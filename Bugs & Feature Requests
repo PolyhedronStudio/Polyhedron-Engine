@@ -1,0 +1,22 @@
+*** In Order of Importance ***
+
+- Additive Blend Mode Texture support
+RTX already supports transparent textures, (trans33 or trans66 surface flag) and seemingly already supports additive blends
+(explosion sprite, could alpha channel be doing this?). Would like the option to have a transparent texture that can be additively
+blended. The easiest way to go about this might to be add a new "KIND" to the RTX material type flagging system. 
+
+- Sprite spawning:
+Currently can only spawn sprites during specific events, i.e. BFG fire/Explosions. Lazarus mod allows for map author defined
+spawning of sprites, currently only works in OpenGL.
+
+- Point light/Light Entity 
+RTX can already spawn point lights, but only occurs during specific events, i.e. BFG fire/Explosions. User defined point lights
+would be very handy. Another option is to enable support for mapping light entities. https://github.com/NVIDIA/Q2RTX/issues/77
+
+- Moon rendering: 
+We currently can go into "night mode" but there's no moon, therefore no direct light/shadows.
+I propose we create a 2nd "sun" that appears during the night with reduced brightness intensity and blue color cast. 
+This way map authors can cycle between day or night depending on their needs.
+
+- Ray traced FOG/Volumetric lights
+Perhaps code from the volumetric light shaft (god rays) could be repurposed for this. Currently only works on bright sunlight.
