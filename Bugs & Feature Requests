@@ -2,7 +2,8 @@
 
 Bugs
 
-- Animated textures don't play back correctly on func_wall. Neither the "ANIMATED" or "ANIMATED FAST" spawnflags work. To be clear,
+- FUNC_WALL Animated texture playback
+Animated textures don't play back correctly on func_wall. Neither the "ANIMATED" or "ANIMATED FAST" spawnflags work. To be clear,
 the animated texture does animate, but seems to be stuck cycling between a few frames.
 
 
