@@ -11,7 +11,7 @@ Features
 
 - Additive Blend Mode Texture support
 RTX already supports transparent textures, (trans33 or trans66 surface flag) and seemingly already supports additive blends
-(alpha_blend_premultiplied). Would like the option to have a transparent texture that can be additively
+with the explosion sprite (alpha_blend_premultiplied?). Would like the option to have a transparent texture that can be additively
 blended. The easiest way to go about this might to be add a new "KIND" to the RTX material type flagging system. 
 
 - Sprite spawning:
