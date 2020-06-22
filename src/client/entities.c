@@ -785,18 +785,17 @@ static void CL_AddPacketEntities(void)
 		{
 			if (model->model_class == MCLASS_FLARE)
 			{
-				float phase = (float)cl.time * 0.03f + (float)ent.id;
-				float anim = sinf(phase);
+                float anim = sinf((float)ent.id + ((float)cl.time / 50.f + frand() * 2.7));
 
-				float offset = anim * 1.5f + 5.f;
-				float brightness = anim * 0.2f + 0.8f;
+                float offset = anim * 2.0f + 5.f;
+                float brightness = anim * 0.3f + 0.8f;
 
 				vec3_t origin;
 				VectorCopy(ent.origin, origin);
 				origin[2] += offset;
 
-				V_AddLightEx(origin, 500.f, 1.6f * brightness, 1.0f * brightness, 0.2f * brightness, 5.f);
-			}
+				V_AddLightEx(origin, 500.f, 1.6f * brightness, 0.5f * brightness, 0.0f * brightness, 1.5f);
+           	}
 		}
 
         // color shells generate a separate entity for the main model

@@ -2105,7 +2105,7 @@ void SV_Init(void)
     sv_show_name_changes = Cvar_Get("sv_show_name_changes", "0", 0);
 
     sv_airaccelerate = Cvar_Get("sv_airaccelerate", "0", CVAR_LATCH);
-    sv_qwmod = Cvar_Get("sv_qwmod", "0", CVAR_LATCH);   //atu QWMod
+    sv_qwmod = Cvar_Get("sv_qwmod", "1", CVAR_LATCH);   //atu QWMod
     sv_public = Cvar_Get("public", "0", CVAR_LATCH);
     sv_password = Cvar_Get("sv_password", "", CVAR_PRIVATE);
     sv_reserved_password = Cvar_Get("sv_reserved_password", "", CVAR_PRIVATE);

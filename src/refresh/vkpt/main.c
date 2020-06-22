@@ -2892,7 +2892,7 @@ R_Init_RTX(qboolean total)
 	cvar_vsync = Cvar_Get("vid_vsync", "0", CVAR_REFRESH | CVAR_ARCHIVE);
 	cvar_vsync->changed = NULL; // in case the GL renderer has set it
 	cvar_pt_caustics = Cvar_Get("pt_caustics", "1", CVAR_ARCHIVE);
-	cvar_pt_enable_nodraw = Cvar_Get("pt_enable_nodraw", "0", 0);
+	cvar_pt_enable_nodraw = Cvar_Get("pt_enable_nodraw", "1", 0);
 
 	// 0 -> disabled, regular pause; 1 -> enabled; 2 -> enabled, hide GUI
 	cvar_pt_accumulation_rendering = Cvar_Get("pt_accumulation_rendering", "1", CVAR_ARCHIVE);
