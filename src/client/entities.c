@@ -785,16 +785,18 @@ static void CL_AddPacketEntities(void)
 		{
 			if (model->model_class == MCLASS_FLARE)
 			{
-                float anim = sinf((float)ent.id + ((float)cl.time / 50.f + frand() * 2.7));
+                float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.5)) / (3.14356 - (frand() / 3.14356));
 
-                float offset = anim * 2.0f + 5.f;
-                float brightness = anim * 0.3f + 0.8f;
+                float offset = anim * 1.0f;
+                float brightness = anim * 0.6f + 0.8f;
 
 				vec3_t origin;
 				VectorCopy(ent.origin, origin);
-				origin[2] += offset;
+                origin[0] += offset;
+                origin[1] += offset;
+                origin[2] += offset;
 
-				V_AddLightEx(origin, 500.f, 1.6f * brightness, 0.5f * brightness, 0.0f * brightness, 1.5f);
+				V_AddLightEx(origin, 500.f, 1.6f * brightness, 0.4f * brightness, 0.0f * brightness, 1.5f);
            	}
 		}
 
