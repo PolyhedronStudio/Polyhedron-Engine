@@ -296,7 +296,8 @@ static qerror_t MOD_LoadSP2(model_t *model, const void *rawdata, size_t length)
         src_frame++;
         dst_frame++;
     }
-
+    if (strstr(model->name, "vrty"))
+        model->sprite_vertical = qtrue;
     Hunk_End(&model->hunk);
 
     return Q_ERR_SUCCESS;

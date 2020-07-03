@@ -546,7 +546,9 @@ static void CL_AddPacketEntities(void)
         else if (effects & EF_ANIM_ALL)
             ent.frame = autoanim;
         else if (effects & EF_ANIM_ALLFAST)
-            ent.frame = cl.time / 100;
+            ent.frame = (cl.time / 33.33f);
+        else if (effects & EF_ANIM_ALLFAST_25)
+            ent.frame = (cl.time / 100.0f);
         else
             ent.frame = s1->frame;
 
@@ -794,7 +796,7 @@ static void CL_AddPacketEntities(void)
 				VectorCopy(ent.origin, origin);
                 origin[2] += offset;
 
-				V_AddLightEx(origin, 500.f, 1.6f * brightness, 0.4f * brightness, 0.0f * brightness, 1.5f);
+				V_AddLightEx(origin, 500.f, 1.6f * brightness, 0.5f * brightness, 0.1f * brightness, 1.5f);
            	}
 		}
 

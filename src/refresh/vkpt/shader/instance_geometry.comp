@@ -91,17 +91,19 @@ main()
 			{
 				uint material = t.material_id;
 				MaterialInfo minfo = get_material_info(material);
-				frame = frame % int(minfo.num_frames);
-
+				//if(int(minfo.num_frames) > 15)
+				//	frame = frame % int(minfo.num_frames);
+				
+				
 				while(true) {
 					material = minfo.next_frame;
 					frame -= 1;
-					if(frame > 0)
+					if(frame >= 0)
 						minfo = get_material_info(material);
 					else
 						break;
 				}
-
+				
 				t_i.material_id = material | (t.material_id & ~MATERIAL_INDEX_MASK); // preserve flags
 			}
 			else
@@ -188,4 +190,3 @@ main()
 		store_instanced_triangle(t_i, instance_triangle_id, idx + buf_offset);
 	}
 }
-
