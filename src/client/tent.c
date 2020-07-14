@@ -1165,6 +1165,7 @@ void CL_ParseTEnt(void)
             ex->lightcolor[1] = 1;
             break;
         case TE_FLECHETTE:
+            ex->type = ex_blaster;
             CL_BlasterParticles2(te.pos1, te.dir, 0x6f);  // 75
             ex->ent.skinnum = 2;
             ex->lightcolor[0] = 0.19;
