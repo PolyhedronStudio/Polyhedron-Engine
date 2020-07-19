@@ -1,5 +1,19 @@
 # Quake II RTX Change Log
 
+## N&C 0.1
+
+**New Features:**
+
+  * Anim Allfast changed to 30hz
+  * Enabled QW_MOD movement mod (QW movement)
+  * Enabled NODRAW surfaces (allows for invisible light sources)
+  * Added support for locking sprites to rotate on z-axis only by using prefix "vrty" (without quotes) in the sprite filename.
+  * Tweaked flare point light to closer resemble a flame light and changed it's "activation" model to effects/firelight/tris.md2
+    
+  **Fixed Issues:**
+
+  * Fixed animated texture playback on BMODELS
+
 ## 1.3.0
 
 **New Features:**
