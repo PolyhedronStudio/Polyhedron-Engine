@@ -218,7 +218,7 @@ get_model_class(const char *name)
 		return MCLASS_SMOKE;
 	else if (!strcmp(name, "models/objects/minelite/light2/tris.md2"))
         return MCLASS_STATIC_LIGHT;
-    else if (!strcmp(name, "models/effects/firelight/tris.md2"))
+    else if (!strcmp(name, "models/objects/flare/tris.md2"))
         return MCLASS_FLARE;
 	else
 		return MCLASS_REGULAR;
