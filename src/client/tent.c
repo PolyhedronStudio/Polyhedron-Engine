@@ -1081,12 +1081,10 @@ void CL_ParseTEnt(void)
         break;
 
     case TE_GUNSHOT:            // bullet hitting wall
+        CL_ParticleEffect(te.pos1, te.dir, 0, 40);
     case TE_SPARKS:
     case TE_BULLET_SPARKS:
-        if (te.type == TE_GUNSHOT)
-            CL_ParticleEffect(te.pos1, te.dir, 0, 40);
-        else
-            CL_ParticleEffect(te.pos1, te.dir, 0xe0, 6);
+         CL_ParticleEffect(te.pos1, te.dir, 0xe0, 6);
 
         if (te.type != TE_SPARKS) {
             CL_SmokeAndFlash(te.pos1);
