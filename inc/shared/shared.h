@@ -1421,6 +1421,12 @@ ROGUE - VERSIONS
 #define BASE_1_FRAMETIME        0.01f   // 1/BASE_FRAMETIME
 #define BASE_FRAMETIME_1000     0.1f    // BASE_FRAMETIME/1000
 
+//N&C 30hz tick
+//#define BASE_FRAMERATE          30 //10
+//#define BASE_FRAMETIME          33.33f //100
+//#define BASE_1_FRAMETIME        0.03f //0.01f   // 1/BASE_FRAMETIME
+//#define BASE_FRAMETIME_1000     0.03333f //0.1f    // BASE_FRAMETIME/1000
+
 // maximum variable FPS factor
 #define MAX_FRAMEDIV    6
 
