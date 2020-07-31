@@ -149,6 +149,9 @@ void main()
 	vec3 direction = texelFetch(TEX_PT_VIEW_DIRECTION, sourcePixelPos.xy, 0).xyz;
 
 	vec4 throughput_distance = texelFetch(TEX_PT_GODRAYS_THROUGHPUT_DIST, sourcePixelPos.xy, 0);
+	
+	//vec4 throughput_color = imageLoad(IMG_PT_ALBEDO, ivec2(gl_GlobalInvocationID.xy));
+		
 	float distance = throughput_distance.w;
 
 	vec3 original_pos = surface_pos - direction * distance;
@@ -192,7 +195,8 @@ void main()
 	vec3 throughput = throughput_distance.xyz;
 	vec3 inscatter = vec3(0);
 
-	offset += getStep(offset, density) * (rand(pixelPos.xy) - 1);
+	float randPos = rand(pixelPos.xy);
+	offset += getStep(offset, density) * (randPos - 1);
 
 	while(true)
 	{
@@ -232,7 +236,10 @@ void main()
 	else
 		prevColor = vec4(0);
 
-	vec4 outputColor = vec4(inscatterColor + prevColor.rgb, 1);
-
-	imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), outputColor);
+	vec3 outscatterColor =	mix(inscatterColor + prevColor.rgb,							// Use inscatter as the input
+							mix(sun_color_ubo.sun_color, vec3(1), 0.17f * randPos),		// Enviromental Tint
+							(1.0f - exp2(-0.00011f * distance * distance)) *			// Density with User push back distance
+							(0.05f * randPos * phase));									// Blue Noise the User Density Root
+					
+	imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), vec4(outscatterColor, 1));
 }
