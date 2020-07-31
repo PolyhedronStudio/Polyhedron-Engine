@@ -43,166 +43,167 @@ extern cvar_t *vid_rtx;
 
 static model_t *MOD_Alloc(void)
 {
-    model_t *model;
-    int i;
+	model_t *model;
+	int i;
 
-    for (i = 0, model = r_models; i < r_numModels; i++, model++) {
-        if (!model->type) {
-            break;
-        }
-    }
+	for (i = 0, model = r_models; i < r_numModels; i++, model++) {
+		if (!model->type) {
+			break;
+		}
+	}
 
-    if (i == r_numModels) {
-        if (r_numModels == MAX_RMODELS) {
-            return NULL;
-        }
-        r_numModels++;
-    }
+	if (i == r_numModels) {
+		if (r_numModels == MAX_RMODELS) {
+			return NULL;
+		}
+		r_numModels++;
+	}
 
-    return model;
+	return model;
 }
 
 static model_t *MOD_Find(const char *name)
 {
-    model_t *model;
-    int i;
+	model_t *model;
+	int i;
 
-    for (i = 0, model = r_models; i < r_numModels; i++, model++) {
-        if (!model->type) {
-            continue;
-        }
-        if (!FS_pathcmp(model->name, name)) {
-            return model;
-        }
-    }
+	for (i = 0, model = r_models; i < r_numModels; i++, model++) {
+		if (!model->type) {
+			continue;
+		}
+		if (!FS_pathcmp(model->name, name)) {
+			return model;
+		}
+	}
 
-    return NULL;
+	return NULL;
 }
 
 static void MOD_List_f(void)
 {
-    static const char types[4] = "FASE";
-    int     i, count;
-    model_t *model;
-    size_t  bytes;
+	static const char types[4] = "FASE";
+	int     i, count;
+	model_t *model;
+	size_t  bytes;
 
-    Com_Printf("------------------\n");
-    bytes = count = 0;
+	Com_Printf("------------------\n");
+	bytes = count = 0;
 
-    for (i = 0, model = r_models; i < r_numModels; i++, model++) {
-        if (!model->type) {
-            continue;
-        }
-        Com_Printf("%c %8"PRIz" : %s\n", types[model->type],
-                   model->hunk.mapped, model->name);
-        bytes += model->hunk.mapped;
-        count++;
-    }
-    Com_Printf("Total models: %d (out of %d slots)\n", count, r_numModels);
-    Com_Printf("Total resident: %"PRIz"\n", bytes);
+	for (i = 0, model = r_models; i < r_numModels; i++, model++) {
+		if (!model->type) {
+			continue;
+		}
+		Com_Printf("%c %8"PRIz" : %s\n", types[model->type],
+			model->hunk.mapped, model->name);
+		bytes += model->hunk.mapped;
+		count++;
+	}
+	Com_Printf("Total models: %d (out of %d slots)\n", count, r_numModels);
+	Com_Printf("Total resident: %"PRIz"\n", bytes);
 }
 
 void MOD_FreeUnused(void)
 {
-    model_t *model;
-    int i;
+	model_t *model;
+	int i;
 
-    for (i = 0, model = r_models; i < r_numModels; i++, model++) {
-        if (!model->type) {
-            continue;
-        }
-        if (model->registration_sequence == registration_sequence) {
-            // make sure it is paged in
-            Com_PageInMemory(model->hunk.base, model->hunk.cursize);
-        } else {
-            // don't need this model
-            Hunk_Free(&model->hunk);
-            memset(model, 0, sizeof(*model));
-        }
-    }
+	for (i = 0, model = r_models; i < r_numModels; i++, model++) {
+		if (!model->type) {
+			continue;
+		}
+		if (model->registration_sequence == registration_sequence) {
+			// make sure it is paged in
+			Com_PageInMemory(model->hunk.base, model->hunk.cursize);
+		}
+		else {
+			// don't need this model
+			Hunk_Free(&model->hunk);
+			memset(model, 0, sizeof(*model));
+		}
+	}
 }
 
 void MOD_FreeAll(void)
 {
-    model_t *model;
-    int i;
+	model_t *model;
+	int i;
 
-    for (i = 0, model = r_models; i < r_numModels; i++, model++) {
-        if (!model->type) {
-            continue;
-        }
+	for (i = 0, model = r_models; i < r_numModels; i++, model++) {
+		if (!model->type) {
+			continue;
+		}
 
-        Hunk_Free(&model->hunk);
-        memset(model, 0, sizeof(*model));
-    }
+		Hunk_Free(&model->hunk);
+		memset(model, 0, sizeof(*model));
+	}
 
-    r_numModels = 0;
+	r_numModels = 0;
 }
 
 qerror_t MOD_ValidateMD2(dmd2header_t *header, size_t length)
 {
-    size_t end;
+	size_t end;
 
-    // check ident and version
-    if (header->ident != MD2_IDENT)
-        return Q_ERR_UNKNOWN_FORMAT;
-    if (header->version != MD2_VERSION)
-        return Q_ERR_UNKNOWN_FORMAT;
+	// check ident and version
+	if (header->ident != MD2_IDENT)
+		return Q_ERR_UNKNOWN_FORMAT;
+	if (header->version != MD2_VERSION)
+		return Q_ERR_UNKNOWN_FORMAT;
 
-    // check triangles
-    if (header->num_tris < 1)
-        return Q_ERR_TOO_FEW;
-    if (header->num_tris > MD2_MAX_TRIANGLES)
-        return Q_ERR_TOO_MANY;
+	// check triangles
+	if (header->num_tris < 1)
+		return Q_ERR_TOO_FEW;
+	if (header->num_tris > MD2_MAX_TRIANGLES)
+		return Q_ERR_TOO_MANY;
 
-    end = header->ofs_tris + sizeof(dmd2triangle_t) * header->num_tris;
-    if (header->ofs_tris < sizeof(header) || end < header->ofs_tris || end > length)
-        return Q_ERR_BAD_EXTENT;
+	end = header->ofs_tris + sizeof(dmd2triangle_t) * header->num_tris;
+	if (header->ofs_tris < sizeof(header) || end < header->ofs_tris || end > length)
+		return Q_ERR_BAD_EXTENT;
 
-    // check st
-    if (header->num_st < 3)
-        return Q_ERR_TOO_FEW;
-    if (header->num_st > MAX_ALIAS_VERTS)
-        return Q_ERR_TOO_MANY;
+	// check st
+	if (header->num_st < 3)
+		return Q_ERR_TOO_FEW;
+	if (header->num_st > MAX_ALIAS_VERTS)
+		return Q_ERR_TOO_MANY;
 
-    end = header->ofs_st + sizeof(dmd2stvert_t) * header->num_st;
-    if (header->ofs_st < sizeof(header) || end < header->ofs_st || end > length)
-        return Q_ERR_BAD_EXTENT;
+	end = header->ofs_st + sizeof(dmd2stvert_t) * header->num_st;
+	if (header->ofs_st < sizeof(header) || end < header->ofs_st || end > length)
+		return Q_ERR_BAD_EXTENT;
 
-    // check xyz and frames
-    if (header->num_xyz < 3)
-        return Q_ERR_TOO_FEW;
-    if (header->num_xyz > MAX_ALIAS_VERTS)
-        return Q_ERR_TOO_MANY;
-    if (header->num_frames < 1)
-        return Q_ERR_TOO_FEW;
-    if (header->num_frames > MD2_MAX_FRAMES)
-        return Q_ERR_TOO_MANY;
+	// check xyz and frames
+	if (header->num_xyz < 3)
+		return Q_ERR_TOO_FEW;
+	if (header->num_xyz > MAX_ALIAS_VERTS)
+		return Q_ERR_TOO_MANY;
+	if (header->num_frames < 1)
+		return Q_ERR_TOO_FEW;
+	if (header->num_frames > MD2_MAX_FRAMES)
+		return Q_ERR_TOO_MANY;
 
-    end = sizeof(dmd2frame_t) + (header->num_xyz - 1) * sizeof(dmd2trivertx_t);
-    if (header->framesize < end || header->framesize > MD2_MAX_FRAMESIZE)
-        return Q_ERR_BAD_EXTENT;
+	end = sizeof(dmd2frame_t) + (header->num_xyz - 1) * sizeof(dmd2trivertx_t);
+	if (header->framesize < end || header->framesize > MD2_MAX_FRAMESIZE)
+		return Q_ERR_BAD_EXTENT;
 
-    end = header->ofs_frames + (size_t)header->framesize * header->num_frames;
-    if (header->ofs_frames < sizeof(header) || end < header->ofs_frames || end > length)
-        return Q_ERR_BAD_EXTENT;
+	end = header->ofs_frames + (size_t)header->framesize * header->num_frames;
+	if (header->ofs_frames < sizeof(header) || end < header->ofs_frames || end > length)
+		return Q_ERR_BAD_EXTENT;
 
-    // check skins
-    if (header->num_skins) {
-        if (header->num_skins > MAX_ALIAS_SKINS)
-            return Q_ERR_TOO_MANY;
+	// check skins
+	if (header->num_skins) {
+		if (header->num_skins > MAX_ALIAS_SKINS)
+			return Q_ERR_TOO_MANY;
 
-        end = header->ofs_skins + (size_t)MD2_MAX_SKINNAME * header->num_skins;
-        if (header->ofs_skins < sizeof(header) || end < header->ofs_skins || end > length)
-            return Q_ERR_BAD_EXTENT;
-    }
+		end = header->ofs_skins + (size_t)MD2_MAX_SKINNAME * header->num_skins;
+		if (header->ofs_skins < sizeof(header) || end < header->ofs_skins || end > length)
+			return Q_ERR_BAD_EXTENT;
+	}
 
-    if (header->skinwidth < 1 || header->skinwidth > MD2_MAX_SKINWIDTH)
-        return Q_ERR_INVALID_FORMAT;
-    if (header->skinheight < 1 || header->skinheight > MD2_MAX_SKINHEIGHT)
-        return Q_ERR_INVALID_FORMAT;
+	if (header->skinwidth < 1 || header->skinwidth > MD2_MAX_SKINWIDTH)
+		return Q_ERR_INVALID_FORMAT;
+	if (header->skinheight < 1 || header->skinheight > MD2_MAX_SKINHEIGHT)
+		return Q_ERR_INVALID_FORMAT;
 
-    return Q_ERR_SUCCESS;
+	return Q_ERR_SUCCESS;
 }
 
 static model_class_t
@@ -217,133 +218,142 @@ get_model_class(const char *name)
 	else if (!strcmp(name, "models/objects/smoke/tris.md2"))
 		return MCLASS_SMOKE;
 	else if (!strcmp(name, "models/objects/minelite/light2/tris.md2"))
-        return MCLASS_STATIC_LIGHT;
-    else if (!strcmp(name, "models/objects/flare/tris.md2"))
-        return MCLASS_FLARE;
+		return MCLASS_STATIC_LIGHT;
+	else if (!strcmp(name, "models/objects/flare/tris.md2"))
+		return MCLASS_FLARE;
 	else
 		return MCLASS_REGULAR;
 }
 
 static qerror_t MOD_LoadSP2(model_t *model, const void *rawdata, size_t length)
 {
-    dsp2header_t header;
-    dsp2frame_t *src_frame;
-    mspriteframe_t *dst_frame;
-    unsigned w, h, x, y;
-    char buffer[SP2_MAX_FRAMENAME];
-    int i;
+	dsp2header_t header;
+	dsp2frame_t *src_frame;
+	mspriteframe_t *dst_frame;
+	unsigned w, h, x, y;
+	char buffer[SP2_MAX_FRAMENAME];
+	int i;
 
-    if (length < sizeof(header))
-        return Q_ERR_FILE_TOO_SMALL;
+	if (length < sizeof(header))
+		return Q_ERR_FILE_TOO_SMALL;
 
-    // byte swap the header
-    header = *(dsp2header_t *)rawdata;
-    for (i = 0; i < sizeof(header) / 4; i++) {
-        ((uint32_t *)&header)[i] = LittleLong(((uint32_t *)&header)[i]);
-    }
+	// byte swap the header
+	header = *(dsp2header_t *)rawdata;
+	for (i = 0; i < sizeof(header) / 4; i++) {
+		((uint32_t *)&header)[i] = LittleLong(((uint32_t *)&header)[i]);
+	}
 
-    if (header.ident != SP2_IDENT)
-        return Q_ERR_UNKNOWN_FORMAT;
-    if (header.version != SP2_VERSION)
-        return Q_ERR_UNKNOWN_FORMAT;
-    if (header.numframes < 1) {
-        // empty models draw nothing
-        model->type = MOD_EMPTY;
-        return Q_ERR_SUCCESS;
-    }
-    if (header.numframes > SP2_MAX_FRAMES)
-        return Q_ERR_TOO_MANY;
-    if (sizeof(dsp2header_t) + sizeof(dsp2frame_t) * header.numframes > length)
-        return Q_ERR_BAD_EXTENT;
+	if (header.ident != SP2_IDENT)
+		return Q_ERR_UNKNOWN_FORMAT;
+	if (header.version != SP2_VERSION)
+		return Q_ERR_UNKNOWN_FORMAT;
+	if (header.numframes < 1) {
+		// empty models draw nothing
+		model->type = MOD_EMPTY;
+		return Q_ERR_SUCCESS;
+	}
+	if (header.numframes > SP2_MAX_FRAMES)
+		return Q_ERR_TOO_MANY;
+	if (sizeof(dsp2header_t) + sizeof(dsp2frame_t) * header.numframes > length)
+		return Q_ERR_BAD_EXTENT;
 
-    Hunk_Begin(&model->hunk, 0x10000);
-    model->type = MOD_SPRITE;
+	Hunk_Begin(&model->hunk, 0x10000);
+	model->type = MOD_SPRITE;
 
-    model->spriteframes = MOD_Malloc(sizeof(mspriteframe_t) * header.numframes);
-    model->numframes = header.numframes;
+	model->spriteframes = MOD_Malloc(sizeof(mspriteframe_t) * header.numframes);
+	model->numframes = header.numframes;
 
-    src_frame = (dsp2frame_t *)((byte *)rawdata + sizeof(dsp2header_t));
-    dst_frame = model->spriteframes;
-    for (i = 0; i < header.numframes; i++) {
-        w = LittleLong(src_frame->width);
-        h = LittleLong(src_frame->height);
-        if (w < 1 || h < 1 || w > MAX_TEXTURE_SIZE || h > MAX_TEXTURE_SIZE) {
-            Com_WPrintf("%s has bad frame dimensions\n", model->name);
-            w = 1;
-            h = 1;
-        }
-        dst_frame->width = w;
-        dst_frame->height = h;
+	src_frame = (dsp2frame_t *)((byte *)rawdata + sizeof(dsp2header_t));
+	dst_frame = model->spriteframes;
+	for (i = 0; i < header.numframes; i++) {
+		w = LittleLong(src_frame->width);
+		h = LittleLong(src_frame->height);
+		if (w < 1 || h < 1 || w > MAX_TEXTURE_SIZE || h > MAX_TEXTURE_SIZE) {
+			Com_WPrintf("%s has bad frame dimensions\n", model->name);
+			w = 1;
+			h = 1;
+		}
+		dst_frame->width = w;
+		dst_frame->height = h;
 
-        // FIXME: are these signed?
-        x = LittleLong(src_frame->origin_x);
-        y = LittleLong(src_frame->origin_y);
-        if (x > 8192 || y > 8192) {
-            Com_WPrintf("%s has bad frame origin\n", model->name);
-            x = y = 0;
-        }
-        dst_frame->origin_x = x;
-        dst_frame->origin_y = y;
+		// FIXME: are these signed?
+		x = LittleLong(src_frame->origin_x);
+		y = LittleLong(src_frame->origin_y);
+		if (x > 8192 || y > 8192) {
+			Com_WPrintf("%s has bad frame origin\n", model->name);
+			x = y = 0;
+		}
+		dst_frame->origin_x = x;
+		dst_frame->origin_y = y;
 
-        if (!Q_memccpy(buffer, src_frame->name, 0, sizeof(buffer))) {
-            Com_WPrintf("%s has bad frame name\n", model->name);
-            dst_frame->image = R_NOTEXTURE;
-        } else {
-            FS_NormalizePath(buffer, buffer);
-            dst_frame->image = IMG_Find(buffer, IT_SPRITE, IF_SRGB);
-        }
+		if (!Q_memccpy(buffer, src_frame->name, 0, sizeof(buffer))) {
+			Com_WPrintf("%s has bad frame name\n", model->name);
+			dst_frame->image = R_NOTEXTURE;
+		}
+		else {
+			FS_NormalizePath(buffer, buffer);
+			dst_frame->image = IMG_Find(buffer, IT_SPRITE, IF_SRGB);
+		}
 
-        src_frame++;
-        dst_frame++;
-    }
-    if (strstr(model->name, "vrty"))
-        model->sprite_vertical = qtrue;
-    Hunk_End(&model->hunk);
+		src_frame++;
+		dst_frame++;
+	}
 
-    return Q_ERR_SUCCESS;
+	if (strstr(model->name, "vrty"))
+		model->sprite_vertical = qtrue;
+	else if (strstr(model->name, "fxup"))
+		model->sprite_fxup = qtrue;
+	else if (strstr(model->name, "fxft"))
+		model->sprite_fxft = qtrue;
+	else if (strstr(model->name, "fxlf"))
+		model->sprite_fxlt = qtrue;
+
+	Hunk_End(&model->hunk);
+
+	return Q_ERR_SUCCESS;
 }
 
 qhandle_t R_RegisterModel(const char *name)
 {
-    char normalized[MAX_QPATH];
-    qhandle_t index;
-    size_t namelen;
-    ssize_t filelen;
-    model_t *model;
-    byte *rawdata = NULL;
-    uint32_t ident;
-    mod_load_t load;
-    qerror_t ret;
+	char normalized[MAX_QPATH];
+	qhandle_t index;
+	size_t namelen;
+	ssize_t filelen;
+	model_t *model;
+	byte *rawdata = NULL;
+	uint32_t ident;
+	mod_load_t load;
+	qerror_t ret;
 
-    // empty names are legal, silently ignore them
-    if (!*name)
-        return 0;
+	// empty names are legal, silently ignore them
+	if (!*name)
+		return 0;
 
-    if (*name == '*') {
-        // inline bsp model
-        index = atoi(name + 1);
-        return ~index;
-    }
+	if (*name == '*') {
+		// inline bsp model
+		index = atoi(name + 1);
+		return ~index;
+	}
 
-    // normalize the path
-    namelen = FS_NormalizePathBuffer(normalized, name, MAX_QPATH);
+	// normalize the path
+	namelen = FS_NormalizePathBuffer(normalized, name, MAX_QPATH);
 
-    // this should never happen
-    if (namelen >= MAX_QPATH)
-        Com_Error(ERR_DROP, "%s: oversize name", __func__);
+	// this should never happen
+	if (namelen >= MAX_QPATH)
+		Com_Error(ERR_DROP, "%s: oversize name", __func__);
 
-    // normalized to empty name?
-    if (namelen == 0) {
-        Com_DPrintf("%s: empty name\n", __func__);
-        return 0;
-    }
+	// normalized to empty name?
+	if (namelen == 0) {
+		Com_DPrintf("%s: empty name\n", __func__);
+		return 0;
+	}
 
-    // see if it's already loaded
-    model = MOD_Find(normalized);
-    if (model) {
-        MOD_Reference(model);
-        goto done;
-    }
+	// see if it's already loaded
+	model = MOD_Find(normalized);
+	if (model) {
+		MOD_Reference(model);
+		goto done;
+	}
 
 	char* extension = normalized + namelen - 4;
 	if (namelen > 4 && (strcmp(extension, ".md2") == 0) && vid_rtx->integer)
@@ -369,97 +379,97 @@ qhandle_t R_RegisterModel(const char *name)
 		}
 	}
 
-    if (filelen < 4) {
-        ret = Q_ERR_FILE_TOO_SMALL;
-        goto fail2;
-    }
+	if (filelen < 4) {
+		ret = Q_ERR_FILE_TOO_SMALL;
+		goto fail2;
+	}
 
-    // check ident
-    ident = LittleLong(*(uint32_t *)rawdata);
-    switch (ident) {
-    case MD2_IDENT:
-        load = MOD_LoadMD2;
-        break;
+	// check ident
+	ident = LittleLong(*(uint32_t *)rawdata);
+	switch (ident) {
+	case MD2_IDENT:
+		load = MOD_LoadMD2;
+		break;
 #if USE_MD3
-    case MD3_IDENT:
-        load = MOD_LoadMD3;
-        break;
+	case MD3_IDENT:
+		load = MOD_LoadMD3;
+		break;
 #endif
-    case SP2_IDENT:
-        load = MOD_LoadSP2;
-        break;
-    default:
-        ret = Q_ERR_UNKNOWN_FORMAT;
-        goto fail2;
-    }
+	case SP2_IDENT:
+		load = MOD_LoadSP2;
+		break;
+	default:
+		ret = Q_ERR_UNKNOWN_FORMAT;
+		goto fail2;
+	}
 
-    model = MOD_Alloc();
-    if (!model) {
-        ret = Q_ERR_OUT_OF_SLOTS;
-        goto fail2;
-    }
+	model = MOD_Alloc();
+	if (!model) {
+		ret = Q_ERR_OUT_OF_SLOTS;
+		goto fail2;
+	}
 
-    memcpy(model->name, normalized, namelen + 1);
-    model->registration_sequence = registration_sequence;
+	memcpy(model->name, normalized, namelen + 1);
+	model->registration_sequence = registration_sequence;
 
-    ret = load(model, rawdata, filelen);
+	ret = load(model, rawdata, filelen);
 
-    FS_FreeFile(rawdata);
+	FS_FreeFile(rawdata);
 
-    if (ret) {
-        memset(model, 0, sizeof(*model));
-        goto fail1;
-    }
+	if (ret) {
+		memset(model, 0, sizeof(*model));
+		goto fail1;
+	}
 
 	model->model_class = get_model_class(model->name);
 
 done:
-    index = (model - r_models) + 1;
+	index = (model - r_models) + 1;
 #if USE_REF == REF_VKPT
 	extern int register_model_dirty;
 	register_model_dirty = 1;
 #endif
-    return index;
+	return index;
 
 fail2:
-    FS_FreeFile(rawdata);
+	FS_FreeFile(rawdata);
 fail1:
-    Com_EPrintf("Couldn't load %s: %s\n", normalized, Q_ErrorString(ret));
-    return 0;
+	Com_EPrintf("Couldn't load %s: %s\n", normalized, Q_ErrorString(ret));
+	return 0;
 }
 
 model_t *MOD_ForHandle(qhandle_t h)
 {
-    model_t *model;
+	model_t *model;
 
-    if (!h) {
-        return NULL;
-    }
+	if (!h) {
+		return NULL;
+	}
 
-    if (h < 0 || h > r_numModels) {
-        Com_Error(ERR_DROP, "%s: %d out of range", __func__, h);
-    }
+	if (h < 0 || h > r_numModels) {
+		Com_Error(ERR_DROP, "%s: %d out of range", __func__, h);
+	}
 
-    model = &r_models[h - 1];
-    if (!model->type) {
-        return NULL;
-    }
+	model = &r_models[h - 1];
+	if (!model->type) {
+		return NULL;
+	}
 
-    return model;
+	return model;
 }
 
 void MOD_Init(void)
 {
-    if (r_numModels) {
-        Com_Error(ERR_FATAL, "%s: %d models not freed", __func__, r_numModels);
-    }
+	if (r_numModels) {
+		Com_Error(ERR_FATAL, "%s: %d models not freed", __func__, r_numModels);
+	}
 
-    Cmd_AddCommand("modellist", MOD_List_f);
+	Cmd_AddCommand("modellist", MOD_List_f);
 }
 
 void MOD_Shutdown(void)
 {
-    MOD_FreeAll();
-    Cmd_RemoveCommand("modellist");
+	MOD_FreeAll();
+	Cmd_RemoveCommand("modellist");
 }
 

@@ -591,7 +591,7 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 
 			vec3_t to_camera;
 			VectorSubtract(view_origin, e->origin, to_camera);
-			
+
 			vec3_t cyl_x;
 			CrossProduct(world_y, to_camera, cyl_x);
 			VectorNormalize(cyl_x);
@@ -604,25 +604,92 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 		}
 		else
 		{
-			VectorScale(view_x, frame->origin_x, left);
-			VectorScale(view_x, frame->origin_x - frame->width, right);
 
-			if (model->sprite_vertical)
+			if (model->sprite_fxup)
 			{
+				// Fixed Up/dn
+				vertex_positions[3][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[3][1] = e->origin[1] - frame->height / 2;
+				vertex_positions[3][2] = e->origin[2];
+
+				vertex_positions[2][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[2][1] = e->origin[1] - frame->height / 2;
+				vertex_positions[2][2] = e->origin[2];
+
+				vertex_positions[1][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[1][1] = e->origin[1] + frame->height / 2;
+				vertex_positions[1][2] = e->origin[2];
+
+				vertex_positions[0][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[0][1] = e->origin[1] + frame->height / 2;
+				vertex_positions[0][2] = e->origin[2];
+			}
+			else if (model->sprite_fxft)
+			{
+				// Fixed Front/Back
+				vertex_positions[0][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[0][1] = e->origin[1];
+				vertex_positions[0][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[1][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[1][1] = e->origin[1];
+				vertex_positions[1][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[2][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[2][1] = e->origin[1];
+				vertex_positions[2][2] = e->origin[2] + frame->height / 2;
+
+				vertex_positions[3][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[3][1] = e->origin[1];
+				vertex_positions[3][2] = e->origin[2] + frame->height / 2;
+			}
+			else if (model->sprite_fxlt)
+			{
+				// Fixed Left/Right
+				vertex_positions[0][0] = e->origin[0];
+				vertex_positions[0][1] = e->origin[1] + frame->width / 2;
+				vertex_positions[0][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[1][0] = e->origin[0];
+				vertex_positions[1][1] = e->origin[1] - frame->width / 2;
+				vertex_positions[1][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[2][0] = e->origin[0];
+				vertex_positions[2][1] = e->origin[1] - frame->width / 2;
+				vertex_positions[2][2] = e->origin[2] + frame->height / 2;
+
+				vertex_positions[3][0] = e->origin[0];
+				vertex_positions[3][1] = e->origin[1] + frame->width / 2;
+				vertex_positions[3][2] = e->origin[2] + frame->height / 2;
+			}
+			else if (model->sprite_vertical)
+			{
+				// 2D Billboard
+				VectorScale(view_x, frame->origin_x, left);
+				VectorScale(view_x, frame->origin_x - frame->width, right);
 				VectorScale(world_y, -frame->origin_y, down);
 				VectorScale(world_y, frame->height - frame->origin_y, up);
+
+				VectorAdd3(e->origin, down, left, vertex_positions[0]);
+				VectorAdd3(e->origin, up, left, vertex_positions[1]);
+				VectorAdd3(e->origin, up, right, vertex_positions[2]);
+				VectorAdd3(e->origin, down, right, vertex_positions[3]);
 			}
 			else
 			{
+				// 3D Billboard
+				VectorScale(view_x, frame->origin_x, left);
+				VectorScale(view_x, frame->origin_x - frame->width, right);
 				VectorScale(view_y, -frame->origin_y, down);
 				VectorScale(view_y, frame->height - frame->origin_y, up);
+
+				VectorAdd3(e->origin, down, left, vertex_positions[0]);
+				VectorAdd3(e->origin, up, left, vertex_positions[1]);
+				VectorAdd3(e->origin, up, right, vertex_positions[2]);
+				VectorAdd3(e->origin, down, right, vertex_positions[3]);
+
 			}
 		}
-
-		VectorAdd3(e->origin, down, left, vertex_positions[0]);
-		VectorAdd3(e->origin, up, left, vertex_positions[1]);
-		VectorAdd3(e->origin, up, right, vertex_positions[2]);
-		VectorAdd3(e->origin, down, right, vertex_positions[3]);
 
 		vertex_positions += 4;
 		sprite_info += TR_SPRITE_INFO_SIZE / sizeof(int);

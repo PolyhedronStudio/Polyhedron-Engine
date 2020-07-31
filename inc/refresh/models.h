@@ -81,6 +81,10 @@ typedef struct model_s {
     // sprite models
     struct mspriteframe_s *spriteframes;
 	qboolean sprite_vertical;
+	qboolean sprite_fxup;
+	qboolean sprite_fxft;
+	qboolean sprite_fxlt;
+	   
 } model_t;
 
 extern model_t      r_models[];
