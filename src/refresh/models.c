@@ -305,7 +305,7 @@ static qerror_t MOD_LoadSP2(model_t *model, const void *rawdata, size_t length)
 		model->sprite_fxup = qtrue;
 	else if (strstr(model->name, "fxft"))
 		model->sprite_fxft = qtrue;
-	else if (strstr(model->name, "fxlt"))
+	else if (strstr(model->name, "fxlf"))
 		model->sprite_fxlt = qtrue;
 
 	Hunk_End(&model->hunk);
