@@ -192,7 +192,8 @@ void main()
 	vec3 throughput = throughput_distance.xyz;
 	vec3 inscatter = vec3(0);
 
-	offset += getStep(offset, density) * (rand(pixelPos.xy) - 1);
+	float randVal = rand(pixelPos.xy);
+	offset += getStep(offset, density) * (randVal - 1);
 
 	while(true)
 	{
@@ -232,7 +233,14 @@ void main()
 	else
 		prevColor = vec4(0);
 
-	vec4 outputColor = vec4(inscatterColor + prevColor.rgb, 1);
+	float expT = -0.00011f;
+	//if(medium != MEDIUM_NONE)
+	//	expT = -1.0f;
 
-	imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), outputColor);
+	vec3 outscatterColor = mix(inscatterColor + prevColor.rgb,							// Use inscatter as the input
+					 	   mix(sun_color_ubo.sun_color, vec3(1), 0.17f * randVal),		// Enviromental Tint
+		                   (1.0f - exp2(expT * distance * distance)) *					// Density with User push back distance
+				   	       (0.28f * randVal * (phase / PI)));									// Blue Noise the User Density Root
+					
+	imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), vec4(outscatterColor, 1));
 }
