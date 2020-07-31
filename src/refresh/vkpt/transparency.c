@@ -664,19 +664,6 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 			}
 			else if (model->sprite_vertical)
 			{
-				// 2D Billboard
-				VectorScale(view_x, frame->origin_x, left);
-				VectorScale(view_x, frame->origin_x - frame->width, right);
-				VectorScale(world_y, -frame->origin_y, down);
-				VectorScale(world_y, frame->height - frame->origin_y, up);
-
-				VectorAdd3(e->origin, down, left, vertex_positions[0]);
-				VectorAdd3(e->origin, up, left, vertex_positions[1]);
-				VectorAdd3(e->origin, up, right, vertex_positions[2]);
-				VectorAdd3(e->origin, down, right, vertex_positions[3]);
-			}
-			else
-			{
 				// 3D Billboard
 				VectorScale(view_x, frame->origin_x, left);
 				VectorScale(view_x, frame->origin_x - frame->width, right);
@@ -687,6 +674,20 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 				VectorAdd3(e->origin, up, left, vertex_positions[1]);
 				VectorAdd3(e->origin, up, right, vertex_positions[2]);
 				VectorAdd3(e->origin, down, right, vertex_positions[3]);
+			}
+			else
+			{
+				// 2D Billboard
+				VectorScale(view_x, frame->origin_x, left);
+				VectorScale(view_x, frame->origin_x - frame->width, right);
+				VectorScale(world_y, -frame->origin_y, down);
+				VectorScale(world_y, frame->height - frame->origin_y, up);
+
+				VectorAdd3(e->origin, down, left, vertex_positions[0]);
+				VectorAdd3(e->origin, up, left, vertex_positions[1]);
+				VectorAdd3(e->origin, up, right, vertex_positions[2]);
+				VectorAdd3(e->origin, down, right, vertex_positions[3]);
+				
 
 			}
 		}
