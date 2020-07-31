@@ -99,30 +99,63 @@ CL_RegisterTEntModels
 */
 void CL_RegisterTEntModels(void)
 {
-    cl_mod_explode = R_RegisterModel("models/objects/explode/tris.md2");
-    cl_mod_smoke = R_RegisterModel("models/objects/smoke/tris.md2");
-    cl_mod_flash = R_RegisterModel("models/objects/flash/tris.md2");
-    cl_mod_parasite_segment = R_RegisterModel("models/monsters/parasite/segment/tris.md2");
-    cl_mod_grapple_cable = R_RegisterModel("models/ctf/segment/tris.md2");
+	cl_mod_explode = R_RegisterModel("models/objects/explode/tris.md2");
+	cl_mod_smoke = R_RegisterModel("models/objects/smoke/tris.md2");
+	cl_mod_flash = R_RegisterModel("models/objects/flash/tris.md2");
+	cl_mod_parasite_segment = R_RegisterModel("models/monsters/parasite/segment/tris.md2");
+	cl_mod_grapple_cable = R_RegisterModel("models/ctf/segment/tris.md2");
 	cl_mod_explo4 = R_RegisterModel("models/objects/r_explode/tris.md2");
 	cl_mod_explosions[0] = R_RegisterModel("sprites/rocket_0.sp2");
 	cl_mod_explosions[1] = R_RegisterModel("sprites/rocket_1.sp2");
 	cl_mod_explosions[2] = R_RegisterModel("sprites/rocket_5.sp2");
 	cl_mod_explosions[3] = R_RegisterModel("sprites/rocket_6.sp2");
-    cl_mod_bfg_explo = R_RegisterModel("sprites/s_bfg2.sp2");
-    cl_mod_powerscreen = R_RegisterModel("models/items/armor/effect/tris.md2");
-    cl_mod_laser = R_RegisterModel("models/objects/laser/tris.md2");
-    cl_mod_dmspot = R_RegisterModel("models/objects/dmspot/tris.md2");
+	cl_mod_bfg_explo = R_RegisterModel("sprites/s_bfg2.sp2");
+	cl_mod_powerscreen = R_RegisterModel("models/items/armor/effect/tris.md2");
+	cl_mod_laser = R_RegisterModel("models/objects/laser/tris.md2");
+	cl_mod_dmspot = R_RegisterModel("models/objects/dmspot/tris.md2");
 
-    cl_mod_lightning = R_RegisterModel("models/proj/lightning/tris.md2");
-    cl_mod_heatbeam = R_RegisterModel("models/proj/beam/tris.md2");
+	cl_mod_lightning = R_RegisterModel("models/proj/lightning/tris.md2");
+	cl_mod_heatbeam = R_RegisterModel("models/proj/beam/tris.md2");
 	cl_mod_explo4_big = R_RegisterModel("models/objects/r_explode2/tris.md2");
 
-	for (int i = 0; i < sizeof(cl_mod_explosions) / sizeof(*cl_mod_explosions); i++)
-	{
-		model_t* model = MOD_ForHandle(cl_mod_explosions[i]);
-		model->sprite_vertical = qtrue;
-	}
+	model_t* model = MOD_ForHandle(cl_mod_explode);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_smoke);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_flash);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_parasite_segment);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_grapple_cable);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_explo4);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_bfg_explo);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_powerscreen);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_laser);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_dmspot);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_lightning);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_heatbeam);
+	model->sprite_vertical = qtrue;
+
+	model = MOD_ForHandle(cl_mod_explo4_big);
+	model->sprite_vertical = qtrue;
 }
 
 /*
