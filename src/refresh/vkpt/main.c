@@ -3231,7 +3231,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t axis)
 
 void R_AddDecal_RTX(decal_t *d)
 { }
-
+extern void SetFogByMap(const char* name);
 void
 R_BeginRegistration_RTX(const char *name)
 {
@@ -3260,6 +3260,10 @@ R_BeginRegistration_RTX(const char *name)
 	if(!bsp) {
 		Com_Error(ERR_DROP, "%s: couldn't load %s: %s", __func__, bsp_path, Q_ErrorString(ret));
 	}
+
+	// Load Map FogList
+	SetFogByMap(bsp_path); 
+
 	bsp_world_model = bsp;
 	bsp_mesh_register_textures(bsp);
 	bsp_mesh_create_from_bsp(&vkpt_refdef.bsp_mesh_world, bsp, name);

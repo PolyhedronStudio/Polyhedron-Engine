@@ -38,6 +38,15 @@ struct
 	cvar_t* intensity;
 	cvar_t* eccentricity;
 	cvar_t* enable;
+
+	cvar_t* fogEnable;
+	cvar_t* fogTintColorRed;
+	cvar_t* fogTintColorGreen;
+	cvar_t* fogTintColorBlue;
+	cvar_t* fogTintPower;
+	cvar_t* fogDensityRoot;
+	cvar_t* fogPushBackDist;
+
 } god_rays;
 
 static void create_image_views();
@@ -47,6 +56,159 @@ static void create_descriptor_set();
 static void update_descriptor_set();
 
 extern cvar_t *physical_sky_space;
+
+#define MAX_CSV_VALUES 32
+typedef struct CSV_values_s {
+	char * values[MAX_CSV_VALUES];
+	int num_values;
+} CSV_values_t;
+
+static qerror_t getStringValue(CSV_values_t const * csv, int index, char * dest)
+{
+	if (index >= csv->num_values)
+		return Q_ERR_FAILURE;
+	strncpy(dest, csv->values[index], MAX_QPATH);
+	return Q_ERR_SUCCESS;
+}
+
+static qerror_t getFloatValue(CSV_values_t const * csv, int index, float * dest)
+{
+	dest[0] = '\0';
+	if (index >= csv->num_values || csv->values[index][0] == '\0')
+		return Q_ERR_FAILURE;
+	*dest = atof(csv->values[index]);
+	return Q_ERR_SUCCESS;
+}
+
+static qerror_t getIntValue(CSV_values_t const * csv, int index, int * dest)
+{
+	if (index >= csv->num_values || csv->values[index][0] == '\0')
+		return Q_ERR_FAILURE;
+	*dest = atoi(csv->values[index]);
+	return Q_ERR_SUCCESS;
+}
+
+static qerror_t getFlagValue(CSV_values_t const * csv, int index, uint32_t * flags, uint32_t mask)
+{
+	if (index >= csv->num_values || csv->values[index][0] == '\0')
+		return Q_ERR_FAILURE;
+	if (atoi(csv->values[index]))
+		*flags = *flags | mask;
+	return Q_ERR_SUCCESS;
+}
+
+static qerror_t parse_CSV_line(char * linebuf, CSV_values_t * csv)
+{
+	static char delim = ',';
+
+	char * cptr = linebuf, c;
+	int inquote = 0;
+
+	int index = 0;
+	csv->values[index] = cptr;
+
+	while ((c = *cptr) != '\0' && index < MAX_CSV_VALUES)
+	{
+		if (c == '"')
+		{
+			if (!inquote)
+				csv->values[index] = cptr + 1;
+			else
+				*cptr = '\0';
+			inquote = !inquote;
+		}
+		else if (c == delim && !inquote)
+		{
+			*cptr = '\0';
+			csv->values[++index] = cptr + 1;
+		}
+		cptr++;
+	}
+	csv->num_values = index + 1;
+	return Q_ERR_SUCCESS;
+}
+
+typedef struct fog_user_item_s{
+	char filename[512];
+	int enabled;
+	float tintRed;
+	float tintGreen;
+	float tintBlue;
+	float tintPower;
+	float densityRoot;
+	float pushBackDist;
+
+} fog_user_item_s_t;
+
+typedef struct fog_user_table_s {
+	fog_user_item_s_t fog[512];
+	int numberFogItems;
+} fog_user_table_s_t;
+
+static qerror_t LoadFogByMapTable(char const * filename, fog_user_table_s_t* table)
+{
+	qerror_t status = Q_ERR_SUCCESS;
+	
+	table->numberFogItems = 0;
+
+	byte * buffer = NULL; ssize_t buffer_size = 0;
+	buffer_size = FS_LoadFile(filename, (void**)&buffer);
+	if (buffer == NULL)
+	{
+		Com_EPrintf("cannot load fogbymap.csv table '%s'\n", filename);
+		return Q_ERR_FAILURE;
+	}
+		
+	int currentLine = 0;
+	char const * ptr = (char const *)buffer;
+	char linebuf[MAX_QPATH * 3];
+	while (sgets(linebuf, sizeof(linebuf), &ptr))
+	{
+		// skip first line because it contains the column names
+		if (currentLine == 0 && strncmp(linebuf, "MapName", 7) == 0)
+			continue;
+
+		fog_user_item_s_t * fogItem = &table->fog[table->numberFogItems];
+
+		fogItem->enabled = 0;
+		fogItem->tintRed = 1;
+		fogItem->tintGreen = 1;
+		fogItem->tintBlue = 1;
+		fogItem->tintPower = 1;
+		fogItem->densityRoot = 1;
+		fogItem->pushBackDist = 1;
+		memset(fogItem->filename, sizeof(fogItem->filename), 0);
+
+		CSV_values_t csv = { 0 };
+
+		if (parse_CSV_line(linebuf, &csv) == Q_ERR_SUCCESS)
+		{
+			if (getStringValue(&csv, 0, fogItem->filename) == Q_ERR_SUCCESS && fogItem->filename[0] != '\0')
+			{
+				status |= getIntValue(&csv, 1, &fogItem->enabled);
+				status |= getFloatValue(&csv, 2, &fogItem->tintRed);
+				status |= getFloatValue(&csv, 3, &fogItem->tintGreen);
+				status |= getFloatValue(&csv, 4, &fogItem->tintBlue);
+				status |= getFloatValue(&csv, 5, &fogItem->tintPower);
+				status |= getFloatValue(&csv, 6, &fogItem->densityRoot);
+				status |= getFloatValue(&csv, 7, &fogItem->pushBackDist);
+			}
+			else
+				status = Q_ERR_FAILURE;
+		}
+		if (status == Q_ERR_SUCCESS)
+		{
+			++table->numberFogItems;
+		}
+		++currentLine;
+	}
+		
+	FS_FreeFile(buffer);
+
+	return status;
+}
+
+static fog_user_table_s_t fogbynametable;
 
 VkResult vkpt_initialize_god_rays()
 {
@@ -59,7 +221,38 @@ VkResult vkpt_initialize_god_rays()
 	god_rays.eccentricity = Cvar_Get("gr_eccentricity", "0.75", 0);
 	god_rays.enable = Cvar_Get("gr_enable", "1", 0);
 
+	god_rays.fogEnable = Cvar_Get("gr_enablefog", "1", 0);
+	god_rays.fogTintColorRed = Cvar_Get("gr_fogtintr", "1.0", 0);
+	god_rays.fogTintColorGreen = Cvar_Get("gr_fogtintg", "1.0", 0);
+	god_rays.fogTintColorBlue = Cvar_Get("gr_fogtintb", "1.0", 0);
+	god_rays.fogTintPower = Cvar_Get("gr_fogtintpow", "0.17", 0);
+	god_rays.fogDensityRoot = Cvar_Get("gr_fogdensity", "0.08", 0);
+	god_rays.fogPushBackDist = Cvar_Get("gr_fogpushback", "0.00011", 0);
+		   	 
+	// Load fog by map csv file make stucture
+	fogbynametable.numberFogItems = 0;
+	LoadFogByMapTable("fogbymap.csv", &fogbynametable);
+
 	return VK_SUCCESS;
+}
+
+void SetFogByMap(const char* name)
+{
+	for (int i = 0; i < fogbynametable.numberFogItems; i++)
+	{
+		if (strcmp(name, fogbynametable.fog[i].filename) == 0)
+		{
+			god_rays.fogEnable = Cvar_Set("gr_enablefog", va("%d", fogbynametable.fog[i].enabled));
+			god_rays.fogTintColorRed = Cvar_Set("gr_fogtintr", va("%f", fogbynametable.fog[i].tintRed));
+			god_rays.fogTintColorGreen = Cvar_Set("gr_fogtintg", va("%f", fogbynametable.fog[i].tintGreen));
+			god_rays.fogTintColorBlue =	Cvar_Set("gr_fogtintb", va("%f", fogbynametable.fog[i].tintBlue));
+			god_rays.fogTintPower =	Cvar_Set("gr_fogtintpow", va("%f", fogbynametable.fog[i].tintPower));
+			god_rays.fogDensityRoot = Cvar_Set("gr_fogdensity", va("%f", fogbynametable.fog[i].densityRoot));
+			god_rays.fogPushBackDist = Cvar_Set("gr_fogpushback", va("%f", fogbynametable.fog[i].pushBackDist));
+						
+			break;
+		}
+	}
 }
 
 VkResult vkpt_destroy_god_rays()
@@ -220,6 +413,14 @@ void vkpt_god_rays_prepare_ubo(
 	ubo->god_rays_intensity = max(0.f, god_rays.intensity->value);
 	ubo->god_rays_eccentricity = god_rays.eccentricity->value;
 
+	ubo->god_rays_fogEnable = god_rays.fogEnable->value;  
+	ubo->god_rays_fogTintColorRed = god_rays.fogTintColorRed->value;
+	ubo->god_rays_fogTintColorGreen = god_rays.fogTintColorGreen->value;
+	ubo->god_rays_fogTintColorBlue = god_rays.fogTintColorBlue->value;
+	ubo->god_rays_fogTintPower = god_rays.fogTintPower->value;
+	ubo->god_rays_fogDensityRoot = god_rays.fogDensityRoot->value;
+	ubo->god_rays_fogPushBackDist = god_rays.fogPushBackDist->value;
+	
 	// Shadow parameters
 	memcpy(ubo->shadow_map_VP, shadowmap_viewproj, 16 * sizeof(float));
 }
