@@ -149,6 +149,9 @@ void main()
 	vec3 direction = texelFetch(TEX_PT_VIEW_DIRECTION, sourcePixelPos.xy, 0).xyz;
 
 	vec4 throughput_distance = texelFetch(TEX_PT_GODRAYS_THROUGHPUT_DIST, sourcePixelPos.xy, 0);
+	
+	//vec4 throughput_color = imageLoad(IMG_PT_ALBEDO, ivec2(gl_GlobalInvocationID.xy));
+		
 	float distance = throughput_distance.w;
 
 	vec3 original_pos = surface_pos - direction * distance;
@@ -191,7 +194,6 @@ void main()
 
 	vec3 throughput = throughput_distance.xyz;
 	vec3 inscatter = vec3(0);
-
 	float randVal = rand(pixelPos.xy);
 	offset += getStep(offset, density) * (randVal - 1);
 
@@ -200,7 +202,7 @@ void main()
 		float density = getDensity(currentPos);
 		float stepLength = getStep(offset, density);
 
-		offset += stepLength;
+		offset += stepLength; 
 
 		if (offset >= distance)
 			break;
@@ -232,15 +234,22 @@ void main()
 		prevColor = imageLoad(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy));
 	else
 		prevColor = vec4(0);
-
-	float expT = -0.00011f;
-	//if(medium != MEDIUM_NONE)
-	//	expT = -1.0f;
-
-	vec3 outscatterColor = mix(inscatterColor + prevColor.rgb,							// Use inscatter as the input
-					 	   mix(sun_color_ubo.sun_color, vec3(1), 0.17f * randVal),		// Enviromental Tint
-		                   (1.0f - exp2(expT * distance * distance)) *					// Density with User push back distance
-				   	       (0.28f * randVal * (phase / PI)));									// Blue Noise the User Density Root
-					
-	imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), vec4(outscatterColor, 1));
+	
+	if(global_ubo.god_rays_fogEnable == 1)	{
+		float expT = -global_ubo.god_rays_fogPushBackDist;
+	
+		vec3 outscatterColor = mix(inscatterColor + prevColor.rgb,									// Use inscatter as the input
+						 	   mix(sun_color_ubo.sun_color,											// Enviromental Tint
+							   vec3(global_ubo.god_rays_fogTintColorRed,							// Enviromental Tint
+								global_ubo.god_rays_fogTintColorGreen,								// Enviromental Tint
+								global_ubo.god_rays_fogTintColorBlue),								// Enviromental Tint
+								global_ubo.god_rays_fogTintPower * randVal),						// Enviromental Tint
+							  (1.0f - exp2(expT * distance * distance)) *							// Density with User push back distance
+				   			  (global_ubo.god_rays_fogDensityRoot * randVal * (phase / PI)));		// Blue Noise the User Density Root
+		
+		imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), vec4(outscatterColor, 1));
+	}
+	else
+		imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), vec4(inscatterColor + prevColor.rgb, 1));
+		
 }

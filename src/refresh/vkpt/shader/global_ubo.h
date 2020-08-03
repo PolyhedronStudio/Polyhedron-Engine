@@ -166,6 +166,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_intensity) \
 	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_eccentricity) \
 	\
+	GLOBAL_UBO_VAR_LIST_DO(int,				god_rays_fogEnable) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogTintColorRed) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogTintColorGreen) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogTintColorBlue) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogTintPower) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogDensityRoot) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogPushBackDist) \
+    GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogPAD) \
+    \
 	GLOBAL_UBO_VAR_LIST_DO(int,             num_cameras) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             screen_image_width) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             screen_image_height) \
