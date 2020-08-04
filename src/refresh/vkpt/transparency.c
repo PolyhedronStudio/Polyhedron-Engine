@@ -584,7 +584,9 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 		// set up the quad - reference code is in function GL_DrawSpriteModel
 
 		vec3_t up, down, left, right;
-
+        float frameW2 = frame->width / 2;
+		float frameH2 = frame->height / 2;
+		
 		if (cvar_pt_projection->integer == 1)
 		{
 			// make the sprite always face the camera and always vertical in cylindrical projection mode
@@ -604,67 +606,66 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 		}
 		else
 		{
-
 			if (model->sprite_fxup)
 			{
 				// Fixed Up/dn
-				vertex_positions[3][0] = e->origin[0] + frame->width / 2;
-				vertex_positions[3][1] = e->origin[1] - frame->height / 2;
+				vertex_positions[3][0] = e->origin[0] + frameW2;
+				vertex_positions[3][1] = e->origin[1] - frameH2;
 				vertex_positions[3][2] = e->origin[2];
 
-				vertex_positions[2][0] = e->origin[0] - frame->width / 2;
-				vertex_positions[2][1] = e->origin[1] - frame->height / 2;
-				vertex_positions[2][2] = e->origin[2];
+				vertex_positions[0][0] = e->origin[0] - frameW2;
+				vertex_positions[0][1] = e->origin[1] - frameH2;
+				vertex_positions[0][2] = e->origin[2];
 
-				vertex_positions[1][0] = e->origin[0] - frame->width / 2;
-				vertex_positions[1][1] = e->origin[1] + frame->height / 2;
+				vertex_positions[1][0] = e->origin[0] - frameW2;
+				vertex_positions[1][1] = e->origin[1] + frameH2;
 				vertex_positions[1][2] = e->origin[2];
 
-				vertex_positions[0][0] = e->origin[0] + frame->width / 2;
-				vertex_positions[0][1] = e->origin[1] + frame->height / 2;
-				vertex_positions[0][2] = e->origin[2];
+				vertex_positions[2][0] = e->origin[0] + frameW2;
+				vertex_positions[2][1] = e->origin[1] + frameH2;
+				vertex_positions[2][2] = e->origin[2];
 			}
 			else if (model->sprite_fxft)
 			{
 				// Fixed Front/Back
-				vertex_positions[0][0] = e->origin[0] + frame->width / 2;
-				vertex_positions[0][1] = e->origin[1];
-				vertex_positions[0][2] = e->origin[2] - frame->height / 2;
-
-				vertex_positions[1][0] = e->origin[0] - frame->width / 2;
-				vertex_positions[1][1] = e->origin[1];
-				vertex_positions[1][2] = e->origin[2] - frame->height / 2;
-
-				vertex_positions[2][0] = e->origin[0] - frame->width / 2;
-				vertex_positions[2][1] = e->origin[1];
-				vertex_positions[2][2] = e->origin[2] + frame->height / 2;
-
-				vertex_positions[3][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[3][0] = e->origin[0] + frameW2;
 				vertex_positions[3][1] = e->origin[1];
-				vertex_positions[3][2] = e->origin[2] + frame->height / 2;
+				vertex_positions[3][2] = e->origin[2] - frameH2;
+
+				vertex_positions[0][0] = e->origin[0] - frameW2;
+				vertex_positions[0][1] = e->origin[1];
+				vertex_positions[0][2] = e->origin[2] - frameH2;
+
+				vertex_positions[1][0] = e->origin[0] - frameW2;
+				vertex_positions[1][1] = e->origin[1];
+				vertex_positions[1][2] = e->origin[2] + frameH2;
+
+				vertex_positions[2][0] = e->origin[0] + frameW2;
+				vertex_positions[2][1] = e->origin[1];
+				vertex_positions[2][2] = e->origin[2] + frameH2;
 			}
 			else if (model->sprite_fxlt)
 			{
 				// Fixed Left/Right
+				vertex_positions[3][0] = e->origin[0];
+				vertex_positions[3][1] = e->origin[1] + frameW2;
+				vertex_positions[3][2] = e->origin[2] - frameH2;
+
 				vertex_positions[0][0] = e->origin[0];
-				vertex_positions[0][1] = e->origin[1] + frame->width / 2;
-				vertex_positions[0][2] = e->origin[2] - frame->height / 2;
+				vertex_positions[0][1] = e->origin[1] - frameW2;
+				vertex_positions[0][2] = e->origin[2] - frameH2;
 
 				vertex_positions[1][0] = e->origin[0];
-				vertex_positions[1][1] = e->origin[1] - frame->width / 2;
-				vertex_positions[1][2] = e->origin[2] - frame->height / 2;
+				vertex_positions[1][1] = e->origin[1] - frameW2;
+				vertex_positions[1][2] = e->origin[2] + frameH2;
 
 				vertex_positions[2][0] = e->origin[0];
-				vertex_positions[2][1] = e->origin[1] - frame->width / 2;
-				vertex_positions[2][2] = e->origin[2] + frame->height / 2;
-
-				vertex_positions[3][0] = e->origin[0];
-				vertex_positions[3][1] = e->origin[1] + frame->width / 2;
-				vertex_positions[3][2] = e->origin[2] + frame->height / 2;
+				vertex_positions[2][1] = e->origin[1] + frameW2;
+				vertex_positions[2][2] = e->origin[2] + frameH2;
 			}
-			else if (model->sprite_vertical)
+			else if (model->sprite_vertical) // inverted true means false better experience for the mappers
 			{
-				// 3D Billboard
+				// 3D Billboard Game use is for all other sprites, mappers use vrty to use this option
 				VectorScale(view_x, frame->origin_x, left);
 				VectorScale(view_x, frame->origin_x - frame->width, right);
 				VectorScale(view_y, -frame->origin_y, down);
@@ -677,7 +678,7 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 			}
 			else
 			{
-				// 2D Billboard
+				// 2D Billboard Game use is for Rocket Explosion only, defualt for mappers
 				VectorScale(view_x, frame->origin_x, left);
 				VectorScale(view_x, frame->origin_x - frame->width, right);
 				VectorScale(world_y, -frame->origin_y, down);
@@ -687,8 +688,6 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 				VectorAdd3(e->origin, up, left, vertex_positions[1]);
 				VectorAdd3(e->origin, up, right, vertex_positions[2]);
 				VectorAdd3(e->origin, down, right, vertex_positions[3]);
-				
-
 			}
 		}
 
