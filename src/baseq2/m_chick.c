@@ -50,6 +50,27 @@ static int  sound_pain3;
 static int  sound_sight;
 static int  sound_search;
 
+static int  sound_step;
+static int  sound_step2;
+
+void chick_footstep(edict_t *self)
+{
+	if (!cl_monsterfootsteps->integer)
+		return;
+
+	int     i;
+	i = rand() % (1 + 1 - 0) + 0;
+
+	if (i == 0)
+	{
+		gi.sound(self, CHAN_BODY, sound_step, 1, ATTN_NORM, 0);
+	}
+	else if (i == 1)
+	{
+		gi.sound(self, CHAN_BODY, sound_step2, 1, ATTN_NORM, 0);
+	}
+}
+
 
 void ChickMoan(edict_t *self)
 {
@@ -157,12 +178,12 @@ mmove_t chick_move_start_run = {FRAME_walk01, FRAME_walk10, chick_frames_start_r
 
 mframe_t chick_frames_run [] = {
     { ai_run, 6,  NULL },
-    { ai_run, 8,  NULL },
+    { ai_run, 8,  chick_footstep },
     { ai_run, 13, NULL },
     { ai_run, 5,  NULL },
     { ai_run, 7,  NULL },
     { ai_run, 4,  NULL },
-    { ai_run, 11, NULL },
+    { ai_run, 11, chick_footstep },
     { ai_run, 5,  NULL },
     { ai_run, 9,  NULL },
     { ai_run, 7,  NULL }
@@ -173,12 +194,12 @@ mmove_t chick_move_run = {FRAME_walk11, FRAME_walk20, chick_frames_run, NULL};
 
 mframe_t chick_frames_walk [] = {
     { ai_walk, 6,  NULL },
-    { ai_walk, 8,  NULL },
+    { ai_walk, 8,  chick_footstep },
     { ai_walk, 13, NULL },
     { ai_walk, 5,  NULL },
     { ai_walk, 7,  NULL },
     { ai_walk, 4,  NULL },
-    { ai_walk, 11, NULL },
+    { ai_walk, 11, chick_footstep },
     { ai_walk, 5,  NULL },
     { ai_walk, 9,  NULL },
     { ai_walk, 7,  NULL }
@@ -294,20 +315,20 @@ mframe_t chick_frames_death2 [] = {
     { ai_move, -6, NULL },
     { ai_move, 0,  NULL },
     { ai_move, -1,  NULL },
-    { ai_move, -5, NULL },
+    { ai_move, -5, chick_footstep },
     { ai_move, 0, NULL },
     { ai_move, -1,  NULL },
     { ai_move, -2,  NULL },
     { ai_move, 1,  NULL },
     { ai_move, 10, NULL },
     { ai_move, 2,  NULL },
-    { ai_move, 3,  NULL },
+    { ai_move, 3,  chick_footstep },
     { ai_move, 1,  NULL },
     { ai_move, 2, NULL },
     { ai_move, 0,  NULL },
     { ai_move, 3,  NULL },
     { ai_move, 3,  NULL },
-    { ai_move, 1,  NULL },
+    { ai_move, 1,  chick_footstep },
     { ai_move, -3,  NULL },
     { ai_move, -5, NULL },
     { ai_move, 4, NULL },
@@ -465,7 +486,7 @@ mframe_t chick_frames_start_attack1 [] = {
     { ai_charge, -3,  NULL },
     { ai_charge, 3,   NULL },
     { ai_charge, 5,   NULL },
-    { ai_charge, 7,   NULL },
+    { ai_charge, 7,   chick_footstep },
     { ai_charge, 0,   NULL },
     { ai_charge, 0,   NULL },
     { ai_charge, 0,   NULL },
@@ -477,17 +498,17 @@ mmove_t chick_move_start_attack1 = {FRAME_attak101, FRAME_attak113, chick_frames
 mframe_t chick_frames_attack1 [] = {
     { ai_charge, 19,  ChickRocket },
     { ai_charge, -6,  NULL },
-    { ai_charge, -5,  NULL },
+    { ai_charge, -5,  chick_footstep },
     { ai_charge, -2,  NULL },
-    { ai_charge, -7,  NULL },
+    { ai_charge, -7,  chick_footstep },
     { ai_charge, 0,   NULL },
     { ai_charge, 1,   NULL },
     { ai_charge, 10,  ChickReload },
     { ai_charge, 4,   NULL },
-    { ai_charge, 5,   NULL },
+    { ai_charge, 5,   chick_footstep },
     { ai_charge, 6,   NULL },
     { ai_charge, 6,   NULL },
-    { ai_charge, 4,   NULL },
+    { ai_charge, 4,   chick_footstep },
     { ai_charge, 3,   chick_rerocket }
 
 };
@@ -498,7 +519,7 @@ mframe_t chick_frames_end_attack1 [] = {
     { ai_charge, 0,   NULL },
     { ai_charge, -6,  NULL },
     { ai_charge, -4,  NULL },
-    { ai_charge, -2,  NULL }
+    { ai_charge, -2,  chick_footstep }
 };
 mmove_t chick_move_end_attack1 = {FRAME_attak128, FRAME_attak132, chick_frames_end_attack1, chick_run};
 
@@ -537,7 +558,7 @@ mframe_t chick_frames_end_slash [] = {
     { ai_charge, -6,  NULL },
     { ai_charge, -1,  NULL },
     { ai_charge, -6,  NULL },
-    { ai_charge, 0,   NULL }
+    { ai_charge, 0,   chick_footstep }
 };
 mmove_t chick_move_end_slash = {FRAME_attak213, FRAME_attak216, chick_frames_end_slash, chick_run};
 
@@ -567,7 +588,7 @@ void chick_slash(edict_t *self)
 mframe_t chick_frames_start_slash [] = {
     { ai_charge, 1,   NULL },
     { ai_charge, 8,   NULL },
-    { ai_charge, 3,   NULL }
+    { ai_charge, 3,   chick_footstep }
 };
 mmove_t chick_move_start_slash = {FRAME_attak201, FRAME_attak203, chick_frames_start_slash, chick_slash};
 
@@ -613,6 +634,9 @@ void SP_monster_chick(edict_t *self)
     sound_pain3             = gi.soundindex("chick/chkpain3.wav");
     sound_sight             = gi.soundindex("chick/chksght1.wav");
     sound_search            = gi.soundindex("chick/chksrch1.wav");
+
+	sound_step = gi.soundindex("bitch/step1.wav");
+	sound_step2 = gi.soundindex("bitch/step2.wav");
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
