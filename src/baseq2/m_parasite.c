@@ -165,10 +165,10 @@ void parasite_stand(edict_t *self)
 mframe_t parasite_frames_run [] = {
     { ai_run, 30, NULL },
     { ai_run, 30, NULL },
-    { ai_run, 22, NULL },
-    { ai_run, 19, NULL },
+    { ai_run, 22, parasite_tap },
+    { ai_run, 19, parasite_tap },
     { ai_run, 24, NULL },
-    { ai_run, 28, NULL },
+    { ai_run, 28, parasite_tap },
     { ai_run, 25, NULL }
 };
 mmove_t parasite_move_run = {FRAME_run03, FRAME_run09, parasite_frames_run, NULL};
@@ -182,7 +182,7 @@ mmove_t parasite_move_start_run = {FRAME_run01, FRAME_run02, parasite_frames_sta
 mframe_t parasite_frames_stop_run [] = {
     { ai_run, 20, NULL },
     { ai_run, 20, NULL },
-    { ai_run, 12, NULL },
+    { ai_run, 12, parasite_tap },
     { ai_run, 10, NULL },
     { ai_run, 0,  NULL },
     { ai_run, 0,  NULL }

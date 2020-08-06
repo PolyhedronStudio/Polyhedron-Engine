@@ -547,6 +547,8 @@ extern  cvar_t  *sv_features;
 
 extern  cvar_t  *sv_flaregun;
 
+extern  cvar_t  *cl_monsterfootsteps;
+
 #define world   (&g_edicts[0])
 
 // item spawnflags

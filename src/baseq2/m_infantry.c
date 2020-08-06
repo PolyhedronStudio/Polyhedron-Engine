@@ -42,6 +42,27 @@ static int  sound_sight;
 static int  sound_search;
 static int  sound_idle;
 
+static int  sound_step;
+static int  sound_step2;
+
+void infantry_footstep(edict_t *self)
+{
+	if (!cl_monsterfootsteps->integer)
+		return;
+
+	int     i;
+	i = rand() % (1 + 1 - 0) + 0;
+
+	if (i == 0)
+	{
+		gi.sound(self, CHAN_BODY, sound_step, 1, ATTN_NORM, 0);
+	}
+	else if (i == 1)
+	{
+		gi.sound(self, CHAN_BODY, sound_step2, 1, ATTN_NORM, 0);
+	}
+}
+
 
 mframe_t infantry_frames_stand [] = {
     { ai_stand, 0, NULL },
@@ -81,7 +102,7 @@ mframe_t infantry_frames_fidget [] = {
     { ai_stand, 1,  NULL },
     { ai_stand, 3,  NULL },
     { ai_stand, 6,  NULL },
-    { ai_stand, 3,  NULL },
+    { ai_stand, 3,  infantry_footstep },
     { ai_stand, 0,  NULL },
     { ai_stand, 0,  NULL },
     { ai_stand, 0,  NULL },
@@ -123,7 +144,7 @@ mframe_t infantry_frames_fidget [] = {
     { ai_stand, -3, NULL },
     { ai_stand, -2, NULL },
     { ai_stand, -3, NULL },
-    { ai_stand, -3, NULL },
+    { ai_stand, -3, infantry_footstep },
     { ai_stand, -2, NULL }
 };
 mmove_t infantry_move_fidget = {FRAME_stand01, FRAME_stand49, infantry_frames_fidget, infantry_stand};
@@ -135,13 +156,13 @@ void infantry_fidget(edict_t *self)
 }
 
 mframe_t infantry_frames_walk [] = {
-    { ai_walk, 5,  NULL },
+    { ai_walk, 5,  infantry_footstep },
     { ai_walk, 4,  NULL },
     { ai_walk, 4,  NULL },
     { ai_walk, 5,  NULL },
     { ai_walk, 4,  NULL },
     { ai_walk, 5,  NULL },
-    { ai_walk, 6,  NULL },
+    { ai_walk, 6,  infantry_footstep },
     { ai_walk, 4,  NULL },
     { ai_walk, 4,  NULL },
     { ai_walk, 4,  NULL },
@@ -157,11 +178,11 @@ void infantry_walk(edict_t *self)
 
 mframe_t infantry_frames_run [] = {
     { ai_run, 10, NULL },
-    { ai_run, 20, NULL },
+    { ai_run, 20, infantry_footstep },
     { ai_run, 5,  NULL },
     { ai_run, 7,  NULL },
     { ai_run, 30, NULL },
-    { ai_run, 35, NULL },
+    { ai_run, 35, infantry_footstep },
     { ai_run, 2,  NULL },
     { ai_run, 6,  NULL }
 };
@@ -181,12 +202,12 @@ mframe_t infantry_frames_pain1 [] = {
     { ai_move, -2, NULL },
     { ai_move, -1, NULL },
     { ai_move, -2, NULL },
-    { ai_move, -1, NULL },
+    { ai_move, -1, infantry_footstep },
     { ai_move, 1,  NULL },
     { ai_move, -1, NULL },
     { ai_move, 1,  NULL },
     { ai_move, 6,  NULL },
-    { ai_move, 2,  NULL }
+    { ai_move, 2,  infantry_footstep }
 };
 mmove_t infantry_move_pain1 = {FRAME_pain101, FRAME_pain110, infantry_frames_pain1, infantry_run};
 
@@ -195,12 +216,12 @@ mframe_t infantry_frames_pain2 [] = {
     { ai_move, -3, NULL },
     { ai_move, 0,  NULL },
     { ai_move, -1, NULL },
-    { ai_move, -2, NULL },
+    { ai_move, -2, infantry_footstep },
     { ai_move, 0,  NULL },
     { ai_move, 0,  NULL },
     { ai_move, 2,  NULL },
     { ai_move, 5,  NULL },
-    { ai_move, 2,  NULL }
+    { ai_move, 2,  infantry_footstep }
 };
 mmove_t infantry_move_pain2 = {FRAME_pain201, FRAME_pain210, infantry_frames_pain2, infantry_run};
 
@@ -299,11 +320,11 @@ mframe_t infantry_frames_death1 [] = {
     { ai_move, 0,  NULL },
     { ai_move, 0,  NULL },
     { ai_move, -1, NULL },
-    { ai_move, -4, NULL },
+    { ai_move, -4, infantry_footstep },
     { ai_move, 0,  NULL },
     { ai_move, 0,  NULL },
     { ai_move, 0,  NULL },
-    { ai_move, -1, NULL },
+    { ai_move, -1, infantry_footstep },
     { ai_move, 3,  NULL },
     { ai_move, 1,  NULL },
     { ai_move, 1,  NULL },
@@ -325,8 +346,8 @@ mframe_t infantry_frames_death2 [] = {
     { ai_move, 5,   NULL },
     { ai_move, -1,  NULL },
     { ai_move, 0,   NULL },
-    { ai_move, 1,   NULL },
-    { ai_move, 1,   NULL },
+    { ai_move, 1,   infantry_footstep },
+    { ai_move, 1,   infantry_footstep },
     { ai_move, 4,   NULL },
     { ai_move, 3,   NULL },
     { ai_move, 0,   NULL },
@@ -431,7 +452,7 @@ mframe_t infantry_frames_duck [] = {
     { ai_move, -5, infantry_duck_hold },
     { ai_move, 3,  NULL },
     { ai_move, 4,  infantry_duck_up },
-    { ai_move, 0,  NULL }
+    { ai_move, 0,  infantry_footstep }
 };
 mmove_t infantry_move_duck = {FRAME_duck01, FRAME_duck05, infantry_frames_duck, infantry_run};
 
@@ -504,7 +525,7 @@ mframe_t infantry_frames_attack2 [] = {
     { ai_charge, 3, NULL },
     { ai_charge, 6, NULL },
     { ai_charge, 0, infantry_swing },
-    { ai_charge, 8, NULL },
+    { ai_charge, 8, infantry_footstep },
     { ai_charge, 5, NULL },
     { ai_charge, 8, infantry_smack },
     { ai_charge, 6, NULL },
@@ -543,6 +564,9 @@ void SP_monster_infantry(edict_t *self)
     sound_sight = gi.soundindex("infantry/infsght1.wav");
     sound_search = gi.soundindex("infantry/infsrch1.wav");
     sound_idle = gi.soundindex("infantry/infidle1.wav");
+
+	sound_step = gi.soundindex("infantry/step1.wav");
+	sound_step2 = gi.soundindex("infantry/step2.wav");
 
 
     self->movetype = MOVETYPE_STEP;

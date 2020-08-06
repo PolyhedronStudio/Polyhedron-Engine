@@ -74,6 +74,7 @@ cvar_t  *sv_maplist;
 cvar_t  *sv_features;
 
 cvar_t  *sv_flaregun;
+cvar_t  *cl_monsterfootsteps;
 
 void SpawnEntities(const char *mapname, const char *entities, const char *spawnpoint);
 void ClientThink(edict_t *ent, usercmd_t *cmd);
@@ -174,7 +175,8 @@ void InitGame(void)
 	//   0 = no flare gun
 	//   1 = spawn with the flare gun
 	//   2 = spawn with the flare gun and some grenades
-	sv_flaregun = gi.cvar("sv_flaregun", "2", 0);
+	sv_flaregun = gi.cvar("sv_flaregun", "1", 0);
+	cl_monsterfootsteps = gi.cvar("cl_monsterfootsteps", "1", 0);
 
     // export our own features
     gi.cvar_forceset("g_features", va("%d", G_FEATURES));
