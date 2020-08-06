@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define AL_NO_PROTOTYPES
 #include <AL/al.h>
-
+#include <AL/alc.h>
 #ifndef AL_SOFT_loop_points
 #define AL_SOFT_loop_points 1
 #define AL_LOOP_POINTS_SOFT 0x2015
@@ -97,7 +97,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     QAL(LPALDOPPLERFACTOR, alDopplerFactor); \
     QAL(LPALDOPPLERVELOCITY, alDopplerVelocity); \
     QAL(LPALSPEEDOFSOUND, alSpeedOfSound); \
-    QAL(LPALDISTANCEMODEL, alDistanceModel);
+    QAL(LPALDISTANCEMODEL, alDistanceModel); \
+	QAL(LPALGENFILTERS, alGenFilters); \
+	QAL(LPALFILTERI, alFilteri); \
+	QAL(LPALFILTERF, alFilterf); \
+	QAL(LPALDELETEFILTERS, alDeleteFilters);\
+	QAL(LPALEFFECTF, alEffectf); \
+	QAL(LPALEFFECTFV, alEffectfv); \
+	QAL(LPALEFFECTI, alEffecti); \
+	QAL(LPALEFFECTIV, alEffectiv); \
+	QAL(LPALGENEFFECTS, alGenEffects);
 
 #define QAL(type, func)  extern type q##func
 QAL_IMP
@@ -106,3 +115,4 @@ QAL_IMP
 qboolean QAL_Init(void);
 void QAL_Shutdown(void);
 
+void QALC_PrintExtensions(void);
