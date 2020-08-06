@@ -24,6 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "qal/dynamic.h"
 #endif
 
+#define AL_METER_OF_Q2_UNIT 0.0315f
+
 // translates from AL coordinate system to quake
 #define AL_UnpackVector(v)  -v[1],v[2],-v[0]
 #define AL_CopyVector(a,b)  ((b)[0]=-(a)[1],(b)[1]=(a)[2],(b)[2]=-(a)[0])
@@ -36,14 +38,24 @@ qboolean streamPlaying = qfalse;
 static ALuint s_srcnums[MAX_CHANNELS];
 static ALuint streamSource = 0;
 static int s_framecount;
+static ALuint underwaterFilter;
 
 void AL_SoundInfo(void)
 {
-    Com_Printf("AL_VENDOR: %s\n", qalGetString(AL_VENDOR));
-    Com_Printf("AL_RENDERER: %s\n", qalGetString(AL_RENDERER));
-    Com_Printf("AL_VERSION: %s\n", qalGetString(AL_VERSION));
-    Com_Printf("AL_EXTENSIONS: %s\n", qalGetString(AL_EXTENSIONS));
-    Com_Printf("Number of sources: %d\n", s_numchannels);
+	Com_Printf("===============\n");
+	Com_Printf("SOUND INFO:\n");
+	Com_Printf("AL_VENDOR: %s\n", qalGetString(AL_VENDOR));
+	Com_Printf("\n");
+	Com_Printf("AL_RENDERER: %s\n", qalGetString(AL_RENDERER));
+	Com_Printf("\n");
+	Com_Printf("AL_VERSION: %s\n", qalGetString(AL_VERSION));
+	Com_Printf("\n");
+	Com_Printf("AL_EXTENSIONS:\n%s\n", qalGetString(AL_EXTENSIONS));
+	Com_Printf("\n");
+	QALC_PrintExtensions();
+	Com_Printf("\n");
+	Com_Printf("Number of sources: %d\n", s_numchannels);
+	Com_Printf("===============\n");
 }
 
 /*
@@ -169,6 +181,15 @@ qboolean AL_Init(void)
 
     s_numchannels = i;
 	AL_InitStreamSource();
+	AL_InitUnderwaterFilter();
+
+	// exaggerate 2x because realistic is barely noticeable
+	if (s_doppler->value) {
+		qalDopplerFactor(2.0f);
+	}
+
+	if (strstr(qalGetString(AL_RENDERER), "OpenAL Soft"))
+		Com_Printf("OpenAL Soft detected.\n");
 
     Com_Printf("OpenAL initialized.\n");
     return qtrue;
@@ -187,6 +208,7 @@ void AL_Shutdown(void)
 	AL_StopAllChannels();
 
 	qalDeleteSources(1, &streamSource);
+	qalDeleteFilters(1, &underwaterFilter);
 
     if (s_numchannels) {
         // delete source names
@@ -254,16 +276,52 @@ void AL_DeleteSfx(sfx_t *s)
 static void AL_Spatialize(channel_t *ch)
 {
     vec3_t      origin;
+	vec3_t		velocity;
+	static vec3_t mins = { 0, 0, 0 }, maxs = { 0, 0, 0 };
+	trace_t trace;
+	vec3_t distance;
+	float dist;
+	float final;
 
-    // anything coming from the view entity will always be full volume
-    // no attenuation = no spatialization
-    if (ch->entnum == -1 || ch->entnum == listener_entnum || !ch->dist_mult) {
-        VectorCopy(listener_origin, origin);
-    } else if (ch->fixed_origin) {
-        VectorCopy(ch->origin, origin);
-    } else {
-        CL_GetEntitySoundOrigin(ch->entnum, origin);
-    }
+	// anything coming from the view entity will always be full volume
+	// no attenuation = no spatialization
+	if (ch->entnum == -1 || ch->entnum == listener_entnum || !ch->dist_mult) {
+		VectorCopy(listener_origin, origin);
+	}
+	else if (ch->fixed_origin) {
+		VectorCopy(ch->origin, origin);
+	}
+	else {
+		CL_GetEntitySoundOrigin(ch->entnum, origin);
+	}
+	
+	if (s_doppler->value) {
+		CL_GetEntitySoundVelocity(ch->entnum, velocity);
+		VectorScale(velocity, AL_METER_OF_Q2_UNIT, velocity);
+		qalSource3f(ch->srcnum, AL_VELOCITY, AL_UnpackVector(velocity));
+	}
+
+	if (cl.bsp && s_occlusion->integer)
+	{
+		CM_BoxTrace(&trace, origin, listener_origin, mins, maxs, cl.bsp->nodes, MASK_PLAYERSOLID);
+		if (trace.fraction < 1.0 && !(ch->entnum == -1 || ch->entnum == listener_entnum || !ch->dist_mult))
+		{
+			VectorSubtract(origin, listener_origin, distance);
+			dist = VectorLength(distance);
+
+			final = 1.0 - ((dist / 1000) * s_occlusion_strength->value);
+
+			qalSourcef(ch->srcnum, AL_GAIN, clamp(final, 0, 1));
+
+			if (!snd_is_underwater)
+				qalSourcei(ch->srcnum, AL_DIRECT_FILTER, underwaterFilter);
+		}
+		else
+		{
+			if (!snd_is_underwater)
+				qalSourcei(ch->srcnum, AL_DIRECT_FILTER, 0);
+		}
+	}
 
     qalSource3f(ch->srcnum, AL_POSITION, AL_UnpackVector(origin));
 }
@@ -435,11 +493,128 @@ static void AL_AddLoopSounds(void)
     }
 }
 
+void oal_update_underwater()
+{
+	int i;
+	float gain_hf;
+	qboolean update = qfalse;
+	ALuint filter;
+
+	if (underwaterFilter == 0)
+		return;
+
+	if (s_underwater->modified) {
+		update = qtrue;
+		s_underwater->modified = qfalse;
+		snd_is_underwater_enabled = ((int)s_underwater->value != 0);
+	}
+
+	if (s_underwater_gain_hf->modified) {
+		update = qtrue;
+		s_underwater_gain_hf->modified = qfalse;
+	}
+
+	if (!update)
+		return;
+
+	gain_hf = s_underwater_gain_hf->value;
+
+	if (gain_hf < AL_LOWPASS_MIN_GAINHF)
+		gain_hf = AL_LOWPASS_MIN_GAINHF;
+
+	if (gain_hf > AL_LOWPASS_MAX_GAINHF)
+		gain_hf = AL_LOWPASS_MAX_GAINHF;
+
+	qalFilterf(underwaterFilter, AL_LOWPASS_GAINHF, gain_hf);
+
+	if (snd_is_underwater_enabled && snd_is_underwater)
+		filter = underwaterFilter;
+	else
+		filter = 0;
+
+	for (i = 0; i < s_numchannels; ++i)
+		qalSourcei(s_srcnums[i], AL_DIRECT_FILTER, filter);
+}
+
+AL_InitUnderwaterFilter(void)
+{
+	underwaterFilter = 0;
+
+	if (!(qalGenFilters && qalFilteri && qalFilterf && qalDeleteFilters))
+		return;
+
+	/* Generate a filter */
+	qalGenFilters(1, &underwaterFilter);
+
+	if (qalGetError() != AL_NO_ERROR)
+	{
+		Com_Printf("Couldn't generate an OpenAL filter!\n");
+		return;
+	}
+
+	/* Low pass filter for underwater effect */
+	qalFilteri(underwaterFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
+
+	if (qalGetError() != AL_NO_ERROR)
+	{
+		Com_Printf("Low pass filter is not supported!\n");
+		return;
+	}
+
+	qalFilterf(underwaterFilter, AL_LOWPASS_GAIN, AL_LOWPASS_DEFAULT_GAIN);
+
+	s_underwater->modified = qtrue;
+	s_underwater_gain_hf->modified = qtrue;
+}
+
+void AL_Underwater()
+{
+	int i;
+
+	if (s_started != SS_OAL)
+	{
+		return;
+	}
+
+	if (underwaterFilter == 0)
+		return;
+
+	/* Apply to all sources */
+	for (i = 0; i < s_numchannels; i++)
+	{
+		qalSourcei(s_srcnums[i], AL_DIRECT_FILTER, underwaterFilter);
+	}
+}
+
+/*
+ * Disables the underwater effect
+ */
+void AL_Overwater()
+{
+	int i;
+
+	if (s_started != SS_OAL)
+	{
+		return;
+	}
+
+	if (underwaterFilter == 0)
+		return;
+
+	/* Apply to all sources */
+	for (i = 0; i < s_numchannels; i++)
+	{
+		qalSourcei(s_srcnums[i], AL_DIRECT_FILTER, 0);
+	}
+}
+
+
 void AL_Update(void)
 {
     int         i;
     channel_t   *ch;
     vec_t       orientation[6];
+	vec3_t		listener_velocity;
 
     if (!s_active) {
         return;
@@ -454,6 +629,12 @@ void AL_Update(void)
     qalListenerfv(AL_ORIENTATION, orientation);
     qalListenerf(AL_GAIN, S_GetLinearVolume(s_volume->value));
     qalDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+
+	if (s_doppler->value) {
+		CL_GetViewVelocity(listener_velocity);
+		VectorScale(listener_velocity, AL_METER_OF_Q2_UNIT, listener_velocity);
+		qalListener3f(AL_VELOCITY, AL_UnpackVector(listener_velocity));
+	}
 
     // update spatialization for dynamic sounds
     ch = channels;
@@ -495,6 +676,8 @@ void AL_Update(void)
 
 	AL_StreamUpdate();
     AL_IssuePlaysounds();
+	
+	oal_update_underwater();
 }
 
 /*

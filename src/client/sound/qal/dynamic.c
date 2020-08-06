@@ -89,6 +89,11 @@ void QAL_Shutdown(void)
         al_device->flags &= ~CVAR_SOUND;
 }
 
+void QALC_PrintExtensions(void)
+{
+	Com_Printf("ALC_EXTENSIONS: %s\n", qalcGetString(device, ALC_EXTENSIONS));
+}
+
 qboolean QAL_Init(void)
 {
     al_driver = Cvar_Get("al_driver", LIBAL, 0);
@@ -126,6 +131,32 @@ qboolean QAL_Init(void)
 
     al_driver->flags |= CVAR_SOUND;
     al_device->flags |= CVAR_SOUND;
+
+	if (qalcIsExtensionPresent(device, "ALC_EXT_EFX")) {
+		qalGenFilters = qalcGetProcAddress(device, "alGenFilters");
+		qalFilteri = qalcGetProcAddress(device, "alFilteri");
+		qalFilterf = qalcGetProcAddress(device, "alFilterf");
+		qalDeleteFilters = qalcGetProcAddress(device, "alDeleteFilters");
+		qalEffectf = qalcGetProcAddress(device, "alEffectf");
+		qalEffectfv = qalcGetProcAddress(device, "alEffectfv");
+		qalEffecti = qalcGetProcAddress(device, "alEffecti");
+		qalEffectiv = qalcGetProcAddress(device, "alEffectiv");
+		qalGenEffects = qalcGetProcAddress(device, "alGenEffects");
+		Com_Printf("OpenAL EFX extensions available.\n");
+	}
+	else {
+		qalGenFilters = NULL;
+		qalFilteri = NULL;
+		qalFilterf = NULL;
+		qalDeleteFilters = NULL;
+		qalEffectf = NULL;
+		qalEffectfv = NULL;
+		qalEffecti = NULL;
+		qalEffectiv = NULL;
+		qalGenEffects = NULL;
+		Com_Printf("OpenAL EFX extensions NOT available.\n");
+	}
+
 
     return qtrue;
 
