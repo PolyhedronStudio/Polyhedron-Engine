@@ -89,6 +89,8 @@ AL_StreamDie(void)
 
 	/* Un-queue any buffers, and delete them */
 	qalGetSourcei(streamSource, AL_BUFFERS_QUEUED, &numBuffers);
+	qalSourcei(streamSource, AL_DIRECT_FILTER, 0);
+	qalSource3i(streamSource, AL_AUXILIARY_SEND_FILTER, 0, 0, AL_FILTER_NULL);
 
 	while (numBuffers--)
 	{
@@ -119,6 +121,8 @@ AL_StreamUpdate(void)
 	{
 		/* Un-queue any already played buffers and delete them */
 		qalGetSourcei(streamSource, AL_BUFFERS_PROCESSED, &numBuffers);
+		qalSourcei(streamSource, AL_DIRECT_FILTER, 0);
+		qalSource3i(streamSource, AL_AUXILIARY_SEND_FILTER, 0, 0, AL_FILTER_NULL);
 
 		while (numBuffers--)
 		{
@@ -545,6 +549,7 @@ void AL_Shutdown(void)
 	qalDeleteSources(1, &streamSource);
 	qalDeleteFilters(1, &underwaterFilter);
 	qalDeleteEffects(1, &ReverbEffect);
+	qalDeleteAuxiliaryEffectSlots(1, &ReverbEffectSlot);
 
     if (s_numchannels) {
         // delete source names
@@ -576,13 +581,13 @@ sfxcache_t *AL_UploadSfx(sfx_t *s)
         return NULL;
     }
 
-#if 0
+//#if 0
     // specify OpenAL-Soft style loop points
     if (s_info.loopstart > 0 && qalIsExtensionPresent("AL_SOFT_loop_points")) {
         ALint points[2] = { s_info.loopstart, s_info.samples };
         qalBufferiv(name, AL_LOOP_POINTS_SOFT, points);
     }
-#endif
+//#endif
 
     // allocate placeholder sfxcache
     sc = s->cache = S_Malloc(sizeof(*sc));
@@ -685,6 +690,8 @@ void AL_StopChannel(channel_t *ch)
     // stop it
     qalSourceStop(ch->srcnum);
     qalSourcei(ch->srcnum, AL_BUFFER, AL_NONE);
+	qalSourcei(ch->srcnum, AL_DIRECT_FILTER, 0);
+	qalSource3i(ch->srcnum, AL_AUXILIARY_SEND_FILTER, 0, 0, AL_FILTER_NULL);
     memset(ch, 0, sizeof(*ch));
 }
 
@@ -707,8 +714,9 @@ void AL_PlayChannel(channel_t *ch)
     }
     qalSourcef(ch->srcnum, AL_GAIN, ch->master_vol);
     qalSourcef(ch->srcnum, AL_REFERENCE_DISTANCE, SOUND_FULLVOLUME);
-    qalSourcef(ch->srcnum, AL_MAX_DISTANCE, 8192);
-    qalSourcef(ch->srcnum, AL_ROLLOFF_FACTOR, ch->dist_mult * (8192 - SOUND_FULLVOLUME));
+	qalSourcef(ch->srcnum, AL_MAX_DISTANCE, 8192); //qalSourcef(ch->srcnum, AL_MAX_DISTANCE, 8192);
+	qalSourcef(ch->srcnum, AL_ROLLOFF_FACTOR, 0.2); //qalSourcef(ch->srcnum, AL_ROLLOFF_FACTOR, ch->dist_mult * (8192 - SOUND_FULLVOLUME));
+	qalSourcei(ch->srcnum, AL_SOURCE_SPATIALIZE_SOFT, AL_AUTO_SOFT);
 
     AL_Spatialize(ch);
 
@@ -979,7 +987,8 @@ void AL_Update(void)
     AL_CopyVector(listener_up, orientation + 3);
     qalListenerfv(AL_ORIENTATION, orientation);
     qalListenerf(AL_GAIN, S_GetLinearVolume(s_volume->value));
-    qalDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+	//qalDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+	qalDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 
 	if (s_doppler->value) {
 		CL_GetViewVelocity(listener_velocity);

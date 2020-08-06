@@ -132,7 +132,7 @@ qboolean QAL_Init(void)
     al_driver->flags |= CVAR_SOUND;
     al_device->flags |= CVAR_SOUND;
 
-	if (qalcIsExtensionPresent(device, "ALC_EXT_EFX")) {
+	if (qalcIsExtensionPresent(device, "ALC_EXT_EFX") && strstr(qalGetString(AL_RENDERER), "OpenAL Soft")) {
 		qalGenFilters = qalcGetProcAddress(device, "alGenFilters");
 		qalFilteri = qalcGetProcAddress(device, "alFilteri");
 		qalFilterf = qalcGetProcAddress(device, "alFilterf");
@@ -163,6 +163,42 @@ qboolean QAL_Init(void)
 		Com_Printf("OpenAL EFX extensions NOT available.\n");
 	}
 
+	if (qalcIsExtensionPresent(device, "ALC_SOFT_HRTF"))
+	{
+		ALCint *enabled;
+		ALCint *status;
+		qalcGetIntegerv(device, ALC_HRTF_SOFT, 1, &enabled);
+		qalcGetIntegerv(device, ALC_HRTF_STATUS_SOFT, 1, &status);
+
+		Com_Printf("HRTF enabled: %i\n", enabled);
+
+		if ((int)status == 0)
+		{
+			Com_Printf("HRTF Status: Disabled\n");
+		}
+		else if ((int)status == 1)
+		{
+			Com_Printf("HRTF Status: Enabled\n");
+		}
+		else if ((int)status == 2)
+		{
+			Com_Printf("HRTF Status: Denied\n");
+		}
+		else if ((int)status == 3)
+		{
+			Com_Printf("HRTF Status: Required\n");
+		}
+		else if ((int)status == 4)
+		{
+			Com_Printf("HRTF Status: Headphones\n");
+		}
+		else if ((int)status == 5)
+		{
+			Com_Printf("HRTF Status: Unsupported\n");
+		}
+
+		Com_Printf("HRTF preset: %s\n", qalcGetString(device, ALC_HRTF_SPECIFIER_SOFT));
+	}
 
     return qtrue;
 

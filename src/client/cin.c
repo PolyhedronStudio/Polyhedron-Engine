@@ -105,7 +105,7 @@ Called when either the cinematic completes, or it is aborted
 void SCR_FinishCinematic(void)
 {
     SCR_StopCinematic();
-
+	AL_UnqueueRawSamples();
     // tell the server to advance to the next map / cinematic
     CL_ClientCommand(va("nextserver %i\n", cl.servercount));
 }
