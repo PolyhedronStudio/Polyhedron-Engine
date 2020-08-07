@@ -524,7 +524,7 @@ qboolean AL_Init(void)
 
 	// exaggerate 2x because realistic is barely noticeable
 	if (s_doppler->value) {
-		qalDopplerFactor(2.0f);
+		qalDopplerFactor(1.5f);
 	}
 
 	if (strstr(qalGetString(AL_RENDERER), "OpenAL Soft"))
