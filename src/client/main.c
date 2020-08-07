@@ -24,6 +24,7 @@ cvar_t  *rcon_address;
 
 cvar_t  *cl_noskins;
 cvar_t  *cl_footsteps;
+cvar_t  *cl_jumpsound;
 cvar_t  *cl_monsterfootsteps;
 cvar_t  *cl_timeout;
 cvar_t  *cl_predict;
@@ -2871,6 +2872,7 @@ static void CL_InitLocal(void)
 	Cmd_AddMacro("cl_viewdir", CL_ViewDir_m);
 	Cmd_AddMacro("cl_hdr_color", CL_HdrColor_m);
 	Cmd_AddMacro("cl_resolution_scale", CL_ResolutionScale_m);
+
 }
 
 /*
