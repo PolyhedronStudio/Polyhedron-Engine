@@ -35,13 +35,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MIN_CHANNELS 16
 
 int active_buffers = 0;
+int active_voice_buffers = 0;
 qboolean streamPlaying = qfalse;
+qboolean voicePlaying = qfalse;
 static ALuint s_srcnums[MAX_CHANNELS];
 static ALuint streamSource = 0;
+static ALuint voiceSource = 0;
 static int s_framecount;
 static ALuint underwaterFilter;
 static ALuint ReverbEffect;
 static ALuint ReverbEffectSlot;
+int lastreverbtreshold = 0;
 
 void AL_SoundInfo(void)
 {
@@ -58,6 +62,7 @@ void AL_SoundInfo(void)
 	QALC_PrintExtensions();
 	Com_Printf("\n");
 	Com_Printf("Number of sources: %d\n", s_numchannels);
+	Com_Printf("\n");
 	Com_Printf("===============\n");
 }
 
@@ -76,6 +81,18 @@ AL_InitStreamSource()
 	qalSourcei(streamSource, AL_SOURCE_RELATIVE, AL_TRUE);
 }
 
+static void
+AL_InitVoiceSource()
+{
+	qalSource3f(voiceSource, AL_POSITION, 0.0, 0.0, 0.0);
+	qalSource3f(voiceSource, AL_VELOCITY, 0.0, 0.0, 0.0);
+	qalSource3f(voiceSource, AL_DIRECTION, 0.0, 0.0, 0.0);
+	qalSourcef(voiceSource, AL_ROLLOFF_FACTOR, 0.0);
+	qalSourcei(voiceSource, AL_BUFFER, 0);
+	qalSourcei(voiceSource, AL_LOOPING, AL_FALSE);
+	qalSourcei(voiceSource, AL_SOURCE_RELATIVE, AL_TRUE);
+}
+
 /*
 * Silence / stop all OpenAL streams
 */
@@ -85,12 +102,14 @@ AL_StreamDie(void)
 	int numBuffers;
 
 	streamPlaying = qfalse;
+	voicePlaying = qfalse;
 	qalSourceStop(streamSource);
+	qalSourceStop(voiceSource);
 
 	/* Un-queue any buffers, and delete them */
 	qalGetSourcei(streamSource, AL_BUFFERS_QUEUED, &numBuffers);
-	qalSourcei(streamSource, AL_DIRECT_FILTER, 0);
-	qalSource3i(streamSource, AL_AUXILIARY_SEND_FILTER, 0, 0, AL_FILTER_NULL);
+	qalSourcei(streamSource, AL_DIRECT_FILTER, AL_FILTER_NULL);
+	qalSource3i(streamSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
 
 	while (numBuffers--)
 	{
@@ -98,6 +117,18 @@ AL_StreamDie(void)
 		qalSourceUnqueueBuffers(streamSource, 1, &buffer);
 		qalDeleteBuffers(1, &buffer);
 		active_buffers--;
+	}
+
+	qalGetSourcei(voiceSource, AL_BUFFERS_QUEUED, &numBuffers);
+	qalSourcei(voiceSource, AL_DIRECT_FILTER, AL_FILTER_NULL);
+	qalSource3i(voiceSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
+
+	while (numBuffers--)
+	{
+		ALuint buffer;
+		qalSourceUnqueueBuffers(voiceSource, 1, &buffer);
+		qalDeleteBuffers(1, &buffer);
+		active_voice_buffers--;
 	}
 }
 
@@ -121,8 +152,8 @@ AL_StreamUpdate(void)
 	{
 		/* Un-queue any already played buffers and delete them */
 		qalGetSourcei(streamSource, AL_BUFFERS_PROCESSED, &numBuffers);
-		qalSourcei(streamSource, AL_DIRECT_FILTER, 0);
-		qalSource3i(streamSource, AL_AUXILIARY_SEND_FILTER, 0, 0, AL_FILTER_NULL);
+		qalSourcei(streamSource, AL_DIRECT_FILTER, AL_FILTER_NULL);
+		qalSource3i(streamSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
 
 		while (numBuffers--)
 		{
@@ -142,6 +173,45 @@ AL_StreamUpdate(void)
 		streamPlaying = qtrue;
 	}
 }
+
+static void
+AL_VoiceUpdate(void)
+{
+	int numBuffers;
+	ALint state;
+
+	qalGetSourcei(voiceSource, AL_SOURCE_STATE, &state);
+
+	if (state == AL_STOPPED)
+	{
+		voicePlaying = qfalse;
+	}
+	else
+	{
+		/* Un-queue any already played buffers and delete them */
+		qalGetSourcei(voiceSource, AL_BUFFERS_PROCESSED, &numBuffers);
+		qalSourcei(voiceSource, AL_DIRECT_FILTER, AL_FILTER_NULL);
+		qalSource3i(voiceSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
+
+		while (numBuffers--)
+		{
+			ALuint buffer;
+			qalSourceUnqueueBuffers(voiceSource, 1, &buffer);
+			qalDeleteBuffers(1, &buffer);
+			active_voice_buffers--;
+		}
+	}
+
+	/* Start the streamSource playing if necessary */
+	qalGetSourcei(voiceSource, AL_BUFFERS_QUEUED, &numBuffers);
+
+	if (!voicePlaying && numBuffers)
+	{
+		qalSourcePlay(voiceSource);
+		voicePlaying = qtrue;
+	}
+}
+
 
 EFXEAXREVERBPROPERTIES ReverbPresets[113] = {
 	EFX_REVERB_PRESET_GENERIC,
@@ -454,23 +524,53 @@ void UpdateReverb(void)
 
 	average = (dist1 + dist2 + dist3 + dist4 + dist5) / 5;
 
-	if (average < 100)
-		SetReverb(41, 0);
+		if (average < 100 && lastreverbtreshold != 0)
+		{
+			SetReverb(41, 0);
+			lastreverbtreshold = 0;
+		}
 
-	if (average > 100 && average < 200)
-		SetReverb(26, 0);
+		if (average > 100 && average < 200 && lastreverbtreshold != 1)
+		{
+			SetReverb(26, 0);
+			lastreverbtreshold = 1;
+		}
 
-	if (average > 200 && average < 330)
-		SetReverb(5, 0);
+		if (average > 200 && average < 330 && lastreverbtreshold != 2)
+		{
+			SetReverb(5, 0);
+			lastreverbtreshold = 2;
+		}
 
-	if (average > 330 && average < 450)
-		SetReverb(12, 0);
+		if (average > 330 && average < 450 && lastreverbtreshold != 3)
+		{
+			SetReverb(12, 0);
+			lastreverbtreshold = 3;
+		}
 
-	if (average > 450 && average < 650)
-		SetReverb(18, 0);
+		if (average > 450 && average < 650 && lastreverbtreshold != 4)
+		{
+			SetReverb(18, 0);
+			lastreverbtreshold = 4;
+		}
 
-	if (average > 650)
-		SetReverb(17, 0);
+		if (average > 650 && lastreverbtreshold != 5)
+		{
+			SetReverb(17, 0);
+			lastreverbtreshold = 5;
+		}
+}
+
+static void voice_changed(cvar_t *self)
+{
+	if (s_voiceinput->integer)
+	{
+
+	}
+	else
+	{
+		qalSourcef(voiceSource, AL_GAIN, 0.0);
+	}
 }
 
 
@@ -530,6 +630,14 @@ qboolean AL_Init(void)
 	if (strstr(qalGetString(AL_RENDERER), "OpenAL Soft"))
 		Com_Printf("OpenAL Soft detected.\n");
 
+	s_voiceinput->changed = voice_changed;
+
+	if (inputdevice)
+	{
+		qalGenSources(1, &voiceSource);
+		AL_InitVoiceSource();
+	}
+
     Com_Printf("OpenAL initialized.\n");
     return qtrue;
 
@@ -547,6 +655,7 @@ void AL_Shutdown(void)
 	AL_StopAllChannels();
 
 	qalDeleteSources(1, &streamSource);
+	qalDeleteSources(1, &voiceSource);
 	qalDeleteFilters(1, &underwaterFilter);
 	qalDeleteEffects(1, &ReverbEffect);
 	qalDeleteAuxiliaryEffectSlots(1, &ReverbEffectSlot);
@@ -575,6 +684,7 @@ sfxcache_t *AL_UploadSfx(sfx_t *s)
 
     qalGetError();
     qalGenBuffers(1, &name);
+
     qalBufferData(name, format, s_info.data, size, s_info.rate);
     if (qalGetError() != AL_NO_ERROR) {
         s->error = Q_ERR_LIBRARY_ERROR;
@@ -651,32 +761,25 @@ static void AL_Spatialize(channel_t *ch)
 			VectorSubtract(origin, listener_origin, distance);
 			dist = VectorLength(distance);
 
-			final = 1.0 - ((dist / 1000) * s_occlusion_strength->value);
+			final = ch->master_vol - ((dist / 1000) * s_occlusion_strength->value);
 
 			qalSourcef(ch->srcnum, AL_GAIN, clamp(final, 0, 1));
 
-			VectorCopy(trace.endpos, origin);
+			if (!ch->autosound)
+				VectorCopy(trace.endpos, origin);
 
-			if (!snd_is_underwater)
+			if (!snd_is_underwater && !ch->autosound)
 				qalSourcei(ch->srcnum, AL_DIRECT_FILTER, underwaterFilter);
 
 			sourceoccluded = qtrue;
 		}
 		else
 		{
-			if (!snd_is_underwater)
-				qalSourcei(ch->srcnum, AL_DIRECT_FILTER, 0);
+			if (!snd_is_underwater && !ch->autosound)
+				qalSourcei(ch->srcnum, AL_DIRECT_FILTER, AL_FILTER_NULL);
 		}
 	}
-
-	if (cl.bsp && !snd_is_underwater && s_reverb_preset_autopick->integer && s_reverb->integer)
-		UpdateReverb();
-
-	if (s_reverb->integer && cl.bsp && ReverbEffect != 0 && sourceoccluded == qfalse)
-		qalSource3i(ch->srcnum, AL_AUXILIARY_SEND_FILTER, ReverbEffectSlot, 0, AL_FILTER_NULL);
-	else
-		qalSource3i(ch->srcnum, AL_AUXILIARY_SEND_FILTER, 0, 0, AL_FILTER_NULL);
-
+		
     qalSource3f(ch->srcnum, AL_POSITION, AL_UnpackVector(origin));
 }
 
@@ -688,11 +791,11 @@ void AL_StopChannel(channel_t *ch)
 #endif
 
     // stop it
-    qalSourceStop(ch->srcnum);
-    qalSourcei(ch->srcnum, AL_BUFFER, AL_NONE);
-	qalSourcei(ch->srcnum, AL_DIRECT_FILTER, 0);
-	qalSource3i(ch->srcnum, AL_AUXILIARY_SEND_FILTER, 0, 0, AL_FILTER_NULL);
-    memset(ch, 0, sizeof(*ch));
+	qalSourceStop(ch->srcnum);
+	qalSourcei(ch->srcnum, AL_BUFFER, AL_NONE);
+	qalSourcei(ch->srcnum, AL_DIRECT_FILTER, AL_FILTER_NULL);
+	qalSource3i(ch->srcnum, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
+	memset(ch, 0, sizeof(*ch));
 }
 
 void AL_PlayChannel(channel_t *ch)
@@ -712,11 +815,14 @@ void AL_PlayChannel(channel_t *ch)
     } else {
         qalSourcei(ch->srcnum, AL_LOOPING, AL_FALSE);
     }
-    qalSourcef(ch->srcnum, AL_GAIN, ch->master_vol);
+	qalSourcef(ch->srcnum, AL_GAIN, ch->master_vol);
     qalSourcef(ch->srcnum, AL_REFERENCE_DISTANCE, SOUND_FULLVOLUME);
-	qalSourcef(ch->srcnum, AL_MAX_DISTANCE, 8192); //qalSourcef(ch->srcnum, AL_MAX_DISTANCE, 8192);
-	qalSourcef(ch->srcnum, AL_ROLLOFF_FACTOR, 0.2); //qalSourcef(ch->srcnum, AL_ROLLOFF_FACTOR, ch->dist_mult * (8192 - SOUND_FULLVOLUME));
+	qalSourcef(ch->srcnum, AL_MAX_DISTANCE, 8192);
+	qalSourcef(ch->srcnum, AL_ROLLOFF_FACTOR, 0.5); 
 	qalSourcei(ch->srcnum, AL_SOURCE_SPATIALIZE_SOFT, AL_AUTO_SOFT);
+
+	if (s_reverb->integer && cl.bsp && ReverbEffect != 0 && !sv_paused->integer)
+		qalSource3i(ch->srcnum, AL_AUXILIARY_SEND_FILTER, ReverbEffectSlot, 0, AL_FILTER_NULL);
 
     AL_Spatialize(ch);
 
@@ -841,12 +947,14 @@ static void AL_AddLoopSounds(void)
         AL_PlayChannel(ch);
 
         // attempt to synchronize with existing sounds of the same type
-        if (ch2) {
+		/* DISABLED - This actually causes crackling on "synchronized" sources due to playback starting from non 0 amplitude.
+		if (ch2) {
             ALint offset;
 
             qalGetSourcei(ch2->srcnum, AL_SAMPLE_OFFSET, &offset);
             qalSourcei(ch->srcnum, AL_SAMPLE_OFFSET, offset);
         }
+		*/
     }
 }
 
@@ -962,8 +1070,12 @@ void AL_Overwater()
 	/* Apply to all sources */
 	for (i = 0; i < s_numchannels; i++)
 	{
-		qalSourcei(s_srcnums[i], AL_DIRECT_FILTER, 0);
-		SetReverb(s_reverb_preset->integer, 0);
+		qalSourcei(s_srcnums[i], AL_DIRECT_FILTER, AL_FILTER_NULL);
+
+		if (!s_reverb_preset_autopick->integer)
+			SetReverb(s_reverb_preset->integer, 0);
+		else
+			lastreverbtreshold = -1;
 	}
 }
 
@@ -1038,6 +1150,20 @@ void AL_Update(void)
     AL_IssuePlaysounds();
 	
 	oal_update_underwater();
+
+	if (cl.bsp && !snd_is_underwater && s_reverb_preset_autopick->integer && s_reverb->integer)
+		UpdateReverb();
+
+	if (s_voiceinput->integer && inputdevice)
+	{
+		AL_VoiceUpdate();
+		micsample_t msample = HandleMic();
+
+		if ((int)msample.sample > 0)
+		{
+			AL_RawSamplesVoice((int)msample.sample, (int)48000, (int)2, (int)2, msample.buffer, s_voiceinput_volume->value);
+		}
+	}
 }
 
 /*
@@ -1095,6 +1221,73 @@ AL_RawSamples(int samples, int rate, int width, int channels,
 	/* emulate behavior of S_RawSamples for s_rawend */
 	s_rawend += samples;
 }
+
+void
+AL_RawSamplesVoice(int samples, int rate, int width, int channels,
+	byte *data, float volume)
+{
+	ALuint buffer;
+	ALuint format = 0;
+
+	/* Work out format */
+	if (width == 1)
+	{
+		if (channels == 1)
+		{
+			format = AL_FORMAT_MONO8;
+		}
+		else if (channels == 2)
+		{
+			format = AL_FORMAT_STEREO8;
+		}
+	}
+	else if (width == 2)
+	{
+		if (channels == 1)
+		{
+			format = AL_FORMAT_MONO16;
+		}
+		else if (channels == 2)
+		{
+			format = AL_FORMAT_STEREO16;
+		}
+	}
+
+	/* Create a buffer, and stuff the data into it */
+	qalGenBuffers(1, &buffer);
+	qalBufferData(buffer, format, (ALvoid *)data,
+		(samples * width * channels), rate);
+	active_voice_buffers++;
+
+	if (cl.bsp && snd_is_underwater)
+	{
+		qalSourcei(voiceSource, AL_DIRECT_FILTER, underwaterFilter);
+	}
+	else
+	{
+		qalSourcei(voiceSource, AL_DIRECT_FILTER, AL_FILTER_NULL);
+	}
+
+	if (s_reverb->integer && cl.bsp && ReverbEffect != 0)
+		qalSource3i(voiceSource, AL_AUXILIARY_SEND_FILTER, ReverbEffectSlot, 0, AL_FILTER_NULL);
+	else
+		qalSource3i(voiceSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
+
+	qalSource3f(voiceSource, AL_POSITION, AL_UnpackVector(listener_origin));
+
+	if (s_doppler->value) {
+		vec3_t velocity;
+
+		CL_GetEntitySoundVelocity(listener_entnum, velocity);
+		VectorScale(velocity, AL_METER_OF_Q2_UNIT, velocity);
+		qalSource3f(voiceSource, AL_VELOCITY, AL_UnpackVector(velocity));
+	}
+
+	qalSourcef(voiceSource, AL_GAIN, volume);
+
+	qalSourceQueueBuffers(voiceSource, 1, &buffer);
+}
+
 
 /*
 * Kills all raw samples still in flight.

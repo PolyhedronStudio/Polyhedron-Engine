@@ -64,6 +64,8 @@ cvar_t		*s_occlusion_strength;
 cvar_t		*s_reverb_preset;
 cvar_t		*s_reverb_preset_autopick;
 cvar_t		*s_reverb;
+cvar_t		*s_voiceinput;
+cvar_t		*s_voiceinput_volume;
 
 cvar_t      *s_ambient;
 #ifdef _DEBUG
@@ -168,6 +170,15 @@ static void reverb_changed(cvar_t *self)
 	SetReverb(s_reverb_preset->integer, 1);
 }
 
+static void voiceinputvolume_changed(cvar_t *self)
+{
+	if (s_voiceinput_volume->value < 0)
+		s_voiceinput_volume->value = 0;
+
+	if (s_voiceinput_volume->value > 1)
+		s_voiceinput_volume->value = 1;
+}
+
 /*
 ================
 S_Init
@@ -191,6 +202,9 @@ void S_Init(void)
 	s_reverb_preset->changed = reverb_changed;
 	s_reverb = Cvar_Get("s_reverb", "1", CVAR_ARCHIVE);
 	s_reverb_preset_autopick = Cvar_Get("s_reverb_preset_autopick", "1", CVAR_ARCHIVE);
+	s_voiceinput = Cvar_Get("s_voiceinput", "0", CVAR_ARCHIVE);
+	s_voiceinput_volume = Cvar_Get("s_voiceinput_volume", "1", CVAR_ARCHIVE);
+	s_voiceinput_volume->changed = voiceinputvolume_changed;
 	s_underwater = Cvar_Get("s_underwater", "1", CVAR_ARCHIVE);
 	s_underwater_gain_hf = Cvar_Get("s_underwater_gain_hf", "0.25", CVAR_ARCHIVE);
     s_ambient = Cvar_Get("s_ambient", "1", 0);
