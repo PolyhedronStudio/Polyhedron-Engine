@@ -685,7 +685,16 @@ sfxcache_t *AL_UploadSfx(sfx_t *s)
     qalGetError();
     qalGenBuffers(1, &name);
 
-    qalBufferData(name, format, s_info.data, size, s_info.rate);
+	/**/
+	int sampleRate = s_info.rate;
+	double sTime = 0.019;
+	int sampleCount = (int)(sTime*sampleRate);
+	int byteCount = sampleCount * sizeof(byte);
+	byte *final = (byte*)calloc(1, byteCount + size);
+	memcpy(final + byteCount, s_info.data, size);
+	/**/
+
+	qalBufferData(name, format, final, size + byteCount, s_info.rate);
     if (qalGetError() != AL_NO_ERROR) {
         s->error = Q_ERR_LIBRARY_ERROR;
         return NULL;
@@ -704,7 +713,7 @@ sfxcache_t *AL_UploadSfx(sfx_t *s)
     sc->length = s_info.samples * 1000 / s_info.rate; // in msec
     sc->loopstart = s_info.loopstart;
     sc->width = s_info.width;
-    sc->size = size;
+	sc->size = size + byteCount;
     sc->bufnum = name;
 
     return sc;
@@ -823,6 +832,9 @@ void AL_PlayChannel(channel_t *ch)
 
 	if (s_reverb->integer && cl.bsp && ReverbEffect != 0 && !sv_paused->integer)
 		qalSource3i(ch->srcnum, AL_AUXILIARY_SEND_FILTER, ReverbEffectSlot, 0, AL_FILTER_NULL);
+	
+	if (cl.bsp && snd_is_underwater && underwaterFilter != 0 && !sv_paused->integer)
+		qalSourcei(ch->srcnum, AL_DIRECT_FILTER, underwaterFilter);
 
     AL_Spatialize(ch);
 
@@ -1151,7 +1163,7 @@ void AL_Update(void)
 	
 	oal_update_underwater();
 
-	if (cl.bsp && !snd_is_underwater && s_reverb_preset_autopick->integer && s_reverb->integer)
+	if (cl.bsp && !snd_is_underwater && s_reverb_preset_autopick->integer && s_reverb->integer) //
 		UpdateReverb();
 
 	if (s_voiceinput->integer && inputdevice)

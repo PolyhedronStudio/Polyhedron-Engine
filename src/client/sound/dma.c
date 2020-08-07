@@ -45,6 +45,8 @@ qboolean DMA_Init(void)
 {
     sndinitstat_t ret = SIS_FAILURE;
 
+	Com_WPrintf("WARNING: Sound is running in software mode!\nPlease set sound renderer to OpenAL for optimal experience!\n");
+
     s_khz = Cvar_Get("s_khz", "44", CVAR_ARCHIVE | CVAR_SOUND);
     s_mixahead = Cvar_Get("s_mixahead", "0.1", CVAR_ARCHIVE);
     s_testsound = Cvar_Get("s_testsound", "0", 0);

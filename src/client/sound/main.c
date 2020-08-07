@@ -79,6 +79,8 @@ static cvar_t   *s_swapstereo;
 qboolean snd_is_underwater;
 qboolean snd_is_underwater_enabled;
 
+extern cvar_t *cl_jumpsound;
+
 // =======================================================================
 // Console functions
 // =======================================================================
@@ -892,6 +894,9 @@ void S_StartSound(const vec3_t origin, int entnum, int entchannel, qhandle_t hSf
         if (!sfx)
             return;
     }
+
+	if ((strstr(sfx->name, "players/male/jump1.wav") || strstr(sfx->name, "players/female/jump1.wav")) && !cl_jumpsound->integer)
+		return;
 
     // make sure the sound is loaded
     sc = S_LoadSound(sfx);
