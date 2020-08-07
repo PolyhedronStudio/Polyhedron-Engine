@@ -73,6 +73,13 @@ void QAL_Shutdown(void)
         device = NULL;
     }
 
+	if (inputdevice)
+	{
+		qalcCaptureStop(inputdevice);
+		qalcCaptureCloseDevice(inputdevice);
+		inputdevice = NULL;
+	}
+
 #define QAL(type, func)  q##func = NULL
     QALC_IMP
     QAL_IMP
@@ -89,15 +96,45 @@ void QAL_Shutdown(void)
         al_device->flags &= ~CVAR_SOUND;
 }
 
+const int SRATE = 48000;
+const int SSIZE = 2250;
+
+byte *buffer[4500];
+ALint sample;
+
+micsample_t HandleMic(void)
+{
+	micsample_t value;
+
+	qalcGetIntegerv(inputdevice, ALC_CAPTURE_SAMPLES, (ALCsizei)sizeof(ALint), &sample);
+	qalcCaptureSamples(inputdevice, (ALCvoid *)buffer, sample);
+
+	value.sample = sample;
+	value.buffer = buffer;
+
+	return value;
+}
+
+
 void QALC_PrintExtensions(void)
 {
 	Com_Printf("ALC_EXTENSIONS: %s\n", qalcGetString(device, ALC_EXTENSIONS));
+
+	if (device)
+	{
+		Com_Printf("\n");
+		Com_Printf("Audio device: %s\n", qalcGetString(device, ALC_ALL_DEVICES_SPECIFIER));
+	}
+
+	if (inputdevice)
+		Com_Printf("Audio capture device: %s\n", qalcGetString(inputdevice, ALC_ALL_DEVICES_SPECIFIER));
+
 }
 
 qboolean QAL_Init(void)
 {
-    al_driver = Cvar_Get("al_driver", LIBAL, 0);
-    al_device = Cvar_Get("al_device", "", 0);
+	al_driver = Cvar_Get("al_driver", LIBAL, 0);
+	al_device = Cvar_Get("al_device", "", 0);
 
     // don't allow absolute or relative paths
     FS_SanitizeFilenameVariable(al_driver);
@@ -170,7 +207,10 @@ qboolean QAL_Init(void)
 		qalcGetIntegerv(device, ALC_HRTF_SOFT, 1, &enabled);
 		qalcGetIntegerv(device, ALC_HRTF_STATUS_SOFT, 1, &status);
 
-		Com_Printf("HRTF enabled: %i\n", enabled);
+		if ((int)enabled == 1)
+			Com_Printf("HRTF enabled: true\n");
+		else
+			Com_Printf("HRTF enabled: false\n");
 
 		if ((int)status == 0)
 		{
@@ -199,6 +239,23 @@ qboolean QAL_Init(void)
 
 		Com_Printf("HRTF preset: %s\n", qalcGetString(device, ALC_HRTF_SPECIFIER_SOFT));
 	}
+
+
+	if (device)
+		Com_Printf("Detected default audio device: %s\n", qalcGetString(device, ALC_ALL_DEVICES_SPECIFIER));
+
+	inputdevice = qalcCaptureOpenDevice(NULL, SRATE, AL_FORMAT_STEREO16, SSIZE);
+	if (inputdevice)
+	{
+		Com_Printf("Detected default audio capture device: %s\n", qalcGetString(inputdevice, ALC_ALL_DEVICES_SPECIFIER));
+	}
+	else
+	{
+		Com_Printf("Could not detect default audio capture device!\n");
+	}
+
+
+	qalcCaptureStart(inputdevice);
 
     return qtrue;
 

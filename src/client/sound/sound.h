@@ -126,6 +126,7 @@ void AL_PlayChannel(channel_t *ch);
 void AL_StopAllChannels(void);
 void AL_Update(void);
 void AL_RawSamples(int samples, int rate, int width, int channels, byte *data, float volume);
+void AL_RawSamplesVoice(int samples, int rate, int width, int channels, byte *data, float volume);
 void AL_UnqueueRawSamples();
 
 /* number of buffers in flight (needed for ogg) */
@@ -141,7 +142,7 @@ extern int active_buffers;
 
 extern qboolean s_active;
 
-#define MAX_CHANNELS            32
+#define MAX_CHANNELS            64
 extern  channel_t   channels[MAX_CHANNELS];
 extern  int         s_numchannels;
 
@@ -165,6 +166,8 @@ extern cvar_t* s_doppler;
 extern cvar_t* s_reverb_preset;
 extern cvar_t* s_reverb_preset_autopick;
 extern cvar_t* s_reverb;
+extern cvar_t* s_voiceinput;
+extern cvar_t* s_voiceinput_volume;
 extern cvar_t* s_underwater;
 extern cvar_t* s_underwater_gain_hf;
 

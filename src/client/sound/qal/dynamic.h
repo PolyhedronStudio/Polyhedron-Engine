@@ -120,3 +120,10 @@ qboolean QAL_Init(void);
 void QAL_Shutdown(void);
 
 void QALC_PrintExtensions(void);
+
+typedef struct micsample_s {
+	byte      *buffer;
+	ALint      sample;
+} micsample_t;
+ALCdevice *inputdevice;
+micsample_t HandleMic(void);
