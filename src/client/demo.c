@@ -27,6 +27,8 @@ static byte     demo_buffer[MAX_PACKETLEN];
 static cvar_t   *cl_demosnaps;
 static cvar_t   *cl_demomsglen;
 static cvar_t   *cl_demowait;
+cvar_t   *cl_renderdemo;
+cvar_t   *cl_renderdemo_fps;
 
 // =========================================================================
 
@@ -730,6 +732,9 @@ static void CL_PlayDemo_f(void)
     CL_Disconnect(ERR_RECONNECT);
 
     cls.demo.playback = f;
+
+	Q_strlcpy(cls.demo.file_name, Cmd_Argv(1), sizeof(cls.demo.file_name));
+
     cls.state = ca_connected;
     Q_strlcpy(cls.servername, COM_SkipPath(name), sizeof(cls.servername));
     cls.serverAddress.type = NA_LOOPBACK;
@@ -1275,6 +1280,9 @@ void CL_InitDemos(void)
     cl_demosnaps = Cvar_Get("cl_demosnaps", "10", 0);
     cl_demomsglen = Cvar_Get("cl_demomsglen", va("%d", MAX_PACKETLEN_WRITABLE_DEFAULT), 0);
     cl_demowait = Cvar_Get("cl_demowait", "0", 0);
+
+	cl_renderdemo = Cvar_Get("cl_renderdemo", "0", CVAR_ARCHIVE);
+	cl_renderdemo_fps = Cvar_Get("cl_renderdemo_fps", "60", CVAR_ARCHIVE);
 
     Cmd_Register(c_demo);
     List_Init(&cls.demo.snapshots);

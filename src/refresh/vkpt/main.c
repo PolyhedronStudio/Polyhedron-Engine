@@ -65,6 +65,7 @@ cvar_t *cvar_drs_adjust_down = NULL;
 cvar_t *cvar_drs_gain = NULL;
 extern cvar_t *scr_viewsize;
 extern cvar_t *cvar_bloom_enable;
+extern cvar_t *cl_renderdemo;
 static int drs_current_scale = 0;
 static int drs_effective_scale = 0;
 
@@ -1914,6 +1915,88 @@ typedef struct reference_mode_s
 	int reflect_refract;
 } reference_mode_t;
 
+void stbi_writex(void *context, void *data, int size)
+{
+	FS_Write(data, size, (qhandle_t)(size_t)context);
+}
+
+#define IMG_SAVE(x) \
+    static qerror_t IMG_Save##x(qhandle_t f, const char *filename, \
+        byte *pic, int width, int height, int row_stride, int param)
+
+IMG_SAVE(PNG)
+{
+	stbi_flip_vertically_on_write(1);
+	int ret = stbi_write_png_to_func(stbi_writex, (void*)(size_t)f, width, height, 3, pic, row_stride);
+
+	if (ret)
+		return Q_ERR_SUCCESS;
+
+	return Q_ERR_LIBRARY_ERROR;
+}
+
+static qhandle_t create_framedump(char *buffer, size_t size,
+	const char *name, const char *ext)
+{
+	qhandle_t f;
+	qerror_t ret;
+	int i;
+
+	if (name && *name) {
+		// save to user supplied name
+		return FS_EasyOpenFile(buffer, size, FS_MODE_WRITE,
+			"screenshots/", name, ext);
+	}
+
+	// find a file name to save it to
+	for (i = 0; i < 1000000; i++) {
+		Q_snprintf(buffer, size, "screenshots/%s_%03d%s", cls.demo.file_name, i, ext);
+		ret = FS_FOpenFile(buffer, &f, FS_MODE_WRITE | FS_FLAG_EXCL);
+		if (f) {
+			return f;
+		}
+		if (ret != Q_ERR_EXIST) {
+			Com_EPrintf("Couldn't exclusively open %s for writing: %s\n",
+				buffer, Q_ErrorString(ret));
+			return 0;
+		}
+	}
+
+	Com_EPrintf("Ran out of frame indexes!.\n");
+	return 0;
+}
+
+static qboolean make_framedump(const char *name, const char *ext,
+	qerror_t(*save)(qhandle_t, const char *, byte *, int, int, int, int),
+	int param)
+{
+	char        buffer[MAX_OSPATH];
+	byte        *pixels;
+	qerror_t    ret;
+	qhandle_t   f;
+	int         w, h, rowbytes;
+
+	f = create_framedump(buffer, sizeof(buffer), name, ext);
+	if (!f) {
+		return;
+	}
+
+	pixels = IMG_ReadPixels(&w, &h, &rowbytes);
+	ret = save(f, buffer, pixels, w, h, rowbytes, param);
+	FS_FreeTempMem(pixels);
+
+	FS_FCloseFile(f);
+
+	if (ret < 0) {
+		Com_EPrintf("Couldn't write %s: %s\n", buffer, Q_ErrorString(ret));
+		return qfalse;
+	}
+	else {
+		return qtrue;
+	}
+}
+
+
 static int
 get_accumulation_rendering_framenum()
 {
@@ -1954,36 +2037,76 @@ evaluate_reference_mode(reference_mode_t* ref_mode)
 		case 1: {
 			char text[MAX_QPATH];
 			float percentage = powf(max(0.f, (num_accumulated_frames - num_warmup_frames) / (float)num_frames_to_accumulate), 0.5f);
-			Q_snprintf(text, sizeof(text), "Photo mode: accumulating samples... %d%%", (int)(min(1.f, percentage) * 100.f));
-
-			int frames_after_accumulation_finished = num_accumulated_frames - num_warmup_frames - num_frames_to_accumulate;
-			float hud_alpha = max(0.f, min(1.f, (50 - frames_after_accumulation_finished) * 0.02f)); // fade out for 50 frames after accumulation finishes
-
-			int x = r_config.width / 4;
-			int y = 30;
-			R_SetScale(0.5f);
-			R_SetAlphaScale(hud_alpha);
-			draw_shadowed_string(x, y, UI_CENTER, MAX_QPATH, text);
-
-			if (cvar_pt_dof->integer)
+			
+			if (percentage < 1.0f)
 			{
-				x = 5;
-				y = r_config.height / 2 - 55;
-				Q_snprintf(text, sizeof(text), "Focal Distance: %.1f", cvar_pt_focus->value);
-				draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, text);
+				if (!cls.demo.playback) 
+				{
+					Q_snprintf(text, sizeof(text), "Photo mode: accumulating samples... %d%%", (int)(min(1.f, percentage) * 100.f));
 
-				y += 10;
-				Q_snprintf(text, sizeof(text), "Aperture: %.2f", cvar_pt_aperture->value);
-				draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, text);
+					int frames_after_accumulation_finished = num_accumulated_frames - num_warmup_frames - num_frames_to_accumulate;
+					float hud_alpha = max(0.f, min(1.f, (50 - frames_after_accumulation_finished) * 0.02f)); // fade out for 50 frames after accumulation finishes
 
-				y += 10;
-				draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, "Use Mouse Wheel, Shift, Ctrl to adjust");
+					int x = r_config.width / 4;
+					int y = 30;
+					R_SetScale(0.5f);
+					R_SetAlphaScale(hud_alpha);
+
+					draw_shadowed_string(x, y, UI_CENTER, MAX_QPATH, text);
+
+					if (cvar_pt_dof->integer)
+					{
+						x = 5;
+						y = r_config.height / 2 - 55;
+
+						Q_snprintf(text, sizeof(text), "Focal Distance: %.1f", cvar_pt_focus->value);
+						draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, text);
+
+						y += 10;
+
+						Q_snprintf(text, sizeof(text), "Aperture: %.2f", cvar_pt_aperture->value);
+						draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, text);
+
+						y += 10;
+
+						draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, "Use Mouse Wheel, Shift, Ctrl to adjust");
+					}
+
+					R_SetAlphaScale(1.f);
+
+					SCR_SetHudAlpha(hud_alpha);
+				}
 			}
+			else
+			{
+				SCR_SetHudAlpha(0.f);
 
-			R_SetAlphaScale(1.f);
+				if (cl_renderdemo->integer)
+				{
+					qboolean result = make_framedump("", ".png", IMG_SavePNG, 0);
 
-			SCR_SetHudAlpha(hud_alpha);
-			break;
+					if (result)
+					{
+						Cvar_Set("cl_paused", "0");
+						CL_CheckForPause();
+
+						num_accumulated_frames = 0;
+
+						ref_mode->enable_accumulation = qfalse;
+						ref_mode->enable_denoiser = !!cvar_flt_enable->integer;
+						if (cvar_pt_num_bounce_rays->value == 0.5f)
+							ref_mode->num_bounce_rays = 0.5f;
+						else
+							ref_mode->num_bounce_rays = max(0, min(2, round(cvar_pt_num_bounce_rays->value)));
+						ref_mode->temporal_blend_factor = 0.f;
+					}
+					else
+						CL_Disconnect(ERR_DISCONNECT);
+				}
+				
+				break;
+			}
+			
 		}
 		case 2:
 			SCR_SetHudAlpha(0.f);
@@ -2142,15 +2265,31 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 		// both reflection and refraction in every pixel
 		ubo->pt_swap_checkerboard = (qvk.frame_counter & 1);
 
-		if (ref_mode->enable_accumulation)
-		{
-			ubo->pt_texture_lod_bias = -log2(sqrt(get_accumulation_rendering_framenum()));
+		if (ref_mode->enable_accumulation || !ref_mode->enable_denoiser)
+			if (!ref_mode->enable_denoiser)
+			{
+				// disable the stabilization hacks
+				// disable fake specular because it is not supported without denoiser, and the result
+				// looks too dark with it missing
+				ubo->pt_fake_roughness_threshold = 1.f;
+				ubo->pt_texture_lod_bias = 0.f;
+				ubo->pt_specular_anti_flicker = 0.f;
+				ubo->pt_sun_bounce_range = 10000.f;
 
-			// disable the other stabilization hacks
-			ubo->pt_specular_anti_flicker = 0.f;
-			ubo->pt_sun_bounce_range = 10000.f;
-			ubo->pt_ndf_trim = 1.f;
-		}
+				// swap the checkerboard fields every frame in reference mode to accumulate 
+				// swap the checkerboard fields every frame in reference or noisy mode to accumulate 
+				// both reflection and refraction in every pixel
+				ubo->pt_swap_checkerboard = (qvk.frame_counter & 1);
+
+				if (ref_mode->enable_accumulation)
+				{
+					ubo->pt_texture_lod_bias = -log2(sqrt(cvar_pt_accumulation_rendering_framenum->integer));
+
+					// disable the other stabilization hacks
+					ubo->pt_specular_anti_flicker = 0.f;
+					ubo->pt_sun_bounce_range = 10000.f;
+				}
+			}
 	}
 
 	{
