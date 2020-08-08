@@ -92,6 +92,8 @@ static cvar_t   *ch_scale;
 static cvar_t   *ch_x;
 static cvar_t   *ch_y;
 
+extern cvar_t	*cl_renderdemo;
+
 #ifdef _DEBUG
 cvar_t      *scr_netgraph;
 cvar_t      *scr_timegraph;
@@ -2114,8 +2116,9 @@ static void SCR_DrawActive(void)
     // start with full screen HUD
     scr.hud_height = r_config.height;
     scr.hud_width = r_config.width;
-
-    SCR_DrawDemo();
+	
+	if (!cl_renderdemo->integer)
+		SCR_DrawDemo();
 
     SCR_CalcVrect();
 
