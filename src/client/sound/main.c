@@ -895,8 +895,8 @@ void S_StartSound(const vec3_t origin, int entnum, int entchannel, qhandle_t hSf
             return;
     }
 
-	if ((strstr(sfx->name, "players/male/jump1.wav") || strstr(sfx->name, "players/female/jump1.wav")) && !cl_jumpsound->integer)
-		return;
+	//if ((strstr(sfx->name, "players/male/jump1.wav") || strstr(sfx->name, "players/female/jump1.wav")) && !cl_jumpsound->integer)
+	//	return;
 
     // make sure the sound is loaded
     sc = S_LoadSound(sfx);
