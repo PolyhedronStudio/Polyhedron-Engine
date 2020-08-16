@@ -1416,16 +1416,16 @@ ROGUE - VERSIONS
 */
 
 // default server FPS
-#define BASE_FRAMERATE          10
-#define BASE_FRAMETIME          100
-#define BASE_1_FRAMETIME        0.01f   // 1/BASE_FRAMETIME
-#define BASE_FRAMETIME_1000     0.1f    // BASE_FRAMETIME/1000
+//#define BASE_FRAMERATE          10
+//#define BASE_FRAMETIME          100
+//#define BASE_1_FRAMETIME        0.01f   // 1/BASE_FRAMETIME
+//#define BASE_FRAMETIME_1000     0.1f    // BASE_FRAMETIME/1000
 
 //N&C 30hz tick
-//#define BASE_FRAMERATE          30 //10
-//#define BASE_FRAMETIME          33.33f //100
-//#define BASE_1_FRAMETIME        0.03f //0.01f   // 1/BASE_FRAMETIME
-//#define BASE_FRAMETIME_1000     0.03333f //0.1f    // BASE_FRAMETIME/1000
+#define BASE_FRAMERATE          30 //10
+#define BASE_FRAMETIME          33.33f //100
+#define BASE_1_FRAMETIME        0.03f //0.01f   // 1/BASE_FRAMETIME
+#define BASE_FRAMETIME_1000     0.03333f //0.1f    // BASE_FRAMETIME/1000
 
 // maximum variable FPS factor
 #define MAX_FRAMEDIV    6
@@ -1457,7 +1457,8 @@ ROGUE - VERSIONS
 #define CS_ITEMS            (CS_LIGHTS+MAX_LIGHTSTYLES)
 #define CS_PLAYERSKINS      (CS_ITEMS+MAX_ITEMS)
 #define CS_GENERAL          (CS_PLAYERSKINS+MAX_CLIENTS)
-#define MAX_CONFIGSTRINGS   (CS_GENERAL+MAX_GENERAL)
+#define CS_FOG              (CS_GENERAL+MAX_GENERAL) // %d %f %f %f %f %f %f format
+#define MAX_CONFIGSTRINGS   (CS_FOG+1)
 
 // Some mods actually exploit CS_STATUSBAR to take space up to CS_AIRACCEL
 #define CS_SIZE(cs) \

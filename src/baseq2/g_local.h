@@ -341,7 +341,9 @@ typedef struct {
 // in edict_t during gameplay
 typedef struct {
     // world vars
-    char        *sky;
+	char        *sky;
+	char        *fog;
+	char        *grFogOnOff, grFogTintRed, grFogTintGreen, grFogTintBlue, grFogTintPower, grFogDenistyRoot, grFogPushBackDist;
     float       skyrotate;
     vec3_t      skyaxis;
     char        *nextmap;
@@ -1098,5 +1100,9 @@ struct edict_s {
     // common data blocks
     moveinfo_t      moveinfo;
     monsterinfo_t   monsterinfo;
+
+	char        *fog;
+	char        *grFogOnOff, *grFogTintRed, *grFogTintGreen, *grFogTintBlue, *grFogTintPower, *grFogDenistyRoot, *grFogPushBackDist;
+
 };
 
