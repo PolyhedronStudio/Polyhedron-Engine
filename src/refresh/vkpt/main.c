@@ -3401,7 +3401,7 @@ R_BeginRegistration_RTX(const char *name)
 	}
 
 	// Load Map FogList
-	SetFogByMap(bsp_path); 
+	//SetFogByMap(bsp_path); 
 
 	bsp_world_model = bsp;
 	bsp_mesh_register_textures(bsp);
