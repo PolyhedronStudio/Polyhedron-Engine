@@ -227,11 +227,11 @@ VkResult vkpt_initialize_god_rays()
 	god_rays.fogTintColorBlue = Cvar_Get("gr_fogtintb", "1.0", 0);
 	god_rays.fogTintPower = Cvar_Get("gr_fogtintpow", "0.17", 0);
 	god_rays.fogDensityRoot = Cvar_Get("gr_fogdensity", "0.08", 0);
-	god_rays.fogPushBackDist = Cvar_Get("gr_fogpushback", "0.01", 0);
+	god_rays.fogPushBackDist = Cvar_Get("gr_fogpushback", "0.00011", 0);
 		   	 
 	// Load fog by map csv file make stucture
 	fogbynametable.numberFogItems = 0;
-	//LoadFogByMapTable("fogbymap.csv", &fogbynametable);
+	LoadFogByMapTable("fogbymap.csv", &fogbynametable);
 
 	return VK_SUCCESS;
 }

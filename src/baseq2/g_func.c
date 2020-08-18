@@ -1931,35 +1931,3 @@ void SP_func_killbox(edict_t *ent)
     ent->svflags = SVF_NOCLIENT;
 }
 
-/*=============================================================================
- TARGET_FOG - uses the "fog" string as parameter 
-=============================================================================*/
-void stuffcmd(edict_t *pent, char *pszCommand)
-{
-	gi.WriteByte(svc_stufftext);
-	gi.WriteString(pszCommand);
-	gi.unicast(pent, qtrue);
-}
-
-void use_target_grfog(edict_t *self, edict_t *other, edict_t *activator)
-{
-	gi.configstring(CS_FOG, self->pathtarget);
-	stuffcmd(&g_edicts[1], va("gr_enablefog %s\n", self->grFogOnOff));
-	stuffcmd(&g_edicts[1], va("gr_fogtintr %s\n", self->grFogTintRed));
-	stuffcmd(&g_edicts[1], va("gr_fogtintg %s\n", self->grFogTintGreen));
-	stuffcmd(&g_edicts[1], va("gr_fogtintb %s\n", self->grFogTintBlue));
-	stuffcmd(&g_edicts[1], va("gr_fogtintpow %s\n", self->grFogTintPower));
-	stuffcmd(&g_edicts[1], va("gr_fogdensity %s\n", self->grFogDenistyRoot));
-	stuffcmd(&g_edicts[1], va("gr_fogpushback %s\n", self->grFogPushBackDist));
-
-	self->count--;
-	if (!self->count) {
-		self->think = G_FreeEdict;
-		self->nextthink = level.time + 1;
-	}
-}
-
-void SP_target_grfog(edict_t *self)
-{
-	self->use = use_target_grfog;
-}
