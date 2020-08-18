@@ -236,8 +236,8 @@ void main()
 		prevColor = vec4(0);
 	
 	if(global_ubo.god_rays_fogEnable == 1)	{
-		
-		float expT = -(1.0 / ((global_ubo.god_rays_fogPushBackDist * 1000) * 1000)); 
+		float expT = -global_ubo.god_rays_fogPushBackDist;
+	
 		vec3 outscatterColor = mix(inscatterColor + prevColor.rgb,									// Use inscatter as the input
 						 	   mix(sun_color_ubo.sun_color,											// Enviromental Tint
 							   vec3(global_ubo.god_rays_fogTintColorRed,							// Enviromental Tint

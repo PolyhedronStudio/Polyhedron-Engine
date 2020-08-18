@@ -147,8 +147,6 @@ void SP_turret_breach(edict_t *self);
 void SP_turret_base(edict_t *self);
 void SP_turret_driver(edict_t *self);
 
-void SP_target_grfog(edict_t *self);
-
 static const spawn_func_t spawn_funcs[] = {
     {"item_health", SP_item_health},
     {"item_health_small", SP_item_health_small},
@@ -207,8 +205,6 @@ static const spawn_func_t spawn_funcs[] = {
     {"target_earthquake", SP_target_earthquake},
     {"target_character", SP_target_character},
     {"target_string", SP_target_string},
-
-	{"target_grfog", SP_target_grfog},
 
     {"worldspawn", SP_worldspawn},
     {"viewthing", SP_viewthing},
@@ -306,16 +302,8 @@ static const spawn_field_t spawn_fields[] = {
     {"map", FOFS(map), F_LSTRING},
     {"origin", FOFS(s.origin), F_VECTOR},
     {"angles", FOFS(s.angles), F_VECTOR},
-	{"angle", FOFS(s.angles), F_ANGLEHACK},
-	{"fog", FOFS(fog), F_LSTRING},
-	{"grFogOnOff", FOFS(grFogOnOff), F_LSTRING},
-	{"grFogTintRed", FOFS(grFogTintRed), F_LSTRING},
-	{"grFogTintGreen", FOFS(grFogTintGreen), F_LSTRING},
-	{"grFogTintBlue", FOFS(grFogTintBlue), F_LSTRING},
-	{"grFogTintPower", FOFS(grFogTintPower), F_LSTRING},
-	{"grFogDenistyRoot", FOFS(grFogDenistyRoot), F_LSTRING},
-	{"grFogPushBackDist", FOFS(grFogPushBackDist), F_LSTRING},
-	
+    {"angle", FOFS(s.angles), F_ANGLEHACK},
+
     {NULL}
 };
 
@@ -884,10 +872,8 @@ void SP_worldspawn(edict_t *ent)
 
     gi.configstring(CS_SKYROTATE, va("%f", st.skyrotate));
 
-	gi.configstring(CS_SKYAXIS, va("%f %f %f",
-		st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]));
-
-	//gi.configstring(CS_FOG, va("%d %f %f %f %f %f %f", (int)st.fog[0], st.fog[1], st.fog[2], st.fog[3], st.fog[4], st.fog[5], st.fog[6]));
+    gi.configstring(CS_SKYAXIS, va("%f %f %f",
+                                   st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]));
 
     gi.configstring(CS_CDTRACK, va("%i", ent->sounds));
 

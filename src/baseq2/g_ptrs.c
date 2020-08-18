@@ -616,7 +616,6 @@ extern void door_secret_move5(void);
 extern void door_secret_done(void);
 extern void flare_think(void); // Q2RTX
 extern void flare_touch(void); // Q2RTX
-extern void use_target_grfog(void); // Q2RTX N&C
 const save_ptr_t save_ptrs[] = {
 { P_blocked, door_blocked },
 { P_blocked, door_secret_blocked },
@@ -1186,7 +1185,6 @@ const save_ptr_t save_ptrs[] = {
 { P_use, func_object_use },
 { P_use, func_timer_use },
 { P_use, func_wall_use },
-{ P_use, use_target_grfog },
 { P_use, hurt_use },
 { P_use, light_use },
 { P_use, misc_blackhole_use },
