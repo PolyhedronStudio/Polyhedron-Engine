@@ -1,0 +1,91 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(377,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+  acebot_ai.c
+  acebot_cmds.c
+  acebot_compress.c
+  acebot_items.c
+  acebot_movement.c
+  acebot_nodes.c
+  acebot_spawn.c
+  g_ai.c
+  g_camera.c
+  g_chase.c
+  g_cmds.c
+  g_combat.c
+  g_crane.c
+  g_ctf.c
+  g_fog.c
+c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\g_fog.c(732): warning C4133: 'function': incompatible types - from 'char [64]' to 'LPCWSTR'
+  g_func.c
+  g_items.c
+  g_jetpack.c
+  g_lights.c
+  g_lock.c
+  Generating Code...
+  Compiling...
+  g_main.c
+  g_misc.c
+  g_model.c
+  g_monster.c
+  g_moreai.c
+  g_mtrain.c
+  g_patchplayermodels.c
+  g_pendulum.c
+  g_phys.c
+  g_reflect.c
+  g_save.c
+  g_spawn.c
+c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\g_spawn.c(653): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\g_spawn.c(705): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\g_spawn.c(728): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  g_svcmds.c
+  g_target.c
+  g_thing.c
+  g_tracktrain.c
+  g_trigger.c
+  g_turret.c
+  g_utils.c
+  g_vehicle.c
+  Generating Code...
+  Compiling...
+  g_weapon.c
+  km_cvar.c
+  m_actor.c
+  m_actor_weap.c
+  m_berserk.c
+  m_boss2.c
+  m_boss3.c
+  m_boss31.c
+  m_boss32.c
+  m_brain.c
+  m_chick.c
+  m_flash.c
+  m_flipper.c
+  m_float.c
+  m_flyer.c
+  m_gladiator.c
+  m_gunner.c
+  m_hover.c
+  m_infantry.c
+  m_insane.c
+  Generating Code...
+  Compiling...
+  m_medic.c
+  m_move.c
+  m_mutant.c
+  m_parasite.c
+  m_soldier.c
+  m_supertank.c
+  m_tank.c
+  p_chase.c
+  p_client.c
+  p_hud.c
+  p_menu.c
+  p_text.c
+c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\p_text.c(323): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  p_trail.c
+  p_view.c
+  p_weapon.c
+  q_shared.c
+  Generating Code...
+     Creating library ../../../nac\gamex86_64.lib and object ../../../nac\gamex86_64.exp
+  gamex86.vcxproj -> C:\Users\OM1DEV\Downloads\nac\Q2RTX-master\Q2RTX\kmnac\game\gamex86\../../../nac\gamex86_64.dll
