@@ -278,7 +278,7 @@ field_t fields[] = {
 	{ "grFogTintGreen", STOFS(grFogTintGreen), F_LSTRING, FFL_SPAWNTEMP },
 	{ "grFogTintBlue", STOFS(grFogTintBlue), F_LSTRING, FFL_SPAWNTEMP },
 	{ "grFogTintPower", STOFS(grFogTintPower), F_LSTRING, FFL_SPAWNTEMP },
-	{ "grFogDenistyRoot", STOFS(grFogDenistyRoot), F_LSTRING, FFL_SPAWNTEMP },
+	{ "grFogDensityRoot", STOFS(grFogDensityRoot), F_LSTRING, FFL_SPAWNTEMP },
 	{ "grFogPushBackDist", STOFS(grFogPushBackDist), F_LSTRING, FFL_SPAWNTEMP },
 	{ "fog", STOFS(fog), F_LSTRING, FFL_SPAWNTEMP },
 	{ "grFogDelay", STOFS(grFogDelay), F_INT, FFL_SPAWNTEMP },
