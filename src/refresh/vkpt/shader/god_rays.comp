@@ -236,18 +236,64 @@ void main()
 		prevColor = vec4(0);
 	
 	if(global_ubo.god_rays_fogEnable == 1)	{
-		float expT = -global_ubo.god_rays_fogPushBackDist;
-	
-		vec3 outscatterColor = mix(inscatterColor + prevColor.rgb,									// Use inscatter as the input
-						 	   mix(sun_color_ubo.sun_color,											// Enviromental Tint
-							   vec3(global_ubo.god_rays_fogTintColorRed,							// Enviromental Tint
-								global_ubo.god_rays_fogTintColorGreen,								// Enviromental Tint
-								global_ubo.god_rays_fogTintColorBlue),								// Enviromental Tint
-								global_ubo.god_rays_fogTintPower * randVal),						// Enviromental Tint
-							  (1.0f - exp2(expT * distance * distance)) *							// Density with User push back distance
-				   			  (global_ubo.god_rays_fogDensityRoot * randVal * (phase / PI)));		// Blue Noise the User Density Root
 		
-		imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), vec4(outscatterColor, 1));
+		if(global_ubo.god_rays_fogMode == 0) {
+			// "0>Exp No God Rays Tint Only t*t*t"
+			
+			float expT = -(1.0 / ((global_ubo.god_rays_fogPushBackDist * 1000) * 1000)); 
+				
+			vec3 outscatterColor = mix(vec3(0.0), 
+			
+			mix(sun_color_ubo.sun_color, vec3(global_ubo.god_rays_fogTintColorRed, global_ubo.god_rays_fogTintColorGreen, global_ubo.god_rays_fogTintColorBlue), global_ubo.god_rays_fogTintPower * randVal),
+			
+			(1.0f - exp(expT * distance * distance * distance)) * (global_ubo.god_rays_fogDensityRoot * randVal));		
+		
+			imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), vec4(outscatterColor, 1));
+		}
+		else if(global_ubo.god_rays_fogMode == 1) {
+			// "1>Exp2 No God Rays Tint Only t*t"
+
+			float expT = -(1.0 / ((global_ubo.god_rays_fogPushBackDist * 1000) * 1000)); 
+				
+			vec3 outscatterColor = mix(vec3(0.0), 
+			
+			mix(sun_color_ubo.sun_color, vec3(global_ubo.god_rays_fogTintColorRed, global_ubo.god_rays_fogTintColorGreen, global_ubo.god_rays_fogTintColorBlue), global_ubo.god_rays_fogTintPower * randVal),
+			
+			(1.0f - exp2(expT * distance * distance)) * (global_ubo.god_rays_fogDensityRoot * randVal * (phase / PI)));		
+		
+			imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), vec4(outscatterColor, 1));
+		}	
+		else if(global_ubo.god_rays_fogMode == 2) {
+			// "3>Exp2 =2> + No Phase from Godrays t*t"
+			float expT = -(1.0 / ((global_ubo.god_rays_fogPushBackDist * 1000) * 1000)); 
+				
+			vec3 outscatterColor = mix(inscatterColor + prevColor.rgb,								
+						 	   mix(sun_color_ubo.sun_color,											
+							   vec3(global_ubo.god_rays_fogTintColorRed,							
+								global_ubo.god_rays_fogTintColorGreen,								
+								global_ubo.god_rays_fogTintColorBlue),								
+								global_ubo.god_rays_fogTintPower * randVal),						
+							  (1.0f - exp2(expT * distance * distance)) *							
+				   			  (global_ubo.god_rays_fogDensityRoot * randVal * (phase / PI)));		
+		
+			imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), vec4(outscatterColor, 1));
+		}
+		else if(global_ubo.god_rays_fogMode == 3) {
+			// "2>Exp2 Blend Tint with God Rays t*t"
+			float expT = -(1.0 / ((global_ubo.god_rays_fogPushBackDist * 1000) * 1000)); 
+				
+			vec3 outscatterColor = mix(inscatterColor + prevColor.rgb,								
+						 	   mix(sun_color_ubo.sun_color,											
+							   vec3(global_ubo.god_rays_fogTintColorRed,							
+								global_ubo.god_rays_fogTintColorGreen,								
+								global_ubo.god_rays_fogTintColorBlue),								
+								global_ubo.god_rays_fogTintPower * randVal),						
+							  (1.0f - exp2(expT * distance * distance)) *							
+				   			  (global_ubo.god_rays_fogDensityRoot * randVal));		
+		
+			imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), vec4(outscatterColor, 1));
+		}
+		
 	}
 	else
 		imageStore(IMG_GODRAYS_INTERMEDIATE, ivec2(gl_GlobalInvocationID.xy), vec4(inscatterColor + prevColor.rgb, 1));

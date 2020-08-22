@@ -489,7 +489,7 @@ typedef struct
 	float		shift;
 
 	char        *fog;
-	char        *grFogOnOff, *grFogTintRed, *grFogTintGreen, *grFogTintBlue, *grFogTintPower, *grFogDenistyRoot, *grFogPushBackDist;
+	char        *grFogOnOff, *grFogTintRed, *grFogTintGreen, *grFogTintBlue, *grFogTintPower, *grFogDensityRoot, *grFogPushBackDist;
 	int         grFogDelay;
 	int         fog_model;
 	vec3_t      fog_color;
@@ -1983,7 +1983,7 @@ struct edict_s
 	int state;
 // ACEBOT_END
 	char        *fog;
-	char        *grFogOnOff, *grFogTintRed, *grFogTintGreen, *grFogTintBlue, *grFogTintPower, *grFogDenistyRoot, *grFogPushBackDist;
+	char        *grFogOnOff, *grFogTintRed, *grFogTintGreen, *grFogTintBlue, *grFogTintPower, *grFogDensityRoot, *grFogPushBackDist;
 	int         grFogDelay;
 
 };
