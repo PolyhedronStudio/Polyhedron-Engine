@@ -1,5 +1,5 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(377,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
-C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (gamex86.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(453,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(467,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (gamex86.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   acebot_ai.c
   acebot_cmds.c
   acebot_compress.c
@@ -15,7 +15,7 @@ C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\
   g_crane.c
   g_ctf.c
   g_fog.c
-c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\g_fog.c(732): warning C4133: 'function': incompatible types - from 'char [64]' to 'LPCWSTR'
+M:\Quake\quake2\baseq2\src\repos\q2rtx\kmnac\game\g_fog.c(732,30): warning C4133: 'function': incompatible types - from 'char [64]' to 'LPCWSTR'
   g_func.c
   g_items.c
   g_jetpack.c
@@ -35,9 +35,9 @@ c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\g_fog.c(732): warnin
   g_reflect.c
   g_save.c
   g_spawn.c
-c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\g_spawn.c(653): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\g_spawn.c(705): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\g_spawn.c(728): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+M:\Quake\quake2\baseq2\src\repos\q2rtx\kmnac\game\g_spawn.c(653,40): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+M:\Quake\quake2\baseq2\src\repos\q2rtx\kmnac\game\g_spawn.c(705,54): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+M:\Quake\quake2\baseq2\src\repos\q2rtx\kmnac\game\g_spawn.c(728,64): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   g_svcmds.c
   g_target.c
   g_thing.c
@@ -82,12 +82,11 @@ c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\g_spawn.c(728): warn
   p_hud.c
   p_menu.c
   p_text.c
-c:\users\om1dev\downloads\nac\q2rtx-master\q2rtx\kmnac\game\p_text.c(323): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+M:\Quake\quake2\baseq2\src\repos\q2rtx\kmnac\game\p_text.c(323,51): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   p_trail.c
   p_view.c
   p_weapon.c
   q_shared.c
   Generating Code...
-  LINK : ../../../nac/gamex86_64.dll not found or not built by the last incremental link; performing full link
      Creating library ../../../nac\gamex86_64.lib and object ../../../nac\gamex86_64.exp
-  gamex86_64.vcxproj -> C:\Users\OM1DEV\Downloads\nac\Q2RTX-master\Q2RTX\kmnac\game\gamex86\../../../nac\gamex86_64.dll
+  gamex86_64.vcxproj -> M:\Quake\quake2\baseq2\src\repos\q2rtx\kmnac\game\gamex86\../../../nac\gamex86_64.dll

@@ -7,6 +7,7 @@ set(Q2RTX_VERSION_MAJOR 1)
 set(Q2RTX_VERSION_MINOR 3)
 set(Q2RTX_VERSION_POINT 0)
 
+
 # get short-hash
 execute_process(
 	COMMAND git rev-parse --short HEAD
@@ -83,3 +84,5 @@ IF(CONFIG_LINUX_PACKAGING_SUPPORT)
 
     include(CPack)
 ENDIF()
+
+
