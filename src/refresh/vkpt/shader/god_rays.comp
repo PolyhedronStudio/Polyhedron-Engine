@@ -164,6 +164,8 @@ void main()
 
 	float offset = 0;
 
+	vec3 color = vec3(0);
+	
 	float tIn, tOut;
 	if (IntersectRayBox(
 		original_pos,
@@ -241,8 +243,13 @@ void main()
 			// "0>Exp No God Rays Tint Only t*t*t"
 			
 			float expT = -(1.0 / ((global_ubo.god_rays_fogPushBackDist * 1000) * 1000)); 
-				
-			vec3 outscatterColor = mix(vec3(0.0), 
+			
+			if(medium != MEDIUM_NONE)
+				color = prevColor.rgb * global_ubo.pt_water_density * 30; 
+			else
+			    color = prevColor.rgb;
+
+			vec3 outscatterColor = mix(color, 
 			
 			mix(sun_color_ubo.sun_color, vec3(global_ubo.god_rays_fogTintColorRed, global_ubo.god_rays_fogTintColorGreen, global_ubo.god_rays_fogTintColorBlue), global_ubo.god_rays_fogTintPower * randVal),
 			
@@ -254,8 +261,13 @@ void main()
 			// "1>Exp2 No God Rays Tint Only t*t"
 
 			float expT = -(1.0 / ((global_ubo.god_rays_fogPushBackDist * 1000) * 1000)); 
-				
-			vec3 outscatterColor = mix(vec3(0.0), 
+							
+			if(medium != MEDIUM_NONE)
+				color = prevColor.rgb * global_ubo.pt_water_density * 30; 
+			else
+			    color = prevColor.rgb;
+
+			vec3 outscatterColor = mix(color, 
 			
 			mix(sun_color_ubo.sun_color, vec3(global_ubo.god_rays_fogTintColorRed, global_ubo.god_rays_fogTintColorGreen, global_ubo.god_rays_fogTintColorBlue), global_ubo.god_rays_fogTintPower * randVal),
 			
