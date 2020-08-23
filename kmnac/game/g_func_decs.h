@@ -1470,7 +1470,7 @@ extern void SP_trigger_fog_bbox ( edict_t * self ) ;
 extern void SP_trigger_fog(edict_t * self);
 extern void trigger_fog_use(edict_t * self, edict_t * other, edict_t * activator);
 extern void SP_trigger_grfog(edict_t * self);
-extern void trigger_grfog_use(edict_t * self, edict_t * other, edict_t * activator);
+extern void trigger_grfog_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 extern void SP_target_fog ( edict_t * self ) ;
 extern void target_fog_use ( edict_t * self , edict_t * other , edict_t * activator ) ;
 extern void SP_target_grfog ( edict_t * self ) ;

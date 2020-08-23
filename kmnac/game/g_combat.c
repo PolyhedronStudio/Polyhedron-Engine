@@ -199,6 +199,9 @@ added color for monster blood
 */
 void SpawnDamage (int type, vec3_t origin, vec3_t normal)
 {
+	if (!normal) 
+		return;
+
 	vec3_t inverted = { -normal[0], -normal[1], -normal[2] };
 
 	gi.WriteByte (svc_temp_entity);

@@ -4411,6 +4411,7 @@ void target_grfog_use(edict_t *self, edict_t *other, edict_t *activator)
 	stuffcmd(&g_edicts[1], va("gr_fogtintpow %s\n", self->grFogTintPower));
 	stuffcmd(&g_edicts[1], va("gr_fogdensity %s\n", self->grFogDensityRoot));
 	stuffcmd(&g_edicts[1], va("gr_fogpushback %s\n", self->grFogPushBackDist));
+	stuffcmd(&g_edicts[1], va("gr_fogmode %d\n", self->grFogMode));
 
 	self->count--;
 	if (!self->count) {
@@ -4435,13 +4436,13 @@ void SP_target_grfog(edict_t *self)
 	strcpy(self->grFogOnOff, st.grFogOnOff);
 
 	self->grFogTintRed = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->grFogTintRed, st.grFogTintRed);
+	self->grFogTintRed = va("%f", st.grFogColor[0]);
 
 	self->grFogTintGreen = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->grFogTintGreen, st.grFogTintGreen);
+	self->grFogTintGreen = va("%f", st.grFogColor[1]);
 
 	self->grFogTintBlue = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->grFogTintBlue, st.grFogTintBlue);
+	self->grFogTintBlue = va("%f", st.grFogColor[2]);
 
 	self->grFogTintPower = gi.TagMalloc(64 + 1, TAG_LEVEL);
 	strcpy(self->grFogTintPower, st.grFogTintPower);
@@ -4452,16 +4453,17 @@ void SP_target_grfog(edict_t *self)
 	self->grFogPushBackDist = gi.TagMalloc(64 + 1, TAG_LEVEL);
 	strcpy(self->grFogPushBackDist, st.grFogPushBackDist);
 
+	self->grFogMode = st.grFogMode;
+
 	self->use = target_grfog_use;
 
 }
 
-void trigger_grfog_use(edict_t *self, edict_t *other, edict_t *activator)
+void trigger_grfog_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	if ((self->spawnflags & 1) && (self->spawnflags & 2))
+	if (self->spawnflags & 1)
 	{   
 		strcpy(self->grFogOnOff, "1");
-		self->spawnflags &= ~1;
 		self->count--;
 		if (self->count == 0)
 		{
@@ -4471,7 +4473,6 @@ void trigger_grfog_use(edict_t *self, edict_t *other, edict_t *activator)
 	}
 	else
 	{
-		self->spawnflags |= 1;
 		strcpy(self->grFogOnOff, "0");
 	}
 
@@ -4482,30 +4483,29 @@ void trigger_grfog_use(edict_t *self, edict_t *other, edict_t *activator)
 	stuffcmd(&g_edicts[1], va("gr_fogtintpow %s\n", self->grFogTintPower));
 	stuffcmd(&g_edicts[1], va("gr_fogdensity %s\n", self->grFogDensityRoot));
 	stuffcmd(&g_edicts[1], va("gr_fogpushback %s\n", self->grFogPushBackDist));
+	stuffcmd(&g_edicts[1], va("gr_fogmode %d\n", self->grFogMode));
 }
 
 void SP_trigger_grfog(edict_t *self)
 {
 	self->class_id = ENTITY_TRIGGER_GRFOG;
 	self->grFogOnOff = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->grFogOnOff, "1");
 
 	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
 	{
-		strcpy(self->grFogOnOff, "0");
 		self->spawnflags |= 1;
 	}
 	
 	self->grFogTintRed = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	self->grFogTintRed = va("%f", st.fog_color[0]);
+	self->grFogTintRed = va("%f", st.grFogColor[0]);
 
 	self->grFogTintGreen = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	self->grFogTintGreen = va("%f", st.fog_color[1]);
+	self->grFogTintGreen = va("%f", st.grFogColor[1]);
 
 	self->grFogTintBlue = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	self->grFogTintBlue = va("%f", st.fog_color[2]);
+	self->grFogTintBlue = va("%f", st.grFogColor[2]);
 
-	self->fog_model = st.fog_model;
+	self->grFogMode = st.grFogMode;
 
 	self->grFogTintPower = gi.TagMalloc(64 + 1, TAG_LEVEL);
 	strcpy(self->grFogTintPower, st.grFogTintPower);
@@ -4521,18 +4521,15 @@ void SP_trigger_grfog(edict_t *self)
 	self->fog = gi.TagMalloc(64 + 1, TAG_LEVEL);
 	strcpy(self->fog, st.fog);
 
-	self->movetype = MOVETYPE_NONE;
-	self->svflags |= SVF_NOCLIENT;
-	self->solid = SOLID_NOT;
-	gi.setmodel(self, self->model);
-	gi.linkentity(self);
-	self->use = trigger_grfog_use;
+	if (!VectorCompare(self->s.angles, vec3_origin))
+		G_SetMovedir(self->s.angles, self->movedir);
 
-	stuffcmd(&g_edicts[1], va("gr_enablefog %s\n", self->grFogOnOff));
-	stuffcmd(&g_edicts[1], va("gr_fogtintr %s\n", self->grFogTintRed));
-	stuffcmd(&g_edicts[1], va("gr_fogtintg %s\n", self->grFogTintGreen));
-	stuffcmd(&g_edicts[1], va("gr_fogtintb %s\n", self->grFogTintBlue));
-	stuffcmd(&g_edicts[1], va("gr_fogtintpow %s\n", self->grFogTintPower));
-	stuffcmd(&g_edicts[1], va("gr_fogdensity %s\n", self->grFogDensityRoot));
-	stuffcmd(&g_edicts[1], va("gr_fogpushback %s\n", self->grFogPushBackDist));
+	self->solid = SOLID_TRIGGER;
+	self->movetype = MOVETYPE_NONE;
+	gi.setmodel(self, self->model);
+	self->svflags = SVF_NOCLIENT;
+
+	self->touch = trigger_grfog_touch;
+	
+	
 }

@@ -282,8 +282,8 @@ field_t fields[] = {
 	{ "grFogPushBackDist", STOFS(grFogPushBackDist), F_LSTRING, FFL_SPAWNTEMP },
 	{ "fog", STOFS(fog), F_LSTRING, FFL_SPAWNTEMP },
 	{ "grFogDelay", STOFS(grFogDelay), F_INT, FFL_SPAWNTEMP },
-	{ "fog_model", STOFS(fog_model), F_INT, FFL_SPAWNTEMP },
-	{ "fog_color", STOFS(fog_color), F_VECTOR, FFL_SPAWNTEMP },
+	{ "grFogMode", STOFS(grFogMode), F_INT, FFL_SPAWNTEMP },
+	{ "grFogColor", STOFS(grFogColor), F_VECTOR, FFL_SPAWNTEMP },
 	{0, 0, 0, 0}
 
 };
