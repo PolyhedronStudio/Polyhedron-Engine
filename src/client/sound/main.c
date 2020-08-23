@@ -66,7 +66,7 @@ cvar_t		*s_reverb_preset_autopick;
 cvar_t		*s_reverb;
 cvar_t		*s_voiceinput;
 cvar_t		*s_voiceinput_volume;
-
+cvar_t		*s_reverb_set_preset;
 cvar_t      *s_ambient;
 #ifdef _DEBUG
 cvar_t      *s_show;
@@ -169,7 +169,26 @@ static void reverb_changed(cvar_t *self)
 
 	if (s_reverb_preset->integer > 112)
 		s_reverb_preset->integer = 112;
+
 	SetReverb(s_reverb_preset->integer, 1);
+}
+
+extern int TriggerReverbOverrideReverb;
+extern int TriggerReverbOverride;
+extern int TriggerReverbOverrideNeeded;
+static void reverb_set_preset_changed(cvar_t *self)
+{
+	int selfValue = self->integer;
+
+	if (selfValue < 0)
+		selfValue = 0;
+
+	if (selfValue > 112)
+		selfValue = 112;
+		
+	TriggerReverbOverride = 1;
+	TriggerReverbOverrideNeeded = 1;
+	TriggerReverbOverrideReverb = selfValue;
 }
 
 static void voiceinputvolume_changed(cvar_t *self)
@@ -200,7 +219,7 @@ void S_Init(void)
 	s_doppler = Cvar_Get("s_doppler", "1", CVAR_ARCHIVE);
 	s_occlusion = Cvar_Get("s_occlusion", "1", CVAR_ARCHIVE);
 	s_occlusion_strength = Cvar_Get("s_occlusion_strength", "1", CVAR_ARCHIVE);
-	s_reverb_preset = Cvar_Get("s_reverb_preset", "0", CVAR_ARCHIVE);
+	s_reverb_preset = Cvar_Get("s_reverb_preset", "7", CVAR_ARCHIVE);
 	s_reverb_preset->changed = reverb_changed;
 	s_reverb = Cvar_Get("s_reverb", "1", CVAR_ARCHIVE);
 	s_reverb_preset_autopick = Cvar_Get("s_reverb_preset_autopick", "1", CVAR_ARCHIVE);
@@ -210,6 +229,10 @@ void S_Init(void)
 	s_underwater = Cvar_Get("s_underwater", "1", CVAR_ARCHIVE);
 	s_underwater_gain_hf = Cvar_Get("s_underwater_gain_hf", "0.25", CVAR_ARCHIVE);
     s_ambient = Cvar_Get("s_ambient", "1", 0);
+
+	s_reverb_set_preset = Cvar_Get("s_reverb_set_preset", "7", CVAR_SERVERINFO);
+	s_reverb_set_preset->changed = reverb_set_preset_changed;
+
 #ifdef _DEBUG
     s_show = Cvar_Get("s_show", "0", 0);
 #endif

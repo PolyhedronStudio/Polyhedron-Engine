@@ -284,6 +284,23 @@ field_t fields[] = {
 	{ "grFogDelay", STOFS(grFogDelay), F_INT, FFL_SPAWNTEMP },
 	{ "grFogMode", STOFS(grFogMode), F_INT, FFL_SPAWNTEMP },
 	{ "grFogColor", STOFS(grFogColor), F_VECTOR, FFL_SPAWNTEMP },
+	{ "reverb", STOFS(reverb), F_LSTRING, FFL_SPAWNTEMP },
+	{ "reverbpreset", STOFS(reverbpreset), F_INT, FFL_SPAWNTEMP },
+	{ "TriggerDelay", STOFS(TriggerDelay), F_INT, FFL_SPAWNTEMP },
+	{ "flDensity", STOFS(flDensity), F_LSTRING, FFL_SPAWNTEMP },
+	{ "flDiffusion", STOFS(flDiffusion), F_LSTRING, FFL_SPAWNTEMP },
+	{ "flGain", STOFS(flGain), F_LSTRING, FFL_SPAWNTEMP },
+	{ "flGainHF", STOFS(flGainHF), F_LSTRING, FFL_SPAWNTEMP },
+	{ "flDecayTime", STOFS(flDecayTime), F_LSTRING, FFL_SPAWNTEMP },
+	{ "flDecayHFRatio", STOFS(flDecayHFRatio), F_LSTRING, FFL_SPAWNTEMP },
+	{ "flReflectionsGain", STOFS(flReflectionsGain), F_LSTRING, FFL_SPAWNTEMP },
+	{ "flReflectionsDelay", STOFS(flReflectionsDelay), F_LSTRING, FFL_SPAWNTEMP },
+	{ "flLateReverbGain", STOFS(flLateReverbGain), F_LSTRING, FFL_SPAWNTEMP },
+	{ "flLateReverbDelay", STOFS(flLateReverbDelay), F_LSTRING, FFL_SPAWNTEMP },
+	{ "flAirAbsorptionGainHF", STOFS(flAirAbsorptionGainHF), F_LSTRING, FFL_SPAWNTEMP },
+	{ "flRoomRolloffFactor", STOFS(flRoomRolloffFactor), F_LSTRING, FFL_SPAWNTEMP },
+
+	{ "iDecayHFLimit", STOFS(iDecayHFLimit), F_INT, FFL_SPAWNTEMP },
 	{0, 0, 0, 0}
 
 };
