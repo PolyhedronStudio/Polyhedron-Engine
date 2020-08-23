@@ -27,6 +27,8 @@ void target_grfog_use(edict_t *self, edict_t *other, edict_t *activator);
 void SP_target_grfog(edict_t *self);
 void trigger_grfog_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 void SP_trigger_grfog(edict_t *self);
+void trigger_reverb_preset_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
+void SP_trigger_reverb_preset(edict_t *self);
 
 /*
 //#ifdef KMQUAKE2_ENGINE_MOD

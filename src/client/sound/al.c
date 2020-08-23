@@ -47,6 +47,10 @@ static ALuint ReverbEffect;
 static ALuint ReverbEffectSlot;
 int lastreverbtreshold = 0;
 
+int TriggerReverbOverrideReverb;
+int TriggerReverbOverride;
+int TriggerReverbOverrideNeeded;
+
 void AL_SoundInfo(void)
 {
 	Com_Printf("===============\n");
@@ -100,13 +104,13 @@ static void
 AL_StreamDie(void)
 {
 	int numBuffers;
-		
+
 	{
 		if (streamPlaying) {
 			qalSourceStop(streamSource);
 			streamPlaying = qfalse;
 		}
-			   
+
 		/* Un-queue any buffers, and delete them */
 		qalGetSourcei(streamSource, AL_BUFFERS_QUEUED, &numBuffers);
 		qalSourcei(streamSource, AL_DIRECT_FILTER, AL_FILTER_NULL);
@@ -121,7 +125,7 @@ AL_StreamDie(void)
 		}
 	}
 
-	
+
 	{
 		if (voicePlaying) {
 			qalSourceStop(voiceSource);
@@ -515,6 +519,16 @@ void UpdateReverb(void)
 	if (ReverbEffect == 0)
 		return;
 
+	if (TriggerReverbOverride == 1)
+	{
+		if (TriggerReverbOverrideNeeded == 1) 
+		{
+			SetReverb(TriggerReverbOverrideReverb, 0);
+			TriggerReverbOverrideNeeded = 0;
+		}
+		return;
+	}
+
 	CM_BoxTrace(&trace1, listener_origin, up, mins, maxs, cl.bsp->nodes, MASK_DEADSOLID);
 	CM_BoxTrace(&trace2, listener_origin, forward, mins, maxs, cl.bsp->nodes, MASK_DEADSOLID);
 	CM_BoxTrace(&trace3, listener_origin, backward, mins, maxs, cl.bsp->nodes, MASK_DEADSOLID);
@@ -549,25 +563,25 @@ void UpdateReverb(void)
 
 	if (average > 200 && average < 330 && lastreverbtreshold != 2)
 	{
-		SetReverb(5, 0);
+		SetReverb(20, 0);
 		lastreverbtreshold = 2;
 	}
 
 	if (average > 330 && average < 450 && lastreverbtreshold != 3)
 	{
-		SetReverb(12, 0);
+		SetReverb(18, 0);
 		lastreverbtreshold = 3;
 	}
 
 	if (average > 450 && average < 650 && lastreverbtreshold != 4)
 	{
-		SetReverb(18, 0);
+		SetReverb(15, 0);
 		lastreverbtreshold = 4;
 	}
 
 	if (average > 650 && lastreverbtreshold != 5)
 	{
-		SetReverb(17, 0);
+		SetReverb(12, 0);
 		lastreverbtreshold = 5;
 	}
 }
@@ -781,7 +795,9 @@ static void AL_Spatialize(channel_t *ch)
 			VectorSubtract(origin, listener_origin, distance);
 			dist = VectorLength(distance);
 
-			final = ch->master_vol - ((dist / 1000) * s_occlusion_strength->value);
+			//final = ch->master_vol - ((dist / 1000) * s_occlusion_strength->value);
+
+			final = ch->master_vol - ((1.0f - exp2(dist * dist)) * s_occlusion_strength->value);
 
 			qalSourcef(ch->srcnum, AL_GAIN, clamp(final, 0, 1));
 

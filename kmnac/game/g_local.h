@@ -493,7 +493,22 @@ typedef struct
 	int         grFogDelay;
 	vec3_t      grFogColor;
 	int			grFogMode;
-
+	int			reverbpreset;
+	char        *reverb;
+	int         TriggerDelay;
+	char        *flDensity;
+	char        *flDiffusion;
+	char        *flGain;
+	char        *flGainHF;
+	char        *flDecayTime;
+	char        *flDecayHFRatio;
+	char        *flReflectionsGain;
+	char        *flReflectionsDelay;
+	char        *flLateReverbGain;
+	char        *flLateReverbDelay;
+	char        *flAirAbsorptionGainHF;
+	char        *flRoomRolloffFactor;
+	int     	iDecayHFLimit;
 } spawn_temp_t;
 
 
@@ -1987,6 +2002,22 @@ struct edict_s
 	int         grFogDelay;
 	vec3_t      grFogColor;
 	int			grFogMode;
+	int			reverbpreset;
+	char        *reverb;
+	int         TriggerDelay;
+	char        *flDensity;
+	char        *flDiffusion;
+	char        *flGain;
+	char        *flGainHF;
+	char        *flDecayTime;
+	char        *flDecayHFRatio;
+	char        *flReflectionsGain;
+	char        *flReflectionsDelay;
+	char        *flLateReverbGain;
+	char        *flLateReverbDelay;
+	char        *flAirAbsorptionGainHF;
+	char        *flRoomRolloffFactor;
+	int     	iDecayHFLimit;
 
 };
 

@@ -4533,3 +4533,49 @@ void SP_trigger_grfog(edict_t *self)
 	
 	
 }
+
+void trigger_reverb_preset_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (self->spawnflags & 1)
+	{
+		stuffcmd(&g_edicts[1], va("s_reverb_set_preset %d\n", self->reverbpreset));
+		self->count--;
+		if (self->count == 0)
+		{
+			self->think = G_FreeEdict;
+			self->nextthink = level.time + FRAMETIME;
+		}
+	}
+	else
+	{
+	}
+}
+
+void SP_trigger_reverb_preset(edict_t *self)
+{
+	self->class_id = ENTITY_TRIGGER_REVERB_PRESET;
+
+	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
+	{
+		self->spawnflags |= 1;
+	}
+
+	self->reverbpreset = st.reverbpreset;
+		
+	self->TriggerDelay = (float)st.TriggerDelay * 1000.0f;
+
+	self->reverb = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->reverb, st.reverb);
+
+	if (!VectorCompare(self->s.angles, vec3_origin))
+		G_SetMovedir(self->s.angles, self->movedir);
+
+	self->solid = SOLID_TRIGGER;
+	self->movetype = MOVETYPE_NONE;
+	gi.setmodel(self, self->model);
+	self->svflags = SVF_NOCLIENT;
+
+	self->touch = trigger_reverb_preset_touch;
+
+
+}
