@@ -1802,3 +1802,5 @@ extern void ACEAI_PickLongRangeGoal ( edict_t * self ) ;
 extern void ACEAI_Think ( edict_t * self ) ;
 extern void trigger_reverb_preset_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 extern void SP_trigger_reverb_preset(edict_t *self);
+extern void trigger_reverb_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
+extern void SP_trigger_reverb(edict_t *self);

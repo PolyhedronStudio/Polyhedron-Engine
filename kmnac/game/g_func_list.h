@@ -1472,6 +1472,8 @@
 {"trigger_grfog_touch", (byte *)trigger_grfog_touch},
 {"SP_trigger_reverb_preset", (byte *)SP_trigger_reverb_preset },
 {"trigger_reverb_preset_touch", (byte *)trigger_reverb_preset_touch },
+{"SP_trigger_reverb", (byte *)SP_trigger_reverb },
+{"trigger_reverb_touch", (byte *)trigger_reverb_touch },
 {"SP_target_fog", (byte *)SP_target_fog},
 {"target_fog_use", (byte *)target_fog_use},
 {"SP_target_grfog", (byte *)SP_target_grfog},

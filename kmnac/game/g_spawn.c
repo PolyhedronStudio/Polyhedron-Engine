@@ -206,6 +206,7 @@ void SP_trigger_bbox (edict_t *self);
 void SP_trigger_disguise (edict_t *self);
 void SP_trigger_grfog(edict_t *self);
 void SP_trigger_reverb_preset(edict_t *self);
+void SP_trigger_reverb(edict_t *self);
 void SP_trigger_fog (edict_t *self);
 void SP_trigger_inside (edict_t *self);
 void SP_trigger_look (edict_t *self);
@@ -458,6 +459,7 @@ spawn_t	spawns[] = {
 	{ "target_grfog", SP_target_grfog },
 	{ "trigger_grfog", SP_trigger_grfog },
 	{ "trigger_reverb_preset", SP_trigger_reverb_preset },
+	{ "trigger_reverb", SP_trigger_reverb },
 
 	{NULL, NULL}
 };

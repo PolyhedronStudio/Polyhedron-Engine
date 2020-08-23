@@ -176,6 +176,9 @@ static void reverb_changed(cvar_t *self)
 extern int TriggerReverbOverrideReverb;
 extern int TriggerReverbOverride;
 extern int TriggerReverbOverrideNeeded;
+extern char* TriggerReverbOverrideReverbString;
+extern int TriggerReverbOverride2;
+extern int TriggerReverbOverrideNeeded2;
 static void reverb_set_preset_changed(cvar_t *self)
 {
 	int selfValue = self->integer;
@@ -185,10 +188,17 @@ static void reverb_set_preset_changed(cvar_t *self)
 
 	if (selfValue > 112)
 		selfValue = 112;
-		
+
 	TriggerReverbOverride = 1;
 	TriggerReverbOverrideNeeded = 1;
 	TriggerReverbOverrideReverb = selfValue;
+}
+
+static void reverb_set_changed(cvar_t *self)
+{
+	TriggerReverbOverride2 = 1;
+	TriggerReverbOverrideNeeded2 = 1;
+	strcpy(TriggerReverbOverrideReverbString, self->string);
 }
 
 static void voiceinputvolume_changed(cvar_t *self)
@@ -232,6 +242,8 @@ void S_Init(void)
 
 	s_reverb_set_preset = Cvar_Get("s_reverb_set_preset", "7", CVAR_SERVERINFO);
 	s_reverb_set_preset->changed = reverb_set_preset_changed;
+	s_reverb_set_preset = Cvar_Get("s_reverb_set", "0 0 0 0 0 0 0 0 0 0 0 0 0", CVAR_SERVERINFO);
+	s_reverb_set_preset->changed = reverb_set_changed;
 
 #ifdef _DEBUG
     s_show = Cvar_Get("s_show", "0", 0);

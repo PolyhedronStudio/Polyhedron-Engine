@@ -50,7 +50,9 @@ int lastreverbtreshold = 0;
 int TriggerReverbOverrideReverb;
 int TriggerReverbOverride;
 int TriggerReverbOverrideNeeded;
-
+char *TriggerReverbOverrideReverbString;
+int TriggerReverbOverride2;
+int TriggerReverbOverrideNeeded2;
 void AL_SoundInfo(void)
 {
 	Com_Printf("===============\n");
@@ -68,6 +70,8 @@ void AL_SoundInfo(void)
 	Com_Printf("Number of sources: %d\n", s_numchannels);
 	Com_Printf("\n");
 	Com_Printf("===============\n");
+
+
 }
 
 /*
@@ -521,10 +525,65 @@ void UpdateReverb(void)
 
 	if (TriggerReverbOverride == 1)
 	{
-		if (TriggerReverbOverrideNeeded == 1) 
+		if (TriggerReverbOverrideNeeded == 1)
 		{
 			SetReverb(TriggerReverbOverrideReverb, 0);
 			TriggerReverbOverrideNeeded = 0;
+		}
+		return;
+	}
+
+	if (TriggerReverbOverride2 == 1)
+	{
+		if (TriggerReverbOverrideNeeded2 == 1)
+		{
+			float		
+				flDensity,
+				flDiffusion,
+				flGain,
+				flGainHF,
+				flDecayTime,
+				flDecayHFRatio,
+				flReflectionsGain,
+				flReflectionsDelay,
+				flLateReverbGain,
+				flLateReverbDelay,
+				flAirAbsorptionGainHF,
+				flRoomRolloffFactor;
+			int			
+				iDecayHFLimit;
+
+			sscanf(TriggerReverbOverrideReverbString, "%f %f %f %f %f %f %f %f %f %f %f %f %d", 
+				&flDensity,
+				&flDiffusion,
+				&flGain,
+				&flGainHF,
+				&flDecayTime,
+				&flDecayHFRatio,
+				&flReflectionsGain,
+				&flReflectionsDelay,
+				&flLateReverbGain,
+				&flLateReverbDelay,
+				&flAirAbsorptionGainHF,
+				&flRoomRolloffFactor,
+				&iDecayHFLimit);
+
+			qalEffectf(ReverbEffect, AL_REVERB_DENSITY, flDensity);
+			qalEffectf(ReverbEffect, AL_REVERB_DIFFUSION, flDiffusion);
+			qalEffectf(ReverbEffect, AL_REVERB_GAIN, flGain);
+			qalEffectf(ReverbEffect, AL_REVERB_GAINHF, flGainHF);
+			qalEffectf(ReverbEffect, AL_REVERB_DECAY_TIME, flDecayTime);
+			qalEffectf(ReverbEffect, AL_REVERB_DECAY_HFRATIO, flDecayHFRatio);
+			qalEffectf(ReverbEffect, AL_REVERB_REFLECTIONS_GAIN, flReflectionsGain);
+			qalEffectf(ReverbEffect, AL_REVERB_REFLECTIONS_DELAY, flReflectionsDelay);
+			qalEffectf(ReverbEffect, AL_REVERB_LATE_REVERB_GAIN, flLateReverbGain);
+			qalEffectf(ReverbEffect, AL_REVERB_LATE_REVERB_DELAY, flLateReverbDelay);
+			qalEffectf(ReverbEffect, AL_REVERB_AIR_ABSORPTION_GAINHF, flAirAbsorptionGainHF);
+			qalEffectf(ReverbEffect, AL_REVERB_ROOM_ROLLOFF_FACTOR, flRoomRolloffFactor);
+			qalEffecti(ReverbEffect, AL_REVERB_DECAY_HFLIMIT, iDecayHFLimit);
+
+			qalAuxiliaryEffectSloti(ReverbEffectSlot, AL_EFFECTSLOT_EFFECT, ReverbEffect);
+			TriggerReverbOverrideNeeded2 = 0;
 		}
 		return;
 	}
@@ -603,6 +662,8 @@ qboolean AL_Init(void)
 {
 	int i;
 
+	TriggerReverbOverrideReverbString = malloc(64 + 1);
+	memset(TriggerReverbOverrideReverbString, 0, 64);
 	Com_DPrintf("Initializing OpenAL\n");
 
 	if (!QAL_Init()) {

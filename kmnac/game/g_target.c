@@ -4579,3 +4579,65 @@ void SP_trigger_reverb_preset(edict_t *self)
 
 
 }
+
+
+void trigger_reverb_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (self->spawnflags & 1)
+	{
+		int len = strlen(self->reverbString);
+		stuffcmd(&g_edicts[1], va("s_reverb_set \"%s\"\n", self->reverbString));
+		self->count--;
+		if (self->count == 0)
+		{
+			self->think = G_FreeEdict;
+			self->nextthink = level.time + FRAMETIME;
+		}
+	}
+	else
+	{
+	}
+}
+
+void SP_trigger_reverb(edict_t *self)
+{
+	self->class_id = ENTITY_TRIGGER_REVERB;
+
+	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
+	{
+		self->spawnflags |= 1;
+	}
+
+	self->TriggerDelay = (float)st.TriggerDelay * 1000.0f;
+
+	self->reverb = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->reverb, st.reverb);
+
+	self->reverbString = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	sprintf(self->reverbString, "%s %s %s %s %s %s %s %s %s %s %s %s %d", 
+	st.flDensity,
+	st.flDiffusion,
+	st.flGain,
+	st.flGainHF,
+	st.flDecayTime,
+	st.flDecayHFRatio,
+	st.flReflectionsGain,
+	st.flReflectionsDelay,
+	st.flLateReverbGain,
+	st.flLateReverbDelay,
+	st.flAirAbsorptionGainHF,
+	st.flRoomRolloffFactor,
+	st.iDecayHFLimit);
+
+	if (!VectorCompare(self->s.angles, vec3_origin))
+		G_SetMovedir(self->s.angles, self->movedir);
+
+	self->solid = SOLID_TRIGGER;
+	self->movetype = MOVETYPE_NONE;
+	gi.setmodel(self, self->model);
+	self->svflags = SVF_NOCLIENT;
+
+	self->touch = trigger_reverb_touch;
+
+
+}
