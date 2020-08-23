@@ -491,8 +491,8 @@ typedef struct
 	char        *fog;
 	char        *grFogOnOff, *grFogTintRed, *grFogTintGreen, *grFogTintBlue, *grFogTintPower, *grFogDensityRoot, *grFogPushBackDist;
 	int         grFogDelay;
-	int         fog_model;
-	vec3_t      fog_color;
+	vec3_t      grFogColor;
+	int			grFogMode;
 
 } spawn_temp_t;
 
@@ -1985,6 +1985,8 @@ struct edict_s
 	char        *fog;
 	char        *grFogOnOff, *grFogTintRed, *grFogTintGreen, *grFogTintBlue, *grFogTintPower, *grFogDensityRoot, *grFogPushBackDist;
 	int         grFogDelay;
+	vec3_t      grFogColor;
+	int			grFogMode;
 
 };
 

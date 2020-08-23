@@ -455,7 +455,8 @@ spawn_t	spawns[] = {
 	{"homing rocket", SP_rocket},
 // end Lazarus
 	{ "target_grfog", SP_target_grfog },
-	{ "target_grfog", SP_trigger_grfog },
+	{ "trigger_grfog", SP_trigger_grfog },
+
 	{NULL, NULL}
 };
 
