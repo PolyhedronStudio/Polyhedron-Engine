@@ -4411,6 +4411,7 @@ void target_grfog_use(edict_t *self, edict_t *other, edict_t *activator)
 	stuffcmd(&g_edicts[1], va("gr_fogtintpow %s\n", self->grFogTintPower));
 	stuffcmd(&g_edicts[1], va("gr_fogdensity %s\n", self->grFogDensityRoot));
 	stuffcmd(&g_edicts[1], va("gr_fogpushback %s\n", self->grFogPushBackDist));
+	stuffcmd(&g_edicts[1], va("gr_fogmode %d\n", self->grFogMode));
 
 	self->count--;
 	if (!self->count) {
@@ -4435,13 +4436,13 @@ void SP_target_grfog(edict_t *self)
 	strcpy(self->grFogOnOff, st.grFogOnOff);
 
 	self->grFogTintRed = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->grFogTintRed, st.grFogTintRed);
+	self->grFogTintRed = va("%f", st.grFogColor[0]);
 
 	self->grFogTintGreen = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->grFogTintGreen, st.grFogTintGreen);
+	self->grFogTintGreen = va("%f", st.grFogColor[1]);
 
 	self->grFogTintBlue = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->grFogTintBlue, st.grFogTintBlue);
+	self->grFogTintBlue = va("%f", st.grFogColor[2]);
 
 	self->grFogTintPower = gi.TagMalloc(64 + 1, TAG_LEVEL);
 	strcpy(self->grFogTintPower, st.grFogTintPower);
@@ -4451,6 +4452,8 @@ void SP_target_grfog(edict_t *self)
 
 	self->grFogPushBackDist = gi.TagMalloc(64 + 1, TAG_LEVEL);
 	strcpy(self->grFogPushBackDist, st.grFogPushBackDist);
+
+	self->grFogMode = st.grFogMode;
 
 	self->use = target_grfog_use;
 
