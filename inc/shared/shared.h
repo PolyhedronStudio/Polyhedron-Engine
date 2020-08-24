@@ -65,7 +65,7 @@ typedef int qerror_t;
 #define MAX_TOKEN_CHARS     1024    // max length of an individual token
 #define MAX_NET_STRING      2048    // max length of a string used in network protocol
 
-#define MAX_QPATH           64      // max length of a quake game pathname
+#define MAX_QPATH           256      // max length of a quake game pathname
 #define MAX_OSPATH          256     // max length of a filesystem pathname
 
 //
@@ -1416,16 +1416,28 @@ ROGUE - VERSIONS
 */
 
 // default server FPS
-#define BASE_FRAMERATE          10
-#define BASE_FRAMETIME          100
-#define BASE_1_FRAMETIME        0.01f   // 1/BASE_FRAMETIME
-#define BASE_FRAMETIME_1000     0.1f    // BASE_FRAMETIME/1000
+//#define BASE_FRAMERATE          10
+//#define BASE_FRAMETIME          100
+//#define BASE_1_FRAMETIME        0.01f   // 1/BASE_FRAMETIME
+//#define BASE_FRAMETIME_1000     0.1f    // BASE_FRAMETIME/1000
 
 //N&C 30hz tick
 //#define BASE_FRAMERATE          30 //10
 //#define BASE_FRAMETIME          33.33f //100
 //#define BASE_1_FRAMETIME        0.03f //0.01f   // 1/BASE_FRAMETIME
 //#define BASE_FRAMETIME_1000     0.03333f //0.1f    // BASE_FRAMETIME/1000
+
+//N&C 20hz tick
+//#define BASE_FRAMERATE          20 //10
+//#define BASE_FRAMETIME          50.0f //100
+//#define BASE_1_FRAMETIME        0.02f //0.01f   // 1/BASE_FRAMETIME
+//#define BASE_FRAMETIME_1000     0.05f //0.1f    // BASE_FRAMETIME/1000
+
+//N&C 24hz tick
+#define BASE_FRAMERATE          24 //10
+#define BASE_FRAMETIME          41.666f //100
+#define BASE_1_FRAMETIME        0.024f //0.01f   // 1/BASE_FRAMETIME
+#define BASE_FRAMETIME_1000     0.041666f //0.1f    // BASE_FRAMETIME/1000
 
 // maximum variable FPS factor
 #define MAX_FRAMEDIV    6
