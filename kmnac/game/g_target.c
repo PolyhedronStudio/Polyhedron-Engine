@@ -4593,7 +4593,7 @@ void trigger_reverb_touch(edict_t *self, edict_t *other, cplane_t *plane, csurfa
 	{
 		if (self->spawnflags & 1)
 		{
-			int len = strlen(self->reverbString);
+			int len = (int)strlen(self->reverbString);
 			stuffcmd(&g_edicts[1], va("s_reverb_set \"%s\"\n", self->reverbString));
 			self->count--;
 			if (self->count == 0)
@@ -4622,7 +4622,7 @@ void SP_trigger_reverb(edict_t *self)
 	self->reverb = gi.TagMalloc(64 + 1, TAG_LEVEL);
 	strcpy(self->reverb, st.reverb);
 
-	self->reverbString = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	self->reverbString = gi.TagMalloc(256 + 1, TAG_LEVEL);
 	sprintf(self->reverbString, "%s %s %s %s %s %s %s %s %s %s %s %s %d",
 		st.flDensity,
 		st.flDiffusion,

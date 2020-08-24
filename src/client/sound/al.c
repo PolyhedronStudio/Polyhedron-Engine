@@ -662,8 +662,8 @@ qboolean AL_Init(void)
 {
 	int i;
 
-	TriggerReverbOverrideReverbString = malloc(64 + 1);
-	memset(TriggerReverbOverrideReverbString, 0, 64);
+	TriggerReverbOverrideReverbString = malloc(256 + 1);
+	memset(TriggerReverbOverrideReverbString, 0, 256);
 	Com_DPrintf("Initializing OpenAL\n");
 
 	if (!QAL_Init()) {
