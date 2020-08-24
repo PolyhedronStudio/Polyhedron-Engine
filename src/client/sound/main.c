@@ -188,17 +188,22 @@ static void reverb_set_preset_changed(cvar_t *self)
 
 	if (selfValue > 112)
 		selfValue = 112;
-
+	
+	TriggerReverbOverrideReverb = selfValue;
+	TriggerReverbOverride2 = 0;
+	TriggerReverbOverrideNeeded2 = 0;
 	TriggerReverbOverride = 1;
 	TriggerReverbOverrideNeeded = 1;
-	TriggerReverbOverrideReverb = selfValue;
 }
 
 static void reverb_set_changed(cvar_t *self)
 {
+	strcpy(TriggerReverbOverrideReverbString, self->string);
+	TriggerReverbOverride = 0;
+	TriggerReverbOverrideNeeded = 0;
 	TriggerReverbOverride2 = 1;
 	TriggerReverbOverrideNeeded2 = 1;
-	strcpy(TriggerReverbOverrideReverbString, self->string);
+	
 }
 
 static void voiceinputvolume_changed(cvar_t *self)
