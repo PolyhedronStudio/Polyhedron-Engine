@@ -2005,7 +2005,7 @@ struct edict_s
 	int			reverbpreset;
 	char        *reverb;
 	int         TriggerDelay;
-	char        *flDensity;
+	char        *reverbString;
 	char        *flDiffusion;
 	char        *flGain;
 	char        *flGainHF;

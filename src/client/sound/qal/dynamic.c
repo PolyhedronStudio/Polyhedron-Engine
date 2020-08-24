@@ -212,27 +212,29 @@ qboolean QAL_Init(void)
 		else
 			Com_Printf("HRTF enabled: false\n");
 
-		if ((int)status == 0)
+		int iStatus = (int)status;
+
+		if (iStatus == 0)
 		{
 			Com_Printf("HRTF Status: Disabled\n");
 		}
-		else if ((int)status == 1)
+		else if (iStatus == 1)
 		{
 			Com_Printf("HRTF Status: Enabled\n");
 		}
-		else if ((int)status == 2)
+		else if (iStatus == 2)
 		{
 			Com_Printf("HRTF Status: Denied\n");
 		}
-		else if ((int)status == 3)
+		else if (iStatus == 3)
 		{
 			Com_Printf("HRTF Status: Required\n");
 		}
-		else if ((int)status == 4)
+		else if (iStatus == 4)
 		{
 			Com_Printf("HRTF Status: Headphones\n");
 		}
-		else if ((int)status == 5)
+		else if (iStatus == 5)
 		{
 			Com_Printf("HRTF Status: Unsupported\n");
 		}

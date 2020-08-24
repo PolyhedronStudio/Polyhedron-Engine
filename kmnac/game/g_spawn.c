@@ -206,6 +206,7 @@ void SP_trigger_bbox (edict_t *self);
 void SP_trigger_disguise (edict_t *self);
 void SP_trigger_grfog(edict_t *self);
 void SP_trigger_reverb_preset(edict_t *self);
+void SP_trigger_reverb(edict_t *self);
 void SP_trigger_fog (edict_t *self);
 void SP_trigger_inside (edict_t *self);
 void SP_trigger_look (edict_t *self);
@@ -458,6 +459,7 @@ spawn_t	spawns[] = {
 	{ "target_grfog", SP_target_grfog },
 	{ "trigger_grfog", SP_trigger_grfog },
 	{ "trigger_reverb_preset", SP_trigger_reverb_preset },
+	{ "trigger_reverb", SP_trigger_reverb },
 
 	{NULL, NULL}
 };
@@ -653,7 +655,7 @@ char *ReadTextFile (char *filename, int *size)
 		return NULL;
     }
 
-    len = fread(filestring, 1, len, fp);
+    len = (int)fread(filestring, 1, len, fp);
 	*size = len;
     filestring[len] = 0;
 
@@ -705,7 +707,7 @@ qboolean LoadAliasFile (char *name)
 			Com_sprintf(pakfile, sizeof(pakfile), "%s/pak%d.pak",filename,i);
 			if (NULL != (fpak = fopen(pakfile, "rb")))
 			{
-				num=fread(&pakheader,1,sizeof(pak_header_t),fpak);
+				num=(int)fread(&pakheader,1,sizeof(pak_header_t),fpak);
 				if(num >= sizeof(pak_header_t))
 				{
 					if (pakheader.id[0] == 'P' &&
@@ -728,7 +730,7 @@ qboolean LoadAliasFile (char *name)
 									gi.dprintf("LoadAliasData: Memory allocation failure for entalias.dat\n");
 									return false;
 								}
-								alias_data_size = fread(alias_data,1,pakitem.size,fpak);
+								alias_data_size = (int)fread(alias_data,1,pakitem.size,fpak);
 								alias_data[pakitem.size] = 0; // put end marker
 								alias_from_pak = true;
 							}
