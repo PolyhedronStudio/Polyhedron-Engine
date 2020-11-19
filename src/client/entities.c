@@ -546,7 +546,8 @@ static void CL_AddPacketEntities(void)
         else if (effects & EF_ANIM_ALL)
             ent.frame = autoanim;
         else if (effects & EF_ANIM_ALLFAST) 
-            ent.frame = (cl.time / 33.33f); //30 fps
+    //      ent.frame = (cl.time / 33.33f); //30 fps
+            ent.frame = (cl.time / 50.0f); //20 fps
         else
             ent.frame = s1->frame;
 
