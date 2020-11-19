@@ -102,6 +102,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SHADER_MAX_ENTITIES                  1024
 #define SHADER_MAX_BSP_ENTITIES              128
 #define MAX_LIGHT_SOURCES                    32
+//MAX_DLIGHTS + MAX_ENTLIGHTS
+#define MAX_ENTLIGHTS                        32
 #define MAX_LIGHT_STYLES                     256
 
 #define AS_FLAG_OPAQUE          (1 << 0)
