@@ -4404,38 +4404,14 @@ void SP_target_skill(edict_t *self)
 
 void target_grfog_use(edict_t *self, edict_t *other, edict_t *activator)
 {
-	char buffer[MAX_QPATH + 1];
-	memset(buffer, 0, MAX_QPATH);
-	sprintf(buffer, "gr_enablefog %s\n", self->grFogOnOff);
-	stuffcmd(&g_edicts[1], buffer);
-
-	memset(buffer, 0, MAX_QPATH);
-	sprintf(buffer, "gr_fogtintr %s\n", self->grFogTintRed);
-	stuffcmd(&g_edicts[1], buffer);
-
-	memset(buffer, 0, MAX_QPATH);
-	sprintf(buffer, "gr_fogtintg %s\n", self->grFogTintGreen);
-	stuffcmd(&g_edicts[1], buffer);
-
-	memset(buffer, 0, MAX_QPATH);
-	sprintf(buffer, "gr_fogtintb %s\n", self->grFogTintBlue);
-	stuffcmd(&g_edicts[1], buffer);
-
-	memset(buffer, 0, MAX_QPATH);
-	sprintf(buffer, "gr_fogtintpow %s\n", self->grFogTintPower);
-	stuffcmd(&g_edicts[1], buffer);
-
-	memset(buffer, 0, MAX_QPATH);
-	sprintf(buffer, "gr_fogdensity %s\n", self->grFogDensityRoot);
-	stuffcmd(&g_edicts[1], buffer);
-
-	memset(buffer, 0, MAX_QPATH);
-	sprintf(buffer, "gr_fogpushback %s\n", self->grFogPushBackDist);
-	stuffcmd(&g_edicts[1], buffer);
-
-	memset(buffer, 0, MAX_QPATH);
-	sprintf(buffer, "gr_fogmode %d\n", self->grFogMode);
-	stuffcmd(&g_edicts[1], buffer);
+	stuffcmd(&g_edicts[1], va("gr_enablefog %s\n", self->grFogOnOff));
+	stuffcmd(&g_edicts[1], va("gr_fogtintr %s\n", self->grFogTintRed));
+	stuffcmd(&g_edicts[1], va("gr_fogtintg %s\n", self->grFogTintGreen));
+	stuffcmd(&g_edicts[1], va("gr_fogtintb %s\n", self->grFogTintBlue));
+	stuffcmd(&g_edicts[1], va("gr_fogtintpow %s\n", self->grFogTintPower));
+	stuffcmd(&g_edicts[1], va("gr_fogdensity %s\n", self->grFogDensityRoot));
+	stuffcmd(&g_edicts[1], va("gr_fogpushback %s\n", self->grFogPushBackDist));
+	stuffcmd(&g_edicts[1], va("gr_fogmode %d\n", self->grFogMode));
 
 	self->count--;
 	if (!self->count) {
@@ -4460,13 +4436,13 @@ void SP_target_grfog(edict_t *self)
 	strcpy(self->grFogOnOff, st.grFogOnOff);
 
 	self->grFogTintRed = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->grFogTintRed, "%f", st.grFogColor[0]);
+	self->grFogTintRed = va("%f", st.grFogColor[0]);
 
 	self->grFogTintGreen = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->grFogTintGreen, "%f", st.grFogColor[1]);
+	self->grFogTintGreen = va("%f", st.grFogColor[1]);
 
 	self->grFogTintBlue = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->grFogTintBlue, "%f", st.grFogColor[2]);
+	self->grFogTintBlue = va("%f", st.grFogColor[2]);
 
 	self->grFogTintPower = gi.TagMalloc(64 + 1, TAG_LEVEL);
 	strcpy(self->grFogTintPower, st.grFogTintPower);
@@ -4502,38 +4478,14 @@ void trigger_grfog_touch(edict_t *self, edict_t *other, cplane_t *plane, csurfac
 			strcpy(self->grFogOnOff, "0");
 		}
 
-		char buffer[MAX_QPATH + 1];
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_enablefog %s\n", self->grFogOnOff);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogtintr %s\n", self->grFogTintRed);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogtintg %s\n", self->grFogTintGreen);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogtintb %s\n", self->grFogTintBlue);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogtintpow %s\n", self->grFogTintPower);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogdensity %s\n", self->grFogDensityRoot);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogpushback %s\n", self->grFogPushBackDist);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogmode %d\n", self->grFogMode);
-		stuffcmd(&g_edicts[1], buffer);
+		stuffcmd(&g_edicts[1], va("gr_enablefog %s\n", self->grFogOnOff));
+		stuffcmd(&g_edicts[1], va("gr_fogtintr %s\n", self->grFogTintRed));
+		stuffcmd(&g_edicts[1], va("gr_fogtintg %s\n", self->grFogTintGreen));
+		stuffcmd(&g_edicts[1], va("gr_fogtintb %s\n", self->grFogTintBlue));
+		stuffcmd(&g_edicts[1], va("gr_fogtintpow %s\n", self->grFogTintPower));
+		stuffcmd(&g_edicts[1], va("gr_fogdensity %s\n", self->grFogDensityRoot));
+		stuffcmd(&g_edicts[1], va("gr_fogpushback %s\n", self->grFogPushBackDist));
+		stuffcmd(&g_edicts[1], va("gr_fogmode %d\n", self->grFogMode));
 	}
 }
 
@@ -4548,13 +4500,13 @@ void SP_trigger_grfog(edict_t *self)
 	}
 
 	self->grFogTintRed = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->grFogTintRed, "%f", st.grFogColor[0]);
+	self->grFogTintRed = va("%f", st.grFogColor[0]);
 
 	self->grFogTintGreen = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->grFogTintGreen, "%f", st.grFogColor[1]);
+	self->grFogTintGreen = va("%f", st.grFogColor[1]);
 
 	self->grFogTintBlue = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->grFogTintBlue, "%f", st.grFogColor[2]);
+	self->grFogTintBlue = va("%f", st.grFogColor[2]);
 
 	self->grFogMode = st.grFogMode;
 
@@ -4642,11 +4594,7 @@ void trigger_reverb_touch(edict_t *self, edict_t *other, cplane_t *plane, csurfa
 		if (self->spawnflags & 1)
 		{
 			int len = (int)strlen(self->reverbString);
-			char buffer[MAX_QPATH + 1];
-			memset(buffer, 0, MAX_QPATH);
-			sprintf(buffer, "s_reverb_set \"%s\"\n", self->reverbString);
-			stuffcmd(&g_edicts[1], buffer);
-						
+			stuffcmd(&g_edicts[1], va("s_reverb_set \"%s\"\n", self->reverbString));
 			self->count--;
 			if (self->count == 0)
 			{
