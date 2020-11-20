@@ -30,7 +30,11 @@ void SP_trigger_grfog(edict_t *self);
 void trigger_reverb_preset_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 void SP_trigger_reverb_preset(edict_t *self);
 void trigger_reverb_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
-void SP_trigger_reverb(edict_t *self);
+void SP_trigger_reverb(edict_t *self);  
+void trigger_godrays_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
+void SP_trigger_godrays(edict_t *self);
+void trigger_sun_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
+void SP_trigger_sun(edict_t *self);
 
 /*
 //#ifdef KMQUAKE2_ENGINE_MOD
