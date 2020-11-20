@@ -84,5 +84,6 @@ c:\users\om1dev\downloads\latestpalmix\q2rtx\kmnac\game\g_fog.c(736): warning C4
   p_weapon.c
   q_shared.c
   Generating Code...
+  LINK : ../../../nac/gamex86_64.dll not found or not built by the last incremental link; performing full link
      Creating library ../../../nac\gamex86_64.lib and object ../../../nac\gamex86_64.exp
   gamex86_64.vcxproj -> C:\Users\OM1DEV\Downloads\latestPalmiX\Q2RTX\kmnac\game\gamex86\../../../nac\gamex86_64.dll

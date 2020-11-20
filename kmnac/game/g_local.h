@@ -509,19 +509,6 @@ typedef struct
 	char        *flAirAbsorptionGainHF;
 	char        *flRoomRolloffFactor;
 	int     	iDecayHFLimit;
-	char        *gr_intensity;
-	char        *gr_eccentricity;
-	int     	gr_enable;
-	char        *godrays;
-	vec3_t      sunColor;
-	char        *sunAngle;
-	char        *sunAnimate;
-	char        *sunAzimuth;
-	char        *sunElevation;
-	char        *sunBrightness;
-	int         sunPreset;
-    char        *sun;
-	int         sunDelay;
 } spawn_temp_t;
 
 
@@ -2031,20 +2018,7 @@ struct edict_s
 	char        *flAirAbsorptionGainHF;
 	char        *flRoomRolloffFactor;
 	int     	iDecayHFLimit;
-	char        *gr_intensity;
-	char        *gr_eccentricity;
-	int     	gr_enable;
-	char        *godrays;
-	char        *sunColorRed;
-	char        *sunColorGreen;
-	char        *sunColorBlue;
-	char        *sunAngle;
-	char        *sunAnimate;
-	char        *sunAzimuth;
-	char        *sunElevation;
-	char        *sunBrightness;
-	int			sunPreset;
-	char        *sun;
+
 };
 
 #define	LOOKAT_NOBRUSHMODELS  1
