@@ -512,6 +512,7 @@ typedef struct
 	char        *gr_intensity;
 	char        *gr_eccentricity;
 	int     	gr_enable;
+	int     	gr_delay;
 	char        *godrays;
 	vec3_t      sunColor;
 	char        *sunAngle;
@@ -2034,6 +2035,8 @@ struct edict_s
 	char        *gr_intensity;
 	char        *gr_eccentricity;
 	int     	gr_enable;
+	int     	gr_delay;
+
 	char        *godrays;
 	char        *sunColorRed;
 	char        *sunColorGreen;
@@ -2045,6 +2048,7 @@ struct edict_s
 	char        *sunBrightness;
 	int			sunPreset;
 	char        *sun;
+	int     	sunDelay;
 };
 
 #define	LOOKAT_NOBRUSHMODELS  1

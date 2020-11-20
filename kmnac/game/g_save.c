@@ -299,7 +299,20 @@ field_t fields[] = {
 	{ "flLateReverbDelay", STOFS(flLateReverbDelay), F_LSTRING, FFL_SPAWNTEMP },
 	{ "flAirAbsorptionGainHF", STOFS(flAirAbsorptionGainHF), F_LSTRING, FFL_SPAWNTEMP },
 	{ "flRoomRolloffFactor", STOFS(flRoomRolloffFactor), F_LSTRING, FFL_SPAWNTEMP },
-
+	{ "gr_enable", STOFS(gr_enable), F_INT, FFL_SPAWNTEMP },
+	{ "gr_eccentricity", STOFS(gr_eccentricity), F_LSTRING, FFL_SPAWNTEMP },
+	{ "gr_intensity", STOFS(gr_intensity), F_LSTRING, FFL_SPAWNTEMP },
+	{ "gr_delay", STOFS(gr_delay), F_INT, FFL_SPAWNTEMP },
+	{ "godrays", STOFS(godrays), F_LSTRING, FFL_SPAWNTEMP },
+	{ "sunColor", STOFS(sunColor), F_VECTOR, FFL_SPAWNTEMP },
+	{ "sunAngle", STOFS(sunAngle), F_LSTRING, FFL_SPAWNTEMP },
+	{ "sunAnimate", STOFS(sunAnimate), F_LSTRING, FFL_SPAWNTEMP },
+	{ "sunAzimuth", STOFS(sunAzimuth), F_LSTRING, FFL_SPAWNTEMP },
+	{ "sunElevation", STOFS(sunElevation), F_LSTRING, FFL_SPAWNTEMP },
+	{ "sunBrightness", STOFS(sunBrightness), F_LSTRING, FFL_SPAWNTEMP },
+	{ "sunPreset", STOFS(sunPreset), F_INT, FFL_SPAWNTEMP },
+	{ "sunDelay", STOFS(sunDelay), F_INT, FFL_SPAWNTEMP },
+	{ "sun", STOFS(sun), F_LSTRING, FFL_SPAWNTEMP },
 	{ "iDecayHFLimit", STOFS(iDecayHFLimit), F_INT, FFL_SPAWNTEMP },
 	{0, 0, 0, 0}
 

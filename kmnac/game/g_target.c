@@ -4738,7 +4738,6 @@ void trigger_godrays_touch(edict_t *self, edict_t *other, cplane_t *plane, csurf
 	}
 }
 
-
 void SP_trigger_godrays(edict_t *self)
 {
 	self->class_id = ENTITY_TRIGGER_GODRAYS;
@@ -4825,7 +4824,7 @@ void trigger_sun_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_
 		stuffcmd(&g_edicts[1], buffer);
 	}
 }
- 
+
 void SP_trigger_sun(edict_t *self)
 {
 	self->class_id = ENTITY_TRIGGER_SUN;
