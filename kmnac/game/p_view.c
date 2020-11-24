@@ -1376,23 +1376,23 @@ void ClientEndServerFrame (edict_t *ent)
 	else if (ent->groundentity || ent->waterlevel == 2)
 	{	// so bobbing only cycles when on ground
 		if (xyspeed > 450) // Knightmare added
-			bobmove = 0.50;
-		else if (xyspeed > 210)
 			bobmove = 0.25;
-		else if (!ent->groundentity && ent->waterlevel == 2 && xyspeed > 100)
-			bobmove = 0.45;
-		else if (xyspeed > 100)
+		else if (xyspeed > 210)
 			bobmove = 0.125;
-		else if (!ent->groundentity && ent->waterlevel == 2)
-			bobmove = 0.325;
-		else
+		else if (!ent->groundentity && ent->waterlevel == 2 && xyspeed > 100)
+			bobmove = 0.225;
+		else if (xyspeed > 100)
 			bobmove = 0.0625;
+		else if (!ent->groundentity && ent->waterlevel == 2)
+			bobmove = 0.1625;
+		else
+			bobmove = 0.03125;
 	}
 	
 	bobtime = (current_client->bobtime += bobmove);
 
 	if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
-		bobtime *= 4;
+		bobtime *= 2;
 
 	bobcycle = (int)bobtime;
 
