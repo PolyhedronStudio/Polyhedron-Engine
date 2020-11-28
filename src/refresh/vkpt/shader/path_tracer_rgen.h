@@ -663,7 +663,7 @@ lava_uv_warp(vec2 uv)
 	// turb_s = ((s + turb[(t >> 16) & (CYCLE - 1)]) >> 16) & TURB_MASK;
     // turb_t = ((t + turb[(s >> 16) & (CYCLE - 1)]) >> 16) & TURB_MASK;
     
-    return uv.xy + sin(fract(uv.yx * 0.5 + global_ubo.time * 1.2 / 128) * 2 * M_PI) * 0.125;
+    return uv.xy + sin(fract(uv.yx * 0.75 + global_ubo.time * 2.5 / 128) * 2 * M_PI) * 0.125;
 }
 
 vec3 get_emissive_shell(uint material_id)

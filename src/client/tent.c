@@ -1152,6 +1152,7 @@ void CL_ParseTEnt(void)
 		}
 		break;
 
+
 	case TE_SCREEN_SPARKS:
 	case TE_SHIELD_SPARKS:
 		if (te.type == TE_SCREEN_SPARKS)

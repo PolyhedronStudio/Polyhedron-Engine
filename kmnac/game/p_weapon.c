@@ -1251,11 +1251,11 @@ void Weapon_HyperBlaster (edict_t *ent)
 	static int	fire_frames[]	= {6, 7, 8, 9, 10, 11, 0};
 
 	Weapon_Generic (ent, 5, 20, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);*/
-	const int ACTIVATE_END = 2;
-	const int FIRE_START = ACTIVATE_END + 1;
-	const int FIRE_LENGTH = 5;
-	const int PUTAWAY_START = 23;
-	const int PUTAWAY_LENGTH = 3;
+	const int ACTIVATE_END = 4;
+	const int FIRE_START = ACTIVATE_END + 2;
+	const int FIRE_LENGTH = 10;
+	const int PUTAWAY_START = 46;
+	const int PUTAWAY_LENGTH = 6;
 	const int NUM_FIRE_ANIMS = 4;
 
 	switch (ent->client->weaponstate)
@@ -1340,7 +1340,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 		const int SUBFRAME = (ent->client->ps.gunframe - FIRE_START) % FIRE_LENGTH;
 
 		// number of frames before we can fire again
-		const int FIRE_DELAY = 1;
+		const int FIRE_DELAY = 3;
 
 		if (SUBFRAME >= FIRE_DELAY)
 		{
