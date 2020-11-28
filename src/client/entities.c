@@ -942,9 +942,17 @@ static void CL_AddPacketEntities(void)
                 V_AddLight(ent.origin, 200, -1, -1, -1);
             } else if (effects & EF_GREENGIB) {
                 CL_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
-            } else if (effects & EF_IONRIPPER) {
-                CL_IonripperTrail(cent->lerp_origin, ent.origin);
-                V_AddLight(ent.origin, 100, 1, 0.5, 0.5);
+            } else if (effects & EF_IONRIPPER) { // N&C - Turned into flickering candle light
+                float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.2)) / (3.24356 - (frand() / 3.24356));
+
+                float offset = anim * 0.0f;
+                float brightness = anim * 1.2f + 1.6f;
+
+                vec3_t origin;
+                VectorCopy(ent.origin, origin);
+                origin[2] += offset;
+
+                V_AddLightEx(origin, 500.f, 1.8f * brightness, 0.7f * brightness, 0.2f * brightness, 0.27f);               
             } else if (effects & EF_BLUEHYPERBLASTER) { // N&C - Turned into flickering flame light
                 float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
 
