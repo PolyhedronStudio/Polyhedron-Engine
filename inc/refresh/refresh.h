@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/cvar.h"
 #include "common/error.h"
 
-#define MAX_DLIGHTS     32
+#define MAX_DLIGHTS     256
 #define MAX_ENTITIES    1024     // == MAX_PACKET_ENTITIES * 2
 #define MAX_PARTICLES   16384
 #define MAX_LIGHTSTYLES 256
@@ -244,7 +244,7 @@ qhandle_t R_RegisterRawImage(const char *name, int width, int height, byte* pic,
 void R_UnregisterImage(qhandle_t handle);
 
 extern void    (*R_SetSky)(const char *name, float rotate, vec3_t axis);
-extern void    (*R_EndRegistration)(void);
+extern void    (*R_EndRegistration)(const char *name);
 
 #define R_RegisterPic(name)     R_RegisterImage(name, IT_PIC, IF_PERMANENT | IF_SRGB, NULL)
 #define R_RegisterPic2(name)    R_RegisterImage(name, IT_PIC, IF_SRGB, NULL)

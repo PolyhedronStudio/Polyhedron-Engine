@@ -35,7 +35,7 @@ void vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], flo
 VkResult vkpt_physical_sky_initialize();
 VkResult vkpt_physical_sky_destroy();
 VkResult vkpt_physical_sky_beginRegistration();
-VkResult vkpt_physical_sky_endRegistration();
+VkResult vkpt_physical_sky_endRegistration(const char *name);
 VkResult vkpt_physical_sky_create_pipelines();
 VkResult vkpt_physical_sky_destroy_pipelines();
 VkResult vkpt_physical_sky_record_cmd_buffer(VkCommandBuffer cmd_buf);

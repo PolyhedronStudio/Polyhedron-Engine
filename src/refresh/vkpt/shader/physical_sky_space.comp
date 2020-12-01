@@ -184,7 +184,7 @@ vec3 planetSurfaceColor(SunInfo sun, PlanetInfo planet, vec3 v, vec3 n) {
 	return vec3(surfColor);
 }
 
-vec4 integratePlanet(SunInfo sun, PlanetInfo planet, vec3 dirView) {
+vec4 integratePlanet(SunInfo sun, PlanetInfo planet, vec3 dirView, int atmo) {
 
     const vec3  v3CameraPos = -planet.position;                   // The camera's current position (with planet at the center)
     const vec3  v3LightPos = sun.direction;                       // The direction vector to the light source
@@ -214,7 +214,9 @@ vec4 integratePlanet(SunInfo sun, PlanetInfo planet, vec3 dirView) {
     vec2 fAtmosphereNearFar;
 
     bool bPlanetIntersection = intersectSphere(v3CameraPos, v3Ray, fCameraHeight2, fInnerRadius2, fPlanetNearFar);
-    bool bAtmosphereIntersection = intersectSphere(v3CameraPos, v3Ray, fCameraHeight2, fOuterRadius2, fAtmosphereNearFar);
+    bool bAtmosphereIntersection = false;
+	if(atmo == 1)
+		bAtmosphereIntersection = intersectSphere(v3CameraPos, v3Ray, fCameraHeight2, fOuterRadius2, fAtmosphereNearFar);
 
     if (bPlanetIntersection) {
 
@@ -371,7 +373,7 @@ void main() {
 	planet.albedoMap = global_ubo.planet_albedo_map;
 	planet.normalMap = global_ubo.planet_normal_map;
 	
-	vec4 planet_color = integratePlanet(sun, planet, eyeVec);
+	vec4 planet_color = integratePlanet(sun, planet, eyeVec, global_ubo.skyPlanetAtmo);
 	radiance = mix(radiance, planet_color.rgb, planet_color.a);
 
 	// export sun radiance

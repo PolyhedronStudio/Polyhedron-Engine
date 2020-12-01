@@ -1121,7 +1121,7 @@ void R_BeginRegistration_GL(const char *name)
 R_EndRegistration
 ===============
 */
-void R_EndRegistration_GL(void)
+void R_EndRegistration_GL(const char *name)
 {
     IMG_FreeUnused();
     MOD_FreeUnused();
