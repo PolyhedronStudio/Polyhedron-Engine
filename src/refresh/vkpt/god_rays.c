@@ -48,6 +48,9 @@ struct
 	cvar_t* fogPushBackDist;
 	cvar_t* fogMode;
 
+	// TODO: I don't belong here
+	cvar_t* skyPlanetAtmo;
+
 } god_rays;
 
 static void create_image_views();
@@ -231,6 +234,9 @@ VkResult vkpt_initialize_god_rays()
 	god_rays.fogDensityRoot = Cvar_Get("gr_fogdensity", "0.08", 0);
 	god_rays.fogPushBackDist = Cvar_Get("gr_fogpushback", "0.01", 0);
 	god_rays.fogMode = Cvar_Get("gr_fogmode", "2", 0);
+
+	// TODO: I don't belong here
+	god_rays.skyPlanetAtmo = Cvar_Get("skyplanetatmo", "1", 0);
 		   	 
 	// Load fog by map csv file make stucture
 	fogbynametable.numberFogItems = 0;
@@ -425,6 +431,9 @@ void vkpt_god_rays_prepare_ubo(
 	ubo->god_rays_fogDensityRoot = god_rays.fogDensityRoot->value;
 	ubo->god_rays_fogPushBackDist = god_rays.fogPushBackDist->value;
 	ubo->god_rays_fogMode = god_rays.fogMode->value;
+
+	// TODO: I don't belong here
+	ubo->skyPlanetAtmo = god_rays.skyPlanetAtmo->value;
 	
 	// Shadow parameters
 	memcpy(ubo->shadow_map_VP, shadowmap_viewproj, 16 * sizeof(float));
