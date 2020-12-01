@@ -586,6 +586,6 @@ qboolean vkpt_god_rays_enabled(const sun_light_t* sun_light)
 {
 	return god_rays.enable->integer
 		&& god_rays.intensity->value > 0.f
-		&& sun_light->visible
-		&& !physical_sky_space->integer;  // god rays look weird in space because they also appear outside of the station
+		&& sun_light->visible;
+		//&& !physical_sky_space->integer;  // god rays look weird in space because they also appear outside of the station
 }

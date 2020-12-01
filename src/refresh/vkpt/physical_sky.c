@@ -342,22 +342,32 @@ vkpt_physical_sky_beginRegistration()
     return VK_SUCCESS;
 }
 
-VkResult 
-vkpt_physical_sky_endRegistration()
+VkResult
+vkpt_physical_sky_endRegistration(const char *name)
 {
-    if (physical_sky_space->integer > 0)
-    {
-        image_t const * albedo_map = IMG_Find("env/planet_albedo.tga", IT_SKIN, IF_SRGB);
-        if (albedo_map != R_NOTEXTURE) {
-            physical_sky_planet_albedo_map = albedo_map - r_images;
-        }
+	char    pathname[MAX_QPATH];
 
-        image_t const * normal_map = IMG_Find("env/planet_normal.tga", IT_SKIN, IF_SRGB);
-        if (normal_map != R_NOTEXTURE) {
-            physical_sky_planet_normal_map = normal_map - r_images;
-        }
-    }
-    return VK_SUCCESS;
+	if (physical_sky_space->integer > 0)
+	{
+		Q_concat(pathname, sizeof(pathname), "env/", name, "/planet_albedo", ".tga", NULL);
+		image_t const * albedo_map = IMG_Find(pathname, IT_SKIN, IF_SRGB);
+		if(albedo_map->pix_data == NULL)
+			albedo_map = IMG_Find("env/planet_albedo.tga", IT_SKIN, IF_SRGB);
+		
+		if (albedo_map != R_NOTEXTURE) {
+			physical_sky_planet_albedo_map = albedo_map - r_images;
+		}
+
+		Q_concat(pathname, sizeof(pathname), "env/", name, "/planet_normal", ".tga", NULL);
+		image_t const * normal_map = IMG_Find(pathname, IT_SKIN, IF_SRGB);
+		if(normal_map->pix_data == NULL)
+			normal_map = IMG_Find("env/planet_normal.tga", IT_SKIN, IF_SRGB);
+
+		if (normal_map != R_NOTEXTURE) {
+			physical_sky_planet_normal_map = normal_map - r_images;
+		}
+	}
+	return VK_SUCCESS;
 }
 
 VkResult

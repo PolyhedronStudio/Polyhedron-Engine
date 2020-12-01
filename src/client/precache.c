@@ -396,7 +396,7 @@ void CL_PrepRefresh(void)
     CL_SetSky();
 
     // the renderer can now free unneeded stuff
-    R_EndRegistration();
+    R_EndRegistration(cl.mapname);
 
     // clear any lines of console text
     Con_ClearNotify_f();

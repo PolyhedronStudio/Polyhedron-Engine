@@ -3829,11 +3829,11 @@ R_BeginRegistration_RTX(const char *name)
 }
 
 void
-R_EndRegistration_RTX(void)
+R_EndRegistration_RTX(const char *name)
 {
 	LOG_FUNC();
     
-    vkpt_physical_sky_endRegistration();
+    vkpt_physical_sky_endRegistration(name);
 
 	IMG_FreeUnused();
 	MOD_FreeUnused();
