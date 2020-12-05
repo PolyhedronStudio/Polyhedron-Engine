@@ -42,13 +42,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define ALIGN_SIZE_4(x, n)  ((x * n + 3) & (~3))
 
-#define VERTEX_BUFFER_BINDING_IDX 0
-#define LIGHT_BUFFER_BINDING_IDX 1
-#define READBACK_BUFFER_BINDING_IDX 2
-#define TONE_MAPPING_BUFFER_BINDING_IDX 3
-#define SUN_COLOR_BUFFER_BINDING_IDX 4
-#define SUN_COLOR_UBO_BINDING_IDX 5
-#define LIGHT_STATS_BUFFER_BINDING_IDX 6
+#define BSP_VERTEX_BUFFER_BINDING_IDX 0
+#define MODEL_DYNAMIC_VERTEX_BUFFER_BINDING_IDX 1
+#define LIGHT_BUFFER_BINDING_IDX 2
+#define READBACK_BUFFER_BINDING_IDX 3
+#define TONE_MAPPING_BUFFER_BINDING_IDX 4
+#define SUN_COLOR_BUFFER_BINDING_IDX 5
+#define SUN_COLOR_UBO_BINDING_IDX 6
+#define LIGHT_STATS_BUFFER_BINDING_IDX 7
 
 #define SUN_COLOR_ACCUMULATOR_FIXED_POINT_SCALE 0x100000
 #define SKY_COLOR_ACCUMULATOR_FIXED_POINT_SCALE 0x100
@@ -57,20 +58,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define uint32_t uint
 #endif
 
-#define VERTEX_BUFFER_LIST \
+#define BSP_VERTEX_BUFFER_LIST \
 	VERTEX_BUFFER_LIST_DO(float,    3, positions_bsp,         (MAX_VERT_BSP        )) \
 	VERTEX_BUFFER_LIST_DO(float,    2, tex_coords_bsp,        (MAX_VERT_BSP        )) \
 	VERTEX_BUFFER_LIST_DO(float,    3, tangents_bsp,          (MAX_VERT_BSP / 3    )) \
 	VERTEX_BUFFER_LIST_DO(uint32_t, 1, materials_bsp,         (MAX_VERT_BSP / 3    )) \
 	VERTEX_BUFFER_LIST_DO(uint32_t, 1, clusters_bsp,          (MAX_VERT_BSP / 3    )) \
 	VERTEX_BUFFER_LIST_DO(float,    1, texel_density_bsp,     (MAX_VERT_BSP / 3    )) \
-	\
-	VERTEX_BUFFER_LIST_DO(float,    3, positions_model,       (MAX_VERT_MODEL      )) \
-	VERTEX_BUFFER_LIST_DO(float,    3, normals_model,         (MAX_VERT_MODEL      )) \
-	VERTEX_BUFFER_LIST_DO(float,    2, tex_coords_model,      (MAX_VERT_MODEL      )) \
-	VERTEX_BUFFER_LIST_DO(float,    4, tangents_model,        (MAX_VERT_MODEL      )) \
-	VERTEX_BUFFER_LIST_DO(uint32_t, 3, idx_model,             (MAX_IDX_MODEL       )) \
-	\
+	VERTEX_BUFFER_LIST_DO(uint32_t, 1, sky_visibility,        (MAX_LIGHT_LISTS / 32)) \
+
+#define MODEL_DYNAMIC_VERTEX_BUFFER_LIST \
 	VERTEX_BUFFER_LIST_DO(float,    3, positions_instanced,   (MAX_VERT_MODEL      )) \
 	VERTEX_BUFFER_LIST_DO(float,    3, pos_prev_instanced,    (MAX_VERT_MODEL      )) \
 	VERTEX_BUFFER_LIST_DO(float,    3, normals_instanced,     (MAX_VERT_MODEL      )) \
@@ -81,37 +78,35 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	VERTEX_BUFFER_LIST_DO(uint32_t, 1, materials_instanced,   (MAX_PRIM_MODEL      )) \
 	VERTEX_BUFFER_LIST_DO(uint32_t, 1, instance_id_instanced, (MAX_PRIM_MODEL      )) \
 	VERTEX_BUFFER_LIST_DO(float,    1, texel_density_instanced, (MAX_PRIM_MODEL    )) \
-	\
-	VERTEX_BUFFER_LIST_DO(uint32_t, 1, sky_visibility,        (MAX_LIGHT_LISTS / 32)) \
-
 
 #define LIGHT_BUFFER_LIST \
-	LIGHT_BUFFER_LIST_DO(uint32_t, 4, material_table,        (MAX_PBR_MATERIALS)) \
-	LIGHT_BUFFER_LIST_DO(float,    4, light_polys,           (MAX_LIGHT_POLYS * LIGHT_POLY_VEC4S)) \
-	LIGHT_BUFFER_LIST_DO(uint32_t, 1, light_list_offsets,    (MAX_LIGHT_LISTS     )) \
-	LIGHT_BUFFER_LIST_DO(uint32_t, 1, light_list_lights,     (MAX_LIGHT_LIST_NODES)) \
-	LIGHT_BUFFER_LIST_DO(float,    1, light_styles,          (MAX_LIGHT_STYLES    )) \
-	LIGHT_BUFFER_LIST_DO(uint32_t, 1, cluster_debug_mask,    (MAX_LIGHT_LISTS / 32)) \
+	VERTEX_BUFFER_LIST_DO(uint32_t, 4, material_table,        (MAX_PBR_MATERIALS)) \
+	VERTEX_BUFFER_LIST_DO(float,    4, light_polys,           (MAX_LIGHT_POLYS * LIGHT_POLY_VEC4S)) \
+	VERTEX_BUFFER_LIST_DO(uint32_t, 1, light_list_offsets,    (MAX_LIGHT_LISTS     )) \
+	VERTEX_BUFFER_LIST_DO(uint32_t, 1, light_list_lights,     (MAX_LIGHT_LIST_NODES)) \
+	VERTEX_BUFFER_LIST_DO(float,    1, light_styles,          (MAX_LIGHT_STYLES    )) \
+	VERTEX_BUFFER_LIST_DO(uint32_t, 1, cluster_debug_mask,    (MAX_LIGHT_LISTS / 32)) \
 
-struct VertexBuffer
-{
 #define VERTEX_BUFFER_LIST_DO(type, dim, name, size) \
 	type name[ALIGN_SIZE_4(size, dim)];
 
-	VERTEX_BUFFER_LIST
+struct BspVertexBuffer
+{
+	BSP_VERTEX_BUFFER_LIST
+};
 
-#undef VERTEX_BUFFER_LIST_DO
+struct ModelDynamicVertexBuffer
+{
+	MODEL_DYNAMIC_VERTEX_BUFFER_LIST
 };
 
 struct LightBuffer
 {
-#define LIGHT_BUFFER_LIST_DO(type, dim, name, size) \
-	type name[ALIGN_SIZE_4(size, dim)];
-
 	LIGHT_BUFFER_LIST
-
-#undef LIGHT_BUFFER_LIST_DO
 };
+
+#undef VERTEX_BUFFER_LIST_DO
+
 
 struct ToneMappingBuffer
 {
@@ -156,11 +151,25 @@ struct SunColorBuffer
 };
 
 #ifndef VKPT_SHADER
-typedef struct VertexBuffer VertexBuffer;
+typedef struct BspVertexBuffer BspVertexBuffer;
+typedef struct ModelDynamicVertexBuffer ModelDynamicVertexBuffer;
 typedef struct LightBuffer LightBuffer;
 typedef struct ReadbackBuffer ReadbackBuffer;
 typedef struct ToneMappingBuffer ToneMappingBuffer;
 typedef struct SunColorBuffer SunColorBuffer;
+
+typedef struct {
+	vec3_t position;
+	vec3_t normal;
+	vec2_t texcoord;
+	vec4_t tangents;
+} model_vertex_t;
+#else
+#define MODEL_VERTEX_SIZE 12
+#define MODEL_VERTEX_POSITION 0
+#define MODEL_VERTEX_NORMAL 3
+#define MODEL_VERTEX_TEXCOORD 6
+#define MODEL_VERTEX_TANGENTS 8
 #endif
 
 #ifdef VKPT_SHADER
@@ -188,12 +197,22 @@ struct LightPolygon
 };
 
 #ifdef VERTEX_READONLY
-layout(set = VERTEX_BUFFER_DESC_SET_IDX, binding = VERTEX_BUFFER_BINDING_IDX) readonly buffer VERTEX_BUFFER {
-	VertexBuffer vbo;
+layout(set = VERTEX_BUFFER_DESC_SET_IDX, binding = BSP_VERTEX_BUFFER_BINDING_IDX) readonly buffer BSP_VERTEX_BUFFER {
+	BspVertexBuffer vbo_bsp;
 };
 #else
-layout(set = VERTEX_BUFFER_DESC_SET_IDX, binding = VERTEX_BUFFER_BINDING_IDX) buffer VERTEX_BUFFER {
-	VertexBuffer vbo;
+layout(set = VERTEX_BUFFER_DESC_SET_IDX, binding = BSP_VERTEX_BUFFER_BINDING_IDX) buffer BSP_VERTEX_BUFFER {
+	BspVertexBuffer vbo_bsp;
+};
+#endif
+
+#ifdef VERTEX_READONLY
+layout(set = VERTEX_BUFFER_DESC_SET_IDX, binding = MODEL_DYNAMIC_VERTEX_BUFFER_BINDING_IDX) readonly buffer MODEL_DYNAMIC_VERTEX_BUFFER {
+	ModelDynamicVertexBuffer vbo_model_dynamic;
+};
+#else
+layout(set = VERTEX_BUFFER_DESC_SET_IDX, binding = MODEL_DYNAMIC_VERTEX_BUFFER_BINDING_IDX) buffer MODEL_DYNAMIC_VERTEX_BUFFER {
+	ModelDynamicVertexBuffer vbo_model_dynamic;
 };
 #endif
 
@@ -325,21 +344,34 @@ set_##name(uint idx, uvec3 v) \
 
 #ifdef VERTEX_READONLY
 #define VERTEX_BUFFER_LIST_DO(type, dim, name, size) \
-	GET_##type##_##dim(vbo,name)
-VERTEX_BUFFER_LIST
+	GET_##type##_##dim(vbo_bsp,name)
+BSP_VERTEX_BUFFER_LIST
 #undef VERTEX_BUFFER_LIST_DO
 #else
 #define VERTEX_BUFFER_LIST_DO(type, dim, name, size) \
-	GET_##type##_##dim(vbo,name) \
-	SET_##type##_##dim(vbo,name)
-VERTEX_BUFFER_LIST
+	GET_##type##_##dim(vbo_bsp,name) \
+	SET_##type##_##dim(vbo_bsp,name)
+BSP_VERTEX_BUFFER_LIST
 #undef VERTEX_BUFFER_LIST_DO
 #endif
 
-#define LIGHT_BUFFER_LIST_DO(type, dim, name, size) \
+#ifdef VERTEX_READONLY
+#define VERTEX_BUFFER_LIST_DO(type, dim, name, size) \
+	GET_##type##_##dim(vbo_model_dynamic,name)
+MODEL_DYNAMIC_VERTEX_BUFFER_LIST
+#undef VERTEX_BUFFER_LIST_DO
+#else
+#define VERTEX_BUFFER_LIST_DO(type, dim, name, size) \
+	GET_##type##_##dim(vbo_model_dynamic,name) \
+	SET_##type##_##dim(vbo_model_dynamic,name)
+MODEL_DYNAMIC_VERTEX_BUFFER_LIST
+#undef VERTEX_BUFFER_LIST_DO
+#endif
+
+#define VERTEX_BUFFER_LIST_DO(type, dim, name, size) \
 	GET_##type##_##dim(lbo,name)
 LIGHT_BUFFER_LIST
-#undef LIGHT_BUFFER_LIST_DO
+#undef VERTEX_BUFFER_LIST_DO
 
 struct Triangle
 {
@@ -385,38 +417,6 @@ get_bsp_triangle(uint prim_id)
 	t.texel_density = get_texel_density_bsp(prim_id);
 
 	t.alpha = 1.0;
-
-	return t;
-}
-
-Triangle
-get_model_triangle(uint prim_id, uint idx_offset, uint vert_offset)
-{
-	uvec3 idx = get_idx_model(prim_id + idx_offset / 3);
-	idx += vert_offset;
-
-	Triangle t;
-	t.positions[0] = get_positions_model(idx[0]);
-	t.positions[1] = get_positions_model(idx[1]);
-	t.positions[2] = get_positions_model(idx[2]);
-
-	t.normals[0] = get_normals_model(idx[0]);
-	t.normals[1] = get_normals_model(idx[1]);
-	t.normals[2] = get_normals_model(idx[2]);
-
-	t.tex_coords[0] = get_tex_coords_model(idx[0]);
-	t.tex_coords[1] = get_tex_coords_model(idx[1]);
-	t.tex_coords[2] = get_tex_coords_model(idx[2]);
-
-	vec4 tangent = get_tangents_model(idx[0]);
-    t.tangent = tangent.xyz;
-
-	t.material_id = 0; // needs to come from uniform buffer
-	if(tangent.w < 0)
-		t.material_id |= MATERIAL_FLAG_HANDEDNESS;
-
-	t.alpha = 1.0;
-	t.texel_density = 0;
 
 	return t;
 }
