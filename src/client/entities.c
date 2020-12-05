@@ -524,7 +524,7 @@ static void CL_AddPacketEntities(void)
     autorotate = anglemod(cl.time * 0.1f);
 
     // brush models can auto animate their frames
-    autoanim = 2 * cl.time / 1000;
+    autoanim = 20 * cl.time / 1000;
 
     memset(&ent, 0, sizeof(ent));
 
@@ -546,8 +546,8 @@ static void CL_AddPacketEntities(void)
         else if (effects & EF_ANIM_ALL)
             ent.frame = autoanim;
         else if (effects & EF_ANIM_ALLFAST) 
-    //      ent.frame = (cl.time / 33.33f); //30 fps
-            ent.frame = (cl.time / 50.0f); //20 fps
+          ent.frame = (cl.time / 33.33f); //30 fps
+    //        ent.frame = (cl.time / 50.0f); //20 fps
         else
             ent.frame = s1->frame;
 

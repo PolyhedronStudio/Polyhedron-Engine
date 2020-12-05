@@ -514,8 +514,8 @@ void boss2_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 void boss2_dead (edict_t *self)
 {
-	VectorSet (self->mins, -56, -56, 0);
-	VectorSet (self->maxs, 56, 56, 80);
+	VectorSet (self->mins, -20, -20, -46);
+	VectorSet (self->maxs, 20, 20, 50);
 	self->movetype = MOVETYPE_TOSS;
 	self->svflags |= SVF_DEADMONSTER;
 	self->nextthink = 0;
@@ -667,7 +667,7 @@ void SP_monster_boss2 (edict_t *self)
 	// Lazarus: special purpose skins
 	if ( (self->spawnflags & SF_MONSTER_SPECIAL) && self->style )
 	{
-		PatchMonsterModel("models/monsters/boss2/tris.md2");
+		PatchMonsterModel("models/monsters/wizard/tris.md3");
 		self->s.skinnum = self->style * 2;
 	}
 
@@ -688,13 +688,13 @@ void SP_monster_boss2 (edict_t *self)
 	// Lazarus: special purpose skins
 	if ( self->style )
 	{
-		PatchMonsterModel("models/monsters/boss2/tris.md2");
+		PatchMonsterModel("models/monsters/wizard/tris.md3");
 		self->s.skinnum = self->style * 2;
 	}
 	
-	self->s.modelindex = gi.modelindex ("models/monsters/boss2/tris.md2");
-	VectorSet (self->mins, -56, -56, 0);
-	VectorSet (self->maxs, 56, 56, 80);
+	self->s.modelindex = gi.modelindex ("models/monsters/wizard/tris.md3");
+	VectorSet (self->mins, -20, -20, -46);
+	VectorSet (self->maxs, 20, 20, 50);
 
 	// Lazarus: mapper-configurable health
 	if(!self->health)
