@@ -71,7 +71,7 @@ a summary of the most significant features and udpates added so far:
    - Monster footsteps
    
    
-   ## Mapping Triggers##
+   ## Mapping Triggers
     -  Sun 
     -  God Rays
     -  Fog
@@ -97,15 +97,15 @@ a summary of the most significant features and udpates added so far:
    
    
    ## Team
-   Project Lead (and a little bit of everything else): Adam "PalmliX" Palmer
-   Graphics/Engine programmer: Matthew "omegaminus1" Motsinger - https://github.com/OmegaMinus1
-   Modelling/Texturing: Gabriel "Zedekiel" Von Gertten - http://gabrielvongertten.com/
-   Game DLL programmer: Mark "Knightmare" Shan - http://www.markshan.com/knightmare/
-   Game DLL programmer & Tools: Jonathan "Paril" Barkley - https://github.com/Paril
-   Music: John S. "Primeval" Weekly - https://johnsweekley.bandcamp.com/
-   Foley Sound: Ryan Haynes - https://soundcloud.com/minayr/tracks
-   Level Design: Aleksandr "alex_mmc" Lavrinovitš  - www.alexmmc.net
-   Graphic design: Isaac Silver
+  - Project Lead (and a little bit of everything else): Adam "PalmliX" Palmer
+  - Graphics/Engine programmer: Matthew "omegaminus1" Motsinger - https://github.com/OmegaMinus1
+  - Modelling/Texturing: Gabriel "Zedekiel" Von Gertten - http://gabrielvongertten.com/
+  - Game DLL programmer: Mark "Knightmare" Shan - http://www.markshan.com/knightmare/
+  - Game DLL programmer & Tools: Jonathan "Paril" Barkley - https://github.com/Paril
+  - Music: John S. "Primeval" Weekly - https://johnsweekley.bandcamp.com/
+  - Foley Sound: Ryan Haynes - https://soundcloud.com/minayr/tracks
+  - Level Design: Aleksandr "alex_mmc" Lavrinovitš  - www.alexmmc.net
+  - Graphic design: Isaac Silver
    
    
  _______________________________________________________________________
