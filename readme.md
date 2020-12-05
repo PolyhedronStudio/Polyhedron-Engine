@@ -44,10 +44,10 @@ a summary of the most significant features and udpates added so far:
  **Fog**
  - Based on god rays, can be dynamically controlled by map triggers.
    4 modes:
-            Mode0 Exp based fog t = T * T * T
-            Mode1 Exp2 based fog t = T * T
-            Mode2 Exp2 based fog t = T * T * T * RNG
-            Mode3 Exp2 Mode2 + no sun phase cherry
+           - Mode0 Exp based fog t = T * T * T
+           - Mode1 Exp2 based fog t = T * T
+           - Mode2 Exp2 based fog t = T * T * T * RNG
+           - Mode3 Exp2 Mode2 + no sun phase cherry
 
             Mode 0 & 1 have no godrays and have been coded to use Spherical Fibonacci Blue Noise
             Mode 2 & 3 use the inscatter as outscatter input
