@@ -58,7 +58,7 @@ a summary of the most significant features and udpates added so far:
   - 30 or 20 FPS playback (mapper selectable)
   
   **Light Entities**
-  - Basic map light entity support merged from Savvy: https://github.com/savvykms/Q2RTX
+  - Basic map light entity support merged from **Savvy: https://github.com/savvykms/Q2RTX
   - 2 new light types added; spotlight and directional
   - Custom lightstyles with full map trigger control (play different animations on one light)
   
