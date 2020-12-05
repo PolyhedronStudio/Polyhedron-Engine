@@ -1,3 +1,116 @@
+# Nail & Crescent
+________________________________________________
+
+
+**Nail & Crescent**  is a project that aims to;
+
+1) Replace all of the copywritten assets of Quake 2, enabling a freely downloadable
+   package that makes it easy for mappers and mod makers to create and share their
+   own content.
+
+2) Update and add new features to the engine/game code that allow for maximum
+   creativity and control by content creators/game devs.
+
+3) Develop and provide tools, tutorials, and documentation.
+
+
+**This is not a source-port for running pre-Q2RTX mods/expansions or 
+  playing Quake 2 as too many significant changes have been made,
+  most notably game tick rate. This fork is dedicated to future
+  content/mod development**
+  
+
+This list will be constantly changing and evolving, but for now here is
+a summary of the most significant features and udpates added so far:
+
+
+## Game Code (DLL)
+
+  Our game DLL is forked from Knightmare Quake 2: http://www.markshan.com/knightmare/
+  This gives us most of the features of the Lazarus mod, which greatly enhances
+  what mappers can do with the engine, as well as some features from Knightmare,
+  such as Entity Alias scripting.
+  
+  **Highlights**
+   - Improved monster AI
+   - Improved physics
+   - Greatly expanded mapper control of monsters (friendly, neutral, teams, scripting)
+   - Model/sprite spawning entities that easily allow the mapper to add custom content
+   - "movewith" which allows for greater control over moving entities
+   - real-time camera/cinematics
+ 
+## Engine/Rendering
+
+ **Fog**
+ - Based on god rays, can be dynamically controlled by map triggers.
+   4 modes:
+            Mode0 Exp based fog t = T * T * T
+            Mode1 Exp2 based fog t = T * T
+            Mode2 Exp2 based fog t = T * T * T * RNG
+            Mode3 Exp2 Mode2 + no sun phase cherry
+
+            Mode 0 & 1 have no godrays and have been coded to use Spherical Fibonacci Blue Noise
+            Mode 2 & 3 use the inscatter as outscatter input
+   
+  **Sprites**
+  - 2 auto-rotation types (360 & locked z-axis)
+  - 3 "fixed" orientations (cards) x, y, z-axis
+  - 30 or 20 FPS playback (mapper selectable)
+  
+  **Light Entities**
+  - Basic map light entity support merged from Savvy: https://github.com/savvykms/Q2RTX
+  - 2 new light types added; spotlight and directional
+  - Custom lightstyles with full map trigger control (play different animations on one light)
+  
+
+  **Merged from SkacikPL - https://github.com/SkacikPL/Q2RTX**
+  - Open AL audio w/ map triggered effects; Occulusion, Doppler, Reverb
+  - Demo pre-rendering; Playing a demo with cl_renderdemo 1 will
+    essentially "render" a sequence of accumulated frames
+   (according to pt_accumulation_rendering_framenum cvar)
+   - Monster footsteps
+   
+   
+   ## Mapping Triggers##
+    -  Sun 
+    -  God Rays
+    -  Fog
+    -  OpenAL Reverb (presets and custom)
+    -  Lightstyles (custom brightness animations)
+    
+   ## Other updates/improvements
+     - Fixed animated texture playback, added 20fps and 30fps playback speeds
+     - Custom dynamic lights (effects) for simulating flame/candle light etc.
+     - Re-enabled god rays in physical_sky_space mode (allows for "standard" 6 image skyboxes)
+     - Custom folder for planetary rendering textures (based on map name)
+     - Cvar to turn planetary rendering off
+     - MD3 multiple skin support
+     - Permenently enabled quakeworld style movement (qwmod)
+     - Changed game tick to 20hz
+     - Expanded dyanmic/map light maximums to 256 from 32
+   
+     
+   ## Tools/Resources
+    - "drag and drop" sprite creation from text file 
+    - Modified Blender export addon (added MD3 skin support)
+    - Custom FDG (entity definitions) and placeholder models/entity presets for map editors
+   
+   
+   ## Team
+   Project Lead (and a little bit of everything else): Adam "PalmliX" Palmer
+   Graphics/Engine programmer: Matthew "omegaminus1" Motsinger - https://github.com/OmegaMinus1
+   Modelling/Texturing: Gabriel "Zedekiel" Von Gertten - http://gabrielvongertten.com/
+   Game DLL programmer: Mark "Knightmare" Shan - http://www.markshan.com/knightmare/
+   Game DLL programmer & Tools: Jonathan "Paril" Barkley - https://github.com/Paril
+   Music: John S. "Primeval" Weekly - https://johnsweekley.bandcamp.com/
+   Foley Sound: Ryan Haynes - https://soundcloud.com/minayr/tracks
+   Level Design: Aleksandr "alex_mmc" Lavrinovitš  - www.alexmmc.net
+   Graphic design: Isaac Silver
+   
+   
+ _______________________________________________________________________
+
+
 # Quake II RTX
 
 **Quake II RTX** is NVIDIA's attempt at implementing a fully functional 
