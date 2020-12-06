@@ -106,6 +106,7 @@ a summary of the most significant features and udpates added so far:
   - Game DLL & Tools coding: Jonathan "Paril" Barkley - https://github.com/Paril
   - Game DLL coding: Mark "Knightmare" Shan - http://www.markshan.com/knightmare/
   - Graphics/Engine coding: Matthew "omegaminus1" Motsinger - https://github.com/OmegaMinus1
+  - Game Design/Story: Miles "Mileator" Williams
   - Foley Sound: Ryan Haynes - https://soundcloud.com/minayr/tracks
   
    _______________________________________________________________________
