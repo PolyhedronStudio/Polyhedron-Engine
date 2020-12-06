@@ -98,18 +98,17 @@ a summary of the most significant features and udpates added so far:
    
    
    ## Team
-  - Project Lead (and a little bit of everything): Adam "PalmliX" Palmer - https://www.youtube.com/user/PalmliX
-  - Graphics/Engine programmer: Matthew "omegaminus1" Motsinger - https://github.com/OmegaMinus1
-  - Modelling/Texturing: Gabriel "Zedekiel" Von Gertten - http://gabrielvongertten.com/
-  - Game DLL programmer: Mark "Knightmare" Shan - http://www.markshan.com/knightmare/
-  - Game DLL programmer & Tools: Jonathan "Paril" Barkley - https://github.com/Paril
-  - Music: John S. "Primeval" Weekly - https://johnsweekley.bandcamp.com/
-  - Foley Sound: Ryan Haynes - https://soundcloud.com/minayr/tracks
+  - Project Lead & little bit of everything: Adam "PalmliX" Palmer - https://www.youtube.com/user/PalmliX
   - Level Design: Aleksandr "alex_mmc" Lavrinovitš  - www.alexmmc.net
+  - Modelling/Texturing: Gabriel "Zedekiel" Von Gertten - http://gabrielvongertten.com/
   - Graphic design: Isaac Silver
-   
-   
- _______________________________________________________________________
+  - Music: John S. "Primeval" Weekly - https://johnsweekley.bandcamp.com/
+  - Game DLL & Tools coding: Jonathan "Paril" Barkley - https://github.com/Paril
+  - Game DLL coding: Mark "Knightmare" Shan - http://www.markshan.com/knightmare/
+  - Graphics/Engine coding: Matthew "omegaminus1" Motsinger - https://github.com/OmegaMinus1
+  - Foley Sound: Ryan Haynes - https://soundcloud.com/minayr/tracks
+  
+   _______________________________________________________________________
 
 
 # Quake II RTX
