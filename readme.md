@@ -1,6 +1,4 @@
-# Nail & Crescent
-
-
+# Nail & Crescent - https://www.youtube.com/watch?v=BIOJ6QURT5k&ab
 
 **Nail & Crescent**  is a project that aims to;
 
@@ -101,7 +99,7 @@ a summary of the most significant features and udpates added so far:
   - Project Lead & little bit of everything: Adam "PalmliX" Palmer - https://www.youtube.com/user/PalmliX
   - Level Design: Aleksandr "alex_mmc" Lavrinovitš  - www.alexmmc.net
   - Modelling/Texturing: Gabriel "Zedekiel" Von Gertten - http://gabrielvongertten.com/
-  - Graphic design: Isaac Silver
+  - Graphic design: Isaac Silver - http://instagram.com/thefoxmulder
   - Music: John S. "Primeval" Weekly - https://johnsweekley.bandcamp.com/
   - Game DLL & Tools coding: Jonathan "Paril" Barkley - https://github.com/Paril
   - Game DLL coding: Mark "Knightmare" Shan - http://www.markshan.com/knightmare/
