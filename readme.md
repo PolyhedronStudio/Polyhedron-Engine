@@ -1,4 +1,6 @@
-# Nail & Crescent - https://www.youtube.com/watch?v=BIOJ6QURT5k&ab
+# Nail & Crescent 
+
+Teaser Video: https://www.youtube.com/watch?v=BIOJ6QURT5k&ab
 
 **Nail & Crescent**  is a project that aims to;
 
