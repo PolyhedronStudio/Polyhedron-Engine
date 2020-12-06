@@ -20,6 +20,7 @@
   content/mod development**
   
 
+
 This list will be constantly changing and evolving, but for now here is
 a summary of the most significant features and udpates added so far:
 
@@ -37,7 +38,7 @@ a summary of the most significant features and udpates added so far:
    - Greatly expanded mapper control of monsters (friendly, neutral, teams, scripting)
    - Model/sprite spawning entities that easily allow the mapper to add custom content
    - "movewith" which allows for greater control over moving entities
-   - real-time camera/cinematics
+   - camera control (cinematics)
  
 ## Engine/Rendering
 
@@ -58,7 +59,7 @@ a summary of the most significant features and udpates added so far:
   - 30 or 20 FPS playback (mapper selectable)
   
   **Light Entities**
-  - Basic map light entity support merged from **Savvy: https://github.com/savvykms/Q2RTX
+  - Basic map light entity support merged from Savvy: https://github.com/savvykms/Q2RTX
   - 2 new light types added; spotlight and directional
   - Custom lightstyles with full map trigger control (play different animations on one light)
   
@@ -85,19 +86,19 @@ a summary of the most significant features and udpates added so far:
      - Custom folder for planetary rendering textures (based on map name)
      - Cvar to turn planetary rendering off
      - MD3 multiple skin support
-     - Permenently enabled quakeworld style movement (qwmod)
+     - Enabled quakeworld style movement (qwmod)
      - Changed game tick to 20hz
-     - Expanded dyanmic/map light maximums to 256 from 32
+     - Expanded dyanmic/map light maximum to 256 from 32
    
      
    ## Tools/Resources
-    - "drag and drop" sprite creation from text file 
+    - "drag and drop" sprite creation from text file (sp2maker)
     - Modified Blender export addon (added MD3 skin support)
     - Custom FDG (entity definitions) and placeholder models/entity presets for map editors
    
    
    ## Team
-  - Project Lead (and a little bit of everything else): Adam "PalmliX" Palmer
+  - Project Lead (and a little bit of everything): Adam "PalmliX" Palmer - https://www.youtube.com/user/PalmliX
   - Graphics/Engine programmer: Matthew "omegaminus1" Motsinger - https://github.com/OmegaMinus1
   - Modelling/Texturing: Gabriel "Zedekiel" Von Gertten - http://gabrielvongertten.com/
   - Game DLL programmer: Mark "Knightmare" Shan - http://www.markshan.com/knightmare/
