@@ -1,0 +1,15 @@
+SP2Maker - created by Jonathan "Paril" Barkley
+- Drag and drop text file onto exe to create sprite (sp2). See in the included example for formatting
+
+Blender MD3 Exporter (io_export_md3.py) - edited by Jonathan "Paril" Barkley
+- Installs like any other Blender addon. This is the same addon that can be found here https://github.com/neumond/blender-md3
+but with a tweak that allows for multiple skins.
+
+To add the skins, create a custom property in the object data properties tab and fill in the folowing fields:
+
+Property Name: md3shader
+Property Value: (texture path separated by semi-colon) models/mymodel/skin1.tga;models/mymodel/skin2.tga;models/mymodel/skin3.tga etc..
+
+
+Nail & Crescent Entity Definitions for map editors (nac.fdg)
+Currently only 100% compatible with Trenchbroom. Other editors may work, or work partially. Need more testing.
