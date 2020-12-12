@@ -667,7 +667,7 @@ void SP_monster_boss2 (edict_t *self)
 	// Lazarus: special purpose skins
 	if ( (self->spawnflags & SF_MONSTER_SPECIAL) && self->style )
 	{
-		PatchMonsterModel("models/monsters/wizard/tris.md3");
+		PatchMonsterModel("models/monsters/wizard/scrag.md3");
 		self->s.skinnum = self->style * 2;
 	}
 
@@ -688,11 +688,11 @@ void SP_monster_boss2 (edict_t *self)
 	// Lazarus: special purpose skins
 	if ( self->style )
 	{
-		PatchMonsterModel("models/monsters/wizard/tris.md3");
+		PatchMonsterModel("models/monsters/wizard/scrag.md3");
 		self->s.skinnum = self->style * 2;
 	}
 	
-	self->s.modelindex = gi.modelindex ("models/monsters/wizard/tris.md3");
+	self->s.modelindex = gi.modelindex ("models/monsters/wizard/scrag.md3");
 	VectorSet (self->mins, -20, -20, -46);
 	VectorSet (self->maxs, 20, 20, 50);
 
