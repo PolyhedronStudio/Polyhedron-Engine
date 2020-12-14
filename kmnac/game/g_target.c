@@ -3839,6 +3839,95 @@ void use_target_change(edict_t *self, edict_t *other, edict_t *activator)
 				}
 			}
 		}
+		// Knightmare- set usermodel and skinnum only for model_spawn/train/turret
+		if (!Q_stricmp(target_ent->classname, "model_spawn") || !Q_stricmp(target_ent->classname, "model_train") || !Q_stricmp(target_ent->classname, "model_turret"))
+		{
+			char	modelname[256];	// Knightmare added
+
+			if (self->usermodel && (strlen(self->usermodel) > 0))
+			{
+				if (strstr(self->usermodel, ".sp2")) {
+					// check for "sprites/" already in path
+					if (!strncmp(self->usermodel, "sprites/", 8))
+						Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
+					else
+						Com_sprintf(modelname, sizeof(modelname), "sprites/%s", self->usermodel);
+				}
+				else {
+					// check for "models/" already in path
+					if (!strncmp(self->usermodel, "models/", 7))
+						Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
+					else
+						Com_sprintf(modelname, sizeof(modelname), "models/%s", self->usermodel);
+				}
+				target_ent->s.modelindex = gi.modelindex(modelname);
+			}
+			// Don't bother checking if skinnum is non-zero, to allow setting to 0
+			target_ent->s.skinnum = self->s.skinnum;
+		}
+		// Knightmare- set solidstate, style, effects, renderfx, startframe, and framenumbers for model_spawn/train
+		if (!Q_stricmp(target_ent->classname, "model_spawn") || !Q_stricmp(target_ent->classname, "model_train"))
+		{
+			int		effects = 0;
+
+			if (self->solidstate > 0)
+			{
+				switch (self->solidstate)
+				{
+				case 1: target_ent->solid = SOLID_NOT; target_ent->movetype = MOVETYPE_NONE; break;
+				case 2: target_ent->solid = SOLID_BBOX; target_ent->movetype = MOVETYPE_TOSS; break;
+				case 3: target_ent->solid = SOLID_BBOX; target_ent->movetype = MOVETYPE_NONE; break;
+				case 4: target_ent->solid = SOLID_NOT; target_ent->movetype = MOVETYPE_TOSS; break;
+				default: target_ent->solid = SOLID_NOT; target_ent->movetype = MOVETYPE_NONE; break;
+				}
+				if ((target_ent->solid != SOLID_NOT) && (target_ent->health > 0)) {
+					target_ent->die = model_die;
+					target_ent->takedamage = DAMAGE_YES;
+				}
+				else {
+					target_ent->die = NULL;
+					target_ent->takedamage = DAMAGE_NO;
+				}
+			}
+
+			if (self->style > 0)
+			{
+				switch (self->style)
+				{
+				case 1: effects |= EF_ANIM01; break;
+				case 2: effects |= EF_ANIM23; break;
+				case 3: effects |= EF_ANIM_ALL; break;
+				case 4: effects |= EF_ANIM_ALLFAST; break;
+				}
+			}
+			if (self->effects != 0) {
+				target_ent->effects = self->effects;
+				target_ent->effects = max(0, target_ent->effects);
+			}
+			if ((self->style > 0) || (self->effects != 0)) {
+				target_ent->s.effects = (effects | target_ent->effects);
+			}
+			if (self->renderfx != 0) {
+				target_ent->renderfx = self->renderfx;
+				target_ent->renderfx = max(0, target_ent->renderfx);
+				target_ent->s.renderfx = target_ent->renderfx;
+			}
+
+			if (self->startframe != 0) {
+				target_ent->startframe = self->startframe;
+				target_ent->startframe = max(0, target_ent->startframe);
+			}
+			if (self->framenumbers != 0) {
+				target_ent->framenumbers = self->framenumbers;
+				target_ent->framenumbers = max(1, target_ent->framenumbers);
+			}
+			if ((self->startframe != 0) || (self->framenumbers != 0)) {
+				// Change framenumbers to last frame to play
+				target_ent->framenumbers += target_ent->startframe;
+				target_ent->s.frame = target_ent->startframe;
+			}
+		}
+		// end Knightmare
 		gi.linkentity(target_ent);
 		target_ent = G_Find(target_ent, FOFS(targetname), target);
 	}

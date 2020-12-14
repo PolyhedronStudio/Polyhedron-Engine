@@ -393,7 +393,10 @@ void Drop_Jetpack (edict_t *ent, gitem_t *item)
 
 qboolean Pickup_Adrenaline (edict_t *ent, edict_t *other)
 {
-	if (!deathmatch->value)
+	if (!deathmatch->value) {
+		other->max_health += 1;
+		
+	}
 		other->max_health += 1;
 
 	if (other->health < other->max_health)
@@ -408,7 +411,7 @@ qboolean Pickup_Adrenaline (edict_t *ent, edict_t *other)
 qboolean Pickup_AncientHead (edict_t *ent, edict_t *other)
 {
 	other->max_health += 2;
-
+	
 	if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
 		SetRespawn (ent, ent->item->quantity);
 
