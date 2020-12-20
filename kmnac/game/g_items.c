@@ -1574,7 +1574,8 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	ent->item = item;
 	ent->nextthink = level.time + 2 * FRAMETIME;    // items start after other solids
 	ent->think = droptofloor;
-	ent->s.skinnum = item->world_model_skinnum; //Knightmare- skinnum specified in item table
+	if (!ent->s.skinnum)								// Knightmare- allow mapper-specified skinnum
+		 ent->s.skinnum = item->world_model_skinnum;	// Knightmare- skinnum specified in item table
 	ent->s.effects = item->world_model_flags;
 	ent->s.renderfx = RF_GLOW;
 
@@ -3155,9 +3156,12 @@ void SP_item_health (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	self->class_id = ENTITY_ITEM_HEALTH;
 
-	self->model = "models/items/healing/medium/tris.md2";
-	self->count = 10;
+	if (!self->model)							// Knightmare- allow mapper-spcified model
+		 self->model = "models/items/healing/medium/tris.md2";
+	if (!self->count)							// Knightmare- allow mapper-spcified count
+		 self->count = 10;
 //	SpawnItem (self, FindItem ("Health"));
 	SpawnItem (self, FindItemByClassname ("item_health"));
 	gi.soundindex ("items/n_health.wav");
@@ -3175,8 +3179,10 @@ void SP_item_health_small (edict_t *self)
 
 	self->class_id = ENTITY_ITEM_HEALTH_SMALL;
 
-	self->model = "models/items/healing/stimpack/tris.md2";
-	self->count = sk_health_bonus_value->value;
+	if (!self->model)							// Knightmare- allow mapper-spcified model
+		 self->model = "models/items/healing/stimpack/tris.md2";
+	if (!self->count)							// Knightmare- allow mapper-spcified count
+		 self->count = sk_health_bonus_value->value;
 //	SpawnItem (self, FindItem ("Health"));
 	SpawnItem (self, FindItemByClassname ("item_health_small"));
 	self->style = HEALTH_IGNORE_MAX;
@@ -3194,8 +3200,10 @@ void SP_item_health_large (edict_t *self)
 	}
 	self->class_id = ENTITY_ITEM_HEALTH_LARGE;
 
-	self->model = "models/items/healing/large/tris.md2";
-	self->count = 25;
+	if (!self->model)							// Knightmare- allow mapper-spcified model
+		 self->model = "models/items/healing/large/tris.md2";
+	if (!self->count)							// Knightmare- allow mapper-spcified count
+		 self->count = 25;
 //	SpawnItem (self, FindItem ("Health"));
 	SpawnItem (self, FindItemByClassname ("item_health_large"));
 	gi.soundindex ("items/l_health.wav");
@@ -3212,8 +3220,10 @@ void SP_item_health_mega (edict_t *self)
 	}
 	self->class_id = ENTITY_ITEM_HEALTH_MEGA;
 
-	self->model = "models/items/mega_h/tris.md2";
-	self->count = 100;
+	if (!self->model)							// Knightmare- allow mapper-spcified model
+		 self->model = "models/items/mega_h/tris.md2";
+	if (!self->count)							// Knightmare- allow mapper-spcified count
+		 self->count = 100;
 //	SpawnItem (self, FindItem ("Health"));
 	SpawnItem (self, FindItemByClassname ("item_health_mega"));
 	gi.soundindex ("items/m_health.wav");
