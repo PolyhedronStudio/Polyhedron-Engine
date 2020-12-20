@@ -2,6 +2,8 @@
 
 Teaser Video: https://www.youtube.com/watch?v=BIOJ6QURT5k&ab
 
+Discord: https://discord.com/invite/9FNqVWCkF6
+
 **Nail & Crescent**  is a project that aims to;
 
 1) Replace all of the copywritten assets of Quake 2, enabling a freely downloadable
