@@ -1153,14 +1153,14 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 
 		if (ent->item->pickup == Pickup_Health)
 		{
-			if (ent->count == sk_health_bonus_value->value)
+			if (ent->style == (HEALTH_IGNORE_MAX | HEALTH_TIMED))	// if (ent->count == 100)
+				 gi.sound(other, CHAN_ITEM, gi.soundindex("items/m_health.wav"), 1, ATTN_NORM, 0);
+			else if (ent->style & HEALTH_SMALL)					// if (ent->count == sk_health_bonus_value->value)
 				gi.sound(other, CHAN_ITEM, gi.soundindex("items/s_health.wav"), 1, ATTN_NORM, 0);
-			else if (ent->count == 10)
-				gi.sound(other, CHAN_ITEM, gi.soundindex("items/n_health.wav"), 1, ATTN_NORM, 0);
-			else if (ent->count == 25)
+			else if (ent->style & HEALTH_LARGE)					// if (ent->count == 25)
 				gi.sound(other, CHAN_ITEM, gi.soundindex("items/l_health.wav"), 1, ATTN_NORM, 0);
-			else // (ent->count == 100)
-				gi.sound(other, CHAN_ITEM, gi.soundindex("items/m_health.wav"), 1, ATTN_NORM, 0);
+			else												// if (ent->count == 10)
+				 gi.sound(other, CHAN_ITEM, gi.soundindex("items/n_health.wav"), 1, ATTN_NORM, 0);
 		}
 		else if (ent->item->pickup_sound)
 		{
@@ -2845,7 +2845,7 @@ tank commander's head
 		0,
 		0,
 		NULL,
-		HEALTH_IGNORE_MAX,
+		HEALTH_IGNORE_MAX | HEALTH_SMALL,
 		"items/s_health.wav"
 	},
 
@@ -2887,7 +2887,7 @@ tank commander's head
 		0,
 		0,
 		NULL,
-		0,
+		HEALTH_LARGE,
 		"items/l_health.wav"
 	},
 
@@ -3185,7 +3185,7 @@ void SP_item_health_small (edict_t *self)
 		 self->count = sk_health_bonus_value->value;
 //	SpawnItem (self, FindItem ("Health"));
 	SpawnItem (self, FindItemByClassname ("item_health_small"));
-	self->style = HEALTH_IGNORE_MAX;
+	self->style = HEALTH_IGNORE_MAX | HEALTH_SMALL;
 	gi.soundindex ("items/s_health.wav");
 }
 
@@ -3206,6 +3206,7 @@ void SP_item_health_large (edict_t *self)
 		 self->count = 25;
 //	SpawnItem (self, FindItem ("Health"));
 	SpawnItem (self, FindItemByClassname ("item_health_large"));
+	self->style = HEALTH_LARGE;
 	gi.soundindex ("items/l_health.wav");
 }
 
