@@ -3105,6 +3105,10 @@ void SP_func_water(edict_t* self)
 	if (self->wait == -1)
 		self->spawnflags |= DOOR_TOGGLE;
 
+#ifdef POSTTHINK_CHILD_MOVEMENT
+	 self->postthink = set_child_movement; // Knightmare- supports movewith
+#endif	// POSTTHINK_CHILD_MOVEMENT
+
 	self->classname = "func_door";
 
 	gi.linkentity(self);
@@ -5499,6 +5503,11 @@ void SP_func_bobbingwater(edict_t* self)
 
 	if (!self->bob) self->bob = 16;
 	if (!self->duration) self->duration = 8;
+
+#ifdef POSTTHINK_CHILD_MOVEMENT
+		 self->postthink = set_child_movement; // Knightmare- supports movewith
+#endif	// POSTTHINK_CHILD_MOVEMENT
+
 	self->think = bob_init;
 	self->nextthink = level.time + FRAMETIME;
 	gi.linkentity(self);

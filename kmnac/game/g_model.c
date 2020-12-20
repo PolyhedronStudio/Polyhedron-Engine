@@ -42,7 +42,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //	NO_MODEL		Don't use a model. Usefull for placeing particle effects and
 //				dynamic lights on their own
 //
-//	"usermodel" = The model to load (models/ is already coded)
+//  "delay"      = Combine with TOGGLE spawnflag to start off
+//	"usermodel"  = The model to load (models/ is already coded)
 //	"startframe" = The starting frame : default 0
 //	"userframes" = The number of frames you want to display after startframe
 //	"solidstate" = 1 : SOLID_NOT - not solid at all
@@ -261,13 +262,15 @@ void SP_model_spawn (edict_t *ent)
 		ent->spawnflags |= TOGGLE;
 
 	if (ent->spawnflags & TOGGLE)
-	{    // Knightmare- allow starting off (but not for model_train)
+	{	// Knightmare- allow starting off (but not for model_train)
 		if ((strcmp(ent->classname, "model_train") != 0) && (ent->delay != 0)) {
 			ent->delay = 1;
 			ent->svflags |= SVF_NOCLIENT;
+			
 		}
-		else {
+		 else {
 			ent->delay = 0;
+			
 		}
 		ent->use = model_spawn_use;
 	}
