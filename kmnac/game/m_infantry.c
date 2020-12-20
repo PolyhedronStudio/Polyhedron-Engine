@@ -680,6 +680,7 @@ void SP_monster_infantry (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Enforcer";
+	self->class_id = ENTITY_MONSTER_INFANTRY;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 

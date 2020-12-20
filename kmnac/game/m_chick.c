@@ -781,6 +781,7 @@ void SP_monster_chick (edict_t *self)
 	if(!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.40;
 	self->common_name = "Iron Maiden";
+	self->class_id = ENTITY_MONSTER_CHICK;
 
 	gi.linkentity (self);
 

@@ -1331,6 +1331,7 @@ void SP_monster_soldier_light (edict_t *self)
 	gi.soundindex ("misc/lasfly.wav");
 	gi.soundindex ("soldier/solatck2.wav");
 	self->common_name = "Light Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER_LIGHT;
 
 	// Lazarus: mapper-configurable health
 	if(!self->health)
@@ -1358,6 +1359,7 @@ void SP_monster_soldier (edict_t *self)
 	sound_death = gi.soundindex ("soldier/soldeth1.wav");
 	gi.soundindex ("soldier/solatck1.wav");
 	self->common_name = "Shotgun Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER;
 
 	// Lazarus: mapper-configurable health
 	if(!self->health)
@@ -1385,6 +1387,7 @@ void SP_monster_soldier_ss (edict_t *self)
 	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
 	gi.soundindex ("soldier/solatck3.wav");
 	self->common_name = "Machinegun Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER_SS;
 
 	// Lazarus: mapper-configurable health
 	if(!self->health)

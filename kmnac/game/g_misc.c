@@ -338,6 +338,8 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 
 	gib->s.renderfx |= RF_IR_VISIBLE;
 
+	self->class_id = ENTITY_GIB;
+
 	gi.linkentity (gib);
 }
 
@@ -482,6 +484,8 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 
 	self->s.renderfx |= RF_IR_VISIBLE;
 
+	self->class_id = ENTITY_GIBHEAD;
+
 	gi.linkentity (self);
 }
 
@@ -619,6 +623,8 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	// Lazarus: skin number and effects
 	chunk->s.skinnum = skin;
 	chunk->s.effects |= effects;
+
+	chunk->class_id = ENTITY_DEBRIS;
 
 	gi.linkentity (chunk);
 }
@@ -813,6 +819,8 @@ void SP_path_corner (edict_t *self)
 		return;
 	}
 
+	self->class_id = ENTITY_PATH_CORNER;
+
 	self->solid = SOLID_TRIGGER;
 	self->touch = path_corner_touch;
 	VectorSet (self->mins, -8, -8, -8);
@@ -905,6 +913,9 @@ void SP_point_combat (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_POINT_COMBAT;
+
 	self->solid = SOLID_TRIGGER;
 	self->touch = point_combat_touch;
 	VectorSet (self->mins, -8, -8, -16);
@@ -933,6 +944,7 @@ void SP_viewthing(edict_t *ent)
 {
 	gi.dprintf ("viewthing spawned\n");
 
+	ent->class_id = ENTITY_VIEWTHING;
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->s.renderfx = RF_FRAMELERP;
@@ -960,6 +972,8 @@ Used as a positional target for lightning.
 */
 void SP_info_notnull (edict_t *self)
 {
+	self->class_id = ENTITY_INFO_NOTNULL;
+
 	VectorCopy (self->s.origin, self->absmin);
 	VectorCopy (self->s.origin, self->absmax);
 };
@@ -1004,6 +1018,8 @@ void SP_light (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_LIGHT;
 
 	if (self->style >= 32)
 	{
@@ -1140,6 +1156,8 @@ void SP_func_object (edict_t *self)
 {
 	gi.setmodel (self, self->model);
 
+	self->class_id = ENTITY_FUNC_OBJECT;
+
 	self->mins[0] += 1;
 	self->mins[1] += 1;
 	self->mins[2] += 1;
@@ -1171,6 +1189,8 @@ void SP_func_object (edict_t *self)
 		self->s.effects |= EF_ANIM_ALLFAST;
 
 	self->clipmask = MASK_MONSTERSOLID;
+
+	self->class_id = ENTITY_FUNC_OBJECT;
 
 	gi.linkentity (self);
 }
@@ -1248,9 +1268,9 @@ void func_explosive_explode (edict_t *self)
 		int	r;
 
 		count = mass/25;
-		if(count > 16)
-			count = 16;
-		while(count--)
+		if (count > 64)	// Knightmare- was 16
+			 count = 64;
+		while (count--)
 		{
 			r = (rand() % 5) + 1;
 			chunkorigin[0] = origin[0] + crandom() * size[0];
@@ -1284,9 +1304,9 @@ void func_explosive_explode (edict_t *self)
 		if (mass >= 100)
 		{
 			count = mass / 100;
-			if (count > 8)
-				count = 8;
-			while(count--)
+			if (count > 32)	// Knightmare- was 8
+				 count = 32;
+			while (count--)
 			{
 				chunkorigin[0] = origin[0] + crandom() * size[0];
 				chunkorigin[1] = origin[1] + crandom() * size[1];
@@ -1297,9 +1317,9 @@ void func_explosive_explode (edict_t *self)
 		
 		// small chunks
 		count = mass / 25;
-		if (count > 16)
-			count = 16;
-		while(count--)
+		if (count > 64)	// Knightmare- was 16
+			 count = 64;
+		while (count--)
 		{
 			chunkorigin[0] = origin[0] + crandom() * size[0];
 			chunkorigin[1] = origin[1] + crandom() * size[1];
@@ -1432,6 +1452,8 @@ void SP_func_explosive (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_FUNC_EXPLOSIVE;
 
 	self->movetype = MOVETYPE_PUSH;
 
@@ -1693,6 +1715,7 @@ void func_breakaway_die (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 		VectorClear(self->avelocity);
 		self->movewith = "";
 		self->movewith_ent = NULL;
+		self->postthink = NULL;
 		self->think = func_breakaway_fall;
 		self->nextthink = level.time + self->delay;
 	}
@@ -1758,6 +1781,7 @@ void func_breakaway_activate(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_func_breakaway (edict_t *self)
 {
+	self->class_id = ENTITY_FUNC_BREAKAWAY;
 	self->movetype = MOVETYPE_PUSH;
 	gi.setmodel (self, self->model);
 	G_SetMovedir (self->s.angles, self->movedir);
@@ -1823,6 +1847,9 @@ void SP_func_breakaway (edict_t *self)
 		self->die = func_breakaway_die;
 		self->takedamage = DAMAGE_YES;
 	}
+#ifdef POSTTHINK_CHILD_MOVEMENT
+	 self->postthink = set_child_movement; // Knightmare- supports movewith
+	#endif	// POSTTHINK_CHILD_MOVEMENT
 
 	//touch function for impact damage
 	self->touch = func_breakaway_touch;
@@ -2073,7 +2100,8 @@ void SP_misc_explobox (edict_t *self)
 	//self->think = M_droptofloor;
 	//self->nextthink = level.time + 2 * FRAMETIME;
 
-	self->common_name = "Exploding Box";
+	self->common_name = "Exploding Barrel";
+	self->class_id = ENTITY_MISC_EXPLOBOX;
 	gi.linkentity (self);
 }
 
@@ -2117,6 +2145,8 @@ void misc_blackhole_transparent (edict_t *ent)
 
 void SP_misc_blackhole (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_BLACKHOLE;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_NOT;
 	VectorSet (ent->mins, -64, -64, 0);
@@ -2148,6 +2178,8 @@ void misc_eastertank_think (edict_t *self)
 
 void SP_misc_eastertank (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_EASTERTANK;
+
 	ent->movetype = MOVETYPE_NONE;
 	// Lazarus - nonsolid
 	if(ent->spawnflags & 1)
@@ -2173,6 +2205,7 @@ void SP_misc_eastertank (edict_t *ent)
 
 void misc_easterchick_think (edict_t *self)
 {
+
 	if (++self->s.frame < 247)
 		self->nextthink = level.time + FRAMETIME;
 	else
@@ -2184,6 +2217,8 @@ void misc_easterchick_think (edict_t *self)
 
 void SP_misc_easterchick (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_EASTERCHICK;
+
 	ent->movetype = MOVETYPE_NONE;
 	// Lazarus - nonsolid
 	if(ent->spawnflags & 1)
@@ -2207,6 +2242,7 @@ void SP_misc_easterchick (edict_t *ent)
 
 void misc_easterchick2_think (edict_t *self)
 {
+
 	if (++self->s.frame < 287)
 		self->nextthink = level.time + FRAMETIME;
 	else
@@ -2218,6 +2254,8 @@ void misc_easterchick2_think (edict_t *self)
 
 void SP_misc_easterchick2 (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_EASTERCHICK2;
+
 	ent->movetype = MOVETYPE_NONE;
 	// Lazarus - nonsolid
 	if(ent->spawnflags & 1)
@@ -2274,6 +2312,8 @@ void commander_body_drop (edict_t *self)
 
 void SP_monster_commander_body (edict_t *self)
 {
+	self->class_id = ENTITY_MONSTER_COMMANDER_BODY;
+
 	self->movetype = MOVETYPE_NONE;
 	self->solid = SOLID_BBOX;
 	self->model = "models/monsters/commandr/tris.md2";
@@ -2306,6 +2346,8 @@ void misc_banner_think (edict_t *ent)
 
 void SP_misc_banner (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_BANNER;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_NOT;
 	ent->s.modelindex = gi.modelindex ("models/objects/banner/tris.md2");
@@ -2394,6 +2436,8 @@ void SP_misc_deadsoldier (edict_t *ent)
 		ent->s.skinnum = ent->style;
 	}
 	ent->common_name = "Dead Marine";
+	ent->class_id = ENTITY_MISC_DEADSOLDIER;
+
 	gi.linkentity (ent);
 }
 
@@ -2522,6 +2566,8 @@ This is a large stationary viper as seen in Paul's intro
 */
 void SP_misc_bigviper (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_BIGVIPER;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	VectorSet (ent->mins, -176, -120, -24);
@@ -2674,6 +2720,7 @@ void SP_misc_viper_bomb (edict_t *self)
 	self->use = misc_viper_bomb_use;
 	self->svflags |= SVF_NOCLIENT;
 	self->common_name = "Bomb";
+	self->class_id = ENTITY_MISC_VIPER_BOMB;
 	gi.linkentity (self);
 }
 
@@ -2704,6 +2751,8 @@ void SP_misc_strogg_ship (edict_t *ent)
 		G_FreeEdict (ent);
 		return;
 	}
+
+	ent->class_id = ENTITY_MISC_STROGG_SHIP;
 
 	ent->class_id = ENTITY_MISC_STROGG_SHIP;
 
@@ -2789,6 +2838,9 @@ void misc_satellite_dish_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_misc_satellite_dish (edict_t *ent)
 {
+
+	ent->class_id = ENTITY_MISC_SATELLITE_DISH;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	VectorSet (ent->mins, -64, -64, 0);
@@ -2804,6 +2856,9 @@ void SP_misc_satellite_dish (edict_t *ent)
 */
 void SP_light_mine1 (edict_t *ent)
 {
+
+	ent->class_id = ENTITY_LIGHT_MINE1;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->s.modelindex = gi.modelindex ("models/objects/minelite/light1/tris.md2");
@@ -2816,6 +2871,9 @@ void SP_light_mine1 (edict_t *ent)
 */
 void SP_light_mine2 (edict_t *ent)
 {
+
+	ent->class_id = ENTITY_LIGHT_MINE2;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->s.modelindex = gi.modelindex ("models/objects/minelite/light2/tris.md2");
@@ -2828,6 +2886,9 @@ Intended for use with the target_spawner
 */
 void SP_misc_gib_arm (edict_t *ent)
 {
+
+	ent->class_id = ENTITY_MISC_GIB_ARM;
+
 	gi.setmodel (ent, "models/objects/gibs/arm/tris.md2");
 	ent->solid = SOLID_NOT;
 	ent->s.effects |= EF_GIB;
@@ -2849,6 +2910,9 @@ Intended for use with the target_spawner
 */
 void SP_misc_gib_leg (edict_t *ent)
 {
+
+	ent->class_id = ENTITY_MISC_GIB_LEG;
+
 	gi.setmodel (ent, "models/objects/gibs/leg/tris.md2");
 	ent->solid = SOLID_NOT;
 	ent->s.effects |= EF_GIB;
@@ -2870,6 +2934,9 @@ Intended for use with the target_spawner
 */
 void SP_misc_gib_head (edict_t *ent)
 {
+	
+	ent->class_id = ENTITY_MISC_GIB_HEAD;
+
 	gi.setmodel (ent, "models/objects/gibs/head/tris.md2");
 	ent->solid = SOLID_NOT;
 	ent->s.effects |= EF_GIB;
@@ -2895,6 +2962,9 @@ used with target_string (must be on same "team")
 
 void SP_target_character (edict_t *self)
 {
+	
+	self->class_id = ENTITY_TARGET_CHARACTER;
+
 	self->movetype = MOVETYPE_PUSH;
 	gi.setmodel (self, self->model);
 	self->solid = SOLID_BSP;
@@ -2942,6 +3012,8 @@ void SP_target_string (edict_t *self)
 	if (!self->message)
 		self->message = "";
 	self->use = target_string_use;
+
+	self->class_id = ENTITY_TARGET_STRING;
 }
 
 
@@ -3131,6 +3203,8 @@ void SP_func_clock (edict_t *self)
 		self->use = func_clock_use;
 	else
 		self->nextthink = level.time + 1;
+
+	self->class_id = ENTITY_FUNC_CLOCK;
 }
 /*==================================================================
  Lazarus changes to misc_teleporter:
@@ -3495,6 +3569,7 @@ void SP_misc_teleporter (edict_t *ent)
 		VectorSet (ent->maxs, 32, 32, -16);
 	}
 	ent->common_name = "Teleporter";
+	ent->class_id = ENTITY_MISC_TELEPORTER;
 	gi.linkentity (ent);
 
 	trig = G_Spawn ();
@@ -3554,10 +3629,64 @@ void SP_trigger_teleporter (edict_t *self)
 	gi.setmodel (self, self->model);
 	self->touch   = teleporter_touch;
 	self->svflags = SVF_NOCLIENT;
-	if(self->spawnflags & 2)
+	if (self->spawnflags & 2)
+		 self->solid = SOLID_NOT;
+	else
+		 self->solid = SOLID_TRIGGER;
+	
+		self->class_id = ENTITY_TRIGGER_TELEPORTER;
+	
+		gi.linkentity(self);
+	
+}
+
+/*QUAKED trigger_teleporter_bbox (.5 .5 .5) (-8 -8 -8) (8 8 8) x Triggered x Monster NoEffects Sound Landmark
+Teleporter field that can transport monsters or players
+
+Use the 'SOUND' spawnflag and then choose your own custom sound.
+"noise" (path/file.wav)
+"target" destination
+
+bleft Min b-box coords XYZ. Default = -16 -16 -16
+tright Max b-box coords XYZ. Default = 16 16 16
+*/
+void SP_trigger_teleporter_bbox(edict_t * self)
+ {
+	if (!self->target)
+		 {
+		gi.dprintf("trigger_teleporter_bbox without a target at %s\n", vtos(self->s.origin));
+		G_FreeEdict(self);
+		return;
+		}
+	 if (!(self->spawnflags & 48))
+		 self->noise_index = gi.soundindex("misc/tele1.wav");
+	else if (self->spawnflags & 32)
+		 {
+		if (st.noise)
+			 self->noise_index = gi.soundindex(st.noise);
+		else
+			 self->noise_index = 0;
+		}
+	 else
+		 self->noise_index = 0;
+	
+		if ((!VectorLength(self->bleft)) && (!VectorLength(self->tright)))
+		 {
+		VectorSet(self->bleft, -16, -16, -16);
+		VectorSet(self->tright, 16, 16, 16);
+		}
+	 VectorCopy(self->bleft, self->mins);
+	VectorCopy(self->tright, self->maxs);
+	self->touch = teleporter_touch;
+	self->use = trigger_teleporter_use;
+	self->svflags = SVF_NOCLIENT;
+	if (self->spawnflags & 2)
 		self->solid = SOLID_NOT;
 	else
 		self->solid = SOLID_TRIGGER;
+
+	self->class_id = ENTITY_TRIGGER_TELEPORTER;
+
 	gi.linkentity (self);
 }
 
@@ -3572,6 +3701,7 @@ void SP_misc_teleporter_dest (edict_t *ent)
 	VectorSet (ent->mins, -32, -32, -24);
 	VectorSet (ent->maxs, 32, 32, -16);
 	ent->common_name = "Teleporter Destination";
+	ent->class_id = ENTITY_MISC_TELEPORTER_DEST;
 	gi.linkentity (ent);
 }
 
@@ -3599,6 +3729,8 @@ void misc_light_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_misc_light (edict_t *self)
 {
+	self->class_id = ENTITY_MISC_LIGHT;
+
 	self->use = misc_light_use;
 	if(self->movewith)
 		self->movetype = MOVETYPE_PUSH;

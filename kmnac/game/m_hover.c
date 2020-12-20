@@ -675,6 +675,8 @@ void SP_monster_hover (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Icarus";
+	self->class_id = ENTITY_MONSTER_HOVER;
+
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	flymonster_start (self);

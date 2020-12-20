@@ -738,6 +738,9 @@ void SP_monster_mutant (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Mutant";
+	self->class_id = ENTITY_MONSTER_MUTANT;
+	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
+
 	self->monsterinfo.scale = MODEL_SCALE;
 	walkmonster_start (self);
 }

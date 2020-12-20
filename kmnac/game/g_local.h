@@ -392,6 +392,17 @@ struct fog_s
 };
 typedef struct fog_s fog_t;
 
+// Knightmare- map vendor for pack-specific code changes
+typedef enum
+ {
+	MAPTYPE_ID,
+		MAPTYPE_XATRIX,
+		MAPTYPE_ROGUE,
+		MAPTYPE_ZAERO,
+		MAPTYPE_CUSTOM
+		 } maptype_t;
+
+
 //
 // this structure is cleared as each map is entered
 // it is read/written to the level.sav file for savegames
@@ -457,6 +468,9 @@ typedef struct
 	int			next_skill;
 	int			num_reflectors;
 	qboolean	intermission_letterbox;		// Knightmare- letterboxing
+
+	// Knightmare- for map-specific logic switching
+	maptype_t	maptype;				// map vendor for pack-specific code changes
 
 } level_locals_t;
 
@@ -1010,6 +1024,10 @@ void Fog_SetFogParms (void);
 //
 // g_func.c
 //
+
+// Knightmare- enable this to call set_child_movement() from postthink function instead of various movement functions
+#define POSTTHINK_CHILD_MOVEMENT
+
 #define TRAIN_START_ON		   1
 #define TRAIN_TOGGLE		   2
 #define TRAIN_BLOCK_STOPS	   4
@@ -1156,6 +1174,7 @@ void ReflectTrail (int type, vec3_t start, vec3_t end);
 // g_spawn.c
 //
 void ED_CallSpawn (edict_t *ent);
+void ReInitialize_Entity(edict_t* ent);
 void G_FindTeams();
 void Cmd_ToggleHud ();
 void Hud_On();
@@ -1219,6 +1238,9 @@ void SavegameDirRelativePath(char *filename, char *output, size_t outputSize);
 void CreatePath (char *path);
 void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target);
 qboolean IsIdMap (void); // Knightmare added
+qboolean IsXatrixMap(void); // Knightmare added
+qboolean IsRogueMap(void); // Knightmare added
+qboolean IsZaeroMap(void); // Knightmare added
 void my_bprintf (int printlevel, char *fmt, ...);
 qboolean UseRegularGoodGuyFlag (edict_t *monster); // Knightmare added
 
@@ -1710,6 +1732,7 @@ struct edict_s
 	float		speed, accel, decel;
 	vec3_t		movedir;
 	vec3_t		pos1, pos2;
+	vec3_t		pos0;	// Knightmare- initial position for secret doors
 
 	vec3_t		velocity;
 	vec3_t		avelocity;
@@ -1861,6 +1884,11 @@ struct edict_s
 	int			bobframe;
 	int			bounce_me;		// 0 for no bounce, 1 to bounce, 2 if velocity should not be clipped
 								// this is solely used by func_pushable for now
+	// Knightmare- added for func_door_secret
+	float		width;
+	float		length;
+	float		side;
+		// end Knightmare
 	vec3_t      origin_offset;  // used to help locate brush models w/o origin brush
 	vec3_t		org_mins,org_maxs;
 	vec3_t		org_angles;
@@ -1904,6 +1932,7 @@ struct edict_s
 	edict_t		*movewith_ent;
 	vec3_t		movewith_offset;
 	vec3_t		parent_attach_angles;
+	vec3_t		child_attach_angles;	// Knightmare added
 	qboolean	do_not_rotate;
 
 	// monster AI

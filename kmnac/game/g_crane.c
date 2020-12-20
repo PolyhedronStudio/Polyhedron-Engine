@@ -1366,6 +1366,9 @@ void SP_crane_control (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_CRANE_CONTROL;
+
 	self->classname = "crane_control";
 	self->solid     = SOLID_BSP;
 	self->movetype  = MOVETYPE_PUSH;
@@ -1378,6 +1381,8 @@ void SP_crane_hook (edict_t *self)
 {
 	vec3_t origin;
 	edict_t *speaker;
+
+	self->class_id = ENTITY_CRANE_HOOK;
 
 	gi.setmodel (self, self->model);
 	VectorAdd(self->absmin,self->absmax,origin);
@@ -1430,6 +1435,8 @@ void SP_crane_hoist (edict_t *self)
 {
 	vec3_t origin;
 	edict_t *speaker;
+
+	self->class_id = ENTITY_CRANE_HOIST;
 
 	gi.setmodel (self, self->model);
 	VectorAdd(self->absmin,self->absmax,origin);
@@ -1487,6 +1494,8 @@ void SP_crane_beam (edict_t *self)
 {
 	vec3_t  origin;
 	edict_t *speaker;
+
+	self->class_id = ENTITY_CRANE_BEAM;
 
 	gi.setmodel (self, self->model);
 	VectorAdd(self->absmin,self->absmax,origin);
@@ -1746,6 +1755,9 @@ void SP_crane_reset (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_CRANE_RESET;
+
 	self->use = crane_reset_use;
 }
 

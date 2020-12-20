@@ -704,7 +704,9 @@ void SP_monster_brain (edict_t *self)
 
 	if(!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.10;
-	self->common_name = "Brains";
+	//	self->common_name = "Brains";
+	self->common_name = "Brain";
+	self->class_id = ENTITY_MONSTER_BRAIN;
 
 	// Knightmare- added sparks and blood type
 	if (!self->blood_type)

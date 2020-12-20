@@ -48,6 +48,8 @@ void Use_Target_Tent(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_temp_entity(edict_t *ent)
 {
+	ent->class_id = ENTITY_TARGET_TEMP_ENTITY;
+
 	ent->use = Use_Target_Tent;
 }
 
@@ -125,6 +127,8 @@ void Use_Target_Speaker(edict_t *ent, edict_t *other, edict_t *activator)
 
 void SP_target_speaker(edict_t *ent)
 {
+	ent->class_id = ENTITY_TARGET_SPEAKER;
+
 	if (!(ent->spawnflags & 8))
 	{
 		if (!st.noise)
@@ -146,8 +150,7 @@ void SP_target_speaker(edict_t *ent)
 			strcpy(ent->message, st.noise);
 		}
 	}
-	ent->class_id = ENTITY_TARGET_SPEAKER;
-
+	
 	ent->noise_index = gi.soundindex(ent->message);
 	ent->spawnflags &= ~8;
 
@@ -214,6 +217,9 @@ void SP_target_help(edict_t *ent)
 		G_FreeEdict(ent);
 		return;
 	}
+
+	ent->class_id = ENTITY_TARGET_HELP;
+
 	ent->use = Use_Target_Help;
 }
 
@@ -250,6 +256,8 @@ void SP_target_secret(edict_t *ent)
 		G_FreeEdict(ent);
 		return;
 	}
+
+	ent->class_id = ENTITY_TARGET_SECRET;
 
 	ent->use = use_target_secret;
 	if (!st.noise)
@@ -301,6 +309,8 @@ void SP_target_goal(edict_t *ent)
 		G_FreeEdict(ent);
 		return;
 	}
+
+	ent->class_id = ENTITY_TARGET_GOAL;
 
 	ent->use = use_target_goal;
 	if (!st.noise)
@@ -376,6 +386,8 @@ void use_target_explosion(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_explosion(edict_t *ent)
 {
+	ent->class_id = ENTITY_TARGET_EXPLOSION;
+
 	ent->use = use_target_explosion;
 	ent->svflags = SVF_NOCLIENT;
 }
@@ -523,8 +535,8 @@ void use_target_changelevel(edict_t *self, edict_t *other, edict_t *activator)
 		gi.cvar_forceset("skill", "3");
 
 	// Knightmare- some of id's stock Q2 maps have this spawnflag
-	//	set on their trigger_changelevels, so exclude those maps
-	if ((self->spawnflags & 1) && !IsIdMap() && allow_clear_inventory->value)
+	//	set on their trigger_changelevels, so only allow this on custom maps
+	if ((self->spawnflags & 1) && (level.maptype == MAPTYPE_CUSTOM) && (int)allow_clear_inventory->value)
 	{
 		int n;
 		if (activator && activator->client)
@@ -572,6 +584,8 @@ void SP_target_changelevel(edict_t *ent)
 		G_FreeEdict(ent);
 		return;
 	}
+
+	ent->class_id = ENTITY_TARGET_CHANGELEVEL;
 
 	if ((deathmatch->value || coop->value) && (ent->spawnflags & 2))
 	{
@@ -622,6 +636,8 @@ void use_target_splash(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_splash(edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_SPLASH;
+
 	self->use = use_target_splash;
 	G_SetMovedir(self->s.angles, self->movedir);
 	if (!self->count)
@@ -683,10 +699,12 @@ void SP_target_spawner(edict_t *self)
 	vec3_t	forward;
 	vec3_t	fact2spawnpoint1 = { -1504,512,72 };
 
+	self->class_id = ENTITY_TARGET_SPEAKER;
+
 	self->use = use_target_spawner;
 	self->svflags = SVF_NOCLIENT;
 
-	//Knightmare- a horrendously ugly hack for the insane spawner on fact2
+	// Knightmare- a horrendously ugly hack for the insane spawner on fact2
 	if (!Q_stricmp(level.mapname, "fact2")
 		&& VectorCompare(self->s.origin, fact2spawnpoint1))
 	{
@@ -1005,6 +1023,7 @@ void SP_target_blaster(edict_t *self)
 		// normal targeted target_blaster
 		self->use = use_target_blaster;
 	}
+	self->class_id = ENTITY_TARGET_BLASTER;
 
 	gi.linkentity(self);
 	self->svflags = SVF_NOCLIENT;
@@ -1027,6 +1046,8 @@ void trigger_crosslevel_trigger_use(edict_t *self, edict_t *other, edict_t *acti
 
 void SP_target_crosslevel_trigger(edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_CROSSLEVEL_TRIGGER;
+
 	self->svflags = SVF_NOCLIENT;
 	self->use = trigger_crosslevel_trigger_use;
 }
@@ -1048,6 +1069,8 @@ void target_crosslevel_target_think(edict_t *self)
 
 void SP_target_crosslevel_target(edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_CROSSLEVEL_TARGET;
+
 	if (!self->delay)
 		self->delay = 1;
 	self->svflags = SVF_NOCLIENT;
@@ -1574,15 +1597,19 @@ void target_lightramp_use(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_lightramp(edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_LIGHTRAMP;
+
 	// DWH: CUSTOM spawnflag allows custom light switching, speed is ignored
-	if (self->spawnflags & LIGHTRAMP_CUSTOM) {
+	if (self->spawnflags & LIGHTRAMP_CUSTOM)
+	{
 		if (!self->message || strlen(self->message) < 2) {
 			gi.dprintf("custom target_lightramp has bad ramp (%s) at %s\n", self->message, vtos(self->s.origin));
 			G_FreeEdict(self);
 			return;
 		}
 	}
-	else {
+	else
+	{
 		if (!self->message || strlen(self->message) != 2 || self->message[0] < 'a' || self->message[0] > 'z' || self->message[1] < 'a' || self->message[1] > 'z' || self->message[0] == self->message[1])
 		{
 			gi.dprintf("target_lightramp has bad ramp (%s) at %s\n", self->message, vtos(self->s.origin));
@@ -1678,6 +1705,8 @@ void target_earthquake_use(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_earthquake(edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_EARTHQUAKE;
+
 	if (!self->targetname)
 		gi.dprintf("untargeted %s at %s\n", self->classname, vtos(self->s.origin));
 
@@ -1822,6 +1851,9 @@ void SP_target_locator(edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->class_id = ENTITY_TARGET_LOCATOR;
+
 	self->think = target_locator_init;
 	self->nextthink = level.time + 2 * FRAMETIME;
 	gi.linkentity(self);
@@ -1976,6 +2008,8 @@ void SP_target_anger(edict_t *self)
 		self->spawnflags &= ~16;
 	}
 
+	self->class_id = ENTITY_TARGET_ANGER;
+
 	G_SetMovedir(self->s.angles, self->movedir);
 	self->movedir[2] = st.height;
 	self->use = use_target_anger;
@@ -2035,6 +2069,9 @@ void SP_target_monsterbattle(edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->class_id = ENTITY_TARGET_MONSTERBATTLE;
+
 	self->use = use_target_monsterbattle;
 }
 
@@ -2088,6 +2125,10 @@ void use_target_rocks(edict_t *self, edict_t *other, edict_t *activator)
 
 	VectorSet(source, 8, 8, 8);
 	mass = self->mass;
+
+	// set movedir here- if we're 
+	G_SetMovedir(self->s.angles, self->movedir);
+
 	// big chunks
 	if (mass >= 100)
 	{
@@ -2130,15 +2171,24 @@ void use_target_rocks(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_rocks(edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_ROCKS;
+	
+	// precache
 	gi.modelindex("models/objects/rock1/tris.md2");
 	gi.modelindex("models/objects/rock2/tris.md2");
+
+	if (!self->targetname)
+		gi.dprintf("target_rocks without a targetname at %s\n", vtos(self->s.origin));
 	if (!self->speed)
 		self->speed = 400;
 	if (!self->mass)
 		self->mass = 500;
+
+//	G_SetMovedir(self->s.angles, self->movedir);
 	self->use = use_target_rocks;
-	G_SetMovedir(self->s.angles, self->movedir);
 	self->svflags = SVF_NOCLIENT;
+
+	gi.linkentity(self);
 }
 
 /*====================================================================================
@@ -2206,6 +2256,9 @@ void SP_target_rotation(edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->class_id = ENTITY_TARGET_ROTATION;
+
 	if ((self->spawnflags & 3) == 3) {
 		gi.dprintf("target_rotation at %s: NO_LOOP and RANDOM are mutually exclusive.\n");
 		self->spawnflags = 2;
@@ -3096,6 +3149,8 @@ void use_target_CD(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_CD(edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_CD;
+
 	self->use = use_target_CD;
 	if (!self->dmg)
 		self->dmg = lazarus_cd_loop->value;
@@ -3401,6 +3456,8 @@ void SP_target_monitor(edict_t *self)
 {
 	char	buffer[MAX_QPATH];
 
+	self->class_id = ENTITY_TARGET_MONITOR;
+
 	if (!self->wait)
 		self->wait = 3;
 	self->use = use_target_monitor;
@@ -3547,6 +3604,9 @@ void SP_target_animation(edict_t *self)
 	return;
 #else
 	mmove_t	*move;
+
+	self->class_id = ENTITY_TARGET_ANIMATION;
+
 	if (!self->target && !(self->spawnflags & 1))
 	{
 		gi.dprintf("target_animation w/o a target at %s\n", vtos(self->s.origin));
@@ -3729,6 +3789,9 @@ void SP_target_failure(edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->class_id = ENTITY_TARGET_FAILURE;
+
 	self->use = use_target_failure;
 	if (st.noise)
 		self->noise_index = gi.soundindex(st.noise);
@@ -3938,9 +4001,18 @@ void use_target_change(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_change(edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_CHANGE;
+	
+		if (!self->targetname)
+		 gi.dprintf("target_change without a targetname at %s\n", vtos(self->s.origin));
+	if (!self->target)
+		 gi.dprintf("target_change without a target at %s\n", vtos(self->s.origin));
+	
+		self->svflags |= SVF_NOCLIENT;
 	self->use = use_target_change;
 	if (st.noise)
 		self->noise_index = gi.soundindex(st.noise);
+	gi.linkentity(self);
 }
 
 /*====================================================================================
@@ -4006,6 +4078,7 @@ void use_target_movewith(edict_t *self, edict_t *other, edict_t *activator)
 
 				target->movewith_ent = parent;
 				VectorCopy(parent->s.angles, target->parent_attach_angles);
+				VectorCopy(target->s.angles, target->child_attach_angles);
 				if (target->org_movetype < 0)
 					target->org_movetype = target->movetype;
 				if (target->movetype != MOVETYPE_NONE)
@@ -4036,6 +4109,8 @@ void use_target_movewith(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_movewith(edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_MOVEWITH;
+
 	if (!self->target)
 	{
 		gi.dprintf("target_movewith with no target\n");
@@ -4048,7 +4123,11 @@ void SP_target_movewith(edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->svflags |= SVF_NOCLIENT;
 	self->use = use_target_movewith;
+
+	gi.linkentity(self);
 }
 
 /*QUAKED target_command (1 0 0) (-8 -8 -8) (8 8 8)
@@ -4072,6 +4151,9 @@ void SP_target_command(edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->class_id = ENTITY_TARGET_COMMAND;
+
 	self->use = target_command_use;
 	self->svflags = SVF_NOCLIENT;
 	gi.linkentity(self);
@@ -4124,7 +4206,12 @@ void SP_target_set_effect(edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->class_id = ENTITY_TARGET_SET_EFFECT;
+
 	self->use = use_target_set_effect;
+	self->svflags = SVF_NOCLIENT;
+	gi.linkentity(self);
 }
 
 /*=============================================================================
@@ -4156,6 +4243,9 @@ void SP_target_sky(edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->class_id = ENTITY_TARGET_SKY;
+
 	self->pathtarget = gi.TagMalloc(strlen(st.sky) + 1, TAG_LEVEL);
 	strcpy(self->pathtarget, st.sky);
 	self->use = use_target_sky;
@@ -4192,6 +4282,8 @@ void use_target_fade(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_fade(edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_FADE;
+
 	self->use = use_target_fade;
 	if (self->fadein < 0)
 		self->fadein = 0;
@@ -4463,6 +4555,12 @@ void target_clone_starton(edict_t *self)
 
 void SP_target_clone(edict_t *self)
 {
+	if (!self->targetname && !(self->spawnflags & 1))
+		 {
+		gi.dprintf("%s without a targetname and without start_on at %s\n", self->classname, vtos(self->s.origin));
+		G_FreeEdict(self);
+		return;
+		}
 	if (!self->source)
 	{
 		gi.dprintf("%s with no source at %s\n",
@@ -4470,6 +4568,9 @@ void SP_target_clone(edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->class_id = ENTITY_TARGET_CLONE;
+
 	self->use = clone;
 	if (self->spawnflags & 1)
 	{
@@ -4488,6 +4589,8 @@ void use_target_skill(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_skill(edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_SKILL;
+
 	self->use = use_target_skill;
 }
 

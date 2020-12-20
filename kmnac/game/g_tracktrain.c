@@ -51,36 +51,36 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SF_PATH_DISABLE_TRAIN       0x0008		// player loses control of train
 #define SF_PATH_ABS_SPEED           0x0010      // speed modifier is absolute rather than a multiplier
 
-void tracktrain_next (edict_t *self);
-void tracktrain_reach_dest (edict_t *self);
+void tracktrain_next(edict_t* self);
+void tracktrain_reach_dest(edict_t* self);
 
 //=============================================================================
 
-static float track_AngleMod (float in)
+static float track_AngleMod(float in)
 {
 	float out;
 
 	if (in < 0)
-		out = in + 360 * ((int)(in / 360)+1);
+		out = in + 360 * ((int)(in / 360) + 1);
 	else if (in >= 360)
 		out = in - 360 * ((int)(in / 360));
 
 	return out;
 }
 
-static float track_ApproachAngle (float targAngle, float inAngle, float speed)
+static float track_ApproachAngle(float targAngle, float inAngle, float speed)
 {
 	float deltaAngle, out;
 
-	targAngle = track_AngleMod (targAngle);
-	out = track_AngleMod (targAngle);
+	targAngle = track_AngleMod(targAngle);
+	out = track_AngleMod(targAngle);
 
 	deltaAngle = targAngle - out;
 
 	// fix speed to be non-negative
 	if (speed < 0)
 		speed *= -1;
-	
+
 	if (deltaAngle < -180)
 		deltaAngle += 360;
 	else if (deltaAngle > 180)
@@ -96,7 +96,7 @@ static float track_ApproachAngle (float targAngle, float inAngle, float speed)
 	return out;
 }
 
-static float track_AngleDistance (float nextAngle, float curAngle)
+static float track_AngleDistance(float nextAngle, float curAngle)
 {
 	float deltaAngle;
 
@@ -121,11 +121,11 @@ deathtarget:	entity to trigger at dead end
 
 ==============================================================================*/
 
-void path_track_use (edict_t *self, edict_t *other, edict_t *activator)
+void path_track_use(edict_t* self, edict_t* other, edict_t* activator)
 {
-	char	*temp;
+	char* temp;
 
-	if(self->spawnflags & SF_PATH_ALTPATH)
+	if (self->spawnflags & SF_PATH_ALTPATH)
 	{
 		temp = self->target;
 		self->target = self->target2;
@@ -138,12 +138,12 @@ void path_track_use (edict_t *self, edict_t *other, edict_t *activator)
 	}
 }
 
-void SP_path_track (edict_t *self)
+void SP_path_track(edict_t* self)
 {
 	if (!self->targetname)
 	{
-		gi.dprintf ("%s with no targetname at %s\n", self->classname,vtos(self->s.origin));
-		G_FreeEdict (self);
+		gi.dprintf("%s with no targetname at %s\n", self->classname, vtos(self->s.origin));
+		G_FreeEdict(self);
 		return;
 	}
 
@@ -151,11 +151,11 @@ void SP_path_track (edict_t *self)
 
 	self->solid = SOLID_TRIGGER;
 	self->use = path_track_use;
-	VectorSet (self->mins, -8, -8, -8);
-	VectorSet (self->maxs, 8, 8, 8);
+	VectorSet(self->mins, -8, -8, -8);
+	VectorSet(self->maxs, 8, 8, 8);
 	self->svflags |= SVF_NOCLIENT;
-	if(!self->count) self->count = -1;
-	gi.linkentity (self);
+	if (!self->count) self->count = -1;
+	gi.linkentity(self);
 }
 
 /* ============================================================
@@ -185,38 +185,38 @@ speed			= Move/Rotate speed
 #define SF_TRACK_YAXIS              0x0080
 
 
-void trackchange_done (edict_t *self)
+void trackchange_done(edict_t* self)
 {
-	edict_t	*train = self->target_ent;
+	edict_t* train = self->target_ent;
 
 	VectorClear(self->velocity);
 	VectorClear(self->avelocity);
 	if (self->s.sound && self->moveinfo.sound_end)
-		gi.positioned_sound (self->s.origin, self, CHAN_AUTO, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_NORM
+		gi.positioned_sound(self->s.origin, self, CHAN_AUTO, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_NORM
 	self->s.sound = 0;
 
-	if(train)
+	if (train)
 	{
 		VectorClear(train->velocity);
 		VectorClear(train->avelocity);
 		train->spawnflags &= ~SF_TRACKTRAIN_DISABLED;
-		if(self->spawnflags & SF_TRACK_ACTIVATETRAIN)
+		if (self->spawnflags & SF_TRACK_ACTIVATETRAIN)
 		{
 			train->moveinfo.state = train->moveinfo.prevstate;
-			if(train->moveinfo.state && (train->sounds > 0)) {
-				train->s.sound = gi.soundindex(va("%sspeed%d.wav",train->source,abs(train->moveinfo.state)));
-	#ifdef LOOP_SOUND_ATTENUATION
+			if (train->moveinfo.state && (train->sounds > 0)) {
+				train->s.sound = gi.soundindex(va("%sspeed%d.wav", train->source, abs(train->moveinfo.state)));
+#ifdef LOOP_SOUND_ATTENUATION
 				train->s.attenuation = train->attenuation;
-	#endif
+#endif
 			}
-			train->moveinfo.next_speed = train->moveinfo.state * train->moveinfo.speed/3;
+			train->moveinfo.next_speed = train->moveinfo.state * train->moveinfo.speed / 3;
 		}
 		else
 		{	// A little redundant, but clear
 			train->moveinfo.state = STOP;
 			train->moveinfo.next_speed = 0;
 		}
-		if(self->moveinfo.state == STATE_MOVEUP)
+		if (self->moveinfo.state == STATE_MOVEUP)
 			train->target = self->pathtarget;
 		else
 			train->target = self->combattarget;
@@ -225,49 +225,49 @@ void trackchange_done (edict_t *self)
 		// SHOULD be at the target path_track now. But
 		// physics may have caused lift to outrun train,
 		// so force it:
-		VectorCopy(train->target_ent->s.origin,train->s.origin);
+		VectorCopy(train->target_ent->s.origin, train->s.origin);
 		train->s.origin[2] += train->viewheight;
 		gi.linkentity(train);
 		tracktrain_next(train);
 	}
-	if(self->moveinfo.state == STATE_MOVEDOWN)
+	if (self->moveinfo.state == STATE_MOVEDOWN)
 		self->moveinfo.state = STATE_BOTTOM;
 	else
 		self->moveinfo.state = STATE_TOP;
 	gi.linkentity(self);
 }
 
-void trackchange_use (edict_t *self, edict_t *other, edict_t *activator)
+void trackchange_use(edict_t* self, edict_t* other, edict_t* activator)
 {
 	float	time, tt, tr;
 	float	tspeed, rspeed;
 
-	if((self->moveinfo.state != STATE_TOP) && (self->moveinfo.state != STATE_BOTTOM))
+	if ((self->moveinfo.state != STATE_TOP) && (self->moveinfo.state != STATE_BOTTOM))
 	{
 		// already moving
 		return;
 	}
 
-	if(self->target)
+	if (self->target)
 	{
-		edict_t	*track;
+		edict_t* track;
 
 		self->target_ent = G_PickTarget(self->target);
-		if(self->target_ent)
+		if (self->target_ent)
 		{
 			// Make sure this sucker is at the path_track it's supposed to
 			// be at
-			if(self->moveinfo.state == STATE_BOTTOM)
+			if (self->moveinfo.state == STATE_BOTTOM)
 				track = G_PickTarget(self->combattarget);
 			else
 				track = G_PickTarget(self->pathtarget);
-			if(!track || (self->target_ent->target_ent != track))
+			if (!track || (self->target_ent->target_ent != track))
 				self->target_ent = NULL;
 			else
 			{
 				vec3_t	v;
-				VectorSubtract(track->s.origin,self->target_ent->s.origin,v);
-				if(VectorLength(v) > self->target_ent->moveinfo.distance)
+				VectorSubtract(track->s.origin, self->target_ent->s.origin, v);
+				if (VectorLength(v) > self->target_ent->moveinfo.distance)
 					self->target_ent = NULL;
 			}
 		}
@@ -275,18 +275,18 @@ void trackchange_use (edict_t *self, edict_t *other, edict_t *activator)
 	else
 		self->target_ent = NULL;
 
-	if(self->target_ent)
+	if (self->target_ent)
 		self->target_ent->s.sound = 0;
 
 	// Adjust speed so that "distance" rotation and "height" movement are achieved
 	// simultaneously.
 	tt = fabs(self->viewheight) / self->speed;
 	tr = fabs(self->moveinfo.distance) / self->speed;
-	time = max(tt,tr);
-	time = 0.1 * ((int)(10.*time-0.5)+1);
+	time = max(tt, tr);
+	time = 0.1 * ((int)(10. * time - 0.5) + 1);
 	tspeed = -self->viewheight / time;
 	rspeed = self->moveinfo.distance / time;
-	if(self->moveinfo.state == STATE_BOTTOM)
+	if (self->moveinfo.state == STATE_BOTTOM)
 	{
 		tspeed = -tspeed;
 		rspeed = -rspeed;
@@ -300,39 +300,39 @@ void trackchange_use (edict_t *self, edict_t *other, edict_t *activator)
 	else
 		self->velocity[2] = tspeed;
 
-	VectorScale(self->movedir,rspeed,self->avelocity);
+	VectorScale(self->movedir, rspeed, self->avelocity);
 
-	if(self->target_ent)
+	if (self->target_ent)
 	{
-		VectorCopy(self->velocity,self->target_ent->velocity);
-		VectorCopy(self->avelocity,self->target_ent->avelocity);
+		VectorCopy(self->velocity, self->target_ent->velocity);
+		VectorCopy(self->avelocity, self->target_ent->avelocity);
 		self->target_ent->spawnflags |= SF_TRACKTRAIN_DISABLED;
 		gi.linkentity(self->target_ent);
 	}
 
-	if(self->moveinfo.state == STATE_TOP)
+	if (self->moveinfo.state == STATE_TOP)
 		self->moveinfo.state = STATE_MOVEDOWN;
 	else
 		self->moveinfo.state = STATE_MOVEUP;
 
 	if (self->moveinfo.sound_start)
-		gi.positioned_sound (self->s.origin, self, CHAN_AUTO, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_NORM
+		gi.positioned_sound(self->s.origin, self, CHAN_AUTO, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_NORM
 	self->s.sound = self->moveinfo.sound_middle;
 #ifdef LOOP_SOUND_ATTENUATION
 	self->s.attenuation = self->attenuation;
 #endif
 
-	self->think     = trackchange_done;
+	self->think = trackchange_done;
 	self->nextthink = level.time + time;
 	gi.linkentity(self);
 }
 
-void SP_func_trackchange (edict_t *self)
+void SP_func_trackchange(edict_t* self)
 {
 	self->class_id = ENTITY_FUNC_TRACKCHANGE;
 
 	self->movetype = MOVETYPE_PUSH;
-	VectorClear (self->s.angles);
+	VectorClear(self->s.angles);
 
 	// set the axis of rotation
 	VectorClear(self->movedir);
@@ -350,11 +350,11 @@ void SP_func_trackchange (edict_t *self)
 	self->viewheight = st.height;
 
 	// Max rotation/translation speed
-	if(!self->speed)
+	if (!self->speed)
 		self->speed = 100;
 
-	VectorCopy(self->s.origin,self->pos1);
-	VectorCopy(self->pos1,self->pos2);
+	VectorCopy(self->s.origin, self->pos1);
+	VectorCopy(self->pos1, self->pos2);
 	if (self->spawnflags & SF_TRACK_XAXIS)
 		self->pos2[0] -= self->viewheight;
 	else if (self->spawnflags & SF_TRACK_YAXIS)
@@ -363,18 +363,22 @@ void SP_func_trackchange (edict_t *self)
 		self->pos2[2] -= self->viewheight;
 
 	self->solid = SOLID_BSP;
-	gi.setmodel (self, self->model);
+	gi.setmodel(self, self->model);
 	self->use = trackchange_use;
 
+#ifdef POSTTHINK_CHILD_MOVEMENT
+	self->postthink = set_child_movement; // Knightmare- supports movewith
+#endif	// POSTTHINK_CHILD_MOVEMENT
+
 	// bottom starters:
-	if(self->spawnflags & SF_TRACK_STARTBOTTOM)
+	if (self->spawnflags & SF_TRACK_STARTBOTTOM)
 	{
 		vec3_t	temp;
-		VectorCopy(self->pos1,temp);
-		VectorCopy(self->pos2,self->pos1);
-		VectorCopy(temp,self->pos2);
-		VectorCopy(self->pos1,self->s.origin);
-		VectorMA(self->s.angles,self->moveinfo.distance,self->movedir,self->s.angles);
+		VectorCopy(self->pos1, temp);
+		VectorCopy(self->pos2, self->pos1);
+		VectorCopy(temp, self->pos2);
+		VectorCopy(self->pos1, self->s.origin);
+		VectorMA(self->s.angles, self->moveinfo.distance, self->movedir, self->s.angles);
 		self->moveinfo.state = STATE_BOTTOM;
 	}
 	else
@@ -382,15 +386,15 @@ void SP_func_trackchange (edict_t *self)
 
 	if (self->sounds > 1 && self->sounds < 100) // custom sounds
 	{
-		self->moveinfo.sound_start = gi.soundindex  (va("plats/pt%02i_strt.wav", self->sounds));
-		self->moveinfo.sound_middle = gi.soundindex  (va("plats/pt%02i_mid.wav", self->sounds));
-		self->moveinfo.sound_end = gi.soundindex  (va("plats/pt%02i_end.wav", self->sounds));
+		self->moveinfo.sound_start = gi.soundindex(va("plats/pt%02i_strt.wav", self->sounds));
+		self->moveinfo.sound_middle = gi.soundindex(va("plats/pt%02i_mid.wav", self->sounds));
+		self->moveinfo.sound_end = gi.soundindex(va("plats/pt%02i_end.wav", self->sounds));
 	}
 	else
 	{
-		self->moveinfo.sound_start = gi.soundindex ("plats/pt1_strt.wav");
-		self->moveinfo.sound_middle = gi.soundindex ("plats/pt1_mid.wav");
-		self->moveinfo.sound_end = gi.soundindex ("plats/pt1_end.wav");
+		self->moveinfo.sound_start = gi.soundindex("plats/pt1_strt.wav");
+		self->moveinfo.sound_middle = gi.soundindex("plats/pt1_mid.wav");
+		self->moveinfo.sound_end = gi.soundindex("plats/pt1_end.wav");
 	}
 
 	if (self->attenuation <= 0)
@@ -402,7 +406,7 @@ void SP_func_trackchange (edict_t *self)
 
 
 /*=====================================================================================
-func_tracktrain 
+func_tracktrain
 
 target		first path_track stop
 dmg			damage applied to blocker
@@ -412,8 +416,8 @@ distance	wheelbase, determines turn rate. default=50
 height		height of origin above path_tracks, default=4
 roll		roll angle while turning, default=0
 */
-void tracktrain_think (edict_t *self);
-void tracktrain_drive (edict_t *train, edict_t *other )
+void tracktrain_think(edict_t* self);
+void tracktrain_drive(edict_t* train, edict_t* other)
 {
 	vec3_t	angles, offset;
 	vec3_t	f1, l1, u1;
@@ -422,35 +426,35 @@ void tracktrain_drive (edict_t *train, edict_t *other )
 	if (!(other->svflags & SVF_MONSTER))
 		return;
 
-	if(train->spawnflags & (SF_TRACKTRAIN_NOCONTROL | SF_TRACKTRAIN_STARTOFF))
+	if (train->spawnflags & (SF_TRACKTRAIN_NOCONTROL | SF_TRACKTRAIN_STARTOFF))
 		return;
 
 	// See if monster is in driving position
-	VectorCopy(train->s.angles,angles);
-	VectorNegate(angles,angles);
-	AngleVectors(angles,f1,l1,u1);
-			
-	VectorSubtract(other->s.origin,train->s.origin,offset);
-	VectorScale(f1, offset[0],f1);
-	VectorScale(l1,-offset[1],l1);
-	VectorScale(u1, offset[2],u1);
-	VectorCopy(f1,offset);
-	VectorAdd(offset,l1,offset);
-	VectorAdd(offset,u1,offset);
+	VectorCopy(train->s.angles, angles);
+	VectorNegate(angles, angles);
+	AngleVectors(angles, f1, l1, u1);
+
+	VectorSubtract(other->s.origin, train->s.origin, offset);
+	VectorScale(f1, offset[0], f1);
+	VectorScale(l1, -offset[1], l1);
+	VectorScale(u1, offset[2], u1);
+	VectorCopy(f1, offset);
+	VectorAdd(offset, l1, offset);
+	VectorAdd(offset, u1, offset);
 
 	// Relax the constraints on driving position just a bit for monsters
 
-	if(offset[0] < train->bleft[0] - 16)
+	if (offset[0] < train->bleft[0] - 16)
 		return;
-	if(offset[1] < train->bleft[1] - 16)
+	if (offset[1] < train->bleft[1] - 16)
 		return;
-	if(offset[2] < train->bleft[2] - 16)
+	if (offset[2] < train->bleft[2] - 16)
 		return;
-	if(offset[0] > train->tright[0] + 16)
+	if (offset[0] > train->tright[0] + 16)
 		return;
-	if(offset[1] > train->tright[1] + 16)
+	if (offset[1] > train->tright[1] + 16)
 		return;
-	if(offset[2] > train->tright[2] + 16)
+	if (offset[2] > train->tright[2] + 16)
 		return;
 
 	train->owner = other;
@@ -459,11 +463,11 @@ void tracktrain_drive (edict_t *train, edict_t *other )
 	// Store the offset and later keep driver at same relative position
 	// (with height adjustments for pitch)
 	AngleVectors(train->s.angles, forward, left, NULL);
-	VectorSubtract(other->s.origin,train->s.origin,train->offset);
-	VectorScale(forward,train->offset[0],f1);
-	VectorScale(left,train->offset[1],l1);
-	VectorCopy(f1,train->offset);
-	VectorAdd(train->offset,l1,train->offset);
+	VectorSubtract(other->s.origin, train->s.origin, train->offset);
+	VectorScale(forward, train->offset[0], f1);
+	VectorScale(left, train->offset[1], l1);
+	VectorCopy(f1, train->offset);
+	VectorAdd(train->offset, l1, train->offset);
 	train->offset[1] = -train->offset[1];
 	train->offset[2] = other->s.origin[2] - train->s.origin[2];
 	gi.linkentity(other);
@@ -471,12 +475,12 @@ void tracktrain_drive (edict_t *train, edict_t *other )
 
 	other->monsterinfo.pausetime = level.time + 100000000;
 	other->monsterinfo.aiflags |= AI_STAND_GROUND;
-	other->monsterinfo.stand (other);
+	other->monsterinfo.stand(other);
 
 	train->moveinfo.state = FAST;
 	train->moveinfo.next_speed = train->moveinfo.speed;
-	if(train->sounds) {
-		train->s.sound = gi.soundindex(va("%sspeed%d.wav",train->source,abs(train->moveinfo.state)));
+	if (train->sounds) {
+		train->s.sound = gi.soundindex(va("%sspeed%d.wav", train->source, abs(train->moveinfo.state)));
 #ifdef LOOP_SOUND_ATTENUATION
 		train->s.attenuation = train->attenuation;
 #endif
@@ -488,86 +492,86 @@ void tracktrain_drive (edict_t *train, edict_t *other )
 
 }
 
-void tracktrain_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void tracktrain_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point)
 {
-	if(self->deathtarget)
+	if (self->deathtarget)
 	{
 		self->target = self->deathtarget;
-		G_UseTargets (self, attacker);
+		G_UseTargets(self, attacker);
 	}
-	BecomeExplosion1 (self);
+	BecomeExplosion1(self);
 }
 
-void tracktrain_disengage (edict_t *train)
+void tracktrain_disengage(edict_t* train)
 {
-	edict_t *driver;
+	edict_t* driver;
 
 	driver = train->owner;
-	if(!driver) return;
+	if (!driver) return;
 
-	if(driver->client)
+	if (driver->client)
 	{
 		vec3_t	forward, left, up, f1, l1, u1;
 
 		driver->movetype = MOVETYPE_WALK;
 		AngleVectors(train->s.angles, forward, left, up);
-		VectorScale(forward,train->offset[0],f1);
-		VectorScale(left,-train->offset[1],l1);
-		VectorScale(up,train->offset[2],u1);
-		VectorAdd(train->s.origin,f1,driver->s.origin);
-		VectorAdd(driver->s.origin,l1,driver->s.origin);
-		VectorAdd(driver->s.origin,u1,driver->s.origin);
-		driver->s.origin[2] += 16 * ( fabs(up[0]) + fabs(up[1]) );
-		VectorCopy(train->velocity,driver->velocity);
+		VectorScale(forward, train->offset[0], f1);
+		VectorScale(left, -train->offset[1], l1);
+		VectorScale(up, train->offset[2], u1);
+		VectorAdd(train->s.origin, f1, driver->s.origin);
+		VectorAdd(driver->s.origin, l1, driver->s.origin);
+		VectorAdd(driver->s.origin, u1, driver->s.origin);
+		driver->s.origin[2] += 16 * (fabs(up[0]) + fabs(up[1]));
+		VectorCopy(train->velocity, driver->velocity);
 		driver->client->vehicle_framenum = level.framenum;
 		// turn ON client side prediction for this player
 		driver->client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
 	}
 	else
 	{
-		if(train->moveinfo.state != STOP)
+		if (train->moveinfo.state != STOP)
 		{
 			train->spawnflags |= SF_TRACKTRAIN_SLOWSTOP;
 			train->moveinfo.state = STOP;
 			train->moveinfo.next_speed = 0;
-			train->s.sound = gi.soundindex(va("%sspeed1.wav",train->source));
-	#ifdef LOOP_SOUND_ATTENUATION
+			train->s.sound = gi.soundindex(va("%sspeed1.wav", train->source));
+#ifdef LOOP_SOUND_ATTENUATION
 			train->s.attenuation = train->attenuation;
-	#endif
+#endif
 		}
 
 		driver->movetype = MOVETYPE_STEP;
-		if(driver->health > 0)
-			VectorCopy(train->velocity,driver->velocity);
+		if (driver->health > 0)
+			VectorCopy(train->velocity, driver->velocity);
 		else
 			VectorClear(driver->velocity);
 		driver->monsterinfo.pausetime = 0;
 		driver->monsterinfo.aiflags &= ~AI_STAND_GROUND;
 	}
-	gi.linkentity (driver);
+	gi.linkentity(driver);
 
 	train->owner = NULL;
 	driver->vehicle = NULL;
 }
 
-void tracktrain_hide (edict_t *self)
+void tracktrain_hide(edict_t* self)
 {
 	self->solid = SOLID_NOT;
 	self->svflags |= SVF_NOCLIENT;
 	gi.linkentity(self);
 }
 
-void tracktrain_think (edict_t *self)
+void tracktrain_think(edict_t* self)
 {
 	float	distance, speed, time;
 	float	yaw, pitch;
 	vec3_t	forward, left, up, f1, l1, u1, v;
 	int		i;
-	edict_t	*ent;
+	edict_t* ent;
 
-	if(self->spawnflags & SF_TRACKTRAIN_OTHERMAP)
+	if (self->spawnflags & SF_TRACKTRAIN_OTHERMAP)
 	{
-		if( (self->spawnflags & SF_TRACKTRAIN_INDICATOR) && !(self->spawnflags & SF_TRACKTRAIN_ANIMATED))
+		if ((self->spawnflags & SF_TRACKTRAIN_INDICATOR) && !(self->spawnflags & SF_TRACKTRAIN_ANIMATED))
 			self->s.frame = 6;
 		else
 			self->s.effects &= ~(EF_ANIM_ALL | EF_ANIM_ALLFAST);
@@ -586,14 +590,14 @@ void tracktrain_think (edict_t *self)
 
 	self->nextthink = level.time + FRAMETIME;
 
-	if(!self->owner && (self->spawnflags & SF_TRACKTRAIN_DISABLED))
+	if (!self->owner && (self->spawnflags & SF_TRACKTRAIN_DISABLED))
 		return;
 
-	if(self->spawnflags & SF_TRACKTRAIN_ANIMATED)
+	if (self->spawnflags & SF_TRACKTRAIN_ANIMATED)
 	{
-		if(self->moveinfo.state)
+		if (self->moveinfo.state)
 		{
-			if(self->spawnflags & SF_TRACKTRAIN_INDICATOR)
+			if (self->spawnflags & SF_TRACKTRAIN_INDICATOR)
 				self->s.effects |= EF_ANIM_ALLFAST;
 			else
 				self->s.effects |= EF_ANIM_ALL;
@@ -601,35 +605,35 @@ void tracktrain_think (edict_t *self)
 		else
 			self->s.effects &= ~(EF_ANIM_ALL | EF_ANIM_ALLFAST);
 	}
-	else if(self->spawnflags & SF_TRACKTRAIN_INDICATOR)
+	else if (self->spawnflags & SF_TRACKTRAIN_INDICATOR)
 	{
-		if((self->moveinfo.state == STOP) && !self->owner)
+		if ((self->moveinfo.state == STOP) && !self->owner)
 		{
-			if(self->spawnflags & SF_TRACKTRAIN_STARTOFF)
+			if (self->spawnflags & SF_TRACKTRAIN_STARTOFF)
 				self->s.frame = 14;
 			else
 				self->s.frame = 6;
 		}
-		else if((level.framenum % 5) == 0)
-			self->s.frame = (self->moveinfo.state - RFAST)*2 + (1 - (self->s.frame % 2));
+		else if ((level.framenum % 5) == 0)
+			self->s.frame = (self->moveinfo.state - RFAST) * 2 + (1 - (self->s.frame % 2));
 	}
 
 	AngleVectors(self->s.angles, forward, left, up);
 
-	if(!(self->spawnflags & SF_TRACKTRAIN_DISABLED))
+	if (!(self->spawnflags & SF_TRACKTRAIN_DISABLED))
 	{
-		VectorCopy(self->velocity,v);
+		VectorCopy(self->velocity, v);
 		speed = VectorLength(v);
-		if(self->moveinfo.state < STOP)
+		if (self->moveinfo.state < STOP)
 			speed = -speed;
 		self->moveinfo.current_speed = speed;
-		if(self->moveinfo.state != STOP)
+		if (self->moveinfo.state != STOP)
 			self->moveinfo.prevstate = self->moveinfo.state;
 	}
 
 	if (self->owner)
 	{
-		edict_t	*driver = self->owner;
+		edict_t* driver = self->owner;
 
 		// ... then we have a driver
 		if ((driver->health <= 0) || (driver->movetype == MOVETYPE_NOCLIP))
@@ -643,16 +647,16 @@ void tracktrain_think (edict_t *self)
 			{
 				// if he's pressing the use key, and he didn't just
 				// get on or off, disengage
-				if(level.framenum - driver->client->vehicle_framenum > 2)
+				if (level.framenum - driver->client->vehicle_framenum > 2)
 				{
-					VectorCopy(self->velocity,driver->velocity);
+					VectorCopy(self->velocity, driver->velocity);
 					tracktrain_disengage(self);
 					return;
 				}
 			}
-			if ( (driver->client->ucmd.sidemove < -199) || (driver->client->ucmd.sidemove > 199) || (driver->client->ucmd.upmove > 0) )
+			if ((driver->client->ucmd.sidemove < -199) || (driver->client->ucmd.sidemove > 199) || (driver->client->ucmd.upmove > 0))
 			{
-				VectorCopy(self->velocity,driver->velocity);
+				VectorCopy(self->velocity, driver->velocity);
 				tracktrain_disengage(self);
 				return;
 			}
@@ -663,22 +667,22 @@ void tracktrain_think (edict_t *self)
 			{
 				if ((driver->client->ucmd.forwardmove > -199) && (driver->client->ucmd.forwardmove < 199))
 					self->moveinfo.wait = 0;
-				else if(!self->moveinfo.wait)
+				else if (!self->moveinfo.wait)
 				{
-					if(driver->client->ucmd.forwardmove > 0)
+					if (driver->client->ucmd.forwardmove > 0)
 					{
-						if(self->moveinfo.state < FAST)
+						if (self->moveinfo.state < FAST)
 						{
 							self->moveinfo.state++;
-							self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed/3;
+							self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed / 3;
 							self->moveinfo.wait = 1;
-							if((self->spawnflags & SF_TRACKTRAIN_ANIMMASK) == SF_TRACKTRAIN_INDICATOR)
-								self->s.frame = (self->moveinfo.state - RFAST)*2 + (1 - (self->s.frame % 2));
-							if(self->moveinfo.state && (self->sounds > 0)) {
-								self->s.sound = gi.soundindex(va("%sspeed%d.wav",self->source,abs(self->moveinfo.state)));
-						#ifdef LOOP_SOUND_ATTENUATION
+							if ((self->spawnflags & SF_TRACKTRAIN_ANIMMASK) == SF_TRACKTRAIN_INDICATOR)
+								self->s.frame = (self->moveinfo.state - RFAST) * 2 + (1 - (self->s.frame % 2));
+							if (self->moveinfo.state && (self->sounds > 0)) {
+								self->s.sound = gi.soundindex(va("%sspeed%d.wav", self->source, abs(self->moveinfo.state)));
+#ifdef LOOP_SOUND_ATTENUATION
 								self->s.attenuation = self->attenuation;
-						#endif
+#endif
 							}
 							else
 								self->s.sound = 0;
@@ -686,19 +690,19 @@ void tracktrain_think (edict_t *self)
 					}
 					else
 					{
-						if( (self->moveinfo.state > STOP) ||
+						if ((self->moveinfo.state > STOP) ||
 							((self->moveinfo.state > RFAST) && !(self->spawnflags & SF_TRACKTRAIN_ONEWAY)))
 						{
 							self->moveinfo.state--;
-							self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed/3;
+							self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed / 3;
 							self->moveinfo.wait = 1;
-							if((self->spawnflags & SF_TRACKTRAIN_ANIMMASK) == SF_TRACKTRAIN_INDICATOR)
-								self->s.frame = (self->moveinfo.state - RFAST)*2 + (1 - (self->s.frame % 2));
-							if(self->moveinfo.state && (self->sounds > 0)) {
-								self->s.sound = gi.soundindex(va("%sspeed%d.wav",self->source,abs(self->moveinfo.state)));
-						#ifdef LOOP_SOUND_ATTENUATION
+							if ((self->spawnflags & SF_TRACKTRAIN_ANIMMASK) == SF_TRACKTRAIN_INDICATOR)
+								self->s.frame = (self->moveinfo.state - RFAST) * 2 + (1 - (self->s.frame % 2));
+							if (self->moveinfo.state && (self->sounds > 0)) {
+								self->s.sound = gi.soundindex(va("%sspeed%d.wav", self->source, abs(self->moveinfo.state)));
+#ifdef LOOP_SOUND_ATTENUATION
 								self->s.attenuation = self->attenuation;
-						#endif
+#endif
 							}
 							else
 								self->s.sound = 0;
@@ -709,31 +713,31 @@ void tracktrain_think (edict_t *self)
 			else
 			{
 				// Driver is monster.
-				if(driver->enemy && driver->enemy->inuse)
+				if (driver->enemy && driver->enemy->inuse)
 				{
 					qboolean	vis;
 
-					vis = visible(driver,driver->enemy);
+					vis = visible(driver, driver->enemy);
 
-					if(vis)
+					if (vis)
 						self->monsterinfo.search_time = 0;
 
-					if(self->monsterinfo.search_time == 0)
+					if (self->monsterinfo.search_time == 0)
 					{
 						float		dot, r;
 						vec3_t		vec;
 
-						if(vis)
-							VectorSubtract(driver->enemy->s.origin,driver->s.origin,vec);
+						if (vis)
+							VectorSubtract(driver->enemy->s.origin, driver->s.origin, vec);
 						else
-							VectorSubtract(driver->monsterinfo.last_sighting,driver->s.origin,vec);
+							VectorSubtract(driver->monsterinfo.last_sighting, driver->s.origin, vec);
 
 						r = VectorNormalize(vec);
-						dot = DotProduct(vec,forward);
-						if((r > 2000) && (dot < 0))
+						dot = DotProduct(vec, forward);
+						if ((r > 2000) && (dot < 0))
 						{
 							self->moveinfo.state = -self->moveinfo.state;
-							self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed/3;
+							self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed / 3;
 							self->monsterinfo.search_time = level.time;
 							tracktrain_next(self);
 							return;
@@ -742,174 +746,176 @@ void tracktrain_think (edict_t *self)
 				}
 			}
 			// Check for change in direction
-			if( self->moveinfo.prevstate < STOP && self->moveinfo.state > STOP )
+			if (self->moveinfo.prevstate < STOP && self->moveinfo.state > STOP)
 			{
 				self->moveinfo.prevstate = self->moveinfo.state;
 				tracktrain_next(self);
 				return;
 			}
-			else if(self->moveinfo.prevstate > STOP && self->moveinfo.state < STOP)
+			else if (self->moveinfo.prevstate > STOP && self->moveinfo.state < STOP)
 			{
 				self->moveinfo.prevstate = self->moveinfo.state;
 				tracktrain_next(self);
 				return;
 			}
 
-			if(self->moveinfo.current_speed < self->moveinfo.next_speed)
+			if (self->moveinfo.current_speed < self->moveinfo.next_speed)
 			{
-				speed = self->moveinfo.current_speed + self->moveinfo.accel/10;
-				if(speed > self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
+				speed = self->moveinfo.current_speed + self->moveinfo.accel / 10;
+				if (speed > self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
 			}
-			else if(self->moveinfo.current_speed > self->moveinfo.next_speed)
+			else if (self->moveinfo.current_speed > self->moveinfo.next_speed)
 			{
-				speed = self->moveinfo.current_speed - self->moveinfo.decel/10;
-				if(speed < self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
+				speed = self->moveinfo.current_speed - self->moveinfo.decel / 10;
+				if (speed < self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
 			}
-			
-			VectorSubtract(self->moveinfo.end_origin,self->s.origin,v);
+
+			VectorSubtract(self->moveinfo.end_origin, self->s.origin, v);
 			distance = VectorLength(v);
-			if(speed != 0)
+			if (speed != 0)
 			{
-				time = distance/fabs(speed);
-				time = 0.1 * ((int)(10*time - 0.5)+1);
-				if( (time > 0) && (distance > 0) )
-					speed = distance/time;
+				time = distance / fabs(speed);
+				time = 0.1 * ((int)(10 * time - 0.5) + 1);
+				if ((time > 0) && (distance > 0))
+					speed = distance / time;
 			}
 			else
 				time = 100000;
 			VectorNormalize(v);
-			VectorScale(v,fabs(speed),self->velocity);
-			
+			VectorScale(v, fabs(speed), self->velocity);
+
 			//		gi.dprintf("distance to %s=%g, time=%g\n",
 			//			self->target_ent->targetname,distance,time);
-			
+
 			gi.linkentity(self);
 		}
 
 		// Set driver velocity, position, and angles
-		VectorCopy(self->velocity,driver->velocity);
+		VectorCopy(self->velocity, driver->velocity);
 
-		VectorScale(forward,self->offset[0],f1);
-		VectorScale(left,-self->offset[1],l1);
-		VectorScale(up,self->offset[2],u1);
-		VectorAdd(self->s.origin,f1,driver->s.origin);
-		VectorAdd(driver->s.origin,l1,driver->s.origin);
-		VectorAdd(driver->s.origin,u1,driver->s.origin);
-		driver->s.origin[2] += 16 * ( fabs(up[0]) + fabs(up[1]) );
+		VectorScale(forward, self->offset[0], f1);
+		VectorScale(left, -self->offset[1], l1);
+		VectorScale(up, self->offset[2], u1);
+		VectorAdd(self->s.origin, f1, driver->s.origin);
+		VectorAdd(driver->s.origin, l1, driver->s.origin);
+		VectorAdd(driver->s.origin, u1, driver->s.origin);
+		driver->s.origin[2] += 16 * (fabs(up[0]) + fabs(up[1]));
 
-		yaw = self->avelocity[YAW]*FRAMETIME;
-		if(yaw != 0)
+		yaw = self->avelocity[YAW] * FRAMETIME;
+		if (yaw != 0)
 		{
 			driver->s.angles[YAW] += yaw;
-			if(driver->client)
+			if (driver->client)
 			{
 				driver->client->ps.pmove.delta_angles[YAW] += ANGLE2SHORT(yaw);
 				driver->client->ps.viewangles[YAW] += yaw;
 			}
 		}
-		pitch = self->avelocity[PITCH]*FRAMETIME;
-		if(pitch != 0)
+		pitch = self->avelocity[PITCH] * FRAMETIME;
+		if (pitch != 0)
 		{
 			float	delta_yaw;
 
 			delta_yaw = driver->s.angles[YAW] - self->s.angles[YAW];
 			delta_yaw *= M_PI / 180.;
 			pitch *= cos(delta_yaw);
-			if(driver->client)
+			if (driver->client)
 			{
 				driver->client->ps.pmove.delta_angles[PITCH] += ANGLE2SHORT(pitch);
 				driver->client->ps.viewangles[PITCH] += pitch;
 			}
 		}
-		if((self->moveinfo.state != STOP) || (yaw != 0) || (pitch != 0))
-			if(driver->client)
+		if ((self->moveinfo.state != STOP) || (yaw != 0) || (pitch != 0))
+			if (driver->client)
 				driver->client->ps.pmove.pm_type = PM_FREEZE;
 
 		gi.linkentity(driver);
 
 	}
-	else if(self->spawnflags & (SF_TRACKTRAIN_NOCONTROL | SF_TRACKTRAIN_STARTOFF))
+	else if (self->spawnflags & (SF_TRACKTRAIN_NOCONTROL | SF_TRACKTRAIN_STARTOFF))
 	{
 		// No driver, either can't be controlled or is "off"
 
 		if (!(self->spawnflags & SF_TRACKTRAIN_DISABLED))
 		{
-			self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed/3;
+			self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed / 3;
 
-			if(self->moveinfo.current_speed < self->moveinfo.next_speed)
+			if (self->moveinfo.current_speed < self->moveinfo.next_speed)
 			{
-				speed = self->moveinfo.current_speed + self->moveinfo.accel/10;
-				if(speed > self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
+				speed = self->moveinfo.current_speed + self->moveinfo.accel / 10;
+				if (speed > self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
 			}
-			else if(self->moveinfo.current_speed > self->moveinfo.next_speed)
+			else if (self->moveinfo.current_speed > self->moveinfo.next_speed)
 			{
-				speed = self->moveinfo.current_speed - self->moveinfo.decel/10;
-				if(speed < self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
+				speed = self->moveinfo.current_speed - self->moveinfo.decel / 10;
+				if (speed < self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
 			}
-			
-			if(speed != 0)
+
+			if (speed != 0)
 			{
-				VectorSubtract(self->moveinfo.end_origin,self->s.origin,v);
+				VectorSubtract(self->moveinfo.end_origin, self->s.origin, v);
 				distance = VectorLength(v);
-				time = distance/fabs(speed);
-				time = 0.1 * ((int)(10*time - 0.5)+1);
-				if( (time > 0) && (distance > 0) )
-					speed = distance/time;
+				time = distance / fabs(speed);
+				time = 0.1 * ((int)(10 * time - 0.5) + 1);
+				if ((time > 0) && (distance > 0))
+					speed = distance / time;
 				VectorNormalize(v);
-				VectorScale(v,fabs(speed),self->velocity);
+				VectorScale(v, fabs(speed), self->velocity);
 				gi.linkentity(self);
 			}
 
-			if( !(self->spawnflags & SF_TRACKTRAIN_NOCONTROL) &&
-				 (self->spawnflags & SF_TRACKTRAIN_STARTOFF)  &&
-				 self->viewmessage )
+			if (!(self->spawnflags & SF_TRACKTRAIN_NOCONTROL) &&
+				(self->spawnflags & SF_TRACKTRAIN_STARTOFF) &&
+				self->viewmessage)
 			{
 				vec3_t	angles, offset;
 
 				// Check for player entering bleft/tright field of train
-				VectorCopy(self->s.angles,angles);
-				VectorNegate(angles,angles);
-				AngleVectors(angles,f1,l1,u1);
-				for (i=1, ent=&g_edicts[1] ; i<=maxclients->value ; i++, ent++)
+				VectorCopy(self->s.angles, angles);
+				VectorNegate(angles, angles);
+				AngleVectors(angles, f1, l1, u1);
+				for (i = 1, ent = &g_edicts[1]; i <= maxclients->value; i++, ent++)
 				{
 					if (!ent->inuse) continue;
 					if (ent->movetype == MOVETYPE_NOCLIP) continue;
-					VectorSubtract(ent->s.origin,self->s.origin,offset);
-					VectorScale(f1, offset[0],f1);
-					VectorScale(l1,-offset[1],l1);
-					VectorScale(u1, offset[2],u1);
-					VectorCopy(f1,offset);
-					VectorAdd(offset,l1,offset);
-					VectorAdd(offset,u1,offset);
-					if(offset[0] < self->bleft[0])
+					VectorSubtract(ent->s.origin, self->s.origin, offset);
+					VectorScale(f1, offset[0], f1);
+					VectorScale(l1, -offset[1], l1);
+					VectorScale(u1, offset[2], u1);
+					VectorCopy(f1, offset);
+					VectorAdd(offset, l1, offset);
+					VectorAdd(offset, u1, offset);
+					if (offset[0] < self->bleft[0])
 						continue;
-					if(offset[1] < self->bleft[1])
+					if (offset[1] < self->bleft[1])
 						continue;
-					if(offset[2] < self->bleft[2])
+					if (offset[2] < self->bleft[2])
 						continue;
-					if(offset[0] > self->tright[0])
+					if (offset[0] > self->tright[0])
 						continue;
-					if(offset[1] > self->tright[1])
+					if (offset[1] > self->tright[1])
 						continue;
-					if(offset[2] > self->tright[2])
+					if (offset[2] > self->tright[2])
 						continue;
 
-					safe_centerprintf(ent,"%s",self->viewmessage);
+					safe_centerprintf(ent, "%s", self->viewmessage);
 					self->viewmessage = NULL;
 				}
 			}
 
-			if(!speed)
+			if (!speed)
 			{
-				if(self->viewmessage)
+				if (self->viewmessage)
 					time = 100000;
 				else
 				{
 					VectorClear(self->avelocity);
 					VectorClear(self->avelocity);
 					self->nextthink = 0;
-					if(self->movewith_next && (self->movewith_next->movewith_ent == self))
+#ifndef POSTTHINK_CHILD_MOVEMENT
+					if (self->movewith_next && (self->movewith_next->movewith_ent == self))
 						set_child_movement(self);
+#endif	// POSTTHINK_CHILD_MOVEMENT
 					gi.linkentity(self);
 					return;
 				}
@@ -921,36 +927,36 @@ void tracktrain_think (edict_t *self)
 		//
 		// No driver, CAN be controlled and isn't currently turned off
 		//
-		self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed/3;
-		if(self->moveinfo.current_speed < self->moveinfo.next_speed)
+		self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed / 3;
+		if (self->moveinfo.current_speed < self->moveinfo.next_speed)
 		{
-			if(self->spawnflags & SF_TRACKTRAIN_SLOWSTOP)
-				speed = self->moveinfo.current_speed + self->moveinfo.accel/25;
+			if (self->spawnflags & SF_TRACKTRAIN_SLOWSTOP)
+				speed = self->moveinfo.current_speed + self->moveinfo.accel / 25;
 			else
-				speed = self->moveinfo.current_speed + self->moveinfo.accel/10;
-			if(speed > self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
+				speed = self->moveinfo.current_speed + self->moveinfo.accel / 10;
+			if (speed > self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
 		}
-		else if(self->moveinfo.current_speed > self->moveinfo.next_speed)
+		else if (self->moveinfo.current_speed > self->moveinfo.next_speed)
 		{
-			if(self->spawnflags & SF_TRACKTRAIN_SLOWSTOP)
-				speed = self->moveinfo.current_speed - self->moveinfo.decel/25;
+			if (self->spawnflags & SF_TRACKTRAIN_SLOWSTOP)
+				speed = self->moveinfo.current_speed - self->moveinfo.decel / 25;
 			else
-				speed = self->moveinfo.current_speed - self->moveinfo.decel/10;
-			if(speed < self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
+				speed = self->moveinfo.current_speed - self->moveinfo.decel / 10;
+			if (speed < self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
 		}
 
-		if( speed != 0 ) 
+		if (speed != 0)
 		{
-			VectorSubtract(self->moveinfo.end_origin,self->s.origin,v);
+			VectorSubtract(self->moveinfo.end_origin, self->s.origin, v);
 			distance = VectorNormalize(v);
-			time = distance/fabs(speed);
-			time = 0.1 * ((int)(10*time - 0.5)+1);
-			if( (time > 0) && (distance > 0) )
-				speed = distance/time;
-			VectorScale(v,fabs(speed),self->velocity);
+			time = distance / fabs(speed);
+			time = 0.1 * ((int)(10 * time - 0.5) + 1);
+			if ((time > 0) && (distance > 0))
+				speed = distance / time;
+			VectorScale(v, fabs(speed), self->velocity);
 			gi.linkentity(self);
 		}
-		else if(self->moveinfo.current_speed != 0)
+		else if (self->moveinfo.current_speed != 0)
 		{
 			VectorClear(self->velocity);
 			self->s.sound = 0;
@@ -963,47 +969,47 @@ void tracktrain_think (edict_t *self)
 			time = 100000;
 		}
 
-		if(!(self->spawnflags & SF_TRACKTRAIN_NOCONTROL))
+		if (!(self->spawnflags & SF_TRACKTRAIN_NOCONTROL))
 		{
 			vec3_t	angles, offset;
 
 			// Check if a player is in driving position (monsters handled elsewhere)
 
-			VectorCopy(self->s.angles,angles);
-			VectorNegate(angles,angles);
-			AngleVectors(angles,f1,l1,u1);
-			
+			VectorCopy(self->s.angles, angles);
+			VectorNegate(angles, angles);
+			AngleVectors(angles, f1, l1, u1);
+
 			// find a player
-			for (i=1, ent=&g_edicts[1] ; i<=maxclients->value ; i++, ent++) {
+			for (i = 1, ent = &g_edicts[1]; i <= maxclients->value; i++, ent++) {
 				if (!ent->inuse) continue;
 				if (ent->movetype == MOVETYPE_NOCLIP) continue;
 				if (!ent->client->use && !self->message) continue;
 				if (level.framenum - ent->client->vehicle_framenum <= 2) continue;
 
-				VectorSubtract(ent->s.origin,self->s.origin,offset);
-				VectorScale(f1, offset[0],f1);
-				VectorScale(l1,-offset[1],l1);
-				VectorScale(u1, offset[2],u1);
-				VectorCopy(f1,offset);
-				VectorAdd(offset,l1,offset);
-				VectorAdd(offset,u1,offset);
-//				gi.dprintf("offset=%g %g %g\n",offset[0],offset[1],offset[2]);
-				if(offset[0] < self->bleft[0])
+				VectorSubtract(ent->s.origin, self->s.origin, offset);
+				VectorScale(f1, offset[0], f1);
+				VectorScale(l1, -offset[1], l1);
+				VectorScale(u1, offset[2], u1);
+				VectorCopy(f1, offset);
+				VectorAdd(offset, l1, offset);
+				VectorAdd(offset, u1, offset);
+				//				gi.dprintf("offset=%g %g %g\n",offset[0],offset[1],offset[2]);
+				if (offset[0] < self->bleft[0])
 					continue;
-				if(offset[1] < self->bleft[1])
+				if (offset[1] < self->bleft[1])
 					continue;
-				if(offset[2] < self->bleft[2])
+				if (offset[2] < self->bleft[2])
 					continue;
-				if(offset[0] > self->tright[0])
+				if (offset[0] > self->tright[0])
 					continue;
-				if(offset[1] > self->tright[1])
+				if (offset[1] > self->tright[1])
 					continue;
-				if(offset[2] > self->tright[2])
+				if (offset[2] > self->tright[2])
 					continue;
 
-				if(self->message)
+				if (self->message)
 				{
-					safe_centerprintf(ent,"%s",self->message);
+					safe_centerprintf(ent, "%s", self->message);
 					self->message = NULL;
 				}
 				if (!ent->client->use) continue;
@@ -1017,11 +1023,11 @@ void tracktrain_think (edict_t *self)
 
 				// Store the offset and later keep driver at same relative position
 				// (with height adjustments for pitch)
-				VectorSubtract(ent->s.origin,self->s.origin,self->offset);
-				VectorScale(forward,self->offset[0],f1);
-				VectorScale(left,self->offset[1],l1);
-				VectorCopy(f1,self->offset);
-				VectorAdd(self->offset,l1,self->offset);
+				VectorSubtract(ent->s.origin, self->s.origin, self->offset);
+				VectorScale(forward, self->offset[0], f1);
+				VectorScale(left, self->offset[1], l1);
+				VectorCopy(f1, self->offset);
+				VectorAdd(self->offset, l1, self->offset);
 				self->offset[1] = -self->offset[1];
 				self->offset[2] = ent->s.origin[2] - self->s.origin[2];
 				gi.linkentity(ent);
@@ -1030,14 +1036,16 @@ void tracktrain_think (edict_t *self)
 			}
 		}
 	}
-	if(self->movewith_next && (self->movewith_next->movewith_ent == self))
+#ifndef POSTTHINK_CHILD_MOVEMENT
+	if (self->movewith_next && (self->movewith_next->movewith_ent == self))
 		set_child_movement(self);
+#endif	// POSTTHINK_CHILD_MOVEMENT
 
-	if( (time < 1.5*FRAMETIME) && !(self->spawnflags & SF_TRACKTRAIN_DISABLED))
+	if ((time < 1.5 * FRAMETIME) && !(self->spawnflags & SF_TRACKTRAIN_DISABLED))
 		self->think = tracktrain_reach_dest;
 }
 
-void tracktrain_blocked (edict_t *self, edict_t *other)
+void tracktrain_blocked(edict_t* self, edict_t* other)
 {
 	vec3_t	dir;
 	int		knockback;
@@ -1045,35 +1053,35 @@ void tracktrain_blocked (edict_t *self, edict_t *other)
 	// Correct owner's velocity
 	if (self->owner)
 	{
-		edict_t	*driver = self->owner;
+		edict_t* driver = self->owner;
 		vec3_t	forward, left, up;
 		vec3_t	f1, l1, u1;
 		VectorCopy(self->velocity, driver->velocity);
-		AngleVectors(self->s.angles,forward,left,up);
-		VectorScale(forward,self->offset[0],f1);
-		VectorScale(left,-self->offset[1],l1);
-		VectorScale(up,self->offset[2],u1);
-		VectorAdd(self->s.origin,f1,driver->s.origin);
-		VectorAdd(driver->s.origin,l1,driver->s.origin);
-		VectorAdd(driver->s.origin,u1,driver->s.origin);
-		driver->s.origin[2] += 16 * ( fabs(up[0]) + fabs(up[1]) );
+		AngleVectors(self->s.angles, forward, left, up);
+		VectorScale(forward, self->offset[0], f1);
+		VectorScale(left, -self->offset[1], l1);
+		VectorScale(up, self->offset[2], u1);
+		VectorAdd(self->s.origin, f1, driver->s.origin);
+		VectorAdd(driver->s.origin, l1, driver->s.origin);
+		VectorAdd(driver->s.origin, u1, driver->s.origin);
+		driver->s.origin[2] += 16 * (fabs(up[0]) + fabs(up[1]));
 		gi.linkentity(driver);
 	}
-	VectorSubtract(other->s.origin,self->s.origin,dir);
+	VectorSubtract(other->s.origin, self->s.origin, dir);
 	dir[2] += 16;
 	VectorNormalize(dir);
-	if (!(other->svflags & SVF_MONSTER) && (!other->client) )
+	if (!(other->svflags & SVF_MONSTER) && (!other->client))
 	{
 		// give it a chance to go away on it's own terms (like gibs)
-		T_Damage (other, self, self, dir, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+		T_Damage(other, self, self, dir, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
 		// if it's still there, nuke it
 		if (other)
 		{
 			// Some of our ents don't have origin near the model
 			vec3_t save;
-			VectorCopy(other->s.origin,save);
-			VectorMA (other->absmin, 0.5, other->size, other->s.origin);
-			BecomeExplosion1 (other);
+			VectorCopy(other->s.origin, save);
+			VectorMA(other->absmin, 0.5, other->size, other->s.origin);
+			BecomeExplosion1(other);
 		}
 		return;
 	}
@@ -1084,54 +1092,54 @@ void tracktrain_blocked (edict_t *self, edict_t *other)
 	if (!self->dmg)
 		return;
 
-	if(other->client && (other->groundentity == self))
+	if (other->client && (other->groundentity == self))
 	{
 		// Don't cream riders who've become embedded - just do minor damage
 		// and *maybe* help them get unstuck by pushing them up.
 		knockback = 2;
-		VectorSet(dir,0,0,1);
-		T_Damage (other, self, self, dir, other->s.origin, vec3_origin, 1, knockback, 0, MOD_CRUSH);
+		VectorSet(dir, 0, 0, 1);
+		T_Damage(other, self, self, dir, other->s.origin, vec3_origin, 1, knockback, 0, MOD_CRUSH);
 	}
 	else
 	{
 		knockback = (int)(fabs(self->moveinfo.current_speed) * other->mass / 300.);
-		T_Damage (other, self, self, dir, other->s.origin, vec3_origin, self->dmg, knockback, 0, MOD_CRUSH);
+		T_Damage(other, self, self, dir, other->s.origin, vec3_origin, self->dmg, knockback, 0, MOD_CRUSH);
 	}
 	self->touch_debounce_time = level.time + 0.5;
 }
 
-void tracktrain_reach_dest (edict_t *self)
+void tracktrain_reach_dest(edict_t* self)
 {
-	edict_t	*path = self->target_ent;
+	edict_t* path = self->target_ent;
 
 	if (path && path->pathtarget)
 	{
-		char	*savetarget;
+		char* savetarget;
 
 		savetarget = path->target;
 		path->target = path->pathtarget;
-		if(self->owner)
-			G_UseTargets (path, self->owner);
+		if (self->owner)
+			G_UseTargets(path, self->owner);
 		else
-			G_UseTargets (path, self);
+			G_UseTargets(path, self);
 		path->target = savetarget;
 
 		// make sure we didn't get killed by a killtarget
 		if (!self->inuse)
 			return;
-		if(path->spawnflags & SF_PATH_FIREONCE)
+		if (path->spawnflags & SF_PATH_FIREONCE)
 			path->pathtarget = NULL;
 	}
 
-	if(path && (path->spawnflags & SF_PATH_DISABLE_TRAIN))
+	if (path && (path->spawnflags & SF_PATH_DISABLE_TRAIN))
 	{
 		self->spawnflags |= SF_TRACKTRAIN_NOCONTROL;
-		if(self->owner)
+		if (self->owner)
 			tracktrain_disengage(self);
 	}
-	if(path && path->speed)
+	if (path && path->speed)
 	{
-		if(path->spawnflags & SF_PATH_ABS_SPEED)
+		if (path->spawnflags & SF_PATH_ABS_SPEED)
 		{
 			self->moveinfo.speed = path->speed;
 			self->moveinfo.next_speed = self->moveinfo.speed;
@@ -1140,46 +1148,46 @@ void tracktrain_reach_dest (edict_t *self)
 		else
 		{
 			self->moveinfo.speed = path->speed * self->speed;
-			self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed/3;
+			self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed / 3;
 		}
 		self->moveinfo.accel = self->moveinfo.decel = self->moveinfo.speed;
 	}
-	tracktrain_next (self);
+	tracktrain_next(self);
 }
 
-qboolean is_backing_up (edict_t *train)
+qboolean is_backing_up(edict_t* train)
 {
 	vec3_t	forward, v_norm;
 
-	VectorCopy(train->velocity,v_norm);
+	VectorCopy(train->velocity, v_norm);
 	VectorNormalize(v_norm);
-	AngleVectors(train->s.angles,forward,NULL,NULL);
-	if(DotProduct(forward,v_norm) < 0.)
+	AngleVectors(train->s.angles, forward, NULL, NULL);
+	if (DotProduct(forward, v_norm) < 0.)
 		return true;
 	else
 		return false;
 }
 
-edict_t *NextPathTrack(edict_t *train, edict_t *path)
+edict_t* NextPathTrack(edict_t* train, edict_t* path)
 {
-	edict_t		*next=NULL;
+	edict_t* next = NULL;
 	vec3_t		forward;
 	vec3_t		to_next;
 	qboolean	in_reverse;
 
-	AngleVectors(train->s.angles,forward,NULL,NULL);
+	AngleVectors(train->s.angles, forward, NULL, NULL);
 
-	if( (train->moveinfo.prevstate < STOP && train->moveinfo.state > STOP) ||
-		(train->moveinfo.prevstate > STOP && train->moveinfo.state < STOP)   )
+	if ((train->moveinfo.prevstate < STOP && train->moveinfo.state > STOP) ||
+		(train->moveinfo.prevstate > STOP && train->moveinfo.state < STOP))
 	{
 		next = path->prevpath;
-		if(next)
+		if (next)
 		{
-			VectorSubtract(next->s.origin,path->s.origin,to_next);
+			VectorSubtract(next->s.origin, path->s.origin, to_next);
 			VectorNormalize(to_next);
-			if((train->moveinfo.state > STOP) && (DotProduct(forward,to_next) < 0))
+			if ((train->moveinfo.state > STOP) && (DotProduct(forward, to_next) < 0))
 				next = NULL;
-			else if((train->moveinfo.state < STOP) && (DotProduct(forward,to_next) > 0))
+			else if ((train->moveinfo.state < STOP) && (DotProduct(forward, to_next) > 0))
 				next = NULL;
 			else
 			{
@@ -1189,9 +1197,9 @@ edict_t *NextPathTrack(edict_t *train, edict_t *path)
 		}
 	}
 
-	if(train->moveinfo.state == STOP)
+	if (train->moveinfo.state == STOP)
 	{
-		if(is_backing_up(train))
+		if (is_backing_up(train))
 			in_reverse = true;
 		else
 			in_reverse = false;
@@ -1199,69 +1207,69 @@ edict_t *NextPathTrack(edict_t *train, edict_t *path)
 	else
 		in_reverse = (train->moveinfo.state < STOP ? true : false);
 
-	if(in_reverse)
+	if (in_reverse)
 	{
-		if(path->spawnflags & SF_PATH_ALTPATH)
+		if (path->spawnflags & SF_PATH_ALTPATH)
 		{
-			next = G_PickTarget (path->target);
-			if(next)
+			next = G_PickTarget(path->target);
+			if (next)
 			{
-				VectorSubtract(next->s.origin,path->s.origin,to_next);
+				VectorSubtract(next->s.origin, path->s.origin, to_next);
 				VectorNormalize(to_next);
-				if(DotProduct(forward,to_next) > 0)
+				if (DotProduct(forward, to_next) > 0)
 					next = NULL;
 			}
 		}
 
-		if(!next)
+		if (!next)
 		{
 			next = path->prevpath;
 
-			if(next)
+			if (next)
 			{
 				// Ensure we don't flipflop
-				VectorSubtract(next->s.origin,path->s.origin,to_next);
+				VectorSubtract(next->s.origin, path->s.origin, to_next);
 				VectorNormalize(to_next);
-				if(DotProduct(forward,to_next) > 0)
+				if (DotProduct(forward, to_next) > 0)
 					next = NULL;
 			}
-			
-			if(!next)
+
+			if (!next)
 			{
 				// Find path_track whose target or target2 is set to 
 				// the current path_track
-				edict_t	*e;
+				edict_t* e;
 				int		i;
-				for(i=maxclients->value; i<globals.num_edicts && !next; i++)
+				for (i = maxclients->value; i < globals.num_edicts && !next; i++)
 				{
 					e = &g_edicts[i];
-					if(!e->inuse)
+					if (!e->inuse)
 						continue;
-					if(e==path)
+					if (e == path)
 						continue;
-					if(!e->classname)
+					if (!e->classname)
 						continue;
-					if(Q_stricmp(e->classname,"path_track"))
+					if (Q_stricmp(e->classname, "path_track"))
 						continue;
-					if(e->target && !Q_stricmp(e->target,path->targetname))
+					if (e->target && !Q_stricmp(e->target, path->targetname))
 					{
 						next = e;
-						VectorSubtract(next->s.origin,path->s.origin,to_next);
+						VectorSubtract(next->s.origin, path->s.origin, to_next);
 						VectorNormalize(to_next);
-						if(DotProduct(forward,to_next) > 0)
+						if (DotProduct(forward, to_next) > 0)
 							next = NULL;
-//						else
-//							path->prevpath = next;
+						//						else
+						//							path->prevpath = next;
 					}
-					if(!next && e->target2 && !Q_stricmp(e->target2,path->targetname))
+					if (!next && e->target2 && !Q_stricmp(e->target2, path->targetname))
 					{
 						next = e;
-						VectorSubtract(next->s.origin,path->s.origin,to_next);
+						VectorSubtract(next->s.origin, path->s.origin, to_next);
 						VectorNormalize(to_next);
-						if(DotProduct(forward,to_next) > 0)
+						if (DotProduct(forward, to_next) > 0)
 							next = NULL;
-//						else
-//							path->prevpath = next;
+						//						else
+						//							path->prevpath = next;
 					}
 				}
 			}
@@ -1271,42 +1279,42 @@ edict_t *NextPathTrack(edict_t *train, edict_t *path)
 				float	dot;
 
 				// Finally, check this path_track's target and target2
-				if(path->target)
+				if (path->target)
 				{
-					next = G_PickTarget (path->target);
-					if(next)
+					next = G_PickTarget(path->target);
+					if (next)
 					{
-						VectorSubtract(next->s.origin,path->s.origin,to_next);
+						VectorSubtract(next->s.origin, path->s.origin, to_next);
 						VectorNormalize(to_next);
-						dot = DotProduct(forward,to_next);
-						if(dot > 0)
+						dot = DotProduct(forward, to_next);
+						if (dot > 0)
 							next = NULL;
 					}
 				}
-				if(path->target2 && !(path->spawnflags & SF_PATH_ALTPATH))
+				if (path->target2 && !(path->spawnflags & SF_PATH_ALTPATH))
 				{
-					edict_t	*next2;
+					edict_t* next2;
 					float	dot2;
-					
-					next2 = G_PickTarget (path->target2);
-					if( next2 == path )
+
+					next2 = G_PickTarget(path->target2);
+					if (next2 == path)
 						next2 = NULL;
-					
-					if(next2)
+
+					if (next2)
 					{
-						VectorSubtract(next2->s.origin,path->s.origin,to_next);
+						VectorSubtract(next2->s.origin, path->s.origin, to_next);
 						VectorNormalize(to_next);
-						dot2 = DotProduct(forward,to_next);
-						if(dot2 > 0)
+						dot2 = DotProduct(forward, to_next);
+						if (dot2 > 0)
 							next2 = NULL;
-						else if(!next)
+						else if (!next)
 						{
 							next = next2;
 							next2 = NULL;
 						}
 					}
-					
-					if((next && next2) && (dot2 < dot))
+
+					if ((next && next2) && (dot2 < dot))
 						next = next2;
 				}
 			}
@@ -1316,169 +1324,169 @@ edict_t *NextPathTrack(edict_t *train, edict_t *path)
 	{
 		float	dot;
 
-		if(path->target)
+		if (path->target)
 		{
-			next = G_PickTarget (path->target);
-			if(next)
+			next = G_PickTarget(path->target);
+			if (next)
 			{
-				VectorSubtract(next->s.origin,path->s.origin,to_next);
+				VectorSubtract(next->s.origin, path->s.origin, to_next);
 				VectorNormalize(to_next);
-				dot = DotProduct(forward,to_next);
-				if(dot < 0)
+				dot = DotProduct(forward, to_next);
+				if (dot < 0)
 					next = NULL;
 			}
 		}
-		if(path->target2 && !(path->spawnflags & SF_PATH_ALTPATH))
+		if (path->target2 && !(path->spawnflags & SF_PATH_ALTPATH))
 		{
-			edict_t	*next2;
+			edict_t* next2;
 			float	dot2;
 
-			next2 = G_PickTarget (path->target2);
-			if( next2 == path )
+			next2 = G_PickTarget(path->target2);
+			if (next2 == path)
 				next2 = NULL;
 
-			if(next2)
+			if (next2)
 			{
-				VectorSubtract(next2->s.origin,path->s.origin,to_next);
+				VectorSubtract(next2->s.origin, path->s.origin, to_next);
 				VectorNormalize(to_next);
-				dot2 = DotProduct(forward,to_next);
-				if(dot2 < 0)
+				dot2 = DotProduct(forward, to_next);
+				if (dot2 < 0)
 					next2 = NULL;
-				else if(!next)
+				else if (!next)
 				{
 					next = next2;
 					next2 = NULL;
 				}
 			}
 
-			if((next && next2) && (dot2 > dot))
+			if ((next && next2) && (dot2 > dot))
 				next = next2;
 		}
-		if(next == path)
+		if (next == path)
 			next = NULL;
 
-		if(!next)
+		if (!next)
 		{	// Check for path_tracks that target (or target2) this path_track.
-			edict_t	*e;
+			edict_t* e;
 			int		i;
-			for(i=maxclients->value; i<globals.num_edicts && !next; i++)
+			for (i = maxclients->value; i < globals.num_edicts && !next; i++)
 			{
 				e = &g_edicts[i];
-				if(!e->inuse)
+				if (!e->inuse)
 					continue;
-				if(e==path)
+				if (e == path)
 					continue;
-				if(!e->classname)
+				if (!e->classname)
 					continue;
-				if(Q_stricmp(e->classname,"path_track"))
+				if (Q_stricmp(e->classname, "path_track"))
 					continue;
-				if(e->target && !Q_stricmp(e->target,path->targetname))
+				if (e->target && !Q_stricmp(e->target, path->targetname))
 				{
 					next = e;
-					VectorSubtract(next->s.origin,path->s.origin,to_next);
+					VectorSubtract(next->s.origin, path->s.origin, to_next);
 					VectorNormalize(to_next);
-					dot = DotProduct(forward,to_next);
-					if(dot < 0)
+					dot = DotProduct(forward, to_next);
+					if (dot < 0)
 						next = NULL;
 				}
-				if(e->target2 && !Q_stricmp(e->target2,path->targetname))
+				if (e->target2 && !Q_stricmp(e->target2, path->targetname))
 				{
-					edict_t	*next2;
+					edict_t* next2;
 					float	dot2;
 
 					next2 = e;
-					VectorSubtract(next2->s.origin,path->s.origin,to_next);
+					VectorSubtract(next2->s.origin, path->s.origin, to_next);
 					VectorNormalize(to_next);
-					dot2 = DotProduct(forward,to_next);
-					if(dot2 < 0)
+					dot2 = DotProduct(forward, to_next);
+					if (dot2 < 0)
 						next2 = NULL;
-					else if(!next)
+					else if (!next)
 					{
 						next = next2;
 						next2 = NULL;
 					}
-					if((next && next2) && (dot2 > dot))
+					if ((next && next2) && (dot2 > dot))
 						next = next2;
 				}
 			}
 		}
-//		if(next)
-//			next->prevpath = path;
+		//		if (next)
+		//			next->prevpath = path;
 
 	}
-	if(developer->value)
+	if (developer->value)
 		gi.dprintf("prev=%s, current=%s, next=%s\n",
 			(path->prevpath ? path->prevpath->targetname : "nada"),
 			path->targetname,
 			(next ? next->targetname : "nada"));
 
-	if(next)
+	if (next)
 		next->prevpath = path;
 	return next;
 }
 
-void LookAhead( edict_t *train, vec3_t point, float dist )
+void LookAhead(edict_t* train, vec3_t point, float dist)
 {
 	float originalDist = dist;
 	float length;
 	vec3_t	v;
-	edict_t	*path;
-	int		n=0;
-	
+	edict_t* path;
+	int		n = 0;
+
 	path = train->target_ent;
-	if(!path || dist < 0)
+	if (!path || dist < 0)
 		return;
 
-	while ( dist > 0 )
+	while (dist > 0)
 	{
 		n++;
-		if(n>20)
+		if (n > 20)
 		{
-			gi.dprintf("WTF??? n=%d\n",n);
+			gi.dprintf("WTF??? n=%d\n", n);
 			return;
 		}
 
-		VectorSubtract(path->s.origin,point,v);
+		VectorSubtract(path->s.origin, point, v);
 		length = VectorLength(v);
-		if(length >= dist)
+		if (length >= dist)
 		{
-			VectorMA(point,dist/length,v,point);
+			VectorMA(point, dist / length, v, point);
 			return;
 		}
 		dist -= length;
-		VectorCopy(path->s.origin,point);
+		VectorCopy(path->s.origin, point);
 
 		// Don't go past a switch
-/*		if(path->spawnflags & SF_PATH_ALTPATH)
+/*		if (path->spawnflags & SF_PATH_ALTPATH)
 		{
 			return;
 		} */
-		path = NextPathTrack(train,path);
-		if(!path)
+		path = NextPathTrack(train, path);
+		if (!path)
 			return;
 	}
 }
 
-void train_angles(edict_t *train)
+void train_angles(edict_t* train)
 {
 	vec3_t	v, angles;
 
-	VectorCopy(train->s.origin,v);
+	VectorCopy(train->s.origin, v);
 	v[2] -= train->viewheight;
-	LookAhead(train,v,train->moveinfo.distance);
+	LookAhead(train, v, train->moveinfo.distance);
 	v[2] += train->viewheight;
-	VectorSubtract (v, train->s.origin, v);
-	if( (train->moveinfo.state < STOP) || (train->moveinfo.state==STOP && is_backing_up(train)) )
-		VectorNegate(v,v);
+	VectorSubtract(v, train->s.origin, v);
+	if ((train->moveinfo.state < STOP) || (train->moveinfo.state == STOP && is_backing_up(train)))
+		VectorNegate(v, v);
 
-//	gi.dprintf("v = %g, %g, %g\n",v[0],v[1],v[2]);
+	//	gi.dprintf("v = %g, %g, %g\n",v[0],v[1],v[2]);
 
-	if(VectorLength(v))
+	if (VectorLength(v))
 	{
-		vectoangles2(v,angles);
+		vectoangles2(v, angles);
 		train->ideal_yaw = angles[YAW];
 		train->ideal_pitch = angles[PITCH];
-		if(train->ideal_pitch < 0) train->ideal_pitch += 360;
+		if (train->ideal_pitch < 0) train->ideal_pitch += 360;
 	}
 	else
 	{
@@ -1493,42 +1501,42 @@ void train_angles(edict_t *train)
 //		train->ideal_yaw, train->ideal_pitch);
 
 	angles[PITCH] = train->ideal_pitch - train->s.angles[PITCH];
-	angles[YAW]   = train->ideal_yaw   - train->s.angles[YAW];
+	angles[YAW] = train->ideal_yaw - train->s.angles[YAW];
 	AnglesNormalize(angles);
 
 	// If yaw angle is > 90, we're about to flipflop (there's no way ideal_yaw
 	// can be more than 90 because the path_track selection code doesn't
 	// allow that
-	if( (angles[YAW] > 90) || (angles[YAW] < -90) )
+	if ((angles[YAW] > 90) || (angles[YAW] < -90))
 	{
-		angles[YAW]   += 180;
-		if(angles[PITCH] != 0)
+		angles[YAW] += 180;
+		if (angles[PITCH] != 0)
 			angles[PITCH] += 180;
 		AnglesNormalize(angles);
 	}
-	train->pitch_speed = fabs(angles[PITCH])*10;
-	train->yaw_speed   = fabs(angles[YAW])*10;
+	train->pitch_speed = fabs(angles[PITCH]) * 10;
+	train->yaw_speed = fabs(angles[YAW]) * 10;
 }
 
-void tracktrain_turn (edict_t *self)
+void tracktrain_turn(edict_t* self)
 {
-	edict_t	*train;
+	edict_t* train;
 	float	cur_yaw, idl_yaw, cur_pitch, idl_pitch;
 	float	yaw_vel, pitch_vel;
 	float	Dist_1, Dist_2, Distance;
 	float	new_speed;
 
 	train = self->enemy;
-	if(!train || !train->inuse)
+	if (!train || !train->inuse)
 		return;
 
 	self->nextthink = level.time + FRAMETIME;
 
-	if(train->spawnflags & (SF_TRACKTRAIN_DISABLED | SF_TRACKTRAIN_OTHERMAP))
+	if (train->spawnflags & (SF_TRACKTRAIN_DISABLED | SF_TRACKTRAIN_OTHERMAP))
 		return;
 
 	// Train doesn't turn if at a complete stop
-	if((train->velocity[0]==0.) && (train->velocity[1]==0.) && (train->velocity[2]==0.))
+	if ((train->velocity[0] == 0.) && (train->velocity[1] == 0.) && (train->velocity[2] == 0.))
 	{
 		VectorClear(train->avelocity);
 		gi.linkentity(train);
@@ -1537,15 +1545,15 @@ void tracktrain_turn (edict_t *self)
 
 	train_angles(train);
 
-	cur_yaw   = train->s.angles[YAW];
-	idl_yaw   = train->ideal_yaw;
+	cur_yaw = train->s.angles[YAW];
+	idl_yaw = train->ideal_yaw;
 	cur_pitch = train->s.angles[PITCH];
 	idl_pitch = train->ideal_pitch;
 
-//	gi.dprintf("current angles=%g %g, ideal angles=%g %g\n",
-//		cur_pitch,cur_yaw,idl_pitch,idl_yaw);
+	//	gi.dprintf("current angles=%g %g, ideal angles=%g %g\n",
+	//		cur_pitch,cur_yaw,idl_pitch,idl_yaw);
 
-	yaw_vel   = train->yaw_speed;
+	yaw_vel = train->yaw_speed;
 	pitch_vel = train->pitch_speed;
 
 	if (train->spawnflags & SF_TRACKTRAIN_NOPITCH)
@@ -1557,82 +1565,82 @@ void tracktrain_turn (edict_t *self)
 	{
 		if (cur_yaw < idl_yaw)
 		{
-			Dist_1 = (idl_yaw - cur_yaw)*10;
-			Dist_2 = ((360 - idl_yaw) + cur_yaw)*10;
-			
+			Dist_1 = (idl_yaw - cur_yaw) * 10;
+			Dist_2 = ((360 - idl_yaw) + cur_yaw) * 10;
+
 			if (Dist_1 < Dist_2)
 			{
 				Distance = Dist_1;
-				
+
 				if (Distance < yaw_vel)
 					yaw_vel = Distance;
-				
+
 				new_speed = yaw_vel;
 			}
 			else
 			{
 				Distance = Dist_2;
-				
+
 				if (Distance < yaw_vel)
 					yaw_vel = Distance;
-				
+
 				new_speed = -yaw_vel;
 			}
 		}
 		else
 		{
-			Dist_1 = (cur_yaw - idl_yaw)*10;
-			Dist_2 = ((360 - cur_yaw) + idl_yaw)*10;
-			
+			Dist_1 = (cur_yaw - idl_yaw) * 10;
+			Dist_2 = ((360 - cur_yaw) + idl_yaw) * 10;
+
 			if (Dist_1 < Dist_2)
 			{
 				Distance = Dist_1;
-				
+
 				if (Distance < yaw_vel)
 					yaw_vel = Distance;
-				
+
 				new_speed = -yaw_vel;
 			}
 			else
 			{
 				Distance = Dist_2;
-				
+
 				if (Distance < yaw_vel)
 					yaw_vel = Distance;
-				
+
 				new_speed = yaw_vel;
 			}
 		}
 		train->avelocity[YAW] = new_speed;
 
-//		if(developer->value)
-//			gi.dprintf ("current yaw: %g ideal yaw: %g yaw speed: %g\n", cur_yaw, idl_yaw, self->enemy->avelocity[1]);
-		
+		//		if (developer->value)
+		//			gi.dprintf ("current yaw: %g ideal yaw: %g yaw speed: %g\n", cur_yaw, idl_yaw, self->enemy->avelocity[1]);
+
 		if (train->s.angles[YAW] < 0)
 			train->s.angles[YAW] += 360;
-		
+
 		if (train->s.angles[YAW] >= 360)
 			train->s.angles[YAW] -= 360;
 	}
 
-	if ( train->roll != 0 )
+	if (train->roll != 0)
 	{
 		float	roll;
 
-		if(train->moveinfo.state < STOP)
+		if (train->moveinfo.state < STOP)
 			roll = -train->roll;
 		else
 			roll = train->roll;
 
-		if(train->spawnflags & SF_TRACKTRAIN_ROLLSPEED)
-			roll *= VectorLength(train->velocity)/train->moveinfo.speed;
+		if (train->spawnflags & SF_TRACKTRAIN_ROLLSPEED)
+			roll *= VectorLength(train->velocity) / train->moveinfo.speed;
 
-		if ( train->avelocity[YAW] < -5 )
-			train->avelocity[ROLL] = track_AngleDistance( track_ApproachAngle( -roll, train->s.angles[ROLL], roll*2 ), train->s.angles[ROLL]);
-		else if ( train->avelocity[YAW] > 5 )
-			train->avelocity[ROLL] = track_AngleDistance( track_ApproachAngle( roll, train->s.angles[ROLL], roll*2 ), train->s.angles[ROLL]);
+		if (train->avelocity[YAW] < -5)
+			train->avelocity[ROLL] = track_AngleDistance(track_ApproachAngle(-roll, train->s.angles[ROLL], roll * 2), train->s.angles[ROLL]);
+		else if (train->avelocity[YAW] > 5)
+			train->avelocity[ROLL] = track_AngleDistance(track_ApproachAngle(roll, train->s.angles[ROLL], roll * 2), train->s.angles[ROLL]);
 		else
-			train->avelocity[ROLL] = track_AngleDistance( track_ApproachAngle( 0, train->s.angles[ROLL], roll*4 ), train->s.angles[ROLL]) * 4;
+			train->avelocity[ROLL] = track_AngleDistance(track_ApproachAngle(0, train->s.angles[ROLL], roll * 4), train->s.angles[ROLL]) * 4;
 	}
 
 	if (cur_pitch == idl_pitch)
@@ -1641,57 +1649,57 @@ void tracktrain_turn (edict_t *self)
 	{
 		if (cur_pitch < idl_pitch)
 		{
-			Dist_1 = (idl_pitch - cur_pitch)*10;
-			Dist_2 = ((360 - idl_pitch) + cur_pitch)*10;
-			
+			Dist_1 = (idl_pitch - cur_pitch) * 10;
+			Dist_2 = ((360 - idl_pitch) + cur_pitch) * 10;
+
 			if (Dist_1 < Dist_2)
 			{
 				Distance = Dist_1;
-				
+
 				if (Distance < pitch_vel)
 					pitch_vel = Distance;
-				
+
 				new_speed = pitch_vel;
 			}
 			else
 			{
 				Distance = Dist_2;
-				
+
 				if (Distance < pitch_vel)
 					pitch_vel = Distance;
-				
+
 				new_speed = -pitch_vel;
 			}
 		}
 		else
 		{
-			Dist_1 = (cur_pitch - idl_pitch)*10;
-			Dist_2 = ((360 - cur_pitch) + idl_pitch)*10;
-			
+			Dist_1 = (cur_pitch - idl_pitch) * 10;
+			Dist_2 = ((360 - cur_pitch) + idl_pitch) * 10;
+
 			if (Dist_1 < Dist_2)
 			{
 				Distance = Dist_1;
-				
+
 				if (Distance < pitch_vel)
 					pitch_vel = Distance;
-				
+
 				new_speed = -pitch_vel;
 			}
 			else
 			{
 				Distance = Dist_2;
-				
+
 				if (Distance < pitch_vel)
 					pitch_vel = Distance;
-				
+
 				new_speed = pitch_vel;
 			}
 		}
 		train->avelocity[PITCH] = new_speed;
-		
-		if (train->s.angles[PITCH] <  0)
+
+		if (train->s.angles[PITCH] < 0)
 			train->s.angles[PITCH] += 360;
-		
+
 		if (train->s.angles[PITCH] >= 360)
 			train->s.angles[PITCH] -= 360;
 	}
@@ -1700,9 +1708,9 @@ void tracktrain_turn (edict_t *self)
 }
 
 
-void tracktrain_next (edict_t *self)
+void tracktrain_next(edict_t* self)
 {
-	edict_t		*ent=NULL;
+	edict_t* ent = NULL;
 	vec3_t		dest;
 
 	if (!self->target_ent)
@@ -1711,22 +1719,22 @@ void tracktrain_next (edict_t *self)
 		return;
 	}
 
-	ent = NextPathTrack(self,self->target_ent);
+	ent = NextPathTrack(self, self->target_ent);
 
-	if(ent && (ent->spawnflags & SF_PATH_DISABLED))
+	if (ent && (ent->spawnflags & SF_PATH_DISABLED))
 		ent = NULL;
 
-	if(!ent)
+	if (!ent)
 	{
 		// Dead end
-		if(self->owner && (self->owner->svflags & SVF_MONSTER) && !self->target_ent->deathtarget )
+		if (self->owner && (self->owner->svflags & SVF_MONSTER) && !self->target_ent->deathtarget)
 		{
 			// For monster drivers, immediately reverse course at
 			// dead ends (but NOT at dead ends that have a "deathtarget",
 			// which is usually an indication of a trackchange
 			self->moveinfo.prevstate = self->moveinfo.state;
 			self->moveinfo.state = -self->moveinfo.state;
-			self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed/3;
+			self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed / 3;
 			self->think = tracktrain_think;
 			self->think(self);
 			self->monsterinfo.search_time = level.time;
@@ -1739,19 +1747,19 @@ void tracktrain_next (edict_t *self)
 		self->moveinfo.state = STOP;
 		self->s.sound = 0;
 		self->moveinfo.current_speed = 0;
-		self->moveinfo.next_speed    = 0;
+		self->moveinfo.next_speed = 0;
 		gi.linkentity(self);
-		if(self->owner)
+		if (self->owner)
 		{
 			VectorClear(self->owner->velocity);
 			gi.linkentity(self->owner);
 		}
-		if(self->target_ent->deathtarget)
+		if (self->target_ent->deathtarget)
 		{
-			char	*temp;
+			char* temp;
 			temp = self->target_ent->target;
 			self->target_ent->target = self->target_ent->deathtarget;
-			G_UseTargets(self->target_ent,self);
+			G_UseTargets(self->target_ent, self);
 			self->target_ent->target = temp;
 		}
 		self->think = tracktrain_think;
@@ -1762,61 +1770,91 @@ void tracktrain_next (edict_t *self)
 	self->target_ent = ent;
 	self->target = ent->targetname;
 
-	VectorCopy (ent->s.origin, dest);
+	VectorCopy(ent->s.origin, dest);
 	dest[2] += self->viewheight;
-	VectorCopy (dest, self->moveinfo.end_origin);
+	VectorCopy(dest, self->moveinfo.end_origin);
 
 	train_angles(self);
 
-	if(!(self->spawnflags & SF_TRACKTRAIN_NOCONTROL) || !(self->spawnflags & SF_TRACKTRAIN_STARTOFF))
+	if (!(self->spawnflags & SF_TRACKTRAIN_NOCONTROL) || !(self->spawnflags & SF_TRACKTRAIN_STARTOFF))
 	{
 		self->think = tracktrain_think;
 		self->think(self);
 	}
 }
 
-void func_tracktrain_find (edict_t *self)
+void func_tracktrain_find(edict_t* self)
 {
-	edict_t *ent;
-	edict_t	*next;
+	edict_t* ent;
+	edict_t* next;
 	vec3_t	vec;
+	vec3_t	daoldorigin;
 
 	if (!self->target)
 	{
-		gi.dprintf ("tracktrain_find: no target\n");
+		gi.dprintf("tracktrain_find: no target\n");
 		return;
 	}
-	ent = G_PickTarget (self->target);
+	ent = G_PickTarget(self->target);
 	if (!ent)
 	{
-		gi.dprintf ("tracktrain_find: target %s not found\n", self->target);
+		gi.dprintf("tracktrain_find: target %s not found\n", self->target);
 		return;
 	}
 
-	if(ent->speed) {
+	if (ent->speed) {
 		self->moveinfo.speed = ent->speed * self->speed;
 		self->moveinfo.accel = self->moveinfo.decel = self->moveinfo.speed;
-		self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed/3;
+		self->moveinfo.next_speed = self->moveinfo.state * self->moveinfo.speed / 3;
 	}
-	
+
 	self->target_ent = ent;
 
 	// Get angles to next path_track
-	next = G_PickTarget (ent->target);
+	next = G_PickTarget(ent->target);
 	if (!next)
 	{
-		gi.dprintf ("tracktrain_find: next target %s not found\n", ent->target);
+		gi.dprintf("tracktrain_find: next target %s not found\n", ent->target);
 		return;
 	}
-	VectorSubtract (next->s.origin, ent->s.origin, vec);
-	vectoangles2(vec,self->s.angles);
+	VectorSubtract(next->s.origin, ent->s.origin, vec);
+	vectoangles2(vec, self->s.angles);
 
 	ent->think = tracktrain_turn;
 	ent->enemy = self;
 	ent->nextthink = level.time + FRAMETIME;
 
-	VectorCopy (ent->s.origin, self->s.origin);
+	VectorCopy(self->s.origin, daoldorigin); // Knightmare- copy old orgin for reference
+	VectorCopy(ent->s.origin, self->s.origin);
 	self->s.origin[2] += self->viewheight;
+
+	// Knightmare- move movewith pieces to spawning point
+	if (self->movewith_next && (self->movewith_next->movewith_ent == self))
+	{
+		edict_t* e = NULL;
+		vec3_t	dir;
+
+		VectorSubtract(self->s.origin, daoldorigin, dir);
+		for (e = self->movewith_next; e; e = e->movewith_next)
+		{
+			if (!e->inuse)
+				break;
+			if (!e->classname)
+				continue;
+
+			// Knightmare- save distance moved for turret_breach to add to its firing point
+			if (!strcmp(e->classname, "turret_breach") || !strcmp(e->classname, "model_turret"))
+				VectorCopy(dir, e->offset);
+
+			VectorAdd(dir, e->s.origin, e->s.origin);
+			VectorCopy(e->s.origin, e->s.old_origin);
+			// This is now the child's original position
+			if ((e->solid == SOLID_BSP) && strcmp(e->classname, "func_rotating")
+				&& strcmp(e->classname, "func_door_rotating"))
+				ReInitialize_Entity(e);
+			gi.linkentity(e);
+		}
+	}
 
 	if (self->spawnflags & SF_TRACKTRAIN_OTHERMAP)
 	{
@@ -1830,22 +1868,22 @@ void func_tracktrain_find (edict_t *self)
 		self->nextthink = level.time + FRAMETIME;
 		self->think = tracktrain_next;
 	}
-	gi.linkentity (self);
+	gi.linkentity(self);
 }
 
-void tracktrain_use (edict_t *self, edict_t *other, edict_t *activator)
+void tracktrain_use(edict_t* self, edict_t* other, edict_t* activator)
 {
-	if(self->spawnflags & SF_TRACKTRAIN_STARTOFF)
+	if (self->spawnflags & SF_TRACKTRAIN_STARTOFF)
 	{
-		if(self->spawnflags & SF_TRACKTRAIN_NOCONTROL)
+		if (self->spawnflags & SF_TRACKTRAIN_NOCONTROL)
 		{
 			self->moveinfo.state = FAST;
 			self->moveinfo.next_speed = self->moveinfo.speed;
-			if(self->sounds) {
-				self->s.sound = gi.soundindex(va("%sspeed%d.wav",self->source,abs(self->moveinfo.state)));
-		#ifdef LOOP_SOUND_ATTENUATION
+			if (self->sounds) {
+				self->s.sound = gi.soundindex(va("%sspeed%d.wav", self->source, abs(self->moveinfo.state)));
+#ifdef LOOP_SOUND_ATTENUATION
 				self->s.attenuation = self->attenuation;
-		#endif
+#endif
 			}
 			else
 				self->s.sound = 0;
@@ -1856,7 +1894,7 @@ void tracktrain_use (edict_t *self, edict_t *other, edict_t *activator)
 	}
 	else
 	{
-		if(self->owner)
+		if (self->owner)
 			tracktrain_disengage(self);
 		self->moveinfo.state = STOP;
 		self->moveinfo.next_speed = 0;
@@ -1867,25 +1905,25 @@ void tracktrain_use (edict_t *self, edict_t *other, edict_t *activator)
 	}
 }
 
-void SP_func_tracktrain (edict_t *self)
+void SP_func_tracktrain(edict_t* self)
 {
 	self->class_id = ENTITY_FUNC_TRACKTRAIN;
 
 	self->movetype = MOVETYPE_PUSH;
 	self->flags |= FL_TRACKTRAIN;
 
-	VectorClear (self->s.angles);
+	VectorClear(self->s.angles);
 	self->blocked = tracktrain_blocked;
 	if (!self->dmg)
 		self->dmg = 100;
 	// Wheelbase determines angular velocities
-	if(st.distance)
+	if (st.distance)
 		self->moveinfo.distance = st.distance;
 	else
 		self->moveinfo.distance = 50;
 
 	// Origin rides by "height" above path_tracks
-	if(st.height)
+	if (st.height)
 		self->viewheight = st.height;
 	else
 		self->viewheight = 4;
@@ -1894,26 +1932,26 @@ void SP_func_tracktrain (edict_t *self)
 	self->mass = 2000;
 
 	// Driving position
-	if( (VectorLength(self->bleft) == 0) && (VectorLength(self->tright) == 0))
+	if ((VectorLength(self->bleft) == 0) && (VectorLength(self->tright) == 0))
 	{
-		VectorSet(self->bleft,-8,-8,-8);
-		VectorSet(self->tright,8,8,8);
+		VectorSet(self->bleft, -8, -8, -8);
+		VectorSet(self->tright, 8, 8, 8);
 	}
-	VectorAdd(self->bleft,self->tright,self->move_origin);
-	VectorScale(self->move_origin,0.5,self->move_origin);
+	VectorAdd(self->bleft, self->tright, self->move_origin);
+	VectorScale(self->move_origin, 0.5, self->move_origin);
 
 	self->solid = SOLID_BSP;
-	gi.setmodel (self, self->model);
+	gi.setmodel(self, self->model);
 
 	// usermodel (for alias model trains) goes on modelindex2
 	if (self->usermodel && strlen(self->usermodel)) {
 		char	modelname[256];
 		// check for "models/" already in path
-		if ( !strncmp(self->usermodel, "models/", 7) )
+		if (!strncmp(self->usermodel, "models/", 7))
 			Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
 		else
 			Com_sprintf(modelname, sizeof(modelname), "models/%s", self->usermodel);
-		self->s.modelindex2 = gi.modelindex (modelname);
+		self->s.modelindex2 = gi.modelindex(modelname);
 	}
 
 	if (!self->speed)
@@ -1932,78 +1970,83 @@ void SP_func_tracktrain (edict_t *self)
 	if (self->health) {
 		self->die = tracktrain_die;
 		self->takedamage = DAMAGE_YES;
-	} else {
+	}
+	else {
 		self->die = NULL;
 		self->takedamage = DAMAGE_NO;
 	}
 
 	self->spawnflags &= ~SF_TRACKTRAIN_DISABLED;	// insurance
-	if(self->spawnflags & SF_TRACKTRAIN_NOCONTROL)
+	if (self->spawnflags & SF_TRACKTRAIN_NOCONTROL)
 		self->spawnflags |= SF_TRACKTRAIN_STARTOFF;
 
 	self->use = tracktrain_use;
 	self->moveinfo.current_speed = 0;
 	self->moveinfo.state = STOP;
-	self->moveinfo.prevstate = STOP+1;	// Assumed, so that initial reverse works correctly
+	self->moveinfo.prevstate = STOP + 1;	// Assumed, so that initial reverse works correctly
 	self->s.sound = 0;
 	self->turn_rider = 1;
 	VectorClear(self->s.angles);
+
+#ifdef POSTTHINK_CHILD_MOVEMENT
+	self->postthink = set_child_movement; // Knightmare- supports movewith
+#endif	// POSTTHINK_CHILD_MOVEMENT
 
 	if (self->target)
 	{
 		self->nextthink = level.time + FRAMETIME;
 		self->think = func_tracktrain_find;
 	}
-	else if(!(self->spawnflags & SF_TRACKTRAIN_OTHERMAP))
+	else if (!(self->spawnflags & SF_TRACKTRAIN_OTHERMAP))
 	{
-		gi.dprintf ("func_tracktrain without a target at %s\n", vtos(self->absmin));
+		gi.dprintf("func_tracktrain without a target at %s\n", vtos(self->absmin));
 		G_FreeEdict(self);
 		return;
 	}
 
-	if(!self->sounds)
+	if (!self->sounds)
 		self->sounds = 1;
-	if(self->sounds > 0)
+	if (self->sounds > 0)
 	{
-		if(self->sounds > 9)
+		if (self->sounds > 9)
 			self->sounds = 9;
-		self->source = gi.TagMalloc(10,TAG_LEVEL);
-		Com_sprintf(self->source, 10, "train/%d/",self->sounds);
-		gi.soundindex(va("%sspeed1.wav",self->source));
-		gi.soundindex(va("%sspeed2.wav",self->source));
-		gi.soundindex(va("%sspeed3.wav",self->source));
+		self->source = gi.TagMalloc(10, TAG_LEVEL);
+		Com_sprintf(self->source, 10, "train/%d/", self->sounds);
+		gi.soundindex(va("%sspeed1.wav", self->source));
+		gi.soundindex(va("%sspeed2.wav", self->source));
+		gi.soundindex(va("%sspeed3.wav", self->source));
 	}
 
 	if (self->attenuation <= 0)
 		self->attenuation = ATTN_IDLE;
 
-	gi.linkentity (self);
+	gi.linkentity(self);
 
 }
 
-void find_tracktrain (edict_t *self)
+void find_tracktrain(edict_t* self)
 {
-	edict_t		*train;
-	qboolean	train_found=false;
+	edict_t* train;
+	qboolean	train_found = false;
 	vec3_t		forward;
 
 	// This gives game a chance to put player in place before
 	// restarting train
-	if(!g_edicts[1].linkcount)
+	if (!g_edicts[1].linkcount)
 	{
 		self->nextthink = level.time + FRAMETIME;
 		return;
 	}
 
-	train = G_Find(NULL,FOFS(targetname),self->targetname);
-	while(train && !train_found)
+	train = G_Find(NULL, FOFS(targetname), self->targetname);
+	while (train && !train_found)
 	{
-		if(!Q_stricmp(train->classname,"func_tracktrain"))
+		if (!Q_stricmp(train->classname, "func_tracktrain"))
 			train_found = true;
 		else
-			train = G_Find(train,FOFS(targetname),self->targetname);
+			train = G_Find(train, FOFS(targetname), self->targetname);
 	}
-	if(!train_found)
+	if (!train_found)
 	{
 		gi.dprintf("find_tracktrain: no matching func_tracktrain with targetname=%s\n",
 			self->targetname);
@@ -2014,63 +2057,63 @@ void find_tracktrain (edict_t *self)
 	train->svflags &= ~SVF_NOCLIENT;
 	train->spawnflags = self->spawnflags;
 	train->spawnflags &= ~(SF_TRACKTRAIN_OTHERMAP | SF_TRACKTRAIN_DISABLED);
-	VectorCopy(self->s.origin,train->s.origin);
-	VectorCopy(self->s.angles,train->s.angles);
-	VectorCopy(self->bleft,   train->bleft);
-	VectorCopy(self->tright,  train->tright);
+	VectorCopy(self->s.origin, train->s.origin);
+	VectorCopy(self->s.angles, train->s.angles);
+	VectorCopy(self->bleft, train->bleft);
+	VectorCopy(self->tright, train->tright);
 	VectorClear(train->avelocity);
-	train->viewheight     = self->viewheight;
+	train->viewheight = self->viewheight;
 	train->speed = self->speed;
 	train->moveinfo.distance = self->radius;
 	train->moveinfo.accel = train->moveinfo.decel = train->moveinfo.speed = train->speed;
 	train->moveinfo.state = train->moveinfo.prevstate = self->count;
 	train->sounds = self->sounds;
-	if(train->sounds > 0)
+	if (train->sounds > 0)
 	{
-		train->source = gi.TagMalloc(10,TAG_LEVEL);
-		Com_sprintf(train->source, 10, "train/%d/",train->sounds);
+		train->source = gi.TagMalloc(10, TAG_LEVEL);
+		Com_sprintf(train->source, 10, "train/%d/", train->sounds);
 	}
-	if(train->moveinfo.state && (train->sounds > 0)) {
-		train->s.sound = gi.soundindex(va("%sspeed%d.wav",train->source,abs(train->moveinfo.state)));
+	if (train->moveinfo.state && (train->sounds > 0)) {
+		train->s.sound = gi.soundindex(va("%sspeed%d.wav", train->source, abs(train->moveinfo.state)));
 #ifdef LOOP_SOUND_ATTENUATION
 		train->s.attenuation = train->attenuation;
 #endif
 	}
 	else
 		train->s.sound = 0;
-	train->moveinfo.next_speed = train->moveinfo.state * train->moveinfo.speed/3;
+	train->moveinfo.next_speed = train->moveinfo.state * train->moveinfo.speed / 3;
 	// Assume train was already at it's "next_speed" when the level change occurred
-	AngleVectors(train->s.angles,forward,NULL,NULL);
-	VectorScale(forward,train->moveinfo.next_speed,train->velocity);
+	AngleVectors(train->s.angles, forward, NULL, NULL);
+	VectorScale(forward, train->moveinfo.next_speed, train->velocity);
 	// Force a wait before taking player input
 	train->moveinfo.wait = 1;
 
-	if(self->style && (self->style <= game.maxclients) && &g_edicts[self->style].inuse)
+	if (self->style && (self->style <= game.maxclients) && &g_edicts[self->style].inuse)
 	{
 		train->owner = &g_edicts[self->style];
 		train->owner->vehicle = train;
-		if(train->owner->client)
+		if (train->owner->client)
 		{
 			train->owner->client->vehicle_framenum = level.framenum;
 			train->owner->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
 		}
-		VectorCopy(self->offset,train->offset);
+		VectorCopy(self->offset, train->offset);
 	}
 	else
 		train->owner = NULL;
 
 	gi.linkentity(train);
-	if(self->target)
+	if (self->target)
 	{
 		vec3_t	dest;
 
 		train->target = self->target;
-		train->target_ent = G_Find(NULL,FOFS(targetname),train->target);
-		VectorCopy (train->target_ent->s.origin, dest);
+		train->target_ent = G_Find(NULL, FOFS(targetname), train->target);
+		VectorCopy(train->target_ent->s.origin, dest);
 		dest[2] += train->viewheight;
-		VectorCopy (dest, train->moveinfo.end_origin);
+		VectorCopy(dest, train->moveinfo.end_origin);
 		train_angles(train);
-		if(!(train->spawnflags & SF_TRACKTRAIN_NOCONTROL) || !(train->spawnflags & SF_TRACKTRAIN_STARTOFF))
+		if (!(train->spawnflags & SF_TRACKTRAIN_NOCONTROL) || !(train->spawnflags & SF_TRACKTRAIN_STARTOFF))
 		{
 			train->think = tracktrain_think;
 			train->think(train);
@@ -2082,9 +2125,9 @@ void find_tracktrain (edict_t *self)
 	G_FreeEdict(self);
 }
 
-void SP_info_train_start (edict_t *self)
+void SP_info_train_start(edict_t* self)
 {
-	if(!self->targetname)
+	if (!self->targetname)
 	{
 		gi.dprintf("crosslevel train with no targetname\n");
 		G_FreeEdict(self);

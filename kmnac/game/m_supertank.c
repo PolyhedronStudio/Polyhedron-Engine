@@ -787,6 +787,7 @@ void SP_monster_supertank (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Supertank";
+	self->class_id = ENTITY_MONSTER_SUPERTANK;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 	walkmonster_start(self);

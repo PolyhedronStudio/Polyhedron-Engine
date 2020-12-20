@@ -833,6 +833,7 @@ void SP_monster_gunner (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Gunner";
+	self->class_id = ENTITY_MONSTER_GUNNER;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 

@@ -439,6 +439,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	bolt->think = G_FreeEdict;
 	bolt->dmg = damage;
 	bolt->classname = "bolt";
+	bolt->class_id = ENTITY_BOLT;
 	if (hyper)
 		bolt->spawnflags = 1;
 	gi.linkentity (bolt);
@@ -883,6 +884,7 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	grenade->dmg = damage;
 	grenade->dmg_radius = damage_radius;
 	grenade->classname = "grenade";
+	grenade->class_id = ENTITY_GRENADE;
 
 	Grenade_Add_To_Chain (grenade);
 
@@ -930,6 +932,7 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	grenade->dmg = damage;
 	grenade->dmg_radius = damage_radius;
 	grenade->classname = "hgrenade";
+	grenade->class_id = ENTITY_HANDGRENADE;
 	if (held)
 		grenade->spawnflags = 3;
 	else
@@ -1324,6 +1327,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 
 		rocket->enemy     = home_target;
 		rocket->classname = "homing rocket";
+		rocket->class_id = ENTITY_ROCKET;
 		rocket->nextthink = level.time + FRAMETIME;
 		rocket->think = homing_think;
 		rocket->starttime = level.time + 0.3; // play homing sound on 3rd frame
@@ -1339,6 +1343,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	else
 	{
 		rocket->classname = "rocket";
+		rocket->class_id = ENTITY_ROCKET;
 		rocket->nextthink = level.time + 8000.0f/speed;
 		rocket->think = G_FreeEdict;
 		Rocket_Evade (rocket, dir, speed);

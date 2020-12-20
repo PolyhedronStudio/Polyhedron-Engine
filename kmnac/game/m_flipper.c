@@ -395,9 +395,7 @@ void SP_monster_flipper (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	self->class_id = ENTITY_MONSTER_FLIPPER;
-	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
-
+	
 	sound_pain1		= gi.soundindex ("flipper/flppain1.wav");	
 	sound_pain2		= gi.soundindex ("flipper/flppain2.wav");	
 	sound_death		= gi.soundindex ("flipper/flpdeth1.wav");	
@@ -451,6 +449,8 @@ void SP_monster_flipper (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Barracuda Shark";
+	self->class_id = ENTITY_MONSTER_FLIPPER;
+	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 

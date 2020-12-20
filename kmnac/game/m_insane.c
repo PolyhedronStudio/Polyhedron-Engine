@@ -38,38 +38,38 @@ static int	sound_shake;
 static int	sound_moan;
 static int	sound_scream[8];
 
-void insane_fist (edict_t *self)
+void insane_fist(edict_t* self)
 {
-	gi.sound (self, CHAN_VOICE, sound_fist, 1, ATTN_IDLE, 0);
+	gi.sound(self, CHAN_VOICE, sound_fist, 1, ATTN_IDLE, 0);
 }
 
-void insane_shake (edict_t *self)
+void insane_shake(edict_t* self)
 {
-	gi.sound (self, CHAN_VOICE, sound_shake, 1, ATTN_IDLE, 0);
+	gi.sound(self, CHAN_VOICE, sound_shake, 1, ATTN_IDLE, 0);
 }
 
-void insane_moan (edict_t *self)
+void insane_moan(edict_t* self)
 {
-	gi.sound (self, CHAN_VOICE, sound_moan, 1, ATTN_IDLE, 0);
+	gi.sound(self, CHAN_VOICE, sound_moan, 1, ATTN_IDLE, 0);
 }
 
-void insane_scream (edict_t *self)
+void insane_scream(edict_t* self)
 {
-	gi.sound (self, CHAN_VOICE, sound_scream[rand()%8], 1, ATTN_IDLE, 0);
+	gi.sound(self, CHAN_VOICE, sound_scream[rand() % 8], 1, ATTN_IDLE, 0);
 }
 
 
-void insane_stand (edict_t *self);
-void insane_dead (edict_t *self);
-void insane_cross (edict_t *self);
-void insane_walk (edict_t *self);
-void insane_run (edict_t *self);
-void insane_checkdown (edict_t *self);
-void insane_checkup (edict_t *self);
-void insane_onground (edict_t *self);
+void insane_stand(edict_t* self);
+void insane_dead(edict_t* self);
+void insane_cross(edict_t* self);
+void insane_walk(edict_t* self);
+void insane_run(edict_t* self);
+void insane_checkdown(edict_t* self);
+void insane_checkup(edict_t* self);
+void insane_onground(edict_t* self);
 
 
-mframe_t insane_frames_stand_normal [] =
+mframe_t insane_frames_stand_normal[] =
 {
 	ai_stand, 0, NULL,
 	ai_stand, 0, NULL,
@@ -78,9 +78,9 @@ mframe_t insane_frames_stand_normal [] =
 	ai_stand, 0, NULL,
 	ai_stand, 0, insane_checkdown
 };
-mmove_t insane_move_stand_normal = {FRAME_stand60, FRAME_stand65, insane_frames_stand_normal, insane_stand};
+mmove_t insane_move_stand_normal = { FRAME_stand60, FRAME_stand65, insane_frames_stand_normal, insane_stand };
 
-mframe_t insane_frames_stand_insane [] =
+mframe_t insane_frames_stand_insane[] =
 {
 	ai_stand,	0,	insane_shake,
 	ai_stand,	0,	NULL,
@@ -113,9 +113,9 @@ mframe_t insane_frames_stand_insane [] =
 	ai_stand,	0,	NULL,
 	ai_stand,	0,	insane_checkdown
 };
-mmove_t insane_move_stand_insane = {FRAME_stand65, FRAME_stand94, insane_frames_stand_insane, insane_stand};
+mmove_t insane_move_stand_insane = { FRAME_stand65, FRAME_stand94, insane_frames_stand_insane, insane_stand };
 
-mframe_t insane_frames_uptodown [] =
+mframe_t insane_frames_uptodown[] =
 {
 	ai_move,	0,	NULL,
 	ai_move,	0,	NULL,
@@ -161,10 +161,10 @@ mframe_t insane_frames_uptodown [] =
 	ai_move,	0,	NULL,
 	ai_move,	0,	NULL
 };
-mmove_t insane_move_uptodown = {FRAME_stand1, FRAME_stand40, insane_frames_uptodown, insane_onground};
+mmove_t insane_move_uptodown = { FRAME_stand1, FRAME_stand40, insane_frames_uptodown, insane_onground };
 
 
-mframe_t insane_frames_downtoup [] =
+mframe_t insane_frames_downtoup[] =
 {
 	ai_move,	-0.7,	NULL,			// 41
 	ai_move,	-1.2,	NULL,			// 42
@@ -186,9 +186,9 @@ mframe_t insane_frames_downtoup [] =
 	ai_move,	0,	NULL,				// 58
 	ai_move,	0,	NULL				// 59
 };
-mmove_t insane_move_downtoup = {FRAME_stand41, FRAME_stand59, insane_frames_downtoup, insane_stand};
+mmove_t insane_move_downtoup = { FRAME_stand41, FRAME_stand59, insane_frames_downtoup, insane_stand };
 
-mframe_t insane_frames_jumpdown [] =
+mframe_t insane_frames_jumpdown[] =
 {
 	ai_move,	0.2,	NULL,
 	ai_move,	11.5,	NULL,
@@ -196,10 +196,10 @@ mframe_t insane_frames_jumpdown [] =
 	ai_move,	7.1,	NULL,
 	ai_move,	0,	NULL
 };
-mmove_t insane_move_jumpdown = {FRAME_stand96, FRAME_stand100, insane_frames_jumpdown, insane_onground};
+mmove_t insane_move_jumpdown = { FRAME_stand96, FRAME_stand100, insane_frames_jumpdown, insane_onground };
 
 
-mframe_t insane_frames_down [] =
+mframe_t insane_frames_down[] =
 {
 	ai_move,	0,		NULL,		// 100
 	ai_move,	0,		NULL,
@@ -263,9 +263,9 @@ mframe_t insane_frames_down [] =
 	ai_move,	0.7,		NULL,
 	ai_move,	0,		insane_checkup		// 160
 };
-mmove_t insane_move_down = {FRAME_stand100, FRAME_stand160, insane_frames_down, insane_onground};
+mmove_t insane_move_down = { FRAME_stand100, FRAME_stand160, insane_frames_down, insane_onground };
 
-mframe_t insane_frames_walk_normal [] =
+mframe_t insane_frames_walk_normal[] =
 {
 	ai_walk,	0,		insane_scream,
 	ai_walk,	2.5,	NULL,
@@ -281,10 +281,10 @@ mframe_t insane_frames_walk_normal [] =
 	ai_walk,	0.9,	NULL,
 	ai_walk,	0,		NULL
 };
-mmove_t insane_move_walk_normal = {FRAME_walk27, FRAME_walk39, insane_frames_walk_normal, insane_walk};
-mmove_t insane_move_run_normal = {FRAME_walk27, FRAME_walk39, insane_frames_walk_normal, insane_run};
+mmove_t insane_move_walk_normal = { FRAME_walk27, FRAME_walk39, insane_frames_walk_normal, insane_walk };
+mmove_t insane_move_run_normal = { FRAME_walk27, FRAME_walk39, insane_frames_walk_normal, insane_run };
 
-mframe_t insane_frames_walk_insane [] =
+mframe_t insane_frames_walk_insane[] =
 {
 	ai_walk,	0,		insane_scream,		// walk 1
 	ai_walk,	3.4,	NULL,		// walk 2
@@ -313,10 +313,10 @@ mframe_t insane_frames_walk_insane [] =
 	ai_walk,	1.8,	NULL,		// 25
 	ai_walk,	0,		NULL		// 26
 };
-mmove_t insane_move_walk_insane = {FRAME_walk1, FRAME_walk26, insane_frames_walk_insane, insane_walk};
-mmove_t insane_move_run_insane = {FRAME_walk1, FRAME_walk26, insane_frames_walk_insane, insane_run};
+mmove_t insane_move_walk_insane = { FRAME_walk1, FRAME_walk26, insane_frames_walk_insane, insane_walk };
+mmove_t insane_move_run_insane = { FRAME_walk1, FRAME_walk26, insane_frames_walk_insane, insane_run };
 
-mframe_t insane_frames_stand_pain [] =
+mframe_t insane_frames_stand_pain[] =
 {
 	ai_move,	0,		NULL,
 	ai_move,	0,		NULL,
@@ -330,9 +330,9 @@ mframe_t insane_frames_stand_pain [] =
 	ai_move,	0,		NULL,
 	ai_move,	0,		NULL
 };
-mmove_t insane_move_stand_pain = {FRAME_st_pain2, FRAME_st_pain12, insane_frames_stand_pain, insane_run};
+mmove_t insane_move_stand_pain = { FRAME_st_pain2, FRAME_st_pain12, insane_frames_stand_pain, insane_run };
 
-mframe_t insane_frames_stand_death [] =
+mframe_t insane_frames_stand_death[] =
 {
 	ai_move,	0,		NULL,
 	ai_move,	0,		NULL,
@@ -352,9 +352,9 @@ mframe_t insane_frames_stand_death [] =
 	ai_move,	0,		NULL,
 	ai_move,	0,		NULL
 };
-mmove_t insane_move_stand_death = {FRAME_st_death2, FRAME_st_death18, insane_frames_stand_death, insane_dead};
+mmove_t insane_move_stand_death = { FRAME_st_death2, FRAME_st_death18, insane_frames_stand_death, insane_dead };
 
-mframe_t insane_frames_crawl [] =
+mframe_t insane_frames_crawl[] =
 {
 	ai_walk,	0,		insane_scream,
 	ai_walk,	1.5,	NULL,
@@ -366,10 +366,10 @@ mframe_t insane_frames_crawl [] =
 	ai_walk,	3.4,	NULL,
 	ai_walk,	2.4,	NULL
 };
-mmove_t insane_move_crawl = {FRAME_crawl1, FRAME_crawl9, insane_frames_crawl, NULL};
-mmove_t insane_move_runcrawl = {FRAME_crawl1, FRAME_crawl9, insane_frames_crawl, NULL};
+mmove_t insane_move_crawl = { FRAME_crawl1, FRAME_crawl9, insane_frames_crawl, NULL };
+mmove_t insane_move_runcrawl = { FRAME_crawl1, FRAME_crawl9, insane_frames_crawl, NULL };
 
-mframe_t insane_frames_crawl_pain [] =
+mframe_t insane_frames_crawl_pain[] =
 {
 	ai_move,	0,		NULL,
 	ai_move,	0,		NULL,
@@ -381,9 +381,9 @@ mframe_t insane_frames_crawl_pain [] =
 	ai_move,	0,		NULL,
 	ai_move,	0,		NULL
 };
-mmove_t insane_move_crawl_pain = {FRAME_cr_pain2, FRAME_cr_pain10, insane_frames_crawl_pain, insane_run};
+mmove_t insane_move_crawl_pain = { FRAME_cr_pain2, FRAME_cr_pain10, insane_frames_crawl_pain, insane_run };
 
-mframe_t insane_frames_crawl_death [] =
+mframe_t insane_frames_crawl_death[] =
 {
 	ai_move,	0,		NULL,
 	ai_move,	0,		NULL,
@@ -393,9 +393,9 @@ mframe_t insane_frames_crawl_death [] =
 	ai_move,	0,		NULL,
 	ai_move,	0,		NULL
 };
-mmove_t insane_move_crawl_death = {FRAME_cr_death10, FRAME_cr_death16, insane_frames_crawl_death, insane_dead};
+mmove_t insane_move_crawl_death = { FRAME_cr_death10, FRAME_cr_death16, insane_frames_crawl_death, insane_dead };
 
-mframe_t insane_frames_cross [] =
+mframe_t insane_frames_cross[] =
 {
 	ai_move,	0,		insane_moan,
 	ai_move,	0,		NULL,
@@ -413,9 +413,9 @@ mframe_t insane_frames_cross [] =
 	ai_move,	0,		NULL,
 	ai_move,	0,		NULL
 };
-mmove_t insane_move_cross = {FRAME_cross1, FRAME_cross15, insane_frames_cross, insane_cross};
+mmove_t insane_move_cross = { FRAME_cross1, FRAME_cross15, insane_frames_cross, insane_cross };
 
-mframe_t insane_frames_struggle_cross [] =
+mframe_t insane_frames_struggle_cross[] =
 {
 	ai_move,	0,		insane_scream,
 	ai_move,	0,		NULL,
@@ -433,19 +433,19 @@ mframe_t insane_frames_struggle_cross [] =
 	ai_move,	0,		NULL,
 	ai_move,	0,		NULL
 };
-mmove_t insane_move_struggle_cross = {FRAME_cross16, FRAME_cross30, insane_frames_struggle_cross, insane_cross};
+mmove_t insane_move_struggle_cross = { FRAME_cross16, FRAME_cross30, insane_frames_struggle_cross, insane_cross };
 
-void insane_cross (edict_t *self)
+void insane_cross(edict_t* self)
 {
-	if (random() < 0.8)		
+	if (random() < 0.8)
 		self->monsterinfo.currentmove = &insane_move_cross;
 	else
 		self->monsterinfo.currentmove = &insane_move_struggle_cross;
 }
 
-void insane_walk (edict_t *self)
+void insane_walk(edict_t* self)
 {
-	if ( self->spawnflags & 16 )			// Hold Ground?
+	if (self->spawnflags & 16)			// Hold Ground?
 		if (self->s.frame == FRAME_cr_pain10)
 		{
 			self->monsterinfo.currentmove = &insane_move_down;
@@ -460,9 +460,9 @@ void insane_walk (edict_t *self)
 			self->monsterinfo.currentmove = &insane_move_walk_insane;
 }
 
-void insane_run (edict_t *self)
+void insane_run(edict_t* self)
 {
-	if ( self->spawnflags & 16 )			// Hold Ground?
+	if (self->spawnflags & 16)			// Hold Ground?
 		if (self->s.frame == FRAME_cr_pain10)
 		{
 			self->monsterinfo.currentmove = &insane_move_down;
@@ -478,9 +478,9 @@ void insane_run (edict_t *self)
 }
 
 
-void insane_pain (edict_t *self, edict_t *other, float kick, int damage)
+void insane_pain(edict_t* self, edict_t* other, float kick, int damage)
 {
-	int	l,r;
+	int	l, r;
 
 	//if (self->health < (self->max_health / 2))
 	//	self->s.skinnum = 1;
@@ -490,7 +490,7 @@ void insane_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 3;
 
-	r = 1 + (rand()&1);
+	r = 1 + (rand() & 1);
 	if (self->health < 25)
 		l = 25;
 	else if (self->health < 50)
@@ -499,20 +499,20 @@ void insane_pain (edict_t *self, edict_t *other, float kick, int damage)
 		l = 75;
 	else
 		l = 100;
-	gi.sound (self, CHAN_VOICE, gi.soundindex (va("player/male/pain%i_%i.wav", l, r)), 1, ATTN_IDLE, 0);
+	gi.sound(self, CHAN_VOICE, gi.soundindex(va("player/male/pain%i_%i.wav", l, r)), 1, ATTN_IDLE, 0);
 
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
 
 	// Don't go into pain frames if crucified.
 //	if (self->spawnflags & 8)
-	if ( (self->spawnflags & 8) || (self->moreflags & 8) )	// Knightmare- use moreflags field instead
+	if ((self->spawnflags & 8) || (self->moreflags & 8))	// Knightmare- use moreflags field instead
 	{
-		self->monsterinfo.currentmove = &insane_move_struggle_cross;			
+		self->monsterinfo.currentmove = &insane_move_struggle_cross;
 		return;
 	}
-	
-	if  ( ((self->s.frame >= FRAME_crawl1) && (self->s.frame <= FRAME_crawl9)) || ((self->s.frame >= FRAME_stand99) && (self->s.frame <= FRAME_stand160)) )
+
+	if (((self->s.frame >= FRAME_crawl1) && (self->s.frame <= FRAME_crawl9)) || ((self->s.frame >= FRAME_stand99) && (self->s.frame <= FRAME_stand160)))
 	{
 		self->monsterinfo.currentmove = &insane_move_crawl_pain;
 	}
@@ -521,12 +521,12 @@ void insane_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 }
 
-void insane_onground (edict_t *self)
+void insane_onground(edict_t* self)
 {
 	self->monsterinfo.currentmove = &insane_move_down;
 }
 
-void insane_checkdown (edict_t *self)
+void insane_checkdown(edict_t* self)
 {
 	//if ( (self->s.frame == FRAME_stand94) || (self->s.frame == FRAME_stand65) )
 	if (self->spawnflags & 32)				// Always stand
@@ -535,76 +535,77 @@ void insane_checkdown (edict_t *self)
 		if (random() < 0.5)
 			self->monsterinfo.currentmove = &insane_move_uptodown;
 		else
-			self->monsterinfo.currentmove = &insane_move_jumpdown; 
+			self->monsterinfo.currentmove = &insane_move_jumpdown;
 }
 
-void insane_checkup (edict_t *self)
+void insane_checkup(edict_t* self)
 {
 	// If Hold_Ground and Crawl are set
-	if ( (self->spawnflags & 4) && (self->spawnflags & 16) )
+	if ((self->spawnflags & 4) && (self->spawnflags & 16))
 		return;
 	if (random() < 0.5)
-		self->monsterinfo.currentmove = &insane_move_downtoup;				
+		self->monsterinfo.currentmove = &insane_move_downtoup;
 
 }
 
-void insane_stand (edict_t *self)
+void insane_stand(edict_t* self)
 {
-//	if (self->spawnflags & 8)			// If crucified
-	if ( (self->spawnflags & 8) || (self->moreflags & 8) )	// If crucified		// Knightmare- use moreflags field instead
+	//	if (self->spawnflags & 8)			// If crucified
+	if ((self->spawnflags & 8) || (self->moreflags & 8))	// If crucified		// Knightmare- use moreflags field instead
 	{
 		self->monsterinfo.currentmove = &insane_move_cross;
 		self->monsterinfo.aiflags |= AI_STAND_GROUND;
 	}
 	// If Hold_Ground and Crawl are set
-	else if ( (self->spawnflags & 4) && (self->spawnflags & 16) )
+	else if ((self->spawnflags & 4) && (self->spawnflags & 16))
 		self->monsterinfo.currentmove = &insane_move_down;
-	else
+	else {
 		if (random() < 0.5)
 			self->monsterinfo.currentmove = &insane_move_stand_normal;
 		else
 			self->monsterinfo.currentmove = &insane_move_stand_insane;
+	}
 }
 
-void insane_dead (edict_t *self)
+void insane_dead(edict_t* self)
 {
-//	if (self->spawnflags & 8)
-	if ( (self->spawnflags & 8) || (self->moreflags & 8) )	// Knightmare- use moreflags field instead
+	//	if (self->spawnflags & 8)
+	if ((self->spawnflags & 8) || (self->moreflags & 8))	// Knightmare- use moreflags field instead
 	{
 		self->flags |= FL_FLY;
 	}
 	else
 	{
-		VectorSet (self->mins, -16, -16, -24);
-		VectorSet (self->maxs, 16, 16, -8);
+		VectorSet(self->mins, -16, -16, -24);
+		VectorSet(self->maxs, 16, 16, -8);
 		self->movetype = MOVETYPE_TOSS;
 	}
 	self->svflags |= SVF_DEADMONSTER;
 	self->nextthink = 0;
-	gi.linkentity (self);
+	gi.linkentity(self);
 	M_FlyCheck(self);
 
 	// Lazarus monster fade
 	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
-		self->think=FadeDieSink;
-		self->nextthink=level.time+corpse_fadetime->value;
+		self->think = FadeDieSink;
+		self->nextthink = level.time + corpse_fadetime->value;
 	}
 }
 
 
-void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void insane_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point)
 {
 	int		n;
 
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_IDLE, 0);
-		for (n= 0; n < 2; n++)
-			ThrowGib (self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
-		for (n= 0; n < 4; n++)
-			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-		ThrowHead (self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
+		gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_IDLE, 0);
+		for (n = 0; n < 2; n++)
+			ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
+		for (n = 0; n < 4; n++)
+			ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+		ThrowHead(self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
 		return;
 	}
@@ -612,19 +613,19 @@ void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-	gi.sound (self, CHAN_VOICE, gi.soundindex(va("player/male/death%i.wav", (rand()%4)+1)), 1, ATTN_IDLE, 0);
+	gi.sound(self, CHAN_VOICE, gi.soundindex(va("player/male/death%i.wav", (rand() % 4) + 1)), 1, ATTN_IDLE, 0);
 
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
-//	if (self->spawnflags & 8)
-	if ( (self->spawnflags & 8) || (self->moreflags & 8) )	// Knightmare- use moreflags field instead
+	//	if (self->spawnflags & 8)
+	if ((self->spawnflags & 8) || (self->moreflags & 8))	// Knightmare- use moreflags field instead
 	{
-		insane_dead (self);
+		insane_dead(self);
 	}
 	else
 	{
-		if ( ((self->s.frame >= FRAME_crawl1) && (self->s.frame <= FRAME_crawl9)) || ((self->s.frame >= FRAME_stand99) && (self->s.frame <= FRAME_stand160)) )		
+		if (((self->s.frame >= FRAME_crawl1) && (self->s.frame <= FRAME_crawl9)) || ((self->s.frame >= FRAME_stand99) && (self->s.frame <= FRAME_stand160)))
 			self->monsterinfo.currentmove = &insane_move_crawl_death;
 		else
 			self->monsterinfo.currentmove = &insane_move_stand_death;
@@ -634,34 +635,34 @@ void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 /*QUAKED misc_insane (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn CRAWL CRUCIFIED STAND_GROUND ALWAYS_STAND
 */
-void SP_misc_insane (edict_t *self)
+void SP_misc_insane(edict_t* self)
 {
-	//static int skin = 0;	//@@
+	//	static int skin = 0;	//@@
 
 	if (deathmatch->value)
 	{
-		G_FreeEdict (self);
+		G_FreeEdict(self);
 		return;
 	}
 
-	sound_fist = gi.soundindex ("insane/insane11.wav");
-	sound_shake = gi.soundindex ("insane/insane5.wav");
-	sound_moan = gi.soundindex ("insane/insane7.wav");
-	sound_scream[0] = gi.soundindex ("insane/insane1.wav");
-	sound_scream[1] = gi.soundindex ("insane/insane2.wav");
-	sound_scream[2] = gi.soundindex ("insane/insane3.wav");
-	sound_scream[3] = gi.soundindex ("insane/insane4.wav");
-	sound_scream[4] = gi.soundindex ("insane/insane6.wav");
-	sound_scream[5] = gi.soundindex ("insane/insane8.wav");
-	sound_scream[6] = gi.soundindex ("insane/insane9.wav");
-	sound_scream[7] = gi.soundindex ("insane/insane10.wav");
+	sound_fist = gi.soundindex("insane/insane11.wav");
+	sound_shake = gi.soundindex("insane/insane5.wav");
+	sound_moan = gi.soundindex("insane/insane7.wav");
+	sound_scream[0] = gi.soundindex("insane/insane1.wav");
+	sound_scream[1] = gi.soundindex("insane/insane2.wav");
+	sound_scream[2] = gi.soundindex("insane/insane3.wav");
+	sound_scream[3] = gi.soundindex("insane/insane4.wav");
+	sound_scream[4] = gi.soundindex("insane/insane6.wav");
+	sound_scream[5] = gi.soundindex("insane/insane8.wav");
+	sound_scream[6] = gi.soundindex("insane/insane9.wav");
+	sound_scream[7] = gi.soundindex("insane/insane10.wav");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 	self->s.modelindex = gi.modelindex("models/monsters/insane/tris.md2");
 
-	VectorSet (self->mins, -16, -16, -24);
-	VectorSet (self->maxs, 16, 16, 32);
+	VectorSet(self->mins, -16, -16, -24);
+	VectorSet(self->maxs, 16, 16, 32);
 
 	if (!self->health)
 		self->health = 100;
@@ -683,12 +684,12 @@ void SP_misc_insane (edict_t *self)
 	self->monsterinfo.aiflags |= AI_GOOD_GUY;
 
 	//@@
-	//self->s.skinnum = skin;
-	//skin++;
-	//if (skin > 12)
-	//	skin = 0;
+	//	self->s.skinnum = skin;
+	//	skin++;
+	//	if (skin > 12)
+	//		skin = 0;
 
-	gi.linkentity (self);
+	gi.linkentity(self);
 
 	if (self->spawnflags & 16)			// Stand Ground
 		self->monsterinfo.aiflags |= AI_STAND_GROUND;
@@ -699,6 +700,7 @@ void SP_misc_insane (edict_t *self)
 		self->monsterinfo.flies = 0.30;
 
 	self->common_name = "Insane Marine";
+	self->class_id = ENTITY_MISC_INSANE;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 
@@ -707,14 +709,14 @@ void SP_misc_insane (edict_t *self)
 		// Knightmare- Spawnflag 8 collides with SF_MONSTER_GOODGUY, and can be cleared in some instances.
 		// This prevents it from screwing up crucified insanes.
 		self->moreflags |= 8;
-		VectorSet (self->mins, -16, 0, 0);
-		VectorSet (self->maxs, 16, 8, 32);
+		VectorSet(self->mins, -16, 0, 0);
+		VectorSet(self->maxs, 16, 8, 32);
 		self->flags |= FL_NO_KNOCKBACK;
-		flymonster_start (self);
+		flymonster_start(self);
 	}
 	else
 	{
-		walkmonster_start (self);
-		self->s.skinnum = rand()%3;
+		walkmonster_start(self);
+		self->s.skinnum = rand() % 3;
 	}
 }

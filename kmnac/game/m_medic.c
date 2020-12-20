@@ -1313,6 +1313,8 @@ void SP_monster_medic (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Medic";
+	self->class_id = ENTITY_MONSTER_MEDIC;
+
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start (self);

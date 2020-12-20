@@ -623,6 +623,8 @@ void SP_monster_parasite (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Parasite";
+	self->class_id = ENTITY_MONSTER_PARASITE;
+
 	self->monsterinfo.scale = MODEL_SCALE;
 	walkmonster_start (self);
 }

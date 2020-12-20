@@ -65,6 +65,9 @@ int	hml_index;
 #define HEALTH_IGNORE_MAX	1
 #define HEALTH_TIMED		2
 
+#define	HEALTH_SMALL		4
+#define	HEALTH_LARGE		8
+
 #define NO_STUPID_SPINNING  4
 #define NO_DROPTOFLOOR      8
 #define SHOOTABLE           16
@@ -3170,7 +3173,7 @@ void SP_item_health_small (edict_t *self)
 		return;
 	}
 
-	//gi.dprintf("HEY - SP_item_health_small\n");
+	self->class_id = ENTITY_ITEM_HEALTH_SMALL;
 
 	self->model = "models/items/healing/stimpack/tris.md2";
 	self->count = sk_health_bonus_value->value;
@@ -3189,6 +3192,7 @@ void SP_item_health_large (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	self->class_id = ENTITY_ITEM_HEALTH_LARGE;
 
 	self->model = "models/items/healing/large/tris.md2";
 	self->count = 25;
@@ -3206,6 +3210,7 @@ void SP_item_health_mega (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	self->class_id = ENTITY_ITEM_HEALTH_MEGA;
 
 	self->model = "models/items/mega_h/tris.md2";
 	self->count = 100;

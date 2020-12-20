@@ -133,6 +133,10 @@ field_t fields[] = {
 	{"relative_avelocity", FOFS(relative_avelocity), F_VECTOR}, //relative angular velocity
 	{"oldvelocity", FOFS(oldvelocity), F_VECTOR}, //relative angular velocity
 
+	{ "width", FOFS(width), F_FLOAT },	// Knightmare- these are needed to update func_door_secret's positions
+	{"length", FOFS(length), F_FLOAT},
+	{"side", FOFS(side), F_FLOAT},
+
 	// Lazarus additions
 	{"actor_current_weapon", FOFS(actor_current_weapon), F_INT},
 	{"aiflags", FOFS(monsterinfo.aiflags), F_INT},
@@ -208,6 +212,7 @@ field_t fields[] = {
 	{"org_size", FOFS(org_size), F_VECTOR},
 	{"owner_id", FOFS(owner_id), F_INT},
 	{"parent_attach_angles", FOFS(parent_attach_angles), F_VECTOR},
+	{ "child_attach_angles", FOFS(child_attach_angles), F_VECTOR },	// Knightmare added
 	{"pitch_speed", FOFS(pitch_speed), F_FLOAT},
 	{"powerarmor", FOFS(powerarmor), F_INT},
 	{"prev_grenade", FOFS(prev_grenade), F_EDICT, FFL_NOSPAWN},

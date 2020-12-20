@@ -448,6 +448,7 @@ void SP_monster_gladiator (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Gladiator";
+	self->class_id = ENTITY_MONSTER_GLADIATOR;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 

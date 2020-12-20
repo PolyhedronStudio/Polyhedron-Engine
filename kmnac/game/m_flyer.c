@@ -655,6 +655,7 @@ void SP_monster_flyer (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 	self->common_name = "Flyer";
+	self->class_id = ENTITY_MONSTER_FLYER;
 
 	gi.linkentity (self);
 

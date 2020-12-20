@@ -189,19 +189,30 @@ void SaveEntProps(edict_t *e, FILE *f)
 #endif
 		"   frame       = %d\n"
 		"   skinnum     = %d\n"
+#ifdef KMQUAKE2_ENGINE_MOD
+		 "   alpha       = %g\n"
+#endif
 		"   effects     = 0x%08x\n"
 		"   solid       = 0x%08x\n"
 		"   sound       = %d\n"
+#ifdef LOOP_SOUND_ATTENUATION
+		       "   attenuation = %g\n"
+#endif
 		"   event       = %d\n",
-		e->s.number,vtos(e->s.origin),vtos(e->s.angles),
-		vtos(e->s.old_origin),e->s.modelindex,e->s.modelindex2,
-		e->s.modelindex3,e->s.modelindex4,
+		e->s.number, vtos(e->s.origin), vtos(e->s.angles),
+		vtos(e->s.old_origin), e->s.modelindex, e->s.modelindex2,
+		e->s.modelindex3, e->s.modelindex4,
 #ifdef KMQUAKE2_ENGINE_MOD
 		e->s.modelindex5,e->s.modelindex6,
 #endif
-		e->s.frame,
-		e->s.skinnum,e->s.effects,e->s.solid,e->s.sound,
-		e->s.event);
+		e->s.frame, e->s.skinnum,
+#ifdef KMQUAKE2_ENGINE_MOD
+                e->s.alpha,
+#endif
+		 e->s.effects, e->s.solid, e->s.sound,
+#ifdef LOOP_SOUND_ATTENUATION
+		 e->s.attenuation,
+#endif
 	fprintf(f,"inuse       = %d\n"
 		"linkcount   = %d\n"
 		"svflags     = 0x%08x\n"
@@ -212,16 +223,17 @@ void SaveEntProps(edict_t *e, FILE *f)
 		"size        = %s\n"
 		"solid       = 0x%08x\n"
 		"clipmask    = 0x%08x\n",
-		e->inuse,e->linkcount,e->svflags,vtos(e->mins),
-		vtos(e->maxs),vtos(e->absmin),vtos(e->absmax),
-		vtos(e->size),e->solid,e->clipmask);
-	fprintf(f,"movetype    = 0x%08x\n"
+		e->inuse, e->linkcount, e->svflags, vtos(e->mins),
+		vtos(e->maxs), vtos(e->absmin), vtos(e->absmax),
+		vtos(e->size), e->solid, e->clipmask));
+	fprintf(f, "movetype    = 0x%08x\n"
 		"flags       = 0x%08x\n"
 		"freetime    = %g\n"
 		"message     = %s\n"
 		"key_message = %s\n"
 		"classname   = %s\n"
 		"spawnflags  = 0x%08x\n"
+		"moreflags   = 0x%08x\n"
 		"timestamp   = %g\n"
 		"angle       = %g\n"
 		"target      = %s\n"
@@ -232,11 +244,11 @@ void SaveEntProps(edict_t *e, FILE *f)
 		"deathtarget = %s\n"
 		"combattarget= %s\n"
 		"dmgteam     = %s\n",
-		e->movetype,e->flags,e->freetime,e->message,e->key_message,
-		e->classname,e->spawnflags,e->timestamp,e->angle,e->target,
-		e->targetname,e->killtarget,e->team,e->pathtarget,e->deathtarget,
-		e->combattarget,e->dmgteam);
-	fprintf(f,"speed       = %g\n"
+		e->movetype, e->flags, e->freetime, e->message, e->key_message,
+		e->classname, e->spawnflags, e->moreflags, e->timestamp, e->angle, e->target,
+		e->targetname, e->killtarget, e->team, e->pathtarget, e->deathtarget,
+		e->combattarget, e->dmgteam);
+	fprintf(f, "speed       = %g\n"
 		"accel       = %g\n"
 		"decel       = %g\n"
 		"movedir     = %s\n"
@@ -254,10 +266,10 @@ void SaveEntProps(edict_t *e, FILE *f)
 		"ideal_roll  = %g\n"
 		"roll        = %g\n"
 		"groundentity= %s\n",
-		e->speed,e->accel,e->decel,vtos(e->movedir),vtos(e->pos1),
-		vtos(e->pos2),vtos(e->velocity),vtos(e->avelocity),
-		e->mass,e->air_finished,e->gravity,e->yaw_speed,e->ideal_yaw,
-		e->pitch_speed,e->ideal_pitch,e->ideal_roll,e->roll,
+		e->speed, e->accel, e->decel, vtos(e->movedir), vtos(e->pos1),
+		vtos(e->pos2), vtos(e->velocity), vtos(e->avelocity),
+		e->mass, e->air_finished, e->gravity, e->yaw_speed, e->ideal_yaw,
+		e->pitch_speed, e->ideal_pitch, e->ideal_roll, e->roll,
 		(e->groundentity ? e->groundentity->classname : "None") );
 	fprintf(f,"touch_debounce_time  = %g\n"
 		"pain_debounce_time   = %g\n"
@@ -276,18 +288,18 @@ void SaveEntProps(edict_t *e, FILE *f)
 		"health2     = %d\n"
 		"mass2       = %d\n"
 		"powerarmor_time=%g\n",
-		e->health,e->max_health,e->gib_health,e->deadflag,e->show_hostile,
-		e->health2,e->mass2,e->powerarmor_time);
-	fprintf(f,"viewheight  = %d\n"
+		e->health, e->max_health, e->gib_health, e->deadflag, e->show_hostile,
+		e->health2, e->mass2, e->powerarmor_time);
+	fprintf(f, "viewheight  = %d\n"
 		"takedamage  = %d\n"
 		"dmg         = %d\n"
 		"radius_dmg  = %d\n"
 		"dmg_radius  = %g\n"
 		"sounds      = %d\n"
 		"count       = %d\n",
-		e->viewheight,e->takedamage,e->dmg,e->radius_dmg,e->dmg_radius,
-		e->sounds,e->count);
-	fprintf(f,"noise_index = %d\n"
+		e->viewheight, e->takedamage, e->dmg, e->radius_dmg, e->dmg_radius,
+		e->sounds, e->count);
+	fprintf(f, "noise_index = %d\n"
 		"noise_index2= %d\n"
 		"volume      = %f\n"
 		"attenuation = %g\n"
@@ -301,10 +313,10 @@ void SaveEntProps(edict_t *e, FILE *f)
 		"waterlevel  = %d\n"
 		"move_origin = %s\n"
 		"move_angles = %s\n",
-		e->noise_index,e->noise_index2,e->volume,e->attenuation,
-		e->wait,e->delay,e->random,e->starttime,e->endtime,e->teleport_time,
-		e->watertype,e->waterlevel,vtos(e->move_origin),vtos(e->move_angles));
-	fprintf(f,"light_level = %d\n"
+		e->noise_index, e->noise_index2, e->volume, e->attenuation,
+		e->wait, e->delay, e->random, e->starttime, e->endtime, e->teleport_time,
+		e->watertype, e->waterlevel, vtos(e->move_origin), vtos(e->move_angles));
+	fprintf(f, "light_level = %d\n"
 		"style       = %d\n",
 		e->light_level,e->style);
 	fprintf(f,"enemy = %s\n",(e->enemy ? e->enemy->classname : "NULL"));
