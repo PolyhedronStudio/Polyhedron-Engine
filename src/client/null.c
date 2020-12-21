@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared/shared.h"
 #include "common/cvar.h"
+#include "common/bsp.h"
 #include "client/client.h"
 void SetFogByMap(const char* name) 
 {
@@ -37,3 +38,31 @@ void Key_Init(void)
     Cmd_AddCommand("unbindall", Key_Bind_Null_f);
 }
 
+void bsp_add_entlights(const bsp_t* bsp)
+{
+
+}
+
+void initlight_changed(cvar_t *self)
+{
+	
+}
+void initlightbind_changed(cvar_t *self)
+{
+}
+
+int num_entlights;
+
+cvar_t		*initlight;
+cvar_t		*initlightbind;
+
+cvar_t		*inittargetlightLSbind;
+cvar_t		*inittargetlightbind;
+void inittargetlightLSbind_changed(cvar_t *self)
+{
+
+}
+void inittargetlightbind_changed(cvar_t *self)
+{
+
+}

@@ -1416,7 +1416,7 @@ edict_t* NextPathTrack(edict_t* train, edict_t* path)
 	}
 	if (developer->value)
 		gi.dprintf("prev=%s, current=%s, next=%s\n",
-			(path->prevpath ? path->prevpath->targetname : "nada"),
+		(path->prevpath ? path->prevpath->targetname : "nada"),
 			path->targetname,
 			(next ? next->targetname : "nada"));
 

@@ -264,7 +264,7 @@ sample_polygonal_lights(
 }
 
 void
-sample_spherical_lights(
+sample_spherical_lightsOld(
 		vec3 p,
 		vec3 n,
 		vec3 gn,
@@ -282,10 +282,10 @@ sample_spherical_lights(
 	float random_light = rng.x * global_ubo.num_sphere_lights;
 	uint light_idx = min(global_ubo.num_sphere_lights - 1, uint(random_light));
 
-	vec4 light_center_radius = global_ubo.sphere_light_data[light_idx * 2];
+	vec4 light_center_radius = global_ubo.sphere_light_data[light_idx * 4];
 	float sphere_radius = light_center_radius.w;
 
-	light_color = global_ubo.sphere_light_data[light_idx * 2 + 1].rgb;
+	light_color = global_ubo.sphere_light_data[light_idx * 4 + 1].rgb;
 
 	vec3 c = light_center_radius.xyz - p;
 	float dist = length(c);
@@ -308,6 +308,231 @@ sample_spherical_lights(
 		light_color = vec3(0);
 }
 
+
+float SpotAttenuation(vec3 spotDirection, vec3 lightDirection, float umbra, float penumbra)
+{
+	// Spot attenuation function from Frostbite, pg 115 in RTR4
+	float cosTheta = clamp(dot(spotDirection, lightDirection), 0.0, 1.0);
+	float t = clamp((cosTheta - cos(umbra)) / (cos(penumbra) - cos(umbra)), 0.0, 1.0);
+	return t * t;
+}
+
+float LightWindowing(float distanceToLight, float maxDistance)
+{
+	return pow(clamp(1.f - pow((distanceToLight / maxDistance), 4), 0.0, 1.0), 2);
+}
+
+float LightFalloff(float distanceToLight)
+{
+	return 1.f / pow(max(distanceToLight, 1.f), 2);
+}
+
+
+
+/*
+void
+sample_spherical_lights3(
+	vec3 p,
+	vec3 n,
+	vec3 gn,
+	float max_solid_angle,
+	out vec3 position_light,
+	out vec3 light_color,
+	vec3 rng)
+{
+	position_light = vec3(0);
+	light_color = vec3(0);
+
+	if (global_ubo.num_sphere_lights == 0)
+		return;
+
+	float random_light = rng.x * global_ubo.num_sphere_lights;
+	uint light_idx = min(global_ubo.num_sphere_lights - 1, uint(random_light));
+
+	vec4 light_center_radius = global_ubo.sphere_light_data[light_idx * 2];
+	float sphere_radius = light_center_radius.w;
+
+	light_color = global_ubo.sphere_light_data[light_idx * 2 + 1].rgb;
+
+	vec3 lightVector = (light_center_radius.xyz - p);
+	float  lightDistance = length(lightVector);
+
+	vec3 lightDirection = normalize(lightVector);
+	float  nol = max(dot(n, lightDirection), 0.f);
+	vec3 spotDirection = normalize(vec3(0, 0, 1));
+	float  attenuation = SpotAttenuation(spotDirection, -lightDirection, 50.0, 40.0);
+	float  falloff = LightFalloff(lightDistance);
+	float  window = LightWindowing(lightDistance, 80.0);
+
+	light_color = 800.0 * light_color * nol * attenuation * falloff * window;
+
+	//mat3 onb = construct_ONB_frisvad(lightDirection);
+	//vec3 diskpt;
+	//diskpt.xy = sample_disk(rng.yz);
+	//diskpt.z = sqrt(max(0, 1 - diskpt.x * diskpt.x - diskpt.y * diskpt.y));
+	position_light = light_center_radius.xyz;
+	//position_light = light_center_radius.xyz + (onb[0] * diskpt.x + onb[2] * diskpt.y - lightDirection * diskpt.z) * sphere_radius;
+
+	//if(dot(position_light - p, gn) <= 0)
+	//	light_color = vec3(0);
+}
+
+void
+sample_spherical_lightsx(
+	vec3 p,
+	vec3 n,
+	vec3 gn,
+	float max_solid_angle,
+	out vec3 position_light,
+	out vec3 light_color,
+	vec3 rng)
+{
+	position_light = vec3(0);
+	light_color = vec3(0);
+
+	if (global_ubo.num_sphere_lights == 0)
+		return;
+
+	float random_light = rng.x * global_ubo.num_sphere_lights;
+	uint light_idx = min(global_ubo.num_sphere_lights - 1, uint(random_light));
+
+	vec4 light_center_radius = global_ubo.sphere_light_data[light_idx * 2];
+	float sphere_radius = light_center_radius.w;
+
+	light_color = global_ubo.sphere_light_data[light_idx * 2 + 1].rgb;
+
+	vec3 lightVector = (light_center_radius.xyz - p);
+	float  lightDistance = length(lightVector);
+
+	
+	float rdist = 1.0 / lightDistance;
+	vec3 L = lightVector * rdist;
+
+	float irradiance = 2 * (1 - sqrt(max(0, 1 - square(sphere_radius * rdist))));
+	irradiance = min(irradiance, max_solid_angle);
+	irradiance *= float(global_ubo.num_sphere_lights); // 1 / pdf
+
+	// Compute lighting
+	vec3 lightDirection = normalize(lightVector);
+	float  nol = max(dot(n, lightDirection), 0);
+	if (nol < 0.0) nol = dot(-n, lightDirection);
+	//float  falloff = LightFalloff(lightDistance);
+	//float  window = LightWindowing(lightDistance, 400);
+
+	light_color = light_color * nol * irradiance;// *window;
+	
+	mat3 onb = construct_ONB_frisvad(L);
+	vec3 diskpt;
+	diskpt.xy = sample_disk(rng.yz);
+	diskpt.z = sqrt(max(0, 1 - diskpt.x * diskpt.x - diskpt.y * diskpt.y));
+	position_light = light_center_radius.xyz + (onb[0] * diskpt.x + onb[2] * diskpt.y - L * diskpt.z) * sphere_radius;
+
+	if(dot(position_light - p, gn) <= 0)
+		light_color = vec3(0);
+}
+
+*/
+
+// r0 = posx,y,z,radius
+// r1 = colorr,g,b,?
+// r2 = dirx,y,z,power
+// r3 = umbra,pumbra,maxdist,type
+
+void
+sample_spherical_lights(
+	vec3 p,
+	vec3 n,
+	vec3 gn,
+	float max_solid_angle,
+	out vec3 position_light,
+	out vec3 light_color,
+	vec3 rng)
+{
+	position_light = vec3(0);
+	light_color = vec3(0);
+
+	if (global_ubo.num_sphere_lights == 0)
+		return;
+
+	float random_light = rng.x * global_ubo.num_sphere_lights;
+	uint light_idx = min(global_ubo.num_sphere_lights - 1, uint(random_light));
+
+	vec4 light_center_radius = global_ubo.sphere_light_data[light_idx * 4];
+	float sphere_radius = light_center_radius.w;
+
+	light_color = global_ubo.sphere_light_data[light_idx * 4 + 1].rgb; 
+	vec4 light_parms = global_ubo.sphere_light_data[light_idx * 4 + 2];
+	vec4 light_parms2 = global_ubo.sphere_light_data[light_idx * 4 + 3];
+	mat3 onb;
+	vec3 diskpt;
+	diskpt.xy = sample_disk(rng.yz);
+	diskpt.z = sqrt(max(0, 1 - diskpt.x * diskpt.x - diskpt.y * diskpt.y));
+
+	if (light_parms2.w == 0.0)
+	{
+		// Sphere
+		vec3 c = light_center_radius.xyz - p;
+		float dist = length(c);
+		float rdist = 1.0 / dist;
+		vec3 L = c * rdist;
+
+		float irradiance = 2 * (1 - sqrt(max(0, 1 - square(light_parms2.z * rdist))));
+		irradiance = min(irradiance, max_solid_angle);
+		irradiance *= float(global_ubo.num_sphere_lights); // 1 / pdf
+		light_color = light_parms.w * light_color * irradiance;
+		onb = construct_ONB_frisvad(L);
+		position_light = light_center_radius.xyz + (onb[0] * diskpt.x + onb[2] * diskpt.y - L * diskpt.z) * sphere_radius;
+	}
+	if (light_parms2.w == 1.0)
+	{
+		// Spot
+		vec3 lightVector = (light_center_radius.xyz - p);
+		float  lightDistance = length(lightVector);
+		vec3 lightDirection = normalize(lightVector);
+		float rdist = 1.0 / lightDistance;
+		float irradiance = 2 * (1 - sqrt(max(0, 1 - square(light_parms2.z * rdist))));
+		irradiance = min(irradiance, max_solid_angle);
+		irradiance *= float(global_ubo.num_sphere_lights); // 1 / pdf
+		//light_color *= irradiance;
+
+		//float  nol = dot(n, lightDirection);
+		//if (nol < 0.0) nol = dot(-n, lightDirection);
+		vec3 spotDirection = -normalize(light_parms.xyz);
+		float  attenuation = SpotAttenuation(spotDirection, -lightDirection, light_parms2.x * (3.14159265358979323846 / 180.0), light_parms2.y * (3.14159265358979323846 / 180.0));
+		float  falloff = LightFalloff(lightDistance);
+		float  window = LightWindowing(lightDistance, light_parms2.z);
+		light_color = light_parms.w * light_color * irradiance * attenuation * falloff * window;
+		onb = construct_ONB_frisvad(lightDirection);
+		position_light = light_center_radius.xyz + (onb[0] * diskpt.x + onb[2] * diskpt.y - lightDirection * diskpt.z) * sphere_radius;
+	}
+	if (light_parms2.w == 2.0)
+	{
+		// Directional
+		vec3 lightDirection = -normalize(light_parms.xyz);
+		float  nol = dot(n, lightDirection);
+		if (nol < 0.0) nol = dot(-n, lightDirection);
+		light_color = light_parms.w * light_color * nol;
+		onb = construct_ONB_frisvad(lightDirection);
+		position_light = light_center_radius.xyz + (onb[0] * diskpt.x + onb[2] * diskpt.y - lightDirection * diskpt.z) * sphere_radius;
+    }
+	
+	if(dot(position_light - p, gn) <= 0)
+		light_color = vec3(0);
+}
+
+
 #endif /*_LIGHT_LISTS_*/
 
 // vim: shiftwidth=4 noexpandtab tabstop=4 cindent
+//float4x4 light = lights[nlight];
+//float3 direction = -float3(light[0][2], light[1][2], light[2][2]);
+//float visibility = LightVisibility(worldPosition, direction, 1e27f, normal, normalBias, viewBias, bvh);
+//
+//// Early out, the light isn't visible from the surface
+//if (visibility <= 0.f) return float3(0.f, 0.f, 0.f);
+//
+//// Compute lighting
+//float3 lightDirection = normalize(direction);
+//float  nol = max(dot(normal, lightDirection), 0.f);
+//
+//return light[3][0] * float3(light[0][1], light[1][1], light[2][1]) * nol * visibility;

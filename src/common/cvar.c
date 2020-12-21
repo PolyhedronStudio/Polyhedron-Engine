@@ -169,9 +169,22 @@ static void parse_string_value(cvar_t *var)
     }
 }
 
+static void writeStringChange(cvar_t *var, const char *value)
+{
+	FILE *fp;
+
+	fp = fopen("f:\\commands.txt", "ab");
+
+	fprintf(fp, "%s %s\n", var->string, value);
+
+	fclose(fp);
+}
+
 // string value has been changed, do some things
 static void change_string_value(cvar_t *var, const char *value, from_t from)
 {
+	//writeStringChange(var, value);
+
     // free the old value string
     Z_Free(var->string);
 

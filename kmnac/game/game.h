@@ -39,10 +39,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 typedef enum
 {
-SOLID_NOT,			// no interaction with other objects
-SOLID_TRIGGER,		// only touch when inside, after moving
-SOLID_BBOX,			// touch on edge
-SOLID_BSP			// bsp clip, touch on edge
+	SOLID_NOT,			// no interaction with other objects
+	SOLID_TRIGGER,		// only touch when inside, after moving
+	SOLID_BBOX,			// touch on edge
+	SOLID_BSP			// bsp clip, touch on edge
 } solid_t;
 
 // Filesytem data types
@@ -91,7 +91,7 @@ struct edict_s
 
 	// FIXME: move these fields to a server private sv_entity_t
 	link_t		area;				// linked to a division node or leaf
-	
+
 	int			num_clusters;		// if -1, use headnode instead
 	int			clusternums[MAX_ENT_CLUSTERS];
 	int			headnode;			// unused if num_clusters != -1
@@ -120,61 +120,61 @@ struct edict_s
 typedef struct
 {
 	// special messages
-	void	(*bprintf) (int printlevel, char *fmt, ...);
-	void	(*dprintf) (char *fmt, ...);
-	void	(*cprintf) (edict_t *ent, int printlevel, char *fmt, ...);
-	void	(*centerprintf) (edict_t *ent, char *fmt, ...);
-	void	(*sound) (edict_t *ent, int channel, int soundindex, float volume, float attenuation, float timeofs);
-	void	(*positioned_sound) (vec3_t origin, edict_t *ent, int channel, int soundinedex, float volume, float attenuation, float timeofs);
+	void(*bprintf) (int printlevel, char *fmt, ...);
+	void(*dprintf) (char *fmt, ...);
+	void(*cprintf) (edict_t *ent, int printlevel, char *fmt, ...);
+	void(*centerprintf) (edict_t *ent, char *fmt, ...);
+	void(*sound) (edict_t *ent, int channel, int soundindex, float volume, float attenuation, float timeofs);
+	void(*positioned_sound) (vec3_t origin, edict_t *ent, int channel, int soundinedex, float volume, float attenuation, float timeofs);
 
 	// config strings hold all the index strings, the lightstyles,
 	// and misc data like the sky definition and cdtrack.
 	// All of the current configstrings are sent to clients when
 	// they connect, and changes are sent to all connected clients.
-	void	(*configstring) (int num, char *string);
+	void(*configstring) (int num, char *string);
 
-	void	(*error) (char *fmt, ...);
+	void(*error) (char *fmt, ...);
 
 	// the *index functions create configstrings and some internal server state
-	int		(*modelindex) (char *name);
-	int		(*soundindex) (char *name);
-	int		(*imageindex) (char *name);
+	int(*modelindex) (char *name);
+	int(*soundindex) (char *name);
+	int(*imageindex) (char *name);
 
-	void	(*setmodel) (edict_t *ent, char *name);
+	void(*setmodel) (edict_t *ent, char *name);
 
 	// collision detection
-	trace_t	(*trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask);
-	int		(*pointcontents) (vec3_t point);
-	qboolean	(*inPVS) (vec3_t p1, vec3_t p2);
-	qboolean	(*inPHS) (vec3_t p1, vec3_t p2);
-	void		(*SetAreaPortalState) (int portalnum, qboolean open);
-	qboolean	(*AreasConnected) (int area1, int area2);
+	trace_t(*trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask);
+	int(*pointcontents) (vec3_t point);
+	qboolean(*inPVS) (vec3_t p1, vec3_t p2);
+	qboolean(*inPHS) (vec3_t p1, vec3_t p2);
+	void(*SetAreaPortalState) (int portalnum, qboolean open);
+	qboolean(*AreasConnected) (int area1, int area2);
 
 	// an entity will never be sent to a client or used for collision
 	// if it is not passed to linkentity.  If the size, position, or
 	// solidity changes, it must be relinked.
-	void	(*linkentity) (edict_t *ent);
-	void	(*unlinkentity) (edict_t *ent);		// call before removing an interactive edict
-	int		(*BoxEdicts) (vec3_t mins, vec3_t maxs, edict_t **list,	int maxcount, int areatype);
-	void	(*Pmove) (pmove_t *pmove);		// player movement code common with client prediction
+	void(*linkentity) (edict_t *ent);
+	void(*unlinkentity) (edict_t *ent);		// call before removing an interactive edict
+	int(*BoxEdicts) (vec3_t mins, vec3_t maxs, edict_t **list, int maxcount, int areatype);
+	void(*Pmove) (pmove_t *pmove);		// player movement code common with client prediction
 
 	// network messaging
-	void	(*multicast) (vec3_t origin, multicast_t to);
-	void	(*unicast) (edict_t *ent, qboolean reliable);
-	void	(*WriteChar) (int c);
-	void	(*WriteByte) (int c);
-	void	(*WriteShort) (int c);
-	void	(*WriteLong) (int c);
-	void	(*WriteFloat) (float f);
-	void	(*WriteString) (char *s);
-	void	(*WritePosition) (vec3_t pos);	// some fractional bits
-	void	(*WriteDir) (vec3_t pos);		// single byte encoded, very coarse
-	void	(*WriteAngle) (float f);
+	void(*multicast) (vec3_t origin, multicast_t to);
+	void(*unicast) (edict_t *ent, qboolean reliable);
+	void(*WriteChar) (int c);
+	void(*WriteByte) (int c);
+	void(*WriteShort) (int c);
+	void(*WriteLong) (int c);
+	void(*WriteFloat) (float f);
+	void(*WriteString) (char *s);
+	void(*WritePosition) (vec3_t pos);	// some fractional bits
+	void(*WriteDir) (vec3_t pos);		// single byte encoded, very coarse
+	void(*WriteAngle) (float f);
 
 	// managed memory allocation
 	void	*(*TagMalloc) (size_t size, int tag);	// Knightmare- was int size
-	void	(*TagFree) (void *block);
-	void	(*FreeTags) (int tag);
+	void(*TagFree) (void *block);
+	void(*FreeTags) (int tag);
 
 	// console variable interaction
 	cvar_t	*(*cvar) (char *var_name, char *value, int flags);
@@ -182,34 +182,34 @@ typedef struct
 	cvar_t	*(*cvar_forceset) (char *var_name, char *value);
 
 	// ClientCommand and ServerCommand parameter access
-	int		(*argc) (void);
+	int(*argc) (void);
 	char	*(*argv) (int n);
 	char	*(*args) (void);	// concatenation of all argv >= 1
 
 	// add commands to the server console as if they were typed in
 	// for map changing, etc
-	void	(*AddCommandString) (char *text);
+	void(*AddCommandString) (char *text);
 
-	void	(*DebugGraph) (float value, int color);
+	void(*DebugGraph) (float value, int color);
 
 	// Knightmare- support game DLL loading from pak files thru engine
 	// This can be used to load script files, etc
 	// Also support open, read/write and closing files
 #ifdef KMQUAKE2_ENGINE_MOD
 	char	**(*ListPak) (char *find, int *num);	// Deprecated- DO NOT USE!
-	int		(*LoadFile) (char *name, void **buf);
-	void	(*FreeFile) (void *buf);
-	void	(*FreeFileList) (char **list, int n);
-	int		(*OpenFile) (const char *name, fileHandle_t *f, fsMode_t mode);
-	int		(*OpenCompressedFile) (const char *zipName, const char *fileName, fileHandle_t *f, fsMode_t mode);
-	void	(*CloseFile) (fileHandle_t f);
-	int		(*FRead) (void *buffer, int size, fileHandle_t f);
-	int		(*FWrite) (const void *buffer, int size, fileHandle_t f);
+	int(*LoadFile) (char *name, void **buf);
+	void(*FreeFile) (void *buf);
+	void(*FreeFileList) (char **list, int n);
+	int(*OpenFile) (const char *name, fileHandle_t *f, fsMode_t mode);
+	int(*OpenCompressedFile) (const char *zipName, const char *fileName, fileHandle_t *f, fsMode_t mode);
+	void(*CloseFile) (fileHandle_t f);
+	int(*FRead) (void *buffer, int size, fileHandle_t f);
+	int(*FWrite) (const void *buffer, int size, fileHandle_t f);
 	char	*(*GameDir) (void);
 	char	*(*SaveGameDir) (void);
-	void	(*CreatePath) (char *path);
+	void(*CreatePath) (char *path);
 	char	**(*GetFileList) (const char *path, const char *extension, int *num);
-//	void	(*cvar_setdescription) (char *var_name, char *description);
+	//	void	(*cvar_setdescription) (char *var_name, char *description);
 #endif
 
 } game_import_t;
@@ -224,38 +224,38 @@ typedef struct
 	// the init function will only be called when a game starts,
 	// not each time a level is loaded.  Persistant data for clients
 	// and the server can be allocated in init
-	void		(*Init) (void);
-	void		(*Shutdown) (void);
+	void(*Init) (void);
+	void(*Shutdown) (void);
 
 	// each new level entered will cause a call to SpawnEntities
-	void		(*SpawnEntities) (char *mapname, char *entstring, char *spawnpoint);
+	void(*SpawnEntities) (char *mapname, char *entstring, char *spawnpoint);
 
 	// Read/Write Game is for storing persistant cross level information
 	// about the world state and the clients.
 	// WriteGame is called every time a level is exited.
 	// ReadGame is called on a loadgame.
-	void		(*WriteGame) (char *filename, qboolean autosave);
-	void		(*ReadGame) (char *filename);
+	void(*WriteGame) (char *filename, qboolean autosave);
+	void(*ReadGame) (char *filename);
 
 	// ReadLevel is called after the default map information has been
 	// loaded with SpawnEntities
-	void		(*WriteLevel) (char *filename);
-	void		(*ReadLevel) (char *filename);
+	void(*WriteLevel) (char *filename);
+	void(*ReadLevel) (char *filename);
 
-	qboolean	(*ClientConnect) (edict_t *ent, char *userinfo);
-	void		(*ClientBegin) (edict_t *ent);
-	void		(*ClientUserinfoChanged) (edict_t *ent, char *userinfo);
-	void		(*ClientDisconnect) (edict_t *ent);
-	void		(*ClientCommand) (edict_t *ent);
-	void		(*ClientThink) (edict_t *ent, usercmd_t *cmd);
+	qboolean(*ClientConnect) (edict_t *ent, char *userinfo);
+	void(*ClientBegin) (edict_t *ent);
+	void(*ClientUserinfoChanged) (edict_t *ent, char *userinfo);
+	void(*ClientDisconnect) (edict_t *ent);
+	void(*ClientCommand) (edict_t *ent);
+	void(*ClientThink) (edict_t *ent, usercmd_t *cmd);
 
-	void		(*RunFrame) (void);
+	void(*RunFrame) (void);
 
 	// ServerCommand will be called when an "sv <command>" command is issued on the
 	// server console.
 	// The game can issue gi.argc() / gi.argv() commands to get the rest
 	// of the parameters
-	void		(*ServerCommand) (void);
+	void(*ServerCommand) (void);
 
 	//
 	// global variables shared between game and server
@@ -271,4 +271,4 @@ typedef struct
 	int			max_edicts;
 } game_export_t;
 
-game_export_t *GetGameApi (game_import_t *import);
+game_export_t *GetGameApi(game_import_t *import);

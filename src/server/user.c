@@ -531,6 +531,8 @@ void SV_Begin_f(void)
 
     AC_ClientAnnounce(sv_client);
 
+	// Try binding light here with message
+	
 	// The server needs to complete the autosave after the client has connected.
 	// See SV_Map (commands.c) for more information.
 	if (sv_pending_autosave)

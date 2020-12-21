@@ -2475,3 +2475,399 @@ void SP_trigger_switch (edict_t *ent)
 }
 
 // end DWH
+
+
+
+
+void trigger_grfog_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (strcmp("player", other->classname) == 0)
+	{
+		if (self->spawnflags & 1)
+		{
+			strcpy(self->grFogOnOff, "1");
+			self->count--;
+			if (self->count == 0)
+			{
+				self->think = G_FreeEdict;
+				self->nextthink = level.time + FRAMETIME;
+			}
+		}
+		else
+		{
+			strcpy(self->grFogOnOff, "0");
+		}
+
+		char buffer[MAX_QPATH + 1];
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "gr_enablefog %s\n", self->grFogOnOff);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "gr_fogtintr %s\n", self->grFogTintRed);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "gr_fogtintg %s\n", self->grFogTintGreen);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "gr_fogtintb %s\n", self->grFogTintBlue);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "gr_fogtintpow %s\n", self->grFogTintPower);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "gr_fogdensity %s\n", self->grFogDensityRoot);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "gr_fogpushback %s\n", self->grFogPushBackDist);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "gr_fogmode %d\n", self->grFogMode);
+		stuffcmd(&g_edicts[1], buffer);
+	}
+}
+
+void SP_trigger_grfog(edict_t *self)
+{
+	self->class_id = ENTITY_TRIGGER_GRFOG;
+	self->grFogOnOff = gi.TagMalloc(64 + 1, TAG_LEVEL);
+
+	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
+	{
+		self->spawnflags |= 1;
+	}
+
+	self->grFogTintRed = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	sprintf(self->grFogTintRed, "%f", st.grFogColor[0]);
+
+	self->grFogTintGreen = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	sprintf(self->grFogTintGreen, "%f", st.grFogColor[1]);
+
+	self->grFogTintBlue = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	sprintf(self->grFogTintBlue, "%f", st.grFogColor[2]);
+
+	self->grFogMode = st.grFogMode;
+
+	self->grFogTintPower = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->grFogTintPower, st.grFogTintPower);
+
+	self->grFogDensityRoot = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->grFogDensityRoot, st.grFogDensityRoot);
+
+	self->grFogPushBackDist = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->grFogPushBackDist, st.grFogPushBackDist);
+
+	self->delay = (float)st.grFogDelay * 1000.0f;
+
+	self->fog = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->fog, st.fog);
+
+	if (!VectorCompare(self->s.angles, vec3_origin))
+		G_SetMovedir(self->s.angles, self->movedir);
+
+	self->solid = SOLID_TRIGGER;
+	self->movetype = MOVETYPE_NONE;
+	gi.setmodel(self, self->model);
+	self->svflags = SVF_NOCLIENT;
+
+	self->touch = trigger_grfog_touch;
+
+
+}
+
+void trigger_reverb_preset_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (strcmp("player", other->classname) == 0)
+	{
+		if (self->spawnflags & 1)
+		{
+			stuffcmd(&g_edicts[1], va("s_reverb_set_preset %d\n", self->reverbpreset));
+			self->count--;
+			if (self->count == 0)
+			{
+				self->think = G_FreeEdict;
+				self->nextthink = level.time + FRAMETIME;
+			}
+		}
+		else
+		{
+		}
+	}
+}
+
+void SP_trigger_reverb_preset(edict_t *self)
+{
+	self->class_id = ENTITY_TRIGGER_REVERB_PRESET;
+
+	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
+	{
+		self->spawnflags |= 1;
+	}
+
+	self->reverbpreset = st.reverbpreset;
+
+	self->TriggerDelay = (float)st.TriggerDelay * 1000.0f;
+
+	self->reverb = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->reverb, st.reverb);
+
+	if (!VectorCompare(self->s.angles, vec3_origin))
+		G_SetMovedir(self->s.angles, self->movedir);
+
+	self->solid = SOLID_TRIGGER;
+	self->movetype = MOVETYPE_NONE;
+	gi.setmodel(self, self->model);
+	self->svflags = SVF_NOCLIENT;
+
+	self->touch = trigger_reverb_preset_touch;
+
+
+}
+
+
+void trigger_reverb_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (strcmp("player", other->classname) == 0)
+	{
+		if (self->spawnflags & 1)
+		{
+			int len = (int)strlen(self->reverbString);
+			char *buffer = gi.TagMalloc(MAX_QPATH + 1, TAG_LEVEL);
+			//memset(buffer, 0, MAX_QPATH);
+			sprintf(buffer, "s_reverb_set \"%s\"\n", self->reverbString);
+			stuffcmd(&g_edicts[1], buffer);
+
+			self->count--;
+			if (self->count == 0)
+			{
+				self->think = G_FreeEdict;
+				self->nextthink = level.time + FRAMETIME;
+			}
+		}
+		else
+		{
+		}
+	}
+}
+
+void SP_trigger_reverb(edict_t *self)
+{
+	self->class_id = ENTITY_TRIGGER_REVERB;
+
+	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
+	{
+		self->spawnflags |= 1;
+	}
+
+	self->TriggerDelay = (float)st.TriggerDelay * 1000.0f;
+
+	self->reverb = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->reverb, st.reverb);
+
+	self->reverbString = gi.TagMalloc(256 + 1, TAG_LEVEL);
+	sprintf(self->reverbString, "%s %s %s %s %s %s %s %s %s %s %s %s %d",
+		st.flDensity,
+		st.flDiffusion,
+		st.flGain,
+		st.flGainHF,
+		st.flDecayTime,
+		st.flDecayHFRatio,
+		st.flReflectionsGain,
+		st.flReflectionsDelay,
+		st.flLateReverbGain,
+		st.flLateReverbDelay,
+		st.flAirAbsorptionGainHF,
+		st.flRoomRolloffFactor,
+		st.iDecayHFLimit);
+
+	if (!VectorCompare(self->s.angles, vec3_origin))
+		G_SetMovedir(self->s.angles, self->movedir);
+
+	self->solid = SOLID_TRIGGER;
+	self->movetype = MOVETYPE_NONE;
+	gi.setmodel(self, self->model);
+	self->svflags = SVF_NOCLIENT;
+
+	self->touch = trigger_reverb_touch;
+
+
+
+}
+
+
+void trigger_godrays_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (strcmp("player", other->classname) == 0)
+	{
+		if (self->spawnflags & 1)
+		{
+			self->gr_enable = 1;
+			self->count--;
+			if (self->count == 0)
+			{
+				self->think = G_FreeEdict;
+				self->nextthink = level.time + FRAMETIME;
+			}
+		}
+		else
+		{
+			self->gr_enable = 0;
+		}
+
+		char buffer[MAX_QPATH + 1];
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "gr_intensity %s\n", self->gr_intensity);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "gr_eccentricity %s\n", self->gr_eccentricity);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "gr_enable %d\n", self->gr_enable);
+		stuffcmd(&g_edicts[1], buffer);
+	}
+}
+
+void SP_trigger_godrays(edict_t *self)
+{
+	self->class_id = ENTITY_TRIGGER_GODRAYS;
+
+	self->gr_enable = st.gr_enable;
+
+	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
+	{
+		self->spawnflags |= 1;
+	}
+
+	self->gr_eccentricity = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->gr_eccentricity, st.gr_eccentricity);
+
+	self->gr_intensity = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->gr_intensity, st.gr_intensity);
+
+	self->delay = (float)st.grFogDelay * 1000.0f;
+
+	self->godrays = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->godrays, st.godrays);
+
+	if (!VectorCompare(self->s.angles, vec3_origin))
+		G_SetMovedir(self->s.angles, self->movedir);
+
+	self->solid = SOLID_TRIGGER;
+	self->movetype = MOVETYPE_NONE;
+	gi.setmodel(self, self->model);
+	self->svflags = SVF_NOCLIENT;
+
+	self->touch = trigger_godrays_touch;
+
+}
+
+void trigger_sun_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (strcmp("player", other->classname) == 0)
+	{
+		if (self->spawnflags & 1)
+		{
+			self->count--;
+			if (self->count == 0)
+			{
+				self->think = G_FreeEdict;
+				self->nextthink = level.time + FRAMETIME;
+			}
+		}
+
+		char buffer[MAX_QPATH + 1];
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "sun_color_r %s\n", self->sunColorRed);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "sun_color_g %s\n", self->sunColorGreen);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "sun_color_b %s\n", self->sunColorBlue);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "sun_angle %s\n", self->sunAngle);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "sun_animate %s\n", self->sunAnimate);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "sun_azimuth %s\n", self->sunAzimuth);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "sun_elevation  %s\n", self->sunElevation);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "sun_brightness %s\n", self->sunBrightness);
+		stuffcmd(&g_edicts[1], buffer);
+
+		memset(buffer, 0, MAX_QPATH);
+		sprintf(buffer, "sun_preset %d\n", self->sunPreset);
+		stuffcmd(&g_edicts[1], buffer);
+	}
+}
+
+void SP_trigger_sun(edict_t *self)
+{
+	self->class_id = ENTITY_TRIGGER_SUN;
+
+	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
+	{
+		self->spawnflags |= 1;
+	}
+
+	self->sunPreset = st.sunPreset;
+
+	self->sunColorRed = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	sprintf(self->sunColorRed, "%f", st.sunColor[0]);
+
+	self->sunColorGreen = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	sprintf(self->sunColorGreen, "%f", st.sunColor[1]);
+
+	self->sunColorBlue = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	sprintf(self->sunColorBlue, "%f", st.sunColor[2]);
+
+	self->sunAnimate = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->sunAnimate, st.sunAnimate);
+
+	self->sunAzimuth = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->sunAzimuth, st.sunAzimuth);
+
+	self->sunElevation = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->sunElevation, st.sunElevation);
+
+	self->sunBrightness = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->sunBrightness, st.sunBrightness);
+
+	self->delay = (float)st.sunDelay * 1000.0f;
+
+	self->sun = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->sun, st.sun);
+
+	if (!VectorCompare(self->s.angles, vec3_origin))
+		G_SetMovedir(self->s.angles, self->movedir);
+
+	self->solid = SOLID_TRIGGER;
+	self->movetype = MOVETYPE_NONE;
+	gi.setmodel(self, self->model);
+	self->svflags = SVF_NOCLIENT;
+
+	self->touch = trigger_sun_touch;
+
+
+}

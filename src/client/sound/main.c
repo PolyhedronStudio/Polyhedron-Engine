@@ -68,6 +68,8 @@ cvar_t		*s_voiceinput;
 cvar_t		*s_voiceinput_volume;
 cvar_t		*s_reverb_set_preset;
 cvar_t      *s_ambient;
+
+
 #ifdef _DEBUG
 cvar_t      *s_show;
 #endif
@@ -215,6 +217,7 @@ static void voiceinputvolume_changed(cvar_t *self)
 		s_voiceinput_volume->value = 1;
 }
 
+
 /*
 ================
 S_Init
@@ -249,6 +252,8 @@ void S_Init(void)
 	s_reverb_set_preset->changed = reverb_set_preset_changed;
 	s_reverb_set_preset = Cvar_Get("s_reverb_set", "0 0 0 0 0 0 0 0 0 0 0 0 0", CVAR_SERVERINFO);
 	s_reverb_set_preset->changed = reverb_set_changed;
+
+
 
 #ifdef _DEBUG
     s_show = Cvar_Get("s_show", "0", 0);

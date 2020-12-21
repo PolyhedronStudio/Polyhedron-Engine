@@ -1077,6 +1077,16 @@ qboolean BSP_SavePatchedPVS(bsp_t *bsp)
 		return qfalse;
 }
 
+extern int num_entlights;
+extern cvar_t		*initlight;
+extern cvar_t		*initlightbind;
+extern void bsp_add_entlights(const bsp_t* bsp);
+extern void initlight_changed(cvar_t *self);
+extern void initlightbind_changed(cvar_t *self);
+extern cvar_t		*inittargetlightLSbind;
+extern cvar_t		*inittargetlightbind;
+extern void inittargetlightLSbind_changed(cvar_t *self);
+extern void inittargetlightbind_changed(cvar_t *self);
 /*
 ==================
 BSP_Load
@@ -1200,6 +1210,21 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 	}
 
     Hunk_End(&bsp->hunk);
+
+    initlight = Cvar_Set("ilt", "0");
+	initlight->changed = initlight_changed;
+
+	initlightbind = Cvar_Set("ilb", "0");
+	initlightbind->changed = initlightbind_changed;
+
+	inittargetlightLSbind = Cvar_Set("itls", "0");
+	inittargetlightLSbind->changed = inittargetlightLSbind_changed;
+
+	inittargetlightbind = Cvar_Set("itl", "0");
+	inittargetlightbind->changed = inittargetlightbind_changed;
+
+	num_entlights = 0;
+	bsp_add_entlights(bsp);
 
     List_Append(&bsp_cache, &bsp->entry);
 

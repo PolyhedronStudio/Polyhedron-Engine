@@ -35,7 +35,11 @@ void trigger_godrays_touch(edict_t *self, edict_t *other, cplane_t *plane, csurf
 void SP_trigger_godrays(edict_t *self);
 void trigger_sun_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 void SP_trigger_sun(edict_t *self);
-
+void SP_target_lighttracker(edict_t *self);
+void SP_target_lightLS(edict_t *self);
+void target_lightLS_use(edict_t *self, edict_t *other, edict_t *activator);
+void SP_target_light(edict_t *self);
+void target_light_use(edict_t *self, edict_t *other, edict_t *activator);
 /*
 //#ifdef KMQUAKE2_ENGINE_MOD
 //#define NEW_FOGSYS
