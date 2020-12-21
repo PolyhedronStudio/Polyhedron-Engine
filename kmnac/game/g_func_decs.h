@@ -1519,6 +1519,11 @@ extern void trigger_grfog_touch(edict_t *self, edict_t *other, cplane_t *plane, 
 extern void SP_target_fog ( edict_t * self ) ;
 extern void target_fog_use ( edict_t * self , edict_t * other , edict_t * activator ) ;
 extern void SP_target_grfog(edict_t * self);
+extern void SP_target_lighttracker(edict_t * self);
+extern void SP_target_light(edict_t *self);
+extern void target_light_use(edict_t *self, edict_t *other, edict_t *activator);
+extern void SP_target_lightLS(edict_t *self);
+extern void target_lightLS_use(edict_t *self, edict_t *other, edict_t *activator);
 extern void target_grfog_use(edict_t * self, edict_t * other, edict_t * activator);
 extern void SP_trigger_godrays(edict_t * self);
 extern void trigger_godrays_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);

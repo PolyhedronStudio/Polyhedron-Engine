@@ -421,6 +421,38 @@ get_bsp_triangle(uint prim_id)
 	return t;
 }
 
+//Triangle
+//get_model_triangle(uint prim_id, uint idx_offset, uint vert_offset)
+//{
+//	uvec3 idx = get_idx_model(prim_id + idx_offset / 3);
+//	idx += vert_offset;
+//
+//	Triangle t;
+//	t.positions[0] = get_positions_model(idx[0]);
+//	t.positions[1] = get_positions_model(idx[1]);
+//	t.positions[2] = get_positions_model(idx[2]);
+//
+//	t.normals[0] = get_normals_model(idx[0]);
+//	t.normals[1] = get_normals_model(idx[1]);
+//	t.normals[2] = get_normals_model(idx[2]);
+//
+//	t.tex_coords[0] = get_tex_coords_model(idx[0]);
+//	t.tex_coords[1] = get_tex_coords_model(idx[1]);
+//	t.tex_coords[2] = get_tex_coords_model(idx[2]);
+//
+//	vec4 tangent = get_tangents_model(idx[0]);
+//    t.tangent = tangent.xyz;
+//
+//	t.material_id = 0; // needs to come from uniform buffer
+//	if(tangent.w < 0)
+//		t.material_id |= MATERIAL_FLAG_HANDEDNESS;
+//
+//	t.alpha = 1.0;
+//	t.texel_density = 0;
+//
+//	return t;
+//}
+
 Triangle
 get_instanced_triangle(uint prim_id)
 {

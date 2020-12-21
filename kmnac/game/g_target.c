@@ -150,7 +150,8 @@ void SP_target_speaker(edict_t *ent)
 			strcpy(ent->message, st.noise);
 		}
 	}
-	
+	ent->class_id = ENTITY_TARGET_SPEAKER;
+
 	ent->noise_index = gi.soundindex(ent->message);
 	ent->spawnflags &= ~8;
 
@@ -2172,7 +2173,7 @@ void use_target_rocks(edict_t *self, edict_t *other, edict_t *activator)
 void SP_target_rocks(edict_t *self)
 {
 	self->class_id = ENTITY_TARGET_ROCKS;
-	
+
 	// precache
 	gi.modelindex("models/objects/rock1/tris.md2");
 	gi.modelindex("models/objects/rock2/tris.md2");
@@ -2184,8 +2185,9 @@ void SP_target_rocks(edict_t *self)
 	if (!self->mass)
 		self->mass = 500;
 
-//	G_SetMovedir(self->s.angles, self->movedir);
+	//	G_SetMovedir(self->s.angles, self->movedir);
 	self->use = use_target_rocks;
+	//G_SetMovedir(self->s.angles, self->movedir);
 	self->svflags = SVF_NOCLIENT;
 
 	gi.linkentity(self);
@@ -3903,115 +3905,115 @@ void use_target_change(edict_t *self, edict_t *other, edict_t *activator)
 			}
 		}
 		// Knightmare- set usermodel and skinnum only for model_spawn/train/turret
-		 if (!Q_stricmp(target_ent->classname, "model_spawn") || !Q_stricmp(target_ent->classname, "model_train") || !Q_stricmp(target_ent->classname, "model_turret"))
-			 {
+		if (!Q_stricmp(target_ent->classname, "model_spawn") || !Q_stricmp(target_ent->classname, "model_train") || !Q_stricmp(target_ent->classname, "model_turret"))
+		{
 			char	modelname[256];	// Knightmare added
-			
-				if (self->usermodel && (strlen(self->usermodel) > 0))
-				 {
+
+			if (self->usermodel && (strlen(self->usermodel) > 0))
+			{
 				if (strstr(self->usermodel, ".sp2")) {
-										// check for "sprites/" already in path
-						if (!strncmp(self->usermodel, "sprites/", 8))
-						 Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
+					// check for "sprites/" already in path
+					if (!strncmp(self->usermodel, "sprites/", 8))
+						Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
 					else
-						 Com_sprintf(modelname, sizeof(modelname), "sprites/%s", self->usermodel);
-					
+						Com_sprintf(modelname, sizeof(modelname), "sprites/%s", self->usermodel);
+
 				}
-				 else {
-										// check for "models/" already in path
-						if (!strncmp(self->usermodel, "models/", 7))
-						 Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
+				else {
+					// check for "models/" already in path
+					if (!strncmp(self->usermodel, "models/", 7))
+						Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
 					else
-						 Com_sprintf(modelname, sizeof(modelname), "models/%s", self->usermodel);
-					
+						Com_sprintf(modelname, sizeof(modelname), "models/%s", self->usermodel);
+
 				}
-				 target_ent->s.modelindex = gi.modelindex(modelname);
-				}
-						// Set skinnum, -1 = 0
-				if (self->skinnum != 0) {
+				target_ent->s.modelindex = gi.modelindex(modelname);
+			}
+			// Set skinnum, -1 = 0
+			if (self->skinnum != 0) {
 				target_ent->skinnum = self->skinnum;
 				target_ent->skinnum = max(0, target_ent->skinnum);
 				target_ent->s.skinnum = target_ent->skinnum;
-				
+
 			}
-						// Don't bother checking if skinnum is non-zero, to allow setting to 0
-						//	target_ent->s.skinnum = self->s.skinnum;
-				}
-				// Knightmare- set solidstate, style, effects, renderfx, startframe, and framenumbers for model_spawn/train
-			if (!Q_stricmp(target_ent->classname, "model_spawn") || !Q_stricmp(target_ent->classname, "model_train"))
-			 {
+			// Don't bother checking if skinnum is non-zero, to allow setting to 0
+			//	target_ent->s.skinnum = self->s.skinnum;
+		}
+		// Knightmare- set solidstate, style, effects, renderfx, startframe, and framenumbers for model_spawn/train
+		if (!Q_stricmp(target_ent->classname, "model_spawn") || !Q_stricmp(target_ent->classname, "model_train"))
+		{
 			int		effects = 0;
-			
-				if (self->solidstate > 0)
-				 {
+
+			if (self->solidstate > 0)
+			{
 				switch (self->solidstate)
-					 {
+				{
 				case 1: target_ent->solid = SOLID_NOT; target_ent->movetype = MOVETYPE_NONE; break;
 				case 2: target_ent->solid = SOLID_BBOX; target_ent->movetype = MOVETYPE_TOSS; break;
 				case 3: target_ent->solid = SOLID_BBOX; target_ent->movetype = MOVETYPE_NONE; break;
 				case 4: target_ent->solid = SOLID_NOT; target_ent->movetype = MOVETYPE_TOSS; break;
 				default: target_ent->solid = SOLID_NOT; target_ent->movetype = MOVETYPE_NONE; break;
-						}
-				 if ((target_ent->solid != SOLID_NOT) && (target_ent->health > 0)) {
+				}
+				if ((target_ent->solid != SOLID_NOT) && (target_ent->health > 0)) {
 					target_ent->die = model_die;
 					target_ent->takedamage = DAMAGE_YES;
-					
+
 				}
-				 else {
+				else {
 					target_ent->die = NULL;
 					target_ent->takedamage = DAMAGE_NO;
-					
+
 				}
-				 }
-			
-				if (self->style > 0)
-				 {
+			}
+
+			if (self->style > 0)
+			{
 				switch (self->style)
-					 {
+				{
 				case 1: effects |= EF_ANIM01; break;
 				case 2: effects |= EF_ANIM23; break;
 				case 3: effects |= EF_ANIM_ALL; break;
 				case 4: effects |= EF_ANIM_ALLFAST; break;
-					   }
-				 }
-						// Set effects, -1 = 0
-				if (self->effects != 0) {
+				}
+			}
+			// Set effects, -1 = 0
+			if (self->effects != 0) {
 				target_ent->effects = self->effects;
 				target_ent->effects = max(0, target_ent->effects);
-				
+
 			}
-			 if ((self->style > 0) || (self->effects != 0)) {
+			if ((self->style > 0) || (self->effects != 0)) {
 				target_ent->s.effects = (effects | target_ent->effects);
-				
+
 			}
-						// Set renderfx, -1 = 0
-				if (self->renderfx != 0) {
+			// Set renderfx, -1 = 0
+			if (self->renderfx != 0) {
 				target_ent->renderfx = self->renderfx;
 				target_ent->renderfx = max(0, target_ent->renderfx);
 				target_ent->s.renderfx = target_ent->renderfx;
-				
+
 			}
-			
-							// Set startframe, -1 = 0
-				if (self->startframe != 0) {
+
+			// Set startframe, -1 = 0
+			if (self->startframe != 0) {
 				target_ent->startframe = self->startframe;
 				target_ent->startframe = max(0, target_ent->startframe);
-				
+
 			}
-						// Set framenumbers, -1 = 0
-				if (self->framenumbers != 0) {
+			// Set framenumbers, -1 = 0
+			if (self->framenumbers != 0) {
 				target_ent->framenumbers = self->framenumbers;
 				target_ent->framenumbers = max(1, target_ent->framenumbers);
-				
+
 			}
-			 if ((self->startframe != 0) || (self->framenumbers != 0)) {
-								// Change framenumbers to last frame to play
-					target_ent->framenumbers += target_ent->startframe;
+			if ((self->startframe != 0) || (self->framenumbers != 0)) {
+				// Change framenumbers to last frame to play
+				target_ent->framenumbers += target_ent->startframe;
 				target_ent->s.frame = target_ent->startframe;
-				
+
 			}
-			 }
-				// end Knightmare
+		}
+		// end Knightmare
 
 		gi.linkentity(target_ent);
 		target_ent = G_Find(target_ent, FOFS(targetname), target);
@@ -4024,13 +4026,13 @@ void use_target_change(edict_t *self, edict_t *other, edict_t *activator)
 void SP_target_change(edict_t *self)
 {
 	self->class_id = ENTITY_TARGET_CHANGE;
-	
-		if (!self->targetname)
-		 gi.dprintf("target_change without a targetname at %s\n", vtos(self->s.origin));
+
+	if (!self->targetname)
+		gi.dprintf("target_change without a targetname at %s\n", vtos(self->s.origin));
 	if (!self->target)
-		 gi.dprintf("target_change without a target at %s\n", vtos(self->s.origin));
-	
-		self->svflags |= SVF_NOCLIENT;
+		gi.dprintf("target_change without a target at %s\n", vtos(self->s.origin));
+
+	self->svflags |= SVF_NOCLIENT;
 	self->use = use_target_change;
 	if (st.noise)
 		self->noise_index = gi.soundindex(st.noise);
@@ -4578,11 +4580,11 @@ void target_clone_starton(edict_t *self)
 void SP_target_clone(edict_t *self)
 {
 	if (!self->targetname && !(self->spawnflags & 1))
-		 {
+	{
 		gi.dprintf("%s without a targetname and without start_on at %s\n", self->classname, vtos(self->s.origin));
 		G_FreeEdict(self);
 		return;
-		}
+	}
 	if (!self->source)
 	{
 		gi.dprintf("%s with no source at %s\n",
@@ -4697,394 +4699,102 @@ void SP_target_grfog(edict_t *self)
 
 }
 
-void trigger_grfog_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+
+
+void target_lighttracker_think(edict_t *self)
 {
-	if (strcmp("player", other->classname) == 0)
+	edict_t	*mover = NULL;
+	if (!self->movewith || strlen(self->movewith) == 0) return;
+
+	mover = G_Find(NULL, FOFS(targetname), self->movewith);
+
+	if (mover)
 	{
-		if (self->spawnflags & 1)
+		if (self->ltMode == 0)
 		{
-			strcpy(self->grFogOnOff, "1");
-			self->count--;
-			if (self->count == 0)
+			if (VectorLength(mover->velocity))
 			{
-				self->think = G_FreeEdict;
-				self->nextthink = level.time + FRAMETIME;
+				VectorCopy(mover->velocity, self->velocity);
 			}
 		}
 		else
 		{
-			strcpy(self->grFogOnOff, "0");
-		}
-
-		char buffer[MAX_QPATH + 1];
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_enablefog %s\n", self->grFogOnOff);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogtintr %s\n", self->grFogTintRed);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogtintg %s\n", self->grFogTintGreen);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogtintb %s\n", self->grFogTintBlue);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogtintpow %s\n", self->grFogTintPower);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogdensity %s\n", self->grFogDensityRoot);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogpushback %s\n", self->grFogPushBackDist);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_fogmode %d\n", self->grFogMode);
-		stuffcmd(&g_edicts[1], buffer);
-	}
-}
-
-void SP_trigger_grfog(edict_t *self)
-{
-	self->class_id = ENTITY_TRIGGER_GRFOG;
-	self->grFogOnOff = gi.TagMalloc(64 + 1, TAG_LEVEL);
-
-	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
-	{
-		self->spawnflags |= 1;
-	}
-
-	self->grFogTintRed = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->grFogTintRed, "%f", st.grFogColor[0]);
-
-	self->grFogTintGreen = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->grFogTintGreen, "%f", st.grFogColor[1]);
-
-	self->grFogTintBlue = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->grFogTintBlue, "%f", st.grFogColor[2]);
-
-	self->grFogMode = st.grFogMode;
-
-	self->grFogTintPower = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->grFogTintPower, st.grFogTintPower);
-
-	self->grFogDensityRoot = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->grFogDensityRoot, st.grFogDensityRoot);
-
-	self->grFogPushBackDist = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->grFogPushBackDist, st.grFogPushBackDist);
-
-	self->delay = (float)st.grFogDelay * 1000.0f;
-
-	self->fog = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->fog, st.fog);
-
-	if (!VectorCompare(self->s.angles, vec3_origin))
-		G_SetMovedir(self->s.angles, self->movedir);
-
-	self->solid = SOLID_TRIGGER;
-	self->movetype = MOVETYPE_NONE;
-	gi.setmodel(self, self->model);
-	self->svflags = SVF_NOCLIENT;
-
-	self->touch = trigger_grfog_touch;
-
-
-}
-
-void trigger_reverb_preset_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-	if (strcmp("player", other->classname) == 0)
-	{
-		if (self->spawnflags & 1)
-		{
-			stuffcmd(&g_edicts[1], va("s_reverb_set_preset %d\n", self->reverbpreset));
-			self->count--;
-			if (self->count == 0)
-			{
-				self->think = G_FreeEdict;
-				self->nextthink = level.time + FRAMETIME;
-			}
-		}
-		else
-		{
+			self->s.origin[0] = (mover->s.origin[0] + self->ltAttachOffsetX);
+			self->s.origin[1] = (mover->s.origin[1] + self->ltAttachOffsetY);
+			self->s.origin[2] = (mover->s.origin[2] + self->ltAttachOffsetZ);
 		}
 	}
+
+	self->nextthink = level.time + FRAMETIME;
 }
 
-void SP_trigger_reverb_preset(edict_t *self)
+void SP_target_lighttracker(edict_t *self)
 {
-	self->class_id = ENTITY_TRIGGER_REVERB_PRESET;
+	self->pathtarget = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->pathtarget, st.ltTracker);
 
-	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
-	{
-		self->spawnflags |= 1;
-	}
+	self->ltAttachOffsetX = st.ltAttachOffset[0];
+	self->ltAttachOffsetY = st.ltAttachOffset[1];
+	self->ltAttachOffsetZ = st.ltAttachOffset[2];
 
-	self->reverbpreset = st.reverbpreset;
+	self->ltMode = st.ltMode;
 
-	self->TriggerDelay = (float)st.TriggerDelay * 1000.0f;
+	self->delay = (float)st.delay * 1000.0f;
 
-	self->reverb = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->reverb, st.reverb);
+	self->think = target_lighttracker_think;
+	self->nextthink = level.time + 1;
 
-	if (!VectorCompare(self->s.angles, vec3_origin))
-		G_SetMovedir(self->s.angles, self->movedir);
-
-	self->solid = SOLID_TRIGGER;
-	self->movetype = MOVETYPE_NONE;
-	gi.setmodel(self, self->model);
-	self->svflags = SVF_NOCLIENT;
-
-	self->touch = trigger_reverb_preset_touch;
-
-
+	self->movetype = MOVETYPE_PUSH;
 }
- 
 
-void trigger_reverb_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+void target_lightLS_use(edict_t *self, edict_t *other, edict_t *activator)
 {
-	if (strcmp("player", other->classname) == 0)
-	{
-		if (self->spawnflags & 1)
-		{
-			int len = (int)strlen(self->reverbString);
-			char buffer[MAX_QPATH + 1];
-			memset(buffer, 0, MAX_QPATH);
-			sprintf(buffer, "s_reverb_set \"%s\"\n", self->reverbString);
-			stuffcmd(&g_edicts[1], buffer);
-						
-			self->count--;
-			if (self->count == 0)
-			{
-				self->think = G_FreeEdict;
-				self->nextthink = level.time + FRAMETIME;
-			}
-		}
-		else
-		{
-		}
-	}
+	self->changeLightLS = 1;
 }
 
-void SP_trigger_reverb(edict_t *self)
+void SP_target_lightLS(edict_t *self)
 {
-	self->class_id = ENTITY_TRIGGER_REVERB;
+	self->pathtarget = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->pathtarget, st.ltsetter);
 
-	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
-	{
-		self->spawnflags |= 1;
-	}
+	self->nacCustom = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->nacCustom, st.nacCustom);
 
-	self->TriggerDelay = (float)st.TriggerDelay * 1000.0f;
+	self->nacCustomEnabled = st.nacCustomEnabled;
+	self->nacCustomLoopEnabled = st.nacCustomLoopEnabled;
+	self->nacCustomToggleEnabled = st.nacCustomToggleEnabled;
+	self->nacHz = st.nacHz;
 
-	self->reverb = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->reverb, st.reverb);
+	self->delay = (float)st.delay * 1000.0f;
 
-	self->reverbString = gi.TagMalloc(256 + 1, TAG_LEVEL);
-	sprintf(self->reverbString, "%s %s %s %s %s %s %s %s %s %s %s %s %d",
-		st.flDensity,
-		st.flDiffusion,
-		st.flGain,
-		st.flGainHF,
-		st.flDecayTime,
-		st.flDecayHFRatio,
-		st.flReflectionsGain,
-		st.flReflectionsDelay,
-		st.flLateReverbGain,
-		st.flLateReverbDelay,
-		st.flAirAbsorptionGainHF,
-		st.flRoomRolloffFactor,
-		st.iDecayHFLimit);
+	self->changeLightLS = 0;
 
-	if (!VectorCompare(self->s.angles, vec3_origin))
-		G_SetMovedir(self->s.angles, self->movedir);
-
-	self->solid = SOLID_TRIGGER;
-	self->movetype = MOVETYPE_NONE;
-	gi.setmodel(self, self->model);
-	self->svflags = SVF_NOCLIENT;
-
-	self->touch = trigger_reverb_touch;
-
-
+	self->use = target_lightLS_use;
 }
 
-
-void trigger_godrays_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+void target_light_use(edict_t *self, edict_t *other, edict_t *activator)
 {
-	if (strcmp("player", other->classname) == 0)
-	{
-		if (self->spawnflags & 1)
-		{
-			self->gr_enable = 1;
-			self->count--;
-			if (self->count == 0)
-			{
-				self->think = G_FreeEdict;
-				self->nextthink = level.time + FRAMETIME;
-			}
-		}
-		else
-		{
-			self->gr_enable = 0;
-		}
-
-		char buffer[MAX_QPATH + 1];
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_intensity %s\n", self->gr_intensity);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_eccentricity %s\n", self->gr_eccentricity);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "gr_enable %d\n", self->gr_enable);
-		stuffcmd(&g_edicts[1], buffer);
-	}
+	self->changeLight = 1;
 }
 
-void SP_trigger_godrays(edict_t *self)
+void SP_target_light(edict_t *self)
 {
-	self->class_id = ENTITY_TRIGGER_GODRAYS;
+	self->pathtarget = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->pathtarget, st.ltsetter);
 
-	self->gr_enable = st.gr_enable;
+	self->nacdirectionX = st.nacdirection[0];
+	self->nacdirectionY = st.nacdirection[1];
+	self->nacdirectionZ = st.nacdirection[2];
+	self->nacumbraangle = atof(st.nacumbraangle);
+	self->nacpenumbraangle = atof(st.nacpenumbraangle);
+	self->naclightpow = atof(st.naclightpow);
+	self->naclightmax = atof(st.naclightmax);
+	self->naclighttype = st.naclighttype;
 
-	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
-	{
-		self->spawnflags |= 1;
-	}
+	self->delay = (float)st.delay * 1000.0f;
 
-	self->gr_eccentricity = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->gr_eccentricity, st.gr_eccentricity);
+	self->changeLight = 0;
 
-	self->gr_intensity = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->gr_intensity, st.gr_intensity);
-
-	self->delay = (float)st.grFogDelay * 1000.0f;
-
-	self->godrays = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->godrays, st.godrays);
-
-	if (!VectorCompare(self->s.angles, vec3_origin))
-		G_SetMovedir(self->s.angles, self->movedir);
-
-	self->solid = SOLID_TRIGGER;
-	self->movetype = MOVETYPE_NONE;
-	gi.setmodel(self, self->model);
-	self->svflags = SVF_NOCLIENT;
-
-	self->touch = trigger_godrays_touch;
-	
+	self->use = target_light_use;
 }
 
-void trigger_sun_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-	if (strcmp("player", other->classname) == 0)
-	{
-		if (self->spawnflags & 1)
-		{
-			self->count--;
-			if (self->count == 0)
-			{
-				self->think = G_FreeEdict;
-				self->nextthink = level.time + FRAMETIME;
-			}
-		}
-
-		char buffer[MAX_QPATH + 1];
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "sun_color_r %s\n", self->sunColorRed);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "sun_color_g %s\n", self->sunColorGreen);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "sun_color_b %s\n", self->sunColorBlue);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "sun_angle %s\n", self->sunAngle);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "sun_animate %s\n", self->sunAnimate);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "sun_azimuth %s\n", self->sunAzimuth);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "sun_elevation  %s\n", self->sunElevation);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "sun_brightness %s\n", self->sunBrightness);
-		stuffcmd(&g_edicts[1], buffer);
-
-		memset(buffer, 0, MAX_QPATH);
-		sprintf(buffer, "sun_preset %d\n", self->sunPreset);
-		stuffcmd(&g_edicts[1], buffer);
-	}
-}
-
-void SP_trigger_sun(edict_t *self)
-{
-	self->class_id = ENTITY_TRIGGER_SUN;
-	
-	if ((!(self->spawnflags & 8)) || self->spawnflags & 4)
-	{
-		self->spawnflags |= 1;
-	}
-
-	self->sunPreset = st.sunPreset;
-
-	self->sunColorRed = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->sunColorRed, "%f", st.sunColor[0]);
-
-	self->sunColorGreen = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->sunColorGreen, "%f", st.sunColor[1]);
-
-	self->sunColorBlue = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	sprintf(self->sunColorBlue, "%f", st.sunColor[2]);
-
-	self->sunAnimate = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->sunAnimate, st.sunAnimate);
-
-	self->sunAzimuth = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->sunAzimuth, st.sunAzimuth);
-
-	self->sunElevation = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->sunElevation, st.sunElevation);
-
-	self->sunBrightness = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->sunBrightness, st.sunBrightness);
-
-	self->delay = (float)st.sunDelay * 1000.0f;
-
-	self->sun = gi.TagMalloc(64 + 1, TAG_LEVEL);
-	strcpy(self->sun, st.sun);
-
-	if (!VectorCompare(self->s.angles, vec3_origin))
-		G_SetMovedir(self->s.angles, self->movedir);
-
-	self->solid = SOLID_TRIGGER;
-	self->movetype = MOVETYPE_NONE;
-	gi.setmodel(self, self->model);
-	self->svflags = SVF_NOCLIENT;
-
-	self->touch = trigger_sun_touch;
-
-
-}

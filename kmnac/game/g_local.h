@@ -537,6 +537,23 @@ typedef struct
 	int         sunPreset;
     char        *sun;
 	int         sunDelay;  
+	char        *nacname;
+	int			ltMode;
+	int			delay;
+	vec3_t		ltAttachOffset;
+	char        *ltTracker;
+	char        *ltsetter;
+	char        *nacCustom;
+	int			nacCustomEnabled;
+	int			nacCustomLoopEnabled;
+	int			nacCustomToggleEnabled;
+	int			nacHz;
+	vec3_t		nacdirection;
+	char        *nacumbraangle;
+	char        *nacpenumbraangle;
+	char        *naclightpow;
+	char        *naclightmax;
+	int			naclighttype;
 } spawn_temp_t;
 
 
@@ -2085,6 +2102,27 @@ struct edict_s
 	int			sunPreset;
 	char        *sun;
 	int     	sunDelay;
+	char        *nacname;
+
+	int			ltMode;
+	float		ltAttachOffsetX;
+	float		ltAttachOffsetY;
+	float		ltAttachOffsetZ;
+	char        *nacCustom;
+	int			nacCustomEnabled;
+	int			nacCustomLoopEnabled;
+	int			nacCustomToggleEnabled;
+	int			nacHz;
+	int         changeLightLS;
+	int         changeLight;
+	float		nacdirectionX;
+	float		nacdirectionY;
+	float		nacdirectionZ;
+	float		nacumbraangle;
+	float		nacpenumbraangle;
+	float		naclightpow;
+	float		naclightmax;
+	int			naclighttype;
 };
 
 #define	LOOKAT_NOBRUSHMODELS  1

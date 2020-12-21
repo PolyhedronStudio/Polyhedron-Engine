@@ -256,3 +256,4 @@ main()
 		store_instanced_triangle(t_i, instance_triangle_id, idx + buf_offset);
 	}
 }
+

@@ -188,6 +188,9 @@ void SP_target_fade (edict_t *self);
 void SP_target_failure (edict_t *self);
 void SP_target_fog(edict_t *self);
 void SP_target_grfog(edict_t *self);
+void SP_target_lighttracker(edict_t *self);
+void SP_target_lightLS(edict_t *self);
+void SP_target_light(edict_t *self);
 void SP_target_fountain (edict_t *self);
 void SP_target_lightswitch (edict_t *self);
 void SP_target_locator (edict_t *self);
@@ -483,12 +486,16 @@ spawn_t	spawns[] = {
 	{"homing rocket", SP_rocket},
 // end Lazarus
 	{ "target_grfog", SP_target_grfog },
+	{ "target_lighttracker", SP_target_lighttracker },
+	{ "target_lightLS", SP_target_lightLS },
+	{ "target_light", SP_target_light },
+
 	{ "trigger_grfog", SP_trigger_grfog },
 	{ "trigger_reverb_preset", SP_trigger_reverb_preset },
 	{ "trigger_reverb", SP_trigger_reverb },
 	{ "trigger_godrays", SP_trigger_godrays },
 	{ "trigger_sun", SP_trigger_sun },
-
+		
 	{NULL, NULL}
 };
 

@@ -1010,25 +1010,45 @@ Default _cone value is 10 (used to set size of light for spotlights)
 
 }
 
+void light_think(edict_t *self)
+{
+	edict_t	*mover = NULL;
+	if (!self->movewith || strlen(self->movewith) == 0) return;
+
+	mover = G_Find(NULL, FOFS(targetname), self->movewith);
+
+	if (mover)
+		if (VectorLength(mover->velocity))
+		{
+			self->velocity[0] = mover->velocity[0];
+			self->velocity[1] = mover->velocity[1];
+			self->velocity[2] = mover->velocity[2];
+		}
+
+	self->nextthink = level.time + FRAMETIME;
+}
+
 void SP_light (edict_t *self)
 {
 	// no targeted lights in deathmatch, because they cause global messages
-	if (!self->targetname || deathmatch->value)
+	if (!self->nacname || strlen(self->nacname) == 0 || deathmatch->value) // || !self->targetname
 	{
 		G_FreeEdict (self);
 		return;
 	}
 
-	self->class_id = ENTITY_LIGHT;
-
-	if (self->style >= 32)
+	/*if (self->style >= 32)
 	{
 		self->use = light_use;
 		if (self->spawnflags & START_OFF)
 			gi.configstring (CS_LIGHTS+self->style, "a");
 		else
 			gi.configstring (CS_LIGHTS+self->style, "m");
-	}
+	}*/
+	
+	self->movetype = MOVETYPE_PUSH;
+	self->think = light_think;
+	self->nextthink = level.time + 1;
 }
 
 

@@ -606,7 +606,7 @@ G_TouchTriggers
 void	G_TouchTriggers(edict_t* ent)
 {
 	int			i, num;
-	edict_t* touch[MAX_EDICTS], * hit;
+	edict_t* touch[MAX_EDICTS], *hit;
 
 	// Lazarus: nothing touches anything if game is frozen
 	if (level.freeze)
@@ -645,7 +645,7 @@ to force all entities it covers to immediately touch it
 void	G_TouchSolids(edict_t* ent)
 {
 	int			i, num;
-	edict_t* touch[MAX_EDICTS], * hit;
+	edict_t* touch[MAX_EDICTS], *hit;
 
 	num = gi.BoxEdicts(ent->absmin, ent->absmax, touch
 		, MAX_EDICTS, AREA_SOLID);
@@ -880,7 +880,7 @@ void GameDirRelativePath(const char* filename, char* output, size_t outputSize)
 #ifdef KMQUAKE2_ENGINE_MOD
 	Com_sprintf(output, outputSize, "%s/%s", gi.GameDir(), filename);
 #else	// KMQUAKE2_ENGINE_MOD
-	cvar_t* basedir, * gamedir;
+	cvar_t* basedir, *gamedir;
 
 	basedir = gi.cvar("basedir", "", 0);
 	gamedir = gi.cvar("gamedir", "", 0);
@@ -896,7 +896,7 @@ void SavegameDirRelativePath(const char* filename, char* output, size_t outputSi
 #ifdef KMQUAKE2_ENGINE_MOD
 	Com_sprintf(output, outputSize, "%s/%s", gi.SaveGameDir(), filename);
 #else	// KMQUAKE2_ENGINE_MOD
-	cvar_t* basedir, * gamedir;
+	cvar_t* basedir, *gamedir;
 
 	basedir = gi.cvar("basedir", "", 0);
 	gamedir = gi.cvar("gamedir", "", 0);

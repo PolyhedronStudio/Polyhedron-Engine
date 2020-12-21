@@ -1491,7 +1491,7 @@ void plat2_dostuff(edict_t* ent, edict_t* other)
 	int		newState;
 	float	platDelay;
 	vec3_t	triggerCenter;
-	edict_t* triggerEnt, * platEnt;
+	edict_t* triggerEnt, *platEnt;
 
 	if (!ent->enemy || !other)	// sanity check
 		return;
@@ -2215,7 +2215,7 @@ void trainbutton_killed(edict_t* self, edict_t* inflictor, edict_t* attacker, in
 }
 void movewith_init(edict_t* ent)
 {
-	edict_t* e, * child;
+	edict_t* e, *child;
 
 	// Unnamed entities can't be movewith parents
 	if (!ent->targetname) return;
@@ -3106,7 +3106,7 @@ void SP_func_water(edict_t* self)
 		self->spawnflags |= DOOR_TOGGLE;
 
 #ifdef POSTTHINK_CHILD_MOVEMENT
-	 self->postthink = set_child_movement; // Knightmare- supports movewith
+	self->postthink = set_child_movement; // Knightmare- supports movewith
 #endif	// POSTTHINK_CHILD_MOVEMENT
 
 	self->classname = "func_door";
@@ -3128,7 +3128,7 @@ noise	looping sound to play when the train is in motion
 // Lazarus: Added health key to func_train
 void train_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point)
 {
-	edict_t* e, * next;
+	edict_t* e, *next;
 
 	if (self->deathtarget)
 	{
@@ -5047,7 +5047,7 @@ void box_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf)
 	int     axis;
 	vec3_t	v1, v2, v;
 	vec3_t	origin;
-	edict_t* bottom, * top;
+	edict_t* bottom, *top;
 
 	// if other is another func_pushable, AND self is in
 	// water, move in proportion to relative masses
@@ -5505,7 +5505,7 @@ void SP_func_bobbingwater(edict_t* self)
 	if (!self->duration) self->duration = 8;
 
 #ifdef POSTTHINK_CHILD_MOVEMENT
-		 self->postthink = set_child_movement; // Knightmare- supports movewith
+	self->postthink = set_child_movement; // Knightmare- supports movewith
 #endif	// POSTTHINK_CHILD_MOVEMENT
 
 	self->think = bob_init;

@@ -2095,8 +2095,42 @@ to be placed into the game.  This will happen every level load.
 void ClientBegin (edict_t *ent)
 {
 	int		i;
-
+    char buffer[MAX_QPATH + 1];
 	ent->client = game.clients + (ent - g_edicts - 1);
+	
+	// N&C Light Tracking and Mover binding
+	edict_t *e2;
+	for (i = 0, e2 = g_edicts; i < globals.num_edicts;i++, e2++)
+	{
+		edict_t *e = e2;
+		if (e != NULL && e->classname != NULL)
+		{
+			if (!strcmp(e->classname, "target_lighttracker"))
+			{
+				memset(buffer, 0, MAX_QPATH);
+				sprintf(buffer, "ilt %s %p\n", e->targetname, e);
+				stuffcmd(ent, buffer);
+			}
+			else if (!strcmp(e->classname, "light"))
+			{
+				memset(buffer, 0, MAX_QPATH);
+				sprintf(buffer, "ilb %s %p\n", e->nacname, e);
+				stuffcmd(ent, buffer);
+			}
+			else if (!strcmp(e->classname, "target_lightLS"))
+			{
+				memset(buffer, 0, MAX_QPATH);
+				sprintf(buffer, "itls %s %p\n", e->target, e);
+				stuffcmd(ent, buffer);
+			}
+			else if (!strcmp(e->classname, "target_light"))
+			{
+				memset(buffer, 0, MAX_QPATH);
+				sprintf(buffer, "itl %s %p\n", e->target, e);
+				stuffcmd(ent, buffer);
+			}
+		}
+	}
 
 	// Lazarus: Set the alias for our alternate attack
 	//stuffcmd(ent, "alias +attack2 attack2_on; alias -attack2 attack2_off\n");

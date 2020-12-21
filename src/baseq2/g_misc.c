@@ -522,6 +522,8 @@ void light_use(edict_t *self, edict_t *other, edict_t *activator)
     }
 }
 
+
+
 void SP_light(edict_t *self)
 {
     // no targeted lights in deathmatch, because they cause global messages
@@ -537,6 +539,8 @@ void SP_light(edict_t *self)
         else
             gi.configstring(CS_LIGHTS + self->style, "m");
     }
+
+	
 }
 
 
