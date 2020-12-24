@@ -1312,7 +1312,7 @@ void CL_BlasterParticles(vec3_t org, vec3_t dir)
     cparticle_t *p;
     float       d;
 
-    const int count = 40 * cl_particle_num_factor->value;
+    const int count = 400 * cl_particle_num_factor->value;
 
     for (i = 0; i < count; i++) {
         p = CL_AllocParticle();
