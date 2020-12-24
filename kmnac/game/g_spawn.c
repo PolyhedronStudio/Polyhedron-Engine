@@ -191,6 +191,8 @@ void SP_target_grfog(edict_t *self);
 void SP_target_lighttracker(edict_t *self);
 void SP_target_lightLS(edict_t *self);
 void SP_target_light(edict_t *self);
+void SP_target_godrays(edict_t* self);
+void SP_target_sun(edict_t* self);
 void SP_target_fountain (edict_t *self);
 void SP_target_lightswitch (edict_t *self);
 void SP_target_locator (edict_t *self);
@@ -487,6 +489,9 @@ spawn_t	spawns[] = {
 // end Lazarus
 	{ "target_grfog", SP_target_grfog },
 	{ "target_lighttracker", SP_target_lighttracker },
+	{ "target_godrays", SP_target_godrays },
+	{ "target_sun", SP_target_sun },
+
 	{ "target_lightLS", SP_target_lightLS },
 	{ "target_light", SP_target_light },
 
