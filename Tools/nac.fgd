@@ -1,0 +1,4047 @@
+// Lazarus Mod for Quake 2 game definition file (.FGD)
+// for Worldcraft 1.6a (Registered & Shareware)
+//
+// Supports Lazarus 2.0
+// Lazarus Home Page: http://lazarus.gamedesign.net
+// See LAZARUS_FGD_README.TXT for more info
+// Last update: August 20, 2001
+
+
+//
+// BASE MARKER DEFINITIONS
+@baseclass = Appearflags 
+[
+	spawnflags(Flags) =
+	[
+		256 : "256>Not Easy" : 0
+		512 : "512>Not Normal" : 0
+		1024 : "1024>Not Hard" : 0
+		2048 : "2048>Not DM" : 0
+	]
+]
+
+//
+@baseclass base(Appearflags) = Appearflags1
+[
+	spawnflags(Flags) =
+	[
+		2048 : "" : 0
+	]
+]
+
+//
+@baseclass = Angles [ angles(string) : "Angles>pitch yaw roll" ]
+@baseclass = Angles1 [ angles(string) : "Angles>pitch yaw 0" ]
+@baseclass = Count [ count(integer) : "Count>kill at # uses" ]
+@baseclass = Count1 [ count(integer) : "Count>kill at # deactivations"]
+@baseclass = Delay [ delay(integer) : "Delay>trigger in x seconds" ]
+@baseclass = Health [ health(integer) : "Health>dmg before trigger" ]
+@baseclass = Killtarget [ killtarget(string) : "Killtarget>remove ent from map" ]
+@baseclass = Message [ message(string) : "Message>print when activated" ]
+@baseclass = Movewith [ movewith(string): "Movewith>ent to move with" ]
+@baseclass = Pathtarget [ pathtarget(string) : "Pathtarget>ent to trigger" ]
+@baseclass = Pathtarget1 [ pathtarget(string) : "Pathtarget>elevator level target" ]
+@baseclass = Speed0 [ speed(integer) : "Speed>units/sec" ]
+@baseclass = Speed25 [ speed(integer) : "Speed>units/sec" : 25 ]
+@baseclass = Speed40 [ speed(integer) : "Speed>units/sec" : 40 ]
+@baseclass = Speed100 [ speed(integer) : "Speed>units/sec" : 100 ]
+@baseclass = SpeedDeg100 [ speed(integer) : "Speed>deg/sec" : 100 ]
+@baseclass = StyleWeap
+[
+	style(choices) : "Style>default weapon" : 0 =
+	[
+		-10 : "-10>BFG (no blaster)"
+		-9 : "-9>RG (no blaster)"
+		-8 : "-8>HB (no blaster)"
+		-7 : "-7>RL (no blaster)"
+		-6 : "-6>GL (no blaster)"
+		-5 : "-5>CG (no blaster)"
+		-4 : "-4>MG (no blaster)"
+		-3 : "-3>SSG (no blaster)"
+		-2 : "-2>SG (no blaster)"
+		-1 : "-1>None"
+		0 : "0>Don't specify"
+		1 : "1>Blaster"
+		2 : "2>SG w/blaster"
+		3 : "3>SSG w/blaster"
+		4 : "4>MG w/blaster"
+		5 : "5>CG w/blaster"
+		6 : "6>GL w/blaster"
+		7 : "7>RL w/blaster"
+		8 : "8>HB w/blaster"
+		9 : "9>RG w/blaster"
+		10 : "10>BFG w/blaster"
+	]
+]
+@baseclass = Targetname [ targetname(target_source) : "Targetname>name" ]
+@baseclass = Target [ target(target_destination) : "Target>ent to trigger" ]
+@baseclass = TeamDM [ team(string) : "Team>DM respawn assoc" ]
+//
+@baseclass = ArghBmodel 
+[
+	_minlight(string) : "_minlight>mottled glow 0.0-2.0"
+	_ambient(string) : "_ambient>minlight-RGB or absolute"
+	light(string) : "Light>tex light value"
+	_lightmin(string) : "_lightmin>min tex light value"
+	style(choices) : "Style>type tex light" : 0 =
+	[
+		0 : "0>Normal"
+		1 : "1>Flicker #1"
+		6 : "6>Flicker #2"
+		2 : "2>Slow Strong Pulse"
+		3 : "3>Candle #1"
+		7 : "7>Candle #2"
+		8 : "8>Candle #3"
+		4 : "4>Fast Strobe"
+		5 : "5>Gentle Pulse #1"
+		9 : "9>Slow Strobe"
+		10 : "10>Fluorescent Flicker"
+		11 : "11>Slow pulse, no black"
+	]
+	_color(color1) : "_color>tex light RGB color"
+	_focus(string) : "_focus>fade tex light edges"
+	_minlighta(string) : "_minlighta>abs scale minlite"
+]
+//
+@baseclass = TremorEffects
+[
+	effects(choices) : "Effects>geewhiz" : 0 =
+	[
+		0: "0>combine:add values"
+		1: "1>rotate"
+		2: "2>gib"
+		8: "8>blaster"
+		16: "16>rocket"
+		32: "32>grenade"
+		64: "64>hyperblaster"
+		128: "128>bfg"
+		256: "256>color_shell"
+		512: "512>powerscreen"
+		16384: "16384>flies"
+		32768: "32768>quad"
+		65536: "65536>pent"
+		131072: "131072>teleporter"
+		262144: "262144>flag1"
+		524288: "524288>flag2"
+		1048576: "1048576>Candle Light"
+		2097152: "2097152>greengib"
+		4194304: "4194304>Flame Light"
+		8388608: "8388608>spinning_lights"
+		16777216: "16777216>plasma"
+		33554432: "33554432>trap"
+		67108864: "67108864>tracker"
+		134217728: "134217728>double"
+		268435456: "268435456>spheretrans"
+		536870912: "536870912>tagtrail"
+		1073741824: "1073741824>half_damage"
+		2147483648: "2147483648>tracker_trail"
+	]
+	renderfx(choices) : "RenderFX>eyecandy" : 0 =
+	[
+		0: "0>combine:add values"
+		1: "1>minlight"
+		2: "2>viewermodel"
+		4: "4>weaponmodel"
+		8: "8>fullbright"
+		16: "16>depthhack"
+		32: "32>translucent"
+		64: "64>framelerp"
+		128: "128>beam"
+		512: "512>glow"
+		1024: "1024>shell_red"
+		2048: "2048>shell_green"
+		4096: "4096>shell_blue"
+		32768: "32768>ir_visible"
+		65536: "65536>shell_double"
+		131072: "131072>shell_half_damage"
+		262144: "262144>use_disguise"
+		524288: "524288>vampire"
+	]
+]
+
+
+
+//
+// WORLDSPAWN
+@SolidClass base(StyleWeap) = worldspawn : "World entity"
+[
+	
+	effects(choices) : "Effects>Global map effects" : 0 =
+	[
+		0 : "0>Combine effects"
+		1 : "1>Custom Help"
+		2 : "2>Footsteps"
+		4 : "4>Item ID"
+		8 : "8>Sound Alert"
+		16 : "16>Corpse Fade"
+	]
+	message(string) : "Message>level name"
+	nextmap(string) : "Nextmap>next level in DM"
+	sky(string) : "Sky>env map name"
+	skyaxis(string) : "Skyaxis>rotating sky XYZ"
+	skyrotate(string) : "Skyrotate>speed deg/sec"
+	sounds(string) : "Sounds>CD track number"
+	musictrack(string) : "Musictrack>name of Ogg Vorbis track"
+	gravity(integer) : "Gravity>default map gravity" : 800
+	mapfile(string) : "Name of config file in /maps to set custom cvars"
+	
+]
+
+// NULL_ENTITY
+@PointClass = null_entity : "Phony entity placeholder to be used as default entity class"
+[
+	comment(string) : "Default PointEntity" : "Not an valid entity!"
+]
+
+//
+// AMMO_*
+@BaseClass base(Appearflags, TeamDM, Target, Targetname, Killtarget, Delay, Message, Angles, Movewith) color(76 76 255) size(-16 -16 -16, 16 16 16) = Ammo
+[
+	spawnflags(Flags) =
+	[
+		8 : "8>No Drop" : 0
+		16: "16>Shootable" : 0
+	]
+	health(integer) : "Health>sustainable damage" : 20
+]
+@PointClass base(Ammo) model({ "path": ":models/items/ammo/shells/medium/tris.md2" }) = ammo_shells : "Shotgun ammo" []
+@PointClass base(Ammo) model({ "path": ":models/items/ammo/bullets/medium/tris.md2" }) = ammo_bullets : "Machine/Chain gun ammo"  []
+@PointClass base(Ammo) model({ "path": ":models/items/ammo/cells/medium/tris.md2" }) = ammo_cells : "Blaster/BFG ammo" []
+@PointClass base(Ammo) model({ "path": ":models/items/ammo/fuel/medium/tris.md2" }) = ammo_fuel : "Rail gun ammo" []
+@PointClass base(Ammo) model({ "path": ":models/items/ammo/grenades/medium/tris.md2" }) = ammo_grenades : "Grenades" []
+@PointClass base(Ammo) model({ "path": ":models/items/ammo/rockets/medium/tris.md2" }) = ammo_rockets : "Rockets" []
+@PointClass base(Ammo) model({ "path": ":models/items/ammo/slugs/medium/tris.md2" }) = ammo_slugs : "Rail gun ammo" []
+
+//
+// CRANE_BEAM
+@Baseclass base(Appearflags, Targetname) = CraneBeam
+[
+	target(string) : "Target>crane_hoist targetname"
+	team(string) : "Team>w/crane_control"
+	speed(integer) : "Speed>units/sec" : 100
+	dmg(integer) : "Dmg>damage when blocked" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	pathtarget(string) : "Pathtarget>path_corner waypoints"
+]
+@SolidClass base(CraneBeam, ArghBmodel) color(0 128 204) = crane_beam : "Crane body" []
+
+//
+// CRANE_CONTROL
+@Baseclass base(Appearflags, Targetname) = CranePanel
+[
+	target(string) : "Target>crane_beam targetname"
+	team(string) : "Team>w/crane_beam"
+	style(integer) : "Style>orient: 0>E,1>N,2>W,3>S"
+	spawnflags(Flags) =
+	[
+		1 : "1>Start on" : 0
+	]
+]
+@SolidClass base(CranePanel, ArghBmodel) color(0 128 204) = crane_control : "Crane control panel" []
+
+//
+// CRANE_HOIST
+@Baseclass base(Appearflags, Targetname) = CraneHoist
+[
+	target(string) : "Target>crane_hook"
+	speed(integer) : "Speed>units/sec" : 100
+	dmg(integer) : "Dmg>damage when blocked" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	pathtarget(string) : "Pathtarget>path_corner waypoints"
+]
+@SolidClass base(CraneHoist, ArghBmodel) color(0 128 204) = crane_hoist : "Crane hoist" []
+
+//
+// CRANE_HOOK
+@Baseclass base(Appearflags, Targetname) = CraneHook
+[
+	speed(integer) : "Speed>units/sec" : 100
+	dmg(integer) : "Dmg>damage when blocked" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	pathtarget(string) : "Pathtarget>path_corner waypoints"
+	move_origin(string) : "Move_origin>Offset to cable XYZ" : "0 0 0"
+	spawnflags(Flags) =
+	[
+		1 : "1>Spotlight" : 0
+	]
+]
+@SolidClass base(CraneHook, ArghBmodel) color(0 128 204) = crane_hook : "Crane hook" []
+
+//
+// CRANE_RESET
+@PointClass base(Appearflags, Targetname, Count) color(0 128 204) = crane_reset : "Crane_reset"
+[
+        target(string) : "Target>name of crane_beam"
+]
+
+//
+// FUNC_AREAPORTAL
+@SolidClass base(Targetname) = func_areaportal : "Area portal (Vis blocker)" []
+
+//
+// FUNC_BOBBINGWATER
+@baseclass base(Appearflags, Targetname, Angles1, Speed25) = FBobbingwater
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start Open" : 0
+		2 : "2>Mud" : 0
+	]
+	wait(choices) : "Wait>sec until reset" : -1 =
+	[
+		-1 : "-1>Toggle"
+	]
+	lip(integer) : "Lip>units visible after move"
+	sounds(Choices) : "Sounds>noise when moving" : 1 =
+	[
+		0 : "0>No Sounds"
+		1 : "1>Water"
+		2 : "2>Lava"
+	]
+	team(string) : "Team>bobbingwater or similar"
+	bob(integer) : "Bob>amplitude of motion" : 16
+	duration(integer) : "Duration>time between bob cycles" : 8
+]
+@SolidClass base(FBobbingwater, ArghBmodel) color(0 128 204) = func_bobbingwater : "Moveable, bobbing water" []
+
+//
+// FUNC_BUTTON
+@baseclass base(Appearflags, Targetname, Target, Killtarget, Delay, Health, Angles1, Pathtarget1, Movewith) = FButton
+[
+	speed(integer) : "Speed>units/sec" : 40
+	wait(integer) : "Wait>sec until reset" : 2
+	lip(integer) : "Lip>units visible after move" : 4
+	sounds(integer) : "Sounds>noise when moving, 0=default, 1=silent, 2-99 custom sound- e.g. switches/butn02.wav" : 0
+	message(string) : "Message>print when activated"
+]
+@SolidClass base(FButton, ArghBmodel) color(0 128 204) = func_button : "Button" []
+
+//
+// FUNC_CLOCK
+@PointClass base(Appearflags, Targetname, Pathtarget) color(0 0 255) size(-8 -8 -8, 8 8 8) = func_clock : "Clock"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Timer Up" : 0
+		2 : "2>Timer Down" : 0
+		4 : "4>Start Off" : 0
+		8 : "8>Multi Use" : 0
+	]
+	target(string) : "Target>target_string"
+	count(integer) : "Count>clock tics in secs"
+	style(choices) : "Style>display type" : 0 =
+	[
+		0 : "0>xx"
+		1 : "1>xx:xx"
+		2 : "2>xx:xx:xx"
+	]
+]
+
+//
+// FUNC_CONVEYOR
+@SolidClass base(Appearflags, Targetname, Speed100, ArghBmodel) color(0 128 204) = func_conveyor : "Conveyor belt"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		2 : "2>Toggle" : 0
+	]
+]
+
+//
+// FUNC_DOOR
+@Baseclass base(Appearflags, Targetname, Target, Angles1, Killtarget, Speed100, Health, Movewith) = FDoor
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start Open" : 0
+		4 : "4>Crusher" : 0
+		8 : "8>No Monsters" : 0
+		16 : "16>Animated" : 0
+		32 : "32>Toggle" : 0
+		64 : "64>Ani Fast" : 0
+	]
+	gib_type(choices): "Gib_type>Material" : 0 =
+	[
+		0 : "0>Default"
+		1 : "1>Metal"
+		2 : "2>Glass"
+		3 : "3>Barrel"
+		4 : "4>Crate"
+		5 : "5>Rock"
+		6 : "6>Crystal"
+		7 : "7>Mechanical"
+		8 : "8>Wood"
+		9 : "9>Tech"
+	]
+	team(string) : "Team>func_door/func_door_rotating"
+	message(string) : "Message>print when trig inactive"
+	accel(string) : "Accel>acceleration"
+	decel(string) : "Decel>deceleration"
+	mass(integer) : "Mass>debris amount"
+	wait(integer) : "Wait>sec until reset" : 3
+	lip(integer) : "Lip>units visible after move" : 8
+	dmg(integer) : "Dmg>damage when blocked" : 10
+	sounds(integer) : "Sounds>noise when moving, 0=default, 1=silent, 5-99 custom sound- e.g. doors/dr05_strt.wav, doors/dr05_mid.wav, doors/dr05_end.wav" : 0
+]
+@SolidClass base(FDoor, ArghBmodel) color(0 128 204) = func_door : "Door" []
+
+//
+// FUNC_DOOR_ROTATING
+@Baseclass base(Appearflags, Targetname, Target, Killtarget, SpeedDeg100, Health, Movewith) = FDoorRot
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start Open" : 0
+		2 : "2>Reverse" : 0
+		4 : "4>Crusher" : 0
+		8 : "8>No Monsters" : 0
+		16 : "16>Animated" : 0
+		32 : "32>Toggle" : 0
+		64 : "64>X Axis" : 0
+		128 : "128>Y Axis" : 0
+	]
+	gib_type(choices): "Gib_type>Material" : 0 =
+	[
+		0 : "0>Default"
+		1 : "1>Metal"
+		2 : "2>Glass"
+		3 : "3>Barrel"
+		4 : "4>Crate"
+		5 : "5>Rock"
+		6 : "6>Crystal"
+		7 : "7>Mechanical"
+		8 : "8>Wood"
+		9 : "9>Tech"
+	]
+	team(string) : "Team>func_door or func_door_rotating"
+	distance(integer) : "Distance>deg/rotation" : 90
+	mass(integer) : "Mass>debris amount"
+	message(string) : "Message>print when trig inactive"
+	wait(integer) : "Wait>sec until reset" : 3
+	dmg(integer) : "Dmg>damage when blocked" : 2
+	sounds(integer) : "Sounds>noise when moving, 0=default, 1=silent, 5-99 custom sound- e.g. doors/dr05_strt.wav, doors/dr05_mid.wav, doors/dr05_end.wav" : 0
+	turn_rider(choices): "Turn_rider>rotate player" : 0 =
+	[
+		0 : "0>Don't turn rider"
+		1 : "1>Turn rider w/model"
+	]
+]
+@SolidClass base(FDoorRot, ArghBmodel) color(0 128 204) = func_door_rotating : "Rotating Door" []
+
+//
+// FUNC_DOOR_ROT_DH
+// Identical to func_door_rotating, but "pathtarget" specifies location of origin at runtime
+@Baseclass base(FDoorRot) = FDoorRotDH
+[
+	pathtarget(string) : "Pathtarget>origin at runtime"
+]
+@SolidClass base(FDoorRotDH, ArghBmodel) color(0 128 204) = func_door_rot_dh : "Rotating Door" []
+
+//
+// FUNC_DOOR_SECRET
+@Baseclass base(Appearflags, Targetname, Target) = FDoorSecret
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Always shoot" : 0
+		2 : "2>1st Left" : 0
+		4 : "4>1st Down" : 0
+	]
+	dmg(integer) : "Dmg>damage when blocked" : 2
+	wait(integer) : "Wait>sec until reset" : 5
+	message(string) : "Message>print when activated"
+	sounds(integer) : "Sounds>noise when moving, 0=default, 1=silent, 5-99 custom sound- e.g. doors/dr05_strt.wav, doors/dr05_mid.wav, doors/dr05_end.wav" : 0
+]
+@SolidClass base(FDoorSecret, ArghBmodel) color(0 128 204) = func_door_secret : "Secret Door" []
+
+//
+// FUNC_DOOR_SWINGING
+@Baseclass base(Appearflags, Targetname, Target, Killtarget, SpeedDeg100, Health, Movewith) = FDoorSwing
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Ignore Activator" : 0
+		2 : "2>Revolving" : 0
+		4 : "4>Crusher" : 0
+		8 : "8>No Monsters" : 0
+		16 : "16>Animated" : 0
+		32 : "32>Toggle" : 0
+		64 : "64>X Axis" : 0
+		128 : "128>Y Axis" : 0
+	]
+	followtarget(string) : "Followtarget>info_notnull"
+	team(string) : "Team>func_door or similar"
+	distance(integer) : "Distance>deg/rotation" : 90
+	message(string) : "Message>print when trig inactive"
+	wait(integer) : "Wait>sec until reset" : 3
+	dmg(integer) : "Dmg>damage when blocked" : 2
+	sounds(integer) : "Sounds>noise when moving, 0=default, 1=silent, 5-99 custom sound- e.g. doors/dr05_strt.wav, doors/dr05_mid.wav, doors/dr05_end.wav" : 0
+	turn_rider(choices): "Turn_rider>rotate player" : 0 =
+	[
+		0 : "0>Don't turn rider"
+		1 : "1>Turn rider w/model"
+	]
+]
+@SolidClass base(FDoorSwing, ArghBmodel) color(0 128 204) = func_door_swinging : "2-way Rotating Door" []
+
+//
+// FUNC_EXPLOSIVE
+@Baseclass base(Appearflags1, Targetname, Target, Killtarget, Movewith) = FExplosive
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Trig Spawn" : 0
+		2 : "2>Animated" : 0
+		4 : "4>Ani Fast" : 0
+	]
+	gib_type(choices): "Gib_type>Material" : 0 =
+	[
+		0 : "0>Default"
+		1 : "1>Metal"
+		2 : "2>Glass"
+		3 : "3>Barrel"
+		4 : "4>Crate"
+		5 : "5>Rock"
+		6 : "6>Crystal"
+		7 : "7>Mechanical"
+		8 : "8>Wood"
+		9 : "9>Tech"
+	]
+	skinnum(integer) : "Skinnum>skin number"
+	health(integer) : "Health>dmg before trigger" : 100
+	mass(integer) : "Mass>debris amount" : 75
+	dmg(integer) : "Dmg>damage at origin" : 0
+]
+@SolidClass base(FExplosive, ArghBmodel) color(0 128 204) = func_explosive : "Exploding/Breakable brush" []
+
+//
+// FUNC_BREAKAWAY
+@Baseclass base(Appearflags1, Targetname, Target, Killtarget, Movewith) = FBreakaway
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Trig Spawn" : 0
+		2 : "2>Animated" : 0
+		4 : "4>Ani Fast" : 0
+		8 : "4>Inactive" : 0
+		16 : "4>Fade" : 0
+		32 : "4>AlwaysShoot" : 0
+		64 : "4>TargAngle" : 0
+	]
+	gib_type(choices): "Gib_type>Material" : 0 =
+	[
+		0 : "0>Default"
+		1 : "1>Metal"
+		2 : "2>Glass"
+		3 : "3>Barrel"
+		4 : "4>Crate"
+		5 : "5>Rock"
+		6 : "6>Crystal"
+		7 : "7>Mechanical"
+		8 : "8>Wood"
+		9 : "9>Tech"
+	]
+	duration(integer) : "For how many seconds the rotation takes.  Default: 5, will also always be > wait" : 5
+
+	skinnum(integer) : "Skinnum>skin number"
+	health(integer) : "Health>dmg before trigger" : 100
+	health2(integer) : "How much health to destroy the brush after it has come to a stop."
+	move_angles(string) : "Angles it will rotate toward if TargAngle flag is set (pitch yaw roll)."
+	duration(string) : "How many seconds the rotation toward move_angles takes."
+	angles(string) : "Sets the initial angle that the brush will move at (pitch yaw roll)."
+	mass(integer) : "This determines how much damage the falling boulder does." : 500
+	speed(integer) : "This sets how fast the brush will move (only if triggered)" : 100
+	delay(string) : "How long to wait before breaking away" : 0
+	wait(string) : "How long before it becomes SOLID_BBOX after being dislodged" : 0.3
+	fadeout(string) : "If the Fade flag is set, this is how long until it fades away"
+	noise(string) : "Sound to play when it hits."
+	count(integer) : "Number of times to play impact sound"
+	destroytarget(string) : "Destroytarget>trigger at destruction after coming to a rest"
+	bleft(string) : "Min b-box coords XYZ. Default = -16 -16 -16"
+	tright(string) :	"Max b-box coords XYZ. Default = 16 16 16"
+]
+@SolidClass base(FBreakaway, ArghBmodel) color(0 128 204) = func_breakaway : "Breakaway/falling brush" []
+
+
+//
+// FUNC_FORCE_WALL
+@SolidClass base(Appearflags, Targetname, Count1) color(255 0 0) = func_force_wall : "Force field"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start on" : 0
+	]
+	style(integer) : "Style>color" : 208
+	dmg(integer) : "Dmg>damage when touched" : 0
+]
+
+//
+// FUNC_GROUP
+@SolidClass color (200 200 200) = func_group : "Non-Entity Grouping" []
+
+//
+// FUNC_KILLBOX
+@SolidClass base(Appearflags, Targetname, Count) color(255 0 0) = func_killbox : "Instant death" []
+
+//
+// FUNC_MONITOR
+@BaseClass base(Appearflags, Targetname) = FMonitor
+[
+	spawnflags(Flags) =
+	[
+		8 : "8>Animated" : 0
+		16 : "16>Ani Fast" : 0
+		32 : "32>Third-person" : 0
+		64 : "64>Camera Effect" : 0
+		128 : "128>Letter Box" : 0
+	]
+	target(string) : "Target>entity with viewpoint"
+]
+@Solidclass base(FMonitor, ArghBmodel) = func_monitor : "Security camera monitor" []
+
+//
+// FUNC_OBJECT
+@Baseclass base(Appearflags, Targetname) = FObject
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Trig Spawn" : 0
+		2 : "2>Animated" : 0
+		4 : "4>Ani Fast" : 0
+	]
+	dmg(integer) : "Dmg>damage when blocked" : 10000
+]
+@SolidClass base(FObject, ArghBmodel) color (0 128 204) = func_object : "Solid bmodel, will fall if its support is removed" []
+
+//
+// FUNC_PENDULUM
+@SolidClass base(Appearflags, Targetname, ArghBmodel) color (0 128 204) = func_pendulum : "Pendulum"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start on" : 0
+		2 : "2>Stop at top" : 0
+	]
+	attenuation(string) : "Attenuation>Rebound 0-1"
+	distance(integer) : "Distance>Rotation (complete arc)" : 90
+	health(integer) : "Health>Sustainable damage"
+	mass(integer) : "Mass>Weight of pendulum" : 100
+	move_origin(string) : "Move_origin>Vector to mass" : "0 0 0"
+	noise(string) : "Noise>Impact sound"
+	radius(integer) : "Radius>Length of pendulum" : 100
+	dmg(integer) : "Dmg>blocking damage / 100 units/sec" : 5
+	phase(string) : "Phase>Rotation offset (0-1)"
+]
+
+//
+// FUNC_PLAT
+@Baseclass base(Appearflags, Targetname, Speed100) = FPlat
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Plat Low Trig" : 0
+	]	
+	accel(integer) : "Accel>acceleration" : 500
+	decel(string) : "Decel>deceleration"
+	lip(integer) : "Lip>units visible after move" : 8
+	height(integer) : "Height>movement distance"
+	dmg(integer) : "Dmg>damage when blocked" : 2
+	sounds(integer) : "0,1=defualt, 2-99 custom sound- e.g. plats/pt02_strt.wav, plats/pt02_mid.wav, plats/pt02_end.wav" : 0
+]
+@SolidClass base(FPlat, ArghBmodel) color(0 128 204) = func_plat : "Platform" []
+
+//
+// FUNC_PUSHABLE
+@Baseclass base(Appearflags, Targetname) = FPushable
+[
+	spawnflags(Flags) =
+	[
+		2 : "Trig spawn" : 0
+	]
+	sounds(choices) : "Sounds>noise when moving" : 0 =
+	[
+		0 : "0>Silent"
+		1 : "1>Tank thud"
+		2 : "2>Rail gun hum"
+		3 : "3>Rocket fly"
+	]
+	mass(integer) : "Mass>weight/debris amt" : 400
+	health(integer) : "Health>sustainable damage"	
+	dmg(integer) : "Dmg>damage at origin" : 0
+	deathtarget(string) : "Deathtarget>trig ent when destroyed"
+	killtarget(string) : "Killtarget>remove ent from map"
+	message(string) : "Message>print when destroyed"
+]
+@SolidClass base(FPushable, ArghBmodel) color(0 128 204) = func_pushable : "Pushable Object" []
+
+//
+// FUNC_ROTATING
+@Baseclass base(Appearflags, Targetname, SpeedDeg100, Movewith) = FRot
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		2 : "2>Reverse" : 0
+		4 : "4>X Axis" : 0
+		8 : "8>Y Axis" : 0
+		16 : "16>Pain Touch" : 0
+		32 : "32>Block Stops" : 0
+		64 : "64>Animated" : 0
+		128 : "128>Ani Fast" : 0
+	]	
+	team(string) : "Team>func_train or func_rotating"
+	dmg(integer) : "Dmg>damage when blocked" : 2
+	noise(string) : "Noise>sound (path/file.wav)"
+	turn_rider(choices): "Turn_rider>rotate player" : 0 =
+	[
+		0 : "0>Don't turn rider"
+		1 : "1>Turn rider w/model"
+	]
+]
+@SolidClass base(FRot, ArghBmodel) color(0 128 204) = func_rotating : "Rotating brush" []
+
+//
+// FUNC_ROTATING_DH
+// Identical to func_rotating, but "pathtarget" specifies location of origin at runtime
+@Baseclass base(FRot) = FRotDH
+[
+	pathtarget(string) : "Pathtarget>origin at runtime"
+]
+@SolidClass base(FRotDH, ArghBmodel) color(0 128 204) = func_rotating_dh : "Rotating brush" []
+
+//
+// FUNC_TIMER
+@PointClass base(Appearflags, Targetname, Target, Count1) color(76 25 153) size(-8 -8 -8, 8 8 8) = func_timer : "Timer"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+	]
+	wait(integer) : "Wait>sec until repeat" : 1
+	random(integer) : "Random>wait variance +/-"
+	delay(integer) : "Delay>first trigger in x sec"
+	pausetime(integer) : "Pausetime>initial delay"
+]
+
+// FUNC_TRACKCHANGE
+@Baseclass base(Appearflags, Targetname) = FTrackchange
+[
+	spawnflags(flags) =
+	[
+		1: "1>Activatetrain" : 0
+		8: "8>Startbottom" : 0
+		64: "64>X Axis" : 0
+		128: "128>Y Axis" : 0
+	]
+	height(integer) : "Height>travel (units)" : 0
+	distance(integer) : "Distance>spin amt (deg)" : 0
+	target(string) : "Target>train to switch"
+	pathtarget(string) : "Pathtarget>top track"
+	combattarget(string) : "Combattarget>bottom track"
+	speed(integer) : "Speed>time to dest" : 0
+	sounds(integer) : "0,1=defualt,, 2-99 custom sound- e.g. plats/pt02_strt.wav, plats/pt02_mid.wav, plats/pt02_end.wav" : 0
+]
+@SolidClass base(FTrackchange, ArghBmodel) = func_trackchange : "Train track changing platform" []
+
+//
+// FUNC_TRACKTRAIN
+@Baseclass base(Appearflags, Targetname) = FTracktrain
+[
+	spawnflags(flags) =
+	[
+		1 : "1>NoPitch" : 0
+		2 : "2>NoControl" : 0
+		4 : "4>OneWay" : 0
+		8 : "8>OtherMap" : 0
+		16: "16>No HUD" : 0
+		32: "32>Anim Indicator" : 0
+		64: "64>Animate" : 0
+		128 : "128>Disabled" : 0
+	]
+	target(string) : "Target>first path_track"
+	sounds(choices) : "Sounds>train sound" : 0 =
+	[
+		0: "None"
+		1: "Nada 1"
+		2: "Nada 2"
+		3: "Nada 3"
+		4: "Nada 4"
+		5: "Nada 5"
+		6: "Nada 6"
+	]
+	distance(integer) : "Distance>wheelbase" : 50
+	height(integer) : "Height>units above track" : 4
+	speed(integer) : "Speed>units/second" : 64
+	dmg(integer) : "Dmg>damage on crush" : 0	
+	roll(integer) : "Roll>turn bank angle" : 0
+	bleft(string) : "Bleft>min driver bbox" : "-16 -16 -16"
+	tright(string) : "Tright>max driver bbox" : "16 16 16"
+]
+@SolidClass base(FTracktrain, ArghBmodel) = func_tracktrain : "Track Train" []
+
+//
+// FUNC_TRAIN
+@Baseclass base(Appearflags, Targetname, Speed100) = FTrain
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		2 : "2>Toggle" : 0
+		4 : "4>Block Stops" : 0
+		8 : "8>Rotate" : 0
+		16 : "16>Rot Const" : 0
+		32 : "32>Animated" : 0
+		64 : "64>Ani Fast" : 0
+		128 : "128>Smooth" : 0
+	]
+	target(string) : "Target>first path_corner"
+	team(string) : "Team>func_train or func_rotating"
+	dmg(integer) : "Dmg>damage when blocked" : 2
+	noise(string) : "Noise>sound (path/file.wav)"
+	health(integer) : "Health>sustainable damage" : 0
+	pitch_speed(string) : "Pitch_Speed>deg/sec"
+	yaw_speed(string) : "Yaw_Speed>deg/sec" 
+	roll_speed(string) : "Roll_Speed>deg/sec"
+	turn_rider(choices): "Turn_rider>rotate player" : 0 =
+	[
+		0 : "0>Don't turn rider"
+		1 : "1>Turn rider w/model"
+	]
+]
+@SolidClass base(FTrain, ArghBmodel) color(0 128 204) = func_train : "Moving platform" []
+
+//
+// FUNC_TRAIN_ORIGIN
+@Baseclass base(Appearflags, Targetname, Speed100) = FTrainOrigin
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		2 : "2>Toggle" : 0
+		4 : "4>Block Stops" : 0
+		8 : "8>Rotate" : 0
+		16 : "16>Rot Const" : 0
+		32 : "32>Animated" : 0
+		64 : "64>Ani Fast" : 0
+		128 : "128>Smooth" : 0
+	]
+	target(string) : "Target>first path_corner"
+	team(string) : "Team>func_train or func_rotating"
+	dmg(integer) : "Dmg>damage when blocked" : 2
+	noise(string) : "Noise>sound (path/file.wav)"
+	health(integer) : "Health>sustainable damage" : 0
+	pitch_speed(string) : "Pitch_Speed>deg/sec"
+	yaw_speed(string) : "Yaw_Speed>deg/sec" 
+	roll_speed(string) : "Roll_Speed>deg/sec"
+	turn_rider(choices): "Turn_rider>rotate player" : 0 =
+	[
+		0 : "0>Don't turn rider"
+		1 : "1>Turn rider w/model"
+	]
+]
+@SolidClass base(FTrainOrigin, ArghBmodel) color(0 128 204) = func_train_origin : "Moving platform (origin variant)" []
+
+//
+// FUNC_TRAINBUTTON
+// Identical to a func_button, but moves along with the train specified by "movewith"
+@baseclass base(FButton) = FTrainButton
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>+Attack" : 0
+		2 : "2>No touch" : 0
+	]
+	movewith(string) : "Movewith>train name"
+]
+@SolidClass base(FTrainButton, ArghBmodel) = func_trainbutton : "Button on a train" []
+
+//
+// FUNC_VEHICLE
+@Baseclass base(Appearflags, Targetname) = FVehicle
+[
+	spawnflags(Flags) =
+	[
+		4 : "4>Block Stops" : 0
+		16: "16>No HUD" : 0
+	]
+	turn_rider(choices): "Turn_rider>rotate movewith children" : 0 =
+	[
+		0 : "0>Don't turn children"
+		1 : "1>Turn children w/vehicle"
+	]
+	message(string) : "Message>print when activated"
+	mass(integer) : "Mass>weight" : 2000
+	speed(integer) : "Speed>units/sec" : 200
+	move_origin(string) : "Move_origin>XYZ driver offset" : "0 0 0"
+	dmg(integer) : "Dmg>damage at origin" : 0
+	health(integer) : "Health>sustainable damage" : 0
+	deathtarget(string) : "Deathtarget>trigger ent at death"
+	radius(integer) : "Radius>turning radius" : 256
+]
+@SolidClass base(FVehicle, ArghBmodel) color(0 128 204) = func_vehicle : "Controllable vehicle" []
+
+//
+// FUNC_WALL
+@SolidClass base(Appearflags, Targetname, Movewith, Count1, ArghBmodel) color(0 128 204) = func_wall : "Solid Wall"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Trig Spawn" : 0
+		2 : "2>Toggle" : 0
+		4 : "4>Start On" : 0
+		8 : "8>Animated" : 0
+		16 : "16>Ani Fast" : 0
+	]
+]
+
+//
+// FUNC_WATER
+@Baseclass base(Appearflags, Targetname, Angles1, Speed25) = FWater
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start Open" : 0
+		2 : "2>Mud" : 0
+	]
+	wait(choices) : "Wait>sec until reset" : -1 =
+	[
+		-1 : "-1>Toggle"
+	]
+	lip(integer) : "Lip>units visible after move"
+	sounds(Choices) : "Sounds>noise when moving" : 1 =
+	[
+		0 : "0>No Sounds"
+		1 : "1>Water"
+		2 : "2>Lava"
+	]
+	team(string) : "Team>func_water or similar"
+]
+@SolidClass base(FWater, ArghBmodel) color(0 128 204) = func_water : "Moveable water" []
+
+//
+// HINT_PATH
+@Pointclass base(Appearflags1, Targetname) color(128 128 0) size(-8 -8 -8, 8 8 8) = hint_path : "Monster hint path"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>End" : 0
+	]
+	target(string) : "Target>next hint_path"
+	wait(integer) : "Wait>Monster pause time" : 0
+]
+ 
+//
+// INFO_NULL
+@PointClass base(Appearflags, Targetname) color(0 128 0) size(-4 -4 -4, 4 4 4) = info_null : "Spotlight target" []
+
+//
+// INFO_NOTNULL
+@PointClass base(info_null, Angles, Movewith) = info_notnull : "Lightning target" []
+
+//
+// INFO_PLAYER_*
+@baseclass base(Appearflags, Targetname, Angles) size(-16 -16 -24, 16 16 32) color(0 255 0) model({ "path": ":models/monsters/insane/tris.md2", "frame":209, "skin":1}) = PlayerClass []
+
+@PointClass base(PlayerClass, StyleWeap, Count) = info_player_start : "Player 1 start" []
+@PointClass base(PlayerClass, StyleWeap) = info_player_deathmatch : "Player deathmatch start"
+[
+	
+]
+@PointClass base(PlayerClass, StyleWeap) = info_player_coop : "Player cooperative start" []
+@PointClass base(PlayerClass) = info_player_intermission : "Deathmatch intermission point"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Letter Box" : 0
+	]
+]
+// Knightmare added
+@PointClass base(PlayerClass, StyleWeap) = info_player_team1 : "Potential team1 spawning position for CTF games" []
+@PointClass base(PlayerClass, StyleWeap) = info_player_team2 : "Potential team2 spawning position for CTF games" []
+@PointClass base(PlayerClass, StyleWeap) = info_player_team3 : "Potential team3 spawning position for 3TCTF games" []
+
+
+//
+// ITEM_*
+@BaseClass base(Appearflags, TeamDM, Targetname, Target, Killtarget, Delay, Message, Angles, Movewith) color(76 76 255) size(-16 -16 -16, 16 16 16) = Items
+[
+	spawnflags(Flags) =
+	[
+		4 : "4>No Spin" : 0
+		8 : "8>No Drop" : 0
+		16 : "16>Shootable" : 0
+	]
+	health(integer) : "Health>sustainable damage" : 20
+]
+@PointClass base(Items) model({ "path": ":models/items/adrenal/tris.md2" }) = item_adrenaline : "+1 to max health" []
+@PointClass base(Items) model({ "path": ":models/items/c_head/tris.md2" }) = item_ancient_head : "+2 to max health" []
+@PointClass base(Items) model({ "path": ":models/items/armor/body/tris.md2" }) = item_armor_body : "Body armor" []
+@PointClass base(Items) model({ "path": ":models/items/armor/combat/tris.md2" }) = item_armor_combat : "Combat armor" []
+@PointClass base(Items) model({ "path": ":models/items/armor/jacket/tris.md2" }) = item_armor_jacket : "Jacket armor" []
+@PointClass base(Items) model({ "path": ":models/items/armor/shard/tris.md2" }) = item_armor_shard : "Armor shard" []
+@PointClass base(Items) = item_armor_shard_flat : "Armor shard (lying on floor)" []
+@PointClass base(Items) model({ "path": ":models/items/band/tris.md2" }) = item_bandolier : "Equipment belt" []
+@PointClass base(Items) model({ "path": ":models/items/breather/tris.md2" }) = item_breather : "Underwater breather" []
+@PointClass base(Items) model({ "path": ":models/items/enviro/tris.md2" }) = item_enviro : "Enviro-Suit" []
+@PointClass base(Items) model({ "path": ":models/items/f_light/tris.md2" }) = item_flashlight : "Flashlight"
+[
+	count(integer) : "Count>cell cost/minute" : 0
+]
+@PointClass base(Items) model({ "path": ":models/items/stasis/tris.md2" }) = item_freeze : "Stasis Generator" []
+@PointClass base(Items) model({ "path": ":models/items/healing/medium/tris.md2" }) = item_health : "+10 health" []
+@PointClass base(Items) model({ "path": ":models/items/healing/stimpack/tris.md2" }) = item_health_small : "+2 health" []
+@PointClass base(Items) model({ "path": ":models/items/healing/large/tris.md2" }) = item_health_large : "+25 health" []
+@PointClass base(Items) model({ "path": ":models/items/mega_h/tris.md2" }) = item_health_mega : "+100 health" []
+@PointClass base(Items) model({ "path": ":models/items/invulner/tris.md2" }) = item_invulnerability : "Invulnerability" []
+@PointClass base(Items) model({ "path": ":models/items/jet/tris.md2" }) = item_jetpack : "Jetpack"
+[
+	count(integer) : "Count>fuel level" : 500
+]
+@PointClass base(Items) model({ "path": ":models/items/pack/tris.md2" }) = item_pack : "Heavy backpack" []
+@PointClass base(Items) model({ "path": ":models/items/armor/screen/tris.md2" }) = item_power_screen : "Power screen" []
+@PointClass base(Items) model({ "path": ":models/items/armor/shield/tris.md2" }) = item_power_shield : "Power shield" []
+@PointClass base(Items) model({ "path": ":models/items/quaddama/tris.md2" }) = item_quad : "Quad damage" []
+@PointClass base(Items) model({ "path": ":models/items/silencer/tris.md2" }) = item_silencer : "Silencer" []
+// Knightmare added
+@PointClass base(Items) = item_flag_team1 : "Red CTF flag" []
+@PointClass base(Items) = item_flag_team2 : "Blue CTF flag" []
+
+//
+// KEY_*
+@BaseClass base(Appearflags, Targetname, Target, Killtarget, Delay, Message, Angles, Movewith) color(0 128 204) size(-16 -16 -16, 16 16 16) = Keys
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Trig Spawn" : 0
+		2 : "2>No Touch" : 0
+		4 : "4>No Spin" : 0
+		8 : "8>No Drop" : 0
+		16 : "16>Shootable" : 0
+	]
+	health(integer) : "Health>sustainable damage" : 20
+]
+@PointClass base(Keys) model({ "path": ":models/items/keys/target/tris.md2" }) = key_airstrike_target : "Tank commander's head" []
+@PointClass base(Keys) model({ "path": ":models/items/keys/key/tris.md2" }) = key_blue_key : "Normal door key - blue" []
+@PointClass base(Keys) model({ "path": ":models/monsters/commandr/head/tris.md2" }) = key_commander_head : "Tank commander's head" []
+@PointClass base(Keys) model({ "path": ":models/items/keys/data_cd/tris.md2" }) = key_data_cd : "Key for computer centers" []
+@PointClass base(Keys) model({ "path": ":models/items/keys/spinner/tris.md2" }) = key_data_spinner : "Key for city computer" []
+@PointClass base(Keys) model({ "path": ":models/items/keys/pass/tris.md2" }) = key_pass : "Security pass for secret level" []
+@PointClass base(Keys) model({ "path": ":models/items/keys/power/tris.md2" }) = key_power_cube : "Warehouse circuits" []
+@PointClass base(Keys) model({ "path": ":models/items/keys/pyramid/tris.md2" }) = key_pyramid : "Key for entrance to jail3" []
+@PointClass base(Keys) model({ "path": ":models/items/keys/red_key/tris.md2" }) = key_red_key : "normal door key - red" []
+
+//
+// LIGHT
+@PointClass base(Appearflags, Targetname, Count1) color(0 255 0) size(-8 -8 -8, 8 8 8) = light : "Light"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start Off" : 0
+	]
+	target(string) : "Target>spot aims at ent"
+	light(integer) : "Light>brightness" : 10
+	_falloff(choices) : "_falloff>falloff ratio" : 0 =
+	[
+		1 : "1>Inverse"
+		0 : "0>Linear"
+		2 : "2>Inverse-square"
+	]
+	_fade(integer) : "_fade>fade dist (less=further)" : 1
+	_angfade(integer) : "_angfade>fade on angled surfaces" : 1
+	_color(color1) : "_color>RGB color"
+	style(choices) : "Style>light type" : 0 =
+	[
+		0 : "0>Normal (switchable)"
+		1 : "1>Flicker #1"
+		6 : "6>Flicker #2"
+		2 : "2>Slow Strong Pulse"
+		3 : "3>Candle #1"
+		7 : "7>Candle #2"
+		8 : "8>Candle #3"
+		4 : "4>Fast Strobe"
+		5 : "5>Gentle Pulse #1"
+		9 : "9>Slow Strobe"
+		10 : "10>Fluorescent Flicker"
+		11 : "11>Slow pulse, no black"
+	]
+	_cone(integer) : "_cone>spot size (max=90)" : 10
+	_focus(integer) : "_focus>fade cone edge" : 1
+	_spotangle(string) : "_spotangle>aim yaw(0-360)/pitch(-90-90)"
+	_spotvector(string) : "_spotvector>spot XYZ vector"
+	_spotpoint(string) : "_spotpoint>spot XYZ point"
+        _naclighttype(choices) : "_naclight>Light Type" : 0 =
+	[
+		0 : "0>Sphere"
+		1 : "1>Spot"
+		2 : "2>Directional"
+	]
+	_nacdirection(string) : "_nacdirection>Light Direction" : "0 0 1"
+	_nacumbraangle(string) : "_nacumbraangle>Umbra Angle" : "50.0"
+	_nacpenumbraangle(string) : "_nacpenumbraangle>Penumbra Angle" : "40.0"
+	_naclightpow(string) : "_naclightpow>Light Power" : "800.0"
+	_naclightmax(string) : "_naclightmax>Light Max Distance" : "50.0"
+	_nacCustom(string) : "_nacCustom>Custom Light Style a-z"
+	_nacCustomEnabled(integer) : "_nacCustomEnabled>Custom Active" : 1
+	_nacCustomLoopEnabled(integer) : "_nacCustomLoopEnabled>Loop" : 0
+	_nacCustomToggleEnabled(integer) : "_nacCustomToggleEnabled>Ping Pong" : 0
+        _nacHz(integer) : "_nacHz>Light Refresh in Hz" : 30
+        movewith(string) : "movewith>Target Enity" 
+	nacname(string) : "Name Of Light>Required for moving light"
+]
+
+//
+// LIGHT_MINE1
+@PointClass base(Angles1, light) color(0 255 0) size(-2 -2 -12, 2 2 12) model({ "path": ":models/objects/minelite/light1/tris.md2", "skin": 0 }) = light_mine1 : "Clean fluorescent light fixture"
+[
+	spawnflags(Flags) =
+	[
+		1 : "" : 0
+	]
+]
+//
+// LIGHT_MINE2
+@PointClass base(light_mine1) model({ "path": ":models/objects/minelite/light2/tris.md2", "skin": 0 }) = light_mine2 : "Dusty fluorescent light fixture" []
+
+//
+// MISC_ACTOR
+@PointClass base(Appearflags1, Targetname, Angles, Movewith, TremorEffects) color(255 128 0) size(-16 -16 -24, 16 16 32) = misc_actor : "Actor"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Ambush" : 0
+		2 : "2>Trig Spawn" : 0
+		4 : "4>Sight" : 0
+		8 : "8>Good Guy" : 0
+		16 : "16>No Gib" : 0
+		32 : "32>Homing" : 0
+		64 : "64>Be Monster" : 0
+		128 : "128>Ignore Fire" : 0
+	]
+	sounds(choices) : "Sound>weapon to use" : 0 =
+	[
+		0 : "0000>None/None"
+		100 : "0100>Blaster"
+		200 : "0200>Shotgun"
+		300 : "0300>Super Shotgun"
+		400 : "0400>Machinegun"
+		500 : "0500>Chaingun"
+		603 : "0603>GL/SSG"
+		703 : "0703>RL/SSG"
+		800 : "0800>Hyperblaster"
+		900 : "0900>Railgun"
+		1003 : "1003>BFG/SSG"
+	]
+	bleft(string) : "Bleft>min b-box coords XYZ"
+	combattarget(string) : "Combattarget>first point_combat"
+	deathtarget(string) : "Deathtarget>trigger ent at death"
+	dmgteam(string) : "DmgTeam>teammates"
+	flies(string) : "Flies>% chance/flies" : "0"
+	gib_health(integer) : "Gib_health>gib level" : -40
+	gib_type(integer) : "Gib_type>models/objects/gibX" : 0
+	health(integer) : "Health>hit points" : 100
+	item(string) : "Item>spawn item at death"
+	killtarget(string) : "Killtarget>at death rem ent from map"
+	mass(integer) : "Mass>weight" : 200
+	move_origin(string) : "Move_origin>Monitor viewpoint XYZ"
+	muzzle(string) : "Muzzle>gun1 firing origin"
+	muzzle2(string) : "Muzzle2>gun2 firing origin"
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	style(integer) : "Style>skin number" : 0
+	target(string) : "Target>path_corner/killtarget"
+	tright(string) : "Tright>max b-box coords XYZ"
+	usermodel(string) : "Usermodel>player model"
+	
+]
+
+//
+// MISC_BANNER
+@PointClass base(Appearflags, Targetname, Angles) color(255 128 0) size(-4 -4 0, 4 4 246) model({ "path": ":models/objects/banner/tris.md2" }) = misc_banner : "Flowing banner"
+[
+
+]
+
+//
+// MISC_BLACKHOLE
+@PointClass base(Appearflags, Targetname, Angles) color(255 128 0) size(-8 -8 -8, 8 8 8) model({ "path": ":models/objects/black/tris.md2" }) = misc_blackhole : "Blackhole" []
+
+//
+// MISC_DEADSOLDIER
+@PointClass base(Appearflags1, Targetname, Angles, Movewith) color(255 128 0) size(-16 -16 0, 16 16 16) model({{
+  spawnflags & 32 -> { "path": ":models/deadbods/dude/tris.md2", "frame": 5 },
+  spawnflags & 16 -> { "path": ":models/deadbods/dude/tris.md2", "frame": 4 },
+  spawnflags &  8 -> { "path": ":models/deadbods/dude/tris.md2", "frame": 3 },
+  spawnflags &  4 -> { "path": ":models/deadbods/dude/tris.md2", "frame": 2 },
+  spawnflags &  2 -> { "path": ":models/deadbods/dude/tris.md2", "frame": 1 },
+                             	":models/deadbods/dude/tris.md2"
+  }}) = misc_deadsoldier : "Dead guys! 6 of em!"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>On Back" : 0
+		2 : "2>On Stomach" : 0
+		4 : "4>Back,Decap" : 0
+		8 : "8>Fetal Pos" : 0
+		16 : "16>Sit,Decap" : 0
+		32 : "32>Impaled" : 0
+		64 : "64>Flies" : 0
+	]
+	style(choices) : "Style>skin" =
+	[
+		0 : "0>Default" 
+		1 : "1>Cipher" 
+		2 : "2>Claymore" 
+		3 : "3>Flak" 
+		4 : "4>Grunt" 
+		5 : "5>Howitzer" 
+		6 : "6>Major" 
+		7 : "7>Nightops" 
+		8 : "8>Pointman" 
+		9 : "9>Psycho" 
+		10 : "10>Rampage" 
+		11 : "11>Razor" 
+		12 : "12>Recon" 
+		13 : "13>Scout" 
+		14 : "14>Sniper" 
+		15 : "15>Viper" 
+	]
+]
+
+//
+// MISC_EASTER*
+@PointClass base(Appearflags, Targetname, Angles) color(255 128 0) size(-32 -32 -16, 32 32 32) model({ "path": ":models/monsters/tank/tris.md2",	"frame":254, "skin": 2}) = misc_eastertank : "Tank sitting down. Make him a chair out of brushes."
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Not solid" : 0
+		2 : "2>Commander skin" : 0 // Knightmare added
+	]
+
+]
+@PointClass base(Appearflags, Targetname, Angles) color(255 128 0) size(-32 -32 0, 32 32 32) model({ "path": ":models/monsters/bitch/tris.md2", "frame":208}) = misc_easterchick : "Chick #1 sitting: Place her near misc_eastertank."
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Not solid" : 0
+	]
+]
+@PointClass base(Appearflags, Targetname, Angles) color(255 128 0) size(-32 -32 0, 32 32 32) model({ "path": ":models/monsters/bitch/tris.md2", "frame":248}) = misc_easterchick2 : "Chick #2 sitting w/ different pose. Can be placed close to misc_eastertank's for full effect."
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Not solid" : 0
+	]
+]
+
+
+//
+// MISC_EXPLOBOX
+@PointClass base(Appearflags1, Targetname, Angles) color(0 128 204) size(-16 -16 0, 16 16 40) model({ "path": ":models/objects/barrels/tris.md2" }) = misc_explobox : "Large exploding box"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Barrel gibs" : 0
+	]
+	mass(integer) : "Mass>debris amount" : 100
+	health(integer) : "Health>sustainable damage" : 80
+	dmg(integer) : "Dmg>damage at origin" : 150
+	
+]
+
+//
+// MISC_GIB_*
+@PointClass base(Appearflags, Targetname, Angles) color(255 0 0) size(-8 -8 -8, 8 8 8) model({ "path": ":models/objects/gibs/arm/tris.md2" }) = misc_gib_arm : "arm gib, use with target_spawner" []
+@PointClass base(Appearflags, Targetname, Angles) color(255 0 0) size(-8 -8 -8, 8 8 8) model({ "path": ":models/objects/gibs/head/tris.md2" }) = misc_gib_head : "head gib, use with target_spawner" []
+@PointClass base(Appearflags, Targetname, Angles) color(255 0 0) size(-8 -8 -8, 8 8 8)  model({ "path": ":models/objects/gibs/arm/tris.md2" }) = misc_gib_leg : "leg gib, use with target_spawner" []
+
+//
+// MISC_INSANE
+@PointClass base(Appearflags1, Targetname, Angles, Movewith) color(255 128 0) size(-16 -16 -24, 16 16 32) model({{
+  spawnflags & 32 -> { "path": ":models/monsters/insane/tris.md2", "frame": 0 },
+  spawnflags & 16 -> { "path": ":models/monsters/insane/tris.md2", "frame": 74 },
+  spawnflags &  8 -> { "path": ":models/monsters/insane/tris.md2", "frame": 252 },
+  spawnflags &  4 -> { "path": ":models/monsters/insane/tris.md2", "frame": 38 },
+  spawnflags &  2 -> { "path": ":models/monsters/insane/tris.md2", "frame": 0 },
+                             	":models/monsters/insane/tris.md2"
+  }}) = misc_insane : "Insane Soldiers"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Ambush" : 0
+		2 : "2>Trig Spawn" : 0
+		4 : "4>Crawl" : 0
+		8 : "8>Crucified" : 0
+		16 : "16>Stand Ground" : 0
+		32 : "32>Always Stand" : 0
+	]
+	target(string) : "Target>path_corner/killtarget"
+	combattarget(string) : "Combattarget>first point_combat"
+	deathtarget(string) : "Deathtarget>trigger ent at death"
+	killtarget(string) : "Killtarget>at death rem ent from map"
+	item(string) : "Item>spawn item at death"
+	health(integer) : "Health>hit points" : 100
+	gib_health(integer) : "Gib_health>gib level" : -50
+	mass(integer) : "Mass>weight" : 300
+	flies(string) : "Flies>% chance/flies" : ".30"
+	
+]
+
+//
+// MISC_SATELLITE_DISH
+@PointClass base(Appearflags, Targetname, Angles) color(255 128 0) size(-64 -64 0, 64 64 128) model({ "path": ":models/objects/satellite/tris.md2" }) = misc_satellite_dish : "Satellite Dish"
+[
+	
+]
+
+//
+// MISC_STROGG_SHIP
+@PointClass base(Appearflags, Targetname, Angles, Speed100) color(255 128 0) size(-16 -16 0, 16 16 32) model({ "path": ":models/ships/strogg1/tris.md2" }) = misc_strogg_ship : "Strogg ship for flybys"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		8 : "8>Rotate" : 0
+		128 : "128>Smooth" : 0
+	]
+	target(string) : "Target>first path_corner"
+	health(integer) : "Health>sustainable damage" : 0
+	mass(integer) : "Mass>debris mass" : 1200
+	dmg(integer) : "Dmg>explosion damage" : 200
+	deathtarget(string) : "Deathtarget>trigger ent at destruction"
+	pitch_speed(string) : "Pitch_Speed>deg/sec"
+	yaw_speed(string) : "Yaw_Speed>deg/sec" 
+	roll_speed(string) : "Roll_Speed>deg/sec"
+	
+]
+
+//
+// MISC_STROGG_SHIP_ORIGIN
+@PointClass base(Appearflags, Targetname, Angles, Speed100) color(255 128 0) size(-16 -16 0, 16 16 32) = misc_strogg_ship_origin : "Strogg ship for flybys (origin variant)"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		8 : "8>Rotate" : 0
+		128 : "128>Smooth" : 0
+	]
+	target(string) : "Target>first path_corner"
+	health(integer) : "Health>sustainable damage" : 0
+	mass(integer) : "Mass>debris mass" : 1200
+	dmg(integer) : "Dmg>explosion damage" : 200
+	deathtarget(string) : "Deathtarget>trigger ent at destruction"
+	pitch_speed(string) : "Pitch_Speed>deg/sec"
+	yaw_speed(string) : "Yaw_Speed>deg/sec" 
+	roll_speed(string) : "Roll_Speed>deg/sec"
+]
+
+//
+// MISC_TELEPORTER
+@PointClass base(Appearflags, Targetname, Angles, Movewith) color(255 0 0) size(-32 -32 -24, 32 32 -16) model({ "path": ":models/objects/dmspot/tris.md2", "skin": 1 }) = misc_teleporter : "Teleporter: To hide the teleport pads, place them units 10 units into a brush."
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start off" : 0
+		2 : "2>Toggle" : 0
+		4 : "4>No model" : 0
+		8 : "8>Monster" : 0
+		64 : "64>Landmark" : 0
+	]
+	target(string) : "Target>destination"
+	
+]
+
+//
+// MISC_TELEPORTER_DEST
+@PointClass base(Appearflags, Targetname, Angles, Movewith) color(255 0 0) size(-32 -32 -24, 32 32 -16)  model({ "path": ":models/objects/dmspot/tris.md2", "skin": 0 }) = misc_teleporter_dest : "Teleport Destination: To hide the teleport pads, place them units 10 units into a brush."
+[
+	
+]
+
+//
+// MISC_BIGVIPER
+@PointClass base(Appearflags, Targetname, Angles) color(255 128 0) size(-176 -120 -24, 176 120 72) model({ "path": ":models/ships/bigviper/tris.md2" }) = misc_bigviper : "Large stationary Viper"
+[
+	
+]
+
+//
+// MISC_VIPER
+@PointClass base(Appearflags, Targetname, Angles, Speed100) color(255 128 0) size(-16 -16 0, 16 16 32) model({ "path": ":models/ships/viper/tris.md2" }) = misc_viper : "Viper for flybys"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		8 : "8>Rotate" : 0
+		128 : "128>Smooth" : 0
+	]
+	target(string) : "Target>first path_corner"
+	health(integer) : "Health>sustainable damage" : 0
+	mass(integer) : "Mass>debris mass" : 1200
+	dmg(integer) : "Dmg>explosion damage" : 200
+	deathtarget(string) : "Deathtarget>trigger ent at destruction"
+	pitch_speed(string) : "Pitch_Speed>deg/sec"
+	yaw_speed(string) : "Yaw_Speed>deg/sec" 
+	roll_speed(string) : "Roll_Speed>deg/sec"
+	
+]
+
+//
+// MISC_VIPER_ORIGIN
+@PointClass base(Appearflags, Targetname, Angles, Speed100) color(255 128 0) size(-16 -16 0, 16 16 32) = misc_viper_origin : "Viper for flybys (origin variant)"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		8 : "8>Rotate" : 0
+		128 : "128>Smooth" : 0
+	]
+	target(string) : "Target>first path_corner"
+	health(integer) : "Health>sustainable damage" : 0
+	mass(integer) : "Mass>debris mass" : 1200
+	dmg(integer) : "Dmg>explosion damage" : 200
+	deathtarget(string) : "Deathtarget>trigger ent at destruction"
+	pitch_speed(string) : "Pitch_Speed>deg/sec"
+	yaw_speed(string) : "Yaw_Speed>deg/sec" 
+	roll_speed(string) : "Roll_Speed>deg/sec"
+]
+
+//
+// MISC_VIPER_BOMB
+@PointClass base(Appearflags, Targetname, Count, Speed0, Angles1) color(255 0 0) size(-8 -8 -8, 8 8 8) model({ "path": ":models/objects/bomb/tris.md2" }) = misc_viper_bomb : "Viper Bomb"
+[
+	spawnflags(Flags) = 
+	[
+		1 : "1>Multi-use" : 0
+	]
+	dmg(integer) : "Dmg>damage at origin" : 1000
+	pathtarget(string) : "Pathtarget>speed/trajectory reference"
+	target(string) : "Target>trigger on impact"
+	killtarget(string) : "Killtarget>remove ent on impact"
+]
+
+//
+// MODEL_SPAWN - MapPack model spawner
+// DWH: corrected "framenumbers" - was "userframes"
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(255 0 0) size(-8 -8 -8, 8 8 8) = model_spawn : "User models"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+		32 : "32>Anim Once" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	startframe(integer) : "Startframe>first frame #"
+	framenumbers(integer) : "Framenumbers># add'l frames" : 1
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	style(choices) : "Style>Ani Type" : 0 =
+	[
+		0 : "0>None(use framenumbers)"
+		1 : "1>Anim01"
+		2 : "2>Anim23"
+		3 : "3>Anim All"
+		4 : "4>Anim AllFast"
+	]
+	bleft(string) : "Bleft>Min b-box coords XYZ"
+	tright(string) : "Tright>Max b-box coords XYZ"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	
+]
+
+//
+// MODEL_TRAIN
+@Baseclass base(Appearflags, Targetname, Angles, Speed100) = MTrain
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		2 : "2>Toggle" : 0
+		4 : "4>Block Stops" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+		32 : "32>Rotate" : 0
+		64 : "64>Rotate Constant" : 0
+		128 : "128>Smooth Move" : 0
+	]
+	target(string) : "Target>first path_corner"
+	team(string) : "Team>func_train or func_rotating"
+	usermodel(string) : "Usermodel>model (path/file.md2)"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	startframe(integer) : "Startframe>first frame #"
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>Not solid"
+		2 : "2>Bounding box"
+	]
+	style(choices) : "Style>Ani Type" : 0 =
+	[
+		0 : "0>None"
+		3 : "3>Anim All"
+		4 : "4>Anim AllFast"
+	]
+	turn_rider(choices): "Turn_rider>rotate player" : 0 =
+	[
+		0 : "0>Don't turn rider"
+		1 : "1>Turn rider w/model"
+	]
+	bleft(string) : "Bleft>Min b-box coords XYZ"
+	tright(string) : "Tright>Max b-box coords XYZ"
+	dmg(integer) : "Dmg>damage when blocked" : 2
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	
+	pitch_speed(string) : "Pitch_Speed>deg/sec"
+	yaw_speed(string) : "Yaw_Speed>deg/sec" 
+	roll_speed(string) : "Roll_Speed>deg/sec"
+]
+@PointClass base(MTrain, TremorEffects) color(255 0 0) size(-8 -8 -8, 8 8 8) = model_train : "Moving model" []
+
+//
+// MODEL_TRAIN_ORIGIN
+@Baseclass base(Appearflags, Targetname, Angles, Speed100) = MTrainOrigin
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		2 : "2>Toggle" : 0
+		4 : "4>Block Stops" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+		32 : "32>Rotate" : 0
+		64 : "64>Rotate Constant" : 0
+		128 : "128>Smooth Move" : 0
+	]
+	target(string) : "Target>first path_corner"
+	team(string) : "Team>func_train or func_rotating"
+	usermodel(string) : "Usermodel>model (path/file.md2)"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	startframe(integer) : "Startframe>first frame #"
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>Not solid"
+		2 : "2>Bounding box"
+	]
+	style(choices) : "Style>Ani Type" : 0 =
+	[
+		0 : "0>None"
+		3 : "3>Anim All"
+		4 : "4>Anim AllFast"
+	]
+	bleft(string) : "Bleft>Min b-box coords XYZ"
+	tright(string) : "Tright>Max b-box coords XYZ"
+	dmg(integer) : "Dmg>damage when blocked" : 2
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	pitch_speed(string) : "Pitch_Speed>deg/sec"
+	yaw_speed(string) : "Yaw_Speed>deg/sec" 
+	roll_speed(string) : "Roll_Speed>deg/sec"
+]
+@PointClass base(MTrainOrigin, TremorEffects) color(255 0 0) size(-8 -8 -8, 8 8 8) = model_train_origin : "Moving model (origin variant)" []
+
+//
+// MODEL_TURRET
+@Baseclass base(Appearflags, Targetname, Movewith) = ModelTurret
+[
+	spawnflags(Flags) =
+	[
+		1: "1>Player" : 0
+		2: "2>Trig Spawn" : 0
+		4: "4>Track" : 0
+		8: "8>Good Guy" : 0
+		16: "16>Start Off" : 0
+	]
+	target(string) : "Target>info_notnull (rocket origin)"
+	sounds(Choices) : "Sounds>weapon used" : 2 =
+	[
+		-1 : "-1>No fire"
+		1 : "1>Railgun"
+		2 : "2>Rocket"
+		3 : "3>BFG"
+		4 : "4>Homing rockets"
+		5 : "5>Machinegun"
+		6 : "6>Hyperblaster"
+		7 : "7>Grenade"
+	]
+	wait(string) : "Wait>rate of fire (sec)" : "2"
+	distance(integer) : "Distance>grenade velocity"
+	speed(integer) : "Speed>rotation deg/sec" : 50
+	minpitch(integer) : "Minpitch>min pitch angle" : -30
+	maxpitch(integer) : "Maxpitch>max pitch angle" : 30
+	minyaw(integer) : "Minyaw>min yaw angle" : 0
+	maxyaw(integer) : "Maxyaw>max yaw angle" : 360
+	team(string) : "Team>turret_base"
+	dmg(integer) : "Dmg>damage when blocked" : 10
+	health(integer) : "Health>sustainable damage" : 0
+	gib_health(integer) : "Gib_health>gib level" : 0
+	deathtarget(string) : "Deathtarget>trigger at death"
+	destroytarget(string) : "Destroytarget>trigger at gib"
+	followtarget(string) : "Followtarget>fallback view target"
+	viewmessage(string) : "Viewmessage>monitor message"
+	count(integer) : "Count>Camera number" : 0
+	usermodel(string) : "MD2 file"
+	
+	bleft(string) : "min bbox" : "-16 -16 -16"
+	tright(string) : "max bbox" : "16 16 16"
+]
+@PointClass base(ModelTurret) color(128 255 128) = model_turret : "MD2 Turret breach" []
+
+// ALIAS ENTITY
+// ENV_TORCH_1 - Medieval Torch on Hanger 
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-8 -8 -32, 8 8 32) model({ "path": ":models/env/torch1/tris.md2", "skin": 0 }) = env_torch_1 : "Medieval Torch on Hanger"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/torch1/tris.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-8 -8 -32"
+	tright(string) : "Tright>Max b-box coords XYZ" : "8 8 32"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+
+// ALIAS ENTITY
+// ENV_TORCH_1a - Medieval Torch w/out Hanger
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 -32, 4 4 32) model({ "path": ":models/env/torch1a/tris.md2", "skin": 0 }) = env_torch_1a : "Medieval Torch w/out Hanger"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/torch2/tris.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-8 -8 -32"
+	tright(string) : "Tright>Max b-box coords XYZ" : "8 8 32"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_GRAVE_1 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-8 -16 -8, 8 16 64) model({ "path": ":models/env/gravestones/grave_01.md2", "skin": 0 }) = env_grave_1 : "Gravestone"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/gravestones/grave_01.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-8 -16 -8"
+	tright(string) : "Tright>Max b-box coords XYZ" : "8 16 64"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_GRAVE_2 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-8 -16 -8, 16 16 24) model({ "path": ":models/env/gravestones/grave_02.md2", "skin": 0 }) = env_grave_2 : "Gravestone"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/gravestones/grave_02.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-8 -16 -8"
+	tright(string) : "Tright>Max b-box coords XYZ" : "16 16 24"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_GRAVE_3 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-12 -16 -8, 12 16 56) model({ "path": ":models/env/gravestones/grave_03.md2", "skin": 0 }) = env_grave_3 : "Gravestone"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/gravestones/grave_03.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-12 -16 -8"
+	tright(string) : "Tright>Max b-box coords XYZ" : "12 16 56"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_GRAVE_4 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-12 -16 -8, 12 16 96) model({ "path": ":models/env/gravestones/grave_04.md2", "skin": 0 }) = env_grave_4 : "Gravestone"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/gravestones/grave_04.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-12 -16 -8"
+	tright(string) : "Tright>Max b-box coords XYZ" : "12 16 96"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_GRAVE_5 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -16 -8, 4 16 24) model({ "path": ":models/env/gravestones/grave_cluster_01.md2", "skin": 0 }) = env_grave_5 : "Gravestone"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/gravestones/grave_cluster_01.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-4 -16 -8"
+	tright(string) : "Tright>Max b-box coords XYZ" : "4 16 24"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_GRAVE_6 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-6 -16 -8, 6 16 32) model({ "path": ":models/env/gravestones/grave_cluster_02.md2", "skin": 0 }) = env_grave_6 : "Gravestone"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/gravestones/grave_cluster_02.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-6 -16 -8"
+	tright(string) : "Tright>Max b-box coords XYZ" : "6 16 32"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_GRAVE_7 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-6 -16 -8, 6 16 46) model({ "path": ":models/env/gravestones/grave_cluster_03.md2", "skin": 0 }) = env_grave_7 : "Gravestone"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/gravestones/grave_cluster_03.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-6 -16 -8"
+	tright(string) : "Tright>Max b-box coords XYZ" : "6 16 46"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_GRAVE_8 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-6 -16 -8, 6 16 32) model({ "path": ":models/env/gravestones/grave_cluster_04.md2", "skin": 0 }) = env_grave_8 : "Gravestone"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/gravestones/grave_cluster_04.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-6 -16 -8"
+	tright(string) : "Tright>Max b-box coords XYZ" : "6 16 46"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_1 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/env/candles/candle_1.md2", "skin": 0 }) = env_candle_1 : "Candle"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_1.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-4 -4 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "4 4 6"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_3 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-12 -6 0, 10 8 4) model({ "path": ":models/env/candles/candle_3.md2", "skin": 0 }) = env_candle_3 : "Candle"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_3.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-12 -6 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "10 8 4"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_5 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/env/candles/candle_5.md2", "skin": 0 }) = env_candle_5 : "Candle"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_5.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-4 -4 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "4 4 6"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_6 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/env/candles/candle_6.md2", "skin": 0 }) = env_candle_6 : "Candle"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_6.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-4 -4 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "4 4 6"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_7 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 24) model({ "path": ":models/env/candles/candle_7.md2", "skin": 0 }) = env_candle_7 : "Candle"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_7.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-4 -4 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "4 4 24"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_8 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/env/candles/candle_8.md2", "skin": 0 }) = env_candle_8 : "Candle"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_8.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-4 -4 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "4 4 16"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_9 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-2 -2 0, 2 2 14) model({ "path": ":models/env/candles/candle_9.md2", "skin": 0 }) = env_candle_9 : "Candle"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_9.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-2 -2 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "2 2 14"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_10 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/env/candles/candle_10.md2", "skin": 0 }) = env_candle_10 : "Candle"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_10.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-4 -4 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "4 4 16"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_11 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 28) model({ "path": ":models/env/candles/candle_11.md2", "skin": 0 }) = env_candle_11 : "Candle"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_11.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-4 -4 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "4 4 28"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_12 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/env/candles/candle_12.md2", "skin": 0 }) = env_candle_12 : "Candle"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_12.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-4 -4 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "4 4 16"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_CLUSTER_1 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-8 -8 0, 8 8 20) model({ "path": ":models/env/candles/candle_merge_1.md2", "skin": 0 }) = env_candle_cluster_1 : "Candle Cluster"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_merge_1.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-8 -8 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "8 8 20"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_CLUSTER_2 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-8 -8 0, 4 8 16) model({ "path": ":models/env/candles/candle_merge_2.md2", "skin": 0 }) = env_candle_cluster_2 : "Candle Cluster"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_merge_2.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-4 -4 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "4 4 16"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_CLUSTER_3 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -8 0, 8 4 16) model({ "path": ":models/env/candles/candle_merge_3.md2", "skin": 0 }) = env_candle_cluster_3 : "Candle Cluster"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_merge_3.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "4 -8 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "8 4 16"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// ENV_CANDLE_CLUSTER_4 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -8 0, 8 4 16) model({ "path": ":models/env/candles/candle_merge_4.md2", "skin": 0 }) = env_candle_cluster_4 : "Candle Cluster"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_merge_4.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "4 -8 0"
+	tright(string) : "Tright>Max b-box coords XYZ" : "8 4 16"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)"
+	angles(string) : "3-Axis Rotations" : "0 0 0"
+]
+
+// ALIAS ENTITY
+// SPRITE_TORCHFLAME_1
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 0 255) size(-8 -8 -14, 8 8 18) model({ "path": ":models/sprites/torchflame1/tris.md2", "skin": 0 }) = sprite_torchflame_1 : "92 frames looping - Timing Variations: torchflame1_2.sp2 - 1_3.sp2 -  1_4.sp2"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+		32 : "32>Anim Once" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md3)" : "sprites/torchflame1_1.sp2"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	startframe(integer) : "Startframe>first frame #" : 0
+	framenumbers(integer) : "Framenumbers># add'l frames" : 92
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	style(choices) : "Style>Ani Type" : 4 =
+	[
+		0 : "0>None(use framenumbers)"
+		1 : "1>Anim01"
+		2 : "2>Anim23"
+		3 : "3>Anim All"
+		4 : "4>Anim AllFast"
+	]
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-8 -8 -16"
+	tright(string) : "Tright>Max b-box coords XYZ" : "8 8 16"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)" : "fx/fire1.wav"
+	
+]
+
+//ALIAS ENTITY
+// SPRITE_TORCHFLAME_2
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 0 255) size(-8 -8 -14, 8 8 32) model({ "path": ":models/sprites/torchflame2/tris.md2", "skin": 0 }) = sprite_torchflame_2 : "61 frames looping - Timing Variations: torchflame2_2.sp2 - 2_3.sp2 -  2_4.sp2"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+		32 : "32>Anim Once" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md3)" : "sprites/torchflame2_1.sp2"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	startframe(integer) : "Startframe>first frame #" : 0
+	framenumbers(integer) : "Framenumbers># add'l frames" : 92
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	style(choices) : "Style>Ani Type" : 4 =
+	[
+		0 : "0>None(use framenumbers)"
+		1 : "1>Anim01"
+		2 : "2>Anim23"
+		3 : "3>Anim All"
+		4 : "4>Anim AllFast"
+	]
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-8 -8 -16"
+	tright(string) : "Tright>Max b-box coords XYZ" : "8 8 16"
+	health(integer) : "Health>Sustainable damage" : 0
+	noise(string) : "Noise>sound (path/file.wav)" : "fx/fire1.wav"
+	
+]
+
+//ALIAS ENTITY
+// SPRITE_CANDLEFLAME
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 0 255) size(-1 -1 -3, 1 1 2) model({ "path": ":models/sprites/candleflame/candleflame.md2", "skin": 0 }) = sprite_candleflame : "94 frames looping - Timing Variations: candleflame1_2.sp2 - 1_3.sp2 -  1_4.sp2"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Toggle" : 0
+		8 : "8>Player" : 0
+		16 : "16>No Model" : 0
+		32 : "32>Anim Once" : 0
+	]
+	usermodel(string) : "Usermodel>model (path/file.md3)" : "sprites/candleflame1_1.sp2"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+	startframe(integer) : "Startframe>first frame #" : 0
+	framenumbers(integer) : "Framenumbers># add'l frames" : 93
+	solidstate(choices) : "Solidstate>clipping" : 1 =
+
+	[
+		1 : "1>unsolid, nodrop"
+		2 : "2>solid, drop"
+		3 : "3>solid, nodrop"
+		4 : "4>unsolid, drop"
+	]
+	style(choices) : "Style>Ani Type" : 4 =
+	[
+		0 : "0>None(use framenumbers)"
+		1 : "1>Anim01"
+		2 : "2>Anim23"
+		3 : "3>Anim All"
+		4 : "4>Anim AllFast"
+	]
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-1 -1 -3"
+	tright(string) : "Tright>Max b-box coords XYZ" : "1 1 2"
+	health(integer) : "Health>Sustainable damage" : 0
+		
+]
+
+//
+// MONSTER_*
+@BaseClass base(Appearflags1, Targetname, Angles, Movewith, TremorEffects) color(255 128 0) size(-16 -16 -24, 16 16 32) = Monsters
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Ambush" : 0
+		2 : "2>Trig Spawn" : 0
+		4 : "4>Sight" : 0
+		8 : "8>Good Guy" : 0
+		16 : "16>No Gib" : 0
+		128 : "128>Ignore Fire" : 0
+	]
+	blood_type(choices) : "Blood_type" : 0 =
+	[
+		0 : "0>Default"
+		1 : "1>Green (gekk)"
+		2 : "2>Robot sparks"
+	]
+	
+	dmgteam(string) : "DmgTeam>teammates"
+	target(string) : "Target>path_corner/killtarget"
+	combattarget(string) : "Combattarget>first point_combat"
+	deathtarget(string) : "Deathtarget>trigger ent at death"
+	gib_type(integer) : "Gib_type>models/objects/gibX" : 0
+	killtarget(string) : "Killtarget>at death rem ent from map"
+	item(string) : "Item>spawn item at death"
+	style(choices) : "Style>skin used" : 0 =
+	[
+		0 : "0>Standard skin"
+		1 : "1>custom1"
+		2 : "2>custom2"
+		3 : "3>custom3"
+	]
+	
+]
+
+@BaseClass base(Monsters) = Monsters1
+[
+	spawnflags(Flags) =
+	[
+		32 : "32>Special" : 0
+	]
+]
+
+@PointClass base(Monsters) model({ "path": ":models/monsters/berserk/tris.md2" }) = monster_berserk : "Berserker"
+[
+	health(integer) : "Health>hit points" : 240
+	gib_health(integer) : "Gib_health>gib level" : -60
+	mass(integer) : "Mass>weight" : 250
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".20"
+]
+@PointClass base(Monsters1) size(-20 -20 -46, 20 20 50) model({ "path": ":models/monsters/wizard/tris.md2" }) = monster_boss2 : "Hornet"
+[
+	health(integer) : "Health>hit points" : 2000
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+]
+@PointClass base(Appearflags, Targetname) size(-32 -32 0, 32 32 90) model({ "path": ":models/monsters/boss3/rider/tris.md2", "frame": 414}) = monster_boss3_stand : "Stationnary Makron" []
+@PointClass base(Monsters) model({ "path": ":models/monsters/brain/tris.md2" }) = monster_brain : "Brains"
+[
+	health(integer) : "Health>hit points" : 300
+	gib_health(integer) : "Gib_health>gib level" : -150
+	mass(integer) : "Mass>weight" : 400
+	flies(string) : "Flies>% chance/flies" : ".10"
+]
+@PointClass base(Monsters1) model({ "path": ":models/monsters/bitch/tris.md2" }) = monster_chick : "Iron Maiden"
+[
+	health(integer) : "Health>hit points" : 175
+	gib_health(integer) : "Gib_health>gib level" : -70
+	mass(integer) : "Mass>weight" : 200
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".40"
+]
+@PointClass base(Appearflags, Targetname) color(255 128 0) size(-32 -32 0, 32 32 48) model({ "path": ":models/monsters/commandr/tris.md2" }) = monster_commander_body : "Tank commander's decapitated body" []
+@PointClass base(Monsters) model({ "path": ":models/monsters/flipper/tris.md2" }) = monster_flipper : "Barracuda shark"
+[
+	health(integer) : "Health>hit points" : 50
+	gib_health(integer) : "Gib_health>gib level" : -30
+	mass(integer) : "Mass>weight" : 100
+	flies(string) : "Flies>% chance/flies" : ".90"
+]
+@PointClass base(Monsters) model({ "path": ":models/monsters/float/tris.md2" }) = monster_floater : "Technician"
+[
+	health(integer) : "Health>hit points" : 200
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+]
+@PointClass base(Monsters) model({ "path": ":models/monsters/flyer/tris.md2" }) = monster_flyer : "Flyer"
+[
+	health(integer) : "Health>hit points" : 50
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+]
+@PointClass base(Monsters) size(-32 -32 -24, 32 32 48) model({ "path": ":models/monsters/gladiatr/tris.md2" }) = monster_gladiator : "Gladiator"
+[
+	health(integer) : "Health>hit points" : 400
+	gib_health(integer) : "Gib_health>gib level" : -175
+	mass(integer) : "Mass>weight" : 400
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".05"
+]
+@PointClass base(Monsters) model({ "path": ":models/monsters/gunner/tris.md2" }) = monster_gunner : "Gunner"
+[
+	health(integer) : "Health>hit points" : 175
+	gib_health(integer) : "Gib_health>gib level" : -70
+	mass(integer) : "Mass>weight" : 200
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".30"
+]
+@PointClass base(Monsters) model({ "path": ":models/monsters/hover/tris.md2" }) = monster_hover : "Icarus"
+[
+	health(integer) : "Health>hit points" : 240
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+]
+@PointClass base(Monsters) model({ "path": ":models/monsters/infantry/tris.md2", "frame": 64}) = monster_infantry : "Infantry"
+[
+	health(integer) : "Health>hit points" : 100
+	gib_health(integer) : "Gib_health>gib level" : -40
+	mass(integer) : "Mass>weight" : 200
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".40"
+]
+@PointClass base(Monsters) size(-80 -80 0, 90 90 140) model({ "path": ":models/monsters/boss3/jorg/tris.md2" }) = monster_jorg : "Jorg"
+[
+	health(integer) : "Health>hit points" : 3000
+	mass(integer) : "Mass>weight" : 1000
+	gib_health(integer) : "Gib_health>gib level" : -900
+	health2(integer) : "Health2>Makron health" : 3000
+	mass2(integer) : "Mass2>Makron weight" : 500
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : "0"
+]
+@PointClass base(Monsters) size(-30 -30 0, 30 30 90) model({ "path": ":models/monsters/boss3/rider/tris.md2", "frame": 414}) = monster_makron : "Makron" []
+@PointClass base(Monsters) model({ "path": ":models/monsters/medic/tris.md2" }) = monster_medic : "Medic"
+[
+	health(integer) : "Health>hit points" : 300
+	gib_health(integer) : "Gib_health>gib level" : -130
+	mass(integer) : "Mass>weight" : 400
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".15"
+]
+@PointClass base(Monsters) size(-32 -32 -24, 32 32 32) model({ "path": ":models/monsters/mutant/tris.md2" }) = monster_mutant : "Mutant"
+[
+	health(integer) : "Health>hit points" : 300
+	gib_health(integer) : "Gib_health>gib level" : -120
+	mass(integer) : "Mass>weight" : 300
+	flies(string) : "Flies>% chance/flies" : ".90"
+]
+@PointClass base(Monsters) model({ "path": ":models/monsters/parasite/tris.md2" }) = monster_parasite : "Parasite"
+[
+	health(integer) : "Health>hit points" : 175
+	gib_health(integer) : "Gib_health>gib level" : -50
+	mass(integer) : "Mass>weight" : 250
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".35"
+]
+@PointClass base(Monsters) model({ "path": ":models/monsters/soldier/tris.md2", "skin": 2 }) = monster_soldier : "Soldier"
+[
+	health(integer) : "Health>hit points" : 30
+	gib_health(integer) : "Gib_health>gib level" : -30
+	mass(integer) : "Mass>weight" : 100
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".40"
+]
+@PointClass base(Monsters) model({ "path": ":models/monsters/soldier/tris.md2", "skin": 0 }) = monster_soldier_light : "Light Soldier"
+[
+	health(integer) : "Health>hit points" : 20
+	gib_health(integer) : "Gib_health>gib level" : -30
+	mass(integer) : "Mass>weight" : 100
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".40"
+]
+@PointClass base(Monsters) model({ "path": ":models/monsters/soldier/tris.md2", "skin": 4 }) = monster_soldier_ss : "SS Soldier"
+[
+	health(integer) : "Health>hit points" : 40
+	gib_health(integer) : "Gib_health>gib level" : -30
+	mass(integer) : "Mass>weight" : 100
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".40"
+]
+@PointClass base(Monsters1) size(-64 -64 0, 64 64 72) model({ "path": ":models/monsters/boss1/tris.md2" }) = monster_supertank : "Super Tank Boss"
+[
+	health(integer) : "Health>hit points" : 1500
+	mass(integer) : "Mass>weight" : 800
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+]
+@PointClass base(Monsters1) size(-32 -32 -16, 32 32 72) model({ "path": ":models/monsters/tank/tris.md2" }) = monster_tank : "Tank"
+[
+	health(integer) : "Health>hit points" : 750
+	gib_health(integer) : "Gib_health>gib level" : -200
+	mass(integer) : "Mass>weight" : 500
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".05"
+]
+@PointClass base(Monsters1) size(-32 -32 -16, 32 32 72) model({ "path": ":models/monsters/tank/tris.md2", "skin": 2 }) = monster_tank_commander : "Tank Commander"
+[
+	health(integer) : "Health>hit points" : 1000
+	gib_health(integer) : "Gib_health>gib level" : -225
+	mass(integer) : "Mass>weight" : 500
+	powerarmor(integer) : "Powerarmor>armor value" : 0
+	flies(string) : "Flies>% chance/flies" : ".05"
+]
+
+//
+// PATH_CORNER
+@PointClass base(Appearflags, Targetname, Pathtarget, Count, Angles) color(128 76 0) size(-8 -8 -8, 8 8 8) = path_corner : "Path marker"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Teleport" : 0
+		2 : "2>No Rotate" : 0
+	]
+	target(string) : "Target>next path_corner"
+	wait(integer) : "Wait>sec until continuing" : 0
+	speed(string) : "Speed>train speed"
+	pitch_speed(string) : "Pitch_speed>deg/sec"
+	yaw_speed(string) : "Yaw_speed>deg/sec"
+	roll_speed(string) : "Roll_speed>deg/sec"
+	roll(string) : "Roll>train roll angle"
+]
+
+//
+// PATH_TRACK
+@PointClass base(Appearflags, Targetname) color(128 9 76) size(-8 -8 -8, 8 8 8) = path_track : "Tracktrain Path"
+[
+	spawnflags(Flags) =
+	[
+		1: "1>Altpath" : 0
+		2: "2>Disabled" : 0
+		4: "4>FireOnce" : 0
+		8: "8>DisableTrain" : 0
+		16 : "16>Abs. Speed" : 0
+	]
+	target(string) : "Target>next1 path_track"
+	target2(string) : "Target2>next2 path_track"
+	pathtarget(string) : "Pathtarget>fire on pass"
+	combattarget(string) : "Combattarget>fire on deadend"
+	speed(integer) : "Speed>new train speed" : 0
+
+]
+
+//
+// POINT_COMBAT
+@PointClass base(Appearflags1, Targetname, Pathtarget, Count) color(128 76 9) size(-8 -8 -8, 8 8 8) = point_combat : "1st point of combat"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Hold" : 0
+		2 : "2>Drive Train" : 0
+	]
+	target(string) : "Target>next point_combat"
+]
+
+//
+// TARGET_ACTOR
+@PointClass base(Appearflags1, Targetname, Count) color(200 50 50) size(-8 -8 -8, 8 8 8) = target_actor : "Actor path"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Jump" : 0
+		2 : "2>Shoot" : 0
+		4 : "4>Attack" : 0
+		16 : "16>Hold" : 0
+		32 : "32>Brutal" : 0
+	]
+	target(string) : "Target>next path target"
+	pathtarget(string) : "Pathtarget>action target"
+	wait(integer) : "Wait>pause time"
+	speed(integer) : "Speed>horiz jump velocity" : 200
+	height(integer) : "Height>vert jump velocity" : 200
+	message(string) : "Message>print when touched"
+]
+
+//
+// TARGET_ANGER
+@PointClass base(Appearflags1, Targetname, Count) color(200 50 50) size(-8 -8 -8, 8 8 8) = target_anger : "Make someone mad"
+[
+	spawnflags(Flags) =
+	[
+		16 : "16>Hold" : 0
+		32 : "32>Brutal" : 0
+	]
+	target(string) : "Target>monster angered"
+	killtarget(string) : "Killtarget>entity to attack"
+	pathtarget(string) : "Pathtarget>move to"
+	speed(integer) : "Speed>horiz jump velocity"
+	height(integer) : "Height>vert jump velocity"
+]
+
+//
+// TARGET_ANIMATION
+@PointClass base(Appearflags, Targetname, Count) color(200 50 50) size(-8 -8 -8, 8 8 8) = target_animation : "Entity animator"
+[
+	sounds(choices) : "Sounds>Actor animation" : 0 =
+	[
+		0 : "0>Specify frames"
+		1 : "1>Jump"
+		2 : "2>Flipoff"
+		3 : "3>Salute"
+		4 : "4>Taunt"
+		5 : "5>Wave"
+		6 : "6>Point"
+	]
+	target(string) : "Target>ent to animate"
+	startframe(integer) : "Startframe>first frame #"
+	framenumbers(integer) : "Framenumbers># add'l frames" : 1
+]
+
+//
+// TARGET_ATTRACTOR
+@PointClass base(Appearflags, Targetname, Pathtarget, Speed0, Count1, Movewith) color(255 255 128) size(-8 -8 -8, 8 8 8) = target_attractor : "Entity magnet"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start on" : 0
+		2 : "2>Player" : 0
+		4 : "4>No gravity" : 0
+		8 : "8>Monster" : 0
+		16 : "16>Sight" : 0
+		32 : "32>Single" : 0
+	]
+	target(string) : "Target>ent to attract"
+	sounds(Choices) : "Sounds>effect to use" : 0 =
+	[
+		0 : "0>None"
+		1 : "1>Medic cable"
+		2 : "2>BFG laser"
+	]
+	distance(integer) : "Distance>max range"
+	accel(string) : "Accel>acceleration"
+	noise(string) : "Noise>sound (path/file.wav)"
+]
+
+//
+// TARGET_BLASTER
+@PointClass base(Appearflags, Targetname, Target, Angles1, Count1, Movewith) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_blaster : "Blaster"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>No Trail" : 0
+		2 : "2>No Effects" : 0
+		4 : "4>Start On" : 0
+		8 : "8>If Visible" : 0
+		128 : "128>Seek Player" : 0
+	]
+	sounds(Choices) : "Sounds>weapon used" : 0 =
+	[
+		0 : "0>Blaster"
+		1 : "1>Railgun"
+		2 : "2>Rocket"
+		3 : "3>BFG"
+		4 : "4>Homing rockets"
+	]
+	dmg(integer) : "Dmg>damage per hit" : 15
+	speed(integer) : "Speed>unit/sec" : 1000
+	wait(string) : "Wait>fire rate/sec" : "0"
+]
+
+//
+// TARGET_BMODEL_SPAWNER
+@PointClass base(Appearflags, Targetname, Count) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_bmodel_spawner : "Clones brush entities"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start On" : 0
+	]
+	source(string) : "Source>bmodel reference"
+	newtargetname(string) : "Newtargetname>clone's name"
+	target(string) : "Target>clone's target"
+	team(string): "Team>clones's team"
+]
+
+//
+// TARGET_CD
+@PointClass base(Appearflags, Targetname, Count) color(128 128 128) size(-8 -8 -8, 8 8 8)=target_cd : "CD track player"
+[
+	sounds(integer) : "Sounds>CD track number" : 2
+	musictrack(string) : "Musictrack>name of Ogg Vorbis track"
+	dmg(integer): "Dmg>times to loop" : 1
+]
+
+//
+// TARGET_CHANGE
+@PointClass base(Appearflags, Targetname) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_change : "Entity changer"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Spawnflags=1" : 0
+		2 : "Spawnflags=2" : 0
+		4 : "Spawnflags=4" : 0
+		8 : "Spawnflags=8" : 0
+		16 : "Spawnflags=16" : 0
+		32 : "Spawnflags=32" : 0
+		64 : "Spawnflags=64" : 0
+		128 : "Spawnflags=128" : 0
+	]
+	target(string) : "Target>targeted ent, new target"
+	newtargetname(string) : "Newtargetname>new name"
+	angles(string) : "Angles>new angles"
+	deathtarget(string) : "Deathtarget>new deathtarget"
+	delay(string) : "Delay>new delay"
+	distance(string) : "Distance>new distance"
+	dmg(string) : "Dmg>new dmg"
+	health(string) : "Health>new health"
+	item(string) : "Item>new item"
+	killtarget(string) : "Killtarget>new killtarget"
+	mass(string) : "Mass>new mass"
+	message(string) : "Message>new message"
+	noise(string) : "Noise>new noise"
+	pathtarget(string) : "Pathtarget>new pathtarget"
+	random(string) : "Random>new random"
+	skinnum(integer) : "Skinnum>skin number"
+	speed(string) : "Speed>new speed"
+	style(string) : "Style>new style"
+	team(string) : "Team>new team"
+	wait(string) : "Wait>new wait"
+]
+
+//
+// TARGET_CHANGELEVEL
+@PointClass base(Appearflags, Targetname) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_changelevel : "Change level"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Clear Inven" : 0
+		2 : "2>Landmark" : 0
+		4 : "4>No Gun" : 0
+	]
+	map(string) : "Map>next level"
+]
+
+//
+// TARGET_CHARACTER
+@Baseclass base(Appearflags, Targetname) = TCharacter
+[
+	team(string) : "Team>target_string"
+	count(integer) : "Count>pos in string (L>R)"
+]
+@SolidClass base(TCharacter, ArghBmodel) color(0 0 255) = target_character : "Use with target_string and func_clock" []
+
+//
+// TARGET_CROSSLEVEL_TRIGGER
+@PointClass base(Appearflags, Targetname, Target, Killtarget, Delay) color(128 128 128) size(-8 -8 -8, 8 8 8) = target_crosslevel_trigger : "Cross-level trigger"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Trigger 1" : 0
+		2 : "2>Trigger 2" : 0
+		4 : "4>Trigger 3" : 0
+		8 : "8>Trigger 4" : 0
+		16 : "16>Trigger 5" : 0
+		32 : "32>Trigger 6" : 0
+		64 : "64>Trigger 7" : 0
+		128 : "128>Trigger 8" : 0
+	]
+	message(string) : "Message>print when activated"
+]
+
+//
+// TARGET_CROSSLEVEL_TARGET
+@PointClass base(Appearflags, Targetname, Target, Killtarget, Delay) color(128 128 128) size(-8 -8 -8, 8 8 8) = target_crosslevel_target : "Cross-level trigger"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Trigger 1" : 0
+		2 : "2>Trigger 2" : 0
+		4 : "4>Trigger 3" : 0
+		8 : "8>Trigger 4" : 0
+		16 : "16>Trigger 5" : 0
+		32 : "32>Trigger 6" : 0
+		64 : "64>Trigger 7" : 0
+		128 : "128>Trigger 8" : 0
+	]
+]
+
+//
+// TARGET_EARTHQUAKE
+@PointClass base(Appearflags, Targetname) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_earthquake : "Level wide earthquake"
+[
+	speed(integer) : "Speed>quake severity" : 200
+	count(integer) : "Count>sec of duration" : 5
+]
+
+//
+// TARGET_EFFECT
+@PointClass base(Appearflags, Targetname, Angles1, Movewith) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_effect : "Calls an effect when used"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Looped On" : 0
+		2 : "2>Looped Off" : 0
+	]
+	style(choices) : "Style>effect type" : 0 =
+	[
+		0 : "0>Gunshot"
+		1 : "1>Blood"
+		2 : "2>Blaster"
+		3 : "3>Railtrail"
+		4 : "4>Shotgun"
+		5 : "5>Explosion1"
+		6 : "6>Explosion2"
+		7 : "7>Rocket explosion"
+		8 : "8>Grenade explosion"
+		9 : "9>Sparks"
+		10 : "10>Splash"
+		11 : "11>Bubbletrail"
+		12 : "12>Screen sparks"
+		13 : "13>Shield sparks"
+		14 : "14>Bullet sparks"
+		15 : "15>Laser sparks"
+		16 : "16>Parasite attack"
+		17 : "17>Rocket expl (water)"
+		18 : "18>Grenade expl (water)"
+		19 : "19>Medic cable attack"
+		20 : "20>BFG explosion"
+		21 : "21>BFG big explosion"
+		22 : "22>BossTport"
+		23 : "23>BFG laser"
+		24 : "24>Grapple cable"
+		25 : "25>Welding sparks"
+		26 : "26>GreenBlood"
+		28 : "28>Plasma explosion"
+		29 : "29>Tunnel sparks"
+		30 : "30>Blaster2"
+		33 : "33>Lightning"
+		34 : "34>Debugtrail"
+		35 : "35>Plain explosion"
+		36 : "36>Flashlight"
+		38 : "38>Heatbeam"
+		39 : "39>Monster heatbeam"
+		40 : "40>Steam"
+		41 : "41>Bubbletrail2"
+		42 : "42>MoreBlood"
+		43 : "43>Heatbeam sparks"
+		44 : "44>Heatbeam steam"
+		45 : "45>Chainfist smoke"
+		46 : "46>Electric sparks"
+		47 : "47>Tracker explosion"
+		48 : "48>Teleport effect"
+		49 : "49>DBall goal"
+		50 : "50>WidowBeamOut"
+		51 : "51>NukeBlast"
+		52 : "52>WidowSplash"
+		53 : "53>Explosion1 Big"
+		54 : "54>Explosion1 NP"
+		55 : "55>Flechette"
+	]
+	target(string) : "Target>ent aimed at"
+	sounds(integer) : "Sounds>splash or pallete index"
+	count(integer) : "Count>pixels/splash (1-255)"
+	wait(integer) : "Wait>steam duration"
+	speed(integer) : "Speed>steam speed"
+]
+
+//
+// TARGET_EXPLOSION
+@PointClass base(Appearflags, Targetname, Delay, Killtarget, Count, Movewith) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_explosion : "Explosion"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Big explosion" : 0
+	]
+	dmg(integer) : "Dmg>damage at origin" : 0
+]
+
+//
+// TARGET_FADE
+@PointClass base(Appearflags1, Targetname, Count) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_fade : "Fade the screen"
+[
+	color(color1) : "color>fade color" : "0 0 0"
+	alpha(string) : "alpha>obscuration (0-1)" : "0"
+	fadein(string) : "fadein>fade-in time (sec)" : "0"
+	holdtime(string) : "holdtime>time to hold fade (sec)" : "0"
+	fadeout(string) : "fadeout>fade-out time (sec)" : "0"
+]
+
+//
+// TARGET_FAILURE
+@PointClass base(Appearflags, Targetname, Count) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_failure : "Mission failure"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>File" : 0
+		2 : "2>No background" : 0
+	]
+	message(string) : "Message>string or path/file.txt"
+	noise(string) : "Noise>sound to play"
+]
+
+//
+// TARGET_LIGHTTRACKER
+@PointClass base(Appearflags1, Targetname, Count, Movewith) color(255 255 0) size(-8 -8 -8, 8 8 8) = target_lighttracker : "Tracker target for lights"
+[ 
+	ltTracker(string) : "Tracker>info"
+	ltMode(choices) : "Light Tacker>Mode" : 0 =
+	[
+		0 : "0>Movewith"
+		1 : "1>Attach"
+	]
+	ltAttachOffset(string) : "Attach Mode>Offset" : "0.0 0.0 0.0"
+	delay(integer) : "Delay>ramp time (sec)"
+]
+
+//
+// TARGET_LIGHTLS
+@PointClass base(Appearflags1, Targetname, Count, Movewith) color(255 255 0) size(-8 -8 -8, 8 8 8) = target_lightLS : "Target for setting light styles"
+[ 
+	ltsetter(string) : "Set Light Style>info"
+	target(string) : "Target Light"
+        style(choices) : "Style>light type" : 0 =
+	[
+		0 : "0>Normal (switchable)"
+		1 : "1>Flicker #1"
+		6 : "6>Flicker #2"
+		2 : "2>Slow Strong Pulse"
+		3 : "3>Candle #1"
+		7 : "7>Candle #2"
+		8 : "8>Candle #3"
+		4 : "4>Fast Strobe"
+		5 : "5>Gentle Pulse #1"
+		9 : "9>Slow Strobe"
+		10 : "10>Fluorescent Flicker"
+		11 : "11>Slow pulse, no black"
+	]
+        nacCustom(string) : "_nacCustom>Custom Light Style a-z"
+	nacCustomEnabled(integer) : "_nacCustomEnabled>Custom Active" : 1
+	nacCustomLoopEnabled(integer) : "_nacCustomLoopEnabled>Loop" : 0
+	nacCustomToggleEnabled(integer) : "_nacCustomToggleEnabled>Ping Pong" : 0
+        nacHz(integer) : "_nacHz>Light Refresh in Hz" : 30
+	delay(integer) : "Delay>ramp time (sec)"
+]
+
+//
+// TARGET_LIGHT
+@PointClass base(Appearflags1, Targetname, Count, Movewith) color(255 255 0) size(-8 -8 -8, 8 8 8) = target_light : "Target for setting light"
+[ 
+	ltsetter(string) : "Set Light>info"
+	target(string) : "Target Light"
+        naclighttype(choices) : "_naclight>Light Type" : 0 =
+	[
+		0 : "0>Sphere"
+		1 : "1>Spot"
+		2 : "2>Directional"
+	]
+ 	nacdirection(string) : "_nacdirection>Light Direction" : "0 0 1"
+	nacumbraangle(string) : "_nacumbraangle>Umbra Angle" : "50.0"
+	nacpenumbraangle(string) : "_nacpenumbraangle>Penumbra Angle" : "40.0"
+	naclightpow(string) : "_naclightpow>Light Power" : "800.0"
+	naclightmax(string) : "_naclightmax>Light Max Distance" : "50.0"
+        color(color1) : "_color>RGB color"
+	delay(integer) : "Delay>ramp time (sec)"
+]
+
+//
+// TRIGGER_GODRAYS
+@SolidClass base(Appearflags, Targetname, Angles1, Count1) color(255 0 0) = trigger_godrays : "grControl field"
+[
+spawnflags(Flags) =
+[
+8 : "8>Start Off" : 0
+]
+gr_enable(integer) : "Godrays>Enable" : 1
+gr_eccentricity(string) : "Godrays>Eccentricity" : 0.75
+gr_intensity(string) : "Godrays>Intensity" : 2
+
+gr_delay(integer) : "Delay>ramp time (sec)" : 1
+godrays(string) : "Godrays>Info" : "Enter Description"
+]
+
+//
+// TRIGGER_SUN
+@SolidClass base(Appearflags, Targetname, Angles1, Count1) color(255 0 0) = trigger_sun : "sunControl field"
+[
+spawnflags(Flags) =
+[
+8 : "8>Start Off" : 0
+]
+sunColor(color1) : "Sun>RGB color" : "1.0 1.0 1.0"
+sunAngle(string) : "Sun>Angle" : 1
+sunAnimate(string) : "Sun>Animate" : 0
+sunAzimuth(string) : "Sun>Azimuth" : 345
+sunElevation(string) : "Sun>Elevation" : 45
+sunBrightness (string) : "Sun>Brightness" : 10
+sunPreset(integer) : "Sun>Preset" : 0
+
+sunDelay(integer) : "Delay>ramp time (sec)" : 1
+sun(string) : "Sun>Info" : "Enter Description"
+]
+
+//
+// TARGET_GODRAYS
+@PointClass base(Appearflags1, Targetname, Count) color(255 255 0) size(-8 -8 -8, 8 8 8) = target_godrays : "grControl field"
+[
+	gr_enable(integer) : "Godrays>Enable" : 1
+	gr_eccentricity(string) : "Godrays>Eccentricity" : 0.75
+	gr_intensity(string) : "Godrays>Intensity" : 2
+		
+	gr_delay(integer) : "Delay>ramp time (sec)" : 1
+	godrays(string) : "Godrays>Info" : "Enter Description"
+]
+
+//
+// TARGET_SUN
+@PointClass base(Appearflags1, Targetname, Count) color(255 255 0) size(-8 -8 -8, 8 8 8) = target_sun : "sunControl field"
+[
+	sunColor(color1) : "Sun>RGB color" : "1.0 1.0 1.0"
+	sunAngle(string) : "Sun>Angle" : 1
+	sunAnimate(string) : "Sun>Animate" : 0
+	sunAzimuth(string) : "Sun>Azimuth" : 345
+	sunElevation(string) : "Sun>Elevation" : 45
+	sunBrightness (string) : "Sun>Brightness" : 10
+	sunPreset(integer) : "Sun>Preset" : 0
+		
+	sunDelay(integer) : "Delay>ramp time (sec)" : 1
+	sun(string) : "Sun>Info" : "Enter Description"
+]
+
+//
+// TARGET_FOG
+@PointClass base(Appearflags, Targetname, Count, Angles1) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_fog : "Fog maker"
+[
+	fog_color(color1) : "Fog_color>RGB color" : "0.5 0.5 0.5"
+	fog_model(choices) : "Fog_model>fog model" : 1 =
+	[
+		0 : "0>Linear"
+		1 : "1>Exp"
+		2 : "2>Exp2"
+	]
+	fog_near(integer) : "Fog_near>start dist(linear)" : 64
+	fog_far(integer) : "Fog_far>0 visibility dist (linear)" : 1024
+	fog_density(integer) : "Fog_density>dens*10K (exp&exp2)" : 20
+	delay(integer) : "Delay>ramp time (sec)"
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		2 : "2>Toggle" : 0
+		4 : "4>Turn Off" : 0
+	]
+	density(integer) : "Density>Density at 180 deg." : 0
+]
+
+//
+// TRIGGER_GRFOG
+@SolidClass base(Appearflags, Targetname, Angles1, Count1) color(255 0 0) = trigger_grfog : "grFog field"
+[
+	spawnflags(Flags) =
+	[
+		8 : "8>Start Off" : 0
+	]
+	grFogColor(color1) : "Fog_BlendTint>RGB color" : "1.0 1.0 1.0"
+	grFogMode(choices) : "Fog_mode>fog mode" : 2 =
+	[
+		0 : "0>Exp No God Rays Tint Only t*t*t"
+		1 : "1>Exp2 No God Rays Tint Only t*t"
+		2 : "2>Exp2 Blend Tint with God Rays t*t"
+		3 : "3>Exp2 =2> + No Phase from God Rays t*t"
+	]
+	grFogTintPower(string) : "Tint>Tint Power before noise 0.0 - 1.0" : 0.17
+	grFogDensityRoot(string) : "Density>Density Root before noise 0.0 - 1.0" : 0.008
+	grFogPushBackDist(string) : "PushBack>Distance 0.0 - 1.0" : 0.01
+		
+	grFogDelay(integer) : "Delay>ramp time (sec)" : 1
+	fog(string) : "Fog>Info" : "Enter Description"
+]
+
+//
+// TARGET_GRFOG
+@PointClass base(Appearflags1, Targetname, Count) color(255 255 0) size(-8 -8 -8, 8 8 8) = target_grfog : "Change env grfog"
+[
+	fog(string) : "Fog>info"
+	grFogOnOff(string) : "Enabled>0 off 1 on"
+	grFogColor(color1) : "Fog_BlendTint>RGB color" : "1.0 1.0 1.0"
+	grFogTintPower(string) : "Tint>Tint Power 0.0 - 1.0"
+	grFogDensityRoot(string) : "Density>Density Root before randomized 0.0 - 1.0"
+	grFogPushBackDist(string) : "PushBack>Distance 0.0 - 1.0"
+	grFogMode(choices) : "Fog_mode>fog mode" : 2 =
+	[
+		0 : "0>Exp No God Rays Tint Only t*t*t"
+		1 : "1>Exp2 No God Rays Tint Only t*t"
+		2 : "2>Exp2 Blend Tint with God Rays t*t"
+		3 : "3>Exp2 =2> + No Phase from God Rays t*t"
+	]
+	grFogDelay(integer) : "Delay>ramp time (sec)"
+]
+
+//
+// TRIGGER_REVERB_PRESET
+@SolidClass base(Appearflags, Targetname, Angles1, Count1) color(255 0 0) = trigger_reverb_preset : "reverb preset field"
+[
+    spawnflags(Flags) =
+    [
+        8 : "8>Start Off" : 0
+    ]
+    reverbpreset(choices) : "Preset> Pre defined reverb settings" : 0 =
+    [
+	0 : "GENERIC"
+	1 : "PADDEDCELL"
+	2 : "ROOM"
+	3 : "BATHROOM"
+	4 : "LIVINGROOM"
+	5 : "STONEROOM"
+	6 : "AUDITORIUM"
+	7 : "CONCERTHALL"
+	8 : "CAVE"
+	9 : "ARENA"
+	10 : "HANGAR"
+	11 : "CARPETEDHALLWAY"
+	12 : "HALLWAY"
+	13 : "STONECORRIDOR"
+	14 : "ALLEY"
+	15 : "FOREST"
+	16 : "CITY"
+	17 : "MOUNTAINS"
+	18 : "QUARRY"
+	19 : "PLAIN"
+	20 : "PARKINGLOT"
+	21 : "SEWERPIPE"
+	22 : "UNDERWATER"
+	23 : "DRUGGED"
+	24 : "DIZZY"
+	25 : "PSYCHOTIC"
+	26 : "CASTLE_SMALLROOM"
+	27 : "CASTLE_SHORTPASSAGE"
+	28 : "CASTLE_MEDIUMROOM"
+	29 : "CASTLE_LARGEROOM"
+	30 : "CASTLE_LONGPASSAGE"
+	31 : "CASTLE_HALL"
+	32 : "CASTLE_CUPBOARD"
+	33 : "CASTLE_COURTYARD"
+	34 : "CASTLE_ALCOVE"
+	35 : "FACTORY_SMALLROOM"
+	36 : "FACTORY_SHORTPASSAGE"
+	37 : "FACTORY_MEDIUMROOM"
+	38 : "FACTORY_LARGEROOM"
+	39 : "FACTORY_LONGPASSAGE"
+	40 : "FACTORY_HALL"
+	41 : "FACTORY_CUPBOARD"
+	42 : "FACTORY_COURTYARD"
+	43 : "FACTORY_ALCOVE"
+	44 : "ICEPALACE_SMALLROOM"
+	45 : "ICEPALACE_SHORTPASSAGE"
+	46 : "ICEPALACE_MEDIUMROOM"
+	47 : "ICEPALACE_LARGEROOM"
+	48 : "ICEPALACE_LONGPASSAGE"
+	49 : "ICEPALACE_HALL"
+	50 : "ICEPALACE_CUPBOARD"
+	51 : "ICEPALACE_COURTYARD"
+	52 : "ICEPALACE_ALCOVE"
+	53 : "SPACESTATION_SMALLROOM"
+	54 : "SPACESTATION_SHORTPASSAGE"
+	55 : "SPACESTATION_MEDIUMROOM"
+	56 : "SPACESTATION_LARGEROOM"
+	57 : "SPACESTATION_LONGPASSAGE"
+	58 : "SPACESTATION_HALL"
+	59 : "SPACESTATION_CUPBOARD"
+	60 : "SPACESTATION_ALCOVE"
+	61 : "WOODEN_SMALLROOM"
+	62 : "WOODEN_SHORTPASSAGE"
+	63 : "WOODEN_MEDIUMROOM"
+	64 : "WOODEN_LARGEROOM"
+	65 : "WOODEN_LONGPASSAGE"
+	66 : "WOODEN_HALL"
+	67 : "WOODEN_CUPBOARD"
+	68 : "WOODEN_COURTYARD"
+	69 : "WOODEN_ALCOVE"
+	70 : "SPORT_EMPTYSTADIUM"
+	71 : "SPORT_SQUASHCOURT"
+	72 : "SPORT_SMALLSWIMMINGPOOL"
+	73 : "SPORT_LARGESWIMMINGPOOL"
+	74 : "SPORT_GYMNASIUM"
+	75 : "SPORT_FULLSTADIUM"
+	76 : "SPORT_STADIUMTANNOY"
+	77 : "PREFAB_WORKSHOP"
+	78 : "PREFAB_SCHOOLROOM"
+	79 : "PREFAB_PRACTISEROOM"
+	80 : "PREFAB_OUTHOUSE"
+	81 : "PREFAB_CARAVAN"
+	82 : "DOME_TOMB"
+	83 : "PIPE_SMALL"
+	84 : "DOME_SAINTPAULS"
+	85 : "PIPE_LONGTHIN"
+	86 : "PIPE_LARGE"
+	87 : "PIPE_RESONANT"
+	88 : "OUTDOORS_BACKYARD"
+	89 : "OUTDOORS_ROLLINGPLAINS"
+	90 : "OUTDOORS_DEEPCANYON"
+	91 : "OUTDOORS_CREEK"
+	92 : "OUTDOORS_VALLEY"
+	93 : "MOOD_HEAVEN"
+	94 : "MOOD_HELL"
+	95 : "MOOD_MEMORY"
+	96 : "DRIVING_COMMENTATOR"
+	97 : "DRIVING_PITGARAGE"
+	98 : "DRIVING_INCAR_RACER"
+	99 : "DRIVING_INCAR_SPORTS"
+	100 : "DRIVING_INCAR_LUXURY"
+	101 : "DRIVING_FULLGRANDSTAND"
+	102 : "DRIVING_EMPTYGRANDSTAND"
+	103 : "DRIVING_TUNNEL"
+	104 : "CITY_STREETS"
+	105 : "CITY_SUBWAY"
+	106 : "CITY_MUSEUM"
+	107 : "CITY_LIBRARY"
+	108 : "CITY_UNDERPASS"
+	109 : "CITY_ABANDONED"
+	110 : "DUSTYROOM"
+	111 : "CHAPEL"
+	112 : "SMALLWATERROOM"
+    ]
+    TriggerDelay(integer) : "Delay>ramp time (sec)" : 1
+    reverb(string) : "Reverb>Info" : "Enter Description"
+]
+
+//
+// TRIGGER_REVERB
+@SolidClass base(Appearflags, Targetname, Angles1, Count1) color(255 0 0) = trigger_reverb : "reverb field"
+[
+    spawnflags(Flags) =
+    [
+        8 : "8>Start Off" : 0
+    ]
+    flDensity(string) : "AL_REVERB_DENSITY" : "1"
+    flDiffusion(string) : "AL_REVERB_DIFFUSION" : ".84"
+    flGain(string) : "AL_REVERB_GAIN"  : ".3162"
+    flGainHF(string) : "AL_REVERB_GAINHF"  : ".5623"
+    flDecayTime(string) : "AL_REVERB_DECAY_TIME"  : "4.62"
+    flDecayHFRatio(string) : "AL_REVERB_DECAY_HFRATIO"  : ".64"
+    flReflectionsGain(string) : "AL_REVERB_REFLECTIONS_GAIN"  : ".4467"
+    flReflectionsDelay(string) : "AL_REVERB_REFLECTIONS_DELAY"  : ".032"
+    flLateReverbGain(string) : "AL_REVERB_LATE_REVERB_GAIN"  : ".7943"
+    flLateReverbDelay(string) : "AL_REVERB_LATE_REVERB_DELAY"  : ".049"
+    flAirAbsorptionGainHF(string) : "AL_REVERB_AIR_ABSORPTION_GAINHF"  : ".9943"
+    flRoomRolloffFactor(string) : "AL_REVERB_ROOM_ROLLOFF_FACTOR"  : "0"
+    iDecayHFLimit(integer) : "AL_REVERB_DECAY_HFLIMIT" : 1 
+    TriggerDelay(integer) : "Delay>ramp time (sec)" : 1
+    reverb(string) : "Reverb>Info" : "Enter Description"
+]
+
+//
+// TARGET_FOUNTAIN
+@PointClass base(Appearflags, Targetname, TremorEffects) color(0 0 192) size(-8 -8 -8, 8 8 8) = target_fountain : "Model fountain"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		2 : "2>Splash" : 0
+		4 : "4>Bounce" : 0
+		8 : "8>Fire Once" : 0
+		16 : "16>Start Fade" : 0
+	]
+	attenuation(string) : "Attenuation>Rebound"
+	bleft(string) : "Bleft>Min extent" : "0 0 0"
+	count(integer) : "Count>Number/frame" : 1
+	fadeout(string) : "Fadeout>Leaf life"
+	gravity(string) : "Gravity>sv_gravity ratio"
+	mass(integer) : "Mass>Weight of model" : 0
+	mass2(integer) : "Mass2>Num. splash particles" : 8
+	random(integer) : "Random>Count variance"
+	sounds(integer) : "Sounds>color index" : 183
+	speed(string) : "Speed>Falling speed" : "300"
+	tright(string) : "Tright>Max extent" : "0 0 0"
+	pitch_speed(string) : "Pitch_Speed>deg/sec"
+	yaw_speed(string) : "Yaw_Speed>deg/sec"
+	roll_speed(string) : "Roll_Speed>deg/sec"
+	usermodel(string) : "Usermodel>model name"
+]
+//
+// TARGET_GOAL
+@PointClass base(Appearflags1, Targetname) color(255 0 255) size(-8 -8 -8, 8 8 8) = target_goal : "Counts a goal completed" []
+
+//
+// TARGET_HELP
+@PointClass base(Appearflags1, Targetname, Count) color(255 0 255) size(-8 -8 -8, 8 8 8) = target_help : "Computer help message"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Main Objective" : 0
+	]
+	message(string) : "Message>update computer"
+]
+
+//
+// TARGET_LASER
+@PointClass base(Appearflags, Targetname, Angles1, Count1, Movewith) color(0 128 204) size(-8 -8 -8, 8 8 8) = target_laser : "Laser"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		2 : "2>Red" : 0
+		4 : "4>Green" : 0
+		8 : "8>Blue" : 0
+		16 : "16>Yellow" : 0
+		32 : "32>Orange" : 0
+		64 : "64>Fat" : 0
+		128 : "128>Seek Player" : 0
+	]
+	target(string) : "Target>ent aimed at"
+	dmg(integer) : "Dmg>damage/.1 sec" : 100
+	style(choices) : "Style>behavior" : 0 =
+	[
+		0 : "0>Normal dmg"
+		1 : "1>Dmg=0"
+		2 : "2>1 + monster ignore"
+		3 : "3>2 + no spark"
+	]
+	mass(integer) : "Mass>beam width" : 0
+	wait(string) : "Wait>sec between pulses" : "0"
+	delay(string) : "Delay>pulse duration (sec)" : "0"
+]
+ 
+//
+// TARGET_LIGHTRAMP
+@PointClass base(Appearflags1, Targetname, Target, Count) color(0 128 204) size(-8 -8 -8, 8 8 8) = target_lightramp : "Light ramp"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Toggle" : 0
+		2 : "2>Custom" : 0
+		4 : "4>Loop" : 0
+	]
+	speed(integer) : "Speed>sec to cover range"
+	message(string) : "Message>range or sequence(a-z)"
+]
+
+//
+// TARGET_LIGHTSWITCH
+// Toggles lights on/off
+@PointClass base(Appearflags, Targetname, Count) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_lightswitch : "Light switch"
+[
+	message(string) : "Message>min light level (a-m)" : "a"
+]
+
+//
+// TARGET_LOCATOR
+// Entity moving thingamajig
+@PointClass base(Appearflags, Targetname) color(0 0 255) size(-8 -8 -8, 8 8 8) = target_locator : "Entity mover"
+[
+	target(string) : "Target>entity randomized"
+	pathtarget(string) : "Pathtarget>1st path_corner"
+]
+
+//
+// TARGET_LOCK
+@PointClass base(Appearflags, Targetname) color(0 0 255) size(-8 -8 -8, 8 8 8) = target_lock : "Combination lock"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Crosslevel" : 0
+		2 : "2>HUD" : 0
+	]
+	target(string) : "Target>success target"
+	pathtarget(string) : "Pathtarget>failure target"
+	team(string) : "Team>target_lock_digit"
+	key_message(string) : "Key_message>initial digits shown"
+	message(string) : "Message>failure message"
+]
+
+//
+// TARGET_LOCK_CODE
+@PointClass base(Appearflags, Targetname) color(0 0 255) size(-8 -8 -8, 8 8 8) = target_lock_code : "Reveals lock combination"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Crosslevel" : 0
+	]
+	target(string) : "Target>target_lock"
+]
+
+//
+// TARGET_LOCK_CLUE
+@PointClass base(Appearflags, Targetname) color(0 0 255) size(-8 -8 -8, 8 8 8) = target_lock_clue : "Use with target lock"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Crosslevel" : 0
+	]
+	target(string) : "Target>target_lock"
+	team(string) : "Team>target_characters"
+]
+
+//
+// TARGET_LOCK_DIGIT
+@Baseclass base(Appearflags, Targetname) = LockDigit
+[
+	team(string) : "Team>target_lock"
+	count(integer) : "Count>pos in string (R>L)"
+]
+@SolidClass base(LockDigit, ArghBmodel) color(0 0 255) = target_lock_digit : "Use with target_lock" []
+
+//
+// TARGET_MONITOR
+@PointClass base(Appearflags, Targetname, Movewith, Angles, Count) color(0 255 0) size(-8 -8 -8, 8 8 8) = target_monitor : "Temporary viewpoint"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Chase Cam" : 0
+		2 : "2>Eyeball" : 0
+		4 : "4>Camera Effect" : 0
+		8 : "8>Letter Box" : 0
+	]
+	wait(string) : "Wait>sec at monitor" : "3"
+	target(string) : "Target>ent to view"
+	noise(string) : "Noise>sound to play"
+	distance(integer) : "Distance>chasecam distance" : 128
+	height(integer) : "Height>chasecam height" : 16
+]
+
+//
+// TARGET_MONSTERBATTLE
+@PointClass base(Appearflags1, Targetname, Count) color(200 50 50) size(-8 -8 -8, 8 8 8) = target_monsterbattle : "Make monster teams fight"
+[
+	target(string) : "Target>monster angered"
+	killtarget(string) : "Killtarget>entity to attack"
+]
+
+//
+// TARGET_MOVEWITH
+@PointClass base(Appearflags, Targetname, Count) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_movewith : "Adds/removes movewith association"
+[
+	target(string) : "Target>movewith child"
+	pathtarget(string): "Pathtarget>movewith parent"
+	spawnflags(Flags) =
+	[
+		1 : "1>Detach" : 0
+	]
+]
+
+//
+// TARGET_PLAYBACK
+@PointClass base(Appearflags, Targetname, Movewith, Count) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_playback : "Music player"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Loop" : 0
+		2 : "2>Toggle" : 0
+		4 : "4>Music" : 0
+		8 : "8>Start On" : 0
+		16 : "16>3D" : 0
+		128 : "128>Sample" : 0
+	]
+	distance(integer) : "Distance>full volume range (3D only)"
+	noise(string) : "Sound (path/file.wav)"
+	volume(integer) : "Volume>loudness (0.0-1.0)" : 1
+	target(string) : "Target>Ent to fire at end of sound"
+	fadein(string) : "fadein>fade-in time (sec)" : "0"
+	fadeout(string) : "fadeout>fade-out time (sec)" : "0"
+]
+
+//
+// TARGET_PRECIPITATION
+@PointClass base(Appearflags, Targetname, Angles1, TremorEffects) color(0 0 192) size(-8 -8 -8, 8 8 8) = target_precipitation : "Rain/snow"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start On" : 0
+		2 : "2>Splash" : 0
+		4 : "4>Bounce" : 0
+		8 : "8>Fire Once" : 0
+		16 : "16>Start Fade" : 0
+	]
+	style(choices) : "Style>effect" : 0 =
+	[
+		0 : "0>Single raindrop"
+		1 : "1>10 raindrops"
+		2 : "2>10 snowflakes"
+		3 : "3>Leaves"
+		4 : "4>User-defined"
+	]
+	attenuation(string) : "Attenuation>Rebound"
+	bleft(string) : "Bleft>Min extent" : "0 0 0"
+	count(integer) : "Count>Number/frame" : 1
+	fadeout(string) : "Fadeout>Leaf life"
+	gravity(string) : "Gravity>sv_gravity ratio"
+	mass(integer) : "Mass>Weight of model" : 0
+	mass2(integer) : "Mass2>Num. splash particles" : 8
+	random(integer) : "Random>Count variance"
+	sounds(integer) : "Sounds>color index" : 183
+	speed(string) : "Speed>Falling speed" : "300"
+	tright(string) : "Tright>Max extent" : "0 0 0"
+	pitch_speed(string) : "Pitch_Speed>deg/sec"
+	yaw_speed(string) : "Yaw_Speed>deg/sec"
+	roll_speed(string) : "Roll_Speed>deg/sec"
+	usermodel(string) : "Usermodel>model name"
+]
+
+//
+// TARGET_ROCKS
+@PointClass base(Appearflags, Targetname, Angles1, Count) color(128 128 128) size(-8 -8 -8, 8 8 8) = target_rocks : "Rock slide"
+[
+	mass(integer)  : "Mass>debris amount" : 500
+	speed(integer) : "Speed>units/sec" : 400
+	style(integer) : "Style>model id" : 0
+]
+
+//
+// TARGET_ROTATION
+@PointClass base(Appearflags, Targetname, Count) color(192 192 192) size(-8 -8 -8, 8 8 8) = target_rotation : "Target cycler"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>No Loop" : 0
+		2 : "2>Random" : 0
+	]
+	target(string) : "Target>ent(s) to trigger"
+]
+
+//
+// TARGET_SECRET
+@PointClass base(Appearflags1, Targetname) color(255 0 255) size(-8 -8 -8, 8 8 8) = target_secret : "Counts a secret found"
+[
+	message(string) : "Message>print when activated"
+]
+
+//
+// TARGET_COMMAND
+@PointClass base(Appearflags, Targetname, TremorEffects) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_command : "Sends a command to the console which gets executed imediately, unless it requires a restart of the server."
+[
+	message(string) : "Command to send"
+]
+
+//
+// TARGET_SET_EFFECT
+@PointClass base(Appearflags, Targetname, TremorEffects) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_set_effect : "Add eyecandy to other entities"
+[
+	target(string) : "Target>ent to enhance"
+]
+
+// TARGET_SKILL
+@PointClass base(Appearflags, Targetname, Count) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_skill : "Change skill level"
+[
+	style(Choices) : "Style" : 1 =
+	[
+		0 : "0>Easy"
+		1 : "1>Normal"
+		2 : "2>Hard"
+		3 : "3>Nightmare"
+	]
+]
+
+//
+// TARGET_SKY
+@PointClass base(Appearflags1, Targetname, Count) color(255 255 0) size(-8 -8 -8, 8 8 8) = target_sky : "Change env sky"
+[
+	sky(string) : "Sky>env map name"
+]
+
+//
+// TARGET_SPAWNER
+@PointClass base(Appearflags, Targetname, Angles1, Speed0, Count, Movewith) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_spawner : "Monster/Item spawner"
+[
+	target(string) : "Target>monster/item spawned"
+]
+
+//
+// TARGET_SPEAKER
+@PointClass base(Appearflags, Targetname, Count, Movewith) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_speaker : "Sound player"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Looped On" : 0
+		2 : "2>Looped Off" : 0
+		4 : "4>Reliable" : 0
+	]
+	noise(string) : "Sound (path/file.wav)"
+	attenuation(Choices) : "Attenuation" : 1 =
+	[
+		-2 : "-2>Activator only"
+		-1 : "-1>None, send to whole level"
+		1 : "1>Normal fighting sounds"
+		2 : "2>Idle sound level"
+		3 : "3>Ambient sound level"
+	]
+	volume(integer) : "Volume>loudness (0.0-1.0)" : 1
+]
+
+//
+// TARGET_SPLASH
+@PointClass base(Appearflags, Targetname, Angles1, Movewith) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_splash : "Creates a splash when used"
+[
+	sounds(choices) : "Sounds>splash type" : 2 =
+	[
+		1 : "1>Sparks w/sound"
+		2 : "2>Blue water (silent)"
+		3 : "3>Brown water (silent)"
+		4 : "4>Slime (silent)"
+		5 : "5>Lava (silent)"
+		6 : "6>Blood (silent)"
+	]
+	count(integer) : "Count>pixels/splash (1-255)"
+	dmg(integer) : "Dmg>damage at origin"
+]
+
+//
+// TARGET_STRING
+@PointClass base(Appearflags, Targetname) color(0 0 255) size(-8 -8 -8, 8 8 8) = target_string : "String"
+[
+	team(string) : "Team>target_characters"
+]
+
+//
+// TARGET_TEMP_ENTITY
+@PointClass base(Appearflags, Targetname, Count, Movewith) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_temp_entity : "Temp entity"
+[
+	style(choices) : "Style>effect type" : 22 =
+	[
+		20 : "20>Green Fireball"
+		21 : "21>Particles #1"
+		22 : "22>Particles #2"
+	]
+]
+
+//
+// TARGET_TEXT
+@PointClass base(Appearflags, Targetname) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_text : "General text display"
+[
+	message(string) : "Message>string or path/file.txt"
+	spawnflags(Flags) =
+	[
+		1 : "1>File" : 0
+		2 : "2>No background" : 0
+	]
+]
+
+// TRIGGER* BASE DEFINITIONS
+@BaseClass base(Appearflags, Targetname, Target, Killtarget, Delay) = Trigger
+[
+	message(string) : "Message>print when activated"
+	sounds(choices) : "Sounds" : 0 = 
+	[
+		0 : "0>Beep beep"
+		1 : "1>Secret"
+		2 : "2>F1 prompt"
+		3 : "3>Silent"
+	]
+]
+
+//
+// TRIGGER_ALWAYS
+@PointClass base(Appearflags, Target, Delay, Killtarget) color(128 128 128) size(-8 -8 -8, 8 8 8) = trigger_always : "Always triggers" []
+
+//
+// TRIGGER_BBOX
+@PointClass base(Appearflags, Trigger, Pathtarget1, Count1, Health, Movewith) color(128 128 128) size(-8 -8 -8, 8 8 8) = trigger_bbox : "Multiple fire trigger"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Monster" : 0
+		2 : "2>Not Player" : 0
+		4 : "4>Triggered" : 0
+		16: "16>Turret" : 0
+	]
+	wait(integer) : "Wait>sec between triggers" : 0
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-16 -16 -16"
+	tright(string) : "Tright>Max b-box coords XYZ" : "16 16 16"
+]
+
+//
+// TRIGGER_COUNTER
+@PointClass base(Appearflags, Targetname, Target, Killtarget, Delay) color(128 128 128) size(-8 -8 -8, 8 8 8) = trigger_counter : "Counter"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>No Message" : 0
+	]
+	count(integer) : "Count>triggers before firing" : 2
+	message(string) : "Message>print when activated"
+]
+
+//
+// TRIGGER_DISGUISE
+@SolidClass base(Appearflags1, Targetname, Count) color(128 128 128) = trigger_disguise : "Notarget"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Toggle" : 0
+		2 : "2>Start On" : 0
+		4 : "4>Remove" : 0
+	]
+]
+
+//
+// TRIGGER_ELEVATOR
+@PointClass base(Appearflags, Targetname, Target) color(76 25 153) = trigger_elevator : "Elevator trigger" []
+
+
+//
+// TRIGGER_GRAVITY
+@SolidClass base(Appearflags) color(128 128 128) = trigger_gravity : "Change gravity"
+[
+	gravity(integer) : "Gravity>normal=1.0" : 1
+]
+
+//
+// TRIGGER_HURT
+@SolidClass base(Appearflags, Targetname, Movewith) color(128 128 128) = trigger_hurt : "Hurts on touch"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Start Off" : 0
+		2 : "2>Toggle" : 0
+		4 : "4>Silent" : 0
+		8 : "8>No Protect" : 0
+		16 : "16>Slow Hurt" : 0
+		32 : "32>No Gib" : 0
+		64 : "64>Environment" : 0
+	]
+	dmg(integer) : "Dmg>damage/.1 sec" : 5
+]
+
+//
+// TRIGGER_INSIDE
+// Fires its targets when the bounding box of the pathtarget entity is completely inside the trigger field
+@SolidClass base(Trigger, Movewith) color(128 128 128) = trigger_inside : "Multiple fire trigger"
+[
+	spawnflags(Flags) =
+	[
+		4 : "4>Triggered" : 0
+	]
+	wait(integer) : "Wait>sec between triggers" : 0
+	pathtarget(string) : "Pathtarget>name of activator"
+]
+
+//
+// TRIGGER_KEY
+@PointClass base(Appearflags, Targetname, Target, Killtarget, Delay) color(128 128 128) size(-8 -8 -8, 8 8 8) = trigger_key : "Triggers with key"
+[
+	spawnflags(Flags) =
+	[
+		1: "1>Multi-use" : 0
+		2: "2>Keep key" : 0
+		4: "4>Silent" : 0
+	]
+	item(string) : "Item>needed to activate" : "key_blue_key"
+	message(string) : "Message>print when successful"
+	key_message(string) : "Key_message>print when no item"
+]
+
+//
+// TRIGGER_LOOK
+@SolidClass base(Trigger, Pathtarget1, Count1, Movewith) color(128 128 128) = trigger_look : "Viewpoint trigger"
+[
+	spawnflags(Flags) =
+	[
+		4 : "4>Triggered" : 0
+		8: "8>+Use required" : 0
+		16: "16>Turret" : 0
+		32: "32>Look Target" : 0
+	]
+	wait(integer) : "Wait>sec between triggers" : 0
+	bleft(string) : "Bleft>Min b-box coords XYZ" : "-16 -16 -16"
+	tright(string) : "Tright>Max b-box coords XYZ" : "16 16 16"
+]
+
+//
+// TRIGGER_RELAY
+@PointClass base(Trigger, Pathtarget1, Count) color(128 128 128) size(-8 -8 -8, 8 8 8) = trigger_relay : "Relay trigger"
+[
+	dmgteam(string) : "DmgTeam>monster dmgteam"
+]
+
+//
+// TRIGGER_ONCE
+@SolidClass base(Trigger, Pathtarget1, Movewith) color(128 128 128) = trigger_once : "Single fire trigger"
+[
+	spawnflags(Flags) =
+	[
+		4 : "4>Triggered" : 0
+		16: "16>Turret" : 0
+	]
+]
+
+//
+// TRIGGER_MASS
+// Fires its targets when the mass of the activator is equal to or greater than the mass value for the trigger.
+@SolidClass base(Trigger, Pathtarget1, Movewith) = trigger_mass : "Weight limit trigger"
+[
+	spawnflags(Flags) =
+	[
+		4 : "4>Triggered" : 0
+	]
+	wait(integer) : "Wait>sec between triggers" : 0
+	mass(integer) : "Mass>min mass to activate" : 100
+]
+
+//
+// TRIGGER_MONSTERJUMP
+@SolidClass base(Appearflags, Targetname, Movewith) color(128 128 128) = trigger_monsterjump : "Makes monsters jump"
+[
+	speed(integer) : "Speed>horizontal velocity" : 200
+	height(integer) : "Height>vertical velocity" : 200
+]
+
+//
+// TRIGGER_MULTIPLE
+@SolidClass base(Trigger, Pathtarget1, Movewith) color(128 128 128) = trigger_multiple : "Multiple fire trigger"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Monster" : 0
+		2 : "2>Not Player" : 0
+		4 : "4>Triggered" : 0
+		16: "16>Turret" : 0
+	]
+	wait(integer) : "Wait>sec between triggers" : 0
+]
+
+//
+// TREMOR_TRIGGER_MULTIPLE
+@SolidClass base(trigger_multiple, Count1, Movewith) = tremor_trigger_multiple : "Multiple fire toggling trigger" []
+
+//
+// TRIGGER_PUSH
+@SolidClass base(Appearflags, Targetname, Angles1, Movewith) color(128 128 128) = trigger_push : "Push trigger"
+[
+	spawnflags(Flags) =
+	[
+		1 : "1>Push Once" : 0
+		2 : "2>Custom Sound" : 0
+	]
+	speed(integer) : "Speed>velocity 10*units/sec" : 100
+	noise(string) : "Noise>custom sound"
+]
+
+//
+// TRIGGER_SCALES
+// Used in conjunction with target_characters to display the mass of entity or 
+// entities touching the trigger (including stacked entities)
+@SolidClass base(Appearflags, Targetname) = trigger_scales : "Scales"
+[
+	spawnflags(Flags) =
+	[
+		4 : "1>Triggered" : 0
+	]
+	team(string) : "Team>target characters"
+]
+
+//
+// TRIGGER_SPEAKER
+//@PointClass base(Targetname) color(128 128 128) = trigger_speaker : "Speaker field"
+//[
+//	spawnflags(Flags) =
+//	[
+//		1: "1>Start on" : 0
+//	]
+//	noise(string) : "Noise>Sound (path/file.wav)"
+//	bleft(string) : "Bleft>Min b-box coords XYZ" : "-16 -16 -16"
+//	tright(string) : "Tright>Max b-box coords XYZ" : "16 16 16"
+//]
+
+//
+// TRIGGER_TELEPORTER
+@SolidClass base(Appearflags, Targetname, Movewith) color(128 128 128) = trigger_teleporter : "Teleporter field"
+[
+	spawnflags(Flags) =
+	[
+		2 : "2>Triggered" : 0
+		8 : "8>Monster" : 0
+		16 : "16>No effects" : 0
+		32 : "32>Custom Sound" : 0
+		64 : "64>Landmark" : 0
+	]
+	noise(string) : "Noise>sound (path/file.wav)"
+	target(string) : "Target>destination"
+]
+
+//
+// TRIGGER_TRANSITION
+@SolidClass base(Appearflags, Targetname) color(255 0 0) = trigger_transition : "Level changer" []
+
+//
+// TURRET_BREACH
+@Baseclass base(Appearflags, Targetname, Movewith) = TurretBreach
+[
+	spawnflags(Flags) =
+	[
+		1: "1>Player" : 0
+		2: "2>Trig Spawn" : 0
+		4: "4>Track" : 0
+		8: "8>Good Guy" : 0
+		16: "16>Start Off" : 0
+	]
+	target(string) : "Target>info_notnull (rocket origin)"
+	combattarget(string) : "Target>info_notnull (second rocket origin)"
+	style(integer) : "Set to 1 to make barrels of double-barreled turret alternate"
+	sounds(Choices) : "Sounds>weapon used" : 2 =
+	[
+		-1 : "-1>No fire"
+		1 : "1>Railgun"
+		2 : "2>Rocket"
+		3 : "3>BFG"
+		4 : "4>Homing rockets"
+		5 : "5>Machinegun"
+		6 : "6>Hyperblaster"
+		7 : "7>Grenade"
+	]
+	wait(string) : "Wait>rate of fire (sec)" : "2"
+	distance(integer) : "Distance>grenade velocity"
+	speed(integer) : "Speed>rotation deg/sec" : 50
+	minpitch(integer) : "Minpitch>min pitch angle" : -30
+	maxpitch(integer) : "Maxpitch>max pitch angle" : 30
+	minyaw(integer) : "Minyaw>min yaw angle" : 0
+	maxyaw(integer) : "Maxyaw>max yaw angle" : 360
+	team(string) : "Team>turret_base"
+	dmg(integer) : "Dmg>damage when blocked" : 10
+	health(integer) : "Health>sustainable damage" : 0
+	gib_health(integer) : "Gib_health>gib level" : 0
+	deathtarget(string) : "Deathtarget>trigger at death"
+	destroytarget(string) : "Destroytarget>trigger at gib"
+	followtarget(string) : "Followtarget>fallback view target"
+	viewmessage(string) : "Viewmessage>monitor message"
+	count(integer) : "Count>Camera number" : 0
+]
+@SolidClass base(TurretBreach, ArghBmodel) color(128 255 128) = turret_breach : "Turret breach" []
+
+//
+// TURRET_BASE
+@Baseclass base (Appearflags, Targetname, Movewith) = TurretBase
+[
+	spawnflags(Flags) =
+	[
+		2: "2>Trig Spawn" : 0
+	]
+	team(string) : "Team>turret_breach"
+]
+@SolidClass base(TurretBase, ArghBmodel) color(128 255 128) = turret_base : "Turret base" []
+
+//
+// TURRET_DRIVER
+@PointClass base(Appearflags1, Angles) color(128 255 128) size(-16 -16 -24, 16 16 32) = turret_driver : "Turret driver" 
+[
+	spawnflags(Flags) =
+	[
+		1: "1>Remote" : 0
+	]
+	target(string) : "Target>turret_breach"
+]
+
+//
+// VIEWTHING
+@PointClass base(Appearflags) color(0 128 204) size(-8 -8 -8, 8 8 8) = viewthing : "Just for debugging level - dont use" []
+
+//
+// WEAPON_*
+@BaseClass base(Appearflags, TeamDM, Targetname, Target, Killtarget, Delay, Message, Angles, Movewith) color(76 76 255) size(-16 -16 -16, 16 16 16) = Weapons
+[
+	spawnflags(Flags) =
+	[
+		4 : "4>No Spin" : 0
+		8 : "8>No Drop" : 0
+		16: "16>Shootable" : 0
+	]
+	health(integer) : "Health>sustainable damage" : 20
+]
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_shotg/tris.md2" }) = weapon_shotgun : "Shotgun" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_shotg2/tris.md2" }) = weapon_supershotgun : "Super shotgun" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_machn/tris.md2" }) = weapon_machinegun : "Machinegun" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_chain/tris.md2" }) = weapon_chaingun : "Chain gun" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_launch/tris.md2" }) = weapon_grenadelauncher : "Grenade launcher" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_rocket/tris.md2" }) = weapon_rocketlauncher : "Rocket launcher" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_perf/g_perf.md2" }) = weapon_perforator : "Perforator" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_rail/tris.md2" }) = weapon_railgun : "Rail gun" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_bfg/tris.md2" }) = weapon_bfg : "Big Freakin Gun!" []
+
+//===================================================
+// Knightmare added- 3Team CTF stuff
+//===================================================
+
+//
+// MISC_CTF_BANNER
+@PointClass base(Appearflags, Targetname, Angles) color(255 128 0) size(-4 -4 0, 4 4 246) = misc_ctf_banner : "Flowing CTF banner, color defaults to Red team"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Blue team" : 0
+		2 : "Green team (3TCTF only)" : 0
+	]
+	
+]
+
+//
+// MISC_CTF_SMALL_BANNER
+@PointClass base(Appearflags, Targetname, Angles) color(255 128 0) size(-4 -4 0, 4 4 122) = misc_ctf_small_banner : "Small flowing CTF banner, color defaults to Red team"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Blue team" : 0
+		2 : "Green team (3TCTF only)" : 0
+	]
+	
+]
