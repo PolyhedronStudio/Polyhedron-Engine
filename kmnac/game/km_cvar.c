@@ -230,15 +230,15 @@ void InitLithiumVars (void)
 	sk_blaster_speed = gi.cvar("sk_blaster_speed", "1000", 0);
 	sk_blaster_color = gi.cvar("sk_blaster_color", "1", 0);
 
-	sk_shotgun_damage = gi.cvar("sk_shotgun_damage", "4", 0);
+	sk_shotgun_damage = gi.cvar("sk_shotgun_damage", "6", 0);
 	sk_shotgun_count = gi.cvar("sk_shotgun_count", "12", 0);
-	sk_shotgun_hspread = gi.cvar("sk_shotgun_hspread", "500", 0);
-	sk_shotgun_vspread = gi.cvar("sk_shotgun_vspread", "500", 0);
+	sk_shotgun_hspread = gi.cvar("sk_shotgun_hspread", "135", 0);
+	sk_shotgun_vspread = gi.cvar("sk_shotgun_vspread", "135", 0);
 
-	sk_sshotgun_damage = gi.cvar("sk_sshotgun_damage", "6", 0);
-	sk_sshotgun_count = gi.cvar("sk_sshotgun_count", "20", 0);
-	sk_sshotgun_hspread = gi.cvar("sk_sshotgun_hspread", "1000", 0);
-	sk_sshotgun_vspread = gi.cvar("sk_sshotgun_vspread", "500", 0);
+	sk_sshotgun_damage = gi.cvar("sk_sshotgun_damage", "8", 0);
+	sk_sshotgun_count = gi.cvar("sk_sshotgun_count", "24", 0);
+	sk_sshotgun_hspread = gi.cvar("sk_sshotgun_hspread", "1200", 0);
+	sk_sshotgun_vspread = gi.cvar("sk_sshotgun_vspread", "1200", 0);
 
 	sk_machinegun_damage = gi.cvar("sk_machinegun_damage", "8", 0);
 	sk_machinegun_hspread = gi.cvar("sk_machinegun_hspread", "300", 0);

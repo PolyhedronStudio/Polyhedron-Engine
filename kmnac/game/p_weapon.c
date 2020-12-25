@@ -1217,10 +1217,10 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 	VectorScale (forward, -1, ent->client->kick_origin);
 	ent->client->kick_angles[0] = 0;
 
-	VectorSet(offset, 16, 0, ent->viewheight-7);
+	VectorSet(offset, 48, 0, ent->viewheight-7);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	fire_nail(ent, start, forward, damage, 9000, 0, false, 0);
+	fire_nail(ent, start, forward, damage, 1000, 0, false, 0);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1687,7 +1687,7 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 	vec3_t		offset;
 	vec3_t		v;
 	int			damage = sk_sshotgun_damage->value;
-	int			kick = 12;
+	int			kick = 48;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
