@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/files.h"
 #include "dynamic.h"
-#include <AL/alc.h>
+#include "AL/alc.h"
 
 #define QALC_IMP \
     QAL(LPALCCREATECONTEXT, alcCreateContext); \

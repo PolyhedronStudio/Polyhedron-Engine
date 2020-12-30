@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "sound.h"
-#include "AL/efx-presets.h"
+#include "qal/AL/efx-presets.h"
 
 #if USE_FIXED_LIBAL
 #include "qal/fixed.h"
