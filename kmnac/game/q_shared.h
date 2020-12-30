@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 	
 // q_shared.h -- included first by ALL program modules
 
+#define C_ONLY 1
+
 #ifdef _MSC_VER	// _WIN32
 // unknown pragmas are SUPPOSED to be ignored, but....
 #pragma warning(disable : 4244)     // MIPS
@@ -83,9 +85,9 @@ typedef enum {false, true}	qboolean;
 	typedef int64_t qint64;
 	typedef unsigned int64_t uint64;
 #elif defined(__linux__) // Linux
-#	include <_G_config.h>
-	typedef _G_int64_t qint64;
-	typedef unsigned _G_int64_t uint64;
+#	include <inttypes.h>
+	typedef int64_t qint64;
+	typedef uint64_t uint64;
 #elif defined(__BEOS__)	// Be
 #	include <inttypes.h>
 	typedef int64_t qint64;
@@ -308,11 +310,12 @@ extern vec4_t vec4_origin;
 // microsoft's fabs seems to be ungodly slow...
 //float Q_fabs (float f);
 //#define	fabs(f) Q_fabs(f)
-#if !defined C_ONLY && !defined __linux__ && !defined __sgi
-extern int Q_ftol( float f );
-#else
-#define Q_ftol( f ) ( long ) (f)
-#endif
+//#if !defined C_ONLY && !defined __linux__ && !defined __sgi
+//extern int Q_ftol( float f );
+//#else
+//#define Q_ftol(f) ((long)(f))
+int Q_ftol(float f);
+//#endif
 
 #define DotProduct(x,y)			(x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
 #define VectorSubtract(a,b,c)	(c[0]=a[0]-b[0],c[1]=a[1]-b[1],c[2]=a[2]-b[2])

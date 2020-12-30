@@ -62,6 +62,8 @@ void SP_target_sun(edict_t* self);
 // gi.WriteByte (fog_blue); // 0-255
 // gi.unicast (player_ent, true);
 
+#define DISABLE_FOG 1 
+
 #ifdef DISABLE_FOG
 
 void Fog_Init (void)	{}
