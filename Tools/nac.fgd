@@ -1595,8 +1595,8 @@
 @PointClass base(ModelTurret) color(128 255 128) = model_turret : "MD2 Turret breach" []
 
 // ALIAS ENTITY
-// ENV_TORCH_1 - Medieval Torch on Hanger 
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-8 -8 -32, 8 8 32) model({ "path": ":models/env/torch1/tris.md2", "skin": 0 }) = env_torch_1 : "Medieval Torch on Hanger"
+// PROP_TORCH_1 - Medieval Torch on Hanger 
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-8 -8 -32, 8 8 32) model({ "path": ":models/props/torch1/torch_1.md2", "skin": 0 }) = prop_torch_1 : "Medieval Torch on Hanger"
 [
 	spawnflags(Flags) =
 	[
@@ -1604,7 +1604,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/torch1/tris.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/torch1/torch_1.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -1623,8 +1623,8 @@
 
 
 // ALIAS ENTITY
-// ENV_TORCH_1a - Medieval Torch w/out Hanger
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 -32, 4 4 32) model({ "path": ":models/env/torch1a/tris.md2", "skin": 0 }) = env_torch_1a : "Medieval Torch w/out Hanger"
+// PROP_TORCH_1a - Medieval Torch w/out Hanger
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 -32, 4 4 32) model({ "path": ":models/props/torch1/torch_1a.md2", "skin": 0 }) = prop_torch_1a : "Medieval Torch w/out Hanger"
 [
 	spawnflags(Flags) =
 	[
@@ -1632,7 +1632,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/torch2/tris.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/torch1/torch_1a.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -1866,8 +1866,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_1 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/env/candles/candle_1.md2", "skin": 0 }) = env_candle_1 : "Candle"
+// PROP_CANDLE_1 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/props/candles/candle_1.md2", "skin": 0 }) = prop_candle_1 : "Candle - Skinnum 1 for unlit / non emissive variation"
 [
 	spawnflags(Flags) =
 	[
@@ -1875,7 +1875,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_1.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_1.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -1893,8 +1893,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_3 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-12 -6 0, 10 8 4) model({ "path": ":models/env/candles/candle_3.md2", "skin": 0 }) = env_candle_3 : "Candle"
+// PROP_CANDLE_3 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-6 -8 0, 6 8 4) model({ "path": ":models/props/candles/candle_3.md2", "skin": 0 }) = prop_candle_3 : "Candle - Skinnum 1 for unlit / non emissive variation"
 [
 	spawnflags(Flags) =
 	[
@@ -1902,7 +1902,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_3.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_3.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -1920,8 +1920,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_5 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/env/candles/candle_5.md2", "skin": 0 }) = env_candle_5 : "Candle"
+// PROP_CANDLE_5 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/props/candles/candle_5.md2", "skin": 0 }) = prop_candle_5 : "Candle - Skinnum 1 for unlit / non emissive variation"
 [
 	spawnflags(Flags) =
 	[
@@ -1929,7 +1929,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_5.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_5.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -1947,8 +1947,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_6 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/env/candles/candle_6.md2", "skin": 0 }) = env_candle_6 : "Candle"
+// PROP_CANDLE_6 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/props/candles/candle_6.md2", "skin": 0 }) = prop_candle_6 : "Candle - Skinnum 1 for unlit / non emissive variation"
 [
 	spawnflags(Flags) =
 	[
@@ -1956,7 +1956,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_6.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_6.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -1974,8 +1974,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_7 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 24) model({ "path": ":models/env/candles/candle_7.md2", "skin": 0 }) = env_candle_7 : "Candle"
+// PROP_CANDLE_7 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 24) model({ "path": ":models/props/candles/candle_7.md2", "skin": 0 }) = prop_candle_7 : "Candle - Skinnum 1 for unlit / non emissive variation"
 [
 	spawnflags(Flags) =
 	[
@@ -1983,7 +1983,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_7.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_7.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -2001,8 +2001,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_8 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/env/candles/candle_8.md2", "skin": 0 }) = env_candle_8 : "Candle"
+// PROP_CANDLE_8 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/props/candles/candle_8.md2", "skin": 0 }) = prop_candle_8 : "Candle - Skinnum 1 for unlit / non emissive variation"
 [
 	spawnflags(Flags) =
 	[
@@ -2010,7 +2010,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_8.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_8.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -2028,8 +2028,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_9 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-2 -2 0, 2 2 14) model({ "path": ":models/env/candles/candle_9.md2", "skin": 0 }) = env_candle_9 : "Candle"
+// PROP_CANDLE_9 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-2 -2 0, 2 2 14) model({ "path": ":models/props/candles/candle_9.md2", "skin": 0 }) = prop_candle_9 : "Candle - Skinnum 1 for unlit / non emissive variation"
 [
 	spawnflags(Flags) =
 	[
@@ -2037,7 +2037,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_9.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_9.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -2055,8 +2055,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_10 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/env/candles/candle_10.md2", "skin": 0 }) = env_candle_10 : "Candle"
+// PROP_CANDLE_10 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/props/candles/candle_10.md2", "skin": 0 }) = prop_candle_10 : "Candle - Skinnum 1 for unlit / non emissive variation"
 [
 	spawnflags(Flags) =
 	[
@@ -2064,7 +2064,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_10.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_10.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -2082,8 +2082,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_11 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 28) model({ "path": ":models/env/candles/candle_11.md2", "skin": 0 }) = env_candle_11 : "Candle"
+// PROP_CANDLE_11 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 28) model({ "path": ":models/props/candles/candle_11.md2", "skin": 0 }) = prop_candle_11 : "Candle - Skinnum 1 for unlit / non emissive variation"
 [
 	spawnflags(Flags) =
 	[
@@ -2091,7 +2091,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_11.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_11.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -2109,8 +2109,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_12 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/env/candles/candle_12.md2", "skin": 0 }) = env_candle_12 : "Candle"
+// PROP_CANDLE_12 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/props/candles/candle_12.md2", "skin": 0 }) = prop_candle_12 : "Candle - Skinnum 1 for unlit / non emissive variation"
 [
 	spawnflags(Flags) =
 	[
@@ -2118,7 +2118,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_12.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_12.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -2136,8 +2136,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_CLUSTER_1 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-8 -8 0, 8 8 20) model({ "path": ":models/env/candles/candle_merge_1.md2", "skin": 0 }) = env_candle_cluster_1 : "Candle Cluster"
+// PROP_CANDLE_CLUSTER_1 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-8 -8 0, 8 8 20) model({ "path": ":models/props/candles/candle_merge_1.md2", "skin": 0 }) = prop_candle_cluster_1 : "Candle Cluster"
 [
 	spawnflags(Flags) =
 	[
@@ -2145,7 +2145,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_merge_1.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_merge_1.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -2163,8 +2163,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_CLUSTER_2 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-8 -8 0, 4 8 16) model({ "path": ":models/env/candles/candle_merge_2.md2", "skin": 0 }) = env_candle_cluster_2 : "Candle Cluster"
+// PROP_CANDLE_CLUSTER_2 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-8 -8 0, 4 8 16) model({ "path": ":models/props/candles/candle_merge_2.md2", "skin": 0 }) = prop_candle_cluster_2 : "Candle Cluster"
 [
 	spawnflags(Flags) =
 	[
@@ -2172,7 +2172,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_merge_2.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_merge_2.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -2190,8 +2190,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_CLUSTER_3 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -8 0, 8 4 16) model({ "path": ":models/env/candles/candle_merge_3.md2", "skin": 0 }) = env_candle_cluster_3 : "Candle Cluster"
+// PROP_CANDLE_CLUSTER_3 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -8 0, 8 4 16) model({ "path": ":models/props/candles/candle_merge_3.md2", "skin": 0 }) = prop_candle_cluster_3 : "Candle Cluster"
 [
 	spawnflags(Flags) =
 	[
@@ -2199,7 +2199,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_merge_3.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_merge_3.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
@@ -2217,8 +2217,8 @@
 ]
 
 // ALIAS ENTITY
-// ENV_CANDLE_CLUSTER_4 - Candle
-@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -8 0, 8 4 16) model({ "path": ":models/env/candles/candle_merge_4.md2", "skin": 0 }) = env_candle_cluster_4 : "Candle Cluster"
+// PROP_CANDLE_CLUSTER_4 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Movewith, TremorEffects) color(0 255 0) size(-4 -8 0, 8 4 16) model({ "path": ":models/props/candles/candle_merge_4.md2", "skin": 0 }) = prop_candle_cluster_4 : "Candle Cluster"
 [
 	spawnflags(Flags) =
 	[
@@ -2226,7 +2226,7 @@
 		8 : "8>Player" : 0
 		16 : "16>No Model" : 0
 	]
-	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/env/candles/candle_merge_4.md3"
+	usermodel(string) : "Usermodel>model (path/file.md2)" : "models/props/candles/candle_merge_4.md3"
 	skinnum(integer) : "Skinnum>Skin number" : 0
 	solidstate(choices) : "Solidstate>clipping" : 1 =
 	[
