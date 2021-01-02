@@ -484,9 +484,58 @@ sample_spherical_lights(
 		onb = construct_ONB_frisvad(L);
 		position_light = light_center_radius.xyz + (onb[0] * diskpt.x + onb[2] * diskpt.y - L * diskpt.z) * sphere_radius;
 	}
+	if (light_parms2.w == 3.0)
+	{
+		// Sphere
+		if (bounce == 0)
+		{
+			vec3 c = light_center_radius.xyz - p;
+			float dist = length(c);
+			float rdist = 1.0 / dist;
+			vec3 L = c * rdist;
+
+			float irradiance = 2 * (1 - sqrt(max(0, 1 - square(light_parms2.z * rdist))));
+			irradiance = min(irradiance, max_solid_angle);
+			irradiance *= float(global_ubo.num_sphere_lights); // 1 / pdf
+			light_color = light_parms.w * light_color * irradiance;
+			onb = construct_ONB_frisvad(L);
+			position_light = light_center_radius.xyz + (onb[0] * diskpt.x + onb[2] * diskpt.y - L * diskpt.z) * sphere_radius;
+		}
+		else
+		{
+			position_light = light_center_radius.xyz;
+		}
+	}
 	if (light_parms2.w == 1.0)
 	{
-			// Spot
+		// Spot
+		vec3 lightVector = (light_center_radius.xyz - p);
+		float  lightDistance = length(lightVector);
+		vec3 lightDirection = normalize(lightVector);
+		float rdist = 1.0 / lightDistance;
+		float irradiance = 2 * (1 - sqrt(max(0, 1 - square(light_parms2.z * rdist))));
+		if (bounce == 0)
+			irradiance = min(irradiance, max_solid_angle);
+		else
+			irradiance = min(irradiance, M_PI * 2.0);
+
+		irradiance *= float(global_ubo.num_sphere_lights); // 1 / pdf
+
+		vec3 spotDirection = -normalize(light_parms.xyz);
+		float  attenuation = SpotAttenuation(spotDirection, -lightDirection, light_parms2.x * (M_PI / 180.0), light_parms2.y * (M_PI / 180.0));
+		float  falloff = LightFalloff(lightDistance);
+		float  window = LightWindowing(lightDistance, light_parms2.z);
+
+		light_color = light_parms.w * light_color * irradiance * attenuation * falloff * window;
+
+		onb = construct_ONB_frisvad(lightDirection);
+		position_light = light_center_radius.xyz + (onb[0] * diskpt.x + onb[2] * diskpt.y - lightDirection * diskpt.z) * sphere_radius;
+	}
+	if (light_parms2.w == 4.0)
+	{
+		// Spot
+		if (bounce == 0)
+		{
 			vec3 lightVector = (light_center_radius.xyz - p);
 			float  lightDistance = length(lightVector);
 			vec3 lightDirection = normalize(lightVector);
@@ -503,11 +552,16 @@ sample_spherical_lights(
 			float  attenuation = SpotAttenuation(spotDirection, -lightDirection, light_parms2.x * (M_PI / 180.0), light_parms2.y * (M_PI / 180.0));
 			float  falloff = LightFalloff(lightDistance);
 			float  window = LightWindowing(lightDistance, light_parms2.z);
-					
+
 			light_color = light_parms.w * light_color * irradiance * attenuation * falloff * window;
-			
+
 			onb = construct_ONB_frisvad(lightDirection);
-			position_light = light_center_radius.xyz +(onb[0] * diskpt.x + onb[2] * diskpt.y - lightDirection * diskpt.z) * sphere_radius;
+			position_light = light_center_radius.xyz + (onb[0] * diskpt.x + onb[2] * diskpt.y - lightDirection * diskpt.z) * sphere_radius;
+		}
+		else
+		{
+			position_light = light_center_radius.xyz;
+		}
 	}
 	if (light_parms2.w == 2.0)
 	{
@@ -518,10 +572,28 @@ sample_spherical_lights(
 		light_color = light_parms.w * light_color * nol;
 		onb = construct_ONB_frisvad(lightDirection);
 		position_light = light_center_radius.xyz + (onb[0] * diskpt.x + onb[2] * diskpt.y - lightDirection * diskpt.z) * sphere_radius;
-    }
+	}
+	if (light_parms2.w == 5.0)
+	{
+		// Directional
+		if (bounce == 0)
+		{
+			vec3 lightDirection = -normalize(light_parms.xyz);
+			float  nol = dot(n, lightDirection);
+			if (nol < 0.0) nol = dot(-n, lightDirection);
+			light_color = light_parms.w * light_color * nol;
+			onb = construct_ONB_frisvad(lightDirection);
+			position_light = light_center_radius.xyz + (onb[0] * diskpt.x + onb[2] * diskpt.y - lightDirection * diskpt.z) * sphere_radius;
+		}
+		else
+		{
+			position_light = light_center_radius.xyz;
+		}
+	}
+
 	
-	//if(dot(position_light - p, gn) <= 0)
-	//	light_color = vec3(0);
+	if(dot(position_light - p, gn) <= 0)
+		light_color = vec3(0);
 }
 
 
