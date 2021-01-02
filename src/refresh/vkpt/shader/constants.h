@@ -43,7 +43,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define NUM_LIGHT_STATS_BUFFERS 3
 
-#define PRIMARY_RAY_T_MAX 10000
+#define PRIMARY_RAY_T_MAX 100000
 
 #define MAX_CAMERAS 8
 

@@ -65,6 +65,8 @@ cvar_t *sky_amb_phase_g;
 static uint32_t physical_sky_planet_albedo_map = 0;
 static uint32_t physical_sky_planet_normal_map = 0;
 
+static uint32_t rgb_noise256_map = 0;
+
 static time_t latched_local_time;
 
 static int current_preset = 0;
@@ -337,6 +339,7 @@ vkpt_physical_sky_destroy()
 VkResult 
 vkpt_physical_sky_beginRegistration() 
 {
+	rgb_noise256_map = 0;
     physical_sky_planet_albedo_map = 0;
     physical_sky_planet_normal_map = 0;
     return VK_SUCCESS;
@@ -367,6 +370,20 @@ vkpt_physical_sky_endRegistration(const char *name)
 			physical_sky_planet_normal_map = normal_map - r_images;
 		}
 	}
+
+
+
+
+
+	Q_concat(pathname, sizeof(pathname), "env/", name, "/rgb_noise256", ".tga", NULL);
+	image_t const* noise_map = IMG_Find(pathname, IT_SKIN, IF_SRGB);
+	if (noise_map->pix_data == NULL)
+		noise_map = IMG_Find("env/rgb_noise256.tga", IT_SKIN, IF_SRGB);
+
+	if (noise_map != R_NOTEXTURE) {
+		rgb_noise256_map = noise_map - r_images;
+	}
+
 	return VK_SUCCESS;
 }
 
@@ -863,8 +880,14 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
 
     // planet
 
-    ubo->planet_albedo_map = physical_sky_planet_albedo_map;
+	ubo->planet_albedo_map = physical_sky_planet_albedo_map;
     ubo->planet_normal_map = physical_sky_planet_normal_map;
+
+
+
+
+
+	ubo->rgb_noise256_map = rgb_noise256_map;
 
 	ubo->sun_visible = light->visible;
 

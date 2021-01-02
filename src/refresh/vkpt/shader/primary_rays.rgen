@@ -108,8 +108,8 @@ void generate_rng_seed(ivec2 ipos, bool is_odd_checkerboard)
 	imageStore(IMG_ASVGF_RNG_SEED_A, ipos, uvec4(rng_seed));
 }
 
-void
-main()
+
+void main()
 {
 	ivec2 ipos = ivec2(rt_LaunchID.xy);
 	if(rt_LaunchID.z != 0)
@@ -164,9 +164,15 @@ main()
 	// store the sky color and motion vectors. Doesn't apply to gradient samples because their rays intentionally miss.
 	if((!found_intersection(ray_payload_brdf) || (is_sky(ray_payload_brdf) && (global_ubo.pt_show_sky == 0))))
 	{
+	    // Override no hit with SDF 
+
 		vec3 env = env_map(ray.direction, false);	
 		env *= global_ubo.pt_env_scale;
 		
+		SampleCloudsSDF(env, ray);
+		
+		// End Override SDF
+
 		vec4 transparent = alpha_blend(unpackHalf4x16(ray_payload_brdf.transparency), vec4(env, 1));
 
 		if(is_readback_pixel)
@@ -181,7 +187,7 @@ main()
 		float prev_distance;
 		projection_view_to_screen(prev_view_dir, prev_screen_pos, prev_distance, true);
 		vec2 motion = prev_screen_pos - inUV;
-
+		
 		// Store an empty surface into the G-buffer
 		imageStore(IMG_PT_NORMAL_A, ipos, uvec4(0));
 		imageStore(IMG_PT_GEO_NORMAL_A, ipos, uvec4(0));
@@ -191,11 +197,11 @@ main()
 		imageStore(IMG_PT_SHADING_POSITION, ipos, vec4(global_ubo.cam_pos.xyz + direction * PRIMARY_RAY_T_MAX, 0));
 		imageStore(IMG_PT_MOTION, ipos, vec4(motion, 0, 0));
 		imageStore(IMG_PT_VISBUF_A, ipos, vec4(-1, -1, uintBitsToFloat(uvec2(~0u))));
-		imageStore(IMG_PT_ALBEDO, ipos, vec4(0));
+		imageStore(IMG_PT_ALBEDO, ipos, vec4(1,0,0,1));
 		imageStore(IMG_PT_TRANSPARENT, ipos, transparent);
 		return;
 	}
-
+	
 	Triangle triangle;
 	vec3 bary;
 

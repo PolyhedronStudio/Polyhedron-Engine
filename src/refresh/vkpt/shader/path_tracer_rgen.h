@@ -36,6 +36,9 @@ uniform rt_accelerationStructure topLevelAS;
 #include "brdf.glsl"
 #include "water.glsl"
 
+
+
+
 #define DESATURATE_ENVIRONMENT_MAP 1
 
 #define RNG_PRIMARY_OFF_X   0
@@ -77,30 +80,32 @@ struct Ray {
 	float t_min, t_max;
 };
 
+void SampleCloudsSDFVisibility(out float alpha, Ray ray);
+
 vec3
 env_map(vec3 direction, bool remove_sun)
 {
 	direction = (global_ubo.environment_rotation_matrix * vec4(direction, 0)).xyz;
 
-    vec3 envmap = vec3(0);
-    if (global_ubo.environment_type == ENVIRONMENT_DYNAMIC)
-    {
-	    envmap = textureLod(TEX_PHYSICAL_SKY, direction.xzy, 0).rgb;
+	vec3 envmap = vec3(0);
+	if (global_ubo.environment_type == ENVIRONMENT_DYNAMIC)
+	{
+		envmap = textureLod(TEX_PHYSICAL_SKY, direction.xzy, 0).rgb;
 
-	    if(remove_sun)
-	    {
+		if (remove_sun)
+		{
 			// roughly remove the sun from the env map
 			envmap = min(envmap, vec3((1 - dot(direction, global_ubo.sun_direction_envmap)) * 200));
 		}
 	}
-    else if (global_ubo.environment_type == ENVIRONMENT_STATIC)
-    {
-        envmap = textureLod(TEX_ENVMAP, direction.xzy, 0).rgb;
+	else if (global_ubo.environment_type == ENVIRONMENT_STATIC)
+	{
+		envmap = textureLod(TEX_ENVMAP, direction.xzy, 0).rgb;
 #if DESATURATE_ENVIRONMENT_MAP
-        float avg = (envmap.x + envmap.y + envmap.z) / 3.0;
-        envmap = mix(envmap, avg.xxx, 0.1) * 0.5;
+		float avg = (envmap.x + envmap.y + envmap.z) / 3.0;
+		envmap = mix(envmap, avg.xxx, 0.1) * 0.5;
 #endif
-    }
+	}
 	return envmap;
 }
 
@@ -112,12 +117,13 @@ ivec2 get_image_position()
 	ivec2 pos;
 
 	bool is_even_checkerboard = push_constants.gpu_index == 0 || push_constants.gpu_index < 0 && rt_LaunchID.z == 0;
-	if(global_ubo.pt_swap_checkerboard != 0)
+	if (global_ubo.pt_swap_checkerboard != 0)
 		is_even_checkerboard = !is_even_checkerboard;
 
 	if (is_even_checkerboard) {
 		pos.x = int(rt_LaunchID.x * 2) + int(rt_LaunchID.y & 1);
-	} else {
+	}
+	else {
 		pos.x = int(rt_LaunchID.x * 2 + 1) - int(rt_LaunchID.y & 1);
 	}
 
@@ -160,8 +166,8 @@ get_hit_triangle(RayPayload rp)
 	uint prim = get_primitive(rp);
 
 	return is_dynamic_instance(rp)
-		?  get_instanced_triangle(prim)
-		:  get_bsp_triangle(prim);
+		? get_instanced_triangle(prim)
+		: get_bsp_triangle(prim);
 }
 
 vec3
@@ -169,7 +175,7 @@ get_hit_barycentric(RayPayload rp)
 {
 	vec3 bary;
 	bary.yz = rp.barycentric;
-	bary.x  = 1.0 - bary.y - bary.z;
+	bary.x = 1.0 - bary.y - bary.z;
 	return bary;
 }
 
@@ -236,7 +242,7 @@ is_camera(uint material)
 vec3
 correct_albedo(vec3 albedo)
 {
-    return max(vec3(0), pow(albedo, vec3(ALBEDO_TRANSFORM_POWER)) * ALBEDO_TRANSFORM_SCALE + vec3(ALBEDO_TRANSFORM_BIAS));
+	return max(vec3(0), pow(albedo, vec3(ALBEDO_TRANSFORM_POWER)) * ALBEDO_TRANSFORM_SCALE + vec3(ALBEDO_TRANSFORM_BIAS));
 }
 
 vec3
@@ -249,16 +255,16 @@ void
 trace_ray(Ray ray, bool cull_back_faces, int instance_mask)
 {
 	uint rayFlags = 0;
-	if(cull_back_faces)
-		rayFlags |=gl_RayFlagsCullBackFacingTrianglesEXT;
-	
-	ray_payload_brdf.transparency = uvec2(0);
-    ray_payload_brdf.hit_distance = 0;
-    ray_payload_brdf.max_transparent_distance = 0;
+	if (cull_back_faces)
+		rayFlags |= gl_RayFlagsCullBackFacingTrianglesEXT;
 
-	rt_traceRay( topLevelAS, rayFlags, instance_mask,
-			SBT_RCHIT_OPAQUE /*sbtRecordOffset*/, 0 /*sbtRecordStride*/, SBT_RMISS_PATH_TRACER /*missIndex*/,
-			ray.origin, ray.t_min, ray.direction, ray.t_max, RT_PAYLOAD_BRDF);
+	ray_payload_brdf.transparency = uvec2(0);
+	ray_payload_brdf.hit_distance = 0;
+	ray_payload_brdf.max_transparent_distance = 0;
+
+	rt_traceRay(topLevelAS, rayFlags, instance_mask,
+		SBT_RCHIT_OPAQUE /*sbtRecordOffset*/, 0 /*sbtRecordStride*/, SBT_RMISS_PATH_TRACER /*missIndex*/,
+		ray.origin, ray.t_min, ray.direction, ray.t_max, RT_PAYLOAD_BRDF);
 }
 
 Ray get_shadow_ray(vec3 p1, vec3 p2, float tmin)
@@ -283,9 +289,9 @@ trace_shadow_ray(Ray ray, int cull_mask)
 
 	ray_payload_shadow.missed = 0;
 
-	rt_traceRay( topLevelAS, rayFlags, cull_mask,
-			SBT_RCHIT_EMPTY /*sbtRecordOffset*/, 0 /*sbtRecordStride*/, SBT_RMISS_SHADOW /*missIndex*/,
-			ray.origin, ray.t_min, ray.direction, ray.t_max, RT_PAYLOAD_SHADOW);
+	rt_traceRay(topLevelAS, rayFlags, cull_mask,
+		SBT_RCHIT_EMPTY /*sbtRecordOffset*/, 0 /*sbtRecordStride*/, SBT_RMISS_SHADOW /*missIndex*/,
+		ray.origin, ray.t_min, ray.direction, ray.t_max, RT_PAYLOAD_SHADOW);
 
 	return float(ray_payload_shadow.missed);
 }
@@ -297,19 +303,19 @@ trace_caustic_ray(Ray ray, int surface_medium)
 
 	rt_traceRay(topLevelAS, gl_RayFlagsCullBackFacingTrianglesEXT, AS_FLAG_TRANSPARENT,
 		SBT_RCHIT_OPAQUE, 0, SBT_RMISS_PATH_TRACER,
-			ray.origin, ray.t_min, ray.direction, ray.t_max, RT_PAYLOAD_BRDF);
+		ray.origin, ray.t_min, ray.direction, ray.t_max, RT_PAYLOAD_BRDF);
 
 	float extinction_distance = ray.t_max - ray.t_min;
 	vec3 throughput = vec3(1);
 
-	if(found_intersection(ray_payload_brdf))
+	if (found_intersection(ray_payload_brdf))
 	{
 		Triangle triangle = get_hit_triangle(ray_payload_brdf);
-		
+
 		vec3 geo_normal = triangle.normals[0];
 		bool is_vertical = abs(geo_normal.z) < 0.1;
 
-		if((is_water(triangle.material_id) || is_slime(triangle.material_id)) && !is_vertical)
+		if ((is_water(triangle.material_id) || is_slime(triangle.material_id)) && !is_vertical)
 		{
 			vec3 position = ray.origin + ray.direction * ray_payload_brdf.hit_distance;
 			vec3 w = get_water_normal(triangle.material_id, geo_normal, triangle.tangent, position, true);
@@ -318,13 +324,13 @@ trace_caustic_ray(Ray ray, int surface_medium)
 			caustic = mix(1, caustic, clamp(ray_payload_brdf.hit_distance * 0.02, 0, 1));
 			throughput = vec3(caustic);
 
-			if(surface_medium != MEDIUM_NONE)
+			if (surface_medium != MEDIUM_NONE)
 			{
 				extinction_distance = ray_payload_brdf.hit_distance;
 			}
 			else
 			{
-				if(is_water(triangle.material_id))
+				if (is_water(triangle.material_id))
 					surface_medium = MEDIUM_WATER;
 				else
 					surface_medium = MEDIUM_SLIME;
@@ -332,16 +338,16 @@ trace_caustic_ray(Ray ray, int surface_medium)
 				extinction_distance = max(0, ray.t_max - ray_payload_brdf.hit_distance);
 			}
 		}
-		else if(is_glass(triangle.material_id) || is_water(triangle.material_id) && is_vertical)
+		else if (is_glass(triangle.material_id) || is_water(triangle.material_id) && is_vertical)
 		{
 			vec3 bary = get_hit_barycentric(ray_payload_brdf);
 			vec2 tex_coord = triangle.tex_coords * bary;
 
 			MaterialInfo minfo = get_material_info(triangle.material_id);
 
-	    	vec3 albedo = global_textureLod(minfo.diffuse_texture, tex_coord, 2).rgb;
+			vec3 albedo = global_textureLod(minfo.diffuse_texture, tex_coord, 2).rgb;
 
-			if((triangle.material_id & MATERIAL_FLAG_CORRECT_ALBEDO) != 0)
+			if ((triangle.material_id & MATERIAL_FLAG_CORRECT_ALBEDO) != 0)
 				albedo = correct_albedo(albedo);
 
 			throughput = albedo;
@@ -354,10 +360,10 @@ trace_caustic_ray(Ray ray, int surface_medium)
 
 vec3 rgbToNormal(vec3 rgb, out float len)
 {
-    vec3 n = vec3(rgb.xy * 2 - 1, rgb.z);
+	vec3 n = vec3(rgb.xy * 2 - 1, rgb.z);
 
-    len = length(n);
-    return len > 0 ? n / len : vec3(0);
+	len = length(n);
+	return len > 0 ? n / len : vec3(0);
 }
 
 
@@ -365,29 +371,29 @@ float
 AdjustRoughnessToksvig(float roughness, float normalMapLen, float mip_level)
 {
 	float effect = global_ubo.pt_toksvig * clamp(mip_level, 0, 1);
-    float shininess = RoughnessSquareToSpecPower(roughness) * effect; // not squaring the roughness here - looks better this way
-    float ft = normalMapLen / mix(shininess, 1.0f, normalMapLen);
-    ft = max(ft, 0.01f);
-    return SpecPowerToRoughnessSquare(ft * shininess / effect);
+	float shininess = RoughnessSquareToSpecPower(roughness) * effect; // not squaring the roughness here - looks better this way
+	float ft = normalMapLen / mix(shininess, 1.0f, normalMapLen);
+	ft = max(ft, 0.01f);
+	return SpecPowerToRoughnessSquare(ft * shininess / effect);
 }
 
 void
 get_direct_illumination(
-	vec3 position, 
-	vec3 normal, 
-	vec3 geo_normal, 
-	uint cluster_idx, 
+	vec3 position,
+	vec3 normal,
+	vec3 geo_normal,
+	uint cluster_idx,
 	uint material_id,
-	int shadow_cull_mask, 
-	vec3 view_direction, 
-	float roughness, 
-	int surface_medium, 
-	bool enable_caustics, 
-	float surface_specular, 
-	float direct_specular_weight, 
+	int shadow_cull_mask,
+	vec3 view_direction,
+	float roughness,
+	int surface_medium,
+	bool enable_caustics,
+	float surface_specular,
+	float direct_specular_weight,
 	bool enable_polygonal,
 	bool enable_spherical,
-	bool is_gradient, 
+	bool is_gradient,
 	int bounce,
 	out vec3 diffuse,
 	out vec3 specular)
@@ -415,19 +421,19 @@ get_direct_illumination(
 		get_rng(RNG_NEE_TRI_Y(bounce)));
 
 	/* polygonal light illumination */
-	if(enable_polygonal) 
+	if (enable_polygonal)
 	{
 		sample_polygonal_lights(
 			cluster_idx,
-			position, 
-			normal, 
-			geo_normal, 
-			view_direction, 
-			phong_exp, 
+			position,
+			normal,
+			geo_normal,
+			view_direction,
+			phong_exp,
 			phong_scale,
-			phong_weight, 
-			is_gradient, 
-			pos_on_light_polygonal, 
+			phong_weight,
+			is_gradient,
+			pos_on_light_polygonal,
 			contrib_polygonal,
 			polygonal_light_index,
 			polygonal_light_area,
@@ -438,13 +444,14 @@ get_direct_illumination(
 	float vis = 1;
 
 	/* spherical light illumination */
-	if(enable_spherical) 
+	if (enable_spherical)
 	{
 		// Limit the solid angle of sphere lights for indirect lighting 
 		// in order to kill some fireflies in locations with many sphere lights.
 		// Example: green wall-lamp corridor in the "train" map.
 		float max_solid_angle = (bounce == 0) ? 2 * M_PI : 0.02;
-	
+		//float max_solid_angle = 2 * M_PI;
+
 		sample_spherical_lights(
 			position,
 			normal,
@@ -452,13 +459,14 @@ get_direct_illumination(
 			max_solid_angle,
 			pos_on_light_spherical,
 			contrib_spherical,
-			rng);
+			rng,
+			bounce);
 	}
 
 	float spec_polygonal = phong(normal, normalize(pos_on_light_polygonal - position), view_direction, phong_exp) * phong_scale;
 	float spec_spherical = phong(normal, normalize(pos_on_light_spherical - position), view_direction, phong_exp) * phong_scale;
 
-	float l_polygonal  = luminance(abs(contrib_polygonal)) * mix(1, spec_polygonal, phong_weight);
+	float l_polygonal = luminance(abs(contrib_polygonal)) * mix(1, spec_polygonal, phong_weight);
 	float l_spherical = luminance(abs(contrib_spherical)) * mix(1, spec_spherical, phong_weight);
 	float l_sum = l_polygonal + l_spherical;
 
@@ -473,53 +481,53 @@ get_direct_illumination(
 	vec3 contrib = is_polygonal ? contrib_polygonal : contrib_spherical;
 
 	Ray shadow_ray = get_shadow_ray(position - view_direction * 0.001, pos_on_light, 0);
-	
+
 	vis *= trace_shadow_ray(shadow_ray, null_light ? 0 : shadow_cull_mask);
 #ifdef ENABLE_SHADOW_CAUSTICS
-	if(enable_caustics)
+	if (enable_caustics)
 	{
 		contrib *= trace_caustic_ray(shadow_ray, surface_medium);
 	}
 #endif
 
-	/* 
+	/*
 		Accumulate light shadowing statistics to guide importance sampling on the next frame.
 		Inspired by paper called "Adaptive Shadow Testing for Ray Tracing" by G. Ward, EUROGRAPHICS 1994.
 
 		The algorithm counts the shadowed and unshadowed rays towards each light, per cluster,
-		per surface orientation in each cluster. Orientation helps improve accuracy in cases 
-		when a single cluster has different parts which have the same light mostly shadowed and 
+		per surface orientation in each cluster. Orientation helps improve accuracy in cases
+		when a single cluster has different parts which have the same light mostly shadowed and
 		mostly unshadowed.
 
 		On the next frame, the light CDF is built using the counts from this frame, or the frame
 		before that in case of gradient rays. See light_lists.h for more info.
 
 		Only applies to polygonal polygon lights (i.e. no model or beam lights) because the spherical
-		polygon lights do not have polygonal indices, and it would be difficult to map them 
+		polygon lights do not have polygonal indices, and it would be difficult to map them
 		between frames.
 	*/
-	if(global_ubo.pt_light_stats != 0 
-		&& is_polygonal 
+	if (global_ubo.pt_light_stats != 0
+		&& is_polygonal
 		&& !null_light
-		&& polygonal_light_index >= 0 
+		&& polygonal_light_index >= 0
 		&& polygonal_light_index < global_ubo.num_static_lights)
 	{
 		uint addr = get_light_stats_addr(cluster_idx, polygonal_light_index, get_primary_direction(normal));
 
 		// Offset 0 is unshadowed rays,
 		// Offset 1 is shadowed rays
-		if(vis == 0) addr += 1;
+		if (vis == 0) addr += 1;
 
 		// Increment the ray counter
 		atomicAdd(light_stats_bufers[global_ubo.current_frame_idx % NUM_LIGHT_STATS_BUFFERS].stats[addr], 1);
 	}
 
-	if(null_light)
+	if (null_light)
 		return;
 
 	diffuse = vis * contrib;
 
-	if(is_polygonal && direct_specular_weight > 0)
+	if (is_polygonal && direct_specular_weight > 0)
 	{
 		// MIS with direct specular and indirect specular.
 		// Only applied to sky lights, for two reasons:
@@ -527,11 +535,11 @@ get_direct_illumination(
 		//  2) Non-sky lights are usually away from walls, so the direct sampling issue is not as pronounced.
 		direct_specular_weight *= 1.0 - smoothstep(
 			global_ubo.pt_direct_area_threshold,
-			global_ubo.pt_direct_area_threshold * 2, 
+			global_ubo.pt_direct_area_threshold * 2,
 			polygonal_light_area);
 	}
 
-	if(vis > 0 && direct_specular_weight > 0)
+	if (vis > 0 && direct_specular_weight > 0)
 	{
 		specular = diffuse * (GGX(view_direction, normalize(pos_on_light - position), normal, roughness, 0.0) * direct_specular_weight);
 	}
@@ -546,28 +554,30 @@ get_direct_illumination(
 
 void
 get_sunlight(
-	uint cluster_idx, 
+	uint cluster_idx,
 	uint material_id,
-	vec3 position, 
-	vec3 normal, 
-	vec3 geo_normal, 
-	vec3 view_direction, 
-	float roughness, 
-	int surface_medium, 
-	bool enable_caustics, 
-	out vec3 diffuse, 
-	out vec3 specular, 
+	vec3 position,
+	vec3 normal,
+	vec3 geo_normal,
+	vec3 view_direction,
+	float roughness,
+	int surface_medium,
+	bool enable_caustics,
+	out vec3 diffuse,
+	out vec3 specular,
 	int shadow_cull_mask)
 {
+	float cloudAlpha = 1.0;
+
 	diffuse = vec3(0);
 	specular = vec3(0);
 
-	if(global_ubo.sun_visible == 0)
+	if (global_ubo.sun_visible == 0)
 		return;
 
 	bool visible = (cluster_idx == ~0u) || (get_sky_visibility(cluster_idx >> 5) & (1 << (cluster_idx & 31))) != 0;
 
-	if(!visible)
+	if (!visible)
 		return;
 
 	vec2 rng3 = vec2(get_rng(RNG_SUNLIGHT_X(0)), get_rng(RNG_SUNLIGHT_Y(0)));
@@ -579,15 +589,23 @@ get_sunlight(
 	float NdotL = dot(direction, normal);
 	float GNdotL = dot(direction, geo_normal);
 
-	if(NdotL <= 0 || GNdotL <= 0)
+	if (NdotL <= 0 || GNdotL <= 0)
 		return;
 
 	Ray shadow_ray = get_shadow_ray(position - view_direction * 0.001, position + direction * 10000, 0);
- 
+
 	float vis = trace_shadow_ray(shadow_ray, shadow_cull_mask);
 
-	if(vis == 0)
+	if (vis == 0)
 		return;
+	else
+	{
+		// Sample SDF Clouds Visibity Probability
+		SampleCloudsSDFVisibility(cloudAlpha, shadow_ray);
+		if (cloudAlpha > .99)
+			return;
+
+	}
 
 #ifdef ENABLE_SUN_SHAPE
 	// Fetch the sun color from the environment map. 
@@ -595,27 +613,26 @@ get_sunlight(
 	// by clouds or landscape.
 
 	vec3 envmap_direction = (global_ubo.environment_rotation_matrix * vec4(direction, 0)).xyz;
-	
-    vec3 envmap = textureLod(TEX_PHYSICAL_SKY, envmap_direction.xzy, 0).rgb;
 
-    diffuse = (global_ubo.sun_solid_angle * global_ubo.pt_env_scale) * envmap;
+	vec3 envmap = textureLod(TEX_PHYSICAL_SKY, envmap_direction.xzy, 0).rgb;
+
+	diffuse = (global_ubo.sun_solid_angle * global_ubo.pt_env_scale) * envmap;
 #else
-    // Fetch the average sun color from the resolved UBO - it's faster.
+	// Fetch the average sun color from the resolved UBO - it's faster.
 
-    diffuse = sun_color_ubo.sun_color;
+	diffuse = sun_color_ubo.sun_color * cloudAlpha; //
 #endif
-
 #ifdef ENABLE_SHADOW_CAUSTICS
-	if(enable_caustics)
+	if (enable_caustics)
 	{
-    	diffuse *= trace_caustic_ray(shadow_ray, surface_medium);
+		diffuse *= trace_caustic_ray(shadow_ray, surface_medium);
 	}
 #endif
 
-    if(global_ubo.pt_sun_specular > 0)
-    {
+	if (global_ubo.pt_sun_specular > 0)
+	{
 		float NoH_offset = 0.5 * square(global_ubo.sun_tan_half_angle);
-    	specular = diffuse * GGX(view_direction, global_ubo.sun_direction, normal, roughness, NoH_offset);
+		specular = diffuse * GGX(view_direction, global_ubo.sun_direction, normal, roughness, NoH_offset);
 	}
 
 	diffuse *= NdotL / M_PI;
@@ -623,9 +640,9 @@ get_sunlight(
 
 vec3 clamp_output(vec3 c)
 {
-	if(any(isnan(c)) || any(isinf(c)))
+	if (any(isnan(c)) || any(isinf(c)))
 		return vec3(0);
-	else 
+	else
 		return clamp(c, vec3(0), vec3(MAX_OUTPUT_VALUE));
 }
 
@@ -633,16 +650,16 @@ vec3
 sample_emissive_texture(uint material_id, MaterialInfo minfo, vec2 tex_coord, vec2 tex_coord_x, vec2 tex_coord_y, float mip_level)
 {
 	if (minfo.emissive_texture != 0)
-    {
-        vec4 image3;
-	    if (mip_level >= 0)
-	        image3 = global_textureLod(minfo.emissive_texture, tex_coord, mip_level);
-	    else
-	        image3 = global_textureGrad(minfo.emissive_texture, tex_coord, tex_coord_x, tex_coord_y);
+	{
+		vec4 image3;
+		if (mip_level >= 0)
+			image3 = global_textureLod(minfo.emissive_texture, tex_coord, mip_level);
+		else
+			image3 = global_textureGrad(minfo.emissive_texture, tex_coord, tex_coord_x, tex_coord_y);
 
-    	vec3 corrected = correct_emissive(material_id, image3.rgb);
+		vec3 corrected = correct_emissive(material_id, image3.rgb);
 
-	    return corrected * minfo.emissive_scale;
+		return corrected * minfo.emissive_scale;
 	}
 
 	return vec3(0);
@@ -661,152 +678,152 @@ lava_uv_warp(vec2 uv)
 	// #define TURB_SIZE               64  // base turbulent texture size
 	// #define TURB_MASK               (TURB_SIZE - 1)
 	// turb_s = ((s + turb[(t >> 16) & (CYCLE - 1)]) >> 16) & TURB_MASK;
-    // turb_t = ((t + turb[(s >> 16) & (CYCLE - 1)]) >> 16) & TURB_MASK;
-    
-    return uv.xy + sin(fract(uv.yx * 0.5 + global_ubo.time * 20 / 128) * 2 * M_PI) * 0.125;
+	// turb_t = ((t + turb[(s >> 16) & (CYCLE - 1)]) >> 16) & TURB_MASK;
+
+	return uv.xy + sin(fract(uv.yx * 0.5 + global_ubo.time * 20 / 128) * 2 * M_PI) * 0.125;
 }
 
 vec3 get_emissive_shell(uint material_id)
 {
 	vec3 c = vec3(0);
 
-	if((material_id & (MATERIAL_FLAG_SHELL_RED | MATERIAL_FLAG_SHELL_GREEN | MATERIAL_FLAG_SHELL_BLUE)) != 0)
-	{ 
-	    if((material_id & MATERIAL_FLAG_SHELL_RED) != 0) c.r += 1;
-	    if((material_id & MATERIAL_FLAG_SHELL_GREEN) != 0) c.g += 1;
-	    if((material_id & MATERIAL_FLAG_SHELL_BLUE) != 0) c.b += 1;
+	if ((material_id & (MATERIAL_FLAG_SHELL_RED | MATERIAL_FLAG_SHELL_GREEN | MATERIAL_FLAG_SHELL_BLUE)) != 0)
+	{
+		if ((material_id & MATERIAL_FLAG_SHELL_RED) != 0) c.r += 1;
+		if ((material_id & MATERIAL_FLAG_SHELL_GREEN) != 0) c.g += 1;
+		if ((material_id & MATERIAL_FLAG_SHELL_BLUE) != 0) c.b += 1;
 
-	    if((material_id & MATERIAL_FLAG_WEAPON) != 0) c *= 0.2;
+		if ((material_id & MATERIAL_FLAG_WEAPON) != 0) c *= 0.2;
 	}
 
-	if(tonemap_buffer.adapted_luminance > 0)
-			c.rgb *= tonemap_buffer.adapted_luminance * 100;
+	if (tonemap_buffer.adapted_luminance > 0)
+		c.rgb *= tonemap_buffer.adapted_luminance * 100;
 
-    return c;
+	return c;
 }
 
 bool get_is_gradient(ivec2 ipos)
 {
-	if(global_ubo.flt_enable != 0)
+	if (global_ubo.flt_enable != 0)
 	{
 		uint u = texelFetch(TEX_ASVGF_GRAD_SMPL_POS_A, ipos / GRAD_DWN, 0).r;
 
 		ivec2 grad_strata_pos = ivec2(
-				u >> (STRATUM_OFFSET_SHIFT * 0),
-				u >> (STRATUM_OFFSET_SHIFT * 1)) & STRATUM_OFFSET_MASK;
+			u >> (STRATUM_OFFSET_SHIFT * 0),
+			u >> (STRATUM_OFFSET_SHIFT * 1)) & STRATUM_OFFSET_MASK;
 
 		return (u > 0 && all(equal(grad_strata_pos, ipos % GRAD_DWN)));
 	}
-	
+
 	return false;
 }
 
 
 void
 get_material(Triangle triangle, vec2 tex_coord, vec2 tex_coord_x, vec2 tex_coord_y, float mip_level, vec3 geo_normal,
-    out vec3 albedo, out vec3 normal, out float metallic, out float specular, out float roughness, out vec3 emissive)
+	out vec3 albedo, out vec3 normal, out float metallic, out float specular, out float roughness, out vec3 emissive)
 {
-	if((triangle.material_id & MATERIAL_FLAG_FLOWING) != 0)
+	if ((triangle.material_id & MATERIAL_FLAG_FLOWING) != 0)
 	{
 		tex_coord.x -= global_ubo.time * 0.5;
 	}
 
-	if((triangle.material_id & MATERIAL_FLAG_WARP) != 0)
+	if ((triangle.material_id & MATERIAL_FLAG_WARP) != 0)
 	{
 		tex_coord = lava_uv_warp(tex_coord);
 	}
 
 
 	MaterialInfo minfo = get_material_info(triangle.material_id);
-	
 
-    vec4 image1;
+
+	vec4 image1;
 	if (mip_level >= 0)
-	    image1 = global_textureLod(minfo.diffuse_texture, tex_coord, mip_level);
+		image1 = global_textureLod(minfo.diffuse_texture, tex_coord, mip_level);
 	else
-	    image1 = global_textureGrad(minfo.diffuse_texture, tex_coord, tex_coord_x, tex_coord_y);
+		image1 = global_textureGrad(minfo.diffuse_texture, tex_coord, tex_coord_x, tex_coord_y);
 
-	if((triangle.material_id & MATERIAL_FLAG_CORRECT_ALBEDO) != 0)
+	if ((triangle.material_id & MATERIAL_FLAG_CORRECT_ALBEDO) != 0)
 		albedo = correct_albedo(image1.rgb);
 	else
 		albedo = image1.rgb;
 
 	normal = geo_normal;
 	metallic = 0;
-    specular = 0;
-    roughness = 1;
+	specular = 0;
+	roughness = 1;
 
-    if (minfo.normals_texture != 0)// && dot(triangle.tangent, triangle.tangent) > 0)
-    {
-        vec4 image2;
-	    if (mip_level >= 0)
-	        image2 = global_textureLod(minfo.normals_texture, tex_coord, mip_level);
-	    else
-	        image2 = global_textureGrad(minfo.normals_texture, tex_coord, tex_coord_x, tex_coord_y);
+	if (minfo.normals_texture != 0)// && dot(triangle.tangent, triangle.tangent) > 0)
+	{
+		vec4 image2;
+		if (mip_level >= 0)
+			image2 = global_textureLod(minfo.normals_texture, tex_coord, mip_level);
+		else
+			image2 = global_textureGrad(minfo.normals_texture, tex_coord, tex_coord_x, tex_coord_y);
 
 		float normalMapLen;
 		vec3 local_normal = rgbToNormal(image2.rgb, normalMapLen);
 
-		if(dot(triangle.tangent, triangle.tangent) > 0)
+		if (dot(triangle.tangent, triangle.tangent) > 0)
 		{
 			vec3 tangent = triangle.tangent,
-				 bitangent = cross(geo_normal, tangent);
+				bitangent = cross(geo_normal, tangent);
 
-			if((triangle.material_id & MATERIAL_FLAG_HANDEDNESS) != 0)
-        		bitangent = -bitangent;
-			
+			if ((triangle.material_id & MATERIAL_FLAG_HANDEDNESS) != 0)
+				bitangent = -bitangent;
+
 			normal = tangent * local_normal.x + bitangent * local_normal.y + geo_normal * local_normal.z;
-        
+
 			float bump_scale = global_ubo.pt_bump_scale * minfo.bump_scale;
-			if(is_glass(triangle.material_id))
-        		bump_scale *= 0.2;
+			if (is_glass(triangle.material_id))
+				bump_scale *= 0.2;
 
 			normal = normalize(mix(geo_normal, normal, bump_scale));
 		}
 
-        metallic = clamp(image2.a * minfo.specular_scale, 0, 1);
-        
-        if(minfo.roughness_override >= 0)
-        	roughness = max(image1.a, minfo.roughness_override);
-        else
-        	roughness = image1.a;
+		metallic = clamp(image2.a * minfo.specular_scale, 0, 1);
 
-        roughness = clamp(roughness, 0, 1);
+		if (minfo.roughness_override >= 0)
+			roughness = max(image1.a, minfo.roughness_override);
+		else
+			roughness = image1.a;
 
-        float effective_mip = mip_level;
+		roughness = clamp(roughness, 0, 1);
 
-    	if (effective_mip < 0)
-    	{
-        	ivec2 texSize = global_textureSize(minfo.normals_texture, 0);
-        	vec2 tx = tex_coord_x * texSize;
-        	vec2 ty = tex_coord_y * texSize;
-        	float d = max(dot(tx, tx), dot(ty, ty));
-        	effective_mip = 0.5 * log2(d);
-        }
+		float effective_mip = mip_level;
 
-        bool is_mirror = (roughness < MAX_MIRROR_ROUGHNESS) && (is_chrome(triangle.material_id) || is_screen(triangle.material_id));
+		if (effective_mip < 0)
+		{
+			ivec2 texSize = global_textureSize(minfo.normals_texture, 0);
+			vec2 tx = tex_coord_x * texSize;
+			vec2 ty = tex_coord_y * texSize;
+			float d = max(dot(tx, tx), dot(ty, ty));
+			effective_mip = 0.5 * log2(d);
+		}
 
-        if (normalMapLen > 0 && global_ubo.pt_toksvig > 0 && effective_mip > 0 && !is_mirror)
-        {
-            roughness = AdjustRoughnessToksvig(roughness, normalMapLen, effective_mip);
-        }
-    } 
+		bool is_mirror = (roughness < MAX_MIRROR_ROUGHNESS) && (is_chrome(triangle.material_id) || is_screen(triangle.material_id));
 
-    if(global_ubo.pt_roughness_override >= 0) roughness = global_ubo.pt_roughness_override;
-    if(global_ubo.pt_metallic_override >= 0) metallic = global_ubo.pt_metallic_override;
+		if (normalMapLen > 0 && global_ubo.pt_toksvig > 0 && effective_mip > 0 && !is_mirror)
+		{
+			roughness = AdjustRoughnessToksvig(roughness, normalMapLen, effective_mip);
+		}
+	}
+
+	if (global_ubo.pt_roughness_override >= 0) roughness = global_ubo.pt_roughness_override;
+	if (global_ubo.pt_metallic_override >= 0) metallic = global_ubo.pt_metallic_override;
 
 	specular = mix(0.05, 1.0, metallic);
 
-    emissive = sample_emissive_texture(triangle.material_id, minfo, tex_coord, tex_coord_x, tex_coord_y, mip_level);
+	emissive = sample_emissive_texture(triangle.material_id, minfo, tex_coord, tex_coord_x, tex_coord_y, mip_level);
 
-    emissive += get_emissive_shell(triangle.material_id) * albedo * (1 - metallic * 0.9);
+	emissive += get_emissive_shell(triangle.material_id) * albedo * (1 - metallic * 0.9);
 }
 
 bool get_camera_uv(vec2 tex_coord, out vec2 cameraUV)
 {
 	const vec2 minUV = vec2(11.0 / 256.0, 14.0 / 256.0);
 	const vec2 maxUV = vec2(245.0 / 256.0, 148.0 / 256.0);
-	
+
 	tex_coord = fract(tex_coord);
 	cameraUV = (tex_coord - minUV) / (maxUV - minUV);
 
@@ -815,3 +832,368 @@ bool get_camera_uv(vec2 tex_coord, out vec2 cameraUV)
 
 	return all(greaterThan(cameraUV, vec2(0))) && all(lessThan(cameraUV, vec2(1)));
 }
+
+// Clouds SDF Sim
+
+#define STEPS 15
+#define max_dist 1e8
+#define COVERAGE		.50
+#define THICKNESS		15.
+#define ABSORPTION		1.030725
+#define WIND			vec3(0, -global_ubo.time * 0.1, 0)
+#define FBM_FREQ		2.76434
+#define NOISE_WORLEY
+
+struct plane_t {
+	vec3 direction;
+	float distance;
+	int material;
+};
+
+struct hit_t {
+	float t;
+	int material_id;
+	vec3 normal;
+	vec3 origin;
+};
+
+struct sphere_t {
+	vec3 origin;
+	float radius;
+	int material;
+};
+
+void intersect_sphere(Ray ray, sphere_t sphere, out hit_t hit)
+{
+	vec3 rc = sphere.origin - ray.origin;
+	float radius2 = sphere.radius * sphere.radius;
+	float tca = dot(rc, ray.direction);
+	//	if (tca < 0.) return;
+
+	float d2 = dot(rc, rc) - tca * tca;
+	if (d2 > radius2)
+		return;
+
+	float thc = sqrt(radius2 - d2);
+	float t0 = tca - thc;
+	float t1 = tca + thc;
+
+	if (t0 < ray.t_min) t0 = t1;
+	if (t0 > ray.t_max)
+		return;
+
+	vec3 impact = ray.origin + ray.direction * t0;
+
+	hit.t = t0;
+	hit.material_id = sphere.material;
+	hit.origin = impact;
+	hit.normal = (impact - sphere.origin) / sphere.radius;
+}
+
+void intersect_plane(Ray ray, plane_t p, out hit_t hit)
+{
+	float denom = dot(p.direction, ray.direction);
+	if (denom < 1e-6) return;
+
+	vec3 P0 = vec3(p.distance, p.distance, p.distance);
+	float t = dot(P0 - ray.origin, p.direction) / denom;
+	if (t < ray.t_min || t > ray.t_max) return;
+
+	hit.t = t;
+	hit.material_id = p.material;
+	hit.origin = ray.origin + ray.direction * t;
+	hit.normal = faceforward(p.direction, ray.direction, p.direction);
+}
+
+float checkboard_pattern(vec2 pos, float scale)
+{
+	vec2 pattern = floor(pos * scale);
+	return mod(pattern.x + pattern.y, 2.0);
+}
+
+vec3 hash_w(vec3 x)
+{
+#if 0
+	vec3 xx = vec3(dot(x, vec3(127.1, 311.7, 74.7)),
+		dot(x, vec3(269.5, 183.3, 246.1)),
+		dot(x, vec3(113.5, 271.9, 124.6)));
+
+	return fract(sin(xx) * 43758.5453123);
+#else
+	//return texture(iChannel0, (x.xy + vec2(3.0, 1.0)*x.z + 0.5) / 256.0, -100.0).xyz;
+
+	vec4 tex = vec4(1.0, 0.0, 1.0, 0.0);
+	if (global_ubo.rgb_noise256_map > 0) {
+		tex = global_textureLod(global_ubo.rgb_noise256_map, (x.xy + vec2(3.0, 1.0) * x.z + 0.5) / 256.0, -100.0);
+	}
+	return tex.xyz;
+#endif
+}
+
+vec3 noise_w(vec3 x)
+{
+	vec3 p = floor(x);
+	vec3 f = fract(x);
+
+	float id = 0.0;
+	vec2 res = vec2(100.0, 100.0);
+	for (int k = -1; k <= 1; k++)
+		for (int j = -1; j <= 1; j++)
+			for (int i = -1; i <= 1; i++)
+			{
+				vec3 b = vec3(float(i), float(j), float(k));
+				vec3 r = vec3(b) - f + hash_w(p + b);
+				float d = dot(r, r);
+
+				if (d < res.x)
+				{
+					id = dot(p + b, vec3(1.0, 57.0, 113.0));
+					res = vec2(d, res.x);
+				}
+				else if (d < res.y)
+				{
+					res.y = d;
+				}
+			}
+
+	return vec3(sqrt(res), abs(id));
+}
+
+float hash(float n)
+{
+	return fract(sin(n) * 753.5453123);
+}
+
+float noise_iq(vec3 x)
+{
+	vec3 p = floor(x);
+	vec3 f = fract(x);
+	f = f * f * (3.0 - 2.0 * f);
+
+	//#if 0
+	float n = p.x + p.y * 157.0 + 113.0 * p.z;
+	return mix(mix(mix(hash(n + 0.0), hash(n + 1.0), f.x),
+		mix(hash(n + 157.0), hash(n + 158.0), f.x), f.y),
+		mix(mix(hash(n + 113.0), hash(n + 114.0), f.x),
+			mix(hash(n + 270.0), hash(n + 271.0), f.x), f.y), f.z);
+	//#else
+	//	vec2 uv = (p.xy + vec2(37.0, 17.0)*p.z) + f.xy;
+	//	//vec2 rg = textureLod( iChannel0, (uv+.5)/256., 0.).yx;
+	//	vec2 rg = global_textureLod(global_ubo.rgb_noise256_map, (uv+.5)/256., 0.).yx;
+	//	return mix(rg.x, rg.y, f.z);
+	//#endif
+}
+
+//#define noise(x) (1. - noise_w(x).r)
+#define noise(x) noise_iq(x)
+
+float fbm(vec3 pos, float lacunarity)
+{
+	vec3 p = pos;
+	float
+		t = 0.51749673 * noise(p); p *= lacunarity;
+	t += 0.25584929 * noise(p); p *= lacunarity;
+	t += 0.12527603 * noise(p); p *= lacunarity;
+	t += 0.06255931 * noise(p);
+
+	return t;
+}
+
+float get_noise(vec3 x)
+{
+	return fbm(x, FBM_FREQ);
+}
+
+float hashF(vec2 p)
+{
+	float h = dot(p, vec2(127.1, 311.7));
+	return fract(sin(h) * 43758.5453123);
+}
+
+float noiseF(vec2 p)
+{
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	vec2 u = f * f * (3.0 - 2.0 * f);
+	return -1.0 + 2.0 * mix(mix(hashF(i + vec2(0.0, 0.0)),
+		hashF(i + vec2(1.0, 0.0)), u.x),
+		mix(hashF(i + vec2(0.0, 1.0)),
+			hashF(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
+float density(vec3 pos, vec3 offset, float t)
+{
+	// signal
+	vec3 p = pos * .0212242 + offset;
+	float dens = get_noise(p);
+
+	float cov = 1. - COVERAGE;
+	//dens = band (.1, .3, .6, dens);
+	//dens *= step(cov, dens);
+	//dens -= cov;
+	dens *= smoothstep(cov, cov + .05, dens);
+
+	return clamp(dens, 0., 1.);
+}
+
+vec4 render_clouds(Ray eye)
+{
+	sphere_t atmosphere = { vec3(0, 0, 0), 50., 0 };
+	sphere_t atmosphere_2 = { atmosphere.origin, atmosphere.radius + 50., 0 };
+
+	hit_t no_hit = { float(max_dist + 1e1),-1, vec3(0., 0., 0.), vec3(0., 0., 0.) };
+	hit_t hit = no_hit;
+	intersect_sphere(eye, atmosphere, hit);
+	//hit_t hit_2 = no_hit;
+	//intersect_sphere(eye, atmosphere_2, hit_2);
+
+	const float thickness = THICKNESS; // length(hit_2.origin - hit.origin);
+	//const float r = 1. - ((atmosphere_2.radius - atmosphere.radius) / thickness);
+	const int steps = STEPS; // +int(32. * r);
+	float march_step = thickness / float(steps);
+
+	vec3 dir_step = eye.direction / eye.direction.z * march_step;
+	vec3 pos = //eye.origin + eye.direction * 100.; 
+		hit.origin;
+
+	float T = 1.; // transmitance
+	vec3 C = vec3(0, 0, 0); // color
+	float alpha = 0.;
+
+	for (int i = 0; i < steps; i++) {
+		float h = float(i) / float(steps);
+		float dens = density(pos, WIND, h);
+
+		float T_i = exp(-ABSORPTION * dens * march_step);
+		T *= T_i;
+		if (T < .01) break;
+
+		C += T * (exp(h) / 1.75) * dens * march_step;
+
+		alpha += (1. - T_i) * (1. - alpha);
+
+		pos += dir_step;
+		if (length(pos) > 1e3) break;
+	}
+
+	return vec4(C, alpha);
+}
+
+float star_hash(float n)
+{
+	return fract(sin(n) * 43758.5453123);
+}
+
+float star_noise(in vec2 x)
+{
+	vec2 p = floor(x);
+	vec2 f = fract(x);
+
+	f = f * f * (3.0 - 2.0 * f);
+
+	float n = p.x + p.y * 57.0;
+
+	float res = mix(mix(star_hash(n + 0.0), star_hash(n + 1.0), f.x),
+		mix(star_hash(n + 57.0), star_hash(n + 58.0), f.x), f.y);
+
+	return res;
+}
+
+void SampleCloudsSDFVisibility(out float alpha, Ray ray)
+{
+	hit_t no_hit = { float(max_dist + 1e1),-1, vec3(0., 0., 0.), vec3(0., 0., 0.) };
+
+	hit_t hit = no_hit;
+
+	plane_t ground = { vec3(0., 0., -1.), -1000., 1 };
+
+	ray.origin = vec3(0);
+
+	intersect_plane(ray, ground, hit);
+
+	if (hit.material_id == 1 && hit.t > 0) {
+		//float cb = checkboard_pattern(hit.origin.xy, .025);
+		//env = mix(vec3(.6, .6, .6), vec3(.75, .75, .75), cb);
+		alpha = 1.0;
+	}
+	else
+	{
+		Ray eye = ray;
+		/*
+		vec3 col = vec3(0);
+		vec3 SUN_DIR = normalize( vec3(0.0,1.0,0.0) );
+		float kOrbit = pow(SUN_DIR.z,0.03);
+		float v = 1.0/( 2. * ( 1. + eye.direction.y ) );
+		vec2 xy = vec2(eye.direction.z * v, eye.direction.x * v);
+		eye.direction.y += global_ubo.time*.002;
+		float s = noiseF(eye.direction.xy*134.0);
+		s += star_noise(eye.direction.xy*370.);
+		s += star_noise(eye.direction.xy*870.);
+		s = pow(s,19.0) * 0.00000001 * max(eye.direction.z, 0.0);
+		if (s > 0.0)
+		{
+			vec3 backStars = vec3((1.0-sin(xy.x*20.0+global_ubo.time*13.0*eye.direction.x+xy.y*30.0))*.5*s,s, s);
+			col += (1.0 - kOrbit) * backStars;
+		}
+		*/
+		//vec3 sky = env;//mix(env, vec3((1./255.)*18,(1./255.)*2,(1./255.)*42)*0.03, .5);
+		vec4 cld = render_clouds(ray);
+
+		// Colorize Clouds
+		//cld.rgb *= (vec3((1./255.)*18,(1./255.)*2,(1./255.)*42)*0.13);
+
+		//env = mix(sky, cld.rgb / (0.000001 + cld.a), cld.a);
+
+		alpha = clamp(1.0 - cld.a,.0,.75);
+	}
+
+}
+
+void SampleCloudsSDF(inout vec3 env, Ray ray)
+{
+	hit_t no_hit = { float(max_dist + 1e1),-1, vec3(0., 0., 0.), vec3(0., 0., 0.) };
+
+	hit_t hit = no_hit;
+
+	plane_t ground = { vec3(0., 0., -1.), -1000., 1 };
+
+	ray.origin = vec3(0);
+
+	intersect_plane(ray, ground, hit);
+
+	if (hit.material_id == 1 && hit.t > 0) {
+		//float cb = checkboard_pattern(hit.origin.xy, .025);
+		//env = mix(vec3(.6, .6, .6), vec3(.75, .75, .75), cb);
+	}
+	else
+	{
+		Ray eye = ray;
+		/*
+		vec3 col = vec3(0);
+		vec3 SUN_DIR = normalize( vec3(0.0,1.0,0.0) );
+		float kOrbit = pow(SUN_DIR.z,0.03);
+		float v = 1.0/( 2. * ( 1. + eye.direction.y ) );
+		vec2 xy = vec2(eye.direction.z * v, eye.direction.x * v);
+		eye.direction.y += global_ubo.time*.002;
+		float s = noiseF(eye.direction.xy*134.0);
+		s += star_noise(eye.direction.xy*370.);
+		s += star_noise(eye.direction.xy*870.);
+		s = pow(s,19.0) * 0.00000001 * max(eye.direction.z, 0.0);
+		if (s > 0.0)
+		{
+			vec3 backStars = vec3((1.0-sin(xy.x*20.0+global_ubo.time*13.0*eye.direction.x+xy.y*30.0))*.5*s,s, s);
+			col += (1.0 - kOrbit) * backStars;
+		}
+		*/
+		vec3 sky = vec3((1./255.)*18,(1./255.)*2,(1./255.)*42)*0.03;
+		vec4 cld = render_clouds(ray);
+
+		// Colorize Clouds
+		cld.rgb *= (vec3((1./255.)*18,(1./255.)*2,(1./255.)*42)*0.13);
+
+		env = mix(sky, cld.rgb / (0.000001 + cld.a), cld.a);
+
+	}
+}
+
+// End Clouds SDF Sim
