@@ -492,6 +492,12 @@ main()
 			vec3 env = env_map(direction, false);
 			env *= global_ubo.pt_env_scale;
 			
+			// Sample SDF Clouds
+
+			SampleCloudsSDF(env, reflection_ray);
+
+			// End Sample SDF Clouds
+
 			transparent = alpha_blend(transparent, vec4(env * throughput, 1));
 		}
 

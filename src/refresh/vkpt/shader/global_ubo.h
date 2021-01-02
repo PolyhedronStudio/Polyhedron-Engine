@@ -177,7 +177,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     GLOBAL_UBO_VAR_LIST_DO(int,             skyPlanet) \
     GLOBAL_UBO_VAR_LIST_DO(int,             skyPlanetPad) \
     GLOBAL_UBO_VAR_LIST_DO(int,             skyPlanetPad2) \
-    GLOBAL_UBO_VAR_LIST_DO(int,             skyPlanetPad3) \
+	GLOBAL_UBO_VAR_LIST_DO(int,             rgb_noise256_map) \
     \
 	GLOBAL_UBO_VAR_LIST_DO(int,             num_cameras) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             screen_image_width) \
