@@ -1544,6 +1544,8 @@ static inline uint32_t fill_model_instance(const entity_t* entity, const model_t
 static void
 add_dlights(const dlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
 {
+	ubo->num_sphere_lights = 0;
+
 	for (int i = 0; i < num_lights && ubo->num_sphere_lights < MAX_LIGHT_SOURCES; i++)
 	{
 		const dlight_t* light = lights + i;
@@ -2358,7 +2360,7 @@ static void ProcessTargetLight(dlight_t *elight, dlightLS_t *elightls)
 
 static void add_elights(refdef_t * fd, QVKUniformBuffer_t * ubo)
 {
-	ubo->num_sphere_lights = 0;
+	
 
 	for (int i = 0; i < num_entlights && ubo->num_sphere_lights < MAX_LIGHT_SOURCES; i++)
 	{
@@ -3449,8 +3451,9 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	VectorCopy(sky_matrix[1], ubo->environment_rotation_matrix + 4);
 	VectorCopy(sky_matrix[2], ubo->environment_rotation_matrix + 8);
 	
-	add_elights(vkpt_refdef.fd->dlights, ubo);
+	
 	add_dlights(vkpt_refdef.fd->dlights, vkpt_refdef.fd->num_dlights, ubo);
+	add_elights(vkpt_refdef.fd->dlights, ubo);
 
 	const bsp_mesh_t* wm = &vkpt_refdef.bsp_mesh_world;
 	if (wm->num_cameras > 0)
