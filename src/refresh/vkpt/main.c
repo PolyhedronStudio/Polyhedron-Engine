@@ -3450,10 +3450,9 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	VectorCopy(sky_matrix[0], ubo->environment_rotation_matrix + 0);
 	VectorCopy(sky_matrix[1], ubo->environment_rotation_matrix + 4);
 	VectorCopy(sky_matrix[2], ubo->environment_rotation_matrix + 8);
-	
-	
+		
 	add_dlights(vkpt_refdef.fd->dlights, vkpt_refdef.fd->num_dlights, ubo);
-	add_elights(vkpt_refdef.fd->dlights, ubo);
+	add_elights(vkpt_refdef.fd, ubo);
 
 	const bsp_mesh_t* wm = &vkpt_refdef.bsp_mesh_world;
 	if (wm->num_cameras > 0)

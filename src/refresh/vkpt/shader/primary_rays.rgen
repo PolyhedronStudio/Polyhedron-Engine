@@ -169,7 +169,8 @@ void main()
 		vec3 env = env_map(ray.direction, false);	
 		env *= global_ubo.pt_env_scale;
 		
-		SampleCloudsSDF(env, ray);
+		if(global_ubo.sdfclouds == 1)
+			SampleCloudsSDF(env, ray);
 		
 		// End Override SDF
 
