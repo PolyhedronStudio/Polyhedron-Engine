@@ -598,7 +598,7 @@ get_sunlight(
 
 	if (vis == 0)
 		return;
-	else
+	else if (global_ubo.sdfclouds == 1)
 	{
 		// Sample SDF Clouds Visibity Probability
 		SampleCloudsSDFVisibility(cloudAlpha, shadow_ray);
@@ -1144,7 +1144,7 @@ void SampleCloudsSDFVisibility(out float alpha, Ray ray)
 
 		//env = mix(sky, cld.rgb / (0.000001 + cld.a), cld.a);
 
-		alpha = clamp(1.0 - cld.a,.0,.75);
+		alpha = clamp(1.0 - cld.a,.0,1.);
 	}
 
 }
@@ -1185,11 +1185,11 @@ void SampleCloudsSDF(inout vec3 env, Ray ray)
 			col += (1.0 - kOrbit) * backStars;
 		}
 		*/
-		vec3 sky = vec3((1./255.)*18,(1./255.)*2,(1./255.)*42)*0.03;
+		vec3 sky = env;
 		vec4 cld = render_clouds(ray);
 
 		// Colorize Clouds
-		cld.rgb *= (vec3((1./255.)*18,(1./255.)*2,(1./255.)*42)*0.13);
+		//cld.rgb *= (vec3((1./255.)*18,(1./255.)*2,(1./255.)*42)*0.13);
 
 		env = mix(sky, cld.rgb / (0.000001 + cld.a), cld.a);
 

@@ -50,6 +50,7 @@ struct
 
 	// TODO: I don't belong here
 	cvar_t* skyPlanet;
+	cvar_t* sdfclouds;
 
 } god_rays;
 
@@ -237,7 +238,8 @@ VkResult vkpt_initialize_god_rays()
 
 	// TODO: I don't belong here
 	god_rays.skyPlanet = Cvar_Get("skyplanet", "1", 0);
-		   	 
+	god_rays.sdfclouds = Cvar_Get("sdfclouds", "0", 0);
+	
 	// Load fog by map csv file make stucture
 	fogbynametable.numberFogItems = 0;
 	LoadFogByMapTable("fogbymap.csv", &fogbynametable);
@@ -434,7 +436,8 @@ void vkpt_god_rays_prepare_ubo(
 
 	// TODO: I don't belong here
 	ubo->skyPlanet = god_rays.skyPlanet->value;
-	
+	ubo->sdfclouds = god_rays.sdfclouds->value;
+
 	// Shadow parameters
 	memcpy(ubo->shadow_map_VP, shadowmap_viewproj, 16 * sizeof(float));
 }

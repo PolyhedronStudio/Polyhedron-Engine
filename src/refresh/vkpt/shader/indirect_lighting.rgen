@@ -269,8 +269,8 @@ indirect_lighting(
 			env *= global_ubo.pt_env_scale;
 			
 			// Sample SDF Clouds
-
-			SampleCloudsSDF(env, bounce_ray);
+			if(global_ubo.sdfclouds == 1)
+				SampleCloudsSDF(env, bounce_ray);
 
 			// End Sample SDF Clouds
 
