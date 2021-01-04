@@ -3089,7 +3089,7 @@ sun(string) : "Sun>Info" : "Enter Description"
 	sdfthickness(string) : "Cloud>Thickness" : 15.0
 	sdfabsorption(string) : "Cloud>absorption" : 1.030725
 	sdffmbfreq(string) : "FMB>Freq Root" : 2.76434
-	sdfwindvec(string) : "Wind>Direction" : 0 0.1 0
+	sdfwindvec(string) : "Wind>Direction" : "0 0.1 0"
 	sdfcloudcolorize(integer) : "Cloud Override>On/Off" : 0
 	sdfcloudcolor(color1) : "Cloud Override>RGB color" : "1.0 1.0 1.0"
 	sdfskycolorize(integer) : "Skybox Override>On/Off" : 0
@@ -4038,7 +4038,7 @@ sun(string) : "Sun>Info" : "Enter Description"
 	]
 	health(integer) : "Health>sustainable damage" : 20
 ]
-@PointClass base(Weapons) model({ "path": ":models/weapons/g_shotg/tris.md2" }) = weapon_shotgun : "Shotgun" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_shotg/g_shotg.md2" }) = weapon_shotgun : "Shotgun" []
 @PointClass base(Weapons) model({ "path": ":models/weapons/g_shotg2/tris.md2" }) = weapon_supershotgun : "Super shotgun" []
 @PointClass base(Weapons) model({ "path": ":models/weapons/g_machn/tris.md2" }) = weapon_machinegun : "Machinegun" []
 @PointClass base(Weapons) model({ "path": ":models/weapons/g_chain/tris.md2" }) = weapon_chaingun : "Chain gun" []
