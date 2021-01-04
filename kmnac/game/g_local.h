@@ -554,6 +554,22 @@ typedef struct
 	char        *naclightpow;
 	char        *naclightmax;
 	int			naclighttype;
+	char		*clouds;
+	int			sdfclouds;
+	int			sdfstep;
+	char        *sdfcoverage;
+	char		*sdfthickness;
+	char		*sdfabsorption;
+	char		*sdffmbfreq;
+	vec3_t      sdfwindvec;
+	int		    sdfcloudcolorize;
+	vec3_t      sdfcloudcolor;
+	int			sdfskycolorize;
+	vec3_t      sdfskycolor;
+	char		*sdfcloudinner;
+	char		*sdfcloudouter;
+	char		*sdfsunfluxmin;
+	char		*sdfsunfluxmax;
 } spawn_temp_t;
 
 
@@ -2123,6 +2139,22 @@ struct edict_s
 	float		naclightpow;
 	float		naclightmax;
 	int			naclighttype;
+	char		*clouds;
+	int			sdfclouds;
+	int			sdfstep;
+	float		sdfcoverage;
+	float		sdfthickness;
+	float		sdfabsorption;
+	float		sdffmbfreq;
+	vec3_t      sdfwindvec;
+	int		    sdfcloudcolorize;
+	vec3_t      sdfcloudcolor;
+	int			sdfskycolorize;
+	vec3_t      sdfskycolor;
+	float		sdfcloudinner;
+	float		sdfcloudouter;
+	float		sdfsunfluxmin;
+	float		sdfsunfluxmax;
 };
 
 #define	LOOKAT_NOBRUSHMODELS  1

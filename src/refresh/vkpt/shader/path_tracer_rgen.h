@@ -835,14 +835,14 @@ bool get_camera_uv(vec2 tex_coord, out vec2 cameraUV)
 
 // Clouds SDF Sim
 
-#define STEPS 15
+//#define STEPS 15
 #define max_dist 1e8
-#define COVERAGE		.50
-#define THICKNESS		15.
-#define ABSORPTION		1.030725
-#define WIND			vec3(0, -global_ubo.time * 0.1, 0)
-#define FBM_FREQ		2.76434
-#define NOISE_WORLEY
+//#define COVERAGE		.50
+//#define THICKNESS		15.
+//#define ABSORPTION		1.030725
+//#define WIND			vec3(0, 0.1, 0) * -global_ubo.time 
+//#define FBM_FREQ		2.76434
+//#define NOISE_WORLEY
 
 struct plane_t {
 	vec3 direction;
@@ -1001,7 +1001,7 @@ float fbm(vec3 pos, float lacunarity)
 
 float get_noise(vec3 x)
 {
-	return fbm(x, FBM_FREQ);
+	return fbm(x, global_ubo.sdffmbfreq);
 }
 
 float hashF(vec2 p)
@@ -1027,7 +1027,7 @@ float density(vec3 pos, vec3 offset, float t)
 	vec3 p = pos * .0212242 + offset;
 	float dens = get_noise(p);
 
-	float cov = 1. - COVERAGE;
+	float cov = 1. - global_ubo.sdfcoverage;
 	//dens = band (.1, .3, .6, dens);
 	//dens *= step(cov, dens);
 	//dens -= cov;
@@ -1038,8 +1038,8 @@ float density(vec3 pos, vec3 offset, float t)
 
 vec4 render_clouds(Ray eye)
 {
-	sphere_t atmosphere = { vec3(0, 0, 0), 50., 0 };
-	sphere_t atmosphere_2 = { atmosphere.origin, atmosphere.radius + 50., 0 };
+	sphere_t atmosphere = { vec3(0, 0, 0), global_ubo.sdfcloudinner, 0 };
+	sphere_t atmosphere_2 = { atmosphere.origin, global_ubo.sdfcloudouter, 0 };
 
 	hit_t no_hit = { float(max_dist + 1e1),-1, vec3(0., 0., 0.), vec3(0., 0., 0.) };
 	hit_t hit = no_hit;
@@ -1047,9 +1047,9 @@ vec4 render_clouds(Ray eye)
 	//hit_t hit_2 = no_hit;
 	//intersect_sphere(eye, atmosphere_2, hit_2);
 
-	const float thickness = THICKNESS; // length(hit_2.origin - hit.origin);
+	const float thickness = global_ubo.sdfthickness; // length(hit_2.origin - hit.origin);
 	//const float r = 1. - ((atmosphere_2.radius - atmosphere.radius) / thickness);
-	const int steps = STEPS; // +int(32. * r);
+	const int steps = global_ubo.sdfstep; // +int(32. * r);
 	float march_step = thickness / float(steps);
 
 	vec3 dir_step = eye.direction / eye.direction.z * march_step;
@@ -1062,9 +1062,9 @@ vec4 render_clouds(Ray eye)
 
 	for (int i = 0; i < steps; i++) {
 		float h = float(i) / float(steps);
-		float dens = density(pos, WIND, h);
+		float dens = density(pos, global_ubo.sdfwindvec.xyz * -global_ubo.time, h);
 
-		float T_i = exp(-ABSORPTION * dens * march_step);
+		float T_i = exp(-global_ubo.sdfabsorption * dens * march_step);
 		T *= T_i;
 		if (T < .01) break;
 
@@ -1112,39 +1112,13 @@ void SampleCloudsSDFVisibility(out float alpha, Ray ray)
 	intersect_plane(ray, ground, hit);
 
 	if (hit.material_id == 1 && hit.t > 0) {
-		//float cb = checkboard_pattern(hit.origin.xy, .025);
-		//env = mix(vec3(.6, .6, .6), vec3(.75, .75, .75), cb);
 		alpha = 1.0;
 	}
 	else
 	{
 		Ray eye = ray;
-		/*
-		vec3 col = vec3(0);
-		vec3 SUN_DIR = normalize( vec3(0.0,1.0,0.0) );
-		float kOrbit = pow(SUN_DIR.z,0.03);
-		float v = 1.0/( 2. * ( 1. + eye.direction.y ) );
-		vec2 xy = vec2(eye.direction.z * v, eye.direction.x * v);
-		eye.direction.y += global_ubo.time*.002;
-		float s = noiseF(eye.direction.xy*134.0);
-		s += star_noise(eye.direction.xy*370.);
-		s += star_noise(eye.direction.xy*870.);
-		s = pow(s,19.0) * 0.00000001 * max(eye.direction.z, 0.0);
-		if (s > 0.0)
-		{
-			vec3 backStars = vec3((1.0-sin(xy.x*20.0+global_ubo.time*13.0*eye.direction.x+xy.y*30.0))*.5*s,s, s);
-			col += (1.0 - kOrbit) * backStars;
-		}
-		*/
-		//vec3 sky = env;//mix(env, vec3((1./255.)*18,(1./255.)*2,(1./255.)*42)*0.03, .5);
 		vec4 cld = render_clouds(ray);
-
-		// Colorize Clouds
-		//cld.rgb *= (vec3((1./255.)*18,(1./255.)*2,(1./255.)*42)*0.13);
-
-		//env = mix(sky, cld.rgb / (0.000001 + cld.a), cld.a);
-
-		alpha = clamp(1.0 - cld.a,.0,1.);
+		alpha = clamp(1.0 - cld.a, global_ubo.sdfsunfluxmin, global_ubo.sdfsunfluxmax);
 	}
 
 }
@@ -1186,10 +1160,14 @@ void SampleCloudsSDF(inout vec3 env, Ray ray)
 		}
 		*/
 		vec3 sky = env;
+		if (global_ubo.sdfskycolorize == 1)
+			sky = global_ubo.sdfskycolor;
+
 		vec4 cld = render_clouds(ray);
 
 		// Colorize Clouds
-		//cld.rgb *= (vec3((1./255.)*18,(1./255.)*2,(1./255.)*42)*0.13);
+		if(global_ubo.sdfcloudcolorize == 1)
+			cld.rgb *= global_ubo.sdfcloudcolor;
 
 		env = mix(sky, cld.rgb / (0.000001 + cld.a), cld.a);
 

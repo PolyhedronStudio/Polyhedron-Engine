@@ -51,7 +51,27 @@ struct
 	// TODO: I don't belong here
 	cvar_t* skyPlanet;
 	cvar_t* sdfclouds;
-
+	cvar_t* sdfstep;
+	cvar_t* sdfcoverage;
+	cvar_t* sdfthickness;
+	cvar_t* sdfabsorption;
+	cvar_t* sdffmbfreq;
+	cvar_t* sdfwindvec_x;
+	cvar_t* sdfwindvec_y;
+	cvar_t* sdfwindvec_z;
+	cvar_t* sdfcloudcolorize;
+	cvar_t* sdfcloudcolorr;
+	cvar_t* sdfcloudcolorg;
+	cvar_t* sdfcloudcolorb;
+	cvar_t* sdfskycolorize;
+	cvar_t* sdfskycolorr;
+	cvar_t* sdfskycolorg;
+	cvar_t* sdfskycolorb;
+	cvar_t* sdfcloudinner;
+	cvar_t* sdfcloudouter;
+	cvar_t* sdfsunfluxmin;
+	cvar_t* sdfsunfluxmax;
+	
 } god_rays;
 
 static void create_image_views();
@@ -60,15 +80,15 @@ static void create_pipelines();
 static void create_descriptor_set();
 static void update_descriptor_set();
 
-extern cvar_t *physical_sky_space;
+extern cvar_t* physical_sky_space;
 
 #define MAX_CSV_VALUES 32
 typedef struct CSV_values_s {
-	char * values[MAX_CSV_VALUES];
+	char* values[MAX_CSV_VALUES];
 	int num_values;
 } CSV_values_t;
 
-static qerror_t getStringValue(CSV_values_t const * csv, int index, char * dest)
+static qerror_t getStringValue(CSV_values_t const* csv, int index, char* dest)
 {
 	if (index >= csv->num_values)
 		return Q_ERR_FAILURE;
@@ -76,7 +96,7 @@ static qerror_t getStringValue(CSV_values_t const * csv, int index, char * dest)
 	return Q_ERR_SUCCESS;
 }
 
-static qerror_t getFloatValue(CSV_values_t const * csv, int index, float * dest)
+static qerror_t getFloatValue(CSV_values_t const* csv, int index, float* dest)
 {
 	dest[0] = '\0';
 	if (index >= csv->num_values || csv->values[index][0] == '\0')
@@ -85,7 +105,7 @@ static qerror_t getFloatValue(CSV_values_t const * csv, int index, float * dest)
 	return Q_ERR_SUCCESS;
 }
 
-static qerror_t getIntValue(CSV_values_t const * csv, int index, int * dest)
+static qerror_t getIntValue(CSV_values_t const* csv, int index, int* dest)
 {
 	if (index >= csv->num_values || csv->values[index][0] == '\0')
 		return Q_ERR_FAILURE;
@@ -93,7 +113,7 @@ static qerror_t getIntValue(CSV_values_t const * csv, int index, int * dest)
 	return Q_ERR_SUCCESS;
 }
 
-static qerror_t getFlagValue(CSV_values_t const * csv, int index, uint32_t * flags, uint32_t mask)
+static qerror_t getFlagValue(CSV_values_t const* csv, int index, uint32_t* flags, uint32_t mask)
 {
 	if (index >= csv->num_values || csv->values[index][0] == '\0')
 		return Q_ERR_FAILURE;
@@ -102,11 +122,11 @@ static qerror_t getFlagValue(CSV_values_t const * csv, int index, uint32_t * fla
 	return Q_ERR_SUCCESS;
 }
 
-static qerror_t parse_CSV_line(char * linebuf, CSV_values_t * csv)
+static qerror_t parse_CSV_line(char* linebuf, CSV_values_t* csv)
 {
 	static char delim = ',';
 
-	char * cptr = linebuf, c;
+	char* cptr = linebuf, c;
 	int inquote = 0;
 
 	int index = 0;
@@ -133,7 +153,7 @@ static qerror_t parse_CSV_line(char * linebuf, CSV_values_t * csv)
 	return Q_ERR_SUCCESS;
 }
 
-typedef struct fog_user_item_s{
+typedef struct fog_user_item_s {
 	char filename[512];
 	int enabled;
 	float tintRed;
@@ -151,22 +171,22 @@ typedef struct fog_user_table_s {
 	int numberFogItems;
 } fog_user_table_s_t;
 
-static qerror_t LoadFogByMapTable(char const * filename, fog_user_table_s_t* table)
+static qerror_t LoadFogByMapTable(char const* filename, fog_user_table_s_t* table)
 {
 	qerror_t status = Q_ERR_SUCCESS;
-	
+
 	table->numberFogItems = 0;
 
-	byte * buffer = NULL; ssize_t buffer_size = 0;
+	byte* buffer = NULL; ssize_t buffer_size = 0;
 	buffer_size = FS_LoadFile(filename, (void**)&buffer);
 	if (buffer == NULL)
 	{
 		Com_EPrintf("cannot load fogbymap.csv table '%s'\n", filename);
 		return Q_ERR_FAILURE;
 	}
-		
+
 	int currentLine = 0;
-	char const * ptr = (char const *)buffer;
+	char const* ptr = (char const*)buffer;
 	char linebuf[MAX_QPATH * 3];
 	while (sgets(linebuf, sizeof(linebuf), &ptr))
 	{
@@ -174,7 +194,7 @@ static qerror_t LoadFogByMapTable(char const * filename, fog_user_table_s_t* tab
 		if (currentLine == 0 && strncmp(linebuf, "MapName", 7) == 0)
 			continue;
 
-		fog_user_item_s_t * fogItem = &table->fog[table->numberFogItems];
+		fog_user_item_s_t* fogItem = &table->fog[table->numberFogItems];
 
 		fogItem->enabled = 0;
 		fogItem->tintRed = 1;
@@ -208,7 +228,7 @@ static qerror_t LoadFogByMapTable(char const * filename, fog_user_table_s_t* tab
 		}
 		++currentLine;
 	}
-		
+
 	FS_FreeFile(buffer);
 
 	return status;
@@ -239,7 +259,27 @@ VkResult vkpt_initialize_god_rays()
 	// TODO: I don't belong here
 	god_rays.skyPlanet = Cvar_Get("skyplanet", "1", 0);
 	god_rays.sdfclouds = Cvar_Get("sdfclouds", "0", 0);
-	
+	god_rays.sdfstep = Cvar_Get("sdfstep", "15", 0);
+	god_rays.sdfcoverage = Cvar_Get("sdfcoverage", "0.5", 0);
+	god_rays.sdfthickness = Cvar_Get("sdfthickness", "15.0", 0);
+	god_rays.sdfabsorption = Cvar_Get("sdfabsorption", "1.030725", 0);
+	god_rays.sdffmbfreq = Cvar_Get("sdffmbfreq", "2.76434", 0);
+	god_rays.sdfwindvec_x = Cvar_Get("sdfwindvec_x", "0.0", 0);
+	god_rays.sdfwindvec_y = Cvar_Get("sdfwindvec_y", "0.1", 0);
+	god_rays.sdfwindvec_z = Cvar_Get("sdfwindvec_z", "0.0", 0);
+	god_rays.sdfcloudcolorize = Cvar_Get("sdfcloudcolorize", "0", 0);
+	god_rays.sdfcloudcolorr = Cvar_Get("sdfcloudcolorr", "0", 0);
+	god_rays.sdfcloudcolorg = Cvar_Get("sdfcloudcolorg", "0", 0);
+	god_rays.sdfcloudcolorb = Cvar_Get("sdfcloudcolorb", "0", 0);
+	god_rays.sdfskycolorize = Cvar_Get("sdfskycolorize", "0", 0);
+	god_rays.sdfskycolorr = Cvar_Get("sdfskycolorr", "0", 0);
+	god_rays.sdfskycolorg = Cvar_Get("sdfskycolorg", "0", 0);
+	god_rays.sdfskycolorb = Cvar_Get("sdfskycolorb", "0", 0);
+	god_rays.sdfcloudinner = Cvar_Get("sdfcloudinner", "40.0", 0);
+	god_rays.sdfcloudouter = Cvar_Get("sdfcloudouter", "80.0", 0);
+	god_rays.sdfsunfluxmin = Cvar_Get("sdfsunfluxmin", "0.0", 0);
+	god_rays.sdfsunfluxmax = Cvar_Get("sdfsunfluxmax", "1.0", 0);
+
 	// Load fog by map csv file make stucture
 	fogbynametable.numberFogItems = 0;
 	LoadFogByMapTable("fogbymap.csv", &fogbynametable);
@@ -256,12 +296,12 @@ void SetFogByMap(const char* name)
 			god_rays.fogEnable = Cvar_Set("gr_enablefog", va("%d", fogbynametable.fog[i].enabled));
 			god_rays.fogTintColorRed = Cvar_Set("gr_fogtintr", va("%f", fogbynametable.fog[i].tintRed));
 			god_rays.fogTintColorGreen = Cvar_Set("gr_fogtintg", va("%f", fogbynametable.fog[i].tintGreen));
-			god_rays.fogTintColorBlue =	Cvar_Set("gr_fogtintb", va("%f", fogbynametable.fog[i].tintBlue));
-			god_rays.fogTintPower =	Cvar_Set("gr_fogtintpow", va("%f", fogbynametable.fog[i].tintPower));
+			god_rays.fogTintColorBlue = Cvar_Set("gr_fogtintb", va("%f", fogbynametable.fog[i].tintBlue));
+			god_rays.fogTintPower = Cvar_Set("gr_fogtintpow", va("%f", fogbynametable.fog[i].tintPower));
 			god_rays.fogDensityRoot = Cvar_Set("gr_fogdensity", va("%f", fogbynametable.fog[i].densityRoot));
 			god_rays.fogPushBackDist = Cvar_Set("gr_fogpushback", va("%f", fogbynametable.fog[i].pushBackDist));
 			god_rays.fogMode = Cvar_Set("gr_fogmode", va("%f", fogbynametable.fog[i].mode));
-					
+
 			break;
 		}
 	}
@@ -280,7 +320,7 @@ VkResult vkpt_god_rays_create_pipelines()
 	create_pipeline_layout();
 	create_pipelines();
 	create_descriptor_set();
-	
+
 	// this is a noop outside a shader reload
 	update_descriptor_set();
 
@@ -300,7 +340,7 @@ VkResult vkpt_god_rays_destroy_pipelines()
 		vkDestroyPipelineLayout(qvk.device, god_rays.pipeline_layout, NULL);
 		god_rays.pipeline_layout = NULL;
 	}
-	
+
 	if (god_rays.descriptor_set_layout) {
 		vkDestroyDescriptorSetLayout(qvk.device, god_rays.descriptor_set_layout, NULL);
 		god_rays.descriptor_set_layout = NULL;
@@ -406,10 +446,10 @@ void vkpt_record_god_rays_filter_command_buffer(VkCommandBuffer command_buffer)
 }
 
 void vkpt_god_rays_prepare_ubo(
-	QVKUniformBuffer_t * ubo,
+	QVKUniformBuffer_t* ubo,
 	const aabb_t* world_aabb,
 	const float* proj,
-	const float* view, 
+	const float* view,
 	const float* shadowmap_viewproj,
 	float shadowmap_depth_scale)
 {
@@ -425,7 +465,7 @@ void vkpt_god_rays_prepare_ubo(
 	ubo->god_rays_intensity = max(0.f, god_rays.intensity->value);
 	ubo->god_rays_eccentricity = god_rays.eccentricity->value;
 
-	ubo->god_rays_fogEnable = god_rays.fogEnable->value;  
+	ubo->god_rays_fogEnable = god_rays.fogEnable->value;
 	ubo->god_rays_fogTintColorRed = god_rays.fogTintColorRed->value;
 	ubo->god_rays_fogTintColorGreen = god_rays.fogTintColorGreen->value;
 	ubo->god_rays_fogTintColorBlue = god_rays.fogTintColorBlue->value;
@@ -437,6 +477,27 @@ void vkpt_god_rays_prepare_ubo(
 	// TODO: I don't belong here
 	ubo->skyPlanet = god_rays.skyPlanet->value;
 	ubo->sdfclouds = god_rays.sdfclouds->value;
+	ubo->sdfstep = god_rays.sdfstep->value;
+	ubo->sdfcoverage = god_rays.sdfcoverage->value;
+	ubo->sdfthickness = god_rays.sdfthickness->value;
+	ubo->sdfabsorption = god_rays.sdfabsorption->value;
+	ubo->sdffmbfreq = god_rays.sdffmbfreq->value;
+	ubo->sdfwindvec[0] = god_rays.sdfwindvec_x->value;
+	ubo->sdfwindvec[1] = god_rays.sdfwindvec_y->value;
+	ubo->sdfwindvec[2] = god_rays.sdfwindvec_z->value;
+	ubo->sdfwindvec[3] = 0;
+	ubo->sdfcloudcolorize = god_rays.sdfcloudcolorize->value;
+	ubo->sdfcloudcolor[0] = god_rays.sdfcloudcolorr->value;
+	ubo->sdfcloudcolor[1] = god_rays.sdfcloudcolorg->value;
+	ubo->sdfcloudcolor[2] = god_rays.sdfcloudcolorb->value;
+	ubo->sdfskycolorize = god_rays.sdfskycolorize->value;
+	ubo->sdfskycolor[0] = god_rays.sdfskycolorr->value;
+	ubo->sdfskycolor[1] = god_rays.sdfskycolorg->value;
+	ubo->sdfskycolor[2] = god_rays.sdfskycolorb->value;
+	ubo->sdfcloudinner = god_rays.sdfcloudinner->value;
+	ubo->sdfcloudouter = god_rays.sdfcloudouter->value;
+	ubo->sdfsunfluxmin = god_rays.sdfsunfluxmin->value;
+	ubo->sdfsunfluxmax = god_rays.sdfsunfluxmax->value;
 
 	// Shadow parameters
 	memcpy(ubo->shadow_map_VP, shadowmap_viewproj, 16 * sizeof(float));
@@ -473,7 +534,7 @@ static void create_pipeline_layout()
 	bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	bindings[0].descriptorCount = 1;
 	bindings[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-	
+
 	const VkDescriptorSetLayoutCreateInfo set_layout_create_info = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
 		.bindingCount = LENGTH(bindings),
@@ -579,7 +640,7 @@ static void update_descriptor_set()
 		.imageView = god_rays.shadow_image_view,
 		.sampler = god_rays.shadow_sampler
 	};
-	
+
 	VkWriteDescriptorSet writes[1] = {
 		{
 			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -599,5 +660,5 @@ qboolean vkpt_god_rays_enabled(const sun_light_t* sun_light)
 	return god_rays.enable->integer
 		&& god_rays.intensity->value > 0.f
 		&& sun_light->visible;
-		//&& !physical_sky_space->integer;  // god rays look weird in space because they also appear outside of the station
+	//&& !physical_sky_space->integer;  // god rays look weird in space because they also appear outside of the station
 }

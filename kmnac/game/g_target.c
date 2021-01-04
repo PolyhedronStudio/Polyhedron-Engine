@@ -4922,3 +4922,159 @@ void SP_target_sun(edict_t* self)
 
 }
 
+void target_clouds_use(edict_t* self, edict_t* other, edict_t* activator)
+{
+	char buffer[MAX_QPATH + 1];
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfclouds %d\n", self->sdfclouds);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfstep %d\n", self->sdfstep);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfcoverage %f\n", self->sdfcoverage);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfthickness %f\n", self->sdfthickness);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfabsorption %f\n", self->sdfabsorption);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdffmbfreq %f\n", self->sdffmbfreq);
+	stuffcmd(&g_edicts[1], buffer);
+	
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfwindvec_x %f\n", self->sdfwindvec[0]);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfwindvec_y %f\n", self->sdfwindvec[1]);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfwindvec_z %f\n", self->sdfwindvec[2]);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfcloudcolorize %d\n", self->sdfcloudcolorize);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfcloudcolorr %f\n", self->sdfcloudcolor[0]);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfcloudcolorg %f\n", self->sdfcloudcolor[1]);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfcloudcolorb %f\n", self->sdfcloudcolor[2]);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfskycolorize %d\n", self->sdfskycolorize);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfskycolorr %f\n", self->sdfskycolor[0]);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfskycolorg %f\n", self->sdfskycolor[1]);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfskycolorb %f\n", self->sdfskycolor[2]);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfcloudinner %f\n", self->sdfcloudinner);
+	stuffcmd(&g_edicts[1], buffer);
+	
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfcloudouter %f\n", self->sdfcloudouter);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfsunfluxmin %f\n", self->sdfsunfluxmin);
+	stuffcmd(&g_edicts[1], buffer);
+
+	memset(buffer, 0, MAX_QPATH);
+	sprintf(buffer, "sdfsunfluxmax %f\n", self->sdfsunfluxmax);
+	stuffcmd(&g_edicts[1], buffer);
+
+	self->count--;
+	if (!self->count) {
+		self->think = G_FreeEdict;
+		self->nextthink = level.time + 1;
+	}
+}
+
+void SP_target_clouds(edict_t* self)
+{
+	self->sdfclouds = st.sdfclouds;
+	self->sdfstep = st.sdfstep;
+	
+	self->sdfwindvec[0] = st.sdfwindvec[0];
+	self->sdfwindvec[1] = st.sdfwindvec[1];
+	self->sdfwindvec[2] = st.sdfwindvec[2];
+
+	self->sdfcoverage = atof(st.sdfcoverage);
+	self->sdfthickness = atof(st.sdfthickness);
+	self->sdfabsorption = atof(st.sdfabsorption);
+	self->sdffmbfreq = atof(st.sdffmbfreq);
+
+	self->sdfcloudinner = atof(st.sdfcloudinner);
+	self->sdfcloudouter = atof(st.sdfcloudouter);
+	self->sdfsunfluxmin = atof(st.sdfsunfluxmin);
+	self->sdfsunfluxmax = atof(st.sdfsunfluxmax);
+
+	self->sdfcloudcolorize = st.sdfcloudcolorize;
+	self->sdfcloudcolor[0] = st.sdfcloudcolor[0];
+	self->sdfcloudcolor[1] = st.sdfcloudcolor[1];
+	self->sdfcloudcolor[2] = st.sdfcloudcolor[2];
+
+	self->sdfskycolorize = st.sdfskycolorize;
+	self->sdfskycolor[0] = st.sdfskycolor[0];
+	self->sdfskycolor[1] = st.sdfskycolor[1];
+	self->sdfskycolor[2] = st.sdfskycolor[2];
+	
+	self->delay = (float)st.gr_delay * 1000.0f;
+
+	self->clouds = gi.TagMalloc(64 + 1, TAG_LEVEL);
+	strcpy(self->clouds, st.clouds);
+
+	self->use = target_clouds_use;
+
+}
+
+/*
+//
+// TARGET_CLOUDS
+@PointClass base(Appearflags1, Targetname, Count) color(255 255 0) size(-8 -8 -8, 8 8 8) = target_clouds : "cloudControl field"
+[
+	 sdfclouds(integer) : "Clouds>On/Off" : 0
+	 sdfstep(integer) : "Cloud>Number ray march steps" : 15
+	 sdfcoverage(string) : "Cloud>Coverage" : 0.50
+	 sdfthickness(string) : "Cloud>Thickness" : 15.0
+	 sdfabsorption(string) : "Cloud>absorption" : 1.030725
+	 sdffmbfreq(string) : "FMB>Freq Root" : 2.76434
+	 sdfwindvec(string) : "Wind>Direction" : 0 0.1 0
+	 sdfcloudcolorize(integer) : "Cloud Override>On/Off" : 0
+	 sdfcloudcolor(color1) : "Cloud Override>RGB color" : "1.0 1.0 1.0"
+	 sdfskycolorize(integer) : "Skybox Override>On/Off" : 0
+	 sdfskycolor(color1) : "Skybox Override>RGB color" : "1.0 1.0 1.0"
+	 sdfcloudinner(string) : "Inner Atmosphere>Radius" : 50
+	 sdfcloudouter(string) : "Outter Atmosphere>Radius" : 100
+	 sdfsunfluxmin(string) : "Sun>Min dim by clouds" : 0.0
+	 sdfsunfluxmax(string) : "Sun>Max brite by clouds" : 1.0
+	 gr_delay(integer) : "Delay>ramp time (sec)" : 1
+	 clouds(string) : "Clouds>Info" : "Enter Description"
+]
+*/

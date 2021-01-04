@@ -964,6 +964,8 @@
 {"SP_target_godrays", (byte*)SP_target_godrays },
 {"target_sun_use", (byte*)target_sun_use },
 {"SP_target_sun", (byte*)SP_target_sun },
+{"target_clouds_use", (byte*)target_clouds_use },
+{"SP_target_clouds", (byte*)SP_target_clouds },
 {"target_lightramp_use", (byte *)target_lightramp_use},
 {"target_lightramp_think", (byte *)target_lightramp_think},
 {"SP_target_laser", (byte *)SP_target_laser},
