@@ -1631,7 +1631,7 @@ void weapon_shotgun_fire (edict_t *ent, qboolean altfire)
 	vec3_t		forward, right;
 	vec3_t		offset;
 	int			damage = sk_shotgun_damage->value;
-	int			kick = 8;
+	int			kick = 12;
 
 	if (ent->client->ps.gunframe == 9)
 	{
