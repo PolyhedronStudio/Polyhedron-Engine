@@ -911,7 +911,7 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
-	fire_grenade (ent, start, forward, damage, sk_grenade_speed->value, 2.5, radius, altfire);
+	fire_grenade (ent, start, forward, damage, sk_grenade_speed->value, 1.75, radius, altfire);
 	// temporary crap to test grenade bounce
 //	fire_grenade (ent, start, forward, damage, sk_grenade_speed->value, 25, radius);
 
@@ -1220,7 +1220,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 	VectorSet(offset, 48, 0, ent->viewheight-7);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	fire_nail(ent, start, forward, damage, 1000, 0, false, 0);
+	fire_nail(ent, start, forward, damage, 1500, 0, false, 0);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1342,7 +1342,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 		const int SUBFRAME = (ent->client->ps.gunframe - FIRE_START) % FIRE_LENGTH;
 
 		// number of frames before we can fire again
-		const int FIRE_DELAY = 3;
+		const int FIRE_DELAY = 2;
 
 		if (SUBFRAME >= FIRE_DELAY)
 		{
@@ -1687,7 +1687,7 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 	vec3_t		offset;
 	vec3_t		v;
 	int			damage = sk_sshotgun_damage->value;
-	int			kick = 48;
+	int			kick = 32;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 

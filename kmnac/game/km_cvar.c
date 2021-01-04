@@ -230,12 +230,12 @@ void InitLithiumVars (void)
 	sk_blaster_speed = gi.cvar("sk_blaster_speed", "1000", 0);
 	sk_blaster_color = gi.cvar("sk_blaster_color", "1", 0);
 
-	sk_shotgun_damage = gi.cvar("sk_shotgun_damage", "6", 0);
+	sk_shotgun_damage = gi.cvar("sk_shotgun_damage", "5", 0);
 	sk_shotgun_count = gi.cvar("sk_shotgun_count", "12", 0);
 	sk_shotgun_hspread = gi.cvar("sk_shotgun_hspread", "135", 0);
 	sk_shotgun_vspread = gi.cvar("sk_shotgun_vspread", "135", 0);
 
-	sk_sshotgun_damage = gi.cvar("sk_sshotgun_damage", "8", 0);
+	sk_sshotgun_damage = gi.cvar("sk_sshotgun_damage", "7", 0);
 	sk_sshotgun_count = gi.cvar("sk_sshotgun_count", "24", 0);
 	sk_sshotgun_hspread = gi.cvar("sk_sshotgun_hspread", "1200", 0);
 	sk_sshotgun_vspread = gi.cvar("sk_sshotgun_vspread", "1200", 0);
@@ -251,7 +251,7 @@ void InitLithiumVars (void)
 
 	sk_grenade_damage = gi.cvar("sk_grenade_damage", "120", 0);
 	sk_grenade_radius = gi.cvar("sk_grenade_radius", "160", 0);
-	sk_grenade_speed = gi.cvar("sk_grenade_speed", "600", 0);
+	sk_grenade_speed = gi.cvar("sk_grenade_speed", "700", 0);
 
 	sk_hand_grenade_damage = gi.cvar("sk_hand_grenade_damage", "125", 0);
 	sk_hand_grenade_radius = gi.cvar("sk_hand_grenade_radius", "165", 0);
@@ -282,7 +282,7 @@ void InitLithiumVars (void)
 	sk_jump_kick_damage = gi.cvar("sk_jump_kick_damage", "10", 0);
 
 	// DM start values
-	sk_dm_start_shells = gi.cvar("sk_dm_start_shells", "0", 0);
+	sk_dm_start_shells = gi.cvar("sk_dm_start_shells", "25", 0);
 	sk_dm_start_bullets = gi.cvar("sk_dm_start_bullets", "0", 0);
 	sk_dm_start_rockets = gi.cvar("sk_dm_start_rockets", "0", 0);
 	sk_dm_start_homing = gi.cvar("sk_dm_start_homing", "0", 0);
@@ -290,7 +290,7 @@ void InitLithiumVars (void)
 	sk_dm_start_cells = gi.cvar("sk_dm_start_cells", "0", 0);
 	sk_dm_start_slugs = gi.cvar("sk_dm_start_slugs", "0", 0);
 
-	sk_dm_start_shotgun = gi.cvar("sk_dm_start_shotgun", "0", 0);
+	sk_dm_start_shotgun = gi.cvar("sk_dm_start_shotgun", "1", 0);
 	sk_dm_start_sshotgun = gi.cvar("sk_dm_start_sshotgun", "0", 0);
 	sk_dm_start_machinegun = gi.cvar("sk_dm_start_machinegun", "0", 0);
 	sk_dm_start_chaingun = gi.cvar("sk_dm_start_chaingun", "0", 0);
