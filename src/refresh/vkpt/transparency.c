@@ -547,7 +547,7 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 	// TODO: remove vkpt_refdef.fd, it's better to calculate it from the view matrix
 	const vec3_t view_origin = { vkpt_refdef.fd->vieworg[0], vkpt_refdef.fd->vieworg[1], vkpt_refdef.fd->vieworg[2] };
 
-	const size_t particle_vertex_data_size = transparency.particle_num * 4 * TR_POSITION_SIZE;
+	const size_t particle_vertex_data_size = transparency.particle_num * 4L * TR_POSITION_SIZE;
 	const size_t beam_vertex_data_size = transparency.beam_num * 4 * TR_POSITION_SIZE;
 	const size_t sprite_vertex_offset = transparency.vertex_position_host_offset + particle_vertex_data_size + beam_vertex_data_size;
 
@@ -683,10 +683,10 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 			}
 		}
 
-		VectorAdd3(e->origin, down, left, vertex_positions[0]);
-		VectorAdd3(e->origin, up, left, vertex_positions[1]);
-		VectorAdd3(e->origin, up, right, vertex_positions[2]);
-		VectorAdd3(e->origin, down, right, vertex_positions[3]);
+		//VectorAdd3(e->origin, down, left, vertex_positions[0]);
+		//VectorAdd3(e->origin, up, left, vertex_positions[1]);
+		//VectorAdd3(e->origin, up, right, vertex_positions[2]);
+		//VectorAdd3(e->origin, down, right, vertex_positions[3]);
 
 		vertex_positions += 4;
 		sprite_info += TR_SPRITE_INFO_SIZE / sizeof(int);
