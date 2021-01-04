@@ -3080,6 +3080,29 @@ sun(string) : "Sun>Info" : "Enter Description"
 ]
 
 //
+// TARGET_CLOUDS
+@PointClass base(Appearflags1, Targetname, Count) color(255 255 0) size(-8 -8 -8, 8 8 8) = target_clouds : "cloudControl field"
+[
+	sdfclouds(integer) : "Clouds>On/Off" : 0
+	sdfstep(integer) : "Cloud>Number ray march steps" : 15
+	sdfcoverage(string) : "Cloud>Coverage" : 0.50
+	sdfthickness(string) : "Cloud>Thickness" : 15.0
+	sdfabsorption(string) : "Cloud>absorption" : 1.030725
+	sdffmbfreq(string) : "FMB>Freq Root" : 2.76434
+	sdfwindvec(string) : "Wind>Direction" : 0 0.1 0
+	sdfcloudcolorize(integer) : "Cloud Override>On/Off" : 0
+	sdfcloudcolor(color1) : "Cloud Override>RGB color" : "1.0 1.0 1.0"
+	sdfskycolorize(integer) : "Skybox Override>On/Off" : 0
+	sdfskycolor(color1) : "Skybox Override>RGB color" : "1.0 1.0 1.0"
+	sdfcloudinner(string) : "Inner Atmosphere>Radius" : 50
+	sdfcloudouter(string) : "Outter Atmosphere>Radius" : 100
+	sdfsunfluxmin(string) : "Sun>Min dim by clouds" : 0.0
+	sdfsunfluxmax(string) : "Sun>Max brite by clouds" : 1.0
+	gr_delay(integer) : "Delay>ramp time (sec)" : 1
+	clouds(string) : "Clouds>Info" : "Enter Description"
+]
+
+//
 // TARGET_FOG
 @PointClass base(Appearflags, Targetname, Count, Angles1) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_fog : "Fog maker"
 [

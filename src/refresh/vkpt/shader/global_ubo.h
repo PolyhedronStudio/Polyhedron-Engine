@@ -175,9 +175,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogPushBackDist) \
     GLOBAL_UBO_VAR_LIST_DO(int,             god_rays_fogMode) \
     GLOBAL_UBO_VAR_LIST_DO(int,             skyPlanet) \
-    GLOBAL_UBO_VAR_LIST_DO(int,             skyPlanetPad) \
+    GLOBAL_UBO_VAR_LIST_DO(int,             sdfstep) \
     GLOBAL_UBO_VAR_LIST_DO(int,             sdfclouds) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             rgb_noise256_map) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           sdfcoverage) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           sdfthickness) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           sdfabsorption) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           sdffmbfreq) \
+	GLOBAL_UBO_VAR_LIST_DO(vec4,            sdfwindvec) \
+    GLOBAL_UBO_VAR_LIST_DO(vec3,            sdfcloudcolor) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           sdfcloudcolorize) \
+    GLOBAL_UBO_VAR_LIST_DO(vec3,            sdfskycolor) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           sdfskycolorize) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           sdfcloudinner) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           sdfcloudouter) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           sdfsunfluxmin) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           sdfsunfluxmax) \
     \
 	GLOBAL_UBO_VAR_LIST_DO(int,             num_cameras) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             screen_image_width) \

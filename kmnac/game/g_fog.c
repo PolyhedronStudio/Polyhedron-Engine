@@ -44,6 +44,8 @@ void target_godrays_use(edict_t* self, edict_t* other, edict_t* activator);
 void SP_target_godrays(edict_t* self);
 void target_sun_use(edict_t* self, edict_t* other, edict_t* activator);
 void SP_target_sun(edict_t* self);
+void SP_target_clouds(edict_t* self);
+void target_sun_clouds(edict_t* self, edict_t* other, edict_t* activator);
 /*
 //#ifdef KMQUAKE2_ENGINE_MOD
 //#define NEW_FOGSYS
