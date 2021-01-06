@@ -683,7 +683,8 @@ void P_FallingDamage (edict_t *ent)
 		ent->client->ctf_grapplestate > CTF_GRAPPLE_STATE_FLY))
 		return;
 //ZOID
-
+	
+	
 	// never take falling damage if completely underwater
 	if (ent->waterlevel == 3)
 		return;
@@ -694,6 +695,12 @@ void P_FallingDamage (edict_t *ent)
 
 	if (delta < 1)
 		return;
+
+	if (deathmatch->value)
+	{
+		delta *= 0.40;
+		//return; // "No damage at all" just return here
+	}
 
 	// Lazarus: Changed here to NOT play footstep sounds if ent isn't on the ground.
 	//          So player will no longer play footstep sounds when descending a ladder.
