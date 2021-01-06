@@ -933,7 +933,7 @@ void Weapon_GrenadeLauncher (edict_t *ent)
 	static int	pause_frames[]	= {34, 51, 59, 0};
 	static int	fire_frames[]	= {6, 0};
 
-	Weapon_Generic (ent, 5, 16, 59, 64, pause_frames, fire_frames, weapon_grenadelauncher_fire);
+	Weapon_Generic (ent, 5, 14, 59, 64, pause_frames, fire_frames, weapon_grenadelauncher_fire);
 }
 
 /*
@@ -1048,7 +1048,7 @@ void Weapon_RocketLauncher (edict_t *ent)
 	static int	pause_frames[]	= {25, 33, 42, 50, 0};
 	static int	fire_frames[]	= {5, 0};
 
-	Weapon_Generic (ent, 4, 12, 50, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
+	Weapon_Generic (ent, 4, 20, 50, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
 }
 
 void Weapon_HomingMissileLauncher_Fire (edict_t *ent, qboolean altfire)
@@ -1207,7 +1207,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 	vec3_t	forward, right;
 	int		damage;
 
-	damage = 20;//sk_rocket_damage->value + (int)(random() * sk_rocket_damage2->value);
+	damage = 30;//sk_rocket_damage->value + (int)(random() * sk_rocket_damage2->value);
 
 	if (is_quad)
 		damage *= 4;
@@ -1220,7 +1220,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 	VectorSet(offset, 48, 0, ent->viewheight-7);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	fire_nail(ent, start, forward, damage, 1500, 0, false, 0);
+	fire_nail(ent, start, forward, damage, 1000, 0, false, 0);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1342,7 +1342,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 		const int SUBFRAME = (ent->client->ps.gunframe - FIRE_START) % FIRE_LENGTH;
 
 		// number of frames before we can fire again
-		const int FIRE_DELAY = 2;
+		const int FIRE_DELAY = 1.8;
 
 		if (SUBFRAME >= FIRE_DELAY)
 		{
@@ -1676,7 +1676,7 @@ void Weapon_Shotgun (edict_t *ent)
 	static int	pause_frames[]	= {22, 28, 34, 0};
 	static int	fire_frames[]	= {8, 9, 0};
 
-	Weapon_Generic (ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
+	Weapon_Generic (ent, 7, 17, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
 }
 
 
@@ -1730,7 +1730,7 @@ void Weapon_SuperShotgun (edict_t *ent)
 	static int	pause_frames[]	= {29, 42, 57, 0};
 	static int	fire_frames[]	= {7, 0};
 
-	Weapon_Generic (ent, 6, 17, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
+	Weapon_Generic (ent, 6, 22, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
 }
 
 

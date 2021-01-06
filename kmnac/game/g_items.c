@@ -1889,7 +1889,7 @@ always owned, never in the world
 		WEAP_SHOTGUN,
 		NULL,
 		0,
-/* precache */ "weapons/shotgf1b.wav weapons/shotgr1b.wav"
+ /* precache */ "weapons/shotgf1b.wav"
 	},
 
 /*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
