@@ -260,7 +260,7 @@ void InitLithiumVars (void)
 	sk_rocket_damage2 = gi.cvar("sk_rocket_damage2", "20", 0);
 	sk_rocket_rdamage = gi.cvar("sk_rocket_rdamage", "120", 0);
 	sk_rocket_radius = gi.cvar("sk_rocket_radius", "140", 0);
-	sk_rocket_speed = gi.cvar("sk_rocket_speed", "650", 0);
+	sk_rocket_speed = gi.cvar("sk_rocket_speed", "900", 0);
 
 	sk_hyperblaster_damage = gi.cvar("sk_hyperblaster_damage", "10", 0);
 	sk_hyperblaster_damage_dm = gi.cvar("sk_hyperblaster_damage_dm", "15", 0);
