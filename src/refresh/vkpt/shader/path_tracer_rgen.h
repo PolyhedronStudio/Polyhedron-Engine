@@ -1133,13 +1133,13 @@ void SampleCloudsSDF(inout vec3 env, Ray ray)
 
 	ray.origin = vec3(0);
 
-	intersect_plane(ray, ground, hit);
+	//intersect_plane(ray, ground, hit);
 
-	if (hit.material_id == 1 && hit.t > 0) {
+	//if (hit.material_id == 1 && hit.t > 0) {
 		//float cb = checkboard_pattern(hit.origin.xy, .025);
 		//env = mix(vec3(.6, .6, .6), vec3(.75, .75, .75), cb);
-	}
-	else
+	//}
+	//else
 	{
 		Ray eye = ray;
 		/*
