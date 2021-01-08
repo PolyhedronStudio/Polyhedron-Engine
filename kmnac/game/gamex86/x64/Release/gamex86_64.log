@@ -1,5 +1,5 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(453,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
-  km_cvar.c
+  p_weapon.c
      Creating library ../../../nac\gamex86_64.lib and object ../../../nac\gamex86_64.exp
   Generating code
   1 of 1896 functions (<0.1%) were compiled, the rest were copied from previous compilation.

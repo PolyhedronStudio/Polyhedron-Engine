@@ -230,10 +230,10 @@ void InitLithiumVars (void)
 	sk_blaster_speed = gi.cvar("sk_blaster_speed", "1000", 0);
 	sk_blaster_color = gi.cvar("sk_blaster_color", "1", 0);
 
-	sk_shotgun_damage = gi.cvar("sk_shotgun_damage", "4", 0);
+	sk_shotgun_damage = gi.cvar("sk_shotgun_damage", "3", 0);
 	sk_shotgun_count = gi.cvar("sk_shotgun_count", "12", 0);
-	sk_shotgun_hspread = gi.cvar("sk_shotgun_hspread", "175", 0);
-	sk_shotgun_vspread = gi.cvar("sk_shotgun_vspread", "175", 0);
+	sk_shotgun_hspread = gi.cvar("sk_shotgun_hspread", "200", 0);
+	sk_shotgun_vspread = gi.cvar("sk_shotgun_vspread", "200", 0);
 
 	sk_sshotgun_damage = gi.cvar("sk_sshotgun_damage", "7", 0);
 	sk_sshotgun_count = gi.cvar("sk_sshotgun_count", "24", 0);
