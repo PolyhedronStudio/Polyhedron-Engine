@@ -1374,7 +1374,7 @@ void ClientEndServerFrame (edict_t *ent)
 	//
 	xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
 
-	if (xyspeed < 5)
+	if (xyspeed < 5 || !(current_client->ps.pmove.pm_flags & PMF_ON_GROUND))
 	{
 		bobmove = 0;
 		current_client->bobtime = 0;	// start at beginning of cycle again
@@ -1400,14 +1400,18 @@ void ClientEndServerFrame (edict_t *ent)
 
 	if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
 		bobtime *= 2;
-
+	
 	bobcycle = (int)bobtime;
 
 	// Lazarus: vehicle drivers don't bob
-	if(ent->vehicle)
-		bobfracsin = 0.;
+	if (ent->vehicle || !(current_client->ps.pmove.pm_flags & PMF_ON_GROUND))
+	{
+		bobfracsin = 0.0f;
+	}
 	else
-		bobfracsin = fabs(sin(bobtime*M_PI));
+	{
+		bobfracsin = fabs(sin(bobtime * M_PI));
+	}
 
 	// detect hitting the floor
 	P_FallingDamage (ent);
