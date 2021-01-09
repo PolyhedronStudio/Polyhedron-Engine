@@ -235,10 +235,10 @@ void InitLithiumVars (void)
 	sk_shotgun_hspread = gi.cvar("sk_shotgun_hspread", "200", 0);
 	sk_shotgun_vspread = gi.cvar("sk_shotgun_vspread", "200", 0);
 
-	sk_sshotgun_damage = gi.cvar("sk_sshotgun_damage", "7", 0);
+	sk_sshotgun_damage = gi.cvar("sk_sshotgun_damage", "5.6", 0);
 	sk_sshotgun_count = gi.cvar("sk_sshotgun_count", "24", 0);
-	sk_sshotgun_hspread = gi.cvar("sk_sshotgun_hspread", "1200", 0);
-	sk_sshotgun_vspread = gi.cvar("sk_sshotgun_vspread", "1200", 0);
+	sk_sshotgun_hspread = gi.cvar("sk_sshotgun_hspread", "1000", 0);
+	sk_sshotgun_vspread = gi.cvar("sk_sshotgun_vspread", "1000", 0);
 
 	sk_machinegun_damage = gi.cvar("sk_machinegun_damage", "8", 0);
 	sk_machinegun_hspread = gi.cvar("sk_machinegun_hspread", "300", 0);

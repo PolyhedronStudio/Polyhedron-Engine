@@ -1048,7 +1048,7 @@ void Weapon_RocketLauncher (edict_t *ent)
 	static int	pause_frames[]	= {25, 33, 42, 50, 0};
 	static int	fire_frames[]	= {5, 0};
 
-	Weapon_Generic (ent, 4, 19, 50, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
+	Weapon_Generic (ent, 4, 20, 50, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
 }
 
 void Weapon_HomingMissileLauncher_Fire (edict_t *ent, qboolean altfire)
@@ -1220,7 +1220,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 	VectorSet(offset, 48, 0, ent->viewheight-7);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	fire_nail(ent, start, forward, damage, 1000, 0, false, 0);
+	fire_nail(ent, start, forward, damage, 1250, 0, false, 0);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
