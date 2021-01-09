@@ -704,11 +704,18 @@ void P_FallingDamage (edict_t *ent)
 
 	// Lazarus: Changed here to NOT play footstep sounds if ent isn't on the ground.
 	//          So player will no longer play footstep sounds when descending a ladder.
-	if (delta < 7) //Knightmare- was 15, changed to 7
+	if (delta < 3)
 	{
+		gi.sound(ent, CHAN_VOICE, gi.soundindex("player/land1.wav"), .001, ATTN_NORM, 0);
+		return;
+	}
+	else if (delta < 7) //Knightmare- was 15, changed to 7
+	{
+		//ent->s.event = EV_FALLSHORT;
+		gi.sound(ent, CHAN_VOICE, gi.soundindex("player/land1.wav"), .5, ATTN_NORM, 0);
 		if (!(ent->watertype & CONTENTS_MUD) && !ent->vehicle && !ent->turret && (ent->groundentity || PlayerOnFloor(ent)) )
 			ent->s.event = EV_FOOTSTEP; //Knightmare- move Lazarus footsteps client-side
-		return;
+ 		return;
 	}
 
 	ent->client->fall_value = delta*0.5;
@@ -751,13 +758,16 @@ void P_FallingDamage (edict_t *ent)
 	}
 	else if (delta > 15)
 	{
-		ent->s.event = EV_FALLSHORT;
+		gi.sound(ent, CHAN_VOICE, gi.soundindex("player/land1.wav"), .75, ATTN_NORM, 0);
+		//ent->s.event = EV_FALLSHORT;
 		if(world->effects & FX_WORLDSPAWN_ALERTSOUNDS)
 			PlayerNoise(ent,ent->s.origin,PNOISE_SELF);
 		return;
 	}
 	else // if delta > 7
-		ent->s.event = EV_LOUDSTEP; //Knightmare- loud footstep for softer landing
+		gi.sound(ent, CHAN_VOICE, gi.soundindex("player/land1.wav"), .50, ATTN_NORM, 0);
+		 //S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("player/land1.wav"), 1, ATTN_NORM, 0);
+		 //ent->s.event = EV_FALLSHORT; //Knightmare- loud footstep for softer landing
 }
 
 
