@@ -379,7 +379,7 @@ void SV_CalcGunOffset (edict_t *ent)
 	ent->client->ps.gunangles[PITCH] = xyspeed * bobfracsin * 0.005;
 
 	// gun angles from delta movement
-	for (i=0 ; i<3 ; i++)
+	/*for (i=0 ; i<3 ; i++)
 	{
 		delta = ent->client->oldviewangles[i] - ent->client->ps.viewangles[i];
 		if (delta > 180)
@@ -392,8 +392,9 @@ void SV_CalcGunOffset (edict_t *ent)
 			delta = -45;
 		if (i == YAW)
 			ent->client->ps.gunangles[ROLL] += 0.1*delta;
+		
 		ent->client->ps.gunangles[i] += 0.2 * delta;
-	}
+	}*/
 
 	// gun height
 	VectorClear (ent->client->ps.gunoffset);
