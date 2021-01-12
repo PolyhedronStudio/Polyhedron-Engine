@@ -118,6 +118,13 @@ SET(SRC_CLIENT
 #	client/sound/qal/fixed.c
 	client/sound/qal/dynamic.c
 )
+# This is there for when building ONLY the OpenGL renderer, fills in the missing blanks.
+if (NOT CONFIG_VKPT_RENDERER AND CONFIG_GL_RENDERER)
+	set(SRC_CLIENT 
+		${SRC_CLIENT}
+		client/null_gl.c
+	)
+endif()
 
 SET(SRC_CLIENT_HTTP
 	client/http.c
