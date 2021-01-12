@@ -2203,7 +2203,7 @@ always owned, never in the world
 		Drop_Ammo,
 		NULL,
 		"misc/am_pkup.wav",
-		"models/items/ammo/cells/medium/tris.md2", 0, 0,
+		"models/items/ammo/nails/nailbox.md2", 0, 0,
 		NULL,
 /* icon */		"a_cells",
 /* pickup */	"Cells",
