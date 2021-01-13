@@ -50,6 +50,87 @@ SET(SRC_BASEQ2
 	baseq2/p_weapon.c
 )
 
+SET(SRC_KMNAC
+	kmnac/game/acebot_ai.c
+	kmnac/game/acebot_cmds.c 
+	kmnac/game/acebot_compress.c 
+	kmnac/game/acebot_items.c 
+	kmnac/game/acebot_movement.c 
+	kmnac/game/acebot_nodes.c 
+	kmnac/game/acebot_spawn.c 
+	
+	kmnac/game/g_ai.c 
+	kmnac/game/g_camera.c 
+	kmnac/game/g_chase.c 
+	kmnac/game/g_cmds.c 
+	kmnac/game/g_combat.c 
+	kmnac/game/g_crane.c 
+	kmnac/game/g_ctf.c 
+	kmnac/game/g_fog.c 
+	kmnac/game/g_func.c 
+	kmnac/game/g_items.c 
+	kmnac/game/g_jetpack.c 
+	kmnac/game/g_lights.c 
+	kmnac/game/g_lock.c 
+	kmnac/game/g_main.c 
+	kmnac/game/g_misc.c 
+	kmnac/game/g_model.c 
+	kmnac/game/g_monster.c 
+	kmnac/game/g_moreai.c 
+	kmnac/game/g_mtrain.c 
+	kmnac/game/g_patchplayermodels.c 
+	kmnac/game/g_pendulum.c 
+	kmnac/game/g_phys.c 
+	kmnac/game/g_ptrs.c 
+	kmnac/game/g_reflect.c 
+	kmnac/game/g_save.c 
+	kmnac/game/g_spawn.c 
+	kmnac/game/g_svcmds.c 
+	kmnac/game/g_target.c 
+	kmnac/game/g_thing.c 
+	kmnac/game/g_tracktrain.c 
+	kmnac/game/g_trigger.c 
+	kmnac/game/g_turret.c 
+	kmnac/game/g_utils.c 
+	kmnac/game/g_vehicle.c 
+	kmnac/game/g_weapon.c 
+	kmnac/game/km_cvar.c 
+	kmnac/game/m_actor_weap.c 
+	kmnac/game/m_actor.c 
+	kmnac/game/m_berserk.c 
+	kmnac/game/m_boss2.c 
+	kmnac/game/m_boss3.c 
+	kmnac/game/m_boss31.c
+	kmnac/game/m_boss32.c 
+	kmnac/game/m_brain.c 
+	kmnac/game/m_chick.c 
+	kmnac/game/m_flash.c 
+	kmnac/game/m_flipper.c 
+	kmnac/game/m_float.c 
+	kmnac/game/m_flyer.c 
+	kmnac/game/m_gladiator.c 
+	kmnac/game/m_gunner.c 
+	kmnac/game/m_hover.c 
+	kmnac/game/m_infantry.c 
+	kmnac/game/m_insane.c 
+	kmnac/game/m_medic.c 
+	kmnac/game/m_move.c 
+	kmnac/game/m_mutant.c 
+	kmnac/game/m_parasite.c 
+	kmnac/game/m_soldier.c 
+	kmnac/game/m_supertank.c 
+	kmnac/game/m_tank.c 
+	kmnac/game/p_chase.c 
+	kmnac/game/p_client.c 
+	kmnac/game/p_hud.c 
+	kmnac/game/p_menu.c 
+	kmnac/game/p_text.c 
+	kmnac/game/p_trail.c 
+	kmnac/game/p_view.c 
+	kmnac/game/p_weapon.c 
+	kmnac/game/q_shared.c 
+)
+
 SET(HEADERS_BASEQ2
 	baseq2/g_local.h
 	baseq2/g_ptrs.h
