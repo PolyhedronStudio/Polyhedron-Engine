@@ -2157,7 +2157,7 @@ always owned, never in the world
 		Drop_Ammo,
 		NULL,
 		"misc/am_pkup.wav",
-		"models/items/ammo/shells/medium/tris.md2", 0, 0,
+		"models/items/ammo/shells/shellbox_small.md2", 0, 0,
 		NULL,
 /* icon */		"a_shells",
 /* pickup */	"Shells",

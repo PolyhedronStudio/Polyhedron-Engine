@@ -230,12 +230,12 @@ void InitLithiumVars (void)
 	sk_blaster_speed = gi.cvar("sk_blaster_speed", "1000", 0);
 	sk_blaster_color = gi.cvar("sk_blaster_color", "1", 0);
 
-	sk_shotgun_damage = gi.cvar("sk_shotgun_damage", "1.5", 0);
+	sk_shotgun_damage = gi.cvar("sk_shotgun_damage", "2", 0);
 	sk_shotgun_count = gi.cvar("sk_shotgun_count", "12", 0);
 	sk_shotgun_hspread = gi.cvar("sk_shotgun_hspread", "200", 0);
 	sk_shotgun_vspread = gi.cvar("sk_shotgun_vspread", "200", 0);
 
-	sk_sshotgun_damage = gi.cvar("sk_sshotgun_damage", "5.6", 0);
+	sk_sshotgun_damage = gi.cvar("sk_sshotgun_damage", "6", 0);
 	sk_sshotgun_count = gi.cvar("sk_sshotgun_count", "24", 0);
 	sk_sshotgun_hspread = gi.cvar("sk_sshotgun_hspread", "1000", 0);
 	sk_sshotgun_vspread = gi.cvar("sk_sshotgun_vspread", "1000", 0);
@@ -249,9 +249,9 @@ void InitLithiumVars (void)
 	sk_chaingun_hspread = gi.cvar("sk_chaingun_hspread", "300", 0);
 	sk_chaingun_vspread = gi.cvar("sk_chaingun_vspread", "500", 0);
 
-	sk_grenade_damage = gi.cvar("sk_grenade_damage", "120", 0);
+	sk_grenade_damage = gi.cvar("sk_grenade_damage", "90", 0);
 	sk_grenade_radius = gi.cvar("sk_grenade_radius", "160", 0);
-	sk_grenade_speed = gi.cvar("sk_grenade_speed", "700", 0);
+	sk_grenade_speed = gi.cvar("sk_grenade_speed", "650", 0);
 
 	sk_hand_grenade_damage = gi.cvar("sk_hand_grenade_damage", "125", 0);
 	sk_hand_grenade_radius = gi.cvar("sk_hand_grenade_radius", "165", 0);
