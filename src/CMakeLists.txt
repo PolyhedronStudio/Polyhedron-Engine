@@ -160,8 +160,6 @@ SET(SRC_KMNAC
 	kmnac/game/p_trail.c 
 	kmnac/game/p_view.c 
 	kmnac/game/p_weapon.c 
-	
-	kmnac/game/q_shared.c 
 )
 
 
@@ -498,6 +496,9 @@ ENDIF()
 if (CONFIG_GAME_BUILD_BASEQ2)
 	ADD_LIBRARY(baseq2_gamex86 SHARED ${SRC_BASEQ2} ${HEADERS_BASEQ2} ${SRC_SHARED})
 endif()
+if (CONFIG_GAME_BUILD_KMNAC)
+	ADD_LIBRARY(kmnac_gamex86 SHARED ${SRC_KMNAC} ${HEADERS_KMNAC} ${SRC_SHARED})
+endif()
 
 IF(WIN32)
 ADD_EXECUTABLE(client WIN32 
@@ -594,8 +595,13 @@ SOURCE_GROUP("windows\\headers" FILES ${HEADERS_WINDOWS})
 IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../VC/inc)
+
+	# BaseQ2.
 	TARGET_INCLUDE_DIRECTORIES(baseq2_gamex86 PRIVATE ../VC/inc)
 	TARGET_SOURCES(baseq2_gamex86 PRIVATE windows/res/baseq2.rc)
+	# KMNAC.
+	TARGET_INCLUDE_DIRECTORIES(kmnac_gamex86 PRIVATE ../VC/inc)
+	TARGET_SOURCES(kmnac_gamex86 PRIVATE windows/res/baseq2.rc)
 
 	TARGET_LINK_LIBRARIES(client winmm ws2_32)
 	TARGET_LINK_LIBRARIES(server winmm ws2_32)
@@ -606,10 +612,17 @@ IF (WIN32)
 	# macro redefinition, deprecation
 	target_compile_options(client PRIVATE /wd4005 /wd4996)
 	target_compile_options(server PRIVATE /wd4005 /wd4996)
+
+	# BaseQ2.
 	target_compile_options(baseq2_gamex86 PRIVATE /wd4005 /wd4996)
+	# KMNAC.
+	target_compile_options(kmnac_gamex86 PRIVATE /wd4005 /wd4996)
 ENDIF()
 
+# BaseQ2.
 TARGET_INCLUDE_DIRECTORIES(baseq2_gamex86 PRIVATE ../inc)
+# KMNAC.
+TARGET_INCLUDE_DIRECTORIES(kmnac_gamex86 PRIVATE ../inc)
 
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
@@ -648,7 +661,7 @@ SET_TARGET_PROPERTIES(server
 )
 
 # specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
-
+# BaseQ2.
 SET_TARGET_PROPERTIES(baseq2_gamex86
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/baseq2"
@@ -664,9 +677,32 @@ SET_TARGET_PROPERTIES(baseq2_gamex86
     PREFIX ""
     DEBUG_POSTFIX ""
 )
+# KMNAC.
+SET_TARGET_PROPERTIES(kmnac_gamex86
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/nac"
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/nac"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/nac"
+    LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/nac"
+    LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/nac"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/nac"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/nac"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/nac"
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/nac"
+    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/nac"
+    PREFIX ""
+    DEBUG_POSTFIX ""
+)
 
 IF(IS_64_BIT)
+	# BaseQ2.
 	SET_TARGET_PROPERTIES(baseq2_gamex86
+		PROPERTIES
+		LIBRARY_OUTPUT_NAME "gamex86_64"
+		RUNTIME_OUTPUT_NAME "gamex86_64"
+	)
+	# KMNAC.
+	SET_TARGET_PROPERTIES(kmnac_gamex86
 		PROPERTIES
 		LIBRARY_OUTPUT_NAME "gamex86_64"
 		RUNTIME_OUTPUT_NAME "gamex86_64"
@@ -682,8 +718,11 @@ IF(CONFIG_LINUX_PACKAGING_SUPPORT)
     INSTALL(CODE "set(SOURCE \"${CMAKE_SOURCE_DIR}\")"
         SCRIPT "${CMAKE_SOURCE_DIR}/setup/package_media.cmake"
         SCRIPT "${CMAKE_SOURCE_DIR}/setup/package_shaders.cmake"
-        COMPONENT shareware)
+		COMPONENT shareware)
+	# BaseQ2.
     INSTALL(TARGETS baseq2_gamex86 DESTINATION share/quake2rtx/baseq2 COMPONENT shareware)
+	# KMNAC.
+	INSTALL(TARGETS kmnac_gamex86 DESTINATION share/quake2rtx/kmnac COMPONENT shareware)
 
     # Package data files, including the shareware pak0 for demo levels
     set (SHAREWARE_DATA_FILES_LIST
