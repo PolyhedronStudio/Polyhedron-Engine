@@ -50,6 +50,35 @@ SET(SRC_BASEQ2
 	baseq2/p_weapon.c
 )
 
+SET(HEADERS_BASEQ2
+	baseq2/g_local.h
+	baseq2/g_ptrs.h
+	baseq2/m_actor.h
+	baseq2/m_berserk.h
+	baseq2/m_boss2.h
+	baseq2/m_boss31.h
+	baseq2/m_boss32.h
+	baseq2/m_brain.h
+	baseq2/m_chick.h
+	baseq2/m_flipper.h
+	baseq2/m_float.h
+	baseq2/m_flyer.h
+	baseq2/m_gladiator.h
+	baseq2/m_gunner.h
+	baseq2/m_hover.h
+	baseq2/m_infantry.h
+	baseq2/m_insane.h
+	baseq2/m_medic.h
+	baseq2/m_mutant.h
+	baseq2/m_parasite.h
+	baseq2/m_player.h
+	baseq2/m_rider.h
+	baseq2/m_soldier.h
+	baseq2/m_supertank.h
+	baseq2/m_tank.h
+)
+
+
 SET(SRC_KMNAC
 	kmnac/game/acebot_ai.c
 	kmnac/game/acebot_cmds.c 
@@ -94,7 +123,9 @@ SET(SRC_KMNAC
 	kmnac/game/g_utils.c 
 	kmnac/game/g_vehicle.c 
 	kmnac/game/g_weapon.c 
+	
 	kmnac/game/km_cvar.c 
+	
 	kmnac/game/m_actor_weap.c 
 	kmnac/game/m_actor.c 
 	kmnac/game/m_berserk.c 
@@ -120,6 +151,7 @@ SET(SRC_KMNAC
 	kmnac/game/m_soldier.c 
 	kmnac/game/m_supertank.c 
 	kmnac/game/m_tank.c 
+	
 	kmnac/game/p_chase.c 
 	kmnac/game/p_client.c 
 	kmnac/game/p_hud.c 
@@ -128,35 +160,55 @@ SET(SRC_KMNAC
 	kmnac/game/p_trail.c 
 	kmnac/game/p_view.c 
 	kmnac/game/p_weapon.c 
+	
 	kmnac/game/q_shared.c 
 )
 
-SET(HEADERS_BASEQ2
-	baseq2/g_local.h
-	baseq2/g_ptrs.h
-	baseq2/m_actor.h
-	baseq2/m_berserk.h
-	baseq2/m_boss2.h
-	baseq2/m_boss31.h
-	baseq2/m_boss32.h
-	baseq2/m_brain.h
-	baseq2/m_chick.h
-	baseq2/m_flipper.h
-	baseq2/m_float.h
-	baseq2/m_flyer.h
-	baseq2/m_gladiator.h
-	baseq2/m_gunner.h
-	baseq2/m_hover.h
-	baseq2/m_infantry.h
-	baseq2/m_insane.h
-	baseq2/m_medic.h
-	baseq2/m_mutant.h
-	baseq2/m_parasite.h
-	baseq2/m_player.h
-	baseq2/m_rider.h
-	baseq2/m_soldier.h
-	baseq2/m_supertank.h
-	baseq2/m_tank.h
+
+SET(HEADERS_KMNAC
+	kmnac/game/acebot.h
+	kmnac/game/g_ctf.h
+	kmnac/game/g_func_decs.h 
+	kmnac/game/g_func_list.h 
+	kmnac/game/g_local.h 
+	kmnac/game/g_mmove_decs.h 
+	kmnac/game/g_mmove_list.h 
+	kmnac/game/g_ptrs.h 
+	
+	kmnac/game/game.h 
+	kmnac/game/km_cvar.h 
+	kmnac/game/laz_misc.h 
+	
+	kmnac/game/m_actor.h 
+	kmnac/game/m_berserk.h 
+	kmnac/game/m_boss2.h 
+	kmnac/game/m_boss31.h 
+	kmnac/game/m_boss32.h 
+	kmnac/game/m_brain.h 
+	kmnac/game/m_chick.h 
+	kmnac/game/m_flipper.h 
+	kmnac/game/m_float.h 
+	kmnac/game/m_flyer.h 
+	kmnac/game/m_gladiator.h 
+	kmnac/game/m_gunner.h 
+	kmnac/game/m_hover.h 
+	kmnac/game/m_infantry.h 
+	kmnac/game/m_insane.h 
+	kmnac/game/m_medic.h 
+	kmnac/game/m_mutant.h 
+	kmnac/game/m_parasite.h 
+	kmnac/game/m_player.h 
+	kmnac/game/m_rider.h 
+	kmnac/game/m_soldier.h
+	kmnac/game/m_supertank.h 
+	kmnac/game/m_tank.h 
+
+	kmnac/game/p_menu.h 
+	kmnac/game/p_text.h 
+	
+	kmnac/game/pak.h 
+	
+	kmnac/game/q_shared.h 
 )
 
 
