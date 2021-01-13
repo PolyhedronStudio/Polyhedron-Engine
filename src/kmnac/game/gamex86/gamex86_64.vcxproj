@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\acebot.h" />
+    <ClInclude Include="..\game.h" />
+    <ClInclude Include="..\g_ctf.h" />
+    <ClInclude Include="..\g_func_decs.h" />
+    <ClInclude Include="..\g_func_list.h" />
+    <ClInclude Include="..\g_local.h" />
+    <ClInclude Include="..\g_mmove_decs.h" />
+    <ClInclude Include="..\g_mmove_list.h" />
+    <ClInclude Include="..\km_cvar.h" />
+    <ClInclude Include="..\laz_misc.h" />
+    <ClInclude Include="..\m_actor.h" />
+    <ClInclude Include="..\m_berserk.h" />
+    <ClInclude Include="..\m_boss2.h" />
+    <ClInclude Include="..\m_boss31.h" />
+    <ClInclude Include="..\m_boss32.h" />
+    <ClInclude Include="..\m_brain.h" />
+    <ClInclude Include="..\m_chick.h" />
+    <ClInclude Include="..\m_flipper.h" />
+    <ClInclude Include="..\m_float.h" />
+    <ClInclude Include="..\m_flyer.h" />
+    <ClInclude Include="..\m_gladiator.h" />
+    <ClInclude Include="..\m_gunner.h" />
+    <ClInclude Include="..\m_hover.h" />
+    <ClInclude Include="..\m_infantry.h" />
+    <ClInclude Include="..\m_insane.h" />
+    <ClInclude Include="..\m_medic.h" />
+    <ClInclude Include="..\m_mutant.h" />
+    <ClInclude Include="..\m_parasite.h" />
+    <ClInclude Include="..\m_player.h" />
+    <ClInclude Include="..\m_rider.h" />
+    <ClInclude Include="..\m_soldier.h" />
+    <ClInclude Include="..\m_supertank.h" />
+    <ClInclude Include="..\m_tank.h" />
+    <ClInclude Include="..\pak.h" />
+    <ClInclude Include="..\p_menu.h" />
+    <ClInclude Include="..\p_text.h" />
+    <ClInclude Include="..\q_shared.h" />
+    <ClInclude Include="..\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\acebot_ai.c" />
+    <ClCompile Include="..\acebot_cmds.c" />
+    <ClCompile Include="..\acebot_compress.c" />
+    <ClCompile Include="..\acebot_items.c" />
+    <ClCompile Include="..\acebot_movement.c" />
+    <ClCompile Include="..\acebot_nodes.c" />
+    <ClCompile Include="..\acebot_spawn.c" />
+    <ClCompile Include="..\g_ai.c" />
+    <ClCompile Include="..\g_camera.c" />
+    <ClCompile Include="..\g_chase.c" />
+    <ClCompile Include="..\g_cmds.c" />
+    <ClCompile Include="..\g_combat.c" />
+    <ClCompile Include="..\g_crane.c" />
+    <ClCompile Include="..\g_ctf.c" />
+    <ClCompile Include="..\g_fog.c" />
+    <ClCompile Include="..\g_func.c" />
+    <ClCompile Include="..\g_items.c" />
+    <ClCompile Include="..\g_jetpack.c" />
+    <ClCompile Include="..\g_lights.c" />
+    <ClCompile Include="..\g_lock.c" />
+    <ClCompile Include="..\g_main.c" />
+    <ClCompile Include="..\g_misc.c" />
+    <ClCompile Include="..\g_model.c" />
+    <ClCompile Include="..\g_monster.c" />
+    <ClCompile Include="..\g_moreai.c" />
+    <ClCompile Include="..\g_mtrain.c" />
+    <ClCompile Include="..\g_patchplayermodels.c" />
+    <ClCompile Include="..\g_pendulum.c" />
+    <ClCompile Include="..\g_phys.c" />
+    <ClCompile Include="..\g_reflect.c" />
+    <ClCompile Include="..\g_save.c" />
+    <ClCompile Include="..\g_spawn.c" />
+    <ClCompile Include="..\g_svcmds.c" />
+    <ClCompile Include="..\g_target.c" />
+    <ClCompile Include="..\g_thing.c" />
+    <ClCompile Include="..\g_tracktrain.c" />
+    <ClCompile Include="..\g_trigger.c" />
+    <ClCompile Include="..\g_turret.c" />
+    <ClCompile Include="..\g_utils.c" />
+    <ClCompile Include="..\g_vehicle.c" />
+    <ClCompile Include="..\g_weapon.c" />
+    <ClCompile Include="..\km_cvar.c" />
+    <ClCompile Include="..\m_actor.c" />
+    <ClCompile Include="..\m_actor_weap.c" />
+    <ClCompile Include="..\m_berserk.c" />
+    <ClCompile Include="..\m_boss2.c" />
+    <ClCompile Include="..\m_boss3.c" />
+    <ClCompile Include="..\m_boss31.c" />
+    <ClCompile Include="..\m_boss32.c" />
+    <ClCompile Include="..\m_brain.c" />
+    <ClCompile Include="..\m_chick.c" />
+    <ClCompile Include="..\m_flash.c" />
+    <ClCompile Include="..\m_flipper.c" />
+    <ClCompile Include="..\m_float.c" />
+    <ClCompile Include="..\m_flyer.c" />
+    <ClCompile Include="..\m_gladiator.c" />
+    <ClCompile Include="..\m_gunner.c" />
+    <ClCompile Include="..\m_hover.c" />
+    <ClCompile Include="..\m_infantry.c" />
+    <ClCompile Include="..\m_insane.c" />
+    <ClCompile Include="..\m_medic.c" />
+    <ClCompile Include="..\m_move.c" />
+    <ClCompile Include="..\m_mutant.c" />
+    <ClCompile Include="..\m_parasite.c" />
+    <ClCompile Include="..\m_soldier.c" />
+    <ClCompile Include="..\m_supertank.c" />
+    <ClCompile Include="..\m_tank.c" />
+    <ClCompile Include="..\p_chase.c" />
+    <ClCompile Include="..\p_client.c" />
+    <ClCompile Include="..\p_hud.c" />
+    <ClCompile Include="..\p_menu.c" />
+    <ClCompile Include="..\p_text.c" />
+    <ClCompile Include="..\p_trail.c" />
+    <ClCompile Include="..\p_view.c" />
+    <ClCompile Include="..\p_weapon.c" />
+    <ClCompile Include="..\q_shared.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\lazarus.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\readme.txt" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{e0a9e06d-8e87-4917-aecf-05b70b0bbae1}</ProjectGuid>
+    <RootNamespace>gamex86_64</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>../../../nac</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>../../../nac</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>../lazarus.def</ModuleDefinitionFile>
+      <NoEntryPoint />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>../lazarus.def</ModuleDefinitionFile>
+      <NoEntryPoint />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <DisableSpecificWarnings>4013;4716;4033;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>../lazarus.def</ModuleDefinitionFile>
+      <NoEntryPoint />
+      <OutputFile>../../../nac/$(TargetName)$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <DisableSpecificWarnings>4013;4716;4033;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>../lazarus.def</ModuleDefinitionFile>
+      <NoEntryPoint />
+      <OutputFile>../../../nac/$(TargetName)$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
