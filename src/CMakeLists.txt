@@ -79,137 +79,6 @@ SET(HEADERS_BASEQ2
 )
 
 
-SET(SRC_KMNAC
-	kmnac/game/acebot_ai.c
-	kmnac/game/acebot_cmds.c 
-	kmnac/game/acebot_compress.c 
-	kmnac/game/acebot_items.c 
-	kmnac/game/acebot_movement.c 
-	kmnac/game/acebot_nodes.c 
-	kmnac/game/acebot_spawn.c 
-	
-	kmnac/game/g_ai.c 
-	kmnac/game/g_camera.c 
-	kmnac/game/g_chase.c 
-	kmnac/game/g_cmds.c 
-	kmnac/game/g_combat.c 
-	kmnac/game/g_crane.c 
-	kmnac/game/g_ctf.c 
-	kmnac/game/g_fog.c 
-	kmnac/game/g_func.c 
-	kmnac/game/g_items.c 
-	kmnac/game/g_jetpack.c 
-	kmnac/game/g_lights.c 
-	kmnac/game/g_lock.c 
-	kmnac/game/g_main.c 
-	kmnac/game/g_misc.c 
-	kmnac/game/g_model.c 
-	kmnac/game/g_monster.c 
-	kmnac/game/g_moreai.c 
-	kmnac/game/g_mtrain.c 
-	kmnac/game/g_patchplayermodels.c 
-	kmnac/game/g_pendulum.c 
-	kmnac/game/g_phys.c 
-	kmnac/game/g_ptrs.c 
-	kmnac/game/g_reflect.c 
-	kmnac/game/g_save.c 
-	kmnac/game/g_spawn.c 
-	kmnac/game/g_svcmds.c 
-	kmnac/game/g_target.c 
-	kmnac/game/g_thing.c 
-	kmnac/game/g_tracktrain.c 
-	kmnac/game/g_trigger.c 
-	kmnac/game/g_turret.c 
-	kmnac/game/g_utils.c 
-	kmnac/game/g_vehicle.c 
-	kmnac/game/g_weapon.c 
-	
-	kmnac/game/km_cvar.c 
-	
-	kmnac/game/m_actor_weap.c 
-	kmnac/game/m_actor.c 
-	kmnac/game/m_berserk.c 
-	kmnac/game/m_boss2.c 
-	kmnac/game/m_boss3.c 
-	kmnac/game/m_boss31.c
-	kmnac/game/m_boss32.c 
-	kmnac/game/m_brain.c 
-	kmnac/game/m_chick.c 
-	kmnac/game/m_flash.c 
-	kmnac/game/m_flipper.c 
-	kmnac/game/m_float.c 
-	kmnac/game/m_flyer.c 
-	kmnac/game/m_gladiator.c 
-	kmnac/game/m_gunner.c 
-	kmnac/game/m_hover.c 
-	kmnac/game/m_infantry.c 
-	kmnac/game/m_insane.c 
-	kmnac/game/m_medic.c 
-	kmnac/game/m_move.c 
-	kmnac/game/m_mutant.c 
-	kmnac/game/m_parasite.c 
-	kmnac/game/m_soldier.c 
-	kmnac/game/m_supertank.c 
-	kmnac/game/m_tank.c 
-	
-	kmnac/game/p_chase.c 
-	kmnac/game/p_client.c 
-	kmnac/game/p_hud.c 
-	kmnac/game/p_menu.c 
-	kmnac/game/p_text.c 
-	kmnac/game/p_trail.c 
-	kmnac/game/p_view.c 
-	kmnac/game/p_weapon.c 
-)
-
-
-SET(HEADERS_KMNAC
-	kmnac/game/acebot.h
-	kmnac/game/g_ctf.h
-	kmnac/game/g_func_decs.h 
-	kmnac/game/g_func_list.h 
-	kmnac/game/g_local.h 
-	kmnac/game/g_mmove_decs.h 
-	kmnac/game/g_mmove_list.h 
-	kmnac/game/g_ptrs.h 
-	
-	kmnac/game/game.h 
-	kmnac/game/km_cvar.h 
-	kmnac/game/laz_misc.h 
-	
-	kmnac/game/m_actor.h 
-	kmnac/game/m_berserk.h 
-	kmnac/game/m_boss2.h 
-	kmnac/game/m_boss31.h 
-	kmnac/game/m_boss32.h 
-	kmnac/game/m_brain.h 
-	kmnac/game/m_chick.h 
-	kmnac/game/m_flipper.h 
-	kmnac/game/m_float.h 
-	kmnac/game/m_flyer.h 
-	kmnac/game/m_gladiator.h 
-	kmnac/game/m_gunner.h 
-	kmnac/game/m_hover.h 
-	kmnac/game/m_infantry.h 
-	kmnac/game/m_insane.h 
-	kmnac/game/m_medic.h 
-	kmnac/game/m_mutant.h 
-	kmnac/game/m_parasite.h 
-	kmnac/game/m_player.h 
-	kmnac/game/m_rider.h 
-	kmnac/game/m_soldier.h
-	kmnac/game/m_supertank.h 
-	kmnac/game/m_tank.h 
-
-	kmnac/game/p_menu.h 
-	kmnac/game/p_text.h 
-	
-	kmnac/game/pak.h 
-	
-	kmnac/game/q_shared.h 
-)
-
-
 SET(SRC_CLIENT
 	client/ascii.c
 	client/console.c
@@ -249,13 +118,6 @@ SET(SRC_CLIENT
 #	client/sound/qal/fixed.c
 	client/sound/qal/dynamic.c
 )
-# This is there for when building ONLY the OpenGL renderer, fills in the missing blanks.
-if (NOT CONFIG_VKPT_RENDERER AND CONFIG_GL_RENDERER)
-	set(SRC_CLIENT 
-		${SRC_CLIENT}
-		client/null_gl.c
-	)
-endif()
 
 SET(SRC_CLIENT_HTTP
 	client/http.c
@@ -375,6 +237,15 @@ SET(SRC_WINDOWS_CLIENT
 	unix/sdl2/video.c
 )
 
+	#windows/ascii.c
+	#windows/client.c
+	#windows/dinput.c
+	#windows/dsound.c
+	#windows/glimp.c
+	#windows/swimp.c
+	#windows/wgl.c
+	#unix/sdl2/sound.c
+
 SET(HEADERS_WINDOWS
 	windows/wgl.h
 	windows/glimp.h
@@ -493,13 +364,7 @@ IF(WIN32)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF()
 
-if (CONFIG_GAME_BUILD_BASEQ2)
-	ADD_LIBRARY(baseq2_gamex86 SHARED ${SRC_BASEQ2} ${HEADERS_BASEQ2} ${SRC_SHARED})
-endif()
-if (CONFIG_GAME_BUILD_KMNAC)
-	ADD_LIBRARY(kmnac_gamex86 SHARED ${SRC_KMNAC} ${HEADERS_KMNAC} ${SRC_SHARED})
-endif()
-
+ADD_LIBRARY(gamex86 SHARED ${SRC_BASEQ2} ${HEADERS_BASEQ2} ${SRC_SHARED})
 IF(WIN32)
 ADD_EXECUTABLE(client WIN32 
 	${SRC_CLIENT} ${HEADERS_CLIENT} 
@@ -595,13 +460,8 @@ SOURCE_GROUP("windows\\headers" FILES ${HEADERS_WINDOWS})
 IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../VC/inc)
-
-	# BaseQ2.
-	TARGET_INCLUDE_DIRECTORIES(baseq2_gamex86 PRIVATE ../VC/inc)
-	TARGET_SOURCES(baseq2_gamex86 PRIVATE windows/res/baseq2.rc)
-	# KMNAC.
-	TARGET_INCLUDE_DIRECTORIES(kmnac_gamex86 PRIVATE ../VC/inc)
-	TARGET_SOURCES(kmnac_gamex86 PRIVATE windows/res/baseq2.rc)
+	TARGET_INCLUDE_DIRECTORIES(gamex86 PRIVATE ../VC/inc)
+	TARGET_SOURCES(gamex86 PRIVATE windows/res/baseq2.rc)
 
 	TARGET_LINK_LIBRARIES(client winmm ws2_32)
 	TARGET_LINK_LIBRARIES(server winmm ws2_32)
@@ -612,17 +472,10 @@ IF (WIN32)
 	# macro redefinition, deprecation
 	target_compile_options(client PRIVATE /wd4005 /wd4996)
 	target_compile_options(server PRIVATE /wd4005 /wd4996)
-
-	# BaseQ2.
-	target_compile_options(baseq2_gamex86 PRIVATE /wd4005 /wd4996)
-	# KMNAC.
-	target_compile_options(kmnac_gamex86 PRIVATE /wd4005 /wd4996)
+	target_compile_options(gamex86 PRIVATE /wd4005 /wd4996)
 ENDIF()
 
-# BaseQ2.
-TARGET_INCLUDE_DIRECTORIES(baseq2_gamex86 PRIVATE ../inc)
-# KMNAC.
-TARGET_INCLUDE_DIRECTORIES(kmnac_gamex86 PRIVATE ../inc)
+TARGET_INCLUDE_DIRECTORIES(gamex86 PRIVATE ../inc)
 
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
@@ -661,8 +514,8 @@ SET_TARGET_PROPERTIES(server
 )
 
 # specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
-# BaseQ2.
-SET_TARGET_PROPERTIES(baseq2_gamex86
+
+SET_TARGET_PROPERTIES(gamex86
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/baseq2"
     LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/baseq2"
@@ -677,32 +530,9 @@ SET_TARGET_PROPERTIES(baseq2_gamex86
     PREFIX ""
     DEBUG_POSTFIX ""
 )
-# KMNAC.
-SET_TARGET_PROPERTIES(kmnac_gamex86
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/nac"
-    LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/nac"
-    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/nac"
-    LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/nac"
-    LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/nac"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/nac"
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/nac"
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/nac"
-    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/nac"
-    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/nac"
-    PREFIX ""
-    DEBUG_POSTFIX ""
-)
 
 IF(IS_64_BIT)
-	# BaseQ2.
-	SET_TARGET_PROPERTIES(baseq2_gamex86
-		PROPERTIES
-		LIBRARY_OUTPUT_NAME "gamex86_64"
-		RUNTIME_OUTPUT_NAME "gamex86_64"
-	)
-	# KMNAC.
-	SET_TARGET_PROPERTIES(kmnac_gamex86
+	SET_TARGET_PROPERTIES(gamex86
 		PROPERTIES
 		LIBRARY_OUTPUT_NAME "gamex86_64"
 		RUNTIME_OUTPUT_NAME "gamex86_64"
@@ -718,11 +548,8 @@ IF(CONFIG_LINUX_PACKAGING_SUPPORT)
     INSTALL(CODE "set(SOURCE \"${CMAKE_SOURCE_DIR}\")"
         SCRIPT "${CMAKE_SOURCE_DIR}/setup/package_media.cmake"
         SCRIPT "${CMAKE_SOURCE_DIR}/setup/package_shaders.cmake"
-		COMPONENT shareware)
-	# BaseQ2.
-    INSTALL(TARGETS baseq2_gamex86 DESTINATION share/quake2rtx/baseq2 COMPONENT shareware)
-	# KMNAC.
-	INSTALL(TARGETS kmnac_gamex86 DESTINATION share/quake2rtx/kmnac COMPONENT shareware)
+        COMPONENT shareware)
+    INSTALL(TARGETS gamex86 DESTINATION share/quake2rtx/baseq2 COMPONENT shareware)
 
     # Package data files, including the shareware pak0 for demo levels
     set (SHAREWARE_DATA_FILES_LIST
