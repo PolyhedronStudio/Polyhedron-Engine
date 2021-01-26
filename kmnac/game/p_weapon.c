@@ -1316,7 +1316,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 			if ((!ent->client->ammo_index) || 
 				( ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity))
 			{
-				ent->client->ps.gunframe = FIRE_START + (((ANIM + 1) % NUM_FIRE_ANIMS) * FIRE_LENGTH);
+				ent->client->ps.gunframe = FIRE_START + (((ANIM + 1) % NUM_FIRE_ANIMS) * FIRE_LENGTH) + 1;
 				ent->client->weaponstate = WEAPON_FIRING;
 
 				Weapon_HyperBlaster_Fire(ent);
@@ -1342,7 +1342,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 		const int SUBFRAME = (ent->client->ps.gunframe - FIRE_START) % FIRE_LENGTH;
 
 		// number of frames before we can fire again
-		const int FIRE_DELAY = 1;
+		const int FIRE_DELAY = 2;
 
 		if (SUBFRAME >= FIRE_DELAY)
 		{
@@ -1352,7 +1352,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 				if ((!ent->client->ammo_index) || 
 					( ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity))
 				{
-					ent->client->ps.gunframe = FIRE_START + (((ANIM + 1) % NUM_FIRE_ANIMS) * FIRE_LENGTH);
+					ent->client->ps.gunframe = FIRE_START + (((ANIM + 1) % NUM_FIRE_ANIMS) * FIRE_LENGTH) + 1;
 					Weapon_HyperBlaster_Fire(ent);
 					return;
 				}
