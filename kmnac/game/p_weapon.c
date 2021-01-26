@@ -1269,7 +1269,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 		if (ent->client->ps.gunframe >= ACTIVATE_END)
 		{
 			ent->client->weaponstate = WEAPON_READY;
-			ent->client->ps.gunframe = PUTAWAY_START - 3;
+			ent->client->ps.gunframe = PUTAWAY_START - 1;
 		}
 		break;
 	case WEAPON_DROPPING:
@@ -1373,7 +1373,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 				// end of this animation, and we didn't try to re-fire, so go ready
 				ent->client->weaponstate = WEAPON_READY;
 
-				ent->client->ps.gunframe -= 2;
+				//ent->client->ps.gunframe -= 3;
 			}
 			else
 				ent->client->ps.gunframe++;

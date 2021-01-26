@@ -1758,7 +1758,7 @@ bsp_add_entlights(const bsp_t* bsp)
 	int el;
 	float entity_scale;
 
-	if (bsp == NULL)
+	if (bsp == NULL || cvar_entlights_scale == NULL)
 		return;
 
 	//replicate algorithm from qrad3; would be best to be able to set entity_scale dynamically depending upon map
