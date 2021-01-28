@@ -1,5 +1,11 @@
 cmake_minimum_required (VERSION 3.8)
 
+###############################################################################
+##
+##			SOURCE AND HEADER FILE LISTS
+##
+###############################################################################
+###################### BaseQ2.
 SET(SRC_BASEQ2
 	baseq2/g_ai.c
 	baseq2/g_chase.c
@@ -49,7 +55,6 @@ SET(SRC_BASEQ2
 	baseq2/p_view.c
 	baseq2/p_weapon.c
 )
-
 SET(HEADERS_BASEQ2
 	baseq2/g_local.h
 	baseq2/g_ptrs.h
@@ -78,7 +83,7 @@ SET(HEADERS_BASEQ2
 	baseq2/m_tank.h
 )
 
-
+###################### Client.
 SET(SRC_CLIENT
 	client/ascii.c
 	client/console.c
@@ -95,6 +100,7 @@ SET(SRC_CLIENT
 	client/main.c
 	client/newfx.c
 #	client/null.c
+#	client/null_gl.c
 	client/parse.c
 	client/precache.c
 	client/predict.c
@@ -118,11 +124,16 @@ SET(SRC_CLIENT
 #	client/sound/qal/fixed.c
 	client/sound/qal/dynamic.c
 )
-
+# Required as a placeholder for certain Vulkan only related features.
+if (NOT CONFIG_VKPT_RENDERER AND CONFIG_GL_RENDERER)
+	set(SRC_CLIENT 
+		${SRC_CLIENT}
+		client/null_gl.c
+	)
+endif()
 SET(SRC_CLIENT_HTTP
 	client/http.c
 )
-
 SET(HEADERS_CLIENT
 	client/client.h
 	client/ui/ui.h
@@ -131,6 +142,7 @@ SET(HEADERS_CLIENT
 	client/sound/qal/fixed.h
 )
 
+###################### Client.
 SET(SRC_SERVER
 	server/commands.c
 	server/entities.c
@@ -146,11 +158,11 @@ SET(SRC_SERVER
 	server/mvd/game.c
 	server/save.c
 )
-
 SET(HEADERS_SERVER
 	server/server.h
 )
 
+###################### Common.
 SET(SRC_COMMON
 	common/bsp.c
 	common/cmd.c
@@ -174,20 +186,20 @@ SET(SRC_COMMON
 	common/net/net.c
 	common/x86/fpu.c
 )
-
 SET(HEADERS_COMMON
 	common/net/inet_ntop.h
 	common/net/inet_pton.h
 	common/net/win.h
 )
 
+###################### Refresh.
 SET(SRC_REFRESH
 	refresh/images.c
 	refresh/models.c
 	refresh/stb/stb.c
 )
 
-
+###################### GL.
 SET(SRC_GL
 	refresh/gl/draw.c
 	refresh/gl/hq2x.c
@@ -203,49 +215,39 @@ SET(SRC_GL
 	refresh/gl/qgl/dynamic.c
 #	refresh/gl/qgl/fixed.c
 )
-
 SET(HEADERS_GL
 	refresh/gl/arbfp.h
 	refresh/gl/gl.h
 )
 
+###################### Client.
 SET(SRC_SHARED
 	shared/m_flash.c
 	shared/shared.c
 )
 
+###################### Linux.
 SET(SRC_LINUX
 	unix/hunk.c
 	unix/system.c
 	unix/tty.c
 )
-
 SET(SRC_LINUX_CLIENT
 	unix/sdl2/sound.c
 	unix/sdl2/video.c
 )
 
+###################### Windows.
 SET(SRC_WINDOWS
 	windows/ac.c
 	windows/debug.c
 	windows/hunk.c
 	windows/system.c
 )
-
 SET(SRC_WINDOWS_CLIENT
 	windows/wave.c
 	unix/sdl2/video.c
 )
-
-	#windows/ascii.c
-	#windows/client.c
-	#windows/dinput.c
-	#windows/dsound.c
-	#windows/glimp.c
-	#windows/swimp.c
-	#windows/wgl.c
-	#unix/sdl2/sound.c
-
 SET(HEADERS_WINDOWS
 	windows/wgl.h
 	windows/glimp.h
@@ -253,6 +255,7 @@ SET(HEADERS_WINDOWS
 	windows/threads/threads.h
 )
 
+###################### VKPT.
 SET(SRC_VKPT
 	refresh/vkpt/asvgf.c
 	refresh/vkpt/bloom.c
@@ -279,7 +282,6 @@ SET(SRC_VKPT
 	refresh/vkpt/device_memory_allocator.c
 	refresh/vkpt/god_rays.c
 )
-
 SET(HEADERS_VKPT
 	refresh/vkpt/vkpt.h
 	refresh/vkpt/vk_util.h
@@ -290,6 +292,7 @@ SET(HEADERS_VKPT
 	refresh/vkpt/precomputed_sky.h
 )
 
+###################### Shaders.
 set(SRC_SHADERS
 	refresh/vkpt/shader/animate_materials.comp
 	refresh/vkpt/shader/god_rays_filter.comp
@@ -318,7 +321,6 @@ set(SRC_SHADERS
 	refresh/vkpt/shader/final_blit_lanczos.frag
 	refresh/vkpt/shader/final_blit.vert
 )
-
 set(SRC_RT_SHADERS
 	refresh/vkpt/shader/primary_rays.rgen
 	refresh/vkpt/shader/direct_lighting.rgen
@@ -333,6 +335,7 @@ set(SRC_RT_SHADERS
 	refresh/vkpt/shader/reflect_refract.rgen
 )
 
+# Check for a shader compiler.
 include(../cmake/compileShaders.cmake)
 
 if (GLSLANG_COMPILER)
