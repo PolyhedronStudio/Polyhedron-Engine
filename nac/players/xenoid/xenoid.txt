@@ -1,0 +1,28 @@
+Xenoid Plugin Player Model
+Model,skins, design, and sounds by Dan Bickell
+
+Unzip all files to quake2\baseq2\players\xenoid
+You must name this directory "xenoid" for this to work properly
+Select xenoid as the model under the player setup menu, then 
+select the xenotype skin you wish to use.
+
+Tools used:
+
+Quake2 Model Editor
+Npherno's Skin Tool
+JawMD2
+Paintshop Pro
+Adobe Photoshop
+Creative WaveStudio
+
+Thanks to Nebu and Xeno for technical advice and help.
+
+Sounds are all original recordings.
+
+This is my second attempt at 3d modelling and animation.  
+"Battroid" was my first attempt, and I'm sure my improvements
+are quite obvious.
+
+Enjoy.
+
+Any questions, just drop me an email:  danbickell@loop.com

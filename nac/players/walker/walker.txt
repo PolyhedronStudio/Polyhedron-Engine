@@ -1,0 +1,52 @@
+
+Walker PPM - A Quake2 Plug-in Player Model by Roger [666] Bacon
+________________________________________________________________
+
+
+In Brief:
+-----------------
+o- Fully Animated, Low Poly Quake2 Player model
+o- 3 Player skins [Firestorm, Scout666, Rorshach]
+o- New Mechanoid sound effects
+
+
+Authors Blurb: :)
+-----------------
+Well this is my first foray into the wooly world of 3D character modelling and animation 
+- The Walker PPM is a small mech which looks pretty like the ED-209 mech off Robocop, the Marauder mech off Battletech/Mechwarrior, and anything else with 'chicken' style reversed legs and twin cannons (even the AT-ST Scout Walker off Star Wars!).. i'm sure you get the idea :)
+I wanted to create a low poly model for use when I'm playing the eraser bots... My pc is already slow and when you get PPM's with 800+ faces it tends to chug a bit..
+
+As some of you know I have been churning out many free Quake2 skins from my website, content with skinning the id models and a few custom PPM's.  Well one long weekend I decided to try and create my OWN player model, and here it is!
+
+
+Installation
+-----------------
+Unzip the file into your Quake2 directory (make sure you unzip with the '-d' option if you are using PKunzip instead of Winzip)
+If anything goes wrong (naaah!) make sure all the .pcx's, .md2's, and .wavs are in this directory:
+	Quake2/Baseq2/Players/Walker/
+
+Now in-game if you go to the Multi-player setup menu you will be able to change your model to Walker, and your skin to any of the 3 provided.
+
+
+Tools Used:
+-----------------
+Modelled in 3DSMAXr2, animated in Quake Model Editor[qME] (dont ask!!)
+Skinned in the Almighty Photoshop 4, with help from Npherno's skin tool.
+Sample sounds provided by my mate Gordon at Rage Software, chopped to buggery by me in Goldwave :)
+
+
+Eternal Gratitude to:
+----------------------
+Gordon at Rage for the sounds
+Smirnoff, maker of fine Vodka
+Evan Dorkin for making me unwillingly laugh like a hyena...
+
+
+Shameless Plugs:
+-----------------
+
+This is my first ever Quake model so send me lots of mail of what you think about it (good/bad/ugly.. hopefully good :))
+If you want to get into creating your own models, I would ask somebody else as i'm new to this myself!
+
+Roger [666] Bacon
+Visit my Website! - www.quake2.com/skins

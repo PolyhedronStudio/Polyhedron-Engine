@@ -857,7 +857,7 @@ void SV_InitGameProgs(void)
             entry = SV_LoadGameLibrary(fs_game->string, "");
     }
 
-    // then try baseq2
+    // then try basenac
     if (!entry) {
         entry = SV_LoadGameLibrary(BASEGAME, "q2pro_");
         if (!entry)

@@ -1,0 +1,32 @@
+
+================================================================
+Model Name              : Marine
+installation directory  : quake2/baseq2/players/Marine
+Author                  : Kurt "Apocalypse" Cadogan
+Email Address           : Turbo911@datatone.com
+
+Additional Credits to   : by HitmanDaz maker of the Model
+
+  			  
+================================================================
+* Play Information *
+
+New Sounds              : <NO>
+CTF Skins               : <NO>
+VWEP Support            : <YES>
+
+* How to use this model *
+
+place it into your Marine models dir and then load q2 normaly .This is my 1st vwep work I am	
+really a skinner ,but after i saw this model I felt obligated to hame a vewp for it ..It is	
+a superb model ,real high quality...I salute HitmanDaz ...		
+
+
+* Copyright / Permissions *
+
+Just give me credit where credit is due ,this is my first Vwep ,so if you like or dislike it
+please feel free to email me. Turbo911@datatone.com
+
+QUAKE(R) and QUAKE II(R) are registered trademarks of id Software, Inc.
+
+				Kurt 'Apocalype' Cadogan

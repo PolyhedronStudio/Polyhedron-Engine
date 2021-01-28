@@ -22,7 +22,7 @@
 #define BUILDSTRING "Linux"
 #endif
 
-#define BASEGAME "baseq2"
+#define BASEGAME "basenac"
 #define DEFGAME ""
 
 #define USE_ICMP 1

@@ -1,0 +1,140 @@
+<May 6, 1999>
+================================================================
+Model Name              : Terran Marine
+installation directory  : quake2/baseq2/players/terran
+Author                  : Wrath
+Skin Author		: Shine, Wrath
+Email Address           : Ruffiana@hotmail.com
+
+Model description       : The Terran Marine unit from Blizzard's Starcraft.
+			  If you've played the game, you'll recognize this chap.
+
+Other info              : What else needs to be said about this model...you either know it or you don't.
+
+			  I'll probably convert this model to Q3, it should be fairly easy to do and work pretty well in the
+			  seperat upper/lower body format.  It'll also give me a LOT more room to map all these little bits and pieces,
+			  and best of all...it won't be the Q2 palette!  WOO HOO!
+
+			  I'll never, ever understand how that damn palette works.  You should see what my test cube looks
+			  like in OpenGL mode.  Maybe you have...maybe you can explain why it looks that way.
+
+Additional Credits to   : id Software,  Blizard, Q2PMP (THE best ppm site on the net)
+
+Thanks to               : R13 and the Q2PMP community for offering advice and help
+			  and generally just being a nice bunch to hang around.
+			  Great site, have to see it.  http://www.planetquake.com/Q2PMP
+
+			  MrRogers, who offered to do a skin for the terran,
+			  but unfortunatly got tied up with other projects and
+			  just wasn't gonna be able to get to it anytime soon.
+			  Man, it woulda been sweet. Que sara, sara.
+			  I still appreciate the offer, and I guess we're now even ; )
+
+			  Shine, for coming up with a very interesting skin for the terran.
+			  I kinda like what this kid's done...it looks NOTHING like a terran marine,
+			  but it's interesting to say the least.
+
+			  Blizzard, who amazed me with their unGODly talent in creating and executing one of the
+			  damn finest computer games ever.
+
+================================================================
+* Play Information *
+
+New Sounds              : NO, but would be very easy to snag them from Starcraft or Brood wars if anyone's intersted.  I
+			  managed to get the in-game sounds...but I'd like to get ahold of the dialogue from the mission
+			  briefings and other from the storyline.  Anyone know how to do this?
+CTF Skins               : Yep...and I like the way they turned out.
+VWEP Support            : Nope, sorry.  I would have given it standerd id weapon support, but I'm still wating for someone
+			  to reskin them in a GL friendly size.  Anyone be intersted in helping with a project like that?
+
+* Construction *
+Poly Count              : 801 (Thanks, R13)
+Vert Count              : 807
+Skin Wastage		: 6%
+Skin Count              : 15 skins, 2 CTF skins, 17 total.  Should be enough for ya.
+Base                    : New model.  I tried modifying Evil Bastard's Sidney model..but it just wasn't working ; P
+Editor used             : 3DS Max 2.5, Character Studio 2.1, Q2 Modeler, NST, Corel Photo-Paint
+Known Bugs              : A lot of clipping problems with the shin guards, TONS of clipping problems in the shoulder guards.
+			  I just could not figure out a way to get the shoulder guards to only rotate along the one axis using CS,
+			  so I said ta hell with it and left them static.  I could have adjusted the animations so that nothing would
+			  self-intersect...but it would have severly limited the range of motion I could have used.  So I chose
+			  freedom of movement over clipping.
+			  
+			  There's an overall mis-proportion of the figure, by the time I figured out why he looked
+			  so odd, it was too late to fix.  So he's just not as bulky and stocky as he should
+			  be.  I'll be doing a bit of resizing for Q3
+
+			  In retrospect, I'm not terribly pleased with the way I laid out the mapping.  I really didn't leave myself,
+			  or anyone else for that matter, enough space to work in in a lot of pretty big areas.  Had I to do
+			  it over again, I would have done it differenlty.  I finally realized that in my zealous to get as low skin
+			  wasteage as I could, I left my self with a lot of warped mapping.
+			  I now know better, and shan't be doing it again.
+			  There was a lot more I could have mirrored, but I chose not to in this case to leave skinners as much
+			  freedom in adding graffitti anywhere they wanted.
+			  Of course, with that freedom came a severe limit on size...so now you can do what you want, but it probably
+			  won't read.  Still, I think it's pretty easy to follow, and should
+			  make custom skinning pretty easy.  Hell, if I can skin it...
+
+			  This whole project was an exercise in working with a very specific facecount, not just a limit.
+			  The model is exactly 1 face over the limit for the Q2PMP...but Rouge13 graciously allowed it in jest one day, so I was
+			  gonna be damned if I didn't use it.  So no complaints about the face count, you better believe that
+			  I know EXACTLY what it is, and it wasn't gonna be a single face more or less.
+			  I am, however, more than open to suggestions about WHERE I should have put those 801 faces.
+
+			  Yes, the faces are snagged from id skins...shhhh.
+
+Build/Animation time    : Build took a week or two off and own, animation took about 6-8 hours altogether to lay out,
+			  dunno how much time I spent redoing anims or tweaking what I had.  I don't really
+			  get to work on it for any extended length of time, just little snatches here and there...
+			  so it's really hard to keep track of how long it took.  This was my first experience with Character
+			  Studio...so a lot of time was spent just learning how it works.
+
+			  This is also my first real skin ever, and I found a nifty way of doing it which allows me to go
+			  to the base layer and change the material/color, and get a fully done skin in a matter of minutes.
+			  Which is why there's so many skins released with this one.  They're not the best skins in the world,
+			  but they get the job done...and they're pretty close to what I had originally envisioned anyway.
+
+
+* How to use this model *
+
+Preheat oven to 350 degrees, place model on an ungreased cookie sheet, cover with foil and place on the center rack.
+Cook for 45 minutes, or until golden brown.
+
+Afterwards, unzip this into a Quake2/baseq2/players/terran directory.  The rest, I think you can figure out.
+
+If it's not working, don't email me, it worked when it left here.  Stop by the Q2PMP site for all your trouble-shooting needs.
+
+This Zip comes packed with one skin, which is enough to get you up and running without a huge download.
+The other skins I have done are available in a seperate download.  If you like this PPM, download the other skins...it's a
+big enough assortment of colors and characters to satisfy you cravings for individuality.  Plus it has my personal skin,
+DON'T USE IT...IT'S MINE!!  Thanks : )
+
+I heartily encourage EVERYONE to make a custom skin.  There are Eight color variations, based on the colors from the multiplayer
+game of Starcraft, which should give you plenty of choices for a "base" skin...but it is very appropriate for you to scribble
+graffitti al over the damn thing.  That's the best thing about the marines from the game, they all have all sorts of
+nifty crap scrawled over the suits.  Have fun!
+
+* Copyright / Permissions *
+
+QUAKE(R) and QUAKE II(R) are registered trademarks of id Software, Inc.  Starcraft(R) is a registered trademarks of Blizzard.
+
+This model is exclusivly released through the Q2PMP site...if you didn't get it there,
+chances are wherever you got it from did.
+
+Contact me before using this model for any conversions or mods...There was someone a LONG time ago
+working on a Starcraft mod, who asked me to build this.  I didn't have time then, but if they still want it...
+well here it is, no?
+
+Don't try sell this model or make money from the model in ANY shape, form, or fashion.
+It's not mine, it sure as hell isn't yours, and there's probably no quicker way
+to get it pulled from the internet entirely.  I don't want to get any nasty letters from Blizzard...so let's all use
+some common sense here, ok?
+
+I'll take job offers from Blizzard though! : )
+Or job offers from ANY game company for that matter. = )
+
+I didn't make this model for a clan, so if you're a clan thinking of adopting this as your clan model...I'm flattered,
+but it would be better if you Made a skin.  If you don't know how, get someone else to or contact me and I might make one for you...
+but don't harass other people for using the model claiming it to be your clan model.
+And if someone harrasses you for using it, tell em to blow off.  Then plug em with the railgun while their typing
+their complaints.

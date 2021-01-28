@@ -1,0 +1,98 @@
+
+19/08/98
+================================================================
+Model Name              : Hunter
+installation directory  : quake2/baseq2/players/hunter
+Author                  : Michael 'Magarnigal' Mellor  
+			  homepage at http://members.tripod.com/~magarn
+
+
+Skin Author(s)          :"François-Xavier Delmotte" created hunter skin plus CTF varients, as
+		 	  well as Snowtiger - and no, he doesn't do tc/clan requests and don't
+		 	  mail him asking 'how do u make yer skins'
+			  email		: delmotte@ackia.com
+			  homepage	: http://www.fondation.com/pandemonium
+
+			 "Deranged" created the very cool 'dark hunter' skin.  
+			  email		: deranged@deathsdoor.com
+			  homepage	: www.gibbed.com/thebin
+
+
+My Email Address        : mellor@iaccess.com.au
+
+
+Model description       : A sleek, deadly killer who spends far too much time striking cinematic
+			  poses.  
+
+			  [or insert lengthy story line here]
+
+
+
+Other info              : Lot of work went in to this little baby, lots of talent came together
+			  to produce a quality product.  François-Xavier Delmotte has included a
+ 			  huntebase.pcx, which is a base skin for those wanting make err...more
+ 			  skins.  People should find it a very useful aid.  
+
+Additional Credits to   : id software.  François-Xavier Delmotte and Deranged for creating
+		  	  the most awesome skins I've seen in a while.  I can't stress enough how
+ 			  much a good skin enhances a model.  Thanks to Eric vonRothkirch for
+			  supplying excellent, original sounds.  Larry Ellis for telling me what
+			  sucked and what didn't suck :)  
+
+
+
+================================================================
+* Play Information *
+
+New Sounds              : Yes.  Original sounds from Eric vonRothkirch of 'The Coven', email him
+ 			  at redchurch@uswest.net
+
+CTF Skins               : Yes.    
+VWEP Support            : nope, but possible...
+
+
+* Construction *
+Poly Counts
+Tris.md2		: 764
+weapon.md2		: 36
+
+Vert Counts
+tris.md2		: 422
+weapon.md2		: 20
+
+Skin Count              : 6, count em.  
+Base                    : new model from scratch
+
+Editors used:-
+
+Modelling/animation	: Lightwave 5.5, 
+
+Converting/clean-up	: QME, Q2modeler
+
+Skinning/mapping	: Paintshop pro, NST, Q2modeler (can't vouch precisely for what ppl used)
+
+Bugs/comments/excuses   : Ho k, I was pretty darn happy with the final tris.  The main probs lie 
+			  in that it doesn't conform to the bounding box too well on some anims.
+			  So if your the kinda person who does flip-offs while looking directly 
+			  at walls or taunts in very low ceiling rooms, then this aint the ppm 
+			  for you.  However, if you spend 90% of your time running, shooting, 
+			  jumping and dying then you should be ok :)  
+			  I spent a lot of time getting limbs and proportions looking right.  So
+ 			  appreciate it dammit! Oh, and the poly count is definately to high for
+ 			  my liking.  Although it was well of 1200 with the original cut, so I
+		  	  haven't done too bad.
+			  
+
+Build/Animation time    : few weeks, on an off.  
+
+
+* How to use this model *
+
+just make sure you extract to quake2\baseq2\players\hunter  ...then go billy.  
+
+
+* Copyright / Permissions *
+
+QUAKE(R) and QUAKE II(R) are registered trademarks of id Software, Inc.
+
+All rights reserved.  

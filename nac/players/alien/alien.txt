@@ -1,0 +1,66 @@
+
+25/08/98
+================================================================
+Model Name              : ALIEN (was first Hunter, but with some 3d and 2d changes.)
+installation directory  : quake2/baseq2/players/alien
+
+All changes made by     : AMC    amc02@hexanet.fr
+(and the skin) 		  http://members.xoom.com/Amc02
+
+Model description       : Alien from the film
+
+Other info              : Author of the Hunter    : Michael 'Magarnigal' Mellor  
+			  (Thank you again)         homepage at http://members.tripod.com/~magarn
+			  the 3d changes: the head extruded, a tail added (with the animation),
+			  and two little things in the back.
+
+Additional Credits to   : Author of the Hunter    : Michael 'Magarnigal' Mellor  
+ 			  homepage at http://members.tripod.com/~magarn
+
+
+
+================================================================
+* Play Information *
+
+New Sounds              : Oh Yes!
+
+CTF Skins               : Yes.    
+
+VWEP Support            : nope, but possible...
+
+
+* Construction *
+Poly Counts
+Tris.md2		: 818
+weapon.md2		: 36
+
+Vert Counts
+tris.md2		: 423
+weapon.md2		: 20
+
+Skin Count              : 4, count em.  
+Base                    : HUNTER
+
+Editors used:-
+
+changes by AMC          : Q2 modeler.
+
+Skinning        	: Photoshop 4.
+
+
+Bugs/comments/excuses   : I wanna thank again Mellor for the Hunter, this brilliant model.
+			  It gave me the inspiration... :)
+
+Build/Animation time    : few weeks, on an off.  
+
+
+* How to use this model *
+
+just make sure you extract to quake2\baseq2\players\hunter  ...then go billy.  
+
+
+* Copyright / Permissions *
+
+QUAKE(R) and QUAKE II(R) are registered trademarks of id Software, Inc.
+
+All rights reserved.  

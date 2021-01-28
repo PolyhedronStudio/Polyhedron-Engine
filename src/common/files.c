@@ -3663,7 +3663,7 @@ static void fs_game_changed(cvar_t *self)
 
     // check for the first time startup
     if (!fs_base_searchpaths) {
-        // start up with baseq2 by default
+        // start up with basenac by default
         setup_base_paths();
 
         // check for game override
@@ -3690,7 +3690,7 @@ static void fs_game_changed(cvar_t *self)
     // otherwise, restart the filesystem
     CL_RestartFilesystem(qfalse);
 
-    // FIXME: if baseq2/autoexec.cfg exists DO NOT exec default.cfg and config.cfg.
+    // FIXME: if basenac/autoexec.cfg exists DO NOT exec default.cfg and config.cfg.
     // this assumes user prefers to do configuration via autoexec.cfg and doesn't
     // want settings and binds messed up whenever gamedir changes after startup.
     if (!FS_FileExistsEx(COM_AUTOEXEC_CFG, FS_TYPE_REAL | FS_PATH_BASE)) {
