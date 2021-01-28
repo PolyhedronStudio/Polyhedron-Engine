@@ -800,11 +800,11 @@ static void *_SV_LoadGameLibrary(const char *path)
 {
     void *entry;
 
-    entry = Sys_LoadLibrary(path, "GetGameAPI", &game_library);
+    entry = Sys_LoadLibrary(path, "GetServerGameAPI", &game_library);
     if (!entry)
-        Com_EPrintf("Failed to load game library: %s\n", Com_GetLastError());
+        Com_EPrintf("Failed to load server game library: %s\n", Com_GetLastError());
     else
-        Com_Printf("Loaded game library from %s\n", path);
+        Com_Printf("Loaded server game library from %s\n", path);
 
     return entry;
 }
@@ -814,11 +814,16 @@ static void *SV_LoadGameLibrary(const char *game, const char *prefix)
     char path[MAX_OSPATH];
     size_t len;
 
+    // WATISDEZE: Old game architecture dynamic link loading code.
+    // len = Q_concat(path, sizeof(path), sys_libdir->string,
+    //                PATH_SEP_STRING, game, PATH_SEP_STRING,
+    //                prefix, "game" CPUSTRING LIBSUFFIX, NULL);
+    // WATISDEZE: Updated to load the renamed "server game" module.
     len = Q_concat(path, sizeof(path), sys_libdir->string,
                    PATH_SEP_STRING, game, PATH_SEP_STRING,
-                   prefix, "game" CPUSTRING LIBSUFFIX, NULL);
+                   prefix, "svgame" LIBSUFFIX, NULL);
     if (len >= sizeof(path)) {
-        Com_EPrintf("Game library path length exceeded\n");
+        Com_EPrintf("Server game library path length exceeded\n");
         return NULL;
     }
 

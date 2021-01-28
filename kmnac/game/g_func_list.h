@@ -1288,7 +1288,7 @@
 {"ClientEndServerFrames", (byte *)ClientEndServerFrames},
 {"Com_Printf", (byte *)Com_Printf},
 {"Sys_Error", (byte *)Sys_Error},
-{"GetGameAPI", (byte *)GetGameAPI},
+{"GetServerGameAPI", (byte *)GetServerGameAPI},
 {"Debug_Soundindex", (byte *)Debug_Soundindex},
 {"Debug_Modelindex", (byte *)Debug_Modelindex},
 {"ShutdownGame", (byte *)ShutdownGame},

@@ -1289,7 +1289,7 @@ extern edict_t * CreateTargetChangeLevel ( char * map ) ;
 extern void ClientEndServerFrames ( void ) ;
 extern void Com_Printf ( char * msg , ... ) ;
 extern void Sys_Error ( const char * error , ... ) ;
-extern game_export_t * GetGameAPI ( game_import_t * import ) ;
+extern game_export_t * GetServerGameAPI ( game_import_t * import ) ;
 extern int Debug_Soundindex ( char * name ) ;
 extern int Debug_Modelindex ( char * name ) ;
 extern void ShutdownGame ( void ) ;
