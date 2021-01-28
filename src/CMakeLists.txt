@@ -235,31 +235,31 @@ SET(SRC_SHARED
 
 ###################### Linux Client Specific.
 SET(SRC_LINUX
-	unix/hunk.c
-	unix/system.c
-	unix/tty.c
+	os/unix/hunk.c
+	os/unix/system.c
+	os/unix/tty.c
 )
 SET(SRC_LINUX_CLIENT
-	unix/sdl2/sound.c
-	unix/sdl2/video.c
+	os/sdl2/sound.c
+	os/sdl2/video.c
 )
 
 ###################### Windows Client Specific.
 SET(SRC_WINDOWS
-	windows/ac.c
-	windows/debug.c
-	windows/hunk.c
-	windows/system.c
+	os/windows/ac.c
+	os/windows/debug.c
+	os/windows/hunk.c
+	os/windows/system.c
 )
 SET(SRC_WINDOWS_CLIENT
-	windows/wave.c
-	unix/sdl2/video.c
+	os/windows/wave.c
+	os/sdl2/video.c
 )
 SET(HEADERS_WINDOWS
-	windows/wgl.h
-	windows/glimp.h
-	windows/client.h
-	windows/threads/threads.h
+	os/windows/wgl.h
+	os/windows/glimp.h
+	os/windows/client.h
+	os/windows/threads/threads.h
 )
 
 ###################### VKPT.
