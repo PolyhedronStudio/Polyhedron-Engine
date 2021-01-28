@@ -857,16 +857,12 @@ void SV_InitGameProgs(void)
 
     // try game first
     if (!entry && fs_game->string[0]) {
-        entry = SV_LoadGameLibrary(fs_game->string, "q2pro_");
-        if (!entry)
-            entry = SV_LoadGameLibrary(fs_game->string, "");
+        entry = SV_LoadGameLibrary(fs_game->string, "");
     }
 
     // then try basenac
     if (!entry) {
-        entry = SV_LoadGameLibrary(BASEGAME, "q2pro_");
-        if (!entry)
-            entry = SV_LoadGameLibrary(BASEGAME, "");
+        entry = SV_LoadGameLibrary(BASEGAME, "");
     }
 
     // all paths failed
