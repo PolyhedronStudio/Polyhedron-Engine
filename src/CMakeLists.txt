@@ -5,82 +5,128 @@ cmake_minimum_required (VERSION 3.8)
 ##			SOURCE AND HEADER FILE LISTS
 ##
 ###############################################################################
-###################### BaseQ2.
-SET(SRC_BASEQ2
-	baseq2/g_ai.c
-	baseq2/g_chase.c
-	baseq2/g_cmds.c
-	baseq2/g_combat.c
-	baseq2/g_func.c
-	baseq2/g_items.c
-	baseq2/g_main.c
-	baseq2/g_misc.c
-	baseq2/g_monster.c
-	baseq2/g_phys.c
-	baseq2/g_ptrs.c
-	baseq2/g_save.c
-	baseq2/g_spawn.c
-	baseq2/g_svcmds.c
-	baseq2/g_target.c
-	baseq2/g_trigger.c
-	baseq2/g_turret.c
-	baseq2/g_utils.c
-	baseq2/g_weapon.c
-	baseq2/m_actor.c
-	baseq2/m_berserk.c
-	baseq2/m_boss2.c
-	baseq2/m_boss3.c
-	baseq2/m_boss31.c
-	baseq2/m_boss32.c
-	baseq2/m_brain.c
-	baseq2/m_chick.c
-	baseq2/m_flipper.c
-	baseq2/m_float.c
-	baseq2/m_flyer.c
-	baseq2/m_gladiator.c
-	baseq2/m_gunner.c
-	baseq2/m_hover.c
-	baseq2/m_infantry.c
-	baseq2/m_insane.c
-	baseq2/m_medic.c
-	baseq2/m_move.c
-	baseq2/m_mutant.c
-	baseq2/m_parasite.c
-	baseq2/m_soldier.c
-	baseq2/m_supertank.c
-	baseq2/m_tank.c
-	baseq2/p_client.c
-	baseq2/p_hud.c
-	baseq2/p_trail.c
-	baseq2/p_view.c
-	baseq2/p_weapon.c
+###################### BASENAC.
+SET(SRC_BASENAC
+	../kmnac/game/acebot_ai.c
+	../kmnac/game/acebot_cmds.c
+	../kmnac/game/acebot_compress.c
+	../kmnac/game/acebot_items.c
+	../kmnac/game/acebot_movement.c
+	../kmnac/game/acebot_nodes.c
+	../kmnac/game/acebot_spawn.c
+	../kmnac/game/g_ai.c
+	../kmnac/game/g_camera.c
+	../kmnac/game/g_chase.c
+	../kmnac/game/g_cmds.c
+	../kmnac/game/g_combat.c
+	../kmnac/game/g_crane.c
+	../kmnac/game/g_ctf.c
+	../kmnac/game/g_fog.c
+	../kmnac/game/g_func.c
+	../kmnac/game/g_items.c
+	../kmnac/game/g_jetpack.c
+	../kmnac/game/g_lights.c
+	../kmnac/game/g_lock.c
+	../kmnac/game/g_main.c
+	../kmnac/game/g_misc.c
+	../kmnac/game/g_model.c
+	../kmnac/game/g_monster.c
+	../kmnac/game/g_moreai.c
+	../kmnac/game/g_mtrain.c
+	../kmnac/game/g_patchplayermodels.c
+	../kmnac/game/g_pendulum.c
+	../kmnac/game/g_phys.c
+	../kmnac/game/g_ptrs.c
+	../kmnac/game/g_reflect.c
+	../kmnac/game/g_save.c
+	../kmnac/game/g_spawn.c
+	../kmnac/game/g_svcmds.c
+	../kmnac/game/g_target.c
+	../kmnac/game/g_thing.c
+	../kmnac/game/g_tracktrain.c
+	../kmnac/game/g_trigger.c
+	../kmnac/game/g_turret.c
+	../kmnac/game/g_utils.c
+	../kmnac/game/g_vehicle.c
+	../kmnac/game/g_weapon.c
+	../kmnac/game/km_cvar.c
+	../kmnac/game/m_actor.c
+	../kmnac/game/m_actor_weap.c
+	../kmnac/game/m_berserk.c
+	../kmnac/game/m_boss2.c
+	../kmnac/game/m_boss3.c
+	../kmnac/game/m_boss31.c
+	../kmnac/game/m_boss32.c
+	../kmnac/game/m_brain.c
+	../kmnac/game/m_chick.c
+#	../kmnac/game/m_flash.c
+	../kmnac/game/m_flipper.c
+	../kmnac/game/m_float.c
+	../kmnac/game/m_flyer.c
+	../kmnac/game/m_gladiator.c
+	../kmnac/game/m_gunner.c
+	../kmnac/game/m_hover.c
+	../kmnac/game/m_infantry.c
+	../kmnac/game/m_insane.c
+	../kmnac/game/m_medic.c
+	../kmnac/game/m_move.c
+	../kmnac/game/m_mutant.c
+	../kmnac/game/m_parasite.c
+	../kmnac/game/m_soldier.c
+	../kmnac/game/m_supertank.c
+	../kmnac/game/m_tank.c
+	../kmnac/game/p_chase.c
+	../kmnac/game/p_client.c
+	../kmnac/game/p_hud.c
+	../kmnac/game/p_menu.c
+	../kmnac/game/p_text.c
+	../kmnac/game/p_trail.c
+	../kmnac/game/p_view.c
+	../kmnac/game/p_weapon.c
+	../kmnac/game/q_shared.c
 )
-SET(HEADERS_BASEQ2
-	baseq2/g_local.h
-	baseq2/g_ptrs.h
-	baseq2/m_actor.h
-	baseq2/m_berserk.h
-	baseq2/m_boss2.h
-	baseq2/m_boss31.h
-	baseq2/m_boss32.h
-	baseq2/m_brain.h
-	baseq2/m_chick.h
-	baseq2/m_flipper.h
-	baseq2/m_float.h
-	baseq2/m_flyer.h
-	baseq2/m_gladiator.h
-	baseq2/m_gunner.h
-	baseq2/m_hover.h
-	baseq2/m_infantry.h
-	baseq2/m_insane.h
-	baseq2/m_medic.h
-	baseq2/m_mutant.h
-	baseq2/m_parasite.h
-	baseq2/m_player.h
-	baseq2/m_rider.h
-	baseq2/m_soldier.h
-	baseq2/m_supertank.h
-	baseq2/m_tank.h
+
+SET(HEADERS_BASENAC
+	../kmnac/game/acebot.h
+	../kmnac/game/game.h
+	../kmnac/game/g_ctf.h
+	../kmnac/game/g_func_decs.h
+	../kmnac/game/g_func_list.h
+	../kmnac/game/g_local.h
+	../kmnac/game/g_mmove_decs.h
+	../kmnac/game/g_mmove_list.h
+	../kmnac/game/lazarus.def
+	../kmnac/game/laz_misc.h
+	../kmnac/game/km_cvar.h
+	../kmnac/game/g_ptrs.h
+	../kmnac/game/m_actor.h
+	../kmnac/game/m_berserk.h
+	../kmnac/game/q_shared.h
+	../kmnac/game/resource.h
+	../kmnac/game/p_text.h
+	../kmnac/game/p_menu.h
+	../kmnac/game/m_tank.h
+	../kmnac/game/pak.h
+	../kmnac/game/m_supertank.h
+	../kmnac/game/m_soldier.h
+	../kmnac/game/m_parasite.h
+	../kmnac/game/m_player.h
+	../kmnac/game/m_rider.h
+	../kmnac/game/m_mutant.h
+	../kmnac/game/m_medic.h
+	../kmnac/game/m_insane.h
+	../kmnac/game/m_boss2.h
+	../kmnac/game/m_infantry.h
+	../kmnac/game/m_hover.h
+	../kmnac/game/m_gunner.h
+	../kmnac/game/m_gladiator.h
+	../kmnac/game/m_flyer.h
+	../kmnac/game/m_float.h
+	../kmnac/game/m_boss31.h
+	../kmnac/game/m_flipper.h
+	../kmnac/game/m_chick.h
+	../kmnac/game/m_brain.h
+	../kmnac/game/m_boss32.h
 )
 
 ###################### Client.
@@ -299,7 +345,7 @@ SET(HEADERS_VKPT
 	refresh/vkpt/precomputed_sky.h
 )
 
-###################### Shaders.
+###################### Vulkan Shaders.
 set(SRC_SHADERS
 	refresh/vkpt/shader/animate_materials.comp
 	refresh/vkpt/shader/god_rays_filter.comp
@@ -374,7 +420,7 @@ IF(WIN32)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF()
 
-ADD_LIBRARY(gamex86 SHARED ${SRC_BASEQ2} ${HEADERS_BASEQ2} ${SRC_SHARED})
+ADD_LIBRARY(gamex86 SHARED ${SRC_BASENAC} ${HEADERS_BASENAC} ${SRC_SHARED})
 IF(WIN32)
 ADD_EXECUTABLE(client WIN32 
 	${SRC_CLIENT} ${HEADERS_CLIENT} 
@@ -383,7 +429,7 @@ ADD_EXECUTABLE(client WIN32
 	${SRC_SHARED} 
 	${SRC_WINDOWS} ${SRC_WINDOWS_CLIENT} ${HEADERS_WINDOWS}
 	${SRC_SERVER} ${HEADERS_SERVER}
-	windows/res/q2rtx.rc
+	os/res/nac.rc
 )
 ADD_EXECUTABLE(server 
 	${SRC_COMMON} ${HEADERS_COMMON} 
@@ -392,7 +438,7 @@ ADD_EXECUTABLE(server
 	${SRC_SERVER} ${HEADERS_SERVER}
 	server/ac.c
 	client/null.c
-	windows/res/q2rtxded.rc
+	os/res/nacded.rc
 )
 ELSE()
 ADD_EXECUTABLE(client
@@ -452,8 +498,8 @@ ENDIF()
 TARGET_LINK_LIBRARIES(client stb)
 TARGET_LINK_LIBRARIES(client tinyobjloader)
 
-SOURCE_GROUP("baseq2\\sources" FILES ${SRC_BASEQ2})
-SOURCE_GROUP("baseq2\\headers" FILES ${HEADERS_BASEQ2})
+SOURCE_GROUP("basenac\\sources" FILES ${SRC_BASENAC})
+SOURCE_GROUP("basenac\\headers" FILES ${HEADERS_BASENAC})
 SOURCE_GROUP("client\\sources" FILES ${SRC_CLIENT})
 SOURCE_GROUP("client\\headers" FILES ${HEADERS_CLIENT})
 SOURCE_GROUP("server\\sources" FILES ${SRC_SERVER})
@@ -471,7 +517,7 @@ IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(gamex86 PRIVATE ../VC/inc)
-	TARGET_SOURCES(gamex86 PRIVATE windows/res/baseq2.rc)
+	TARGET_SOURCES(gamex86 PRIVATE os/res/basenac.rc)
 
 	TARGET_LINK_LIBRARIES(client winmm ws2_32)
 	TARGET_LINK_LIBRARIES(server winmm ws2_32)
@@ -527,16 +573,16 @@ SET_TARGET_PROPERTIES(server
 
 SET_TARGET_PROPERTIES(gamex86
     PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/baseq2"
-    LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/baseq2"
-    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/baseq2"
-    LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/baseq2"
-    LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/baseq2"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/baseq2"
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/baseq2"
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/baseq2"
-    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/baseq2"
-    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/baseq2"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/basenac"
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/basenac"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/basenac"
+    LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/basenac"
+    LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/basenac"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/basenac"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/basenac"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/basenac"
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/basenac"
+    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/basenac"
     PREFIX ""
     DEBUG_POSTFIX ""
 )
@@ -559,24 +605,24 @@ IF(CONFIG_LINUX_PACKAGING_SUPPORT)
         SCRIPT "${CMAKE_SOURCE_DIR}/setup/package_media.cmake"
         SCRIPT "${CMAKE_SOURCE_DIR}/setup/package_shaders.cmake"
         COMPONENT shareware)
-    INSTALL(TARGETS gamex86 DESTINATION share/quake2rtx/baseq2 COMPONENT shareware)
+    INSTALL(TARGETS gamex86 DESTINATION share/quake2rtx/basenac COMPONENT shareware)
 
     # Package data files, including the shareware pak0 for demo levels
     set (SHAREWARE_DATA_FILES_LIST
-        "${CMAKE_SOURCE_DIR}/baseq2/q2rtx_media.pkz"
-        "${CMAKE_SOURCE_DIR}/baseq2/shaders.pkz"
-        "${CMAKE_SOURCE_DIR}/baseq2/blue_noise.pkz"
-        "${CMAKE_SOURCE_DIR}/baseq2/shareware/pak0.pak"
+        "${CMAKE_SOURCE_DIR}/basenac/q2rtx_media.pkz"
+        "${CMAKE_SOURCE_DIR}/basenac/shaders.pkz"
+        "${CMAKE_SOURCE_DIR}/basenac/blue_noise.pkz"
+        "${CMAKE_SOURCE_DIR}/basenac/shareware/pak0.pak"
     )
     INSTALL(FILES
         ${SHAREWARE_DATA_FILES_LIST}
-        DESTINATION share/quake2rtx/baseq2
+        DESTINATION share/quake2rtx/basenac
         COMPONENT shareware)
 
     # Package shareware player model
     INSTALL(DIRECTORY
-        "${CMAKE_SOURCE_DIR}/baseq2/shareware/players"
-        DESTINATION share/quake2rtx/baseq2
+        "${CMAKE_SOURCE_DIR}/basenac/shareware/players"
+        DESTINATION share/quake2rtx/basenac
         COMPONENT shareware)
 
     # Package the legal and info files

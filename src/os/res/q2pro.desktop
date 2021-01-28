@@ -1,8 +1,8 @@
 [Desktop Entry]
-Name=Quake II RTX
-GenericName=Quake 2 client
-Exec=q2rtx
-Icon=q2rtx
+Name=Nails & Crescent
+GenericName=Nails & Crescent client
+Exec=nac
+Icon=nac
 Terminal=false
 Type=Application
 Categories=Game;ActionGame;
