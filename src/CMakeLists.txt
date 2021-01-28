@@ -220,13 +220,20 @@ SET(HEADERS_GL
 	refresh/gl/gl.h
 )
 
-###################### Client.
+###################### Shared Folder.
+SET(HEADERS_SHARED
+	../inc/shared/config.h
+	../inc/shared/game.h 
+	../inc/shared/list.h 
+	../inc/shared/platform.h
+	../inc/shared/shared.h 
+)
 SET(SRC_SHARED
 	shared/m_flash.c
 	shared/shared.c
 )
 
-###################### Linux.
+###################### Linux Client Specific.
 SET(SRC_LINUX
 	unix/hunk.c
 	unix/system.c
@@ -237,7 +244,7 @@ SET(SRC_LINUX_CLIENT
 	unix/sdl2/video.c
 )
 
-###################### Windows.
+###################### Windows Client Specific.
 SET(SRC_WINDOWS
 	windows/ac.c
 	windows/debug.c
