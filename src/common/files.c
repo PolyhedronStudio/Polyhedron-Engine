@@ -3695,7 +3695,7 @@ static void fs_game_changed(cvar_t *self)
     // want settings and binds messed up whenever gamedir changes after startup.
     if (!FS_FileExistsEx(COM_AUTOEXEC_CFG, FS_TYPE_REAL | FS_PATH_BASE)) {
         Com_AddConfigFile(COM_DEFAULT_CFG, FS_PATH_GAME);
-		Com_AddConfigFile(COM_Q2RTX_CFG, 0);
+		Com_AddConfigFile(COM_NAC_CFG, 0);
 		Com_AddConfigFile(COM_CONFIG_CFG, FS_TYPE_REAL | FS_PATH_GAME);
     }
 

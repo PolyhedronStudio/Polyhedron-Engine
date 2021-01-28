@@ -286,7 +286,7 @@ LONG WINAPI Sys_ExceptionFilter(LPEXCEPTION_POINTERS exceptionInfo)
     execdir[len] = 0;
 
     CopyMemory(path, execdir, len);
-    CopyMemory(path + len, "\\Q2RTX_CrashReportXX.txt", 25);
+    CopyMemory(path + len, "\\NAC_CrashReportXX.txt", 25);
     for (i = 0; i < 100; i++) {
         path[len + 18] = '0' + i / 10;
         path[len + 19] = '0' + i % 10;
