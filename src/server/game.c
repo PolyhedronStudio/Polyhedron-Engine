@@ -802,9 +802,9 @@ static void *_SV_LoadGameLibrary(const char *path)
 
     entry = Sys_LoadLibrary(path, "GetServerGameAPI", &game_library);
     if (!entry)
-        Com_EPrintf("Failed to load server game library: %s\n", Com_GetLastError());
+        Com_EPrintf("Failed to load Server Game library: %s\n", Com_GetLastError());
     else
-        Com_Printf("Loaded server game library from %s\n", path);
+        Com_Printf("Loaded Server Game library from %s\n", path);
 
     return entry;
 }
@@ -823,7 +823,7 @@ static void *SV_LoadGameLibrary(const char *game, const char *prefix)
                    PATH_SEP_STRING, game, PATH_SEP_STRING,
                    prefix, "svgame" LIBSUFFIX, NULL);
     if (len >= sizeof(path)) {
-        Com_EPrintf("Server game library path length exceeded\n");
+        Com_EPrintf("Server Game library path length exceeded\n");
         return NULL;
     }
 
@@ -867,7 +867,7 @@ void SV_InitGameProgs(void)
 
     // all paths failed
     if (!entry)
-        Com_Error(ERR_DROP, "Failed to load game library");
+        Com_Error(ERR_DROP, "Failed to load Server Game library");
 
     // load a new game dll
     import.multicast = SV_Multicast;
@@ -926,11 +926,11 @@ void SV_InitGameProgs(void)
 
     ge = entry(&import);
     if (!ge) {
-        Com_Error(ERR_DROP, "Game DLL returned NULL exports");
+        Com_Error(ERR_DROP, "Server Game DLL returned NULL exports");
     }
 
     if (ge->apiversion != GAME_API_VERSION) {
-        Com_Error(ERR_DROP, "Game DLL is version %d, expected %d",
+        Com_Error(ERR_DROP, "Server Game DLL is version %d, expected %d",
                   ge->apiversion, GAME_API_VERSION);
     }
 
@@ -939,12 +939,12 @@ void SV_InitGameProgs(void)
 
     // sanitize edict_size
     if (ge->edict_size < sizeof(edict_t) || ge->edict_size > SIZE_MAX / MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Game DLL returned bad size of edict_t");
+        Com_Error(ERR_DROP, "Server Game DLL returned bad size of edict_t");
     }
 
     // sanitize max_edicts
     if (ge->max_edicts <= sv_maxclients->integer || ge->max_edicts > MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Game DLL returned bad number of max_edicts");
+        Com_Error(ERR_DROP, "Server Game DLL returned bad number of max_edicts");
     }
 }
 
