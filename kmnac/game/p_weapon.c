@@ -933,7 +933,7 @@ void Weapon_GrenadeLauncher (edict_t *ent)
 	static int	pause_frames[]	= {34, 51, 59, 0};
 	static int	fire_frames[]	= {3, 0};
 
-	Weapon_Generic (ent, 2, 13, 59, 61, pause_frames, fire_frames, weapon_grenadelauncher_fire);
+	Weapon_Generic (ent, 2, 12, 59, 61, pause_frames, fire_frames, weapon_grenadelauncher_fire);
 }
 
 /*
@@ -1048,7 +1048,7 @@ void Weapon_RocketLauncher (edict_t *ent)
 	static int	pause_frames[]	= {25, 33, 42, 50, 0};
 	static int	fire_frames[]	= {3, 0};
 
-	Weapon_Generic (ent, 2, 20, 50, 52, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
+	Weapon_Generic (ent, 2, 17, 50, 52, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
 }
 
 void Weapon_HomingMissileLauncher_Fire (edict_t *ent, qboolean altfire)
