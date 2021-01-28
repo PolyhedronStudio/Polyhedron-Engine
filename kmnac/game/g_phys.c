@@ -1526,7 +1526,7 @@ void SV_Physics_Toss (edict_t *ent)
 	{
 		if (ent->movetype == MOVETYPE_BOUNCE) {
 		//	backoff = 1.5;
-			backoff = 1.0 + bounce_bounce->value;
+			backoff = 1.1 + bounce_bounce->value;
 			//if (mega_gibs->value && !strcmp(ent->classname, "gib") && !isinwater)
 			//	gi.sound (ent, CHAN_VOICE, gi.soundindex ("misc/fhit3.wav"), 1, ATTN_NORM, 0);
 		}

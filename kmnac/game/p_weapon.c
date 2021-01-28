@@ -911,7 +911,7 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
-	fire_grenade (ent, start, forward, damage, sk_grenade_speed->value, 1.75, radius, altfire);
+	fire_grenade (ent, start, forward, damage, sk_grenade_speed->value, 2.0, radius, altfire);
 	// temporary crap to test grenade bounce
 //	fire_grenade (ent, start, forward, damage, sk_grenade_speed->value, 25, radius);
 
@@ -931,9 +931,9 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 void Weapon_GrenadeLauncher (edict_t *ent)
 {
 	static int	pause_frames[]	= {34, 51, 59, 0};
-	static int	fire_frames[]	= {6, 0};
+	static int	fire_frames[]	= {3, 0};
 
-	Weapon_Generic (ent, 5, 16, 59, 64, pause_frames, fire_frames, weapon_grenadelauncher_fire);
+	Weapon_Generic (ent, 2, 12, 59, 61, pause_frames, fire_frames, weapon_grenadelauncher_fire);
 }
 
 /*
@@ -1046,9 +1046,9 @@ void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 void Weapon_RocketLauncher (edict_t *ent)
 {
 	static int	pause_frames[]	= {25, 33, 42, 50, 0};
-	static int	fire_frames[]	= {5, 0};
+	static int	fire_frames[]	= {3, 0};
 
-	Weapon_Generic (ent, 4, 20, 50, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
+	Weapon_Generic (ent, 2, 17, 50, 52, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
 }
 
 void Weapon_HomingMissileLauncher_Fire (edict_t *ent, qboolean altfire)
@@ -1253,11 +1253,11 @@ void Weapon_HyperBlaster (edict_t *ent)
 	static int	fire_frames[]	= {6, 7, 8, 9, 10, 11, 0};
 
 	Weapon_Generic (ent, 5, 20, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);*/
-	const int ACTIVATE_END = 4;
-	const int FIRE_START = ACTIVATE_END + 2;
+	const int ACTIVATE_END = 3;
+	const int FIRE_START = ACTIVATE_END + 1;
 	const int FIRE_LENGTH = 10;
-	const int PUTAWAY_START = 46;
-	const int PUTAWAY_LENGTH = 6;
+	const int PUTAWAY_START = 44;
+	const int PUTAWAY_LENGTH = 2;
 	const int NUM_FIRE_ANIMS = 4;
 
 	switch (ent->client->weaponstate)
@@ -1269,7 +1269,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 		if (ent->client->ps.gunframe >= ACTIVATE_END)
 		{
 			ent->client->weaponstate = WEAPON_READY;
-			ent->client->ps.gunframe = PUTAWAY_START - 3;
+			ent->client->ps.gunframe = PUTAWAY_START - 1;
 		}
 		break;
 	case WEAPON_DROPPING:
@@ -1316,7 +1316,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 			if ((!ent->client->ammo_index) || 
 				( ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity))
 			{
-				ent->client->ps.gunframe = FIRE_START + (((ANIM + 1) % NUM_FIRE_ANIMS) * FIRE_LENGTH);
+				ent->client->ps.gunframe = FIRE_START + (((ANIM + 1) % NUM_FIRE_ANIMS) * FIRE_LENGTH) + 1;
 				ent->client->weaponstate = WEAPON_FIRING;
 
 				Weapon_HyperBlaster_Fire(ent);
@@ -1342,7 +1342,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 		const int SUBFRAME = (ent->client->ps.gunframe - FIRE_START) % FIRE_LENGTH;
 
 		// number of frames before we can fire again
-		const int FIRE_DELAY = 1.8;
+		const int FIRE_DELAY = 2;
 
 		if (SUBFRAME >= FIRE_DELAY)
 		{
@@ -1352,7 +1352,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 				if ((!ent->client->ammo_index) || 
 					( ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity))
 				{
-					ent->client->ps.gunframe = FIRE_START + (((ANIM + 1) % NUM_FIRE_ANIMS) * FIRE_LENGTH);
+					ent->client->ps.gunframe = FIRE_START + (((ANIM + 1) % NUM_FIRE_ANIMS) * FIRE_LENGTH) + 1;
 					Weapon_HyperBlaster_Fire(ent);
 					return;
 				}
@@ -1373,7 +1373,7 @@ void Weapon_HyperBlaster (edict_t *ent)
 				// end of this animation, and we didn't try to re-fire, so go ready
 				ent->client->weaponstate = WEAPON_READY;
 
-				ent->client->ps.gunframe -= 2;
+				//ent->client->ps.gunframe -= 3;
 			}
 			else
 				ent->client->ps.gunframe++;
@@ -1674,9 +1674,9 @@ void weapon_shotgun_fire (edict_t *ent, qboolean altfire)
 void Weapon_Shotgun (edict_t *ent)
 {
 	static int	pause_frames[]	= {22, 28, 34, 0};
-	static int	fire_frames[]	= {8, 9, 0};
+	static int	fire_frames[]	= {3, 9, 0};
 
-	Weapon_Generic (ent, 7, 17, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
+	Weapon_Generic (ent, 2, 11, 36, 38, pause_frames, fire_frames, weapon_shotgun_fire);
 }
 
 
@@ -1687,7 +1687,7 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 	vec3_t		offset;
 	vec3_t		v;
 	int			damage = sk_sshotgun_damage->value;
-	int			kick = 32;
+	int			kick = 24;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
@@ -1728,9 +1728,9 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 void Weapon_SuperShotgun (edict_t *ent)
 {
 	static int	pause_frames[]	= {29, 42, 57, 0};
-	static int	fire_frames[]	= {7, 0};
+	static int	fire_frames[]	= {3, 0};
 
-	Weapon_Generic (ent, 6, 22, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
+	Weapon_Generic (ent, 2, 18, 57, 59, pause_frames, fire_frames, weapon_supershotgun_fire);
 }
 
 
