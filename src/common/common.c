@@ -1057,7 +1057,7 @@ void Qcommon_Init(int argc, char **argv)
 
     Com_AddConfigFile(COM_POSTINIT_CFG, FS_TYPE_REAL);
 
-    Com_Printf("====== " PRODUCT " initialized ======\n\n");
+    Com_Printf("====== " PRODUCT " - Engine Initialized ======\n\n");
     Com_LPrintf(PRINT_NOTICE, APPLICATION " " VERSION_STRING ", " __DATE__ "\n");
 
 	if (fs_shareware->integer)

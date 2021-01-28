@@ -876,7 +876,7 @@ static qboolean parse_userinfo(conn_params_t *params, char *userinfo)
 	if (sv_restrict_rtx->integer)
 	{
 		s = Info_ValueForKey(info, "version");
-		if (strncmp(s, "q2rtx", 5) != 0)
+		if (strncmp(s, "nac", 3) != 0)
 		{
 			return reject("This server is only available to Q2RTX clients.\n");
 		}

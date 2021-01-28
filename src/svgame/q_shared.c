@@ -24,13 +24,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "q_shared.h"
 #include "laz_misc.h"
 
-#ifdef _WIN32
-#include "../win32/winquake.h"
-#endif
+// WATISDEZE: Removed.
+// #ifdef _WIN32
+// #include "../win32/winquake.h"
+// #endif
 
-// vec2_t vec2_origin = {0,0};
-// vec3_t vec3_origin = {0,0,0};
-// vec4_t vec4_origin = {0,0,0,0};
+vec2_t vec2_origin = {0,0};
+vec3_t vec3_origin = {0,0,0};
+vec4_t vec4_origin = {0,0,0,0};
 
 //============================================================================
 
@@ -99,44 +100,44 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 
 
 
-// void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
-// {
-// 	float		angle;
-// 	static float		sr, sp, sy, cr, cp, cy;
-// 	// static to help MS compiler fp bugs
+void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
+{
+	float		angle;
+	static float		sr, sp, sy, cr, cp, cy;
+	// static to help MS compiler fp bugs
 
-// 	if (!angles)
-// 		return;
+	if (!angles)
+		return;
 
-// 	angle = angles[YAW] * (M_PI*2 / 360);
-// 	sy = sin(angle);
-// 	cy = cos(angle);
-// 	angle = angles[PITCH] * (M_PI*2 / 360);
-// 	sp = sin(angle);
-// 	cp = cos(angle);
-// 	angle = angles[ROLL] * (M_PI*2 / 360);
-// 	sr = sin(angle);
-// 	cr = cos(angle);
+	angle = angles[YAW] * (M_PI*2 / 360);
+	sy = sin(angle);
+	cy = cos(angle);
+	angle = angles[PITCH] * (M_PI*2 / 360);
+	sp = sin(angle);
+	cp = cos(angle);
+	angle = angles[ROLL] * (M_PI*2 / 360);
+	sr = sin(angle);
+	cr = cos(angle);
 
-// 	if (forward)
-// 	{
-// 		forward[0] = cp*cy;
-// 		forward[1] = cp*sy;
-// 		forward[2] = -sp;
-// 	}
-// 	if (right)
-// 	{
-// 		right[0] = (-1*sr*sp*cy+-1*cr*-sy);
-// 		right[1] = (-1*sr*sp*sy+-1*cr*cy);
-// 		right[2] = -1*sr*cp;
-// 	}
-// 	if (up)
-// 	{
-// 		up[0] = (cr*sp*cy+-sr*-sy);
-// 		up[1] = (cr*sp*sy+-sr*cy);
-// 		up[2] = cr*cp;
-// 	}
-// }
+	if (forward)
+	{
+		forward[0] = cp*cy;
+		forward[1] = cp*sy;
+		forward[2] = -sp;
+	}
+	if (right)
+	{
+		right[0] = (-1*sr*sp*cy+-1*cr*-sy);
+		right[1] = (-1*sr*sp*sy+-1*cr*cy);
+		right[2] = -1*sr*cp;
+	}
+	if (up)
+	{
+		up[0] = (cr*sp*cy+-sr*-sy);
+		up[1] = (cr*sp*sy+-sr*cy);
+		up[2] = cr*cp;
+	}
+}
 
 void MakeNormalVectors (vec3_t forward, vec3_t right, vec3_t up)
 {
@@ -703,26 +704,26 @@ Lerror:
 #pragma warning( default: 4035 )
 #endif
 
-// void ClearBounds (vec3_t mins, vec3_t maxs)
-// {
-// 	mins[0] = mins[1] = mins[2] = 99999;
-// 	maxs[0] = maxs[1] = maxs[2] = -99999;
-// }
+void ClearBounds (vec3_t mins, vec3_t maxs)
+{
+	mins[0] = mins[1] = mins[2] = 99999;
+	maxs[0] = maxs[1] = maxs[2] = -99999;
+}
 
-// void AddPointToBounds (vec3_t v, vec3_t mins, vec3_t maxs)
-// {
-// 	int		i;
-// 	vec_t	val;
+void AddPointToBounds (vec3_t v, vec3_t mins, vec3_t maxs)
+{
+	int		i;
+	vec_t	val;
 
-// 	for (i=0 ; i<3 ; i++)
-// 	{
-// 		val = v[i];
-// 		if (val < mins[i])
-// 			mins[i] = val;
-// 		if (val > maxs[i])
-// 			maxs[i] = val;
-// 	}
-// }
+	for (i=0 ; i<3 ; i++)
+	{
+		val = v[i];
+		if (val < mins[i])
+			mins[i] = val;
+		if (val > maxs[i])
+			maxs[i] = val;
+	}
+}
 
 
 int VectorCompare (vec3_t v1, vec3_t v2)
@@ -734,41 +735,41 @@ int VectorCompare (vec3_t v1, vec3_t v2)
 }
 
 
-// vec_t VectorNormalize (vec3_t v)
-// {
-// 	float	length, ilength;
+vec_t VectorNormalize (vec3_t v)
+{
+	float	length, ilength;
 
-// 	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-// 	length = sqrt (length);		// FIXME
+	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+	length = sqrt (length);		// FIXME
 
-// 	if (length)
-// 	{
-// 		ilength = 1/length;
-// 		v[0] *= ilength;
-// 		v[1] *= ilength;
-// 		v[2] *= ilength;
-// 	}
+	if (length)
+	{
+		ilength = 1/length;
+		v[0] *= ilength;
+		v[1] *= ilength;
+		v[2] *= ilength;
+	}
 		
-// 	return length;
-// }
+	return length;
+}
 
-// vec_t VectorNormalize2 (vec3_t v, vec3_t out)
-// {
-// 	float	length, ilength;
+vec_t VectorNormalize2 (vec3_t v, vec3_t out)
+{
+	float	length, ilength;
 
-// 	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-// 	length = sqrt (length);		// FIXME
+	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+	length = sqrt (length);		// FIXME
 
-// 	if (length)
-// 	{
-// 		ilength = 1/length;
-// 		out[0] = v[0]*ilength;
-// 		out[1] = v[1]*ilength;
-// 		out[2] = v[2]*ilength;
-// 	}
+	if (length)
+	{
+		ilength = 1/length;
+		out[0] = v[0]*ilength;
+		out[1] = v[1]*ilength;
+		out[2] = v[2]*ilength;
+	}
 		
-// 	return length;
-// }
+	return length;
+}
 
 /*
 =================
@@ -1016,156 +1017,156 @@ void MatrixMultiply (float in1[3][3], float in2[3][3], float out[3][3])
 
 //====================================================================================
 
-// /*
-// ============
-// COM_SkipPath
+/*
+============
+COM_SkipPath
 
-// Skips the file path
-// ============
-// */
-// char *COM_SkipPath (char *pathname)
-// {
-// 	char	*last;
+Skips the file path
+============
+*/
+char *COM_SkipPath (char *pathname)
+{
+	char	*last;
 	
-// 	last = pathname;
-// 	while (*pathname)
-// 	{
-// 		if (*pathname == '/' || *pathname == '\\')
-// 			last = pathname+1;
-// 		pathname++;
-// 	}
-// 	return last;
-// }
+	last = pathname;
+	while (*pathname)
+	{
+		if (*pathname == '/' || *pathname == '\\')
+			last = pathname+1;
+		pathname++;
+	}
+	return last;
+}
 
-// /*
-// ============
-// COM_StripExtension
+/*
+============
+COM_StripExtension
 
-// Removes the file extension, if any
-// ============
-// */
-// void COM_StripExtension (char *in, char *out, size_t outSize)
-// {
-// /*	while (*in && *in != '.')
-// 		*out++ = *in++;
-// 	*out = 0;
-// 	*/
-// 	char	*s, *last;
+Removes the file extension, if any
+============
+*/
+void COM_StripExtension (char *in, char *out, size_t outSize)
+{
+/*	while (*in && *in != '.')
+		*out++ = *in++;
+	*out = 0;
+	*/
+	char	*s, *last;
 
-// 	s = last = in + strlen(in);
-// 	while (*s != '/' && *s != '\\' && s != in)
-// 	{
-// 		if (*s == '.'){
-// 			last = s;
-// 			break;
-// 		}
-// 		s--;
-// 	}
+	s = last = in + strlen(in);
+	while (*s != '/' && *s != '\\' && s != in)
+	{
+		if (*s == '.'){
+			last = s;
+			break;
+		}
+		s--;
+	}
 
-// 	Q_strncpyz(out, in, outSize);
-// 	if (last-in < outSize)
-// 		out[last-in] = 0;
-// }
+	Q_strncpyz(out, in, outSize);
+	if (last-in < outSize)
+		out[last-in] = 0;
+}
 
-// /*
-// ============
-// COM_FileExtension
-// ============
-// */
-// char *COM_FileExtension (char *in)
-// {
-// 	static char exten[8];
-// 	int		i;
+/*
+============
+COM_FileExtension
+============
+*/
+char *COM_FileExtension (char *in)
+{
+	static char exten[8];
+	int		i;
 
-// 	while (*in && *in != '.')
-// 		in++;
-// 	if (!*in)
-// 		return "";
-// 	in++;
-// 	for (i=0 ; i<7 && *in ; i++,in++)
-// 		exten[i] = *in;
-// 	exten[i] = 0;
-// 	return exten;
-// }
+	while (*in && *in != '.')
+		in++;
+	if (!*in)
+		return "";
+	in++;
+	for (i=0 ; i<7 && *in ; i++,in++)
+		exten[i] = *in;
+	exten[i] = 0;
+	return exten;
+}
 
-// /*
-// ============
-// COM_FileBase
-// ============
-// */
-// void COM_FileBase (char *in, char *out, size_t outSize)
-// {
-// 	char *s, *s2;
+/*
+============
+COM_FileBase
+============
+*/
+void COM_FileBase (char *in, char *out, size_t outSize)
+{
+	char *s, *s2;
 	
-// 	s = in + strlen(in) - 1;
+	s = in + strlen(in) - 1;
 	
-// 	while (s != in && *s != '.')
-// 		s--;
+	while (s != in && *s != '.')
+		s--;
 	
-// 	for (s2 = s ; s2 != in && *s2 != '/' ; s2--)
-// 	;
+	for (s2 = s ; s2 != in && *s2 != '/' ; s2--)
+	;
 	
-// 	if (s-s2 < 2)
-// 		out[0] = 0;
-// 	else
-// 	{
-// 		s--;
-// 	//	strncpy (out,s2+1, s-s2);
-// 	//	out[s-s2] = 0;
-// 		Q_strncpyz (out, s2+1, outSize);
-// 		if (s-s2 < outSize)
-// 			out[s-s2] = 0;
-// 	}
-// }
+	if (s-s2 < 2)
+		out[0] = 0;
+	else
+	{
+		s--;
+	//	strncpy (out,s2+1, s-s2);
+	//	out[s-s2] = 0;
+		Q_strncpyz (out, s2+1, outSize);
+		if (s-s2 < outSize)
+			out[s-s2] = 0;
+	}
+}
 
-// /*
-// ============
-// COM_FilePath
+/*
+============
+COM_FilePath
 
-// Returns the path up to, but not including the last /
-// ============
-// */
-// void COM_FilePath (char *in, char *out, size_t outSize)
-// {
-// 	char *s;
+Returns the path up to, but not including the last /
+============
+*/
+void COM_FilePath (char *in, char *out, size_t outSize)
+{
+	char *s;
 	
-// 	s = in + strlen(in) - 1;
+	s = in + strlen(in) - 1;
 	
-// 	while (s != in && *s != '/')
-// 		s--;
+	while (s != in && *s != '/')
+		s--;
 
-// //	strncpy (out,in, s-in);
-// //	out[s-in] = 0;
-// 	Q_strncpyz (out, in, outSize);
-// 	if (s-in < outSize)
-// 		out[s-in] = 0;
-// }
+//	strncpy (out,in, s-in);
+//	out[s-in] = 0;
+	Q_strncpyz (out, in, outSize);
+	if (s-in < outSize)
+		out[s-in] = 0;
+}
 
 
-// /*
-// ==================
-// COM_DefaultExtension
-// ==================
-// */
-// void COM_DefaultExtension (char *path, size_t pathSize, char *extension)
-// {
-// 	char    *src;
-// //
-// // if path doesn't have a .EXT, append extension
-// // (extension should include the .)
-// //
-// 	src = path + strlen(path) - 1;
+/*
+==================
+COM_DefaultExtension
+==================
+*/
+void COM_DefaultExtension (char *path, size_t pathSize, char *extension)
+{
+	char    *src;
+//
+// if path doesn't have a .EXT, append extension
+// (extension should include the .)
+//
+	src = path + strlen(path) - 1;
 
-// 	while (*src != '/' && src != path)
-// 	{
-// 		if (*src == '.')
-// 			return;                 // it has an extension
-// 		src--;
-// 	}
+	while (*src != '/' && src != path)
+	{
+		if (*src == '.')
+			return;                 // it has an extension
+		src--;
+	}
 
-// //	strncat (path, extension);
-// 	Q_strncatz(path, extension, pathSize);
-// }
+//	strncat (path, extension);
+	Q_strncatz(path, extension, pathSize);
+}
 
 /*
 ============================================================================
@@ -1319,17 +1320,17 @@ does a varargs printf into a temp buffer, so I don't need to have
 varargs versions of all text functions.
 ============
 */
-// char *va (char *format, ...)
-// {
-// 	va_list		argptr;
-// 	static char		string[1024];
+char *va (char *format, ...)
+{
+	va_list		argptr;
+	static char		string[1024];
 	
-// 	va_start (argptr, format);
-// 	Q_vsnprintf (string, sizeof(string), format, argptr);
-// 	va_end (argptr);
+	va_start (argptr, format);
+	Q_vsnprintf (string, sizeof(string), format, argptr);
+	va_end (argptr);
 
-// 	return string;	
-// }
+	return string;	
+}
 
 /*
 =======================================================================
@@ -1420,88 +1421,88 @@ COM_Parse
 Parse a token out of a string
 ==============
 */
-// char *COM_Parse (char **data_p)
-// {
-// 	int		c;
-// 	int		len;
-// 	char	*data;
+char *COM_Parse (char **data_p)
+{
+	int		c;
+	int		len;
+	char	*data;
 
-// 	data = *data_p;
-// 	len = 0;
-// 	com_token[0] = 0;
+	data = *data_p;
+	len = 0;
+	com_token[0] = 0;
 	
-// 	if (!data)
-// 	{
-// 		*data_p = NULL;
-// 		return "";
-// 	}
+	if (!data)
+	{
+		*data_p = NULL;
+		return "";
+	}
 		
-// // skip whitespace
-// skipwhite:
-// 	while ( (c = *data) <= ' ')
-// 	{
-// 		if (c == 0)
-// 		{
-// 			*data_p = NULL;
-// 			return "";
-// 		}
-// 		data++;
-// 	}
+// skip whitespace
+skipwhite:
+	while ( (c = *data) <= ' ')
+	{
+		if (c == 0)
+		{
+			*data_p = NULL;
+			return "";
+		}
+		data++;
+	}
 	
-// // skip // comments
-// 	if (c=='/' && data[1] == '/')
-// 	{
-// 		while (*data && *data != '\n')
-// 			data++;
-// 		goto skipwhite;
-// 	}
+// skip // comments
+	if (c=='/' && data[1] == '/')
+	{
+		while (*data && *data != '\n')
+			data++;
+		goto skipwhite;
+	}
 
-// // handle quoted strings specially
-// 	if (c == '\"')
-// 	{
-// 		data++;
-// 		while (1)
-// 		{
-// 			c = *data++;
-// 			if (c=='\"' || !c)
-// 			{
-// 				if (len == MAX_TOKEN_CHARS)	// Knightmare- discard if > MAX_TOKEN_CHARS-1
-// 					len = 0;
+// handle quoted strings specially
+	if (c == '\"')
+	{
+		data++;
+		while (1)
+		{
+			c = *data++;
+			if (c=='\"' || !c)
+			{
+				if (len == MAX_TOKEN_CHARS)	// Knightmare- discard if > MAX_TOKEN_CHARS-1
+					len = 0;
 
-// 				com_token[len] = 0;
-// 				*data_p = data;
-// 				return com_token;
-// 			}
-// 			if (len < MAX_TOKEN_CHARS)
-// 			{
-// 				com_token[len] = c;
-// 				len++;
-// 			}
-// 		}
-// 	}
+				com_token[len] = 0;
+				*data_p = data;
+				return com_token;
+			}
+			if (len < MAX_TOKEN_CHARS)
+			{
+				com_token[len] = c;
+				len++;
+			}
+		}
+	}
 
-// // parse a regular word
-// 	do
-// 	{
-// 		if (len < MAX_TOKEN_CHARS)
-// 		{
-// 			com_token[len] = c;
-// 			len++;
-// 		}
-// 		data++;
-// 		c = *data;
-// 	} while (c>32);
+// parse a regular word
+	do
+	{
+		if (len < MAX_TOKEN_CHARS)
+		{
+			com_token[len] = c;
+			len++;
+		}
+		data++;
+		c = *data;
+	} while (c>32);
 
-// 	if (len == MAX_TOKEN_CHARS)
-// 	{
-// //		Com_Printf ("Token exceeded %i chars, discarded.\n", MAX_TOKEN_CHARS);
-// 		len = 0;
-// 	}
-// 	com_token[len] = 0;
+	if (len == MAX_TOKEN_CHARS)
+	{
+//		Com_Printf ("Token exceeded %i chars, discarded.\n", MAX_TOKEN_CHARS);
+		len = 0;
+	}
+	com_token[len] = 0;
 
-// 	*data_p = data;
-// 	return com_token;
-// }
+	*data_p = data;
+	return com_token;
+}
 
 
 /*
@@ -1953,31 +1954,31 @@ int Q_SortStrcmp (const char **arg1, const char **arg2)
 Q_strncasecmp
 =================
 */
-// int Q_strncasecmp (char *s1, char *s2, size_t n)
-// {
-// 	int		c1, c2;
+int Q_strncasecmp (char *s1, char *s2, size_t n)
+{
+	int		c1, c2;
 	
-// 	do
-// 	{
-// 		c1 = *s1++;
-// 		c2 = *s2++;
+	do
+	{
+		c1 = *s1++;
+		c2 = *s2++;
 
-// 		if (!n--)
-// 			return 0;		// strings are equal until end point
+		if (!n--)
+			return 0;		// strings are equal until end point
 		
-// 		if (c1 != c2)
-// 		{
-// 			if (c1 >= 'a' && c1 <= 'z')
-// 				c1 -= ('a' - 'A');
-// 			if (c2 >= 'a' && c2 <= 'z')
-// 				c2 -= ('a' - 'A');
-// 			if (c1 != c2)
-// 				return -1;		// strings not equal
-// 		}
-// 	} while (c1);
+		if (c1 != c2)
+		{
+			if (c1 >= 'a' && c1 <= 'z')
+				c1 -= ('a' - 'A');
+			if (c2 >= 'a' && c2 <= 'z')
+				c2 -= ('a' - 'A');
+			if (c1 != c2)
+				return -1;		// strings not equal
+		}
+	} while (c1);
 	
-// 	return 0;		// strings are equal
-// }
+	return 0;		// strings are equal
+}
 
 
 /*
@@ -1985,10 +1986,10 @@ Q_strncasecmp
 Q_strcasecmp
 =================
 */
-// int Q_strcasecmp (char *s1, char *s2)
-// {
-// 	return Q_strncasecmp (s1, s2, 99999);
-// }
+int Q_strcasecmp (char *s1, char *s2)
+{
+	return Q_strncasecmp (s1, s2, 99999);
+}
 
 
 /*
@@ -2165,176 +2166,176 @@ unsigned int Com_HashFileName (const char *fname, int hashSize, qboolean sized)
 =====================================================================
 */
 
-// /*
-// ===============
-// Info_ValueForKey
+/*
+===============
+Info_ValueForKey
 
-// Searches the string for the given
-// key and returns the associated value, or an empty string.
-// ===============
-// */
-// char *Info_ValueForKey (char *s, char *key)
-// {
-// 	char	pkey[512];
-// 	static	char value[2][512];	// use two buffers so compares
-// 								// work without stomping on each other
-// 	static	int	valueindex;
-// 	char	*o;
+Searches the string for the given
+key and returns the associated value, or an empty string.
+===============
+*/
+char *Info_ValueForKey (char *s, char *key)
+{
+	char	pkey[512];
+	static	char value[2][512];	// use two buffers so compares
+								// work without stomping on each other
+	static	int	valueindex;
+	char	*o;
 	
-// 	valueindex ^= 1;
-// 	if (*s == '\\')
-// 		s++;
-// 	while (1)
-// 	{
-// 		o = pkey;
-// 		while (*s != '\\')
-// 		{
-// 			if (!*s)
-// 				return "";
-// 			*o++ = *s++;
-// 		}
-// 		*o = 0;
-// 		s++;
+	valueindex ^= 1;
+	if (*s == '\\')
+		s++;
+	while (1)
+	{
+		o = pkey;
+		while (*s != '\\')
+		{
+			if (!*s)
+				return "";
+			*o++ = *s++;
+		}
+		*o = 0;
+		s++;
 
-// 		o = value[valueindex];
+		o = value[valueindex];
 
-// 		while (*s != '\\' && *s)
-// 		{
-// 			if (!*s)
-// 				return "";
-// 			*o++ = *s++;
-// 		}
-// 		*o = 0;
+		while (*s != '\\' && *s)
+		{
+			if (!*s)
+				return "";
+			*o++ = *s++;
+		}
+		*o = 0;
 
-// 		if (!strcmp (key, pkey) )
-// 			return value[valueindex];
+		if (!strcmp (key, pkey) )
+			return value[valueindex];
 
-// 		if (!*s)
-// 			return "";
-// 		s++;
-// 	}
-// }
+		if (!*s)
+			return "";
+		s++;
+	}
+}
 
-// void Info_RemoveKey (char *s, char *key)
-// {
-// 	char	*start;
-// 	char	pkey[512];
-// 	char	value[512];
-// 	char	*o;
+void Info_RemoveKey (char *s, char *key)
+{
+	char	*start;
+	char	pkey[512];
+	char	value[512];
+	char	*o;
 
-// 	if (strstr (key, "\\"))
-// 	{
-// //		Com_Printf ("Can't use a key with a \\\n");
-// 		return;
-// 	}
+	if (strstr (key, "\\"))
+	{
+//		Com_Printf ("Can't use a key with a \\\n");
+		return;
+	}
 
-// 	while (1)
-// 	{
-// 		start = s;
-// 		if (*s == '\\')
-// 			s++;
-// 		o = pkey;
-// 		while (*s != '\\')
-// 		{
-// 			if (!*s)
-// 				return;
-// 			*o++ = *s++;
-// 		}
-// 		*o = 0;
-// 		s++;
+	while (1)
+	{
+		start = s;
+		if (*s == '\\')
+			s++;
+		o = pkey;
+		while (*s != '\\')
+		{
+			if (!*s)
+				return;
+			*o++ = *s++;
+		}
+		*o = 0;
+		s++;
 
-// 		o = value;
-// 		while (*s != '\\' && *s)
-// 		{
-// 			if (!*s)
-// 				return;
-// 			*o++ = *s++;
-// 		}
-// 		*o = 0;
+		o = value;
+		while (*s != '\\' && *s)
+		{
+			if (!*s)
+				return;
+			*o++ = *s++;
+		}
+		*o = 0;
 
-// 		if (!strcmp (key, pkey) )
-// 		{
-// 			strcpy (start, s);	// remove this part
-// 			return;
-// 		}
+		if (!strcmp (key, pkey) )
+		{
+			strcpy (start, s);	// remove this part
+			return;
+		}
 
-// 		if (!*s)
-// 			return;
-// 	}
+		if (!*s)
+			return;
+	}
 
-// }
+}
 
 
-// /*
-// ==================
-// Info_Validate
+/*
+==================
+Info_Validate
 
-// Some characters are illegal in info strings because they
-// can mess up the server's parsing
-// ==================
-// */
-// qboolean Info_Validate (char *s)
-// {
-// 	if (strstr (s, "\""))
-// 		return false;
-// 	if (strstr (s, ";"))
-// 		return false;
-// 	return true;
-// }
+Some characters are illegal in info strings because they
+can mess up the server's parsing
+==================
+*/
+qboolean Info_Validate (char *s)
+{
+	if (strstr (s, "\""))
+		return false;
+	if (strstr (s, ";"))
+		return false;
+	return true;
+}
 
-// void Info_SetValueForKey (char *s, char *key, char *value)
-// {
-// 	char	newi[MAX_INFO_STRING], *v;
-// 	int		c;
-// 	int		maxsize = MAX_INFO_STRING;
+void Info_SetValueForKey (char *s, char *key, char *value)
+{
+	char	newi[MAX_INFO_STRING], *v;
+	int		c;
+	int		maxsize = MAX_INFO_STRING;
 
-// 	if (strstr (key, "\\") || strstr (value, "\\") )
-// 	{
-// 		Com_Printf ("Can't use keys or values with a \\\n");
-// 		return;
-// 	}
+	if (strstr (key, "\\") || strstr (value, "\\") )
+	{
+		Com_Printf ("Can't use keys or values with a \\\n");
+		return;
+	}
 
-// 	if (strstr (key, ";") )
-// 	{
-// 		Com_Printf ("Can't use keys or values with a semicolon\n");
-// 		return;
-// 	}
+	if (strstr (key, ";") )
+	{
+		Com_Printf ("Can't use keys or values with a semicolon\n");
+		return;
+	}
 
-// 	if (strstr (key, "\"") || strstr (value, "\"") )
-// 	{
-// 		Com_Printf ("Can't use keys or values with a \"\n");
-// 		return;
-// 	}
+	if (strstr (key, "\"") || strstr (value, "\"") )
+	{
+		Com_Printf ("Can't use keys or values with a \"\n");
+		return;
+	}
 
-// 	if (strlen(key) > MAX_INFO_KEY-1 || strlen(value) > MAX_INFO_KEY-1)
-// 	{
-// 		Com_Printf ("Keys and values must be < 64 characters.\n");
-// 		return;
-// 	}
-// 	Info_RemoveKey (s, key);
-// 	if (!value || !strlen(value))
-// 		return;
+	if (strlen(key) > MAX_INFO_KEY-1 || strlen(value) > MAX_INFO_KEY-1)
+	{
+		Com_Printf ("Keys and values must be < 64 characters.\n");
+		return;
+	}
+	Info_RemoveKey (s, key);
+	if (!value || !strlen(value))
+		return;
 
-// 	Com_sprintf (newi, sizeof(newi), "\\%s\\%s", key, value);
+	Com_sprintf (newi, sizeof(newi), "\\%s\\%s", key, value);
 
-// 	if (strlen(newi) + strlen(s) > maxsize)
-// 	{
-// 		Com_Printf ("Info string length exceeded\n");
-// 		return;
-// 	}
+	if (strlen(newi) + strlen(s) > maxsize)
+	{
+		Com_Printf ("Info string length exceeded\n");
+		return;
+	}
 
-// 	// only copy ascii values
-// 	s += strlen(s);
-// 	v = newi;
-// 	while (*v)
-// 	{
-// 		c = *v++;
-// 		c &= 127;		// strip high bits
-// 		if (c >= 32 && c < 127)
-// 			*s++ = c;
-// 	}
-// 	*s = 0;
-// }
+	// only copy ascii values
+	s += strlen(s);
+	v = newi;
+	while (*v)
+	{
+		c = *v++;
+		c &= 127;		// strip high bits
+		if (c >= 32 && c < 127)
+			*s++ = c;
+	}
+	*s = 0;
+}
 
 //====================================================================
 

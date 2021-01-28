@@ -59,7 +59,7 @@ SET(SRC_SVGAME
 	svgame/m_boss32.c
 	svgame/m_brain.c
 	svgame/m_chick.c
-#	svgame/m_flash.c
+	svgame/m_flash.c
 	svgame/m_flipper.c
 	svgame/m_float.c
 	svgame/m_flyer.c
@@ -420,7 +420,7 @@ IF(WIN32)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF()
 
-ADD_LIBRARY(svgame SHARED ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED})
+ADD_LIBRARY(svgame SHARED ${SRC_SVGAME} ${HEADERS_SVGAME})
 IF(WIN32)
 ADD_EXECUTABLE(client WIN32 
 	${SRC_CLIENT} ${HEADERS_CLIENT} 

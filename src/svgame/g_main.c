@@ -153,6 +153,38 @@ void ReadLevel (char *filename);
 void InitGame (void);
 void G_RunFrame (void);
 
+// WATISDEZE: These are here temporarily
+#ifndef GAME_HARD_LINKED
+// this is only here so the stock lazarus lib works.
+// (hacked, changed the printtype and error type to int.)
+void Com_LPrintf(int type, const char *fmt, ...)
+{
+    va_list     argptr;
+    char        text[MAX_STRING_CHARS];
+
+    if (type == PRINT_DEVELOPER) {
+        return;
+    }
+
+    va_start(argptr, fmt);
+    Q_vsnprintf(text, sizeof(text), fmt, argptr);
+    va_end(argptr);
+
+    gi.dprintf("%s", text);
+}
+
+void Com_Error(int type, const char *fmt, ...)
+{
+    va_list     argptr;
+    char        text[MAX_STRING_CHARS];
+
+    va_start(argptr, fmt);
+    Q_vsnprintf(text, sizeof(text), fmt, argptr);
+    va_end(argptr);
+
+    gi.error("%s", text);
+}
+#endif
 //===================================================================
 
 void ShutdownGame (void)
