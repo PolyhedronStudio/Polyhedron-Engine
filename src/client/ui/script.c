@@ -788,6 +788,6 @@ static qboolean Parse_File(const char *path, int depth)
 
 void UI_LoadScript(void)
 {
-    Parse_File("q2rtx.menu", 0);
+    Parse_File("nac.menu", 0);
 }
 
