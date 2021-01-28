@@ -3,9 +3,9 @@ cmake_minimum_required (VERSION 3.8)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 project(nac)
-set(NAC_VERSION_MAJOR 1)
-set(NAC_VERSION_MINOR 4)
-set(NAC_VERSION_POINT 0)
+set(NAC_VERSION_MAJOR 0)
+set(NAC_VERSION_MINOR 0)
+set(NAC_VERSION_POINT 1)
 
 # get short-hash
 execute_process(

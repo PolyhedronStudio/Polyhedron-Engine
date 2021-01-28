@@ -279,13 +279,13 @@ SET(SRC_SHARED
 	shared/shared.c
 )
 
-###################### Linux Client Specific.
-SET(SRC_LINUX
+###################### UNIX Client Specific.
+SET(SRC_UNIX
 	os/unix/hunk.c
 	os/unix/system.c
 	os/unix/tty.c
 )
-SET(SRC_LINUX_CLIENT
+SET(SRC_UNIX_CLIENT
 	os/sdl2/sound.c
 	os/sdl2/video.c
 )
@@ -446,13 +446,13 @@ ADD_EXECUTABLE(client
 	${SRC_COMMON} ${HEADERS_COMMON} 
 	${SRC_REFRESH} ${SRC_SHADERS} 
 	${SRC_SHARED} 
-	${SRC_LINUX} ${SRC_LINUX_CLIENT}
+	${SRC_UNIX} ${SRC_UNIX_CLIENT}
 	${SRC_SERVER} ${HEADERS_SERVER}
 )
 ADD_EXECUTABLE(server
 	${SRC_COMMON} ${HEADERS_COMMON} 
 	${SRC_SHARED} 
-	${SRC_LINUX}
+	${SRC_UNIX}
 	${SRC_SERVER} ${HEADERS_SERVER}
 	server/ac.c
 	client/null.c
@@ -498,20 +498,22 @@ ENDIF()
 TARGET_LINK_LIBRARIES(client stb)
 TARGET_LINK_LIBRARIES(client tinyobjloader)
 
-SOURCE_GROUP("svgame\\sources" FILES ${SRC_SVGAME})
-SOURCE_GROUP("svgame\\headers" FILES ${HEADERS_SVGAME})
+SOURCE_GROUP("common\\sources" FILES ${SRC_COMMON})
+SOURCE_GROUP("common\\headers" FILES ${HEADERS_COMMON})
 SOURCE_GROUP("client\\sources" FILES ${SRC_CLIENT})
 SOURCE_GROUP("client\\headers" FILES ${HEADERS_CLIENT})
 SOURCE_GROUP("server\\sources" FILES ${SRC_SERVER})
 SOURCE_GROUP("server\\headers" FILES ${HEADERS_SERVER})
-SOURCE_GROUP("common\\sources" FILES ${SRC_COMMON})
-SOURCE_GROUP("common\\headers" FILES ${HEADERS_COMMON})
+SOURCE_GROUP("svgame\\sources" FILES ${SRC_SVGAME})
+SOURCE_GROUP("svgame\\headers" FILES ${HEADERS_SVGAME})
 SOURCE_GROUP("refresh\\sources" FILES ${SRC_REFRESH} ${SRC_VKPT})
 SOURCE_GROUP("refresh\\headers" FILES ${HEADERS_VKPT})
 SOURCE_GROUP("refresh\\shaders" FILES ${SRC_SHADERS})
 SOURCE_GROUP("shared\\sources" FILES ${SRC_SHARED})
-SOURCE_GROUP("windows\\sources" FILES ${SRC_WINDOWS})
-SOURCE_GROUP("windows\\headers" FILES ${HEADERS_WINDOWS})
+SOURCE_GROUP("os\\windows\\sources" FILES ${SRC_WINDOWS})
+SOURCE_GROUP("os\\windows\\headers" FILES ${HEADERS_WINDOWS})
+SOURCE_GROUP("os\\unix\\sources" FILES ${SRC_UNIX})
+SOURCE_GROUP("os\\unix\\headers" FILES ${HEADERS_UNIX})
 
 IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../VC/inc)
@@ -538,14 +540,17 @@ TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
 TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(server PRIVATE "${ZLIB_INCLUDE_DIRS}")
 
+# WATISDEZE: Do we still need this?
 # Use dynamic zlib for steam runtime
-if (CONFIG_LINUX_STEAM_RUNTIME_SUPPORT)
-    TARGET_LINK_LIBRARIES(client SDL2main SDL2-static z)
-    TARGET_LINK_LIBRARIES(server SDL2main SDL2-static z)
-else()
-    TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
-    TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
-endif()
+# if (CONFIG_LINUX_STEAM_RUNTIME_SUPPORT)
+#     TARGET_LINK_LIBRARIES(client SDL2main SDL2-static z)
+#     TARGET_LINK_LIBRARIES(server SDL2main SDL2-static z)
+# else()
+# TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
+# TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
+# endif()
+TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
+TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
 
 SET_TARGET_PROPERTIES(client
     PROPERTIES
