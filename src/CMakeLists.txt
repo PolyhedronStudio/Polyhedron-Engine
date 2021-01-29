@@ -192,7 +192,7 @@ SET(HEADERS_CLIENT
 SET(SRC_SERVER
 	server/commands.c
 	server/entities.c
-	server/game.c
+	server/svgame.c
 	server/init.c
 	server/main.c
 	server/mvd.c
