@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // #ifdef _WIN32
 // #include "../win32/winquake.h"
 // #endif
-
+ 
 vec2_t vec2_origin = {0,0};
 vec3_t vec3_origin = {0,0,0};
 vec4_t vec4_origin = {0,0,0,0};
