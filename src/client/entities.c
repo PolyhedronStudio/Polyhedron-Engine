@@ -952,7 +952,7 @@ static void CL_AddPacketEntities(void)
                 VectorCopy(ent.origin, origin);
                 origin[2] += offset;
 
-                V_AddLightEx(origin, 100.f, 1.40f * brightness, 0.7f * brightness, 0.2f * brightness, 0.17f);               
+                V_AddLightEx(origin, 25.f, 1.0f * brightness, 0.52f * brightness, 0.1f * brightness, 1.0f);               
             } else if (effects & EF_BLUEHYPERBLASTER) { // N&C - Turned into flickering flame light
                 float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
 
@@ -963,7 +963,7 @@ static void CL_AddPacketEntities(void)
                 VectorCopy(ent.origin, origin);
                 origin[2] += offset;
 
-                V_AddLightEx(origin, 25.f, 2.2f * brightness, 0.7f * brightness, 0.2f * brightness, 1.5f);
+                V_AddLightEx(origin, 25.f, 1.0f * brightness, 0.425f * brightness, 0.1f * brightness, 3.6f);
             } else if (effects & EF_PLASMA) {
                 if (effects & EF_ANIM_ALLFAST) {
                     CL_BlasterTrail(cent->lerp_origin, ent.origin);
