@@ -329,17 +329,18 @@ of server connections
 #define CONNECT_INSTANT     CONNECT_DELAY
 #define CONNECT_FAST        (CONNECT_DELAY - 1000u)
 
-typedef enum {
-    ca_uninitialized,
-    ca_disconnected,    // not talking to a server
-    ca_challenging,     // sending getchallenge packets to the server
-    ca_connecting,      // sending connect packets to the server
-    ca_connected,       // netchan_t established, waiting for svc_serverdata
-    ca_loading,         // loading level data
-    ca_precached,       // loaded level data, waiting for svc_frame
-    ca_active,          // game views should be displayed
-    ca_cinematic        // running a cinematic
-} connstate_t;
+// Moved to shared/shared.h
+// typedef enum {
+//     ca_uninitialized,
+//     ca_disconnected,    // not talking to a server
+//     ca_challenging,     // sending getchallenge packets to the server
+//     ca_connecting,      // sending connect packets to the server
+//     ca_connected,       // netchan_t established, waiting for svc_serverdata
+//     ca_loading,         // loading level data
+//     ca_precached,       // loaded level data, waiting for svc_frame
+//     ca_active,          // game views should be displayed
+//     ca_cinematic        // running a cinematic
+// } connstate_t;
 
 #define FOR_EACH_DLQ(q) \
     LIST_FOR_EACH(dlqueue_t, q, &cls.download.queue, entry)

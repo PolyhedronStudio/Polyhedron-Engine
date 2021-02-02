@@ -33,59 +33,61 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_ALIAS_SKINS     32
 #define MAX_ALIAS_VERTS     4096
 
-typedef struct mspriteframe_s {
-    int             width, height;
-    int             origin_x, origin_y;
-    struct image_s  *image;
-} mspriteframe_t;
+// WATISDEZE: Moved over to shared/refresh.h since client game dll 
+// needs to know about these.
+// typedef struct mspriteframe_s {
+//     int             width, height;
+//     int             origin_x, origin_y;
+//     struct image_s  *image;
+// } mspriteframe_t;
 
-typedef enum
-{
-	MCLASS_REGULAR,
-	MCLASS_EXPLOSION,
-	MCLASS_SMOKE,
-    MCLASS_STATIC_LIGHT,
-    MCLASS_FLARE
-} model_class_t;
+// typedef enum
+// {
+// 	MCLASS_REGULAR,
+// 	MCLASS_EXPLOSION,
+// 	MCLASS_SMOKE,
+//     MCLASS_STATIC_LIGHT,
+//     MCLASS_FLARE
+// } model_class_t;
 
-typedef struct model_s {
-    enum {
-        MOD_FREE,
-        MOD_ALIAS,
-        MOD_SPRITE,
-        MOD_EMPTY
-    } type;
-    char name[MAX_QPATH];
-    int registration_sequence;
-    memhunk_t hunk;
+// typedef struct model_s {
+//     enum {
+//         MOD_FREE,
+//         MOD_ALIAS,
+//         MOD_SPRITE,
+//         MOD_EMPTY
+//     } type;
+//     char name[MAX_QPATH];
+//     int registration_sequence;
+//     memhunk_t hunk;
 
-    // alias models
-    int numframes;
-    struct maliasframe_s *frames;
-#if USE_REF == REF_GL || USE_REF == REF_VKPT
-    int nummeshes;
-    struct maliasmesh_s *meshes;
-	model_class_t model_class;
-#else
-    int numskins;
-    struct image_s *skins[MAX_ALIAS_SKINS];
-    int numtris;
-    struct maliastri_s *tris;
-    int numsts;
-    struct maliasst_s *sts;
-    int numverts;
-    int skinwidth;
-    int skinheight;
-#endif
+//     // alias models
+//     int numframes;
+//     struct maliasframe_s *frames;
+// #if USE_REF == REF_GL || USE_REF == REF_VKPT
+//     int nummeshes;
+//     struct maliasmesh_s *meshes;
+// 	model_class_t model_class;
+// #else
+//     int numskins;
+//     struct image_s *skins[MAX_ALIAS_SKINS];
+//     int numtris;
+//     struct maliastri_s *tris;
+//     int numsts;
+//     struct maliasst_s *sts;
+//     int numverts;
+//     int skinwidth;
+//     int skinheight;
+// #endif
 
-    // sprite models
-    struct mspriteframe_s *spriteframes;
-	qboolean sprite_vertical;
-	qboolean sprite_fxup;
-	qboolean sprite_fxft;
-	qboolean sprite_fxlt;
+//     // sprite models
+//     struct mspriteframe_s *spriteframes;
+// 	qboolean sprite_vertical;
+// 	qboolean sprite_fxup;
+// 	qboolean sprite_fxft;
+// 	qboolean sprite_fxlt;
 	   
-} model_t;
+// } model_t;
 
 extern model_t      r_models[];
 extern int          r_numModels;

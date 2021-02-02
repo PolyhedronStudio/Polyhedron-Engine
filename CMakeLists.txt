@@ -24,6 +24,8 @@ execute_process(
 )
 
 
+OPTION(CONFIG_BUILD_CL_GAME "Build Client Game module" ON)
+OPTION(CONFIG_BUILD_SV_GAME "Build Server Game module" ON)
 OPTION(CONFIG_GL_RENDERER "Enable GL renderer" ON)
 OPTION(CONFIG_VKPT_RENDERER "Enable VKPT renderer" ON)
 OPTION(CONFIG_VKPT_ENABLE_DEVICE_GROUPS "Enable device groups (multi-gpu) support" ON)

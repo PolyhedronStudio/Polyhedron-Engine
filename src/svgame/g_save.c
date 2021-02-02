@@ -454,8 +454,9 @@ void InitGame (void)
 	flood_persecond = gi.cvar ("flood_persecond", "4", 0);
 	flood_waitdelay = gi.cvar ("flood_waitdelay", "10", 0);
 
-	// dm map list
+	// N&C Server features.
 	sv_maplist = gi.cvar ("sv_maplist", "", 0);
+	sv_maplist_random = gi.cvar("sv_maplist_random", "", 0);
 
 	// Lazarus
 	actorchicken = gi.cvar("actorchicken", "1", CVAR_SERVERINFO|CVAR_LATCH);

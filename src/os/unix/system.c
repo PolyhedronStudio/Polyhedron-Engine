@@ -223,7 +223,7 @@ void Sys_Init(void)
     signal(SIGUSR1, hup_handler);
 
     // Check for a full-install before searching local dirs
-    sprintf(baseDirectory, "%s", "/usr/share/quake2rtx");
+    sprintf(baseDirectory, "%s", "/usr/share/nac");
     dir_hnd = opendir(baseDirectory);
     if (dir_hnd) {
         closedir(dir_hnd);
@@ -244,7 +244,7 @@ void Sys_Init(void)
     if (!homedir) {
 	Sys_Error("Homedir not found!\n");
     }
-    sprintf(homegamedir, "%s/%s", homedir, ".quake2rtx");
+    sprintf(homegamedir, "%s/%s", homedir, ".nac");
     sys_homedir = Cvar_Get("homedir", homegamedir, CVAR_NOSET);
     sys_libdir = Cvar_Get("libdir", baseDirectory, CVAR_NOSET);
     sys_forcegamelib = Cvar_Get("sys_forcegamelib", "", CVAR_NOSET);

@@ -273,6 +273,13 @@ void SVCmd_WriteIP_f (void)
 	fclose (f);
 }
 
+//
+// N&C Server Commands.
+//
+void	SVCmd_NextMap_f (void)
+{
+	SVG_NextMap();
+}
 /*
 =================
 ServerCommand
@@ -298,6 +305,10 @@ void	ServerCommand (void)
 	else if (Q_stricmp (cmd, "writeip") == 0)
 		SVCmd_WriteIP_f ();
 
+// N&C: Features
+	else if (Q_stricmp (cmd, "nextmap") == 0)
+		SVCmd_NextMap_f ();
+// N&C: End Features.
 // ACEBOT_ADD
 	else if(Q_stricmp (cmd, "acedebug") == 0)
  		if (strcmp(gi.argv(2),"on")==0)

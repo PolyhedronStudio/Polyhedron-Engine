@@ -98,6 +98,8 @@ typedef enum {
     PRINT_NOTICE        // print in cyan color
 } print_type_t;
 
+// WATISDEZE: We don't want these defined in clgame.h
+#ifndef CGAME_INCLUDE
 void    Com_LPrintf(print_type_t type, const char *fmt, ...)
 q_printf(2, 3);
 void    Com_Error(error_type_t code, const char *fmt, ...)
@@ -106,6 +108,8 @@ q_noreturn q_printf(2, 3);
 #define Com_Printf(...) Com_LPrintf(PRINT_ALL, __VA_ARGS__)
 #define Com_WPrintf(...) Com_LPrintf(PRINT_WARNING, __VA_ARGS__)
 #define Com_EPrintf(...) Com_LPrintf(PRINT_ERROR, __VA_ARGS__)
+
+#endif // CGAME_INCLUDE
 
 // game print flags
 #define PRINT_LOW           0       // pickup messages
@@ -122,6 +126,29 @@ typedef enum {
     MULTICAST_PHS_R,
     MULTICAST_PVS_R
 } multicast_t;
+
+// WatIsDeze: connstate_t has been moved here, so it is known to the client game dll.
+typedef enum {
+    ca_uninitialized,
+    ca_disconnected,    // not talking to a server
+    ca_challenging,     // sending getchallenge packets to the server
+    ca_connecting,      // sending connect packets to the server
+    ca_connected,       // netchan_t established, waiting for svc_serverdata
+    ca_loading,         // loading level data
+    ca_precached,       // loaded level data, waiting for svc_frame
+    ca_active,          // game views should be displayed
+    ca_cinematic        // running a cinematic
+} connstate_t;
+
+// WatIsDeze: server_state_t has been moved here, so it is known to the client game dll.
+typedef enum {
+    ss_dead,            // no map loaded
+    ss_loading,         // spawning level edicts
+    ss_game,            // actively running
+    ss_pic,             // showing static picture
+    ss_broadcast,       // running MVD client
+    ss_cinematic,
+} server_state_t;
 
 /*
 ==============================================================
@@ -1550,5 +1577,12 @@ typedef struct {
 
     short       stats[MAX_STATS];       // fast status bar updates
 } player_state_t;
+
+// WatIsDeze: Ifdef, for cgame dll.
+#ifdef CGAME_INCLUDE
+#include "common/cmodel.h"
+#include "common/cmd.h"
+#include "common/math.h"
+#endif // CGAME_INCLUDE
 
 #endif // SHARED_H

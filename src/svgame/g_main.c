@@ -77,7 +77,10 @@ cvar_t	*flood_msgs;
 cvar_t	*flood_persecond;
 cvar_t	*flood_waitdelay;
 
-cvar_t	*sv_maplist;
+// N&C: Server cvars.
+cvar_t	*sv_maplist;		// space, comma, and newline separated map list to use for nextmap.
+cvar_t	*sv_maplist_random; // When set to 1 it enables random map selection from the maplist.
+
 
 cvar_t	*actorchicken;
 cvar_t	*actorjump;

@@ -21,14 +21,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "common/net/net.h"
 
-typedef enum {
-    ss_dead,            // no map loaded
-    ss_loading,         // spawning level edicts
-    ss_game,            // actively running
-    ss_pic,             // showing static picture
-    ss_broadcast,       // running MVD client
-    ss_cinematic,
-} server_state_t;
+// WatIsDeze: Has been moved to shared/shared.h for the clgame dll.
+// typedef enum {
+//     ss_dead,            // no map loaded
+//     ss_loading,         // spawning level edicts
+//     ss_game,            // actively running
+//     ss_pic,             // showing static picture
+//     ss_broadcast,       // running MVD client
+//     ss_cinematic,
+// } server_state_t;
 
 #if USE_ICMP
 void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info);
@@ -40,6 +41,9 @@ unsigned SV_Frame(unsigned msec);
 void SV_SetConsoleTitle(void);
 #endif
 //void SV_ConsoleOutput(const char *msg);
+server_state_t	SV_GetState (void);                 // WATISDEZE: Added for client game dll
+void            SV_SetState (server_state_t state); // WATISDEZE: Added for client game dll
+
 
 #if USE_MVD_CLIENT && USE_CLIENT
 int MVD_GetDemoPercent(qboolean *paused, int *framenum);
