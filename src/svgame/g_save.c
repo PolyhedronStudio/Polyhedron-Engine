@@ -391,8 +391,8 @@ is loaded.
 */
 void InitGame (void)
 {
-	gi.dprintf ("==== InitGame (Lazarus) ====\n");
-	gi.dprintf ("by Mr. Hyde & Mad Dog\ne-mail: rascal@vicksburg.com\n\n");
+	gi.dprintf ("==== InitGame (Nail & Crescent) ====\n");
+	gi.dprintf ("By team N&C - Project Website: https://github.com/PalmliX/Q2RTX\n\n");
 
 	// Knightmare- init lithium cvars
 	InitLithiumVars ();

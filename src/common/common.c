@@ -1057,7 +1057,12 @@ void Qcommon_Init(int argc, char **argv)
 
     Com_AddConfigFile(COM_POSTINIT_CFG, FS_TYPE_REAL);
 
-    Com_Printf("====== " PRODUCT " - Engine Initialized ======\n\n");
+    // N&C: Tell us whether we have an initialized dedicated server, or a client that has been initialized.
+    if (!dedicated->integer) {
+        Com_Printf("====== " PRODUCT " - Client Initialized ======\n\n");
+    } else {
+        Com_Printf("====== " PRODUCT " - Dedicated Server Initialized ======\n\n");
+    }
     Com_LPrintf(PRINT_NOTICE, APPLICATION " " VERSION_STRING ", " __DATE__ "\n");
 
 	if (fs_shareware->integer)
