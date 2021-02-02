@@ -24,6 +24,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "g_local.h"
 
 
+//
+// N&C Server Commands Declaration.
+//
+void	SVCmd_NextMap_f (void);
+
 void	Svcmd_Test_f (void)
 {
 	safe_cprintf (NULL, PRINT_HIGH, "Svcmd_Test_f()\n");
@@ -273,13 +278,6 @@ void SVCmd_WriteIP_f (void)
 	fclose (f);
 }
 
-//
-// N&C Server Commands.
-//
-void	SVCmd_NextMap_f (void)
-{
-	SVG_NextMap();
-}
 /*
 =================
 ServerCommand
@@ -304,11 +302,10 @@ void	ServerCommand (void)
 		SVCmd_ListIP_f ();
 	else if (Q_stricmp (cmd, "writeip") == 0)
 		SVCmd_WriteIP_f ();
-
-// N&C: Features
+// N&C: Server Commands.
 	else if (Q_stricmp (cmd, "nextmap") == 0)
 		SVCmd_NextMap_f ();
-// N&C: End Features.
+// N&C: End Server Commands.
 // ACEBOT_ADD
 	else if(Q_stricmp (cmd, "acedebug") == 0)
  		if (strcmp(gi.argv(2),"on")==0)
@@ -370,4 +367,20 @@ void	ServerCommand (void)
 	else
 		safe_cprintf (NULL, PRINT_HIGH, "Unknown server command \"%s\"\n", cmd);
 }
+
+
+//
+//=============================================================================
+//
+//	N&C Server Commands.
+//
+//=============================================================================
+//
+void SVCmd_NextMap_f (void) 
+{
+	//BeginIntermission(CreateTargetChangeLevel(level.mapname));
+	//SVG_NextMap();
+	safe_cprintf (NULL, PRINT_HIGH, "%s SVCmd_NextMap_f!\n", level.mapname);
+}
+
 
