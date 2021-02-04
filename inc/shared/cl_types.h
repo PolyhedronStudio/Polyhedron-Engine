@@ -20,51 +20,258 @@
 // compatibility with current mods.
 //=============================================================================
 //
-// game print flags
-#define PRINT_LOW           0       // pickup messages
-#define PRINT_MEDIUM        1       // death messages
-#define PRINT_HIGH          2       // critical messages
-#define PRINT_CHAT          3       // chat messages    
+//
+// CLIENT STRUCTURES - GAME MODULE NEEDS TO KNOW ABOUT.
+//
 
-// destination class for gi.multicast()
-typedef enum {
-    MULTICAST_ALL,
-    MULTICAST_PHS,
-    MULTICAST_PVS,
-    MULTICAST_ALL_R,
-    MULTICAST_PHS_R,
-    MULTICAST_PVS_R
-} multicast_t;
+//
+// Explosion particle entity effect structure.
+//
+typedef struct {
+	enum {
+		ex_free,
+		ex_explosion,
+		ex_misc,
+		ex_flash,
+		ex_mflash,
+		ex_poly,
+		ex_poly2,
+		ex_light,
+		ex_blaster,
+		ex_flare
+	} type;
 
-// WatIsDeze: connstate_t has been moved here, so it is known to the client game dll.
-typedef enum {
-    ca_uninitialized,
-    ca_disconnected,    // not talking to a server
-    ca_challenging,     // sending getchallenge packets to the server
-    ca_connecting,      // sending connect packets to the server
-    ca_connected,       // netchan_t established, waiting for svc_serverdata
-    ca_loading,         // loading level data
-    ca_precached,       // loaded level data, waiting for svc_frame
-    ca_active,          // game views should be displayed
-    ca_cinematic        // running a cinematic
-} connstate_t;
+	entity_t    ent;
+	int         frames;
+	float       light;
+	vec3_t      lightcolor;
+	float       start;
+	int         baseframe;
+	int         frametime; /* in milliseconds */
+} explosion_t;
 
-// WatIsDeze: server_state_t has been moved here, so it is known to the client game dll.
-typedef enum {
-    ss_dead,            // no map loaded
-    ss_loading,         // spawning level edicts
-    ss_game,            // actively running
-    ss_pic,             // showing static picture
-    ss_broadcast,       // running MVD client
-    ss_cinematic,
-} server_state_t;
+// Maximum amount of explosions.
+#define MAX_EXPLOSIONS  32
 
-// WatIsDeze: file_info_t has been moved here, so it is known to the client game dll.
-typedef struct file_info_s {
-    size_t  size;
-    time_t  ctime;
-    time_t  mtime;
-    char    name[1];
-} file_info_t;
+
+//
+// Local client entity structure, temporary entities.
+//
+typedef struct centity_s {
+    entity_state_t    current;
+    entity_state_t    prev;            // will always be valid, but might just be a copy of current
+
+    vec3_t          mins, maxs;
+
+    int             serverframe;        // if not current, this ent isn't in the frame
+
+    int             trailcount;         // for diminishing grenade trails
+    vec3_t          lerp_origin;        // for trails (variable hz)
+
+#if USE_FPS
+    int             prev_frame;
+    int             anim_start;
+
+    int             event_frame;
+#endif
+
+    int             fly_stoptime;
+
+    int             id;
+} centity_t;
+
+//
+// Maximum amount of weapon models allowed.
+//
+#define MAX_CLIENTWEAPONMODELS        20        // PGM -- upped from 16 to fit the chainfist vwep
+
+//
+// Contains all the info about a client we need to know.
+//
+typedef struct clientinfo_s {
+    char name[MAX_QPATH];           // The client name.
+    char model_name[MAX_QPATH];     // The model name.
+    char skin_name[MAX_QPATH];      // The skin name.
+
+    qhandle_t skin;                 // The skin handle.
+    qhandle_t icon;                 // The icon handle. 
+    qhandle_t model;                // Model handle.
+
+    qhandle_t weaponmodel[MAX_CLIENTWEAPONMODELS];  // The weapon model handles.
+} clientinfo_t;
+
+//
+// Used for storing client input commands.
+//
+typedef struct {
+    unsigned    sent;           // time sent, for calculating pings
+    unsigned    rcvd;           // time rcvd, for calculating pings
+    unsigned    cmdNumber;      // current cmdNumber for this frame
+} client_history_t;
+
+//
+// The server frame structure contains information about the frame
+// being sent from the server.
+//
+typedef struct {
+    qboolean        valid;      // False if delta parsing failed.
+
+    int             number;     // Sequential identifier, used for delta.
+    int             delta;      // Delta between frames.
+
+    byte            areabits[MAX_MAP_AREA_BYTES];   // Area bits of this frame.
+    int             areabytes;                      // Area bytes.
+
+    player_state_t  ps;         // The player state.
+    int             clientNum;  // The client number.
+
+    int             numEntities;    // The number of entities in the frame.
+    int             firstEntity;    // The first entity in the frame.
+} server_frame_t;
+
+//
+// The client structure is cleared at each level load, and is exposed to
+// * the client game module to provide access to media and other client state.
+//
+typedef struct client_state_s {
+    int         timeoutcount;
+
+    unsigned    lastTransmitTime;
+    unsigned    lastTransmitCmdNumber;
+    unsigned    lastTransmitCmdNumberReal;
+    qboolean    sendPacketNow;
+
+    usercmd_t    cmd;
+    usercmd_t    cmds[CMD_BACKUP];    // each mesage will send several old cmds
+    unsigned     cmdNumber;
+    short        predicted_origins[CMD_BACKUP][3];    // for debug comparing against server
+    client_history_t    history[CMD_BACKUP];
+    int         initialSeq;
+
+    float       predicted_step;                // for stair up smoothing
+    unsigned    predicted_step_time;
+    unsigned    predicted_step_frame;
+
+    vec3_t      predicted_origin;    // generated by CL_PredictMovement
+    vec3_t      predicted_angles;
+    vec3_t      predicted_velocity;
+    vec3_t      prediction_error;
+
+    // rebuilt each valid frame
+    centity_t       *solidEntities[MAX_PACKET_ENTITIES];
+    int             numSolidEntities;
+
+    entity_state_t  baselines[MAX_EDICTS];
+
+    entity_state_t  entityStates[MAX_PARSE_ENTITIES];
+    int             numEntityStates;
+
+    msgEsFlags_t    esFlags;
+
+    server_frame_t  frames[UPDATE_BACKUP];
+    unsigned        frameflags;
+
+    server_frame_t  frame;                // received from server
+    server_frame_t  oldframe;
+    int             servertime;
+    int             serverdelta;
+
+#if USE_FPS
+    server_frame_t  keyframe;
+    server_frame_t  oldkeyframe;
+    int             keyservertime;
+#endif
+
+    byte            dcs[CS_BITMAP_BYTES];
+
+    // the client maintains its own idea of view angles, which are
+    // sent to the server each frame.  It is cleared to 0 upon entering each level.
+    // the server sends a delta each frame which is added to the locally
+    // tracked view angles to account for standing on rotating objects,
+    // and teleport direction changes
+    vec3_t      viewangles;
+
+    // interpolated movement vector used for local prediction,
+    // never sent to server, rebuilt each client frame
+    vec3_t      localmove;
+
+    // accumulated mouse forward/side movement, added to both
+    // localmove and pending cmd, cleared each time cmd is finalized
+    vec2_t      mousemove;
+
+#if USE_SMOOTH_DELTA_ANGLES
+    short       delta_angles[3]; // interpolated
+#endif
+
+    int         time;           // this is the time value that the client
+                                // is rendering at.  always <= cl.servertime
+    float       lerpfrac;       // between oldframe and frame
+
+#if USE_FPS
+    int         keytime;
+    float       keylerpfrac;
+#endif
+
+    refdef_t    refdef;
+    float       fov_x;      // interpolated
+    float       fov_y;      // derived from fov_x assuming 4/3 aspect ratio
+    int         lightlevel;
+
+    vec3_t      v_forward, v_right, v_up;    // set when refdef.angles is set
+
+    qboolean    thirdPersonView;
+
+    // predicted values, used for smooth player entity movement in thirdperson view
+    vec3_t      playerEntityOrigin;
+    vec3_t      playerEntityAngles;
+
+    //
+    // transient data from server
+    //
+    char        layout[MAX_NET_STRING];     // general 2D overlay
+    int         inventory[MAX_ITEMS];
+
+    //
+    // server state information
+    //
+    int         serverstate;    // ss_* constants
+    int         servercount;    // server identification for prespawns
+    char        gamedir[MAX_QPATH];
+    int         clientNum;            // never changed during gameplay, set by serverdata packet
+    int         maxclients;
+    pmoveParams_t pmp;
+
+#if USE_FPS
+    int         frametime;      // variable server frame time
+    float       frametime_inv;  // 1/frametime
+    int         framediv;       // BASE_FRAMETIME/frametime
+#endif
+
+    char        baseconfigstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
+    char        configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
+    char        mapname[MAX_QPATH]; // short format - q2dm1, etc
+
+#if USE_AUTOREPLY
+    unsigned    reply_time;
+    unsigned    reply_delta;
+#endif
+
+    //
+    // locally derived information from server state
+    //
+    bsp_t        *bsp;
+
+    qhandle_t model_draw[MAX_MODELS];
+    mmodel_t *model_clip[MAX_MODELS];
+
+    qhandle_t sound_precache[MAX_SOUNDS];
+    qhandle_t image_precache[MAX_IMAGES];
+
+    clientinfo_t    clientinfo[MAX_CLIENTS];
+    clientinfo_t    baseclientinfo;
+
+    char    weaponModels[MAX_CLIENTWEAPONMODELS][MAX_QPATH];
+    int     numWeaponModels;
+} client_state_t;
 
 #endif // __SHARED_CL_TYPES_H__
