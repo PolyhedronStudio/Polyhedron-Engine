@@ -281,7 +281,7 @@ SET(HEADERS_GL
 
 ###################### Shared Folder.
 SET(HEADERS_SHARED
-	../inc/shared/clgame.h
+	../inc/shared/cl_game.h
 	../inc/shared/config.h
 	../inc/shared/game.h 
 	../inc/shared/list.h 

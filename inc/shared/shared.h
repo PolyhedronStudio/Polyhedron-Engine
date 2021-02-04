@@ -98,7 +98,7 @@ typedef enum {
     PRINT_NOTICE        // print in cyan color
 } print_type_t;
 
-// WATISDEZE: We don't want these defined in clgame.h
+// WATISDEZE: We don't want these defined in cl_game.h
 #ifndef CGAME_INCLUDE
 void    Com_LPrintf(print_type_t type, const char *fmt, ...)
 q_printf(2, 3);

@@ -22,7 +22,7 @@
 #include "client.h"
 #include "server/server.h"
 #include "client/gamemodule.h"   // TODO: How come it can find client.h??
-#include "shared/clgame.h"
+#include "shared/cl_game.h"
 
 // Contains the function s being exported to client game dll.
 static clg_export_t *cge;

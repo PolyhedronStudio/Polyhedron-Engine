@@ -29,7 +29,7 @@
 // #include "common/math.h"
 
 // Shared Client Game Header.
-#include "shared/clgame.h"
+#include "shared/cl_game.h"
 
 //
 //=============================================================================
