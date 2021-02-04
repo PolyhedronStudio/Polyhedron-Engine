@@ -1182,6 +1182,9 @@ void CL_ParseServerMessage(void)
 //
 // parse the message
 //
+    // WATISDEZE: Inform game module about beginning of message parsing.
+    CL_GM_StartServerMessage();
+
     while (1) {
         if (msg_read.readcount > msg_read.cursize) {
             Com_Error(ERR_DROP, "%s: read past end of server message", __func__);
@@ -1206,6 +1209,12 @@ void CL_ParseServerMessage(void)
         // other commands
         switch (cmd) {
         default:
+            // WATISDEZE: Call the game module server message parsing in case the engine didn't catch any.
+			if (CL_GM_ParseServerMessage (cmd)) {
+				break;
+            } else {
+                goto badbyte;
+            }
 badbyte:
             Com_Error(ERR_DROP, "%s: illegible server message: %d", __func__, cmd);
             break;
@@ -1326,6 +1335,9 @@ badbyte:
             }
         }
 
+        // WATISDEZE: Inform game module about beginning of message parsing.
+        CL_GM_EndServerMessage();
+        
         // if running GTV server, add current message
         CL_GTV_WriteMessage(msg_read.data + readcount,
                             msg_read.readcount - readcount);

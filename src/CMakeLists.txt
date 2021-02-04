@@ -8,6 +8,7 @@ cmake_minimum_required (VERSION 3.8)
 ###################### CLIENT GAME
 SET(SRC_CLGAME
 	clgame/clg_main.c
+	clgame/clg_parse.c
 	clgame/clg_tests.c
 )
 

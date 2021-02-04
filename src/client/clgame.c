@@ -151,7 +151,7 @@ static void CL_ShutdownGameProgs(void)
         Sys_FreeLibrary(cgame_library);
         cgame_library = NULL;
     }
-    Cvar_Set("clg_features", "0");
+    Cvar_Set("CL_GM_features", "0");
 }
 
 //
@@ -355,7 +355,7 @@ void CL_GM_Shutdown (void) {
 
 //
 //===============
-// CLG_StartServerMessage
+// CL_GM_StartServerMessage
 // 
 // Called by the client BEFORE all server messages have been parsed
 //===============
@@ -367,7 +367,7 @@ void CL_GM_StartServerMessage (void) {
 
 //
 //===============
-// CLG_ParseServerMessage
+// CL_GM_ParseServerMessage
 // 
 // Parses command operations known to the game dll
 // Returns true if the message was parsed
@@ -382,7 +382,7 @@ qboolean CL_GM_ParseServerMessage (int serverCommand) {
 
 //
 //===============
-// CLG_ParseServerMessage
+// CL_GM_ParseServerMessage
 // 
 // Parses command operations known to the game dll, but for
 // demo playback only. This means certain commands such as
@@ -396,7 +396,7 @@ qboolean CL_GM_ParseDemoMessage (int serverCommand) {
 
 //
 //===============
-// CLG_EndServerMessage
+// CL_GM_EndServerMessage
 // 
 // Called by the client AFTER all server messages have been parsed
 //===============
