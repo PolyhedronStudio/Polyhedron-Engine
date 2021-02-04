@@ -18,7 +18,7 @@
 //
 #define CGAME_INCLUDE
 
-// Shared.
+// Shared. 
 #include "shared/shared.h"
 #include "shared/list.h"
 #include "shared/refresh.h"
