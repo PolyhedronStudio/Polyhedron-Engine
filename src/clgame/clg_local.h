@@ -14,7 +14,7 @@
 
 // Define CGAME_INCLUDE so that files such as:
 // common/cmodel.h
-// common/cmd.h
+// common/cmd.h 
 //
 #define CGAME_INCLUDE
 
@@ -28,7 +28,7 @@
 // #include "common/cmd.h"
 // #include "common/math.h"
 
-// Shared Client Game Header.
+// Shared Client Game Header. 
 #include "shared/clgame.h"
 
 //
