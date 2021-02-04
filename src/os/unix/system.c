@@ -50,6 +50,7 @@ cvar_t  *sys_basedir;
 cvar_t  *sys_libdir;
 cvar_t  *sys_homedir;
 cvar_t  *sys_forcegamelib;
+cvar_t  *sys_forcecgamelib;
 
 static qboolean terminate;
 
@@ -248,6 +249,7 @@ void Sys_Init(void)
     sys_homedir = Cvar_Get("homedir", homegamedir, CVAR_NOSET);
     sys_libdir = Cvar_Get("libdir", baseDirectory, CVAR_NOSET);
     sys_forcegamelib = Cvar_Get("sys_forcegamelib", "", CVAR_NOSET);
+    sys_forcecgamelib = Cvar_Get("sys_forcecgamelib", "", CVAR_NOSET);
 
     if (tty_init_input()) {
         signal(SIGHUP, term_handler);

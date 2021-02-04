@@ -26,12 +26,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_LISTED_FILES    2048
 #define MAX_LISTED_DEPTH    8
 
-typedef struct file_info_s {
-    size_t  size;
-    time_t  ctime;
-    time_t  mtime;
-    char    name[1];
-} file_info_t;
+// moved to shared/shared.h
+// typedef struct file_info_s {
+//     size_t  size;
+//     time_t  ctime;
+//     time_t  mtime;
+//     char    name[1];
+// } file_info_t;
 
 // bits 0 - 1, enum
 #define FS_MODE_APPEND          0x00000000

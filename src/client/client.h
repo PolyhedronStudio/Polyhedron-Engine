@@ -599,6 +599,8 @@ void CL_CheckForPause(void);
 void CL_UpdateFrameTimes(void);
 qboolean CL_CheckForIgnore(const char *s);
 void CL_WriteConfig(void);
+connstate_t CL_GetState (void);              // WATISDEZE: Added for client game dll
+void        CL_SetState (connstate_t state); // WATISDEZE: Added for client game dll
 
 
 //

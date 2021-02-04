@@ -697,6 +697,28 @@ static void CL_Rcon_c(genctx_t *ctx, int argnum)
     Com_Generic_c(ctx, argnum - 1);
 }
 
+//
+//===============
+// CL_GetState
+// 
+// Returns the current state of the client.
+//===============
+//
+connstate_t     CL_GetState (void) {
+    return cls.state;
+}
+
+//
+//===============
+// CL_SetState
+// 
+// Sets the current state of the client.
+//===============
+//
+void CL_SetState (connstate_t state) {
+    cls.state = state;
+}
+
 /*
 =====================
 CL_ClearState
@@ -2726,6 +2748,7 @@ static void CL_InitLocal(void)
     cls.state = ca_disconnected;
     cls.connect_time -= CONNECT_INSTANT;
 
+    // Initialize the rest of the client.
     CL_RegisterInput();
     CL_InitDemos();
     LOC_Init();
@@ -2733,7 +2756,7 @@ static void CL_InitLocal(void)
     CL_InitEffects();
     CL_InitTEnts();
     CL_InitDownloads();
-    CL_GTV_Init();
+//    CL_GTV_Init();
 
     List_Init(&cl_ignores);
 
@@ -2876,6 +2899,8 @@ static void CL_InitLocal(void)
 	Cmd_AddMacro("cl_hdr_color", CL_HdrColor_m);
 	Cmd_AddMacro("cl_resolution_scale", CL_ResolutionScale_m);
 
+    // WATISDEZE: This is where we want our client game dll to load.
+    CL_GM_Init();
 }
 
 /*
@@ -3516,6 +3541,9 @@ void CL_Shutdown(void)
     if (!cl_running || !cl_running->integer) {
         return;
     }
+
+    // WATISDEZE: Shutdown CGame dll.
+    CL_GM_Shutdown();
 
     CL_GTV_Shutdown();
 

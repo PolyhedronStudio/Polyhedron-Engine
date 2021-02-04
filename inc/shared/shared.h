@@ -150,6 +150,13 @@ typedef enum {
     ss_cinematic,
 } server_state_t;
 
+// WatIsDeze: file_info_t has been moved here, so it is known to the client game dll.
+typedef struct file_info_s {
+    size_t  size;
+    time_t  ctime;
+    time_t  mtime;
+    char    name[1];
+} file_info_t;
 /*
 ==============================================================
 

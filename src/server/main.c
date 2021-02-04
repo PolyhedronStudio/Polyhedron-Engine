@@ -162,6 +162,28 @@ void SV_CleanClient(client_t *client)
     }
 }
 
+//
+//===============
+// SV_GetState
+// 
+// Returns the current state of the server.
+//===============
+//
+server_state_t SV_GetState (void) {
+    return sv.state;
+}
+
+//
+//===============
+// SV_SetState
+// 
+// Sets the current state of the server.
+//===============
+//
+void SV_SetState (server_state_t state) {
+    sv.state = state;
+}
+
 static void print_drop_reason(client_t *client, const char *reason, clstate_t oldstate)
 {
     int announce = oldstate == cs_spawned ? 2 : 1;

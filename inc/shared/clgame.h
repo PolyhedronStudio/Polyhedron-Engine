@@ -131,6 +131,10 @@ extern "C" {
         void		(*Com_Error) (error_type_t code, char *fmt, ...);
 	    void		(*Com_LPrintf) (print_type_t type, char *fmt, ...);
 
+        // Returns a string description value of the given qerror_t type.
+        const char  *(*Com_ErrorString) (qerror_t type);
+
+        // Client state management is used for managing precaching.
         // Returns the current state of the client.
         connstate_t     (*Com_GetClientState) (void);
         // Sets the current state of the client.
@@ -184,7 +188,69 @@ extern "C" {
         //---------------------------------------------------------------------
         // Filesystem.
         //---------------------------------------------------------------------
-        // TODO.
+        // Renames the file contained in string from, to the one in string to.
+        qerror_t    (*FS_RenameFile) (const char *from, const char *to);
+        // Creates the directories of the given path.
+        qerror_t    (*FS_CreatePath) (char *path);
+        
+        // Opens the given filename and stores it in the passed to handle.
+        // Returns 0 in case the file could not open.
+        ssize_t     (*FS_FOpenFile) (const char *filename, qhandle_t *f, unsigned mode);
+        // Closes the given file handle.
+        void        (*FS_FCloseFile) (qhandle_t f);
+        // A wrapper function for opening a file in a given directory,
+        // with the given name, and extension.
+        qhandle_t   (*FS_EasyOpenFile) (char *buf, size_t size, unsigned mode,
+                                const char *dir, const char *name, const char *ext);
+        
+        // Checks if the given file exists.
+        qhandle_t   (*FS_FileExists) (const char *path);
+        // Check if the given file exists, matching the given flags.
+        qhandle_t   (*FS_FileExistsEx) (const char *path, unsigned flags);
+        
+        // Writes data to of a given length to the file(path).
+        qerror_t    (*FS_WriteFile) (const char *path, const void *data, size_t len);
+        // Another easy function, should be understandable now.
+        qboolean    (*FS_EasyWriteFile) (char *buf, size_t size, unsigned mode,
+                                 const char *dir, const char *name, const char *ext,
+                                 const void *data, size_t len);
+        // Read the given length from the file handle into the given buffer.
+        ssize_t     (*FS_Read) (void *buffer, size_t len, qhandle_t f);
+        // Write from the given buffer into the given file with given length.
+        ssize_t     (*FS_Write) (const void *buffer, size_t len, qhandle_t f);
+        // properly handles partial reads
+        // File printf.
+        ssize_t     (*FS_FPrintf) (qhandle_t f, const char *format, ...);
+        // Read file line into buffer.
+        ssize_t     (*FS_ReadLine) (qhandle_t f, char *buffer, size_t size);
+        // Flushes file handle.
+        void        (*FS_Flush) (qhandle_t f);
+        // Tell where file handle is.
+        ssize_t     (*FS_Tell) (qhandle_t f);
+        // Seek in file handle to given offset.
+        qerror_t    (*FS_Seek) (qhandle_t f, off_t offset);
+        // Retrieve given file handle length.
+        ssize_t     (*FS_Length) (qhandle_t f);
+        
+        // Wildcard comparison.
+        qboolean    (*FS_WildCmp) (const char *filter, const char *string);
+        // Extension comparison.
+        qboolean    (*FS_ExtCmp) (const char *extension, const char *string);
+        // Last modified.
+        qerror_t    (*FS_LastModified) (char const * file, uint64_t * last_modified);
+        
+        // File list functionality.
+        void        **(*FS_ListFiles) (const char *path, const char *filter, unsigned flags, int *count_p);
+        void        **(*FS_CopyList) (void **list, int count);
+        file_info_t *(*FS_CopyInfo) (const char *name, size_t size, time_t ctime, time_t mtime);
+        void        (*FS_FreeList) (void **list);
+        // Normalize path.
+        size_t      (*FS_NormalizePath) (char *out, const char *in);
+        size_t      (*FS_NormalizePathBuffer) (char *out, const char *in, size_t size);
+        // Validate path.
+        int         (*FS_ValidatePath) (const char *s);
+        // Sanitize cvar filename variable, so it is safe to use.
+        void        (*FS_SanitizeFilenameVariable) (cvar_t *var);
 
 
         //---------------------------------------------------------------------

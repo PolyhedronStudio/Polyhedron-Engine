@@ -14,6 +14,7 @@
 // Has to be defined for these to be declared.
 #ifdef USE_CLIENT
 
+#else
 //
 // cgmodule.c
 //

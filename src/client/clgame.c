@@ -57,6 +57,22 @@ mmodel_t *_wrp_CM_InlineModel(cm_t *cm, const char *name) {
     return CM_InlineModel(cm, name);
 }
 
+// FILES
+qhandle_t _wrp_FS_FileExists(const char *path) {
+    return FS_FileExists(path);
+}
+qhandle_t _wrp_FS_FileExistsEx(const char *path, unsigned flags) {
+    return FS_FileExistsEx(path, flags);
+}
+ssize_t _wrp_FS_FPrintf(qhandle_t f, const char *format, ...) {
+    ssize_t ret;
+    va_list args;
+    va_start (args, format);
+    ret = FS_FPrintf(f, format, args);
+    va_end (args);
+    return ret;
+}
+
 // REFRESH
 qhandle_t _wrp_R_RegisterPic(const char *name) {
     return R_RegisterPic(name);
@@ -222,6 +238,36 @@ static void CL_InitGameProgs(void)
 	import.Cvar_Reset					= _wrp_Cvar_Reset;
 	import.Cvar_ClampInteger			= Cvar_ClampInteger;
 	import.Cvar_ClampValue				= Cvar_ClampValue;
+
+    // Files.
+    import.FS_RenameFile                = FS_RenameFile;
+    import.FS_CreatePath                = FS_CreatePath;
+    import.FS_FOpenFile                 = FS_FOpenFile;
+    import.FS_FCloseFile                = FS_FCloseFile;
+    import.FS_EasyOpenFile              = FS_EasyOpenFile;
+    import.FS_FileExists                = _wrp_FS_FileExists;
+    import.FS_FileExistsEx              = _wrp_FS_FileExistsEx;
+    import.FS_WriteFile                 = FS_WriteFile;
+    import.FS_EasyWriteFile             = FS_EasyWriteFile;
+    import.FS_Read                      = FS_Read;
+    import.FS_Write                     = FS_Write;
+    import.FS_FPrintf                   = _wrp_FS_FPrintf;
+    import.FS_ReadLine                  = FS_ReadLine;
+    import.FS_Flush                     = FS_Flush;
+    import.FS_Tell                      = FS_Tell;
+    import.FS_Seek                      = FS_Seek;
+    import.FS_Length                    = FS_Length;
+    import.FS_WildCmp                   = FS_WildCmp;
+    import.FS_ExtCmp                    = FS_ExtCmp;
+    import.FS_LastModified              = FS_LastModified;
+    import.FS_ListFiles                 = FS_ListFiles;
+    import.FS_CopyList                  = FS_CopyList;
+    import.FS_CopyInfo                  = FS_CopyInfo;
+    import.FS_FreeList                  = FS_FreeList;
+    import.FS_NormalizePath             = FS_NormalizePath;
+    import.FS_NormalizePathBuffer       = FS_NormalizePathBuffer;
+    import.FS_ValidatePath              = FS_ValidatePath;
+    import.FS_SanitizeFilenameVariable  = FS_SanitizeFilenameVariable;
 
     // Networking.
     import.MSG_ReadChar                 = MSG_ReadChar;
