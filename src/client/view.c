@@ -65,6 +65,11 @@ particle_t  r_particles[MAX_PARTICLES];
 lightstyle_t    r_lightstyles[MAX_LIGHTSTYLES];
 #endif
 
+//
+// N&C: View structure, which is handled over to the client game module.
+//
+cl_view_t   clientView;
+
 /*
 ====================
 V_ClearScene
@@ -79,6 +84,13 @@ static void V_ClearScene(void)
 #endif
     r_numentities = 0;
     r_numparticles = 0;
+
+    // N&C: Update clientView.
+#if USE_DLIGHTS
+    cl.view.num_dlights = 0;
+#endif
+    cl.view.num_entities = 0;
+    cl.view.num_particles = 0;
 }
 
 
@@ -555,6 +567,19 @@ void V_Init(void)
     cl_add_blend->changed = cl_add_blend_changed;
 
     cl_adjustfov = Cvar_Get("cl_adjustfov", "1", 0);
+
+    // Store pointers to the actual arrays.
+    cl.view.entities     = r_entities;
+    cl.view.num_entities = &r_numentities;
+    cl.view.particles    = r_particles;
+    cl.view.num_entities = &r_numparticles;
+#if USE_DLIGHTS
+    cl.view.dlights        = r_dlights;
+    cl.view.num_dlights    = &r_numdlights;
+#endif
+#if USE_LIGHTSTYLES
+    cl.view.lightstyles    = r_lightstyles;
+#endif
 }
 
 void V_Shutdown(void)
