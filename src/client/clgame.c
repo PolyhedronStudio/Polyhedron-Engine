@@ -22,6 +22,7 @@
 #include "client.h"
 #include "server/server.h"
 #include "client/gamemodule.h"   // TODO: How come it can find client.h??
+#include "shared/cl_types.h"
 #include "shared/cl_game.h"
 
 // Contains the function s being exported to client game dll.

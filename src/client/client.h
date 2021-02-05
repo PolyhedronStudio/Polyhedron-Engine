@@ -437,36 +437,6 @@ void CL_SendCmd(void);
 // parse.c
 //
 
-typedef struct {
-    int type;
-    vec3_t pos1;
-    vec3_t pos2;
-    vec3_t offset;
-    vec3_t dir;
-    int count;
-    int color;
-    int entity1;
-    int entity2;
-    int time;
-} tent_params_t;
-
-typedef struct {
-    int entity;
-    int weapon;
-    int silenced;
-} mz_params_t;
-
-typedef struct {
-    int     flags;
-    int     index;
-    int     entity;
-    int     channel;
-    vec3_t  pos;
-    float   volume;
-    float   attenuation;
-    float   timeofs;
-} snd_params_t;
-
 extern tent_params_t    te;
 extern mz_params_t      mz;
 extern snd_params_t     snd;
@@ -519,20 +489,6 @@ void CL_UpdateBlendSetting(void);
 // tent.c
 //
 
-typedef struct cl_sustain_s {
-    int     id;
-    int     type;
-    int     endtime;
-    int     nextthink;
-    int     thinkinterval;
-    vec3_t  org;
-    vec3_t  dir;
-    int     color;
-    int     count;
-    int     magnitude;
-    void    (*think)(struct cl_sustain_s *self);
-} cl_sustain_t;
-
 void CL_SmokeAndFlash(vec3_t origin);
 
 void CL_RegisterTEntSounds(void);
@@ -554,37 +510,7 @@ void CL_CheckPredictionError(void);
 //
 // effects.c
 //
-#define PARTICLE_GRAVITY        120
-#define BLASTER_PARTICLE_COLOR  0xe0
-#define INSTANT_PARTICLE    -10000.0
 
-typedef struct cparticle_s {
-    struct cparticle_s    *next;
-
-    float   time;
-
-    vec3_t  org;
-    vec3_t  vel;
-    vec3_t  accel;
-    int     color;      // -1 => use rgba
-    float   alpha;
-    float   alphavel;
-    color_t rgba;
-	float   brightness;
-} cparticle_t;
-
-#if USE_DLIGHTS
-typedef struct cdlight_s {
-    int     key;        // so entities can reuse same entry
-    vec3_t  color;
-    vec3_t  origin;
-    float   radius;
-    float   die;        // stop lighting after this time
-    float   decay;      // drop this each second
-	vec3_t  velosity;     // move this far each second
-    //float   minlight;   // don't add when contributing less
-} cdlight_t;
-#endif
 
 void CL_BigTeleportParticles(vec3_t org);
 void CL_RocketTrail(vec3_t start, vec3_t end, centity_t *old);

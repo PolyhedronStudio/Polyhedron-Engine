@@ -27,9 +27,14 @@
 // #include "common/cmodel.h"
 // #include "common/cmd.h"
 // #include "common/math.h"
+#include "common/msg.h"
+#include "common/pmove.h"
+#include "common/protocol.h"
 
 // Shared Client Game Header.
+#include "shared/cl_types.h"
 #include "shared/cl_game.h"
+
 
 //
 //=============================================================================

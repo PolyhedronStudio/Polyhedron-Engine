@@ -81,6 +81,103 @@ typedef struct centity_s {
 } centity_t;
 
 //
+// Temporarl Entity parameters.
+// Used for parsing EFFECTS in the client.
+//
+typedef struct {
+    int type;
+    vec3_t pos1;
+    vec3_t pos2;
+    vec3_t offset;
+    vec3_t dir;
+    int count;
+    int color;
+    int entity1;
+    int entity2;
+    int time;
+} tent_params_t;
+
+//
+// MuzzleFlash parameters.
+// Used for parsing MUZZLEFLASHE messages in the client.
+//
+typedef struct {
+    int entity;
+    int weapon;
+    int silenced;
+} mz_params_t;
+
+//
+// Sound parameters.
+// Used for parsing SOUND messages in the client.
+//
+typedef struct {
+    int     flags;
+    int     index;
+    int     entity;
+    int     channel;
+    vec3_t  pos;
+    float   volume;
+    float   attenuation;
+    float   timeofs;
+} snd_params_t;
+
+//
+// Client Sustain structure.
+//
+typedef struct cl_sustain_s {
+    int     id;
+    int     type;
+    int     endtime;
+    int     nextthink;
+    int     thinkinterval;
+    vec3_t  org;
+    vec3_t  dir;
+    int     color;
+    int     count;
+    int     magnitude;
+    void    (*think)(struct cl_sustain_s *self);
+} cl_sustain_t;
+
+//
+// Client Particle Structure.
+//
+#define PARTICLE_GRAVITY        120
+#define BLASTER_PARTICLE_COLOR  0xe0
+#define INSTANT_PARTICLE    -10000.0
+
+typedef struct cparticle_s {
+    struct cparticle_s    *next;
+
+    float   time;
+
+    vec3_t  org;
+    vec3_t  vel;
+    vec3_t  accel;
+    int     color;      // -1 => use rgba
+    float   alpha;
+    float   alphavel;
+    color_t rgba;
+	float   brightness;
+} cparticle_t;
+
+//
+// Client DLight structure.
+//
+#if USE_DLIGHTS
+typedef struct cdlight_s {
+    int     key;        // so entities can reuse same entry
+    vec3_t  color;
+    vec3_t  origin;
+    float   radius;
+    float   die;        // stop lighting after this time
+    float   decay;      // drop this each second
+	vec3_t  velosity;     // move this far each second
+    //float   minlight;   // don't add when contributing less
+} cdlight_t;
+#endif
+
+//
 // Maximum amount of weapon models allowed.
 //
 #define MAX_CLIENTWEAPONMODELS        20        // PGM -- upped from 16 to fit the chainfist vwep
@@ -128,6 +225,13 @@ typedef struct {
     int             numEntities;    // The number of entities in the frame.
     int             firstEntity;    // The first entity in the frame.
 } server_frame_t;
+
+//
+// Each client frame populates a view, and submits it to the renderer.
+//
+typedef struct r_view_s {
+
+} r_view_t;
 
 //
 // The client structure is cleared at each level load, and is exposed to
@@ -259,19 +363,19 @@ typedef struct client_state_s {
     //
     // locally derived information from server state
     //
-    bsp_t        *bsp;
+    bsp_t        *bsp;                  // Pointer to the actual BSP.
 
-    qhandle_t model_draw[MAX_MODELS];
-    mmodel_t *model_clip[MAX_MODELS];
+    qhandle_t model_draw[MAX_MODELS];   // Handles for loaded draw models (MD2, MD3, ...).
+    mmodel_t *model_clip[MAX_MODELS];   // mmodel_t ptr handles for loaded clip models (Brush models).
 
-    qhandle_t sound_precache[MAX_SOUNDS];
-    qhandle_t image_precache[MAX_IMAGES];
+    qhandle_t sound_precache[MAX_SOUNDS];   // Handles to the loaded sounds.
+    qhandle_t image_precache[MAX_IMAGES];   // Handles to the loaded images.
 
-    clientinfo_t    clientinfo[MAX_CLIENTS];
-    clientinfo_t    baseclientinfo;
+    clientinfo_t    clientinfo[MAX_CLIENTS];    // Client info for all clients.
+    clientinfo_t    baseclientinfo;             // Local, Player, Client Info.
 
-    char    weaponModels[MAX_CLIENTWEAPONMODELS][MAX_QPATH];
-    int     numWeaponModels;
+    char    weaponModels[MAX_CLIENTWEAPONMODELS][MAX_QPATH]; // Weapon Models string paths.
+    int     numWeaponModels;    // Number of weapon models.
 } client_state_t;
 
 #endif // __SHARED_CL_TYPES_H__
