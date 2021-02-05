@@ -78,6 +78,8 @@ void CLG_ExecuteTests (void);
 //
 // clg_view.c
 //
+void CLG_PreRenderView (void);
 void CLG_RenderView (void);
+void CLG_PostRenderView (void);
 
 #endif // __CLGAME_LOCAL_H__

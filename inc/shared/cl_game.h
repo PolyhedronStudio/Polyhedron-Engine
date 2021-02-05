@@ -65,8 +65,13 @@ extern "C" {
         //---------------------------------------------------------------------
         // View
         //---------------------------------------------------------------------
-        // Called whenever the engine wants to render the view.
+        // Called right after the engine clears the scene, and begins a new one.
+        void        (*PreRenderView) (void);
+        // Called whenever the engine wants to render a valid frame.
         void        (*RenderView) (void);
+        // Called right after the engine renders the scene, and prepares to
+        // finish up its current frame loop iteration.
+        void        (*PostRenderView) (void);
 
     } clg_export_t;
 
@@ -344,6 +349,7 @@ extern "C" {
         //---------------------------------------------------------------------
         // Rendering.
         //---------------------------------------------------------------------
+        void            (*R_LightPoint) (vec3_t origin, vec3_t light);
         
         //---------------------------------------------------------------------
         // 2D Rendering.

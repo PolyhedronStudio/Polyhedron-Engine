@@ -53,7 +53,9 @@ clg_export_t *GetClientGameAPI (clg_import_t *clgimp)
     clge.EndServerMessage           = CLG_EndServerMessage;
 
     // View.
+    clge.PreRenderView              = CLG_PreRenderView;
     clge.RenderView                 = CLG_RenderView;
+    clge.PostRenderView             = CLG_PostRenderView;
 
     // Return cgame function pointer struct.
     return &clge;

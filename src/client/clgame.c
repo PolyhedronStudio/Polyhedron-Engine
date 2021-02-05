@@ -292,7 +292,7 @@ static void CL_InitGameProgs(void)
     import.MSG_WritePos                 = MSG_WritePos;
     import.MSG_WriteAngle               = MSG_WriteAngle;
     
-    // Refresh.
+    // Register.
     import.R_RegisterModel              = R_RegisterModel;
     import.R_RegisterImage              = R_RegisterImage;
     import.R_RegisterRawImage           = R_RegisterRawImage;
@@ -302,6 +302,9 @@ static void CL_InitGameProgs(void)
     import.R_RegisterPic2               = _wrp_R_RegisterPic2;
     import.R_RegisterFont               = _wrp_R_RegisterFont;
     import.R_RegisterSkin               = _wrp_R_RegisterSkin;
+
+    // Rendering
+    import.R_LightPoint                 = R_LightPoint;
 
     // Sound.
     import.S_BeginRegistration          = S_BeginRegistration;
@@ -412,14 +415,39 @@ void CL_GM_EndServerMessage () {
         cge->EndServerMessage(cls.realtime);
 }
 
+
+//
+//===============
+// CL_GM_PreRenderView
+// 
+// Call into the CG Module for notifying about "Pre Render View"
+//===============
+//
+void CL_GM_PreRenderView () {
+    if (cge)
+        cge->PreRenderView();
+}
+
 //
 //===============
 // CL_GM_RenderView
 // 
-// Called by the client WHEN it wants to render a view.
+// Call into the CG Module for notifying about "Render View"
 //===============
 //
 void CL_GM_RenderView () {
     if (cge)
         cge->RenderView();
+}
+
+//
+//===============
+// CL_GM_PostRenderView
+// 
+// Call into the CG Module for notifying about "Post Render"
+//===============
+//
+void CL_GM_PostRenderView () {
+    if (cge)
+        cge->PostRenderView();
 }

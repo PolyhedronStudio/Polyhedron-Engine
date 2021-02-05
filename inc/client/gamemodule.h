@@ -36,7 +36,9 @@ void		CL_GM_EndServerMessage (void);
 //
 // View
 //
+void		CL_GM_PreRenderView (void);
 void		CL_GM_RenderView (void);
+void		CL_GM_PostRenderView (void);
 
 #endif // USE_CLIENT
 #endif //  __CLIENT_CGMODULE_H__

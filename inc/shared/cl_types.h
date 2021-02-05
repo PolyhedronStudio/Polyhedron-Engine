@@ -177,10 +177,10 @@ typedef struct cdlight_s {
 } cdlight_t;
 #endif
 
-#if 0 // WatIsDeze: Unnescessary, we got cl.refdef. for these.
 //
 // The view structure contains the view data per frame.
-// Also contains pointers to the actual entity arrays.
+//
+// These are pointers to the actual variables in the client.
 //
 typedef struct cl_view_s {
 	// The entities to render for the current frame.
@@ -202,7 +202,7 @@ typedef struct cl_view_s {
     lightstyle_t    *lightstyles;   // Will always point to a lightstyle_t[MAX_LIGHTSTYLES] array.
     #endif
 } cl_view_t;
-#endif
+
 
 //
 // Maximum amount of weapon models allowed.
@@ -336,10 +336,14 @@ typedef struct client_state_s {
     float       keylerpfrac;
 #endif
 
-#if 0 // WatIsDeze: Unnescessary, we got cl.refdef. for these.
+    //
+    // Client Game View Variables.
+    //
     cl_view_t   view;
-#endif
 
+    //
+    // Client Rendering Variables.
+    //
     refdef_t    refdef;
     float       fov_x;      // interpolated
     float       fov_y;      // derived from fov_x assuming 4/3 aspect ratio
