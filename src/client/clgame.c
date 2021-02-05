@@ -74,7 +74,8 @@ ssize_t _wrp_FS_FPrintf(qhandle_t f, const char *format, ...) {
     return ret;
 }
 
-// REFRESH
+// REFRESH - These are wrapped, since some of the actual function pointers 
+// get loaded in later in at boot time. 
 qhandle_t _wrp_R_RegisterPic(const char *name) {
     return R_RegisterPic(name);
 }
@@ -88,6 +89,12 @@ qhandle_t _wrp_R_RegisterSkin(const char *name) {
     return R_RegisterSkin(name);
 }
 
+void _wrp_R_LightPoint(vec3_t origin, vec3_t light) {
+    if (R_LightPoint)
+        R_LightPoint(origin, light);
+    else
+        Com_EPrintf("%s - Invalid R_LightPoint func_ptr\n");
+}
 
 //
 //=============================================================================
@@ -304,7 +311,7 @@ void CL_InitGameProgs(void)
     import.R_RegisterSkin               = _wrp_R_RegisterSkin;
 
     // Rendering
-    import.R_LightPoint                 = R_LightPoint;
+    import.R_LightPoint                 = _wrp_R_LightPoint;
 
     // Sound.
     import.S_BeginRegistration          = S_BeginRegistration;
@@ -479,8 +486,8 @@ void CL_GM_PreRenderView () {
 //===============
 //
 void CL_GM_RenderView () {
-    // if (cge)
-    //     cge->RenderView();
+    if (cge)
+        cge->RenderView();
 }
 
 //

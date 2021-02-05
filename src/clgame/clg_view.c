@@ -21,7 +21,6 @@ static cvar_t   *cl_show_lights;
 static cvar_t   *cl_add_entities;
 static cvar_t   *cl_add_blend;
 
-#ifdef _DEBUG
 static cvar_t   *cl_testparticles;
 static cvar_t   *cl_testentities;
 #if USE_DLIGHTS
@@ -30,7 +29,6 @@ static cvar_t   *cl_testlights;
 static cvar_t   *cl_testblend;
 
 static cvar_t   *cl_stats;
-#endif
 
 static cvar_t   *cl_adjustfov;
 
@@ -213,7 +211,6 @@ void V_AddLightStyle(int style, vec4_t value)
 }
 #endif
 
-#ifdef _DEBUG
 //
 //===============
 // V_TestParticles
@@ -256,8 +253,12 @@ static void V_TestEntities(void)
     float       f, r;
     entity_t    *ent;
 
+    if (!cl->view.num_entities || !cl->view.entities) {
+        Com_DPrint("%s - %s\n", __func__, "cl->view.entities | cl->view.num_entities is empty");
+        return;
+    }
     *cl->view.num_entities = 32;
-    memset(cl->view.entities, 0, sizeof(cl->view.entities));
+    memset(cl->view.entities, 0, sizeof(entity_t) * MAX_ENTITIES);
 
     for (i = 0; i < *cl->view.num_entities; i++) {
         ent = &cl->view.entities[i];
@@ -321,7 +322,6 @@ static void V_TestLights(void)
 }
 #endif
 
-#endif
 
 //
 //===============
@@ -334,16 +334,14 @@ void V_Init(void)
 {
     //Cmd_Register(v_cmds);
 
-// #ifdef _DEBUG
-//     cl_testblend = clgi.Cvar_Get("cl_testblend", "0", 0);
-//     cl_testparticles = clgi.Cvar_Get("cl_testparticles", "0", 0);
-//     cl_testentities = clgi.Cvar_Get("cl_testentities", "0", 0);
-// #if USE_DLIGHTS
-//     cl_testlights = clgi.Cvar_Get("cl_testlights", "0", CVAR_CHEAT);
-// #endif
+    cl_testblend = clgi.Cvar_Get("cl_testblend", "0", 0);
+    cl_testparticles = clgi.Cvar_Get("cl_testparticles", "0", 0);
+    cl_testentities = clgi.Cvar_Get("cl_testentities", "0", 0);
+#if USE_DLIGHTS
+    cl_testlights = clgi.Cvar_Get("cl_testlights", "0", CVAR_CHEAT);
+#endif
 
 //     cl_stats = clgi.Cvar_Get("cl_stats", "0", 0);
-// #endif
 
 // #if USE_DLIGHTS
 //     cl_add_lights = clgi.Cvar_Get("cl_lights", "1", 0);
@@ -384,7 +382,7 @@ static void V_SetLightLevel(void)
     // save off light value for server to look at (BIG HACK!)
     if (!clgi.R_LightPoint)
         Com_DPrint("WTF WTF WTF WTF WTF\n\n WTF WTF \n");
-    //clgi.R_LightPoint(cl->refdef.vieworg, shadelight);
+    clgi.R_LightPoint(cl->refdef.vieworg, shadelight);
 
     // pick the greatest component, which should be the same
     // as the mono value returned by software
@@ -411,22 +409,20 @@ static void V_SetLightLevel(void)
 //===============
 //
 static void V_AddEntities (void) {
-// #ifdef _DEBUG
-//         if (cl_testparticles->integer)
-//             V_TestParticles();
-//         if (cl_testentities->integer)
-//             V_TestEntities();
-// #if USE_DLIGHTS
-//         if (cl_testlights->integer)
-//             V_TestLights();
-// #endif
-//         if (cl_testblend->integer) {
-//             cl.refdef.blend[0] = 1;
-//             cl.refdef.blend[1] = 0.5;
-//             cl.refdef.blend[2] = 0.25;
-//             cl.refdef.blend[3] = 0.5;
-//         }
-// #endif
+        if (cl_testparticles->integer)
+            V_TestParticles();
+        if (cl_testentities->integer)
+            V_TestEntities();
+#if USE_DLIGHTS
+        if (cl_testlights->integer)
+            V_TestLights();
+#endif
+        // if (cl_testblend->integer) {
+        //     cl.refdef.blend[0] = 1;
+        //     cl.refdef.blend[1] = 0.5;
+        //     cl.refdef.blend[2] = 0.25;
+        //     cl.refdef.blend[3] = 0.5;
+        // }
 }
 
 //
@@ -459,7 +455,7 @@ void CLG_PreRenderView (void) {
 //
 void CLG_RenderView (void) {
     // Add our view entities.
-    //V_AddEntities();
+    V_AddEntities();
 // #ifdef _DEBUG
 //         if (cl_testparticles->integer)
 //             V_TestParticles();

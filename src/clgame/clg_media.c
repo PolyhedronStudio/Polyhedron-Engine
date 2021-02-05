@@ -30,6 +30,7 @@
 void CLG_InitMedia(void)
 {
     Com_DPrint("[CG Module Callback] - %s\n", __func__);
+    
     // Initialize View Data.
     V_Init();
 }

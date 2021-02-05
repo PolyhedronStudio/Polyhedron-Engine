@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl_view.c -- player rendering positioning
 
 #include "client.h"
+#include "client/gamemodule.h"
 
 //=============
 //
@@ -413,6 +414,19 @@ void V_RenderView(void)
         // Clear the scene before calling into the CG Module.
         V_ClearScene();
 
+        // N&C: These need to be assigned on a per frame basis.
+        cl.view.entities     = &r_entities;
+        cl.view.num_entities = &r_numentities;
+        cl.view.particles    = &r_particles;
+        cl.view.num_entities = &r_numparticles;
+    #if USE_DLIGHTS
+        cl.view.dlights        = &r_dlights;
+        cl.view.num_dlights    = &r_numdlights;
+    #endif
+    #if USE_LIGHTSTYLES
+        cl.view.lightstyles    = &r_lightstyles;
+    #endif
+
         // PreRender CG Module View.
         CL_GM_PreRenderView();
 
@@ -666,12 +680,12 @@ void V_Init(void)
     Cmd_Register(v_cmds);
 
 #ifdef _DEBUG
-    cl_testblend = Cvar_Get("cl_testblend", "0", 0);
-    cl_testparticles = Cvar_Get("cl_testparticles", "0", 0);
-    cl_testentities = Cvar_Get("cl_testentities", "0", 0);
-#if USE_DLIGHTS
-    cl_testlights = Cvar_Get("cl_testlights", "0", CVAR_CHEAT);
-#endif
+//     cl_testblend = Cvar_Get("cl_testblend", "0", 0);
+//     cl_testparticles = Cvar_Get("cl_testparticles", "0", 0);
+//     cl_testentities = Cvar_Get("cl_testentities", "0", 0);
+// #if USE_DLIGHTS
+//     cl_testlights = Cvar_Get("cl_testlights", "0", CVAR_CHEAT);
+// #endif
 
     cl_stats = Cvar_Get("cl_stats", "0", 0);
 #endif
@@ -687,20 +701,19 @@ void V_Init(void)
 
     cl_adjustfov = Cvar_Get("cl_adjustfov", "1", 0);
 
-//#if 0 // WatIsDeze: Unnescessary, we got cl.refdef. for these.
     // N&C: Store pointers inside the view struct.
-    cl.view.entities     = r_entities;
+    // This is so they are there for the first frame.
+    cl.view.entities     = &r_entities;
     cl.view.num_entities = &r_numentities;
-    cl.view.particles    = r_particles;
+    cl.view.particles    = &r_particles;
     cl.view.num_entities = &r_numparticles;
 #if USE_DLIGHTS
-    cl.view.dlights        = r_dlights;
+    cl.view.dlights        = &r_dlights;
     cl.view.num_dlights    = &r_numdlights;
 #endif
 #if USE_LIGHTSTYLES
-    cl.view.lightstyles    = r_lightstyles;
+    cl.view.lightstyles    = &r_lightstyles;
 #endif
-//#endif
 }
 
 void V_Shutdown(void)

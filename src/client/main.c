@@ -2486,6 +2486,7 @@ void CL_RestartFilesystem(qboolean total)
 
         R_Init(qfalse);
 
+        CL_GM_RegisterMedia();
         SCR_RegisterMedia();
         Con_RegisterMedia();
         UI_Init();
