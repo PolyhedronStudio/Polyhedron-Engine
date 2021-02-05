@@ -8,6 +8,8 @@
 //
 #include "clg_local.h"
 
+#define USE_DLIGHTS 1
+
 // Development tools for weapons.
 int         gun_frame;
 qhandle_t   gun_model;
@@ -157,7 +159,7 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
 
     if (*cl->view.num_dlights >= MAX_DLIGHTS)
         return;
-    dl = &cl->view.dlights[*r_numdlights++];
+    dl = &cl->view.dlights[*cl->view.num_dlights++];
     VectorCopy(org, dl->origin);
     dl->intensity = intensity;
     dl->color[0] = r;
@@ -224,6 +226,11 @@ static void V_TestParticles(void)
     int         i, j;
     float       d, r, u;
 
+    if (!cl->view.num_particles || !cl->view.particles) {
+        Com_DPrint("%s - %s\n", __func__, "cl->view.particles | cl->view.num_particles is empty");
+        return;
+    }
+
     *cl->view.num_particles = MAX_PARTICLES;
     for (i = 0; i < *cl->view.num_particles; i++) {
         d = i * 0.25;
@@ -257,6 +264,7 @@ static void V_TestEntities(void)
         Com_DPrint("%s - %s\n", __func__, "cl->view.entities | cl->view.num_entities is empty");
         return;
     }
+
     *cl->view.num_entities = 32;
     memset(cl->view.entities, 0, sizeof(entity_t) * MAX_ENTITIES);
 
@@ -264,7 +272,7 @@ static void V_TestEntities(void)
         ent = &cl->view.entities[i];
 
         r = 64 * ((i % 4) - 1.5);
-        f = 64 * (i / 4) + 128;
+        f = 64 * (i / 4) + 32;
 
         for (j = 0; j < 3; j++)
             ent->origin[j] = cl->refdef.vieworg[j] + cl->v_forward[j] * f +
