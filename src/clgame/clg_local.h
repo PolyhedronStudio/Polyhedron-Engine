@@ -55,6 +55,11 @@ extern client_state_t *cl;
 //
 
 //
+// clg_entities.c
+//
+
+
+//
 // clg_main.c
 //
 void CLG_Init (void);

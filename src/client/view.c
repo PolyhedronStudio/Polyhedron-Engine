@@ -349,29 +349,6 @@ static int entitycmpfnc(const void *_a, const void *_b)
         return a->model - b->model;
 }
 
-static void V_SetLightLevel(void)
-{
-    vec3_t shadelight;
-
-    // save off light value for server to look at (BIG HACK!)
-    R_LightPoint(cl.refdef.vieworg, shadelight);
-
-    // pick the greatest component, which should be the same
-    // as the mono value returned by software
-    if (shadelight[0] > shadelight[1]) {
-        if (shadelight[0] > shadelight[2]) {
-            cl.lightlevel = 150.0f * shadelight[0];
-        } else {
-            cl.lightlevel = 150.0f * shadelight[2];
-        }
-    } else {
-        if (shadelight[1] > shadelight[2]) {
-            cl.lightlevel = 150.0f * shadelight[1];
-        } else {
-            cl.lightlevel = 150.0f * shadelight[2];
-        }
-    }
-}
 
 /*
 ====================
@@ -415,16 +392,16 @@ void V_RenderView(void)
         V_ClearScene();
 
         // N&C: These need to be assigned on a per frame basis.
-        cl.view.entities     = &r_entities;
-        cl.view.num_entities = &r_numentities;
-        cl.view.particles    = &r_particles;
-        cl.view.num_entities = &r_numparticles;
+        cl.view.entities        = &r_entities;
+        cl.view.num_entities    = &r_numentities;
+        cl.view.particles       = &r_particles;
+        cl.view.num_particles   = &r_numparticles;
     #if USE_DLIGHTS
-        cl.view.dlights        = &r_dlights;
-        cl.view.num_dlights    = &r_numdlights;
+        cl.view.dlights         = &r_dlights;
+        cl.view.num_dlights     = &r_numdlights;
     #endif
     #if USE_LIGHTSTYLES
-        cl.view.lightstyles    = &r_lightstyles;
+        cl.view.lightstyles     = &r_lightstyles;
     #endif
 
         // PreRender CG Module View.

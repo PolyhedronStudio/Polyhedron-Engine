@@ -188,19 +188,19 @@ typedef struct cl_view_s {
 	int         *num_entities;
 
     // The dlights to render for the current frame.
-    //#if USE_DLIGHTS
+    #if USE_DLIGHTS
     dlight_t    *dlights;   // Will always point to a dlight_t[MAX_DLIGHTS] array.
     int         *num_dlights;
-    //#endif
+    #endif
 
     // The particles to render for the current frame.
     particle_t  *particles;   // Will always point to a particle_t[MAX_PARTICLES] array.
     int         *num_particles;
 
     // The lightstyles for the current frame.
-    //#if USE_LIGHTSTYLES
+    #if USE_LIGHTSTYLES
     lightstyle_t    *lightstyles;   // Will always point to a lightstyle_t[MAX_LIGHTSTYLES] array.
-    //#endif
+    #endif
 } cl_view_t;
 
 

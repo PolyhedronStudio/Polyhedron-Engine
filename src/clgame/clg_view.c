@@ -8,7 +8,7 @@
 //
 #include "clg_local.h"
 
-#define USE_DLIGHTS 1
+#define USE_DLIGHTS 0
 
 // Development tools for weapons.
 int         gun_frame;
@@ -89,7 +89,7 @@ static void V_Gun_Model_f(void)
         return;
     }
     Q_concat(name, sizeof(name), "models/", Cmd_Argv(1), "/tris.md2", NULL);
-    gun_model = R_RegisterModel(name);
+    gun_model = clgi.R_RegisterModel(name);
 }
 
 static void V_Viewpos_f(void)
@@ -124,9 +124,11 @@ static void V_Viewpos_f(void)
 //
 void V_AddEntity(entity_t *ent)
 {
+    // Ensure we aren't exceeding boundary limits.
     if (cl->view.num_entities >= MAX_ENTITIES)
         return;
 
+    // Copy entity over into the current scene frame list.
     cl->view.entities[*cl->view.num_entities++] = *ent;
 }
 
@@ -140,8 +142,11 @@ void V_AddEntity(entity_t *ent)
 //
 void V_AddParticle(particle_t *p)
 {
+    // Ensure we aren't exceeding boundary limits.
     if (*cl->view.num_particles >= MAX_PARTICLES)
         return;
+
+    // Copy particle over into the current scene frame list.
     cl->view.particles[*cl->view.num_particles++] = *p;
 }
 
