@@ -479,8 +479,8 @@ void CL_GM_PreRenderView () {
 //===============
 //
 void CL_GM_RenderView () {
-    if (cge)
-        cge->RenderView();
+    // if (cge)
+    //     cge->RenderView();
 }
 
 //

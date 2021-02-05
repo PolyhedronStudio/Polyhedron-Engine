@@ -29,10 +29,9 @@
 //
 void CLG_InitMedia(void)
 {
-    clgi.Cbuf_AddText("echo \"CLG_InitMediaCLG_InitMediaCLG_InitMedia CLG_InitMedia\"\n"); // We want that newline! lol
-    clgi.Cbuf_Execute();
-
     Com_DPrint("[CG Module Callback] - %s\n", __func__);
+    // Initialize View Data.
+    V_Init();
 }
 
 //
@@ -61,4 +60,7 @@ void CLG_RegisterMedia(void)
 //
 void CLG_ShutdownMedia (void) {
     Com_DPrint("[CG Module Callback] - %s\n", __func__);
+
+    // Shutdown View Data.
+    V_Shutdown();
 }
