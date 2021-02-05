@@ -42,8 +42,7 @@ void CLG_InitMedia(void)
 // This is called when the client starts, but also when the renderer has had
 // modified settings.
 //
-// Use this to load data that is non persistent, and needs a reload in case
-// of render setting changes.
+// It should register the basic screen media, 2D icons etc.
 //===============
 //
 void CLG_RegisterMedia(void)
