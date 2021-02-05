@@ -421,22 +421,22 @@ void V_RenderView(void)
 //         // v_forward, etc.
 //         CL_AddEntities();
 
-// #ifdef _DEBUG
-//         if (cl_testparticles->integer)
-//             V_TestParticles();
-//         if (cl_testentities->integer)
-//             V_TestEntities();
-// #if USE_DLIGHTS
-//         if (cl_testlights->integer)
-//             V_TestLights();
-// #endif
-//         if (cl_testblend->integer) {
-//             cl.refdef.blend[0] = 1;
-//             cl.refdef.blend[1] = 0.5;
-//             cl.refdef.blend[2] = 0.25;
-//             cl.refdef.blend[3] = 0.5;
-//         }
-// #endif
+#ifdef _DEBUG
+        if (cl_testparticles->integer)
+            V_TestParticles();
+        if (cl_testentities->integer)
+            V_TestEntities();
+#if USE_DLIGHTS
+        if (cl_testlights->integer)
+            V_TestLights();
+#endif
+        if (cl_testblend->integer) {
+            cl.refdef.blend[0] = 1;
+            cl.refdef.blend[1] = 0.5;
+            cl.refdef.blend[2] = 0.25;
+            cl.refdef.blend[3] = 0.5;
+        }
+#endif
 
         // never let it sit exactly on a node line, because a water plane can
         // dissapear when viewed with the eye exactly on it.
@@ -657,12 +657,12 @@ void V_Init(void)
     Cmd_Register(v_cmds);
 
 #ifdef _DEBUG
-//     cl_testblend = Cvar_Get("cl_testblend", "0", 0);
-//     cl_testparticles = Cvar_Get("cl_testparticles", "0", 0);
-//     cl_testentities = Cvar_Get("cl_testentities", "0", 0);
-// #if USE_DLIGHTS
-//     cl_testlights = Cvar_Get("cl_testlights", "0", CVAR_CHEAT);
-// #endif
+    cl_testblend = Cvar_Get("cl_testblend", "0", 0);
+    cl_testparticles = Cvar_Get("cl_testparticles", "0", 0);
+    cl_testentities = Cvar_Get("cl_testentities", "0", 0);
+#if USE_DLIGHTS
+    cl_testlights = Cvar_Get("cl_testlights", "0", CVAR_CHEAT);
+#endif
 
     cl_stats = Cvar_Get("cl_stats", "0", 0);
 #endif

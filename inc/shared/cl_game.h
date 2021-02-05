@@ -328,7 +328,8 @@ extern "C" {
         void        (*MSG_WritePos) (const vec3_t pos);
         // Writes an angle over the network.
         void        (*MSG_WriteAngle) (float f);
-
+        // Flushes message.
+        void        (*MSG_FlushTo) (sizebuf_t *buf);
         //---------------------------------------------------------------------
         // Registering.
         //---------------------------------------------------------------------

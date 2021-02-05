@@ -74,6 +74,11 @@ ssize_t _wrp_FS_FPrintf(qhandle_t f, const char *format, ...) {
     return ret;
 }
 
+// NETWORKING
+void _trp_MSG_FlushTo(sizebuf_t *buf) {
+    MSG_FlushTo(buf);
+}
+
 // REFRESH - These are wrapped, since some of the actual function pointers 
 // get loaded in later in at boot time. 
 qhandle_t _wrp_R_RegisterPic(const char *name) {
