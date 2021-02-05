@@ -14,6 +14,9 @@
 // Contains the function pointers being passed in from the engine.
 clg_import_t clgi;
 
+// Pointer to the actual client frame state.
+client_state_t *cl;
+
 //
 //=============================================================================
 //
@@ -36,6 +39,9 @@ clg_export_t *GetClientGameAPI (clg_import_t *clgimp)
     // Setup the API version.
     clge.apiversion = CGAME_API_VERSION;
 
+    // Setup the game variable pointers.
+    cl                              = clgi.cl;
+
     // Setup the game export function pointers.
     // Core.
     clge.Init                       = CLG_Init;
@@ -45,6 +51,9 @@ clg_export_t *GetClientGameAPI (clg_import_t *clgimp)
     clge.StartServerMessage         = CLG_StartServerMessage;
     clge.ParseServerMessage         = CLG_ParseServerMessage;
     clge.EndServerMessage           = CLG_EndServerMessage;
+
+    // View.
+    clge.RenderView                 = CLG_RenderView;
 
     // Return cgame function pointer struct.
     return &clge;

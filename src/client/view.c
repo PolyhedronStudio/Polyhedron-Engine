@@ -68,7 +68,9 @@ lightstyle_t    r_lightstyles[MAX_LIGHTSTYLES];
 //
 // N&C: View structure, which is handled over to the client game module.
 //
+#if 0 // WatIsDeze: Unnescessary, we got cl.refdef. for these.
 cl_view_t   clientView;
+#endif
 
 /*
 ====================
@@ -84,13 +86,6 @@ static void V_ClearScene(void)
 #endif
     r_numentities = 0;
     r_numparticles = 0;
-
-    // N&C: Update clientView.
-#if USE_DLIGHTS
-    cl.view.num_dlights = 0;
-#endif
-    cl.view.num_entities = 0;
-    cl.view.num_particles = 0;
 }
 
 
@@ -568,7 +563,8 @@ void V_Init(void)
 
     cl_adjustfov = Cvar_Get("cl_adjustfov", "1", 0);
 
-    // Store pointers to the actual arrays.
+#if 0 // WatIsDeze: Unnescessary, we got cl.refdef. for these.
+    // N&C: Store pointers inside the view struct.
     cl.view.entities     = r_entities;
     cl.view.num_entities = &r_numentities;
     cl.view.particles    = r_particles;
@@ -579,6 +575,7 @@ void V_Init(void)
 #endif
 #if USE_LIGHTSTYLES
     cl.view.lightstyles    = r_lightstyles;
+#endif
 #endif
 }
 

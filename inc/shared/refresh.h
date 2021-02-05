@@ -50,39 +50,42 @@
 #define DLIGHT_CUTOFF       64
 
 typedef struct entity_s {
-    qhandle_t           model;          // opaque type outside refresh
-    vec3_t              angles;
+    //
+    // Model.
+    //
+    qhandle_t           model;   // The entity model - opaque type outside refresh
+    vec3_t              angles;  // The entity angles.
 
-    /*
-    ** most recent data
-    */
-    vec3_t              origin;     // also used as RF_BEAM's "from"
-    int                 frame;          // also used as RF_BEAM's diameter
+    //
+    // Most recent data
+    //
+    vec3_t              origin;  // The entity origin -  also used as RF_BEAM's "from"
+    int                 frame;   // The entity frame - also used as RF_BEAM's diameter
 
-    /*
-    ** previous data for lerping
-    */
-    vec3_t              oldorigin;  // also used as RF_BEAM's "to"
-    int                 oldframe;
+    //
+    // Previous data for lerping
+    //
+    vec3_t              oldorigin;  // The old entity origin - also used as RF_BEAM's "to"
+    int                 oldframe;   // The old entity frame.
 
-    /*
-    ** misc
-    */
-    float   backlerp;               // 0.0 = current, 1.0 = old
-    int     skinnum;                // also used as RF_BEAM's palette index,
+    //
+    // Misc.
+    //
+    float               backlerp;   // 0.0 = current, 1.0 = old
+    int                 skinnum;    // also used as RF_BEAM's palette index,
                                     // -1 => use rgba
 
-    float   alpha;                  // ignore if RF_TRANSLUCENT isn't set
-    color_t rgba;
+    float               alpha;      // ignore if RF_TRANSLUCENT isn't set
+    color_t             rgba;
 
-    qhandle_t   skin;           // NULL for inline skin
-    int         flags;
+    qhandle_t           skin;       // NULL for inline skin
+    int                 flags;      // Flags.
 
-    int                 id;
+    int                 id;         // Entity ID.
 
-	int tent_type;
+	int                 tent_type;  // Temporary Entity Type.
 
-	float scale;
+	float               scale;      // Entity Scale.
 } entity_t;
 
 typedef struct dlight_s {

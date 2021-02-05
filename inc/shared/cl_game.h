@@ -61,6 +61,13 @@ extern "C" {
         qboolean    (*ParseServerMessage) (int serverCommand);
         // Called when we're done receiving a server message.
         void        (*EndServerMessage) (int realTime);
+
+        //---------------------------------------------------------------------
+        // View
+        //---------------------------------------------------------------------
+        // Called whenever the engine wants to render the view.
+        void        (*RenderView) (void);
+
     } clg_export_t;
 
     // Structure containing all the engine function pointers for the client dll to work with.

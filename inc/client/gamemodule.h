@@ -18,13 +18,25 @@
 //
 // cgmodule.c
 //
+
+//
+// Init
+//
 void        CL_GM_Init (void);
 void        CL_GM_Shutdown (void);
 
+//
+// Parse
+//
 void		CL_GM_StartServerMessage (void);
 qboolean	CL_GM_ParseServerMessage (int serverCommand);
 qboolean    CL_GM_ParseDemoMessage (int serverCommand);
 void		CL_GM_EndServerMessage (void);
+
+//
+// View
+//
+void		CL_GM_RenderView (void);
 
 #endif // USE_CLIENT
 #endif //  __CLIENT_CGMODULE_H__

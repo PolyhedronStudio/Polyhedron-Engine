@@ -177,6 +177,7 @@ typedef struct cdlight_s {
 } cdlight_t;
 #endif
 
+#if 0 // WatIsDeze: Unnescessary, we got cl.refdef. for these.
 //
 // The view structure contains the view data per frame.
 // Also contains pointers to the actual entity arrays.
@@ -201,6 +202,7 @@ typedef struct cl_view_s {
     lightstyle_t    *lightstyles;   // Will always point to a lightstyle_t[MAX_LIGHTSTYLES] array.
     #endif
 } cl_view_t;
+#endif
 
 //
 // Maximum amount of weapon models allowed.
@@ -334,7 +336,9 @@ typedef struct client_state_s {
     float       keylerpfrac;
 #endif
 
+#if 0 // WatIsDeze: Unnescessary, we got cl.refdef. for these.
     cl_view_t   view;
+#endif
 
     refdef_t    refdef;
     float       fov_x;      // interpolated

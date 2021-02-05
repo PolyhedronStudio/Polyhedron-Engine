@@ -44,6 +44,7 @@
 //=============================================================================
 //
 extern clg_import_t clgi;
+extern client_state_t *cl;
 
 //
 //=============================================================================
@@ -73,5 +74,10 @@ void Com_Error (error_type_t code, char *fmt, ...);
 // clg_tests.c
 //
 void CLG_ExecuteTests (void);
+
+//
+// clg_view.c
+//
+void CLG_RenderView (void);
 
 #endif // __CLGAME_LOCAL_H__

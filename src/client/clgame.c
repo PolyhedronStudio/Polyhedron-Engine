@@ -189,6 +189,11 @@ static void CL_InitGameProgs(void)
         Com_Error(ERR_DROP, "Failed to load Client Game library");
 
 	//
+    // Setup the variable pointers for the cgame dll.
+	//
+    import.cl                           = &cl;
+
+	//
     // Setup the function pointers for the cgame dll.
 	//
 	// Command Buffer.
@@ -405,4 +410,16 @@ qboolean CL_GM_ParseDemoMessage (int serverCommand) {
 void CL_GM_EndServerMessage () {
     if (cge)
         cge->EndServerMessage(cls.realtime);
+}
+
+//
+//===============
+// CL_GM_RenderView
+// 
+// Called by the client WHEN it wants to render a view.
+//===============
+//
+void CL_GM_RenderView () {
+    if (cge)
+        cge->RenderView();
 }
