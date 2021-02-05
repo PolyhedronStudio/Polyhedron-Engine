@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "client.h"
 #include "client/sound/vorbis.h"
+#include "client/gamemodule.h"
+
 cvar_t  *rcon_address;
 
 cvar_t  *cl_noskins;
@@ -2542,9 +2544,15 @@ void CL_RestartRefresh(qboolean total)
         UI_Shutdown();
         R_Shutdown(qfalse);
         R_Init(qfalse);
+        
+        // N&C: Inform the CG Module about the registration of media.
+        CL_GM_RegisterMedia();
+
+        // N&C: These should eventually all move over to the CG Module.
         SCR_RegisterMedia();
         Con_RegisterMedia();
         UI_Init();
+
     }
 
     if (cls_state == ca_disconnected) {
@@ -2899,7 +2907,7 @@ static void CL_InitLocal(void)
 	Cmd_AddMacro("cl_hdr_color", CL_HdrColor_m);
 	Cmd_AddMacro("cl_resolution_scale", CL_ResolutionScale_m);
 
-    // WATISDEZE: This is where we want our client game dll to load.
+    // N&C: Initialize the game progs.
     CL_GM_Init();
 }
 
@@ -3485,6 +3493,9 @@ void CL_Init(void)
 
     // start with full screen console
     cls.key_dest = KEY_CONSOLE;
+    
+    // N&C: Load our client game module here.
+    CL_InitGameProgs();
 
 #ifdef _WIN32
     CL_InitRefresh();
@@ -3518,6 +3529,7 @@ void CL_Init(void)
     cl_cmdbuf.exec = exec_server_string;
 
     Cvar_Set("cl_running", "1");
+
 }
 
 /*
@@ -3542,7 +3554,7 @@ void CL_Shutdown(void)
         return;
     }
 
-    // WATISDEZE: Shutdown CGame dll.
+    // N&C: Notify the CG Module.
     CL_GM_Shutdown();
 
     CL_GTV_Shutdown();
@@ -3554,10 +3566,15 @@ void CL_Shutdown(void)
 #endif
 
     HTTP_Shutdown();
-    S_Shutdown();
+
+    S_Shutdown();  
     IN_Shutdown();
     Con_Shutdown();
+    
     CL_ShutdownRefresh();
+    // N&C: Unload the client game dll.
+    CL_ShutdownGameProgs();
+
     CL_WriteConfig();
 
     memset(&cls, 0, sizeof(cls));

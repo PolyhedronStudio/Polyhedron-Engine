@@ -357,11 +357,17 @@ void CL_InitRefresh(void)
 
     mode_changed = 0;
 
-    FX_Init();
+    // N&C: Inform the CG Module about the initialization.
+    CL_GM_InitMedia();
 
+    // N&C: Eventually, these should gradually move over to CG Module its InitMedia.
     // Initialize the rest of graphics subsystems
+    FX_Init();
     V_Init();
     SCR_Init();
+
+    // N&C: Inform the CG Module about the registration of media.
+    CL_GM_RegisterMedia();
     UI_Init();
 
     SCR_RegisterMedia();
@@ -381,6 +387,10 @@ void CL_ShutdownRefresh(void)
         return;
     }
 
+    // N&C: Notify the CG Module about it.
+    CL_GM_ShutdownMedia();
+
+    // N&C: Eventually these should move over to the CG Module.
     // Shutdown the rest of graphics subsystems
     V_Shutdown();
     SCR_Shutdown();

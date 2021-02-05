@@ -18,6 +18,8 @@
 //
 // cgmodule.c
 //
+void CL_ShutdownGameProgs(void);    // N&C: Place elsewhere?
+void CL_InitGameProgs(void);        // N&C: Place elsewhere?
 
 //
 // Init

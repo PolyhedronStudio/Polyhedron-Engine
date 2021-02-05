@@ -51,6 +51,12 @@ extern "C" {
         // Shuts down the client game dll.
         void		(*Shutdown) (void); 
 
+        //
+        // Media.
+        //
+        void        (*InitMedia) (void);
+        void        (*RegisterMedia) (void);
+        void        (*ShutdownMedia) (void);
 
         //---------------------------------------------------------------------
         // ServerMessage Parsing.
@@ -350,7 +356,7 @@ extern "C" {
         // Rendering.
         //---------------------------------------------------------------------
         void            (*R_LightPoint) (vec3_t origin, vec3_t light);
-        
+
         //---------------------------------------------------------------------
         // 2D Rendering.
         //---------------------------------------------------------------------

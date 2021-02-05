@@ -71,6 +71,13 @@ void Com_EPrint(char *fmt, ...);
 void Com_Error (error_type_t code, char *fmt, ...);
 
 //
+// clg_media.c
+//
+void CLG_InitMedia (void);
+void CLG_RegisterMedia (void);
+void CLG_ShutdownMedia (void);
+
+//
 // clg_tests.c
 //
 void CLG_ExecuteTests (void);

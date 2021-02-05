@@ -47,6 +47,11 @@ clg_export_t *GetClientGameAPI (clg_import_t *clgimp)
     clge.Init                       = CLG_Init;
     clge.Shutdown                   = CLG_Shutdown;
 
+    // Media.
+    clge.InitMedia                  = CLG_InitMedia;
+    clge.RegisterMedia              = CLG_RegisterMedia;
+    clge.ShutdownMedia              = CLG_ShutdownMedia;
+
     // ServerMessage.
     clge.StartServerMessage         = CLG_StartServerMessage;
     clge.ParseServerMessage         = CLG_ParseServerMessage;

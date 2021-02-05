@@ -142,12 +142,12 @@ static void *CL_LoadGameLibrary(const char *game, const char *prefix)
 // it is changing to a different game directory.
 // ===============
 //
-static void CL_ShutdownGameProgs(void)
+void CL_ShutdownGameProgs(void)
 {
     if (cge) {
-        cge->Shutdown();
         cge = NULL;
     }
+
     if (cgame_library) {
         Sys_FreeLibrary(cgame_library);
         cgame_library = NULL;
@@ -159,10 +159,10 @@ static void CL_ShutdownGameProgs(void)
 //===============
 // CL_InitGameProgs
 //
-// Init the game client subsystem for a new map
+// Init the game client modulke.
 //===============
 //
-static void CL_InitGameProgs(void)
+void CL_InitGameProgs(void)
 {
     clg_import_t   import;
     clg_export_t   *(*entry)(clg_import_t *) = NULL;
@@ -325,9 +325,6 @@ static void CL_InitGameProgs(void)
                   cge->apiversion, CGAME_API_VERSION);
     }
 
-    // Initialize the cgame dll.
-    cge->Init();
-
     // sanitize edict_size
     // if (ge->edict_size < sizeof(edict_t) || ge->edict_size > SIZE_MAX / MAX_EDICTS) {
     //     Com_Error(ERR_DROP, "Client Game DLL returned bad size of edict_t");
@@ -351,15 +348,24 @@ static void CL_InitGameProgs(void)
 //===============
 // CL_GM_Init
 // 
-// Called by the client BEFORE all server messages have been parsed
+// Called by the client when it is ready initializing.
 //===============
 //
 void CL_GM_Init (void) {
-    CL_InitGameProgs();
+    if (cge)
+        cge->Init();
 }
 
+//
+//===============
+// CL_GM_Shutdown
+//
+// Called by the client right before shutting down.
+//===============
+//
 void CL_GM_Shutdown (void) {
-    CL_ShutdownGameProgs();
+    if (cge)
+        cge->Shutdown();
 }
 
 //
@@ -415,6 +421,43 @@ void CL_GM_EndServerMessage () {
         cge->EndServerMessage(cls.realtime);
 }
 
+//
+//===============
+// CL_GM_InitMedia
+// 
+// Call into the CG Module for notifying about "Init Media"
+//===============
+//
+void CL_GM_InitMedia(void)
+{
+    if (cge)
+        cge->InitMedia();
+}
+
+//
+//===============
+// CL_GM_RegisterMedia
+// 
+// Call into the CG Module for notifying about "Register Media"
+//===============
+//
+void CL_GM_RegisterMedia(void)
+{
+    if (cge)
+        cge->RegisterMedia();
+}
+
+//
+//===============
+// CL_GM_ShutdownMedia
+// 
+// Call into the CG Module for notifying about "Shutdown Media"
+//===============
+//
+void CL_GM_ShutdownMedia (void) {
+    if (cge)
+        cge->ShutdownMedia();
+}
 
 //
 //===============

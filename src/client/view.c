@@ -687,7 +687,7 @@ void V_Init(void)
 
     cl_adjustfov = Cvar_Get("cl_adjustfov", "1", 0);
 
-#if 0 // WatIsDeze: Unnescessary, we got cl.refdef. for these.
+//#if 0 // WatIsDeze: Unnescessary, we got cl.refdef. for these.
     // N&C: Store pointers inside the view struct.
     cl.view.entities     = r_entities;
     cl.view.num_entities = &r_numentities;
@@ -700,7 +700,7 @@ void V_Init(void)
 #if USE_LIGHTSTYLES
     cl.view.lightstyles    = r_lightstyles;
 #endif
-#endif
+//#endif
 }
 
 void V_Shutdown(void)
