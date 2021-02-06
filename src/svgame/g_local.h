@@ -709,8 +709,8 @@ typedef struct
 
 extern	game_locals_t	game;
 extern	level_locals_t	level;
-extern	game_import_t	gi;
-extern	game_export_t	globals;
+extern	svgame_import_t	gi;
+extern	svgame_export_t	globals;
 extern	spawn_temp_t	st;
 
 extern	int	sm_meat_index;

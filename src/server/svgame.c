@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "server.h"
 
-game_export_t    *ge;
+svgame_export_t    *ge;
 
 static void PF_configstring(int index, const char *val);
 
@@ -845,8 +845,8 @@ Init the game subsystem for a new map
 */
 void SV_InitGameProgs(void)
 {
-    game_import_t   import;
-    game_export_t   *(*entry)(game_import_t *) = NULL;
+    svgame_import_t   import;
+    svgame_export_t   *(*entry)(svgame_import_t *) = NULL;
 
     // unload anything we have now
     SV_ShutdownGameProgs();

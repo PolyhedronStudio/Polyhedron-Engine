@@ -89,7 +89,7 @@ extern "C" {
         // finish up its current frame loop iteration.
         void        (*PostRenderView) (void);
 
-    } clg_export_t;
+    } clgame_export_t;
 
     // Structure containing all the engine function pointers for the client dll to work with.
     typedef struct clg_import_s {
@@ -97,12 +97,6 @@ extern "C" {
         // API Version.
         //---------------------------------------------------------------------
         int apiversion;                // Should always be the same as the extport's struct api_version.
-
-        //
-        // Pointers to actual client data.
-        //
-        client_state_t *cl;
-
 
         //---------------------------------------------------------------------
         // Command Buffer.
@@ -396,10 +390,16 @@ extern "C" {
         // System.
         //---------------------------------------------------------------------
         // TODO.
-    } clg_import_t;
+
+                //
+        // Pointers to actual client data.
+        //
+        client_state_t *cl;
+        client_test_t *ct;
+    } clgame_import_t;
 
     // Function pointer type for handling the actual import function.
-    typedef clg_export_t (*GetClientGameAPI_t) (clg_import_t);
+    typedef clgame_export_t (*GetClientGameAPI_t) (clgame_import_t);
 #ifdef __cplusplus
 };  // Extern C.
 #endif

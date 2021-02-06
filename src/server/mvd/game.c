@@ -2282,7 +2282,7 @@ void MVD_PrepWorldFrame(void)
 }
 
 
-game_export_t mvd_ge = {
+svgame_export_t mvd_ge = {
     GAME_API_VERSION,
 
     MVD_GameInit,

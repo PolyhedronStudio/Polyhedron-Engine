@@ -182,7 +182,7 @@ typedef struct {
     void (*AddCommandString)(const char *text);
 
     void (*DebugGraph)(float value, int color);
-} game_import_t;
+} svgame_import_t;
 
 //
 // functions exported by the game subsystem
@@ -246,6 +246,6 @@ typedef struct {
     int         edict_size;
     int         num_edicts;     // current number, <= max_edicts
     int         max_edicts;
-} game_export_t;
+} svgame_export_t;
 
 #endif // GAME_H

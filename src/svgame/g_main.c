@@ -25,8 +25,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 game_locals_t	game;
 level_locals_t	level;
-game_import_t	gi;
-game_export_t	globals;
+svgame_import_t	gi;
+svgame_export_t	globals;
 spawn_temp_t	st;
 
 int	sm_meat_index;
@@ -211,7 +211,7 @@ void ShutdownGame (void)
 }
 
 
-game_import_t RealFunc;
+svgame_import_t RealFunc;
 int	max_modelindex;
 int	max_soundindex;
 
@@ -248,7 +248,7 @@ Returns a pointer to the structure with all entry points
 and global variables
 =================
 */
-game_export_t *GetServerGameAPI (game_import_t *import)
+svgame_export_t *GetServerGameAPI (svgame_import_t *import)
 {
 	gi = *import;
 

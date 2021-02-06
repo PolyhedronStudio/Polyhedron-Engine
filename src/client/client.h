@@ -90,6 +90,7 @@ extern centity_t    cl_entities[MAX_EDICTS];
 #endif
 
 extern    client_state_t    cl;
+extern    client_test_t ct;
 
 /*
 ==================================================================

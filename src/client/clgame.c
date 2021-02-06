@@ -26,7 +26,7 @@
 #include "shared/cl_game.h"
 
 // Contains the function s being exported to client game dll.
-static clg_export_t *cge;
+static clgame_export_t *cge;
 
 // Operating System handle to the cgame library.
 static void *cgame_library;
@@ -191,8 +191,8 @@ void CL_ShutdownGameProgs(void)
 //
 void CL_InitGameProgs(void)
 {
-    clg_import_t   import;
-    clg_export_t   *(*entry)(clg_import_t *) = NULL;
+    clgame_import_t   import;
+    clgame_export_t   *(*entry)(clgame_import_t *) = NULL;
 
     // unload anything we have now
     CL_ShutdownGameProgs();
@@ -215,10 +215,14 @@ void CL_InitGameProgs(void)
     if (!entry)
         Com_Error(ERR_DROP, "Failed to load Client Game library");
 
+    // API Version.
+    import.apiversion                   = CGAME_API_VERSION;
+
 	//
     // Setup the function pointers for the cgame dll.
 	//
     import.cl                           = &cl;
+    import.ct                           = &ct;
 
 	// Command Buffer.
 	import.Cbuf_AddText					= _wrp_Cbuf_AddText;

@@ -12,10 +12,14 @@
 #include "clg_local.h"
 
 // Contains the function pointers being passed in from the engine.
-clg_import_t clgi;
+clgame_import_t clgi;
+
+// Static export variable, lives as long as the client game dll lives.
+clgame_export_t clge;
 
 // Pointer to the actual client frame state.
 client_state_t *cl;
+client_test_t *ct;
 
 //
 //=============================================================================
@@ -28,20 +32,34 @@ client_state_t *cl;
 extern "C" {
 #endif
 
-clg_export_t *GetClientGameAPI (clg_import_t *clgimp)
+clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 {
-    // Static export variable, lives as long as the client game dll lives.
-    static clg_export_t	clge;
+
+
+    // Do an API version check match.
+
 
     // Store a copy of the engine imported function pointer struct.
     clgi = *clgimp;
 
     // Store a pointer to the actual client state.
     cl  = clgimp->cl;
+    ct  = clgimp->ct;
 
-    Com_DPrint("cl = %i - clgimp->cl = %i\n", cl, clgimp->cl);
     // Setup the API version.
-    clge.apiversion = CGAME_API_VERSION;
+    clge.apiversion                 = CGAME_API_VERSION;
+
+    for (int i = 0; i < MAX_MODELS; i++) {
+        Com_DPrint("%s\n", ct->configstrings[CS_MODELS][i]);
+    }
+
+    // Test if it is compatible, if not, return clge with only the apiversion set.
+    // The client will handle the issue from there on.
+    if (clgimp->apiversion != CGAME_API_VERSION) {
+        clge.apiversion = -1;
+        return &clge;
+    }
+    Com_DPrint("cl = %i - clgimp->cl = %i\n", cl, clgimp->cl);
 
     // Setup the game export function pointers.
     // Core.

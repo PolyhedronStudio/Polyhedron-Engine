@@ -43,8 +43,9 @@
 //
 //=============================================================================
 //
-extern clg_import_t clgi;
+extern clgame_import_t clgi;
 extern client_state_t *cl;
+extern client_test_t *ct;
 
 //
 //=============================================================================
@@ -57,6 +58,7 @@ extern client_state_t *cl;
 //
 // clg_entities.cs
 //
+// void CLG_ENT_Create(); or other CLG_ENT_?? What name shall we pick?
 
 
 //
@@ -75,30 +77,36 @@ void Com_WPrint(char *fmt, ...);
 void Com_EPrint(char *fmt, ...);
 void Com_Error (error_type_t code, char *fmt, ...);
 
+
 //
 // clg_media.c
 //
 
 // Custom load state enumerator.
-// Can be used in CLG_LoadWorldMedia.
-// Return the matching string handle in CLG_GetMediaLoadStateName to
-// add a custom load state, with its own string handle name.
+//
+// Rename LOAD_CUSTOM_# or add your own.
+// Once the load stage is set, the client will inquire the
+// CLG_GetMediaLoadStateName function for a matching display string.
 typedef enum {
     LOAD_CUSTOM_START = LOAD_SOUNDS + 1,    // DO NOT TOUCH.
-    LOAD_CUSTOM_0,  // Rename to thy own.
-    LOAD_CUSTOM_1,  // Rename to thy own.
-    LOAD_CUSTOM_2   // Rename to thy own, and so forth..
+    LOAD_CUSTOM_0,  // Let thy will be known, rename to your hearts content.
+    LOAD_CUSTOM_1,  // Let thy will be known, rename to your hearts content.
+    LOAD_CUSTOM_2   // Let thy will be known, rename to your hearts content.
+    // You can add more here if you desire so.
 } clg_load_state_t;
+
 void CLG_InitMedia (void);
 const char *CLG_GetMediaLoadStateName (load_state_t state);
 void CLG_LoadScreenMedia (void);
 void CLG_LoadWorldMedia (void);
 void CLG_ShutdownMedia (void);
 
+
 //
 // clg_tests.c
 //
 void CLG_ExecuteTests (void);
+
 
 //
 // clg_view.c

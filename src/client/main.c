@@ -104,6 +104,7 @@ extern cvar_t *cl_renderdemo_fps;
 
 client_static_t cls;
 client_state_t  cl;
+client_test_t ct;
 
 centity_t   cl_entities[MAX_EDICTS];
 
@@ -1824,6 +1825,11 @@ void CL_Begin(void)
     LOC_LoadLocations();
     CL_LoadState(LOAD_NONE);
     cls.state = ca_precached;
+
+    // Setup ct.
+    for (int i = 0; i < MAX_MODELS; i++) {
+        sprintf(ct.configstrings[CS_MODELS + i], "Testing, ct.configstring[CS_MODELS][%i]", i);
+    }
 
 #if USE_FPS
     CL_UpdateRateSetting();

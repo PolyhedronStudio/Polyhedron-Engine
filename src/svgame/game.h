@@ -212,7 +212,7 @@ typedef struct
 	//	void	(*cvar_setdescription) (char *var_name, char *description);
 #endif
 
-} game_import_t;
+} svgame_import_t;
 
 //
 // functions exported by the game subsystem
@@ -269,6 +269,6 @@ typedef struct
 	int			edict_size;
 	int			num_edicts;		// current number, <= max_edicts
 	int			max_edicts;
-} game_export_t;
+} svgame_export_t;
 
-game_export_t *GetServerGameAPI(game_import_t *import);
+svgame_export_t *GetServerGameAPI(svgame_import_t *import);
