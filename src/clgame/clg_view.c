@@ -28,7 +28,7 @@
 void V_AddEntity(entity_t *ent)
 {
     // Ensure we aren't exceeding boundary limits.
-    if (cl->view.num_entities >= MAX_ENTITIES)
+    if (*cl->view.num_entities >= MAX_ENTITIES)
         return;
 
     // Copy entity over into the current scene frame list.

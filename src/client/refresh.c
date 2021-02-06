@@ -367,7 +367,7 @@ void CL_InitRefresh(void)
     SCR_Init();
 
     // N&C: Inform the CG Module about the registration of media.
-    CL_GM_RegisterMedia();
+    CL_GM_LoadScreenMedia();
     UI_Init();
 
     SCR_RegisterMedia();

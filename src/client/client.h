@@ -357,6 +357,67 @@ extern cvar_t    *info_uf;
 //=============================================================================
 
 //
+// console.c
+//
+#define CON_TIMES       16
+#define CON_TIMES_MASK  (CON_TIMES - 1)
+
+#define CON_TOTALLINES          1024    // total lines in console scrollback
+#define CON_TOTALLINES_MASK     (CON_TOTALLINES - 1)
+
+#define CON_LINEWIDTH   100     // fixed width, do not need more
+
+typedef enum {
+    CHAT_NONE,
+    CHAT_DEFAULT,
+    CHAT_TEAM
+} chatMode_t;
+
+typedef enum {
+    CON_POPUP,
+    CON_DEFAULT,
+    CON_CHAT,
+    CON_REMOTE
+} consoleMode_t;
+
+typedef struct console_s {
+    qboolean    initialized;
+
+    char    text[CON_TOTALLINES][CON_LINEWIDTH];
+    int     current;        // line where next message will be printed
+    int     x;              // offset in current line for next print
+    int     display;        // bottom of console displays this line
+    int     color;
+    int     newline;
+
+    int     linewidth;      // characters across screen
+    int     vidWidth, vidHeight;
+    float   scale;
+
+    unsigned    times[CON_TIMES];   // cls.realtime time the line was generated
+                                    // for transparent notify lines
+    qboolean    skipNotify;
+
+    qhandle_t   backImage;
+    qhandle_t   charsetImage;
+
+    float   currentHeight;  // aproaches scr_conlines at scr_conspeed
+    float   destHeight;     // 0.0 to 1.0 lines of console to display
+
+    commandPrompt_t chatPrompt;
+    commandPrompt_t prompt;
+
+    chatMode_t chat;
+    consoleMode_t mode;
+    netadr_t remoteAddress;
+    char *remotePassword;
+
+    load_state_t loadstate;
+} console_t;
+extern console_t con;
+//=============================================================================
+
+//
 // main.c
 //
 
@@ -376,22 +437,23 @@ void CL_CheckForPause(void);
 void CL_UpdateFrameTimes(void);
 qboolean CL_CheckForIgnore(const char *s);
 void CL_WriteConfig(void);
-connstate_t CL_GetState (void);              // WATISDEZE: Added for client game dll
-void        CL_SetState (connstate_t state); // WATISDEZE: Added for client game dll
-
+connstate_t CL_GetState (void);                     // WATISDEZE Added for CG Module.
+void        CL_SetState (connstate_t state);        // WATISDEZE Added for CG Module.
+void        CL_SetLoadState (load_state_t state);   // WATISDEZE Added for CG Module.
 
 //
 // precache.c
 //
 
-typedef enum {
-    LOAD_NONE,
-    LOAD_MAP,
-    LOAD_MODELS,
-    LOAD_IMAGES,
-    LOAD_CLIENTS,
-    LOAD_SOUNDS
-} load_state_t;
+// WatIsDeze: Moved to shared/cl_types.h
+// typedef enum {
+//     LOAD_NONE,
+//     LOAD_MAP,
+//     LOAD_MODELS,
+//     LOAD_IMAGES,
+//     LOAD_CLIENTS,
+//     LOAD_SOUNDS
+// } load_state_t;
 
 void CL_ParsePlayerSkin(char *name, char *model, char *skin, const char *s);
 void CL_LoadClientinfo(clientinfo_t *ci, const char *s);
@@ -399,7 +461,7 @@ void CL_LoadState(load_state_t state);
 void CL_RegisterSounds(void);
 void CL_RegisterBspModels(void);
 void CL_RegisterVWepModels(void);
-void CL_PrepRefresh(void);
+void CL_PrepareMedia(void);
 void CL_UpdateConfigstring(int index);
 
 

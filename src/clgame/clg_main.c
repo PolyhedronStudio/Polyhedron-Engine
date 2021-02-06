@@ -36,11 +36,12 @@ clg_export_t *GetClientGameAPI (clg_import_t *clgimp)
     // Store a copy of the engine imported function pointer struct.
     clgi = *clgimp;
 
+    // Store a pointer to the actual client state.
+    cl  = clgimp->cl;
+
+    Com_DPrint("cl = %i - clgimp->cl = %i\n", cl, clgimp->cl);
     // Setup the API version.
     clge.apiversion = CGAME_API_VERSION;
-
-    // Setup the game variable pointers.
-    cl                              = clgi.cl;
 
     // Setup the game export function pointers.
     // Core.
@@ -49,7 +50,9 @@ clg_export_t *GetClientGameAPI (clg_import_t *clgimp)
 
     // Media.
     clge.InitMedia                  = CLG_InitMedia;
-    clge.RegisterMedia              = CLG_RegisterMedia;
+    clge.GetMediaLoadStateName      = CLG_GetMediaLoadStateName;
+    clge.LoadScreenMedia            = CLG_LoadScreenMedia;
+    clge.LoadWorldMedia             = CLG_LoadWorldMedia;
     clge.ShutdownMedia              = CLG_ShutdownMedia;
 
     // ServerMessage.
@@ -82,10 +85,10 @@ clg_export_t *GetClientGameAPI (clg_import_t *clgimp)
 //===============
 // CLG_Init
 // 
-// Handles the initialisation of the client game dll.
+// Handles the initialisation of the CG Module.
 //===============
 //
-void CLG_Init(void) {
+void CLG_Init() {
     // Begin init log.
     Com_Print("\n%s\n", "==== InitCGame ====");
 
@@ -97,7 +100,7 @@ void CLG_Init(void) {
 //===============
 // CLG_Shutdown
 // 
-// Handles the shutdown of the client game dll.
+// Handles the shutdown of the CG Module.
 // ===============
 //
 void CLG_Shutdown(void) {

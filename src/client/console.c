@@ -19,63 +19,63 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "client.h"
 
-#define CON_TIMES       16
-#define CON_TIMES_MASK  (CON_TIMES - 1)
+// #define CON_TIMES       16
+// #define CON_TIMES_MASK  (CON_TIMES - 1)
 
-#define CON_TOTALLINES          1024    // total lines in console scrollback
-#define CON_TOTALLINES_MASK     (CON_TOTALLINES - 1)
+// #define CON_TOTALLINES          1024    // total lines in console scrollback
+// #define CON_TOTALLINES_MASK     (CON_TOTALLINES - 1)
 
-#define CON_LINEWIDTH   100     // fixed width, do not need more
+// #define CON_LINEWIDTH   100     // fixed width, do not need more
 
-typedef enum {
-    CHAT_NONE,
-    CHAT_DEFAULT,
-    CHAT_TEAM
-} chatMode_t;
+// typedef enum {
+//     CHAT_NONE,
+//     CHAT_DEFAULT,
+//     CHAT_TEAM
+// } chatMode_t;
 
-typedef enum {
-    CON_POPUP,
-    CON_DEFAULT,
-    CON_CHAT,
-    CON_REMOTE
-} consoleMode_t;
+// typedef enum {
+//     CON_POPUP,
+//     CON_DEFAULT,
+//     CON_CHAT,
+//     CON_REMOTE
+// } consoleMode_t;
 
-typedef struct console_s {
-    qboolean    initialized;
+// typedef struct console_s {
+//     qboolean    initialized;
 
-    char    text[CON_TOTALLINES][CON_LINEWIDTH];
-    int     current;        // line where next message will be printed
-    int     x;              // offset in current line for next print
-    int     display;        // bottom of console displays this line
-    int     color;
-    int     newline;
+//     char    text[CON_TOTALLINES][CON_LINEWIDTH];
+//     int     current;        // line where next message will be printed
+//     int     x;              // offset in current line for next print
+//     int     display;        // bottom of console displays this line
+//     int     color;
+//     int     newline;
 
-    int     linewidth;      // characters across screen
-    int     vidWidth, vidHeight;
-    float   scale;
+//     int     linewidth;      // characters across screen
+//     int     vidWidth, vidHeight;
+//     float   scale;
 
-    unsigned    times[CON_TIMES];   // cls.realtime time the line was generated
-                                    // for transparent notify lines
-    qboolean    skipNotify;
+//     unsigned    times[CON_TIMES];   // cls.realtime time the line was generated
+//                                     // for transparent notify lines
+//     qboolean    skipNotify;
 
-    qhandle_t   backImage;
-    qhandle_t   charsetImage;
+//     qhandle_t   backImage;
+//     qhandle_t   charsetImage;
 
-    float   currentHeight;  // aproaches scr_conlines at scr_conspeed
-    float   destHeight;     // 0.0 to 1.0 lines of console to display
+//     float   currentHeight;  // aproaches scr_conlines at scr_conspeed
+//     float   destHeight;     // 0.0 to 1.0 lines of console to display
 
-    commandPrompt_t chatPrompt;
-    commandPrompt_t prompt;
+//     commandPrompt_t chatPrompt;
+//     commandPrompt_t prompt;
 
-    chatMode_t chat;
-    consoleMode_t mode;
-    netadr_t remoteAddress;
-    char *remotePassword;
+//     chatMode_t chat;
+//     consoleMode_t mode;
+//     netadr_t remoteAddress;
+//     char *remotePassword;
 
-    load_state_t loadstate;
-} console_t;
+//     load_state_t loadstate;
+// } console_t;
 
-static console_t    con;
+console_t    con;
 
 static cvar_t   *con_notifytime;
 static cvar_t   *con_notifylines;
@@ -899,7 +899,8 @@ static void Con_DrawSolidConsole(void)
             text = "sounds";
             break;
         default:
-            text = NULL;
+            // N&C: Allow for custom load screen states.
+            text = CL_GM_GetMediaLoadStateName(con.loadstate);
             break;
         }
 

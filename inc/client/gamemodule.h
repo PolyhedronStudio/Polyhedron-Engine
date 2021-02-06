@@ -24,8 +24,17 @@ void CL_InitGameProgs(void);        // N&C: Place elsewhere?
 //
 // Init
 //
-void        CL_GM_Init (void);
+void        CL_GM_Init (client_state_t *_cl);
 void        CL_GM_Shutdown (void);
+
+//
+// Media
+//
+void        CL_GM_InitMedia (void);
+const char *CL_GM_GetMediaLoadStateName (load_state_t state);
+void        CL_GM_LoadScreenMedia (void);
+void        CL_GM_LoadWorldMedia (void);
+void        CL_GM_ShutdownMedia (void);
 
 //
 // Parse

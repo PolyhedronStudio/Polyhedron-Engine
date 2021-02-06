@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "client.h"
+#include "client/gamemodule.h"
 #include "client/sound/vorbis.h"
 
 /*
@@ -200,6 +201,8 @@ void CL_LoadClientinfo(clientinfo_t *ci, const char *s)
 CL_RegisterSounds
 =================
 */
+// WatIsDeze: Not needed anymore, we'll start a sound registering process next to
+// the render registering process. Why separate the two?
 void CL_RegisterSounds(void)
 {
     int i;
@@ -209,6 +212,7 @@ void CL_RegisterSounds(void)
     CL_RegisterTEntSounds();
     for (i = 1; i < MAX_SOUNDS; i++) {
         s = cl.configstrings[CS_SOUNDS + i];
+        Com_DPrintf("name == %s - %i\n", (!s[0] ? "" : s), i);
         if (!s[0])
             break;
         cl.sound_precache[i] = S_RegisterSound(s);
@@ -325,12 +329,12 @@ qhandle_t cl_dev_shaderballs = -1;
 
 /*
 =================
-CL_PrepRefresh
+CL_PrepareMedia
 
 Call before entering a new level, or after changing dlls
 =================
 */
-void CL_PrepRefresh(void)
+void CL_PrepareMedia(void)
 {
     int         i;
     char        *name;
@@ -340,47 +344,80 @@ void CL_PrepRefresh(void)
     if (!cl.mapname[0])
         return;     // no map loaded
 
+
     // register models, pics, and skins
     R_BeginRegistration(cl.mapname);
+    // register sounds.
+    S_BeginRegistration();
 
-    CL_LoadState(LOAD_MODELS);
-
+    // N&C: Pass over loading to the CG Module so it can actively
+    // manage the load state. This is useful for load screen information.
+    CL_GM_Init();
+    CL_GM_LoadWorldMedia();
+    
+    // TODO: Move over to CG Module.
     CL_RegisterTEntModels();
+    CL_RegisterTEntSounds();
+// #if CL_RTX_SHADERBALLS
+//     cvar_shaderballs = Cvar_Get("cl_shaderballs", "0", 0);
+//     if (cvar_shaderballs->integer && vid_rtx->integer)
+//     {
+//         cl_dev_shaderballs = R_RegisterModel("develop/objects/ShaderBallArray/ShaderBallArray16.MD3");
+//         if (cl_dev_shaderballs)
+//             Com_Printf("Loaded the ShaderBalls model\n");
+//         else
+//             Com_WPrintf("Failed to load the ShaderBalls model\n");
+//     }
+//     else
+//         cl_dev_shaderballs = -1;
+// #endif
+    // END TODO
 
-#if CL_RTX_SHADERBALLS
-	cvar_shaderballs = Cvar_Get("cl_shaderballs", "0", 0);
-	if (cvar_shaderballs->integer && vid_rtx->integer)
-	{
-		cl_dev_shaderballs = R_RegisterModel("develop/objects/ShaderBallArray/ShaderBallArray16.MD3");
-		if (cl_dev_shaderballs)
-			Com_Printf("Loaded the ShaderBalls model\n");
-		else
-			Com_WPrintf("Failed to load the ShaderBalls model\n");
-	}
-	else
-		cl_dev_shaderballs = -1;
-#endif
+//     CL_LoadState(LOAD_MODELS);
 
-    for (i = 2; i < MAX_MODELS; i++) {
-        name = cl.configstrings[CS_MODELS + i];
-        if (!name[0]) {
-            break;
-        }
-        if (name[0] == '#') {
-            continue;
-        }
-        cl.model_draw[i] = R_RegisterModel(name);
-    }
+//     CL_RegisterTEntModels();
 
-    CL_LoadState(LOAD_IMAGES);
-    for (i = 1; i < MAX_IMAGES; i++) {
-        name = cl.configstrings[CS_IMAGES + i];
-        if (!name[0]) {
-            break;
-        }
-        cl.image_precache[i] = R_RegisterPic2(name);
-    }
+// #if CL_RTX_SHADERBALLS
+// 	cvar_shaderballs = Cvar_Get("cl_shaderballs", "0", 0);
+// 	if (cvar_shaderballs->integer && vid_rtx->integer)
+// 	{
+// 		cl_dev_shaderballs = R_RegisterModel("develop/objects/ShaderBallArray/ShaderBallArray16.MD3");
+// 		if (cl_dev_shaderballs)
+// 			Com_Printf("Loaded the ShaderBalls model\n");
+// 		else
+// 			Com_WPrintf("Failed to load the ShaderBalls model\n");
+// 	}
+// 	else
+// 		cl_dev_shaderballs = -1;
+// #endif
 
+    // // Let the CG Module load the media properly.
+    // CL_GM_LoadWorldMedia();
+
+    // // // ENABLING THIS JUST MAKES IT WORK....
+    // for (i = 2; i < MAX_MODELS; i++) {
+    //     name = cl.configstrings[CS_MODELS + i];
+    //     Com_DPrintf("name == %s - %i\n", (!name[0] ? "" : name), i);
+    //     if (!name[0]) {
+    //         break;
+    //     } 
+    //     if (name[0] == '#') {
+    //         continue;
+    //     }
+    //     cl.model_draw[i] = R_RegisterModel(name);
+    // }
+
+    // CL_LoadState(LOAD_IMAGES);
+    // for (i = 1; i < MAX_IMAGES; i++) {
+    //     name = cl.configstrings[CS_IMAGES + i];
+    //     if (!name[0]) {
+    //         break;
+    //     }
+    //     cl.image_precache[i] = R_RegisterPic2(name);
+    // }
+
+    // CL_LoadState(LOAD_SOUNDS);
+    // CL_RegisterSounds();
     CL_LoadState(LOAD_CLIENTS);
     for (i = 0; i < MAX_CLIENTS; i++) {
         name = cl.configstrings[CS_PLAYERSKINS + i];
@@ -392,8 +429,12 @@ void CL_PrepRefresh(void)
 
     CL_LoadClientinfo(&cl.baseclientinfo, "unnamed\\male/grunt");
 
+
     // set sky textures and speed
     CL_SetSky();
+
+    // The sound engine can now free unneeded stuff
+    S_EndRegistration();
 
     // the renderer can now free unneeded stuff
     R_EndRegistration(cl.mapname);

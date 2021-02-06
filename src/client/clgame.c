@@ -94,6 +94,21 @@ qhandle_t _wrp_R_RegisterSkin(const char *name) {
     return R_RegisterSkin(name);
 }
 
+qhandle_t _wrp_R_RegisterModel(const char *name) {
+    return R_RegisterModel(name);
+}
+qhandle_t _wrp_R_RegisterImage(const char *name, imagetype_t type,
+                                        imageflags_t flags, qerror_t *err_p) {
+    return R_RegisterImage(name, type, flags, err_p);
+}
+qhandle_t _wrp_R_RegisterRawImage(const char *name, int width, int height, byte* pic, imagetype_t type,
+                                        imageflags_t flags) {
+    return R_RegisterRawImage(name, width, height, pic, type, flags);
+}
+void _wrp_R_UnregisterImage(const char *name) {
+    R_UnregisterImage(name);
+}
+ 
 void _wrp_R_LightPoint(vec3_t origin, vec3_t light) {
     if (R_LightPoint)
         R_LightPoint(origin, light);
@@ -201,13 +216,10 @@ void CL_InitGameProgs(void)
         Com_Error(ERR_DROP, "Failed to load Client Game library");
 
 	//
-    // Setup the variable pointers for the cgame dll.
+    // Setup the function pointers for the cgame dll.
 	//
     import.cl                           = &cl;
 
-	//
-    // Setup the function pointers for the cgame dll.
-	//
 	// Command Buffer.
 	import.Cbuf_AddText					= _wrp_Cbuf_AddText;
 	import.Cbuf_InsertText				= _wrp_Cbuf_InsertText;
@@ -236,6 +248,7 @@ void CL_InitGameProgs(void)
 
     import.Com_ErrorString              = Q_ErrorString;
 
+    import.Com_SetClientLoadState       = CL_SetLoadState;
     import.Com_GetClientState           = CL_GetState;
     import.Com_SetClientState           = CL_SetState;
 
@@ -305,10 +318,10 @@ void CL_InitGameProgs(void)
     import.MSG_WriteAngle               = MSG_WriteAngle;
     
     // Register.
-    import.R_RegisterModel              = R_RegisterModel;
-    import.R_RegisterImage              = R_RegisterImage;
-    import.R_RegisterRawImage           = R_RegisterRawImage;
-    import.R_UnregisterImage            = R_UnregisterImage;
+    import.R_RegisterModel              = _wrp_R_RegisterModel;
+    import.R_RegisterImage              = _wrp_R_RegisterImage;
+    import.R_RegisterRawImage           = _wrp_R_RegisterRawImage;
+    import.R_UnregisterImage            = _wrp_R_UnregisterImage;
 
     import.R_RegisterPic                = _wrp_R_RegisterPic;
     import.R_RegisterPic2               = _wrp_R_RegisterPic2;
@@ -337,15 +350,7 @@ void CL_InitGameProgs(void)
                   cge->apiversion, CGAME_API_VERSION);
     }
 
-    // sanitize edict_size
-    // if (ge->edict_size < sizeof(edict_t) || ge->edict_size > SIZE_MAX / MAX_EDICTS) {
-    //     Com_Error(ERR_DROP, "Client Game DLL returned bad size of edict_t");
-    // }
-
-    // sanitize max_edicts
-    // if (ge->max_edicts <= sv_maxclients->integer || ge->max_edicts > MAX_EDICTS) {
-    //     Com_Error(ERR_DROP, "Client Game DLL returned bad number of max_edicts");
-    // }
+    // We will not be calling the init function here, since we want to actually initialize later.
 }
 
 //
@@ -447,17 +452,46 @@ void CL_GM_InitMedia(void)
 }
 
 //
-//===============
-// CL_GM_RegisterMedia
-// 
-// Call into the CG Module for notifying about "Register Media"
+//==============
+// GetMediaLoadStateName
+//
+// Call into the CG Module for notifying about "Media Load State Name"
 //===============
 //
-void CL_GM_RegisterMedia(void)
+const char *CL_GM_GetMediaLoadStateName(load_state_t state)
 {
     if (cge)
-        cge->RegisterMedia();
+        return cge->GetMediaLoadStateName(state);
+    else
+        return "";
 }
+
+//
+//===============
+// CL_GM_LoadScreenMedia
+// 
+// Call into the CG Module for notifying about "Register Screen Media"
+//===============
+//
+void CL_GM_LoadScreenMedia(void)
+{
+    if (cge)
+        cge->LoadScreenMedia();
+}
+
+//
+//===============
+// CL_GM_LoadWorldMedia
+// 
+// Call into the CG Module for notifying about "Register Screen Media"
+//===============
+//
+void CL_GM_LoadWorldMedia(void)
+{
+    if (cge)
+        cge->LoadWorldMedia();
+}
+
 
 //
 //===============

@@ -721,6 +721,17 @@ void CL_SetState (connstate_t state) {
     cls.state = state;
 }
 
+//
+//===============
+// CL_SetLoadState
+// 
+// Sets the current load state of the client.
+//===============
+//
+void CL_SetLoadState (load_state_t state) {
+    CL_LoadState(state);
+}
+
 /*
 =====================
 CL_ClearState
@@ -1750,7 +1761,9 @@ static void CL_RestartSound_f(void)
 {
     S_Shutdown();
     S_Init();
-    CL_RegisterSounds();
+
+    // Restart the refresh system along so it can load all models.
+    CL_RestartRefresh(qfalse);
 }
 
 /*
@@ -1804,9 +1817,10 @@ void CL_Begin(void)
 
     Cvar_FixCheats();
 
-    CL_PrepRefresh();
-    CL_LoadState(LOAD_SOUNDS);
-    CL_RegisterSounds();
+    CL_PrepareMedia();
+    // WatIsDeze: Moved to CL_PrepareMedia.
+    // CL_LoadState(LOAD_SOUNDS);
+    // CL_RegisterSounds();
     LOC_LoadLocations();
     CL_LoadState(LOAD_NONE);
     cls.state = ca_precached;
@@ -1844,14 +1858,16 @@ static void CL_Precache_f(void)
 
     S_StopAllSounds();
 
-    CL_RegisterVWepModels();
+    // WatIsDeze: Moved to CL_PrepareMedia.
+    //CL_RegisterVWepModels();
 
     // demos use different precache sequence
     if (cls.demo.playback) {
         CL_RegisterBspModels();
-        CL_PrepRefresh();
-        CL_LoadState(LOAD_SOUNDS);
-        CL_RegisterSounds();
+        CL_PrepareMedia();
+        // Moved to CL_PrepareMedia.
+        // CL_LoadState(LOAD_SOUNDS);
+        // CL_RegisterSounds();
         CL_LoadState(LOAD_NONE);
         cls.state = ca_precached;
         return;
@@ -2486,7 +2502,7 @@ void CL_RestartFilesystem(qboolean total)
 
         R_Init(qfalse);
 
-        CL_GM_RegisterMedia();
+        CL_GM_LoadScreenMedia();
         SCR_RegisterMedia();
         Con_RegisterMedia();
         UI_Init();
@@ -2498,9 +2514,10 @@ void CL_RestartFilesystem(qboolean total)
         UI_OpenMenu(UIMENU_DEFAULT);
     } else if (cls_state >= ca_loading && cls_state <= ca_active) {
         CL_LoadState(LOAD_MAP);
-        CL_PrepRefresh();
-        CL_LoadState(LOAD_SOUNDS);
-        CL_RegisterSounds();
+        CL_PrepareMedia();
+        // Moved tl CL_PrepareMedia
+        // CL_LoadState(LOAD_SOUNDS);
+        // CL_RegisterSounds();
         CL_LoadState(LOAD_NONE);
     } else if (cls_state == ca_cinematic) {
         cl.image_precache[0] = R_RegisterPic2(cl.mapname);
@@ -2547,7 +2564,7 @@ void CL_RestartRefresh(qboolean total)
         R_Init(qfalse);
         
         // N&C: Inform the CG Module about the registration of media.
-        CL_GM_RegisterMedia();
+        CL_GM_LoadScreenMedia();
 
         // N&C: These should eventually all move over to the CG Module.
         SCR_RegisterMedia();
@@ -2560,7 +2577,7 @@ void CL_RestartRefresh(qboolean total)
         UI_OpenMenu(UIMENU_DEFAULT);
     } else if (cls_state >= ca_loading && cls_state <= ca_active) {
         CL_LoadState(LOAD_MAP);
-        CL_PrepRefresh();
+        CL_PrepareMedia();
         CL_LoadState(LOAD_NONE);
     } else if (cls_state == ca_cinematic) {
         cl.image_precache[0] = R_RegisterPic2(cl.mapname);

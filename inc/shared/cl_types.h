@@ -254,6 +254,19 @@ typedef struct {
 } server_frame_t;
 
 //
+// Contains the client load states, clg_local.h can expand upon it with custom
+// states. They can send a text name for the loading state to show in display.
+//
+typedef enum {
+    LOAD_NONE,
+    LOAD_MAP,
+    LOAD_MODELS,
+    LOAD_IMAGES,
+    LOAD_CLIENTS,
+    LOAD_SOUNDS
+} load_state_t;
+
+//
 // The client structure is cleared at each level load, and is exposed to
 // * the client game module to provide access to media and other client state.
 //

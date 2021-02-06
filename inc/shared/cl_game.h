@@ -47,15 +47,25 @@ extern "C" {
         // Core.
         //---------------------------------------------------------------------
         // Initializes the client game dll.
-        void		(*Init) (void);
+        void		(*Init) ();
         // Shuts down the client game dll.
         void		(*Shutdown) (void); 
 
-        //
-        // Media.
-        //
+        //---------------------------------------------------------------------
+        // Core.
+        //---------------------------------------------------------------------
+        // Called when the client wants to know the name of a custom load stat.
+        const char  *(*GetMediaLoadStateName) (load_state_t state);
+        // Called when the renderer initializes.
         void        (*InitMedia) (void);
-        void        (*RegisterMedia) (void);
+        // Called whenever the screen media has te reinitialize.
+        // Load all HUD/Menu related media here. 2D Images, sounds
+        // for HUD, etc.
+        void        (*LoadScreenMedia) (void);
+        // Called during map load, register world data here such as particles,
+        // view models, sounds for entities, etc.
+        void        (*LoadWorldMedia) (void);
+        // Called when the renderer shutsdown. Should unload all media.
         void        (*ShutdownMedia) (void);
 
         //---------------------------------------------------------------------
@@ -88,11 +98,11 @@ extern "C" {
         //---------------------------------------------------------------------
         int apiversion;                // Should always be the same as the extport's struct api_version.
 
+        //
+        // Pointers to actual client data.
+        //
+        client_state_t *cl;
 
-        //---------------------------------------------------------------------
-        // Pointers to client data.
-        //---------------------------------------------------------------------
-        client_state_t          *cl;   // Client Frame State.
 
         //---------------------------------------------------------------------
         // Command Buffer.
@@ -158,6 +168,8 @@ extern "C" {
         const char  *(*Com_ErrorString) (qerror_t type);
 
         // Client state management is used for managing precaching.
+        // Sets the client load state.
+        void            (*Com_SetClientLoadState) (load_state_t state);
         // Returns the current state of the client.
         connstate_t     (*Com_GetClientState) (void);
         // Sets the current state of the client.

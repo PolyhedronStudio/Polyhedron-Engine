@@ -55,14 +55,14 @@ extern client_state_t *cl;
 //
 
 //
-// clg_entities.c
+// clg_entities.cs
 //
 
 
 //
 // clg_main.c
 //
-void CLG_Init (void);
+void CLG_Init ();
 void CLG_Shutdown (void);
 
 void CLG_StartServerMessage (void);
@@ -78,8 +78,21 @@ void Com_Error (error_type_t code, char *fmt, ...);
 //
 // clg_media.c
 //
+
+// Custom load state enumerator.
+// Can be used in CLG_LoadWorldMedia.
+// Return the matching string handle in CLG_GetMediaLoadStateName to
+// add a custom load state, with its own string handle name.
+typedef enum {
+    LOAD_CUSTOM_START = LOAD_SOUNDS + 1,    // DO NOT TOUCH.
+    LOAD_CUSTOM_0,  // Rename to thy own.
+    LOAD_CUSTOM_1,  // Rename to thy own.
+    LOAD_CUSTOM_2   // Rename to thy own, and so forth..
+} clg_load_state_t;
 void CLG_InitMedia (void);
-void CLG_RegisterMedia (void);
+const char *CLG_GetMediaLoadStateName (load_state_t state);
+void CLG_LoadScreenMedia (void);
+void CLG_LoadWorldMedia (void);
 void CLG_ShutdownMedia (void);
 
 //
@@ -90,6 +103,9 @@ void CLG_ExecuteTests (void);
 //
 // clg_view.c
 //
+void V_Init (void);
+void V_Shutdown (void);
+
 void CLG_PreRenderView (void);
 void CLG_RenderView (void);
 void CLG_PostRenderView (void);
