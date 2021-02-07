@@ -426,7 +426,7 @@ static void PF_WriteFloat(float f)
 
 static qboolean PF_inVIS(vec3_t p1, vec3_t p2, int vis)
 {
-    mleaf_t *leaf1, *leaf2;
+    mleaf_t *leaf1 = NULL, *leaf2 = NULL;
     byte mask[VIS_MAX_BYTES];
     bsp_t *bsp = sv.cm.cache;
 

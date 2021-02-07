@@ -15,7 +15,7 @@ void CLG_TestCommand(void) {
 }
 
 void CLG_ExecuteTests(void) {
-    //
+    // 
     // Test for custom commands.
     //
     clgi.Cvar_Set("maplist", "map_a map_b map_c map_d");

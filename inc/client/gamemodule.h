@@ -11,10 +11,6 @@
 #ifndef __CLIENT_CLGMODULE_H__
 #define __CLIENT_CLGMODULE_H__
 
-// Has to be defined for these to be declared.
-#ifdef USE_CLIENT
-
-#else
 //
 // cgmodule.c
 //
@@ -24,14 +20,14 @@ void CL_InitGameProgs(void);        // N&C: Place elsewhere?
 //
 // Init
 //
-void        CL_GM_Init (client_state_t *_cl);
+void        CL_GM_Init ();
 void        CL_GM_Shutdown (void);
 
 //
 // Media
 //
 void        CL_GM_InitMedia (void);
-const char *CL_GM_GetMediaLoadStateName (load_state_t state);
+char *CL_GM_GetMediaLoadStateName (load_state_t state);
 void        CL_GM_LoadScreenMedia (void);
 void        CL_GM_LoadWorldMedia (void);
 void        CL_GM_ShutdownMedia (void);
@@ -51,5 +47,4 @@ void		CL_GM_PreRenderView (void);
 void		CL_GM_RenderView (void);
 void		CL_GM_PostRenderView (void);
 
-#endif // USE_CLIENT
 #endif //  __CLIENT_CGMODULE_H__

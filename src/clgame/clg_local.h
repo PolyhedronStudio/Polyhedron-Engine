@@ -16,7 +16,7 @@
 // common/cmodel.h
 // common/cmd.h
 //
-#define CGAME_INCLUDE
+#define CGAME_INCLUDE 1
 
 // Shared.
 #include "shared/shared.h"
@@ -96,7 +96,7 @@ typedef enum {
 } clg_load_state_t;
 
 void CLG_InitMedia (void);
-const char *CLG_GetMediaLoadStateName (load_state_t state);
+char *CLG_GetMediaLoadStateName (load_state_t state);
 void CLG_LoadScreenMedia (void);
 void CLG_LoadWorldMedia (void);
 void CLG_ShutdownMedia (void);

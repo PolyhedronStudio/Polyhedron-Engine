@@ -13,6 +13,8 @@ SET(SRC_CLGAME
 	clgame/clg_parse.c
 	clgame/clg_tests.c
 	clgame/clg_view.c
+
+	clgame/clgame.def
 )
 
 SET(HEADERS_CLGAME

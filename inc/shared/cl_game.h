@@ -55,7 +55,7 @@ extern "C" {
         // Core.
         //---------------------------------------------------------------------
         // Called when the client wants to know the name of a custom load stat.
-        const char  *(*GetMediaLoadStateName) (load_state_t state);
+        char        *(*GetMediaLoadStateName) (load_state_t state);
         // Called when the renderer initializes.
         void        (*InitMedia) (void);
         // Called whenever the screen media has te reinitialize.
@@ -110,12 +110,12 @@ extern "C" {
         // Forwards current command buffer to the server for processing (skips client processing).
         qboolean    (*CL_ForwardToServer) ();
 
-
+         
         //---------------------------------------------------------------------
         // Collision Model.
         //---------------------------------------------------------------------
         // Creates a clipping hull for an arbitrary box.
-        struct mnode_t     *(*CM_HeadnodeForBox) (vec3_t mins, vec3_t maxs);
+        mnode_t     *(*CM_HeadnodeForBox) (vec3_t mins, vec3_t maxs);
         // We need a way to share these values to cgame dll.
         mmodel_t    *(*CM_InlineModel) (cm_t *cm, const char *name);
         // TODO: Document.
@@ -310,7 +310,7 @@ extern "C" {
         // Reads a short from the network.
         int			(*MSG_ReadShort) (void);
         // Reads a word from the network.
-        float		(*MSG_ReadWord) (void);
+        int 		(*MSG_ReadWord) (void);
         // Reads a long from the network.
         int			(*MSG_ReadLong) (void);
         // Reads a string from the network.

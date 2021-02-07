@@ -102,15 +102,14 @@ typedef enum {
 // WATISDEZE: We don't want these defined in cl_game.h
 //
 #ifndef CGAME_INCLUDE
-void    Com_LPrintf(print_type_t type, const char *fmt, ...)
+void    Com_LPrintf(print_type_t type, const char* fmt, ...)
 q_printf(2, 3);
-void    Com_Error(error_type_t code, const char *fmt, ...)
+void    Com_Error(error_type_t code, const char* fmt, ...)
 q_noreturn q_printf(2, 3);
 
 #define Com_Printf(...) Com_LPrintf(PRINT_ALL, __VA_ARGS__)
 #define Com_WPrintf(...) Com_LPrintf(PRINT_WARNING, __VA_ARGS__)
 #define Com_EPrintf(...) Com_LPrintf(PRINT_ERROR, __VA_ARGS__)
-
 #endif // CGAME_INCLUDE
 
 // game print flags

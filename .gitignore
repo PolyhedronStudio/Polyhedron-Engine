@@ -38,6 +38,8 @@ q2rtx
 q2rtxded
 
 out
+out/
+out/*
 
 
 basenac/game*

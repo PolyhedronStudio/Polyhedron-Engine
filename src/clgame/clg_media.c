@@ -106,7 +106,7 @@ static void CLG_LoadClientSounds(void)
 // Return NULL if unknown.
 //===============
 //
-const char *CLG_GetMediaLoadStateName(load_state_t state) {
+char *CLG_GetMediaLoadStateName(load_state_t state) {
     switch (state)
     {
         default:
@@ -184,7 +184,7 @@ void CLG_LoadWorldMedia(void)
         // Skip if it starts with a #, let engine handle this.
         if (name[0] == '#') {
             continue;
-        }
+        } 
         cl->model_draw[i] = clgi.R_RegisterModel(name);
     }
     //

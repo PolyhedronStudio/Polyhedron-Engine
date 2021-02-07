@@ -16,7 +16,7 @@
 // CLIENT MODULE VIEW COMMAND FUNCTIONS.
 //
 //=============================================================================
-//
+// 
 //
 //===============
 // V_AddEntity
@@ -163,8 +163,6 @@ static void V_SetLightLevel(void)
     vec3_t shadelight;
 
     // save off light value for server to look at (BIG HACK!)
-    if (!clgi.R_LightPoint)
-        Com_DPrint("WTF WTF WTF WTF WTF\n\n WTF WTF \n");
     clgi.R_LightPoint(cl->refdef.vieworg, shadelight);
 
     // pick the greatest component, which should be the same

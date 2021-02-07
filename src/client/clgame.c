@@ -105,8 +105,8 @@ qhandle_t _wrp_R_RegisterRawImage(const char *name, int width, int height, byte*
                                         imageflags_t flags) {
     return R_RegisterRawImage(name, width, height, pic, type, flags);
 }
-void _wrp_R_UnregisterImage(const char *name) {
-    R_UnregisterImage(name);
+void _wrp_R_UnregisterImage(qhandle_t image) {
+    R_UnregisterImage(image);
 }
  
 void _wrp_R_LightPoint(vec3_t origin, vec3_t light) {
@@ -179,7 +179,6 @@ void CL_ShutdownGameProgs(void)
         Sys_FreeLibrary(cgame_library);
         cgame_library = NULL;
     }
-    Cvar_Set("CL_GM_features", "0");
 }
 
 //
@@ -229,7 +228,7 @@ void CL_InitGameProgs(void)
 	import.Cbuf_InsertText				= _wrp_Cbuf_InsertText;
 	import.Cbuf_Execute					= _wrp_Cbuf_Execute;
 	import.CL_ForwardToServer			= CL_ForwardToServer;
-
+     
     // Collision Model.
     import.CM_HeadnodeForBox            = CM_HeadnodeForBox;
     import.CM_InlineModel               = _wrp_CM_InlineModel;
@@ -339,19 +338,22 @@ void CL_InitGameProgs(void)
     import.S_BeginRegistration          = S_BeginRegistration;
     import.S_RegisterSound              = S_RegisterSound;
     import.S_EndRegistration            = S_EndRegistration;
-
+     
     import.S_StartSound                 = S_StartSound;
     import.S_StartLocalSound            = S_StartLocalSound;
 
 	// Load up the cgame dll.
     cge = entry(&import);
+
     if (!cge) {
         Com_Error(ERR_DROP, "Client Game DLL returned NULL exports");
+        return;
     }
 
     if (cge->apiversion != CGAME_API_VERSION) {
         Com_Error(ERR_DROP, "Client Game DLL is version %d, expected %d",
                   cge->apiversion, CGAME_API_VERSION);
+        return;
     }
 
     // We will not be calling the init function here, since we want to actually initialize later.
@@ -386,12 +388,12 @@ void CL_GM_Init (void) {
 //
 void CL_GM_Shutdown (void) {
     if (cge)
-        cge->Shutdown();
+        cge->Shutdown(); 
 }
 
 //
 //===============
-// CL_GM_StartServerMessage
+// CL_GM_StartServerMessage 
 // 
 // Called by the client BEFORE all server messages have been parsed
 //===============
@@ -462,7 +464,7 @@ void CL_GM_InitMedia(void)
 // Call into the CG Module for notifying about "Media Load State Name"
 //===============
 //
-const char *CL_GM_GetMediaLoadStateName(load_state_t state)
+char *CL_GM_GetMediaLoadStateName(load_state_t state)
 {
     if (cge)
         return cge->GetMediaLoadStateName(state);

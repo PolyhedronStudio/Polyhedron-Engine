@@ -360,13 +360,13 @@ float V_CalcFov(float fov_x, float width, float height)
     float    a;
     float    x;
 
-    if (fov_x < 1 || fov_x > 179)
+    if (fov_x < 1.f || fov_x > 179.f)
         Com_Error(ERR_DROP, "%s: bad fov: %f", __func__, fov_x);
 
-    x = width / tan(fov_x / 360 * M_PI);
+    x = width / tan(fov_x / 360.f * M_PI);
 
     a = atan(height / x);
-    a = a * 360 / M_PI;
+    a = a * 360.f / M_PI;
 
     return a;
 }
@@ -392,16 +392,16 @@ void V_RenderView(void)
         V_ClearScene();
 
         // N&C: These need to be assigned on a per frame basis.
-        cl.view.entities        = &r_entities;
+        cl.view.entities        = r_entities;
         cl.view.num_entities    = &r_numentities;
-        cl.view.particles       = &r_particles;
+        cl.view.particles       = r_particles;
         cl.view.num_particles   = &r_numparticles;
     #if USE_DLIGHTS
-        cl.view.dlights         = &r_dlights;
+        cl.view.dlights         = r_dlights;
         cl.view.num_dlights     = &r_numdlights;
     #endif
     #if USE_LIGHTSTYLES
-        cl.view.lightstyles     = &r_lightstyles;
+        cl.view.lightstyles     = r_lightstyles;
     #endif
 
         // PreRender CG Module View.
@@ -680,16 +680,16 @@ void V_Init(void)
 
     // N&C: Store pointers inside the view struct.
     // This is so they are there for the first frame.
-    cl.view.entities     = &r_entities;
+    cl.view.entities     = r_entities;
     cl.view.num_entities = &r_numentities;
-    cl.view.particles    = &r_particles;
+    cl.view.particles    = r_particles;
     cl.view.num_entities = &r_numparticles;
 #if USE_DLIGHTS
-    cl.view.dlights        = &r_dlights;
+    cl.view.dlights        = r_dlights;
     cl.view.num_dlights    = &r_numdlights;
 #endif
 #if USE_LIGHTSTYLES
-    cl.view.lightstyles    = &r_lightstyles;
+    cl.view.lightstyles    = r_lightstyles;
 #endif
 }
 
