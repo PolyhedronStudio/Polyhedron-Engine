@@ -31,6 +31,8 @@ CMakeCache.txt
 CMakeSettings.json
 cmake_install.cmake
 
+src/CMakeSettings.json
+
 nac
 nacded 
 

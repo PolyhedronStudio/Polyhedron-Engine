@@ -319,6 +319,8 @@ void CL_InitGameProgs(void)
     import.MSG_WriteString              = MSG_WriteString;
     import.MSG_WritePos                 = MSG_WritePos;
     import.MSG_WriteAngle               = MSG_WriteAngle;
+
+    import.MSG_FlushTo                  = _trp_MSG_FlushTo;
     
     // Register.
     import.R_RegisterModel              = _wrp_R_RegisterModel;
