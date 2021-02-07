@@ -2663,17 +2663,6 @@ static void process_regular_entity(
 	*num_instanced_vert = current_num_instanced_vert;
 }
 
-#if CL_RTX_SHADERBALLS
-extern vec3_t cl_dev_shaderballs_pos;
-
-void
-vkpt_drop_shaderballs()
-{
-	VectorCopy(vkpt_refdef.fd->vieworg, cl_dev_shaderballs_pos);
-	cl_dev_shaderballs_pos[2] -= 46.12f; // player eye-level
-}
-#endif
-
 static void
 prepare_entities(EntityUploadInfo* upload_info)
 {
@@ -4270,9 +4259,6 @@ R_Init_RTX(qboolean total)
 	Cmd_AddCommand("print_material", (xcommand_t)&vkpt_print_material);
 	Cmd_AddCommand("show_pvs", (xcommand_t)&vkpt_show_pvs);
 	Cmd_AddCommand("next_sun", (xcommand_t)&vkpt_next_sun_preset);
-#if CL_RTX_SHADERBALLS
-	Cmd_AddCommand("drop_balls", (xcommand_t)&vkpt_drop_shaderballs);
-#endif
 
 	for (int i = 0; i < 256; i++) {
 		qvk.sintab[i] = sinf(i * (2 * M_PI / 255));
@@ -4303,9 +4289,6 @@ R_Shutdown_RTX(qboolean total)
 	Cmd_RemoveCommand("print_material");
 	Cmd_RemoveCommand("show_pvs");
 	Cmd_RemoveCommand("next_sun");
-#if CL_RTX_SHADERBALLS
-	Cmd_RemoveCommand("drop_balls");
-#endif
 	
 	IMG_FreeAll();
 	vkpt_textures_destroy_unused();

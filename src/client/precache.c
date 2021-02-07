@@ -322,11 +322,6 @@ void CL_SetSky(void)
     R_SetSky(cl.configstrings[CS_SKY], rotate, axis);
 }
 
-#if CL_RTX_SHADERBALLS
-cvar_t* cvar_shaderballs;
-qhandle_t cl_dev_shaderballs = -1;
-#endif
-
 /*
 =================
 CL_PrepareMedia
@@ -357,38 +352,12 @@ void CL_PrepareMedia(void)
     // TODO: Move over to CG Module.
     CL_RegisterTEntModels();
     CL_RegisterTEntSounds();
-// #if CL_RTX_SHADERBALLS
-//     cvar_shaderballs = Cvar_Get("cl_shaderballs", "0", 0);
-//     if (cvar_shaderballs->integer && vid_rtx->integer)
-//     {
-//         cl_dev_shaderballs = R_RegisterModel("develop/objects/ShaderBallArray/ShaderBallArray16.MD3");
-//         if (cl_dev_shaderballs)
-//             Com_Printf("Loaded the ShaderBalls model\n");
-//         else
-//             Com_WPrintf("Failed to load the ShaderBalls model\n");
-//     }
-//     else
-//         cl_dev_shaderballs = -1;
-// #endif
     // END TODO
 
 //     CL_LoadState(LOAD_MODELS);
 
 //     CL_RegisterTEntModels();
 
-// #if CL_RTX_SHADERBALLS
-// 	cvar_shaderballs = Cvar_Get("cl_shaderballs", "0", 0);
-// 	if (cvar_shaderballs->integer && vid_rtx->integer)
-// 	{
-// 		cl_dev_shaderballs = R_RegisterModel("develop/objects/ShaderBallArray/ShaderBallArray16.MD3");
-// 		if (cl_dev_shaderballs)
-// 			Com_Printf("Loaded the ShaderBalls model\n");
-// 		else
-// 			Com_WPrintf("Failed to load the ShaderBalls model\n");
-// 	}
-// 	else
-// 		cl_dev_shaderballs = -1;
-// #endif
 
     // // Let the CG Module load the media properly.
     // CL_GM_LoadWorldMedia();

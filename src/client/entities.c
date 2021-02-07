@@ -1363,29 +1363,6 @@ void CL_CalcViewValues(void)
     VectorCopy(cl.v_up, listener_up);
 }
 
-#if CL_RTX_SHADERBALLS
-extern qhandle_t cl_dev_shaderballs;
-vec3_t cl_dev_shaderballs_pos = { 0 };
-
-void CL_AddShaderBalls(void)
-{
-	if (cl_dev_shaderballs != -1 && vid_rtx->integer)
-	{
-		model_t * model = MOD_ForHandle(cl_dev_shaderballs);
-
-		if (model != NULL && model->meshes != NULL)
-		{
-			entity_t entity = { 0 };
-			entity.model = cl_dev_shaderballs;
-			VectorCopy(cl_dev_shaderballs_pos, entity.origin);
-			entity.alpha = 1.0;
-			entity.id = RESERVED_ENTITIY_SHADERBALLS;
-			V_AddEntity(&entity);
-		}
-	}
-}
-#endif
-
 /*
 ===============
 CL_AddEntities
@@ -1405,9 +1382,6 @@ void CL_AddEntities(void)
 #endif
 #if USE_LIGHTSTYLES
     CL_AddLightStyles();
-#endif
-#if CL_RTX_SHADERBALLS
-	CL_AddShaderBalls();
 #endif
     LOC_AddLocationsToScene();
 }
