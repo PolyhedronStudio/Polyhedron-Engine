@@ -118,6 +118,18 @@ q_noreturn q_printf(2, 3);
 #define PRINT_HIGH          2       // critical messages
 #define PRINT_CHAT          3       // chat messages    
 
+//
+// Color defines, modify these as you please for custom colors.
+//
+#define U32_BLACK   MakeColor(  0,   0,   0, 255)
+#define U32_RED     MakeColor(255,   0,   0, 255)
+#define U32_GREEN   MakeColor(  0, 255,   0, 255)
+#define U32_YELLOW  MakeColor(255, 255,   0, 255)
+#define U32_BLUE    MakeColor(  0,   0, 255, 255)
+#define U32_CYAN    MakeColor(  0, 255, 255, 255)
+#define U32_MAGENTA MakeColor(255,   0, 255, 255)
+#define U32_WHITE   MakeColor(255, 255, 255, 255)
+
 // WatIsDeze: Moved here for clgame.
 #define CVAR_CHEAT          (1 << 5)  // can't be changed when connected
 #define CVAR_PRIVATE        (1 << 6)  // never macro expanded or saved to config

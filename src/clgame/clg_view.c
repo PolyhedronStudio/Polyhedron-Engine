@@ -8,7 +8,35 @@
 //
 #include "clg_local.h"
 
-#define USE_DLIGHTS 0
+//=============
+//
+// development tools for weapons
+//
+int         gun_frame;
+qhandle_t   gun_model;
+
+//=============
+
+static cvar_t* cl_add_particles;
+#if USE_DLIGHTS
+static cvar_t* cl_add_lights;
+static cvar_t* cl_show_lights;
+#endif
+static cvar_t* cl_add_entities;
+static cvar_t* cl_add_blend;
+
+#ifdef _DEBUG
+static cvar_t* cl_testparticles;
+static cvar_t* cl_testentities;
+#if USE_DLIGHTS
+static cvar_t* cl_testlights;
+#endif
+static cvar_t* cl_testblend;
+
+static cvar_t* cl_stats;
+#endif
+
+static cvar_t* cl_adjustfov;
 
 //
 //=============================================================================
@@ -191,6 +219,7 @@ static void V_SetLightLevel(void)
 //
 static void V_AddEntities (void) {
     // Add entities here.
+    //CLG_AddTemporaryEnties();
 }
 
 //

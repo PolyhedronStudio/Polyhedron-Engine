@@ -21,6 +21,9 @@
 //
 #include "client.h"
 #include "server/server.h"
+#include "refresh/models.h"
+
+// (Client/Game) related.
 #include "client/gamemodule.h"   // TODO: How come it can find client.h??
 #include "shared/cl_types.h"
 #include "shared/cl_game.h"
@@ -332,6 +335,8 @@ void CL_InitGameProgs(void)
     import.R_RegisterPic2               = _wrp_R_RegisterPic2;
     import.R_RegisterFont               = _wrp_R_RegisterFont;
     import.R_RegisterSkin               = _wrp_R_RegisterSkin;
+
+    import.MOD_ForHandle                = MOD_ForHandle;
 
     // Rendering
     import.R_LightPoint                 = _wrp_R_LightPoint;

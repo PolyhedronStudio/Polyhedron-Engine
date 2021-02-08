@@ -354,38 +354,7 @@ void CL_PrepareMedia(void)
     CL_RegisterTEntSounds();
     // END TODO
 
-//     CL_LoadState(LOAD_MODELS);
-
-//     CL_RegisterTEntModels();
-
-
-    // // Let the CG Module load the media properly.
-    // CL_GM_LoadWorldMedia();
-
-    // // // ENABLING THIS JUST MAKES IT WORK....
-    // for (i = 2; i < MAX_MODELS; i++) {
-    //     name = cl.configstrings[CS_MODELS + i];
-    //     Com_DPrintf("name == %s - %i\n", (!name[0] ? "" : name), i);
-    //     if (!name[0]) {
-    //         break;
-    //     } 
-    //     if (name[0] == '#') {
-    //         continue;
-    //     }
-    //     cl.model_draw[i] = R_RegisterModel(name);
-    // }
-
-    // CL_LoadState(LOAD_IMAGES);
-    // for (i = 1; i < MAX_IMAGES; i++) {
-    //     name = cl.configstrings[CS_IMAGES + i];
-    //     if (!name[0]) {
-    //         break;
-    //     }
-    //     cl.image_precache[i] = R_RegisterPic2(name);
-    // }
-
-    // CL_LoadState(LOAD_SOUNDS);
-    // CL_RegisterSounds();
+    // Load in all client infos.
     CL_LoadState(LOAD_CLIENTS);
     for (i = 0; i < MAX_CLIENTS; i++) {
         name = cl.configstrings[CS_PLAYERSKINS + i];
@@ -395,8 +364,8 @@ void CL_PrepareMedia(void)
         CL_LoadClientinfo(&cl.clientinfo[i], name);
     }
 
-    CL_LoadClientinfo(&cl.baseclientinfo, "unnamed\\male/grunt");
 
+    CL_LoadClientinfo(&cl.baseclientinfo, "unnamed\\male/grunt");
 
     // set sky textures and speed
     CL_SetSky();

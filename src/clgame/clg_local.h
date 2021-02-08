@@ -101,6 +101,16 @@ void CLG_LoadScreenMedia (void);
 void CLG_LoadWorldMedia (void);
 void CLG_ShutdownMedia (void);
 
+//
+// clg_tent.c
+//
+void CLG_RegisterTEntModels (void);
+void CLG_RegisterTEntSounds (void);
+
+void CLG_ClearTemporaryEnties (void);
+void CLG_AddTemporaryEnties (void);
+void CLG_InitTemporaryEnties (void);
+
 
 //
 // clg_tests.c

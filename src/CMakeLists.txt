@@ -12,6 +12,7 @@ SET(SRC_CLGAME
 	clgame/clg_media.c
 	clgame/clg_parse.c
 	clgame/clg_tests.c
+	clgame/clg_tents.c
 	clgame/clg_view.c
 
 	clgame/clgame.def

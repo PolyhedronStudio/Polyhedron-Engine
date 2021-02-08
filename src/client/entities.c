@@ -219,8 +219,9 @@ static void entity_event(int number)
         CL_TeleportParticles(cent->current.origin);
         break;
     case EV_FOOTSTEP:
-        if (cl_footsteps->integer)
-            S_StartSound(NULL, number, CHAN_BODY, cl_sfx_footsteps[rand() & 3], 1, ATTN_NORM, 0);
+        // WatIsDeze: Commented, will be implemented later when we move this over to CG module.
+        //if (cl_footsteps->integer)
+        //    S_StartSound(NULL, number, CHAN_BODY, cl_sfx_footsteps[rand() & 3], 1, ATTN_NORM, 0);
         break;
     case EV_FALLSHORT:
         S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("player/land1.wav"), 1, ATTN_NORM, 0);

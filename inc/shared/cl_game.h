@@ -336,6 +336,7 @@ extern "C" {
         void        (*MSG_WriteAngle) (float f);
         // Flushes message.
         void        (*MSG_FlushTo) (sizebuf_t *buf);
+        
         //---------------------------------------------------------------------
         // Registering.
         //---------------------------------------------------------------------
@@ -358,6 +359,9 @@ extern "C" {
         qhandle_t       (*R_RegisterFont) (const char *name);
         // Precaches a skin, and returns its handle.
         qhandle_t       (*R_RegisterSkin) (const char *name);
+
+        // Returns a pointer to the model based on the given handle.
+        model_t         *(*MOD_ForHandle) (qhandle_t h);
 
         //---------------------------------------------------------------------
         // Rendering.

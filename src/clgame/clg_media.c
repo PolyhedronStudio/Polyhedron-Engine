@@ -56,8 +56,6 @@ static void CLG_RegisterVWepModels()
 //
 static void CLG_LoadClientModels(void)
 {
-    Com_DPrint("[CG Module Callback] - %s\n", __func__);
-    
     // Register view weapon models.
     CLG_RegisterVWepModels();
 }
@@ -71,8 +69,6 @@ static void CLG_LoadClientModels(void)
 //
 static void CLG_LoadClientImages(void)
 {
-    Com_DPrint("[CG Module Callback] - %s\n", __func__);
-    
     // ...
 }
 
@@ -84,9 +80,7 @@ static void CLG_LoadClientImages(void)
 //===============
 //
 static void CLG_LoadClientSounds(void)
-{
-    Com_DPrint("[CG Module Callback] - %s\n", __func__);
-    
+{    
     // ...
 }
 
@@ -128,8 +122,6 @@ char *CLG_GetMediaLoadStateName(load_state_t state) {
 //
 void CLG_InitMedia(void)
 {
-    Com_DPrint("[CG Module Callback] - %s\n", __func__);
-    
     // Initialize View Data.
     V_Init();
 }
@@ -146,7 +138,7 @@ void CLG_InitMedia(void)
 //
 void CLG_LoadScreenMedia(void)
 {
-    Com_DPrint("[CG Module Callback] - %s\n", __func__);
+
 }
 
 //
@@ -162,9 +154,7 @@ void CLG_LoadScreenMedia(void)
 void CLG_LoadWorldMedia(void)
 {
     int i;
-    char *name;
-
-    Com_DPrint("[CG Module Callback] - %s\n", __func__);
+    char* filename;
 
     //
     // Set Loadstate to: LOAD_MODELS.
@@ -172,50 +162,55 @@ void CLG_LoadWorldMedia(void)
     clgi.Com_SetClientLoadState(LOAD_MODELS);
     // Load Client Models.
     CLG_LoadClientModels();
-
-    // THIS HERE DOES NOT WORK AT ALL FOR SOME SILLY REASON??
     // Load World Models passed from server.
     for (i = 2; i < MAX_MODELS; i++) {
-        name = cl->configstrings[CS_MODELS + i];
-        Com_DPrint("cl = %i, name == %s - %i\n", cl, (!name[0] ? "" : name), i);
-        if (!name[0]) {
+        // Fetch string (filename).
+        filename = cl->configstrings[CS_MODELS + i];
+        // Ensure it has a name.
+        if (!filename[0]) {
             break;
         }
         // Skip if it starts with a #, let engine handle this.
-        if (name[0] == '#') {
+        if (filename[0] == '#') {
             continue;
         } 
-        cl->model_draw[i] = clgi.R_RegisterModel(name);
+        // Register the model.
+        cl->model_draw[i] = clgi.R_RegisterModel(filename);
     }
+
     //
     // Set Loadstate to: LOAD_IMAGES.
     //
     // Load Image passed from server.
     clgi.Com_SetClientLoadState(LOAD_IMAGES);
-    // POSSIBLE: Load client images here.
+    // Load client images here.
     CLG_LoadClientImages();
     for (i = 1; i < MAX_IMAGES; i++) {
-        name = cl->configstrings[CS_IMAGES + i];
-    Com_DPrint("name == %s - %i\n", (!name[0] ? "" : name), i);
-        if (!name[0]) {
+        // Fetch string (filename).
+        filename = cl->configstrings[CS_IMAGES + i];
+        // Ensure it has a name.
+        if (!filename[0]) {
             break;
         }
-        cl->image_precache[i] = clgi.R_RegisterPic2(name);
+        // Regtister the image.
+        cl->image_precache[i] = clgi.R_RegisterPic2(filename);
     }
 
-    // //
-    // // Set Loadstate to: LOAD_SOUNDS.
-    // //
+    //
+    // Set Loadstate to: LOAD_SOUNDS.
+    //
     clgi.Com_SetClientLoadState(LOAD_SOUNDS);
     // Load client sounds here.
     CLG_LoadClientSounds();
     // Load sounds passed from the server.
     for (i = 1; i < MAX_SOUNDS; i++) {
-        name = cl->configstrings[CS_SOUNDS + i];
-Com_DPrint("name == %s - %i\n", (!name[0] ? "" : name), i);
-        if (!name[0])
+        // Fetch string (filename).
+        filename = cl->configstrings[CS_SOUNDS + i];
+        // Ensure it has a name.
+        if (!filename[0])
             break;
-        cl->sound_precache[i] = clgi.S_RegisterSound(name);
+        // Register the sound.
+        cl->sound_precache[i] = clgi.S_RegisterSound(filename);
     }
 }
 
@@ -228,8 +223,6 @@ Com_DPrint("name == %s - %i\n", (!name[0] ? "" : name), i);
 //===============
 //
 void CLG_ShutdownMedia (void) {
-    Com_DPrint("[CG Module Callback] - %s\n", __func__);
-
     // Shutdown View Data.
     V_Shutdown();
 }

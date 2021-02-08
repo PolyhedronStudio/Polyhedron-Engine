@@ -34,11 +34,6 @@ extern "C" {
 
 clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 {
-
-
-    // Do an API version check match.
-
-
     // Store a copy of the engine imported function pointer struct.
     clgi = *clgimp;
 
@@ -109,6 +104,9 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 void CLG_Init() {
     // Begin init log.
     Com_Print("\n%s\n", "==== InitCGame ====");
+
+    // Initialize temporary entities.
+    CLG_InitTemporaryEnties();
 
     // Execute tests.
     CLG_ExecuteTests();
