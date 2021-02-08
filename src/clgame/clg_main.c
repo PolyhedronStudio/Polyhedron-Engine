@@ -90,6 +90,7 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     clge.CalcViewValues             = CLG_CalcViewValues;
     clge.ClientFrame                = CLG_ClientFrame;
     clge.ClearState                 = CLG_ClearState;
+    clge.DemoSeek                   = CLG_DemoSeek;
 
     // Media.
     clge.InitMedia                  = CLG_InitMedia;
@@ -99,6 +100,7 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     clge.ShutdownMedia              = CLG_ShutdownMedia;
 
     // ServerMessage.
+    clge.UpdateConfigString         = CLG_UpdateConfigString;
     clge.StartServerMessage         = CLG_StartServerMessage;
     clge.ParseServerMessage         = CLG_ParseServerMessage;
     clge.SeekDemoMessage            = CLG_SeekDemoMessage;
@@ -205,12 +207,26 @@ void CLG_ClearState(void) {
     // Clear Effects.
     CLG_ClearEffects();
 
-//    CL_ClearEffects();
-//#if USE_LIGHTSTYLES
-//    CL_ClearLightStyles();
-//#endif
-//    CL_ClearTEnts();
+#if USE_LIGHTSTYLES
+    CLG_ClearLightStyles();
+#endif
+    CLG_ClearTempEntities();
 //    LOC_FreeLocations();
+}
+
+//
+//===============
+// CLG_DemoSeek
+// 
+// Called when a demo seeks to a certain position for playback.
+// Used to clear the scene from effects and temporary entities.
+// ===============
+//
+void CLG_DemoSeek(void) {
+    // Clear Effects.
+    CLG_ClearEffects();
+    // Clear Temp Entities.
+    CLG_ClearTempEntities();
 }
 
 //

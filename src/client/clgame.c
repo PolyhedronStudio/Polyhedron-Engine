@@ -483,6 +483,17 @@ void CL_GM_ClearState(void) {
         cge->ClearState();
 }
 
+//
+//===============
+// CL_GM_DemoSeek
+// 
+// Called when the client is seeking in a demo playback.
+//===============
+//
+void CL_GM_DemoSeek(void) {
+    if (cge)
+        cge->DemoSeek();
+}
 
 //
 //===============
@@ -494,6 +505,21 @@ void CL_GM_ClearState(void) {
 void CL_GM_StartServerMessage (void) {
     if (cge)
         cge->StartServerMessage();
+}
+
+//
+//===============
+// CL_GM_UpdateConfigString
+// 
+// Called when the engine is about to parse a configstring, we will
+// give the CG Module access to do with it as it pleases.
+//===============
+//
+qboolean CL_GM_UpdateConfigString (int index, const char *str) {
+    if (cge)
+        return cge->UpdateConfigString(index, str);
+
+    return qfalse;
 }
 
 //

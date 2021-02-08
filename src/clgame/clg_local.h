@@ -118,6 +118,7 @@ void CLG_AddDLights(void);
 void CLG_RunDLights(void);
 #endif
 #if USE_LIGHTSTYLES
+void CLG_ClearLightStyles(void);
 void CLG_AddLightStyles(void);
 void CLG_RunLightStyles(void);
 #endif
@@ -140,7 +141,9 @@ void CLG_Shutdown(void);
 
 void CLG_ClientFrame(void);
 void CLG_ClearState(void);
+void CLG_DemoSeek(void);
 
+qboolean CLG_UpdateConfigString(int index, const char* str);
 void CLG_StartServerMessage(void);
 qboolean CLG_ParseServerMessage(int serverCommand);
 qboolean CLG_SeekDemoMessage(int demoCommand);

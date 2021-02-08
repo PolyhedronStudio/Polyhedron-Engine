@@ -59,6 +59,8 @@ extern "C" {
         void        (*ClearState) (void);
         // Can be called by the engine too for updating audio positioning.
         void        (*CalcViewValues) (void);
+        // Called by the engine when a demo is being seeked.
+        void        (*DemoSeek) (void);
 
         //---------------------------------------------------------------------
         // Media.
@@ -80,6 +82,10 @@ extern "C" {
         //---------------------------------------------------------------------
         // ServerMessage Parsing.
         //---------------------------------------------------------------------
+        // Called when a configstring update has been parsed and still left
+        // unhandled by the client.
+        qboolean    (*UpdateConfigString) (int index, const char* str);
+
         // Called at the start of receiving a server message.
         void        (*StartServerMessage) (void);
         // Actually parses the server message, and handles it accordingly.

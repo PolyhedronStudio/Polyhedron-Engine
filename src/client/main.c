@@ -744,12 +744,12 @@ void CL_ClearState(void)
     //  WatIsDeze: Inform the CG Module.
     CL_GM_ClearState();
 
-    CL_ClearEffects();
-#if USE_LIGHTSTYLES
-    CL_ClearLightStyles();
-#endif
-    CL_ClearTEnts();
-    LOC_FreeLocations();
+//    CL_ClearEffects();
+//#if USE_LIGHTSTYLES
+//    CL_ClearLightStyles();
+//#endif
+//    CL_ClearTEnts();
+    //LOC_FreeLocations();
 
     // wipe the entire cl structure
     BSP_Free(cl.bsp);

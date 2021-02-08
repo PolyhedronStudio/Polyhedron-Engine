@@ -396,6 +396,14 @@ void CL_UpdateConfigstring(int index)
 {
     const char *s = cl.configstrings[index];
 
+    // Let the CG Module handle the string.
+    // If it returns TRUE it has succeeded.
+    // If it returns false, we move on.
+    if (CL_GM_UpdateConfigString(index, s)) {
+        // We're done here.
+        return;
+    }
+
     if (index == CS_MAXCLIENTS) {
         cl.maxclients = atoi(s);
         return;
@@ -420,12 +428,12 @@ void CL_UpdateConfigstring(int index)
         return;
     }
 
-#if USE_LIGHTSTYLES
-    if (index >= CS_LIGHTS && index < CS_LIGHTS + MAX_LIGHTSTYLES) {
-        CL_SetLightStyle(index - CS_LIGHTS, s);
-        return;
-    }
-#endif
+//#if USE_LIGHTSTYLES
+//    if (index >= CS_LIGHTS && index < CS_LIGHTS + MAX_LIGHTSTYLES) {
+//        CL_SetLightStyle(index - CS_LIGHTS, s);
+//        return;
+//    }
+//#endif
 
     if (cls.state < ca_precached) {
         return;

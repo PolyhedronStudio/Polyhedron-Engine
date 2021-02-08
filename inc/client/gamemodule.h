@@ -40,6 +40,7 @@ void        CL_GM_ShutdownMedia(void);
 //
 // Parse
 //
+qboolean	CL_GM_UpdateConfigString(int index, const char* str);
 void		CL_GM_StartServerMessage(void);
 qboolean	CL_GM_ParseServerMessage(int serverCommand);
 qboolean    CL_GM_SeekDemoMessage(int demoCommand);

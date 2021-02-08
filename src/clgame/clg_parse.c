@@ -220,6 +220,27 @@ static void CLG_ParseMuzzleFlashPacket(int mask)
 //
 //=============================================================================
 //
+//
+//===============
+// CLG_UpdateConfigString
+// 
+// Called when a configstring has been parsed and is ready to be
+// loaded in again.
+//
+// Returns qtrue in case of having handled it, otherwise returns qfalse
+// and lets the client work it out.
+//===============
+//
+qboolean CLG_UpdateConfigString(int index, const char *str) {
+#if USE_LIGHTSTYLES
+    if (index >= CS_LIGHTS && index < CS_LIGHTS + MAX_LIGHTSTYLES) {
+        CLG_SetLightStyle(index - CS_LIGHTS, str);
+        return qtrue;
+    }
+#endif
+    // None have been found for updating here, leave it to the client.
+    return qfalse;
+}
 
 //
 //===============
