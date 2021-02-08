@@ -69,7 +69,7 @@ extern cvar_t* cvar_pt_particle_emissive;
 // Registers all sounds used for temporary entities.
 //===============
 //
-void CLG_RegisterTEntSounds(void)
+void CLG_RegisterTempEntitySounds(void)
 {
 	int     i;
 	char    name[MAX_QPATH];
@@ -105,12 +105,12 @@ void CLG_RegisterTEntSounds(void)
 
 //
 //===============
-// CLG_RegisterTEntModels
+// CLG_RegisterTempEntityModels
 // 
 // Registers all models used for temporary entities.
 //===============
 //
-void CLG_RegisterTEntModels(void)
+void CLG_RegisterTempEntityModels(void)
 {
 	// Register FX models.
 	cl_mod_explode = clgi.R_RegisterModel("models/objects/explode/tris.md2");
@@ -208,12 +208,12 @@ void CLG_RegisterTEntModels(void)
 
 //
 //===============
-// CLG_AddTemporaryEnties
+// CLG_AddTempEntities
 // 
 // Adds all temporal entities to the current frame scene.
 //===============
 //
-void CLG_AddTemporaryEnties(void)
+void CLG_AddTempEntities(void)
 {
 	//CL_AddBeams();
 	//CL_AddPlayerBeams();
@@ -224,12 +224,12 @@ void CLG_AddTemporaryEnties(void)
 
 //
 //===============
-// CLG_ClearTemporaryEnties
+// CLG_ClearTempEntities
 // 
 // Clear the current temporary entities.
 //===============
 //
-void CLG_ClearTemporaryEnties(void)
+void CLG_ClearTempEntities(void)
 {
 	//CL_ClearBeams();
 	//CL_ClearExplosions();
@@ -239,12 +239,12 @@ void CLG_ClearTemporaryEnties(void)
 
 //
 //===============
-// CLG_InitTemporaryEnties
+// CLG_InitTempEntities
 // 
 // Initialize temporary entity CVars.
 //===============
 //
-void CLG_InitTemporaryEnties(void)
+void CLG_InitTempEntities(void)
 {
 	//cl_railtrail_type = clgi.Cvar_Get("cl_railtrail_type", "0", 0);
 	//cl_railtrail_time = clgi.Cvar_Get("cl_railtrail_time", "1.0", 0);

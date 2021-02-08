@@ -427,16 +427,18 @@ qboolean CL_GM_ParseServerMessage (int serverCommand) {
 
 //
 //===============
-// CL_GM_ParseServerMessage
+// CL_GM_SeekDemoMessage
 // 
 // Parses command operations known to the game dll, but for
 // demo playback only. This means certain commands such as
 // svc_centerprint can be skipped.
 //===============
 //
-qboolean CL_GM_ParseDemoMessage (int serverCommand) {
-    // TODO: IMPLEMENT...
-    return qtrue;
+qboolean CL_GM_SeekDemoMessage (int demoCommand) {
+    if (cge)
+        return cge->SeekDemoMessage(demoCommand);
+
+    return qfalse;
 }
 
 //

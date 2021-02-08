@@ -71,6 +71,7 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     // ServerMessage.
     clge.StartServerMessage         = CLG_StartServerMessage;
     clge.ParseServerMessage         = CLG_ParseServerMessage;
+    clge.SeekDemoMessage            = CLG_SeekDemoMessage;
     clge.EndServerMessage           = CLG_EndServerMessage;
 
     // View.
@@ -106,7 +107,7 @@ void CLG_Init() {
     Com_Print("\n%s\n", "==== InitCGame ====");
 
     // Initialize temporary entities.
-    CLG_InitTemporaryEnties();
+    CLG_InitTempEntities();
 
     // Execute tests.
     CLG_ExecuteTests();

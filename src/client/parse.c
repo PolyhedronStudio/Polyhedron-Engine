@@ -1016,21 +1016,6 @@ static void CL_ParseStuffText(void)
     Cbuf_AddText(&cl_cmdbuf, s);
 }
 
-static void CL_ParseLayout(void)
-{
-    MSG_ReadString(cl.layout, sizeof(cl.layout));
-    SHOWNET(2, "    \"%s\"\n", cl.layout);
-}
-
-static void CL_ParseInventory(void)
-{
-    int        i;
-
-    for (i = 0; i < MAX_ITEMS; i++) {
-        cl.inventory[i] = MSG_ReadShort();
-    }
-}
-
 static void CL_ParseDownload(int cmd)
 {
     int size, percent, compressed;
@@ -1285,13 +1270,15 @@ badbyte:
             CL_ParseFrame(extrabits);
             continue;
 
-        case svc_inventory:
-            CL_ParseInventory();
-            break;
+        // N&C: Moved over to Client Game Module.
+        //case svc_inventory:
+        //    CL_ParseInventory();
+        //    break;
 
-        case svc_layout:
-            CL_ParseLayout();
-            break;
+        // N&C: Moved over to Client Game Module.
+        //case svc_layout:
+        //    CL_ParseLayout();
+        //    break;
 
         case svc_zpacket:
             if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
@@ -1391,7 +1378,10 @@ void CL_SeekDemoMessage(void)
         // other commands
         switch (cmd) {
         default:
-            Com_Error(ERR_DROP, "%s: illegible server message: %d", __func__, cmd);
+            // Give the CGModule a chance to handle the command.
+            if (!CL_GM_SeekDemoMessage(cmd)) {
+                Com_Error(ERR_DROP, "%s: illegible server message: %d", __func__, cmd);
+            }
             break;
 
         case svc_nop:
@@ -1433,13 +1423,14 @@ void CL_SeekDemoMessage(void)
             CL_ParseFrame(extrabits);
             continue;
 
-        case svc_inventory:
-            CL_ParseInventory();
-            break;
+        // N&C: Moved to CGModule.
+        //case svc_inventory:
+        //    CL_ParseInventory();
+        //    break;
 
-        case svc_layout:
-            CL_ParseLayout();
-            break;
+        //case svc_layout:
+        //    CL_ParseLayout();
+        //    break;
 
         }
     }

@@ -27,7 +27,7 @@ void        CL_GM_Shutdown (void);
 // Media
 //
 void        CL_GM_InitMedia (void);
-char *CL_GM_GetMediaLoadStateName (load_state_t state);
+char		*CL_GM_GetMediaLoadStateName (load_state_t state);
 void        CL_GM_LoadScreenMedia (void);
 void        CL_GM_LoadWorldMedia (void);
 void        CL_GM_ShutdownMedia (void);
@@ -37,7 +37,7 @@ void        CL_GM_ShutdownMedia (void);
 //
 void		CL_GM_StartServerMessage (void);
 qboolean	CL_GM_ParseServerMessage (int serverCommand);
-qboolean    CL_GM_ParseDemoMessage (int serverCommand);
+qboolean    CL_GM_SeekDemoMessage(int demoCommand);
 void		CL_GM_EndServerMessage (void);
 
 //

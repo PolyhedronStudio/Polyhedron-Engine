@@ -69,6 +69,7 @@ void CLG_Shutdown (void);
 
 void CLG_StartServerMessage (void);
 qboolean CLG_ParseServerMessage (int serverCommand);
+qboolean CLG_SeekDemoMessage(int demoCommand);
 void CLG_EndServerMessage (int realTime);
 
 void Com_Print(char *fmt, ...);
@@ -104,12 +105,12 @@ void CLG_ShutdownMedia (void);
 //
 // clg_tent.c
 //
-void CLG_RegisterTEntModels (void);
-void CLG_RegisterTEntSounds (void);
+void CLG_RegisterTempEntityModels (void);
+void CLG_RegisterTempEntitySounds (void);
 
-void CLG_ClearTemporaryEnties (void);
-void CLG_AddTemporaryEnties (void);
-void CLG_InitTemporaryEnties (void);
+void CLG_ClearTempEntities (void);
+void CLG_AddTempEntities (void);
+void CLG_InitTempEntities (void);
 
 
 //
