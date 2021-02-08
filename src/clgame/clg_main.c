@@ -11,15 +11,32 @@
 //
 #include "clg_local.h"
 
+//
+// Core.
+//
 // Contains the function pointers being passed in from the engine.
 clgame_import_t clgi;
-
 // Static export variable, lives as long as the client game dll lives.
 clgame_export_t clge;
-
 // Pointer to the actual client frame state.
-client_state_t *cl;
-client_test_t *ct;
+client_state_t *cl = NULL;
+
+//
+// Game.
+//
+// The client side entity array. Filled each frame.
+centity_t   clg_entities[MAX_EDICTS];
+
+//
+// CVar.
+//
+// Client Prediction? Y/N
+cvar_t  *cl_predict = NULL;
+// Server Paused? Y/N
+cvar_t  *sv_paused = NULL;
+// User Info.
+cvar_t  *info_fov = NULL;
+cvar_t  *info_uf = NULL;
 
 //
 //=============================================================================
@@ -39,14 +56,9 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 
     // Store a pointer to the actual client state.
     cl  = clgimp->cl;
-    ct  = clgimp->ct;
 
     // Setup the API version.
     clge.apiversion                 = CGAME_API_VERSION;
-     
-    for (int i = 0; i < MAX_MODELS; i++) {
-        Com_DPrint("%s\n", ct->configstrings[CS_MODELS][i]);
-    }
 
     // Test if it is compatible, if not, return clge with only the apiversion set.
     // The client will handle the issue from there on.
@@ -60,6 +72,10 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     // Core.
     clge.Init                       = CLG_Init;
     clge.Shutdown                   = CLG_Shutdown;
+
+    clge.CalcViewValues             = CLG_CalcViewValues;
+    clge.ClientFrame                = CLG_ClientFrame;
+    clge.ClearState                 = CLG_ClearState;
 
     // Media.
     clge.InitMedia                  = CLG_InitMedia;
@@ -106,11 +122,61 @@ void CLG_Init() {
     // Begin init log.
     Com_Print("\n%s\n", "==== InitCGame ====");
 
+    // Create cvars.
+    info_fov    = clgi.Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_uf     = clgi.Cvar_Get("uf", "", CVAR_USERINFO);
+
+    // Fetch cvars.
+    cl_predict  = clgi.Cvar_Get("cl_predict", "", 0);
+    sv_paused   = clgi.Cvar_Get("sv_paused", "", 0);
+
+    // Initialize effects.
+    CLG_EffectsInit();
+
     // Initialize temporary entities.
     CLG_InitTempEntities();
+}
 
-    // Execute tests.
-    CLG_ExecuteTests();
+//
+//===============
+// CLG_ClientFrame
+// 
+// Called each client frame. Handle per frame basis things here.
+//===============
+//
+void CLG_ClientFrame() {
+    // Advance local effects.
+#if USE_DLIGHTS
+    CLG_RunDLights();
+#endif
+#if USE_LIGHTSTYLES
+    //CLG_RunLightSTyles();
+#endif
+}
+
+
+//
+//===============
+// CLG_ClearState
+// 
+// Handles clearing the current state when the client is disconnected
+// for whichever reasons.
+// ===============
+//
+void CLG_ClearState(void) {
+    // Wipe out our client entities array, so it's clean in case of a
+    // new connect.
+    memset(&clg_entities, 0, sizeof(clg_entities));
+
+    // Clear Effects.
+    CLG_ClearEffects();
+
+//    CL_ClearEffects();
+//#if USE_LIGHTSTYLES
+//    CL_ClearLightStyles();
+//#endif
+//    CL_ClearTEnts();
+//    LOC_FreeLocations();
 }
 
 //
@@ -121,10 +187,8 @@ void CLG_Init() {
 // ===============
 //
 void CLG_Shutdown(void) {
-    // Begin shutdown log.
-    Com_Print("\n%s\n", "==== ShutdownCGame ====");
-}
 
+}
 
 //
 //=============================================================================

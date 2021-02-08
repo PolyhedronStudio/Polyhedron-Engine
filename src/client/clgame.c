@@ -40,6 +40,24 @@ static void *cgame_library;
 //	WRAPPER CODE FOR CERTAIN FUNCTIONALITIES SUCH AS COMMAND BUFFERS ETC.
 //
 //=============================================================================
+// CLIENT.
+int _wrp_GetServerProtocol(void) {
+    return cls.serverProtocol;
+}
+int _wrp_GetProtocolVersion(void) {
+    return cls.protocolVersion;
+}
+
+unsigned _wrp_GetRealTime(void) {
+    return cls.realtime;
+}
+float _wrp_GetFrameTime(void) {
+    return cls.frametime;
+}
+qboolean _wrp_IsDemoPlayback(void) {
+    return cls.demo.playback;
+}
+
 // CBUF_
 void _wrp_Cbuf_AddText(char *text) {
 	Cbuf_AddText(&cmd_buffer, text);
@@ -82,8 +100,7 @@ void _trp_MSG_FlushTo(sizebuf_t *buf) {
     MSG_FlushTo(buf);
 }
 
-// REFRESH - These are wrapped, since some of the actual function pointers 
-// get loaded in later in at boot time. 
+// REGISTER
 qhandle_t _wrp_R_RegisterPic(const char *name) {
     return R_RegisterPic(name);
 }
@@ -111,12 +128,20 @@ qhandle_t _wrp_R_RegisterRawImage(const char *name, int width, int height, byte*
 void _wrp_R_UnregisterImage(qhandle_t image) {
     R_UnregisterImage(image);
 }
- 
+
+// REFRESH - These are wrapped, since some of the actual function pointers 
+// get loaded in later in at boot time. 
 void _wrp_R_LightPoint(vec3_t origin, vec3_t light) {
     if (R_LightPoint)
         R_LightPoint(origin, light);
     else
-        Com_EPrintf("%s - Invalid R_LightPoint func_ptr\n");
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+}
+void _wrp_R_AddDecal(decal_t* d) {
+    if (R_AddDecal)
+        R_AddDecal(d);
+    else
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
 
 //
@@ -224,7 +249,24 @@ void CL_InitGameProgs(void)
     // Setup the function pointers for the cgame dll.
 	//
     import.cl                           = &cl;
-    import.ct                           = &ct;
+ 
+    // Client.
+    import.GetFrameTime                 = _wrp_GetFrameTime;
+    import.GetRealTime                  = _wrp_GetRealTime;
+    
+    import.GetServerProtocol            = _wrp_GetServerProtocol;
+    import.GetProtocolVersion           = _wrp_GetProtocolVersion;
+
+    import.IsDemoPlayback               = _wrp_IsDemoPlayback;
+    
+    import.SetClientLoadState           = CL_SetLoadState;
+    import.GetClienState                = CL_GetState;
+    import.SetClienState                = CL_SetState;
+
+    import.GetServerState               = SV_GetState;
+    import.SetServerState               = SV_SetState;
+
+    import.UpdateListenerOrigin         = CL_UpdateListenerOrigin;
 
 	// Command Buffer.
 	import.Cbuf_AddText					= _wrp_Cbuf_AddText;
@@ -253,13 +295,6 @@ void CL_InitGameProgs(void)
     import.Com_LPrintf 					= Com_LPrintf;
 
     import.Com_ErrorString              = Q_ErrorString;
-
-    import.Com_SetClientLoadState       = CL_SetLoadState;
-    import.Com_GetClientState           = CL_GetState;
-    import.Com_SetClientState           = CL_SetState;
-
-    import.Com_GetServerState           = SV_GetState;
-    import.Com_SetServerState           = SV_SetState;
 
 	// Cvar.
 	import.Cvar_Get						= Cvar_Get;
@@ -397,6 +432,43 @@ void CL_GM_Shutdown (void) {
     if (cge)
         cge->Shutdown(); 
 }
+
+//
+//===============
+// CL_GM_ClientFrame
+// 
+// Called by the engine in case it wants to update audio positioning.
+//===============
+//
+void CL_GM_CalcViewValues(void) {
+    if (cge)
+        cge->CalcViewValues();
+}
+
+//
+//===============
+// CL_GM_ClientFrame
+// 
+// Called each client frame. Handle per frame basis things here.
+//===============
+//
+void CL_GM_ClientFrame(void) {
+    if (cge)
+        cge->ClientFrame();
+}
+
+//
+//===============
+// CL_GM_ClearState
+// 
+// Called when the client (and/is) disconnected for whichever reasons.
+//===============
+//
+void CL_GM_ClearState(void) {
+    if (cge)
+        cge->ClearState();
+}
+
 
 //
 //===============

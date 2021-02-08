@@ -350,6 +350,11 @@ typedef struct client_state_s {
 #endif
 
     //
+    // Client Sound Variables.
+    //
+    vec3_t      listener_origin;
+
+    //
     // Client Game View Variables.
     //
     cl_view_t   view;
@@ -418,11 +423,5 @@ typedef struct client_state_s {
     char    weaponModels[MAX_CLIENTWEAPONMODELS][MAX_QPATH]; // Weapon Models string paths.
     int     numWeaponModels;    // Number of weapon models.
 } client_state_t;
-
-typedef struct client_test_s {
-    // Tests..
-    char        baseconfigstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
-    char        configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
-} client_test_t;
 
 #endif // __SHARED_CL_TYPES_H__

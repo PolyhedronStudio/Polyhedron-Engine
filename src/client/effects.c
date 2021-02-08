@@ -833,6 +833,11 @@ PARTICLE MANAGEMENT
 
 ==============================================================
 */
+// Stores parameters parsed from a temporary entity message.s
+tent_params_t   te;
+// Stores parameters parsed from a muzzleflash message.
+mz_params_t     mz;
+snd_params_t    snd;
 
 static cparticle_t  *active_particles, *free_particles;
 
@@ -842,7 +847,7 @@ static const int    cl_numparticles = MAX_PARTICLES;
 extern uint32_t d_8to24table[256];
 
 cvar_t* cvar_pt_particle_emissive = NULL;
-static cvar_t* cl_particle_num_factor = NULL;
+cvar_t* cl_particle_num_factor = NULL;
 
 void FX_Init(void)
 {

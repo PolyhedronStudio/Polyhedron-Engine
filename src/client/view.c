@@ -409,7 +409,7 @@ void V_RenderView(void)
 
         // N&C: Calculate the view values (v_forward, v_up, v_right) so the
         // before calling into the CG Module.
-        CL_CalcViewValues();
+        //CL_CalcViewValues();
 
         // Add Engine Client entities.
         CL_AddEntities();
@@ -478,17 +478,17 @@ void V_RenderView(void)
         if (!cl_add_blend->integer)
             Vector4Clear(cl.refdef.blend);
 
-        cl.refdef.num_entities = r_numentities;
-        cl.refdef.entities = r_entities;
-        cl.refdef.num_particles = r_numparticles;
-        cl.refdef.particles = r_particles;
-#if USE_DLIGHTS
-        cl.refdef.num_dlights = r_numdlights;
-        cl.refdef.dlights = r_dlights;
-#endif
-#if USE_LIGHTSTYLES
-        cl.refdef.lightstyles = r_lightstyles;
-#endif
+//        cl.refdef.num_entities = r_numentities;
+//        cl.refdef.entities = r_entities;
+//        cl.refdef.num_particles = r_numparticles;
+//        cl.refdef.particles = r_particles;
+//#if USE_DLIGHTS
+//        cl.refdef.num_dlights = r_numdlights;
+//        cl.refdef.dlights = r_dlights;
+//#endif
+//#if USE_LIGHTSTYLES
+//        cl.refdef.lightstyles = r_lightstyles;
+//#endif
 
         cl.refdef.rdflags = cl.frame.ps.rdflags;
 

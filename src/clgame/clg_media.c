@@ -122,6 +122,9 @@ char *CLG_GetMediaLoadStateName(load_state_t state) {
 //
 void CLG_InitMedia(void)
 {
+    // Initialize FX Data.
+    CLG_EffectsInit();
+
     // Initialize View Data.
     V_Init();
 }
@@ -159,7 +162,7 @@ void CLG_LoadWorldMedia(void)
     //
     // Set Loadstate to: LOAD_MODELS.
     //
-    clgi.Com_SetClientLoadState(LOAD_MODELS);
+    clgi.SetClientLoadState(LOAD_MODELS);
     // Load Client Models.
     CLG_LoadClientModels();
     // Load World Models passed from server.
@@ -182,7 +185,7 @@ void CLG_LoadWorldMedia(void)
     // Set Loadstate to: LOAD_IMAGES.
     //
     // Load Image passed from server.
-    clgi.Com_SetClientLoadState(LOAD_IMAGES);
+    clgi.SetClientLoadState(LOAD_IMAGES);
     // Load client images here.
     CLG_LoadClientImages();
     for (i = 1; i < MAX_IMAGES; i++) {
@@ -199,7 +202,7 @@ void CLG_LoadWorldMedia(void)
     //
     // Set Loadstate to: LOAD_SOUNDS.
     //
-    clgi.Com_SetClientLoadState(LOAD_SOUNDS);
+    clgi.SetClientLoadState(LOAD_SOUNDS);
     // Load client sounds here.
     CLG_LoadClientSounds();
     // Load sounds passed from the server.

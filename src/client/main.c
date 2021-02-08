@@ -104,7 +104,6 @@ extern cvar_t *cl_renderdemo_fps;
 
 client_static_t cls;
 client_state_t  cl;
-client_test_t ct;
 
 centity_t   cl_entities[MAX_EDICTS];
 
@@ -742,6 +741,9 @@ CL_ClearState
 void CL_ClearState(void)
 {
     S_StopAllSounds();
+    //  WatIsDeze: Inform the CG Module.
+    CL_GM_ClearState();
+
     CL_ClearEffects();
 #if USE_LIGHTSTYLES
     CL_ClearLightStyles();
@@ -1798,6 +1800,21 @@ static void CL_PlaySound_f(void)
 
 static int precache_spawncount;
 
+//
+//===============
+// CL_UpdateListenerOrigin
+//
+// Updates the listener_ variables, this is called by the CG Module its
+// CLG_RenderView function.
+//===============
+//
+void CL_UpdateListenerOrigin(void) {
+    VectorCopy(cl.refdef.vieworg, listener_origin);
+    VectorCopy(cl.v_forward, listener_forward);
+    VectorCopy(cl.v_right, listener_right);
+    VectorCopy(cl.v_up, listener_up);
+}
+
 /*
 =================
 CL_Begin
@@ -1825,11 +1842,6 @@ void CL_Begin(void)
     LOC_LoadLocations();
     CL_LoadState(LOAD_NONE);
     cls.state = ca_precached;
-
-    // Setup ct.
-    for (int i = 0; i < MAX_MODELS; i++) {
-        sprintf(ct.configstrings[CS_MODELS + i], "Testing, ct.configstring[CS_MODELS][%i]", i);
-    }
 
 #if USE_FPS
     CL_UpdateRateSetting();
@@ -2888,10 +2900,9 @@ static void CL_InitLocal(void)
     info_msg = Cvar_Get("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
     info_hand = Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
     info_hand->changed = info_hand_changed;
-    info_fov = Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
     info_gender = Cvar_Get("gender", "male", CVAR_USERINFO | CVAR_ARCHIVE);
     info_gender->modified = qfalse; // clear this so we know when user sets it manually
-    info_uf = Cvar_Get("uf", "", CVAR_USERINFO);
+
 
 	// Generate a random user name to avoid new users being kicked out of MP servers.
 	// The default quake2 config files set the user name to "Player", same as the cvar initialization above.
@@ -2933,6 +2944,10 @@ static void CL_InitLocal(void)
 
     // N&C: Initialize the game progs.
     CL_GM_Init();
+
+    // Fetch CVars that should've been initialized by CG Module.
+    info_fov = Cvar_Get("fov", "", 0);
+    info_uf = Cvar_Get("uf", "", 0);
 }
 
 /*
@@ -3439,18 +3454,21 @@ run_fx:
         // update audio after the 3D view was drawn
         S_Update();
 
-        // advance local effects for next frame
-#if USE_DLIGHTS
-        CL_RunDLights();
-#endif
-
-#if USE_LIGHTSTYLES
-        CL_RunLightStyles();
-#endif
+//        // advance local effects for next frame
+        // WatIsDeze: Moved to CLG Module.
+//#if USE_DLIGHTS
+//        CL_RunDLights();
+//#endif
+//
+//#if USE_LIGHTSTYLES
+//        CL_RunLightStyles();
+//#endif
+        CL_GM_ClientFrame();
         SCR_RunCinematic();
     } else if (sync_mode == SYNC_SLEEP_10) {
         // force audio and effects update if not rendering
-        CL_CalcViewValues();
+        //CL_CalcViewValues();
+        CL_GM_CalcViewValues();
         goto run_fx;
     }
 

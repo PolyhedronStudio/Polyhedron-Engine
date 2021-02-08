@@ -39,12 +39,31 @@ static cvar_t* cl_stats;
 static cvar_t* cl_adjustfov;
 
 //
+// The actual CG Module entities.
+//
+#if USE_DLIGHTS
+int         r_numdlights;
+dlight_t    r_dlights[MAX_DLIGHTS];
+#endif
+
+int         r_numentities;
+entity_t    r_entities[MAX_ENTITIES];
+
+int         r_numparticles;
+particle_t  r_particles[MAX_PARTICLES];
+
+#if USE_LIGHTSTYLES
+lightstyle_t    r_lightstyles[MAX_LIGHTSTYLES];
+#endif
+
+//
 //=============================================================================
 //
 // CLIENT MODULE VIEW COMMAND FUNCTIONS.
 //
 //=============================================================================
 // 
+
 //
 //===============
 // V_AddEntity
@@ -56,13 +75,12 @@ static cvar_t* cl_adjustfov;
 void V_AddEntity(entity_t *ent)
 {
     // Ensure we aren't exceeding boundary limits.
-    if (*cl->view.num_entities >= MAX_ENTITIES)
+    if (r_numentities >= MAX_ENTITIES)
         return;
 
     // Copy entity over into the current scene frame list.
-    cl->view.entities[*cl->view.num_entities++] = *ent;
+    r_entities[r_numentities++] = *ent;
 }
-
 
 //
 //===============
@@ -75,11 +93,11 @@ void V_AddEntity(entity_t *ent)
 void V_AddParticle(particle_t *p)
 {
     // Ensure we aren't exceeding boundary limits.
-    if (*cl->view.num_particles >= MAX_PARTICLES)
+    if (r_numparticles >= MAX_PARTICLES)
         return;
 
     // Copy particle over into the current scene frame list.
-    cl->view.particles[*cl->view.num_particles++] = *p;
+    r_particles[r_numparticles++] = *p;
 }
 
 #if USE_DLIGHTS
@@ -95,9 +113,9 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
 {
     dlight_t    *dl;
 
-    if (*cl->view.num_dlights >= MAX_DLIGHTS)
+    if (r_numdlights >= MAX_DLIGHTS)
         return;
-    dl = &cl->view.dlights[*cl->view.num_dlights++];
+    dl = &r_dlights[r_numdlights++];
     VectorCopy(org, dl->origin);
     dl->intensity = intensity;
     dl->color[0] = r;
@@ -105,9 +123,9 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
     dl->color[2] = b;
 	dl->radius = radius;
 
-	if (cl_show_lights->integer && *cl->view.num_particles < MAX_PARTICLES)
+	if (cl_show_lights->integer && r_numparticles < MAX_PARTICLES)
 	{
-		particle_t* part = &cl->view.particles[*cl->view.num_particles++];
+		particle_t* part = &r_particles[r_numparticles++];
 
 		VectorCopy(dl->origin, part->origin);
 		part->radius = radius;
@@ -142,7 +160,7 @@ void V_AddLightStyle(int style, vec4_t value)
 
     if (style < 0 || style >= MAX_LIGHTSTYLES)
         Com_Error(ERR_DROP, "Bad light style %i", style);
-    ls = &cl->view.lightstyles[style];
+    ls = &r_lightstyles[style];
 
     //ls->white = r+g+b;
     ls->rgb[0] = value[0];
@@ -212,14 +230,43 @@ static void V_SetLightLevel(void)
 
 //
 //===============
+// V_CalcFOV
+// 
+// Calculates the Field Of View.
+//===============
+//
+float V_CalcFOV(float fov_x, float width, float height)
+{
+    float    a;
+    float    x;
+
+    if (fov_x < 1.f || fov_x > 179.f)
+        Com_Error(ERR_DROP, "%s: bad fov: %f", __func__, fov_x);
+
+    x = width / tan(fov_x / 360.f * M_PI);
+
+    a = atan(height / x);
+    a = a * 360.f / M_PI;
+
+    return a;
+}
+
+//
+//===============
 // V_AddEntities
 // 
 // Adds all the CG Module entities to tthe current frame scene.
 //===============
 //
 static void V_AddEntities (void) {
+    // Calculate client view values.
+    CLG_CalcViewValues();
+
+    // Finish calculating view values.
+    //CLG_FinishViewValues
+
     // Add entities here.
-    //CLG_AddTemporaryEnties();
+    CLG_AddTempEntities();
 }
 
 //
@@ -253,6 +300,19 @@ void CLG_PreRenderView (void) {
 void CLG_RenderView (void) {
     // Add our view entities.
     V_AddEntities();
+
+    // Last but not least, pass our array over to the client.
+    cl->refdef.num_entities     = r_numentities;
+    cl->refdef.entities         = r_entities;
+    cl->refdef.num_particles    = r_numparticles;
+    cl->refdef.particles        = r_particles;
+#if USE_DLIGHTS
+    cl->refdef.num_dlights      = r_numdlights;
+    cl->refdef.dlights          = r_dlights;
+#endif
+#if USE_LIGHTSTYLES
+    cl->refdef.lightstyles      = r_lightstyles;
+#endif
 }
 
 

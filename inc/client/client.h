@@ -65,6 +65,7 @@ void CL_Disconnect(error_type_t type);
 void CL_ShutdownGameModule(void);
 void CL_Shutdown(void);
 unsigned CL_Frame(unsigned msec);
+void CL_UpdateListenerOrigin(void);
 void CL_RestartFilesystem(qboolean total);
 void CL_Activate(active_t active);
 void CL_UpdateUserinfo(cvar_t *var, from_t from);

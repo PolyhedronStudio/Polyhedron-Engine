@@ -50,9 +50,16 @@ extern "C" {
         void		(*Init) ();
         // Shuts down the client game dll.
         void		(*Shutdown) (void); 
+        
+        // Called each client frame. Handle per frame basis things here.
+        void        (*ClientFrame) (void);
+        // Called when the client (and/is) disconnected for whichever reasons.
+        void        (*ClearState) (void);
+        // Can be called by the engine too for updating audio positioning.
+        void        (*CalcViewValues) (void);
 
         //---------------------------------------------------------------------
-        // Core.
+        // Media.
         //---------------------------------------------------------------------
         // Called when the client wants to know the name of a custom load stat.
         char        *(*GetMediaLoadStateName) (load_state_t state);
@@ -101,6 +108,41 @@ extern "C" {
         // API Version.
         //---------------------------------------------------------------------
         int apiversion;                // Should always be the same as the extport's struct api_version.
+
+        //---------------------------------------------------------------------
+        // Client.
+        //---------------------------------------------------------------------
+        // Returns the current amount of seconds since the last frame.s
+        float           (*GetFrameTime) (void);
+        // Returns the amount of miliseconds since the start of client.
+        unsigned        (*GetRealTime) (void);
+
+        // Returns the protocol type version.
+        int             (*GetServerProtocol) (void);
+        // Returns the protocol minor version.
+        int             (*GetProtocolVersion) (void);
+
+        // Returns qtrue if we're in demo playback, qfalse otherwise.
+        qboolean        (*IsDemoPlayback) (void);
+        
+        // Updates the client's audio position values to the current
+        // cl.refdef.vieworg, cl->v_forward, cl->v_right and cl->v_up
+        // values.
+        void            (*UpdateListenerOrigin) (void);
+
+        // Client state management is used for managing precaching.
+        // Sets the client load state.
+        void            (*SetClientLoadState) (load_state_t state);
+        // Returns the current state of the client.
+        connstate_t     (*GetClienState) (void);
+        // Sets the current state of the client.
+        void            (*SetClienState) (connstate_t state);
+
+        // Returns the current state of the server.
+        server_state_t  (*GetServerState) (void);
+        // Sets the current state of the client.
+        void        	(*SetServerState) (server_state_t state);
+
 
         //---------------------------------------------------------------------
         // Command Buffer.
@@ -164,20 +206,6 @@ extern "C" {
 
         // Returns a string description value of the given qerror_t type.
         const char  *(*Com_ErrorString) (qerror_t type);
-
-        // Client state management is used for managing precaching.
-        // Sets the client load state.
-        void            (*Com_SetClientLoadState) (load_state_t state);
-        // Returns the current state of the client.
-        connstate_t     (*Com_GetClientState) (void);
-        // Sets the current state of the client.
-        void            (*Com_SetClientState) (connstate_t state);
-        
-        // Returns the current state of the server.
-        server_state_t	(*Com_GetServerState) (void);
-        // Sets the current state of the client.
-        void        	(*Com_SetServerState) (server_state_t state);
-
 
         //---------------------------------------------------------------------
         // CVar.
@@ -371,6 +399,7 @@ extern "C" {
         // Rendering.
         //---------------------------------------------------------------------
         void            (*R_LightPoint) (vec3_t origin, vec3_t light);
+        void            (*R_AddDecal) (decal_t* d);
 
         //---------------------------------------------------------------------
         // 2D Rendering.
@@ -399,11 +428,10 @@ extern "C" {
         //---------------------------------------------------------------------
         // TODO.
 
-                //
+        //
         // Pointers to actual client data.
         //
         client_state_t *cl;
-        client_test_t *ct;
     } clgame_import_t;
 
     // Function pointer type for handling the actual import function.

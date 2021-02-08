@@ -966,16 +966,16 @@ If you desire any custom things to be rendered, add them here.
 */
 void CLG_AddEntities(void)
 {
-    // CL_CalcViewValues(); // N&C: Moved to V_RenderView so CG Module can use these too.
+    //CL_CalcViewValues(); // N&C: Moved to V_RenderView so CG Module can use these too.
     //CL_FinishViewValues();
     //CL_AddPacketEntities();
-   // CLG_AddTemporaryEntities();
-    //CL_AddParticles();
+    CLG_AddTempEntities();
+    CLG_AddParticles();
 //#if USE_DLIGHTS
-//    CL_AddDLights();
+    CLG_AddDLights();
 //#endif
 //#if USE_LIGHTSTYLES
-//    CL_AddLightStyles();
+    CLG_AddLightStyles();
 //#endif
     //LOC_AddLocationsToScene();
 }
@@ -986,3 +986,134 @@ void CLG_AddEntities(void)
 // CLIENT MODULE ENTITY ENTRY FUNCTIONS.
 //
 //=============================================================================}
+static inline float lerp_client_fov(float ofov, float nfov, float lerp)
+{
+    if (clgi.IsDemoPlayback()) {
+        float fov = info_fov->value;
+
+        if (fov < 1)
+            fov = 90;
+        else if (fov > 160)
+            fov = 160;
+
+        if (info_uf->integer & UF_LOCALFOV)
+            return fov;
+
+        if (!(info_uf->integer & UF_PLAYERFOV)) {
+            if (ofov >= 90)
+                ofov = fov;
+            if (nfov >= 90)
+                nfov = fov;
+        }
+    }
+
+    return ofov + lerp * (nfov - ofov);
+}
+
+//
+//===============
+// CLG_CalcViewValues
+//
+// Sets cl->refdef view values and sound spatialization params.
+// Usually called from CLG_AddEntities, but may be directly called from the main
+// loop if rendering is disabled but sound is running.
+//===============
+//
+void CLG_CalcViewValues(void)
+{
+    player_state_t* ps, * ops;
+    vec3_t viewoffset;
+    float lerp;
+
+    if (!cl->frame.valid) {
+        return;
+    }
+
+    // find states to interpolate between
+    ps = &cl->frame.ps;
+    ops = &cl->oldframe.ps;
+
+    lerp = cl->lerpfrac;
+
+    // calculate the origin
+    if (!clgi.IsDemoPlayback && cl_predict->integer && !(ps->pmove.pm_flags & PMF_NO_PREDICTION)) {
+        // use predicted values
+        unsigned delta = clgi.GetRealTime() - cl->predicted_step_time;
+        float backlerp = lerp - 1.0;
+
+        VectorMA(cl->predicted_origin, backlerp, cl->prediction_error, cl->refdef.vieworg);
+
+        // smooth out stair climbing
+        if (cl->predicted_step < 127 * 0.125f) {
+            delta <<= 1; // small steps
+        }
+        if (delta < 100) {
+            cl->refdef.vieworg[2] -= cl->predicted_step * (100 - delta) * 0.01f;
+        }
+    }
+    else {
+        // just use interpolated values
+        cl->refdef.vieworg[0] = ops->pmove.origin[0] * 0.125f +
+            lerp * (ps->pmove.origin[0] - ops->pmove.origin[0]) * 0.125f;
+        cl->refdef.vieworg[1] = ops->pmove.origin[1] * 0.125f +
+            lerp * (ps->pmove.origin[1] - ops->pmove.origin[1]) * 0.125f;
+        cl->refdef.vieworg[2] = ops->pmove.origin[2] * 0.125f +
+            lerp * (ps->pmove.origin[2] - ops->pmove.origin[2]) * 0.125f;
+    }
+
+    // if not running a demo or on a locked frame, add the local angle movement
+    if (clgi.IsDemoPlayback()) {
+        LerpAngles(ops->viewangles, ps->viewangles, lerp, cl->refdef.viewangles);
+    }
+    else if (ps->pmove.pm_type < PM_DEAD) {
+        // use predicted values
+        VectorCopy(cl->predicted_angles, cl->refdef.viewangles);
+    }
+    else if (ops->pmove.pm_type < PM_DEAD && clgi.GetServerProtocol() > PROTOCOL_VERSION_DEFAULT) {
+        // lerp from predicted angles, since enhanced servers
+        // do not send viewangles each frame
+        LerpAngles(cl->predicted_angles, ps->viewangles, lerp, cl->refdef.viewangles);
+    }
+    else {
+        // just use interpolated values
+        LerpAngles(ops->viewangles, ps->viewangles, lerp, cl->refdef.viewangles);
+    }
+
+#if USE_SMOOTH_DELTA_ANGLES
+    cl->delta_angles[0] = LerpShort(ops->pmove.delta_angles[0], ps->pmove.delta_angles[0], lerp);
+    cl->delta_angles[1] = LerpShort(ops->pmove.delta_angles[1], ps->pmove.delta_angles[1], lerp);
+    cl->delta_angles[2] = LerpShort(ops->pmove.delta_angles[2], ps->pmove.delta_angles[2], lerp);
+#endif
+
+    // don't interpolate blend color
+    Vector4Copy(ps->blend, cl->refdef.blend);
+
+#if USE_FPS
+    ps = &cl->keyframe.ps;
+    ops = &cl->oldkeyframe.ps;
+
+    lerp = cl->keylerpfrac;
+#endif
+
+    // interpolate field of view
+    cl->fov_x = lerp_client_fov(ops->fov, ps->fov, lerp);
+    cl->fov_y = V_CalcFOV(cl->fov_x, 4, 3);
+
+    LerpVector(ops->viewoffset, ps->viewoffset, lerp, viewoffset);
+
+    AngleVectors(cl->refdef.viewangles, cl->v_forward, cl->v_right, cl->v_up);
+
+    VectorCopy(cl->refdef.vieworg, cl->playerEntityOrigin);
+    VectorCopy(cl->refdef.viewangles, cl->playerEntityAngles);
+
+    if (cl->playerEntityAngles[PITCH] > 180) {
+        cl->playerEntityAngles[PITCH] -= 360;
+    }
+
+    cl->playerEntityAngles[PITCH] = cl->playerEntityAngles[PITCH] / 3;
+
+    VectorAdd(cl->refdef.vieworg, viewoffset, cl->refdef.vieworg);
+
+    // Update the client's listener origin values.
+    clgi.UpdateListenerOrigin();
+}

@@ -16,6 +16,10 @@
 //
 //=============================================================================
 //
+// Variables used to store parsed message data in.
+tent_params_t   teParameters;
+mz_params_t     mzParameters;
+snd_params_t    sndParameters;
 
 //
 //===============
@@ -44,6 +48,169 @@ static void CLG_ParseInventory(void)
     for (i = 0; i < MAX_ITEMS; i++) {
         cl->inventory[i] = clgi.MSG_ReadShort();
     }
+}
+
+//
+//===============
+// CLG_ParseInventory
+// 
+// Parse the temporary entity server message that keeps us up to date about
+// the particles, explosions, and alike on the server side.
+//
+// The teParameters variable is prepared for the CLG_ParseTempEntity function.
+//===============
+//
+static void CLG_ParseTempEntitiesPacket(void)
+{
+    teParameters.type = clgi.MSG_ReadByte();
+
+    switch (teParameters.type) {
+    case TE_BLOOD:
+    case TE_GUNSHOT:
+    case TE_SPARKS:
+    case TE_BULLET_SPARKS:
+    case TE_SCREEN_SPARKS:
+    case TE_SHIELD_SPARKS:
+    case TE_SHOTGUN:
+    case TE_BLASTER:
+    case TE_GREENBLOOD:
+    case TE_BLASTER2:
+    case TE_FLECHETTE:
+    case TE_HEATBEAM_SPARKS:
+    case TE_HEATBEAM_STEAM:
+    case TE_MOREBLOOD:
+    case TE_ELECTRIC_SPARKS:
+        clgi.MSG_ReadPos(teParameters.pos1);
+        clgi.MSG_ReadDir(teParameters.dir);
+        break;
+
+    case TE_SPLASH:
+    case TE_LASER_SPARKS:
+    case TE_WELDING_SPARKS:
+    case TE_TUNNEL_SPARKS:
+        teParameters.count = clgi.MSG_ReadByte();
+        clgi.MSG_ReadPos(teParameters.pos1);
+        clgi.MSG_ReadDir(teParameters.dir);
+        teParameters.color = clgi.MSG_ReadByte();
+        break;
+
+    case TE_BLUEHYPERBLASTER:
+    case TE_RAILTRAIL:
+    case TE_BUBBLETRAIL:
+    case TE_DEBUGTRAIL:
+    case TE_BUBBLETRAIL2:
+    case TE_BFG_LASER:
+        clgi.MSG_ReadPos(teParameters.pos1);
+        clgi.MSG_ReadPos(teParameters.pos2);
+        break;
+
+    case TE_GRENADE_EXPLOSION:
+    case TE_GRENADE_EXPLOSION_WATER:
+    case TE_EXPLOSION2:
+    case TE_PLASMA_EXPLOSION:
+    case TE_ROCKET_EXPLOSION:
+    case TE_ROCKET_EXPLOSION_WATER:
+    case TE_EXPLOSION1:
+    case TE_EXPLOSION1_NP:
+    case TE_EXPLOSION1_BIG:
+    case TE_BFG_EXPLOSION:
+    case TE_BFG_BIGEXPLOSION:
+    case TE_BOSSTPORT:
+    case TE_PLAIN_EXPLOSION:
+    case TE_CHAINFIST_SMOKE:
+    case TE_TRACKER_EXPLOSION:
+    case TE_TELEPORT_EFFECT:
+    case TE_DBALL_GOAL:
+    case TE_WIDOWSPLASH:
+    case TE_NUKEBLAST:
+        clgi.MSG_ReadPos(teParameters.pos1);
+        break;
+
+    case TE_PARASITE_ATTACK:
+    case TE_MEDIC_CABLE_ATTACK:
+    case TE_HEATBEAM:
+    case TE_MONSTER_HEATBEAM:
+        teParameters.entity1 = clgi.MSG_ReadShort();
+        clgi.MSG_ReadPos(teParameters.pos1);
+        clgi.MSG_ReadPos(teParameters.pos2);
+        break;
+
+    case TE_GRAPPLE_CABLE:
+        teParameters.entity1 = clgi.MSG_ReadShort();
+        clgi.MSG_ReadPos(teParameters.pos1);
+        clgi.MSG_ReadPos(teParameters.pos2);
+        clgi.MSG_ReadPos(teParameters.offset);
+        break;
+
+    case TE_LIGHTNING:
+        teParameters.entity1 = clgi.MSG_ReadShort();
+        teParameters.entity2 = clgi.MSG_ReadShort();
+        clgi.MSG_ReadPos(teParameters.pos1);
+        clgi.MSG_ReadPos(teParameters.pos2);
+        break;
+
+    case TE_FLASHLIGHT:
+        clgi.MSG_ReadPos(teParameters.pos1);
+        teParameters.entity1 = clgi.MSG_ReadShort();
+        break;
+
+    case TE_FORCEWALL:
+        clgi.MSG_ReadPos(teParameters.pos1);
+        clgi.MSG_ReadPos(teParameters.pos2);
+        teParameters.color = clgi.MSG_ReadByte();
+        break;
+
+    case TE_STEAM:
+        teParameters.entity1 = clgi.MSG_ReadShort();
+        teParameters.count = clgi.MSG_ReadByte();
+        clgi.MSG_ReadPos(teParameters.pos1);
+        clgi.MSG_ReadDir(teParameters.dir);
+        teParameters.color = clgi.MSG_ReadByte();
+        teParameters.entity2 = clgi.MSG_ReadShort();
+        if (teParameters.entity1 != -1) {
+            teParameters.time = clgi.MSG_ReadLong();
+        }
+        break;
+
+    case TE_WIDOWBEAMOUT:
+        teParameters.entity1 = clgi.MSG_ReadShort();
+        clgi.MSG_ReadPos(teParameters.pos1);
+        break;
+
+    case TE_FLARE:
+        teParameters.entity1 = clgi.MSG_ReadShort();
+        teParameters.count = clgi.MSG_ReadByte();
+        clgi.MSG_ReadPos(teParameters.pos1);
+        clgi.MSG_ReadDir(teParameters.dir);
+        break;
+
+    default:
+        Com_Error(ERR_DROP, "%s: bad type", __func__);
+    }
+}
+
+//
+//===============
+// CLG_ParseMuzzleFlashPacket
+// 
+// Parse the muzzleflash server message that keeps us up to date about
+// the muzzleflashes for our own client, as well as worldly entities.
+//
+// The mzParameters variable is prepared for the CLG_MuzzleFlash(1/2) function.
+//===============
+//
+static void CLG_ParseMuzzleFlashPacket(int mask)
+{
+    int entity, weapon;
+
+    entity = clgi.MSG_ReadShort();
+    if (entity < 1 || entity >= MAX_EDICTS)
+        Com_Error(ERR_DROP, "%s: bad entity", __func__);
+
+    weapon = clgi.MSG_ReadByte();
+    mzParameters.silenced = weapon & mask;
+    mzParameters.weapon = weapon & ~mask;
+    mzParameters.entity = entity;
 }
 
 //
@@ -78,10 +245,34 @@ void CLG_StartServerMessage (void) {
 qboolean CLG_ParseServerMessage (int serverCommand) {
     // Switch cmd.
     switch (serverCommand) {
+
+        // Client temporary entities. (Particles, etc.)
+        case svc_temp_entity:
+            CLG_ParseTempEntitiesPacket();
+            //CLG_ParseTempEntity();
+            return qtrue;
+        break;
+
+        // Client Muzzle Flash.
+        case svc_muzzleflash:
+            CLG_ParseMuzzleFlashPacket(MZ_SILENCED);
+            CLG_MuzzleFlash();
+            return qtrue;
+        break;
+        // Entity Muzzle Flash.
+        case svc_muzzleflash2:
+            CLG_ParseMuzzleFlashPacket(0);
+            CLG_MuzzleFlash2();
+            return qtrue;
+        break;
+
+        // Client inventory updates.
         case svc_inventory:
             CLG_ParseInventory();
             return qtrue;
         break;
+
+        // Client layout (Cruel, limited, ugly UI...) updates
         case svc_layout :
             CLG_ParseLayout();
             return qtrue;
