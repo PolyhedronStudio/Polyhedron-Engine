@@ -2902,7 +2902,8 @@ static void CL_InitLocal(void)
     info_hand->changed = info_hand_changed;
     info_gender = Cvar_Get("gender", "male", CVAR_USERINFO | CVAR_ARCHIVE);
     info_gender->modified = qfalse; // clear this so we know when user sets it manually
-
+    info_fov = Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_uf = Cvar_Get("uf", "", CVAR_USERINFO);
 
 	// Generate a random user name to avoid new users being kicked out of MP servers.
 	// The default quake2 config files set the user name to "Player", same as the cvar initialization above.
@@ -2946,8 +2947,6 @@ static void CL_InitLocal(void)
     CL_GM_Init();
 
     // Fetch CVars that should've been initialized by CG Module.
-    info_fov = Cvar_Get("fov", "", 0);
-    info_uf = Cvar_Get("uf", "", 0);
 }
 
 /*

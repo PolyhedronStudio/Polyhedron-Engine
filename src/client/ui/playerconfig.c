@@ -18,6 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "ui.h"
 
+// N&C: Lame hack, but it needs access to it...
+extern float CL_GM_CalcFOV(float fov_x, float width, float height);
 
 /*
 =============================================================================
@@ -162,7 +164,7 @@ static void Size(menuFrameWork_t *self)
     m_player.refdef.height = h - h / 5;
 
     m_player.refdef.fov_x = 90;
-    m_player.refdef.fov_y = V_CalcFov(m_player.refdef.fov_x,
+    m_player.refdef.fov_y = CL_GM_CalcFOV(m_player.refdef.fov_x,
                                       m_player.refdef.width, m_player.refdef.height);
 
     if (uis.width < 800 && uis.width >= 640) {

@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl.input.c  -- builds an intended movement command to send to the server
 
 #include "client.h"
+#include "client/gamemodule.h"
 #include "system/lirc.h"
 
 static cvar_t    *cl_nodelta;
@@ -696,7 +697,7 @@ static void m_autosens_changed(cvar_t *self)
         fov = 90.0f;
 
     autosens_x = 1.0f / fov;
-    autosens_y = 1.0f / V_CalcFov(fov, 4, 3);
+    autosens_y = 1.0f / CL_GM_CalcFOV(fov, 4, 3);
 }
 
 /*

@@ -50,7 +50,9 @@ extern "C" {
         void		(*Init) ();
         // Shuts down the client game dll.
         void		(*Shutdown) (void); 
-        
+
+        // Can be called by the engine too.
+        float       (*CalcFOV) (float fov_x, float width, float height);
         // Called each client frame. Handle per frame basis things here.
         void        (*ClientFrame) (void);
         // Called when the client (and/is) disconnected for whichever reasons.

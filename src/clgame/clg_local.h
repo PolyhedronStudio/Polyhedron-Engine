@@ -173,6 +173,7 @@ void V_Shutdown (void);
 void V_AddLight (vec3_t org, float intensity, float r, float g, float b);
 void V_AddLightStyle (int style, vec4_t value);
 
+float CLG_CalcFOV(float fov_x, float width, float height);
 void CLG_CalcViewValues(void);
 
 void CLG_PreRenderView (void);

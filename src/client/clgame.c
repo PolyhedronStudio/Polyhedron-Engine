@@ -435,6 +435,20 @@ void CL_GM_Shutdown (void) {
 
 //
 //===============
+// CL_GM_CalcFOV
+//
+// Called whenever the FOV has to be calculated.
+//===============
+//
+float CL_GM_CalcFOV(float fov_x, float width, float height) {
+    if (cge)
+        return cge->CalcFOV(fov_x, width, height);
+    else
+        return 0.f;
+}
+
+//
+//===============
 // CL_GM_ClientFrame
 // 
 // Called by the engine in case it wants to update audio positioning.

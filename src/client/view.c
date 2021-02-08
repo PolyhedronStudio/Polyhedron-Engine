@@ -352,10 +352,10 @@ static int entitycmpfnc(const void *_a, const void *_b)
 
 /*
 ====================
-V_CalcFov
+V_CalcFOV
 ====================
 */
-float V_CalcFov(float fov_x, float width, float height)
+float V_CalcFOV(float fov_x, float width, float height)
 {
     float    a;
     float    x;
@@ -453,10 +453,10 @@ void V_RenderView(void)
         // adjust for non-4/3 screens
         if (cl_adjustfov->integer) {
             cl.refdef.fov_y = cl.fov_y;
-            cl.refdef.fov_x = V_CalcFov(cl.refdef.fov_y, cl.refdef.height, cl.refdef.width);
+            cl.refdef.fov_x = CL_GM_CalcFOV(cl.refdef.fov_y, cl.refdef.height, cl.refdef.width);
         } else {
             cl.refdef.fov_x = cl.fov_x;
-            cl.refdef.fov_y = V_CalcFov(cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
+            cl.refdef.fov_y = CL_GM_CalcFOV(cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
         }
 
         cl.refdef.time = cl.time * 0.001;
@@ -565,10 +565,10 @@ N&C: This is the old actual client render function.
 //         // adjust for non-4/3 screens
 //         if (cl_adjustfov->integer) {
 //             cl.refdef.fov_y = cl.fov_y;
-//             cl.refdef.fov_x = V_CalcFov(cl.refdef.fov_y, cl.refdef.height, cl.refdef.width);
+//             cl.refdef.fov_x = V_CalcFOV(cl.refdef.fov_y, cl.refdef.height, cl.refdef.width);
 //         } else {
 //             cl.refdef.fov_x = cl.fov_x;
-//             cl.refdef.fov_y = V_CalcFov(cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
+//             cl.refdef.fov_y = V_CalcFOV(cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
 //         }
 
 //         cl.refdef.time = cl.time * 0.001;

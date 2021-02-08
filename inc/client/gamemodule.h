@@ -23,6 +23,7 @@ void CL_InitGameProgs(void);        // N&C: Place elsewhere?
 void        CL_GM_Init();
 void        CL_GM_Shutdown(void);
 
+float		CL_GM_CalcFOV(float fov_x, float width, float height);
 void		CL_GM_CalcViewValues(void);
 void		CL_GM_ClearState(void);
 void		CL_GM_ClientFrame(void);

@@ -73,6 +73,7 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     clge.Init                       = CLG_Init;
     clge.Shutdown                   = CLG_Shutdown;
 
+    clge.CalcFOV                    = CLG_CalcFOV;
     clge.CalcViewValues             = CLG_CalcViewValues;
     clge.ClientFrame                = CLG_ClientFrame;
     clge.ClearState                 = CLG_ClearState;
@@ -123,12 +124,19 @@ void CLG_Init() {
     Com_Print("\n%s\n", "==== InitCGame ====");
 
     // Create cvars.
-    info_fov    = clgi.Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_uf     = clgi.Cvar_Get("uf", "", CVAR_USERINFO);
+    // ...
 
     // Fetch cvars.
-    cl_predict  = clgi.Cvar_Get("cl_predict", "", 0);
-    sv_paused   = clgi.Cvar_Get("sv_paused", "", 0);
+    cl_predict  = clgi.Cvar_Get("cl_predict", NULL, 0);
+    sv_paused   = clgi.Cvar_Get("sv_paused", NULL, 0);
+
+    info_fov = clgi.Cvar_Get("fov", NULL, 0);
+    info_uf = clgi.Cvar_Get("uf", NULL, 0);
+
+    Com_DPrint("cl_predict = %s\n", cl_predict->string);
+    Com_DPrint("sv_paused = %s\n", sv_paused->string);
+    Com_DPrint("info_fov = %s\n", info_fov->string);
+    Com_DPrint("info_uf = %s\n", info_uf->string);
 
     // Initialize effects.
     CLG_EffectsInit();
@@ -150,7 +158,7 @@ void CLG_ClientFrame() {
     CLG_RunDLights();
 #endif
 #if USE_LIGHTSTYLES
-    //CLG_RunLightSTyles();
+    CLG_RunLightStyles();
 #endif
 }
 

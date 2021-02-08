@@ -1341,7 +1341,7 @@ loop if rendering is disabled but sound is running.
 //
 //    // interpolate field of view
 //    cl.fov_x = lerp_client_fov(ops->fov, ps->fov, lerp);
-//    cl.fov_y = V_CalcFov(cl.fov_x, 4, 3);
+//    cl.fov_y = V_CalcFOV(cl.fov_x, 4, 3);
 //
 //    LerpVector(ops->viewoffset, ps->viewoffset, lerp, viewoffset);
 //
@@ -1374,16 +1374,16 @@ Emits all entities, particles, and lights to the refresh
 void CL_AddEntities(void)
 {
     // CL_CalcViewValues(); // N&C: Moved to V_RenderView so CG Module can use these too.
-    CL_FinishViewValues();
+   // CL_FinishViewValues();
     CL_AddPacketEntities();
-    CL_AddTEnts();
-    CL_AddParticles();
-#if USE_DLIGHTS
-    CL_AddDLights();
-#endif
-#if USE_LIGHTSTYLES
-    CL_AddLightStyles();
-#endif
+   // CL_AddTEnts();
+//   // CL_AddParticles();
+//#if USE_DLIGHTS
+//    CL_AddDLights();
+//#endif
+//#if USE_LIGHTSTYLES
+//    CL_AddLightStyles();
+//#endif
     LOC_AddLocationsToScene();
 }
 
