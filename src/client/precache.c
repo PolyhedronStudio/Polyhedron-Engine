@@ -350,8 +350,8 @@ void CL_PrepareMedia(void)
     CL_GM_LoadWorldMedia();
     
     // TODO: Move over to CG Module.
-    CL_RegisterTEntModels();
-    CL_RegisterTEntSounds();
+    //CL_RegisterTEntModels();
+    //CL_RegisterTEntSounds();
     // END TODO
 
     // Load in all client infos.
@@ -363,7 +363,6 @@ void CL_PrepareMedia(void)
         }
         CL_LoadClientinfo(&cl.clientinfo[i], name);
     }
-
 
     CL_LoadClientinfo(&cl.baseclientinfo, "unnamed\\male/grunt");
 
@@ -428,6 +427,7 @@ void CL_UpdateConfigstring(int index)
         return;
     }
 
+// N&C: Moved to CG Module.
 //#if USE_LIGHTSTYLES
 //    if (index >= CS_LIGHTS && index < CS_LIGHTS + MAX_LIGHTSTYLES) {
 //        CL_SetLightStyle(index - CS_LIGHTS, s);

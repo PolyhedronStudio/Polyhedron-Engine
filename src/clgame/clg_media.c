@@ -58,6 +58,7 @@ static void CLG_LoadClientModels(void)
 {
     // Register view weapon models.
     CLG_RegisterVWepModels();
+    CLG_RegisterTempEntitySounds();
 }
 
 //
