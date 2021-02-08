@@ -49,6 +49,8 @@
 extern clgame_import_t  clgi;
 extern client_state_t   *cl;
 
+extern centity_t   clg_entities[MAX_EDICTS];
+
 //
 // Game - Specific to the game itself.
 //
@@ -60,13 +62,26 @@ extern mz_params_t     mzParameters;
 //
 // CVars - Externed so they can be accessed all over the CG Module.
 //
-// Client Prediction?
+// Client.
+extern cvar_t* cl_disable_particles;
+extern cvar_t* cl_gibs;
+extern cvar_t* cl_gunalpha;
+extern cvar_t* cl_kickangles;
+extern cvar_t* cl_noglow;
+extern cvar_t* cl_player_model;
 extern cvar_t* cl_predict;
-// Server Paused?
+extern cvar_t* cl_rollhack;
+extern cvar_t* cl_thirdperson_angle;
+extern cvar_t* cl_thirdperson_range;
+
+// Server.
 extern cvar_t* sv_paused;
 // User Info.
 extern cvar_t* info_fov;
+extern cvar_t* info_hand;
 extern cvar_t* info_uf;
+// Video.
+extern cvar_t* vid_rtx;
 
 
 //
@@ -76,12 +91,18 @@ extern cvar_t* info_uf;
 //
 //=============================================================================
 //
+#define CL_PLAYER_MODEL_DISABLED     0
+#define CL_PLAYER_MODEL_ONLY_GUN     1
+#define CL_PLAYER_MODEL_FIRST_PERSON 2
+#define CL_PLAYER_MODEL_THIRD_PERSON 3
 
 //
 // clg_entities.c
 //
 // void CLG_ENT_Create(); or other CLG_ENT_?? What name shall we pick?
-
+void CLG_AddPacketEntities(void);
+void CLG_AddViewWeapon(void);
+void CLG_CalcViewValues(void);
 
 //
 // clg_effects.c
@@ -89,19 +110,27 @@ extern cvar_t* info_uf;
 void CLG_ClearEffects(void);
 void CLG_EffectsInit(void);
 
+cparticle_t* CLG_AllocParticle(void);
 void CLG_AddParticles(void);
 #if USE_DLIGHTS
+cdlight_t* CLG_AllocDLight(int key);
 void CLG_AddDLights(void);
+void CLG_RunDLights(void);
 #endif
 #if USE_LIGHTSTYLES
 void CLG_AddLightStyles(void);
+void CLG_RunLightStyles(void);
 #endif
 
 void CLG_MuzzleFlash(void);
 void CLG_MuzzleFlash2(void);
 
-void CLG_RunDLights(void);
-
+void CLG_BfgParticles(entity_t* ent);
+void CLG_BlasterTrail(vec3_t start, vec3_t end);
+void CLG_DiminishingTrail(vec3_t start, vec3_t end, centity_t* old, int flags);
+void CLG_FlagTrail(vec3_t start, vec3_t end, int color);
+void CLG_FlyEffect(centity_t* ent, vec3_t origin);
+void CLG_RocketTrail(vec3_t start, vec3_t end, centity_t* old);
 
 //
 // clg_main.c
@@ -147,6 +176,39 @@ void CLG_LoadScreenMedia(void);
 void CLG_LoadWorldMedia(void);
 void CLG_ShutdownMedia(void);
 
+
+//
+// clg_newfx.c
+//
+#if USE_DLIGHTS
+void CLG_Flashlight(int ent, vec3_t pos);
+void CLG_ColorFlash(vec3_t pos, int ent, int intensity, float r, float g, float b);
+#endif
+void CLG_DebugTrail(vec3_t start, vec3_t end);
+void CLG_SmokeTrail(vec3_t start, vec3_t end, int colorStart, int colorRun, int spacing);
+void CLG_ForceWall(vec3_t start, vec3_t end, int color);
+void CLG_GenericParticleEffect(vec3_t org, vec3_t dir, int color, int count, int numcolors, int dirspread, float alphavel);
+void CLG_BubbleTrail2(vec3_t start, vec3_t end, int dist);
+void CLG_Heatbeam(vec3_t start, vec3_t forward);
+void CLG_ParticleSteamEffect(vec3_t org, vec3_t dir, int color, int count, int magnitude);
+void CLG_ParticleSteamEffect2(cl_sustain_t* self);
+void CLG_TrackerTrail(vec3_t start, vec3_t end, int particleColor);
+void CLG_Tracker_Shell(vec3_t origin);
+void CLG_MonsterPlasma_Shell(vec3_t origin);
+void CLG_Widowbeamout(cl_sustain_t* self);
+void CLG_Nukeblast(cl_sustain_t* self);
+void CLG_WidowSplash(void);
+void CLG_Tracker_Explode(vec3_t  origin);
+void CLG_TagTrail(vec3_t start, vec3_t end, int color);
+void CLG_ColorExplosionParticles(vec3_t org, int color, int run);
+void CLG_ParticleSmokeEffect(vec3_t org, vec3_t dir, int color, int count, int magnitude);
+void CLG_BlasterParticles2(vec3_t org, vec3_t dir, unsigned int color);
+void CLG_BlasterTrail2(vec3_t start, vec3_t end);
+void CLG_IonripperTrail(vec3_t start, vec3_t ent);
+void CLG_TrapParticles(entity_t* ent);
+void CLG_ParticleEffect3(vec3_t org, vec3_t dir, int color, int count);
+
+
 //
 // clg_tent.c
 //
@@ -167,17 +229,25 @@ void CLG_ExecuteTests (void);
 //
 // clg_view.c
 //
-void V_Init (void);
-void V_Shutdown (void);
+// For debugging purposes.
+extern int         gun_frame;
+extern qhandle_t   gun_model;
 
-void V_AddLight (vec3_t org, float intensity, float r, float g, float b);
+void V_Init(void);
+void V_Shutdown(void);
+
+void V_AddEntity(entity_t* ent);
+void V_AddLight(vec3_t org, float intensity, float r, float g, float b);
+void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float radius);
 void V_AddLightStyle (int style, vec4_t value);
+void V_AddParticle(particle_t* p);
 
 float CLG_CalcFOV(float fov_x, float width, float height);
 void CLG_CalcViewValues(void);
 
-void CLG_PreRenderView (void);
-void CLG_RenderView (void);
-void CLG_PostRenderView (void);
+void CLG_PreRenderView(void);
+void CLG_ClearScene(void);
+void CLG_RenderView(void);
+void CLG_PostRenderView(void);
 
 #endif // __CLGAME_LOCAL_H__

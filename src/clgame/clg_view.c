@@ -179,6 +179,17 @@ void V_AddLightStyle(int style, vec4_t value)
 //
 void V_Init(void)
 {
+#if USE_DLIGHTS
+    cl_add_lights       = clgi.Cvar_Get("cl_lights", "1", 0);
+    cl_show_lights      = clgi.Cvar_Get("cl_show_lights", "0", 0);
+#endif
+    cl_add_particles    = clgi.Cvar_Get("cl_particles", "1", 0);
+    cl_add_entities     = clgi.Cvar_Get("cl_entities", "1", 0);
+    cl_add_blend        = clgi.Cvar_Get("cl_blend", "1", 0);
+    //cl_add_blend->changed = cl_add_blend_changed;
+
+    cl_adjustfov        = clgi.Cvar_Get("cl_adjustfov", "1", 0);
+
     // Register possible view related commands and cvars here.
     // ...
 }
@@ -192,6 +203,7 @@ void V_Init(void)
 //
 void V_Shutdown(void)
 {
+
     // Unregister cmd's here.
     // ...
 }
@@ -230,6 +242,117 @@ static void V_SetLightLevel(void)
 
 //
 //===============
+// CLG_SetupFirstPersonView
+// 
+// First Person Camera implementation.
+//===============
+//
+static void CLG_SetupFirstPersonView(void)
+{
+    player_state_t* ps, * ops;
+    vec3_t kickangles;
+    float lerp;
+
+    // add kick angles
+    if (cl_kickangles->integer) {
+        ps = CL_KEYPS;
+        ops = CL_OLDKEYPS;
+
+        lerp = CL_KEYLERPFRAC;
+
+        LerpAngles(ops->kick_angles, ps->kick_angles, lerp, kickangles);
+        VectorAdd(cl->refdef.viewangles, kickangles, cl->refdef.viewangles);
+    }
+
+    // add the weapon
+    CLG_AddViewWeapon();
+
+    cl->thirdPersonView = qfalse;
+}
+
+//
+//===============
+// CLG_SetupThirdPersionView
+// 
+// Third Person Camera implementation.
+//===============
+//
+static void CLG_SetupThirdPersionView(void)
+{
+    vec3_t focus;
+    float fscale, rscale;
+    float dist, angle, range;
+    trace_t trace;
+    static vec3_t mins = { -4, -4, -4 }, maxs = { 4, 4, 4 };
+
+    // if dead, set a nice view angle
+    if (cl->frame.ps.stats[STAT_HEALTH] <= 0) {
+        cl->refdef.viewangles[ROLL] = 0;
+        cl->refdef.viewangles[PITCH] = 10;
+    }
+
+    VectorMA(cl->refdef.vieworg, 512, cl->v_forward, focus);
+
+    cl->refdef.vieworg[2] += 8;
+
+    cl->refdef.viewangles[PITCH] *= 0.5f;
+    AngleVectors(cl->refdef.viewangles, cl->v_forward, cl->v_right, cl->v_up);
+
+    angle = DEG2RAD(cl_thirdperson_angle->value);
+    range = cl_thirdperson_range->value;
+    fscale = cos(angle);
+    rscale = sin(angle);
+    VectorMA(cl->refdef.vieworg, -range * fscale, cl->v_forward, cl->refdef.vieworg);
+    VectorMA(cl->refdef.vieworg, -range * rscale, cl->v_right, cl->refdef.vieworg);
+
+    clgi.CM_BoxTrace(&trace, cl->playerEntityOrigin, cl->refdef.vieworg,
+        mins, maxs, cl->bsp->nodes, MASK_SOLID);
+    if (trace.fraction != 1.0f) {
+        VectorCopy(trace.endpos, cl->refdef.vieworg);
+    }
+
+    VectorSubtract(focus, cl->refdef.vieworg, focus);
+    dist = sqrt(focus[0] * focus[0] + focus[1] * focus[1]);
+
+    cl->refdef.viewangles[PITCH] = -180 / M_PI * atan2(focus[2], dist);
+    cl->refdef.viewangles[YAW] -= cl_thirdperson_angle->value;
+
+    cl->thirdPersonView = qtrue;
+}
+
+//
+//===============
+// CLG_FinishViewValues
+// 
+// Finish the view values, calculate first/third -person view.
+//===============
+//
+static void CLG_FinishViewValues(void)
+{
+    centity_t* ent;
+
+    if (cl_player_model->integer != CL_PLAYER_MODEL_THIRD_PERSON)
+        goto first;
+
+    if (cl->frame.clientNum == CLIENTNUM_NONE)
+        goto first;
+
+    ent = &clg_entities[cl->frame.clientNum + 1];
+    if (ent->serverframe != cl->frame.number)
+        goto first;
+
+    if (!ent->current.modelindex)
+        goto first;
+
+    CLG_SetupThirdPersionView();
+    return;
+
+first:
+    CLG_SetupFirstPersonView();
+}
+
+//
+//===============
 // V_AddEntities
 // 
 // Adds all the CG Module entities to tthe current frame scene.
@@ -240,10 +363,19 @@ static void V_AddEntities (void) {
     CLG_CalcViewValues();
 
     // Finish calculating view values.
-    //CLG_FinishViewValues
+    CLG_FinishViewValues();
 
     // Add entities here.
+    CLG_AddPacketEntities();
     CLG_AddTempEntities();
+    CLG_AddParticles();
+#if USE_DLIGHTS
+    CLG_AddDLights();
+#endif
+#if USE_LIGHTSTYLES
+    CLG_AddLightStyles();
+#endif
+    //LOC_AddLocationsToScene();
 }
 
 //
@@ -288,6 +420,22 @@ void CLG_PreRenderView (void) {
 
 }
 
+//
+//===============
+// CLG_ClearScene
+// 
+// Called when the engine wants to clear the frame.
+// It also specifies the model that will be used as the world.
+//===============
+//
+void CLG_ClearScene(void)
+{
+#if USE_DLIGHTS
+    r_numdlights = 0;
+#endif
+    r_numentities = 0;
+    r_numparticles = 0;
+}
 
 //
 //===============

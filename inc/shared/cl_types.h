@@ -53,6 +53,16 @@ typedef struct {
 // Maximum amount of explosions.
 #define MAX_EXPLOSIONS  32
 
+// No Particle Settings.
+#define NOPART_GRENADE_EXPLOSION    1
+#define NOPART_GRENADE_TRAIL        2
+#define NOPART_ROCKET_EXPLOSION     4
+#define NOPART_ROCKET_TRAIL         8
+#define NOPART_BLOOD                16
+
+// No Explosion settings.
+#define NOEXP_GRENADE   1
+#define NOEXP_ROCKET    2
 
 //
 // Local client entity structure, temporary entities.

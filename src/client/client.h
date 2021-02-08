@@ -70,24 +70,7 @@ extern centity_t    cl_entities[MAX_EDICTS];
 #define FF_OLDENT       (1<<7)
 #define FF_NODELTA      (1<<8)
 
-// variable server FPS
-#if USE_FPS
-#define CL_FRAMETIME    cl.frametime
-#define CL_1_FRAMETIME  cl.frametime_inv
-#define CL_FRAMEDIV     cl.framediv
-#define CL_FRAMESYNC    !(cl.frame.number % cl.framediv)
-#define CL_KEYPS        &cl.keyframe.ps
-#define CL_OLDKEYPS     &cl.oldkeyframe.ps
-#define CL_KEYLERPFRAC  cl.keylerpfrac
-#else
-#define CL_FRAMETIME    BASE_FRAMETIME
-#define CL_1_FRAMETIME  BASE_1_FRAMETIME
-#define CL_FRAMEDIV     1
-#define CL_FRAMESYNC    1
-#define CL_KEYPS        &cl.frame.ps
-#define CL_OLDKEYPS     &cl.oldframe.ps
-#define CL_KEYLERPFRAC  cl.lerpfrac
-#endif
+
 
 extern    client_state_t    cl;
 
@@ -270,15 +253,6 @@ extern cmdbuf_t    cl_cmdbuf;
 extern char        cl_cmdbuf_text[MAX_STRING_CHARS];
 
 //=============================================================================
-
-#define NOPART_GRENADE_EXPLOSION    1
-#define NOPART_GRENADE_TRAIL        2
-#define NOPART_ROCKET_EXPLOSION     4
-#define NOPART_ROCKET_TRAIL         8
-#define NOPART_BLOOD                16
-
-#define NOEXP_GRENADE   1
-#define NOEXP_ROCKET    2
 
 //
 // cvars

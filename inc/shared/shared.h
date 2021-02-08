@@ -132,6 +132,32 @@ typedef enum {
     PRINT_NOTICE        // print in cyan color
 } print_type_t;
 
+// variable server FPS
+#if USE_FPS
+#define CL_FRAMETIME    cl.frametime
+#define CL_1_FRAMETIME  cl.frametime_inv
+#define CL_FRAMEDIV     cl.framediv
+#define CL_FRAMESYNC    !(cl.frame.number % cl.framediv)
+#define CL_KEYPS        &cl.keyframe.ps
+#define CL_OLDKEYPS     &cl.oldkeyframe.ps
+#define CL_KEYLERPFRAC  cl.keylerpfrac
+#else
+// N&C: Moved here instead of client.h, for CG Module.
+#define CL_FRAMETIME    BASE_FRAMETIME
+#define CL_1_FRAMETIME  BASE_1_FRAMETIME
+#define CL_FRAMEDIV     1
+#define CL_FRAMESYNC    1
+#if CGAME_INCLUDE
+#define CL_KEYPS        &cl->frame.ps
+#define CL_OLDKEYPS     &cl->oldframe.ps
+#define CL_KEYLERPFRAC  cl->lerpfrac
+#else
+#define CL_KEYPS        &cl.frame.ps
+#define CL_OLDKEYPS     &cl.oldframe.ps
+#define CL_KEYLERPFRAC  cl.lerpfrac
+#endif
+#endif
+
 //
 // WATISDEZE: We don't want these defined in cl_game.h
 //

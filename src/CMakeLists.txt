@@ -11,6 +11,7 @@ SET(SRC_CLGAME
 	clgame/clg_entities.c
 	clgame/clg_main.c
 	clgame/clg_media.c
+	clgame/clg_newfx.c
 	clgame/clg_parse.c
 	clgame/clg_tents.c
 	clgame/clg_tests.c

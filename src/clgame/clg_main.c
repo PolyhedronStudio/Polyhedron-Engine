@@ -30,14 +30,27 @@ centity_t   clg_entities[MAX_EDICTS];
 //
 // CVar.
 //
-// Client Prediction? Y/N
+cvar_t  *cl_disable_particles = NULL;
+cvar_t  *cl_gibs = NULL;
+cvar_t  *cl_gunalpha = NULL;
+cvar_t  *cl_kickangles = NULL;
+cvar_t  *cl_noglow = NULL;
+cvar_t  *cl_player_model = NULL;
 cvar_t  *cl_predict = NULL;
-// Server Paused? Y/N
+cvar_t  *cl_rollhack = NULL;
+cvar_t  *cl_thirdperson_angle = NULL;
+cvar_t  *cl_thirdperson_range = NULL;
+
+// Server.
 cvar_t  *sv_paused = NULL;
+
 // User Info.
 cvar_t  *info_fov = NULL;
+cvar_t  *info_hand = NULL;
 cvar_t  *info_uf = NULL;
 
+// Video.
+cvar_t* vid_rtx = NULL;
 //
 //=============================================================================
 //
@@ -93,6 +106,7 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 
     // View.
     clge.PreRenderView              = CLG_PreRenderView;
+    clge.ClearScene                 = CLG_ClearScene;
     clge.RenderView                 = CLG_RenderView;
     clge.PostRenderView             = CLG_PostRenderView;
 
@@ -123,15 +137,27 @@ void CLG_Init() {
     // Begin init log.
     Com_Print("\n%s\n", "==== InitCGame ====");
 
-    // Create cvars.
-    // ...
-
     // Fetch cvars.
-    cl_predict  = clgi.Cvar_Get("cl_predict", NULL, 0);
+    cl_disable_particles = clgi.Cvar_Get("cl_disable_particles", NULL, 0);
+    cl_gibs              = clgi.Cvar_Get("cl_gibs", NULL, 0);
+    cl_gunalpha          = clgi.Cvar_Get("cl_gunalpha", NULL, 0);
+    cl_kickangles        = clgi.Cvar_Get("cl_kickangles", NULL, 0);
+    cl_noglow            = clgi.Cvar_Get("cl_noglow", NULL, 0);
+    cl_player_model      = clgi.Cvar_Get("cl_player_model", NULL, 0);
+    cl_predict           = clgi.Cvar_Get("cl_predict", NULL, 0);
+    cl_rollhack          = clgi.Cvar_Get("cl_rollhack", NULL, 0);
+    cl_thirdperson_angle = clgi.Cvar_Get("cl_thirdperson_angle", NULL, 0);
+    cl_thirdperson_range = clgi.Cvar_Get("cl_thirdperson_range", NULL, 0);
+
     sv_paused   = clgi.Cvar_Get("sv_paused", NULL, 0);
 
-    info_fov = clgi.Cvar_Get("fov", NULL, 0);
-    info_uf = clgi.Cvar_Get("uf", NULL, 0);
+    // Create CVars.
+    info_fov    = clgi.Cvar_Get("fov", NULL, 0);
+    info_hand   = clgi.Cvar_Get("hand", NULL, 0);
+    info_uf     = clgi.Cvar_Get("uf", NULL, 0);
+
+    // Video.
+    vid_rtx     = clgi.Cvar_Get("vid_rtx", NULL, 0);
 
     Com_DPrint("cl_predict = %s\n", cl_predict->string);
     Com_DPrint("sv_paused = %s\n", sv_paused->string);

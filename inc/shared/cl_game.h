@@ -96,6 +96,8 @@ extern "C" {
         //---------------------------------------------------------------------
         // Called right after the engine clears the scene, and begins a new one.
         void        (*PreRenderView) (void);
+        // Called whenever the engine wants to clear the scene.
+        void        (*ClearScene) (void);
         // Called whenever the engine wants to render a valid frame.
         void        (*RenderView) (void);
         // Called right after the engine renders the scene, and prepares to

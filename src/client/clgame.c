@@ -622,6 +622,18 @@ void CL_GM_PreRenderView () {
 //===============
 // CL_GM_RenderView
 // 
+// Call into the CG Module for notifying about "Clear Scene"
+//===============
+//
+void CL_GM_ClearScene() {
+    if (cge)
+        cge->ClearScene();
+}
+
+//
+//===============
+// CL_GM_RenderView
+// 
 // Call into the CG Module for notifying about "Render View"
 //===============
 //

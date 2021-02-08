@@ -389,20 +389,20 @@ void V_RenderView(void)
     // we can't use the old frame if the video mode has changed, though...
     if (cl.frame.valid) {
         // Clear the scene before calling into the CG Module.
-        V_ClearScene();
+        CL_GM_ClearScene();
 
-        // N&C: These need to be assigned on a per frame basis.
-        cl.view.entities        = r_entities;
-        cl.view.num_entities    = &r_numentities;
-        cl.view.particles       = r_particles;
-        cl.view.num_particles   = &r_numparticles;
-    #if USE_DLIGHTS
-        cl.view.dlights         = r_dlights;
-        cl.view.num_dlights     = &r_numdlights;
-    #endif
-    #if USE_LIGHTSTYLES
-        cl.view.lightstyles     = r_lightstyles;
-    #endif
+    //    // N&C: These need to be assigned on a per frame basis.
+    //    cl.view.entities        = r_entities;
+    //    cl.view.num_entities    = &r_numentities;
+    //    cl.view.particles       = r_particles;
+    //    cl.view.num_particles   = &r_numparticles;
+    //#if USE_DLIGHTS
+    //    cl.view.dlights         = r_dlights;
+    //    cl.view.num_dlights     = &r_numdlights;
+    //#endif
+    //#if USE_LIGHTSTYLES
+    //    cl.view.lightstyles     = r_lightstyles;
+    //#endif
 
         // PreRender CG Module View.
         CL_GM_PreRenderView();
@@ -478,17 +478,18 @@ void V_RenderView(void)
         if (!cl_add_blend->integer)
             Vector4Clear(cl.refdef.blend);
 
-//        cl.refdef.num_entities = r_numentities;
-//        cl.refdef.entities = r_entities;
-//        cl.refdef.num_particles = r_numparticles;
-//        cl.refdef.particles = r_particles;
-//#if USE_DLIGHTS
-//        cl.refdef.num_dlights = r_numdlights;
-//        cl.refdef.dlights = r_dlights;
-//#endif
-//#if USE_LIGHTSTYLES
-//        cl.refdef.lightstyles = r_lightstyles;
-//#endif
+        // N&C: This is now handled by the client game module.
+        // cl.refdef.num_entities = r_numentities;
+        // cl.refdef.entities = r_entities;
+        // cl.refdef.num_particles = r_numparticles;
+        // cl.refdef.particles = r_particles;
+        // #if USE_DLIGHTS
+        //  cl.refdef.num_dlights = r_numdlights;
+        //  cl.refdef.dlights = r_dlights;
+        // #endif
+        // #if USE_LIGHTSTYLES
+        //  cl.refdef.lightstyles = r_lightstyles;
+        // #endif
 
         cl.refdef.rdflags = cl.frame.ps.rdflags;
 
@@ -677,20 +678,6 @@ void V_Init(void)
     cl_add_blend->changed = cl_add_blend_changed;
 
     cl_adjustfov = Cvar_Get("cl_adjustfov", "1", 0);
-
-    // N&C: Store pointers inside the view struct.
-    // This is so they are there for the first frame.
-    cl.view.entities     = r_entities;
-    cl.view.num_entities = &r_numentities;
-    cl.view.particles    = r_particles;
-    cl.view.num_entities = &r_numparticles;
-#if USE_DLIGHTS
-    cl.view.dlights        = r_dlights;
-    cl.view.num_dlights    = &r_numdlights;
-#endif
-#if USE_LIGHTSTYLES
-    cl.view.lightstyles    = r_lightstyles;
-#endif
 }
 
 void V_Shutdown(void)

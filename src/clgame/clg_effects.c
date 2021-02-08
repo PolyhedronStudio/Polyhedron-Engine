@@ -202,7 +202,7 @@ static void CLG_ClearDLights(void)
 
 //
 //===============
-// CLG_RunDLights
+// CLG_AllocDLight
 // 
 // Returns a pointer to an allocated dlight, in case there is room.
 // ===============

@@ -889,7 +889,7 @@ static void CL_AddPacketEntities(void)
                 else
                     V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
             } else if (effects & EF_GIB) {
-                CL_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
+                    CL_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
             } else if (effects & EF_GRENADE) {
                 if (!(cl_disable_particles->integer & NOPART_GRENADE_TRAIL)) {
                     CL_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
@@ -1375,7 +1375,7 @@ void CL_AddEntities(void)
 {
     // CL_CalcViewValues(); // N&C: Moved to V_RenderView so CG Module can use these too.
    // CL_FinishViewValues();
-    CL_AddPacketEntities();
+    //CL_AddPacketEntities();
    // CL_AddTEnts();
 //   // CL_AddParticles();
 //#if USE_DLIGHTS
