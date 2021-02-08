@@ -121,6 +121,7 @@ void CLG_RunDLights(void);
 void CLG_ClearLightStyles(void);
 void CLG_AddLightStyles(void);
 void CLG_RunLightStyles(void);
+void CLG_SetLightStyle(int index, const char* s);
 #endif
 
 void CLG_MuzzleFlash(void);

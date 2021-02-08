@@ -238,6 +238,34 @@ qboolean CLG_UpdateConfigString(int index, const char *str) {
         return qtrue;
     }
 #endif
+    // In case we aren't precaching, but got updated configstrings by the
+    // server, we reload them.
+    if (clgi.GetClienState() < ca_precached) {
+        //if (index >= CS_MODELS + 2 && index < CS_MODELS + MAX_MODELS) {
+        //    // In case it is the BSP world map, we want to leave it up to the engine.
+        //    if (*str == '*') {
+        //        return qfalse;
+        //    } else {
+        //        int i = index - CS_MODELS;
+        //        cl->model_draw[i] = clgi.R_RegisterModel(str);
+        //        cl->model_clip[i] = NULL;
+        //        return qtrue;
+        //    }
+        //}
+
+        //// Load in sounds from our updated configstring.
+        //if (index >= CS_SOUNDS && index < CS_SOUNDS + MAX_SOUNDS) {
+        //    cl->sound_precache[index - CS_SOUNDS] = clgi.S_RegisterSound(str);
+        //    return qtrue;
+        //}
+
+        //// Load in images from our updated configstring.
+        //if (index >= CS_IMAGES && index < CS_IMAGES + MAX_IMAGES) {
+        //    cl->image_precache[index - CS_IMAGES] = clgi.R_RegisterPic2(str);
+        //    return qtrue;
+        //}
+    }
+
     // None have been found for updating here, leave it to the client.
     return qfalse;
 }

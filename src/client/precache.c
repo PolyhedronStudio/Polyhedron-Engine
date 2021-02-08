@@ -439,6 +439,17 @@ void CL_UpdateConfigstring(int index)
         return;
     }
 
+    // TODO: Move all over to CG Module and ONLY
+    // handle the BSP Model loading. EXAMPLE:
+    //if (index >= CS_MODELS + 2 && index < CS_MODELS + MAX_MODELS) {
+    //    if (*s == '*') {
+    //        int i = index - CS_MODELS;
+    //        cl.model_draw[i] = R_RegisterModel(s);
+    //        cl.model_clip[i] = BSP_InlineModel(cl.bsp, s);
+    //    }
+    //    return;
+    //}
+    
     if (index >= CS_MODELS + 2 && index < CS_MODELS + MAX_MODELS) {
         int i = index - CS_MODELS;
 
@@ -449,12 +460,10 @@ void CL_UpdateConfigstring(int index)
             cl.model_clip[i] = NULL;
         return;
     }
-
     if (index >= CS_SOUNDS && index < CS_SOUNDS + MAX_SOUNDS) {
         cl.sound_precache[index - CS_SOUNDS] = S_RegisterSound(s);
         return;
     }
-
     if (index >= CS_IMAGES && index < CS_IMAGES + MAX_IMAGES) {
         cl.image_precache[index - CS_IMAGES] = R_RegisterPic2(s);
         return;
