@@ -20,6 +20,8 @@ clgame_import_t clgi;
 clgame_export_t clge;
 // Pointer to the actual client frame state.
 client_state_t *cl = NULL;
+// Actual client game state (Contains the view for example).
+clientgame_state_t clg;
 
 //
 // Game.

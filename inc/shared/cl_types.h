@@ -188,33 +188,6 @@ typedef struct cdlight_s {
 #endif
 
 //
-// The view structure contains the view data per frame.
-//
-// These are pointers to the actual variables in the client.
-//
-typedef struct cl_view_s {
-	// The entities to render for the current frame.
-	entity_t    *entities;      // Will always point to a entity_t[MAX_ENTITIES] array.
-	int         *num_entities;
-
-    // The dlights to render for the current frame.
-    #if USE_DLIGHTS
-    dlight_t    *dlights;   // Will always point to a dlight_t[MAX_DLIGHTS] array.
-    int         *num_dlights;
-    #endif
-
-    // The particles to render for the current frame.
-    particle_t  *particles;   // Will always point to a particle_t[MAX_PARTICLES] array.
-    int         *num_particles;
-
-    // The lightstyles for the current frame.
-    #if USE_LIGHTSTYLES
-    lightstyle_t    *lightstyles;   // Will always point to a lightstyle_t[MAX_LIGHTSTYLES] array.
-    #endif
-} cl_view_t;
-
-
-//
 // Maximum amount of weapon models allowed.
 //
 #define MAX_CLIENTWEAPONMODELS        20        // PGM -- upped from 16 to fit the chainfist vwep
@@ -363,11 +336,6 @@ typedef struct client_state_s {
     // Client Sound Variables.
     //
     vec3_t      listener_origin;
-
-    //
-    // Client Game View Variables.
-    //
-    cl_view_t   view;
 
     //
     // Client Rendering Variables.

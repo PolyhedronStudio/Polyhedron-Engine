@@ -1496,9 +1496,6 @@ void CLG_TeleportParticles(vec3_t org)
             }
 }
 
-extern int          r_numparticles;
-extern particle_t   r_particles[MAX_PARTICLES];
-
 /*
 ===============
 CLG_AddParticles
@@ -1533,9 +1530,9 @@ void CLG_AddParticles(void)
             alpha = p->alpha;
         }
 
-        if (r_numparticles >= MAX_PARTICLES)
+        if (clg.view.num_particles >= MAX_PARTICLES)
             break;
-        part = &r_particles[r_numparticles++];
+        part = &clg.view.particles[clg.view.num_particles++];
 
         p->next = NULL;
         if (!tail)

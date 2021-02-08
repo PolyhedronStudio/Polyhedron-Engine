@@ -41,20 +41,20 @@ static cvar_t* cl_adjustfov;
 //
 // The actual CG Module entities.
 //
-#if USE_DLIGHTS
-int         r_numdlights;
-dlight_t    r_dlights[MAX_DLIGHTS];
-#endif
-
-int         r_numentities;
-entity_t    r_entities[MAX_ENTITIES];
-
-int         r_numparticles;
-particle_t  r_particles[MAX_PARTICLES];
-
-#if USE_LIGHTSTYLES
-lightstyle_t    r_lightstyles[MAX_LIGHTSTYLES];
-#endif
+//#if USE_DLIGHTS
+//int         r_numdlights;
+//dlight_t    r_dlights[MAX_DLIGHTS];
+//#endif
+//
+//int         r_numentities;
+//entity_t    r_entities[MAX_ENTITIES];
+//
+//int         r_numparticles;
+//particle_t  r_particles[MAX_PARTICLES];
+//
+//#if USE_LIGHTSTYLES
+//lightstyle_t    r_lightstyles[MAX_LIGHTSTYLES];
+//#endif
 
 //
 //=============================================================================
@@ -75,11 +75,11 @@ lightstyle_t    r_lightstyles[MAX_LIGHTSTYLES];
 void V_AddEntity(entity_t *ent)
 {
     // Ensure we aren't exceeding boundary limits.
-    if (r_numentities >= MAX_ENTITIES)
+    if (clg.view.num_entities >= MAX_ENTITIES)
         return;
 
     // Copy entity over into the current scene frame list.
-    r_entities[r_numentities++] = *ent;
+    clg.view.entities[clg.view.num_entities++] = *ent;
 }
 
 //
@@ -93,11 +93,11 @@ void V_AddEntity(entity_t *ent)
 void V_AddParticle(particle_t *p)
 {
     // Ensure we aren't exceeding boundary limits.
-    if (r_numparticles >= MAX_PARTICLES)
+    if (clg.view.num_particles >= MAX_PARTICLES)
         return;
 
     // Copy particle over into the current scene frame list.
-    r_particles[r_numparticles++] = *p;
+    clg.view.particles[clg.view.num_particles++] = *p;
 }
 
 #if USE_DLIGHTS
@@ -113,9 +113,9 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
 {
     dlight_t    *dl;
 
-    if (r_numdlights >= MAX_DLIGHTS)
+    if (clg.view.num_dlights >= MAX_DLIGHTS)
         return;
-    dl = &r_dlights[r_numdlights++];
+    dl = &clg.view.dlights[clg.view.num_dlights++];
     VectorCopy(org, dl->origin);
     dl->intensity = intensity;
     dl->color[0] = r;
@@ -123,9 +123,9 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
     dl->color[2] = b;
 	dl->radius = radius;
 
-	if (cl_show_lights->integer && r_numparticles < MAX_PARTICLES)
+	if (cl_show_lights->integer && clg.view.num_particles < MAX_PARTICLES)
 	{
-		particle_t* part = &r_particles[r_numparticles++];
+		particle_t* part = &clg.view.particles[clg.view.num_particles++];
 
 		VectorCopy(dl->origin, part->origin);
 		part->radius = radius;
@@ -160,7 +160,7 @@ void V_AddLightStyle(int style, vec4_t value)
 
     if (style < 0 || style >= MAX_LIGHTSTYLES)
         Com_Error(ERR_DROP, "Bad light style %i", style);
-    ls = &r_lightstyles[style];
+    ls = &clg.view.lightstyles[style];
 
     //ls->white = r+g+b;
     ls->rgb[0] = value[0];
@@ -431,10 +431,10 @@ void CLG_PreRenderView (void) {
 void CLG_ClearScene(void)
 {
 #if USE_DLIGHTS
-    r_numdlights = 0;
+    clg.view.num_dlights = 0;
 #endif
-    r_numentities = 0;
-    r_numparticles = 0;
+    clg.view.num_entities = 0;
+    clg.view.num_particles = 0;
 }
 
 //
@@ -450,16 +450,16 @@ void CLG_RenderView (void) {
     V_AddEntities();
 
     // Last but not least, pass our array over to the client.
-    cl->refdef.num_entities     = r_numentities;
-    cl->refdef.entities         = r_entities;
-    cl->refdef.num_particles    = r_numparticles;
-    cl->refdef.particles        = r_particles;
+    cl->refdef.num_entities     = clg.view.num_entities;
+    cl->refdef.entities         = clg.view.entities;
+    cl->refdef.num_particles    = clg.view.num_particles;
+    cl->refdef.particles        = clg.view.particles;
 #if USE_DLIGHTS
-    cl->refdef.num_dlights      = r_numdlights;
-    cl->refdef.dlights          = r_dlights;
+    cl->refdef.num_dlights      = clg.view.num_dlights;
+    cl->refdef.dlights          = clg.view.dlights;
 #endif
 #if USE_LIGHTSTYLES
-    cl->refdef.lightstyles      = r_lightstyles;
+    cl->refdef.lightstyles      = clg.view.lightstyles;
 #endif
 }
 

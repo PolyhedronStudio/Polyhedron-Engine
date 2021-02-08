@@ -42,26 +42,71 @@
 //	Client Game structures and definitions.
 //
 //=============================================================================
+//-------------------
+// The client game view structure contains all entities, lights, particles,
+// and lightstyles of the current client state frame.
+//-------------------
+typedef struct clg_view_s {
+    // Holds all the entities currently in the view frame.
+    entity_t entities[MAX_ENTITIES];
+    int num_entities;
+
+    // Holds all the dynamic lights currently in the view frame.
+#if USE_DLIGHTS
+    dlight_t dlights[MAX_DLIGHTS];
+    int num_dlights;
+#endif
+
+    // Holds all the particles currently in the view frame.
+    particle_t particles[MAX_PARTICLES];
+    int num_particles;
+
+    // Holds all the lightstylescurrently in the view frame.
+#if USE_LIGHTSTYLES
+    lightstyle_t lightstyles[MAX_LIGHTSTYLES];
+#endif
+} clg_view_t;
+
+//-------------------
+// Client Game State structure.
 //
+// This structure is used to contain all local client game module
+// state variables.
 //
+// Expand as you please.
+//-------------------
+typedef struct clientgame_state_s {
+    clg_view_t view;
+} clientgame_state_t;
+
+extern clientgame_state_t clg;
+
+//-------------------
+// Client player model settings.
+//-------------------
+#define CL_PLAYER_MODEL_DISABLED     0
+#define CL_PLAYER_MODEL_ONLY_GUN     1
+#define CL_PLAYER_MODEL_FIRST_PERSON 2
+#define CL_PLAYER_MODEL_THIRD_PERSON 3
+
+//-------------------
 // Core - Used to access the client's internals.
-//
+//-------------------
 extern clgame_import_t  clgi;
 extern client_state_t   *cl;
-
 extern centity_t   clg_entities[MAX_EDICTS];
 
-//
+//-------------------
 // Game - Specific to the game itself.
-//
+//-------------------
 // Stores parameters parsed from a temporary entity message.s
 extern tent_params_t   teParameters;
 // Stores parameters parsed from a muzzleflash message.
 extern mz_params_t     mzParameters;
 
-//
+//-------------------
 // CVars - Externed so they can be accessed all over the CG Module.
-//
+//-------------------
 // Client.
 extern cvar_t* cl_disable_particles;
 extern cvar_t* cl_gibs;
@@ -73,7 +118,6 @@ extern cvar_t* cl_predict;
 extern cvar_t* cl_rollhack;
 extern cvar_t* cl_thirdperson_angle;
 extern cvar_t* cl_thirdperson_range;
-
 // Server.
 extern cvar_t* sv_paused;
 // User Info.
@@ -91,11 +135,6 @@ extern cvar_t* vid_rtx;
 //
 //=============================================================================
 //
-#define CL_PLAYER_MODEL_DISABLED     0
-#define CL_PLAYER_MODEL_ONLY_GUN     1
-#define CL_PLAYER_MODEL_FIRST_PERSON 2
-#define CL_PLAYER_MODEL_THIRD_PERSON 3
-
 //
 // clg_entities.c
 //
