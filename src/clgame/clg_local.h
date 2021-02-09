@@ -118,6 +118,11 @@ extern cvar_t* cl_predict;
 extern cvar_t* cl_rollhack;
 extern cvar_t* cl_thirdperson_angle;
 extern cvar_t* cl_thirdperson_range;
+
+extern cvar_t* cl_disable_explosions;
+extern cvar_t* cl_explosion_sprites;
+extern cvar_t* cl_explosion_frametime;
+
 // Server.
 extern cvar_t* sv_paused;
 // User Info.

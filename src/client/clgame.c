@@ -256,6 +256,7 @@ void CL_InitGameProgs(void)
     
     import.GetServerProtocol            = _wrp_GetServerProtocol;
     import.GetProtocolVersion           = _wrp_GetProtocolVersion;
+    import.GetClientNetChannel          = CL_GetNetChannel;
 
     import.IsDemoPlayback               = _wrp_IsDemoPlayback;
     
@@ -457,6 +458,18 @@ float CL_GM_CalcFOV(float fov_x, float width, float height) {
 void CL_GM_CalcViewValues(void) {
     if (cge)
         cge->CalcViewValues();
+}
+
+//
+//===============
+// CL_GM_ClientBegin
+// 
+// Called after finishing in CL_Begin (aka after map load etc)
+//===============
+//
+void CL_GM_ClientBegin(void) {
+    if (cge)
+        cge->ClientBegin();
 }
 
 //

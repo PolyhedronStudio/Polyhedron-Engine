@@ -701,6 +701,16 @@ static void CL_Rcon_c(genctx_t *ctx, int argnum)
 
 //
 //===============
+// CL_GetNetChannel
+//
+// Return a pointer to cls.netchannel
+//===============
+//
+netchan_t *CL_GetNetChannel(void) {
+    return cls.netchan;
+}
+
+//===============
 // CL_GetState
 // 
 // Returns the current state of the client.
@@ -1849,6 +1859,10 @@ void CL_Begin(void)
 
     CL_ClientCommand(va("begin %i\n", precache_spawncount));
 
+    // N&C: Notify CG Module that a map has been loaded.
+    CL_GM_ClientBegin();
+
+    // N&C: Moved to CG Module.
     CL_UpdateGunSetting();
     CL_UpdateBlendSetting();
     CL_UpdateGibSetting();
@@ -2533,9 +2547,6 @@ void CL_RestartFilesystem(qboolean total)
     } else if (cls_state >= ca_loading && cls_state <= ca_active) {
         CL_LoadState(LOAD_MAP);
         CL_PrepareMedia();
-        // Moved tl CL_PrepareMedia
-        // CL_LoadState(LOAD_SOUNDS);
-        // CL_RegisterSounds();
         CL_LoadState(LOAD_NONE);
     } else if (cls_state == ca_cinematic) {
         cl.image_precache[0] = R_RegisterPic2(cl.mapname);
@@ -2852,13 +2863,13 @@ static void CL_InitLocal(void)
 
 	cl_player_model = Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
 	cl_player_model->changed = cl_player_model_changed;
-    cl_thirdperson_angle = Cvar_Get("cl_thirdperson_angle", "0", 0);
-    cl_thirdperson_range = Cvar_Get("cl_thirdperson_range", "60", 0);
+    //cl_thirdperson_angle = Cvar_Get("cl_thirdperson_angle", "0", 0);
+    //cl_thirdperson_range = Cvar_Get("cl_thirdperson_range", "60", 0);
 
-    cl_disable_particles = Cvar_Get("cl_disable_particles", "0", 0);
-	cl_disable_explosions = Cvar_Get("cl_disable_explosions", "0", 0);
-	cl_explosion_sprites = Cvar_Get("cl_explosion_sprites", "1", 0);
-	cl_explosion_frametime = Cvar_Get("cl_explosion_frametime", "20", 0);
+//    cl_disable_particles = Cvar_Get("cl_disable_particles", "0", 0);
+	//cl_disable_explosions = Cvar_Get("cl_disable_explosions", "0", 0);
+	//cl_explosion_sprites = Cvar_Get("cl_explosion_sprites", "1", 0);
+	//cl_explosion_frametime = Cvar_Get("cl_explosion_frametime", "20", 0);
     cl_gibs = Cvar_Get("cl_gibs", "1", 0);
     cl_gibs->changed = cl_gibs_changed;
 

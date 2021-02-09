@@ -32,7 +32,6 @@ centity_t   clg_entities[MAX_EDICTS];
 //
 // CVar.
 //
-cvar_t  *cl_disable_particles = NULL;
 cvar_t  *cl_gibs = NULL;
 cvar_t  *cl_gunalpha = NULL;
 cvar_t  *cl_kickangles = NULL;
@@ -42,6 +41,11 @@ cvar_t  *cl_predict = NULL;
 cvar_t  *cl_rollhack = NULL;
 cvar_t  *cl_thirdperson_angle = NULL;
 cvar_t  *cl_thirdperson_range = NULL;
+
+cvar_t* cl_disable_particles = NULL;
+cvar_t  *cl_disable_explosions  = NULL;
+cvar_t  *cl_explosion_sprites    = NULL;
+cvar_t  *cl_explosion_frametime  = NULL;
 
 // Server.
 cvar_t  *sv_paused = NULL;
@@ -90,9 +94,11 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 
     clge.CalcFOV                    = CLG_CalcFOV;
     clge.CalcViewValues             = CLG_CalcViewValues;
-    clge.ClientFrame                = CLG_ClientFrame;
     clge.ClearState                 = CLG_ClearState;
     clge.DemoSeek                   = CLG_DemoSeek;
+
+    clge.ClientBegin                = CLG_ClientBegin;
+    clge.ClientFrame                = CLG_ClientFrame;
 
     // Media.
     clge.InitMedia                  = CLG_InitMedia;
@@ -122,11 +128,51 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 }; // Extern "C"
 #endif
 
+//
+//=============================================================================
+//
+//	CLIENT UPDATES
+//
+//=============================================================================
+//
+static void CLG_UpdateGunSetting(void)
+{
+    int nogun;
+
+    if (!clgi.GetClientNetChannel()) {
+        return;
+    }
+    if (clgi.GetServerProtocol() < PROTOCOL_VERSION_R1Q2) {
+        return;
+    }
+
+    if (cl_player_model->integer == CL_PLAYER_MODEL_DISABLED || info_hand->integer == 2) {
+        nogun = 1;
+    }
+    else {
+        nogun = 0;
+    }
+
+    clgi.MSG_WriteByte(clc_setting);
+    clgi.MSG_WriteShort(CLS_NOGUN);
+    clgi.MSG_WriteShort(nogun);
+    clgi.MSG_FlushTo(&clgi.GetClientNetChannel()->message);
+}
+
+static void cl_player_model_changed(cvar_t* self)
+{
+    CL_UpdateGunSetting();
+}
+
+static void info_hand_changed(cvar_t* self)
+{
+    CL_UpdateGunSetting();
+}
 
 //
 //=============================================================================
 //
-//	CGAME INIT AND SHUTDOWN
+//	CG MODULE MAIN ENTRY FUNCTIONS
 //
 //=============================================================================
 //
@@ -141,24 +187,31 @@ void CLG_Init() {
     // Begin init log.
     Com_Print("\n%s\n", "==== InitCGame ====");
 
-    // Fetch cvars.
-    cl_disable_particles = clgi.Cvar_Get("cl_disable_particles", NULL, 0);
-    cl_gibs              = clgi.Cvar_Get("cl_gibs", NULL, 0);
-    cl_gunalpha          = clgi.Cvar_Get("cl_gunalpha", NULL, 0);
-    cl_kickangles        = clgi.Cvar_Get("cl_kickangles", NULL, 0);
-    cl_noglow            = clgi.Cvar_Get("cl_noglow", NULL, 0);
-    cl_player_model      = clgi.Cvar_Get("cl_player_model", NULL, 0);
-    cl_predict           = clgi.Cvar_Get("cl_predict", NULL, 0);
-    cl_rollhack          = clgi.Cvar_Get("cl_rollhack", NULL, 0);
-    cl_thirdperson_angle = clgi.Cvar_Get("cl_thirdperson_angle", NULL, 0);
-    cl_thirdperson_range = clgi.Cvar_Get("cl_thirdperson_range", NULL, 0);
+    // Fetch cvars from the client.
+    cl_gibs                  = clgi.Cvar_Get("cl_gibs", NULL, 0);
+    cl_gunalpha              = clgi.Cvar_Get("cl_gunalpha", NULL, 0);
+    cl_kickangles            = clgi.Cvar_Get("cl_kickangles", NULL, 0);
+    cl_noglow                = clgi.Cvar_Get("cl_noglow", NULL, 0);
+    cl_player_model          = clgi.Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
+    cl_player_model->changed = cl_player_model_changed;
+    cl_predict               = clgi.Cvar_Get("cl_predict", NULL, 0);
+    cl_rollhack              = clgi.Cvar_Get("cl_rollhack", NULL, 0);
 
     sv_paused   = clgi.Cvar_Get("sv_paused", NULL, 0);
 
     // Create CVars.
-    info_fov    = clgi.Cvar_Get("fov", NULL, 0);
-    info_hand   = clgi.Cvar_Get("hand", NULL, 0);
-    info_uf     = clgi.Cvar_Get("uf", NULL, 0);
+    cl_thirdperson_angle    = clgi.Cvar_Get("cl_thirdperson_angle", "0", 0);
+    cl_thirdperson_range    = clgi.Cvar_Get("cl_thirdperson_range", "60", 0);
+
+    cl_disable_particles    = clgi.Cvar_Get("cl_disable_particles", "0", 0);
+    cl_disable_explosions   = clgi.Cvar_Get("cl_disable_explosions", "0", 0);
+    cl_explosion_sprites    = clgi.Cvar_Get("cl_explosion_sprites", "1", 0);
+    cl_explosion_frametime  = clgi.Cvar_Get("cl_explosion_frametime", "20", 0);
+
+    info_fov                = clgi.Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_hand               = clgi.Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_hand->changed      = info_hand_changed;
+    info_uf                 = clgi.Cvar_Get("uf", NULL, 0);
 
     // Video.
     vid_rtx     = clgi.Cvar_Get("vid_rtx", NULL, 0);
@@ -173,6 +226,19 @@ void CLG_Init() {
 
     // Initialize temporary entities.
     CLG_InitTempEntities();
+}
+
+//
+//===============
+// CLG_ClientBegin
+// 
+// Called after all downloads are done. (Aka, a map has started.)
+// Not used for demos.
+//===============
+//
+void CLG_ClientBegin() {
+    // Update settings.
+    CLG_UpdateGunSetting();
 }
 
 //
