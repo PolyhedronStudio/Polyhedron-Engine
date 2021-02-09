@@ -16,7 +16,7 @@
 // Register view weapon models, coming from server.
 //===============
 //
-static void CLG_RegisterVWepModels()
+void CLG_RegisterVWepModels()
 {
     int         i;
     char        *name;
@@ -25,9 +25,9 @@ static void CLG_RegisterVWepModels()
     strcpy(cl->weaponModels[0], "weapon.md2");
 
     // only default model when vwep is off
-    // if (!cl_vwep->integer) {
-    //     return;
-    // }
+     if (!cl_vwep->integer) {
+         return;
+     }
     
     for (i = 2; i < MAX_MODELS; i++) {
         name = cl->configstrings[CS_MODELS + i];

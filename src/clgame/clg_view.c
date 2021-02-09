@@ -38,23 +38,6 @@ static cvar_t* cl_stats;
 
 static cvar_t* cl_adjustfov;
 
-//
-// The actual CG Module entities.
-//
-//#if USE_DLIGHTS
-//int         r_numdlights;
-//dlight_t    r_dlights[MAX_DLIGHTS];
-//#endif
-//
-//int         r_numentities;
-//entity_t    r_entities[MAX_ENTITIES];
-//
-//int         r_numparticles;
-//particle_t  r_particles[MAX_PARTICLES];
-//
-//#if USE_LIGHTSTYLES
-//lightstyle_t    r_lightstyles[MAX_LIGHTSTYLES];
-//#endif
 
 //
 //=============================================================================

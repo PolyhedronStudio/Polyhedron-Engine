@@ -5,9 +5,6 @@
 //
 //
 // Handles the main initialisation of the client game dll.
-// 
-// Initialises the appropriate cvars, precaches data, and handles
-// shutdowns.
 //
 #include "clg_local.h"
 
@@ -136,23 +133,56 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 //
 //=============================================================================
 //
+static void CLG_UpdateGunSettings() {
+    if (cl_player_model->integer == CL_PLAYER_MODEL_DISABLED || info_hand->integer == 2) {
+        clgi.UpdateSetting(CLS_NOGUN, 1);
+    }
+    else {
+        clgi.UpdateSetting(CLS_NOGUN, 0);
+    }
+}
+static void CLG_UpdateGibSettings() {
+    clgi.UpdateSetting(CLS_NOGIBS, !cl_gibs->integer);
+}
 static void cl_gibs_changed(cvar_t* self)
 {
-    //    CL_UpdateGunSetting();
+    CLG_UpdateGibSettings();
 }
-
 static void cl_info_hand_changed(cvar_t* self)
 {
-    //    CL_UpdateGunSetting();
+    CLG_UpdateGunSettings();
 }
-
 static void cl_player_model_changed(cvar_t* self)
 {
-//    CL_UpdateGunSetting();
+    CLG_UpdateGunSettings();
 }
+// N&C: TODO: Move all related to cl_noskins over to CG Module.
+//static void cl_noskins_changed(cvar_t* self)
+//{
+//    int i;
+//    char* s;
+//    clientinfo_t* ci;
+//
+//    if (cls.state < ca_loading) {
+//        return;
+//    }
+//
+//    for (i = 0; i < MAX_CLIENTS; i++) {
+//        s = cl.configstrings[CS_PLAYERSKINS + i];
+//        if (!s[0])
+//            continue;
+//        ci = &cl.clientinfo[i];
+//        CL_LoadClientinfo(ci, s);
+//    }
+//}
 static void cl_vwep_changed(cvar_t* self)
 {
-    //    CL_UpdateGunSetting();
+    if (clgi.GetClienState() < ca_loading) {
+        return;
+    }
+    // Register view weapon models again.
+    CLG_RegisterVWepModels();
+    //cl_noskins_changed(self);
 }
 
 
@@ -204,11 +234,6 @@ void CLG_Init() {
     // Video.
     vid_rtx     = clgi.Cvar_Get("vid_rtx", NULL, 0);
 
-    Com_DPrint("cl_predict = %s\n", cl_predict->string);
-    Com_DPrint("sv_paused = %s\n", sv_paused->string);
-    Com_DPrint("info_fov = %s\n", info_fov->string);
-    Com_DPrint("info_uf = %s\n", info_uf->string);
-
     // Initialize effects.
     CLG_EffectsInit();
 
@@ -226,7 +251,8 @@ void CLG_Init() {
 //
 void CLG_ClientBegin() {
     // Update settings.
-    //CLG_UpdateGunSetting();
+    CLG_UpdateGunSettings();
+    CLG_UpdateGibSettings();
 }
 
 

@@ -47,6 +47,23 @@ int _wrp_GetServerProtocol(void) {
 int _wrp_GetProtocolVersion(void) {
     return cls.protocolVersion;
 }
+void _wrp_UpdateSetting(clientSetting_t setting, int value) {
+    // Ensure there is a valid netchan.
+    if (!cls.netchan) {
+        return;
+    }
+    // Ensure it matches our protocol.
+    if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
+        return;
+    }
+    
+    // Write out message with a flush. (Saving few bytes on the network.)
+    MSG_WriteByte(clc_setting);
+    MSG_WriteShort(setting);
+    MSG_WriteShort(value);
+    MSG_FlushTo(&cls.netchan->message);
+}
+
 
 unsigned _wrp_GetRealTime(void) {
     return cls.realtime;
@@ -263,6 +280,7 @@ void CL_InitGameProgs(void)
     import.GetClienState                = CL_GetState;
 
     import.UpdateListenerOrigin         = CL_UpdateListenerOrigin;
+    import.UpdateSetting                = _wrp_UpdateSetting;
 
 	// Command Buffer.
 	import.Cbuf_AddText					= _wrp_Cbuf_AddText;

@@ -2800,8 +2800,8 @@ static void CL_InitLocal(void)
     CL_InitDemos();
     LOC_Init();
     CL_InitAscii();
-    CL_InitEffects();
-    CL_InitTEnts();
+    //CL_InitEffects();
+    //CL_InitTEnts();
     CL_InitDownloads();
 //    CL_GTV_Init();
 

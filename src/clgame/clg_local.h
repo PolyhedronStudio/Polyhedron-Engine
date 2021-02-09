@@ -219,6 +219,8 @@ typedef enum {
     // You can add more here if you desire so.
 } clg_load_state_t;
 
+void CLG_RegisterVWepModels();
+
 void CLG_InitMedia(void);
 char *CLG_GetMediaLoadStateName(load_state_t state);
 void CLG_LoadScreenMedia(void);
