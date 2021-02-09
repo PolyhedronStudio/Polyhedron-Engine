@@ -53,18 +53,14 @@ extern "C" {
 
         // Can be called by the engine too.
         float       (*CalcFOV) (float fov_x, float width, float height);
+        // Called each client frame. Handle per frame basis things here.
+        void        (*ClientFrame) (void);
         // Called when the client (and/is) disconnected for whichever reasons.
         void        (*ClearState) (void);
         // Can be called by the engine too for updating audio positioning.
         void        (*CalcViewValues) (void);
         // Called by the engine when a demo is being seeked.
         void        (*DemoSeek) (void);
-
-        // Called after all downloads are done. (Aka, a map has started.)
-        // Not used for demos.
-        void        (*ClientBegin) (void);
-        // Called each client frame. Handle per frame basis things here.
-        void        (*ClientFrame) (void);
 
         //---------------------------------------------------------------------
         // Media.
@@ -135,7 +131,6 @@ extern "C" {
         int             (*GetServerProtocol) (void);
         // Returns the protocol minor version.
         int             (*GetProtocolVersion) (void);
-        netchan_t*      (*GetClientNetChannel) (void);
 
         // Returns qtrue if we're in demo playback, qfalse otherwise.
         qboolean        (*IsDemoPlayback) (void);

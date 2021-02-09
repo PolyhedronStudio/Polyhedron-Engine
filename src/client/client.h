@@ -411,7 +411,6 @@ void CL_CheckForPause(void);
 void CL_UpdateFrameTimes(void);
 qboolean CL_CheckForIgnore(const char *s);
 void CL_WriteConfig(void);
-netchan_t*  CL_GetNetChannel(void);
 connstate_t CL_GetState (void);                     // WATISDEZE Added for CG Module.
 void        CL_SetState (connstate_t state);        // WATISDEZE Added for CG Module.
 void        CL_SetLoadState (load_state_t state);   // WATISDEZE Added for CG Module.
