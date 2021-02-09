@@ -108,6 +108,9 @@ extern mz_params_t     mzParameters;
 // CVars - Externed so they can be accessed all over the CG Module.
 //-------------------
 // Client.
+extern cvar_t* cl_disable_explosions;
+extern cvar_t* cl_explosion_sprites;
+extern cvar_t* cl_explosion_frametime;
 extern cvar_t* cl_disable_particles;
 extern cvar_t* cl_gibs;
 extern cvar_t* cl_gunalpha;
@@ -118,6 +121,8 @@ extern cvar_t* cl_predict;
 extern cvar_t* cl_rollhack;
 extern cvar_t* cl_thirdperson_angle;
 extern cvar_t* cl_thirdperson_range;
+extern cvar_t* cl_vwep;
+
 // Server.
 extern cvar_t* sv_paused;
 // User Info.
@@ -180,6 +185,7 @@ void CLG_Init();
 void CLG_Shutdown(void);
 
 void CLG_ClientFrame(void);
+void CLG_ClientBegin(void);
 void CLG_ClearState(void);
 void CLG_DemoSeek(void);
 

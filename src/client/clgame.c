@@ -261,10 +261,6 @@ void CL_InitGameProgs(void)
     
     import.SetClientLoadState           = CL_SetLoadState;
     import.GetClienState                = CL_GetState;
-    import.SetClienState                = CL_SetState;
-
-    import.GetServerState               = SV_GetState;
-    import.SetServerState               = SV_SetState;
 
     import.UpdateListenerOrigin         = CL_UpdateListenerOrigin;
 
@@ -449,14 +445,26 @@ float CL_GM_CalcFOV(float fov_x, float width, float height) {
 
 //
 //===============
-// CL_GM_ClientFrame
+// CL_GM_CalcViewValues
 // 
-// Called by the engine in case it wants to update audio positioning.
+// Called by the client in case it wants to update audio positioning.
 //===============
 //
 void CL_GM_CalcViewValues(void) {
     if (cge)
         cge->CalcViewValues();
+}
+
+//
+//===============
+// CL_GM_ClientBegin
+// 
+// Called after finishing in CL_Begin (aka after map load etc)
+//===============
+//
+void CL_GM_ClientBegin(void) {
+    if (cge)
+        cge->ClientBegin();
 }
 
 //

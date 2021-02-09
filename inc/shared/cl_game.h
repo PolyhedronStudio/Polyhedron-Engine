@@ -53,14 +53,18 @@ extern "C" {
 
         // Can be called by the engine too.
         float       (*CalcFOV) (float fov_x, float width, float height);
-        // Called each client frame. Handle per frame basis things here.
-        void        (*ClientFrame) (void);
         // Called when the client (and/is) disconnected for whichever reasons.
         void        (*ClearState) (void);
         // Can be called by the engine too for updating audio positioning.
         void        (*CalcViewValues) (void);
         // Called by the engine when a demo is being seeked.
         void        (*DemoSeek) (void);
+        
+        // Called after all downloads are done. (Aka, a map has started.)
+        // Not used for demos.
+        void        (*ClientBegin) (void);
+        // Called each client frame. Handle per frame basis things here.
+        void        (*ClientFrame) (void);
 
         //---------------------------------------------------------------------
         // Media.
@@ -140,18 +144,11 @@ extern "C" {
         // values.
         void            (*UpdateListenerOrigin) (void);
 
-        // Client state management is used for managing precaching.
+        // Client state.
         // Sets the client load state.
         void            (*SetClientLoadState) (load_state_t state);
         // Returns the current state of the client.
         connstate_t     (*GetClienState) (void);
-        // Sets the current state of the client.
-        void            (*SetClienState) (connstate_t state);
-
-        // Returns the current state of the server.
-        server_state_t  (*GetServerState) (void);
-        // Sets the current state of the client.
-        void        	(*SetServerState) (server_state_t state);
 
 
         //---------------------------------------------------------------------

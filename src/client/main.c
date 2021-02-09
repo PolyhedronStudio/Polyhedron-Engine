@@ -1835,11 +1835,12 @@ void CL_Begin(void)
 
     Cvar_FixCheats();
 
+    // N&C: Prepare media loading.
     CL_PrepareMedia();
-    // WatIsDeze: Moved to CL_PrepareMedia.
-    // CL_LoadState(LOAD_SOUNDS);
-    // CL_RegisterSounds();
+
+    // N&C: Move over to the CG Module.
     LOC_LoadLocations();
+
     CL_LoadState(LOAD_NONE);
     cls.state = ca_precached;
 
@@ -1849,9 +1850,11 @@ void CL_Begin(void)
 
     CL_ClientCommand(va("begin %i\n", precache_spawncount));
 
-    CL_UpdateGunSetting();
-    CL_UpdateBlendSetting();
-    CL_UpdateGibSetting();
+    // N&C: notify the CGModule.
+    CL_GM_ClientBegin();
+    //CL_UpdateGunSetting();
+    //CL_UpdateBlendSetting();
+    //CL_UpdateGibSetting();
     CL_UpdateFootstepsSetting();
     CL_UpdatePredictSetting();
     CL_UpdateRecordingSetting();
@@ -2850,17 +2853,17 @@ static void CL_InitLocal(void)
     rcon_address = Cvar_Get("rcon_address", "", CVAR_PRIVATE);
     rcon_address->generator = Com_Address_g;
 
-	cl_player_model = Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
-	cl_player_model->changed = cl_player_model_changed;
-    cl_thirdperson_angle = Cvar_Get("cl_thirdperson_angle", "0", 0);
-    cl_thirdperson_range = Cvar_Get("cl_thirdperson_range", "60", 0);
+	//cl_player_model = Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
+	//cl_player_model->changed = cl_player_model_changed;
+ //   cl_thirdperson_angle = Cvar_Get("cl_thirdperson_angle", "0", 0);
+ //   cl_thirdperson_range = Cvar_Get("cl_thirdperson_range", "60", 0);
 
-    cl_disable_particles = Cvar_Get("cl_disable_particles", "0", 0);
+/*    cl_disable_particles = Cvar_Get("cl_disable_particles", "0", 0);
 	cl_disable_explosions = Cvar_Get("cl_disable_explosions", "0", 0);
 	cl_explosion_sprites = Cvar_Get("cl_explosion_sprites", "1", 0);
 	cl_explosion_frametime = Cvar_Get("cl_explosion_frametime", "20", 0);
-    cl_gibs = Cvar_Get("cl_gibs", "1", 0);
-    cl_gibs->changed = cl_gibs_changed;
+   *//* cl_gibs = Cvar_Get("cl_gibs", "1", 0);
+    cl_gibs->changed = cl_gibs_changed;*/
 
 #if USE_FPS
     cl_updaterate = Cvar_Get("cl_updaterate", "0", 0);
@@ -2880,9 +2883,6 @@ static void CL_InitLocal(void)
     cl_protocol = Cvar_Get("cl_protocol", "0", 0);
 
     gender_auto = Cvar_Get("gender_auto", "1", CVAR_ARCHIVE);
-
-    cl_vwep = Cvar_Get("cl_vwep", "1", CVAR_ARCHIVE);
-    cl_vwep->changed = cl_vwep_changed;
 
     cl_cinematics = Cvar_Get("cl_cinematics", "1", CVAR_ARCHIVE);
 
