@@ -1530,9 +1530,9 @@ void CLG_AddParticles(void)
             alpha = p->alpha;
         }
 
-        if (clg.view.num_particles >= MAX_PARTICLES)
+        if (cl->view.num_particles >= MAX_PARTICLES)
             break;
-        part = &clg.view.particles[clg.view.num_particles++];
+        part = &cl->view.particles[cl->view.num_particles++];
 
         p->next = NULL;
         if (!tail)

@@ -564,8 +564,11 @@ void CLG_AddPacketEntities(void)
             }
         }
 
+        //Com_DPrint("[NORMAL] entity ID =%i - origin = [%f, %f, %f]\n", ent.id, ent.origin[0], ent.origin[1], ent.origin[1]);
     skip:
         VectorCopy(ent.origin, cent->lerp_origin);
+
+        //Com_DPrint("[SKIP] entity ID =%i - origin = [%f, %f, %f]\n", ent.id, ent.origin[0], ent.origin[1], ent.origin[1]);
     }
 }
 
@@ -782,7 +785,7 @@ static inline float lerp_client_fov(float ofov, float nfov, float lerp)
 // CLG_CalcViewValues
 //
 // Sets cl->refdef view values and sound spatialization params.
-// Usually called from CLG_AddEntities, but may be directly called from the main
+// Usually called from V_AddEntities, but may be directly called from the main
 // loop if rendering is disabled but sound is running.
 //===============
 //

@@ -58,11 +58,11 @@ static cvar_t* cl_adjustfov;
 void V_AddEntity(entity_t *ent)
 {
     // Ensure we aren't exceeding boundary limits.
-    if (clg.view.num_entities >= MAX_ENTITIES)
+    if (cl->view.num_entities >= MAX_ENTITIES)
         return;
 
     // Copy entity over into the current scene frame list.
-    clg.view.entities[clg.view.num_entities++] = *ent;
+    cl->view.entities[cl->view.num_entities++] = *ent;
 }
 
 //
@@ -76,11 +76,11 @@ void V_AddEntity(entity_t *ent)
 void V_AddParticle(particle_t *p)
 {
     // Ensure we aren't exceeding boundary limits.
-    if (clg.view.num_particles >= MAX_PARTICLES)
+    if (cl->view.num_particles >= MAX_PARTICLES)
         return;
 
     // Copy particle over into the current scene frame list.
-    clg.view.particles[clg.view.num_particles++] = *p;
+    cl->view.particles[cl->view.num_particles++] = *p;
 }
 
 #if USE_DLIGHTS
@@ -96,9 +96,9 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
 {
     dlight_t    *dl;
 
-    if (clg.view.num_dlights >= MAX_DLIGHTS)
+    if (cl->view.num_dlights >= MAX_DLIGHTS)
         return;
-    dl = &clg.view.dlights[clg.view.num_dlights++];
+    dl = &cl->view.dlights[cl->view.num_dlights++];
     VectorCopy(org, dl->origin);
     dl->intensity = intensity;
     dl->color[0] = r;
@@ -106,9 +106,9 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
     dl->color[2] = b;
 	dl->radius = radius;
 
-	if (cl_show_lights->integer && clg.view.num_particles < MAX_PARTICLES)
+	if (cl_show_lights->integer && cl->view.num_particles < MAX_PARTICLES)
 	{
-		particle_t* part = &clg.view.particles[clg.view.num_particles++];
+		particle_t* part = &cl->view.particles[cl->view.num_particles++];
 
 		VectorCopy(dl->origin, part->origin);
 		part->radius = radius;
@@ -143,7 +143,7 @@ void V_AddLightStyle(int style, vec4_t value)
 
     if (style < 0 || style >= MAX_LIGHTSTYLES)
         Com_Error(ERR_DROP, "Bad light style %i", style);
-    ls = &clg.view.lightstyles[style];
+    ls = &cl->view.lightstyles[style];
 
     //ls->white = r+g+b;
     ls->rgb[0] = value[0];
@@ -414,10 +414,10 @@ void CLG_PreRenderView (void) {
 void CLG_ClearScene(void)
 {
 #if USE_DLIGHTS
-    clg.view.num_dlights = 0;
+    cl->view.num_dlights = 0;
 #endif
-    clg.view.num_entities = 0;
-    clg.view.num_particles = 0;
+    cl->view.num_entities = 0;
+    cl->view.num_particles = 0;
 }
 
 //
@@ -433,16 +433,16 @@ void CLG_RenderView (void) {
     V_AddEntities();
 
     // Last but not least, pass our array over to the client.
-    cl->refdef.num_entities     = clg.view.num_entities;
-    cl->refdef.entities         = clg.view.entities;
-    cl->refdef.num_particles    = clg.view.num_particles;
-    cl->refdef.particles        = clg.view.particles;
+    cl->refdef.num_entities     = cl->view.num_entities;
+    cl->refdef.entities         = cl->view.entities;
+    cl->refdef.num_particles    = cl->view.num_particles;
+    cl->refdef.particles        = cl->view.particles;
 #if USE_DLIGHTS
-    cl->refdef.num_dlights      = clg.view.num_dlights;
-    cl->refdef.dlights          = clg.view.dlights;
+    cl->refdef.num_dlights      = cl->view.num_dlights;
+    cl->refdef.dlights          = cl->view.dlights;
 #endif
 #if USE_LIGHTSTYLES
-    cl->refdef.lightstyles      = clg.view.lightstyles;
+    cl->refdef.lightstyles      = cl->view.lightstyles;
 #endif
 }
 

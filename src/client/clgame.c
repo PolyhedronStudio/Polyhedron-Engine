@@ -390,6 +390,7 @@ void CL_InitGameProgs(void)
     // Rendering
     import.R_LightPoint                 = _wrp_R_LightPoint;
     import.R_AddDecal                   = _wrp_R_AddDecal;
+
     // Sound.
     import.S_BeginRegistration          = S_BeginRegistration;
     import.S_RegisterSound              = S_RegisterSound;

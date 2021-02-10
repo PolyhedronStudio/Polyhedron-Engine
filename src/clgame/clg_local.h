@@ -43,31 +43,6 @@
 //
 //=============================================================================
 //-------------------
-// The client game view structure contains all entities, lights, particles,
-// and lightstyles of the current client state frame.
-//-------------------
-typedef struct clg_view_s {
-    // Holds all the entities currently in the view frame.
-    entity_t entities[MAX_ENTITIES];
-    int num_entities;
-
-    // Holds all the dynamic lights currently in the view frame.
-#if USE_DLIGHTS
-    dlight_t dlights[MAX_DLIGHTS];
-    int num_dlights;
-#endif
-
-    // Holds all the particles currently in the view frame.
-    particle_t particles[MAX_PARTICLES];
-    int num_particles;
-
-    // Holds all the lightstylescurrently in the view frame.
-#if USE_LIGHTSTYLES
-    lightstyle_t lightstyles[MAX_LIGHTSTYLES];
-#endif
-} clg_view_t;
-
-//-------------------
 // Client Game State structure.
 //
 // This structure is used to contain all local client game module
@@ -76,7 +51,7 @@ typedef struct clg_view_s {
 // Expand as you please.
 //-------------------
 typedef struct clientgame_state_s {
-    clg_view_t view;
+    int nothing;
 } clientgame_state_t;
 
 extern clientgame_state_t clg;

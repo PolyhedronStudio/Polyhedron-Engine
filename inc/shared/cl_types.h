@@ -250,6 +250,31 @@ typedef enum {
 } load_state_t;
 
 //
+// The client view structure contains all entities, lights, particles,
+// and lightstyles of the current client state frame.
+//
+typedef struct cl_view_s {
+    // Holds all the entities currently in the view frame.
+    entity_t entities[MAX_ENTITIES];
+    int num_entities;
+
+    // Holds all the dynamic lights currently in the view frame.
+#if USE_DLIGHTS
+    dlight_t dlights[MAX_DLIGHTS];
+    int num_dlights;
+#endif
+
+    // Holds all the particles currently in the view frame.
+    particle_t particles[MAX_PARTICLES];
+    int num_particles;
+
+    // Holds all the lightstylescurrently in the view frame.
+#if USE_LIGHTSTYLES
+    lightstyle_t lightstyles[MAX_LIGHTSTYLES];
+#endif
+} cl_view_t;
+
+//
 // The client structure is cleared at each level load, and is exposed to
 // * the client game module to provide access to media and other client state.
 //
@@ -331,6 +356,11 @@ typedef struct client_state_s {
     int         keytime;
     float       keylerpfrac;
 #endif
+
+    //
+    // Client View Related Variables.
+    //
+    cl_view_t   view;
 
     //
     // Client Sound Variables.
