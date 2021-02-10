@@ -105,7 +105,11 @@ extern cvar_t *cl_renderdemo_fps;
 client_static_t cls;
 client_state_t  cl;
 
-centity_t   cl_entities[MAX_EDICTS];
+// N&C: Client shared structure. used to access entities etc in CG Module.
+client_shared_t cs;
+
+
+//centity_t   cl_entities[MAX_EDICTS];
 
 // used for executing stringcmds
 cmdbuf_t    cl_cmdbuf;
@@ -754,7 +758,7 @@ void CL_ClearState(void)
     // wipe the entire cl structure
     BSP_Free(cl.bsp);
     memset(&cl, 0, sizeof(cl));
-    memset(&cl_entities, 0, sizeof(cl_entities));
+    memset(&cs.entities, 0, sizeof(cs.entities));
 
     if (cls.state > ca_connected) {
         cls.state = ca_connected;

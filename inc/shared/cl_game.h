@@ -444,7 +444,10 @@ extern "C" {
         //
         // Pointers to actual client data.
         //
+        // Client State.
         client_state_t *cl;
+        // Client Shared.
+        client_shared_t* cs;
     } clgame_import_t;
 
     // Function pointer type for handling the actual import function.

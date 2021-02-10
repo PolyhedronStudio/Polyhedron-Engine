@@ -43,18 +43,45 @@
 //
 //=============================================================================
 //-------------------
-// Client Game State structure.
+// Client View structure.
+//
+// Contains all current client view entities.
+//-------------------
+typedef struct clg_view_s {
+    // Stores the entities.
+    entity_t entities[MAX_ENTITIES];
+    int num_entities;
+
+    // Holds all the dynamic lights currently in the view frame.
+#if USE_DLIGHTS
+    dlight_t dlights[MAX_DLIGHTS];
+    int num_dlights;
+#endif
+
+    // Holds all the particles currently in the view frame.
+    particle_t particles[MAX_PARTICLES];
+    int num_particles;
+
+    // Holds all the lightstylescurrently in the view frame.
+#if USE_LIGHTSTYLES
+    lightstyle_t lightstyles[MAX_LIGHTSTYLES];
+#endif
+} clg_view_t;
+extern clg_view_t view;
+
+//-------------------
+// Client Game structure.
 //
 // This structure is used to contain all local client game module
-// state variables.
+// variables.
 //
 // Expand as you please.
 //-------------------
-typedef struct clientgame_state_s {
+typedef struct clientgame_s {
     int nothing;
-} clientgame_state_t;
+} clientgame_t;
 
-extern clientgame_state_t clg;
+extern clientgame_t clg;
 
 //-------------------
 // Client player model settings.
@@ -69,7 +96,7 @@ extern clientgame_state_t clg;
 //-------------------
 extern clgame_import_t  clgi;
 extern client_state_t   *cl;
-extern centity_t   clg_entities[MAX_EDICTS];
+extern client_shared_t* cs;
 
 //-------------------
 // Game - Specific to the game itself.

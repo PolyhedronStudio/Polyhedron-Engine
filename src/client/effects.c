@@ -277,8 +277,8 @@ void CL_MuzzleFlash(void)
     if (developer->integer)
         CL_CheckEntityPresent(mz.entity, "muzzleflash");
 #endif
-
-    pl = &cl.view.entities[mz.entity];
+    
+    pl = &cs.entities[mz.entity];
 
 #if USE_DLIGHTS
     dl = CL_AllocDlight(mz.entity);
@@ -477,7 +477,7 @@ void CL_MuzzleFlash2(void)
     char        soundname[MAX_QPATH];
 
     // locate the origin
-    ent = &cl.view.entities[mz.entity];
+    ent = &cs.entities[mz.entity];
     AngleVectors(ent->current.angles, forward, right, NULL);
     ofs = monster_flash_offset[mz.weapon];
     origin[0] = ent->current.origin[0] + forward[0] * ofs[0] + right[0] * ofs[1];

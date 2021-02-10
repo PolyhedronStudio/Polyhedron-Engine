@@ -40,7 +40,7 @@ static void build_gamestate(void)
 
     // set base entity states
     for (i = 1; i < MAX_EDICTS; i++) {
-        ent = &cl_entities[i];
+        ent = &cs.entities[i];
 
         if (ent->serverframe != cl.frame.number) {
             continue;
@@ -139,7 +139,7 @@ void CL_GTV_EmitFrame(void)
     // send entity states
     for (i = 1; i < MAX_EDICTS; i++) {
         oldes = &cls.gtv.entities[i];
-        ent = &cl_entities[i];
+        ent = &cs.entities[i];
 
         if (ent->serverframe != cl.frame.number) {
             if (oldes->number) {

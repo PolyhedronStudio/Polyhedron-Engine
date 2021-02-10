@@ -266,6 +266,7 @@ void CL_InitGameProgs(void)
     // Setup the function pointers for the cgame dll.
 	//
     import.cl                           = &cl;
+    import.cs                           = &cs;
  
     // Client.
     import.GetFrameTime                 = _wrp_GetFrameTime;

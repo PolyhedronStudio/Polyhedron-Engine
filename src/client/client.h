@@ -73,6 +73,7 @@ extern centity_t    cl_entities[MAX_EDICTS];
 
 
 extern    client_state_t    cl;
+extern    client_shared_t   cs;
 
 /*
 ==================================================================

@@ -94,7 +94,7 @@ void CLG_AddPacketEntities(void)
         i = (cl->frame.firstEntity + pnum) & PARSE_ENTITIES_MASK;
         s1 = &cl->entityStates[i];
 
-        cent = &clg_entities[s1->number];
+        cent = &cs->entities[s1->number];
         ent.id = cent->id + RESERVED_ENTITIY_COUNT;
 
         effects = s1->effects;
@@ -580,7 +580,7 @@ static int shell_effect_hack(void)
     if (cl->frame.clientNum == CLIENTNUM_NONE)
         return 0;
 
-    ent = &clg_entities[cl->frame.clientNum + 1];
+    ent = &cs->entities[cl->frame.clientNum + 1];
     if (ent->serverframe != cl->frame.number)
         return 0;
 

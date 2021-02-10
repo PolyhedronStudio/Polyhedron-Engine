@@ -8,6 +8,7 @@
 //
 #include "clg_local.h"
 
+clg_view_t  view;
 //=============
 //
 // development tools for weapons
@@ -58,11 +59,11 @@ static cvar_t* cl_adjustfov;
 void V_AddEntity(entity_t *ent)
 {
     // Ensure we aren't exceeding boundary limits.
-    if (cl->view.num_entities >= MAX_ENTITIES)
+    if (view.num_entities >= MAX_ENTITIES)
         return;
 
     // Copy entity over into the current scene frame list.
-    cl->view.entities[cl->view.num_entities++] = *ent;
+    view.entities[view.num_entities++] = *ent;
 }
 
 //
@@ -76,11 +77,11 @@ void V_AddEntity(entity_t *ent)
 void V_AddParticle(particle_t *p)
 {
     // Ensure we aren't exceeding boundary limits.
-    if (cl->view.num_particles >= MAX_PARTICLES)
+    if (view.num_particles >= MAX_PARTICLES)
         return;
 
     // Copy particle over into the current scene frame list.
-    cl->view.particles[cl->view.num_particles++] = *p;
+    view.particles[view.num_particles++] = *p;
 }
 
 #if USE_DLIGHTS
@@ -96,9 +97,9 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
 {
     dlight_t    *dl;
 
-    if (cl->view.num_dlights >= MAX_DLIGHTS)
+    if (view.num_dlights >= MAX_DLIGHTS)
         return;
-    dl = &cl->view.dlights[cl->view.num_dlights++];
+    dl = &view.dlights[view.num_dlights++];
     VectorCopy(org, dl->origin);
     dl->intensity = intensity;
     dl->color[0] = r;
@@ -106,9 +107,9 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
     dl->color[2] = b;
 	dl->radius = radius;
 
-	if (cl_show_lights->integer && cl->view.num_particles < MAX_PARTICLES)
+	if (cl_show_lights->integer && view.num_particles < MAX_PARTICLES)
 	{
-		particle_t* part = &cl->view.particles[cl->view.num_particles++];
+		particle_t* part = &view.particles[view.num_particles++];
 
 		VectorCopy(dl->origin, part->origin);
 		part->radius = radius;
@@ -143,7 +144,7 @@ void V_AddLightStyle(int style, vec4_t value)
 
     if (style < 0 || style >= MAX_LIGHTSTYLES)
         Com_Error(ERR_DROP, "Bad light style %i", style);
-    ls = &cl->view.lightstyles[style];
+    ls = &view.lightstyles[style];
 
     //ls->white = r+g+b;
     ls->rgb[0] = value[0];
@@ -319,8 +320,10 @@ static void CLG_FinishViewValues(void)
 
     if (cl->frame.clientNum == CLIENTNUM_NONE)
         goto first;
+    
 
-    ent = &clg_entities[cl->frame.clientNum + 1];
+    // TODO: Figure out which array  to use here...?
+    ent = &cs->entities[cl->frame.clientNum + 1];
     if (ent->serverframe != cl->frame.number)
         goto first;
 
@@ -336,12 +339,12 @@ first:
 
 //
 //===============
-// V_AddEntities
+// CLG_AddEntities
 // 
 // Adds all the CG Module entities to tthe current frame scene.
 //===============
 //
-static void V_AddEntities (void) {
+static void CLG_AddEntities (void) {
     // Calculate client view values.
     CLG_CalcViewValues();
 
@@ -414,10 +417,10 @@ void CLG_PreRenderView (void) {
 void CLG_ClearScene(void)
 {
 #if USE_DLIGHTS
-    cl->view.num_dlights = 0;
+    view.num_dlights = 0;
 #endif
-    cl->view.num_entities = 0;
-    cl->view.num_particles = 0;
+    view.num_entities = 0;
+    view.num_particles = 0;
 }
 
 //
@@ -430,19 +433,19 @@ void CLG_ClearScene(void)
 //
 void CLG_RenderView (void) {
     // Add our view entities.
-    V_AddEntities();
+    CLG_AddEntities();
 
     // Last but not least, pass our array over to the client.
-    cl->refdef.num_entities     = cl->view.num_entities;
-    cl->refdef.entities         = cl->view.entities;
-    cl->refdef.num_particles    = cl->view.num_particles;
-    cl->refdef.particles        = cl->view.particles;
+    cl->refdef.num_entities     = view.num_entities;
+    cl->refdef.entities         = view.entities;
+    cl->refdef.num_particles    = view.num_particles;
+    cl->refdef.particles        = view.particles;
 #if USE_DLIGHTS
-    cl->refdef.num_dlights      = cl->view.num_dlights;
-    cl->refdef.dlights          = cl->view.dlights;
+    cl->refdef.num_dlights      = view.num_dlights;
+    cl->refdef.dlights          = view.dlights;
 #endif
 #if USE_LIGHTSTYLES
-    cl->refdef.lightstyles      = cl->view.lightstyles;
+    cl->refdef.lightstyles      = view.lightstyles;
 #endif
 }
 

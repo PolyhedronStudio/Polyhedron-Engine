@@ -15,17 +15,18 @@
 clgame_import_t clgi;
 // Static export variable, lives as long as the client game dll lives.
 clgame_export_t clge;
+
 // Pointer to the actual client frame state.
-client_state_t *cl = NULL;
+client_state_t* cl = NULL;
+// Pointer to the actual client shared data.
+client_shared_t* cs = NULL;
+
 // Actual client game state (Contains the view for example).
-clientgame_state_t clg;
+clientgame_t clg;
 
 //
 // Game.
 //
-// The client side entity array. Filled each frame.
-centity_t   clg_entities[MAX_EDICTS];
-
 //
 // CVar.
 //
@@ -73,8 +74,9 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     // Store a copy of the engine imported function pointer struct.
     clgi = *clgimp;
 
-    // Store a pointer to the actual client state.
+    // Store pointers to client  data.
     cl  = clgimp->cl;
+    cs  = clgimp->cs;
 
     // Setup the API version.
     clge.apiversion                 = CGAME_API_VERSION;
@@ -287,10 +289,6 @@ void CLG_ClientFrame() {
 // ===============
 //
 void CLG_ClearState(void) {
-    // Wipe out our client entities array, so it's clean in case of a
-    // new connect.
-    memset(&clg_entities, 0, sizeof(clg_entities));
-
     // Clear Effects.
     CLG_ClearEffects();
 

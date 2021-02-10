@@ -412,7 +412,7 @@ void V_RenderView(void)
         //CL_CalcViewValues();
 
         // Add Engine Client entities.
-        CL_AddEntities();
+        //CL_AddEntities();
 
         // Add CG Module entities.
         CL_GM_RenderView();
