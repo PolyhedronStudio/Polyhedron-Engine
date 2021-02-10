@@ -123,6 +123,8 @@ extern cvar_t* cl_thirdperson_angle;
 extern cvar_t* cl_thirdperson_range;
 extern cvar_t* cl_vwep;
 
+// Refresh... TODO: Move.
+extern cvar_t* cvar_pt_beam_lights;
 // Server.
 extern cvar_t* sv_paused;
 // User Info.
@@ -170,13 +172,23 @@ void CLG_SetLightStyle(int index, const char* s);
 
 void CLG_MuzzleFlash(void);
 void CLG_MuzzleFlash2(void);
-
+void CLG_BFGExplosionParticles(vec3_t org);
 void CLG_BfgParticles(entity_t* ent);
+void CLG_BigTeleportParticles(vec3_t org);
 void CLG_BlasterTrail(vec3_t start, vec3_t end);
+void CLG_BlasterParticles(vec3_t org, vec3_t dir);
+void CLG_BloodParticleEffect(vec3_t org, vec3_t dir, int color, int count);
+void CLG_BubbleTrail(vec3_t start, vec3_t end);
 void CLG_DiminishingTrail(vec3_t start, vec3_t end, centity_t* old, int flags);
+void CLG_ExplosionParticles(vec3_t org);
 void CLG_FlagTrail(vec3_t start, vec3_t end, int color);
 void CLG_FlyEffect(centity_t* ent, vec3_t origin);
+void CLG_OldRailTrail(void);
+void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count);
+void CLG_ParticleEffect2(vec3_t org, vec3_t dir, int color, int count);
+void CLG_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count);
 void CLG_RocketTrail(vec3_t start, vec3_t end, centity_t* old);
+void CLG_TeleportParticles(vec3_t org);
 
 //
 // clg_main.c
@@ -263,6 +275,8 @@ void CLG_ParticleEffect3(vec3_t org, vec3_t dir, int color, int count);
 //
 // clg_tent.c
 //
+void CLG_ParseTempEntity(void);
+
 void CLG_RegisterTempEntityModels(void);
 void CLG_RegisterTempEntitySounds(void);
 

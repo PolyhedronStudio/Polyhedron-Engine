@@ -44,6 +44,9 @@ cvar_t  *cl_thirdperson_angle = NULL;
 cvar_t  *cl_thirdperson_range = NULL;
 cvar_t  *cl_vwep = NULL;
 
+// Refresh.
+cvar_t* cvar_pt_beam_lights = NULL;
+
 // Server.
 cvar_t  *sv_paused = NULL;
 

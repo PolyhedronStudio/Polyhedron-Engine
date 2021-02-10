@@ -1853,8 +1853,8 @@ void CL_Begin(void)
     // N&C: notify the CGModule.
     CL_GM_ClientBegin();
     //CL_UpdateGunSetting();
-    //CL_UpdateBlendSetting();
     //CL_UpdateGibSetting();
+    CL_UpdateBlendSetting();
     CL_UpdateFootstepsSetting();
     CL_UpdatePredictSetting();
     CL_UpdateRecordingSetting();

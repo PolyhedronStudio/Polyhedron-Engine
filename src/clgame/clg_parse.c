@@ -298,7 +298,7 @@ qboolean CLG_ParseServerMessage (int serverCommand) {
         // Client temporary entities. (Particles, etc.)
         case svc_temp_entity:
             CLG_ParseTempEntitiesPacket();
-            //CLG_ParseTempEntity();
+            CLG_ParseTempEntity();
             return qtrue;
         break;
 
