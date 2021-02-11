@@ -184,9 +184,42 @@ static void CL_Skins_f(void)
 }
 
 //---------------
+// Minor command macro functions.
+//
+// They can have the same name as a cvar, but when a macro $ is used,
+// it gains a higher priority than the cvar.
+//
+// Example: echo $cl_health
+// will output the amount of health.
+//
+// These can be useful for debugging purposes, or for general use cases
+// where commands may need to be constructed for menus etc.
+//---------------
+static size_t CL_Health_m(char* buffer, size_t size)
+{
+    return Q_scnprintf(buffer, size, "%i", cl->frame.ps.stats[STAT_HEALTH]);
+}
+
+static size_t CL_Ammo_m(char* buffer, size_t size)
+{
+    return Q_scnprintf(buffer, size, "%i", cl->frame.ps.stats[STAT_AMMO]);
+}
+
+static size_t CL_Armor_m(char* buffer, size_t size)
+{
+    return Q_scnprintf(buffer, size, "%i", cl->frame.ps.stats[STAT_ARMOR]);
+}
+
+static size_t CL_WeaponModel_m(char* buffer, size_t size)
+{
+    return Q_scnprintf(buffer, size, "%s",
+        cl->configstrings[cl->frame.ps.gunindex + CS_MODELS]);
+}
+
+//---------------
 // Commands to register to the client.
 //---------------
-static const cmdreg_t c_cgmodule[] = {
+static const cmdreg_t cmd_cgmodule[] = {
     //
     // Client commands.
     //
@@ -305,9 +338,6 @@ void CLG_Init() {
     // Begin init log.
     Com_Print("\n%s\n", "==== InitCLGame ====");
 
-    // Register our commands.
-    clgi.Cmd_Register(c_cgmodule);
-
     // Here we fetch cvars that were created by the client.
     // These are nescessary for certain CG Module functionalities.
     cl_gibs                  = clgi.Cvar_Get("cl_gibs", "1", 0);
@@ -362,6 +392,15 @@ void CLG_Init() {
     // Video.
     vid_rtx                 = clgi.Cvar_Get("vid_rtx", NULL, 0);
 
+    // Register our macros.
+    clgi.Cmd_AddMacro("cl_health", CL_Health_m);
+    clgi.Cmd_AddMacro("cl_ammo", CL_Ammo_m);
+    clgi.Cmd_AddMacro("cl_armor", CL_Armor_m);
+    clgi.Cmd_AddMacro("cl_weaponmodel", CL_WeaponModel_m);
+
+    // Register our commands.
+    clgi.Cmd_Register(cmd_cgmodule);
+
     // Generate a random user name to avoid new users being kicked out of MP servers.
     // The default N&C config files set the user name to "Player", same as the cvar initialization above.
     if (Q_strcasecmp(info_name->string, "Player") == 0)
@@ -393,8 +432,6 @@ void CLG_ClientBegin() {
     CLG_UpdateGunSettings();
     CLG_UpdateGibSettings();
 }
-
-
 
 //
 //===============
@@ -457,7 +494,7 @@ void CLG_DemoSeek(void) {
 //
 void CLG_Shutdown(void) {
     // Deregister commands.
-    clgi.Cmd_Deregister(c_cgmodule);
+    clgi.Cmd_Deregister(cmd_cgmodule);
 }
 
 
