@@ -96,129 +96,6 @@ default_model:
     }
 }
 
-/*
-================
-CL_LoadClientinfo
-
-================
-*/
-void CL_LoadClientinfo(clientinfo_t *ci, const char *s)
-{
-    int         i;
-    char        model_name[MAX_QPATH];
-    char        skin_name[MAX_QPATH];
-    char        model_filename[MAX_QPATH];
-    char        skin_filename[MAX_QPATH];
-    char        weapon_filename[MAX_QPATH];
-    char        icon_filename[MAX_QPATH];
-
-    CL_ParsePlayerSkin(ci->name, model_name, skin_name, s);
-
-    // model file
-    Q_concat(model_filename, sizeof(model_filename),
-             "players/", model_name, "/tris.md2", NULL);
-    ci->model = R_RegisterModel(model_filename);
-    if (!ci->model && Q_stricmp(model_name, "male")) {
-        strcpy(model_name, "male");
-        strcpy(model_filename, "players/male/tris.md2");
-        ci->model = R_RegisterModel(model_filename);
-    }
-
-    // skin file
-    Q_concat(skin_filename, sizeof(skin_filename),
-             "players/", model_name, "/", skin_name, ".pcx", NULL);
-    ci->skin = R_RegisterSkin(skin_filename);
-
-    // if we don't have the skin and the model was female,
-    // see if athena skin exists
-    if (!ci->skin && !Q_stricmp(model_name, "female")) {
-        strcpy(skin_name, "athena");
-        strcpy(skin_filename, "players/female/athena.pcx");
-        ci->skin = R_RegisterSkin(skin_filename);
-    }
-
-    // if we don't have the skin and the model wasn't male,
-    // see if the male has it (this is for CTF's skins)
-    if (!ci->skin && Q_stricmp(model_name, "male")) {
-        // change model to male
-        strcpy(model_name, "male");
-        strcpy(model_filename, "players/male/tris.md2");
-        ci->model = R_RegisterModel(model_filename);
-
-        // see if the skin exists for the male model
-        Q_concat(skin_filename, sizeof(skin_filename),
-                 "players/male/", skin_name, ".pcx", NULL);
-        ci->skin = R_RegisterSkin(skin_filename);
-    }
-
-    // if we still don't have a skin, it means that the male model
-    // didn't have it, so default to grunt
-    if (!ci->skin) {
-        // see if the skin exists for the male model
-        strcpy(skin_name, "grunt");
-        strcpy(skin_filename, "players/male/grunt.pcx");
-        ci->skin = R_RegisterSkin(skin_filename);
-    }
-
-    // weapon file
-    for (i = 0; i < cl.numWeaponModels; i++) {
-        Q_concat(weapon_filename, sizeof(weapon_filename),
-                 "players/", model_name, "/", cl.weaponModels[i], NULL);
-        ci->weaponmodel[i] = R_RegisterModel(weapon_filename);
-        if (!ci->weaponmodel[i] && !Q_stricmp(model_name, "cyborg")) {
-            // try male
-            Q_concat(weapon_filename, sizeof(weapon_filename),
-                     "players/male/", cl.weaponModels[i], NULL);
-            ci->weaponmodel[i] = R_RegisterModel(weapon_filename);
-        }
-    }
-
-    // icon file
-    Q_concat(icon_filename, sizeof(icon_filename),
-             "/players/", model_name, "/", skin_name, "_i.pcx", NULL);
-    ci->icon = R_RegisterPic2(icon_filename);
-
-    strcpy(ci->model_name, model_name);
-    strcpy(ci->skin_name, skin_name);
-
-    // base info should be at least partially valid
-    if (ci == &cl.baseclientinfo)
-        return;
-
-    // must have loaded all data types to be valid
-    if (!ci->skin || !ci->icon || !ci->model || !ci->weaponmodel[0]) {
-        ci->skin = 0;
-        ci->icon = 0;
-        ci->model = 0;
-        ci->weaponmodel[0] = 0;
-        ci->model_name[0] = 0;
-        ci->skin_name[0] = 0;
-    }
-}
-
-/*
-=================
-CL_RegisterSounds
-=================
-*/
-// WatIsDeze: Not needed anymore, we'll start a sound registering process next to
-// the render registering process. Why separate the two?
-void CL_RegisterSounds(void)
-{
-    int i;
-    char    *s;
-
-    S_BeginRegistration();
-    CL_RegisterTEntSounds();
-    for (i = 1; i < MAX_SOUNDS; i++) {
-        s = cl.configstrings[CS_SOUNDS + i];
-        Com_DPrintf("name == %s - %i\n", (!s[0] ? "" : s), i);
-        if (!s[0])
-            break;
-        cl.sound_precache[i] = S_RegisterSound(s);
-    }
-    S_EndRegistration();
-}
 
 /*
 =================
@@ -263,64 +140,6 @@ void CL_RegisterBspModels(void)
     }
 }
 
-/*
-=================
-CL_RegisterVWepModels
-
-Builds a list of visual weapon models
-=================
-*/
-void CL_RegisterVWepModels(void)
-{
-    int         i;
-    char        *name;
-
-    cl.numWeaponModels = 1;
-    strcpy(cl.weaponModels[0], "weapon.md2");
-
-    // only default model when vwep is off
-    if (!cl_vwep->integer) {
-        return;
-    }
-
-    for (i = 2; i < MAX_MODELS; i++) {
-        name = cl.configstrings[CS_MODELS + i];
-        if (!name[0]) {
-            break;
-        }
-        if (name[0] != '#') {
-            continue;
-        }
-
-        // special player weapon model
-        strcpy(cl.weaponModels[cl.numWeaponModels++], name + 1);
-
-        if (cl.numWeaponModels == MAX_CLIENTWEAPONMODELS) {
-            break;
-        }
-    }
-}
-
-/*
-=================
-CL_SetSky
-
-=================
-*/
-void CL_SetSky(void)
-{
-    float       rotate;
-    vec3_t      axis;
-
-    rotate = atof(cl.configstrings[CS_SKYROTATE]);
-    if (sscanf(cl.configstrings[CS_SKYAXIS], "%f %f %f",
-               &axis[0], &axis[1], &axis[2]) != 3) {
-        Com_DPrintf("Couldn't parse CS_SKYAXIS\n");
-        VectorClear(axis);
-    }
-
-    R_SetSky(cl.configstrings[CS_SKY], rotate, axis);
-}
 
 /*
 =================
@@ -331,9 +150,6 @@ Call before entering a new level, or after changing dlls
 */
 void CL_PrepareMedia(void)
 {
-    int         i;
-    char        *name;
-
     if (!cls.ref_initialized)
         return;
     if (!cl.mapname[0])
@@ -349,26 +165,6 @@ void CL_PrepareMedia(void)
     // manage the load state. This is useful for load screen information.
     CL_GM_LoadWorldMedia();
     
-    // TODO: Move over to CG Module.
-    //CL_RegisterTEntModels();
-    //CL_RegisterTEntSounds();
-    // END TODO
-
-    // Load in all client infos.
-    CL_LoadState(LOAD_CLIENTS);
-    for (i = 0; i < MAX_CLIENTS; i++) {
-        name = cl.configstrings[CS_PLAYERSKINS + i];
-        if (!name[0]) {
-            continue;
-        }
-        CL_LoadClientinfo(&cl.clientinfo[i], name);
-    }
-
-    CL_LoadClientinfo(&cl.baseclientinfo, "unnamed\\male/grunt");
-
-    // set sky textures and speed
-    CL_SetSky();
-
     // The sound engine can now free unneeded stuff
     S_EndRegistration();
 
@@ -427,14 +223,8 @@ void CL_UpdateConfigstring(int index)
         return;
     }
 
-// N&C: Moved to CG Module.
-//#if USE_LIGHTSTYLES
-//    if (index >= CS_LIGHTS && index < CS_LIGHTS + MAX_LIGHTSTYLES) {
-//        CL_SetLightStyle(index - CS_LIGHTS, s);
-//        return;
-//    }
-//#endif
-
+    // Anything processed after this if statement is done so only when we're
+    // not fully precached yet. 
     if (cls.state < ca_precached) {
         return;
     }
@@ -466,11 +256,6 @@ void CL_UpdateConfigstring(int index)
     }
     if (index >= CS_IMAGES && index < CS_IMAGES + MAX_IMAGES) {
         cl.image_precache[index - CS_IMAGES] = R_RegisterPic2(s);
-        return;
-    }
-
-    if (index >= CS_PLAYERSKINS && index < CS_PLAYERSKINS + MAX_CLIENTS) {
-        CL_LoadClientinfo(&cl.clientinfo[index - CS_PLAYERSKINS], s);
         return;
     }
 }

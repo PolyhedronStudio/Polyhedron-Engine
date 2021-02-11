@@ -32,7 +32,7 @@ static cvar_t* cl_particle_num_factor = NULL;
 //===============
 // CLG_EffectsInit
 // 
-// Clears effects.
+// Initializes the effects.
 // ===============
 //
 void CLG_EffectsInit(void)

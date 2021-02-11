@@ -381,7 +381,7 @@ qerror_t MOD_LoadMD3_GL(model_t *model, const void *rawdata, size_t length)
     if (header.ofs_meshes > length)
         return Q_ERR_BAD_EXTENT;
 
-    Hunk_Begin(&model->hunk, 0x400000);
+    Hunk_Begin(&model->hunk, 0x800000);
     model->type = MOD_ALIAS;
     model->numframes = header.num_frames;
     model->nummeshes = header.num_meshes;

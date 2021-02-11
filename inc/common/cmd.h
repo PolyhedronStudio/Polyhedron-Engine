@@ -36,19 +36,19 @@ typedef enum {
     FROM_CMDLINE,
     FROM_CODE
 } from_t;
+
 // WatIsDeze: Added for cgame dll, it doesn't need these functions.
+typedef struct cmdbuf_s {
+    from_t      from;
+    char* text; // may not be NULL terminated
+    size_t      cursize;
+    size_t      maxsize;
+    int         waitCount;
+    int         aliasCount; // for detecting runaway loops
+    void        (*exec)(struct cmdbuf_s*, const char*);
+} cmdbuf_t;
+
 #ifndef CGAME_INCLUDE
-
-    typedef struct cmdbuf_s {
-        from_t      from;
-        char        *text; // may not be NULL terminated
-        size_t      cursize;
-        size_t      maxsize;
-        int         waitCount;
-        int         aliasCount; // for detecting runaway loops
-        void        (*exec)(struct cmdbuf_s *, const char *);
-    } cmdbuf_t;
-
     // generic console buffer
     extern char         cmd_buffer_text[CMD_BUFFER_SIZE];
     extern cmdbuf_t     cmd_buffer;
@@ -102,12 +102,9 @@ typedef enum {
 
     // Looks a bit oddly positioned here, but we need this in the cgame dll so...
     typedef void (*xcommand_t)(void);
-// WatIsDeze: Added for cgame dll, it doesn't need these functions.
-#ifndef CGAME_INCLUDE
-    typedef void (*xcommandex_t)(cmdbuf_t *);
-    typedef size_t (*xmacro_t)(char *, size_t);
-    typedef void (*xcompleter_t)(struct genctx_s *, int);
-
+    typedef void (*xcommandex_t)(cmdbuf_t*);
+    typedef size_t(*xmacro_t)(char*, size_t);
+    typedef void (*xcompleter_t)(struct genctx_s*, int);
     typedef struct cmd_macro_s {
         struct cmd_macro_s  *next, *hashNext;
         const char          *name;
@@ -124,6 +121,8 @@ typedef enum {
         xcompleter_t    completer;
     } cmdreg_t;
 
+    // WatIsDeze: Added for cgame dll, it doesn't need these functions.
+#ifndef CGAME_INCLUDE
     void Cmd_Init(void);
 
     qboolean Cmd_Exists(const char *cmd_name);

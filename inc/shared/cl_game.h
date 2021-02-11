@@ -197,6 +197,14 @@ extern "C" {
         // Removes the command name from the client command list.
         void        (*Cmd_RemoveCommand) (const char *cmd_name);
 
+        // Registers the list of commands to the client command list.
+        void        (*Cmd_Register) (const cmdreg_t* reg);
+        // Deregisters the list of commands to the client command list.
+        void        (*Cmd_Deregister) (const cmdreg_t* reg);
+
+        // Adds a macro command to the list of client macros.
+        void        (*Cmd_AddMacro) (const char* name, xmacro_t function);
+
         // Takes a null terminated string.  Does not need to be \n terminated.
         // breaks the string up into arg tokens.
         void        (*Cmd_TokenizeString) (char *text, qboolean macroExpand);
@@ -411,13 +419,22 @@ extern "C" {
         //---------------------------------------------------------------------
         // Rendering.
         //---------------------------------------------------------------------
-        void            (*R_LightPoint) (vec3_t origin, vec3_t light);
         void            (*R_AddDecal) (decal_t* d);
+        void            (*R_LightPoint) (vec3_t origin, vec3_t light);
+        void            (*R_SetSky)(const char* name, float rotate, vec3_t axis);
 
         //---------------------------------------------------------------------
         // 2D Rendering.
         //---------------------------------------------------------------------
         // TODO:
+
+        //---------------------------------------------------------------------
+        // Screen.
+        //---------------------------------------------------------------------
+        // This is called every frame by the client itself. However in the case
+        // of this CG Module, it can also be called explicitly to flush text to
+        // the screen.
+        void            (*SCR_UpdateScreen) (void);
 
         //---------------------------------------------------------------------
         // Sound.

@@ -321,8 +321,6 @@ static void CLG_FinishViewValues(void)
     if (cl->frame.clientNum == CLIENTNUM_NONE)
         goto first;
     
-
-    // TODO: Figure out which array  to use here...?
     ent = &cs->entities[cl->frame.clientNum + 1];
     if (ent->serverframe != cl->frame.number)
         goto first;
@@ -355,6 +353,7 @@ static void CLG_AddEntities (void) {
     CLG_AddPacketEntities();
     CLG_AddTempEntities();
     CLG_AddParticles();
+
 #if USE_DLIGHTS
     CLG_AddDLights();
 #endif

@@ -241,6 +241,15 @@ qboolean CLG_UpdateConfigString(int index, const char *str) {
     // In case we aren't precaching, but got updated configstrings by the
     // server, we reload them.
     if (clgi.GetClienState() < ca_precached) {
+        if (index >= CS_PLAYERSKINS && index < CS_PLAYERSKINS + MAX_CLIENTS) {
+            CLG_LoadClientinfo(&cl->clientinfo[index - CS_PLAYERSKINS], str);
+            return qtrue;
+        }
+
+        // Return qfalse, nothing handled if we reached this point.
+        return qfalse;
+
+        // WATISDEZE: Possible todo?
         //if (index >= CS_MODELS + 2 && index < CS_MODELS + MAX_MODELS) {
         //    // In case it is the BSP world map, we want to leave it up to the engine.
         //    if (*str == '*') {

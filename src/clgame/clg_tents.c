@@ -183,7 +183,6 @@ static void CLG_ParseLaser(int colors)
 //
 //=============================================================================
 //
-
 explosion_t  clg_explosions[MAX_EXPLOSIONS];
 
 static void CLG_ClearExplosions(void)

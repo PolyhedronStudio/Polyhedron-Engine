@@ -38,6 +38,7 @@ cvar_t  *cl_gibs = NULL;
 cvar_t  *cl_gunalpha = NULL;
 cvar_t  *cl_kickangles = NULL;
 cvar_t  *cl_noglow = NULL;
+cvar_t  *cl_noskins = NULL;
 cvar_t  *cl_player_model = NULL;
 cvar_t  *cl_predict = NULL;
 cvar_t  *cl_rollhack = NULL;
@@ -130,11 +131,52 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 }; // Extern "C"
 #endif
 
+//
+//=============================================================================
+//
+//	CLGAME CMD FUNCTIONS
+//
+//=============================================================================
+//
+/*
+=================
+CL_Skins_f
+
+Load or download any custom player skins and models
+=================
+*/
+static void CL_Skins_f(void)
+{
+    int i;
+    char* s;
+    clientinfo_t* ci;
+
+    if (clgi.GetClienState() < ca_loading) {
+        Com_Print("Must be in a level to load skins.\n");
+        return;
+    }
+
+    CLG_RegisterVWepModels();
+
+    for (i = 0; i < MAX_CLIENTS; i++) {
+        s = cl->configstrings[CS_PLAYERSKINS + i];
+        if (!s[0])
+            continue;
+        ci = &cl->clientinfo[i];
+        CLG_LoadClientinfo(ci, s);
+        if (!ci->model_name[0] || !ci->skin_name[0])
+            ci = &cl->baseclientinfo;
+        Com_Print("client %d: %s --> %s/%s\n", i, s,
+            ci->model_name, ci->skin_name);
+        clgi.SCR_UpdateScreen();
+    }
+}
+
 
 //
 //=============================================================================
 //
-//	CGAME INIT AND SHUTDOWN
+//	CLGAME INIT AND SHUTDOWN
 //
 //=============================================================================
 //
@@ -146,40 +188,44 @@ static void CLG_UpdateGunSettings() {
         clgi.UpdateSetting(CLS_NOGUN, 0);
     }
 }
+
 static void CLG_UpdateGibSettings() {
     clgi.UpdateSetting(CLS_NOGIBS, !cl_gibs->integer);
 }
+
 static void cl_gibs_changed(cvar_t* self)
 {
     CLG_UpdateGibSettings();
 }
+
 static void cl_info_hand_changed(cvar_t* self)
 {
     CLG_UpdateGunSettings();
 }
+
 static void cl_player_model_changed(cvar_t* self)
 {
     CLG_UpdateGunSettings();
 }
-// N&C: TODO: Move all related to cl_noskins over to CG Module.
-//static void cl_noskins_changed(cvar_t* self)
-//{
-//    int i;
-//    char* s;
-//    clientinfo_t* ci;
-//
-//    if (cls.state < ca_loading) {
-//        return;
-//    }
-//
-//    for (i = 0; i < MAX_CLIENTS; i++) {
-//        s = cl.configstrings[CS_PLAYERSKINS + i];
-//        if (!s[0])
-//            continue;
-//        ci = &cl.clientinfo[i];
-//        CL_LoadClientinfo(ci, s);
-//    }
-//}
+
+static void cl_noskins_changed(cvar_t* self)
+{
+    int i;
+    char* s;
+    clientinfo_t* ci;
+
+    if (clgi.GetClienState() < ca_loading) {
+        return;
+    }
+
+    for (i = 0; i < MAX_CLIENTS; i++) {
+        s = cl->configstrings[CS_PLAYERSKINS + i];
+        if (!s[0])
+            continue;
+        ci = &cl->clientinfo[i];
+        CLG_LoadClientinfo(ci, s);
+    }
+}
 static void cl_vwep_changed(cvar_t* self)
 {
     if (clgi.GetClienState() < ca_loading) {
@@ -190,6 +236,13 @@ static void cl_vwep_changed(cvar_t* self)
     //cl_noskins_changed(self);
 }
 
+//---------------
+// Macro commands to register to the client.
+//---------------
+static const cmdreg_t c_cgmodule[] = {
+    { "skins", CL_Skins_f },
+    {NULL}
+};
 
 //
 //===============
@@ -202,13 +255,17 @@ void CLG_Init() {
     // Begin init log.
     Com_Print("\n%s\n", "==== InitCGame ====");
 
-    // Fetch cvars.
+    // Register our commands.
+    clgi.Cmd_Register(c_cgmodule);
+
     // Fetch cvars from the client.
     cl_gibs                  = clgi.Cvar_Get("cl_gibs", "1", 0);
     cl_gibs->changed         = cl_gibs_changed;
     cl_gunalpha              = clgi.Cvar_Get("cl_gunalpha", NULL, 0);
     cl_kickangles            = clgi.Cvar_Get("cl_kickangles", NULL, 0);
     cl_noglow                = clgi.Cvar_Get("cl_noglow", NULL, 0);
+    cl_noskins               = clgi.Cvar_Get("cl_noskins", "0", 0);
+    cl_noskins->changed      = cl_noskins_changed;
     cl_predict               = clgi.Cvar_Get("cl_predict", NULL, 0);
     cl_rollhack              = clgi.Cvar_Get("cl_rollhack", NULL, 0);
     sv_paused                = clgi.Cvar_Get("sv_paused", NULL, 0);
@@ -322,7 +379,8 @@ void CLG_DemoSeek(void) {
 // ===============
 //
 void CLG_Shutdown(void) {
-
+    // Deregister commands.
+    clgi.Cmd_Deregister(c_cgmodule);
 }
 
 //

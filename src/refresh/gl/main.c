@@ -723,8 +723,9 @@ static void gl_modulate_changed(cvar_t *self)
 // ugly hack to reset sky
 static void gl_drawsky_changed(cvar_t *self)
 {
-    if (gl_static.world.cache)
-        CL_SetSky();
+    // This is deprecated, we've got a RTX renderer.
+    //if (gl_static.world.cache)
+    //    CL_SetSky();
 }
 
 static void gl_novis_changed(cvar_t *self)

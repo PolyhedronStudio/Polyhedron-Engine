@@ -1119,52 +1119,6 @@ static void SCR_SizeDown_f(void)
 }
 
 /*
-=================
-SCR_Sky_f
-
-Set a specific sky and rotation speed. If empty sky name is provided, falls
-back to server defaults.
-=================
-*/
-static void SCR_Sky_f(void)
-{
-    char    *name;
-    float   rotate;
-    vec3_t  axis;
-    int     argc = Cmd_Argc();
-
-    if (argc < 2) {
-        Com_Printf("Usage: sky <basename> [rotate] [axis x y z]\n");
-        return;
-    }
-
-    if (cls.state != ca_active) {
-        Com_Printf("No map loaded.\n");
-        return;
-    }
-
-    name = Cmd_Argv(1);
-    if (!*name) {
-        CL_SetSky();
-        return;
-    }
-
-    if (argc > 2)
-        rotate = atof(Cmd_Argv(2));
-    else
-        rotate = 0;
-
-    if (argc == 6) {
-        axis[0] = atof(Cmd_Argv(3));
-        axis[1] = atof(Cmd_Argv(4));
-        axis[2] = atof(Cmd_Argv(5));
-    } else
-        VectorSet(axis, 0, 0, 1);
-
-    R_SetSky(name, rotate, axis);
-}
-
-/*
 ================
 SCR_TimeRefresh_f
 ================
@@ -1335,7 +1289,7 @@ static const cmdreg_t scr_cmds[] = {
     { "timerefresh", SCR_TimeRefresh_f },
     { "sizeup", SCR_SizeUp_f },
     { "sizedown", SCR_SizeDown_f },
-    { "sky", SCR_Sky_f },
+ //   { "sky", SCR_Sky_f },
     { "draw", SCR_Draw_f, SCR_Draw_c },
     { "undraw", SCR_UnDraw_f, SCR_UnDraw_c },
     { "clearchathud", SCR_ClearChatHUD_f },

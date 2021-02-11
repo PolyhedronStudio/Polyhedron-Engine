@@ -62,7 +62,10 @@ typedef struct clg_view_s {
     particle_t particles[MAX_PARTICLES];
     int num_particles;
 
-    // Holds all the lightstylescurrently in the view frame.
+    // Holds all the explosions currently in the view frame.
+    explosion_t  explosions[MAX_EXPLOSIONS];
+
+    // Holds all the lightstyles currently in the view frame.
 #if USE_LIGHTSTYLES
     lightstyle_t lightstyles[MAX_LIGHTSTYLES];
 #endif
@@ -118,6 +121,7 @@ extern cvar_t* cl_gibs;
 extern cvar_t* cl_gunalpha;
 extern cvar_t* cl_kickangles;
 extern cvar_t* cl_noglow;
+extern cvar_t* cl_noskins;
 extern cvar_t* cl_player_model;
 extern cvar_t* cl_predict;
 extern cvar_t* cl_rollhack;
@@ -234,6 +238,7 @@ typedef enum {
 } clg_load_state_t;
 
 void CLG_RegisterVWepModels();
+void CLG_LoadClientinfo(clientinfo_t* ci, const char* str);
 
 void CLG_InitMedia(void);
 char *CLG_GetMediaLoadStateName(load_state_t state);

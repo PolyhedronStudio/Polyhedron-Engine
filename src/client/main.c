@@ -1274,69 +1274,6 @@ static void CL_PingServers_f(void)
     }
 }
 
-/*
-=================
-CL_Skins_f
-
-Load or download any custom player skins and models
-=================
-*/
-static void CL_Skins_f(void)
-{
-    int i;
-    char *s;
-    clientinfo_t *ci;
-
-    if (cls.state < ca_loading) {
-        Com_Printf("Must be in a level to load skins.\n");
-        return;
-    }
-
-    CL_RegisterVWepModels();
-
-    for (i = 0; i < MAX_CLIENTS; i++) {
-        s = cl.configstrings[CS_PLAYERSKINS + i];
-        if (!s[0])
-            continue;
-        ci = &cl.clientinfo[i];
-        CL_LoadClientinfo(ci, s);
-        if (!ci->model_name[0] || !ci->skin_name[0])
-            ci = &cl.baseclientinfo;
-        Com_Printf("client %d: %s --> %s/%s\n", i, s,
-                   ci->model_name, ci->skin_name);
-        SCR_UpdateScreen();
-    }
-}
-
-static void cl_noskins_changed(cvar_t *self)
-{
-    int i;
-    char *s;
-    clientinfo_t *ci;
-
-    if (cls.state < ca_loading) {
-        return;
-    }
-
-    for (i = 0; i < MAX_CLIENTS; i++) {
-        s = cl.configstrings[CS_PLAYERSKINS + i];
-        if (!s[0])
-            continue;
-        ci = &cl.clientinfo[i];
-        CL_LoadClientinfo(ci, s);
-    }
-}
-
-static void cl_vwep_changed(cvar_t *self)
-{
-    if (cls.state < ca_loading) {
-        return;
-    }
-
-    CL_RegisterVWepModels();
-    cl_noskins_changed(self);
-}
-
 static void CL_Name_g(genctx_t *ctx)
 {
     int i;
@@ -2528,6 +2465,7 @@ void CL_RestartFilesystem(qboolean total)
         R_Init(qfalse);
 
         CL_GM_LoadScreenMedia();
+
         SCR_RegisterMedia();
         Con_RegisterMedia();
         UI_Init();
@@ -2743,7 +2681,7 @@ static const cmdreg_t c_client[] = {
     { "cmd", CL_ForwardToServer_f },
     { "pause", CL_Pause_f },
     { "pingservers", CL_PingServers_f },
-    { "skins", CL_Skins_f },
+//    { "skins", CL_Skins_f },
     { "userinfo", CL_Userinfo_f },
     { "snd_restart", CL_RestartSound_f },
     { "play", CL_PlaySound_f, CL_PlaySound_c },
@@ -2825,8 +2763,8 @@ static void CL_InitLocal(void)
     cl_footsteps = Cvar_Get("cl_footsteps", "1", 0);
 	cl_monsterfootsteps = Cvar_Get("cl_monsterfootsteps", "1", 0);
     cl_footsteps->changed = cl_footsteps_changed;
-    cl_noskins = Cvar_Get("cl_noskins", "0", 0);
-    cl_noskins->changed = cl_noskins_changed;
+    //cl_noskins = Cvar_Get("cl_noskins", "0", 0);
+    //cl_noskins->changed = cl_noskins_changed;
     cl_predict = Cvar_Get("cl_predict", "1", 0);
     cl_predict->changed = cl_predict_changed;
     cl_kickangles = Cvar_Get("cl_kickangles", "1", CVAR_CHEAT);

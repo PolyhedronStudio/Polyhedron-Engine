@@ -431,7 +431,6 @@ void        CL_SetLoadState (load_state_t state);   // WATISDEZE Added for CG Mo
 // } load_state_t;
 
 void CL_ParsePlayerSkin(char *name, char *model, char *skin, const char *s);
-void CL_LoadClientinfo(clientinfo_t *ci, const char *s);
 void CL_LoadState(load_state_t state);
 void CL_RegisterSounds(void);
 void CL_RegisterBspModels(void);

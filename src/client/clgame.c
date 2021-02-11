@@ -148,15 +148,22 @@ void _wrp_R_UnregisterImage(qhandle_t image) {
 
 // REFRESH - These are wrapped, since some of the actual function pointers 
 // get loaded in later in at boot time. 
+void _wrp_R_AddDecal(decal_t* d) {
+    if (R_AddDecal)
+        R_AddDecal(d);
+    else
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+}
+
 void _wrp_R_LightPoint(vec3_t origin, vec3_t light) {
     if (R_LightPoint)
         R_LightPoint(origin, light);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
-void _wrp_R_AddDecal(decal_t* d) {
-    if (R_AddDecal)
-        R_AddDecal(d);
+void _wrp_R_SetSky(const char* name, float rotate, vec3_t axis) {
+    if (R_SetSky)
+        R_SetSky(name, rotate, axis);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
@@ -300,6 +307,12 @@ void CL_InitGameProgs(void)
 	// Command.
 	import.Cmd_AddCommand				= Cmd_AddCommand;
 	import.Cmd_RemoveCommand			= Cmd_RemoveCommand;
+
+    import.Cmd_Register                 = Cmd_Register;
+    import.Cmd_Deregister               = Cmd_Deregister;
+
+    import.Cmd_AddMacro                 = Cmd_AddMacro;
+
 	import.Cmd_TokenizeString			= Cmd_TokenizeString;
 	import.Cmd_Argc						= Cmd_Argc;
 	import.Cmd_Argv						= Cmd_Argv;
@@ -389,8 +402,12 @@ void CL_InitGameProgs(void)
     import.MOD_ForHandle                = MOD_ForHandle;
 
     // Rendering
+    import.R_AddDecal = _wrp_R_AddDecal;
     import.R_LightPoint                 = _wrp_R_LightPoint;
-    import.R_AddDecal                   = _wrp_R_AddDecal;
+    import.R_SetSky                     = _wrp_R_SetSky;
+
+    // Screen.
+    import.SCR_UpdateScreen             = SCR_UpdateScreen;
 
     // Sound.
     import.S_BeginRegistration          = S_BeginRegistration;
