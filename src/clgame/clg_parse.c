@@ -245,7 +245,7 @@ qboolean CLG_UpdateConfigString(int index, const char *str) {
     }
     
     if (index >= CS_PLAYERSKINS && index < CS_PLAYERSKINS + MAX_CLIENTS) {
-        CLG_LoadClientinfo(&cl->clientinfo[index - CS_PLAYERSKINS], str);
+        CLG_LoadClientInfo(&cl->clientinfo[index - CS_PLAYERSKINS], str);
         return qtrue;
     }
 

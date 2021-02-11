@@ -49,7 +49,7 @@ void CLG_RegisterVWepModels()
 
 //
 //===============
-// CLG_LoadClientinfo
+// CLG_LoadClientInfo
 // 
 // Breaks up playerskin into name (optional), model and skin components.
 // If model or skin are found to be invalid, replaces them with sane defaults.
@@ -123,7 +123,7 @@ default_skin:
 
 //
 //===============
-// CLG_LoadClientinfo
+// CLG_LoadClientInfo
 // 
 // Loads up the data for the given client. Here you can set the default
 // models that it'll load, or totally disable clients from doing their
@@ -133,7 +133,7 @@ default_skin:
 // here.
 //===============
 //
-void CLG_LoadClientinfo(clientinfo_t* ci, const char* str)
+void CLG_LoadClientInfo(clientinfo_t* ci, const char* str)
 {
     int         i;
     char        model_name[MAX_QPATH];
@@ -426,11 +426,11 @@ void CLG_LoadWorldMedia(void)
         if (!filename[0]) {
             continue;
         }
-        CLG_LoadClientinfo(&cl->clientinfo[i], filename);
+        CLG_LoadClientInfo(&cl->clientinfo[i], filename);
     }
 
     // Load in our base client (the actual player)
-    CLG_LoadClientinfo(&cl->baseclientinfo, "unnamed\\male/grunt");
+    CLG_LoadClientInfo(&cl->baseclientinfo, "unnamed\\male/grunt");
 
     // Last but not least, set the sky.
     CLG_SetSky();

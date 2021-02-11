@@ -542,6 +542,20 @@ void CL_GM_DemoSeek(void) {
 
 //
 //===============
+// CL_GM_UpdateUserInfo
+// 
+// Called when the client has changed user info.
+// Here we can fix up the gender for example before all data gets applied and
+// send to the other clients.
+//===============
+//
+void CL_GM_UpdateUserInfo(cvar_t* var, from_t from) {
+    if (cge)
+        cge->UpdateUserinfo(var, from);
+}
+
+//
+//===============
 // CL_GM_StartServerMessage 
 // 
 // Called by the client BEFORE all server messages have been parsed

@@ -27,11 +27,9 @@ cvar_t  *rcon_address;
 cvar_t  *cl_noskins;
 cvar_t  *cl_footsteps;
 cvar_t  *cl_jumpsound;
-cvar_t  *cl_monsterfootsteps;
 cvar_t  *cl_timeout;
 cvar_t  *cl_predict;
 cvar_t  *cl_gun;
-cvar_t  *cl_gunalpha;
 cvar_t  *cl_maxfps;
 cvar_t  *cl_async;
 cvar_t  *r_maxfps;
@@ -188,28 +186,6 @@ static request_t *CL_FindRequest(void)
 
 //======================================================================
 
-static void CL_UpdateGunSetting(void)
-{
-    int nogun;
-
-    if (!cls.netchan) {
-        return;
-    }
-    if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
-        return;
-    }
-
-    if (cl_player_model->integer == CL_PLAYER_MODEL_DISABLED || info_hand->integer == 2) {
-        nogun = 1;
-    } else {
-        nogun = 0;
-    }
-
-    MSG_WriteByte(clc_setting);
-    MSG_WriteShort(CLS_NOGUN);
-    MSG_WriteShort(nogun);
-    MSG_FlushTo(&cls.netchan->message);
-}
 
 static void CL_UpdateGibSetting(void)
 {
@@ -223,21 +199,6 @@ static void CL_UpdateGibSetting(void)
     MSG_WriteByte(clc_setting);
     MSG_WriteShort(CLS_NOGIBS);
     MSG_WriteShort(!cl_gibs->integer);
-    MSG_FlushTo(&cls.netchan->message);
-}
-
-static void CL_UpdateFootstepsSetting(void)
-{
-    if (!cls.netchan) {
-        return;
-    }
-    if (cls.serverProtocol != PROTOCOL_VERSION_Q2PRO) {
-        return;
-    }
-
-    MSG_WriteByte(clc_setting);
-    MSG_WriteShort(CLS_NOFOOTSTEPS);
-    MSG_WriteShort(!cl_footsteps->integer);
     MSG_FlushTo(&cls.netchan->message);
 }
 
@@ -1622,30 +1583,32 @@ void CL_ErrorEvent(netadr_t *from)
 CL_FixUpGender_f
 ==============
 */
-static void CL_FixUpGender(void)
-{
-    char *p;
-    char sk[MAX_QPATH];
-
-    Q_strlcpy(sk, info_skin->string, sizeof(sk));
-    if ((p = strchr(sk, '/')) != NULL)
-        *p = 0;
-    if (Q_stricmp(sk, "male") == 0 || Q_stricmp(sk, "cyborg") == 0)
-        Cvar_Set("gender", "male");
-    else if (Q_stricmp(sk, "female") == 0 || Q_stricmp(sk, "crackhor") == 0)
-        Cvar_Set("gender", "female");
-    else
-        Cvar_Set("gender", "none");
-    info_gender->modified = qfalse;
-}
+//static void CL_FixUpGender(void)
+//{
+//    char *p;
+//    char sk[MAX_QPATH];
+//
+//    Q_strlcpy(sk, info_skin->string, sizeof(sk));
+//    if ((p = strchr(sk, '/')) != NULL)
+//        *p = 0;
+//    if (Q_stricmp(sk, "male") == 0 || Q_stricmp(sk, "cyborg") == 0)
+//        Cvar_Set("gender", "male");
+//    else if (Q_stricmp(sk, "female") == 0 || Q_stricmp(sk, "crackhor") == 0)
+//        Cvar_Set("gender", "female");
+//    else
+//        Cvar_Set("gender", "none");
+//    info_gender->modified = qfalse;
+//}
 
 void CL_UpdateUserinfo(cvar_t *var, from_t from)
 {
     int i;
 
-    if (var == info_skin && from > FROM_CONSOLE && gender_auto->integer) {
-        CL_FixUpGender();
-    }
+    // N&C: Allow the CG Module to work with it.
+    CL_GM_UpdateUserInfo(var, from);
+    //if (var == info_skin && from > FROM_CONSOLE && gender_auto->integer) {
+    //    CL_FixUpGender();
+    //}
 
     if (!cls.netchan) {
         return;
@@ -1796,7 +1759,6 @@ void CL_Begin(void)
     //CL_UpdateGunSetting();
     //CL_UpdateGibSetting();
     CL_UpdateBlendSetting();
-    CL_UpdateFootstepsSetting();
     CL_UpdatePredictSetting();
     CL_UpdateRecordingSetting();
 }
@@ -2617,26 +2579,6 @@ static void exec_server_string(cmdbuf_t *buf, const char *text)
     Cmd_ExecuteCommand(buf);
 }
 
-static void cl_player_model_changed(cvar_t *self)
-{
-    CL_UpdateGunSetting();
-}
-
-static void info_hand_changed(cvar_t *self)
-{
-    CL_UpdateGunSetting();
-}
-
-static void cl_gibs_changed(cvar_t *self)
-{
-    CL_UpdateGibSetting();
-}
-
-static void cl_footsteps_changed(cvar_t *self)
-{
-    CL_UpdateFootstepsSetting();
-}
-
 static void cl_predict_changed(cvar_t *self)
 {
     CL_UpdatePredictSetting();
@@ -2759,12 +2701,6 @@ static void CL_InitLocal(void)
     //
     // register our variables
     //
-    cl_gunalpha = Cvar_Get("cl_gunalpha", "1", 0);
-    cl_footsteps = Cvar_Get("cl_footsteps", "1", 0);
-	cl_monsterfootsteps = Cvar_Get("cl_monsterfootsteps", "1", 0);
-    cl_footsteps->changed = cl_footsteps_changed;
-    //cl_noskins = Cvar_Get("cl_noskins", "0", 0);
-    //cl_noskins->changed = cl_noskins_changed;
     cl_predict = Cvar_Get("cl_predict", "1", 0);
     cl_predict->changed = cl_predict_changed;
     cl_kickangles = Cvar_Get("cl_kickangles", "1", CVAR_CHEAT);
@@ -2795,18 +2731,6 @@ static void CL_InitLocal(void)
     rcon_address = Cvar_Get("rcon_address", "", CVAR_PRIVATE);
     rcon_address->generator = Com_Address_g;
 
-	//cl_player_model = Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
-	//cl_player_model->changed = cl_player_model_changed;
- //   cl_thirdperson_angle = Cvar_Get("cl_thirdperson_angle", "0", 0);
- //   cl_thirdperson_range = Cvar_Get("cl_thirdperson_range", "60", 0);
-
-/*    cl_disable_particles = Cvar_Get("cl_disable_particles", "0", 0);
-	cl_disable_explosions = Cvar_Get("cl_disable_explosions", "0", 0);
-	cl_explosion_sprites = Cvar_Get("cl_explosion_sprites", "1", 0);
-	cl_explosion_frametime = Cvar_Get("cl_explosion_frametime", "20", 0);
-   *//* cl_gibs = Cvar_Get("cl_gibs", "1", 0);
-    cl_gibs->changed = cl_gibs_changed;*/
-
 #if USE_FPS
     cl_updaterate = Cvar_Get("cl_updaterate", "0", 0);
     cl_updaterate->changed = cl_updaterate_changed;
@@ -2824,8 +2748,6 @@ static void CL_InitLocal(void)
 
     cl_protocol = Cvar_Get("cl_protocol", "0", 0);
 
-    gender_auto = Cvar_Get("gender_auto", "1", CVAR_ARCHIVE);
-
     cl_cinematics = Cvar_Get("cl_cinematics", "1", CVAR_ARCHIVE);
 
     allow_download->changed = cl_allow_download_changed;
@@ -2834,28 +2756,8 @@ static void CL_InitLocal(void)
     //
     // userinfo
     //
-    info_password = Cvar_Get("password", "", CVAR_USERINFO);
-    info_spectator = Cvar_Get("spectator", "0", CVAR_USERINFO);
-    info_name = Cvar_Get("name", "Player", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_skin = Cvar_Get("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
     info_rate = Cvar_Get("rate", "5000", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_msg = Cvar_Get("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_hand = Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_hand->changed = info_hand_changed;
-    info_gender = Cvar_Get("gender", "male", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_gender->modified = qfalse; // clear this so we know when user sets it manually
-    info_fov = Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_uf = Cvar_Get("uf", "", CVAR_USERINFO);
 
-	// Generate a random user name to avoid new users being kicked out of MP servers.
-	// The default quake2 config files set the user name to "Player", same as the cvar initialization above.
-	if (Q_strcasecmp(info_name->string, "Player") == 0)
-	{
-		int random_number = rand() % 10000;
-		char buf[MAX_CLIENT_NAME];
-		Q_snprintf(buf, sizeof(buf), "Player-%04d", random_number);
-		Cvar_Set("name", buf);
-	}
 
     //
     // macros

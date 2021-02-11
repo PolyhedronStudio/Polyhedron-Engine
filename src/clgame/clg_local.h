@@ -117,9 +117,11 @@ extern cvar_t* cl_disable_explosions;
 extern cvar_t* cl_explosion_sprites;
 extern cvar_t* cl_explosion_frametime;
 extern cvar_t* cl_disable_particles;
+extern cvar_t* cl_footsteps;
 extern cvar_t* cl_gibs;
 extern cvar_t* cl_gunalpha;
 extern cvar_t* cl_kickangles;
+extern cvar_t* cl_monsterfootsteps;
 extern cvar_t* cl_noglow;
 extern cvar_t* cl_noskins;
 extern cvar_t* cl_player_model;
@@ -134,8 +136,15 @@ extern cvar_t* cvar_pt_beam_lights;
 // Server.
 extern cvar_t* sv_paused;
 // User Info.
+extern cvar_t* gender_auto;
 extern cvar_t* info_fov;
 extern cvar_t* info_hand;
+extern cvar_t* info_gender;
+extern cvar_t* info_msg;
+extern cvar_t* info_name;
+extern cvar_t* info_password;
+extern cvar_t* info_skin;
+extern cvar_t* info_spectator;
 extern cvar_t* info_uf;
 // Video.
 extern cvar_t* vid_rtx;
@@ -207,11 +216,7 @@ void CLG_ClientBegin(void);
 void CLG_ClearState(void);
 void CLG_DemoSeek(void);
 
-qboolean CLG_UpdateConfigString(int index, const char* str);
-void CLG_StartServerMessage(void);
-qboolean CLG_ParseServerMessage(int serverCommand);
-qboolean CLG_SeekDemoMessage(int demoCommand);
-void CLG_EndServerMessage(int realTime);
+void CLG_UpdateUserInfo(cvar_t* var, from_t from);
 
 void Com_Print(char *fmt, ...);
 void Com_DPrint(char *fmt, ...);
@@ -238,13 +243,23 @@ typedef enum {
 } clg_load_state_t;
 
 void CLG_RegisterVWepModels();
-void CLG_LoadClientinfo(clientinfo_t* ci, const char* str);
+void CLG_LoadClientInfo(clientinfo_t* ci, const char* str);
 
 void CLG_InitMedia(void);
 char *CLG_GetMediaLoadStateName(load_state_t state);
 void CLG_LoadScreenMedia(void);
 void CLG_LoadWorldMedia(void);
 void CLG_ShutdownMedia(void);
+
+
+//
+// clg_parse.c
+//
+qboolean CLG_UpdateConfigString(int index, const char* str);
+void CLG_StartServerMessage(void);
+qboolean CLG_ParseServerMessage(int serverCommand);
+qboolean CLG_SeekDemoMessage(int demoCommand);
+void CLG_EndServerMessage(int realTime);
 
 
 //

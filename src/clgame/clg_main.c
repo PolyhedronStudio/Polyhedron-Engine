@@ -30,32 +30,41 @@ clientgame_t clg;
 //
 // CVar.
 //
-cvar_t* cl_disable_particles = NULL;
-cvar_t* cl_disable_explosions = NULL;
-cvar_t* cl_explosion_sprites = NULL;
-cvar_t* cl_explosion_frametime = NULL;
-cvar_t  *cl_gibs = NULL;
-cvar_t  *cl_gunalpha = NULL;
-cvar_t  *cl_kickangles = NULL;
-cvar_t  *cl_noglow = NULL;
-cvar_t  *cl_noskins = NULL;
-cvar_t  *cl_player_model = NULL;
-cvar_t  *cl_predict = NULL;
-cvar_t  *cl_rollhack = NULL;
-cvar_t  *cl_thirdperson_angle = NULL;
-cvar_t  *cl_thirdperson_range = NULL;
-cvar_t  *cl_vwep = NULL;
+cvar_t *cl_disable_particles = NULL;
+cvar_t *cl_disable_explosions = NULL;
+cvar_t *cl_explosion_sprites = NULL;
+cvar_t *cl_explosion_frametime = NULL;
+cvar_t *cl_footsteps = NULL;
+cvar_t *cl_gibs = NULL;
+cvar_t *cl_gunalpha = NULL;
+cvar_t *cl_kickangles = NULL;
+cvar_t *cl_monsterfootsteps = NULL;
+cvar_t *cl_noglow = NULL;
+cvar_t *cl_noskins = NULL;
+cvar_t *cl_player_model = NULL;
+cvar_t *cl_predict = NULL;
+cvar_t *cl_rollhack = NULL;
+cvar_t *cl_thirdperson_angle = NULL;
+cvar_t *cl_thirdperson_range = NULL;
+cvar_t *cl_vwep = NULL;
 
 // Refresh.
 cvar_t* cvar_pt_beam_lights = NULL;
 
 // Server.
-cvar_t  *sv_paused = NULL;
+cvar_t *sv_paused = NULL;
 
 // User Info.
-cvar_t  *info_fov = NULL;
-cvar_t  *info_hand = NULL;
-cvar_t  *info_uf = NULL;
+cvar_t *gender_auto = NULL;
+cvar_t *info_fov = NULL;
+cvar_t *info_hand = NULL;
+cvar_t *info_gender = NULL;
+cvar_t *info_msg = NULL;
+cvar_t *info_name = NULL;
+cvar_t *info_password = NULL;
+cvar_t *info_skin = NULL;
+cvar_t *info_spectator = NULL;
+cvar_t *info_uf = NULL;
 
 // Video.
 cvar_t* vid_rtx = NULL;
@@ -102,6 +111,8 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 
     clge.ClientBegin                = CLG_ClientBegin;
     clge.ClientFrame                = CLG_ClientFrame;
+
+    clge.UpdateUserinfo             = CLG_UpdateUserInfo;
 
     // Media.
     clge.InitMedia                  = CLG_InitMedia;
@@ -163,7 +174,7 @@ static void CL_Skins_f(void)
         if (!s[0])
             continue;
         ci = &cl->clientinfo[i];
-        CLG_LoadClientinfo(ci, s);
+        CLG_LoadClientInfo(ci, s);
         if (!ci->model_name[0] || !ci->skin_name[0])
             ci = &cl->baseclientinfo;
         Com_Print("client %d: %s --> %s/%s\n", i, s,
@@ -180,6 +191,11 @@ static void CL_Skins_f(void)
 //
 //=============================================================================
 //
+static void CLG_UpdateFootstepsSetting(void)
+{
+    clgi.UpdateSetting(CLS_NOFOOTSTEPS, !cl_footsteps->integer);
+}
+
 static void CLG_UpdateGunSettings() {
     if (cl_player_model->integer == CL_PLAYER_MODEL_DISABLED || info_hand->integer == 2) {
         clgi.UpdateSetting(CLS_NOGUN, 1);
@@ -193,17 +209,17 @@ static void CLG_UpdateGibSettings() {
     clgi.UpdateSetting(CLS_NOGIBS, !cl_gibs->integer);
 }
 
+static void cl_footsteps_changed(cvar_t* self)
+{
+    CLG_UpdateFootstepsSetting();
+}
+
 static void cl_gibs_changed(cvar_t* self)
 {
     CLG_UpdateGibSettings();
 }
 
 static void cl_info_hand_changed(cvar_t* self)
-{
-    CLG_UpdateGunSettings();
-}
-
-static void cl_player_model_changed(cvar_t* self)
 {
     CLG_UpdateGunSettings();
 }
@@ -223,9 +239,15 @@ static void cl_noskins_changed(cvar_t* self)
         if (!s[0])
             continue;
         ci = &cl->clientinfo[i];
-        CLG_LoadClientinfo(ci, s);
+        CLG_LoadClientInfo(ci, s);
     }
 }
+
+static void cl_player_model_changed(cvar_t* self)
+{
+    CLG_UpdateGunSettings();
+}
+
 static void cl_vwep_changed(cvar_t* self)
 {
     if (clgi.GetClienState() < ca_loading) {
@@ -253,15 +275,15 @@ static const cmdreg_t c_cgmodule[] = {
 //
 void CLG_Init() {
     // Begin init log.
-    Com_Print("\n%s\n", "==== InitCGame ====");
+    Com_Print("\n%s\n", "==== InitCLGame ====");
 
     // Register our commands.
     clgi.Cmd_Register(c_cgmodule);
 
-    // Fetch cvars from the client.
+    // Here we fetch cvars that were created by the client.
+    // These are nescessary for certain CG Module functionalities.
     cl_gibs                  = clgi.Cvar_Get("cl_gibs", "1", 0);
     cl_gibs->changed         = cl_gibs_changed;
-    cl_gunalpha              = clgi.Cvar_Get("cl_gunalpha", NULL, 0);
     cl_kickangles            = clgi.Cvar_Get("cl_kickangles", NULL, 0);
     cl_noglow                = clgi.Cvar_Get("cl_noglow", NULL, 0);
     cl_noskins               = clgi.Cvar_Get("cl_noskins", "0", 0);
@@ -270,7 +292,14 @@ void CLG_Init() {
     cl_rollhack              = clgi.Cvar_Get("cl_rollhack", NULL, 0);
     sv_paused                = clgi.Cvar_Get("sv_paused", NULL, 0);
 
-    // Create CVars.
+    // Create the CG Module its own cvars here.
+    gender_auto              = clgi.Cvar_Get("gender_auto", "1", CVAR_ARCHIVE);
+
+    cl_footsteps             = clgi.Cvar_Get("cl_footsteps", "1", 0);
+    cl_footsteps->changed    = cl_footsteps_changed;
+    cl_gunalpha              = clgi.Cvar_Get("cl_gunalpha", "1", 0);
+    // TODO: This one was never implemented at all!!
+    cl_monsterfootsteps      = clgi.Cvar_Get("cl_monsterfootsteps", "1", 0);
     cl_player_model          = clgi.Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
     cl_player_model->changed = cl_player_model_changed;
     cl_thirdperson_angle     = clgi.Cvar_Get("cl_thirdperson_angle", "0", 0);
@@ -288,13 +317,32 @@ void CLG_Init() {
     //
     // User Info.
     //
+    info_name               = clgi.Cvar_Get("name", "Player", CVAR_USERINFO | CVAR_ARCHIVE);
     info_fov                = clgi.Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_gender             = clgi.Cvar_Get("gender", "male", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_gender->modified   = qfalse; // clear this so we know when user sets it manually
     info_hand               = clgi.Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
     info_hand->changed      = cl_info_hand_changed;
-    info_uf                 = clgi.Cvar_Get("uf", NULL, 0);
+    info_skin               = clgi.Cvar_Get("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_uf                 = clgi.Cvar_Get("uf", "", CVAR_USERINFO);
+    
+    // TODO: not sure what this is for, don't see it used anywhere.
+    info_msg                = clgi.Cvar_Get("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_password           = clgi.Cvar_Get("password", "", CVAR_USERINFO);
+    info_spectator          = clgi.Cvar_Get("spectator", "0", CVAR_USERINFO);
 
     // Video.
-    vid_rtx     = clgi.Cvar_Get("vid_rtx", NULL, 0);
+    vid_rtx                 = clgi.Cvar_Get("vid_rtx", NULL, 0);
+
+    // Generate a random user name to avoid new users being kicked out of MP servers.
+    // The default N&C config files set the user name to "Player", same as the cvar initialization above.
+    if (Q_strcasecmp(info_name->string, "Player") == 0)
+    {
+        int random_number = rand() % 10000;
+        char buf[MAX_CLIENT_NAME];
+        Q_snprintf(buf, sizeof(buf), "n00b-%04d", random_number);
+        clgi.Cvar_Set("name", buf);
+    }
 
     // Initialize effects.
     CLG_EffectsInit();
@@ -313,6 +361,7 @@ void CLG_Init() {
 //
 void CLG_ClientBegin() {
     // Update settings.
+    CLG_UpdateFootstepsSetting();
     CLG_UpdateGunSettings();
     CLG_UpdateGibSettings();
 }
@@ -381,6 +430,35 @@ void CLG_DemoSeek(void) {
 void CLG_Shutdown(void) {
     // Deregister commands.
     clgi.Cmd_Deregister(c_cgmodule);
+}
+
+
+//
+//===============
+// CLG_UpdateUserInfo
+// 
+// Called when the client has changed user info.
+// Here we can fix up the gender for example before all data gets applied and
+// send to the other clients.
+//===============
+//
+void CLG_UpdateUserInfo(cvar_t* var, from_t from) {
+    // If there is a skin change, and the gender setting is set to auto find it...
+    if (var == info_skin && from > FROM_CONSOLE && gender_auto->integer) {
+        char* p;
+        char sk[MAX_QPATH];
+
+        Q_strlcpy(sk, info_skin->string, sizeof(sk));
+        if ((p = strchr(sk, '/')) != NULL)
+            *p = 0;
+        if (Q_stricmp(sk, "male") == 0 || Q_stricmp(sk, "cyborg") == 0)
+            clgi.Cvar_Set("gender", "male");
+        else if (Q_stricmp(sk, "female") == 0 || Q_stricmp(sk, "crackhor") == 0)
+            clgi.Cvar_Set("gender", "female");
+        else
+            clgi.Cvar_Set("gender", "none");
+        info_gender->modified = qfalse;
+    }
 }
 
 //

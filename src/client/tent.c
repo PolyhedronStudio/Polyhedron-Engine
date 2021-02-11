@@ -737,12 +737,12 @@ static void CL_AddPlayerBeams(void)
 	float       hand_multiplier;
 	player_state_t  *ps, *ops;
 
-	if (info_hand->integer == 2)
-		hand_multiplier = 0;
-	else if (info_hand->integer == 1)
-		hand_multiplier = -1;
-	else
-		hand_multiplier = 1;
+	//if (info_hand->integer == 2)
+	//	hand_multiplier = 0;
+	//else if (info_hand->integer == 1)
+	//	hand_multiplier = -1;
+	//else
+	//	hand_multiplier = 1;
 
 	// update beams
 	for (i = 0, b = cl_playerbeams; i < MAX_BEAMS; i++, b++) {
