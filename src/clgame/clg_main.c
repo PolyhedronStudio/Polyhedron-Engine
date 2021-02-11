@@ -209,24 +209,24 @@ void CLG_Init() {
     cl_gunalpha              = clgi.Cvar_Get("cl_gunalpha", NULL, 0);
     cl_kickangles            = clgi.Cvar_Get("cl_kickangles", NULL, 0);
     cl_noglow                = clgi.Cvar_Get("cl_noglow", NULL, 0);
-    cl_player_model          = clgi.Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
-    cl_player_model->changed = cl_player_model_changed;
     cl_predict               = clgi.Cvar_Get("cl_predict", NULL, 0);
     cl_rollhack              = clgi.Cvar_Get("cl_rollhack", NULL, 0);
     sv_paused                = clgi.Cvar_Get("sv_paused", NULL, 0);
 
     // Create CVars.
-    cl_thirdperson_angle    = clgi.Cvar_Get("cl_thirdperson_angle", "0", 0);
-    cl_thirdperson_range    = clgi.Cvar_Get("cl_thirdperson_range", "60", 0);
+    cl_player_model          = clgi.Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
+    cl_player_model->changed = cl_player_model_changed;
+    cl_thirdperson_angle     = clgi.Cvar_Get("cl_thirdperson_angle", "0", 0);
+    cl_thirdperson_range     = clgi.Cvar_Get("cl_thirdperson_range", "60", 0);
 
-    cl_disable_particles    = clgi.Cvar_Get("cl_disable_particles", "0", 0);
-    cl_disable_explosions   = clgi.Cvar_Get("cl_disable_explosions", "0", 0);
-    cl_explosion_sprites    = clgi.Cvar_Get("cl_explosion_sprites", "1", 0);
-    cl_explosion_frametime  = clgi.Cvar_Get("cl_explosion_frametime", "20", 0);
-    cl_gibs                 = clgi.Cvar_Get("cl_gibs", "1", 0);
-    cl_gibs->changed        = cl_gibs_changed;
-    cl_vwep                 = clgi.Cvar_Get("cl_vwep", "1", CVAR_ARCHIVE);
-    cl_vwep->changed        = cl_vwep_changed;
+    cl_disable_particles     = clgi.Cvar_Get("cl_disable_particles", "0", 0);
+    cl_disable_explosions    = clgi.Cvar_Get("cl_disable_explosions", "0", 0);
+    cl_explosion_sprites     = clgi.Cvar_Get("cl_explosion_sprites", "1", 0);
+    cl_explosion_frametime   = clgi.Cvar_Get("cl_explosion_frametime", "20", 0);
+    cl_gibs                  = clgi.Cvar_Get("cl_gibs", "1", 0);
+    cl_gibs->changed         = cl_gibs_changed;
+    cl_vwep                  = clgi.Cvar_Get("cl_vwep", "1", CVAR_ARCHIVE);
+    cl_vwep->changed         = cl_vwep_changed;
 
     //
     // User Info.

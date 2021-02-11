@@ -3457,20 +3457,12 @@ run_fx:
         // update audio after the 3D view was drawn
         S_Update();
 
-//        // advance local effects for next frame
-        // WatIsDeze: Moved to CLG Module.
-//#if USE_DLIGHTS
-//        CL_RunDLights();
-//#endif
-//
-//#if USE_LIGHTSTYLES
-//        CL_RunLightStyles();
-//#endif
+        // N&C: Advance local game effects for next frame
         CL_GM_ClientFrame();
+
         SCR_RunCinematic();
     } else if (sync_mode == SYNC_SLEEP_10) {
         // force audio and effects update if not rendering
-        //CL_CalcViewValues();
         CL_GM_CalcViewValues();
         goto run_fx;
     }

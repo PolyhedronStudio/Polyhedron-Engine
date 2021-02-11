@@ -806,7 +806,7 @@ void CLG_CalcViewValues(void)
     lerp = cl->lerpfrac;
 
     // calculate the origin
-    if (!clgi.IsDemoPlayback && cl_predict->integer && !(ps->pmove.pm_flags & PMF_NO_PREDICTION)) {
+    if (!clgi.IsDemoPlayback() && cl_predict->integer && !(ps->pmove.pm_flags & PMF_NO_PREDICTION)) {
         // use predicted values
         unsigned delta = clgi.GetRealTime() - cl->predicted_step_time;
         float backlerp = lerp - 1.0;
