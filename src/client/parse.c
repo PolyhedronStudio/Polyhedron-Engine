@@ -19,6 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "client.h"
 #include "client/gamemodule.h"
+#include "shared/cl_game.h"
+
+// N&C: Cheesy hack, we need to actually make this extern in a header.
+extern clgame_export_t* cge;
 
 /*
 =====================================================================
@@ -536,7 +540,9 @@ static void CL_ParseServerData(void)
     MSG_ReadString(levelname, sizeof(levelname));
 
     // setup default pmove parameters
-    PmoveInit(&cl.pmp);
+     // N&C: Let the client game module handle this.
+    CL_GM_PmoveInit(cge->pmoveParams);
+    //PmoveInit(&cl.pmp);
 
 #if USE_FPS
     // setup default frame times
@@ -570,13 +576,13 @@ static void CL_ParseServerData(void)
         i = MSG_ReadByte();
         if (i) {
             Com_DPrintf("R1Q2 strafejump hack enabled\n");
-            cl.pmp.strafehack = qtrue;
+            cge->pmoveParams->strafehack = qtrue;
         }
         cl.esFlags |= MSG_ES_BEAMORIGIN;
         if (cls.protocolVersion >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
             cl.esFlags |= MSG_ES_LONGSOLID;
         }
-        cl.pmp.speedmult = 2;
+        cge->pmoveParams->speedmult = 2;
     } else if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
         i = MSG_ReadShort();
         if (!Q2PRO_SUPPORTED(i)) {
@@ -594,12 +600,14 @@ static void CL_ParseServerData(void)
         i = MSG_ReadByte();
         if (i) {
             Com_DPrintf("Q2PRO strafejump hack enabled\n");
-            cl.pmp.strafehack = qtrue;
+            cge->pmoveParams->strafehack = qtrue;
         }
         i = MSG_ReadByte(); //atu QWMod
         if (i) {
             Com_DPrintf("Q2PRO QW mode enabled\n");
-            PmoveEnableQW(&cl.pmp);
+            // N&C: Let the client game module handle this.
+            CL_GM_PmoveEnableQW(cge->pmoveParams);
+            //PmoveEnableQW(&cl.pmp);
         }
         cl.esFlags |= MSG_ES_UMASK;
         if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_LONG_SOLID) {
@@ -615,12 +623,12 @@ static void CL_ParseServerData(void)
             i = MSG_ReadByte();
             if (i) {
                 Com_DPrintf("Q2PRO waterjump hack enabled\n");
-                cl.pmp.waterhack = qtrue;
+                cge->pmoveParams->waterhack = qtrue;
             }
         }
-        cl.pmp.speedmult = 2;
-        cl.pmp.flyhack = qtrue; // fly hack is unconditionally enabled
-        cl.pmp.flyfriction = 4;
+        cge->pmoveParams->speedmult = 2;
+        cge->pmoveParams->flyhack = qtrue; // fly hack is unconditionally enabled
+        cge->pmoveParams->flyfriction = 4;
     }
 
     if (cl.clientNum == -1) {

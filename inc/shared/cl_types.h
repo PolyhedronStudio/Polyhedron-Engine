@@ -376,7 +376,12 @@ typedef struct client_state_s {
     char        gamedir[MAX_QPATH];
     int         clientNum;            // never changed during gameplay, set by serverdata packet
     int         maxclients;
-    pmoveParams_t pmp;
+
+    // N&C: This has moved over to the client game exports.
+    // It has been changed in to a pointer. By doing so we can prevent
+    // this structure from turning inconsistent if the game decides to
+    // add extra parameters to this structure.
+    //pmoveParams_t *pmp;
 
 #if USE_FPS
     int         frametime;      // variable server frame time

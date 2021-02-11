@@ -82,7 +82,12 @@ extern clg_view_t view;
 // Expand as you please.
 //-------------------
 typedef struct clientgame_s {
-    int nothing;
+    // This is required for C to compile. It doesn't like to compile an empty
+    // struct.
+    //int nothingHereYet;
+
+    // The player move parameters.
+    pmoveParams_t pmoveParams;
 } clientgame_t;
 
 extern clientgame_t clg;

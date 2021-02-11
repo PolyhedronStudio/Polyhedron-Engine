@@ -204,14 +204,6 @@ void CL_UpdateConfigstring(int index)
         return;
     }
 
-    if (index == CS_AIRACCEL) {
-        if (cl.pmp.qwmode)
-            cl.pmp.airaccelerate = qtrue;
-        else
-            cl.pmp.airaccelerate = atoi(s) ? qtrue : qfalse;
-        return;
-    }
-
     if (index == CS_MODELS + 1) {
         size_t len = strlen(s);
 

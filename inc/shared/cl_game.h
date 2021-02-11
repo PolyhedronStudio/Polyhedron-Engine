@@ -42,6 +42,15 @@ extern "C" {
         // Should always be the same as the import's struct api_version.
         int apiversion;
 
+        //---------------------------------------------------------------------
+        // Pointers to CG Module.
+        //---------------------------------------------------------------------
+        // Shared player move parameters.
+        // N&C: This has moved over to the client game exports.
+        // It has been changed in to a pointer. By doing so we can prevent
+        // this structure from turning inconsistent if the game decides to
+        // add extra parameters to this structure.
+        pmoveParams_t* pmoveParams;
 
         //---------------------------------------------------------------------
         // Core.
@@ -86,8 +95,13 @@ extern "C" {
         // Called when the renderer shutsdown. Should unload all media.
         void        (*ShutdownMedia) (void);
 
+        // Called by the client to initialize Pmove.
+        void        (*PmoveInit) (pmoveParams_t* pmp);
+        // Called by the client when the enable QW movement is toggled.
+        void        (*PmoveEnableQW) (pmoveParams_t* pmp);
+
         //---------------------------------------------------------------------
-        // // Predict Movement (Client Side)
+        // Predict Movement (Client Side)
         //---------------------------------------------------------------------
         void		(*CheckPredictionError) (int frame, unsigned int cmd);
         void		(*PredictAngles) (void);

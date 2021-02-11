@@ -289,6 +289,14 @@ SET(HEADERS_GL
 	refresh/gl/gl.h
 )
 
+###################### Shared Game Folder.
+SET(HEADERS_SHAREDGAME
+	../inc/sharedgame/pmove.h 
+)
+SET(SRC_SHAREDGAME
+	sharedgame/pmove.c
+)
+
 ###################### Shared Folder.
 SET(HEADERS_SHARED
 	../inc/shared/cl_game.h
@@ -298,13 +306,11 @@ SET(HEADERS_SHARED
 	../inc/shared/list.h 
 	../inc/shared/math.h 
 	../inc/shared/platform.h
-	../inc/shared/pmove.h
 	../inc/shared/shared.h 
 )
 SET(SRC_SHARED
 	shared/m_flash.c
 	shared/math.c
-	shared/pmove.c
 	shared/shared.c
 )
 
@@ -451,12 +457,12 @@ ENDIF()
 
 # Optional build target.
 if (CONFIG_BUILD_SV_GAME)
-	ADD_LIBRARY(svgame SHARED ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED})
+	ADD_LIBRARY(svgame SHARED ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
 endif()
 
 # Optional build target.
 if (CONFIG_BUILD_CL_GAME)
-	ADD_LIBRARY(clgame SHARED ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED})
+	ADD_LIBRARY(clgame SHARED ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
 endif()
 
 IF(WIN32)

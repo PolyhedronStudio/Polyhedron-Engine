@@ -232,6 +232,14 @@ static void CLG_ParseMuzzleFlashPacket(int mask)
 //===============
 //
 qboolean CLG_UpdateConfigString(int index, const char *str) {
+    if (index == CS_AIRACCEL) {
+        if (clg.pmoveParams.qwmode)
+            clg.pmoveParams.airaccelerate = qtrue;
+        else
+            clg.pmoveParams.airaccelerate = atoi(str) ? qtrue : qfalse;
+        return qtrue;
+    }
+
 #if USE_LIGHTSTYLES
     if (index >= CS_LIGHTS && index < CS_LIGHTS + MAX_LIGHTSTYLES) {
         CLG_SetLightStyle(index - CS_LIGHTS, str);

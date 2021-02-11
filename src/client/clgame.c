@@ -28,8 +28,8 @@
 #include "shared/cl_types.h"
 #include "shared/cl_game.h"
 
-// Contains the function s being exported to client game dll.
-static clgame_export_t *cge;
+// Contains the functions being exported to client game dll.
+clgame_export_t *cge;
 
 // Operating System handle to the cgame library.
 static void *cgame_library;
@@ -726,6 +726,30 @@ void CL_GM_LoadWorldMedia(void)
 void CL_GM_ShutdownMedia (void) {
     if (cge)
         cge->ShutdownMedia();
+}
+
+//
+//===============
+// CL_GM_PmoveInit
+// 
+// Call into the CG Module for initializing certain PMove parameters.
+//===============
+//
+void CL_GM_PmoveInit(pmoveParams_t* pmp) {
+    if (cge)
+        cge->PmoveInit(pmp);
+}
+
+//
+//===============
+// CL_GM_PmoveEnableQW
+// 
+// Call into the CG Module for enabling certain PMove parameters.
+//===============
+//
+void CL_GM_PmoveEnableQW(pmoveParams_t* pmp) {
+    if (cge)
+        cge->PmoveEnableQW(pmp);
 }
 
 //

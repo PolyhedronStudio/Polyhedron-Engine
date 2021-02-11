@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#ifndef SHARED_PMOVE_H
-#define SHARED_PMOVE_H
+#ifndef SHAREDGAME_PMOVE_H
+#define SHAREDGAME_PMOVE_H
 
 /*
 ==============================================================
@@ -29,6 +29,10 @@ Common between server and client so prediction matches
 ==============================================================
 */
 
+//
+// The server has a copy of this struct.
+// Any additional game data should be added at THE BOTTOM.
+//
 typedef struct {
     qboolean    qwmode;
     qboolean    airaccelerate;
@@ -41,6 +45,9 @@ typedef struct {
     float       friction;
     float       waterfriction;
     float       flyfriction;
+
+    //--------------------------------------
+    // Additional game data here.
 } pmoveParams_t;
 
 void Pmove(pmove_t* pmove, pmoveParams_t* params);

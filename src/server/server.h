@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/net/net.h"
 #include "common/net/chan.h"
 //#include "common/pmove.h"
-#include "shared/pmove.h"
+//#include "shared/pmove.h"
 #include "common/prompt.h"
 #include "common/protocol.h"
 #include "common/x86/fpu.h"
@@ -485,6 +485,21 @@ extern list_t      sv_clientlist; // linked list of non-free clients
 
 extern server_static_t     svs;        // persistant server info
 extern server_t            sv;         // local server
+
+//// N&C: Server pMoveParams struct.
+//typedef struct {
+//    qboolean    qwmode;
+//    qboolean    airaccelerate;
+//    qboolean    strafehack;
+//    qboolean    flyhack;
+//    qboolean    waterhack;
+//    float       speedmult;
+//    float       watermult;
+//    float       maxspeed;
+//    float       friction;
+//    float       waterfriction;
+//    float       flyfriction;
+//} pmoveParams_t;
 
 extern pmoveParams_t    sv_pmp;
 

@@ -249,7 +249,6 @@ typedef struct client_static_s {
 } client_static_t;
 
 extern client_static_t    cls;
-
 extern cmdbuf_t    cl_cmdbuf;
 extern char        cl_cmdbuf_text[MAX_STRING_CHARS];
 

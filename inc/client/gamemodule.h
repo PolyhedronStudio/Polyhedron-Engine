@@ -28,6 +28,7 @@ void		CL_GM_CalcViewValues(void);
 void		CL_GM_ClientBegin(void);
 void		CL_GM_ClientFrame(void);
 void		CL_GM_ClearState(void);
+void		CL_GM_DemoSeek(void);
 void		CL_GM_UpdateUserInfo(cvar_t* var, from_t from);
 
 //
@@ -38,6 +39,12 @@ char		*CL_GM_GetMediaLoadStateName(load_state_t state);
 void        CL_GM_LoadScreenMedia(void);
 void        CL_GM_LoadWorldMedia(void);
 void        CL_GM_ShutdownMedia(void);
+
+//
+// PMove.
+//
+void		CL_GM_PmoveInit(pmoveParams_t* pmp);
+void		CL_GM_PmoveEnableQW(pmoveParams_t* pmp);
 
 //
 // Predict

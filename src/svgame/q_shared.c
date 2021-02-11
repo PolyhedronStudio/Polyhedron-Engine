@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // #endif
  
 vec2_t vec2_origin = {0,0};
-vec3_t vec3_origin = {0,0,0};
+//vec3_t vec3_origin = {0,0,0};
 vec4_t vec4_origin = {0,0,0,0};
 
 //============================================================================
@@ -39,60 +39,60 @@ vec4_t vec4_origin = {0,0,0,0};
 #pragma optimize( "", off )
 #endif
 
-void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees )
-{
-	float	m[3][3];
-	float	im[3][3];
-	float	zrot[3][3];
-	float	tmpmat[3][3];
-	float	rot[3][3];
-	int	i;
-	vec3_t vr, vup, vf;
-
-	vf[0] = dir[0];
-	vf[1] = dir[1];
-	vf[2] = dir[2];
-
-	PerpendicularVector( vr, dir );
-	CrossProduct( vr, vf, vup );
-
-	m[0][0] = vr[0];
-	m[1][0] = vr[1];
-	m[2][0] = vr[2];
-
-	m[0][1] = vup[0];
-	m[1][1] = vup[1];
-	m[2][1] = vup[2];
-
-	m[0][2] = vf[0];
-	m[1][2] = vf[1];
-	m[2][2] = vf[2];
-
-	memcpy( im, m, sizeof( im ) );
-
-	im[0][1] = m[1][0];
-	im[0][2] = m[2][0];
-	im[1][0] = m[0][1];
-	im[1][2] = m[2][1];
-	im[2][0] = m[0][2];
-	im[2][1] = m[1][2];
-
-	memset( zrot, 0, sizeof( zrot ) );
-	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
-
-	zrot[0][0] = cos( DEG2RAD( degrees ) );
-	zrot[0][1] = sin( DEG2RAD( degrees ) );
-	zrot[1][0] = -sin( DEG2RAD( degrees ) );
-	zrot[1][1] = cos( DEG2RAD( degrees ) );
-
-	R_ConcatRotations( m, zrot, tmpmat );
-	R_ConcatRotations( tmpmat, im, rot );
-
-	for ( i = 0; i < 3; i++ )
-	{
-		dst[i] = rot[i][0] * point[0] + rot[i][1] * point[1] + rot[i][2] * point[2];
-	}
-}
+//void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees )
+//{
+//	float	m[3][3];
+//	float	im[3][3];
+//	float	zrot[3][3];
+//	float	tmpmat[3][3];
+//	float	rot[3][3];
+//	int	i;
+//	vec3_t vr, vup, vf;
+//
+//	vf[0] = dir[0];
+//	vf[1] = dir[1];
+//	vf[2] = dir[2];
+//
+//	PerpendicularVector( vr, dir );
+//	CrossProduct( vr, vf, vup );
+//
+//	m[0][0] = vr[0];
+//	m[1][0] = vr[1];
+//	m[2][0] = vr[2];
+//
+//	m[0][1] = vup[0];
+//	m[1][1] = vup[1];
+//	m[2][1] = vup[2];
+//
+//	m[0][2] = vf[0];
+//	m[1][2] = vf[1];
+//	m[2][2] = vf[2];
+//
+//	memcpy( im, m, sizeof( im ) );
+//
+//	im[0][1] = m[1][0];
+//	im[0][2] = m[2][0];
+//	im[1][0] = m[0][1];
+//	im[1][2] = m[2][1];
+//	im[2][0] = m[0][2];
+//	im[2][1] = m[1][2];
+//
+//	memset( zrot, 0, sizeof( zrot ) );
+//	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
+//
+//	zrot[0][0] = cos( DEG2RAD( degrees ) );
+//	zrot[0][1] = sin( DEG2RAD( degrees ) );
+//	zrot[1][0] = -sin( DEG2RAD( degrees ) );
+//	zrot[1][1] = cos( DEG2RAD( degrees ) );
+//
+//	R_ConcatRotations( m, zrot, tmpmat );
+//	R_ConcatRotations( tmpmat, im, rot );
+//
+//	for ( i = 0; i < 3; i++ )
+//	{
+//		dst[i] = rot[i][0] * point[0] + rot[i][1] * point[1] + rot[i][2] * point[2];
+//	}
+//}
 
 #ifdef _WIN32
 #pragma optimize( "", on )
@@ -100,60 +100,60 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 
 
 
-void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
-{
-	float		angle;
-	static float		sr, sp, sy, cr, cp, cy;
-	// static to help MS compiler fp bugs
+//void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
+//{
+//	float		angle;
+//	static float		sr, sp, sy, cr, cp, cy;
+//	// static to help MS compiler fp bugs
+//
+//	if (!angles)
+//		return;
+//
+//	angle = angles[YAW] * (M_PI*2 / 360);
+//	sy = sin(angle);
+//	cy = cos(angle);
+//	angle = angles[PITCH] * (M_PI*2 / 360);
+//	sp = sin(angle);
+//	cp = cos(angle);
+//	angle = angles[ROLL] * (M_PI*2 / 360);
+//	sr = sin(angle);
+//	cr = cos(angle);
+//
+//	if (forward)
+//	{
+//		forward[0] = cp*cy;
+//		forward[1] = cp*sy;
+//		forward[2] = -sp;
+//	}
+//	if (right)
+//	{
+//		right[0] = (-1*sr*sp*cy+-1*cr*-sy);
+//		right[1] = (-1*sr*sp*sy+-1*cr*cy);
+//		right[2] = -1*sr*cp;
+//	}
+//	if (up)
+//	{
+//		up[0] = (cr*sp*cy+-sr*-sy);
+//		up[1] = (cr*sp*sy+-sr*cy);
+//		up[2] = cr*cp;
+//	}
+//}
 
-	if (!angles)
-		return;
-
-	angle = angles[YAW] * (M_PI*2 / 360);
-	sy = sin(angle);
-	cy = cos(angle);
-	angle = angles[PITCH] * (M_PI*2 / 360);
-	sp = sin(angle);
-	cp = cos(angle);
-	angle = angles[ROLL] * (M_PI*2 / 360);
-	sr = sin(angle);
-	cr = cos(angle);
-
-	if (forward)
-	{
-		forward[0] = cp*cy;
-		forward[1] = cp*sy;
-		forward[2] = -sp;
-	}
-	if (right)
-	{
-		right[0] = (-1*sr*sp*cy+-1*cr*-sy);
-		right[1] = (-1*sr*sp*sy+-1*cr*cy);
-		right[2] = -1*sr*cp;
-	}
-	if (up)
-	{
-		up[0] = (cr*sp*cy+-sr*-sy);
-		up[1] = (cr*sp*sy+-sr*cy);
-		up[2] = cr*cp;
-	}
-}
-
-void MakeNormalVectors (vec3_t forward, vec3_t right, vec3_t up)
-{
-	float		d;
-
-	// this rotate and negat guarantees a vector
-	// not colinear with the original
-	right[1] = -forward[0];
-	right[2] = forward[1];
-	right[0] = forward[2];
-
-	d = DotProduct (right, forward);
-	VectorMA (right, -d, forward, right);
-	VectorNormalize (right);
-	CrossProduct (right, forward, up);
-}
+//void MakeNormalVectors (vec3_t forward, vec3_t right, vec3_t up)
+//{
+//	float		d;
+//
+//	// this rotate and negat guarantees a vector
+//	// not colinear with the original
+//	right[1] = -forward[0];
+//	right[2] = forward[1];
+//	right[0] = forward[2];
+//
+//	d = DotProduct (right, forward);
+//	VectorMA (right, -d, forward, right);
+//	VectorNormalize (right);
+//	CrossProduct (right, forward, up);
+//}
 
 void VecToAngleRolled (vec3_t value1, float angleyaw, vec3_t angles)
 {
@@ -402,328 +402,328 @@ Which means (THANKS FOR THE FUCKING COMMENTS CARMACK!):
 //#if !id386 || defined __linux__ 
 //#ifndef id386
 //#ifndef _WIN32
-#if !defined (_WIN32) || !defined (_M_IX86)
-int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
-{
-	float	dist1, dist2;
-	int		sides;
+//#if !defined (_WIN32) || !defined (_M_IX86)
+//int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
+//{
+//	float	dist1, dist2;
+//	int		sides;
+//
+//// fast axial cases
+//	if (p->type < 3)
+//	{
+//		if (p->dist <= emins[p->type])
+//			return 1;
+//		if (p->dist >= emaxs[p->type])
+//			return 2;
+//		return 3;
+//	}
+//	
+//// general case
+//	switch (p->signbits)
+//	{
+//	case 0:
+//		dist1 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
+//		dist2 = p->normal[0]*emins[0] + p->normal[1]*emins[1] + p->normal[2]*emins[2];
+//		break;
+//	case 1:
+//		dist1 = p->normal[0]*emins[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
+//		dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emins[1] + p->normal[2]*emins[2];
+//		break;
+//	case 2:
+//		dist1 = p->normal[0]*emaxs[0] + p->normal[1]*emins[1] + p->normal[2]*emaxs[2];
+//		dist2 = p->normal[0]*emins[0] + p->normal[1]*emaxs[1] + p->normal[2]*emins[2];
+//		break;
+//	case 3:
+//		dist1 = p->normal[0]*emins[0] + p->normal[1]*emins[1] + p->normal[2]*emaxs[2];
+//		dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emins[2];
+//		break;
+//	case 4:
+//		dist1 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emins[2];
+//		dist2 = p->normal[0]*emins[0] + p->normal[1]*emins[1] + p->normal[2]*emaxs[2];
+//		break;
+//	case 5:
+//		dist1 = p->normal[0]*emins[0] + p->normal[1]*emaxs[1] + p->normal[2]*emins[2];
+//		dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emins[1] + p->normal[2]*emaxs[2];
+//		break;
+//	case 6:
+//		dist1 = p->normal[0]*emaxs[0] + p->normal[1]*emins[1] + p->normal[2]*emins[2];
+//		dist2 = p->normal[0]*emins[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
+//		break;
+//	case 7:
+//		dist1 = p->normal[0]*emins[0] + p->normal[1]*emins[1] + p->normal[2]*emins[2];
+//		dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
+//		break;
+//	default:
+//		dist1 = dist2 = 0;		// shut up compiler
+//		assert( 0 );
+//		break;
+//	}
+//
+//	sides = 0;
+//	if (dist1 >= p->dist)
+//		sides = 1;
+//	if (dist2 < p->dist)
+//		sides |= 2;
+//
+//	assert( sides != 0 );
+//
+//	return sides;
+//}
+//#else
+//#pragma warning( disable: 4035 )
+//
+//__declspec( naked ) int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
+//{
+//	static int bops_initialized;
+//	static int Ljmptab[8];
+//
+//	__asm {
+//
+//		push ebx
+//			
+//		cmp bops_initialized, 1
+//		je  initialized
+//		mov bops_initialized, 1
+//		
+//		mov Ljmptab[0*4], offset Lcase0
+//		mov Ljmptab[1*4], offset Lcase1
+//		mov Ljmptab[2*4], offset Lcase2
+//		mov Ljmptab[3*4], offset Lcase3
+//		mov Ljmptab[4*4], offset Lcase4
+//		mov Ljmptab[5*4], offset Lcase5
+//		mov Ljmptab[6*4], offset Lcase6
+//		mov Ljmptab[7*4], offset Lcase7
+//			
+//initialized:
+//
+//		mov edx,ds:dword ptr[4+12+esp]
+//		mov ecx,ds:dword ptr[4+4+esp]
+//		xor eax,eax
+//		mov ebx,ds:dword ptr[4+8+esp]
+//		mov al,ds:byte ptr[17+edx]
+//		cmp al,8
+//		jge Lerror
+//		fld ds:dword ptr[0+edx]
+//		fld st(0)
+//		jmp dword ptr[Ljmptab+eax*4]
+//Lcase0:
+//		fmul ds:dword ptr[ebx]
+//		fld ds:dword ptr[0+4+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[ecx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[4+ebx]
+//		fld ds:dword ptr[0+8+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[4+ecx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[8+ebx]
+//		fxch st(5)
+//		faddp st(3),st(0)
+//		fmul ds:dword ptr[8+ecx]
+//		fxch st(1)
+//		faddp st(3),st(0)
+//		fxch st(3)
+//		faddp st(2),st(0)
+//		jmp LSetSides
+//Lcase1:
+//		fmul ds:dword ptr[ecx]
+//		fld ds:dword ptr[0+4+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[ebx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[4+ebx]
+//		fld ds:dword ptr[0+8+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[4+ecx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[8+ebx]
+//		fxch st(5)
+//		faddp st(3),st(0)
+//		fmul ds:dword ptr[8+ecx]
+//		fxch st(1)
+//		faddp st(3),st(0)
+//		fxch st(3)
+//		faddp st(2),st(0)
+//		jmp LSetSides
+//Lcase2:
+//		fmul ds:dword ptr[ebx]
+//		fld ds:dword ptr[0+4+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[ecx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[4+ecx]
+//		fld ds:dword ptr[0+8+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[4+ebx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[8+ebx]
+//		fxch st(5)
+//		faddp st(3),st(0)
+//		fmul ds:dword ptr[8+ecx]
+//		fxch st(1)
+//		faddp st(3),st(0)
+//		fxch st(3)
+//		faddp st(2),st(0)
+//		jmp LSetSides
+//Lcase3:
+//		fmul ds:dword ptr[ecx]
+//		fld ds:dword ptr[0+4+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[ebx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[4+ecx]
+//		fld ds:dword ptr[0+8+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[4+ebx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[8+ebx]
+//		fxch st(5)
+//		faddp st(3),st(0)
+//		fmul ds:dword ptr[8+ecx]
+//		fxch st(1)
+//		faddp st(3),st(0)
+//		fxch st(3)
+//		faddp st(2),st(0)
+//		jmp LSetSides
+//Lcase4:
+//		fmul ds:dword ptr[ebx]
+//		fld ds:dword ptr[0+4+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[ecx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[4+ebx]
+//		fld ds:dword ptr[0+8+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[4+ecx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[8+ecx]
+//		fxch st(5)
+//		faddp st(3),st(0)
+//		fmul ds:dword ptr[8+ebx]
+//		fxch st(1)
+//		faddp st(3),st(0)
+//		fxch st(3)
+//		faddp st(2),st(0)
+//		jmp LSetSides
+//Lcase5:
+//		fmul ds:dword ptr[ecx]
+//		fld ds:dword ptr[0+4+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[ebx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[4+ebx]
+//		fld ds:dword ptr[0+8+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[4+ecx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[8+ecx]
+//		fxch st(5)
+//		faddp st(3),st(0)
+//		fmul ds:dword ptr[8+ebx]
+//		fxch st(1)
+//		faddp st(3),st(0)
+//		fxch st(3)
+//		faddp st(2),st(0)
+//		jmp LSetSides
+//Lcase6:
+//		fmul ds:dword ptr[ebx]
+//		fld ds:dword ptr[0+4+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[ecx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[4+ecx]
+//		fld ds:dword ptr[0+8+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[4+ebx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[8+ecx]
+//		fxch st(5)
+//		faddp st(3),st(0)
+//		fmul ds:dword ptr[8+ebx]
+//		fxch st(1)
+//		faddp st(3),st(0)
+//		fxch st(3)
+//		faddp st(2),st(0)
+//		jmp LSetSides
+//Lcase7:
+//		fmul ds:dword ptr[ecx]
+//		fld ds:dword ptr[0+4+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[ebx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[4+ecx]
+//		fld ds:dword ptr[0+8+edx]
+//		fxch st(2)
+//		fmul ds:dword ptr[4+ebx]
+//		fxch st(2)
+//		fld st(0)
+//		fmul ds:dword ptr[8+ecx]
+//		fxch st(5)
+//		faddp st(3),st(0)
+//		fmul ds:dword ptr[8+ebx]
+//		fxch st(1)
+//		faddp st(3),st(0)
+//		fxch st(3)
+//		faddp st(2),st(0)
+//LSetSides:
+//		faddp st(2),st(0)
+//		fcomp ds:dword ptr[12+edx]
+//		xor ecx,ecx
+//		fnstsw ax
+//		fcomp ds:dword ptr[12+edx]
+//		and ah,1
+//		xor ah,1
+//		add cl,ah
+//		fnstsw ax
+//		and ah,1
+//		add ah,ah
+//		add cl,ah
+//		pop ebx
+//		mov eax,ecx
+//		ret
+//Lerror:
+//		int 3
+//	}
+//}
+//#pragma warning( default: 4035 )
+//#endif
 
-// fast axial cases
-	if (p->type < 3)
-	{
-		if (p->dist <= emins[p->type])
-			return 1;
-		if (p->dist >= emaxs[p->type])
-			return 2;
-		return 3;
-	}
-	
-// general case
-	switch (p->signbits)
-	{
-	case 0:
-		dist1 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
-		dist2 = p->normal[0]*emins[0] + p->normal[1]*emins[1] + p->normal[2]*emins[2];
-		break;
-	case 1:
-		dist1 = p->normal[0]*emins[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
-		dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emins[1] + p->normal[2]*emins[2];
-		break;
-	case 2:
-		dist1 = p->normal[0]*emaxs[0] + p->normal[1]*emins[1] + p->normal[2]*emaxs[2];
-		dist2 = p->normal[0]*emins[0] + p->normal[1]*emaxs[1] + p->normal[2]*emins[2];
-		break;
-	case 3:
-		dist1 = p->normal[0]*emins[0] + p->normal[1]*emins[1] + p->normal[2]*emaxs[2];
-		dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emins[2];
-		break;
-	case 4:
-		dist1 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emins[2];
-		dist2 = p->normal[0]*emins[0] + p->normal[1]*emins[1] + p->normal[2]*emaxs[2];
-		break;
-	case 5:
-		dist1 = p->normal[0]*emins[0] + p->normal[1]*emaxs[1] + p->normal[2]*emins[2];
-		dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emins[1] + p->normal[2]*emaxs[2];
-		break;
-	case 6:
-		dist1 = p->normal[0]*emaxs[0] + p->normal[1]*emins[1] + p->normal[2]*emins[2];
-		dist2 = p->normal[0]*emins[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
-		break;
-	case 7:
-		dist1 = p->normal[0]*emins[0] + p->normal[1]*emins[1] + p->normal[2]*emins[2];
-		dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
-		break;
-	default:
-		dist1 = dist2 = 0;		// shut up compiler
-		assert( 0 );
-		break;
-	}
-
-	sides = 0;
-	if (dist1 >= p->dist)
-		sides = 1;
-	if (dist2 < p->dist)
-		sides |= 2;
-
-	assert( sides != 0 );
-
-	return sides;
-}
-#else
-#pragma warning( disable: 4035 )
-
-__declspec( naked ) int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
-{
-	static int bops_initialized;
-	static int Ljmptab[8];
-
-	__asm {
-
-		push ebx
-			
-		cmp bops_initialized, 1
-		je  initialized
-		mov bops_initialized, 1
-		
-		mov Ljmptab[0*4], offset Lcase0
-		mov Ljmptab[1*4], offset Lcase1
-		mov Ljmptab[2*4], offset Lcase2
-		mov Ljmptab[3*4], offset Lcase3
-		mov Ljmptab[4*4], offset Lcase4
-		mov Ljmptab[5*4], offset Lcase5
-		mov Ljmptab[6*4], offset Lcase6
-		mov Ljmptab[7*4], offset Lcase7
-			
-initialized:
-
-		mov edx,ds:dword ptr[4+12+esp]
-		mov ecx,ds:dword ptr[4+4+esp]
-		xor eax,eax
-		mov ebx,ds:dword ptr[4+8+esp]
-		mov al,ds:byte ptr[17+edx]
-		cmp al,8
-		jge Lerror
-		fld ds:dword ptr[0+edx]
-		fld st(0)
-		jmp dword ptr[Ljmptab+eax*4]
-Lcase0:
-		fmul ds:dword ptr[ebx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ebx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase1:
-		fmul ds:dword ptr[ecx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ebx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase2:
-		fmul ds:dword ptr[ebx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ecx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase3:
-		fmul ds:dword ptr[ecx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ecx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase4:
-		fmul ds:dword ptr[ebx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ebx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase5:
-		fmul ds:dword ptr[ecx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ebx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase6:
-		fmul ds:dword ptr[ebx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ecx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase7:
-		fmul ds:dword ptr[ecx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ecx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-LSetSides:
-		faddp st(2),st(0)
-		fcomp ds:dword ptr[12+edx]
-		xor ecx,ecx
-		fnstsw ax
-		fcomp ds:dword ptr[12+edx]
-		and ah,1
-		xor ah,1
-		add cl,ah
-		fnstsw ax
-		and ah,1
-		add ah,ah
-		add cl,ah
-		pop ebx
-		mov eax,ecx
-		ret
-Lerror:
-		int 3
-	}
-}
-#pragma warning( default: 4035 )
-#endif
-
-void ClearBounds (vec3_t mins, vec3_t maxs)
-{
-	mins[0] = mins[1] = mins[2] = 99999;
-	maxs[0] = maxs[1] = maxs[2] = -99999;
-}
-
-void AddPointToBounds (vec3_t v, vec3_t mins, vec3_t maxs)
-{
-	int		i;
-	vec_t	val;
-
-	for (i=0 ; i<3 ; i++)
-	{
-		val = v[i];
-		if (val < mins[i])
-			mins[i] = val;
-		if (val > maxs[i])
-			maxs[i] = val;
-	}
-}
+//void ClearBounds (vec3_t mins, vec3_t maxs)
+//{
+//	mins[0] = mins[1] = mins[2] = 99999;
+//	maxs[0] = maxs[1] = maxs[2] = -99999;
+//}
+//
+//void AddPointToBounds (vec3_t v, vec3_t mins, vec3_t maxs)
+//{
+//	int		i;
+//	vec_t	val;
+//
+//	for (i=0 ; i<3 ; i++)
+//	{
+//		val = v[i];
+//		if (val < mins[i])
+//			mins[i] = val;
+//		if (val > maxs[i])
+//			maxs[i] = val;
+//	}
+//}
 
 
 int VectorCompare (vec3_t v1, vec3_t v2)
@@ -735,41 +735,41 @@ int VectorCompare (vec3_t v1, vec3_t v2)
 }
 
 
-vec_t VectorNormalize (vec3_t v)
-{
-	float	length, ilength;
-
-	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = sqrt (length);		// FIXME
-
-	if (length)
-	{
-		ilength = 1/length;
-		v[0] *= ilength;
-		v[1] *= ilength;
-		v[2] *= ilength;
-	}
-		
-	return length;
-}
-
-vec_t VectorNormalize2 (vec3_t v, vec3_t out)
-{
-	float	length, ilength;
-
-	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = sqrt (length);		// FIXME
-
-	if (length)
-	{
-		ilength = 1/length;
-		out[0] = v[0]*ilength;
-		out[1] = v[1]*ilength;
-		out[2] = v[2]*ilength;
-	}
-		
-	return length;
-}
+//vec_t VectorNormalize (vec3_t v)
+//{
+//	float	length, ilength;
+//
+//	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+//	length = sqrt (length);		// FIXME
+//
+//	if (length)
+//	{
+//		ilength = 1/length;
+//		v[0] *= ilength;
+//		v[1] *= ilength;
+//		v[2] *= ilength;
+//	}
+//		
+//	return length;
+//}
+//
+//vec_t VectorNormalize2 (vec3_t v, vec3_t out)
+//{
+//	float	length, ilength;
+//
+//	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+//	length = sqrt (length);		// FIXME
+//
+//	if (length)
+//	{
+//		ilength = 1/length;
+//		out[0] = v[0]*ilength;
+//		out[1] = v[1]*ilength;
+//		out[2] = v[2]*ilength;
+//	}
+//		
+//	return length;
+//}
 
 /*
 =================
@@ -1024,19 +1024,19 @@ COM_SkipPath
 Skips the file path
 ============
 */
-char *COM_SkipPath (char *pathname)
-{
-	char	*last;
-	
-	last = pathname;
-	while (*pathname)
-	{
-		if (*pathname == '/' || *pathname == '\\')
-			last = pathname+1;
-		pathname++;
-	}
-	return last;
-}
+//char *COM_SkipPath (char *pathname)
+//{
+//	char	*last;
+//	
+//	last = pathname;
+//	while (*pathname)
+//	{
+//		if (*pathname == '/' || *pathname == '\\')
+//			last = pathname+1;
+//		pathname++;
+//	}
+//	return last;
+//}
 
 /*
 ============
@@ -1045,79 +1045,79 @@ COM_StripExtension
 Removes the file extension, if any
 ============
 */
-void COM_StripExtension (char *in, char *out, size_t outSize)
-{
-/*	while (*in && *in != '.')
-		*out++ = *in++;
-	*out = 0;
-	*/
-	char	*s, *last;
-
-	s = last = in + strlen(in);
-	while (*s != '/' && *s != '\\' && s != in)
-	{
-		if (*s == '.'){
-			last = s;
-			break;
-		}
-		s--;
-	}
-
-	Q_strncpyz(out, in, outSize);
-	if (last-in < outSize)
-		out[last-in] = 0;
-}
+//void COM_StripExtension (char *in, char *out, size_t outSize)
+//{
+///*	while (*in && *in != '.')
+//		*out++ = *in++;
+//	*out = 0;
+//	*/
+//	char	*s, *last;
+//
+//	s = last = in + strlen(in);
+//	while (*s != '/' && *s != '\\' && s != in)
+//	{
+//		if (*s == '.'){
+//			last = s;
+//			break;
+//		}
+//		s--;
+//	}
+//
+//	Q_strncpyz(out, in, outSize);
+//	if (last-in < outSize)
+//		out[last-in] = 0;
+//}
 
 /*
 ============
 COM_FileExtension
 ============
 */
-char *COM_FileExtension (char *in)
-{
-	static char exten[8];
-	int		i;
-
-	while (*in && *in != '.')
-		in++;
-	if (!*in)
-		return "";
-	in++;
-	for (i=0 ; i<7 && *in ; i++,in++)
-		exten[i] = *in;
-	exten[i] = 0;
-	return exten;
-}
+//char *COM_FileExtension (char *in)
+//{
+//	static char exten[8];
+//	int		i;
+//
+//	while (*in && *in != '.')
+//		in++;
+//	if (!*in)
+//		return "";
+//	in++;
+//	for (i=0 ; i<7 && *in ; i++,in++)
+//		exten[i] = *in;
+//	exten[i] = 0;
+//	return exten;
+//}
 
 /*
 ============
 COM_FileBase
 ============
 */
-void COM_FileBase (char *in, char *out, size_t outSize)
-{
-	char *s, *s2;
-	
-	s = in + strlen(in) - 1;
-	
-	while (s != in && *s != '.')
-		s--;
-	
-	for (s2 = s ; s2 != in && *s2 != '/' ; s2--)
-	;
-	
-	if (s-s2 < 2)
-		out[0] = 0;
-	else
-	{
-		s--;
-	//	strncpy (out,s2+1, s-s2);
-	//	out[s-s2] = 0;
-		Q_strncpyz (out, s2+1, outSize);
-		if (s-s2 < outSize)
-			out[s-s2] = 0;
-	}
-}
+//void COM_FileBase (char *in, char *out, size_t outSize)
+//{
+//	char *s, *s2;
+//	
+//	s = in + strlen(in) - 1;
+//	
+//	while (s != in && *s != '.')
+//		s--;
+//	
+//	for (s2 = s ; s2 != in && *s2 != '/' ; s2--)
+//	;
+//	
+//	if (s-s2 < 2)
+//		out[0] = 0;
+//	else
+//	{
+//		s--;
+//	//	strncpy (out,s2+1, s-s2);
+//	//	out[s-s2] = 0;
+//		Q_strncpyz (out, s2+1, outSize);
+//		if (s-s2 < outSize)
+//			out[s-s2] = 0;
+//	}
+//}
 
 /*
 ============
@@ -1126,21 +1126,21 @@ COM_FilePath
 Returns the path up to, but not including the last /
 ============
 */
-void COM_FilePath (char *in, char *out, size_t outSize)
-{
-	char *s;
-	
-	s = in + strlen(in) - 1;
-	
-	while (s != in && *s != '/')
-		s--;
-
-//	strncpy (out,in, s-in);
-//	out[s-in] = 0;
-	Q_strncpyz (out, in, outSize);
-	if (s-in < outSize)
-		out[s-in] = 0;
-}
+//void COM_FilePath (char *in, char *out, size_t outSize)
+//{
+//	char *s;
+//	
+//	s = in + strlen(in) - 1;
+//	
+//	while (s != in && *s != '/')
+//		s--;
+//
+////	strncpy (out,in, s-in);
+////	out[s-in] = 0;
+//	Q_strncpyz (out, in, outSize);
+//	if (s-in < outSize)
+//		out[s-in] = 0;
+//}
 
 
 /*
@@ -1148,25 +1148,25 @@ void COM_FilePath (char *in, char *out, size_t outSize)
 COM_DefaultExtension
 ==================
 */
-void COM_DefaultExtension (char *path, size_t pathSize, char *extension)
-{
-	char    *src;
+//void COM_DefaultExtension (char *path, size_t pathSize, char *extension)
+//{
+//	char    *src;
+////
+//// if path doesn't have a .EXT, append extension
+//// (extension should include the .)
+////
+//	src = path + strlen(path) - 1;
 //
-// if path doesn't have a .EXT, append extension
-// (extension should include the .)
+//	while (*src != '/' && src != path)
+//	{
+//		if (*src == '.')
+//			return;                 // it has an extension
+//		src--;
+//	}
 //
-	src = path + strlen(path) - 1;
-
-	while (*src != '/' && src != path)
-	{
-		if (*src == '.')
-			return;                 // it has an extension
-		src--;
-	}
-
-//	strncat (path, extension);
-	Q_strncatz(path, extension, pathSize);
-}
+////	strncat (path, extension);
+//	Q_strncatz(path, extension, pathSize);
+//}
 
 /*
 ============================================================================
@@ -1320,17 +1320,17 @@ does a varargs printf into a temp buffer, so I don't need to have
 varargs versions of all text functions.
 ============
 */
-char *va (char *format, ...)
-{
-	va_list		argptr;
-	static char		string[1024];
-	
-	va_start (argptr, format);
-	Q_vsnprintf (string, sizeof(string), format, argptr);
-	va_end (argptr);
-
-	return string;	
-}
+//char *va (char *format, ...)
+//{
+//	va_list		argptr;
+//	static char		string[1024];
+//	
+//	va_start (argptr, format);
+//	Q_vsnprintf (string, sizeof(string), format, argptr);
+//	va_end (argptr);
+//
+//	return string;	
+//}
 
 /*
 =======================================================================
@@ -1421,88 +1421,88 @@ COM_Parse
 Parse a token out of a string
 ==============
 */
-char *COM_Parse (char **data_p)
-{
-	int		c;
-	int		len;
-	char	*data;
-
-	data = *data_p;
-	len = 0;
-	com_token[0] = 0;
-	
-	if (!data)
-	{
-		*data_p = NULL;
-		return "";
-	}
-		
-// skip whitespace
-skipwhite:
-	while ( (c = *data) <= ' ')
-	{
-		if (c == 0)
-		{
-			*data_p = NULL;
-			return "";
-		}
-		data++;
-	}
-	
-// skip // comments
-	if (c=='/' && data[1] == '/')
-	{
-		while (*data && *data != '\n')
-			data++;
-		goto skipwhite;
-	}
-
-// handle quoted strings specially
-	if (c == '\"')
-	{
-		data++;
-		while (1)
-		{
-			c = *data++;
-			if (c=='\"' || !c)
-			{
-				if (len == MAX_TOKEN_CHARS)	// Knightmare- discard if > MAX_TOKEN_CHARS-1
-					len = 0;
-
-				com_token[len] = 0;
-				*data_p = data;
-				return com_token;
-			}
-			if (len < MAX_TOKEN_CHARS)
-			{
-				com_token[len] = c;
-				len++;
-			}
-		}
-	}
-
-// parse a regular word
-	do
-	{
-		if (len < MAX_TOKEN_CHARS)
-		{
-			com_token[len] = c;
-			len++;
-		}
-		data++;
-		c = *data;
-	} while (c>32);
-
-	if (len == MAX_TOKEN_CHARS)
-	{
-//		Com_Printf ("Token exceeded %i chars, discarded.\n", MAX_TOKEN_CHARS);
-		len = 0;
-	}
-	com_token[len] = 0;
-
-	*data_p = data;
-	return com_token;
-}
+//char *COM_Parse (char **data_p)
+//{
+//	int		c;
+//	int		len;
+//	char	*data;
+//
+//	data = *data_p;
+//	len = 0;
+//	com_token[0] = 0;
+//	
+//	if (!data)
+//	{
+//		*data_p = NULL;
+//		return "";
+//	}
+//		
+//// skip whitespace
+//skipwhite:
+//	while ( (c = *data) <= ' ')
+//	{
+//		if (c == 0)
+//		{
+//			*data_p = NULL;
+//			return "";
+//		}
+//		data++;
+//	}
+//	
+//// skip // comments
+//	if (c=='/' && data[1] == '/')
+//	{
+//		while (*data && *data != '\n')
+//			data++;
+//		goto skipwhite;
+//	}
+//
+//// handle quoted strings specially
+//	if (c == '\"')
+//	{
+//		data++;
+//		while (1)
+//		{
+//			c = *data++;
+//			if (c=='\"' || !c)
+//			{
+//				if (len == MAX_TOKEN_CHARS)	// Knightmare- discard if > MAX_TOKEN_CHARS-1
+//					len = 0;
+//
+//				com_token[len] = 0;
+//				*data_p = data;
+//				return com_token;
+//			}
+//			if (len < MAX_TOKEN_CHARS)
+//			{
+//				com_token[len] = c;
+//				len++;
+//			}
+//		}
+//	}
+//
+//// parse a regular word
+//	do
+//	{
+//		if (len < MAX_TOKEN_CHARS)
+//		{
+//			com_token[len] = c;
+//			len++;
+//		}
+//		data++;
+//		c = *data;
+//	} while (c>32);
+//
+//	if (len == MAX_TOKEN_CHARS)
+//	{
+////		Com_Printf ("Token exceeded %i chars, discarded.\n", MAX_TOKEN_CHARS);
+//		len = 0;
+//	}
+//	com_token[len] = 0;
+//
+//	*data_p = data;
+//	return com_token;
+//}
 
 
 /*
@@ -1954,31 +1954,31 @@ int Q_SortStrcmp (const char **arg1, const char **arg2)
 Q_strncasecmp
 =================
 */
-int Q_strncasecmp (char *s1, char *s2, size_t n)
-{
-	int		c1, c2;
-	
-	do
-	{
-		c1 = *s1++;
-		c2 = *s2++;
-
-		if (!n--)
-			return 0;		// strings are equal until end point
-		
-		if (c1 != c2)
-		{
-			if (c1 >= 'a' && c1 <= 'z')
-				c1 -= ('a' - 'A');
-			if (c2 >= 'a' && c2 <= 'z')
-				c2 -= ('a' - 'A');
-			if (c1 != c2)
-				return -1;		// strings not equal
-		}
-	} while (c1);
-	
-	return 0;		// strings are equal
-}
+//int Q_strncasecmp (char *s1, char *s2, size_t n)
+//{
+//	int		c1, c2;
+//	
+//	do
+//	{
+//		c1 = *s1++;
+//		c2 = *s2++;
+//
+//		if (!n--)
+//			return 0;		// strings are equal until end point
+//		
+//		if (c1 != c2)
+//		{
+//			if (c1 >= 'a' && c1 <= 'z')
+//				c1 -= ('a' - 'A');
+//			if (c2 >= 'a' && c2 <= 'z')
+//				c2 -= ('a' - 'A');
+//			if (c1 != c2)
+//				return -1;		// strings not equal
+//		}
+//	} while (c1);
+//	
+//	return 0;		// strings are equal
+//}
 
 
 /*
@@ -1986,10 +1986,10 @@ int Q_strncasecmp (char *s1, char *s2, size_t n)
 Q_strcasecmp
 =================
 */
-int Q_strcasecmp (char *s1, char *s2)
-{
-	return Q_strncasecmp (s1, s2, 99999);
-}
+//int Q_strcasecmp (char *s1, char *s2)
+//{
+//	return Q_strncasecmp (s1, s2, 99999);
+//}
 
 
 /*
@@ -2174,96 +2174,96 @@ Searches the string for the given
 key and returns the associated value, or an empty string.
 ===============
 */
-char *Info_ValueForKey (char *s, char *key)
-{
-	char	pkey[512];
-	static	char value[2][512];	// use two buffers so compares
-								// work without stomping on each other
-	static	int	valueindex;
-	char	*o;
-	
-	valueindex ^= 1;
-	if (*s == '\\')
-		s++;
-	while (1)
-	{
-		o = pkey;
-		while (*s != '\\')
-		{
-			if (!*s)
-				return "";
-			*o++ = *s++;
-		}
-		*o = 0;
-		s++;
-
-		o = value[valueindex];
-
-		while (*s != '\\' && *s)
-		{
-			if (!*s)
-				return "";
-			*o++ = *s++;
-		}
-		*o = 0;
-
-		if (!strcmp (key, pkey) )
-			return value[valueindex];
-
-		if (!*s)
-			return "";
-		s++;
-	}
-}
-
-void Info_RemoveKey (char *s, char *key)
-{
-	char	*start;
-	char	pkey[512];
-	char	value[512];
-	char	*o;
-
-	if (strstr (key, "\\"))
-	{
-//		Com_Printf ("Can't use a key with a \\\n");
-		return;
-	}
-
-	while (1)
-	{
-		start = s;
-		if (*s == '\\')
-			s++;
-		o = pkey;
-		while (*s != '\\')
-		{
-			if (!*s)
-				return;
-			*o++ = *s++;
-		}
-		*o = 0;
-		s++;
-
-		o = value;
-		while (*s != '\\' && *s)
-		{
-			if (!*s)
-				return;
-			*o++ = *s++;
-		}
-		*o = 0;
-
-		if (!strcmp (key, pkey) )
-		{
-			strcpy (start, s);	// remove this part
-			return;
-		}
-
-		if (!*s)
-			return;
-	}
-
-}
+//char *Info_ValueForKey (char *s, char *key)
+//{
+//	char	pkey[512];
+//	static	char value[2][512];	// use two buffers so compares
+//								// work without stomping on each other
+//	static	int	valueindex;
+//	char	*o;
+//	
+//	valueindex ^= 1;
+//	if (*s == '\\')
+//		s++;
+//	while (1)
+//	{
+//		o = pkey;
+//		while (*s != '\\')
+//		{
+//			if (!*s)
+//				return "";
+//			*o++ = *s++;
+//		}
+//		*o = 0;
+//		s++;
+//
+//		o = value[valueindex];
+//
+//		while (*s != '\\' && *s)
+//		{
+//			if (!*s)
+//				return "";
+//			*o++ = *s++;
+//		}
+//		*o = 0;
+//
+//		if (!strcmp (key, pkey) )
+//			return value[valueindex];
+//
+//		if (!*s)
+//			return "";
+//		s++;
+//	}
+//}
+//
+//void Info_RemoveKey (char *s, char *key)
+//{
+//	char	*start;
+//	char	pkey[512];
+//	char	value[512];
+//	char	*o;
+//
+//	if (strstr (key, "\\"))
+//	{
+////		Com_Printf ("Can't use a key with a \\\n");
+//		return;
+//	}
+//
+//	while (1)
+//	{
+//		start = s;
+//		if (*s == '\\')
+//			s++;
+//		o = pkey;
+//		while (*s != '\\')
+//		{
+//			if (!*s)
+//				return;
+//			*o++ = *s++;
+//		}
+//		*o = 0;
+//		s++;
+//
+//		o = value;
+//		while (*s != '\\' && *s)
+//		{
+//			if (!*s)
+//				return;
+//			*o++ = *s++;
+//		}
+//		*o = 0;
+//
+//		if (!strcmp (key, pkey) )
+//		{
+//			strcpy (start, s);	// remove this part
+//			return;
+//		}
+//
+//		if (!*s)
+//			return;
+//	}
+//
+//}
 
 
 /*
@@ -2274,68 +2274,68 @@ Some characters are illegal in info strings because they
 can mess up the server's parsing
 ==================
 */
-qboolean Info_Validate (char *s)
-{
-	if (strstr (s, "\""))
-		return false;
-	if (strstr (s, ";"))
-		return false;
-	return true;
-}
-
-void Info_SetValueForKey (char *s, char *key, char *value)
-{
-	char	newi[MAX_INFO_STRING], *v;
-	int		c;
-	int		maxsize = MAX_INFO_STRING;
-
-	if (strstr (key, "\\") || strstr (value, "\\") )
-	{
-		Com_Printf ("Can't use keys or values with a \\\n");
-		return;
-	}
-
-	if (strstr (key, ";") )
-	{
-		Com_Printf ("Can't use keys or values with a semicolon\n");
-		return;
-	}
-
-	if (strstr (key, "\"") || strstr (value, "\"") )
-	{
-		Com_Printf ("Can't use keys or values with a \"\n");
-		return;
-	}
-
-	if (strlen(key) > MAX_INFO_KEY-1 || strlen(value) > MAX_INFO_KEY-1)
-	{
-		Com_Printf ("Keys and values must be < 64 characters.\n");
-		return;
-	}
-	Info_RemoveKey (s, key);
-	if (!value || !strlen(value))
-		return;
-
-	Com_sprintf (newi, sizeof(newi), "\\%s\\%s", key, value);
-
-	if (strlen(newi) + strlen(s) > maxsize)
-	{
-		Com_Printf ("Info string length exceeded\n");
-		return;
-	}
-
-	// only copy ascii values
-	s += strlen(s);
-	v = newi;
-	while (*v)
-	{
-		c = *v++;
-		c &= 127;		// strip high bits
-		if (c >= 32 && c < 127)
-			*s++ = c;
-	}
-	*s = 0;
-}
+//qboolean Info_Validate (char *s)
+//{
+//	if (strstr (s, "\""))
+//		return false;
+//	if (strstr (s, ";"))
+//		return false;
+//	return true;
+//}
+//
+//void Info_SetValueForKey (char *s, char *key, char *value)
+//{
+//	char	newi[MAX_INFO_STRING], *v;
+//	int		c;
+//	int		maxsize = MAX_INFO_STRING;
+//
+//	if (strstr (key, "\\") || strstr (value, "\\") )
+//	{
+//		Com_Printf ("Can't use keys or values with a \\\n");
+//		return;
+//	}
+//
+//	if (strstr (key, ";") )
+//	{
+//		Com_Printf ("Can't use keys or values with a semicolon\n");
+//		return;
+//	}
+//
+//	if (strstr (key, "\"") || strstr (value, "\"") )
+//	{
+//		Com_Printf ("Can't use keys or values with a \"\n");
+//		return;
+//	}
+//
+//	if (strlen(key) > MAX_INFO_KEY-1 || strlen(value) > MAX_INFO_KEY-1)
+//	{
+//		Com_Printf ("Keys and values must be < 64 characters.\n");
+//		return;
+//	}
+//	Info_RemoveKey (s, key);
+//	if (!value || !strlen(value))
+//		return;
+//
+//	Com_sprintf (newi, sizeof(newi), "\\%s\\%s", key, value);
+//
+//	if (strlen(newi) + strlen(s) > maxsize)
+//	{
+//		Com_Printf ("Info string length exceeded\n");
+//		return;
+//	}
+//
+//	// only copy ascii values
+//	s += strlen(s);
+//	v = newi;
+//	while (*v)
+//	{
+//		c = *v++;
+//		c &= 127;		// strip high bits
+//		if (c >= 32 && c < 127)
+//			*s++ = c;
+//	}
+//	*s = 0;
+//}
 
 //====================================================================
 

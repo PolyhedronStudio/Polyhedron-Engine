@@ -106,9 +106,6 @@ client_state_t  cl;
 // N&C: Client shared structure. used to access entities etc in CG Module.
 client_shared_t cs;
 
-
-//centity_t   cl_entities[MAX_EDICTS];
-
 // used for executing stringcmds
 cmdbuf_t    cl_cmdbuf;
 char        cl_cmdbuf_text[MAX_STRING_CHARS];

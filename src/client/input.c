@@ -18,8 +18,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl.input.c  -- builds an intended movement command to send to the server
 
 #include "client.h"
+#include "shared/cl_game.h"
 #include "client/gamemodule.h"
 #include "system/lirc.h"
+
+// N&C: Cheesy hack, we need to actually make this extern in a header.
+extern clgame_export_t* cge;
 
 static cvar_t    *cl_nodelta;
 static cvar_t    *cl_maxpackets;
@@ -619,7 +623,14 @@ static void CL_BaseMove(vec3_t move)
 
 static void CL_ClampSpeed(vec3_t move)
 {
-    float speed = cl.pmp.maxspeed;
+    if (!cge)
+        return;
+
+    // N&C: This... can happen :P
+    if (!cge->pmoveParams)
+        return;
+
+    float speed = cge->pmoveParams->maxspeed;
 
     clamp(move[0], -speed, speed);
     clamp(move[1], -speed, speed);

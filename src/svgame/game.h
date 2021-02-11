@@ -20,7 +20,7 @@ along with Lazarus Quake 2 Mod source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
-#include "shared/pmove.h"
+#include "sharedgame/pmove.h"
 
 // game.h -- game dll information visible to server
 
@@ -157,7 +157,16 @@ typedef struct
 	void(*linkentity) (edict_t *ent);
 	void(*unlinkentity) (edict_t *ent);		// call before removing an interactive edict
 	int(*BoxEdicts) (vec3_t mins, vec3_t maxs, edict_t **list, int maxcount, int areatype);
-//	void(*Pmove) (pmove_t *pmove);		// player movement code common with client prediction
+
+	//
+	// N&C: We've moved the PMove functionality into sharedgame/pmove.c
+	// by doing so, we now call into the server for finding the proper
+	// pmoveparams_t to work in.
+	//
+	// Doing it this reversed method, allows for games to customize the pmove
+	// code.
+	//
+	//void (*Pmove)(pmove_t *pmove);          // player movement code common with client prediction
 	pmoveParams_t* (*GetPMoveParams) ();    // Used to call the shared PMove code with.
 
 	// network messaging
@@ -252,6 +261,13 @@ typedef struct
 	void(*ClientThink) (edict_t *ent, usercmd_t *cmd);
 
 	void(*RunFrame) (void);
+
+	//
+	// N&C: Our custom PMove requires that the server calls into the SVGame
+	// module for initializing pmove parameters.
+	//
+	void (*PmoveInit) (pmoveParams_t* pmp);
+	void (*PmoveEnableQW) (pmoveParams_t* pmp);
 
 	// ServerCommand will be called when an "sv <command>" command is issued on the
 	// server console.

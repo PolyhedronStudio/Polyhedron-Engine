@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "shared/shared.h"
-#include "shared/pmove.h"
+#include "sharedgame/pmove.h"
 #include "client/client.h"
 
 void AL_Underwater();
