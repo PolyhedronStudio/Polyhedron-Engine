@@ -13,6 +13,8 @@ SET(SRC_CLGAME
 	clgame/clg_media.c
 	clgame/clg_newfx.c
 	clgame/clg_parse.c
+	clgame/clg_predict.c
+	clgame/clg_screen.c
 	clgame/clg_tents.c
 	clgame/clg_tests.c
 	clgame/clg_view.c
@@ -243,7 +245,7 @@ SET(SRC_COMMON
 	common/math.c
 	common/mdfour.c
 	common/msg.c
-	common/pmove.c
+#	common/pmove.c
 	common/prompt.c
 	common/sizebuf.c
 #	common/tests.c
@@ -290,16 +292,19 @@ SET(HEADERS_GL
 ###################### Shared Folder.
 SET(HEADERS_SHARED
 	../inc/shared/cl_game.h
+	../inc/shared/cl_types.h
 	../inc/shared/config.h
 	../inc/shared/game.h 
 	../inc/shared/list.h 
 	../inc/shared/math.h 
 	../inc/shared/platform.h
+	../inc/shared/pmove.h
 	../inc/shared/shared.h 
 )
 SET(SRC_SHARED
 	shared/m_flash.c
 	shared/math.c
+	shared/pmove.c
 	shared/shared.c
 )
 
@@ -446,7 +451,7 @@ ENDIF()
 
 # Optional build target.
 if (CONFIG_BUILD_SV_GAME)
-	ADD_LIBRARY(svgame SHARED ${SRC_SVGAME} ${HEADERS_SVGAME})
+	ADD_LIBRARY(svgame SHARED ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED})
 endif()
 
 # Optional build target.
@@ -459,14 +464,14 @@ ADD_EXECUTABLE(client WIN32
 	${SRC_CLIENT} ${HEADERS_CLIENT} 
 	${SRC_COMMON} ${HEADERS_COMMON} 
 	${SRC_REFRESH} ${SRC_SHADERS} 
-	${SRC_SHARED} 
+	${SRC_SHARED} ${HEADERS_SHARED}
 	${SRC_WINDOWS} ${SRC_WINDOWS_CLIENT} ${HEADERS_WINDOWS}
 	${SRC_SERVER} ${HEADERS_SERVER}
 	os/res/nac.rc
 )
 ADD_EXECUTABLE(server 
 	${SRC_COMMON} ${HEADERS_COMMON} 
-	${SRC_SHARED} 
+	${SRC_SHARED} ${HEADERS_SHARED}
 	${SRC_WINDOWS} ${HEADERS_WINDOWS}
 	${SRC_SERVER} ${HEADERS_SERVER}
 	server/ac.c
@@ -478,13 +483,13 @@ ADD_EXECUTABLE(client
 	${SRC_CLIENT} ${HEADERS_CLIENT} 
 	${SRC_COMMON} ${HEADERS_COMMON} 
 	${SRC_REFRESH} ${SRC_SHADERS} 
-	${SRC_SHARED} 
+	${SRC_SHARED} ${HEADERS_SHARED}
 	${SRC_UNIX} ${SRC_UNIX_CLIENT}
 	${SRC_SERVER} ${HEADERS_SERVER}
 )
 ADD_EXECUTABLE(server
 	${SRC_COMMON} ${HEADERS_COMMON} 
-	${SRC_SHARED} 
+	${SRC_SHARED} ${HEADERS_SHARED}
 	${SRC_UNIX}
 	${SRC_SERVER} ${HEADERS_SERVER}
 	server/ac.c

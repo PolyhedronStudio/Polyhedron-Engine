@@ -272,7 +272,7 @@ static void CLG_LoadClientSounds(void)
 // Sets the sky based on the configstring.
 //===============
 //
-static void CLG_SetSky(void)
+void CLG_SetSky(void)
 {
     float       rotate;
     vec3_t      axis;
@@ -330,6 +330,9 @@ void CLG_InitMedia(void)
 
     // Initialize View Data.
     V_Init();
+
+    // Initialize the Screen Data.
+    SCR_Init();
 }
 
 //
@@ -447,4 +450,7 @@ void CLG_LoadWorldMedia(void)
 void CLG_ShutdownMedia (void) {
     // Shutdown View Data.
     V_Shutdown();
+
+    // Shutdown Screen Data.
+    SCR_Shutdown();
 }

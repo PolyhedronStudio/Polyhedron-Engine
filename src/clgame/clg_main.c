@@ -121,6 +121,11 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     clge.LoadWorldMedia             = CLG_LoadWorldMedia;
     clge.ShutdownMedia              = CLG_ShutdownMedia;
 
+    // Predict Movement (Client Side)
+    clge.CheckPredictionError       = CLG_CheckPredictionError;
+    clge.PredictAngles              = CLG_PredictAngles;
+    clge.PredictMovement            = CLG_PredictMovement;
+
     // ServerMessage.
     clge.UpdateConfigString         = CLG_UpdateConfigString;
     clge.StartServerMessage         = CLG_StartServerMessage;

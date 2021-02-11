@@ -40,6 +40,13 @@ void        CL_GM_LoadWorldMedia(void);
 void        CL_GM_ShutdownMedia(void);
 
 //
+// Predict
+//
+void		CL_GM_CheckPredictionError(int frame, unsigned int cmd);
+void		CL_GM_PredictAngles(void);
+void		CL_GM_PredictMovement(unsigned int ack, unsigned int current);
+
+//
 // Parse
 //
 qboolean	CL_GM_UpdateConfigString(int index, const char* str);

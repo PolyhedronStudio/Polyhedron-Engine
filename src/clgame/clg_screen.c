@@ -4,7 +4,7 @@
 // clg_screen.c
 //
 //
-// View handling on a per frame basis.
+// Client Screen Implementation.
 //
 #include "clg_local.h"
 
@@ -30,7 +30,7 @@ static void SCR_Sky_f(void)
     vec3_t  axis;
     int     argc = clgi.Cmd_Argc();
 
-    if (argc < 2) {
+    if (argc < 2) { 
         Com_Print("Usage: sky <basename> [rotate] [axis x y z]\n");
         return;
     }
@@ -87,7 +87,7 @@ static const cmdreg_t scr_cmds[] = {
 // 
 //================
 //
-void CLG_SCR_Init(void)
+void SCR_Init(void)
 {
 //    scr_viewsize = Cvar_Get("viewsize", "100", CVAR_ARCHIVE);
 //    scr_showpause = Cvar_Get("scr_showpause", "1", 0);
@@ -159,7 +159,7 @@ void CLG_SCR_Init(void)
 // 
 //================
 //
-void CLG_SCR_Shutdown(void)
+void SCR_Shutdown(void)
 {
     clgi.Cmd_Deregister(scr_cmds);
 //    scr.initialized = qfalse;

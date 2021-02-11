@@ -27,6 +27,7 @@
 // #include "common/cmodel.h"
 // #include "common/cmd.h"
 // #include "common/math.h"
+#include "common/x86/fpu.h"
 #include "common/msg.h"
 #include "common/pmove.h"
 #include "common/protocol.h"
@@ -244,23 +245,13 @@ typedef enum {
 
 void CLG_RegisterVWepModels();
 void CLG_LoadClientInfo(clientinfo_t* ci, const char* str);
+void CLG_SetSky(void);
 
 void CLG_InitMedia(void);
 char *CLG_GetMediaLoadStateName(load_state_t state);
 void CLG_LoadScreenMedia(void);
 void CLG_LoadWorldMedia(void);
 void CLG_ShutdownMedia(void);
-
-
-//
-// clg_parse.c
-//
-qboolean CLG_UpdateConfigString(int index, const char* str);
-void CLG_StartServerMessage(void);
-qboolean CLG_ParseServerMessage(int serverCommand);
-qboolean CLG_SeekDemoMessage(int demoCommand);
-void CLG_EndServerMessage(int realTime);
-
 
 //
 // clg_newfx.c
@@ -292,6 +283,31 @@ void CLG_BlasterTrail2(vec3_t start, vec3_t end);
 void CLG_IonripperTrail(vec3_t start, vec3_t ent);
 void CLG_TrapParticles(entity_t* ent);
 void CLG_ParticleEffect3(vec3_t org, vec3_t dir, int color, int count);
+
+
+//
+// clg_parse.c
+//
+qboolean CLG_UpdateConfigString(int index, const char* str);
+void CLG_StartServerMessage(void);
+qboolean CLG_ParseServerMessage(int serverCommand);
+qboolean CLG_SeekDemoMessage(int demoCommand);
+void CLG_EndServerMessage(int realTime);
+
+
+//
+// clg_predict.c
+//
+void CLG_CheckPredictionError(int frame, unsigned int cmd);
+void CLG_PredictAngles(void);
+void CLG_PredictMovement(unsigned int ack, unsigned int current);
+
+
+//
+// clg_screen.c
+//
+void SCR_Init(void);
+void SCR_Shutdown(void);
 
 
 //

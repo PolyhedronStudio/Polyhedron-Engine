@@ -20,6 +20,7 @@ along with Lazarus Quake 2 Mod source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
+#include "shared/pmove.h"
 
 // game.h -- game dll information visible to server
 
@@ -156,7 +157,8 @@ typedef struct
 	void(*linkentity) (edict_t *ent);
 	void(*unlinkentity) (edict_t *ent);		// call before removing an interactive edict
 	int(*BoxEdicts) (vec3_t mins, vec3_t maxs, edict_t **list, int maxcount, int areatype);
-	void(*Pmove) (pmove_t *pmove);		// player movement code common with client prediction
+//	void(*Pmove) (pmove_t *pmove);		// player movement code common with client prediction
+	pmoveParams_t* (*GetPMoveParams) ();    // Used to call the shared PMove code with.
 
 	// network messaging
 	void(*multicast) (vec3_t origin, multicast_t to);

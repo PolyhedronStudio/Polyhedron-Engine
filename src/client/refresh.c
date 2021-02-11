@@ -359,12 +359,14 @@ void CL_InitRefresh(void)
 
     mode_changed = 0;
 
+    // This registers the PT cvars, so we'll do this before InitMedia.
+    FX_Init();
+
     // N&C: Inform the CG Module about the initialization.
     CL_GM_InitMedia();
 
     // N&C: Eventually, these should gradually move over to CG Module its InitMedia.
     // Initialize the rest of graphics subsystems
-    FX_Init();
     V_Init();
     SCR_Init();
 

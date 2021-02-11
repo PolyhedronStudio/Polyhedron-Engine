@@ -2901,7 +2901,8 @@ void ClientSpycam(edict_t *ent)
 	pm.trace = PM_trace;	// adds default parms
 	pm.pointcontents = gi.pointcontents;
 
-	gi.Pmove(&pm);
+	//gi.Pmove(&pm);
+	Pmove(&pm, gi.GetPMoveParams());
 
 	gi.linkentity(ent);
 	//	client->old_owner_angles[0] = client->ucmd.angles[0];
@@ -3349,7 +3350,8 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 			pm.s.pm_flags |= PMF_ON_GROUND;
 
 		// perform a pmove
-		gi.Pmove(&pm);
+		//gi.Pmove(&pm);
+		Pmove(&pm, gi.GetPMoveParams());
 
 		// save results of pmove
 		client->ps.pmove = pm.s;

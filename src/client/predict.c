@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "client.h"
+#include "client/gamemodule.h"
 #include "common/x86/fpu.h"
 
 /*
@@ -27,9 +28,9 @@ CL_CheckPredictionError
 void CL_CheckPredictionError(void)
 {
     int         frame;
-    int         delta[3];
+    //int         delta[3];
     unsigned    cmd;
-    int         len;
+    //int         len;
 
     if (!cls.netchan) {
         return;
@@ -47,28 +48,31 @@ void CL_CheckPredictionError(void)
     frame = cls.netchan->incoming_acknowledged & CMD_MASK;
     cmd = cl.history[frame].cmdNumber;
 
-    // compare what the server returned with what we had predicted it to be
-    VectorSubtract(cl.frame.ps.pmove.origin, cl.predicted_origins[cmd & CMD_MASK], delta);
+    // N&C: Call into the CG Module to let it handle this.
+    CL_GM_CheckPredictionError(frame, cmd);
 
-    // save the prediction error for interpolation
-    len = abs(delta[0]) + abs(delta[1]) + abs(delta[2]);
-    if (len < 1 || len > 640) {
-        // > 80 world units is a teleport or something
-        VectorClear(cl.prediction_error);
-        return;
-    }
+    //// compare what the server returned with what we had predicted it to be
+    //VectorSubtract(cl.frame.ps.pmove.origin, cl.predicted_origins[cmd & CMD_MASK], delta);
 
-    SHOWMISS("prediction miss on %i: %i (%d %d %d)\n",
-             cl.frame.number, len, delta[0], delta[1], delta[2]);
+    //// save the prediction error for interpolation
+    //len = abs(delta[0]) + abs(delta[1]) + abs(delta[2]);
+    //if (len < 1 || len > 640) {
+    //    // > 80 world units is a teleport or something
+    //    VectorClear(cl.prediction_error);
+    //    return;
+    //}
 
-    // don't predict steps against server returned data
-    if (cl.predicted_step_frame <= cmd)
-        cl.predicted_step_frame = cmd + 1;
+    //SHOWMISS("prediction miss on %i: %i (%d %d %d)\n",
+    //         cl.frame.number, len, delta[0], delta[1], delta[2]);
 
-    VectorCopy(cl.frame.ps.pmove.origin, cl.predicted_origins[cmd & CMD_MASK]);
+    //// don't predict steps against server returned data
+    //if (cl.predicted_step_frame <= cmd)
+    //    cl.predicted_step_frame = cmd + 1;
 
-    // save for error interpolation
-    VectorScale(delta, 0.125f, cl.prediction_error);
+    //VectorCopy(cl.frame.ps.pmove.origin, cl.predicted_origins[cmd & CMD_MASK]);
+
+    //// save for error interpolation
+    //VectorScale(delta, 0.125f, cl.prediction_error);
 }
 
 /*
@@ -167,9 +171,9 @@ Sets cl.predicted_origin and cl.predicted_angles
 */
 void CL_PredictAngles(void)
 {
-    cl.predicted_angles[0] = cl.viewangles[0] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[0]);
-    cl.predicted_angles[1] = cl.viewangles[1] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[1]);
-    cl.predicted_angles[2] = cl.viewangles[2] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[2]);
+    //cl.predicted_angles[0] = cl.viewangles[0] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[0]);
+    //cl.predicted_angles[1] = cl.viewangles[1] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[1]);
+    //cl.predicted_angles[2] = cl.viewangles[2] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[2]);
 }
 
 void CL_PredictMovement(void)
@@ -191,8 +195,10 @@ void CL_PredictMovement(void)
     }
 
     if (!cl_predict->integer || (cl.frame.ps.pmove.pm_flags & PMF_NO_PREDICTION)) {
+        // N&C: Call into the CG Module to let it handle this.
         // just set angles
-        CL_PredictAngles();
+        CL_GM_PredictAngles();
+        //CL_PredictAngles();
         return;
     }
 
@@ -210,62 +216,65 @@ void CL_PredictMovement(void)
         return;
     }
 
-    X86_PUSH_FPCW;
-    X86_SINGLE_FPCW;
+    // N&C: Call into the CG Module to let it handle this.
+    CL_GM_PredictMovement(ack, current);
 
-    // copy current state to pmove
-    memset(&pm, 0, sizeof(pm));
-    pm.trace = CL_Trace;
-    pm.pointcontents = CL_PointContents;
-
-    pm.s = cl.frame.ps.pmove;
-#if USE_SMOOTH_DELTA_ANGLES
-    VectorCopy(cl.delta_angles, pm.s.delta_angles);
-#endif
-
-    // run frames
-    while (++ack <= current) {
-        pm.cmd = cl.cmds[ack & CMD_MASK];
-        Pmove(&pm, &cl.pmp);
-
-        // save for debug checking
-        VectorCopy(pm.s.origin, cl.predicted_origins[ack & CMD_MASK]);
-    }
-
-    // run pending cmd
-    if (cl.cmd.msec) {
-        pm.cmd = cl.cmd;
-        pm.cmd.forwardmove = cl.localmove[0];
-        pm.cmd.sidemove = cl.localmove[1];
-        pm.cmd.upmove = cl.localmove[2];
-        Pmove(&pm, &cl.pmp);
-        frame = current;
-
-        // save for debug checking
-        VectorCopy(pm.s.origin, cl.predicted_origins[(current + 1) & CMD_MASK]);
-    } else {
-        frame = current - 1;
-    }
-
-    X86_POP_FPCW;
-
-    if (pm.s.pm_type != PM_SPECTATOR && (pm.s.pm_flags & PMF_ON_GROUND)) {
-        oldz = cl.predicted_origins[cl.predicted_step_frame & CMD_MASK][2];
-        step = pm.s.origin[2] - oldz;
-        if (step > 63 && step < 160) {
-            cl.predicted_step = step * 0.125f;
-            cl.predicted_step_time = cls.realtime;
-            cl.predicted_step_frame = frame + 1;    // don't double step
-        }
-    }
-
-    if (cl.predicted_step_frame < frame) {
-        cl.predicted_step_frame = frame;
-    }
-
-    // copy results out for rendering
-    VectorScale(pm.s.origin, 0.125f, cl.predicted_origin);
-    VectorScale(pm.s.velocity, 0.125f, cl.predicted_velocity);
-    VectorCopy(pm.viewangles, cl.predicted_angles);
+//    X86_PUSH_FPCW;
+//    X86_SINGLE_FPCW;
+//
+//    // copy current state to pmove
+//    memset(&pm, 0, sizeof(pm));
+//    pm.trace = CL_Trace;
+//    pm.pointcontents = CL_PointContents;
+//
+//    pm.s = cl.frame.ps.pmove;
+//#if USE_SMOOTH_DELTA_ANGLES
+//    VectorCopy(cl.delta_angles, pm.s.delta_angles);
+//#endif
+//
+//    // run frames
+//    while (++ack <= current) {
+//        pm.cmd = cl.cmds[ack & CMD_MASK];
+//        Pmove(&pm, &cl.pmp);
+//
+//        // save for debug checking
+//        VectorCopy(pm.s.origin, cl.predicted_origins[ack & CMD_MASK]);
+//    }
+//
+//    // run pending cmd
+//    if (cl.cmd.msec) {
+//        pm.cmd = cl.cmd;
+//        pm.cmd.forwardmove = cl.localmove[0];
+//        pm.cmd.sidemove = cl.localmove[1];
+//        pm.cmd.upmove = cl.localmove[2];
+//        Pmove(&pm, &cl.pmp);
+//        frame = current;
+//
+//        // save for debug checking
+//        VectorCopy(pm.s.origin, cl.predicted_origins[(current + 1) & CMD_MASK]);
+//    } else {
+//        frame = current - 1;
+//    }
+//
+//    X86_POP_FPCW;
+//
+//    if (pm.s.pm_type != PM_SPECTATOR && (pm.s.pm_flags & PMF_ON_GROUND)) {
+//        oldz = cl.predicted_origins[cl.predicted_step_frame & CMD_MASK][2];
+//        step = pm.s.origin[2] - oldz;
+//        if (step > 63 && step < 160) {
+//            cl.predicted_step = step * 0.125f;
+//            cl.predicted_step_time = cls.realtime;
+//            cl.predicted_step_frame = frame + 1;    // don't double step
+//        }
+//    }
+//
+//    if (cl.predicted_step_frame < frame) {
+//        cl.predicted_step_frame = frame;
+//    }
+//
+//    // copy results out for rendering
+//    VectorScale(pm.s.origin, 0.125f, cl.predicted_origin);
+//    VectorScale(pm.s.velocity, 0.125f, cl.predicted_velocity);
+//    VectorCopy(pm.viewangles, cl.predicted_angles);
 }
 

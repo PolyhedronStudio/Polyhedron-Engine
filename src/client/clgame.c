@@ -303,6 +303,7 @@ void CL_InitGameProgs(void)
     import.CM_TransformedPointContents  = CM_TransformedPointContents;
     import.CM_BoxTrace                  = CM_BoxTrace;
     import.CM_TransformedBoxTrace       = CM_TransformedBoxTrace;
+    import.CM_ClipEntity                = CM_ClipEntity;
 
 	// Command.
 	import.Cmd_AddCommand				= Cmd_AddCommand;
@@ -622,6 +623,42 @@ qboolean CL_GM_SeekDemoMessage (int demoCommand) {
 void CL_GM_EndServerMessage () {
     if (cge)
         cge->EndServerMessage(cls.realtime);
+}
+
+//
+//===============
+// CL_GM_CheckPredictionError
+// 
+// Called by the client to check for prediction errors.
+//===============
+//
+void CL_GM_CheckPredictionError(int frame, unsigned int cmd) {
+    if (cge)
+        cge->CheckPredictionError(frame, cmd);
+}
+
+//
+//===============
+// CL_GM_PredictAngles
+// 
+// Called by the client to set prediction angles.
+//===============
+//
+void CL_GM_PredictAngles(void) {
+    if (cge)
+        cge->PredictAngles();
+}
+
+//
+//===============
+// CL_GM_PredictMovement
+// 
+// Called by the client to predict the actual movement.
+//===============
+//
+void CL_GM_PredictMovement(unsigned int ack, unsigned int current) {
+    if (cge)
+        cge->PredictMovement(ack, current);
 }
 
 //

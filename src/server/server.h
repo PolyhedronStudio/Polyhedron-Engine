@@ -31,7 +31,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/msg.h"
 #include "common/net/net.h"
 #include "common/net/chan.h"
-#include "common/pmove.h"
+//#include "common/pmove.h"
+#include "shared/pmove.h"
 #include "common/prompt.h"
 #include "common/protocol.h"
 #include "common/x86/fpu.h"
@@ -732,7 +733,7 @@ void SV_InitGameProgs(void);
 void SV_ShutdownGameProgs(void);
 void SV_InitEdict(edict_t *e);
 
-void PF_Pmove(pmove_t *pm);
+//void PF_Pmove(pmove_t *pm);
 
 //
 // sv_save.c

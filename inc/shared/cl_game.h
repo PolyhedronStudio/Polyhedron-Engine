@@ -87,6 +87,13 @@ extern "C" {
         void        (*ShutdownMedia) (void);
 
         //---------------------------------------------------------------------
+        // // Predict Movement (Client Side)
+        //---------------------------------------------------------------------
+        void		(*CheckPredictionError) (int frame, unsigned int cmd);
+        void		(*PredictAngles) (void);
+        void        (*PredictMovement) (unsigned int ack, unsigned int current);
+
+        //---------------------------------------------------------------------
         // ServerMessage Parsing.
         //---------------------------------------------------------------------
         // Called when a configstring update has been parsed and still left
@@ -191,6 +198,7 @@ extern "C" {
                                                 vec3_t mins, vec3_t maxs,
                                                 mnode_t * headnode, int brushmask,
                                                 vec3_t origin, vec3_t angles);
+        void        (*CM_ClipEntity) (trace_t* dst, const trace_t* src, struct edict_s* ent);
 
         //---------------------------------------------------------------------
         // Command

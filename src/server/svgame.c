@@ -704,15 +704,22 @@ static void PF_PositionedSound(vec3_t origin, edict_t *entity, int channel,
     }
 }
 
-
-void PF_Pmove(pmove_t *pm)
-{
-    if (sv_client) {
-        Pmove(pm, &sv_client->pmp);
-    } else {
-        Pmove(pm, &sv_pmp);
-    }
+// N&C: This returns the current PMoveParams to execute a PMove with in the
+// svgame dll code.
+pmoveParams_t* PF_GetPMoveParams(void) {
+    return (sv_client ? &sv_client->pmp : &sv_pmp);
 }
+
+// N&C: This has been removed, we now call the shared PMove in SVGame.
+// We pass PF_GetPMoveParams into it.
+//void PF_Pmove(pmove_t *pm)
+//{
+//    if (sv_client) {
+//        Pmove(pm, &sv_client->pmp);
+//    } else {
+//        Pmove(pm, &sv_pmp);
+//    }
+//}
 
 static cvar_t *PF_cvar(const char *name, const char *value, int flags)
 {
@@ -886,7 +893,8 @@ void SV_InitGameProgs(void)
     import.setmodel = PF_setmodel;
     import.inPVS = PF_inPVS;
     import.inPHS = PF_inPHS;
-    import.Pmove = PF_Pmove;
+    //import.Pmove = PF_Pmove;
+    import.GetPMoveParams = PF_GetPMoveParams;
 
     import.modelindex = PF_ModelIndex;
     import.soundindex = PF_SoundIndex;
