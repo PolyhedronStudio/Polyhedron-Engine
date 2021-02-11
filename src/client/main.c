@@ -2657,11 +2657,11 @@ static const cmdreg_t c_client[] = {
     { "say", NULL, CL_Say_c },
     { "say_team", NULL, CL_Say_c },
 
-    { "wave" }, { "inven" }, { "kill" }, { "use" },
-    { "drop" }, { "info" }, { "prog" },
-    { "give" }, { "god" }, { "notarget" }, { "noclip" },
-    { "invuse" }, { "invprev" }, { "invnext" }, { "invdrop" },
-	{ "weapnext" }, { "weapprev" },
+ //   { "wave" }, { "inven" }, { "kill" }, { "use" },
+ //   { "drop" }, { "info" }, { "prog" },
+ //   { "give" }, { "god" }, { "notarget" }, { "noclip" },
+ //   { "invuse" }, { "invprev" }, { "invnext" }, { "invdrop" },
+	//{ "weapnext" }, { "weapprev" },
 
     { NULL }
 };
@@ -2773,10 +2773,11 @@ static void CL_InitLocal(void)
     Cmd_AddMacro("cl_pps", CL_Pps_m);   // packets per second
     Cmd_AddMacro("cl_ping", CL_Ping_m);
     Cmd_AddMacro("cl_lag", CL_Lag_m);
-    Cmd_AddMacro("cl_health", CL_Health_m);
-    Cmd_AddMacro("cl_ammo", CL_Ammo_m);
-    Cmd_AddMacro("cl_armor", CL_Armor_m);
-    Cmd_AddMacro("cl_weaponmodel", CL_WeaponModel_m);
+    // N&C: Moved over to the client game.
+    //Cmd_AddMacro("cl_health", CL_Health_m);
+    //Cmd_AddMacro("cl_ammo", CL_Ammo_m);
+    //Cmd_AddMacro("cl_armor", CL_Armor_m);
+    //Cmd_AddMacro("cl_weaponmodel", CL_WeaponModel_m);
 	Cmd_AddMacro("cl_cluster", CL_Cluster_m);
 	Cmd_AddMacro("cl_clusterthere", CL_ClusterThere_m);
 	Cmd_AddMacro("cl_lightpolys", CL_NumLightPolys_m);

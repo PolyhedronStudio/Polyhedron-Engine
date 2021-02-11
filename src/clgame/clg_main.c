@@ -183,6 +183,34 @@ static void CL_Skins_f(void)
     }
 }
 
+//---------------
+// Commands to register to the client.
+//---------------
+static const cmdreg_t c_cgmodule[] = {
+    //
+    // Client commands.
+    //
+    { "skins", CL_Skins_f },
+
+    //
+    // Forward to server commands
+    //
+    // The only thing this does is allow command completion
+    // to work. All of the unknown commands are automatically
+    // forwarded to the server for handling.
+
+    // TODO: maybe some day, we'll move these over to the CG Module.
+    //{ "say", NULL, CL_Say_c },
+    //{ "say_team", NULL, CL_Say_c },
+
+    { "wave" }, { "inven" }, { "kill" }, { "use" },
+    { "drop" }, { "info" }, { "prog" },
+    { "give" }, { "god" }, { "notarget" }, { "noclip" },
+    { "invuse" }, { "invprev" }, { "invnext" }, { "invdrop" },
+    { "weapnext" }, { "weapprev" },
+
+    {NULL}
+};
 
 //
 //=============================================================================
@@ -191,6 +219,14 @@ static void CL_Skins_f(void)
 //
 //=============================================================================
 //
+//---------------
+// Update functions for when cvars change.
+//
+// These will notify the server about the changes, this will apply to for
+// example, spectators who are viewing a game. They'll see/hear the same
+// as the actual player they are spectating due to the settings being shared
+// to the server.
+//---------------
 static void CLG_UpdateFootstepsSetting(void)
 {
     clgi.UpdateSetting(CLS_NOFOOTSTEPS, !cl_footsteps->integer);
@@ -257,14 +293,6 @@ static void cl_vwep_changed(cvar_t* self)
     CLG_RegisterVWepModels();
     //cl_noskins_changed(self);
 }
-
-//---------------
-// Macro commands to register to the client.
-//---------------
-static const cmdreg_t c_cgmodule[] = {
-    { "skins", CL_Skins_f },
-    {NULL}
-};
 
 //
 //===============
