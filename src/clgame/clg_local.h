@@ -166,7 +166,8 @@ extern cvar_t* vid_rtx;
 //
 // clg_entities.c
 //
-// void CLG_ENT_Create(); or other CLG_ENT_?? What name shall we pick?
+void CLG_EntityEvent(int number);
+
 void CLG_AddPacketEntities(void);
 void CLG_AddViewWeapon(void);
 void CLG_CalcViewValues(void);
@@ -204,12 +205,14 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, centity_t* old, int flags);
 void CLG_ExplosionParticles(vec3_t org);
 void CLG_FlagTrail(vec3_t start, vec3_t end, int color);
 void CLG_FlyEffect(centity_t* ent, vec3_t origin);
+void CLG_ItemRespawnParticles(vec3_t org);
 void CLG_OldRailTrail(void);
 void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count);
 void CLG_ParticleEffect2(vec3_t org, vec3_t dir, int color, int count);
 void CLG_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count);
 void CLG_RocketTrail(vec3_t start, vec3_t end, centity_t* old);
 void CLG_TeleportParticles(vec3_t org);
+void CLG_TeleporterParticles(vec3_t org);
 
 //
 // clg_main.c

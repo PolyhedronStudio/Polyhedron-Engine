@@ -32,6 +32,11 @@ void		CL_GM_DemoSeek(void);
 void		CL_GM_UpdateUserInfo(cvar_t* var, from_t from);
 
 //
+// Entities.
+//
+void		CL_GM_EntityEvent(int number);
+
+//
 // Media
 //
 void        CL_GM_InitMedia(void);

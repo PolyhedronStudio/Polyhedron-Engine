@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl_ents.c -- entity parsing and management
 
 #include "client.h"
+#include "client/gamemodule.h"
 #include "refresh/models.h"
 
 extern qhandle_t cl_mod_powerscreen;
@@ -197,42 +198,44 @@ static void entity_update(const entity_state_t *state)
 // an entity has just been parsed that has an event value
 static void entity_event(int number)
 {
-    centity_t *cent = &cs.entities[number];
-
-    // EF_TELEPORTER acts like an event, but is not cleared each frame
-    if ((cent->current.effects & EF_TELEPORTER) && CL_FRAMESYNC) {
-        CL_TeleporterParticles(cent->current.origin);
-    }
-
-#if USE_FPS
-    if (cent->event_frame != cl.frame.number)
-        return;
-#endif
-
-    switch (cent->current.event) {
-    case EV_ITEM_RESPAWN:
-        S_StartSound(NULL, number, CHAN_WEAPON, S_RegisterSound("items/respawn1.wav"), 1, ATTN_IDLE, 0);
-        CL_ItemRespawnParticles(cent->current.origin);
-        break;
-    case EV_PLAYER_TELEPORT:
-        S_StartSound(NULL, number, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_IDLE, 0);
-        CL_TeleportParticles(cent->current.origin);
-        break;
-    case EV_FOOTSTEP:
-        // WatIsDeze: Commented, will be implemented later when we move this over to CG module.
-        //if (cl_footsteps->integer)
-        //    S_StartSound(NULL, number, CHAN_BODY, cl_sfx_footsteps[rand() & 3], 1, ATTN_NORM, 0);
-        break;
-    case EV_FALLSHORT:
-        S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("player/land1.wav"), 1, ATTN_NORM, 0);
-        break;
-    case EV_FALL:
-        S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("*fall2.wav"), 1, ATTN_NORM, 0);
-        break;
-    case EV_FALLFAR:
-        S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("*fall1.wav"), 1, ATTN_NORM, 0);
-        break;
-    }
+    // N&C: Let the CG Module handle this.
+    CL_GM_EntityEvent(number);
+//    centity_t *cent = &cs.entities[number];
+//
+//    // EF_TELEPORTER acts like an event, but is not cleared each frame
+//    if ((cent->current.effects & EF_TELEPORTER) && CL_FRAMESYNC) {
+//        CL_TeleporterParticles(cent->current.origin);
+//    }
+//
+//#if USE_FPS
+//    if (cent->event_frame != cl.frame.number)
+//        return;
+//#endif
+//
+//    switch (cent->current.event) {
+//    case EV_ITEM_RESPAWN:
+//        S_StartSound(NULL, number, CHAN_WEAPON, S_RegisterSound("items/respawn1.wav"), 1, ATTN_IDLE, 0);
+//        CL_ItemRespawnParticles(cent->current.origin);
+//        break;
+//    case EV_PLAYER_TELEPORT:
+//        S_StartSound(NULL, number, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_IDLE, 0);
+//        CL_TeleportParticles(cent->current.origin);
+//        break;
+//    case EV_FOOTSTEP:
+//        // WatIsDeze: Commented, will be implemented later when we move this over to CG module.
+//        //if (cl_footsteps->integer)
+//        //    S_StartSound(NULL, number, CHAN_BODY, cl_sfx_footsteps[rand() & 3], 1, ATTN_NORM, 0);
+//        break;
+//    case EV_FALLSHORT:
+//        S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("player/land1.wav"), 1, ATTN_NORM, 0);
+//        break;
+//    case EV_FALL:
+//        S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("*fall2.wav"), 1, ATTN_NORM, 0);
+//        break;
+//    case EV_FALLFAR:
+//        S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("*fall1.wav"), 1, ATTN_NORM, 0);
+//        break;
+//    }
 }
 
 static void set_active_state(void)

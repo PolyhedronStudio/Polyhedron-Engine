@@ -178,9 +178,7 @@ void CL_PredictAngles(void)
 
 void CL_PredictMovement(void)
 {
-    unsigned    ack, current, frame;
-    pmove_t     pm;
-    int         step, oldz;
+    unsigned    ack, current;
 
     if (cls.state != ca_active) {
         return;

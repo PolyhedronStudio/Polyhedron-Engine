@@ -442,6 +442,17 @@ void CL_InitGameProgs(void)
 //
 //=============================================================================
 //
+//
+//===============
+// CL_GM_DemoSeek
+// 
+// Called when the client is seeking in a demo playback.
+//===============
+//
+void CL_GM_EntityEvent(int number) {
+    if (cge)
+        cge->EntityEvent(number);
+}
 
 //
 //===============

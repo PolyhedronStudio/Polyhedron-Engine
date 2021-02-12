@@ -16,7 +16,17 @@ extern qhandle_t cl_sfx_footsteps[4];
 //
 //==========================================================================
 //
-//INTERPOLATE BETWEEN FRAMES TO GET RENDERING PARMS
+// ENTITY EVENTS
+//
+//==========================================================================
+//
+
+
+
+//
+//==========================================================================
+//
+// INTERPOLATE BETWEEN FRAMES TO GET RENDERING PARMS
 //
 //==========================================================================
 //
@@ -756,6 +766,54 @@ void CLG_AddEntities(void)
 // CLIENT MODULE ENTITY ENTRY FUNCTIONS.
 //
 //=============================================================================}
+//
+//===============
+// CLG_EntityEvent
+//
+// Handles specific events on an entity.
+//===============
+//
+void CLG_EntityEvent(int number) {
+    centity_t *cent = &cs->entities[number];
+    
+    // EF_TELEPORTER acts like an event, but is not cleared each frame
+    if ((cent->current.effects & EF_TELEPORTER) && CL_FRAMESYNC) {
+        CLG_TeleporterParticles(cent->current.origin);
+    }
+    
+#if USE_FPS
+    if (cent->event_frame != cl.frame.number)
+        return;
+#endif
+    
+    switch (cent->current.event) {
+    case EV_ITEM_RESPAWN:
+        clgi.S_StartSound(NULL, number, CHAN_WEAPON, clgi.S_RegisterSound("items/respawn1.wav"), 1, ATTN_IDLE, 0);
+        CLG_ItemRespawnParticles(cent->current.origin);
+        break;
+    case EV_PLAYER_TELEPORT:
+        clgi.S_StartSound(NULL, number, CHAN_WEAPON, clgi.S_RegisterSound("misc/tele1.wav"), 1, ATTN_IDLE, 0);
+        CLG_TeleportParticles(cent->current.origin);
+        break;
+    case EV_FOOTSTEP:
+        // WatIsDeze: Commented, will be implemented later when we move this over to CG module.
+        if (cl_footsteps->integer)
+            clgi.S_StartSound(NULL, number, CHAN_BODY, cl_sfx_footsteps[rand() & 3], 1, ATTN_NORM, 0);
+        break;
+    case EV_FALLSHORT:
+        clgi.S_StartSound(NULL, number, CHAN_AUTO, clgi.S_RegisterSound("player/land1.wav"), 1, ATTN_NORM, 0);
+        break;
+    case EV_FALL:
+        clgi.S_StartSound(NULL, number, CHAN_AUTO, clgi.S_RegisterSound("*fall2.wav"), 1, ATTN_NORM, 0);
+        break;
+    case EV_FALLFAR:
+        clgi.S_StartSound(NULL, number, CHAN_AUTO, clgi.S_RegisterSound("*fall1.wav"), 1, ATTN_NORM, 0);
+        break;
+    }
+}
+
+
+// Utility function for CLG_CalcViewValues
 static inline float lerp_client_fov(float ofov, float nfov, float lerp)
 {
     if (clgi.IsDemoPlayback()) {

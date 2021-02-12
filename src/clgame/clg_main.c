@@ -117,6 +117,9 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 
     clge.UpdateUserinfo             = CLG_UpdateUserInfo;
 
+    // Entities.
+    clge.EntityEvent                = CLG_EntityEvent;
+
     // Media.
     clge.InitMedia                  = CLG_InitMedia;
     clge.GetMediaLoadStateName      = CLG_GetMediaLoadStateName;
