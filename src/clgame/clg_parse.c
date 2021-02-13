@@ -214,6 +214,121 @@ static void CLG_ParseMuzzleFlashPacket(int mask)
 }
 
 //
+//===============
+// CLG_ParsePrint
+// 
+// Parses print messages, this includes chat messages from other clients
+// coming in from the server.
+//===============
+//
+#if USE_AUTOREPLY
+static void CLG_CheckForVersion(const char* s)
+{
+    char* p;
+
+    p = strstr(s, ": ");
+    if (!p) {
+        return;
+    }
+
+    if (strncmp(p + 2, "!version", 8)) {
+        return;
+    }
+
+    if (cl->reply_time && clgi.GetRealTime() - cl->reply_time < 120000) {
+        return;
+    }
+
+    cl->reply_time = clgi.GetRealTime();
+    cl->reply_delta = 1024 + (rand() & 1023);
+}
+#endif
+static void CLG_ParsePrint(void)
+{
+    int level;
+    char s[MAX_STRING_CHARS];
+    const char* fmt;
+
+    level = clgi.MSG_ReadByte();
+    clgi.MSG_ReadString(s, sizeof(s));
+
+    //SHOWNET(2, "    %i \"%s\"\n", level, s);
+
+    if (level != PRINT_CHAT) {
+        Com_Print("%s", s);
+        if (!clgi.IsDemoPlayback() && clgi.GetServerState() != ss_broadcast) {
+            COM_strclr(s);
+            clgi.Cmd_ExecTrigger(s);
+        }
+        return;
+    }
+
+    if (clgi.CheckForIgnore(s)) {
+        return;
+    }
+
+#if USE_AUTOREPLY
+    if (!clgi.IsDemoPlayback() && clgi.GetServerState() != ss_broadcast) {
+        CLG_CheckForVersion(s);
+    }
+#endif
+
+    clgi.CheckForIP(s);
+
+    // disable notify
+    if (!cl_chat_notify->integer) {
+        clgi.Con_SkipNotify(qtrue);
+    }
+
+    // filter text
+    if (cl_chat_filter->integer) {
+        COM_strclr(s);
+        fmt = "%s\n";
+    }
+    else {
+        fmt = "%s";
+    }
+
+    clgi.Com_LPrintf(PRINT_TALK, fmt, s);
+
+    clgi.Con_SkipNotify(qfalse);
+
+    SCR_AddToChatHUD(s);
+
+    // N&C: We don't need this stuff anymore..
+    //// silence MVD spectator chat
+    //if (cl.serverstate == ss_broadcast && !strncmp(s, "[MVD] ", 6))
+    //    return;
+
+    // play sound
+    if (cl_chat_sound->integer > 1)
+        clgi.S_StartLocalSound_("misc/talk1.wav");
+    else if (cl_chat_sound->integer > 0)
+        clgi.S_StartLocalSound_("misc/talk.wav");
+}
+
+//
+//===============
+// CL_ParseCenterPrint
+// 
+// Parses center print messages.
+//===============
+//
+static void CLG_ParseCenterPrint(void)
+{
+    char s[MAX_STRING_CHARS];
+
+    clgi.MSG_ReadString(s, sizeof(s));
+    //SHOWNET(2, "    \"%s\"\n", s);
+    SCR_CenterPrint(s);
+
+    if (!clgi.IsDemoPlayback() && clgi.GetServerState() != ss_broadcast) {
+        COM_strclr(s);
+        clgi.Cmd_ExecTrigger(s);
+    }
+}
+
+//
 //=============================================================================
 //
 //	CLIENT MODULE 'PARSE' ENTRY POINTS.
@@ -284,6 +399,18 @@ void CLG_StartServerMessage (void) {
 qboolean CLG_ParseServerMessage (int serverCommand) {
     // Switch cmd.
     switch (serverCommand) {
+
+        // Client Print Messages.
+        case svc_print:
+            CLG_ParsePrint();
+            return qtrue;
+            break;
+
+        // Client Center Screen Print messages.
+        case svc_centerprint:
+            CLG_ParseCenterPrint();
+            return qtrue;
+            break;
 
         // Client temporary entities. (Particles, etc.)
         case svc_temp_entity:

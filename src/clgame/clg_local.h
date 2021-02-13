@@ -119,6 +119,10 @@ extern mz_params_t     mzParameters;
 // CVars - Externed so they can be accessed all over the CG Module.
 //-------------------
 // Client.
+extern cvar_t* cl_chat_notify;
+extern cvar_t* cl_chat_sound;
+extern cvar_t* cl_chat_filter;
+
 extern cvar_t* cl_disable_explosions;
 extern cvar_t* cl_explosion_sprites;
 extern cvar_t* cl_explosion_frametime;
@@ -316,6 +320,8 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current);
 // clg_screen.c
 //
 void SCR_SetCrosshairColor(void);
+void SCR_AddToChatHUD(const char* text);
+void SCR_CenterPrint(const char* str);
 
 void SCR_RegisterMedia(void);
 

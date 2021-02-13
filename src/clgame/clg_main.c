@@ -27,9 +27,14 @@ clientgame_t clg;
 //
 // Game.
 //
+
+
 //
 // CVar.
 //
+cvar_t *cl_chat_notify = NULL;
+cvar_t *cl_chat_sound = NULL;
+cvar_t *cl_chat_filter = NULL;
 cvar_t *cl_disable_particles = NULL;
 cvar_t *cl_disable_explosions = NULL;
 cvar_t *cl_explosion_sprites = NULL;
@@ -293,6 +298,18 @@ static void CLG_UpdateGunSettings() {
     }
 }
 
+static void cl_chat_sound_changed(cvar_t* self)
+{
+    if (!*self->string)
+        self->integer = 0;
+    else if (!Q_stricmp(self->string, "misc/talk.wav"))
+        self->integer = 1;
+    else if (!Q_stricmp(self->string, "misc/talk1.wav"))
+        self->integer = 2;
+    else if (!self->integer && !COM_IsUint(self->string))
+        self->integer = 1;
+}
+
 static void CLG_UpdateGibSettings() {
     clgi.UpdateSetting(CLS_NOGIBS, !cl_gibs->integer);
 }
@@ -381,6 +398,12 @@ void CLG_Init() {
     cl_player_model->changed = cl_player_model_changed;
     cl_thirdperson_angle     = clgi.Cvar_Get("cl_thirdperson_angle", "0", 0);
     cl_thirdperson_range     = clgi.Cvar_Get("cl_thirdperson_range", "60", 0);
+
+    cl_chat_notify           = clgi.Cvar_Get("cl_chat_notify", "1", 0);
+    cl_chat_sound            = clgi.Cvar_Get("cl_chat_sound", "1", 0);
+    cl_chat_sound->changed   = cl_chat_sound_changed;
+    cl_chat_sound_changed(cl_chat_sound);
+    cl_chat_filter           = clgi.Cvar_Get("cl_chat_filter", "0", 0);
 
     cl_disable_particles     = clgi.Cvar_Get("cl_disable_particles", "0", 0);
     cl_disable_explosions    = clgi.Cvar_Get("cl_disable_explosions", "0", 0);

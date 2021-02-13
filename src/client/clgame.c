@@ -47,6 +47,9 @@ int _wrp_GetServerProtocol(void) {
 int _wrp_GetProtocolVersion(void) {
     return cls.protocolVersion;
 }
+int _wrp_GetServerState() {
+    return cl.serverstate;
+}
 void _wrp_UpdateSetting(clientSetting_t setting, int value) {
     // Ensure there is a valid netchan.
     if (!cls.netchan) {
@@ -387,16 +390,20 @@ void CL_InitGameProgs(void)
     import.GetFrameTime                 = _wrp_GetFrameTime;
     import.GetRealTime                  = _wrp_GetRealTime;
     
+    import.GetServerState               = _wrp_GetServerState;
     import.GetServerProtocol            = _wrp_GetServerProtocol;
     import.GetProtocolVersion           = _wrp_GetProtocolVersion;
 
     import.IsDemoPlayback               = _wrp_IsDemoPlayback;
-    
+
+    import.UpdateListenerOrigin = CL_UpdateListenerOrigin;
+    import.UpdateSetting = _wrp_UpdateSetting;
+
     import.SetClientLoadState           = CL_SetLoadState;
     import.GetClienState                = CL_GetState;
 
-    import.UpdateListenerOrigin         = CL_UpdateListenerOrigin;
-    import.UpdateSetting                = _wrp_UpdateSetting;
+    import.CheckForIgnore               = CL_CheckForIgnore;
+    import.CheckForIP                   = CL_CheckForIP;
 
 	// Command Buffer.
 	import.Cbuf_AddText					= _wrp_Cbuf_AddText;
@@ -427,6 +434,8 @@ void CL_InitGameProgs(void)
 	import.Cmd_Argv						= Cmd_Argv;
 	import.Cmd_Args						= Cmd_Args;
 
+    import.Cmd_ExecTrigger              = Cmd_ExecTrigger;
+
 	// Common.
     import.Com_Error 					= Com_Error;
     import.Com_LPrintf 					= Com_LPrintf;
@@ -435,6 +444,7 @@ void CL_InitGameProgs(void)
 
     // Console.
     import.Con_ClearNotify              = Con_ClearNotify_f;
+    import.Con_SkipNotify               = Con_SkipNotify;
 
 	// Cvar.
 	import.Cvar_Get						= Cvar_Get;
@@ -551,6 +561,7 @@ void CL_InitGameProgs(void)
      
     import.S_StartSound                 = S_StartSound;
     import.S_StartLocalSound            = S_StartLocalSound;
+    import.S_StartLocalSound_           = S_StartLocalSound_;
 
 	// Load up the cgame dll.
     cge = entry(&import);

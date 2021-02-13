@@ -168,6 +168,8 @@ extern "C" {
         // Returns the amount of miliseconds since the start of client.
         unsigned        (*GetRealTime) (void);
 
+        // Returns the server state.
+        int             (*GetServerState) (void);
         // Returns the protocol type version.
         int             (*GetServerProtocol) (void);
         // Returns the protocol minor version.
@@ -193,6 +195,10 @@ extern "C" {
         // Returns the current state of the client.
         connstate_t     (*GetClienState) (void);
 
+        // Checks if the name of the player is on the client's ignore list.
+        qboolean        (*CheckForIgnore) (const char *s);
+        // Add scanned out IP address to circular array of recent addresses.
+        void            (*CheckForIP) (const char* s);
 
         //---------------------------------------------------------------------
         // Command Buffer.
@@ -205,8 +211,7 @@ extern "C" {
         void        (*Cbuf_Execute) ();
         // Forwards current command buffer to the server for processing (skips client processing).
         qboolean    (*CL_ForwardToServer) ();
-
-         
+                 
         //---------------------------------------------------------------------
         // Collision Model.
         //---------------------------------------------------------------------
@@ -252,6 +257,8 @@ extern "C" {
         char        *(*Cmd_Argv) (int arg);
         // Returns the original argument string fed to the current command.
         char        *(*Cmd_Args) (void);
+        // Executes matching cmd triggers.
+        void        (*Cmd_ExecTrigger) (const char* string);
 
 
         //---------------------------------------------------------------------
@@ -270,6 +277,7 @@ extern "C" {
         // Console.
         //---------------------------------------------------------------------
         void        (*Con_ClearNotify) (void);
+        void        (*Con_SkipNotify) (qboolean skip);
 
         //---------------------------------------------------------------------
         // CVar.
@@ -513,8 +521,10 @@ extern "C" {
         // be dynamically sourced from the entity.
         void            (*S_StartSound)(const vec3_t origin, int entnum, int entchannel,
                                        qhandle_t sfx, float fvol, float attenuation, float timeofs);
-        // Plays a local 2D sound.                               
+        // Plays a local 2D sound on entchannel 0.                               
         void            (*S_StartLocalSound) (const char *s);
+        // Plays a local 2D sound on entchannel 256.                               
+        void            (*S_StartLocalSound_) (const char* s);
 
         //---------------------------------------------------------------------
         // System.
