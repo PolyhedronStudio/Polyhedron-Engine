@@ -90,7 +90,7 @@ void Sys_Quit(void)
     exit(EXIT_SUCCESS);
 }
 
-#define SYS_SITE_CFG    "/etc/default/q2pro"
+#define SYS_SITE_CFG    "/etc/default/nac"
 
 void Sys_AddDefaultConfig(void)
 {

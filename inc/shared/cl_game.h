@@ -72,6 +72,9 @@ extern "C" {
         // Called after all downloads are done. (Aka, a map has started.)
         // Not used for demos.
         void        (*ClientBegin) (void);
+        // Called each VALID client frame. Handle per VALID frame basis 
+        // things here.
+        void        (*ClientDeltaFrame) (void);
         // Called each client frame. Handle per frame basis things here.
         void        (*ClientFrame) (void);
 
@@ -129,6 +132,11 @@ extern "C" {
         qboolean   (*SeekDemoMessage) (int demoCommand);
         // Called when we're done receiving a server message.
         void        (*EndServerMessage) (int realTime);
+
+        //---------------------------------------------------------------------
+        // Screen
+        //---------------------------------------------------------------------
+        void        (*RenderScreen) (void);
 
         //---------------------------------------------------------------------
         // View
@@ -259,6 +267,11 @@ extern "C" {
         const char  *(*Com_ErrorString) (qerror_t type);
 
         //---------------------------------------------------------------------
+        // Console.
+        //---------------------------------------------------------------------
+        void        (*Con_ClearNotify) (void);
+
+        //---------------------------------------------------------------------
         // CVar.
         //---------------------------------------------------------------------
         // Creates the variable if it doesn't exist, or returns the existing one
@@ -368,7 +381,10 @@ extern "C" {
         //---------------------------------------------------------------------
         // Key/User input.
         //---------------------------------------------------------------------
-        // TODO.
+        // Returns whether a key is down or not.
+        int         (*Key_IsDown) (int key);
+        // Returns the ASCII value of the key belonging to the binding.
+        char        *(*Key_GetBinding) (const char* binding);
 
 
         //---------------------------------------------------------------------
@@ -449,9 +465,26 @@ extern "C" {
         //---------------------------------------------------------------------
         // Rendering.
         //---------------------------------------------------------------------
-        void            (*R_AddDecal) (decal_t* d);
-        void            (*R_LightPoint) (vec3_t origin, vec3_t light);
-        void            (*R_SetSky)(const char* name, float rotate, vec3_t axis);
+        void        (*R_AddDecal) (decal_t* d);
+        void        (*R_LightPoint) (vec3_t origin, vec3_t light);
+        void        (*R_SetSky)(const char* name, float rotate, vec3_t axis);
+
+        void        (*R_ClearColor) (void);
+        void        (*R_SetAlpha) (float clpha);
+        void        (*R_SetAlphaScale) (float alpha);
+        void        (*R_SetColor) (uint32_t color);
+        void        (*R_SetClipRect) (const clipRect_t* clip);
+        float       (*R_ClampScale) (cvar_t* var);
+        void        (*R_SetScale) (float scale);
+        void        (*R_DrawChar) (int x, int y, int flags, int ch, qhandle_t font);
+        int         (*R_DrawString) (int x, int y, int flags, size_t maxChars,
+                                    const char* string, qhandle_t font);  // returns advanced x coord
+        qboolean    (*R_GetPicSize) (int* w, int* h, qhandle_t pic);   // returns transparency bit
+        void        (*R_DrawPic) (int x, int y, qhandle_t pic);
+        void        (*R_DrawStretchPic) (int x, int y, int w, int h, qhandle_t pic);
+        void        (*R_TileClear) (int x, int y, int w, int h, qhandle_t pic);
+        void        (*R_DrawFill8) (int x, int y, int w, int h, int c);
+        void        (*R_DrawFill32) (int x, int y, int w, int h, uint32_t color);
 
         //---------------------------------------------------------------------
         // 2D Rendering.
@@ -486,7 +519,7 @@ extern "C" {
         //---------------------------------------------------------------------
         // System.
         //---------------------------------------------------------------------
-        // TODO.
+        unsigned        (*Sys_Milliseconds) (void);
 
         //
         // Pointers to actual client data.

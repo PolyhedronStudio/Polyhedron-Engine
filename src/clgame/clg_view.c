@@ -426,7 +426,7 @@ void CLG_ClearScene(void)
 //===============
 // CLG_RenderView
 // 
-// Called whenever the engine wants to render a valid frame.
+// Called whenever the engine wants to render a newly parsed valid frame.
 // Fill the scene with entities you want rendered to the client here.
 //===============
 //

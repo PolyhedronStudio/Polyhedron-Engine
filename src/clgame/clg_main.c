@@ -113,6 +113,7 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     clge.DemoSeek                   = CLG_DemoSeek;
 
     clge.ClientBegin                = CLG_ClientBegin;
+    clge.ClientDeltaFrame           = CLG_ClientDeltaFrame;
     clge.ClientFrame                = CLG_ClientFrame;
 
     clge.UpdateUserinfo             = CLG_UpdateUserInfo;
@@ -142,6 +143,9 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     clge.ParseServerMessage         = CLG_ParseServerMessage;
     clge.SeekDemoMessage            = CLG_SeekDemoMessage;
     clge.EndServerMessage           = CLG_EndServerMessage;
+
+    // Screen.
+    clge.RenderScreen               = CLG_RenderScreen;
 
     // View.
     clge.PreRenderView              = CLG_PreRenderView;
@@ -450,6 +454,18 @@ void CLG_ClientBegin() {
 
 //
 //===============
+// CLG_ClientDeltaFrame
+// 
+// Called each VALID client frame. Handle per VALID frame basis things here.
+//===============
+//
+void CLG_ClientDeltaFrame(void) {
+    // Called each time a valid client frame has been 
+    SCR_SetCrosshairColor();
+}
+
+//
+//===============
 // CLG_ClientFrame
 // 
 // Called each client frame. Handle per frame basis things here.
@@ -596,7 +612,7 @@ void Com_Error (error_type_t code, char *fmt, ...) {
 }
 
 // Prints a message of a type of your own liking. Using variable arg formatting
-void    Com_LPrintf(print_type_t type, const char* fmt, ...) {
+void Com_LPrintf(print_type_t type, const char* fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start(args, fmt);

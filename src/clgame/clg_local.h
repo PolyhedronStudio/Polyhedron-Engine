@@ -220,6 +220,7 @@ void CLG_TeleporterParticles(vec3_t org);
 void CLG_Init();
 void CLG_Shutdown(void);
 
+void CLG_ClientDeltaFrame(void);
 void CLG_ClientFrame(void);
 void CLG_ClientBegin(void);
 void CLG_ClearState(void);
@@ -314,14 +315,20 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current);
 //
 // clg_screen.c
 //
+void SCR_SetCrosshairColor(void);
+
+void SCR_RegisterMedia(void);
+
 void SCR_Init(void);
 void SCR_Shutdown(void);
 
+void CLG_RenderScreen(void);
 
 //
 // clg_tent.c
 //
 void CLG_ParseTempEntity(void);
+void CLG_SmokeAndFlash(vec3_t origin);
 
 void CLG_RegisterTempEntityModels(void);
 void CLG_RegisterTempEntitySounds(void);

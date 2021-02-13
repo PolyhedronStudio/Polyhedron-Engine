@@ -8,6 +8,1152 @@
 //
 #include "clg_local.h"
 
+// Number of "sb_pics"
+#define STAT_PICS   11              // Number of "sb_pics"
+#define STAT_MINUS  (STAT_PICS - 1) // Index into the sb_pics array pointing at the pic name for the '-'
+
+// Our client game screen container struct.
+static struct {
+    qboolean    initialized;        // ready to draw
+
+    qhandle_t   crosshair_pic;
+    int         crosshair_width, crosshair_height;
+    color_t     crosshair_color;
+
+    qhandle_t   sb_pics[2][STAT_PICS];
+    qhandle_t   inven_pic;
+    qhandle_t   field_pic;
+
+    qhandle_t   font_pic;
+
+    int         hud_width, hud_height;
+    float       hud_scale;
+    float       hud_alpha;
+} scr;
+
+//-----
+// CVars.
+//-----
+cvar_t* scr_viewsize;           // Scale of the view size.
+
+static cvar_t* scr_showitemname;// Show item name, or not.
+
+static cvar_t* scr_draw2d;      // To draw 2D elements or not.
+static cvar_t* scr_alpha;       // Alpha value for elements.
+static cvar_t* scr_font;        // The quake fontset to use for rendering.
+static cvar_t* scr_scale;       // Determines the scale we render our screen elements at.
+
+static cvar_t* scr_centertime;  // The amount of time the center print is on-screen.
+
+static cvar_t* scr_crosshair;   // Whether to draw the crosshair or not.
+
+static cvar_t* scr_chathud;
+static cvar_t* scr_chathud_lines;
+static cvar_t* scr_chathud_time;
+static cvar_t* scr_chathud_x;
+static cvar_t* scr_chathud_y;
+
+static cvar_t* ch_scale;        // Crosshair scale.
+static cvar_t* ch_x;            // Crosshair Y
+static cvar_t* ch_y;            // Crosshair X
+
+static cvar_t* ch_health;       // Wether to color the crosshair based on current health or not.
+static cvar_t* ch_red;          // Crosshair R color value.
+static cvar_t* ch_green;        // Crosshair G color value.
+static cvar_t* ch_blue;         // Crosshair B color value.
+static cvar_t* ch_alpha;        // Crosshair A color value.
+
+//-----
+// View Rectangle.
+//-----
+vrect_t     scr_vrect;      // position of render window on screen
+
+// HUD image filenames, matching their corresponding number based on array access. (Exception for the -..)
+static const char* const sb_nums[2][STAT_PICS] = {
+    {
+        "num_0", "num_1", "num_2", "num_3", "num_4", "num_5",
+        "num_6", "num_7", "num_8", "num_9", "num_minus"
+    },
+    {
+        "anum_0", "anum_1", "anum_2", "anum_3", "anum_4", "anum_5",
+        "anum_6", "anum_7", "anum_8", "anum_9", "anum_minus"
+    }
+};
+
+// Color table containing actual color codes that match their string names.
+const uint32_t colorTable[8] = {
+    U32_BLACK, U32_RED, U32_GREEN, U32_YELLOW,
+    U32_BLUE, U32_CYAN, U32_MAGENTA, U32_WHITE
+};
+
+//
+//=============================================================================
+//
+// SCREEN UTILITY FUNCTIONS
+//
+//=============================================================================
+// 
+
+//
+//===============
+// SCR_DrawString
+// 
+// A simplified version of SCR_DrawStringEx. It fills in certain defaults
+// so you don't have to worry about those.
+// 
+// (Uses the default font, and the default string limit.)
+//===============
+//
+#define SCR_DrawString(x, y, flags, string) \
+    SCR_DrawStringEx(x, y, flags, MAX_STRING_CHARS, string, scr.font_pic)
+
+//
+//===============
+// SCR_DrawStringEx
+// 
+// Draws a string with the given font, maximum length, and flags, at the
+// desired destination. Does NOT support multiline string buffers (\n).
+//===============
+//
+int SCR_DrawStringEx(int x, int y, int flags, size_t maxlen,
+    const char* s, qhandle_t font)
+{
+    size_t len = strlen(s);
+
+    if (len > maxlen) {
+        len = maxlen;
+    }
+
+    if ((flags & UI_CENTER) == UI_CENTER) {
+        x -= len * CHAR_WIDTH / 2;
+    }
+    else if (flags & UI_RIGHT) {
+        x -= len * CHAR_WIDTH;
+    }
+
+    return clgi.R_DrawString(x, y, flags, maxlen, s, font);
+}
+
+
+//
+//===============
+// SCR_DrawStringMulti
+// 
+// Similar to SCR_DrawStringEx, with the addition of supporting strings
+// that contain the multiline \n symbol.
+//===============
+//
+void SCR_DrawStringMulti(int x, int y, int flags, size_t maxlen,
+    const char* s, qhandle_t font)
+{
+    char* p;
+    size_t  len;
+
+    while (*s) {
+        p = strchr(s, '\n');
+        if (!p) {
+            SCR_DrawStringEx(x, y, flags, maxlen, s, font);
+            break;
+        }
+
+        len = p - s;
+        if (len > maxlen) {
+            len = maxlen;
+        }
+        SCR_DrawStringEx(x, y, flags, len, s, font);
+
+        y += CHAR_HEIGHT;
+        s = p + 1;
+    }
+}
+
+
+//
+//===============
+// SCR_FadeAlpha
+// 
+// Calculates the alpha value fade.
+//
+// startTime is meant to be a constant.
+// visTime is the amount of time it has to be on-screen in miliseconds.
+// fadeTime is the speed at which to fade in miliseconds.
+//
+// WatIsDeze: Excuse me if I documented this incorrectly, there's a lot 
+// of more work to be done :)
+//===============
+//
+float SCR_FadeAlpha(unsigned startTime, unsigned visTime, unsigned fadeTime)
+{
+    float alpha;
+    unsigned timeLeft, delta = clgi.GetRealTime() - startTime;
+
+    if (delta >= visTime) {
+        return 0;
+    }
+
+    if (fadeTime > visTime) {
+        fadeTime = visTime;
+    }
+
+    alpha = 1;
+    timeLeft = visTime - delta;
+    if (timeLeft < fadeTime) {
+        alpha = (float)timeLeft / fadeTime;
+    }
+
+    return alpha;
+}
+
+//
+//=============================================================================
+//
+// COLOR PARSING
+//
+//=============================================================================
+// 
+const char* const colorNames[10] = {
+    "black", "red", "green", "yellow",
+    "blue", "cyan", "magenta", "white",
+    "alt", "none"
+};
+
+typedef enum {
+    COLOR_BLACK,
+    COLOR_RED,
+    COLOR_GREEN,
+    COLOR_YELLOW,
+    COLOR_BLUE,
+    COLOR_CYAN,
+    COLOR_MAGENTA,
+    COLOR_WHITE,
+
+    COLOR_ALT,
+    COLOR_NONE
+} color_index_t;
+
+//
+//===============
+// SCR_ParseColorIndex
+// 
+// Parses color name or index up to the maximum allowed index.
+// Returns COLOR_NONE in case of error.
+//
+// TODO: Let the client be able to use this for the console. Why not? :)
+// ================
+//
+color_index_t SCR_ParseColorIndex(const char* s, color_index_t last)
+{
+    color_index_t i;
+
+    if (COM_IsUint(s)) {
+        i = strtoul(s, NULL, 10);
+        return i > last ? COLOR_NONE : i;
+    }
+
+    for (i = 0; i <= last; i++) {
+        if (!strcmp(colorNames[i], s)) {
+            return i;
+        }
+    }
+
+    return COLOR_NONE;
+}
+
+//
+//===============
+// SCR_ParseColor
+// 
+// Accepts as input a 12 bit hexadecimal color value, or one of the following
+// string color names: black, red, green, yellow, blue, cyan, magenta, white,
+// alt, none.
+//
+// If the color string is invalid, it returns qfalse. If it is valid, it will
+// return qtrue and assign the color value to the designated color pointer.
+//===============
+//
+qboolean SCR_ParseColor(const char* s, color_t* color)
+{
+    int i;
+    int c[8];
+
+    // parse generic color
+    if (*s == '#') {
+        s++;
+        for (i = 0; s[i]; i++) {
+            if (i == 8) {
+                return qfalse;
+            }
+            c[i] = Q_charhex(s[i]);
+            if (c[i] == -1) {
+                return qfalse;
+            }
+        }
+
+        switch (i) {
+        case 3:
+            color->u8[0] = c[0] | (c[0] << 4);
+            color->u8[1] = c[1] | (c[1] << 4);
+            color->u8[2] = c[2] | (c[2] << 4);
+            color->u8[3] = 255;
+            break;
+        case 6:
+            color->u8[0] = c[1] | (c[0] << 4);
+            color->u8[1] = c[3] | (c[2] << 4);
+            color->u8[2] = c[5] | (c[4] << 4);
+            color->u8[3] = 255;
+            break;
+        case 8:
+            color->u8[0] = c[1] | (c[0] << 4);
+            color->u8[1] = c[3] | (c[2] << 4);
+            color->u8[2] = c[5] | (c[4] << 4);
+            color->u8[3] = c[7] | (c[6] << 4);
+            break;
+        default:
+            return qfalse;
+        }
+
+        return qtrue;
+    }
+
+    // parse name or index
+    i = SCR_ParseColorIndex(s, COLOR_WHITE);
+    if (i == COLOR_NONE) {
+        return qfalse;
+    }
+
+    color->u32 = colorTable[i];
+    return qtrue;
+}
+
+//
+//=============================================================================
+//
+// CENTER PRINTING
+//
+//=============================================================================
+// 
+static char     scr_centerstring[MAX_STRING_CHARS];
+static unsigned scr_centertime_start;   // for slow victory printing
+static int      scr_center_lines;
+
+//
+//===============
+// SCR_CenterPrint
+// 
+// Places the given string in the centerprint buffer which will be rendered
+// to screen.
+//===============
+//
+void SCR_CenterPrint(const char* str)
+{
+    const char* s;
+
+    scr_centertime_start = clgi.GetRealTime();
+    if (!strcmp(scr_centerstring, str)) {
+        return;
+    }
+
+    Q_strlcpy(scr_centerstring, str, sizeof(scr_centerstring));
+
+    // count the number of lines for centering
+    scr_center_lines = 1;
+    s = str;
+    while (*s) {
+        if (*s == '\n')
+            scr_center_lines++;
+        s++;
+    }
+
+    // echo it to the console
+    Com_Print("%s\n", scr_centerstring);
+
+    // N&C: We call into the client so it can clear the previous notify times.
+    // (these are set at realtime).
+    clgi.Con_ClearNotify();
+}
+
+//
+//===============
+// SCR_DrawCenterString
+// 
+// Takes care of actually drawing the center print string.
+//===============
+//
+static void SCR_DrawCenterString(void)
+{
+    int y;
+    float alpha;
+
+    clgi.Cvar_ClampValue(scr_centertime, 0.3f, 10.0f);
+
+    alpha = SCR_FadeAlpha(scr_centertime_start, scr_centertime->value * 1000, 300);
+    if (!alpha) {
+        return;
+    }
+
+    clgi.R_SetAlpha(alpha * scr_alpha->value);
+
+    y = scr.hud_height / 4 - scr_center_lines * 8 / 2;
+
+    SCR_DrawStringMulti(scr.hud_width / 2, y, UI_CENTER,
+        MAX_STRING_CHARS, scr_centerstring, scr.font_pic);
+
+    clgi.R_SetAlpha(scr_alpha->value);
+}
+
+//
+//=============================================================================
+//
+// CROSSHAIR
+//
+//=============================================================================
+// 
+
+//
+//===============
+// scr_crosshair_changed
+// 
+// Called when the crosshair cvar changes. It'll reload the crosshair
+// based on the value of scr_crosshair
+//===============
+//
+static void scr_crosshair_changed(cvar_t* self)
+{
+    char buffer[16];
+    int w, h;
+    float scale;
+
+    if (scr_crosshair->integer > 0) {
+        Q_snprintf(buffer, sizeof(buffer), "ch%i", scr_crosshair->integer);
+        scr.crosshair_pic = clgi.R_RegisterPic(buffer);
+        clgi.R_GetPicSize(&w, &h, scr.crosshair_pic);
+
+        // prescale
+        scale = clgi.Cvar_ClampValue(ch_scale, 0.1f, 9.0f);
+        scr.crosshair_width = w * scale;
+        scr.crosshair_height = h * scale;
+        if (scr.crosshair_width < 1)
+            scr.crosshair_width = 1;
+        if (scr.crosshair_height < 1)
+            scr.crosshair_height = 1;
+
+        if (ch_health->integer) {
+            SCR_SetCrosshairColor();
+        }
+        else {
+            scr.crosshair_color.u8[0] = (byte)(ch_red->value * 255);
+            scr.crosshair_color.u8[1] = (byte)(ch_green->value * 255);
+            scr.crosshair_color.u8[2] = (byte)(ch_blue->value * 255);
+        }
+        scr.crosshair_color.u8[3] = (byte)(ch_alpha->value * 255);
+    }
+    else {
+        scr.crosshair_pic = 0;
+    }
+}
+
+//
+//===============
+// SCR_SetCrosshairColor
+// 
+// Called each time by DeltaFrame
+//===============
+//
+void SCR_SetCrosshairColor(void)
+{
+    int health;
+
+    if (!ch_health->integer) {
+        return;
+    }
+
+    health = cl->frame.ps.stats[STAT_HEALTH];
+    if (health <= 0) {
+        VectorSet(scr.crosshair_color.u8, 0, 0, 0);
+        return;
+    }
+
+    // red
+    scr.crosshair_color.u8[0] = 255;
+
+    // green
+    if (health >= 66) {
+        scr.crosshair_color.u8[1] = 255;
+    }
+    else if (health < 33) {
+        scr.crosshair_color.u8[1] = 0;
+    }
+    else {
+        scr.crosshair_color.u8[1] = (255 * (health - 33)) / 33;
+    }
+
+    // blue
+    if (health >= 99) {
+        scr.crosshair_color.u8[2] = 255;
+    }
+    else if (health < 66) {
+        scr.crosshair_color.u8[2] = 0;
+    }
+    else {
+        scr.crosshair_color.u8[2] = (255 * (health - 66)) / 33;
+    }
+}
+
+//
+//=============================================================================
+//
+// CHAT HUD.
+//
+//=============================================================================
+// 
+
+#define MAX_CHAT_TEXT       150
+#define MAX_CHAT_LINES      32
+#define CHAT_LINE_MASK      (MAX_CHAT_LINES - 1)
+
+typedef struct {
+    char        text[MAX_CHAT_TEXT];
+    unsigned    time;
+} chatline_t;
+
+static chatline_t   scr_chatlines[MAX_CHAT_LINES];
+static unsigned     scr_chathead;
+
+void SCR_ClearChatHUD_f(void)
+{
+    memset(scr_chatlines, 0, sizeof(scr_chatlines));
+    scr_chathead = 0;
+}
+
+void SCR_AddToChatHUD(const char* text)
+{
+    chatline_t* line;
+    char* p;
+
+    line = &scr_chatlines[scr_chathead++ & CHAT_LINE_MASK];
+    Q_strlcpy(line->text, text, sizeof(line->text));
+    line->time = clgi.GetRealTime();
+
+    p = strrchr(line->text, '\n');
+    if (p)
+        *p = 0;
+}
+
+static void SCR_DrawChatHUD(void)
+{
+    int x, y, flags, step;
+    unsigned i, lines, time;
+    float alpha;
+    chatline_t* line;
+
+    if (scr_chathud->integer == 0)
+        return;
+
+    x = scr_chathud_x->integer;
+    y = scr_chathud_y->integer;
+
+    if (scr_chathud->integer == 2)
+        flags = UI_ALTCOLOR;
+    else
+        flags = 0;
+
+    if (x < 0) {
+        x += scr.hud_width + 1;
+        flags |= UI_RIGHT;
+    }
+    else {
+        flags |= UI_LEFT;
+    }
+
+    if (y < 0) {
+        y += scr.hud_height - CHAR_HEIGHT + 1;
+        step = -CHAR_HEIGHT;
+    }
+    else {
+        step = CHAR_HEIGHT;
+    }
+
+    lines = scr_chathud_lines->integer;
+    if (lines > scr_chathead)
+        lines = scr_chathead;
+
+    time = scr_chathud_time->value * 1000;
+
+    for (i = 0; i < lines; i++) {
+        line = &scr_chatlines[(scr_chathead - i - 1) & CHAT_LINE_MASK];
+
+        if (time) {
+            alpha = SCR_FadeAlpha(line->time, time, 1000);
+            if (!alpha)
+                break;
+
+            clgi.R_SetAlpha(alpha * scr_alpha->value);
+            SCR_DrawString(x, y, flags, line->text);
+            clgi.R_SetAlpha(scr_alpha->value);
+        }
+        else {
+            SCR_DrawString(x, y, flags, line->text);
+        }
+
+        y += step;
+    }
+}
+
+
+//
+//=============================================================================
+//
+// MEDIA REGISTRATION.
+//
+//=============================================================================
+// 
+void SCR_RegisterMedia(void)
+{
+    int     i, j;
+
+    // N&C: We register these here, once again. The client has its own
+    // internally. However, we want to give the CG Module the option to
+    // register their own, and for that... We have this piece of code around :)
+    for (i = 0; i < 2; i++)
+        for (j = 0; j < STAT_PICS; j++)
+            scr.sb_pics[i][j] = clgi.R_RegisterPic(sb_nums[i][j]);
+
+    // Register inventory and field pictures.
+    scr.inven_pic = clgi.R_RegisterPic("inventory");
+    scr.field_pic = clgi.R_RegisterPic("field_3");
+
+    // Register font pic. (Has unless modified, already been registered by the client.)
+    scr.font_pic = clgi.R_RegisterFont(scr_font->string);
+
+    // Crosshair chan
+    scr_crosshair_changed(scr_crosshair);
+}
+
+
+//
+//=============================================================================
+//
+// STAT PROGRAMS.
+//
+//=============================================================================
+// 
+
+#define ICON_WIDTH  24
+#define ICON_HEIGHT 24
+#define DIGIT_WIDTH 16
+#define ICON_SPACE  8
+
+#define HUD_DrawString(x, y, string) \
+    clgi.R_DrawString(x, y, 0, MAX_STRING_CHARS, string, scr.font_pic)
+
+#define HUD_DrawAltString(x, y, string) \
+    clgi.R_DrawString(x, y, UI_XORCOLOR, MAX_STRING_CHARS, string, scr.font_pic)
+
+#define HUD_DrawCenterString(x, y, string) \
+    SCR_DrawStringMulti(x, y, UI_CENTER, MAX_STRING_CHARS, string, scr.font_pic)
+
+#define HUD_DrawAltCenterString(x, y, string) \
+    SCR_DrawStringMulti(x, y, UI_CENTER | UI_XORCOLOR, MAX_STRING_CHARS, string, scr.font_pic)
+
+static void HUD_DrawNumber(int x, int y, int color, int width, int value)
+{
+    char    num[16], * ptr;
+    int     l;
+    int     frame;
+
+    if (width < 1)
+        return;
+
+    // draw number string
+    if (width > 5)
+        width = 5;
+
+    color &= 1;
+
+    l = Q_scnprintf(num, sizeof(num), "%i", value);
+    if (l > width)
+        l = width;
+    x += 2 + DIGIT_WIDTH * (width - l);
+
+    ptr = num;
+    while (*ptr && l) {
+        if (*ptr == '-')
+            frame = STAT_MINUS;
+        else
+            frame = *ptr - '0';
+
+        clgi.R_DrawPic(x, y, scr.sb_pics[color][frame]);
+        x += DIGIT_WIDTH;
+        ptr++;
+        l--;
+    }
+}
+
+#define DISPLAY_ITEMS   17
+
+static void SCR_DrawInventory(void)
+{
+    int     i;
+    int     num, selected_num, item;
+    int     index[MAX_ITEMS];
+    char    string[MAX_STRING_CHARS];
+    int     x, y;
+    char* bind;
+    int     selected;
+    int     top;
+
+    if (!(cl->frame.ps.stats[STAT_LAYOUTS] & 2))
+        return;
+
+    selected = cl->frame.ps.stats[STAT_SELECTED_ITEM];
+
+    num = 0;
+    selected_num = 0;
+    for (i = 0; i < MAX_ITEMS; i++) {
+        if (i == selected) {
+            selected_num = num;
+        }
+        if (cl->inventory[i]) {
+            index[num++] = i;
+        }
+    }
+
+    // determine scroll point
+    top = selected_num - DISPLAY_ITEMS / 2;
+    if (top > num - DISPLAY_ITEMS) {
+        top = num - DISPLAY_ITEMS;
+    }
+    if (top < 0) {
+        top = 0;
+    }
+
+    x = (scr.hud_width - 256) / 2;
+    y = (scr.hud_height - 240) / 2;
+
+    clgi.R_DrawPic(x, y + 8, scr.inven_pic);
+    y += 24;
+    x += 24;
+
+    HUD_DrawString(x, y, "hotkey ### item");
+    y += CHAR_HEIGHT;
+
+    HUD_DrawString(x, y, "------ --- ----");
+    y += CHAR_HEIGHT;
+
+    for (i = top; i < num && i < top + DISPLAY_ITEMS; i++) {
+        item = index[i];
+        // search for a binding
+        Q_concat(string, sizeof(string),
+            "use ", cl->configstrings[CS_ITEMS + item], NULL);
+        bind = clgi.Key_GetBinding(string);
+
+        Q_snprintf(string, sizeof(string), "%6s %3i %s",
+            bind, cl->inventory[item], cl->configstrings[CS_ITEMS + item]);
+
+        if (item != selected) {
+            HUD_DrawAltString(x, y, string);
+        }
+        else {    // draw a blinky cursor by the selected item
+            HUD_DrawString(x, y, string);
+            if ((clgi.GetRealTime() >> 8) & 1) {
+                clgi.R_DrawChar(x - CHAR_WIDTH, y, 0, 15, scr.font_pic);
+            }
+        }
+
+        y += CHAR_HEIGHT;
+    }
+}
+
+static void SCR_DrawSelectedItemName(int x, int y, int item)
+{
+    static int display_item = -1;
+    static int display_start_time = 0;
+
+    float duration = 0.f;
+    if (display_item != item)
+    {
+        display_start_time = clgi.Sys_Milliseconds();
+        display_item = item;
+    }
+    else
+    {
+        duration = (float)(clgi.Sys_Milliseconds() - display_start_time) * 0.001f;
+    }
+
+    float alpha;
+    if (scr_showitemname->integer < 2)
+        alpha = max(0.f, min(1.f, 5.f - 4.f * duration)); // show and hide
+    else
+        alpha = 1; // always show
+
+    if (alpha > 0.f)
+    {
+        clgi.R_SetAlpha(alpha * scr_alpha->value);
+
+        int index = CS_ITEMS + item;
+        HUD_DrawString(x, y, cl->configstrings[index]);
+
+        clgi.R_SetAlpha(scr_alpha->value);
+    }
+}
+
+static void SCR_ExecuteLayoutString(const char* s)
+{
+    char    buffer[MAX_QPATH];
+    int     x, y;
+    int     value;
+    char* token;
+    int     width;
+    int     index;
+    clientinfo_t* ci;
+
+    if (!s[0])
+        return;
+
+    x = 0;
+    y = 0;
+
+    while (s) {
+        token = COM_Parse(&s);
+        if (token[2] == 0) {
+            if (token[0] == 'x') {
+                if (token[1] == 'l') {
+                    token = COM_Parse(&s);
+                    x = atoi(token);
+                    continue;
+                }
+
+                if (token[1] == 'r') {
+                    token = COM_Parse(&s);
+                    x = scr.hud_width + atoi(token);
+                    continue;
+                }
+
+                if (token[1] == 'v') {
+                    token = COM_Parse(&s);
+                    x = scr.hud_width / 2 - 160 + atoi(token);
+                    continue;
+                }
+            }
+
+            if (token[0] == 'y') {
+                if (token[1] == 't') {
+                    token = COM_Parse(&s);
+                    y = atoi(token);
+                    continue;
+                }
+
+                if (token[1] == 'b') {
+                    token = COM_Parse(&s);
+                    y = scr.hud_height + atoi(token);
+                    continue;
+                }
+
+                if (token[1] == 'v') {
+                    token = COM_Parse(&s);
+                    y = scr.hud_height / 2 - 120 + atoi(token);
+                    continue;
+                }
+            }
+        }
+
+        if (!strcmp(token, "pic")) {
+            // draw a pic from a stat number
+            token = COM_Parse(&s);
+            value = atoi(token);
+            if (value < 0 || value >= MAX_STATS) {
+                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+            }
+            index = cl->frame.ps.stats[value];
+            if (index < 0 || index >= MAX_IMAGES) {
+                Com_Error(ERR_DROP, "%s: invalid pic index", __func__);
+            }
+            token = cl->configstrings[CS_IMAGES + index];
+            if (token[0] && cl->image_precache[index]) {
+                clgi.R_DrawPic(x, y, cl->image_precache[index]);
+            }
+
+            if (value == STAT_SELECTED_ICON && scr_showitemname->integer)
+            {
+                SCR_DrawSelectedItemName(x + 32, y + 8, cl->frame.ps.stats[STAT_SELECTED_ITEM]);
+            }
+            continue;
+        }
+
+        if (!strcmp(token, "client")) {
+            // draw a deathmatch client block
+            int     score, ping, time;
+
+            token = COM_Parse(&s);
+            x = scr.hud_width / 2 - 160 + atoi(token);
+            token = COM_Parse(&s);
+            y = scr.hud_height / 2 - 120 + atoi(token);
+
+            token = COM_Parse(&s);
+            value = atoi(token);
+            if (value < 0 || value >= MAX_CLIENTS) {
+                Com_Error(ERR_DROP, "%s: invalid client index", __func__);
+            }
+            ci = &cl->clientinfo[value];
+
+            token = COM_Parse(&s);
+            score = atoi(token);
+
+            token = COM_Parse(&s);
+            ping = atoi(token);
+
+            token = COM_Parse(&s);
+            time = atoi(token);
+
+            HUD_DrawAltString(x + 32, y, ci->name);
+            HUD_DrawString(x + 32, y + CHAR_HEIGHT, "Score: ");
+            Q_snprintf(buffer, sizeof(buffer), "%i", score);
+            HUD_DrawAltString(x + 32 + 7 * CHAR_WIDTH, y + CHAR_HEIGHT, buffer);
+            Q_snprintf(buffer, sizeof(buffer), "Ping:  %i", ping);
+            HUD_DrawString(x + 32, y + 2 * CHAR_HEIGHT, buffer);
+            Q_snprintf(buffer, sizeof(buffer), "Time:  %i", time);
+            HUD_DrawString(x + 32, y + 3 * CHAR_HEIGHT, buffer);
+
+            if (!ci->icon) {
+                ci = &cl->baseclientinfo;
+            }
+            clgi.R_DrawPic(x, y, ci->icon);
+            continue;
+        }
+
+        if (!strcmp(token, "ctf")) {
+            // draw a ctf client block
+            int     score, ping;
+
+            token = COM_Parse(&s);
+            x = scr.hud_width / 2 - 160 + atoi(token);
+            token = COM_Parse(&s);
+            y = scr.hud_height / 2 - 120 + atoi(token);
+
+            token = COM_Parse(&s);
+            value = atoi(token);
+            if (value < 0 || value >= MAX_CLIENTS) {
+                Com_Error(ERR_DROP, "%s: invalid client index", __func__);
+            }
+            ci = &cl->clientinfo[value];
+
+            token = COM_Parse(&s);
+            score = atoi(token);
+
+            token = COM_Parse(&s);
+            ping = atoi(token);
+            if (ping > 999)
+                ping = 999;
+
+            Q_snprintf(buffer, sizeof(buffer), "%3d %3d %-12.12s",
+                score, ping, ci->name);
+            if (value == cl->frame.clientNum) {
+                HUD_DrawAltString(x, y, buffer);
+            }
+            else {
+                HUD_DrawString(x, y, buffer);
+            }
+            continue;
+        }
+
+        if (!strcmp(token, "picn")) {
+            // draw a pic from a name
+            token = COM_Parse(&s);
+            clgi.R_DrawPic(x, y, clgi.R_RegisterPic2(token));
+            continue;
+        }
+
+        if (!strcmp(token, "num")) {
+            // draw a number
+            token = COM_Parse(&s);
+            width = atoi(token);
+            token = COM_Parse(&s);
+            value = atoi(token);
+            if (value < 0 || value >= MAX_STATS) {
+                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+            }
+            value = cl->frame.ps.stats[value];
+            HUD_DrawNumber(x, y, 0, width, value);
+            continue;
+        }
+
+        if (!strcmp(token, "hnum")) {
+            // health number
+            int     color;
+
+            width = 3;
+            value = cl->frame.ps.stats[STAT_HEALTH];
+            if (value > 25)
+                color = 0;  // green
+            else if (value > 0)
+                color = ((cl->frame.number / CL_FRAMEDIV) >> 2) & 1;     // flash
+            else
+                color = 1;
+
+            if (cl->frame.ps.stats[STAT_FLASHES] & 1)
+                clgi.R_DrawPic(x, y, scr.field_pic);
+
+            HUD_DrawNumber(x, y, color, width, value);
+            continue;
+        }
+
+        if (!strcmp(token, "anum")) {
+            // ammo number
+            int     color;
+
+            width = 3;
+            value = cl->frame.ps.stats[STAT_AMMO];
+            if (value > 5)
+                color = 0;  // green
+            else if (value >= 0)
+                color = ((cl->frame.number / CL_FRAMEDIV) >> 2) & 1;     // flash
+            else
+                continue;   // negative number = don't show
+
+            if (cl->frame.ps.stats[STAT_FLASHES] & 4)
+                clgi.R_DrawPic(x, y, scr.field_pic);
+
+            HUD_DrawNumber(x, y, color, width, value);
+            continue;
+        }
+
+        if (!strcmp(token, "rnum")) {
+            // armor number
+            int     color;
+
+            width = 3;
+            value = cl->frame.ps.stats[STAT_ARMOR];
+            if (value < 1)
+                continue;
+
+            color = 0;  // green
+
+            if (cl->frame.ps.stats[STAT_FLASHES] & 2)
+                clgi.R_DrawPic(x, y, scr.field_pic);
+
+            HUD_DrawNumber(x, y, color, width, value);
+            continue;
+        }
+
+        if (!strcmp(token, "stat_string")) {
+            token = COM_Parse(&s);
+            index = atoi(token);
+            if (index < 0 || index >= MAX_STATS) {
+                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+            }
+            index = cl->frame.ps.stats[index];
+            if (index < 0 || index >= MAX_CONFIGSTRINGS) {
+                Com_Error(ERR_DROP, "%s: invalid string index", __func__);
+            }
+            HUD_DrawString(x, y, cl->configstrings[index]);
+            continue;
+        }
+
+        if (!strcmp(token, "cstring")) {
+            token = COM_Parse(&s);
+            HUD_DrawCenterString(x + 320 / 2, y, token);
+            continue;
+        }
+
+        if (!strcmp(token, "cstring2")) {
+            token = COM_Parse(&s);
+            HUD_DrawAltCenterString(x + 320 / 2, y, token);
+            continue;
+        }
+
+        if (!strcmp(token, "string")) {
+            token = COM_Parse(&s);
+            HUD_DrawString(x, y, token);
+            continue;
+        }
+
+        if (!strcmp(token, "string2")) {
+            token = COM_Parse(&s);
+            HUD_DrawAltString(x, y, token);
+            continue;
+        }
+
+        if (!strcmp(token, "if")) {
+            token = COM_Parse(&s);
+            value = atoi(token);
+            if (value < 0 || value >= MAX_STATS) {
+                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+            }
+            value = cl->frame.ps.stats[value];
+            if (!value) {   // skip to endif
+                while (strcmp(token, "endif")) {
+                    token = COM_Parse(&s);
+                    if (!s) {
+                        break;
+                    }
+                }
+            }
+            continue;
+        }
+
+        if (!strcmp(token, "color")) {
+            color_t     color;
+
+            token = COM_Parse(&s);
+            if (SCR_ParseColor(token, &color)) {
+                color.u8[3] *= scr_alpha->value;
+                clgi.R_SetColor(color.u32);
+            }
+            continue;
+        }
+    }
+
+    clgi.R_ClearColor();
+    clgi.R_SetAlpha(scr_alpha->value);
+}
+
+
+//=============================================================================
+
+
+static void SCR_DrawCrosshair(void)
+{
+    int x, y;
+
+    if (!scr_crosshair->integer)
+        return;
+
+    x = (scr.hud_width - scr.crosshair_width) / 2;
+    y = (scr.hud_height - scr.crosshair_height) / 2;
+
+    clgi.R_SetColor(scr.crosshair_color.u32);
+
+    clgi.R_DrawStretchPic(x + ch_x->integer,
+        y + ch_y->integer,
+        scr.crosshair_width,
+        scr.crosshair_height,
+        scr.crosshair_pic);
+}
+
+// The status bar is a small layout program that is based on the stats array
+static void SCR_DrawStats(void)
+{
+    if (scr_draw2d->integer <= 1)
+        return;
+
+    SCR_ExecuteLayoutString(cl->configstrings[CS_STATUSBAR]);
+}
+
+static void SCR_DrawLayout(void)
+{
+    if (scr_draw2d->integer == 3 && !clgi.Key_IsDown(K_F1))
+        return;     // turn off for GTV
+
+    if (clgi.IsDemoPlayback() && clgi.Key_IsDown(K_F1))
+        goto draw;
+
+    if (!(cl->frame.ps.stats[STAT_LAYOUTS] & 1))
+        return;
+
+draw:
+    SCR_ExecuteLayoutString(cl->layout);
+}
+
 //
 //=============================================================================
 //
@@ -62,6 +1208,14 @@ static void SCR_Sky_f(void)
     clgi.R_SetSky(name, rotate, axis);
 }
 
+static void SCR_CalcVRect(void) {
+    scr_vrect.width = scr.hud_width;
+    scr_vrect.height = scr.hud_height;
+    scr_vrect.x = 0;
+    scr_vrect.y = 0;
+}
+
+
 //
 //=============================================================================
 //
@@ -76,7 +1230,7 @@ static const cmdreg_t scr_cmds[] = {
     { "sky", SCR_Sky_f },
     //{ "draw", SCR_Draw_f, SCR_Draw_c },
     //{ "undraw", SCR_UnDraw_f, SCR_UnDraw_c },
-    //{ "clearchathud", SCR_ClearChatHUD_f },
+    { "clearchathud", SCR_ClearChatHUD_f },
     { NULL }
 };
 
@@ -89,67 +1243,96 @@ static const cmdreg_t scr_cmds[] = {
 //
 void SCR_Init(void)
 {
-//    scr_viewsize = Cvar_Get("viewsize", "100", CVAR_ARCHIVE);
-//    scr_showpause = Cvar_Get("scr_showpause", "1", 0);
-//    scr_centertime = Cvar_Get("scr_centertime", "2.5", 0);
-//#ifdef _DEBUG
-//    scr_netgraph = Cvar_Get("netgraph", "0", 0);
-//    scr_timegraph = Cvar_Get("timegraph", "0", 0);
-//    scr_debuggraph = Cvar_Get("debuggraph", "0", 0);
-//    scr_graphheight = Cvar_Get("graphheight", "32", 0);
-//    scr_graphscale = Cvar_Get("graphscale", "1", 0);
-//    scr_graphshift = Cvar_Get("graphshift", "0", 0);
-//#endif
-//    scr_demobar = Cvar_Get("scr_demobar", "1", 0);
-//    scr_font = Cvar_Get("scr_font", "conchars", 0);
-//    scr_font->changed = scr_font_changed;
-//    scr_scale = Cvar_Get("scr_scale", "2", 0);
-//    scr_scale->changed = scr_scale_changed;
-//    scr_crosshair = Cvar_Get("crosshair", "0", CVAR_ARCHIVE);
-//    scr_crosshair->changed = scr_crosshair_changed;
-//
-//    scr_chathud = Cvar_Get("scr_chathud", "0", 0);
-//    scr_chathud_lines = Cvar_Get("scr_chathud_lines", "4", 0);
-//    scr_chathud_time = Cvar_Get("scr_chathud_time", "0", 0);
-//    scr_chathud_x = Cvar_Get("scr_chathud_x", "8", 0);
-//    scr_chathud_y = Cvar_Get("scr_chathud_y", "-64", 0);
-//
-//    ch_health = Cvar_Get("ch_health", "0", 0);
-//    ch_health->changed = scr_crosshair_changed;
-//    ch_red = Cvar_Get("ch_red", "1", 0);
-//    ch_red->changed = scr_crosshair_changed;
-//    ch_green = Cvar_Get("ch_green", "1", 0);
-//    ch_green->changed = scr_crosshair_changed;
-//    ch_blue = Cvar_Get("ch_blue", "1", 0);
-//    ch_blue->changed = scr_crosshair_changed;
-//    ch_alpha = Cvar_Get("ch_alpha", "1", 0);
-//    ch_alpha->changed = scr_crosshair_changed;
-//
-//    ch_scale = Cvar_Get("ch_scale", "1", 0);
-//    ch_scale->changed = scr_crosshair_changed;
-//    ch_x = Cvar_Get("ch_x", "0", 0);
-//    ch_y = Cvar_Get("ch_y", "0", 0);
-//
-//    scr_draw2d = Cvar_Get("scr_draw2d", "2", 0);
-//    scr_showturtle = Cvar_Get("scr_showturtle", "1", 0);
-//    scr_showitemname = Cvar_Get("scr_showitemname", "1", CVAR_ARCHIVE);
-//    scr_lag_x = Cvar_Get("scr_lag_x", "-1", 0);
-//    scr_lag_y = Cvar_Get("scr_lag_y", "-1", 0);
-//    scr_lag_draw = Cvar_Get("scr_lag_draw", "0", 0);
-//    scr_lag_min = Cvar_Get("scr_lag_min", "0", 0);
-//    scr_lag_max = Cvar_Get("scr_lag_max", "200", 0);
-//    scr_alpha = Cvar_Get("scr_alpha", "1", 0);
-//    scr_fps = Cvar_Get("scr_fps", "0", CVAR_ARCHIVE);
-//#ifdef _DEBUG
-//    scr_showstats = Cvar_Get("scr_showstats", "0", 0);
-//    scr_showpmove = Cvar_Get("scr_showpmove", "0", 0);
-//#endif
+    // Fetch CVars from client.
+    scr_viewsize    = clgi.Cvar_Get("viewsize", NULL, 0);
+    scr_draw2d      = clgi.Cvar_Get("scr_draw2d", NULL, 0);
+    scr_alpha       = clgi.Cvar_Get("scr_alpha", NULL, 0);
+    scr_font        = clgi.Cvar_Get("scr_font", NULL, 0);
+    scr_scale       = clgi.Cvar_Get("scr_scale", NULL, 0);
 
+    // Create CVars.
+    scr_showitemname        = clgi.Cvar_Get("scr_showitemname", "1", CVAR_ARCHIVE);
+
+    scr_centertime          = clgi.Cvar_Get("scr_centertime", "2.5", 0);
+
+    scr_crosshair           = clgi.Cvar_Get("crosshair", "0", CVAR_ARCHIVE);
+    scr_crosshair->changed  = scr_crosshair_changed;
+
+    ch_scale            = clgi.Cvar_Get("ch_scale", "1", 0);
+    ch_scale->changed   = scr_crosshair_changed;
+    ch_x                = clgi.Cvar_Get("ch_x", "0", 0);
+    ch_y                = clgi.Cvar_Get("ch_y", "0", 0);
+
+    scr_chathud         = clgi.Cvar_Get("scr_chathud", "0", 0);
+    scr_chathud_lines   = clgi.Cvar_Get("scr_chathud_lines", "4", 0);
+    scr_chathud_time    = clgi.Cvar_Get("scr_chathud_time", "0", 0);
+    scr_chathud_x       = clgi.Cvar_Get("scr_chathud_x", "8", 0);
+    scr_chathud_y       = clgi.Cvar_Get("scr_chathud_y", "-64", 0);
+
+    ch_health           = clgi.Cvar_Get("ch_health", "0", 0);
+    ch_health->changed  = scr_crosshair_changed;
+    ch_red              = clgi.Cvar_Get("ch_red", "1", 0);
+    ch_red->changed     = scr_crosshair_changed;
+    ch_green            = clgi.Cvar_Get("ch_green", "1", 0);
+    ch_green->changed   = scr_crosshair_changed;
+    ch_blue             = clgi.Cvar_Get("ch_blue", "1", 0);
+    ch_blue->changed    = scr_crosshair_changed;
+    ch_alpha            = clgi.Cvar_Get("ch_alpha", "1", 0);
+    ch_alpha->changed   = scr_crosshair_changed;
+
+    // Register commands.
     clgi.Cmd_Register(scr_cmds);
 
-    //scr_scale_changed(scr_scale);
+    // We've initialized the screen.
+    scr.initialized = qtrue;
+}
 
-    //scr.initialized = qtrue;
+//
+//===============
+// CLG_DrawScreen
+//
+// 
+//===============
+//
+void CLG_RenderScreen(void) {
+    // start with full screen HUD
+    scr.hud_width = cl->refdef.width;
+    scr.hud_height = cl->refdef.height;
+
+    // Calculate view rectangle.
+    SCR_CalcVRect();
+
+    clgi.R_SetAlphaScale(scr.hud_alpha);
+
+    clgi.R_SetScale(scr.hud_scale);
+
+    scr.hud_height *= scr.hud_scale;
+    scr.hud_width *= scr.hud_scale;
+
+    // Render the crosshair.
+    SCR_DrawCrosshair();
+
+    // the rest of 2D elements share common alpha
+    clgi.R_ClearColor();
+    clgi.R_SetAlpha(clgi.Cvar_ClampValue(scr_alpha, 0, 1));
+
+    // Draw status.
+    SCR_DrawStats();
+
+    // Draw layout string.
+    SCR_DrawLayout();
+
+    // Draw inventory.
+    SCR_DrawInventory();
+
+    // Draw center screen print
+    SCR_DrawCenterString();
+
+    // Draw objects.
+    // SCR_DrawObjects
+
+    // Draw Chat Hud.
+    SCR_DrawChatHUD();
 }
 
 //
@@ -162,5 +1345,5 @@ void SCR_Init(void)
 void SCR_Shutdown(void)
 {
     clgi.Cmd_Deregister(scr_cmds);
-//    scr.initialized = qfalse;
+    scr.initialized = qfalse;
 }

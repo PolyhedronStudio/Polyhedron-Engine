@@ -1077,13 +1077,13 @@ badbyte:
             CL_ParseReconnect();
             return;
 
-        case svc_print:
-            CL_ParsePrint();
-            break;
+        //case svc_print:
+        //    CL_ParsePrint();
+        //    break;
 
-        case svc_centerprint:
-            CL_ParseCenterPrint();
-            break;
+        //case svc_centerprint:
+        //    CL_ParseCenterPrint();
+        //    break;
 
         case svc_stufftext:
             CL_ParseStuffText();

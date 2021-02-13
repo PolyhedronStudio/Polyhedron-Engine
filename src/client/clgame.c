@@ -168,6 +168,114 @@ void _wrp_R_SetSky(const char* name, float rotate, vec3_t axis) {
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
 
+void _wrp_R_ClearColor(void) {
+    if (R_ClearColor)
+        R_ClearColor();
+    else
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+}
+void _wrp_R_SetAlpha(float alpha) {
+    if (R_SetAlpha)
+        R_SetAlpha(alpha);
+    else
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+}
+void _wrp_R_SetAlphaScale(float scale) {
+    if (R_SetAlphaScale)
+        R_SetAlphaScale(scale);
+    else
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+}
+void _wrp_R_SetColor(uint32_t color) {
+    if (R_SetColor)
+        R_SetColor(color);
+    else
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+}
+void _wrp_R_SetClipRect(const clipRect_t* clip) {
+    if (R_SetClipRect)
+        R_SetClipRect(clip);
+    else
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+}
+float _wrp_R_ClampScale(cvar_t *var) {
+    if (R_ClampScale) {
+        return R_ClampScale(var);
+    } else {
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+        return 0.0f;
+    }
+}
+void _wrp_R_SetScale(float scale) {
+    if (R_SetScale)
+        R_SetScale(scale);
+    else
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+}
+void _wrp_R_DrawChar(int x, int y, int flags, int ch, qhandle_t font) {
+    if (R_DrawChar)
+        R_DrawChar(x, y, flags, ch, font);
+    else
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+}
+int _wrp_R_DrawString(int x, int y, int flags, size_t maxChars,
+                                    const char* string, qhandle_t font) {
+    if (R_DrawString)
+        return R_DrawString(x, y, flags, maxChars, string, font);
+    else
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+
+    return 0;
+}
+qboolean _wrp_R_GetPicSize(int* w, int* h, qhandle_t pic) {
+    if (R_GetPicSize) {
+        return R_GetPicSize(w, h, pic);
+    }
+    else {
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+        return qfalse;
+    }
+}
+void _wrp_R_DrawPic(int x, int y, qhandle_t pic) {
+    if (R_DrawPic) {
+        R_DrawPic(x, y, pic);
+    } else {
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+    }
+}
+void _wrp_R_DrawStretchPic(int x, int y, int w, int h, qhandle_t pic) {
+    if (R_DrawStretchPic) {
+        R_DrawStretchPic(x, y, w, h, pic);
+    }
+    else {
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+    }
+}
+void _wrp_R_TileClear(int x, int y, int w, int h, qhandle_t pic) {
+    if (R_TileClear) {
+        R_TileClear(x, y, w, h, pic);
+    }
+    else {
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+    }
+}
+void _wrp_R_DrawFill8(int x, int y, int w, int h, int c) {
+    if (R_DrawFill8) {
+        R_DrawFill8(x, y, w, h, c);
+    }
+    else {
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+    }
+}
+void _wrp_R_DrawFill32(int x, int y, int w, int h, uint32_t color) {
+    if (R_DrawFill32) {
+        R_DrawFill32(x, y, w, h, color);
+    }
+    else {
+        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+    }
+}
+
 //
 //=============================================================================
 //
@@ -325,6 +433,9 @@ void CL_InitGameProgs(void)
 
     import.Com_ErrorString              = Q_ErrorString;
 
+    // Console.
+    import.Con_ClearNotify              = Con_ClearNotify_f;
+
 	// Cvar.
 	import.Cvar_Get						= Cvar_Get;
 	import.Cvar_WeakGet					= Cvar_WeakGet;
@@ -370,6 +481,10 @@ void CL_InitGameProgs(void)
     import.FS_ValidatePath              = FS_ValidatePath;
     import.FS_SanitizeFilenameVariable  = FS_SanitizeFilenameVariable;
 
+    // Keys.
+    import.Key_IsDown                   = Key_IsDown;
+    import.Key_GetBinding               = Key_GetBinding;
+
     // Networking.
     import.MSG_ReadChar                 = MSG_ReadChar;
     import.MSG_ReadByte                 = MSG_ReadByte;
@@ -403,12 +518,31 @@ void CL_InitGameProgs(void)
     import.MOD_ForHandle                = MOD_ForHandle;
 
     // Rendering
-    import.R_AddDecal = _wrp_R_AddDecal;
+    import.R_AddDecal                   = _wrp_R_AddDecal;
     import.R_LightPoint                 = _wrp_R_LightPoint;
     import.R_SetSky                     = _wrp_R_SetSky;
 
+    import.R_ClearColor                 = _wrp_R_ClearColor;
+    import.R_SetAlpha                   = _wrp_R_SetAlpha;
+    import.R_SetAlphaScale              = _wrp_R_SetAlphaScale;
+    import.R_SetColor                   = _wrp_R_SetColor;
+    import.R_SetClipRect                = _wrp_R_SetClipRect;
+    import.R_ClampScale                 = _wrp_R_ClampScale;
+    import.R_SetScale                   = _wrp_R_SetScale;
+    import.R_DrawChar                   = _wrp_R_DrawChar;
+    import.R_DrawString                 = _wrp_R_DrawString;
+    import.R_GetPicSize                 = _wrp_R_GetPicSize;
+    import.R_DrawPic                    = _wrp_R_DrawPic;
+    import.R_DrawStretchPic             = _wrp_R_DrawStretchPic;
+    import.R_TileClear                  = _wrp_R_TileClear;
+    import.R_DrawFill8                  = _wrp_R_DrawFill8;
+    import.R_DrawFill32                 = _wrp_R_DrawFill32;
+
     // Screen.
     import.SCR_UpdateScreen             = SCR_UpdateScreen;
+
+    // System.
+    import.Sys_Milliseconds             = Sys_Milliseconds;
 
     // Sound.
     import.S_BeginRegistration          = S_BeginRegistration;
@@ -514,6 +648,19 @@ void CL_GM_CalcViewValues(void) {
 void CL_GM_ClientBegin(void) {
     if (cge)
         cge->ClientBegin();
+}
+
+//
+//===============
+// CL_GM_ClientDeltaFrame
+// 
+// Called each time the client has parsed a valid frame. 
+// Handle per VALID frame basis things here.
+//===============
+//
+void CL_GM_ClientDeltaFrame(void) {
+    if (cge)
+        cge->ClientDeltaFrame();
 }
 
 //
@@ -765,15 +912,16 @@ void CL_GM_PmoveEnableQW(pmoveParams_t* pmp) {
 
 //
 //===============
-// CL_GM_PreRenderView
+// CL_GM_RenderScreen
 // 
-// Call into the CG Module for notifying about "Pre Render View"
+// Call into the CG Module for rendering the screen's 2D elements.
 //===============
 //
-void CL_GM_PreRenderView () {
+void CL_GM_RenderScreen(void) {
     if (cge)
-        cge->PreRenderView();
+        cge->RenderScreen();
 }
+
 
 //
 //===============
@@ -785,6 +933,18 @@ void CL_GM_PreRenderView () {
 void CL_GM_ClearScene() {
     if (cge)
         cge->ClearScene();
+}
+
+//
+//===============
+// CL_GM_PreRenderView
+// 
+// Call into the CG Module for notifying about "Pre Render View"
+//===============
+//
+void CL_GM_PreRenderView() {
+    if (cge)
+        cge->PreRenderView();
 }
 
 //

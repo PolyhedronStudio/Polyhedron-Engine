@@ -2402,9 +2402,10 @@ void CL_RestartFilesystem(qboolean total)
 
         R_Init(qfalse);
 
-        CL_GM_LoadScreenMedia();
-
+        // Load client screen media first.
         SCR_RegisterMedia();
+        // N&C: Inform the CG Module about the registration of media.
+        CL_GM_LoadScreenMedia();
         Con_RegisterMedia();
         UI_Init();
     } else {
@@ -2464,11 +2465,10 @@ void CL_RestartRefresh(qboolean total)
         R_Shutdown(qfalse);
         R_Init(qfalse);
         
+        // Load client screen media first.
+        SCR_RegisterMedia();
         // N&C: Inform the CG Module about the registration of media.
         CL_GM_LoadScreenMedia();
-
-        // N&C: These should eventually all move over to the CG Module.
-        SCR_RegisterMedia();
         Con_RegisterMedia();
         UI_Init();
 

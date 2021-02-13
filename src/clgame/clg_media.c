@@ -347,7 +347,7 @@ void CLG_InitMedia(void)
 //
 void CLG_LoadScreenMedia(void)
 {
-
+    SCR_RegisterMedia();
 }
 
 //

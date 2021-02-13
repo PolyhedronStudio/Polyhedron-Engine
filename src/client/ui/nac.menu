@@ -1,5 +1,5 @@
 /*
-This is example menu definition file for NAC(Similar to the old Q2PRO).
+This is example menu definition file for Q2PRO.
 
 File format is line based, whitespace is ignored.  C and C++ style comments are
 supported.  Long lines can be broken into multiple ones by escaping linefeed
@@ -412,9 +412,8 @@ begin quit
 end
 
 begin main
-    //title "Main Menu"
+//    title "Main Menu"
     plaque m_main_plaque m_main_logo
-    //footer m_main_footer 0.5
     bitmap m_main_game pushmenu singleplayer
     bitmap m_main_multiplayer pushmenu multiplayer
     bitmap m_main_options pushmenu options
@@ -426,7 +425,6 @@ begin game
     background #212F3CD0
     style --compact
     plaque m_main_plaque m_main_logo
-    //footer m_main_footer 0.5
     bitmap m_main_game pushmenu singleplayer
     bitmap m_main_multiplayer pushmenu multiplayer
     bitmap m_main_options pushmenu options
@@ -554,7 +552,7 @@ begin weapons
     bind "grenades" "use grenades"
     blank
     bind "quad damage" "use quad damage"
-    bind "silencer" "use silencer"
+    bind "sliencer" "use silencer"
     bind "rebreather" "use rebreather"
     bind "environment suit" "use environment suit"
     bind "invulnerability" "use invulnerability"

@@ -26,6 +26,7 @@ void        CL_GM_Shutdown(void);
 float		CL_GM_CalcFOV(float fov_x, float width, float height);
 void		CL_GM_CalcViewValues(void);
 void		CL_GM_ClientBegin(void);
+void		CL_GM_ClientDeltaFrame(void);
 void		CL_GM_ClientFrame(void);
 void		CL_GM_ClearState(void);
 void		CL_GM_DemoSeek(void);
@@ -66,6 +67,11 @@ void		CL_GM_StartServerMessage(void);
 qboolean	CL_GM_ParseServerMessage(int serverCommand);
 qboolean    CL_GM_SeekDemoMessage(int demoCommand);
 void		CL_GM_EndServerMessage(void);
+
+//
+// Screen
+//
+void		CL_GM_RenderScreen(void);
 
 //
 // View

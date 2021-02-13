@@ -362,19 +362,20 @@ void CL_InitRefresh(void)
     // This registers the PT cvars, so we'll do this before InitMedia.
     FX_Init();
 
-    // N&C: Inform the CG Module about the initialization.
-    CL_GM_InitMedia();
-
-    // N&C: Eventually, these should gradually move over to CG Module its InitMedia.
-    // Initialize the rest of graphics subsystems
+    // N&C: Initialize these first, we fetch certain cvars in the CG Module.
     V_Init();
     SCR_Init();
 
+    // N&C: Inform the CG Module about the initialization.
+    CL_GM_InitMedia();
+
+    // Load client screen media first.
+    SCR_RegisterMedia();
     // N&C: Inform the CG Module about the registration of media.
     CL_GM_LoadScreenMedia();
-    UI_Init();
 
-    SCR_RegisterMedia();
+    // Register the rest.
+    UI_Init();
     Con_RegisterMedia();
 
     cvar_modified &= ~(CVAR_FILES | CVAR_REFRESH);

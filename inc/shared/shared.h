@@ -178,6 +178,10 @@ q_noreturn q_printf(2, 3);
 #define PRINT_HIGH          2       // critical messages
 #define PRINT_CHAT          3       // chat messages    
 
+// Include keys definitions.
+#include "shared/keys.h"
+#include "shared/ui.h"
+
 //
 // Color defines, modify these as you please for custom colors.
 //
