@@ -956,7 +956,7 @@ void CL_GM_RenderScreen(void) {
 
 //
 //===============
-// CL_GM_RenderScreen
+// CL_GM_ScreenModeChanged
 // 
 // Call into the CG Module for notifying the screen mode changed.
 //===============
@@ -964,6 +964,30 @@ void CL_GM_RenderScreen(void) {
 void CL_GM_ScreenModeChanged(void) {
     if (cge)
         cge->ScreenModeChanged();
+}
+
+//
+//===============
+// CL_GM_DrawLoadScreen
+// 
+// Call into the CG Module for notifying the screen mode changed.
+//===============
+//
+void CL_GM_DrawLoadScreen(void) {
+    if (cge)
+        cge->DrawLoadScreen();
+}
+
+//
+//===============
+// CL_GM_DrawPauseScreen
+// 
+// Call into the CG Module for notifying the screen mode changed.
+//===============
+//
+void CL_GM_DrawPauseScreen(void) {
+    if (cge)
+        cge->DrawPauseScreen();
 }
 
 //

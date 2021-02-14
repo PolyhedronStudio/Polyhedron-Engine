@@ -16,6 +16,14 @@
 static struct {
     qboolean    initialized;        // ready to draw
 
+    qhandle_t   font_pic;
+
+    qhandle_t   pause_pic;
+    int         pause_width, pause_height;
+
+    qhandle_t   loading_pic;
+    int         loading_width, loading_height;
+
     qhandle_t   crosshair_pic;
     int         crosshair_width, crosshair_height;
     color_t     crosshair_color;
@@ -23,8 +31,6 @@ static struct {
     qhandle_t   sb_pics[2][STAT_PICS];
     qhandle_t   inven_pic;
     qhandle_t   field_pic;
-
-    qhandle_t   font_pic;
 
     int         hud_width, hud_height;
     float       hud_scale;
@@ -875,6 +881,14 @@ void SCR_RegisterMedia(void)
     scr.inven_pic = clgi.R_RegisterPic("inventory");
     scr.field_pic = clgi.R_RegisterPic("field_3");
 
+    // Register pause screen picture and fetch its size info.
+    scr.pause_pic = clgi.R_RegisterPic("pause");
+    clgi.R_GetPicSize(&scr.pause_width, &scr.pause_height, scr.pause_pic);
+
+    // Register load screen picture and fetch its size info.
+    scr.loading_pic = clgi.R_RegisterPic("loading");
+    clgi.R_GetPicSize(&scr.loading_width, &scr.loading_height, scr.loading_pic);
+
     // Register font pic. (Has unless modified, already been registered by the client.)
     scr.font_pic = clgi.R_RegisterFont(scr_font->string);
 
@@ -1494,7 +1508,7 @@ static void scr_scale_changed(cvar_t* self)
 
 //
 //===============
-// CLG_SCR_Init
+// SCR_Init
 // 
 // 
 //================
@@ -1567,7 +1581,7 @@ void CLG_ScreenModeChanged(void) {
 
 //
 //===============
-// CLG_DrawScreen
+// CLG_RenderScreen
 //
 // 
 //===============
@@ -1618,7 +1632,42 @@ void CLG_RenderScreen(void) {
 
 //
 //===============
-// CLG_SCR_Init
+// CLG_DrawLoadScreen
+// 
+// 
+//================
+//
+void CLG_DrawLoadScreen(void) {
+    int x, y;
+
+    clgi.R_SetScale(scr.hud_scale);
+
+    x = (cl->refdef.width * scr.hud_scale - scr.loading_width) / 2; //x = (r_config.width * scr.hud_scale - scr.loading_width) / 2;
+    y = (cl->refdef.height * scr.hud_scale - scr.loading_height) / 2; //y = (r_config.height * scr.hud_scale - scr.loading_height) / 2;
+
+    clgi.R_DrawPic(x, y, scr.loading_pic);
+    clgi.R_SetScale(1.0f);
+}
+
+//
+//===============
+// CLG_DrawPauseScreen
+// 
+// 
+//================
+//
+void CLG_DrawPauseScreen(void) {
+    int x, y;
+
+    x = (scr.hud_width - scr.pause_width) / 2;
+    y = (scr.hud_height - scr.pause_height) / 2;
+
+    clgi.R_DrawPic(x, y, scr.pause_pic);
+}
+
+//
+//===============
+// SCR_Shutdown
 // 
 // 
 //================

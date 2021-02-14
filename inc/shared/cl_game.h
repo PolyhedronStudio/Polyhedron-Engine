@@ -140,6 +140,11 @@ extern "C" {
         void        (*RenderScreen) (void);
         // Called when the screen mode has changed.
         void        (*ScreenModeChanged) (void);
+        // Called when the client wants to render the loading screen.
+        void        (*DrawLoadScreen) (void);
+        // Called when the client wants to render the pause screen.
+        void        (*DrawPauseScreen) (void);
+        
 
         //---------------------------------------------------------------------
         // View

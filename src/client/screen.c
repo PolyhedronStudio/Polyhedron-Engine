@@ -1898,8 +1898,8 @@ static void SCR_ExecuteLayoutString(const char *s)
 //=============================================================================
 
 static void SCR_DrawPause(void)
-{
-    int x, y;
+{/*
+    int x, y;*/
 
     if (!sv_paused->integer)
         return;
@@ -1908,29 +1908,31 @@ static void SCR_DrawPause(void)
     if (scr_showpause->integer != 1)
         return;
 
-    x = (scr.hud_width - scr.pause_width) / 2;
-    y = (scr.hud_height - scr.pause_height) / 2;
+    //x = (scr.hud_width - scr.pause_width) / 2;
+    //y = (scr.hud_height - scr.pause_height) / 2;
 
-    R_DrawPic(x, y, scr.pause_pic);
+    //R_DrawPic(x, y, scr.pause_pic);
+    CL_GM_DrawPauseScreen();
 }
 
 static void SCR_DrawLoading(void)
-{
-    int x, y;
+{/*
+    int x, y;*/
 
     if (!scr.draw_loading)
         return;
 
     scr.draw_loading = qfalse;
 
-    R_SetScale(scr.hud_scale);
+    CL_GM_DrawLoadScreen();
+    //R_SetScale(scr.hud_scale);
 
-    x = (r_config.width * scr.hud_scale - scr.loading_width) / 2;
-    y = (r_config.height * scr.hud_scale - scr.loading_height) / 2;
+    //x = (r_config.width * scr.hud_scale - scr.loading_width) / 2;
+    //y = (r_config.height * scr.hud_scale - scr.loading_height) / 2;
 
-    R_DrawPic(x, y, scr.loading_pic);
+    //R_DrawPic(x, y, scr.loading_pic);
 
-    R_SetScale(1.0f);
+    //R_SetScale(1.0f);
 }
 
 static void SCR_DrawCrosshair(void)

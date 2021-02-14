@@ -330,6 +330,8 @@ void SCR_Shutdown(void);
 
 void CLG_RenderScreen(void);
 void CLG_ScreenModeChanged(void);
+void CLG_DrawLoadScreen(void);
+void CLG_DrawPauseScreen(void);
 
 //
 // clg_tent.c
