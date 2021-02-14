@@ -72,6 +72,7 @@ void		CL_GM_EndServerMessage(void);
 // Screen
 //
 void		CL_GM_RenderScreen(void);
+void		CL_GM_ScreenModeChanged(void);
 
 //
 // View

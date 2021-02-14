@@ -88,19 +88,20 @@ typedef struct cmdbuf_s {
     then searches for a command or variable that matches the first token.
     */
 
-    typedef struct genctx_s {
-        const char  *partial;
-        size_t length;
-        int argnum;
-        char **matches;
-        int count, size;
-        void *data;
-        qboolean ignorecase;
-        qboolean ignoredups;
-    } genctx_t;
 #endif // CGAME_INCLUDE
 
     // Looks a bit oddly positioned here, but we need this in the cgame dll so...
+    typedef struct genctx_s {
+        const char* partial;
+        size_t length;
+        int argnum;
+        char** matches;
+        int count, size;
+        void* data;
+        qboolean ignorecase;
+        qboolean ignoredups;
+    } genctx_t;
+
     typedef void (*xcommand_t)(void);
     typedef void (*xcommandex_t)(cmdbuf_t*);
     typedef size_t(*xmacro_t)(char*, size_t);

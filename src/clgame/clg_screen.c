@@ -36,6 +36,7 @@ static struct {
 //-----
 cvar_t* scr_viewsize;           // Scale of the view size.
 
+static cvar_t* scr_fps;         // Show FPS count, or not.
 static cvar_t* scr_showitemname;// Show item name, or not.
 
 static cvar_t* scr_draw2d;      // To draw 2D elements or not.
@@ -365,7 +366,7 @@ void SCR_CenterPrint(const char* str)
     }
 
     // echo it to the console
-    Com_Print("%s\n", scr_centerstring);
+    Com_LPrintf(PRINT_ALL, "%s\n", scr_centerstring);
 
     // N&C: We call into the client so it can clear the previous notify times.
     // (these are set at realtime).
@@ -497,6 +498,258 @@ void SCR_SetCrosshairColor(void)
     else {
         scr.crosshair_color.u8[2] = (255 * (health - 66)) / 33;
     }
+}
+
+/*
+===============================================================================
+
+DRAW OBJECTS
+
+===============================================================================
+*/
+
+typedef struct {
+    list_t          entry;
+    int             x, y;
+    cvar_t* cvar;
+    cmd_macro_t* macro;
+    int             flags;
+    color_t         color;
+} drawobj_t;
+
+#define FOR_EACH_DRAWOBJ(obj) \
+    LIST_FOR_EACH(drawobj_t, obj, &scr_objects, entry)
+#define FOR_EACH_DRAWOBJ_SAFE(obj, next) \
+    LIST_FOR_EACH_SAFE(drawobj_t, obj, next, &scr_objects, entry)
+
+static LIST_DECL(scr_objects);
+
+static void SCR_Color_g(genctx_t* ctx)
+{
+    int color;
+
+    for (color = 0; color < 10; color++) {
+        if (!clgi.Prompt_AddMatch(ctx, colorNames[color])) {
+            break;
+        }
+    }
+}
+
+static void SCR_Draw_c(genctx_t* ctx, int argnum)
+{
+    if (argnum == 1) {
+        clgi.Cvar_Variable_g(ctx);
+        clgi.Cmd_Macro_g(ctx);
+    }
+    else if (argnum == 4) {
+        SCR_Color_g(ctx);
+    }
+}
+
+// draw cl_fps -1 80
+static void SCR_Draw_f(void)
+{
+    int x, y;
+    const char* s, * c;
+    drawobj_t* obj;
+    cmd_macro_t* macro;
+    cvar_t* cvar;
+    color_t color;
+    int flags;
+    int argc = clgi.Cmd_Argc();
+
+    if (argc == 1) {
+        if (LIST_EMPTY(&scr_objects)) {
+            Com_Print("No draw strings registered.\n");
+            return;
+        }
+        Com_Print("Name               X    Y\n"
+            "--------------- ---- ----\n");
+        FOR_EACH_DRAWOBJ(obj) {
+            s = obj->macro ? obj->macro->name : obj->cvar->name;
+            Com_Print("%-15s %4d %4d\n", s, obj->x, obj->y);
+        }
+        return;
+    }
+
+    if (argc < 4) {
+        Com_Print("Usage: %s <name> <x> <y> [color]\n", clgi.Cmd_Argv(0));
+        return;
+    }
+
+    color.u32 = U32_BLACK;
+    flags = UI_IGNORECOLOR;
+
+    s = clgi.Cmd_Argv(1);
+    x = atoi(clgi.Cmd_Argv(2));
+    y = atoi(clgi.Cmd_Argv(3));
+
+    if (x < 0) {
+        flags |= UI_RIGHT;
+    }
+
+    if (argc > 4) {
+        c = clgi.Cmd_Argv(4);
+        if (!strcmp(c, "alt")) {
+            flags |= UI_ALTCOLOR;
+        }
+        else if (strcmp(c, "none")) {
+            if (!SCR_ParseColor(c, &color)) {
+                Com_Print("Unknown color '%s'\n", c);
+                return;
+            }
+            flags &= ~UI_IGNORECOLOR;
+        }
+    }
+
+    cvar = NULL;
+    macro = clgi.Cmd_FindMacro(s);
+    if (!macro) {
+        cvar = clgi.Cvar_WeakGet(s);
+    }
+
+    FOR_EACH_DRAWOBJ(obj) {
+        if (obj->macro == macro && obj->cvar == cvar) {
+            obj->x = x;
+            obj->y = y;
+            obj->flags = flags;
+            obj->color.u32 = color.u32;
+            return;
+        }
+    }
+
+    obj = clgi.Z_TagMalloc(sizeof(*obj), TAG_GENERAL);
+    obj->x = x;
+    obj->y = y;
+    obj->cvar = cvar;
+    obj->macro = macro;
+    obj->flags = flags;
+    obj->color.u32 = color.u32;
+
+    List_Append(&scr_objects, &obj->entry);
+}
+
+static void SCR_Draw_g(genctx_t* ctx)
+{
+    drawobj_t* obj;
+    const char* s;
+
+    if (LIST_EMPTY(&scr_objects)) {
+        return;
+    }
+
+    clgi.Prompt_AddMatch(ctx, "all");
+
+    FOR_EACH_DRAWOBJ(obj) {
+        s = obj->macro ? obj->macro->name : obj->cvar->name;
+        if (!clgi.Prompt_AddMatch(ctx, s)) {
+            break;
+        }
+    }
+}
+
+static void SCR_UnDraw_c(genctx_t* ctx, int argnum)
+{
+    if (argnum == 1) {
+        SCR_Draw_g(ctx);
+    }
+}
+
+static void SCR_UnDraw_f(void)
+{
+    char* s;
+    drawobj_t* obj, * next;
+    cmd_macro_t* macro;
+    cvar_t* cvar;
+
+    if (clgi.Cmd_Argc() != 2) {
+        Com_Print("Usage: %s <name>\n", clgi.Cmd_Argv(0));
+        return;
+    }
+
+    if (LIST_EMPTY(&scr_objects)) {
+        Com_Print("No draw strings registered.\n");
+        return;
+    }
+
+    s = clgi.Cmd_Argv(1);
+    if (!strcmp(s, "all")) {
+        FOR_EACH_DRAWOBJ_SAFE(obj, next) {
+            clgi.Z_Free(obj);
+        }
+        List_Init(&scr_objects);
+        Com_Print("Deleted all draw strings.\n");
+        return;
+    }
+
+    cvar = NULL;
+    macro = clgi.Cmd_FindMacro(s);
+    if (!macro) {
+        cvar = clgi.Cvar_WeakGet(s);
+    }
+
+    FOR_EACH_DRAWOBJ_SAFE(obj, next) {
+        if (obj->macro == macro && obj->cvar == cvar) {
+            List_Remove(&obj->entry);
+            clgi.Z_Free(obj);
+            return;
+        }
+    }
+
+    Com_Print("Draw string '%s' not found.\n", s);
+}
+
+static void SCR_DrawObjects(void)
+{
+    char buffer[MAX_QPATH];
+    int x, y;
+    drawobj_t* obj;
+
+    FOR_EACH_DRAWOBJ(obj) {
+        x = obj->x;
+        y = obj->y;
+        if (x < 0) {
+            x += scr.hud_width + 1;
+        }
+        if (y < 0) {
+            y += scr.hud_height - CHAR_HEIGHT + 1;
+        }
+        if (!(obj->flags & UI_IGNORECOLOR)) {
+            clgi.R_SetColor(obj->color.u32);
+        }
+        if (obj->macro) {
+            obj->macro->function(buffer, sizeof(buffer));
+            SCR_DrawString(x, y, obj->flags, buffer);
+        }
+        else {
+            SCR_DrawString(x, y, obj->flags, obj->cvar->string);
+        }
+        if (!(obj->flags & UI_IGNORECOLOR)) {
+            clgi.R_ClearColor();
+            clgi.R_SetAlpha(scr_alpha->value);
+        }
+    }
+}
+
+static void SCR_DrawFPS(void)
+{
+    if (scr_fps->integer == 0)
+        return;
+
+    int fps = clgi.GetFramesPerSecond();
+    int scale = clgi.GetResolutionScale();
+
+    char buffer[MAX_QPATH];
+    if (scr_fps->integer == 2 && vid_rtx->integer)
+        Q_snprintf(buffer, MAX_QPATH, "%d FPS at %3d%%", fps, scale);
+    else
+        Q_snprintf(buffer, MAX_QPATH, "%d FPS", fps);
+
+    int x = scr.hud_width - 2;
+    int y = 1;
+
+    clgi.R_SetColor(~0u);
+    SCR_DrawString(x, y, UI_RIGHT, buffer);
 }
 
 //
@@ -1228,11 +1481,16 @@ static const cmdreg_t scr_cmds[] = {
     //{ "sizeup", SCR_SizeUp_f },
     //{ "sizedown", SCR_SizeDown_f },
     { "sky", SCR_Sky_f },
-    //{ "draw", SCR_Draw_f, SCR_Draw_c },
-    //{ "undraw", SCR_UnDraw_f, SCR_UnDraw_c },
+    { "draw", SCR_Draw_f, SCR_Draw_c },
+    { "undraw", SCR_UnDraw_f, SCR_UnDraw_c },
     { "clearchathud", SCR_ClearChatHUD_f },
     { NULL }
 };
+
+static void scr_scale_changed(cvar_t* self)
+{
+    scr.hud_scale = clgi.R_ClampScale(self);
+}
 
 //
 //===============
@@ -1248,9 +1506,12 @@ void SCR_Init(void)
     scr_draw2d      = clgi.Cvar_Get("scr_draw2d", NULL, 0);
     scr_alpha       = clgi.Cvar_Get("scr_alpha", NULL, 0);
     scr_font        = clgi.Cvar_Get("scr_font", NULL, 0);
-    scr_scale       = clgi.Cvar_Get("scr_scale", NULL, 0);
+    scr_fps         = clgi.Cvar_Get("scr_fps", NULL, 0);
 
     // Create CVars.
+    scr_scale               = clgi.Cvar_Get("scr_scale", "2", 0);
+    scr_scale->changed      = scr_scale_changed;
+
     scr_showitemname        = clgi.Cvar_Get("scr_showitemname", "1", CVAR_ARCHIVE);
 
     scr_centertime          = clgi.Cvar_Get("scr_centertime", "2.5", 0);
@@ -1283,8 +1544,25 @@ void SCR_Init(void)
     // Register commands.
     clgi.Cmd_Register(scr_cmds);
 
+    // Scale init.
+    scr_scale_changed(scr_scale);
+
     // We've initialized the screen.
     scr.initialized = qtrue;
+}
+
+//
+//===============
+// CLG_ScreenModeChanged
+//
+// 
+//===============
+//
+void CLG_ScreenModeChanged(void) {
+    if (scr.initialized)
+        scr.hud_scale = clgi.R_ClampScale(scr_scale);
+
+    scr.hud_alpha = 1.f;
 }
 
 //
@@ -1329,7 +1607,10 @@ void CLG_RenderScreen(void) {
     SCR_DrawCenterString();
 
     // Draw objects.
-    // SCR_DrawObjects
+    SCR_DrawObjects();
+
+    // Draw FPS.
+    SCR_DrawFPS();
 
     // Draw Chat Hud.
     SCR_DrawChatHUD();

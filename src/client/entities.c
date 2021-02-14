@@ -424,7 +424,8 @@ void CL_DeltaFrame(void)
 
     CL_CheckPredictionError();
 
-    SCR_SetCrosshairColor();
+    CL_GM_ClientDeltaFrame();
+    //SCR_SetCrosshairColor();
 }
 
 #ifdef _DEBUG

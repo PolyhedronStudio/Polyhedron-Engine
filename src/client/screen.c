@@ -483,7 +483,7 @@ void SCR_CenterPrint(const char *str)
     //}
 
     //// echo it to the console
-    //Com_Printf("%s\n", scr_centerstring);
+    Com_Printf("%s\n", scr_centerstring);
     //Con_ClearNotify_f();
 }
 
@@ -1244,6 +1244,9 @@ void SCR_ModeChanged(void)
         scr.hud_scale = R_ClampScale(scr_scale);
 
 	scr.hud_alpha = 1.f;
+
+    // Inform the CG Module.
+    CL_GM_ScreenModeChanged();
 }
 
 /*
@@ -1281,11 +1284,6 @@ static void scr_font_changed(cvar_t *self)
     scr.font_pic = R_RegisterFont(self->string);
 }
 
-static void scr_scale_changed(cvar_t *self)
-{
-    scr.hud_scale = R_ClampScale(self);
-}
-
 static const cmdreg_t scr_cmds[] = {
     { "timerefresh", SCR_TimeRefresh_f },
     { "sizeup", SCR_SizeUp_f },
@@ -1318,8 +1316,8 @@ void SCR_Init(void)
     scr_demobar = Cvar_Get("scr_demobar", "1", 0);
     scr_font = Cvar_Get("scr_font", "conchars", 0);
     scr_font->changed = scr_font_changed;
-    scr_scale = Cvar_Get("scr_scale", "2", 0);
-    scr_scale->changed = scr_scale_changed;
+    //scr_scale = Cvar_Get("scr_scale", "2", 0);
+    //scr_scale->changed = scr_scale_changed;
 
     //scr_chathud = Cvar_Get("scr_chathud", "0", 0);
     //scr_chathud_lines = Cvar_Get("scr_chathud_lines", "4", 0);
@@ -1360,7 +1358,7 @@ void SCR_Init(void)
 
     Cmd_Register(scr_cmds);
 
-    scr_scale_changed(scr_scale);
+    /*scr_scale_changed(scr_scale);*/
 
     scr.initialized = qtrue;
 }

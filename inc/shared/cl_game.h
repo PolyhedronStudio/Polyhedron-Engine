@@ -136,7 +136,10 @@ extern "C" {
         //---------------------------------------------------------------------
         // Screen
         //---------------------------------------------------------------------
+        // Called when the engine decides to render the 2D display.
         void        (*RenderScreen) (void);
+        // Called when the screen mode has changed.
+        void        (*ScreenModeChanged) (void);
 
         //---------------------------------------------------------------------
         // View
@@ -163,10 +166,13 @@ extern "C" {
         //---------------------------------------------------------------------
         // Client.
         //---------------------------------------------------------------------
-        // Returns the current amount of seconds since the last frame.s
+        // Returns the current amount of seconds since the last frame.
         float           (*GetFrameTime) (void);
         // Returns the amount of miliseconds since the start of client.
         unsigned        (*GetRealTime) (void);
+
+        int             (*GetFramesPerSecond) (void);
+        int             (*GetResolutionScale) (void);
 
         // Returns the server state.
         int             (*GetServerState) (void);
@@ -246,7 +252,14 @@ extern "C" {
         void        (*Cmd_Deregister) (const cmdreg_t* reg);
 
         // Adds a macro command to the list of client macros.
-        void        (*Cmd_AddMacro) (const char* name, xmacro_t function);
+        void            (*Cmd_AddMacro) (const char* name, xmacro_t function);
+        // Finds the macro matching the name, and returns a pointer to it.
+        cmd_macro_t*    (*Cmd_FindMacro) (const char* name);
+        // TODO: Document.
+        void            (*Cmd_Macro_g) (genctx_t* ctx);
+
+        // Add's a match for generating in the cmd prompt.
+        qboolean        (*Prompt_AddMatch) (genctx_t* ctx, const char* s);
 
         // Takes a null terminated string.  Does not need to be \n terminated.
         // breaks the string up into arg tokens.
@@ -317,6 +330,9 @@ extern "C" {
         // Clamps the cvar in the float range min and max.
         float       (*Cvar_ClampValue) (cvar_t *var, float min, float max);
 
+        // TODO: Document.
+        void        (*Cvar_Variable_g) (genctx_t* ctx);
+        void        (*Cvar_Default_g) (genctx_t* ctx);
 
         //---------------------------------------------------------------------
         // Filesystem.
@@ -398,7 +414,16 @@ extern "C" {
         //---------------------------------------------------------------------
         // Memory.
         //---------------------------------------------------------------------
-        // TODO.
+        // TODO: Document.
+        void        *(*Z_TagMalloc) (size_t size, memtag_t tag);
+        // TODO: Document.
+        void        *(*Z_TagMallocz) (size_t size, memtag_t tag);
+        // TODO: Document.
+        void        (*Z_TagReserve) (size_t size, memtag_t tag);
+        // TODO: Document.
+        char        *(*Z_TagCopyString) (const char* in, memtag_t tag);
+        // TODO: Document.
+        void        (*Z_Free) (void* ptr);
 
 
         //---------------------------------------------------------------------

@@ -151,6 +151,7 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 
     // Screen.
     clge.RenderScreen               = CLG_RenderScreen;
+    clge.ScreenModeChanged          = CLG_ScreenModeChanged;
 
     // View.
     clge.PreRenderView              = CLG_PreRenderView;

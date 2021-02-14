@@ -34,6 +34,10 @@ clgame_export_t *cge;
 // Operating System handle to the cgame library.
 static void *cgame_library;
 
+// Cheesy externs..
+extern int CL_GetFps(void);
+extern int CL_GetResolutionScale(void);
+
 //
 //=============================================================================
 //
@@ -47,7 +51,7 @@ int _wrp_GetServerProtocol(void) {
 int _wrp_GetProtocolVersion(void) {
     return cls.protocolVersion;
 }
-int _wrp_GetServerState() {
+int _wrp_GetServerState(void) {
     return cl.serverstate;
 }
 void _wrp_UpdateSetting(clientSetting_t setting, int value) {
@@ -390,14 +394,17 @@ void CL_InitGameProgs(void)
     import.GetFrameTime                 = _wrp_GetFrameTime;
     import.GetRealTime                  = _wrp_GetRealTime;
     
+    import.GetFramesPerSecond           = CL_GetFps;
+    import.GetResolutionScale           = CL_GetResolutionScale;
+
     import.GetServerState               = _wrp_GetServerState;
     import.GetServerProtocol            = _wrp_GetServerProtocol;
     import.GetProtocolVersion           = _wrp_GetProtocolVersion;
 
     import.IsDemoPlayback               = _wrp_IsDemoPlayback;
 
-    import.UpdateListenerOrigin = CL_UpdateListenerOrigin;
-    import.UpdateSetting = _wrp_UpdateSetting;
+    import.UpdateListenerOrigin         = CL_UpdateListenerOrigin;
+    import.UpdateSetting                = _wrp_UpdateSetting;
 
     import.SetClientLoadState           = CL_SetLoadState;
     import.GetClienState                = CL_GetState;
@@ -428,6 +435,10 @@ void CL_InitGameProgs(void)
     import.Cmd_Deregister               = Cmd_Deregister;
 
     import.Cmd_AddMacro                 = Cmd_AddMacro;
+    import.Cmd_FindMacro                = Cmd_FindMacro;
+    import.Cmd_Macro_g                  = Cmd_Macro_g;
+
+    import.Prompt_AddMatch              = Prompt_AddMatch;
 
 	import.Cmd_TokenizeString			= Cmd_TokenizeString;
 	import.Cmd_Argc						= Cmd_Argc;
@@ -460,6 +471,9 @@ void CL_InitGameProgs(void)
 	import.Cvar_Reset					= _wrp_Cvar_Reset;
 	import.Cvar_ClampInteger			= Cvar_ClampInteger;
 	import.Cvar_ClampValue				= Cvar_ClampValue;
+
+    import.Cvar_Variable_g              = Cvar_Variable_g;
+    import.Cvar_Default_g               = Cvar_Default_g;
 
     // Files.
     import.FS_RenameFile                = FS_RenameFile;
@@ -494,6 +508,13 @@ void CL_InitGameProgs(void)
     // Keys.
     import.Key_IsDown                   = Key_IsDown;
     import.Key_GetBinding               = Key_GetBinding;
+
+    // Memory.
+    import.Z_TagMalloc                  = Z_TagMalloc;
+    import.Z_TagMallocz                 = Z_TagMallocz;
+    import.Z_TagReserve                 = Z_TagReserve;
+    import.Z_TagCopyString              = Z_TagCopyString;
+    import.Z_Free                       = Z_Free;
 
     // Networking.
     import.MSG_ReadChar                 = MSG_ReadChar;
@@ -933,6 +954,17 @@ void CL_GM_RenderScreen(void) {
         cge->RenderScreen();
 }
 
+//
+//===============
+// CL_GM_RenderScreen
+// 
+// Call into the CG Module for notifying the screen mode changed.
+//===============
+//
+void CL_GM_ScreenModeChanged(void) {
+    if (cge)
+        cge->ScreenModeChanged();
+}
 
 //
 //===============

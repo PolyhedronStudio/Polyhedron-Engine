@@ -178,6 +178,26 @@ q_noreturn q_printf(2, 3);
 #define PRINT_HIGH          2       // critical messages
 #define PRINT_CHAT          3       // chat messages    
 
+// memory tags to allow dynamic memory to be cleaned up
+// game DLLs have separate tag namespace starting at TAG_MAX
+typedef enum {
+    TAG_FREE,       // should have never been set
+    TAG_STATIC,
+
+    TAG_GENERAL,
+    TAG_CMD,
+    TAG_CVAR,
+    TAG_FILESYSTEM,
+    TAG_RENDERER,
+    TAG_UI,
+    TAG_SERVER,
+    TAG_MVD,
+    TAG_SOUND,
+    TAG_CMODEL,
+
+    TAG_MAX
+} memtag_t;
+
 // Include keys definitions.
 #include "shared/keys.h"
 #include "shared/ui.h"

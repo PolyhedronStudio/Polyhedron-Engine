@@ -856,16 +856,16 @@ static void CL_ParsePrint(void)
 
 static void CL_ParseCenterPrint(void)
 {
-    char s[MAX_STRING_CHARS];
+    //char s[MAX_STRING_CHARS];
 
-    MSG_ReadString(s, sizeof(s));
-    SHOWNET(2, "    \"%s\"\n", s);
-    SCR_CenterPrint(s);
+    //MSG_ReadString(s, sizeof(s));
+    //SHOWNET(2, "    \"%s\"\n", s);
+    //SCR_CenterPrint(s);
 
-    if (!cls.demo.playback && cl.serverstate != ss_broadcast) {
-        COM_strclr(s);
-        Cmd_ExecTrigger(s);
-    }
+    //if (!cls.demo.playback && cl.serverstate != ss_broadcast) {
+    //    COM_strclr(s);
+    //    Cmd_ExecTrigger(s);
+    //}
 }
 
 static void CL_ParseStuffText(void)

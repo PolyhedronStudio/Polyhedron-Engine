@@ -24,25 +24,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define Z_Reserve(size)         Z_TagReserve(size, TAG_GENERAL)
 #define Z_CopyString(string)    Z_TagCopyString(string, TAG_GENERAL)
 
-// memory tags to allow dynamic memory to be cleaned up
-// game DLL has separate tag namespace starting at TAG_MAX
-typedef enum {
-    TAG_FREE,       // should have never been set
-    TAG_STATIC,
-
-    TAG_GENERAL,
-    TAG_CMD,
-    TAG_CVAR,
-    TAG_FILESYSTEM,
-    TAG_RENDERER,
-    TAG_UI,
-    TAG_SERVER,
-    TAG_MVD,
-    TAG_SOUND,
-    TAG_CMODEL,
-
-    TAG_MAX
-} memtag_t;
+// WatIsDeze: Moved over the shared/shared.h
+//// memory tags to allow dynamic memory to be cleaned up
+//// game DLLs have separate tag namespace starting at TAG_MAX
+//typedef enum {
+//    TAG_FREE,       // should have never been set
+//    TAG_STATIC,
+//
+//    TAG_GENERAL,
+//    TAG_CMD,
+//    TAG_CVAR,
+//    TAG_FILESYSTEM,
+//    TAG_RENDERER,
+//    TAG_UI,
+//    TAG_SERVER,
+//    TAG_MVD,
+//    TAG_SOUND,
+//    TAG_CMODEL,
+//
+//    TAG_MAX
+//} memtag_t;
 
 void    Z_Init(void);
 void    Z_Free(void *ptr);

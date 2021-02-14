@@ -237,7 +237,7 @@ void Com_DPrint(char *fmt, ...);
 void Com_WPrint(char *fmt, ...);
 void Com_EPrint(char *fmt, ...);
 void Com_Error (error_type_t code, char *fmt, ...);
-
+void Com_LPrintf(print_type_t type, const char* fmt, ...);
 
 //
 // clg_media.c
@@ -329,6 +329,7 @@ void SCR_Init(void);
 void SCR_Shutdown(void);
 
 void CLG_RenderScreen(void);
+void CLG_ScreenModeChanged(void);
 
 //
 // clg_tent.c

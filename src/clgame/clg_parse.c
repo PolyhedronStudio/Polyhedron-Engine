@@ -247,7 +247,7 @@ static void CLG_ParsePrint(void)
 {
     int level;
     char s[MAX_STRING_CHARS];
-    const char* fmt;
+    char* fmt;
 
     level = clgi.MSG_ReadByte();
     clgi.MSG_ReadString(s, sizeof(s));
@@ -439,7 +439,7 @@ qboolean CLG_ParseServerMessage (int serverCommand) {
         break;
 
         // Client layout (Cruel, limited, ugly UI...) updates
-        case svc_layout :
+        case svc_layout:
             CLG_ParseLayout();
             return qtrue;
         break;

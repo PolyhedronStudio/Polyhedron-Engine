@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "client.h"
+#include "client/gamemodule.h"
 
 static byte     demo_buffer[MAX_PACKETLEN];
 
