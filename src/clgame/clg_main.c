@@ -73,6 +73,7 @@ cvar_t *info_uf = NULL;
 
 // Video.
 cvar_t* vid_rtx = NULL;
+
 //
 //=============================================================================
 //
@@ -120,6 +121,7 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     clge.ClientBegin                = CLG_ClientBegin;
     clge.ClientDeltaFrame           = CLG_ClientDeltaFrame;
     clge.ClientFrame                = CLG_ClientFrame;
+    clge.ClientDisconnect           = CLG_ClientDisconnect;
 
     clge.UpdateUserinfo             = CLG_UpdateUserInfo;
 
@@ -488,6 +490,18 @@ void CLG_ClientBegin() {
 void CLG_ClientDeltaFrame(void) {
     // Called each time a valid client frame has been 
     SCR_SetCrosshairColor();
+}
+
+//
+//===============
+// CLG_ClientDisconnect
+// 
+// Called when the client gets disconnected, for whichever reasons.
+//===============
+//
+void CLG_ClientDisconnect(void) {
+    // Clear the chat hud.
+    SCR_ClearChatHUD_f();
 }
 
 //

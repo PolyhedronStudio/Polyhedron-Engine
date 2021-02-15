@@ -28,6 +28,7 @@ void		CL_GM_CalcViewValues(void);
 void		CL_GM_ClientBegin(void);
 void		CL_GM_ClientDeltaFrame(void);
 void		CL_GM_ClientFrame(void);
+void		CL_GM_ClientDisconnect(void);
 void		CL_GM_ClearState(void);
 void		CL_GM_DemoSeek(void);
 void		CL_GM_UpdateUserInfo(cvar_t* var, from_t from);

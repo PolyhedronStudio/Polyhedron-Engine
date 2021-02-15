@@ -77,6 +77,8 @@ extern "C" {
         void        (*ClientDeltaFrame) (void);
         // Called each client frame. Handle per frame basis things here.
         void        (*ClientFrame) (void);
+        // Called when a disconnect even occures. Including those for Com_Error
+        void        (*ClientDisconnect) (void);
 
         // Called when there is a needed retransmit of user info variables.
         void        (*UpdateUserinfo) (cvar_t* var, from_t from);

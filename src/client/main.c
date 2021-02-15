@@ -755,7 +755,9 @@ void CL_Disconnect(error_type_t type)
 
     SCR_EndLoadingPlaque(); // get rid of loading plaque
 
-    SCR_ClearChatHUD_f();   // clear chat HUD on server change
+    // N&C: Call into the CG Module to inform that we're disconnected.
+    CL_GM_ClientDisconnect();
+    //SCR_ClearChatHUD_f();   // clear chat HUD on server change
 
     if (cls.state > ca_disconnected && !cls.demo.playback) {
         EXEC_TRIGGER(cl_disconnectcmd);

@@ -709,6 +709,18 @@ void CL_GM_ClientFrame(void) {
 
 //
 //===============
+// CL_GM_ClientDisconnect
+// 
+// Called when the client disconnects, including by Com_Error etc.
+//===============
+//
+void CL_GM_ClientDisconnect(void) {
+    if (cge)
+        cge->ClientDisconnect();
+}
+
+//
+//===============
 // CL_GM_ClearState
 // 
 // Called when the client (and/is) disconnected for whichever reasons.

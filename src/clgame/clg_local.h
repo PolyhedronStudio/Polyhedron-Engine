@@ -227,6 +227,7 @@ void CLG_Shutdown(void);
 void CLG_ClientDeltaFrame(void);
 void CLG_ClientFrame(void);
 void CLG_ClientBegin(void);
+void CLG_ClientDisconnect(void);
 void CLG_ClearState(void);
 void CLG_DemoSeek(void);
 
@@ -322,6 +323,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current);
 void SCR_SetCrosshairColor(void);
 void SCR_AddToChatHUD(const char* text);
 void SCR_CenterPrint(const char* str);
+void SCR_ClearChatHUD_f(void);
 
 void SCR_RegisterMedia(void);
 
