@@ -245,10 +245,8 @@ SET(SRC_COMMON
 	common/math.c
 	common/mdfour.c
 	common/msg.c
-#	common/pmove.c
 	common/prompt.c
 	common/sizebuf.c
-#	common/tests.c
 	common/utils.c
 	common/zone.c
 	common/net/chan.c
