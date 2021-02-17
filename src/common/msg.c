@@ -912,16 +912,24 @@ void MSG_WriteDeltaPlayerstate_Default(const player_packed_t *from, const player
     if (pflags & PS_M_TYPE)
         MSG_WriteByte(to->pmove.pm_type);
 
+    // N&C: Full float precision.
     if (pflags & PS_M_ORIGIN) {
-        MSG_WriteShort(to->pmove.origin[0]);
-        MSG_WriteShort(to->pmove.origin[1]);
-        MSG_WriteShort(to->pmove.origin[2]);
+        MSG_WriteFloat(to->pmove.origin[0]);
+        MSG_WriteFloat(to->pmove.origin[1]);
+        MSG_WriteFloat(to->pmove.origin[2]);
+        //MSG_WriteShort(to->pmove.origin[0]);
+        //MSG_WriteShort(to->pmove.origin[1]);
+        //MSG_WriteShort(to->pmove.origin[2]);
     }
 
+    // N&C: Full float precision.
     if (pflags & PS_M_VELOCITY) {
-        MSG_WriteShort(to->pmove.velocity[0]);
-        MSG_WriteShort(to->pmove.velocity[1]);
-        MSG_WriteShort(to->pmove.velocity[2]);
+        MSG_WriteFloat(to->pmove.velocity[0]);
+        MSG_WriteFloat(to->pmove.velocity[1]);
+        MSG_WriteFloat(to->pmove.velocity[2]);
+        //MSG_WriteShort(to->pmove.velocity[0]);
+        //MSG_WriteShort(to->pmove.velocity[1]);
+        //MSG_WriteShort(to->pmove.velocity[2]);
     }
 
     if (pflags & PS_M_TIME)
@@ -1159,21 +1167,26 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
     if (pflags & PS_M_TYPE)
         MSG_WriteByte(to->pmove.pm_type);
 
+    // N&C: Full float precision.
     if (pflags & PS_M_ORIGIN) {
-        MSG_WriteShort(to->pmove.origin[0]);
-        MSG_WriteShort(to->pmove.origin[1]);
+        MSG_WriteFloat(to->pmove.origin[0]);
+        MSG_WriteFloat(to->pmove.origin[1]);
     }
 
     if (eflags & EPS_M_ORIGIN2)
-        MSG_WriteShort(to->pmove.origin[2]);
+        MSG_WriteFloat(to->pmove.origin[2]);
 
+    // N&C: Full float precision.
     if (pflags & PS_M_VELOCITY) {
-        MSG_WriteShort(to->pmove.velocity[0]);
-        MSG_WriteShort(to->pmove.velocity[1]);
+        MSG_WriteFloat(to->pmove.velocity[0]);
+        MSG_WriteFloat(to->pmove.velocity[1]);
+        //MSG_WriteShort(to->pmove.velocity[0]);
+        //MSG_WriteShort(to->pmove.velocity[1]);
     }
 
+    // N&C: Full float precision.
     if (eflags & EPS_M_VELOCITY2)
-        MSG_WriteShort(to->pmove.velocity[2]);
+        MSG_WriteFloat(to->pmove.velocity[2]);
 
     if (pflags & PS_M_TIME)
         MSG_WriteByte(to->pmove.pm_time);
@@ -1378,13 +1391,15 @@ void MSG_WriteDeltaPlayerstate_Packet(const player_packed_t *from,
     if (pflags & PPS_M_TYPE)
         MSG_WriteByte(to->pmove.pm_type);
 
+    // N&C: Full float precision.
     if (pflags & PPS_M_ORIGIN) {
-        MSG_WriteShort(to->pmove.origin[0]);
-        MSG_WriteShort(to->pmove.origin[1]);
+        MSG_WriteFloat(to->pmove.origin[0]);
+        MSG_WriteFloat(to->pmove.origin[1]);
     }
 
+    // N&C: Full float precision.
     if (pflags & PPS_M_ORIGIN2)
-        MSG_WriteShort(to->pmove.origin[2]);
+        MSG_WriteFloat(to->pmove.origin[2]);
 
     //
     // write the rest of the player_state_t
@@ -2085,16 +2100,18 @@ void MSG_ParseDeltaPlayerstate_Default(const player_state_t *from,
     if (flags & PS_M_TYPE)
         to->pmove.pm_type = MSG_ReadByte();
 
+    // N&C: Full float precision.
     if (flags & PS_M_ORIGIN) {
-        to->pmove.origin[0] = MSG_ReadShort();
-        to->pmove.origin[1] = MSG_ReadShort();
-        to->pmove.origin[2] = MSG_ReadShort();
+        to->pmove.origin[0] = MSG_ReadFloat();
+        to->pmove.origin[1] = MSG_ReadFloat();
+        to->pmove.origin[2] = MSG_ReadFloat();
     }
 
+    // N&C: Full float precision.
     if (flags & PS_M_VELOCITY) {
-        to->pmove.velocity[0] = MSG_ReadShort();
-        to->pmove.velocity[1] = MSG_ReadShort();
-        to->pmove.velocity[2] = MSG_ReadShort();
+        to->pmove.velocity[0] = MSG_ReadFloat();
+        to->pmove.velocity[1] = MSG_ReadFloat();
+        to->pmove.velocity[2] = MSG_ReadFloat();
     }
 
     if (flags & PS_M_TIME)
@@ -2198,22 +2215,26 @@ void MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t    *from,
     if (flags & PS_M_TYPE)
         to->pmove.pm_type = MSG_ReadByte();
 
+    // N&C: Full float precision.
     if (flags & PS_M_ORIGIN) {
-        to->pmove.origin[0] = MSG_ReadShort();
-        to->pmove.origin[1] = MSG_ReadShort();
+        to->pmove.origin[0] = MSG_ReadFloat();
+        to->pmove.origin[1] = MSG_ReadFloat();
     }
 
+    // N&C: Full float precision.
     if (extraflags & EPS_M_ORIGIN2) {
-        to->pmove.origin[2] = MSG_ReadShort();
+        to->pmove.origin[2] = MSG_ReadFloat();
     }
 
+    // N&C: Full float precision.
     if (flags & PS_M_VELOCITY) {
-        to->pmove.velocity[0] = MSG_ReadShort();
-        to->pmove.velocity[1] = MSG_ReadShort();
+        to->pmove.velocity[0] = MSG_ReadFloat();
+        to->pmove.velocity[1] = MSG_ReadFloat();
     }
 
+    // N&C: Full float precision.
     if (extraflags & EPS_M_VELOCITY2) {
-        to->pmove.velocity[2] = MSG_ReadShort();
+        to->pmove.velocity[2] = MSG_ReadFloat();
     }
 
     if (flags & PS_M_TIME)
@@ -2333,13 +2354,15 @@ void MSG_ParseDeltaPlayerstate_Packet(const player_state_t *from,
     if (flags & PPS_M_TYPE)
         to->pmove.pm_type = MSG_ReadByte();
 
+    // N&C: Full float precision.
     if (flags & PPS_M_ORIGIN) {
-        to->pmove.origin[0] = MSG_ReadShort();
-        to->pmove.origin[1] = MSG_ReadShort();
+        to->pmove.origin[0] = MSG_ReadFloat();
+        to->pmove.origin[1] = MSG_ReadFloat();
     }
 
+    // N&C: Full float precision.
     if (flags & PPS_M_ORIGIN2) {
-        to->pmove.origin[2] = MSG_ReadShort();
+        to->pmove.origin[2] = MSG_ReadFloat();
     }
 
     //

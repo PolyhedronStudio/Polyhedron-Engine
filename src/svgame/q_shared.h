@@ -781,12 +781,15 @@ typedef struct
 {
 	pmtype_t	pm_type;
 
-#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare- larger coordinate range
-	int			origin[3];		// 20.3
-#else
-	short		origin[3];		// 12.3
-#endif	// end Knightmare
-	short		velocity[3];	// 12.3
+	// N&C: Full float precision.
+	vec3_t      origin;
+	vec3_t      velocity;
+//#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare- larger coordinate range
+//	int			origin[3];		// 20.3
+//#else
+//	short		origin[3];		// 12.3
+//#endif	// end Knightmare
+//short		velocity[3];	// 12.3
 	byte		pm_flags;		// ducked, jump_held, etc
 	byte		pm_time;		// each unit = 8 ms
 	short		gravity;
