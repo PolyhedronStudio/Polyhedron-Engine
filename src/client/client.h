@@ -49,6 +49,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/ui.h"
 #include "client/video.h"
 
+// Shared Game includes.
+#include "sharedgame/protocol.h"
+
 #if USE_ZLIB
 #include <zlib.h>
 #endif

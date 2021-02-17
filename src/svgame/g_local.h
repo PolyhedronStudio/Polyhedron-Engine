@@ -36,13 +36,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // because we define the full size ones in this file
 #define	GAME_INCLUDE
 #include "game.h"
+#include "sharedgame/protocol.h"
 #include "p_menu.h"
 #include "p_text.h"
 #include "km_cvar.h"
+
 #define JETPACK_MOD
 
 // the "gameversion" client command will print this plus compile date
-#define	GAMEVERSION	"lazarus"
+#define	GAMEVERSION	"basenac"
 
 // protocol bytes that can be directly added to messages
 #define	svc_muzzleflash		1

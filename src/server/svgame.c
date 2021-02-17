@@ -731,6 +731,21 @@ static cvar_t *PF_cvar(const char *name, const char *value, int flags)
     return Cvar_Get(name, value, flags | CVAR_GAME);
 }
 
+//
+//===============
+// PF_stuffcmd
+// 
+// Stuff Cmd implementation like other Quake engines have for the server module.
+//===============
+//
+static void PF_stuffcmd(edict_t* pent, char* pszCommand) {
+    MSG_WriteByte(svc_stufftext);
+    MSG_WriteString(pszCommand);
+
+    // Use the PF Unicast.
+    PF_Unicast(pent, qtrue);
+}
+
 static void PF_AddCommandString(const char *string)
 {
     Cbuf_AddText(&cmd_buffer, string);
@@ -927,6 +942,9 @@ void SV_InitGameProgs(void)
     // original Cmd_Args() did actually return raw arguments
     import.args = Cmd_RawArgs;
     import.AddCommandString = PF_AddCommandString;
+
+    // N&C: stuffcmd
+    import.stuffcmd = PF_stuffcmd;
 
     import.DebugGraph = PF_DebugGraph;
     import.SetAreaPortalState = PF_SetAreaPortalState;

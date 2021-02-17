@@ -197,6 +197,9 @@ typedef struct
 	char	*(*argv) (int n);
 	char	*(*args) (void);	// concatenation of all argv >= 1
 
+	// N&C: Stuff Cmd.
+	void (*stuffcmd) (edict_t* pent, char* pszCommand);
+
 	// add commands to the server console as if they were typed in
 	// for map changing, etc
 	void(*AddCommandString) (char *text);

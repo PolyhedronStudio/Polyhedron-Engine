@@ -22,6 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/sizebuf.h"
 #include "common/math.h"
 
+#include "sharedgame/protocol.h"
+
 /*
 ==============================================================================
 

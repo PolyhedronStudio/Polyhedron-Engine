@@ -68,6 +68,9 @@ typedef struct {
     int16_t         stats[MAX_STATS];
 } player_packed_t;
 
+//---------------
+// Player state messaging flags.
+//---------------
 typedef enum {
     MSG_PS_IGNORE_GUNINDEX      = (1 << 0),
     MSG_PS_IGNORE_GUNFRAMES     = (1 << 1),
@@ -79,6 +82,9 @@ typedef enum {
     MSG_PS_REMOVE               = (1 << 8)
 } msgPsFlags_t;
 
+//---------------
+// Entity state messaging flags.
+//---------------
 typedef enum {
     MSG_ES_FORCE        = (1 << 0),
     MSG_ES_NEWENTITY    = (1 << 1),

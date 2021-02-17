@@ -730,9 +730,10 @@ float SnapToEights(float x)
 
 void stuffcmd(edict_t* pent, char* pszCommand)
 {
-	gi.WriteByte(svc_stufftext);
-	gi.WriteString(pszCommand);
-	gi.unicast(pent, true);
+	gi.stuffcmd(pent, pszCommand);
+	//gi.WriteByte(svc_stufftext);
+	//gi.WriteString(pszCommand);
+	//gi.unicast(pent, true);
 }
 
 qboolean point_infront(edict_t* self, vec3_t point)

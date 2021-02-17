@@ -32,9 +32,12 @@
 #include "common/pmove.h"
 #include "common/protocol.h"
 
-// Shared Client Game Header.
+// Shared Client Game Headers.
 #include "shared/cl_types.h"
 #include "shared/cl_game.h"
+
+// Shared Game Headers.
+#include "sharedgame/protocol.h"
 
 
 //
