@@ -125,7 +125,7 @@ static void MVD_LayoutClients(mvd_client_t *client)
     }
 
     // send the layout
-    MSG_WriteByte(svc_layout);
+    MSG_WriteByte(svg_layout);
     MSG_WriteData(layout, total + 1);
     SV_ClientAddMessage(client->cl, flags);
 
@@ -219,7 +219,7 @@ static void MVD_LayoutChannels(mvd_client_t *client)
     layout[total] = 0;
 
     // send the layout
-    MSG_WriteByte(svc_layout);
+    MSG_WriteByte(svg_layout);
     MSG_WriteData(layout, total + 1);
     SV_ClientAddMessage(client->cl, MSG_RELIABLE | MSG_CLEAR | MSG_COMPRESS);
 
@@ -280,7 +280,7 @@ static void MVD_LayoutMenu(mvd_client_t *client)
                         VER_OFS);
 
     // send the layout
-    MSG_WriteByte(svc_layout);
+    MSG_WriteByte(svg_layout);
     MSG_WriteData(layout, total + 1);
     SV_ClientAddMessage(client->cl, MSG_RELIABLE | MSG_CLEAR | MSG_COMPRESS);
 
@@ -308,7 +308,7 @@ static void MVD_LayoutScores(mvd_client_t *client)
     }
 
     // send the layout
-    MSG_WriteByte(svc_layout);
+    MSG_WriteByte(svg_layout);
     MSG_WriteString(layout);
     SV_ClientAddMessage(client->cl, flags);
 
@@ -327,7 +327,7 @@ static void MVD_LayoutFollow(mvd_client_t *client)
                         mvd_chase_prefix->string, mvd->name, name);
 
     // send the layout
-    MSG_WriteByte(svc_layout);
+    MSG_WriteByte(svg_layout);
     MSG_WriteData(layout, total + 1);
     SV_ClientAddMessage(client->cl, MSG_RELIABLE | MSG_CLEAR);
 

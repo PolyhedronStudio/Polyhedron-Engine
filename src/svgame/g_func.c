@@ -5670,7 +5670,7 @@ void force_wall_think(edict_t* self)
 {
 	if (!self->wait)
 	{
-		gi.WriteByte(svc_temp_entity);
+		gi.WriteByte(svg_temp_entity);
 		gi.WriteByte(TE_FORCEWALL);
 		gi.WritePosition(self->pos1);
 		gi.WritePosition(self->pos2);

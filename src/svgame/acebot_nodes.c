@@ -532,7 +532,7 @@ void ACEND_DrawPath (void)
 	// Now set up and display the path
 	while (current_node != goal_node && current_node != -1)
 	{
-		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (svg_temp_entity);
 		gi.WriteByte (TE_BFG_LASER);
 		gi.WritePosition (nodes[current_node].origin);
 		gi.WritePosition (nodes[next_node].origin);

@@ -444,7 +444,7 @@ static void MVD_ParseUnicast(mvd_t *mvd, mvd_ops_t op, int extrabits)
         }
 #endif
         switch (cmd) {
-        case svc_layout:
+        case svg_layout:
             MVD_UnicastLayout(mvd, player);
             break;
         case svc_configstring:

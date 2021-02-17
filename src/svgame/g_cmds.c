@@ -1067,7 +1067,7 @@ void Cmd_Inven_f (edict_t *ent)
 
 	cl->showinventory = true;
 
-	gi.WriteByte (svc_inventory);
+	gi.WriteByte (svg_inventory);
 	for (i=0 ; i<MAX_ITEMS ; i++)
 	{
 		// Don't show "No Weapon" or "Homing Rocket Launcher" in inventory
@@ -1587,19 +1587,19 @@ void DrawBBox(edict_t *ent)
 	VectorCopy(ent->s.origin,origin);
 	VectorSet(p1,origin[0]+ent->mins[0],origin[1]+ent->mins[1],origin[2]+ent->mins[2]);
 	VectorSet(p2,origin[0]+ent->mins[0],origin[1]+ent->mins[1],origin[2]+ent->maxs[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
 	gi.multicast (p1, MULTICAST_ALL);
 	VectorSet(p2,origin[0]+ent->mins[0],origin[1]+ent->maxs[1],origin[2]+ent->mins[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
 	gi.multicast (p1, MULTICAST_ALL);
 	VectorSet(p2,origin[0]+ent->maxs[0],origin[1]+ent->mins[1],origin[2]+ent->mins[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
@@ -1607,19 +1607,19 @@ void DrawBBox(edict_t *ent)
 
 	VectorSet(p1,origin[0]+ent->maxs[0],origin[1]+ent->maxs[1],origin[2]+ent->mins[2]);
 	VectorSet(p2,origin[0]+ent->maxs[0],origin[1]+ent->maxs[1],origin[2]+ent->maxs[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
 	gi.multicast (p1, MULTICAST_ALL);
 	VectorSet(p2,origin[0]+ent->maxs[0],origin[1]+ent->mins[1],origin[2]+ent->mins[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
 	gi.multicast (p1, MULTICAST_ALL);
 	VectorSet(p2,origin[0]+ent->mins[0],origin[1]+ent->maxs[1],origin[2]+ent->mins[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
@@ -1627,19 +1627,19 @@ void DrawBBox(edict_t *ent)
 
 	VectorSet(p1,origin[0]+ent->maxs[0],origin[1]+ent->mins[1],origin[2]+ent->maxs[2]);
 	VectorSet(p2,origin[0]+ent->maxs[0],origin[1]+ent->mins[1],origin[2]+ent->mins[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
 	gi.multicast (p1, MULTICAST_ALL);
 	VectorSet(p2,origin[0]+ent->maxs[0],origin[1]+ent->maxs[1],origin[2]+ent->maxs[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
 	gi.multicast (p1, MULTICAST_ALL);
 	VectorSet(p2,origin[0]+ent->mins[0],origin[1]+ent->mins[1],origin[2]+ent->maxs[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
@@ -1647,19 +1647,19 @@ void DrawBBox(edict_t *ent)
 
 	VectorSet(p1,origin[0]+ent->mins[0],origin[1]+ent->maxs[1],origin[2]+ent->maxs[2]);
 	VectorSet(p2,origin[0]+ent->mins[0],origin[1]+ent->maxs[1],origin[2]+ent->mins[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
 	gi.multicast (p1, MULTICAST_ALL);
 	VectorSet(p2,origin[0]+ent->mins[0],origin[1]+ent->mins[1],origin[2]+ent->maxs[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
 	gi.multicast (p1, MULTICAST_ALL);
 	VectorSet(p2,origin[0]+ent->maxs[0],origin[1]+ent->maxs[1],origin[2]+ent->maxs[2]);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (p1);
 	gi.WritePosition (p2);
@@ -1838,7 +1838,7 @@ void decoy_think(edict_t *self)
 
 void forcewall_think(edict_t *self)
 {
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_FORCEWALL);
 	gi.WritePosition (self->pos1);
 	gi.WritePosition (self->pos2);

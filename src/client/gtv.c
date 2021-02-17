@@ -236,7 +236,7 @@ void CL_GTV_WriteMessage(byte *data, size_t len)
         SZ_WriteByte(&cls.gtv.message, mvd_print);
         SZ_Write(&cls.gtv.message, data + 1, len - 1);
         break;
-    case svc_layout:
+    case svg_layout:
     case svc_stufftext:
         bits = ((len >> 8) & 7) << SVCMD_BITS;
         SZ_WriteByte(&cls.gtv.message, mvd_unicast | bits);

@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared/list.h"
 #include "sharedgame/pmove.h"
+#include "sharedgame/protocol.h"
 
 //
 // game.h -- game dll information visible to server

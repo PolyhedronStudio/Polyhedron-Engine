@@ -2575,11 +2575,12 @@ const char *MSG_ServerCommandString(int cmd)
     default: return "UNKNOWN COMMAND";
 #define S(x) case svc_##x: return "svc_" #x;
         S(bad)
-        S(muzzleflash)
-        S(muzzleflash2)
-        S(temp_entity)
-        S(layout)
-        S(inventory)
+        // N&C: Protocol todo: add a game callback for this...?
+        //S(muzzleflash)
+        //S(muzzleflash2)
+        //S(temp_entity)
+        //S(layout)
+        //S(inventory)
         S(nop)
         S(disconnect)
         S(reconnect)

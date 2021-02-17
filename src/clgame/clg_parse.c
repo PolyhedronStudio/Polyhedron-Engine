@@ -413,33 +413,33 @@ qboolean CLG_ParseServerMessage (int serverCommand) {
             break;
 
         // Client temporary entities. (Particles, etc.)
-        case svc_temp_entity:
+        case svg_temp_entity:
             CLG_ParseTempEntitiesPacket();
             CLG_ParseTempEntity();
             return qtrue;
         break;
 
         // Client Muzzle Flash.
-        case svc_muzzleflash:
+        case svg_muzzleflash:
             CLG_ParseMuzzleFlashPacket(MZ_SILENCED);
             CLG_MuzzleFlash();
             return qtrue;
         break;
         // Entity Muzzle Flash.
-        case svc_muzzleflash2:
+        case svg_muzzleflash2:
             CLG_ParseMuzzleFlashPacket(0);
             CLG_MuzzleFlash2();
             return qtrue;
         break;
 
         // Client inventory updates.
-        case svc_inventory:
+        case svg_inventory:
             CLG_ParseInventory();
             return qtrue;
         break;
 
         // Client layout (Cruel, limited, ugly UI...) updates
-        case svc_layout:
+        case svg_layout:
             CLG_ParseLayout();
             return qtrue;
         break;
@@ -464,11 +464,11 @@ qboolean CLG_ParseServerMessage (int serverCommand) {
 qboolean CLG_SeekDemoMessage(int demoCommand) {
     // Switch cmd.
     switch (demoCommand) {
-    case svc_inventory:
+    case svg_inventory:
         CLG_ParseInventory();
         return qtrue;
         break;
-    case svc_layout:
+    case svg_layout:
         CLG_ParseLayout();
         return qtrue;
         break;

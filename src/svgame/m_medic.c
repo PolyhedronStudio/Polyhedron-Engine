@@ -1074,7 +1074,7 @@ void medic_cable_attack (edict_t *self)
 	VectorNormalize(f);
 	VectorMA(start,16,f,start);
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_MEDIC_CABLE_ATTACK);
 	gi.WriteShort (self - g_edicts);
 	gi.WritePosition (start);

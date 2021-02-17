@@ -356,7 +356,7 @@ void parasite_drain_attack (edict_t *self)
 		damage = 2;
 	}
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_PARASITE_ATTACK);
 	gi.WriteShort (self - g_edicts);
 	gi.WritePosition (start);

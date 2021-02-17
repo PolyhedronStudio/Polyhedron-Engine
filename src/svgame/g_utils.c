@@ -730,6 +730,7 @@ float SnapToEights(float x)
 
 void stuffcmd(edict_t* pent, char* pszCommand)
 {
+	// N&C: Let's just do it properly... gi.stuffcmd :)
 	gi.stuffcmd(pent, pszCommand);
 	//gi.WriteByte(svc_stufftext);
 	//gi.WriteString(pszCommand);

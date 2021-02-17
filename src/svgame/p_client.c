@@ -1711,7 +1711,7 @@ void spectator_respawn(edict_t *ent)
 	if (!ent->client->pers.spectator)
 	{
 		// send effect
-		gi.WriteByte(svc_muzzleflash);
+		gi.WriteByte(svg_muzzleflash);
 		gi.WriteShort(ent - g_edicts);
 		gi.WriteByte(MZ_LOGIN);
 		gi.multicast(ent->s.origin, MULTICAST_PVS);
@@ -2075,7 +2075,7 @@ void ClientBeginDeathmatch(edict_t *ent)
 	else
 	{
 		// send effect
-		gi.WriteByte(svc_muzzleflash);
+		gi.WriteByte(svg_muzzleflash);
 		gi.WriteShort(ent - g_edicts);
 		gi.WriteByte(MZ_LOGIN);
 		gi.multicast(ent->s.origin, MULTICAST_PVS);
@@ -2200,7 +2200,7 @@ void ClientBegin(edict_t *ent)
 		// send effect if in a multiplayer game
 		if (game.maxclients > 1)
 		{
-			gi.WriteByte(svc_muzzleflash);
+			gi.WriteByte(svg_muzzleflash);
 			gi.WriteShort(ent - g_edicts);
 			gi.WriteByte(MZ_LOGIN);
 			gi.multicast(ent->s.origin, MULTICAST_PVS);
@@ -2456,7 +2456,7 @@ void ClientDisconnect(edict_t *ent)
 	//ZOID
 
 		// send effect
-	gi.WriteByte(svc_muzzleflash);
+	gi.WriteByte(svg_muzzleflash);
 	gi.WriteShort(ent - g_edicts);
 	gi.WriteByte(MZ_LOGOUT);
 	gi.multicast(ent->s.origin, MULTICAST_PVS);

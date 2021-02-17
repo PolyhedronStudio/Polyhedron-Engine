@@ -47,12 +47,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define	GAMEVERSION	"basenac"
 
 // protocol bytes that can be directly added to messages
-#define	svc_muzzleflash		1
-#define	svc_muzzleflash2	2
-#define	svc_temp_entity		3
-#define	svc_layout			4
-#define	svc_inventory		5
-#define	svc_stufftext		11
+//#define	svg_muzzleflash		1
+//#define	svg_muzzleflash2	2
+//#define	svg_temp_entity		3
+//#define	svg_layout			4
+//#define	svg_inventory		5
+//#define	svc_stufftext		11
 #define	svc_fog				21
 
 //==================================================================

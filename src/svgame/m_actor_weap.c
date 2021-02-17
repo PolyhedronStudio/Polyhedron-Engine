@@ -45,7 +45,7 @@ void muzzleflash_think(edict_t *flash)
 
 void TraceAimPoint(vec3_t start,vec3_t target)
 {
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_DEBUGTRAIL);
 	gi.WritePosition (start);
 	gi.WritePosition (target);
@@ -208,7 +208,7 @@ void actorShotgun (edict_t *self)
 	VectorNormalize (forward);
 	fire_shotgun (self, start, forward, 4, 8, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
 
-	gi.WriteByte(svc_temp_entity);
+	gi.WriteByte(svg_temp_entity);
 	gi.WriteByte(TE_CHAINFIST_SMOKE);
 	gi.WritePosition(start);
 	gi.multicast(start, MULTICAST_PVS);
@@ -264,7 +264,7 @@ void actorSuperShotgun (edict_t *self)
 	AngleVectors(angles,forward,NULL,NULL);
 	fire_shotgun (self, start, forward, 6, 12, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
 
-	gi.WriteByte(svc_temp_entity);
+	gi.WriteByte(svg_temp_entity);
 	gi.WriteByte(TE_CHAINFIST_SMOKE);
 	gi.WritePosition(start);
 	gi.multicast(start, MULTICAST_PVS);
@@ -311,7 +311,7 @@ void actorMachineGun (edict_t *self)
 
 	fire_bullet (self, start, forward, damage, 2, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
 
-	gi.WriteByte(svc_temp_entity);
+	gi.WriteByte(svg_temp_entity);
 	gi.WriteByte(TE_CHAINFIST_SMOKE);
 	gi.WritePosition(start);
 	gi.multicast(start, MULTICAST_PVS);
@@ -335,7 +335,7 @@ void actorMachineGun (edict_t *self)
 		VectorSubtract (target, start, forward);
 		VectorNormalize (forward);
 		fire_bullet (self, start, forward, damage, 2, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
-		gi.WriteByte(svc_temp_entity);
+		gi.WriteByte(svg_temp_entity);
 		gi.WriteByte(TE_CHAINFIST_SMOKE);
 		gi.WritePosition(start);
 		gi.multicast(start, MULTICAST_PVS);
@@ -393,7 +393,7 @@ void actorChaingun (edict_t *self)
 	for(i=0; i<shots; i++)
 		fire_bullet (self, start, forward, damage, 2, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
 
-	gi.WriteByte(svc_temp_entity);
+	gi.WriteByte(svg_temp_entity);
 	gi.WriteByte(TE_CHAINFIST_SMOKE);
 	gi.WritePosition(start);
 	gi.multicast(start, MULTICAST_PVS);
@@ -418,7 +418,7 @@ void actorChaingun (edict_t *self)
 		VectorNormalize (forward);
 		for(i=0; i<shots; i++)
 			fire_bullet (self, start, forward, damage, 2, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
-		gi.WriteByte(svc_temp_entity);
+		gi.WriteByte(svg_temp_entity);
 		gi.WriteByte(TE_CHAINFIST_SMOKE);
 		gi.WritePosition(start);
 		gi.multicast(start, MULTICAST_PVS);

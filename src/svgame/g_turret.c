@@ -253,7 +253,7 @@ void turret_breach_fire (edict_t *self)
 				gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/railgf1a.wav"), 1, ATTN_NORM, 0);
 
 				//ed - muzzleflash ? on a turret ? Yeah baby
-				gi.WriteByte (svc_muzzleflash);
+				gi.WriteByte (svg_muzzleflash);
 				gi.WriteShort (self-g_edicts);
 				gi.WriteByte (MZ_RAILGUN);
 				gi.multicast (start, MULTICAST_PVS);
@@ -383,7 +383,7 @@ void turret_breach_fire (edict_t *self)
 				else
 //CW--
 					fire_bullet (owner, start, forward, self->wait, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
-				gi.WriteByte (svc_muzzleflash);
+				gi.WriteByte (svg_muzzleflash);
 				gi.WriteShort (self-g_edicts);
 				gi.WriteByte (MZ_MACHINEGUN);
 				gi.multicast (start, MULTICAST_PVS);
@@ -449,7 +449,7 @@ void turret_breach_fire (edict_t *self)
 				else
 //CW--
 					fire_grenade (owner, start, forward, 50, self->fog_far, 2.5, 90, false);
-				gi.WriteByte (svc_muzzleflash2);
+				gi.WriteByte (svg_muzzleflash2);
 				gi.WriteShort (self - g_edicts);
 				gi.WriteByte (MZ2_GUNNER_GRENADE_1);
 				gi.multicast (start, MULTICAST_PVS);

@@ -1109,17 +1109,17 @@ badbyte:
             break;
 
         // N&C: Moved over to CLGame Module.
-        //case svc_temp_entity:
+        //case svg_temp_entity:
         //    CL_ParseTEntPacket();
         //    CL_ParseTEnt();
         //    break;
 
-        //case svc_muzzleflash:
+        //case svg_muzzleflash:
         //    CL_ParseMuzzleFlashPacket(MZ_SILENCED);
         //    CL_MuzzleFlash();
         //    break;
 
-        //case svc_muzzleflash2:
+        //case svg_muzzleflash2:
         //    CL_ParseMuzzleFlashPacket(0);
         //    CL_MuzzleFlash2();
         //    break;
@@ -1133,12 +1133,12 @@ badbyte:
             continue;
 
         // N&C: Moved over to Client Game Module.
-        //case svc_inventory:
+        //case svg_inventory:
         //    CL_ParseInventory();
         //    break;
 
         // N&C: Moved over to Client Game Module.
-        //case svc_layout:
+        //case svg_layout:
         //    CL_ParseLayout();
         //    break;
 
@@ -1273,12 +1273,12 @@ void CL_SeekDemoMessage(void)
             break;
 
         // WatIsDeze: Movd to CGModule.
-        //case svc_temp_entity:
+        //case svg_temp_entity:
         //    CL_ParseTEntPacket();
         //    break;
 
-        //case svc_muzzleflash:
-        //case svc_muzzleflash2:
+        //case svg_muzzleflash:
+        //case svg_muzzleflash2:
         //    CL_ParseMuzzleFlashPacket(0);
         //    break;
 
@@ -1287,11 +1287,11 @@ void CL_SeekDemoMessage(void)
             continue;
 
         // N&C: Moved to CGModule.
-        //case svc_inventory:
+        //case svg_inventory:
         //    CL_ParseInventory();
         //    break;
 
-        //case svc_layout:
+        //case svg_layout:
         //    CL_ParseLayout();
         //    break;
 

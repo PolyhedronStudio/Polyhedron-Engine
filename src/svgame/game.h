@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 #include "sharedgame/pmove.h"
+#include "sharedgame/protocol.h"
 
 // game.h -- game dll information visible to server
 

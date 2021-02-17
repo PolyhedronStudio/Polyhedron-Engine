@@ -837,7 +837,7 @@ void CL_EmitDemoSnapshot(void)
     }
 
     // write layout
-    MSG_WriteByte(svc_layout);
+    MSG_WriteByte(svg_layout);
     MSG_WriteString(cl.layout);
 
     snap = Z_Malloc(sizeof(*snap) + msg_write.cursize - 1);

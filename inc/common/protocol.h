@@ -106,11 +106,11 @@ typedef enum {
     svc_bad,
 
     // these ops are known to the game dll
-    svc_muzzleflash,
-    svc_muzzleflash2,
-    svc_temp_entity,
-    svc_layout,
-    svc_inventory,
+    //svg_muzzleflash,
+    //svg_muzzleflash2,
+    //svg_temp_entity,
+    //svg_layout,
+    //svg_inventory,
 
     // the rest are private to the client and server
     svc_nop,
@@ -136,7 +136,8 @@ typedef enum {
     svc_gamestate, // q2pro specific, means svc_playerupdate in r1q2
     svc_setting,
 
-    svc_num_types
+    // This determines the maximum amount of types we can have.
+    svc_num_types = 255
 } svc_ops_t;
 
 // MVD protocol specific operations

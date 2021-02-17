@@ -2099,7 +2099,7 @@ void CTFGrappleTouch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 	gi.sound (self->owner, CHAN_RELIABLE+CHAN_WEAPON, gi.soundindex("weapons/grapple/grpull.wav"), volume, ATTN_NORM, 0);
 	gi.sound (self, CHAN_WEAPON, gi.soundindex("weapons/grapple/grhit.wav"), volume, ATTN_NORM, 0);
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_SPARKS);
 	gi.WritePosition (self->s.origin);
 	if (!plane)
@@ -2159,7 +2159,7 @@ void CTFGrappleDrawCable (edict_t *self)
 	// adjust end z for end spot since the monster is currently dead
 //	end[2] = self->absmin[2] + self->size[2] / 2;
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 #if 1 //def USE_GRAPPLE_CABLE
 	gi.WriteByte (TE_GRAPPLE_CABLE);
 	gi.WriteShort (self->owner - g_edicts);
@@ -2323,7 +2323,7 @@ void CTFGrappleFire (edict_t *ent, vec3_t g_offset, int damage, int effect)
 
 #if 0
 	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
+	gi.WriteByte (svg_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte (MZ_BLASTER);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -2845,7 +2845,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 		}
 	}
 
-	gi.WriteByte (svc_layout);
+	gi.WriteByte (svg_layout);
 	gi.WriteString (string);
 }
 

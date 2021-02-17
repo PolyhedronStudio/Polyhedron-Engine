@@ -1046,7 +1046,7 @@ void G_SetClientEffects (edict_t *ent)
 			if (tr.fraction != 1)
 				VectorMA(tr.endpos,-4,forward,end);
 			VectorCopy(tr.endpos,end);
-			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (svg_temp_entity);
 			gi.WriteByte (TE_FLASHLIGHT);
 			gi.WritePosition (end);
 			gi.WriteShort (ent - g_edicts);
@@ -1322,7 +1322,7 @@ void WhatsIt(edict_t *ent)
 		return;
 
 	Com_sprintf(string, sizeof(string), "xv 0 yb -68 cstring2 \"%s\" ", ent->client->whatsit);
-	gi.WriteByte (svc_layout);
+	gi.WriteByte (svg_layout);
 	gi.WriteString (string);
 	gi.unicast(ent,true);
 }

@@ -161,7 +161,7 @@ void ACESP_HoldSpawn(edict_t *self)
 	self->nextthink = level.time + FRAMETIME;
 
 	// send effect
-	gi.WriteByte (svc_muzzleflash);
+	gi.WriteByte (svg_muzzleflash);
 	gi.WriteShort (self-g_edicts);
 	gi.WriteByte (MZ_LOGIN);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
@@ -337,7 +337,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 		bot->nextthink = level.time + FRAMETIME;
 
 			// send effect
-		gi.WriteByte (svc_muzzleflash);
+		gi.WriteByte (svg_muzzleflash);
 		gi.WriteShort (bot-g_edicts);
 		gi.WriteByte (MZ_LOGIN);
 		gi.multicast (bot->s.origin, MULTICAST_PVS);

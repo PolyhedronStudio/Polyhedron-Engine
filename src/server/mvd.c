@@ -1160,7 +1160,7 @@ static qboolean filter_unicast_data(edict_t *ent)
         return qtrue;
     }
 
-    if (cmd == svc_layout) {
+    if (cmd == svg_layout) {
         if (ent != mvd.dummy->edict) {
             // discard any layout updates to players
             return qfalse;

@@ -915,7 +915,7 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 	// temporary crap to test grenade bounce
 //	fire_grenade (ent, start, forward, damage, sk_grenade_speed->value, 25, radius);
 
-	gi.WriteByte (svc_muzzleflash);
+	gi.WriteByte (svg_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte (MZ_GRENADE | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1030,7 +1030,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 		fire_rocket (ent, start, forward, damage, sk_rocket_speed->value, damage_radius, radius_damage, NULL);
 
 	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
+	gi.WriteByte (svg_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte (MZ_ROCKET | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1135,14 +1135,14 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	// Knightmare- different flash if in chasecam mode
 	if(ent->client && ent->client->chasetoggle)
 	{
-		gi.WriteByte (svc_muzzleflash);
+		gi.WriteByte (svg_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
 		gi.WriteByte (muzzleflash | is_silenced);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 	}
 	else
 	{
-		gi.WriteByte (svc_muzzleflash);
+		gi.WriteByte (svg_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
 		gi.WriteByte (muzzleflash | is_silenced);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1223,7 +1223,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 	fire_nail(ent, start, forward, damage, 1250, 0, false, 0);
 
 	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
+	gi.WriteByte (svg_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte (MZ_HYPERBLASTER | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1457,7 +1457,7 @@ void Machinegun_Fire (edict_t *ent, qboolean altfire)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	fire_bullet (ent, start, forward, damage, kick, sk_machinegun_hspread->value, sk_machinegun_vspread->value, MOD_MACHINEGUN);
 
-	gi.WriteByte (svc_muzzleflash);
+	gi.WriteByte (svg_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte (MZ_MACHINEGUN | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1596,7 +1596,7 @@ void Chaingun_Fire (edict_t *ent, qboolean altfire)
 	}
 
 	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
+	gi.WriteByte (svg_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte ((MZ_CHAINGUN1 + shots - 1) | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1659,7 +1659,7 @@ void weapon_shotgun_fire (edict_t *ent, qboolean altfire)
 		fire_shotgun (ent, start, forward, damage, kick, sk_shotgun_hspread->value, sk_shotgun_vspread->value, sk_shotgun_count->value, MOD_SHOTGUN);
 
 	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
+	gi.WriteByte (svg_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte (MZ_SHOTGUN | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1713,7 +1713,7 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 	fire_shotgun (ent, start, forward, damage, kick, sk_sshotgun_hspread->value, sk_sshotgun_vspread->value, sk_sshotgun_count->value/2, MOD_SSHOTGUN);
 
 	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
+	gi.WriteByte (svg_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte (MZ_SSHOTGUN | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1778,7 +1778,7 @@ void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 	fire_rail (ent, start, forward, damage, kick);
 
 	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
+	gi.WriteByte (svg_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte (MZ_RAILGUN | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -1823,7 +1823,7 @@ void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 	if (ent->client->ps.gunframe == 9)
 	{
 		// send muzzle flash
-		gi.WriteByte (svc_muzzleflash);
+		gi.WriteByte (svg_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
 		gi.WriteByte (MZ_BFG | is_silenced);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);

@@ -676,7 +676,7 @@ void BossExplode (edict_t *self)
 		return;
 	}
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_EXPLOSION1);
 	gi.WritePosition (org);
 	gi.multicast (self->s.origin, MULTICAST_PVS);

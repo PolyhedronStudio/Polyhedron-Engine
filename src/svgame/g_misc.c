@@ -693,7 +693,7 @@ void BecomeExplosion1 (edict_t *self)
 	}
 //ZOID
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_EXPLOSION1);
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
@@ -707,7 +707,7 @@ void BecomeExplosion1 (edict_t *self)
 
 void BecomeExplosion2 (edict_t *self)
 {
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_EXPLOSION2);
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
@@ -720,7 +720,7 @@ void BecomeExplosion2 (edict_t *self)
 
 void BecomeExplosion3 (edict_t *self)
 {
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_EXPLOSION1_BIG);
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
@@ -1365,7 +1365,7 @@ void func_explosive_explode (edict_t *self)
 /*  with these:
     if (self->dmg)
     {
-        gi.WriteByte (svc_temp_entity);
+        gi.WriteByte (svg_temp_entity);
         gi.WriteByte (TE_EXPLOSION1);
         gi.WritePosition (self->s.origin);
         gi.multicast (self->s.origin, MULTICAST_PVS);
@@ -2136,7 +2136,7 @@ void SP_misc_explobox (edict_t *self)
 void misc_blackhole_use (edict_t *ent, edict_t *other, edict_t *activator)
 {
 	/*
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_BOSSTPORT);
 	gi.WritePosition (ent->s.origin);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
@@ -2615,7 +2615,7 @@ void misc_viper_bomb_touch (edict_t *self, edict_t *other, cplane_t *plane, csur
 
 	if(self->spawnflags & 1)
 	{
-		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (svg_temp_entity);
 		gi.WriteByte (TE_EXPLOSION2);
 		gi.WritePosition (self->s.origin);
 		gi.multicast (self->s.origin, MULTICAST_PVS);
@@ -3463,7 +3463,7 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 
 		if(!(self->spawnflags & 16))
 		{
-			gi.WriteByte(svc_temp_entity);
+			gi.WriteByte(svg_temp_entity);
 			gi.WriteByte(TE_TELEPORT_EFFECT);
 			gi.WritePosition(origin);
 			gi.multicast(origin, MULTICAST_PHS);
@@ -3730,7 +3730,7 @@ void SP_misc_teleporter_dest (edict_t *ent)
 void misc_light_think (edict_t *self)
 {
 	if(self->spawnflags & START_OFF) return;
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_FLASHLIGHT);
 	gi.WritePosition (self->s.origin);
 	gi.WriteShort (self - g_edicts);
@@ -3804,7 +3804,7 @@ void drop_add_to_chain(edict_t *drop)
 void drop_splash(edict_t *drop)
 {
 	vec3_t	up = {0,0,1};
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_LASER_SPARKS);
 	gi.WriteByte (drop->owner->mass2);
 	gi.WritePosition (drop->s.origin);

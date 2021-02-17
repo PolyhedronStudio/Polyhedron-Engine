@@ -204,7 +204,7 @@ void SpawnDamage (int type, vec3_t origin, vec3_t normal)
 
 	vec3_t inverted = { -normal[0], -normal[1], -normal[2] };
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (type);
 	gi.WritePosition (origin);
 	gi.WriteDir (inverted);

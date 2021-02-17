@@ -86,7 +86,7 @@ void ReflectExplosion (int type, vec3_t origin)
 		if(org[2] < mirror->absmin[2]) continue;
 		if(org[2] > mirror->absmax[2]) continue;
 
-		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (svg_temp_entity);
 		gi.WriteByte (type);
 		gi.WritePosition (org);
 		gi.multicast (org, MULTICAST_PVS);
@@ -150,7 +150,7 @@ void ReflectTrail (int type, vec3_t start, vec3_t end)
 		// If p1 is within func_reflect, we assume p2 is also. If map is constructed 
 		// properly this should always be true.
 
-		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (svg_temp_entity);
 		gi.WriteByte (type);
 		gi.WritePosition (p1);
 		gi.WritePosition (p2);
@@ -215,7 +215,7 @@ void ReflectSteam (vec3_t origin,vec3_t movedir,int count,int sounds,int speed, 
 		// If p1 is within func_reflect, we assume p2 is also. If map is constructed 
 		// properly this should always be true.
 
-		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (svg_temp_entity);
 		gi.WriteByte (TE_STEAM);
 		gi.WriteShort (nextid);
 		gi.WriteByte (count);
@@ -286,7 +286,7 @@ void ReflectSparks (int type,vec3_t origin,vec3_t movedir)
 		if(org[2] < mirror->absmin[2]) continue;
 		if(org[2] > mirror->absmax[2]) continue;
 
-		gi.WriteByte(svc_temp_entity);
+		gi.WriteByte(svg_temp_entity);
 		gi.WriteByte(type);
 		gi.WritePosition(org);
 		if(type != TE_CHAINFIST_SMOKE) 

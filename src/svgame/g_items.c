@@ -103,7 +103,7 @@ void item_die(edict_t *self,edict_t *inflictor, edict_t *attacker, int damage, v
 	}
 //ZOID
 	
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_EXPLOSION1);
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PVS);

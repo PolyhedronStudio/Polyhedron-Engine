@@ -148,7 +148,7 @@ void PMenu_Do_Update(edict_t *ent)
 		alt = false;
 	}
 
-	gi.WriteByte (svc_layout);
+	gi.WriteByte (svg_layout);
 	gi.WriteString (string);
 }
 
@@ -222,7 +222,7 @@ void PMenu_Update(edict_t *ent)
 		alt = false;
 	}
 
-	gi.WriteByte (svc_layout);
+	gi.WriteByte (svg_layout);
 	gi.WriteString (string);
 }
 

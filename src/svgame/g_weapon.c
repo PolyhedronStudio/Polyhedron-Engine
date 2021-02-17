@@ -205,7 +205,7 @@ This is an internal support routine used for bullet/pellet based weapons.
 
 				if (color != SPLASH_UNKNOWN)
 				{
-					gi.WriteByte (svc_temp_entity);
+					gi.WriteByte (svg_temp_entity);
 					gi.WriteByte (TE_SPLASH);
 					gi.WriteByte (8);
 					gi.WritePosition (tr.endpos);
@@ -248,7 +248,7 @@ This is an internal support routine used for bullet/pellet based weapons.
 			{
 				if (strncmp (tr.surface->name, "sky", 3) != 0)
 				{
-					gi.WriteByte (svc_temp_entity);
+					gi.WriteByte (svg_temp_entity);
 					gi.WriteByte (te_impact);
 					gi.WritePosition (tr.endpos);
 					gi.WriteDir (tr.plane.normal);
@@ -280,7 +280,7 @@ This is an internal support routine used for bullet/pellet based weapons.
 		VectorAdd (water_start, tr.endpos, pos);
 		VectorScale (pos, 0.5, pos);
 
-		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (svg_temp_entity);
 		gi.WriteByte (TE_BUBBLETRAIL);
 		gi.WritePosition (water_start);
 		gi.WritePosition (tr.endpos);
@@ -368,7 +368,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 		else //standard yellow
 			tempevent = TE_BLASTER;
 
-		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (svg_temp_entity);
 		gi.WriteByte (tempevent);
 		gi.WritePosition (self->s.origin);
 		if (!plane)
@@ -519,7 +519,7 @@ void nail_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf
 	}
 	else
 	{
-		gi.WriteByte(svc_temp_entity);
+		gi.WriteByte(svg_temp_entity);
 	//	gi.WriteByte(tempevent); //N&C
 		gi.WriteByte(TE_GUNSHOT);
 		gi.WritePosition(self->s.origin);
@@ -532,7 +532,7 @@ void nail_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf
 //	}
 	
 //	G_FreeEdict(self);
-//			gi.WriteByte(svc_temp_entity);
+//			gi.WriteByte(svg_temp_entity);
 //		gi.WriteByte(TE_ROCKET_EXPLOSION);
 //		gi.WritePosition(self->s.origin);
 //		gi.multicast(self->s.origin, MULTICAST_PVS);
@@ -759,7 +759,7 @@ void Grenade_Evade (edict_t *monster)
 	T_RadiusDamage(ent, ent->owner, ent->dmg, ent->enemy, ent->dmg_radius, mod, -0.5);
 
 	VectorMA (ent->s.origin, -0.02, ent->velocity, origin);
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	if (ent->waterlevel)
 	{
 		if (ent->groundentity)
@@ -1223,7 +1223,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	else
 		T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_R_SPLASH, -0.5);
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	if (ent->waterlevel)
 		type = TE_ROCKET_EXPLOSION_WATER;
 	else
@@ -1251,7 +1251,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, NULL, ent->dmg_radius, MOD_R_SPLASH, -0.5);
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	if (ent->waterlevel)
 		type = TE_ROCKET_EXPLOSION_WATER;
 	else
@@ -1449,7 +1449,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	}
 
 	// send gun puff / flash
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (tempevent);
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
@@ -1460,7 +1460,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 
 	if (water)
 	{
-		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (svg_temp_entity);
 		gi.WriteByte (tempevent);
 		gi.WritePosition (start);
 		gi.WritePosition (tr.endpos);
@@ -1507,7 +1507,7 @@ void bfg_explode (edict_t *self)
 			if (ent == self->owner)
 				points = points * 0.5;
 
-			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (svg_temp_entity);
 			gi.WriteByte (TE_BFG_EXPLOSION);
 			gi.WritePosition (ent->s.origin);
 			gi.multicast (ent->s.origin, MULTICAST_PHS);
@@ -1557,7 +1557,7 @@ void bfg_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	self->nextthink = level.time + FRAMETIME;
 	self->enemy = other;
 
-	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (svg_temp_entity);
 	gi.WriteByte (TE_BFG_BIGEXPLOSION);
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
@@ -1629,7 +1629,7 @@ void bfg_think (edict_t *self)
 			// if we hit something that's not a monster or player we're done
 			if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
 			{
-				gi.WriteByte (svc_temp_entity);
+				gi.WriteByte (svg_temp_entity);
 				gi.WriteByte (TE_LASER_SPARKS);
 				gi.WriteByte (4);
 				gi.WritePosition (tr.endpos);
@@ -1643,7 +1643,7 @@ void bfg_think (edict_t *self)
 			VectorCopy (tr.endpos, start);
 		}
 
-		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (svg_temp_entity);
 		gi.WriteByte (TE_BFG_LASER);
 		gi.WritePosition (self->s.origin);
 		gi.WritePosition (tr.endpos);
@@ -1871,7 +1871,7 @@ qboolean AimGrenade(edict_t* self, vec3_t start, vec3_t target, vec_t speed, vec
 		// Spawn some sparks.  This isn't net-friendly at all, but will 
 		// be fine for single player. 
 		// 
-		gi.WriteByte(svc_temp_entity);
+		gi.WriteByte(svg_temp_entity);
 		gi.WriteByte(56);
 
 		gi.WriteShort(self - g_edicts);

@@ -193,7 +193,7 @@ void Text_Update(edict_t *ent)
 //	if (strlen(string) > 1000)
 //		gi.dprintf("WARNING: formatted string length (%d) > 1000\n",strlen(string));
 
-	gi.WriteByte (svc_layout);
+	gi.WriteByte (svg_layout);
 	gi.WriteString (string);
 	gi.unicast (ent, true);
 }
