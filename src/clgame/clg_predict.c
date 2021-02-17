@@ -56,12 +56,13 @@ void CLG_PredictAngles(void) {
     cl->predicted_angles[2] = cl->viewangles[2] + SHORT2ANGLE(cl->frame.ps.pmove.delta_angles[2]);
 }
 
-/*
-====================
-CL_ClipMoveToEntities
-
-====================
-*/
+//
+//===============
+// CLG_ClipMoveToEntities
+// 
+// 
+//================
+//
 static void CLG_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, trace_t* tr)
 {
     int         i;

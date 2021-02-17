@@ -22,11 +22,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/protocol.h"
 #include "common/sizebuf.h"
 
+//---------------
+// A trick taken from Quetoo. Use an int32_t and a float in an union to
+// simplify the networking of a float.
+//---------------
+typedef union {
+    int32_t i;
+    float f;
+} msg_float;
+
 typedef struct {
     uint16_t    number;
-    int16_t     origin[3];
-    int16_t     angles[3];
-    int16_t     old_origin[3];
+    // N&C: Full float precision for entities.
+    vec3_t      origin;
+    vec3_t      angles;
+    vec3_t      old_origin;
+    //int16_t     origin[3];
+    //int16_t     angles[3];
+    //int16_t     old_origin[3];
     uint8_t     modelindex;
     uint8_t     modelindex2;
     uint8_t     modelindex3;
@@ -94,6 +107,7 @@ void    MSG_WriteChar(int c);
 void    MSG_WriteByte(int c);
 void    MSG_WriteShort(int c);
 void    MSG_WriteLong(int c);
+void    MSG_WriteFloat(float c);
 void    MSG_WriteString(const char *s);
 void    MSG_WritePos(const vec3_t pos);
 void    MSG_WriteAngle(float f);
@@ -128,6 +142,7 @@ int     MSG_ReadByte(void);
 int     MSG_ReadShort(void);
 int     MSG_ReadWord(void);
 int     MSG_ReadLong(void);
+float   MSG_ReadFloat(void);
 size_t  MSG_ReadString(char *dest, size_t size);
 size_t  MSG_ReadStringLine(char *dest, size_t size);
 #if USE_CLIENT

@@ -152,6 +152,22 @@ void MSG_WriteLong(int c)
     buf[3] = c >> 24;
 }
 
+//
+//===============
+// MSG_WriteFloat
+// 
+// The idea is smart and taken from Quetoo, use an union for memory mapping.
+// Write the float as an int32_t, use it after reading as a float.
+//================
+//
+void MSG_WriteFloat(float c) {
+    const msg_float vec = {
+        .f = c
+    };
+
+    MSG_WriteLong(vec.i);
+}
+
 /*
 =============
 MSG_WriteString
@@ -471,24 +487,28 @@ void MSG_PackEntity(entity_packed_t *out, const entity_state_t *in, qboolean sho
     if (in->number < 0 || in->number >= MAX_EDICTS)
         Com_Error(ERR_DROP, "%s: bad number: %d", __func__, in->number);
 
+    // N&C: Full float precision.
     out->number = in->number;
-    out->origin[0] = COORD2SHORT(in->origin[0]);
-    out->origin[1] = COORD2SHORT(in->origin[1]);
-    out->origin[2] = COORD2SHORT(in->origin[2]);
-    if (short_angles) {
-        out->angles[0] = ANGLE2SHORT(in->angles[0]);
-        out->angles[1] = ANGLE2SHORT(in->angles[1]);
-        out->angles[2] = ANGLE2SHORT(in->angles[2]);
-    } else {
-        // pack angles8 akin to angles16 to make delta compression happy when
-        // precision suddenly changes between entity updates
-        out->angles[0] = ANGLE2BYTE(in->angles[0]) << 8;
-        out->angles[1] = ANGLE2BYTE(in->angles[1]) << 8;
-        out->angles[2] = ANGLE2BYTE(in->angles[2]) << 8;
-    }
-    out->old_origin[0] = COORD2SHORT(in->old_origin[0]);
-    out->old_origin[1] = COORD2SHORT(in->old_origin[1]);
-    out->old_origin[2] = COORD2SHORT(in->old_origin[2]);
+    out->origin[0] = in->origin[0];
+    out->origin[1] = in->origin[1];
+    out->origin[2] = in->origin[2];
+    out->angles[0] = in->angles[0];
+    out->angles[1] = in->angles[1];
+    out->angles[2] = in->angles[2];
+    //if (short_angles) {
+    //    out->angles[0] = in->angles[0];
+    //    out->angles[1] = in->angles[1];
+    //    out->angles[2] = in->angles[2];
+    //} else {
+    //    // pack angles8 akin to angles16 to make delta compression happy when
+    //    // precision suddenly changes between entity updates
+    //    out->angles[0] = ANGLE2BYTE(in->angles[0]) << 8;
+    //    out->angles[1] = ANGLE2BYTE(in->angles[1]) << 8;
+    //    out->angles[2] = ANGLE2BYTE(in->angles[2]) << 8;
+    //}
+    out->old_origin[0] = in->old_origin[0];
+    out->old_origin[1] = in->old_origin[1];
+    out->old_origin[2] = in->old_origin[2];
     out->modelindex = in->modelindex;
     out->modelindex2 = in->modelindex2;
     out->modelindex3 = in->modelindex3;
@@ -548,21 +568,28 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
         if (to->origin[2] != from->origin[2])
             bits |= U_ORIGIN3;
 
-        if (flags & MSG_ES_SHORTANGLES) {
-            if (to->angles[0] != from->angles[0])
-                bits |= U_ANGLE1 | U_ANGLE16;
-            if (to->angles[1] != from->angles[1])
-                bits |= U_ANGLE2 | U_ANGLE16;
-            if (to->angles[2] != from->angles[2])
-                bits |= U_ANGLE3 | U_ANGLE16;
-        } else {
-            if (to->angles[0] != from->angles[0])
-                bits |= U_ANGLE1;
-            if (to->angles[1] != from->angles[1])
-                bits |= U_ANGLE2;
-            if (to->angles[2] != from->angles[2])
-                bits |= U_ANGLE3;
-        }
+        // N&C: Full float precision.
+        if (to->angles[0] != from->angles[0])
+            bits |= U_ANGLE1 | U_ANGLE16;
+        if (to->angles[1] != from->angles[1])
+            bits |= U_ANGLE2 | U_ANGLE16;
+        if (to->angles[2] != from->angles[2])
+            bits |= U_ANGLE3 | U_ANGLE16;
+        //if (flags & MSG_ES_SHORTANGLES) {
+        //    if (to->angles[0] != from->angles[0])
+        //        bits |= U_ANGLE1 | U_ANGLE16;
+        //    if (to->angles[1] != from->angles[1])
+        //        bits |= U_ANGLE2 | U_ANGLE16;
+        //    if (to->angles[2] != from->angles[2])
+        //        bits |= U_ANGLE3 | U_ANGLE16;
+        //} else {
+        //    if (to->angles[0] != from->angles[0])
+        //        bits |= U_ANGLE1;
+        //    if (to->angles[1] != from->angles[1])
+        //        bits |= U_ANGLE2;
+        //    if (to->angles[2] != from->angles[2])
+        //        bits |= U_ANGLE3;
+        //}
 
         if (flags & MSG_ES_NEWENTITY) {
             if (to->old_origin[0] != from->origin[0] ||
@@ -718,34 +745,31 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
         MSG_WriteByte(to->renderfx);
     else if (bits & U_RENDERFX16)
         MSG_WriteShort(to->renderfx);
-
+    
+    // N&C: Full float precision.
     if (bits & U_ORIGIN1)
-        MSG_WriteShort(to->origin[0]);
+        MSG_WriteFloat(to->origin[0]);
     if (bits & U_ORIGIN2)
-        MSG_WriteShort(to->origin[1]);
+        MSG_WriteFloat(to->origin[1]);
     if (bits & U_ORIGIN3)
-        MSG_WriteShort(to->origin[2]);
+        MSG_WriteFloat(to->origin[2]);
 
-    if ((flags & MSG_ES_SHORTANGLES) && (bits & U_ANGLE16)) {
+    // N&C: Full float precision.
+    //if ((flags & MSG_ES_SHORTANGLES) && (bits & U_ANGLE16)) {
+    if (bits & U_ANGLE16) {
         if (bits & U_ANGLE1)
-            MSG_WriteShort(to->angles[0]);
+            MSG_WriteFloat(to->angles[0]);
         if (bits & U_ANGLE2)
-            MSG_WriteShort(to->angles[1]);
+            MSG_WriteFloat(to->angles[1]);
         if (bits & U_ANGLE3)
-            MSG_WriteShort(to->angles[2]);
-    } else {
-        if (bits & U_ANGLE1)
-            MSG_WriteByte(to->angles[0] >> 8);
-        if (bits & U_ANGLE2)
-            MSG_WriteByte(to->angles[1] >> 8);
-        if (bits & U_ANGLE3)
-            MSG_WriteByte(to->angles[2] >> 8);
+            MSG_WriteFloat(to->angles[2]);
     }
 
+    // N&C: Full float precision.
     if (bits & U_OLDORIGIN) {
-        MSG_WriteShort(to->old_origin[0]);
-        MSG_WriteShort(to->old_origin[1]);
-        MSG_WriteShort(to->old_origin[2]);
+        MSG_WriteFloat(to->old_origin[0]);
+        MSG_WriteFloat(to->old_origin[1]);
+        MSG_WriteFloat(to->old_origin[2]);
     }
 
     if (bits & U_SOUND)
@@ -1528,6 +1552,22 @@ int MSG_ReadLong(void)
     return c;
 }
 
+//
+//===============
+// MSG_WriteFloat
+// 
+// The idea is smart and taken from Quetoo, use an union for memory mapping.
+// Write the float as an int32_t, use it after reading as a float.
+//================
+//
+float MSG_ReadFloat(void) {
+    const msg_float vec = {
+        .i = MSG_ReadLong()
+    };
+
+    return vec.f;
+}
+
 size_t MSG_ReadString(char *dest, size_t size)
 {
     int     c;
@@ -1948,34 +1988,49 @@ void MSG_ParseDeltaEntity(const entity_state_t *from,
     else if (bits & U_RENDERFX16)
         to->renderfx = MSG_ReadWord();
 
+    // N&C: Full float precision.
     if (bits & U_ORIGIN1) {
-        to->origin[0] = MSG_ReadCoord();
+        to->origin[0] = MSG_ReadFloat();
     }
     if (bits & U_ORIGIN2) {
-        to->origin[1] = MSG_ReadCoord();
+        to->origin[1] = MSG_ReadFloat();
     }
     if (bits & U_ORIGIN3) {
-        to->origin[2] = MSG_ReadCoord();
+        to->origin[2] = MSG_ReadFloat();
     }
 
-    if ((flags & MSG_ES_SHORTANGLES) && (bits & U_ANGLE16)) {
+    // N&C: Full float precision.
+    if (bits & U_ANGLE16) {
         if (bits & U_ANGLE1)
-            to->angles[0] = MSG_ReadAngle16();
+            to->angles[0] = MSG_ReadFloat();
         if (bits & U_ANGLE2)
-            to->angles[1] = MSG_ReadAngle16();
+            to->angles[1] = MSG_ReadFloat();
         if (bits & U_ANGLE3)
-            to->angles[2] = MSG_ReadAngle16();
-    } else {
-        if (bits & U_ANGLE1)
-            to->angles[0] = MSG_ReadAngle();
-        if (bits & U_ANGLE2)
-            to->angles[1] = MSG_ReadAngle();
-        if (bits & U_ANGLE3)
-            to->angles[2] = MSG_ReadAngle();
+            to->angles[2] = MSG_ReadFloat();
     }
+    //if ((flags & MSG_ES_SHORTANGLES) && (bits & U_ANGLE16)) {
+    //    if (bits & U_ANGLE1)
+    //        to->angles[0] = MSG_ReadAngle16();
+    //    if (bits & U_ANGLE2)
+    //        to->angles[1] = MSG_ReadAngle16();
+    //    if (bits & U_ANGLE3)
+    //        to->angles[2] = MSG_ReadAngle16();
+    //} else {
+    //    if (bits & U_ANGLE1)
+    //        to->angles[0] = MSG_ReadAngle();
+    //    if (bits & U_ANGLE2)
+    //        to->angles[1] = MSG_ReadAngle();
+    //    if (bits & U_ANGLE3)
+    //        to->angles[2] = MSG_ReadAngle();
+    //}
 
+    // N&C: Full float precision.
     if (bits & U_OLDORIGIN) {
-        MSG_ReadPos(to->old_origin);
+        to->old_origin[0] = MSG_ReadFloat();
+        to->old_origin[1] = MSG_ReadFloat();
+        to->old_origin[2] = MSG_ReadFloat();
+
+        //MSG_ReadPos(to->old_origin);
     }
 
     if (bits & U_SOUND) {
