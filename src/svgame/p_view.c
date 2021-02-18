@@ -330,9 +330,14 @@ void SV_CalcViewOffset (edict_t *ent)
 	if(ent->client->chasetoggle) {
 		VectorSet (v, 0, 0, 0);
 		if(ent->client->chasecam != NULL) {
-			ent->client->ps.pmove.origin[0] = ent->client->chasecam->s.origin[0]*8;
-			ent->client->ps.pmove.origin[1] = ent->client->chasecam->s.origin[1]*8;
-			ent->client->ps.pmove.origin[2] = ent->client->chasecam->s.origin[2]*8;
+			// N&C: FF Precision.
+			VectorCopy(ent->client->chasecam->s.origin, ent->client->ps.pmove.origin);
+			//ent->client->ps.pmove.origin[0] = ent->client->chasecam->s.origin[0] * 8;
+			//ent->client->ps.pmove.origin[1] = ent->client->chasecam->s.origin[1] * 8;
+			//ent->client->ps.pmove.origin[2] = ent->client->chasecam->s.origin[2] * 8;
+			//ent->client->ps.pmove.origin[0] = ent->client->chasecam->s.origin[0]*8;
+			//ent->client->ps.pmove.origin[1] = ent->client->chasecam->s.origin[1]*8;
+			//ent->client->ps.pmove.origin[2] = ent->client->chasecam->s.origin[2]*8;
 		}
 	} else if(ent->client->spycam) {
 		VectorSet (v, 0, 0, 0);
@@ -1345,8 +1350,11 @@ void ClientEndServerFrame (edict_t *ent)
 	//
 	for (i=0 ; i<3 ; i++)
 	{
-		current_client->ps.pmove.origin[i] = ent->s.origin[i]*8.0;
-		current_client->ps.pmove.velocity[i] = ent->velocity[i]*8.0;
+		// N&C: FF Precision.
+		VectorCopy(ent->s.origin, current_client->ps.pmove.origin);
+		VectorCopy(ent->velocity, current_client->ps.pmove.velocity);
+		//current_client->ps.pmove.origin[i] = ent->s.origin[i]*8.0;
+		//current_client->ps.pmove.velocity[i] = ent->velocity[i]*8.0;
 	}
 
 	//

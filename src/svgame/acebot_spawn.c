@@ -256,10 +256,14 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 
 	// clear playerstate values
 	memset (&bot->client->ps, 0, sizeof(client->ps));
-	
-	client->ps.pmove.origin[0] = spawn_origin[0]*8;
-	client->ps.pmove.origin[1] = spawn_origin[1]*8;
-	client->ps.pmove.origin[2] = spawn_origin[2]*8;
+
+	// N&C: FF Precision.
+	client->ps.pmove.origin[0] = spawn_origin[0];
+	client->ps.pmove.origin[1] = spawn_origin[1];
+	client->ps.pmove.origin[2] = spawn_origin[2];
+	//client->ps.pmove.origin[0] = spawn_origin[0]*8;
+	//client->ps.pmove.origin[1] = spawn_origin[1]*8;
+	//client->ps.pmove.origin[2] = spawn_origin[2]*8;
 
 //ZOID
 	client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;

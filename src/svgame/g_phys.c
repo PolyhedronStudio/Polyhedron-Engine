@@ -1891,7 +1891,8 @@ void SV_Physics_Step (edict_t *ent)
 			int   current;
 
 			if (ent->mass > 400)
-				v = 0.125 * ent->mass;
+				// N&C: FF Precision.
+				v = ent->mass; // v = 0.125 * ent->mass;
 			else
 				v = 50.;
 			current = ent->watertype & MASK_CURRENT;

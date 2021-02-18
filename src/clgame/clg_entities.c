@@ -873,9 +873,10 @@ void CLG_CalcViewValues(void)
 
         // smooth out stair climbing
         // N&C: FF Precision.
-        if (cl->predicted_step < 127) {
+        if (cl->predicted_step < (127.0f / 8.0f)) {
         //if (cl->predicted_step < 127 * 0.125f) {
-            delta <<= 1; // small steps
+            delta *= 2;
+            //delta <<= 1; // small steps
         }
         // N&C: FF Precision.
         if (delta < (100.0f / 8.0f)) {

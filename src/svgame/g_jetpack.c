@@ -210,9 +210,10 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
 		curves or around corners youre floating a little bit in the old direction*/
 	    VectorAdd( ent->velocity, acc, ent->velocity );
 		/*round velocitys (is this necessary?)*/
-	    ent->velocity[0] = (float)((int)(ent->velocity[0]*8))/8;
-		ent->velocity[1] = (float)((int)(ent->velocity[1]*8))/8;
-	    ent->velocity[2] = (float)((int)(ent->velocity[2]*8))/8;
+		// N&C: FF Precision.
+	 //   ent->velocity[0] = (float)((int)(ent->velocity[0]*8))/8;
+		//ent->velocity[1] = (float)((int)(ent->velocity[1]*8))/8;
+	 //   ent->velocity[2] = (float)((int)(ent->velocity[2]*8))/8;
 		/*Bound X and Y velocity so that friction and acceleration dont need to be
 		synced on maxvelocitys*/
 		if(jetpack_weenie->value)

@@ -981,7 +981,7 @@ static qboolean PM_GoodPosition(void)
 
     // N&C: FF Precision.
     for (i = 0; i < 3; i++)
-        origin[i] = end[i] = pm->s.origin[i] * 0.125;
+        origin[i] = end[i] = pm->s.origin[i];
 //    for (i = 0; i < 3; i++)
 //        origin[i] = end[i] = pm->s.origin[i] * 0.125;
     trace = pm->trace(origin, pm->mins, pm->maxs, end);
@@ -1056,11 +1056,17 @@ void PM_HackedSnapPosition(void)
     int i;
 
     // snap velocity to eigths
+    // N&C: FF Precision.
     for (i = 0; i < 3; i++)
-        pm->s.velocity[i] = Q_rint(pml.velocity[i] * 8);
+        pm->s.velocity[i] = (pml.velocity[i]);
 
     for (i = 0; i < 3; i++)
-        pm->s.origin[i] = Q_rint(pml.origin[i] * 8);
+        pm->s.origin[i] = (pml.origin[i]);
+    //for (i = 0; i < 3; i++)
+    //    pm->s.velocity[i] = Q_rint(pml.velocity[i] * 8);
+
+    //for (i = 0; i < 3; i++)
+    //    pm->s.origin[i] = Q_rint(pml.origin[i] * 8);
 
     VectorCopy(pm->s.origin, base);
 
@@ -1071,9 +1077,14 @@ void PM_HackedSnapPosition(void)
             for (x = 0; x < 3; x++) {
                 pm->s.origin[0] = base[0] + offset[x];
                 if (PM_GoodPosition()) {
-                    pml.origin[0] = pm->s.origin[0] * 0.125;
-                    pml.origin[1] = pm->s.origin[1] * 0.125;
-                    pml.origin[2] = pm->s.origin[2] * 0.125;
+                    // N&C: FF Precision.
+                    pml.origin[0] = pm->s.origin[0];
+                    pml.origin[1] = pm->s.origin[1];
+                    pml.origin[2] = pm->s.origin[2];
+
+                    //pml.origin[0] = pm->s.origin[0] * 0.125;
+                    //pml.origin[1] = pm->s.origin[1] * 0.125;
+                    //pml.origin[2] = pm->s.origin[2] * 0.125;
                     VectorCopy(pm->s.origin, pml.previous_origin);
                     return;
                 }

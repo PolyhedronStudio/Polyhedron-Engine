@@ -36,9 +36,14 @@ void MoveClientToIntermission (edict_t *ent)
 	if (deathmatch->value || coop->value)
 		ent->client->showscores = true;
 	VectorCopy (level.intermission_origin, ent->s.origin);
-	ent->client->ps.pmove.origin[0] = level.intermission_origin[0]*8;
-	ent->client->ps.pmove.origin[1] = level.intermission_origin[1]*8;
-	ent->client->ps.pmove.origin[2] = level.intermission_origin[2]*8;
+	// N&C: FF Precision.
+	VectorCopy(ent->client->ps.pmove.origin, level.intermission_origin);
+	ent->client->ps.pmove.origin[0] = level.intermission_origin[0];
+	ent->client->ps.pmove.origin[1] = level.intermission_origin[1];
+	ent->client->ps.pmove.origin[2] = level.intermission_origin[2];
+	//ent->client->ps.pmove.origin[0] = level.intermission_origin[0]*8;
+	//ent->client->ps.pmove.origin[1] = level.intermission_origin[1]*8;
+	//ent->client->ps.pmove.origin[2] = level.intermission_origin[2]*8;
 	VectorCopy (level.intermission_angle, ent->client->ps.viewangles);
 	ent->client->ps.pmove.pm_type = PM_FREEZE;
 	ent->client->ps.gunindex = 0;

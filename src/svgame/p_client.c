@@ -3343,7 +3343,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 		
 		// N&C: FF Precision.
 		VectorCopy(ent->s.origin, pm.s.origin);
-		VectorCopy(ent->s.velocity, pm.s.velocity);
+		VectorCopy(ent->velocity, pm.s.velocity);
 		//for (i = 0; i < 3; i++)
 		//{
 		//	pm.s.origin[i] = ent->s.origin[i] * 8;
@@ -3375,7 +3375,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 
 		// N&C: FF Precision.
 		VectorCopy(pm.s.origin, ent->s.origin);
-		VectorCopy(pm.s.velocity, ent->s.velocity);
+		VectorCopy(pm.s.velocity, ent->velocity);
 		//for (i = 0; i < 3; i++)
 		//{
 		//	ent->s.origin[i] = pm.s.origin[i] * 0.125;
