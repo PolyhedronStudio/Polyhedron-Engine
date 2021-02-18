@@ -3363,11 +3363,14 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 		client->ps.pmove = pm.s;
 		client->old_pmove = pm.s;
 
-		for (i = 0; i < 3; i++)
-		{
-			ent->s.origin[i] = pm.s.origin[i] * 0.125;
-			ent->velocity[i] = pm.s.velocity[i] * 0.125;
-		}
+		// N&C: FF Precision.
+		VectorCopy(pm.s.origin, ent->s.origin);
+		VectorCopy(pm.s.velocity, ent->s.velocity);
+		//for (i = 0; i < 3; i++)
+		//{
+		//	ent->s.origin[i] = pm.s.origin[i] * 0.125;
+		//	ent->velocity[i] = pm.s.velocity[i] * 0.125;
+		//}
 		VectorCopy(pm.mins, ent->mins);
 		VectorCopy(pm.maxs, ent->maxs);
 

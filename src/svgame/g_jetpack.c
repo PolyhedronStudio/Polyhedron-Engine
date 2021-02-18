@@ -82,16 +82,18 @@ void Jet_ApplyLifting( edict_t *ent )
 	float		amplitude = 2.0;
 	/*calculate the z-distance to lift in this step*/
 	delta = sin( (float)((level.framenum%time)*(360/time))/180*M_PI ) * amplitude;
-	delta = (float)((int)(delta*8))/8; /*round to multiples of 0.125*/
+	// N&C: Float precision.
+	//delta = (float)((int)(delta*8))/8; /*round to multiples of 0.125*/
 	VectorCopy( ent->s.origin, new_origin );
 	new_origin[2] += delta;
 	if( VectorLength(ent->velocity) == 0 )
 	{
 		/*i dont know the reason yet, but there is some floating so we
 		have to compensate that here (only if there is no velocity left)*/
-		new_origin[0] -= 0.125;
-		new_origin[1] -= 0.125;
-		new_origin[2] -= 0.125;
+		// N&C: FF precision.
+		//new_origin[0] -= 0.125;
+		//new_origin[1] -= 0.125;
+		//new_origin[2] -= 0.125;
 	}
 	/*before we change origin, its important to check that we dont go
 	into solid*/
