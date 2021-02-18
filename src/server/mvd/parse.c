@@ -611,9 +611,12 @@ static void MVD_ParseSound(mvd_t *mvd, int extrabits)
         msg->attenuation = attenuation;
         msg->timeofs = offset;
         msg->sendchan = sendchan;
-        for (i = 0; i < 3; i++) {
-            msg->pos[i] = origin[i] * 8;
-        }
+
+        // N&C: FF Precision.
+        VectorCopy(msg->pos, origin);
+        //for (i = 0; i < 3; i++) {
+        //    msg->pos[i] = origin[i] * 8;
+        //}
 
         List_Remove(&msg->entry);
         List_Append(&cl->msg_unreliable_list, &msg->entry);

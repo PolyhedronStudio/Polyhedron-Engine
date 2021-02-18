@@ -635,9 +635,11 @@ static void PF_StartSound(edict_t *edict, int channel,
         msg->attenuation = attenuation * 64;
         msg->timeofs = timeofs * 1000;
         msg->sendchan = sendchan;
-        for (i = 0; i < 3; i++) {
-            msg->pos[i] = origin[i] * 8;
-        }
+        // N&C: FF Precision.
+        VectorCopy(msg->pos, origin);
+        //for (i = 0; i < 3; i++) {
+        //    msg->pos[i] = origin[i] * 8;
+        //}
 
         List_Remove(&msg->entry);
         List_Append(&client->msg_unreliable_list, &msg->entry);

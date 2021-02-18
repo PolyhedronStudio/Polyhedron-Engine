@@ -1895,10 +1895,11 @@ void PutClientInServer(edict_t *ent)
 
 	if (spawn_landmark)
 		client->ps.pmove.pm_flags = spawn_pm_flags;
-
-	client->ps.pmove.origin[0] = spawn_origin[0] * 8;
-	client->ps.pmove.origin[1] = spawn_origin[1] * 8;
-	client->ps.pmove.origin[2] = spawn_origin[2] * 8;
+	// N&C: FF Precision.
+	VectorCopy(spawn_origin, client->ps.pmove.origin);
+	//client->ps.pmove.origin[0] = spawn_origin[0] * 8;
+	//client->ps.pmove.origin[1] = spawn_origin[1] * 8;
+	//client->ps.pmove.origin[2] = spawn_origin[2] * 8;
 
 	if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV))
 	{
@@ -2896,11 +2897,17 @@ void ClientSpycam(edict_t *ent)
 
 	memset(&pm, 0, sizeof(pm));
 	pm.s = client->ps.pmove;
+	// N&C: FF Precision.
+	VectorCopy(ent->s.origin, pm.s.origin);
 	for (i = 0; i < 3; i++) {
-		pm.s.origin[i] = ent->s.origin[i] * 8;
 		client->ps.pmove.delta_angles[i] =
 			ANGLE2SHORT(client->ps.viewangles[i] - client->resp.cmd_angles[i]);
 	}
+	//for (i = 0; i < 3; i++) {
+	//	pm.s.origin[i] = ent->s.origin[i] * 8;
+	//	client->ps.pmove.delta_angles[i] =
+	//		ANGLE2SHORT(client->ps.viewangles[i] - client->resp.cmd_angles[i]);
+	//}
 	if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s)))
 		pm.snapinitial = true;
 	pm.cmd = client->ucmd;
@@ -3333,13 +3340,16 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 #endif    // #ifdef JETPACK_MOD
 
 		pm.s = client->ps.pmove;
-
-		for (i = 0; i < 3; i++)
-		{
-			pm.s.origin[i] = ent->s.origin[i] * 8;
-			// FIXME: make sure this short doesn't overflow
-			pm.s.velocity[i] = ent->velocity[i] * 8;
-		}
+		
+		// N&C: FF Precision.
+		VectorCopy(ent->s.origin, pm.s.origin);
+		VectorCopy(ent->s.velocity, pm.s.velocity);
+		//for (i = 0; i < 3; i++)
+		//{
+		//	pm.s.origin[i] = ent->s.origin[i] * 8;
+		//	// FIXME: make sure this short doesn't overflow
+		//	pm.s.velocity[i] = ent->velocity[i] * 8;
+		//}
 
 		if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s)))
 		{

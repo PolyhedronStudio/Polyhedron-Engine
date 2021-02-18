@@ -3193,9 +3193,11 @@ void target_monitor_off(edict_t* self)
 	VectorCopy(faker->s.origin, player->s.origin);
 	gi.TagFree(faker->client);
 	G_FreeEdict(faker);
-	player->client->ps.pmove.origin[0] = player->s.origin[0] * 8;
-	player->client->ps.pmove.origin[1] = player->s.origin[1] * 8;
-	player->client->ps.pmove.origin[2] = player->s.origin[2] * 8;
+	// N&C: FF Precision.
+	VectorCopy(player->s.origin, player->client->ps.pmove.origin);
+	//player->client->ps.pmove.origin[0] = player->s.origin[0] * 8;
+	//player->client->ps.pmove.origin[1] = player->s.origin[1] * 8;
+	//player->client->ps.pmove.origin[2] = player->s.origin[2] * 8;
 	for (i = 0; i < 3; i++)
 		player->client->ps.pmove.delta_angles[i] =
 		ANGLE2SHORT(player->client->org_viewangles[i] - player->client->resp.cmd_angles[i]);
@@ -3376,9 +3378,11 @@ void use_target_monitor(edict_t* self, edict_t* other, edict_t* activator)
 		VectorCopy(self->s.angles, activator->client->ps.viewangles);
 
 	VectorCopy(self->s.origin, activator->s.origin);
-	activator->client->ps.pmove.origin[0] = self->s.origin[0] * 8;
-	activator->client->ps.pmove.origin[1] = self->s.origin[1] * 8;
-	activator->client->ps.pmove.origin[2] = self->s.origin[2] * 8;
+	// N&C: FF Precision.
+	VectorCopy(self->s.origin, activator->client->ps.pmove.origin);
+	//activator->client->ps.pmove.origin[0] = self->s.origin[0] * 8;
+	//activator->client->ps.pmove.origin[1] = self->s.origin[1] * 8;
+	//activator->client->ps.pmove.origin[2] = self->s.origin[2] * 8;
 	activator->client->ps.pmove.pm_type = PM_FREEZE;
 #ifdef KMQUAKE2_ENGINE_MOD
 	// Knightmare- camera effect and letterboxing
