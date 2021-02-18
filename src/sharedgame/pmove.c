@@ -1094,13 +1094,13 @@ static void PM_InitialSnapPosition(void)
     //static const short offset[3] = { 0, -1, 1 };
 
     //VectorCopy(pm->s.origin, base);
-    //if (PM_GoodPosition()) {
-    //    pml.origin[0] = pm->s.origin[0] * 0.125;
-    //    pml.origin[1] = pm->s.origin[1] * 0.125;
-    //    pml.origin[2] = pm->s.origin[2] * 0.125;
-    //    VectorCopy(pm->s.origin, pml.previous_origin);
-    //    return;
-    //}
+    if (PM_GoodPosition()) {
+        pml.origin[0] = pm->s.origin[0] * 0.125;
+        pml.origin[1] = pm->s.origin[1] * 0.125;
+        pml.origin[2] = pm->s.origin[2] * 0.125;
+        VectorCopy(pm->s.origin, pml.previous_origin);
+        return;
+    }
     //for (z = 0; z < 3; z++) {
     //    pm->s.origin[2] = base[2] + offset[z];
     //    for (y = 0; y < 3; y++) {

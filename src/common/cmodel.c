@@ -347,7 +347,9 @@ BOX TRACING
 */
 
 // 1/32 epsilon to keep floating point happy
-#define DIST_EPSILON    (0.03125)
+// N&C: FF Precision.
+//#define DIST_EPSILON    (0.03125)
+#define DIST_EPSILON    0.125
 
 static vec3_t   trace_start, trace_end;
 static vec3_t   trace_mins, trace_maxs;
@@ -486,6 +488,35 @@ static void CM_TestBoxInBrush(vec3_t mins, vec3_t maxs, vec3_t p1,
     if (!brush->numsides)
         return;
 
+    // N&C: FF Precision. Fixes (hopefully) float movement from blocking in brushes..
+    // special test for axial
+    //if (trace->bounds[0][0] > trace->bounds[1][0]
+    //    || trace->bounds[0][1] > trace->bounds[1][1]
+    //    || trace->bounds[0][2] > trace->bounds[1][2]
+    //    || trace->bounds[1][0] < trace->bounds[0][0]
+    //    || trace->bounds[1][1] < trace->bounds[0][1]
+    //    || trace->bounds[1][2] < trace->bounds[0][2]
+    //    ) {
+    //    return;
+    //}
+    // The first six planes are the axial planes, so we only
+    // need to test the remainder
+    //for (i = 6; i < brush->numsides; i++) {
+    //    side = brush->firstbrushside + i;
+    //    plane = side->plane;
+
+    //    // adjust the plane distance appropriately for mins/maxs
+    //    dist = plane->dist - DotProduct(trace->offsets[plane->signbits], plane->normal);
+
+    //    d1 = DotProduct(p1, plane->normal) - dist;
+
+    //    // if completely in front of face, no intersection
+    //    if (d1 > 0) {
+    //        return;
+    //    }
+    //}
+
+    // N&C: FF Precision. This was the old code.
     side = brush->firstbrushside;
     for (i = 0; i < brush->numsides; i++, side++) {
         plane = side->plane;
@@ -622,17 +653,18 @@ recheck:
         if (trace_ispoint)
             offset = 0;
         else
-            offset = fabs(trace_extents[0] * plane->normal[0]) +
-                     fabs(trace_extents[1] * plane->normal[1]) +
-                     fabs(trace_extents[2] * plane->normal[2]);
+            offset = 2048.f;
+            //offset = fabs(trace_extents[0] * plane->normal[0]) +
+            //         fabs(trace_extents[1] * plane->normal[1]) +
+            //         fabs(trace_extents[2] * plane->normal[2]);
     }
 
     // see which sides we need to consider
-    if (t1 >= offset && t2 >= offset) {
+    if (t1 >= offset + DIST_EPSILON && t2 >= offset + DIST_EPSILON) {
         node = node->children[0];
         goto recheck;
     }
-    if (t1 < -offset && t2 < -offset) {
+    if (t1 < -offset - DIST_EPSILON && t2 < -offset - DIST_EPSILON) {
         node = node->children[1];
         goto recheck;
     }
@@ -739,6 +771,36 @@ void CM_BoxTrace(trace_t *trace, vec3_t start, vec3_t end,
         trace_extents[0] = -mins[0] > maxs[0] ? -mins[0] : maxs[0];
         trace_extents[1] = -mins[1] > maxs[1] ? -mins[1] : maxs[1];
         trace_extents[2] = -mins[2] > maxs[2] ? -mins[2] : maxs[2];
+
+        // N&C: Q3 - FF Precision. Hopefully...
+        VectorCopy(maxs, trace_trace->offsets[0]);
+
+        trace_trace->offsets[1][0] = maxs[0];
+        trace_trace->offsets[1][1] = mins[1];
+        trace_trace->offsets[1][2] = mins[2];
+
+        trace_trace->offsets[2][0] = mins[0];
+        trace_trace->offsets[2][1] = maxs[1];
+        trace_trace->offsets[2][2] = mins[2];
+
+        trace_trace->offsets[3][0] = maxs[0];
+        trace_trace->offsets[3][1] = maxs[1];
+        trace_trace->offsets[3][2] = mins[2];
+
+        trace_trace->offsets[4][0] = mins[0];
+        trace_trace->offsets[4][1] = mins[1];
+        trace_trace->offsets[4][2] = maxs[2];
+
+        trace_trace->offsets[5][0] = maxs[0];
+        trace_trace->offsets[5][1] = mins[1];
+        trace_trace->offsets[5][2] = maxs[2];
+
+        trace_trace->offsets[6][0] = mins[0];
+        trace_trace->offsets[6][1] = maxs[1];
+        trace_trace->offsets[6][2] = maxs[2];
+
+        VectorCopy(maxs, trace_trace->offsets[7]);
+//        trace_trace->offsets[7] = maxs0;
     }
 
     //
