@@ -16,8 +16,9 @@
 //================
 //
 void CLG_CheckPredictionError(int frame, unsigned int cmd) {
-    int delta[3];
-    int len;
+    // N&C: FF Precision. (Used to be ints.)
+    float delta[3];
+    float len;
     // compare what the server returned with what we had predicted it to be
     VectorSubtract(cl->frame.ps.pmove.origin, cl->predicted_origins[cmd & CMD_MASK], delta);
 
@@ -39,8 +40,11 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
 
     VectorCopy(cl->frame.ps.pmove.origin, cl->predicted_origins[cmd & CMD_MASK]);
 
+    // N&C: FF Precision. No need to scale, just copy.
     // save for error interpolation
-    VectorScale(delta, 0.125f, cl->prediction_error);
+    VectorCopy(delta, cl->prediction_error);
+    // save for error interpolation
+    //VectorScale(delta, 0.125f, cl->prediction_error);
 }
 
 //
@@ -153,7 +157,7 @@ static int CLG_PointContents(vec3_t point)
 //
 void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     pmove_t     pm;
-    int         step, oldz;
+    float       step, oldz;     // N&C: FF Precision. These were ints.
     int         frame;
 
     X86_PUSH_FPCW;
@@ -199,8 +203,11 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     if (pm.s.pm_type != PM_SPECTATOR && (pm.s.pm_flags & PMF_ON_GROUND)) {
         oldz = cl->predicted_origins[cl->predicted_step_frame & CMD_MASK][2];
         step = pm.s.origin[2] - oldz;
-        if (step > 63 && step < 160) {
-            cl->predicted_step = step * 0.125f;
+        // N&C: FF Precision.
+        if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
+            cl->predicted_step = step;
+        //if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f) {
+        //    cl->predicted_step = step * 0.125f;
             cl->predicted_step_time = clgi.GetRealTime();
             cl->predicted_step_frame = frame + 1;    // don't double step
         }
@@ -211,7 +218,10 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     }
 
     // copy results out for rendering
-    VectorScale(pm.s.origin, 0.125f, cl->predicted_origin);
-    VectorScale(pm.s.velocity, 0.125f, cl->predicted_velocity);
+    // N&C: FF Precision.
+    VectorCopy(pm.s.origin, cl->predicted_origin);
+    VectorCopy(pm.s.velocity, cl->predicted_velocity);
+    //VectorScale(pm.s.origin, 0.125f, cl->predicted_origin);
+    //VectorScale(pm.s.velocity, 0.125f, cl->predicted_velocity);
     VectorCopy(pm.viewangles, cl->predicted_angles);
 }
