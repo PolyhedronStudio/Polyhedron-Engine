@@ -173,7 +173,9 @@ static void entity_update(const entity_state_t *state)
 
     // work around Q2PRO server bandwidth optimization
     if (entity_optimized(state)) {
-        VectorScale(cl.frame.ps.pmove.origin, 0.125f, origin_v);
+        // N&C: FF Precision.
+        VectorCopy(cl.frame.ps.pmove.origin, origin_v);
+        //VectorScale(cl.frame.ps.pmove.origin, 0.125f, origin_v);
         origin = origin_v;
     } else {
         origin = state->origin;
@@ -268,8 +270,11 @@ static void set_active_state(void)
         CL_FirstDemoFrame();
     } else {
         // set initial cl.predicted_origin and cl.predicted_angles
-        VectorScale(cl.frame.ps.pmove.origin, 0.125f, cl.predicted_origin);
-        VectorScale(cl.frame.ps.pmove.velocity, 0.125f, cl.predicted_velocity);
+        // N&C: FF Precision.
+        VectorCopy(cl.frame.ps.pmove.origin, cl.predicted_origin);
+        VectorCopy(cl.frame.ps.pmove.velocity, cl.predicted_velocity);
+        //VectorScale(cl.frame.ps.pmove.origin, 0.125f, cl.predicted_origin);
+        //VectorScale(cl.frame.ps.pmove.velocity, 0.125f, cl.predicted_velocity);
         if (cl.frame.ps.pmove.pm_type < PM_DEAD &&
             cls.serverProtocol > PROTOCOL_VERSION_DEFAULT) {
             // enhanced servers don't send viewangles
@@ -315,11 +320,17 @@ player_update(server_frame_t *oldframe, server_frame_t *frame, int framediv)
         goto dup;
 
     // no lerping if player entity was teleported (origin check)
-    if (abs(ops->pmove.origin[0] - ps->pmove.origin[0]) > 256 * 8 ||
-        abs(ops->pmove.origin[1] - ps->pmove.origin[1]) > 256 * 8 ||
-        abs(ops->pmove.origin[2] - ps->pmove.origin[2]) > 256 * 8) {
+    // N&C: FF Precision.
+    if (abs(ops->pmove.origin[0] - ps->pmove.origin[0]) > 256 ||
+        abs(ops->pmove.origin[1] - ps->pmove.origin[1]) > 256 ||
+        abs(ops->pmove.origin[2] - ps->pmove.origin[2]) > 256) {
         goto dup;
     }
+    //if (abs(ops->pmove.origin[0] - ps->pmove.origin[0]) > 256 * 8 ||
+    //    abs(ops->pmove.origin[1] - ps->pmove.origin[1]) > 256 * 8 ||
+    //    abs(ops->pmove.origin[2] - ps->pmove.origin[2]) > 256 * 8) {
+    //    goto dup;
+    //}
  
     // no lerping if player entity was teleported (event check)
     ent = &cs.entities[frame->clientNum + 1];
@@ -604,12 +615,14 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
 
 void CL_GetViewVelocity(vec3_t vel)
 {
-	// restore value from 12.3 fixed point
-	const float scale_factor = 1.0f / 8.0f;
+    // N&C: FF Precision.
+    VectorCopy(cl.frame.ps.pmove.velocity, vel);
+    // restore value from 12.3 fixed point
+	//const float scale_factor = 1.0f / 8.0f;
 
-	vel[0] = (float)cl.frame.ps.pmove.velocity[0] * scale_factor;
-	vel[1] = (float)cl.frame.ps.pmove.velocity[1] * scale_factor;
-	vel[2] = (float)cl.frame.ps.pmove.velocity[2] * scale_factor;
+	//vel[0] = (float)cl.frame.ps.pmove.velocity[0] * scale_factor;
+	//vel[1] = (float)cl.frame.ps.pmove.velocity[1] * scale_factor;
+	//vel[2] = (float)cl.frame.ps.pmove.velocity[2] * scale_factor;
 }
 
 void CL_GetEntitySoundVelocity(int ent, vec3_t vel)
