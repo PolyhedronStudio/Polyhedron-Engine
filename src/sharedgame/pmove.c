@@ -979,8 +979,11 @@ static qboolean PM_GoodPosition(void)
     if (pm->s.pm_type == PM_SPECTATOR)
         return qtrue;
 
+    // N&C: FF Precision.
     for (i = 0; i < 3; i++)
         origin[i] = end[i] = pm->s.origin[i] * 0.125;
+//    for (i = 0; i < 3; i++)
+//        origin[i] = end[i] = pm->s.origin[i] * 0.125;
     trace = pm->trace(origin, pm->mins, pm->maxs, end);
 
     return !trace.allsolid;
@@ -990,26 +993,29 @@ static qboolean PM_GoodPosition(void)
 ================
 PM_SnapPosition
 
-On exit, the origin will have a value that is pre-quantized to the 0.125
-precision of the network channel and in a valid position.
+On exit, the origin will have a value in a valid position.
 ================
 */
 static void PM_SnapPosition(void)
 {
-    int     sign[3];
-    int     i, j, bits;
-    short   base[3];
-    // try all single bits first
-    static const byte jitterbits[8] = { 0, 4, 1, 2, 3, 5, 6, 7 };
+    //int     sign[3];
+    //int     i, j, bits;
+    //short   base[3];
+    //// try all single bits first
+    //static const byte jitterbits[8] = { 0, 4, 1, 2, 3, 5, 6, 7 };
+
+    // N&C: FF Precision.
+    VectorCopy(pml.velocity, pm->s.velocity);
+    VectorCopy(pml.origin, pm->s.origin);
 
     // snap velocity to eigths
-    for (i = 0; i < 3; i++)
-        pm->s.velocity[i] = (int)(pml.velocity[i] * 8);
+    //for (i = 0; i < 3; i++)
+    //    pm->s.velocity[i] = (int)(pml.velocity[i] * 8);
 
-    // No need for the bottom code...
-    // Snap origin to eights.
-    for (i = 0; i < 3; i++)
-        pm->s.origin[i] = (int)(pml.origin[i] * 8);
+    //// No need for the bottom code...
+    //// Snap origin to eights.
+    //for (i = 0; i < 3; i++)
+    //    pm->s.origin[i] = (int)(pml.origin[i] * 8);
 
     //for (i = 0; i < 3; i++) {
     //    if (pml.origin[i] >= 0)
@@ -1095,9 +1101,11 @@ static void PM_InitialSnapPosition(void)
 
     //VectorCopy(pm->s.origin, base);
     if (PM_GoodPosition()) {
-        pml.origin[0] = pm->s.origin[0] * 0.125;
-        pml.origin[1] = pm->s.origin[1] * 0.125;
-        pml.origin[2] = pm->s.origin[2] * 0.125;
+        // N&C: FF Precision.
+        VectorCopy(pm->s.origin, pml.origin);
+        //pml.origin[0] = pm->s.origin[0] * 0.125;
+        //pml.origin[1] = pm->s.origin[1] * 0.125;
+        //pml.origin[2] = pm->s.origin[2] * 0.125;
         VectorCopy(pm->s.origin, pml.previous_origin);
         return;
     }
@@ -1175,8 +1183,11 @@ void Pmove(pmove_t* pmove, pmoveParams_t* params)
     memset(&pml, 0, sizeof(pml));
 
     // convert origin and velocity to float values
-    VectorScale(pm->s.origin, 0.125f, pml.origin);
-    VectorScale(pm->s.velocity, 0.125f, pml.velocity);
+    // N&C: FF Precision.
+    VectorCopy(pm->s.origin, pml.origin);
+    VectorCopy(pm->s.velocity, pml.velocity);
+    //VectorScale(pm->s.origin, 0.125f, pml.origin);
+    //VectorScale(pm->s.velocity, 0.125f, pml.velocity);
 
     // save old org in case we get stuck
     VectorCopy(pm->s.origin, pml.previous_origin);
