@@ -1006,28 +1006,36 @@ static void PM_SnapPosition(void)
     for (i = 0; i < 3; i++)
         pm->s.velocity[i] = (int)(pml.velocity[i] * 8);
 
-    for (i = 0; i < 3; i++) {
-        if (pml.origin[i] >= 0)
-            sign[i] = 1;
-        else
-            sign[i] = -1;
+    // No need for the bottom code...
+    // Snap origin to eights.
+    for (i = 0; i < 3; i++)
         pm->s.origin[i] = (int)(pml.origin[i] * 8);
-        if (pm->s.origin[i] * 0.125f == pml.origin[i])
-            sign[i] = 0;
-    }
-    VectorCopy(pm->s.origin, base);
 
-    // try all combinations
-    for (j = 0; j < 8; j++) {
-        bits = jitterbits[j];
-        VectorCopy(base, pm->s.origin);
-        for (i = 0; i < 3; i++)
-            if (bits & (1 << i))
-                pm->s.origin[i] += sign[i];
+    //for (i = 0; i < 3; i++) {
+    //    if (pml.origin[i] >= 0)
+    //        sign[i] = 1;
+    //    else
+    //        sign[i] = -1;
+    //    pm->s.origin[i] = (int)(pml.origin[i] * 8);
+    //    if (pm->s.origin[i] * 0.125f == pml.origin[i])
+    //        sign[i] = 0;
+    //}
+    //VectorCopy(pm->s.origin, base);
 
-        if (PM_GoodPosition())
-            return;
-    }
+    //// try all combinations
+    //for (j = 0; j < 8; j++) {
+    //    bits = jitterbits[j];
+    //    VectorCopy(base, pm->s.origin);
+    //    for (i = 0; i < 3; i++)
+    //        if (bits & (1 << i))
+    //            pm->s.origin[i] += sign[i];
+
+    //    if (PM_GoodPosition())
+    //        return;
+    //}
+    
+    if (PM_GoodPosition())
+        return;
 
     // go back to the last position
     VectorCopy(pml.previous_origin, pm->s.origin);
@@ -1081,28 +1089,34 @@ PM_InitialSnapPosition
 */
 static void PM_InitialSnapPosition(void)
 {
-    int        x, y, z;
-    short      base[3];
-    static const short offset[3] = { 0, -1, 1 };
+    //int        x, y, z;
+    //short      base[3];
+    //static const short offset[3] = { 0, -1, 1 };
 
-    VectorCopy(pm->s.origin, base);
-
-    for (z = 0; z < 3; z++) {
-        pm->s.origin[2] = base[2] + offset[z];
-        for (y = 0; y < 3; y++) {
-            pm->s.origin[1] = base[1] + offset[y];
-            for (x = 0; x < 3; x++) {
-                pm->s.origin[0] = base[0] + offset[x];
-                if (PM_GoodPosition()) {
-                    pml.origin[0] = pm->s.origin[0] * 0.125;
-                    pml.origin[1] = pm->s.origin[1] * 0.125;
-                    pml.origin[2] = pm->s.origin[2] * 0.125;
-                    VectorCopy(pm->s.origin, pml.previous_origin);
-                    return;
-                }
-            }
-        }
-    }
+    //VectorCopy(pm->s.origin, base);
+    //if (PM_GoodPosition()) {
+    //    pml.origin[0] = pm->s.origin[0] * 0.125;
+    //    pml.origin[1] = pm->s.origin[1] * 0.125;
+    //    pml.origin[2] = pm->s.origin[2] * 0.125;
+    //    VectorCopy(pm->s.origin, pml.previous_origin);
+    //    return;
+    //}
+    //for (z = 0; z < 3; z++) {
+    //    pm->s.origin[2] = base[2] + offset[z];
+    //    for (y = 0; y < 3; y++) {
+    //        pm->s.origin[1] = base[1] + offset[y];
+    //        for (x = 0; x < 3; x++) {
+    //            pm->s.origin[0] = base[0] + offset[x];
+    //            if (PM_GoodPosition()) {
+    //                pml.origin[0] = pm->s.origin[0] * 0.125;
+    //                pml.origin[1] = pm->s.origin[1] * 0.125;
+    //                pml.origin[2] = pm->s.origin[2] * 0.125;
+    //                VectorCopy(pm->s.origin, pml.previous_origin);
+    //                return;
+    //            }
+    //        }
+    //    }
+    //}
 }
 
 /*

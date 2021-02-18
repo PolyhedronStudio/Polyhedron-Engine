@@ -273,7 +273,8 @@ static void set_active_state(void)
         if (cl.frame.ps.pmove.pm_type < PM_DEAD &&
             cls.serverProtocol > PROTOCOL_VERSION_DEFAULT) {
             // enhanced servers don't send viewangles
-            CL_PredictAngles();
+            // N&C: Let the client game module predict angles.
+            CL_GM_PredictAngles();
         } else {
             // just use what server provided
             VectorCopy(cl.frame.ps.viewangles, cl.predicted_angles);
