@@ -310,7 +310,9 @@ void SV_Multicast(vec3_t origin, multicast_t to)
             // find the client's PVS
 #if 0
             player_state_t *ps = &client->edict->client->ps;
-            VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
+            // N&C: FF Precision.
+            VectorAdd(ps->viewoffset, ps->pmove.origin, orig);
+            //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
 #else
             // FIXME: for some strange reason, game code assumes the server
             // uses entity origin for PVS/PHS culling, not the view origin

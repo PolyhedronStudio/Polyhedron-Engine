@@ -563,7 +563,9 @@ static void PF_StartSound(edict_t *edict, int channel,
         if (!(channel & CHAN_NO_PHS_ADD)) {
             // get client viewpos
             ps = &client->edict->client->ps;
-            VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, origin);
+            // N&C: FF Precision.
+            VectorAdd(ps->viewoffset, ps->pmove.origin, origin);
+            //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, origin);
             leaf = CM_PointLeaf(&sv.cm, origin);
             area = CM_LeafArea(leaf);
             if (!CM_AreasConnected(&sv.cm, area, edict->areanum)) {

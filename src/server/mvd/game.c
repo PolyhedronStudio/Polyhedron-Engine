@@ -1973,7 +1973,8 @@ static mvd_player_t *MVD_HitPlayer(mvd_client_t *client)
     if (mvd->intermission)
         return NULL;
 
-    VectorMA(client->ps.viewoffset, 0.125f, client->ps.pmove.origin, start);
+    // N&C: FF Precision.
+    VectorAdd(client->ps.viewoffset, client->ps.pmove.origin, start);
     AngleVectors(client->ps.viewangles, forward, NULL, NULL);
     VectorMA(start, 8192, forward, end);
 

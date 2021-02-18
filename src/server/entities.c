@@ -411,7 +411,9 @@ void SV_BuildClientFrame(client_t *client)
 
     // find the client's PVS
     ps = &clent->client->ps;
-    VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
+    // N&C: FF Precision.
+    VectorAdd(ps->viewoffset, ps->pmove.origin, org);
+    //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
 
     leaf = CM_PointLeaf(client->cm, org);
     clientarea = CM_LeafArea(leaf);

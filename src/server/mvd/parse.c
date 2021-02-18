@@ -225,11 +225,16 @@ static void MVD_ParseMulticast(mvd_t *mvd, mvd_ops_t op, int extrabits)
             // find the client's PVS
             ps = &client->ps;
 #if 0
-            VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
+            // N&C: FF Precision.
+            VectorAdd(ps->viewoffset, ps->pmove.origin, org);
+            //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
 #else
             // FIXME: for some strange reason, game code assumes the server
             // uses entity origin for PVS/PHS culling, not the view origin
-            VectorScale(ps->pmove.origin, 0.125f, org);
+            
+            // N&C: FF Precision.
+            VectorCopy(ps->pmove.origin, org);
+            //VectorScale(ps->pmove.origin, 0.125f, org);
 #endif
             leaf2 = CM_PointLeaf(&mvd->cm, org);
             if (!CM_AreasConnected(&mvd->cm, leaf1->area, leaf2->area))
@@ -539,7 +544,9 @@ static void MVD_ParseSound(mvd_t *mvd, int extrabits)
         if (!(extrabits & 1)) {
             // get client viewpos
             ps = &client->ps;
-            VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, origin);
+            // N&C: FF Precision.
+            VectorAdd(ps->viewoffset, ps->pmove.origin, origin);
+            //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, origin);
             leaf = CM_PointLeaf(&mvd->cm, origin);
             area = CM_LeafArea(leaf);
             if (!CM_AreasConnected(&mvd->cm, area, entity->areanum)) {
