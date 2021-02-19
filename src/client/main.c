@@ -2664,10 +2664,7 @@ static void CL_InitLocal(void)
     CL_InitDemos();
     LOC_Init();
     CL_InitAscii();
-    //CL_InitEffects();
-    //CL_InitTEnts();
     CL_InitDownloads();
-//    CL_GTV_Init();
 
     List_Init(&cl_ignores);
 
@@ -2715,12 +2712,6 @@ static void CL_InitLocal(void)
     cl_updaterate = Cvar_Get("cl_updaterate", "0", 0);
     cl_updaterate->changed = cl_updaterate_changed;
 #endif
-
-    //cl_chat_notify = Cvar_Get("cl_chat_notify", "1", 0);
-    //cl_chat_sound = Cvar_Get("cl_chat_sound", "1", 0);
-    //cl_chat_sound->changed = cl_chat_sound_changed;
-    //cl_chat_sound_changed(cl_chat_sound);
-    //cl_chat_filter = Cvar_Get("cl_chat_filter", "0", 0);
 
     cl_disconnectcmd = Cvar_Get("cl_disconnectcmd", "", 0);
     cl_changemapcmd = Cvar_Get("cl_changemapcmd", "", 0);
@@ -2772,6 +2763,7 @@ static void CL_InitLocal(void)
     CL_GM_Init();
 
     // Fetch CVars that should've been initialized by CG Module.
+    cl_player_model = Cvar_Get("cl_player_model", NULL, 0);     // The Vulkan renderer needs this...
 }
 
 /*

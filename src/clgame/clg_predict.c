@@ -23,8 +23,11 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
     VectorSubtract(cl->frame.ps.pmove.origin, cl->predicted_origins[cmd & CMD_MASK], delta);
 
     // save the prediction error for interpolation
-    len = abs(delta[0]) + abs(delta[1]) + abs(delta[2]);
-    if (len < 1 || len > 640) {
+    // N&C: FF Precision. (1.0 / 8 = 0.125, 640 / 8 = 80)
+    len = fabs(delta[0]) + fabs(delta[1]) + fabs(delta[2]);
+    if (len < 0.125f  || len > 80.f) {
+    //len = abs(delta[0]) + abs(delta[1]) + abs(delta[2]);
+    //if (len < 1 || len > 640) {
         // > 80 world units is a teleport or something
         VectorClear(cl->prediction_error);
         return;

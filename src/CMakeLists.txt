@@ -167,7 +167,7 @@ SET(SRC_CLIENT
 	client/keys.c
 	client/locs.c
 	client/main.c
-	client/newfx.c
+#	client/newfx.c
 #	client/null.c
 #	client/null_gl.c
 	client/parse.c
@@ -175,7 +175,7 @@ SET(SRC_CLIENT
 	client/predict.c
 	client/refresh.c
 	client/screen.c
-	client/tent.c
+#	client/tent.c
 	client/view.c
 	client/ui/demos.c
 	client/ui/menu.c

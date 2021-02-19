@@ -873,17 +873,16 @@ void CLG_CalcViewValues(void)
 
         // smooth out stair climbing
         // N&C: FF Precision.
-        if (cl->predicted_step < (127.0f / 8.0f)) {
-        //if (cl->predicted_step < 127 * 0.125f) {
-            delta *= 2;
-            //delta <<= 1; // small steps
+        if (cl->predicted_step < (127.0f / 8.0f)) {         //if (cl->predicted_step < 127 * 0.125f) {
+            delta *= 0.5;                                   //  delta <<= 1; // small steps
         }
         // N&C: FF Precision.
-        if (delta < (100.0f / 8.0f)) {
-            cl->refdef.vieworg[2] -= cl->predicted_step * ((100.0f / 8.0f) - delta) * 0.01f;
-        //if (delta < 100) {
-            //cl->refdef.vieworg[2] -= cl->predicted_step * (100 - delta) * 0.01f;
+        if (delta < (100.0f)) {
+            cl->refdef.vieworg[2] -= cl->predicted_step * ((100.0f) - delta) * 0.01f;
         }
+        //if (delta < 100) {
+        //  cl->refdef.vieworg[2] -= cl->predicted_step * (100 - delta) * 0.01f;
+        //}
     }
     else {
         // just use interpolated values
@@ -894,12 +893,6 @@ void CLG_CalcViewValues(void)
             lerp * (ps->pmove.origin[1] - ops->pmove.origin[1]);
         cl->refdef.vieworg[2] = ops->pmove.origin[2] +
             lerp * (ps->pmove.origin[2] - ops->pmove.origin[2]);
-        //cl->refdef.vieworg[0] = ops->pmove.origin[0] * 0.125f +
-        //    lerp * (ps->pmove.origin[0] - ops->pmove.origin[0]) * 0.125f;
-        //cl->refdef.vieworg[1] = ops->pmove.origin[1] * 0.125f +
-        //    lerp * (ps->pmove.origin[1] - ops->pmove.origin[1]) * 0.125f;
-        //cl->refdef.vieworg[2] = ops->pmove.origin[2] * 0.125f +
-        //    lerp * (ps->pmove.origin[2] - ops->pmove.origin[2]) * 0.125f;
     }
 
     // if not running a demo or on a locked frame, add the local angle movement
