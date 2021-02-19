@@ -401,6 +401,8 @@ void SV_New_f(void)
     // send the serverdata
     MSG_WriteByte(svc_serverdata);
     MSG_WriteLong(sv_client->protocol);
+    // WID: This value was unset here, so it defaulted to the int64 max or so.
+    sv_client->spawncount = 0;
     MSG_WriteLong(sv_client->spawncount);
     MSG_WriteByte(0);   // no attract loop
     MSG_WriteString(sv_client->gamedir);
