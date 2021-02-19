@@ -16,7 +16,6 @@ SET(SRC_CLGAME
 	clgame/clg_predict.c
 	clgame/clg_screen.c
 	clgame/clg_tents.c
-	clgame/clg_tests.c
 	clgame/clg_view.c
 
 	clgame/clgame.def

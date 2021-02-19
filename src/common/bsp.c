@@ -1129,13 +1129,14 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
         return filelen;
     }
 
+    // N&C: BSP: Version check, currently supports ID and WID formats.
     // byte swap and validate the header
     header = (dheader_t *)buf;
-    if (LittleLong(header->ident) != IDBSPHEADER) {
+    if ((LittleLong(header->ident) != IDBSPHEADER) && (LittleLong(header->ident) != WIDBSPHEADER)) {
         ret = Q_ERR_UNKNOWN_FORMAT;
         goto fail2;
     }
-    if (LittleLong(header->version) != BSPVERSION) {
+    if ((LittleLong(header->version) != BSPVERSION) && (LittleLong(header->version) != WIDBSPVERSION)) {
         ret = Q_ERR_UNKNOWN_FORMAT;
         goto fail2;
     }
