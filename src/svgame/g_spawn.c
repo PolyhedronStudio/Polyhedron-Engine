@@ -254,6 +254,9 @@ void SP_rocket (edict_t *self);
 //
 // end Lazarus
 
+// N&C: Pmover.
+void SP_monster_pmover(edict_t* self);
+
 spawn_t	spawns[] = {
 	{"item_health", SP_item_health},
 	{"item_health_small", SP_item_health_small},
@@ -376,6 +379,7 @@ spawn_t	spawns[] = {
 	{"monster_tank", SP_monster_tank},
 	{"monster_tank_commander", SP_monster_tank},
 	{"monster_medic", SP_monster_medic},
+	{"monster_pmover", SP_monster_pmover },
 	{"monster_flipper", SP_monster_flipper},
 	{"monster_chick", SP_monster_chick},
 	{"monster_parasite", SP_monster_parasite},

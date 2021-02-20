@@ -93,6 +93,7 @@ SET(SRC_SVGAME
 	svgame/m_move.c
 	svgame/m_mutant.c
 	svgame/m_parasite.c
+	svgame/m_pmover.c
 	svgame/m_soldier.c
 	svgame/m_supertank.c
 	svgame/m_tank.c
@@ -132,6 +133,7 @@ SET(HEADERS_SVGAME
 	svgame/m_soldier.h
 	svgame/m_parasite.h
 	svgame/m_player.h
+	svgame/m_pmover.h
 	svgame/m_rider.h
 	svgame/m_mutant.h
 	svgame/m_medic.h

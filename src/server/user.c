@@ -22,6 +22,77 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /*
 ============================================================
 
+USER PLAYER MOVEMENT 
+
+============================================================
+*/
+//
+//===============
+// SV_PMTypeForClient
+// 
+// Returns the player movetype for a "client", on an "entity'.
+// used by RunPlayerPhysics.
+//===============
+//
+int SV_PMTypeForClient(client_t* cl, edict_t* ent)
+{
+    return PM_NORMAL;
+    //switch ((int)ent->v->movetype)
+    //{
+    //case MOVETYPE_NOCLIP:
+    //    return PM_SPECTATOR;
+
+    //// TODO: Implement.
+    ////case MOVETYPE_FLY:
+    ////    return PM_FLY;
+    //// TODO: Implement.
+    ////case MOVETYPE_NONE:
+    ////    return PM_NONE;
+
+    //case MOVETYPE_TOSS:
+    //case MOVETYPE_BOUNCE:
+    //    return PM_DEAD;
+
+    //case MOVETYPE_WALK:
+    //default:
+    //    if (cl && ent->v->health <= 0)
+    //        return PM_DEAD;
+    //    return PM_NORMAL;
+    //}
+}
+
+
+//
+//===============
+// SV_PreRunCmd
+// 
+// Done before running a player command.Clears the touch array
+//===============
+//
+byte* playertouch;
+size_t playertouchmax;
+
+void SV_PreRunCmd(void)
+{
+    size_t max = (ge->num_edicts + 512 + 7) & ~7;
+    if (max > playertouchmax)
+    {
+        playertouchmax = max;
+        Z_Free(playertouch);
+        playertouch = Z_Malloc((playertouchmax >> 3) + 1);
+    }
+    memset(playertouch, 0, playertouchmax >> 3);
+}
+void SV_RunCmdCleanup(void)
+{
+    Z_Free(playertouch);
+    playertouch = NULL;
+    playertouchmax = 0;
+}
+
+/*
+============================================================
+
 USER STRINGCMD EXECUTION
 
 sv_client and sv_player will be valid.

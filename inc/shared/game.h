@@ -192,6 +192,9 @@ typedef struct {
     // N&C: Stuff Cmd.
     void (*stuffcmd) (edict_t* pent, char* pszCommand);
 
+    // N&C: RunPlayerPhysics
+    void (*RunPlayerPhysics) (edict_t* ent);
+
     // add commands to the server console as if they were typed in
     // for map changing, etc
     void (*AddCommandString)(const char *text);

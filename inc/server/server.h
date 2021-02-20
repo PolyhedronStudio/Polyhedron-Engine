@@ -53,4 +53,12 @@ int MVD_GetDemoPercent(qboolean *paused, int *framenum);
 char *SV_GetSaveInfo(const char *dir);
 #endif
 
+// svgame.c
+
+
+// user.c
+//int SV_PMTypeForClient(client_t* cl, edict_t* ent);
+void SV_PreRunCmd(void);
+void SV_RunCmdCleanup(void);
+
 #endif // SERVER_H
