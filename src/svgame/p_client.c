@@ -1601,7 +1601,7 @@ void respawn(edict_t *self)
 
 	if (deathmatch->value || coop->value)
 	{
-
+		 
 		// ACEBOT_ADD special respawning code
 		if (self->is_bot)
 		{
