@@ -2166,6 +2166,16 @@ struct edict_s
 	float		sdfcloudouter;
 	float		sdfsunfluxmin;
 	float		sdfsunfluxmax;
+
+// N&C - PMover
+	// aips - AI Player State, for AI using Player Movement.
+	player_state_t aips;
+	// aipm - AI Player Movement.
+	pmove_t	aipm;
+	// aicmd - AI User CMD. (This is the actual user input.)
+	// User CMD of this entity.
+	usercmd_t aicmd;
+// N&C - End PMover
 };
 
 #define	LOOKAT_NOBRUSHMODELS  1
