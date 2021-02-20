@@ -346,6 +346,19 @@ begin multiplayer
     endif
 end
 
+begin development
+    background #212F3CD0
+    style --compact
+    banner m_banner_game
+    action testmap_0 "skill 0; deathmatch 0; coop 0; maxclients 1; newgame; gamemap dev_testmap_0"
+    action medium "skill 0; deathmatch 0; coop 0; maxclients 1; newgame; gamemap dev_testmap_1"
+    action hard "skill 0; deathmatch 0; coop 0; maxclients 1; newgame; gamemap dev_testmap_2"
+    action nightmare "skill 0; deathmatch 0; coop 0; maxclients 1; newgame; gamemap dev_testmap_3"
+    blank
+    action "load game..." pushmenu loadgame
+    action "save game..." pushmenu savegame
+end
+
 begin singleplayer
     background #212F3CD0
     style --compact
@@ -414,6 +427,9 @@ end
 begin main
 //    title "Main Menu"
     plaque m_main_plaque m_main_logo
+    if developer 1
+        action easy pushmenu development
+    endif
     bitmap m_main_game pushmenu singleplayer
     bitmap m_main_multiplayer pushmenu multiplayer
     bitmap m_main_options pushmenu options

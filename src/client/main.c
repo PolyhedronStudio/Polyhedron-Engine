@@ -89,6 +89,10 @@ cvar_t  *info_hand;
 cvar_t  *info_gender;
 cvar_t  *info_uf;
 
+// N&C: Developer utilities.
+cvar_t* dev_map;
+//cvar_t* dev_maplist;
+
 #if USE_REF == REF_GL
 extern cvar_t *gl_modulate_world;
 extern cvar_t *gl_modulate_entities;
@@ -2729,6 +2733,9 @@ static void CL_InitLocal(void)
     //
     info_rate = Cvar_Get("rate", "5000", CVAR_USERINFO | CVAR_ARCHIVE);
 
+    // N&C: Developer utilities.
+    dev_map = Cvar_Get("dev_map", "", CVAR_ARCHIVE);
+    //dev_maplist = Cvar_Get("dev_maplist", "dev_map_0 dev_map_1 dev_map_2 dev_map_3", CVAR_ARCHIVE);
 
     //
     // macros
