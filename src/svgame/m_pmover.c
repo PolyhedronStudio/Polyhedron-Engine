@@ -82,15 +82,30 @@ void PMover_Think(edict_t* self) {
 
 	// Setup a user input command for this AI frame.
 	aicmd.forwardmove = 80;
+	aicmd.msec = 1;
+
+	// Copy over the origin to old origin.
+	//VectorCopy(self->s.origin, self->s.old_origin);
+	// Copy over the entities origin into the AIPlayer PMove State.
+	VectorCopy(self->s.origin, self->aips.pmove.origin);
+	// Copy over the entities origin into the AIPlayer State.
+	VectorCopy(self->s.origin, self->aipm.s.origin);
 
 	// Execute the player movement using the given "AI Player Input"
 	aipm_passent = self;		// Store self in pm_passent
 	self->aicmd = aicmd;		// Copy over ai movement cmd.
+	
 	Pmove(&self->aipm, &aipmp);	// Execute!
 	//ge->Pmove
 	
-	// Copy over origin to the entity.
-	VectorCopy(self->aipm.s.origin, self->move_origin);
+	// Unlink the entity, copy origin, relink it.
+	gi.unlinkentity(self);
+	VectorCopy(self->aips.pmove.origin, self->s.origin);
+	gi.linkentity(self);
+
+	// Setup the next think.
+	self->nextthink = level.time + 0.1;
+	self->think = PMover_Think;
 }
 
 /*QUAKED monster_pmover (1 .5 0) (-16 -16 -24) (16 16 32) 
@@ -104,7 +119,7 @@ void SP_monster_pmover(edict_t* self)
 	//	return;
 	//}
 	// Set movetype, solid, model, and bounds.
-	self->movetype = MOVETYPE_STEP;
+	self->movetype = MOVETYPE_WALK;
 	self->solid = SOLID_BBOX;
 	self->s.modelindex = gi.modelindex("models/monsters/infantry/tris.md2");
 	VectorSet(self->mins, -16, -16, -24);
@@ -143,15 +158,24 @@ void SP_monster_pmover(edict_t* self)
 	self->aipm.pointcontents = gi.pointcontents;
 
 	// Copy over the entities origin into the player move for its spawn point.
-	VectorCopy(self->move_origin, self->aips.pmove.origin);
+	VectorCopy(self->s.origin, self->aips.pmove.origin);
+	VectorCopy(self->s.origin, self->aipm.s.origin);
 
 	// Setup the AI Player State.
 	self->aips.pmove.pm_flags &= ~PMF_NO_PREDICTION;	// We don't want it to use prediction, there is no client.
 	self->aips.pmove.gravity = sv_gravity->value;		// Default gravity.
 	self->aips.pmove.pm_type = PM_NORMAL;				// Defualt Player Movement.
+	self->aips.pmove.pm_time = 1;						// 1ms = 8 units
 
-	// Setup regular entity data.
+	// Setup entity data.
+	self->classname = "pmover";
+	self->class_id = ENTITY_MONSTER_PMOVER;
 	self->movetype = MOVETYPE_WALK;		// Regular walk movetype.
+	self->deadflag = DEAD_NO;
+	self->groundentity = NULL;
+	self->takedamage = DAMAGE_AIM;
+	self->mass = 200;
+	self->flags &= ~FL_NO_KNOCKBACK;
 	self->svflags &= ~SVF_NOCLIENT;		// Let the server know that this is not a client either.
 	self->clipmask = MASK_PLAYERSOLID;	// We want clipping to behave as if it is a player.
 	self->solid = SOLID_BBOX;			// Solid bbox ofc.
