@@ -4,6 +4,6 @@
 //
 // Find Functionalities.
 //
-qboolean AIPM_FindTarget(edict_t* self);
+edict_t *AIPM_FindTarget(edict_t* self);
 
 #endif // __G_AIPM_H__

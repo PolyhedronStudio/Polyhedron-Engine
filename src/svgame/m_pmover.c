@@ -30,6 +30,7 @@ PMover - AI using Player Movement.
 */
 
 #include "g_local.h"
+#include "g_aipm.h"
 #include "m_pmover.h"
 
 // AI Player Move settings are stored here.
@@ -83,17 +84,45 @@ trace_t	AIPM_trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 //
 // Does the thinking for the pmover...
 //
+
+// X(PITCH) = 0
+// Y(YAW) = 1
+// Z(ROLL) = 2
+
 void PMover_Think(edict_t* self) {
+	edict_t* target = NULL;
+
+	// Clear the user input.
 	usercmd_t aicmd;
-	
 	memset(&aicmd, 0, sizeof(aicmd));
 
+	// Find a target.
+	target = AIPM_FindTarget(self);
+	if (target) {
+		vec3_t vec;
+		VectorSubtract(target->s.origin, self->s.origin, vec);
+		self->ideal_yaw = vectoyaw(vec);
+
+		// Tell it to move.
+		aicmd.forwardmove = 240;
+		aicmd.msec = 30;
+		aicmd.angles[0] = ANGLE2SHORT(self->ideal_yaw);
+		aicmd.angles[1] = ANGLE2SHORT(self->ideal_yaw);
+		aicmd.angles[2] = ANGLE2SHORT(self->ideal_yaw);
+
+		self->s.angles[1] = self->ideal_yaw;
+	}
+
+	//-------------------------------------------------------------------------
+	// Actual movement code.
+	//-------------------------------------------------------------------------
+
 	// Setup a user input command for this AI frame.
-	aicmd.forwardmove = 80;
-	aicmd.msec = 30;
-	aicmd.angles[0] = ANGLE2SHORT(self->s.angles[0]);
-	aicmd.angles[1] = ANGLE2SHORT(self->s.angles[1]);
-	aicmd.angles[2] = ANGLE2SHORT(self->s.angles[2]);
+	//aicmd.forwardmove = 80;
+	//aicmd.msec = 30;
+	//aicmd.angles[0] = ANGLE2SHORT(self->s.angles[0]);
+	//aicmd.angles[1] = ANGLE2SHORT(self->s.angles[1]);
+	//aicmd.angles[2] = ANGLE2SHORT(self->s.angles[2]);
 	
 	// Execute the player movement using the given "AI Player Input"
 	aipm_passent = self;		// Store self in pm_passent
@@ -167,7 +196,7 @@ void SP_monster_pmover(edict_t* self)
 	// Setup the pmove state flags.
 	self->aipm.s.pm_flags &= ~PMF_NO_PREDICTION;	// We don't want it to use prediction, there is no client.
 	self->aipm.s.gravity = sv_gravity->value;		// Default gravity.
-	self->aipm.s.pm_type = PM_SPECTATOR;				// Defualt Player Movement.
+	self->aipm.s.pm_type = PM_NORMAL;				// Defualt Player Movement.
 	self->aipm.s.pm_time = 1;						// 1ms = 8 units
 	
 	// Copy over the entities origin into the player move for its spawn point.

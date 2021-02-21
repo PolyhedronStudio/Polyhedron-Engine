@@ -35,6 +35,7 @@ SET(SRC_SVGAME
 	svgame/acebot_nodes.c
 	svgame/acebot_spawn.c
 	svgame/g_ai.c
+	svgame/g_aipm.c
 	svgame/g_camera.c
 	svgame/g_chase.c
 	svgame/g_cmds.c
@@ -111,6 +112,7 @@ SET(SRC_SVGAME
 SET(HEADERS_SVGAME
 	svgame/acebot.h
 	svgame/game.h
+	svgame/g_aipm.h
 	svgame/g_ctf.h
 	svgame/g_func_decs.h
 	svgame/g_func_list.h

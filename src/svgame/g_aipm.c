@@ -24,13 +24,16 @@ static qboolean ai_heardit;
 //==========================================================================
 //
 edict_t *AIPM_FindTarget(edict_t* self) {
-	heardit = false;
+	ai_heardit = false;
 	// if the first spawnflag bit is set, the monster will only wake up on
 	// really seeing the player, not another monster getting angry or hearing
 	// something
 	if ((level.sight_entity_framenum >= (level.framenum - 1)) && !(self->spawnflags & SF_MONSTER_SIGHT))
 	{
 		ai_client = level.sight_entity;
+		if (!ai_client)
+			return NULL;
+
 		if (ai_client->enemy == self->enemy)
 		{
 			return NULL;
@@ -43,12 +46,12 @@ edict_t *AIPM_FindTarget(edict_t* self) {
 	else if (level.sound_entity_framenum >= (level.framenum - 1))
 	{
 		ai_client = level.sound_entity;
-		heardit = true;
+		ai_heardit = true;
 	}
 	else if (!(self->enemy) && (level.sound2_entity_framenum >= (level.framenum - 1)) && !(self->spawnflags & SF_MONSTER_SIGHT))
 	{
 		ai_client = level.sound2_entity;
-		heardit = true;
+		ai_heardit = true;
 	}
 	else
 	{
