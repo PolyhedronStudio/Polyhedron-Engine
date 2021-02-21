@@ -2168,16 +2168,10 @@ struct edict_s
 	float		sdfsunfluxmax;
 
 // N&C - PMover
-	// This is the AI player state structure. It is used instead of the entity_state_t for
-	// our player movement.
+	// Player move structure used for AI entities.
 	//
-	// Copy this origin over into edict->s.origin
-	player_state_t aips;
-	// Player Move for AI. It stores its own actual player move state.
+	// Stores the current state of movement for ai.
 	pmove_t	aipm;
-	// aicmd - AI User CMD. (This is the actual user input.)
-	// User CMD of this entity.
-	usercmd_t aicmd;
 // N&C - End PMover
 };
 

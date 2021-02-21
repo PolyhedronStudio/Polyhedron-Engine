@@ -80,33 +80,18 @@ trace_t	AIPM_trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 void PMover_Think(edict_t* self) {
 	usercmd_t aicmd;
 
+	memset(&aicmd, 0, sizeof(aicmd));
+
 	// Setup a user input command for this AI frame.
-	aicmd.forwardmove = 80;
-	aicmd.msec = 1;
-
-	// Copy over the origin to old origin.
-	VectorCopy(self->s.origin, self->s.old_origin);
-
-	//// Copy over the entities origin into the AIPlayer State.
-	//VectorCopy(self->s.origin, self->aipm.s.origin);
-	//// Copy over the entities origin into the AIPlayer PMove State.
-	//VectorCopy(self->s.origin, self->aips.pmove.origin);
-	//
-	// Store pmove velocities in player state.
-	//VectorCopy(self->aipm.s.origin, self->aips.pmove.origin);
-	//VectorCopy(self->aipm.s.velocity, self->aips.pmove.velocity);
+	aicmd.forwardmove = 200;
+	aicmd.msec = level.time;
 
 	// Execute the player movement using the given "AI Player Input"
 	aipm_passent = self;		// Store self in pm_passent
-	self->aicmd = aicmd;		// Copy over ai movement cmd.
+	self->aipm.cmd = aicmd;		// Copy over ai movement cmd.
 	
 	Pmove(&self->aipm, &aipmp);	// Execute!
-	//ge->Pmove
 
-	// Store pmove velocities in player state.
-	//VectorCopy(self->aips.pmove.origin, self->aipm.s.origin);
-	//VectorCopy(self->aips.pmove.velocity, self->aipm.s.velocity);
-	//
 	// Unlink the entity, copy origin, relink it.
 	gi.unlinkentity(self);
 	VectorCopy(self->aipm.s.origin, self->s.origin);
@@ -165,17 +150,13 @@ void SP_monster_pmover(edict_t* self)
 	// Setup the pmove trace and point contents function pointers.
 	self->aipm.trace = AIPM_trace;	// adds default parms
 	self->aipm.pointcontents = gi.pointcontents;
+
+	// Setup the pmove state flags.
 	self->aipm.s.pm_flags &= ~PMF_NO_PREDICTION;	// We don't want it to use prediction, there is no client.
 	self->aipm.s.gravity = sv_gravity->value;		// Default gravity.
 	self->aipm.s.pm_type = PM_NORMAL;				// Defualt Player Movement.
 	self->aipm.s.pm_time = 14;						// 1ms = 8 units
 	
-	// Setup the AI Player State.
-	//self->aips.pmove.pm_flags &= ~PMF_NO_PREDICTION;	// We don't want it to use prediction, there is no client.
-	//self->aips.pmove.gravity = sv_gravity->value;		// Default gravity.
-	//self->aips.pmove.pm_type = PM_NORMAL;				// Defualt Player Movement.
-	//self->aips.pmove.pm_time = 1;						// 1ms = 8 units
-
 	// Copy over the entities origin into the player move for its spawn point.
 	//VectorCopy(self->s.origin, self->aips.pmove.origin);
 	VectorCopy(self->s.origin, self->aipm.s.origin);
@@ -186,7 +167,7 @@ void SP_monster_pmover(edict_t* self)
 	self->deadflag = DEAD_NO;
 	self->groundentity = NULL;
 	self->takedamage = DAMAGE_AIM;
-	self->mass = 200;
+	self->mass = 800;
 	self->flags &= ~FL_NO_KNOCKBACK;
 	self->svflags &= ~SVF_NOCLIENT;		// Let the server know that this is not a client either.
 	self->clipmask = MASK_PLAYERSOLID;	// We want clipping to behave as if it is a player.
