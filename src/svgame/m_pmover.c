@@ -36,6 +36,12 @@ PMover - AI using Player Movement.
 pmoveParams_t aipmp;
 
 //
+// NON IMPORTANT, ARE IN SHARED/SHARED.H but the GAME DLL IS STILL RIGGED WITH THAT KMQ2 ISSUE.
+//
+#define ANGLE2SHORT(x)  ((int)((x)*65536/360) & 65535)
+#define SHORT2ANGLE(x)  ((x)*(360.0/65536))
+
+//
 // NON IMPORTANT FUNCTION.
 //
 void PMover_Pain(edict_t* self, edict_t* other, float kick, int damage)
@@ -83,9 +89,12 @@ void PMover_Think(edict_t* self) {
 	memset(&aicmd, 0, sizeof(aicmd));
 
 	// Setup a user input command for this AI frame.
-	aicmd.forwardmove = 200;
-	aicmd.msec = level.time;
-
+	aicmd.forwardmove = 80;
+	aicmd.msec = 30;
+	aicmd.angles[0] = ANGLE2SHORT(self->s.angles[0]);
+	aicmd.angles[1] = ANGLE2SHORT(self->s.angles[1]);
+	aicmd.angles[2] = ANGLE2SHORT(self->s.angles[2]);
+	
 	// Execute the player movement using the given "AI Player Input"
 	aipm_passent = self;		// Store self in pm_passent
 	self->aipm.cmd = aicmd;		// Copy over ai movement cmd.
@@ -151,11 +160,15 @@ void SP_monster_pmover(edict_t* self)
 	self->aipm.trace = AIPM_trace;	// adds default parms
 	self->aipm.pointcontents = gi.pointcontents;
 
+	// Setup the pmove bounding box.
+	VectorSet(self->aipm.mins, -16, -16, -24);
+	VectorSet(self->aipm.maxs, 16, 16, 32);
+
 	// Setup the pmove state flags.
 	self->aipm.s.pm_flags &= ~PMF_NO_PREDICTION;	// We don't want it to use prediction, there is no client.
 	self->aipm.s.gravity = sv_gravity->value;		// Default gravity.
 	self->aipm.s.pm_type = PM_NORMAL;				// Defualt Player Movement.
-	self->aipm.s.pm_time = 14;						// 1ms = 8 units
+	self->aipm.s.pm_time = 1;						// 1ms = 8 units
 	
 	// Copy over the entities origin into the player move for its spawn point.
 	//VectorCopy(self->s.origin, self->aips.pmove.origin);
