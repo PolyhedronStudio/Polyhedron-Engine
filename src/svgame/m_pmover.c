@@ -85,7 +85,7 @@ trace_t	AIPM_trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 //
 void PMover_Think(edict_t* self) {
 	usercmd_t aicmd;
-
+	
 	memset(&aicmd, 0, sizeof(aicmd));
 
 	// Setup a user input command for this AI frame.
