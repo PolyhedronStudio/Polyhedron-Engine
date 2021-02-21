@@ -167,7 +167,7 @@ void SP_monster_pmover(edict_t* self)
 	// Setup the pmove state flags.
 	self->aipm.s.pm_flags &= ~PMF_NO_PREDICTION;	// We don't want it to use prediction, there is no client.
 	self->aipm.s.gravity = sv_gravity->value;		// Default gravity.
-	self->aipm.s.pm_type = PM_NORMAL;				// Defualt Player Movement.
+	self->aipm.s.pm_type = PM_SPECTATOR;				// Defualt Player Movement.
 	self->aipm.s.pm_time = 1;						// 1ms = 8 units
 	
 	// Copy over the entities origin into the player move for its spawn point.
