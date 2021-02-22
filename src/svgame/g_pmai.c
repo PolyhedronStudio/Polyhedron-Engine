@@ -26,6 +26,19 @@ static qboolean ai_heardit;
 //
 
 //
+// This is a straight copy from PM_Trace.
+// Eventually it needs to be moved into its own file obviously.
+//
+edict_t* pmai_passent;
+trace_t	PMAI_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
+{
+	if (pmai_passent->health > 0)
+		return gi.trace(start, mins, maxs, end, pmai_passent, MASK_PLAYERSOLID);
+	else
+		return gi.trace(start, mins, maxs, end, pmai_passent, MASK_DEADSOLID);
+}
+
+//
 //===============
 // PMAI_SetSightClient
 // 
@@ -207,6 +220,95 @@ qboolean PMAI_EntityIsInFront(edict_t* self, edict_t* other, float min_dot)
 //
 //==========================================================================
 //
+// SETTINGS
+//
+//==========================================================================
+//
+
+//
+//===============
+// PMAI_ProcessMovement
+// 
+// 
+//===============
+//
+void PMAI_ProcessMovement(edict_t *self) {
+	// Ensure it is valid.
+	if (!self)
+		return;
+
+	// Execute the player movement using the given "AI Player Input"
+	pmai_passent = self;								// Store self in pm_passent
+	self->pmai.pmove.cmd = self->pmai.movement.cmd;		// Copy over ai movement cmd.
+
+	// Execute!
+	Pmove(&self->pmai.pmove, &self->pmai.pmp);
+
+	// Unlink the entity, copy origin, relink it.
+	gi.unlinkentity(self);
+	VectorCopy(self->pmai.pmove.s.origin, self->s.origin);
+	gi.linkentity(self);
+}
+
+
+//
+//==========================================================================
+//
+// SETTINGS
+//
+//==========================================================================
+//
+
+//
+//===============
+// PMAI_Initialize
+// 
+// Initializes an entity with the default AI settings. Call this before
+// tweaking them on your own.
+//===============
+//
+void PMAI_Initialize(edict_t* self) {
+	// Make sure it's valid.
+	if (!self)
+		return;
+
+	// Setup the player move parameters.
+	PmoveInit(&self->pmai.pmp);
+
+	// Setup view.
+	self->pmai.settings.view.height = 25;
+
+	// Setup ranges.
+	self->pmai.settings.ranges.melee = 80;
+	self->pmai.settings.ranges.hostility = 500;
+	
+	self->pmai.settings.ranges.max_hearing = 1024;
+	self->pmai.settings.ranges.max_sight = 1024;
+
+	self->pmai.settings.ranges.min_dot = 0.3;
+
+	// Setup the pmove trace and point contents function pointers.
+	self->pmai.pmove.trace = PMAI_Trace;	// adds default parms
+	self->pmai.pmove.pointcontents = gi.pointcontents;
+
+	// Setup the pmove bounding box.
+	VectorSet(self->pmai.pmove.mins, -16, -16, -24);
+	VectorSet(self->pmai.pmove.maxs, 16, 16, 32);
+
+	// Setup the pmove state flags.
+	self->pmai.pmove.s.pm_flags &= ~PMF_NO_PREDICTION;	// We don't want it to use prediction, there is no client.
+	self->pmai.pmove.s.gravity = sv_gravity->value;		// Default gravity.
+	self->pmai.pmove.s.pm_type = PM_NORMAL;				// Defualt Player Movement.
+	self->pmai.pmove.s.pm_time = 1;						// 1ms = 8 units
+
+	// Copy over the entities origin into the player move for its spawn point.
+	VectorCopy(self->s.origin, self->pmai.pmove.s.origin);
+
+}
+
+//
+//==========================================================================
+//
 // TARGET SEEKING ETC.
 //
 //==========================================================================
@@ -315,7 +417,7 @@ qboolean PMAI_FindEnemyTarget(edict_t* self) {
 		self->pmai.targets.enemy.entity = target;
 
 		// If the classname of the entity was player_noise.
-		if (strcmp(self->enemy->classname, "player_noise") != 0)
+		if (strcmp(self->pmai.targets.enemy.entity->classname, "player_noise") != 0)
 		{
 			// Remove target heard flag.
 			self->pmai.targets.enemy.flags &= ~FL_AI_TARGET_HEARD;
@@ -357,7 +459,7 @@ qboolean PMAI_FindEnemyTarget(edict_t* self) {
 		self->pmai.targets.enemy.entity = target;
 	}
 
-foundtarget:
+//foundtarget:
 	// TODO: Remove, didn't wanna bother testing if it'd work with no code here
 	// although I assume the compiler will rid it since it's useless anyway.
 	

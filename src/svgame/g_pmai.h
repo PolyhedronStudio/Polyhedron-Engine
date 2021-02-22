@@ -51,12 +51,12 @@ typedef struct pmai_settings_s {
 
 	// Range related settings.
 	struct {
+		// The maximum range the AI will accept for being triggered by audio.
+		float max_hearing;
+
 		// The maximum range the AI will accept for being triggered by
 		// seeing a possible enemy.
 		float max_sight;
-
-		// The maximum range the AI will accept for being triggered by audio.
-		float max_hearing;
 
 		// The maximum range for melee combat.
 		float melee;
@@ -102,15 +102,29 @@ typedef struct pmai_targets_s {
 //} pmai_addtransform_t;
 
 //-------------------
+// Current frame movement state.
+//-------------------
+typedef struct pmai_movement_s{
+	// The actual user input being sent to the movement code.
+	usercmd_t cmd;
+} pmai_movement_t;
+
+//-------------------
 // This is the main Player Move AI structure.
 // It contains all relevant states to work with for the PMAI system.
 //-------------------
 typedef struct {
+	// The entity AI movement state.
+	pmai_movement_t movement;
+
 	// The entity AI settings.
 	pmai_settings_t settings;
 
 	// The entity AI target state.
 	pmai_targets_t targets;
+
+	// The pmove params for this AI entity.
+	pmoveParams_t pmp;
 
 	// The pmove_t state for this AI entity.
 	pmove_t pmove;
@@ -133,6 +147,16 @@ float		PMAI_EntityRange(edict_t* self, edict_t* other);
 
 qboolean	PMAI_EntityIsVisible(edict_t* self, edict_t* other);
 qboolean	PMAI_EntityIsInFront(edict_t* self, edict_t* other, float min_dot);
+
+//-------------------
+// Movement.
+//-------------------
+void		PMAI_ProcessMovement(edict_t *self);
+
+//-------------------
+// Settings.
+//-------------------
+void		PMAI_Initialize(edict_t* self);
 
 //-------------------
 // Target searching.
