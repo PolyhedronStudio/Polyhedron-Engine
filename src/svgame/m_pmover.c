@@ -55,17 +55,21 @@ void PMover_Pain(edict_t* self, edict_t* other, float kick, int damage)
 //
 void PMover_Die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point)
 {
-	self->s.effects = 0;
-	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
+	self->nextthink = 0;
 
-	self->s.skinnum |= 1;
+	VectorSet(self->mins, -16, -16, -24);
+	VectorSet(self->maxs, 16, 16, -8);
+	self->movetype = MOVETYPE_TOSS;
+	self->svflags |= SVF_DEADMONSTER;
+	gi.linkentity(self);
+	M_FlyCheck(self);
 
-	if (self->deadflag == DEAD_DEAD)
-		return;
-
-	// regular death
-	self->deadflag = DEAD_DEAD;
-	self->takedamage = DAMAGE_YES;
+	// Lazarus monster fade
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	{
+		self->think = FadeDieSink;
+		self->nextthink = level.time + corpse_fadetime->value;
+	}
 }
 
 //
@@ -89,18 +93,36 @@ void PMover_Think(edict_t* self) {
 	// If we've found an enemy target. Proceed further.
 	if (PMAI_FindEnemyTarget(self)) {
 		vec3_t vecyaw;
+		vec3_t vecangles;
 		edict_t* target = self->pmai.targets.enemy.entity;
 
 		// Calculate the yaw to move to.
 		VectorSubtract(target->s.origin, self->s.origin, vecyaw);
-		float yaw = vectoyaw2(vecyaw);
+		vectoangles2(vecyaw, vecangles); // used for aiming at the player always.
+//		float yaw = vectoyaw2(vecyaw); // used for yaw
 
-		// Update the current frame pmove command.
-		movecmd->forwardmove = 240;					// Speed.
-		movecmd->angles[YAW] = ANGLE2SHORT(yaw);	// Yaw angle.
+		// Set direction speeds.
+		movecmd->forwardmove = 240;
 
-		// Setup the entity's state yaw.
-		self->s.angles[YAW] = yaw;
+		// Setup the move angles.
+		movecmd->angles[YAW] = ANGLE2SHORT(vecangles[YAW]);
+		movecmd->angles[PITCH] = ANGLE2SHORT(vecangles[PITCH]);
+
+		// Don't allow pitch and up speeds to go haywire.
+		float pitch = vecangles[PITCH];
+		if (pitch >= 0.01 && pitch >= 45.f) {
+			pitch = 45.f;
+			movecmd->upmove = 240;
+		}
+		if (pitch <= -0.01 && pitch <= -45.f) {
+			pitch = -45.f;
+			movecmd->upmove = 240;
+		}
+
+		// Setup the entity's state angles.
+		self->s.angles[YAW]		= vecangles[YAW];
+		self->s.angles[PITCH]	= pitch;
+		//self->s.angles[ROLL] = ANGLE2SHORT(self->s.angles[ROLL]);
 	}
 	else {
 		movecmd->msec = 1;
@@ -157,11 +179,18 @@ void SP_monster_pmover(edict_t* self)
 	self->deadflag = DEAD_NO;
 	self->groundentity = NULL;
 	self->takedamage = DAMAGE_AIM;
-	self->mass = 800;
 	self->flags &= ~FL_NO_KNOCKBACK;
 	self->svflags &= SVF_MONSTER;
 	self->svflags &= ~SVF_NOCLIENT;		// Let the server know that this is not a client either.
 	self->clipmask = MASK_PLAYERSOLID;	// We want clipping to behave as if it is a player.
+
+	// Mapper entity data.
+	if (!self->health)
+		self->health = 100;
+	if (!self->gib_health)
+		self->gib_health = 0;
+	if (!self->mass)
+		self->mass = 200;
 
 	// Link entity to world.
 	gi.linkentity(self);
