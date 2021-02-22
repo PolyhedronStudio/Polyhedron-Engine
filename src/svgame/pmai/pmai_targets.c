@@ -27,295 +27,128 @@
 // slower noticing monsters.
 //===============
 //
-qboolean PMAI_FindTarget(edict_t* self)
-{
-	edict_t* client = NULL;
-	qboolean	heardit;
-	edict_t* reflection;
-	edict_t* self_reflection;
-	int			r;
+//
+//===============
+// PMAI_FindTarget
+// 
+// 
+//===============
+//
+qboolean PMAI_FindEnemyTarget(edict_t* self) {
+	// Is non NULL if we found a client target.
+	edict_t* target = NULL;
+	// This is currently for client targets only, but they can make noise, so..
+	qboolean heardit = false;
+	// The actual range between self and its target.
+	float range = 0.0f;
 
-	if (self->monsterinfo.aiflags & (AI_CHASE_THING | AI_HINT_TEST))
-		return false;
-
-	if (self->monsterinfo.aiflags & AI_GOOD_GUY)
+	// Check whether we've found a client.
+	if (level.sound_entity_framenum >= (level.framenum - 1))
 	{
-		if (self->goalentity && self->goalentity->inuse && self->goalentity->classname)
-		{
-			if (strcmp(self->goalentity->classname, "target_actor") == 0)
-				return false;
-		}
-
-		// Lazarus: Look for monsters
-		if (!self->enemy)
-		{
-			if (self->monsterinfo.aiflags & AI_FOLLOW_LEADER)
-			{
-				int		i;
-				edict_t* e;
-				edict_t* best = NULL;
-				vec_t	dist, best_dist;
-
-				best_dist = self->monsterinfo.max_range;
-				for (i = game.maxclients + 1; i < globals.num_edicts; i++)
-				{
-					e = &g_edicts[i];
-					if (!e->inuse)
-						continue;
-					if (!(e->svflags & SVF_MONSTER))
-						continue;
-					if (e->svflags & SVF_NOCLIENT)
-						continue;
-					if (e->solid == SOLID_NOT)
-						continue;
-					if (e->monsterinfo.aiflags & AI_GOOD_GUY)
-						continue;
-					if (!visible(self, e))
-						continue;
-					if (self->monsterinfo.aiflags & AI_BRUTAL)
-					{
-						if (e->health <= e->gib_health)
-							continue;
-					}
-					else if (e->health <= 0)
-						continue;
-					dist = realrange(self, e);
-					if (dist < best_dist)
-					{
-						best_dist = dist;
-						best = e;
-					}
-				}
-				if (best)
-				{
-					self->enemy = best;
-					FoundTarget(self);
-					return true;
-				}
-			}
-			return false;
-		}
-		else if (level.time < self->monsterinfo.pausetime)
-			return false;
-		else
-		{
-			if (!visible(self, self->enemy))
-				return false;
-			else
-			{
-				FoundTarget(self);
-				return true;
-			}
-		}
-	}
-
-	// if we're going to a combat point, just proceed
-	if (self->monsterinfo.aiflags & AI_COMBAT_POINT)
-		return false;
-
-	// if the first spawnflag bit is set, the monster will only wake up on
-	// really seeing the player, not another monster getting angry or hearing
-	// something
-
-	// revised behavior so they will wake up if they "see" a player make a noise
-	// but not weapon impact/explosion noises
-
-	heardit = false;
-	if ((level.sight_entity_framenum >= (level.framenum - 1)) && !(self->spawnflags & SF_MONSTER_SIGHT))
-	{
-		client = level.sight_entity;
-		if (client->enemy == self->enemy)
-		{
-			return false;
-		}
-	}
-	else if (level.disguise_violation_framenum > level.framenum)
-	{
-		client = level.disguise_violator;
-	}
-	else if (level.sound_entity_framenum >= (level.framenum - 1))
-	{
-		client = level.sound_entity;
+		// Someone jumped, or shot.
+		target = level.sound_entity;
 		heardit = true;
 	}
-	else if (!(self->enemy) && (level.sound2_entity_framenum >= (level.framenum - 1)) && !(self->spawnflags & SF_MONSTER_SIGHT))
+	else if (!(self->pmai.targets.enemy.entity) && (level.sound2_entity_framenum >= (level.framenum - 1)) && !(self->spawnflags & SF_MONSTER_SIGHT))
 	{
-		client = level.sound2_entity;
+		// Someone caused an impact (explosion etc).
+		target = level.sound2_entity;
 		heardit = true;
 	}
 	else
 	{
-		client = level.sight_client;
-		if (!client)
+		// Someone was in sight.
+		target = level.sight_client;
+
+		// If we still haven't found a client target, return.
+		if (!target)
 			return false;	// no clients to get mad at
 	}
 
-	// if the entity went away, forget it
-	if (!client || !client->inuse)
+	// If the entity is away, out of use, we can't work with it.
+	if (!target || !target->inuse)
 		return false;
 
-	// Lazarus
-	if (client->client && client->client->camplayer)
-		client = client->client->camplayer;
+	// Cam player.
+	if (target->client && target->client->camplayer)
+		target = target->client->camplayer;
 
-	if (client == self->enemy)
+	// If target equals the AI we were already angry at, we've found a match.
+	if (target == self->pmai.targets.enemy.entity)
 		return true;	// JDC false;
 
-	// Lazarus: Force idle medics to look for dead monsters
-	if (!self->enemy && !Q_stricmp(self->classname, "monster_medic"))
-	{
-		if (medic_FindDeadMonster(self))
-			return true;
-	}
-
 	// in coop mode, ignore sounds if we're following a hint_path
-	if ((coop && coop->value) && (self->monsterinfo.aiflags & AI_HINT_PATH))
-		heardit = false;
+	//if ((coop && coop->value) && (self->monsterinfo.aiflags & AI_HINT_PATH))
+	//	heardit = false;
 
-	if (client->client)
-	{
-		if (client->flags & FL_NOTARGET)
+	// Don't return true in case the target is marked as 
+	if (target->client) {
+		if (target->flags & FL_NOTARGET)
 			return false;
 	}
-	else if (client->svflags & SVF_MONSTER)
-	{
-		if (!client->enemy)
+	// Checks for when the entity that was found is a monster.
+	else if (target->svflags & SVF_MONSTER) {
+		// If it has no enemy, return false.
+		if (!target->enemy)
 			return false;
-		if (client->enemy->flags & FL_NOTARGET)
-			return false;
-	}
-	else if (heardit)
-	{
-		if (client->owner && (client->owner->flags & FL_NOTARGET))
+		// If the enemy has no target set as flags, return false.
+		if (target->enemy->flags & FL_NOTARGET)
 			return false;
 	}
-	else
+	// Ensure the owner of the sound, isn't having a NOTARGET flag.
+	else if (heardit) {
+		if (target->owner && (target->owner->flags & FL_NOTARGET))
+			return false;
+	}
+	else {
 		return false;
-
-	reflection = NULL;
-	self_reflection = NULL;
-	if (level.num_reflectors)
-	{
-		int		i;
-		edict_t* ref;
-
-		for (i = 0; i < 6 && !reflection; i++)
-		{
-			ref = client->reflection[i];
-			if (ref && visible(self, ref) && infront(self, ref))
-			{
-				reflection = ref;
-				self_reflection = self->reflection[i];
-			}
-		}
 	}
 
-	if (!heardit)
-	{
-		r = range(self, client);
+	// Two paths for going further:
+	// 1: We've not heard a sound, but seen a client.
+	// 2: We've heard a sound. Treat things differently.
+	if (!heardit) {
+		range = PMAI_EntityRange(self, target);
 
-		if (r == RANGE_FAR)
+		// If the range exceeds the AI settings max_sight, return false.
+		if (range >= self->pmai.settings.ranges.max_sight)
 			return false;
 
-		// this is where we would check invisibility
-
-				// is client in an spot too dark to be seen?
-		if (client->light_level <= 5)
+		// If the client is in a too dark spot, we can't see it, return false.
+		if (target->light_level <= 5)
 			return false;
 
-		if (!visible(self, client))
-		{
-			vec3_t	temp;
-
-			if (!reflection)
+		// Return false if an enemy is in range of melee combat but is not in front of.
+		if (range >= target->pmai.settings.ranges.melee) {
+			if (target->show_hostile < level.time && !PMAI_EntityIsInFront(self, target, target->pmai.settings.ranges.min_dot))
 				return false;
-
-			self->goalentity = self->movetarget = reflection;
-			VectorSubtract(reflection->s.origin, self->s.origin, temp);
-			self->ideal_yaw = vectoyaw(temp);
-			M_ChangeYaw(self);
-			// If MORON (=4) is set, then the reflection becomes the
-			// enemy. Otherwise if DUMMY (=8) is set, reflection
-			// becomes the enemy ONLY if the monster cannot see his
-			// own reflection in the same mirror. And if neither situation
-			// applies, then reflection is treated identically 
-			// to a player noise.
-			// Don't do the MORON/DUMMY bit if SF_MONSTER_KNOWS_MIRRORS
-			// is set (set automatically for melee-only monsters, and
-			// turned on once other monsters have figured out the truth)
-			if (!(self->spawnflags & SF_MONSTER_KNOWS_MIRRORS))
-			{
-				if (reflection->activator->spawnflags & 4)
-				{
-					self->monsterinfo.attack_state = 0;
-					self->enemy = reflection;
-					goto got_one;
-				}
-				if (reflection->activator->spawnflags & 8)
-				{
-					if (!self_reflection || !visible(self, self_reflection))
-					{
-						self->monsterinfo.attack_state = 0;
-						self->enemy = reflection;
-						goto got_one;
-					}
-				}
-			}
-			self->monsterinfo.pausetime = 0;
-			self->monsterinfo.aiflags &= ~AI_STAND_GROUND;
-			self->monsterinfo.run(self);
-			return false;
+		}
+		// Return false if an enemy isn't in front FOV range of the AI for combat.
+		else if (range >= target->pmai.settings.ranges.hostility) {
+			if (!PMAI_EntityIsInFront(self, target, target->pmai.settings.ranges.min_dot))
+				return false;
 		}
 
-		// Knightmare- commented this out because it causes a crash
-		/*if (reflection && !(self->spawnflags & SF_MONSTER_KNOWS_MIRRORS) &&
-			!infront(self,client))
+		// If we've come this far, we can safely assign it as our enemy.
+		self->pmai.targets.enemy.entity = target;
+
+		// If the classname of the entity was player_noise.
+		if (strcmp(self->pmai.targets.enemy.entity->classname, "player_noise") != 0)
 		{
-			// Client is visible but behind monster.
-			// If MORON or DUMMY for the parent func_reflect is set,
-			// attack the reflection (in the case of DUMMY, only
-			// if monster doesn't see himself in the same mirror)
-			if( (reflection->activator->spawnflags & 4) ||
-				( (reflection->activator->spawnflags & 8) &&
-				(!self_reflection || !visible(self,self_reflection)) ) ) // crashes here
+			// Remove target heard flag.
+			self->pmai.targets.enemy.flags &= ~FL_AI_TARGET_HEARD;
+
+			// If the target isn't a client, do some further processing.
+			if (!self->pmai.targets.enemy.entity->client)
 			{
-				vec3_t	temp;
+				edict_t* ent_a = self->pmai.targets.enemy.entity;
+				edict_t* ent_b = ent_a->pmai.targets.enemy.entity;
 
-				self->goalentity = self->movetarget = reflection;
-				VectorSubtract(reflection->s.origin,self->s.origin,temp);
-				self->ideal_yaw = vectoyaw(temp);
-				M_ChangeYaw (self);
-				self->enemy = reflection;
-				goto got_one;
-			}
-		}*/
-
-		if (!reflection)
-		{
-			if (r == RANGE_NEAR)
-			{
-				if (client->show_hostile < level.time && !infront(self, client))
-					return false;
-			}
-			else if (r == RANGE_MID)
-			{
-				if (!infront(self, client))
-					return false;
-			}
-		}
-
-		self->enemy = client;
-
-		if (strcmp(self->enemy->classname, "player_noise") != 0)
-		{
-			self->monsterinfo.aiflags &= ~AI_SOUND_TARGET;
-
-			if (!self->enemy->client)
-			{
-				self->enemy = self->enemy->enemy;
-				if (!self->enemy->client)
+				// Set the new enemy to be the target's enemy, if it is still no
+				// client, return false and unset the entity.
+				if (!ent_b->client)
 				{
-					self->enemy = NULL;
+					self->pmai.targets.enemy.entity = NULL;
 					return false;
 				}
 			}
@@ -323,58 +156,34 @@ qboolean PMAI_FindTarget(edict_t* self)
 	}
 	else	// heardit
 	{
-		vec3_t	temp;
+		// Ensure the target isn't too far off.
+		range = PMAI_EntityRange(self, target);
 
-		if (self->spawnflags & SF_MONSTER_SIGHT)
-		{
-			if (!visible(self, client))
-				return false;
-		}
-		else if (!(client->flags & FL_REFLECT))
-		{
-			// Knightmare- exclude turret drivers from this check
-			if (!gi.inPHS(self->s.origin, client->s.origin) && strcmp(self->classname, "turret_driver"))
-				return false;
-		}
-
-		VectorSubtract(client->s.origin, self->s.origin, temp);
-
-		if (VectorLength(temp) > 1000)	// too far to hear
-		{
+		if (range >= self->pmai.settings.ranges.max_hearing) {
 			return false;
 		}
 
-		// check area portals - if they are different and not connected then we can't hear it
-		if (!(client->flags & FL_REFLECT))
-		{
-			if (client->areanum != self->areanum)
-				if (!gi.AreasConnected(self->areanum, client->areanum))
-					return false;
-		}
+		// Check if the areas between the target and the AI are connected.
+		// If they aren't connected, then the audio could've been from another
+		// area that sits right next to it within distance.
+		if (target->areanum != self->areanum)
+			if (!gi.AreasConnected(self->areanum, target->areanum))
+				return false;
 
-		self->ideal_yaw = vectoyaw(temp);
-		M_ChangeYaw(self);
-
-		// hunt the sound for a bit; hopefully find the real player
-		self->monsterinfo.aiflags |= AI_SOUND_TARGET;
-		self->enemy = client;
+		// Update the enemy target.
+		self->pmai.targets.enemy.flags |= AI_SOUND_TARGET;
+		self->pmai.targets.enemy.entity = target;
 	}
 
-got_one:
+	//foundtarget:
+		// TODO: Remove, didn't wanna bother testing if it'd work with no code here
+		// although I assume the compiler will rid it since it's useless anyway.
 
-	//
-	// got one
-	//
-		// stop following hint_paths if we've found our enemy
-	if (self->monsterinfo.aiflags & AI_HINT_PATH)
-		hintpath_stop(self); // hintpath_stop calls foundtarget
-	else if (self->monsterinfo.aiflags & AI_MEDIC_PATROL)
-		medic_StopPatrolling(self);
-	else
-		FoundTarget(self);
 
-	if (!(self->monsterinfo.aiflags & AI_SOUND_TARGET) && (self->monsterinfo.sight))
-		self->monsterinfo.sight(self, self->enemy);
-
+		//
+		// got one
+		//
+		// WatIsDeze - TODO: Perform certain callbacks here for when we've found an
+		// enemy target.
 	return true;
 }
