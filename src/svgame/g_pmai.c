@@ -9,14 +9,6 @@
 #include "g_local.h"
 #include "g_pmai.h"
 
-// The actual client that is being taken care of in this current frame of iterating AI logic.
-// Each game frame another client is picked to scan for, this goes on and on.
-static edict_t* ai_client;
-
-// This is set to true in case the AI has heard the client.
-static qboolean ai_heardit;
-
-
 //
 //==========================================================================
 //
@@ -139,7 +131,7 @@ float PMAI_EntityRange(edict_t* self, edict_t* other)
 //===============
 // PMAI_EntityVisible
 // 
-// Returns true if an entity is visible, even if it is not IN FRONT of the
+// Returns true if an entity is visible, even if it is NOT IN FRONT of the
 // other entity.
 //===============
 //
@@ -216,40 +208,70 @@ qboolean PMAI_EntityIsInFront(edict_t* self, edict_t* other, float min_dot)
 	return false;
 }
 
-
-//
-//==========================================================================
-//
-// SETTINGS
-//
-//==========================================================================
-//
-
 //
 //===============
-// PMAI_ProcessMovement
-// 
-// 
+// PMAI_BrushInFront
+//
+// Will return true in case a brush has been traced from the given viewheight.
+// This can be used to check for jumping, or crouching.
 //===============
 //
-void PMAI_ProcessMovement(edict_t *self) {
-	// Ensure it is valid.
-	if (!self)
-		return;
+qboolean PMAI_BrushInFront(edict_t* self, float viewheight)
+{
+	vec3_t dir, forward, right, start, end, offset;
+	vec3_t top;
+	trace_t tr;
 
-	// Execute the player movement using the given "AI Player Input"
-	pmai_passent = self;								// Store self in pm_passent
-	self->pmai.pmove.cmd = self->pmai.movement.cmd;		// Copy over ai movement cmd.
+	// Get current direction
+	VectorCopy(self->s.angles, dir);
+	AngleVectors(dir, forward, right, NULL);
 
-	// Execute!
-	Pmove(&self->pmai.pmove, &self->pmai.pmp);
+	// Calculate the start vector, with a distance in the direction.
+	VectorSet(offset, 18, 0, 0);
+	G_ProjectSource(self->s.origin, offset, forward, right, start);
 
-	// Unlink the entity, copy origin, relink it.
-	gi.unlinkentity(self);
-	VectorCopy(self->pmai.pmove.s.origin, self->s.origin);
-	gi.linkentity(self);
+	// Calculate the end vector, with a distance in the direction.
+	G_ProjectSource(self->s.origin, offset, forward, right, end);
+
+	// Start tracing for a jump.
+	start[2] += 18; // so they are not jumping all the time
+	end[2] += 18;
+	tr = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+
+	if (tr.allsolid)
+	{
+		// Check for crouching
+		start[2] -= 14;
+		end[2] -= 14;
+
+		// Set up for crouching check
+		VectorCopy(self->maxs, top);
+		top[2] = 0.0; // crouching height
+		tr = gi.trace(start, self->mins, top, end, self, MASK_PLAYERSOLID);
+
+		// Crouch
+		if (!tr.allsolid)
+		{
+//			ucmd->forwardmove = 400;
+//			ucmd->upmove = -400;
+			return 1;
+		}
+
+		// Check for jump
+		start[2] += 32;
+		end[2] += 32;
+		tr = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+
+		if (!tr.allsolid)
+		{
+//			ucmd->forwardmove = 400;
+//			ucmd->upmove = 400;
+			return 2;
+		}
+	}
+
+	return false; // We did not resolve a move here
 }
-
 
 //
 //==========================================================================
@@ -288,7 +310,7 @@ void PMAI_Initialize(edict_t* self) {
 	self->pmai.settings.ranges.min_dot = 0.3;
 
 	// Setup the pmove trace and point contents function pointers.
-	self->pmai.pmove.trace = PMAI_Trace;	// adds default parms
+	self->pmai.pmove.trace = PMAI_Trace;				// Adds default parms
 	self->pmai.pmove.pointcontents = gi.pointcontents;
 
 	// Setup the pmove bounding box.

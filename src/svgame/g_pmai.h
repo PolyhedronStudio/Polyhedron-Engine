@@ -110,10 +110,38 @@ typedef struct pmai_movement_s{
 } pmai_movement_t;
 
 //-------------------
+// Stores the actual animation data, start and end frame, and also
+// the current frame where it is at.
+//-------------------
+typedef struct pmai_animation_s {
+	// The first frame of the animation.
+	int startframe;
+	// The last frame of the animation.
+	int endframe;
+	// The current frame being played of this animation.
+	int currentframe;
+} pmai_animation_t;
+
+//-------------------
+// Stores a list of animations, these can be customized.
+//-------------------
+typedef struct pmai_animations_s {
+	// The list of animations, 20 max for now..
+	pmai_animation_t list[20];
+
+	// The current animation which we are playing.
+	int current;
+} pmai_animations_t;
+
+
+//-------------------
 // This is the main Player Move AI structure.
 // It contains all relevant states to work with for the PMAI system.
 //-------------------
 typedef struct {
+	// The entity AI movement state.
+	pmai_animations_t animations;
+
 	// The entity AI movement state.
 	pmai_movement_t movement;
 
@@ -147,6 +175,8 @@ float		PMAI_EntityRange(edict_t* self, edict_t* other);
 
 qboolean	PMAI_EntityIsVisible(edict_t* self, edict_t* other);
 qboolean	PMAI_EntityIsInFront(edict_t* self, edict_t* other, float min_dot);
+
+qboolean	PMAI_BrushInFront(edict_t* self, float viewheight);
 
 //-------------------
 // Movement.

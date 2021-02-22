@@ -31,10 +31,9 @@ PMover - AI using Player Movement.
 
 #include "g_local.h"
 #include "g_pmai.h"
-#include "m_pmover.h"
 
-// AI Player Move settings are stored here.
-pmoveParams_t aipmp;
+// Include this one instead, for animations.
+#include "m_player.h"
 
 //
 // NON IMPORTANT, ARE IN SHARED/SHARED.H but the GAME DLL IS STILL RIGGED WITH THAT KMQ2 ISSUE.
@@ -55,21 +54,167 @@ void PMover_Pain(edict_t* self, edict_t* other, float kick, int damage)
 //
 void PMover_Die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point)
 {
-	self->nextthink = 0;
+	//self->nextthink = 0;
 
-	VectorSet(self->mins, -16, -16, -24);
-	VectorSet(self->maxs, 16, 16, -8);
-	self->movetype = MOVETYPE_TOSS;
-	self->svflags |= SVF_DEADMONSTER;
-	gi.linkentity(self);
-	M_FlyCheck(self);
+	//VectorSet(self->mins, -16, -16, -24);
+	//VectorSet(self->maxs, 16, 16, -8);
+	//self->movetype = MOVETYPE_TOSS;
+	//self->svflags |= SVF_DEADMONSTER;
+	//gi.linkentity(self);
+	//M_FlyCheck(self);
+	if (self->health > 0)
+		return;
 
-	// Lazarus monster fade
-	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
-	{
-		self->think = FadeDieSink;
-		self->nextthink = level.time + corpse_fadetime->value;
+	// Lazarus
+	int n = 0;
+
+	self->s.effects &= ~EF_FLIES;
+	self->s.sound = 0;
+
+	gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+	for (n = 0; n < 4; n++)
+		ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+	ThrowHead(self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
+}
+
+
+
+
+
+
+// ------------------------------------------------------------------------------
+// CODE STARTS HERE, AT LEAST THE CODE THAT MATTERS LOL HAHA LOLOLOL. 1337 H4X0R
+
+//
+// Detects the current animation frame to use for the AI.
+//
+void PMover_FillAnimations(edict_t* self) {
+	// Ensure they are valid.
+	if (!self)
+		return;
+
+	// 0 == stand
+	self->pmai.animations.list[0].startframe	= FRAME_stand01;
+	self->pmai.animations.list[0].endframe		= FRAME_stand40;
+	self->pmai.animations.list[0].currentframe	= 0;
+
+	// 1 == run
+	self->pmai.animations.list[0].startframe = FRAME_run1;
+	self->pmai.animations.list[0].endframe = FRAME_run6;
+	self->pmai.animations.list[0].currentframe = 0;
+
+	// 2 == crouchwalk
+	self->pmai.animations.list[0].startframe = FRAME_crwalk1;
+	self->pmai.animations.list[0].endframe = FRAME_crwalk6;
+	self->pmai.animations.list[0].currentframe = 0;
+
+	// 4 == jump
+	self->pmai.animations.list[0].startframe = FRAME_jump1;
+	self->pmai.animations.list[0].endframe = FRAME_jump6;
+	self->pmai.animations.list[0].currentframe = 0;
+}
+
+//
+// Handles the animations for the pmover...
+//
+void PMover_SetAnimation(edict_t* self, int animationID) {
+	// Ensure animationID is within bounds.
+	if (!(animationID >= 0 && animationID < 20))
+		return;
+
+	// Reset the animation at hand.
+	//self->pmai.animations.list[animationID].currentframe = 0;
+
+	// Set the current active animation.
+	self->pmai.animations.current = animationID;
+}
+
+void PMover_DetectAnimation(edict_t* self, usercmd_t* movecmd) {
+	// State variables.
+	qboolean moving_forward = false;
+	qboolean moving_backward = false;
+	qboolean strafing_left = false;
+	qboolean strafing_right = false;
+	qboolean jumping = false;
+	qboolean crouching = false;
+
+	// Ensure they are valid.
+	if (!self || !movecmd)
+		return;
+
+	// Determine the boolean states based on the input.
+	// Forward moving.
+	if (movecmd->forwardmove >= 1) {
+		moving_forward = true;
 	}
+	// Strafe moving.
+	if (movecmd->sidemove < 0) {
+		strafing_left = true;
+	} else if (movecmd->sidemove > 0) {
+		strafing_right = true;
+	}
+	// Jumping.
+	if (movecmd->upmove > 0) {
+		jumping = true;
+		crouching = false;
+	}
+	// Crouching.
+	if (movecmd->upmove < 0) {
+		jumping = false;
+		crouching = true;
+	}
+
+	//
+	// Determine the animation based on movecmd.
+	// Moving forward, so.
+	if (moving_forward == true) {
+		// Just regular movement.
+		PMover_SetAnimation(self, 1);
+
+		return;
+	}
+
+	if (crouching == true) {
+		PMover_SetAnimation(self, 2);
+		return;
+	}
+
+	if (jumping == true) {
+		PMover_SetAnimation(self, 4);
+		return;
+	}
+
+	// Idle.
+	PMover_SetAnimation(self, 0);
+}
+
+
+//
+// Processes the actual animation.
+//
+void PMover_ProcessAnimation(edict_t* self, usercmd_t* movecmd) {
+	// Ensure it is valid.
+	if (!self || !movecmd)
+		return;
+
+	// Detect the animation to use.
+	PMover_DetectAnimation(self, movecmd);
+
+	// Find the current animationID.
+	int animationid = self->pmai.animations.current;
+
+	// Process animation.
+	self->pmai.animations.list[animationid].currentframe++;
+	if (self->pmai.animations.list[animationid].currentframe > self->pmai.animations.list[animationid].endframe) {
+		self->pmai.animations.list[animationid].currentframe = self->pmai.animations.list[animationid].startframe;
+	}
+
+	// Set the animation to entity state.
+	int startframe	= self->pmai.animations.list[animationid].startframe;			// T
+	int actualframe	= self->pmai.animations.list[animationid].currentframe;			// T
+
+	// 
+	self->s.frame = startframe;
 }
 
 //
@@ -79,7 +224,6 @@ void PMover_Die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
 // X(PITCH) = 0
 // Y(YAW) = 1
 // Z(ROLL) = 2
-
 void PMover_Think(edict_t* self) {
 	edict_t* target = NULL;
 
@@ -94,19 +238,18 @@ void PMover_Think(edict_t* self) {
 	if (PMAI_FindEnemyTarget(self)) {
 		vec3_t vecyaw;
 		vec3_t vecangles;
-		edict_t* target = self->pmai.targets.enemy.entity;
+		edict_t *target = self->pmai.targets.enemy.entity;
 
 		// Calculate the yaw to move to.
 		VectorSubtract(target->s.origin, self->s.origin, vecyaw);
 		vectoangles2(vecyaw, vecangles); // used for aiming at the player always.
-//		float yaw = vectoyaw2(vecyaw); // used for yaw
 
 		// Set direction speeds.
 		movecmd->forwardmove = 240;
 
 		// Setup the move angles.
-		movecmd->angles[YAW] = ANGLE2SHORT(vecangles[YAW]);
-		movecmd->angles[PITCH] = ANGLE2SHORT(vecangles[PITCH]);
+		movecmd->angles[YAW]	= ANGLE2SHORT(vecangles[YAW]);
+		movecmd->angles[PITCH]	= ANGLE2SHORT(vecangles[PITCH]);
 
 		// Don't allow pitch and up speeds to go haywire.
 		float pitch = vecangles[PITCH];
@@ -123,15 +266,26 @@ void PMover_Think(edict_t* self) {
 		self->s.angles[YAW]		= vecangles[YAW];
 		self->s.angles[PITCH]	= pitch;
 		//self->s.angles[ROLL] = ANGLE2SHORT(self->s.angles[ROLL]);
-	}
-	else {
+
+		// Determine what to do with the brush in front of them, if there is one.
+		int brushAction = PMAI_BrushInFront(self, self->pmai.settings.view.height);
+
+		if (brushAction == 1) {
+			movecmd->upmove = -240;
+		}
+		if (brushAction == 2) {
+			movecmd->upmove = 240;
+		}
+	} else {
 		movecmd->msec = 1;
 	}
 
 	//-------------------------------------------------------------------------
 	// Actual movement code.
 	//-------------------------------------------------------------------------
-		
+	// Determine the animation to use based on input cmd.
+	PMover_ProcessAnimation(self, movecmd);
+	
 	// Execute the player movement using the given "AI Player Input"
 	PMAI_ProcessMovement(self);
 
@@ -147,7 +301,7 @@ void SP_monster_pmover(edict_t* self)
 	// Set movetype, solid, model, and bounds.
 	self->movetype = MOVETYPE_WALK;
 	self->solid = SOLID_BBOX;
-	self->s.modelindex = gi.modelindex("models/monsters/infantry/tris.md2");
+	self->s.modelindex = gi.modelindex("players/marine/tris.md2");
 	VectorSet(self->mins, -16, -16, -24);
 	VectorSet(self->maxs, 16, 16, 32);
 
@@ -160,10 +314,6 @@ void SP_monster_pmover(edict_t* self)
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.10;
 
-	// Setup class description.
-	self->common_name = "Pmover";
-	self->class_id = ENTITY_MONSTER_PMOVER;
-
 	// Setup the think.
 	self->nextthink = level.time + 0.1;
 	self->think = PMover_Think;
@@ -171,18 +321,28 @@ void SP_monster_pmover(edict_t* self)
 	//-------------------------------------------------------------------------
 	// Setup actual PMAI
 	//-------------------------------------------------------------------------
+	// Initialize the AI.
 	PMAI_Initialize(self);
+
+	// Initialize the animations list.
+	PMover_FillAnimations(self);
 
 	// Setup other entity data.
 	self->classname = "pmover";
 	self->class_id = ENTITY_MONSTER_PMOVER;
+
 	self->deadflag = DEAD_NO;
-	self->groundentity = NULL;
 	self->takedamage = DAMAGE_AIM;
+
+	self->groundentity = NULL;
+	
 	self->flags &= ~FL_NO_KNOCKBACK;
 	self->svflags &= SVF_MONSTER;
 	self->svflags &= ~SVF_NOCLIENT;		// Let the server know that this is not a client either.
 	self->clipmask = MASK_PLAYERSOLID;	// We want clipping to behave as if it is a player.
+	self->waterlevel = 0;
+	self->watertype = 0;
+	self->is_jumping = false;
 
 	// Mapper entity data.
 	if (!self->health)
