@@ -154,7 +154,7 @@ qboolean	PMAI_EntityIsInFront(edict_t* self, edict_t* other, float min_dot);
 void		PMAI_ProcessMovement(edict_t *self);
 
 //-------------------
-// Settings.
+// Settings. 
 //-------------------
 void		PMAI_Initialize(edict_t* self);
 
