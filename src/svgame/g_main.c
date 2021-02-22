@@ -590,6 +590,8 @@ void G_RunFrame (void)
 
 	// choose a client for monsters to target this frame
 	AI_SetSightClient ();
+	// N&C: PMAI
+	PMAI_SetSightClient();
 
 	// exit intermissions
 

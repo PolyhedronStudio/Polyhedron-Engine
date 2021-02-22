@@ -41,6 +41,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "p_text.h"
 #include "km_cvar.h"
 
+#include "g_pmai.h"
+
 #define JETPACK_MOD
 
 // the "gameversion" client command will print this plus compile date
@@ -428,12 +430,14 @@ typedef struct
 
 	edict_t		*sight_client;	// changed once each frame for coop games
 
-	edict_t		*sight_entity;
+	// N&C: We're keeping these for AI.
+	edict_t		*sight_entity;	// Stores an entity in case it is actually in sight.
 	int			sight_entity_framenum;
-	edict_t		*sound_entity;
+	edict_t		*sound_entity;	// Stores an entity in case it jumped, or used a weapon.
 	int			sound_entity_framenum;
-	edict_t		*sound2_entity;
+	edict_t		*sound2_entity; // Stores an entity in case an impact has been made. (Explisons etc)
 	int			sound2_entity_framenum;
+	// N&C: End.
 
 	int			pic_health;
 
@@ -2167,12 +2171,9 @@ struct edict_s
 	float		sdfsunfluxmin;
 	float		sdfsunfluxmax;
 
-// N&C - PMover
-	// Player move structure used for AI entities.
-	//
-	// Stores the current state of movement for ai.
-	pmove_t	aipm;
-// N&C - End PMover
+// N&C - Player Move AI
+	pmai_t pmai;
+// N&C - Player Move AI
 };
 
 #define	LOOKAT_NOBRUSHMODELS  1

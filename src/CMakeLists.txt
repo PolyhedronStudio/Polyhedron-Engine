@@ -34,8 +34,8 @@ SET(SRC_SVGAME
 	svgame/acebot_movement.c
 	svgame/acebot_nodes.c
 	svgame/acebot_spawn.c
+	svgame/pmai/pmai_targets.c
 	svgame/g_ai.c
-	svgame/g_aipm.c
 	svgame/g_camera.c
 	svgame/g_chase.c
 	svgame/g_cmds.c
@@ -58,6 +58,7 @@ SET(SRC_SVGAME
 	svgame/g_patchplayermodels.c
 	svgame/g_pendulum.c
 	svgame/g_phys.c
+	svgame/g_pmai.c
 	svgame/g_ptrs.c
 	svgame/g_reflect.c
 	svgame/g_save.c
@@ -112,7 +113,6 @@ SET(SRC_SVGAME
 SET(HEADERS_SVGAME
 	svgame/acebot.h
 	svgame/game.h
-	svgame/g_aipm.h
 	svgame/g_ctf.h
 	svgame/g_func_decs.h
 	svgame/g_func_list.h
@@ -122,6 +122,7 @@ SET(HEADERS_SVGAME
 	svgame/lazarus.def
 	svgame/laz_misc.h
 	svgame/km_cvar.h
+	svgame/g_pmai.h
 	svgame/g_ptrs.h
 	svgame/m_actor.h
 	svgame/m_berserk.h

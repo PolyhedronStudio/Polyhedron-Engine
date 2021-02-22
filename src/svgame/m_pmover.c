@@ -30,7 +30,7 @@ PMover - AI using Player Movement.
 */
 
 #include "g_local.h"
-#include "g_aipm.h"
+#include "g_pmai.h"
 #include "m_pmover.h"
 
 // AI Player Move settings are stored here.
@@ -72,13 +72,13 @@ void PMover_Die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
 // This is a straight copy from PM_Trace.
 // Eventually it needs to be moved into its own file obviously.
 //
-edict_t* aipm_passent;
-trace_t	AIPM_trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
+edict_t* pmai_passent;
+trace_t	PMAI_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 {
-	if (aipm_passent->health > 0)
-		return gi.trace(start, mins, maxs, end, aipm_passent, MASK_PLAYERSOLID);
+	if (pmai_passent->health > 0)
+		return gi.trace(start, mins, maxs, end, pmai_passent, MASK_PLAYERSOLID);
 	else
-		return gi.trace(start, mins, maxs, end, aipm_passent, MASK_DEADSOLID);
+		return gi.trace(start, mins, maxs, end, pmai_passent, MASK_DEADSOLID);
 }
 
 //
@@ -96,19 +96,25 @@ void PMover_Think(edict_t* self) {
 	usercmd_t aicmd;
 	memset(&aicmd, 0, sizeof(aicmd));
 
-	// Find a target.
-	target = AIPM_FindTarget(self);
-	if (target) {
-		vec3_t vec;
-		VectorSubtract(target->s.origin, self->s.origin, vec);
-		self->ideal_yaw = vectoyaw(vec);
+	// Each frame we look for an enemy.
+	PMAI_FindEnemyTarget(self);
+
+	// If we've found an enemy target. Proceed further.
+	if (self->pmai.targets.enemy.entity) {
+		vec3_t vecyaw;
+		edict_t* target = self->pmai.targets.enemy.entity;
+
+		// Calculate the yaw to move to.
+		VectorSubtract(target->s.origin, self->s.origin, vecyaw);
+		float yaw = vectoyaw2(vecyaw);
 
 		// Tell it to move.
 		aicmd.forwardmove = 240;
 		aicmd.msec = 30;
-		aicmd.angles[0] = ANGLE2SHORT(self->ideal_yaw);
-		aicmd.angles[1] = ANGLE2SHORT(self->ideal_yaw);
-		aicmd.angles[2] = ANGLE2SHORT(self->ideal_yaw);
+		aicmd.angles[YAW] = ANGLE2SHORT(yaw);
+//		aicmd.angles[0] = ANGLE2SHORT(self->ideal_yaw);
+//		aicmd.angles[1] = ANGLE2SHORT(self->ideal_yaw);
+//		aicmd.angles[2] = ANGLE2SHORT(self->ideal_yaw);
 
 		self->s.angles[1] = self->ideal_yaw;
 	}
@@ -125,14 +131,14 @@ void PMover_Think(edict_t* self) {
 	//aicmd.angles[2] = ANGLE2SHORT(self->s.angles[2]);
 	
 	// Execute the player movement using the given "AI Player Input"
-	aipm_passent = self;		// Store self in pm_passent
-	self->aipm.cmd = aicmd;		// Copy over ai movement cmd.
+	pmai_passent = self;		// Store self in pm_passent
+	self->pmai.pmove.cmd = aicmd;		// Copy over ai movement cmd.
 	
-	Pmove(&self->aipm, &aipmp);	// Execute!
+	Pmove(&self->pmai.pmove, &aipmp);	// Execute!
 
 	// Unlink the entity, copy origin, relink it.
 	gi.unlinkentity(self);
-	VectorCopy(self->aipm.s.origin, self->s.origin);
+	VectorCopy(self->pmai.pmove.s.origin, self->s.origin);
 	gi.linkentity(self);
 
 	// Setup the next think.
@@ -144,12 +150,6 @@ void PMover_Think(edict_t* self) {
 */
 void SP_monster_pmover(edict_t* self)
 {
-	// It is free to stick around in Multiplayer.
-	//if (deathmatch->value)
-	//{
-	//	G_FreeEdict(self);
-	//	return;
-	//}
 	// Set movetype, solid, model, and bounds.
 	self->movetype = MOVETYPE_WALK;
 	self->solid = SOLID_BBOX;
@@ -186,22 +186,21 @@ void SP_monster_pmover(edict_t* self)
 	}
 
 	// Setup the pmove trace and point contents function pointers.
-	self->aipm.trace = AIPM_trace;	// adds default parms
-	self->aipm.pointcontents = gi.pointcontents;
+	self->pmai.pmove.trace = PMAI_Trace;	// adds default parms
+	self->pmai.pmove.pointcontents = gi.pointcontents;
 
 	// Setup the pmove bounding box.
-	VectorSet(self->aipm.mins, -16, -16, -24);
-	VectorSet(self->aipm.maxs, 16, 16, 32);
+	VectorSet(self->pmai.pmove.mins, -16, -16, -24);
+	VectorSet(self->pmai.pmove.maxs, 16, 16, 32);
 
 	// Setup the pmove state flags.
-	self->aipm.s.pm_flags &= ~PMF_NO_PREDICTION;	// We don't want it to use prediction, there is no client.
-	self->aipm.s.gravity = sv_gravity->value;		// Default gravity.
-	self->aipm.s.pm_type = PM_NORMAL;				// Defualt Player Movement.
-	self->aipm.s.pm_time = 1;						// 1ms = 8 units
+	self->pmai.pmove.s.pm_flags &= ~PMF_NO_PREDICTION;	// We don't want it to use prediction, there is no client.
+	self->pmai.pmove.s.gravity = sv_gravity->value;		// Default gravity.
+	self->pmai.pmove.s.pm_type = PM_NORMAL;				// Defualt Player Movement.
+	self->pmai.pmove.s.pm_time = 1;						// 1ms = 8 units
 	
 	// Copy over the entities origin into the player move for its spawn point.
-	//VectorCopy(self->s.origin, self->aips.pmove.origin);
-	VectorCopy(self->s.origin, self->aipm.s.origin);
+	VectorCopy(self->s.origin, self->pmai.pmove.s.origin);
 
 	// Setup other entity data.
 	self->classname = "pmover";
