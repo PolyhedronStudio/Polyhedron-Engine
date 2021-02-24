@@ -223,8 +223,8 @@ static inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_
 #define MAX_WORLD_COORD		(16384)
 #define MIN_WORLD_COORD		(-16384)
 #else
-#define MAX_WORLD_COORD		(4096)
-#define MIN_WORLD_COORD		(-4096)
+#define MAX_WORLD_COORD		(16384)
+#define MIN_WORLD_COORD		(-16384)
 #endif
 #define WORLD_SIZE			(MAX_WORLD_COORD - MIN_WORLD_COORD)
 // end Knightmare

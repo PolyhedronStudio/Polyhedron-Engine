@@ -176,7 +176,7 @@ float		PMAI_EntityRange(edict_t* self, edict_t* other);
 qboolean	PMAI_EntityIsVisible(edict_t* self, edict_t* other);
 qboolean	PMAI_EntityIsInFront(edict_t* self, edict_t* other, float min_dot);
 
-qboolean	PMAI_BrushInFront(edict_t* self, float viewheight);
+int			PMAI_BrushInFront(edict_t* self, float viewheight);
 
 //-------------------
 // Movement.

@@ -216,61 +216,119 @@ qboolean PMAI_EntityIsInFront(edict_t* self, edict_t* other, float min_dot)
 // This can be used to check for jumping, or crouching.
 //===============
 //
-qboolean PMAI_BrushInFront(edict_t* self, float viewheight)
+int PMAI_BrushInFront(edict_t* self, float viewheight)
 {
-	vec3_t dir, forward, right, start, end, offset;
+	// Vectors.
+	vec3_t dir;				// Direction.
+	vec3_t forward, right;	// Forward, and right vector.
+	vec3_t start, end;		// Start and end point of our traces.
+	vec3_t offset;			// The offset to start tracing from, IN that direction.
 	vec3_t top;
-	trace_t tr;
+
+	// The actual trace results.
+	trace_t trace_head;
+	trace_t trace_torso;
+	trace_t trace_feet;
 
 	// Get current direction
 	VectorCopy(self->s.angles, dir);
 	AngleVectors(dir, forward, right, NULL);
 
+	//
+	// We will calculate the base values for start and end positions to use for
+	// tracing.
+	// 
+	// This will be a scan starting 18 units in front of the player, and with a
+	// length of 18 units.
 	// Calculate the start vector, with a distance in the direction.
 	VectorSet(offset, 18, 0, 0);
+	gi.dprintf("------------------------------------------------\n");
+	gi.dprintf("origin = %s\n", vtos(self->s.origin));
 	G_ProjectSource(self->s.origin, offset, forward, right, start);
 
-	// Calculate the end vector, with a distance in the direction.
+//	// Calculate the end vector, with a distance in the direction.
+	offset[0] += 18;
 	G_ProjectSource(self->s.origin, offset, forward, right, end);
-
-	// Start tracing for a jump.
-	start[2] += 18; // so they are not jumping all the time
+	gi.dprintf("base_start = %s		base_end = %s\n", vtos(start), vtos(end));
+//
+	//
+	// We start off by tracing the head, torso and feet.
+	//
+	// Trace the feet.
+	start[2] += 18;
 	end[2] += 18;
-	tr = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+	trace_feet = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+	gi.dprintf("trace_feet = start(%s) end(%s)\n", vtos(start), vtos(end));
 
-	if (tr.allsolid)
-	{
-		// Check for crouching
-		start[2] -= 14;
-		end[2] -= 14;
+	// Trace the torso.
+	start[2] += 8;
+	end[2] += 8;
+	trace_torso = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+	gi.dprintf("trace_torso = start(%s) end(%s)\n", vtos(start), vtos(end));
 
-		// Set up for crouching check
-		VectorCopy(self->maxs, top);
-		top[2] = 0.0; // crouching height
-		tr = gi.trace(start, self->mins, top, end, self, MASK_PLAYERSOLID);
+	// Trace the head.
+	start[2] += 12;
+	end[2] += 12;
+	trace_head = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+	gi.dprintf("trace_head = start(%s) end(%s)\n", vtos(start), vtos(end));
 
-		// Crouch
-		if (!tr.allsolid)
-		{
-//			ucmd->forwardmove = 400;
-//			ucmd->upmove = -400;
-			return 1;
-		}
+	// There is an object in front of our feet, but not in front of our torso.
+	// This could insist we jump.
+	if (trace_feet.allsolid && !trace_torso.allsolid && !trace_head.allsolid) {
+		gi.dprintf("All Solid\n");
 
-		// Check for jump
-		start[2] += 32;
-		end[2] += 32;
-		tr = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
-
-		if (!tr.allsolid)
-		{
-//			ucmd->forwardmove = 400;
-//			ucmd->upmove = 400;
-			return 2;
-		}
+		return 1;
 	}
 
-	return false; // We did not resolve a move here
+	return -1;
+//
+//	if (tr.allsolid)
+//	{
+//		//return 1;
+//
+//		// Check for crouching
+//		start[2] -= 14;
+//		end[2] -= 14;
+//
+//		// Set up for crouching check
+//		VectorCopy(self->maxs, top);
+//		top[2] = 24.0; // crouching height
+//		tr = gi.trace(start, self->mins, top, end, self, MASK_PLAYERSOLID);
+//
+//		// Crouch
+//		if (!tr.allsolid)
+//		{
+////			ucmd->forwardmove = 400;
+////			ucmd->upmove = -400;
+//			return 1;
+//		}
+//
+//		// Check for high jump
+//		start[2] += 16;
+//		end[2] += 16;
+//		tr = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+//
+//		if (!tr.allsolid)
+//		{
+//			//			ucmd->forwardmove = 400;
+//			//			ucmd->upmove = 400;
+//			return 2;
+//		}
+//
+//		// Check for high jump
+//		start[2] += 16;
+//		end[2] += 16;
+//		tr = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+//
+//		if (!tr.allsolid)
+//		{
+////			ucmd->forwardmove = 400;
+////			ucmd->upmove = 400;
+//			return 3;
+//		}
+//	}
+//
+//	return 0;
 }
 
 //
