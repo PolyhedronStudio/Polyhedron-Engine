@@ -25,7 +25,7 @@ edict_t* pmai_passent;
 trace_t	PMAI_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 {
 	if (pmai_passent->health > 0)
-		return gi.trace(start, mins, maxs, end, pmai_passent, MASK_PLAYERSOLID);
+		return gi.trace(start, mins, maxs, end, pmai_passent, MASK_MONSTERSOLID);
 	else
 		return gi.trace(start, mins, maxs, end, pmai_passent, MASK_DEADSOLID);
 }
@@ -154,7 +154,7 @@ qboolean PMAI_EntityIsVisible(edict_t* self, edict_t* other)
 	// origin + viewheight of the 'other' AI entity.
 	VectorCopy(other->s.origin, spot2);
 	spot2[2] += other->pmai.settings.view.height;
-	
+
 	// Execute the trace.
 	trace = gi.trace(spot1, vec3_origin, vec3_origin, spot2, self, MASK_OPAQUE);
 
@@ -223,112 +223,88 @@ int PMAI_BrushInFront(edict_t* self, float viewheight)
 	vec3_t forward, right;	// Forward, and right vector.
 	vec3_t start, end;		// Start and end point of our traces.
 	vec3_t offset;			// The offset to start tracing from, IN that direction.
-	vec3_t top;
+
+	vec3_t mins;			// The actual PMove mins.
+	vec3_t maxs;			// The actual PMove maxs.
 
 	// The actual trace results.
-	trace_t trace_head;
-	trace_t trace_torso;
-	trace_t trace_feet;
+	trace_t trace_forward;
 
-	// Get current direction
+	// Copy pmove mins and max.
+	VectorCopy(self->pmai.pmove.mins, mins);
+	VectorCopy(self->pmai.pmove.maxs, maxs);
+
+	// Anglevectors for our direction that we're moving in.
 	VectorCopy(self->s.angles, dir);
 	AngleVectors(dir, forward, right, NULL);
 
-	//
-	// We will calculate the base values for start and end positions to use for
-	// tracing.
-	// 
-	// This will be a scan starting 18 units in front of the player, and with a
-	// length of 18 units.
-	// Calculate the start vector, with a distance in the direction.
-	VectorSet(offset, 18, 0, 0);
-	gi.dprintf("------------------------------------------------\n");
-	gi.dprintf("origin = %s\n", vtos(self->s.origin));
+	// Start calculating the start and offset endfor forward tracing.
+	VectorSet(offset, 0, 0, 0);
 	G_ProjectSource(self->s.origin, offset, forward, right, start);
-
-//	// Calculate the end vector, with a distance in the direction.
 	offset[0] += 18;
 	G_ProjectSource(self->s.origin, offset, forward, right, end);
-	gi.dprintf("base_start = %s		base_end = %s\n", vtos(start), vtos(end));
-//
-	//
-	// We start off by tracing the head, torso and feet.
-	//
-	// Trace the feet.
-	start[2] += 18;
-	end[2] += 18;
-	trace_feet = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
-	gi.dprintf("trace_feet = start(%s) end(%s)\n", vtos(start), vtos(end));
 
-	// Trace the torso.
-	start[2] += 8;
-	end[2] += 8;
-	trace_torso = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
-	gi.dprintf("trace_torso = start(%s) end(%s)\n", vtos(start), vtos(end));
+	// Execute our forward trace.
+	trace_forward = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+	gi.dprintf("-------------\nstart = %s\nend = %s\n",
+		vtos(start),
+		vtos(end)
+	);
+	gi.dprintf("-------------\nfraction = %f\nallsolid = %s\n",
+		trace_forward.fraction,
+		(trace_forward.allsolid == true ? "solid" : "nonsolid")
+	);
 
-	// Trace the head.
-	start[2] += 12;
-	end[2] += 12;
-	trace_head = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
-	gi.dprintf("trace_head = start(%s) end(%s)\n", vtos(start), vtos(end));
-
-	// There is an object in front of our feet, but not in front of our torso.
-	// This could insist we jump.
-	if (trace_feet.allsolid && !trace_torso.allsolid && !trace_head.allsolid) {
-		gi.dprintf("All Solid\n");
-
-		return 1;
+	if (trace_forward.allsolid)
+	{
+		vec3_t top;
+		//return 1;
+	
+		// Check for crouching
+		start[2] -= 14;
+		end[2] -= 14;
+	
+		// Set up for crouching check
+		VectorCopy(self->maxs, top);
+		top[2] = 24.0; // crouching height
+		trace_forward = gi.trace(start, self->mins, top, end, self, MASK_PLAYERSOLID);
+	
+		// Crouch
+		if (!trace_forward.allsolid)
+		{
+//			ucmd->forwardmove = 400;
+//			ucmd->upmove = -400;
+			return 1;
+		}
+	
+		// Check for high jump
+		start[2] += 16;
+		end[2] += 16;
+		trace_forward = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+	
+		if (!trace_forward.allsolid)
+		{
+			//			ucmd->forwardmove = 400;
+			//			ucmd->upmove = 400;
+			return 2;
+		}
+	
+		// Check for high jump
+		start[2] += 16;
+		end[2] += 16;
+		trace_forward = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+	
+		if (!trace_forward.allsolid)
+		{
+//			ucmd->forwardmove = 400;
+//			ucmd->upmove = 400;
+			return 3;
+		}
 	}
+	
+	return 0;
 
-	return -1;
-//
-//	if (tr.allsolid)
-//	{
-//		//return 1;
-//
-//		// Check for crouching
-//		start[2] -= 14;
-//		end[2] -= 14;
-//
-//		// Set up for crouching check
-//		VectorCopy(self->maxs, top);
-//		top[2] = 24.0; // crouching height
-//		tr = gi.trace(start, self->mins, top, end, self, MASK_PLAYERSOLID);
-//
-//		// Crouch
-//		if (!tr.allsolid)
-//		{
-////			ucmd->forwardmove = 400;
-////			ucmd->upmove = -400;
-//			return 1;
-//		}
-//
-//		// Check for high jump
-//		start[2] += 16;
-//		end[2] += 16;
-//		tr = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
-//
-//		if (!tr.allsolid)
-//		{
-//			//			ucmd->forwardmove = 400;
-//			//			ucmd->upmove = 400;
-//			return 2;
-//		}
-//
-//		// Check for high jump
-//		start[2] += 16;
-//		end[2] += 16;
-//		tr = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
-//
-//		if (!tr.allsolid)
-//		{
-////			ucmd->forwardmove = 400;
-////			ucmd->upmove = 400;
-//			return 3;
-//		}
-//	}
-//
-//	return 0;
+	return -1; // We did not resolve a move here
 }
 
 //
@@ -361,7 +337,7 @@ void PMAI_Initialize(edict_t* self) {
 	// Setup ranges.
 	self->pmai.settings.ranges.melee = 80;
 	self->pmai.settings.ranges.hostility = 500;
-	
+
 	self->pmai.settings.ranges.max_hearing = 1024;
 	self->pmai.settings.ranges.max_sight = 1024;
 

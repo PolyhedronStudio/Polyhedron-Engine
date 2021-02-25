@@ -174,19 +174,19 @@ void PMover_DetectAnimation(edict_t* self, usercmd_t* movecmd) {
 	if (moving_forward == true) {
 		// Just regular movement.
 		PMover_SetAnimation(self, 1);
-		return;
+
 	}
 
 	if (crouching == true) {
 		// Crouch movement.
 		PMover_SetAnimation(self, 2);
-		return;
+		//return;
 	}
 
 	if (jumping == true) {
 		// Jump movement.
 		PMover_SetAnimation(self, 4);
-		return;
+		//return;
 	}
 }
 
@@ -235,7 +235,6 @@ void PMover_ProcessAnimation(edict_t* self, usercmd_t* movecmd) {
 // Y(YAW) = 1
 // Z(ROLL) = 2
 void PMover_Think(edict_t* self) {
-	edict_t* target = NULL;
 
 	// Clear the user input.
 	usercmd_t *movecmd = &self->pmai.movement.cmd;
@@ -244,63 +243,65 @@ void PMover_Think(edict_t* self) {
 	// TODO: Figure out why 30 is a nice speed here..?
 	movecmd->msec = 30;
 
-	// If we've found an enemy target. Proceed further.
-	if (PMAI_FindEnemyTarget(self)) {
-		vec3_t vecyaw;
-		vec3_t vecangles;
-		edict_t *target = self->pmai.targets.enemy.entity;
+	//-------------------------------------------------------------------------
+	// Search for enemies in sight, always a good thing to do.
+	//-------------------------------------------------------------------------
+	qboolean foundEnemyTarget = PMAI_FindEnemyTarget(self);
+
+	if (foundEnemyTarget == true) {
+		vec3_t vecDist;		// Distance vector, used for calculating angles.
+		vec3_t vecAngles;	// Vector containing the actual view angles of 
+		
+		// Since we've found a target, store its pointer for less typing.
+		edict_t *eTarget = self->pmai.targets.enemy.entity;
 
 		// Calculate the yaw to move to.
-		VectorSubtract(target->s.origin, self->s.origin, vecyaw);
-		vectoangles2(vecyaw, vecangles); // used for aiming at the player always.
-
-		// Set direction speeds.
-		movecmd->forwardmove = 240;
+		VectorSubtract(eTarget->s.origin, self->s.origin, vecDist);
+		vectoangles2(vecDist, vecAngles); // used for aiming at the player always.
 
 		// Setup the move angles.
-		movecmd->angles[YAW]	= ANGLE2SHORT(vecangles[YAW]);
-		movecmd->angles[PITCH]	= ANGLE2SHORT(vecangles[PITCH]);
+		movecmd->angles[YAW]	= ANGLE2SHORT(vecAngles[YAW]);
+//		movecmd->angles[PITCH]	= ANGLE2SHORT(vecAngles[PITCH]);
 
-		// Don't allow pitch and up speeds to go haywire.
-		float pitch = vecangles[PITCH];
-
-		// This is for ladder climbing.
-		if (pitch >= 45.f) {
-			pitch = 45.f;
-			movecmd->upmove = 240;
-		}
-		if (pitch <= -45.f) {
-			pitch = -45.f;
-			//movecmd->buttons->upmove = -240;
-		}
-
-		gi.dprintf("------------------------------------------------\n");
-		gi.dprintf("pitch = %f\n", pitch);
+		// Setup the movement speed.
+		movecmd->forwardmove = 240;
 
 		// Setup the entity's state angles.
-		self->s.angles[YAW]		= vecangles[YAW];
-		//self->s.angles[PITCH]	= pitch;
-		//self->s.angles[ROLL] = ANGLE2SHORT(self->s.angles[ROLL]);
+		self->s.angles[YAW] = vecAngles[YAW];
 
-		// Determine what to do with the brush in front of them, if there is one.
-		int brushAction = PMAI_BrushInFront(self, self->pmai.settings.view.height);
-		gi.dprintf("brushAction = %f\n", brushAction);
-
-		if (brushAction == 1) {
-			movecmd->upmove = 240;
-		}
-		//if (brushAction == 2) {
+		//// Don't allow pitch and up speeds to go haywire.
+		//float pitch = vecangles[PITCH];
+		//// This is for ladder climbing.
+		//if (pitch >= 45.f) {
+		//	pitch = 45.f;
 		//	movecmd->upmove = 240;
 		//}
-		//if (brushAction == 3) {
-		//	movecmd->upmove = 240;
+		//if (pitch <= -45.f) {
+		//	pitch = -45.f;
+		//	//movecmd->buttons->upmove = -240;
 		//}
-	} else {
-		movecmd->msec = 1;
 	}
 
 	//-------------------------------------------------------------------------
-	// Actual movement code.
+	// Brush detection, for jumping and crouching.
+	//-------------------------------------------------------------------------
+	// Determine what to do with the brush in front of them, if there is one.
+	int brushAction = PMAI_BrushInFront(self, self->pmai.settings.view.height);
+	gi.dprintf("brushAction = %i\n", brushAction);
+
+	// Jump.
+	//if (brushAction == 1) {
+	//	movecmd->forwardmove = 240;
+		movecmd->upmove = 400;
+	//}
+	// Crouch.
+	if (brushAction == 2) {
+		movecmd->forwardmove = 240;
+		movecmd->upmove = -400;
+	}
+
+	//-------------------------------------------------------------------------
+	// Actual processing of movement code.
 	//-------------------------------------------------------------------------
 	// Determine the animation to use based on input cmd.
 	PMover_ProcessAnimation(self, movecmd);
@@ -321,7 +322,7 @@ void SP_monster_pmover(edict_t* self)
 	self->movetype = MOVETYPE_WALK;
 	self->solid = SOLID_BBOX;
 	self->s.modelindex = gi.modelindex("players/marine/tris.md2");
-	self->s.modelindex2 = gi.modelindex("models/weapons/g_perf/g_perf.md2");
+	self->s.modelindex2 = gi.modelindex("players/marine/w_blaster.md2");
 	VectorSet(self->mins, -16, -16, -24);
 	VectorSet(self->maxs, 16, 16, 32);
 
@@ -361,7 +362,7 @@ void SP_monster_pmover(edict_t* self)
 	self->flags &= ~FL_NO_KNOCKBACK;
 	//self->svflags |= SVF_MONSTER;
 	self->svflags &= ~SVF_NOCLIENT;		// Let the server know that this is not a client either.
-	self->clipmask = MASK_PLAYERSOLID;	// We want clipping to behave as if it is a player.
+	self->clipmask = MASK_MONSTERSOLID;	// We want clipping to behave as if it is a monster.
 	self->waterlevel = 0;
 	self->watertype = 0;
 	self->is_jumping = false;

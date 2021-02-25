@@ -265,7 +265,7 @@ extern "C" {
         // TODO: Document.
         void            (*Cmd_Macro_g) (genctx_t* ctx);
 
-        // Add's a match for generating in the cmd prompt.
+        // Adds a match for generating in the cmd prompt.
         qboolean        (*Prompt_AddMatch) (genctx_t* ctx, const char* s);
 
         // Takes a null terminated string.  Does not need to be \n terminated.
