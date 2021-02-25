@@ -255,53 +255,77 @@ int PMAI_BrushInFront(edict_t* self, float viewheight)
 		(trace_forward.allsolid == true ? "solid" : "nonsolid")
 	);
 
-	if (trace_forward.fraction < 0.35f)	{
+	if (trace_forward.fraction < 1.0)	{
 		vec3_t top;
-		//return 1;
-	
+
 		// Check for crouching
 		start[2] -= 14;
 		end[2] -= 14;
-	
+
 		// Set up for crouching check
 		VectorCopy(self->maxs, top);
-		top[2] = 24.0; // crouching height
+		top[2] = 0.0; // crouching height
 		trace_forward = gi.trace(start, self->mins, top, end, self, MASK_PLAYERSOLID);
-	
+
 		// Crouch
 		if (!trace_forward.allsolid)
 		{
-//			ucmd->forwardmove = 400;
-//			ucmd->upmove = -400;
 			return 1;
 		}
-	
-		// Check for high jump
-		start[2] += 16;
-		end[2] += 16;
+
+		// Check for jump
+		start[2] += 32;
+		end[2] += 32;
 		trace_forward = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
-	
+
 		if (!trace_forward.allsolid)
 		{
-			//			ucmd->forwardmove = 400;
-			//			ucmd->upmove = 400;
 			return 2;
 		}
-	
-		// Check for high jump
-		start[2] += 16;
-		end[2] += 16;
-		trace_forward = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
-	
-		if (!trace_forward.allsolid)
-		{
-//			ucmd->forwardmove = 400;
-//			ucmd->upmove = 400;
-			return 3;
-		}
+		//		vec3_t top;
+//		//return 1;
+//	
+//		// Check for crouching
+//		start[2] -= 14;
+//		end[2] -= 14;
+//	
+//		// Set up for crouching check
+//		VectorCopy(self->maxs, top);
+//		top[2] = 24.0; // crouching height
+//		trace_forward = gi.trace(start, self->mins, top, end, self, MASK_PLAYERSOLID);
+//	
+//		// Crouch
+//		if (!trace_forward.allsolid)
+//		{
+////			ucmd->forwardmove = 400;
+////			ucmd->upmove = -400;
+//			return 1;
+//		}
+//	
+//		// Check for high jump
+//		start[2] += 16;
+//		end[2] += 16;
+//		trace_forward = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+//	
+//		if (!trace_forward.allsolid)
+//		{
+//			//			ucmd->forwardmove = 400;
+//			//			ucmd->upmove = 400;
+//			return 2;
+//		}
+//	
+//		// Check for high jump
+//		start[2] += 16;
+//		end[2] += 16;
+//		trace_forward = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
+//	
+//		if (!trace_forward.allsolid)
+//		{
+////			ucmd->forwardmove = 400;
+////			ucmd->upmove = 400;
+//			return 3;
+//		}
 	}
-	
-	return 0;
 
 	return -1; // We did not resolve a move here
 }
