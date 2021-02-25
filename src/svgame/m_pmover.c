@@ -123,7 +123,8 @@ void PMover_SetAnimation(edict_t* self, int animationID) {
 		return;
 
 	// Reset the animation at hand.
-	//self->pmai.animations.list[animationID].currentframe = 0;
+	if (self->pmai.animations.current != animationID)
+		self->pmai.animations.list[animationID].currentframe = 0;
 
 	// Set the current active animation.
 	self->pmai.animations.current = animationID;
@@ -144,7 +145,7 @@ void PMover_DetectAnimation(edict_t* self, usercmd_t* movecmd) {
 
 	// Determine the boolean states based on the input.
 	// Forward moving.
-	if (movecmd->forwardmove >= 1) {
+	if (movecmd->forwardmove > 1) {
 		moving_forward = true;
 	}
 	// Strafe moving.
@@ -167,27 +168,37 @@ void PMover_DetectAnimation(edict_t* self, usercmd_t* movecmd) {
 	//
 	// Determine the animation based on movecmd.
 
+	// TODO:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// !!!!!!!!!!!!!!!!!!!!! Set back the code to proper animations. This is for 
+	// testing.
 	// Idle by default.
-	PMover_SetAnimation(self, 0);
+	//PMover_SetAnimation(self, 0);
+	//if (moving_forward == false &&
+	//		moving_backward == false &&
+	//		strafing_left == false &&
+	//		strafing_right == false &&
+	//		jumping == false &&
+	//		crouching == false) {
+	//
+	//	PMover_SetAnimation(self, 0);
+	//} else {
 
-	// Moving forward, so.
-	if (moving_forward == true) {
-		// Just regular movement.
-		PMover_SetAnimation(self, 1);
+	//	if (crouching == true) {
+	//		// Crouch movement.
+	//		PMover_SetAnimation(self, 2);
+	//		return;
+	//	}
 
-	}
-
-	if (crouching == true) {
-		// Crouch movement.
-		PMover_SetAnimation(self, 2);
-		//return;
-	}
-
-	if (jumping == true) {
-		// Jump movement.
-		PMover_SetAnimation(self, 4);
-		//return;
-	}
+	//	else if (jumping == true) {
+	//		// Jump movement.
+	//		PMover_SetAnimation(self, 4);
+	//		return;
+	//	}
+	//	else {
+	//		// If we aren't crouching or jumping, we are moving forward.
+	//		PMover_SetAnimation(self, 1);
+	//	}
+	//}
 }
 
 
@@ -261,7 +272,7 @@ void PMover_Think(edict_t* self) {
 
 		// Setup the move angles.
 		movecmd->angles[YAW]	= ANGLE2SHORT(vecAngles[YAW]);
-//		movecmd->angles[PITCH]	= ANGLE2SHORT(vecAngles[PITCH]);
+		movecmd->angles[PITCH]	= ANGLE2SHORT(vecAngles[PITCH]); // TODO: REMOVE.
 
 		// Setup the movement speed.
 		movecmd->forwardmove = 240;
@@ -270,16 +281,17 @@ void PMover_Think(edict_t* self) {
 		self->s.angles[YAW] = vecAngles[YAW];
 
 		//// Don't allow pitch and up speeds to go haywire.
-		//float pitch = vecangles[PITCH];
-		//// This is for ladder climbing.
-		//if (pitch >= 45.f) {
-		//	pitch = 45.f;
-		//	movecmd->upmove = 240;
-		//}
-		//if (pitch <= -45.f) {
-		//	pitch = -45.f;
-		//	//movecmd->buttons->upmove = -240;
-		//}
+		// TODO: REMOVE.
+		float pitch = vecAngles[PITCH];
+		// This is for ladder climbing.
+		if (pitch >= 45.f) {
+			pitch = 45.f;
+			movecmd->upmove = 240;
+		}
+		if (pitch <= -45.f) {
+			pitch = -45.f;
+			//movecmd->buttons->upmove = -240;
+		}
 	}
 
 	//-------------------------------------------------------------------------
@@ -287,17 +299,20 @@ void PMover_Think(edict_t* self) {
 	//-------------------------------------------------------------------------
 	// Determine what to do with the brush in front of them, if there is one.
 	int brushAction = PMAI_BrushInFront(self, self->pmai.settings.view.height);
-	gi.dprintf("brushAction = %i\n", brushAction);
+	//gi.dprintf("brushAction = %i\n", brushAction);
 
-	// Jump.
-	if (brushAction == 1) {
-		movecmd->forwardmove = 400;
-		movecmd->upmove = -400;
-	}
 	// Crouch.
+	if (brushAction == 1) {
+		movecmd->forwardmove = 240;
+		//movecmd->upmove = -400;
+	} else
+	// Jump.
 	if (brushAction == 2) {
-		movecmd->forwardmove = 400;
+		movecmd->forwardmove = 240;
 		movecmd->upmove = 400;
+	}
+	else {
+		movecmd->upmove = 0;
 	}
 
 	//-------------------------------------------------------------------------
@@ -349,7 +364,7 @@ void SP_monster_pmover(edict_t* self)
 
 	// Initialize the animations list.
 	PMover_FillAnimations(self);
-
+	PMover_SetAnimation(self, 0);
 	// Setup other entity data.
 	self->classname = "pmover";
 	self->class_id = ENTITY_MONSTER_PMOVER;
