@@ -290,10 +290,10 @@ void PMover_Think(edict_t* self) {
 	gi.dprintf("brushAction = %i\n", brushAction);
 
 	// Jump.
-	//if (brushAction == 1) {
-	//	movecmd->forwardmove = 240;
+	if (brushAction == 1) {
+		movecmd->forwardmove = 240;
 		movecmd->upmove = 400;
-	//}
+	}
 	// Crouch.
 	if (brushAction == 2) {
 		movecmd->forwardmove = 240;

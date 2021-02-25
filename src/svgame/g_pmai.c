@@ -255,8 +255,7 @@ int PMAI_BrushInFront(edict_t* self, float viewheight)
 		(trace_forward.allsolid == true ? "solid" : "nonsolid")
 	);
 
-	if (trace_forward.allsolid)
-	{
+	if (trace_forward.fraction < 0.35f)	{
 		vec3_t top;
 		//return 1;
 	
