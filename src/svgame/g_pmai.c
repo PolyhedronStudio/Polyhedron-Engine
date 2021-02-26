@@ -301,6 +301,100 @@ int PMAI_BrushInFront(edict_t* self, float viewheight)
 }
 
 //
+//===============
+// PMAI_CheckEyes
+//
+// Check for obstructions in front of the AI. If the move is resolved here
+// we return true.
+//===============
+//
+qboolean PMAI_CheckEyes(edict_t* self, usercmd_t* ucmd)
+{
+	vec3_t  forward, right;
+	vec3_t  leftstart, rightstart, focalpoint;
+	vec3_t  upstart, upend;
+	vec3_t  dir, offset;
+
+	trace_t traceRight, traceLeft, traceUp, traceFront; // for eyesight
+
+	// Get current angle and set up "eyes"
+	VectorCopy(self->s.angles, dir);
+	AngleVectors(dir, forward, right, NULL);
+
+	// Let them move to targets by walls
+	if (!self->movetarget)
+		VectorSet(offset, 200, 0, 4); // focalpoint 
+	else
+		VectorSet(offset, 36, 0, 4); // focalpoint 
+
+	G_ProjectSource(self->s.origin, offset, forward, right, focalpoint);
+
+	// Check from self to focalpoint
+	// Ladder code
+	VectorSet(offset, 36, 0, 0); // set as high as possible
+	G_ProjectSource(self->s.origin, offset, forward, right, upend);
+	traceFront = gi.trace(self->s.origin, self->mins, self->maxs, upend, self, MASK_OPAQUE);
+
+	if (traceFront.contents & 0x8000000) // using detail brush here cuz sometimes it does not pick up ladders...??
+	{
+		ucmd->upmove = 400;
+		ucmd->forwardmove = 400;
+		return true;
+	}
+
+	// If this check fails we need to continue on with more detailed checks
+	if (traceFront.fraction == 1)
+	{
+		ucmd->forwardmove = 400;
+		return true;
+	}
+
+	VectorSet(offset, 0, 18, 4);
+	G_ProjectSource(self->s.origin, offset, forward, right, leftstart);
+
+	offset[1] -= 36; // want to make sure this is correct
+	//VectorSet(offset, 0, -18, 4);
+	G_ProjectSource(self->s.origin, offset, forward, right, rightstart);
+
+	traceRight = gi.trace(rightstart, NULL, NULL, focalpoint, self, MASK_OPAQUE);
+	traceLeft = gi.trace(leftstart, NULL, NULL, focalpoint, self, MASK_OPAQUE);
+
+	// Wall checking code, this will degenerate progressivly so the least cost 
+	// check will be done first.
+
+	// If open space move ok
+	if (traceRight.fraction != 1 || traceLeft.fraction != 1 || strcmp(traceLeft.ent->classname, "func_door") != 0)
+	{
+		// Special uppoint logic to check for slopes/stairs/jumping etc.
+		VectorSet(offset, 0, 18, 24);
+		G_ProjectSource(self->s.origin, offset, forward, right, upstart);
+
+		VectorSet(offset, 0, 0, 200); // scan for height above head
+		G_ProjectSource(self->s.origin, offset, forward, right, upend);
+		traceUp = gi.trace(upstart, NULL, NULL, upend, self, MASK_OPAQUE);
+
+		VectorSet(offset, 200, 0, 200 * traceUp.fraction - 5); // set as high as possible
+		G_ProjectSource(self->s.origin, offset, forward, right, upend);
+		traceUp = gi.trace(upstart, NULL, NULL, upend, self, MASK_OPAQUE);
+
+		// If the upper trace is not open, we need to turn.
+		if (traceUp.fraction != 1)
+		{
+			if (traceRight.fraction > traceLeft.fraction)
+				self->s.angles[YAW] += (1.0 - traceLeft.fraction) * 45.0;
+			else
+				self->s.angles[YAW] += -(1.0 - traceRight.fraction) * 45.0;
+
+			ucmd->forwardmove = 400;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+//
 //==========================================================================
 //
 // SETTINGS

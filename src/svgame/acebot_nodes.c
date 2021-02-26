@@ -254,9 +254,9 @@ qboolean ACEND_FollowPath (edict_t *self)
 	
 	//////////////////////////////////////////
 	// Show the path (uncomment for debugging)
-//	show_path_from = self->current_node;
-//	show_path_to = self->goal_node;
-//	ACEND_DrawPath();
+	show_path_from = self->current_node;
+	show_path_to = self->goal_node;
+	ACEND_DrawPath();
 	//////////////////////////////////////////
 
 	// Try again?

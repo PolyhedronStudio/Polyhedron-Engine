@@ -96,22 +96,22 @@ void PMover_FillAnimations(edict_t* self) {
 	// 0 == stand
 	self->pmai.animations.list[0].startframe	= FRAME_stand01;
 	self->pmai.animations.list[0].endframe		= FRAME_stand40;
-	self->pmai.animations.list[0].currentframe	= 0;
+	self->pmai.animations.list[0].currentframe	= FRAME_stand01;
 
 	// 1 == run
 	self->pmai.animations.list[1].startframe = FRAME_run1;
 	self->pmai.animations.list[1].endframe = FRAME_run6;
-	self->pmai.animations.list[1].currentframe = 0;
+	self->pmai.animations.list[1].currentframe = FRAME_run1;
 
 	// 2 == crouchwalk
 	self->pmai.animations.list[2].startframe = FRAME_crwalk1;
 	self->pmai.animations.list[2].endframe = FRAME_crwalk6;
-	self->pmai.animations.list[2].currentframe = 0;
+	self->pmai.animations.list[2].currentframe = FRAME_crwalk1;
 
 	// 4 == jump
 	self->pmai.animations.list[4].startframe = FRAME_jump1;
 	self->pmai.animations.list[4].endframe = FRAME_jump6;
-	self->pmai.animations.list[4].currentframe = 0;
+	self->pmai.animations.list[4].currentframe = FRAME_jump1;
 }
 
 //
@@ -124,7 +124,7 @@ void PMover_SetAnimation(edict_t* self, int animationID) {
 
 	// Reset the animation at hand.
 	if (self->pmai.animations.current != animationID)
-		self->pmai.animations.list[animationID].currentframe = 0;
+		self->pmai.animations.list[animationID].currentframe = self->pmai.animations.list[animationID].startframe;
 
 	// Set the current active animation.
 	self->pmai.animations.current = animationID;
@@ -155,12 +155,12 @@ void PMover_DetectAnimation(edict_t* self, usercmd_t* movecmd) {
 		strafing_right = true;
 	}
 	// Jumping.
-	if (movecmd->upmove > 0) {
+	if (movecmd->upmove > 50) {
 		jumping = true;
 		crouching = false;
 	}
 	// Crouching.
-	if (movecmd->upmove < 0) {
+	if (movecmd->upmove < 50) {
 		jumping = false;
 		crouching = true;
 	}
@@ -173,10 +173,11 @@ void PMover_DetectAnimation(edict_t* self, usercmd_t* movecmd) {
 	// testing.
 	// Idle by default.
 	//PMover_SetAnimation(self, 0);
+	PMover_SetAnimation(self, 1);
 	//if (moving_forward == false &&
 	//		moving_backward == false &&
-	//		strafing_left == false &&
-	//		strafing_right == false &&
+	//		//strafing_left == false &&
+	//		//strafing_right == false &&
 	//		jumping == false &&
 	//		crouching == false) {
 	//
@@ -257,14 +258,13 @@ void PMover_Think(edict_t* self) {
 	//-------------------------------------------------------------------------
 	// Search for enemies in sight, always a good thing to do.
 	//-------------------------------------------------------------------------
+	// Since we've found a target, store its pointer for less typing.
+	edict_t* eTarget = self->pmai.targets.enemy.entity;
 	qboolean foundEnemyTarget = PMAI_FindEnemyTarget(self);
 
-	if (foundEnemyTarget == true) {
+	if (eTarget != NULL) {
 		vec3_t vecDist;		// Distance vector, used for calculating angles.
 		vec3_t vecAngles;	// Vector containing the actual view angles of 
-		
-		// Since we've found a target, store its pointer for less typing.
-		edict_t *eTarget = self->pmai.targets.enemy.entity;
 
 		// Calculate the yaw to move to.
 		VectorSubtract(eTarget->s.origin, self->s.origin, vecDist);
@@ -295,24 +295,28 @@ void PMover_Think(edict_t* self) {
 	}
 
 	//-------------------------------------------------------------------------
-	// Brush detection, for jumping and crouching.
+	// Special movement handling for jumps.
 	//-------------------------------------------------------------------------
-	// Determine what to do with the brush in front of them, if there is one.
-	int brushAction = PMAI_BrushInFront(self, self->pmai.settings.view.height);
-	//gi.dprintf("brushAction = %i\n", brushAction);
-
-	// Crouch.
-	if (brushAction == 1) {
-		movecmd->forwardmove = 240;
-		//movecmd->upmove = -400;
-	} else
-	// Jump.
-	if (brushAction == 2) {
-		movecmd->forwardmove = 240;
-		movecmd->upmove = 400;
-	}
-	else {
-		movecmd->upmove = 0;
+	if (!PMAI_CheckEyes(self, movecmd)) {
+		// Determine what to do with the brush in front of them, if there is one.
+		int brushAction = PMAI_BrushInFront(self, self->pmai.settings.view.height);
+		//gi.dprintf("brushAction = %i\n", brushAction);
+		if (random() > 0.1) {
+			// Crouch.
+			if (brushAction == 1) {
+				movecmd->forwardmove = 240;
+				//movecmd->upmove = -400;
+			}
+			// Jump
+			else if (brushAction == 2) {
+				movecmd->forwardmove = 240;
+				movecmd->upmove = 400;
+			}
+			// Nothing.
+			else {
+				movecmd->upmove = 0;
+			}
+		}
 	}
 
 	//-------------------------------------------------------------------------
