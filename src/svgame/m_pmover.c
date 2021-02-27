@@ -87,27 +87,6 @@ void PMover_FillAnimations(edict_t* self) {
 
 //
 //===============
-// PMover_FillAnimations
-// 
-// Switches active animation. In case this gets called multiple times a game
-// tick, it won't reset in case the animation value is the same.
-//===============
-//
-void PMover_SetAnimation(edict_t* self, int animationID) {
-	// Ensure animationID is within bounds.
-	if (animationID < 0 && animationID > 20)
-		return;
-
-	// Reset the animation at hand.
-	if (self->pmai.animations.current != animationID)
-		self->pmai.animations.list[animationID].currentframe = 0;
-
-	// Set the current active animation.
-	self->pmai.animations.current = animationID;
-}
-
-//
-//===============
 // PMover_DetectAnimation
 // 
 // Try and detect which animation to play based on the PMAI status.
@@ -186,65 +165,6 @@ void PMover_DetectAnimation(edict_t* self, usercmd_t* movecmd) {
 	//}
 }
 
-
-//
-//===============
-// PMover_ProcessAnimation
-// 
-// Handles playing of the actual current animation.
-//===============
-//
-void PMover_ProcessAnimation(edict_t* self) {
-	// Ensure it is valid.
-	if (!self)
-		return;
-
-	// TODO: This will be moved elsewhere.
-	// Detect the animation to use.
-	//PMover_DetectAnimation(self, movecmd);
-
-	// Find the current animationID.
-	int animationID = self->pmai.animations.current;
-
-	// Calculate the frame to use, and whether to reset animation.
-	int frameIndex = self->pmai.animations.list[animationID].startframe + self->pmai.animations.list[animationID].currentframe;
-
-	// Check whether the animation needs a reset to loop.
-	if (self->pmai.animations.list[animationID].loop == true) {
-		if (frameIndex > self->pmai.animations.list[animationID].endframe) {
-			// Reset currentframe.
-			self->pmai.animations.list[animationID].currentframe = 0;
-
-			// Recalculate frame index.
-			frameIndex = self->pmai.animations.list[animationID].startframe + self->pmai.animations.list[animationID].currentframe;
-		}
-	} 
-	// No looping, make sure it clamps.
-	else {
-		// In case we aren't looping, and exceeding, clamp the animation frames.
-		if (frameIndex > self->pmai.animations.list[animationID].endframe) {
-			// Reset.
-			frameIndex = self->pmai.animations.list[animationID].currentframe = self->pmai.animations.list[animationID].endframe;
-		}
-	}
-
-	// Assign the animation frame to the entity state.
-	self->s.frame = frameIndex;
-
-	// Process animation.
-// Silly hack for the 20 fps, right now this model is meant for 10 fps...
-	static int firstFramePass = false;
-
-	if (firstFramePass == false) {
-		self->pmai.animations.list[animationID].currentframe++;
-		firstFramePass = true;
-	}
-	else {
-		firstFramePass = false;
-	}
-	// End Silly hack for the 20 fps, right now this model is meant for 10 fps...
-}
-
 //
 //===============
 // PMover_Think
@@ -297,6 +217,9 @@ void PMover_Think(edict_t* self) {
 			pitch = -45.f;
 			//movecmd->buttons->upmove = -240;
 		}
+
+		// Set animation to running yay.
+		PMAI_SetAnimation(self, 1);
 	}
 
 	//-------------------------------------------------------------------------
@@ -328,7 +251,7 @@ void PMover_Think(edict_t* self) {
 	// Actual processing of movement code.
 	//-------------------------------------------------------------------------
 	// Determine the animation to use based on input cmd.
-	PMover_ProcessAnimation(self);
+	PMAI_ProcessAnimation(self);
 
 	// Execute the player movement using the given "AI Player Input"
 	PMAI_ProcessMovement(self);
@@ -348,6 +271,50 @@ void PMover_Think(edict_t* self) {
 
 //
 //===============
+// PMover_PainAnimation_Callback
+// 
+// Used to reset the monster to go back to regular thinking after the animation
+// has finished playing.
+//===============
+//
+void PMover_PainAnimation_Callback(edict_t* self, int animationID, int currentFrame) {
+	// Ensure all is valid.
+	if (!self || (animationID < 0 && animationID > 20)) {
+		return;
+	}
+
+	// In case we've reached the last frame...
+	if (currentFrame == FRAME_pain104 ||
+		currentFrame == FRAME_pain204 ||
+		currentFrame == FRAME_pain304) {
+
+		gi.dprintf("PMover_PainAnimation_Callback - CHECK");
+
+		// Return to default behavior.
+		self->nextthink = 0.05;
+		self->think = PMover_Think;
+	}
+}
+
+//
+//===============
+// PMover_PainThink
+// 
+// Engine callback in case this entity has been inflicted pain.
+//===============
+//
+void PMover_PainThink(edict_t* self)
+{
+	// Return to default behavior.
+	self->nextthink = 0.05;
+	self->think = PMover_PainThink;
+
+	// Process animation.
+	PMAI_ProcessAnimation(self);
+}
+
+//
+//===============
 // PMover_Pain
 // 
 // Engine callback in case this entity has been inflicted pain.
@@ -355,7 +322,46 @@ void PMover_Think(edict_t* self) {
 //
 void PMover_Pain(edict_t* self, edict_t* other, float kick, int damage)
 {
+	int iSelf = (self ? self->s.number : -1);
+	int iOther = (other ? other->s.number : -1);
 
+
+	gi.dprintf("PMover_Pain - self=%i other=%i kick=%f damage=%i\n", 
+		iSelf,
+		iOther,
+		kick,
+		damage);
+
+	// Set the pain animation.
+	PMAI_SetAnimation(self, 14);
+
+	// Setup the pain think.
+	self->nextthink = 0.05;
+	self->think = PMover_PainThink;
+}
+
+//
+//===============
+// PMover_DeadAnimation_Callback
+// 
+//===============
+//
+void PMover_DeadAnimation_Callback(edict_t* self, int animationID, int currentFrame) {
+	// Ensure all is valid.
+	if (!self || (animationID < 0 && animationID > 20)) {
+		return;
+	}
+
+	// In case we've reached the last frame...
+	if (currentFrame == FRAME_death106 ||
+		currentFrame == FRAME_death206 ||
+		currentFrame == FRAME_death308) {	
+
+		gi.dprintf("PMover_DeadAnimation_Callback - CHECK");
+
+		// DEAD.
+		self->deadflag = DEAD_DEAD;
+	}
 }
 
 //
@@ -366,12 +372,12 @@ void PMover_Pain(edict_t* self, edict_t* other, float kick, int damage)
 //===============
 //
 void PMover_DeadThink(edict_t* self) {
-	// Process animation.
-	PMover_ProcessAnimation(self);
-
 	// Next frame.
 	self->nextthink = 0.05;
 	self->think = PMover_DeadThink;
+
+	// Process animation.
+	PMAI_ProcessAnimation(self);
 }
 
 //
@@ -390,11 +396,11 @@ void PMover_Die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
 	// Check whether to gib to death. This could happen when the monster gets
 	// assaulted too hard, or when its dead body is assaulted.
 	if (self->health < self->gib_health) {
-		// Set flies effect.
-		self->s.effects |= EF_FLIES;
+		//// Set flies effect.
+		//self->s.effects |= EF_FLIES;
 
-		// Disable any active entity sound ID that might be there.
-		self->s.sound = gi.soundindex("infantry/inflies1.wav");
+		//// Disable any active entity sound ID that might be there.
+		//self->s.sound = gi.soundindex("infantry/inflies1.wav");
 
 		// Play the death sound.
 		gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -414,6 +420,7 @@ void PMover_Die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
 		// Change the movetype and add SVF_DEADMONSTER to sv flags.
 		self->movetype = MOVETYPE_TOSS;
 		self->svflags |= SVF_DEADMONSTER;
+		self->deadflag = DEAD_DYING;
 
 		// Remove the weapon model index, it doesn't have death animations.
 		self->s.modelindex2 = 0;
@@ -422,7 +429,7 @@ void PMover_Die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
 		gi.linkentity(self);
 
 		// Setup death animation.
-		PMover_SetAnimation(self, 17);
+		PMAI_SetAnimation(self, 17);
 
 		// Setup the dead think.
 		self->nextthink = 0.05;
@@ -464,7 +471,7 @@ void SP_monster_pmover(edict_t* self)
 	self->die = PMover_Die;
 
 	// Setup the think.
-	self->nextthink = level.time + 0.1;
+	self->nextthink = level.time + 0.05;
 	self->think = PMover_Think;
 
 	// Mapper entity data.
@@ -486,8 +493,14 @@ void SP_monster_pmover(edict_t* self)
 	// Initialize the animations list.
 	PMover_FillAnimations(self);
 
+	// Setup the PAIN animation callback
+	PMAI_SetAnimationFrameCallback(self, 14, PMover_PainAnimation_Callback);
+
+	// Setup the dying animation callback.
+	PMAI_SetAnimationFrameCallback(self, 17, PMover_DeadAnimation_Callback);
+
 	// Set Idle animation.
-	PMover_SetAnimation(self, 0);
+	PMAI_SetAnimation(self, 0);
 
 	// Link entity to world.
 	gi.linkentity(self);

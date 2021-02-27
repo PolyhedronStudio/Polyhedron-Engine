@@ -110,19 +110,23 @@ typedef struct pmai_movement_s{
 } pmai_movement_t;
 
 //-------------------
-// Stores the actual animation data, start and end frame, and also
-// the current frame where it is at.
+// Stores the actual animation data.
+// Start frame, end frame, current frame.
+// Whether to loop.
+// And a function pointer to a callback that gets called each frame.
 //-------------------
+typedef void	(*PMAI_AnimationFrameCallback) (edict_t* self, int animationID, int currentFrame);
 typedef struct pmai_animation_s {
 	// The first frame of the animation.
-	int startframe;
+	int startFrame;
 	// The last frame of the animation.
-	int endframe;
+	int endFrame;
 	// The current frame being played of this animation.
-	int currentframe;
+	int currentFrame;
 	// Should the animation loop?
 	qboolean loop;
-
+	// Does this animation have a callback?
+	PMAI_AnimationFrameCallback frameCallback;
 } pmai_animation_t;
 
 //-------------------
@@ -187,6 +191,9 @@ qboolean	PMAI_CheckEyes(edict_t* self, usercmd_t* ucmd);
 // Animations.
 //-------------------
 void		PMAI_FillAnimation(edict_t* self, int animationID, int startFrame, int endFrame, qboolean loop);
+void		PMAI_SetAnimation(edict_t* self, int animationID);
+void		PMAI_SetAnimationFrameCallback(edict_t* self, int animationID, PMAI_AnimationFrameCallback callback);
+void		PMAI_ProcessAnimation(edict_t* self);
 
 //-------------------
 // Movement.
