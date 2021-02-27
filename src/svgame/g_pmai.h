@@ -120,6 +120,9 @@ typedef struct pmai_animation_s {
 	int endframe;
 	// The current frame being played of this animation.
 	int currentframe;
+	// Should the animation loop?
+	qboolean loop;
+
 } pmai_animation_t;
 
 //-------------------
@@ -166,6 +169,7 @@ typedef struct {
 //
 //=============================================================================
 //
+
 //-------------------
 // Utility.
 //-------------------
@@ -178,6 +182,11 @@ qboolean	PMAI_EntityIsInFront(edict_t* self, edict_t* other, float min_dot);
 
 int			PMAI_BrushInFront(edict_t* self, float viewheight);
 qboolean	PMAI_CheckEyes(edict_t* self, usercmd_t* ucmd);
+
+//-------------------
+// Animations.
+//-------------------
+void		PMAI_FillAnimation(edict_t* self, int animationID, int startFrame, int endFrame, qboolean loop);
 
 //-------------------
 // Movement.

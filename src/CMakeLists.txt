@@ -34,6 +34,7 @@ SET(SRC_SVGAME
 	svgame/acebot_movement.c
 	svgame/acebot_nodes.c
 	svgame/acebot_spawn.c
+	svgame/pmai/pmai_animations.c
 	svgame/pmai/pmai_movement.c
 	svgame/pmai/pmai_targets.c
 	svgame/g_ai.c
