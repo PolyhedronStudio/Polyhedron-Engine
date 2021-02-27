@@ -244,8 +244,9 @@ void PMover_Think(edict_t* self) {
 			//else 
 			if (range <= self->pmai.settings.ranges.hostility) {
 				// Ensure we are on the floor
-				// Determine at random whether to attack.
-				if (random() > 0.65) {
+
+				// Determine at random whether to attack, only if on the floor though.
+				if (random() > 0.65 && M_CheckBottom(self)) {
 					// Setup the attack think.
 					self->nextthink = level.time + 0.05;
 					self->think = PMover_AttackThink;
@@ -331,6 +332,7 @@ void PMover_AttackAnimation_Callback(edict_t* self, int animationID, int current
 	if (currentFrame == FRAME_attack6) {
 		// Angular vectors.
 		vec3_t dir, forward, right;
+		vec3_t vecDist;
 
 		// Start shoot vector.
 		vec3_t start;
@@ -341,11 +343,13 @@ void PMover_AttackAnimation_Callback(edict_t* self, int animationID, int current
 
 		// Calculate direction to shoot at.
 		VectorCopy(self->s.angles, dir);
+		VectorSubtract(self->pmai.targets.enemy.entity->s.origin, self->s.origin, vecDist);
+		vectoangles2(vecDist, dir); // used for aiming at the player always.
 		AngleVectors(dir, forward, right, NULL);
 
 		// Calculate start vector.
 		VectorCopy(self->s.origin, start);
-		start[2] += self->pmai.settings.view.height;
+		start[2] += self->pmai.settings.view.height - 4;
 
 		// Fire away!
 		pmover_fire_blaster(self, start, forward, 20, 600, 1, effect, color);
@@ -369,6 +373,14 @@ void PMover_AttackThink(edict_t* self) {
 
 	// Process animation.
 	PMAI_ProcessAnimation(self);
+
+	// Ensure we are idle.
+	self->pmai.pmove.cmd.msec = 30;
+	self->pmai.pmove.cmd.forwardmove = 0;
+	self->pmai.pmove.cmd.upmove = 0;
+
+	// Execute the player movement (so he can fall and what not)
+	PMAI_ProcessMovement(self);
 }
 
 //
@@ -413,6 +425,14 @@ void PMover_PainThink(edict_t* self)
 
 	// Process animation.
 	PMAI_ProcessAnimation(self);
+
+	// Ensure we are idle.
+	self->pmai.pmove.cmd.msec = 30;
+	self->pmai.pmove.cmd.forwardmove = 0;
+	self->pmai.pmove.cmd.upmove = 0;
+
+	// Execute the player movement (so he can fall and what not)
+	PMAI_ProcessMovement(self);
 }
 
 //
