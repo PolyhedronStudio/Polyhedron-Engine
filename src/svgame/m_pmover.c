@@ -383,10 +383,10 @@ void PMover_Die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
 	// assaulted too hard, or when its dead body is assaulted.
 	if (self->health < self->gib_health) {
 		// Set flies effect.
-		self->s.effects &= ~EF_FLIES;
+		self->s.effects |= EF_FLIES;
 
 		// Disable any active entity sound ID that might be there.
-		self->s.sound = 0;
+		self->s.sound = gi.soundindex("infantry/inflies1.wav");
 
 		// Play the death sound.
 		gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -406,23 +406,19 @@ void PMover_Die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
 		// Change the movetype and add SVF_DEADMONSTER to sv flags.
 		self->movetype = MOVETYPE_TOSS;
 		self->svflags |= SVF_DEADMONSTER;
-		self->nextthink = 0.05;
-		self->think = PMover_DeadThink;
+
+		// Remove the weapon model index, it doesn't have death animations.
+		self->s.modelindex2 = 0;
 
 		// Last but not least, relink the entity into the world.
 		gi.linkentity(self);
-		
-		// Check for flies.
-		M_FlyCheck(self);
 
 		// Setup death animation.
 		PMover_SetAnimation(self, 17);
-		// Lazarus monster fade
-		//if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
-		//{
-		//	self->think = FadeDieSink;
-		//	self->nextthink = level.time + corpse_fadetime->value;
-		//}
+
+		// Setup the dead think.
+		self->nextthink = 0.05;
+		self->think = PMover_DeadThink;
 	}
 }
 
