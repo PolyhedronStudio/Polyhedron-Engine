@@ -41,6 +41,10 @@ PMover - AI using Player Movement.
 #define ANGLE2SHORT(x)  ((int)((x)*65536/360) & 65535)
 #define SHORT2ANGLE(x)  ((x)*(360.0/65536))
 
+
+// Declared here.
+void PMover_AttackThink(edict_t* self);
+
 //
 //=============================================================================
 //
@@ -69,6 +73,8 @@ void PMover_FillAnimations(edict_t* self) {
 	PMAI_FillAnimation(self, 2, FRAME_crwalk1,	FRAME_crwalk6,	true);
 	// 3 == jump1
 	PMAI_FillAnimation(self, 3, FRAME_jump1,	FRAME_jump6,	true);
+	// 4 == attack
+	PMAI_FillAnimation(self, 4, FRAME_attack1,	FRAME_attack8,	true);
 
 	// 14 == pain1
 	PMAI_FillAnimation(self, 14, FRAME_pain101, FRAME_pain104, false);
@@ -218,8 +224,43 @@ void PMover_Think(edict_t* self) {
 			//movecmd->buttons->upmove = -240;
 		}
 
-		// Set animation to running yay.
-		PMAI_SetAnimation(self, 1);
+		//---------------------------------------------------------------------
+		// Figure out whether to attack or run.
+		//---------------------------------------------------------------------
+		float range = PMAI_EntityRange(self, eTarget);
+
+		gi.dprintf("----------------------------\n");
+		gi.dprintf("range = %f\nlightLevel = %i\n", range, eTarget->light_level);
+		gi.dprintf("melee = %f\nhostility = %f\n", self->pmai.settings.ranges.melee, self->pmai.settings.ranges.hostility);
+		gi.dprintf("----------------------------\n");
+		// Check for things to do since enemy is in range and not in a too light spot.
+		if (range <= self->pmai.settings.ranges.max_sight && eTarget->light_level >= 5) {
+			// Do a melee attack if enemy is in melee range.
+			//if (range <= self->pmai.settings.ranges.melee) {
+			//	//if (eTarget->show_hostile < level.time)
+			//	//return false;
+			//}
+			//// Return false if an enemy isn't in front FOV range of the AI for combat.
+			//else 
+			if (range <= self->pmai.settings.ranges.hostility) {
+				// Ensure we are on the floor
+				// Determine at random whether to attack.
+				if (random() > 0.65) {
+					// Setup the attack think.
+					self->nextthink = level.time + 0.05;
+					self->think = PMover_AttackThink;
+
+					// Setup attack animation.
+					PMAI_SetAnimation(self, 4);
+
+					// Exit function.
+					return;
+				}
+			}
+
+			// Set animation to running.
+			PMAI_SetAnimation(self, 1);
+		}
 	}
 
 	//-------------------------------------------------------------------------
@@ -257,7 +298,7 @@ void PMover_Think(edict_t* self) {
 	PMAI_ProcessMovement(self);
 
 	// Setup the next think.
-	self->nextthink = level.time + 0.1;
+	self->nextthink = level.time + 0.05;
 	self->think = PMover_Think;
 }
 
@@ -268,6 +309,67 @@ void PMover_Think(edict_t* self) {
 //
 //=============================================================================
 //
+
+// Copied over monster_fire_blaster...
+void pmover_fire_blaster(edict_t* self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect, int color)
+{
+	fire_blaster(self, start, dir, damage, speed, effect, false, color);
+
+	gi.WriteByte(svg_muzzleflash2);
+	gi.WriteShort(self - g_edicts);
+	gi.WriteByte(flashtype);
+	gi.multicast(start, MULTICAST_PVS);
+}
+
+void PMover_AttackAnimation_Callback(edict_t* self, int animationID, int currentFrame) {
+	// Ensure all is valid.
+	if (!self || (animationID < 0 && animationID > 20)) {
+		return;
+	}
+
+	// In case we've reached the last frame...
+	if (currentFrame == FRAME_attack6) {
+		// Angular vectors.
+		vec3_t dir, forward, right;
+
+		// Start shoot vector.
+		vec3_t start;
+
+		// Color.
+		int color = BLASTER_GREEN;	// ORANGE = 1, GREEN = 2, BLUE = 3, RED = 4
+		int effect = EF_BLASTER;
+
+		// Calculate direction to shoot at.
+		VectorCopy(self->s.angles, dir);
+		AngleVectors(dir, forward, right, NULL);
+
+		// Calculate start vector.
+		VectorCopy(self->s.origin, start);
+		start[2] += self->pmai.settings.view.height;
+
+		// Fire away!
+		pmover_fire_blaster(self, start, forward, 20, 600, 1, effect, color);
+		// Start calculating the start and offset endfor forward tracing.
+		//VectorSet(offset, 0, 0, 0);
+		//G_ProjectSource(self->s.origin, offset, forward, right, start);
+		// Fire the gun.
+	}
+
+	// End of animation, return to default thinking.
+	if (currentFrame == FRAME_attack8) {
+		self->nextthink = 0.05;
+		self->think = PMover_Think;
+	}
+}
+
+void PMover_AttackThink(edict_t* self) {
+	// Return to attack think behavior.
+	self->nextthink = 0.05;
+	self->think = PMover_AttackThink;
+
+	// Process animation.
+	PMAI_ProcessAnimation(self);
+}
 
 //
 //===============
@@ -305,7 +407,7 @@ void PMover_PainAnimation_Callback(edict_t* self, int animationID, int currentFr
 //
 void PMover_PainThink(edict_t* self)
 {
-	// Return to default behavior.
+	// Return to pain think behavior.
 	self->nextthink = 0.05;
 	self->think = PMover_PainThink;
 
@@ -325,6 +427,9 @@ void PMover_Pain(edict_t* self, edict_t* other, float kick, int damage)
 	int iSelf = (self ? self->s.number : -1);
 	int iOther = (other ? other->s.number : -1);
 
+	// Setup the enemy to be other.
+	// TODO: Remove this is a hack for now.
+	self->pmai.targets.enemy.entity = other;
 
 	gi.dprintf("PMover_Pain - self=%i other=%i kick=%f damage=%i\n", 
 		iSelf,
@@ -493,10 +598,13 @@ void SP_monster_pmover(edict_t* self)
 	// Initialize the animations list.
 	PMover_FillAnimations(self);
 
+	// Setup the ATTACK animation callback
+	PMAI_SetAnimationFrameCallback(self, 4, PMover_AttackAnimation_Callback);
+
 	// Setup the PAIN animation callback
 	PMAI_SetAnimationFrameCallback(self, 14, PMover_PainAnimation_Callback);
 
-	// Setup the dying animation callback.
+	// Setup the DEAD animation callback.
 	PMAI_SetAnimationFrameCallback(self, 17, PMover_DeadAnimation_Callback);
 
 	// Set Idle animation.

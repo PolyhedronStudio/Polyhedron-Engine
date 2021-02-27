@@ -246,14 +246,14 @@ int PMAI_BrushInFront(edict_t* self, float viewheight)
 
 	// Execute our forward trace.
 	trace_forward = gi.trace(start, self->mins, self->maxs, end, self, MASK_MONSTERSOLID);
-	gi.dprintf("-------------\nstart = %s			end = %s\n",
-		vtos(start),
-		vtos(end)
-	);
-	gi.dprintf("-------------\nfraction = %f			allsolid = %s\n",
-		trace_forward.fraction,
-		(trace_forward.allsolid == true ? "solid" : "nonsolid")
-	);
+	//gi.dprintf("-------------\nstart = %s			end = %s\n",
+	//	vtos(start),
+	//	vtos(end)
+	//);
+	//gi.dprintf("-------------\nfraction = %f			allsolid = %s\n",
+	//	trace_forward.fraction,
+	//	(trace_forward.allsolid == true ? "solid" : "nonsolid")
+	//);
 
 	if (trace_forward.fraction < 1.0)	{
 		trace_t trace_crouch;
@@ -269,19 +269,19 @@ int PMAI_BrushInFront(edict_t* self, float viewheight)
 		top[2] = 0.0; // crouching height
 		trace_crouch = gi.trace(start, self->mins, top, end, self, MASK_PLAYERSOLID);
 
-		gi.dprintf("-------------\nstart = %s\nend = %s\n",
-			vtos(start),
-			vtos(end)
-		);
-		gi.dprintf("-------------\nfraction = %f\nallsolid = %s\n",
-			trace_crouch.fraction,
-			(trace_crouch.allsolid == true ? "solid" : "nonsolid")
-		);
+		//gi.dprintf("-------------\nstart = %s\nend = %s\n",
+		//	vtos(start),
+		//	vtos(end)
+		//);
+		//gi.dprintf("-------------\nfraction = %f\nallsolid = %s\n",
+		//	trace_crouch.fraction,
+		//	(trace_crouch.allsolid == true ? "solid" : "nonsolid")
+		//);
 
 		// Crouch
 		if (!trace_crouch.allsolid)
 		{
-			gi.dprintf("brushAction = crouch\n");
+			//gi.dprintf("brushAction = crouch\n");
 			return 1;
 		}
 
@@ -292,7 +292,7 @@ int PMAI_BrushInFront(edict_t* self, float viewheight)
 
 		if (!trace_jump.allsolid)
 		{
-			gi.dprintf("brushAction = jump\n");
+			//gi.dprintf("brushAction = jump\n");
 			return 2;
 		}
 	}
@@ -422,13 +422,13 @@ void PMAI_Initialize(edict_t* self) {
 	self->pmai.settings.view.height = 25;
 
 	// Setup ranges.
-	self->pmai.settings.ranges.melee = 80;
-	self->pmai.settings.ranges.hostility = 500;
+	self->pmai.settings.ranges.melee = 80.f;
+	self->pmai.settings.ranges.hostility = 500.f;
 
-	self->pmai.settings.ranges.max_hearing = 1024;
-	self->pmai.settings.ranges.max_sight = 1024;
+	self->pmai.settings.ranges.max_hearing = 1024.f;
+	self->pmai.settings.ranges.max_sight = 1024.f;
 
-	self->pmai.settings.ranges.min_dot = 0.3;
+	self->pmai.settings.ranges.min_dot = 0.3f;
 
 	// Setup the pmove trace and point contents function pointers.
 	self->pmai.pmove.trace = PMAI_Trace;				// Adds default parms
