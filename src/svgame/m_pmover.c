@@ -236,17 +236,14 @@ void PMover_Think(edict_t* self) {
 		// Check for things to do since enemy is in range and not in a too light spot.
 		if (range <= self->pmai.settings.ranges.max_sight && eTarget->light_level >= 5) {
 			// Do a melee attack if enemy is in melee range.
-			//if (range <= self->pmai.settings.ranges.melee) {
-			//	//if (eTarget->show_hostile < level.time)
-			//	//return false;
-			//}
+//			if (range <= self->pmai.settings.ranges.melee) {
+
+//			}
 			//// Return false if an enemy isn't in front FOV range of the AI for combat.
 			//else 
 			if (range <= self->pmai.settings.ranges.hostility) {
-				// Ensure we are on the floor
-
 				// Determine at random whether to attack, only if on the floor though.
-				if (random() > 0.65 && M_CheckBottom(self)) {
+				if (random() > 0.85 ) {
 					// Setup the attack think.
 					self->nextthink = level.time + 0.05;
 					self->think = PMover_AttackThink;
@@ -292,7 +289,7 @@ void PMover_Think(edict_t* self) {
 	//-------------------------------------------------------------------------
 	// Actual processing of movement code.
 	//-------------------------------------------------------------------------
-	// Determine the animation to use based on input cmd.
+	// Process current animation.
 	PMAI_ProcessAnimation(self);
 
 	// Execute the player movement using the given "AI Player Input"
@@ -328,8 +325,8 @@ void PMover_AttackAnimation_Callback(edict_t* self, int animationID, int current
 		return;
 	}
 
-	// In case we've reached the last frame...
-	if (currentFrame == FRAME_attack6) {
+	// In case we've reached the assault fire frame
+	if (currentFrame == FRAME_attack2) {
 		// Angular vectors.
 		vec3_t dir, forward, right;
 		vec3_t vecDist;
@@ -338,8 +335,8 @@ void PMover_AttackAnimation_Callback(edict_t* self, int animationID, int current
 		vec3_t start;
 
 		// Color.
-		int color = BLASTER_GREEN;	// ORANGE = 1, GREEN = 2, BLUE = 3, RED = 4
-		int effect = EF_BLASTER;
+		int color	= BLASTER_GREEN;	// ORANGE = 1, GREEN = 2, BLUE = 3, RED = 4
+		int effect	= EF_BLASTER;
 
 		// Calculate direction to shoot at.
 		VectorCopy(self->s.angles, dir);
@@ -349,14 +346,11 @@ void PMover_AttackAnimation_Callback(edict_t* self, int animationID, int current
 
 		// Calculate start vector.
 		VectorCopy(self->s.origin, start);
-		start[2] += self->pmai.settings.view.height - 4;
+		start[1] += 6;
+		start[2] += self->pmai.settings.view.height - 11;
 
 		// Fire away!
 		pmover_fire_blaster(self, start, forward, 20, 600, 1, effect, color);
-		// Start calculating the start and offset endfor forward tracing.
-		//VectorSet(offset, 0, 0, 0);
-		//G_ProjectSource(self->s.origin, offset, forward, right, start);
-		// Fire the gun.
 	}
 
 	// End of animation, return to default thinking.
@@ -374,12 +368,23 @@ void PMover_AttackThink(edict_t* self) {
 	// Process animation.
 	PMAI_ProcessAnimation(self);
 
-	// Ensure we are idle.
-	self->pmai.pmove.cmd.msec = 30;
-	self->pmai.pmove.cmd.forwardmove = 0;
-	self->pmai.pmove.cmd.upmove = 0;
+	//// Ensure we are idle.
+	memset(&self->pmai.movement.cmd, 0, sizeof(usercmd_t));
+	self->pmai.movement.cmd.msec = 30;
+	self->pmai.movement.cmd.forwardmove = 0;
+	self->pmai.movement.cmd.upmove = 0;
 
-	// Execute the player movement (so he can fall and what not)
+	//// Setup the angles..
+	vec3_t dir;
+	vec3_t vecDist;
+	VectorCopy(self->s.angles, dir);
+	VectorSubtract(self->pmai.targets.enemy.entity->s.origin, self->s.origin, vecDist);
+	vectoangles2(vecDist, dir); // used for aiming at the player always.
+
+	self->pmai.movement.cmd.angles[YAW]	= ANGLE2SHORT(vecDist[YAW]);
+	self->pmai.movement.cmd.angles[PITCH]	= ANGLE2SHORT(vecDist[PITCH]); // TODO: REMOVE.
+
+	//// Execute the player movement (so he can fall and what not)
 	PMAI_ProcessMovement(self);
 }
 
@@ -426,12 +431,13 @@ void PMover_PainThink(edict_t* self)
 	// Process animation.
 	PMAI_ProcessAnimation(self);
 
-	// Ensure we are idle.
-	self->pmai.pmove.cmd.msec = 30;
-	self->pmai.pmove.cmd.forwardmove = 0;
-	self->pmai.pmove.cmd.upmove = 0;
+	//// Ensure we are idle.
+	memset(&self->pmai.movement.cmd, 0, sizeof(usercmd_t));
+	self->pmai.movement.cmd.msec = 30;
+	self->pmai.movement.cmd.forwardmove = 0;
+	self->pmai.movement.cmd.upmove = 0;
 
-	// Execute the player movement (so he can fall and what not)
+	//// Execute the player movement (so he can fall and what not)
 	PMAI_ProcessMovement(self);
 }
 

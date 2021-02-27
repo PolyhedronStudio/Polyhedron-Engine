@@ -338,14 +338,14 @@ qboolean PMAI_CheckEyes(edict_t* self, usercmd_t* ucmd)
 	if (traceFront.contents & 0x8000000) // using detail brush here cuz sometimes it does not pick up ladders...??
 	{
 		ucmd->upmove = 400;
-		ucmd->forwardmove = 400;
+		ucmd->forwardmove = 240;
 		return true;
 	}
 
 	// If this check fails we need to continue on with more detailed checks
 	if (traceFront.fraction == 1)
 	{
-		ucmd->forwardmove = 400;
+		ucmd->forwardmove = 240;
 		return true;
 	}
 
@@ -380,12 +380,12 @@ qboolean PMAI_CheckEyes(edict_t* self, usercmd_t* ucmd)
 		// If the upper trace is not open, we need to turn.
 		if (traceUp.fraction != 1)
 		{
-			if (traceRight.fraction > traceLeft.fraction)
-				self->s.angles[YAW] += (1.0 - traceLeft.fraction) * 45.0;
-			else
-				self->s.angles[YAW] += -(1.0 - traceRight.fraction) * 45.0;
+			//if (traceRight.fraction > traceLeft.fraction)
+			//	self->s.angles[YAW] += (1.0 - traceLeft.fraction) * 45.0;
+			//else
+			//	self->s.angles[YAW] += -(1.0 - traceRight.fraction) * 45.0;
 
-			ucmd->forwardmove = 400;
+			ucmd->forwardmove = 240;
 			return true;
 		}
 	}
