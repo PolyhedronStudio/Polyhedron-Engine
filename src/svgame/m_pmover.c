@@ -70,11 +70,11 @@ void PMover_FillAnimations(edict_t* self) {
 	// 3 == jump1
 	PMAI_FillAnimation(self, 3, FRAME_jump1,	FRAME_jump6,	true);
 	// 17 == death101
-	PMAI_FillAnimation(self, 17, FRAME_death101, FRAME_death106, true);
+	PMAI_FillAnimation(self, 17, FRAME_death101, FRAME_death106, false);
 	// 18 == death201
-	PMAI_FillAnimation(self, 18, FRAME_death201, FRAME_death206, true);
+	PMAI_FillAnimation(self, 18, FRAME_death201, FRAME_death206, false);
 	// 19 == death301
-	PMAI_FillAnimation(self, 19, FRAME_death301, FRAME_death308, true);
+	PMAI_FillAnimation(self, 19, FRAME_death301, FRAME_death308, false);
 }
 
 //
@@ -186,9 +186,9 @@ void PMover_DetectAnimation(edict_t* self, usercmd_t* movecmd) {
 // Handles playing of the actual current animation.
 //===============
 //
-void PMover_ProcessAnimation(edict_t* self, usercmd_t* movecmd) {
+void PMover_ProcessAnimation(edict_t* self) {
 	// Ensure it is valid.
-	if (!self || !movecmd)
+	if (!self)
 		return;
 
 	// TODO: This will be moved elsewhere.
@@ -198,9 +198,34 @@ void PMover_ProcessAnimation(edict_t* self, usercmd_t* movecmd) {
 	// Find the current animationID.
 	int animationID = self->pmai.animations.current;
 
+	// Calculate the frame to use, and whether to reset animation.
+	int frameIndex = self->pmai.animations.list[animationID].startframe + self->pmai.animations.list[animationID].currentframe;
+
+	// Check whether the animation needs a reset to loop.
+	if (self->pmai.animations.list[animationID].loop == true) {
+		if (frameIndex > self->pmai.animations.list[animationID].endframe) {
+			// Reset currentframe.
+			self->pmai.animations.list[animationID].currentframe = 0;
+
+			// Recalculate frame index.
+			frameIndex = self->pmai.animations.list[animationID].startframe + self->pmai.animations.list[animationID].currentframe;
+		}
+	} 
+	// No looping, make sure it clamps.
+	else {
+		// In case we aren't looping, and exceeding, clamp the animation frames.
+		if (frameIndex > self->pmai.animations.list[animationID].endframe) {
+			// Reset.
+			frameIndex = self->pmai.animations.list[animationID].currentframe = self->pmai.animations.list[animationID].endframe;
+		}
+	}
+
+	// Assign the animation frame to the entity state.
+	self->s.frame = frameIndex;
+
 	// Process animation.
-	// Silly hack for the 20 fps, right now this model is meant for 10 fps...
-	static int firstFramePass = true;
+// Silly hack for the 20 fps, right now this model is meant for 10 fps...
+	static int firstFramePass = false;
 
 	if (firstFramePass == false) {
 		self->pmai.animations.list[animationID].currentframe++;
@@ -210,19 +235,6 @@ void PMover_ProcessAnimation(edict_t* self, usercmd_t* movecmd) {
 		firstFramePass = false;
 	}
 	// End Silly hack for the 20 fps, right now this model is meant for 10 fps...
-
-	// Calculate the frame to use, and whether to reset animation.
-	int frameIndex = self->pmai.animations.list[animationID].startframe + self->pmai.animations.list[animationID].currentframe;
-
-	// Check whether the animation needs a reset to loop.
-	if (self->pmai.animations.list[animationID].loop == true) {
-		if (frameIndex > self->pmai.animations.list[animationID].endframe) {
-			frameIndex = self->pmai.animations.list[animationID].startframe;
-		}
-	}
-
-	// Assign the animation frame to the entity state.
-	self->s.frame = frameIndex;
 }
 
 //
@@ -233,7 +245,6 @@ void PMover_ProcessAnimation(edict_t* self, usercmd_t* movecmd) {
 //===============
 //
 void PMover_Think(edict_t* self) {
-
 	// Clear the user input.
 	usercmd_t* movecmd = &self->pmai.movement.cmd;
 	memset(movecmd, 0, sizeof(movecmd));
@@ -309,7 +320,7 @@ void PMover_Think(edict_t* self) {
 	// Actual processing of movement code.
 	//-------------------------------------------------------------------------
 	// Determine the animation to use based on input cmd.
-	PMover_ProcessAnimation(self, movecmd);
+	PMover_ProcessAnimation(self);
 
 	// Execute the player movement using the given "AI Player Input"
 	PMAI_ProcessMovement(self);
@@ -337,6 +348,22 @@ void PMover_Think(edict_t* self) {
 void PMover_Pain(edict_t* self, edict_t* other, float kick, int damage)
 {
 
+}
+
+//
+//===============
+// PMover_DeadThink
+// 
+// Called for processing the death animation in case the AI is dead.
+//===============
+//
+void PMover_DeadThink(edict_t* self) {
+	// Process animation.
+	PMover_ProcessAnimation(self);
+
+	// Next frame.
+	self->nextthink = 0.05;
+	self->think = PMover_DeadThink;
 }
 
 //
@@ -379,7 +406,8 @@ void PMover_Die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
 		// Change the movetype and add SVF_DEADMONSTER to sv flags.
 		self->movetype = MOVETYPE_TOSS;
 		self->svflags |= SVF_DEADMONSTER;
-		self->nextthink = 0;
+		self->nextthink = 0.05;
+		self->think = PMover_DeadThink;
 
 		// Last but not least, relink the entity into the world.
 		gi.linkentity(self);
@@ -387,6 +415,8 @@ void PMover_Die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
 		// Check for flies.
 		M_FlyCheck(self);
 
+		// Setup death animation.
+		PMover_SetAnimation(self, 17);
 		// Lazarus monster fade
 		//if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 		//{
@@ -437,7 +467,7 @@ void SP_monster_pmover(edict_t* self)
 	if (!self->health)
 		self->health = 100;
 	if (!self->gib_health)
-		self->gib_health = 0;
+		self->gib_health = -20;
 	if (!self->mass)
 		self->mass = 200;
 
