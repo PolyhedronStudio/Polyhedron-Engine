@@ -69,6 +69,14 @@ void PMover_FillAnimations(edict_t* self) {
 	PMAI_FillAnimation(self, 2, FRAME_crwalk1,	FRAME_crwalk6,	true);
 	// 3 == jump1
 	PMAI_FillAnimation(self, 3, FRAME_jump1,	FRAME_jump6,	true);
+
+	// 14 == pain1
+	PMAI_FillAnimation(self, 14, FRAME_pain101, FRAME_pain104, false);
+	// 15 == pain2
+	PMAI_FillAnimation(self, 15, FRAME_pain201, FRAME_pain204, false);
+	// 16 == pain3
+	PMAI_FillAnimation(self, 16, FRAME_pain301, FRAME_pain304, false);
+
 	// 17 == death101
 	PMAI_FillAnimation(self, 17, FRAME_death101, FRAME_death106, false);
 	// 18 == death201
