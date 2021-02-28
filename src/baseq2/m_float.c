@@ -523,7 +523,7 @@ void floater_zap(edict_t *self)
     gi.sound(self, CHAN_WEAPON, sound_attack2, 1, ATTN_NORM, 0);
 
     //FIXME use the flash, Luke
-    gi.WriteByte(svc_temp_entity);
+    gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_SPLASH);
     gi.WriteByte(32);
     gi.WritePosition(origin);

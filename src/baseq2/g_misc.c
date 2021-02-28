@@ -296,7 +296,7 @@ void ThrowDebris(edict_t *self, char *modelname, float speed, vec3_t origin)
 
 void BecomeExplosion1(edict_t *self)
 {
-    gi.WriteByte(svc_temp_entity);
+    gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_EXPLOSION1);
     gi.WritePosition(self->s.origin);
     gi.multicast(self->s.origin, MULTICAST_PVS);
@@ -307,7 +307,7 @@ void BecomeExplosion1(edict_t *self)
 
 void BecomeExplosion2(edict_t *self)
 {
-    gi.WriteByte(svc_temp_entity);
+    gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_EXPLOSION2);
     gi.WritePosition(self->s.origin);
     gi.multicast(self->s.origin, MULTICAST_PVS);
@@ -969,7 +969,7 @@ void SP_misc_explobox(edict_t *self)
 void misc_blackhole_use(edict_t *ent, edict_t *other, edict_t *activator)
 {
     /*
-    gi.WriteByte (svc_temp_entity);
+    gi.WriteByte (svg_temp_entity);
     gi.WriteByte (TE_BOSSTPORT);
     gi.WritePosition (ent->s.origin);
     gi.multicast (ent->s.origin, MULTICAST_PVS);

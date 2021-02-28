@@ -57,7 +57,6 @@ char *SV_GetSaveInfo(const char *dir);
 
 
 // user.c
-//int SV_PMTypeForClient(client_t* cl, edict_t* ent);
 void SV_PreRunCmd(void);
 void SV_RunCmdCleanup(void);
 

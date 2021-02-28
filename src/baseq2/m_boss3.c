@@ -28,7 +28,7 @@ boss3
 
 void Use_Boss3(edict_t *ent, edict_t *other, edict_t *activator)
 {
-    gi.WriteByte(svc_temp_entity);
+    gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_BOSSTPORT);
     gi.WritePosition(ent->s.origin);
     gi.multicast(ent->s.origin, MULTICAST_PVS);

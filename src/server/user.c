@@ -26,41 +26,6 @@ USER PLAYER MOVEMENT
 
 ============================================================
 */
-//
-//===============
-// SV_PMTypeForClient
-// 
-// Returns the player movetype for a "client", on an "entity'.
-// used by RunPlayerPhysics.
-//===============
-//
-int SV_PMTypeForClient(client_t* cl, edict_t* ent)
-{
-    return PM_NORMAL;
-    //switch ((int)ent->v->movetype)
-    //{
-    //case MOVETYPE_NOCLIP:
-    //    return PM_SPECTATOR;
-
-    //// TODO: Implement.
-    ////case MOVETYPE_FLY:
-    ////    return PM_FLY;
-    //// TODO: Implement.
-    ////case MOVETYPE_NONE:
-    ////    return PM_NONE;
-
-    //case MOVETYPE_TOSS:
-    //case MOVETYPE_BOUNCE:
-    //    return PM_DEAD;
-
-    //case MOVETYPE_WALK:
-    //default:
-    //    if (cl && ent->v->health <= 0)
-    //        return PM_DEAD;
-    //    return PM_NORMAL;
-    //}
-}
-
 
 //
 //===============

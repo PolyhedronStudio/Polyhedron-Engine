@@ -20,8 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 game_locals_t   game;
 level_locals_t  level;
-game_import_t   gi;
-game_export_t   globals;
+svgame_import_t   gi;       // CLEANUP: These were game_import_t and game_export_t
+svgame_export_t   globals;  // CLEANUP: These were game_import_t and game_export_t
 spawn_temp_t    st;
 
 int sm_meat_index;
@@ -203,13 +203,13 @@ void InitGame(void)
 
 /*
 =================
-GetGameAPI
+GetServerGameAPI
 
 Returns a pointer to the structure with all entry points
 and global variables
 =================
 */
-q_exported game_export_t *GetGameAPI(game_import_t *import)
+svgame_export_t* GetServerGameAPI(svgame_import_t* import)
 {
     gi = *import;
 
@@ -229,6 +229,9 @@ q_exported game_export_t *GetGameAPI(game_import_t *import)
     globals.ClientDisconnect = ClientDisconnect;
     globals.ClientBegin = ClientBegin;
     globals.ClientCommand = ClientCommand;
+
+    globals.PmoveInit = PmoveInit;
+    globals.PmoveEnableQW = PmoveEnableQW;
 
     globals.RunFrame = G_RunFrame;
 

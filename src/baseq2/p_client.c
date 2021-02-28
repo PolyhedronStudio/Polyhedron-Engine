@@ -922,7 +922,7 @@ void CopyToBodyQue(edict_t *ent)
 
     // send an effect on the removed body
     if (body->s.modelindex) {
-        gi.WriteByte(svc_temp_entity);
+        gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_BLOOD);
         gi.WritePosition(body->s.origin);
         gi.WriteDir(vec3_origin);
@@ -997,9 +997,11 @@ void spectator_respawn(edict_t *ent)
             strcmp(spectator_password->string, value)) {
             gi.cprintf(ent, PRINT_HIGH, "Spectator password incorrect.\n");
             ent->client->pers.spectator = qfalse;
-            gi.WriteByte(svc_stufftext);
-            gi.WriteString("spectator 0\n");
+            // CLEANUP: Stuffcmd
+            //gi.WriteByte(svg_stufftext);
+            //gi.WriteString("spectator 0\n");
             gi.unicast(ent, qtrue);
+            gi.stuffcmd(ent, "spectator 0\n");
             return;
         }
 
@@ -1012,9 +1014,10 @@ void spectator_respawn(edict_t *ent)
             gi.cprintf(ent, PRINT_HIGH, "Server spectator limit is full.");
             ent->client->pers.spectator = qfalse;
             // reset his spectator var
-            gi.WriteByte(svc_stufftext);
-            gi.WriteString("spectator 0\n");
-            gi.unicast(ent, qtrue);
+            //gi.WriteByte(svg_stufftext);
+            //gi.WriteString("spectator 0\n");
+            //gi.unicast(ent, qtrue);
+            gi.stuffcmd(ent, "spectator 0\n");
             return;
         }
     } else {
@@ -1025,9 +1028,10 @@ void spectator_respawn(edict_t *ent)
             strcmp(password->string, value)) {
             gi.cprintf(ent, PRINT_HIGH, "Password incorrect.\n");
             ent->client->pers.spectator = qtrue;
-            gi.WriteByte(svc_stufftext);
-            gi.WriteString("spectator 1\n");
-            gi.unicast(ent, qtrue);
+            //gi.WriteByte(svg_stufftext);
+            //gi.WriteString("spectator 1\n");
+            //gi.unicast(ent, qtrue);
+            gi.stuffcmd(ent, "spectator 0\n");
             return;
         }
     }
@@ -1041,7 +1045,7 @@ void spectator_respawn(edict_t *ent)
     // add a teleportation effect
     if (!ent->client->pers.spectator)  {
         // send effect
-        gi.WriteByte(svc_muzzleflash);
+        gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
         gi.WriteByte(MZ_LOGIN);
         gi.multicast(ent->s.origin, MULTICAST_PVS);
@@ -1243,7 +1247,7 @@ void ClientBeginDeathmatch(edict_t *ent)
         MoveClientToIntermission(ent);
     } else {
         // send effect
-        gi.WriteByte(svc_muzzleflash);
+        gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
         gi.WriteByte(MZ_LOGIN);
         gi.multicast(ent->s.origin, MULTICAST_PVS);
@@ -1299,7 +1303,7 @@ void ClientBegin(edict_t *ent)
     } else {
         // send effect if in a multiplayer game
         if (game.maxclients > 1) {
-            gi.WriteByte(svc_muzzleflash);
+            gi.WriteByte(svg_muzzleflash);
             gi.WriteShort(ent - g_edicts);
             gi.WriteByte(MZ_LOGIN);
             gi.multicast(ent->s.origin, MULTICAST_PVS);
@@ -1470,7 +1474,7 @@ void ClientDisconnect(edict_t *ent)
 
     // send effect
     if (ent->inuse) {
-        gi.WriteByte(svc_muzzleflash);
+        gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
         gi.WriteByte(MZ_LOGOUT);
         gi.multicast(ent->s.origin, MULTICAST_PVS);
@@ -1591,7 +1595,8 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         pm.pointcontents = gi.pointcontents;
 
         // perform a pmove
-        gi.Pmove(&pm);
+        //gi.Pmove(&pm);
+        Pmove(&pm, gi.GetPMoveParams());
 
         // save results of pmove
         client->ps.pmove = pm.s;

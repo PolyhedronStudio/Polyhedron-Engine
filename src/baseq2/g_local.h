@@ -25,20 +25,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // because we define the full size ones in this file
 #define GAME_INCLUDE
 #include "shared/game.h"
+#include "sharedgame/protocol.h"
 
 // features this game supports
 #define G_FEATURES  (GMF_PROPERINUSE|GMF_WANT_ALL_DISCONNECTS|GMF_ENHANCED_SAVEGAMES)
 
 // the "gameversion" client command will print this plus compile date
-#define GAMEVERSION "baseq2"
+#define GAMEVERSION "basenac"
 
 // protocol bytes that can be directly added to messages
-#define svc_muzzleflash     1
-#define svc_muzzleflash2    2
-#define svc_temp_entity     3
-#define svc_layout          4
-#define svc_inventory       5
-#define svc_stufftext       11
+//#define	svg_muzzleflash		1
+//#define	svg_muzzleflash2	2
+//#define	svg_temp_entity		3
+//#define	svg_layout			4
+//#define	svg_inventory		5
+//#define	svc_stufftext		11
 
 //==================================================================
 
@@ -441,8 +442,8 @@ typedef struct {
 
 extern  game_locals_t   game;
 extern  level_locals_t  level;
-extern  game_import_t   gi;
-extern  game_export_t   globals;
+extern  svgame_import_t gi;         // CLEANUP: These were game_import_t and game_export_T
+extern  svgame_export_t globals;    // CLEANUP: These were game_import_t and game_export_T
 extern  spawn_temp_t    st;
 
 extern  int sm_meat_index;
