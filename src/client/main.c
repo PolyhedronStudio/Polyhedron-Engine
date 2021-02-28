@@ -50,8 +50,8 @@ cvar_t  *cl_player_model;
 cvar_t  *cl_thirdperson_angle;
 cvar_t  *cl_thirdperson_range;
 
-cvar_t  *cl_disable_particles;
-cvar_t  *cl_disable_explosions;
+//cvar_t  *cl_disable_particles;
+//cvar_t  *cl_disable_explosions;
 //cvar_t  *cl_chat_notify;
 //cvar_t  *cl_chat_sound;
 //cvar_t  *cl_chat_filter;

@@ -238,7 +238,9 @@ static void CLG_LoadClientModels(void)
 {
     // Register view weapon models.
     CLG_RegisterVWepModels();
-    CLG_RegisterTempEntitySounds();
+    
+    // Register Temp Entity models.
+    CLG_RegisterTempEntityModels();
 }
 
 //
@@ -262,7 +264,8 @@ static void CLG_LoadClientImages(void)
 //
 static void CLG_LoadClientSounds(void)
 {    
-    // ...
+    // Register temp entity sounds.
+    CLG_RegisterTempEntitySounds();
 }
 
 //
