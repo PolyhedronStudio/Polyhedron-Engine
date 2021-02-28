@@ -60,15 +60,15 @@ SET(SRC_SVGAME
 )
 
 SET(HEADERS_SVGAME
-	baseq2/svgame.def
+	svgame/svgame.def
 
-	baseq2/g_local.h
-	baseq2/g_ptrs.h
+	svgame/g_local.h
+	svgame/g_ptrs.h
 
-	baseq2/m_gunner.h
-	baseq2/m_infantry.h
-	baseq2/m_player.h
-	baseq2/m_soldier.h
+	svgame/m_gunner.h
+	svgame/m_infantry.h
+	svgame/m_player.h
+	svgame/m_soldier.h
 )
 
 ###################### Client.
