@@ -47,6 +47,15 @@ SET(SRC_SVGAME
 	svgame/utils.c
 	svgame/weapons.c
 
+	svgame/entities/func_areaportal.c
+	svgame/entities/func_group.c
+	svgame/entities/info_notnull.c
+	svgame/entities/info_null.c
+	svgame/entities/light.c
+	svgame/entities/path_corner.c
+	svgame/entities/point_combat.c
+	svgame/entities/viewthing.c
+
 	svgame/monsters/movement.c
 	svgame/monsters/soldier.c
 

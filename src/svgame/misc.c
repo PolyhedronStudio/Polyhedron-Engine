@@ -26,24 +26,24 @@ Used to group brushes together just for editor convenience.
 
 //=====================================================
 
-void Use_Areaportal(edict_t *ent, edict_t *other, edict_t *activator)
-{
-    ent->count ^= 1;        // toggle state
-//  gi.dprintf ("portalstate: %i = %i\n", ent->style, ent->count);
-    gi.SetAreaPortalState(ent->style, ent->count);
-}
-
-/*QUAKED func_areaportal (0 0 0) ?
-
-This is a non-visible object that divides the world into
-areas that are seperated when this portal is not activated.
-Usually enclosed in the middle of a door.
-*/
-void SP_func_areaportal(edict_t *ent)
-{
-    ent->use = Use_Areaportal;
-    ent->count = 0;     // always start closed;
-}
+//void Use_Areaportal(edict_t *ent, edict_t *other, edict_t *activator)
+//{
+//    ent->count ^= 1;        // toggle state
+////  gi.dprintf ("portalstate: %i = %i\n", ent->style, ent->count);
+//    gi.SetAreaPortalState(ent->style, ent->count);
+//}
+//
+///*QUAKED func_areaportal (0 0 0) ?
+//
+//This is a non-visible object that divides the world into
+//areas that are seperated when this portal is not activated.
+//Usually enclosed in the middle of a door.
+//*/
+//void SP_func_areaportal(edict_t *ent)
+//{
+//    ent->use = Use_Areaportal;
+//    ent->count = 0;     // always start closed;
+//}
 
 //=====================================================
 
@@ -322,183 +322,183 @@ Pathtarget: gets used when an entity that has
     this path_corner targeted touches it
 */
 
-void path_corner_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-    vec3_t      v;
-    edict_t     *next;
-
-    if (other->movetarget != self)
-        return;
-
-    if (other->enemy)
-        return;
-
-    if (self->pathtarget) {
-        char *savetarget;
-
-        savetarget = self->target;
-        self->target = self->pathtarget;
-        G_UseTargets(self, other);
-        self->target = savetarget;
-    }
-
-    if (self->target)
-        next = G_PickTarget(self->target);
-    else
-        next = NULL;
-
-    if ((next) && (next->spawnflags & 1)) {
-        VectorCopy(next->s.origin, v);
-        v[2] += next->mins[2];
-        v[2] -= other->mins[2];
-        VectorCopy(v, other->s.origin);
-        next = G_PickTarget(next->target);
-        other->s.event = EV_OTHER_TELEPORT;
-    }
-
-    other->goalentity = other->movetarget = next;
-
-    if (self->wait) {
-        other->monsterinfo.pausetime = level.time + self->wait;
-        other->monsterinfo.stand(other);
-        return;
-    }
-
-    if (!other->movetarget) {
-        other->monsterinfo.pausetime = level.time + 100000000;
-        other->monsterinfo.stand(other);
-    } else {
-        VectorSubtract(other->goalentity->s.origin, other->s.origin, v);
-        other->ideal_yaw = vectoyaw(v);
-    }
-}
-
-void SP_path_corner(edict_t *self)
-{
-    if (!self->targetname) {
-        gi.dprintf("path_corner with no targetname at %s\n", vtos(self->s.origin));
-        G_FreeEdict(self);
-        return;
-    }
-
-    self->solid = SOLID_TRIGGER;
-    self->touch = path_corner_touch;
-    VectorSet(self->mins, -8, -8, -8);
-    VectorSet(self->maxs, 8, 8, 8);
-    self->svflags |= SVF_NOCLIENT;
-    gi.linkentity(self);
-}
-
-
-/*QUAKED point_combat (0.5 0.3 0) (-8 -8 -8) (8 8 8) Hold
-Makes this the target of a monster and it will head here
-when first activated before going after the activator.  If
-hold is selected, it will stay here.
-*/
-void point_combat_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-    edict_t *activator;
-
-    if (other->movetarget != self)
-        return;
-
-    if (self->target) {
-        other->target = self->target;
-        other->goalentity = other->movetarget = G_PickTarget(other->target);
-        if (!other->goalentity) {
-            gi.dprintf("%s at %s target %s does not exist\n", self->classname, vtos(self->s.origin), self->target);
-            other->movetarget = self;
-        }
-        self->target = NULL;
-    } else if ((self->spawnflags & 1) && !(other->flags & (FL_SWIM | FL_FLY))) {
-        other->monsterinfo.pausetime = level.time + 100000000;
-        other->monsterinfo.aiflags |= AI_STAND_GROUND;
-        other->monsterinfo.stand(other);
-    }
-
-    if (other->movetarget == self) {
-        other->target = NULL;
-        other->movetarget = NULL;
-        other->goalentity = other->enemy;
-        other->monsterinfo.aiflags &= ~AI_COMBAT_POINT;
-    }
-
-    if (self->pathtarget) {
-        char *savetarget;
-
-        savetarget = self->target;
-        self->target = self->pathtarget;
-        if (other->enemy && other->enemy->client)
-            activator = other->enemy;
-        else if (other->oldenemy && other->oldenemy->client)
-            activator = other->oldenemy;
-        else if (other->activator && other->activator->client)
-            activator = other->activator;
-        else
-            activator = other;
-        G_UseTargets(self, activator);
-        self->target = savetarget;
-    }
-}
-
-void SP_point_combat(edict_t *self)
-{
-    if (deathmatch->value) {
-        G_FreeEdict(self);
-        return;
-    }
-    self->solid = SOLID_TRIGGER;
-    self->touch = point_combat_touch;
-    VectorSet(self->mins, -8, -8, -16);
-    VectorSet(self->maxs, 8, 8, 16);
-    self->svflags = SVF_NOCLIENT;
-    gi.linkentity(self);
-}
+//void path_corner_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+//{
+//    vec3_t      v;
+//    edict_t     *next;
+//
+//    if (other->movetarget != self)
+//        return;
+//
+//    if (other->enemy)
+//        return;
+//
+//    if (self->pathtarget) {
+//        char *savetarget;
+//
+//        savetarget = self->target;
+//        self->target = self->pathtarget;
+//        G_UseTargets(self, other);
+//        self->target = savetarget;
+//    }
+//
+//    if (self->target)
+//        next = G_PickTarget(self->target);
+//    else
+//        next = NULL;
+//
+//    if ((next) && (next->spawnflags & 1)) {
+//        VectorCopy(next->s.origin, v);
+//        v[2] += next->mins[2];
+//        v[2] -= other->mins[2];
+//        VectorCopy(v, other->s.origin);
+//        next = G_PickTarget(next->target);
+//        other->s.event = EV_OTHER_TELEPORT;
+//    }
+//
+//    other->goalentity = other->movetarget = next;
+//
+//    if (self->wait) {
+//        other->monsterinfo.pausetime = level.time + self->wait;
+//        other->monsterinfo.stand(other);
+//        return;
+//    }
+//
+//    if (!other->movetarget) {
+//        other->monsterinfo.pausetime = level.time + 100000000;
+//        other->monsterinfo.stand(other);
+//    } else {
+//        VectorSubtract(other->goalentity->s.origin, other->s.origin, v);
+//        other->ideal_yaw = vectoyaw(v);
+//    }
+//}
+//
+//void SP_path_corner(edict_t *self)
+//{
+//    if (!self->targetname) {
+//        gi.dprintf("path_corner with no targetname at %s\n", vtos(self->s.origin));
+//        G_FreeEdict(self);
+//        return;
+//    }
+//
+//    self->solid = SOLID_TRIGGER;
+//    self->touch = path_corner_touch;
+//    VectorSet(self->mins, -8, -8, -8);
+//    VectorSet(self->maxs, 8, 8, 8);
+//    self->svflags |= SVF_NOCLIENT;
+//    gi.linkentity(self);
+//}
 
 
-/*QUAKED viewthing (0 .5 .8) (-8 -8 -8) (8 8 8)
-Just for the debugging level.  Don't use
-*/
-void TH_viewthing(edict_t *ent)
-{
-    ent->s.frame = (ent->s.frame + 1) % 7;
-    ent->nextthink = level.time + FRAMETIME;
-}
+///*QUAKED point_combat (0.5 0.3 0) (-8 -8 -8) (8 8 8) Hold
+//Makes this the target of a monster and it will head here
+//when first activated before going after the activator.  If
+//hold is selected, it will stay here.
+//*/
+//void point_combat_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+//{
+//    edict_t *activator;
+//
+//    if (other->movetarget != self)
+//        return;
+//
+//    if (self->target) {
+//        other->target = self->target;
+//        other->goalentity = other->movetarget = G_PickTarget(other->target);
+//        if (!other->goalentity) {
+//            gi.dprintf("%s at %s target %s does not exist\n", self->classname, vtos(self->s.origin), self->target);
+//            other->movetarget = self;
+//        }
+//        self->target = NULL;
+//    } else if ((self->spawnflags & 1) && !(other->flags & (FL_SWIM | FL_FLY))) {
+//        other->monsterinfo.pausetime = level.time + 100000000;
+//        other->monsterinfo.aiflags |= AI_STAND_GROUND;
+//        other->monsterinfo.stand(other);
+//    }
+//
+//    if (other->movetarget == self) {
+//        other->target = NULL;
+//        other->movetarget = NULL;
+//        other->goalentity = other->enemy;
+//        other->monsterinfo.aiflags &= ~AI_COMBAT_POINT;
+//    }
+//
+//    if (self->pathtarget) {
+//        char *savetarget;
+//
+//        savetarget = self->target;
+//        self->target = self->pathtarget;
+//        if (other->enemy && other->enemy->client)
+//            activator = other->enemy;
+//        else if (other->oldenemy && other->oldenemy->client)
+//            activator = other->oldenemy;
+//        else if (other->activator && other->activator->client)
+//            activator = other->activator;
+//        else
+//            activator = other;
+//        G_UseTargets(self, activator);
+//        self->target = savetarget;
+//    }
+//}
+//
+//void SP_point_combat(edict_t *self)
+//{
+//    if (deathmatch->value) {
+//        G_FreeEdict(self);
+//        return;
+//    }
+//    self->solid = SOLID_TRIGGER;
+//    self->touch = point_combat_touch;
+//    VectorSet(self->mins, -8, -8, -16);
+//    VectorSet(self->maxs, 8, 8, 16);
+//    self->svflags = SVF_NOCLIENT;
+//    gi.linkentity(self);
+//}
 
-void SP_viewthing(edict_t *ent)
-{
-    gi.dprintf("viewthing spawned\n");
 
-    ent->movetype = MOVETYPE_NONE;
-    ent->solid = SOLID_BBOX;
-    ent->s.renderfx = RF_FRAMELERP;
-    VectorSet(ent->mins, -16, -16, -24);
-    VectorSet(ent->maxs, 16, 16, 32);
-    ent->s.modelindex = gi.modelindex("models/objects/banner/tris.md2");
-    gi.linkentity(ent);
-    ent->nextthink = level.time + 0.5;
-    ent->think = TH_viewthing;
-    return;
-}
+///*QUAKED viewthing (0 .5 .8) (-8 -8 -8) (8 8 8)
+//Just for the debugging level.  Don't use
+//*/
+//void TH_viewthing(edict_t *ent)
+//{
+//    ent->s.frame = (ent->s.frame + 1) % 7;
+//    ent->nextthink = level.time + FRAMETIME;
+//}
+//
+//void SP_viewthing(edict_t *ent)
+//{
+//    gi.dprintf("viewthing spawned\n");
+//
+//    ent->movetype = MOVETYPE_NONE;
+//    ent->solid = SOLID_BBOX;
+//    ent->s.renderfx = RF_FRAMELERP;
+//    VectorSet(ent->mins, -16, -16, -24);
+//    VectorSet(ent->maxs, 16, 16, 32);
+//    ent->s.modelindex = gi.modelindex("models/objects/banner/tris.md2");
+//    gi.linkentity(ent);
+//    ent->nextthink = level.time + 0.5;
+//    ent->think = TH_viewthing;
+//    return;
+//}
 
 
-/*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)
-Used as a positional target for spotlights, etc.
-*/
-void SP_info_null(edict_t *self)
-{
-    G_FreeEdict(self);
-}
-
-
-/*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
-Used as a positional target for lightning.
-*/
-void SP_info_notnull(edict_t *self)
-{
-    VectorCopy(self->s.origin, self->absmin);
-    VectorCopy(self->s.origin, self->absmax);
-}
+///*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)
+//Used as a positional target for spotlights, etc.
+//*/
+//void SP_info_null(edict_t *self)
+//{
+//    G_FreeEdict(self);
+//}
+//
+//
+///*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
+//Used as a positional target for lightning.
+//*/
+//void SP_info_notnull(edict_t *self)
+//{
+//    VectorCopy(self->s.origin, self->absmin);
+//    VectorCopy(self->s.origin, self->absmax);
+//}
 
 
 /*QUAKED light (0 1 0) (-8 -8 -8) (8 8 8) START_OFF
@@ -509,39 +509,39 @@ If targeted, will toggle between on and off.
 Default _cone value is 10 (used to set size of light for spotlights)
 */
 
-#define START_OFF   1
-
-void light_use(edict_t *self, edict_t *other, edict_t *activator)
-{
-    if (self->spawnflags & START_OFF) {
-        gi.configstring(CS_LIGHTS + self->style, "m");
-        self->spawnflags &= ~START_OFF;
-    } else {
-        gi.configstring(CS_LIGHTS + self->style, "a");
-        self->spawnflags |= START_OFF;
-    }
-}
-
-
-
-void SP_light(edict_t *self)
-{
-    // no targeted lights in deathmatch, because they cause global messages
-    if (!self->targetname || deathmatch->value) {
-        G_FreeEdict(self);
-        return;
-    }
-
-    if (self->style >= 32) {
-        self->use = light_use;
-        if (self->spawnflags & START_OFF)
-            gi.configstring(CS_LIGHTS + self->style, "a");
-        else
-            gi.configstring(CS_LIGHTS + self->style, "m");
-    }
-
-	
-}
+//#define START_OFF   1
+//
+//void light_use(edict_t *self, edict_t *other, edict_t *activator)
+//{
+//    if (self->spawnflags & START_OFF) {
+//        gi.configstring(CS_LIGHTS + self->style, "m");
+//        self->spawnflags &= ~START_OFF;
+//    } else {
+//        gi.configstring(CS_LIGHTS + self->style, "a");
+//        self->spawnflags |= START_OFF;
+//    }
+//}
+//
+//
+//
+//void SP_light(edict_t *self)
+//{
+//    // no targeted lights in deathmatch, because they cause global messages
+//    if (!self->targetname || deathmatch->value) {
+//        G_FreeEdict(self);
+//        return;
+//    }
+//
+//    if (self->style >= 32) {
+//        self->use = light_use;
+//        if (self->spawnflags & START_OFF)
+//            gi.configstring(CS_LIGHTS + self->style, "a");
+//        else
+//            gi.configstring(CS_LIGHTS + self->style, "m");
+//    }
+//
+//	
+//}
 
 
 /*QUAKED func_wall (0 .5 .8) ? TRIGGER_SPAWN TOGGLE START_ON ANIMATED ANIMATED_FAST
