@@ -396,15 +396,17 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 
     // clamp the move to 1/8 units, so the position will
     // be accurate for client side prediction
-    for (i = 0 ; i < 3 ; i++) {
-        float   temp;
-        temp = move[i] * 8.0;
-        if (temp > 0.0)
-            temp += 0.5;
-        else
-            temp -= 0.5;
-        move[i] = 0.125 * (int)temp;
-    }
+
+    // N&C: FF Precision.
+    //for (i = 0 ; i < 3 ; i++) {
+    //    float   temp;
+    //    temp = move[i] * 8.0;
+    //    if (temp > 0.0)
+    //        temp += 0.5;
+    //    else
+    //        temp -= 0.5;
+    //    move[i] = 0.125 * (int)temp;
+    //}
 
     // find the bounding box
     for (i = 0 ; i < 3 ; i++) {

@@ -1160,9 +1160,11 @@ void PutClientInServer(edict_t *ent)
     // clear playerstate values
     memset(&ent->client->ps, 0, sizeof(client->ps));
 
-    client->ps.pmove.origin[0] = spawn_origin[0] * 8;
-    client->ps.pmove.origin[1] = spawn_origin[1] * 8;
-    client->ps.pmove.origin[2] = spawn_origin[2] * 8;
+    // N&C: FF Precision.
+    VectorCopy(spawn_origin, client->ps.pmove.origin);
+    //client->ps.pmove.origin[0] = spawn_origin[0] * 8;
+    //client->ps.pmove.origin[1] = spawn_origin[1] * 8;
+    //client->ps.pmove.origin[2] = spawn_origin[2] * 8;
 
     if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV)) {
         client->ps.fov = 90;
@@ -1579,10 +1581,13 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         client->ps.pmove.gravity = sv_gravity->value;
         pm.s = client->ps.pmove;
 
-        for (i = 0 ; i < 3 ; i++) {
-            pm.s.origin[i] = ent->s.origin[i] * 8;
-            pm.s.velocity[i] = ent->velocity[i] * 8;
-        }
+        // N&C: FF Precision.
+        VectorCopy(ent->s.origin, pm.s.origin);
+        VectorCopy(ent->velocity, pm.s.velocity);
+        //for (i = 0 ; i < 3 ; i++) {
+        //    pm.s.origin[i] = ent->s.origin[i] * 8;
+        //    pm.s.velocity[i] = ent->velocity[i] * 8;
+        //}
 
         if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s))) {
             pm.snapinitial = qtrue;
@@ -1602,10 +1607,13 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         client->ps.pmove = pm.s;
         client->old_pmove = pm.s;
 
-        for (i = 0 ; i < 3 ; i++) {
-            ent->s.origin[i] = pm.s.origin[i] * 0.125;
-            ent->velocity[i] = pm.s.velocity[i] * 0.125;
-        }
+        // N&C: FF Precision.
+        VectorCopy(pm.s.origin, ent->s.origin);
+        VectorCopy(pm.s.velocity, ent->velocity);
+        //for (i = 0 ; i < 3 ; i++) {
+        //    ent->s.origin[i] = pm.s.origin[i] * 0.125;
+        //    ent->velocity[i] = pm.s.velocity[i] * 0.125;
+        //}
 
         VectorCopy(pm.mins, ent->mins);
         VectorCopy(pm.maxs, ent->maxs);

@@ -34,12 +34,13 @@ void AnglesNormalize(vec3_t vec)
 
 float SnapToEights(float x)
 {
-    x *= 8.0;
-    if (x > 0.0)
-        x += 0.5;
-    else
-        x -= 0.5;
-    return 0.125 * (int)x;
+    //x *= 8.0;
+    //if (x > 0.0)
+    //    x += 0.5;
+    //else
+    //    x -= 0.5;
+    //return 0.125 * (int)x;
+    return x;
 }
 
 
@@ -170,8 +171,9 @@ void turret_breach_think(edict_t *self)
         // x & y
         angle = self->s.angles[1] + self->owner->move_origin[1];
         angle *= (M_PI * 2 / 360);
-        target[0] = SnapToEights(self->s.origin[0] + cos(angle) * self->owner->move_origin[0]);
-        target[1] = SnapToEights(self->s.origin[1] + sin(angle) * self->owner->move_origin[0]);
+        // N&C: FF Precision.
+        target[0] = (self->s.origin[0] + cos(angle) * self->owner->move_origin[0]); //SnapToEights(self->s.origin[0] + cos(angle) * self->owner->move_origin[0]);
+        target[1] = (self->s.origin[1] + sin(angle) * self->owner->move_origin[0]); // SnapToEights(self->s.origin[1] + sin(angle) * self->owner->move_origin[0]);
         target[2] = self->owner->s.origin[2];
 
         VectorSubtract(target, self->owner->s.origin, dir);

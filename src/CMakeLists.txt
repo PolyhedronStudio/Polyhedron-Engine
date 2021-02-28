@@ -78,6 +78,7 @@ SET(SRC_SVGAME
 
 SET(HEADERS_SVGAME
 	baseq2/g_local.h
+	baseq2/svgame.def
 	baseq2/g_ptrs.h
 	baseq2/m_actor.h
 	baseq2/m_berserk.h

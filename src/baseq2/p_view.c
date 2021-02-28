@@ -903,8 +903,9 @@ void ClientEndServerFrame(edict_t *ent)
     // behind the body position when pushed -- "sinking into plats"
     //
     for (i = 0 ; i < 3 ; i++) {
-        current_client->ps.pmove.origin[i] = ent->s.origin[i] * 8.0;
-        current_client->ps.pmove.velocity[i] = ent->velocity[i] * 8.0;
+        // N&C: FF Precision.
+        VectorCopy(ent->s.origin, current_client->ps.pmove.origin);
+        VectorCopy(ent->velocity, current_client->ps.pmove.velocity);
     }
 
     //
