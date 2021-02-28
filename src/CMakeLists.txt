@@ -47,16 +47,14 @@ SET(SRC_SVGAME
 	svgame/g_utils.c
 	svgame/g_weapon.c
 
-	svgame/m_gunner.c
-	svgame/m_infantry.c
-	svgame/m_move.c
-	svgame/m_soldier.c
+	svgame/monsters/movement.c
+	svgame/monsters/soldier.c
 
-	svgame/p_client.c
-	svgame/p_hud.c
-	svgame/p_trail.c
-	svgame/p_view.c
-	svgame/p_weapon.c
+	svgame/player/client.c
+	svgame/player/hud.c
+	svgame/player/trail.c
+	svgame/player/view.c
+	svgame/player/weapons.c
 )
 
 SET(HEADERS_SVGAME
@@ -65,10 +63,8 @@ SET(HEADERS_SVGAME
 	svgame/g_local.h
 	svgame/g_ptrs.h
 
-	svgame/m_gunner.h
-	svgame/m_infantry.h
-	svgame/m_player.h
-	svgame/m_soldier.h
+	svgame/monsters/soldier.h
+	svgame/player/animations.h
 )
 
 ###################### Client.
@@ -87,15 +83,11 @@ SET(SRC_CLIENT
 	client/keys.c
 	client/locs.c
 	client/main.c
-#	client/newfx.c
-#	client/null.c
-#	client/null_gl.c
 	client/parse.c
 	client/precache.c
 	client/predict.c
 	client/refresh.c
 	client/screen.c
-#	client/tent.c
 	client/view.c
 	client/ui/demos.c
 	client/ui/menu.c

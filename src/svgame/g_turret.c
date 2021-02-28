@@ -285,7 +285,7 @@ void turret_driver_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int
     self->target_ent->owner = NULL;
     self->target_ent->teammaster->owner = NULL;
 
-    infantry_die(self, inflictor, attacker, damage);
+    //infantry_die(self, inflictor, attacker, damage);
 }
 
 qboolean FindTarget(edict_t *self);
@@ -389,7 +389,7 @@ void SP_turret_driver(edict_t *self)
     self->viewheight = 24;
 
     self->die = turret_driver_die;
-    self->monsterinfo.stand = infantry_stand;
+    //self->monsterinfo.stand = infantry_stand;
 
     self->flags |= FL_NO_KNOCKBACK;
 
