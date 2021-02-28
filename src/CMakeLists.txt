@@ -27,25 +27,25 @@ SET(HEADERS_CLGAME
 
 ###################### SERVER GAME
 SET(SRC_SVGAME
-	svgame/g_ai.c
-	svgame/g_chase.c
-	svgame/g_cmds.c
-	svgame/g_combat.c
-	svgame/g_func.c
-	svgame/g_items.c
-	svgame/g_main.c
-	svgame/g_misc.c
-	svgame/g_monster.c
-	svgame/g_phys.c
+	svgame/ai.c
+	svgame/chase.c
+	svgame/cmds.c
+	svgame/combat.c
+	svgame/func.c
+	svgame/items.c
+	svgame/main.c
+	svgame/misc.c
+	svgame/monsters.c
+	svgame/physics.c
 	svgame/g_ptrs.c
-	svgame/g_save.c
-	svgame/g_spawn.c
-	svgame/g_svcmds.c
-	svgame/g_target.c
-	svgame/g_trigger.c
-	svgame/g_turret.c
-	svgame/g_utils.c
-	svgame/g_weapon.c
+	svgame/save.c
+	svgame/spawn.c
+	svgame/svcmds.c
+	svgame/target.c
+	svgame/trigger.c
+	svgame/turret.c
+	svgame/utils.c
+	svgame/weapons.c
 
 	svgame/monsters/movement.c
 	svgame/monsters/soldier.c
@@ -55,6 +55,16 @@ SET(SRC_SVGAME
 	svgame/player/trail.c
 	svgame/player/view.c
 	svgame/player/weapons.c
+
+	svgame/weapons/bfg10k.c
+	svgame/weapons/blaster.c
+	svgame/weapons/flaregun.c
+	svgame/weapons/grenade.c
+	svgame/weapons/grenadelauncher.c
+	svgame/weapons/machinegun.c
+	svgame/weapons/railgun.c
+	svgame/weapons/rocketlauncher.c
+	svgame/weapons/shotgun.c
 )
 
 SET(HEADERS_SVGAME
