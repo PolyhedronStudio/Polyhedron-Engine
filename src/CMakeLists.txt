@@ -27,213 +27,48 @@ SET(HEADERS_CLGAME
 
 ###################### SERVER GAME
 SET(SRC_SVGAME
-	baseq2/g_ai.c
-	baseq2/g_chase.c
-	baseq2/g_cmds.c
-	baseq2/g_combat.c
-	baseq2/g_func.c
-	baseq2/g_items.c
-	baseq2/g_main.c
-	baseq2/g_misc.c
-	baseq2/g_monster.c
-	baseq2/g_phys.c
-	baseq2/g_ptrs.c
-	baseq2/g_save.c
-	baseq2/g_spawn.c
-	baseq2/g_svcmds.c
-	baseq2/g_target.c
-	baseq2/g_trigger.c
-	baseq2/g_turret.c
-	baseq2/g_utils.c
-	baseq2/g_weapon.c
-	baseq2/m_actor.c
-	baseq2/m_berserk.c
-	baseq2/m_boss2.c
-	baseq2/m_boss3.c
-	baseq2/m_boss31.c
-	baseq2/m_boss32.c
-	baseq2/m_brain.c
-	baseq2/m_chick.c
-	baseq2/m_flipper.c
-	baseq2/m_float.c
-	baseq2/m_flyer.c
-	baseq2/m_gladiator.c
-	baseq2/m_gunner.c
-	baseq2/m_hover.c
-	baseq2/m_infantry.c
-	baseq2/m_insane.c
-	baseq2/m_medic.c
-	baseq2/m_move.c
-	baseq2/m_mutant.c
-	baseq2/m_parasite.c
-	baseq2/m_soldier.c
-	baseq2/m_supertank.c
-	baseq2/m_tank.c
-	baseq2/p_client.c
-	baseq2/p_hud.c
-	baseq2/p_trail.c
-	baseq2/p_view.c
-	baseq2/p_weapon.c
-)
-
-SET(HEADERS_SVGAME
-	baseq2/g_local.h
-	baseq2/svgame.def
-	baseq2/g_ptrs.h
-	baseq2/m_actor.h
-	baseq2/m_berserk.h
-	baseq2/m_boss2.h
-	baseq2/m_boss31.h
-	baseq2/m_boss32.h
-	baseq2/m_brain.h
-	baseq2/m_chick.h
-	baseq2/m_flipper.h
-	baseq2/m_float.h
-	baseq2/m_flyer.h
-	baseq2/m_gladiator.h
-	baseq2/m_gunner.h
-	baseq2/m_hover.h
-	baseq2/m_infantry.h
-	baseq2/m_insane.h
-	baseq2/m_medic.h
-	baseq2/m_mutant.h
-	baseq2/m_parasite.h
-	baseq2/m_player.h
-	baseq2/m_rider.h
-	baseq2/m_soldier.h
-	baseq2/m_supertank.h
-	baseq2/m_tank.h
-)
-
-SET(SRC_SVGAME_OLD
-	svgame/acebot_ai.c
-	svgame/acebot_cmds.c
-	svgame/acebot_compress.c
-	svgame/acebot_items.c
-	svgame/acebot_movement.c
-	svgame/acebot_nodes.c
-	svgame/acebot_spawn.c
-	svgame/pmai/pmai_animations.c
-	svgame/pmai/pmai_movement.c
-	svgame/pmai/pmai_targets.c
 	svgame/g_ai.c
-	svgame/g_camera.c
 	svgame/g_chase.c
 	svgame/g_cmds.c
 	svgame/g_combat.c
-	svgame/g_crane.c
-	svgame/g_ctf.c
-	svgame/g_fog.c
 	svgame/g_func.c
 	svgame/g_items.c
-	svgame/g_jetpack.c
-	svgame/g_lights.c
-	svgame/g_lock.c
 	svgame/g_main.c
-	svgame/g_maplist.c
 	svgame/g_misc.c
-	svgame/g_model.c
 	svgame/g_monster.c
-	svgame/g_moreai.c
-	svgame/g_mtrain.c
-	svgame/g_patchplayermodels.c
-	svgame/g_pendulum.c
 	svgame/g_phys.c
-	svgame/g_pmai.c
 	svgame/g_ptrs.c
-	svgame/g_reflect.c
 	svgame/g_save.c
 	svgame/g_spawn.c
 	svgame/g_svcmds.c
 	svgame/g_target.c
-	svgame/g_thing.c
-	svgame/g_tracktrain.c
 	svgame/g_trigger.c
 	svgame/g_turret.c
 	svgame/g_utils.c
-	svgame/g_vehicle.c
 	svgame/g_weapon.c
-	svgame/km_cvar.c
-	svgame/m_actor.c
-	svgame/m_actor_weap.c
-	svgame/m_berserk.c
-	svgame/m_boss2.c
-	svgame/m_boss3.c
-	svgame/m_boss31.c
-	svgame/m_boss32.c
-	svgame/m_brain.c
-	svgame/m_chick.c
-	svgame/m_flash.c
-	svgame/m_flipper.c
-	svgame/m_float.c
-	svgame/m_flyer.c
-	svgame/m_gladiator.c
+
 	svgame/m_gunner.c
-	svgame/m_hover.c
 	svgame/m_infantry.c
-	svgame/m_insane.c
-	svgame/m_medic.c
 	svgame/m_move.c
-	svgame/m_mutant.c
-	svgame/m_parasite.c
-	svgame/m_pmover.c
 	svgame/m_soldier.c
-	svgame/m_supertank.c
-	svgame/m_tank.c
-	svgame/p_chase.c
+
 	svgame/p_client.c
 	svgame/p_hud.c
-	svgame/p_menu.c
-	svgame/p_text.c
 	svgame/p_trail.c
 	svgame/p_view.c
 	svgame/p_weapon.c
-	svgame/q_shared.c
 )
 
-SET(HEADERS_SVGAME_OLD
-	svgame/acebot.h
-	svgame/game.h
-	svgame/g_ctf.h
-	svgame/g_func_decs.h
-	svgame/g_func_list.h
-	svgame/g_local.h
-	svgame/g_mmove_decs.h
-	svgame/g_mmove_list.h
-	svgame/lazarus.def
-	svgame/laz_misc.h
-	svgame/km_cvar.h
-	svgame/g_pmai.h
-	svgame/g_ptrs.h
-	svgame/m_actor.h
-	svgame/m_berserk.h
-	svgame/q_shared.h
-	svgame/resource.h
-	svgame/p_text.h
-	svgame/p_menu.h
-	svgame/m_tank.h
-	svgame/pak.h
-	svgame/m_supertank.h
-	svgame/m_soldier.h
-	svgame/m_parasite.h
-	svgame/m_player.h
-	svgame/m_pmover.h
-	svgame/m_rider.h
-	svgame/m_mutant.h
-	svgame/m_medic.h
-	svgame/m_insane.h
-	svgame/m_boss2.h
-	svgame/m_infantry.h
-	svgame/m_hover.h
-	svgame/m_gunner.h
-	svgame/m_gladiator.h
-	svgame/m_flyer.h
-	svgame/m_float.h
-	svgame/m_boss31.h
-	svgame/m_flipper.h
-	svgame/m_chick.h
-	svgame/m_brain.h
-	svgame/m_boss32.h
+SET(HEADERS_SVGAME
+	baseq2/svgame.def
+
+	baseq2/g_local.h
+	baseq2/g_ptrs.h
+
+	baseq2/m_gunner.h
+	baseq2/m_infantry.h
+	baseq2/m_player.h
+	baseq2/m_soldier.h
 )
 
 ###################### Client.
