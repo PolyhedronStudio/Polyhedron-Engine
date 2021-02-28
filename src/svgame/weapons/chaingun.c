@@ -14,6 +14,9 @@
 #include "../player/animations.h"
 #include "../player/weapons.h"
 
+// Include weapon header.
+#include "chaingun.h"
+
 //
 //======================================================================
 //

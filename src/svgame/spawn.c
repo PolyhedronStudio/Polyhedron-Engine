@@ -141,7 +141,7 @@ void SP_monster_soldier_ss(edict_t *self);
 //void SP_monster_jorg(edict_t *self);
 //void SP_monster_boss3_stand(edict_t *self);
 
-void SP_monster_commander_body(edict_t *self);
+//void SP_monster_commander_body(edict_t *self);
 
 void SP_turret_breach(edict_t *self);
 void SP_turret_base(edict_t *self);
@@ -242,7 +242,7 @@ static const spawn_func_t spawn_funcs[] = {
     {"monster_soldier", SP_monster_soldier},
     {"monster_soldier_ss", SP_monster_soldier_ss},
 
-    {"monster_commander_body", SP_monster_commander_body},
+    //{"monster_commander_body", SP_monster_commander_body},
 
     {"turret_breach", SP_turret_breach},
     {"turret_base", SP_turret_base},

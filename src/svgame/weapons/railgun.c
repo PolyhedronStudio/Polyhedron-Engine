@@ -14,6 +14,10 @@
 #include "../player/animations.h"
 #include "../player/weapons.h"
 
+// Include railgun weapon header.
+#include "railgun.h"
+
+
 //
 //======================================================================
 //

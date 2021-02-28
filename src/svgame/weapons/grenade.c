@@ -14,8 +14,8 @@
 #include "../player/animations.h"
 #include "../player/weapons.h"
 
-
-void weapon_grenade_fire(edict_t* ent, qboolean held);
+// Include weapon header.
+#include "grenade.h"
 
 /*
 ======================================================================
@@ -24,10 +24,6 @@ GRENADE
 
 ======================================================================
 */
-
-#define GRENADE_TIMER       3.0
-#define GRENADE_MINSPEED    400
-#define GRENADE_MAXSPEED    800
 
 void weapon_grenade_fire(edict_t* ent, qboolean held)
 {

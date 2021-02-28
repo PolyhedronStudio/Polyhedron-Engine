@@ -14,6 +14,10 @@
 #include "../player/animations.h"
 #include "../player/weapons.h"
 
+// Include blaster and hyperblaster header.
+#include "blaster.h"
+#include "hyperblaster.h"
+
 //
 //======================================================================
 //

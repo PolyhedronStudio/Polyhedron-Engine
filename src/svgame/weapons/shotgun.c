@@ -14,6 +14,10 @@
 #include "../player/animations.h"
 #include "../player/weapons.h"
 
+// Include shotgun weapon header.
+#include "shotgun.h"
+
+
 //
 //======================================================================
 //

@@ -14,16 +14,19 @@
 #include "../player/animations.h"
 #include "../player/weapons.h"
 
+// Include weapon header.
+#include "bfg10k.h"
+
 // This is actually declared in grenade.c
 void weapon_grenade_fire(edict_t* ent, qboolean held);
 
-/*
-======================================================================
-
-BFG10K
-
-======================================================================
-*/
+//
+//======================================================================
+//
+// BFG10K
+//
+//======================================================================
+//
 
 void weapon_bfg_fire(edict_t* ent)
 {

@@ -48,12 +48,37 @@ SET(SRC_SVGAME
 	svgame/weapons.c
 
 	svgame/entities/func_areaportal.c
+	svgame/entities/func_clock.c
+	svgame/entities/func_explosive.c 
 	svgame/entities/func_group.c
+	svgame/entities/func_object.c 
+	svgame/entities/func_wall.c
 	svgame/entities/info_notnull.c
 	svgame/entities/info_null.c
 	svgame/entities/light.c
+	svgame/entities/light_mine1.c
+	svgame/entities/light_mine2.c
+	svgame/entities/misc_banner.c 
+	svgame/entities/misc_bigviper.c 
+	svgame/entities/misc_blackhole.c 
+	svgame/entities/misc_deadsoldier.c 
+	svgame/entities/misc_easterchick.c 
+	svgame/entities/misc_easterchick2.c 
+	svgame/entities/misc_eastertank.c 
+	svgame/entities/misc_explobox.c 
+	svgame/entities/misc_gib_arm.c 
+	svgame/entities/misc_gib_leg.c 
+	svgame/entities/misc_gib_head.c 
+	svgame/entities/misc_satellite_dish.c 
+	svgame/entities/misc_strogg_ship.c 
+	svgame/entities/misc_teleporter.c
+	svgame/entities/misc_teleporter_dest.c
+	svgame/entities/misc_viper.c
+	svgame/entities/misc_viperbomb.c
 	svgame/entities/path_corner.c
 	svgame/entities/point_combat.c
+	svgame/entities/target_character.c
+	svgame/entities/target_string.c
 	svgame/entities/viewthing.c
 
 	svgame/monsters/movement.c
@@ -86,7 +111,22 @@ SET(HEADERS_SVGAME
 	svgame/g_ptrs.h
 
 	svgame/monsters/soldier.h
+
 	svgame/player/animations.h
+	svgame/player/weapons.h
+
+	svgame/weapons/bfg10k.h
+	svgame/weapons/blaster.h
+	svgame/weapons/chaingun.h
+	svgame/weapons/flaregun.h
+	svgame/weapons/grenade.h
+	svgame/weapons/grenadelauncher.h
+	svgame/weapons/hyperblaster.h
+	svgame/weapons/machinegun.h
+	svgame/weapons/railgun.h
+	svgame/weapons/rocketlauncher.h
+	svgame/weapons/shotgun.h
+	svgame/weapons/supershotgun.h
 )
 
 ###################### Client.

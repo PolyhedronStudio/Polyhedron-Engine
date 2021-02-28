@@ -216,8 +216,8 @@ extern void bfg_explode(void);
 extern void bfg_think(void);
 
 extern void button_return(void);
-extern void commander_body_drop(void);
-extern void commander_body_think(void);
+//extern void commander_body_drop(void);
+//extern void commander_body_think(void);
 extern void door_go_down(void);
 extern void door_secret_move2(void);
 extern void door_secret_move4(void);
@@ -300,7 +300,7 @@ extern void trigger_monsterjump_touch(void);
 extern void trigger_push_touch(void);
 
 extern void button_use(void);
-extern void commander_body_use(void);
+//extern void commander_body_use(void);
 extern void door_secret_use(void);
 extern void door_use(void);
 extern void func_clock_use(void);
@@ -575,8 +575,8 @@ const save_ptr_t save_ptrs[] = {
 { P_think, bfg_think },
 //{ P_think, BossExplode },
 { P_think, button_return },
-{ P_think, commander_body_drop },
-{ P_think, commander_body_think },
+//{ P_think, commander_body_drop },
+//{ P_think, commander_body_think },
 { P_think, door_go_down },
 { P_think, door_secret_move2 },
 { P_think, door_secret_move4 },
@@ -663,7 +663,7 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, trigger_push_touch },
 //{ P_use, actor_use },
 { P_use, button_use },
-{ P_use, commander_body_use },
+//{ P_use, commander_body_use },
 { P_use, door_secret_use },
 { P_use, door_use },
 { P_use, func_clock_use },

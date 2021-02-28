@@ -14,6 +14,10 @@
 #include "../player/animations.h"
 #include "../player/weapons.h"
 
+// Include rocket launcher weapon header.
+#include "rocketlauncher.h"
+
+
 //
 //======================================================================
 //
