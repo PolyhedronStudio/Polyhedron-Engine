@@ -14,9 +14,6 @@
 #include "../player/animations.h"
 #include "../player/weapons.h"
 
-// This is actually declared in grenade.c
-void weapon_grenade_fire(edict_t* ent, qboolean held);
-
 //======================================================================
 
 /*

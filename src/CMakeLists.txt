@@ -58,13 +58,16 @@ SET(SRC_SVGAME
 
 	svgame/weapons/bfg10k.c
 	svgame/weapons/blaster.c
+	svgame/weapons/chaingun.c
 	svgame/weapons/flaregun.c
 	svgame/weapons/grenade.c
 	svgame/weapons/grenadelauncher.c
+	svgame/weapons/hyperblaster.c
 	svgame/weapons/machinegun.c
 	svgame/weapons/railgun.c
 	svgame/weapons/rocketlauncher.c
 	svgame/weapons/shotgun.c
+	svgame/weapons/supershotgun.c
 )
 
 SET(HEADERS_SVGAME
