@@ -27,6 +27,84 @@ SET(HEADERS_CLGAME
 
 ###################### SERVER GAME
 SET(SRC_SVGAME
+	baseq2/g_ai.c
+	baseq2/g_chase.c
+	baseq2/g_cmds.c
+	baseq2/g_combat.c
+	baseq2/g_func.c
+	baseq2/g_items.c
+	baseq2/g_main.c
+	baseq2/g_misc.c
+	baseq2/g_monster.c
+	baseq2/g_phys.c
+	baseq2/g_ptrs.c
+	baseq2/g_save.c
+	baseq2/g_spawn.c
+	baseq2/g_svcmds.c
+	baseq2/g_target.c
+	baseq2/g_trigger.c
+	baseq2/g_turret.c
+	baseq2/g_utils.c
+	baseq2/g_weapon.c
+	baseq2/m_actor.c
+	baseq2/m_berserk.c
+	baseq2/m_boss2.c
+	baseq2/m_boss3.c
+	baseq2/m_boss31.c
+	baseq2/m_boss32.c
+	baseq2/m_brain.c
+	baseq2/m_chick.c
+	baseq2/m_flipper.c
+	baseq2/m_float.c
+	baseq2/m_flyer.c
+	baseq2/m_gladiator.c
+	baseq2/m_gunner.c
+	baseq2/m_hover.c
+	baseq2/m_infantry.c
+	baseq2/m_insane.c
+	baseq2/m_medic.c
+	baseq2/m_move.c
+	baseq2/m_mutant.c
+	baseq2/m_parasite.c
+	baseq2/m_soldier.c
+	baseq2/m_supertank.c
+	baseq2/m_tank.c
+	baseq2/p_client.c
+	baseq2/p_hud.c
+	baseq2/p_trail.c
+	baseq2/p_view.c
+	baseq2/p_weapon.c
+)
+
+SET(HEADERS_SVGAME
+	baseq2/g_local.h
+	baseq2/g_ptrs.h
+	baseq2/m_actor.h
+	baseq2/m_berserk.h
+	baseq2/m_boss2.h
+	baseq2/m_boss31.h
+	baseq2/m_boss32.h
+	baseq2/m_brain.h
+	baseq2/m_chick.h
+	baseq2/m_flipper.h
+	baseq2/m_float.h
+	baseq2/m_flyer.h
+	baseq2/m_gladiator.h
+	baseq2/m_gunner.h
+	baseq2/m_hover.h
+	baseq2/m_infantry.h
+	baseq2/m_insane.h
+	baseq2/m_medic.h
+	baseq2/m_mutant.h
+	baseq2/m_parasite.h
+	baseq2/m_player.h
+	baseq2/m_rider.h
+	baseq2/m_soldier.h
+	baseq2/m_supertank.h
+	baseq2/m_tank.h
+)
+
+SET(SRC_SVGAME_OLD
 	svgame/acebot_ai.c
 	svgame/acebot_cmds.c
 	svgame/acebot_compress.c
@@ -112,7 +190,7 @@ SET(SRC_SVGAME
 	svgame/q_shared.c
 )
 
-SET(HEADERS_SVGAME
+SET(HEADERS_SVGAME_OLD
 	svgame/acebot.h
 	svgame/game.h
 	svgame/g_ctf.h
