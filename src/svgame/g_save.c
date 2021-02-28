@@ -1,979 +1,771 @@
 /*
-===========================================================================
 Copyright (C) 1997-2001 Id Software, Inc.
-Copyright (C) 2000-2002 Mr. Hyde and Mad Dog
 
-This file is part of Lazarus Quake 2 Mod source code.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-Lazarus Quake 2 Mod source code is free software; you can redistribute it
-and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of the License,
-or (at your option) any later version.
-
-Lazarus Quake 2 Mod source code is distributed in the hope that it will be
-useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with Lazarus Quake 2 Mod source code; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-===========================================================================
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
 #include "g_local.h"
+#include "g_ptrs.h"
 
-#define Function(f) {#f, f}
-
-mmove_t mmove_reloc;
-
-field_t fields[] = {
-	{"classname", FOFS(classname), F_LSTRING},
-	{"model", FOFS(model), F_LSTRING},
-	{"spawnflags", FOFS(spawnflags), F_INT},
-	{"speed", FOFS(speed), F_FLOAT},
-	{"nacname", FOFS(nacname), F_LSTRING},
-	{"accel", FOFS(accel), F_FLOAT},
-	{"decel", FOFS(decel), F_FLOAT},
-	{"target", FOFS(target), F_LSTRING},
-	{"targetname", FOFS(targetname), F_LSTRING},
-	{"pathtarget", FOFS(pathtarget), F_LSTRING},
-	{"deathtarget", FOFS(deathtarget), F_LSTRING},
-	{"killtarget", FOFS(killtarget), F_LSTRING},
-	{"combattarget", FOFS(combattarget), F_LSTRING},
-	{"message", FOFS(message), F_LSTRING},
-	{"key_message", FOFS(key_message), F_LSTRING},
-	{"team", FOFS(team), F_LSTRING},
-	{"wait", FOFS(wait), F_FLOAT},
-	{"delay", FOFS(delay), F_FLOAT},
-	{"random", FOFS(random), F_FLOAT},
-	{"move_origin", FOFS(move_origin), F_VECTOR},
-	{"move_angles", FOFS(move_angles), F_VECTOR},
-	{"style", FOFS(style), F_INT},
-	{"count", FOFS(count), F_INT},
-	{"health", FOFS(health), F_INT},
-	{"health2", FOFS(health2), F_INT},
-	{"sounds", FOFS(sounds), F_INT},
-	{"light", 0, F_IGNORE},
-	{"dmg", FOFS(dmg), F_INT},
-	{"mass", FOFS(mass), F_INT},
-	{"volume", FOFS(volume), F_FLOAT},
-	{"attenuation", FOFS(attenuation), F_FLOAT},
-	{"map", FOFS(map), F_LSTRING},
-	{"origin", FOFS(s.origin), F_VECTOR},
-	{"angles", FOFS(s.angles), F_VECTOR},
-	{"angle", FOFS(s.angles), F_ANGLEHACK},
-
-	{"goalentity", FOFS(goalentity), F_EDICT, FFL_NOSPAWN},
-	{"movetarget", FOFS(movetarget), F_EDICT, FFL_NOSPAWN},
-	{"enemy", FOFS(enemy), F_EDICT, FFL_NOSPAWN},
-	{"oldenemy", FOFS(oldenemy), F_EDICT, FFL_NOSPAWN},
-	{"activator", FOFS(activator), F_EDICT, FFL_NOSPAWN},
-	{"groundentity", FOFS(groundentity), F_EDICT, FFL_NOSPAWN},
-	{"teamchain", FOFS(teamchain), F_EDICT, FFL_NOSPAWN},
-	{"teammaster", FOFS(teammaster), F_EDICT, FFL_NOSPAWN},
-	{"owner", FOFS(owner), F_EDICT, FFL_NOSPAWN},
-	{"mynoise", FOFS(mynoise), F_EDICT, FFL_NOSPAWN},
-	{"mynoise2", FOFS(mynoise2), F_EDICT, FFL_NOSPAWN},
-	{"target_ent", FOFS(target_ent), F_EDICT, FFL_NOSPAWN},
-	{"chain", FOFS(chain), F_EDICT, FFL_NOSPAWN},
-
-	{"prethink", FOFS(prethink), F_FUNCTION, FFL_NOSPAWN},
-	{"think", FOFS(think), F_FUNCTION, FFL_NOSPAWN},
-	{"postthink", FOFS(postthink), F_FUNCTION, FFL_NOSPAWN}, // Knightmare added
-	{"blocked", FOFS(blocked), F_FUNCTION, FFL_NOSPAWN},
-	{"touch", FOFS(touch), F_FUNCTION, FFL_NOSPAWN},
-	{"use", FOFS(use), F_FUNCTION, FFL_NOSPAWN},
-	{"pain", FOFS(pain), F_FUNCTION, FFL_NOSPAWN},
-	{"die", FOFS(die), F_FUNCTION, FFL_NOSPAWN},
-
-	{"stand", FOFS(monsterinfo.stand), F_FUNCTION, FFL_NOSPAWN},
-	{"idle", FOFS(monsterinfo.idle), F_FUNCTION, FFL_NOSPAWN},
-	{"search", FOFS(monsterinfo.search), F_FUNCTION, FFL_NOSPAWN},
-	{"walk", FOFS(monsterinfo.walk), F_FUNCTION, FFL_NOSPAWN},
-	{"run", FOFS(monsterinfo.run), F_FUNCTION, FFL_NOSPAWN},
-	{"dodge", FOFS(monsterinfo.dodge), F_FUNCTION, FFL_NOSPAWN},
-	{"attack", FOFS(monsterinfo.attack), F_FUNCTION, FFL_NOSPAWN},
-	{"melee", FOFS(monsterinfo.melee), F_FUNCTION, FFL_NOSPAWN},
-	{"sight", FOFS(monsterinfo.sight), F_FUNCTION, FFL_NOSPAWN},
-	{"jump", FOFS(monsterinfo.jump), F_FUNCTION, FFL_NOSPAWN},
-	{"checkattack", FOFS(monsterinfo.checkattack), F_FUNCTION, FFL_NOSPAWN},
-	{"currentmove", FOFS(monsterinfo.currentmove), F_MMOVE, FFL_NOSPAWN},
-
-	{"endfunc", FOFS(moveinfo.endfunc), F_FUNCTION, FFL_NOSPAWN},
-
-	// temp spawn vars -- only valid when the spawn function is called
-	{"lip", STOFS(lip), F_INT, FFL_SPAWNTEMP},
-	{"distance", STOFS(distance), F_INT, FFL_SPAWNTEMP},
-	{"height", STOFS(height), F_INT, FFL_SPAWNTEMP},
-	{"noise", STOFS(noise), F_LSTRING, FFL_SPAWNTEMP},
-	{"pausetime", STOFS(pausetime), F_FLOAT, FFL_SPAWNTEMP},
-	{"phase", STOFS(phase), F_FLOAT, FFL_SPAWNTEMP},
-	{"item", STOFS(item), F_LSTRING, FFL_SPAWNTEMP},
-	{"shift", STOFS(shift), F_FLOAT, FFL_SPAWNTEMP},
-
-//need for item field in edict struct, FFL_SPAWNTEMP item will be skipped on saves
-	{"item", FOFS(item), F_ITEM},
-
-	{"gravity", STOFS(gravity), F_LSTRING, FFL_SPAWNTEMP},
-	{"sky", STOFS(sky), F_LSTRING, FFL_SPAWNTEMP},
-	{"skyrotate", STOFS(skyrotate), F_FLOAT, FFL_SPAWNTEMP},
-	{"skyaxis", STOFS(skyaxis), F_VECTOR, FFL_SPAWNTEMP},
-	{"minyaw", STOFS(minyaw), F_FLOAT, FFL_SPAWNTEMP},
-	{"maxyaw", STOFS(maxyaw), F_FLOAT, FFL_SPAWNTEMP},
-	{"minpitch", STOFS(minpitch), F_FLOAT, FFL_SPAWNTEMP},
-	{"maxpitch", STOFS(maxpitch), F_FLOAT, FFL_SPAWNTEMP},
-	{"nextmap", STOFS(nextmap), F_LSTRING, FFL_SPAWNTEMP},
-#ifdef KMQUAKE2_ENGINE_MOD
-	{"salpha", FOFS(s.alpha), F_FLOAT}, // Knightmare- hack for setting alpha
+//#define _DEBUG
+typedef struct {
+    fieldtype_t type;
+#ifdef _DEBUG
+    char *name;
 #endif
-	{"musictrack", FOFS(musictrack), F_LSTRING},
-	//Knightmare- movetype backup
-	{"oldmovetype", FOFS(oldmovetype), F_INT},
-	{"relative_velocity", FOFS(relative_velocity), F_VECTOR}, 	//relative velocity
-	{"relative_avelocity", FOFS(relative_avelocity), F_VECTOR}, //relative angular velocity
-	{"oldvelocity", FOFS(oldvelocity), F_VECTOR}, //relative angular velocity
+    size_t ofs;
+    size_t size;
+} save_field_t;
 
-	{ "width", FOFS(width), F_FLOAT },	// Knightmare- these are needed to update func_door_secret's positions
-	{"length", FOFS(length), F_FLOAT},
-	{"side", FOFS(side), F_FLOAT},
-
-	// Lazarus additions
-	{"actor_current_weapon", FOFS(actor_current_weapon), F_INT},
-	{"aiflags", FOFS(monsterinfo.aiflags), F_INT},
-	{"alpha", FOFS(alpha), F_FLOAT},
-	{"axis", FOFS(axis), F_INT},
-	{"base_radius", FOFS(base_radius), F_FLOAT},
-	{"bleft", FOFS(bleft), F_VECTOR},
-	{"blood_type", FOFS(blood_type), F_INT},
-	{"bob", FOFS(bob), F_FLOAT},
-	{"bobframe", FOFS(bobframe), F_INT},
-	{"busy", FOFS(busy), F_INT},
-	{"child", FOFS(child), F_EDICT},
-	{"class_id", FOFS(class_id), F_INT},
-	{"color", FOFS(color), F_VECTOR},
-	{"crane_beam", FOFS(crane_beam), F_EDICT, FFL_NOSPAWN},
-	{"crane_bonk", FOFS(crane_bonk), F_VECTOR},
-	{"crane_cable", FOFS(crane_cable), F_EDICT, FFL_NOSPAWN},
-	{"crane_cargo", FOFS(crane_cargo), F_EDICT, FFL_NOSPAWN},
-	{"crane_control", FOFS(crane_control), F_EDICT, FFL_NOSPAWN},
-	{"crane_dir", FOFS(crane_dir), F_INT},
-	{"crane_hoist", FOFS(crane_hoist), F_EDICT, FFL_NOSPAWN},
-	{"crane_hook", FOFS(crane_hook), F_EDICT, FFL_NOSPAWN},
-	{"crane_increment", FOFS(crane_increment), F_INT},
-	{"crane_light", FOFS(crane_light), F_EDICT, FFL_NOSPAWN},
-	{"crane_onboard_control", FOFS(crane_onboard_control), F_EDICT, FFL_NOSPAWN},
-	{"datafile", FOFS(datafile), F_LSTRING},
-	{"deadflag", FOFS(deadflag), F_INT},
-	{"show_hostile", FOFS(show_hostile), F_INT}, // Knightmare added
-	{"powerarmor_time", FOFS(powerarmor_time), F_FLOAT}, // Knightmare added
-	{"density", FOFS(density), F_FLOAT},
-	{"destroytarget", FOFS(destroytarget), F_LSTRING},
-	{"dmgteam", FOFS(dmgteam), F_LSTRING},
-	{"do_not_rotate", FOFS(do_not_rotate), F_INT},
-	{"duration", FOFS(duration), F_FLOAT},
-	{"effects", FOFS(effects), F_INT},
-	{"fadein", FOFS(fadein), F_FLOAT},
-	{"fadeout", FOFS(fadeout), F_FLOAT},
-	{"flies", FOFS(monsterinfo.flies), F_FLOAT},
-	{"fog_color", FOFS(fog_color), F_VECTOR},
-	{"fog_density", FOFS(fog_density), F_FLOAT},
-	{"fog_far", FOFS(fog_far), F_FLOAT},
-	{"fog_model", FOFS(fog_model), F_INT},
-	{"fog_near", FOFS(fog_near), F_FLOAT},
-	{"fogclip", FOFS(fogclip), F_INT},
-	{"followtarget", FOFS(followtarget), F_LSTRING},
-	{"frame", FOFS(s.frame), F_INT},
-	{"framenumbers", FOFS(framenumbers), F_INT},
-	{"gib_health", FOFS(gib_health), F_INT},
-	{"gib_type", FOFS(gib_type), F_INT},
-	{"health2", FOFS(health2), F_INT},
-	{"holdtime", FOFS(holdtime), F_FLOAT},
-	{"id", FOFS(id), F_INT},
-	{"idle_noise", FOFS(idle_noise), F_LSTRING},
-	{"jumpdn", FOFS(monsterinfo.jumpdn), F_FLOAT},
-	{"jumpup", FOFS(monsterinfo.jumpup), F_FLOAT},
-	{"mass2", FOFS(mass2), F_INT},
-	{"max_health", FOFS(max_health), F_INT},
-	{"max_range", FOFS(monsterinfo.max_range), F_FLOAT},
-	{"moreflags", FOFS(moreflags), F_INT},
-	{"movewith", FOFS(movewith), F_LSTRING},
-	{"movewith_ent", FOFS(movewith_ent), F_EDICT},
-	{"movewith_next", FOFS(movewith_next), F_EDICT},
-	{"movewith_offset", FOFS(movewith_offset), F_VECTOR},
-	{"move_to", FOFS(move_to), F_LSTRING},
-	{"muzzle", FOFS(muzzle), F_VECTOR},
-	{"muzzle2", FOFS(muzzle2), F_VECTOR},
-	{"newtargetname", FOFS(newtargetname), F_LSTRING},
-	{"next_grenade", FOFS(next_grenade), F_EDICT, FFL_NOSPAWN},
-	{"origin_offset", FOFS(origin_offset), F_VECTOR},
-	{"offset", FOFS(offset), F_VECTOR},
-	{"org_maxs", FOFS(org_maxs), F_VECTOR},
-	{"org_mins", FOFS(org_mins), F_VECTOR},
-	{"org_size", FOFS(org_size), F_VECTOR},
-	{"owner_id", FOFS(owner_id), F_INT},
-	{"parent_attach_angles", FOFS(parent_attach_angles), F_VECTOR},
-	{ "child_attach_angles", FOFS(child_attach_angles), F_VECTOR },	// Knightmare added
-	{"pitch_speed", FOFS(pitch_speed), F_FLOAT},
-	{"powerarmor", FOFS(powerarmor), F_INT},
-	{"prev_grenade", FOFS(prev_grenade), F_EDICT, FFL_NOSPAWN},
-	{"prevpath", FOFS(prevpath), F_EDICT},
-	{"radius", FOFS(radius), F_FLOAT},
-	{"renderfx", FOFS(renderfx), F_INT},
-	{"roll", FOFS(roll), F_FLOAT},
-	{"roll_speed", FOFS(roll_speed), F_FLOAT},
-	{ "skinnum", FOFS(skinnum), F_INT },	// was s.skinnum
-	{"speaker", FOFS(speaker), F_EDICT, FFL_NOSPAWN},
-	{"smooth_movement", FOFS(smooth_movement), F_INT},
-	{"solidstate", FOFS(solidstate), F_INT},
-	{"source", FOFS(source), F_LSTRING},
-	{"startframe", FOFS(startframe), F_INT},
-	{"target2", FOFS(target2), F_LSTRING},
-	{"tright", FOFS(tright), F_VECTOR},
-	{"turn_rider", FOFS(turn_rider), F_INT},
-	{"turret", FOFS(turret), F_EDICT},
-	{"usermodel", FOFS(usermodel), F_LSTRING},
-	{"vehicle", FOFS(vehicle), F_EDICT, FFL_NOSPAWN},
-	{"viewer", FOFS(viewer), F_EDICT},
-	{"viewheight", FOFS(viewheight), F_INT},
-	{"viewmessage", FOFS(viewmessage), F_LSTRING},
-	{"yaw_speed", FOFS(yaw_speed), F_FLOAT},
-
-	{"crosshair", FOFS(crosshair), F_EDICT},
-	{"from", FOFS(from), F_EDICT},
-	{"to", FOFS(to), F_EDICT},
-	{"flash", FOFS(flash), F_EDICT},
-	// FIXME: how to save 6-part reflection field?
-
-	// fields added by Rogue mission pack
-	{"bad_area", FOFS(bad_area), F_EDICT},
-	{"hint_chain", FOFS(hint_chain), F_EDICT},
-	{"monster_hint_chain", FOFS(monster_hint_chain), F_EDICT},
-	{"target_hint_chain", FOFS(target_hint_chain), F_EDICT},
-	{"goal_hint", FOFS(monsterinfo.goal_hint), F_EDICT},
-	{"badMedic1", FOFS(monsterinfo.badMedic1), F_EDICT},
-	{"badMedic2", FOFS(monsterinfo.badMedic2), F_EDICT},
-	{"last_player_enemy", FOFS(monsterinfo.last_player_enemy), F_EDICT},
-	{"commander", FOFS(monsterinfo.commander), F_EDICT},
-	{"blocked", FOFS(monsterinfo.blocked), F_FUNCTION, FFL_NOSPAWN},
-	{"duck", FOFS(monsterinfo.duck), F_FUNCTION, FFL_NOSPAWN},
-	{"unduck", FOFS(monsterinfo.unduck), F_FUNCTION, FFL_NOSPAWN},
-	{"sidestep", FOFS(monsterinfo.sidestep), F_FUNCTION, FFL_NOSPAWN},
-//	{"blocked", FOFS(monsterinfo.blocked), F_MMOVE, FFL_NOSPAWN},
-//	{"duck", FOFS(monsterinfo.duck), F_MMOVE, FFL_NOSPAWN},
-//	{"unduck", FOFS(monsterinfo.unduck), F_MMOVE, FFL_NOSPAWN},
-//	{"sidestep", FOFS(monsterinfo.sidestep), F_MMOVE, FFL_NOSPAWN},
-
-// ACEBOT_ADD
-	{"is_bot", FOFS(is_bot), F_INT},
-	{"is_jumping", FOFS(is_jumping), F_INT},
-	{"move_vector", FOFS(move_vector), F_VECTOR},
-	{"next_move_time", FOFS(next_move_time), F_FLOAT},
-	{"wander_timeout", FOFS(wander_timeout), F_FLOAT},
-	{"suicide_timeout", FOFS(suicide_timeout), F_FLOAT},
-	{"current_node", FOFS(current_node), F_INT},
-	{"goal_node", FOFS(goal_node), F_INT},
-	{"next_node", FOFS(next_node), F_INT},
-	{"node_timeout", FOFS(node_timeout), F_INT},
-	{"last_node", FOFS(last_node), F_INT},
-	{"tries", FOFS(tries), F_INT},
-	{"state", FOFS(state), F_INT},
-// ACEBOT_END
-	{ "nacumbraangle", STOFS(nacumbraangle), F_LSTRING, FFL_SPAWNTEMP },
-	{ "nacpenumbraangle", STOFS(nacpenumbraangle), F_LSTRING, FFL_SPAWNTEMP },
-	{ "naclightpow", STOFS(naclightpow), F_LSTRING, FFL_SPAWNTEMP },
-	{ "naclightmax", STOFS(naclightmax), F_LSTRING, FFL_SPAWNTEMP },
-	{ "nacdirection", STOFS(nacdirection), F_VECTOR, FFL_SPAWNTEMP },
-	{ "naclighttype", STOFS(naclighttype), F_INT, FFL_SPAWNTEMP },
-	{ "ltsetter", STOFS(ltsetter), F_LSTRING, FFL_SPAWNTEMP },
-	{ "nacCustom", STOFS(nacCustom), F_LSTRING, FFL_SPAWNTEMP },
-	{ "nacCustomEnabled", STOFS(nacCustomEnabled), F_INT, FFL_SPAWNTEMP },
-	{ "nacCustomLoopEnabled", STOFS(nacCustomLoopEnabled), F_INT, FFL_SPAWNTEMP },
-	{ "nacCustomToggleEnabled", STOFS(nacCustomToggleEnabled), F_INT, FFL_SPAWNTEMP },
-	{ "nacHz", STOFS(nacHz), F_INT, FFL_SPAWNTEMP },
-	{ "ltMode", STOFS(ltMode), F_INT, FFL_SPAWNTEMP },
-	{ "delay", STOFS(delay), F_INT, FFL_SPAWNTEMP },
-	{ "ltAttachOffset", STOFS(ltAttachOffset), F_VECTOR, FFL_SPAWNTEMP },
-	{ "ltTracker", STOFS(ltTracker), F_LSTRING, FFL_SPAWNTEMP },
-	{ "grFogOnOff", STOFS(grFogOnOff), F_LSTRING, FFL_SPAWNTEMP },
-	{ "grFogTintRed", STOFS(grFogTintRed), F_LSTRING, FFL_SPAWNTEMP },
-	{ "grFogTintGreen", STOFS(grFogTintGreen), F_LSTRING, FFL_SPAWNTEMP },
-	{ "grFogTintBlue", STOFS(grFogTintBlue), F_LSTRING, FFL_SPAWNTEMP },
-	{ "grFogTintPower", STOFS(grFogTintPower), F_LSTRING, FFL_SPAWNTEMP },
-	{ "grFogDensityRoot", STOFS(grFogDensityRoot), F_LSTRING, FFL_SPAWNTEMP },
-	{ "grFogPushBackDist", STOFS(grFogPushBackDist), F_LSTRING, FFL_SPAWNTEMP },
-	{ "fog", STOFS(fog), F_LSTRING, FFL_SPAWNTEMP },
-	{ "grFogDelay", STOFS(grFogDelay), F_INT, FFL_SPAWNTEMP },
-	{ "grFogMode", STOFS(grFogMode), F_INT, FFL_SPAWNTEMP },
-	{ "grFogColor", STOFS(grFogColor), F_VECTOR, FFL_SPAWNTEMP },
-	{ "reverb", STOFS(reverb), F_LSTRING, FFL_SPAWNTEMP },
-	{ "reverbpreset", STOFS(reverbpreset), F_INT, FFL_SPAWNTEMP },
-	{ "TriggerDelay", STOFS(TriggerDelay), F_INT, FFL_SPAWNTEMP },
-	{ "flDensity", STOFS(flDensity), F_LSTRING, FFL_SPAWNTEMP },
-	{ "flDiffusion", STOFS(flDiffusion), F_LSTRING, FFL_SPAWNTEMP },
-	{ "flGain", STOFS(flGain), F_LSTRING, FFL_SPAWNTEMP },
-	{ "flGainHF", STOFS(flGainHF), F_LSTRING, FFL_SPAWNTEMP },
-	{ "flDecayTime", STOFS(flDecayTime), F_LSTRING, FFL_SPAWNTEMP },
-	{ "flDecayHFRatio", STOFS(flDecayHFRatio), F_LSTRING, FFL_SPAWNTEMP },
-	{ "flReflectionsGain", STOFS(flReflectionsGain), F_LSTRING, FFL_SPAWNTEMP },
-	{ "flReflectionsDelay", STOFS(flReflectionsDelay), F_LSTRING, FFL_SPAWNTEMP },
-	{ "flLateReverbGain", STOFS(flLateReverbGain), F_LSTRING, FFL_SPAWNTEMP },
-	{ "flLateReverbDelay", STOFS(flLateReverbDelay), F_LSTRING, FFL_SPAWNTEMP },
-	{ "flAirAbsorptionGainHF", STOFS(flAirAbsorptionGainHF), F_LSTRING, FFL_SPAWNTEMP },
-	{ "flRoomRolloffFactor", STOFS(flRoomRolloffFactor), F_LSTRING, FFL_SPAWNTEMP },
-	{ "gr_enable", STOFS(gr_enable), F_INT, FFL_SPAWNTEMP },
-	{ "gr_eccentricity", STOFS(gr_eccentricity), F_LSTRING, FFL_SPAWNTEMP },
-	{ "gr_intensity", STOFS(gr_intensity), F_LSTRING, FFL_SPAWNTEMP },
-	{ "gr_delay", STOFS(gr_delay), F_INT, FFL_SPAWNTEMP },
-	{ "godrays", STOFS(godrays), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sunColor", STOFS(sunColor), F_VECTOR, FFL_SPAWNTEMP },
-	{ "sunAngle", STOFS(sunAngle), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sunAnimate", STOFS(sunAnimate), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sunAzimuth", STOFS(sunAzimuth), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sunElevation", STOFS(sunElevation), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sunBrightness", STOFS(sunBrightness), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sunPreset", STOFS(sunPreset), F_INT, FFL_SPAWNTEMP },
-	{ "sunDelay", STOFS(sunDelay), F_INT, FFL_SPAWNTEMP },
-	{ "sun", STOFS(sun), F_LSTRING, FFL_SPAWNTEMP },
-	{ "clouds", STOFS(clouds), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sdfclouds", STOFS(sdfclouds), F_INT, FFL_SPAWNTEMP },
-	{ "sdfstep", STOFS(sdfstep), F_INT, FFL_SPAWNTEMP },
-	{ "sdfcoverage", STOFS(sdfcoverage), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sdfthickness", STOFS(sdfthickness), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sdfabsorption", STOFS(sdfabsorption), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sdffmbfreq", STOFS(sdffmbfreq), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sdfcloudinner", STOFS(sdfcloudinner), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sdfcloudouter", STOFS(sdfcloudouter), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sdfsunfluxmin", STOFS(sdfsunfluxmin), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sdfsunfluxmax", STOFS(sdfsunfluxmax), F_LSTRING, FFL_SPAWNTEMP },
-	{ "sdfwindvec", STOFS(sdfwindvec), F_VECTOR, FFL_SPAWNTEMP },
-	{ "sdfcloudcolorize", STOFS(sdfcloudcolorize), F_INT, FFL_SPAWNTEMP },
-	{ "sdfcloudcolor", STOFS(sdfcloudcolor), F_VECTOR, FFL_SPAWNTEMP },
-	{ "sdfskycolorize", STOFS(sdfskycolorize), F_INT, FFL_SPAWNTEMP },
-	{ "sdfskycolor", STOFS(sdfskycolor), F_VECTOR, FFL_SPAWNTEMP },
-	{ "iDecayHFLimit", STOFS(iDecayHFLimit), F_INT, FFL_SPAWNTEMP },
-	{0, 0, 0, 0}
-
-};
-
-field_t		levelfields[] =
-{
-	{"changemap", LLOFS(changemap), F_LSTRING},
-	{"sight_client", LLOFS(sight_client), F_EDICT},
-	{"sight_entity", LLOFS(sight_entity), F_EDICT},
-	{"sound_entity", LLOFS(sound_entity), F_EDICT},
-	{"sound2_entity", LLOFS(sound2_entity), F_EDICT},
-	{"disguise_violator", LLOFS(disguise_violator), F_EDICT},
-
-	{NULL, 0, F_INT}
-};
-
-field_t		clientfields[] =
-{
-	{"pers.weapon", CLOFS(pers.weapon), F_ITEM},
-	{"pers.lastweapon", CLOFS(pers.lastweapon), F_ITEM},
-	{"newweapon", CLOFS(newweapon), F_ITEM},
-	{"chasecam", CLOFS(chasecam), F_EDICT},
-	{"oldplayer", CLOFS(oldplayer), F_EDICT},
-
-	{NULL, 0, F_INT}
-};
-
-
-/*
-============
-InitGame
-
-This will be called when the dll is first loaded, which
-only happens when a new game is started or a save game
-is loaded.
-============
-*/
-void InitGame (void)
-{
-	gi.dprintf ("==== InitGame (Nail & Crescent) ====\n");
-	gi.dprintf ("By team N&C - Project Website: https://github.com/PalmliX/Q2RTX\n\n");
-
-	// Knightmare- init lithium cvars
-	InitLithiumVars ();
-
-	gun_x = gi.cvar ("gun_x", "0", 0);
-	gun_y = gi.cvar ("gun_y", "0", 0);
-	gun_z = gi.cvar ("gun_z", "0", 0);
-
-	//FIXME: sv_ prefix is wrong for these
-	sv_rollspeed = gi.cvar ("sv_rollspeed", "200", 0);
-	sv_rollangle = gi.cvar ("sv_rollangle", "2", 0);
-	sv_maxvelocity = gi.cvar ("sv_maxvelocity", "2000", 0);
-	sv_gravity = gi.cvar ("sv_gravity", "750", 0);
-
-	sv_stopspeed = gi.cvar ("sv_stopspeed", "100", 0);		// PGM - was #define in g_phys.c
-	sv_step_fraction = gi.cvar ("sv_step_fraction", "0.90", 0);	// Knightmare- this was a define in p_view.c
-
-	// noset vars
-	dedicated = gi.cvar ("dedicated", "0", CVAR_NOSET);
-
-	// latched vars
-	sv_cheats = gi.cvar ("cheats", "0", CVAR_SERVERINFO|CVAR_LATCH);
-	gi.cvar ("gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_LATCH);
-	gi.cvar ("gamedate", __DATE__ , CVAR_SERVERINFO | CVAR_LATCH);
-
-	maxclients = gi.cvar ("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
-	maxspectators = gi.cvar ("maxspectators", "4", CVAR_SERVERINFO);
-	deathmatch = gi.cvar ("deathmatch", "0", CVAR_LATCH);
-	coop = gi.cvar ("coop", "0", CVAR_LATCH);
-	skill = gi.cvar ("skill", "1", CVAR_LATCH);
-
-	// Knightmare- increase maxentities
-	//maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH);
-	maxentities = gi.cvar ("maxentities", va("%i",MAX_EDICTS), CVAR_LATCH);
-
-	// change anytime vars
-	dmflags = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);
-	fraglimit = gi.cvar ("fraglimit", "0", CVAR_SERVERINFO);
-	timelimit = gi.cvar ("timelimit", "0", CVAR_SERVERINFO);
-//ZOID
-	capturelimit = gi.cvar ("capturelimit", "0", CVAR_SERVERINFO);
-	instantweap = gi.cvar ("instantweap", "0", CVAR_SERVERINFO);
-//ZOID
-	password = gi.cvar ("password", "", CVAR_USERINFO);
-	spectator_password = gi.cvar ("spectator_password", "", CVAR_USERINFO);
-	needpass = gi.cvar ("needpass", "0", CVAR_SERVERINFO);
-	filterban = gi.cvar ("filterban", "1", 0);
-
-	g_select_empty = gi.cvar ("g_select_empty", "0", CVAR_ARCHIVE);
-
-	run_pitch = gi.cvar ("run_pitch", "0.002", 0);
-	run_roll = gi.cvar ("run_roll", "0.005", 0);
-	bob_up  = gi.cvar ("bob_up", "0.005", 0);
-	bob_pitch = gi.cvar ("bob_pitch", "0.002", 0);
-	bob_roll = gi.cvar ("bob_roll", "0.002", 0);
-
-	// flood control
-	flood_msgs = gi.cvar ("flood_msgs", "4", 0);
-	flood_persecond = gi.cvar ("flood_persecond", "4", 0);
-	flood_waitdelay = gi.cvar ("flood_waitdelay", "10", 0);
-
-	// N&C Server features.
-	sv_maplist = gi.cvar ("sv_maplist", "", 0);
-	sv_maplist_random = gi.cvar("sv_maplist_random", "", 0);
-
-	// Lazarus
-	actorchicken = gi.cvar("actorchicken", "1", CVAR_SERVERINFO|CVAR_LATCH);
-	actorjump = gi.cvar("actorjump", "1", CVAR_SERVERINFO|CVAR_LATCH);
-	actorscram = gi.cvar("actorscram", "1", CVAR_SERVERINFO|CVAR_LATCH);
-	alert_sounds = gi.cvar("alert_sounds", "0", CVAR_SERVERINFO|CVAR_LATCH);
-	allow_fog = gi.cvar ("allow_fog", "1", CVAR_ARCHIVE);
-
-	// set to 0 to bypass target_changelevel clear inventory flag
-	// because some user maps have this erroneously set
-	allow_clear_inventory = gi.cvar ("allow_clear_inventory", "1", CVAR_ARCHIVE);
-
-	cd_loopcount = gi.cvar("cd_loopcount","4",0);
-	cl_gun = gi.cvar("cl_gun", "1", 0);
-	cl_thirdperson = gi.cvar(CLIENT_THIRDPERSON_CVAR, "0", 0); // Knightmare added
-	corpse_fade = gi.cvar("corpse_fade", "0", CVAR_SERVERINFO|CVAR_LATCH);
-	corpse_fadetime = gi.cvar("corpse_fadetime", "20", 0);
-	crosshair = gi.cvar("crosshair", "1", 0);
-	footstep_sounds = gi.cvar("footstep_sounds", "0", CVAR_SERVERINFO|CVAR_LATCH);
-	fov = gi.cvar("fov", "90", 0);
-	hand = gi.cvar("hand", "0", 0);
-	jetpack_weenie = gi.cvar("jetpack_weenie", "0", CVAR_SERVERINFO);
-	joy_pitchsensitivity = gi.cvar("joy_pitchsensitivity", "1", 0);
-	joy_yawsensitivity = gi.cvar("joy_yawsensitivity", "-1", 0);
-	jump_kick = gi.cvar("jump_kick", "0", CVAR_SERVERINFO|CVAR_LATCH);
-	lights = gi.cvar("lights", "1", 0);
-	lightsmin = gi.cvar("lightsmin", "a", CVAR_SERVERINFO);
-	m_pitch = gi.cvar("m_pitch", "0.022", 0);
-	m_yaw = gi.cvar("m_yaw", "0.022", 0);
-	monsterjump = gi.cvar("monsterjump", "1", CVAR_SERVERINFO|CVAR_LATCH);
-	rocket_strafe = gi.cvar("rocket_strafe", "0", 0);
-	s_primary = gi.cvar("s_primary", "0", 0);
-#ifdef KMQUAKE2_ENGINE_MOD
-	sv_maxgibs = gi.cvar("sv_maxgibs", "160", CVAR_SERVERINFO);
+#ifdef _DEBUG
+#define _FA(type, name, size) { type, #name, _OFS(name), size }
 #else
-	sv_maxgibs = gi.cvar("sv_maxgibs", "20", CVAR_SERVERINFO);
+#define _FA(type, name, size) { type, _OFS(name), size }
 #endif
-	turn_rider = gi.cvar("turn_rider", "1", CVAR_SERVERINFO);
-	zoomrate = gi.cvar("zoomrate", "80", CVAR_ARCHIVE);
-	zoomsnap = gi.cvar("zoomsnap", "20", CVAR_ARCHIVE);
+#define _F(type, name) _FA(type, name, 1)
+#define SZ(name, size) _FA(F_ZSTRING, name, size)
+#define BA(name, size) _FA(F_BYTE, name, size)
+#define B(name) BA(name, 1)
+#define SA(name, size) _FA(F_SHORT, name, size)
+#define S(name) SA(name, 1)
+#define IA(name, size) _FA(F_INT, name, size)
+#define I(name) IA(name, 1)
+#define FA(name, size) _FA(F_FLOAT, name, size)
+#define F(name) FA(name, 1)
+#define L(name) _F(F_LSTRING, name)
+#define V(name) _F(F_VECTOR, name)
+#define T(name) _F(F_ITEM, name)
+#define E(name) _F(F_EDICT, name)
+#define P(name, type) _FA(F_POINTER, name, type)
 
-	// shift_ and rotate_distance only used for debugging stuff - this is the distance
-	// an entity will be moved by "item_left", "item_right", etc.
-	shift_distance = gi.cvar("shift_distance", "1", CVAR_SERVERINFO);
-	rotate_distance = gi.cvar("rotate_distance", "1", CVAR_SERVERINFO);
+static const save_field_t entityfields[] = {
+#define _OFS FOFS
+    V(s.origin),
+    V(s.angles),
+    V(s.old_origin),
+    I(s.modelindex),
+    I(s.modelindex2),
+    I(s.modelindex3),
+    I(s.modelindex4),
+    I(s.frame),
+    I(s.skinnum),
+    I(s.effects),
+    I(s.renderfx),
+    I(s.solid),
+    I(s.sound),
+    I(s.event),
 
-	// GL stuff
-	gl_clear = gi.cvar("gl_clear", "0", 0);
+    // [...]
 
-	// Lazarus saved cvars that we may or may not manipulate, but need to
-	// restore to original values upon map exit.
-	lazarus_cd_loop = gi.cvar("lazarus_cd_loop", "0", 0);
-	lazarus_gl_clear= gi.cvar("lazarus_gl_clear","0", 0);
-	lazarus_pitch   = gi.cvar("lazarus_pitch",   "0", 0);
-	lazarus_yaw     = gi.cvar("lazarus_yaw",     "0", 0);
-	lazarus_joyp    = gi.cvar("lazarus_joyp",    "0", 0);
-	lazarus_joyy    = gi.cvar("lazarus_joyy",    "0", 0);
-	lazarus_cl_gun  = gi.cvar("lazarus_cl_gun",  "0", 0);
-	lazarus_crosshair = gi.cvar("lazarus_crosshair", "0", 0);
+    I(svflags),
+    V(mins),
+    V(maxs),
+    V(absmin),
+    V(absmax),
+    V(size),
+    I(solid),
+    I(clipmask),
+    E(owner),
 
-	/*if(lazarus_gl_clear->value)
-		gi.cvar_forceset("gl_clear",         va("%d",lazarus_gl_clear->value));
-	else
-		gi.cvar_forceset("lazarus_gl_clear", va("%d",gl_clear->value));*/
+    I(movetype),
+    I(flags),
 
-	if(!deathmatch->value && !coop->value)
-	{
-		/*if(lazarus_pitch->value) {
-			gi.cvar_forceset("cd_loopcount",         va("%d",(int)(lazarus_cd_loop->value)));
-			gi.cvar_forceset("m_pitch",              va("%f",lazarus_pitch->value));
-			gi.cvar_forceset("m_yaw",                va("%f",lazarus_yaw->value));
-			gi.cvar_forceset("cl_gun",               va("%d",(int)(lazarus_cl_gun->value)));
-			gi.cvar_forceset("crosshair",            va("%d",(int)(lazarus_crosshair->value)));
-		} else {*/
-			gi.cvar_forceset("lazarus_cd_loop",        va("%d",(int)(cd_loopcount->value)));
-#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom autosensitivity
-			gi.cvar_forceset("lazarus_pitch",          va("%f",m_pitch->value));
-			gi.cvar_forceset("lazarus_yaw",            va("%f",m_yaw->value));
-			gi.cvar_forceset("lazarus_joyp",           va("%f",joy_pitchsensitivity->value));
-			gi.cvar_forceset("lazarus_joyy",           va("%f",joy_yawsensitivity->value));
-#endif
-			gi.cvar_forceset("lazarus_cl_gun",         va("%d",(int)(cl_gun->value)));
-			gi.cvar_forceset("lazarus_crosshair",      va("%d",(int)(crosshair->value)));
-		//}
-	}
+    L(model),
+    F(freetime),
 
-	tpp = gi.cvar ("tpp", "0", CVAR_ARCHIVE);
-	tpp_auto = gi.cvar ("tpp_auto", "1", 0);
-	crossh = gi.cvar ("crossh", "1", 0);
-	allow_download = gi.cvar("allow_download", "0", 0);
+    L(message),
+    L(classname),
+    I(spawnflags),
 
-	blaster_color = gi.cvar("blaster_color", "1", 0); // Knightmare added
+    F(timestamp),
 
-	// If this is an SP game and "readout" is not set, force allow_download off
-	// so we don't get the annoying "Refusing to download path with .." messages
-	// due to misc_actor sounds.
-#ifndef KMQUAKE2_ENGINE_MOD // engine skips downloading on local server
-	if (allow_download->value && !readout->value && !deathmatch->value)
-		gi.cvar_forceset("allow_download", "0");
-#endif
+    L(target),
+    L(targetname),
+    L(killtarget),
+    L(team),
+    L(pathtarget),
+    L(deathtarget),
+    L(combattarget),
+    E(target_ent),
 
-	bounce_bounce = gi.cvar("bounce_bounce", "0.5", 0);
-	bounce_minv   = gi.cvar("bounce_minv",   "60",  0);
+    F(speed),
+    F(accel),
+    F(decel),
+    V(movedir),
+    V(pos1),
+    V(pos2),
 
-	// items
-	InitItems ();
+    V(velocity),
+    V(avelocity),
+    I(mass),
+    F(air_finished),
+    F(gravity),
 
-	Com_sprintf (game.helpmessage1, sizeof(game.helpmessage1), "");
+    E(goalentity),
+    E(movetarget),
+    F(yaw_speed),
+    F(ideal_yaw),
 
-	Com_sprintf (game.helpmessage2, sizeof(game.helpmessage2), "");
+    F(nextthink),
+    P(prethink, P_prethink),
+    P(think, P_think),
+    P(blocked, P_blocked),
+    P(touch, P_touch),
+    P(use, P_use),
+    P(pain, P_pain),
+    P(die, P_die),
 
-	// initialize all entities for this game
-	game.maxentities = maxentities->value;
-	g_edicts =  gi.TagMalloc (game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
-	globals.edicts = g_edicts;
-	globals.max_edicts = game.maxentities;
+    F(touch_debounce_time),
+    F(pain_debounce_time),
+    F(damage_debounce_time),
+    F(fly_sound_debounce_time),
+    F(last_move_time),
 
-	// initialize all clients for this game
-	game.maxclients = maxclients->value;
-	game.clients = gi.TagMalloc (game.maxclients * sizeof(game.clients[0]), TAG_GAME);
-	globals.num_edicts = game.maxclients+1;
+    I(health),
+    I(max_health),
+    I(gib_health),
+    I(deadflag),
+    I(show_hostile),
 
-//ZOID
-	CTFInit();
-//ZOID
-}
+    F(powerarmor_time),
 
-//=========================================================
+    L(map),
 
-#ifdef SAVEGAME_USE_FUNCTION_TABLE
+    I(viewheight),
+    I(takedamage),
+    I(dmg),
+    I(radius_dmg),
+    F(dmg_radius),
+    I(sounds),
+    I(count),
 
-typedef struct {
-	char *funcStr;
-	byte *funcPtr;
-} functionList_t;
+    E(chain),
+    E(enemy),
+    E(oldenemy),
+    E(activator),
+    E(groundentity),
+    I(groundentity_linkcount),
+    E(teamchain),
+    E(teammaster),
 
-typedef struct {
-	char	*mmoveStr;
-	mmove_t *mmovePtr;
-} mmoveList_t;
+    E(mynoise),
+    E(mynoise2),
 
-#include "g_func_decs.h"
+    I(noise_index),
+    I(noise_index2),
+    F(volume),
+    F(attenuation),
 
-functionList_t functionList[] = {
-#include "g_func_list.h"
+    F(wait),
+    F(delay),
+    F(random),
+
+    F(teleport_time),
+
+    I(watertype),
+    I(waterlevel),
+
+    V(move_origin),
+    V(move_angles),
+
+    I(light_level),
+
+    I(style),
+
+    T(item),
+
+    V(moveinfo.start_origin),
+    V(moveinfo.start_angles),
+    V(moveinfo.end_origin),
+    V(moveinfo.end_angles),
+
+    I(moveinfo.sound_start),
+    I(moveinfo.sound_middle),
+    I(moveinfo.sound_end),
+
+    F(moveinfo.accel),
+    F(moveinfo.speed),
+    F(moveinfo.decel),
+    F(moveinfo.distance),
+
+    F(moveinfo.wait),
+
+    I(moveinfo.state),
+    V(moveinfo.dir),
+    F(moveinfo.current_speed),
+    F(moveinfo.move_speed),
+    F(moveinfo.next_speed),
+    F(moveinfo.remaining_distance),
+    F(moveinfo.decel_distance),
+    P(moveinfo.endfunc, P_moveinfo_endfunc),
+
+    P(monsterinfo.currentmove, P_monsterinfo_currentmove),
+    I(monsterinfo.aiflags),
+    I(monsterinfo.nextframe),
+    F(monsterinfo.scale),
+
+    P(monsterinfo.stand, P_monsterinfo_stand),
+    P(monsterinfo.idle, P_monsterinfo_idle),
+    P(monsterinfo.search, P_monsterinfo_search),
+    P(monsterinfo.walk, P_monsterinfo_walk),
+    P(monsterinfo.run, P_monsterinfo_run),
+    P(monsterinfo.dodge, P_monsterinfo_dodge),
+    P(monsterinfo.attack, P_monsterinfo_attack),
+    P(monsterinfo.melee, P_monsterinfo_melee),
+    P(monsterinfo.sight, P_monsterinfo_sight),
+    P(monsterinfo.checkattack, P_monsterinfo_checkattack),
+
+    F(monsterinfo.pausetime),
+    F(monsterinfo.attack_finished),
+
+    V(monsterinfo.saved_goal),
+    F(monsterinfo.search_time),
+    F(monsterinfo.trail_time),
+    V(monsterinfo.last_sighting),
+    I(monsterinfo.attack_state),
+    I(monsterinfo.lefty),
+    F(monsterinfo.idle_time),
+    I(monsterinfo.linkcount),
+
+    I(monsterinfo.power_armor_type),
+    I(monsterinfo.power_armor_power),
+
+    {0}
+#undef _OFS
 };
 
-#include "g_mmove_decs.h"
+static const save_field_t levelfields[] = {
+#define _OFS LLOFS
+    I(framenum),
+    F(time),
 
-mmoveList_t mmoveList[] = {
-#include "g_mmove_list.h"
+    SZ(level_name, MAX_QPATH),
+    SZ(mapname, MAX_QPATH),
+    SZ(nextmap, MAX_QPATH),
+
+    F(intermissiontime),
+    L(changemap),
+    I(exitintermission),
+    V(intermission_origin),
+    V(intermission_angle),
+
+    E(sight_client),
+
+    E(sight_entity),
+    I(sight_entity_framenum),
+    E(sound_entity),
+    I(sound_entity_framenum),
+    E(sound2_entity),
+    I(sound2_entity_framenum),
+
+    I(pic_health),
+
+    I(total_secrets),
+    I(found_secrets),
+
+    I(total_goals),
+    I(found_goals),
+
+    I(total_monsters),
+    I(killed_monsters),
+
+    I(body_que),
+
+    I(power_cubes),
+
+    {0}
+#undef _OFS
 };
 
-functionList_t *GetFunctionByAddress (byte *adr)
-{
-	int i;
-	for (i=0; functionList[i].funcStr; i++)
-	{
-		if (functionList[i].funcPtr == adr)
-			return &functionList[i];
-	}
-	return NULL;
-}
+static const save_field_t clientfields[] = {
+#define _OFS CLOFS
+    I(ps.pmove.pm_type),
 
-byte *FindFunctionByName (char *name)
-{
-	int i;
-	for (i=0; functionList[i].funcStr; i++)
-	{
-		if (!strcmp(name, functionList[i].funcStr))
-			return functionList[i].funcPtr;
-	}
-	return NULL;
-}
+    SA(ps.pmove.origin, 3),
+    SA(ps.pmove.velocity, 3),
+    B(ps.pmove.pm_flags),
+    B(ps.pmove.pm_time),
+    S(ps.pmove.gravity),
+    SA(ps.pmove.delta_angles, 3),
 
-mmoveList_t *GetMmoveByAddress (mmove_t *adr)
-{
-	int i;
-	for (i=0; mmoveList[i].mmoveStr; i++)
-	{
-		if (mmoveList[i].mmovePtr == adr)
-			return &mmoveList[i];
-	}
-	return NULL;
-}
+    V(ps.viewangles),
+    V(ps.viewoffset),
+    V(ps.kick_angles),
 
-mmove_t *FindMmoveByName (char *name)
-{
-	int i;
-	for (i=0; mmoveList[i].mmoveStr; i++)
-	{
-		if (!strcmp(name, mmoveList[i].mmoveStr))
-			return mmoveList[i].mmovePtr;
-	}
-	return NULL;
-}
+    V(ps.gunangles),
+    V(ps.gunoffset),
+    I(ps.gunindex),
+    I(ps.gunframe),
 
-#endif // SAVEGAME_USE_FUNCTION_TABLE
+    FA(ps.blend, 4),
 
-//=========================================================
+    F(ps.fov),
 
-void WriteField1 (FILE *f, field_t *field, byte *base)
-{
-	void		*p;
-	int			len;
-	int			index;
-#ifdef SAVEGAME_USE_FUNCTION_TABLE
-	functionList_t *func;
-	mmoveList_t *mmove;
-#endif
+    I(ps.rdflags),
 
-	if (field->flags & FFL_SPAWNTEMP)
-		return;
+    SA(ps.stats, MAX_STATS),
 
-	p = (void *)(base + field->ofs);
-	switch (field->type)
-	{
-	case F_INT:
-	case F_FLOAT:
-	case F_ANGLEHACK:
-	case F_VECTOR:
-	case F_IGNORE:
-		break;
+    SZ(pers.userinfo, MAX_INFO_STRING),
+    SZ(pers.netname, 16),
+    I(pers.hand),
 
-	case F_LSTRING:
-	case F_GSTRING:
-		if ( *(char **)p )
-			len = (int)strlen(*(char **)p) + 1;
-		else
-			len = 0;
-		*(int *)p = len;
-		break;
-	case F_EDICT:
-		if ( *(edict_t **)p == NULL)
-			index = -1;
-		else
-			index = *(edict_t **)p - g_edicts;
-		*(int *)p = index;
-		break;
-	case F_CLIENT:
-		if ( *(gclient_t **)p == NULL)
-			index = -1;
-		else
-			index = *(gclient_t **)p - game.clients;
-		*(int *)p = index;
-		break;
-	case F_ITEM:
-		if ( *(edict_t **)p == NULL)
-			index = -1;
-		else
-			index = *(gitem_t **)p - itemlist;
-		*(int *)p = index;
-		break;
-#ifdef SAVEGAME_USE_FUNCTION_TABLE
-	// Matches with an address in the function list, which is generated by extractfuncs.exe.
-	// Actual name of function is saved as a string, allowing version-independent savegames.
-	case F_FUNCTION:
-		if (*(byte **)p == NULL)
-			len = 0;
-		else
-		{
-			func = GetFunctionByAddress (*(byte **)p);
-			if (!func)
-				gi.error ("WriteField1: function not in list, can't save game");
-			len = (int)strlen(func->funcStr)+1;
-		}
-		*(int *)p = len;
-		break;
-	// Matches with an address in the mmove list, which is generated by extractfuncs.exe.
-	// Actual name of mmove is saved as a string, allowing version-independent savegames.
-	case F_MMOVE:
-		if (*(byte **)p == NULL)
-			len = 0;
-		else
-		{
-			mmove = GetMmoveByAddress (*(mmove_t **)p);
-			if (!mmove)
-				gi.error ("WriteField1: mmove not in list, can't save game");
-			len = (int)strlen(mmove->mmoveStr)+1;
-		}
-		*(int *)p = len;
-		break;
-#else // SAVEGAME_USE_FUNCTION_TABLE
-	// relative to code segment
-	case F_FUNCTION:
-		if (*(byte **)p == NULL)
-			index = 0;
-		else
-			index = *(byte **)p - ((byte *)InitGame);
-		*(int *)p = index;
-		break;
-	// relative to data segment
-	case F_MMOVE:
-		if (*(byte **)p == NULL)
-			index = 0;
-		else
-			index = *(byte **)p - (byte *)&mmove_reloc;
-		*(int *)p = index;
-		break;
-#endif // SAVEGAME_USE_FUNCTION_TABLE
-	default:
-		gi.error ("WriteEdict: unknown field type");
-	}
-}
+    I(pers.connected),
 
+    I(pers.health),
+    I(pers.max_health),
+    I(pers.savedFlags),
 
-void WriteField2 (FILE *f, field_t *field, byte *base)
-{
-	int			len;
-	void		*p;
-#ifdef SAVEGAME_USE_FUNCTION_TABLE
-	functionList_t *func;
-	mmoveList_t *mmove;
-#endif
+    I(pers.selected_item),
+    IA(pers.inventory, MAX_ITEMS),
 
-	if (field->flags & FFL_SPAWNTEMP)
-		return;
+    I(pers.max_bullets),
+    I(pers.max_shells),
+    I(pers.max_rockets),
+    I(pers.max_grenades),
+    I(pers.max_cells),
+    I(pers.max_slugs),
 
-	p = (void *)(base + field->ofs);
-	switch (field->type)
-	{
-	case F_LSTRING:
-		if ( *(char **)p )
-		{
-			len = (int)strlen(*(char **)p) + 1;
-			fwrite (*(char **)p, len, 1, f);
-		}
-		break;
-#ifdef SAVEGAME_USE_FUNCTION_TABLE
-	case F_FUNCTION:
-		if ( *(byte **)p )
-		{
-			func = GetFunctionByAddress (*(byte **)p);
-			if (!func)
-				gi.error ("WriteField2: function not in list, can't save game");
-			len = (int)strlen(func->funcStr)+1;
-			fwrite (func->funcStr, len, 1, f);
-		}
-		break;
-	case F_MMOVE:
-		if ( *(byte **)p )
-		{
-			mmove = GetMmoveByAddress (*(mmove_t **)p);
-			if (!mmove)
-				gi.error ("WriteField2: mmove not in list, can't save game");
-			len = (int)strlen(mmove->mmoveStr)+1;
-			fwrite (mmove->mmoveStr, len, 1, f);
-		}
-		break;
-#endif
-	}
-}
+    T(pers.weapon),
+    T(pers.lastweapon),
 
-void ReadField (FILE *f, field_t *field, byte *base)
-{
-	void		*p;
-	int			len;
-	int			index;
-#ifdef SAVEGAME_USE_FUNCTION_TABLE
-	char		funcStr[512];
-#endif
+    I(pers.power_cubes),
+    I(pers.score),
 
-	if (field->flags & FFL_SPAWNTEMP)
-		return;
+    I(pers.game_helpchanged),
+    I(pers.helpchanged),
 
-	p = (void *)(base + field->ofs);
-	switch (field->type)
-	{
-	case F_INT:
-	case F_FLOAT:
-	case F_ANGLEHACK:
-	case F_VECTOR:
-	case F_IGNORE:
-		break;
+    I(pers.spectator),
 
-	case F_LSTRING:
-		len = *(int *)p;
-		if (!len)
-			*(char **)p = NULL;
-		else
-		{
-			*(char **)p = gi.TagMalloc (len, TAG_LEVEL);
-			fread (*(char **)p, len, 1, f);
-		}
-		break;
-	case F_EDICT:
-		index = *(int *)p;
-		if ( index == -1 )
-			*(edict_t **)p = NULL;
-		else
-			*(edict_t **)p = &g_edicts[index];
-		break;
-	case F_CLIENT:
-		index = *(int *)p;
-		if ( index == -1 )
-			*(gclient_t **)p = NULL;
-		else
-			*(gclient_t **)p = &game.clients[index];
-		break;
-	case F_ITEM:
-		index = *(int *)p;
-		if ( index == -1 )
-			*(gitem_t **)p = NULL;
-		else
-			*(gitem_t **)p = &itemlist[index];
-		break;
-#ifdef SAVEGAME_USE_FUNCTION_TABLE
-	// Matches with a string in the function list, which is generated by extractfuncs.exe.
-	// Actual address of function is loaded from list, allowing version-independent savegames.
-	case F_FUNCTION:
-		len = *(int *)p;
-		if (!len)
-			*(byte **)p = NULL;
-		else
-		{
-			if (len > sizeof(funcStr))
-				gi.error ("ReadField: function name is longer than buffer (%i chars)", sizeof(funcStr));
-			fread (funcStr, len, 1, f);
-			if ( !(*(byte **)p = FindFunctionByName (funcStr)) )
-				gi.error ("ReadField: function %s not found in table, can't load game", funcStr);
-		}
-		break;
-	// Matches with a string in the mmove list, which is generated by extractfuncs.exe.
-	// Actual address of mmove is loaded from list, allowing version-independent savegames.
-	case F_MMOVE:
-		len = *(int *)p;
-		if (!len)
-			*(byte **)p = NULL;
-		else
-		{
-			if (len > sizeof(funcStr))
-				gi.error ("ReadField: mmove name is longer than buffer (%i chars)", sizeof(funcStr));
-			fread (funcStr, len, 1, f);
-			if ( !(*(mmove_t **)p = FindMmoveByName (funcStr)) )
-				gi.error ("ReadField: mmove %s not found in table, can't load game", funcStr);
-		}
-		break;
-#else // SAVEGAME_USE_FUNCTION_TABLE
-	// relative to code segment
-	case F_FUNCTION:
-		index = *(int *)p;
-		if ( index == 0 )
-			*(byte **)p = NULL;
-		else
-			*(byte **)p = ((byte *)InitGame) + index;
-		break;
-	// relative to data segment
-	case F_MMOVE:
-		index = *(int *)p;
-		if (index == 0)
-			*(byte **)p = NULL;
-		else
-			*(byte **)p = (byte *)&mmove_reloc + index;
-		break;
-#endif // SAVEGAME_USE_FUNCTION_TABLE
-	default:
-		gi.error ("ReadEdict: unknown field type");
-	}
-}
+    I(showscores),
+    I(showinventory),
+    I(showhelp),
+    I(showhelpicon),
+
+    I(ammo_index),
+
+    T(newweapon),
+
+    I(damage_armor),
+    I(damage_parmor),
+    I(damage_blood),
+    I(damage_knockback),
+    V(damage_from),
+
+    F(killer_yaw),
+
+    I(weaponstate),
+
+    V(kick_angles),
+    V(kick_origin),
+    F(v_dmg_roll),
+    F(v_dmg_pitch),
+    F(v_dmg_time),
+    F(fall_time),
+    F(fall_value),
+    F(damage_alpha),
+    F(bonus_alpha),
+    V(damage_blend),
+    V(v_angle),
+    F(bobtime),
+    V(oldviewangles),
+    V(oldvelocity),
+
+    F(next_drown_time),
+    I(old_waterlevel),
+    I(breather_sound),
+
+    I(machinegun_shots),
+
+    I(anim_end),
+    I(anim_priority),
+    I(anim_duck),
+    I(anim_run),
+
+    // powerup timers
+    I(quad_framenum),
+    I(invincible_framenum),
+    I(breather_framenum),
+    I(enviro_framenum),
+
+    I(grenade_blew_up),
+    F(grenade_time),
+    I(silencer_shots),
+    I(weapon_sound),
+
+    F(pickup_msg_time),
+
+    {0}
+#undef _OFS
+};
+
+static const save_field_t gamefields[] = {
+#define _OFS GLOFS
+    SZ(helpmessage1, 512),
+    SZ(helpmessage2, 512),
+
+    I(maxclients),
+    I(maxentities),
+
+    I(serverflags),
+
+    I(num_items),
+
+    I(autosaved),
+
+    {0}
+#undef _OFS
+};
 
 //=========================================================
 
-/*
-==============
-WriteClient
-
-All pointer variables (except function pointers) must be handled specially.
-==============
-*/
-void WriteClient (FILE *f, gclient_t *client)
+static void write_data(void *buf, size_t len, FILE *f)
 {
-	field_t		*field;
-	gclient_t	temp;
-	
-	// all of the ints, floats, and vectors stay as they are
-	temp = *client;
-
-	// change the pointers to lengths or indexes
-	for (field=clientfields; field->name; field++)
-	{
-		WriteField1 (f, field, (byte *)&temp);
-	}
-
-	// write the block
-	fwrite (&temp, sizeof(temp), 1, f);
-
-	// now write any allocated data following the edict
-	for (field=clientfields; field->name; field++)
-	{
-		WriteField2 (f, field, (byte *)client);
-	}
+    if (fwrite(buf, 1, len, f) != len) {
+        gi.error("%s: couldn't write %"PRIz" bytes", __func__, len);
+    }
 }
 
-/*
-==============
-ReadClient
-
-All pointer variables (except function pointers) must be handled specially.
-==============
-*/
-void ReadClient (FILE *f, gclient_t *client)
+static void write_short(FILE *f, short v)
 {
-	field_t		*field;
-
-	fread (client, sizeof(*client), 1, f);
-
-	client->pers.spawn_landmark = false;
-	client->pers.spawn_levelchange = false;
-	for (field=clientfields; field->name; field++)
-	{
-		ReadField (f, field, (byte *)client);
-	}
-
-	// Knightmare- fix/hack for loading game with textdisplay open
-	client->textdisplay = NULL;
-	client->showscores = false;
+    v = LittleShort(v);
+    write_data(&v, sizeof(v), f);
 }
+
+static void write_int(FILE *f, int v)
+{
+    v = LittleLong(v);
+    write_data(&v, sizeof(v), f);
+}
+
+static void write_float(FILE *f, float v)
+{
+    v = LittleFloat(v);
+    write_data(&v, sizeof(v), f);
+}
+
+static void write_string(FILE *f, char *s)
+{
+    size_t len;
+
+    if (!s) {
+        write_int(f, -1);
+        return;
+    }
+
+    len = strlen(s);
+    write_int(f, len);
+    write_data(s, len, f);
+}
+
+static void write_vector(FILE *f, vec_t *v)
+{
+    write_float(f, v[0]);
+    write_float(f, v[1]);
+    write_float(f, v[2]);
+}
+
+static void write_index(FILE *f, void *p, size_t size, void *start, int max_index)
+{
+    size_t diff;
+
+    if (!p) {
+        write_int(f, -1);
+        return;
+    }
+
+    if (p < start || (byte *)p > (byte *)start + max_index * size) {
+        gi.error("%s: pointer out of range: %p", __func__, p);
+    }
+
+    diff = (byte *)p - (byte *)start;
+    if (diff % size) {
+        gi.error("%s: misaligned pointer: %p", __func__, p);
+    }
+    write_int(f, (int)(diff / size));
+}
+
+static void write_pointer(FILE *f, void *p, ptr_type_t type)
+{
+    const save_ptr_t *ptr;
+    int i;
+
+    if (!p) {
+        write_int(f, -1);
+        return;
+    }
+
+    for (i = 0, ptr = save_ptrs; i < num_save_ptrs; i++, ptr++) {
+        if (ptr->type == type && ptr->ptr == p) {
+            write_int(f, i);
+            return;
+        }
+    }
+
+    gi.error("%s: unknown pointer: %p", __func__, p);
+}
+
+static void write_field(FILE *f, const save_field_t *field, void *base)
+{
+    void *p = (byte *)base + field->ofs;
+    int i;
+
+    switch (field->type) {
+    case F_BYTE:
+        write_data(p, field->size, f);
+        break;
+    case F_SHORT:
+        for (i = 0; i < field->size; i++) {
+            write_short(f, ((short *)p)[i]);
+        }
+        break;
+    case F_INT:
+        for (i = 0; i < field->size; i++) {
+            write_int(f, ((int *)p)[i]);
+        }
+        break;
+    case F_FLOAT:
+        for (i = 0; i < field->size; i++) {
+            write_float(f, ((float *)p)[i]);
+        }
+        break;
+    case F_VECTOR:
+        write_vector(f, (vec_t *)p);
+        break;
+
+    case F_ZSTRING:
+        write_string(f, (char *)p);
+        break;
+    case F_LSTRING:
+        write_string(f, *(char **)p);
+        break;
+
+    case F_EDICT:
+        write_index(f, *(void **)p, sizeof(edict_t), g_edicts, MAX_EDICTS - 1);
+        break;
+    case F_CLIENT:
+        write_index(f, *(void **)p, sizeof(gclient_t), game.clients, game.maxclients - 1);
+        break;
+    case F_ITEM:
+        write_index(f, *(void **)p, sizeof(gitem_t), itemlist, game.num_items - 1);
+        break;
+
+    case F_POINTER:
+        write_pointer(f, *(void **)p, field->size);
+        break;
+
+    default:
+        gi.error("%s: unknown field type", __func__);
+    }
+}
+
+static void write_fields(FILE *f, const save_field_t *fields, void *base)
+{
+    const save_field_t *field;
+
+    for (field = fields; field->type; field++) {
+        write_field(f, field, base);
+    }
+}
+
+static void read_data(void *buf, size_t len, FILE *f)
+{
+    if (fread(buf, 1, len, f) != len) {
+        gi.error("%s: couldn't read %"PRIz" bytes", __func__, len);
+    }
+}
+
+static int read_short(FILE *f)
+{
+    short v;
+
+    read_data(&v, sizeof(v), f);
+    v = LittleShort(v);
+
+    return v;
+}
+
+static int read_int(FILE *f)
+{
+    int v;
+
+    read_data(&v, sizeof(v), f);
+    v = LittleLong(v);
+
+    return v;
+}
+
+static float read_float(FILE *f)
+{
+    float v;
+
+    read_data(&v, sizeof(v), f);
+    v = LittleFloat(v);
+
+    return v;
+}
+
+
+static char *read_string(FILE *f)
+{
+    int len;
+    char *s;
+
+    len = read_int(f);
+    if (len == -1) {
+        return NULL;
+    }
+
+    if (len < 0 || len > 65536) {
+        gi.error("%s: bad length", __func__);
+    }
+
+    s = gi.TagMalloc(len + 1, TAG_LEVEL);
+    read_data(s, len, f);
+    s[len] = 0;
+
+    return s;
+}
+
+static void read_zstring(FILE *f, char *s, size_t size)
+{
+    int len;
+
+    len = read_int(f);
+    if (len < 0 || len >= size) {
+        gi.error("%s: bad length", __func__);
+    }
+
+    read_data(s, len, f);
+    s[len] = 0;
+}
+
+static void read_vector(FILE *f, vec_t *v)
+{
+    v[0] = read_float(f);
+    v[1] = read_float(f);
+    v[2] = read_float(f);
+}
+
+static void *read_index(FILE *f, size_t size, void *start, int max_index)
+{
+    int index;
+    byte *p;
+
+    index = read_int(f);
+    if (index == -1) {
+        return NULL;
+    }
+
+    if (index < 0 || index > max_index) {
+        gi.error("%s: bad index", __func__);
+    }
+
+    p = (byte *)start + index * size;
+    return p;
+}
+
+static void *read_pointer(FILE *f, ptr_type_t type)
+{
+    int index;
+    const save_ptr_t *ptr;
+
+    index = read_int(f);
+    if (index == -1) {
+        return NULL;
+    }
+
+    if (index < 0 || index >= num_save_ptrs) {
+        gi.error("%s: bad index", __func__);
+    }
+
+    ptr = &save_ptrs[index];
+    if (ptr->type != type) {
+        gi.error("%s: type mismatch", __func__);
+    }
+
+    return ptr->ptr;
+}
+
+static void read_field(FILE *f, const save_field_t *field, void *base)
+{
+    void *p = (byte *)base + field->ofs;
+    int i;
+
+    switch (field->type) {
+    case F_BYTE:
+        read_data(p, field->size, f);
+        break;
+    case F_SHORT:
+        for (i = 0; i < field->size; i++) {
+            ((short *)p)[i] = read_short(f);
+        }
+        break;
+    case F_INT:
+        for (i = 0; i < field->size; i++) {
+            ((int *)p)[i] = read_int(f);
+        }
+        break;
+    case F_FLOAT:
+        for (i = 0; i < field->size; i++) {
+            ((float *)p)[i] = read_float(f);
+        }
+        break;
+    case F_VECTOR:
+        read_vector(f, (vec_t *)p);
+        break;
+
+    case F_LSTRING:
+        *(char **)p = read_string(f);
+        break;
+    case F_ZSTRING:
+        read_zstring(f, (char *)p, field->size);
+        break;
+
+    case F_EDICT:
+        *(edict_t **)p = read_index(f, sizeof(edict_t), g_edicts, game.maxentities - 1);
+        break;
+    case F_CLIENT:
+        *(gclient_t **)p = read_index(f, sizeof(gclient_t), game.clients, game.maxclients - 1);
+        break;
+    case F_ITEM:
+        *(gitem_t **)p = read_index(f, sizeof(gitem_t), itemlist, game.num_items - 1);
+        break;
+
+    case F_POINTER:
+        *(void **)p = read_pointer(f, field->size);
+        break;
+
+    default:
+        gi.error("%s: unknown field type", __func__);
+    }
+}
+
+static void read_fields(FILE *f, const save_field_t *fields, void *base)
+{
+    const save_field_t *field;
+
+    for (field = fields; field->type; field++) {
+        read_field(f, field, base);
+    }
+}
+
+//=========================================================
+
+#define SAVE_MAGIC1     (('1'<<24)|('V'<<16)|('S'<<8)|'S')  // "SSV1"
+#define SAVE_MAGIC2     (('1'<<24)|('V'<<16)|('A'<<8)|'S')  // "SAV1"
+#define SAVE_VERSION    2
 
 /*
 ============
@@ -989,221 +781,81 @@ A single player death will automatically restore from the
 last save position.
 ============
 */
-void WriteGame (char *filename, qboolean autosave)
+void WriteGame(const char *filename, qboolean autosave)
 {
-	FILE	*f;
-	int		i;
-	char	str[16];
-#ifdef SAVEGAME_USE_FUNCTION_TABLE
-	char	str2[64];
-#endif
+    FILE    *f;
+    int     i;
 
-	if (developer->value)
-		gi.dprintf ("==== WriteGame ====\n");
+    if (!autosave)
+        SaveClientData();
 
-	if (!autosave) {
-		game.transition_ents = 0;
-		SaveClientData ();
-	}
+    f = fopen(filename, "wb");
+    if (!f)
+        gi.error("Couldn't open %s", filename);
 
-	f = fopen (filename, "wb");
-	if (!f)
-		gi.error ("Couldn't open %s", filename);
+    write_int(f, SAVE_MAGIC1);
+    write_int(f, SAVE_VERSION);
 
-	memset (str, 0, sizeof(str));
-	Q_strncpyz (str, __DATE__, sizeof(str));
-	fwrite (str, sizeof(str), 1, f);
+    game.autosaved = autosave;
+    write_fields(f, gamefields, &game);
+    game.autosaved = qfalse;
 
-#ifdef SAVEGAME_USE_FUNCTION_TABLE
-	// use modname and save version for compatibility instead of build date
-	memset (str2, 0, sizeof(str2));
-	Q_strncpyz (str2, SAVEGAME_DLLNAME, sizeof(str2));
-	fwrite (str2, sizeof(str2), 1, f);
+    for (i = 0; i < game.maxclients; i++) {
+        write_fields(f, clientfields, &game.clients[i]);
+    }
 
-	i = SAVEGAME_VERSION;
-	fwrite (&i, sizeof(i), 1, f);
-#endif
-
-	game.autosaved = autosave;
-	fwrite (&game, sizeof(game), 1, f);
-	game.autosaved = false;
-
-	for (i=0; i<game.maxclients; i++)
-		WriteClient (f, &game.clients[i]);
-
-	fclose (f);
+    fclose(f);
 }
 
-void ReadGame (char *filename)
+void ReadGame(const char *filename)
 {
-	FILE	*f;
-	int		i;
-	char	str[16];
-#ifdef SAVEGAME_USE_FUNCTION_TABLE
-	char	str2[64];
-#endif
+    FILE    *f;
+    int     i;
 
-	if (developer->value)
-		gi.dprintf ("==== ReadGame ====\n");
+    gi.FreeTags(TAG_GAME);
 
-	gi.FreeTags (TAG_GAME);
+    f = fopen(filename, "rb");
+    if (!f)
+        gi.error("Couldn't open %s", filename);
 
-	f = fopen (filename, "rb");
-	if (!f)
-		gi.error ("Couldn't open %s", filename);
+    i = read_int(f);
+    if (i != SAVE_MAGIC1) {
+        fclose(f);
+        gi.error("Not a save game");
+    }
 
-	fread (str, sizeof(str), 1, f);
-#ifndef SAVEGAME_USE_FUNCTION_TABLE
-	if (strcmp (str, __DATE__))
-	{
-		fclose (f);
-		gi.error ("Savegame from an older version.\n");
-	}
-#else // SAVEGAME_USE_FUNCTION_TABLE
-	// check modname and save version for compatibility instead of build date
-	fread (str2, sizeof(str2), 1, f);
-	if (strcmp (str2, SAVEGAME_DLLNAME))
-	{
-		fclose (f);
-		gi.error ("Savegame from a different game DLL.\n");
-	}
+    i = read_int(f);
+    if (i != SAVE_VERSION) {
+        fclose(f);
+        gi.error("Savegame from an older version");
+    }
 
-	fread (&i, sizeof(i), 1, f);
-	if (i != SAVEGAME_VERSION)
-	{
-		fclose (f);
-		gi.error ("ReadGame: savegame %s is wrong version (%i, should be %i)\n", filename, i, SAVEGAME_VERSION);
-	}
-#endif // SAVEGAME_USE_FUNCTION_TABLE
+    read_fields(f, gamefields, &game);
 
-	g_edicts =  gi.TagMalloc (game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
-	globals.edicts = g_edicts;
+    // should agree with server's version
+    if (game.maxclients != (int)maxclients->value) {
+        fclose(f);
+        gi.error("Savegame has bad maxclients");
+    }
+    if (game.maxentities <= game.maxclients || game.maxentities > MAX_EDICTS) {
+        fclose(f);
+        gi.error("Savegame has bad maxentities");
+    }
 
-	fread (&game, sizeof(game), 1, f);
-	game.clients = gi.TagMalloc (game.maxclients * sizeof(game.clients[0]), TAG_GAME);
-	for (i=0; i<game.maxclients; i++)
-		ReadClient (f, &game.clients[i]);
-	fclose (f);
+    g_edicts = gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
+    globals.edicts = g_edicts;
+    globals.max_edicts = game.maxentities;
+
+    game.clients = gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME);
+    for (i = 0; i < game.maxclients; i++) {
+        read_fields(f, clientfields, &game.clients[i]);
+    }
+
+    fclose(f);
 }
 
 //==========================================================
 
-
-/*
-==============
-WriteEdict
-
-All pointer variables (except function pointers) must be handled specially.
-==============
-*/
-void WriteEdict (FILE *f, edict_t *ent)
-{
-	field_t		*field;
-	edict_t		temp;
-
-	// all of the ints, floats, and vectors stay as they are
-	temp = *ent;
-
-#ifdef SAVEGAME_USE_FUNCTION_TABLE // FIXME: remove once this is working reliably
-	if (readout->value)
-	{
-		if (ent->classname && strlen(ent->classname))
-			gi.dprintf("WriteEdict: %s\n", ent->classname);
-		else
-			gi.dprintf("WriteEdict: unknown entity\n");
-	}
-#endif
-
-	// change the pointers to lengths or indexes
-	for (field=fields; field->name; field++)
-	{
-		WriteField1 (f, field, (byte *)&temp);
-	}
-
-	// write the block
-	fwrite (&temp, sizeof(temp), 1, f);
-
-	// now write any allocated data following the edict
-	for (field=fields; field->name; field++)
-	{
-		WriteField2 (f, field, (byte *)ent);
-	}
-
-}
-
-/*
-==============
-WriteLevelLocals
-
-All pointer variables (except function pointers) must be handled specially.
-==============
-*/
-void WriteLevelLocals (FILE *f)
-{
-	field_t		*field;
-	level_locals_t		temp;
-
-	// all of the ints, floats, and vectors stay as they are
-	temp = level;
-
-	// change the pointers to lengths or indexes
-	for (field=levelfields; field->name; field++)
-	{
-		WriteField1 (f, field, (byte *)&temp);
-	}
-
-	// write the block
-	fwrite (&temp, sizeof(temp), 1, f);
-
-	// now write any allocated data following the edict
-	for (field=levelfields; field->name; field++)
-	{
-		WriteField2 (f, field, (byte *)&level);
-	}
-}
-
-
-/*
-==============
-ReadEdict
-
-All pointer variables (except function pointers) must be handled specially.
-==============
-*/
-void ReadEdict (FILE *f, edict_t *ent)
-{
-	field_t		*field;
-	int		i; // Knightmare added
-
-	fread (ent, sizeof(*ent), 1, f);
-
-	for (field=fields; field->name; field++)
-	{
-		ReadField (f, field, (byte *)ent);
-	}
-	// Knightmare- nullify reflection pointers to prevent crash
-	for (i=0; i<6; i++)
-		ent->reflection[i] = NULL;
-}
-
-/*
-==============
-ReadLevelLocals
-
-All pointer variables (except function pointers) must be handled specially.
-==============
-*/
-void ReadLevelLocals (FILE *f)
-{
-	field_t		*field;
-
-	fread (&level, sizeof(level), 1, f);
-
-	for (field=levelfields; field->name; field++)
-	{
-		ReadField (f, field, (byte *)&level);
-	}
-}
 
 /*
 =================
@@ -1211,47 +863,33 @@ WriteLevel
 
 =================
 */
-void WriteLevel (char *filename)
+void WriteLevel(const char *filename)
 {
-	int		i;
-	edict_t	*ent;
-	FILE	*f;
-	void	*base;
+    int     i;
+    edict_t *ent;
+    FILE    *f;
 
-	if (developer->value)
-		gi.dprintf ("==== WriteLevel ====\n");
+    f = fopen(filename, "wb");
+    if (!f)
+        gi.error("Couldn't open %s", filename);
 
-	f = fopen (filename, "wb");
-	if (!f)
-		gi.error ("Couldn't open %s", filename);
+    write_int(f, SAVE_MAGIC2);
+    write_int(f, SAVE_VERSION);
 
-	// write out edict size for checking
-	i = sizeof(edict_t);
-	fwrite (&i, sizeof(i), 1, f);
+    // write out level_locals_t
+    write_fields(f, levelfields, &level);
 
-	// write out a function pointer for checking
-	base = (void *)InitGame;
-	fwrite (&base, sizeof(base), 1, f);
+    // write out all the entities
+    for (i = 0; i < globals.num_edicts; i++) {
+        ent = &g_edicts[i];
+        if (!ent->inuse)
+            continue;
+        write_int(f, i);
+        write_fields(f, entityfields, ent);
+    }
+    write_int(f, -1);
 
-	// write out level_locals_t
-	WriteLevelLocals (f);
-
-	// write out all the entities
-	for (i=0; i<globals.num_edicts; i++)
-	{
-		ent = &g_edicts[i];
-		if (!ent->inuse)
-			continue;
-		// Knightmare- don't save reflections
-		if (ent->flags & FL_REFLECT)
-			continue;
-		fwrite (&i, sizeof(i), 1, f);
-		WriteEdict (f, ent);
-	}
-	i = -1;
-	fwrite (&i, sizeof(i), 1, f);
-
-	fclose (f);
+    fclose(f);
 }
 
 
@@ -1271,109 +909,90 @@ calling ReadLevel.
 No clients are connected yet.
 =================
 */
-void LoadTransitionEnts();
-void ReadLevel (char *filename)
+void ReadLevel(const char *filename)
 {
-	int		entnum;
-	FILE	*f;
-	int		i;
-	void	*base;
-	edict_t	*ent;
+    int     entnum;
+    FILE    *f;
+    int     i;
+    edict_t *ent;
 
-	if (developer->value)
-		gi.dprintf ("==== ReadLevel ====\n");
+    // free any dynamic memory allocated by loading the level
+    // base state
+    gi.FreeTags(TAG_LEVEL);
 
-	f = fopen (filename, "rb");
-	if (!f)
-		gi.error ("Couldn't open %s", filename);
+    f = fopen(filename, "rb");
+    if (!f)
+        gi.error("Couldn't open %s", filename);
 
-	// free any dynamic memory allocated by loading the level
-	// base state
-	gi.FreeTags (TAG_LEVEL);
+    // wipe all the entities
+    memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
+    globals.num_edicts = maxclients->value + 1;
 
-	// wipe all the entities
-	memset (g_edicts, 0, game.maxentities*sizeof(g_edicts[0]));
-	globals.num_edicts = maxclients->value+1;
+    i = read_int(f);
+    if (i != SAVE_MAGIC2) {
+        fclose(f);
+        gi.error("Not a save game");
+    }
 
-	// check edict size
-	fread (&i, sizeof(i), 1, f);
-	if (i != sizeof(edict_t))
-	{
-		fclose (f);
-		gi.error ("ReadLevel: mismatched edict size");
-	}
+    i = read_int(f);
+    if (i != SAVE_VERSION) {
+        fclose(f);
+        gi.error("Savegame from an older version");
+    }
 
-	// check function pointer base address
-	fread (&base, sizeof(base), 1, f);
+    // load the level locals
+    read_fields(f, levelfields, &level);
 
-/*	Lazarus: The __DATE__ check in ReadGame is sufficient for a version
-	         check. The following is reported to fail under some 
-	         circumstances (though I've never seen it).
+    // load all the entities
+    while (1) {
+        entnum = read_int(f);
+        if (entnum == -1)
+            break;
+        if (entnum < 0 || entnum >= game.maxentities) {
+            gi.error("%s: bad entity number", __func__);
+        }
+        if (entnum >= globals.num_edicts)
+            globals.num_edicts = entnum + 1;
 
-#ifdef _WIN32
-	if (base != (void *)InitGame)
-	{
-		fclose (f);
-		gi.error ("ReadLevel: function pointers have moved");
-	}
-#else
-	gi.dprintf("Function offsets %d\n", ((byte *)base) - ((byte *)InitGame));
-#endif
+        ent = &g_edicts[entnum];
+        read_fields(f, entityfields, ent);
+        ent->inuse = qtrue;
+        ent->s.number = entnum;
 
-*/
+        // let the server rebuild world links for this ent
+        memset(&ent->area, 0, sizeof(ent->area));
+        gi.linkentity(ent);
+    }
 
-	// load the level locals
-	ReadLevelLocals (f);
+    fclose(f);
 
-	// load all the entities
-	while (1)
-	{
-		if (fread (&entnum, sizeof(entnum), 1, f) != 1)
-		{
-			fclose (f);
-			gi.error ("ReadLevel: failed to read entnum");
-		}
-		if (entnum == -1)
-			break;
-		if (entnum >= globals.num_edicts)
-			globals.num_edicts = entnum+1;
+    // mark all clients as unconnected
+    for (i = 0 ; i < maxclients->value ; i++) {
+        ent = &g_edicts[i + 1];
+        ent->client = game.clients + i;
+        ent->client->pers.connected = qfalse;
+    }
 
-		ent = &g_edicts[entnum];
-		ReadEdict (f, ent);
+    // do any load time things at this point
+    for (i = 0 ; i < globals.num_edicts ; i++) {
+        ent = &g_edicts[i];
 
-		// let the server rebuild world links for this ent
-		memset (&ent->area, 0, sizeof(ent->area));
-		gi.linkentity (ent);
-	}
+        if (!ent->inuse)
+            continue;
 
-	fclose (f);
+        // fire any cross-level triggers
+        if (ent->classname)
+            if (strcmp(ent->classname, "target_crosslevel_target") == 0)
+                ent->nextthink = level.time + ent->delay;
 
-	// mark all clients as unconnected
-	for (i=0; i<maxclients->value; i++)
-	{
-		ent = &g_edicts[i+1];
-		ent->client = game.clients + i;
-		ent->client->pers.connected = false;
-	}
-
-	// do any load time things at this point
-	for (i=0; i<globals.num_edicts; i++)
-	{
-		ent = &g_edicts[i];
-
-		if (!ent->inuse)
-			continue;
-
-		// fire any cross-level triggers
-		if (ent->classname)
-			if (strcmp(ent->classname, "target_crosslevel_target") == 0)
-				ent->nextthink = level.time + ent->delay;
-	}
-
-	// DWH: Load transition entities
-	if (game.transition_ents)
-	{
-		LoadTransitionEnts();
-		actor_files();
-	}
+        if (ent->think == func_clock_think || ent->use == func_clock_use) {
+            char *msg = ent->message;
+            ent->message = gi.TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL);
+            if (msg) {
+                Q_strlcpy(ent->message, msg, CLOCK_MESSAGE_SIZE);
+                gi.TagFree(msg);
+            }
+        }
+    }
 }
+

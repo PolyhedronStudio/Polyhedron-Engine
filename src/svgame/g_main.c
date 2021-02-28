@@ -1,166 +1,250 @@
 /*
-===========================================================================
 Copyright (C) 1997-2001 Id Software, Inc.
-Copyright (C) 2000-2002 Mr. Hyde and Mad Dog
 
-This file is part of Lazarus Quake 2 Mod source code.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-Lazarus Quake 2 Mod source code is free software; you can redistribute it
-and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of the License,
-or (at your option) any later version.
-
-Lazarus Quake 2 Mod source code is distributed in the hope that it will be
-useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with Lazarus Quake 2 Mod source code; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-===========================================================================
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
 #include "g_local.h"
 
-game_locals_t	game;
-level_locals_t	level;
-svgame_import_t	gi;
-svgame_export_t	globals;
-spawn_temp_t	st;
+game_locals_t   game;
+level_locals_t  level;
+svgame_import_t   gi;       // CLEANUP: These were game_import_t and game_export_t
+svgame_export_t   globals;  // CLEANUP: These were game_import_t and game_export_t
+spawn_temp_t    st;
 
-int	sm_meat_index;
-int	snd_fry;
+int sm_meat_index;
+int snd_fry;
 int meansOfDeath;
 
-edict_t		*g_edicts;
+edict_t     *g_edicts;
 
-cvar_t	*deathmatch;
-cvar_t	*coop;
-cvar_t	*dmflags;
-cvar_t	*skill;
-cvar_t	*fraglimit;
-cvar_t	*timelimit;
-//ZOID
-cvar_t	*capturelimit;
-cvar_t	*instantweap;
-//ZOID
-cvar_t	*password;
-cvar_t	*spectator_password;
-cvar_t	*needpass;
-cvar_t	*maxclients;
-cvar_t	*maxspectators;
-cvar_t	*maxentities;
-cvar_t	*g_select_empty;
-cvar_t	*dedicated;
+cvar_t  *deathmatch;
+cvar_t  *coop;
+cvar_t  *dmflags;
+cvar_t  *skill;
+cvar_t  *fraglimit;
+cvar_t  *timelimit;
+cvar_t  *password;
+cvar_t  *spectator_password;
+cvar_t  *needpass;
+cvar_t  *maxclients;
+cvar_t  *maxspectators;
+cvar_t  *maxentities;
+cvar_t  *g_select_empty;
+cvar_t  *dedicated;
+cvar_t  *nomonsters;
 
-cvar_t	*filterban;
+cvar_t  *filterban;
 
-cvar_t	*sv_maxvelocity;
-cvar_t	*sv_gravity;
+cvar_t  *sv_maxvelocity;
+cvar_t  *sv_gravity;
 
-cvar_t	*sv_rollspeed;
-cvar_t	*sv_rollangle;
-cvar_t	*gun_x;
-cvar_t	*gun_y;
-cvar_t	*gun_z;
+cvar_t  *sv_rollspeed;
+cvar_t  *sv_rollangle;
+cvar_t  *gun_x;
+cvar_t  *gun_y;
+cvar_t  *gun_z;
 
-cvar_t	*run_pitch;
-cvar_t	*run_roll;
-cvar_t	*bob_up;
-cvar_t	*bob_pitch;
-cvar_t	*bob_roll;
+cvar_t  *run_pitch;
+cvar_t  *run_roll;
+cvar_t  *bob_up;
+cvar_t  *bob_pitch;
+cvar_t  *bob_roll;
 
-cvar_t	*sv_cheats;
+cvar_t  *sv_cheats;
 
-cvar_t	*flood_msgs;
-cvar_t	*flood_persecond;
-cvar_t	*flood_waitdelay;
+cvar_t  *flood_msgs;
+cvar_t  *flood_persecond;
+cvar_t  *flood_waitdelay;
 
-// N&C: Server cvars.
-cvar_t	*sv_maplist;		// space, comma, and newline separated map list to use for nextmap.
-cvar_t	*sv_maplist_random; // When set to 1 it enables random map selection from the maplist.
+cvar_t  *sv_maplist;
+
+cvar_t  *sv_features;
+
+cvar_t  *sv_flaregun;
+cvar_t  *cl_monsterfootsteps;
+
+void SpawnEntities(const char *mapname, const char *entities, const char *spawnpoint);
+void ClientThink(edict_t *ent, usercmd_t *cmd);
+qboolean ClientConnect(edict_t *ent, char *userinfo);
+void ClientUserinfoChanged(edict_t *ent, char *userinfo);
+void ClientDisconnect(edict_t *ent);
+void ClientBegin(edict_t *ent);
+void ClientCommand(edict_t *ent);
+void RunEntity(edict_t *ent);
+void WriteGame(const char *filename, qboolean autosave);
+void ReadGame(const char *filename);
+void WriteLevel(const char *filename);
+void ReadLevel(const char *filename);
+void InitGame(void);
+void G_RunFrame(void);
 
 
-cvar_t	*actorchicken;
-cvar_t	*actorjump;
-cvar_t	*actorscram;
-cvar_t	*alert_sounds;
-cvar_t	*allow_download;
-cvar_t	*allow_fog;			// Set to 0 for no fog
+//===================================================================
 
-// set to 0 to bypass target_changelevel clear inventory flag
-// because some user maps have this erroneously set
-cvar_t	*allow_clear_inventory; 
 
-cvar_t	*bounce_bounce;
-cvar_t	*bounce_minv;
-cvar_t	*cd_loopcount;
-cvar_t	*cl_gun;
-cvar_t	*cl_thirdperson; // Knightmare added
-cvar_t	*corpse_fade;
-cvar_t	*corpse_fadetime;
-cvar_t	*crosshair;
-cvar_t	*developer;
-cvar_t	*footstep_sounds;
-cvar_t	*fov;
-cvar_t	*gl_clear;
-cvar_t	*gl_driver;
-cvar_t	*gl_driver_fog;
-cvar_t	*hand;
-cvar_t	*jetpack_weenie;
-cvar_t	*joy_pitchsensitivity;
-cvar_t	*joy_yawsensitivity;
-cvar_t	*jump_kick;
-cvar_t	*lazarus_cd_loop;
-cvar_t	*lazarus_cl_gun;
-cvar_t	*lazarus_crosshair;
-cvar_t	*lazarus_gl_clear;
-cvar_t	*lazarus_joyp;
-cvar_t	*lazarus_joyy;
-cvar_t	*lazarus_pitch;
-cvar_t	*lazarus_yaw;
-cvar_t	*lights;
-cvar_t	*lightsmin;
-cvar_t	*m_pitch;
-cvar_t	*m_yaw;
-cvar_t	*monsterjump;
-cvar_t	*readout;
-cvar_t	*rocket_strafe;
-cvar_t	*rotate_distance;
-cvar_t	*s_primary;
-cvar_t	*shift_distance;
-cvar_t	*sv_maxgibs;
-cvar_t	*turn_rider;
-cvar_t	*vid_ref;
-cvar_t	*zoomrate;
-cvar_t	*zoomsnap;
+void ShutdownGame(void)
+{
+    gi.dprintf("==== ShutdownGame ====\n");
 
-cvar_t	*sv_stopspeed;	//PGM	 (this was a define in g_phys.c)
-cvar_t	*sv_step_fraction;	// Knightmare- this was a define in p_view.c
+    gi.FreeTags(TAG_LEVEL);
+    gi.FreeTags(TAG_GAME);
+}
 
-cvar_t	*blaster_color; // Knightmare added
+/*
+============
+InitGame
 
-void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
-void ClientThink (edict_t *ent, usercmd_t *cmd);
-qboolean ClientConnect (edict_t *ent, char *userinfo);
-void ClientUserinfoChanged (edict_t *ent, char *userinfo);
-void ClientDisconnect (edict_t *ent);
-void ClientBegin (edict_t *ent);
-void ClientCommand (edict_t *ent);
-void RunEntity (edict_t *ent);
-void WriteGame (char *filename, qboolean autosave);
-void ReadGame (char *filename);
-void WriteLevel (char *filename);
-void ReadLevel (char *filename);
-void InitGame (void);
-void G_RunFrame (void);
+This will be called when the dll is first loaded, which
+only happens when a new game is started or a save game
+is loaded.
+============
+*/
+void InitGame(void)
+{
+    gi.dprintf("==== InitGame ====\n");
 
-// WATISDEZE: These are here temporarily
+    gun_x = gi.cvar("gun_x", "0", 0);
+    gun_y = gi.cvar("gun_y", "0", 0);
+    gun_z = gi.cvar("gun_z", "0", 0);
+
+    //FIXME: sv_ prefix is wrong for these
+    sv_rollspeed = gi.cvar("sv_rollspeed", "200", 0);
+    sv_rollangle = gi.cvar("sv_rollangle", "2", 0);
+    sv_maxvelocity = gi.cvar("sv_maxvelocity", "2000", 0);
+    sv_gravity = gi.cvar("sv_gravity", "800", 0);
+
+    // noset vars
+    dedicated = gi.cvar("dedicated", "0", CVAR_NOSET);
+
+	nomonsters = gi.cvar("nomonsters", "0", 0);
+
+    // latched vars
+    sv_cheats = gi.cvar("cheats", "0", CVAR_SERVERINFO | CVAR_LATCH);
+    gi.cvar("gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_LATCH);
+    gi.cvar("gamedate", __DATE__ , CVAR_SERVERINFO | CVAR_LATCH);
+
+    maxclients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
+    maxspectators = gi.cvar("maxspectators", "4", CVAR_SERVERINFO);
+    deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
+    coop = gi.cvar("coop", "0", CVAR_LATCH);
+    skill = gi.cvar("skill", "1", CVAR_LATCH);
+    maxentities = gi.cvar("maxentities", "1024", CVAR_LATCH);
+
+    // change anytime vars
+    dmflags = gi.cvar("dmflags", "0", CVAR_SERVERINFO);
+    fraglimit = gi.cvar("fraglimit", "0", CVAR_SERVERINFO);
+    timelimit = gi.cvar("timelimit", "0", CVAR_SERVERINFO);
+    password = gi.cvar("password", "", CVAR_USERINFO);
+    spectator_password = gi.cvar("spectator_password", "", CVAR_USERINFO);
+    needpass = gi.cvar("needpass", "0", CVAR_SERVERINFO);
+    filterban = gi.cvar("filterban", "1", 0);
+
+    g_select_empty = gi.cvar("g_select_empty", "0", CVAR_ARCHIVE);
+
+    run_pitch = gi.cvar("run_pitch", "0.002", 0);
+    run_roll = gi.cvar("run_roll", "0.005", 0);
+    bob_up  = gi.cvar("bob_up", "0.005", 0);
+    bob_pitch = gi.cvar("bob_pitch", "0.002", 0);
+    bob_roll = gi.cvar("bob_roll", "0.002", 0);
+
+    // flood control
+    flood_msgs = gi.cvar("flood_msgs", "4", 0);
+    flood_persecond = gi.cvar("flood_persecond", "4", 0);
+    flood_waitdelay = gi.cvar("flood_waitdelay", "10", 0);
+
+    // dm map list
+    sv_maplist = gi.cvar("sv_maplist", "", 0);
+
+    // obtain server features
+    sv_features = gi.cvar("sv_features", NULL, 0);
+
+	// flare gun switch: 
+	//   0 = no flare gun
+	//   1 = spawn with the flare gun
+	//   2 = spawn with the flare gun and some grenades
+	sv_flaregun = gi.cvar("sv_flaregun", "1", 0);
+	cl_monsterfootsteps = gi.cvar("cl_monsterfootsteps", "1", 0);
+
+    // export our own features
+    gi.cvar_forceset("g_features", va("%d", G_FEATURES));
+
+    // items
+    InitItems();
+
+    game.helpmessage1[0] = 0;
+    game.helpmessage2[0] = 0;
+
+    // initialize all entities for this game
+    game.maxentities = maxentities->value;
+    clamp(game.maxentities, (int)maxclients->value + 1, MAX_EDICTS);
+    g_edicts = gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
+    globals.edicts = g_edicts;
+    globals.max_edicts = game.maxentities;
+
+    // initialize all clients for this game
+    game.maxclients = maxclients->value;
+    game.clients = gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME);
+    globals.num_edicts = game.maxclients + 1;
+}
+
+
+/*
+=================
+GetServerGameAPI
+
+Returns a pointer to the structure with all entry points
+and global variables
+=================
+*/
+svgame_export_t* GetServerGameAPI(svgame_import_t* import)
+{
+    gi = *import;
+
+    globals.apiversion = GAME_API_VERSION;
+    globals.Init = InitGame;
+    globals.Shutdown = ShutdownGame;
+    globals.SpawnEntities = SpawnEntities;
+
+    globals.WriteGame = WriteGame;
+    globals.ReadGame = ReadGame;
+    globals.WriteLevel = WriteLevel;
+    globals.ReadLevel = ReadLevel;
+
+    globals.ClientThink = ClientThink;
+    globals.ClientConnect = ClientConnect;
+    globals.ClientUserinfoChanged = ClientUserinfoChanged;
+    globals.ClientDisconnect = ClientDisconnect;
+    globals.ClientBegin = ClientBegin;
+    globals.ClientCommand = ClientCommand;
+
+    globals.PmoveInit = PmoveInit;
+    globals.PmoveEnableQW = PmoveEnableQW;
+
+    globals.RunFrame = G_RunFrame;
+
+    globals.ServerCommand = ServerCommand;
+
+    globals.edict_size = sizeof(edict_t);
+
+    return &globals;
+}
+
 #ifndef GAME_HARD_LINKED
-// this is only here so the stock lazarus lib works.
-// (hacked, changed the printtype and error type to int.)
-void Com_LPrintf(int type, const char *fmt, ...)
+// this is only here so the functions in q_shared.c can link
+void Com_LPrintf(print_type_t type, const char *fmt, ...)
 {
     va_list     argptr;
     char        text[MAX_STRING_CHARS];
@@ -176,7 +260,7 @@ void Com_LPrintf(int type, const char *fmt, ...)
     gi.dprintf("%s", text);
 }
 
-void Com_Error(int type, const char *fmt, ...)
+void Com_Error(error_type_t type, const char *fmt, ...)
 {
     va_list     argptr;
     char        text[MAX_STRING_CHARS];
@@ -188,192 +272,29 @@ void Com_Error(int type, const char *fmt, ...)
     gi.error("%s", text);
 }
 #endif
-//===================================================================
 
-void ShutdownGame (void)
-{
-	gi.dprintf ("==== ShutdownGame ====\n");
-	if(!deathmatch->value && !coop->value) {
-#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom autosensitivity
-		gi.cvar_forceset("m_pitch", va("%f",lazarus_pitch->value));
-#endif
-		//gi.cvar_forceset("cd_loopcount", va("%d",lazarus_cd_loop->value));
-		//gi.cvar_forceset("gl_clear", va("%d", lazarus_gl_clear->value));
-	}
-	// Lazarus: Turn off fog if it's on
-	if (!dedicated->value) {
-	//	Fog_Off (true);
-		Fog_Off_Global ();
-	}
+//======================================================================
 
-	gi.FreeTags (TAG_LEVEL);
-	gi.FreeTags (TAG_GAME);
-}
-
-
-svgame_import_t RealFunc;
-int	max_modelindex;
-int	max_soundindex;
-
-
-int Debug_Modelindex (char *name)
-{
-	int	modelnum;
-	modelnum = RealFunc.modelindex(name);
-	if(modelnum > max_modelindex)
-	{
-		gi.dprintf("Model %03d %s\n",modelnum,name);
-		max_modelindex = modelnum;
-	}
-	return modelnum;
-}
-
-int Debug_Soundindex (char *name)
-{
-	int soundnum;
-	soundnum = RealFunc.soundindex(name);
-	if(soundnum > max_soundindex)
-	{
-		gi.dprintf("Sound %03d %s\n",soundnum,name);
-		max_soundindex = soundnum;
-	}
-	return soundnum;
-}
-
-/*
-=================
-GetServerGameAPI
-
-Returns a pointer to the structure with all entry points
-and global variables
-=================
-*/
-svgame_export_t *GetServerGameAPI (svgame_import_t *import)
-{
-	gi = *import;
-
-	globals.apiversion = GAME_API_VERSION;
-	globals.Init = InitGame;
-	globals.Shutdown = ShutdownGame;
-	globals.SpawnEntities = SpawnEntities;
-
-	globals.WriteGame = WriteGame;
-	globals.ReadGame = ReadGame;
-	globals.WriteLevel = WriteLevel;
-	globals.ReadLevel = ReadLevel;
-
-	globals.ClientThink = ClientThink;
-	globals.ClientConnect = ClientConnect;
-	globals.ClientUserinfoChanged = ClientUserinfoChanged;
-	globals.ClientDisconnect = ClientDisconnect;
-	globals.ClientBegin = ClientBegin;
-	globals.ClientCommand = ClientCommand;
-
-	globals.PmoveInit		= PmoveInit;
-	globals.PmoveEnableQW	= PmoveEnableQW;
-
-	globals.RunFrame = G_RunFrame;
-
-	globals.ServerCommand = ServerCommand;
-
-	globals.edict_size = sizeof(edict_t);
-
-	gl_driver = gi.cvar ("gl_driver", "", 0);
-	vid_ref = gi.cvar ("vid_ref", "", 0);
-	gl_driver_fog = gi.cvar ("gl_driver_fog", "opengl32", CVAR_NOSET | CVAR_ARCHIVE);
-
-	Fog_Init();
-
-	developer = gi.cvar("developer", "0", CVAR_SERVERINFO);
-	readout   = gi.cvar("readout", "0", CVAR_SERVERINFO);
-	if (readout->value)
-	{
-		max_modelindex = 0;
-		max_soundindex = 0;
-		RealFunc.modelindex = gi.modelindex;
-		gi.modelindex       = Debug_Modelindex;
-		RealFunc.soundindex = gi.soundindex;
-		gi.soundindex       = Debug_Soundindex;
-	}
-
-	return &globals;
-}
-
-#ifndef GAME_HARD_LINKED
-// this is only here so the functions in q_shared.c and q_shwin.c can link
-void Sys_Error (const char *error, ...)
-{
-	va_list		argptr;
-	char		text[1024];
-
-	va_start (argptr, error);
-	Q_vsnprintf (text, sizeof(text), error, argptr);
-	va_end (argptr);
-
-	gi.error (ERR_FATAL, "%s", text);
-}
-
-void Com_Printf (char *msg, ...)
-{
-	va_list		argptr;
-	char		text[1024];
-
-	va_start (argptr, msg);
-	Q_vsnprintf (text, sizeof(text), msg, argptr);
-	va_end (argptr);
-
-	gi.dprintf ("%s", text);
-}
-
-#endif
 
 /*
 =================
 ClientEndServerFrames
 =================
 */
-void ClientEndServerFrames (void)
+void ClientEndServerFrames(void)
 {
-	int		i;
-	edict_t	*ent;
+    int     i;
+    edict_t *ent;
 
-	// calc the player views now that all pushing
-	// and damage has been added
-	for (i=0 ; i<maxclients->value ; i++)
-	{
-		ent = g_edicts + 1 + i;
-		if (!ent->inuse || !ent->client)
-			continue;
-		ClientEndServerFrame (ent);
-	}
+    // calc the player views now that all pushing
+    // and damage has been added
+    for (i = 0 ; i < maxclients->value ; i++) {
+        ent = g_edicts + 1 + i;
+        if (!ent->inuse || !ent->client)
+            continue;
+        ClientEndServerFrame(ent);
+    }
 
-	//reflection stuff -- modified from psychospaz' original code
-	if (level.num_reflectors)
-	{
-		ent = &g_edicts[0];
-		for (i=0 ; i<globals.num_edicts ; i++, ent++) //pointers, not as slow as you think
-		{
-			if (!ent->inuse)
-				continue;
-			if (!ent->s.modelindex)
-				continue;
-		//	if (ent->s.effects & EF_ROTATE)
-		//		continue;
-			if (ent->flags & FL_REFLECT)
-				continue;
-			if (!ent->client && (ent->svflags & SVF_NOCLIENT))
-				continue;
-			if (ent->client && !ent->client->chasetoggle && (ent->svflags & SVF_NOCLIENT))
-				continue;
-			if (ent->svflags&SVF_MONSTER && ent->solid!=SOLID_BBOX)
-				continue;
-			if ( (ent->solid == SOLID_BSP) && (ent->movetype != MOVETYPE_PUSHABLE))
-				continue;
-			if (ent->client && (ent->client->resp.spectator || ent->health<=0 || ent->deadflag == DEAD_DEAD))
-				continue;		
-			AddReflection(ent);	
-		}
-	}
 }
 
 /*
@@ -385,13 +306,13 @@ Returns the created target changelevel
 */
 edict_t *CreateTargetChangeLevel(char *map)
 {
-	edict_t *ent;
+    edict_t *ent;
 
-	ent = G_Spawn ();
-	ent->classname = "target_changelevel";
-	Com_sprintf(level.nextmap, sizeof(level.nextmap), "%s", map);
-	ent->map = level.nextmap;
-	return ent;
+    ent = G_Spawn();
+    ent->classname = "target_changelevel";
+    Q_snprintf(level.nextmap, sizeof(level.nextmap), "%s", map);
+    ent->map = level.nextmap;
+    return ent;
 }
 
 /*
@@ -401,57 +322,56 @@ EndDMLevel
 The timelimit or fraglimit has been exceeded
 =================
 */
-void EndDMLevel (void)
+void EndDMLevel(void)
 {
-	edict_t		*ent;
-	char *s, *t, *f;
-	static const char *seps = " ,\n\r";
+    edict_t     *ent;
+    char *s, *t, *f;
+    static const char *seps = " ,\n\r";
 
-	// stay on same level flag
-	if ((int)dmflags->value & DF_SAME_LEVEL)
-	{
-		BeginIntermission (CreateTargetChangeLevel (level.mapname) );
-		return;
-	}
+    // stay on same level flag
+    if ((int)dmflags->value & DF_SAME_LEVEL) {
+        BeginIntermission(CreateTargetChangeLevel(level.mapname));
+        return;
+    }
 
-	// see if it's in the map list
-	if (*sv_maplist->string) {
-		s = strdup(sv_maplist->string);
-		f = NULL;
-		t = strtok(s, seps);
-		while (t != NULL) {
-			if (Q_stricmp(t, level.mapname) == 0) {
-				// it's in the list, go to the next one
-				t = strtok(NULL, seps);
-				if (t == NULL) { // end of list, go to first one
-					if (f == NULL) // there isn't a first one, same level
-						BeginIntermission (CreateTargetChangeLevel (level.mapname) );
-					else
-						BeginIntermission (CreateTargetChangeLevel (f) );
-				} else
-					BeginIntermission (CreateTargetChangeLevel (t) );
-				free(s);
-				return;
-			}
-			if (!f)
-				f = t;
-			t = strtok(NULL, seps);
-		}
-		free(s);
-	}
+    // see if it's in the map list
+    if (*sv_maplist->string) {
+        s = strdup(sv_maplist->string);
+        f = NULL;
+        t = strtok(s, seps);
+        while (t != NULL) {
+            if (Q_stricmp(t, level.mapname) == 0) {
+                // it's in the list, go to the next one
+                t = strtok(NULL, seps);
+                if (t == NULL) { // end of list, go to first one
+                    if (f == NULL) // there isn't a first one, same level
+                        BeginIntermission(CreateTargetChangeLevel(level.mapname));
+                    else
+                        BeginIntermission(CreateTargetChangeLevel(f));
+                } else
+                    BeginIntermission(CreateTargetChangeLevel(t));
+                free(s);
+                return;
+            }
+            if (!f)
+                f = t;
+            t = strtok(NULL, seps);
+        }
+        free(s);
+    }
 
-	if (level.nextmap[0]) // go to a specific map
-		BeginIntermission (CreateTargetChangeLevel (level.nextmap) );
-	else {	// search for a changelevel
-		ent = G_Find (NULL, FOFS(classname), "target_changelevel");
-		if (!ent)
-		{	// the map designer didn't include a changelevel,
-			// so create a fake ent that goes back to the same level
-			BeginIntermission (CreateTargetChangeLevel (level.mapname) );
-			return;
-		}
-		BeginIntermission (ent);
-	}
+    if (level.nextmap[0]) // go to a specific map
+        BeginIntermission(CreateTargetChangeLevel(level.nextmap));
+    else {  // search for a changelevel
+        ent = G_Find(NULL, FOFS(classname), "target_changelevel");
+        if (!ent) {
+            // the map designer didn't include a changelevel,
+            // so create a fake ent that goes back to the same level
+            BeginIntermission(CreateTargetChangeLevel(level.mapname));
+            return;
+        }
+        BeginIntermission(ent);
+    }
 }
 
 
@@ -460,25 +380,24 @@ void EndDMLevel (void)
 CheckNeedPass
 =================
 */
-void CheckNeedPass (void)
+void CheckNeedPass(void)
 {
-	int need;
+    int need;
 
-	// if password or spectator_password has changed, update needpass
-	// as needed
-	if (password->modified || spectator_password->modified) 
-	{
-		password->modified = spectator_password->modified = false;
+    // if password or spectator_password has changed, update needpass
+    // as needed
+    if (password->modified || spectator_password->modified) {
+        password->modified = spectator_password->modified = qfalse;
 
-		need = 0;
+        need = 0;
 
-		if (*password->string && Q_stricmp(password->string, "none"))
-			need |= 1;
-		if (*spectator_password->string && Q_stricmp(spectator_password->string, "none"))
-			need |= 2;
+        if (*password->string && Q_stricmp(password->string, "none"))
+            need |= 1;
+        if (*spectator_password->string && Q_stricmp(spectator_password->string, "none"))
+            need |= 2;
 
-		gi.cvar_set("needpass", va("%d", need));
-	}
+        gi.cvar_set("needpass", va("%d", need));
+    }
 }
 
 /*
@@ -486,43 +405,38 @@ void CheckNeedPass (void)
 CheckDMRules
 =================
 */
-void CheckDMRules (void)
+void CheckDMRules(void)
 {
-	int			i;
-	gclient_t	*cl;
+    int         i;
+    gclient_t   *cl;
 
-	if (level.intermissiontime)
-		return;
+    if (level.intermissiontime)
+        return;
 
-	if (!deathmatch->value)
-		return;
+    if (!deathmatch->value)
+        return;
 
-	if (timelimit->value)
-	{
-		if (level.time >= timelimit->value*60)
-		{
-			safe_bprintf (PRINT_HIGH, "Timelimit hit.\n");
-			EndDMLevel ();
-			return;
-		}
-	}
+    if (timelimit->value) {
+        if (level.time >= timelimit->value * 60) {
+            gi.bprintf(PRINT_HIGH, "Timelimit hit.\n");
+            EndDMLevel();
+            return;
+        }
+    }
 
-	if (fraglimit->value)
-	{
-		for (i=0 ; i<maxclients->value ; i++)
-		{
-			cl = game.clients + i;
-			if (!g_edicts[i+1].inuse)
-				continue;
+    if (fraglimit->value) {
+        for (i = 0 ; i < maxclients->value ; i++) {
+            cl = game.clients + i;
+            if (!g_edicts[i + 1].inuse)
+                continue;
 
-			if (cl->resp.score >= fraglimit->value)
-			{
-				safe_bprintf (PRINT_HIGH, "Fraglimit hit.\n");
-				EndDMLevel ();
-				return;
-			}
-		}
-	}
+            if (cl->resp.score >= fraglimit->value) {
+                gi.bprintf(PRINT_HIGH, "Fraglimit hit.\n");
+                EndDMLevel();
+                return;
+            }
+        }
+    }
 }
 
 
@@ -531,32 +445,28 @@ void CheckDMRules (void)
 ExitLevel
 =============
 */
-void ExitLevel (void)
+void ExitLevel(void)
 {
-	int		i;
-	edict_t	*ent;
-	char	command [256];
+    int     i;
+    edict_t *ent;
+    char    command [256];
 
-	Com_sprintf (command, sizeof(command), "gamemap \"%s\"\n", level.changemap);
-	gi.AddCommandString (command);
-	level.changemap = NULL;
-	level.exitintermission = 0;
-	level.intermissiontime = 0;
-	ClientEndServerFrames ();
+    Q_snprintf(command, sizeof(command), "gamemap \"%s\"\n", level.changemap);
+    gi.AddCommandString(command);
+    level.changemap = NULL;
+    level.exitintermission = 0;
+    level.intermissiontime = 0;
+    ClientEndServerFrames();
 
-	// clear some things before going to next level
-	for (i=0 ; i<maxclients->value ; i++)
-	{
-		ent = g_edicts + 1 + i;
-		if (!ent->inuse)
-			continue;
-		if (ent->health > ent->client->pers.max_health)
-			ent->health = ent->client->pers.max_health;
-	}
+    // clear some things before going to next level
+    for (i = 0 ; i < maxclients->value ; i++) {
+        ent = g_edicts + 1 + i;
+        if (!ent->inuse)
+            continue;
+        if (ent->health > ent->client->pers.max_health)
+            ent->health = ent->client->pers.max_health;
+    }
 
-	// mxd added
-	gibsthisframe = 0;
-	lastgibframe = 0;
 }
 
 /*
@@ -566,88 +476,60 @@ G_RunFrame
 Advances the world by 0.1 seconds
 ================
 */
-
-void CheckNumTechs(void);
-
-void G_RunFrame (void)
+void G_RunFrame(void)
 {
-	int		i;
-	edict_t	*ent;
+    int     i;
+    edict_t *ent;
 
-	// Knightmare- dm pause
-	if (paused && deathmatch->value)
-		return;
+    level.framenum++;
+    level.time = level.framenum * FRAMETIME;
 
-	if(level.freeze)
-	{
-		level.freezeframes++;
-		if(level.freezeframes >= sk_stasis_time->value*10)
-			level.freeze = false;
-	} else
-		level.framenum++;
+    // choose a client for monsters to target this frame
+    AI_SetSightClient();
 
-	level.time = level.framenum*FRAMETIME;
+    // exit intermissions
 
-	// choose a client for monsters to target this frame
-	AI_SetSightClient ();
-	// N&C: PMAI
-	PMAI_SetSightClient();
+    if (level.exitintermission) {
+        ExitLevel();
+        return;
+    }
 
-	// exit intermissions
+    //
+    // treat each object in turn
+    // even the world gets a chance to think
+    //
+    ent = &g_edicts[0];
+    for (i = 0 ; i < globals.num_edicts ; i++, ent++) {
+        if (!ent->inuse)
+            continue;
 
-	if (level.exitintermission)
-	{
-		ExitLevel ();
-		return;
-	}
+        level.current_entity = ent;
 
-	if (use_techs->value || (ctf->value && !((int)dmflags->value & DF_CTF_NO_TECH)) )
-		CheckNumTechs ();
+        VectorCopy(ent->s.origin, ent->s.old_origin);
 
-	//
-	// treat each object in turn
-	// even the world gets a chance to think
-	//
-	ent = &g_edicts[0];
-	for (i=0 ; i<globals.num_edicts ; i++, ent++)
-	{
-		if (!ent->inuse)
-			continue;
+        // if the ground entity moved, make sure we are still on it
+        if ((ent->groundentity) && (ent->groundentity->linkcount != ent->groundentity_linkcount)) {
+            ent->groundentity = NULL;
+            if (!(ent->flags & (FL_SWIM | FL_FLY)) && (ent->svflags & SVF_MONSTER)) {
+                M_CheckGround(ent);
+            }
+        }
 
-		level.current_entity = ent;
+        if (i > 0 && i <= maxclients->value) {
+            ClientBeginServerFrame(ent);
+            continue;
+        }
 
-		VectorCopy (ent->s.origin, ent->s.old_origin);
+        G_RunEntity(ent);
+    }
 
-		// if the ground entity moved, make sure we are still on it
-		if ((ent->groundentity) && (ent->groundentity->linkcount != ent->groundentity_linkcount))
-		{
-			ent->groundentity = NULL;
-			if ( !(ent->flags & (FL_SWIM|FL_FLY)) && (ent->svflags & SVF_MONSTER) )
-			{
-				M_CheckGround (ent);
-			}
-		}
+    // see if it is time to end a deathmatch
+    CheckDMRules();
 
-		if (i > 0 && i <= maxclients->value)
-		{
-			ClientBeginServerFrame (ent);
-// ACEBOT_ADD
-			if (!ent->is_bot) // Bots need G_RunEntity called
-				continue;
-// ACEBOT_END
-		}
+    // see if needpass needs updated
+    CheckNeedPass();
 
-		G_RunEntity (ent);
-	}
-
-	// see if it is time to end a deathmatch
-	CheckDMRules ();
-
-	// see if needpass needs updated
-	CheckNeedPass ();
-
-	// build the playerstate_t structures for all players
-	ClientEndServerFrames ();
-
+    // build the playerstate_t structures for all players
+    ClientEndServerFrames();
 }
 
