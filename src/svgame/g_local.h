@@ -17,6 +17,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // g_local.h -- local definitions for game module
 
+#ifndef __SVGAME_G_LOCAL_H__
+#define __SVGAME_G_LOCAL_H__
+
 #include "shared/shared.h"
 #include "shared/list.h"
 
@@ -1102,3 +1105,4 @@ struct edict_s {
     monsterinfo_t   monsterinfo;
 };
 
+#endif

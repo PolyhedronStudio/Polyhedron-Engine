@@ -208,9 +208,9 @@ extern void soldier_pain(void);
 extern void supertank_pain(void);
 extern void tank_pain(void);
 extern void misc_viper_bomb_prethink(void);
-extern void AngleMove_Begin(void);
-extern void AngleMove_Done(void);
-extern void AngleMove_Final(void);
+extern void Brush_AngleMove_Begin(void);
+extern void Brush_AngleMove_Done(void);
+extern void Brush_AngleMove_Final(void);
 extern void barrel_explode(void);
 extern void bfg_explode(void);
 extern void bfg_think(void);
@@ -246,9 +246,9 @@ extern void misc_eastertank_think(void);
 extern void misc_satellite_dish_think(void);
 extern void monster_think(void);
 extern void monster_triggered_spawn(void);
-extern void Move_Begin(void);
-extern void Move_Done(void);
-extern void Move_Final(void);
+extern void Brush_Move_Begin(void);
+extern void Brush_Move_Done(void);
+extern void Brush_Move_Final(void);
 extern void multi_wait(void);
 extern void plat_go_down(void);
 extern void SP_CreateCoopSpots(void);
@@ -567,9 +567,9 @@ const save_ptr_t save_ptrs[] = {
 //{ P_pain, supertank_pain },
 //{ P_pain, tank_pain },
 { P_prethink, misc_viper_bomb_prethink },
-{ P_think, AngleMove_Begin },
-{ P_think, AngleMove_Done },
-{ P_think, AngleMove_Final },
+{ P_think, Brush_AngleMove_Begin },
+{ P_think, Brush_AngleMove_Done },
+{ P_think, Brush_AngleMove_Final },
 { P_think, barrel_explode },
 { P_think, bfg_explode },
 { P_think, bfg_think },
@@ -607,9 +607,9 @@ const save_ptr_t save_ptrs[] = {
 { P_think, misc_satellite_dish_think },
 { P_think, monster_think },
 { P_think, monster_triggered_spawn },
-{ P_think, Move_Begin },
-{ P_think, Move_Done },
-{ P_think, Move_Final },
+{ P_think, Brush_Move_Begin },
+{ P_think, Brush_Move_Done },
+{ P_think, Brush_Move_Final },
 { P_think, multi_wait },
 { P_think, plat_go_down },
 { P_think, SP_CreateCoopSpots },

@@ -28,6 +28,7 @@ SET(HEADERS_CLGAME
 ###################### SERVER GAME
 SET(SRC_SVGAME
 	svgame/ai.c
+	svgame/brushfuncs.c
 	svgame/chase.c
 	svgame/cmds.c
 	svgame/combat.c
@@ -48,10 +49,15 @@ SET(SRC_SVGAME
 	svgame/weapons.c
 
 	svgame/entities/func_areaportal.c
+	svgame/entities/func_button.c
 	svgame/entities/func_clock.c
+	svgame/entities/func_door.c 
+	svgame/entities/func_door_rotating.c
 	svgame/entities/func_explosive.c 
 	svgame/entities/func_group.c
-	svgame/entities/func_object.c 
+	svgame/entities/func_object.c
+	svgame/entities/func_plat.c
+	svgame/entities/func_rotating.c
 	svgame/entities/func_wall.c
 	svgame/entities/info_notnull.c
 	svgame/entities/info_null.c
