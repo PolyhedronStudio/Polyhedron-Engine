@@ -114,7 +114,7 @@ is loaded.
 */
 void InitGame(void)
 {
-    gi.dprintf("==== InitGame ====\n");
+    gi.dprintf("==== InitServerGame ====\n");
 
     gun_x = gi.cvar("gun_x", "0", 0);
     gun_y = gi.cvar("gun_y", "0", 0);
@@ -124,7 +124,7 @@ void InitGame(void)
     sv_rollspeed = gi.cvar("sv_rollspeed", "200", 0);
     sv_rollangle = gi.cvar("sv_rollangle", "2", 0);
     sv_maxvelocity = gi.cvar("sv_maxvelocity", "2000", 0);
-    sv_gravity = gi.cvar("sv_gravity", "800", 0);
+    sv_gravity = gi.cvar("sv_gravity", "750", 0);
 
     // noset vars
     dedicated = gi.cvar("dedicated", "0", CVAR_NOSET);
