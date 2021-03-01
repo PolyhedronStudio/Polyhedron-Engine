@@ -41,7 +41,6 @@ SET(SRC_SVGAME
 	svgame/save.c
 	svgame/spawn.c
 	svgame/svcmds.c
-	svgame/target.c
 	svgame/trigger.c
 	svgame/turret.c
 	svgame/utils.c
@@ -87,7 +86,22 @@ SET(SRC_SVGAME
 	svgame/entities/misc_viperbomb.c
 	svgame/entities/path_corner.c
 	svgame/entities/point_combat.c
+	svgame/entities/target_blaster.c
+	svgame/entities/target_changelevel.c
 	svgame/entities/target_character.c
+	svgame/entities/target_crosslevel_target.c
+	svgame/entities/target_crosslevel_trigger.c
+	svgame/entities/target_earthquake.c
+	svgame/entities/target_explosion.c
+	svgame/entities/target_goal.c
+	svgame/entities/target_help.c
+	svgame/entities/target_laser.c
+	svgame/entities/target_lightramp.c
+	svgame/entities/target_secret.c
+	svgame/entities/target_spawner.c
+	svgame/entities/target_speaker.c
+	svgame/entities/target_splash.c
+	svgame/entities/target_temp_entity.c
 	svgame/entities/target_string.c
 	svgame/entities/trigger_always.c
 	svgame/entities/trigger_counter.c
