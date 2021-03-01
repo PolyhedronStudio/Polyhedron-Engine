@@ -46,74 +46,77 @@ SET(SRC_SVGAME
 	svgame/utils.c
 	svgame/weapons.c
 
-	svgame/entities/func_areaportal.c
-	svgame/entities/func_button.c
-	svgame/entities/func_clock.c
-	svgame/entities/func_conveyor.c
-	svgame/entities/func_door.c 
-	svgame/entities/func_door_rotating.c
-	svgame/entities/func_explosive.c 
-	svgame/entities/func_group.c
-	svgame/entities/func_killbox.c
-	svgame/entities/func_object.c
-	svgame/entities/func_plat.c
-	svgame/entities/func_rotating.c
-	svgame/entities/func_timer.c
-	svgame/entities/func_train.c 
-	svgame/entities/func_wall.c
-	svgame/entities/func_water.c
+	svgame/entities/func/func_areaportal.c
+	svgame/entities/func/func_button.c
+	svgame/entities/func/func_clock.c
+	svgame/entities/func/func_conveyor.c
+	svgame/entities/func/func_door.c 
+	svgame/entities/func/func_door_rotating.c
+	svgame/entities/func/func_explosive.c 
+	svgame/entities/func/func_group.c
+	svgame/entities/func/func_killbox.c
+	svgame/entities/func/func_object.c
+	svgame/entities/func/func_plat.c
+	svgame/entities/func/func_rotating.c
+	svgame/entities/func/func_timer.c
+	svgame/entities/func/func_train.c 
+	svgame/entities/func/func_wall.c
+	svgame/entities/func/func_water.c
+	
+	svgame/entities/misc/misc_banner.c 
+	svgame/entities/misc/misc_bigviper.c 
+	svgame/entities/misc/misc_blackhole.c 
+	svgame/entities/misc/misc_deadsoldier.c 
+	svgame/entities/misc/misc_easterchick.c 
+	svgame/entities/misc/misc_easterchick2.c 
+	svgame/entities/misc/misc_eastertank.c 
+	svgame/entities/misc/misc_explobox.c 
+	svgame/entities/misc/misc_gib_arm.c 
+	svgame/entities/misc/misc_gib_leg.c 
+	svgame/entities/misc/misc_gib_head.c 
+	svgame/entities/misc/misc_satellite_dish.c 
+	svgame/entities/misc/misc_strogg_ship.c 
+	svgame/entities/misc/misc_teleporter.c
+	svgame/entities/misc/misc_teleporter_dest.c
+	svgame/entities/misc/misc_viper.c
+	svgame/entities/misc/misc_viperbomb.c
+
+	svgame/entities/target/target_blaster.c
+	svgame/entities/target/target_changelevel.c
+	svgame/entities/target/target_character.c
+	svgame/entities/target/target_crosslevel_target.c
+	svgame/entities/target/target_crosslevel_trigger.c
+	svgame/entities/target/target_earthquake.c
+	svgame/entities/target/target_explosion.c
+	svgame/entities/target/target_goal.c
+	svgame/entities/target/target_help.c
+	svgame/entities/target/target_laser.c
+	svgame/entities/target/target_lightramp.c
+	svgame/entities/target/target_secret.c
+	svgame/entities/target/target_spawner.c
+	svgame/entities/target/target_speaker.c
+	svgame/entities/target/target_splash.c
+	svgame/entities/target/target_string.c
+	svgame/entities/target/target_temp_entity.c
+	svgame/entities/trigger/trigger_always.c
+	svgame/entities/trigger/trigger_counter.c
+	svgame/entities/trigger/trigger_elevator.c
+	svgame/entities/trigger/trigger_gravity.c
+	svgame/entities/trigger/trigger_hurt.c
+	svgame/entities/trigger/trigger_key.c
+	svgame/entities/trigger/trigger_monsterjump.c
+	svgame/entities/trigger/trigger_multiple.c
+	svgame/entities/trigger/trigger_once.c
+	svgame/entities/trigger/trigger_push.c
+	svgame/entities/trigger/trigger_relay.c
+	
 	svgame/entities/info_notnull.c
 	svgame/entities/info_null.c
 	svgame/entities/light.c
 	svgame/entities/light_mine1.c
 	svgame/entities/light_mine2.c
-	svgame/entities/misc_banner.c 
-	svgame/entities/misc_bigviper.c 
-	svgame/entities/misc_blackhole.c 
-	svgame/entities/misc_deadsoldier.c 
-	svgame/entities/misc_easterchick.c 
-	svgame/entities/misc_easterchick2.c 
-	svgame/entities/misc_eastertank.c 
-	svgame/entities/misc_explobox.c 
-	svgame/entities/misc_gib_arm.c 
-	svgame/entities/misc_gib_leg.c 
-	svgame/entities/misc_gib_head.c 
-	svgame/entities/misc_satellite_dish.c 
-	svgame/entities/misc_strogg_ship.c 
-	svgame/entities/misc_teleporter.c
-	svgame/entities/misc_teleporter_dest.c
-	svgame/entities/misc_viper.c
-	svgame/entities/misc_viperbomb.c
 	svgame/entities/path_corner.c
 	svgame/entities/point_combat.c
-	svgame/entities/target_blaster.c
-	svgame/entities/target_changelevel.c
-	svgame/entities/target_character.c
-	svgame/entities/target_crosslevel_target.c
-	svgame/entities/target_crosslevel_trigger.c
-	svgame/entities/target_earthquake.c
-	svgame/entities/target_explosion.c
-	svgame/entities/target_goal.c
-	svgame/entities/target_help.c
-	svgame/entities/target_laser.c
-	svgame/entities/target_lightramp.c
-	svgame/entities/target_secret.c
-	svgame/entities/target_spawner.c
-	svgame/entities/target_speaker.c
-	svgame/entities/target_splash.c
-	svgame/entities/target_temp_entity.c
-	svgame/entities/target_string.c
-	svgame/entities/trigger_always.c
-	svgame/entities/trigger_counter.c
-	svgame/entities/trigger_elevator.c
-	svgame/entities/trigger_gravity.c
-	svgame/entities/trigger_hurt.c
-	svgame/entities/trigger_key.c
-	svgame/entities/trigger_monsterjump.c
-	svgame/entities/trigger_multiple.c
-	svgame/entities/trigger_once.c
-	svgame/entities/trigger_push.c
-	svgame/entities/trigger_relay.c
 	svgame/entities/viewthing.c
 
 	svgame/monsters/movement.c
@@ -145,7 +148,7 @@ SET(HEADERS_SVGAME
 	svgame/g_local.h
 	svgame/functionpointers.h
 
-	svgame/entities/func_door.h
+	svgame/entities/func/func_door.h
 
 	svgame/monsters/soldier.h
 
