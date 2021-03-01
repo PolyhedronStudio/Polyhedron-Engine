@@ -7,16 +7,16 @@ cmake_minimum_required (VERSION 3.8)
 ###############################################################################
 ###################### CLIENT GAME
 SET(SRC_CLGAME
-	clgame/clg_effects.c
-	clgame/clg_entities.c
-	clgame/clg_main.c
-	clgame/clg_media.c
-	clgame/clg_newfx.c
-	clgame/clg_parse.c
-	clgame/clg_predict.c
-	clgame/clg_screen.c
-	clgame/clg_tents.c
-	clgame/clg_view.c
+	clgame/clg_effects.cpp
+	clgame/clg_entities.cpp
+	clgame/clg_main.cpp
+	clgame/clg_media.cpp
+	clgame/clg_newfx.cpp
+	clgame/clg_parse.cpp
+	clgame/clg_predict.cpp
+	clgame/clg_screen.cpp
+	clgame/clg_tents.cpp
+	clgame/clg_view.cpp
 
 	clgame/clgame.def
 )
@@ -27,119 +27,119 @@ SET(HEADERS_CLGAME
 
 ###################### SERVER GAME
 SET(SRC_SVGAME
-	svgame/ai.c
-	svgame/brushfuncs.c
-	svgame/chase.c
-	svgame/cmds.c
-	svgame/combat.c
-	svgame/functionpointers.c
-	svgame/items.c
-	svgame/main.c
-	svgame/misc.c
-	svgame/monsters.c
-	svgame/physics.c
-	svgame/save.c
-	svgame/spawn.c
-	svgame/svcmds.c
-	svgame/trigger.c
-	svgame/turret.c
-	svgame/utils.c
-	svgame/weapons.c
+	svgame/ai.cpp
+	svgame/brushfuncs.cpp
+	svgame/chase.cpp
+	svgame/cmds.cpp
+	svgame/combat.cpp
+	svgame/functionpointers.cpp
+	svgame/items.cpp
+	svgame/main.cpp
+	svgame/misc.cpp
+	svgame/monsters.cpp
+	svgame/physics.cpp
+	svgame/save.cpp
+	svgame/spawn.cpp
+	svgame/svcmds.cpp
+	svgame/trigger.cpp
+	svgame/turret.cpp
+	svgame/utils.cpp
+	svgame/weapons.cpp
 
-	svgame/entities/func/func_areaportal.c
-	svgame/entities/func/func_button.c
-	svgame/entities/func/func_clock.c
-	svgame/entities/func/func_conveyor.c
-	svgame/entities/func/func_door.c 
-	svgame/entities/func/func_door_rotating.c
-	svgame/entities/func/func_explosive.c 
-	svgame/entities/func/func_group.c
-	svgame/entities/func/func_killbox.c
-	svgame/entities/func/func_object.c
-	svgame/entities/func/func_plat.c
-	svgame/entities/func/func_rotating.c
-	svgame/entities/func/func_timer.c
-	svgame/entities/func/func_train.c 
-	svgame/entities/func/func_wall.c
-	svgame/entities/func/func_water.c
+	svgame/entities/func/func_areaportal.cpp
+	svgame/entities/func/func_button.cpp
+	svgame/entities/func/func_clock.cpp
+	svgame/entities/func/func_conveyor.cpp
+	svgame/entities/func/func_door.cpp 
+	svgame/entities/func/func_door_rotating.cpp
+	svgame/entities/func/func_explosive.cpp 
+	svgame/entities/func/func_group.cpp
+	svgame/entities/func/func_killbox.cpp
+	svgame/entities/func/func_object.cpp
+	svgame/entities/func/func_plat.cpp
+	svgame/entities/func/func_rotating.cpp
+	svgame/entities/func/func_timer.cpp
+	svgame/entities/func/func_train.cpp 
+	svgame/entities/func/func_wall.cpp
+	svgame/entities/func/func_water.cpp
 	
-	svgame/entities/misc/misc_banner.c 
-	svgame/entities/misc/misc_bigviper.c 
-	svgame/entities/misc/misc_blackhole.c 
-	svgame/entities/misc/misc_deadsoldier.c 
-	svgame/entities/misc/misc_easterchick.c 
-	svgame/entities/misc/misc_easterchick2.c 
-	svgame/entities/misc/misc_eastertank.c 
-	svgame/entities/misc/misc_explobox.c 
-	svgame/entities/misc/misc_gib_arm.c 
-	svgame/entities/misc/misc_gib_leg.c 
-	svgame/entities/misc/misc_gib_head.c 
-	svgame/entities/misc/misc_satellite_dish.c 
-	svgame/entities/misc/misc_strogg_ship.c 
-	svgame/entities/misc/misc_teleporter.c
-	svgame/entities/misc/misc_teleporter_dest.c
-	svgame/entities/misc/misc_viper.c
-	svgame/entities/misc/misc_viperbomb.c
+	svgame/entities/misc/misc_banner.cpp 
+	svgame/entities/misc/misc_bigviper.cpp 
+	svgame/entities/misc/misc_blackhole.cpp 
+	svgame/entities/misc/misc_deadsoldier.cpp 
+	svgame/entities/misc/misc_easterchick.cpp 
+	svgame/entities/misc/misc_easterchick2.cpp 
+	svgame/entities/misc/misc_eastertank.cpp 
+	svgame/entities/misc/misc_explobox.cpp 
+	svgame/entities/misc/misc_gib_arm.cpp 
+	svgame/entities/misc/misc_gib_leg.cpp 
+	svgame/entities/misc/misc_gib_head.cpp 
+	svgame/entities/misc/misc_satellite_dish.cpp 
+	svgame/entities/misc/misc_strogg_ship.cpp 
+	svgame/entities/misc/misc_teleporter.cpp
+	svgame/entities/misc/misc_teleporter_dest.cpp
+	svgame/entities/misc/misc_viper.cpp
+	svgame/entities/misc/misc_viperbomb.cpp
 
-	svgame/entities/target/target_blaster.c
-	svgame/entities/target/target_changelevel.c
-	svgame/entities/target/target_character.c
-	svgame/entities/target/target_crosslevel_target.c
-	svgame/entities/target/target_crosslevel_trigger.c
-	svgame/entities/target/target_earthquake.c
-	svgame/entities/target/target_explosion.c
-	svgame/entities/target/target_goal.c
-	svgame/entities/target/target_help.c
-	svgame/entities/target/target_laser.c
-	svgame/entities/target/target_lightramp.c
-	svgame/entities/target/target_secret.c
-	svgame/entities/target/target_spawner.c
-	svgame/entities/target/target_speaker.c
-	svgame/entities/target/target_splash.c
-	svgame/entities/target/target_string.c
-	svgame/entities/target/target_temp_entity.c
-	svgame/entities/trigger/trigger_always.c
-	svgame/entities/trigger/trigger_counter.c
-	svgame/entities/trigger/trigger_elevator.c
-	svgame/entities/trigger/trigger_gravity.c
-	svgame/entities/trigger/trigger_hurt.c
-	svgame/entities/trigger/trigger_key.c
-	svgame/entities/trigger/trigger_monsterjump.c
-	svgame/entities/trigger/trigger_multiple.c
-	svgame/entities/trigger/trigger_once.c
-	svgame/entities/trigger/trigger_push.c
-	svgame/entities/trigger/trigger_relay.c
+	svgame/entities/target/target_blaster.cpp
+	svgame/entities/target/target_changelevel.cpp
+	svgame/entities/target/target_character.cpp
+	svgame/entities/target/target_crosslevel_target.cpp
+	svgame/entities/target/target_crosslevel_trigger.cpp
+	svgame/entities/target/target_earthquake.cpp
+	svgame/entities/target/target_explosion.cpp
+	svgame/entities/target/target_goal.cpp
+	svgame/entities/target/target_help.cpp
+	svgame/entities/target/target_laser.cpp
+	svgame/entities/target/target_lightramp.cpp
+	svgame/entities/target/target_secret.cpp
+	svgame/entities/target/target_spawner.cpp
+	svgame/entities/target/target_speaker.cpp
+	svgame/entities/target/target_splash.cpp
+	svgame/entities/target/target_string.cpp
+	svgame/entities/target/target_temp_entity.cpp
+	svgame/entities/trigger/trigger_always.cpp
+	svgame/entities/trigger/trigger_counter.cpp
+	svgame/entities/trigger/trigger_elevator.cpp
+	svgame/entities/trigger/trigger_gravity.cpp
+	svgame/entities/trigger/trigger_hurt.cpp
+	svgame/entities/trigger/trigger_key.cpp
+	svgame/entities/trigger/trigger_monsterjump.cpp
+	svgame/entities/trigger/trigger_multiple.cpp
+	svgame/entities/trigger/trigger_once.cpp
+	svgame/entities/trigger/trigger_push.cpp
+	svgame/entities/trigger/trigger_relay.cpp
 	
-	svgame/entities/info_notnull.c
-	svgame/entities/info_null.c
-	svgame/entities/light.c
-	svgame/entities/light_mine1.c
-	svgame/entities/light_mine2.c
-	svgame/entities/path_corner.c
-	svgame/entities/point_combat.c
-	svgame/entities/viewthing.c
+	svgame/entities/info_notnull.cpp
+	svgame/entities/info_null.cpp
+	svgame/entities/light.cpp
+	svgame/entities/light_mine1.cpp
+	svgame/entities/light_mine2.cpp
+	svgame/entities/path_corner.cpp
+	svgame/entities/point_combat.cpp
+	svgame/entities/viewthing.cpp
 
-	svgame/monsters/movement.c
-	svgame/monsters/soldier.c
+	svgame/monsters/movement.cpp
+	svgame/monsters/soldier.cpp
 
-	svgame/player/client.c
-	svgame/player/hud.c
-	svgame/player/trail.c
-	svgame/player/view.c
-	svgame/player/weapons.c
+	svgame/player/client.cpp
+	svgame/player/hud.cpp
+	svgame/player/trail.cpp
+	svgame/player/view.cpp
+	svgame/player/weapons.cpp
 
-	svgame/weapons/bfg10k.c
-	svgame/weapons/blaster.c
-	svgame/weapons/chaingun.c
-	svgame/weapons/flaregun.c
-	svgame/weapons/grenade.c
-	svgame/weapons/grenadelauncher.c
-	svgame/weapons/hyperblaster.c
-	svgame/weapons/machinegun.c
-	svgame/weapons/railgun.c
-	svgame/weapons/rocketlauncher.c
-	svgame/weapons/shotgun.c
-	svgame/weapons/supershotgun.c
+	svgame/weapons/bfg10k.cpp
+	svgame/weapons/blaster.cpp
+	svgame/weapons/chaingun.cpp
+	svgame/weapons/flaregun.cpp
+	svgame/weapons/grenade.cpp
+	svgame/weapons/grenadelauncher.cpp
+	svgame/weapons/hyperblaster.cpp
+	svgame/weapons/machinegun.cpp
+	svgame/weapons/railgun.cpp
+	svgame/weapons/rocketlauncher.cpp
+	svgame/weapons/shotgun.cpp
+	svgame/weapons/supershotgun.cpp
 )
 
 SET(HEADERS_SVGAME
@@ -171,39 +171,39 @@ SET(HEADERS_SVGAME
 
 ###################### Client.
 SET(SRC_CLIENT
-	client/ascii.c
-	client/console.c
-	client/cin.c
-	client/clgame.c
-	client/crc.c
-	client/demo.c
-	client/download.c
-	client/effects.c
-	client/entities.c
-	client/gtv.c
-	client/input.c
-	client/keys.c
-	client/locs.c
-	client/main.c
-	client/parse.c
-	client/precache.c
-	client/predict.c
-	client/refresh.c
-	client/screen.c
-	client/view.c
-	client/ui/demos.c
-	client/ui/menu.c
-	client/ui/playerconfig.c
-	client/ui/playermodels.c
-	client/ui/script.c
-	client/ui/servers.c
-	client/ui/ui.c
-	client/sound/dma.c
-	client/sound/al.c
-	client/sound/main.c
-	client/sound/mem.c
-	client/sound/mix.c
-	client/sound/ogg.c
+	client/ascii.cpp
+	client/console.cpp
+	client/cin.cpp
+	client/clgame.cpp
+	client/crc.cpp
+	client/demo.cpp
+	client/download.cpp
+	client/effects.cpp
+	client/entities.cpp
+	client/gtv.cpp
+	client/input.cpp
+	client/keys.cpp
+	client/locs.cpp
+	client/main.cpp
+	client/parse.cpp
+	client/precache.cpp
+	client/predict.cpp
+	client/refresh.cpp
+	client/screen.cpp
+	client/view.cpp
+	client/ui/demos.cpp
+	client/ui/menu.cpp
+	client/ui/playerconfig.cpp
+	client/ui/playermodels.cpp
+	client/ui/script.cpp
+	client/ui/servers.cpp
+	client/ui/ui.cpp
+	client/sound/dma.cpp
+	client/sound/al.cpp
+	client/sound/main.cpp
+	client/sound/mem.cpp
+	client/sound/mix.cpp
+	client/sound/ogg.cpp
 #	client/sound/qal/fixed.c
 	client/sound/qal/dynamic.c
 )
@@ -211,11 +211,11 @@ SET(SRC_CLIENT
 if (NOT CONFIG_VKPT_RENDERER AND CONFIG_GL_RENDERER)
 	set(SRC_CLIENT 
 		${SRC_CLIENT}
-		client/null_gl.c
+		client/null_gl.cpp
 	)
 endif()
 SET(SRC_CLIENT_HTTP
-	client/http.c
+	client/http.cpp
 )
 SET(HEADERS_CLIENT
 	client/client.h
@@ -227,19 +227,19 @@ SET(HEADERS_CLIENT
 
 ###################### Client.
 SET(SRC_SERVER
-	server/commands.c
-	server/entities.c
-	server/svgame.c
-	server/init.c
-	server/main.c
-	server/mvd.c
-	server/send.c
-	server/user.c
-	server/world.c
-	server/mvd/client.c
-	server/mvd/parse.c
-	server/mvd/game.c
-	server/save.c
+	server/commands.cpp
+	server/entities.cpp
+	server/svgame.cpp
+	server/init.cpp
+	server/main.cpp
+	server/mvd.cpp
+	server/send.cpp
+	server/user.cpp
+	server/world.cpp
+	server/mvd/client.cpp
+	server/mvd/parse.cpp
+	server/mvd/game.cpp
+	server/save.cpp
 )
 SET(HEADERS_SERVER
 	server/server.h
@@ -247,25 +247,25 @@ SET(HEADERS_SERVER
 
 ###################### Common.
 SET(SRC_COMMON
-	common/bsp.c
-	common/cmd.c
-	common/cmodel.c
-	common/common.c
-	common/cvar.c
-	common/error.c
-	common/field.c
-	common/fifo.c
-	common/files.c
-	common/math.c
-	common/mdfour.c
-	common/msg.c
-	common/prompt.c
-	common/sizebuf.c
-	common/utils.c
-	common/zone.c
-	common/net/chan.c
-	common/net/net.c
-	common/x86/fpu.c
+	common/bsp.cpp
+	common/cmd.cpp
+	common/cmodel.cpp
+	common/common.cpp
+	common/cvar.cpp
+	common/error.cpp
+	common/field.cpp
+	common/fifo.cpp
+	common/files.cpp
+	common/math.cpp
+	common/mdfour.cpp
+	common/msg.cpp
+	common/prompt.cpp
+	common/sizebuf.cpp
+	common/utils.cpp
+	common/zone.cpp
+	common/net/chan.cpp
+	common/net/net.cpp
+	common/x86/fpu.cpp
 )
 SET(HEADERS_COMMON
 	common/net/inet_ntop.h
@@ -275,24 +275,24 @@ SET(HEADERS_COMMON
 
 ###################### Refresh.
 SET(SRC_REFRESH
-	refresh/images.c
-	refresh/models.c
+	refresh/images.cpp
+	refresh/models.cpp
 	refresh/stb/stb.c
 )
 
 ###################### GL.
 SET(SRC_GL
-	refresh/gl/draw.c
-	refresh/gl/hq2x.c
-	refresh/gl/images.c
-	refresh/gl/main.c
-	refresh/gl/mesh.c
-	refresh/gl/models.c
-	refresh/gl/sky.c
-	refresh/gl/state.c
-	refresh/gl/surf.c
-	refresh/gl/tess.c
-	refresh/gl/world.c
+	refresh/gl/draw.cpp
+	refresh/gl/hq2x.cpp
+	refresh/gl/images.cpp
+	refresh/gl/main.cpp
+	refresh/gl/mesh.cpp
+	refresh/gl/models.cpp
+	refresh/gl/sky.cpp
+	refresh/gl/state.cpp
+	refresh/gl/surf.cpp
+	refresh/gl/tess.cpp
+	refresh/gl/world.cpp
 	refresh/gl/qgl/dynamic.c
 #	refresh/gl/qgl/fixed.c
 )
@@ -306,7 +306,7 @@ SET(HEADERS_SHAREDGAME
 	../inc/sharedgame/pmove.h 
 )
 SET(SRC_SHAREDGAME
-	sharedgame/pmove.c
+	sharedgame/pmove.cpp
 )
 
 ###################### Shared Folder.
@@ -321,32 +321,32 @@ SET(HEADERS_SHARED
 	../inc/shared/shared.h 
 )
 SET(SRC_SHARED
-	shared/m_flash.c
-	shared/math.c
-	shared/shared.c
+	shared/m_flash.cpp
+	shared/math.cpp
+	shared/shared.cpp
 )
 
 ###################### UNIX Client Specific.
 SET(SRC_UNIX
-	os/unix/hunk.c
-	os/unix/system.c
-	os/unix/tty.c
+	os/unix/hunk.cpp
+	os/unix/system.cpp
+	os/unix/tty.cpp
 )
 SET(SRC_UNIX_CLIENT
-	os/sdl2/sound.c
-	os/sdl2/video.c
+	os/sdl2/sound.cpp
+	os/sdl2/video.cpp
 )
 
 ###################### Windows Client Specific.
 SET(SRC_WINDOWS
-	os/windows/ac.c
-	os/windows/debug.c
-	os/windows/hunk.c
-	os/windows/system.c
+	os/windows/ac.cpp
+	os/windows/debug.cpp
+	os/windows/hunk.cpp
+	os/windows/system.cpp
 )
 SET(SRC_WINDOWS_CLIENT
-	os/windows/wave.c
-	os/sdl2/video.c
+	os/windows/wave.cpp
+	os/sdl2/video.cpp
 )
 SET(HEADERS_WINDOWS
 	os/windows/wgl.h
@@ -492,8 +492,8 @@ ADD_EXECUTABLE(server
 	${SRC_SHARED} ${HEADERS_SHARED}
 	${SRC_WINDOWS} ${HEADERS_WINDOWS}
 	${SRC_SERVER} ${HEADERS_SERVER}
-	server/ac.c
-	client/null.c
+	server/ac.cpp
+	client/null.cpp
 	os/res/nacded.rc
 )
 ELSE()
