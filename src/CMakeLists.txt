@@ -32,7 +32,6 @@ SET(SRC_SVGAME
 	svgame/chase.c
 	svgame/cmds.c
 	svgame/combat.c
-	svgame/func.c
 	svgame/items.c
 	svgame/main.c
 	svgame/misc.c
