@@ -55,10 +55,14 @@ SET(SRC_SVGAME
 	svgame/entities/func_door_rotating.c
 	svgame/entities/func_explosive.c 
 	svgame/entities/func_group.c
+	svgame/entities/func_killbox.c
 	svgame/entities/func_object.c
 	svgame/entities/func_plat.c
 	svgame/entities/func_rotating.c
+	svgame/entities/func_timer.c
+	svgame/entities/func_train.c 
 	svgame/entities/func_wall.c
+	svgame/entities/func_water.c
 	svgame/entities/info_notnull.c
 	svgame/entities/info_null.c
 	svgame/entities/light.c
