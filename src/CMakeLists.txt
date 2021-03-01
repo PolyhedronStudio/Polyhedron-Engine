@@ -50,6 +50,7 @@ SET(SRC_SVGAME
 	svgame/entities/func_areaportal.c
 	svgame/entities/func_button.c
 	svgame/entities/func_clock.c
+	svgame/entities/func_conveyor.c
 	svgame/entities/func_door.c 
 	svgame/entities/func_door_rotating.c
 	svgame/entities/func_explosive.c 
@@ -88,6 +89,17 @@ SET(SRC_SVGAME
 	svgame/entities/point_combat.c
 	svgame/entities/target_character.c
 	svgame/entities/target_string.c
+	svgame/entities/trigger_always.c
+	svgame/entities/trigger_counter.c
+	svgame/entities/trigger_elevator.c
+	svgame/entities/trigger_gravity.c
+	svgame/entities/trigger_hurt.c
+	svgame/entities/trigger_key.c
+	svgame/entities/trigger_monsterjump.c
+	svgame/entities/trigger_multiple.c
+	svgame/entities/trigger_once.c
+	svgame/entities/trigger_push.c
+	svgame/entities/trigger_relay.c
 	svgame/entities/viewthing.c
 
 	svgame/monsters/movement.c

@@ -44,7 +44,7 @@ void SP_func_plat(edict_t *ent);
 void SP_func_rotating(edict_t *ent);
 void SP_func_button(edict_t *ent);
 void SP_func_door(edict_t *ent);
-void SP_func_door_secret(edict_t *ent);
+//void SP_func_door_secret(edict_t *ent);
 void SP_func_door_rotating(edict_t *ent);
 void SP_func_water(edict_t *ent);
 void SP_func_train(edict_t *ent);
@@ -161,7 +161,7 @@ static const spawn_func_t spawn_funcs[] = {
     {"func_plat", SP_func_plat},
     {"func_button", SP_func_button},
     {"func_door", SP_func_door},
-    {"func_door_secret", SP_func_door_secret},
+    //{"func_door_secret", SP_func_door_secret},
     {"func_door_rotating", SP_func_door_rotating},
     {"func_rotating", SP_func_rotating},
     {"func_train", SP_func_train},
