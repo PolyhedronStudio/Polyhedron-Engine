@@ -126,16 +126,20 @@ void _trp_MSG_FlushTo(sizebuf_t *buf) {
 
 // REGISTER
 qhandle_t _wrp_R_RegisterPic(const char *name) {
-    return R_RegisterPic(name);
+    // CPP: Explicit cast required.
+    return (qhandle_t)R_RegisterPic(name);
 }
 qhandle_t _wrp_R_RegisterPic2(const char *name) {
-    return R_RegisterPic2(name);
+    // CPP: Explicit cast required.
+    return (qhandle_t)R_RegisterPic2(name);
 }
 qhandle_t _wrp_R_RegisterFont(const char *name) {
-    return R_RegisterFont(name);
+    // CPP: Explicit cast required.
+    return (qhandle_t)R_RegisterFont(name);
 }
 qhandle_t _wrp_R_RegisterSkin(const char *name) {
-    return R_RegisterSkin(name);
+    // CPP: Explicit cast required.
+    return (qhandle_t)R_RegisterSkin(name);
 }
 
 qhandle_t _wrp_R_RegisterModel(const char *name) {
@@ -206,12 +210,13 @@ void _wrp_R_SetClipRect(const clipRect_t* clip) {
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
 float _wrp_R_ClampScale(cvar_t *var) {
-    if (R_ClampScale) {
+    // CPP: This was a bug I guess in the C code, there is no funcptr check.
+    //if (R_ClampScale) {
         return R_ClampScale(var);
-    } else {
-        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
-        return 0.0f;
-    }
+    //} else {
+    //    Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+    //    return 0.0f;
+    //}
 }
 void _wrp_R_SetScale(float scale) {
     if (R_SetScale)
@@ -235,13 +240,14 @@ int _wrp_R_DrawString(int x, int y, int flags, size_t maxChars,
     return 0;
 }
 qboolean _wrp_R_GetPicSize(int* w, int* h, qhandle_t pic) {
-    if (R_GetPicSize) {
+    // CPP: Bug in the old code I guess.
+//    if (R_GetPicSize) {
         return R_GetPicSize(w, h, pic);
-    }
-    else {
-        Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
-        return qfalse;
-    }
+    //}
+    //else {
+    //    Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
+    //    return qfalse;
+    //}
 }
 void _wrp_R_DrawPic(int x, int y, qhandle_t pic) {
     if (R_DrawPic) {
@@ -365,16 +371,16 @@ void CL_InitGameProgs(void)
 
     // for debugging or `proxy' mods
     if (sys_forcecgamelib->string[0])
-        entry = _CL_LoadGameLibrary(sys_forcecgamelib->string);
+        entry = (clgame_export_t*)_CL_LoadGameLibrary(sys_forcecgamelib->string); // CPP: Cast from void* to clgame_export_t*
 
     // try game first
     if (!entry && fs_game->string[0]) {
-        entry = CL_LoadGameLibrary(fs_game->string, "");
+        entry = (clgame_export_t*)CL_LoadGameLibrary(fs_game->string, "");
     }
 
     // then try basenac
     if (!entry) {
-        entry = CL_LoadGameLibrary(BASEGAME, "");
+        entry = (clgame_export_t*)CL_LoadGameLibrary(BASEGAME, "");
     }
 
     // all paths failed

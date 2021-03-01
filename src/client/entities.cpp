@@ -321,11 +321,17 @@ player_update(server_frame_t *oldframe, server_frame_t *frame, int framediv)
 
     // no lerping if player entity was teleported (origin check)
     // N&C: FF Precision.
-    if (abs(ops->pmove.origin[0] - ps->pmove.origin[0]) > 256 ||
-        abs(ops->pmove.origin[1] - ps->pmove.origin[1]) > 256 ||
-        abs(ops->pmove.origin[2] - ps->pmove.origin[2]) > 256) {
+    // CPP: Added fabs instead of abs
+    if (fabs((float)(ops->pmove.origin[0] - ps->pmove.origin[0])) > 256 ||
+        fabs((float)(ops->pmove.origin[1] - ps->pmove.origin[1])) > 256 ||
+        fabs((float)(ops->pmove.origin[2] - ps->pmove.origin[2])) > 256) {
         goto dup;
     }
+    //if (abs(ops->pmove.origin[0] - ps->pmove.origin[0]) > 256 ||
+    //    abs(ops->pmove.origin[1] - ps->pmove.origin[1]) > 256 ||
+    //    abs(ops->pmove.origin[2] - ps->pmove.origin[2]) > 256) {
+    //    goto dup;
+    //}
     //if (abs(ops->pmove.origin[0] - ps->pmove.origin[0]) > 256 * 8 ||
     //    abs(ops->pmove.origin[1] - ps->pmove.origin[1]) > 256 * 8 ||
     //    abs(ops->pmove.origin[2] - ps->pmove.origin[2]) > 256 * 8) {

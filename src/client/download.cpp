@@ -64,7 +64,8 @@ qerror_t CL_QueueDownload(const char *path, dltype_t type)
         Com_Error(ERR_DROP, "%s: oversize quake path", __func__);
     }
 
-    q = Z_Malloc(sizeof(*q) + len);
+    // CPP:
+    q = (dlqueue_t*)Z_Malloc(sizeof(*q) + len);
     memcpy(q->path, path, len + 1);
     q->type = type;
     q->state = DL_PENDING;
@@ -210,7 +211,8 @@ void CL_LoadDownloadIgnores(void)
         if (*data && *data != '#' && *data != '/') {
             len = strlen(data);
             if (len < MAX_QPATH) {
-                entry = Z_Malloc(sizeof(*entry) + len);
+                // CPP:
+                entry = (string_entry_t*)Z_Malloc(sizeof(*entry) + len);
                 memcpy(entry->string, data, len + 1);
                 entry->next = cls.download.ignores;
                 cls.download.ignores = entry;
@@ -260,15 +262,15 @@ static qboolean start_udp_download(dlqueue_t *q)
         Com_DPrintf("[UDP] Resuming %s\n", q->path);
 #if USE_ZLIB
         if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2)
-            CL_ClientCommand(va("download \"%s\" %"PRIz" udp-zlib", q->path, ret));
+            CL_ClientCommand(va("download \"%s\" %" PRIz " udp-zlib", q->path, ret)); // CPP: WARNING: Had to put spaces in between the macro and strings. Unlike C which accepts it without.
         else
 #endif
-            CL_ClientCommand(va("download \"%s\" %"PRIz, q->path, ret));
+            CL_ClientCommand(va("download \"%s\" %" PRIz, q->path, ret)); // CPP: WARNING: Had to put spaces in between the macro and strings. Unlike C which accepts it without.
     } else if (ret == Q_ERR_NOENT) {  // it doesn't exist
         Com_DPrintf("[UDP] Downloading %s\n", q->path);
 #if USE_ZLIB
         if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2)
-            CL_ClientCommand(va("download \"%s\" %"PRIz" udp-zlib", q->path, (size_t)0));
+            CL_ClientCommand(va("download \"%s\" %" PRIz " udp-zlib", q->path, (size_t)0)); // CPP: WARNING: Had to put spaces in between the macro and strings. Unlike C which accepts it without.
         else
 #endif
             CL_ClientCommand(va("download \"%s\"", q->path));

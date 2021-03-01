@@ -47,7 +47,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define q_countof(a)        (sizeof(a) / sizeof(a[0]))
 
 typedef unsigned char byte;
-typedef enum { qfalse, qtrue } qboolean;
+// CPP: Changed to int, since C has no strict standards to this enum it is...
+// odd to say the least. Code will crash too if we use a regular C++ boolean aka
+// byte lol
+typedef int qboolean;       //typedef enum { qfalse, qtrue } qboolean;
+#define qtrue 1
+#define qfalse 0
 typedef int qhandle_t;
 typedef int qerror_t;
 

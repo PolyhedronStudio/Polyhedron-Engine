@@ -98,7 +98,7 @@ static void emit_gamestate(void)
             flags |= MSG_ES_REMOVE;
         }
         es->number = i;
-        MSG_WriteDeltaEntity(NULL, es, flags);
+        MSG_WriteDeltaEntity(NULL, es, (msgEsFlags_t)flags);    // CPP: Added msgEsFlags_t cast
         es->number = j;
     }
     MSG_WriteShort(0);
@@ -161,7 +161,7 @@ void CL_GTV_EmitFrame(void)
         // quantize
         MSG_PackEntity(&newes, &ent->current, qfalse);
 
-        MSG_WriteDeltaEntity(oldes, &newes, flags);
+        MSG_WriteDeltaEntity(oldes, &newes, (msgEsFlags_t)flags); // CPP Added (msgEsFlags_t) cast
 
         // shuffle current state to previous
         *oldes = newes;

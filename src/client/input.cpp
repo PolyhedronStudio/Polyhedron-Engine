@@ -1045,7 +1045,8 @@ static void CL_SendBatchedCmd(void)
     cl.lastTransmitCmdNumberReal = cl.cmdNumber;
 
     // begin a client move command
-    patch = SZ_GetSpace(&msg_write, 1);
+    // CPP: 
+    patch = (byte*)SZ_GetSpace(&msg_write, 1);
 
     // let the server know what the last frame we
     // got was, so the next message can be delta compressed

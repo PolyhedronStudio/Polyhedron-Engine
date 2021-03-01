@@ -270,7 +270,7 @@ extern "C" {
 
         // Takes a null terminated string.  Does not need to be \n terminated.
         // breaks the string up into arg tokens.
-        void        (*Cmd_TokenizeString) (char *text, qboolean macroExpand);
+        void        (*Cmd_TokenizeString) (const char *text, qboolean macroExpand);
         // Returns the amount of arguments fed to the current command.
         int         (*Cmd_Argc) (void);
         // Returns the value of the argument number fed to the current command.
@@ -287,8 +287,8 @@ extern "C" {
         // NOTE: Look at clg_local.h to see documentation for the following:
         // Com_Error, Com_LPrintf
         //---------------------------------------------------------------------
-        void		(*Com_Error) (error_type_t code, char *fmt, ...);
-	    void		(*Com_LPrintf) (print_type_t type, char *fmt, ...);
+        void		(*Com_Error) (error_type_t code, const char *fmt, ...);
+	    void		(*Com_LPrintf) (print_type_t type, const char *fmt, ...);
 
         // Returns a string description value of the given qerror_t type.
         const char  *(*Com_ErrorString) (qerror_t type);
