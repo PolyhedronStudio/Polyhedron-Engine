@@ -181,7 +181,8 @@ void Key_SetDest(keydest_t dest)
 
 // if not connected, console or menu should be up
     if (cls.state < ca_active && !(dest & (KEY_MENU | KEY_CONSOLE))) {
-        dest |= KEY_CONSOLE;
+        
+        dest = (keydest_t)(dest | KEY_CONSOLE); // CPP: dest |= KEY_CONSOLE;
     }
 
     diff = cls.key_dest ^ dest;

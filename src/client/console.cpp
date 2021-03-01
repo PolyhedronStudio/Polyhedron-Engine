@@ -136,7 +136,8 @@ void Con_Close(qboolean force)
     Con_ClearTyping();
     Con_ClearNotify_f();
 
-    Key_SetDest(cls.key_dest & ~KEY_CONSOLE);
+    // CPP: WARNING: Cast keydest_t.
+    Key_SetDest((keydest_t)(cls.key_dest & ~KEY_CONSOLE));
 
     con.destHeight = con.currentHeight = 0;
     con.mode = CON_POPUP;
@@ -156,7 +157,8 @@ void Con_Popup(qboolean force)
         con.mode = CON_POPUP;
     }
 
-    Key_SetDest(cls.key_dest | KEY_CONSOLE);
+    // CPP: WARNING: Cast keydest_t.
+    Key_SetDest((keydest_t)(cls.key_dest | KEY_CONSOLE));
     Con_RunConsole();
 }
 
@@ -175,7 +177,8 @@ static void toggle_console(consoleMode_t mode, chatMode_t chat)
     Con_ClearNotify_f();
 
     if (cls.key_dest & KEY_CONSOLE) {
-        Key_SetDest(cls.key_dest & ~KEY_CONSOLE);
+        // CPP: WARNING: Cast keydest_t.
+        Key_SetDest((keydest_t)(cls.key_dest & ~KEY_CONSOLE));
         con.mode = CON_POPUP;
         con.chat = CHAT_NONE;
         return;
@@ -187,7 +190,8 @@ static void toggle_console(consoleMode_t mode, chatMode_t chat)
     }
 
     // toggling console discards chat message
-    Key_SetDest((cls.key_dest | KEY_CONSOLE) & ~KEY_MESSAGE);
+    // CPP: WARNING: Cast keydest_t.
+    Key_SetDest((keydest_t)((cls.key_dest | KEY_CONSOLE) & ~KEY_MESSAGE));
     con.mode = mode;
     con.chat = chat;
 }
@@ -301,7 +305,8 @@ static void start_message_mode(chatMode_t mode)
 
     con.chat = mode;
     IF_Replace(&con.chatPrompt.inputLine, Cmd_RawArgs());
-    Key_SetDest(cls.key_dest | KEY_MESSAGE);
+    // CPP: WARNING: Cast keydest_t.
+    Key_SetDest((keydest_t)(cls.key_dest | KEY_MESSAGE));
 }
 
 static void Con_MessageMode_f(void)
@@ -630,24 +635,24 @@ void Con_RegisterMedia(void)
 {
     qerror_t err;
 
-    con.charsetImage = R_RegisterImage(con_font->string, IT_FONT, IF_PERMANENT | IF_SRGB, &err);
+    con.charsetImage = R_RegisterImage(con_font->string, IT_FONT, (imageflags_t)(IF_PERMANENT | IF_SRGB), &err); // CPP: cast imageflags_t
     if (!con.charsetImage) {
         if (strcmp(con_font->string, "conchars")) {
             Com_WPrintf("Couldn't load %s: %s\n", con_font->string, Q_ErrorString(err));
             Cvar_Reset(con_font);
-            con.charsetImage = R_RegisterImage("conchars", IT_FONT, IF_PERMANENT | IF_SRGB, &err);
+            con.charsetImage = R_RegisterImage("conchars", IT_FONT, (imageflags_t)(IF_PERMANENT | IF_SRGB), &err); // CPP: cast imageflags_t
         }
         if (!con.charsetImage) {
             Com_Error(ERR_FATAL, "Couldn't load pics/conchars.pcx: %s", Q_ErrorString(err));
         }
     }
 
-    con.backImage = R_RegisterImage(con_background->string, IT_PIC, IF_PERMANENT | IF_SRGB, &err);
+    con.backImage = R_RegisterImage(con_background->string, IT_PIC, (imageflags_t)(IF_PERMANENT | IF_SRGB), &err); // CPP: cast imageflags_t
     if (!con.backImage) {
         if (strcmp(con_background->string, "conback")) {
             Com_WPrintf("Couldn't load %s: %s\n", con_background->string, Q_ErrorString(err));
             Cvar_Reset(con_background);
-            con.backImage = R_RegisterImage("conback", IT_PIC, IF_PERMANENT | IF_SRGB, &err);
+            con.backImage = R_RegisterImage("conback", IT_PIC, (imageflags_t)(IF_PERMANENT | IF_SRGB), &err); // CPP: cast imageflags_t
         }
         if (!con.backImage) {
             Com_EPrintf("Couldn't load pics/conback.pcx: %s\n", Q_ErrorString(err));
@@ -666,7 +671,7 @@ DRAWING
 static int Con_DrawLine(int v, int line, float alpha)
 {
     char *p = con.text[line & CON_TOTALLINES_MASK];
-    color_index_t c = *p;
+    color_index_t c = (color_index_t)(*p);   // CPP: WARNING: CAST: char to color_index_t
     color_t color;
     int flags = 0;
 
@@ -1253,12 +1258,14 @@ void Key_Message(int key)
         if (cmd) {
             Con_Say(cmd);
         }
-        Key_SetDest(cls.key_dest & ~KEY_MESSAGE);
+        // CPP: WARNING: Keydest_t cast.
+        Key_SetDest((keydest_t)(cls.key_dest & ~KEY_MESSAGE));
         return;
     }
 
     if (key == K_ESCAPE) {
-        Key_SetDest(cls.key_dest & ~KEY_MESSAGE);
+        // CPP: WARNING: Keydest_t cast.
+        Key_SetDest((keydest_t)(cls.key_dest & ~KEY_MESSAGE));
         IF_Clear(&con.chatPrompt.inputLine);
         return;
     }

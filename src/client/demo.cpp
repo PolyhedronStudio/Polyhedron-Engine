@@ -118,7 +118,7 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
             MSG_PackEntity(&oldpack, oldent, qfalse);
             MSG_PackEntity(&newpack, newent, qfalse);
             MSG_WriteDeltaEntity(&oldpack, &newpack,
-                                 newent->number <= cl.maxclients ? MSG_ES_NEWENTITY : 0);
+                                 (msgEsFlags_t)(newent->number <= cl.maxclients ? MSG_ES_NEWENTITY : 0));   // CPP: WARNING: msgEsFlags_t cast.
             oldindex++;
             newindex++;
             continue;
@@ -128,7 +128,7 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
             // this is a new entity, send it from the baseline
             MSG_PackEntity(&oldpack, &cl.baselines[newnum], qfalse);
             MSG_PackEntity(&newpack, newent, qfalse);
-            MSG_WriteDeltaEntity(&oldpack, &newpack, MSG_ES_FORCE | MSG_ES_NEWENTITY);
+            MSG_WriteDeltaEntity(&oldpack, &newpack, (msgEsFlags_t)(MSG_ES_FORCE | MSG_ES_NEWENTITY));  // CPP: WARNING: msgEsFlags_t cast.
             newindex++;
             continue;
         }
@@ -840,14 +840,15 @@ void CL_EmitDemoSnapshot(void)
     MSG_WriteByte(svg_layout);
     MSG_WriteString(cl.layout);
 
-    snap = Z_Malloc(sizeof(*snap) + msg_write.cursize - 1);
+    // CPP: Cast void* to demosnap_t *
+    snap = (demosnap_t*)Z_Malloc(sizeof(*snap) + msg_write.cursize - 1);
     snap->framenum = cls.demo.frames_read;
     snap->filepos = pos;
     snap->msglen = msg_write.cursize;
     memcpy(snap->data, msg_write.data, msg_write.cursize);
     List_Append(&cls.demo.snapshots, &snap->entry);
 
-    Com_DPrintf("[%d] snaplen %"PRIz"\n", cls.demo.frames_read, msg_write.cursize);
+    Com_DPrintf("[%d] snaplen %" PRIz "\n", cls.demo.frames_read, msg_write.cursize); // CPP: WARNING: String concat
 
     SZ_Clear(&msg_write);
 

@@ -79,12 +79,13 @@ static void Parse_Spin(menuFrameWork_t *menu, menuType_t type)
 
     CHECK_NITEMS
 
-    s = UI_Mallocz(sizeof(*s));
+    // CPP: WARNING: CAST void* menuSpinControl_t*
+    s = (menuSpinControl_t*)UI_Mallocz(sizeof(*s));
     s->generic.type = type;
     s->generic.name = UI_CopyString(Cmd_Argv(cmd_optind));
     s->generic.status = UI_CopyString(status);
     s->cvar = Cvar_WeakGet(Cmd_Argv(cmd_optind + 1));
-    s->itemnames = UI_Mallocz(sizeof(char *) * (numItems + 1));
+    s->itemnames = (char**)UI_Mallocz(sizeof(char *) * (numItems + 1)); // CPP: WARNING: Cast void* to char**
     for (i = 0; i < numItems; i++) {
         s->itemnames[i] = UI_CopyString(Cmd_Argv(cmd_optind + 2 + i));
     }
@@ -117,14 +118,15 @@ static void Parse_Pairs(menuFrameWork_t *menu)
 
     CHECK_NITEMS
 
-    s = UI_Mallocz(sizeof(*s));
+    // CPP: WARNING: void* to menuSpinControl_t*
+    s = (menuSpinControl_t*)UI_Mallocz(sizeof(*s));
     s->generic.type = MTYPE_PAIRS;
     s->generic.name = UI_CopyString(Cmd_Argv(cmd_optind));
     s->generic.status = UI_CopyString(status);
     s->cvar = Cvar_WeakGet(Cmd_Argv(cmd_optind + 1));
     numItems /= 2;
-    s->itemnames = UI_Mallocz(sizeof(char *) * (numItems + 1));
-    s->itemvalues = UI_Mallocz(sizeof(char *) * (numItems + 1));
+    s->itemnames = (char**)UI_Mallocz(sizeof(char *) * (numItems + 1));     // CPP: WARNING: Cast void* to char**
+    s->itemvalues = (char**)UI_Mallocz(sizeof(char *) * (numItems + 1));    // CPP: WARNING: Cast void* to char**
     for (i = 0; i < numItems; i++) {
         s->itemnames[i] = UI_CopyString(Cmd_Argv(cmd_optind + 2 + i * 2));
         s->itemvalues[i] = UI_CopyString(Cmd_Argv(cmd_optind + 3 + i * 2));
@@ -171,7 +173,8 @@ static void Parse_Range(menuFrameWork_t *menu)
 
     CHECK_NITEMS
 
-    s = UI_Mallocz(sizeof(*s));
+    // CPP:
+    s = (menuSlider_t*)UI_Mallocz(sizeof(*s));
     s->generic.type = MTYPE_SLIDER;
     s->generic.name = UI_CopyString(Cmd_Argv(cmd_optind));
     s->generic.status = UI_CopyString(status);
@@ -221,7 +224,8 @@ static void Parse_Action(menuFrameWork_t *menu)
 
     CHECK_NITEMS
 
-    a = UI_Mallocz(sizeof(*a));
+    // CPP:
+    a = (menuAction_t*)UI_Mallocz(sizeof(*a));
     a->generic.type = MTYPE_ACTION;
     a->generic.name = UI_CopyString(Cmd_Argv(cmd_optind));
     a->generic.activate = Activate;
@@ -266,7 +270,8 @@ static void Parse_Bitmap(menuFrameWork_t *menu)
     if (!altname)
         altname = va("%s_sel", Cmd_Argv(cmd_optind));
 
-    b = UI_Mallocz(sizeof(*b));
+    // CPP:
+    b = (menuBitmap_t*)UI_Mallocz(sizeof(*b));
     b->generic.type = MTYPE_BITMAP;
     b->generic.activate = Activate;
     b->generic.status = UI_CopyString(status);
@@ -310,7 +315,8 @@ static void Parse_Bind(menuFrameWork_t *menu)
 
     CHECK_NITEMS
 
-    k = UI_Mallocz(sizeof(*k));
+    // CPP:
+    k = (menuKeybind_t*)UI_Mallocz(sizeof(*k));
     k->generic.type = MTYPE_KEYBIND;
     k->generic.name = UI_CopyString(Cmd_Argv(cmd_optind));
     k->generic.uiFlags = UI_CENTER;
@@ -344,7 +350,8 @@ static void Parse_Savegame(menuFrameWork_t *menu, menuType_t type)
 
     CHECK_NITEMS
 
-    a = UI_Mallocz(sizeof(*a));
+    // CPP:
+    a = (menuAction_t*)UI_Mallocz(sizeof(*a));
     a->generic.type = type;
     a->generic.name = UI_CopyString("<EMPTY>");
     a->generic.activate = Activate;
@@ -398,7 +405,8 @@ static void Parse_Toggle(menuFrameWork_t *menu)
 
     CHECK_NITEMS
 
-    s = UI_Mallocz(sizeof(*s));
+    // CPP:
+    s = (menuSpinControl_t*)UI_Mallocz(sizeof(*s));
     s->generic.type = type;
     s->generic.name = UI_CopyString(Cmd_Argv(cmd_optind));
     s->generic.status = UI_CopyString(status);
@@ -454,7 +462,8 @@ static void Parse_Field(menuFrameWork_t *menu)
 
     CHECK_NITEMS
 
-    f = UI_Mallocz(sizeof(*f));
+    // CPP:
+    f = (menuField_t*)UI_Mallocz(sizeof(*f));
     f->generic.type = MTYPE_FIELD;
     f->generic.name = center ? NULL : UI_CopyString(Cmd_Argv(cmd_optind));
     f->generic.status = UI_CopyString(status);
@@ -471,7 +480,7 @@ static void Parse_Blank(menuFrameWork_t *menu)
 
     CHECK_NITEMS
 
-    s = UI_Mallocz(sizeof(*s));
+    s = (menuSeparator_t*)UI_Mallocz(sizeof(*s));
     s->generic.type = MTYPE_SEPARATOR;
 
     Menu_AddItem(menu, s);
@@ -723,7 +732,8 @@ static qboolean Parse_File(const char *path, int depth)
                         }
                         List_Remove(&menu->entry);
                     }
-                    menu = UI_Mallocz(sizeof(*menu));
+                    // CPP: Cast.
+                    menu = (menuFrameWork_t*)UI_Mallocz(sizeof(*menu));
                     menu->name = UI_CopyString(s);
                     menu->push = Menu_Push;
                     menu->pop = Menu_Pop;

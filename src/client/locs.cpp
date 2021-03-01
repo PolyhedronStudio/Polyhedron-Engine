@@ -45,7 +45,8 @@ static location_t *LOC_Alloc(const char *name)
     size_t len;
 
     len = strlen(name);
-    loc = Z_Malloc(sizeof(*loc) + len);
+    // CPP:
+    loc = (location_t*)Z_Malloc(sizeof(*loc) + len);
     memcpy(loc->name, name, len + 1);
 
     return loc;

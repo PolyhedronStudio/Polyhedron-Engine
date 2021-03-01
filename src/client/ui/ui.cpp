@@ -72,7 +72,8 @@ void UI_PushMenu(menuFrameWork_t *menu)
 
     Menu_Init(menu);
 
-    Key_SetDest((Key_GetDest() & ~KEY_CONSOLE) | KEY_MENU);
+    // CPP: Keydest_t
+    Key_SetDest((keydest_t)((Key_GetDest() & ~KEY_CONSOLE) | KEY_MENU));
 
     Con_Close(qtrue);
 
@@ -128,7 +129,8 @@ void UI_ForceMenuOff(void)
         }
     }
 
-    Key_SetDest(Key_GetDest() & ~KEY_MENU);
+    // CPP: Keydest
+    Key_SetDest((keydest_t)(Key_GetDest() & ~KEY_MENU));
     uis.menuDepth = 0;
     uis.activeMenu = NULL;
     uis.mouseTracker = NULL;
@@ -267,7 +269,8 @@ void *UI_FormatColumns(int extrasize, ...)
     }
     va_end(argptr);
 
-    buffer = UI_Malloc(extrasize + total + 1);
+    // CPP:
+    buffer = (char*)UI_Malloc(extrasize + total + 1);
     p = buffer + extrasize;
     for (j = 0; j < i; j++) {
         memcpy(p, strings[j], lengths[j]);

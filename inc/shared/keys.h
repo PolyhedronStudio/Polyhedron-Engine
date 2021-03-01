@@ -101,6 +101,13 @@ typedef enum keydest_e {
     KEY_MESSAGE = (1 << 1),
     KEY_MENU = (1 << 2)
 } keydest_t;
+// CPP: C enum, commented out.
+//typedef enum keydest_e {
+//    KEY_GAME = 0,
+//    KEY_CONSOLE = (1 << 0),
+//    KEY_MESSAGE = (1 << 1),
+//    KEY_MENU = (1 << 2)
+//} keydest_t;
 
 typedef qboolean(*keywaitcb_t)(void* arg, int key);
 

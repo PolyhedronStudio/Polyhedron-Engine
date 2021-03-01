@@ -158,6 +158,9 @@ static void s_auto_focus_changed(cvar_t *self)
     S_Activate();
 }
 
+// CPP: This needs a declaration here... it resides in al.cpp
+void SetReverb(int index, int concalled);
+
 static void reverb_changed(cvar_t *self)
 {
 	if (s_reverb_preset_autopick->integer)
@@ -375,7 +378,8 @@ void S_Activate(void)
     if (!s_started)
         return;
 
-    level = Cvar_ClampInteger(s_auto_focus, ACT_MINIMIZED, ACT_ACTIVATED);
+    // CPP: Cast
+    level = (active_t)Cvar_ClampInteger(s_auto_focus, ACT_MINIMIZED, ACT_ACTIVATED);
 
     active = cls.active >= level;
 

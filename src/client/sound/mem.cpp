@@ -45,7 +45,8 @@ static sfxcache_t *ResampleSfx(sfx_t *sfx)
         return NULL;
     }
 
-    sc = sfx->cache = S_Malloc(outcount * s_info.width + sizeof(sfxcache_t) - 1);
+    // CPP: WARNING: Cast to sfxcache_t*
+    sc = sfx->cache = (sfxcache_t*)S_Malloc(outcount * s_info.width + sizeof(sfxcache_t) - 1);
 
     sc->length = outcount;
     sc->loopstart = s_info.loopstart == -1 ? -1 : s_info.loopstart / stepscale;

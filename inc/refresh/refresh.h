@@ -57,10 +57,10 @@ void R_UnregisterImage(qhandle_t handle);
 extern void    (*R_SetSky)(const char *name, float rotate, vec3_t axis);
 extern void    (*R_EndRegistration)(const char *name);
 
-#define R_RegisterPic(name)     R_RegisterImage(name, IT_PIC, IF_PERMANENT | IF_SRGB, NULL)
-#define R_RegisterPic2(name)    R_RegisterImage(name, IT_PIC, IF_SRGB, NULL)
-#define R_RegisterFont(name)    R_RegisterImage(name, IT_FONT, IF_PERMANENT | IF_SRGB, NULL)
-#define R_RegisterSkin(name)    R_RegisterImage(name, IT_SKIN, IF_SRGB, NULL)
+#define R_RegisterPic(name)     R_RegisterImage(name, IT_PIC, (imageflags_t)(IF_PERMANENT | IF_SRGB), NULL)
+#define R_RegisterPic2(name)    R_RegisterImage(name, IT_PIC, (imageflags_t)IF_SRGB, NULL)
+#define R_RegisterFont(name)    R_RegisterImage(name, IT_FONT, (imageflags_t)(IF_PERMANENT | IF_SRGB), NULL)
+#define R_RegisterSkin(name)    R_RegisterImage(name, IT_SKIN, (imageflags_t)IF_SRGB, NULL)
 
 extern void    (*R_RenderFrame)(refdef_t *fd);
 extern void    (*R_LightPoint)(vec3_t origin, vec3_t light);

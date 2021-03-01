@@ -136,7 +136,8 @@ static void BuildName(const file_info_t *info, char **cache)
 
     Com_FormatSize(buffer, sizeof(buffer), info->size);
 
-    e = UI_FormatColumns(DEMO_EXTRASIZE,
+    // CPP: Cast
+    e = (demoEntry_t*)UI_FormatColumns(DEMO_EXTRASIZE,
                          info->name, date, buffer, demo.map, demo.pov, NULL);
     e->type = ENTRY_DEMO;
     e->size = info->size;
@@ -149,7 +150,8 @@ static void BuildName(const file_info_t *info, char **cache)
 
 static void BuildDir(const char *name, int type)
 {
-    demoEntry_t *e = UI_FormatColumns(DEMO_EXTRASIZE, name, "-", DEMO_DIR_SIZE, "-", "-", NULL);
+    // CPP: Cast
+    demoEntry_t *e = (demoEntry_t*)UI_FormatColumns(DEMO_EXTRASIZE, name, "-", DEMO_DIR_SIZE, "-", "-", NULL);
 
     e->type = type;
     e->size = 0;
@@ -227,7 +229,8 @@ static void WriteCache(void)
     FS_FPrintf(f, "\\");
 
     for (i = m_demos.numDirs; i < m_demos.list.numItems; i++) {
-        e = m_demos.list.items[i];
+        // CPP: Cast
+        e = (demoEntry_t*)m_demos.list.items[i];
         map = UI_GetColumn(e->name, COL_MAP);
         pov = UI_GetColumn(e->name, COL_POV);
         FS_FPrintf(f, "%s\\%s\\", map, pov);
@@ -243,7 +246,8 @@ static void CalcHash(void **list)
 
     mdfour_begin(&md);
     while (*list) {
-        info = *list++;
+        // CPP: Cast
+        info = (file_info_t*)*list++;
         len = sizeof(*info) + strlen(info->name) - 1;
         mdfour_update(&md, (uint8_t *)info, len);
     }
@@ -259,7 +263,8 @@ static menuSound_t Change(menuCommon_t *self)
         return QMS_BEEP;
     }
 
-    e = m_demos.list.items[m_demos.list.curvalue];
+    // CPP: Cast
+    e = (demoEntry_t*)m_demos.list.items[m_demos.list.curvalue];
     switch (e->type) {
     case ENTRY_DEMO:
         m_demos.menu.status = "Press Enter to play demo";
@@ -295,7 +300,8 @@ static void BuildList(void)
                             FS_SEARCH_EXTRAINFO, &numDemos);
 
     // alloc entries
-    m_demos.list.items = UI_Malloc(sizeof(demoEntry_t *) * (numDirs + numDemos + 1));
+    // CPP: WARNING: Cast to void**
+    m_demos.list.items = (void**)UI_Malloc(sizeof(demoEntry_t *) * (numDirs + numDemos + 1));
     m_demos.list.numItems = 0;
     m_demos.list.curvalue = 0;
     m_demos.list.prestep = 0;
@@ -314,7 +320,7 @@ static void BuildList(void)
     // add directories
     if (dirlist) {
         for (i = 0; i < numDirs; i++) {
-            BuildDir(dirlist[i], ENTRY_DN);
+            BuildDir((const char*)dirlist[i], ENTRY_DN); // CPP: Cast to const char * from void * --- BuildDir(dirlist[i], ENTRY_DN);
         }
         FS_FreeList(dirlist);
     }
@@ -327,12 +333,12 @@ static void BuildList(void)
         if ((cache = LoadCache(demolist)) != NULL) {
             p = cache + 32 + 1;
             for (i = 0; i < numDemos; i++) {
-                BuildName(demolist[i], &p);
+                BuildName((const file_info_t*)demolist[i], &p); // CPP: WARNING: Cast to const file_info_t*
             }
             FS_FreeFile(cache);
         } else {
             for (i = 0; i < numDemos; i++) {
-                BuildName(demolist[i], NULL);
+                BuildName((const file_info_t*)demolist[i], NULL); // CPP: WARNING: Cast to const file_info_t*
                 if ((i & 7) == 0) {
                     m_demos.menu.size(&m_demos.menu);
                     SCR_UpdateScreen();
@@ -399,7 +405,8 @@ static menuSound_t LeaveDirectory(void)
 
     // move cursor to the previous directory
     for (i = 0; i < m_demos.numDirs; i++) {
-        demoEntry_t *e = m_demos.list.items[i];
+        // CPP: Cast
+        demoEntry_t *e = (demoEntry_t*)m_demos.list.items[i];
         if (!strcmp(e->name, s + 1)) {
             MenuList_SetValue(&m_demos.list, i);
             break;
@@ -456,7 +463,8 @@ static menuSound_t Activate(menuCommon_t *self)
         return QMS_BEEP;
     }
 
-    e = m_demos.list.items[m_demos.list.curvalue];
+    // CPP: Cast.
+    e = (demoEntry_t*)m_demos.list.items[m_demos.list.curvalue];
     switch (e->type) {
     case ENTRY_UP:
         return LeaveDirectory();

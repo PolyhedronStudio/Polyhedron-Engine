@@ -102,6 +102,8 @@ SCR_FinishCinematic
 Called when either the cinematic completes, or it is aborted
 ====================
 */
+// CPP: Declared in sound.h, but now here too...
+void AL_UnqueueRawSamples();
 void SCR_FinishCinematic(void)
 {
     SCR_StopCinematic();

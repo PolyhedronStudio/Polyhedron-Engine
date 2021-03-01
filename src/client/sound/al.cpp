@@ -25,6 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "qal/dynamic.h"
 #endif
 
+// CPP: WATISDEZE: Declared here, C didn't require it somehow...
+void CL_GetEntitySoundVelocity(int ent, vec3_t vel);
+void AL_InitUnderwaterFilter(void);
+
 #define AL_METER_OF_Q2_UNIT 0.0315f
 
 // translates from AL coordinate system to quake
@@ -662,7 +666,8 @@ qboolean AL_Init(void)
 {
 	int i;
 
-	TriggerReverbOverrideReverbString = malloc(256 + 1);
+	// CPP: Cast.
+	TriggerReverbOverrideReverbString = (char*)malloc(256 + 1);
 	memset(TriggerReverbOverrideReverbString, 0, 256);
 	Com_DPrintf("Initializing OpenAL\n");
 
@@ -795,7 +800,8 @@ sfxcache_t *AL_UploadSfx(sfx_t *s)
 	//#endif
 
 		// allocate placeholder sfxcache
-	sc = s->cache = S_Malloc(sizeof(*sc));
+	// CPP: Cast.
+	sc = s->cache = (sfxcache_t*)S_Malloc(sizeof(*sc));
 	sc->length = s_info.samples * 1000 / s_info.rate; // in msec
 	sc->loopstart = s_info.loopstart;
 	sc->width = s_info.width;
@@ -1102,7 +1108,7 @@ void oal_update_underwater()
 		qalSourcei(s_srcnums[i], AL_DIRECT_FILTER, filter);
 }
 
-AL_InitUnderwaterFilter(void)
+void AL_InitUnderwaterFilter(void)
 {
 	underwaterFilter = 0;
 

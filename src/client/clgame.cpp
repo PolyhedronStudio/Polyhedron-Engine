@@ -371,16 +371,16 @@ void CL_InitGameProgs(void)
 
     // for debugging or `proxy' mods
     if (sys_forcecgamelib->string[0])
-        entry = (clgame_export_t*)_CL_LoadGameLibrary(sys_forcecgamelib->string); // CPP: Cast from void* to clgame_export_t*
+        entry = (clgame_export_t * (*)(clgame_import_t*))_CL_LoadGameLibrary(sys_forcecgamelib->string); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
 
     // try game first
     if (!entry && fs_game->string[0]) {
-        entry = (clgame_export_t*)CL_LoadGameLibrary(fs_game->string, "");
+        entry = (clgame_export_t * (*)(clgame_import_t*))CL_LoadGameLibrary(fs_game->string, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
     }
 
     // then try basenac
     if (!entry) {
-        entry = (clgame_export_t*)CL_LoadGameLibrary(BASEGAME, "");
+        entry = (clgame_export_t * (*)(clgame_import_t*))CL_LoadGameLibrary(BASEGAME, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
     }
 
     // all paths failed

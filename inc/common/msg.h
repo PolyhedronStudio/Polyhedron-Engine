@@ -85,16 +85,28 @@ typedef enum {
 //---------------
 // Entity state messaging flags.
 //---------------
-typedef enum {
-    MSG_ES_FORCE        = (1 << 0),
-    MSG_ES_NEWENTITY    = (1 << 1),
-    MSG_ES_FIRSTPERSON  = (1 << 2),
-    MSG_ES_LONGSOLID    = (1 << 3),
-    MSG_ES_UMASK        = (1 << 4),
-    MSG_ES_BEAMORIGIN   = (1 << 5),
-    MSG_ES_SHORTANGLES  = (1 << 6),
-    MSG_ES_REMOVE       = (1 << 7)
+typedef enum msgEsFlags_s : int32_t {
+    MSG_ES_FORCE = (1 << 0),
+    MSG_ES_NEWENTITY = (1 << 1),
+    MSG_ES_FIRSTPERSON = (1 << 2),
+    MSG_ES_LONGSOLID = (1 << 3),
+    MSG_ES_UMASK = (1 << 4),
+    MSG_ES_BEAMORIGIN = (1 << 5),
+    MSG_ES_SHORTANGLES = (1 << 6),
+    MSG_ES_REMOVE = (1 << 7)
 } msgEsFlags_t;
+
+// CPP: Commented out, this was C code. 
+//typedef enum {
+//    MSG_ES_FORCE        = (1 << 0),
+//    MSG_ES_NEWENTITY    = (1 << 1),
+//    MSG_ES_FIRSTPERSON  = (1 << 2),
+//    MSG_ES_LONGSOLID    = (1 << 3),
+//    MSG_ES_UMASK        = (1 << 4),
+//    MSG_ES_BEAMORIGIN   = (1 << 5),
+//    MSG_ES_SHORTANGLES  = (1 << 6),
+//    MSG_ES_REMOVE       = (1 << 7)
+//} msgEsFlags_t;
 
 extern sizebuf_t    msg_write;
 extern byte         msg_write_buffer[MAX_MSGLEN];

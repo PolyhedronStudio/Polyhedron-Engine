@@ -46,7 +46,7 @@ void CL_ParsePlayerSkin(char *name, char *model, char *skin, const char *s)
     }
 
     // isolate the player's name
-    t = strchr(s, '\\');
+    t = (char*)strchr(s, '\\'); // CPP: WARNING: Cast from const char* to char*
     if (t) {
         len = t - s;
         strcpy(model, t + 1);

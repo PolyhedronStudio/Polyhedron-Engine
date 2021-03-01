@@ -140,7 +140,8 @@ void SCR_DrawStringMulti(int x, int y, int flags, size_t maxlen,
     size_t  len;
 
     while (*s) {
-        p = strchr(s, '\n');
+        // CPP: WARNING: const char * to char * cast.
+        p = (char*)strchr(s, '\n');
         if (!p) {
             SCR_DrawStringEx(x, y, flags, maxlen, s, font);
             break;

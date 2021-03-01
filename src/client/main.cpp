@@ -1395,7 +1395,7 @@ static void CL_ConnectionlessPacket(void)
             } else if (!strncmp(s, "nc=", 3)) {
                 s += 3;
                 if (*s) {
-                    type = atoi(s);
+                    type = (netchan_type_t)atoi(s); // CPP: int to (netchan_type_t)
                     if (type != NETCHAN_OLD && type != NETCHAN_NEW) {
                         Com_Error(ERR_DISCONNECT,
                                   "Server returned invalid netchan type");
@@ -1863,7 +1863,8 @@ static void add_ignore(const char *match)
         return;
     }
 
-    ignore = Z_Malloc(sizeof(*ignore) + matchlen);
+    // CPP: cast
+    ignore = (ignore_t*)Z_Malloc(sizeof(*ignore) + matchlen);
     ignore->hits = 0;
     memcpy(ignore->match, match, matchlen + 1);
     List_Append(&cl_ignores, &ignore->entry);
@@ -2436,7 +2437,7 @@ void CL_RestartFilesystem(qboolean total)
     CL_LoadDownloadIgnores();
 
     // switch back to original state
-    cls.state = cls_state;
+    cls.state = (connstate_t)cls_state; // CPP:
 
     Con_Close(qfalse);
 
@@ -2493,7 +2494,7 @@ void CL_RestartRefresh(qboolean total)
     }
 
     // switch back to original state
-    cls.state = cls_state;
+    cls.state = (connstate_t)cls_state; // CPP:
 
     Con_Close(qfalse);
 

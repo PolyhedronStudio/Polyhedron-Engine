@@ -365,7 +365,7 @@ static void CL_ParseFrame(int extrabits)
             int seq = cls.netchan->incoming_acknowledged & CMD_MASK;
             rtt = cls.realtime - cl.history[seq].sent;
         }
-        Com_LPrintf(PRINT_DEVELOPER, "%3"PRIz":frame:%d  delta:%d  rtt:%d\n",
+        Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":frame:%d  delta:%d  rtt:%d\n",   // CPP: String concat.
                     msg_read.readcount - 1, frame.number, frame.delta, rtt);
     }
 #endif
@@ -578,9 +578,9 @@ static void CL_ParseServerData(void)
             Com_DPrintf("R1Q2 strafejump hack enabled\n");
             cge->pmoveParams->strafehack = qtrue;
         }
-        cl.esFlags |= MSG_ES_BEAMORIGIN;
+        cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
         if (cls.protocolVersion >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
-            cl.esFlags |= MSG_ES_LONGSOLID;
+            cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_LONGSOLID); // CPP: IMPROVE: cl.esFlags |= MSG_ES_LONGSOLID;
         }
         cge->pmoveParams->speedmult = 2;
     } else if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
@@ -609,15 +609,15 @@ static void CL_ParseServerData(void)
             CL_GM_PmoveEnableQW(cge->pmoveParams);
             //PmoveEnableQW(&cl.pmp);
         }
-        cl.esFlags |= MSG_ES_UMASK;
+        cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_UMASK); // CPP: IMPROVE: cl.esFlags |= MSG_ES_UMASK;
         if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_LONG_SOLID) {
-            cl.esFlags |= MSG_ES_LONGSOLID;
+            cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_LONGSOLID); // CPP: IMPROVE: cl.esFlags |= MSG_ES_LONGSOLID;
         }
         if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN) {
-            cl.esFlags |= MSG_ES_BEAMORIGIN;
+            cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
         }
         if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_SHORT_ANGLES) {
-            cl.esFlags |= MSG_ES_SHORTANGLES;
+            cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_SHORTANGLES); // CPP: IMPROVE: cl.esFlags |= MSG_ES_SHORTANGLES;
         }
         if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {
             i = MSG_ReadByte();
@@ -739,7 +739,8 @@ static void CL_CheckForVersion(const char *s)
 {
     char *p;
 
-    p = strstr(s, ": ");
+    // CPP: WARNING: Cast from const char * to char*
+    p = (char*)strstr(s, ": ");
     if (!p) {
         return;
     }
@@ -768,7 +769,8 @@ void CL_CheckForIP(const char *s)
     while (*s) {
         if (sscanf(s, "%3u.%3u.%3u.%3u", &b1, &b2, &b3, &b4) == 4 &&
             b1 < 256 && b2 < 256 && b3 < 256 && b4 < 256) {
-            p = strchr(s, ':');
+            // CPP: WARNING: Cast from const char* to char*...
+            p = (char*)strchr(s, ':');
             if (p) {
                 port = strtoul(p + 1, NULL, 10);
                 if (port < 1024 || port > 65535) {
@@ -1020,7 +1022,7 @@ void CL_ParseServerMessage(void)
 
 #ifdef _DEBUG
     if (cl_shownet->integer == 1) {
-        Com_LPrintf(PRINT_DEVELOPER, "%"PRIz" ", msg_read.cursize);
+        Com_LPrintf(PRINT_DEVELOPER, "%" PRIz " ", msg_read.cursize); // CPP: String concat.
     } else if (cl_shownet->integer > 1) {
         Com_LPrintf(PRINT_DEVELOPER, "------------------\n");
     }
@@ -1209,7 +1211,7 @@ void CL_SeekDemoMessage(void)
 
 #ifdef _DEBUG
     if (cl_shownet->integer == 1) {
-        Com_LPrintf(PRINT_DEVELOPER, "%"PRIz" ", msg_read.cursize);
+        Com_LPrintf(PRINT_DEVELOPER, "%" PRIz " ", msg_read.cursize); // CPP: String concat.
     } else if (cl_shownet->integer > 1) {
         Com_LPrintf(PRINT_DEVELOPER, "------------------\n");
     }
