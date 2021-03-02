@@ -184,25 +184,25 @@ extern void mutant_walk(void);
 extern void parasite_start_walk(void);
 extern void soldier_walk(void);
 extern void supertank_walk(void);
-extern void tank_walk(void);
-extern void actor_pain(void);
-extern void berserk_pain(void);
-extern void boss2_pain(void);
-extern void brain_pain(void);
-extern void chick_pain(void);
-extern void flipper_pain(void);
-extern void floater_pain(void);
-extern void flyer_pain(void);
-extern void gladiator_pain(void);
-extern void gunner_pain(void);
-extern void hover_pain(void);
-extern void infantry_pain(void);
-extern void insane_pain(void);
-extern void jorg_pain(void);
-extern void makron_pain(void);
-extern void medic_pain(void);
-extern void mutant_pain(void);
-extern void parasite_pain(void);
+//extern void tank_walk(void);
+//extern void actor_pain(void);
+//extern void berserk_pain(void);
+//extern void boss2_pain(void);
+//extern void brain_pain(void);
+//extern void chick_pain(void);
+//extern void flipper_pain(void);
+//extern void floater_pain(void);
+//extern void flyer_pain(void);
+//extern void gladiator_pain(void);
+//extern void gunner_pain(void);
+//extern void hover_pain(void);
+//extern void infantry_pain(void);
+//extern void insane_pain(void);
+//extern void jorg_pain(void);
+//extern void makron_pain(void);
+//extern void medic_pain(void);
+//extern void mutant_pain(void);
+//extern void parasite_pain(void);
 extern void player_pain(void);
 extern void soldier_pain(void);
 extern void supertank_pain(void);
@@ -355,59 +355,33 @@ extern void button_wait(void);
 extern void door_hit_bottom(void);
 extern void door_hit_top(void);
 extern void train_wait(void);
-//extern void door_secret_move1(void);
-//extern void door_secret_move3(void);
-//extern void door_secret_move5(void);
-//extern void door_secret_done(void);
+
 extern void flare_think(void); // Q2RTX
 extern void flare_touch(void); // Q2RTX
 const save_ptr_t save_ptrs[] = {
 { P_blocked, door_blocked },
-//{ P_blocked, door_secret_blocked },
 { P_blocked, plat_blocked },
 { P_blocked, rotating_blocked },
 { P_blocked, train_blocked },
 { P_blocked, turret_blocked },
+
 { P_die, barrel_delay },
 { P_die, body_die },
 { P_die, button_killed },
 { P_die, debris_die },
 { P_die, door_killed },
-//{ P_die, door_secret_die },
-{ P_die, func_explosive_explode },
-{ P_die, gib_die },
 
+{ P_die, func_explosive_explode },
+
+{ P_die, gib_die },
 { P_die, misc_deadsoldier_die },
-//{ P_die, mutant_die },
-//{ P_die, parasite_die },
 { P_die, player_die },
 { P_die, soldier_die },
-//{ P_die, supertank_die },
-//{ P_die, tank_die },
 { P_die, turret_driver_die },
-//{ P_monsterinfo_attack, actor_attack },
-//{ P_monsterinfo_attack, boss2_attack },
-//{ P_monsterinfo_attack, chick_attack },
-//{ P_monsterinfo_attack, floater_attack },
-//{ P_monsterinfo_attack, flyer_attack },
-//{ P_monsterinfo_attack, gladiator_attack },
-//{ P_monsterinfo_attack, gunner_attack },
-////{ P_monsterinfo_attack, hover_start_attack },
-//{ P_monsterinfo_attack, infantry_attack },
-//{ P_monsterinfo_attack, jorg_attack },
-//{ P_monsterinfo_attack, makron_attack },
-//{ P_monsterinfo_attack, medic_attack },
-//{ P_monsterinfo_attack, mutant_jump },
-//{ P_monsterinfo_attack, parasite_attack },
+
 { P_monsterinfo_attack, soldier_attack },
-//{ P_monsterinfo_attack, supertank_attack },
-//{ P_monsterinfo_attack, tank_attack },
-//{ P_monsterinfo_checkattack, Boss2_CheckAttack },
-//{ P_monsterinfo_checkattack, Jorg_CheckAttack },
-//{ P_monsterinfo_checkattack, Makron_CheckAttack },
+
 { P_monsterinfo_checkattack, M_CheckAttack },
-//{ P_monsterinfo_checkattack, medic_checkattack },
-//{ P_monsterinfo_checkattack, mutant_checkattack },
 
 { P_monsterinfo_currentmove, &soldier_move_attack1 },
 { P_monsterinfo_currentmove, &soldier_move_attack2 },
@@ -432,141 +406,20 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_currentmove, &soldier_move_walk1 },
 { P_monsterinfo_currentmove, &soldier_move_walk2 },
 
-//{ P_monsterinfo_dodge, brain_dodge },
-//{ P_monsterinfo_dodge, chick_dodge },
-//{ P_monsterinfo_dodge, gunner_dodge },
-//{ P_monsterinfo_dodge, infantry_dodge },
-//{ P_monsterinfo_dodge, medic_dodge },
+
 { P_monsterinfo_dodge, soldier_dodge },
-//{ P_monsterinfo_idle, brain_idle },
-//{ P_monsterinfo_idle, floater_idle },
-//{ P_monsterinfo_idle, flyer_idle },
-//{ P_monsterinfo_idle, gladiator_idle },
-//{ P_monsterinfo_idle, infantry_fidget },
-//{ P_monsterinfo_idle, medic_idle },
-//{ P_monsterinfo_idle, mutant_idle },
-//{ P_monsterinfo_idle, parasite_idle },
-//{ P_monsterinfo_idle, tank_idle },
-//{ P_monsterinfo_melee, berserk_melee },
-//{ P_monsterinfo_melee, brain_melee },
-//{ P_monsterinfo_melee, chick_melee },
-//{ P_monsterinfo_melee, flipper_melee },
-//{ P_monsterinfo_melee, floater_melee },
-//{ P_monsterinfo_melee, flyer_melee },
-//{ P_monsterinfo_melee, gladiator_melee },
-//{ P_monsterinfo_melee, mutant_melee },
-//{ P_monsterinfo_run, actor_run },
-//{ P_monsterinfo_run, berserk_run },
-//{ P_monsterinfo_run, boss2_run },
-//{ P_monsterinfo_run, brain_run },
-//{ P_monsterinfo_run, chick_run },
-//{ P_monsterinfo_run, flipper_start_run },
-//{ P_monsterinfo_run, floater_run },
-//{ P_monsterinfo_run, flyer_run },
-//{ P_monsterinfo_run, gladiator_run },
-//{ P_monsterinfo_run, gunner_run },
-////{ P_monsterinfo_run, hover_run },
-//{ P_monsterinfo_run, infantry_run },
-//{ P_monsterinfo_run, insane_run },
-//{ P_monsterinfo_run, jorg_run },
-//{ P_monsterinfo_run, makron_run },
-//{ P_monsterinfo_run, medic_run },
-//{ P_monsterinfo_run, mutant_run },
-//{ P_monsterinfo_run, parasite_start_run },
+
 { P_monsterinfo_run, soldier_run },
-//{ P_monsterinfo_run, supertank_run },
-//{ P_monsterinfo_run, tank_run },
-/*{ P_monsterinfo_search, berserk_search },
-{ P_monsterinfo_search, boss2_search },
-{ P_monsterinfo_search, brain_search },
-{ P_monsterinfo_search, gladiator_search },
-{ */
-//{ P_monsterinfo_search, gunner_search },
-////{ P_monsterinfo_search, hover_search },
-////{ P_monsterinfo_search, jorg_search },
-////{ P_monsterinfo_search, medic_search },
-////{ P_monsterinfo_search, mutant_search },
-////{ P_monsterinfo_search, supertank_search },
-////{ P_monsterinfo_sight, berserk_sight },
-////{ P_monsterinfo_sight, brain_sight },
-////{ P_monsterinfo_sight, chick_sight },
-////{ P_monsterinfo_sight, flipper_sight },
-////{ P_monsterinfo_sight, floater_sight },
-////{ P_monsterinfo_sight, flyer_sight },
-////{ P_monsterinfo_sight, gladiator_sight },
-//{ P_monsterinfo_sight, gunner_sight },
-////{ P_monsterinfo_sight, hover_sight },
-//{ P_monsterinfo_sight, infantry_sight },
-//{ P_monsterinfo_sight, makron_sight },
-//{ P_monsterinfo_sight, medic_sight },
-//{ P_monsterinfo_sight, mutant_sight },
-//{ P_monsterinfo_sight, parasite_sight },
+
 { P_monsterinfo_sight, soldier_sight },
-//{ P_monsterinfo_sight, tank_sight },
-//{ P_monsterinfo_stand, actor_stand },
-//{ P_monsterinfo_stand, berserk_stand },
-//{ P_monsterinfo_stand, boss2_stand },
-//{ P_monsterinfo_stand, brain_stand },
-//{ P_monsterinfo_stand, chick_stand },
-//{ P_monsterinfo_stand, flipper_stand },
-//{ P_monsterinfo_stand, floater_stand },
-//{ P_monsterinfo_stand, flyer_stand },
-//{ P_monsterinfo_stand, gladiator_stand },
-//{ P_monsterinfo_stand, gunner_stand },
-////{ P_monsterinfo_stand, hover_stand },
-//{ P_monsterinfo_stand, infantry_stand },
-//{ P_monsterinfo_stand, insane_stand },
-//{ P_monsterinfo_stand, jorg_stand },
-//{ P_monsterinfo_stand, makron_stand },
-//{ P_monsterinfo_stand, medic_stand },
-//{ P_monsterinfo_stand, mutant_stand },
-//{ P_monsterinfo_stand, parasite_stand },
+
 { P_monsterinfo_stand, soldier_stand },
-//{ P_monsterinfo_stand, supertank_stand },
-//{ P_monsterinfo_stand, tank_stand },
-//{ P_monsterinfo_walk, actor_walk },
-//{ P_monsterinfo_walk, berserk_walk },
-//{ P_monsterinfo_walk, boss2_walk },
-//{ P_monsterinfo_walk, brain_walk },
-//{ P_monsterinfo_walk, chick_walk },
-//{ P_monsterinfo_walk, flipper_walk },
-//{ P_monsterinfo_walk, floater_walk },
-//{ P_monsterinfo_walk, flyer_walk },
-//{ P_monsterinfo_walk, gladiator_walk },
-//{ P_monsterinfo_walk, gunner_walk },
-////{ P_monsterinfo_walk, hover_walk },
-//{ P_monsterinfo_walk, infantry_walk },
-//{ P_monsterinfo_walk, insane_walk },
-//{ P_monsterinfo_walk, jorg_walk },
-//{ P_monsterinfo_walk, makron_walk },
-//{ P_monsterinfo_walk, medic_walk },
-//{ P_monsterinfo_walk, mutant_walk },
-//{ P_monsterinfo_walk, parasite_start_walk },
+
 { P_monsterinfo_walk, soldier_walk },
-//{ P_monsterinfo_walk, supertank_walk },
-//{ P_monsterinfo_walk, tank_walk },
-//{ P_pain, actor_pain },
-//{ P_pain, berserk_pain },
-//{ P_pain, boss2_pain },
-//{ P_pain, brain_pain },
-//{ P_pain, chick_pain },
-//{ P_pain, flipper_pain },
-//{ P_pain, floater_pain },
-//{ P_pain, flyer_pain },
-//{ P_pain, gladiator_pain },
-//{ P_pain, gunner_pain },
-////{ P_pain, hover_pain },
-//{ P_pain, infantry_pain },
-//{ P_pain, insane_pain },
-//{ P_pain, jorg_pain },
-//{ P_pain, makron_pain },
-//{ P_pain, medic_pain },
-//{ P_pain, mutant_pain },
-//{ P_pain, parasite_pain },
+
 { P_pain, player_pain },
 { P_pain, soldier_pain },
-//{ P_pain, supertank_pain },
-//{ P_pain, tank_pain },
+
 { P_prethink, misc_viper_bomb_prethink },
 { P_think, Brush_AngleMove_Begin },
 { P_think, Brush_AngleMove_Done },
@@ -574,14 +427,11 @@ const save_ptr_t save_ptrs[] = {
 { P_think, barrel_explode },
 { P_think, bfg_explode },
 { P_think, bfg_think },
-//{ P_think, BossExplode },
+
 { P_think, button_return },
-//{ P_think, commander_body_drop },
-//{ P_think, commander_body_think },
+
 { P_think, door_go_down },
-//{ P_think, door_secret_move2 },
-//{ P_think, door_secret_move4 },
-//{ P_think, door_secret_move6 },
+
 { P_think, DoRespawn },
 { P_think, drop_make_touchable },
 { P_think, droptofloor },
@@ -593,9 +443,7 @@ const save_ptr_t save_ptrs[] = {
 { P_think, G_FreeEdict },
 { P_think, gib_think },
 { P_think, Grenade_Explode },
-//{ P_think, hover_deadthink },
-//{ P_think, MakronSpawn },
-//{ P_think, makron_torso_think },
+
 { P_think, M_droptofloor },
 { P_think, MegaHealth_think },
 { P_think, M_FliesOff },
@@ -623,7 +471,7 @@ const save_ptr_t save_ptrs[] = {
 { P_think, target_laser_think },
 { P_think, target_lightramp_think },
 { P_think, Think_AccelMove },
-//{ P_think, Think_Boss3Stand },
+
 { P_think, Think_CalcMoveSpeed },
 { P_think, Think_Delay },
 { P_think, Think_SpawnDoorTrigger },
@@ -648,25 +496,28 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, Grenade_Touch },
 { P_touch, hurt_touch },
 { P_touch, misc_viper_bomb_touch },
-//{ P_touch, mutant_jump_touch },
+
 { P_touch, path_corner_touch },
 { P_touch, point_combat_touch },
 { P_touch, rocket_touch },
 { P_touch, rotating_touch },
-//{ P_touch, target_actor_touch },
+
+
 { P_touch, teleporter_touch },
+
 { P_touch, Touch_DoorTrigger },
 { P_touch, Touch_Item },
 { P_touch, Touch_Multi },
 { P_touch, Touch_Plat_Center },
+
 { P_touch, trigger_gravity_touch },
 { P_touch, trigger_monsterjump_touch },
 { P_touch, trigger_push_touch },
-//{ P_use, actor_use },
+
 { P_use, button_use },
-//{ P_use, commander_body_use },
-//{ P_use, door_secret_use },
+
 { P_use, door_use },
+
 { P_use, func_clock_use },
 { P_use, func_conveyor_use },
 { P_use, func_explosive_spawn },
@@ -674,29 +525,35 @@ const save_ptr_t save_ptrs[] = {
 { P_use, func_object_use },
 { P_use, func_timer_use },
 { P_use, func_wall_use },
+
 { P_use, hurt_use },
 { P_use, light_use },
+
 { P_use, misc_blackhole_use },
 { P_use, misc_satellite_dish_use },
 { P_use, misc_strogg_ship_use },
 { P_use, misc_viper_bomb_use },
 { P_use, misc_viper_use },
+
 { P_use, monster_triggered_spawn_use },
 { P_use, monster_use },
+
 { P_use, rotating_use },
+
 { P_use, target_earthquake_use },
 { P_use, target_laser_use },
 { P_use, target_lightramp_use },
 { P_use, target_string_use },
 { P_use, train_use },
+
 { P_use, trigger_counter_use },
 { P_use, trigger_crosslevel_trigger_use },
 { P_use, trigger_elevator_use },
 { P_use, trigger_enable },
 { P_use, trigger_key_use },
 { P_use, trigger_relay_use },
+
 { P_use, Use_Areaportal },
-//{ P_use, Use_Boss3 },
 { P_use, Use_Item },
 { P_use, use_killbox },
 { P_use, Use_Multi },
@@ -711,16 +568,17 @@ const save_ptr_t save_ptrs[] = {
 { P_use, Use_Target_Speaker },
 { P_use, use_target_splash },
 { P_use, Use_Target_Tent },
+
 { P_moveinfo_endfunc, plat_hit_bottom },
 { P_moveinfo_endfunc, plat_hit_top },
+
 { P_moveinfo_endfunc, button_done },
 { P_moveinfo_endfunc, button_wait },
+
 { P_moveinfo_endfunc, door_hit_bottom },
 { P_moveinfo_endfunc, door_hit_top },
+
 { P_moveinfo_endfunc, train_wait },
-//{ P_moveinfo_endfunc, door_secret_move1 },
-//{ P_moveinfo_endfunc, door_secret_move3 },
-//{ P_moveinfo_endfunc, door_secret_move5 },
-//{ P_moveinfo_endfunc, door_secret_done },
+
 };
 const int num_save_ptrs = sizeof(save_ptrs) / sizeof(save_ptrs[0]);

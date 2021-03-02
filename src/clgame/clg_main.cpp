@@ -642,7 +642,7 @@ void Com_EPrint(char *fmt, ...) {
 }
 
 // Triggers an error code of type. Using variable arg formatting.
-void Com_Error (error_type_t code, char *fmt, ...) {
+void Com_Error (error_type_t code, const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);

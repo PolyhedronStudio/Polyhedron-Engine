@@ -276,7 +276,7 @@ badhash:
         }
     }
 
-    file = SV_Malloc(sizeof(*file) + pathlen);
+    file = (ac_file_t*)SV_Malloc(sizeof(*file) + pathlen); // CPP: Cast
     memcpy(file->hash, hash, sizeof(file->hash));
     memcpy(file->path, pstr, pathlen + 1);
     file->flags = flags;
@@ -360,15 +360,15 @@ static void AC_ParseCvar(char *data, int linenum, const char *path)
 
     Z_TagReserve(sizeof(*cvar) + num_values * sizeof(char *) +
                  namelen + 1 + deflen + 1 + vallen + 1, TAG_SERVER);
-    cvar = Z_ReservedAlloc(sizeof(*cvar));
-    cvar->values = Z_ReservedAlloc(num_values * sizeof(char *));
-    cvar->name = Z_ReservedAlloc(namelen + 1);
+    cvar = (ac_cvar_t*)Z_ReservedAlloc(sizeof(*cvar)); // CPP: Cast
+    cvar->values = (char**)Z_ReservedAlloc(num_values * sizeof(char *)); // CPP: Cast
+    cvar->name = (char*)Z_ReservedAlloc(namelen + 1); // CPP: Cast
     memcpy(cvar->name, name, namelen + 1);
-    cvar->def = Z_ReservedAlloc(deflen + 1);
+    cvar->def = (char*)Z_ReservedAlloc(deflen + 1); // CPP: Cast
     memcpy(cvar->def, def, deflen + 1);
     cvar->num_values = num_values;
     for (i = 0; i < num_values; i++) {
-        cvar->values[i] = Z_ReservedAlloc(lengths[i]);
+        cvar->values[i] = (char*)Z_ReservedAlloc(lengths[i]); // CPP: Cast
         memcpy(cvar->values[i], values[i], lengths[i]);
     }
     cvar->op = op->code;
@@ -382,7 +382,7 @@ static void AC_ParseToken(char *data, int linenum, const char *path)
     string_entry_t *tok;
     size_t len = strlen(data);
 
-    tok = SV_Malloc(sizeof(*tok) + len);
+    tok = (string_entry_t*)SV_Malloc(sizeof(*tok) + len); // CPP: Cast
     memcpy(tok->string, data, len + 1);
     tok->next = acs.tokens;
     acs.tokens = tok;
@@ -810,7 +810,7 @@ static void AC_ParseFileViolation(void)
         return;
     }
 
-    bad = SV_Malloc(sizeof(*bad) + pathlen);
+    bad = (string_entry_t*)SV_Malloc(sizeof(*bad) + pathlen); // CPP: Cast
     memcpy(bad->string, path, pathlen + 1);
     bad->next = cl->ac_bad_files;
     cl->ac_bad_files = bad;
