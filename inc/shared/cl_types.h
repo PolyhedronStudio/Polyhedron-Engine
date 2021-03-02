@@ -344,7 +344,12 @@ typedef struct client_state_s {
     //
     // Client Sound Variables.
     //
+    // Used for storing the listener origin of the client.
     vec3_t      listener_origin;
+
+    // Special Effect: UNDERWATER
+    qboolean    snd_is_underwater;
+    qboolean    snd_is_underwater_enabled;
 
     //
     // Client Rendering Variables.

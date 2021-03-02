@@ -796,7 +796,6 @@ void CLG_EntityEvent(int number) {
         CLG_TeleportParticles(cent->current.origin);
         break;
     case EV_FOOTSTEP:
-        // WatIsDeze: Commented, will be implemented later when we move this over to CG module.
         if (cl_footsteps->integer)
             clgi.S_StartSound(NULL, number, CHAN_BODY, cl_sfx_footsteps[rand() & 3], 1, ATTN_NORM, 0);
         break;

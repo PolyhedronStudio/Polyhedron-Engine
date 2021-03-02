@@ -288,6 +288,15 @@ void _wrp_R_DrawFill32(int x, int y, int w, int h, uint32_t color) {
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
     }
 }
+// SOUND
+extern void AL_SpecialEffect_Underwater_Disable();
+void _wrp_SFX_Underwater_Disable(void) {
+    AL_SpecialEffect_Underwater_Disable();
+}
+extern void AL_SpecialEffect_Underwater_Enable();
+void _wrp_SFX_Underwater_Enable(void) {
+    AL_SpecialEffect_Underwater_Enable();
+}
 
 //
 //=============================================================================
@@ -589,6 +598,9 @@ void CL_InitGameProgs(void)
     import.S_StartSound = S_StartSound;
     import.S_StartLocalSound = S_StartLocalSound;
     import.S_StartLocalSound_ = S_StartLocalSound_;
+
+    import.SFX_Underwater_Disable = _wrp_SFX_Underwater_Enable;
+    import.SFX_Underwater_Enable = _wrp_SFX_Underwater_Enable;
 
     // Load up the cgame dll.
     cge = entry(&import);

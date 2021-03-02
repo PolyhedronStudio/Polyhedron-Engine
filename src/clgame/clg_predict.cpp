@@ -152,6 +152,45 @@ static int CLG_PointContents(vec3_t point)
 }
 
 //
+//================
+// PM_UpdateClientSoundSpecialEffects
+//
+// Can be called by either the server or the client
+//================
+//
+static void CLG_UpdateClientSoundSpecialEffects(pmove_t* pm)
+{
+    static int underwater;
+
+    // Ensure that cl != NULL, it'd be odd but hey..
+    if (cl == NULL) {
+        return;
+    }
+
+    if ((pm->waterlevel == 3) && !underwater) {
+        underwater = 1;
+        cl->snd_is_underwater = 1; // OAL: snd_is_underwater moved to client struct.
+// TODO: DO!
+#ifdef USE_OPENAL
+        if (cl->snd_is_underwater_enabled)
+            clgi.SFX_Underwater_Enable();
+#endif
+    }
+
+    if ((pm->waterlevel < 3) && underwater) {
+        underwater = 0;
+        cl->snd_is_underwater = 0; // OAL: snd_is_underwater moved to client struct.
+
+// TODO: DO!
+#ifdef USE_OPENAL
+        if (cl->snd_is_underwater_enabled)
+            clgi.SFX_Underwater_Disable();
+#endif
+    }
+}
+
+
+//
 //===============
 // CLG_PredictMovement
 // 
@@ -180,6 +219,9 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     while (++ack <= current) {
         pm.cmd = cl->cmds[ack & CMD_MASK];
         Pmove(&pm, &clg.pmoveParams);
+
+        // Update player move client side audio effects.
+        CLG_UpdateClientSoundSpecialEffects(&pm);
 
         // save for debug checking
         VectorCopy(pm.s.origin, cl->predicted_origins[ack & CMD_MASK]);

@@ -558,6 +558,11 @@ extern "C" {
         // Plays a local 2D sound on entchannel 256.                               
         void            (*S_StartLocalSound_) (const char* s);
 
+        // Enables under water special audio effect.
+        void            (*SFX_Underwater_Enable) (void);
+        // Disables under water special audio effect.
+        void            (*SFX_Underwater_Disable) (void);
+
         //---------------------------------------------------------------------
         // System.
         //---------------------------------------------------------------------

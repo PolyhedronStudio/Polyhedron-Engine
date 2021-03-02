@@ -205,10 +205,10 @@ qboolean QAL_Init(void)
 
 	if (qalcIsExtensionPresent(device, "ALC_SOFT_HRTF"))
 	{
-		ALCint *enabled;
-		ALCint *status;
-		qalcGetIntegerv(device, ALC_HRTF_SOFT, 1, enabled); // CPP: IMPORTANT: DANGER: OPENAL: CAST
-		qalcGetIntegerv(device, ALC_HRTF_STATUS_SOFT, 1, status); // CPP: IMPORTANT: DANGER: OPENAL: CAST
+		ALCint enabled;
+		ALCint status;
+		qalcGetIntegerv(device, ALC_HRTF_SOFT, 1, &enabled); // CPP: IMPORTANT: DANGER: OPENAL: CAST
+		qalcGetIntegerv(device, ALC_HRTF_STATUS_SOFT, 1, &status); // CPP: IMPORTANT: DANGER: OPENAL: CAST
 
 		if ((int)enabled == 1)
 			Com_Printf("HRTF enabled: true\n");

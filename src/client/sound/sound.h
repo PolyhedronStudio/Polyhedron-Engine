@@ -94,9 +94,6 @@ typedef struct {
     byte    *data;
 } wavinfo_t;
 
-extern qboolean snd_is_underwater;
-extern qboolean snd_is_underwater_enabled;
-
 /*
 ====================================================================
 

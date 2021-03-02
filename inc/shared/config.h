@@ -62,7 +62,8 @@
 #endif
 
 #define _USE_MATH_DEFINES
-#define inline __inline
+// C++
+//#define inline __inline
 #define __func__ __FUNCTION__
 
 #ifdef _WIN64

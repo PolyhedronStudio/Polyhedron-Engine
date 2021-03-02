@@ -871,14 +871,14 @@ static void AL_Spatialize(channel_t *ch)
 			if (!ch->autosound)
 				VectorCopy(trace.endpos, origin);
 
-			if (!snd_is_underwater && !ch->autosound)
+			if (!cl.snd_is_underwater && !ch->autosound) // OAL: snd_is_underwater moved to client struct.
 				qalSourcei(ch->srcnum, AL_DIRECT_FILTER, underwaterFilter);
 
 			sourceoccluded = qtrue;
 		}
 		else
 		{
-			if (!snd_is_underwater && !ch->autosound)
+			if (!cl.snd_is_underwater && !ch->autosound) // OAL: snd_is_underwater moved to client struct.
 				qalSourcei(ch->srcnum, AL_DIRECT_FILTER, AL_FILTER_NULL);
 		}
 	}
@@ -928,7 +928,7 @@ void AL_PlayChannel(channel_t *ch)
 	if (s_reverb->integer && cl.bsp && ReverbEffect != 0 && !sv_paused->integer)
 		qalSource3i(ch->srcnum, AL_AUXILIARY_SEND_FILTER, ReverbEffectSlot, 0, AL_FILTER_NULL);
 
-	if (cl.bsp && snd_is_underwater && underwaterFilter != 0 && !sv_paused->integer)
+	if (cl.bsp && cl.snd_is_underwater && underwaterFilter != 0 && !sv_paused->integer) // OAL: snd_is_underwater moved to client struct.
 		qalSourcei(ch->srcnum, AL_DIRECT_FILTER, underwaterFilter);
 
 	AL_Spatialize(ch);
@@ -1078,7 +1078,7 @@ void oal_update_underwater()
 	if (s_underwater->modified) {
 		update = qtrue;
 		s_underwater->modified = qfalse;
-		snd_is_underwater_enabled = ((int)s_underwater->value != 0);
+		cl.snd_is_underwater_enabled = ((int)s_underwater->value != 0); // OAL: snd_is_underwater moved to client struct.
 	}
 
 	if (s_underwater_gain_hf->modified) {
@@ -1099,7 +1099,7 @@ void oal_update_underwater()
 
 	qalFilterf(underwaterFilter, AL_LOWPASS_GAINHF, gain_hf);
 
-	if (snd_is_underwater_enabled && snd_is_underwater)
+	if (cl.snd_is_underwater_enabled && cl.snd_is_underwater)  // OAL: snd_is_underwater moved to client struct.
 		filter = underwaterFilter;
 	else
 		filter = 0;
@@ -1139,7 +1139,7 @@ void AL_InitUnderwaterFilter(void)
 	s_underwater_gain_hf->modified = qtrue;
 }
 
-void AL_Underwater()
+void AL_SpecialEffect_Underwater_Enable(void)
 {
 	int i;
 
@@ -1162,7 +1162,7 @@ void AL_Underwater()
 /*
  * Disables the underwater effect
  */
-void AL_Overwater()
+void AL_SpecialEffect_Underwater_Disable(void)
 {
 	int i;
 
@@ -1259,7 +1259,7 @@ void AL_Update(void)
 
 	oal_update_underwater();
 
-	if (cl.bsp && !snd_is_underwater && s_reverb_preset_autopick->integer && s_reverb->integer) //
+	if (cl.bsp && !cl.snd_is_underwater && s_reverb_preset_autopick->integer && s_reverb->integer) // OAL: snd_is_underwater moved to client struct.
 		UpdateReverb();
 
 	if (s_voiceinput->integer && inputdevice)
@@ -1367,7 +1367,7 @@ AL_RawSamplesVoice(int samples, int rate, int width, int channels,
 		(samples * width * channels), rate);
 	active_voice_buffers++;
 
-	if (cl.bsp && snd_is_underwater)
+	if (cl.bsp && cl.snd_is_underwater) // OAL: snd_is_underwater moved to client struct.
 	{
 		qalSourcei(voiceSource, AL_DIRECT_FILTER, underwaterFilter);
 	}

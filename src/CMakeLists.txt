@@ -469,11 +469,17 @@ ENDIF()
 
 # Optional build target.
 if (CONFIG_BUILD_SV_GAME)
+	# Used for sharedgame code(such as pmove), so we can ifdef certain parts specific to client or server.	
+	ADD_DEFINITIONS(-DSHAREDGAME_SERVER=1)
+	# Add library.
 	ADD_LIBRARY(svgame SHARED ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
 endif()
 
 # Optional build target.
 if (CONFIG_BUILD_CL_GAME)
+	# Used for sharedgame code(such as pmove), so we can ifdef certain parts specific to client or server.	
+	ADD_DEFINITIONS(-DSHAREDGAME_CLIENT=1)
+	# Add library.
 	ADD_LIBRARY(clgame SHARED ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
 endif()
 

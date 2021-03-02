@@ -749,7 +749,7 @@ This is also called on Com_Error, so it shouldn't cause any errors
 =====================
 */
 
-qboolean snd_is_underwater;
+//qboolean snd_is_underwater; // OAL: Moved to client.
 
 void CL_Disconnect(error_type_t type)
 {
@@ -805,7 +805,7 @@ void CL_Disconnect(error_type_t type)
 
     cls.state = ca_disconnected;
 
-	snd_is_underwater = qfalse;
+    cl.snd_is_underwater = qfalse; // OAL: Moved to client.
 
     cls.userinfo_modified = 0;
 
