@@ -664,8 +664,8 @@ void QGL_ShutdownExtensions(unsigned mask)
 #undef QGL
 }
 
-#define GCA(x)  VID_GetCoreAddr("gl"#x)
-#define GPA(x)  VID_GetProcAddr("gl"#x)
+#define GCA(x)  (qgl##x##_t)VID_GetCoreAddr("gl"#x) // CPP: IMPORTANT: WARNING: CAST: Well this is macro magic... Dang.
+#define GPA(x)  (qgl##x##_t)VID_GetProcAddr("gl"#x) // CPP: IMPORTANT: WARNING: CAST: Well this is macro magic... Dang.
 
 qboolean QGL_Init(void)
 {

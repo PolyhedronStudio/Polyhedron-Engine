@@ -81,11 +81,13 @@ cvar_t* vid_rtx = NULL;
 //
 //=============================================================================
 //
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
+// CPP: These might need to be re-enabled on Linux.
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
+
+q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 {
     // Store a copy of the engine imported function pointer struct.
     clgi = *clgimp;
@@ -167,9 +169,9 @@ clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     return &clge;
 }
 
-#ifdef __cplusplus
-}; // Extern "C"
-#endif
+//#ifdef __cplusplus
+//}; // Extern "C"
+//#endif
 
 //
 //=============================================================================

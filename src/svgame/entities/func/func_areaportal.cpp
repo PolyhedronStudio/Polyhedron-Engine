@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// svgame/entities/func_areaportal.c
+// svgame/entities/func_areaportal.cpp
 //
 //
 // func_areaportal entity implementation.

@@ -364,7 +364,7 @@ void CL_ShutdownGameProgs(void)
 void CL_InitGameProgs(void)
 {
     clgame_import_t   import;
-    clgame_export_t   *(*entry)(clgame_import_t *) = NULL;
+    clgame_export_t* (*entry)(clgame_import_t*) = NULL;
 
     // unload anything we have now
     CL_ShutdownGameProgs();
@@ -388,209 +388,209 @@ void CL_InitGameProgs(void)
         Com_Error(ERR_DROP, "Failed to load Client Game library");
 
     // API Version.
-    import.apiversion                   = CGAME_API_VERSION;
+    import.apiversion = CGAME_API_VERSION;
 
-	//
+    //
     // Setup the function pointers for the cgame dll.
-	//
-    import.cl                           = &cl;
-    import.cs                           = &cs;
- 
+    //
+    import.cl = &cl;
+    import.cs = &cs;
+
     // Client.
-    import.GetFrameTime                 = _wrp_GetFrameTime;
-    import.GetRealTime                  = _wrp_GetRealTime;
-    
-    import.GetFramesPerSecond           = CL_GetFps;
-    import.GetResolutionScale           = CL_GetResolutionScale;
+    import.GetFrameTime = _wrp_GetFrameTime;
+    import.GetRealTime = _wrp_GetRealTime;
 
-    import.GetServerState               = _wrp_GetServerState;
-    import.GetServerProtocol            = _wrp_GetServerProtocol;
-    import.GetProtocolVersion           = _wrp_GetProtocolVersion;
+    import.GetFramesPerSecond = CL_GetFps;
+    import.GetResolutionScale = CL_GetResolutionScale;
 
-    import.IsDemoPlayback               = _wrp_IsDemoPlayback;
+    import.GetServerState = _wrp_GetServerState;
+    import.GetServerProtocol = _wrp_GetServerProtocol;
+    import.GetProtocolVersion = _wrp_GetProtocolVersion;
 
-    import.UpdateListenerOrigin         = CL_UpdateListenerOrigin;
-    import.UpdateSetting                = _wrp_UpdateSetting;
+    import.IsDemoPlayback = _wrp_IsDemoPlayback;
 
-    import.SetClientLoadState           = CL_SetLoadState;
-    import.GetClienState                = CL_GetState;
+    import.UpdateListenerOrigin = CL_UpdateListenerOrigin;
+    import.UpdateSetting = _wrp_UpdateSetting;
 
-    import.CheckForIgnore               = CL_CheckForIgnore;
-    import.CheckForIP                   = CL_CheckForIP;
+    import.SetClientLoadState = CL_SetLoadState;
+    import.GetClienState = CL_GetState;
 
-	// Command Buffer.
-	import.Cbuf_AddText					= _wrp_Cbuf_AddText;
-	import.Cbuf_InsertText				= _wrp_Cbuf_InsertText;
-	import.Cbuf_Execute					= _wrp_Cbuf_Execute;
-	import.CL_ForwardToServer			= CL_ForwardToServer;
-     
+    import.CheckForIgnore = CL_CheckForIgnore;
+    import.CheckForIP = CL_CheckForIP;
+
+    // Command Buffer.
+    import.Cbuf_AddText = _wrp_Cbuf_AddText;
+    import.Cbuf_InsertText = _wrp_Cbuf_InsertText;
+    import.Cbuf_Execute = _wrp_Cbuf_Execute;
+    import.CL_ForwardToServer = CL_ForwardToServer;
+
     // Collision Model.
-    import.CM_HeadnodeForBox            = CM_HeadnodeForBox;
-    import.CM_InlineModel               = _wrp_CM_InlineModel;
-    import.CM_PointContents             = CM_PointContents;
-    import.CM_TransformedPointContents  = CM_TransformedPointContents;
-    import.CM_BoxTrace                  = CM_BoxTrace;
-    import.CM_TransformedBoxTrace       = CM_TransformedBoxTrace;
-    import.CM_ClipEntity                = CM_ClipEntity;
+    import.CM_HeadnodeForBox = CM_HeadnodeForBox;
+    import.CM_InlineModel = _wrp_CM_InlineModel;
+    import.CM_PointContents = CM_PointContents;
+    import.CM_TransformedPointContents = CM_TransformedPointContents;
+    import.CM_BoxTrace = CM_BoxTrace;
+    import.CM_TransformedBoxTrace = CM_TransformedBoxTrace;
+    import.CM_ClipEntity = CM_ClipEntity;
 
-	// Command.
-	import.Cmd_AddCommand				= Cmd_AddCommand;
-	import.Cmd_RemoveCommand			= Cmd_RemoveCommand;
+    // Command.
+    import.Cmd_AddCommand = Cmd_AddCommand;
+    import.Cmd_RemoveCommand = Cmd_RemoveCommand;
 
-    import.Cmd_Register                 = Cmd_Register;
-    import.Cmd_Deregister               = Cmd_Deregister;
+    import.Cmd_Register = Cmd_Register;
+    import.Cmd_Deregister = Cmd_Deregister;
 
-    import.Cmd_AddMacro                 = Cmd_AddMacro;
-    import.Cmd_FindMacro                = Cmd_FindMacro;
-    import.Cmd_Macro_g                  = Cmd_Macro_g;
+    import.Cmd_AddMacro = Cmd_AddMacro;
+    import.Cmd_FindMacro = Cmd_FindMacro;
+    import.Cmd_Macro_g = Cmd_Macro_g;
 
-    import.Prompt_AddMatch              = Prompt_AddMatch;
+    import.Prompt_AddMatch = Prompt_AddMatch;
 
-	import.Cmd_TokenizeString			= Cmd_TokenizeString;
-	import.Cmd_Argc						= Cmd_Argc;
-	import.Cmd_Argv						= Cmd_Argv;
-	import.Cmd_Args						= Cmd_Args;
+    import.Cmd_TokenizeString = Cmd_TokenizeString;
+    import.Cmd_Argc = Cmd_Argc;
+    import.Cmd_Argv = Cmd_Argv;
+    import.Cmd_Args = Cmd_Args;
 
-    import.Cmd_ExecTrigger              = Cmd_ExecTrigger;
+    import.Cmd_ExecTrigger = Cmd_ExecTrigger;
 
-	// Common.
-    import.Com_Error 					= Com_Error;
-    import.Com_LPrintf 					= Com_LPrintf;
+    // Common.
+    import.Com_Error = Com_Error;
+    import.Com_LPrintf = Com_LPrintf;
 
-    import.Com_ErrorString              = Q_ErrorString;
+    import.Com_ErrorString = Q_ErrorString;
 
     // Console.
-    import.Con_ClearNotify              = Con_ClearNotify_f;
-    import.Con_SkipNotify               = Con_SkipNotify;
+    import.Con_ClearNotify = Con_ClearNotify_f;
+    import.Con_SkipNotify = Con_SkipNotify;
 
-	// Cvar.
-	import.Cvar_Get						= Cvar_Get;
-	import.Cvar_WeakGet					= Cvar_WeakGet;
-	import.Cvar_Exists					= Cvar_Exists;
-	import.Cvar_VariableValue			= Cvar_VariableValue;
-	import.Cvar_VariableInteger			= Cvar_VariableInteger;
-	import.Cvar_VariableString			= Cvar_VariableString;
-	import.Cvar_Set						= Cvar_Set;
-	import.Cvar_SetValue				= Cvar_SetValue;
-	import.Cvar_SetInteger				= Cvar_SetInteger;
-	import.Cvar_UserSet					= Cvar_UserSet;
-	import.Cvar_Reset					= _wrp_Cvar_Reset;
-	import.Cvar_ClampInteger			= Cvar_ClampInteger;
-	import.Cvar_ClampValue				= Cvar_ClampValue;
+    // Cvar.
+    import.Cvar_Get = Cvar_Get;
+    import.Cvar_WeakGet = Cvar_WeakGet;
+    import.Cvar_Exists = Cvar_Exists;
+    import.Cvar_VariableValue = Cvar_VariableValue;
+    import.Cvar_VariableInteger = Cvar_VariableInteger;
+    import.Cvar_VariableString = Cvar_VariableString;
+    import.Cvar_Set = Cvar_Set;
+    import.Cvar_SetValue = Cvar_SetValue;
+    import.Cvar_SetInteger = Cvar_SetInteger;
+    import.Cvar_UserSet = Cvar_UserSet;
+    import.Cvar_Reset = _wrp_Cvar_Reset;
+    import.Cvar_ClampInteger = Cvar_ClampInteger;
+    import.Cvar_ClampValue = Cvar_ClampValue;
 
-    import.Cvar_Variable_g              = Cvar_Variable_g;
-    import.Cvar_Default_g               = Cvar_Default_g;
+    import.Cvar_Variable_g = Cvar_Variable_g;
+    import.Cvar_Default_g = Cvar_Default_g;
 
     // Files.
-    import.FS_RenameFile                = FS_RenameFile;
-    import.FS_CreatePath                = FS_CreatePath;
-    import.FS_FOpenFile                 = FS_FOpenFile;
-    import.FS_FCloseFile                = FS_FCloseFile;
-    import.FS_EasyOpenFile              = FS_EasyOpenFile;
-    import.FS_FileExists                = _wrp_FS_FileExists;
-    import.FS_FileExistsEx              = _wrp_FS_FileExistsEx;
-    import.FS_WriteFile                 = FS_WriteFile;
-    import.FS_EasyWriteFile             = FS_EasyWriteFile;
-    import.FS_Read                      = FS_Read;
-    import.FS_Write                     = FS_Write;
-    import.FS_FPrintf                   = _wrp_FS_FPrintf;
-    import.FS_ReadLine                  = FS_ReadLine;
-    import.FS_Flush                     = FS_Flush;
-    import.FS_Tell                      = FS_Tell;
-    import.FS_Seek                      = FS_Seek;
-    import.FS_Length                    = FS_Length;
-    import.FS_WildCmp                   = FS_WildCmp;
-    import.FS_ExtCmp                    = FS_ExtCmp;
-    import.FS_LastModified              = FS_LastModified;
-    import.FS_ListFiles                 = FS_ListFiles;
-    import.FS_CopyList                  = FS_CopyList;
-    import.FS_CopyInfo                  = FS_CopyInfo;
-    import.FS_FreeList                  = FS_FreeList;
-    import.FS_NormalizePath             = FS_NormalizePath;
-    import.FS_NormalizePathBuffer       = FS_NormalizePathBuffer;
-    import.FS_ValidatePath              = FS_ValidatePath;
-    import.FS_SanitizeFilenameVariable  = FS_SanitizeFilenameVariable;
+    import.FS_RenameFile = FS_RenameFile;
+    import.FS_CreatePath = FS_CreatePath;
+    import.FS_FOpenFile = FS_FOpenFile;
+    import.FS_FCloseFile = FS_FCloseFile;
+    import.FS_EasyOpenFile = FS_EasyOpenFile;
+    import.FS_FileExists = _wrp_FS_FileExists;
+    import.FS_FileExistsEx = _wrp_FS_FileExistsEx;
+    import.FS_WriteFile = FS_WriteFile;
+    import.FS_EasyWriteFile = FS_EasyWriteFile;
+    import.FS_Read = FS_Read;
+    import.FS_Write = FS_Write;
+    import.FS_FPrintf = _wrp_FS_FPrintf;
+    import.FS_ReadLine = FS_ReadLine;
+    import.FS_Flush = FS_Flush;
+    import.FS_Tell = FS_Tell;
+    import.FS_Seek = FS_Seek;
+    import.FS_Length = FS_Length;
+    import.FS_WildCmp = FS_WildCmp;
+    import.FS_ExtCmp = FS_ExtCmp;
+    import.FS_LastModified = FS_LastModified;
+    import.FS_ListFiles = FS_ListFiles;
+    import.FS_CopyList = FS_CopyList;
+    import.FS_CopyInfo = FS_CopyInfo;
+    import.FS_FreeList = FS_FreeList;
+    import.FS_NormalizePath = FS_NormalizePath;
+    import.FS_NormalizePathBuffer = FS_NormalizePathBuffer;
+    import.FS_ValidatePath = FS_ValidatePath;
+    import.FS_SanitizeFilenameVariable = FS_SanitizeFilenameVariable;
 
     // Keys.
-    import.Key_IsDown                   = Key_IsDown;
-    import.Key_GetBinding               = Key_GetBinding;
+    import.Key_IsDown = Key_IsDown;
+    import.Key_GetBinding = Key_GetBinding;
 
     // Memory.
-    import.Z_TagMalloc                  = Z_TagMalloc;
-    import.Z_TagMallocz                 = Z_TagMallocz;
-    import.Z_TagReserve                 = Z_TagReserve;
-    import.Z_TagCopyString              = Z_TagCopyString;
-    import.Z_Free                       = Z_Free;
+    import.Z_TagMalloc = Z_TagMalloc;
+    import.Z_TagMallocz = Z_TagMallocz;
+    import.Z_TagReserve = Z_TagReserve;
+    import.Z_TagCopyString = Z_TagCopyString;
+    import.Z_Free = Z_Free;
 
     // Networking.
-    import.MSG_ReadChar                 = MSG_ReadChar;
-    import.MSG_ReadByte                 = MSG_ReadByte;
-    import.MSG_ReadShort                = MSG_ReadShort;
-    import.MSG_ReadWord                 = MSG_ReadWord;
-    import.MSG_ReadLong                 = MSG_ReadLong;
-    import.MSG_ReadString               = MSG_ReadString;
-    import.MSG_ReadDir                  = MSG_ReadDir;
-    import.MSG_ReadPos                  = MSG_ReadPos;
-    import.MSG_WriteChar                = MSG_WriteChar;
-    import.MSG_WriteByte                = MSG_WriteByte;
-    import.MSG_WriteShort               = MSG_WriteShort;
-    import.MSG_WriteLong                = MSG_WriteLong;
-    import.MSG_WriteString              = MSG_WriteString;
-    import.MSG_WritePos                 = MSG_WritePos;
-    import.MSG_WriteAngle               = MSG_WriteAngle;
+    import.MSG_ReadChar = MSG_ReadChar;
+    import.MSG_ReadByte = MSG_ReadByte;
+    import.MSG_ReadShort = MSG_ReadShort;
+    import.MSG_ReadWord = MSG_ReadWord;
+    import.MSG_ReadLong = MSG_ReadLong;
+    import.MSG_ReadString = MSG_ReadString;
+    import.MSG_ReadDir = MSG_ReadDir;
+    import.MSG_ReadPos = MSG_ReadPos;
+    import.MSG_WriteChar = MSG_WriteChar;
+    import.MSG_WriteByte = MSG_WriteByte;
+    import.MSG_WriteShort = MSG_WriteShort;
+    import.MSG_WriteLong = MSG_WriteLong;
+    import.MSG_WriteString = MSG_WriteString;
+    import.MSG_WritePos = MSG_WritePos;
+    import.MSG_WriteAngle = MSG_WriteAngle;
 
-    import.MSG_FlushTo                  = _trp_MSG_FlushTo;
-    
+    import.MSG_FlushTo = _trp_MSG_FlushTo;
+
     // Register.
-    import.R_RegisterModel              = _wrp_R_RegisterModel;
-    import.R_RegisterImage              = _wrp_R_RegisterImage;
-    import.R_RegisterRawImage           = _wrp_R_RegisterRawImage;
-    import.R_UnregisterImage            = _wrp_R_UnregisterImage;
+    import.R_RegisterModel = _wrp_R_RegisterModel;
+    import.R_RegisterImage = _wrp_R_RegisterImage;
+    import.R_RegisterRawImage = _wrp_R_RegisterRawImage;
+    import.R_UnregisterImage = _wrp_R_UnregisterImage;
 
-    import.R_RegisterPic                = _wrp_R_RegisterPic;
-    import.R_RegisterPic2               = _wrp_R_RegisterPic2;
-    import.R_RegisterFont               = _wrp_R_RegisterFont;
-    import.R_RegisterSkin               = _wrp_R_RegisterSkin;
+    import.R_RegisterPic = _wrp_R_RegisterPic;
+    import.R_RegisterPic2 = _wrp_R_RegisterPic2;
+    import.R_RegisterFont = _wrp_R_RegisterFont;
+    import.R_RegisterSkin = _wrp_R_RegisterSkin;
 
-    import.MOD_ForHandle                = MOD_ForHandle;
+    import.MOD_ForHandle = MOD_ForHandle;
 
     // Rendering
-    import.R_AddDecal                   = _wrp_R_AddDecal;
-    import.R_LightPoint                 = _wrp_R_LightPoint;
-    import.R_SetSky                     = _wrp_R_SetSky;
+    import.R_AddDecal = _wrp_R_AddDecal;
+    import.R_LightPoint = _wrp_R_LightPoint;
+    import.R_SetSky = _wrp_R_SetSky;
 
-    import.R_ClearColor                 = _wrp_R_ClearColor;
-    import.R_SetAlpha                   = _wrp_R_SetAlpha;
-    import.R_SetAlphaScale              = _wrp_R_SetAlphaScale;
-    import.R_SetColor                   = _wrp_R_SetColor;
-    import.R_SetClipRect                = _wrp_R_SetClipRect;
-    import.R_ClampScale                 = _wrp_R_ClampScale;
-    import.R_SetScale                   = _wrp_R_SetScale;
-    import.R_DrawChar                   = _wrp_R_DrawChar;
-    import.R_DrawString                 = _wrp_R_DrawString;
-    import.R_GetPicSize                 = _wrp_R_GetPicSize;
-    import.R_DrawPic                    = _wrp_R_DrawPic;
-    import.R_DrawStretchPic             = _wrp_R_DrawStretchPic;
-    import.R_TileClear                  = _wrp_R_TileClear;
-    import.R_DrawFill8                  = _wrp_R_DrawFill8;
-    import.R_DrawFill32                 = _wrp_R_DrawFill32;
+    import.R_ClearColor = _wrp_R_ClearColor;
+    import.R_SetAlpha = _wrp_R_SetAlpha;
+    import.R_SetAlphaScale = _wrp_R_SetAlphaScale;
+    import.R_SetColor = _wrp_R_SetColor;
+    import.R_SetClipRect = _wrp_R_SetClipRect;
+    import.R_ClampScale = _wrp_R_ClampScale;
+    import.R_SetScale = _wrp_R_SetScale;
+    import.R_DrawChar = _wrp_R_DrawChar;
+    import.R_DrawString = _wrp_R_DrawString;
+    import.R_GetPicSize = _wrp_R_GetPicSize;
+    import.R_DrawPic = _wrp_R_DrawPic;
+    import.R_DrawStretchPic = _wrp_R_DrawStretchPic;
+    import.R_TileClear = _wrp_R_TileClear;
+    import.R_DrawFill8 = _wrp_R_DrawFill8;
+    import.R_DrawFill32 = _wrp_R_DrawFill32;
 
     // Screen.
-    import.SCR_UpdateScreen             = SCR_UpdateScreen;
+    import.SCR_UpdateScreen = SCR_UpdateScreen;
 
     // System.
-    import.Sys_Milliseconds             = Sys_Milliseconds;
+    import.Sys_Milliseconds = Sys_Milliseconds;
 
     // Sound.
-    import.S_BeginRegistration          = S_BeginRegistration;
-    import.S_RegisterSound              = S_RegisterSound;
-    import.S_EndRegistration            = S_EndRegistration;
-     
-    import.S_StartSound                 = S_StartSound;
-    import.S_StartLocalSound            = S_StartLocalSound;
-    import.S_StartLocalSound_           = S_StartLocalSound_;
+    import.S_BeginRegistration = S_BeginRegistration;
+    import.S_RegisterSound = S_RegisterSound;
+    import.S_EndRegistration = S_EndRegistration;
 
-	// Load up the cgame dll.
+    import.S_StartSound = S_StartSound;
+    import.S_StartLocalSound = S_StartLocalSound;
+    import.S_StartLocalSound_ = S_StartLocalSound_;
+
+    // Load up the cgame dll.
     cge = entry(&import);
 
     if (!cge) {
@@ -600,12 +600,13 @@ void CL_InitGameProgs(void)
 
     if (cge->apiversion != CGAME_API_VERSION) {
         Com_Error(ERR_DROP, "Client Game DLL is version %d, expected %d",
-                  cge->apiversion, CGAME_API_VERSION);
+            cge->apiversion, CGAME_API_VERSION);
         return;
     }
 
     // We will not be calling the init function here, since we want to actually initialize later.
 }
+
 
 //
 //=============================================================================

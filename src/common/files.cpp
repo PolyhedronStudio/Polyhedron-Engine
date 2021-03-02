@@ -1906,7 +1906,7 @@ ssize_t FS_LoadFileEx(const char *path, void **buffer, unsigned flags, memtag_t 
     }
 
     // allocate chunk of memory, +1 for NUL
-    buf = (byte*)(len + 1, tag); // CPP: Cast
+    buf = (byte*)Z_TagMalloc(len + 1, tag); // CPP: Cast
 
     // read entire file
     read = FS_Read(buf, len, f);

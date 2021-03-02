@@ -15,7 +15,7 @@
 // cgmodule.c
 //
 void CL_ShutdownGameProgs(void);    // N&C: Place elsewhere?
-void CL_InitGameProgs(void);        // N&C: Place elsewhere?
+extern "C" void CL_InitGameProgs(void);        // N&C: Place elsewhere? // CPP: Extern "C"
 
 //
 // Core

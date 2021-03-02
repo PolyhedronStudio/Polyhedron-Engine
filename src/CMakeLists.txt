@@ -205,7 +205,7 @@ SET(SRC_CLIENT
 	client/sound/mix.cpp
 	client/sound/ogg.cpp
 #	client/sound/qal/fixed.c
-	client/sound/qal/dynamic.c
+	client/sound/qal/dynamic.cpp
 )
 # Required as a placeholder for certain Vulkan only related features.
 if (NOT CONFIG_VKPT_RENDERER AND CONFIG_GL_RENDERER)
@@ -277,7 +277,7 @@ SET(HEADERS_COMMON
 SET(SRC_REFRESH
 	refresh/images.cpp
 	refresh/models.cpp
-	refresh/stb/stb.c
+	refresh/stb/stb.cpp
 )
 
 ###################### GL.
@@ -293,7 +293,7 @@ SET(SRC_GL
 	refresh/gl/surf.cpp
 	refresh/gl/tess.cpp
 	refresh/gl/world.cpp
-	refresh/gl/qgl/dynamic.c
+	refresh/gl/qgl/dynamic.cpp
 #	refresh/gl/qgl/fixed.c
 )
 SET(HEADERS_GL

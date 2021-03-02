@@ -53,6 +53,8 @@ static void *handle;
 static ALCdevice *device;
 static ALCcontext *context;
 
+ALCdevice* inputdevice;
+
 #define QAL(type, func)  static type q##func
 QALC_IMP
 #undef QAL
@@ -110,7 +112,7 @@ micsample_t HandleMic(void)
 	qalcCaptureSamples(inputdevice, (ALCvoid *)buffer, sample);
 
 	value.sample = sample;
-	value.buffer = buffer;
+	value.buffer = (byte*)buffer; // CPP: Cast
 
 	return value;
 }
@@ -144,7 +146,8 @@ qboolean QAL_Init(void)
         return qfalse;
     }
 
-#define QAL(type, func)  if ((q##func = Sys_GetProcAddress(handle, #func)) == NULL) goto fail;
+	// CPP: Added the (type) cast.
+#define QAL(type, func)  if ((q##func = (type)Sys_GetProcAddress(handle, #func)) == NULL) goto fail;
     QALC_IMP
     QAL_IMP
 #undef QAL
@@ -170,19 +173,19 @@ qboolean QAL_Init(void)
     al_device->flags |= CVAR_SOUND;
 
 	if (qalcIsExtensionPresent(device, "ALC_EXT_EFX") && strstr(qalGetString(AL_RENDERER), "OpenAL Soft")) {
-		qalGenFilters = qalcGetProcAddress(device, "alGenFilters");
-		qalFilteri = qalcGetProcAddress(device, "alFilteri");
-		qalFilterf = qalcGetProcAddress(device, "alFilterf");
-		qalDeleteFilters = qalcGetProcAddress(device, "alDeleteFilters");
-		qalEffectf = qalcGetProcAddress(device, "alEffectf");
-		qalEffectfv = qalcGetProcAddress(device, "alEffectfv");
-		qalEffecti = qalcGetProcAddress(device, "alEffecti");
-		qalEffectiv = qalcGetProcAddress(device, "alEffectiv");
-		qalGenEffects = qalcGetProcAddress(device, "alGenEffects");
-		qalAuxiliaryEffectSloti = qalcGetProcAddress(device, "alAuxiliaryEffectSloti");
-		qalGenAuxiliaryEffectSlots = qalcGetProcAddress(device, "alGenAuxiliaryEffectSlots");
-		qalDeleteAuxiliaryEffectSlots = qalcGetProcAddress(device, "alDeleteAuxiliaryEffectSlots");
-		qalDeleteEffects = qalcGetProcAddress(device, "alDeleteEffects");
+		qalGenFilters = (LPALGENFILTERS)qalcGetProcAddress(device, "alGenFilters");
+		qalFilteri = (LPALFILTERI)qalcGetProcAddress(device, "alFilteri");
+		qalFilterf = (LPALFILTERF)qalcGetProcAddress(device, "alFilterf");
+		qalDeleteFilters = (LPALDELETEFILTERS)qalcGetProcAddress(device, "alDeleteFilters");
+		qalEffectf = (LPALEFFECTF)qalcGetProcAddress(device, "alEffectf");
+		qalEffectfv = (LPALEFFECTFV)qalcGetProcAddress(device, "alEffectfv");
+		qalEffecti = (LPALEFFECTI)qalcGetProcAddress(device, "alEffecti");
+		qalEffectiv = (LPALEFFECTIV)qalcGetProcAddress(device, "alEffectiv");
+		qalGenEffects = (LPALGENEFFECTS)qalcGetProcAddress(device, "alGenEffects");
+		qalAuxiliaryEffectSloti = (LPALAUXILIARYEFFECTSLOTI)qalcGetProcAddress(device, "alAuxiliaryEffectSloti");
+		qalGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)qalcGetProcAddress(device, "alGenAuxiliaryEffectSlots");
+		qalDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)qalcGetProcAddress(device, "alDeleteAuxiliaryEffectSlots");
+		qalDeleteEffects = (LPALDELETEEFFECTS)qalcGetProcAddress(device, "alDeleteEffects");
 		Com_Printf("OpenAL EFX extensions available.\n");
 	}
 	else {
@@ -204,8 +207,8 @@ qboolean QAL_Init(void)
 	{
 		ALCint *enabled;
 		ALCint *status;
-		qalcGetIntegerv(device, ALC_HRTF_SOFT, 1, &enabled);
-		qalcGetIntegerv(device, ALC_HRTF_STATUS_SOFT, 1, &status);
+		qalcGetIntegerv(device, ALC_HRTF_SOFT, 1, enabled); // CPP: IMPORTANT: DANGER: OPENAL: CAST
+		qalcGetIntegerv(device, ALC_HRTF_STATUS_SOFT, 1, status); // CPP: IMPORTANT: DANGER: OPENAL: CAST
 
 		if ((int)enabled == 1)
 			Com_Printf("HRTF enabled: true\n");
