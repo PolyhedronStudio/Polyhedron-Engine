@@ -82,15 +82,15 @@ static void SV_EmitPacketEntities(client_t         *client,
             // of packet loss.
             flags = client->esFlags;
             if (newnum <= client->maxclients) {
-                flags |= MSG_ES_NEWENTITY;
+                flags = (msgEsFlags_t)(flags | MSG_ES_NEWENTITY);
             }
             if (newnum == clientEntityNum) {
-                flags |= MSG_ES_FIRSTPERSON;
+                flags = (msgEsFlags_t)(flags | MSG_ES_FIRSTPERSON);
                 VectorCopy(oldent->origin, newent->origin);
                 VectorCopy(oldent->angles, newent->angles);
             }
             if (Q2PRO_SHORTANGLES(client, newnum)) {
-                flags |= MSG_ES_SHORTANGLES;
+                flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES);
             }
             MSG_WriteDeltaEntity(oldent, newent, flags);
             oldindex++;
@@ -100,7 +100,7 @@ static void SV_EmitPacketEntities(client_t         *client,
 
         if (newnum < oldnum) {
             // this is a new entity, send it from the baseline
-            flags = client->esFlags | MSG_ES_FORCE | MSG_ES_NEWENTITY;
+            flags = (msgEsFlags_t)(client->esFlags | MSG_ES_FORCE | MSG_ES_NEWENTITY); // CPP: Cast
             oldent = client->baselines[newnum >> SV_BASELINES_SHIFT];
             if (oldent) {
                 oldent += (newnum & SV_BASELINES_MASK);
@@ -108,12 +108,12 @@ static void SV_EmitPacketEntities(client_t         *client,
                 oldent = &nullEntityState;
             }
             if (newnum == clientEntityNum) {
-                flags |= MSG_ES_FIRSTPERSON;
+                flags = (msgEsFlags_t)(flags | MSG_ES_FIRSTPERSON); // CPP: Cast flags |= MSG_ES_FIRSTPERSON;
                 VectorCopy(oldent->origin, newent->origin);
                 VectorCopy(oldent->angles, newent->angles);
             }
             if (Q2PRO_SHORTANGLES(client, newnum)) {
-                flags |= MSG_ES_SHORTANGLES;
+                flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES); // CPP: Cast flags |= MSG_ES_SHORTANGLES;
             }
             MSG_WriteDeltaEntity(oldent, newent, flags);
             newindex++;
@@ -239,36 +239,36 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
     }
 
     // first byte to be patched
-    b1 = SZ_GetSpace(&msg_write, 1);
+    b1 = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
 
     MSG_WriteLong((client->framenum & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));
 
     // second byte to be patched
-    b2 = SZ_GetSpace(&msg_write, 1);
+    b2 = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
 
     // send over the areabits
     MSG_WriteByte(frame->areabytes);
     MSG_WriteData(frame->areabits, frame->areabytes);
 
     // ignore some parts of playerstate if not recording demo
-    psFlags = 0;
+    psFlags = (msgPsFlags_t)0; // CPP: Cast
     if (!client->settings[CLS_RECORDING]) {
         if (client->settings[CLS_NOGUN]) {
-            psFlags |= MSG_PS_IGNORE_GUNFRAMES;
+            psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_GUNFRAMES);  // CPP: Cast
             if (client->settings[CLS_NOGUN] != 2) {
-                psFlags |= MSG_PS_IGNORE_GUNINDEX;
+                psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_GUNINDEX);  // CPP: Cast
             }
         }
         if (client->settings[CLS_NOBLEND]) {
-            psFlags |= MSG_PS_IGNORE_BLEND;
+            psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_BLEND);  // CPP: Cast
         }
         if (frame->ps.pmove.pm_type < PM_DEAD) {
             if (!(frame->ps.pmove.pm_flags & PMF_NO_PREDICTION)) {
-                psFlags |= MSG_PS_IGNORE_VIEWANGLES;
+                psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_VIEWANGLES);  // CPP: Cast
             }
         } else {
             // lying dead on a rotating platform?
-            psFlags |= MSG_PS_IGNORE_DELTAANGLES;
+            psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_DELTAANGLES);  // CPP: Cast
         }
     }
 
@@ -278,7 +278,7 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
             clientEntityNum = frame->clientNum + 1;
         }
         if (client->settings[CLS_NOPREDICT]) {
-            psFlags |= MSG_PS_IGNORE_PREDICTION;
+            psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_PREDICTION); // CPP: Cast
         }
         suppressed = client->frameflags;
     } else {

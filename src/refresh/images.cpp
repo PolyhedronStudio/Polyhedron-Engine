@@ -352,7 +352,7 @@ IMG_LOAD(STB)
 	image->upload_height = image->height = h;
 
     if (channels == 3)
-        image->flags = (image->flags | IF_OPAQUE);
+        image->flags = (imageflags_t)(image->flags | IF_OPAQUE); // CPP: Castd
 
     return Q_ERR_SUCCESS;
 }
@@ -715,7 +715,7 @@ static void IMG_List_f(void)
 	} else {
 
 		// dump to console
-		static const char types[8] = "PFMSWY??";
+		static const char types[] = "PFMSWY??"; // CPP: static const char types[8] = "PFMSWY??";
 
 		Com_Printf("------------------\n");
 		texels = count = 0;
@@ -1236,7 +1236,7 @@ qhandle_t R_RegisterRawImage(const char *name, int width, int height, byte* pic,
 
     // look for it
     if ((image = lookup_image(name, type, hash, len)) != NULL) {
-        image->flags |= flags & IF_PERMANENT;
+        image->flags = (imageflags_t)(image->flags | (flags & IF_PERMANENT)); // CPP: Bitflags cast thing image->flags |= flags & IF_PERMANENT;
         image->registration_sequence = registration_sequence;
         return image - r_images;
     }

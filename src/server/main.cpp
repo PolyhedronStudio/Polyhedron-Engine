@@ -1006,9 +1006,9 @@ static void init_pmove_and_es_flags(client_t *newcl)
 
     // r1q2 extensions
     if (newcl->protocol == PROTOCOL_VERSION_R1Q2) {
-        newcl->esFlags |= MSG_ES_BEAMORIGIN;
+        newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
         if (newcl->version >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
-            newcl->esFlags |= MSG_ES_LONGSOLID;
+            newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_LONGSOLID); // CPP: Cast bitflag
         }
     }
 
@@ -1020,12 +1020,12 @@ static void init_pmove_and_es_flags(client_t *newcl)
         }
         newcl->pmp.flyhack = qtrue;
         newcl->pmp.flyfriction = 4;
-        newcl->esFlags |= MSG_ES_UMASK;
+        newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_UMASK); // CPP: Cast bitflag
         if (newcl->version >= PROTOCOL_VERSION_Q2PRO_LONG_SOLID) {
-            newcl->esFlags |= MSG_ES_LONGSOLID;
+            newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_LONGSOLID); // CPP: Cast bitflag
         }
         if (newcl->version >= PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN) {
-            newcl->esFlags |= MSG_ES_BEAMORIGIN;
+            newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
         }
         if (newcl->version >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {
             force = 1;
@@ -1155,7 +1155,7 @@ static void SVC_DirectConnect(void)
     }
 
     // setup netchan
-    newcl->netchan = Netchan_Setup(NS_SERVER, params.nctype,
+    newcl->netchan = Netchan_Setup(NS_SERVER, (netchan_type_t)params.nctype, // CPP: Cast
                                    &net_from, params.qport,
                                    params.maxlength,
                                    params.protocol);
@@ -2284,7 +2284,7 @@ void SV_Shutdown(const char *finalmsg, error_type_t type)
         // don't shutdown if called from internal MVD spawn function (ugly hack)!
         MVD_Shutdown();
     }
-    type &= ~MVD_SPAWN_MASK;
+    type = (error_type_t)(type & ~MVD_SPAWN_MASK);// &= ~MVD_SPAWN_MASK; // CPP: Cast type &= ~MVD_SPAWN_MASK;
 #endif
 
     AC_Disconnect();

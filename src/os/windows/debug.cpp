@@ -475,7 +475,7 @@ LONG WINAPI Sys_ExceptionFilter(LPEXCEPTION_POINTERS exceptionInfo)
                pSymGetModuleBase64,
                NULL)) {
         write_report(
-            "%d: %"PRIxx" %"PRIxx" %"PRIxx" %"PRIxx" ",
+            "%d: %" PRIxx " %" PRIxx " %" PRIxx " %" PRIxx " ", // CPP: String fix.
             count,
             WORDxx(stackFrame.Params[0]),
             WORDxx(stackFrame.Params[1]),
@@ -494,16 +494,16 @@ LONG WINAPI Sys_ExceptionFilter(LPEXCEPTION_POINTERS exceptionInfo)
                     stackFrame.AddrPC.Offset,
                     &offset,
                     symbol)) {
-                write_report("%s!%s+%"PRIxx32"\r\n",
+                write_report("%s!%s+%" PRIxx32 "\r\n", // CPP: String fix
                              moduleInfo.ModuleName,
                              symbol->Name, (DWORD32)offset);
             } else {
-                write_report("%s!%"PRIxx"\r\n",
+                write_report("%s!%" PRIxx "\r\n", // CPP: String fix
                              moduleInfo.ModuleName,
                              WORDxx(stackFrame.AddrPC.Offset));
             }
         } else {
-            write_report("%"PRIxx"\r\n",
+            write_report("%" PRIxx "\r\n", // CPP: String fix
                          WORDxx(stackFrame.AddrPC.Offset));
         }
 

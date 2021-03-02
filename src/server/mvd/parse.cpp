@@ -330,7 +330,7 @@ static void MVD_UnicastString(mvd_t *mvd, qboolean reliable, mvd_player_t *playe
         }
     }
     if (!cs) {
-        cs = MVD_Malloc(sizeof(*cs) + MAX_QPATH - 1);
+        cs = (mvd_cs_t*)MVD_Malloc(sizeof(*cs) + MAX_QPATH - 1); // CPP: Cast
         cs->index = index;
         cs->next = player->configstrings;
         player->configstrings = cs;
@@ -742,7 +742,7 @@ static void MVD_ParsePacketEntities(mvd_t *mvd)
         }
 #endif
 
-        MSG_ParseDeltaEntity(&ent->s, &ent->s, number, bits, 0);
+        MSG_ParseDeltaEntity(&ent->s, &ent->s, number, bits, (msgEsFlags_t)0); // CPP: Cast
 
         // lazily relink even if removed
         if ((bits & RELINK_MASK) && !mvd->demoseeking) {
@@ -974,7 +974,7 @@ static void MVD_ParseServerData(mvd_t *mvd, int extrabits)
         MVD_Destroyf(mvd, "Oversize gamedir string");
     }
     mvd->clientNum = MSG_ReadShort();
-    mvd->flags = extrabits;
+    mvd->flags = (mvd_flags_t)extrabits; // CPP: Cast
 
 #if 0
     // change gamedir unless playing a demo
@@ -1018,7 +1018,7 @@ static void MVD_ParseServerData(mvd_t *mvd, int extrabits)
         Z_Free(mvd->players);
 
         // allocate new players
-        mvd->players = MVD_Mallocz(sizeof(mvd_player_t) * index);
+        mvd->players = (mvd_player_t*)MVD_Mallocz(sizeof(mvd_player_t) * index); // CPP: Cast
         mvd->maxclients = index;
 
         // clear chase targets
@@ -1152,11 +1152,11 @@ qboolean MVD_ParseMessage(mvd_t *mvd)
         case mvd_multicast_all_r:
         case mvd_multicast_pvs_r:
         case mvd_multicast_phs_r:
-            MVD_ParseMulticast(mvd, cmd, extrabits);
+            MVD_ParseMulticast(mvd, (mvd_ops_t)cmd, extrabits); // CPP: Cast
             break;
         case mvd_unicast:
         case mvd_unicast_r:
-            MVD_ParseUnicast(mvd, cmd, extrabits);
+            MVD_ParseUnicast(mvd, (mvd_ops_t)cmd, extrabits); // CPP: Cast
             break;
         case mvd_configstring:
             MVD_ParseConfigstring(mvd);
@@ -1173,7 +1173,7 @@ qboolean MVD_ParseMessage(mvd_t *mvd)
         case mvd_nop:
             break;
         default:
-            MVD_Destroyf(mvd, "Illegible command at %"PRIz": %d",
+            MVD_Destroyf(mvd, (const char*)"Illegible command at %" PRIz ": %d", // CPP: String fix.
                          msg_read.readcount - 1, cmd);
         }
     }

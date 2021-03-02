@@ -576,10 +576,10 @@ static void draw_alias_mesh(maliasmesh_t *mesh)
     GL_LoadMatrix(glr.entmatrix);
 
     if (shadelight)
-        state |= GLS_SHADE_SMOOTH;
+        state = (glStateBits_t)(state | GLS_SHADE_SMOOTH); // CPP: Bitflag cast
 
     if (glr.ent->flags & RF_TRANSLUCENT)
-        state |= GLS_BLEND_BLEND | GLS_DEPTHMASK_FALSE;
+        state = (glStateBits_t)(state | GLS_BLEND_BLEND | GLS_DEPTHMASK_FALSE); // CPP: Bitflag cast
 
     GL_StateBits(state);
 
@@ -589,11 +589,11 @@ static void draw_alias_mesh(maliasmesh_t *mesh)
     c.trisDrawn += mesh->numtris;
 
     if (shadelight) {
-        GL_ArrayBits(GLA_VERTEX | GLA_TC | GLA_COLOR);
+        GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_TC | GLA_COLOR)); // CPP: Cast
         GL_VertexPointer(3, VERTEX_SIZE, tess.vertices);
         GL_ColorFloatPointer(4, VERTEX_SIZE, tess.vertices + 4);
     } else {
-        GL_ArrayBits(GLA_VERTEX | GLA_TC);
+        GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_TC)); // CPP: Cast
         GL_VertexPointer(3, 4, tess.vertices);
         qglColor4fv(color);
     }

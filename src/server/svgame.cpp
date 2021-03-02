@@ -375,7 +375,7 @@ static void PF_configstring(int index, const char *val)
     maxlen = (MAX_CONFIGSTRINGS - index) * MAX_QPATH;
     if (len >= maxlen) {
         Com_Error(ERR_DROP,
-                  "%s: index %d overflowed: %"PRIz" > %"PRIz,
+                  "%s: index %d overflowed: %" PRIz " > %" PRIz, // CPP: String fix.
                   __func__, index, len, maxlen - 1);
     }
 
@@ -779,7 +779,7 @@ static void *PF_TagMalloc(size_t size, unsigned tag)
     if (!size) {
         return NULL;
     }
-    return memset(Z_TagMalloc(size, tag + TAG_MAX), 0, size);
+    return memset(Z_TagMalloc(size, (memtag_t)(tag + TAG_MAX)), 0, size); // CPP: Cast
 }
 
 static void PF_FreeTags(unsigned tag)
@@ -787,7 +787,7 @@ static void PF_FreeTags(unsigned tag)
     if (tag + TAG_MAX < tag) {
         Com_Error(ERR_FATAL, "%s: bad tag", __func__);
     }
-    Z_FreeTags(tag + TAG_MAX);
+    Z_FreeTags((memtag_t)(tag + TAG_MAX)); // CPP: Cast
 }
 
 static void PF_DebugGraph(float value, int color)
@@ -880,16 +880,16 @@ void SV_InitGameProgs(void)
 
     // for debugging or `proxy' mods
     if (sys_forcegamelib->string[0])
-        entry = _SV_LoadGameLibrary(sys_forcegamelib->string);
+        entry = (svgame_export_t * (*)(svgame_import_t*))_SV_LoadGameLibrary(sys_forcegamelib->string); // CPP: DANGER: WARNING: Is this cast ok?
 
     // try game first
     if (!entry && fs_game->string[0]) {
-        entry = SV_LoadGameLibrary(fs_game->string, "");
+        entry = (svgame_export_t * (*)(svgame_import_t*))SV_LoadGameLibrary(fs_game->string, ""); // CPP: DANGER: WARNING: Is this cast ok?
     }
 
     // then try basenac
     if (!entry) {
-        entry = SV_LoadGameLibrary(BASEGAME, "");
+        entry = (svgame_export_t * (*)(svgame_import_t*))SV_LoadGameLibrary(BASEGAME, ""); // CPP: DANGER: WARNING: Is this cast ok?
     }
 
     // all paths failed

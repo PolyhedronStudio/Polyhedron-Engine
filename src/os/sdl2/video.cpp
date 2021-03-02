@@ -233,13 +233,21 @@ static void VID_SDL_SetMode(void)
         SDL_SetWindowPosition(sdl_window, display_bounds.x, display_bounds.y);
 
         if (VID_GetFullscreen(&rc, &freq, NULL)) {
+            // CPP: Struct init ...
             SDL_DisplayMode mode = {
-                .format         = SDL_PIXELFORMAT_UNKNOWN,
-                .w              = rc.width,
-                .h              = rc.height,
-                .refresh_rate   = freq,
-                .driverdata     = NULL
+                SDL_PIXELFORMAT_UNKNOWN, // .format = 
+                rc.width, // .w = 
+                rc.height, // .h = 
+                freq, // .refresh_rate = 
+                NULL // .driverdata =
             };
+            //SDL_DisplayMode mode = {
+            //    .format         = SDL_PIXELFORMAT_UNKNOWN,
+            //    .w              = rc.width,
+            //    .h              = rc.height,
+            //    .refresh_rate   = freq,
+            //    .driverdata     = NULL
+            //};
             SDL_SetWindowDisplayMode(sdl_window, &mode);
             flags = SDL_WINDOW_FULLSCREEN;
         } else {
@@ -534,7 +542,7 @@ qboolean VID_Init(graphics_api_t api)
         if (SDL_GetWindowGammaRamp(sdl_window, gamma[0], gamma[1], gamma[2]) == 0 &&
             SDL_SetWindowGammaRamp(sdl_window, gamma[0], gamma[1], gamma[2]) == 0) {
             Com_Printf("...enabling hardware gamma\n");
-            sdl_flags |= (sdl_flags | QVF_GAMMARAMP);
+            sdl_flags = (vidFlags_t)(sdl_flags | (sdl_flags | QVF_GAMMARAMP)); // CPP: IMPORTANT: DANGER: sdl_flags |= (sdl_flags | QVF_GAMMARAMP);
         } else {
             Com_Printf("...hardware gamma not supported\n");
             Cvar_Reset(vid_hwgamma);
@@ -561,7 +569,7 @@ void VID_Shutdown(void)
         SDL_DestroyWindow(sdl_window);
         sdl_window = NULL;
     }
-    sdl_flags = 0;
+    sdl_flags = (vidFlags_t)0; // CPP: Cast
     if (SDL_WasInit(SDL_INIT_EVERYTHING) == SDL_INIT_VIDEO) {
         SDL_Quit();
     } else {
@@ -793,7 +801,7 @@ static qboolean InitMouse(void)
 
 static void GrabMouse(qboolean grab)
 {
-    SDL_bool relative = grab && !(Key_GetDest() & KEY_MENU);
+    SDL_bool relative = (SDL_bool)(grab && !(Key_GetDest() & KEY_MENU)); // CPP: Cast
     int cursor = (sdl_flags & QVF_FULLSCREEN) ? SDL_DISABLE : SDL_ENABLE;
 
     SDL_SetWindowGrab(sdl_window, (SDL_bool)grab);

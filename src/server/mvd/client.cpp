@@ -319,7 +319,7 @@ static mvd_t *create_channel(gtv_t *gtv)
 {
     mvd_t *mvd;
 
-    mvd = MVD_Mallocz(sizeof(*mvd));
+    mvd = (mvd_t*)MVD_Mallocz(sizeof(*mvd)); // CPP: Cast
     mvd->gtv = gtv;
     mvd->id = gtv->id;
     Q_strlcpy(mvd->name, gtv->name, sizeof(mvd->name));
@@ -610,7 +610,7 @@ static void demo_emit_snapshot(mvd_t *mvd)
 
     // TODO: write private layouts/configstrings
 
-    snap = MVD_Malloc(sizeof(*snap) + msg_write.cursize - 1);
+    snap = (mvd_snap_t*)MVD_Malloc(sizeof(*snap) + msg_write.cursize - 1); // CPP: Cast
     snap->framenum = mvd->framenum;
     snap->filepos = pos;
     snap->msglen = msg_write.cursize;
@@ -1102,7 +1102,7 @@ static void parse_hello(gtv_t *gtv)
             }
         }
         if (!gtv->z_buf.data) {
-            gtv->z_buf.data = MVD_Malloc(MAX_GTS_MSGLEN);
+            gtv->z_buf.data = (byte*)MVD_Malloc(MAX_GTS_MSGLEN); // CPP: Cast
             gtv->z_buf.size = MAX_GTS_MSGLEN;
         }
         gtv->z_act = qtrue; // remaining data is deflated
@@ -1189,7 +1189,7 @@ static void parse_stream_data(gtv_t *gtv)
 
         // allocate delay buffer
         size = mvd_buffer_size->integer * MAX_MSGLEN;
-        mvd->delay.data = MVD_Malloc(size);
+        mvd->delay.data = (byte*)MVD_Malloc(size);  // CPP: Cast
         mvd->delay.size = size;
         mvd->read_frame = gtv_read_frame;
         mvd->forward_cmd = gtv_forward_cmd;
@@ -1343,14 +1343,14 @@ static int inflate_stream(fifo_t *dst, fifo_t *src, z_streamp z)
     int     ret = Z_BUF_ERROR;
 
     do {
-        data = FIFO_Peek(src, &avail_in);
+        data = (byte*)FIFO_Peek(src, &avail_in); // CPP: Cast
         if (!avail_in) {
             break;
         }
         z->next_in = data;
         z->avail_in = (uInt)avail_in;
 
-        data = FIFO_Reserve(dst, &avail_out);
+        data = (byte*)FIFO_Reserve(dst, &avail_out); // CPP: Cast
         if (!avail_out) {
             break;
         }
@@ -1398,7 +1398,7 @@ static neterr_t run_connect(gtv_t *gtv)
 
     // allocate buffers
     if (!gtv->data) {
-        gtv->data = MVD_Malloc(MAX_GTS_MSGLEN + MAX_GTC_MSGLEN);
+        gtv->data = (byte*)MVD_Malloc(MAX_GTS_MSGLEN + MAX_GTC_MSGLEN); // CPP: Cast
     }
     gtv->stream.recv.data = gtv->data;
     gtv->stream.recv.size = MAX_GTS_MSGLEN;
@@ -1837,7 +1837,7 @@ static void emit_base_frame(mvd_t *mvd)
     for (i = 0; i < mvd->maxclients; i++) {
         player = &mvd->players[i];
         MSG_PackPlayer(&ps, &player->ps);
-        MSG_WriteDeltaPlayerstate_Packet(NULL, &ps, i, player_flags(mvd, player));
+        MSG_WriteDeltaPlayerstate_Packet(NULL, &ps, i, (msgPsFlags_t)player_flags(mvd, player)); // CPP: Cast
     }
     MSG_WriteByte(CLIENTNUM_NONE);
 
@@ -1848,7 +1848,7 @@ static void emit_base_frame(mvd_t *mvd)
             continue;   // entity never seen
         ent->s.number = i;
         MSG_PackEntity(&es, &ent->s, qfalse);
-        MSG_WriteDeltaEntity(NULL, &es, entity_flags(mvd, ent));
+        MSG_WriteDeltaEntity(NULL, &es, (msgEsFlags_t)entity_flags(mvd, ent)); // CPP: Cast
     }
     MSG_WriteShort(0);
 }
@@ -2052,7 +2052,7 @@ static void MVD_Connect_f(void)
     }
 
     // create new connection
-    gtv = MVD_Mallocz(sizeof(*gtv));
+    gtv = (gtv_t*)MVD_Mallocz(sizeof(*gtv)); // CPP: Cast
     gtv->id = mvd_chanid++;
     gtv->state = GTV_CONNECTING;
     gtv->stream = stream;
@@ -2480,7 +2480,7 @@ static void MVD_Play_f(void)
         FS_FCloseFile(f);
 
         len = strlen(buffer);
-        entry = MVD_Malloc(sizeof(*entry) + len);
+        entry = (string_entry_t*)MVD_Malloc(sizeof(*entry) + len); // CPP: Cast
         memcpy(entry->string, buffer, len + 1);
         entry->next = head;
         head = entry;
@@ -2495,7 +2495,7 @@ static void MVD_Play_f(void)
         demo_free_playlist(gtv);
     } else {
         // create new connection
-        gtv = MVD_Mallocz(sizeof(*gtv));
+        gtv = (gtv_t*)MVD_Mallocz(sizeof(*gtv)); // CPP: Cast
         gtv->id = mvd_chanid++;
         gtv->state = GTV_READING;
         gtv->drop = demo_destroy;

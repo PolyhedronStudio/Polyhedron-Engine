@@ -457,7 +457,7 @@ static void MVD_FollowStop(mvd_client_t *client)
     VectorClear(client->ps.kick_angles);
     Vector4Clear(client->ps.blend);
     client->ps.pmove.pm_flags = 0;
-    client->ps.pmove.pm_type = mvd->pm_type;
+    client->ps.pmove.pm_type = (pmtype_t)mvd->pm_type; // CPP: Cast
     client->ps.rdflags = 0;
     client->ps.gunindex = 0;
     client->ps.fov = client->fov;
@@ -1723,9 +1723,9 @@ static void MVD_GameInit(void)
     Z_TagReserve((sizeof(edict_t) +
                   sizeof(mvd_client_t)) * sv_maxclients->integer +
                  sizeof(edict_t), TAG_MVD);
-    mvd_clients = Z_ReservedAllocz(sizeof(mvd_client_t) *
+    mvd_clients = (mvd_client_t*)Z_ReservedAllocz(sizeof(mvd_client_t) * // CPP: Cast
                                    sv_maxclients->integer);
-    edicts = Z_ReservedAllocz(sizeof(edict_t) *
+    edicts = (edict_t*)Z_ReservedAllocz(sizeof(edict_t) * // CPP: Cast
                               (sv_maxclients->integer + 1));
 
     for (i = 0; i < sv_maxclients->integer; i++) {
@@ -2136,7 +2136,7 @@ static void MVD_IntermissionStop(mvd_t *mvd)
             continue;
         }
         if (client->layout_type == LAYOUT_SCORES) {
-            client->layout_type = 0;
+            client->layout_type = (mvd_layout_t)0; // CPP: Cast
         }
         target = client->oldtarget;
         if (target && target->inuse) {
@@ -2259,7 +2259,7 @@ update:
     }
 }
 
-static void MVD_GameServerCommand(void)
+static void MVD_GameServerCommand(pmoveParams_t *) // CPP: Fix, but wtf do we do with this anyway
 {
 }
 

@@ -366,7 +366,7 @@ void SV_InitGame(unsigned mvd_spawn)
 
     if (svs.initialized) {
         // cause any connected clients to reconnect
-        SV_Shutdown("Server restarted\n", ERR_RECONNECT | mvd_spawn);
+        SV_Shutdown("Server restarted\n", (error_type_t)(ERR_RECONNECT | mvd_spawn));
     } else {
         // make sure the client is down
         CL_Disconnect(ERR_RECONNECT);
@@ -426,10 +426,10 @@ void SV_InitGame(unsigned mvd_spawn)
         NET_Config(NET_SERVER);
     }
 
-    svs.client_pool = SV_Mallocz(sizeof(client_t) * sv_maxclients->integer);
+    svs.client_pool = (client_t*)SV_Mallocz(sizeof(client_t) * sv_maxclients->integer); // CPP: Cast
 
     svs.num_entities = sv_maxclients->integer * UPDATE_BACKUP * MAX_PACKET_ENTITIES;
-    svs.entities = SV_Mallocz(sizeof(entity_packed_t) * svs.num_entities);
+    svs.entities = (entity_packed_t*)SV_Mallocz(sizeof(entity_packed_t) * svs.num_entities); // CPP: Cast
 
     // initialize MVD server
     if (!mvd_spawn) {

@@ -44,7 +44,7 @@ void SV_PreRunCmd(void)
     {
         playertouchmax = max;
         Z_Free(playertouch);
-        playertouch = Z_Malloc((playertouchmax >> 3) + 1);
+        playertouch = (byte*)Z_Malloc((playertouchmax >> 3) + 1); // CPP: Cast
     }
     memset(playertouch, 0, playertouchmax >> 3);
 }
@@ -103,7 +103,7 @@ static void create_baselines(void)
 
         chunk = &sv_client->baselines[i >> SV_BASELINES_SHIFT];
         if (*chunk == NULL) {
-            *chunk = SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK);
+            *chunk = (entity_packed_t*)SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK); // CPP: Cast
         }
 
         base = *chunk + (i & SV_BASELINES_MASK);
@@ -154,10 +154,10 @@ static void write_plain_configstrings(void)
 
 static void write_baseline(entity_packed_t *base)
 {
-    msgEsFlags_t flags = sv_client->esFlags | MSG_ES_FORCE;
+    msgEsFlags_t flags = (msgEsFlags_t)(sv_client->esFlags | MSG_ES_FORCE); // CPP: Cast
 
     if (Q2PRO_SHORTANGLES(sv_client, base->number)) {
-        flags |= MSG_ES_SHORTANGLES;
+        flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES); //flags |= MSG_ES_SHORTANGLES;
     }
 
     MSG_WriteDeltaEntity(NULL, base, flags);
@@ -237,7 +237,7 @@ static void write_compressed_gamestate(void)
     MSG_WriteShort(0);   // end of baselines
 
     SZ_WriteByte(buf, svc_zpacket);
-    patch = SZ_GetSpace(buf, 2);
+    patch = (uint8_t*)SZ_GetSpace(buf, 2); // CPP: Cast
     SZ_WriteShort(buf, msg_write.cursize);
 
     deflateReset(&svs.z);
@@ -750,7 +750,7 @@ static void SV_BeginDownload_f(void)
         return;
     }
 
-    download = SV_Malloc(downloadsize);
+    download = (byte*)SV_Malloc(downloadsize); // CPP: Cast
     result = FS_Read(download, downloadsize, f);
     if (result != downloadsize) {
         Com_DPrintf("Couldn't download %s to %s\n", name, sv_client->name);
