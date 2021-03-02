@@ -456,7 +456,8 @@ byte *IMG_ReadPixels_GL(int *width, int *height, int *rowbytes);
  * gl_tess.c
  *
  */
-#define TESS_MAX_VERTICES   4096
+// N&C: Increase limits.
+#define TESS_MAX_VERTICES   8192 // 4096
 #define TESS_MAX_INDICES    (3 * TESS_MAX_VERTICES)
 
 typedef struct {
