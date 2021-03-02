@@ -230,7 +230,7 @@ void Scrap_Upload(void)
     maxlevel = GL_UpscaleLevel(SCRAP_BLOCK_WIDTH, SCRAP_BLOCK_HEIGHT, IT_PIC, IF_SCRAP);
     if (maxlevel) {
         GL_Upscale32(scrap_data, SCRAP_BLOCK_WIDTH, SCRAP_BLOCK_HEIGHT, maxlevel, IT_PIC, IF_SCRAP);
-        GL_SetFilterAndRepeat(IT_PIC, IF_SCRAP | IF_UPSCALED);
+        GL_SetFilterAndRepeat(IT_PIC, (imageflags_t)(IF_SCRAP | IF_UPSCALED));
     } else {
         GL_Upload32(scrap_data, SCRAP_BLOCK_WIDTH, SCRAP_BLOCK_HEIGHT, maxlevel, IT_PIC, IF_SCRAP);
         GL_SetFilterAndRepeat(IT_PIC, IF_SCRAP);
@@ -432,7 +432,7 @@ static void GL_Upload32(byte *data, int width, int height, int baselevel, imaget
             height >>= 1;
         }
     } else {
-        scaled = FS_AllocTempMem(scaled_width * scaled_height * 4);
+        scaled = (byte*)FS_AllocTempMem(scaled_width * scaled_height * 4); // CPP: Cast
         IMG_ResampleTexture(data, width, height, scaled,
                             scaled_width, scaled_height);
     }
@@ -513,7 +513,7 @@ static void GL_Upscale32(byte *data, int width, int height, int maxlevel, imaget
 {
     byte    *buffer;
 
-    buffer = FS_AllocTempMem((width * height) << ((maxlevel + 1) * 2));
+    buffer = (byte*)FS_AllocTempMem((width * height) << ((maxlevel + 1) * 2)); // CPP: Cast
 
     if (maxlevel >= 2) {
         HQ4x_Render((uint32_t *)buffer, (uint32_t *)data, width, height);
@@ -636,7 +636,7 @@ void IMG_Load_GL(image_t *image, byte *pic)
         }
 
         image->texnum = TEXNUM_SCRAP;
-        image->flags |= IF_SCRAP | IF_TRANSPARENT;
+        image->flags = (imageflags_t)(image->flags | IF_SCRAP | IF_TRANSPARENT); // CPP: DANGER: WARNING: ENUM CAST FLAG BIT THING
         image->sl = (s + 0.01f) / (float)SCRAP_BLOCK_WIDTH;
         image->sh = (s + width - 0.01f) / (float)SCRAP_BLOCK_WIDTH;
         image->tl = (t + 0.01f) / (float)SCRAP_BLOCK_HEIGHT;
@@ -644,7 +644,7 @@ void IMG_Load_GL(image_t *image, byte *pic)
 
         maxlevel = GL_UpscaleLevel(SCRAP_BLOCK_WIDTH, SCRAP_BLOCK_HEIGHT, IT_PIC, IF_SCRAP);
         if (maxlevel)
-            image->flags |= IF_UPSCALED;
+            image->flags = (imageflags_t)(image->flags | IF_UPSCALED); // CPP: Bitflags
 
         scrap_dirty = qtrue;
     } else {
@@ -654,7 +654,7 @@ void IMG_Load_GL(image_t *image, byte *pic)
         maxlevel = GL_UpscaleLevel(width, height, image->type, image->flags);
         if (maxlevel) {
             GL_Upscale32(pic, width, height, maxlevel, image->type, image->flags);
-            image->flags |= IF_UPSCALED;
+            image->flags = (imageflags_t)(image->flags | IF_UPSCALED); // CPP: Image flags bitflag
         } else {
             GL_Upload32(pic, width, height, maxlevel, image->type, image->flags);
         }
@@ -662,7 +662,7 @@ void IMG_Load_GL(image_t *image, byte *pic)
         GL_SetFilterAndRepeat(image->type, image->flags);
 
         if (upload_alpha) {
-            image->flags |= IF_TRANSPARENT;
+            image->flags = (imageflags_t)(image->flags | IF_TRANSPARENT);
         }
         image->upload_width = upload_width << maxlevel;     // after power of 2 and scales
         image->upload_height = upload_height << maxlevel;
@@ -772,7 +772,7 @@ static void GL_InitDefaultTexture(void)
     ntx->width = ntx->upload_width = 8;
     ntx->height = ntx->upload_height = 8;
     ntx->type = IT_WALL;
-    ntx->flags = 0;
+    ntx->flags = (imageflags_t)0;
     ntx->texnum = TEXNUM_DEFAULT;
     ntx->sl = 0;
     ntx->sh = 1;
@@ -813,13 +813,13 @@ static void GL_InitWhiteImage(void)
 
     pixel = U32_WHITE;
     GL_ForceTexture(0, TEXNUM_WHITE);
-    GL_Upload32((byte *)&pixel, 1, 1, 0, IT_SPRITE, IF_REPEAT | IF_NEAREST);
-    GL_SetFilterAndRepeat(IT_SPRITE, IF_REPEAT | IF_NEAREST);
+    GL_Upload32((byte *)&pixel, 1, 1, 0, IT_SPRITE, (imageflags_t)(IF_REPEAT | IF_NEAREST)); // CPP: Cast
+    GL_SetFilterAndRepeat(IT_SPRITE, (imageflags_t)(IF_REPEAT | IF_NEAREST)); // CPP: Cast
 
     pixel = U32_BLACK;
     GL_ForceTexture(0, TEXNUM_BLACK);
-    GL_Upload32((byte *)&pixel, 1, 1, 0, IT_SPRITE, IF_REPEAT | IF_NEAREST);
-    GL_SetFilterAndRepeat(IT_SPRITE, IF_REPEAT | IF_NEAREST);
+    GL_Upload32((byte*)&pixel, 1, 1, 0, IT_SPRITE, (imageflags_t)(IF_REPEAT | IF_NEAREST)); // CPP: Cast
+    GL_SetFilterAndRepeat(IT_SPRITE, (imageflags_t)(IF_REPEAT | IF_NEAREST)); // CPP: Cast
 }
 
 static void GL_InitBeamTexture(void)

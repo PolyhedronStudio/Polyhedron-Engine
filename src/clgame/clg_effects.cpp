@@ -1070,11 +1070,18 @@ void CLG_BloodParticleEffect(vec3_t org, vec3_t dir, int color, int count)
     float       d;
 
     // add decal:
+    // CPP: struct init.
     decal_t dec = {
-      .pos = {org[0],org[1],org[2]},
-      .dir = {dir[0],dir[1],dir[2]},
-      .spread = 0.25f,
-      .length = 350 };
+      {org[0],org[1],org[2]}, // .pos = 
+      {dir[0],dir[1],dir[2]}, // .dir = 
+      0.25f, // .spread = 
+      350  // .length = 
+    };
+    //decal_t dec = {
+    //  .pos = {org[0],org[1],org[2]},
+    //  .dir = {dir[0],dir[1],dir[2]},
+    //  .spread = 0.25f,
+    //  .length = 350 };
     clgi.R_AddDecal(&dec);
 
     float a[3] = { dir[1], -dir[2], dir[0] };

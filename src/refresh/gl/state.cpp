@@ -59,7 +59,7 @@ void GL_BindTexture(GLuint tmu, GLuint texnum)
 
 void GL_StateBits(glStateBits_t bits)
 {
-    glStateBits_t diff = bits ^ gls.state_bits;
+    glStateBits_t diff = (glStateBits_t)(bits ^ gls.state_bits); // CPP: Cast
 
     if (!diff) {
         return;
@@ -184,7 +184,7 @@ void GL_StateBits(glStateBits_t bits)
 
 void GL_ArrayBits(glArrayBits_t bits)
 {
-    glArrayBits_t diff = bits ^ gls.array_bits;
+    glArrayBits_t diff = (glArrayBits_t)(bits ^ gls.array_bits); // CPP: Cast
 
     if (!diff) {
         return;
@@ -432,7 +432,7 @@ byte *IMG_ReadPixels_GL(int *width, int *height, int *rowbytes)
 
     qglGetIntegerv(GL_PACK_ALIGNMENT, &align);
     pitch = (r_config.width * 3 + align - 1) & ~(align - 1);
-    pixels = FS_AllocTempMem(pitch * r_config.height);
+    pixels = (byte*)FS_AllocTempMem(pitch * r_config.height); // CPP: Cast
 
     qglReadPixels(0, 0, r_config.width, r_config.height,
                   GL_RGB, GL_UNSIGNED_BYTE, pixels);

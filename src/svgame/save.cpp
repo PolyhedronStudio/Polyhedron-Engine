@@ -433,7 +433,7 @@ static const save_field_t gamefields[] = {
 static void write_data(void *buf, size_t len, FILE *f)
 {
     if (fwrite(buf, 1, len, f) != len) {
-        gi.error("%s: couldn't write %"PRIz" bytes", __func__, len);
+        gi.error("%s: couldn't write %" PRIz " bytes", __func__, len); // CPP: String fix.
     }
 }
 
@@ -562,7 +562,7 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     case F_POINTER:
-        write_pointer(f, *(void **)p, field->size);
+        write_pointer(f, *(void **)p, (ptr_type_t)field->size); // CPP: Cast
         break;
 
     default:
@@ -582,7 +582,7 @@ static void write_fields(FILE *f, const save_field_t *fields, void *base)
 static void read_data(void *buf, size_t len, FILE *f)
 {
     if (fread(buf, 1, len, f) != len) {
-        gi.error("%s: couldn't read %"PRIz" bytes", __func__, len);
+        gi.error("%s: couldn't read %" PRIz " bytes", __func__, len); // CPP: String fix.
     }
 }
 
@@ -631,7 +631,7 @@ static char *read_string(FILE *f)
         gi.error("%s: bad length", __func__);
     }
 
-    s = gi.TagMalloc(len + 1, TAG_LEVEL);
+    s = (char*)gi.TagMalloc(len + 1, TAG_LEVEL); // CPP: Casts
     read_data(s, len, f);
     s[len] = 0;
 
@@ -734,17 +734,17 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     case F_EDICT:
-        *(edict_t **)p = read_index(f, sizeof(edict_t), g_edicts, game.maxentities - 1);
+        *(edict_t **)p = (edict_t*)read_index(f, sizeof(edict_t), g_edicts, game.maxentities - 1); // CPP: Cast
         break;
     case F_CLIENT:
-        *(gclient_t **)p = read_index(f, sizeof(gclient_t), game.clients, game.maxclients - 1);
+        *(gclient_t **)p = (gclient_t*)read_index(f, sizeof(gclient_t), game.clients, game.maxclients - 1); // CPP: Cast
         break;
     case F_ITEM:
-        *(gitem_t **)p = read_index(f, sizeof(gitem_t), itemlist, game.num_items - 1);
+        *(gitem_t **)p = (gitem_t*)read_index(f, sizeof(gitem_t), itemlist, game.num_items - 1); // CPP: Cast
         break;
 
     case F_POINTER:
-        *(void **)p = read_pointer(f, field->size);
+        *(void **)p = read_pointer(f, (ptr_type_t)field->size); // CPP: Cast
         break;
 
     default:
@@ -842,11 +842,11 @@ void ReadGame(const char *filename)
         gi.error("Savegame has bad maxentities");
     }
 
-    g_edicts = gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
+    g_edicts = (edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
     globals.edicts = g_edicts;
     globals.max_edicts = game.maxentities;
 
-    game.clients = gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME);
+    game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     for (i = 0; i < game.maxclients; i++) {
         read_fields(f, clientfields, &game.clients[i]);
     }
@@ -987,7 +987,7 @@ void ReadLevel(const char *filename)
 
         if (ent->think == func_clock_think || ent->use == func_clock_use) {
             char *msg = ent->message;
-            ent->message = gi.TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL);
+            ent->message = (char*)gi.TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL); // CPP: Cast
             if (msg) {
                 Q_strlcpy(ent->message, msg, CLOCK_MESSAGE_SIZE);
                 gi.TagFree(msg);

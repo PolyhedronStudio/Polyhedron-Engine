@@ -226,7 +226,7 @@ static void CLG_CheckForVersion(const char* s)
 {
     char* p;
 
-    p = strstr(s, ": ");
+    p = (char*)strstr(s, ": "); // CPP: Cast
     if (!p) {
         return;
     }

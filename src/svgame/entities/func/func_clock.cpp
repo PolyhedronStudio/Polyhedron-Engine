@@ -152,7 +152,7 @@ void SP_func_clock(edict_t* self)
 
     func_clock_reset(self);
 
-    self->message = gi.TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL);
+    self->message = (char*)gi.TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL); // CPP: Cast
 
     self->think = func_clock_think;
 

@@ -360,8 +360,8 @@ static void GL_DrawSpriteModel(model_t *model)
 
     GL_LoadMatrix(glr.viewmatrix);
     GL_BindTexture(0, image->texnum);
-    GL_StateBits(bits);
-    GL_ArrayBits(GLA_VERTEX | GLA_TC);
+    GL_StateBits((glStateBits_t)bits); // CPP: Cast
+    GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_TC)); // CPP: Cast
     qglColor4f(1, 1, 1, alpha);
 
     VectorScale(glr.viewaxis[1], frame->origin_x, left);
@@ -409,7 +409,7 @@ static void GL_DrawNullModel(void)
     GL_LoadMatrix(glr.viewmatrix);
     GL_BindTexture(0, TEXNUM_WHITE);
     GL_StateBits(GLS_DEFAULT);
-    GL_ArrayBits(GLA_VERTEX | GLA_COLOR);
+    GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_COLOR)); // CPP: Cast
     GL_ColorBytePointer(4, 0, (GLubyte *)colors);
     GL_VertexPointer(3, 0, &points[0][0]);
     qglDrawArrays(GL_LINES, 0, 6);
@@ -474,13 +474,13 @@ static void GL_DrawEntities(int mask)
         }
 
         switch (model->type) {
-        case MOD_ALIAS:
+        case model_s::MOD_ALIAS: // CPP: Enum
             GL_DrawAliasModel(model);
             break;
-        case MOD_SPRITE:
+        case model_s::MOD_SPRITE: // CPP: Enum
             GL_DrawSpriteModel(model);
             break;
-        case MOD_EMPTY:
+        case model_s::MOD_EMPTY: // CPP: Enum
             break;
         default:
             Com_Error(ERR_FATAL, "%s: bad model type", __func__);
@@ -1139,7 +1139,7 @@ void R_ModeChanged_GL(int width, int height, int flags, int rowbytes, void *pixe
 {
     r_config.width = width;
     r_config.height = height;
-    r_config.flags = flags;
+    r_config.flags = (vidFlags_t)flags; // CPP: Cast
 }
 
 void R_AddDecal_GL(decal_t *d) {}

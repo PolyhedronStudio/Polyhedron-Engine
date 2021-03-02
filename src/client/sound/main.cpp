@@ -78,7 +78,7 @@ static cvar_t   *s_enable;
 static cvar_t   *s_auto_focus;
 static cvar_t   *s_swapstereo;
 
-qboolean snd_is_underwater;
+extern qboolean snd_is_underwater; // CPP: Made extern
 qboolean snd_is_underwater_enabled;
 
 extern cvar_t *cl_jumpsound;

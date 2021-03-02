@@ -157,7 +157,7 @@ void SCR_DrawStringMulti(int x, int y, int flags, size_t maxlen,
     size_t  len;
 
     while (*s) {
-        p = strchr(s, '\n');
+        p = (char*)strchr(s, '\n'); // CPP: Cast
         if (!p) {
             SCR_DrawStringEx(x, y, flags, maxlen, s, font);
             break;
@@ -253,11 +253,11 @@ color_index_t SCR_ParseColorIndex(const char* s, color_index_t last)
     color_index_t i;
 
     if (COM_IsUint(s)) {
-        i = strtoul(s, NULL, 10);
+        i = (color_index_t)strtoul(s, NULL, 10); // CPP: Cast
         return i > last ? COLOR_NONE : i;
     }
 
-    for (i = 0; i <= last; i++) {
+    for (i = (color_index_t)0; i <= last; i = (color_index_t)(i + 1)) { // CPP: Cast for loop
         if (!strcmp(colorNames[i], s)) {
             return i;
         }
@@ -624,7 +624,7 @@ static void SCR_Draw_f(void)
         }
     }
 
-    obj = clgi.Z_TagMalloc(sizeof(*obj), TAG_GENERAL);
+    obj = (drawobj_t*)clgi.Z_TagMalloc(sizeof(*obj), TAG_GENERAL); // CPP: Cast
     obj->x = x;
     obj->y = y;
     obj->cvar = cvar;

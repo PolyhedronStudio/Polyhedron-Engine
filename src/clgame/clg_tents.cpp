@@ -197,7 +197,7 @@ static explosion_t* CLG_AllocExplosion(void)
 	int     time;
 
 	for (i = 0, e = clg_explosions; i < MAX_EXPLOSIONS; i++, e++) {
-		if (e->type == ex_free) {
+		if (e->type == explosion_t::ex_free) { // CPP: Enum
 			memset(e, 0, sizeof(*e));
 			return e;
 		}
@@ -222,7 +222,7 @@ static explosion_t* CLG_PlainExplosion(qboolean big)
 
 	ex = CLG_AllocExplosion();
 	VectorCopy(teParameters.pos1, ex->ent.origin);
-	ex->type = ex_poly;
+	ex->type = explosion_t::ex_poly; // CPP: Enum
 	ex->ent.flags = RF_FULLBRIGHT;
 	ex->start = cl->servertime - CL_FRAMETIME;
 	ex->light = 350;
@@ -260,7 +260,7 @@ void CLG_SmokeAndFlash(vec3_t origin)
 
 	ex = CLG_AllocExplosion();
 	VectorCopy(origin, ex->ent.origin);
-	ex->type = ex_misc;
+	ex->type = explosion_t::ex_misc; // CPP: Enum
 	ex->frames = 4;
 	ex->ent.flags = RF_TRANSLUCENT | RF_NOSHADOW;
 	ex->start = cl->servertime - CL_FRAMETIME;
@@ -268,7 +268,7 @@ void CLG_SmokeAndFlash(vec3_t origin)
 
 	ex = CLG_AllocExplosion();
 	VectorCopy(origin, ex->ent.origin);
-	ex->type = ex_flash;
+	ex->type = explosion_t::ex_flash; // CPP: Enum
 	ex->ent.flags = RF_FULLBRIGHT;
 	ex->frames = 2;
 	ex->start = cl->servertime - CL_FRAMETIME;
@@ -314,11 +314,11 @@ static void CLG_AddExplosionLight(explosion_t* ex, float phase)
 
 	switch (ex->type)
 	{
-	case ex_poly:
+	case explosion_t::ex_poly: // CPP: Enum
 		curve = ex_poly_light;
 		curve_size = LENGTH(ex_poly_light);
 		break;
-	case ex_blaster:
+	case explosion_t::ex_blaster: // CPP: Enum
 		curve = ex_blaster_light;
 		curve_size = LENGTH(ex_blaster_light);
 		break;
@@ -363,7 +363,7 @@ static void CLG_AddExplosions(void)
 	memset(&ent, 0, sizeof(ent));
 
 	for (i = 0, ex = clg_explosions; i < MAX_EXPLOSIONS; i++, ex++) {
-		if (ex->type == ex_free)
+		if (ex->type == explosion_t::ex_free) // CPP: Cast
 			continue;
 		float inv_frametime = ex->frametime ? 1.f / (float)ex->frametime : BASE_1_FRAMETIME;
 		frac = (cl->time - ex->start) * inv_frametime;
@@ -372,30 +372,30 @@ static void CLG_AddExplosions(void)
 		ent = &ex->ent;
 
 		switch (ex->type) {
-		case ex_mflash:
+		case explosion_t::ex_mflash:
 			if (f >= ex->frames - 1)
-				ex->type = ex_free;
+				ex->type = explosion_t::ex_free;
 			break;
-		case ex_misc:
-		case ex_blaster:
-		case ex_flare:
-		case ex_light:
+		case explosion_t::ex_misc:
+		case explosion_t::ex_blaster:
+		case explosion_t::ex_flare:
+		case explosion_t::ex_light:
 			if (f >= ex->frames - 1) {
-				ex->type = ex_free;
+				ex->type = explosion_t::ex_free;
 				break;
 			}
 			ent->alpha = 1.0 - frac / (ex->frames - 1);
 			break;
-		case ex_flash:
+		case explosion_t::ex_flash:
 			if (f >= 1) {
-				ex->type = ex_free;
+				ex->type = explosion_t::ex_free;
 				break;
 			}
 			ent->alpha = 1.0;
 			break;
-		case ex_poly:
+		case explosion_t::ex_poly:
 			if (f >= ex->frames - 1) {
-				ex->type = ex_free;
+				ex->type = explosion_t::ex_free;
 				break;
 			}
 
@@ -416,9 +416,9 @@ static void CLG_AddExplosions(void)
 					ent->skinnum = 6;
 			}
 			break;
-		case ex_poly2:
+		case explosion_t::ex_poly2:
 			if (f >= ex->frames - 1) {
-				ex->type = ex_free;
+				ex->type = explosion_t::ex_free;
 				break;
 			}
 
@@ -430,7 +430,7 @@ static void CLG_AddExplosions(void)
 			break;
 		}
 
-		if (ex->type == ex_free)
+		if (ex->type == explosion_t::ex_free) // CPP: Cast
 			continue;
 
 		if (vid_rtx->integer)
@@ -442,7 +442,7 @@ static void CLG_AddExplosions(void)
 					ex->lightcolor[0], ex->lightcolor[1], ex->lightcolor[2]);
 		}
 
-		if (ex->type != ex_light) {
+		if (ex->type != explosion_t::ex_light) {
 			VectorCopy(ent->origin, ent->oldorigin);
 
 			if (f < 0)
@@ -1089,7 +1089,7 @@ void CLG_ParseTempEntity(void)
 		ex = CLG_AllocExplosion();
 		VectorCopy(teParameters.pos1, ex->ent.origin);
 		dirtoangles(ex->ent.angles);
-		ex->type = ex_blaster;
+		ex->type = explosion_t::ex_blaster;
 		ex->ent.flags = RF_FULLBRIGHT | RF_TRANSLUCENT;
 		ex->ent.tent_type = teParameters.type;
 		switch (teParameters.type) {
@@ -1104,7 +1104,7 @@ void CLG_ParseTempEntity(void)
 			ex->lightcolor[1] = 1;
 			break;
 		case TE_FLECHETTE:
-			ex->type = ex_blaster;
+			ex->type = explosion_t::ex_blaster;
 			CLG_BlasterParticles2(teParameters.pos1, teParameters.dir, 0x6f);  // 75
 			ex->ent.skinnum = 2;
 			ex->lightcolor[0] = 0.19;
@@ -1115,7 +1115,7 @@ void CLG_ParseTempEntity(void)
 			CLG_BlasterParticles2(teParameters.pos1, teParameters.dir, 0xd0);
 			ex->lightcolor[0] = 1;
 			ex->lightcolor[1] = 1;
-			ex->type = ex_flare;
+			ex->type = explosion_t::ex_flare;
 			break;
 		}
 		ex->start = cl->servertime - CL_FRAMETIME;
@@ -1149,7 +1149,7 @@ void CLG_ParseTempEntity(void)
 			ex->baseframe = 30;
 		}
 		if (cl_disable_explosions->integer & NOEXP_GRENADE)
-			ex->type = ex_light;
+			ex->type = explosion_t::ex_light;
 
 		if (!(cl_disable_particles->integer & NOPART_GRENADE_EXPLOSION))
 			CLG_ExplosionParticles(teParameters.pos1);
@@ -1181,7 +1181,7 @@ void CLG_ParseTempEntity(void)
 	case TE_ROCKET_EXPLOSION_WATER:
 		ex = CLG_PlainExplosion(qfalse);
 		if (cl_disable_explosions->integer & NOEXP_ROCKET)
-			ex->type = ex_light;
+			ex->type = explosion_t::ex_light;
 
 		if (!(cl_disable_particles->integer & NOPART_ROCKET_EXPLOSION))
 			CLG_ExplosionParticles(teParameters.pos1);
@@ -1211,7 +1211,7 @@ void CLG_ParseTempEntity(void)
 	case TE_BFG_EXPLOSION:
 		ex = CLG_AllocExplosion();
 		VectorCopy(teParameters.pos1, ex->ent.origin);
-		ex->type = ex_poly;
+		ex->type = explosion_t::ex_poly;
 		ex->ent.flags = RF_FULLBRIGHT;
 		ex->start = cl->servertime - CL_FRAMETIME;
 		ex->light = 350;
@@ -1258,7 +1258,7 @@ void CLG_ParseTempEntity(void)
 
 		ex = CLG_AllocExplosion();
 		VectorCopy(teParameters.pos1, ex->ent.origin);
-		ex->type = ex_flash;
+		ex->type = explosion_t::ex_flash;
 		// note to self
 		// we need a better no draw flag
 		ex->ent.flags = RF_BEAM;

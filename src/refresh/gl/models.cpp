@@ -67,7 +67,7 @@ qerror_t MOD_LoadMD2_GL(model_t *model, const void *rawdata, size_t length)
     if (ret) {
         if (ret == Q_ERR_TOO_FEW) {
             // empty models draw nothing
-            model->type = MOD_EMPTY;
+            model->type = model_s::MOD_EMPTY; // CPP: Enum
             return Q_ERR_SUCCESS;
         }
         return ret;
@@ -132,20 +132,20 @@ qerror_t MOD_LoadMD2_GL(model_t *model, const void *rawdata, size_t length)
     }
 
     Hunk_Begin(&model->hunk, 0x400000);
-    model->type = MOD_ALIAS;
+    model->type = model_s::MOD_ALIAS; // CPP: Enum
     model->nummeshes = 1;
     model->numframes = header.num_frames;
-    model->meshes = MOD_Malloc(sizeof(maliasmesh_t));
-    model->frames = MOD_Malloc(header.num_frames * sizeof(maliasframe_t));
+    model->meshes = (maliasmesh_s*)MOD_Malloc(sizeof(maliasmesh_t)); // CPP: Cast
+    model->frames = (maliasframe_s*)MOD_Malloc(header.num_frames * sizeof(maliasframe_t)); // CPP: Cast
 
     dst_mesh = model->meshes;
     dst_mesh->numtris = numindices / 3;
     dst_mesh->numindices = numindices;
     dst_mesh->numverts = numverts;
     dst_mesh->numskins = header.num_skins;
-    dst_mesh->verts = MOD_Malloc(numverts * header.num_frames * sizeof(maliasvert_t));
-    dst_mesh->tcoords = MOD_Malloc(numverts * sizeof(maliastc_t));
-    dst_mesh->indices = MOD_Malloc(numindices * sizeof(QGL_INDEX_TYPE));
+    dst_mesh->verts = (maliasvert_t*)MOD_Malloc(numverts * header.num_frames * sizeof(maliasvert_t)); // CPP: Cast
+    dst_mesh->tcoords = (maliastc_t*)MOD_Malloc(numverts * sizeof(maliastc_t)); // CPP: Cast
+    dst_mesh->indices = (GLuint*)MOD_Malloc(numindices * sizeof(QGL_INDEX_TYPE)); // CPP: Cast
 
     if (dst_mesh->numtris != header.num_tris) {
         Com_DPrintf("%s has %d bad triangles\n", model->name, header.num_tris - dst_mesh->numtris);
@@ -295,9 +295,9 @@ static qerror_t MOD_LoadMD3Mesh(model_t *model, maliasmesh_t *mesh,
     mesh->numindices = header.num_tris * 3;
     mesh->numverts = header.num_verts;
     mesh->numskins = header.num_skins;
-    mesh->verts = MOD_Malloc(sizeof(maliasvert_t) * header.num_verts * model->numframes);
-    mesh->tcoords = MOD_Malloc(sizeof(maliastc_t) * header.num_verts);
-    mesh->indices = MOD_Malloc(sizeof(QGL_INDEX_TYPE) * header.num_tris * 3);
+    mesh->verts = (maliasvert_t*)MOD_Malloc(sizeof(maliasvert_t) * header.num_verts * model->numframes); // CPP: Cast
+    mesh->tcoords = (maliastc_t*)MOD_Malloc(sizeof(maliastc_t) * header.num_verts); // CPP: Cast
+    mesh->indices = (GLuint*)MOD_Malloc(sizeof(QGL_INDEX_TYPE) * header.num_tris * 3); // CPP: Cast
 
     // load all skins
     src_skin = (dmd3skin_t *)(rawdata + header.ofs_skins);
@@ -382,11 +382,11 @@ qerror_t MOD_LoadMD3_GL(model_t *model, const void *rawdata, size_t length)
         return Q_ERR_BAD_EXTENT;
 
     Hunk_Begin(&model->hunk, 0x800000);
-    model->type = MOD_ALIAS;
+    model->type = model_s::MOD_ALIAS; // CPP: Enum
     model->numframes = header.num_frames;
     model->nummeshes = header.num_meshes;
-    model->meshes = MOD_Malloc(sizeof(maliasmesh_t) * header.num_meshes);
-    model->frames = MOD_Malloc(sizeof(maliasframe_t) * header.num_frames);
+    model->meshes = (maliasmesh_s*)MOD_Malloc(sizeof(maliasmesh_t) * header.num_meshes); // CPP: Cast
+    model->frames = (maliasframe_s*)MOD_Malloc(sizeof(maliasframe_t) * header.num_frames); // CPP: Cast
 
     // load all frames
     src_frame = (dmd3frame_t *)((byte *)rawdata + header.ofs_frames);
@@ -428,7 +428,7 @@ void MOD_Reference_GL(model_t *model)
 
     // register any images used by the models
     switch (model->type) {
-    case MOD_ALIAS:
+    case model_s::MOD_ALIAS: // CPP: Enum
         for (i = 0; i < model->nummeshes; i++) {
             maliasmesh_t *mesh = &model->meshes[i];
             for (j = 0; j < mesh->numskins; j++) {
@@ -436,12 +436,12 @@ void MOD_Reference_GL(model_t *model)
             }
         }
         break;
-    case MOD_SPRITE:
+    case model_s::MOD_SPRITE: // CPP: Enum
         for (i = 0; i < model->numframes; i++) {
             model->spriteframes[i].image->registration_sequence = registration_sequence;
         }
         break;
-    case MOD_EMPTY:
+    case model_s::MOD_EMPTY: // CPP: Enum
         break;
     default:
         Com_Error(ERR_FATAL, "%s: bad model type", __func__);

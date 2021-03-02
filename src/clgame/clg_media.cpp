@@ -68,7 +68,7 @@ static void CLG_ParsePlayerSkin(char* name, char* model, char* skin, const char*
     }
 
     // isolate the player's name
-    t = strchr(s, '\\');
+    t = (char*)strchr(s, '\\'); // CPP: Cast
     if (t) {
         len = t - s;
         strcpy(model, t + 1);
@@ -307,12 +307,14 @@ void CLG_SetSky(void)
 //===============
 //
 char *CLG_GetMediaLoadStateName(load_state_t state) {
-    switch (state)
-    {
-        default:
-            return NULL;
-            break;
-    }
+    // CPP: Compiler hates a switch with just a default.
+    return NULL;
+    //switch (state)
+    //{
+    //    default:
+    //        return NULL;
+    //        break;
+    //}
 }
 
 //
