@@ -68,10 +68,25 @@ static const char *viewmodes[] = {
 	0
 };
 
+// CPP: Converted to C++
 static dlight_t dlights[] = {
-	{.origin = { -120.f, -80.f, 80.f },.color = {1.f, 1.f, 1.f},.intensity = 200.f,.radius = 20.f },
-	{.origin = { 100.f, 80.f, 20.f },.color = {0.5f, 0.5f, 1.f},.intensity = 200.f,.radius = 20.f }
+    {
+        { -120.f, -80.f, 80.f },    // Origin
+        {1.f, 1.f, 1.f},            // Color
+        200.f,                      // Intensity
+        20.f                        // Radius
+    },
+    {
+        { 100.f, 80.f, 20.f },      // Origin
+        {0.5f, 0.5f, 1.f},          // Color
+        200.f,                      // Intensity
+        20.f                        // Radius
+    }
 };
+//static dlight_t dlights[] = {
+//	{.origin = { -120.f, -80.f, 80.f },.color = {1.f, 1.f, 1.f},.intensity = 200.f,.radius = 20.f },
+//	{.origin = { 100.f, 80.f, 20.f },.color = {0.5f, 0.5f, 1.f},.intensity = 200.f,.radius = 20.f }
+//};
 
 static void ReloadMedia(void)
 {

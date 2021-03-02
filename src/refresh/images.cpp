@@ -278,11 +278,11 @@ IMG_LOAD(PCX)
     if (image->type == IT_SKIN)
         IMG_FloodFill(buffer, w, h);
 
-    *pic = IMG_AllocPixels(w * h * 4);
+    *pic = (byte*)IMG_AllocPixels(w * h * 4); // CPP: WARNING: Cast
 
     image->upload_width = image->width = w;
     image->upload_height = image->height = h;
-    image->flags |= IMG_Unpack8((uint32_t *)*pic, buffer, w, h);
+    image->flags = (imageflags_t)(image->flags | IMG_Unpack8((uint32_t*)*pic, buffer, w, h)); // CPP: Cast
 
     return Q_ERR_SUCCESS;
 }
@@ -321,11 +321,11 @@ IMG_LOAD(WAL)
         return Q_ERR_BAD_EXTENT;
     }
 
-    *pic = IMG_AllocPixels(size * 4);
+    *pic = (byte*)IMG_AllocPixels(size * 4); // CPP: Cast
 
     image->upload_width = image->width = w;
     image->upload_height = image->height = h;
-    image->flags |= IMG_Unpack8((uint32_t *)*pic, (uint8_t *)mt + offset, w, h);
+    image->flags = (imageflags_t)(image->flags | IMG_Unpack8((uint32_t*)*pic, (uint8_t*)mt + offset, w, h));
 
     return Q_ERR_SUCCESS;
 }
@@ -351,8 +351,8 @@ IMG_LOAD(STB)
 	image->upload_width = image->width = w;
 	image->upload_height = image->height = h;
 
-	if (channels == 3)
-		image->flags |= IF_OPAQUE;
+    if (channels == 3)
+        image->flags = (image->flags | IF_OPAQUE);
 
     return Q_ERR_SUCCESS;
 }
@@ -917,7 +917,7 @@ static void r_texture_formats_changed(cvar_t *self)
         if (j != img_total)
             continue;
 
-        img_search[img_total++] = i;
+        img_search[img_total++] = (imageformat_t)i; // CPP: Cast
         if (img_total == IM_MAX) {
             break;
         }
@@ -943,12 +943,12 @@ load_img(const char *name, image_t *image)
 
     memcpy(image->name, name, len + 1);
     image->baselen = len - 4;
-    image->type = 0;
-    image->flags = 0;
+    image->type = (imagetype_t)0; // CPP: Cast
+    image->flags = (imageflags_t)0; // CPP: Cats
     image->registration_sequence = 1;
 
     // find out original extension
-    for (fmt = 0; fmt < IM_MAX; fmt++) {
+    for (fmt = (imageformat_t)0; fmt < IM_MAX; fmt = (imageformat_t)(fmt + 1)) {
         if (!Q_stricmp(image->name + image->baselen + 1, img_loaders[fmt].ext)) {
             break;
         }
@@ -1013,7 +1013,7 @@ static qerror_t find_or_load_image(const char *name, size_t len,
 
     // look for it
     if ((image = lookup_image(name, type, hash, len - 4)) != NULL) {
-        image->flags |= flags & IF_PERMANENT;
+        image->flags = (imageflags_t)((image->flags) | flags & IF_PERMANENT); // CPP: WARNING: NOTE: DANGER: imageflags cast.
         image->registration_sequence = registration_sequence;
         *image_p = image;
         return Q_ERR_SUCCESS;
@@ -1054,7 +1054,7 @@ static qerror_t find_or_load_image(const char *name, size_t len,
 		image->registration_sequence = registration_sequence;
 
 		// find out original extension
-		for (fmt = 0; fmt < IM_MAX; fmt++) {
+		for (fmt = (imageformat_t)0; fmt < IM_MAX; fmt = (imageformat_t)(fmt + 1)) { // CPP: Cast for loop
 			if (!Q_stricmp(image->name + image->baselen + 1, img_loaders[fmt].ext)) {
 				break;
 			}

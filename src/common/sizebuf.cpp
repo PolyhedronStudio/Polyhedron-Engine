@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 void SZ_TagInit(sizebuf_t *buf, void *data, size_t size, uint32_t tag)
 {
     memset(buf, 0, sizeof(*buf));
-    buf->data = data;
+    buf->data = (byte*)data; // CPP: Cast
     buf->maxsize = size;
     buf->tag = tag;
 }
@@ -31,7 +31,7 @@ void SZ_TagInit(sizebuf_t *buf, void *data, size_t size, uint32_t tag)
 void SZ_Init(sizebuf_t *buf, void *data, size_t size)
 {
     memset(buf, 0, sizeof(*buf));
-    buf->data = data;
+    buf->data = (byte*)data; // CPP: Cast
     buf->maxsize = size;
     buf->allowoverflow = qtrue;
     buf->allowunderflow = qtrue;
@@ -58,7 +58,7 @@ void *SZ_GetSpace(sizebuf_t *buf, size_t len)
     if (len > buf->maxsize - buf->cursize) {
         if (len > buf->maxsize) {
             Com_Error(ERR_FATAL,
-                      "%s: %#x: %"PRIz" is > full buffer size %"PRIz"",
+                      "%s: %#x: %" PRIz " is > full buffer size %" PRIz "", // CPP: Cast
                       __func__, buf->tag, len, buf->maxsize);
         }
 
@@ -83,7 +83,7 @@ void SZ_WriteByte(sizebuf_t *sb, int c)
 {
     byte    *buf;
 
-    buf = SZ_GetSpace(sb, 1);
+    buf = (byte*)SZ_GetSpace(sb, 1); // CPP: Cast
     buf[0] = c;
 }
 
@@ -91,7 +91,7 @@ void SZ_WriteShort(sizebuf_t *sb, int c)
 {
     byte    *buf;
 
-    buf = SZ_GetSpace(sb, 2);
+    buf = (byte*)SZ_GetSpace(sb, 2); // CPP: Cast
     buf[0] = c & 0xff;
     buf[1] = c >> 8;
 }
@@ -100,7 +100,7 @@ void SZ_WriteLong(sizebuf_t *sb, int c)
 {
     byte    *buf;
 
-    buf = SZ_GetSpace(sb, 4);
+    buf = (byte*)SZ_GetSpace(sb, 4); // CPP: Cast
     buf[0] = c & 0xff;
     buf[1] = (c >> 8) & 0xff;
     buf[2] = (c >> 16) & 0xff;
@@ -119,7 +119,7 @@ void SZ_WriteString(sizebuf_t *sb, const char *s)
 
     len = strlen(s);
     if (len >= MAX_NET_STRING) {
-        Com_WPrintf("%s: overflow: %"PRIz" chars", __func__, len);
+        Com_WPrintf("%s: overflow: %" PRIz " chars", __func__, len); // CPP: String fix
         SZ_WriteByte(sb, 0);
         return;
     }

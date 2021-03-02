@@ -154,7 +154,8 @@ void PlayerModel_Load(void)
             goto skip;
         }
 
-        skinnames = UI_Malloc(sizeof(char *) * (nskins + 1));
+        // CPP: WARNING: void* to char**
+        skinnames = (char**)UI_Malloc(sizeof(char *) * (nskins + 1));
         skinnames[nskins] = NULL;
 
         // copy the valid skins

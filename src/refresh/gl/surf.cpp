@@ -944,7 +944,7 @@ void GL_LoadWorld(const char *name)
         Com_DPrintf("%s: %"PRIz" bytes of vertex data as VBO\n", __func__, size);
     } else {
         Hunk_Begin(&gl_static.world.hunk, size);
-        gl_static.world.vertices = Hunk_Alloc(&gl_static.world.hunk, size);
+        gl_static.world.vertices = (vec_t*)Hunk_Alloc(&gl_static.world.hunk, size); // CPP: Cast
         Hunk_End(&gl_static.world.hunk);
 
         Com_DPrintf("%s: %"PRIz" bytes of vertex data on hunk\n", __func__, size);

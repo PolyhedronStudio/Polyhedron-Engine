@@ -16,6 +16,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+// CPP: Required include for _ReturnAddress();
+#include <intrin.h>
+
 #include "shared/shared.h"
 #include "common/common.h"
 #include "common/zone.h"
@@ -205,9 +208,9 @@ void *Z_Realloc(void *ptr, size_t size)
     }
 
     size = (size + Z_EXTRA + 3) & ~3;
-    z = realloc(z, size);
+    z = (zhead_t*)realloc(z, size); // CPP: Cast
     if (!z) {
-        Com_Error(ERR_FATAL, "%s: couldn't realloc %"PRIz" bytes", __func__, size);
+        Com_Error(ERR_FATAL, "%s: couldn't realloc %" PRIz " bytes", __func__, size); // CPP: String fix
     }
 
     z->size = size;
@@ -290,9 +293,9 @@ void *Z_TagMalloc(size_t size, memtag_t tag)
     }
 
     size = (size + Z_EXTRA + 3) & ~3;
-    z = malloc(size);
+    z = (zhead_t*)malloc(size); // CPP: Cast
     if (!z) {
-        Com_Error(ERR_FATAL, "%s: couldn't allocate %"PRIz" bytes", __func__, size);
+        Com_Error(ERR_FATAL, "%s: couldn't allocate %" PRIz " bytes", __func__, size); // CPP: String fix.
     }
     z->magic = Z_MAGIC;
     z->tag = tag;
@@ -341,7 +344,7 @@ static size_t   z_reserved_total;
 
 void Z_TagReserve(size_t size, memtag_t tag)
 {
-    z_reserved_data = Z_TagMalloc(size, tag);
+    z_reserved_data = (byte*)Z_TagMalloc(size, tag); // CPP: Cast
     z_reserved_total = size;
     z_reserved_inuse = 0;
 }
@@ -355,7 +358,7 @@ void *Z_ReservedAlloc(size_t size)
     }
 
     if (size > z_reserved_total - z_reserved_inuse) {
-        Com_Error(ERR_FATAL, "%s: couldn't allocate %"PRIz" bytes", __func__, size);
+        Com_Error(ERR_FATAL, "%s: couldn't allocate %" PRIz " bytes", __func__, size); // CPP: String fix.
     }
 
     ptr = z_reserved_data + z_reserved_inuse;
@@ -381,7 +384,7 @@ char *Z_ReservedCopyString(const char *in)
     }
 
     len = strlen(in) + 1;
-    return memcpy(Z_ReservedAlloc(len), in, len);
+    return (char*)memcpy(Z_ReservedAlloc(len), in, len); // CPP: Cast
 }
 
 /*
@@ -408,7 +411,7 @@ char *Z_TagCopyString(const char *in, memtag_t tag)
     }
 
     len = strlen(in) + 1;
-    return memcpy(Z_TagMalloc(len, tag), in, len);
+    return (char*)memcpy(Z_TagMalloc(len, tag), in, len); // CPP: Cast
 }
 
 /*
@@ -433,7 +436,7 @@ char *Z_CvarCopyString(const char *in)
         i = in[0] - '0';
     } else {
         len = strlen(in) + 1;
-        return memcpy(Z_TagMalloc(len, TAG_CVAR), in, len);
+        return (char*)memcpy(Z_TagMalloc(len, TAG_CVAR), in, len); // CPP: Cast
     }
 
     // return static storage

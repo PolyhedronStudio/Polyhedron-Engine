@@ -192,10 +192,15 @@ static void VID_SDL_ModeChanged(void)
     SDL_GetWindowSize(sdl_window, &width, &height);
 
     Uint32 flags = SDL_GetWindowFlags(sdl_window);
+    // CPP: Bitflags
     if (flags & SDL_WINDOW_FULLSCREEN)
-        sdl_flags |= QVF_FULLSCREEN;
+        sdl_flags = (vidFlags_t)(sdl_flags | QVF_FULLSCREEN);
     else
-        sdl_flags &= ~QVF_FULLSCREEN;
+        sdl_flags = (vidFlags_t)(sdl_flags & ~QVF_FULLSCREEN);
+    //if (flags & SDL_WINDOW_FULLSCREEN)
+    //    sdl_flags |= QVF_FULLSCREEN;
+    //else
+    //    sdl_flags &= ~QVF_FULLSCREEN;
 
 #if USE_REF == REF_SOFT
     SDL_Surface *surf = SDL_GetWindowSurface(sdl_window);
@@ -357,8 +362,8 @@ static void VID_GetDisplayList()
     string_size += 1;
     max_display_name_length += 1;
 
-    char *display_list = Z_Malloc(string_size);
-    char *display_name = Z_Malloc(max_display_name_length);
+    char *display_list = (char*)Z_Malloc(string_size); // CPP: Cast
+    char *display_name = (char*)Z_Malloc(max_display_name_length); // CPP: Cast
     display_list[0] = 0;
 
     for (int display = 0; display < num_displays; display++)
@@ -404,7 +409,7 @@ char *VID_GetDefaultModeList(void)
         return Z_CopyString(VID_MODELIST);
 
     size = 8 + num_modes * 32 + 1;
-    buf = Z_Malloc(size);
+    buf = (char*)Z_Malloc(size); // CPP: Cast
 
     len = Q_strlcpy(buf, "desktop ", size);
     for (i = 0; i < num_modes; i++) {
@@ -509,7 +514,7 @@ qboolean VID_Init(graphics_api_t api)
 #if REF_GL
 	if (api == GAPI_OPENGL)
 	{
-		sdl_context = SDL_GL_CreateContext(sdl_window);
+		sdl_context = (SDL_GLContext*)SDL_GL_CreateContext(sdl_window); // CPP: Cast
 		if (!sdl_context) {
 			Com_EPrintf("Couldn't create OpenGL context: %s\n", SDL_GetError());
 			goto fail;
@@ -529,7 +534,7 @@ qboolean VID_Init(graphics_api_t api)
         if (SDL_GetWindowGammaRamp(sdl_window, gamma[0], gamma[1], gamma[2]) == 0 &&
             SDL_SetWindowGammaRamp(sdl_window, gamma[0], gamma[1], gamma[2]) == 0) {
             Com_Printf("...enabling hardware gamma\n");
-            sdl_flags |= QVF_GAMMARAMP;
+            sdl_flags |= (sdl_flags | QVF_GAMMARAMP);
         } else {
             Com_Printf("...hardware gamma not supported\n");
             Cvar_Reset(vid_hwgamma);

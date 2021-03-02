@@ -435,7 +435,7 @@ static void NET_LogPacket(const netadr_t *address, const char *prefix,
         return;
     }
 
-    FS_FPrintf(net_logFile, "%u : %s : %s : %"PRIz" bytes\n",
+    FS_FPrintf(net_logFile, "%u : %s : %s : %" PRIz " bytes\n", // CPP: String fix.
                com_localTime, prefix, NET_AdrToString(address), length);
 
     numRows = (length + 15) / 16;
@@ -529,12 +529,12 @@ static void NET_Stats_f(void)
 
 static size_t NET_UpRate_m(char *buffer, size_t size)
 {
-    return Q_scnprintf(buffer, size, "%"PRIz, net_rate_up);
+    return Q_scnprintf(buffer, size, "%" PRIz, net_rate_up); // CPP: String fix.
 }
 
 static size_t NET_DnRate_m(char *buffer, size_t size)
 {
-    return Q_scnprintf(buffer, size, "%"PRIz, net_rate_dn);
+    return Q_scnprintf(buffer, size, "%" PRIz, net_rate_dn); // CPP: String fix.
 }
 
 //=============================================================================
@@ -594,7 +594,7 @@ static qboolean NET_SendLoopPacket(netsrc_t sock, const void *data,
 
 #ifdef _DEBUG
     if (net_log_enable->integer > 1) {
-        NET_LogPacket(to, "LP send", data, len);
+        NET_LogPacket(to, "LP send", (const byte*)data, len); // CPP: Cast
     }
 #endif
     if (sock == NS_CLIENT) {
@@ -968,7 +968,7 @@ qboolean NET_SendPacket(netsrc_t sock, const void *data,
 
 #ifdef _DEBUG
     if (net_log_enable->integer)
-        NET_LogPacket(to, "UDP send", data, ret);
+        NET_LogPacket(to, "UDP send", (const byte*)data, ret); // CPP: Cast
 #endif
 
     net_rate_sent += ret;
@@ -1319,7 +1319,7 @@ void NET_Config(netflag_t flag)
 
     if (flag == NET_NONE) {
         // shut down any existing sockets
-        for (sock = 0; sock < NS_COUNT; sock++) {
+        for (sock = (netsrc_t)0; sock < NS_COUNT; sock = (netsrc_t)(sock + 1)) { // CPP: Cast for loop
             if (udp_sockets[sock] != -1) {
                 NET_RemoveFd(udp_sockets[sock]);
                 os_closesocket(udp_sockets[sock]);
@@ -1347,7 +1347,7 @@ void NET_Config(netflag_t flag)
         NET_OpenServer6();
     }
 
-    net_active |= flag;
+    net_active = (netflag_t)(net_active | flag); // CPP: Cast
 }
 
 /*
@@ -1675,7 +1675,7 @@ neterr_t NET_RunStream(netstream_t *s)
                 FIFO_Commit(&s->recv, ret);
 #if _DEBUG
                 if (net_log_enable->integer) {
-                    NET_LogPacket(&s->address, "TCP recv", data, ret);
+                    NET_LogPacket(&s->address, "TCP recv", (const byte*)data, ret); // CPP: Cast
                 }
 #endif
                 net_rate_rcvd += ret;
@@ -1710,7 +1710,7 @@ neterr_t NET_RunStream(netstream_t *s)
                 FIFO_Decommit(&s->send, ret);
 #if _DEBUG
                 if (net_log_enable->integer) {
-                    NET_LogPacket(&s->address, "TCP send", data, ret);
+                    NET_LogPacket(&s->address, "TCP send", (const byte*)data, ret); // CPP: Cast
                 }
 #endif
                 net_rate_sent += ret;

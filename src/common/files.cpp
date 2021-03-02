@@ -523,7 +523,7 @@ ssize_t FS_Tell(qhandle_t f)
     case FS_ZIP:
         return tell_zip_file(file);
     case FS_GZ:
-        ret = gztell(file->zfp);
+        ret = gztell((gzFile)file->zfp); // CPP: Cast
         if (ret == -1) {
             return Q_ERR_LIBRARY_ERROR;
         }
@@ -584,7 +584,7 @@ qerror_t FS_Seek(qhandle_t f, off_t offset)
         return seek_pak_file(file, offset);
 #if USE_ZLIB
     case FS_GZ:
-        if (gzseek(file->zfp, (z_off_t)offset, SEEK_SET) == -1) {
+        if (gzseek((gzFile)file->zfp, (z_off_t)offset, SEEK_SET) == -1) { // CPP: Cast
             return Q_Errno();
         }
         return Q_ERR_SUCCESS;
@@ -775,7 +775,7 @@ void FS_FCloseFile(qhandle_t f)
         break;
 #if USE_ZLIB
     case FS_GZ:
-        gzclose(file->zfp);
+        gzclose((gzFile)file->zfp); // CPP: Cast
         fclose(file->fp);
         break;
     case FS_ZIP:
@@ -1087,7 +1087,7 @@ static void open_zip_file(file_t *file)
     z_streamp z;
 
     if (file->unique) {
-        s = FS_Malloc(sizeof(*s));
+        s = (zipstream_t*)FS_Malloc(sizeof(*s)); // CPP: Cast
         memset(&s->stream, 0, sizeof(s->stream));
     } else {
         s = &fs_zipstream;
@@ -1116,7 +1116,7 @@ static void open_zip_file(file_t *file)
 // only called for unique handles
 static void close_zip_file(file_t *file)
 {
-    zipstream_t *s = file->zfp;
+    zipstream_t *s = (zipstream_t*)file->zfp; // CPP: Cast
 
     inflateEnd(&s->stream);
     Z_Free(s);
@@ -1126,14 +1126,14 @@ static void close_zip_file(file_t *file)
 
 static ssize_t tell_zip_file(file_t *file)
 {
-    zipstream_t *s = file->zfp;
+    zipstream_t *s = (zipstream_t*)file->zfp; // CPP: Cast
 
     return s->stream.total_out;
 }
 
 static ssize_t read_zip_file(file_t *file, void *buf, size_t len)
 {
-    zipstream_t *s = file->zfp;
+    zipstream_t *s = (zipstream_t*)file->zfp; // CPP: Cast
     z_streamp z = &s->stream;
     size_t block, result;
     int ret;
@@ -1145,7 +1145,7 @@ static ssize_t read_zip_file(file_t *file, void *buf, size_t len)
         return 0;
     }
 
-    z->next_out = buf;
+    z->next_out = (Bytef*)buf; // CPP: Cast
     z->avail_out = (uInt)len;
 
     do {
@@ -1574,7 +1574,7 @@ ssize_t FS_Read(void *buf, size_t len, qhandle_t f)
         return read_pak_file(file, buf, len);
 #if USE_ZLIB
     case FS_GZ:
-        ret = gzread(file->zfp, buf, len);
+        ret = gzread((gzFile)file->zfp, buf, len); // CPP: Cast
         if (ret < 0) {
             return Q_ERR_LIBRARY_ERROR;
         }
@@ -1627,7 +1627,7 @@ void FS_Flush(qhandle_t f)
         break;
 #if USE_ZLIB
     case FS_GZ:
-        gzflush(file->zfp, Z_SYNC_FLUSH);
+        gzflush((gzFile)file->zfp, Z_SYNC_FLUSH); // CPP: Cast
         break;
 #endif
     default:
@@ -1671,7 +1671,7 @@ ssize_t FS_Write(const void *buf, size_t len, qhandle_t f)
         break;
 #if USE_ZLIB
     case FS_GZ:
-        if (gzwrite(file->zfp, buf, len) == 0) {
+        if (gzwrite((gzFile)file->zfp, buf, len) == 0) { // CPP: Cast
             file->error = Q_ERR_LIBRARY_ERROR;
             return file->error;
         }
@@ -1906,7 +1906,7 @@ ssize_t FS_LoadFileEx(const char *path, void **buffer, unsigned flags, memtag_t 
     }
 
     // allocate chunk of memory, +1 for NUL
-    buf = Z_TagMalloc(len + 1, tag);
+    buf = (byte*)(len + 1, tag); // CPP: Cast
 
     // read entire file
     read = FS_Read(buf, len, f);
@@ -2087,7 +2087,7 @@ static pack_t *pack_alloc(FILE *fp, filetype_t type, const char *name,
     hash_size = npot32(num_files / 3);
 
     len = strlen(name) + 1;
-    pack = FS_Malloc(sizeof(pack_t) +
+    pack = (pack_t*)FS_Malloc(sizeof(pack_t) + // CPP: Cast
                      num_files * sizeof(packfile_t) +
                      hash_size * sizeof(packfile_t *) +
                      len + names_len);
@@ -2199,7 +2199,7 @@ static pack_t *load_pak_file(const char *packfile)
     for (i = 0, dfile = info; i < num_files; i++, dfile++) {
         len = strlen(dfile->name) + 1;
 
-        file->name = memcpy(name, dfile->name, len);
+        file->name = (char*)memcpy(name, dfile->name, len); // CPP: Cast
         name += len;
 
         file->filepos = dfile->filepos;
@@ -2568,7 +2568,7 @@ static void q_printf(2, 3) add_game_dir(unsigned mode, const char *fmt, ...)
             pack = load_pak_file(path);
         if (!pack)
             continue;
-        search = FS_Malloc(sizeof(searchpath_t));
+        search = (searchpath_t*)FS_Malloc(sizeof(searchpath_t)); // CPP: Cast
         search->mode = mode;
         search->filename[0] = 0;
         search->pack = pack_get(pack);
@@ -2582,7 +2582,7 @@ static void q_printf(2, 3) add_game_dir(unsigned mode, const char *fmt, ...)
 
 	// add the directory to the search path
 	// the directory has priority over the pak files
-	search = FS_Malloc(sizeof(searchpath_t) + len);
+	search = (searchpath_t*)FS_Malloc(sizeof(searchpath_t) + len); // CPP: Cast
 	search->mode = mode;
 	search->pack = NULL;
 	memcpy(search->filename, fs_gamedir, len + 1);
@@ -2606,7 +2606,7 @@ file_info_t *FS_CopyInfo(const char *name, size_t size, time_t ctime, time_t mti
     }
 
     len = strlen(name);
-    out = FS_Mallocz(sizeof(*out) + len);
+    out = (file_info_t*)FS_Mallocz(sizeof(*out) + len); // CPP: Cast
     out->size = size;
     out->ctime = ctime;
     out->mtime = mtime;
@@ -2624,7 +2624,7 @@ void **FS_CopyList(void **list, int count)
         return NULL;
     }
 
-    out = FS_Malloc(sizeof(void *) * (count + 1));
+    out = (void**)FS_Malloc(sizeof(void *) * (count + 1)); // CPP: WARNING: DANGER: void**?
     for (i = 0; i < count; i++) {
         out[i] = list[i];
     }
@@ -2814,7 +2814,7 @@ void **FS_ListFiles(const char *path,
                     }
                     *p = 0;
                     for (j = 0; j < count; j++) {
-                        if (!FS_pathcmp(files[j], s)) {
+                        if (!FS_pathcmp((const char*)files[j], s)) {// CPP: Cast
                             break;
                         }
                     }
@@ -2867,7 +2867,7 @@ void **FS_ListFiles(const char *path,
                 if (valid == PATH_INVALID) {
                     continue;
                 }
-                s = memcpy(buffer, search->filename, len);
+                s = (char*)memcpy(buffer, search->filename, len); // CPP: Cast
                 s[len++] = '/';
                 memcpy(s + len, path, pathlen + 1);
             } else {
@@ -2905,7 +2905,7 @@ fail:
         // remove duplicates
         total = 1;
         for (i = 1; i < count; i++) {
-            if (!FS_pathcmp(files[i - 1], files[i])) {
+            if (!FS_pathcmp((const char*)files[i - 1], (const char*)files[i])) { // CPP: Cast
                 Z_Free(files[i - 1]);
                 files[i - 1] = NULL;
             } else {
@@ -2914,7 +2914,7 @@ fail:
         }
     }
 
-    list = FS_Malloc(sizeof(void *) * (total + 1));
+    list = (void**)FS_Malloc(sizeof(void *) * (total + 1)); // CPP: Cast
 
     total = 0;
     for (i = 0; i < count; i++) {
@@ -2963,7 +2963,7 @@ void FS_File_g(const char *path, const char *ext, unsigned flags, genctx_t *ctx)
     }
 
     for (i = 0; i < numFiles; i++) {
-        s = list[i];
+        s = (char*)list[i]; // CPP: Cast
         if (ctx->count < ctx->size && !strncmp(s, ctx->partial, ctx->length)) {
             ctx->matches[ctx->count++] = s;
         } else {
@@ -3456,7 +3456,7 @@ static void FS_Link_f(void)
     }
 
     // create new link
-    link = FS_Malloc(sizeof(*link) + namelen);
+    link = (symlink_t*)FS_Malloc(sizeof(*link) + namelen); // CPP: Cast
     memcpy(link->name, name, namelen + 1);
     link->namelen = namelen;
     List_Append(list, &link->entry);
@@ -3501,7 +3501,7 @@ static void setup_base_paths(void)
     // base paths have both BASE and GAME bits set by default
     // the GAME bit will be removed once gamedir is set,
     // and will be put back once gamedir is reset to basegame
-    add_game_dir(FS_PATH_BASE | FS_PATH_GAME, "%s/"BASEGAME, sys_basedir->string);
+    add_game_dir(FS_PATH_BASE | FS_PATH_GAME, "%s/" BASEGAME, sys_basedir->string); // CPP: String "%s/"BASEGAME fix thing
     fs_base_searchpaths = fs_searchpaths;
 }
 
@@ -3516,7 +3516,7 @@ static void setup_game_paths(void)
 
         // home paths override system paths
         if (sys_homedir->string[0]) {
-            add_game_dir(FS_PATH_BASE, "%s/"BASEGAME, sys_homedir->string);
+            add_game_dir(FS_PATH_BASE, "%s/" BASEGAME, sys_homedir->string); // CPP: String "%s/"BASEGAME fix thing
             add_game_dir(FS_PATH_GAME, "%s/%s", sys_homedir->string, fs_game->string);
         }
 
@@ -3531,7 +3531,7 @@ static void setup_game_paths(void)
     } else {
         if (sys_homedir->string[0]) {
             add_game_dir(FS_PATH_BASE | FS_PATH_GAME,
-                         "%s/"BASEGAME, sys_homedir->string);
+                         "%s/" BASEGAME, sys_homedir->string); // CPP: String "%s/"BASEGAME fix thing
         }
 
         // add the game bit to base paths
@@ -3564,7 +3564,7 @@ void FS_Restart(qboolean total)
     } else {
         // just change gamedir
         free_game_paths();
-        Q_snprintf(fs_gamedir, sizeof(fs_gamedir), "%s/"BASEGAME, sys_basedir->string);
+        Q_snprintf(fs_gamedir, sizeof(fs_gamedir), "%s/" BASEGAME, sys_basedir->string); // CPP: String "%s/"BASEGAME fix thing
 #ifdef _WIN32
         FS_ReplaceSeparators(fs_gamedir, '/');
 #endif

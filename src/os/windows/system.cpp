@@ -788,7 +788,7 @@ DLL LOADING
 
 void Sys_FreeLibrary(void *handle)
 {
-    if (handle && !FreeLibrary(handle)) {
+    if (handle && !FreeLibrary((HMODULE)handle)) { // CPP: Cast
         Com_Error(ERR_FATAL, "FreeLibrary failed on %p", handle);
     }
 }
@@ -827,7 +827,7 @@ void *Sys_GetProcAddress(void *handle, const char *sym)
 {
     void    *entry;
 
-    entry = GetProcAddress(handle, sym);
+    entry = GetProcAddress((HMODULE)handle, sym); // CPP: Cast
     if (!entry)
         Com_SetLastError(va("GetProcAddress(%s) failed with error %lu",
                             sym, GetLastError()));

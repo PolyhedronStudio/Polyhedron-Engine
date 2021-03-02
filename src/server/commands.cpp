@@ -79,7 +79,7 @@ static void SV_SetMaster_f(void)
 
         Com_Printf("Master server at %s.\n", NET_AdrToString(&adr));
         len = strlen(s);
-        m = Z_Malloc(sizeof(*m) + len);
+        m = (master_t*)Z_Malloc(sizeof(*m) + len); // CPP: Cast
         memcpy(m->name, s, len + 1);
         m->adr = adr;
         m->last_ack = 0;
@@ -260,7 +260,7 @@ another level:
 
 static void abort_func(void *arg)
 {
-    CM_FreeMap(arg);
+    CM_FreeMap((cm_t*)arg); // CPP: Cast
 }
 
 static void SV_Map(qboolean restart)
@@ -493,7 +493,7 @@ static void SV_Kick_f(void)
     if (!strcmp(Cmd_Argv(0), "kickban")) {
         netadr_t *addr = &sv_client->netchan->remote_address;
         if (addr->type == NA_IP || addr->type == NA_IP6) {
-            addrmatch_t *match = Z_Malloc(sizeof(*match));
+            addrmatch_t *match = (addrmatch_t*)Z_Malloc(sizeof(*match)); // CPP: Cast
             match->addr = *addr;
             make_mask(&match->mask, addr->type, addr->type == NA_IP6 ? 128 : 32);
             match->hits = 0;
@@ -1107,7 +1107,7 @@ void SV_AddMatch_f(list_t *list)
 
     s = Cmd_ArgsFrom(2);
     len = strlen(s);
-    match = Z_Malloc(sizeof(*match) + len);
+    match = (addrmatch_t*)Z_Malloc(sizeof(*match) + len); // CPP: Cast
     match->addr = addr;
     match->mask = mask;
     match->hits = 0;
@@ -1261,7 +1261,7 @@ static void SV_AddStuffCmd_f(void)
 
     s = Cmd_ArgsFrom(2);
     len = strlen(s);
-    stuff = Z_Malloc(sizeof(*stuff) + len);
+    stuff = (stuffcmd_t*)Z_Malloc(sizeof(*stuff) + len); // CPP: Cast
     stuff->len = len;
     memcpy(stuff->string, s, len + 1);
     List_Append(list, &stuff->entry);
@@ -1367,7 +1367,7 @@ usage:
 
     if (Cmd_Argc() > 2) {
         s = Cmd_Argv(2);
-        for (action = 0; action < FA_MAX; action++) {
+        for (action = (filteraction_t)0; action < FA_MAX; action = (filteraction_t)(action + 1)) { // CPP: Cast for loop
             if (!strcmp(s, filteractions[action])) {
                 break;
             }
@@ -1390,7 +1390,7 @@ usage:
         }
     }
     len = strlen(s);
-    filter = Z_Malloc(sizeof(*filter) + len);
+    filter = (filtercmd_t*)Z_Malloc(sizeof(*filter) + len); // CPP: Cast
     memcpy(filter->string, s, len + 1);
     filter->action = action;
     filter->comment = Z_CopyString(comment);
@@ -1402,7 +1402,7 @@ static void SV_AddFilterCmd_c(genctx_t *ctx, int argnum)
     filteraction_t action;
 
     if (argnum == 2) {
-        for (action = 0; action < FA_MAX; action++) {
+        for (action = (filteraction_t)0; action < FA_MAX; action = (filteraction_t )(action + 1)) { // CPP: Cast for loop
             Prompt_AddMatch(ctx, filteractions[action]);
         }
     }

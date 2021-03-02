@@ -81,7 +81,7 @@ static model_t *MOD_Find(const char *name)
 
 static void MOD_List_f(void)
 {
-	static const char types[4] = "FASE";
+	static const char types[] = "FASE"; // CPP: Cast - was types[4] = "FASE";
 	int     i, count;
 	model_t *model;
 	size_t  bytes;
@@ -93,13 +93,13 @@ static void MOD_List_f(void)
 		if (!model->type) {
 			continue;
 		}
-		Com_Printf("%c %8"PRIz" : %s\n", types[model->type],
+		Com_Printf("%c %8" PRIz " : %s\n", types[model->type], // CPP: String fix.
 			model->hunk.mapped, model->name);
 		bytes += model->hunk.mapped;
 		count++;
 	}
 	Com_Printf("Total models: %d (out of %d slots)\n", count, r_numModels);
-	Com_Printf("Total resident: %"PRIz"\n", bytes);
+	Com_Printf("Total resident: %" PRIz "\n", bytes); // CPP: String fix.
 }
 
 void MOD_FreeUnused(void)
@@ -249,7 +249,7 @@ static qerror_t MOD_LoadSP2(model_t *model, const void *rawdata, size_t length)
 		return Q_ERR_UNKNOWN_FORMAT;
 	if (header.numframes < 1) {
 		// empty models draw nothing
-		model->type = MOD_EMPTY;
+		model->type = model_s::MOD_EMPTY; // CPP: Enum
 		return Q_ERR_SUCCESS;
 	}
 	if (header.numframes > SP2_MAX_FRAMES)
@@ -258,9 +258,9 @@ static qerror_t MOD_LoadSP2(model_t *model, const void *rawdata, size_t length)
 		return Q_ERR_BAD_EXTENT;
 
 	Hunk_Begin(&model->hunk, 0x10000);
-	model->type = MOD_SPRITE;
+	model->type = model_s::MOD_SPRITE; // CPP: Enum
 
-	model->spriteframes = MOD_Malloc(sizeof(mspriteframe_t) * header.numframes);
+	model->spriteframes = (mspriteframe_s*)MOD_Malloc(sizeof(mspriteframe_t) * header.numframes); // CPP: Cast
 	model->numframes = header.numframes;
 
 	src_frame = (dsp2frame_t *)((byte *)rawdata + sizeof(dsp2header_t));

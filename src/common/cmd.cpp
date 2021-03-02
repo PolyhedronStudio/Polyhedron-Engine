@@ -275,7 +275,7 @@ void Cmd_AliasSet(const char *name, const char *cmd)
     }
 
     len = strlen(name);
-    a = Cmd_Malloc(sizeof(cmdalias_t) + len);
+    a = (cmdalias_t*)Cmd_Malloc(sizeof(cmdalias_t) + len); // CPP: Cast
     memcpy(a->name, name, len + 1);
     a->value = Cmd_CopyString(cmd);
 
@@ -514,7 +514,7 @@ static void Cmd_Trigger_f(void)
         return;
     }
 
-    trigger = Z_Malloc(sizeof(*trigger) + cmdlen + matchlen);
+    trigger = (cmd_trigger_t*)Z_Malloc(sizeof(*trigger) + cmdlen + matchlen); // CPP: Casts
     trigger->command = (char *)(trigger + 1);
     trigger->match = trigger->command + cmdlen;
     memcpy(trigger->command, command, cmdlen);
@@ -787,7 +787,7 @@ void Cmd_AddMacro(const char *name, xmacro_t function)
         return;
     }
 
-    macro = Cmd_Malloc(sizeof(cmd_macro_t));
+    macro = (cmd_macro_t*)Cmd_Malloc(sizeof(cmd_macro_t)); // CPP: Cast
     macro->name = name;
     macro->function = function;
     macro->next = cmd_macros;
@@ -1235,7 +1235,7 @@ char *Cmd_MacroExpandString(const char *text, qboolean aliasHack)
         return NULL;
     }
 
-    scan = memcpy(expanded, text, len + 1);
+    scan = (char*)memcpy(expanded, text, len + 1); // CPP: Cast
 
     inquote = qfalse;
     count = 0;
@@ -1543,7 +1543,7 @@ static void Cmd_RegCommand(const cmdreg_t *reg)
         return;
     }
 
-    cmd = Cmd_Malloc(sizeof(*cmd));
+    cmd = (cmd_function_t*)Cmd_Malloc(sizeof(*cmd)); // CPP: Cast
     cmd->name = (char *)reg->name;
     cmd->function = reg->function;
     cmd->completer = reg->completer;
@@ -2007,7 +2007,7 @@ static void Cmd_Complete_f(void)
     }
 
     len = strlen(name) + 1;
-    cmd = Cmd_Malloc(sizeof(*cmd) + len);
+    cmd = (cmd_function_t*)Cmd_Malloc(sizeof(*cmd) + len); // CPP: Cast
     cmd->name = (char *)(cmd + 1);
     memcpy(cmd->name, name, len);
     cmd->function = NULL;

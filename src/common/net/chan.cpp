@@ -401,7 +401,7 @@ static netchan_t *NetchanOld_Setup(netsrc_t sock, const netadr_t *adr,
     Z_TagReserve(sizeof(*chan) + maxpacketlen * 2,
                  sock == NS_SERVER ? TAG_SERVER : TAG_GENERAL);
 
-    chan = Z_ReservedAlloc(sizeof(*chan));
+    chan = (netchan_old_t*)Z_ReservedAlloc(sizeof(*chan)); // CPP: Cast
     memset(chan, 0, sizeof(*chan));
     netchan = (netchan_t *)chan;
     netchan->sock = sock;
@@ -418,10 +418,10 @@ static netchan_t *NetchanOld_Setup(netsrc_t sock, const netadr_t *adr,
     netchan->TransmitNextFragment = NetchanOld_TransmitNextFragment;
     netchan->ShouldUpdate = NetchanOld_ShouldUpdate;
 
-    chan->message_buf = Z_ReservedAlloc(maxpacketlen);
+    chan->message_buf = (byte*)Z_ReservedAlloc(maxpacketlen); // CPP: Cast
     SZ_Init(&netchan->message, chan->message_buf, maxpacketlen);
 
-    chan->reliable_buf = Z_ReservedAlloc(maxpacketlen);
+    chan->reliable_buf = (byte*)Z_ReservedAlloc(maxpacketlen); // CPP: Cast
 
     return netchan;
 }
@@ -800,7 +800,7 @@ static netchan_t *NetchanNew_Setup(netsrc_t sock, const netadr_t *adr,
     netchan_new_t *chan;
     netchan_t *netchan;
 
-    chan = Z_TagMallocz(sizeof(*chan),
+    chan = (netchan_new_t*)Z_TagMallocz(sizeof(*chan), // CPP: Cast
                         sock == NS_SERVER ? TAG_SERVER : TAG_GENERAL);
     netchan = (netchan_t *)chan;
     netchan->sock = sock;

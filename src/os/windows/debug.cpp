@@ -166,7 +166,7 @@ STATIC BOOL CALLBACK enum_modules_callback(
     }
 
     write_report(
-        "%"PRIxx" %"PRIxx" %s (version %s, symbols %s)%s\r\n",
+        "%" PRIxx " %" PRIxx " %s (version %s, symbols %s)%s\r\n", // CPP: String fix.
         WORDxx(ModuleBase), WORDxx(ModuleBase + ModuleSize),
         ModuleName, version, symbols, star);
 
@@ -416,28 +416,28 @@ LONG WINAPI Sys_ExceptionFilter(LPEXCEPTION_POINTERS exceptionInfo)
 
     write_report("\r\nException information:\r\n");
     write_report("Code: %#08x\r\n", exception->ExceptionCode);
-    write_report("Address: %"PRIxx" (%s)\r\n", WORDxx(pc), faultyModuleName);
+    write_report("Address: %" PRIxx " (%s)\r\n", WORDxx(pc), faultyModuleName); // CPP: String fix.
 
     write_report("\r\nThread context:\r\n");
 #ifdef _WIN64
-    write_report("RIP: %"PRIxx64" RBP: %"PRIxx64" RSP: %"PRIxx64"\r\n",
+    write_report("RIP: %" PRIxx64 " RBP: %" PRIxx64 " RSP: %" PRIxx64 "\r\n", // CPP: String fix.
                  context->Rip, context->Rbp, context->Rsp);
-    write_report("RAX: %"PRIxx64" RBX: %"PRIxx64" RCX: %"PRIxx64"\r\n",
+    write_report("RAX: %" PRIxx64 " RBX: %" PRIxx64 " RCX: %" PRIxx64 "\r\n", // CPP: String fix.
                  context->Rax, context->Rbx, context->Rcx);
-    write_report("RDX: %"PRIxx64" RSI: %"PRIxx64" RDI: %"PRIxx64"\r\n",
+    write_report("RDX: %" PRIxx64 " RSI: %" PRIxx64 " RDI: %" PRIxx64 "\r\n", // CPP: String fix.
                  context->Rdx, context->Rsi, context->Rdi);
-    write_report("R8 : %"PRIxx64" R9 : %"PRIxx64" R10: %"PRIxx64"\r\n",
+    write_report("R8 : %" PRIxx64 " R9 : %" PRIxx64 " R10: %" PRIxx64 "\r\n", // CPP: String fix.
                  context->R8, context->R9, context->R10);
-    write_report("R11: %"PRIxx64" R12: %"PRIxx64" R13: %"PRIxx64"\r\n",
+    write_report("R11: %" PRIxx64 " R12: %" PRIxx64 " R13: %" PRIxx64 "\r\n", // CPP: String fix.
                  context->R11, context->R12, context->R13);
-    write_report("R14: %"PRIxx64" R15: %"PRIxx64"\r\n",
+    write_report("R14: %" PRIxx64 " R15: %" PRIxx64 "\r\n", // CPP: String fix.
                  context->R14, context->R15);
 #else
-    write_report("EIP: %"PRIxx32" EBP: %"PRIxx32" ESP: %"PRIxx32"\r\n",
+    write_report("EIP: %" PRIxx32 " EBP: %" PRIxx32 " ESP: %"PRIxx32"\r\n", // CPP: String fix.
                  context->Eip, context->Ebp, context->Esp);
-    write_report("EAX: %"PRIxx32" EBX: %"PRIxx32" ECX: %"PRIxx32"\r\n",
+    write_report("EAX: %" PRIxx32 " EBX: %" PRIxx32 " ECX: %"PRIxx32"\r\n", // CPP: String fix.
                  context->Eax, context->Ebx, context->Ecx);
-    write_report("EDX: %"PRIxx32" ESI: %"PRIxx32" EDI: %"PRIxx32"\r\n",
+    write_report("EDX: %" PRIxx32 " ESI: %" PRIxx32 " EDI: %"PRIxx32"\r\n", // CPP: String fix.
                  context->Edx, context->Esi, context->Edi);
 #endif
 

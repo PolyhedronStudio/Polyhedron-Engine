@@ -683,8 +683,8 @@ static size_t Com_MapList_m(char *buffer, size_t size)
 
     list = FS_ListFiles("maps", ".bsp", 0, &numFiles);
     for (i = 0; i < numFiles; i++) {
-        s = list[i];
-        p = COM_FileExtension(list[i]);
+        s = (char*)list[i]; // CPP: Cast
+        p = COM_FileExtension((const char*)list[i]); // CPP: Cast
         *p = 0;
         len = strlen(s);
         if (total + len + 1 < size) {

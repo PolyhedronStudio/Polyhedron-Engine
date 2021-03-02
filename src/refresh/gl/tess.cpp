@@ -36,18 +36,18 @@ void GL_Flush2D(void)
         return;
     }
 
-    bits = GLS_DEPTHTEST_DISABLE | GLS_DEPTHMASK_FALSE | GLS_CULL_DISABLE;
+    bits = (glStateBits_t)(GLS_DEPTHTEST_DISABLE | GLS_DEPTHMASK_FALSE | GLS_CULL_DISABLE); // CPP: Cast
     if (tess.flags & 2) {
-        bits |= GLS_BLEND_BLEND;
+        bits = (glStateBits_t)(bits | GLS_BLEND_BLEND); // CPP: Cast bits |= GLS_BLEND_BLEND;
     } else if (tess.flags & 1) {
-        bits |= GLS_ALPHATEST_ENABLE;
+        bits = (glStateBits_t)(bits | GLS_ALPHATEST_ENABLE); // CPP: Cast
     }
 
     Scrap_Upload();
 
     GL_BindTexture(0, tess.texnum[0]);
     GL_StateBits(bits);
-    GL_ArrayBits(GLA_VERTEX | GLA_TC | GLA_COLOR);
+    GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_TC | GLA_COLOR)); // CPP: Cast
 
     GL_VertexPointer(2, 4, tess.vertices);
     GL_TexCoordPointer(2, 4, tess.vertices + 2);
@@ -106,8 +106,8 @@ void GL_DrawParticles(void)
     total = glr.fd.num_particles;
     do {
         GL_BindTexture(0, TEXNUM_PARTICLE);
-        GL_StateBits(blend | GLS_DEPTHMASK_FALSE);
-        GL_ArrayBits(GLA_VERTEX | GLA_TC | GLA_COLOR);
+        GL_StateBits((glStateBits_t)(blend | GLS_DEPTHMASK_FALSE)); // CPP: Cast
+        GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_TC | GLA_COLOR)); // CPP: Cast
 
         count = total;
         if (count > TESS_MAX_VERTICES / 3)
@@ -181,8 +181,8 @@ void GL_DrawBeams(void)
 
     GL_LoadMatrix(glr.viewmatrix);
     GL_BindTexture(0, TEXNUM_BEAM);
-    GL_StateBits(GLS_BLEND_BLEND | GLS_DEPTHMASK_FALSE);
-    GL_ArrayBits(GLA_VERTEX | GLA_TC | GLA_COLOR);
+    GL_StateBits((glStateBits_t)(GLS_BLEND_BLEND | GLS_DEPTHMASK_FALSE)); // CPP: Cast
+    GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_TC | GLA_COLOR)); // CPP: Cast
 
     GL_VertexPointer(3, 5, tess.vertices);
     GL_TexCoordPointer(2, 5, tess.vertices + 3);
@@ -283,20 +283,20 @@ void GL_BindArrays(void)
 
 void GL_Flush3D(void)
 {
-    glStateBits_t state = tess.flags;
-    glArrayBits_t array = GLA_VERTEX | GLA_TC;
+    glStateBits_t state = (glStateBits_t)tess.flags;           // CPP: Cast
+    glArrayBits_t array = (glArrayBits_t)(GLA_VERTEX | GLA_TC);  // CPP: Cast
 
     if (!tess.numindices) {
         return;
     }
 
     if (q_likely(tess.texnum[1])) {
-        state |= GLS_LIGHTMAP_ENABLE;
-        array |= GLA_LMTC;
+        state = (glStateBits_t)(state | GLS_LIGHTMAP_ENABLE);   // CPP: Cast state 
+        array = (glArrayBits_t)(array | GLA_LMTC);              // CPP: Cast array |= GLA_LMTC;
     }
 
     if (!(state & GLS_TEXTURE_REPLACE)) {
-        array |= GLA_COLOR;
+        array = (glArrayBits_t)(array | GLA_COLOR);
     }
 
     GL_StateBits(state);

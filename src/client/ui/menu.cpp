@@ -286,7 +286,8 @@ static void Keybind_Update(menuFrameWork_t *menu)
     int i;
 
     for (i = 0; i < menu->nitems; i++) {
-        k = menu->items[i];
+        // CPP: Cast
+        k = (menuKeybind_t*)menu->items[i];
         if (k->generic.type == MTYPE_KEYBIND) {
             Keybind_Push(k);
             Keybind_Init(k);
@@ -309,7 +310,7 @@ static void Keybind_Remove(const char *cmd)
 
 static qboolean keybind_cb(void *arg, int key)
 {
-    menuKeybind_t *k = arg;
+    menuKeybind_t *k = (menuKeybind_t*)arg; // CPP: Cast
     menuFrameWork_t *menu = k->generic.parent;
 
     // console key is hardcoded
@@ -1849,13 +1850,13 @@ void Menu_Init(menuFrameWork_t *menu)
         focus |= ((menuCommon_t *)item)->flags & QMF_HASFOCUS;
         switch (((menuCommon_t *)item)->type) {
         case MTYPE_FIELD:
-            Field_Init(item);
+            Field_Init((menuField_t*)item); // CPP: Cast
             break;
         case MTYPE_SLIDER:
-            Slider_Init(item);
+            Slider_Init((menuSlider_t*)item); // CPP: Cast
             break;
         case MTYPE_LIST:
-            MenuList_Init(item);
+            MenuList_Init((menuList_t*)item); // CPP: Cast
             break;
         case MTYPE_SPINCONTROL:
         case MTYPE_BITFIELD:
@@ -1863,24 +1864,24 @@ void Menu_Init(menuFrameWork_t *menu)
         case MTYPE_VALUES:
         case MTYPE_STRINGS:
         case MTYPE_TOGGLE:
-            SpinControl_Init(item);
+            SpinControl_Init((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_ACTION:
         case MTYPE_SAVEGAME:
         case MTYPE_LOADGAME:
-            Action_Init(item);
+            Action_Init((menuAction_t*)item); // CPP: Cast
             break;
         case MTYPE_SEPARATOR:
-            Separator_Init(item);
+            Separator_Init((menuSeparator_t*)item); // CPP: Cast
             break;
         case MTYPE_STATIC:
-            Static_Init(item);
+            Static_Init((menuStatic_t*)item); // CPP: Cast
             break;
         case MTYPE_KEYBIND:
-            Keybind_Init(item);
+            Keybind_Init((menuKeybind_t*)item); // CPP: Cast
             break;
         case MTYPE_BITMAP:
-            Bitmap_Init(item);
+            Bitmap_Init((menuBitmap_t*)item); // CPP: Cast
             break;
         default:
             Com_Error(ERR_FATAL, "Menu_Init: unknown item type");
@@ -1933,7 +1934,7 @@ void Menu_Size(menuFrameWork_t *menu)
 
     // count visible items
     for (i = 0, h = 0; i < menu->nitems; i++) {
-        item = menu->items[i];
+        item = (menuCommon_t*)menu->items[i]; // CPP: Cast
         if (item->flags & QMF_HIDDEN) {
             continue;
         }
@@ -2009,7 +2010,7 @@ void Menu_Size(menuFrameWork_t *menu)
 	
     // align items
     for (i = 0; i < menu->nitems; i++) {
-        item = menu->items[i];
+        item = (menuCommon_t*)menu->items[i]; // CPP: Cast
         if (item->flags & QMF_HIDDEN) {
             continue;
         }
@@ -2045,7 +2046,7 @@ menuCommon_t *Menu_ItemAtCursor(menuFrameWork_t *m)
     int i;
 
     for (i = 0; i < m->nitems; i++) {
-        item = m->items[i];
+        item = (menuCommon_t*)m->items[i]; // CPP: Cast
         if (item->flags & QMF_HASFOCUS) {
             return item;
         }
@@ -2244,13 +2245,13 @@ void Menu_Draw(menuFrameWork_t *menu)
 
         switch (((menuCommon_t *)item)->type) {
         case MTYPE_FIELD:
-            Field_Draw(item);
+            Field_Draw((menuField_t*)item);     // CPP: Cast
             break;
         case MTYPE_SLIDER:
-            Slider_Draw(item);
+            Slider_Draw((menuSlider_t*)item);   // CPP: Cast
             break;
         case MTYPE_LIST:
-            MenuList_Draw(item);
+            MenuList_Draw((menuList_t*)item);   // CPP: Cast
             break;
         case MTYPE_SPINCONTROL:
         case MTYPE_BITFIELD:
@@ -2258,24 +2259,24 @@ void Menu_Draw(menuFrameWork_t *menu)
         case MTYPE_VALUES:
         case MTYPE_STRINGS:
         case MTYPE_TOGGLE:
-            SpinControl_Draw(item);
+            SpinControl_Draw((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_ACTION:
         case MTYPE_SAVEGAME:
         case MTYPE_LOADGAME:
-            Action_Draw(item);
+            Action_Draw((menuAction_t*)item); // CPP: Cast
             break;
         case MTYPE_SEPARATOR:
-            Separator_Draw(item);
+            Separator_Draw((menuSeparator_t*)item); // CPP: Cast
             break;
         case MTYPE_STATIC:
-            Static_Draw(item);
+            Static_Draw((menuStatic_t*)item); // CPP: Cast
             break;
         case MTYPE_KEYBIND:
-            Keybind_Draw(item);
+            Keybind_Draw((menuKeybind_t*)item); // CPP: Cast
             break;
         case MTYPE_BITMAP:
-            Bitmap_Draw(item);
+            Bitmap_Draw((menuBitmap_t*)item);// CPP: Cast
             break;
         default:
             Com_Error(ERR_FATAL, "Menu_Draw: unknown item type");
@@ -2312,16 +2313,16 @@ menuSound_t Menu_SelectItem(menuFrameWork_t *s)
     case MTYPE_VALUES:
     case MTYPE_STRINGS:
     case MTYPE_TOGGLE:
-        return SpinControl_DoEnter((menuSpinControl_t *)item);
+        return (menuSound_t)SpinControl_DoEnter((menuSpinControl_t *)item); // CPP: Cast
     case MTYPE_KEYBIND:
-        return Keybind_DoEnter((menuKeybind_t *)item);
+        return (menuSound_t)Keybind_DoEnter((menuKeybind_t *)item); // CPP: Cast
     case MTYPE_FIELD:
     case MTYPE_ACTION:
     case MTYPE_LIST:
     case MTYPE_BITMAP:
     case MTYPE_SAVEGAME:
     case MTYPE_LOADGAME:
-        return Common_DoEnter(item);
+        return (menuSound_t)Common_DoEnter(item); // CPP: Cast
     default:
         return QMS_NOTHANDLED;
     }
@@ -2344,7 +2345,7 @@ menuSound_t Menu_SlideItem(menuFrameWork_t *s, int dir)
     case MTYPE_VALUES:
     case MTYPE_STRINGS:
     case MTYPE_TOGGLE:
-        return SpinControl_DoSlide((menuSpinControl_t *)item, dir);
+        return (menuSound_t)SpinControl_DoSlide((menuSpinControl_t *)item, dir); // CPP: Cast
     default:
         return QMS_NOTHANDLED;
     }
@@ -2361,7 +2362,7 @@ menuSound_t Menu_KeyEvent(menuCommon_t *item, int key)
 
     switch (item->type) {
     case MTYPE_FIELD:
-        return Field_Key((menuField_t *)item, key);
+        return (menuSound_t)Field_Key((menuField_t *)item, key); // CPP: Cast
     case MTYPE_LIST:
         return MenuList_Key((menuList_t *)item, key);
     case MTYPE_SLIDER:
@@ -2377,7 +2378,7 @@ menuSound_t Menu_CharEvent(menuCommon_t *item, int key)
 {
     switch (item->type) {
     case MTYPE_FIELD:
-        return Field_Char((menuField_t *)item, key);
+        return (menuSound_t)Field_Char((menuField_t *)item, key); // CPP: Cast
     default:
         return QMS_NOTHANDLED;
     }
@@ -2487,7 +2488,7 @@ menuCommon_t *Menu_HitTest(menuFrameWork_t *menu)
     }
 
     for (i = 0; i < menu->nitems; i++) {
-        item = menu->items[i];
+        item = (menuCommon_t*)menu->items[i]; // CPP: Cast
         if (item->flags & QMF_HIDDEN) {
             continue;
         }
@@ -2510,32 +2511,32 @@ qboolean Menu_Push(menuFrameWork_t *menu)
 
         switch (((menuCommon_t *)item)->type) {
         case MTYPE_SLIDER:
-            Slider_Push(item);
+            Slider_Push((menuSlider_t*)item); // CPP: Cast
             break;
         case MTYPE_BITFIELD:
-            BitField_Push(item);
+            BitField_Push((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_PAIRS:
-            Pairs_Push(item);
+            Pairs_Push((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_STRINGS:
-            Strings_Push(item);
+            Strings_Push((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_SPINCONTROL:
-            SpinControl_Push(item);
+            SpinControl_Push((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_TOGGLE:
-            Toggle_Push(item);
+            Toggle_Push((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_KEYBIND:
-            Keybind_Push(item);
+            Keybind_Push((menuKeybind_t*)item); // CPP: Cast
             break;
         case MTYPE_FIELD:
-            Field_Push(item);
+            Field_Push((menuField_t*)item); // CPP: Cast
             break;
         case MTYPE_SAVEGAME:
         case MTYPE_LOADGAME:
-            Savegame_Push(item);
+            Savegame_Push((menuAction_t*)item); // CPP: Cast
             break;
         default:
             break;
@@ -2554,28 +2555,28 @@ void Menu_Pop(menuFrameWork_t *menu)
 
         switch (((menuCommon_t *)item)->type) {
         case MTYPE_SLIDER:
-            Slider_Pop(item);
+            Slider_Pop((menuSlider_t*)item); // CPP: Cast
             break;
         case MTYPE_BITFIELD:
-            BitField_Pop(item);
+            BitField_Pop((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_PAIRS:
-            Pairs_Pop(item);
+            Pairs_Pop((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_STRINGS:
-            Strings_Pop(item);
+            Strings_Pop((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_SPINCONTROL:
-            SpinControl_Pop(item);
+            SpinControl_Pop((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_TOGGLE:
-            Toggle_Pop(item);
+            Toggle_Pop((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_KEYBIND:
-            Keybind_Pop(item);
+            Keybind_Pop((menuKeybind_t*)item); // CPP: Cast
             break;
         case MTYPE_FIELD:
-            Field_Pop(item);
+            Field_Pop((menuField_t*)item); // CPP: Cast
             break;
         default:
             break;
@@ -2595,33 +2596,33 @@ void Menu_Free(menuFrameWork_t *menu)
         case MTYPE_ACTION:
         case MTYPE_SAVEGAME:
         case MTYPE_LOADGAME:
-            Action_Free(item);
+            Action_Free((menuAction_t*)item); // CPP: Cast
             break;
         case MTYPE_SLIDER:
-            Slider_Free(item);
+            Slider_Free((menuSlider_t*)item); // CPP: Cast
             break;
         case MTYPE_BITFIELD:
         case MTYPE_TOGGLE:
-            BitField_Free(item);
+            BitField_Free((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_PAIRS:
-            Pairs_Free(item);
+            Pairs_Free((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_SPINCONTROL:
         case MTYPE_STRINGS:
-            SpinControl_Free(item);
+            SpinControl_Free((menuSpinControl_t*)item); // CPP: Cast
             break;
         case MTYPE_KEYBIND:
-            Keybind_Free(item);
+            Keybind_Free((menuKeybind_t*)item); // CPP: Cast
             break;
         case MTYPE_FIELD:
-            Field_Free(item);
+            Field_Free((menuField_t*)item); // CPP: Cast
             break;
         case MTYPE_SEPARATOR:
             Z_Free(item);
             break;
         case MTYPE_BITMAP:
-            Bitmap_Free(item);
+            Bitmap_Free((menuBitmap_t*)item); // CPP: Cast
             break;
         default:
             break;

@@ -143,7 +143,7 @@ void Cvar_Variable_g(genctx_t *ctx)
 
 void Cvar_Default_g(genctx_t *ctx)
 {
-    cvar_t *c = ctx->data;
+    cvar_t *c = (cvar_t*)ctx->data; // CPP: Cast
 
     if (c) {
         if (strcmp(c->string, c->default_string)) {
@@ -300,7 +300,7 @@ cvar_t *Cvar_Get(const char *var_name, const char *var_value, int flags)
 
     // create new variable
     length = strlen(var_name) + 1;
-    var = Cvar_Malloc(sizeof(*var) + length);
+    var = (cvar_t*)Cvar_Malloc(sizeof(*var) + length); // CPP: Cast
     var->name = (char *)(var + 1);
     memcpy(var->name, var_name, length);
     var->string = Z_CvarCopyString(var_value);

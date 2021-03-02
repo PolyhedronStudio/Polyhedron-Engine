@@ -68,7 +68,7 @@ LOAD(Visibility)
     }
 
     bsp->numvisibility = count;
-    bsp->vis = ALLOC(count);
+    bsp->vis = (dvis_t*)ALLOC(count); // CPP: Cast
     memcpy(bsp->vis, base, count);
 
     numclusters = LittleLong(bsp->vis->numclusters);
@@ -111,10 +111,10 @@ LOAD(Texinfo)
 #endif
 
     bsp->numtexinfo = count;
-    bsp->texinfo = ALLOC(sizeof(*out) * count);
+    bsp->texinfo = (mtexinfo_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
-    out = bsp->texinfo;
+    in = (dtexinfo_t*)base; // CPP: Cast
+    out = bsp->texinfo; // CPP: Cast
     for (i = 0; i < count; i++, in++, out++) {
         memcpy(out->c.name, in->texture, sizeof(out->c.name));
         out->c.name[sizeof(out->c.name) - 1] = 0;
@@ -170,9 +170,9 @@ LOAD(Planes)
     int         i, j;
 
     bsp->numplanes = count;
-    bsp->planes = ALLOC(sizeof(*out) * count);
+    bsp->planes = (cplane_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (dplane_t*)base; // CPP: Cast
     out = bsp->planes;
     for (i = 0; i < count; i++, in++, out++) {
         for (j = 0; j < 3; j++) {
@@ -194,9 +194,9 @@ LOAD(BrushSides)
     uint16_t    planenum, texinfo;
 
     bsp->numbrushsides = count;
-    bsp->brushsides = ALLOC(sizeof(*out) * count);
+    bsp->brushsides = (mbrushside_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (dbrushside_t*)base; // CPP: Cast
     out = bsp->brushsides;
     for (i = 0; i < count; i++, in++, out++) {
         planenum = LittleShort(in->planenum);
@@ -228,9 +228,9 @@ LOAD(Brushes)
     uint32_t    firstside, numsides, lastside;
 
     bsp->numbrushes = count;
-    bsp->brushes = ALLOC(sizeof(*out) * count);
+    bsp->brushes = (mbrush_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (dbrush_t*)base; // CPP: Cast
     out = bsp->brushes;
     for (i = 0; i < count; i++, out++, in++) {
         firstside = LittleLong(in->firstside);
@@ -257,9 +257,9 @@ LOAD(LeafBrushes)
     uint16_t    brushnum;
 
     bsp->numleafbrushes = count;
-    bsp->leafbrushes = ALLOC(sizeof(*out) * count);
+    bsp->leafbrushes = (mbrush_t**)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (uint16_t*)base; // CPP: Cast
     out = bsp->leafbrushes;
     for (i = 0; i < count; i++, in++, out++) {
         brushnum = LittleShort(*in);
@@ -282,7 +282,7 @@ LOAD(Lightmap)
     }
 
     bsp->numlightmapbytes = count;
-    bsp->lightmap = ALLOC(count);
+    bsp->lightmap = (byte*)ALLOC(count); // CPP: Cast
 
     memcpy(bsp->lightmap, base, count);
 
@@ -296,9 +296,9 @@ LOAD(Vertices)
     int         i, j;
 
     bsp->numvertices = count;
-    bsp->vertices = ALLOC(sizeof(*out) * count);
+    bsp->vertices = (mvertex_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (dvertex_t*)base; // CPP: Cast
     out = bsp->vertices;
     for (i = 0; i < count; i++, out++, in++) {
         for (j = 0; j < 3; j++) {
@@ -317,9 +317,9 @@ LOAD(Edges)
     uint16_t    vertnum;
 
     bsp->numedges = count;
-    bsp->edges = ALLOC(sizeof(*out) * count);
+    bsp->edges = (medge_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (dedge_t*)base; // CPP: Cast
     out = bsp->edges;
     for (i = 0; i < count; i++, out++, in++) {
         for (j = 0; j < 2; j++) {
@@ -343,9 +343,9 @@ LOAD(SurfEdges)
     int32_t     index;
 
     bsp->numsurfedges = count;
-    bsp->surfedges = ALLOC(sizeof(*out) * count);
+    bsp->surfedges = (msurfedge_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (int*)base; // CPP: Cast
     out = bsp->surfedges;
     for (i = 0; i < count; i++, out++, in++) {
         index = (int32_t)LittleLong(*in);
@@ -378,9 +378,9 @@ LOAD(Faces)
     uint32_t    lightofs;
 
     bsp->numfaces = count;
-    bsp->faces = ALLOC(sizeof(*out) * count);
+    bsp->faces = (mface_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (dface_t*)base; // CPP: Cast
     out = bsp->faces;
     for (i = 0; i < count; i++, in++, out++) {
         firstedge = LittleLong(in->firstedge);
@@ -449,9 +449,9 @@ LOAD(LeafFaces)
     uint16_t    facenum;
 
     bsp->numleaffaces = count;
-    bsp->leaffaces = ALLOC(sizeof(*out) * count);
+    bsp->leaffaces = (mface_t**)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (uint16_t*)base; // CPP: Cast
     out = bsp->leaffaces;
     for (i = 0; i < count; i++, in++, out++) {
         facenum = LittleShort(*in);
@@ -484,9 +484,9 @@ LOAD(Leafs)
     }
 
     bsp->numleafs = count;
-    bsp->leafs = ALLOC(sizeof(*out) * count);
+    bsp->leafs = (mleaf_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (dleaf_t*)base; // CPP: Cast
     out = bsp->leafs;
     for (i = 0; i < count; i++, in++, out++) {
         out->plane = NULL;
@@ -569,9 +569,9 @@ LOAD(Nodes)
     }
 
     bsp->numnodes = count;
-    bsp->nodes = ALLOC(sizeof(*out) * count);
+    bsp->nodes = (mnode_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (dnode_t*)base; // CPP: Cast
     out = bsp->nodes;
     for (i = 0; i < count; i++, out++, in++) {
         planenum = LittleLong(in->planenum);
@@ -638,10 +638,10 @@ LOAD(Submodels)
         return Q_ERR_TOO_FEW;
     }
 
-    bsp->models = ALLOC(sizeof(*out) * count);
+    bsp->models = (mmodel_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
     bsp->nummodels = count;
 
-    in = base;
+    in = (dmodel_t*)base; // CPP: Cast
     out = bsp->models;
     for (i = 0; i < count; i++, in++, out++) {
         for (j = 0; j < 3; j++) {
@@ -695,9 +695,9 @@ LOAD(AreaPortals)
     int         i;
 
     bsp->numareaportals = count;
-    bsp->areaportals = ALLOC(sizeof(*out) * count);
+    bsp->areaportals = (mareaportal_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (dareaportal_t*)base; // CPP: Cast
     out = bsp->areaportals;
     for (i = 0; i < count; i++, in++, out++) {
         out->portalnum = LittleLong(in->portalnum);
@@ -715,9 +715,9 @@ LOAD(Areas)
     uint32_t    numareaportals, firstareaportal, lastareaportal;
 
     bsp->numareas = count;
-    bsp->areas = ALLOC(sizeof(*out) * count);
+    bsp->areas = (marea_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
-    in = base;
+    in = (darea_t*)base; // CPP: Cast
     out = bsp->areas;
     for (i = 0; i < count; i++, in++, out++) {
         numareaportals = LittleLong(in->numareaportals);
@@ -738,7 +738,7 @@ LOAD(Areas)
 LOAD(EntString)
 {
     bsp->numentitychars = count;
-    bsp->entitystring = ALLOC(count + 1);
+    bsp->entitystring = (char*)ALLOC(count + 1); // CPP: Cast
     memcpy(bsp->entitystring, base, count);
     bsp->entitystring[count] = 0;
 
@@ -961,11 +961,11 @@ static void BSP_BuildPvsMatrix(bsp_t *bsp)
 
 	// allocate the matrix but don't set it in the BSP structure yet: 
 	// we want BSP_CluterVis to use the old PVS data here, and not the new empty matrix
-	char* pvs_matrix = Z_Mallocz(matrix_size);
+	char* pvs_matrix = (char*)Z_Mallocz(matrix_size); // CPP: Cast
 	
 	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++)
 	{
-		BSP_ClusterVis(bsp, pvs_matrix + bsp->visrowsize * cluster, cluster, DVIS_PVS);
+		BSP_ClusterVis(bsp, (byte*)(pvs_matrix + bsp->visrowsize * cluster), cluster, DVIS_PVS);
 	}
 
 	bsp->pvs_matrix = pvs_matrix;
@@ -1025,7 +1025,7 @@ static qboolean BSP_LoadPatchedPVS(bsp_t *bsp)
 
 	unsigned char* filebuf = 0;
 	ssize_t filelen = 0;
-	filelen = FS_LoadFile(pvs_path, &filebuf);
+	filelen = FS_LoadFile(pvs_path, &(void*)filebuf); // CPP: WARNING: DANGER: IMPORTANT: CAST: unsigned char ** to void**
 
 	if (filebuf == 0)
 		return qfalse;
@@ -1037,10 +1037,10 @@ static qboolean BSP_LoadPatchedPVS(bsp_t *bsp)
 		return qfalse;
 	}
 
-	bsp->pvs_matrix = Z_Malloc(matrix_size);
+	bsp->pvs_matrix = (char*)Z_Malloc(matrix_size); // CPP: Cast
 	memcpy(bsp->pvs_matrix, filebuf, matrix_size);
 
-	bsp->pvs2_matrix = Z_Malloc(matrix_size);
+	bsp->pvs2_matrix = (char*)Z_Malloc(matrix_size); // CPP: Cast
 	memcpy(bsp->pvs2_matrix, filebuf + matrix_size, matrix_size);
 
 	FS_FreeFile(filebuf);
@@ -1062,7 +1062,7 @@ qboolean BSP_SavePatchedPVS(bsp_t *bsp)
 		return qfalse;
 
 	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
-	unsigned char* filebuf = Z_Malloc(matrix_size * 2);
+	unsigned char* filebuf = (unsigned char*)Z_Malloc(matrix_size * 2); // CPP: Cast
 
 	memcpy(filebuf, bsp->pvs_matrix, matrix_size);
 	memcpy(filebuf + matrix_size, bsp->pvs2_matrix, matrix_size);
@@ -1169,7 +1169,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 
     // load into hunk
     len = strlen(name);
-    bsp = Z_Mallocz(sizeof(*bsp) + len);
+    bsp = (bsp_t*)Z_Mallocz(sizeof(*bsp) + len); // CPP: Cast
     memcpy(bsp->name, name, len + 1);
     bsp->refcount = 1;
 
@@ -1368,10 +1368,10 @@ byte *BSP_ClusterVis(bsp_t *bsp, byte *mask, int cluster, int vis)
     int     c;
 
     if (!bsp || !bsp->vis) {
-        return memset(mask, 0xff, VIS_MAX_BYTES);
+        return (byte*)memset(mask, 0xff, VIS_MAX_BYTES); // CPP: Cast
     }
     if (cluster == -1) {
-        return memset(mask, 0, bsp->visrowsize);
+        return (byte*)memset(mask, 0, bsp->visrowsize); // CPP: Cast
     }
     if (cluster < 0 || cluster >= bsp->vis->numclusters) {
         Com_Error(ERR_DROP, "%s: bad cluster", __func__);

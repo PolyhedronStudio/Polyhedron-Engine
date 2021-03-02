@@ -998,15 +998,26 @@ static void CL_ParseSetting(void)
     index = MSG_ReadLong();
     value = MSG_ReadLong();
 
-    switch (index) {
+    // N&C: Server setting parsing commented out. 
+    // USE_FPS isn't enabled by us, so..
 #if USE_FPS
+    switch (index) {
     case SVS_FPS:
         set_server_fps(value);
         break;
-#endif
     default:
         break;
     }
+#endif
+//    switch (index) {
+//#if USE_FPS
+//    case SVS_FPS:
+//        set_server_fps(value);
+//        break;
+//#endif
+//    default:
+//        break;
+//    }
 }
 
 /*

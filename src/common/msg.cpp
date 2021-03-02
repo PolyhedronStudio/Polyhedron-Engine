@@ -97,7 +97,7 @@ void MSG_WriteChar(int c)
         Com_Error(ERR_FATAL, "MSG_WriteChar: range error");
 #endif
 
-    buf = SZ_GetSpace(&msg_write, 1);
+    buf = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
     buf[0] = c;
 }
 
@@ -115,7 +115,7 @@ void MSG_WriteByte(int c)
         Com_Error(ERR_FATAL, "MSG_WriteByte: range error");
 #endif
 
-    buf = SZ_GetSpace(&msg_write, 1);
+    buf = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
     buf[0] = c;
 }
 
@@ -133,7 +133,7 @@ void MSG_WriteShort(int c)
         Com_Error(ERR_FATAL, "MSG_WriteShort: range error");
 #endif
 
-    buf = SZ_GetSpace(&msg_write, 2);
+    buf = (byte*)SZ_GetSpace(&msg_write, 2); // CPP: Cast
     buf[0] = c & 0xff;
     buf[1] = c >> 8;
 }
@@ -147,7 +147,7 @@ void MSG_WriteLong(int c)
 {
     byte    *buf;
 
-    buf = SZ_GetSpace(&msg_write, 4);
+    buf = (byte*)SZ_GetSpace(&msg_write, 4); // CPP: Cast
     buf[0] = c & 0xff;
     buf[1] = (c >> 8) & 0xff;
     buf[2] = (c >> 16) & 0xff;
@@ -163,9 +163,12 @@ void MSG_WriteLong(int c)
 //================
 //
 void MSG_WriteFloat(float c) {
-    const msg_float vec = {
-        .f = c
-    };
+    // CPP: IMPORTANT: DANGER: CARE: This one is important that it works out just fine in C++
+    msg_float vec;
+    vec.f = c;
+    //const msg_float vec = {
+    //    .f = c
+    //};
 
     MSG_WriteLong(vec.i);
 }
@@ -1578,9 +1581,12 @@ int MSG_ReadLong(void)
 //================
 //
 float MSG_ReadFloat(void) {
-    const msg_float vec = {
-        .i = MSG_ReadLong()
-    };
+    // CPP: IMPORTANT: DANGER: CARE: This one is important that it works out just fine in C++
+    msg_float vec;
+    vec.i = MSG_ReadLong();
+    //const msg_float vec = {
+    //    i = MSG_ReadLong()
+    //};
 
     return vec.f;
 }
@@ -2098,7 +2104,7 @@ void MSG_ParseDeltaPlayerstate_Default(const player_state_t *from,
     // parse the pmove_state_t
     //
     if (flags & PS_M_TYPE)
-        to->pmove.pm_type = MSG_ReadByte();
+        to->pmove.pm_type = (pmtype_t)MSG_ReadByte(); // CPP: Cast
 
     // N&C: Full float precision.
     if (flags & PS_M_ORIGIN) {
@@ -2213,7 +2219,7 @@ void MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t    *from,
     // parse the pmove_state_t
     //
     if (flags & PS_M_TYPE)
-        to->pmove.pm_type = MSG_ReadByte();
+        to->pmove.pm_type = (pmtype_t)MSG_ReadByte(); // CPP: Cast
 
     // N&C: Full float precision.
     if (flags & PS_M_ORIGIN) {
@@ -2352,7 +2358,7 @@ void MSG_ParseDeltaPlayerstate_Packet(const player_state_t *from,
     // parse the pmove_state_t
     //
     if (flags & PPS_M_TYPE)
-        to->pmove.pm_type = MSG_ReadByte();
+        to->pmove.pm_type = (pmtype_t)MSG_ReadByte(); // CPP: Cast
 
     // N&C: Full float precision.
     if (flags & PPS_M_ORIGIN) {

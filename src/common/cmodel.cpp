@@ -72,7 +72,7 @@ qerror_t CM_LoadMap(cm_t *cm, const char *name)
     }
 
     cm->cache = cache;
-    cm->floodnums = Z_TagMallocz(sizeof(int) * cm->cache->numareas +
+    cm->floodnums = (int*)Z_TagMallocz(sizeof(int) * cm->cache->numareas +      // CPP: Cast
                                  sizeof(qboolean) * (cm->cache->lastareaportal + 1), TAG_CMODEL);
     cm->portalopen = (qboolean *)(cm->floodnums + cm->cache->numareas);
     FloodAreaConnections(cm);
@@ -1114,10 +1114,10 @@ byte *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t org, int vis)
     vec3_t  mins, maxs;
 
     if (!cm->cache) {   // map not loaded
-        return memset(mask, 0, VIS_MAX_BYTES);
+        return (byte*)memset(mask, 0, VIS_MAX_BYTES); // CPP: Cast
     }
     if (!cm->cache->vis) {
-        return memset(mask, 0xff, VIS_MAX_BYTES);
+        return (byte*)memset(mask, 0xff, VIS_MAX_BYTES); // CPP: Cast
     }
 
     for (i = 0; i < 3; i++) {

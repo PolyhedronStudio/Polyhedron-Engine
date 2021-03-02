@@ -91,7 +91,7 @@ qboolean FIFO_ReadMessage(fifo_t *fifo, size_t msglen)
     size_t len;
     byte *data;
 
-    data = FIFO_Peek(fifo, &len);
+    data = (byte*)FIFO_Peek(fifo, &len); // CPP: Cast
     if (len < msglen) {
         // read in two chunks into message buffer
         if (!FIFO_TryRead(fifo, msg_read_buffer, msglen)) {

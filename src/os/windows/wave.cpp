@@ -166,7 +166,7 @@ static sndinitstat_t WAVE_Init(void)
     Com_DPrintf("ok\n");
 
     Com_DPrintf("...locking waveform buffer: ");
-    lpData = GlobalLock(hData);
+    lpData = (HPSTR)GlobalLock(hData); // CPP: Cast
     if (!lpData) {
         Com_DPrintf(" failed with error %#lx\n", GetLastError());
         WAVE_Shutdown();

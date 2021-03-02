@@ -206,11 +206,11 @@ color_index_t Com_ParseColor(const char *s, color_index_t last)
     color_index_t i;
 
     if (COM_IsUint(s)) {
-        i = strtoul(s, NULL, 10);
+        i = (color_index_t)strtoul(s, NULL, 10); // CPP: Cast
         return i > last ? COLOR_NONE : i;
     }
 
-    for (i = 0; i <= last; i++) {
+    for ((color_index_t)i = (color_index_t)0; (color_index_t)i <= last; i = (color_index_t)((int)i + 1)) { // CPP: Cast - LOL
         if (!strcmp(colorNames[i], s)) {
             return i;
         }
