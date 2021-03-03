@@ -842,11 +842,14 @@ void ReadGame(const char *filename)
         gi.error("Savegame has bad maxentities");
     }
 
-    g_edicts = (edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
+    // WatIs: C++-ify: Note that this may be a problem maker.
+    g_edicts = new edict_t[game.maxentities];//(edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
     globals.pool.edicts = g_edicts;
     globals.pool.max_edicts = game.maxentities;
 
-    game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    // WatIs: C++-ify: Note that this may be a problem maker.
+    game.clients = new gclient_t[game.maxclients];
+    //game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     for (i = 0; i < game.maxclients; i++) {
         read_fields(f, clientfields, &game.clients[i]);
     }
@@ -925,7 +928,11 @@ void ReadLevel(const char *filename)
         gi.error("Couldn't open %s", filename);
 
     // wipe all the entities
-    memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
+    // WatIs: C++-ify: Note that this may be a problem maker.
+    for (int i = 0; i < game.maxentities; i++) {
+        g_edicts[i] = edict_t();
+    }
+    //memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
     globals.pool.num_edicts = maxclients->value + 1;
 
     i = read_int(f);

@@ -427,7 +427,9 @@ void G_FreeEdict(edict_t *ed)
         return;
     }
 
-    memset(ed, 0, sizeof(*ed));
+    // C++-ify, reset the struct itself.
+    //memset(ed, 0, sizeof(*ed));
+    *ed = edict_t();
     ed->classname = "freed";
     ed->freetime = level.time;
     ed->inuse = qfalse;

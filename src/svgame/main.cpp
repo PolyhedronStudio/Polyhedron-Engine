@@ -99,6 +99,14 @@ void ShutdownGame(void)
 {
     gi.dprintf("==== ShutdownGame ====\n");
 
+    // WatIs: C++-ify: Delete the edicts and clients arrays, they are allocated using new [], so need a delete[]
+    if (g_edicts)
+        delete[] g_edicts;
+
+    if (game.clients)
+        delete[] game.clients;
+
+    // Shutdown the game.
     gi.FreeTags(TAG_LEVEL);
     gi.FreeTags(TAG_GAME);
 }
@@ -190,13 +198,17 @@ void InitGame(void)
     // initialize all entities for this game
     game.maxentities = maxentities->value;
     clamp(game.maxentities, (int)maxclients->value + 1, MAX_EDICTS);
-    g_edicts = (edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
+    // WatIs: C++-ify
+    g_edicts = new edict_t[game.maxentities];
+    //g_edicts = (edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
     globals.pool.edicts = g_edicts;
     globals.pool.max_edicts = game.maxentities;
 
     // initialize all clients for this game
     game.maxclients = maxclients->value;
-    game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    // WatIs: C++-ify
+    game.clients = new gclient_t[game.maxclients];
+    //game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     globals.pool.num_edicts = game.maxclients + 1;
 }
 

@@ -567,7 +567,11 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
     gi.FreeTags(TAG_LEVEL);
 
     memset(&level, 0, sizeof(level));
-    memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
+    // WatIs: C++-ify: Note that this may be a problem maker.
+    for (int i = 0; i < game.maxentities; i++) {
+        g_edicts[i] = edict_t();
+    }
+    //memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0])); // WatIs: C++-ify: Note that this may be a problem maker.
 
     strncpy(level.mapname, mapname, sizeof(level.mapname) - 1);
     strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
