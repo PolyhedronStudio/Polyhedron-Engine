@@ -2,7 +2,7 @@
 
 Watch our [Teaser](https://www.youtube.com/watch?v=BIOJ6QURT5k) on Youtube, and see what the fuzz is all about.
 
-# Technology
+## Technology
 
 **Nail & Crescent** builds upon the beautiful [Quake II RTX](https://github.com/NVIDIA/Q2RTX) technology.
 
@@ -13,30 +13,25 @@ of all, improvements to the engine in overall, so it has more modern features to
 system.
 
 **Nail & Crescent** has introduced the following changes and features:
-    - Own custom BSP tooling based on the **qbism v220** toolset. Can be found [here](https://github.com/WatIsDeze/widtools/)
-    - Client Game DLL interface. This allows for mods to have control over client side effects, something normally not possible
-    in vanilla Quake 2.
-    - OpenAL Audio support. Such as underwater effects.
-    - Entities and player positions are networked using full floating point precision. No more drunk feeling due to
-    entity positions being networked as shorts.
-    - Larger world boundary limits, break free of the 4096x4096x4096 boundaries.
-    - Shared player move code. The client game dll, and server game dll both share the player move code now. This allows for
-    mods to implement custom movement. 
-    - Highly restructured game code. 
+- Own custom [BSP tooling](https://github.com/WatIsDeze/widtools/) based on the **qbism v220** toolset.
+- Client Game DLL interface. This allows for mods to have control over client side effects, something normally not possible in vanilla Quake 2.
+- OpenAL Audio support. Such as underwater effects.
+- Entities and player positions are networked using full floating point precision. No more drunk feeling due to entity positions being networked as shorts.
+- Larger world boundary limits, break free of the 4096x4096x4096 boundaries.
+- Shared player move code. The client game dll, and server game dll both share the player move code now. This allows for mods to implement custom movement. 
+- Highly restructured game code. 
 
 Here is a list of plans for the technology behind **Nail & Crescent**. Note that not all might make it in the end.:
-    - Adjust BSP format to use ints instead of shorts, so we can extend its limits.
-    - Add a material system, let Trenchbroom and the BSP tools support this.
-        - Will also contain a converter for the .csv file which is currently in use as
-        the material database.
-    - Implement libRmlUI and use it for the HUD, Console, MainMenu, and in-game menus.
-    - Skeletal Animation support.
-    - Player Movement AI (A proof of concept can be found in [this](https://github.com/WatIsDeze/Nail-Crescent/tree/AI-PMove) branch)
-        - Adding a Schedule, Task, and Waypoint system should greatly improve the proof of concept and bring it to decent modern standards.
-    - Replace trace code by a physics library, ultimately improving collision detection overall and allowing for the option of several physics
-    entities.
-        - This retains the actual Player Movement code as always and should not influence the gameplay negatively. In fact, it's not wished for.
-    - Add RESTIR to the RTX renderer, hereby greatly reducing noise and making typical scenes with torches a reality.
+- Adjust BSP format to use ints instead of shorts, so we can extend its limits.
+- Add a material system, let Trenchbroom and the BSP tools support this.
+    - Will also contain a converter for the .csv file which is currently in use as the material database.
+- Implement libRmlUI and use it for the HUD, Console, MainMenu, and in-game menus.
+- Skeletal Animation support.
+- Player Movement AI (A proof of concept can be found in [this](https://github.com/WatIsDeze/Nail-Crescent/tree/AI-PMove) branch)
+    - Adding a Schedule, Task, and Waypoint system should greatly improve the proof of concept and bring it to decent modern standards.
+- Replace trace code by a physics library, ultimately improving collision detection overall and allowing for the option of several physics entities.
+    - This retains the actual Player Movement code as always and should not influence the gameplay negatively. In fact, it's not wished for.
+- Add RESTIR to the RTX renderer, hereby greatly reducing noise and making typical scenes with torches a reality.
 
 ## License
 
