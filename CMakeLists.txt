@@ -7,6 +7,15 @@ set(NAC_VERSION_MAJOR 0)
 set(NAC_VERSION_MINOR 0)
 set(NAC_VERSION_POINT 1)
 
+# CPP Version
+if(WIN32)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++14")
+else()
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
+
 # get short-hash
 execute_process(
 	COMMAND git rev-parse --short HEAD
@@ -26,11 +35,13 @@ execute_process(
 
 OPTION(CONFIG_BUILD_CL_GAME "Build Client Game module" ON)
 OPTION(CONFIG_BUILD_SV_GAME "Build Server Game module" ON)
+OPTION(CONFIG_ENABLE_RMLUI "Enable libRmlUI implementation" ON)
 OPTION(CONFIG_GL_RENDERER "Enable GL renderer" ON)
 OPTION(CONFIG_VKPT_RENDERER "Enable VKPT renderer" ON)
 OPTION(CONFIG_VKPT_ENABLE_DEVICE_GROUPS "Enable device groups (multi-gpu) support" ON)
 OPTION(CONFIG_VKPT_ENABLE_IMAGE_DUMPS "Enable image dumping functionality" OFF)
 OPTION(CONFIG_USE_CURL "Use CURL for HTTP support" ON)
+
 # WATISDEZE: Do we still need these?
 # OPTION(CONFIG_LINUX_PACKAGING_SUPPORT "Enable Linux Packaging support" OFF)
 # OPTION(CONFIG_LINUX_STEAM_RUNTIME_SUPPORT "Enable Linux Steam Runtime support" OFF)

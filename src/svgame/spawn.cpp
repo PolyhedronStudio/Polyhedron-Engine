@@ -638,7 +638,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
 #ifdef DEBUG
     i = 1;
     ent = EDICT_NUM(i);
-    while (i < globals.num_edicts) {
+    while (i < globals.pool.num_edicts) {
         if (ent->inuse != 0 || ent->inuse != 1)
             Com_DPrintf("Invalid entity %d\n", i);
         i++, ent++;

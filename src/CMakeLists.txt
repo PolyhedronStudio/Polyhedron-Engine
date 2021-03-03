@@ -214,6 +214,15 @@ if (NOT CONFIG_VKPT_RENDERER AND CONFIG_GL_RENDERER)
 		client/null_gl.cpp
 	)
 endif()
+
+SET(SRC_CLIENT_RMLUI
+	client/rmlui/interfaces/RenderInterface.cpp
+	client/rmlui/interfaces/RenderInterface.h
+	client/rmlui/interfaces/SystemInterface.cpp
+	client/rmlui/interfaces/SystemInterface.h
+	client/rmlui/rmlui.cpp
+	client/rmlui/rmlui.h
+)
 SET(SRC_CLIENT_HTTP
 	client/http.cpp
 )
@@ -528,6 +537,13 @@ IF(CONFIG_USE_CURL)
 	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_HTTP})
 	TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_CURL=1)
 	TARGET_LINK_LIBRARIES(client libcurl)
+ENDIF()
+
+IF(CONFIG_ENABLE_RMLUI)
+ 	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
+	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ${CMAKE_SOURCE_DIR}/extern/RmlUi/Include/)
+	TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_RMLUI=1 RMLUI_STATIC_LIB)
+	TARGET_LINK_LIBRARIES(client RmlCore RmlDebugger RmlLua)
 ENDIF()
 
 if (GLSLANG_COMPILER)

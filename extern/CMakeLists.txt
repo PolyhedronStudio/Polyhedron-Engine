@@ -31,6 +31,7 @@ set_target_properties(SDL2main PROPERTIES FOLDER extern)
 set_target_properties(SDL2-static PROPERTIES FOLDER extern)
 set_target_properties(uninstall PROPERTIES FOLDER extern)
 
+
 #
 # CURL
 #
@@ -57,9 +58,33 @@ if(CONFIG_USE_CURL)
     set_target_properties(libcurl PROPERTIES FOLDER extern)
 endif()
 
-
+#
+# STB
+#
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/stb)
 
+#
+# TinyObjLoader
+#
 add_library(tinyobjloader INTERFACE)
 target_include_directories(tinyobjloader INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/tinyobjloader-c)
+
+#
+# libRmlUI
+#
+if (CONFIG_ENABLE_RMLUI)
+    # Shared libs.
+    option(BUILD_SHARED_LIBS "" ON)
+
+    # Lua bindings.
+    option(BUILD_LUA_BINDINGS "" ON)
+
+    set(CURL_CA_PATH "none" CACHE PATH "")
+
+    add_subdirectory(RmlUi)
+
+    set_target_properties(RmlCore PROPERTIES FOLDER extern)
+    set_target_properties(RmlDebugger PROPERTIES FOLDER extern)
+    #set_target_properties(RmlLua PROPERTIES FOLDER extern)
+endif()

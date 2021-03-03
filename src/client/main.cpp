@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // cl_main.c  -- client main loop
+#include "rmlui/rmlui.h"
 
 #include "client.h"
 #include "client/sound/vorbis.h"
@@ -3259,6 +3260,9 @@ unsigned CL_Frame(unsigned msec)
 
     Con_RunConsole();
 
+    // Update RMLUI
+    RMLUI_UpdateFrame();
+
     UI_Frame(main_extra);
 
     if (ref_frame) {
@@ -3376,6 +3380,9 @@ void CL_Init(void)
 
     HTTP_Init();
 
+    // Initialize RMLUI
+    RMLUI_Init();
+
     UI_OpenMenu(UIMENU_DEFAULT);
 
     Con_PostInit();
@@ -3411,6 +3418,9 @@ void CL_Shutdown(void)
     if (!cl_running || !cl_running->integer) {
         return;
     }
+
+    // Shutdown the RMLUI
+    RMLUI_Shutdown();
 
     // N&C: Notify the CG Module.
     CL_GM_Shutdown();

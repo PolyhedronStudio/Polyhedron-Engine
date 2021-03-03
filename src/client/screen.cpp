@@ -16,6 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // cl_scrn.c -- master for refresh, status bar, console, chat, notify, etc
+#include "rmlui/rmlui.h"
 
 #include "client.h"
 #include "client/gamemodule.h"
@@ -1019,6 +1020,9 @@ void SCR_UpdateScreen(void)
 
     // draw main menu
     UI_Draw(cls.realtime);
+
+    // Draw RMLUI
+    RMLUI_RenderFrame();
 
     // draw console
     Con_DrawConsole();
