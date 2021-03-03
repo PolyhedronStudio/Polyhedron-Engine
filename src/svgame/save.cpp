@@ -843,8 +843,8 @@ void ReadGame(const char *filename)
     }
 
     g_edicts = (edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
-    globals.edicts = g_edicts;
-    globals.max_edicts = game.maxentities;
+    globals.pool.edicts = g_edicts;
+    globals.pool.max_edicts = game.maxentities;
 
     game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     for (i = 0; i < game.maxclients; i++) {
@@ -880,7 +880,7 @@ void WriteLevel(const char *filename)
     write_fields(f, levelfields, &level);
 
     // write out all the entities
-    for (i = 0; i < globals.num_edicts; i++) {
+    for (i = 0; i < globals.pool.num_edicts; i++) {
         ent = &g_edicts[i];
         if (!ent->inuse)
             continue;
@@ -926,7 +926,7 @@ void ReadLevel(const char *filename)
 
     // wipe all the entities
     memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
-    globals.num_edicts = maxclients->value + 1;
+    globals.pool.num_edicts = maxclients->value + 1;
 
     i = read_int(f);
     if (i != SAVE_MAGIC2) {
@@ -951,8 +951,8 @@ void ReadLevel(const char *filename)
         if (entnum < 0 || entnum >= game.maxentities) {
             gi.error("%s: bad entity number", __func__);
         }
-        if (entnum >= globals.num_edicts)
-            globals.num_edicts = entnum + 1;
+        if (entnum >= globals.pool.num_edicts)
+            globals.pool.num_edicts = entnum + 1;
 
         ent = &g_edicts[entnum];
         read_fields(f, entityfields, ent);
@@ -974,7 +974,7 @@ void ReadLevel(const char *filename)
     }
 
     // do any load time things at this point
-    for (i = 0 ; i < globals.num_edicts ; i++) {
+    for (i = 0 ; i < globals.pool.num_edicts ; i++) {
         ent = &g_edicts[i];
 
         if (!ent->inuse)

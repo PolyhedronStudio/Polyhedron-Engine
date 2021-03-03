@@ -435,7 +435,7 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 
 // see if any solid entities are inside the final position
     check = g_edicts + 1;
-    for (e = 1; e < globals.num_edicts; e++, check++) {
+    for (e = 1; e < globals.pool.num_edicts; e++, check++) {
         if (!check->inuse)
             continue;
         if (check->movetype == MOVETYPE_PUSH

@@ -141,7 +141,7 @@ void InitGame(void)
     deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
     coop = gi.cvar("coop", "0", CVAR_LATCH);
     skill = gi.cvar("skill", "1", CVAR_LATCH);
-    maxentities = gi.cvar("maxentities", "1024", CVAR_LATCH);
+    maxentities = gi.cvar("maxentities", "2048", CVAR_LATCH); // N&C: Pool
 
     // change anytime vars
     dmflags = gi.cvar("dmflags", "0", CVAR_SERVERINFO);
@@ -191,13 +191,13 @@ void InitGame(void)
     game.maxentities = maxentities->value;
     clamp(game.maxentities, (int)maxclients->value + 1, MAX_EDICTS);
     g_edicts = (edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
-    globals.edicts = g_edicts;
-    globals.max_edicts = game.maxentities;
+    globals.pool.edicts = g_edicts;
+    globals.pool.max_edicts = game.maxentities;
 
     // initialize all clients for this game
     game.maxclients = maxclients->value;
     game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
-    globals.num_edicts = game.maxclients + 1;
+    globals.pool.num_edicts = game.maxclients + 1;
 }
 
 
@@ -237,7 +237,7 @@ svgame_export_t* GetServerGameAPI(svgame_import_t* import)
 
     globals.ServerCommand = ServerCommand;
 
-    globals.edict_size = sizeof(edict_t);
+    globals.pool.edict_size = sizeof(edict_t);
 
     return &globals;
 }
@@ -499,7 +499,7 @@ void G_RunFrame(void)
     // even the world gets a chance to think
     //
     ent = &g_edicts[0];
-    for (i = 0 ; i < globals.num_edicts ; i++, ent++) {
+    for (i = 0 ; i < globals.pool.num_edicts ; i++, ent++) {
         if (!ent->inuse)
             continue;
 

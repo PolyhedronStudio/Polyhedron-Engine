@@ -39,7 +39,7 @@ size_t playertouchmax;
 
 void SV_PreRunCmd(void)
 {
-    size_t max = (ge->num_edicts + 512 + 7) & ~7;
+    size_t max = (ge->pool.num_edicts + 512 + 7) & ~7;
     if (max > playertouchmax)
     {
         playertouchmax = max;
