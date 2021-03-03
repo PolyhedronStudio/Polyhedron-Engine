@@ -85,7 +85,9 @@ void RMLUI_Init(void) {
 void RMLUI_UpdateFrame(void) {
 	if (!context)
 		return;
-
+	if (!(Key_GetDest() & KEY_MENU)) {
+		return;
+	}
 	context->Update();
 }
 
@@ -93,6 +95,9 @@ void RMLUI_UpdateFrame(void) {
 void RMLUI_RenderFrame(void) {
 	if (!context)
 		return;
+	if (!(Key_GetDest() & KEY_MENU)) {
+		return;
+	}
 
 	context->Render();
 }

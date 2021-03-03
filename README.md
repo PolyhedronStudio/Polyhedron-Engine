@@ -1,19 +1,46 @@
-# Quake II RTX
+# Nail & Crescent
 
-**Quake II RTX** is NVIDIA's attempt at implementing a fully functional 
-version of Id Software's 1997 hit game **Quake II** with RTX path-traced 
-global illumination.
+Watch our [Teaser](https://www.youtube.com/watch?v=BIOJ6QURT5k) on Youtube, and see what the fuzz is all about.
 
-**Quake II RTX** builds upon the [Q2VKPT](http://brechpunkt.de/q2vkpt) 
-branch of the Quake II open source engine. Q2VKPT was created by former 
-NVIDIA intern Christoph Schied, a Ph.D. student at the Karlsruhe Institute 
-of Technology in Germany.
+# Technology
 
-Q2VKPT, in turn, builds upon [Q2PRO](https://skuller.net/q2pro/), which is a 
-modernized version of the Quake II engine. Consequently, many of the settings 
-and console variables that work for Q2PRO also work for Quake II RTX.
+**Nail & Crescent** builds upon the beautiful [Quake II RTX](https://github.com/NVIDIA/Q2RTX) technology.
+
+Using **Quake II RTX** its powerful renderer, with extra additions of our own we set off to
+improve the engine. There were two important goals that we had in mind, make it more fun and user friendly
+to work with the engine. Hereby inviting the oppertunity for mod developers to use our technology. But most
+of all, improvements to the engine in overall, so it has more modern features to match its unique modern render
+system.
+
+**Nail & Crescent** has introduced the following changes and features:
+    - Own custom BSP tooling based on the **qbism v220** toolset. Can be found [here](https://github.com/WatIsDeze/widtools/)
+    - Client Game DLL interface. This allows for mods to have control over client side effects, something normally not possible
+    in vanilla Quake 2.
+    - OpenAL Audio support. Such as underwater effects.
+    - Entities and player positions are networked using full floating point precision. No more drunk feeling due to
+    entity positions being networked as shorts.
+    - Larger world boundary limits, break free of the 4096x4096x4096 boundaries.
+    - Shared player move code. The client game dll, and server game dll both share the player move code now. This allows for
+    mods to implement custom movement. 
+    - Highly restructured game code. 
+
+Here is a list of plans for the technology behind **Nail & Crescent**. Note that not all might make it in the end.:
+    - Adjust BSP format to use ints instead of shorts, so we can extend its limits.
+    - Add a material system, let Trenchbroom and the BSP tools support this.
+        - Will also contain a converter for the .csv file which is currently in use as
+        the material database.
+    - Implement libRmlUI and use it for the HUD, Console, MainMenu, and in-game menus.
+    - Skeletal Animation support.
+    - Player Movement AI (A proof of concept can be found in [this](https://github.com/WatIsDeze/Nail-Crescent/tree/AI-PMove) branch)
+        - Adding a Schedule, Task, and Waypoint system should greatly improve the proof of concept and bring it to decent modern standards.
+    - Replace trace code by a physics library, ultimately improving collision detection overall and allowing for the option of several physics
+    entities.
+        - This retains the actual Player Movement code as always and should not influence the gameplay negatively. In fact, it's not wished for.
+    - Add RESTIR to the RTX renderer, hereby greatly reducing noise and making typical scenes with torches a reality.
 
 ## License
+
+**Nail & Crescet** its code is licensed under the same terms as **Quake II RTX**. It's hard to not be.
 
 **Quake II RTX** is licensed under the terms of the **GPL v.2** (GNU General Public License).
 You can find the entire license in the [license.txt](license.txt) file.
@@ -24,7 +51,9 @@ original game.
 
 ## Features
 
-**Quake II RTX** introduces the following features:
+TODO: List our RTX stuff here.
+
+**Quake II RTX** introduced the following features:
   - Caustics approximation and coloring of light that passes through tinted glass
   - Cutting-edge denoising technology
   - Cylindrical projection mode
@@ -50,10 +79,6 @@ or [Steam](https://store.steampowered.com/app/1089130/Quake_II_RTX/).
 ## Additional Information
 
   * [Announcement Article](https://www.nvidia.com/en-us/geforce/news/quake-ii-rtx-ray-tracing-vulkan-vkray-geforce-rtx/)
-  * [Ray-Tracing Deep Dive](https://www.nvidia.com/en-us/geforce/news/geforce-gtx-dxr-ray-tracing-available-now/)
-  * [Launch Trailer Video](https://www.youtube.com/watch?v=unGtBbhaPeU)
-  * [Path Tracer Overview Video](https://www.youtube.com/watch?v=BOltWXdV2XY)
-  * [GDC 2019 Presentation](https://www.gdcvault.com/play/1026185/)
   * [Client Manual](doc/client.md)
   * [Server Manual](doc/server.md)
 
