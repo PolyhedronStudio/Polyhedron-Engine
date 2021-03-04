@@ -108,7 +108,6 @@ q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
         clge.apiversion = -1;
         return &clge;
     }
-    Com_DPrint("cl = %i - clgimp->cl = %i\n", cl, clgimp->cl);
 
     // Setup the game export function pointers.
     // Core.

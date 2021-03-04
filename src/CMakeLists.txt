@@ -216,6 +216,8 @@ if (NOT CONFIG_VKPT_RENDERER AND CONFIG_GL_RENDERER)
 endif()
 
 SET(SRC_CLIENT_RMLUI
+	client/rmlui/interfaces/FileInterface.cpp
+	client/rmlui/interfaces/FileInterface.h
 	client/rmlui/interfaces/RenderInterface.cpp
 	client/rmlui/interfaces/RenderInterface.h
 	client/rmlui/interfaces/SystemInterface.cpp

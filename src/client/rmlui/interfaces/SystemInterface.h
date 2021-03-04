@@ -22,16 +22,19 @@ public:
 	double GetElapsedTime() override;
 
 	/// Set mouse cursor.
-	/// @param[in] cursor_name Cursor name to activate.
 	void SetMouseCursor(const Rml::String& cursor_name) override;
 
 	/// Set clipboard text.
-	/// @param[in] text Text to apply to clipboard.
 	void SetClipboardText(const Rml::String& text) override;
 
 	/// Get clipboard text.
-	/// @param[out] text Retrieved text from clipboard.
 	void GetClipboardText(Rml::String& text) override;
+
+	//// Translate the input string into the translated string.
+	//virtual int TranslateString(Rml::String& translated, const Rml::String& input);
+
+	//// Log the specified message.
+	virtual bool LogMessage(Rml::Log::Type type, const Rml::String& message);
 };
 
 #endif // __CLIENT_RMLUI_INTERFACES_SHELLSYSTEMINTERFACE_H__

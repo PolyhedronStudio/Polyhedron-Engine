@@ -75,6 +75,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define FS_FLAG_TEXT            0x00000400
 #define FS_FLAG_DEFLATE         0x00000800
 
+// N&C: These are for FS_SeekEx
+#define FS_SEEK_CUR         0
+#define FS_SEEK_SET         1
+#define FS_SEEK_END         2
+
 //
 // Limit the maximum file size FS_LoadFile can handle, as a protection from
 // malicious paks causing memory exhaustion.
@@ -153,6 +158,7 @@ void    FS_Flush(qhandle_t f);
 
 ssize_t FS_Tell(qhandle_t f);
 qerror_t FS_Seek(qhandle_t f, off_t offset);
+qerror_t FS_SeekEx(qhandle_t f, off_t offset, int method);
 
 ssize_t  FS_Length(qhandle_t f);
 

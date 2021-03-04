@@ -20,14 +20,21 @@
 
 // QGL.
 #include "../../src/refresh/gl/gl.h"
-#define GL_CLAMP_TO_EDGE 0x812F
+//#define GL_CLAMP_TO_EDGE 0x812F
 
 RmlUiRenderInterface::RmlUiRenderInterface() : m_width(0), m_height(0), m_transform_enabled(false)
 {
 
 }
 
-// Called by RmlUi when it wants to render geometry that it does not wish to optimise.
+//
+//=============================================================================
+// CompileGeometry
+// 
+// Called by RmlUi when it wants to render geometry that it does not wish to 
+// optimise.	
+//=============================================================================
+//
 void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int RMLUI_UNUSED_PARAMETER(num_vertices), int* indices, int num_indices, const Rml::TextureHandle texture, const Rml::Vector2f& translation)
 {
 	RMLUI_UNUSED(num_vertices);
@@ -57,7 +64,14 @@ void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int RMLUI_UNUSE
 	qglPopMatrix();
 }
 
-// Called by RmlUi when it wants to compile geometry it believes will be static for the forseeable future.		
+//
+//=============================================================================
+// CompileGeometry
+// 
+// Called by RmlUi when it wants to compile geometry it believes will be static 
+// for the forseeable future.		
+//=============================================================================
+//
 Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Vertex* RMLUI_UNUSED_PARAMETER(vertices), int RMLUI_UNUSED_PARAMETER(num_vertices), int* RMLUI_UNUSED_PARAMETER(indices), int RMLUI_UNUSED_PARAMETER(num_indices), const Rml::TextureHandle RMLUI_UNUSED_PARAMETER(texture))
 {
 	RMLUI_UNUSED(vertices);
@@ -69,20 +83,38 @@ Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Vertex* R
 	return (Rml::CompiledGeometryHandle) nullptr;
 }
 
-// Called by RmlUi when it wants to render application-compiled geometry.		
+//
+//=============================================================================
+// RenderCompiledGeometry
+// 
+// Called by RmlUi when it wants to render application-compiled geometry.	
+//=============================================================================
+//
 void RmlUiRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle RMLUI_UNUSED_PARAMETER(geometry), const Rml::Vector2f& RMLUI_UNUSED_PARAMETER(translation))
 {
 	RMLUI_UNUSED(geometry);
 	RMLUI_UNUSED(translation);
 }
 
-// Called by RmlUi when it wants to release application-compiled geometry.		
+//
+//=============================================================================
+// ReleaseCompiledGeometry
+// 
+// Called by RmlUi when it wants to release application-compiled geometry.	
+//=============================================================================
+//
 void RmlUiRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle RMLUI_UNUSED_PARAMETER(geometry))
 {
 	RMLUI_UNUSED(geometry);
 }
 
-// Called by RmlUi when it wants to enable or disable scissoring to clip content.		
+//
+//=============================================================================
+// EnableScissorRegion
+// 
+// Called by RmlUi when it wants to enable or disable scissoring to clip content.	
+//=============================================================================
+//
 void RmlUiRenderInterface::EnableScissorRegion(bool enable)
 {
 	if (enable) {
@@ -101,7 +133,13 @@ void RmlUiRenderInterface::EnableScissorRegion(bool enable)
 	}
 }
 
+//
+//=============================================================================
+// SetScissorRegion
+// 
 // Called by RmlUi when it wants to change the scissor region.		
+//=============================================================================
+//
 void RmlUiRenderInterface::SetScissorRegion(int x, int y, int width, int height)
 {
 	if (!m_transform_enabled) {
@@ -164,7 +202,13 @@ struct TGAHeader
 // Restore packing
 #pragma pack()
 
+//
+//=============================================================================
+// LoadTexture
+// 
 // Called by RmlUi when a texture is required by the library.		
+//=============================================================================
+//
 bool RmlUiRenderInterface::LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions, const Rml::String& source)
 {
 	Rml::FileInterface* file_interface = Rml::GetFileInterface();
@@ -242,7 +286,14 @@ bool RmlUiRenderInterface::LoadTexture(Rml::TextureHandle& texture_handle, Rml::
 	return success;
 }
 
-// Called by RmlUi when a texture is required to be built from an internally-generated sequence of pixels.
+//
+//=============================================================================
+// GenerateTexture
+// 
+// Called by RmlUi when a texture is required to be built from an internally-
+// generated sequence of pixels.
+//=============================================================================
+//
 bool RmlUiRenderInterface::GenerateTexture(Rml::TextureHandle& texture_handle, const Rml::byte* source, const Rml::Vector2i& source_dimensions)
 {
 	GLuint texture_id = 0;
@@ -267,13 +318,25 @@ bool RmlUiRenderInterface::GenerateTexture(Rml::TextureHandle& texture_handle, c
 	return true;
 }
 
+//
+//=============================================================================
+// ReleaseTexture
+// 
 // Called by RmlUi when a loaded texture is no longer required.		
+//=============================================================================
+//
 void RmlUiRenderInterface::ReleaseTexture(Rml::TextureHandle texture_handle)
 {
 	qglDeleteTextures(1, (GLuint*)&texture_handle);
 }
 
-// Called by RmlUi when it wants to set the current transform matrix to a new matrix.
+//
+//=============================================================================
+// SetTransform
+// 
+// Called by RmlUi when it wants to set the current transform matrix to a new matrix.	
+//=============================================================================
+//
 void RmlUiRenderInterface::SetTransform(const Rml::Matrix4f* transform)
 {
 	m_transform_enabled = (bool)transform;
@@ -289,7 +352,13 @@ void RmlUiRenderInterface::SetTransform(const Rml::Matrix4f* transform)
 		qglLoadIdentity();
 }
 
-
+//
+//=============================================================================
+// CaptureScreen
+// 
+// Called by RmlUi when it wants to capture the screen output.
+//=============================================================================
+//
 RmlUiRenderInterface::Image RmlUiRenderInterface::CaptureScreen()
 {
 	Image image;

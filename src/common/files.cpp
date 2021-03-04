@@ -596,6 +596,55 @@ qerror_t FS_Seek(qhandle_t f, off_t offset)
 
 /*
 ============
+FS_Seek
+
+Seeks to an absolute position within the file.
+============
+*/
+qerror_t FS_SeekEx(qhandle_t f, off_t offset, int method)
+{
+    file_t* file = file_for_handle(f);
+
+    if (!file)
+        return Q_ERR_BADF;
+
+    if (offset > LONG_MAX)
+        return Q_ERR_INVAL;
+
+    if (offset < 0)
+        offset = 0;
+
+    // Setup method to use
+    int seek_method = SEEK_SET;
+    if (method == FS_SEEK_CUR)
+        seek_method = SEEK_CUR;
+    if (method == FS_SEEK_END)
+        seek_method = SEEK_END;
+    if (method == FS_SEEK_SET)
+        seek_method = SEEK_SET;
+
+    switch (file->type) {
+    case FS_REAL:
+        if (fseek(file->fp, (long)offset, seek_method) == -1) {
+            return Q_Errno();
+        }
+        return Q_ERR_SUCCESS;
+    case FS_PAK:
+        return seek_pak_file(file, offset);
+#if USE_ZLIB
+    case FS_GZ:
+        if (gzseek((gzFile)file->zfp, (z_off_t)offset, seek_method) == -1) { // CPP: Cast
+            return Q_Errno();
+        }
+        return Q_ERR_SUCCESS;
+#endif
+    default:
+        return Q_ERR_NOSYS;
+    }
+}
+
+/*
+============
 FS_CreatePath
 
 Creates any directories needed to store the given filename.

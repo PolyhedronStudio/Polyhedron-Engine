@@ -19,6 +19,7 @@
 // RmlUI includes.
 #include "rmlui.h"
 
+#include "interfaces/FileInterface.h"
 #include "interfaces/RenderInterface.h"
 #include "interfaces/SystemInterface.h"
 
@@ -27,15 +28,17 @@
 static Rml::Context* context = NULL;
 static Rml::ElementDocument* document = NULL;
 
-static RmlUiRenderInterface render_interface;
-static RmlUISystemInterface system_interface;
+static RmlUiRenderInterface rmlRenderInterface;
+static RmlUISystemInterface rmlSystemInterface;
+static RmlUIFileInterface rmlFileInterface;
 
 // Initializes RMLUI.
 void RMLUI_Init(void) {
 
 	// Begin by installing the custom interfaces.
-	Rml::SetRenderInterface(&render_interface);
-	Rml::SetSystemInterface(&system_interface);
+	Rml::SetRenderInterface(&rmlRenderInterface);
+	Rml::SetSystemInterface(&rmlSystemInterface);
+	Rml::SetFileInterface(&rmlFileInterface);
 
 	// Now we can initialize RmlUi.
 	Rml::Initialise();
@@ -55,7 +58,7 @@ void RMLUI_Init(void) {
 
 	for (const FontFace& face : font_faces)
 	{
-		Rml::LoadFontFace("basenac/fonts/" + face.filename, face.fallback_face);
+		Rml::LoadFontFace("fonts/" + face.filename, face.fallback_face);
 	}
 
 	// Create a context next.
@@ -69,9 +72,8 @@ void RMLUI_Init(void) {
 	// If you want to use the debugger, initialize it now.
 	Rml::Debugger::Initialise(context);
 
-
 	// Now we are ready to load our document.
-	document = context->LoadDocument("basenac/fonts/demo.rml");
+	document = context->LoadDocument("fonts/demo.rml");
 	if (!document)
 	{
 		Rml::Shutdown();
