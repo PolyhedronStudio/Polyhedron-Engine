@@ -83,6 +83,13 @@ void RMLUI_Init(void) {
 	document->Show();
 }
 
+bool RMLUI_ProcessMouseMove(int x, int y) {
+	if (!context)
+		return qfalse;
+
+	return context->ProcessMouseMove(x, y, RmlUISystemInterface::GetKeyModifiers());
+	//return qtrue;
+}
 // Render RMLUI
 void RMLUI_UpdateFrame(void) {
 	if (!context)

@@ -12,6 +12,9 @@
 // Initializes RMLUI.
 void RMLUI_Init(void);
 
+// Process mouse move events
+bool RMLUI_ProcessMouseMove(int x, int y);
+
 // Update RMLUI
 void RMLUI_UpdateFrame(void);
 

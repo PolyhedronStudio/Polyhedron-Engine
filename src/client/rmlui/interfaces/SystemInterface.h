@@ -9,6 +9,7 @@
 #ifndef __CLIENT_RMLUI_INTERFACES_SYSTEMINTERFACE_H__
 #define __CLIENT_RMLUI_INTERFACES_SYSTEMINTERFACE_H__
 
+#include <SDL.h>
 #include <RmlUi/Core/SystemInterface.h>
 
 //
@@ -35,6 +36,15 @@ public:
 
 	//// Log the specified message.
 	virtual bool LogMessage(Rml::Log::Type type, const Rml::String& message);
+
+	// Translate key.
+	Rml::Input::KeyIdentifier TranslateKey(SDL_Keycode sdlkey);
+
+	// Translate mouse button.
+	int TranslateMouseButton(uint8_t button);
+
+	// Get key modifiers.
+	static int GetKeyModifiers();
 };
 
 #endif // __CLIENT_RMLUI_INTERFACES_SHELLSYSTEMINTERFACE_H__

@@ -36,6 +36,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../res/q2pro.xbm"
 #include <SDL.h>
 
+// RMLUI.
+#include "client/rmlui/rmlui.h"
+
 #ifdef _WINDOWS
 #include <ShellScalingAPI.h>
 
@@ -733,6 +736,33 @@ void VID_PumpEvents(void)
 {
     SDL_Event    event;
 
+    			//case SDL_MOUSEMOTION:
+       //             Context->ProcessMouseMove(event.motion.x, event.motion.y, SystemInterface.GetKeyModifiers());
+       //             break;
+       //         case SDL_MOUSEBUTTONDOWN:
+       //             Context->ProcessMouseButtonDown(SystemInterface.TranslateMouseButton(event.button.button), SystemInterface.GetKeyModifiers());
+       //             break;
+
+       //         case SDL_MOUSEBUTTONUP:
+       //             Context->ProcessMouseButtonUp(SystemInterface.TranslateMouseButton(event.button.button), SystemInterface.GetKeyModifiers());
+       //             break;
+
+       //         case SDL_MOUSEWHEEL:
+       //             Context->ProcessMouseWheel(float(event.wheel.y), SystemInterface.GetKeyModifiers());
+       //             break;
+
+       //         case SDL_KEYDOWN:
+       //         {
+       //             // Intercept F8 key stroke to toggle RmlUi's visual debugger tool
+       //             if (event.key.keysym.sym == SDLK_F8)
+       //             {
+       //                 Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
+       //                 break;
+       //             }
+
+       //             Context->ProcessKeyDown(SystemInterface.TranslateKey(event.key.keysym.sym), SystemInterface.GetKeyModifiers());
+       //             break;
+       //         }
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_QUIT:
@@ -747,6 +777,7 @@ void VID_PumpEvents(void)
             break;
         case SDL_MOUSEMOTION:
             UI_MouseEvent(event.motion.x, event.motion.y);
+            RMLUI_ProcessMouseMove(event.motion.x, event.motion.y);
             break;
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
@@ -757,6 +788,31 @@ void VID_PumpEvents(void)
             break;
         }
     }
+    // N&C: The loop before RMLUI implementation.
+    //while (SDL_PollEvent(&event)) {
+    //    switch (event.type) {
+    //    case SDL_QUIT:
+    //        Com_Quit(NULL, ERR_DISCONNECT);
+    //        break;
+    //    case SDL_WINDOWEVENT:
+    //        window_event(&event.window);
+    //        break;
+    //    case SDL_KEYDOWN:
+    //    case SDL_KEYUP:
+    //        key_event(&event.key);
+    //        break;
+    //    case SDL_MOUSEMOTION:
+    //        UI_MouseEvent(event.motion.x, event.motion.y);
+    //        break;
+    //    case SDL_MOUSEBUTTONDOWN:
+    //    case SDL_MOUSEBUTTONUP:
+    //        mouse_button_event(&event.button);
+    //        break;
+    //    case SDL_MOUSEWHEEL:
+    //        mouse_wheel_event(&event.wheel);
+    //        break;
+    //    }
+    //}
 }
 
 /*
