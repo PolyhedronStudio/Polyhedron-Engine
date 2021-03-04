@@ -49,7 +49,7 @@ edict_t *G_Find(edict_t *from, int fieldofs, char *match)
     else
         from++;
 
-    for (; from < &g_edicts[globals.pool.num_edicts] ; from++) {
+    for (; from < &g_edicts[globals.num_edicts] ; from++) {
         if (!from->inuse)
             continue;
         s = *(char **)((byte *)from + fieldofs);
@@ -81,7 +81,7 @@ edict_t *findradius(edict_t *from, vec3_t org, float rad)
         from = g_edicts;
     else
         from++;
-    for (; from < &g_edicts[globals.pool.num_edicts]; from++) {
+    for (; from < &g_edicts[globals.num_edicts]; from++) {
         if (!from->inuse)
             continue;
         if (from->solid == SOLID_NOT)
@@ -394,7 +394,7 @@ edict_t *G_Spawn(void)
     edict_t     *e;
 
     e = &g_edicts[game.maxclients + 1];
-    for (i = game.maxclients + 1 ; i < globals.pool.num_edicts ; i++, e++) {
+    for (i = game.maxclients + 1 ; i < globals.num_edicts ; i++, e++) {
         // the first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!e->inuse && (e->freetime < 2 || level.time - e->freetime > 0.5)) {
@@ -406,7 +406,7 @@ edict_t *G_Spawn(void)
     if (i == game.maxentities)
         gi.error("ED_Alloc: no free edicts");
 
-    globals.pool.num_edicts++;
+    globals.num_edicts++;
     G_InitEdict(e);
     return e;
 }
@@ -428,8 +428,8 @@ void G_FreeEdict(edict_t *ed)
     }
 
     // C++-ify, reset the struct itself.
-    //memset(ed, 0, sizeof(*ed));
-    *ed = edict_t();
+    memset(ed, 0, sizeof(*ed));
+   //*ed = edict_t();
     ed->classname = "freed";
     ed->freetime = level.time;
     ed->inuse = qfalse;

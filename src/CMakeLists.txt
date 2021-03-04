@@ -346,6 +346,7 @@ SET(SRC_UNIX
 SET(SRC_UNIX_CLIENT
 	os/sdl2/sound.cpp
 	os/sdl2/video.cpp
+	os/sdl2/time.cpp
 )
 
 ###################### Windows Client Specific.
@@ -358,6 +359,7 @@ SET(SRC_WINDOWS
 SET(SRC_WINDOWS_CLIENT
 	os/windows/wave.cpp
 	os/sdl2/video.cpp
+	os/sdl2/time.cpp
 )
 SET(HEADERS_WINDOWS
 	os/windows/wgl.h
@@ -511,6 +513,7 @@ ADD_EXECUTABLE(server
 	${SRC_SERVER} ${HEADERS_SERVER}
 	server/ac.cpp
 	client/null.cpp
+	#os/sdl2/time.cpp
 	os/res/nacded.rc
 )
 ELSE()

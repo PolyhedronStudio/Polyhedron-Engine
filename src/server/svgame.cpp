@@ -969,13 +969,13 @@ void SV_InitGameProgs(void)
     ge->Init();
 
     // sanitize edict_size
-    if (ge->pool.edict_size < sizeof(edict_t) || ge->pool.edict_size > SIZE_MAX / MAX_EDICTS) {
+    if (ge->edict_size < sizeof(edict_t) || ge->edict_size > SIZE_MAX / MAX_EDICTS) {
         Com_Error(ERR_DROP, "Server Game DLL returned bad size of edict_t");
     }
 
     // sanitize max_edicts
-    if (ge->pool.edict_size <= sv_maxclients->integer || ge->pool.edict_size > MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Server Game DLL returned bad number of max_edicts %i   %i", ge->pool.edict_size, sizeof(edict_t));
+    if (ge->edict_size <= sv_maxclients->integer || ge->edict_size > MAX_EDICTS) {
+        Com_Error(ERR_DROP, "Server Game DLL returned bad number of max_edicts %i   %i", ge->edict_size, sizeof(edict_t));
     }
 }
 

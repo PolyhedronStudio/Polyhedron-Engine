@@ -28,7 +28,7 @@ void target_earthquake_think(edict_t* self)
         self->last_move_time = level.time + 0.5;
     }
 
-    for (i = 1, e = g_edicts + i; i < globals.pool.num_edicts; i++, e++) {
+    for (i = 1, e = g_edicts + i; i < globals.num_edicts; i++, e++) {
         if (!e->inuse)
             continue;
         if (!e->client)

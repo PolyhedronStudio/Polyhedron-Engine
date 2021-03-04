@@ -844,8 +844,8 @@ void ReadGame(const char *filename)
 
     // WatIs: C++-ify: Note that this may be a problem maker.
     g_edicts = new edict_t[game.maxentities];//(edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
-    globals.pool.edicts = g_edicts;
-    globals.pool.max_edicts = game.maxentities;
+    globals.edicts = g_edicts;
+    globals.max_edicts = game.maxentities;
 
     // WatIs: C++-ify: Note that this may be a problem maker.
     game.clients = new gclient_t[game.maxclients];
@@ -883,7 +883,7 @@ void WriteLevel(const char *filename)
     write_fields(f, levelfields, &level);
 
     // write out all the entities
-    for (i = 0; i < globals.pool.num_edicts; i++) {
+    for (i = 0; i < globals.num_edicts; i++) {
         ent = &g_edicts[i];
         if (!ent->inuse)
             continue;
@@ -929,11 +929,12 @@ void ReadLevel(const char *filename)
 
     // wipe all the entities
     // WatIs: C++-ify: Note that this may be a problem maker.
-    for (int i = 0; i < game.maxentities; i++) {
+    /*for (int i = 0; i < game.maxentities; i++) {
         g_edicts[i] = edict_t();
     }
-    //memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
-    globals.pool.num_edicts = maxclients->value + 1;
+    */
+    memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
+    globals.num_edicts = maxclients->value + 1;
 
     i = read_int(f);
     if (i != SAVE_MAGIC2) {
@@ -958,8 +959,8 @@ void ReadLevel(const char *filename)
         if (entnum < 0 || entnum >= game.maxentities) {
             gi.error("%s: bad entity number", __func__);
         }
-        if (entnum >= globals.pool.num_edicts)
-            globals.pool.num_edicts = entnum + 1;
+        if (entnum >= globals.num_edicts)
+            globals.num_edicts = entnum + 1;
 
         ent = &g_edicts[entnum];
         read_fields(f, entityfields, ent);
@@ -981,7 +982,7 @@ void ReadLevel(const char *filename)
     }
 
     // do any load time things at this point
-    for (i = 0 ; i < globals.pool.num_edicts ; i++) {
+    for (i = 0 ; i < globals.num_edicts ; i++) {
         ent = &g_edicts[i];
 
         if (!ent->inuse)

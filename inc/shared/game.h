@@ -264,12 +264,12 @@ typedef struct {
     // can vary in size from one game to another.
     //
     // The size will be fixed when ge->Init() is called
-    edict_pool_t pool;
+//    edict_pool_t pool;
 
-    //struct edict_s  *edicts;
-    //int         edict_size;
-    //int         num_edicts;     // current number, <= max_edicts
-    //int         max_edicts;
+    struct edict_s  *edicts;
+    int         edict_size;
+    int         num_edicts;     // current number, <= max_edicts
+    int         max_edicts;
 } svgame_export_t;
 
 #endif // GAME_H

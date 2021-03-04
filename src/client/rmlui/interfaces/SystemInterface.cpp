@@ -29,37 +29,60 @@ double RmlUISystemInterface::GetElapsedTime() {
 	return elapsedTime;
 }
 
-/// Set mouse cursor.
-/// @param[in] cursor_name Cursor name to activate.
-void RmlUISystemInterface::SetMouseCursor(const Rml::String& cursor_name) {
-
-}
-
-/// Set clipboard text.
-/// @param[in] text Text to apply to clipboard.
-void RmlUISystemInterface::SetClipboardText(const Rml::String& text) {
-
-}
-
-/// Get clipboard text.
-/// @param[out] text Retrieved text from clipboard.
-void RmlUISystemInterface::GetClipboardText(Rml::String& text) {
-
-}
-
-//// Translate the input string into the translated string.
-//int RmlUISystemInterface::TranslateString(Rml::String& translated, const Rml::String& input) {
-//	return 0;
-//}
 //
-//The LogMessage() function is called when RmlUi generates a message.
-// Here, type is one of Rml::Log::ERROR for error messages, 
-// Rml::Log::ASSERT for failed internal assertions(debug library only), 
-// Rml::Log::WARNING for non - fatal warnings, or 
-// Rml::Log::INFO for generic information messages.
-// The message parameter is the actual message itself. The function should return true if program execution should continue, 
-// or false to generate an interrupt to break execution.
-// This can be useful if you are running inside a debugger to see exactly what an application is doing to trigger a certain message.
+//=============================================================================
+// SetMouseCursor
+//
+// Assigns the text to VID_SetClipboardData
+//=============================================================================
+//
+void RmlUISystemInterface::SetMouseCursor(const Rml::String& cursor_name) {
+	
+}
+
+//
+//=============================================================================
+// SetClipboardText
+//
+// Assigns the text to VID_SetClipboardData
+//=============================================================================
+//
+void RmlUISystemInterface::SetClipboardText(const Rml::String& text) {
+	// Set clipboard data.
+	VID_SetClipboardData(text.c_str());
+}
+
+//
+//=============================================================================
+// GetClipboardText
+//
+// Captures the VID_GetClipboardData and assigns it to text.
+//=============================================================================
+//
+void RmlUISystemInterface::GetClipboardText(Rml::String& text) {
+	char *data = VID_GetClipboardData();
+	if (data)
+		text = data;
+}
+
+//
+//=============================================================================
+// LogMessage
+//
+// Type is one of the following:
+// Rml::Log::ERROR for error messages
+// Rml::Log::ASSERT for failed internal assertions(debug library only)
+// Rml::Log::WARNING for non - fatal warnings
+// Rml::Log::INFO for generic information messages
+// 
+// The message parameter is the actual message itself. 
+// 
+// The function should return true if program execution should continue, 
+// or false to generate an interrupt to break execution. This can be useful if 
+// you are running inside a debugger to see exactly what an application is 
+// doing to trigger a certain message.
+//=============================================================================
+//
 bool RmlUISystemInterface::LogMessage(Rml::Log::Type type, const Rml::String& message) {
 	// Convert output to Com_Print
 	switch (type) {
