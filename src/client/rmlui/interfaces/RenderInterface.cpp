@@ -22,7 +22,7 @@
 #include "../../src/refresh/gl/gl.h"
 //#define GL_CLAMP_TO_EDGE 0x812F
 
-RmlUiRenderInterface::RmlUiRenderInterface() : m_width(0), m_height(0), m_transform_enabled(false)
+RmlUiRenderInterface::RmlUiRenderInterface() : m_width(0), m_height(0), m_transform_enabled(true)
 {
 
 }

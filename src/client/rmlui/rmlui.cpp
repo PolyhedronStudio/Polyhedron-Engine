@@ -92,7 +92,66 @@ void RMLUI_Init(void) {
 
 //
 //=============================================================================
+// RMLUI_ProcessKeyDown
+// 
+// True if the event was not consumed, false if it was.
+//=============================================================================
 //
+bool RMLUI_ProcessKeyDown(SDL_Keycode key) {
+	if (!context)
+		return qfalse;
+
+	// Enable/Disable RMLUI Debugger.
+	if (key == SDLK_F8)
+	{
+	    Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
+		return false; // Consumed.
+	}
+
+	return context->ProcessKeyDown(rmlSystemInterface.TranslateKey(key), RmlUISystemInterface::GetKeyModifiers());
+}
+
+//
+//=============================================================================
+// RMLUI_ProcessKeyUp
+// 
+// True if the event was not consumed, false if it was.
+//=============================================================================
+//
+bool RMLUI_ProcessKeyUp(SDL_Keycode key) {
+	if (!context)
+		return qfalse;
+
+	// Enable/Disable RMLUI Debugger.
+	//if (key == SDLK_F8)
+	//{
+	//	Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
+	//	return false; // Consumed.
+	//}
+
+	return context->ProcessKeyUp(rmlSystemInterface.TranslateKey(key), RmlUISystemInterface::GetKeyModifiers());
+}
+
+//
+//=============================================================================
+// RMLUI_ProcessTextInput
+// 
+// 
+//=============================================================================
+//
+bool RMLUI_ProcessTextInput(const char* text) {
+	if (!context)
+		return qfalse;
+
+	return context->ProcessTextInput(Rml::String(text));
+}
+
+//
+//=============================================================================
+// RMLUI_ProcessMouseMove
+// 
+// True if the mouse is not interacting with any elements in the context 
+// (see 'IsMouseInteracting'), otherwise false.
 //=============================================================================
 //
 bool RMLUI_ProcessMouseMove(int x, int y) {
@@ -100,6 +159,50 @@ bool RMLUI_ProcessMouseMove(int x, int y) {
 		return qfalse;
 
 	return context->ProcessMouseMove(x, y, RmlUISystemInterface::GetKeyModifiers());
+}
+
+//
+//=============================================================================
+// RMLUI_ProcessMouseWheel
+// 
+// True if the event was not consumed (ie, was prevented from propagating by an element), false if it was.
+//=============================================================================
+//
+bool RMLUI_ProcessMouseWheel(float delta) {
+	if (!context)
+		return qfalse;
+
+	return context->ProcessMouseWheel(delta, RmlUISystemInterface::GetKeyModifiers());
+}
+
+//
+//=============================================================================
+// RMLUI_ProcessMouseButtonUp
+// 
+// True if the mouse is not interacting with any elements in the context 
+// (see 'IsMouseInteracting'), otherwise false.
+//=============================================================================
+//
+bool RMLUI_ProcessMouseButtonUp(int button) {
+	if (!context)
+		return qfalse;
+
+	return context->ProcessMouseButtonUp(rmlSystemInterface.TranslateMouseButton(button), RmlUISystemInterface::GetKeyModifiers());
+}
+
+//
+//=============================================================================
+// RMLUI_ProcessMouseButtonDown
+// 
+// True if the mouse is not interacting with any elements in the context 
+// (see 'IsMouseInteracting'), otherwise false.
+//=============================================================================
+//
+bool RMLUI_ProcessMouseButtonDown(int button) {
+	if (!context)
+		return qfalse;
+
+	return context->ProcessMouseButtonDown(rmlSystemInterface.TranslateMouseButton(button), RmlUISystemInterface::GetKeyModifiers());
 }
 
 //

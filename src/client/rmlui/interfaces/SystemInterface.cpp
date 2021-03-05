@@ -62,8 +62,12 @@ void RmlUISystemInterface::SetClipboardText(const Rml::String& text) {
 //
 void RmlUISystemInterface::GetClipboardText(Rml::String& text) {
 	char *data = VID_GetClipboardData();
-	if (data)
-		text = data;
+
+    // Copy data in, or clear buffer in case of invalid/no data.
+    if (data)
+        text = data;
+    else
+        text.clear();
 }
 
 //
@@ -461,7 +465,7 @@ Rml::Input::KeyIdentifier RmlUISystemInterface::TranslateKey(SDL_Keycode sdlkey)
 
 //
 //=============================================================================
-// TranslateKey
+// TranslateMouseButton
 //
 // 
 //=============================================================================
