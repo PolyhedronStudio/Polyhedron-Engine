@@ -4,7 +4,7 @@
 // client/rmlui/rmlui.cpp
 //
 //
-// RmlUI implementation.
+// RmlUI Wrapper API that is client game friendly if needed.
 //
 
 // Declare static library linkage.
@@ -32,7 +32,14 @@ static RmlUiRenderInterface rmlRenderInterface;
 static RmlUISystemInterface rmlSystemInterface;
 static RmlUIFileInterface rmlFileInterface;
 
-// Initializes RMLUI.
+
+//
+//=============================================================================
+// RMLUI_Init
+// 
+// Initializes the RMLUI library.
+//=============================================================================
+//
 void RMLUI_Init(void) {
 
 	// Begin by installing the custom interfaces.
@@ -83,14 +90,25 @@ void RMLUI_Init(void) {
 	document->Show();
 }
 
+//
+//=============================================================================
+//
+//=============================================================================
+//
 bool RMLUI_ProcessMouseMove(int x, int y) {
 	if (!context)
 		return qfalse;
 
 	return context->ProcessMouseMove(x, y, RmlUISystemInterface::GetKeyModifiers());
-	//return qtrue;
 }
-// Render RMLUI
+
+//
+//=============================================================================
+// RMLUI_UpdateFrame
+// 
+// Updates the RMLUI Context if initialized and a menu is active.
+//=============================================================================
+//
 void RMLUI_UpdateFrame(void) {
 	if (!context)
 		return;
@@ -100,7 +118,13 @@ void RMLUI_UpdateFrame(void) {
 	context->Update();
 }
 
-// Render RMLUI
+//
+//=============================================================================
+// RMLUI_RenderFrame
+// 
+// Renders the RMLUI Context if initialized and a menu is active.
+//=============================================================================
+//
 void RMLUI_RenderFrame(void) {
 	if (!context)
 		return;
@@ -111,7 +135,13 @@ void RMLUI_RenderFrame(void) {
 	context->Render();
 }
 
-// Shutdowns RMLUI.
+//
+//=============================================================================
+// RMLUI_Shutdown
+// 
+// Shutdowns RMLUI library.
+//=============================================================================
+//
 void RMLUI_Shutdown(void) {
 	// Shutting down RmlUi releases all its resources, including elements, documents, and contexts.
 	Rml::Shutdown();
