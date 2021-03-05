@@ -62,5 +62,5 @@ extern/stb/*
 extern/tinyobjloader-c/*
 extern/Vulkan-Headers/*
 extern/zlib/*
-/extern/RmlUi
+/extern/RmlUi/*
 /NaC.rar
