@@ -19,12 +19,12 @@
 #include "rmlui.h"
 
 //////////////////////
-static Rml::Context* context = NULL;
-static Rml::ElementDocument* document = NULL;
+Rml::Context* context = NULL;
+Rml::ElementDocument* document = NULL;
 
-static RmlUiRenderInterface rmlRenderInterface;
-static RmlUISystemInterface rmlSystemInterface;
-static RmlUIFileInterface rmlFileInterface;
+RmlUiRenderInterface rmlRenderInterface;
+RmlUISystemInterface rmlSystemInterface;
+RmlUIFileInterface rmlFileInterface;
 
 
 //
@@ -72,7 +72,7 @@ void RMLUI_Init(void) {
 
 	// If you want to use the debugger, initialize it now.
 	Rml::Debugger::Initialise(context);
-
+	
 	// Now we are ready to load our document.
 	document = context->LoadDocument("fonts/demo.rml");
 	if (!document)

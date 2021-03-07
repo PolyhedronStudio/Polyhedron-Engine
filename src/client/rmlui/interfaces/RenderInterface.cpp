@@ -74,28 +74,34 @@ void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int num_vertice
 {/*
 	RMLUI_UNUSED(num_vertices);*/
 
+	// Push matrix and translate.
 	qglPushMatrix();
 	qglTranslatef(translation.x, translation.y, 0);
 
-	//qglVertexPointer(2, GL_FLOAT, sizeof(Rml::Vertex), &vertices[0].position);
-	//qglEnableClientState(GL_COLOR_ARRAY);
-	//qglColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Rml::Vertex), &vertices[0].colour);
+	qglVertexPointer(2, GL_FLOAT, sizeof(Rml::Vertex), &vertices[0].position);
+	qglEnableClientState(GL_COLOR_ARRAY);
+	qglColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Rml::Vertex), &vertices[0].colour);
 
-	//if (!texture)
-	//{
-	//	qglDisable(GL_TEXTURE_2D);
-	//	qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	//}
-	//else
-	//{
-	//	qglEnable(GL_TEXTURE_2D);
-	//	qglBindTexture(GL_TEXTURE_2D, (GLuint)texture);
-	//	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	//	qglTexCoordPointer(2, GL_FLOAT, sizeof(Rml::Vertex), &vertices[0].tex_coord);
-	//}
+	if (!texture)
+	{
+		qglDisable(GL_TEXTURE_2D);
+		qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
+	else
+	{
+		qglEnable(GL_TEXTURE_2D);
+		qglBindTexture(GL_TEXTURE_2D, (GLuint)texture);
+		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		qglTexCoordPointer(2, GL_FLOAT, sizeof(Rml::Vertex), &vertices[0].tex_coord);
+	}
 
-	//qglDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_INT, indices);
+	qglDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_INT, indices);
 
+	// Diable GL states.
+	//if (texture) qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	//qglDisableClientState(GL_COLOR_ARRAY);
+	
+	// Pop matrix.
 	qglPopMatrix();
 }
 
@@ -110,59 +116,59 @@ void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int num_vertice
 // Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Vertex* RMLUI_UNUSED_PARAMETER(vertices), int RMLUI_UNUSED_PARAMETER(num_vertices), int* RMLUI_UNUSED_PARAMETER(indices), int RMLUI_UNUSED_PARAMETER(num_indices), const Rml::TextureHandle RMLUI_UNUSED_PARAMETER(texture))
 Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rml::TextureHandle texture)
 {
-	std::vector<RmlUiRendererVertex> bufferData(num_vertices);
+	//std::vector<RmlUiRendererVertex> bufferData(num_vertices);
 
-	// Ensure we have valid pointers.
-	if (!vertices || !indices)
-		return (Rml::CompiledGeometryHandle)nullptr;
-	
+	//// Ensure we have valid pointers.
+	//if (!vertices || !indices)
+	//	return (Rml::CompiledGeometryHandle)nullptr;
+	//
 
-	// Assign buffer data.
-	for (std::size_t i = 0; i < bufferData.size(); i++)
-	{
-		// Position.
-		bufferData[i].position[0] = vertices[i].position.x;
-		bufferData[i].position[1] = vertices[i].position.y;
+	//// Assign buffer data.
+	//for (std::size_t i = 0; i < bufferData.size(); i++)
+	//{
+	//	// Position.
+	//	bufferData[i].position[0] = vertices[i].position.x;
+	//	bufferData[i].position[1] = vertices[i].position.y;
 
-		// Tex Coord.
-		bufferData[i].texCoord[0] = vertices[i].tex_coord.x;
-		bufferData[i].texCoord[1] = vertices[i].tex_coord.y;
+	//	// Tex Coord.
+	//	bufferData[i].texCoord[0] = vertices[i].tex_coord.x;
+	//	bufferData[i].texCoord[1] = vertices[i].tex_coord.y;
 
-		// Color data.
-		bufferData[i].color[0] = vertices[i].colour.red;
-		bufferData[i].color[1] = vertices[i].colour.green;
-		bufferData[i].color[2] = vertices[i].colour.blue;
-		bufferData[i].color[3] = vertices[i].colour.alpha;
-	};
+	//	// Color data.
+	//	bufferData[i].color[0] = vertices[i].colour.red;
+	//	bufferData[i].color[1] = vertices[i].colour.green;
+	//	bufferData[i].color[2] = vertices[i].colour.blue;
+	//	bufferData[i].color[3] = vertices[i].colour.alpha;
+	//};
 
-	//// Allocate a geometry handler.
-	RmlUiRendererGeometryHandler* Geometry = new RmlUiRendererGeometryHandler();
-	Geometry->NumVertices = num_indices;
+	////// Allocate a geometry handler.
+	//RmlUiRendererGeometryHandler* Geometry = new RmlUiRendererGeometryHandler();
+	//Geometry->NumVertices = num_indices;
 
-	//// Allocate GL buffers.
-	qglGenBuffersARB(1, &Geometry->VertexID);
-	qglBindBufferARB(GL_ARRAY_BUFFER, Geometry->VertexID);
-	qglBufferDataARB(GL_ARRAY_BUFFER, sizeof(RmlUiRendererVertex) * num_vertices, &bufferData[0],
-		GL_STATIC_DRAW);
+	////// Allocate GL buffers.
+	//qglGenBuffersARB(1, &Geometry->VertexID);
+	//qglBindBufferARB(GL_ARRAY_BUFFER, Geometry->VertexID);
+	//qglBufferDataARB(GL_ARRAY_BUFFER, sizeof(RmlUiRendererVertex) * num_vertices, &bufferData[0],
+	//	GL_STATIC_DRAW);
 
-	qglGenBuffersARB(1, &Geometry->IndexID);
-	qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, Geometry->IndexID);
+	//qglGenBuffersARB(1, &Geometry->IndexID);
+	//qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, Geometry->IndexID);
 	//qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * num_indices, indices, 
 	//	GL_STATIC_DRAW);
 	//qglBindBufferARB(GL_ARRAY_BUFFER, 0);
 
-	// Store texture ID.
-	Geometry->Texture = texture;
+	//// Store texture ID.
+	//Geometry->Texture = texture;
 
-	// Return handle.
-	return (Rml::CompiledGeometryHandle)Geometry;
+	//// Return handle.
+	//return (Rml::CompiledGeometryHandle)Geometry;
 	//RMLUI_UNUSED(vertices);
 	//RMLUI_UNUSED(num_vertices);
 	//RMLUI_UNUSED(indices);
 	//RMLUI_UNUSED(num_indices);
 	//RMLUI_UNUSED(texture);
 
-	//return (Rml::CompiledGeometryHandle) nullptr;
+	return (Rml::CompiledGeometryHandle) nullptr;
 }
 
 //

@@ -9,7 +9,7 @@
 #ifndef __CLIENT_RMLUI_X_RMLUI_H__
 #define __CLIENT_RMLUI_X_RMLUI_H__
 
-#define RMLUI_STATIC_LIB
+//#define RMLUI_STATIC_LIB
 
 // RmlUI.
 #include <RmlUi/Core/Core.h>
@@ -28,4 +28,4 @@
 #include "interfaces/RenderInterface.h"
 #include "interfaces/SystemInterface.h"
 
-#endif // __CLIENT_RMLUI_RMLUI_H__
+#endif // __CLIENT_RMLUI_X_RMLUI_H__

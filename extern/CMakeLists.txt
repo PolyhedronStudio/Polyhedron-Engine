@@ -75,16 +75,18 @@ target_include_directories(tinyobjloader INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/t
 #
 if (CONFIG_ENABLE_RMLUI)
     # Shared libs.
-    option(BUILD_SHARED_LIBS "" ON)
+    set(BUILD_SHARED_LIBS "" ON)
 
     # Lua bindings.
-    option(BUILD_LUA_BINDINGS "" ON)
+    set(BUILD_LUA_BINDINGS "" ON)
 
     set(CURL_CA_PATH "none" CACHE PATH "")
 
-    add_subdirectory(RmlUi)
+    #add_library(RmlUi INTERFACE)
+    #target_include_directories(RmlUi INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/RmlUi)
 
+    add_subdirectory(RmlUi)
     set_target_properties(RmlCore PROPERTIES FOLDER extern)
     set_target_properties(RmlDebugger PROPERTIES FOLDER extern)
-    #set_target_properties(RmlLua PROPERTIES FOLDER extern)
+    set_target_properties(RmlLua PROPERTIES FOLDER extern)
 endif()
