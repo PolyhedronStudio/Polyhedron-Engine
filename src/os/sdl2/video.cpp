@@ -769,6 +769,7 @@ void VID_PumpEvents(void)
             Com_Quit(NULL, ERR_DISCONNECT);
             break;
         case SDL_TEXTINPUT:
+            // RMLUI Process Textinput.
             RMLUI_ProcessTextInput(event.text.text);
             break;
         case SDL_KEYDOWN:

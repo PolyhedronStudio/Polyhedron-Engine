@@ -6,28 +6,27 @@
 //
 // RmlUI N&C System Interface implementation.
 //
-#include <SDL.h>
-
-#include <RmlUi/Core.h>
-#include <RmlUi/Debugger.h>
+ 
+#include "../librmlui.h"
 
 // Client includes.
 #include "../../client.h"
 #include "client/sound/vorbis.h"
 #include "client/gamemodule.h"
 
+// RmlUI includes.
 #include "../rmlui.h"
-#include "SystemInterface.h"
 
 /// Get the number of seconds elapsed since the start of the application
 /// @returns Seconds elapsed
 double RmlUISystemInterface::GetElapsedTime() {
 	// Cheap hack for now.
-	static double elapsedTime = 0.0f;
-	if (elapsedTime < cls.frametime)
-		elapsedTime += cls.frametime;
+	//static double elapsedTime = 0.0f;
+	//if (elapsedTime < cls.frametime)
+	//	elapsedTime += cls.frametime;
 
-	return elapsedTime;
+	//return elapsedTime;
+    return double(SDL_GetTicks()) / 1000.0;
 }
 
 //

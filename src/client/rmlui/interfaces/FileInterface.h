@@ -9,8 +9,9 @@
 #ifndef __CLIENT_RMLUI_INTERFACES_FILEINTERFACE_H__
 #define __CLIENT_RMLUI_INTERFACES_FILEINTERFACE_H__
 
+// Required include here to prevent collisions.
 #include <map>
-#include <RmlUi/Core/FileInterface.h>
+#include "shared/shared.h"
 
 //
 // Simple Nac System Interface to Rml

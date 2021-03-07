@@ -222,6 +222,7 @@ SET(SRC_CLIENT_RMLUI
 	client/rmlui/interfaces/RenderInterface.h
 	client/rmlui/interfaces/SystemInterface.cpp
 	client/rmlui/interfaces/SystemInterface.h
+	client/rmlui/librmlui.h
 	client/rmlui/rmlui.cpp
 	client/rmlui/rmlui.h
 )

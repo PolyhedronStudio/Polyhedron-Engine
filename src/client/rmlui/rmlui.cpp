@@ -7,9 +7,8 @@
 // RmlUI Wrapper API that is client game friendly if needed.
 //
 
-// Declare static library linkage.
-#include <RmlUi/Core.h>
-#include <RmlUi/Debugger.h>
+#include "librmlui.h"
+
 
 // Client includes.
 #include "../client.h"
@@ -18,11 +17,6 @@
 
 // RmlUI includes.
 #include "rmlui.h"
-
-#include "interfaces/FileInterface.h"
-#include "interfaces/RenderInterface.h"
-#include "interfaces/SystemInterface.h"
-
 
 //////////////////////
 static Rml::Context* context = NULL;

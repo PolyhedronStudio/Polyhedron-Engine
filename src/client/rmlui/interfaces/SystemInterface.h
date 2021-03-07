@@ -9,8 +9,8 @@
 #ifndef __CLIENT_RMLUI_INTERFACES_SYSTEMINTERFACE_H__
 #define __CLIENT_RMLUI_INTERFACES_SYSTEMINTERFACE_H__
 
+// Required include.
 #include <SDL.h>
-#include <RmlUi/Core/SystemInterface.h>
 
 //
 // Simple Nac System Interface to Rml

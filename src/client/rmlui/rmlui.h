@@ -9,8 +9,11 @@
 #ifndef __CLIENT_RMLUI_RMLUI_H__
 #define __CLIENT_RMLUI_RMLUI_H__
 
+// Required include.
 #include <SDL.h>
-#include <string>
+
+// Include shared headers.
+#include "shared/shared.h"
 
 // Initializes RMLUI.
 void RMLUI_Init(void);
