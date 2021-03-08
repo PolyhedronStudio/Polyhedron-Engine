@@ -83,6 +83,7 @@ void RmlUiRenderInterface::Initialize() {
 
 void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rml::TextureHandle texture, const Rml::Vector2f& translation)
 {
+	qglLoadIdentity();
 	// Setup 2D rendering mode.
 	qglViewport(0, 0, r_config.width, r_config.height);
 	GL_Ortho(0, r_config.width, r_config.height, 0, -1, 1);
@@ -112,14 +113,18 @@ void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int num_vertice
 
 	// Setup array bits.
 	if (texture) {
-		qglEnable(GL_TEXTURE_2D);
 		qglActiveTextureARB(GL_TEXTURE0_ARB);
 		qglBindTexture(GL_TEXTURE_2D, texture);
+		qglEnable(GL_TEXTURE_2D);
+		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
+
 		GL_StateBits(bits);
 		GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_TC | GLA_COLOR)); // CPP: Cast
 	} else {
 		qglActiveTextureARB(GL_TEXTURE0_ARB);
 		qglBindTexture(GL_TEXTURE_2D, 0);
+		qglEnable(GL_TEXTURE_2D);
+		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
 		//qglDisable(GL_TEXTURE_2D);
 		GL_StateBits(bits);
 		GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_COLOR)); // CPP: Cast
