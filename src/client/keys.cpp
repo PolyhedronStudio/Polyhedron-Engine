@@ -189,7 +189,7 @@ void Key_SetDest(keydest_t dest)
     cls.key_dest = dest;
 
 // activate or deactivate mouse
-    if (diff & (KEY_CONSOLE | KEY_MENU)) {
+    if (diff & (KEY_INGAME_MENU | KEY_CONSOLE | KEY_MENU)) { // IngameMenu: Added KEY_INGAME_MENU to ensure that the mouse is out in case of a KEY_INGAME_MENU
         IN_Activate();
         CL_CheckForPause();
     }

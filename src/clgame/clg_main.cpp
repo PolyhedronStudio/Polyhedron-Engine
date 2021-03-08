@@ -246,6 +246,33 @@ static size_t CL_WeaponModel_m(char* buffer, size_t size)
         cl->configstrings[cl->frame.ps.gunindex + CS_MODELS]);
 }
 
+static void CL_Name_g(genctx_t* ctx)
+{
+    int i;
+    clientinfo_t* ci;
+    char buffer[MAX_CLIENT_NAME];
+
+    if (clgi.GetClienState() < ca_loading) {
+        return;
+    }
+
+    for (i = 0; i < MAX_CLIENTS; i++) {
+        ci = &cl->clientinfo[i];
+        if (!ci->name[0]) {
+            continue;
+        }
+        Q_strlcpy(buffer, ci->name, sizeof(buffer));
+        if (COM_strclr(buffer) && !clgi.Prompt_AddMatch(ctx, buffer)) {
+            break;
+        }
+    }
+}
+
+static void CL_Say_c(genctx_t *ctx, int argnum)
+{
+    CL_Name_g(ctx);
+}
+
 //---------------
 // Commands to register to the client.
 //---------------
@@ -403,7 +430,7 @@ void CLG_Init() {
     cl_player_model          = clgi.Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
     cl_player_model->changed = cl_player_model_changed;
     cl_thirdperson_angle     = clgi.Cvar_Get("cl_thirdperson_angle", "0", 0);
-    cl_thirdperson_range     = clgi.Cvar_Get("cl_thirdperson_range", "60", 0);
+    cl_thirdperson_range     = clgi.Cvar_Get("cl_thirdperson_range", "0", 0);
 
     cl_chat_notify           = clgi.Cvar_Get("cl_chat_notify", "1", 0);
     cl_chat_sound            = clgi.Cvar_Get("cl_chat_sound", "1", 0);

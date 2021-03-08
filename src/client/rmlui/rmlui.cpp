@@ -96,13 +96,13 @@ void RMLUI_Init(void) {
 //
 bool RMLUI_ProcessKeyDown(SDL_Keycode key) {
 	if (!context)
-		return qfalse;
+		return qtrue;
 
 	// Enable/Disable RMLUI Debugger.
 	if (key == SDLK_F8)
 	{
 	    Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
-		return false; // Consumed.
+		return qfalse; // Consumed.
 	}
 
 	return context->ProcessKeyDown(rmlSystemInterface.TranslateKey(key), RmlUISystemInterface::GetKeyModifiers());
@@ -117,7 +117,7 @@ bool RMLUI_ProcessKeyDown(SDL_Keycode key) {
 //
 bool RMLUI_ProcessKeyUp(SDL_Keycode key) {
 	if (!context)
-		return qfalse;
+		return qtrue;
 
 	// Enable/Disable RMLUI Debugger.
 	//if (key == SDLK_F8)
@@ -138,7 +138,7 @@ bool RMLUI_ProcessKeyUp(SDL_Keycode key) {
 //
 bool RMLUI_ProcessTextInput(const char* text) {
 	if (!context)
-		return qfalse;
+		return qtrue;
 
 	return context->ProcessTextInput(Rml::String(text));
 }
@@ -153,7 +153,7 @@ bool RMLUI_ProcessTextInput(const char* text) {
 //
 bool RMLUI_ProcessMouseMove(int x, int y) {
 	if (!context)
-		return qfalse;
+		return qtrue;
 
 	return context->ProcessMouseMove(x, y, RmlUISystemInterface::GetKeyModifiers());
 }
@@ -167,7 +167,7 @@ bool RMLUI_ProcessMouseMove(int x, int y) {
 //
 bool RMLUI_ProcessMouseWheel(float delta) {
 	if (!context)
-		return qfalse;
+		return qtrue;
 
 	return context->ProcessMouseWheel(delta, RmlUISystemInterface::GetKeyModifiers());
 }
@@ -182,7 +182,7 @@ bool RMLUI_ProcessMouseWheel(float delta) {
 //
 bool RMLUI_ProcessMouseButtonUp(int button) {
 	if (!context)
-		return qfalse;
+		return qtrue;
 
 	return context->ProcessMouseButtonUp(rmlSystemInterface.TranslateMouseButton(button), RmlUISystemInterface::GetKeyModifiers());
 }
@@ -197,7 +197,7 @@ bool RMLUI_ProcessMouseButtonUp(int button) {
 //
 bool RMLUI_ProcessMouseButtonDown(int button) {
 	if (!context)
-		return qfalse;
+		return qtrue;
 
 	return context->ProcessMouseButtonDown(rmlSystemInterface.TranslateMouseButton(button), RmlUISystemInterface::GetKeyModifiers());
 }
@@ -212,9 +212,9 @@ bool RMLUI_ProcessMouseButtonDown(int button) {
 void RMLUI_UpdateFrame(void) {
 	if (!context)
 		return;
-	if (!(Key_GetDest() & KEY_MENU)) {
-		return;
-	}
+	//if (!(Key_GetDest() & KEY_INGAME_MENU)) { //KEY_MENU)) { // IngameMenu: Added KEY_INGAME_MENU to ensure that the mouse is out in case of a KEY_INGAME_MENU
+	//	return;
+	//}
 	context->Update();
 }
 
@@ -228,9 +228,9 @@ void RMLUI_UpdateFrame(void) {
 void RMLUI_RenderFrame(void) {
 	if (!context)
 		return;
-	if (!(Key_GetDest() & KEY_MENU)) {
-		return;
-	}
+	//if (!(Key_GetDest() & KEY_INGAME_MENU)) { //KEY_MENU)) { // IngameMenu: Added KEY_INGAME_MENU to ensure that the mouse is out in case of a KEY_INGAME_MENU
+	//	return;
+	//}
 
 	context->Render();
 }

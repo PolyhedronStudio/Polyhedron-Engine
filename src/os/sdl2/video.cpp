@@ -888,7 +888,8 @@ static qboolean InitMouse(void)
 
 static void GrabMouse(qboolean grab)
 {
-    SDL_bool relative = (SDL_bool)(grab && !(Key_GetDest() & KEY_MENU)); // CPP: Cast
+    // IngameMenu: Added KEY_INGAME_MENU to ensure that the mouse is out in case of a KEY_INGAME_MENU
+    SDL_bool relative = (SDL_bool)(grab && !(Key_GetDest() & (KEY_INGAME_MENU | KEY_MENU))); // CPP: Cast
     int cursor = (sdl_flags & QVF_FULLSCREEN) ? SDL_DISABLE : SDL_ENABLE;
 
     SDL_SetWindowGrab(sdl_window, (SDL_bool)grab);

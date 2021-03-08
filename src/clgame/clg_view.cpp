@@ -328,7 +328,7 @@ static void CLG_FinishViewValues(void)
     if (!ent->current.modelindex)
         goto first;
 
-    CLG_SetupThirdPersionView();
+    CLG_SetupFirstPersonView();
     return;
 
 first:
