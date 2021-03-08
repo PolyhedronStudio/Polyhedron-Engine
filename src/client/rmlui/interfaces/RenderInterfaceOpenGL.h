@@ -37,7 +37,8 @@
 #ifndef __CLIENT_RMLUI_INTERFACES_RENDERINTERFACE_H__
 #define __CLIENT_RMLUI_INTERFACES_RENDERINTERFACE_H__
 
-#include "shared/shared.h"
+#include <RmlUi/Core/RenderInterface.h>
+
 
  /**
 	N&C Quake RML Render Interface.
@@ -85,12 +86,8 @@ public:
 		Rml::UniquePtr<Rml::byte[]> data;
 	};
 	Image CaptureScreen();
-	
 
 protected:
-	int scissorRect[4]; // 0 = x 1 = y 2 = width 3 = height - scissor rect.
-	qboolean scissorEnabled; // Is scissoring enabled state.
-
 	int m_width;
 	int m_height;
 	bool m_transform_enabled;

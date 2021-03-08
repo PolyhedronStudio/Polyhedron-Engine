@@ -49,6 +49,21 @@
 
 #define DLIGHT_CUTOFF       64
 
+// N&C: Geometry that can be pushed to the render interface.
+// Added mainly for libRmlUi so we can have beautiful UIs.
+//
+// 
+typedef struct refresh_geometry_s {
+    int numverts;
+    vec4_t* verts;
+    vec4_t* normals;
+    vec2_t* stcoords;
+    vec4_t* colors;
+    int numelems;
+    unsigned short* elems;
+} refresh_geometry_t;
+
+
 typedef struct entity_s {
     //
     // Model.

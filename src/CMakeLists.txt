@@ -370,30 +370,30 @@ SET(HEADERS_WINDOWS
 
 ###################### VKPT.
 SET(SRC_VKPT
-	refresh/vkpt/asvgf.c
-	refresh/vkpt/bloom.c
-	refresh/vkpt/bsp_mesh.c
-	refresh/vkpt/draw.c
-	refresh/vkpt/freecam.c
-	refresh/vkpt/main.c
-	refresh/vkpt/material.c
-	refresh/vkpt/matrix.c
-	refresh/vkpt/mgpu.c
-	refresh/vkpt/models.c
-	refresh/vkpt/path_tracer.c
-	refresh/vkpt/physical_sky.c
-	refresh/vkpt/precomputed_sky.c
-	refresh/vkpt/profiler.c
-	refresh/vkpt/shadow_map.c
-	refresh/vkpt/textures.c
-	refresh/vkpt/tone_mapping.c
-	refresh/vkpt/transparency.c
-	refresh/vkpt/uniform_buffer.c
-	refresh/vkpt/vertex_buffer.c
-	refresh/vkpt/vk_util.c
-	refresh/vkpt/buddy_allocator.c
-	refresh/vkpt/device_memory_allocator.c
-	refresh/vkpt/god_rays.c
+	refresh/vkpt/asvgf.cpp
+	refresh/vkpt/bloom.cpp
+	refresh/vkpt/bsp_mesh.cpp
+	refresh/vkpt/draw.cpp
+	refresh/vkpt/freecam.cpp
+	refresh/vkpt/main.cpp
+	refresh/vkpt/material.cpp
+	refresh/vkpt/matrix.cpp
+	refresh/vkpt/mgpu.cpp
+	refresh/vkpt/models.cpp
+	refresh/vkpt/path_tracer.cpp
+	refresh/vkpt/physical_sky.cpp
+	refresh/vkpt/precomputed_sky.cpp
+	refresh/vkpt/profiler.cpp
+	refresh/vkpt/shadow_map.cpp
+	refresh/vkpt/textures.cpp
+	refresh/vkpt/tone_mapping.cpp
+	refresh/vkpt/transparency.cpp
+	refresh/vkpt/uniform_buffer.cpp
+	refresh/vkpt/vertex_buffer.cpp
+	refresh/vkpt/vk_util.cpp
+	refresh/vkpt/buddy_allocator.cpp
+	refresh/vkpt/device_memory_allocator.cpp
+	refresh/vkpt/god_rays.cpp
 )
 SET(HEADERS_VKPT
 	refresh/vkpt/vkpt.h
@@ -539,6 +539,8 @@ TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_SERVER=1 USE_CLIENT=1)
 TARGET_COMPILE_DEFINITIONS(server PRIVATE USE_SERVER=1 USE_CLIENT=0)
 
 IF(CONFIG_USE_CURL)
+	ADD_DEFINITIONS(-DHAVE_CONFIG_H=1 -DCURL_STATICLIB)
+
 	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_HTTP})
 	TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_CURL=1)
 	TARGET_LINK_LIBRARIES(client libcurl)
