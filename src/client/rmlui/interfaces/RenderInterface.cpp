@@ -57,7 +57,7 @@ struct RmlUiRendererVertex
 // The actual RmlUi render interface for OpenGL.
 //=============================================================================
 //
-RmlUiRenderInterface::RmlUiRenderInterface() : m_width(1280), m_height(768), m_transform_enabled(true)
+RmlUiRenderInterface::RmlUiRenderInterface() : m_width(1280), m_height(768), m_transform_enabled(false)
 {
 
 }
@@ -77,13 +77,13 @@ void RmlUiRenderInterface::SetViewportArea(int width, int height) {
 
 // Called to initialize the renderer, enable certain OpenGL states.
 void RmlUiRenderInterface::Initialize() {
-
+	m_width = r_config.width;
+	m_height = r_config.height;
 }
 
 void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rml::TextureHandle texture, const Rml::Vector2f& translation)
 {
 	// Setup 2D rendering mode.
-	qglLoadIdentity();
 	qglViewport(0, 0, r_config.width, r_config.height);
 	GL_Ortho(0, r_config.width, r_config.height, 0, -1, 1);
 	qglMatrixMode(GL_MODELVIEW);
@@ -185,6 +185,10 @@ void RmlUiRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle g
 //
 void RmlUiRenderInterface::EnableScissorRegion(bool enable)
 {
+	//if (enable)
+	//	qglEnable(GL_SCISSOR_TEST);
+	//else
+	//	qglDisable(GL_SCISSOR_TEST);
 	// Disable renderer clip rect.
 	//if (!enable)
 	//	R_SetClipRect_GL(NULL);
@@ -212,6 +216,8 @@ void RmlUiRenderInterface::EnableScissorRegion(bool enable)
 //
 void RmlUiRenderInterface::SetScissorRegion(int x, int y, int width, int height)
 {
+	//qglScissor(x, r_config.width - (y + height), width, height);
+
 	if (!m_transform_enabled) {
 		qglScissor(x, m_height - (y + height), width, height);
 	} else {
@@ -239,7 +245,7 @@ void RmlUiRenderInterface::SetScissorRegion(int x, int y, int width, int height)
 		};
 		qglDisableClientState(GL_COLOR_ARRAY);
 		qglEnableClientState(GL_VERTEX_ARRAY);
-		//qglVertexPointer(3, GL_FLOAT, 0, vertices);
+		qglVertexPointer(3, GL_FLOAT, 0, vertices);
 		GLushort indices[] = { 1, 2, 0, 3 };
 		qglDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, indices);
 		qglEnableClientState(GL_COLOR_ARRAY);

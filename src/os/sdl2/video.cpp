@@ -798,22 +798,22 @@ void VID_PumpEvents(void)
             break;
         case SDL_MOUSEBUTTONDOWN:
             // RMLUI Process Mouse Button Down.
-            RMLUI_ProcessMouseButtonDown(event.button.button);
-            //if (RMLUI_ProcessMouseButtonDown(event.button.button))
+            //RMLUI_ProcessMouseButtonDown(event.button.button);
+            if (RMLUI_ProcessMouseButtonDown(event.button.button))
                 // Process regular mouse button event.
                 mouse_button_event(&event.button);
             break;
         case SDL_MOUSEBUTTONUP:
             // RMLUI Process Mouse Button Up.
-            RMLUI_ProcessMouseButtonUp(event.button.button);
-            //if (RMLUI_ProcessMouseButtonUp(event.button.button))           
+            //RMLUI_ProcessMouseButtonUp(event.button.button);
+            if (RMLUI_ProcessMouseButtonUp(event.button.button))           
                 // Process regular mouse button event.
                 mouse_button_event(&event.button);
             break;
         case SDL_MOUSEWHEEL:
             // RMLUI Process Mouse Button Up.
-            RMLUI_ProcessMouseWheel(-(float)event.wheel.y);
-            //if (RMLUI_ProcessMouseWheel(-(float)event.wheel.y))
+            //RMLUI_ProcessMouseWheel(-(float)event.wheel.y);
+            if (RMLUI_ProcessMouseWheel(-(float)event.wheel.y))
                 // Process regular mouse scroll event.
                 mouse_wheel_event(&event.wheel);
             break;
