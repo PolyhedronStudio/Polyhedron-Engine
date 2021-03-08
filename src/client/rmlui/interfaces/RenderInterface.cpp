@@ -409,16 +409,16 @@ void RmlUiRenderInterface::ReleaseTexture(Rml::TextureHandle texture_handle)
 //
 void RmlUiRenderInterface::SetTransform(const Rml::Matrix4f* transform)
 {
-	//m_transform_enabled = (bool)transform;
+	m_transform_enabled = (bool)transform;
 
-	//if (transform)
-	//{
-	//	if (std::is_same<Rml::Matrix4f, Rml::ColumnMajorMatrix4f>::value)
-	//		qglLoadMatrixf(transform->data());
-	//	else if (std::is_same<Rml::Matrix4f, Rml::RowMajorMatrix4f>::value)
-	//		qglLoadMatrixf(transform->Transpose().data());
-	//}
-	//else
+	if (transform)
+	{
+		if (std::is_same<Rml::Matrix4f, Rml::ColumnMajorMatrix4f>::value)
+			qglLoadMatrixf(transform->data());
+		else if (std::is_same<Rml::Matrix4f, Rml::RowMajorMatrix4f>::value)
+			qglLoadMatrixf(transform->Transpose().data());
+	}
+	else
 		qglLoadIdentity();
 }
 

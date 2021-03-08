@@ -775,16 +775,16 @@ void VID_PumpEvents(void)
         case SDL_KEYDOWN:
             // RMLUI Process Keydown.
             RMLUI_ProcessKeyDown(event.key.keysym.sym);
-
-            // Regular Key Event.
-            key_event(&event.key);
+            //if (RMLUI_ProcessKeyDown(event.key.keysym.sym))
+                // Regular Key Event.
+                key_event(&event.key);
             break;
         case SDL_KEYUP:
             // RMLUI Process Keyup.
             RMLUI_ProcessKeyUp(event.key.keysym.sym);
-
-            // Regular Key Event.
-            key_event(&event.key);
+            //if (RMLUI_ProcessKeyUp(event.key.keysym.sym))
+                // Regular Key Event.
+                key_event(&event.key);
             break;
         case SDL_WINDOWEVENT:
             window_event(&event.window);
@@ -792,30 +792,30 @@ void VID_PumpEvents(void)
         case SDL_MOUSEMOTION:
             // RMLUI Process Mouse Move.
             RMLUI_ProcessMouseMove(event.motion.x, event.motion.y);
-
-            // Regular UI Mouse event for Q-Based engine.
-            UI_MouseEvent(event.motion.x, event.motion.y);
+            //if (RMLUI_ProcessMouseMove(event.motion.x, event.motion.y))
+                // Regular UI Mouse event for Q-Based engine.
+                UI_MouseEvent(event.motion.x, event.motion.y);
             break;
         case SDL_MOUSEBUTTONDOWN:
             // RMLUI Process Mouse Button Down.
             RMLUI_ProcessMouseButtonDown(event.button.button);
-
-            // Process regular mouse button event.
-            mouse_button_event(&event.button);
+            //if (RMLUI_ProcessMouseButtonDown(event.button.button))
+                // Process regular mouse button event.
+                mouse_button_event(&event.button);
             break;
         case SDL_MOUSEBUTTONUP:
             // RMLUI Process Mouse Button Up.
             RMLUI_ProcessMouseButtonUp(event.button.button);
-            
-            // Process regular mouse button event.
-            mouse_button_event(&event.button);
+            //if (RMLUI_ProcessMouseButtonUp(event.button.button))           
+                // Process regular mouse button event.
+                mouse_button_event(&event.button);
             break;
         case SDL_MOUSEWHEEL:
             // RMLUI Process Mouse Button Up.
             RMLUI_ProcessMouseWheel(-(float)event.wheel.y);
-
-            // Process regular mouse scroll event.
-            mouse_wheel_event(&event.wheel);
+            //if (RMLUI_ProcessMouseWheel(-(float)event.wheel.y))
+                // Process regular mouse scroll event.
+                mouse_wheel_event(&event.wheel);
             break;
         }
     }
