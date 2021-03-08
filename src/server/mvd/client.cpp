@@ -229,7 +229,7 @@ static mvd_t *find_local_channel(void)
 
 mvd_t *MVD_SetChannel(int arg)
 {
-    char *s = Cmd_Argv(arg);
+    const char *s = Cmd_Argv(arg); // C++20: Added cast.
     mvd_t *mvd;
     int id;
 
@@ -337,7 +337,7 @@ static mvd_t *create_channel(gtv_t *gtv)
 
 static gtv_t *gtv_set_conn(int arg)
 {
-    char *s = Cmd_Argv(arg);
+    const char *s = Cmd_Argv(arg); // C++20: Added const.
     gtv_t *gtv;
     int id;
 
@@ -998,7 +998,7 @@ static qboolean gtv_forward_cmd(mvd_client_t *client)
         return qfalse;
     }
 
-    text = Cmd_Args();
+    text = (char*)Cmd_Args(); // C++20: added cast.
     len = strlen(text);
     if (len > 150) {
         len = 150;
@@ -1738,7 +1738,7 @@ static void MVD_ListChannels_f(void)
         return;
     }
 
-    s = Cmd_Argv(1);
+    s = (char*)Cmd_Argv(1); // C++20: added cast.
     if (*s == 'r') {
         list_recordings();
     } else {
@@ -2187,7 +2187,7 @@ static void MVD_Seek_f(void)
         return;
     }
 
-    to = Cmd_Argv(1);
+    to = (char*)Cmd_Argv(1); // C++20: Added cast.
 
     if (*to == '-' || *to == '+') {
         // relative to current frame

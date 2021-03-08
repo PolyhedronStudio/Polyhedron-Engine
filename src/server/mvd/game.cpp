@@ -318,7 +318,7 @@ static void MVD_LayoutScores(mvd_client_t *client)
 static void MVD_LayoutFollow(mvd_client_t *client)
 {
     mvd_t *mvd = client->mvd;
-    char *name = client->target ? client->target->name : "<no target>";
+    const char *name = client->target ? client->target->name : "<no target>"; // C++20: Added const.
     char layout[MAX_STRING_CHARS];
     size_t total;
 
