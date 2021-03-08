@@ -595,7 +595,7 @@ static void SV_Loadgame_f(void)
         return;
     }
 
-    dir = Cmd_Argv(1);
+    dir = (char*)Cmd_Argv(1); // C++20: Added a cast.
     if (!COM_IsPath(dir)) {
         Com_Printf("Bad savedir.\n");
         return;
@@ -662,7 +662,7 @@ static void SV_Savegame_f(void)
         return;
     }
 
-    dir = Cmd_Argv(1);
+    dir = (char*)Cmd_Argv(1); // C++20: Added cast.
     if (!COM_IsPath(dir)) {
         Com_Printf("Bad savedir.\n");
         return;
