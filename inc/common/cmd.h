@@ -176,17 +176,17 @@ typedef struct cmdbuf_s {
 
     from_t  Cmd_From(void);
     int     Cmd_Argc(void);
-    char    *Cmd_Argv(int arg);
-    char    *Cmd_Args(void);
-    char    *Cmd_RawArgs(void);
-    char    *Cmd_ArgsFrom(int from);
-    char    *Cmd_RawArgsFrom(int from);
+    const char    *Cmd_Argv(int arg); // C++20: char*
+    const char    *Cmd_Args(void); // C++20: char*
+    const char    *Cmd_RawArgs(void); // C++20: char*
+    const char    *Cmd_ArgsFrom(int from); // C++20: char*
+    const char    *Cmd_RawArgsFrom(int from); // C++20: char*
     size_t  Cmd_ArgsBuffer(char *buffer, size_t size);
     size_t  Cmd_ArgvBuffer(int arg, char *buffer, size_t size);
     size_t  Cmd_ArgOffset(int arg);
     int     Cmd_FindArgForOffset(size_t offset);
     size_t  Cmd_WhiteSpaceTail(void);
-    char    *Cmd_RawString(void);
+    const char    *Cmd_RawString(void); // C++20: char*
     void    Cmd_Shift(void);
     // The functions that execute commands get their parameters with these
     // functions. Cmd_Argv () will return an empty string, not a NULL

@@ -828,7 +828,7 @@ static  list_t  cmd_hash[CMD_HASH_SIZE];
 
 static  int     cmd_argc;
 static  char    *cmd_argv[MAX_STRING_TOKENS]; // pointers to cmd_data[]
-static  char    *cmd_null_string = "";
+static  const char    *cmd_null_string = "";
 
 // complete command string, left untouched
 static  char    cmd_string[MAX_STRING_CHARS];
@@ -896,7 +896,7 @@ int Cmd_Argc(void)
 Cmd_Argv
 ============
 */
-char *Cmd_Argv(int arg)
+const char *Cmd_Argv(int arg)
 {
     if (arg < 0 || arg >= cmd_argc) {
         return cmd_null_string;
@@ -930,7 +930,7 @@ Cmd_Args
 Returns a single string containing argv(1) to argv(argc()-1)
 ============
 */
-char *Cmd_Args(void)
+const char *Cmd_Args(void)
 {
     int i;
 
@@ -948,7 +948,7 @@ char *Cmd_Args(void)
     return cmd_args;
 }
 
-char *Cmd_RawArgs(void)
+const char *Cmd_RawArgs(void)
 {
     if (cmd_argc < 2) {
         return cmd_null_string;
@@ -956,7 +956,7 @@ char *Cmd_RawArgs(void)
     return cmd_string + cmd_offsets[1];
 }
 
-char *Cmd_RawString(void)
+const char *Cmd_RawString(void)
 {
     return cmd_string;
 }
@@ -978,7 +978,7 @@ Cmd_ArgsFrom
 Returns a single string containing argv(1) to argv(from-1)
 ============
 */
-char *Cmd_ArgsFrom(int from)
+const char *Cmd_ArgsFrom(int from)
 {
     int i;
 
@@ -1018,7 +1018,7 @@ static char *Cmd_ArgsRange(int from, int to)
     return cmd_args;
 }
 
-char *Cmd_RawArgsFrom(int from)
+const char *Cmd_RawArgsFrom(int from)
 {
     size_t offset;
 
@@ -1345,11 +1345,11 @@ char *Cmd_MacroExpandString(const char *text, qboolean aliasHack)
                     token = var->string;
                     rescan = qtrue;
                 } else if (!strcmp(temporary, "qt")) {
-                    token = "\"";
+                    token = (char*)"\""; // C++20: token = "\";
                 } else if (!strcmp(temporary, "sc")) {
-                    token = ";";
+                    token = (char*)";"; // C++20: token = ";";
                 } else {
-                    token = "";
+                    token = (char*)""; // C++20: token = "";
                 }
             }
         }
