@@ -35,7 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define Cmd_Malloc(size)        Z_TagMalloc(size, TAG_CMD)
 #define Cmd_CopyString(string)  Z_TagCopyString(string, TAG_CMD)
 
-static char *Cmd_ArgsRange(int from, int to);
+static const char *Cmd_ArgsRange(int from, int to); // C++20: added const
 
 /*
 =============================================================================
@@ -321,7 +321,7 @@ void Cmd_Alias_f(void)
         return;
     }
 
-    s = Cmd_Argv(1);
+    s = (char*)Cmd_Argv(1); // C++20: added cast.
     if (Cmd_Exists(s)) {
         Com_Printf("\"%s\" already defined as a command\n", s);
         return;
@@ -343,7 +343,7 @@ void Cmd_Alias_f(void)
     }
 
     // copy the rest of the command line
-    cmd = Cmd_ArgsFrom(2);
+    cmd = (char*)Cmd_ArgsFrom(2); // C++20: added cast.
     Cmd_AliasSet(s, cmd);
 }
 
@@ -388,7 +388,7 @@ static void Cmd_UnAlias_f(void)
         return;
     }
 
-    s = Cmd_Argv(1);
+    s = (char*)Cmd_Argv(1); // C++20: added cast.
     a = Cmd_AliasFind(s);
     if (!a) {
         Com_Printf("\"%s\" is undefined.\n", s);
@@ -613,9 +613,9 @@ static void Cmd_If_f(void)
         return;
     }
 
-    a = Cmd_Argv(1);
-    op = Cmd_Argv(2);
-    b = Cmd_Argv(3);
+    a   = (char*)Cmd_Argv(1);   // C++20: added cast.
+    op  = (char*)Cmd_Argv(2);   // C++20: added cast.
+    b   = (char*)Cmd_Argv(3);   // C++20: added cast.
 
     numeric = COM_IsFloat(a) && COM_IsFloat(b);
     if (!strcmp(op, "==")) {
@@ -911,7 +911,7 @@ Cmd_ArgvBuffer
 */
 size_t Cmd_ArgvBuffer(int arg, char *buffer, size_t size)
 {
-    char *s;
+    std::string s; // C++20: char *s
 
     if (arg < 0 || arg >= cmd_argc) {
         s = cmd_null_string;
@@ -919,7 +919,7 @@ size_t Cmd_ArgvBuffer(int arg, char *buffer, size_t size)
         s = cmd_argv[arg];
     }
 
-    return Q_strlcpy(buffer, s, size);
+    return Q_strlcpy(buffer, s.c_str(), size);
 }
 
 
@@ -996,7 +996,7 @@ const char *Cmd_ArgsFrom(int from)
     return cmd_args;
 }
 
-static char *Cmd_ArgsRange(int from, int to)
+static const char *Cmd_ArgsRange(int from, int to)
 {
     int i;
 
@@ -1059,10 +1059,10 @@ int Cmd_ParseOptions(const cmd_option_t *opt)
     const cmd_option_t *o;
     char *s, *p;
 
-    cmd_optopt = cmd_null_string;
+    cmd_optopt = (char*)cmd_null_string; // C++20: Added cast.
 
     if (cmd_optind == cmd_argc) {
-        cmd_optarg = cmd_null_string;
+        cmd_optarg = (char*)cmd_null_string; // C++20: Added cast.
         return -1; // no more arguments
     }
 
@@ -1079,7 +1079,7 @@ int Cmd_ParseOptions(const cmd_option_t *opt)
             if (++cmd_optind < cmd_argc) {
                 cmd_optarg = cmd_argv[cmd_optind];
             } else {
-                cmd_optarg = cmd_null_string;
+                cmd_optarg = (char*)cmd_null_string;  // C++20: Added cast.
             }
             return -1; // special terminator
         }
