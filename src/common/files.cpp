@@ -3060,7 +3060,7 @@ static void FS_FDir_f(void)
         return;
     }
 
-    filter = Cmd_Argv(1);
+    filter = (char*)Cmd_Argv(1); // C++20: Added cast.
 
     flags = FS_SEARCH_BYFILTER;
     if (Cmd_Argc() > 2) {
@@ -3084,9 +3084,9 @@ static void FS_Dir_f(void)
         return;
     }
 
-    path = Cmd_Argv(1);
+    path = (char*)Cmd_Argv(1); // C++20: Added cast.
     if (Cmd_Argc() > 2) {
-        ext = Cmd_Argv(2);
+        ext = (char*)Cmd_Argv(2); // C++20: Added cast.
     } else {
         ext = NULL;
     }
