@@ -57,7 +57,7 @@ struct RmlUiRendererVertex
 // The actual RmlUi render interface for OpenGL.
 //=============================================================================
 //
-RmlUiRenderInterface::RmlUiRenderInterface() : m_width(1280), m_height(720), m_transform_enabled(false)
+RmlUiRenderInterface::RmlUiRenderInterface() : m_width(1280), m_height(768), m_transform_enabled(true)
 {
 
 }
@@ -70,39 +70,70 @@ RmlUiRenderInterface::RmlUiRenderInterface() : m_width(1280), m_height(720), m_t
 // optimise.	
 //=============================================================================
 //
-void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rml::TextureHandle texture, const Rml::Vector2f& translation)
-{/*
-	RMLUI_UNUSED(num_vertices);*/
+	// Called when the render viewport size has changed.
+void RmlUiRenderInterface::SetViewportArea(int width, int height) {
 
-	// Push matrix and translate.
-	qglPushMatrix();
+}
+
+// Called to initialize the renderer, enable certain OpenGL states.
+void RmlUiRenderInterface::Initialize() {
+
+}
+
+void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rml::TextureHandle texture, const Rml::Vector2f& translation)
+{
+	// Setup 2D rendering mode.
+	qglLoadIdentity();
+	qglViewport(0, 0, r_config.width, r_config.height);
+	GL_Ortho(0, r_config.width, r_config.height, 0, -1, 1);
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity();
+
+	//// Translate.
 	qglTranslatef(translation.x, translation.y, 0);
 
-	qglVertexPointer(2, GL_FLOAT, sizeof(Rml::Vertex), &vertices[0].position);
-	qglEnableClientState(GL_COLOR_ARRAY);
-	qglColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Rml::Vertex), &vertices[0].colour);
+	Rml::Vector<Rml::Vector2f> Positions(num_vertices);
+	Rml::Vector<Rml::Colourb> Colors(num_vertices);
+	Rml::Vector<Rml::Vector2f> TexCoords(num_vertices);
 
-	if (!texture)
+	for (int i = 0; i < num_vertices; i++)
 	{
-		qglDisable(GL_TEXTURE_2D);
-		qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	else
-	{
+		Positions[i] = vertices[i].position;
+		Colors[i] = vertices[i].colour;
+		TexCoords[i] = vertices[i].tex_coord;
+	};
+
+	// Setup state bits.
+	glStateBits_t bits = GLS_DEFAULT;
+	////bits = (glStateBits_t)(GLS_DEPTHTEST_DISABLE | GLS_DEPTHMASK_FALSE | GLS_CULL_DISABLE); // CPP: Cast
+	bits = (glStateBits_t)(GLS_CULL_DISABLE); // CPP: Cast
+	bits = (glStateBits_t)(bits | GLS_BLEND_BLEND); // CPP: Cast bits |= GLS_BLEND_BLEND;
+	//bits = (glStateBits_t)(bits | GLS_ALPHATEST_ENABLE); // CPP: Cast
+
+	// Setup array bits.
+	if (texture) {
 		qglEnable(GL_TEXTURE_2D);
-		qglBindTexture(GL_TEXTURE_2D, (GLuint)texture);
-		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		qglTexCoordPointer(2, GL_FLOAT, sizeof(Rml::Vertex), &vertices[0].tex_coord);
+		qglActiveTextureARB(GL_TEXTURE0_ARB);
+		qglBindTexture(GL_TEXTURE_2D, texture);
+		GL_StateBits(bits);
+		GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_TC | GLA_COLOR)); // CPP: Cast
+	} else {
+		qglActiveTextureARB(GL_TEXTURE0_ARB);
+		qglBindTexture(GL_TEXTURE_2D, 0);
+		//qglDisable(GL_TEXTURE_2D);
+		GL_StateBits(bits);
+		GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_COLOR)); // CPP: Cast
 	}
 
-	qglDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_INT, indices);
+	qglVertexPointer(2, GL_FLOAT, 0, &Positions[0]);
+	qglColorPointer(4, GL_UNSIGNED_BYTE, 0, &Colors[0]);
+	qglTexCoordPointer(2, GL_FLOAT, 0, &TexCoords[0]);
 
-	// Diable GL states.
-	//if (texture) qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	//qglDisableClientState(GL_COLOR_ARRAY);
-	
-	// Pop matrix.
-	qglPopMatrix();
+	GL_LockArrays(num_vertices);
+
+	qglDrawElements(GL_TRIANGLES, num_indices, QGL_INDEX_ENUM, indices);
+
+	GL_UnlockArrays();
 }
 
 //
@@ -116,58 +147,6 @@ void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int num_vertice
 // Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Vertex* RMLUI_UNUSED_PARAMETER(vertices), int RMLUI_UNUSED_PARAMETER(num_vertices), int* RMLUI_UNUSED_PARAMETER(indices), int RMLUI_UNUSED_PARAMETER(num_indices), const Rml::TextureHandle RMLUI_UNUSED_PARAMETER(texture))
 Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rml::TextureHandle texture)
 {
-	//std::vector<RmlUiRendererVertex> bufferData(num_vertices);
-
-	//// Ensure we have valid pointers.
-	//if (!vertices || !indices)
-	//	return (Rml::CompiledGeometryHandle)nullptr;
-	//
-
-	//// Assign buffer data.
-	//for (std::size_t i = 0; i < bufferData.size(); i++)
-	//{
-	//	// Position.
-	//	bufferData[i].position[0] = vertices[i].position.x;
-	//	bufferData[i].position[1] = vertices[i].position.y;
-
-	//	// Tex Coord.
-	//	bufferData[i].texCoord[0] = vertices[i].tex_coord.x;
-	//	bufferData[i].texCoord[1] = vertices[i].tex_coord.y;
-
-	//	// Color data.
-	//	bufferData[i].color[0] = vertices[i].colour.red;
-	//	bufferData[i].color[1] = vertices[i].colour.green;
-	//	bufferData[i].color[2] = vertices[i].colour.blue;
-	//	bufferData[i].color[3] = vertices[i].colour.alpha;
-	//};
-
-	////// Allocate a geometry handler.
-	//RmlUiRendererGeometryHandler* Geometry = new RmlUiRendererGeometryHandler();
-	//Geometry->NumVertices = num_indices;
-
-	////// Allocate GL buffers.
-	//qglGenBuffersARB(1, &Geometry->VertexID);
-	//qglBindBufferARB(GL_ARRAY_BUFFER, Geometry->VertexID);
-	//qglBufferDataARB(GL_ARRAY_BUFFER, sizeof(RmlUiRendererVertex) * num_vertices, &bufferData[0],
-	//	GL_STATIC_DRAW);
-
-	//qglGenBuffersARB(1, &Geometry->IndexID);
-	//qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, Geometry->IndexID);
-	//qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * num_indices, indices, 
-	//	GL_STATIC_DRAW);
-	//qglBindBufferARB(GL_ARRAY_BUFFER, 0);
-
-	//// Store texture ID.
-	//Geometry->Texture = texture;
-
-	//// Return handle.
-	//return (Rml::CompiledGeometryHandle)Geometry;
-	//RMLUI_UNUSED(vertices);
-	//RMLUI_UNUSED(num_vertices);
-	//RMLUI_UNUSED(indices);
-	//RMLUI_UNUSED(num_indices);
-	//RMLUI_UNUSED(texture);
-
 	return (Rml::CompiledGeometryHandle) nullptr;
 }
 
@@ -181,63 +160,7 @@ Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Vertex* v
 //void RmlUiRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle RMLUI_UNUSED_PARAMETER(geometry), const Rml::Vector2f& RMLUI_UNUSED_PARAMETER(translation))
 void RmlUiRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry, const Rml::Vector2f& translation)
 {
-//#ifdef ENABLE_GLEW
-	RmlUiRendererGeometryHandler* RealGeometry = (RmlUiRendererGeometryHandler*)geometry;
 
-	// Ensure we have a valid pointer.
-	if (!RealGeometry)
-		return;
-
-	// Push matrix and init viewport.
-	//qglPushMatrix();
-	//// Init viewport??	// Init viewport??	// Init viewport??	// Init viewport??	// Init viewport??
-	////initViewport();
-	//qglViewport(0, 0, 1280, 720);
-	//// Init viewport??	// Init viewport??	// Init viewport??	// Init viewport??	// Init viewport??
-
-	//qglTranslatef(translation.x, translation.y, 0);
-	//qglEnable(GL_BLEND);
-	//qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	//GLuint textureID =  (GLuint)RealGeometry->Texture;
-
-	//if (textureID)
-	//{
-	////	qglBindTexture(GL_TEXTURE_2D, textureID);
-	//}
-	//else
-	//{
-	////	qglBindTexture(GL_TEXTURE_2D, 0);
-	//};
-
-	//qglEnable(GL_VERTEX_ARRAY);
-	//qglEnable(GL_TEXTURE_COORD_ARRAY);
-	//qglEnable(GL_COLOR_ARRAY);
-
-	////qglBindBufferARB(GL_ARRAY_BUFFER, RealGeometry->VertexID);
-	////qglVertexPointer(2, GL_FLOAT, sizeof(RmlUiRendererVertex), (const void*)0);
-	////qglTexCoordPointer(2, GL_FLOAT, sizeof(RmlUiRendererVertex), (const void*)sizeof(float[2]));
-	////qglColorPointer(4, GL_UNSIGNED_BYTE, sizeof(RmlUiRendererVertex), (const void*)sizeof(float[4]));
-	//////qglColorPointer(4, GL_UNSIGNED_BYTE, sizeof(RmlUiRendererVertex), (const void*)(sizeof(float[2]) + sizeof(unsigned char[4])));
-
-	////qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, RealGeometry->IndexID);
-	////qglDrawElements(GL_TRIANGLES, RealGeometry->NumVertices, GL_UNSIGNED_INT, (const void*)0);
-
-	//qglBindBufferARB(GL_ARRAY_BUFFER, 0);
-
-	//qglDisable(GL_COLOR_ARRAY);
-	//qglDisable(GL_TEXTURE_COORD_ARRAY);
-	//qglDisable(GL_VERTEX_ARRAY);
-
-	//qglColor4f(1, 1, 1, 1);
-
-	//// Pop matrix.
-	//qglPopMatrix();
-////#else
-////	RMLUI_ASSERT(false);
-////#endif
-	//RMLUI_UNUSED(geometry);
-	//RMLUI_UNUSED(translation);
 }
 
 //
@@ -250,9 +173,7 @@ void RmlUiRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle ge
 //void RmlUiRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle RMLUI_UNUSED_PARAMETER(geometry))
 void RmlUiRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry)
 {
-	if (geometry)
-		delete (RmlUiRendererGeometryHandler*)geometry;
-//	RMLUI_UNUSED(geometry);
+
 }
 
 //
@@ -264,6 +185,9 @@ void RmlUiRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle g
 //
 void RmlUiRenderInterface::EnableScissorRegion(bool enable)
 {
+	// Disable renderer clip rect.
+	//if (!enable)
+	//	R_SetClipRect_GL(NULL);
 	if (enable) {
 		if (!m_transform_enabled) {
 			qglEnable(GL_SCISSOR_TEST);
@@ -273,8 +197,7 @@ void RmlUiRenderInterface::EnableScissorRegion(bool enable)
 			qglDisable(GL_SCISSOR_TEST);
 			qglEnable(GL_STENCIL_TEST);
 		}
-	}
-	else {
+	} else {
 		qglDisable(GL_SCISSOR_TEST);
 		qglDisable(GL_STENCIL_TEST);
 	}
@@ -291,8 +214,7 @@ void RmlUiRenderInterface::SetScissorRegion(int x, int y, int width, int height)
 {
 	if (!m_transform_enabled) {
 		qglScissor(x, m_height - (y + height), width, height);
-	}
-	else {
+	} else {
 		// clear the stencil buffer
 		qglStencilMask(GLuint(-1));
 		qglClear(GL_STENCIL_BUFFER_BIT);
@@ -316,7 +238,8 @@ void RmlUiRenderInterface::SetScissorRegion(int x, int y, int width, int height)
 			fx + fwidth, fy, 0
 		};
 		qglDisableClientState(GL_COLOR_ARRAY);
-		qglVertexPointer(3, GL_FLOAT, 0, vertices);
+		qglEnableClientState(GL_VERTEX_ARRAY);
+		//qglVertexPointer(3, GL_FLOAT, 0, vertices);
 		GLushort indices[] = { 1, 2, 0, 3 };
 		qglDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, indices);
 		qglEnableClientState(GL_COLOR_ARRAY);
@@ -486,16 +409,16 @@ void RmlUiRenderInterface::ReleaseTexture(Rml::TextureHandle texture_handle)
 //
 void RmlUiRenderInterface::SetTransform(const Rml::Matrix4f* transform)
 {
-	m_transform_enabled = (bool)transform;
+	//m_transform_enabled = (bool)transform;
 
-	if (transform)
-	{
-		if (std::is_same<Rml::Matrix4f, Rml::ColumnMajorMatrix4f>::value)
-			qglLoadMatrixf(transform->data());
-		else if (std::is_same<Rml::Matrix4f, Rml::RowMajorMatrix4f>::value)
-			qglLoadMatrixf(transform->Transpose().data());
-	}
-	else
+	//if (transform)
+	//{
+	//	if (std::is_same<Rml::Matrix4f, Rml::ColumnMajorMatrix4f>::value)
+	//		qglLoadMatrixf(transform->data());
+	//	else if (std::is_same<Rml::Matrix4f, Rml::RowMajorMatrix4f>::value)
+	//		qglLoadMatrixf(transform->Transpose().data());
+	//}
+	//else
 		qglLoadIdentity();
 }
 

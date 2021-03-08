@@ -41,6 +41,9 @@ void RMLUI_Init(void) {
 	Rml::SetSystemInterface(&rmlSystemInterface);
 	Rml::SetFileInterface(&rmlFileInterface);
 
+	// Initialize the render interface.
+	rmlRenderInterface.Initialize();
+
 	// Now we can initialize RmlUi.
 	Rml::Initialise();
 

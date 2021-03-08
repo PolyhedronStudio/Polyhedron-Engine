@@ -46,7 +46,7 @@ void GL_Flush2D(void)
     Scrap_Upload();
 
     GL_BindTexture(0, tess.texnum[0]);
-    GL_StateBits(bits);
+    //GL_StateBits(bits);
     GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_TC | GLA_COLOR)); // CPP: Cast
 
     GL_VertexPointer(2, 4, tess.vertices);

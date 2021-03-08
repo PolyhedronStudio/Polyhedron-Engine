@@ -18,6 +18,12 @@ class RmlUiRenderInterface : public Rml::RenderInterface
 public:
 	RmlUiRenderInterface();
 
+	// Called when the render viewport size has changed.
+	void SetViewportArea(int width, int height);
+
+	// Called to initialize the renderer, enable certain OpenGL states.
+	void Initialize();
+
 	/// Called by RmlUi when it wants to render geometry that it does not wish to optimise.
 	void RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture, const Rml::Vector2f& translation) override;
 
