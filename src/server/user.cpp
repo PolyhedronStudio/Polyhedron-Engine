@@ -806,7 +806,7 @@ static void SV_StopDownload_f(void)
 static void SV_NextServer_f(void)
 {
     char nextserver[MAX_QPATH];
-    char* v = Cvar_VariableString("nextserver");
+    const char* v = Cvar_VariableString("nextserver"); // C++20: Added const.
     Q_strlcpy(nextserver, v, sizeof(nextserver));
     Cvar_Set("nextserver", "");
     
@@ -915,10 +915,10 @@ static void SV_CvarResult_f(void)
 {
     char *c, *v;
 
-    c = Cmd_Argv(1);
+    c = (char*)Cmd_Argv(1); // C++20: Added a cast.
     if (!strcmp(c, "version")) {
         if (!sv_client->version_string) {
-            v = Cmd_RawArgsFrom(2);
+            v = (char*)Cmd_RawArgsFrom(2); // C++20: Added a cast.
             if (COM_DEDICATED) {
                 Com_Printf("%s[%s]: %s\n", sv_client->name,
                            NET_AdrToString(&sv_client->netchan->remote_address), v);
@@ -1028,7 +1028,7 @@ static void SV_ExecuteUserCommand(const char *s)
     Cmd_TokenizeString(s, qfalse);
     sv_player = sv_client->edict;
 
-    c = Cmd_Argv(0);
+    c = (char*)Cmd_Argv(0); // C++20: Added a cast.
     if (!c[0]) {
         return;
     }

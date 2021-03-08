@@ -92,11 +92,11 @@ static void MVD_LayoutClients(mvd_client_t *client)
             continue;
         }
         if (cl->target && cl->target != mvd->dummy) {
-            status1 = "-> ";
+            status1 = (char*)"-> "; // C++20: Added cast.
             status2 = cl->target->name;
         } else {
-            status1 = "observing";
-            status2 = "";
+            status1 = (char*)"observing"; // C++20: Added cast.
+            status2 = (char*)""; // C++20: Added cast.
         }
         len = Q_snprintf(buffer, sizeof(buffer),
                          "yv %d string \"%3d %-15.15s %3d %s%s\"",
@@ -299,7 +299,7 @@ static void MVD_LayoutScores(mvd_client_t *client)
         layout = mvd->layout;
     }
     if (!layout || !layout[0]) {
-        layout = "xv 100 yv 60 string \"<no scoreboard>\"";
+        layout = (char*)"xv 100 yv 60 string \"<no scoreboard>\""; // C++20: Added cast.
     }
 
     // end-of-match scoreboard is reliably delivered
@@ -1061,7 +1061,7 @@ static void MVD_Follow_f(mvd_client_t *client)
         return;
     }
 
-    s = Cmd_Argv(1);
+    s = (char*)Cmd_Argv(1); // C++20: Added cast.
     if (*s == '!') {
         s++;
         switch (*s) {
@@ -1154,7 +1154,7 @@ static void MVD_AutoFollow_f(mvd_client_t *client)
         return;
     }
 
-    s = Cmd_Argv(1);
+    s = (char*)Cmd_Argv(1); // C++20: added cast.
     if (!strcmp(s, "add") || !strcmp(s, "rm") || !strcmp(s, "del")) {
         if (argc < 3) {
             SV_ClientPrintf(client->cl, PRINT_HIGH,
@@ -1164,7 +1164,7 @@ static void MVD_AutoFollow_f(mvd_client_t *client)
         }
 
         for (i = 2; i < argc; i++) {
-            p = Cmd_Argv(i);
+            p = (char*)Cmd_Argv(i); // C++20: added cast.
             for (j = 0; j < mvd->maxclients; j++) {
                 player = &mvd->players[j];
                 if (!player->name[0] || player == mvd->dummy)
@@ -1430,7 +1430,7 @@ static void MVD_GameClientCommand(edict_t *ent)
         return;
     }
 
-    cmd = Cmd_Argv(0);
+    cmd = (char*)Cmd_Argv(0); // C++20: Added cast.
     if (!*cmd) {
         return;
     }
