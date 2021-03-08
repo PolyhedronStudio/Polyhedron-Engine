@@ -707,7 +707,7 @@ static qboolean permit_connection(conn_params_t *p)
     if ((match = SV_MatchAddress(&sv_banlist, &net_from)) != NULL) {
         s = match->comment;
         if (!*s) {
-            s = "Your IP address is banned from this server.";
+            s = (char*)"Your IP address is banned from this server."; // C++20: Added cast.
         }
         return reject("%s\nConnection refused.\n", s);
     }
@@ -756,7 +756,7 @@ static qboolean parse_packet_length(conn_params_t *p)
     // set maximum packet length
     p->maxlength = MAX_PACKETLEN_WRITABLE_DEFAULT;
     if (p->protocol >= PROTOCOL_VERSION_R1Q2) {
-        s = Cmd_Argv(5);
+        s = (char*)Cmd_Argv(5); // C++20: Added cast.
         if (*s) {
             p->maxlength = atoi(s);
             if (p->maxlength < 0 || p->maxlength > MAX_PACKETLEN_WRITABLE)
@@ -787,7 +787,7 @@ static qboolean parse_enhanced_params(conn_params_t *p)
 
     if (p->protocol == PROTOCOL_VERSION_R1Q2) {
         // set minor protocol version
-        s = Cmd_Argv(6);
+        s = (char*)Cmd_Argv(6); // C++20: Added cast.
         if (*s) {
             p->version = atoi(s);
             clamp(p->version,
@@ -800,7 +800,7 @@ static qboolean parse_enhanced_params(conn_params_t *p)
         p->has_zlib = qtrue;
     } else if (p->protocol == PROTOCOL_VERSION_Q2PRO) {
         // set netchan type
-        s = Cmd_Argv(6);
+        s = (char*)Cmd_Argv(6); // C++20: Added cast.
         if (*s) {
             p->nctype = atoi(s);
             if (p->nctype < NETCHAN_OLD || p->nctype > NETCHAN_NEW)
@@ -810,7 +810,7 @@ static qboolean parse_enhanced_params(conn_params_t *p)
         }
 
         // set zlib
-        s = Cmd_Argv(7);
+        s = (char*)Cmd_Argv(7); // C++20: Added cast.
         if (*s) {
             p->has_zlib = !!atoi(s);
         } else {
@@ -818,7 +818,7 @@ static qboolean parse_enhanced_params(conn_params_t *p)
         }
 
         // set minor protocol version
-        s = Cmd_Argv(8);
+        s = (char*)Cmd_Argv(8); // C++20: Added cast.
         if (*s) {
             p->version = atoi(s);
             clamp(p->version,
@@ -860,7 +860,7 @@ static qboolean parse_userinfo(conn_params_t *params, char *userinfo)
     char *info, *s;
 
     // validate userinfo
-    info = Cmd_Argv(4);
+    info = (char*)Cmd_Argv(4); // C++20: Added cast.
     if (!info[0])
         return reject("Empty userinfo string.\n");
 

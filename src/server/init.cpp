@@ -215,7 +215,7 @@ void SV_SpawnServer(mapcmd_t *cmd)
     } else {
         // no real map
         strcpy(sv.configstrings[CS_MAPCHECKSUM], "0");
-        entitystring = "";
+        entitystring = (char*)""; // C++20: Added cast.
     }
 
     //
