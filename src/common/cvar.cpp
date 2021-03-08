@@ -124,8 +124,9 @@ const char *Cvar_VariableString(const char *var_name)
     cvar_t *var;
 
     var = Cvar_FindVar(var_name);
-    if (!var)
+    if (!var) {
         return "";
+    }
 
     return var->string;
 }
@@ -808,7 +809,8 @@ with the archive flag set to true.
 void Cvar_WriteVariables(qhandle_t f, int mask, qboolean modified)
 {
     cvar_t  *var;
-    char    *s, *a;
+    char* s; // C++20: char *s, *a;
+    std::string a;
 
     for (var = cvar_vars; var; var = var->next) {
         if (var->flags & CVAR_NOARCHIVEMASK)
@@ -821,7 +823,7 @@ void Cvar_WriteVariables(qhandle_t f, int mask, qboolean modified)
             continue;
 
         a = !modified && (var->flags & CVAR_ARCHIVE) ? "a" : "";
-        FS_FPrintf(f, "set%s %s \"%s\"\n", a, var->name, s);
+        FS_FPrintf(f, "set%s %s \"%s\"\n", a.c_str(), var->name, s); // C++20: .c_str()
     }
 }
 

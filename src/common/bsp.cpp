@@ -1025,7 +1025,7 @@ static qboolean BSP_LoadPatchedPVS(bsp_t *bsp)
 
 	unsigned char* filebuf = 0;
 	ssize_t filelen = 0;
-	filelen = FS_LoadFile(pvs_path, (void*)filebuf); // C++20: Removed the & from: &(void*)filebuf
+	filelen = FS_LoadFile(pvs_path, (void**)&filebuf); // C++20: Repositioned the & and add a * to the original: &(void*)filebuf
 
 	if (filebuf == 0)
 		return qfalse;
