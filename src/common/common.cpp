@@ -1036,10 +1036,10 @@ void Qcommon_Init(int argc, char **argv)
     // add + commands from command line
     if (!Com_AddLateCommands()) {
         // if the user didn't give any commands, run default action
-        char *cmd = COM_DEDICATED ? "dedicated_start" : "client_start";
+        std::string cmd = COM_DEDICATED ? "dedicated_start" : "client_start"; // C++ 20: char *cmd = COM_DEDICATED ? "dedicated_start" : "client_start";
 
-        if ((cmd = Cmd_AliasCommand(cmd)) != NULL) {
-            Cbuf_AddText(&cmd_buffer, cmd);
+        if ((cmd = Cmd_AliasCommand(cmd.c_str())) != NULL) { // C++ 20: .c_str()
+            Cbuf_AddText(&cmd_buffer, cmd.c_str()); // C++20: .c_str()
             Cbuf_Execute(&cmd_buffer);
         }
     } else {
