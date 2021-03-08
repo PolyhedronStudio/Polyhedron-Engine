@@ -210,7 +210,7 @@ color_index_t Com_ParseColor(const char *s, color_index_t last)
         return i > last ? COLOR_NONE : i;
     }
 
-    for ((color_index_t)i = (color_index_t)0; (color_index_t)i <= last; i = (color_index_t)((int)i + 1)) { // CPP: Cast - LOL
+    for (i = (color_index_t)0; (color_index_t)i <= last; i = (color_index_t)((int)i + 1)) { // CPP: Cast - LOL
         if (!strcmp(colorNames[i], s)) {
             return i;
         }
