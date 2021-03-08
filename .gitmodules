@@ -17,6 +17,3 @@
 [submodule "extern/Vulkan-Headers"]
 	path = extern/Vulkan-Headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers.git
-[submodule "extern/RmlUi"]
-	path = extern/RmlUi
-	url = https://github.com/mikke89/RmlUi

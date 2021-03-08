@@ -222,7 +222,6 @@ SET(SRC_CLIENT_RMLUI
 	client/rmlui/interfaces/RenderInterface.h
 	client/rmlui/interfaces/SystemInterface.cpp
 	client/rmlui/interfaces/SystemInterface.h
-	client/rmlui/librmlui.h
 	client/rmlui/rmlui.cpp
 	client/rmlui/rmlui.h
 )
@@ -548,7 +547,7 @@ ENDIF()
 IF(CONFIG_ENABLE_RMLUI)
  	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ${CMAKE_SOURCE_DIR}/extern/RmlUi/Include/)
-	TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_RMLUI=1)
+	TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_RMLUI=1 RMLUI_STATIC_LIB)
 	TARGET_LINK_LIBRARIES(client RmlCore RmlDebugger RmlLua)
 ENDIF()
 

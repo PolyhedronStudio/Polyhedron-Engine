@@ -2185,11 +2185,10 @@ static void CL_WriteConfig_f(void)
     Com_Printf("Wrote %s.\n", buffer);
 }
 
-// N&C: Moved over to client game module.
-//static void CL_Say_c(genctx_t *ctx, int argnum)
-//{
-//    CL_Name_g(ctx);
-//}
+static void CL_Say_c(genctx_t *ctx, int argnum)
+{
+    CL_Name_g(ctx);
+}
 
 static size_t CL_Mapname_m(char *buffer, size_t size)
 {
@@ -2641,8 +2640,8 @@ static const cmdreg_t c_client[] = {
     // the only thing this does is allow command completion
     // to work -- all unknown commands are automatically
     // forwarded to the server
-    //{ "say", NULL, CL_Say_c },
-    //{ "say_team", NULL, CL_Say_c },
+    { "say", NULL, CL_Say_c },
+    { "say_team", NULL, CL_Say_c },
 
  //   { "wave" }, { "inven" }, { "kill" }, { "use" },
  //   { "drop" }, { "info" }, { "prog" },

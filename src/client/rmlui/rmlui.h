@@ -23,7 +23,7 @@ bool RMLUI_ProcessKeyDown(SDL_Keycode key);
 bool RMLUI_ProcessKeyUp(SDL_Keycode key);
 
 // Process text events.
-bool RMLUI_ProcessTextInput(const char *text);
+bool RMLUI_ProcessTextInput(const char* text);
 
 // Process mouse events
 bool RMLUI_ProcessMouseMove(int x, int y);
@@ -39,5 +39,4 @@ void RMLUI_RenderFrame(void);
 
 // Shutdowns RMLUI.
 void RMLUI_Shutdown(void);
-
 #endif // __CLIENT_RMLUI_RMLUI_H__

@@ -27,7 +27,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 #endif
 
-// C stdio.
 #include <math.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -38,16 +37,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <inttypes.h>
 #include <limits.h>
 #include <time.h>
-
-// CPP stl
-#include <string>
-#include <vector>
-#include <map>
-#include <array>
-#include <iostream>
-#include <sstream>
-#include <list>
-
 
 #if HAVE_ENDIAN_H
 #include <endian.h>

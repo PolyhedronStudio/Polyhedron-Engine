@@ -6,7 +6,7 @@
 //
 // RmlUI N&C System Interface implementation.
 //
- 
+
 #include "../librmlui.h"
 
 // Client includes.
@@ -20,12 +20,12 @@
 /// Get the number of seconds elapsed since the start of the application
 /// @returns Seconds elapsed
 double RmlUISystemInterface::GetElapsedTime() {
-	// Cheap hack for now.
-	//static double elapsedTime = 0.0f;
-	//if (elapsedTime < cls.frametime)
-	//	elapsedTime += cls.frametime;
+    // Cheap hack for now.
+    //static double elapsedTime = 0.0f;
+    //if (elapsedTime < cls.frametime)
+    //	elapsedTime += cls.frametime;
 
-	//return elapsedTime;
+    //return elapsedTime;
     return double(SDL_GetTicks()) / 1000.0;
 }
 
@@ -37,7 +37,7 @@ double RmlUISystemInterface::GetElapsedTime() {
 //=============================================================================
 //
 void RmlUISystemInterface::SetMouseCursor(const Rml::String& cursor_name) {
-	
+
 }
 
 //
@@ -48,8 +48,8 @@ void RmlUISystemInterface::SetMouseCursor(const Rml::String& cursor_name) {
 //=============================================================================
 //
 void RmlUISystemInterface::SetClipboardText(const Rml::String& text) {
-	// Set clipboard data.
-	VID_SetClipboardData(text.c_str());
+    // Set clipboard data.
+    VID_SetClipboardData(text.c_str());
 }
 
 //
@@ -60,7 +60,7 @@ void RmlUISystemInterface::SetClipboardText(const Rml::String& text) {
 //=============================================================================
 //
 void RmlUISystemInterface::GetClipboardText(Rml::String& text) {
-	char *data = VID_GetClipboardData();
+    char* data = VID_GetClipboardData();
 
     // Copy data in, or clear buffer in case of invalid/no data.
     if (data)
@@ -88,29 +88,29 @@ void RmlUISystemInterface::GetClipboardText(Rml::String& text) {
 //=============================================================================
 //
 bool RmlUISystemInterface::LogMessage(Rml::Log::Type type, const Rml::String& message) {
-	// Convert output to Com_Print
-	switch (type) {
-	case Rml::Log::Type::LT_ALWAYS:
-		Com_Printf("[RmlUI]: %s\n", message.c_str());
-		break;
-	case Rml::Log::Type::LT_ERROR:
-		Com_EPrintf("[RmlUI - ERROR]: %s\n", message.c_str());
-		break;
-	case Rml::Log::Type::LT_ASSERT:
-		Com_EPrintf("[RmlUI - ASSERT]: %s\n", message.c_str());
-		break;
-	case Rml::Log::Type::LT_WARNING:
-		Com_WPrintf("[RmlUI - WARNING]: %s\n", message.c_str());
-		break;
-	case Rml::Log::Type::LT_INFO:
-		Com_Printf("[RmlUI - INFO]: %s\n", message.c_str());
-		break;
-	case Rml::Log::Type::LT_DEBUG:
-		Com_DPrintf("[RmlUI - DEBUG]: %s\n", message.c_str());
-		break;
-	}
+    // Convert output to Com_Print
+    switch (type) {
+    case Rml::Log::Type::LT_ALWAYS:
+        Com_Printf("[RmlUI]: %s\n", message.c_str());
+        break;
+    case Rml::Log::Type::LT_ERROR:
+        Com_EPrintf("[RmlUI - ERROR]: %s\n", message.c_str());
+        break;
+    case Rml::Log::Type::LT_ASSERT:
+        Com_EPrintf("[RmlUI - ASSERT]: %s\n", message.c_str());
+        break;
+    case Rml::Log::Type::LT_WARNING:
+        Com_WPrintf("[RmlUI - WARNING]: %s\n", message.c_str());
+        break;
+    case Rml::Log::Type::LT_INFO:
+        Com_Printf("[RmlUI - INFO]: %s\n", message.c_str());
+        break;
+    case Rml::Log::Type::LT_DEBUG:
+        Com_DPrintf("[RmlUI - DEBUG]: %s\n", message.c_str());
+        break;
+    }
 
-	return true;
+    return true;
 }
 
 //

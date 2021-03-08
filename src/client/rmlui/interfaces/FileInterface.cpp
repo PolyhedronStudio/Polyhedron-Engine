@@ -6,16 +6,19 @@
 //
 // RmlUI N&C File Interface implementation.
 //
-
-#include "../librmlui.h"
+// RmlUi Includes.
+#include <RmlUi/Core.h>
+#include <RmlUi/Core/URL.h>
+#include <RmlUi/Debugger.h>
 
 // Client includes.
 #include "../../client.h"
 #include "client/sound/vorbis.h"
 #include "client/gamemodule.h"
 
-// RmlUI includes.
+// RmlUi Client includes.
 #include "../rmlui.h"
+#include "FileInterface.h"
 
 //
 //=============================================================================

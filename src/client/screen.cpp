@@ -1021,6 +1021,9 @@ void SCR_UpdateScreen(void)
     // draw main menu
     UI_Draw(cls.realtime);
 
+    // Draw RMLUI
+    RMLUI_RenderFrame();
+
     // draw console
     Con_DrawConsole();
 
@@ -1036,10 +1039,6 @@ void SCR_UpdateScreen(void)
         SCR_DrawDebugGraph();
 #endif
 
-    // Last but not least, draw the RMLUI
-    RMLUI_RenderFrame();
-
-    // End rendering frame.
     R_EndFrame();
 
     recursive--;

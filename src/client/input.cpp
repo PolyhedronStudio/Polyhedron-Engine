@@ -94,7 +94,7 @@ static qboolean IN_GetCurrentGrab(void)
     if (r_config.flags & QVF_FULLSCREEN)
         return qtrue;   // full screen
 
-    if (cls.key_dest & (KEY_INGAME_MENU | KEY_MENU | KEY_CONSOLE)) // IngameMenu: Added KEY_INGAME_MENU to ensure that the mouse is out in case of a KEY_INGAME_MENU
+    if (cls.key_dest & (KEY_MENU | KEY_CONSOLE))
         return qfalse;  // menu or console is up
 
     if (cls.state != ca_active && cls.state != ca_cinematic)
@@ -511,7 +511,7 @@ static void CL_MouseMove(void)
     if (!input.api.GetMotion) {
         return;
     }
-    if (cls.key_dest & (KEY_INGAME_MENU | KEY_MENU | KEY_CONSOLE)) { // IngameMenu: Added KEY_INGAME_MENU to ensure that the player view doesn't move in case of KEY_INGAME_MENU
+    if (cls.key_dest & (KEY_MENU | KEY_CONSOLE)) {
         return;
     }
     if (!input.api.GetMotion(&dx, &dy)) {

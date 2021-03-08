@@ -35,7 +35,6 @@ RmlUIFileInterface rmlFileInterface;
 //=============================================================================
 //
 void RMLUI_Init(void) {
-
 	// Begin by installing the custom interfaces.
 	Rml::SetRenderInterface(&rmlRenderInterface);
 	Rml::SetSystemInterface(&rmlSystemInterface);
@@ -66,7 +65,7 @@ void RMLUI_Init(void) {
 	}
 
 	// Create a context next.
-	context = Rml::CreateContext("main", Rml::Vector2i( 1280, 720 ));
+	context = Rml::CreateContext("main", Rml::Vector2i(1280, 720));
 	if (!context)
 	{
 		Rml::Shutdown();
@@ -75,7 +74,7 @@ void RMLUI_Init(void) {
 
 	// If you want to use the debugger, initialize it now.
 	Rml::Debugger::Initialise(context);
-	
+
 	// Now we are ready to load our document.
 	document = context->LoadDocument("fonts/demo.rml");
 	if (!document)
@@ -101,7 +100,7 @@ bool RMLUI_ProcessKeyDown(SDL_Keycode key) {
 	// Enable/Disable RMLUI Debugger.
 	if (key == SDLK_F8)
 	{
-	    Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
+		Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
 		return qfalse; // Consumed.
 	}
 
@@ -202,46 +201,27 @@ bool RMLUI_ProcessMouseButtonDown(int button) {
 	return context->ProcessMouseButtonDown(rmlSystemInterface.TranslateMouseButton(button), RmlUISystemInterface::GetKeyModifiers());
 }
 
-//
-//=============================================================================
-// RMLUI_UpdateFrame
-// 
-// Updates the RMLUI Context if initialized and a menu is active.
-//=============================================================================
-//
+// Render RMLUI
 void RMLUI_UpdateFrame(void) {
 	if (!context)
 		return;
-	//if (!(Key_GetDest() & KEY_INGAME_MENU)) { //KEY_MENU)) { // IngameMenu: Added KEY_INGAME_MENU to ensure that the mouse is out in case of a KEY_INGAME_MENU
-	//	return;
-	//}
+	if (!(Key_GetDest() & KEY_MENU)) {
+		return;
+	}
 	context->Update();
 }
 
-//
-//=============================================================================
-// RMLUI_RenderFrame
-// 
-// Renders the RMLUI Context if initialized and a menu is active.
-//=============================================================================
-//
+// Render RMLUI
 void RMLUI_RenderFrame(void) {
 	if (!context)
 		return;
-	//if (!(Key_GetDest() & KEY_INGAME_MENU)) { //KEY_MENU)) { // IngameMenu: Added KEY_INGAME_MENU to ensure that the mouse is out in case of a KEY_INGAME_MENU
-	//	return;
-	//}
-
+	if (!(Key_GetDest() & KEY_MENU)) {
+		return;
+	}
 	context->Render();
 }
 
-//
-//=============================================================================
-// RMLUI_Shutdown
-// 
-// Shutdowns RMLUI library.
-//=============================================================================
-//
+// Shutdowns RMLUI.
 void RMLUI_Shutdown(void) {
 	// Shutting down RmlUi releases all its resources, including elements, documents, and contexts.
 	Rml::Shutdown();

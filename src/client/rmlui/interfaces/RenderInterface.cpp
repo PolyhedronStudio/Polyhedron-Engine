@@ -20,46 +20,15 @@
 #endif
 
 
-class RmlUiRendererGeometryHandler
-{
-public:
-	GLuint VertexID, IndexID;
-	int NumVertices;
-	Rml::TextureHandle Texture;
-
-	RmlUiRendererGeometryHandler() : VertexID(0), IndexID(0), NumVertices(0), Texture(0)
-	{
-	};
-
-	~RmlUiRendererGeometryHandler()
-	{
-		if (VertexID)
-			qglDeleteBuffersARB(1, &VertexID);
-
-		if (IndexID)
-			qglDeleteBuffersARB(1, &IndexID);
-
-		VertexID = IndexID = 0;
-	};
-};
-
-struct RmlUiRendererVertex
-{
-	float position[2];
-	float texCoord[2];
-	unsigned char color[4];
-};
-
-//
-//=============================================================================
-// RmlUiRenderInterface::RmlUiRenderInterface
-// 
-// The actual RmlUi render interface for OpenGL.
-//=============================================================================
-//
-RmlUiRenderInterface::RmlUiRenderInterface() : m_width(1280), m_height(768), m_transform_enabled(false)
+RmlUiRenderInterface::RmlUiRenderInterface() : m_width(r_config.width), m_height(r_config.height), m_transform_enabled(false)
 {
 
+}
+
+// Called to initialize the renderer, enable certain OpenGL states.
+void RmlUiRenderInterface::Initialize() {
+	m_width = r_config.width;
+	m_height = r_config.height;
 }
 
 //
@@ -70,19 +39,10 @@ RmlUiRenderInterface::RmlUiRenderInterface() : m_width(1280), m_height(768), m_t
 // optimise.	
 //=============================================================================
 //
-	// Called when the render viewport size has changed.
-void RmlUiRenderInterface::SetViewportArea(int width, int height) {
-
-}
-
-// Called to initialize the renderer, enable certain OpenGL states.
-void RmlUiRenderInterface::Initialize() {
-	m_width = r_config.width;
-	m_height = r_config.height;
-}
-
-void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rml::TextureHandle texture, const Rml::Vector2f& translation)
+void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int RMLUI_UNUSED_PARAMETER(num_vertices), int* indices, int num_indices, const Rml::TextureHandle texture, const Rml::Vector2f& translation)
 {
+	RMLUI_UNUSED(num_vertices);
+
 	qglLoadIdentity();
 	// Setup 2D rendering mode.
 	qglViewport(0, 0, r_config.width, r_config.height);
@@ -90,55 +50,28 @@ void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int num_vertice
 	qglMatrixMode(GL_MODELVIEW);
 	qglLoadIdentity();
 
-	//// Translate.
 	qglTranslatef(translation.x, translation.y, 0);
 
-	Rml::Vector<Rml::Vector2f> Positions(num_vertices);
-	Rml::Vector<Rml::Colourb> Colors(num_vertices);
-	Rml::Vector<Rml::Vector2f> TexCoords(num_vertices);
+	qglVertexPointer(2, GL_FLOAT, sizeof(Rml::Vertex), &vertices[0].position);
+	qglEnableClientState(GL_COLOR_ARRAY);
+	qglColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Rml::Vertex), &vertices[0].colour);
 
-	for (int i = 0; i < num_vertices; i++)
+	if (!texture)
 	{
-		Positions[i] = vertices[i].position;
-		Colors[i] = vertices[i].colour;
-		TexCoords[i] = vertices[i].tex_coord;
-	};
-
-	// Setup state bits.
-	glStateBits_t bits = GLS_DEFAULT;
-	////bits = (glStateBits_t)(GLS_DEPTHTEST_DISABLE | GLS_DEPTHMASK_FALSE | GLS_CULL_DISABLE); // CPP: Cast
-	bits = (glStateBits_t)(GLS_CULL_DISABLE); // CPP: Cast
-	bits = (glStateBits_t)(bits | GLS_BLEND_BLEND); // CPP: Cast bits |= GLS_BLEND_BLEND;
-	//bits = (glStateBits_t)(bits | GLS_ALPHATEST_ENABLE); // CPP: Cast
-
-	// Setup array bits.
-	if (texture) {
-		qglActiveTextureARB(GL_TEXTURE0_ARB);
-		qglBindTexture(GL_TEXTURE_2D, texture);
+		qglDisable(GL_TEXTURE_2D);
+		qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
+	else
+	{
 		qglEnable(GL_TEXTURE_2D);
-		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
-
-		GL_StateBits(bits);
-		GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_TC | GLA_COLOR)); // CPP: Cast
-	} else {
-		qglActiveTextureARB(GL_TEXTURE0_ARB);
-		qglBindTexture(GL_TEXTURE_2D, 0);
-		qglEnable(GL_TEXTURE_2D);
-		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
-		//qglDisable(GL_TEXTURE_2D);
-		GL_StateBits(bits);
-		GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_COLOR)); // CPP: Cast
+		qglBindTexture(GL_TEXTURE_2D, (GLuint)texture);
+		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		qglTexCoordPointer(2, GL_FLOAT, sizeof(Rml::Vertex), &vertices[0].tex_coord);
 	}
 
-	qglVertexPointer(2, GL_FLOAT, 0, &Positions[0]);
-	qglColorPointer(4, GL_UNSIGNED_BYTE, 0, &Colors[0]);
-	qglTexCoordPointer(2, GL_FLOAT, 0, &TexCoords[0]);
+	qglDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_INT, indices);
 
-	GL_LockArrays(num_vertices);
-
-	qglDrawElements(GL_TRIANGLES, num_indices, QGL_INDEX_ENUM, indices);
-
-	GL_UnlockArrays();
+	//qglPopMatrix();
 }
 
 //
@@ -149,9 +82,14 @@ void RmlUiRenderInterface::RenderGeometry(Rml::Vertex* vertices, int num_vertice
 // for the forseeable future.		
 //=============================================================================
 //
-// Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Vertex* RMLUI_UNUSED_PARAMETER(vertices), int RMLUI_UNUSED_PARAMETER(num_vertices), int* RMLUI_UNUSED_PARAMETER(indices), int RMLUI_UNUSED_PARAMETER(num_indices), const Rml::TextureHandle RMLUI_UNUSED_PARAMETER(texture))
-Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rml::TextureHandle texture)
+Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Vertex* RMLUI_UNUSED_PARAMETER(vertices), int RMLUI_UNUSED_PARAMETER(num_vertices), int* RMLUI_UNUSED_PARAMETER(indices), int RMLUI_UNUSED_PARAMETER(num_indices), const Rml::TextureHandle RMLUI_UNUSED_PARAMETER(texture))
 {
+	RMLUI_UNUSED(vertices);
+	RMLUI_UNUSED(num_vertices);
+	RMLUI_UNUSED(indices);
+	RMLUI_UNUSED(num_indices);
+	RMLUI_UNUSED(texture);
+
 	return (Rml::CompiledGeometryHandle) nullptr;
 }
 
@@ -162,10 +100,10 @@ Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Vertex* v
 // Called by RmlUi when it wants to render application-compiled geometry.	
 //=============================================================================
 //
-//void RmlUiRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle RMLUI_UNUSED_PARAMETER(geometry), const Rml::Vector2f& RMLUI_UNUSED_PARAMETER(translation))
-void RmlUiRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry, const Rml::Vector2f& translation)
+void RmlUiRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle RMLUI_UNUSED_PARAMETER(geometry), const Rml::Vector2f& RMLUI_UNUSED_PARAMETER(translation))
 {
-
+	RMLUI_UNUSED(geometry);
+	RMLUI_UNUSED(translation);
 }
 
 //
@@ -175,10 +113,9 @@ void RmlUiRenderInterface::RenderCompiledGeometry(Rml::CompiledGeometryHandle ge
 // Called by RmlUi when it wants to release application-compiled geometry.	
 //=============================================================================
 //
-//void RmlUiRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle RMLUI_UNUSED_PARAMETER(geometry))
-void RmlUiRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry)
+void RmlUiRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle RMLUI_UNUSED_PARAMETER(geometry))
 {
-
+	RMLUI_UNUSED(geometry);
 }
 
 //
@@ -190,13 +127,6 @@ void RmlUiRenderInterface::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle g
 //
 void RmlUiRenderInterface::EnableScissorRegion(bool enable)
 {
-	//if (enable)
-	//	qglEnable(GL_SCISSOR_TEST);
-	//else
-	//	qglDisable(GL_SCISSOR_TEST);
-	// Disable renderer clip rect.
-	//if (!enable)
-	//	R_SetClipRect_GL(NULL);
 	if (enable) {
 		if (!m_transform_enabled) {
 			qglEnable(GL_SCISSOR_TEST);
@@ -206,7 +136,8 @@ void RmlUiRenderInterface::EnableScissorRegion(bool enable)
 			qglDisable(GL_SCISSOR_TEST);
 			qglEnable(GL_STENCIL_TEST);
 		}
-	} else {
+	}
+	else {
 		qglDisable(GL_SCISSOR_TEST);
 		qglDisable(GL_STENCIL_TEST);
 	}
@@ -221,11 +152,10 @@ void RmlUiRenderInterface::EnableScissorRegion(bool enable)
 //
 void RmlUiRenderInterface::SetScissorRegion(int x, int y, int width, int height)
 {
-	//qglScissor(x, r_config.width - (y + height), width, height);
-
 	if (!m_transform_enabled) {
-		qglScissor(x, m_height - (y + height), width, height);
-	} else {
+		qglScissor(x, r_config.height - (y + height), width, height);
+	}
+	else {
 		// clear the stencil buffer
 		qglStencilMask(GLuint(-1));
 		qglClear(GL_STENCIL_BUFFER_BIT);
@@ -249,7 +179,6 @@ void RmlUiRenderInterface::SetScissorRegion(int x, int y, int width, int height)
 			fx + fwidth, fy, 0
 		};
 		qglDisableClientState(GL_COLOR_ARRAY);
-		qglEnableClientState(GL_VERTEX_ARRAY);
 		qglVertexPointer(3, GL_FLOAT, 0, vertices);
 		GLushort indices[] = { 1, 2, 0, 3 };
 		qglDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, indices);
@@ -381,7 +310,7 @@ bool RmlUiRenderInterface::GenerateTexture(Rml::TextureHandle& texture_handle, c
 	qglGenTextures(1, &texture_id);
 	if (texture_id == 0)
 	{
-		Com_WPrintf("RmlUiRenderInterface::GenerateTexture failed to generate textures\n");
+		printf("Failed to generate textures\n");
 		return false;
 	}
 
@@ -444,8 +373,8 @@ RmlUiRenderInterface::Image RmlUiRenderInterface::CaptureScreen()
 {
 	Image image;
 	image.num_components = 3;
-	image.width = m_width;
-	image.height = m_height;
+	image.width = r_config.width;
+	image.height = r_config.height;
 
 	const int byte_size = image.width * image.height * image.num_components;
 	image.data = Rml::UniquePtr<Rml::byte[]>(new Rml::byte[byte_size]);

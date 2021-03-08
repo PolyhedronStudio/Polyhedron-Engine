@@ -736,33 +736,6 @@ void VID_PumpEvents(void)
 {
     SDL_Event    event;
 
-    			//case SDL_MOUSEMOTION:
-       //             Context->ProcessMouseMove(event.motion.x, event.motion.y, SystemInterface.GetKeyModifiers());
-       //             break;
-       //         case SDL_MOUSEBUTTONDOWN:
-       //             Context->ProcessMouseButtonDown(SystemInterface.TranslateMouseButton(event.button.button), SystemInterface.GetKeyModifiers());
-       //             break;
-
-       //         case SDL_MOUSEBUTTONUP:
-       //             Context->ProcessMouseButtonUp(SystemInterface.TranslateMouseButton(event.button.button), SystemInterface.GetKeyModifiers());
-       //             break;
-
-       //         case SDL_MOUSEWHEEL:
-       //             Context->ProcessMouseWheel(float(event.wheel.y), SystemInterface.GetKeyModifiers());
-       //             break;
-
-       //         case SDL_KEYDOWN:
-       //         {
-       //             // Intercept F8 key stroke to toggle RmlUi's visual debugger tool
-       //             if (event.key.keysym.sym == SDLK_F8)
-       //             {
-       //                 Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
-       //                 break;
-       //             }
-
-       //             Context->ProcessKeyDown(SystemInterface.TranslateKey(event.key.keysym.sym), SystemInterface.GetKeyModifiers());
-       //             break;
-       //         }
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_QUIT:
@@ -777,14 +750,14 @@ void VID_PumpEvents(void)
             RMLUI_ProcessKeyDown(event.key.keysym.sym);
             //if (RMLUI_ProcessKeyDown(event.key.keysym.sym))
                 // Regular Key Event.
-                key_event(&event.key);
+            key_event(&event.key);
             break;
         case SDL_KEYUP:
             // RMLUI Process Keyup.
             RMLUI_ProcessKeyUp(event.key.keysym.sym);
             //if (RMLUI_ProcessKeyUp(event.key.keysym.sym))
                 // Regular Key Event.
-                key_event(&event.key);
+            key_event(&event.key);
             break;
         case SDL_WINDOWEVENT:
             window_event(&event.window);
@@ -794,7 +767,7 @@ void VID_PumpEvents(void)
             RMLUI_ProcessMouseMove(event.motion.x, event.motion.y);
             //if (RMLUI_ProcessMouseMove(event.motion.x, event.motion.y))
                 // Regular UI Mouse event for Q-Based engine.
-                UI_MouseEvent(event.motion.x, event.motion.y);
+            UI_MouseEvent(event.motion.x, event.motion.y);
             break;
         case SDL_MOUSEBUTTONDOWN:
             // RMLUI Process Mouse Button Down.
@@ -806,7 +779,7 @@ void VID_PumpEvents(void)
         case SDL_MOUSEBUTTONUP:
             // RMLUI Process Mouse Button Up.
             //RMLUI_ProcessMouseButtonUp(event.button.button);
-            if (RMLUI_ProcessMouseButtonUp(event.button.button))           
+            if (RMLUI_ProcessMouseButtonUp(event.button.button))
                 // Process regular mouse button event.
                 mouse_button_event(&event.button);
             break;
@@ -819,7 +792,6 @@ void VID_PumpEvents(void)
             break;
         }
     }
-    // N&C: The loop before RMLUI implementation.
     //while (SDL_PollEvent(&event)) {
     //    switch (event.type) {
     //    case SDL_QUIT:
@@ -888,8 +860,7 @@ static qboolean InitMouse(void)
 
 static void GrabMouse(qboolean grab)
 {
-    // IngameMenu: Added KEY_INGAME_MENU to ensure that the mouse is out in case of a KEY_INGAME_MENU
-    SDL_bool relative = (SDL_bool)(grab && !(Key_GetDest() & (KEY_INGAME_MENU | KEY_MENU))); // CPP: Cast
+    SDL_bool relative = (SDL_bool)(grab && !(Key_GetDest() & KEY_MENU)); // CPP: Cast
     int cursor = (sdl_flags & QVF_FULLSCREEN) ? SDL_DISABLE : SDL_ENABLE;
 
     SDL_SetWindowGrab(sdl_window, (SDL_bool)grab);

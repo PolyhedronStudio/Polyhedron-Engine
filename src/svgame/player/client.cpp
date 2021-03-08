@@ -644,7 +644,7 @@ void SaveClientData(void)
         game.clients[i].pers.health = ent->health;
         game.clients[i].pers.max_health = ent->max_health;
         game.clients[i].pers.savedFlags = (ent->flags & (FL_GODMODE | FL_NOTARGET | FL_POWER_ARMOR));
-        if (coop->value)
+        if (coop->value && ent->client)
             game.clients[i].pers.score = ent->client->resp.score;
     }
 }
@@ -654,7 +654,7 @@ void FetchClientEntData(edict_t *ent)
     ent->health = ent->client->pers.health;
     ent->max_health = ent->client->pers.max_health;
     ent->flags |= ent->client->pers.savedFlags;
-    if (coop->value)
+    if (coop->value && ent->client)
         ent->client->resp.score = ent->client->pers.score;
 }
 

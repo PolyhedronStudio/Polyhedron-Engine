@@ -843,14 +843,13 @@ void ReadGame(const char *filename)
     }
 
     // WatIs: C++-ify: Note that this may be a problem maker.
-    //g_edicts = new edict_t[game.maxentities];//(edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
-    g_edicts = (edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
+    g_edicts = new edict_t[game.maxentities];//(edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
     globals.edicts = g_edicts;
     globals.max_edicts = game.maxentities;
 
     // WatIs: C++-ify: Note that this may be a problem maker.
-    //game.clients = new gclient_t[game.maxclients];
-    game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    game.clients = new gclient_t[game.maxclients];
+    //game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     for (i = 0; i < game.maxclients; i++) {
         read_fields(f, clientfields, &game.clients[i]);
     }
