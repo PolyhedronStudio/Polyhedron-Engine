@@ -119,7 +119,7 @@ static void SV_ListMasters_f(void)
         } else {
             Q_snprintf(buf, sizeof(buf), "%u", svs.realtime - m->last_ack);
         }
-        adr = m->adr.port ? NET_AdrToString(&m->adr) : "error";
+        adr = m->adr.port ? NET_AdrToString(&m->adr) : (char*)"error"; // C++20: Added cast.
         Com_Printf("%3d %-21.21s %7s %-21s\n", ++i, m->name, buf, adr);
     }
 }
@@ -586,7 +586,7 @@ static void dump_downloads(void)
                 size = 1;
             percent = client->downloadcount * 100 / size;
         } else if (client->http_download) {
-            name = "<HTTP download>";
+            name = (char*)"<HTTP download>"; // C++20: Added cast.
             size = percent = 0;
         } else {
             continue;
@@ -695,7 +695,7 @@ static void SV_Status_f(void)
         Com_Printf("No UDP clients.\n");
     } else {
         if (Cmd_Argc() > 1) {
-            char *w = Cmd_Argv(1);
+            const char *w = Cmd_Argv(1); // C++20: added const
             switch (*w) {
             case 't': dump_time(); break;
             case 'd': dump_downloads(); break;
@@ -733,7 +733,7 @@ static void SV_ConSay_f(void)
         return;
     }
 
-    s = Cmd_RawArgs();
+    s = (char*)Cmd_RawArgs(); // C++20: Added cast.
     FOR_EACH_CLIENT(client) {
         if (client->state != cs_spawned)
             continue;
@@ -924,7 +924,7 @@ static void SV_StuffCvar_f(void)
         return;
 
     for (i = 2; i < argc; i++) {
-        c = Cmd_Argv(i);
+        c = (char*)Cmd_Argv(i); // C++20: Added cast.
         SV_ClientCommand(sv_client, "cmd \177c console %s $%s\n", c, c);
         sv_client->console_queries++;
     }
@@ -952,7 +952,7 @@ static void SV_PickClient_f(void)
         return;
     }
 
-    s = Cmd_Argv(1);
+    s = (char*)Cmd_Argv(1); // C++20: Added cast.
     if (!NET_StringToAdr(s, &address, 0)) {
         Com_Printf("Bad client address: %s\n", s);
         return;
@@ -1091,7 +1091,7 @@ void SV_AddMatch_f(list_t *list)
         return;
     }
 
-    s = Cmd_Argv(1);
+    s = (char*)Cmd_Argv(1); // C++20: Added cast.
     if (!parse_mask(s, &addr, &mask)) {
         return;
     }
@@ -1105,7 +1105,7 @@ void SV_AddMatch_f(list_t *list)
         }
     }
 
-    s = Cmd_ArgsFrom(2);
+    s = (char*)Cmd_ArgsFrom(2); // C++20: Added cast.
     len = strlen(s);
     match = (addrmatch_t*)Z_Malloc(sizeof(*match) + len); // CPP: Cast
     match->addr = addr;
@@ -1133,7 +1133,7 @@ void SV_DelMatch_f(list_t *list)
         return;
     }
 
-    s = Cmd_Argv(1);
+    s = (char*)Cmd_Argv(1); // C++20: Added cast.
     if (!strcmp(s, "all")) {
         LIST_FOR_EACH_SAFE(addrmatch_t, match, next, list, entry) {
             Z_Free(match);
@@ -1231,7 +1231,7 @@ static void SV_ListBlackHoles_f(void)
 
 static list_t *SV_FindStuffList(void)
 {
-    char *s = Cmd_Argv(1);
+    const char *s = Cmd_Argv(1); // C++20: added const.
 
     if (!strcmp(s, "connect")) {
         return &sv_cmdlist_connect;
@@ -1259,7 +1259,7 @@ static void SV_AddStuffCmd_f(void)
         return;
     }
 
-    s = Cmd_ArgsFrom(2);
+    s = (char*)Cmd_ArgsFrom(2); // C++20: Added cast.
     len = strlen(s);
     stuff = (stuffcmd_t*)Z_Malloc(sizeof(*stuff) + len); // CPP: Cast
     stuff->len = len;
@@ -1288,7 +1288,7 @@ static void SV_DelStuffCmd_f(void)
         return;
     }
 
-    s = Cmd_Argv(2);
+    s = (char*)Cmd_Argv(2); // C++20: Added cast.
     if (!strcmp(s, "all")) {
         LIST_FOR_EACH_SAFE(stuffcmd_t, stuff, next, list, entry) {
             Z_Free(stuff);
@@ -1366,7 +1366,7 @@ usage:
     }
 
     if (Cmd_Argc() > 2) {
-        s = Cmd_Argv(2);
+        s = (char*)Cmd_Argv(2); // C++20: Added cast.
         for (action = (filteraction_t)0; action < FA_MAX; action = (filteraction_t)(action + 1)) { // CPP: Cast for loop
             if (!strcmp(s, filteractions[action])) {
                 break;
@@ -1375,14 +1375,14 @@ usage:
         if (action == FA_MAX) {
             goto usage;
         }
-        comment = Cmd_ArgsFrom(3);
+        comment = (char*)Cmd_ArgsFrom(3); // C++20: Added cast.
     } else {
         action = FA_IGNORE;
         comment = NULL;
     }
 
 
-    s = Cmd_Argv(1);
+    s = (char*)Cmd_Argv(1); // C++20: Added cast.
     LIST_FOR_EACH(filtercmd_t, filter, &sv_filterlist, entry) {
         if (!Q_stricmp(filter->string, s)) {
             Com_Printf("Filtercmd already exists: %s\n", s);
@@ -1424,7 +1424,7 @@ static void SV_DelFilterCmd_f(void)
         return;
     }
 
-    s = Cmd_Argv(1);
+    s = (char*)Cmd_Argv(1); // C++20: Added cast.
     if (!strcmp(s, "all")) {
         LIST_FOR_EACH_SAFE(filtercmd_t, filter, next, &sv_filterlist, entry) {
             Z_Free(filter->comment);
