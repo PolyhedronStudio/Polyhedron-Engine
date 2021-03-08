@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // snd_main.c -- common sound functions
 
+#include "shared/shared.h"
 #include "sound.h"
 #include "client/sound/vorbis.h"
 
@@ -547,7 +548,7 @@ S_RegisterSexedSound
 static sfx_t *S_RegisterSexedSound(int entnum, const char *base)
 {
     sfx_t           *sfx;
-    char            *model;
+    std::string     model; // C++20: Converted from char* to std::string
     char            buffer[MAX_QPATH];
     size_t          len;
 
@@ -558,7 +559,7 @@ static sfx_t *S_RegisterSexedSound(int entnum, const char *base)
         model = cl.baseclientinfo.model_name;
 
     // if we can't figure it out, they're male
-    if (!*model)
+    if (model.empty()) // C++20: !*model
         model = "male";
 
     // see if we already know of the model specific sound

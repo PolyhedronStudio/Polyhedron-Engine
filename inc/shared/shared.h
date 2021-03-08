@@ -27,16 +27,38 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 #endif
 
-#include <math.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <inttypes.h>
-#include <limits.h>
-#include <time.h>
+// C STDIO:
+//#include <math.h>
+//#include <ctype.h>
+//#include <stdio.h>
+//#include <stdarg.h>
+//#include <string.h>
+//#include <stdlib.h>
+//#include <stdint.h>
+//#include <inttypes.h>
+//#include <limits.h>
+//#include <time.h>
+#include <cmath>
+#include <cctype>
+#include <cstdio>
+#include <cstdarg>
+#include <cstdlib>
+#include <cstdint>
+#include <cinttypes>
+#include <climits>
+#include <ctime>
+
+// C++ STL:
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <map>
+#include <vector>
+#include <list>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+
 
 #if HAVE_ENDIAN_H
 #include <endian.h>

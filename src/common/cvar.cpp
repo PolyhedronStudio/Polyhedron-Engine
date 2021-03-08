@@ -119,7 +119,7 @@ int Cvar_VariableInteger(const char *var_name)
 Cvar_VariableString
 ============
 */
-char *Cvar_VariableString(const char *var_name)
+const char *Cvar_VariableString(const char *var_name)
 {
     cvar_t *var;
 
