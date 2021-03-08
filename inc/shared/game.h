@@ -186,8 +186,8 @@ typedef struct {
 
     // ClientCommand and ServerCommand parameter access
     int (*argc)(void);
-    char *(*argv)(int n);
-    char *(*args)(void);     // concatenation of all argv >= 1
+    const char *(*argv)(int n);     // C++20: char*
+    const char *(*args)(void);      // concatenation of all argv >= 1 // C++20: char*
 
     // N&C: Stuff Cmd.
     void (*stuffcmd) (edict_t* pent, char* pszCommand);

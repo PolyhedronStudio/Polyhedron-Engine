@@ -872,7 +872,7 @@ Init the game subsystem for a new map
 */
 void SV_InitGameProgs(void)
 {
-    svgame_import_t   import;
+    svgame_import_t   importAPI;
     svgame_export_t   *(*entry)(svgame_import_t *) = NULL;
 
     // unload anything we have now
@@ -897,65 +897,65 @@ void SV_InitGameProgs(void)
         Com_Error(ERR_DROP, "Failed to load Server Game library");
 
     // load a new game dll
-    import.multicast = SV_Multicast;
-    import.unicast = PF_Unicast;
-    import.bprintf = PF_bprintf;
-    import.dprintf = PF_dprintf;
-    import.cprintf = PF_cprintf;
-    import.centerprintf = PF_centerprintf;
-    import.error = PF_error;
+    importAPI.multicast = SV_Multicast;
+    importAPI.unicast = PF_Unicast;
+    importAPI.bprintf = PF_bprintf;
+    importAPI.dprintf = PF_dprintf;
+    importAPI.cprintf = PF_cprintf;
+    importAPI.centerprintf = PF_centerprintf;
+    importAPI.error = PF_error;
 
-    import.linkentity = PF_LinkEdict;
-    import.unlinkentity = PF_UnlinkEdict;
-    import.BoxEdicts = SV_AreaEdicts;
-    import.trace = SV_Trace;
-    import.pointcontents = SV_PointContents;
-    import.setmodel = PF_setmodel;
-    import.inPVS = PF_inPVS;
-    import.inPHS = PF_inPHS;
+    importAPI.linkentity = PF_LinkEdict;
+    importAPI.unlinkentity = PF_UnlinkEdict;
+    importAPI.BoxEdicts = SV_AreaEdicts;
+    importAPI.trace = SV_Trace;
+    importAPI.pointcontents = SV_PointContents;
+    importAPI.setmodel = PF_setmodel;
+    importAPI.inPVS = PF_inPVS;
+    importAPI.inPHS = PF_inPHS;
     //import.Pmove = PF_Pmove;
-    import.GetPMoveParams = PF_GetPMoveParams;
+    importAPI.GetPMoveParams = PF_GetPMoveParams;
 
-    import.modelindex = PF_ModelIndex;
-    import.soundindex = PF_SoundIndex;
-    import.imageindex = PF_ImageIndex;
+    importAPI.modelindex = PF_ModelIndex;
+    importAPI.soundindex = PF_SoundIndex;
+    importAPI.imageindex = PF_ImageIndex;
 
-    import.configstring = PF_configstring;
-    import.sound = PF_StartSound;
-    import.positioned_sound = PF_PositionedSound;
+    importAPI.configstring = PF_configstring;
+    importAPI.sound = PF_StartSound;
+    importAPI.positioned_sound = PF_PositionedSound;
 
-    import.WriteChar = MSG_WriteChar;
-    import.WriteByte = MSG_WriteByte;
-    import.WriteShort = MSG_WriteShort;
-    import.WriteLong = MSG_WriteLong;
-    import.WriteFloat = PF_WriteFloat;
-    import.WriteString = MSG_WriteString;
-    import.WritePosition = MSG_WritePos;
-    import.WriteDir = MSG_WriteDir;
-    import.WriteAngle = MSG_WriteAngle;
+    importAPI.WriteChar = MSG_WriteChar;
+    importAPI.WriteByte = MSG_WriteByte;
+    importAPI.WriteShort = MSG_WriteShort;
+    importAPI.WriteLong = MSG_WriteLong;
+    importAPI.WriteFloat = PF_WriteFloat;
+    importAPI.WriteString = MSG_WriteString;
+    importAPI.WritePosition = MSG_WritePos;
+    importAPI.WriteDir = MSG_WriteDir;
+    importAPI.WriteAngle = MSG_WriteAngle;
 
-    import.TagMalloc = PF_TagMalloc;
-    import.TagFree = Z_Free;
-    import.FreeTags = PF_FreeTags;
+    importAPI.TagMalloc = PF_TagMalloc;
+    importAPI.TagFree = Z_Free;
+    importAPI.FreeTags = PF_FreeTags;
 
-    import.cvar = PF_cvar;
-    import.cvar_set = Cvar_UserSet;
-    import.cvar_forceset = Cvar_Set;
+    importAPI.cvar = PF_cvar;
+    importAPI.cvar_set = Cvar_UserSet;
+    importAPI.cvar_forceset = Cvar_Set;
 
-    import.argc = Cmd_Argc;
-    import.argv = Cmd_Argv;
+    importAPI.argc = Cmd_Argc;
+    importAPI.argv = Cmd_Argv;
     // original Cmd_Args() did actually return raw arguments
-    import.args = Cmd_RawArgs;
-    import.AddCommandString = PF_AddCommandString;
+    importAPI.args = Cmd_RawArgs;
+    importAPI.AddCommandString = PF_AddCommandString;
 
     // N&C: stuffcmd
-    import.stuffcmd = PF_stuffcmd;
+    importAPI.stuffcmd = PF_stuffcmd;
 
-    import.DebugGraph = PF_DebugGraph;
-    import.SetAreaPortalState = PF_SetAreaPortalState;
-    import.AreasConnected = PF_AreasConnected;
+    importAPI.DebugGraph = PF_DebugGraph;
+    importAPI.SetAreaPortalState = PF_SetAreaPortalState;
+    importAPI.AreasConnected = PF_AreasConnected;
 
-    ge = entry(&import);
+    ge = entry(&importAPI);
     if (!ge) {
         Com_Error(ERR_DROP, "Server Game DLL returned NULL exports");
     }
