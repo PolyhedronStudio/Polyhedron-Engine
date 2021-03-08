@@ -437,7 +437,7 @@ static void build_pvs2(bsp_t* bsp)
 {
 	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
 
-	bsp->pvs2_matrix = Z_Mallocz(matrix_size);
+	bsp->pvs2_matrix = (char*)Z_Mallocz(matrix_size); // C++20 VKPT: Added cast.
 
 	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++)
 	{
@@ -714,7 +714,7 @@ append_light_poly(int* num_lights, int* allocated, light_poly_t** lights)
 	if (*num_lights == *allocated)
 	{
 		*allocated = max(*allocated * 2, 128);
-		*lights = Z_Realloc(*lights, *allocated * sizeof(light_poly_t));
+		*lights = (light_poly_t*)Z_Realloc(*lights, *allocated * sizeof(light_poly_t)); // C++20 VKPT: Added cast.
 	}
 	return *lights + (*num_lights)++;
 }
@@ -1135,8 +1135,8 @@ compute_world_tangents(bsp_mesh_t* wm)
 
 	// tangent space is co-planar to triangle : only need to compute
 	// 1 vertex because all 3 verts share the same tangent space
-	wm->tangents = Z_Malloc(MAX_VERT_BSP * sizeof(*wm->tangents));
-	wm->texel_density = Z_Malloc(MAX_VERT_BSP * sizeof(float) / 3);
+	wm->tangents = (float*)Z_Malloc(MAX_VERT_BSP * sizeof(*wm->tangents));	// C++20 VKPT: Added a cast.
+	wm->texel_density = (float*)Z_Malloc(MAX_VERT_BSP * sizeof(float) / 3);	// C++20 VKPT: Added a cast.
 
 	for (int idx_tri = 0; idx_tri < ntriangles; ++idx_tri)
 	{
