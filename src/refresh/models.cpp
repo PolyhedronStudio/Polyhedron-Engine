@@ -349,13 +349,13 @@ qhandle_t R_RegisterModel(const char *name)
 	}
 
 	// see if it's already loaded
+	char* extension = normalized + namelen - 4; // C++20: Moved up in case we need to.
 	model = MOD_Find(normalized);
 	if (model) {
 		MOD_Reference(model);
 		goto done;
 	}
 
-	char* extension = normalized + namelen - 4;
 	if (namelen > 4 && (strcmp(extension, ".md2") == 0)/* && vid_rtx->integer*/)
 	{
 		memcpy(extension, ".md3", 4);
