@@ -978,14 +978,18 @@ static client_t *find_client_slot(conn_params_t *params)
     }
 
     // clients that know the password are never redirected
-    if (sv_reserved_slots->integer != params->reserved)
-        return reject2("Server and reserved slots are full.\n");
+    if (sv_reserved_slots->integer != params->reserved) {
+        reject2("Server and reserved slots are full.\n");
+        return NULL; // C++20: return reject2("Server and reserved slots are full.\n");
+    }
 
     // optionally redirect them to a different address
-    if (*s)
+    if (*s) {
         return redirect(s);
+    }
 
-    return reject2("Server is full.\n");
+    reject2("Server is full.\n");
+    return NULL; // C++20: return reject2("Server is full.\n");
 }
 
 static void init_pmove_and_es_flags(client_t *newcl)
