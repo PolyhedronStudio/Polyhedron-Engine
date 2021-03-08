@@ -95,7 +95,7 @@ static void hide_console_input(void)
 
     if (!sys_hidden) {
         for (i = 0; i <= sys_con.inputLine.cursorPos; i++) {
-            write_console_data("\b \b", 3);
+            write_console_data((void*)"\b \b", 3); // C++20: Added cast.
         }
     }
     sys_hidden++;
@@ -109,7 +109,7 @@ static void show_console_input(void)
 
     sys_hidden--;
     if (!sys_hidden) {
-        write_console_data("]", 1);
+        write_console_data((void*)"]", 1); // C++20: Added cast.
         write_console_data(sys_con.inputLine.text, sys_con.inputLine.cursorPos);
     }
 }
@@ -210,14 +210,14 @@ void Sys_RunConsole(void)
                     Cbuf_AddText(&cmd_buffer, s);
                     Cbuf_AddText(&cmd_buffer, "\n");
                 } else {
-                    write_console_data("\n", 1);
+                    write_console_data((void*)"\n", 1); // C++20: Added cast.
                 }
                 show_console_input();
                 break;
             case VK_BACK:
                 if (f->cursorPos) {
                     f->text[--f->cursorPos] = 0;
-                    write_console_data("\b \b", 3);
+                    write_console_data((void*)"\b \b", 3); // C++20: Added cast.
                 }
                 break;
             case VK_TAB:
