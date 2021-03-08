@@ -1309,7 +1309,7 @@ char *Cmd_MacroExpandString(const char *text, qboolean aliasHack)
         if (aliasHack) {
             // expand positional parameters only
             if (!strcmp(temporary, "@")) {
-                token = Cmd_Args();
+                token = (char*)Cmd_Args(); // C++20: Added cast.
             } else {
                 int arg1, arg2;
                 char *s;
@@ -1325,9 +1325,9 @@ char *Cmd_MacroExpandString(const char *text, qboolean aliasHack)
                     } else {
                         arg2 = cmd_argc - 1;
                     }
-                    token = Cmd_ArgsRange(arg1, arg2);
+                    token = (char*)Cmd_ArgsRange(arg1, arg2); // C++20: Added cast.
                 } else if (s[0] == 0) {
-                    token = Cmd_Argv(arg1);
+                    token = (char*)Cmd_Argv(arg1); // C++20: Added cast.
                 } else {
                     continue; // first part is not a number
                 }
@@ -1412,7 +1412,7 @@ void Cmd_TokenizeString(const char *text, qboolean macroExpand)
     cmd_string_len = 0;
     cmd_string_tail = 0;
     cmd_optind = 1;
-    cmd_optarg = cmd_optopt = cmd_null_string;
+    cmd_optarg = cmd_optopt = (char*)cmd_null_string; // C++20: Added cast.
 
     if (!text[0]) {
         return;
@@ -1908,7 +1908,7 @@ static void Cmd_EchoEx_f(void)
         }
     }
 
-    s = Cmd_RawArgsFrom(cmd_optind);
+    s = (char*)Cmd_RawArgsFrom(cmd_optind); // C++20: Added casts.
     if (escapes) {
         s = unescape_string(buffer, s);
     }
