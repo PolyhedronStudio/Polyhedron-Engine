@@ -594,11 +594,15 @@ qerror_t MAT_SetPBRMaterialAttribute(pbr_material_t * mat, char const * token, c
 		{6, "correct_albedo_flag", TOKEN_BOOL} };
 
 	static int ntokens = sizeof(tokens) / sizeof(struct Token);
+	
+	struct Token const* t = NULL;
+	float fvalue = 0.f; qboolean bvalue = qfalse; char const* svalue = NULL;
 
 	if (token == NULL || value == NULL)
 		goto usage;
 
-	struct Token const * t = NULL;
+	// C++20 VKPT: moved to top.
+	//struct Token const * t = NULL;
 	for (int i = 0; i < ntokens; ++i)
 	{
 		if (strcmp(token, tokens[i].name) == 0)
@@ -610,7 +614,8 @@ qerror_t MAT_SetPBRMaterialAttribute(pbr_material_t * mat, char const * token, c
 		goto usage;
 	}
 
-	float fvalue = 0.f; qboolean bvalue = qfalse; char const * svalue = NULL;
+	// C++20 VKPT: Moved to top.
+	//float fvalue = 0.f; qboolean bvalue = qfalse; char const * svalue = NULL;
 	switch (t->type)
 	{
 		case TOKEN_BOOL:   bvalue = atoi(value) == 0 ? qfalse : qtrue; break;
@@ -648,16 +653,17 @@ usage:
 	Com_Printf("Usage : set_material <token> <value>\n");
 	for (int i = 0; i < ntokens; ++i)
 	{
-		struct Token const * t = &tokens[i];
+		// C++20 VKPT: struct Token const * t = &tokens[i];
+		t = &tokens[i];
 
-		char const * typename = "(undefined)";
+		char const * typeName = "(undefined)";
 		switch (t->type)
 		{
-		case TOKEN_BOOL: typename = "bool [0,1]"; break;
-		case TOKEN_FLOAT: typename = "float"; break;
-		case TOKEN_STRING: typename = "string"; break;
+		case TOKEN_BOOL: typeName = "bool [0,1]"; break;
+		case TOKEN_FLOAT: typeName = "float"; break;
+		case TOKEN_STRING: typeName = "string"; break;
 		}
-		Com_Printf("  %s (%s)\n", t->name, typename);
+		Com_Printf("  %s (%s)\n", t->name, typeName);
 	}
 	return Q_ERR_FAILURE;
 }
