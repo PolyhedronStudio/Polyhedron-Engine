@@ -442,6 +442,7 @@ char *VID_GetDefaultModeList(void)
 
 qboolean VID_Init(graphics_api_t api)
 {
+    cvar_t* vid_hwgamma;
 #ifdef _WINDOWS
 	// Load the DLL and function dynamically to avoid exe file incompatibility with Windows 7
 
@@ -538,7 +539,8 @@ qboolean VID_Init(graphics_api_t api)
 	}
 #endif
 
-    cvar_t *vid_hwgamma = Cvar_Get("vid_hwgamma", "0", CVAR_REFRESH);
+    // C++20: Moved declaration to top.
+    vid_hwgamma = Cvar_Get("vid_hwgamma", "0", CVAR_REFRESH);
     if (vid_hwgamma->integer) {
         Uint16  gamma[3][256];
 

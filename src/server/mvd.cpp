@@ -238,7 +238,7 @@ static void dummy_exec_string(cmdbuf_t *buf, const char *line)
 
     Cmd_TokenizeString(line, qtrue);
 
-    cmd = Cmd_Argv(0);
+    cmd = (char*)Cmd_Argv(0); // C++20: Added cast.
     if (!cmd[0]) {
         return;
     }
@@ -400,7 +400,7 @@ static int dummy_create(void)
     if (!allow) {
         s = Info_ValueForKey(userinfo, "rejmsg");
         if (!*s) {
-            s = "Connection refused";
+            s = (char*)"Connection refused"; // C++20: Added cast.
         }
         Com_EPrintf("Dummy MVD client rejected by game: %s\n", s);
         Z_Free(newcl->netchan);
