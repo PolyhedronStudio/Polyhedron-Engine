@@ -125,7 +125,7 @@ STATIC BOOL CALLBACK enum_modules_callback(
     }
 
     if (pGetFileVersionInfoA(ModuleName, 0, sizeof(buffer), buffer) &&
-        pVerQueryValueA(buffer, "\\", (LPVOID *)&data, &numBytes) &&
+        pVerQueryValueA(buffer, (LPSTR)"\\", (LPVOID *)&data, &numBytes) && // C++20: Added cast.
         numBytes >= sizeof(*info)) {
         info = (VS_FIXEDFILEINFO *)data;
         wsprintf(version, "%u.%u.%u.%u",
@@ -145,24 +145,24 @@ STATIC BOOL CALLBACK enum_modules_callback(
     if (ret) {
         ModuleName = moduleInfo.ModuleName;
         switch (moduleInfo.SymType) {
-        case SymNone:       symbols = "none";       break;
-        case SymCoff:       symbols = "COFF";       break;
-        case SymPdb:        symbols = "PDB";        break;
-        case SymExport:     symbols = "export";     break;
-        case SymVirtual:    symbols = "virtual";    break;
-        default:            symbols = "unknown";    break;
+        case SymNone:       symbols = (char*)"none";       break; // C++20: Added cast.
+        case SymCoff:       symbols = (char*)"COFF";       break; // C++20: Added cast.
+        case SymPdb:        symbols = (char*)"PDB";        break; // C++20: Added cast.
+        case SymExport:     symbols = (char*)"export";     break; // C++20: Added cast.
+        case SymVirtual:    symbols = (char*)"virtual";    break; // C++20: Added cast.
+        default:            symbols = (char*)"unknown";    break; // C++20: Added cast.
         }
     } else {
         write_report("SymGetModuleInfo64 failed with error %#x\r\n",
                      GetLastError());
-        symbols = "failed";
+        symbols = (char*)"failed"; // C++20: Added cast.
     }
 
     if (pc >= ModuleBase && pc < ModuleBase + ModuleSize) {
         CopyMemory(faultyModuleName, ModuleName, len + 1);
-        star = " *";
+        star = (char*)" *"; // C++20: Added cast.
     } else {
-        star = "";
+        star = (char*)""; // C++20: Added cast.
     }
 
     write_report(
