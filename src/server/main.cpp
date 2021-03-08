@@ -1228,7 +1228,7 @@ static void SVC_RemoteCommand(void)
         return;
     }
 
-    s = Cmd_RawArgsFrom(2);
+    s = (char*)Cmd_RawArgsFrom(2); // C++20: Added cast.
     if (!rcon_valid()) {
         Com_Printf("Invalid rcon from %s:\n%s\n",
                    NET_AdrToString(&net_from), s);
@@ -1293,7 +1293,7 @@ static void SV_ConnectionlessPacket(void)
 
     Cmd_TokenizeString(string, qfalse);
 
-    c = Cmd_Argv(0);
+    c = (char*)Cmd_Argv(0); // C++20: Added cast.
     Com_DPrintf("ServerPacket[%s]: %s\n", NET_AdrToString(&net_from), c);
 
     if (!strcmp(c, "rcon")) {
