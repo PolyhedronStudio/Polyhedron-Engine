@@ -158,7 +158,7 @@ void Cmd_Give_f(edict_t *ent)
         return;
     }
 
-    name = gi.args();
+    name = (char*)gi.args(); // C++20: Added cast.
 
     if (Q_stricmp(name, "all") == 0)
         give_all = qtrue;
@@ -244,7 +244,7 @@ void Cmd_Give_f(edict_t *ent)
 
     it = FindItem(name);
     if (!it) {
-        name = gi.argv(1);
+        name = (char*)gi.argv(1); // C++20: Added cast.
         it = FindItem(name);
         if (!it) {
             gi.cprintf(ent, PRINT_HIGH, "unknown item\n");
@@ -360,7 +360,7 @@ void Cmd_Use_f(edict_t *ent)
     gitem_t     *it;
     char        *s;
 
-    s = gi.args();
+    s = (char*)gi.args(); // C++20: Added casts.
     it = FindItem(s);
     if (!it) {
         gi.cprintf(ent, PRINT_HIGH, "unknown item: %s\n", s);
@@ -393,7 +393,7 @@ void Cmd_Drop_f(edict_t *ent)
     gitem_t     *it;
     char        *s;
 
-    s = gi.args();
+    s = (char*)gi.args(); // C++20: Added casts.
     it = FindItem(s);
     if (!it) {
         gi.cprintf(ent, PRINT_HIGH, "unknown item: %s\n", s);
@@ -752,7 +752,7 @@ void Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
         strcat(text, " ");
         strcat(text, gi.args());
     } else {
-        p = gi.args();
+        p = (char*)gi.args();  // C++20: Added casts.
 
         if (*p == '"') {
             p++;
@@ -850,7 +850,7 @@ void ClientCommand(edict_t *ent)
     if (!ent->client)
         return;     // not fully in game yet
 
-    cmd = gi.argv(0);
+    cmd = (char*)gi.argv(0); // C++20: Added casts.
 
     if (Q_stricmp(cmd, "players") == 0) {
         Cmd_Players_f(ent);
