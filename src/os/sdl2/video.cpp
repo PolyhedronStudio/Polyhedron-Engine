@@ -443,6 +443,7 @@ char *VID_GetDefaultModeList(void)
 qboolean VID_Init(graphics_api_t api)
 {
     cvar_t* vid_hwgamma;
+    SDL_Surface* icon;
 #ifdef _WINDOWS
 	// Load the DLL and function dynamically to avoid exe file incompatibility with Windows 7
 
@@ -515,7 +516,8 @@ qboolean VID_Init(graphics_api_t api)
 		}
 	}
 
-    SDL_Surface *icon = SDL_CreateRGBSurfaceFrom(icon_rgb, q2icon_width, q2icon_height, 32, q2icon_width * sizeof(uint32_t), 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+    // C++20: Declaration moved to top.
+    icon = SDL_CreateRGBSurfaceFrom(icon_rgb, q2icon_width, q2icon_height, 32, q2icon_width * sizeof(uint32_t), 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
     if (icon) {
         SDL_SetWindowIcon(sdl_window, icon);
         SDL_FreeSurface(icon);
