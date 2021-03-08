@@ -228,7 +228,7 @@ void Prompt_CompleteCommand(commandPrompt_t *prompt, qboolean backslash)
     // determine relative argument number to be completed
     argnum = 0;
     for (i = 0; i < currentArg; i++) {
-        s = Cmd_Argv(i);
+        s = (char*)Cmd_Argv(i); // C++20: Added cast.
         argnum++;
         if (*s == ';') {
             // semicolon starts a new command
@@ -237,11 +237,11 @@ void Prompt_CompleteCommand(commandPrompt_t *prompt, qboolean backslash)
     }
 
     // get the partial argument string to be completed
-    partial = Cmd_Argv(currentArg);
+    partial = (char*)Cmd_Argv(currentArg); // C++20: Added cast.
     if (*partial == ';') {
         // semicolon starts a new command
         currentArg++;
-        partial = Cmd_Argv(currentArg);
+        partial = (char*)Cmd_Argv(currentArg); // C++20: Added cast.
         argnum = 0;
     }
 
@@ -288,7 +288,7 @@ void Prompt_CompleteCommand(commandPrompt_t *prompt, qboolean backslash)
 
     if (ctx.count == 1) {
         // we have finished completion!
-        s = Cmd_RawArgsFrom(currentArg + 1);
+        s = (char*)Cmd_RawArgsFrom(currentArg + 1); // C++20: Added cast.
         if (needs_quotes(matches[0])) {
             pos += Q_concat(text, size, "\"", matches[0], "\" ", s, NULL);
         } else {
@@ -340,7 +340,7 @@ void Prompt_CompleteCommand(commandPrompt_t *prompt, qboolean backslash)
 
     // copy trailing arguments
     if (currentArg + 1 < argc) {
-        s = Cmd_RawArgsFrom(currentArg + 1);
+        s = (char*)Cmd_RawArgsFrom(currentArg + 1); // C++20: Added cast.
         pos += Q_concat(text + len, size, " ", s, NULL);
     }
 
