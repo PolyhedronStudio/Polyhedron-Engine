@@ -64,7 +64,7 @@ static void SV_SetMaster_f(void)
             break;
         }
 
-        s = Cmd_Argv(i);
+        s = (char*)Cmd_Argv(i); // C++20: Added cast.
         if (!NET_StringToAdr(s, &adr, PORT_MASTER)) {
             Com_Printf("Bad master address: %s\n", s);
             continue;
