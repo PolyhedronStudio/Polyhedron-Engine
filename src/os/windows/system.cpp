@@ -1080,7 +1080,7 @@ Sys_ParseCommandLine
 static void Sys_ParseCommandLine(char *line)
 {
     sys_argc = 1;
-    sys_argv[0] = APPLICATION;
+    sys_argv[0] = (char*)APPLICATION; // C++20: Added cast.
     while (*line) {
         while (*line && *line <= 32) {
             line++;
