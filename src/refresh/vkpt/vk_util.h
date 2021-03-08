@@ -94,11 +94,13 @@ uint32_t get_memory_type(uint32_t mem_req_type_bits, VkMemoryPropertyFlags mem_p
 const char *qvk_format_to_string(VkFormat format);
 const char *qvk_result_to_string(VkResult result);
 
+// C++20: VKPT: Added .pNext = NULL, because all members need to be initialized.
 #define ATTACH_LABEL_VARIABLE(a, type) \
 	if(qvkDebugMarkerSetObjectNameEXT) { \
 		/*Com_Printf("attaching object label 0x%08lx %s\n", (uint64_t) a, #a);*/ \
 		VkDebugMarkerObjectNameInfoEXT name_info = { \
 			.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT, \
+			.pNext = NULL, \
 			.object = (uint64_t) a, \
 			.objectType = VK_DEBUG_REPORT_OBJECT_TYPE_##type##_EXT, \
 			.pObjectName = #a \
