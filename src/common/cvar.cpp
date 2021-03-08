@@ -709,7 +709,7 @@ static void Cvar_Set_c(genctx_t *ctx, int argnum)
     if (argnum == 1) {
         Cvar_Variable_g(ctx);
     } else if (argnum == 2) {
-        s = Cmd_Argv(ctx->argnum - 1);
+        s = (char*)Cmd_Argv(ctx->argnum - 1); // C++20: Added cast.
         if ((var = Cvar_FindVar(s)) != NULL) {
             g = var->generator;
             if (g) {
@@ -745,7 +745,7 @@ void Cvar_Set_f(void)
     }
 
     if (c == 4) {
-        f = Cmd_Argv(3);
+        f = (char*)Cmd_Argv(3); // C++20: Added cast.
         if (!strcmp(f, "u")) {
             flags = CVAR_USERINFO;
         } else if (!strcmp(f, "s")) {
@@ -770,7 +770,7 @@ Allows setting and defining of arbitrary cvars from console
 */
 static void Cvar_SetFlag_f(void)
 {
-    char    *s = Cmd_Argv(0);
+    const char    *s = Cmd_Argv(0); // C++20: char *s = Cmd_Argv(0);
     int     flags;
 
     if (Cmd_Argc() < 3) {
@@ -1024,7 +1024,7 @@ static void Cvar_Toggle_c(genctx_t *ctx, int argnum)
     if (argnum == 1) {
         Cvar_Variable_g(ctx);
     } else {
-        s = Cmd_Argv(ctx->argnum - argnum + 1);
+        s = (char*)Cmd_Argv(ctx->argnum - argnum + 1); // C++20: Added cast.
         if ((g = Cvar_FindGenerator(s)) != NULL) {
             g(ctx);
         }
