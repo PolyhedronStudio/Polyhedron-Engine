@@ -763,7 +763,7 @@ void Com_Generic_c(genctx_t *ctx, int argnum)
     // protect against possible duplicates
     ctx->ignoredups = qtrue;
 
-    s = Cmd_Argv(ctx->argnum - argnum);
+    s = (char*)Cmd_Argv(ctx->argnum - argnum); // C++20: Added cast.
 
     // complete command argument or cvar value
     if ((c = Cmd_FindCompleter(s)) != NULL) {
@@ -1036,10 +1036,10 @@ void Qcommon_Init(int argc, char **argv)
     // add + commands from command line
     if (!Com_AddLateCommands()) {
         // if the user didn't give any commands, run default action
-        std::string cmd = COM_DEDICATED ? "dedicated_start" : "client_start"; // C++ 20: char *cmd = COM_DEDICATED ? "dedicated_start" : "client_start";
+        char *cmd = (char*)(COM_DEDICATED ? "dedicated_start" : "client_start"); // C++ 20: char *cmd = COM_DEDICATED ? "dedicated_start" : "client_start";
 
-        if ((cmd = Cmd_AliasCommand(cmd.c_str())) != NULL) { // C++ 20: .c_str()
-            Cbuf_AddText(&cmd_buffer, cmd.c_str()); // C++20: .c_str()
+        if ((cmd = Cmd_AliasCommand(cmd)) != NULL) { // C++ 20: .c_str()
+            Cbuf_AddText(&cmd_buffer, cmd); // C++20: .c_str()
             Cbuf_Execute(&cmd_buffer);
         }
     } else {
