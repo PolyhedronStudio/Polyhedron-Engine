@@ -473,12 +473,18 @@ vkpt_bloom_record_cmd_buffer(VkCommandBuffer cmd_buf)
 			.z = 1
 		};
 
+		// C++20 VKPT: One of those "can't do srcOffsets[0] = offset_UL, things again.
 		VkImageBlit blit_region = {
 			.srcSubresource = subresource,
-			.srcOffsets[0] = offset_UL,
+			.srcOffsets {
+				offset_UL,
+				0				// Member value is set in code below.
+			},
 			.dstSubresource = subresource,
-			.dstOffsets[0] = offset_UL,
-			.dstOffsets[1] = offset_LR_input,
+			.dstOffsets = {
+				offset_UL,
+				offset_LR_input,
+			}
 		};
 
 		BARRIER_TO_COPY_DEST(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT]);
