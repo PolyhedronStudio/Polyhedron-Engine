@@ -449,6 +449,7 @@ vkpt_physical_sky_destroy_pipelines()
 	return VK_SUCCESS;
 }
 
+// C++20 VKPT: BARRIER_COMPUTE
 #define BARRIER_COMPUTE(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -459,12 +460,12 @@ vkpt_physical_sky_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
 				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
 				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 

@@ -178,23 +178,32 @@ vkpt_tone_mapping_reset(VkCommandBuffer cmd_buf)
 		.uint32 = { 0, 0, 0, 0 }
 	};
 
+	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
+		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+		.pNext = NULL,
+		.srcAccessMask = 0,
+		.dstAccessMask = 0,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_tonemap.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = 0,
-		.dstAccessMask = 0
 	);
 
 	vkCmdFillBuffer(cmd_buf, qvk.buf_tonemap.buffer,
 		0, VK_WHOLE_SIZE, 0);
 
+	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
+		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+		.srcAccessMask = 0,
+		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_tonemap.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = 0,
-		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT
 	);
 
 	return VK_SUCCESS;
@@ -214,6 +223,7 @@ vkpt_tone_mapping_destroy_pipelines()
 // Shorthand to record a resource barrier on a single image, to prevent threads
 // from trying to read from this image before it has been written to by the
 // previous stage.
+// C++20 VKPT: BARRIER_COMPUTE
 #define BARRIER_COMPUTE(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -224,12 +234,13 @@ vkpt_tone_mapping_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
+				.pNext = NULL, \
 				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
 				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 
@@ -250,6 +261,7 @@ vkpt_tone_mapping_record_cmd_buffer(VkCommandBuffer cmd_buf, float frame_time)
 		qvk_get_current_desc_set_textures(),
 		qvk.desc_set_vertex_buffer
 	};
+	// C++20 VKPT: BARRIER_COMPUTE
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT]);
 
 
@@ -322,12 +334,16 @@ vkpt_tone_mapping_record_cmd_buffer(VkCommandBuffer cmd_buf, float frame_time)
 
 	vkCmdDispatch(cmd_buf, 1, 1, 1);
 
+	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
+		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_tonemap.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT
 	);
 
 

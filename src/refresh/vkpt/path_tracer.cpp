@@ -560,7 +560,7 @@ vkpt_pt_create_accel_bottom(
 					.sType = VK_STRUCTURE_TYPE_GEOMETRY_TRIANGLES_NV,
 					.vertexData = buffer_vertex->buffer,
 					.vertexOffset = offset_vertex,
-					.vertexCount = num_vertices,
+					.vertexCount = (uint32_t)num_vertices, // C++20 VKPT: Added cast
 					.vertexStride = sizeof(float) * 3,
 					.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT,
 					.indexData = buffer_index ? buffer_index->buffer : VK_NULL_HANDLE,
@@ -643,9 +643,9 @@ vkpt_pt_create_accel_bottom(
 		VkAccelerationStructureInfoNV as_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
 			.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
+			.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV,
 			.geometryCount = 1,
 			.pGeometries = &geometry,
-			.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV
 		};
 
 		qvkCmdBuildAccelerationStructureNV(cmd_buf, &as_info,
@@ -789,10 +789,10 @@ append_blas(QvkGeometryInstance_t *instances, int *num_instances, blas_t* blas, 
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
 		},
-		.instance_id = instance_id,
-		.mask = mask,
-		.instance_offset = sbt_offset,
-		.flags = flags,
+		.instance_id = (uint32_t)instance_id, // C++20 VKPT: Added a cast.
+		.mask = (uint32_t)mask, // C++20 VKPT: Added a cast.
+		.instance_offset = (uint32_t)sbt_offset, // C++20 VKPT: Added a cast.
+		.flags = (uint32_t)flags, // C++20 VKPT: Added a cast.
 		.acceleration_structure = 0
 	};
 
@@ -890,7 +890,7 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 		};
 
 		VkAccelerationStructureBuildSizesInfoKHR sizeInfo = { .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
-		qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &num_instances, &sizeInfo);
+		qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, (const uint32_t*)&num_instances, &sizeInfo); // C++20 VKPT: Added cast.
 		assert(sizeInfo.accelerationStructureSize < SIZE_SCRATCH_BUFFER);
 
 		if (accel_top_match[idx].instanceCount < num_instances) {
@@ -918,7 +918,7 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 		buildInfo.scratchData.deviceAddress = buf_accel_scratch.address;
 		assert(buf_accel_scratch.address);
 
-		VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = num_instances };
+		VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = (uint32_t)num_instances }; // C++20 VKPT: Added cast.
 
 		VkAccelerationStructureBuildRangeInfoKHR* offsets = &offset;
 
@@ -936,7 +936,7 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 			.info = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
 				.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_NV,
-				.instanceCount = num_instances,
+				.instanceCount = (uint32_t)num_instances, // C++20 VKPT: Added cast.
 				.geometryCount = 0,
 				.pGeometries = NULL,
 			}
@@ -978,7 +978,7 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 		VkAccelerationStructureInfoNV as_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
 			.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_NV,
-			.instanceCount = num_instances,
+			.instanceCount = (uint32_t)num_instances, // C++20 VKPT: Added cast.
 			.geometryCount = 0,
 			.pGeometries = NULL,
 		};
@@ -986,10 +986,11 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 		// Request the amount of scratch memory, just to make the validation layer happy.
 		// Our static scratch buffer is definitely big enough.
 
+		// C++20 VKPT: Order fix.
 		VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
+			.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_BUILD_SCRATCH_NV,
 			.accelerationStructure = accel_top_nv[idx],
-			.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_BUILD_SCRATCH_NV
 		};
 
 		VkMemoryRequirements2 mem_req = { .sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2 };
@@ -1115,8 +1116,11 @@ vkpt_pt_trace_primary_rays(VkCommandBuffer cmd_buf)
 	int frame_idx = qvk.frame_counter & 1;
 	
 	BUFFER_BARRIER(cmd_buf,
+			.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
 			.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 			.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 			.buffer = qvk.buf_readback.buffer,
 			.offset = 0,
 			.size = VK_WHOLE_SIZE,

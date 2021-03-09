@@ -732,7 +732,7 @@ void Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 {
     int     i, j;
     edict_t *other;
-    const char    *p;
+    char    *p; // C++20: Removed const.
     char    text[2048];
     gclient_t *cl;
 
@@ -752,7 +752,7 @@ void Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
         strcat(text, " ");
         strcat(text, gi.args());
     } else {
-        p = (const char*)gi.args();  // C++20: Added casts.
+        p = (char*)gi.args();  // C++20: Added casts.
 
         if (*p == '"') {
             p++;
