@@ -645,7 +645,7 @@ out:;
 
 	if(vkCreateSwapchainKHR(qvk.device, &swpch_create_info, NULL, &qvk.swap_chain) != VK_SUCCESS) {
 		Com_EPrintf("error creating swapchain\n");
-		return 1;
+		return (VkResult)1;	// C++20 VKPT: Added cast.
 	}
 
 	vkGetSwapchainImagesKHR(qvk.device, qvk.swap_chain, &qvk.num_swap_chain_images, NULL);
@@ -679,7 +679,7 @@ out:;
 
 		if(vkCreateImageView(qvk.device, &img_create_info, NULL, qvk.swap_chain_image_views + i) != VK_SUCCESS) {
 			Com_EPrintf("error creating image view!");
-			return 1;
+			return (VkResult)1; // C++20 VKPT: Added cast.
 		}
 	}
 
@@ -720,10 +720,11 @@ out:;
 VkResult
 create_command_pool_and_fences()
 {
+	// C++20 VKPT: Order fix.
 	VkCommandPoolCreateInfo cmd_pool_create_info = {
 		.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+		.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
 		.queueFamilyIndex = qvk.queue_idx_graphics,
-		.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
 	};
 
 	/* command pool and buffers */
@@ -801,7 +802,7 @@ init_vulkan()
 		return qfalse;
 	}
 
-	qvk.sdl2_extensions = malloc(sizeof(char*) * qvk.num_sdl2_extensions);
+	qvk.sdl2_extensions = (const char**)malloc(sizeof(char*) * qvk.num_sdl2_extensions); // C++20 VKPT: Added a malloc cast.
 	if (!SDL_Vulkan_GetInstanceExtensions(qvk.window, &qvk.num_sdl2_extensions, qvk.sdl2_extensions)) {
 		Com_EPrintf("Couldn't get SDL2 Vulkan extensions\n");
 		return qfalse;
@@ -813,7 +814,7 @@ init_vulkan()
 	}
 
 	int num_inst_ext_combined = qvk.num_sdl2_extensions + LENGTH(vk_requested_instance_extensions);
-	char **ext = alloca(sizeof(char *) * num_inst_ext_combined);
+	char **ext = (char**)alloca(sizeof(char *) * num_inst_ext_combined); // C++20 VKPT: Added an alloca cast.
 	memcpy(ext, qvk.sdl2_extensions, qvk.num_sdl2_extensions * sizeof(*qvk.sdl2_extensions));
 	memcpy(ext + qvk.num_sdl2_extensions, vk_requested_instance_extensions, sizeof(vk_requested_instance_extensions));
 
@@ -902,7 +903,7 @@ init_vulkan()
 	_VK(vkEnumeratePhysicalDevices(qvk.instance, &num_devices, NULL));
 	if(num_devices == 0)
 		return qfalse;
-	VkPhysicalDevice *devices = alloca(sizeof(VkPhysicalDevice) *num_devices);
+	VkPhysicalDevice *devices = (VkPhysicalDevice*)alloca(sizeof(VkPhysicalDevice) *num_devices); // C++20 VKPT: Added an alloca cast.
 	_VK(vkEnumeratePhysicalDevices(qvk.instance, &num_devices, devices));
 
 #ifdef VKPT_DEVICE_GROUPS
@@ -952,7 +953,7 @@ init_vulkan()
 		uint32_t num_ext;
 		vkEnumerateDeviceExtensionProperties(devices[i], NULL, &num_ext, NULL);
 
-		VkExtensionProperties *ext_properties = alloca(sizeof(VkExtensionProperties) * num_ext);
+		VkExtensionProperties *ext_properties = (VkExtensionProperties*)alloca(sizeof(VkExtensionProperties) * num_ext); // C++20 VKPT: Added an alloca cast.
 		vkEnumerateDeviceExtensionProperties(devices[i], NULL, &num_ext, ext_properties);
 
 		Com_Printf("Supported Vulkan device extensions:\n");
@@ -1060,7 +1061,7 @@ init_vulkan()
 	/* queue family and create physical device */
 	uint32_t num_queue_families = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(qvk.physical_device, &num_queue_families, NULL);
-	VkQueueFamilyProperties *queue_families = alloca(sizeof(VkQueueFamilyProperties) * num_queue_families);
+	VkQueueFamilyProperties *queue_families = (VkQueueFamilyProperties*)alloca(sizeof(VkQueueFamilyProperties) * num_queue_families); // C++20 VKPT: Added an alloca cast.
 	vkGetPhysicalDeviceQueueFamilyProperties(qvk.physical_device, &num_queue_families, queue_families);
 
 	// Com_Printf("num queue families: %d\n", num_queue_families);
@@ -1102,39 +1103,43 @@ init_vulkan()
 	VkDeviceQueueCreateInfo queue_create_info[3];
 
 	{
+		// C++20 VKPT: Order fix.
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+			.queueFamilyIndex = qvk.queue_idx_graphics,
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
-			.queueFamilyIndex = qvk.queue_idx_graphics,
 		};
 
 		queue_create_info[num_create_queues++] = q;
 	};
 	if(qvk.queue_idx_compute != qvk.queue_idx_graphics) {
+		// C++20 VKPT: Order fix.
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+			.queueFamilyIndex = qvk.queue_idx_compute,
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
-			.queueFamilyIndex = qvk.queue_idx_compute,
 		};
 		queue_create_info[num_create_queues++] = q;
 	};
 	if(qvk.queue_idx_transfer != qvk.queue_idx_graphics && qvk.queue_idx_transfer != qvk.queue_idx_compute) {
+		// C++20 VKPT: Order fix.
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+			.queueFamilyIndex = qvk.queue_idx_transfer,
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
-			.queueFamilyIndex = qvk.queue_idx_transfer,
 		};
 		queue_create_info[num_create_queues++] = q;
 	};
 
+	// C++20 VKPT: Order fix.
 	VkPhysicalDeviceDescriptorIndexingFeatures idx_features = {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES,
 		.runtimeDescriptorArray = 1,
+		.shaderStorageBufferArrayNonUniformIndexing = 1,
 		.shaderSampledImageArrayNonUniformIndexing = 1,
-		.shaderStorageBufferArrayNonUniformIndexing = 1
 	};
 
 #ifdef VKPT_DEVICE_GROUPS
@@ -1221,18 +1226,19 @@ init_vulkan()
 			.inheritedQueries = 0,
 		}
 	};
+	// C++20 VKPT: Order fix
 	VkDeviceCreateInfo dev_create_info = {
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		.pNext                   = &device_features,
+		.queueCreateInfoCount	 = num_create_queues,
 		.pQueueCreateInfos       = queue_create_info,
-		.queueCreateInfoCount    = num_create_queues
 	};
 
 	uint32_t max_extension_count = LENGTH(vk_requested_device_extensions_common);
 	max_extension_count += max(LENGTH(vk_requested_device_extensions_khr), LENGTH(vk_requested_device_extensions_nv));
 	max_extension_count += LENGTH(vk_requested_device_extensions_debug);
 
-	const char** device_extensions = alloca(sizeof(char*) * max_extension_count);
+	const char** device_extensions = (const char **)alloca(sizeof(char*) * max_extension_count); // C++20 VKPT: Added an alloca cast.
 	uint32_t device_extension_count = 0;
 
 	append_string_list(device_extensions, &device_extension_count, max_extension_count, 
@@ -1326,7 +1332,7 @@ create_shader_module_from_file(const char *name, const char *enum_name, qboolean
 	char *data;
 	size_t size;
 
-	size = FS_LoadFile(path, &data);
+	size = FS_LoadFile(path, (void**)&data); // C++20 VKPT: ADded a FS_Loadfile cast.
 	if(!data) {
 		Com_EPrintf("Couldn't find shader module %s!\n", path);
 		return VK_NULL_HANDLE;
@@ -1594,7 +1600,7 @@ char* COM_Parse_old(char** data_p)
 	if (!data)
 	{
 		*data_p = NULL;
-		return "";
+		return (char*)""; // C++20 VKPT: Added a (char*) cast to return "" 
 	}
 
 	// skip whitespace
@@ -1604,7 +1610,7 @@ skipwhite:
 		if (c == 0)
 		{
 			*data_p = NULL;
-			return "";
+			return (char*)""; // C++20 VKPT: Added a (char*) cast to return "" 
 		}
 		data++;
 	}
@@ -2214,7 +2220,8 @@ bsp_add_entlights(const bsp_t* bsp)
 
 }
 
-bsp_reset_entlights(const bsp_t* bsp)
+// C++20 VKPT: Added void return type to bsp_reset_entlights which had none...
+void bsp_reset_entlights(const bsp_t* bsp)
 {
 	int el;
 	for (el = 0; el < MAX_ENTLIGHTS; el++)
@@ -3278,14 +3285,27 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 		// In some cases (ex.: player setup), 'fd' will describe a viewport that is not full screen.
 		// Simulate that with a projection matrix adjustment to avoid modifying the rendering code.
 
+		// C++20 VKPT: Changed viewport array construction.
+		//float viewport_proj[16] = {
+		//	[0] = (float)fd->width / (float)qvk.extent_unscaled.width,
+		//	[12] = (float)(fd->x * 2 + fd->width - (int)qvk.extent_unscaled.width) / (float)qvk.extent_unscaled.width,
+		//	[5] = (float)fd->height / (float)qvk.extent_unscaled.height,
+		//	[13] = -(float)(fd->y * 2 + fd->height - (int)qvk.extent_unscaled.height) / (float)qvk.extent_unscaled.height,
+		//	[10] = 1.f,
+		//	[15] = 1.f
+		//};
 		float viewport_proj[16] = {
-			[0] = (float)fd->width / (float)qvk.extent_unscaled.width,
-			[12] = (float)(fd->x * 2 + fd->width - (int)qvk.extent_unscaled.width) / (float)qvk.extent_unscaled.width,
-			[5] = (float)fd->height / (float)qvk.extent_unscaled.height,
-			[13] = -(float)(fd->y * 2 + fd->height - (int)qvk.extent_unscaled.height) / (float)qvk.extent_unscaled.height,
-			[10] = 1.f,
-			[15] = 1.f
+			0.f, 0.f, 0.f, 0.f,
+			0.f, 0.f, 0.f, 0.f,
+			0.f, 0.f, 0.f, 0.f,
+			0.f, 0.f, 0.f, 0.f,
 		};
+		viewport_proj[0] = (float)fd->width / (float)qvk.extent_unscaled.width;
+		viewport_proj[12] = (float)(fd->x * 2 + fd->width - (int)qvk.extent_unscaled.width) / (float)qvk.extent_unscaled.width;
+		viewport_proj[5] = (float)fd->height / (float)qvk.extent_unscaled.heightv
+		viewport_proj[13] = -(float)(fd->y * 2 + fd->height - (int)qvk.extent_unscaled.height) / (float)qvk.extent_unscaled.heightv
+		viewport_proj[10] = 1.f;
+		viewport_proj[15] = 1.f;
 
 		mult_matrix_matrix(P, viewport_proj, raw_proj);
 	}
@@ -4334,22 +4354,33 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 		.layerCount = 1
 	};
 		
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = swap_chain_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = swap_chain_image,
+		.subresourceRange = subresource_range,
+
 	);
 
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.screenshot_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = qvk.screenshot_image,
+		.subresourceRange = subresource_range,
 	);
 
 	VkImageCopy img_copy_region = {
@@ -4363,31 +4394,43 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 		qvk.screenshot_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1, &img_copy_region);
 
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = swap_chain_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.dstAccessMask = 0,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = swap_chain_image,
+		.subresourceRange = subresource_range,
+
 	);
 
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.screenshot_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = qvk.screenshot_image,
+		.subresourceRange = subresource_range,
 	);
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qfalse);
 	vkpt_wait_idle(qvk.queue_graphics, &qvk.cmd_buffers_graphics);
 
+	// C++20 VKPT: Order fix.
 	VkImageSubresource subresource = {
 		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+		.mipLevel = 0,
 		.arrayLayer = 0,
-		.mipLevel = 0
 	};
 
 	VkSubresourceLayout subresource_layout;
@@ -4397,7 +4440,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 	_VK(vkMapMemory(qvk.device, qvk.screenshot_image_memory, 0, qvk.screenshot_image_memory_size, 0, &device_data));
 	
 	int pitch = qvk.extent_unscaled.width * 3;
-	byte *pixels = FS_AllocTempMem(pitch * qvk.extent_unscaled.height);
+	byte *pixels = (byte*)FS_AllocTempMem(pitch * qvk.extent_unscaled.height); // C++20 VKPT: Added a cast.
 
 	for (int row = 0; row < qvk.extent_unscaled.height; row++)
 	{
@@ -4462,7 +4505,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t axis)
 			if(data) {
 				Z_Free(data);
 			}
-			data = Z_Malloc(6 * sizeof(uint32_t));
+			data = (byte*)Z_Malloc(6 * sizeof(uint32_t)); // C++20 VKPT: Added a Z_Malloc cast.
 			for(int j = 0; j < 6; j++)
 				((uint32_t *)data)[j] = 0xff00ffffu;
 			w_prev = h_prev = 1;
@@ -4471,7 +4514,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t axis)
 
 		size_t s = img->upload_width * img->upload_height * 4;
 		if(!data) {
-			data = Z_Malloc(s * 6);
+			data = (byte*)Z_Malloc(s * 6); // C++20 VKPT: Added a Z_Malloc cast.
 			w_prev = img->upload_width;
 			h_prev = img->upload_height;
 		}
@@ -4596,7 +4639,7 @@ VkCommandBuffer vkpt_begin_command_buffer(cmd_buf_group_t* group)
 	if (group->used_this_frame == group->count_per_frame)
 	{
 		uint32_t new_count = max(4, group->count_per_frame * 2);
-		VkCommandBuffer* new_buffers = Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(VkCommandBuffer));
+		VkCommandBuffer* new_buffers = (VkCommandBuffer*)Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(VkCommandBuffer)); // C++20 VKPT: Added a Z_Mallocz cast.
 
 		for (int frame = 0; frame < MAX_FRAMES_IN_FLIGHT; frame++)
 		{
@@ -4616,7 +4659,7 @@ VkCommandBuffer vkpt_begin_command_buffer(cmd_buf_group_t* group)
 		}
 
 #ifdef _DEBUG
-		void** new_addrs = Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(void*));
+		void** new_addrs = (void**)Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(void*)); // C++20 VKPT: Added a Z_Mallocz cast.
 
 		if (group->count_per_frame > 0)
 		{
@@ -4717,15 +4760,16 @@ void vkpt_submit_command_buffer(
 {
 	_VK(vkEndCommandBuffer(cmd_buf));
 
+	// C++20 VKPT: Order fix.
 	VkSubmitInfo submit_info = {
 		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 		.waitSemaphoreCount = wait_semaphore_count,
 		.pWaitSemaphores = wait_semaphores,
 		.pWaitDstStageMask = wait_stages,
-		.signalSemaphoreCount = signal_semaphore_count,
-		.pSignalSemaphores = signal_semaphores,
 		.commandBufferCount = 1,
 		.pCommandBuffers = &cmd_buf,
+		.signalSemaphoreCount = signal_semaphore_count,
+		.pSignalSemaphores = signal_semaphores,
 	};
 
 #ifdef VKPT_DEVICE_GROUPS
