@@ -213,6 +213,11 @@ vkpt_asvgf_destroy_pipelines()
 	return VK_SUCCESS;
 }
 
+// C++20 VKPT: Modified to initialize members in order.
+// It also takes away the initialization of:
+// .sType, .srcQueueFamilyIndex and .dstQueueFamilyIndex
+//
+// This is because they need to be initialized in order.
 #define BARRIER_COMPUTE(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -223,6 +228,7 @@ vkpt_asvgf_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
+
 				.image            = img, \
 				.subresourceRange = subresource_range, \
 				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \

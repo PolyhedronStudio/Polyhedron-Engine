@@ -54,13 +54,12 @@ VkDeviceAddress get_buffer_device_address(VkBuffer buffer);
 
 uint32_t get_memory_type(uint32_t mem_req_type_bits, VkMemoryPropertyFlags mem_prop);
 
-
+// C++20 VKPT: Moved the initializers for:
+// sType srcQueueFamilyIndex dstQueueFamilyIndex
+// over to each respective call to IMAGE_BARRIER
 #define IMAGE_BARRIER(cmd_buf, ...) \
 	do { \
 		VkImageMemoryBarrier img_mem_barrier = { \
-			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
-			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
 			__VA_ARGS__ \
 		}; \
 		vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
