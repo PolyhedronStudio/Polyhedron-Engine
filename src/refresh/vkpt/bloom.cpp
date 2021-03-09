@@ -325,21 +325,24 @@ vkpt_bloom_record_cmd_buffer(VkCommandBuffer cmd_buf)
 			.z = 0
 		};
 
+		// C++20 VKPT: Added casts.
 		VkOffset3D offset_LR_mip_0 = {
-			.x = extent.width,
-			.y = extent.height,
+			.x = (int32_t)extent.width,
+			.y = (int32_t)extent.height,
 			.z = 1
 		};
 
+		// C++20 VKPT: Added casts.
 		VkOffset3D offset_LR_mip_1 = {
-			.x = extent.width / 2,
-			.y = extent.height / 2,
+			.x = (int32_t)(extent.width / 2),
+			.y = (int32_t)(extent.height / 2),
 			.z = 1
 		};
 
+		// C++20 VKPT: Added casts.
 		VkOffset3D offset_LR_mip_2 = {
-			.x = extent.width / 4,
-			.y =  extent.height / 4,
+			.x = (int32_t)(extent.width / 4),
+			.y = (int32_t)(extent.height / 4),
 			.z = 1
 		};
 
