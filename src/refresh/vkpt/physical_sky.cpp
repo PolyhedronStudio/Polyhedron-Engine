@@ -137,15 +137,18 @@ initializeEnvTexture(int width, int height)
 
     // cube image
 
-    VkImageCreateInfo img_info = {
-        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-        .extent = {
-            .width = width,
-            .height = height,
-            .depth = 1,
-        },
-        .imageType = VK_IMAGE_TYPE_2D,
+	// C++20 VKPT: Added member initialisation in order of.
+	VkImageCreateInfo img_info = {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.pNext = NULL,		// C++20 VKPT: Added.
+		.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
+		.imageType = VK_IMAGE_TYPE_2D,
         .format = VK_FORMAT_R16G16B16A16_SFLOAT,
+		.extent = { // C++20 VKPT: Added here in order.
+			.width = (uint32_t)width,	// C++20 VKPT: Added required narrowing conversion.
+			.height = (uint32_t)height,	// C++20 VKPT: Added required narrowing conversion.
+			.depth = 1,
+		},
         .mipLevels = 1,
         .arrayLayers = num_images,
         .samples = VK_SAMPLE_COUNT_1_BIT,
@@ -153,9 +156,8 @@ initializeEnvTexture(int width, int height)
         .usage = VK_IMAGE_USAGE_STORAGE_BIT
                                | VK_IMAGE_USAGE_TRANSFER_DST_BIT
                                | VK_IMAGE_USAGE_SAMPLED_BIT,
-        .flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .queueFamilyIndexCount = qvk.queue_idx_graphics,
+        .queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added required narrowing conversion.
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
     };
 

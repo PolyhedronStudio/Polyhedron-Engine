@@ -95,23 +95,21 @@ const char *qvk_format_to_string(VkFormat format);
 const char *qvk_result_to_string(VkResult result);
 
 // C++20: VKPT: Added .pNext = NULL, because all members need to be initialized.
+// Moved members in order.
+// Changed (uint64_t)a cast to (VkDebugReportObjectTypeEXT)a
 #define ATTACH_LABEL_VARIABLE(a, type) \
 	if(qvkDebugMarkerSetObjectNameEXT) { \
 		/*Com_Printf("attaching object label 0x%08lx %s\n", (uint64_t) a, #a);*/ \
 		VkDebugMarkerObjectNameInfoEXT name_info = { \
 			VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT, \
 			NULL, \
-			(uint64_t) a, \
+			static_cast<VkDebugReportObjectTypeEXT>((uint64_t)(a)), \
 			VK_DEBUG_REPORT_OBJECT_TYPE_##type##_EXT, \
 			#a \
 		}; \
 		qvkDebugMarkerSetObjectNameEXT(qvk.device, &name_info); \
 	}
-//VkStructureType               sType;
-//const void* pNext;
-//VkDebugReportObjectTypeEXT    objectType;
-//uint64_t                      object;
-//const char* pObjectName;
+
 #define ATTACH_LABEL_VARIABLE_NAME(a, type, name) \
 	if(qvkDebugMarkerSetObjectNameEXT) { \
 		/*Com_Printf("attaching object label 0x%08lx %s\n", (uint64_t) a, name);*/ \
