@@ -144,22 +144,22 @@ vkpt_tone_mapping_request_reset()
 VkResult
 vkpt_tone_mapping_create_pipelines()
 {
-	VkComputePipelineCreateInfo pipeline_info[TM_NUM_PIPELINES] = {
-		[TONE_MAPPING_HISTOGRAM] = {
+	// C++20 VKPT: Array construct fix.
+	VkComputePipelineCreateInfo pipeline_info[TM_NUM_PIPELINES];
+	pipeline_info[TONE_MAPPING_HISTOGRAM] = {
 			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
 			.stage = SHADER_STAGE(QVK_MOD_TONE_MAPPING_HISTOGRAM_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
 			.layout = pipeline_layout_tone_mapping_histogram,
-		},
-		[TONE_MAPPING_CURVE] = {
-			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE(QVK_MOD_TONE_MAPPING_CURVE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_tone_mapping_curve,
-		},
-		[TONE_MAPPING_APPLY] = {
-			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE(QVK_MOD_TONE_MAPPING_APPLY_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_tone_mapping_apply,
-		},
+	};
+	pipeline_info[TONE_MAPPING_CURVE] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_TONE_MAPPING_CURVE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_tone_mapping_curve,
+	};
+	pipeline_info[TONE_MAPPING_APPLY] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_TONE_MAPPING_APPLY_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_tone_mapping_apply,
 	};
 
 	_VK(vkCreateComputePipelines(qvk.device, 0, LENGTH(pipeline_info), pipeline_info, 0, pipelines));
