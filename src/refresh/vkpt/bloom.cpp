@@ -201,7 +201,7 @@ vkpt_bloom_destroy_pipelines()
 	return VK_SUCCESS;
 }
 
-// C++20 VKPT: IMAGE_BARRIER
+// C++20 VKPT: BARRIER_COMPUTE
 #define BARRIER_COMPUTE(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -225,7 +225,7 @@ vkpt_bloom_destroy_pipelines()
 		); \
 	} while(0)
 
-// C++20 VKPT: IMAGE_BARRIER
+// C++20 VKPT: BARRIER_TO_COPY_DEST
 #define BARRIER_TO_COPY_DEST(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -249,7 +249,7 @@ vkpt_bloom_destroy_pipelines()
 		); \
 	} while(0)
 
-// C++20 VKPT: IMAGE_BARRIER
+// C++20 VKPT: BARRIER_FROM_COPY_DEST
 #define BARRIER_FROM_COPY_DEST(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \

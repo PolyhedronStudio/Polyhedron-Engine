@@ -65,8 +65,9 @@ static DeviceMemory     tex_invalid_texture_image_memory = { 0 };
 
 static VkDeviceMemory mem_images[NUM_VKPT_IMAGES];
 
-static DeviceMemory            tex_image_memory[MAX_RIMAGES] = { 0 };
-static VkBindImageMemoryInfo   tex_bind_image_info[MAX_RIMAGES] = { 0 };
+// C++20 VKPT: { 0 } initializers removed from static arrays.
+static DeviceMemory            tex_image_memory[MAX_RIMAGES];
+static VkBindImageMemoryInfo   tex_bind_image_info[MAX_RIMAGES];
 static DeviceMemoryAllocator*  tex_device_memory_allocator = NULL;
 
 static int image_loading_dirty_flag = 0;
@@ -84,7 +85,7 @@ void vkpt_textures_prefetch()
         return;
     }
 
-    char const * ptr = buffer;
+    char const * ptr = (const char*)buffer; // C++20 VKPT: Added cast.
 	char linebuf[MAX_QPATH];
 	while (sgets(linebuf, sizeof(linebuf), &ptr))
 	{
@@ -92,7 +93,7 @@ void vkpt_textures_prefetch()
 		if (!line)
 			continue;
 
-		image_t const * img1 = IMG_Find(line, IT_SKIN, IF_PERMANENT | IF_SRGB);
+		image_t const * img1 = IMG_Find(line, IT_SKIN, (imageflags_t)(IF_PERMANENT | IF_SRGB)); // C++20 VKPT: Added enum cast.
 
 		char other_name[MAX_QPATH];
 
@@ -110,7 +111,7 @@ void vkpt_textures_prefetch()
 			continue;
 		Q_concat(other_name, sizeof(other_name), other_name, "_light.tga", NULL);
 		FS_NormalizePath(other_name, other_name);
-		image_t const * img3 = IMG_Find(other_name, IT_SKIN, IF_PERMANENT | IF_SRGB);
+		image_t const * img3 = IMG_Find(other_name, IT_SKIN, (imageflags_t)(IF_PERMANENT | IF_SRGB)); // C++20 VKPT: Added enum cast.
 	}
     // Com_Printf("Loaded '%s'\n", filename);
     FS_FreeFile(buffer);
@@ -171,15 +172,17 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 	buffer_unmap(&buf_img_upload);
 	envmap = NULL;
 
+	// C++20 VKPT: Order fix.
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_R8G8B8A8_UNORM,
 		.extent = {
 			.width  = w,
 			.height = h,
 			.depth  = 1,
 		},
-		.imageType             = VK_IMAGE_TYPE_2D,
-		.format                = VK_FORMAT_R8G8B8A8_UNORM,
 		.mipLevels             = 1,
 		.arrayLayers           = num_images,
 		.samples               = VK_SAMPLE_COUNT_1_BIT,
@@ -187,7 +190,6 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 		.usage                 = VK_IMAGE_USAGE_STORAGE_BIT
 		                       | VK_IMAGE_USAGE_TRANSFER_DST_BIT
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT,
-		.flags                 = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE,
 		.queueFamilyIndexCount = qvk.queue_idx_graphics,
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -204,23 +206,24 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 
 	_VK(vkBindImageMemory(qvk.device, img_envmap, mem_envmap, 0));
 
+	// C++20 VKPT: Order fix.
 	VkImageViewCreateInfo img_view_info = {
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = img_envmap,
 		.viewType   = VK_IMAGE_VIEW_TYPE_CUBE,
 		.format     = VK_FORMAT_R8G8B8A8_UNORM,
-		.image      = img_envmap,
+		.components = {
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_G,
+			VK_COMPONENT_SWIZZLE_B,
+			VK_COMPONENT_SWIZZLE_A,
+		},
 		.subresourceRange = {
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
 			.baseArrayLayer = 0,
 			.layerCount     = num_images,
-		},
-		.components     = {
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_G,
-			VK_COMPONENT_SWIZZLE_B,
-			VK_COMPONENT_SWIZZLE_A,
 		},
 	};
 	_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_envmap));
@@ -238,13 +241,18 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 			.layerCount     = 1,
 		};
 
+		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
-				.image            = img_envmap,
-				.subresourceRange = subresource_range,
-				.srcAccessMask    = 0,
-				.dstAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
-				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = NULL,
+			.srcAccessMask = 0,
+			.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image            = img_envmap,
+			.subresourceRange = subresource_range,
 		);
 
 		VkBufferImageCopy cpy_info = {
@@ -261,40 +269,46 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 		vkCmdCopyBufferToImage(cmd_buf, buf_img_upload.buffer, img_envmap,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &cpy_info);
 
-
+		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+				.pNext = NULL,
+				.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 				.image            = img_envmap,
 				.subresourceRange = subresource_range,
-				.srcAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				.newLayout        = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 		);
 	}
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
 
 	{
-	VkDescriptorImageInfo desc_img_info = {
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		.imageView   = imv_envmap,
-		.sampler     = qvk.tex_sampler,
-	};
+		// C++20 VKPT: Order fix.
+		VkDescriptorImageInfo desc_img_info = {
+			.sampler = qvk.tex_sampler,
+			.imageView = imv_envmap,
+			.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		};
 
-	VkWriteDescriptorSet s = {
-		.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.dstSet          = qvk.desc_set_textures_even,
-		.dstBinding      = BINDING_OFFSET_ENVMAP,
-		.dstArrayElement = 0,
-		.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-		.descriptorCount = 1,
-		.pImageInfo      = &desc_img_info,
-	};
+		// C++20 VKPT: Order fix.
+		VkWriteDescriptorSet s = {
+			.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet          = qvk.desc_set_textures_even,
+			.dstBinding      = BINDING_OFFSET_ENVMAP,
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.pImageInfo      = &desc_img_info,
+		};
 
-	vkUpdateDescriptorSets(qvk.device, 1, &s, 0, NULL);
+		vkUpdateDescriptorSets(qvk.device, 1, &s, 0, NULL);
 
-	s.dstSet = qvk.desc_set_textures_odd;
-	vkUpdateDescriptorSets(qvk.device, 1, &s, 0, NULL);
+		s.dstSet = qvk.desc_set_textures_odd;
+		vkUpdateDescriptorSets(qvk.device, 1, &s, 0, NULL);
 	}
 
 	vkQueueWaitIdle(qvk.queue_graphics);
@@ -326,7 +340,7 @@ load_blue_noise()
 
 		byte* filedata = 0;
 		uint16_t *data = 0;
-		ssize_t filelen = FS_LoadFile(buf, &filedata);
+		ssize_t filelen = FS_LoadFile(buf, (void**)&filedata); // C++20 VKPT: Added cast.
 
 		if (filedata) {
 			data = stbi_load_16_from_memory(filedata, filelen, &w, &h, &n, 4);
@@ -351,15 +365,16 @@ load_blue_noise()
 	buffer_unmap(&buf_img_upload);
 	bn_tex = NULL;
 
+	// C++20 VKPT: Order fix.
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_R16_UNORM,
 		.extent = {
 			.width  = BLUE_NOISE_RES,
 			.height = BLUE_NOISE_RES,
 			.depth  = 1,
 		},
-		.imageType             = VK_IMAGE_TYPE_2D,
-		.format                = VK_FORMAT_R16_UNORM,
 		.mipLevels             = 1,
 		.arrayLayers           = NUM_BLUE_NOISE_TEX,
 		.samples               = VK_SAMPLE_COUNT_1_BIT,
@@ -383,23 +398,24 @@ load_blue_noise()
 
 	_VK(vkBindImageMemory(qvk.device, img_blue_noise, mem_blue_noise, 0));
 
+	// C++20 VKPT: Order fix.
 	VkImageViewCreateInfo img_view_info = {
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = img_blue_noise,
 		.viewType   = VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 		.format     = VK_FORMAT_R16_UNORM,
-		.image      = img_blue_noise,
+		.components = {
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_R,
+		},
 		.subresourceRange = {
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
 			.baseArrayLayer = 0,
 			.layerCount     = NUM_BLUE_NOISE_TEX,
-		},
-		.components     = {
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_R,
 		},
 	};
 	_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_blue_noise));
@@ -417,13 +433,18 @@ load_blue_noise()
 			.layerCount     = 1,
 		};
 
+		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
-				.image            = img_blue_noise,
-				.subresourceRange = subresource_range,
-				.srcAccessMask    = 0,
-				.dstAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
-				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = NULL,
+			.srcAccessMask = 0,
+			.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image            = img_blue_noise,
+			.subresourceRange = subresource_range,
 		);
 
 		VkBufferImageCopy cpy_info = {
@@ -442,30 +463,36 @@ load_blue_noise()
 
 
 		IMAGE_BARRIER(cmd_buf,
-				.image            = img_blue_noise,
-				.subresourceRange = subresource_range,
-				.srcAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				.newLayout        = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = NULL,
+			.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image            = img_blue_noise,
+			.subresourceRange = subresource_range,
 		);
 	}
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
 	
+	// C++20 VKPT: Order fix.
 	VkDescriptorImageInfo desc_img_info = {
+		.sampler = qvk.tex_sampler,
+		.imageView = imv_blue_noise,
 		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		.imageView   = imv_blue_noise,
-		.sampler     = qvk.tex_sampler,
 	};
 
+	// C++20 VKPT: Order fix.
 	VkWriteDescriptorSet s = {
 		.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 		.dstSet          = qvk.desc_set_textures_even,
 		.dstBinding      = BINDING_OFFSET_BLUE_NOISE,
 		.dstArrayElement = 0,
-		.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.descriptorCount = 1,
+		.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.pImageInfo      = &desc_img_info,
 	};
 
@@ -778,31 +805,44 @@ void create_invalid_texture()
 
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = tex_invalid_texture_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = tex_invalid_texture_image,
+		.subresourceRange = subresource_range,
 	);
 
+	// C++20 VKPT: float32 array construct fix.
 	const VkClearColorValue color = {
-		.float32[0] = 1.0f,
-		.float32[1] = 0.0f,
-		.float32[2] = 1.0f,
-		.float32[3] = 1.0f
+		.float32 = {
+			1.0f,
+			0.0f,
+			1.0f,
+			1.0f
+		}
 	};
 	const VkImageSubresourceRange range = subresource_range;
 	vkCmdClearColorImage(cmd_buf, tex_invalid_texture_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &color, 1, &range);
 
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = tex_invalid_texture_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = tex_invalid_texture_image,
+		.subresourceRange = subresource_range,
 	);
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
@@ -827,27 +867,30 @@ vkpt_textures_initialize()
 
 	create_invalid_texture();
 
+	// C++20 VKPT: Order fix.
 	VkSamplerCreateInfo sampler_info = {
 		.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
 		.magFilter               = VK_FILTER_LINEAR,
 		.minFilter               = VK_FILTER_LINEAR,
+		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		.addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.anisotropyEnable        = VK_TRUE,
-		.maxAnisotropy           = 16,
+		.maxAnisotropy = 16,
+		.minLod = 0.0f,
+		.maxLod = 128.0f,
 		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
 		.unnormalizedCoordinates = VK_FALSE,
-		.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-		.minLod                  = 0.0f,
-		.maxLod                  = 128.0f,
 	};
 	_VK(vkCreateSampler(qvk.device, &sampler_info, NULL, &qvk.tex_sampler));
 	ATTACH_LABEL_VARIABLE(qvk.tex_sampler, SAMPLER);
+	// C++20 VKPT: Order Fix.
 	VkSamplerCreateInfo sampler_nearest_info = {
 		.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
 		.magFilter               = VK_FILTER_NEAREST,
 		.minFilter               = VK_FILTER_NEAREST,
+		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST,
 		.addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
@@ -855,15 +898,16 @@ vkpt_textures_initialize()
 		.maxAnisotropy           = 16,
 		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
 		.unnormalizedCoordinates = VK_FALSE,
-		.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_NEAREST,
 	};
 	_VK(vkCreateSampler(qvk.device, &sampler_nearest_info, NULL, &qvk.tex_sampler_nearest));
 	ATTACH_LABEL_VARIABLE(qvk.tex_sampler_nearest, SAMPLER);
 
+	// C++20 VKPT: Order Fix.
 	VkSamplerCreateInfo sampler_linear_clamp_info = {
 		.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
 		.magFilter               = VK_FILTER_LINEAR,
 		.minFilter               = VK_FILTER_LINEAR,
+		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		.addressModeU            = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 		.addressModeV            = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
@@ -871,23 +915,23 @@ vkpt_textures_initialize()
 		.maxAnisotropy           = 16,
 		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
 		.unnormalizedCoordinates = VK_FALSE,
-		.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 	};
 	_VK(vkCreateSampler(qvk.device, &sampler_linear_clamp_info, NULL, &qvk.tex_sampler_linear_clamp));
 	ATTACH_LABEL_VARIABLE(qvk.tex_sampler_linear_clamp, SAMPLER);
 
+	// C++20 VKPT: Order Fix.
 	VkDescriptorSetLayoutBinding layout_bindings[] = {
 		{
+			.binding = 0,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = MAX_RIMAGES,
-			.binding         = 0,
 			.stageFlags      = VK_SHADER_STAGE_ALL,
 		},
 #define IMG_DO(_name, _binding, ...) \
 		{ \
+			.binding         = BINDING_OFFSET_IMAGES + _binding, \
 			.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, \
 			.descriptorCount = 1, \
-			.binding         = BINDING_OFFSET_IMAGES + _binding, \
 			.stageFlags      = VK_SHADER_STAGE_ALL, \
 		},
 	LIST_IMAGES
@@ -895,84 +939,84 @@ vkpt_textures_initialize()
 #undef IMG_DO
 #define IMG_DO(_name, _binding, ...) \
 		{ \
+			.binding         = BINDING_OFFSET_TEXTURES + _binding, \
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, \
 			.descriptorCount = 1, \
-			.binding         = BINDING_OFFSET_TEXTURES + _binding, \
 			.stageFlags      = VK_SHADER_STAGE_ALL, \
 		},
 	LIST_IMAGES
 	LIST_IMAGES_A_B
 #undef IMG_DO
 		{
+			.binding = BINDING_OFFSET_BLUE_NOISE,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
-			.binding         = BINDING_OFFSET_BLUE_NOISE,
 			.stageFlags      = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.binding = BINDING_OFFSET_ENVMAP,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
-			.binding         = BINDING_OFFSET_ENVMAP,
 			.stageFlags      = VK_SHADER_STAGE_ALL,
 		},
         {
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .binding = BINDING_OFFSET_PHYSICAL_SKY,
-            .stageFlags = VK_SHADER_STAGE_ALL,
-        },
-        {
-            .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .descriptorCount = 1,
-            .binding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
-            .stageFlags = VK_SHADER_STAGE_ALL,
-        },
-		{
+			.binding = BINDING_OFFSET_PHYSICAL_SKY,
 			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_ALL,
+        },
+        {
+			.binding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_ALL,
+        },
+		{
 			.binding = BINDING_OFFSET_SKY_TRANSMITTANCE,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_SKY_SCATTERING,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_SKY_IRRADIANCE,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_SKY_CLOUDS,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_TERRAIN_ALBEDO,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_TERRAIN_NORMALS,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_TERRAIN_DEPTH,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.binding = BINDING_OFFSET_TERRAIN_SHADOWMAP,
 			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
-			.binding = BINDING_OFFSET_TERRAIN_SHADOWMAP,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		}
 	};
@@ -990,11 +1034,12 @@ vkpt_textures_initialize()
 		.descriptorCount = 2 * (MAX_RIMAGES + 2 * NUM_VKPT_IMAGES) + 128,
 	};
 
+	// C++20 VKPT: Order Fix.
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		.maxSets = 2,
 		.poolSizeCount = 1,
 		.pPoolSizes    = &pool_size,
-		.maxSets       = 2,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_textures));
@@ -1090,15 +1135,16 @@ vkpt_textures_end_registration()
 		return VK_SUCCESS;
 	image_loading_dirty_flag = 0;
 
+	// C++20 VKPT: Order Fix.
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_UNDEFINED,
 		.extent = {
 			.width  = 1337,
 			.height = 1337,
 			.depth  = 1
 		},
-		.imageType             = VK_IMAGE_TYPE_2D,
-		.format                = VK_FORMAT_UNDEFINED,
 		.mipLevels             = 1,
 		.arrayLayers           = 1,
 		.samples               = VK_SAMPLE_COUNT_1_BIT,
@@ -1111,22 +1157,23 @@ vkpt_textures_end_registration()
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
+	// C++20 VKPT: Order Fix.
 	VkImageViewCreateInfo img_view_info = {
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 		.viewType   = VK_IMAGE_VIEW_TYPE_2D,
 		.format     = VK_FORMAT_UNDEFINED,
+		.components = {
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_G,
+			VK_COMPONENT_SWIZZLE_B,
+			VK_COMPONENT_SWIZZLE_A
+		},
 		.subresourceRange = {
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
 			.baseArrayLayer = 0,
 			.layerCount     = 1
-		},
-		.components     = {
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_G,
-			VK_COMPONENT_SWIZZLE_B,
-			VK_COMPONENT_SWIZZLE_A
 		},
 	};
 
@@ -1186,7 +1233,7 @@ vkpt_textures_end_registration()
 	
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
-	char *staging_buffer = buffer_map(&buf_img_upload);
+	char *staging_buffer = (char*)buffer_map(&buf_img_upload); // C++20 VKPT: Added cast
 
 	size_t offset = 0;
 	for(int i = 0; i < MAX_RIMAGES; i++) {
@@ -1215,13 +1262,18 @@ vkpt_textures_end_registration()
 			.layerCount     = 1
 		};
 
+		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
-				.image            = tex_images[i],
-				.subresourceRange = subresource_range,
-				.srcAccessMask    = 0,
-				.dstAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
-				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = NULL,
+			.srcAccessMask = 0,
+			.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image            = tex_images[i],
+			.subresourceRange = subresource_range,
 		);
 
 		{
@@ -1249,14 +1301,19 @@ vkpt_textures_end_registration()
 		{
 			subresource_range.baseMipLevel = mip - 1;
 
+			// C++20 VKPT: IMAGE_BARRIER
 			IMAGE_BARRIER(cmd_buf,
-				.image = tex_images[i],
-				.subresourceRange = subresource_range,
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+				.pNext = NULL,
 				.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 				.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-				);
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.image = tex_images[i],
+				.subresourceRange = subresource_range,
+			);
 
 			int nwd = (wd > 1) ? (wd >> 1) : wd;
 			int nht = (ht > 1) ? (ht >> 1) : ht;
@@ -1292,14 +1349,19 @@ vkpt_textures_end_registration()
 
 			subresource_range.baseMipLevel = mip - 1;
 
+			// C++20 VKPT: IMAGE_BARRIER
 			IMAGE_BARRIER(cmd_buf,
-				.image = tex_images[i],
-				.subresourceRange = subresource_range,
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+				.pNext = NULL,
 				.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				);
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.image = tex_images[i],
+				.subresourceRange = subresource_range,
+			);
 
 			wd = nwd;
 			ht = nht;
@@ -1307,14 +1369,19 @@ vkpt_textures_end_registration()
 
 		subresource_range.baseMipLevel = num_mip_levels - 1;
 
+		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
-			.image = tex_images[i],
-			.subresourceRange = subresource_range,
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = NULL,
 			.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 			.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			);
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image = tex_images[i],
+			.subresourceRange = subresource_range,
+		);
 
 		img_view_info.image = tex_images[i];
 		img_view_info.subresourceRange.levelCount = num_mip_levels;
@@ -1363,10 +1430,11 @@ void vkpt_textures_update_descriptor_set()
 		else if (q_img->type == IT_SPRITE)
 			sampler = qvk.tex_sampler_linear_clamp;
 
+		// C++20 VKPT: Order fix.
 		VkDescriptorImageInfo img_info = {
+			.sampler = sampler,
+			.imageView = image_view,
 			.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			.imageView   = image_view,
-			.sampler     = sampler,
 		};
 
 		if (i >= VKPT_IMG_BLOOM_HBLUR &&
@@ -1374,13 +1442,14 @@ void vkpt_textures_update_descriptor_set()
 			img_info.sampler = qvk.tex_sampler_linear_clamp;
 		}
 
+		// C++20 VKPT: Order fix.
 		VkWriteDescriptorSet descriptor_set_write = {
 			.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet          = qvk_get_current_desc_set_textures(),
 			.dstBinding      = GLOBAL_TEXTURES_TEX_ARR_BINDING_IDX,
 			.dstArrayElement = i,
-			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
+			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.pImageInfo      = &img_info,
 		};
 
@@ -1391,13 +1460,16 @@ void vkpt_textures_update_descriptor_set()
 static VkResult
 create_readback_image(VkImage *image, VkDeviceMemory *memory, VkDeviceSize *memory_size, VkFormat format, uint32_t width, uint32_t height)
 {
+	// C++20 VKPT: Construct fix.
 	VkImageCreateInfo dump_image_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 		.imageType = VK_IMAGE_TYPE_2D,
 		.format = format,
-		.extent.width = width,
-		.extent.height = height,
-		.extent.depth = 1,
+		.extent = {
+			.width = width,
+			.height = height,
+			.depth = 1,
+		},
 		.mipLevels = 1,
 		.arrayLayers = 1,
 		.samples = VK_SAMPLE_COUNT_1_BIT,
@@ -1441,9 +1513,10 @@ destroy_readback_image(VkImage *image, VkDeviceMemory *memory, VkDeviceSize *mem
 VkResult
 vkpt_create_images()
 {
-	VkImageCreateInfo images_create_info[NUM_VKPT_IMAGES] = {
+	// C++20 VKPT: vkpt_create_images changed to not do array designators
+	VkImageCreateInfo images_create_info[NUM_VKPT_IMAGES];// = {
 #define IMG_DO(_name, _binding, _vkformat, _glslformat, _w, _h) \
-	[VKPT_IMG_##_name] = { \
+	images_create_info[VKPT_IMG_##_name] = { \
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, \
 		.imageType = VK_IMAGE_TYPE_2D, \
 		.format = VK_FORMAT_##_vkformat, \
@@ -1464,11 +1537,11 @@ vkpt_create_images()
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE, \
 		.queueFamilyIndexCount = qvk.queue_idx_graphics, \
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED, \
-	},
+	};
 LIST_IMAGES
 LIST_IMAGES_A_B
 #undef IMG_DO
-	};
+//	};
 
 #ifdef VKPT_DEVICE_GROUPS
 #define IMG_DO(_name, _binding, _vkformat, _glslformat, _w, _h) \
@@ -1550,22 +1623,28 @@ LIST_IMAGES_A_B
 #define IMG_DO(_name, _binding, ...) \
 	ATTACH_LABEL_VARIABLE_NAME(qvk.images[VKPT_IMG_##_name], IMAGE, #_name);
 	LIST_IMAGES
-	LIST_IMAGES_A_B
+		LIST_IMAGES_A_B
 #undef IMG_DO
-	/* attach labels to images */
+		/* attach labels to images */
 #define IMG_DO(_name, _binding, ...) \
 	ATTACH_LABEL_VARIABLE_NAME(qvk.images[VKPT_IMG_##_name], IMAGE, #_name);
-	LIST_IMAGES
-	LIST_IMAGES_A_B
+		LIST_IMAGES
+		LIST_IMAGES_A_B
 #undef IMG_DO
 
 
 #define IMG_DO(_name, _binding, _vkformat, _glslformat, _w, _h) \
-	[VKPT_IMG_##_name] = { \
+	images_view_create_info[VKPT_IMG_##_name] = { \
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO, \
+		.image      = qvk.images[VKPT_IMG_##_name], \
 		.viewType   = VK_IMAGE_VIEW_TYPE_2D, \
 		.format     = VK_FORMAT_##_vkformat, \
-		.image      = qvk.images[VKPT_IMG_##_name], \
+		.components     = { \
+			VK_COMPONENT_SWIZZLE_R, \
+			VK_COMPONENT_SWIZZLE_G, \
+			VK_COMPONENT_SWIZZLE_B, \
+			VK_COMPONENT_SWIZZLE_A \
+		}, \
 		.subresourceRange = { \
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
 			.baseMipLevel   = 0, \
@@ -1573,18 +1652,12 @@ LIST_IMAGES_A_B
 			.baseArrayLayer = 0, \
 			.layerCount     = 1 \
 		}, \
-		.components     = { \
-			VK_COMPONENT_SWIZZLE_R, \
-			VK_COMPONENT_SWIZZLE_G, \
-			VK_COMPONENT_SWIZZLE_B, \
-			VK_COMPONENT_SWIZZLE_A \
-		}, \
-	},
-
-	VkImageViewCreateInfo images_view_create_info[NUM_VKPT_IMAGES] = {
-		LIST_IMAGES
-		LIST_IMAGES_A_B
 	};
+
+	VkImageViewCreateInfo images_view_create_info[NUM_VKPT_IMAGES];// = {
+	LIST_IMAGES
+	LIST_IMAGES_A_B
+	//};
 #undef IMG_DO
 
 
@@ -1606,32 +1679,31 @@ LIST_IMAGES_A_B
 #define IMG_DO(_name, ...) \
 	ATTACH_LABEL_VARIABLE_NAME(qvk.images_views[VKPT_IMG_##_name], IMAGE_VIEW, #_name);
 	LIST_IMAGES
-	LIST_IMAGES_A_B
+		LIST_IMAGES_A_B
 #undef IMG_DO
 
 #define IMG_DO(_name, ...) \
-	[VKPT_IMG_##_name] = { \
+	desc_output_img_info[VKPT_IMG_##_name] = { \
 		.sampler     = VK_NULL_HANDLE, \
 		.imageView   = qvk.images_views[VKPT_IMG_##_name], \
 		.imageLayout = VK_IMAGE_LAYOUT_GENERAL \
-	},
-	VkDescriptorImageInfo desc_output_img_info[] = {
-		LIST_IMAGES
-		LIST_IMAGES_A_B
 	};
+
+	VkDescriptorImageInfo desc_output_img_info[NUM_VKPT_IMAGES]; // C++20 VKPT: Added NUM_VKPT_IMAGES size to desc_output_img_info array.
+	LIST_IMAGES
+	LIST_IMAGES_A_B
 #undef IMG_DO
 
-	VkDescriptorImageInfo img_info[] = {
+	VkDescriptorImageInfo img_info[NUM_VKPT_IMAGES]; //= { // C++20 VKPT: Added NUM_VKPT_IMAGES size to desc_output_img_info array.
 #define IMG_DO(_name, ...) \
-		[VKPT_IMG_##_name] = { \
-			.imageLayout = VK_IMAGE_LAYOUT_GENERAL, \
-			.imageView   = qvk.images_views[VKPT_IMG_##_name], \
+		img_info[VKPT_IMG_##_name] = { \
 			.sampler     = qvk.tex_sampler_nearest, \
-		},
+			.imageView   = qvk.images_views[VKPT_IMG_##_name], \
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL \
+		};
 
-		LIST_IMAGES
-		LIST_IMAGES_A_B
-	};
+	LIST_IMAGES
+	LIST_IMAGES_A_B
 #undef IMG_DO
 
 	for(int i = VKPT_IMG_BLOOM_HBLUR; i <= VKPT_IMG_BLOOM_VBLUR; i++) {
@@ -1698,13 +1770,18 @@ LIST_IMAGES_A_B
 	};
 
 	for (int i = 0; i < NUM_VKPT_IMAGES; i++) {
+		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
-			.image = qvk.images[i],
-			.subresourceRange = subresource_range,
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = NULL,
 			.srcAccessMask = 0,
 			.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 			.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image = qvk.images[i],
+			.subresourceRange = subresource_range,
 		);
 
 #ifdef VKPT_DEVICE_GROUPS
@@ -1713,13 +1790,18 @@ LIST_IMAGES_A_B
 			{
 				set_current_gpu(cmd_buf, d);
 
+				// C++20 VKPT: IMAGE_BARRIER
 				IMAGE_BARRIER(cmd_buf,
-					.image = qvk.images_local[d][i],
-					.subresourceRange = subresource_range,
+					.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+					.pNext = NULL,
 					.srcAccessMask = 0,
 					.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 					.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-					.newLayout = VK_IMAGE_LAYOUT_GENERAL
+					.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+					.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+					.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+					.image = qvk.images_local[d][i],
+					.subresourceRange = subresource_range,
 				);
 			}
 
@@ -1729,23 +1811,32 @@ LIST_IMAGES_A_B
 
 	}
 
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.screenshot_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-		);
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = qvk.screenshot_image,
+		.subresourceRange = subresource_range,
+	);
 
 #ifdef VKPT_IMAGE_DUMPS
 	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.dump_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = qvk.dump_image,
+		.subresourceRange = subresource_range,
 	);
 #endif
 	
