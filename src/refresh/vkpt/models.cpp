@@ -60,7 +60,7 @@ static void computeTangents(model_t * model)
         maliasmesh_t * mesh = &model->meshes[idx_mesh];
 
         assert(mesh->tangents);
-        float * stangents = Z_Malloc(mesh->numverts * 2 * 3 * sizeof(float));
+        float * stangents = (float*)Z_Malloc(mesh->numverts * 2 * 3 * sizeof(float)); // C++20 VKPT: Added cast
         float * ttangents = stangents + (mesh->numverts * 3);
  
         for (int idx_frame = 0; idx_frame < model->numframes; ++idx_frame)
