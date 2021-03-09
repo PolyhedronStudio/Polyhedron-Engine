@@ -467,12 +467,12 @@ reset_sun_color_buffer(VkCommandBuffer cmd_buf)
 {
 	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER, \
-		.pNext = NULL, \
-		.srcAccessMask = VK_ACCESS_UNIFORM_READ_BIT, \
-		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT, \
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+		.pNext = NULL,
+		.srcAccessMask = VK_ACCESS_UNIFORM_READ_BIT,
+		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
@@ -481,12 +481,17 @@ reset_sun_color_buffer(VkCommandBuffer cmd_buf)
 	vkCmdFillBuffer(cmd_buf, qvk.buf_sun_color.buffer,
 		0, VK_WHOLE_SIZE, 0);
 
+	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
+		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+		.pNext = NULL,
+		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT
 	);
 }
 
@@ -531,12 +536,17 @@ vkpt_physical_sky_record_cmd_buffer(VkCommandBuffer cmd_buf)
 
 	BARRIER_COMPUTE(cmd_buf, img_envmap);
 
+	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
+		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+		.pNext = NULL,
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT
 	);
 
 	{
@@ -552,12 +562,17 @@ vkpt_physical_sky_record_cmd_buffer(VkCommandBuffer cmd_buf)
 		vkCmdDispatch(cmd_buf, 1, 1, 1);
 	}
 
+	// C++20 VKPT: BUFFER BARRIER
 	BUFFER_BARRIER(cmd_buf,
+		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+		.pNext = NULL,
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_UNIFORM_READ_BIT,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_UNIFORM_READ_BIT
 	);
 
     skyNeedsUpdate = VK_FALSE;
@@ -569,13 +584,18 @@ static void change_image_layouts(VkImage image, const VkImageSubresourceRange* s
 {
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = img_envmap,
-		.subresourceRange = *subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = img_envmap,
+		.subresourceRange = *subresource_range,
 	);
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);

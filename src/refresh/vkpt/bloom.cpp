@@ -175,17 +175,17 @@ vkpt_bloom_destroy()
 VkResult
 vkpt_bloom_create_pipelines()
 {
-	VkComputePipelineCreateInfo pipeline_info[BLOOM_NUM_PIPELINES] = {
-		[BLUR] = {
-			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE(QVK_MOD_BLOOM_BLUR_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_blur,
-		},
-		[COMPOSITE] = {
-			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE(QVK_MOD_BLOOM_COMPOSITE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_composite,
-		}
+	// C++20 VKPT: Removed the [INDEX] enum things.
+	VkComputePipelineCreateInfo pipeline_info[BLOOM_NUM_PIPELINES];
+	pipeline_info[BLUR] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_BLOOM_BLUR_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_blur
+	};
+	pipeline_info[COMPOSITE] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_BLOOM_COMPOSITE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_composite
 	};
 
 	_VK(vkCreateComputePipelines(qvk.device, 0, LENGTH(pipeline_info), pipeline_info, 0, pipelines));
