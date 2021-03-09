@@ -346,22 +346,34 @@ vkpt_bloom_record_cmd_buffer(VkCommandBuffer cmd_buf)
 			.z = 1
 		};
 
+		// C++20 VKPT: Initialize array instead of duplicated (.srcOffsets[0], .srcOffsets[1]) which are invalid.
+		// C++20 VKPT: Initialize array instead of duplicated (.dstOffsets[0], .dstOffsets[1]) which are invalid.
 		VkImageBlit blit_mip_0_to_1 = {
 			.srcSubresource = subresource,
-			.srcOffsets[0] = offset_UL,
-			.srcOffsets[1] = offset_LR_mip_0,
+			.srcOffsets {
+				offset_UL,
+				offset_LR_mip_0,
+			},
 			.dstSubresource = subresource,
-			.dstOffsets[0] = offset_UL,
-			.dstOffsets[1] = offset_LR_mip_1,
+			.dstOffsets = {
+				offset_UL,
+				offset_LR_mip_1,
+			}
 		};
 
+		// C++20 VKPT: Initialize array instead of duplicated (.srcOffsets[0], .srcOffsets[1]) which are invalid.
+		// C++20 VKPT: Initialize array instead of duplicated (.dstOffsets[0], .dstOffsets[1]) which are invalid.
 		VkImageBlit blit_mip_1_to_2 = {
 			.srcSubresource = subresource,
-			.srcOffsets[0] = offset_UL,
-			.srcOffsets[1] = offset_LR_mip_1,
+			.srcOffsets {
+				offset_UL,
+				offset_LR_mip_1,
+			},
 			.dstSubresource = subresource,
-			.dstOffsets[0] = offset_UL,
-			.dstOffsets[1] = offset_LR_mip_2,
+			.dstOffsets = {
+				offset_UL,
+				offset_LR_mip_2,
+			}
 		};
 
 		BARRIER_TO_COPY_SRC(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT]);
