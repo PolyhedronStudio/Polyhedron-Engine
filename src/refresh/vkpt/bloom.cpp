@@ -225,6 +225,7 @@ vkpt_bloom_destroy_pipelines()
 		); \
 	} while(0)
 
+// C++20 VKPT: IMAGE_BARRIER
 #define BARRIER_TO_COPY_DEST(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -235,15 +236,20 @@ vkpt_bloom_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+				.pNext = NULL, \
 				.srcAccessMask    = 0, \
 				.dstAccessMask    = 0, \
 				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, \
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 
+// C++20 VKPT: IMAGE_BARRIER
 #define BARRIER_FROM_COPY_DEST(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -254,15 +260,20 @@ vkpt_bloom_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+				.pNext = NULL, \
 				.srcAccessMask    = 0, \
 				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 
+// C++20 VKPT: IMAGE_BARRIER
 #define BARRIER_TO_COPY_SRC(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -273,15 +284,20 @@ vkpt_bloom_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+				.pNext = NULL, \
 				.srcAccessMask    = 0, \
 				.dstAccessMask    = 0, \
 				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, \
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 
+// C++20 VKPT: IMAGE_BARRIER
 #define BARRIER_FROM_COPY_SRC(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -292,12 +308,16 @@ vkpt_bloom_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+				.pNext = NULL, \
 				.srcAccessMask    = 0, \
 				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 
