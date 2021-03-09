@@ -353,12 +353,14 @@ done:
 	return retval;
 }
 
+// C++20 VKPT: Added uint32_t framenumber since somehow the C code is sending that...
 VkDescriptorSetLayout* SkyGetDescriptorLayout()
 {
 	return &uniform_precomputed_descriptor_layout;
 }
 
-VkDescriptorSet SkyGetDescriptorSet()
+// C++20 VKPT: Added uint32_t framenumber since somehow the C code is sending that...
+VkDescriptorSet SkyGetDescriptorSet(uint32_t framenumber)
 {
 	return desc_set_precomputed_ubo;
 }

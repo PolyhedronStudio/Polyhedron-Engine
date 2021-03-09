@@ -467,9 +467,10 @@ vkpt_bloom_record_cmd_buffer(VkCommandBuffer cmd_buf)
 			.z = 0
 		};
 
+		// C++20 VKPT: Cast
 		VkOffset3D offset_LR_input = {
-			.x = IMG_WIDTH,
-			.y = IMG_HEIGHT,
+			.x = (int32_t)IMG_WIDTH,
+			.y = (int32_t)IMG_HEIGHT,
 			.z = 1
 		};
 

@@ -183,39 +183,44 @@ initializeEnvTexture(int width, int height)
     change_image_layouts(img_envmap, &subresource_range);
 
     // image view
-
+	// C++20 VKPT: Order related VkImageViewCreateInfo again.
     VkImageViewCreateInfo img_view_info = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-        .viewType = VK_IMAGE_VIEW_TYPE_CUBE,
+		.pNext = NULL,
+		.flags = 0,
+		.image = img_envmap,
+		.viewType = VK_IMAGE_VIEW_TYPE_CUBE,
         .format = VK_FORMAT_R16G16B16A16_SFLOAT,
-        .image = img_envmap,
-        .subresourceRange = subresource_range,
-        .components = {
-            VK_COMPONENT_SWIZZLE_R,
-            VK_COMPONENT_SWIZZLE_G,
-            VK_COMPONENT_SWIZZLE_B,
-            VK_COMPONENT_SWIZZLE_A,
-        },
+		.components = {
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_G,
+			VK_COMPONENT_SWIZZLE_B,
+			VK_COMPONENT_SWIZZLE_A,
+		},
+		.subresourceRange = subresource_range
     };
     _VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_envmap));
     ATTACH_LABEL_VARIABLE(imv_envmap, IMAGE_VIEW);
 
     // cube descriptor layout
     {
-        VkDescriptorImageInfo desc_img_info = {
-            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .imageView = imv_envmap,
-            .sampler = qvk.tex_sampler,
+        VkDescriptorImageInfo desc_img_info = { // C++20 VKPT: Order fix.
+			.sampler = qvk.tex_sampler,
+			.imageView = imv_envmap,
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
         };
 
-        VkWriteDescriptorSet s = {
+        VkWriteDescriptorSet s = { // C++20 VKPT: Order fix.
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.pNext = NULL,
             .dstSet = qvk.desc_set_textures_even,
             .dstBinding = BINDING_OFFSET_PHYSICAL_SKY,
             .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
             .pImageInfo = &desc_img_info,
+			.pBufferInfo = NULL,
+			.pTexelBufferView = NULL
         };
 
         vkUpdateDescriptorSets(qvk.device, 1, &s, 0, NULL);
@@ -226,18 +231,20 @@ initializeEnvTexture(int width, int height)
 
     // image descriptor
     {
-        VkDescriptorImageInfo desc_img_info = {
-            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .imageView = imv_envmap,
+        VkDescriptorImageInfo desc_img_info = { // C++20 VKPT: Order fix - Added .sampler = 0 !!
+			.sampler = 0,
+			.imageView = imv_envmap,
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL
         };
 
+		// C++20 VKPT: Order Fix.
         VkWriteDescriptorSet s = {
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
             .dstSet = qvk.desc_set_textures_even,
             .dstBinding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
             .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .descriptorCount = 1,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
             .pImageInfo = &desc_img_info,
         };
 

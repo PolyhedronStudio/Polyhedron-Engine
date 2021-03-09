@@ -60,7 +60,7 @@ void UpdateTerrainShadowMapView(vec3_t forward);
 VkResult SkyLoadScatterParameters(SkyPreset preset);
 
 VkDescriptorSetLayout* SkyGetDescriptorLayout();
-VkDescriptorSet SkyGetDescriptorSet();
+VkDescriptorSet SkyGetDescriptorSet(uint32_t framenumber); // C++20 VKPT: Added missing uint32_t
 
 void RecordCommandBufferShadowmap(VkCommandBuffer cmd_buf);
 
