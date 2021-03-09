@@ -118,7 +118,7 @@ vkpt_shadow_map_initialize()
 		.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
 		       | VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added cast.
 		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
@@ -274,18 +274,20 @@ vkpt_shadow_map_create_pipelines()
 		.pScissors     = &scissor,
 	};
 
+	// C++20 VKPT: Order fix.
 	VkPipelineRasterizationStateCreateInfo rasterizer_state = {
 		.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
 		.polygonMode             = VK_POLYGON_MODE_FILL,
+		.cullMode = VK_CULL_MODE_FRONT_BIT,
+		.frontFace = VK_FRONT_FACE_CLOCKWISE,
 		.lineWidth               = 1.0f,
-		.cullMode                = VK_CULL_MODE_FRONT_BIT,
-		.frontFace               = VK_FRONT_FACE_CLOCKWISE,
 	};
 
+	// C++20 VKPT: Order fix.
 	VkPipelineMultisampleStateCreateInfo multisample_state = {
 		.sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+		.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
 		.sampleShadingEnable   = VK_FALSE,
-		.rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT,
 		.minSampleShading      = 1.0f,
 		.pSampleMask           = NULL,
 		.alphaToCoverageEnable = VK_FALSE,
@@ -395,12 +397,15 @@ vkpt_shadow_map_render(VkCommandBuffer cmd_buf, float* view_projection_matrix, i
 
 	VkClearValue clear_depth = { .depthStencil = { .depth = 1.f } };
 	
+	// C++20 VKPT: Construct fix.
 	VkRenderPassBeginInfo render_pass_info = {
 		.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.renderPass        = render_pass_smap,
 		.framebuffer       = framebuffer_smap,
-		.renderArea.offset = { 0, 0 },
-		.renderArea.extent = { SHADOWMAP_SIZE, SHADOWMAP_SIZE },
+		.renderArea = {
+			.offset = { 0, 0 },
+			.extent = { SHADOWMAP_SIZE, SHADOWMAP_SIZE },
+		},
 		.clearValueCount   = 1,
 		.pClearValues      = &clear_depth
 	};
@@ -418,12 +423,17 @@ vkpt_shadow_map_render(VkCommandBuffer cmd_buf, float* view_projection_matrix, i
 
 	vkCmdSetViewport(cmd_buf, 0, 1, &viewport);
 
+	// C++20 VKPT: Order and construct fix.
 	VkRect2D scissor =
 	{
-		.extent.width = SHADOWMAP_SIZE,
-		.extent.height = SHADOWMAP_SIZE,
-		.offset.x = 0,
-		.offset.y = 0,
+		.offset = {
+			.x = 0,
+			.y = 0,
+		},
+		.extent = {
+			.width = SHADOWMAP_SIZE,
+			.height = SHADOWMAP_SIZE,
+		},
 	};
 
 	vkCmdSetScissor(cmd_buf, 0, 1, &scissor);

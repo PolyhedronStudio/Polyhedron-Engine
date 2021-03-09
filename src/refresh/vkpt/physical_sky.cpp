@@ -700,7 +700,7 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 	if (skyIndex != current_preset)
 	{
 		vkQueueWaitIdle(qvk.queue_graphics);
-		SkyLoadScatterParameters(skyDesc->preset);
+		SkyLoadScatterParameters((SkyPreset)skyDesc->preset); // C++20 VKPT: Added cast.
 		current_preset = skyIndex;
 	}
 
