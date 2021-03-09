@@ -381,10 +381,11 @@ VkDescriptorSet SkyGetDescriptorSet(uint32_t framenumber)
 VkResult
 vkpt_uniform_precomputed_buffer_create()
 {
+	// C++20 VKPT: Order fix.
 	VkDescriptorSetLayoutBinding ubo_layout_binding = {
+		.binding = PRECOMPUTED_SKY_BINDING_IDX,
 		.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 		.descriptorCount = 1,
-		.binding = PRECOMPUTED_SKY_BINDING_IDX,
 		.stageFlags = VK_SHADER_STAGE_ALL,
 	};
 
@@ -409,11 +410,12 @@ vkpt_uniform_precomputed_buffer_create()
 		.descriptorCount = MAX_FRAMES_IN_FLIGHT,
 	};
 
+	// C++20 VKPT: Order fix.
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		.maxSets = MAX_FRAMES_IN_FLIGHT,
 		.poolSizeCount = 1,
 		.pPoolSizes = &pool_size,
-		.maxSets = MAX_FRAMES_IN_FLIGHT,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_precomputed_ubo));
@@ -437,13 +439,14 @@ vkpt_uniform_precomputed_buffer_create()
 			.range = sizeof(struct AtmosphereParameters),
 		};
 
+		// C++20 VKPT: Order fix.
 		VkWriteDescriptorSet output_buf_write = {
 			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet = desc_set_precomputed_ubo,
 			.dstBinding = PRECOMPUTED_SKY_BINDING_IDX,
 			.dstArrayElement = 0,
-			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			.pBufferInfo = &buf_info,
 		};
 
@@ -474,7 +477,7 @@ vkpt_uniform_precomputed_buffer_update()
 	assert(ubo->buffer != VK_NULL_HANDLE);
 	assert(qvk.current_frame_index < MAX_FRAMES_IN_FLIGHT);
 
-	struct AtmosphereParameters *mapped_ubo = buffer_map(ubo);
+	struct AtmosphereParameters *mapped_ubo = (AtmosphereParameters*)buffer_map(ubo); // C++20 VKPT: Added cast.
 	assert(mapped_ubo);
 	memcpy(mapped_ubo, Constants, sizeof(struct AtmosphereParameters));
 	buffer_unmap(ubo);
@@ -995,8 +998,8 @@ void CreateShadowMap(struct Shadowmap* InOutShadowmap)
 
 	// C++20 VKPT: Order fix.
 	VkDescriptorImageInfo desc_img_info = {
-		.imageView = InOutShadowmap->DepthView,
 		.sampler = qvk.tex_sampler,
+		.imageView = InOutShadowmap->DepthView,
 		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
@@ -1108,8 +1111,8 @@ void RecordCommandBufferShadowmap(VkCommandBuffer cmd_buf)
 
 	VkViewport viewport = 
 	{
-		.width = ShadowmapData.Width,
-		.height = ShadowmapData.Height,
+		.width = (float)ShadowmapData.Width,	// C++20 VKPT: Added cast.
+		.height = (float)ShadowmapData.Height,	// C++20 VKPT: Added cast.
 		.minDepth = 0,
 		.maxDepth = 1.0f,
 	};
