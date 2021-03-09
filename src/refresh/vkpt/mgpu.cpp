@@ -70,16 +70,34 @@ vkpt_mgpu_image_copy(VkCommandBuffer cmd_buf,
 
 	VkImageCopy copy_region = {
 		.srcSubresource = subresource_layers,
-		.srcOffset.x = src_offset.x,
-		.srcOffset.y = src_offset.y,
-		.srcOffset.z = 0,
+		// C++20 VKPT: Added a nested initializer list since nested member access is not allowed.
+		//.srcOffset.x = src_offset.x,
+		//.srcOffset.y = src_offset.y,
+		//.srcOffset.z = 0,
+		.srcOffset = {
+			.x = src_offset.x,
+			.y = src_offset.y,
+			.z = 0
+		},
 		.dstSubresource = subresource_layers,
-		.dstOffset.x = dst_offset.x,
-		.dstOffset.y = dst_offset.y,
-		.dstOffset.z = 0,
-		.extent.width = size.width,
-		.extent.height = size.height,
-		.extent.depth = 1
+		// C++20 VKPT: Added a nested initializer list since nested member access is not allowed.
+		//.dstOffset.x = dst_offset.x,
+		//.dstOffset.y = dst_offset.y,
+		//.dstOffset.z = 0,
+		.dstOffset = {
+			.x = dst_offset.x,
+			.y = dst_offset.y,
+			.z = 0
+		},
+		// C++20 VKPT: Added a nested initializer list since nested member access is not allowed.
+		//.extent.width = size.width,
+		//.extent.height = size.height,
+		//.extent.depth = 1
+		.extent = {
+			.width = size.width,
+			.height = size.height,
+			.depth = 1
+		}
 	};
 
 	set_current_gpu(cmd_buf, src_gpu_index);
@@ -132,16 +150,34 @@ vkpt_image_copy(VkCommandBuffer cmd_buf,
 
 	VkImageCopy copy_region = {
 		.srcSubresource = subresource_layers,
-		.srcOffset.x = src_offset.x,
-		.srcOffset.y = src_offset.y,
-		.srcOffset.z = 0,
+		// C++20 VKPT: Added a nested initializer list since nested member access is not allowed.
+		//.srcOffset.x = src_offset.x,
+		//.srcOffset.y = src_offset.y,
+		//.srcOffset.z = 0,
+		.srcOffset = {
+			.x = src_offset.x,
+			.y = src_offset.y,
+			.z = 0
+		},
 		.dstSubresource = subresource_layers,
-		.dstOffset.x = dst_offset.x,
-		.dstOffset.y = dst_offset.y,
-		.dstOffset.z = 0,
-		.extent.width = size.width,
-		.extent.height = size.height,
-		.extent.depth = 1
+		// C++20 VKPT: Added a nested initializer list since nested member access is not allowed.
+		//.dstOffset.x = dst_offset.x,
+		//.dstOffset.y = dst_offset.y,
+		//.dstOffset.z = 0,
+		.dstOffset = {
+			.x = dst_offset.x,
+			.y = dst_offset.y,
+			.z = 0
+		},
+		// C++20 VKPT: Added a nested initializer list since nested member access is not allowed.
+		//.extent.width = size.width,
+		//.extent.height = size.height,
+		//.extent.depth = 1
+		.extent = {
+			.width = size.width,
+			.height = size.height,
+			.depth = 1
+		}
 	};
 
 	VkMemoryBarrier mem_barrier = {
