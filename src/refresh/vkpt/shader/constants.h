@@ -134,5 +134,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SBT_RAHIT_SPRITE 7
 #define SBT_RCHIT_EMPTY 8
 #define SBT_ENTRIES_PER_PIPELINE 9
+#define SBT_ENTRIES_COUNT 10	// C++20 VKPT: Added for array size fix.
 
 #endif /*_CONSTANTS_H_*/
