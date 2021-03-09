@@ -57,13 +57,14 @@ create_render_pass()
 		.pDepthStencilAttachment = &depth_attachment_ref,
 	};
 
+	// C++20 VKPT: Order fix.
 	VkSubpassDependency dependencies[] = {
 		{
 			.srcSubpass    = VK_SUBPASS_EXTERNAL,
 			.dstSubpass    = 0, /* index for own subpass */
 			.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			.srcAccessMask = 0, /* XXX verify */
-			.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
 			               | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 		},
@@ -100,15 +101,16 @@ vkpt_shadow_map_initialize()
 	);
 
 
+	// C++20 VKPT: Order fix.
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_D32_SFLOAT,
 		.extent = {
 			.width = SHADOWMAP_SIZE,
 			.height = SHADOWMAP_SIZE,
 			.depth = 1,
 		},
-		.imageType = VK_IMAGE_TYPE_2D,
-		.format = VK_FORMAT_D32_SFLOAT,
 		.mipLevels = 1,
 		.arrayLayers = 2,
 		.samples = VK_SAMPLE_COUNT_1_BIT,
@@ -130,23 +132,24 @@ vkpt_shadow_map_initialize()
 
 	_VK(vkBindImageMemory(qvk.device, img_smap, mem_smap, 0));
 
+	// C++20 VKPT: Order fix.
 	VkImageViewCreateInfo img_view_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = img_smap,
 		.viewType = VK_IMAGE_VIEW_TYPE_2D,
 		.format = VK_FORMAT_D32_SFLOAT,
-		.image = img_smap,
+		.components = {
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_G,
+			VK_COMPONENT_SWIZZLE_B,
+			VK_COMPONENT_SWIZZLE_A,
+		},
 		.subresourceRange = {
 			.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
 			.baseMipLevel = 0,
 			.levelCount = 1,
 			.baseArrayLayer = 0,
 			.layerCount = 1,
-		},
-		.components = {
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_G,
-			VK_COMPONENT_SWIZZLE_B,
-			VK_COMPONENT_SWIZZLE_A,
 		},
 	};
 	_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_smap_depth));
