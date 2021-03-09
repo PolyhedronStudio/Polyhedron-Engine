@@ -115,7 +115,7 @@ STATIC BOOL CALLBACK enum_modules_callback(
     UINT numBytes;
     VS_FIXEDFILEINFO *info;
     char version[64];
-    char *symbols, *star;
+    const char* symbols, *star; // C++20: //char *symbols, *star;
     int len;
     BOOL ret;
 
@@ -145,24 +145,24 @@ STATIC BOOL CALLBACK enum_modules_callback(
     if (ret) {
         ModuleName = moduleInfo.ModuleName;
         switch (moduleInfo.SymType) {
-        case SymNone:       symbols = (char*)"none";       break; // C++20: Added cast.
-        case SymCoff:       symbols = (char*)"COFF";       break; // C++20: Added cast.
-        case SymPdb:        symbols = (char*)"PDB";        break; // C++20: Added cast.
-        case SymExport:     symbols = (char*)"export";     break; // C++20: Added cast.
-        case SymVirtual:    symbols = (char*)"virtual";    break; // C++20: Added cast.
-        default:            symbols = (char*)"unknown";    break; // C++20: Added cast.
+        case SymNone:       symbols = (const char*)"none";       break; // C++20: Added cast.
+        case SymCoff:       symbols = (const char*)"COFF";       break; // C++20: Added cast.
+        case SymPdb:        symbols = (const char*)"PDB";        break; // C++20: Added cast.
+        case SymExport:     symbols = (const char*)"export";     break; // C++20: Added cast.
+        case SymVirtual:    symbols = (const char*)"virtual";    break; // C++20: Added cast.
+        default:            symbols = (const char*)"unknown";    break; // C++20: Added cast.
         }
     } else {
         write_report("SymGetModuleInfo64 failed with error %#x\r\n",
                      GetLastError());
-        symbols = (char*)"failed"; // C++20: Added cast.
+        symbols = (const char*)"failed"; // C++20: Added cast.
     }
 
     if (pc >= ModuleBase && pc < ModuleBase + ModuleSize) {
         CopyMemory(faultyModuleName, ModuleName, len + 1);
-        star = (char*)" *"; // C++20: Added cast.
+        star = (const char*)" *"; // C++20: Added cast.
     } else {
-        star = (char*)""; // C++20: Added cast.
+        star = (const char*)""; // C++20: Added cast.
     }
 
     write_report(

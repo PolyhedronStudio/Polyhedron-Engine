@@ -165,7 +165,7 @@ VkResult UploadImage(void* FirstPixel, size_t total_size, unsigned int Width, un
 	VkMemoryAllocateFlagsInfo mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
 		.flags = VK_MEMORY_ALLOCATE_DEVICE_MASK_BIT,
-		.deviceMask = (1 << qvk.device_count) - 1
+		.deviceMask = (uint32_t)((1 << qvk.device_count) - 1) // C++20 VKPT: Cast to uint32_t
 	};
 
 	if (qvk.device_count > 1) {

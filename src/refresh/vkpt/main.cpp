@@ -474,7 +474,7 @@ get_vk_extension_list(
 		VkExtensionProperties **ext)
 {
 	_VK(vkEnumerateInstanceExtensionProperties(layer, num_extensions, NULL));
-	*ext = malloc(sizeof(**ext) * *num_extensions);
+	*ext = (VkExtensionProperties*)malloc(sizeof(**ext) * *num_extensions); // C++20 VKPT: malloc typecast
 	_VK(vkEnumerateInstanceExtensionProperties(layer, num_extensions, *ext));
 }
 
@@ -484,7 +484,7 @@ get_vk_layer_list(
 		VkLayerProperties **ext)
 {
 	_VK(vkEnumerateInstanceLayerProperties(num_layers, NULL));
-	*ext = malloc(sizeof(**ext) * *num_layers);
+	*ext = (VkLayerProperties*)malloc(sizeof(**ext) * *num_layers); // C++20 VKPT: malloc typecast
 	_VK(vkEnumerateInstanceLayerProperties(num_layers, *ext));
 }
 
@@ -560,7 +560,7 @@ create_swapchain()
 
 	uint32_t num_formats = 0;
 	vkGetPhysicalDeviceSurfaceFormatsKHR(qvk.physical_device, qvk.surface, &num_formats, NULL);
-	VkSurfaceFormatKHR *avail_surface_formats = alloca(sizeof(VkSurfaceFormatKHR) * num_formats);
+	VkSurfaceFormatKHR *avail_surface_formats = (VkSurfaceFormatKHR*)alloca(sizeof(VkSurfaceFormatKHR) * num_formats); // C++20 VKPT: alloca typecast
 	vkGetPhysicalDeviceSurfaceFormatsKHR(qvk.physical_device, qvk.surface, &num_formats, avail_surface_formats);
 	/* Com_Printf("num surface formats: %d\n", num_formats);
 
@@ -586,7 +586,7 @@ out:;
 
 	uint32_t num_present_modes = 0;
 	vkGetPhysicalDeviceSurfacePresentModesKHR(qvk.physical_device, qvk.surface, &num_present_modes, NULL);
-	VkPresentModeKHR *avail_present_modes = alloca(sizeof(VkPresentModeKHR) * num_present_modes);
+	VkPresentModeKHR *avail_present_modes = (VkPresentModeKHR*)alloca(sizeof(VkPresentModeKHR) * num_present_modes); // C++20 VKPT: alloca typecast
 	vkGetPhysicalDeviceSurfacePresentModesKHR(qvk.physical_device, qvk.surface, &num_present_modes, avail_present_modes);
 	qboolean immediate_mode_available = qfalse;
 
@@ -687,7 +687,16 @@ out:;
 
 	for (int image_index = 0; image_index < qvk.num_swap_chain_images; image_index++)
 	{
+		// IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 
+			.pNext = NULL, 
+			.srcAccessMask = 0,
+			.dstAccessMask = 0,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, 
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, 
 			.image = qvk.swap_chain_images[image_index],
 			.subresourceRange = {
 				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -696,10 +705,7 @@ out:;
 				.baseArrayLayer = 0,
 				.layerCount = 1
 			},
-			.srcAccessMask = 0,
-			.dstAccessMask = 0,
-			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-			.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+
 		);
 	}
 

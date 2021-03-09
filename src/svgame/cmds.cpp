@@ -146,7 +146,7 @@ Give items to a client
 */
 void Cmd_Give_f(edict_t *ent)
 {
-    char        *name;
+    const char        *name;
     gitem_t     *it;
     int         index;
     int         i;
@@ -158,7 +158,7 @@ void Cmd_Give_f(edict_t *ent)
         return;
     }
 
-    name = (char*)gi.args(); // C++20: Added cast.
+    name = (const char*)gi.args(); // C++20: Added cast.
 
     if (Q_stricmp(name, "all") == 0)
         give_all = qtrue;
@@ -244,7 +244,7 @@ void Cmd_Give_f(edict_t *ent)
 
     it = FindItem(name);
     if (!it) {
-        name = (char*)gi.argv(1); // C++20: Added cast.
+        name = (const char*)gi.argv(1); // C++20: Added cast.
         it = FindItem(name);
         if (!it) {
             gi.cprintf(ent, PRINT_HIGH, "unknown item\n");
@@ -358,9 +358,9 @@ void Cmd_Use_f(edict_t *ent)
 {
     int         index;
     gitem_t     *it;
-    char        *s;
+    const char        *s;
 
-    s = (char*)gi.args(); // C++20: Added casts.
+    s = (const char*)gi.args(); // C++20: Added casts.
     it = FindItem(s);
     if (!it) {
         gi.cprintf(ent, PRINT_HIGH, "unknown item: %s\n", s);
@@ -391,9 +391,9 @@ void Cmd_Drop_f(edict_t *ent)
 {
     int         index;
     gitem_t     *it;
-    char        *s;
+    const char        *s;
 
-    s = (char*)gi.args(); // C++20: Added casts.
+    s = (const char*)gi.args(); // C++20: Added casts.
     it = FindItem(s);
     if (!it) {
         gi.cprintf(ent, PRINT_HIGH, "unknown item: %s\n", s);
@@ -732,7 +732,7 @@ void Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 {
     int     i, j;
     edict_t *other;
-    char    *p;
+    const char    *p;
     char    text[2048];
     gclient_t *cl;
 
@@ -752,7 +752,7 @@ void Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
         strcat(text, " ");
         strcat(text, gi.args());
     } else {
-        p = (char*)gi.args();  // C++20: Added casts.
+        p = (const char*)gi.args();  // C++20: Added casts.
 
         if (*p == '"') {
             p++;
@@ -845,12 +845,12 @@ ClientCommand
 */
 void ClientCommand(edict_t *ent)
 {
-    char    *cmd;
+    const char    *cmd;
 
     if (!ent->client)
         return;     // not fully in game yet
 
-    cmd = (char*)gi.argv(0); // C++20: Added casts.
+    cmd = (const char*)gi.argv(0); // C++20: Added casts.
 
     if (Q_stricmp(cmd, "players") == 0) {
         Cmd_Players_f(ent);

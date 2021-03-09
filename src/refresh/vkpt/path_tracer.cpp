@@ -350,11 +350,12 @@ get_scratch_buffer_size_nv(VkAccelerationStructureNV ac)
 	// C++20 VKPT: Order fix.
 	VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
 		.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
-		.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_BUILD_SCRATCH_NV
+		.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_BUILD_SCRATCH_NV,
 		.accelerationStructure = ac,
 	};
 
-	VkMemoryRequirements2 mem_req = { 0 };
+	VkMemoryRequirements2 mem_req; // C++20 VKPT: Initialize struct using memset instead of { 0 }
+	memset(&mem_req, 0, sizeof(VkMemoryRequirements2));
 	mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
 	qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
 
