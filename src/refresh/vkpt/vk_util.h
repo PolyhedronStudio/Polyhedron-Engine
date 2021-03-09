@@ -108,13 +108,14 @@ const char *qvk_result_to_string(VkResult result);
 		qvkDebugMarkerSetObjectNameEXT(qvk.device, &name_info); \
 	}
 
+// C++20 VKPT: Order fix of ATTACH_LABEL_VARIABLE_NAME
 #define ATTACH_LABEL_VARIABLE_NAME(a, type, name) \
 	if(qvkDebugMarkerSetObjectNameEXT) { \
 		/*Com_Printf("attaching object label 0x%08lx %s\n", (uint64_t) a, name);*/ \
 		VkDebugMarkerObjectNameInfoEXT name_info = { \
 			.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT, \
-			.object = (uint64_t) a, \
 			.objectType = VK_DEBUG_REPORT_OBJECT_TYPE_##type##_EXT, \
+			.object = (uint64_t) a, \
 			.pObjectName = name, \
 		}; \
 		qvkDebugMarkerSetObjectNameEXT(qvk.device, &name_info); \

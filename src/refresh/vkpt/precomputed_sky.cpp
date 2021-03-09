@@ -121,27 +121,28 @@ VkResult UploadImage(void* FirstPixel, size_t total_size, unsigned int Width, un
 	if (Depth > 1)
 		ImageType = VK_IMAGE_TYPE_3D;
 
+	// C++20 VKPT: Order fix.
 	VkImageCreateInfo img_info =
 	{
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.flags = 0,
+		.imageType = ImageType,
+		.format = PixelFormat,
 		.extent = {
-		.width = Width,
-		.height = Height,
-		.depth = Depth,
-	},
-	.imageType = ImageType,
-	.format = PixelFormat,
-	.mipLevels = 1,
-	.arrayLayers = ArraySize,
-	.samples = VK_SAMPLE_COUNT_1_BIT,
-	.tiling = VK_IMAGE_TILING_OPTIMAL,
-	.usage = VK_IMAGE_USAGE_STORAGE_BIT
-	| VK_IMAGE_USAGE_TRANSFER_DST_BIT
-		| VK_IMAGE_USAGE_SAMPLED_BIT,
+			.width = Width,
+			.height = Height,
+			.depth = Depth,
+		},
+		.mipLevels = 1,
+		.arrayLayers = ArraySize,
+		.samples = VK_SAMPLE_COUNT_1_BIT,
+		.tiling = VK_IMAGE_TILING_OPTIMAL,
+		.usage = VK_IMAGE_USAGE_STORAGE_BIT
+				| VK_IMAGE_USAGE_TRANSFER_DST_BIT
+				| VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added  cast.
 		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-		.flags = 0
 	};
 
 	if (Cube)
