@@ -347,10 +347,11 @@ vkpt_pt_update_descripter_set_bindings(int idx)
 static size_t
 get_scratch_buffer_size_nv(VkAccelerationStructureNV ac)
 {
+	// C++20 VKPT: Order fix.
 	VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
 		.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
-		.accelerationStructure = ac,
 		.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_BUILD_SCRATCH_NV
+		.accelerationStructure = ac,
 	};
 
 	VkMemoryRequirements2 mem_req = { 0 };
@@ -441,14 +442,15 @@ vkpt_pt_create_accel_bottom(
 		assert(buffer_vertex->address);
 		if (buffer_index) assert(buffer_index->address);
 
+		// C++20 VKPT: Order fix.
 		const VkAccelerationStructureGeometryTrianglesDataKHR triangles = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR,
 			.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT,
 			.vertexData = {.deviceAddress = buffer_vertex->address + offset_vertex },
 			.vertexStride = sizeof(float) * 3,
-			.maxVertex = num_vertices - 1,
-			.indexData = {.deviceAddress = buffer_index ? (buffer_index->address + offset_index) : 0 },
+			.maxVertex = (uint32_t)num_vertices - 1, // C++20 VKPT: Narrowing conversion fix.
 			.indexType = buffer_index ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_NONE_KHR,
+			.indexData = {.deviceAddress = buffer_index ? (buffer_index->address + offset_index) : 0 },
 		};
 
 		const VkAccelerationStructureGeometryDataKHR geometry_data = { 
@@ -514,8 +516,8 @@ vkpt_pt_create_accel_bottom(
 			// Create acceleration structure
 			VkAccelerationStructureCreateInfoKHR createInfo = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
+				.size = sizeInfo.accelerationStructureSize, // C++20 VKPT: Order fix.
 				.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
-				.size = sizeInfo.accelerationStructureSize
 			};
 
 			// Create the buffer for the acceleration structure
@@ -542,13 +544,14 @@ vkpt_pt_create_accel_bottom(
 		assert(scratch_buf_ptr < SIZE_SCRATCH_BUFFER);
 
 		// build offset
-		VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = max(num_vertices, num_indices) / 3 };
+		VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = (uint32_t)(max(num_vertices, num_indices) / 3) };
 		VkAccelerationStructureBuildRangeInfoKHR* offsets = &offset;
 
 		qvkCmdBuildAccelerationStructuresKHR(cmd_buf, 1, &buildInfo, &offsets);
 	}
 	else // (!qvk.use_khr_ray_tracing)
 	{
+		// C++20 VKPT: Order fix.
 		VkGeometryNV geometry = {
 			.sType = VK_STRUCTURE_TYPE_GEOMETRY_NV,
 			.geometry = {
@@ -560,8 +563,8 @@ vkpt_pt_create_accel_bottom(
 					.vertexStride = sizeof(float) * 3,
 					.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT,
 					.indexData = buffer_index ? buffer_index->buffer : VK_NULL_HANDLE,
-					.indexType = buffer_index ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_NONE_NV,
 					.indexCount = num_indices,
+					.indexType = buffer_index ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_NONE_NV,
 				},
 				.aabbs = { .sType = VK_STRUCTURE_TYPE_GEOMETRY_AABB_NV }
 			}
@@ -591,25 +594,27 @@ vkpt_pt_create_accel_bottom(
 				allocGeometry.geometry.triangles.vertexCount *= DYNAMIC_GEOMETRY_BLOAT_FACTOR;
 			}
 
+			// C++20 VKPT: Order fix.
 			VkAccelerationStructureCreateInfoNV accel_create_info = 
 			{
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_NV,
 				.info = {
 					.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
+					.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
+					.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV
 					.instanceCount = 0,
 					.geometryCount = 1,
 					.pGeometries = &allocGeometry,
-					.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
-					.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV
 				}
 			};
 
 			qvkCreateAccelerationStructureNV(qvk.device, &accel_create_info, NULL, &blas->accel_nv);
 
+			// C++20 VKPT: Order fix.
 			VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
+				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV,
 				.accelerationStructure = blas->accel_nv,
-				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV
 			};
 
 			VkMemoryRequirements2 mem_req = { 0 };
@@ -872,14 +877,15 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 		};
 
 		// Find size to build on the device
+		// C++20 VKPT: Order fix.
 		VkAccelerationStructureBuildGeometryInfoKHR buildInfo = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR,
+			.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
 			.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR,
+			.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR,
+			.srcAccelerationStructure = VK_NULL_HANDLE,
 			.geometryCount = 1,
 			.pGeometries = &topASGeometry,
-			.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR,
-			.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
-			.srcAccelerationStructure = VK_NULL_HANDLE
 		};
 
 		VkAccelerationStructureBuildSizesInfoKHR sizeInfo = { .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
@@ -894,11 +900,12 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 
 			// Create TLAS
 			// Create acceleration structure
+			// C++20 VKPT: Order fix.
 			VkAccelerationStructureCreateInfoKHR createInfo = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
-				.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
+				.buffer = mem_accel_top[idx].buffer,
 				.size = sizeInfo.accelerationStructureSize,
-				.buffer = mem_accel_top[idx].buffer
+				.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
 			};
 
 			// Create the acceleration structure
@@ -922,15 +929,16 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 	}
 	else // (!qvk.use_khr_ray_tracing)
 	{
+		// C++20 VKPT: Order fix.
 		VkAccelerationStructureCreateInfoNV accel_create_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_NV,
 			.info = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
-			.instanceCount = num_instances,
-			.geometryCount = 0,
-			.pGeometries = NULL,
-			.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_NV
-		}
+				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
+				.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_NV,
+				.instanceCount = num_instances,
+				.geometryCount = 0,
+				.pGeometries = NULL,
+			}
 		};
 
 		if (accel_top_match[idx].instanceCount < accel_create_info.info.instanceCount) 
@@ -940,10 +948,11 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 			qvkCreateAccelerationStructureNV(qvk.device, &accel_create_info, NULL, accel_top_nv + idx);
 
 			/* XXX: do allocation only once with safety margin */
+			// C++20 VKPT: Order fix.
 			VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
+				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV,
 				.accelerationStructure = accel_top_nv[idx],
-				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV
 			};
 			VkMemoryRequirements2 mem_req = { 0 };
 			mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
@@ -964,12 +973,13 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 			accel_top_match[idx].instanceCount = accel_create_info.info.instanceCount;
 		}
 
+		// C++20 VKPT: Order fix.
 		VkAccelerationStructureInfoNV as_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
 			.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_NV,
+			.instanceCount = num_instances,
 			.geometryCount = 0,
 			.pGeometries = NULL,
-			.instanceCount = num_instances,
 		};
 
 		// Request the amount of scratch memory, just to make the validation layer happy.
@@ -1007,6 +1017,7 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 	return VK_SUCCESS;
 }
 
+// C++20 VKPT: IMAGE_BARRIER
 #define BARRIER_COMPUTE(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -1017,12 +1028,16 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+				.pNext = NULL, \
 				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
 				.dstAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 
@@ -1299,7 +1314,7 @@ vkpt_pt_create_pipelines()
 	};
 
 	uint32_t num_shader_groups = SBT_ENTRIES_PER_PIPELINE * PIPELINE_COUNT;
-	char* shader_handles = alloca(num_shader_groups * shaderGroupHandleSize);
+	char* shader_handles = (char*)alloca(num_shader_groups * shaderGroupHandleSize); 	// C++20 VKPT: Cast
 
 	VkPipelineShaderStageCreateInfo shader_stages[] = {
 		{
@@ -1316,7 +1331,9 @@ vkpt_pt_create_pipelines()
 		SHADER_STAGE(QVK_MOD_PATH_TRACER_SPRITE_RAHIT,        VK_SHADER_STAGE_ANY_HIT_BIT_KHR),
 	};
 
-	for (pipeline_index_t index = 0; index < PIPELINE_COUNT; index++)
+	// C++20 VKPT: pipeline_index_t is uint32_t in this for loop
+	//for (pipeline_index_t index = 0; index < PIPELINE_COUNT; index++)
+	for (uint32_t index = 0; index < PIPELINE_COUNT; index++)
 	{
 		switch (index)
 		{
