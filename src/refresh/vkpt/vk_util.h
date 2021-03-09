@@ -67,12 +67,11 @@ uint32_t get_memory_type(uint32_t mem_req_type_bits, VkMemoryPropertyFlags mem_p
 				1, &img_mem_barrier); \
 	} while(0)
 
+// C++20 VKPT: Moved .sType, .srcQueueFamilyIndex, .dstQueueFamilyIndex out.
+// Initialized in the calls to BUFFER_BARRIER now due to init + dec orders having to match.
 #define BUFFER_BARRIER(cmd_buf, ...) \
 	do { \
 		VkBufferMemoryBarrier buf_mem_barrier = { \
-			.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER, \
-			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
 			__VA_ARGS__ \
 		}; \
 		vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \

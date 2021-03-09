@@ -228,13 +228,16 @@ vkpt_asvgf_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-
-				.image            = img, \
-				.subresourceRange = subresource_range, \
-				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
-				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+			.pNext = NULL, \
+			.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT, \
+			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT, \
+			.oldLayout = VK_IMAGE_LAYOUT_GENERAL, \
+			.newLayout = VK_IMAGE_LAYOUT_GENERAL, \
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+			.image            = img, \
+			.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 

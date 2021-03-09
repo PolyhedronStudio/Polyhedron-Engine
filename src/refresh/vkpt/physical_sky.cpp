@@ -465,12 +465,17 @@ vkpt_physical_sky_destroy_pipelines()
 static void
 reset_sun_color_buffer(VkCommandBuffer cmd_buf)
 {
+	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
+		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER, \
+		.pNext = NULL, \
+		.srcAccessMask = VK_ACCESS_UNIFORM_READ_BIT, \
+		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT, \
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_UNIFORM_READ_BIT,
-		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT
 	);
 
 	vkCmdFillBuffer(cmd_buf, qvk.buf_sun_color.buffer,
