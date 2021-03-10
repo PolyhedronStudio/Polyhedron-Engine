@@ -1769,7 +1769,7 @@ void
 bsp_add_entlights(const bsp_t* bsp)
 {
 	char* entString;
-	char* com_token;
+	const char* com_token;
 	int el;
 	float entity_scale;
 
@@ -1822,7 +1822,7 @@ bsp_add_entlights(const bsp_t* bsp)
 		EntityKVPair_t keypairs[BSP_MAX_ENTITY_PROPERTIES];
 		int num_keypairs, i;
 		qboolean islight;
-		char* com_token_inner;
+		const char* com_token_inner;
 		//char* inner;
 
 		num_keypairs = 0;
