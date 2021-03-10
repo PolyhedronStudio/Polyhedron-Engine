@@ -181,7 +181,7 @@ vkpt_tone_mapping_reset(VkCommandBuffer cmd_buf)
 	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = 0,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
@@ -234,11 +234,13 @@ vkpt_tone_mapping_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.pNext = NULL, \
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
 				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
 				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
 				.image            = img, \
 				.subresourceRange = subresource_range, \
 		); \
