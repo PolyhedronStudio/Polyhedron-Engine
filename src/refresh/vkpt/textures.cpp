@@ -245,7 +245,7 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
 			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-			.pNext = NULL,
+			//.pNext = NULL,
 			.srcAccessMask = 0,
 			.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -273,7 +273,7 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
 				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-				.pNext = NULL,
+				//.pNext = NULL,
 				.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -437,7 +437,7 @@ load_blue_noise()
 		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
 			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-			.pNext = NULL,
+			//.pNext = NULL,
 			.srcAccessMask = 0,
 			.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -465,7 +465,7 @@ load_blue_noise()
 
 		IMAGE_BARRIER(cmd_buf,
 			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-			.pNext = NULL,
+			//.pNext = NULL,
 			.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 			.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -809,7 +809,7 @@ void create_invalid_texture()
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -835,7 +835,7 @@ void create_invalid_texture()
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -1266,7 +1266,7 @@ vkpt_textures_end_registration()
 		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
 			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-			.pNext = NULL,
+			//.pNext = NULL,
 			.srcAccessMask = 0,
 			.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -1305,7 +1305,7 @@ vkpt_textures_end_registration()
 			// C++20 VKPT: IMAGE_BARRIER
 			IMAGE_BARRIER(cmd_buf,
 				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-				.pNext = NULL,
+				//.pNext = NULL,
 				.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 				.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -1353,7 +1353,7 @@ vkpt_textures_end_registration()
 			// C++20 VKPT: IMAGE_BARRIER
 			IMAGE_BARRIER(cmd_buf,
 				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-				.pNext = NULL,
+				//.pNext = NULL,
 				.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
@@ -1373,7 +1373,7 @@ vkpt_textures_end_registration()
 		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
 			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-			.pNext = NULL,
+			//.pNext = NULL,
 			.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 			.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -1774,7 +1774,7 @@ LIST_IMAGES_A_B
 		// C++20 VKPT: IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
 			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-			.pNext = NULL,
+			//.pNext = NULL,
 			.srcAccessMask = 0,
 			.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -1794,7 +1794,7 @@ LIST_IMAGES_A_B
 				// C++20 VKPT: IMAGE_BARRIER
 				IMAGE_BARRIER(cmd_buf,
 					.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-					.pNext = NULL,
+					//.pNext = NULL,
 					.srcAccessMask = 0,
 					.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 					.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -1815,7 +1815,7 @@ LIST_IMAGES_A_B
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -1829,7 +1829,7 @@ LIST_IMAGES_A_B
 #ifdef VKPT_IMAGE_DUMPS
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
