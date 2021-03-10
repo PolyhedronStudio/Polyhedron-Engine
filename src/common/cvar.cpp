@@ -702,14 +702,14 @@ void Cvar_Command(cvar_t *v)
 
 static void Cvar_Set_c(genctx_t *ctx, int argnum)
 {
-    char *s;
+    const char *s;
     cvar_t *var;
     xgenerator_t g;
 
     if (argnum == 1) {
         Cvar_Variable_g(ctx);
     } else if (argnum == 2) {
-        s = (char*)Cmd_Argv(ctx->argnum - 1); // C++20: Added cast.
+        s = Cmd_Argv(ctx->argnum - 1); // C++20: Added cast.
         if ((var = Cvar_FindVar(s)) != NULL) {
             g = var->generator;
             if (g) {
