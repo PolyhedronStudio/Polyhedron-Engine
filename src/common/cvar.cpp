@@ -731,7 +731,7 @@ Allows setting and defining of arbitrary cvars from console
 void Cvar_Set_f(void)
 {
     int     c, flags;
-    char    *f;
+    const char    *f;
 
     c = Cmd_Argc();
     if (c < 3) {
@@ -745,7 +745,7 @@ void Cvar_Set_f(void)
     }
 
     if (c == 4) {
-        f = (char*)Cmd_Argv(3); // C++20: Added cast.
+        f = Cmd_Argv(3); 
         if (!strcmp(f, "u")) {
             flags = CVAR_USERINFO;
         } else if (!strcmp(f, "s")) {
@@ -1018,13 +1018,13 @@ static void Cvar_Toggle_f(void)
 
 static void Cvar_Toggle_c(genctx_t *ctx, int argnum)
 {
-    char *s;
+    const char *s;
     xgenerator_t g;
 
     if (argnum == 1) {
         Cvar_Variable_g(ctx);
     } else {
-        s = (char*)Cmd_Argv(ctx->argnum - argnum + 1); // C++20: Added cast.
+        s = Cmd_Argv(ctx->argnum - argnum + 1); // C++20: Added cast.
         if ((g = Cvar_FindGenerator(s)) != NULL) {
             g(ctx);
         }
