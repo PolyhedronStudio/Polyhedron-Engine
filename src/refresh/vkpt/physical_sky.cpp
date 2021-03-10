@@ -225,8 +225,7 @@ initializeEnvTexture(int width, int height)
 
     // image descriptor
     {
-        VkDescriptorImageInfo desc_img_info = { // C++20 VKPT: Order fix - Added .sampler = 0 !!
-			.sampler = 0,
+        VkDescriptorImageInfo desc_img_info = { // C++20 VKPT: Order fix -
 			.imageView = imv_envmap,
 			.imageLayout = VK_IMAGE_LAYOUT_GENERAL
         };
