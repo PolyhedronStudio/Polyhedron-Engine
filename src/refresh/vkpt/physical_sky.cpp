@@ -185,8 +185,6 @@ initializeEnvTexture(int width, int height)
 	// C++20 VKPT: Order related VkImageViewCreateInfo again.
     VkImageViewCreateInfo img_view_info = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		.pNext = NULL,
-		.flags = 0,
 		.image = img_envmap,
 		.viewType = VK_IMAGE_VIEW_TYPE_CUBE,
         .format = VK_FORMAT_R16G16B16A16_SFLOAT,
