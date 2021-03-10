@@ -573,7 +573,7 @@ static void dump_downloads(void)
 {
     client_t    *client;
     int         size, percent;
-    char        *name;
+    const char        *name;
 
     Com_Printf(
         "num name            download                                 size    done\n"
@@ -587,7 +587,7 @@ static void dump_downloads(void)
                 size = 1;
             percent = client->downloadcount * 100 / size;
         } else if (client->http_download) {
-            name = (char*)"<HTTP download>"; // C++20: Added cast.
+            name = "<HTTP download>"; // C++20: Added cast.
             size = percent = 0;
         } else {
             continue;
@@ -722,7 +722,7 @@ SV_ConSay_f
 static void SV_ConSay_f(void)
 {
     client_t *client;
-    char *s;
+    const char *s;
 
     if (!svs.initialized) {
         Com_Printf("No server running.\n");
@@ -734,7 +734,7 @@ static void SV_ConSay_f(void)
         return;
     }
 
-    s = (char*)Cmd_RawArgs(); // C++20: Added cast.
+    s = Cmd_RawArgs(); // C++20: Added cast.
     FOR_EACH_CLIENT(client) {
         if (client->state != cs_spawned)
             continue;
@@ -909,7 +909,7 @@ Stuff one or more cvar queries to the client.
 static void SV_StuffCvar_f(void)
 {
     int i, argc = Cmd_Argc();
-    char *c;
+    const char *c;
 
     if (!svs.initialized) {
         Com_Printf("No server running.\n");
@@ -925,7 +925,7 @@ static void SV_StuffCvar_f(void)
         return;
 
     for (i = 2; i < argc; i++) {
-        c = (char*)Cmd_Argv(i); // C++20: Added cast.
+        c = Cmd_Argv(i); // C++20: Added cast.
         SV_ClientCommand(sv_client, "cmd \177c console %s $%s\n", c, c);
         sv_client->console_queries++;
     }
@@ -936,7 +936,7 @@ static void SV_StuffCvar_f(void)
 
 static void SV_PickClient_f(void)
 {
-    char *s;
+    const char *s;
     netadr_t address;
 
     if (!svs.initialized) {
@@ -953,7 +953,7 @@ static void SV_PickClient_f(void)
         return;
     }
 
-    s = (char*)Cmd_Argv(1); // C++20: Added cast.
+    s = Cmd_Argv(1); // C++20: Added cast.
     if (!NET_StringToAdr(s, &address, 0)) {
         Com_Printf("Bad client address: %s\n", s);
         return;
@@ -1082,7 +1082,8 @@ static size_t format_mask(addrmatch_t *match, char *buf, size_t buf_size)
 
 void SV_AddMatch_f(list_t *list)
 {
-    char *s, buf[MAX_QPATH];
+    const char* s;
+    char buf[MAX_QPATH];
     addrmatch_t *match;
     netadr_t addr, mask;
     size_t len;
@@ -1092,8 +1093,8 @@ void SV_AddMatch_f(list_t *list)
         return;
     }
 
-    s = (char*)Cmd_Argv(1); // C++20: Added cast.
-    if (!parse_mask(s, &addr, &mask)) {
+    s = Cmd_Argv(1); // C++20: Added cast.
+    if (!parse_mask((char*)s, &addr, &mask)) {
         return;
     }
 
@@ -1119,7 +1120,7 @@ void SV_AddMatch_f(list_t *list)
 
 void SV_DelMatch_f(list_t *list)
 {
-    char *s;
+    const char *s;
     addrmatch_t *match, *next;
     netadr_t addr, mask;
     int i;
@@ -1134,7 +1135,7 @@ void SV_DelMatch_f(list_t *list)
         return;
     }
 
-    s = (char*)Cmd_Argv(1); // C++20: Added cast.
+    s = Cmd_Argv(1); // C++20: Added cast.
     if (!strcmp(s, "all")) {
         LIST_FOR_EACH_SAFE(addrmatch_t, match, next, list, entry) {
             Z_Free(match);
@@ -1158,7 +1159,7 @@ void SV_DelMatch_f(list_t *list)
         return;
     }
 
-    if (!parse_mask(s, &addr, &mask)) {
+    if (!parse_mask((char*)s, &addr, &mask)) {
         return;
     }
 
@@ -1246,7 +1247,7 @@ static list_t *SV_FindStuffList(void)
 
 static void SV_AddStuffCmd_f(void)
 {
-    char *s;
+    const char *s;
     list_t *list;
     stuffcmd_t *stuff;
     int len;
@@ -1260,7 +1261,7 @@ static void SV_AddStuffCmd_f(void)
         return;
     }
 
-    s = (char*)Cmd_ArgsFrom(2); // C++20: Added cast.
+    s = Cmd_ArgsFrom(2); // C++20: Added cast.
     len = strlen(s);
     stuff = (stuffcmd_t*)Z_Malloc(sizeof(*stuff) + len); // CPP: Cast
     stuff->len = len;
@@ -1272,7 +1273,7 @@ static void SV_DelStuffCmd_f(void)
 {
     list_t *list;
     stuffcmd_t *stuff, *next;
-    char *s;
+    const char *s;
     int i;
 
     if (Cmd_Argc() < 3) {
@@ -1289,7 +1290,7 @@ static void SV_DelStuffCmd_f(void)
         return;
     }
 
-    s = (char*)Cmd_Argv(2); // C++20: Added cast.
+    s = Cmd_Argv(2); // C++20: Added cast.
     if (!strcmp(s, "all")) {
         LIST_FOR_EACH_SAFE(stuffcmd_t, stuff, next, list, entry) {
             Z_Free(stuff);
@@ -1355,7 +1356,7 @@ static const char filteractions[FA_MAX][8] = {
 
 static void SV_AddFilterCmd_f(void)
 {
-    char *s, *comment;
+    const char *s, *comment;
     filtercmd_t *filter;
     filteraction_t action;
     size_t len;
@@ -1367,7 +1368,7 @@ usage:
     }
 
     if (Cmd_Argc() > 2) {
-        s = (char*)Cmd_Argv(2); // C++20: Added cast.
+        s = Cmd_Argv(2); // C++20: Added cast.
         for (action = (filteraction_t)0; action < FA_MAX; action = (filteraction_t)(action + 1)) { // CPP: Cast for loop
             if (!strcmp(s, filteractions[action])) {
                 break;
@@ -1376,14 +1377,14 @@ usage:
         if (action == FA_MAX) {
             goto usage;
         }
-        comment = (char*)Cmd_ArgsFrom(3); // C++20: Added cast.
+        comment = Cmd_ArgsFrom(3); // C++20: Added cast.
     } else {
         action = FA_IGNORE;
         comment = NULL;
     }
 
 
-    s = (char*)Cmd_Argv(1); // C++20: Added cast.
+    s = Cmd_Argv(1); // C++20: Added cast.
     LIST_FOR_EACH(filtercmd_t, filter, &sv_filterlist, entry) {
         if (!Q_stricmp(filter->string, s)) {
             Com_Printf("Filtercmd already exists: %s\n", s);
@@ -1412,7 +1413,7 @@ static void SV_AddFilterCmd_c(genctx_t *ctx, int argnum)
 static void SV_DelFilterCmd_f(void)
 {
     filtercmd_t *filter, *next;
-    char *s;
+    const char *s;
     int i;
 
     if (Cmd_Argc() < 2) {
@@ -1425,7 +1426,7 @@ static void SV_DelFilterCmd_f(void)
         return;
     }
 
-    s = (char*)Cmd_Argv(1); // C++20: Added cast.
+    s = Cmd_Argv(1); // C++20: Added cast.
     if (!strcmp(s, "all")) {
         LIST_FOR_EACH_SAFE(filtercmd_t, filter, next, &sv_filterlist, entry) {
             Z_Free(filter->comment);
