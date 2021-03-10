@@ -712,7 +712,7 @@ qerror_t FS_FilterFile(qhandle_t f)
 #if USE_ZLIB
     file_t *file = file_for_handle(f);
     unsigned mode;
-    std::string modeStr; // C++ 20: char *modeStr;
+    const char* modeStr; // C++ 20: char *modeStr;
     void *zfp;
     uint32_t magic;
     size_t length;
@@ -785,7 +785,7 @@ qerror_t FS_FilterFile(qhandle_t f)
     if (fd == -1)
         return Q_Errno();
 
-    zfp = gzdopen(fd, modeStr.c_str()); // C++20: .c_str()
+    zfp = gzdopen(fd, modeStr); // C++20: .c_str()
     if (!zfp) {
         return Q_ERR_FAILURE;
     }

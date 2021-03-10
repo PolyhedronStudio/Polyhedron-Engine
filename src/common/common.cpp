@@ -609,14 +609,14 @@ do the apropriate things. This function never returns.
 void Com_Quit(const char *reason, error_type_t type)
 {
     char buffer[MAX_STRING_CHARS];
-    std::string what = (type == error_type_t::ERR_DISCONNECT ? "restarted" : "quit"); // C++20: char *what = type == ERR_RECONNECT ? "restarted" : "quit";
+    const char* what = (type == error_type_t::ERR_DISCONNECT ? "restarted" : "quit"); // C++20: char *what = type == ERR_RECONNECT ? "restarted" : "quit";
 
     if (reason && *reason) {
         Q_snprintf(buffer, sizeof(buffer),
-                   "Server %s: %s\n", what.c_str(), reason);
+                   "Server %s: %s\n", what, reason);
     } else {
         Q_snprintf(buffer, sizeof(buffer),
-                   "Server %s\n", what.c_str());
+                   "Server %s\n", what);
     }
 
     SV_Shutdown(buffer, type);
