@@ -3077,16 +3077,16 @@ FS_Dir_f
 */
 static void FS_Dir_f(void)
 {
-    char    *path, *ext;
+    const char    *path, *ext;
 
     if (Cmd_Argc() < 2) {
         Com_Printf("Usage: %s <directory> [.extension]\n", Cmd_Argv(0));
         return;
     }
 
-    path = (char*)Cmd_Argv(1); // C++20: Added cast.
+    path = Cmd_Argv(1); // C++20: Added cast.
     if (Cmd_Argc() > 2) {
-        ext = (char*)Cmd_Argv(2); // C++20: Added cast.
+        ext = Cmd_Argv(2); // C++20: Added cast.
     } else {
         ext = NULL;
     }
