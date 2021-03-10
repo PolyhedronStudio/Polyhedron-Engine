@@ -38,7 +38,7 @@ static void SV_SetMaster_f(void)
 {
     netadr_t adr;
     int     i, total;
-    char    *s;
+    const char    *s;
     master_t *m, *n;
     size_t len;
 
@@ -64,7 +64,7 @@ static void SV_SetMaster_f(void)
             break;
         }
 
-        s = (char*)Cmd_Argv(i); // C++20: Added cast.
+        s = Cmd_Argv(i); // C++20: Added cast.
         if (!NET_StringToAdr(s, &adr, PORT_MASTER)) {
             Com_Printf("Bad master address: %s\n", s);
             continue;
@@ -100,7 +100,8 @@ out:;
 static void SV_ListMasters_f(void)
 {
     master_t *m;
-    char buf[8], *adr;
+    char buf[8];
+    const char* adr;
     int i;
 
     if (LIST_EMPTY(&sv_masterlist)) {
@@ -119,7 +120,7 @@ static void SV_ListMasters_f(void)
         } else {
             Q_snprintf(buf, sizeof(buf), "%u", svs.realtime - m->last_ack);
         }
-        adr = m->adr.port ? NET_AdrToString(&m->adr) : (char*)"error"; // C++20: Added cast.
+        adr = m->adr.port ? NET_AdrToString(&m->adr) : "error";
         Com_Printf("%3d %-21.21s %7s %-21s\n", ++i, m->name, buf, adr);
     }
 }
