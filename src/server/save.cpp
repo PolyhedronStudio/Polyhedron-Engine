@@ -583,7 +583,7 @@ static void SV_Savegame_c(genctx_t *ctx, int argnum)
 
 static void SV_Loadgame_f(void)
 {
-    char *dir;
+    const char *dir;
 
     if (Cmd_Argc() != 2) {
         Com_Printf("Usage: %s <directory>\n", Cmd_Argv(0));
@@ -595,7 +595,7 @@ static void SV_Loadgame_f(void)
         return;
     }
 
-    dir = (char*)Cmd_Argv(1); // C++20: Added a cast.
+    dir = Cmd_Argv(1); // C++20: Added a cast.
     if (!COM_IsPath(dir)) {
         Com_Printf("Bad savedir.\n");
         return;
@@ -629,7 +629,7 @@ static void SV_Loadgame_f(void)
 
 static void SV_Savegame_f(void)
 {
-    char *dir;
+    const char *dir;
 
     if (sv.state != ss_game) {
         Com_Printf("You must be in a game to save.\n");
@@ -662,7 +662,7 @@ static void SV_Savegame_f(void)
         return;
     }
 
-    dir = (char*)Cmd_Argv(1); // C++20: Added cast.
+    dir = Cmd_Argv(1); // C++20: Added cast.
     if (!COM_IsPath(dir)) {
         Com_Printf("Bad savedir.\n");
         return;

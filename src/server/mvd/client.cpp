@@ -979,7 +979,7 @@ static qboolean gtv_forward_cmd(mvd_client_t *client)
 {
     mvd_t *mvd = client->mvd;
     gtv_t *gtv = mvd->gtv;
-    char *text;
+    const char *text;
     size_t len;
 
     if (!gtv || gtv->state < GTV_CONNECTED) {
@@ -998,7 +998,7 @@ static qboolean gtv_forward_cmd(mvd_client_t *client)
         return qfalse;
     }
 
-    text = (char*)Cmd_Args(); // C++20: added cast.
+    text = Cmd_Args(); 
     len = strlen(text);
     if (len > 150) {
         len = 150;
@@ -1731,14 +1731,14 @@ static void list_recordings(void)
 
 static void MVD_ListChannels_f(void)
 {
-    char *s;
+    const char *s;
 
     if (LIST_EMPTY(&mvd_channel_list)) {
         Com_Printf("No MVD channels.\n");
         return;
     }
 
-    s = (char*)Cmd_Argv(1); // C++20: added cast.
+    s = Cmd_Argv(1); // C++20: added cast.
     if (*s == 'r') {
         list_recordings();
     } else {
