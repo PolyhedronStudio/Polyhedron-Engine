@@ -209,15 +209,12 @@ initializeEnvTexture(int width, int height)
 
         VkWriteDescriptorSet s = { // C++20 VKPT: Order fix.
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-			.pNext = NULL,
             .dstSet = qvk.desc_set_textures_even,
             .dstBinding = BINDING_OFFSET_PHYSICAL_SKY,
             .dstArrayElement = 0,
 			.descriptorCount = 1,
 			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
             .pImageInfo = &desc_img_info,
-			.pBufferInfo = NULL,
-			.pTexelBufferView = NULL
         };
 
         vkUpdateDescriptorSets(qvk.device, 1, &s, 0, NULL);
