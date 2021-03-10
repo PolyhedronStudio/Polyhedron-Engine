@@ -208,7 +208,7 @@ typedef enum
 
 typedef struct gitem_s
 {
-	char		*classname;	// spawning name
+	const char		*classname;	// spawning name
 	qboolean(*pickup)(struct edict_s *ent, struct edict_s *other);
 	void(*use)(struct edict_s *ent, struct gitem_s *item);
 	void(*drop)(struct edict_s *ent, struct gitem_s *item);
@@ -220,8 +220,8 @@ typedef struct gitem_s
 	char		*view_model;
 
 	// client side info
-	char		*icon;
-	char		*pickup_name;	// for printing on pickup
+	const char		*icon;
+	const char		*pickup_name;	// for printing on pickup
 	int			count_width;		// number of digits to display by icon
 
 	int			quantity;		// for ammo how much, for weapons how much is used per shot
@@ -233,7 +233,7 @@ typedef struct gitem_s
 	void		*info;
 	int			tag;
 
-	char		*precaches;		// string of all models, sounds, and images this item will use
+	const char		*precaches;		// string of all models, sounds, and images this item will use
 } gitem_t;
 
 typedef struct
@@ -407,14 +407,14 @@ struct edict_s
 	int			oldmovetype;	// Knightmare added
 	int			flags;
 
-	char		*model;
+	const char		*model;
 	float		freetime;			// sv.time when the object was freed
 
 	//
 	// only used locally in game, not by server
 	//
-	char		*message;
-	char        *key_message;   // Lazarus: used from tremor_trigger_key
+	const char		*message;
+	const char        *key_message;   // Lazarus: used from tremor_trigger_key
 	char		*classname;
 	int			spawnflags;
 
@@ -489,7 +489,7 @@ struct edict_s
 
 	float		powerarmor_time;
 
-	char		*map;			// target_changelevel
+	const char		*map;			// target_changelevel
 
 	int			viewheight;		// height above origin where eyesight is determined
 	int			takedamage;

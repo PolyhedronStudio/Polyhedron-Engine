@@ -511,6 +511,7 @@ void G_SetSpectatorStats(edict_t *ent)
     if (!cl->chase_target)
         G_SetStats(ent);
 
+
     cl->ps.stats[STAT_SPECTATOR] = 1;
 
     // layouts are independant in spectator

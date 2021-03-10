@@ -140,7 +140,7 @@ void SV_SpawnServer(mapcmd_t *cmd)
 {
     int         i;
     client_t    *client;
-    char        *entitystring;
+    const char        *entitystring;
 
     SCR_BeginLoadingPlaque();           // for local system
 
@@ -215,7 +215,7 @@ void SV_SpawnServer(mapcmd_t *cmd)
     } else {
         // no real map
         strcpy(sv.configstrings[CS_MAPCHECKSUM], "0");
-        entitystring = (char*)""; // C++20: Added cast.
+        entitystring = ""; // C++20: Added cast.
     }
 
     //
