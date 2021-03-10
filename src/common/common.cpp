@@ -750,7 +750,7 @@ void Com_Generic_c(genctx_t *ctx, int argnum)
     xcompleter_t c;
     xgenerator_t g;
     cvar_t *var;
-    char *s;
+    const char *s;
 
     // complete command, alias or cvar name
     if (!argnum) {
@@ -763,7 +763,7 @@ void Com_Generic_c(genctx_t *ctx, int argnum)
     // protect against possible duplicates
     ctx->ignoredups = qtrue;
 
-    s = (char*)Cmd_Argv(ctx->argnum - argnum); // C++20: Added cast.
+    s = Cmd_Argv(ctx->argnum - argnum);
 
     // complete command argument or cvar value
     if ((c = Cmd_FindCompleter(s)) != NULL) {
