@@ -54,9 +54,12 @@ vkpt_vertex_buffer_bsp_upload_staging()
 	};
 	vkCmdCopyBuffer(cmd_buf, qvk.buf_vertex_bsp_staging.buffer, qvk.buf_vertex_bsp.buffer, 1, &copyRegion);
 
+	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_vertex_bsp.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
