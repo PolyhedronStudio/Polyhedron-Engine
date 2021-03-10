@@ -228,7 +228,7 @@ static const ucmd_t dummy_cmds[] = {
 
 static void dummy_exec_string(cmdbuf_t *buf, const char *line)
 {
-    char *cmd, *alias;
+    const char *cmd, *alias;
     const ucmd_t *u;
     cvar_t *v;
 
@@ -238,7 +238,7 @@ static void dummy_exec_string(cmdbuf_t *buf, const char *line)
 
     Cmd_TokenizeString(line, qtrue);
 
-    cmd = (char*)Cmd_Argv(0); // C++20: Added cast.
+    cmd = Cmd_Argv(0); // C++20: Added cast.
     if (!cmd[0]) {
         return;
     }
