@@ -913,9 +913,9 @@ static void SV_PacketdupHack_f(void)
 
 static void SV_CvarResult_f(void)
 {
-    char *c, *v;
+    const char *c, *v;
 
-    c = (char*)Cmd_Argv(1); // C++20: Added a cast.
+    c = Cmd_Argv(1); // C++20: Added a cast.
     if (!strcmp(c, "version")) {
         if (!sv_client->version_string) {
             v = (char*)Cmd_RawArgsFrom(2); // C++20: Added a cast.
@@ -1023,12 +1023,12 @@ static void SV_ExecuteUserCommand(const char *s)
 {
     const ucmd_t *u;
     filtercmd_t *filter;
-    char *c;
+    const char *c;
 
     Cmd_TokenizeString(s, qfalse);
     sv_player = sv_client->edict;
 
-    c = (char*)Cmd_Argv(0); // C++20: Added a cast.
+    c = Cmd_Argv(0); // C++20: Added a cast.
     if (!c[0]) {
         return;
     }

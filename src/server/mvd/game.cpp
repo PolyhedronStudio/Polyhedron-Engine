@@ -61,7 +61,7 @@ static void MVD_LayoutClients(mvd_client_t *client)
         "xv 16 yv 0 string2 \"    Name            RTT Status\"";
     char layout[MAX_STRING_CHARS];
     char buffer[MAX_QPATH];
-    char *status1, *status2;
+    const char *status1, *status2;
     size_t len, total;
     mvd_client_t *cl;
     mvd_t *mvd = client->mvd;
@@ -92,11 +92,11 @@ static void MVD_LayoutClients(mvd_client_t *client)
             continue;
         }
         if (cl->target && cl->target != mvd->dummy) {
-            status1 = (char*)"-> "; // C++20: Added cast.
+            status1 = "-> "; 
             status2 = cl->target->name;
         } else {
-            status1 = (char*)"observing"; // C++20: Added cast.
-            status2 = (char*)""; // C++20: Added cast.
+            status1 = "observing"; 
+            status2 = "";
         }
         len = Q_snprintf(buffer, sizeof(buffer),
                          "yv %d string \"%3d %-15.15s %3d %s%s\"",
@@ -291,7 +291,7 @@ static void MVD_LayoutScores(mvd_client_t *client)
 {
     mvd_t *mvd = client->mvd;
     int flags = MSG_CLEAR | MSG_COMPRESS;
-    char *layout;
+    const char *layout;
 
     if (client->layout_type == LAYOUT_OLDSCORES) {
         layout = mvd->oldscores;
@@ -299,7 +299,7 @@ static void MVD_LayoutScores(mvd_client_t *client)
         layout = mvd->layout;
     }
     if (!layout || !layout[0]) {
-        layout = (char*)"xv 100 yv 60 string \"<no scoreboard>\""; // C++20: Added cast.
+        layout = "xv 100 yv 60 string \"<no scoreboard>\""; // C++20: Added cast.
     }
 
     // end-of-match scoreboard is reliably delivered
@@ -1043,7 +1043,7 @@ static void MVD_Follow_f(mvd_client_t *client)
 {
     mvd_t *mvd = client->mvd;
     mvd_player_t *player;
-    char *s;
+    const char *s;
     int mask;
 
     if (!mvd->players) {
@@ -1061,7 +1061,7 @@ static void MVD_Follow_f(mvd_client_t *client)
         return;
     }
 
-    s = (char*)Cmd_Argv(1); // C++20: Added cast.
+    s = Cmd_Argv(1); // C++20: Added cast.
     if (*s == '!') {
         s++;
         switch (*s) {
@@ -1133,7 +1133,8 @@ static void MVD_AutoFollow_f(mvd_client_t *client)
 {
     mvd_t *mvd = client->mvd;
     mvd_player_t *player;
-    char *s, *p;
+    const char* s;
+    const char * p;
     int i, j, argc;
 
     if (!mvd->players) {
@@ -1154,7 +1155,7 @@ static void MVD_AutoFollow_f(mvd_client_t *client)
         return;
     }
 
-    s = (char*)Cmd_Argv(1); // C++20: added cast.
+    s = Cmd_Argv(1); // C++20: added cast.
     if (!strcmp(s, "add") || !strcmp(s, "rm") || !strcmp(s, "del")) {
         if (argc < 3) {
             SV_ClientPrintf(client->cl, PRINT_HIGH,
@@ -1164,7 +1165,7 @@ static void MVD_AutoFollow_f(mvd_client_t *client)
         }
 
         for (i = 2; i < argc; i++) {
-            p = (char*)Cmd_Argv(i); // C++20: added cast.
+            p = Cmd_Argv(i); // C++20: added cast.
             for (j = 0; j < mvd->maxclients; j++) {
                 player = &mvd->players[j];
                 if (!player->name[0] || player == mvd->dummy)
@@ -1424,13 +1425,13 @@ static void MVD_Commands_f(mvd_client_t *client)
 static void MVD_GameClientCommand(edict_t *ent)
 {
     mvd_client_t *client = EDICT_MVDCL(ent);
-    char *cmd;
+    const char *cmd;
 
     if (client->cl->state < cs_spawned) {
         return;
     }
 
-    cmd = (char*)Cmd_Argv(0); // C++20: Added cast.
+    cmd = Cmd_Argv(0); // C++20: Added cast.
     if (!*cmd) {
         return;
     }
