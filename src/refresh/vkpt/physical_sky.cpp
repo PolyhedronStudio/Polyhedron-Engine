@@ -457,6 +457,8 @@ vkpt_physical_sky_destroy_pipelines()
 				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
 				.image            = img, \
 				.subresourceRange = subresource_range, \
 		); \

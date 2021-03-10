@@ -222,7 +222,6 @@ VkResult UploadImage(void* FirstPixel, size_t total_size, unsigned int Width, un
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
-		.pNext = NULL, \
 		.srcAccessMask = 0, \
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT, \
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED, \
@@ -250,7 +249,6 @@ VkResult UploadImage(void* FirstPixel, size_t total_size, unsigned int Width, un
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -823,7 +821,7 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf, 
 		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
@@ -835,7 +833,7 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
@@ -846,7 +844,7 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
@@ -871,7 +869,7 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
@@ -883,7 +881,7 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_INDEX_READ_BIT,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
@@ -896,7 +894,7 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -1074,7 +1072,7 @@ void RecordCommandBufferShadowmap(VkCommandBuffer cmd_buf)
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -1147,7 +1145,7 @@ void RecordCommandBufferShadowmap(VkCommandBuffer cmd_buf)
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
