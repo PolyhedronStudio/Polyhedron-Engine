@@ -3053,14 +3053,14 @@ FS_FDir_f
 static void FS_FDir_f(void)
 {
     unsigned flags;
-    char *filter;
+    const char *filter;
 
     if (Cmd_Argc() < 2) {
         Com_Printf("Usage: %s <filter> [full_path]\n", Cmd_Argv(0));
         return;
     }
 
-    filter = (char*)Cmd_Argv(1); // C++20: Added cast.
+    filter = Cmd_Argv(1);
 
     flags = FS_SEARCH_BYFILTER;
     if (Cmd_Argc() > 2) {
