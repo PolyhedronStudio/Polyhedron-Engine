@@ -1998,7 +1998,7 @@ static void MVD_Connect_f(void)
 {
     netadr_t adr;
     netstream_t stream;
-    char *name = NULL, *username = NULL, *password = NULL;
+    const char *name = NULL, *username = NULL, *password = NULL;
     gtv_t *gtv;
     int c;
 
@@ -2341,7 +2341,7 @@ static void MVD_Control_f(void)
         { NULL }
     };
     mvd_t *mvd;
-    char *name = NULL;
+    const char *name = NULL;
     int loop = -1;
     int todo = 0;
     int c;
@@ -2415,7 +2415,7 @@ static void MVD_Play_c(genctx_t *ctx, int argnum)
 
 static void MVD_Play_f(void)
 {
-    char *name = NULL;
+    const char *name = NULL;
     char buffer[MAX_OSPATH];
     int loop = -1, chan_id = -1;
     qhandle_t f;

@@ -863,7 +863,7 @@ static void Cvar_List_f(void)
     int        i, total;
     qboolean verbose = qfalse, modified = qfalse, latched = qfalse;
     int mask = 0;
-    char *wildcard = NULL;
+    const char *wildcard = NULL;
     char buffer[5];
     int c;
 

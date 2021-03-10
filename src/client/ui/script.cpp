@@ -59,7 +59,7 @@ static void Parse_Spin(menuFrameWork_t *menu, menuType_t type)
 {
     menuSpinControl_t *s;
     int c, i, numItems;
-    char *status = NULL;
+    const char *status = NULL;
 
     while ((c = Cmd_ParseOptions(o_common)) != -1) {
         switch (c) {
@@ -98,7 +98,7 @@ static void Parse_Pairs(menuFrameWork_t *menu)
 {
     menuSpinControl_t *s;
     int c, i, numItems;
-    char *status = NULL;
+    const char *status = NULL;
 
     while ((c = Cmd_ParseOptions(o_common)) != -1) {
         switch (c) {
@@ -145,8 +145,8 @@ static const cmd_option_t o_range[] = {
 static void Parse_Range(menuFrameWork_t *menu)
 {
     menuSlider_t *s;
-    char *status = NULL;
-    char *format = NULL;
+    const char *status = NULL;
+    const char *format = NULL;
     qboolean percentage = qfalse;
     int c;
 
@@ -201,7 +201,7 @@ static void Parse_Action(menuFrameWork_t *menu)
     };
     menuAction_t *a;
     int uiFlags = UI_CENTER;
-    char *status = NULL;
+    const char *status = NULL;
     int c;
 
     while ((c = Cmd_ParseOptions(o_action)) != -1) {
@@ -244,7 +244,7 @@ static void Parse_Bitmap(menuFrameWork_t *menu)
         { NULL }
     };
     menuBitmap_t *b;
-    char *status = NULL, *altname = NULL;
+    const char *status = NULL, *altname = NULL;
     int c;
 
     while ((c = Cmd_ParseOptions(o_bitmap)) != -1) {
@@ -330,7 +330,7 @@ static void Parse_Bind(menuFrameWork_t *menu)
 static void Parse_Savegame(menuFrameWork_t *menu, menuType_t type)
 {
     menuAction_t *a;
-    char *status = NULL;
+    const char *status = NULL;
     int c;
 
     while ((c = Cmd_ParseOptions(o_common)) != -1) {
@@ -432,7 +432,7 @@ static void Parse_Field(menuFrameWork_t *menu)
     menuField_t *f;
     qboolean center = qfalse;
     int flags = 0;
-    char *status = NULL;
+    const char *status = NULL;
     int width = 16;
     int c;
 

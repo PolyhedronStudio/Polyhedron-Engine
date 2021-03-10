@@ -3406,7 +3406,7 @@ static void FS_UnLink_f(void)
     };
     list_t *list;
     symlink_t *link;
-    char *name;
+    const char *name;
     int c;
 
     if (!strncmp(Cmd_Argv(0), "soft", 4))

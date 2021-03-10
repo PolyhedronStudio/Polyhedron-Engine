@@ -204,8 +204,8 @@ typedef struct cmdbuf_s {
         } while(0)
 
     extern int cmd_optind;
-    extern char *cmd_optarg;
-    extern char *cmd_optopt;
+    extern const char *cmd_optarg;
+    extern const char *cmd_optopt;
 
     int Cmd_ParseOptions(const cmd_option_t *opt);
     void Cmd_PrintHelp(const cmd_option_t *opt);
