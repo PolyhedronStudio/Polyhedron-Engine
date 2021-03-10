@@ -343,7 +343,7 @@ static int dummy_create(void)
 {
     client_t *newcl;
     char userinfo[MAX_INFO_STRING * 2];
-    char *s;
+    const char *s;
     qboolean allow;
     int number;
 
@@ -400,7 +400,7 @@ static int dummy_create(void)
     if (!allow) {
         s = Info_ValueForKey(userinfo, "rejmsg");
         if (!*s) {
-            s = (char*)"Connection refused"; // C++20: Added cast.
+            s = "Connection refused"; // C++20: Added cast.
         }
         Com_EPrintf("Dummy MVD client rejected by game: %s\n", s);
         Z_Free(newcl->netchan);
