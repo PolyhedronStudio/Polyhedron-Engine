@@ -1221,7 +1221,7 @@ Redirect all printfs.
 */
 static void SVC_RemoteCommand(void)
 {
-    char *s;
+    const char *s;
 
     if (SV_RateLimited(&svs.ratelimit_rcon)) {
         Com_DPrintf("Dropping rcon from %s\n",
@@ -1229,7 +1229,7 @@ static void SVC_RemoteCommand(void)
         return;
     }
 
-    s = (char*)Cmd_RawArgsFrom(2); // C++20: Added cast.
+    s = Cmd_RawArgsFrom(2);
     if (!rcon_valid()) {
         Com_Printf("Invalid rcon from %s:\n%s\n",
                    NET_AdrToString(&net_from), s);
@@ -1274,7 +1274,7 @@ connectionless packets.
 static void SV_ConnectionlessPacket(void)
 {
     char    string[MAX_STRING_CHARS];
-    char    *c;
+    const char    *c;
     int     i;
     size_t  len;
 
@@ -1294,7 +1294,7 @@ static void SV_ConnectionlessPacket(void)
 
     Cmd_TokenizeString(string, qfalse);
 
-    c = (char*)Cmd_Argv(0); // C++20: Added cast.
+    c = Cmd_Argv(0); 
     Com_DPrintf("ServerPacket[%s]: %s\n", NET_AdrToString(&net_from), c);
 
     if (!strcmp(c, "rcon")) {
