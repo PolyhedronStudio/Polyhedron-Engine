@@ -652,9 +652,9 @@ typedef struct {
 #define __reject(...) \
     Netchan_OutOfBand(NS_SERVER, &net_from, "print\n" __VA_ARGS__)
 
-// small hack to permit one-line return statement :)
+// small hack to permit one-line return statement :) // C++20: reject2 fix - added a cast
 #define reject(...) __reject(__VA_ARGS__), qfalse
-#define reject2(...) __reject(__VA_ARGS__), NULL
+#define reject2(...) __reject(__VA_ARGS__), (client_t*)NULL
 
 static qboolean parse_basic_params(conn_params_t *p)
 {
@@ -980,8 +980,8 @@ static client_t *find_client_slot(conn_params_t *params)
 
     // clients that know the password are never redirected
     if (sv_reserved_slots->integer != params->reserved) {
-        reject2("Server and reserved slots are full.\n");
-        return NULL; // C++20: return reject2("Server and reserved slots are full.\n");
+        return reject2("Server and reserved slots are full.\n");
+        //return NULL; // C++20: return reject2("Server and reserved slots are full.\n");
     }
 
     // optionally redirect them to a different address
@@ -989,8 +989,8 @@ static client_t *find_client_slot(conn_params_t *params)
         return redirect(s);
     }
 
-    reject2("Server is full.\n");
-    return NULL; // C++20: return reject2("Server is full.\n");
+    return reject2("Server is full.\n");
+    //return NULL; // C++20: return reject2("Server is full.\n");
 }
 
 static void init_pmove_and_es_flags(client_t *newcl)
