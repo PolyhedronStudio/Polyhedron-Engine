@@ -1327,7 +1327,7 @@ vkpt_textures_end_registration()
 				},
 				.srcOffsets = { 
 					{ 0, 0, 0 }, 
-					{ (uint32_t)wd, (uint32_t)ht, 1 } }, // C++20 VKPT: Added cast.
+					{ (int32_t)wd, (int32_t)ht, 1 } }, // C++20 VKPT: Added cast.
 
 				.dstSubresource = {
 					.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -1535,8 +1535,8 @@ vkpt_create_images()
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT \
 		                       | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, \
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE, \
-		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, \
-		.initialLayout         = (uint32_t)VK_IMAGE_LAYOUT_UNDEFINED, \
+		.queueFamilyIndexCount = (const uint32_t*)qvk.queue_idx_graphics, \
+		.initialLayout         = (VkImageLayout)VK_IMAGE_LAYOUT_UNDEFINED, \
 	};
 LIST_IMAGES
 LIST_IMAGES_A_B

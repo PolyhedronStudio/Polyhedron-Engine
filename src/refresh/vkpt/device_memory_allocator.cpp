@@ -47,7 +47,7 @@ int create_sub_allocator(DeviceMemoryAllocator* allocator, uint32_t memory_type)
 
 DeviceMemoryAllocator* create_device_memory_allocator(VkDevice device)
 {
-	char* memory = malloc(sizeof(DeviceMemoryAllocator));
+	char* memory = (char*)malloc(sizeof(DeviceMemoryAllocator)); // C++20 VKPT: Added malloc typecast.
 
 	DeviceMemoryAllocator* allocator = (DeviceMemoryAllocator*)memory;
 	memset(allocator, 0, sizeof(DeviceMemoryAllocator));
@@ -136,7 +136,7 @@ int create_sub_allocator(DeviceMemoryAllocator* allocator, uint32_t memory_type)
 	VkMemoryAllocateFlagsInfo mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
 		.flags = VK_MEMORY_ALLOCATE_DEVICE_MASK_BIT,
-		.deviceMask = (1 << qvk.device_count) - 1
+		.deviceMask = (uint32_t)(1 << qvk.device_count) - 1 // C++20 VKPT: Added cast.
 	};
 
 	if (qvk.device_count > 1) {

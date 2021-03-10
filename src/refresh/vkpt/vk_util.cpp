@@ -101,7 +101,7 @@ buffer_create(
 
 	mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
-		.flags = (VkMemoryAllocateFlags)(usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT : 0, // C++20 VKPT: Added cast.
+		.flags = (VkMemoryAllocateFlags)((usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT : 0), // C++20 VKPT: Added cast.
 		.deviceMask = 0
 	};
 

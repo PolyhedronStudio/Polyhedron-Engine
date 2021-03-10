@@ -564,7 +564,7 @@ vkpt_pt_create_accel_bottom(
 					.vertexStride = sizeof(float) * 3,
 					.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT,
 					.indexData = buffer_index ? buffer_index->buffer : VK_NULL_HANDLE,
-					.indexCount = num_indices,
+					.indexCount = (uint32_t)num_indices, // C++20 VKPT: Addedcast.
 					.indexType = buffer_index ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_NONE_NV,
 				},
 				.aabbs = { .sType = VK_STRUCTURE_TYPE_GEOMETRY_AABB_NV }
@@ -643,7 +643,7 @@ vkpt_pt_create_accel_bottom(
 		VkAccelerationStructureInfoNV as_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
 			.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
-			.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV,
+			.flags = (VkBuildAccelerationStructureFlagBitsKHR)(fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV),
 			.geometryCount = 1,
 			.pGeometries = &geometry,
 		};

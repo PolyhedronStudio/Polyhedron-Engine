@@ -149,7 +149,7 @@ vkpt_uniform_buffer_update(VkCommandBuffer command_buffer)
 	assert(ubo->buffer != VK_NULL_HANDLE);
 	assert(qvk.current_frame_index < MAX_FRAMES_IN_FLIGHT);
 
-	QVKUniformBuffer_t *mapped_ubo = (QVKUniformBuffer_t)buffer_map(ubo);// C++20 VKPT: Added cast.
+	QVKUniformBuffer_t *mapped_ubo = (QVKUniformBuffer_t*)buffer_map(ubo);// C++20 VKPT: Added cast.
 	assert(mapped_ubo);
 	memcpy(mapped_ubo, &vkpt_refdef.uniform_buffer, sizeof(QVKUniformBuffer_t));
 
