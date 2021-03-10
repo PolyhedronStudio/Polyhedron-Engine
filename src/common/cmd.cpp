@@ -1881,7 +1881,8 @@ static char *unescape_string(char *dst, const char *src)
 
 static void Cmd_EchoEx_f(void)
 {
-    char buffer[MAX_STRING_CHARS], *s;
+    char buffer[MAX_STRING_CHARS];// , * s;
+    const char* s;
     qboolean escapes = qfalse;
     color_index_t color = COLOR_NONE;
     const char *newline = "\n";
@@ -1908,7 +1909,7 @@ static void Cmd_EchoEx_f(void)
         }
     }
 
-    s = (char*)Cmd_RawArgsFrom(cmd_optind); // C++20: Added casts.
+    s = Cmd_RawArgsFrom(cmd_optind); // C++20: Added casts.
     if (escapes) {
         s = unescape_string(buffer, s);
     }
