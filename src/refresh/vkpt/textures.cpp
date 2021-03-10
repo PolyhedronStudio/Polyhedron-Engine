@@ -179,8 +179,8 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 		.imageType = VK_IMAGE_TYPE_2D,
 		.format = VK_FORMAT_R8G8B8A8_UNORM,
 		.extent = {
-			.width  = w,
-			.height = h,
+			.width  = (uint32_t)w,	// C++20 VKPT: Added cast.
+			.height = (uint32_t)h,	// C++20 VKPT: Added cast.
 			.depth  = 1,
 		},
 		.mipLevels             = 1,
@@ -191,7 +191,7 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 		                       | VK_IMAGE_USAGE_TRANSFER_DST_BIT
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added cast.
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
@@ -237,7 +237,7 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
-			.baseArrayLayer = layer,
+			.baseArrayLayer = (uint32_t)layer, // C++20 VKPT: Added cast.
 			.layerCount     = 1,
 		};
 
@@ -260,11 +260,11 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 			.imageSubresource = { 
 				.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 				.mipLevel       = 0,
-				.baseArrayLayer = layer,
+				.baseArrayLayer = (uint32_t)layer, // C++20 VKPT: Added cast.
 				.layerCount     = 1,
 			},
 			.imageOffset    = { 0, 0, 0 },
-			.imageExtent    = { w, h, 1 }
+			.imageExtent    = { (uint32_t)w, (uint32_t)h, 1 } // C++20 VKPT: Added cast.
 		};
 		vkCmdCopyBufferToImage(cmd_buf, buf_img_upload.buffer, img_envmap,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &cpy_info);
@@ -383,7 +383,7 @@ load_blue_noise()
 		                       | VK_IMAGE_USAGE_TRANSFER_DST_BIT
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added cast.
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
@@ -429,7 +429,7 @@ load_blue_noise()
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
-			.baseArrayLayer = layer,
+			.baseArrayLayer = (uint32_t)layer, // C++20 VKPT: Added cast.
 			.layerCount     = 1,
 		};
 
@@ -452,7 +452,7 @@ load_blue_noise()
 			.imageSubresource = { 
 				.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 				.mipLevel       = 0,
-				.baseArrayLayer = layer,
+				.baseArrayLayer = (uint32_t)layer, // C++20 VKPT: Added cast.
 				.layerCount     = 1,
 			},
 			.imageOffset    = { 0, 0, 0 },
@@ -1153,7 +1153,7 @@ vkpt_textures_end_registration()
 		                       | VK_IMAGE_USAGE_TRANSFER_SRC_BIT
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added cast.
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
@@ -1257,7 +1257,7 @@ vkpt_textures_end_registration()
 		VkImageSubresourceRange subresource_range = {
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
-			.levelCount     = num_mip_levels,
+			.levelCount     = (uint32_t)num_mip_levels, // C++20 VKPT: Added cast.
 			.baseArrayLayer = 0,
 			.layerCount     = 1
 		};
@@ -1321,17 +1321,17 @@ vkpt_textures_end_registration()
 			VkImageBlit region = {
 				.srcSubresource = {
 					.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-					.mipLevel = mip - 1,
+					.mipLevel = (uint32_t)mip - 1, // C++20 VKPT: Added cast.
 					.baseArrayLayer = 0,
 					.layerCount = 1
 				},
 				.srcOffsets = { 
 					{ 0, 0, 0 }, 
-					{ wd, ht, 1 } },
+					{ (uint32_t)wd, (uint32_t)ht, 1 } }, // C++20 VKPT: Added cast.
 
 				.dstSubresource = {
 					.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-					.mipLevel = mip,
+					.mipLevel = (uint32_t)mip, // C++20 VKPT: Added cast.
 					.baseArrayLayer = 0,
 					.layerCount = 1
 				},
@@ -1447,7 +1447,7 @@ void vkpt_textures_update_descriptor_set()
 			.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet          = qvk_get_current_desc_set_textures(),
 			.dstBinding      = GLOBAL_TEXTURES_TEX_ARR_BINDING_IDX,
-			.dstArrayElement = i,
+			.dstArrayElement = (uint32_t)i, // C++20 VKPT: Added cast.
 			.descriptorCount = 1,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.pImageInfo      = &img_info,
@@ -1521,8 +1521,8 @@ vkpt_create_images()
 		.imageType = VK_IMAGE_TYPE_2D, \
 		.format = VK_FORMAT_##_vkformat, \
 		.extent = { \
-			.width  = _w, \
-			.height = _h, \
+			.width  = (uint32_t)_w, \
+			.height = (uint32_t)_h, \
 			.depth  = 1 \
 		}, \
 		.mipLevels             = 1, \
@@ -1535,8 +1535,8 @@ vkpt_create_images()
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT \
 		                       | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, \
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE, \
-		.queueFamilyIndexCount = qvk.queue_idx_graphics, \
-		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED, \
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, \
+		.initialLayout         = (uint32_t)VK_IMAGE_LAYOUT_UNDEFINED, \
 	};
 LIST_IMAGES
 LIST_IMAGES_A_B

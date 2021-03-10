@@ -122,8 +122,11 @@ qboolean initialize_transparency()
 	if (allocate_and_bind_memory_to_buffers() != VK_TRUE)
 		return qfalse;
 
-	create_buffer_views(transparency);
-	fill_index_buffer(transparency);
+	// C++20 VKPT: void argument fix.
+	create_buffer_views();
+	fill_index_buffer();
+	//create_buffer_views(transparency);
+	//fill_index_buffer(transparency);
 
 	return qtrue;
 }
@@ -158,7 +161,7 @@ void update_transparency(VkCommandBuffer command_buffer, const float* view_matri
 		else if ((entities[i].model & 0x80000000) == 0)
 		{
 			const model_t* model = MOD_ForHandle(entities[i].model);
-			if (model && model->type == MOD_SPRITE)
+			if (model && model->type == model_t::MOD_SPRITE) // C++20 VKPT: Enum fix.
 				++sprite_num;
 		}
 	}
@@ -379,8 +382,8 @@ static void write_beam_geometry(const float* view_matrix, const entity_t* entiti
 
 static int compare_beams(const void* _a, const void* _b)
 {
-	const entity_t* a = *(void**)_a;
-	const entity_t* b = *(void**)_b;
+	const entity_t* a = (const entity_t*)*(void**)_a; // C++20 VKPT: Added const entity_t* cast.
+	const entity_t* b = (const entity_t*)*(void**)_b; // C++20 VKPT: Added const entity_t* cast.
 
 	if (a->origin[0] < b->origin[0]) return -1;
 	if (a->origin[0] > b->origin[0]) return 1;
@@ -553,7 +556,7 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 
 	// TODO: use better alignment?
 	vec3_t* vertex_positions = (vec3_t*)(transparency.mapped_host_buffer + sprite_vertex_offset);
-	uint32_t* sprite_info = (int*)(transparency.mapped_host_buffer + transparency.sprite_info_host_offset);
+	uint32_t* sprite_info = (uint32_t*)(transparency.mapped_host_buffer + transparency.sprite_info_host_offset); // C++20 VKPT: pointer warning: casting (int*) to (uint32_t*) is now (uint32_t*) again.
 
 	int sprite_count = 0;
 	for (int i = 0; i < entity_num; i++)
@@ -564,7 +567,7 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 			continue;
 
 		const model_t* model = MOD_ForHandle(e->model);
-		if (!model || model->type != MOD_SPRITE)
+		if (!model || model->type != model_t::MOD_SPRITE) // C++20 VKPT: Added enum.
 			continue;
 
 		mspriteframe_t *frame = &model->spriteframes[e->frame % model->numframes];
@@ -822,7 +825,8 @@ static qboolean allocate_and_bind_memory_to_buffers()
 
 	_VK(vkAllocateMemory(qvk.device, &host_memory_allocate_info, NULL, &transparency.host_buffer_memory));
 
-	VkBindBufferMemoryInfo bindings[1] = { 0 };
+	// C++20 VKPT: Construct fix for: VkBindBufferMemoryInfo bindings[1]
+	VkBindBufferMemoryInfo bindings[1] = { {} };
 
 	bindings[0].sType = VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_INFO;
 	bindings[0].buffer = transparency.host_buffer;
@@ -834,7 +838,7 @@ static qboolean allocate_and_bind_memory_to_buffers()
 	const size_t host_buffer_size = transparency.host_buffered_frame_num * transparency.host_frame_size;
 
 	_VK(vkMapMemory(qvk.device, transparency.host_buffer_memory, 0, host_buffer_size, 0,
-		&transparency.mapped_host_buffer));
+		(void**)&transparency.mapped_host_buffer)); // C++20 VKPT: Added void cast.
 	
 	return qtrue;
 }

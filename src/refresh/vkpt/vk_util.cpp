@@ -101,7 +101,7 @@ buffer_create(
 
 	mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
-		.flags = (usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT : 0,
+		.flags = (VkMemoryAllocateFlags)(usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT : 0, // C++20 VKPT: Added cast.
 		.deviceMask = 0
 	};
 
@@ -444,7 +444,7 @@ VkResult allocate_gpu_memory(VkMemoryRequirements mem_req, VkDeviceMemory* pMemo
 	VkMemoryAllocateFlagsInfo mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
 		.flags = VK_MEMORY_ALLOCATE_DEVICE_MASK_BIT,
-		.deviceMask = (1 << qvk.device_count) - 1
+		.deviceMask = (uint32_t)(1 << qvk.device_count) - 1 // C++20 VKPT: Added cast.
 	};
 
 	if (qvk.device_count > 1) {

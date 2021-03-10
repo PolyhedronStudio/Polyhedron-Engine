@@ -187,17 +187,19 @@ create_render_pass()
 		.pColorAttachments    = &color_attachment_ref,
 	};
 
-	VkSubpassDependency dependencies[] = {
-		{
-			.srcSubpass    = VK_SUBPASS_EXTERNAL,
-			.dstSubpass    = 0, /* index for own subpass */
-			.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			.srcAccessMask = 0, /* XXX verify */
-			.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
-			               | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-		},
+	// C++20 VKPT: Order fix.
+	// C++20 VKPT: LENGTH() array macro fix.
+	VkSubpassDependency dependencies[1];// = {
+	dependencies[0] = {
+		.srcSubpass = VK_SUBPASS_EXTERNAL,
+		.dstSubpass = 0, /* index for own subpass */
+		.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.srcAccessMask = 0, /* XXX verify */
+		.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+					   | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 	};
+	//};
 
 	VkRenderPassCreateInfo render_pass_info = {
 		.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
@@ -225,13 +227,14 @@ vkpt_draw_initialize()
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
 	}
 
-	VkDescriptorSetLayoutBinding layout_bindings[] = {
-		{
-			.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+	// C++20 VKPT: Order fix.
+	// C++20 VKPT: LENGTH() array macro fix.
+	VkDescriptorSetLayoutBinding layout_bindings[1];// = {
+	layout_bindings = {
+			.binding = 0,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.descriptorCount = 1,
-			.binding         = 0,
-			.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT,
-		},
+			.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
 	};
 
 	VkDescriptorSetLayoutCreateInfo layout_info = {
@@ -248,11 +251,12 @@ vkpt_draw_initialize()
 		.descriptorCount = MAX_FRAMES_IN_FLIGHT,
 	};
 
+	// C++20 VKPT: Order fix.
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		.maxSets = MAX_FRAMES_IN_FLIGHT,
 		.poolSizeCount = 1,
 		.pPoolSizes    = &pool_size,
-		.maxSets       = MAX_FRAMES_IN_FLIGHT,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_sbo));
@@ -276,13 +280,14 @@ vkpt_draw_initialize()
 			.range  = sizeof(stretch_pic_queue),
 		};
 
+		// C++20 VKPT: Order fix.
 		VkWriteDescriptorSet output_buf_write = {
 			.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet          = desc_set_sbo[i],
 			.dstBinding      = 0,
 			.dstArrayElement = 0,
-			.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.descriptorCount = 1,
+			.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.pBufferInfo     = &buf_info,
 		};
 
@@ -381,18 +386,19 @@ vkpt_draw_create_pipelines()
 		.pScissors     = &scissor,
 	};
 
+	// C++20 VKPT: Order fix.
 	VkPipelineRasterizationStateCreateInfo rasterizer_state = {
 		.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
 		.depthClampEnable        = VK_FALSE,
 		.rasterizerDiscardEnable = VK_FALSE, /* skip rasterizer */
 		.polygonMode             = VK_POLYGON_MODE_FILL,
-		.lineWidth               = 1.0f,
 		.cullMode                = VK_CULL_MODE_BACK_BIT,
 		.frontFace               = VK_FRONT_FACE_CLOCKWISE,
 		.depthBiasEnable         = VK_FALSE,
 		.depthBiasConstantFactor = 0.0f,
 		.depthBiasClamp          = 0.0f,
 		.depthBiasSlopeFactor    = 0.0f,
+		.lineWidth = 1.0f,
 	};
 
 	VkPipelineMultisampleStateCreateInfo multisample_state = {
