@@ -1031,7 +1031,6 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
 				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
-				.pNext = NULL, \
 				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
 				.dstAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
