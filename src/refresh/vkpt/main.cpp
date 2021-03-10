@@ -1591,7 +1591,7 @@ add_dlights(const dlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
 #define COM_PARSE_OLD_MAX_TOKEN_CHARS 128
 char	com_token_internal[COM_PARSE_OLD_MAX_TOKEN_CHARS];
 
-char* COM_Parse_old(char** data_p)
+const char* COM_Parse_old(char** data_p)
 {
 	int		c;
 	int		len;
