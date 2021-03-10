@@ -694,7 +694,7 @@ out:;
 		// IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
 			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 
-			.pNext = NULL, 
+			//.pNext = NULL, 
 			.srcAccessMask = 0,
 			.dstAccessMask = 0,
 			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -709,7 +709,6 @@ out:;
 				.baseArrayLayer = 0,
 				.layerCount = 1
 			},
-
 		);
 	}
 
@@ -2879,21 +2878,27 @@ copy_to_dump_texture(VkCommandBuffer cmd_buf, int src_image_index)
 	};
 
 	IMAGE_BARRIER(cmd_buf,
-		.image = src_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
 		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = src_image,
+		.subresourceRange = subresource_range,
 	);
 
 	IMAGE_BARRIER(cmd_buf,
-		.image = dst_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
 		.srcAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = dst_image,
+		.subresourceRange = subresource_range,
 	);
 
 	vkCmdCopyImage(cmd_buf,
@@ -2902,21 +2907,27 @@ copy_to_dump_texture(VkCommandBuffer cmd_buf, int src_image_index)
 		1, &image_copy_region);
 
 	IMAGE_BARRIER(cmd_buf,
-		.image = src_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
 		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = src_image,
+		.subresourceRange = subresource_range,
 	);
 
 	IMAGE_BARRIER(cmd_buf,
-		.image = dst_image,
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = dst_image,
+		.subresourceRange = subresource_range,
 	);
 }
 #endif
@@ -4361,7 +4372,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
@@ -4376,7 +4387,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
@@ -4401,7 +4412,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.dstAccessMask = 0,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
@@ -4416,7 +4427,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
+		//.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
