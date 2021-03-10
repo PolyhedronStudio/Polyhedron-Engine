@@ -760,7 +760,7 @@ G_SetClientSound
 */
 void G_SetClientSound(edict_t *ent)
 {
-    char    *weap;
+    const char    *weap; // C++20: STRING: Added const to char*
 
     if (ent->client->pers.game_helpchanged != game.helpchanged) {
         ent->client->pers.game_helpchanged = game.helpchanged;

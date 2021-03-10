@@ -303,7 +303,7 @@ static qboolean     in_mlooking;
 static void KeyDown(kbutton_t *b)
 {
     int k;
-    char *c;
+    const char *c; // C++20: STRING: Added const to char*
 
     c = Cmd_Argv(1);
     if (c[0])
@@ -339,7 +339,7 @@ static void KeyDown(kbutton_t *b)
 static void KeyUp(kbutton_t *b)
 {
     int k;
-    char *c;
+    const char *c; // C++20: STRING: Added const to char*
     unsigned uptime;
 
     c = Cmd_Argv(1);
@@ -1006,7 +1006,7 @@ static void CL_SendDefaultCmd(void)
     cursize = cls.netchan->Transmit(cls.netchan, msg_write.cursize, msg_write.data, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
-        Com_Printf("%"PRIz" ", cursize);
+        Com_Printf("%" PRIz " ", cursize); // C++20: String concat fix.
     }
 #endif
 

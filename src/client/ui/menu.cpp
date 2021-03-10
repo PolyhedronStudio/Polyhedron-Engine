@@ -30,10 +30,10 @@ ACTION CONTROL
 
 static void Action_Free(menuAction_t *a)
 {
-    Z_Free(a->generic.name);
-    Z_Free(a->generic.status);
-    Z_Free(a->cmd);
-    Z_Free(a);
+    Z_Free((void*)a->generic.name);     // C++20: Added a cast.
+    Z_Free((void*)a->generic.status);   // C++20: Added a cast.
+    Z_Free((void*)a->cmd);              // C++20: Added a cast.
+    Z_Free((void*)a);                   // C++20: Added a cast.
 }
 
 /*
@@ -145,9 +145,9 @@ BITMAP CONTROL
 
 static void Bitmap_Free(menuBitmap_t *b)
 {
-    Z_Free(b->generic.status);
-    Z_Free(b->cmd);
-    Z_Free(b);
+    Z_Free((void*)b->generic.status);  // C++20: Added a cast.
+    Z_Free((void*)b->cmd);             // C++20: Added a cast.
+    Z_Free((void*)b);                  // C++20: Added a cast.
 }
 
 static void Bitmap_Init(menuBitmap_t *b)
@@ -179,11 +179,11 @@ KEYBIND CONTROL
 
 static void Keybind_Free(menuKeybind_t *k)
 {
-    Z_Free(k->generic.name);
-    Z_Free(k->generic.status);
-    Z_Free(k->cmd);
-    Z_Free(k->altstatus);
-    Z_Free(k);
+    Z_Free((void*)k->generic.name);     // C++20: Added a cast.
+    Z_Free((void*)k->generic.status);   // C++20: Added a cast.
+    Z_Free((void*)k->cmd);              // C++20: Added a cast.
+    Z_Free((void*)k->altstatus);        // C++20: Added a cast.
+    Z_Free((void*)k);                   // C++20: Added a cast.
 }
 
 /*
@@ -386,9 +386,9 @@ static void Field_Pop(menuField_t *f)
 
 static void Field_Free(menuField_t *f)
 {
-    Z_Free(f->generic.name);
-    Z_Free(f->generic.status);
-    Z_Free(f);
+    Z_Free((void*)f->generic.name);    // C++20: Added a cast.
+    Z_Free((void*)f->generic.status);  // C++20: Added a cast.
+    Z_Free((void*)f);                  // C++20: Added a cast.
 }
 
 /*
@@ -526,13 +526,13 @@ static void SpinControl_Free(menuSpinControl_t *s)
 {
     int i;
 
-    Z_Free(s->generic.name);
-    Z_Free(s->generic.status);
+    Z_Free((void*)s->generic.name);            // C++20: Added a cast.
+    Z_Free((void*)s->generic.status);          // C++20: Added a cast.
     for (i = 0; i < s->numItems; i++) {
-        Z_Free(s->itemnames[i]);
+        Z_Free((void*)s->itemnames[i]);        // C++20: Added a cast.
     }
-    Z_Free(s->itemnames);
-    Z_Free(s);
+    Z_Free((void*)s->itemnames);               // C++20: Added a cast.
+    Z_Free((void*)s);                          // C++20: Added a cast.
 }
 
 
@@ -625,7 +625,7 @@ SpinControl_Draw
 */
 static void SpinControl_Draw(menuSpinControl_t *s)
 {
-    char *name;
+    const char *name; // C++20: STRING: Added const to char*
 
     UI_DrawString(s->generic.x + LCOLUMN_OFFSET, s->generic.y,
                   s->generic.uiFlags | UI_RIGHT | UI_ALTCOLOR, s->generic.name);
@@ -677,9 +677,9 @@ static void BitField_Pop(menuSpinControl_t *s)
 
 static void BitField_Free(menuSpinControl_t *s)
 {
-    Z_Free(s->generic.name);
-    Z_Free(s->generic.status);
-    Z_Free(s);
+    Z_Free((void*)s->generic.name);    // C++20: Added a cast.
+    Z_Free((void*)s->generic.status);  // C++20: Added a cast.
+    Z_Free((void*)s);                  // C++20: Added a cast.
 }
 
 /*
@@ -714,15 +714,15 @@ static void Pairs_Free(menuSpinControl_t *s)
 {
     int i;
 
-    Z_Free(s->generic.name);
-    Z_Free(s->generic.status);
-    for (i = 0; i < s->numItems; i++) {
-        Z_Free(s->itemnames[i]);
-        Z_Free(s->itemvalues[i]);
+    Z_Free((void*)s->generic.name);                // C++20: Added a cast.
+    Z_Free((void*)s->generic.status);              // C++20: Added a cast.
+    for (i = 0; i < s->numItems; i++) { 
+        Z_Free((void*)s->itemnames[i]);            // C++20: Added a cast.
+        Z_Free((void*)s->itemvalues[i]);           // C++20: Added a cast.
     }
-    Z_Free(s->itemnames);
-    Z_Free(s->itemvalues);
-    Z_Free(s);
+    Z_Free((void*)s->itemnames);                   // C++20: Added a cast.
+    Z_Free((void*)s->itemvalues);                  // C++20: Added a cast.
+    Z_Free((void*)s);                              // C++20: Added a cast.
 }
 
 /*
@@ -1522,10 +1522,10 @@ static void Slider_Pop(menuSlider_t *s)
 
 static void Slider_Free(menuSlider_t *s)
 {
-    Z_Free(s->generic.name);
-    Z_Free(s->generic.status);
-    Z_Free(s->format);
-    Z_Free(s);
+    Z_Free((void*)s->generic.name);    // C++20: Added a cast.
+    Z_Free((void*)s->generic.status);  // C++20: Added a cast.
+    Z_Free((void*)s->format);          // C++20: Added a cast.
+    Z_Free((void*)s);                  // C++20: Added a cast.
 }
 
 static void Slider_Init(menuSlider_t *s)
@@ -1728,7 +1728,7 @@ static void Savegame_Push(menuAction_t *a)
 {
     char *info;
 
-    Z_Free(a->generic.name);
+    Z_Free((void*)a->generic.name); // C++20: Added a cast.
 
     info = SV_GetSaveInfo(a->cmd);
     if (info) {
@@ -1745,7 +1745,7 @@ static void Savegame_Push(menuAction_t *a)
     if (is_auto_save || is_quick_save)
     {
         char *new_name = va("%s - %s", a->generic.name, is_auto_save ? "Auto Save" : "Quick Save");
-        Z_Free(a->generic.name);
+        Z_Free((void*)a->generic.name); // C++20: Added a cast.
         a->generic.name = Z_CopyString(new_name);
     }
 
@@ -2154,7 +2154,7 @@ static void Menu_DrawStatus(menuFrameWork_t *menu)
     int     lens[8];
     char    *ptrs[8];
 
-    txt = menu->status;
+    txt = (char*)menu->status; // C++20: STRING: Unsafe ugly const to char* cast.
     x = 0;
 
     count = 0;
@@ -2629,8 +2629,8 @@ void Menu_Free(menuFrameWork_t *menu)
         }
     }
 
-    Z_Free(menu->title);
-    Z_Free(menu->name);
-    Z_Free(menu);
+    Z_Free((void*)menu->title); // C++20: Added a cast.
+    Z_Free((void*)menu->name); // C++20: Added a cast.
+    Z_Free((void*)menu); // C++20: Added a cast.
 }
 

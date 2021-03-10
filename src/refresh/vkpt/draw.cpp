@@ -230,7 +230,7 @@ vkpt_draw_initialize()
 	// C++20 VKPT: Order fix.
 	// C++20 VKPT: LENGTH() array macro fix.
 	VkDescriptorSetLayoutBinding layout_bindings[1];// = {
-	layout_bindings = {
+	layout_bindings[0] = {
 			.binding = 0,
 			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.descriptorCount = 1,
@@ -401,28 +401,30 @@ vkpt_draw_create_pipelines()
 		.lineWidth = 1.0f,
 	};
 
+	// C++20 VKPT: Order fix.
 	VkPipelineMultisampleStateCreateInfo multisample_state = {
 		.sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+		.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
 		.sampleShadingEnable   = VK_FALSE,
-		.rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT,
 		.minSampleShading      = 1.0f,
 		.pSampleMask           = NULL,
 		.alphaToCoverageEnable = VK_FALSE,
 		.alphaToOneEnable      = VK_FALSE,
 	};
 
+	// C++20 VKPT: Order fix.
 	VkPipelineColorBlendAttachmentState color_blend_attachment = {
-		.colorWriteMask      = VK_COLOR_COMPONENT_R_BIT
-			                 | VK_COLOR_COMPONENT_G_BIT
-			                 | VK_COLOR_COMPONENT_B_BIT
-			                 | VK_COLOR_COMPONENT_A_BIT,
-		.blendEnable         = VK_TRUE,
+		.blendEnable = VK_TRUE,
 		.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA,
 		.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
 		.colorBlendOp        = VK_BLEND_OP_ADD,
 		.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
 		.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
 		.alphaBlendOp        = VK_BLEND_OP_ADD,
+		.colorWriteMask = VK_COLOR_COMPONENT_R_BIT
+							 | VK_COLOR_COMPONENT_G_BIT
+							 | VK_COLOR_COMPONENT_B_BIT
+							 | VK_COLOR_COMPONENT_A_BIT,
 	};
 
 	VkPipelineColorBlendStateCreateInfo color_blend_state = {
@@ -513,12 +515,15 @@ vkpt_draw_submit_stretch_pics(VkCommandBuffer cmd_buf)
 	buffer_unmap(buf_spq);
 	spq_dev = NULL;
 
+	// C++20 VKPT: Construct fix.
 	VkRenderPassBeginInfo render_pass_info = {
 		.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.renderPass        = render_pass_stretch_pic,
 		.framebuffer       = framebuffer_stretch_pic[qvk.current_swap_chain_image_index],
-		.renderArea.offset = { 0, 0 },
-		.renderArea.extent = vkpt_draw_get_extent()
+		.renderArea = {
+			.offset = { 0, 0 },
+			.extent = vkpt_draw_get_extent()
+		}
 	};
 
 	VkDescriptorSet desc_sets[] = {
@@ -548,61 +553,86 @@ vkpt_final_blit_simple(VkCommandBuffer cmd_buf)
 		.layerCount = 1
 	};
 
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
+		.subresourceRange = subresource_range,
 	);
 
 	int output_img = VKPT_IMG_TAA_OUTPUT;
 
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.images[output_img],
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = qvk.images[output_img],
+		.subresourceRange = subresource_range,
+
 	);
 
 	VkOffset3D blit_size = {
-		.x = qvk.extent_taa_output.width,
-		.y = qvk.extent_taa_output.height,
-		.z = 1
+		.x = (int32_t)qvk.extent_taa_output.width,	// C++20 VKPT: Added cast.
+		.y = (int32_t)qvk.extent_taa_output.height,	// C++20 VKPT: Added cast.
+		.z = (int32_t)1								// C++20 VKPT: Added cast.
 	};
 	VkOffset3D blit_size_unscaled = {
-		.x = qvk.extent_unscaled.width,.y = qvk.extent_unscaled.height,.z = 1
+		.x = (int32_t)qvk.extent_unscaled.width,.y = (int32_t)qvk.extent_unscaled.height,.z = 1 // C++20 VKPT: Added cast.
 	};
+
+	// C++20 VKPT: COnstruct fix.
 	VkImageBlit img_blit = {
 		.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
 		.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
-		.srcOffsets = { [1] = blit_size },
-		.dstOffsets = { [1] = blit_size_unscaled },
+		//.srcOffsets = { [1] = blit_size },
+		//.dstOffsets = { [1] = blit_size_unscaled },
 	};
+	img_blit.srcOffsets[1] = blit_size;
+	img_blit.dstOffsets[1] = blit_size_unscaled;
 	vkCmdBlitImage(cmd_buf,
 		qvk.images[output_img], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 		qvk.swap_chain_images[qvk.current_swap_chain_image_index], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1, &img_blit, VK_FILTER_NEAREST);
 
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = 0,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
+		.subresourceRange = subresource_range,
 	);
 
+	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.images[output_img],
-		.subresourceRange = subresource_range,
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
 		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = qvk.images[output_img],
+		.subresourceRange = subresource_range,
 	);
 
 	return VK_SUCCESS;
@@ -611,12 +641,15 @@ vkpt_final_blit_simple(VkCommandBuffer cmd_buf)
 VkResult
 vkpt_final_blit_filtered(VkCommandBuffer cmd_buf)
 {
+	// C++20 VKPT: Construct fix.
 	VkRenderPassBeginInfo render_pass_info = {
 		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.renderPass = render_pass_stretch_pic,
 		.framebuffer = framebuffer_stretch_pic[qvk.current_swap_chain_image_index],
-		.renderArea.offset = { 0, 0 },
-		.renderArea.extent = vkpt_draw_get_extent()
+		.renderArea = {
+			.offset = { 0, 0 },
+			.extent = vkpt_draw_get_extent()
+		}
 	};
 
 	VkDescriptorSet desc_sets[] = {

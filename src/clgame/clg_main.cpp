@@ -605,7 +605,7 @@ void CLG_UpdateUserInfo(cvar_t* var, from_t from) {
 //
 //=============================================================================
 // Prints a message of type PRINT_ALL. Using variable arg formatting.
-void Com_Print(char *fmt, ...) {
+void Com_Print(const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);
@@ -615,7 +615,7 @@ void Com_Print(char *fmt, ...) {
 }
 // Prints a message of type PRINT_DEVELOPER. Using variable arg formatting.
 // Only prints when developer cvar is set to 1.
-void Com_DPrint(char *fmt, ...) {
+void Com_DPrint(const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);
@@ -624,7 +624,7 @@ void Com_DPrint(char *fmt, ...) {
     va_end (args);
 }
 // Prints a message of type PRINT_WARNING. Using variable arg formatting.
-void Com_WPrint(char *fmt, ...) {
+void Com_WPrint(const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);
@@ -633,7 +633,7 @@ void Com_WPrint(char *fmt, ...) {
     va_end (args);
 }
 // Prints a message of type PRINT_ERROR. Using variable arg formatting.
-void Com_EPrint(char *fmt, ...) {
+void Com_EPrint(const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);

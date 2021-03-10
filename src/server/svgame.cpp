@@ -742,7 +742,7 @@ static cvar_t *PF_cvar(const char *name, const char *value, int flags)
 // Stuff Cmd implementation like other Quake engines have for the server module.
 //===============
 //
-static void PF_stuffcmd(edict_t* pent, char* pszCommand) {
+static void PF_stuffcmd(edict_t* pent, const char* pszCommand) {
     MSG_WriteByte(svc_stufftext);
     MSG_WriteString(pszCommand);
 

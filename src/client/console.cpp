@@ -327,7 +327,7 @@ Con_RemoteMode_f
 static void Con_RemoteMode_f(void)
 {
     netadr_t adr;
-    char *s;
+    const char *s; // C++20: STRING: Added const to char*
 
     if (Cmd_Argc() != 3) {
         Com_Printf("Usage: %s <address> <password>\n", Cmd_Argv(0));
@@ -710,7 +710,7 @@ Draws the last few lines of output transparently over the game top
 static void Con_DrawNotify(void)
 {
     int     v;
-    char    *text;
+    const char    *text; // C++20: STRING: Added const to char*
     int     i, j;
     unsigned    time;
     int     skip;
@@ -782,7 +782,7 @@ static void Con_DrawSolidConsole(void)
 {
     int             i, x, y;
     int             rows;
-    char            *text;
+    const char      *text; // C++20: STRING: Added const to char*
     int             row;
     char            buffer[CON_LINEWIDTH];
     int             vislines;

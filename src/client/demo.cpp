@@ -624,7 +624,7 @@ static int read_next_message(qhandle_t f)
 
 static void finish_demo(int ret)
 {
-    char *s = Cvar_VariableString("nextserver");
+    const char *s = Cvar_VariableString("nextserver"); // C++20: STRING: Added const to char*
 
     if (!s[0]) {
         if (ret == 0) {
@@ -911,7 +911,7 @@ static void CL_Seek_f(void)
 {
     demosnap_t *snap;
     int i, j, ret, index, frames, dest, prev;
-    char *from, *to;
+    const char *from, *to; // C++20: STRING: Added const to char*
 
     if (Cmd_Argc() < 2) {
         Com_Printf("Usage: %s [+-]<timespec>\n", Cmd_Argv(0));
@@ -996,7 +996,8 @@ static void CL_Seek_f(void)
                     continue;
 
                 Q_SetBit(cl.dcs, i);
-                strcpy(to, from);
+                // C++20: STRING: I know this cast is evil but...
+                strcpy((char*)to, from);
             }
 
             SZ_Init(&msg_read, snap->data, snap->msglen);

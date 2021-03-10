@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef struct {
     fieldtype_t type;
 #ifdef _DEBUG
-    char *name;
+    const char *name; // C++20: STRING: Added const to char*
 #endif
     size_t ofs;
     size_t size;
@@ -993,14 +993,14 @@ void ReadLevel(const char *filename)
             if (strcmp(ent->classname, "target_crosslevel_target") == 0)
                 ent->nextthink = level.time + ent->delay;
 
-        if (ent->think == func_clock_think || ent->use == func_clock_use) {
-            char *msg = ent->message;
-            ent->message = (char*)gi.TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL); // CPP: Cast
-            if (msg) {
-                Q_strlcpy(ent->message, msg, CLOCK_MESSAGE_SIZE);
-                gi.TagFree(msg);
-            }
-        }
+        //if (ent->think == func_clock_think || ent->use == func_clock_use) {
+        //    const char *msg = ent->message;
+        //    ent->message = (const char)gi.TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL); // CPP: Cast
+        //    if (msg) {
+        //        Q_strlcpy((char*)ent->message, msg, CLOCK_MESSAGE_SIZE); // C++20: STRING: Dangerous (const char*) to (char*)..?
+        //        gi.TagFree((void*)msg);
+        //    }
+        //}
     }
 }
 

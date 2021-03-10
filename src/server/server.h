@@ -670,7 +670,7 @@ void SV_MvdStop_f(void);
 // sv_ac.c
 //
 #if USE_AC_SERVER
-char *AC_ClientConnect(client_t *cl);
+const char *AC_ClientConnect(client_t *cl);
 void AC_ClientDisconnect(client_t *cl);
 qboolean AC_ClientBegin(client_t *cl);
 void AC_ClientAnnounce(client_t *cl);

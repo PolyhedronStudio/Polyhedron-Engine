@@ -321,7 +321,7 @@ edict_t *CreateTargetChangeLevel(char *map)
     edict_t *ent;
 
     ent = G_Spawn();
-    ent->classname = "target_changelevel";
+    ent->classname = (char*)"target_changelevel"; // C++20: Added a cast.
     Q_snprintf(level.nextmap, sizeof(level.nextmap), "%s", map);
     ent->map = level.nextmap;
     return ent;

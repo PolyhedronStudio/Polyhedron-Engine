@@ -413,7 +413,7 @@ static void Sys_InstallService_f(void)
     char serviceName[1024];
     SC_HANDLE scm, service;
     DWORD error, length;
-    char *commandline;
+    const char *commandline; // C++20: STRING: ADded const to char*
 
     if (Cmd_Argc() < 3) {
         Com_Printf("Usage: %s <servicename> <+command> [...]\n"
@@ -1161,7 +1161,7 @@ static VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
 }
 
 static SERVICE_TABLE_ENTRY serviceTable[] = {
-    { APPLICATION, ServiceMain },
+    { (LPSTR)APPLICATION, ServiceMain }, // C++20: Added cast.
     { NULL, NULL }
 };
 

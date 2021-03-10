@@ -95,7 +95,7 @@ FindItem
 
 ===============
 */
-gitem_t *FindItem(char *pickup_name)
+gitem_t *FindItem(const char *pickup_name) // C++20: STRING: Added const to char*
 {
     int     i;
     gitem_t *it;
@@ -936,7 +936,7 @@ and for each item in each client's inventory.
 */
 void PrecacheItem(gitem_t *it)
 {
-    char    *s, *start;
+    const char    *s, *start; // C++20: STRING: Added const
     char    data[MAX_QPATH];
     int     len;
     gitem_t *ammo;

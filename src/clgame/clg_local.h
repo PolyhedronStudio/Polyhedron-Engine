@@ -236,10 +236,10 @@ void CLG_DemoSeek(void);
 
 void CLG_UpdateUserInfo(cvar_t* var, from_t from);
 
-void Com_Print(char *fmt, ...);
-void Com_DPrint(char *fmt, ...);
-void Com_WPrint(char *fmt, ...);
-void Com_EPrint(char *fmt, ...);
+void Com_Print(const char *fmt, ...);
+void Com_DPrint(const char *fmt, ...);
+void Com_WPrint(const char *fmt, ...);
+void Com_EPrint(const char *fmt, ...);
 void Com_Error (error_type_t code, const char *fmt, ...);
 void Com_LPrintf(print_type_t type, const char* fmt, ...);
 

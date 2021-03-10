@@ -70,7 +70,7 @@ int         numipfilters;
 StringToFilter
 =================
 */
-static qboolean StringToFilter(char *s, ipfilter_t *f)
+static qboolean StringToFilter(const char *s, ipfilter_t *f) // C++20: STRING: Added const to char*
 {
     char    num[128];
     int     i, j;
@@ -274,7 +274,7 @@ of the parameters
 */
 void    ServerCommand(void)
 {
-    char    *cmd;
+    const char    *cmd; // C++20: Added const to char*
 
     cmd = gi.argv(1);
     if (Q_stricmp(cmd, "test") == 0)

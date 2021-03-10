@@ -92,6 +92,9 @@ void CLG_AddPacketEntities(void)
     clientinfo_t* ci;
     unsigned int        effects, renderfx;
 
+    // C++20: Had to be placed here because of label skip.
+    int base_entity_flags = 0;
+
     // bonus items rotate at a fixed rate
     autorotate = anglemod(cl->time * 0.1f);
 
@@ -293,8 +296,6 @@ void CLG_AddPacketEntities(void)
                 ent.angles[ROLL] = -ent.angles[ROLL];
             }
         }
-
-        int base_entity_flags = 0;
 
         if (s1->number == cl->frame.clientNum + 1) {
             if (effects & EF_FLAG1)

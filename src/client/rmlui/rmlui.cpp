@@ -83,7 +83,7 @@ void RMLUI_Init(void) {
 		return;
 	}
 
-	document->Show();
+	document->Hide();
 }
 
 //

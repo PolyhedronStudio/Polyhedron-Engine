@@ -663,7 +663,7 @@ static void SCR_UnDraw_c(genctx_t* ctx, int argnum)
 
 static void SCR_UnDraw_f(void)
 {
-    char* s;
+    const char* s; // C++20: STRING: Added const to char*
     drawobj_t* obj, * next;
     cmd_macro_t* macro;
     cvar_t* cvar;
@@ -965,7 +965,7 @@ static void SCR_DrawInventory(void)
     int     index[MAX_ITEMS];
     char    string[MAX_STRING_CHARS];
     int     x, y;
-    char* bind;
+    const char* bind; // C++20: STRING: Added const to char*
     int     selected;
     int     top;
 
@@ -1438,7 +1438,7 @@ back to server defaults.
 */
 static void SCR_Sky_f(void)
 {
-    char* name;
+    const char* name; // C++20: STRING: Added const to char*
     float   rotate;
     vec3_t  axis;
     int     argc = clgi.Cmd_Argc();

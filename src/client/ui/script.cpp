@@ -291,8 +291,8 @@ static void Parse_Bind(menuFrameWork_t *menu)
         { NULL }
     };
     menuKeybind_t *k;
-    char *status = "Press Enter to change, Backspace to clear";
-    char *altstatus = "Press the desired key, Escape to cancel";
+    const char *status = "Press Enter to change, Backspace to clear"; // C++20: STRING: Added const to char*
+    const char *altstatus = "Press the desired key, Escape to cancel"; // C++20: STRING: Added const to char*
     int c;
 
     while ((c = Cmd_ParseOptions(o_bind)) != -1) {
@@ -372,7 +372,7 @@ static void Parse_Toggle(menuFrameWork_t *menu)
     qboolean negate = qfalse;
     menuType_t type = MTYPE_TOGGLE;
     int c, bit = 0;
-    char *b, *status = NULL;
+    const char *b, *status = NULL; // C++20: STRING: Added const to char*
 
     while ((c = Cmd_ParseOptions(o_common)) != -1) {
         switch (c) {
@@ -488,7 +488,7 @@ static void Parse_Blank(menuFrameWork_t *menu)
 
 static void Parse_Background(menuFrameWork_t *menu)
 {
-    char *s = Cmd_Argv(1);
+    const char *s = Cmd_Argv(1); // C++20: STRING: Added const to char*
 
     if (SCR_ParseColor(s, &menu->color)) {
         menu->image = 0;
@@ -532,7 +532,7 @@ static void Parse_Style(menuFrameWork_t *menu)
 
 static void Parse_Color(void)
 {
-    char *s, *c;
+    const char *s, *c; // C++20: STRING: Added const to char*
 
     if (Cmd_Argc() < 3) {
         Com_Printf("Usage: %s <state> <color>\n", Cmd_Argv(0));
@@ -632,7 +632,8 @@ static void Parse_If(menuFrameWork_t *menu, qboolean equals)
 
 static qboolean Parse_File(const char *path, int depth)
 {
-    char *raw, *data, *p, *cmd;
+    char* raw, * data, * p;// , * cmd;
+    const char* cmd; // C++20: STRING: Added const to char*
     int argc;
     menuFrameWork_t *menu = NULL;
     qerror_t ret;
@@ -672,7 +673,7 @@ static qboolean Parse_File(const char *path, int depth)
                     menu = NULL;
                 } else if (!strcmp(cmd, "title")) {
                     if (menu->title) {
-                        Z_Free(menu->title);
+                        Z_Free((void*)menu->title); // C++20: Added a cast.
                     }
                     menu->title = UI_CopyString(Cmd_Argv(1));
                 } else if (!strcmp(cmd, "plaque")) {
@@ -720,7 +721,7 @@ static qboolean Parse_File(const char *path, int depth)
                 }
             } else {
                 if (!strcmp(cmd, "begin")) {
-                    char *s = Cmd_Argv(1);
+                    const char *s = Cmd_Argv(1); // C++20: STRING: Added const to char*
                     if (!*s) {
                         Com_WPrintf("Expected menu name after '%s'\n", cmd);
                         break;
@@ -742,7 +743,7 @@ static qboolean Parse_File(const char *path, int depth)
                     menu->color.u32 = uis.color.background.u32;
                     menu->transparent = uis.transparent;
                 } else if (!strcmp(cmd, "include")) {
-                    char *s = Cmd_Argv(1);
+                    const char *s = Cmd_Argv(1); // C++20: STRING: Added const to char*
                     if (!*s) {
                         Com_WPrintf("Expected file name after '%s'\n", cmd);
                         break;
@@ -755,7 +756,7 @@ static qboolean Parse_File(const char *path, int depth)
                 } else if (!strcmp(cmd, "color")) {
                     Parse_Color();
                 } else if (!strcmp(cmd, "background")) {
-                    char *s = Cmd_Argv(1);
+                    const char *s = Cmd_Argv(1); // C++20: STRING: Added const to char*
 
                     if (SCR_ParseColor(s, &uis.color.background)) {
                         uis.backgroundHandle = 0;

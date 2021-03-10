@@ -20,12 +20,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "g_local.h"
 
 typedef struct {
-    char    *name;
+    const char    *name; // C++20: STRING: Added const
     void (*spawn)(edict_t *ent);
 } spawn_func_t;
 
 typedef struct {
-    char    *name;
+    const char    *name; // C++20: STRING: Added const
     size_t  ofs;
     fieldtype_t type;
 } spawn_field_t;

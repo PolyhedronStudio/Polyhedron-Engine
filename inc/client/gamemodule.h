@@ -42,7 +42,7 @@ void		CL_GM_EntityEvent(int number);
 // Media
 //
 void        CL_GM_InitMedia(void);
-char		*CL_GM_GetMediaLoadStateName(load_state_t state);
+const char	*CL_GM_GetMediaLoadStateName(load_state_t state);
 void        CL_GM_LoadScreenMedia(void);
 void        CL_GM_LoadWorldMedia(void);
 void        CL_GM_ShutdownMedia(void);

@@ -274,9 +274,9 @@ extern "C" {
         // Returns the amount of arguments fed to the current command.
         int         (*Cmd_Argc) (void);
         // Returns the value of the argument number fed to the current command.
-        char        *(*Cmd_Argv) (int arg);
+        const char  *(*Cmd_Argv) (int arg);
         // Returns the original argument string fed to the current command.
-        char        *(*Cmd_Args) (void);
+        const char  *(*Cmd_Args) (void);
         // Executes matching cmd triggers.
         void        (*Cmd_ExecTrigger) (const char* string);
 
@@ -318,7 +318,7 @@ extern "C" {
         // NOTE: returns 0 if not defined or non numeric.
         int         (*Cvar_VariableInteger) (const char *var_name);
         // Returns the string value of the cvar.
-        char        *(*Cvar_VariableString) (const char *var_name);
+        const char  *(*Cvar_VariableString) (const char *var_name);
 
         // Will create the variable if it doesn't exist.
         // Sets the string value.
@@ -415,7 +415,7 @@ extern "C" {
         // Returns whether a key is down or not.
         int         (*Key_IsDown) (int key);
         // Returns the ASCII value of the key belonging to the binding.
-        char        *(*Key_GetBinding) (const char* binding);
+        const char  *(*Key_GetBinding) (const char* binding);
 
 
         //---------------------------------------------------------------------

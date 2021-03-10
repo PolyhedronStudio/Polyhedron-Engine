@@ -566,7 +566,7 @@ static void UI_PushMenu_c(genctx_t *ctx, int argnum)
 static void UI_PushMenu_f(void)
 {
     menuFrameWork_t *menu;
-    char *s;
+    const char *s; // C++20: STRING: Added const to char*
 
     if (Cmd_Argc() < 2) {
         Com_Printf("Usage: %s <menu>\n", Cmd_Argv(0));

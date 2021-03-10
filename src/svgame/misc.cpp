@@ -92,7 +92,7 @@ void gib_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, v
     G_FreeEdict(self);
 }
 
-void ThrowGib(edict_t *self, char *gibname, int damage, int type)
+void ThrowGib(edict_t *self, const char *gibname, int damage, int type)
 {
     edict_t *gib;
     vec3_t  vd;
@@ -137,7 +137,7 @@ void ThrowGib(edict_t *self, char *gibname, int damage, int type)
     gi.linkentity(gib);
 }
 
-void ThrowHead(edict_t *self, char *gibname, int damage, int type)
+void ThrowHead(edict_t *self, const char *gibname, int damage, int type)
 {
     vec3_t  vd;
     float   vscale;
@@ -183,7 +183,7 @@ void ThrowHead(edict_t *self, char *gibname, int damage, int type)
 void ThrowClientHead(edict_t *self, int damage)
 {
     vec3_t  vd;
-    char    *gibname;
+    const char    *gibname; // C++20 VKPT: added const.
 
     if (rand() & 1) {
         gibname = "models/objects/gibs/head2/tris.md2";
@@ -231,7 +231,7 @@ void debris_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     G_FreeEdict(self);
 }
 
-void ThrowDebris(edict_t *self, char *modelname, float speed, vec3_t origin)
+void ThrowDebris(edict_t *self, const char *modelname, float speed, vec3_t origin) // C++20: STRING: Added const to char*
 {
     edict_t *chunk;
     vec3_t  v;

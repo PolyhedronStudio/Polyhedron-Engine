@@ -247,7 +247,7 @@ static void CLG_ParsePrint(void)
 {
     int level;
     char s[MAX_STRING_CHARS];
-    char* fmt;
+    const char* fmt; // C++20: STRING: Added const to char*
 
     level = clgi.MSG_ReadByte();
     clgi.MSG_ReadString(s, sizeof(s));

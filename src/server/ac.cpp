@@ -1091,7 +1091,7 @@ void AC_ClientAnnounce(client_t *cl)
     }
 }
 
-char *AC_ClientConnect(client_t *cl)
+const char *AC_ClientConnect(client_t *cl)
 {
     if (!ac_required->integer) {
         return ""; // anticheat is not in use
@@ -1490,7 +1490,7 @@ void AC_Disconnect(void)
 void AC_List_f(void)
 {
     client_t    *cl;
-    char        *sub;
+    const char  *sub; // C++20: STRING: Added const to char*
     int         i;
 
     if (!svs.initialized) {
@@ -1550,7 +1550,7 @@ void AC_Info_f(void)
 {
     client_t *cl;
     string_entry_t *bad;
-    char *substring, *filesubstring;
+    const char *substring, *filesubstring; // C++20: STRING: Added const to char*
     int clientID;
 
     if (!svs.initialized) {

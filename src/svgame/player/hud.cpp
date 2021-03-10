@@ -162,7 +162,7 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
     int     x, y;
     gclient_t   *cl;
     edict_t     *cl_ent;
-    char    *tag;
+    const char    *tag; // C++20: STRING: Added const to char*
 
     // sort the clients by score
     total = 0;
@@ -283,7 +283,7 @@ Draw help computer.
 void HelpComputer(edict_t *ent)
 {
     char    string[1024];
-    char    *sk;
+    const char    *sk; // C++20: STRING: Added const to char*
 
     if (skill->value == 0)
         sk = "easy";
@@ -520,7 +520,8 @@ void G_SetSpectatorStats(edict_t *ent)
     if (cl->showinventory && cl->pers.health > 0)
         cl->ps.stats[STAT_LAYOUTS] |= 2;
 
-    if (cl->chase_target && cl->chase_target->inuse)
+    // C++20: FIX: Added a check for if cl->chase_target
+    if (cl->chase_target && cl->chase_target && cl->chase_target->inuse)
         cl->ps.stats[STAT_CHASE] = CS_PLAYERSKINS +
                                    (cl->chase_target - g_edicts) - 1;
     else

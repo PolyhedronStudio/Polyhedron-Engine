@@ -910,7 +910,7 @@ Request a download from the server
 */
 static void CL_Download_f(void)
 {
-    char *path;
+    const char *path; // C++20: STRING: Added const to char*
     qerror_t ret;
 
     if (cls.state < ca_connected) {

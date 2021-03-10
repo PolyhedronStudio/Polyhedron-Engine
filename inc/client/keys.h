@@ -33,14 +33,14 @@ int         Key_IsDown(int key);
 int         Key_AnyKeyDown(void);
 void        Key_ClearStates(void);
 
-char    *Key_KeynumToString(int keynum);
-int     Key_StringToKeynum(const char *str);
-void    Key_SetBinding(int keynum, const char *binding);
-char    *Key_GetBinding(const char *binding);
-char    *Key_GetBindingForKey(int keynum);
-int     Key_EnumBindings(int key, const char *binding);
-void    Key_WriteBindings(qhandle_t f);
+const char  *Key_KeynumToString(int keynum);
+int			Key_StringToKeynum(const char *str);
+void		Key_SetBinding(int keynum, const char *binding);
+const char  *Key_GetBinding(const char *binding);
+const char  *Key_GetBindingForKey(int keynum);
+int			Key_EnumBindings(int key, const char *binding);
+void		Key_WriteBindings(qhandle_t f);
 
-void    Key_WaitKey(keywaitcb_t wait, void *arg);
+void		Key_WaitKey(keywaitcb_t wait, void *arg);
 
 #endif // KEYS_H

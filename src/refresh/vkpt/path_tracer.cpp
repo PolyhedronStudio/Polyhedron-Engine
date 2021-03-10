@@ -602,7 +602,7 @@ vkpt_pt_create_accel_bottom(
 				.info = {
 					.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
 					.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
-					.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV
+					.flags = (VkBuildAccelerationStructureFlagsNV)(fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV), // C++20 VKPT: Added cast.
 					.instanceCount = 0,
 					.geometryCount = 1,
 					.pGeometries = &allocGeometry,
@@ -643,7 +643,7 @@ vkpt_pt_create_accel_bottom(
 		VkAccelerationStructureInfoNV as_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
 			.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
-			.flags = (VkBuildAccelerationStructureFlagBitsKHR)(fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV),
+			.flags = (VkBuildAccelerationStructureFlagsNV)(fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV),
 			.geometryCount = 1,
 			.pGeometries = &geometry,
 		};
@@ -1378,7 +1378,7 @@ vkpt_pt_create_pipelines()
 		if (qvk.use_khr_ray_tracing)
 		{
 			// C++20 VKPT: Array initialize list fix rt_shader_group_info.
-			VkRayTracingShaderGroupCreateInfoKHR rt_shader_group_info[SBT_ENTRIES_COUNT];
+			VkRayTracingShaderGroupCreateInfoKHR rt_shader_group_info[SBT_ENTRIES_PER_PIPELINE];
 			rt_shader_group_info[SBT_RGEN] = {
 				.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
 				.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR,
@@ -1488,7 +1488,7 @@ vkpt_pt_create_pipelines()
 		else // (!qvk.use_khr_ray_tracing)
 		{
 			// C++20 VKPT: Array initialize list fix rt_shader_group_info.
-			VkRayTracingShaderGroupCreateInfoNV rt_shader_group_info[SBT_ENTRIES_COUNT];
+			VkRayTracingShaderGroupCreateInfoNV rt_shader_group_info[SBT_ENTRIES_PER_PIPELINE];
 			rt_shader_group_info[SBT_RGEN] = {
 				.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV,
 				.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_NV,

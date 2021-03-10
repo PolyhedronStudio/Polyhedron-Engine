@@ -41,8 +41,8 @@ static byte     buttondown[256 / 8];
 static qboolean key_overstrike;
 
 typedef struct keyname_s {
-    char    *name;
-    int     keynum;
+    const char *name; // C++20: STRING: Added const to char*
+    int        keynum;
 } keyname_t;
 
 #define K(x) { #x, K_##x }
@@ -257,7 +257,7 @@ given keynum.
 FIXME: handle quote special (general escape sequence?)
 ===================
 */
-char *Key_KeynumToString(int keynum)
+const char *Key_KeynumToString(int keynum)
 {
     const keyname_t *kn;
     static char tinystr[2];
@@ -286,7 +286,7 @@ Key_GetBinding
 Returns the name of the first key found.
 ===================
 */
-char *Key_GetBinding(const char *binding)
+const char *Key_GetBinding(const char *binding)
 {
     int key;
 
@@ -308,7 +308,7 @@ Key_GetBindingForKey
 Returns the command bound to a given key.
 ===================
 */
-char *Key_GetBindingForKey(int keynum)
+const char *Key_GetBindingForKey(int keynum)
 {
 	return keybindings[keynum];
 }

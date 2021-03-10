@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <assert.h>
 
+
 #include "../stb/stb_image.h"
 #include "../stb/stb_image_resize.h"
 #include "../stb/stb_image_write.h"
@@ -1529,14 +1530,14 @@ vkpt_create_images()
 		.arrayLayers           = 1, \
 		.samples               = VK_SAMPLE_COUNT_1_BIT, \
 		.tiling                = VK_IMAGE_TILING_OPTIMAL, \
-		.usage                 = VK_IMAGE_USAGE_STORAGE_BIT \
+		.usage                 = (VkImageUsageFlags)(VK_IMAGE_USAGE_STORAGE_BIT \
 		                       | VK_IMAGE_USAGE_TRANSFER_SRC_BIT \
 		                       | VK_IMAGE_USAGE_TRANSFER_DST_BIT \
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT \
-		                       | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, \
+		                       | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT), \
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE, \
-		.queueFamilyIndexCount = (const uint32_t*)qvk.queue_idx_graphics, \
-		.initialLayout         = (VkImageLayout)VK_IMAGE_LAYOUT_UNDEFINED, \
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, \
+		.initialLayout         = (VkImageLayout)VK_IMAGE_LAYOUT_UNDEFINED \
 	};
 LIST_IMAGES
 LIST_IMAGES_A_B
@@ -1597,7 +1598,7 @@ LIST_IMAGES_A_B
 				VkBindImageMemoryDeviceGroupInfo device_group_info = {
 					.sType = VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_DEVICE_GROUP_INFO,
 					.pNext = NULL,
-					.deviceIndexCount = qvk.device_count,
+					.deviceIndexCount = (uint32_t)qvk.device_count, // C++20 VKPT: Added a cast.
 					.pDeviceIndices = device_indices,
 					.splitInstanceBindRegionCount = 0,
 					.pSplitInstanceBindRegions = NULL,

@@ -202,8 +202,8 @@ qboolean IsNeutral(edict_t *ent)
 void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker)
 {
     int         mod;
-    char        *message;
-    char        *message2;
+    const char        *message; // C++20: STRING: Added const to char*
+    const char        *message2; // C++20: STRING: Added const to char*
     qboolean    ff;
 
     if (coop->value && attacker->client)
@@ -805,7 +805,7 @@ edict_t *SelectCoopSpawnPoint(edict_t *ent)
 {
     int     index;
     edict_t *spot = NULL;
-    char    *target;
+    const char    *target; // C++20: STRING: Added const to char*
 
     index = ent->client - game.clients;
 

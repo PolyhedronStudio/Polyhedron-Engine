@@ -363,6 +363,7 @@ vkpt_god_rays_noop()
 	return VK_SUCCESS;
 }
 
+// C++20 VKPT: BARRIER_COMPUTE
 #define BARRIER_COMPUTE(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -373,12 +374,16 @@ vkpt_god_rays_noop()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+				.pNext = NULL, \
 				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
 				.dstAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 
@@ -544,13 +549,13 @@ static void create_pipeline_layout()
 	_VK(vkCreateDescriptorSetLayout(qvk.device, &set_layout_create_info, NULL,
 		&god_rays.descriptor_set_layout));
 
-
-	VkDescriptorSetLayout desc_set_layouts[] = {
-		god_rays.descriptor_set_layout,
-		qvk.desc_set_layout_vertex_buffer,
-		qvk.desc_set_layout_ubo,
-		qvk.desc_set_layout_textures
-	};
+	// C++20 VKPT: LENGTH() array fix.
+	VkDescriptorSetLayout desc_set_layouts[4];// = {
+	desc_set_layouts[0] = god_rays.descriptor_set_layout;
+	desc_set_layouts[1] = qvk.desc_set_layout_vertex_buffer;
+	desc_set_layouts[2] = qvk.desc_set_layout_ubo;
+	desc_set_layouts[3] = qvk.desc_set_layout_textures;
+	//};
 
 	VkPushConstantRange push_constant_range = {
 		.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
@@ -560,8 +565,8 @@ static void create_pipeline_layout()
 
 	const VkPipelineLayoutCreateInfo layout_create_info = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-		.pSetLayouts = desc_set_layouts,
 		.setLayoutCount = LENGTH(desc_set_layouts),
+		.pSetLayouts = desc_set_layouts,
 		.pushConstantRangeCount = 1,
 		.pPushConstantRanges = &push_constant_range
 	};
@@ -635,18 +640,20 @@ static void update_descriptor_set()
 	if (god_rays.shadow_image_view == NULL)
 		return;
 
+	// C++20 VKPT: Order fix.
 	VkDescriptorImageInfo image_info = {
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.sampler = god_rays.shadow_sampler,
 		.imageView = god_rays.shadow_image_view,
-		.sampler = god_rays.shadow_sampler
+		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
+	// C++20 VKPT: Order fix.
 	VkWriteDescriptorSet writes[1] = {
 		{
 			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet = god_rays.descriptor_set,
-			.descriptorCount = 1,
 			.dstBinding = 0,
+			.descriptorCount = 1,
 			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.pImageInfo = &image_info
 		}

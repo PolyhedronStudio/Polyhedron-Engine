@@ -47,6 +47,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 #include <assert.h>
 
+#include "../stb/stb_image.h"
+#include "../stb/stb_image_resize.h"
+#include "../stb/stb_image_write.h"
+
 cvar_t *cvar_profiler = NULL;
 cvar_t *cvar_vsync = NULL;
 cvar_t *cvar_pt_caustics = NULL;
@@ -724,7 +728,7 @@ create_command_pool_and_fences()
 	VkCommandPoolCreateInfo cmd_pool_create_info = {
 		.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
 		.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-		.queueFamilyIndex = qvk.queue_idx_graphics,
+		.queueFamilyIndex = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added a cast.
 	};
 
 	/* command pool and buffers */
@@ -835,7 +839,7 @@ init_vulkan()
 	VkInstanceCreateInfo inst_create_info = {
 		.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
 		.pApplicationInfo        = &vk_app_info,
-		.enabledExtensionCount   = num_inst_ext_combined,
+		.enabledExtensionCount   = (uint32_t)num_inst_ext_combined, // C++20 VKPT: Added a cast.
 		.ppEnabledExtensionNames = (const char * const*)ext,
 	};
 
@@ -1106,7 +1110,7 @@ init_vulkan()
 		// C++20 VKPT: Order fix.
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-			.queueFamilyIndex = qvk.queue_idx_graphics,
+			.queueFamilyIndex = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added a cast.
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
 		};
@@ -1117,7 +1121,7 @@ init_vulkan()
 		// C++20 VKPT: Order fix.
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-			.queueFamilyIndex = qvk.queue_idx_compute,
+			.queueFamilyIndex = (uint32_t)qvk.queue_idx_compute, // C++20 VKPT: Added a cast.
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
 		};
@@ -1127,7 +1131,7 @@ init_vulkan()
 		// C++20 VKPT: Order fix.
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-			.queueFamilyIndex = qvk.queue_idx_transfer,
+			.queueFamilyIndex = (uint32_t)qvk.queue_idx_transfer, // C++20 VKPT: Added a cast.
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
 		};
@@ -1137,9 +1141,9 @@ init_vulkan()
 	// C++20 VKPT: Order fix.
 	VkPhysicalDeviceDescriptorIndexingFeatures idx_features = {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES,
-		.runtimeDescriptorArray = 1,
-		.shaderStorageBufferArrayNonUniformIndexing = 1,
 		.shaderSampledImageArrayNonUniformIndexing = 1,
+		.shaderStorageBufferArrayNonUniformIndexing = 1,
+		.runtimeDescriptorArray = 1,
 	};
 
 #ifdef VKPT_DEVICE_GROUPS
@@ -1230,7 +1234,7 @@ init_vulkan()
 	VkDeviceCreateInfo dev_create_info = {
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		.pNext                   = &device_features,
-		.queueCreateInfoCount	 = num_create_queues,
+		.queueCreateInfoCount	 = (uint32_t)num_create_queues, // C++20 VKPT: Added a cast.
 		.pQueueCreateInfos       = queue_create_info,
 	};
 
@@ -3041,7 +3045,7 @@ static qboolean make_framedump(const char *name, const char *ext,
 
 	f = create_framedump(buffer, sizeof(buffer), name, ext);
 	if (!f) {
-		return;
+		return qfalse; // C++20 VKPT: ADDED RETURN qfalse to make_framedump
 	}
 
 	pixels = IMG_ReadPixels(&w, &h, &rowbytes);
@@ -3302,8 +3306,8 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 		};
 		viewport_proj[0] = (float)fd->width / (float)qvk.extent_unscaled.width;
 		viewport_proj[12] = (float)(fd->x * 2 + fd->width - (int)qvk.extent_unscaled.width) / (float)qvk.extent_unscaled.width;
-		viewport_proj[5] = (float)fd->height / (float)qvk.extent_unscaled.heightv
-		viewport_proj[13] = -(float)(fd->y * 2 + fd->height - (int)qvk.extent_unscaled.height) / (float)qvk.extent_unscaled.heightv
+		viewport_proj[5] = (float)fd->height / (float)qvk.extent_unscaled.height;
+		viewport_proj[13] = -(float)(fd->y * 2 + fd->height - (int)qvk.extent_unscaled.height) / (float)qvk.extent_unscaled.height;
 		viewport_proj[10] = 1.f;
 		viewport_proj[15] = 1.f;
 
@@ -3964,7 +3968,7 @@ retry:;
 		.timeout = (~((uint64_t) 0)),
 		.semaphore = qvk.semaphores[qvk.current_frame_index][0].image_available,
 		.fence = VK_NULL_HANDLE,
-		.deviceMask = (1 << qvk.device_count) - 1,
+		.deviceMask = (uint32_t)(1 << qvk.device_count) - 1, // C++20 VKPT: Added a cast.
 	};
 
 	VkResult res_swapchain = vkAcquireNextImage2KHR(qvk.device, &acquire_info, &qvk.current_swap_chain_image_index);
@@ -4089,7 +4093,7 @@ R_EndFrame_RTX(void)
 
 	VkPresentInfoKHR present_info = {
 		.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-		.waitSemaphoreCount = qvk.device_count,
+		.waitSemaphoreCount = (uint32_t)qvk.device_count, // C++20 VKPT: Added a cast.
 		.pWaitSemaphores    = signal_semaphores,
 		.swapchainCount     = 1,
 		.pSwapchains        = &qvk.swap_chain,
@@ -4125,7 +4129,7 @@ R_ModeChanged_RTX(int width, int height, int flags, int rowbytes, void *pixels)
 
 	r_config.width  = width;
 	r_config.height = height;
-	r_config.flags  = flags;
+	r_config.flags  = (vidFlags_t)flags; // C++20 VKPT: Added a cast.
 
 	qvk.wait_for_idle_frames = MAX_FRAMES_IN_FLIGHT * 2;
 }
@@ -4143,7 +4147,7 @@ vkpt_show_pvs(void)
 		return;
 	}
 
-	BSP_ClusterVis(bsp_world_model, cluster_debug_mask, vkpt_refdef.fd->feedback.lookatcluster, DVIS_PVS);
+	BSP_ClusterVis(bsp_world_model, (byte*)cluster_debug_mask, vkpt_refdef.fd->feedback.lookatcluster, DVIS_PVS); // C++20 VKPT: Added cast (byte*)
 	cluster_debug_index = vkpt_refdef.fd->feedback.lookatcluster;
 }
 
@@ -4763,12 +4767,12 @@ void vkpt_submit_command_buffer(
 	// C++20 VKPT: Order fix.
 	VkSubmitInfo submit_info = {
 		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		.waitSemaphoreCount = wait_semaphore_count,
+		.waitSemaphoreCount = (uint32_t)wait_semaphore_count, // C++20 VKPT: Added cast.
 		.pWaitSemaphores = wait_semaphores,
 		.pWaitDstStageMask = wait_stages,
 		.commandBufferCount = 1,
 		.pCommandBuffers = &cmd_buf,
-		.signalSemaphoreCount = signal_semaphore_count,
+		.signalSemaphoreCount = (uint32_t)signal_semaphore_count,
 		.pSignalSemaphores = signal_semaphores,
 	};
 
@@ -4776,11 +4780,11 @@ void vkpt_submit_command_buffer(
 	VkDeviceGroupSubmitInfo device_group_submit_info = {
 		.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_SUBMIT_INFO,
 		.pNext = NULL,
-		.waitSemaphoreCount = wait_semaphore_count,
+		.waitSemaphoreCount = (uint32_t)wait_semaphore_count, // C++20 VKPT: Added cast.
 		.pWaitSemaphoreDeviceIndices = wait_device_indices,
 		.commandBufferCount = 1,
 		.pCommandBufferDeviceMasks = &execute_device_mask,
-		.signalSemaphoreCount = signal_semaphore_count,
+		.signalSemaphoreCount = (uint32_t)signal_semaphore_count, // C++20 VKPT: Added cast.
 		.pSignalSemaphoreDeviceIndices = signal_device_indices,
 	};
 

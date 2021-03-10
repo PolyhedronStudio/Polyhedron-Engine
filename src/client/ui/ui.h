@@ -98,7 +98,7 @@ typedef struct menuCondition_s {
 typedef struct menuFrameWork_s {
     list_t  entry;
 
-    char    *name, *title, *status;
+    const char    *name, *title, *status; // C++20: STRING: Added const to char*
 
     int     nitems;
     void    *items[MAXMENUITEMS];
@@ -140,11 +140,11 @@ typedef struct menuFrameWork_s {
 typedef struct menuCommon_s {
     menuType_t type;
     int id;
-    char *name;
+    const char *name; // C++20: STRING: Added const to char*
     menuFrameWork_t *parent;
     color_t color;
     vrect_t rect;
-    char *status;
+    const char *status; // C++20: STRING: Added const to char*
 
     int x, y;
     int width, height;
@@ -195,7 +195,7 @@ typedef struct menuSlider_s {
 #define MLF_COLOR       0x00000004
 
 typedef struct menuListColumn_s {
-    char *name;
+    const char *name; // C++20: STRING: Added const to char*
     int width;
     int uiFlags;
 } menuListColumn_t;

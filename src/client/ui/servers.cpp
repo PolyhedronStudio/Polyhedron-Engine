@@ -70,14 +70,14 @@ typedef struct {
     menuList_t      info;
     menuList_t      players;
     void            *names[MAX_STATUS_SERVERS];
-    char            *args;
+    const char            *args;  // C++20: STRING: Added const to char*
     unsigned        timestamp;
     int             pingstage;
     int             pingindex;
     int             pingtime;
     int             pingextra;
-    char            *status_c;
-    char            status_r[32];
+    const char            *status_c;  // C++20: STRING: Added const to char*
+    char            status_r[32];   
 } m_servers_t;
 
 static m_servers_t  m_servers;
@@ -212,7 +212,8 @@ A server status response has been received, validated and parsed.
 void UI_StatusEvent(const serverStatus_t *status)
 {
     serverslot_t *slot;
-    char *hostname, *host, *mod, *map, *maxclients;
+    char *hostname, *host;
+    const char* map, *mod, *maxclients; // C++20: STRING: Added const to char*
     unsigned timestamp, ping;
     const char *info = status->infostring;
     char key[MAX_INFO_STRING];
@@ -560,7 +561,8 @@ static void ParseMasterArgs(netadr_t *broadcast)
     ssize_t len;
     void (*parse)(void *, size_t, size_t);
     size_t chunk;
-    char *s, *p;
+    const char* s;// , * p; // C++20: STRING: Added const to char*
+    char* p;
     int i, argc;
 
     Cmd_TokenizeString(m_servers.args, qfalse);
@@ -1069,7 +1071,7 @@ static void Pop(menuFrameWork_t *self)
 {
     ClearServers();
     if (m_servers.args) {
-        Z_Free(m_servers.args);
+        Z_Free((void*)m_servers.args); // C++20: Added a cast.
         m_servers.args = NULL;
     }
 }

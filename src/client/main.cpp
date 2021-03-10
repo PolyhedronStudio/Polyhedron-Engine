@@ -294,7 +294,7 @@ so when they are typed in at the console, they will need to be forwarded.
 */
 qboolean CL_ForwardToServer(void)
 {
-    char    *cmd;
+    const char    *cmd; // C++20: STRING: Added const to char*
 
     cmd = Cmd_Argv(0);
     if (cls.state != ca_active || *cmd == '-' || *cmd == '+') {
@@ -487,7 +487,8 @@ CL_Connect_f
 */
 static void CL_Connect_f(void)
 {
-    char    *server, *p;
+    const char* server;// , * p; // C++20: STRING: Added const to char*
+    char* p;
     netadr_t    address;
     int protocol;
     int argc = Cmd_Argc();
@@ -522,7 +523,7 @@ usage:
     // support quake2://<address>[/] scheme
     if (!Q_strncasecmp(server, "quake2://", 9)) {
         server += 9;
-        if ((p = strchr(server, '/')) != NULL) {
+        if ((p = (char*)strchr(server, '/')) != NULL) {
             *p = 0;
         }
     }
@@ -848,7 +849,7 @@ CL_ServerStatus_f
 */
 static void CL_ServerStatus_f(void)
 {
-    char        *s;
+    const char        *s; // C++20: STRING: Added const to char*
     netadr_t    adr;
     neterr_t    ret;
 
@@ -1090,7 +1091,7 @@ drop to full console
 static void CL_Changing_f(void)
 {
     int i, j;
-    char *s;
+    const char *s; // C++20: STRING: Added const to char*
 
     if (cls.state < ca_connected) {
         return;
@@ -1272,7 +1273,7 @@ Responses to broadcasts, etc
 static void CL_ConnectionlessPacket(void)
 {
     char    string[MAX_STRING_CHARS];
-    char    *s, *c;
+    const char    *s, *c; // C++20: STRING: Added const to char*
     int     i, j, k;
     size_t  len;
 
@@ -1320,7 +1321,7 @@ static void CL_ConnectionlessPacket(void)
             if (!strncmp(s, "p=", 2)) {
                 s += 2;
                 while (*s) {
-                    k = strtoul(s, &s, 10);
+                    k = strtoul(s, (char**)&s, 10);
                     if (k == PROTOCOL_VERSION_R1Q2) {
                         mask |= 1;
                     } else if (k == PROTOCOL_VERSION_Q2PRO) {
@@ -2531,7 +2532,7 @@ static void CL_RestartRefresh_f(void)
 // execute string in server command buffer
 static void exec_server_string(cmdbuf_t *buf, const char *text)
 {
-    char *s;
+    const char *s; // C++20: STRING: Added const to char*
 
     Cmd_TokenizeString(text, qtrue);
 
