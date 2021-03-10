@@ -140,7 +140,6 @@ initializeEnvTexture(int width, int height)
 	// C++20 VKPT: Added member initialisation in order of.
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-		.pNext = NULL,		// C++20 VKPT: Added.
 		.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
 		.imageType = VK_IMAGE_TYPE_2D,
         .format = VK_FORMAT_R16G16B16A16_SFLOAT,
