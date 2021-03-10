@@ -305,7 +305,6 @@ vkpt_bloom_destroy_pipelines()
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
 				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
-				.pNext = NULL, \
 				.srcAccessMask    = 0, \
 				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, \
