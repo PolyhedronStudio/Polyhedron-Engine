@@ -182,15 +182,15 @@ vkpt_asvgf_create_pipelines()
 		.layout = pipeline_layout_general,
 	};
 	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[TAAU] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_ASVGF_TAAU_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_general,
-	};
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
 	pipeline_info[CHECKERBOARD_INTERLEAVE] = {
 		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
 		.stage = SHADER_STAGE(QVK_MOD_CHECKERBOARD_INTERLEAVE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_general,
+	};
+	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
+	pipeline_info[TAAU] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_ASVGF_TAAU_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
 		.layout = pipeline_layout_general,
 	};
 	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
