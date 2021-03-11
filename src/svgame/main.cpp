@@ -198,16 +198,12 @@ void InitGame(void)
     // initialize all entities for this game
     game.maxentities = maxentities->value;
     clamp(game.maxentities, (int)maxclients->value + 1, MAX_EDICTS);
-    // WatIs: C++-ify
-    //g_edicts = new edict_t[game.maxentities];
     g_edicts = (edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
     globals.edicts = g_edicts;
     globals.max_edicts = game.maxentities;
 
     // initialize all clients for this game
     game.maxclients = maxclients->value;
-    // WatIs: C++-ify
-    //game.clients = new gclient_t[game.maxclients];
     game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     globals.num_edicts = game.maxclients + 1;
 }
