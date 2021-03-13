@@ -533,7 +533,7 @@ static void create_image_views()
 
 static void create_pipeline_layout()
 {
-	VkDescriptorSetLayoutBinding bindings[1] = { 0 };
+	VkDescriptorSetLayoutBinding bindings[1] = { };
 	bindings[0].binding = 0;
 	bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	bindings[0].descriptorCount = 1;
@@ -549,12 +549,12 @@ static void create_pipeline_layout()
 		&god_rays.descriptor_set_layout));
 
 	// C++20 VKPT: LENGTH() array fix.
-	VkDescriptorSetLayout desc_set_layouts[4];// = {
-	desc_set_layouts[0] = god_rays.descriptor_set_layout;
-	desc_set_layouts[1] = qvk.desc_set_layout_vertex_buffer;
-	desc_set_layouts[2] = qvk.desc_set_layout_ubo;
-	desc_set_layouts[3] = qvk.desc_set_layout_textures;
-	//};
+	VkDescriptorSetLayout desc_set_layouts[] = {
+		god_rays.descriptor_set_layout,
+		qvk.desc_set_layout_vertex_buffer,
+		qvk.desc_set_layout_ubo,
+		qvk.desc_set_layout_textures
+	};
 
 	VkPushConstantRange push_constant_range = {
 		.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,

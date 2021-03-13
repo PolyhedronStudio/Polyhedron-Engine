@@ -983,13 +983,14 @@ void CreateShadowMap(struct Shadowmap* InOutShadowmap)
 		.image = InOutShadowmap->TargetTexture,
 		.viewType = VK_IMAGE_VIEW_TYPE_2D,
 		.format = InOutShadowmap->DepthFormat,
-		.subresourceRange = {
-			.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
-			.baseMipLevel = 0,
-			.levelCount = 1,
-			.baseArrayLayer = 0,
-			.layerCount = 1,
-		},
+	};
+	depthStencilView.subresourceRange = {};
+	depthStencilView.subresourceRange = {
+		.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+		.baseMipLevel = 0,
+		.levelCount = 1,
+		.baseArrayLayer = 0,
+		.layerCount = 1,
 	};
 
 	_VK(vkCreateImageView(qvk.device, &depthStencilView, NULL, &InOutShadowmap->DepthView));

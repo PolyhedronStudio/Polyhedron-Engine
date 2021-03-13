@@ -354,8 +354,7 @@ get_scratch_buffer_size_nv(VkAccelerationStructureNV ac)
 		.accelerationStructure = ac,
 	};
 
-	VkMemoryRequirements2 mem_req; // C++20 VKPT: Initialize struct using memset instead of { 0 }
-	memset(&mem_req, 0, sizeof(VkMemoryRequirements2));
+	VkMemoryRequirements2 mem_req = { };
 	mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
 	qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
 
@@ -618,7 +617,7 @@ vkpt_pt_create_accel_bottom(
 				.accelerationStructure = blas->accel_nv,
 			};
 
-			VkMemoryRequirements2 mem_req = { 0 };
+			VkMemoryRequirements2 mem_req = { };
 			mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
 			qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
 
@@ -955,7 +954,7 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV,
 				.accelerationStructure = accel_top_nv[idx],
 			};
-			VkMemoryRequirements2 mem_req = { 0 };
+			VkMemoryRequirements2 mem_req = { };
 			mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
 			qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
 
