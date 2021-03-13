@@ -86,5 +86,5 @@ if (CONFIG_ENABLE_RMLUI)
 
     set_target_properties(RmlCore PROPERTIES FOLDER extern)
     set_target_properties(RmlDebugger PROPERTIES FOLDER extern)
-    #set_target_properties(RmlLua PROPERTIES FOLDER extern)
+    set_target_properties(RmlLua PROPERTIES FOLDER extern)
 endif()
