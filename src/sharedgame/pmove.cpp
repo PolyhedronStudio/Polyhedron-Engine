@@ -35,7 +35,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sharedgame/pmove.h"
 #include "client/client.h"
 
-#define STEPSIZE    18
+//--------------------------------------------------
+// Player Movement configuration.
+//
+// Most settings can be easily tweaked her to fine tune movement to custom
+// desires.
+//--------------------------------------------------
+// Minimum step height for interpolation by the client.
+#define PM_STEP_HEIGHT_MIN		4.f
+
+// Maximum vertical distance for being able to climb a step.
+#define PM_STEP_HEIGHT_MAX    18
+
+// The minimum Z plane normal component required for standing.
+#define PM_STEP_NORMAL			0.7f
 
 //--------------------------------------------------
 // all of the locals will be zeroed before each
@@ -60,34 +73,37 @@ typedef struct {
 
 
 // Static locals.
-static pmove_t* pm;             // A pointer to the actual player move structure.
-static pml_t        pml;
-static pmoveParams_t* pmp;
+static pmoveParams_t* pmp;  // Pointer to the player movement parameter settings.
+static pml_t pml;           // Local movement state variables.
+static pmove_t* pm;         // Pointer to the actual player move structure.
 
-// movement parameters
+// Player Movement Parameters
 static const float  pm_stopspeed = 100;
 static const float  pm_duckspeed = 100;
 static const float  pm_accelerate = 10;
 static const float  pm_wateraccelerate = 10;
 static const float  pm_waterspeed = 400;
 
-/*
-
-  walking up a step should kill some velocity
-
-*/
 
 
-/*
-==================
-PM_ClipVelocity
-
-Slide off of the impacting object
-returns the blocked flags (1 = floor, 2 = step / wall)
-==================
-*/
+//
+//=============================================================================
+//
+//	UTILITY FUNCTIONS.
+//
+//=============================================================================
+//
+//
+//===============
+// PM_ClipVelocity
+//
+// Walking up a step should kill some velocity.
+//  
+// Slide off of the impacting object
+// returns the blocked flags(1 = floor, 2 = step / wall)
+//===============
+//
 #define STOP_EPSILON    0.1
-
 static void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce)
 {
     float   backoff;
@@ -104,14 +120,13 @@ static void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overboun
     }
 }
 
-
-/*
-==================
-PM_TouchEntity
-
-Marks the specified entity as touched.
-==================
-*/
+//
+//===============
+// PM_TouchEntity
+// 
+// Marks the specified entity as touched.
+//===============
+//
 static void PM_TouchEntity(struct edict_s* ent) {
     // Ensure it is valid.
     if (ent == NULL) {
@@ -129,18 +144,107 @@ static void PM_TouchEntity(struct edict_s* ent) {
     }
 }
 
+//
+//===============
+// PM_ClampAngles
+// 
+// Clamp angles with deltas. Ensure they pitch doesn't exceed 90 or 270
+//===============
+//
+static void PM_ClampAngles(void)
+{
+    short   temp;
+    int     i;
 
-/*
-==================
-PM_StepSlideMove
+    if (pm->s.pm_flags & PMF_TIME_TELEPORT) {
+        pm->viewangles[YAW] = SHORT2ANGLE(pm->cmd.angles[YAW] + pm->s.delta_angles[YAW]);
+        pm->viewangles[PITCH] = 0;
+        pm->viewangles[ROLL] = 0;
+    }
+    else {
+        // circularly clamp the angles with deltas
+        for (i = 0; i < 3; i++) {
+            temp = pm->cmd.angles[i] + pm->s.delta_angles[i];
+            pm->viewangles[i] = SHORT2ANGLE(temp);
+        }
 
-Each intersection will try to step over the obstruction instead of
-sliding along it.
+        // don't let the player look up or down more than 90 degrees
+        if (pm->viewangles[PITCH] > 89 && pm->viewangles[PITCH] < 180)
+            pm->viewangles[PITCH] = 89;
+        else if (pm->viewangles[PITCH] < 271 && pm->viewangles[PITCH] >= 180)
+            pm->viewangles[PITCH] = 271;
+    }
+    AngleVectors(pm->viewangles, pml.forward, pml.right, pml.up);
+}
 
-Returns a new origin, velocity, and contact entity
-Does not modify any world state?
-==================
-*/
+
+//
+//=============================================================================
+//
+//	STEP SLIDE MOVE
+//
+//=============================================================================
+//
+//
+//===============
+// PM_StepCheck
+// 
+// Check whether the player just stepped off of something, or not.
+//===============
+//
+static bool PM_CheckStep(trace_t* trace) {
+
+    if (!trace->allsolid) {
+        if (trace->ent && trace->plane.normal[2] >= PM_STEP_NORMAL) {
+            if (trace->ent != pm->groundentity || trace->plane.dist != pml.groundplane.dist) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+//
+//===============
+// Pm_StepDown
+// 
+// Steps the player down, for slope/stair handling.
+//===============
+//
+static void PM_StepDown(trace_t* trace) {
+
+    // Copy the player move state origin 
+    VectorCopy(pm->s.origin, trace->endpos);
+
+    // Calculate step height.
+    pm->step = pm->s.origin[2] - pml.previous_origin[2];
+
+    // If we are above minimal step height, remove the PMF_ON_STAIRS flag.
+    if (pm->step >= PM_STEP_HEIGHT_MIN) {
+        pm->s.pm_flags |= PMF_ON_STAIRS;
+    }
+    // If we are stepping down more rapidly than PM_STEP_HEIGHT_MIN then remove the stairs flag.
+    else if (pm->step <= -PM_STEP_HEIGHT_MIN && (pm->s.pm_flags & PMF_ON_GROUND)) {
+        pm->s.pm_flags |= PMF_ON_STAIRS;
+    }
+    // Nothing to deal with, set it to 0.
+    else {
+        pm->step = 0.0;
+    }
+}
+
+//
+//===============
+// PM_StepSlideMove_
+// 
+// Each intersection will try to step over the obstruction instead of
+// sliding along it.
+//
+// Returns a new origin, velocity, and contact entity
+// Does not modify any world state ?
+//===============
+//
 #define MIN_STEP_NORMAL 0.7     // can't step up onto very steep slopes
 #define MAX_CLIP_PLANES 5
 static void PM_StepSlideMove_(void)
@@ -187,10 +291,6 @@ static void PM_StepSlideMove_(void)
         // save entity for contact
         // PMOVE: Touchentity.
         PM_TouchEntity(trace.ent);
-        //if (pm->numtouch < MAXTOUCH && trace.ent) {
-        //    pm->touchents[pm->numtouch] = trace.ent;
-        //    pm->numtouch++;
-        //}
 
         time_left -= time_left * trace.fraction;
 
@@ -248,12 +348,13 @@ static void PM_StepSlideMove_(void)
     }
 }
 
-/*
-==================
-PM_StepSlideMove
-
-==================
-*/
+//
+//===============
+// PM_StepSlideMove
+//
+// Executes the slide movement.
+//===============
+//
 static void PM_StepSlideMove(void)
 {
     vec3_t      start_o, start_v;
@@ -272,7 +373,7 @@ static void PM_StepSlideMove(void)
     VectorCopy(pml.velocity, down_v);
 
     VectorCopy(start_o, up);
-    up[2] += STEPSIZE;
+    up[2] += PM_STEP_HEIGHT_MAX;
 
     trace = pm->trace(up, pm->mins, pm->maxs, up);
     if (trace.allsolid)
@@ -286,7 +387,7 @@ static void PM_StepSlideMove(void)
 
     // push down the final amount
     VectorCopy(pml.origin, down);
-    down[2] -= STEPSIZE;
+    down[2] -= PM_STEP_HEIGHT_MAX;
     trace = pm->trace(pml.origin, pm->mins, pm->maxs, down);
     if (!trace.allsolid) {
         VectorCopy(trace.endpos, pml.origin);
@@ -300,7 +401,7 @@ static void PM_StepSlideMove(void)
     up_dist = (up[0] - start_o[0]) * (up[0] - start_o[0])
         + (up[1] - start_o[1]) * (up[1] - start_o[1]);
 
-    if (down_dist > up_dist || trace.plane.normal[2] < MIN_STEP_NORMAL) {
+    if (down_dist > up_dist || trace.plane.normal[2] < PM_STEP_NORMAL) {
         VectorCopy(down_o, pml.origin);
         VectorCopy(down_v, pml.velocity);
         return;
@@ -311,13 +412,20 @@ static void PM_StepSlideMove(void)
 }
 
 
-/*
-==================
-PM_Friction
-
-Handles both ground friction and water friction
-==================
-*/
+//
+//=============================================================================
+//
+//	ACCELERATION/FRICTION
+//
+//=============================================================================
+//
+//
+//===============
+// PM_Accelerate
+//
+// Handles both ground friction and water friction
+//===============
+//
 static void PM_Friction(void)
 {
     float* vel;
@@ -359,14 +467,13 @@ static void PM_Friction(void)
     vel[2] = vel[2] * newspeed;
 }
 
-
-/*
-==============
-PM_Accelerate
-
-Handles user intended acceleration
-==============
-*/
+//
+//===============
+// PM_Accelerate
+//
+// Accelerate function for on-ground.
+//===============
+//
 static void PM_Accelerate(vec3_t wishdir, float wishspeed, float accel)
 {
     int         i;
@@ -384,6 +491,13 @@ static void PM_Accelerate(vec3_t wishdir, float wishspeed, float accel)
         pml.velocity[i] += accelspeed * wishdir[i];
 }
 
+//
+//===============
+// PM_AirAccelerate
+//
+// Accelerate function for in-air.
+//===============
+//
 static void PM_AirAccelerate(vec3_t wishdir, float wishspeed, float accel)
 {
     int         i;
@@ -403,20 +517,22 @@ static void PM_AirAccelerate(vec3_t wishdir, float wishspeed, float accel)
         pml.velocity[i] += accelspeed * wishdir[i];
 }
 
-/*
-=============
-PM_AddCurrents
-=============
-*/
+//
+//===============
+// PM_AddCurrents
+//
+// Adds all the active currents to our wished for velocity.
+// - Ladders
+// - Water
+// - Conveyor Belts.
+//===============
+//
 static void PM_AddCurrents(vec3_t wishvel)
 {
     vec3_t  v;
     float   s;
 
-    //
-    // account for ladders
-    //
-
+    // Ladders Velocities.
     if (pml.ladder && fabs(pml.velocity[2]) <= 200) {
         if ((pm->viewangles[PITCH] <= -15) && (pm->cmd.forwardmove > 0))
             wishvel[2] = 200;
@@ -429,7 +545,7 @@ static void PM_AddCurrents(vec3_t wishvel)
         else
             wishvel[2] = 0;
 
-        // limit horizontal speed when on a ladder
+        // Limit horizontal speed when on a ladder
         if (wishvel[0] < -25)
             wishvel[0] = -25;
         else if (wishvel[0] > 25)
@@ -442,10 +558,7 @@ static void PM_AddCurrents(vec3_t wishvel)
     }
 
 
-    //
-    // add water currents
-    //
-
+    // Water Current Velocities.
     if (pm->watertype & MASK_CURRENT) {
         VectorClear(v);
 
@@ -469,10 +582,7 @@ static void PM_AddCurrents(vec3_t wishvel)
         VectorMA(wishvel, s, v, wishvel);
     }
 
-    //
-    // add conveyor belt velocities
-    //
-
+    // Conveyor Belt Velocities.
     if (pm->groundentity) {
         VectorClear(v);
 
@@ -493,13 +603,13 @@ static void PM_AddCurrents(vec3_t wishvel)
     }
 }
 
-
-/*
-===================
-PM_WaterMove
-
-===================
-*/
+//
+//===============
+// PM_WaterMove
+//
+// Handles in-water movement.
+//===============
+//
 static void PM_WaterMove(void)
 {
     int     i;
@@ -534,13 +644,13 @@ static void PM_WaterMove(void)
     PM_StepSlideMove();
 }
 
-
-/*
-===================
-PM_AirMove
-
-===================
-*/
+//
+//===============
+// PM_AirMove
+//
+// Handles in-air movement.
+//===============
+//
 static void PM_AirMove(void)
 {
     int         i;
@@ -627,108 +737,13 @@ static void PM_AirMove(void)
 }
 
 
-
 //
-//===============
-// PM_CategorizePosition
+//=============================================================================
 //
-// + Tests for whether the player is on-ground or not:
-//   - In case of the player its velocity being over 180, it will
-//     assume it is off ground, and not test any further. 
-// +  
-// -
-//===============
+//	SPECIAL MOVEMENT HANDLING
 //
-static void PM_CategorizePosition(void)
-{
-    vec3_t      point;
-    int         cont;
-    trace_t     trace;
-    int         sample1;
-    int         sample2;
-
-    // if the player hull point one unit down is solid, the player
-    // is on ground
-
-    // see if standing on something solid
-    point[0] = pml.origin[0];
-    point[1] = pml.origin[1];
-    point[2] = pml.origin[2] - 0.25f;
-    if (pml.velocity[2] > 180) { //!!ZOID changed from 100 to 180 (ramp accel)
-        pm->s.pm_flags &= ~PMF_ON_GROUND;
-        pm->groundentity = NULL;
-    }
-    else {
-        trace = pm->trace(pml.origin, pm->mins, pm->maxs, point);
-        pml.groundplane = trace.plane;
-        pml.groundsurface = trace.surface;
-        pml.groundcontents = trace.contents;
-
-        if (!trace.ent || (trace.plane.normal[2] < 0.7 && !trace.startsolid)) {
-            pm->groundentity = NULL;
-            pm->s.pm_flags &= ~PMF_ON_GROUND;
-        }
-        else {
-            pm->groundentity = trace.ent;
-
-            // hitting solid ground will end a waterjump
-            if (pm->s.pm_flags & PMF_TIME_WATERJUMP) {
-                pm->s.pm_flags &= ~(PMF_TIME_WATERJUMP | PMF_TIME_LAND | PMF_TIME_TELEPORT);
-                pm->s.pm_time = 0;
-            }
-
-            if (!(pm->s.pm_flags & PMF_ON_GROUND)) {
-                // just hit the ground
-                pm->s.pm_flags |= PMF_ON_GROUND;
-                // don't do landing time if we were just going down a slope
-                if (pml.velocity[2] < -200 && !pmp->strafehack) {
-                    pm->s.pm_flags |= PMF_TIME_LAND;
-                    // don't allow another jump for a little while
-                    if (pml.velocity[2] < -400)
-                        pm->s.pm_time = 25;
-                    else
-                        pm->s.pm_time = 18;
-                }
-            }
-        }
-
-        // PMOVE: Touchentity.
-        PM_TouchEntity(trace.ent);
-        //if (pm->numtouch < MAXTOUCH && trace.ent) {
-        //    pm->touchents[pm->numtouch] = trace.ent;
-        //    pm->numtouch++;
-        //}
-    }
-
-    //
-    // get waterlevel, accounting for ducking
-    //
-    pm->waterlevel = 0;
-    pm->watertype = 0;
-
-    sample2 = pm->viewheight - pm->mins[2];
-    sample1 = sample2 / 2;
-
-    point[2] = pml.origin[2] + pm->mins[2] + 1;
-    cont = pm->pointcontents(point);
-
-    if (cont & MASK_WATER) {
-        pm->watertype = cont;
-        pm->waterlevel = 1;
-        point[2] = pml.origin[2] + pm->mins[2] + sample1;
-        cont = pm->pointcontents(point);
-        if (cont & MASK_WATER) {
-            pm->waterlevel = 2;
-            point[2] = pml.origin[2] + pm->mins[2] + sample2;
-            cont = pm->pointcontents(point);
-            if (cont & MASK_WATER)
-                pm->waterlevel = 3;
-        }
-    }
-
-}
-
-
+//=============================================================================
+//
 //
 //===============
 // PM_CheckJump
@@ -788,7 +803,6 @@ static void PM_CheckJump(void)
     if (pml.velocity[2] < 270)
         pml.velocity[2] = 270;
 }
-
 
 //
 //===============
@@ -901,6 +915,115 @@ static void PM_CheckDuck(void)
 
 
 //
+//=============================================================================
+//
+//	POSITION TESTING
+//
+//=============================================================================
+//
+
+//
+//===============
+// PM_CategorizePosition
+//
+// + Tests for whether the player is on-ground or not:
+//   - In case of the player its velocity being over 180, it will
+//     assume it is off ground, and not test any further. 
+// + End water jumps.
+// + Test falling velocity.
+//   - In case its falling velocity is too high, check the pmove landing flag.
+// + Test for touching entities, and mark them.
+// + Test whether the player view is inside water, or not, and set the
+// waterlevel based on that accordingly. (1 to 3)
+//===============
+//
+static void PM_CategorizePosition(void)
+{
+    vec3_t      point;
+    int         cont;
+    trace_t     trace;
+    int         sample1;
+    int         sample2;
+
+    // if the player hull point one unit down is solid, the player
+    // is on ground
+
+    // see if standing on something solid
+    point[0] = pml.origin[0];
+    point[1] = pml.origin[1];
+    point[2] = pml.origin[2] - 0.25f;
+    if (pml.velocity[2] > 180) { //!!ZOID changed from 100 to 180 (ramp accel)
+        pm->s.pm_flags &= ~PMF_ON_GROUND;
+        pm->groundentity = NULL;
+    }
+    else {
+        trace = pm->trace(pml.origin, pm->mins, pm->maxs, point);
+        pml.groundplane = trace.plane;
+        pml.groundsurface = trace.surface;
+        pml.groundcontents = trace.contents;
+
+        // No ent, or place normal is under PM_STEP_NORMAL.
+        if (!trace.ent || (trace.plane.normal[2] < PM_STEP_NORMAL && !trace.startsolid)) {
+            pm->groundentity = NULL;
+            pm->s.pm_flags &= ~PMF_ON_GROUND;
+        }
+        else {
+            pm->groundentity = trace.ent;
+
+            // hitting solid ground will end a waterjump
+            if (pm->s.pm_flags & PMF_TIME_WATERJUMP) {
+                pm->s.pm_flags &= ~(PMF_TIME_WATERJUMP | PMF_TIME_LAND | PMF_TIME_TELEPORT);
+                pm->s.pm_time = 0;
+            }
+
+            if (!(pm->s.pm_flags & PMF_ON_GROUND)) {
+                // just hit the ground
+                pm->s.pm_flags |= PMF_ON_GROUND;
+                // don't do landing time if we were just going down a slope
+                if (pml.velocity[2] < -200 && !pmp->strafehack) {
+                    pm->s.pm_flags |= PMF_TIME_LAND;
+                    // don't allow another jump for a little while
+                    if (pml.velocity[2] < -400)
+                        pm->s.pm_time = 25;
+                    else
+                        pm->s.pm_time = 18;
+                }
+            }
+        }
+
+        // PMOVE: Touchentity.
+        PM_TouchEntity(trace.ent);
+    }
+
+    //
+    // get waterlevel, accounting for ducking
+    //
+    pm->waterlevel = 0;
+    pm->watertype = 0;
+
+    sample2 = pm->viewheight - pm->mins[2];
+    sample1 = sample2 / 2;
+
+    point[2] = pml.origin[2] + pm->mins[2] + 1;
+    cont = pm->pointcontents(point);
+
+    if (cont & MASK_WATER) {
+        pm->watertype = cont;
+        pm->waterlevel = 1;
+        point[2] = pml.origin[2] + pm->mins[2] + sample1;
+        cont = pm->pointcontents(point);
+        if (cont & MASK_WATER) {
+            pm->waterlevel = 2;
+            point[2] = pml.origin[2] + pm->mins[2] + sample2;
+            cont = pm->pointcontents(point);
+            if (cont & MASK_WATER)
+                pm->waterlevel = 3;
+        }
+    }
+
+}
+
+//
 //===============
 // PM_TestPosition
 // 
@@ -972,6 +1095,7 @@ static void PM_FinalizePosition(qboolean testForValid) {
 //
 static void PM_TestInitialPosition(void)
 {
+    // Do 
     if (PM_TestPosition()) {
         // Copy over the state origin in case it is valid.
         VectorCopy(pm->s.origin, pml.origin);
@@ -980,39 +1104,14 @@ static void PM_TestInitialPosition(void)
     }
 }
 
+
 //
-//===============
-// PM_FlyMove
-// 
-// Clamp angles with deltas. Ensure they pitch doesn't exceed 90 or 270
-//===============
+//=============================================================================
 //
-static void PM_ClampAngles(void)
-{
-    short   temp;
-    int     i;
-
-    if (pm->s.pm_flags & PMF_TIME_TELEPORT) {
-        pm->viewangles[YAW] = SHORT2ANGLE(pm->cmd.angles[YAW] + pm->s.delta_angles[YAW]);
-        pm->viewangles[PITCH] = 0;
-        pm->viewangles[ROLL] = 0;
-    }
-    else {
-        // circularly clamp the angles with deltas
-        for (i = 0; i < 3; i++) {
-            temp = pm->cmd.angles[i] + pm->s.delta_angles[i];
-            pm->viewangles[i] = SHORT2ANGLE(temp);
-        }
-
-        // don't let the player look up or down more than 90 degrees
-        if (pm->viewangles[PITCH] > 89 && pm->viewangles[PITCH] < 180)
-            pm->viewangles[PITCH] = 89;
-        else if (pm->viewangles[PITCH] < 271 && pm->viewangles[PITCH] >= 180)
-            pm->viewangles[PITCH] = 271;
-    }
-    AngleVectors(pm->viewangles, pml.forward, pml.right, pml.up);
-}
-
+//	PLAYER MOVEMENT STYLE IMPLEMENTATIONS
+//
+//=============================================================================
+//
 //
 //===============
 // PM_FlyMove
@@ -1032,8 +1131,7 @@ static void PM_FlyMove(void)
 
     pm->viewheight = 22;
 
-    // friction
-
+    // Friction
     speed = VectorLength(pml.velocity);
     if (speed < 1) {
         VectorCopy(vec3_origin, pml.velocity);
@@ -1151,7 +1249,7 @@ static void PM_SpectatorMove(void)
 
     // Execute typical fly movement.
     PM_FlyMove();
-
+    
     // Finalize the position. Do no position testing, a spectator is free to
     // roam where he pleases.
     PM_FinalizePosition(false);
@@ -1178,6 +1276,9 @@ void PMove(pmove_t* pmove, pmoveParams_t* params)
     pm->groundentity = NULL;
     pm->watertype = 0;
     pm->waterlevel = 0;
+
+    // Reset the PMF_ON_STAIRS flag that we test for every move.
+    pm->s.pm_flags &= ~(PMF_ON_GROUND | PMF_ON_STAIRS);
 
     // clear all pmove local vars
     memset(&pml, 0, sizeof(pml));
@@ -1285,6 +1386,14 @@ void PMove(pmove_t* pmove, pmoveParams_t* params)
     PM_FinalizePosition(true);
 }
 
+
+//
+//=============================================================================
+//
+//	PMOVE PARAMETER
+//
+//=============================================================================
+//
 //
 //===============
 // PMoveInit

@@ -711,15 +711,19 @@ typedef enum {
     PM_FREEZE
 } pmtype_t;
 
-// pmove->pm_flags
-#define PMF_DUCKED          1
-#define PMF_JUMP_HELD       2
-#define PMF_ON_GROUND       4
-#define PMF_TIME_WATERJUMP  8   // pm_time is waterjump
-#define PMF_TIME_LAND       16  // pm_time is time before rejump
-#define PMF_TIME_TELEPORT   32  // pm_time is non-moving time
-#define PMF_NO_PREDICTION   64  // temporarily disables prediction (used for grappling hook)
-#define PMF_TELEPORT_BIT    128 // used by q2pro
+
+// Player Move Flags.
+#define PMF_GAME			(1 << 0)
+#define PMF_DUCKED          (PMF_GAME << 0) // Player is ducked.
+#define PMF_JUMP_HELD       (PMF_GAME << 1) // Player jump key is held.
+#define PMF_ON_GROUND       (PMF_GAME << 2) // Player is on-ground.
+#define PMF_ON_STAIRS		(PMF_GAME << 3) // Player is traversing stairs.
+#define PMF_TIME_WATERJUMP  (PMF_GAME << 4) // Value of: pm_time is waterjump
+#define PMF_TIME_LAND       (PMF_GAME << 5) // Value of: pm_time is time before rejump
+#define PMF_TIME_TELEPORT   (PMF_GAME << 6) // Value of: pm_time is non-moving time
+#define PMF_NO_PREDICTION   (PMF_GAME << 7) // Temporarily disables prediction (used for grappling hook)
+#define PMF_TELEPORT_BIT    (PMF_GAME << 8) // Used by q2pro
+
 
 // this structure needs to be communicated bit-accurate
 // from the server to the client to guarantee that
@@ -763,27 +767,30 @@ typedef struct usercmd_s {
 
 #define MAXTOUCH    32
 typedef struct {
-    // state (in / out)
-    pmove_state_t   s;
+    // IN/OUT variables.
+    pmove_state_t   s;  // Player Move State.
 
-    // command (in)
-    usercmd_t       cmd;
+    // IN variables.
+    usercmd_t       cmd;            // User input command.
     qboolean        testInitial;    // If .s has changed outside of pmove, testInitial is true.
 
-    // results (out)
-    int         numtouch;
-    struct edict_s  *touchents[MAXTOUCH];
+    // OUT(results) variables.
+    int             numtouch;               // Number of touched entities.
+    struct edict_s  *touchents[MAXTOUCH];   // Pointers to touched entities.
 
-    vec3_t      viewangles;         // clamped
-    float       viewheight;
+    struct edict_s* groundentity; // Pointer to the entity that is below the player.
 
-    vec3_t      mins, maxs;         // bounding box size
+    float       step; // Traversed step height.
 
-    struct edict_s  *groundentity;
-    int         watertype;
-    int         waterlevel;
+    vec3_t      viewangles; // Clamped View Angles
+    float       viewheight; // Viewheight.
 
-    // callbacks to test the world
+    vec3_t      mins, maxs; // Bounding box size
+
+    int         watertype;  // Water Type.
+    int         waterlevel; // Water Level (1 - 3)
+
+    // Callback function pointers for testing the world with.
     trace_t     (* q_gameabi trace)(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
     int         (*pointcontents)(vec3_t point);
 } pmove_t;
