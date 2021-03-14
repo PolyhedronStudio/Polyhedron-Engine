@@ -628,11 +628,17 @@ static void PM_AirMove(void)
 
 
 
-/*
-=============
-PM_CategorizePosition
-=============
-*/
+//
+//===============
+// PM_CategorizePosition
+//
+// + Tests for whether the player is on-ground or not:
+//   - In case of the player its velocity being over 180, it will
+//     assume it is off ground, and not test any further. 
+// +  
+// -
+//===============
+//
 static void PM_CategorizePosition(void)
 {
     vec3_t      point;
@@ -723,11 +729,13 @@ static void PM_CategorizePosition(void)
 }
 
 
-/*
-=============
-PM_CheckJump
-=============
-*/
+//
+//===============
+// PM_CheckJump
+//
+// Tests for whether we can jump. If so, set the appropriate velocity values.
+//===============
+//
 static void PM_CheckJump(void)
 {
     if (pm->s.pm_flags & PMF_TIME_LAND) {
@@ -791,7 +799,7 @@ static void PM_CheckJump(void)
 // - Whether to jump out of the water, or not.
 //===============
 //
-static void PM_CheckSpecialMovement(void)
+static void PM_CheckSpecialMovements(void)
 {
     vec3_t  spot;
     int     cont;
@@ -1211,10 +1219,13 @@ void PMove(pmove_t* pmove, pmoveParams_t* params)
     // set groundentity, watertype, and waterlevel
     PM_CategorizePosition();
 
+    // Check for whether we're dead, if so, call PM_DeadMove. It will stop
+    // the player from keeping on moving forward.
     if (pm->s.pm_type == PM_DEAD)
         PM_DeadMove();
 
-    PM_CheckSpecialMovement();
+    // Check for special movements to execute.
+    PM_CheckSpecialMovements();
 
     // drop timing counter
     if (pm->s.pm_time) {

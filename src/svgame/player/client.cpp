@@ -987,52 +987,55 @@ void spectator_respawn(edict_t *ent)
 {
     int i, numspec;
 
-    // if the user wants to become a spectator, make sure he doesn't
+    // If the user wants to become a spectator, make sure he doesn't
     // exceed max_spectators
     if (ent->client->pers.spectator) {
+        // Test if the spectator password was correct, if not, error and return.
         char *value = Info_ValueForKey(ent->client->pers.userinfo, "spectator");
         if (*spectator_password->string &&
             strcmp(spectator_password->string, "none") &&
             strcmp(spectator_password->string, value)) {
+            // Report error message by centerprinting it to client.
             gi.cprintf(ent, PRINT_HIGH, "Spectator password incorrect.\n");
+
+            // Enable spectator state.
             ent->client->pers.spectator = qfalse;
-            // CLEANUP: Stuffcmd
-            //gi.WriteByte(svg_stufftext);
-            //gi.WriteString("spectator 0\n");
-            //gi.unicast(ent, qtrue);
-            // TODO: FIX STUFFCMD.
+
+            // Let the client go out of its spectator mode by using a stuffcmd.
             gi.stuffcmd(ent, "spectator 0\n");
             return;
         }
 
-        // count spectators
+        // Count actual active spectators
         for (i = 1, numspec = 0; i <= maxclients->value; i++)
             if (g_edicts[i].inuse && g_edicts[i].client->pers.spectator)
                 numspec++;
 
         if (numspec >= maxspectators->value) {
-            gi.cprintf(ent, PRINT_HIGH, "Server spectator limit is full.");
+            // Report error message by centerprinting it to client.
+            gi.cprintf(ent, PRINT_HIGH, "Server spectator limit is full.\n");
+
+            // Enable spectator state.
             ent->client->pers.spectator = qfalse;
-            // reset his spectator var
-            //gi.WriteByte(svg_stufftext);
-            //gi.WriteString("spectator 0\n");
-            //gi.unicast(ent, qtrue);
-            // TODO: FIX STUFFCMD.
+
+            // Let the client go out of its spectator mode by using a stuffcmd.
             gi.stuffcmd(ent, "spectator 0\n");
             return;
         }
     } else {
-        // he was a spectator and wants to join the game
-        // he must have the right password
+        // He was a spectator and wants to join the game 
+        // He must have the right password
+        // Test if the spectator password was correct, if not, error and return.
         char *value = Info_ValueForKey(ent->client->pers.userinfo, "password");
         if (*password->string && strcmp(password->string, "none") &&
             strcmp(password->string, value)) {
+            // Report error message by centerprinting it to client.
             gi.cprintf(ent, PRINT_HIGH, "Password incorrect.\n");
+
+            // Enable spectator state.
             ent->client->pers.spectator = qtrue;
-            //gi.WriteByte(svg_stufftext);
-            //gi.WriteString("spectator 1\n");
-            //gi.unicast(ent, qtrue);
-            // TODO: FIX STUFFCMD.
+
+            // Let the client go in its spectator mode by using a stuffcmd.
             gi.stuffcmd(ent, "spectator 1\n");
             return;
         }
