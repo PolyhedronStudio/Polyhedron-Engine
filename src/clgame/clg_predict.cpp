@@ -218,7 +218,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     // run frames
     while (++ack <= current) {
         pm.cmd = cl->cmds[ack & CMD_MASK];
-        Pmove(&pm, &clg.pmoveParams);
+        PMove(&pm, &clg.pmoveParams);
 
         // Update player move client side audio effects.
         CLG_UpdateClientSoundSpecialEffects(&pm);
@@ -233,7 +233,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
         pm.cmd.forwardmove = cl->localmove[0];
         pm.cmd.sidemove = cl->localmove[1];
         pm.cmd.upmove = cl->localmove[2];
-        Pmove(&pm, &clg.pmoveParams);
+        PMove(&pm, &clg.pmoveParams);
         frame = current;
 
         // save for debug checking

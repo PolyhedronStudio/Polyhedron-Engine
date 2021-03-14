@@ -716,12 +716,12 @@ pmoveParams_t* PF_GetPMoveParams(void) {
 
 // N&C: This has been removed, we now call the shared PMove in SVGame.
 // We pass PF_GetPMoveParams into it.
-//void PF_Pmove(pmove_t *pm)
+//void PF_PMove(pmove_t *pm)
 //{
 //    if (sv_client) {
-//        Pmove(pm, &sv_client->pmp);
+//        PMove(pm, &sv_client->pmp);
 //    } else {
-//        Pmove(pm, &sv_pmp);
+//        PMove(pm, &sv_pmp);
 //    }
 //}
 
@@ -913,7 +913,7 @@ void SV_InitGameProgs(void)
     importAPI.setmodel = PF_setmodel;
     importAPI.inPVS = PF_inPVS;
     importAPI.inPHS = PF_inPHS;
-    //import.Pmove = PF_Pmove;
+    //import.PMove = PF_PMove;
     importAPI.GetPMoveParams = PF_GetPMoveParams;
 
     importAPI.modelindex = PF_ModelIndex;

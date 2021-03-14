@@ -43,9 +43,9 @@ typedef struct {
     float       flyfriction;
 } pmoveParams_t;
 
-void Pmove(pmove_t *pmove, pmoveParams_t *params);
+void PMove(pmove_t *pmove, pmoveParams_t *params);
 
-void PmoveInit(pmoveParams_t *pmp);
-void PmoveEnableQW(pmoveParams_t *pmp);
+void PMoveInit(pmoveParams_t *pmp);
+void PMoveEnableQW(pmoveParams_t *pmp);
 
 #endif // PMOVE_H

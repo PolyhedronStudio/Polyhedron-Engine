@@ -1021,7 +1021,7 @@ static void init_pmove_and_es_flags(client_t *newcl)
     force = 2;
     if (newcl->protocol == PROTOCOL_VERSION_Q2PRO) {
         if (sv_qwmod->integer) {
-            ge->PmoveEnableQW(&newcl->pmp);
+            ge->PMoveEnableQW(&newcl->pmp);
         }
         newcl->pmp.flyhack = qtrue;
         newcl->pmp.flyfriction = 4;
@@ -2200,8 +2200,8 @@ void SV_Init(void)
 
     // set up default pmove parameters
     // N&C: Moved over to the SV_InitGameProgs
-    //PmoveInit(&sv_pmp);
-    //ge->PmoveInit(&sv_pmp);
+    //PMoveInit(&sv_pmp);
+    //ge->PMoveInit(&sv_pmp);
 
 #if USE_SYSCON
     SV_SetConsoleTitle();

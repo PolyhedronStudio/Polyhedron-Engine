@@ -541,8 +541,8 @@ static void CL_ParseServerData(void)
 
     // setup default pmove parameters
      // N&C: Let the client game module handle this.
-    CL_GM_PmoveInit(cge->pmoveParams);
-    //PmoveInit(&cl.pmp);
+    CL_GM_PMoveInit(cge->pmoveParams);
+    //PMoveInit(&cl.pmp);
 
 #if USE_FPS
     // setup default frame times
@@ -606,8 +606,8 @@ static void CL_ParseServerData(void)
         if (i) {
             Com_DPrintf("Q2PRO QW mode enabled\n");
             // N&C: Let the client game module handle this.
-            CL_GM_PmoveEnableQW(cge->pmoveParams);
-            //PmoveEnableQW(&cl.pmp);
+            CL_GM_PMoveEnableQW(cge->pmoveParams);
+            //PMoveEnableQW(&cl.pmp);
         }
         cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_UMASK); // CPP: IMPROVE: cl.esFlags |= MSG_ES_UMASK;
         if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_LONG_SOLID) {

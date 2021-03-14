@@ -951,26 +951,26 @@ void CL_GM_ShutdownMedia (void) {
 
 //
 //===============
-// CL_GM_PmoveInit
+// CL_GM_PMoveInit
 // 
 // Call into the CG Module for initializing certain PMove parameters.
 //===============
 //
-void CL_GM_PmoveInit(pmoveParams_t* pmp) {
+void CL_GM_PMoveInit(pmoveParams_t* pmp) {
     if (cge)
-        cge->PmoveInit(pmp);
+        cge->PMoveInit(pmp);
 }
 
 //
 //===============
-// CL_GM_PmoveEnableQW
+// CL_GM_PMoveEnableQW
 // 
 // Call into the CG Module for enabling certain PMove parameters.
 //===============
 //
-void CL_GM_PmoveEnableQW(pmoveParams_t* pmp) {
+void CL_GM_PMoveEnableQW(pmoveParams_t* pmp) {
     if (cge)
-        cge->PmoveEnableQW(pmp);
+        cge->PMoveEnableQW(pmp);
 }
 
 //

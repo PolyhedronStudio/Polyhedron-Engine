@@ -15,19 +15,36 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
+//
+// pmove.cpp
+//
+//
+// Implements the player movement logic for both client and server game modules
+// 
+// The pml_t structure is used locally when processing the movement. Consider it
+// a temporary structure. The origin, prev_origin, and velocity are copied over
+// each frame from the player pmove state of the given entity.
+// 
+// Afterwards the actual player state is tested after applying the needed tran-
+// slations. In case of success, the move is kept. Otherwise, reverted.
+// 
+// Finally, we copy the results over into the player pmove state. This should
+// sort if sum up the method of action that's used for player movement.
+//
 #include "shared/shared.h"
 #include "sharedgame/pmove.h"
 #include "client/client.h"
 
 #define STEPSIZE    18
 
+//--------------------------------------------------
 // all of the locals will be zeroed before each
 // pmove, just to make damn sure we don't have
 // any differences when running on client or server
-
+//--------------------------------------------------
 typedef struct {
-    vec3_t      origin;         // full float precision
-    vec3_t      velocity;       // full float precision
+    vec3_t      origin;
+    vec3_t      velocity;
 
     vec3_t      forward, right, up;
     float       frametime;
@@ -41,9 +58,10 @@ typedef struct {
     qboolean    ladder;
 } pml_t;
 
-static pmove_t* pm;
-static pml_t        pml;
 
+// Static locals.
+static pmove_t* pm;             // A pointer to the actual player move structure.
+static pml_t        pml;
 static pmoveParams_t* pmp;
 
 // movement parameters
@@ -89,12 +107,12 @@ static void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overboun
 
 /*
 ==================
-Pm_TouchEntity
+PM_TouchEntity
 
 Marks the specified entity as touched.
 ==================
 */
-static void Pm_TouchEntity(struct edict_s* ent) {
+static void PM_TouchEntity(struct edict_s* ent) {
     // Ensure it is valid.
     if (ent == NULL) {
         Com_LPrintf(PRINT_DEVELOPER, "Pm_TouchEntity: ent = NULL\n", MAXTOUCH);
@@ -168,7 +186,7 @@ static void PM_StepSlideMove_(void)
 
         // save entity for contact
         // PMOVE: Touchentity.
-        Pm_TouchEntity(trace.ent);
+        PM_TouchEntity(trace.ent);
         //if (pm->numtouch < MAXTOUCH && trace.ent) {
         //    pm->touchents[pm->numtouch] = trace.ent;
         //    pm->numtouch++;
@@ -669,7 +687,7 @@ static void PM_CategorizePosition(void)
         }
 
         // PMOVE: Touchentity.
-        Pm_TouchEntity(trace.ent);
+        PM_TouchEntity(trace.ent);
         //if (pm->numtouch < MAXTOUCH && trace.ent) {
         //    pm->touchents[pm->numtouch] = trace.ent;
         //    pm->numtouch++;
@@ -1078,14 +1096,34 @@ static void PM_ClampAngles(void)
     AngleVectors(pm->viewangles, pml.forward, pml.right, pml.up);
 }
 
-/*
-================
-Pmove
+//
+//===============
+// PM_SpectatorMove
+// 
+// Handles special spectator movement.
+//===============
+//
+static void PM_SpectatorMove(void)
+{
+    // Setup a different frametime for movement.
+    pml.frametime = pmp->speedmult * pm->cmd.msec * 0.001f;
 
-Can be called by either the server or the client
-================
-*/
-void Pmove(pmove_t* pmove, pmoveParams_t* params)
+    // Execute typical fly movement.
+    PM_FlyMove();
+
+    // Snap to position.
+    PM_SnapPosition();
+}
+
+
+//
+//===============
+// PMove
+// 
+// Can be called by either the server or the client
+//===============
+//
+void PMove(pmove_t* pmove, pmoveParams_t* params)
 {
     pm = pmove;
     pmp = params;
@@ -1101,19 +1139,18 @@ void Pmove(pmove_t* pmove, pmoveParams_t* params)
     // clear all pmove local vars
     memset(&pml, 0, sizeof(pml));
 
-    // N&C: FF Precision.
+    // Copy over the actual player state data we need into the
+    // local player move data. This is where we'll be working with.
     VectorCopy(pm->s.origin, pml.origin);
     VectorCopy(pm->s.velocity, pml.velocity);
+    VectorCopy(pm->s.origin, pml.previous_origin);  // Save old origin, just in case we get stuck.
 
-    // save old org in case we get stuck
-    VectorCopy(pm->s.origin, pml.previous_origin);
-
+    // Clamp angles.
     PM_ClampAngles();
 
+    // Special spectator movement handling.
     if (pm->s.pm_type == PM_SPECTATOR) {
-        pml.frametime = pmp->speedmult * pm->cmd.msec * 0.001f;
-        PM_FlyMove();
-        PM_SnapPosition();
+        PM_SpectatorMove();
         return;
     }
 
@@ -1200,7 +1237,14 @@ void Pmove(pmove_t* pmove, pmoveParams_t* params)
     PM_SnapPosition();
 }
 
-void PmoveInit(pmoveParams_t* pmp)
+//
+//===============
+// PMoveInit
+// 
+// Initializes the pmp structure.
+//===============
+//
+void PMoveInit(pmoveParams_t* pmp)
 {
     // set up default pmove parameters
     memset(pmp, 0, sizeof(*pmp));
@@ -1213,7 +1257,14 @@ void PmoveInit(pmoveParams_t* pmp)
     pmp->flyfriction = 9;
 }
 
-void PmoveEnableQW(pmoveParams_t* pmp)
+//
+//===============
+// PMoveEnableQW
+// 
+// Enables QuakeWorld movement on the pmp.
+//===============
+//
+void PMoveEnableQW(pmoveParams_t* pmp)
 {
     pmp->qwmode = qtrue;
     pmp->watermult = 0.7f;

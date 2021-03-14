@@ -50,8 +50,8 @@ void        CL_GM_ShutdownMedia(void);
 //
 // PMove.
 //
-void		CL_GM_PmoveInit(pmoveParams_t* pmp);
-void		CL_GM_PmoveEnableQW(pmoveParams_t* pmp);
+void		CL_GM_PMoveInit(pmoveParams_t* pmp);
+void		CL_GM_PMoveEnableQW(pmoveParams_t* pmp);
 
 //
 // Predict

@@ -2082,7 +2082,7 @@ static void MVD_GameClientThink(edict_t *ent, usercmd_t *cmd)
         pm.cmd = *cmd;
 
         // N&C: changed to support the new PMove shared method.
-        //PF_Pmove(&pm);
+        //PF_PMove(&pm);
 //        PMove(&pm, GetPMoveParams());
 
         client->ps.pmove = pm.s;

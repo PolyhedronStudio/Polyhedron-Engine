@@ -105,10 +105,10 @@ extern "C" {
         // Called when the renderer shutsdown. Should unload all media.
         void        (*ShutdownMedia) (void);
 
-        // Called by the client to initialize Pmove.
-        void        (*PmoveInit) (pmoveParams_t* pmp);
+        // Called by the client to initialize PMove.
+        void        (*PMoveInit) (pmoveParams_t* pmp);
         // Called by the client when the enable QW movement is toggled.
-        void        (*PmoveEnableQW) (pmoveParams_t* pmp);
+        void        (*PMoveEnableQW) (pmoveParams_t* pmp);
 
         //---------------------------------------------------------------------
         // Predict Movement (Client Side)

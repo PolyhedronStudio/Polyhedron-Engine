@@ -1520,7 +1520,7 @@ unsigned CheckBlock(void *b, int c)
         v += ((byte *)b)[i];
     return v;
 }
-void PrintPmove(pmove_t *pm)
+void PrintPMove(pmove_t *pm)
 {
     unsigned    c1, c2;
 
@@ -1600,8 +1600,8 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         pm.pointcontents = gi.pointcontents;
 
         // perform a pmove
-        //gi.Pmove(&pm);
-        Pmove(&pm, gi.GetPMoveParams());
+        //gi.PMove(&pm);
+        PMove(&pm, gi.GetPMoveParams());
 
         // save results of pmove
         client->ps.pmove = pm.s;

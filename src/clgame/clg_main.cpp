@@ -137,8 +137,8 @@ q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     clge.ShutdownMedia              = CLG_ShutdownMedia;
 
     // Player Movement. (Client Side)
-    clge.PmoveInit                  = PmoveInit;
-    clge.PmoveEnableQW              = PmoveEnableQW;
+    clge.PMoveInit                  = PMoveInit;
+    clge.PMoveEnableQW              = PMoveEnableQW;
 
     // Predict Movement (Client Side)
     clge.CheckPredictionError       = CLG_CheckPredictionError;

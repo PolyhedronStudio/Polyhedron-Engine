@@ -158,7 +158,7 @@ typedef struct {
     // Doing it this reversed method, allows for games to customize the pmove
     // code.
     //
-    //void (*Pmove)(pmove_t *pmove);          // player movement code common with client prediction
+    //void (*PMove)(pmove_t *pmove);          // player movement code common with client prediction
     pmoveParams_t* (*GetPMoveParams) ();    // Used to call the shared PMove code with.
 
     // network messaging
@@ -247,8 +247,8 @@ typedef struct {
     // N&C: Our custom PMove requires that the server calls into the SVGame
     // module for initializing pmove parameters.
     //
-    void (*PmoveInit) (pmoveParams_t* pmp);
-    void (*PmoveEnableQW) (pmoveParams_t* pmp);
+    void (*PMoveInit) (pmoveParams_t* pmp);
+    void (*PMoveEnableQW) (pmoveParams_t* pmp);
 
     // ServerCommand will be called when an "sv <command>" command is issued on the
     // server console.

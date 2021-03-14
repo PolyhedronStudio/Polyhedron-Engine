@@ -459,8 +459,8 @@ void SV_InitGame(unsigned mvd_spawn)
 #endif
         SV_InitGameProgs();
 
-    // N&C: Pmove init here.
-    ge->PmoveInit(&sv_pmp);
+    // N&C: PMove init here.
+    ge->PMoveInit(&sv_pmp);
 
     // send heartbeat very soon
     svs.last_heartbeat = -(HEARTBEAT_SECONDS - 5) * 1000;

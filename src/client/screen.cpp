@@ -600,7 +600,7 @@ static void SCR_DrawDebugStats(void)
     }
 }
 
-static void SCR_DrawDebugPmove(void)
+static void SCR_DrawDebugPMove(void)
 {
     static const char * const types[] = {
         "NORMAL", "SPECTATOR", "DEAD", "GIB", "FREEZE"
@@ -917,7 +917,7 @@ static void SCR_Draw2D(void)
 
 #ifdef _DEBUG
     SCR_DrawDebugStats();
-    SCR_DrawDebugPmove();
+    SCR_DrawDebugPMove();
 #endif
 
     R_SetScale(1.0f);
