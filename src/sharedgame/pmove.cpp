@@ -782,11 +782,15 @@ static void PM_CheckJump(void)
 }
 
 
-/*
-=============
-PM_CheckSpecialMovement
-=============
-*/
+//
+//===============
+// PM_CheckSpecialMovements
+//
+// Checks for special movements such as:
+// - Whether we are climbing a ladder.
+// - Whether to jump out of the water, or not.
+//===============
+//
 static void PM_CheckSpecialMovement(void)
 {
     vec3_t  spot;
@@ -832,12 +836,182 @@ static void PM_CheckSpecialMovement(void)
     pm->s.pm_time = 255;
 }
 
+//
+//===============
+// PM_CheckDuck
+//
+// Sets the wished for values to crouch:
+// pm->mins, pm->maxs, and pm->viewheight
+//===============
+//
+static void PM_CheckDuck(void)
+{
+    trace_t trace;
 
-/*
-===============
-PM_FlyMove
-===============
-*/
+    pm->mins[0] = -16;
+    pm->mins[1] = -16;
+
+    pm->maxs[0] = 16;
+    pm->maxs[1] = 16;
+
+    if (pm->s.pm_type == PM_GIB) {
+        pm->mins[2] = 0;
+        pm->maxs[2] = 16;
+        pm->viewheight = 8;
+        return;
+    }
+
+    pm->mins[2] = -24;
+
+    if (pm->s.pm_type == PM_DEAD) {
+        pm->s.pm_flags |= PMF_DUCKED;
+    }
+    else if (pm->cmd.upmove < 0 && (pm->s.pm_flags & PMF_ON_GROUND)) {
+        // duck
+        pm->s.pm_flags |= PMF_DUCKED;
+    }
+    else {
+        // stand up if possible
+        if (pm->s.pm_flags & PMF_DUCKED) {
+            // try to stand up
+            pm->maxs[2] = 32;
+            trace = pm->trace(pml.origin, pm->mins, pm->maxs, pml.origin);
+            if (!trace.allsolid)
+                pm->s.pm_flags &= ~PMF_DUCKED;
+        }
+    }
+
+    if (pm->s.pm_flags & PMF_DUCKED) {
+        pm->maxs[2] = 4;
+        pm->viewheight = -2;
+    }
+    else {
+        pm->maxs[2] = 32;
+        pm->viewheight = 22;
+    }
+}
+
+
+//
+//===============
+// PM_TestPosition
+// 
+// Tests for whether the position is valid, or not.
+// (In a wall, or object, etc.) 
+//===============
+//
+static qboolean PM_TestPosition(void)
+{
+    trace_t trace;
+    vec3_t  origin, end;
+    int     i;
+
+    // This check is not needed anymore. Whether to test for a position or not
+    // can now be decided by calling PM_FinalizePosition with true as its arg. 
+    //if (pm->s.pm_type == PM_SPECTATOR)
+    //    return qtrue;
+
+    // Copy over the s.origin to end and origin for trace testing.
+    VectorCopy(pm->s.origin, origin);
+    VectorCopy(pm->s.origin, end);
+
+    // Do a trace test.
+    trace = pm->trace(origin, pm->mins, pm->maxs, end);
+
+    // Return whether not allsolid.
+    return !trace.allsolid;
+}
+
+//
+//===============
+// PM_FinalizePosition
+// 
+// Copies over the velocity and origin back into the player movement pmove
+// state. 
+// 
+// If testForValid is true, it'll do some extra work. Where in case of a 
+// good position, the function returns and is done. If invalid, it'll revert to
+// the old origin. By doing so, we prevent from moving into objects and walls.
+// 
+// The PM_SpectatorMove for example does NOT test for a valid position, it is 
+// free to move wherever it pleases.
+//===============
+//
+static void PM_FinalizePosition(qboolean testForValid) {
+    // Copy over velocity and origin.
+    VectorCopy(pml.velocity, pm->s.velocity);
+    VectorCopy(pml.origin, pm->s.origin);
+    
+    // Don't test for a valid position if not wished for.
+    if (!testForValid)
+        return;
+
+    // Check to see if the position is valid.
+    if (PM_TestPosition())
+        return;
+
+    // Revert back to the previous origin.
+    VectorCopy(pml.previous_origin, pm->s.origin);
+}
+
+//
+//===============
+// PM_TestInitialPosition
+// 
+// In case the position has been changed outside of PMove, it'll test its new
+// position and copy it over in case it is valid.
+//===============
+//
+static void PM_TestInitialPosition(void)
+{
+    if (PM_TestPosition()) {
+        // Copy over the state origin in case it is valid.
+        VectorCopy(pm->s.origin, pml.origin);
+        VectorCopy(pm->s.origin, pml.previous_origin);
+        return;
+    }
+}
+
+//
+//===============
+// PM_FlyMove
+// 
+// Clamp angles with deltas. Ensure they pitch doesn't exceed 90 or 270
+//===============
+//
+static void PM_ClampAngles(void)
+{
+    short   temp;
+    int     i;
+
+    if (pm->s.pm_flags & PMF_TIME_TELEPORT) {
+        pm->viewangles[YAW] = SHORT2ANGLE(pm->cmd.angles[YAW] + pm->s.delta_angles[YAW]);
+        pm->viewangles[PITCH] = 0;
+        pm->viewangles[ROLL] = 0;
+    }
+    else {
+        // circularly clamp the angles with deltas
+        for (i = 0; i < 3; i++) {
+            temp = pm->cmd.angles[i] + pm->s.delta_angles[i];
+            pm->viewangles[i] = SHORT2ANGLE(temp);
+        }
+
+        // don't let the player look up or down more than 90 degrees
+        if (pm->viewangles[PITCH] > 89 && pm->viewangles[PITCH] < 180)
+            pm->viewangles[PITCH] = 89;
+        else if (pm->viewangles[PITCH] < 271 && pm->viewangles[PITCH] >= 180)
+            pm->viewangles[PITCH] = 271;
+    }
+    AngleVectors(pm->viewangles, pml.forward, pml.right, pml.up);
+}
+
+//
+//===============
+// PM_FlyMove
+// 
+// Executes fly movement.
+//===============
+//
 static void PM_FlyMove(void)
 {
     float   speed, drop, friction, control, newspeed;
@@ -928,66 +1102,13 @@ static void PM_FlyMove(void)
 }
 
 
-/*
-==============
-PM_CheckDuck
-
-Sets mins, maxs, and pm->viewheight
-==============
-*/
-static void PM_CheckDuck(void)
-{
-    trace_t trace;
-
-    pm->mins[0] = -16;
-    pm->mins[1] = -16;
-
-    pm->maxs[0] = 16;
-    pm->maxs[1] = 16;
-
-    if (pm->s.pm_type == PM_GIB) {
-        pm->mins[2] = 0;
-        pm->maxs[2] = 16;
-        pm->viewheight = 8;
-        return;
-    }
-
-    pm->mins[2] = -24;
-
-    if (pm->s.pm_type == PM_DEAD) {
-        pm->s.pm_flags |= PMF_DUCKED;
-    }
-    else if (pm->cmd.upmove < 0 && (pm->s.pm_flags & PMF_ON_GROUND)) {
-        // duck
-        pm->s.pm_flags |= PMF_DUCKED;
-    }
-    else {
-        // stand up if possible
-        if (pm->s.pm_flags & PMF_DUCKED) {
-            // try to stand up
-            pm->maxs[2] = 32;
-            trace = pm->trace(pml.origin, pm->mins, pm->maxs, pml.origin);
-            if (!trace.allsolid)
-                pm->s.pm_flags &= ~PMF_DUCKED;
-        }
-    }
-
-    if (pm->s.pm_flags & PMF_DUCKED) {
-        pm->maxs[2] = 4;
-        pm->viewheight = -2;
-    }
-    else {
-        pm->maxs[2] = 32;
-        pm->viewheight = 22;
-    }
-}
-
-
-/*
-==============
-PM_DeadMove
-==============
-*/
+//
+//===============
+// PM_DeadMove
+// 
+// Handles movement when dead movement.
+//===============
+//
 static void PM_DeadMove(void)
 {
     float   forward;
@@ -1008,94 +1129,6 @@ static void PM_DeadMove(void)
     }
 }
 
-
-static qboolean PM_GoodPosition(void)
-{
-    trace_t trace;
-    vec3_t  origin, end;
-    int     i;
-
-    if (pm->s.pm_type == PM_SPECTATOR)
-        return qtrue;
-
-    // N&C: FF Precision.
-    for (i = 0; i < 3; i++)
-        origin[i] = end[i] = pm->s.origin[i];
-//    for (i = 0; i < 3; i++)
-//        origin[i] = end[i] = pm->s.origin[i] * 0.125;
-    trace = pm->trace(origin, pm->mins, pm->maxs, end);
-
-    return !trace.allsolid;
-}
-
-/*
-================
-PM_SnapPosition
-
-On exit, the origin will have a value in a valid position.
-================
-*/
-static void PM_SnapPosition(void)
-{
-    // N&C: FF Precision.
-    VectorCopy(pml.velocity, pm->s.velocity);
-    VectorCopy(pml.origin, pm->s.origin);
-    
-    if (PM_GoodPosition())
-        return;
-
-    // go back to the last position
-    VectorCopy(pml.previous_origin, pm->s.origin);
-}
-
-/*
-================
-PM_InitialSnapPosition
-
-================
-*/
-static void PM_InitialSnapPosition(void)
-{
-    if (PM_GoodPosition()) {
-        // N&C: FF Precision.
-        VectorCopy(pm->s.origin, pml.origin);
-        VectorCopy(pm->s.origin, pml.previous_origin);
-        return;
-    }
-}
-
-/*
-================
-PM_ClampAngles
-
-================
-*/
-static void PM_ClampAngles(void)
-{
-    short   temp;
-    int     i;
-
-    if (pm->s.pm_flags & PMF_TIME_TELEPORT) {
-        pm->viewangles[YAW] = SHORT2ANGLE(pm->cmd.angles[YAW] + pm->s.delta_angles[YAW]);
-        pm->viewangles[PITCH] = 0;
-        pm->viewangles[ROLL] = 0;
-    }
-    else {
-        // circularly clamp the angles with deltas
-        for (i = 0; i < 3; i++) {
-            temp = pm->cmd.angles[i] + pm->s.delta_angles[i];
-            pm->viewangles[i] = SHORT2ANGLE(temp);
-        }
-
-        // don't let the player look up or down more than 90 degrees
-        if (pm->viewangles[PITCH] > 89 && pm->viewangles[PITCH] < 180)
-            pm->viewangles[PITCH] = 89;
-        else if (pm->viewangles[PITCH] < 271 && pm->viewangles[PITCH] >= 180)
-            pm->viewangles[PITCH] = 271;
-    }
-    AngleVectors(pm->viewangles, pml.forward, pml.right, pml.up);
-}
-
 //
 //===============
 // PM_SpectatorMove
@@ -1111,8 +1144,9 @@ static void PM_SpectatorMove(void)
     // Execute typical fly movement.
     PM_FlyMove();
 
-    // Snap to position.
-    PM_SnapPosition();
+    // Finalize the position. Do no position testing, a spectator is free to
+    // roam where he pleases.
+    PM_FinalizePosition(false);
 }
 
 
@@ -1125,6 +1159,7 @@ static void PM_SpectatorMove(void)
 //
 void PMove(pmove_t* pmove, pmoveParams_t* params)
 {
+    // Store pointers for local usage.
     pm = pmove;
     pmp = params;
 
@@ -1168,8 +1203,10 @@ void PMove(pmove_t* pmove, pmoveParams_t* params)
     // set mins, maxs, and viewheight
     PM_CheckDuck();
 
-    if (pm->snapinitial)
-        PM_InitialSnapPosition();
+    // Check whether we need to test the initial position, in case it has been modified outside of
+    // pmove.cpp
+    if (pm->testInitial)
+        PM_TestInitialPosition();
 
     // set groundentity, watertype, and waterlevel
     PM_CategorizePosition();
@@ -1234,7 +1271,7 @@ void PMove(pmove_t* pmove, pmoveParams_t* params)
 
     //PM_UpdateClientSoundSpecialEffects();
 
-    PM_SnapPosition();
+    PM_FinalizePosition(true);
 }
 
 //

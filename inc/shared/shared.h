@@ -768,7 +768,7 @@ typedef struct {
 
     // command (in)
     usercmd_t       cmd;
-    qboolean        snapinitial;    // if s has been changed outside pmove
+    qboolean        testInitial;    // If .s has changed outside of pmove, testInitial is true.
 
     // results (out)
     int         numtouch;

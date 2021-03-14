@@ -989,7 +989,6 @@ void spectator_respawn(edict_t *ent)
 
     // if the user wants to become a spectator, make sure he doesn't
     // exceed max_spectators
-
     if (ent->client->pers.spectator) {
         char *value = Info_ValueForKey(ent->client->pers.userinfo, "spectator");
         if (*spectator_password->string &&
@@ -1000,7 +999,8 @@ void spectator_respawn(edict_t *ent)
             // CLEANUP: Stuffcmd
             //gi.WriteByte(svg_stufftext);
             //gi.WriteString("spectator 0\n");
-            gi.unicast(ent, qtrue);
+            //gi.unicast(ent, qtrue);
+            // TODO: FIX STUFFCMD.
             gi.stuffcmd(ent, "spectator 0\n");
             return;
         }
@@ -1017,6 +1017,7 @@ void spectator_respawn(edict_t *ent)
             //gi.WriteByte(svg_stufftext);
             //gi.WriteString("spectator 0\n");
             //gi.unicast(ent, qtrue);
+            // TODO: FIX STUFFCMD.
             gi.stuffcmd(ent, "spectator 0\n");
             return;
         }
@@ -1031,7 +1032,8 @@ void spectator_respawn(edict_t *ent)
             //gi.WriteByte(svg_stufftext);
             //gi.WriteString("spectator 1\n");
             //gi.unicast(ent, qtrue);
-            gi.stuffcmd(ent, "spectator 0\n");
+            // TODO: FIX STUFFCMD.
+            gi.stuffcmd(ent, "spectator 1\n");
             return;
         }
     }
@@ -1590,7 +1592,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         //}
 
         if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s))) {
-            pm.snapinitial = qtrue;
+            pm.testInitial = qtrue;
             //      gi.dprintf ("pmove changed!\n");
         }
 
