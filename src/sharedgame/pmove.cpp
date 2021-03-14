@@ -87,6 +87,29 @@ static void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overboun
 }
 
 
+/*
+==================
+Pm_TouchEntity
+
+Marks the specified entity as touched.
+==================
+*/
+static void Pm_TouchEntity(struct edict_s* ent) {
+    // Ensure it is valid.
+    if (ent == NULL) {
+        Com_LPrintf(PRINT_DEVELOPER, "Pm_TouchEntity: ent = NULL\n", MAXTOUCH);
+        return;
+    }
+
+    // Only touch entity if we aren't at the maximum limit yet.
+    if (pm->numtouch < MAXTOUCH && ent) {
+        pm->touchents[pm->numtouch] = ent;
+        pm->numtouch++;
+    } else {
+        // Developer print.
+        Com_LPrintf(PRINT_DEVELOPER, "Pm_TouchEntity: MAXTOUCH(%i) amount of entities reached for this frame.\n", MAXTOUCH);
+    }
+}
 
 
 /*
@@ -144,10 +167,12 @@ static void PM_StepSlideMove_(void)
             break;     // moved the entire distance
 
         // save entity for contact
-        if (pm->numtouch < MAXTOUCH && trace.ent) {
-            pm->touchents[pm->numtouch] = trace.ent;
-            pm->numtouch++;
-        }
+        // PMOVE: Touchentity.
+        Pm_TouchEntity(trace.ent);
+        //if (pm->numtouch < MAXTOUCH && trace.ent) {
+        //    pm->touchents[pm->numtouch] = trace.ent;
+        //    pm->numtouch++;
+        //}
 
         time_left -= time_left * trace.fraction;
 
@@ -643,10 +668,12 @@ static void PM_CategorizePosition(void)
             }
         }
 
-        if (pm->numtouch < MAXTOUCH && trace.ent) {
-            pm->touchents[pm->numtouch] = trace.ent;
-            pm->numtouch++;
-        }
+        // PMOVE: Touchentity.
+        Pm_TouchEntity(trace.ent);
+        //if (pm->numtouch < MAXTOUCH && trace.ent) {
+        //    pm->touchents[pm->numtouch] = trace.ent;
+        //    pm->numtouch++;
+        //}
     }
 
     //
