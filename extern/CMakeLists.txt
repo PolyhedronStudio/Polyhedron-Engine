@@ -25,7 +25,7 @@ if (CONFIG_LINUX_STEAM_RUNTIME_SUPPORT)
 	option(INPUT_TSLIB OFF)
 endif()
 
-add_subdirectory(SDL2)
+add_subdirectory(NaC-SDL)
 
 set_target_properties(SDL2main PROPERTIES FOLDER extern)
 set_target_properties(SDL2-static PROPERTIES FOLDER extern)
@@ -82,7 +82,7 @@ if (CONFIG_ENABLE_RMLUI)
 
     set(CURL_CA_PATH "none" CACHE PATH "")
 
-    add_subdirectory(RmlUi)
+    add_subdirectory(Nac-RmlUi)
 
     set_target_properties(RmlCore PROPERTIES FOLDER extern)
     set_target_properties(RmlDebugger PROPERTIES FOLDER extern)
