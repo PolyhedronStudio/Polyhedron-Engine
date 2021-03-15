@@ -723,7 +723,7 @@ typedef enum {
 #define PMF_TIME_TELEPORT   (PMF_GAME << 6) // Value of: pm_time is non-moving time
 #define PMF_NO_PREDICTION   (PMF_GAME << 7) // Temporarily disables prediction (used for grappling hook)
 #define PMF_TELEPORT_BIT    (PMF_GAME << 8) // Used by q2pro
-
+// NOTE: Any more flags requires changing the pmove states and networking code.
 
 // this structure needs to be communicated bit-accurate
 // from the server to the client to guarantee that

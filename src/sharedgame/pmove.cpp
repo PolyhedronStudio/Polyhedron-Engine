@@ -288,8 +288,7 @@ static void PM_StepSlideMove_(void)
         if (trace.fraction == 1)
             break;     // moved the entire distance
 
-        // save entity for contact
-        // PMOVE: Touchentity.
+        // Save entity for contact (touch) callbacks.
         PM_TouchEntity(trace.ent);
 
         time_left -= time_left * trace.fraction;
@@ -1278,7 +1277,7 @@ void PMove(pmove_t* pmove, pmoveParams_t* params)
     pm->waterlevel = 0;
 
     // Reset the PMF_ON_STAIRS flag that we test for every move.
-    pm->s.pm_flags &= ~(PMF_ON_GROUND | PMF_ON_STAIRS);
+    pm->s.pm_flags &= ~(PMF_ON_STAIRS);
 
     // clear all pmove local vars
     memset(&pml, 0, sizeof(pml));
