@@ -17,3 +17,9 @@
 [submodule "extern/Vulkan-Headers"]
 	path = extern/Vulkan-Headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+[submodule "extern/--recursive"]
+	path = extern/--recursive
+	url = https://github.com/WatIsDeze/Nac-RmlUi
+[submodule "extern/Nac-RmlUi"]
+	path = extern/Nac-RmlUi
+	url = https://github.com/WatIsDeze/Nac-RmlUi
