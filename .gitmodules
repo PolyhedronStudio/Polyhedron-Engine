@@ -5,9 +5,6 @@
 [submodule "extern/curl"]
     path = extern/curl
     url = https://github.com/curl/curl.git
-[submodule "extern/SDL2"]
-    path = extern/SDL2
-    url = https://github.com/spurious/SDL-mirror.git
 [submodule "extern/stb"]
 	path = extern/stb
 	url = https://github.com/nothings/stb.git
