@@ -19,19 +19,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SHAREDGAME_PMOVE_H
 #define SHAREDGAME_PMOVE_H
 
-/*
-==============================================================
+// Shared include, we need it :)
+#include "shared/shared.h"
 
-PLAYER MOVEMENT CODE
-
-Common between server and client so prediction matches
-
-==============================================================
-*/
+//
+//==============================================================
+//
+// Player Movement(PM) Code.
+//
+// Common between server and client so prediction matches
+//
+//==============================================================
+//
 
 //
 // The server has a copy of this struct.
-// Any additional game data should be added at THE BOTTOM.
 //
 typedef struct {
     qboolean    qwmode;
@@ -45,10 +47,38 @@ typedef struct {
     float       friction;
     float       waterfriction;
     float       flyfriction;
-
-    //--------------------------------------
-    // Additional game data here.
 } pmoveParams_t;
+
+// PMOVE: Old PMove code.
+#define MAXTOUCH    32
+typedef struct {
+    // IN/OUT variables.
+    pm_state_t   s;  // Player Move State.
+
+    // IN variables.
+    usercmd_t       cmd;            // User input command.
+    qboolean        testInitial;    // If .s has changed outside of pmove, testInitial is true.
+
+    // OUT(results) variables.
+    int             numtouch;               // Number of touched entities.
+    struct edict_s* touchents[MAXTOUCH];   // Pointers to touched entities.
+
+    struct edict_s* groundentity; // Pointer to the entity that is below the player.
+
+    float       step; // Traversed step height.
+
+    vec3_t      viewangles; // Clamped View Angles
+    float       viewheight; // Viewheight.
+
+    vec3_t      mins, maxs; // Bounding box size
+
+    int         watertype;  // Water Type.
+    int         waterlevel; // Water Level (1 - 3)
+
+    // Callback function pointers for testing the world with.
+    trace_t(*q_gameabi trace)(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
+    int         (*pointcontents)(vec3_t point);
+} pmove_t;
 
 void PMove(pmove_t* pmove, pmoveParams_t* params);
 

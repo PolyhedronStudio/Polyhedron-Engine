@@ -513,7 +513,7 @@ static qboolean player_is_active(const edict_t *ent)
     }
 
     // never capture spectators
-    if (ent->client->ps.pmove.pm_type == PM_SPECTATOR) {
+    if (ent->client->ps.pmove.type == PM_SPECTATOR) {
         return qfalse;
     }
 
@@ -531,12 +531,12 @@ static qboolean player_is_active(const edict_t *ent)
     }
 
     // they are likely following someone in case of PM_FREEZE
-    if (ent->client->ps.pmove.pm_type == PM_FREEZE) {
+    if (ent->client->ps.pmove.type == PM_FREEZE) {
         return qfalse;
     }
 
     // they are likely following someone if PMF_NO_PREDICTION is set
-    if (ent->client->ps.pmove.pm_flags & PMF_NO_PREDICTION) {
+    if (ent->client->ps.pmove.flags & PMF_NO_PREDICTION) {
         return qfalse;
     }
 
@@ -669,7 +669,7 @@ static void emit_gamestate(void)
         if ((j = es->number) != 0) {
             if (i <= sv_maxclients->integer) {
                 ps = &mvd.players[i - 1];
-                if (PPS_INUSE(ps) && ps->pmove.pm_type == PM_NORMAL) {
+                if (PPS_INUSE(ps) && ps->pmove.type == PM_NORMAL) {
                     flags |= MSG_ES_FIRSTPERSON;
                 }
             }
@@ -791,7 +791,7 @@ static void emit_frame(void)
         flags = MSG_ES_UMASK;
         if (i <= sv_maxclients->integer) {
             oldps = &mvd.players[i - 1];
-            if (PPS_INUSE(oldps) && oldps->pmove.pm_type == PM_NORMAL) {
+            if (PPS_INUSE(oldps) && oldps->pmove.type == PM_NORMAL) {
                 // do not waste bandwidth on origin/angle updates,
                 // client will recover them from player state
                 flags |= MSG_ES_FIRSTPERSON;

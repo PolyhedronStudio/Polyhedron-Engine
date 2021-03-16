@@ -157,7 +157,7 @@ typedef struct mvd_s {
     cm_t    cm;
     vec3_t  spawnOrigin;
     vec3_t  spawnAngles;
-    int     pm_type;
+    int     type;
     byte            dcs[CS_BITMAP_BYTES];
     char            baseconfigstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
     char            configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];

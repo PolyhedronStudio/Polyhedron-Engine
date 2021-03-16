@@ -700,7 +700,7 @@ typedef struct {
 } trace_t;
 
 // PMOVE: Old PMove definitions.
-// pmove_state_t is the information necessary for client side movement
+// pm_state_t is the information necessary for client side movement
 // prediction
 typedef enum {
     // can accelerate and turn
@@ -710,7 +710,7 @@ typedef enum {
     PM_DEAD,
     PM_GIB,     // different bounding box
     PM_FREEZE
-} pmtype_t;
+} pm_type_t;
 
 
 // Player Move Flags.
@@ -719,9 +719,9 @@ typedef enum {
 #define PMF_JUMP_HELD       (PMF_GAME << 1) // Player jump key is held.
 #define PMF_ON_GROUND       (PMF_GAME << 2) // Player is on-ground.
 #define PMF_ON_STAIRS		(PMF_GAME << 3) // Player is traversing stairs.
-#define PMF_TIME_WATERJUMP  (PMF_GAME << 4) // Value of: pm_time is waterjump
-#define PMF_TIME_LAND       (PMF_GAME << 5) // Value of: pm_time is time before rejump
-#define PMF_TIME_TELEPORT   (PMF_GAME << 6) // Value of: pm_time is non-moving time
+#define PMF_TIME_WATERJUMP  (PMF_GAME << 4) // Value of: time is waterjump
+#define PMF_TIME_LAND       (PMF_GAME << 5) // Value of: time is time before rejump
+#define PMF_TIME_TELEPORT   (PMF_GAME << 6) // Value of: time is non-moving time
 #define PMF_NO_PREDICTION   (PMF_GAME << 7) // Temporarily disables prediction (used for grappling hook)
 #define PMF_TELEPORT_BIT    (PMF_GAME << 8) // Used by q2pro
 // NOTE: Any more flags requires changing the pmove states and networking code.
@@ -732,17 +732,17 @@ typedef enum {
 // if any part of the game code modifies this struct, it
 // will result in a prediction error of some degree.
 typedef struct {
-    pmtype_t    pm_type;
+    pm_type_t    type;
 
     vec3_t      origin;
     vec3_t      velocity;
 
-    uint16_t    pm_flags;       // ducked, jump_held, etc
-    uint16_t    pm_time;        // each unit = 8 ms
+    uint16_t    flags;       // ducked, jump_held, etc
+    uint16_t    time;        // each unit = 8 ms
     uint16_t    gravity;
     uint16_t    delta_angles[3];    // add to command angles to get view direction
     // changed by spawns, rotating objects, and teleporters
-} pmove_state_t;
+} pm_state_t;
 // PMOVE: New definitions.
 
 //Some constants for the hook movement
@@ -815,37 +815,6 @@ typedef struct usercmd_s {
     byte    lightlevel;     // light level the player is standing on
 } usercmd_t;
 
-
-// PMOVE: Old PMove code.
-#define MAXTOUCH    32
-typedef struct {
-    // IN/OUT variables.
-    pmove_state_t   s;  // Player Move State.
-
-    // IN variables.
-    usercmd_t       cmd;            // User input command.
-    qboolean        testInitial;    // If .s has changed outside of pmove, testInitial is true.
-
-    // OUT(results) variables.
-    int             numtouch;               // Number of touched entities.
-    struct edict_s  *touchents[MAXTOUCH];   // Pointers to touched entities.
-
-    struct edict_s* groundentity; // Pointer to the entity that is below the player.
-
-    float       step; // Traversed step height.
-
-    vec3_t      viewangles; // Clamped View Angles
-    float       viewheight; // Viewheight.
-
-    vec3_t      mins, maxs; // Bounding box size
-
-    int         watertype;  // Water Type.
-    int         waterlevel; // Water Level (1 - 3)
-
-    // Callback function pointers for testing the world with.
-    trace_t     (* q_gameabi trace)(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
-    int         (*pointcontents)(vec3_t point);
-} pmove_t;
 
 /*
 ==============================================================
@@ -1519,12 +1488,12 @@ typedef struct entity_state_s {
 //==============================================
 
 
-// player_state_t is the information needed in addition to pmove_state_t
+// player_state_t is the information needed in addition to pm_state_t
 // to rendered a view.  There will only be 10 player_state_t sent each second,
-// but the number of pmove_state_t changes will be reletive to client
+// but the number of pm_state_t changes will be reletive to client
 // frame rates
 typedef struct {
-    pmove_state_t   pmove;      // for prediction
+    pm_state_t   pmove;      // for prediction
 
     // these fields do not need to be communicated bit-precise
 

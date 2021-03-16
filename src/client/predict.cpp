@@ -41,7 +41,7 @@ void CL_CheckPredictionError(void)
         return;
     }
 
-    if (!cl_predict->integer || (cl.frame.ps.pmove.pm_flags & PMF_NO_PREDICTION))
+    if (!cl_predict->integer || (cl.frame.ps.pmove.flags & PMF_NO_PREDICTION))
         return;
 
     // calculate the last usercmd_t we sent that the server has processed
@@ -169,7 +169,7 @@ void CL_PredictMovement(void)
         return;
     }
 
-    if (!cl_predict->integer || (cl.frame.ps.pmove.pm_flags & PMF_NO_PREDICTION)) {
+    if (!cl_predict->integer || (cl.frame.ps.pmove.flags & PMF_NO_PREDICTION)) {
         // N&C: Call into the CG Module to let it handle this.
         // just set angles
         CL_GM_PredictAngles();

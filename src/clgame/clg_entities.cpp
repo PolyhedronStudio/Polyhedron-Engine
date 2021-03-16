@@ -864,7 +864,7 @@ void CLG_CalcViewValues(void)
     lerp = cl->lerpfrac;
 
     // calculate the origin
-    if (!clgi.IsDemoPlayback() && cl_predict->integer && !(ps->pmove.pm_flags & PMF_NO_PREDICTION)) {
+    if (!clgi.IsDemoPlayback() && cl_predict->integer && !(ps->pmove.flags & PMF_NO_PREDICTION)) {
         // use predicted values
         unsigned delta = clgi.GetRealTime() - cl->predicted_step_time;
         float backlerp = lerp - 1.0;
@@ -899,11 +899,11 @@ void CLG_CalcViewValues(void)
     if (clgi.IsDemoPlayback()) {
         LerpAngles(ops->viewangles, ps->viewangles, lerp, cl->refdef.viewangles);
     }
-    else if (ps->pmove.pm_type < PM_DEAD) {
+    else if (ps->pmove.type < PM_DEAD) {
         // use predicted values
         VectorCopy(cl->predicted_angles, cl->refdef.viewangles);
     }
-    else if (ops->pmove.pm_type < PM_DEAD && clgi.GetServerProtocol() > PROTOCOL_VERSION_DEFAULT) {
+    else if (ops->pmove.type < PM_DEAD && clgi.GetServerProtocol() > PROTOCOL_VERSION_DEFAULT) {
         // lerp from predicted angles, since enhanced servers
         // do not send viewangles each frame
         LerpAngles(cl->predicted_angles, ps->viewangles, lerp, cl->refdef.viewangles);

@@ -619,14 +619,14 @@ static void SCR_DrawDebugPMove(void)
     x = CHAR_WIDTH;
     y = (scr.hud_height - 2 * CHAR_HEIGHT) / 2;
 
-    i = cl.frame.ps.pmove.pm_type;
+    i = cl.frame.ps.pmove.type;
     if (i > PM_FREEZE)
         i = PM_FREEZE;
 
     R_DrawString(x, y, 0, MAX_STRING_CHARS, types[i], scr.font_pic);
     y += CHAR_HEIGHT;
 
-    j = cl.frame.ps.pmove.pm_flags;
+    j = cl.frame.ps.pmove.flags;
     for (i = 0; i < 8; i++) {
         if (j & (1 << i)) {
             x = R_DrawString(x, y, 0, MAX_STRING_CHARS, flags[i], scr.font_pic);

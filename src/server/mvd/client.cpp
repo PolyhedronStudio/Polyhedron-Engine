@@ -326,7 +326,7 @@ static mvd_t *create_channel(gtv_t *gtv)
     mvd->pool.edicts = mvd->edicts;
     mvd->pool.edict_size = sizeof(edict_t);
     mvd->pool.max_edicts = MAX_EDICTS;
-    mvd->pm_type = PM_SPECTATOR;
+    mvd->type = PM_SPECTATOR;
     mvd->min_packets = mvd_wait_delay->value * 10;
     List_Init(&mvd->snapshots);
     List_Init(&mvd->clients);
@@ -1813,7 +1813,7 @@ static inline int entity_flags(mvd_t *mvd, edict_t *ent)
         flags |= MSG_ES_REMOVE;
     } else if (ent->s.number <= mvd->maxclients) {
         mvd_player_t *player = &mvd->players[ent->s.number - 1];
-        if (player->inuse && player->ps.pmove.pm_type == PM_NORMAL)
+        if (player->inuse && player->ps.pmove.type == PM_NORMAL)
             flags |= MSG_ES_FIRSTPERSON;
     }
 

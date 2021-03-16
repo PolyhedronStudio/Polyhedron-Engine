@@ -50,7 +50,7 @@ extern "C" {
         // It has been changed in to a pointer. By doing so we can prevent
         // this structure from turning inconsistent if the game decides to
         // add extra parameters to this structure.
-        pmoveParams_t* pmoveParams;
+        pmoveParams_t* pmoveParams; // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
 
         //---------------------------------------------------------------------
         // Core.

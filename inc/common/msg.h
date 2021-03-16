@@ -54,7 +54,7 @@ typedef struct {
 } entity_packed_t;
 
 typedef struct {
-    pmove_state_t   pmove;
+    pm_state_t   pmove;
     int16_t         viewangles[3];
     int8_t          viewoffset[3];
     int8_t          kick_angles[3];

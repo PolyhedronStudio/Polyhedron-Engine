@@ -838,7 +838,7 @@ void MSG_WriteDeltaPlayerstate_Default(const player_packed_t *from, const player
     //
     pflags = 0;
 
-    if (to->pmove.pm_type != from->pmove.pm_type)
+    if (to->pmove.type != from->pmove.type)
         pflags |= PS_M_TYPE;
 
     if (to->pmove.origin[0] != from->pmove.origin[0] ||
@@ -851,10 +851,10 @@ void MSG_WriteDeltaPlayerstate_Default(const player_packed_t *from, const player
         to->pmove.velocity[2] != from->pmove.velocity[2])
         pflags |= PS_M_VELOCITY;
 
-    if (to->pmove.pm_time != from->pmove.pm_time)
+    if (to->pmove.time != from->pmove.time)
         pflags |= PS_M_TIME;
 
-    if (to->pmove.pm_flags != from->pmove.pm_flags)
+    if (to->pmove.flags != from->pmove.flags)
         pflags |= PS_M_FLAGS;
 
     if (to->pmove.gravity != from->pmove.gravity)
@@ -910,10 +910,10 @@ void MSG_WriteDeltaPlayerstate_Default(const player_packed_t *from, const player
     MSG_WriteShort(pflags);
 
     //
-    // write the pmove_state_t
+    // write the pm_state_t
     //
     if (pflags & PS_M_TYPE)
-        MSG_WriteByte(to->pmove.pm_type);
+        MSG_WriteByte(to->pmove.type);
 
     // N&C: Full float precision.
     if (pflags & PS_M_ORIGIN) {
@@ -936,10 +936,10 @@ void MSG_WriteDeltaPlayerstate_Default(const player_packed_t *from, const player
     }
 
     if (pflags & PS_M_TIME)
-        MSG_WriteShort(to->pmove.pm_time);
+        MSG_WriteShort(to->pmove.time);
 
     if (pflags & PS_M_FLAGS)
-        MSG_WriteShort(to->pmove.pm_flags);
+        MSG_WriteShort(to->pmove.flags);
 
     if (pflags & PS_M_GRAVITY)
         MSG_WriteShort(to->pmove.gravity);
@@ -1029,7 +1029,7 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
     pflags = 0;
     eflags = 0;
 
-    if (to->pmove.pm_type != from->pmove.pm_type)
+    if (to->pmove.type != from->pmove.type)
         pflags |= PS_M_TYPE;
 
     if (to->pmove.origin[0] != from->pmove.origin[0] ||
@@ -1047,10 +1047,10 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
         if (to->pmove.velocity[2] != from->pmove.velocity[2])
             eflags |= EPS_M_VELOCITY2;
 
-        if (to->pmove.pm_time != from->pmove.pm_time)
+        if (to->pmove.time != from->pmove.time)
             pflags |= PS_M_TIME;
 
-        if (to->pmove.pm_flags != from->pmove.pm_flags)
+        if (to->pmove.flags != from->pmove.flags)
             pflags |= PS_M_FLAGS;
 
         if (to->pmove.gravity != from->pmove.gravity)
@@ -1058,8 +1058,8 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
     } else {
         // save previous state
         VectorCopy(from->pmove.velocity, to->pmove.velocity);
-        to->pmove.pm_time = from->pmove.pm_time;
-        to->pmove.pm_flags = from->pmove.pm_flags;
+        to->pmove.time = from->pmove.time;
+        to->pmove.flags = from->pmove.flags;
         to->pmove.gravity = from->pmove.gravity;
     }
 
@@ -1165,10 +1165,10 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
     MSG_WriteShort(pflags);
 
     //
-    // write the pmove_state_t
+    // write the pm_state_t
     //
     if (pflags & PS_M_TYPE)
-        MSG_WriteByte(to->pmove.pm_type);
+        MSG_WriteByte(to->pmove.type);
 
     // N&C: Full float precision.
     if (pflags & PS_M_ORIGIN) {
@@ -1192,10 +1192,10 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
         MSG_WriteFloat(to->pmove.velocity[2]);
 
     if (pflags & PS_M_TIME)
-        MSG_WriteShort(to->pmove.pm_time);
+        MSG_WriteShort(to->pmove.time);
 
     if (pflags & PS_M_FLAGS)
-        MSG_WriteShort(to->pmove.pm_flags);
+        MSG_WriteShort(to->pmove.flags);
 
     if (pflags & PS_M_GRAVITY)
         MSG_WriteShort(to->pmove.gravity);
@@ -1277,7 +1277,7 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
 ==================
 MSG_WriteDeltaPlayerstate_Packet
 
-Throws away most of the pmove_state_t fields as they are used only
+Throws away most of the pm_state_t fields as they are used only
 for client prediction, and are not needed in MVDs.
 ==================
 */
@@ -1307,7 +1307,7 @@ void MSG_WriteDeltaPlayerstate_Packet(const player_packed_t *from,
     //
     pflags = 0;
 
-    if (to->pmove.pm_type != from->pmove.pm_type)
+    if (to->pmove.type != from->pmove.type)
         pflags |= PPS_M_TYPE;
 
     if (to->pmove.origin[0] != from->pmove.origin[0] ||
@@ -1389,10 +1389,10 @@ void MSG_WriteDeltaPlayerstate_Packet(const player_packed_t *from,
     MSG_WriteShort(pflags);
 
     //
-    // write some part of the pmove_state_t
+    // write some part of the pm_state_t
     //
     if (pflags & PPS_M_TYPE)
-        MSG_WriteByte(to->pmove.pm_type);
+        MSG_WriteByte(to->pmove.type);
 
     // N&C: Full float precision.
     if (pflags & PPS_M_ORIGIN) {
@@ -2101,10 +2101,10 @@ void MSG_ParseDeltaPlayerstate_Default(const player_state_t *from,
     }
 
     //
-    // parse the pmove_state_t
+    // parse the pm_state_t
     //
     if (flags & PS_M_TYPE)
-        to->pmove.pm_type = (pmtype_t)MSG_ReadByte(); // CPP: Cast
+        to->pmove.type = (pm_type_t)MSG_ReadByte(); // CPP: Cast
 
     // N&C: Full float precision.
     if (flags & PS_M_ORIGIN) {
@@ -2121,10 +2121,10 @@ void MSG_ParseDeltaPlayerstate_Default(const player_state_t *from,
     }
 
     if (flags & PS_M_TIME)
-        to->pmove.pm_time = MSG_ReadShort();
+        to->pmove.time = MSG_ReadShort();
 
     if (flags & PS_M_FLAGS)
-        to->pmove.pm_flags = MSG_ReadShort();
+        to->pmove.flags = MSG_ReadShort();
 
     if (flags & PS_M_GRAVITY)
         to->pmove.gravity = MSG_ReadShort();
@@ -2216,10 +2216,10 @@ void MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t    *from,
     }
 
     //
-    // parse the pmove_state_t
+    // parse the pm_state_t
     //
     if (flags & PS_M_TYPE)
-        to->pmove.pm_type = (pmtype_t)MSG_ReadByte(); // CPP: Cast
+        to->pmove.type = (pm_type_t)MSG_ReadByte(); // CPP: Cast
 
     // N&C: Full float precision.
     if (flags & PS_M_ORIGIN) {
@@ -2244,10 +2244,10 @@ void MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t    *from,
     }
 
     if (flags & PS_M_TIME)
-        to->pmove.pm_time = MSG_ReadShort();
+        to->pmove.time = MSG_ReadShort();
 
     if (flags & PS_M_FLAGS)
-        to->pmove.pm_flags = MSG_ReadShort();
+        to->pmove.flags = MSG_ReadShort();
 
     if (flags & PS_M_GRAVITY)
         to->pmove.gravity = MSG_ReadShort();
@@ -2355,10 +2355,10 @@ void MSG_ParseDeltaPlayerstate_Packet(const player_state_t *from,
     }
 
     //
-    // parse the pmove_state_t
+    // parse the pm_state_t
     //
     if (flags & PPS_M_TYPE)
-        to->pmove.pm_type = (pmtype_t)MSG_ReadByte(); // CPP: Cast
+        to->pmove.type = (pm_type_t)MSG_ReadByte(); // CPP: Cast
 
     // N&C: Full float precision.
     if (flags & PPS_M_ORIGIN) {
@@ -2459,11 +2459,11 @@ void MSG_ParseDeltaPlayerstate_Packet(const player_state_t *from,
 void MSG_ShowDeltaPlayerstateBits_Default(int flags)
 {
 #define S(b,s) if(flags&PS_##b) SHOWBITS(s)
-    S(M_TYPE,           "pmove.pm_type");
+    S(M_TYPE,           "pmove.type");
     S(M_ORIGIN,         "pmove.origin");
     S(M_VELOCITY,       "pmove.velocity");
-    S(M_TIME,           "pmove.pm_time");
-    S(M_FLAGS,          "pmove.pm_flags");
+    S(M_TIME,           "pmove.time");
+    S(M_FLAGS,          "pmove.flags");
     S(M_GRAVITY,        "pmove.gravity");
     S(M_DELTA_ANGLES,   "pmove.delta_angles");
     S(VIEWOFFSET,       "viewoffset");
@@ -2481,13 +2481,13 @@ void MSG_ShowDeltaPlayerstateBits_Enhanced(int flags, int extraflags)
 {
 #define SP(b,s) if(flags&PS_##b) SHOWBITS(s)
 #define SE(b,s) if(extraflags&EPS_##b) SHOWBITS(s)
-    SP(M_TYPE,          "pmove.pm_type");
+    SP(M_TYPE,          "pmove.type");
     SP(M_ORIGIN,        "pmove.origin[0,1]");
     SE(M_ORIGIN2,       "pmove.origin[2]");
     SP(M_VELOCITY,      "pmove.velocity[0,1]");
     SE(M_VELOCITY2,     "pmove.velocity[2]");
-    SP(M_TIME,          "pmove.pm_time");
-    SP(M_FLAGS,         "pmove.pm_flags");
+    SP(M_TIME,          "pmove.time");
+    SP(M_FLAGS,         "pmove.flags");
     SP(M_GRAVITY,       "pmove.gravity");
     SP(M_DELTA_ANGLES,  "pmove.delta_angles");
     SP(VIEWOFFSET,      "viewoffset");
@@ -2579,7 +2579,7 @@ void MSG_ShowDeltaEntityBits(int bits)
 void MSG_ShowDeltaPlayerstateBits_Packet(int flags)
 {
 #define S(b,s) if(flags&PPS_##b) SHOWBITS(s)
-    S(M_TYPE,       "pmove.pm_type");
+    S(M_TYPE,       "pmove.type");
     S(M_ORIGIN,     "pmove.origin[0,1]");
     S(M_ORIGIN2,    "pmove.origin[2]");
     S(VIEWOFFSET,   "viewoffset");

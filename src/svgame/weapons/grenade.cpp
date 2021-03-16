@@ -59,7 +59,7 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
     if (ent->health <= 0)
         return;
 
-    if (ent->client->ps.pmove.pm_flags & PMF_DUCKED) {
+    if (ent->client->ps.pmove.flags & PMF_DUCKED) {
         ent->client->anim_priority = ANIM_ATTACK;
         ent->s.frame = FRAME_crattak1 - 1;
         ent->client->anim_end = FRAME_crattak3;

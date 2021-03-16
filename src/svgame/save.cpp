@@ -291,12 +291,12 @@ static const save_field_t levelfields[] = {
 
 static const save_field_t clientfields[] = {
 #define _OFS CLOFS
-    I(ps.pmove.pm_type),
+    I(ps.pmove.type),
 
     SA(ps.pmove.origin, 3),
     SA(ps.pmove.velocity, 3),
-    B(ps.pmove.pm_flags),
-    B(ps.pmove.pm_time),
+    B(ps.pmove.flags),
+    B(ps.pmove.time),
     S(ps.pmove.gravity),
     SA(ps.pmove.delta_angles, 3),
 

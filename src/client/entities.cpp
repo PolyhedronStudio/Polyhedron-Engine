@@ -43,7 +43,7 @@ static inline qboolean entity_optimized(const entity_state_t *state)
     if (state->number != cl.frame.clientNum + 1)
         return qfalse;
 
-    if (cl.frame.ps.pmove.pm_type >= PM_DEAD)
+    if (cl.frame.ps.pmove.type >= PM_DEAD)
         return qfalse;
 
     return qtrue;
@@ -275,7 +275,7 @@ static void set_active_state(void)
         VectorCopy(cl.frame.ps.pmove.velocity, cl.predicted_velocity);
         //VectorScale(cl.frame.ps.pmove.origin, 0.125f, cl.predicted_origin);
         //VectorScale(cl.frame.ps.pmove.velocity, 0.125f, cl.predicted_velocity);
-        if (cl.frame.ps.pmove.pm_type < PM_DEAD &&
+        if (cl.frame.ps.pmove.type < PM_DEAD &&
             cls.serverProtocol > PROTOCOL_VERSION_DEFAULT) {
             // enhanced servers don't send viewangles
             // N&C: Let the client game module predict angles.
@@ -352,7 +352,7 @@ player_update(server_frame_t *oldframe, server_frame_t *frame, int framediv)
     }
 
     // no lerping if teleport bit was flipped
-    if ((ops->pmove.pm_flags ^ ps->pmove.pm_flags) & PMF_TELEPORT_BIT)
+    if ((ops->pmove.flags ^ ps->pmove.flags) & PMF_TELEPORT_BIT)
         goto dup;
     // no lerping if POV number changed
     if (oldframe->clientNum != frame->clientNum)
@@ -429,7 +429,7 @@ void CL_DeltaFrame(void)
         VectorClear(cl.frame.ps.pmove.delta_angles);
     }
 
-    if (cl.oldframe.ps.pmove.pm_type != cl.frame.ps.pmove.pm_type) {
+    if (cl.oldframe.ps.pmove.type != cl.frame.ps.pmove.type) {
         IN_Activate();
     }
 

@@ -882,7 +882,7 @@ struct gclient_s {
     // private to game
     client_persistant_t pers;
     client_respawn_t    resp;
-    pmove_state_t       old_pmove;  // for detecting out-of-pmove changes
+    pm_state_t       old_pmove;  // for detecting out-of-pmove changes
 
     qboolean    showscores;         // set layout stat
     qboolean    showinventory;      // set layout stat

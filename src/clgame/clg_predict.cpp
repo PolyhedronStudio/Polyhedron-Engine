@@ -245,7 +245,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
 
     X86_POP_FPCW;
 
-    if (pm.s.pm_type != PM_SPECTATOR && (pm.s.pm_flags & PMF_ON_GROUND)) {
+    if (pm.s.type != PM_SPECTATOR && (pm.s.flags & PMF_ON_GROUND)) {
         oldz = cl->predicted_origins[cl->predicted_step_frame & CMD_MASK][2];
         step = pm.s.origin[2] - oldz;
         // N&C: FF Precision.

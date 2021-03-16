@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "client.h"
+#include "sharedgame/pmove.h" // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
 
 static cvar_t   *mvd_admin_password;
 static cvar_t   *mvd_part_filter;
@@ -456,8 +457,8 @@ static void MVD_FollowStop(mvd_client_t *client)
 
     VectorClear(client->ps.kick_angles);
     Vector4Clear(client->ps.blend);
-    client->ps.pmove.pm_flags = 0;
-    client->ps.pmove.pm_type = (pmtype_t)mvd->pm_type; // CPP: Cast
+    client->ps.pmove.flags = 0;
+    client->ps.pmove.type = (pm_type_t)mvd->type; // CPP: Cast
     client->ps.rdflags = 0;
     client->ps.gunindex = 0;
     client->ps.fov = client->fov;
@@ -666,8 +667,8 @@ static void MVD_UpdateClient(mvd_client_t *client)
                                            && client->ps.fov >= 90)) {
             client->ps.fov = client->fov;
         }
-        client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
-        client->ps.pmove.pm_type = PM_FREEZE;
+        client->ps.pmove.flags |= PMF_NO_PREDICTION;
+        client->ps.pmove.type = PM_FREEZE;
         client->clientNum = target - mvd->players;
 
         if (target != mvd->dummy) {
@@ -1771,7 +1772,7 @@ static void MVD_GameInit(void)
     strcpy(mvd->configstrings[CS_LIGHTS], "m");
 
     mvd->dummy = &mvd_dummy;
-    mvd->pm_type = PM_FREEZE;
+    mvd->type = PM_FREEZE;
     mvd->servercount = sv.spawncount;
 
     // set serverinfo variables
@@ -2086,7 +2087,7 @@ static void MVD_GameClientThink(edict_t *ent, usercmd_t *cmd)
 //        PMove(&pm, GetPMoveParams());
 
         client->ps.pmove = pm.s;
-        if (pm.s.pm_type != PM_FREEZE) {
+        if (pm.s.type != PM_FREEZE) {
             VectorCopy(pm.viewangles, client->ps.viewangles);
         }
     }
@@ -2183,10 +2184,10 @@ void MVD_UpdateClients(mvd_t *mvd)
     // check for intermission
     if (mvd_freeze_hack->integer && mvd->dummy) {
         if (!mvd->intermission) {
-            if (mvd->dummy->ps.pmove.pm_type == PM_FREEZE) {
+            if (mvd->dummy->ps.pmove.type == PM_FREEZE) {
                 MVD_IntermissionStart(mvd);
             }
-        } else if (mvd->dummy->ps.pmove.pm_type != PM_FREEZE) {
+        } else if (mvd->dummy->ps.pmove.type != PM_FREEZE) {
             MVD_IntermissionStop(mvd);
         }
     } else if (mvd->intermission) {

@@ -262,8 +262,8 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
         if (client->settings[CLS_NOBLEND]) {
             psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_BLEND);  // CPP: Cast
         }
-        if (frame->ps.pmove.pm_type < PM_DEAD) {
-            if (!(frame->ps.pmove.pm_flags & PMF_NO_PREDICTION)) {
+        if (frame->ps.pmove.type < PM_DEAD) {
+            if (!(frame->ps.pmove.flags & PMF_NO_PREDICTION)) {
                 psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_VIEWANGLES);  // CPP: Cast
             }
         } else {
@@ -274,7 +274,7 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
 
     clientEntityNum = 0;
     if (client->protocol == PROTOCOL_VERSION_Q2PRO) {
-        if (frame->ps.pmove.pm_type < PM_DEAD && !client->settings[CLS_RECORDING]) {
+        if (frame->ps.pmove.type < PM_DEAD && !client->settings[CLS_RECORDING]) {
             clientEntityNum = frame->clientNum + 1;
         }
         if (client->settings[CLS_NOPREDICT]) {

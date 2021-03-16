@@ -18,8 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl.input.c  -- builds an intended movement command to send to the server
 
 #include "client.h"
-#include "shared/cl_game.h"
 #include "client/gamemodule.h"
+#include "shared/cl_game.h"
 #include "system/lirc.h"
 
 // N&C: Cheesy hack, we need to actually make this extern in a header.
@@ -104,7 +104,7 @@ static qboolean IN_GetCurrentGrab(void)
         if (cls.demo.playback && !Key_IsDown(K_SHIFT))
             return qfalse;  // playing a demo (and not using freelook)
 
-        if (cl.frame.ps.pmove.pm_type == PM_FREEZE)
+        if (cl.frame.ps.pmove.type == PM_FREEZE)
             return qfalse;  // spectator mode
     }
 

@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/cvar.h"
 #include "common/field.h"
 #include "common/files.h"
-#include "common/pmove.h"
+//#include "common/pmove.h"
 #include "common/math.h"
 #include "common/msg.h"
 #include "common/net/chan.h"
@@ -50,7 +50,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/video.h"
 
 // Shared Game includes.
-#include "sharedgame/protocol.h"
+#include "sharedgame/protocol.h" // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
 
 #if USE_ZLIB
 #include <zlib.h>

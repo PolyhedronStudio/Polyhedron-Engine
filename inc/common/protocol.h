@@ -259,7 +259,7 @@ typedef enum {
 
 // this is just a small hack to store inuse flag
 // in a field left otherwise unused by MVD code
-#define PPS_INUSE(ps)       (ps)->pmove.pm_time
+#define PPS_INUSE(ps)       (ps)->pmove.time
 
 //==============================================
 
