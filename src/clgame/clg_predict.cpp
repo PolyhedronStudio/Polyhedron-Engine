@@ -167,7 +167,7 @@ static void CLG_UpdateClientSoundSpecialEffects(pmove_t* pm)
         return;
     }
 
-    if ((pm->waterlevel == 3) && !underwater) {
+    if ((pm->waterLevel == 3) && !underwater) {
         underwater = 1;
         cl->snd_is_underwater = 1; // OAL: snd_is_underwater moved to client struct.
 // TODO: DO!
@@ -177,7 +177,7 @@ static void CLG_UpdateClientSoundSpecialEffects(pmove_t* pm)
 #endif
     }
 
-    if ((pm->waterlevel < 3) && underwater) {
+    if ((pm->waterLevel < 3) && underwater) {
         underwater = 0;
         cl->snd_is_underwater = 0; // OAL: snd_is_underwater moved to client struct.
 
@@ -207,12 +207,12 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
 
     // copy current state to pmove
     memset(&pm, 0, sizeof(pm));
-    pm.trace = CLG_Trace;
-    pm.pointcontents = CLG_PointContents;
+    pm.Trace = CLG_Trace;
+    pm.PointContents = CLG_PointContents;
 
-    pm.s = cl->frame.ps.pmove;
+    pm.state = cl->frame.ps.pmove;
 #if USE_SMOOTH_DELTA_ANGLES
-    VectorCopy(cl->delta_angles, pm.s.delta_angles);
+    VectorCopy(cl->delta_angles, pm.state.delta_angles);
 #endif
 
     // run frames
@@ -224,7 +224,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
         CLG_UpdateClientSoundSpecialEffects(&pm);
 
         // save for debug checking
-        VectorCopy(pm.s.origin, cl->predicted_origins[ack & CMD_MASK]);
+        VectorCopy(pm.state.origin, cl->predicted_origins[ack & CMD_MASK]);
     }
 
     // run pending cmd
@@ -237,7 +237,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
         frame = current;
 
         // save for debug checking
-        VectorCopy(pm.s.origin, cl->predicted_origins[(current + 1) & CMD_MASK]);
+        VectorCopy(pm.state.origin, cl->predicted_origins[(current + 1) & CMD_MASK]);
     }
     else {
         frame = current - 1;
@@ -245,9 +245,9 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
 
     X86_POP_FPCW;
 
-    if (pm.s.type != PM_SPECTATOR && (pm.s.flags & PMF_ON_GROUND)) {
+    if (pm.state.type != PM_SPECTATOR && (pm.state.flags & PMF_ON_GROUND)) {
         oldz = cl->predicted_origins[cl->predicted_step_frame & CMD_MASK][2];
-        step = pm.s.origin[2] - oldz;
+        step = pm.state.origin[2] - oldz;
         // N&C: FF Precision.
         if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
             cl->predicted_step = step;
@@ -264,9 +264,9 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
 
     // copy results out for rendering
     // N&C: FF Precision.
-    VectorCopy(pm.s.origin, cl->predicted_origin);
-    VectorCopy(pm.s.velocity, cl->predicted_velocity);
-    //VectorScale(pm.s.origin, 0.125f, cl->predicted_origin);
-    //VectorScale(pm.s.velocity, 0.125f, cl->predicted_velocity);
-    VectorCopy(pm.viewangles, cl->predicted_angles);
+    VectorCopy(pm.state.origin, cl->predicted_origin);
+    VectorCopy(pm.state.velocity, cl->predicted_velocity);
+    //VectorScale(pm.state.origin, 0.125f, cl->predicted_origin);
+    //VectorScale(pm.state.velocity, 0.125f, cl->predicted_velocity);
+    VectorCopy(pm.viewAngles, cl->predicted_angles);
 }

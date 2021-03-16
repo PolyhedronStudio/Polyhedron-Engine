@@ -2077,18 +2077,18 @@ static void MVD_GameClientThink(edict_t *ent, usercmd_t *cmd)
         }
     } else {
         memset(&pm, 0, sizeof(pm));
-        pm.trace = MVD_Trace;
-        pm.pointcontents = MVD_PointContents;
-        pm.s = client->ps.pmove;
+        pm.Trace = MVD_Trace;
+        pm.PointContents = MVD_PointContents;
+        pm.state = client->ps.pmove;
         pm.cmd = *cmd;
 
         // N&C: changed to support the new PMove shared method.
         //PF_PMove(&pm);
 //        PMove(&pm, GetPMoveParams());
 
-        client->ps.pmove = pm.s;
-        if (pm.s.type != PM_FREEZE) {
-            VectorCopy(pm.viewangles, client->ps.viewangles);
+        client->ps.pmove = pm.state;
+        if (pm.state.type != PM_FREEZE) {
+            VectorCopy(pm.viewAngles, client->ps.viewangles);
         }
     }
 

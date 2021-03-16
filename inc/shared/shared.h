@@ -699,32 +699,38 @@ typedef struct {
     vec3_t		offsets[8];	// [signbits][x] = either size[0][x] or size[1][x]
 } trace_t;
 
-// PMOVE: Old PMove definitions.
-// pm_state_t is the information necessary for client side movement
-// prediction
+//
+// General player movement and capabilities classification.
+//
 typedef enum {
-    // can accelerate and turn
-    PM_NORMAL,
-    PM_SPECTATOR,
-    // no acceleration or turning
-    PM_DEAD,
-    PM_GIB,     // different bounding box
-    PM_FREEZE
+    PM_NORMAL, // Walking, jumping, falling, swimming, etc.
+    PM_HOOK_PULL, // Pull hook
+    PM_HOOK_SWING, // Swing hook
+    PM_SPECTATOR, // Free-flying movement with acceleration and friction
+    PM_DEAD, // No movement, but the ability to rotate in place
+    PM_FREEZE, // No movement at all
+    PM_GIB,     // No movement, different bounding box
 } pm_type_t;
 
+//
+// Player movement flags.The game is free to define up to 16 bits.
+//
+#define PMF_ENGINE          (1 << 0)
+#define PMF_NO_PREDICTION   (PMF_ENGINE << 0)
+#define PMF_TELEPORT_BIT    (PMF_ENGINE << 1)
+#define PMF_GAME			(PMF_ENGINE << 2)
 
-// Player Move Flags.
-#define PMF_GAME			(1 << 0)
-#define PMF_DUCKED          (PMF_GAME << 0) // Player is ducked.
-#define PMF_JUMP_HELD       (PMF_GAME << 1) // Player jump key is held.
-#define PMF_ON_GROUND       (PMF_GAME << 2) // Player is on-ground.
-#define PMF_ON_STAIRS		(PMF_GAME << 3) // Player is traversing stairs.
-#define PMF_TIME_WATERJUMP  (PMF_GAME << 4) // Value of: time is waterjump
-#define PMF_TIME_LAND       (PMF_GAME << 5) // Value of: time is time before rejump
-#define PMF_TIME_TELEPORT   (PMF_GAME << 6) // Value of: time is non-moving time
-#define PMF_NO_PREDICTION   (PMF_GAME << 7) // Temporarily disables prediction (used for grappling hook)
-#define PMF_TELEPORT_BIT    (PMF_GAME << 8) // Used by q2pro
-// NOTE: Any more flags requires changing the pmove states and networking code.
+//#define PMF_GAME			(1 << 0)
+//#define PMF_DUCKED          (PMF_GAME << 0) // Player is ducked.
+//#define PMF_JUMP_HELD       (PMF_GAME << 1) // Player jump key is held.
+//#define PMF_ON_GROUND       (PMF_GAME << 2) // Player is on-ground.
+//#define PMF_ON_STAIRS		(PMF_GAME << 3) // Player is traversing stairs.
+//#define PMF_TIME_WATERJUMP  (PMF_GAME << 4) // Value of: time is waterjump
+//#define PMF_TIME_LAND       (PMF_GAME << 5) // Value of: time is time before rejump
+//#define PMF_TIME_TELEPORT   (PMF_GAME << 6) // Value of: time is non-moving time
+//#define PMF_NO_PREDICTION   (PMF_GAME << 7) // Temporarily disables prediction (used for grappling hook)
+//#define PMF_TELEPORT_BIT    (PMF_GAME << 8) // Used by q2pro
+//// NOTE: Any more flags requires changing the pmove states and networking code.
 
 // this structure needs to be communicated bit-accurate
 // from the server to the client to guarantee that
@@ -743,59 +749,7 @@ typedef struct {
     uint16_t    delta_angles[3];    // add to command angles to get view direction
     // changed by spawns, rotating objects, and teleporters
 } pm_state_t;
-// PMOVE: New definitions.
 
-//Some constants for the hook movement
-//#define PM_HOOK_MIN_DIST		(32.0)
-//#define PM_HOOK_MAX_DIST		(MAX_WORLD_DIST)
-//#define PM_HOOK_DEF_DIST		(2048.0)
-
-// Water level
-//typedef enum {
-//    WATER_UNKNOWN = -1,
-//    WATER_NONE,
-//    WATER_FEET,
-//    WATER_WAIST,
-//    WATER_UNDER
-//} pm_water_level_t;
-//
-//// General player movement and capabilities classification.
-//
-//typedef enum {
-//    PM_NORMAL, // walking, jumping, falling, swimming, etc.
-//    PM_HOOK_PULL, // pull hook
-//    PM_HOOK_SWING, // swing hook
-//    PM_SPECTATOR, // free-flying movement with acceleration and friction
-//    PM_DEAD, // no movement, but the ability to rotate in place
-//    PM_FREEZE // no movement at all
-//} pm_type_t;
-//
-////Player movement flags. The game is free to define up to 16 bits.
-//#define PMF_GAME			(1 << 0)
-//
-//// The player movement state contains quantized snapshots of player
-//// position, orientation, velocity and world interaction state. This should
-//// be modified only through invoking Pm_Move.
-//typedef struct {
-//    pm_type_t type;
-//
-//    vec3_t origin;
-//    vec3_t velocity;
-//
-//    uint16_t flags;   // Game-specific state flags
-//    uint16_t time;    // Duration for temporal state flags
-//
-//    int16_t gravity;
-//
-//    vec3_t view_offset; // Add to origin to resolve eyes
-//    vec3_t view_angles; // Base view angles
-//
-//    vec3_t delta_angles; // Offset for spawns, pushers, etc.
-//
-//    //vec3_t hook_position; // Position we're hooking to
-//    //uint16_t hook_length; // Length of the hook, for swing hook
-//} pm_state_t;
-// PMOVE: End of definitions.
 
 //
 // button bits

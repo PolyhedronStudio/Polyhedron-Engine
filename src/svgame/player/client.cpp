@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 #include "../g_local.h"
+#include "sharedgame/pmove.h"
 #include "animations.h"
 
 void ClientUserinfoChanged(edict_t *ent, char *userinfo);
@@ -1529,7 +1530,7 @@ void PrintPMove(pmove_t *pm)
 {
     unsigned    c1, c2;
 
-    c1 = CheckBlock(&pm->s, sizeof(pm->s));
+    c1 = CheckBlock(&pm->state, sizeof(pm->state));
     c2 = CheckBlock(&pm->cmd, sizeof(pm->cmd));
     Com_Printf("sv %3i:%i %i\n", pm->cmd.impulse, c1, c2);
 }
@@ -1584,40 +1585,40 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
             client->ps.pmove.type = PM_NORMAL;
 
         client->ps.pmove.gravity = sv_gravity->value;
-        pm.s = client->ps.pmove;
+        pm.state = client->ps.pmove;
 
         // N&C: FF Precision.
-        VectorCopy(ent->s.origin, pm.s.origin);
-        VectorCopy(ent->velocity, pm.s.velocity);
+        VectorCopy(ent->s.origin, pm.state.origin);
+        VectorCopy(ent->velocity, pm.state.velocity);
         //for (i = 0 ; i < 3 ; i++) {
-        //    pm.s.origin[i] = ent->s.origin[i] * 8;
-        //    pm.s.velocity[i] = ent->velocity[i] * 8;
+        //    pm.state.origin[i] = ent->s.origin[i] * 8;
+        //    pm.state.velocity[i] = ent->velocity[i] * 8;
         //}
 
-        if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s))) {
+        if (memcmp(&client->old_pmove, &pm.state, sizeof(pm.state))) {
             pm.testInitial = qtrue;
             //      gi.dprintf ("pmove changed!\n");
         }
 
         pm.cmd = *ucmd;
 
-        pm.trace = PM_trace;    // adds default parms
-        pm.pointcontents = gi.pointcontents;
+        pm.Trace = PM_trace;    // adds default parms
+        pm.PointContents = gi.pointcontents;
 
         // perform a pmove
         //gi.PMove(&pm);
         PMove(&pm, gi.GetPMoveParams());
 
         // save results of pmove
-        client->ps.pmove = pm.s;
-        client->old_pmove = pm.s;
+        client->ps.pmove = pm.state;
+        client->old_pmove = pm.state;
 
         // N&C: FF Precision.
-        VectorCopy(pm.s.origin, ent->s.origin);
-        VectorCopy(pm.s.velocity, ent->velocity);
+        VectorCopy(pm.state.origin, ent->s.origin);
+        VectorCopy(pm.state.velocity, ent->velocity);
         //for (i = 0 ; i < 3 ; i++) {
-        //    ent->s.origin[i] = pm.s.origin[i] * 0.125;
-        //    ent->velocity[i] = pm.s.velocity[i] * 0.125;
+        //    ent->s.origin[i] = pm.state.origin[i] * 0.125;
+        //    ent->velocity[i] = pm.state.velocity[i] * 0.125;
         //}
 
         VectorCopy(pm.mins, ent->mins);
@@ -1627,25 +1628,25 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
         client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
 
-        if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == 0)) {
+        if (ent->groundentity && !pm.groundEntity && (pm.cmd.upmove >= 10) && (pm.waterLevel == 0)) {
             gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, 0);
             PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
         }
 
-        ent->viewheight = pm.viewheight;
-        ent->waterlevel = pm.waterlevel;
-        ent->watertype = pm.watertype;
-        ent->groundentity = pm.groundentity;
-        if (pm.groundentity)
-            ent->groundentity_linkcount = pm.groundentity->linkcount;
+        ent->viewheight = pm.viewHeight;
+        ent->waterlevel = pm.waterLevel;
+        ent->watertype = pm.waterType;
+        ent->groundentity = pm.groundEntity;
+        if (pm.groundEntity)
+            ent->groundentity_linkcount = pm.groundEntity->linkcount;
 
         if (ent->deadflag) {
             client->ps.viewangles[ROLL] = 40;
             client->ps.viewangles[PITCH] = -15;
             client->ps.viewangles[YAW] = client->killer_yaw;
         } else {
-            VectorCopy(pm.viewangles, client->v_angle);
-            VectorCopy(pm.viewangles, client->ps.viewangles);
+            VectorCopy(pm.viewAngles, client->v_angle);
+            VectorCopy(pm.viewAngles, client->ps.viewangles);
         }
 
         gi.linkentity(ent);
@@ -1654,10 +1655,10 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
             G_TouchTriggers(ent);
 
         // touch other objects
-        for (i = 0 ; i < pm.numtouch ; i++) {
-            other = pm.touchents[i];
+        for (i = 0 ; i < pm.numTouchedEntities; i++) {
+            other = pm.touchedEntities[i];
             for (j = 0 ; j < i ; j++)
-                if (pm.touchents[j] == other)
+                if (pm.touchedEntities[j] == other)
                     break;
             if (j != i)
                 continue;   // duplicated

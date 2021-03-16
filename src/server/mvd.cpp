@@ -536,9 +536,10 @@ static qboolean player_is_active(const edict_t *ent)
     }
 
     // they are likely following someone if PMF_NO_PREDICTION is set
-    if (ent->client->ps.pmove.flags & PMF_NO_PREDICTION) {
-        return qfalse;
-    }
+    // PMOVE: Removed..
+    //if (ent->client->ps.pmove.flags & PMF_NO_PREDICTION) {
+    //    return qfalse;
+    //}
 
     return qtrue;
 }
