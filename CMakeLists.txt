@@ -63,10 +63,13 @@ if (CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif ()
 
 IF(WIN32)
-	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MDd")
-	set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} /MT")
-	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} /MT")
+    # From: gheshu
+    # /MP: multi-process compilation
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
+    # /MD: release dynamic linkage runtime (the default, encouraged by GPL)
+    set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} /MD")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MD")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} /MD")
 ENDIF()
 
 add_subdirectory(extern)

@@ -33,11 +33,10 @@ set_target_properties(uninstall PROPERTIES FOLDER extern)
 
 
 #
-# CURL
+# CURL - On Windows it'll search for the extern/win64 library and header files.
 #
 
 if(CONFIG_USE_CURL)
-
     option(BUILD_CURL_EXE "" OFF)
     option(BUILD_SHARED_LIBS "" OFF)
     option(CURL_STATICLIB "" ON)
