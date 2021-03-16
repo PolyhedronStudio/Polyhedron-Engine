@@ -720,18 +720,6 @@ typedef enum {
 #define PMF_TELEPORT_BIT    (PMF_ENGINE << 1)
 #define PMF_GAME			(PMF_ENGINE << 2)
 
-//#define PMF_GAME			(1 << 0)
-//#define PMF_DUCKED          (PMF_GAME << 0) // Player is ducked.
-//#define PMF_JUMP_HELD       (PMF_GAME << 1) // Player jump key is held.
-//#define PMF_ON_GROUND       (PMF_GAME << 2) // Player is on-ground.
-//#define PMF_ON_STAIRS		(PMF_GAME << 3) // Player is traversing stairs.
-//#define PMF_TIME_WATERJUMP  (PMF_GAME << 4) // Value of: time is waterjump
-//#define PMF_TIME_LAND       (PMF_GAME << 5) // Value of: time is time before rejump
-//#define PMF_TIME_TELEPORT   (PMF_GAME << 6) // Value of: time is non-moving time
-//#define PMF_NO_PREDICTION   (PMF_GAME << 7) // Temporarily disables prediction (used for grappling hook)
-//#define PMF_TELEPORT_BIT    (PMF_GAME << 8) // Used by q2pro
-//// NOTE: Any more flags requires changing the pmove states and networking code.
-
 // this structure needs to be communicated bit-accurate
 // from the server to the client to guarantee that
 // prediction stays in sync, so no floats are used.

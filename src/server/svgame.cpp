@@ -715,7 +715,7 @@ pmoveParams_t* PF_GetPMoveParams(void) {
 
 // N&C: This has been removed, we now call the shared PMove in SVGame.
 // We pass PF_GetPMoveParams into it.
-//void PF_PMove(pmove_t *pm)
+//void PF_PMove(pm_move_t *pm)
 //{
 //    if (sv_client) {
 //        PMove(pm, &sv_client->pmp);

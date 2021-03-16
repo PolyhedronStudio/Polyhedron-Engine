@@ -2034,7 +2034,7 @@ static void MVD_GameClientThink(edict_t *ent, usercmd_t *cmd)
 {
     mvd_client_t *client = EDICT_MVDCL(ent);
     usercmd_t *old = &client->lastcmd;
-    pmove_t pm;
+    pm_move_t pm;
 
     if (cmd->buttons != old->buttons
         || cmd->forwardmove != old->forwardmove

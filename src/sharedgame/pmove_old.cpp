@@ -75,7 +75,7 @@ typedef struct {
 // Static locals.
 static pmoveParams_t* pmp;  // Pointer to the player movement parameter settings.
 static pml_t pml;           // Local movement state variables.
-static pmove_t* pm;         // Pointer to the actual player move structure.
+static pm_move_t* pm;         // Pointer to the actual player move structure.
 
 // Player Movement Parameters
 static const float  pm_stopspeed = 100;
@@ -1262,7 +1262,7 @@ static void PM_SpectatorMove(void)
 // Can be called by either the server or the client
 //===============
 //
-void PMove(pmove_t* pmove, pmoveParams_t* params)
+void PMove(pm_move_t* pmove, pmoveParams_t* params)
 {
     // Store pointers for local usage.
     pm = pmove;

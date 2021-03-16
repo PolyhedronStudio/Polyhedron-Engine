@@ -241,7 +241,7 @@ typedef struct {
 
     //vec3_t      mins, maxs; // Bounding box size
 
-} pmove_t;
+} pm_move_t;
 
 
 
@@ -269,7 +269,7 @@ typedef struct {
 //
 // PMove functions.
 //
-void PMove(pmove_t* pmove, pmoveParams_t* params);
+void PMove(pm_move_t* pmove, pmoveParams_t* params);
 
 // TODO: 
 void PMoveInit(pmoveParams_t* pmp);

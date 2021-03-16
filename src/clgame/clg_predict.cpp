@@ -158,7 +158,7 @@ static int CLG_PointContents(vec3_t point)
 // Can be called by either the server or the client
 //================
 //
-static void CLG_UpdateClientSoundSpecialEffects(pmove_t* pm)
+static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
 {
     static int underwater;
 
@@ -198,7 +198,7 @@ static void CLG_UpdateClientSoundSpecialEffects(pmove_t* pm)
 //================
 //
 void CLG_PredictMovement(unsigned int ack, unsigned int current) {
-    pmove_t     pm;
+    pm_move_t     pm;
     float       step, oldz;     // N&C: FF Precision. These were ints.
     int         frame;
 

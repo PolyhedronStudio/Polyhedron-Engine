@@ -158,7 +158,7 @@ typedef struct {
     // Doing it this reversed method, allows for games to customize the pmove
     // code.
     //
-    //void (*PMove)(pmove_t *pmove);          // player movement code common with client prediction
+    //void (*PMove)(pm_move_t *pmove);          // player movement code common with client prediction
     pmoveParams_t* (*GetPMoveParams) ();    // Used to call the shared PMove code with.
 
     // network messaging

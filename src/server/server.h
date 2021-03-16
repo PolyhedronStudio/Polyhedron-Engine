@@ -748,7 +748,7 @@ void SV_InitGameProgs(void);
 void SV_ShutdownGameProgs(void);
 void SV_InitEdict(edict_t *e);
 
-//void PF_PMove(pmove_t *pm);
+//void PF_PMove(pm_move_t *pm);
 
 //
 // sv_save.c

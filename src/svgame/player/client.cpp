@@ -1526,7 +1526,7 @@ unsigned CheckBlock(void *b, int c)
         v += ((byte *)b)[i];
     return v;
 }
-void PrintPMove(pmove_t *pm)
+void PrintPMove(pm_move_t *pm)
 {
     unsigned    c1, c2;
 
@@ -1548,7 +1548,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
     gclient_t   *client;
     edict_t *other;
     int     i, j;
-    pmove_t pm;
+    pm_move_t pm;
 
     level.current_entity = ent;
     client = ent->client;
