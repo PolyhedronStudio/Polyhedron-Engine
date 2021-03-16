@@ -35,55 +35,56 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sharedgame/pmove.h"
 #include "client/client.h"
 
-//--------------------------------------------------
-// Player Movement configuration.
 //
-// Most settings can be easily tweaked here to fine tune movement to custom
-// desires.
-//--------------------------------------------------
-// Minimum step height for interpolation by the client.
-#define PM_STEP_HEIGHT_MIN		4.f
+// PM_MINS and PM_MAXS are the default bounding box, scaled by PM_SCALE
+// in Pm_Init. They are referenced in a few other places e.g. to create effects
+// at a certain body position on the player model.
+//
+const vec3_t PM_MINS = { -16.f, -16.f, -24.f };
+const vec3_t PM_MAXS = {  16.f,  16.f,  32.f };
 
-// Maximum vertical distance for being able to climb a step.
-#define PM_STEP_HEIGHT_MAX    18
+static const vec3_t PM_DEAD_MINS = { -16.f, -16.f, -24.f };
+static const vec3_t PM_DEAD_MAXS = {  16.f,  16.f,  -4.f };
 
-// The minimum Z plane normal component required for standing.
-#define PM_STEP_NORMAL			0.7f
+static const vec3_t PM_GIBLET_MINS = { -8.f, -8.f, -8.f };
+static const vec3_t PM_GIBLET_MAXS = {  8.f,  8.f,  8.f };
 
-//--------------------------------------------------
-// all of the locals will be zeroed before each
-// pmove, just to make damn sure we don't have
-// any differences when running on client or server
-//--------------------------------------------------
-typedef struct {
-    vec3_t      origin;
-    vec3_t      velocity;
+// PM Move pointer to the current (client-)pmove being processed.
+static pm_move_t* pm;
+// PM Move pointer to the current (client-)pmove parameter settings.
+static pmoveParams_t* pmp;
 
-    vec3_t      forward, right, up;
-    float       frametime;
+//-------------------
+// @brief A structure containing full floating point precision copies of all
+// movement variables. This is initialized with the player's last movement
+// at each call to Pm_Move (this is obviously not thread-safe).
+//-------------------
+static struct {
+    // Previous (incoming) origin, in case movement fails and must be reverted.
+    vec3_t previousOrigin;
+    // Previous (incoming) velocity, used for detecting landings.
+    vec3_t previousVelocity;
 
+    // Directional vectors based on command angles, with Z component.
+    vec3_t forwardXYZ, rightXYZ, upXYZ;
+    // Directional vectors without Z component, for air and ground movement.
+    vec3_t forwardXY, rightXY;
 
-    csurface_t* groundsurface;
-    cplane_t    groundplane;
-    int         groundcontents;
+    // The current movement command duration, in seconds.
+    float time;
 
-    vec3_t      previous_origin;
-    qboolean    ladder;
-} pml_t;
+    // The player's ground interaction, copied from a trace.
+    struct {
+        // The ground plane.
+        cplane_t plane;
 
+        // The ground texinfo.
+        csurface_t* texInfo;
 
-// Static locals.
-static pmoveParams_t* pmp;  // Pointer to the player movement parameter settings.
-static pml_t pml;           // Local movement state variables.
-static pm_move_t* pm;         // Pointer to the actual player move structure.
-
-// Player Movement Parameters
-static const float  pm_stopspeed = 100;
-static const float  pm_duckspeed = 100;
-static const float  pm_accelerate = 10;
-static const float  pm_wateraccelerate = 10;
-static const float  pm_waterspeed = 400;
-
+        // The ground contents.
+        int32_t contents;
+    } ground;
+} pm_locals;
 
 
 //
@@ -124,7 +125,7 @@ static void PM_ClampAngles(void)
         else if (pm->viewAngles[PITCH] < 271 && pm->viewAngles[PITCH] >= 180)
             pm->viewAngles[PITCH] = 271;
     }
-    AngleVectors(pm->viewAngles, pml.forward, pml.right, pml.up);
+    AngleVectors(pm->viewAngles, pm_locals.forwardXYZ, pm_locals.rightXYZ, pm_locals.upXYZ);
 }
 
 
@@ -172,7 +173,6 @@ static qboolean PM_TestPosition(void)
 {
     trace_t trace;
     vec3_t  origin, end;
-    int     i;
 
     // This check is not needed anymore. Whether to test for a position or not
     // can now be decided by calling PM_FinalizePosition with true as its arg. 
@@ -206,10 +206,6 @@ static qboolean PM_TestPosition(void)
 //===============
 //
 static void PM_FinalizePosition(qboolean testForValid) {
-    // Copy over velocity and origin.
-    VectorCopy(pml.velocity, pm->state.velocity);
-    VectorCopy(pml.origin, pm->state.origin);
-
     // Don't test for a valid position if not wished for.
     if (!testForValid)
         return;
@@ -219,7 +215,7 @@ static void PM_FinalizePosition(qboolean testForValid) {
         return;
 
     // Revert back to the previous origin.
-    VectorCopy(pml.previous_origin, pm->state.origin);
+    VectorCopy(pm_locals.previousOrigin, pm->state.origin);
 }
 
 //
@@ -235,8 +231,7 @@ static void PM_TestInitialPosition(void)
     // Do 
     if (PM_TestPosition()) {
         // Copy over the state origin in case it is valid.
-        VectorCopy(pm->state.origin, pml.origin);
-        VectorCopy(pm->state.origin, pml.previous_origin);
+        VectorCopy(pm->state.origin, pm_locals.previousOrigin);
         return;
     }
 }
