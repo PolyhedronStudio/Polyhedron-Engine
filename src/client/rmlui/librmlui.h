@@ -12,7 +12,7 @@
 //#define RMLUI_STATIC_LIB
 
 // RmlUI.
-#include <RmlUi/Core/Core.h>
+#include "RmlUi/Core/Core.h"
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Input.h>

@@ -53,7 +53,7 @@ if(CONFIG_USE_CURL)
     
     set(ZLIB_DIR "{CMAKE_CURRENT_SOURCE_DIR}/zlib")
 
-    add_subdirectory(curl)
+    add_subdirectory(NaC-curl)
 
     set_target_properties(libcurl PROPERTIES FOLDER extern)
 endif()

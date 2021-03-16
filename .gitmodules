@@ -1,15 +1,3 @@
-[submodule "extern/curl"]
-    path = extern/curl
-    url = https://github.com/curl/curl.git
-[submodule "extern/stb"]
-	path = extern/stb
-	url = https://github.com/nothings/stb.git
-[submodule "extern/tinyobjloader-c"]
-	path = extern/tinyobjloader-c
-	url = https://github.com/syoyo/tinyobjloader-c.git
-[submodule "extern/Vulkan-Headers"]
-	path = extern/Vulkan-Headers
-	url = https://github.com/KhronosGroup/Vulkan-Headers.git
 [submodule "extern/Nac-RmlUi"]
 	path = extern/Nac-RmlUi
 	url = https://github.com/WatIsDeze/Nac-RmlUi
@@ -19,3 +7,15 @@
 [submodule "extern/NaC-SDL"]
 	path = extern/NaC-SDL
 	url = https://github.com/WatIsDeze/NaC-SDL
+[submodule "extern/Vulkan-Headers"]
+	path = extern/Vulkan-Headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers
+[submodule "extern/NaC-curl"]
+	path = extern/NaC-curl
+	url = https://github.com/WatIsDeze/NaC-curl
+[submodule "extern/tinyobjloader-c"]
+	path = extern/tinyobjloader-c
+	url = https://github.com/syoyo/tinyobjloader-c.git
+[submodule "extern/stb"]
+	path = extern/stb
+	url = https://github.com/nothings/stb.git

@@ -242,7 +242,7 @@ static const save_field_t entityfields[] = {
     I(monsterinfo.power_armor_type),
     I(monsterinfo.power_armor_power),
 
-    {0}
+    {(fieldtype_t)0}
 #undef _OFS
 };
 
@@ -285,7 +285,7 @@ static const save_field_t levelfields[] = {
 
     I(power_cubes),
 
-    {0}
+    {(fieldtype_t)0}
 #undef _OFS
 };
 
@@ -406,7 +406,7 @@ static const save_field_t clientfields[] = {
 
     F(pickup_msg_time),
 
-    {0}
+    {(fieldtype_t)0}
 #undef _OFS
 };
 
@@ -424,7 +424,7 @@ static const save_field_t gamefields[] = {
 
     I(autosaved),
 
-    {0}
+    {(fieldtype_t)0}
 #undef _OFS
 };
 

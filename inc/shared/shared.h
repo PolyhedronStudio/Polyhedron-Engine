@@ -502,9 +502,9 @@ static inline float FloatSwap(float f)
      (b)[2]=LittleFloat((a)[2]))
 
 #if USE_BGRA
-#define MakeColor(r, g, b, a)   MakeRawLong(b, g, r, a)
+#define MakeColor(r, g, b, a)   (const uint32_t)MakeRawLong(b, g, r, a)
 #else
-#define MakeColor(r, g, b, a)   MakeRawLong(r, g, b, a)
+#define MakeColor(r, g, b, a)   (const uint32_t)MakeRawLong(r, g, b, a)
 #endif
 
 //=============================================

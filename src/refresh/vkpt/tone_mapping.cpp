@@ -314,12 +314,12 @@ vkpt_tone_mapping_record_cmd_buffer(VkCommandBuffer cmd_buf, float frame_time)
 	// in global_ubo.h will override this.
 	float slope_blur_sigma = Cvar_Get("tm_slope_blur_sigma", "6.0", 0)->value;
 	float push_constants_tm2_curve[16] = {
-		 reset_required ? 1.0 : 0.0, // 1 means reset the histogram
+		 reset_required ? 1.0f : 0.0f, // 1 means reset the histogram
 		 frame_time, // Frame time
-		 0.0, 0.0, 0.0, 0.0, // Slope kernel filter
-		 0.0, 0.0, 0.0, 0.0,
-		 0.0, 0.0, 0.0, 0.0,
-		 0.0, 0.0
+		 0.0f, 0.0f, 0.0f, 0.0f, // Slope kernel filter
+		 0.0f, 0.0f, 0.0f, 0.0f,
+		 0.0f, 0.0f, 0.0f, 0.0f,
+		 0.0f, 0.0f
 	};
 
 	// Compute Gaussian curve and sum, taking symmetry into account.
