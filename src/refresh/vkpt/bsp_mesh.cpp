@@ -1551,9 +1551,10 @@ bsp_mesh_load_custom_sky(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, const char* m
 	tinyobj_material_t* materials = NULL;
 	size_t num_materials;
 
+	// N&C: Updated the tinyobj-c lib, now is multi-thread compatible. We use none, so we pass NULL to the context pointer.
 	unsigned int flags = TINYOBJ_FLAG_TRIANGULATE;
 	int ret = tinyobj_parse_obj(&attrib, &shapes, &num_shapes, &materials,
-		&num_materials, (const char*)file_buffer, file_size, flags);
+		&num_materials, (const char*)file_buffer, (file_reader_callback)file_size, NULL, flags);
 
 	FS_FreeFile(file_buffer);
 

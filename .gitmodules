@@ -13,9 +13,9 @@
 [submodule "extern/NaC-curl"]
 	path = extern/NaC-curl
 	url = https://github.com/WatIsDeze/NaC-curl
-[submodule "extern/tinyobjloader-c"]
-	path = extern/tinyobjloader-c
-	url = https://github.com/syoyo/tinyobjloader-c.git
 [submodule "extern/stb"]
 	path = extern/stb
 	url = https://github.com/nothings/stb.git
+[submodule "extern/nac-tinyobjloader-c"]
+	path = extern/nac-tinyobjloader-c
+	url = https://github.com/WatIsDeze/nac-tinyobjloader-c
