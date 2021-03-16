@@ -699,6 +699,7 @@ typedef struct {
     vec3_t		offsets[8];	// [signbits][x] = either size[0][x] or size[1][x]
 } trace_t;
 
+// PMOVE: Old PMove definitions.
 // pmove_state_t is the information necessary for client side movement
 // prediction
 typedef enum {
@@ -733,18 +734,68 @@ typedef enum {
 typedef struct {
     pmtype_t    pm_type;
 
-    // N&C: Full float precision.
     vec3_t      origin;
     vec3_t      velocity;
-    //short       origin[3];      // 12.3
-    //short       velocity[3];    // 12.3
-    byte        pm_flags;       // ducked, jump_held, etc
-    byte        pm_time;        // each unit = 8 ms
-    short       gravity;
-    short       delta_angles[3];    // add to command angles to get view direction
+
+    uint16_t    pm_flags;       // ducked, jump_held, etc
+    uint16_t    pm_time;        // each unit = 8 ms
+    uint16_t    gravity;
+    uint16_t    delta_angles[3];    // add to command angles to get view direction
     // changed by spawns, rotating objects, and teleporters
 } pmove_state_t;
+// PMOVE: New definitions.
 
+//Some constants for the hook movement
+//#define PM_HOOK_MIN_DIST		(32.0)
+//#define PM_HOOK_MAX_DIST		(MAX_WORLD_DIST)
+//#define PM_HOOK_DEF_DIST		(2048.0)
+
+// Water level
+//typedef enum {
+//    WATER_UNKNOWN = -1,
+//    WATER_NONE,
+//    WATER_FEET,
+//    WATER_WAIST,
+//    WATER_UNDER
+//} pm_water_level_t;
+//
+//// General player movement and capabilities classification.
+//
+//typedef enum {
+//    PM_NORMAL, // walking, jumping, falling, swimming, etc.
+//    PM_HOOK_PULL, // pull hook
+//    PM_HOOK_SWING, // swing hook
+//    PM_SPECTATOR, // free-flying movement with acceleration and friction
+//    PM_DEAD, // no movement, but the ability to rotate in place
+//    PM_FREEZE // no movement at all
+//} pm_type_t;
+//
+////Player movement flags. The game is free to define up to 16 bits.
+//#define PMF_GAME			(1 << 0)
+//
+//// The player movement state contains quantized snapshots of player
+//// position, orientation, velocity and world interaction state. This should
+//// be modified only through invoking Pm_Move.
+//typedef struct {
+//    pm_type_t type;
+//
+//    vec3_t origin;
+//    vec3_t velocity;
+//
+//    uint16_t flags;   // Game-specific state flags
+//    uint16_t time;    // Duration for temporal state flags
+//
+//    int16_t gravity;
+//
+//    vec3_t view_offset; // Add to origin to resolve eyes
+//    vec3_t view_angles; // Base view angles
+//
+//    vec3_t delta_angles; // Offset for spawns, pushers, etc.
+//
+//    //vec3_t hook_position; // Position we're hooking to
+//    //uint16_t hook_length; // Length of the hook, for swing hook
+//} pm_state_t;
+// PMOVE: End of definitions.
 
 //
 // button bits
@@ -765,6 +816,7 @@ typedef struct usercmd_s {
 } usercmd_t;
 
 
+// PMOVE: Old PMove code.
 #define MAXTOUCH    32
 typedef struct {
     // IN/OUT variables.

@@ -522,7 +522,6 @@ static void PF_StartSound(edict_t *edict, int channel,
     int         area;
     player_state_t      *ps;
     message_packet_t    *msg;
-    int         i;
 
     if (!edict)
         return;

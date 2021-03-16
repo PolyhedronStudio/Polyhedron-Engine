@@ -503,7 +503,6 @@ static void MVD_ParseSound(mvd_t *mvd, int extrabits)
     player_state_t      *ps;
     message_packet_t    *msg;
     edict_t     *entity;
-    int         i;
 
     flags = MSG_ReadByte();
     index = MSG_ReadByte();

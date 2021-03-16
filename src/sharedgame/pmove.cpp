@@ -38,7 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //--------------------------------------------------
 // Player Movement configuration.
 //
-// Most settings can be easily tweaked her to fine tune movement to custom
+// Most settings can be easily tweaked here to fine tune movement to custom
 // desires.
 //--------------------------------------------------
 // Minimum step height for interpolation by the client.
