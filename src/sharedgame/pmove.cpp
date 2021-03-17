@@ -31,6 +31,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Finally, we copy the results over into the player pmove state. This should
 // sort if sum up the method of action that's used for player movement.
 //
+#include <math.h>
+#include "shared/math/vector3.hpp"
+
 #include "shared/shared.h"
 #include "sharedgame/pmove.h"
 #include "client/client.h"
@@ -94,6 +97,29 @@ static struct {
 //
 //=============================================================================
 //
+
+//
+//===============
+// PM_ClipVelocity
+// 
+// Slide off of the impacted plane.
+//===============
+//
+static const Vector &PM_ClipVelocity(const Vector &in,  const Vector &normal, float bounce) {
+    // Calculate the dot product for in and normal.
+    float backoff = in * normal;
+
+    // Multiply/Divide backoff by bounce, based on negative or positive value.
+    if (backoff < 0.0f) {
+        backoff *= bounce;
+    }
+    else {
+        backoff /= bounce;
+    }
+
+    // Return the input minus the normal scaled by backoff.
+    return in - normal * backoff;
+}
 
 //
 //===============
