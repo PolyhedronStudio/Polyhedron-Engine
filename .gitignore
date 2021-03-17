@@ -55,11 +55,4 @@ basenac/sound
 basenac/sprites
 basenac/textures
 
-extern/CMakeFiles.txt
-extern/curl/*
-extern/SDL2/*
-extern/stb/*
-extern/tinyobjloader-c/*
-extern/Vulkan-Headers/*
-extern/zlib/*
-/extern/RmlUi
+
