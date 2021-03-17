@@ -206,6 +206,170 @@ static trace_t PM_TraceCorrectAllSolid(const Vector &start, const Vector& end, c
     return pm->Trace(trStart, trEnd, trMins, trMaxs);
 }
 
+
+//
+//===============
+// PM_ImpactPlane
+// 
+// Returns true if `plane` is unique to `planes` and should be impacted, false otherwise.
+//===============
+//
+static bool PM_ImpactPlane(Vector *planes, int32_t num_planes, const Vector &plane) {
+
+    for (int32_t i = 0; i < num_planes; i++) {
+        if (plane * planes[i] > 1.0f - PM_STOP_EPSILON) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+//
+//===============
+// PM_SlideMove
+// 
+// Calculates a new origin, velocity, and contact entities based on the
+// movement command and world state. Returns true if not blocked.
+//===============
+//
+#define MAX_CLIP_PLANES	6
+static bool PM_SlideMove(void) {
+    const int32_t numBumps = MAX_CLIP_PLANES - 2;
+    vec3_t planes[MAX_CLIP_PLANES];
+    int32_t bump;
+
+    float timeRemaining = pm_locals.time;
+    int32_t numPlanes = 0;
+
+    // Never turn against our ground plane
+    if (pm->s.flags & PMF_ON_GROUND) {
+        planes[numPlanes] = pm_locals.ground.plane.normal;
+        numPlanes++;
+    }
+
+    // or our original velocity
+    planes[numPlanes] = Vector(pm->s.velocity).Normalized();
+    numPlanes++;
+
+    for (bump = 0; bump < numBumps; bump++) {
+        //vec3_t pos;
+        Vector position;
+
+        if (timeRemaining <= 0.0f) { // out of time
+            break;
+        }
+
+        // project desired destination
+        //static inline vec3_t __attribute__((warn_unused_result)) Vec3_Fmaf(const vec3_t v, float multiply, const vec3_t add) {
+        //    return Vec3(fmaf(add.x, multiply, v.x), fmaf(add.y, multiply, v.y), fmaf(add.z, multiply, v.z));
+        //}
+        //pos = Vec3_Fmaf(pm->s.origin, time_remaining, pm->s.velocity);
+        position = Vector(fmaf(pm->state.origin), timeRemaining, pm->state.velocity[0]
+
+        // trace to it
+        const cm_trace_t trace = Pm_TraceCorrectAllSolid(pm->s.origin, pos, pm->mins, pm->maxs);
+
+        // if the player is trapped in a solid, don't build up Z
+        if (trace.all_solid) {
+            pm->s.velocity.z = 0.0f;
+            return true;
+        }
+
+        // if the trace succeeded, move some distance
+        if (trace.fraction > 0.0f) {
+
+            pm->s.origin = trace.end;
+
+            // if the trace didn't hit anything, we're done
+            if (trace.fraction == 1.0f) {
+                break;
+            }
+
+            // update the movement time remaining
+            time_remaining -= (time_remaining * trace.fraction);
+        }
+
+        // store a reference to the entity for firing game events
+        Pm_TouchEntity(trace.ent);
+
+        // record the impacted plane, or nudge velocity out along it
+        if (Pm_ImpactPlane(planes, num_planes, trace.plane.normal)) {
+            planes[num_planes] = trace.plane.normal;
+            num_planes++;
+        }
+        else {
+            // if we've seen this plane before, nudge our velocity out along it
+            pm->s.velocity = Vec3_Add(pm->s.velocity, trace.plane.normal);
+            continue;
+        }
+
+        // and modify velocity, clipping to all impacted planes
+        for (int32_t i = 0; i < num_planes; i++) {
+            vec3_t vel;
+
+            // if velocity doesn't impact this plane, skip it
+            if (Vec3_Dot(pm->s.velocity, planes[i]) >= 0.0f) {
+                continue;
+            }
+
+            // slide along the plane
+            vel = Pm_ClipVelocity(pm->s.velocity, planes[i], PM_CLIP_BOUNCE);
+
+            // see if there is a second plane that the new move enters
+            for (int32_t j = 0; j < num_planes; j++) {
+                vec3_t cross;
+
+                if (j == i) {
+                    continue;
+                }
+
+                // if the clipped velocity doesn't impact this plane, skip it
+                if (Vec3_Dot(vel, planes[j]) >= 0.0f) {
+                    continue;
+                }
+
+                // we are now intersecting a second plane
+                vel = Pm_ClipVelocity(vel, planes[j], PM_CLIP_BOUNCE);
+
+                // but if we clip against it without being deflected back, we're okay
+                if (Vec3_Dot(vel, planes[i]) >= 0.0f) {
+                    continue;
+                }
+
+                // we must now slide along the crease (cross product of the planes)
+                cross = Vec3_Cross(planes[i], planes[j]);
+                cross = Vec3_Normalize(cross);
+
+                const float scale = Vec3_Dot(cross, pm->s.velocity);
+                vel = Vec3_Scale(cross, scale);
+
+                // see if there is a third plane the the new move enters
+                for (int32_t k = 0; k < num_planes; k++) {
+
+                    if (k == i || k == j) {
+                        continue;
+                    }
+
+                    if (Vec3_Dot(vel, planes[k]) >= 0.0f) {
+                        continue;
+                    }
+
+                    // stop dead at a triple plane interaction
+                    pm->s.velocity = Vec3_Zero();
+                    return true;
+                }
+            }
+
+            // if we have fixed all interactions, try another move
+            pm->s.velocity = vel;
+            break;
+        }
+    }
+
+    return bump == 0;
+}
+
 //
 //===============
 // PM_ClampAngles

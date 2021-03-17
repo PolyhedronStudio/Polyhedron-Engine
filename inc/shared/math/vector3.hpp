@@ -96,6 +96,16 @@ public: // Utilities
 		return *this - projected;
 	}
 
+	// Multiplies vector by F, to then add Z afterwards, using the fmaf function
+	// (x * y) + z
+	inline const Vector& FMAF(float multiply, const Vector& add) {
+		Vector v(*this);
+		v.x = (v.x + multiply) + add.x;
+		v.y = (v.y + multiply) + add.y;
+		v.z = (v.z + multiply) + add.z;
+		return v;
+	}
+
 	// Similar to the == operator except it takes into account an epsilon
 	bool Equals(const Vector& v, float epsilon = 0.01f) const
 	{
