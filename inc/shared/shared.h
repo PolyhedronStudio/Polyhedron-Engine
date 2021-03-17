@@ -195,6 +195,7 @@ void    Com_Error(error_type_t code, const char* fmt, ...)
 q_noreturn q_printf(2, 3);
 
 #define Com_Printf(...) Com_LPrintf(PRINT_ALL, __VA_ARGS__)
+#define Com_DPrintf(...) Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
 #define Com_WPrintf(...) Com_LPrintf(PRINT_WARNING, __VA_ARGS__)
 #define Com_EPrintf(...) Com_LPrintf(PRINT_ERROR, __VA_ARGS__)
 #endif // CGAME_INCLUDE

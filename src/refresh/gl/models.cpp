@@ -221,13 +221,13 @@ qerror_t MOD_LoadMD2_GL(model_t *model, const void *rawdata, size_t length)
             }
         }
 
-        VectorVectorScale(mins, dst_frame->scale, mins);
-        VectorVectorScale(maxs, dst_frame->scale, maxs);
+        Vec3_ScaleVec3(mins, dst_frame->scale, mins);
+        Vec3_ScaleVec3(maxs, dst_frame->scale, maxs);
 
         dst_frame->radius = RadiusFromBounds(mins, maxs);
 
-        VectorAdd(mins, dst_frame->translate, dst_frame->bounds[0]);
-        VectorAdd(maxs, dst_frame->translate, dst_frame->bounds[1]);
+        Vec3_Add(mins, dst_frame->translate, dst_frame->bounds[0]);
+        Vec3_Add(maxs, dst_frame->translate, dst_frame->bounds[1]);
 
         src_frame = (dmd2frame_t *)((byte *)src_frame + header.framesize);
         dst_frame++;
@@ -394,7 +394,7 @@ qerror_t MOD_LoadMD3_GL(model_t *model, const void *rawdata, size_t length)
     dst_frame = model->frames;
     for (i = 0; i < header.num_frames; i++) {
         LittleVector(src_frame->translate, dst_frame->translate);
-        VectorSet(dst_frame->scale, MD3_XYZ_SCALE, MD3_XYZ_SCALE, MD3_XYZ_SCALE);
+        Vec3_Set(dst_frame->scale, MD3_XYZ_SCALE, MD3_XYZ_SCALE, MD3_XYZ_SCALE);
 
         LittleVector(src_frame->mins, dst_frame->bounds[0]);
         LittleVector(src_frame->maxs, dst_frame->bounds[1]);

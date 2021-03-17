@@ -277,41 +277,41 @@ static void write_particle_geometry(const float* view_matrix, const particle_t* 
 		particle_colors = particle_colors + 4;
 
 		vec3_t origin;
-		VectorCopy(particle->origin, origin);
+		Vec3_Copy(particle->origin, origin);
 
 		vec3_t z_axis;
-		VectorSubtract(view_origin, origin, z_axis);
+		Vec3_Subtract(view_origin, origin, z_axis);
 		VectorNormalize(z_axis);
 
 		vec3_t x_axis;
 		vec3_t y_axis;
-		CrossProduct(z_axis, view_y, x_axis);
-		CrossProduct(x_axis, z_axis, y_axis);
+		Vec3_Cross(z_axis, view_y, x_axis);
+		Vec3_Cross(x_axis, z_axis, y_axis);
 
 		const float size_factor = pow(particle->alpha, 0.05f);
 		if (particle->radius == 0.f)
 		{
-			VectorScale(y_axis, particle_size * size_factor, y_axis);
-			VectorScale(x_axis, particle_size * size_factor, x_axis);
+			Vec3_Scale(y_axis, particle_size * size_factor, y_axis);
+			Vec3_Scale(x_axis, particle_size * size_factor, x_axis);
 		}
 		else
 		{
-			VectorScale(y_axis, particle->radius, y_axis);
-			VectorScale(x_axis, particle->radius, x_axis);
+			Vec3_Scale(y_axis, particle->radius, y_axis);
+			Vec3_Scale(x_axis, particle->radius, x_axis);
 		}
 
 		vec3_t temp;
-		VectorSubtract(origin, x_axis, temp);
-		VectorAdd(temp, y_axis, vertex_positions[0]);
+		Vec3_Subtract(origin, x_axis, temp);
+		Vec3_Add(temp, y_axis, vertex_positions[0]);
 
-		VectorAdd(origin, x_axis, temp);
-		VectorAdd(temp, y_axis, vertex_positions[1]);
+		Vec3_Add(origin, x_axis, temp);
+		Vec3_Add(temp, y_axis, vertex_positions[1]);
 
-		VectorAdd(origin, x_axis, temp);
-		VectorSubtract(temp, y_axis, vertex_positions[2]);
+		Vec3_Add(origin, x_axis, temp);
+		Vec3_Subtract(temp, y_axis, vertex_positions[2]);
 
-		VectorSubtract(origin, x_axis, temp);
-		VectorSubtract(temp, y_axis, vertex_positions[3]);
+		Vec3_Subtract(origin, x_axis, temp);
+		Vec3_Subtract(temp, y_axis, vertex_positions[3]);
 
 		vertex_positions += 4;
 	}
@@ -350,30 +350,30 @@ static void write_beam_geometry(const float* view_matrix, const entity_t* entiti
 
 		vec3_t begin;
 		vec3_t end;
-		VectorCopy(beam->oldorigin, begin);
-		VectorCopy(beam->origin, end);
+		Vec3_Copy(beam->oldorigin, begin);
+		Vec3_Copy(beam->origin, end);
 
 		vec3_t to_end;
-		VectorSubtract(end, begin, to_end);
+		Vec3_Subtract(end, begin, to_end);
 
 		vec3_t norm_dir;
-		VectorCopy(to_end, norm_dir);
+		Vec3_Copy(to_end, norm_dir);
 		VectorNormalize(norm_dir);
-		VectorMA(begin, -5.f, norm_dir, begin);
-		VectorMA(end, 5.f, norm_dir, end);
+		Vec3_MA(begin, -5.f, norm_dir, begin);
+		Vec3_MA(end, 5.f, norm_dir, end);
 
 		vec3_t to_view;
-		VectorSubtract(view_origin, begin, to_view);
+		Vec3_Subtract(view_origin, begin, to_view);
 
 		vec3_t x_axis;
-		CrossProduct(to_end, to_view, x_axis);
+		Vec3_Cross(to_end, to_view, x_axis);
 		VectorNormalize(x_axis);
-		VectorScale(x_axis, beam_width, x_axis);
+		Vec3_Scale(x_axis, beam_width, x_axis);
 
-		VectorSubtract(end, x_axis, vertex_positions[0]);
-		VectorAdd(end, x_axis, vertex_positions[1]);
-		VectorAdd(begin, x_axis, vertex_positions[2]);
-		VectorSubtract(begin, x_axis, vertex_positions[3]);
+		Vec3_Subtract(end, x_axis, vertex_positions[0]);
+		Vec3_Add(end, x_axis, vertex_positions[1]);
+		Vec3_Add(begin, x_axis, vertex_positions[2]);
+		Vec3_Subtract(begin, x_axis, vertex_positions[3]);
 		vertex_positions += 4;
 	}
 }
@@ -403,24 +403,24 @@ static int compare_beams(const void* _a, const void* _b)
 qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, vec3_t begin, vec3_t end, vec3_t color, float radius)
 {
 	vec3_t dir, norm_dir;
-	VectorSubtract(end, begin, dir);
-	VectorCopy(dir, norm_dir);
+	Vec3_Subtract(end, begin, dir);
+	Vec3_Copy(dir, norm_dir);
 	VectorNormalize(norm_dir);
 
 	vec3_t up = { 0.f, 0.f, 1.f };
 	vec3_t left = { 1.f, 0.f, 0.f };
 	if (fabsf(norm_dir[2]) < 0.9f)
 	{
-		CrossProduct(up, norm_dir, left);
+		Vec3_Cross(up, norm_dir, left);
 		VectorNormalize(left);
-		CrossProduct(norm_dir, left, up);
+		Vec3_Cross(norm_dir, left, up);
 		VectorNormalize(up);
 	}
 	else
 	{
-		CrossProduct(norm_dir, left, up);
+		Vec3_Cross(norm_dir, left, up);
 		VectorNormalize(up);
-		CrossProduct(up, norm_dir, left);
+		Vec3_Cross(up, norm_dir, left);
 		VectorNormalize(left);
 	}
 
@@ -446,11 +446,11 @@ qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, in
 	for (int vert = 0; vert < 6; vert++)
 	{
 		vec3_t transformed;
-		VectorCopy(begin, transformed);
-		VectorMA(transformed, vertices[vert][0] * radius, up, transformed);
-		VectorMA(transformed, vertices[vert][1] * radius, left, transformed);
-		VectorMA(transformed, vertices[vert][2], dir, transformed);
-		VectorCopy(transformed, vertices[vert]);
+		Vec3_Copy(begin, transformed);
+		Vec3_MA(transformed, vertices[vert][0] * radius, up, transformed);
+		Vec3_MA(transformed, vertices[vert][1] * radius, left, transformed);
+		Vec3_MA(transformed, vertices[vert][2], dir, transformed);
+		Vec3_Copy(transformed, vertices[vert]);
 	}
 
 	for (int tri = 0; tri < 6; tri++)
@@ -464,16 +464,16 @@ qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, in
 
 		light_poly_t* light = light_list + *num_lights;
 
-		VectorCopy(vertices[i0], light->positions + 0);
-		VectorCopy(vertices[i1], light->positions + 3);
-		VectorCopy(vertices[i2], light->positions + 6);
+		Vec3_Copy(vertices[i0], light->positions + 0);
+		Vec3_Copy(vertices[i1], light->positions + 3);
+		Vec3_Copy(vertices[i2], light->positions + 6);
 		get_triangle_off_center(light->positions, light->off_center, NULL);
 
 		light->cluster = BSP_PointLeaf(bsp->nodes, light->off_center)->cluster;
 		light->material = NULL;
 		light->style = 0;
 
-		VectorCopy(color, light->color);
+		Vec3_Copy(color, light->color);
 
 		if (light->cluster >= 0)
 		{
@@ -519,17 +519,17 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 
 		vec3_t begin;
 		vec3_t end;
-		VectorCopy(beam->oldorigin, begin);
-		VectorCopy(beam->origin, end);
+		Vec3_Copy(beam->oldorigin, begin);
+		Vec3_Copy(beam->origin, end);
 
 		vec3_t to_end;
-		VectorSubtract(end, begin, to_end);
+		Vec3_Subtract(end, begin, to_end);
 
 		vec3_t norm_dir;
-		VectorCopy(to_end, norm_dir);
+		Vec3_Copy(to_end, norm_dir);
 		VectorNormalize(norm_dir);
-		VectorMA(begin, -5.f, norm_dir, begin);
-		VectorMA(end, 5.f, norm_dir, end);
+		Vec3_MA(begin, -5.f, norm_dir, begin);
+		Vec3_MA(end, 5.f, norm_dir, end);
 
 		vec3_t color;
 		cast_u32_to_f32_color(beam->skinnum, &beam->rgba, color, hdr_factor);
@@ -587,17 +587,17 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 			// make the sprite always face the camera and always vertical in cylindrical projection mode
 
 			vec3_t to_camera;
-			VectorSubtract(view_origin, e->origin, to_camera);
+			Vec3_Subtract(view_origin, e->origin, to_camera);
 			
 			vec3_t cyl_x;
-			CrossProduct(world_y, to_camera, cyl_x);
+			Vec3_Cross(world_y, to_camera, cyl_x);
 			VectorNormalize(cyl_x);
 
-			VectorScale(cyl_x, frame->origin_x, left);
-			VectorScale(cyl_x, frame->origin_x - frame->width, right);
+			Vec3_Scale(cyl_x, frame->origin_x, left);
+			Vec3_Scale(cyl_x, frame->origin_x - frame->width, right);
 
-			VectorScale(world_y, -frame->origin_y, down);
-			VectorScale(world_y, frame->height - frame->origin_y, up);
+			Vec3_Scale(world_y, -frame->origin_y, down);
+			Vec3_Scale(world_y, frame->height - frame->origin_y, up);
 		}
 		else
 		{
@@ -661,35 +661,35 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 			else if (model->sprite_vertical) // inverted true means false better experience for the mappers
 			{
 				// 3D Billboard Game use is for all other sprites, mappers use vrty to use this option
-				VectorScale(view_x, frame->origin_x, left);
-				VectorScale(view_x, frame->origin_x - frame->width, right);
-				VectorScale(view_y, -frame->origin_y, down);
-				VectorScale(view_y, frame->height - frame->origin_y, up);
+				Vec3_Scale(view_x, frame->origin_x, left);
+				Vec3_Scale(view_x, frame->origin_x - frame->width, right);
+				Vec3_Scale(view_y, -frame->origin_y, down);
+				Vec3_Scale(view_y, frame->height - frame->origin_y, up);
 
-				VectorAdd3(e->origin, down, left, vertex_positions[0]);
-				VectorAdd3(e->origin, up, left, vertex_positions[1]);
-				VectorAdd3(e->origin, up, right, vertex_positions[2]);
-				VectorAdd3(e->origin, down, right, vertex_positions[3]);
+				Vec3_Add3(e->origin, down, left, vertex_positions[0]);
+				Vec3_Add3(e->origin, up, left, vertex_positions[1]);
+				Vec3_Add3(e->origin, up, right, vertex_positions[2]);
+				Vec3_Add3(e->origin, down, right, vertex_positions[3]);
 			}
 			else
 			{
 				// 2D Billboard Game use is for Rocket Explosion only, defualt for mappers
-				VectorScale(view_x, frame->origin_x, left);
-				VectorScale(view_x, frame->origin_x - frame->width, right);
-				VectorScale(world_y, -frame->origin_y, down);
-				VectorScale(world_y, frame->height - frame->origin_y, up);
+				Vec3_Scale(view_x, frame->origin_x, left);
+				Vec3_Scale(view_x, frame->origin_x - frame->width, right);
+				Vec3_Scale(world_y, -frame->origin_y, down);
+				Vec3_Scale(world_y, frame->height - frame->origin_y, up);
 
-				VectorAdd3(e->origin, down, left, vertex_positions[0]);
-				VectorAdd3(e->origin, up, left, vertex_positions[1]);
-				VectorAdd3(e->origin, up, right, vertex_positions[2]);
-				VectorAdd3(e->origin, down, right, vertex_positions[3]);
+				Vec3_Add3(e->origin, down, left, vertex_positions[0]);
+				Vec3_Add3(e->origin, up, left, vertex_positions[1]);
+				Vec3_Add3(e->origin, up, right, vertex_positions[2]);
+				Vec3_Add3(e->origin, down, right, vertex_positions[3]);
 			}
 		}
 
-		//VectorAdd3(e->origin, down, left, vertex_positions[0]);
-		//VectorAdd3(e->origin, up, left, vertex_positions[1]);
-		//VectorAdd3(e->origin, up, right, vertex_positions[2]);
-		//VectorAdd3(e->origin, down, right, vertex_positions[3]);
+		//Vec3_Add3(e->origin, down, left, vertex_positions[0]);
+		//Vec3_Add3(e->origin, up, left, vertex_positions[1]);
+		//Vec3_Add3(e->origin, up, right, vertex_positions[2]);
+		//Vec3_Add3(e->origin, down, right, vertex_positions[3]);
 
 		vertex_positions += 4;
 		sprite_info += TR_SPRITE_INFO_SIZE / sizeof(int);

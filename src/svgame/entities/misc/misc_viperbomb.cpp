@@ -34,7 +34,7 @@ void misc_viper_bomb_prethink(edict_t* self)
     if (diff < -1.0)
         diff = -1.0;
 
-    VectorScale(self->moveinfo.dir, 1.0 + diff, v);
+    Vec3_Scale(self->moveinfo.dir, 1.0 + diff, v);
     v[2] = diff;
 
     diff = self->s.angles[2];
@@ -56,18 +56,18 @@ void misc_viper_bomb_use(edict_t* self, edict_t* other, edict_t* activator)
     self->activator = activator;
 
     viper = G_Find(NULL, FOFS(classname), "misc_viper");
-    VectorScale(viper->moveinfo.dir, viper->moveinfo.speed, self->velocity);
+    Vec3_Scale(viper->moveinfo.dir, viper->moveinfo.speed, self->velocity);
 
     self->timestamp = level.time;
-    VectorCopy(viper->moveinfo.dir, self->moveinfo.dir);
+    Vec3_Copy(viper->moveinfo.dir, self->moveinfo.dir);
 }
 
 void SP_misc_viper_bomb(edict_t* self)
 {
     self->movetype = MOVETYPE_NONE;
     self->solid = SOLID_NOT;
-    VectorSet(self->mins, -8, -8, -8);
-    VectorSet(self->maxs, 8, 8, 8);
+    Vec3_Set(self->mins, -8, -8, -8);
+    Vec3_Set(self->maxs, 8, 8, 8);
 
     self->s.modelindex = gi.modelindex("models/objects/bomb/tris.md2");
 

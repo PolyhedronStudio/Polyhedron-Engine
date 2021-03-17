@@ -95,25 +95,25 @@ static void GL_SetupFrustum(void)
     sf = sin(angle);
     cf = cos(angle);
 
-    VectorScale(glr.viewaxis[0], sf, forward);
-    VectorScale(glr.viewaxis[1], cf, left);
+    Vec3_Scale(glr.viewaxis[0], sf, forward);
+    Vec3_Scale(glr.viewaxis[1], cf, left);
 
-    VectorAdd(forward, left, glr.frustumPlanes[0].normal);
-    VectorSubtract(forward, left, glr.frustumPlanes[1].normal);
+    Vec3_Add(forward, left, glr.frustumPlanes[0].normal);
+    Vec3_Subtract(forward, left, glr.frustumPlanes[1].normal);
 
     // top/bottom
     angle = DEG2RAD(glr.fd.fov_y / 2);
     sf = sin(angle);
     cf = cos(angle);
 
-    VectorScale(glr.viewaxis[0], sf, forward);
-    VectorScale(glr.viewaxis[2], cf, up);
+    Vec3_Scale(glr.viewaxis[0], sf, forward);
+    Vec3_Scale(glr.viewaxis[2], cf, up);
 
-    VectorAdd(forward, up, glr.frustumPlanes[2].normal);
-    VectorSubtract(forward, up, glr.frustumPlanes[3].normal);
+    Vec3_Add(forward, up, glr.frustumPlanes[2].normal);
+    Vec3_Subtract(forward, up, glr.frustumPlanes[3].normal);
 
     for (i = 0, p = glr.frustumPlanes; i < 4; i++, p++) {
-        p->dist = DotProduct(glr.fd.vieworg, p->normal);
+        p->dist = Vec3_Dot(glr.fd.vieworg, p->normal);
         p->type = PLANE_NON_AXIAL;
         SetPlaneSignbits(p);
     }
@@ -174,10 +174,10 @@ static inline void make_box_points(const vec3_t    origin,
     int i;
 
     for (i = 0; i < 8; i++) {
-        VectorCopy(origin, points[i]);
-        VectorMA(points[i], bounds[(i >> 0) & 1][0], glr.entaxis[0], points[i]);
-        VectorMA(points[i], bounds[(i >> 1) & 1][1], glr.entaxis[1], points[i]);
-        VectorMA(points[i], bounds[(i >> 2) & 1][2], glr.entaxis[2], points[i]);
+        Vec3_Copy(origin, points[i]);
+        Vec3_MA(points[i], bounds[(i >> 0) & 1][0], glr.entaxis[0], points[i]);
+        Vec3_MA(points[i], bounds[(i >> 1) & 1][1], glr.entaxis[1], points[i]);
+        Vec3_MA(points[i], bounds[(i >> 2) & 1][2], glr.entaxis[2], points[i]);
     }
 
 }
@@ -201,7 +201,7 @@ glCullResult_t GL_CullLocalBox(const vec3_t origin, vec3_t bounds[2])
     for (i = 0, p = glr.frustumPlanes; i < 4; i++, p++) {
         infront = qfalse;
         for (j = 0; j < 8; j++) {
-            dot = DotProduct(points[j], p->normal);
+            dot = Vec3_Dot(points[j], p->normal);
             if (dot >= p->dist) {
                 infront = qtrue;
                 if (cull == CULL_CLIP) {
@@ -364,24 +364,24 @@ static void GL_DrawSpriteModel(model_t *model)
     GL_ArrayBits((glArrayBits_t)(GLA_VERTEX | GLA_TC)); // CPP: Cast
     qglColor4f(1, 1, 1, alpha);
 
-    VectorScale(glr.viewaxis[1], frame->origin_x, left);
-    VectorScale(glr.viewaxis[1], frame->origin_x - frame->width, right);
+    Vec3_Scale(glr.viewaxis[1], frame->origin_x, left);
+    Vec3_Scale(glr.viewaxis[1], frame->origin_x - frame->width, right);
 
 	if (model->sprite_vertical)
 	{
-		VectorScale(world_y, -frame->origin_y, down);
-		VectorScale(world_y, frame->height - frame->origin_y, up);
+		Vec3_Scale(world_y, -frame->origin_y, down);
+		Vec3_Scale(world_y, frame->height - frame->origin_y, up);
 	}
 	else
 	{
-		VectorScale(glr.viewaxis[2], -frame->origin_y, down);
-		VectorScale(glr.viewaxis[2], frame->height - frame->origin_y, up);
+		Vec3_Scale(glr.viewaxis[2], -frame->origin_y, down);
+		Vec3_Scale(glr.viewaxis[2], frame->height - frame->origin_y, up);
 	}
 
-    VectorAdd3(e->origin, down, left, points[0]);
-    VectorAdd3(e->origin, up, left, points[1]);
-    VectorAdd3(e->origin, down, right, points[2]);
-    VectorAdd3(e->origin, up, right, points[3]);
+    Vec3_Add3(e->origin, down, left, points[0]);
+    Vec3_Add3(e->origin, up, left, points[1]);
+    Vec3_Add3(e->origin, down, right, points[2]);
+    Vec3_Add3(e->origin, up, right, points[3]);
 
     GL_TexCoordPointer(2, 0, tcoords);
     GL_VertexPointer(3, 0, &points[0][0]);
@@ -398,13 +398,13 @@ static void GL_DrawNullModel(void)
     entity_t *e = glr.ent;
     vec3_t points[6];
 
-    VectorCopy(e->origin, points[0]);
-    VectorCopy(e->origin, points[2]);
-    VectorCopy(e->origin, points[4]);
+    Vec3_Copy(e->origin, points[0]);
+    Vec3_Copy(e->origin, points[2]);
+    Vec3_Copy(e->origin, points[4]);
 
-    VectorMA(e->origin, 16, glr.entaxis[0], points[1]);
-    VectorMA(e->origin, 16, glr.entaxis[1], points[3]);
-    VectorMA(e->origin, 16, glr.entaxis[2], points[5]);
+    Vec3_MA(e->origin, 16, glr.entaxis[0], points[1]);
+    Vec3_MA(e->origin, 16, glr.entaxis[1], points[3]);
+    Vec3_MA(e->origin, 16, glr.entaxis[2], points[5]);
 
     GL_LoadMatrix(glr.viewmatrix);
     GL_BindTexture(0, TEXNUM_WHITE);
@@ -438,11 +438,11 @@ static void GL_DrawEntities(int mask)
         glr.ent = ent;
 
         // convert angles to axis
-        if (VectorEmpty(ent->angles)) {
+        if (Vec3_Empty(ent->angles)) {
             glr.entrotated = qfalse;
-            VectorSet(glr.entaxis[0], 1, 0, 0);
-            VectorSet(glr.entaxis[1], 0, 1, 0);
-            VectorSet(glr.entaxis[2], 0, 0, 1);
+            Vec3_Set(glr.entaxis[0], 1, 0, 0);
+            Vec3_Set(glr.entaxis[1], 0, 1, 0);
+            Vec3_Set(glr.entaxis[2], 0, 0, 1);
         } else {
             glr.entrotated = qtrue;
             AnglesToAxis(ent->angles, glr.entaxis);

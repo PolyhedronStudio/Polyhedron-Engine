@@ -2315,7 +2315,7 @@ static void MVD_Seek_f(void)
             continue;
 
         if (!(ent->s.renderfx & RF_BEAM))
-            VectorCopy(ent->s.origin, ent->s.old_origin);
+            Vec3_Copy(ent->s.origin, ent->s.old_origin);
 
         ent->s.event = EV_OTHER_TELEPORT;
     }

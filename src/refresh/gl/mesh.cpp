@@ -67,7 +67,7 @@ static void setup_dotshading(void)
 
 static inline vec_t shadedot(const vec_t *normal)
 {
-    vec_t d = DotProduct(normal, shadedir);
+    vec_t d = Vec3_Dot(normal, shadedir);
 
     // matches the anormtab.h precalculations
     if (d < 0) {
@@ -161,11 +161,11 @@ static inline vec_t *get_lerped_normal(vec_t *normal,
     get_static_normal(oldnorm, oldvert);
     get_static_normal(newnorm, newvert);
 
-    LerpVector2(oldnorm, newnorm, backlerp, frontlerp, tmp);
+    Vec3_Lerp2(oldnorm, newnorm, backlerp, frontlerp, tmp);
 
     // normalize result
-    len = 1 / VectorLength(tmp);
-    VectorScale(tmp, len, normal);
+    len = 1 / Vec3_Length(tmp);
+    Vec3_Scale(tmp, len, normal);
 
     return normal;
 }
@@ -273,8 +273,8 @@ static glCullResult_t cull_static_model(model_t *model)
             }
         }
     } else {
-        VectorAdd(newframe->bounds[0], origin, bounds[0]);
-        VectorAdd(newframe->bounds[1], origin, bounds[1]);
+        Vec3_Add(newframe->bounds[0], origin, bounds[0]);
+        Vec3_Add(newframe->bounds[1], origin, bounds[1]);
         cull = GL_CullBox(bounds);
         if (cull == CULL_OUT) {
             c.boxesCulled++;
@@ -282,8 +282,8 @@ static glCullResult_t cull_static_model(model_t *model)
         }
     }
 
-    VectorCopy(newframe->scale, newscale);
-    VectorCopy(newframe->translate, translate);
+    Vec3_Copy(newframe->scale, newscale);
+    Vec3_Copy(newframe->translate, translate);
 
     return cull;
 }
@@ -314,8 +314,8 @@ static glCullResult_t cull_lerped_model(model_t *model)
         }
     } else {
         UnionBounds(newframe->bounds, oldframe->bounds, bounds);
-        VectorAdd(bounds[0], origin, bounds[0]);
-        VectorAdd(bounds[1], origin, bounds[1]);
+        Vec3_Add(bounds[0], origin, bounds[0]);
+        Vec3_Add(bounds[1], origin, bounds[1]);
         cull = GL_CullBox(bounds);
         if (cull == CULL_OUT) {
             c.boxesCulled++;
@@ -323,10 +323,10 @@ static glCullResult_t cull_lerped_model(model_t *model)
         }
     }
 
-    VectorScale(oldframe->scale, backlerp, oldscale);
-    VectorScale(newframe->scale, frontlerp, newscale);
+    Vec3_Scale(oldframe->scale, backlerp, oldscale);
+    Vec3_Scale(newframe->scale, frontlerp, newscale);
 
-    LerpVector2(oldframe->translate, newframe->translate,
+    Vec3_Lerp2(oldframe->translate, newframe->translate,
                 backlerp, frontlerp, translate);
 
     return cull;
@@ -341,7 +341,7 @@ static void setup_color(void)
     memset(&glr.lightpoint, 0, sizeof(glr.lightpoint));
 
     if (flags & RF_SHELL_MASK) {
-        VectorClear(color);
+        Vec3_Clear(color);
         if (flags & RF_SHELL_HALF_DAM) {
             color[0] = 0.56f;
             color[1] = 0.59f;
@@ -361,9 +361,9 @@ static void setup_color(void)
             color[2] = 1;
         }
     } else if (flags & RF_FULLBRIGHT) {
-        VectorSet(color, 1, 1, 1);
+        Vec3_Set(color, 1, 1, 1);
     } else if ((flags & RF_IR_VISIBLE) && (glr.fd.rdflags & RDF_IRGOGGLES)) {
-        VectorSet(color, 1, 0, 0);
+        Vec3_Set(color, 1, 0, 0);
     } else {
         GL_LightPoint(origin, color);
 
@@ -374,7 +374,7 @@ static void setup_color(void)
                 }
             }
             if (i == 3) {
-                VectorSet(color, 0.1f, 0.1f, 0.1f);
+                Vec3_Set(color, 0.1f, 0.1f, 0.1f);
             }
         }
 
@@ -413,8 +413,8 @@ static void setup_celshading(void)
     if (glr.ent->flags & (RF_TRANSLUCENT | RF_SHELL_MASK))
         return;
 
-    VectorSubtract(origin, glr.fd.vieworg, dir);
-    celscale = 1.0f - VectorLength(dir) / 700.0f;
+    Vec3_Subtract(origin, glr.fd.vieworg, dir);
+    celscale = 1.0f - Vec3_Length(dir) / 700.0f;
 }
 
 static void draw_celshading(maliasmesh_t *mesh)
@@ -456,9 +456,9 @@ static void setup_shadow(void)
 
     // position fake light source straight over the model
     if (glr.lightpoint.surf->drawflags & DSURF_PLANEBACK)
-        VectorSet(dir, 0, 0, -1);
+        Vec3_Set(dir, 0, 0, -1);
     else
-        VectorSet(dir, 0, 0, 1);
+        Vec3_Set(dir, 0, 0, 1);
 
     // project shadow on ground plane
     plane = &glr.lightpoint.plane;
@@ -481,7 +481,7 @@ static void setup_shadow(void)
     matrix[3] = 0;
     matrix[7] = 0;
     matrix[11] = 0;
-    matrix[15] = DotProduct(plane->normal, dir);
+    matrix[15] = Vec3_Dot(plane->normal, dir);
 
     GL_MultMatrix(tmp, glr.viewmatrix, matrix);
 
@@ -647,10 +647,10 @@ void GL_DrawAliasModel(model_t *model)
 
     // interpolate origin, if necessarry
     if (ent->flags & RF_FRAMELERP)
-        LerpVector2(ent->oldorigin, ent->origin,
+        Vec3_Lerp2(ent->oldorigin, ent->origin,
                     backlerp, frontlerp, origin);
     else
-        VectorCopy(ent->origin, origin);
+        Vec3_Copy(ent->origin, origin);
 
     // cull the model, setup scale and translate vectors
     if (newframenum == oldframenum)

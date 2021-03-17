@@ -41,10 +41,10 @@ remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices)
 		float* p2 = positions + ((i + 1) % num_vertices_local) * 3;
 
 		vec3_t e1, e2;
-		VectorSubtract(p1, p0, e1);
-		VectorSubtract(p2, p1, e2);
-		float l1 = VectorLength(e1);
-		float l2 = VectorLength(e2);
+		Vec3_Subtract(p1, p0, e1);
+		Vec3_Subtract(p2, p1, e2);
+		float l1 = Vec3_Length(e1);
+		float l2 = Vec3_Length(e2);
 
 		qboolean remove = qfalse;
 		if (l1 == 0)
@@ -53,10 +53,10 @@ remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices)
 		}
 		else if (l2 > 0)
 		{
-			VectorScale(e1, 1.f / l1, e1);
-			VectorScale(e2, 1.f / l2, e2);
+			Vec3_Scale(e1, 1.f / l1, e1);
+			Vec3_Scale(e2, 1.f / l2, e2);
 
-			float dot = DotProduct(e1, e2);
+			float dot = Vec3_Dot(e1, e2);
 			if (dot > 0.999f)
 				remove = qtrue;
 		}
@@ -125,14 +125,14 @@ create_poly(
 		float *p = positions + i * 3;
 		float *t = tex_coords + i * 2;
 
-		VectorCopy(src_vert->point, p);
+		Vec3_Copy(src_vert->point, p);
 
 		pos_center[0] += src_vert->point[0];
 		pos_center[1] += src_vert->point[1];
 		pos_center[2] += src_vert->point[2];
 
-		t[0] = (DotProduct(p, texinfo->axis[0]) + texinfo->offset[0]) * sc[0];
-		t[1] = (DotProduct(p, texinfo->axis[1]) + texinfo->offset[1]) * sc[1];
+		t[0] = (Vec3_Dot(p, texinfo->axis[0]) + texinfo->offset[0]) * sc[0];
+		t[1] = (Vec3_Dot(p, texinfo->axis[1]) + texinfo->offset[1]) * sc[1];
 
 #if DUMP_WORLD_MESH_TO_OBJ
 		if (obj_dump_file)
@@ -158,8 +158,8 @@ create_poly(
 	pos_center[1] /= (float)surf->numsurfedges;
 	pos_center[2] /= (float)surf->numsurfedges;
 
-	tc_center[0] = (DotProduct(pos_center, texinfo->axis[0]) + texinfo->offset[0]) * sc[0];
-	tc_center[1] = (DotProduct(pos_center, texinfo->axis[1]) + texinfo->offset[1]) * sc[1];
+	tc_center[0] = (Vec3_Dot(pos_center, texinfo->axis[0]) + texinfo->offset[0]) * sc[0];
+	tc_center[1] = (Vec3_Dot(pos_center, texinfo->axis[1]) + texinfo->offset[1]) * sc[1];
 
 	int num_vertices = surf->numsurfedges;
 
@@ -287,27 +287,27 @@ get_triangle_off_center(const float* positions, float* center, float* anti_cente
 
 	// Compute the triangle center
 
-	VectorCopy(v0, center);
-	VectorAdd(center, v1, center);
-	VectorAdd(center, v2, center);
-	VectorScale(center, 1.f / 3.f, center);
+	Vec3_Copy(v0, center);
+	Vec3_Add(center, v1, center);
+	Vec3_Add(center, v2, center);
+	Vec3_Scale(center, 1.f / 3.f, center);
 
 	// Compute the normal
 
 	vec3_t e1, e2, normal;
-	VectorSubtract(v1, v0, e1);
-	VectorSubtract(v2, v0, e2);
-	CrossProduct(e1, e2, normal);
+	Vec3_Subtract(v1, v0, e1);
+	Vec3_Subtract(v2, v0, e2);
+	Vec3_Cross(e1, e2, normal);
 	float length = VectorNormalize(normal);
 
 	// Offset the center by one normal to make sure that the point is
 	// inside a BSP leaf and not on a boundary plane.
 
-	VectorAdd(center, normal, center);
+	Vec3_Add(center, normal, center);
 
 	if (anti_center)
 	{
-		VectorMA(center, -2.f, normal, anti_center);
+		Vec3_MA(center, -2.f, normal, anti_center);
 	}
 
 	return (length > 0.f);
@@ -336,14 +336,14 @@ get_surf_plane_equation(mface_t* surf, float* plane)
 		float* v1 = surf->firstsurfedge[i + 1].edge->v[surf->firstsurfedge[i + 1].vert]->point;
 		float* v2 = surf->firstsurfedge[(i + 2) % surf->numsurfedges].edge->v[surf->firstsurfedge[(i + 2) % surf->numsurfedges].vert]->point;
 		vec3_t e0, e1;
-		VectorSubtract(v1, v0, e0);
-		VectorSubtract(v2, v1, e1);
-		CrossProduct(e0, e1, plane);
-		float len = VectorLength(plane);
+		Vec3_Subtract(v1, v0, e0);
+		Vec3_Subtract(v2, v1, e1);
+		Vec3_Cross(e0, e1, plane);
+		float len = Vec3_Length(plane);
 		if (len > 0)
 		{
-			VectorScale(plane, 1.0f / len, plane);
-			plane[3] = -DotProduct(plane, v0);
+			Vec3_Scale(plane, 1.0f / len, plane);
+			plane[3] = -Vec3_Dot(plane, v0);
 			return qtrue;
 		}
 	}
@@ -776,7 +776,7 @@ collect_ligth_polys(bsp_mesh_t *wm, bsp_t *bsp, int model_idx, int* num_lights, 
 
 				float *p = positions + i * 3;
 
-				VectorCopy(src_vert->point, p);
+				Vec3_Copy(src_vert->point, p);
 			}
 
 			int num_vertices = surf->numsurfedges;
@@ -792,10 +792,10 @@ collect_ligth_polys(bsp_mesh_t *wm, bsp_t *bsp, int model_idx, int* num_lights, 
 				int i2 = (i + 1) % e;
 
 				light_poly_t light;
-				VectorCopy(positions, light.positions + 0);
-				VectorCopy(positions + i1 * 3, light.positions + 3);
-				VectorCopy(positions + i2 * 3, light.positions + 6);
-				VectorCopy(image->light_color, light.color);
+				Vec3_Copy(positions, light.positions + 0);
+				Vec3_Copy(positions + i1 * 3, light.positions + 3);
+				Vec3_Copy(positions + i2 * 3, light.positions + 6);
+				Vec3_Copy(image->light_color, light.color);
 
 				light.material = texinfo->material;
 				light.style = light_style;
@@ -827,22 +827,22 @@ collect_ligth_polys(bsp_mesh_t *wm, bsp_t *bsp, int model_idx, int* num_lights, 
 
 		// Scale the texture axes according to the original resolution of the game's .wal textures
 		vec4_t tex_axis0, tex_axis1;
-		VectorScale(texinfo->axis[0], tex_scale[0], tex_axis0);
-		VectorScale(texinfo->axis[1], tex_scale[1], tex_axis1);
+		Vec3_Scale(texinfo->axis[0], tex_scale[0], tex_axis0);
+		Vec3_Scale(texinfo->axis[1], tex_scale[1], tex_axis1);
 		tex_axis0[3] = texinfo->offset[0] * tex_scale[0];
 		tex_axis1[3] = texinfo->offset[1] * tex_scale[1];
 
 		// The texture basis is not normalized, so we need the lengths of the axes to convert
 		// texture coordinates back into world space
-		float tex_axis0_inv_square_length = 1.0f / DotProduct(tex_axis0, tex_axis0);
-		float tex_axis1_inv_square_length = 1.0f / DotProduct(tex_axis1, tex_axis1);
+		float tex_axis0_inv_square_length = 1.0f / Vec3_Dot(tex_axis0, tex_axis0);
+		float tex_axis1_inv_square_length = 1.0f / Vec3_Dot(tex_axis1, tex_axis1);
 
 		// Find the normal of the texture plane
 		vec3_t tex_normal;
-		CrossProduct(tex_axis0, tex_axis1, tex_normal);
+		Vec3_Cross(tex_axis0, tex_axis1, tex_normal);
 		VectorNormalize(tex_normal);
 
-		float surf_normal_dot_tex_normal = DotProduct(tex_normal, plane);
+		float surf_normal_dot_tex_normal = Vec3_Dot(tex_normal, plane);
 
 		if (surf_normal_dot_tex_normal == 0.f)
 		{
@@ -867,8 +867,8 @@ collect_ligth_polys(bsp_mesh_t *wm, bsp_t *bsp, int model_idx, int* num_lights, 
 			mvertex_t   *src_vert = src_edge->v[src_surfedge->vert];
 			
 			point2_t t;
-			t.x = DotProduct(src_vert->point, tex_axis0) + tex_axis0[3];
-			t.y = DotProduct(src_vert->point, tex_axis1) + tex_axis1[3];
+			t.x = Vec3_Dot(src_vert->point, tex_axis0) + tex_axis0[3];
+			t.y = Vec3_Dot(src_vert->point, tex_axis1) + tex_axis1[3];
 
 			tex_poly.v[i] = t;
 
@@ -918,9 +918,9 @@ collect_ligth_polys(bsp_mesh_t *wm, bsp_t *bsp, int model_idx, int* num_lights, 
 					// Find a world space point on the texture projection plane
 
 					vec3_t p0, p1, point_on_texture_plane;
-					VectorScale(tex_axis0, (instance.v[vert].x - tex_axis0[3]) * tex_axis0_inv_square_length, p0);
-					VectorScale(tex_axis1, (instance.v[vert].y - tex_axis1[3]) * tex_axis1_inv_square_length, p1);
-					VectorAdd(p0, p1, point_on_texture_plane);
+					Vec3_Scale(tex_axis0, (instance.v[vert].x - tex_axis0[3]) * tex_axis0_inv_square_length, p0);
+					Vec3_Scale(tex_axis1, (instance.v[vert].y - tex_axis1[3]) * tex_axis1_inv_square_length, p1);
+					Vec3_Add(p0, p1, point_on_texture_plane);
 
 					// Shoot a ray from that point in the texture normal direction,
 					// and intersect it with the surface plane.
@@ -931,13 +931,13 @@ collect_ligth_polys(bsp_mesh_t *wm, bsp_t *bsp, int model_idx, int* num_lights, 
 					// (A.N)t + B.N + d = 0
 					// t = -(B.N + d) / (A.N)
 
-					float bn = DotProduct(point_on_texture_plane, plane);
+					float bn = Vec3_Dot(point_on_texture_plane, plane);
 
 					float ray_t = -(bn + plane[3]) / surf_normal_dot_tex_normal;
 
 					vec3_t p2;
-					VectorScale(tex_normal, ray_t, p2);
-					VectorAdd(p2, point_on_texture_plane, instance_positions[vert]);
+					Vec3_Scale(tex_normal, ray_t, p2);
+					Vec3_Add(p2, point_on_texture_plane, instance_positions[vert]);
 				}
 
 				// Create triangles for the polygon, using a triangle fan topology
@@ -954,10 +954,10 @@ collect_ligth_polys(bsp_mesh_t *wm, bsp_t *bsp, int model_idx, int* num_lights, 
 					light_poly_t* light = append_light_poly(num_lights, allocated_lights, lights);
 					light->material = texinfo->material;
 					light->style = light_style;
-					VectorCopy(instance_positions[0], light->positions + 0);
-					VectorCopy(instance_positions[i1], light->positions + 3);
-					VectorCopy(instance_positions[i2], light->positions + 6);
-					VectorCopy(image->light_color, light->color);
+					Vec3_Copy(instance_positions[0], light->positions + 0);
+					Vec3_Copy(instance_positions[i1], light->positions + 3);
+					Vec3_Copy(instance_positions[i2], light->positions + 6);
+					Vec3_Copy(image->light_color, light->color);
 					
 					get_triangle_off_center(light->positions, light->off_center, NULL);
 
@@ -1013,7 +1013,7 @@ collect_sky_and_lava_ligth_polys(bsp_mesh_t *wm, bsp_t* bsp)
 
 			float *p = positions + i * 3;
 
-			VectorCopy(src_vert->point, p);
+			Vec3_Copy(src_vert->point, p);
 		}
 
 		int num_vertices = surf->numsurfedges;
@@ -1027,18 +1027,18 @@ collect_sky_and_lava_ligth_polys(bsp_mesh_t *wm, bsp_t* bsp)
 			int i2 = (i + 1) % num_vertices;
 
 			light_poly_t light;
-			VectorCopy(positions, light.positions + 0);
-			VectorCopy(positions + i1 * 3, light.positions + 3);
-			VectorCopy(positions + i2 * 3, light.positions + 6);
+			Vec3_Copy(positions, light.positions + 0);
+			Vec3_Copy(positions + i1 * 3, light.positions + 3);
+			Vec3_Copy(positions + i2 * 3, light.positions + 6);
 
 			if (is_sky)
 			{
-				VectorSet(light.color, -1.f, -1.f, -1.f); // special value for the sky
+				Vec3_Set(light.color, -1.f, -1.f, -1.f); // special value for the sky
 				light.material = 0;
 			}
 			else
 			{
-				VectorCopy(surf->texinfo->material->image_emissive->light_color, light.color);
+				Vec3_Copy(surf->texinfo->material->image_emissive->light_color, light.color);
 				light.material = surf->texinfo->material;
 			}
 
@@ -1110,8 +1110,8 @@ encode_normal(vec3_t normal)
 void
 compute_aabb(const float* positions, int numvert, float* aabb_min, float* aabb_max)
 {
-	VectorSet(aabb_min, FLT_MAX, FLT_MAX, FLT_MAX);
-	VectorSet(aabb_max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+	Vec3_Set(aabb_min, FLT_MAX, FLT_MAX, FLT_MAX);
+	Vec3_Set(aabb_max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	for (int i = 0; i < numvert; i++)
 	{
@@ -1153,12 +1153,12 @@ compute_world_tangents(bsp_mesh_t* wm)
 		float const * tC = wm->tex_coords + (iC * 2);
 
 		vec3_t dP0, dP1;
-		VectorSubtract(pB, pA, dP0);
-		VectorSubtract(pC, pA, dP1);
+		Vec3_Subtract(pB, pA, dP0);
+		Vec3_Subtract(pC, pA, dP1);
 
 		vec2_t dt0, dt1;
-		Vector2Subtract(tB, tA, dt0);
-		Vector2Subtract(tC, tA, dt1);
+		Vec2_Subtract(tB, tA, dt0);
+		Vec2_Subtract(tC, tA, dt1);
 
 		float r = 1.f / (dt0[0] * dt1[1] - dt1[0] * dt0[1]);
 
@@ -1173,21 +1173,21 @@ compute_world_tangents(bsp_mesh_t* wm)
 			(dt0[0] * dP1[2] - dt1[0] * dP0[2]) * r };
 
 		vec3_t normal;
-		CrossProduct(dP0, dP1, normal);
+		Vec3_Cross(dP0, dP1, normal);
 		VectorNormalize(normal);
 
 		vec3_t tangent;
 
 		vec3_t t;
-		VectorScale(normal, DotProduct(normal, sdir), t);
-		VectorSubtract(sdir, t, t);
+		Vec3_Scale(normal, Vec3_Dot(normal, sdir), t);
+		Vec3_Subtract(sdir, t, t);
 		VectorNormalize2(t, tangent); // Graham-Schmidt : t = normalize(t - n * (n.t))
 
-		VectorSet(&wm->tangents[idx_tri * 3], tangent[0], tangent[1], tangent[2]);
+		Vec3_Set(&wm->tangents[idx_tri * 3], tangent[0], tangent[1], tangent[2]);
 
 		vec3_t cross;
-		CrossProduct(normal, t, cross);
-		float dot = DotProduct(cross, tdir);
+		Vec3_Cross(normal, t, cross);
+		float dot = Vec3_Dot(cross, tdir);
 
 		if (dot < 0.0f)
 		{
@@ -1204,8 +1204,8 @@ compute_world_tangents(bsp_mesh_t* wm)
 			dt1[0] *= mat->image_diffuse->width;
 			dt1[1] *= mat->image_diffuse->height;
 
-			float WL0 = VectorLength(dP0);
-			float WL1 = VectorLength(dP1);
+			float WL0 = Vec3_Length(dP0);
+			float WL1 = Vec3_Length(dP1);
 			float TL0 = sqrt(dt0[0] * dt0[0] + dt0[1] * dt0[1]);
 			float TL1 = sqrt(dt1[0] * dt1[0] + dt1[1] * dt1[1]);
 			float L0 = (WL0 > 0) ? (TL0 / WL0) : 0.f;
@@ -1340,8 +1340,8 @@ load_cameras(bsp_mesh_t* wm, const char* map_name)
 		{
 			if (wm->num_cameras < MAX_CAMERAS)
 			{
-				VectorCopy(pos, wm->cameras[wm->num_cameras].pos);
-				VectorCopy(dir, wm->cameras[wm->num_cameras].dir);
+				Vec3_Copy(pos, wm->cameras[wm->num_cameras].pos);
+				Vec3_Copy(dir, wm->cameras[wm->num_cameras].dir);
 				wm->num_cameras++;
 			}
 		}
@@ -1390,8 +1390,8 @@ compute_cluster_aabbs(bsp_mesh_t* wm)
 	wm->cluster_aabbs = (aabb_t*)Z_Malloc(wm->num_clusters * sizeof(aabb_t)); // C++20 VKPT: Added a cast.
 	for (int c = 0; c < wm->num_clusters; c++)
 	{
-		VectorSet(wm->cluster_aabbs[c].mins, FLT_MAX, FLT_MAX, FLT_MAX);
-		VectorSet(wm->cluster_aabbs[c].maxs, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+		Vec3_Set(wm->cluster_aabbs[c].mins, FLT_MAX, FLT_MAX, FLT_MAX);
+		Vec3_Set(wm->cluster_aabbs[c].maxs, -FLT_MAX, -FLT_MAX, -FLT_MAX);
 	}
 
 	for (int tri = 0; tri < wm->world_idx_count / 3; tri++)
@@ -1439,12 +1439,12 @@ light_affects_cluster(light_poly_t* light, aabb_t* aabb)
 	
 	// Get the light plane equation
 	vec3_t e1, e2, normal;
-	VectorSubtract(v1, v0, e1);
-	VectorSubtract(v2, v0, e2);
-	CrossProduct(e1, e2, normal);
+	Vec3_Subtract(v1, v0, e1);
+	Vec3_Subtract(v2, v0, e2);
+	Vec3_Cross(e1, e2, normal);
 	VectorNormalize(normal);
 	
-	float plane_distance = -DotProduct(normal, v0);
+	float plane_distance = -Vec3_Dot(normal, v0);
 
 	qboolean all_culled = qtrue;
 
@@ -1454,7 +1454,7 @@ light_affects_cluster(light_poly_t* light, aabb_t* aabb)
 		vec3_t corner;
 		get_aabb_corner(aabb, corner_idx, corner);
 
-		float side = DotProduct(normal, corner) + plane_distance;
+		float side = Vec3_Dot(normal, corner) + plane_distance;
 		if (side > 0)
 			all_culled = qfalse;
 	}
@@ -1572,16 +1572,16 @@ bsp_mesh_load_custom_sky(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, const char* m
 		int i2 = attrib.faces[face_offset + 2].v_idx;
 
 		vec3_t v0, v1, v2;
-		VectorCopy(attrib.vertices + i0 * 3, v0);
-		VectorCopy(attrib.vertices + i1 * 3, v1);
-		VectorCopy(attrib.vertices + i2 * 3, v2);
+		Vec3_Copy(attrib.vertices + i0 * 3, v0);
+		Vec3_Copy(attrib.vertices + i1 * 3, v1);
+		Vec3_Copy(attrib.vertices + i2 * 3, v2);
 
 		int wm_index = *idx_ctr;
 		int wm_prim = wm_index / 3;
 
-		VectorCopy(v0, wm->positions + wm_index * 3 + 0);
-		VectorCopy(v1, wm->positions + wm_index * 3 + 3);
-		VectorCopy(v2, wm->positions + wm_index * 3 + 6);
+		Vec3_Copy(v0, wm->positions + wm_index * 3 + 0);
+		Vec3_Copy(v1, wm->positions + wm_index * 3 + 3);
+		Vec3_Copy(v2, wm->positions + wm_index * 3 + 6);
 
 		wm->tex_coords[wm_index * 2 + 0] = 0.f;
 		wm->tex_coords[wm_index * 2 + 1] = 0.f;
@@ -1599,11 +1599,11 @@ bsp_mesh_load_custom_sky(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, const char* m
 
 		light_poly_t* light = append_light_poly(&wm->num_light_polys, &wm->allocated_light_polys, &wm->light_polys);
 
-		VectorCopy(v0, light->positions + 0);
-		VectorCopy(v1, light->positions + 3);
-		VectorCopy(v2, light->positions + 6);
-		VectorSet(light->color, -1.f, -1.f, -1.f); // special value for the sky
-		VectorCopy(center, light->off_center);
+		Vec3_Copy(v0, light->positions + 0);
+		Vec3_Copy(v1, light->positions + 3);
+		Vec3_Copy(v2, light->positions + 6);
+		Vec3_Set(light->color, -1.f, -1.f, -1.f); // special value for the sky
+		Vec3_Copy(center, light->off_center);
 		light->material = 0;
 		light->style = 0;
 		light->cluster = cluster;
@@ -1724,15 +1724,15 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 
 		compute_aabb(wm->positions + model->idx_offset * 3, model->idx_count, model->aabb_min, model->aabb_max);
 
-		VectorAdd(model->aabb_min, model->aabb_max, model->center);
-		VectorScale(model->center, 0.5f, model->center);
+		Vec3_Add(model->aabb_min, model->aabb_max, model->center);
+		Vec3_Scale(model->center, 0.5f, model->center);
 	}
 
 	compute_aabb(wm->positions, wm->world_idx_count, wm->world_aabb.mins, wm->world_aabb.maxs);
 
 	vec3_t margin = { 1.f, 1.f, 1.f };
-	VectorSubtract(wm->world_aabb.mins, margin, wm->world_aabb.mins);
-	VectorAdd(wm->world_aabb.maxs, margin, wm->world_aabb.maxs);
+	Vec3_Subtract(wm->world_aabb.mins, margin, wm->world_aabb.mins);
+	Vec3_Add(wm->world_aabb.maxs, margin, wm->world_aabb.maxs);
 
 	compute_cluster_aabbs(wm);
 

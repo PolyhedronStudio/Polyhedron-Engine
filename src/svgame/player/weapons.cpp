@@ -32,7 +32,7 @@ void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance, vec3_t fo
 {
     vec3_t  _distance;
 
-    VectorCopy(distance, _distance);
+    Vec3_Copy(distance, _distance);
     if (client->pers.hand == LEFT_HANDED)
         _distance[1] *= -1;
     else if (client->pers.hand == CENTER_HANDED)
@@ -74,16 +74,16 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
     if (!who->mynoise) {
         noise = G_Spawn();
         noise->classname = "player_noise";
-        VectorSet(noise->mins, -8, -8, -8);
-        VectorSet(noise->maxs, 8, 8, 8);
+        Vec3_Set(noise->mins, -8, -8, -8);
+        Vec3_Set(noise->maxs, 8, 8, 8);
         noise->owner = who;
         noise->svflags = SVF_NOCLIENT;
         who->mynoise = noise;
 
         noise = G_Spawn();
         noise->classname = "player_noise";
-        VectorSet(noise->mins, -8, -8, -8);
-        VectorSet(noise->maxs, 8, 8, 8);
+        Vec3_Set(noise->mins, -8, -8, -8);
+        Vec3_Set(noise->maxs, 8, 8, 8);
         noise->owner = who;
         noise->svflags = SVF_NOCLIENT;
         who->mynoise2 = noise;
@@ -99,9 +99,9 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
         level.sound2_entity_framenum = level.framenum;
     }
 
-    VectorCopy(where, noise->s.origin);
-    VectorSubtract(where, noise->maxs, noise->absmin);
-    VectorAdd(where, noise->maxs, noise->absmax);
+    Vec3_Copy(where, noise->s.origin);
+    Vec3_Subtract(where, noise->maxs, noise->absmin);
+    Vec3_Add(where, noise->maxs, noise->absmax);
     noise->teleport_time = level.time;
     gi.linkentity(noise);
 }

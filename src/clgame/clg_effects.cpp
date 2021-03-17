@@ -275,7 +275,7 @@ void CLG_RunDLights(void)
         if (dl->radius < 0)
             dl->radius = 0;
 
-        VectorMA(dl->origin, clgi.GetFrameTime(), dl->velosity, dl->origin);
+        Vec3_MA(dl->origin, clgi.GetFrameTime(), dl->velosity, dl->origin);
     }
 }
 
@@ -335,17 +335,17 @@ void CLG_MuzzleFlash() {
 
 #if USE_DLIGHTS
     dl = CLG_AllocDLight(mzParameters.entity);
-    VectorCopy(pl->current.origin, dl->origin);
+    Vec3_Copy(pl->current.origin, dl->origin);
     AngleVectors(pl->current.angles, fv, rv, NULL);
-    VectorMA(dl->origin, 18, fv, dl->origin);
-    VectorMA(dl->origin, 16, rv, dl->origin);
+    Vec3_MA(dl->origin, 18, fv, dl->origin);
+    Vec3_MA(dl->origin, 16, rv, dl->origin);
     if (mzParameters.silenced)
         dl->radius = 100 + (rand() & 31);
     else
         dl->radius = 200 + (rand() & 31);
     //dl->minlight = 32;
     dl->die = cl->time; // + 0.1;
-#define DL_COLOR(r, g, b)   VectorSet(dl->color, r, g, b)
+#define DL_COLOR(r, g, b)   Vec3_Set(dl->color, r, g, b)
 #define DL_RADIUS(r)        (dl->radius = r)
 #define DL_DIE(t)           (dl->die = cl->time + t)
 #else
@@ -539,7 +539,7 @@ void CLG_MuzzleFlash2() {
 
 #if USE_DLIGHTS
     dl = CLG_AllocDLight(mzParameters.entity);
-    VectorCopy(origin, dl->origin);
+    Vec3_Copy(origin, dl->origin);
     dl->radius = 200 + (rand() & 31);
     //dl->minlight = 32;
     dl->die = cl->time;  // + 0.1;
@@ -937,12 +937,12 @@ cparticle_t* CLG_AllocParticle(void)
 void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
 {
     vec3_t oy;
-    VectorSet(oy, 0.0f, 1.0f, 0.0f);
-    if (fabs(DotProduct(oy, dir)) > 0.95f)
-        VectorSet(oy, 1.0f, 0.0f, 0.0f);
+    Vec3_Set(oy, 0.0f, 1.0f, 0.0f);
+    if (fabs(Vec3_Dot(oy, dir)) > 0.95f)
+        Vec3_Set(oy, 1.0f, 0.0f, 0.0f);
 
     vec3_t ox;
-    CrossProduct(oy, dir, ox);
+    Vec3_Cross(oy, dir, ox);
 
     count *= cl_particle_num_factor->value;
     const int spark_count = count / 10;
@@ -968,16 +968,16 @@ void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         p->brightness = 0.5f;
 
         vec3_t origin;
-        VectorCopy(org, origin);
-        VectorMA(origin, dirt_horizontal_spread * crand(), ox, origin);
-        VectorMA(origin, dirt_horizontal_spread * crand(), oy, origin);
-        VectorMA(origin, dirt_vertical_spread * frand() + 1.0f, dir, origin);
-        VectorCopy(origin, p->org);
+        Vec3_Copy(org, origin);
+        Vec3_MA(origin, dirt_horizontal_spread * crand(), ox, origin);
+        Vec3_MA(origin, dirt_horizontal_spread * crand(), oy, origin);
+        Vec3_MA(origin, dirt_vertical_spread * frand() + 1.0f, dir, origin);
+        Vec3_Copy(origin, p->org);
 
         vec3_t velocity;
-        VectorSubtract(origin, org, velocity);
+        Vec3_Subtract(origin, org, velocity);
         VectorNormalize(velocity);
-        VectorScale(velocity, dirt_base_velocity + frand() * dirt_rand_velocity, p->vel);
+        Vec3_Scale(velocity, dirt_base_velocity + frand() * dirt_rand_velocity, p->vel);
 
         p->accel[0] = p->accel[1] = 0;
         p->accel[2] = -PARTICLE_GRAVITY;
@@ -997,16 +997,16 @@ void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         p->brightness = cvar_pt_particle_emissive->value;
 
         vec3_t origin;
-        VectorCopy(org, origin);
-        VectorMA(origin, spark_horizontal_spread * crand(), ox, origin);
-        VectorMA(origin, spark_horizontal_spread * crand(), oy, origin);
-        VectorMA(origin, spark_vertical_spread * frand() + 1.0f, dir, origin);
-        VectorCopy(origin, p->org);
+        Vec3_Copy(org, origin);
+        Vec3_MA(origin, spark_horizontal_spread * crand(), ox, origin);
+        Vec3_MA(origin, spark_horizontal_spread * crand(), oy, origin);
+        Vec3_MA(origin, spark_vertical_spread * frand() + 1.0f, dir, origin);
+        Vec3_Copy(origin, p->org);
 
         vec3_t velocity;
-        VectorSubtract(origin, org, velocity);
+        Vec3_Subtract(origin, org, velocity);
         VectorNormalize(velocity);
-        VectorScale(velocity, spark_base_velocity + powf(frand(), 2.0f) * spark_rand_velocity, p->vel);
+        Vec3_Scale(velocity, spark_base_velocity + powf(frand(), 2.0f) * spark_rand_velocity, p->vel);
 
         p->accel[0] = p->accel[1] = 0;
         p->accel[2] = -PARTICLE_GRAVITY;
@@ -1019,12 +1019,12 @@ void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
 void CLG_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count)
 {
     vec3_t oy;
-    VectorSet(oy, 0.0f, 1.0f, 0.0f);
-    if (fabs(DotProduct(oy, dir)) > 0.95f)
-        VectorSet(oy, 1.0f, 0.0f, 0.0f);
+    Vec3_Set(oy, 0.0f, 1.0f, 0.0f);
+    if (fabs(Vec3_Dot(oy, dir)) > 0.95f)
+        Vec3_Set(oy, 1.0f, 0.0f, 0.0f);
 
     vec3_t ox;
-    CrossProduct(oy, dir, ox);
+    Vec3_Cross(oy, dir, ox);
 
     count *= cl_particle_num_factor->value;
 
@@ -1044,16 +1044,16 @@ void CLG_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count)
         p->brightness = 1.0f;
 
         vec3_t origin;
-        VectorCopy(org, origin);
-        VectorMA(origin, water_horizontal_spread * crand(), ox, origin);
-        VectorMA(origin, water_horizontal_spread * crand(), oy, origin);
-        VectorMA(origin, water_vertical_spread * frand() + 1.0f, dir, origin);
-        VectorCopy(origin, p->org);
+        Vec3_Copy(org, origin);
+        Vec3_MA(origin, water_horizontal_spread * crand(), ox, origin);
+        Vec3_MA(origin, water_horizontal_spread * crand(), oy, origin);
+        Vec3_MA(origin, water_vertical_spread * frand() + 1.0f, dir, origin);
+        Vec3_Copy(origin, p->org);
 
         vec3_t velocity;
-        VectorSubtract(origin, org, velocity);
+        Vec3_Subtract(origin, org, velocity);
         VectorNormalize(velocity);
-        VectorScale(velocity, water_base_velocity + frand() * water_rand_velocity, p->vel);
+        Vec3_Scale(velocity, water_base_velocity + frand() * water_rand_velocity, p->vel);
 
         p->accel[0] = p->accel[1] = 0;
         p->accel[2] = -PARTICLE_GRAVITY;
@@ -1412,12 +1412,12 @@ void CLG_BlasterTrail(vec3_t start, vec3_t end)
     cparticle_t* p;
     int         dec;
 
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
+    Vec3_Copy(start, move);
+    Vec3_Subtract(end, start, vec);
     len = VectorNormalize(vec);
 
     dec = 5;
-    VectorScale(vec, 5, vec);
+    Vec3_Scale(vec, 5, vec);
 
     // FIXME: this is a really silly way to have a loop
     while (len > 0) {
@@ -1426,7 +1426,7 @@ void CLG_BlasterTrail(vec3_t start, vec3_t end)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        Vec3_Clear(p->accel);
 
         p->time = cl->time;
 
@@ -1442,7 +1442,7 @@ void CLG_BlasterTrail(vec3_t start, vec3_t end)
             p->accel[j] = 0;
         }
 
-        VectorAdd(move, vec, move);
+        Vec3_Add(move, vec, move);
     }
 }
 
@@ -1461,12 +1461,12 @@ void CLG_QuadTrail(vec3_t start, vec3_t end)
     cparticle_t* p;
     int         dec;
 
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
+    Vec3_Copy(start, move);
+    Vec3_Subtract(end, start, vec);
     len = VectorNormalize(vec);
 
     dec = 5;
-    VectorScale(vec, 5, vec);
+    Vec3_Scale(vec, 5, vec);
 
     while (len > 0) {
         len -= dec;
@@ -1474,7 +1474,7 @@ void CLG_QuadTrail(vec3_t start, vec3_t end)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        Vec3_Clear(p->accel);
 
         p->time = cl->time;
 
@@ -1490,7 +1490,7 @@ void CLG_QuadTrail(vec3_t start, vec3_t end)
             p->accel[j] = 0;
         }
 
-        VectorAdd(move, vec, move);
+        Vec3_Add(move, vec, move);
     }
 }
 
@@ -1509,12 +1509,12 @@ void CLG_FlagTrail(vec3_t start, vec3_t end, int color)
     cparticle_t* p;
     int         dec;
 
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
+    Vec3_Copy(start, move);
+    Vec3_Subtract(end, start, vec);
     len = VectorNormalize(vec);
 
     dec = 5;
-    VectorScale(vec, 5, vec);
+    Vec3_Scale(vec, 5, vec);
 
     while (len > 0) {
         len -= dec;
@@ -1522,7 +1522,7 @@ void CLG_FlagTrail(vec3_t start, vec3_t end, int color)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        Vec3_Clear(p->accel);
 
         p->time = cl->time;
 
@@ -1538,7 +1538,7 @@ void CLG_FlagTrail(vec3_t start, vec3_t end, int color)
             p->accel[j] = 0;
         }
 
-        VectorAdd(move, vec, move);
+        Vec3_Add(move, vec, move);
     }
 }
 
@@ -1559,12 +1559,12 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, centity_t* old, int flags)
     float       orgscale;
     float       velscale;
 
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
+    Vec3_Copy(start, move);
+    Vec3_Subtract(end, start, vec);
     len = VectorNormalize(vec);
 
     dec = 0.5;
-    VectorScale(vec, dec, vec);
+    Vec3_Scale(vec, dec, vec);
 
     if (old->trailcount > 900) {
         orgscale = 4;
@@ -1587,7 +1587,7 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, centity_t* old, int flags)
             p = CLG_AllocParticle();
             if (!p)
                 return;
-            VectorClear(p->accel);
+            Vec3_Clear(p->accel);
 
             p->time = cl->time;
 
@@ -1637,7 +1637,7 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, centity_t* old, int flags)
         old->trailcount -= 5;
         if (old->trailcount < 100)
             old->trailcount = 100;
-        VectorAdd(move, vec, move);
+        Vec3_Add(move, vec, move);
     }
 }
 
@@ -1660,12 +1660,12 @@ void CLG_RocketTrail(vec3_t start, vec3_t end, centity_t* old)
     CLG_DiminishingTrail(start, end, old, EF_ROCKET);
 
     // fire
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
+    Vec3_Copy(start, move);
+    Vec3_Subtract(end, start, vec);
     len = VectorNormalize(vec);
 
     dec = 1;
-    VectorScale(vec, dec, vec);
+    Vec3_Scale(vec, dec, vec);
 
     while (len > 0) {
         len -= dec;
@@ -1675,7 +1675,7 @@ void CLG_RocketTrail(vec3_t start, vec3_t end, centity_t* old)
             if (!p)
                 return;
 
-            VectorClear(p->accel);
+            Vec3_Clear(p->accel);
             p->time = cl->time;
 
             p->alpha = 1.0;
@@ -1690,7 +1690,7 @@ void CLG_RocketTrail(vec3_t start, vec3_t end, centity_t* old)
             }
             p->accel[2] = -PARTICLE_GRAVITY;
         }
-        VectorAdd(move, vec, move);
+        Vec3_Add(move, vec, move);
     }
 }
 
@@ -1714,8 +1714,8 @@ void CLG_OldRailTrail(void)
     vec3_t      dir;
     byte        clr = 0x74;
 
-    VectorCopy(teParameters.pos1, move);
-    VectorSubtract(teParameters.pos2, teParameters.pos1, vec);
+    Vec3_Copy(teParameters.pos1, move);
+    Vec3_Subtract(teParameters.pos2, teParameters.pos1, vec);
     len = VectorNormalize(vec);
 
     MakeNormalVectors(vec, right, up);
@@ -1726,14 +1726,14 @@ void CLG_OldRailTrail(void)
             return;
 
         p->time = cl->time;
-        VectorClear(p->accel);
+        Vec3_Clear(p->accel);
 
         d = i * 0.1;
         c = cos(d);
         s = sin(d);
 
-        VectorScale(right, c, dir);
-        VectorMA(dir, s, up, dir);
+        Vec3_Scale(right, c, dir);
+        Vec3_MA(dir, s, up, dir);
 
         p->alpha = 1.0;
         p->alphavel = -1.0 / (1 + frand() * 0.2);
@@ -1746,12 +1746,12 @@ void CLG_OldRailTrail(void)
             p->vel[j] = dir[j] * 6;
         }
 
-        VectorAdd(move, vec, move);
+        Vec3_Add(move, vec, move);
     }
 
     dec = 0.75;
-    VectorScale(vec, dec, vec);
-    VectorCopy(teParameters.pos1, move);
+    Vec3_Scale(vec, dec, vec);
+    Vec3_Copy(teParameters.pos1, move);
 
     while (len > 0) {
         len -= dec;
@@ -1761,7 +1761,7 @@ void CLG_OldRailTrail(void)
             return;
 
         p->time = cl->time;
-        VectorClear(p->accel);
+        Vec3_Clear(p->accel);
 
         p->alpha = 1.0;
         p->alphavel = -1.0 / (0.6 + frand() * 0.2);
@@ -1775,7 +1775,7 @@ void CLG_OldRailTrail(void)
             p->accel[j] = 0;
         }
 
-        VectorAdd(move, vec, move);
+        Vec3_Add(move, vec, move);
     }
 }
 
@@ -1795,19 +1795,19 @@ void CLG_BubbleTrail(vec3_t start, vec3_t end)
     cparticle_t* p;
     float       dec;
 
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
+    Vec3_Copy(start, move);
+    Vec3_Subtract(end, start, vec);
     len = VectorNormalize(vec);
 
     dec = 32;
-    VectorScale(vec, dec, vec);
+    Vec3_Scale(vec, dec, vec);
 
     for (i = 0; i < len; i += dec) {
         p = CLG_AllocParticle();
         if (!p)
             return;
 
-        VectorClear(p->accel);
+        Vec3_Clear(p->accel);
         p->time = cl->time;
 
         p->alpha = 1.0;
@@ -1822,7 +1822,7 @@ void CLG_BubbleTrail(vec3_t start, vec3_t end)
         }
         p->vel[2] += 6;
 
-        VectorAdd(move, vec, move);
+        Vec3_Add(move, vec, move);
     }
 }
 
@@ -1872,8 +1872,8 @@ static void CLG_FlyParticles(vec3_t origin, int count)
         p->org[1] = origin[1] + bytedirs[i][1] * dist + forward[1] * BEAMLENGTH;
         p->org[2] = origin[2] + bytedirs[i][2] * dist + forward[2] * BEAMLENGTH;
 
-        VectorClear(p->vel);
-        VectorClear(p->accel);
+        Vec3_Clear(p->vel);
+        Vec3_Clear(p->accel);
 
         p->color = 0;
         p->brightness = 1.0f;
@@ -1953,11 +1953,11 @@ void CLG_BfgParticles(entity_t* ent)
         p->org[1] = ent->origin[1] + bytedirs[i][1] * dist + forward[1] * BEAMLENGTH;
         p->org[2] = ent->origin[2] + bytedirs[i][2] * dist + forward[2] * BEAMLENGTH;
 
-        VectorClear(p->vel);
-        VectorClear(p->accel);
+        Vec3_Clear(p->vel);
+        Vec3_Clear(p->accel);
 
-        VectorSubtract(p->org, ent->origin, v);
-        dist = VectorLength(v) / 90.0;
+        Vec3_Subtract(p->org, ent->origin, v);
+        dist = Vec3_Length(v) / 90.0;
 
         p->color = floor(0xd0 + dist * 7);
         p->brightness = cvar_pt_particle_emissive->value;
@@ -2043,7 +2043,7 @@ void CLG_TeleportParticles(vec3_t org)
 
                 VectorNormalize(dir);
                 vel = 50 + (rand() & 63);
-                VectorScale(dir, vel, p->vel);
+                Vec3_Scale(dir, vel, p->vel);
 
                 p->accel[0] = p->accel[1] = 0;
                 p->accel[2] = -PARTICLE_GRAVITY;

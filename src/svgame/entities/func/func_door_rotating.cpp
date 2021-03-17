@@ -48,10 +48,10 @@ REVERSE will cause the door to rotate in the opposite direction.
 
 void SP_func_door_rotating(edict_t* ent)
 {
-    VectorClear(ent->s.angles);
+    Vec3_Clear(ent->s.angles);
 
     // set the axis of rotation
-    VectorClear(ent->movedir);
+    Vec3_Clear(ent->movedir);
     if (ent->spawnflags & DOOR_X_AXIS)
         ent->movedir[2] = 1.0;
     else if (ent->spawnflags & DOOR_Y_AXIS)
@@ -61,15 +61,15 @@ void SP_func_door_rotating(edict_t* ent)
 
     // check for reverse rotation
     if (ent->spawnflags & DOOR_REVERSE)
-        VectorNegate(ent->movedir, ent->movedir);
+        Vec3_Negate(ent->movedir, ent->movedir);
 
     if (!st.distance) {
         gi.dprintf("%s at %s with no distance set\n", ent->classname, vtos(ent->s.origin));
         st.distance = 90;
     }
 
-    VectorCopy(ent->s.angles, ent->pos1);
-    VectorMA(ent->s.angles, st.distance, ent->movedir, ent->pos2);
+    Vec3_Copy(ent->s.angles, ent->pos1);
+    Vec3_MA(ent->s.angles, st.distance, ent->movedir, ent->pos2);
     ent->moveinfo.distance = st.distance;
 
     ent->movetype = MOVETYPE_PUSH;
@@ -99,10 +99,10 @@ void SP_func_door_rotating(edict_t* ent)
 
     // if it starts open, switch the positions
     if (ent->spawnflags & DOOR_START_OPEN) {
-        VectorCopy(ent->pos2, ent->s.angles);
-        VectorCopy(ent->pos1, ent->pos2);
-        VectorCopy(ent->s.angles, ent->pos1);
-        VectorNegate(ent->movedir, ent->movedir);
+        Vec3_Copy(ent->pos2, ent->s.angles);
+        Vec3_Copy(ent->pos1, ent->pos2);
+        Vec3_Copy(ent->s.angles, ent->pos1);
+        Vec3_Negate(ent->movedir, ent->movedir);
     }
 
     if (ent->health) {
@@ -121,10 +121,10 @@ void SP_func_door_rotating(edict_t* ent)
     ent->moveinfo.accel = ent->accel;
     ent->moveinfo.decel = ent->decel;
     ent->moveinfo.wait = ent->wait;
-    VectorCopy(ent->s.origin, ent->moveinfo.start_origin);
-    VectorCopy(ent->pos1, ent->moveinfo.start_angles);
-    VectorCopy(ent->s.origin, ent->moveinfo.end_origin);
-    VectorCopy(ent->pos2, ent->moveinfo.end_angles);
+    Vec3_Copy(ent->s.origin, ent->moveinfo.start_origin);
+    Vec3_Copy(ent->pos1, ent->moveinfo.start_angles);
+    Vec3_Copy(ent->s.origin, ent->moveinfo.end_origin);
+    Vec3_Copy(ent->pos2, ent->moveinfo.end_angles);
 
     if (ent->spawnflags & 16)
         ent->s.effects |= EF_ANIM_ALL;

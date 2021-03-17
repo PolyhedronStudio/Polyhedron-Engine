@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // 
 // Vector class, kindly taken from https://github.com/Admer456/ioq3-burek
 //
-#include <math.h>
+#include "shared/shared.h"
 #include "shared/math/vector3.hpp"
 
 constexpr float MPi = 3.14159f;

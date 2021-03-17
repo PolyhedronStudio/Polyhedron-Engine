@@ -28,8 +28,8 @@ void SP_viewthing(edict_t* ent)
     ent->movetype = MOVETYPE_NONE;
     ent->solid = SOLID_BBOX;
     ent->s.renderfx = RF_FRAMELERP;
-    VectorSet(ent->mins, -16, -16, -24);
-    VectorSet(ent->maxs, 16, 16, 32);
+    Vec3_Set(ent->mins, -16, -16, -24);
+    Vec3_Set(ent->maxs, 16, 16, 32);
     ent->s.modelindex = gi.modelindex("models/objects/banner/tris.md2");
     gi.linkentity(ent);
     ent->nextthink = level.time + 0.5;

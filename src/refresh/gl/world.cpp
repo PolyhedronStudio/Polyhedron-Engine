@@ -48,7 +48,7 @@ void GL_SampleLightPoint(vec3_t color)
     tmax = T_MAX(surf);
     size = smax * tmax * 3;
 
-    VectorClear(color);
+    Vec3_Clear(color);
 
     // add all the lightmaps with bilinear filtering
     lightmap = surf->lightmap;
@@ -116,8 +116,8 @@ static qboolean _GL_LightPoint(vec3_t start, vec3_t color)
                 continue;
             angles = ent->angles;
         } else {
-            VectorAdd(model->mins, ent->origin, mins);
-            VectorAdd(model->maxs, ent->origin, maxs);
+            Vec3_Add(model->mins, ent->origin, mins);
+            Vec3_Add(model->maxs, ent->origin, maxs);
             if (start[0] < mins[0] || start[0] > maxs[0])
                 continue;
             if (start[1] < mins[1] || start[1] > maxs[1])
@@ -188,7 +188,7 @@ static void GL_MarkLights(void)
     glr.dlightframe++;
 
     for (i = 0, light = glr.fd.dlights; i < glr.fd.num_dlights; i++, light++) {
-        VectorCopy(light->origin, light->transformed);
+        Vec3_Copy(light->origin, light->transformed);
         GL_MarkLights_r(gl_static.world.cache->nodes, light, 1 << i);
     }
 }
@@ -202,10 +202,10 @@ static void GL_TransformLights(mmodel_t *model)
     glr.dlightframe++;
 
     for (i = 0, light = glr.fd.dlights; i < glr.fd.num_dlights; i++, light++) {
-        VectorSubtract(light->origin, glr.ent->origin, temp);
-        light->transformed[0] = DotProduct(temp, glr.entaxis[0]);
-        light->transformed[1] = DotProduct(temp, glr.entaxis[1]);
-        light->transformed[2] = DotProduct(temp, glr.entaxis[2]);
+        Vec3_Subtract(light->origin, glr.ent->origin, temp);
+        light->transformed[0] = Vec3_Dot(temp, glr.entaxis[0]);
+        light->transformed[1] = Vec3_Dot(temp, glr.entaxis[1]);
+        light->transformed[2] = Vec3_Dot(temp, glr.entaxis[2]);
         GL_MarkLights_r(model->headnode, light, 1 << i);
     }
 }
@@ -220,7 +220,7 @@ static void GL_AddLights(vec3_t origin, vec3_t color)
         f = light->intensity - DLIGHT_CUTOFF - Distance(light->origin, origin);
         if (f > 0) {
             f *= (1.0f / 255);
-            VectorMA(color, f, light->color, color);
+            Vec3_MA(color, f, light->color, color);
         }
     }
 }
@@ -233,13 +233,13 @@ static void GL_AddLights(vec3_t origin, vec3_t color)
 void GL_LightPoint(vec3_t origin, vec3_t color)
 {
     if (gl_fullbright->integer) {
-        VectorSet(color, 1, 1, 1);
+        Vec3_Set(color, 1, 1, 1);
         return;
     }
 
     // get lighting from world
     if (!_GL_LightPoint(origin, color)) {
-        VectorSet(color, 1, 1, 1);
+        Vec3_Set(color, 1, 1, 1);
     }
 
     // add dynamic lights
@@ -247,7 +247,7 @@ void GL_LightPoint(vec3_t origin, vec3_t color)
 
     if (gl_doublelight_entities->integer) {
         // apply modulate twice to mimic original ref_gl behavior
-        VectorScale(color, gl_static.entity_modulate, color);
+        Vec3_Scale(color, gl_static.entity_modulate, color);
     }
 }
 
@@ -277,7 +277,7 @@ static void GL_MarkLeaves(void)
 
     leaf = BSP_PointLeaf(bsp->nodes, glr.fd.vieworg);
     cluster1 = cluster2 = leaf->cluster;
-    VectorCopy(glr.fd.vieworg, tmp);
+    Vec3_Copy(glr.fd.vieworg, tmp);
     if (!leaf->contents) {
         tmp[2] -= 16;
     } else {
@@ -374,27 +374,27 @@ void GL_DrawBspModel(mmodel_t *model)
             return;
         }
         if (cull == CULL_CLIP) {
-            VectorCopy(model->mins, bounds[0]);
-            VectorCopy(model->maxs, bounds[1]);
+            Vec3_Copy(model->mins, bounds[0]);
+            Vec3_Copy(model->maxs, bounds[1]);
             cull = GL_CullLocalBox(ent->origin, bounds);
             if (cull == CULL_OUT) {
                 c.rotatedBoxesCulled++;
                 return;
             }
         }
-        VectorSubtract(glr.fd.vieworg, ent->origin, temp);
-        transformed[0] = DotProduct(temp, glr.entaxis[0]);
-        transformed[1] = DotProduct(temp, glr.entaxis[1]);
-        transformed[2] = DotProduct(temp, glr.entaxis[2]);
+        Vec3_Subtract(glr.fd.vieworg, ent->origin, temp);
+        transformed[0] = Vec3_Dot(temp, glr.entaxis[0]);
+        transformed[1] = Vec3_Dot(temp, glr.entaxis[1]);
+        transformed[2] = Vec3_Dot(temp, glr.entaxis[2]);
     } else {
-        VectorAdd(model->mins, ent->origin, bounds[0]);
-        VectorAdd(model->maxs, ent->origin, bounds[1]);
+        Vec3_Add(model->mins, ent->origin, bounds[0]);
+        Vec3_Add(model->maxs, ent->origin, bounds[1]);
         cull = GL_CullBox(bounds);
         if (cull == CULL_OUT) {
             c.boxesCulled++;
             return;
         }
-        VectorSubtract(glr.fd.vieworg, ent->origin, transformed);
+        Vec3_Subtract(glr.fd.vieworg, ent->origin, transformed);
     }
 
     GL_TransformLights(model);

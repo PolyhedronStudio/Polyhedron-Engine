@@ -54,9 +54,9 @@ R_AliasTransformVector
 */
 static void R_AliasTransformVector(vec3_t in, vec3_t out, float xf[3][4])
 {
-    out[0] = DotProduct(in, xf[0]) + xf[0][3];
-    out[1] = DotProduct(in, xf[1]) + xf[1][3];
-    out[2] = DotProduct(in, xf[2]) + xf[2][3];
+    out[0] = Vec3_Dot(in, xf[0]) + xf[0][3];
+    out[1] = Vec3_Dot(in, xf[1]) + xf[1][3];
+    out[2] = Vec3_Dot(in, xf[2]) + xf[2][3];
 }
 
 
@@ -126,7 +126,7 @@ static unsigned long R_AliasCheckFrameBBox(maliasframe_t *frame, float worldxf[3
         R_AliasTransformVector(tmp, transformed, worldxf);
 
         for (j = 0; j < 4; j++) {
-            float dp = DotProduct(transformed, view_clipplanes[j].normal);
+            float dp = Vec3_Dot(transformed, view_clipplanes[j].normal);
 
             if ((dp - view_clipplanes[j].dist) < 0.0F)
                 clipcode |= 1 << j;
@@ -242,14 +242,14 @@ static void R_AliasTransformFinalVerts(int numpoints, finalvert_t *fv, maliasver
             lerped_vert[2] += plightnormal[2] * scale;
         }
 
-        fv->xyz[0] = DotProduct(lerped_vert, aliastransform[0]) + aliastransform[0][3];
-        fv->xyz[1] = DotProduct(lerped_vert, aliastransform[1]) + aliastransform[1][3];
-        fv->xyz[2] = DotProduct(lerped_vert, aliastransform[2]) + aliastransform[2][3];
+        fv->xyz[0] = Vec3_Dot(lerped_vert, aliastransform[0]) + aliastransform[0][3];
+        fv->xyz[1] = Vec3_Dot(lerped_vert, aliastransform[1]) + aliastransform[1][3];
+        fv->xyz[2] = Vec3_Dot(lerped_vert, aliastransform[2]) + aliastransform[2][3];
 
         fv->flags = 0;
 
         // lighting
-        lightcos = DotProduct(plightnormal, r_plightvec);
+        lightcos = Vec3_Dot(plightnormal, r_plightvec);
         if (lightcos < 0)
             lightcos *= 0.3f;
 
@@ -424,10 +424,10 @@ static void R_AliasSetUpTransform(void)
 //  R_ConcatTransforms(t2matrix, tmatrix, rotationmatrix);
 
 // TODO: should be global, set when vright, etc., set
-    VectorCopy(vright, viewmatrix[0]);
-    VectorCopy(vup, viewmatrix[1]);
-    VectorNegate(viewmatrix[1], viewmatrix[1]);
-    VectorCopy(vpn, viewmatrix[2]);
+    Vec3_Copy(vright, viewmatrix[0]);
+    Vec3_Copy(vup, viewmatrix[1]);
+    Vec3_Negate(viewmatrix[1], viewmatrix[1]);
+    Vec3_Copy(vpn, viewmatrix[2]);
 
     viewmatrix[0][3] = 0;
     viewmatrix[1][3] = 0;
@@ -497,7 +497,7 @@ static void R_AliasSetupLighting(void)
 
     // all components of light should be identical in software
     if (currententity->flags & RF_FULLBRIGHT) {
-        VectorSet(light, 1, 1, 1);
+        Vec3_Set(light, 1, 1, 1);
     } else {
         R_LightPoint(currententity->origin, light);
     }
@@ -588,16 +588,16 @@ static void R_AliasSetUpLerpData(float backlerp)
     /*
     ** translation is the vector from last position to this position
     */
-    VectorSubtract(currententity->oldorigin, currententity->origin, translation);
+    Vec3_Subtract(currententity->oldorigin, currententity->origin, translation);
 
     /*
     ** move should be the delta back to the previous frame * backlerp
     */
-    r_lerp_move[0] =  DotProduct(translation, vectors[0]);  // forward
-    r_lerp_move[1] = -DotProduct(translation, vectors[1]);  // left
-    r_lerp_move[2] =  DotProduct(translation, vectors[2]);  // up
+    r_lerp_move[0] =  Vec3_Dot(translation, vectors[0]);  // forward
+    r_lerp_move[1] = -Vec3_Dot(translation, vectors[1]);  // left
+    r_lerp_move[2] =  Vec3_Dot(translation, vectors[2]);  // up
 
-    VectorAdd(r_lerp_move, r_lastframe->translate, r_lerp_move);
+    Vec3_Add(r_lerp_move, r_lastframe->translate, r_lerp_move);
 
     for (i = 0; i < 3; i++) {
         r_lerp_move[i] = backlerp * r_lerp_move[i] + frontlerp * r_thisframe->translate[i];

@@ -32,17 +32,17 @@ void target_laser_think(edict_t* self)
         count = 4;
 
     if (self->enemy) {
-        VectorCopy(self->movedir, last_movedir);
-        VectorMA(self->enemy->absmin, 0.5, self->enemy->size, point);
-        VectorSubtract(point, self->s.origin, self->movedir);
+        Vec3_Copy(self->movedir, last_movedir);
+        Vec3_MA(self->enemy->absmin, 0.5, self->enemy->size, point);
+        Vec3_Subtract(point, self->s.origin, self->movedir);
         VectorNormalize(self->movedir);
-        if (!VectorCompare(self->movedir, last_movedir))
+        if (!Vec3_Compare(self->movedir, last_movedir))
             self->spawnflags |= 0x80000000;
     }
 
     ignore = self;
-    VectorCopy(self->s.origin, start);
-    VectorMA(start, 2048, self->movedir, end);
+    Vec3_Copy(self->s.origin, start);
+    Vec3_MA(start, 2048, self->movedir, end);
     while (1) {
         tr = gi.trace(start, NULL, NULL, end, ignore, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_DEADMONSTER);
 
@@ -69,10 +69,10 @@ void target_laser_think(edict_t* self)
         }
 
         ignore = tr.ent;
-        VectorCopy(tr.endpos, start);
+        Vec3_Copy(tr.endpos, start);
     }
 
-    VectorCopy(tr.endpos, self->s.old_origin);
+    Vec3_Copy(tr.endpos, self->s.old_origin);
 
     self->nextthink = level.time + FRAMETIME;
 }
@@ -146,8 +146,8 @@ void target_laser_start(edict_t* self)
     if (!self->dmg)
         self->dmg = 1;
 
-    VectorSet(self->mins, -8, -8, -8);
-    VectorSet(self->maxs, 8, 8, 8);
+    Vec3_Set(self->mins, -8, -8, -8);
+    Vec3_Set(self->maxs, 8, 8, 8);
     gi.linkentity(self);
 
     if (self->spawnflags & 1)

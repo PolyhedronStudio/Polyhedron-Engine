@@ -37,10 +37,10 @@ void path_corner_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_
         next = NULL;
 
     if ((next) && (next->spawnflags & 1)) {
-        VectorCopy(next->s.origin, v);
+        Vec3_Copy(next->s.origin, v);
         v[2] += next->mins[2];
         v[2] -= other->mins[2];
-        VectorCopy(v, other->s.origin);
+        Vec3_Copy(v, other->s.origin);
         next = G_PickTarget(next->target);
         other->s.event = EV_OTHER_TELEPORT;
     }
@@ -58,7 +58,7 @@ void path_corner_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_
         other->monsterinfo.stand(other);
     }
     else {
-        VectorSubtract(other->goalentity->s.origin, other->s.origin, v);
+        Vec3_Subtract(other->goalentity->s.origin, other->s.origin, v);
         other->ideal_yaw = vectoyaw(v);
     }
 }
@@ -78,8 +78,8 @@ void SP_path_corner(edict_t* self)
 
     self->solid = SOLID_TRIGGER;
     self->touch = path_corner_touch;
-    VectorSet(self->mins, -8, -8, -8);
-    VectorSet(self->maxs, 8, 8, 8);
+    Vec3_Set(self->mins, -8, -8, -8);
+    Vec3_Set(self->maxs, 8, 8, 8);
     self->svflags |= SVF_NOCLIENT;
     gi.linkentity(self);
 }

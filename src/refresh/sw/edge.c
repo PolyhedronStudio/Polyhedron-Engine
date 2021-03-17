@@ -742,13 +742,13 @@ static void D_CalcGradients(mface_t *pface)
                     r_refdef.xcenter * d_tdivzstepu -
                     r_refdef.ycenter * d_tdivzstepv;
 
-    VectorScale(transformed_modelorg, mipscale, p_temp1);
+    Vec3_Scale(transformed_modelorg, mipscale, p_temp1);
 
     t = 0x10000 * mipscale;
-    sadjust = ((fixed16_t)(DotProduct(p_temp1, p_saxis) * 0x10000 + 0.5)) -
+    sadjust = ((fixed16_t)(Vec3_Dot(p_temp1, p_saxis) * 0x10000 + 0.5)) -
               ((pface->texturemins[0] << 16) >> miplevel)
               + pface->texinfo->offset[0] * t;
-    tadjust = ((fixed16_t)(DotProduct(p_temp1, p_taxis) * 0x10000 + 0.5)) -
+    tadjust = ((fixed16_t)(Vec3_Dot(p_temp1, p_taxis) * 0x10000 + 0.5)) -
               ((pface->texturemins[1] << 16) >> miplevel)
               + pface->texinfo->offset[1] * t;
 
@@ -811,7 +811,7 @@ static void D_TurbulentSurf(surf_t *s)
         // TODO: store once at start of frame
         currententity = s->entity;  // FIXME: make this passed in to
                                     // R_RotateBmodel ()
-        VectorSubtract(r_origin, currententity->origin, local_modelorg);
+        Vec3_Subtract(r_origin, currententity->origin, local_modelorg);
         R_TransformVector(local_modelorg, transformed_modelorg);
 
         R_RotateBmodel();   // FIXME: don't mess with the frustum,
@@ -835,10 +835,10 @@ static void D_TurbulentSurf(surf_t *s)
         // TODO: speed up
         //
         currententity = NULL;   // &r_worldentity;
-        VectorCopy(world_transformed_modelorg, transformed_modelorg);
-        VectorCopy(base_vpn, vpn);
-        VectorCopy(base_vup, vup);
-        VectorCopy(base_vright, vright);
+        Vec3_Copy(world_transformed_modelorg, transformed_modelorg);
+        Vec3_Copy(base_vpn, vpn);
+        Vec3_Copy(base_vup, vup);
+        Vec3_Copy(base_vright, vright);
         R_TransformFrustum();
     }
 }
@@ -902,7 +902,7 @@ static void D_SolidSurf(surf_t *s)
         // TODO: store once at start of frame
         currententity = s->entity;  // FIXME: make this passed in to
                                     // R_RotateBmodel ()
-        VectorSubtract(r_origin, currententity->origin, local_modelorg);
+        Vec3_Subtract(r_origin, currententity->origin, local_modelorg);
         R_TransformVector(local_modelorg, transformed_modelorg);
 
         R_RotateBmodel();   // FIXME: don't mess with the frustum,
@@ -933,10 +933,10 @@ static void D_SolidSurf(surf_t *s)
         // FIXME: we don't want to do this every time!
         // TODO: speed up
         //
-        VectorCopy(world_transformed_modelorg, transformed_modelorg);
-        VectorCopy(base_vpn, vpn);
-        VectorCopy(base_vup, vup);
-        VectorCopy(base_vright, vright);
+        Vec3_Copy(world_transformed_modelorg, transformed_modelorg);
+        Vec3_Copy(base_vpn, vpn);
+        Vec3_Copy(base_vup, vup);
+        Vec3_Copy(base_vright, vright);
         R_TransformFrustum();
         currententity = NULL;   //&r_worldentity;
     }
@@ -1003,9 +1003,9 @@ void D_DrawSurfaces(void)
     surf_t          *s;
 
 //  currententity = NULL;   //&r_worldentity;
-    VectorSubtract(r_origin, vec3_origin, modelorg);
+    Vec3_Subtract(r_origin, vec3_origin, modelorg);
     R_TransformVector(modelorg, transformed_modelorg);
-    VectorCopy(transformed_modelorg, world_transformed_modelorg);
+    Vec3_Copy(transformed_modelorg, world_transformed_modelorg);
 
     if (sw_drawsird->integer) {
         D_DrawZSurfaces();
@@ -1030,7 +1030,7 @@ void D_DrawSurfaces(void)
     }
 
     currententity = NULL;   //&r_worldentity;
-    VectorSubtract(r_origin, vec3_origin, modelorg);
+    Vec3_Subtract(r_origin, vec3_origin, modelorg);
     R_TransformFrustum();
 }
 

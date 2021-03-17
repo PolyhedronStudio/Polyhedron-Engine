@@ -31,10 +31,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Finally, we copy the results over into the player pmove state. This should
 // sort if sum up the method of action that's used for player movement.
 //
-#include <math.h>
-#include "shared/math/vector3.hpp"
 
 #include "shared/shared.h"
+#include "shared/math/vector3.hpp"
 #include "sharedgame/pmove.h"
 #include "client/client.h"
 
@@ -89,7 +88,6 @@ static struct {
     } ground;
 } pm_locals;
 
-
 //
 //=============================================================================
 //
@@ -119,6 +117,93 @@ static const Vector &PM_ClipVelocity(const Vector &in,  const Vector &normal, fl
 
     // Return the input minus the normal scaled by backoff.
     return in - normal * backoff;
+}
+
+//
+//===============
+// PM_TouchEntity
+// 
+// Mark the specified entity as touched. This enables the game module to
+// detect player -> entity interactions.
+//===============
+//
+static void PM_TouchEntity(struct edict_s* ent) {
+    // Ensure it is valid.
+    if (ent == NULL) {
+        return;
+    }
+
+    // Return in case of crossing the max touch entities limit.
+    if (pm->numTouchedEntities == PM_MAX_TOUCH_ENTS) {
+        //Com_DPrintf("MAX_TOUCH_ENTS\n");
+        return;
+    }
+
+    // Return in case of a duplicate entity.
+    for (int32_t i = 0; i < pm->numTouchedEntities; i++) {
+        if (pm->touchedEntities[i] == ent) {
+            return;
+        }
+    }
+
+    // Increment counter, and store pointer to entity.
+    pm->touchedEntities[pm->numTouchedEntities++] = ent;
+}
+
+//
+//===============
+// PM_TraceCorrectAllSolid
+// 
+// Adapted from Quake III, this function adjusts a trace so that if it starts inside of a wall,
+// it is adjusted so that the trace begins outside of the solid it impacts.
+// Returns the actual trace.
+//===============
+//
+static trace_t PM_TraceCorrectAllSolid(const Vector &start, const Vector& end, const Vector& mins, const Vector& maxs) {
+    // Offsets testing array.
+    const int32_t offsets[] = { 0, 1, -1 };
+
+    // Trace vec3_t
+    vec3_t trStart;
+    vec3_t trEnd;
+    vec3_t trMins;
+    vec3_t trMaxs;
+
+    // Jitter around, 3x3x3 = 18 traces... TODO: Improve this? Seems expensive.
+    for (uint32_t i = 0; i < 3; i++) {
+        for (uint32_t j = 0; j < 3; j++) {
+            for (uint32_t k = 0; k < 3; k++) {
+                // Calculate point to start tracing from.
+                Vector point = start + Vector(offsets[i], offsets[j], offsets[k]);
+
+                // Copy Vectors into vec3_t and excute trace. 
+                // (Point, not start, unlike below in the return.)
+                point.CopyToArray(trStart);
+                end.CopyToArray(trEnd);
+                mins.CopyToArray(trMins);
+                maxs.CopyToArray(trMaxs);
+                trace_t trace = pm->Trace(trStart, trEnd, trMins, trMaxs);
+
+                // No solid had to be fixed.
+                if (!trace.allsolid) {
+                    // In case solids had to be fixed, debug print.
+                    if (i != 0 || j != 0 || k != 0) {
+                        Com_DPrintf("Fixed all-solid\n");
+                    }
+
+                    return trace;
+                }
+            }
+        }
+    }
+
+    Com_DPrintf("No good position\n");
+    // Copy Vectors into vec3_t and excute trace.
+    start.CopyToArray(trStart);
+    end.CopyToArray(trEnd);
+    mins.CopyToArray(trMins);
+    maxs.CopyToArray(trMaxs);
+    return pm->Trace(trStart, trEnd, trMins, trMaxs);
 }
 
 //
@@ -206,8 +291,8 @@ static qboolean PM_TestPosition(void)
     //    return qtrue;
 
     // Copy over the s.origin to end and origin for trace testing.
-    VectorCopy(pm->state.origin, origin);
-    VectorCopy(pm->state.origin, end);
+    Vec3_Copy(pm->state.origin, origin);
+    Vec3_Copy(pm->state.origin, end);
 
     // Do a trace test.
     trace = pm->Trace(origin, pm->mins, pm->maxs, end);
@@ -241,7 +326,7 @@ static void PM_FinalizePosition(qboolean testForValid) {
         return;
 
     // Revert back to the previous origin.
-    VectorCopy(pm_locals.previousOrigin, pm->state.origin);
+    Vec3_Copy(pm_locals.previousOrigin, pm->state.origin);
 }
 
 //
@@ -257,7 +342,7 @@ static void PM_TestInitialPosition(void)
     // Do 
     if (PM_TestPosition()) {
         // Copy over the state origin in case it is valid.
-        VectorCopy(pm->state.origin, pm_locals.previousOrigin);
+        Vec3_Copy(pm->state.origin, pm_locals.previousOrigin);
         return;
     }
 }

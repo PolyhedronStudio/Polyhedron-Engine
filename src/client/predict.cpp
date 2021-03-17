@@ -37,7 +37,7 @@ void CL_CheckPredictionError(void)
     }
 
     if (sv_paused->integer) {
-        VectorClear(cl.prediction_error);
+        Vec3_Clear(cl.prediction_error);
         return;
     }
 

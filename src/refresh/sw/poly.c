@@ -193,7 +193,7 @@ static int R_ClipPolyFace(int nump, clipplane_t *pclipplane)
 
     instep = in;
     for (i = 0; i < nump; i++, instep += sizeof(vec5_t) / sizeof(float)) {
-        dists[i] = DotProduct(instep, pclipnormal) - clipdist;
+        dists[i] = Vec3_Dot(instep, pclipnormal) - clipdist;
     }
 
 // handle wraparound case
@@ -571,7 +571,7 @@ static void R_ClipAndDrawPoly(float alpha, int isturbulent, int textured)
     pv = &r_clip_verts[clip_current][0][0];
 
     for (i = 0; i < nump; i++) {
-        VectorSubtract(pv, r_origin, local);
+        Vec3_Subtract(pv, r_origin, local);
         R_TransformVector(local, transformed);
 
         if (transformed[2] < NEAR_CLIP)
@@ -623,16 +623,16 @@ static void R_BuildPolygonFromSurface(mface_t *fa)
     surfedge = fa->firstsurfedge;
     for (i = 0; i < lnumverts; i++, surfedge++) {
         vec = surfedge->edge->v[surfedge->vert]->point;
-        VectorCopy(vec, pverts[i]);
+        Vec3_Copy(vec, pverts[i]);
     }
 
-    VectorCopy(fa->texinfo->axis[0], r_polydesc.vright);
-    VectorCopy(fa->texinfo->axis[1], r_polydesc.vup);
-    VectorCopy(fa->plane->normal, r_polydesc.vpn);
-    VectorCopy(r_origin, r_polydesc.viewer_position);
+    Vec3_Copy(fa->texinfo->axis[0], r_polydesc.vright);
+    Vec3_Copy(fa->texinfo->axis[1], r_polydesc.vup);
+    Vec3_Copy(fa->plane->normal, r_polydesc.vpn);
+    Vec3_Copy(r_origin, r_polydesc.viewer_position);
 
     if (fa->drawflags & DSURF_PLANEBACK) {
-        VectorInverse(r_polydesc.vpn);
+        Vec3_Inverse(r_polydesc.vpn);
     }
 
     if (fa->texinfo->c.flags & (SURF_WARP | SURF_FLOWING)) {
@@ -652,7 +652,7 @@ static void R_BuildPolygonFromSurface(mface_t *fa)
         tmins[1] = fa->texturemins[1];
     }
 
-    r_polydesc.dist = DotProduct(r_polydesc.vpn, pverts[0]);
+    r_polydesc.dist = Vec3_Dot(r_polydesc.vpn, pverts[0]);
 
     r_polydesc.s_offset = fa->texinfo->offset[0] - tmins[0];
     r_polydesc.t_offset = fa->texinfo->offset[1] - tmins[1];
@@ -677,7 +677,7 @@ static void R_PolygonCalculateGradients(void)
     R_TransformVector(r_polydesc.vright, p_saxis);
     R_TransformVector(r_polydesc.vup, p_taxis);
 
-    distinv = 1.0 / (-(DotProduct(r_polydesc.viewer_position, r_polydesc.vpn)) + r_polydesc.dist);
+    distinv = 1.0 / (-(Vec3_Dot(r_polydesc.viewer_position, r_polydesc.vpn)) + r_polydesc.dist);
 
     d_sdivzstepu  =  p_saxis[0] * r_refdef.xscaleinv;
     d_sdivzstepv  = -p_saxis[1] * r_refdef.yscaleinv;
@@ -691,8 +691,8 @@ static void R_PolygonCalculateGradients(void)
     d_zistepv =  -p_normal[1] * r_refdef.yscaleinv * distinv;
     d_ziorigin =  p_normal[2] * distinv - r_refdef.xcenter * d_zistepu - r_refdef.ycenter * d_zistepv;
 
-    sadjust = (fixed16_t)((DotProduct(r_polydesc.viewer_position, r_polydesc.vright) + r_polydesc.s_offset) * 0x10000);
-    tadjust = (fixed16_t)((DotProduct(r_polydesc.viewer_position, r_polydesc.vup) + r_polydesc.t_offset) * 0x10000);
+    sadjust = (fixed16_t)((Vec3_Dot(r_polydesc.viewer_position, r_polydesc.vright) + r_polydesc.s_offset) * 0x10000);
+    tadjust = (fixed16_t)((Vec3_Dot(r_polydesc.viewer_position, r_polydesc.vup) + r_polydesc.t_offset) * 0x10000);
 
 // -1 (-epsilon) so we never wander off the edge of the texture
     bbextents = (r_polydesc.pixel_width << 16) - 1;
@@ -793,12 +793,12 @@ void R_IMFlatShadedQuad(vec3_t a, vec3_t b, vec3_t c, vec3_t d, color_t color, f
     vec3_t s0, s1;
 
     r_polydesc.nump = 4;
-    VectorCopy(r_origin, r_polydesc.viewer_position);
+    Vec3_Copy(r_origin, r_polydesc.viewer_position);
 
-    VectorCopy(a, r_clip_verts[0][0]);
-    VectorCopy(b, r_clip_verts[0][1]);
-    VectorCopy(c, r_clip_verts[0][2]);
-    VectorCopy(d, r_clip_verts[0][3]);
+    Vec3_Copy(a, r_clip_verts[0][0]);
+    Vec3_Copy(b, r_clip_verts[0][1]);
+    Vec3_Copy(c, r_clip_verts[0][2]);
+    Vec3_Copy(d, r_clip_verts[0][3]);
 
     r_clip_verts[0][0][3] = 0;
     r_clip_verts[0][1][3] = 0;
@@ -810,12 +810,12 @@ void R_IMFlatShadedQuad(vec3_t a, vec3_t b, vec3_t c, vec3_t d, color_t color, f
     r_clip_verts[0][2][4] = 0;
     r_clip_verts[0][3][4] = 0;
 
-    VectorSubtract(d, c, s0);
-    VectorSubtract(c, b, s1);
-    CrossProduct(s0, s1, r_polydesc.vpn);
+    Vec3_Subtract(d, c, s0);
+    Vec3_Subtract(c, b, s1);
+    Vec3_Cross(s0, s1, r_polydesc.vpn);
     VectorNormalize(r_polydesc.vpn);
 
-    r_polydesc.dist = DotProduct(r_polydesc.vpn, r_clip_verts[0][0]);
+    r_polydesc.dist = Vec3_Dot(r_polydesc.vpn, r_clip_verts[0][0]);
 
     r_polydesc.alpha = 255 * alpha;
 
@@ -848,22 +848,22 @@ void R_DrawSprite(void)
     r_polydesc.dist         = 0;
 
     // generate the sprite's axes, completely parallel to the viewplane.
-    VectorCopy(vup, r_polydesc.vup);
-    VectorCopy(vright, r_polydesc.vright);
-    VectorCopy(vpn, r_polydesc.vpn);
+    Vec3_Copy(vup, r_polydesc.vup);
+    Vec3_Copy(vright, r_polydesc.vright);
+    Vec3_Copy(vpn, r_polydesc.vpn);
 
 // build the sprite poster in worldspace
-    VectorScale(r_polydesc.vright,
+    Vec3_Scale(r_polydesc.vright,
                 frame->width - frame->origin_x, right);
-    VectorScale(r_polydesc.vup,
+    Vec3_Scale(r_polydesc.vup,
                 frame->height - frame->origin_y, up);
-    VectorScale(r_polydesc.vright,
+    Vec3_Scale(r_polydesc.vright,
                 -frame->origin_x, left);
-    VectorScale(r_polydesc.vup,
+    Vec3_Scale(r_polydesc.vup,
                 -frame->origin_y, down);
 
     // invert UP vector for sprites
-    VectorNegate(r_polydesc.vup, r_polydesc.vup);
+    Vec3_Negate(r_polydesc.vup, r_polydesc.vup);
 
     pverts = r_clip_verts[0];
 
@@ -894,7 +894,7 @@ void R_DrawSprite(void)
     r_polydesc.nump = 4;
     r_polydesc.s_offset = (r_polydesc.pixel_width  >> 1);
     r_polydesc.t_offset = (r_polydesc.pixel_height >> 1);
-    VectorCopy(modelorg, r_polydesc.viewer_position);
+    Vec3_Copy(modelorg, r_polydesc.viewer_position);
 
     if (frame->image->flags & IF_TRANSPARENT)
         textured = 2;

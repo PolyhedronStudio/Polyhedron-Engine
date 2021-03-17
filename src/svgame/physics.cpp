@@ -151,7 +151,7 @@ int ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce)
     if (!normal[2])
         blocked |= 2;       // step
 
-    backoff = DotProduct(in, normal) * overbounce;
+    backoff = Vec3_Dot(in, normal) * overbounce;
 
     for (i = 0 ; i < 3 ; i++) {
         change = normal[i] * backoff;
@@ -194,8 +194,8 @@ int SV_FlyMove(edict_t *ent, float time, int mask)
     numbumps = 4;
 
     blocked = 0;
-    VectorCopy(ent->velocity, original_velocity);
-    VectorCopy(ent->velocity, primal_velocity);
+    Vec3_Copy(ent->velocity, original_velocity);
+    Vec3_Copy(ent->velocity, primal_velocity);
     numplanes = 0;
 
     time_left = time;
@@ -209,14 +209,14 @@ int SV_FlyMove(edict_t *ent, float time, int mask)
 
         if (trace.allsolid) {
             // entity is trapped in another solid
-            VectorCopy(vec3_origin, ent->velocity);
+            Vec3_Copy(vec3_origin, ent->velocity);
             return 3;
         }
 
         if (trace.fraction > 0) {
             // actually covered some distance
-            VectorCopy(trace.endpos, ent->s.origin);
-            VectorCopy(ent->velocity, original_velocity);
+            Vec3_Copy(trace.endpos, ent->s.origin);
+            Vec3_Copy(ent->velocity, original_velocity);
             numplanes = 0;
         }
 
@@ -249,11 +249,11 @@ int SV_FlyMove(edict_t *ent, float time, int mask)
         // cliped to another plane
         if (numplanes >= MAX_CLIP_PLANES) {
             // this shouldn't really happen
-            VectorCopy(vec3_origin, ent->velocity);
+            Vec3_Copy(vec3_origin, ent->velocity);
             return 3;
         }
 
-        VectorCopy(trace.plane.normal, planes[numplanes]);
+        Vec3_Copy(trace.plane.normal, planes[numplanes]);
         numplanes++;
 
 //
@@ -263,8 +263,8 @@ int SV_FlyMove(edict_t *ent, float time, int mask)
             ClipVelocity(original_velocity, planes[i], new_velocity, 1);
 
             for (j = 0 ; j < numplanes ; j++)
-                if ((j != i) && !VectorCompare(planes[i], planes[j])) {
-                    if (DotProduct(new_velocity, planes[j]) < 0)
+                if ((j != i) && !Vec3_Compare(planes[i], planes[j])) {
+                    if (Vec3_Dot(new_velocity, planes[j]) < 0)
                         break;  // not ok
                 }
             if (j == numplanes)
@@ -273,25 +273,25 @@ int SV_FlyMove(edict_t *ent, float time, int mask)
 
         if (i != numplanes) {
             // go along this plane
-            VectorCopy(new_velocity, ent->velocity);
+            Vec3_Copy(new_velocity, ent->velocity);
         } else {
             // go along the crease
             if (numplanes != 2) {
 //              gi.dprintf ("clip velocity, numplanes == %i\n",numplanes);
-                VectorCopy(vec3_origin, ent->velocity);
+                Vec3_Copy(vec3_origin, ent->velocity);
                 return 7;
             }
-            CrossProduct(planes[0], planes[1], dir);
-            d = DotProduct(dir, ent->velocity);
-            VectorScale(dir, d, ent->velocity);
+            Vec3_Cross(planes[0], planes[1], dir);
+            d = Vec3_Dot(dir, ent->velocity);
+            Vec3_Scale(dir, d, ent->velocity);
         }
 
 //
 // if original velocity is against the original velocity, stop dead
 // to avoid tiny occilations in sloping corners
 //
-        if (DotProduct(ent->velocity, primal_velocity) <= 0) {
-            VectorCopy(vec3_origin, ent->velocity);
+        if (Vec3_Dot(ent->velocity, primal_velocity) <= 0) {
+            Vec3_Copy(vec3_origin, ent->velocity);
             return blocked;
         }
     }
@@ -333,8 +333,8 @@ trace_t SV_PushEntity(edict_t *ent, vec3_t push)
     vec3_t  end;
     int     mask;
 
-    VectorCopy(ent->s.origin, start);
-    VectorAdd(start, push, end);
+    Vec3_Copy(ent->s.origin, start);
+    Vec3_Add(start, push, end);
 
 retry:
     if (ent->clipmask)
@@ -344,7 +344,7 @@ retry:
 
     trace = gi.trace(start, ent->mins, ent->maxs, end, ent, mask);
 
-    VectorCopy(trace.endpos, ent->s.origin);
+    Vec3_Copy(trace.endpos, ent->s.origin);
     gi.linkentity(ent);
 
     if (trace.fraction != 1.0) {
@@ -353,7 +353,7 @@ retry:
         // if the pushed entity went away and the pusher is still there
         if (!trace.ent->inuse && ent->inuse) {
             // move the pusher back and try again
-            VectorCopy(start, ent->s.origin);
+            Vec3_Copy(start, ent->s.origin);
             gi.linkentity(ent);
             goto retry;
         }
@@ -415,13 +415,13 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
     }
 
 // we need this for pushing things later
-    VectorSubtract(vec3_origin, amove, org);
+    Vec3_Subtract(vec3_origin, amove, org);
     AngleVectors(org, forward, right, up);
 
 // save the pusher's original position
     pushed_p->ent = pusher;
-    VectorCopy(pusher->s.origin, pushed_p->origin);
-    VectorCopy(pusher->s.angles, pushed_p->angles);
+    Vec3_Copy(pusher->s.origin, pushed_p->origin);
+    Vec3_Copy(pusher->s.angles, pushed_p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
     if (pusher->client)
         pushed_p->deltayaw = pusher->client->ps.pmove.delta_angles[YAW];
@@ -429,8 +429,8 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
     pushed_p++;
 
 // move the pusher to it's final position
-    VectorAdd(pusher->s.origin, move, pusher->s.origin);
-    VectorAdd(pusher->s.angles, amove, pusher->s.angles);
+    Vec3_Add(pusher->s.origin, move, pusher->s.origin);
+    Vec3_Add(pusher->s.angles, amove, pusher->s.angles);
     gi.linkentity(pusher);
 
 // see if any solid entities are inside the final position
@@ -466,8 +466,8 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
         if ((pusher->movetype == MOVETYPE_PUSH) || (check->groundentity == pusher)) {
             // move this entity
             pushed_p->ent = check;
-            VectorCopy(check->s.origin, pushed_p->origin);
-            VectorCopy(check->s.angles, pushed_p->angles);
+            Vec3_Copy(check->s.origin, pushed_p->origin);
+            Vec3_Copy(check->s.angles, pushed_p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
             if (check->client)
                 pushed_p->deltayaw = check->client->ps.pmove.delta_angles[YAW];
@@ -475,7 +475,7 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
             pushed_p++;
 
             // try moving the contacted entity
-            VectorAdd(check->s.origin, move, check->s.origin);
+            Vec3_Add(check->s.origin, move, check->s.origin);
 #if USE_SMOOTH_DELTA_ANGLES
             if (check->client) {
                 // FIXME: doesn't rotate monsters?
@@ -485,12 +485,12 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 #endif
 
             // figure movement due to the pusher's amove
-            VectorSubtract(check->s.origin, pusher->s.origin, org);
-            org2[0] = DotProduct(org, forward);
-            org2[1] = -DotProduct(org, right);
-            org2[2] = DotProduct(org, up);
-            VectorSubtract(org2, org, move2);
-            VectorAdd(check->s.origin, move2, check->s.origin);
+            Vec3_Subtract(check->s.origin, pusher->s.origin, org);
+            org2[0] = Vec3_Dot(org, forward);
+            org2[1] = -Vec3_Dot(org, right);
+            org2[2] = Vec3_Dot(org, up);
+            Vec3_Subtract(org2, org, move2);
+            Vec3_Add(check->s.origin, move2, check->s.origin);
 
             // may have pushed them off an edge
             if (check->groundentity != pusher)
@@ -507,7 +507,7 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
             // if it is ok to leave in the old position, do it
             // this is only relevent for riding entities, not pushed
             // FIXME: this doesn't acount for rotation
-            VectorSubtract(check->s.origin, move, check->s.origin);
+            Vec3_Subtract(check->s.origin, move, check->s.origin);
             block = SV_TestEntityPosition(check);
             if (!block) {
                 pushed_p--;
@@ -522,8 +522,8 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
         // go backwards, so if the same entity was pushed
         // twice, it goes back to the original position
         for (p = pushed_p - 1 ; p >= pushed ; p--) {
-            VectorCopy(p->origin, p->ent->s.origin);
-            VectorCopy(p->angles, p->ent->s.angles);
+            Vec3_Copy(p->origin, p->ent->s.origin);
+            Vec3_Copy(p->angles, p->ent->s.angles);
 #if USE_SMOOTH_DELTA_ANGLES
             if (p->ent->client) {
                 p->ent->client->ps.pmove.delta_angles[YAW] = p->deltayaw;
@@ -569,8 +569,8 @@ void SV_Physics_Pusher(edict_t *ent)
             part->avelocity[0] || part->avelocity[1] || part->avelocity[2]
            ) {
             // object is moving
-            VectorScale(part->velocity, FRAMETIME, move);
-            VectorScale(part->avelocity, FRAMETIME, amove);
+            Vec3_Scale(part->velocity, FRAMETIME, move);
+            Vec3_Scale(part->avelocity, FRAMETIME, amove);
 
             if (!SV_Push(part, move, amove))
                 break;  // move was blocked
@@ -633,8 +633,8 @@ void SV_Physics_Noclip(edict_t *ent)
     if (!ent->inuse)
         return;
 
-    VectorMA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
-    VectorMA(ent->s.origin, FRAMETIME, ent->velocity, ent->s.origin);
+    Vec3_MA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
+    Vec3_MA(ent->s.origin, FRAMETIME, ent->velocity, ent->s.origin);
 
     gi.linkentity(ent);
 }
@@ -685,7 +685,7 @@ void SV_Physics_Toss(edict_t *ent)
     if (ent->groundentity)
         return;
 
-    VectorCopy(ent->s.origin, old_origin);
+    Vec3_Copy(ent->s.origin, old_origin);
 
     SV_CheckVelocity(ent);
 
@@ -695,10 +695,10 @@ void SV_Physics_Toss(edict_t *ent)
         SV_AddGravity(ent);
 
 // move angles
-    VectorMA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
+    Vec3_MA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
 
 // move origin
-    VectorScale(ent->velocity, FRAMETIME, move);
+    Vec3_Scale(ent->velocity, FRAMETIME, move);
     trace = SV_PushEntity(ent, move);
     if (!ent->inuse)
         return;
@@ -716,8 +716,8 @@ void SV_Physics_Toss(edict_t *ent)
             if (ent->velocity[2] < 60 || ent->movetype != MOVETYPE_BOUNCE) {
                 ent->groundentity = trace.ent;
                 ent->groundentity_linkcount = trace.ent->linkcount;
-                VectorCopy(vec3_origin, ent->velocity);
-                VectorCopy(vec3_origin, ent->avelocity);
+                Vec3_Copy(vec3_origin, ent->velocity);
+                Vec3_Copy(vec3_origin, ent->avelocity);
             }
         }
 
@@ -742,7 +742,7 @@ void SV_Physics_Toss(edict_t *ent)
 
 // move teamslaves
     for (slave = ent->teamchain; slave; slave = slave->teamchain) {
-        VectorCopy(ent->s.origin, slave->s.origin);
+        Vec3_Copy(ent->s.origin, slave->s.origin);
         gi.linkentity(slave);
     }
 }
@@ -778,7 +778,7 @@ void SV_AddRotationalFriction(edict_t *ent)
     int     n;
     float   adjustment;
 
-    VectorMA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
+    Vec3_MA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
     adjustment = FRAMETIME * sv_stopspeed * sv_friction;
     for (n = 0; n < 3; n++) {
         if (ent->avelocity[n] > 0) {

@@ -29,8 +29,8 @@ void SP_misc_easterchick2(edict_t* ent)
 {
     ent->movetype = MOVETYPE_NONE;
     ent->solid = SOLID_BBOX;
-    VectorSet(ent->mins, -32, -32, 0);
-    VectorSet(ent->maxs, 32, 32, 32);
+    Vec3_Set(ent->mins, -32, -32, 0);
+    Vec3_Set(ent->maxs, 32, 32, 32);
     ent->s.modelindex = gi.modelindex("models/monsters/bitch/tris.md2");
     ent->s.frame = 248;
     ent->think = misc_easterchick2_think;

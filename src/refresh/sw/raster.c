@@ -77,7 +77,7 @@ static void R_EmitEdge(mvertex_t *pv0, mvertex_t *pv1)
         world = &pv0->point[0];
 
         // transform and project
-        VectorSubtract(world, modelorg, local);
+        Vec3_Subtract(world, modelorg, local);
         R_TransformVector(local, transformed);
 
         if (transformed[2] < NEAR_CLIP)
@@ -106,7 +106,7 @@ static void R_EmitEdge(mvertex_t *pv0, mvertex_t *pv1)
     world = &pv1->point[0];
 
 // transform and project
-    VectorSubtract(world, modelorg, local);
+    Vec3_Subtract(world, modelorg, local);
     R_TransformVector(local, transformed);
 
     if (transformed[2] < NEAR_CLIP)
@@ -231,8 +231,8 @@ static void R_ClipEdge(mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip)
     mvertex_t   clipvert;
 
     for (; clip; clip = clip->next) {
-        d0 = DotProduct(pv0->point, clip->normal) - clip->dist;
-        d1 = DotProduct(pv1->point, clip->normal) - clip->dist;
+        d0 = Vec3_Dot(pv0->point, clip->normal) - clip->dist;
+        d1 = Vec3_Dot(pv1->point, clip->normal) - clip->dist;
 
         if (d0 >= 0) {
             // point 0 is unclipped
@@ -247,7 +247,7 @@ static void R_ClipEdge(mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip)
             cacheoffset = CLIPPED_NOT_CACHED;
 
             f = d0 / (d0 - d1);
-            LerpVector(pv0->point, pv1->point, f, clipvert.point);
+            Vec3_Lerp(pv0->point, pv1->point, f, clipvert.point);
 
             if (clip->leftedge) {
                 r_leftclipped = qtrue;
@@ -277,7 +277,7 @@ static void R_ClipEdge(mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip)
             cacheoffset = CLIPPED_NOT_CACHED;
 
             f = d0 / (d0 - d1);
-            LerpVector(pv0->point, pv1->point, f, clipvert.point);
+            Vec3_Lerp(pv0->point, pv1->point, f, clipvert.point);
 
             if (clip->leftedge) {
                 r_leftclipped = qtrue;
@@ -457,7 +457,7 @@ void R_RenderFace(mface_t *fa, int clipflags)
 // FIXME: cache this?
     R_TransformVector(pplane->normal, p_normal);
 // FIXME: cache this?
-    distinv = 1.0 / (pplane->dist - DotProduct(modelorg, pplane->normal));
+    distinv = 1.0 / (pplane->dist - Vec3_Dot(modelorg, pplane->normal));
 
     surface_p->d_zistepu = p_normal[0] * r_refdef.xscaleinv * distinv;
     surface_p->d_zistepv = -p_normal[1] * r_refdef.yscaleinv * distinv;
@@ -571,7 +571,7 @@ void R_RenderBmodelFace(bedge_t *pedges, mface_t *psurf)
 // FIXME: cache this?
     R_TransformVector(pplane->normal, p_normal);
 // FIXME: cache this?
-    distinv = 1.0 / (pplane->dist - DotProduct(modelorg, pplane->normal));
+    distinv = 1.0 / (pplane->dist - Vec3_Dot(modelorg, pplane->normal));
 
     surface_p->d_zistepu = p_normal[0] * r_refdef.xscaleinv * distinv;
     surface_p->d_zistepv = -p_normal[1] * r_refdef.yscaleinv * distinv;

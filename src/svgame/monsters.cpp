@@ -165,9 +165,9 @@ void M_CheckGround(edict_t *ent)
 //  ent->groundentity = trace.ent;
 //  ent->groundentity_linkcount = trace.ent->linkcount;
 //  if (!trace.startsolid && !trace.allsolid)
-//      VectorCopy (trace.endpos, ent->s.origin);
+//      Vec3_Copy (trace.endpos, ent->s.origin);
     if (!trace.startsolid && !trace.allsolid) {
-        VectorCopy(trace.endpos, ent->s.origin);
+        Vec3_Copy(trace.endpos, ent->s.origin);
         ent->groundentity = trace.ent;
         ent->groundentity_linkcount = trace.ent->linkcount;
         ent->velocity[2] = 0;
@@ -289,7 +289,7 @@ void M_droptofloor(edict_t *ent)
     trace_t     trace;
 
     ent->s.origin[2] += 1;
-    VectorCopy(ent->s.origin, end);
+    Vec3_Copy(ent->s.origin, end);
     end[2] -= 256;
 
     trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
@@ -297,7 +297,7 @@ void M_droptofloor(edict_t *ent)
     if (trace.fraction == 1 || trace.allsolid)
         return;
 
-    VectorCopy(trace.endpos, ent->s.origin);
+    Vec3_Copy(trace.endpos, ent->s.origin);
 
     gi.linkentity(ent);
     M_CheckGround(ent);
@@ -520,7 +520,7 @@ qboolean monster_start(edict_t *self)
 
     if (!self->monsterinfo.checkattack)
         self->monsterinfo.checkattack = M_CheckAttack;
-    VectorCopy(self->s.origin, self->s.old_origin);
+    Vec3_Copy(self->s.origin, self->s.old_origin);
 
     if (st.item) {
         self->item = FindItemByClassname(st.item);
@@ -588,7 +588,7 @@ void monster_start_go(edict_t *self)
             self->monsterinfo.pausetime = 100000000;
             self->monsterinfo.stand(self);
         } else if (strcmp(self->movetarget->classname, "path_corner") == 0) {
-            VectorSubtract(self->goalentity->s.origin, self->s.origin, v);
+            Vec3_Subtract(self->goalentity->s.origin, self->s.origin, v);
             self->ideal_yaw = self->s.angles[YAW] = vectoyaw(v);
             self->monsterinfo.walk(self);
             self->target = NULL;

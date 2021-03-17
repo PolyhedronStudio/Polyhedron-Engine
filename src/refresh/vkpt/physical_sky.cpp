@@ -813,7 +813,7 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 
 	// color before occlusion
 	vec3_t sunColor = { sun_color[0]->value, sun_color[1]->value, sun_color[2]->value };
-	VectorScale(sunColor, sun_brightness->value, light->color);
+	Vec3_Scale(sunColor, sun_brightness->value, light->color);
 
 	// potentially visible - can be overridden if readback data says it's occluded
 	if (physical_sky_space->integer)
@@ -825,7 +825,7 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 	sun_direction_world[0] = light->direction_envmap[0] * sky_matrix[0][0] + light->direction_envmap[1] * sky_matrix[0][1] + light->direction_envmap[2] * sky_matrix[0][2];
 	sun_direction_world[1] = light->direction_envmap[0] * sky_matrix[1][0] + light->direction_envmap[1] * sky_matrix[1][1] + light->direction_envmap[2] * sky_matrix[1][2];
 	sun_direction_world[2] = light->direction_envmap[0] * sky_matrix[2][0] + light->direction_envmap[1] * sky_matrix[2][1] + light->direction_envmap[2] * sky_matrix[2][2];
-	VectorCopy(sun_direction_world, light->direction);
+	Vec3_Copy(sun_direction_world, light->direction);
 }
 
 VkResult
@@ -852,22 +852,22 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
 	ubo->sun_solid_angle = 2 * M_PI * (float)(1.0 - cos(light->angular_size_rad * 0.5)); // use double for precision
 	//ubo->sun_solid_angle = max(ubo->sun_solid_angle, 1e-3f);
 
-	VectorCopy(light->color, ubo->sun_color);
-	VectorCopy(light->direction_envmap, ubo->sun_direction_envmap);
-	VectorCopy(light->direction, ubo->sun_direction);
+	Vec3_Copy(light->color, ubo->sun_color);
+	Vec3_Copy(light->direction_envmap, ubo->sun_direction_envmap);
+	Vec3_Copy(light->direction, ubo->sun_direction);
 
     if (light->direction[2] >= 0.99f)
     {
-        VectorSet(ubo->sun_tangent, 1.f, 0.f, 0.f);
-        VectorSet(ubo->sun_bitangent, 0.f, 1.f, 0.f);
+        Vec3_Set(ubo->sun_tangent, 1.f, 0.f, 0.f);
+        Vec3_Set(ubo->sun_bitangent, 0.f, 1.f, 0.f);
     }
     else
     {
         vec3_t up;
-        VectorSet(up, 0.f, 0.f, 1.f);
-        CrossProduct(light->direction, up, ubo->sun_tangent);
+        Vec3_Set(up, 0.f, 0.f, 1.f);
+        Vec3_Cross(light->direction, up, ubo->sun_tangent);
         VectorNormalize(ubo->sun_tangent);
-        CrossProduct(light->direction, ubo->sun_tangent, ubo->sun_bitangent);
+        Vec3_Cross(light->direction, ubo->sun_tangent, ubo->sun_bitangent);
         VectorNormalize(ubo->sun_bitangent);
     }
 	// clouds
@@ -900,11 +900,11 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
 
         // compute approximation of reflected radiance from ground
         vec3_t ground_radiance;
-        VectorCopy(skyDesc->groundAlbedo, ground_radiance);
-        VectorScale(ground_radiance, max(0.f, light->direction_envmap[2]), ground_radiance); // N.L
-        VectorVectorScale(ground_radiance, light->color, ground_radiance);
+        Vec3_Copy(skyDesc->groundAlbedo, ground_radiance);
+        Vec3_Scale(ground_radiance, max(0.f, light->direction_envmap[2]), ground_radiance); // N.L
+        Vec3_ScaleVec3(ground_radiance, light->color, ground_radiance);
 
-		VectorCopy(ground_radiance, ubo->physical_sky_ground_radiance);
+		Vec3_Copy(ground_radiance, ubo->physical_sky_ground_radiance);
     }
 	else
 		skyNeedsUpdate = VK_FALSE;
@@ -925,7 +925,7 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
 	if (render_world && !(skyDesc->flags & PHYSICAL_SKY_FLAG_USE_SKYBOX))
 	{
 		vec3_t forward;
-		VectorScale(light->direction_envmap, -1.0f, forward);
+		Vec3_Scale(light->direction_envmap, -1.0f, forward);
 		UpdateTerrainShadowMapView(forward);
 	}
 

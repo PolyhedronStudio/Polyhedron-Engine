@@ -51,10 +51,10 @@ void weapon_railgun_fire(edict_t* ent)
 
     AngleVectors(ent->client->v_angle, forward, right, NULL);
 
-    VectorScale(forward, -3, ent->client->kick_origin);
+    Vec3_Scale(forward, -3, ent->client->kick_origin);
     ent->client->kick_angles[0] = -3;
 
-    VectorSet(offset, 0, 7, ent->viewheight - 8);
+    Vec3_Set(offset, 0, 7, ent->viewheight - 8);
     P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
     fire_rail(ent, start, forward, damage, kick);
 

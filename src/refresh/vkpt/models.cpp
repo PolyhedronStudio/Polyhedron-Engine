@@ -85,12 +85,12 @@ static void computeTangents(model_t * model)
                 float const * tC = (float const *)mesh->tex_coords + ((offset + iC) * 2);
 
                 vec3_t dP0, dP1;
-                VectorSubtract(pB, pA, dP0);
-                VectorSubtract(pC, pA, dP1);
+                Vec3_Subtract(pB, pA, dP0);
+                Vec3_Subtract(pC, pA, dP1);
 
                 vec2_t dt0, dt1;
-                Vector2Subtract(tB, tA, dt0);
-                Vector2Subtract(tC, tA, dt1);
+                Vec2_Subtract(tB, tA, dt0);
+                Vec2_Subtract(tC, tA, dt1);
 
                 float r = 1.f / (dt0[0] * dt1[1] - dt1[0] * dt0[1]);
 
@@ -104,13 +104,13 @@ static void computeTangents(model_t * model)
                     (dt0[0] * dP1[1] - dt1[0] * dP0[1]) * r,
                     (dt0[0] * dP1[2] - dt1[0] * dP0[2]) * r };
 
-                VectorAdd(stangents + (iA * 3), sdir, stangents + (iA * 3));
-                VectorAdd(stangents + (iB * 3), sdir, stangents + (iB * 3));
-                VectorAdd(stangents + (iC * 3), sdir, stangents + (iC * 3));
+                Vec3_Add(stangents + (iA * 3), sdir, stangents + (iA * 3));
+                Vec3_Add(stangents + (iB * 3), sdir, stangents + (iB * 3));
+                Vec3_Add(stangents + (iC * 3), sdir, stangents + (iC * 3));
 
-                VectorAdd(ttangents + (iA * 3), tdir, ttangents + (iA * 3));
-                VectorAdd(ttangents + (iB * 3), tdir, ttangents + (iB * 3));
-                VectorAdd(ttangents + (iC * 3), tdir, ttangents + (iC * 3));
+                Vec3_Add(ttangents + (iA * 3), tdir, ttangents + (iA * 3));
+                Vec3_Add(ttangents + (iB * 3), tdir, ttangents + (iB * 3));
+                Vec3_Add(ttangents + (iC * 3), tdir, ttangents + (iC * 3));
             }
 
             for (int idx_vert = 0; idx_vert < mesh->numverts; ++idx_vert)
@@ -122,13 +122,13 @@ static void computeTangents(model_t * model)
                 float * tangent = (float *)mesh->tangents + ((offset+idx_vert) * 4);
 
                 vec3_t t;
-                VectorScale(normal, DotProduct(normal, stan), t);
-                VectorSubtract(stan, t, t);
+                Vec3_Scale(normal, Vec3_Dot(normal, stan), t);
+                Vec3_Subtract(stan, t, t);
                 VectorNormalize2(t, tangent); // Graham-Schmidt : t = normalize(t - n * (n.t))
 
                 vec3_t cross;
-                CrossProduct(normal, t, cross);
-                float dot = DotProduct(cross, ttan);
+                Vec3_Cross(normal, t, cross);
+                float dot = Vec3_Dot(cross, ttan);
                 tangent[3] = dot < 0.0f ? -1.0f : 1.0f; // handedness
             }
         }
@@ -440,24 +440,24 @@ qerror_t MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length)
 				vec3_t *p2 = &dst_mesh->positions[i2];
 
 				vec3_t e1, e2, n;
-				VectorSubtract(*p1, *p0, e1);
-				VectorSubtract(*p2, *p0, e2);
-				CrossProduct(e2, e1, n);
+				Vec3_Subtract(*p1, *p0, e1);
+				Vec3_Subtract(*p2, *p0, e2);
+				Vec3_Cross(e2, e1, n);
 				VectorNormalize(n);
 
-				VectorCopy(n, dst_mesh->normals[i0]);
-				VectorCopy(n, dst_mesh->normals[i1]);
-				VectorCopy(n, dst_mesh->normals[i2]);
+				Vec3_Copy(n, dst_mesh->normals[i0]);
+				Vec3_Copy(n, dst_mesh->normals[i1]);
+				Vec3_Copy(n, dst_mesh->normals[i2]);
 			}
 		}
 
-		VectorVectorScale(mins, dst_frame->scale, mins);
-		VectorVectorScale(maxs, dst_frame->scale, maxs);
+		Vec3_ScaleVec3(mins, dst_frame->scale, mins);
+		Vec3_ScaleVec3(maxs, dst_frame->scale, maxs);
 
 		dst_frame->radius = RadiusFromBounds(mins, maxs);
 
-		VectorAdd(mins, dst_frame->translate, dst_frame->bounds[0]);
-		VectorAdd(maxs, dst_frame->translate, dst_frame->bounds[1]);
+		Vec3_Add(mins, dst_frame->translate, dst_frame->bounds[0]);
+		Vec3_Add(maxs, dst_frame->translate, dst_frame->bounds[1]);
 
 		src_frame = (dmd2frame_t *)((byte *)src_frame + header.framesize);
 		dst_frame++;
@@ -694,7 +694,7 @@ qerror_t MOD_LoadMD3_RTX(model_t *model, const void *rawdata, size_t length)
 	dst_frame = model->frames;
 	for (i = 0; i < header.num_frames; i++) {
 		LittleVector(src_frame->translate, dst_frame->translate);
-		VectorSet(dst_frame->scale, MD3_XYZ_SCALE, MD3_XYZ_SCALE, MD3_XYZ_SCALE);
+		Vec3_Set(dst_frame->scale, MD3_XYZ_SCALE, MD3_XYZ_SCALE, MD3_XYZ_SCALE);
 
 		LittleVector(src_frame->mins, dst_frame->bounds[0]);
 		LittleVector(src_frame->maxs, dst_frame->bounds[1]);

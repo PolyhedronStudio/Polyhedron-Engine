@@ -217,8 +217,8 @@ void Think_SpawnDoorTrigger(edict_t* ent)
     if (ent->flags & FL_TEAMSLAVE)
         return;     // only the team leader spawns a trigger
 
-    VectorCopy(ent->absmin, mins);
-    VectorCopy(ent->absmax, maxs);
+    Vec3_Copy(ent->absmin, mins);
+    Vec3_Copy(ent->absmax, maxs);
 
     for (other = ent->teamchain; other; other = other->teamchain) {
         AddPointToBounds(other->absmin, mins, maxs);
@@ -232,8 +232,8 @@ void Think_SpawnDoorTrigger(edict_t* ent)
     maxs[1] += 60;
 
     other = G_Spawn();
-    VectorCopy(mins, other->mins);
-    VectorCopy(maxs, other->maxs);
+    Vec3_Copy(mins, other->mins);
+    Vec3_Copy(maxs, other->maxs);
     other->owner = ent;
     other->solid = SOLID_TRIGGER;
     other->movetype = MOVETYPE_NONE;
@@ -339,18 +339,18 @@ void SP_func_door(edict_t* ent)
         ent->dmg = 2;
 
     // calculate second position
-    VectorCopy(ent->s.origin, ent->pos1);
+    Vec3_Copy(ent->s.origin, ent->pos1);
     abs_movedir[0] = fabs(ent->movedir[0]);
     abs_movedir[1] = fabs(ent->movedir[1]);
     abs_movedir[2] = fabs(ent->movedir[2]);
     ent->moveinfo.distance = abs_movedir[0] * ent->size[0] + abs_movedir[1] * ent->size[1] + abs_movedir[2] * ent->size[2] - st.lip;
-    VectorMA(ent->pos1, ent->moveinfo.distance, ent->movedir, ent->pos2);
+    Vec3_MA(ent->pos1, ent->moveinfo.distance, ent->movedir, ent->pos2);
 
     // if it starts open, switch the positions
     if (ent->spawnflags & DOOR_START_OPEN) {
-        VectorCopy(ent->pos2, ent->s.origin);
-        VectorCopy(ent->pos1, ent->pos2);
-        VectorCopy(ent->s.origin, ent->pos1);
+        Vec3_Copy(ent->pos2, ent->s.origin);
+        Vec3_Copy(ent->pos1, ent->pos2);
+        Vec3_Copy(ent->s.origin, ent->pos1);
     }
 
     ent->moveinfo.state = STATE_BOTTOM;
@@ -369,10 +369,10 @@ void SP_func_door(edict_t* ent)
     ent->moveinfo.accel = ent->accel;
     ent->moveinfo.decel = ent->decel;
     ent->moveinfo.wait = ent->wait;
-    VectorCopy(ent->pos1, ent->moveinfo.start_origin);
-    VectorCopy(ent->s.angles, ent->moveinfo.start_angles);
-    VectorCopy(ent->pos2, ent->moveinfo.end_origin);
-    VectorCopy(ent->s.angles, ent->moveinfo.end_angles);
+    Vec3_Copy(ent->pos1, ent->moveinfo.start_origin);
+    Vec3_Copy(ent->s.angles, ent->moveinfo.start_angles);
+    Vec3_Copy(ent->pos2, ent->moveinfo.end_origin);
+    Vec3_Copy(ent->s.angles, ent->moveinfo.end_angles);
 
     if (ent->spawnflags & 16)
         ent->s.effects |= EF_ANIM_ALL;

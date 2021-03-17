@@ -338,8 +338,8 @@ static void PF_setmodel(edict_t *ent, const char *name)
 // if it is an inline model, get the size information for it
     if (name[0] == '*') {
         mod = CM_InlineModel(&sv.cm, name);
-        VectorCopy(mod->mins, ent->mins);
-        VectorCopy(mod->maxs, ent->maxs);
+        Vec3_Copy(mod->mins, ent->mins);
+        Vec3_Copy(mod->maxs, ent->maxs);
         PF_LinkEdict(ent);
     }
 
@@ -563,8 +563,8 @@ static void PF_StartSound(edict_t *edict, int channel,
             // get client viewpos
             ps = &client->edict->client->ps;
             // N&C: FF Precision.
-            VectorAdd(ps->viewoffset, ps->pmove.origin, origin);
-            //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, origin);
+            Vec3_Add(ps->viewoffset, ps->pmove.origin, origin);
+            //Vec3_MA(ps->viewoffset, 0.125f, ps->pmove.origin, origin);
             leaf = CM_PointLeaf(&sv.cm, origin);
             area = CM_LeafArea(leaf);
             if (!CM_AreasConnected(&sv.cm, area, edict->areanum)) {
@@ -582,10 +582,10 @@ static void PF_StartSound(edict_t *edict, int channel,
 
         // use the entity origin unless it is a bmodel
         if (edict->solid == SOLID_BSP) {
-            VectorAvg(edict->mins, edict->maxs, origin);
-            VectorAdd(edict->s.origin, origin, origin);
+            Vec3_Average(edict->mins, edict->maxs, origin);
+            Vec3_Add(edict->s.origin, origin, origin);
         } else {
-            VectorCopy(edict->s.origin, origin);
+            Vec3_Copy(edict->s.origin, origin);
         }
 
         // reliable sounds will always have position explicitly set,
@@ -635,7 +635,7 @@ static void PF_StartSound(edict_t *edict, int channel,
         msg->timeofs = timeofs * 1000;
         msg->sendchan = sendchan;
         // N&C: FF Precision.
-        VectorCopy(msg->pos, origin);
+        Vec3_Copy(msg->pos, origin);
         //for (i = 0; i < 3; i++) {
         //    msg->pos[i] = origin[i] * 8;
         //}

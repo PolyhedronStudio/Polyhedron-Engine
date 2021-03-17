@@ -41,11 +41,11 @@ void weapon_flaregun_fire(edict_t* ent)
 
     // Setup the parameters used in the call to fire_flaregun() 
      // 
-    VectorSet(offset, 8, 8, ent->viewheight - 8);
+    Vec3_Set(offset, 8, 8, ent->viewheight - 8);
     AngleVectors(ent->client->v_angle, forward, right, NULL);
     P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
-    VectorScale(forward, -2, ent->client->kick_origin);
+    Vec3_Scale(forward, -2, ent->client->kick_origin);
     ent->client->kick_angles[0] = -1;
 
     // Make the flaregun actually shoot the flare 

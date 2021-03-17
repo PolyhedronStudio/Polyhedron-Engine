@@ -72,8 +72,8 @@ void SP_point_combat(edict_t* self)
     }
     self->solid = SOLID_TRIGGER;
     self->touch = point_combat_touch;
-    VectorSet(self->mins, -8, -8, -16);
-    VectorSet(self->maxs, 8, 8, 16);
+    Vec3_Set(self->mins, -8, -8, -16);
+    Vec3_Set(self->maxs, 8, 8, 16);
     self->svflags = SVF_NOCLIENT;
     gi.linkentity(self);
 }

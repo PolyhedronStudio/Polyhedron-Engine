@@ -72,17 +72,17 @@ static areanode_t *SV_CreateAreaNode(int depth, vec3_t mins, vec3_t maxs)
         return anode;
     }
 
-    VectorSubtract(maxs, mins, size);
+    Vec3_Subtract(maxs, mins, size);
     if (size[0] > size[1])
         anode->axis = 0;
     else
         anode->axis = 1;
 
     anode->dist = 0.5 * (maxs[anode->axis] + mins[anode->axis]);
-    VectorCopy(mins, mins1);
-    VectorCopy(mins, mins2);
-    VectorCopy(maxs, maxs1);
-    VectorCopy(maxs, maxs2);
+    Vec3_Copy(mins, mins1);
+    Vec3_Copy(mins, mins2);
+    Vec3_Copy(maxs, maxs1);
+    Vec3_Copy(maxs, maxs2);
 
     maxs1[anode->axis] = mins2[anode->axis] = anode->dist;
 
@@ -163,7 +163,7 @@ void SV_LinkEdict(cm_t *cm, edict_t *ent)
     mnode_t     *topnode;
 
     // set the size
-    VectorSubtract(ent->maxs, ent->mins, ent->size);
+    Vec3_Subtract(ent->maxs, ent->mins, ent->size);
 
     // set the abs box
     if (ent->solid == SOLID_BSP &&
@@ -187,8 +187,8 @@ void SV_LinkEdict(cm_t *cm, edict_t *ent)
         }
     } else {
         // normal
-        VectorAdd(ent->s.origin, ent->mins, ent->absmin);
-        VectorAdd(ent->s.origin, ent->maxs, ent->absmax);
+        Vec3_Add(ent->s.origin, ent->mins, ent->absmin);
+        Vec3_Add(ent->s.origin, ent->maxs, ent->absmax);
     }
 
     // because movement is clipped an epsilon away from an actual edge,
@@ -291,7 +291,7 @@ void PF_LinkEdict(edict_t *ent)
     // encode the size into the entity_state for client prediction
     switch (ent->solid) {
     case SOLID_BBOX:
-        if ((ent->svflags & SVF_DEADMONSTER) || VectorCompare(ent->mins, ent->maxs)) {
+        if ((ent->svflags & SVF_DEADMONSTER) || Vec3_Compare(ent->mins, ent->maxs)) {
             ent->s.solid = 0;
             sent->solid32 = 0;
         } else {
@@ -313,9 +313,9 @@ void PF_LinkEdict(edict_t *ent)
 
     // if first time, make sure old_origin is valid
     if (!ent->linkcount) {
-        VectorCopy(ent->s.origin, ent->s.old_origin);
+        Vec3_Copy(ent->s.origin, ent->s.old_origin);
 #if USE_FPS
-        VectorCopy(ent->s.origin, sent->create_origin);
+        Vec3_Copy(ent->s.origin, sent->create_origin);
         sent->create_framenum = sv.framenum;
 #endif
     }
@@ -324,7 +324,7 @@ void PF_LinkEdict(edict_t *ent)
 #if USE_FPS
     // save origin for later recovery
     i = sv.framenum & ENT_HISTORY_MASK;
-    VectorCopy(ent->s.origin, sent->history[i].origin);
+    Vec3_Copy(ent->s.origin, sent->history[i].origin);
     sent->history[i].framenum = sv.framenum;
 #endif
 
@@ -558,7 +558,7 @@ trace_t q_gameabi SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
         memset(&trace, 0, sizeof(trace));
         trace.fraction = 1;
         trace.ent = ge->edicts;
-        VectorCopy(end, trace.endpos);
+        Vec3_Copy(end, trace.endpos);
         sv.tracecount = 0;
         return trace;
     }

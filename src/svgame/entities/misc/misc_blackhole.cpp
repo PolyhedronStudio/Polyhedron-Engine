@@ -39,8 +39,8 @@ void SP_misc_blackhole(edict_t* ent)
 {
     ent->movetype = MOVETYPE_NONE;
     ent->solid = SOLID_NOT;
-    VectorSet(ent->mins, -64, -64, 0);
-    VectorSet(ent->maxs, 64, 64, 8);
+    Vec3_Set(ent->mins, -64, -64, 0);
+    Vec3_Set(ent->maxs, 64, 64, 8);
     ent->s.modelindex = gi.modelindex("models/objects/black/tris.md2");
     ent->s.renderfx = RF_TRANSLUCENT;
     ent->use = misc_blackhole_use;

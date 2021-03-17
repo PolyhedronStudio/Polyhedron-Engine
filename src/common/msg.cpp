@@ -1057,7 +1057,7 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
             pflags |= PS_M_GRAVITY;
     } else {
         // save previous state
-        VectorCopy(from->pmove.velocity, to->pmove.velocity);
+        Vec3_Copy(from->pmove.velocity, to->pmove.velocity);
         to->pmove.time = from->pmove.time;
         to->pmove.flags = from->pmove.flags;
         to->pmove.gravity = from->pmove.gravity;
@@ -1070,7 +1070,7 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
             pflags |= PS_M_DELTA_ANGLES;
     } else {
         // save previous state
-        VectorCopy(from->pmove.delta_angles, to->pmove.delta_angles);
+        Vec3_Copy(from->pmove.delta_angles, to->pmove.delta_angles);
     }
 
     if (from->viewoffset[0] != to->viewoffset[0] ||
@@ -1664,7 +1664,7 @@ void MSG_ReadDir(vec3_t dir)
     b = MSG_ReadByte();
     if (b < 0 || b >= NUMVERTEXNORMALS)
         Com_Error(ERR_DROP, "MSG_ReadDir: out of range");
-    VectorCopy(bytedirs[b], dir);
+    Vec3_Copy(bytedirs[b], dir);
 }
 
 void MSG_ReadDeltaUsercmd(const usercmd_t *from, usercmd_t *to)

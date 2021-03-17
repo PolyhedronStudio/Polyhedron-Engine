@@ -81,9 +81,9 @@ void R_TransformFrustum(void)
         v2[1] = v[1] * vright[1] + v[2] * vup[1] + v[0] * vpn[1];
         v2[2] = v[1] * vright[2] + v[2] * vup[2] + v[0] * vpn[2];
 
-        VectorCopy(v2, view_clipplanes[i].normal);
+        Vec3_Copy(v2, view_clipplanes[i].normal);
 
-        view_clipplanes[i].dist = DotProduct(modelorg, v2);
+        view_clipplanes[i].dist = Vec3_Dot(modelorg, v2);
     }
 }
 
@@ -95,9 +95,9 @@ R_TransformVector
 */
 void R_TransformVector(vec3_t in, vec3_t out)
 {
-    out[0] = DotProduct(in, vright);
-    out[1] = DotProduct(in, vup);
-    out[2] = DotProduct(in, vpn);
+    out[0] = Vec3_Dot(in, vright);
+    out[1] = Vec3_Dot(in, vup);
+    out[2] = Vec3_Dot(in, vpn);
 }
 
 #if 0
@@ -110,7 +110,7 @@ void R_TransformPlane(cplane_t *p, float *normal, float *dist)
 {
     float   d;
 
-    d = DotProduct(r_origin, p->normal);
+    d = Vec3_Dot(r_origin, p->normal);
     *dist = p->dist - d;
 // TODO: when we have rotating entities, this will need to use the view matrix
     R_TransformVector(p->normal, normal);
@@ -254,8 +254,8 @@ void R_SetupFrame(void)
 
 
 // build the transformation matrix for the given view angles
-    VectorCopy(r_newrefdef.vieworg, modelorg);
-    VectorCopy(r_newrefdef.vieworg, r_origin);
+    Vec3_Copy(r_newrefdef.vieworg, modelorg);
+    Vec3_Copy(r_newrefdef.vieworg, r_origin);
 
     AngleVectors(r_newrefdef.viewangles, vpn, vright, vup);
 
@@ -296,9 +296,9 @@ void R_SetupFrame(void)
     R_SetUpFrustumIndexes();
 
 // save base values
-    VectorCopy(vpn, base_vpn);
-    VectorCopy(vright, base_vright);
-    VectorCopy(vup, base_vup);
+    Vec3_Copy(vpn, base_vpn);
+    Vec3_Copy(vright, base_vright);
+    Vec3_Copy(vup, base_vup);
 
 // clear frame counts
     c_faceclip = 0;

@@ -138,8 +138,8 @@ void plat_spawn_inside_trigger(edict_t* ent)
         tmax[1] = tmin[1] + 1;
     }
 
-    VectorCopy(tmin, trigger->mins);
-    VectorCopy(tmax, trigger->maxs);
+    Vec3_Copy(tmin, trigger->mins);
+    Vec3_Copy(tmax, trigger->maxs);
 
     gi.linkentity(trigger);
 }
@@ -164,7 +164,7 @@ Set "sounds" to one of the following:
 */
 void SP_func_plat(edict_t* ent)
 {
-    VectorClear(ent->s.angles);
+    Vec3_Clear(ent->s.angles);
     ent->solid = SOLID_BSP;
     ent->movetype = MOVETYPE_PUSH;
 
@@ -194,8 +194,8 @@ void SP_func_plat(edict_t* ent)
         st.lip = 8;
 
     // pos1 is the top position, pos2 is the bottom
-    VectorCopy(ent->s.origin, ent->pos1);
-    VectorCopy(ent->s.origin, ent->pos2);
+    Vec3_Copy(ent->s.origin, ent->pos1);
+    Vec3_Copy(ent->s.origin, ent->pos2);
     if (st.height)
         ent->pos2[2] -= st.height;
     else
@@ -209,7 +209,7 @@ void SP_func_plat(edict_t* ent)
         ent->moveinfo.state = STATE_UP;
     }
     else {
-        VectorCopy(ent->pos2, ent->s.origin);
+        Vec3_Copy(ent->pos2, ent->s.origin);
         gi.linkentity(ent);
         ent->moveinfo.state = STATE_BOTTOM;
     }
@@ -218,10 +218,10 @@ void SP_func_plat(edict_t* ent)
     ent->moveinfo.accel = ent->accel;
     ent->moveinfo.decel = ent->decel;
     ent->moveinfo.wait = ent->wait;
-    VectorCopy(ent->pos1, ent->moveinfo.start_origin);
-    VectorCopy(ent->s.angles, ent->moveinfo.start_angles);
-    VectorCopy(ent->pos2, ent->moveinfo.end_origin);
-    VectorCopy(ent->s.angles, ent->moveinfo.end_angles);
+    Vec3_Copy(ent->pos1, ent->moveinfo.start_origin);
+    Vec3_Copy(ent->s.angles, ent->moveinfo.start_angles);
+    Vec3_Copy(ent->pos2, ent->moveinfo.end_origin);
+    Vec3_Copy(ent->s.angles, ent->moveinfo.end_angles);
 
     ent->moveinfo.sound_start = gi.soundindex("plats/pt1_strt.wav");
     ent->moveinfo.sound_middle = gi.soundindex("plats/pt1_mid.wav");

@@ -476,7 +476,7 @@ void SCR_SetCrosshairColor(void)
 
     health = cl->frame.ps.stats[STAT_HEALTH];
     if (health <= 0) {
-        VectorSet(scr.crosshair_color.u8, 0, 0, 0);
+        Vec3_Set(scr.crosshair_color.u8, 0, 0, 0);
         return;
     }
 
@@ -1470,7 +1470,7 @@ static void SCR_Sky_f(void)
         axis[2] = atof(clgi.Cmd_Argv(5));
     }
     else
-        VectorSet(axis, 0, 0, 1);
+        Vec3_Set(axis, 0, 0, 1);
 
     clgi.R_SetSky(name, rotate, axis);
 }

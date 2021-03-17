@@ -53,8 +53,8 @@ void SP_misc_deadsoldier(edict_t* ent)
     else
         ent->s.frame = 0;
 
-    VectorSet(ent->mins, -16, -16, 0);
-    VectorSet(ent->maxs, 16, 16, 16);
+    Vec3_Set(ent->mins, -16, -16, 0);
+    Vec3_Set(ent->maxs, 16, 16, 16);
     ent->deadflag = DEAD_DEAD;
     ent->takedamage = DAMAGE_YES;
     ent->svflags |= SVF_MONSTER | SVF_DEADMONSTER;

@@ -88,7 +88,7 @@ edict_t *findradius(edict_t *from, vec3_t org, float rad)
             continue;
         for (j = 0 ; j < 3 ; j++)
             eorg[j] = org[j] - (from->s.origin[j] + (from->mins[j] + from->maxs[j]) * 0.5);
-        if (VectorLength(eorg) > rad)
+        if (Vec3_Length(eorg) > rad)
             continue;
         return from;
     }
@@ -295,15 +295,15 @@ vec3_t MOVEDIR_DOWN = {0, 0, -1};
 
 void G_SetMovedir(vec3_t angles, vec3_t movedir)
 {
-    if (VectorCompare(angles, VEC_UP)) {
-        VectorCopy(MOVEDIR_UP, movedir);
-    } else if (VectorCompare(angles, VEC_DOWN)) {
-        VectorCopy(MOVEDIR_DOWN, movedir);
+    if (Vec3_Compare(angles, VEC_UP)) {
+        Vec3_Copy(MOVEDIR_UP, movedir);
+    } else if (Vec3_Compare(angles, VEC_DOWN)) {
+        Vec3_Copy(MOVEDIR_DOWN, movedir);
     } else {
         AngleVectors(angles, movedir, NULL, NULL);
     }
 
-    VectorClear(angles);
+    Vec3_Clear(angles);
 }
 
 

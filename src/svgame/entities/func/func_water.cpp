@@ -57,24 +57,24 @@ void SP_func_water(edict_t* self)
     }
 
     // calculate second position
-    VectorCopy(self->s.origin, self->pos1);
+    Vec3_Copy(self->s.origin, self->pos1);
     abs_movedir[0] = fabs(self->movedir[0]);
     abs_movedir[1] = fabs(self->movedir[1]);
     abs_movedir[2] = fabs(self->movedir[2]);
     self->moveinfo.distance = abs_movedir[0] * self->size[0] + abs_movedir[1] * self->size[1] + abs_movedir[2] * self->size[2] - st.lip;
-    VectorMA(self->pos1, self->moveinfo.distance, self->movedir, self->pos2);
+    Vec3_MA(self->pos1, self->moveinfo.distance, self->movedir, self->pos2);
 
     // if it starts open, switch the positions
     if (self->spawnflags & DOOR_START_OPEN) {
-        VectorCopy(self->pos2, self->s.origin);
-        VectorCopy(self->pos1, self->pos2);
-        VectorCopy(self->s.origin, self->pos1);
+        Vec3_Copy(self->pos2, self->s.origin);
+        Vec3_Copy(self->pos1, self->pos2);
+        Vec3_Copy(self->s.origin, self->pos1);
     }
 
-    VectorCopy(self->pos1, self->moveinfo.start_origin);
-    VectorCopy(self->s.angles, self->moveinfo.start_angles);
-    VectorCopy(self->pos2, self->moveinfo.end_origin);
-    VectorCopy(self->s.angles, self->moveinfo.end_angles);
+    Vec3_Copy(self->pos1, self->moveinfo.start_origin);
+    Vec3_Copy(self->s.angles, self->moveinfo.start_angles);
+    Vec3_Copy(self->pos2, self->moveinfo.end_origin);
+    Vec3_Copy(self->s.angles, self->moveinfo.end_angles);
 
     self->moveinfo.state = STATE_BOTTOM;
 

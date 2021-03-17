@@ -28,12 +28,12 @@ void teleporter_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t
     // unlink to make sure it can't possibly interfere with KillBox
     gi.unlinkentity(other);
 
-    VectorCopy(dest->s.origin, other->s.origin);
-    VectorCopy(dest->s.origin, other->s.old_origin);
+    Vec3_Copy(dest->s.origin, other->s.origin);
+    Vec3_Copy(dest->s.origin, other->s.old_origin);
     other->s.origin[2] += 10;
 
     // clear the velocity and hold them in place briefly
-    VectorClear(other->velocity);
+    Vec3_Clear(other->velocity);
     other->client->ps.pmove.time = 160 >> 3;     // hold time
     other->client->ps.pmove.flags |= PMF_TIME_TELEPORT;
 
@@ -46,9 +46,9 @@ void teleporter_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t
         other->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(dest->s.angles[i] - other->client->resp.cmd_angles[i]);
     }
 
-    VectorClear(other->s.angles);
-    VectorClear(other->client->ps.viewangles);
-    VectorClear(other->client->v_angle);
+    Vec3_Clear(other->s.angles);
+    Vec3_Clear(other->client->ps.viewangles);
+    Vec3_Clear(other->client->v_angle);
 
     // kill anything at the destination
     KillBox(other);
@@ -75,8 +75,8 @@ void SP_misc_teleporter(edict_t* ent)
     ent->s.sound = gi.soundindex("world/amb10.wav");
     ent->solid = SOLID_BBOX;
 
-    VectorSet(ent->mins, -32, -32, -24);
-    VectorSet(ent->maxs, 32, 32, -16);
+    Vec3_Set(ent->mins, -32, -32, -24);
+    Vec3_Set(ent->maxs, 32, 32, -16);
     gi.linkentity(ent);
 
     trig = G_Spawn();
@@ -84,9 +84,9 @@ void SP_misc_teleporter(edict_t* ent)
     trig->solid = SOLID_TRIGGER;
     trig->target = ent->target;
     trig->owner = ent;
-    VectorCopy(ent->s.origin, trig->s.origin);
-    VectorSet(trig->mins, -8, -8, 8);
-    VectorSet(trig->maxs, 8, 8, 24);
+    Vec3_Copy(ent->s.origin, trig->s.origin);
+    Vec3_Set(trig->mins, -8, -8, 8);
+    Vec3_Set(trig->maxs, 8, 8, 24);
     gi.linkentity(trig);
 
 }

@@ -230,14 +230,15 @@ public: // Operators
 		z = assigned.z;
 	}
 
+
 	// Special operator to convert into a vec3_t
-	inline operator float* ()
+	inline operator vec_t* ()
 	{
 		return &x;
 	}
 
 	// There are some special cases where this is needed
-	inline operator const float* () const
+	inline operator const vec_t* () const
 	{
 		return &x;
 	}

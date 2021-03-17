@@ -31,14 +31,14 @@ void MoveClientToIntermission(edict_t *ent)
 {
     if (deathmatch->value || coop->value)
         ent->client->showscores = qtrue;
-    VectorCopy(level.intermission_origin, ent->s.origin);
+    Vec3_Copy(level.intermission_origin, ent->s.origin);
 
     // N&C: FF Precision.
-    VectorCopy(level.intermission_origin, ent->client->ps.pmove.origin);
+    Vec3_Copy(level.intermission_origin, ent->client->ps.pmove.origin);
     //ent->client->ps.pmove.origin[0] = level.intermission_origin[0] * 8;
     //ent->client->ps.pmove.origin[1] = level.intermission_origin[1] * 8;
     //ent->client->ps.pmove.origin[2] = level.intermission_origin[2] * 8;
-    VectorCopy(level.intermission_angle, ent->client->ps.viewangles);
+    Vec3_Copy(level.intermission_angle, ent->client->ps.viewangles);
     ent->client->ps.pmove.type = PM_FREEZE;
     ent->client->ps.gunindex = 0;
     ent->client->ps.blend[3] = 0;
@@ -131,8 +131,8 @@ void BeginIntermission(edict_t *targ)
         }
     }
 
-    VectorCopy(ent->s.origin, level.intermission_origin);
-    VectorCopy(ent->s.angles, level.intermission_angle);
+    Vec3_Copy(ent->s.origin, level.intermission_origin);
+    Vec3_Copy(ent->s.angles, level.intermission_angle);
 
     // move all clients to the intermission point
     for (i = 0 ; i < maxclients->value ; i++) {

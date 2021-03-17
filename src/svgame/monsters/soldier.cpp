@@ -491,21 +491,21 @@ void soldier_fire(edict_t *self, int flash_number)
     G_ProjectSource(self->s.origin, monster_flash_offset[flash_index], forward, right, start);
 
     if (flash_number == 5 || flash_number == 6) {
-        VectorCopy(forward, aim);
+        Vec3_Copy(forward, aim);
     } else {
-        VectorCopy(self->enemy->s.origin, end);
+        Vec3_Copy(self->enemy->s.origin, end);
         end[2] += self->enemy->viewheight;
-        VectorSubtract(end, start, aim);
+        Vec3_Subtract(end, start, aim);
         vectoangles(aim, dir);
         AngleVectors(dir, forward, right, up);
 
         r = crandom() * 1000;
         u = crandom() * 500;
-        VectorMA(start, 8192, forward, end);
-        VectorMA(end, r, right, end);
-        VectorMA(end, u, up, end);
+        Vec3_MA(start, 8192, forward, end);
+        Vec3_MA(end, r, right, end);
+        Vec3_MA(end, u, up, end);
 
-        VectorSubtract(end, start, aim);
+        Vec3_Subtract(end, start, aim);
         VectorNormalize(aim);
     }
 
@@ -872,8 +872,8 @@ void soldier_fire7(edict_t *self)
 
 void soldier_dead(edict_t *self)
 {
-    VectorSet(self->mins, -16, -16, -24);
-    VectorSet(self->maxs, 16, 16, -8);
+    Vec3_Set(self->mins, -16, -16, -24);
+    Vec3_Set(self->maxs, 16, 16, -8);
     self->movetype = MOVETYPE_TOSS;
     self->svflags |= SVF_DEADMONSTER;
     self->nextthink = 0;
@@ -1183,8 +1183,8 @@ void SP_monster_soldier_x(edict_t *self)
 
     self->s.modelindex = gi.modelindex("models/monsters/soldier/tris.md2");
     self->monsterinfo.scale = MODEL_SCALE;
-    VectorSet(self->mins, -16, -16, -24);
-    VectorSet(self->maxs, 16, 16, 32);
+    Vec3_Set(self->mins, -16, -16, -24);
+    Vec3_Set(self->maxs, 16, 16, 32);
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
 

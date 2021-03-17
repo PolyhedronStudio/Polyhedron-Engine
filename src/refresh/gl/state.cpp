@@ -335,17 +335,17 @@ static void GL_RotateForViewer(void)
     matrix[0] = -glr.viewaxis[1][0];
     matrix[4] = -glr.viewaxis[1][1];
     matrix[8] = -glr.viewaxis[1][2];
-    matrix[12] = DotProduct(glr.viewaxis[1], glr.fd.vieworg);
+    matrix[12] = Vec3_Dot(glr.viewaxis[1], glr.fd.vieworg);
 
     matrix[1] = glr.viewaxis[2][0];
     matrix[5] = glr.viewaxis[2][1];
     matrix[9] = glr.viewaxis[2][2];
-    matrix[13] = -DotProduct(glr.viewaxis[2], glr.fd.vieworg);
+    matrix[13] = -Vec3_Dot(glr.viewaxis[2], glr.fd.vieworg);
 
     matrix[2] = -glr.viewaxis[0][0];
     matrix[6] = -glr.viewaxis[0][1];
     matrix[10] = -glr.viewaxis[0][2];
-    matrix[14] = DotProduct(glr.viewaxis[0], glr.fd.vieworg);
+    matrix[14] = Vec3_Dot(glr.viewaxis[0], glr.fd.vieworg);
 
     matrix[3] = 0;
     matrix[7] = 0;

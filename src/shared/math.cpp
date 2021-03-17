@@ -70,10 +70,10 @@ void MakeNormalVectors(const vec3_t forward, vec3_t right, vec3_t up)
     right[2] = forward[1];
     right[0] = forward[2];
 
-    d = DotProduct(right, forward);
-    VectorMA(right, -d, forward, right);
+    d = Vec3_Dot(right, forward);
+    Vec3_MA(right, -d, forward, right);
     VectorNormalize(right);
-    CrossProduct(right, forward, up);
+    Vec3_Cross(right, forward, up);
 }
 
 //#endif  // USE_CLIENT
@@ -255,7 +255,7 @@ int DirToByte(const vec3_t dir)
     bestd = 0;
     best = 0;
     for (i = 0; i < NUMVERTEXNORMALS; i++) {
-        d = DotProduct(dir, bytedirs[i]);
+        d = Vec3_Dot(dir, bytedirs[i]);
         if (d > bestd) {
             bestd = d;
             best = i;
@@ -272,7 +272,7 @@ void ByteToDir(int index, vec3_t dir)
         Com_Error(ERR_FATAL, "ByteToDir: illegal index");
     }
 
-    VectorCopy(bytedirs[index], dir);
+    Vec3_Copy(bytedirs[index], dir);
 }
 #endif
 
@@ -352,9 +352,9 @@ void RotatePointAroundVector(vec3_t dst, const vec3_t dir, const vec3_t point, f
 
     SetupRotationMatrix(matrix, dir, degrees);
 
-    dst[0] = DotProduct(matrix[0], point);
-    dst[1] = DotProduct(matrix[1], point);
-    dst[2] = DotProduct(matrix[2], point);
+    dst[0] = Vec3_Dot(matrix[0], point);
+    dst[1] = Vec3_Dot(matrix[1], point);
+    dst[2] = Vec3_Dot(matrix[2], point);
 }
 
 /*
@@ -408,9 +408,9 @@ void ProjectPointOnPlane(vec3_t dst, const vec3_t p, const vec3_t normal)
     vec3_t n;
     float inv_denom;
 
-    inv_denom = 1.0F / DotProduct(normal, normal);
+    inv_denom = 1.0F / Vec3_Dot(normal, normal);
 
-    d = DotProduct(normal, p) * inv_denom;
+    d = Vec3_Dot(normal, p) * inv_denom;
 
     n[0] = normal[0] * inv_denom;
     n[1] = normal[1] * inv_denom;

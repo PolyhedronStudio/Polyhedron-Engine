@@ -41,33 +41,33 @@ static inline float Q_fabs(float f)
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define CLAMP(a, m, M) MIN(MAX(a, m), M)
 
-#define DotProduct(x,y)         ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
-#define CrossProduct(v1,v2,cross) \
+#define Vec3_Dot(x,y)         ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
+#define Vec3_Cross(v1,v2,cross) \
         ((cross)[0]=(v1)[1]*(v2)[2]-(v1)[2]*(v2)[1], \
          (cross)[1]=(v1)[2]*(v2)[0]-(v1)[0]*(v2)[2], \
          (cross)[2]=(v1)[0]*(v2)[1]-(v1)[1]*(v2)[0])
-#define VectorSubtract(a,b,c) \
+#define Vec3_Subtract(a,b,c) \
         ((c)[0]=(a)[0]-(b)[0], \
          (c)[1]=(a)[1]-(b)[1], \
          (c)[2]=(a)[2]-(b)[2])
-#define VectorAdd(a,b,c) \
+#define Vec3_Add(a,b,c) \
         ((c)[0]=(a)[0]+(b)[0], \
          (c)[1]=(a)[1]+(b)[1], \
          (c)[2]=(a)[2]+(b)[2])
-#define VectorAdd3(a,b,c,d) \
+#define Vec3_Add3(a,b,c,d) \
         ((d)[0]=(a)[0]+(b)[0]+(c)[0], \
          (d)[1]=(a)[1]+(b)[1]+(c)[1], \
          (d)[2]=(a)[2]+(b)[2]+(c)[2])
-#define VectorCopy(a,b)     ((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2])
-#define VectorClear(a)      ((a)[0]=(a)[1]=(a)[2]=0)
-#define VectorNegate(a,b)   ((b)[0]=-(a)[0],(b)[1]=-(a)[1],(b)[2]=-(a)[2])
-#define VectorInverse(a)    ((a)[0]=-(a)[0],(a)[1]=-(a)[1],(a)[2]=-(a)[2])
-#define VectorSet(v, x, y, z)   ((v)[0]=(x),(v)[1]=(y),(v)[2]=(z))
-#define VectorAvg(a,b,c) \
+#define Vec3_Copy(a,b)     ((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2])
+#define Vec3_Clear(a)      ((a)[0]=(a)[1]=(a)[2]=0)
+#define Vec3_Negate(a,b)   ((b)[0]=-(a)[0],(b)[1]=-(a)[1],(b)[2]=-(a)[2])
+#define Vec3_Inverse(a)    ((a)[0]=-(a)[0],(a)[1]=-(a)[1],(a)[2]=-(a)[2])
+#define Vec3_Set(v, x, y, z)   ((v)[0]=(x),(v)[1]=(y),(v)[2]=(z))
+#define Vec3_Average(a,b,c) \
         ((c)[0]=((a)[0]+(b)[0])*0.5f, \
          (c)[1]=((a)[1]+(b)[1])*0.5f, \
          (c)[2]=((a)[2]+(b)[2])*0.5f)
-#define VectorMA(a,b,c,d) \
+#define Vec3_MA(a,b,c,d) \
         ((d)[0]=(a)[0]+(b)*(c)[0], \
          (d)[1]=(a)[1]+(b)*(c)[1], \
          (d)[2]=(a)[2]+(b)*(c)[2])
@@ -75,15 +75,15 @@ static inline float Q_fabs(float f)
         ((d)[0]=(a)[0]+(b)[0]*(c)[0], \
          (d)[1]=(a)[1]+(b)[1]*(c)[1], \
          (d)[2]=(a)[2]+(b)[2]*(c)[2])
-#define VectorEmpty(v) ((v)[0]==0&&(v)[1]==0&&(v)[2]==0)
-#define VectorCompare(v1,v2)    ((v1)[0]==(v2)[0]&&(v1)[1]==(v2)[1]&&(v1)[2]==(v2)[2])
-#define VectorLength(v)     (sqrt(DotProduct((v),(v))))
-#define VectorLengthSquared(v)      (DotProduct((v),(v)))
-#define VectorScale(in,scale,out) \
+#define Vec3_Empty(v) ((v)[0]==0&&(v)[1]==0&&(v)[2]==0)
+#define Vec3_Compare(v1,v2)    ((v1)[0]==(v2)[0]&&(v1)[1]==(v2)[1]&&(v1)[2]==(v2)[2])
+#define Vec3_Length(v)     (sqrt(Vec3_Dot((v),(v))))
+#define Vec3_LengthSquared(v)      (Vec3_Dot((v),(v)))
+#define Vec3_Scale(in,scale,out) \
         ((out)[0]=(in)[0]*(scale), \
          (out)[1]=(in)[1]*(scale), \
          (out)[2]=(in)[2]*(scale))
-#define VectorVectorScale(in,scale,out) \
+#define Vec3_ScaleVec3(in,scale,out) \
         ((out)[0]=(in)[0]*(scale)[0], \
          (out)[1]=(in)[1]*(scale)[1], \
          (out)[2]=(in)[2]*(scale)[2])
@@ -96,25 +96,25 @@ static inline float Q_fabs(float f)
         ((d)[0]=LerpAngle((a)[0],(b)[0],c), \
          (d)[1]=LerpAngle((a)[1],(b)[1],c), \
          (d)[2]=LerpAngle((a)[2],(b)[2],c))
-#define LerpVector(a,b,c,d) \
+#define Vec3_Lerp(a,b,c,d) \
     ((d)[0]=(a)[0]+(c)*((b)[0]-(a)[0]), \
      (d)[1]=(a)[1]+(c)*((b)[1]-(a)[1]), \
      (d)[2]=(a)[2]+(c)*((b)[2]-(a)[2]))
-#define LerpVector2(a,b,c,d,e) \
+#define Vec3_Lerp2(a,b,c,d,e) \
     ((e)[0]=(a)[0]*(c)+(b)[0]*(d), \
      (e)[1]=(a)[1]*(c)+(b)[1]*(d), \
      (e)[2]=(a)[2]*(c)+(b)[2]*(d))
-#define PlaneDiff(v,p)   (DotProduct(v,(p)->normal)-(p)->dist)
+#define PlaneDiff(v,p)   (Vec3_Dot(v,(p)->normal)-(p)->dist)
 
-#define Vector2Subtract(a,b,c)  ((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1])
-#define Vector2Add(a,b,c)       ((c)[0]=(a)[0]+(b)[0],(c)[1]=(a)[1]+(b)[1])
+#define Vec2_Subtract(a,b,c)  ((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1])
+#define Vec2_Add(a,b,c)       ((c)[0]=(a)[0]+(b)[0],(c)[1]=(a)[1]+(b)[1])
 
-#define Vector4Subtract(a,b,c)  ((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1],(c)[2]=(a)[2]-(b)[2],(c)[3]=(a)[3]-(b)[3])
-#define Vector4Add(a,b,c)       ((c)[0]=(a)[0]+(b)[0],(c)[1]=(a)[1]+(b)[1],(c)[2]=(a)[2]+(b)[2],(c)[3]=(a)[3]+(b)[3])
-#define Vector4Copy(a,b)        ((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
-#define Vector4Clear(a)         ((a)[0]=(a)[1]=(a)[2]=(a)[3]=0)
-#define Vector4Negate(a,b)      ((b)[0]=-(a)[0],(b)[1]=-(a)[1],(b)[2]=-(a)[2],(b)[3]=-(a)[3])
-#define Vector4Set(v, a, b, c, d)   ((v)[0]=(a),(v)[1]=(b),(v)[2]=(c),(v)[3]=(d))
+#define Vec4_Subtract(a,b,c)  ((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1],(c)[2]=(a)[2]-(b)[2],(c)[3]=(a)[3]-(b)[3])
+#define Vec4_Add(a,b,c)       ((c)[0]=(a)[0]+(b)[0],(c)[1]=(a)[1]+(b)[1],(c)[2]=(a)[2]+(b)[2],(c)[3]=(a)[3]+(b)[3])
+#define Vec4_Copy(a,b)        ((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
+#define Vec4_Clear(a)         ((a)[0]=(a)[1]=(a)[2]=(a)[3]=0)
+#define Vec4_Negate(a,b)      ((b)[0]=-(a)[0],(b)[1]=-(a)[1],(b)[2]=-(a)[2],(b)[3]=-(a)[3])
+#define Vec4_Set(v, a, b, c, d)   ((v)[0]=(a),(v)[1]=(b),(v)[2]=(c),(v)[3]=(d))
 
 void SetupRotationMatrix(vec3_t matrix[3], const vec3_t dir, float degrees);
 void RotatePointAroundVector(vec3_t dst, const vec3_t dir, const vec3_t point, float degrees);
@@ -179,7 +179,7 @@ static inline vec_t PlaneDiffFast(vec3_t v, cplane_t* p)
 static inline void AnglesToAxis(vec3_t angles, vec3_t axis[3])
 {
     AngleVectors(angles, axis[0], axis[1], axis[2]);
-    VectorInverse(axis[1]);
+    Vec3_Inverse(axis[1]);
 }
 
 static inline void TransposeAxis(vec3_t axis[3])
@@ -203,10 +203,10 @@ static inline void RotatePoint(vec3_t point, vec3_t axis[3])
 {
     vec3_t temp;
 
-    VectorCopy(point, temp);
-    point[0] = DotProduct(temp, axis[0]);
-    point[1] = DotProduct(temp, axis[1]);
-    point[2] = DotProduct(temp, axis[2]);
+    Vec3_Copy(point, temp);
+    point[0] = Vec3_Dot(temp, axis[0]);
+    point[1] = Vec3_Dot(temp, axis[1]);
+    point[2] = Vec3_Dot(temp, axis[2]);
 }
 
 static inline unsigned npot32(unsigned k)

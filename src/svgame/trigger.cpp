@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 void InitTrigger(edict_t *self)
 {
-    if (!VectorCompare(self->s.angles, vec3_origin))
+    if (!Vec3_Compare(self->s.angles, vec3_origin))
         G_SetMovedir(self->s.angles, self->movedir);
 
     self->solid = SOLID_TRIGGER;
@@ -76,11 +76,11 @@ void Touch_Multi(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
     } else
         return;
 
-    if (!VectorCompare(self->movedir, vec3_origin)) {
+    if (!Vec3_Compare(self->movedir, vec3_origin)) {
         vec3_t  forward;
 
         AngleVectors(other->s.angles, forward, NULL, NULL);
-        if (DotProduct(forward, self->movedir) < 0)
+        if (Vec3_Dot(forward, self->movedir) < 0)
             return;
     }
 

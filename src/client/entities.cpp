@@ -67,14 +67,14 @@ entity_update_new(centity_t *ent, const entity_state_t *state, const vec_t *orig
         state->event == EV_OTHER_TELEPORT ||
         (state->renderfx & (RF_FRAMELERP | RF_BEAM))) {
         // no lerping if teleported
-        VectorCopy(origin, ent->lerp_origin);
+        Vec3_Copy(origin, ent->lerp_origin);
         return;
     }
 
     // old_origin is valid for new entities,
     // so use it as starting point for interpolating between
-    VectorCopy(state->old_origin, ent->prev.origin);
-    VectorCopy(state->old_origin, ent->lerp_origin);
+    Vec3_Copy(state->old_origin, ent->prev.origin);
+    Vec3_Copy(state->old_origin, ent->lerp_origin);
 }
 
 static inline void
@@ -111,7 +111,7 @@ entity_update_old(centity_t *ent, const entity_state_t *state, const vec_t *orig
         ent->prev_frame = state->frame;
 #endif
         // no lerping if teleported or morphed
-        VectorCopy(origin, ent->lerp_origin);
+        Vec3_Copy(origin, ent->lerp_origin);
         return;
     }
 
@@ -174,8 +174,8 @@ static void entity_update(const entity_state_t *state)
     // work around Q2PRO server bandwidth optimization
     if (entity_optimized(state)) {
         // N&C: FF Precision.
-        VectorCopy(cl.frame.ps.pmove.origin, origin_v);
-        //VectorScale(cl.frame.ps.pmove.origin, 0.125f, origin_v);
+        Vec3_Copy(cl.frame.ps.pmove.origin, origin_v);
+        //Vec3_Scale(cl.frame.ps.pmove.origin, 0.125f, origin_v);
         origin = origin_v;
     } else {
         origin = state->origin;
@@ -271,10 +271,10 @@ static void set_active_state(void)
     } else {
         // set initial cl.predicted_origin and cl.predicted_angles
         // N&C: FF Precision.
-        VectorCopy(cl.frame.ps.pmove.origin, cl.predicted_origin);
-        VectorCopy(cl.frame.ps.pmove.velocity, cl.predicted_velocity);
-        //VectorScale(cl.frame.ps.pmove.origin, 0.125f, cl.predicted_origin);
-        //VectorScale(cl.frame.ps.pmove.velocity, 0.125f, cl.predicted_velocity);
+        Vec3_Copy(cl.frame.ps.pmove.origin, cl.predicted_origin);
+        Vec3_Copy(cl.frame.ps.pmove.velocity, cl.predicted_velocity);
+        //Vec3_Scale(cl.frame.ps.pmove.origin, 0.125f, cl.predicted_origin);
+        //Vec3_Scale(cl.frame.ps.pmove.velocity, 0.125f, cl.predicted_velocity);
         if (cl.frame.ps.pmove.type < PM_DEAD &&
             cls.serverProtocol > PROTOCOL_VERSION_DEFAULT) {
             // enhanced servers don't send viewangles
@@ -282,7 +282,7 @@ static void set_active_state(void)
             CL_GM_PredictAngles();
         } else {
             // just use what server provided
-            VectorCopy(cl.frame.ps.viewangles, cl.predicted_angles);
+            Vec3_Copy(cl.frame.ps.viewangles, cl.predicted_angles);
         }
     }
 
@@ -426,7 +426,7 @@ void CL_DeltaFrame(void)
     if (cls.demo.playback) {
         // this delta has nothing to do with local viewangles,
         // clear it to avoid interfering with demo freelook hack
-        VectorClear(cl.frame.ps.pmove.delta_angles);
+        Vec3_Clear(cl.frame.ps.pmove.delta_angles);
     }
 
     if (cl.oldframe.ps.pmove.type != cl.frame.ps.pmove.type) {
@@ -600,21 +600,21 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
 
     if (!entnum || entnum == listener_entnum) {
         // should this ever happen?
-        VectorCopy(listener_origin, org);
+        Vec3_Copy(listener_origin, org);
         return;
     }
 
     // interpolate origin
     // FIXME: what should be the sound origin point for RF_BEAM entities?
     ent = &cs.entities[entnum];
-    LerpVector(ent->prev.origin, ent->current.origin, cl.lerpfrac, org);
+    Vec3_Lerp(ent->prev.origin, ent->current.origin, cl.lerpfrac, org);
 
     // offset the origin for BSP models
     if (ent->current.solid == PACKED_BSP) {
         cm = cl.model_clip[ent->current.modelindex];
         if (cm) {
-            VectorAvg(cm->mins, cm->maxs, mid);
-            VectorAdd(org, mid, org);
+            Vec3_Average(cm->mins, cm->maxs, mid);
+            Vec3_Add(org, mid, org);
         }
     }
 }
@@ -622,7 +622,7 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
 void CL_GetViewVelocity(vec3_t vel)
 {
     // N&C: FF Precision.
-    VectorCopy(cl.frame.ps.pmove.velocity, vel);
+    Vec3_Copy(cl.frame.ps.pmove.velocity, vel);
     // restore value from 12.3 fixed point
 	//const float scale_factor = 1.0f / 8.0f;
 
@@ -642,5 +642,5 @@ void CL_GetEntitySoundVelocity(int ent, vec3_t vel)
 
 	old = &cs.entities[ent];
 
-	VectorSubtract(old->current.origin, old->prev.origin, vel);
+	Vec3_Subtract(old->current.origin, old->prev.origin, vel);
 }

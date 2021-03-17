@@ -78,7 +78,7 @@ void train_wait(edict_t* self)
         else if (self->spawnflags & TRAIN_TOGGLE) { // && wait < 0
             train_next(self);
             self->spawnflags &= ~TRAIN_START_ON;
-            VectorClear(self->velocity);
+            Vec3_Clear(self->velocity);
             self->nextthink = 0;
         }
 
@@ -122,8 +122,8 @@ again:
             return;
         }
         first = qfalse;
-        VectorSubtract(ent->s.origin, self->mins, self->s.origin);
-        VectorCopy(self->s.origin, self->s.old_origin);
+        Vec3_Subtract(ent->s.origin, self->mins, self->s.origin);
+        Vec3_Copy(self->s.origin, self->s.old_origin);
         self->s.event = EV_OTHER_TELEPORT;
         gi.linkentity(self);
         goto again;
@@ -138,10 +138,10 @@ again:
         self->s.sound = self->moveinfo.sound_middle;
     }
 
-    VectorSubtract(ent->s.origin, self->mins, dest);
+    Vec3_Subtract(ent->s.origin, self->mins, dest);
     self->moveinfo.state = STATE_TOP;
-    VectorCopy(self->s.origin, self->moveinfo.start_origin);
-    VectorCopy(dest, self->moveinfo.end_origin);
+    Vec3_Copy(self->s.origin, self->moveinfo.start_origin);
+    Vec3_Copy(dest, self->moveinfo.end_origin);
     Brush_Move_Calc(self, dest, train_wait);
     self->spawnflags |= TRAIN_START_ON;
 }
@@ -153,10 +153,10 @@ void train_resume(edict_t* self)
 
     ent = self->target_ent;
 
-    VectorSubtract(ent->s.origin, self->mins, dest);
+    Vec3_Subtract(ent->s.origin, self->mins, dest);
     self->moveinfo.state = STATE_TOP;
-    VectorCopy(self->s.origin, self->moveinfo.start_origin);
-    VectorCopy(dest, self->moveinfo.end_origin);
+    Vec3_Copy(self->s.origin, self->moveinfo.start_origin);
+    Vec3_Copy(dest, self->moveinfo.end_origin);
     Brush_Move_Calc(self, dest, train_wait);
     self->spawnflags |= TRAIN_START_ON;
 }
@@ -176,7 +176,7 @@ void func_train_find(edict_t* self)
     }
     self->target = ent->target;
 
-    VectorSubtract(ent->s.origin, self->mins, self->s.origin);
+    Vec3_Subtract(ent->s.origin, self->mins, self->s.origin);
     gi.linkentity(self);
 
     // if not triggered, start immediately
@@ -198,7 +198,7 @@ void train_use(edict_t* self, edict_t* other, edict_t* activator)
         if (!(self->spawnflags & TRAIN_TOGGLE))
             return;
         self->spawnflags &= ~TRAIN_START_ON;
-        VectorClear(self->velocity);
+        Vec3_Clear(self->velocity);
         self->nextthink = 0;
     }
     else {
@@ -213,7 +213,7 @@ void SP_func_train(edict_t* self)
 {
     self->movetype = MOVETYPE_PUSH;
 
-    VectorClear(self->s.angles);
+    Vec3_Clear(self->s.angles);
     self->blocked = train_blocked;
     if (self->spawnflags & TRAIN_BLOCK_STOPS)
         self->dmg = 0;
