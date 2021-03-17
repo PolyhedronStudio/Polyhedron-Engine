@@ -519,7 +519,7 @@ qboolean KillBox(edict_t *ent)
     trace_t     tr;
 
     while (1) {
-        tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, MASK_PLAYERSOLID);
+        tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, CONTENTS_MASK_PLAYERSOLID);
         if (!tr.ent)
             break;
 

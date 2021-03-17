@@ -74,7 +74,7 @@ void SP_func_object(edict_t* self)
     if (self->spawnflags & 4)
         self->s.effects |= EF_ANIM_ALLFAST;
 
-    self->clipmask = MASK_MONSTERSOLID;
+    self->clipmask = CONTENTS_MASK_MONSTERSOLID;
 
     gi.linkentity(self);
 }

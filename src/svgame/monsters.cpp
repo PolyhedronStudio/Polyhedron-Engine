@@ -154,7 +154,7 @@ void M_CheckGround(edict_t *ent)
     point[1] = ent->s.origin[1];
     point[2] = ent->s.origin[2] - 0.25;
 
-    trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, point, ent, MASK_MONSTERSOLID);
+    trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, point, ent, CONTENTS_MASK_MONSTERSOLID);
 
     // check steepness
     if (trace.plane.normal[2] < 0.7 && !trace.startsolid) {
@@ -188,7 +188,7 @@ void M_CatagorizePosition(edict_t *ent)
     point[2] = ent->s.origin[2] + ent->mins[2] + 1;
     cont = gi.pointcontents(point);
 
-    if (!(cont & MASK_WATER)) {
+    if (!(cont & CONTENTS_MASK_LIQUID)) {
         ent->waterlevel = 0;
         ent->watertype = 0;
         return;
@@ -198,13 +198,13 @@ void M_CatagorizePosition(edict_t *ent)
     ent->waterlevel = 1;
     point[2] += 26;
     cont = gi.pointcontents(point);
-    if (!(cont & MASK_WATER))
+    if (!(cont & CONTENTS_MASK_LIQUID))
         return;
 
     ent->waterlevel = 2;
     point[2] += 22;
     cont = gi.pointcontents(point);
-    if (cont & MASK_WATER)
+    if (cont & CONTENTS_MASK_LIQUID)
         ent->waterlevel = 3;
 }
 
@@ -292,7 +292,7 @@ void M_droptofloor(edict_t *ent)
     Vec3_Copy(ent->s.origin, end);
     end[2] -= 256;
 
-    trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
+    trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
 
     if (trace.fraction == 1 || trace.allsolid)
         return;
@@ -512,7 +512,7 @@ qboolean monster_start(edict_t *self)
     self->air_finished = level.time + 12;
     self->use = monster_use;
     self->max_health = self->health;
-    self->clipmask = MASK_MONSTERSOLID;
+    self->clipmask = CONTENTS_MASK_MONSTERSOLID;
 
     self->s.skinnum = 0;
     self->deadflag = DEAD_NO;

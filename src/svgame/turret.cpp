@@ -399,7 +399,7 @@ void SP_turret_driver(edict_t *self)
     self->s.renderfx |= RF_FRAMELERP;
     self->takedamage = DAMAGE_AIM;
     self->use = monster_use;
-    self->clipmask = MASK_MONSTERSOLID;
+    self->clipmask = CONTENTS_MASK_MONSTERSOLID;
     Vec3_Copy(self->s.origin, self->s.old_origin);
     self->monsterinfo.aiflags |= AI_STAND_GROUND | AI_DUCKED;
 

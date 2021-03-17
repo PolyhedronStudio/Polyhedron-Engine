@@ -80,13 +80,26 @@ static struct {
         // The ground plane.
         cplane_t plane;
 
-        // The ground texinfo.
-        csurface_t* texInfo;
+        // The ground surface, used for texinfo.
+        csurface_t* surface;
 
         // The ground contents.
         int32_t contents;
     } ground;
 } pm_locals;
+
+
+/**
+ * @brief Water level
+ */
+typedef enum {
+    WATER_UNKNOWN = -1,
+    WATER_NONE,
+    WATER_FEET,
+    WATER_WAIST,
+    WATER_UNDER
+} pm_water_level_t;
+
 
 //
 //=============================================================================
@@ -492,39 +505,39 @@ static void PM_StepSlideMove(void) {
 //===============
 //
 static void PM_Friction(void) {
-    Vector vel1 = pm->s.velocity;
+    Vector vel1 = pm->state.velocity;
 
     // Set Z to 0 if on ground, so we can do a proper speed value calculation.
-    if (pm->s.flags & PMF_ON_GROUND) {
+    if (pm->state.flags & PMF_ON_GROUND) {
         vel1.z = 0.0;
     }
 
     // If the speed is considerably lower than 1.0f, set X and Y velocity to 0.
-    const float speed = vel2.Length();
+    const float speed = vel1.Length();
 
     if (speed < 1.0f) {
-        pm->s.velocity.x = pm->s.velocity.y = 0.0f;
+        pm->state.velocity[0] = pm->state.velocity[1] = 0.0f;
         return;
     }
 
     // Make sure that the "control" speed does not exceed PM_SPEED_STOP
-    const float control = Maxf(PM_SPEED_STOP, speed);
+    const float control = std::fmaxf(PM_SPEED_STOP, speed);
 
     // The actual friction value we'll be using, set it based on several
     // conditions.
     float friction = 0.0;
 
-    if (pm->s.type == PM_SPECTATOR) { // spectator friction
+    if (pm->state.type == PM_SPECTATOR) { // spectator friction
         friction = PM_FRICT_SPECTATOR;
     }
-    else if (pm->s.flags & PMF_ON_LADDER) { // ladder friction
+    else if (pm->state.flags & PMF_ON_LADDER) { // ladder friction
         friction = PM_FRICT_LADDER;
     }
-    else if (pm->water_level > WATER_FEET) { // water friction
+    else if (pm->waterLevel > WATER_FEET) { // water friction
         friction = PM_FRICT_WATER;
     }
-    else if (pm->s.flags & PMF_ON_GROUND) { // ground friction
-        if (pm_locals.ground.texinfo && (pm_locals.ground.texinfo->flags & SURF_SLICK)) {
+    else if (pm->state.flags & PMF_ON_GROUND) { // ground friction
+        if (pm_locals.ground.surface && (pm_locals.ground.surface->flags & SURF_SLICK)) {
             friction = PM_FRICT_GROUND_SLICK;
         }
         else {
@@ -536,7 +549,7 @@ static void PM_Friction(void) {
     }
 
     // Scale the velocity, taking care to not reverse direction
-    const float scale = Maxf(0.0, speed - (friction * control * pm_locals.time)) / speed;
+    const float scale = std::fmaxf(0.0, speed - (friction * control * pm_locals.time)) / speed;
 
     // Calculate new velocity.
     Vector vel2 = pm->state.velocity;
@@ -559,7 +572,7 @@ static void PM_Accelerate(const Vector &dir, float speed, float accel) {
     // 
     // We then subtract it from the intended speed value to give us
     // the added speed left to add.
-    const float current_speed = Vector(pm->s.velocity) * dir;
+    const float current_speed = Vector(pm->state.velocity) * dir;
     const float add_speed = speed - current_speed;
 
     if (add_speed <= 0.0f) {
@@ -575,9 +588,8 @@ static void PM_Accelerate(const Vector &dir, float speed, float accel) {
     }
 
     // Set the new player move state velocity.
-    //Vector vel2 = pm->state.velocity;
-    // (add multiplied PM_SPEED_CURRENT * current to pm->state.velocity).
-    Vector(pm->state.velocity).vel2.FMAF(accel_speed, dir).CopyToArray(pm->state.velocity);
+    // (add multiplied accel_speed * dir to pm->state.velocity).
+    Vector(pm->state.velocity).FMAF(accel_speed, dir).CopyToArray(pm->state.velocity);
 }
 
 //
@@ -589,7 +601,7 @@ static void PM_Accelerate(const Vector &dir, float speed, float accel) {
 //
 static void PM_Gravity(void) {
 
-    if (pm->s.type == PM_HOOK_PULL) {
+    if (pm->state.type == PM_HOOK_PULL) {
         return;
     }
 
@@ -616,29 +628,29 @@ static void PM_Currents(void) {
     Vector current = Vector::Zero;
 
     // add water currents
-    if (pm->water_level) {
-        if (pm->water_type & CONTENTS_CURRENT_0) {
+    if (pm->waterLevel) {
+        if (pm->waterType & CONTENTS_CURRENT_0) {
             current.x += 1.0;
         }
-        if (pm->water_type & CONTENTS_CURRENT_90) {
+        if (pm->waterType & CONTENTS_CURRENT_90) {
             current.y += 1.0;
         }
-        if (pm->water_type & CONTENTS_CURRENT_180) {
+        if (pm->waterType & CONTENTS_CURRENT_180) {
             current.x -= 1.0;
         }
-        if (pm->water_type & CONTENTS_CURRENT_270) {
+        if (pm->waterType & CONTENTS_CURRENT_270) {
             current.y -= 1.0;
         }
-        if (pm->water_type & CONTENTS_CURRENT_UP) {
+        if (pm->waterType & CONTENTS_CURRENT_UP) {
             current.z += 1.0;
         }
-        if (pm->water_type & CONTENTS_CURRENT_DOWN) {
+        if (pm->waterType & CONTENTS_CURRENT_DOWN) {
             current.z -= 1.0;
         }
     }
 
     // add conveyer belt velocities
-    if (pm->ground_entity) {
+    if (pm->groundEntity) {
         if (pm_locals.ground.contents & CONTENTS_CURRENT_0) {
             current.x += 1.0;
         }
@@ -667,7 +679,6 @@ static void PM_Currents(void) {
     // Set the new player move state velocity.
     // (add multiplied PM_SPEED_CURRENT * current to pm->state.velocity).
     Vector(pm->state.velocity).FMAF(PM_SPEED_CURRENT, current).CopyToArray(pm->state.velocity);
-//    pm->s.velocity = Vec3_Fmaf(pm->s.velocity, PM_SPEED_CURRENT, current);
 }
 
 //
@@ -678,13 +689,13 @@ static void PM_Currents(void) {
 // impact the ground on this frame, false otherwise.
 //===============
 //
-static bool Pm_CheckTrickJump(void) {
+static bool PM_CheckTrickJump(void) {
 
     if (pm->groundEntity) {
         return false;
     }
 
-    if (pm_locals.previousVelocity.z < PM_SPEED_UP) {
+    if (pm_locals.previousVelocity[2] < PM_SPEED_UP) {
         return false;
     }
 
@@ -710,10 +721,10 @@ static bool Pm_CheckTrickJump(void) {
 // Returns True if the player is attempting to leave the ground via grappling hook.
 //===============
 //
-static bool Pm_CheckHookJump(void) {
+static bool PM_CheckHookJump(void) {
 
     if ((pm->state.type == PM_HOOK_PULL || pm->state.type == PM_HOOK_SWING) 
-        && pm->state.velocity.z > 4.0f) 
+        && pm->state.velocity[2] > 4.0f) 
     {
 
         pm->state.flags &= ~PMF_ON_GROUND;
@@ -725,116 +736,264 @@ static bool Pm_CheckHookJump(void) {
     return false;
 }
 
+//
+//===============
+// PM_CheckHook
+// 
+//===============
+//
+static void PM_CheckHook(void) {
+    ////// hookers only
+    //if (pm->state.type != PM_HOOK_PULL && pm->state.type != PM_HOOK_SWING) {
+    //    pm->state.flags &= ~PMF_HOOK_RELEASED;
+    //    return;
+    //}
+
+    //// get chain length
+    //if (pm->state.type == PM_HOOK_PULL) {
+
+    //    // if we let go of hook, just go back to normal
+    //    if (!(pm->cmd.buttons & BUTTON_HOOK)) {
+    //        pm->state.type = PM_NORMAL;
+    //        return;
+    //    }
+
+    //    pm->cmd.forwardmove = pm->cmd.sidemove = 0;
+
+    //    // Pull physics
+    //    // Calculate the distance vector.
+    //    const float dist = Vector(pm->state.hook_position - pm->state.origin).Length();
+    //    // Normalize the pm->state.velocity vector to make it directional.
+    //    Vector(pm->state.velocity).Normalized().CopyToArray(pm->state.velocity);
+
+    //    if (dist > 8.0f && !PM_CheckHookJump()) {
+    //        // Scale PM State velocity.
+    //        Vector(Vector(pm->s.velocity) * pm->hook_pull_speed).CopyToArray(pm->state.velocity);
+    //    }
+    //    else {
+    //        // Zero out PM State velocity.
+    //        Vector::Zero.CopyToArray(pm->s.velocity);
+    //    }
+    //}
+    //else {
+
+    //    // Check for disable
+    //    if (!(pm->state.flags & PMF_HOOK_RELEASED)) {
+    //        if (!(pm->cmd.buttons & BUTTON_HOOK)) {
+    //            pm->state.flags |= PMF_HOOK_RELEASED;
+    //        }
+    //    }
+    //    else {
+    //        // If we let go of hook, just go back to normal.
+    //        if (pm->cmd.buttons & BUTTON_HOOK) {
+    //            pm->state.type = PM_NORMAL;
+    //            pm->state.flags &= ~PMF_HOOK_RELEASED;
+    //            return;
+    //        }
+    //    }
+
+    //    const float hook_rate = (pm->hook_pull_speed / 1.5f) * pm_locals.time;
+
+    //    // Chain physics
+    //    // Grow/shrink chain based on input
+    //    if ((pm->cmd.up > 0 || !(pm->state.flags & PMF_HOOK_RELEASED)) && (pm->state.hook_length > PM_HOOK_MIN_DIST)) {
+    //        pm->state.hook_length = std::fmaxf(pm->state.hook_length - hook_rate, PM_HOOK_MIN_DIST);
+    //    }
+    //    else if ((pm->cmd.up < 0) && (pm->state.hook_length < PM_HOOK_MAX_DIST)) {
+    //        pm->state.hook_length = std::fminf(pm->state.hook_length + hook_rate, PM_HOOK_MAX_DIST);
+    //    }
+
+    //    Vector chainVec     = Vector(pm->state.hook_position) - Vector(pm->state.origin);
+    //    float chainLength   = chainVec.Length();
+
+    //    // If player's location is already within the chain's reach
+    //    if (chainLength <= pm->state.hook_length) {
+    //        return;
+    //    }
+
+    //    // Reel us in!
+    //    Vector velocityPart;
+
+    //    // Determine player's velocity component of chain vector
+    //    velocityPart = chainVec * ((Vector(pm->state.velocity ) * chainVec) / (chainVec * chainVec));
+
+    //    // Restrainment default force
+    //    float force = (chainLength - pm->state.hook_length) * 5.0f;
+
+    //    // If player's velocity heading is away from the hook
+    //    if (Vector(pm->state.velocity) * chainVec) < 0.0f) {
+
+    //        // If chain has streched for 24 units
+    //        if (chainLength > pm->state.hook_length + 24.0f) {
+
+    //            // Remove player's velocity component moving away from hook
+    //            Vector(Vector(pm->state.velocity) - velocityPart)).CopyToArray(pm->state.velocity);
+    //        }
+    //    }
+    //    else { // If player's velocity heading is towards the hook
+    //        float length = velocityPart.Length();
+    //        if (length < force) {
+    //            force -= length;
+    //        }
+    //        else {
+    //            force = 0.0f;
+    //        }
+    //    }
+
+    //    if (force) {
+    //        // Applies chain restrainment
+    //        chainVec.Normalize();
+    //        Vector(pm->state.velocity).FMAF(force, chainVec).CopyToArray(pm->state.velocity);
+    //    }
+    //}
+}
+
 /**
- * @brief
+ * @brief Checks for ground interaction, enabling trick jumping and dealing with landings.
  */
-static void Pm_CheckHook(void) {
-    //// hookers only
-    if (pm->state.type != PM_HOOK_PULL && pm->state.type != PM_HOOK_SWING) {
-        pm->state.flags &= ~PMF_HOOK_RELEASED;
+//
+//===============
+// PM_CheckGround
+// 
+// Checks for ground interaction, enabling trick jumping and dealing with landings.
+//===============
+//
+static void PM_CheckGround(void) {
+    if (PM_CheckHookJump()) {
         return;
     }
 
-    // get chain length
-    if (pm->state.type == PM_HOOK_PULL) {
+    // If we jumped, or been pushed, do not attempt to seek ground
+    if (pm->state.flags & (PMF_JUMPED | PMF_TIME_PUSHED | PMF_ON_LADDER)) {
+        return;
+    }
 
-        // if we let go of hook, just go back to normal
-        if (!(pm->cmd.buttons & BUTTON_HOOK)) {
-            pm->state.type = PM_NORMAL;
-            return;
+    // Seek ground eagerly if the player wishes to trick jump
+    const bool trick_jump = PM_CheckTrickJump();
+    Vector position;
+
+    if (trick_jump) {
+        position = Vector(pm->state.origin).FMAF(pm_locals.time, pm->state.velocity);
+        position.z -= PM_GROUND_DIST_TRICK;
+    }
+    else {
+        position = pm->state.origin;
+        position.z -= PM_GROUND_DIST;
+    }
+
+    // Seek the ground
+    trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, position, pm->mins, pm->maxs);
+
+    // Store ground information.
+    pm_locals.ground.plane = trace.plane;
+    pm_locals.ground.surface = trace.surface;
+    pm_locals.ground.contents = trace.contents;
+
+    // If we hit an upward facing plane, make it our ground
+    if (trace.ent && trace.plane.normal[2] >= PM_STEP_NORMAL) {
+        // If we had no ground, then handle landing events
+        if (!pm->groundEntity) {
+            // Any landing terminates the water jump
+            if (pm->state.flags & PMF_TIME_WATER_JUMP) {
+                pm->state.flags &= ~PMF_TIME_WATER_JUMP;
+                pm->state.time = 0;
+            }
+
+            // Hard landings disable jumping briefly
+            if (pm_locals.previousVelocity[2] <= PM_SPEED_LAND) {
+                pm->state.flags |= PMF_TIME_LAND;
+                pm->state.time = 1;
+
+                if (pm_locals.previousVelocity[2] <= PM_SPEED_FALL) {
+                    pm->state.time = 16;
+
+                    if (pm_locals.previousVelocity[2] <= PM_SPEED_FALL_FAR) {
+                        pm->state.time = 256;
+                    }
+                }
+            }
+            else { // Soft landings with upward momentum grant trick jumps
+                if (trick_jump) {
+                    pm->state.flags |= PMF_TIME_TRICK_JUMP;
+                    pm->state.time = 32;
+                }
+            }
         }
 
-        pm->cmd.forward = pm->cmd.right = 0;
+        // Save a reference to the ground
+        pm->state.flags |= PMF_ON_GROUND;
+        pm->groundEntity = trace.ent;
 
-        // Pull physics
-        // Calculate the distance vector.
-        const float dist = Vector(pm->state.hook_position - pm->state.origin).Length();
-        // Normalize the pm->state.velocity vector to make it directional.
-        Vector(pm->state.velocity).Normalized().CopyToArray(pm->state.velocity);
+        // And sink down to it if not trick jumping
+        if (!(pm->state.flags & PMF_TIME_TRICK_JUMP)) {
+            // Copy trace result into the PM State origin.
+            Vector(trace.endpos).CopyToArray(pm->state.origin);
 
-        if (dist > 8.0f && !PM_CheckHookJump()) {
-            // Scale PM State velocity.
-            Vector(Vector(pm->s.velocity) * pm->hook_pull_speed).CopyToArray(pm->state.velocity);
-        }
-        else {
-            // Zero out PM State velocity.
-            Vector::Zero.CopyToArray(pm->s.velocity);
+            // Clip velocity, and copy results back into PM State velocity.
+            PM_ClipVelocity(pm->state.velocity, trace.plane.normal, PM_CLIP_BOUNCE).CopyToArray(pm->state.velocity);
         }
     }
     else {
+        pm->state.flags &= ~PMF_ON_GROUND;
+        pm->groundEntity = NULL;
+    }
 
-        // Check for disable
-        if (!(pm->state.flags & PMF_HOOK_RELEASED)) {
+    // always touch the entity, even if we couldn't stand on it
+    PM_TouchEntity(trace.ent);
+}
 
-            if (!(pm->cmd.buttons & BUTTON_HOOK)) {
-                pm->state.flags |= PMF_HOOK_RELEASED;
+ //
+ //===============
+ // PM_CheckWater
+ // 
+ // Checks for water interaction, accounting for player ducking, etc.
+ //===============
+ //
+static void PM_CheckWater(void) {
+    // Reset water levels first.
+    pm->waterLevel = WATER_NONE;
+    pm->waterType = 0;
+
+    // Calculate view height aka GROUND_DIST origin position.
+    vec3_t pos;// = pm->state.origin;
+    // Copy the vec3_t state origin into the vec3_t pos.
+    Vec3_Copy(pm->state.origin, pos);
+    pos[2] = pm->state.origin[2] + pm->mins[2] + PM_GROUND_DIST;
+
+    // Test contents.
+    int32_t contents = pm->PointContents(pos);
+    if (contents & CONTENTS_MASK_LIQUID) {
+        // Set water FEET level.
+        pm->waterType = contents;
+        pm->waterLevel = WATER_FEET;
+
+        // Reset Z position for testing.
+        pos[2] = pm->state.origin[2];
+
+        // Test contents.
+        contents = pm->PointContents(pos);
+        if (contents & CONTENTS_MASK_LIQUID) {
+            // Set water WAIST level.
+            pm->waterType |= contents;
+            pm->waterLevel = WATER_WAIST;
+
+            // Calculate the new Z.
+            pos[2] = pm->state.origin[2] + pm->viewHeight + 1.0f;
+
+            // Test contents.
+            contents = pm->PointContents(pos);
+            if (contents & CONTENTS_MASK_LIQUID) {
+                // Set water UNDER level.
+                pm->waterType |= contents;
+                pm->waterLevel = WATER_UNDER;
+
+                pm->state.flags |= PMF_UNDER_WATER;
             }
-        }
-        else {
-
-            // If we let go of hook, just go back to normal.
-            if (pm->cmd.buttons & BUTTON_HOOK) {
-                pm->state.type = PM_NORMAL;
-                pm->state.flags &= ~PMF_HOOK_RELEASED;
-                return;
-            }
-        }
-
-        const float hook_rate = (pm->hook_pull_speed / 1.5f) * pm_locals.time;
-
-        // Chain physics
-        // Grow/shrink chain based on input
-        if ((pm->cmd.up > 0 || !(pm->s.flags & PMF_HOOK_RELEASED)) && (pm->s.hook_length > PM_HOOK_MIN_DIST)) {
-            pm->s.hook_length = Maxf(pm->s.hook_length - hook_rate, PM_HOOK_MIN_DIST);
-        }
-        else if ((pm->cmd.up < 0) && (pm->s.hook_length < PM_HOOK_MAX_DIST)) {
-            pm->s.hook_length = Minf(pm->s.hook_length + hook_rate, PM_HOOK_MAX_DIST);
-        }
-
-        Vector chainVec     = Vector(pm->s.hook_position) - Vector(pm->s.origin);
-        float chainLength   = chainVec.Length();
-
-        // If player's location is already within the chain's reach
-        if (chainLength <= pm->s.hook_length) {
-            return;
-        }
-
-        // Reel us in!
-        Vector velocityPart;
-
-        // Determine player's velocity component of chain vector
-        velocityPart = chainVec * ((Vector(pm->s.velocity ) * chain_vec) / (chainVec * chainVec));
-
-        // Restrainment default force
-        float force = (chainLength - pm->s.hook_length) * 5.0f;
-
-        // If player's velocity heading is away from the hook
-        if (Vector(pm->s.velocity) * chainVec) < 0.0f) {
-
-            // If chain has streched for 24 units
-            if (chainLength > pm->s.hook_length + 24.0f) {
-
-                // Remove player's velocity component moving away from hook
-                Vector(Vector(pm->state.velocity) - velocityPart)).CopyToArray(pm->state.velocity);
-            }
-        }
-        else { // If player's velocity heading is towards the hook
-            float length = velocityPart.Length();
-            if (length < force) {
-                force -= length;
-            }
-            else {
-                force = 0.0f;
-            }
-        }
-
-        if (force) {
-            // Applies chain restrainment
-            chainVec.Normalize();
-            Vector(pm->state.velocity).FMAF(force, chainVec).CopyToArray(pm->state.velocity);
         }
     }
 }
+
+
 
 //
 //===============

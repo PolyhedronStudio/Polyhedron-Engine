@@ -383,7 +383,7 @@ static void PF_configstring(int index, const char *val)
     maxlen = CS_SIZE(index);
     if (len >= maxlen) {
         Com_WPrintf(
-            "%s: index %d overflowed: %"PRIz" > %"PRIz"\n",
+            "%s: index %d overflowed: %" PRIz " > %" PRIz "\n",
             __func__, index, len, maxlen - 1);
         len = maxlen - 1;
     }

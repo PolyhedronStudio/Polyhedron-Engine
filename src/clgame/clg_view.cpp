@@ -290,7 +290,7 @@ static void CLG_SetupThirdPersionView(void)
     Vec3_MA(cl->refdef.vieworg, -range * rscale, cl->v_right, cl->refdef.vieworg);
 
     clgi.CM_BoxTrace(&trace, cl->playerEntityOrigin, cl->refdef.vieworg,
-        mins, maxs, cl->bsp->nodes, MASK_SOLID);
+        mins, maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
     if (trace.fraction != 1.0f) {
         Vec3_Copy(trace.endpos, cl->refdef.vieworg);
     }

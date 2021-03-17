@@ -58,7 +58,7 @@ void UpdateChaseCam(edict_t *ent)
     if (!targ->groundentity)
         o[2] += 16;
 
-    trace = gi.trace(ownerv, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
+    trace = gi.trace(ownerv, vec3_origin, vec3_origin, o, targ, CONTENTS_MASK_SOLID);
 
     Vec3_Copy(trace.endpos, goal);
 
@@ -67,7 +67,7 @@ void UpdateChaseCam(edict_t *ent)
     // pad for floors and ceilings
     Vec3_Copy(goal, o);
     o[2] += 6;
-    trace = gi.trace(goal, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
+    trace = gi.trace(goal, vec3_origin, vec3_origin, o, targ, CONTENTS_MASK_SOLID);
     if (trace.fraction < 1) {
         Vec3_Copy(trace.endpos, goal);
         goal[2] -= 6;
@@ -75,7 +75,7 @@ void UpdateChaseCam(edict_t *ent)
 
     Vec3_Copy(goal, o);
     o[2] -= 6;
-    trace = gi.trace(goal, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
+    trace = gi.trace(goal, vec3_origin, vec3_origin, o, targ, CONTENTS_MASK_SOLID);
     if (trace.fraction < 1) {
         Vec3_Copy(trace.endpos, goal);
         goal[2] += 6;

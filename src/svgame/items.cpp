@@ -886,7 +886,7 @@ void droptofloor(edict_t *ent)
     v = tv(0, 0, -128);
     Vec3_Add(ent->s.origin, v, dest);
 
-    tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, dest, ent, MASK_SOLID);
+    tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
     if (tr.startsolid) {
         gi.dprintf("droptofloor: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
         G_FreeEdict(ent);

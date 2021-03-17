@@ -558,7 +558,7 @@ static void PM_AddCurrents(vec3_t wishvel)
 
 
     // Water Current Velocities.
-    if (pm->watertype & MASK_CURRENT) {
+    if (pm->watertype & CONTENTS_MASK_CURRENT) {
         Vec3_Clear(v);
 
         if (pm->watertype & CONTENTS_CURRENT_0)
@@ -1006,16 +1006,16 @@ static void PM_CategorizePosition(void)
     point[2] = pml.origin[2] + pm->mins[2] + 1;
     cont = pm->pointcontents(point);
 
-    if (cont & MASK_WATER) {
+    if (cont & CONTENTS_MASK_LIQUID) {
         pm->watertype = cont;
         pm->waterlevel = 1;
         point[2] = pml.origin[2] + pm->mins[2] + sample1;
         cont = pm->pointcontents(point);
-        if (cont & MASK_WATER) {
+        if (cont & CONTENTS_MASK_LIQUID) {
             pm->waterlevel = 2;
             point[2] = pml.origin[2] + pm->mins[2] + sample2;
             cont = pm->pointcontents(point);
-            if (cont & MASK_WATER)
+            if (cont & CONTENTS_MASK_LIQUID)
                 pm->waterlevel = 3;
         }
     }

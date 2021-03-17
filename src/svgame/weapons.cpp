@@ -40,7 +40,7 @@ static void check_dodge(edict_t *self, vec3_t start, vec3_t dir, int speed)
             return;
     }
     Vec3_MA(start, 8192, dir, end);
-    tr = gi.trace(start, NULL, NULL, end, self, MASK_SHOT);
+    tr = gi.trace(start, NULL, NULL, end, self, CONTENTS_MASK_SHOT);
     if ((tr.ent) && (tr.ent->svflags & SVF_MONSTER) && (tr.ent->health > 0) && (tr.ent->monsterinfo.dodge) && infront(tr.ent, self)) {
         Vec3_Subtract(tr.endpos, start, v);
         eta = (Vec3_Length(v) - tr.ent->maxs[0]) / speed;
@@ -84,7 +84,7 @@ qboolean fire_hit(edict_t *self, vec3_t aim, int damage, int kick)
 
     Vec3_MA(self->s.origin, range, dir, point);
 
-    tr = gi.trace(self->s.origin, NULL, NULL, point, self, MASK_SHOT);
+    tr = gi.trace(self->s.origin, NULL, NULL, point, self, CONTENTS_MASK_SHOT);
     if (tr.fraction < 1) {
         if (!tr.ent->takedamage)
             return qfalse;
@@ -133,9 +133,9 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
     float       u;
     vec3_t      water_start;
     qboolean    water = qfalse;
-    int         content_mask = MASK_SHOT | MASK_WATER;
+    int         content_mask = CONTENTS_MASK_SHOT | CONTENTS_MASK_LIQUID;
 
-    tr = gi.trace(self->s.origin, NULL, NULL, start, self, MASK_SHOT);
+    tr = gi.trace(self->s.origin, NULL, NULL, start, self, CONTENTS_MASK_SHOT);
     if (!(tr.fraction < 1.0)) {
         vectoangles(aimdir, dir);
         AngleVectors(dir, forward, right, up);
@@ -146,16 +146,16 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
         Vec3_MA(end, r, right, end);
         Vec3_MA(end, u, up, end);
 
-        if (gi.pointcontents(start) & MASK_WATER) {
+        if (gi.pointcontents(start) & CONTENTS_MASK_LIQUID) {
             water = qtrue;
             Vec3_Copy(start, water_start);
-            content_mask &= ~MASK_WATER;
+            content_mask &= ~CONTENTS_MASK_LIQUID;
         }
 
         tr = gi.trace(start, NULL, NULL, end, self, content_mask);
 
         // see if we hit water
-        if (tr.contents & MASK_WATER) {
+        if (tr.contents & CONTENTS_MASK_LIQUID) {
             int     color;
 
             water = qtrue;
@@ -196,7 +196,7 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
             }
 
             // re-trace ignoring water this time
-            tr = gi.trace(water_start, NULL, NULL, end, self, MASK_SHOT);
+            tr = gi.trace(water_start, NULL, NULL, end, self, CONTENTS_MASK_SHOT);
         }
     }
 
@@ -227,10 +227,10 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
         Vec3_Subtract(tr.endpos, water_start, dir);
         VectorNormalize(dir);
         Vec3_MA(tr.endpos, -2, dir, pos);
-        if (gi.pointcontents(pos) & MASK_WATER)
+        if (gi.pointcontents(pos) & CONTENTS_MASK_LIQUID)
             Vec3_Copy(pos, tr.endpos);
         else
-            tr = gi.trace(pos, NULL, NULL, water_start, tr.ent, MASK_WATER);
+            tr = gi.trace(pos, NULL, NULL, water_start, tr.ent, CONTENTS_MASK_LIQUID);
 
         Vec3_Add(water_start, tr.endpos, pos);
         Vec3_Scale(pos, 0.5, pos);
@@ -335,7 +335,7 @@ void fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
     vectoangles(dir, bolt->s.angles);
     Vec3_Scale(dir, speed, bolt->velocity);
     bolt->movetype = MOVETYPE_FLYMISSILE;
-    bolt->clipmask = MASK_SHOT;
+    bolt->clipmask = CONTENTS_MASK_SHOT;
     bolt->solid = SOLID_BBOX;
     bolt->s.effects |= effect;
     Vec3_Clear(bolt->mins);
@@ -355,7 +355,7 @@ void fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
     if (self->client)
         check_dodge(self, bolt->s.origin, dir, speed);
 
-    tr = gi.trace(self->s.origin, NULL, NULL, bolt->s.origin, bolt, MASK_SHOT);
+    tr = gi.trace(self->s.origin, NULL, NULL, bolt->s.origin, bolt, CONTENTS_MASK_SHOT);
     if (tr.fraction < 1.0) {
         Vec3_MA(bolt->s.origin, -10, dir, bolt->s.origin);
         bolt->touch(bolt, tr.ent, NULL, NULL);
@@ -463,7 +463,7 @@ void fire_grenade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int sp
     Vec3_MA(grenade->velocity, crandom() * 10.0, right, grenade->velocity);
     Vec3_Set(grenade->avelocity, 300, 300, 300);
     grenade->movetype = MOVETYPE_BOUNCE;
-    grenade->clipmask = MASK_SHOT;
+    grenade->clipmask = CONTENTS_MASK_SHOT;
     grenade->solid = SOLID_BBOX;
     grenade->s.effects |= EF_GRENADE;
     Vec3_Clear(grenade->mins);
@@ -496,7 +496,7 @@ void fire_grenade2(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
     Vec3_MA(grenade->velocity, crandom() * 10.0, right, grenade->velocity);
     Vec3_Set(grenade->avelocity, 300, 300, 300);
     grenade->movetype = MOVETYPE_BOUNCE;
-    grenade->clipmask = MASK_SHOT;
+    grenade->clipmask = CONTENTS_MASK_SHOT;
     grenade->solid = SOLID_BBOX;
     grenade->s.effects |= EF_GRENADE;
     Vec3_Clear(grenade->mins);
@@ -584,7 +584,7 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
     vectoangles(dir, rocket->s.angles);
     Vec3_Scale(dir, speed, rocket->velocity);
     rocket->movetype = MOVETYPE_FLYMISSILE;
-    rocket->clipmask = MASK_SHOT;
+    rocket->clipmask = CONTENTS_MASK_SHOT;
     rocket->solid = SOLID_BBOX;
     rocket->s.effects |= EF_ROCKET;
     Vec3_Clear(rocket->mins);
@@ -625,7 +625,7 @@ void fire_rail(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
     Vec3_Copy(start, from);
     ignore = self;
     water = qfalse;
-    mask = MASK_SHOT | CONTENTS_SLIME | CONTENTS_LAVA;
+    mask = CONTENTS_MASK_SHOT | CONTENTS_SLIME | CONTENTS_LAVA;
     while (ignore) {
         tr = gi.trace(from, NULL, NULL, end, ignore, mask);
 
@@ -837,7 +837,7 @@ void fire_bfg(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, fl
     vectoangles(dir, bfg->s.angles);
     Vec3_Scale(dir, speed, bfg->velocity);
     bfg->movetype = MOVETYPE_FLYMISSILE;
-    bfg->clipmask = MASK_SHOT;
+    bfg->clipmask = CONTENTS_MASK_SHOT;
     bfg->solid = SOLID_BBOX;
     bfg->s.effects |= EF_BFG | EF_ANIM_ALLFAST;
     Vec3_Clear(bfg->mins);
@@ -969,7 +969,7 @@ void fire_flaregun(edict_t *self, vec3_t start, vec3_t aimdir,
 	Vec3_Scale(aimdir, speed, flare->velocity);
 	Vec3_Set(flare->avelocity, 300, 300, 300);
 	flare->movetype = MOVETYPE_BOUNCE;
-	flare->clipmask = MASK_SHOT;
+	flare->clipmask = CONTENTS_MASK_SHOT;
 	flare->solid = SOLID_BBOX;
 
 	const float size = 4;

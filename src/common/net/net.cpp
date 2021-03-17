@@ -523,8 +523,8 @@ static void NET_Stats_f(void)
     Com_Printf("Total errors: %"PRIu64"/%"PRIu64" (send/recv)\n",
                net_send_errors, net_recv_errors);
 #endif
-    Com_Printf("Current upload rate: %"PRIz" bytes/sec\n", net_rate_up);
-    Com_Printf("Current download rate: %"PRIz" bytes/sec\n", net_rate_dn);
+    Com_Printf("Current upload rate: %" PRIz " bytes/sec\n", net_rate_up);
+    Com_Printf("Current download rate: %" PRIz " bytes/sec\n", net_rate_dn);
 }
 
 static size_t NET_UpRate_m(char *buffer, size_t size)

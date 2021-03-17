@@ -63,7 +63,7 @@ qboolean CL_WriteDemoMessage(sizebuf_t *buf)
     if (ret != buf->cursize)
         goto fail;
 
-    Com_DDPrintf("%s: wrote %"PRIz" bytes\n", __func__, buf->cursize);
+    Com_DDPrintf("%s: wrote %" PRIz " bytes\n", __func__, buf->cursize);
 
     SZ_Clear(buf);
     return qtrue;
@@ -212,13 +212,13 @@ void CL_EmitDemoFrame(void)
     emit_delta_frame(oldframe, &cl.frame, lastframe, FRAME_CUR);
 
     if (cls.demo.buffer.cursize + msg_write.cursize > cls.demo.buffer.maxsize) {
-        Com_DPrintf("Demo frame overflowed (%"PRIz" + %"PRIz" > %"PRIz")\n",
+        Com_DPrintf("Demo frame overflowed (% " PRIz " + %" PRIz " > %" PRIz ")\n",
                     cls.demo.buffer.cursize, msg_write.cursize, cls.demo.buffer.maxsize);
         cls.demo.frames_dropped++;
 
         // warn the user if drop rate is too high
         if (cls.demo.frames_written < 20 && cls.demo.frames_dropped == 50)
-            Com_WPrintf("Too many demo frames don't fit into %"PRIz" bytes.\n"
+            Com_WPrintf("Too many demo frames don't fit into %" PRIz " bytes.\n"
                         "Try to increase 'cl_demomsglen' value and restart recording.\n",
                         cls.demo.buffer.maxsize);
     } else {
@@ -1218,7 +1218,7 @@ void CL_CleanupDemos(void)
     }
 
     if (total)
-        Com_DPrintf("Freed %"PRIz" bytes of snaps\n", total);
+        Com_DPrintf("Freed %" PRIz " bytes of snaps\n", total);
 
     memset(&cls.demo, 0, sizeof(cls.demo));
 

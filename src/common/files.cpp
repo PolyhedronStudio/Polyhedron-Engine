@@ -1308,7 +1308,7 @@ static ssize_t open_from_pak(file_t *file, pack_t *pack, packfile_t *entry, qboo
         pack_get(pack);
     }
 
-    FS_DPrintf("%s: %s/%s: %"PRIz" bytes\n",
+    FS_DPrintf("%s: %s/%s: %" PRIz " bytes\n",
                __func__, pack->filename, entry->name, file->length);
 
     return file->length;
@@ -1348,7 +1348,7 @@ static ssize_t open_from_disk(file_t *file, const char *fullpath)
     file->error = Q_ERR_SUCCESS;
     file->length = info.size;
 
-    FS_DPrintf("%s: %s: %"PRIz" bytes\n", __func__, fullpath, info.size);
+    FS_DPrintf("%s: %s: %" PRIz " bytes\n", __func__, fullpath, info.size);
     return info.size;
 
 fail:
@@ -2456,7 +2456,7 @@ static pack_t *load_zip_file(const char *packfile)
 // non-zero for sfx?
     extra_bytes = header_pos - central_end;
     if (extra_bytes) {
-        Com_Printf("%s has %"PRIz" extra bytes at the beginning, funny sfx archive?\n",
+        Com_Printf("%s has %" PRIz " extra bytes at the beginning, funny sfx archive?\n",
                    packfile, extra_bytes);
     }
 
@@ -3180,7 +3180,7 @@ recheck:
                 }
                 if (!FS_pathcmp(entry->name, normalized)) {
                     // found it!
-                    Com_Printf("%s/%s (%"PRIz" bytes)\n", pak->filename,
+                    Com_Printf("%s/%s (%" PRIz " bytes)\n", pak->filename,
                                normalized, entry->filelen);
                     if (!report_all) {
                         return;
@@ -3226,7 +3226,7 @@ recheck:
 #endif
 
             if (ret == Q_ERR_SUCCESS) {
-                Com_Printf("%s (%"PRIz" bytes)\n", fullpath, info.size);
+                Com_Printf("%s (%" PRIz " bytes)\n", fullpath, info.size);
                 if (!report_all) {
                     return;
                 }

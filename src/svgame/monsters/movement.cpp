@@ -68,7 +68,7 @@ realcheck:
     start[0] = stop[0] = (mins[0] + maxs[0]) * 0.5;
     start[1] = stop[1] = (mins[1] + maxs[1]) * 0.5;
     stop[2] = start[2] - 2 * STEPSIZE;
-    trace = gi.trace(start, vec3_origin, vec3_origin, stop, ent, MASK_MONSTERSOLID);
+    trace = gi.trace(start, vec3_origin, vec3_origin, stop, ent, CONTENTS_MASK_MONSTERSOLID);
 
     if (trace.fraction == 1.0)
         return qfalse;
@@ -80,7 +80,7 @@ realcheck:
             start[0] = stop[0] = x ? maxs[0] : mins[0];
             start[1] = stop[1] = y ? maxs[1] : mins[1];
 
-            trace = gi.trace(start, vec3_origin, vec3_origin, stop, ent, MASK_MONSTERSOLID);
+            trace = gi.trace(start, vec3_origin, vec3_origin, stop, ent, CONTENTS_MASK_MONSTERSOLID);
 
             if (trace.fraction != 1.0 && trace.endpos[2] > bottom)
                 bottom = trace.endpos[2];
@@ -145,7 +145,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
                         neworg[2] += dz;
                 }
             }
-            trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, neworg, ent, MASK_MONSTERSOLID);
+            trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, neworg, ent, CONTENTS_MASK_MONSTERSOLID);
 
             // fly monsters don't enter water voluntarily
             if (ent->flags & FL_FLY) {
@@ -154,7 +154,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
                     test[1] = trace.endpos[1];
                     test[2] = trace.endpos[2] + ent->mins[2] + 1;
                     contents = gi.pointcontents(test);
-                    if (contents & MASK_WATER)
+                    if (contents & CONTENTS_MASK_LIQUID)
                         return qfalse;
                 }
             }
@@ -166,7 +166,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
                     test[1] = trace.endpos[1];
                     test[2] = trace.endpos[2] + ent->mins[2] + 1;
                     contents = gi.pointcontents(test);
-                    if (!(contents & MASK_WATER))
+                    if (!(contents & CONTENTS_MASK_LIQUID))
                         return qfalse;
                 }
             }
@@ -197,14 +197,14 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
     Vec3_Copy(neworg, end);
     end[2] -= stepsize * 2;
 
-    trace = gi.trace(neworg, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
+    trace = gi.trace(neworg, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
 
     if (trace.allsolid)
         return qfalse;
 
     if (trace.startsolid) {
         neworg[2] -= stepsize;
-        trace = gi.trace(neworg, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
+        trace = gi.trace(neworg, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
         if (trace.allsolid || trace.startsolid)
             return qfalse;
     }
@@ -217,7 +217,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
         test[2] = trace.endpos[2] + ent->mins[2] + 1;
         contents = gi.pointcontents(test);
 
-        if (contents & MASK_WATER)
+        if (contents & CONTENTS_MASK_LIQUID)
             return qfalse;
     }
 

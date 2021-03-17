@@ -52,7 +52,7 @@ edict_t *SV_TestEntityPosition(edict_t *ent)
     if (ent->clipmask)
         mask = ent->clipmask;
     else
-        mask = MASK_SOLID;
+        mask = CONTENTS_MASK_SOLID;
     trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, mask);
 
     if (trace.startsolid)
@@ -340,7 +340,7 @@ retry:
     if (ent->clipmask)
         mask = ent->clipmask;
     else
-        mask = MASK_SOLID;
+        mask = CONTENTS_MASK_SOLID;
 
     trace = gi.trace(start, ent->mins, ent->maxs, end, ent, mask);
 
@@ -726,9 +726,9 @@ void SV_Physics_Toss(edict_t *ent)
     }
 
 // check for water transition
-    wasinwater = (ent->watertype & MASK_WATER);
+    wasinwater = (ent->watertype & CONTENTS_MASK_LIQUID);
     ent->watertype = gi.pointcontents(ent->s.origin);
-    isinwater = ent->watertype & MASK_WATER;
+    isinwater = ent->watertype & CONTENTS_MASK_LIQUID;
 
     if (isinwater)
         ent->waterlevel = 1;
@@ -877,9 +877,9 @@ void SV_Physics_Step(edict_t *ent)
             }
 
         if (ent->svflags & SVF_MONSTER)
-            mask = MASK_MONSTERSOLID;
+            mask = CONTENTS_MASK_MONSTERSOLID;
         else
-            mask = MASK_SOLID;
+            mask = CONTENTS_MASK_SOLID;
         SV_FlyMove(ent, FRAMETIME, mask);
 
         gi.linkentity(ent);

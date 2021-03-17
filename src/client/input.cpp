@@ -1103,9 +1103,9 @@ static void CL_SendBatchedCmd(void)
     cursize = cls.netchan->Transmit(cls.netchan, msg_write.cursize, msg_write.data, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer == 1) {
-        Com_Printf("%"PRIz"(%i) ", cursize, totalCmds);
+        Com_Printf("%" PRIz "(%i) ", cursize, totalCmds);
     } else if (cl_showpackets->integer == 2) {
-        Com_Printf("%"PRIz"(%i) ", cursize, totalMsec);
+        Com_Printf("%" PRIz "(%i) ", cursize, totalMsec);
     } else if (cl_showpackets->integer == 3) {
         Com_Printf(" | ");
     }
@@ -1132,7 +1132,7 @@ static void CL_SendKeepAlive(void)
     cursize = cls.netchan->Transmit(cls.netchan, 0, NULL, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
-        Com_Printf("%"PRIz" ", cursize);
+        Com_Printf("%" PRIz " ", cursize);
     }
 #endif
 }

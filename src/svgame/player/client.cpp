@@ -1150,7 +1150,7 @@ void PutClientInServer(edict_t *ent)
     ent->solid = SOLID_BBOX;
     ent->deadflag = DEAD_NO;
     ent->air_finished = level.time + 12;
-    ent->clipmask = MASK_PLAYERSOLID;
+    ent->clipmask = CONTENTS_MASK_PLAYERSOLID;
     ent->model = "players/male/tris.md2";
     ent->pain = player_pain;
     ent->die = player_die;
@@ -1513,9 +1513,9 @@ edict_t *pm_passent;
 trace_t q_gameabi PM_trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 {
     if (pm_passent->health > 0)
-        return gi.trace(start, mins, maxs, end, pm_passent, MASK_PLAYERSOLID);
+        return gi.trace(start, mins, maxs, end, pm_passent, CONTENTS_MASK_PLAYERSOLID);
     else
-        return gi.trace(start, mins, maxs, end, pm_passent, MASK_DEADSOLID);
+        return gi.trace(start, mins, maxs, end, pm_passent, CONTENTS_MASK_DEADSOLID);
 }
 
 unsigned CheckBlock(void *b, int c)

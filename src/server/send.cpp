@@ -74,7 +74,7 @@ static qboolean SV_RateDrop(client_t *client)
 #endif
 
     if (total > client->rate) {
-        SV_DPrintf(0, "Frame %d suppressed for %s (total = %"PRIz")\n",
+        SV_DPrintf(0, "Frame %d suppressed for %s (total = %" PRIz ")\n",
                    client->framenum, client->name, total);
         client->frameflags |= FF_SUPPRESSED;
         client->suppress_count++;
@@ -400,7 +400,7 @@ unless told otherwise.
 */
 void SV_ClientAddMessage(client_t *client, int flags)
 {
-    SV_DPrintf(1, "Added %sreliable message to %s: %"PRIz" bytes\n",
+    SV_DPrintf(1, "Added %sreliable message to %s: %" PRIz " bytes\n",
                (flags & MSG_RELIABLE) ? "" : "un", client->name, msg_write.cursize);
 
     if (!msg_write.cursize) {
@@ -735,7 +735,7 @@ static void write_datagram_old(client_t *client)
     // and the player_state_t
     client->WriteFrame(client);
     if (msg_write.cursize > maxsize) {
-        SV_DPrintf(0, "Frame %d overflowed for %s: %"PRIz" > %"PRIz"\n",
+        SV_DPrintf(0, "Frame %d overflowed for %s: %" PRIz " > %" PRIz"\n",
                    client->framenum, client->name, msg_write.cursize, maxsize);
         SZ_Clear(&msg_write);
     }
@@ -1004,7 +1004,7 @@ void SV_SendAsyncPackets(void)
         // make sure all fragments are transmitted first
         if (netchan->fragment_pending) {
             cursize = netchan->TransmitNextFragment(netchan);
-            SV_DPrintf(0, "%s: frag: %"PRIz"\n", client->name, cursize);
+            SV_DPrintf(0, "%s: frag: %" PRIz "\n", client->name, cursize);
             goto calctime;
         }
 
@@ -1032,7 +1032,7 @@ void SV_SendAsyncPackets(void)
         if (netchan->message.cursize || netchan->reliable_ack_pending ||
             netchan->reliable_length || retransmit) {
             cursize = netchan->Transmit(netchan, 0, NULL, 1);
-            SV_DPrintf(0, "%s: send: %"PRIz"\n", client->name, cursize);
+            SV_DPrintf(0, "%s: send: %" PRIz "\n", client->name, cursize);
 calctime:
             SV_CalcSendTime(client, cursize);
         }

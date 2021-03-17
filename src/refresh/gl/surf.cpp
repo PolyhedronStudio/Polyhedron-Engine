@@ -751,7 +751,7 @@ static void upload_surface_vbo(int lastvert)
     GLintptrARB offset = lastvert * VERTEX_SIZE * sizeof(vec_t);
     GLsizeiptrARB size = tess.numverts * VERTEX_SIZE * sizeof(vec_t);
 
-    Com_DDPrintf("%s: %"PRIz" bytes at %"PRIz"\n", __func__, size, offset);
+    Com_DDPrintf("%s: %" PRIz " bytes at %" PRIz "\n", __func__, size, offset);
 
     qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, offset, size, tess.vertices);
     tess.numverts = 0;
@@ -941,13 +941,13 @@ void GL_LoadWorld(const char *name)
 
     // try VBO first, then allocate on hunk
     if (create_surface_vbo(size)) {
-        Com_DPrintf("%s: %"PRIz" bytes of vertex data as VBO\n", __func__, size);
+        Com_DPrintf("%s: %" PRIz " bytes of vertex data as VBO\n", __func__, size);
     } else {
         Hunk_Begin(&gl_static.world.hunk, size);
         gl_static.world.vertices = (vec_t*)Hunk_Alloc(&gl_static.world.hunk, size); // CPP: Cast
         Hunk_End(&gl_static.world.hunk);
 
-        Com_DPrintf("%s: %"PRIz" bytes of vertex data on hunk\n", __func__, size);
+        Com_DPrintf("%s: %" PRIz " bytes of vertex data on hunk\n", __func__, size);
     }
 
     // begin building lightmaps

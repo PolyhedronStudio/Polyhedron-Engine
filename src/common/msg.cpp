@@ -189,7 +189,7 @@ void MSG_WriteString(const char *string)
 
     length = strlen(string);
     if (length >= MAX_NET_STRING) {
-        Com_WPrintf("%s: overflow: %"PRIz" chars", __func__, length);
+        Com_WPrintf("%s: overflow: %" PRIz " chars", __func__, length);
         MSG_WriteByte(0);
         return;
     }

@@ -592,11 +592,11 @@ void UpdateReverb(void)
 		return;
 	}
 
-	CM_BoxTrace(&trace1, listener_origin, up, mins, maxs, cl.bsp->nodes, MASK_DEADSOLID);
-	CM_BoxTrace(&trace2, listener_origin, forward, mins, maxs, cl.bsp->nodes, MASK_DEADSOLID);
-	CM_BoxTrace(&trace3, listener_origin, backward, mins, maxs, cl.bsp->nodes, MASK_DEADSOLID);
-	CM_BoxTrace(&trace4, listener_origin, left, mins, maxs, cl.bsp->nodes, MASK_DEADSOLID);
-	CM_BoxTrace(&trace5, listener_origin, right, mins, maxs, cl.bsp->nodes, MASK_DEADSOLID);
+	CM_BoxTrace(&trace1, listener_origin, up, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
+	CM_BoxTrace(&trace2, listener_origin, forward, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
+	CM_BoxTrace(&trace3, listener_origin, backward, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
+	CM_BoxTrace(&trace4, listener_origin, left, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
+	CM_BoxTrace(&trace5, listener_origin, right, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
 
 	Vec3_Subtract(trace1.endpos, listener_origin, length1);
 	Vec3_Subtract(trace2.endpos, listener_origin, length2);
@@ -856,7 +856,7 @@ static void AL_Spatialize(channel_t *ch)
 
 	if (cl.bsp && s_occlusion->integer)
 	{
-		CM_BoxTrace(&trace, origin, listener_origin, mins, maxs, cl.bsp->nodes, MASK_PLAYERSOLID);
+		CM_BoxTrace(&trace, origin, listener_origin, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_PLAYERSOLID);
 		if (trace.fraction < 1.0 && !(ch->entnum == -1 || ch->entnum == listener_entnum || !ch->dist_mult))
 		{
 			Vec3_Subtract(origin, listener_origin, distance);

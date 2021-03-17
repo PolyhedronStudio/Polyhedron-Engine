@@ -311,7 +311,7 @@ static void CL_ParseFrame(int extrabits)
         }
     }
 
-    SHOWNET(2, "%3"PRIz":playerinfo\n", msg_read.readcount - 1);
+    SHOWNET(2, "%3" PRIz ":playerinfo\n", msg_read.readcount - 1);
 
     // parse playerstate
     bits = MSG_ReadShort();
@@ -351,7 +351,7 @@ static void CL_ParseFrame(int extrabits)
         }
     }
 
-    SHOWNET(2, "%3"PRIz":packetentities\n", msg_read.readcount - 1);
+    SHOWNET(2, "%3" PRIz ":packetentities\n", msg_read.readcount - 1);
 
     CL_ParsePacketEntities(oldframe, &frame);
 
@@ -427,7 +427,7 @@ static void CL_ParseConfigstring(int index)
 
     if (len >= maxlen) {
         Com_WPrintf(
-            "%s: index %d overflowed: %"PRIz" > %"PRIz"\n",
+            "%s: index %d overflowed: %" PRIz " > %" PRIz "\n",
             __func__, index, len, maxlen - 1);
     }
 
@@ -1053,7 +1053,7 @@ void CL_ParseServerMessage(void)
         readcount = msg_read.readcount;
 
         if ((cmd = MSG_ReadByte()) == -1) {
-            SHOWNET(1, "%3"PRIz":END OF MESSAGE\n", msg_read.readcount - 1);
+            SHOWNET(1, "%3" PRIz ":END OF MESSAGE\n", msg_read.readcount - 1);
             break;
         }
 
@@ -1237,7 +1237,7 @@ void CL_SeekDemoMessage(void)
         }
 
         if ((cmd = MSG_ReadByte()) == -1) {
-            SHOWNET(1, "%3"PRIz":END OF MESSAGE\n", msg_read.readcount - 1);
+            SHOWNET(1, "%3" PRIz ":END OF MESSAGE\n", msg_read.readcount - 1);
             break;
         }
 
