@@ -255,6 +255,8 @@ public: // Operators
 
 public: // Some constants
 	static const Vector Zero;
+	static const Vector Up;
+	static const Vector Down;
 
 public: // Actual variables
 	float x, y, z;

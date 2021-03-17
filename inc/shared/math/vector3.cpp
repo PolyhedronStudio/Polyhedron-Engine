@@ -26,6 +26,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 constexpr float MPi = 3.14159f;
 
 const Vector Vector::Zero = Vector(0, 0, 0);
+const Vector Vector::Up = Vector(0, 0, 1);
+const Vector Vector::Down = Vector(0, 0, -1);
 
 Vector Vector::Normalized() const
 {

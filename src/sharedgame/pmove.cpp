@@ -236,138 +236,604 @@ static bool PM_ImpactPlane(Vector *planes, int32_t num_planes, const Vector &pla
 #define MAX_CLIP_PLANES	6
 static bool PM_SlideMove(void) {
     const int32_t numBumps = MAX_CLIP_PLANES - 2;
-    vec3_t planes[MAX_CLIP_PLANES];
+    Vector planes[MAX_CLIP_PLANES];
     int32_t bump;
 
     float timeRemaining = pm_locals.time;
     int32_t numPlanes = 0;
 
     // Never turn against our ground plane
-    if (pm->s.flags & PMF_ON_GROUND) {
+    if (pm->state.flags & PMF_ON_GROUND) {
         planes[numPlanes] = pm_locals.ground.plane.normal;
         numPlanes++;
     }
 
     // or our original velocity
-    planes[numPlanes] = Vector(pm->s.velocity).Normalized();
+    planes[numPlanes] = Vector(pm->state.velocity).Normalized();
     numPlanes++;
 
     for (bump = 0; bump < numBumps; bump++) {
-        //vec3_t pos;
         Vector position;
 
         if (timeRemaining <= 0.0f) { // out of time
             break;
         }
 
-        // project desired destination
-        //static inline vec3_t __attribute__((warn_unused_result)) Vec3_Fmaf(const vec3_t v, float multiply, const vec3_t add) {
-        //    return Vec3(fmaf(add.x, multiply, v.x), fmaf(add.y, multiply, v.y), fmaf(add.z, multiply, v.z));
-        //}
-        //pos = Vec3_Fmaf(pm->s.origin, time_remaining, pm->s.velocity);
-        position = Vector(fmaf(pm->state.origin), timeRemaining, pm->state.velocity[0]
+        // Project desired destination
+        position = Vector(pm->state.origin).FMAF(timeRemaining, pm->state.velocity);
 
-        // trace to it
-        const cm_trace_t trace = Pm_TraceCorrectAllSolid(pm->s.origin, pos, pm->mins, pm->maxs);
+        // Execute trace.
+        trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, position, pm->mins, pm->maxs);
 
-        // if the player is trapped in a solid, don't build up Z
-        if (trace.all_solid) {
-            pm->s.velocity.z = 0.0f;
+        // If the player is trapped in a solid, don't build up Z
+        if (trace.allsolid) {
+            pm->state.velocity[0] = 0.0f;
             return true;
         }
 
-        // if the trace succeeded, move some distance
+        // If the trace succeeded, move some distance
         if (trace.fraction > 0.0f) {
+            // Do a Vec3_Copy into the pm->state.origin vec3_t. 
+            Vec3_Copy(trace.endpos, pm->state.origin);
 
-            pm->s.origin = trace.end;
-
-            // if the trace didn't hit anything, we're done
+            // If the trace didn't hit anything, we're done
             if (trace.fraction == 1.0f) {
                 break;
             }
 
-            // update the movement time remaining
-            time_remaining -= (time_remaining * trace.fraction);
+            // Update the movement time remaining
+            timeRemaining -= (timeRemaining * trace.fraction);
         }
 
-        // store a reference to the entity for firing game events
-        Pm_TouchEntity(trace.ent);
+        // Store a reference to the entity for firing game events
+        PM_TouchEntity(trace.ent);
 
-        // record the impacted plane, or nudge velocity out along it
-        if (Pm_ImpactPlane(planes, num_planes, trace.plane.normal)) {
-            planes[num_planes] = trace.plane.normal;
-            num_planes++;
+        // Record the impacted plane, or nudge velocity out along it
+        if (PM_ImpactPlane(planes, numPlanes, trace.plane.normal)) {
+            planes[numPlanes] = trace.plane.normal;
+            numPlanes++;
         }
         else {
-            // if we've seen this plane before, nudge our velocity out along it
-            pm->s.velocity = Vec3_Add(pm->s.velocity, trace.plane.normal);
+            // If we've seen this plane before, nudge our velocity out along it
+            Vector velocity = Vector(pm->state.velocity) + Vector(trace.plane.normal);
+            velocity.CopyToArray(pm->state.velocity);
             continue;
         }
 
-        // and modify velocity, clipping to all impacted planes
-        for (int32_t i = 0; i < num_planes; i++) {
-            vec3_t vel;
+        // And modify velocity, clipping to all impacted planes
+        for (int32_t i = 0; i < numPlanes; i++) {
+            Vector velocity = pm->state.velocity;
 
-            // if velocity doesn't impact this plane, skip it
-            if (Vec3_Dot(pm->s.velocity, planes[i]) >= 0.0f) {
+            // If velocity doesn't impact this plane, skip it
+            if (velocity * planes[i] >= 0.0f) {
                 continue;
             }
 
-            // slide along the plane
-            vel = Pm_ClipVelocity(pm->s.velocity, planes[i], PM_CLIP_BOUNCE);
+            // Slide along the plane
+            velocity = PM_ClipVelocity(pm->state.velocity, planes[i], PM_CLIP_BOUNCE);
 
-            // see if there is a second plane that the new move enters
-            for (int32_t j = 0; j < num_planes; j++) {
-                vec3_t cross;
+            // See if there is a second plane that the new move enters
+            for (int32_t j = 0; j < numPlanes; j++) {
+                Vector cross;
 
+                // Skip in case we are testing the same plane.
                 if (j == i) {
                     continue;
                 }
 
-                // if the clipped velocity doesn't impact this plane, skip it
-                if (Vec3_Dot(vel, planes[j]) >= 0.0f) {
+                // If the clipped velocity doesn't impact this plane, skip it
+                if (velocity * planes[j] >= 0.0f) {
                     continue;
                 }
 
-                // we are now intersecting a second plane
-                vel = Pm_ClipVelocity(vel, planes[j], PM_CLIP_BOUNCE);
+                // We are now intersecting a second plane
+                velocity = PM_ClipVelocity(velocity, planes[j], PM_CLIP_BOUNCE);
 
-                // but if we clip against it without being deflected back, we're okay
-                if (Vec3_Dot(vel, planes[i]) >= 0.0f) {
+                // But if we clip against it without being deflected back, we're okay
+                if (velocity * planes[i] >= 0.0f) {
                     continue;
                 }
 
-                // we must now slide along the crease (cross product of the planes)
-                cross = Vec3_Cross(planes[i], planes[j]);
-                cross = Vec3_Normalize(cross);
+                // We must now slide along the crease (cross product of the planes)
+                cross = Vector(planes[i]).CrossProduct(planes[j]);
+                cross.Normalize();
 
-                const float scale = Vec3_Dot(cross, pm->s.velocity);
-                vel = Vec3_Scale(cross, scale);
+                // Calculate new velocity.
+                const float scale = cross * pm->state.velocity;
+                velocity = cross * scale;
 
                 // see if there is a third plane the the new move enters
-                for (int32_t k = 0; k < num_planes; k++) {
-
+                for (int32_t k = 0; k < numPlanes; k++) {
+                    // Once again, make sure we aren't testing the same plane.
                     if (k == i || k == j) {
                         continue;
                     }
 
-                    if (Vec3_Dot(vel, planes[k]) >= 0.0f) {
+                    if (velocity * planes[k] >= 0.0f) {
                         continue;
                     }
 
                     // stop dead at a triple plane interaction
-                    pm->s.velocity = Vec3_Zero();
+                    Vector::Zero.CopyToArray(pm->state.velocity);
                     return true;
                 }
             }
 
             // if we have fixed all interactions, try another move
-            pm->s.velocity = vel;
+            velocity.CopyToArray(pm->state.velocity);
             break;
         }
     }
 
     return bump == 0;
+}
+
+//
+//===============
+// PM_SlideMove
+// 
+// Returns True if the downward trace yielded a step, false otherwise.
+//===============
+//
+static bool PM_CheckStep(const trace_t* trace) {
+    if (!trace->allsolid) {
+        if (trace->ent && trace->plane.normal[2] >= PM_STEP_NORMAL) {
+            if (trace->ent != pm->groundEntity || trace->plane.dist != pm_locals.ground.plane.dist) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+//
+//===============
+// PM_StepDown
+// 
+// Calculates the step value, and removes stair flag if needed.
+//===============
+//
+static void PM_StepDown(const trace_t* trace) {
+    // Hard copy the trace end into the pm state origin.
+    Vec3_Copy(trace->endpos, pm->state.origin);
+    
+    // Calculate step value.
+    pm->step = pm->state.origin[2] - pm_locals.previousOrigin[2];
+
+    if (pm->step >= PM_STEP_HEIGHT_MIN) {
+        Com_DPrintf("step up %3.2f\n", pm->step);
+        pm->state.flags |= PMF_ON_STAIRS;
+    }
+    else if (pm->step <= -PM_STEP_HEIGHT_MIN && (pm->state.flags & PMF_ON_GROUND)) {
+        Com_DPrintf("step down %3.2f\n", pm->step);
+        pm->state.flags |= PMF_ON_STAIRS;
+    }
+    else {
+        pm->step = 0.0;
+    }
+}
+
+//
+//===============
+// PM_StepDown
+// 
+// 
+//===============
+//
+static void PM_StepSlideMove(void) {
+
+    // Store pre-move parameters
+    const Vector org0 = pm->state.origin;
+    const Vector vel0 = pm->state.velocity;
+
+    // Attempt to move; if nothing blocks us, we're done
+    if (PM_SlideMove()) {
+        // Attempt to step down to remain on ground
+        if ((pm->state.flags & PMF_ON_GROUND) && pm->cmd.upmove <= 0) {
+            // Calculate down vector.
+            Vector down = Vector(pm->state.origin).FMAF(PM_STEP_HEIGHT + PM_GROUND_DIST, Vector::Down);
+
+            // Execute trace.
+            trace_t stepDown = PM_TraceCorrectAllSolid(pm->state.origin, down, pm->mins, pm->maxs);
+
+            // Check for valid step down, if so, step it.
+            if (PM_CheckStep(&stepDown)) {
+                PM_StepDown(&stepDown);
+            }
+        }
+
+        return;
+    }
+
+    // we were blocked, so try to step over the obstacle
+    const Vector org1 = pm->state.origin;
+    const Vector vel1 = pm->state.velocity;
+
+    Vector up = Vector(org0).FMAF(PM_STEP_HEIGHT, Vector::Up);
+    trace_t stepUp = PM_TraceCorrectAllSolid(org0, up, pm->mins, pm->maxs);
+
+    if (!stepUp.allsolid) {
+
+        // Step from the higher position, with the original velocity
+        Vec3_Copy(stepUp.endpos, pm->state.origin);
+        vel0.CopyToArray(pm->state.velocity);
+
+        PM_SlideMove();
+
+        // Settle to the new ground, keeping the step if and only if it was successful
+        const Vector down = Vector(pm->state.origin).FMAF(PM_STEP_HEIGHT + PM_GROUND_DIST, Vector::Down);
+        trace_t stepDown = PM_TraceCorrectAllSolid(pm->state.origin, down, pm->mins, pm->maxs);
+
+        if (PM_CheckStep(&stepDown)) {
+            // Quake2 trick jump secret sauce
+            if ((pm->state.flags & PMF_ON_GROUND) || vel0.z < PM_SPEED_UP) {
+                PM_StepDown(&stepDown);
+            }
+            else {
+                pm->step = pm->state.origin[2] - pm_locals.previousOrigin[2];
+                pm->state.flags |= PMF_ON_STAIRS;
+            }
+
+            return;
+        }
+    }
+
+    // Copy into original vec3_t vectors.
+    org1.CopyToArray(pm->state.origin);
+    vel1.CopyToArray(pm->state.velocity);
+}
+
+//
+//===============
+// PM_Friction
+// 
+// Handles friction against user intentions, and based on contents.
+//===============
+//
+static void PM_Friction(void) {
+    Vector vel1 = pm->s.velocity;
+
+    // Set Z to 0 if on ground, so we can do a proper speed value calculation.
+    if (pm->s.flags & PMF_ON_GROUND) {
+        vel1.z = 0.0;
+    }
+
+    // If the speed is considerably lower than 1.0f, set X and Y velocity to 0.
+    const float speed = vel2.Length();
+
+    if (speed < 1.0f) {
+        pm->s.velocity.x = pm->s.velocity.y = 0.0f;
+        return;
+    }
+
+    // Make sure that the "control" speed does not exceed PM_SPEED_STOP
+    const float control = Maxf(PM_SPEED_STOP, speed);
+
+    // The actual friction value we'll be using, set it based on several
+    // conditions.
+    float friction = 0.0;
+
+    if (pm->s.type == PM_SPECTATOR) { // spectator friction
+        friction = PM_FRICT_SPECTATOR;
+    }
+    else if (pm->s.flags & PMF_ON_LADDER) { // ladder friction
+        friction = PM_FRICT_LADDER;
+    }
+    else if (pm->water_level > WATER_FEET) { // water friction
+        friction = PM_FRICT_WATER;
+    }
+    else if (pm->s.flags & PMF_ON_GROUND) { // ground friction
+        if (pm_locals.ground.texinfo && (pm_locals.ground.texinfo->flags & SURF_SLICK)) {
+            friction = PM_FRICT_GROUND_SLICK;
+        }
+        else {
+            friction = PM_FRICT_GROUND;
+        }
+    }
+    else { // everything else friction
+        friction = PM_FRICT_AIR;
+    }
+
+    // Scale the velocity, taking care to not reverse direction
+    const float scale = Maxf(0.0, speed - (friction * control * pm_locals.time)) / speed;
+
+    // Calculate new velocity.
+    Vector vel2 = pm->state.velocity;
+    vel2 *= scale;
+
+    // Copy the new velocity back into player move state.
+    vel2.CopyToArray(pm->state.velocity);
+}
+
+//
+//===============
+// PM_Accelerate
+// 
+// Handles user intended acceleration.
+//===============
+//
+static void PM_Accelerate(const Vector &dir, float speed, float accel) {
+    // Calculate the dot product between velocity and direction.
+    // This gives us the current speed.
+    // 
+    // We then subtract it from the intended speed value to give us
+    // the added speed left to add.
+    const float current_speed = Vector(pm->s.velocity) * dir;
+    const float add_speed = speed - current_speed;
+
+    if (add_speed <= 0.0f) {
+        return;
+    }
+
+    // Calculate the actual acceleration speed based on time.
+    float accel_speed = accel * pm_locals.time * speed;
+
+    // Make sure we do not exceed the speed we wished to add.
+    if (accel_speed > add_speed) {
+        accel_speed = add_speed;
+    }
+
+    // Set the new player move state velocity.
+    //Vector vel2 = pm->state.velocity;
+    // (add multiplied PM_SPEED_CURRENT * current to pm->state.velocity).
+    Vector(pm->state.velocity).vel2.FMAF(accel_speed, dir).CopyToArray(pm->state.velocity);
+}
+
+//
+//===============
+// PM_Gravity
+// 
+// Applies gravity to the current movement.
+//===============
+//
+static void PM_Gravity(void) {
+
+    if (pm->s.type == PM_HOOK_PULL) {
+        return;
+    }
+
+    // Fetch the current state gravity.
+    float gravity = pm->state.gravity;
+
+    // In case we are with our waist under water, double the gravity force.
+    if (pm->waterLevel > WATER_WAIST) {
+        gravity *= PM_GRAVITY_WATER;
+    }
+
+    // Update the velocity with gravity.
+    pm->state.velocity[2] -= gravity * pm_locals.time;
+}
+
+//
+//===============
+// PM_Currents
+// 
+// Handles user intended acceleration.
+//===============
+//
+static void PM_Currents(void) {
+    Vector current = Vector::Zero;
+
+    // add water currents
+    if (pm->water_level) {
+        if (pm->water_type & CONTENTS_CURRENT_0) {
+            current.x += 1.0;
+        }
+        if (pm->water_type & CONTENTS_CURRENT_90) {
+            current.y += 1.0;
+        }
+        if (pm->water_type & CONTENTS_CURRENT_180) {
+            current.x -= 1.0;
+        }
+        if (pm->water_type & CONTENTS_CURRENT_270) {
+            current.y -= 1.0;
+        }
+        if (pm->water_type & CONTENTS_CURRENT_UP) {
+            current.z += 1.0;
+        }
+        if (pm->water_type & CONTENTS_CURRENT_DOWN) {
+            current.z -= 1.0;
+        }
+    }
+
+    // add conveyer belt velocities
+    if (pm->ground_entity) {
+        if (pm_locals.ground.contents & CONTENTS_CURRENT_0) {
+            current.x += 1.0;
+        }
+        if (pm_locals.ground.contents & CONTENTS_CURRENT_90) {
+            current.y += 1.0;
+        }
+        if (pm_locals.ground.contents & CONTENTS_CURRENT_180) {
+            current.x -= 1.0;
+        }
+        if (pm_locals.ground.contents & CONTENTS_CURRENT_270) {
+            current.y -= 1.0;
+        }
+        if (pm_locals.ground.contents & CONTENTS_CURRENT_UP) {
+            current.z += 1.0;
+        }
+        if (pm_locals.ground.contents & CONTENTS_CURRENT_DOWN) {
+            current.z -= 1.0;
+        }
+    }
+
+    // Make sure it isn't equal to our Zero vector.
+    if (current != Vector::Zero) {
+        current.Normalize();
+    }
+
+    // Set the new player move state velocity.
+    // (add multiplied PM_SPEED_CURRENT * current to pm->state.velocity).
+    Vector(pm->state.velocity).FMAF(PM_SPEED_CURRENT, current).CopyToArray(pm->state.velocity);
+//    pm->s.velocity = Vec3_Fmaf(pm->s.velocity, PM_SPEED_CURRENT, current);
+}
+
+//
+//===============
+// PM_CheckTrickJump
+// 
+// True if the player will be eligible for trick jumping should they
+// impact the ground on this frame, false otherwise.
+//===============
+//
+static bool Pm_CheckTrickJump(void) {
+
+    if (pm->groundEntity) {
+        return false;
+    }
+
+    if (pm_locals.previousVelocity.z < PM_SPEED_UP) {
+        return false;
+    }
+
+    if (pm->cmd.upmove < 1) {
+        return false;
+    }
+
+    if (pm->state.flags & PMF_JUMP_HELD) {
+        return false;
+    }
+
+    if (pm->state.flags & PMF_TIME_MASK) {
+        return false;
+    }
+
+    return true;
+}
+
+//
+//===============
+// PM_CheckTrickJump
+// 
+// Returns True if the player is attempting to leave the ground via grappling hook.
+//===============
+//
+static bool Pm_CheckHookJump(void) {
+
+    if ((pm->state.type == PM_HOOK_PULL || pm->state.type == PM_HOOK_SWING) 
+        && pm->state.velocity.z > 4.0f) 
+    {
+
+        pm->state.flags &= ~PMF_ON_GROUND;
+        pm->groundEntity = NULL;
+
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @brief
+ */
+static void Pm_CheckHook(void) {
+    //// hookers only
+    if (pm->state.type != PM_HOOK_PULL && pm->state.type != PM_HOOK_SWING) {
+        pm->state.flags &= ~PMF_HOOK_RELEASED;
+        return;
+    }
+
+    // get chain length
+    if (pm->state.type == PM_HOOK_PULL) {
+
+        // if we let go of hook, just go back to normal
+        if (!(pm->cmd.buttons & BUTTON_HOOK)) {
+            pm->state.type = PM_NORMAL;
+            return;
+        }
+
+        pm->cmd.forward = pm->cmd.right = 0;
+
+        // Pull physics
+        // Calculate the distance vector.
+        const float dist = Vector(pm->state.hook_position - pm->state.origin).Length();
+        // Normalize the pm->state.velocity vector to make it directional.
+        Vector(pm->state.velocity).Normalized().CopyToArray(pm->state.velocity);
+
+        if (dist > 8.0f && !PM_CheckHookJump()) {
+            // Scale PM State velocity.
+            Vector(Vector(pm->s.velocity) * pm->hook_pull_speed).CopyToArray(pm->state.velocity);
+        }
+        else {
+            // Zero out PM State velocity.
+            Vector::Zero.CopyToArray(pm->s.velocity);
+        }
+    }
+    else {
+
+        // Check for disable
+        if (!(pm->state.flags & PMF_HOOK_RELEASED)) {
+
+            if (!(pm->cmd.buttons & BUTTON_HOOK)) {
+                pm->state.flags |= PMF_HOOK_RELEASED;
+            }
+        }
+        else {
+
+            // If we let go of hook, just go back to normal.
+            if (pm->cmd.buttons & BUTTON_HOOK) {
+                pm->state.type = PM_NORMAL;
+                pm->state.flags &= ~PMF_HOOK_RELEASED;
+                return;
+            }
+        }
+
+        const float hook_rate = (pm->hook_pull_speed / 1.5f) * pm_locals.time;
+
+        // Chain physics
+        // Grow/shrink chain based on input
+        if ((pm->cmd.up > 0 || !(pm->s.flags & PMF_HOOK_RELEASED)) && (pm->s.hook_length > PM_HOOK_MIN_DIST)) {
+            pm->s.hook_length = Maxf(pm->s.hook_length - hook_rate, PM_HOOK_MIN_DIST);
+        }
+        else if ((pm->cmd.up < 0) && (pm->s.hook_length < PM_HOOK_MAX_DIST)) {
+            pm->s.hook_length = Minf(pm->s.hook_length + hook_rate, PM_HOOK_MAX_DIST);
+        }
+
+        Vector chainVec     = Vector(pm->s.hook_position) - Vector(pm->s.origin);
+        float chainLength   = chainVec.Length();
+
+        // If player's location is already within the chain's reach
+        if (chainLength <= pm->s.hook_length) {
+            return;
+        }
+
+        // Reel us in!
+        Vector velocityPart;
+
+        // Determine player's velocity component of chain vector
+        velocityPart = chainVec * ((Vector(pm->s.velocity ) * chain_vec) / (chainVec * chainVec));
+
+        // Restrainment default force
+        float force = (chainLength - pm->s.hook_length) * 5.0f;
+
+        // If player's velocity heading is away from the hook
+        if (Vector(pm->s.velocity) * chainVec) < 0.0f) {
+
+            // If chain has streched for 24 units
+            if (chainLength > pm->s.hook_length + 24.0f) {
+
+                // Remove player's velocity component moving away from hook
+                Vector(Vector(pm->state.velocity) - velocityPart)).CopyToArray(pm->state.velocity);
+            }
+        }
+        else { // If player's velocity heading is towards the hook
+            float length = velocityPart.Length();
+            if (length < force) {
+                force -= length;
+            }
+            else {
+                force = 0.0f;
+            }
+        }
+
+        if (force) {
+            // Applies chain restrainment
+            chainVec.Normalize();
+            Vector(pm->state.velocity).FMAF(force, chainVec).CopyToArray(pm->state.velocity);
+        }
+    }
 }
 
 //
