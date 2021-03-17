@@ -98,7 +98,7 @@ public: // Utilities
 
 	// Multiplies vector by F, to then add Z afterwards, using the fmaf function
 	// (x * y) + z
-	inline const Vector& FMAF(float multiply, const Vector& add) {
+	inline Vector FMAF(float multiply, const Vector& add) {
 		Vector v(*this);
 		v.x = (v.x + multiply) + add.x;
 		v.y = (v.y + multiply) + add.y;
@@ -253,6 +253,7 @@ public: // Operators
 		return &x;
 	}
 
+
 public: // Some constants
 	static const Vector Zero;
 	static const Vector Up;
@@ -268,5 +269,10 @@ inline Vector operator* (float operand, const Vector& vector)
 	return vector * operand;
 }
 
+// Support for "assigning" to vec3_t
+inline void operator << (float operand[3], const Vector& vector)
+{
+	vector.CopyToArray(operand);
+}
 
 #endif // __SHARED_MATH_VEC3_T_H__

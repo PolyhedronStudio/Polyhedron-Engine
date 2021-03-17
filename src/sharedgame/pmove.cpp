@@ -191,11 +191,17 @@ static trace_t PM_TraceCorrectAllSolid(const Vector &start, const Vector& end, c
 
                 // Copy Vectors into vec3_t and excute trace. 
                 // (Point, not start, unlike below in the return.)
-                point.CopyToArray(trStart);
-                end.CopyToArray(trEnd);
-                mins.CopyToArray(trMins);
-                maxs.CopyToArray(trMaxs);
-                trace_t trace = pm->Trace(trStart, trEnd, trMins, trMaxs);
+                //point.CopyToArray(trStart);
+                //end.CopyToArray(trEnd);
+                //mins.CopyToArray(trMins);
+                //maxs.CopyToArray(trMaxs);
+                //trStart << point;
+                //trEnd << end;
+                //trMins << mins;
+                //trMaxs << maxs;
+                //trace_t trace = pm->Trace(trStart, trEnd, trMins, trMaxs);
+
+                trace_t trace = pm->Trace(start, end, mins, maxs);
 
                 // No solid had to be fixed.
                 if (!trace.allsolid) {
@@ -993,7 +999,161 @@ static void PM_CheckWater(void) {
     }
 }
 
+//
+//===============
+// PM_ClampAngles
+//
+// Check for jumping and trick jumping.
+// Returns True if a jump occurs, false otherwise.
+//===============
+//
+static bool PM_CheckJump(void) {
+    if (PM_CheckHookJump()) {
+        return true;
+    }
 
+    // Must wait for landing damage to subside
+    if (pm->state.flags & PMF_TIME_LAND) {
+        return false;
+    }
+
+    // Must wait for jump key to be released
+    if (pm->state.flags & PMF_JUMP_HELD) {
+        return false;
+    }
+
+    // Didn't ask to jump
+    if (pm->cmd.upmove < 1) {
+        return false;
+    }
+
+    // Finally, do the jump
+    float jump = PM_SPEED_JUMP;
+
+    // Factoring in water level
+    if (pm->waterLevel > WATER_FEET) {
+        jump *= PM_SPEED_JUMP_MOD_WATER;
+    }
+
+    // Adding the trick jump if eligible
+    if (pm->state.flags & PMF_TIME_TRICK_JUMP) {
+        jump += PM_SPEED_TRICK_JUMP;
+
+        pm->state.flags &= ~PMF_TIME_TRICK_JUMP;
+        pm->state.time = 0;
+
+        Com_DPrintf("Trick jump: %d\n", pm->cmd.upmove);
+    }
+    else {
+        Com_DPrintf("Jump: %d\n", pm->cmd.upmove);
+    }
+
+    // If velocity is below zero, make it JUMP.
+    if (pm->state.velocity[2] < 0.0f) {
+        pm->state.velocity[2] = jump;
+    }
+    else {
+        pm->s.velocity[2] += jump;
+    }
+
+    // Indicate that jump is currently held
+    pm->s.flags |= (PMF_JUMPED | PMF_JUMP_HELD);
+
+    // clear the ground indicators
+    pm->s.flags &= ~PMF_ON_GROUND;
+    pm->ground_entity = NULL;
+
+    // we can trick jump soon
+    pm->s.flags |= PMF_TIME_TRICK_START;
+    pm->s.time = 100;
+
+    return true;
+}
+
+/**
+ * @brief Check for ladder interaction.
+ *
+ * @return True if the player is on a ladder, false otherwise.
+ */
+static void Pm_CheckLadder(void) {
+
+    if (pm->s.flags & PMF_TIME_MASK) {
+        return;
+    }
+
+    if (pm->s.type == PM_HOOK_PULL) {
+        return;
+    }
+
+    const vec3_t pos = Vec3_Fmaf(pm->s.origin, 4.f, pm_locals.forward_xy);
+    const cm_trace_t trace = Pm_TraceCorrectAllSolid(pm->s.origin, pos, pm->mins, pm->maxs);
+
+    if ((trace.fraction < 1.0f) && (trace.contents & CONTENTS_LADDER)) {
+        pm->s.flags |= PMF_ON_LADDER;
+
+        pm->ground_entity = NULL;
+        pm->s.flags &= ~(PMF_ON_GROUND | PMF_DUCKED);
+    }
+}
+
+/**
+ * @brief Checks for water exit. The player may exit the water when they can
+ * see a usable step out of the water.
+ *
+ * @return True if a water jump has occurred, false otherwise.
+ */
+static _Bool Pm_CheckWaterJump(void) {
+
+    if (pm->s.type == PM_HOOK_PULL || pm->s.type == PM_HOOK_SWING) {
+        return false;
+    }
+
+    if (pm->s.flags & PMF_TIME_WATER_JUMP) {
+        return false;
+    }
+
+    if (pm->water_level != WATER_WAIST) {
+        return false;
+    }
+
+    if (pm->cmd.up < 1 && pm->cmd.forward < 1) {
+        return false;
+    }
+
+    vec3_t pos = Vec3_Fmaf(pm->s.origin, 16.f, pm_locals.forward);
+    cm_trace_t trace = Pm_TraceCorrectAllSolid(pm->s.origin, pos, pm->mins, pm->maxs);
+
+    if ((trace.fraction < 1.0f) && (trace.contents & CONTENTS_MASK_SOLID)) {
+
+        pos.z += PM_STEP_HEIGHT + pm->maxs.z - pm->mins.z;
+
+        trace = Pm_TraceCorrectAllSolid(pos, pos, pm->mins, pm->maxs);
+
+        if (trace.start_solid) {
+            Pm_Debug("Can't exit water: blocked\n");
+            return false;
+        }
+
+        vec3_t pos2 = Vec3(pos.x, pos.y, pm->s.origin.z);
+
+        trace = Pm_TraceCorrectAllSolid(pos, pos2, pm->mins, pm->maxs);
+
+        if (!(trace.ent && trace.plane.normal.z >= PM_STEP_NORMAL)) {
+            Pm_Debug("Can't exit water: not a step\n");
+            return false;
+        }
+
+        // jump out of water
+        pm->s.velocity.z = PM_SPEED_WATER_JUMP;
+
+        pm->s.flags |= PMF_TIME_WATER_JUMP | PMF_JUMP_HELD;
+        pm->s.time = 2000;
+
+        return true;
+    }
+
+    return false;
+}
 
 //
 //===============
