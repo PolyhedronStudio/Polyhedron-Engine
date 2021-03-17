@@ -774,11 +774,11 @@ static void PM_CheckHook(void) {
 
     //    if (dist > 8.0f && !PM_CheckHookJump()) {
     //        // Scale PM State velocity.
-    //        Vector(Vector(pm->s.velocity) * pm->hook_pull_speed).CopyToArray(pm->state.velocity);
+    //        Vector(Vector(pm->state.velocity) * pm->hook_pull_speed).CopyToArray(pm->state.velocity);
     //    }
     //    else {
     //        // Zero out PM State velocity.
-    //        Vector::Zero.CopyToArray(pm->s.velocity);
+    //        Vector::Zero.CopyToArray(pm->state.velocity);
     //    }
     //}
     //else {
@@ -984,7 +984,7 @@ static void PM_CheckWater(void) {
             pm->waterLevel = WATER_WAIST;
 
             // Calculate the new Z.
-            pos[2] = pm->state.origin[2] + pm->viewHeight + 1.0f;
+            pos[2] = pm->state.origin[2] + pm->state.view_offset[2] + 1.0f;
 
             // Test contents.
             contents = pm->PointContents(pos);
@@ -1001,7 +1001,74 @@ static void PM_CheckWater(void) {
 
 //
 //===============
-// PM_ClampAngles
+// PM_CheckJump
+//
+// Handles ducking, adjusting both the player's bounding box and view
+// offset accordingly.Players must be on the ground in order to duck.
+//===============
+//
+static void PM_CheckDuck(void) {
+
+    if (pm->state.type == PM_DEAD) {
+        if (pm->state.flags & PMF_GIBLET) {
+            pm->state.view_offset[2] = 0.0f;
+        }
+        else {
+            pm->state.view_offset[2] = -16.0f;
+        }
+    }
+    else {
+
+        const bool is_ducking = pm->state.flags & PMF_DUCKED;
+        const bool wants_ducking = (pm->cmd.upmove < 0) && !(pm->state.flags & PMF_ON_LADDER);
+
+        if (!is_ducking && wants_ducking) {
+            pm->state.flags |= PMF_DUCKED;
+        }
+        else if (is_ducking && !wants_ducking) {
+            trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->state.origin, pm->mins, pm->maxs);
+
+            if (!trace.allsolid && !trace.startsolid) {
+                pm->state.flags &= ~PMF_DUCKED;
+            }
+        }
+
+        const float height = pm->maxs[2] - pm->mins[2];
+
+        if (pm->state.flags & PMF_DUCKED) { // ducked, reduce height
+            const float target = pm->mins[2] + height * 0.5f;
+
+            if (pm->state.view_offset[2] > target) { // go down
+                pm->state.view_offset[2] -= pm_locals.time * PM_SPEED_DUCK_STAND;
+            }
+
+            if (pm->state.view_offset[2] < target) {
+                pm->state.view_offset[2] = target;
+            }
+
+            // change the bounding box to reflect ducking
+            pm->maxs[2] = pm->maxs[2] + pm->mins[2] * 0.5f;
+        }
+        else {
+            const float target = pm->mins[2] + height * 0.9f;
+
+            if (pm->state.view_offset[2] < target) { // go up
+                pm->state.view_offset[2] += pm_locals.time * PM_SPEED_DUCK_STAND;
+            }
+
+            if (pm->state.view_offset[2] > target) {
+                pm->state.view_offset[2] = target;
+            }
+        }
+    }
+
+    // ??
+    //pm->s.view_offset = pm->s.view_offset;
+}
+
+//
+//===============
+// PM_CheckJump
 //
 // Check for jumping and trick jumping.
 // 
@@ -1177,6 +1244,407 @@ static bool PM_CheckWaterJump(void) {
 
 //
 //===============
+// PM_LadderMove
+//
+//===============
+//
+static void PM_LadderMove(void) {
+
+    //Com_DPrintf("%s\n", vtos(pm->state.origin));
+
+    //PM_Friction();
+
+    //PM_Currents();
+
+    //// user intentions in X/Y
+    //vec3_t vel = Vec3_Zero();
+    //vel = Vec3_Fmaf(vel, pm->cmd.forward, pm_locals.forward_xy);
+    //vel = Vec3_Fmaf(vel, pm->cmd.right, pm_locals.right_xy);
+
+    //const float s = PM_SPEED_LADDER * 0.125f;
+
+    //// limit horizontal speed when on a ladder
+    //vel.x = Clampf(vel.x, -s, s);
+    //vel.y = Clampf(vel.y, -s, s);
+    //vel.z = 0.f;
+
+    //// handle Z intentions differently
+    //if (fabsf(pm->state.velocity.z) < PM_SPEED_LADDER) {
+
+    //    if ((pm->viewAngles[0] <= -15.0f) && (pm->cmd.forward > 0)) {
+    //        vel.z = PM_SPEED_LADDER;
+    //    }
+    //    else if ((pm->viewAngles[0] >= 15.0f) && (pm->cmd.forward > 0)) {
+    //        vel.z = -PM_SPEED_LADDER;
+    //    }
+    //    else if (pm->cmd.up > 0) {
+    //        vel.z = PM_SPEED_LADDER;
+    //    }
+    //    else if (pm->cmd.up < 0) {
+    //        vel.z = -PM_SPEED_LADDER;
+    //    }
+    //    else {
+    //        vel.z = 0.0;
+    //    }
+    //}
+
+    //if (pm->cmd.up > 0) { // avoid jumps when exiting ladders
+    //    pm->state.flags |= PMF_JUMP_HELD;
+    //}
+
+    //float speed;
+    //const vec3_t dir = Vec3_NormalizeLength(vel, &speed);
+    //speed = Clampf(speed, 0.0, PM_SPEED_LADDER);
+
+    //if (speed < PM_STOP_EPSILON) {
+    //    speed = 0.0;
+    //}
+
+    //PM_Accelerate(dir, speed, PM_ACCEL_LADDER);
+
+    //PM_StepSlideMove();
+}
+
+//
+//===============
+// PM_WaterJumpMove
+//
+//===============
+//
+static void PM_WaterJumpMove(void) {
+    //Com_DPrintf("%s\n", vtos(pm->state.origin));
+
+    //PM_Friction();
+    //PM_Gravity();
+
+    //// check for a usable spot directly in front of us
+    //const vec3_t pos = Vec3_Fmaf(pm->state.origin, 30.f, pm_locals.forward_xy);
+
+    //// if we've reached a usable spot, clamp the jump to avoid launching
+    //if (PM_TraceCorrectAllSolid(pm->state.origin, pos, pm->mins, pm->maxs).fraction == 1.0f) {
+    //    pm->state.velocity.z = Clampf(pm->state.velocity.z, 0.f, PM_SPEED_JUMP);
+    //}
+
+    //// if we're falling back down, clear the timer to regain control
+    //if (pm->state.velocity.z <= 0.0f) {
+    //    pm->state.flags &= ~PMF_TIME_MASK;
+    //    pm->state.time = 0;
+    //}
+
+    //PM_StepSlideMove();
+}
+
+//
+//===============
+// PM_WaterJumpMove
+//
+//===============
+//
+static void PM_WaterMove(void) {
+
+    //if (PM_CheckWaterJump()) {
+    //    PM_WaterJumpMove();
+    //    return;
+    //}
+
+    //Com_DPrintf("%s\n", vtos(pm->state.origin));
+
+    //// apply friction, slowing rapidly when first entering the water
+    //PM_Friction();
+
+    //// and sink if idle
+    //if (!pm->cmd.forward && !pm->cmd.right && !pm->cmd.up && pm->state.type != PM_HOOK_PULL && pm->state.type != PM_HOOK_SWING) {
+    //    if (pm->state.velocity.z > PM_SPEED_WATER_SINK) {
+    //        PM_Gravity();
+    //    }
+    //}
+
+    //PM_Currents();
+
+    //// user intentions on X/Y/Z
+    //vec3_t vel = Vec3_Zero();
+    //vel = Vec3_Fmaf(vel, pm->cmd.forward, pm_locals.forward);
+    //vel = Vec3_Fmaf(vel, pm->cmd.right, pm_locals.right);
+
+    //// add explicit Z
+    //vel.z += pm->cmd.up;
+
+    //// disable water skiing
+    //if (pm->state.type != PM_HOOK_PULL && pm->state.type != PM_HOOK_SWING) {
+    //    if (pm->waterLevel == WATER_WAIST) {
+    //        vec3_t view = Vec3_Add(pm->state.origin, pm->state.view_offset);
+    //        view.z -= 4.0;
+
+    //        if (!(pm->PointContents(view) & CONTENTS_MASK_LIQUID)) {
+    //            pm->state.velocity.z = Minf(pm->state.velocity.z, 0.0);
+    //            vel.z = Minf(vel.z, 0.0);
+    //        }
+    //    }
+    //}
+
+    //float speed;
+    //const vec3_t dir = Vec3_NormalizeLength(vel, &speed);
+    //speed = Clampf(speed, 0, PM_SPEED_WATER);
+
+    //if (speed < PM_STOP_EPSILON) {
+    //    speed = 0.0;
+    //}
+
+    //PM_Accelerate(dir, speed, PM_ACCEL_WATER);
+
+    //if (pm->cmd.up > 0) {
+    //    PM_SlideMove();
+    //}
+    //else {
+    //    PM_StepSlideMove();
+    //}
+}
+
+//
+//===============
+// PM_AirMove
+//
+//===============
+//
+static void PM_AirMove(void) {
+
+    //Com_DPrintf("%s\n", vtos(pm->state.origin));
+
+    //PM_Friction();
+
+    //PM_Gravity();
+
+    //vec3_t vel = Vec3_Zero();
+    //vel = Vec3_Fmaf(vel, pm->cmd.forwardmove, pm_locals.forward_xy);
+    //vel = Vec3_Fmaf(vel, pm->cmd.sidemove, pm_locals.right_xy);
+    //vel.z = 0.f;
+
+    //float max_speed = PM_SPEED_AIR;
+
+    //// accounting for walk modulus
+    //if (pm->cmd.buttons & BUTTON_WALK) {
+    //    max_speed *= PM_SPEED_MOD_WALK;
+    //}
+
+    //float speed;
+    //const vec3_t dir = Vec3_NormalizeLength(vel, &speed);
+    //speed = Clampf(speed, 0.f, max_speed);
+
+    //if (speed < PM_STOP_EPSILON) {
+    //    speed = 0.f;
+    //}
+
+    //float accel = PM_ACCEL_AIR;
+
+    //if (pm->state.flags & PMF_DUCKED) {
+    //    accel *= PM_ACCEL_AIR_MOD_DUCKED;
+    //}
+
+    //PM_Accelerate(dir, speed, accel);
+
+    //PM_StepSlideMove();
+}
+
+//
+//===============
+// PM_WalkMove
+// Called for movements where player is on ground, regardless of water level.
+//===============
+//
+static void PM_WalkMove(void) {
+
+    //// check for beginning of a jump
+    //if (PM_CheckJump()) {
+    //    PM_AirMove();
+    //    return;
+    //}
+
+    //Com_DPrintf("%s\n", vtos(pm->state.origin));
+
+    //PM_Friction();
+
+    //PM_Currents();
+
+    //// project the desired movement into the X/Y plane
+
+    //const vec3_t forward = Vec3_Normalize(Pm_ClipVelocity(pm_locals.forward_xy, pm_locals.ground.plane.normal, PM_CLIP_BOUNCE));
+    //const vec3_t right = Vec3_Normalize(Pm_ClipVelocity(pm_locals.right_xy, pm_locals.ground.plane.normal, PM_CLIP_BOUNCE));
+
+    //vec3_t vel = Vec3_Zero();
+    //vel = Vec3_Fmaf(vel, pm->cmd.forward, forward);
+    //vel = Vec3_Fmaf(vel, pm->cmd.right, right);
+
+    //float max_speed;
+
+    //// clamp to max speed
+    //if (pm->water_level > WATER_FEET) {
+    //    max_speed = PM_SPEED_WATER;
+    //}
+    //else if (pm->state.flags & PMF_DUCKED) {
+    //    max_speed = PM_SPEED_DUCKED;
+    //}
+    //else {
+    //    max_speed = PM_SPEED_RUN;
+    //}
+
+    //// accounting for walk modulus
+    //if (pm->cmd.buttons & BUTTON_WALK) {
+    //    max_speed *= PM_SPEED_MOD_WALK;
+    //}
+
+    //// clamp the speed to min/max speed
+    //float speed;
+    //const vec3_t dir = Vec3_NormalizeLength(vel, &speed);
+    //speed = Clampf(speed, 0.0, max_speed);
+
+    //if (speed < PM_STOP_EPSILON) {
+    //    speed = 0.0;
+    //}
+
+    //// accelerate based on slickness of ground surface
+    //const float accel = (pm_locals.ground.texinfo->flags & SURF_SLICK) ? PM_ACCEL_GROUND_SLICK : PM_ACCEL_GROUND;
+
+    //PM_Accelerate(dir, speed, accel);
+
+    //// determine the speed after acceleration
+    //speed = Vec3_Length(pm->state.velocity);
+
+    //// clip to the ground
+    //pm->state.velocity = PM_ClipVelocity(pm->state.velocity, pm_locals.ground.plane.normal, PM_CLIP_BOUNCE);
+
+    //// and now scale by the speed to avoid slowing down on slopes
+    //pm->state.velocity = Vec3_Normalize(pm->state.velocity);
+    //pm->state.velocity = Vec3_Scale(pm->state.velocity, speed);
+
+    //// and finally, step if moving in X/Y
+    //if (pm->state.velocity.x || pm->state.velocity.y) {
+    //    PM_StepSlideMove();
+    //}
+}
+
+//
+//===============
+// PM_SpectatorMove
+// 
+//===============
+//
+static void PM_SpectatorMove(void) {
+    //PM_Friction();
+
+    //// user intentions on X/Y/Z
+    //vec3_t vel = Vec3_Zero();
+    //vel = Vec3_Fmaf(vel, pm->cmd.forward, pm_locals.forward);
+    //vel = Vec3_Fmaf(vel, pm->cmd.right, pm_locals.right);
+
+    //// add explicit Z
+    //vel.z += pm->cmd.up;
+
+    //float speed;
+    //vel = Vec3_NormalizeLength(vel, &speed);
+    //speed = Clampf(speed, 0.0, PM_SPEED_SPECTATOR);
+
+    //if (speed < PM_STOP_EPSILON) {
+    //    speed = 0.0;
+    //}
+
+    //// accelerate
+    //PM_Accelerate(vel, speed, PM_ACCEL_SPECTATOR);
+
+    //// do the move
+    //pm->state.origin = Vec3_Fmaf(pm->state.origin, pm_locals.time, pm->state.velocity);
+}
+/*
+=============
+VectorToString
+
+This is just a convenience function
+for printing vectors
+=============
+*/
+static char* vtos(vec3_t v)
+{
+    static  int     index;
+    static  char    str[8][32];
+    char* s;
+
+    // use an array so that multiple vtos won't collide
+    s = str[index];
+    index = (index + 1) & 7;
+
+    Q_snprintf(s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
+
+    return s;
+}
+//
+//===============
+// PM_SpectatorMove
+// 
+//===============
+//
+static void PM_FreezeMove(void) {
+
+    Com_DPrintf("%s\n", vtos(pm->state.origin));
+}
+
+//
+//===============
+// PM_Init
+// 
+//===============
+//
+static void PM_Init(void) {
+    // Set the default bounding box
+    if (pm->state.type == PM_DEAD) {
+        if (pm->state.flags & PMF_GIBLET) {
+            // Use Vector << to  copy PM_GIBLET_MINS, PM_GIBLET_MAXS into
+            // the pm->mins/maxs vec3_t.
+            pm->mins << Vector(PM_GIBLET_MINS);
+            pm->maxs << Vector(PM_GIBLET_MAXS);
+        } else {
+            // Use Vector << to  copy PM_DEAD_MINS, PM_DEAD_MAXS into
+            // the pm->mins/maxs vec3_t.
+            pm->mins << Vector(PM_DEAD_MINS) * PM_SCALE;
+            pm->maxs << Vector(PM_DEAD_MAXS) * PM_SCALE;
+        }
+    } else {
+        // Use Vector << to  copy PM_MINS, PM_MAXS into
+        // the pm->mins/maxs vec3_t.
+        pm->mins << Vector(PM_MINS) * PM_SCALE;
+        pm->maxs << Vector(PM_MAXS) * PM_SCALE;
+    }
+
+    
+    // Initialize pm values to 0.
+    pm->viewAngles << Vector::Zero; // Vector << trick to initialize angles to 0.
+
+    pm->numTouchedEntities = 0;
+    pm->waterLevel = WATER_NONE;
+    pm->waterType = 0;
+
+    pm->step = 0.0;
+
+    // Reset flags that we test each move
+    pm->state.flags &= ~(PMF_ON_GROUND | PMF_ON_STAIRS | PMF_ON_LADDER);
+    pm->state.flags &= ~(PMF_JUMPED | PMF_UNDER_WATER);
+
+    if (pm->cmd.upmove < 1) { // jump key released
+        pm->state.flags &= ~PMF_JUMP_HELD;
+    }
+
+    // Decrement the movement timer by the duration of the command
+    if (pm->state.time) {
+        if (pm->cmd.msec >= pm->state.time) { // clear the timer and timed flags
+            pm->state.flags &= ~PMF_TIME_MASK;
+            pm->state.time = 0;
+        }
+        else { // or just decrement the timer
+            pm->state.time -= pm->cmd.msec;
+        }
+    }
+}
+
+//
+//===============
 // PM_ClampAngles
 // 
 // Clamp angles with deltas. Ensure they pitch doesn't exceed 90 or 270
@@ -1208,114 +1676,32 @@ static void PM_ClampAngles(void)
     AngleVectors(pm->viewAngles, pm_locals.forwardXYZ, pm_locals.rightXYZ, pm_locals.upXYZ);
 }
 
-
-
-
-
-//
-//=============================================================================
-//
-//	POSITION TESTING
-//
-//=============================================================================
-//
-
 //
 //===============
-// PM_CategorizePosition
-//
-// + Tests for whether the player is on-ground or not:
-//   - In case of the player its velocity being over 180, it will
-//     assume it is off ground, and not test any further. 
-// + End water jumps.
-// + Test falling velocity.
-//   - In case its falling velocity is too high, check the pmove landing flag.
-// + Test for touching entities, and mark them.
-// + Test whether the player view is inside water, or not, and set the
-// waterlevel based on that accordingly. (1 to 3)
+// PM_ClampAngles
+// 
+// Clamp angles with deltas. Ensure they pitch doesn't exceed 90 or 270
 //===============
 //
-static void PM_CategorizePosition(void)
-{
+static void PM_InitLocal(void) {
 
+    memset(&pm_locals, 0, sizeof(pm_locals));
 
+    // save previous values in case move fails, and to detect landings
+    pm_locals.previousOrigin << Vector(pm->state.origin);
+    pm_locals.previousVelocity << Vector(pm->state.velocity);
+
+    // convert from milliseconds to seconds
+    pm_locals.time = pm->cmd.msec * 0.001;
+
+    // calculate the directional vectors for this move
+    AngleVectors(pm->viewAngles, pm_locals.forwardXYZ, pm_locals.rightXYZ, pm_locals.upXYZ);
+
+    // and calculate the directional vectors in the XY plane
+    vec3_t angle = { 0, pm->viewAngles[1], 0 };
+
+    AngleVectors(angle, pm_locals.forwardXY, pm_locals.rightXY, NULL);
 }
-
-//
-//===============
-// PM_TestPosition
-// 
-// Tests for whether the position is valid, or not.
-// (In a wall, or object, etc.) 
-//===============
-//
-static qboolean PM_TestPosition(void)
-{
-    trace_t trace;
-    vec3_t  origin, end;
-
-    // This check is not needed anymore. Whether to test for a position or not
-    // can now be decided by calling PM_FinalizePosition with true as its arg. 
-    //if (pm->s.type == PM_SPECTATOR)
-    //    return qtrue;
-
-    // Copy over the s.origin to end and origin for trace testing.
-    Vec3_Copy(pm->state.origin, origin);
-    Vec3_Copy(pm->state.origin, end);
-
-    // Do a trace test.
-    trace = pm->Trace(origin, pm->mins, pm->maxs, end);
-
-    // Return whether not allsolid.
-    return !trace.allsolid;
-}
-
-//
-//===============
-// PM_FinalizePosition
-// 
-// Copies over the velocity and origin back into the player movement pmove
-// state. 
-// 
-// If testForValid is true, it'll do some extra work. Where in case of a 
-// good position, the function returns and is done. If invalid, it'll revert to
-// the old origin. By doing so, we prevent from moving into objects and walls.
-// 
-// The PM_SpectatorMove for example does NOT test for a valid position, it is 
-// free to move wherever it pleases.
-//===============
-//
-static void PM_FinalizePosition(qboolean testForValid) {
-    // Don't test for a valid position if not wished for.
-    if (!testForValid)
-        return;
-
-    // Check to see if the position is valid.
-    if (PM_TestPosition())
-        return;
-
-    // Revert back to the previous origin.
-    Vec3_Copy(pm_locals.previousOrigin, pm->state.origin);
-}
-
-//
-//===============
-// PM_TestInitialPosition
-// 
-// In case the position has been changed outside of PMove, it'll test its new
-// position and copy it over in case it is valid.
-//===============
-//
-static void PM_TestInitialPosition(void)
-{
-    // Do 
-    if (PM_TestPosition()) {
-        // Copy over the state origin in case it is valid.
-        Vec3_Copy(pm->state.origin, pm_locals.previousOrigin);
-        return;
-    }
-}
-
 
 //
 //===============
@@ -1326,7 +1712,74 @@ static void PM_TestInitialPosition(void)
 //
 void PMove(pm_move_t* pmove, pmoveParams_t* params)
 {
+    pm = pmove;
+    pmp = params;
 
+    // Initialize PMove for this iteration.
+    PM_Init();
+
+    // Clamp Angles.
+    PM_ClampAngles();
+
+    // Init PM locals.
+    PM_InitLocal();
+
+    // No movement if FROZEN.
+    if (pm->state.type == PM_FREEZE) {
+        PM_FreezeMove();
+        return;
+    }
+
+    // No interaction if spectating.
+    if (pm->state.type == PM_SPECTATOR) { 
+        PM_SpectatorMove();
+        return;
+    }
+
+    // No user input control if dead.
+    if (pm->state.type == PM_DEAD) { 
+        pm->cmd.forwardmove = pm->cmd.sidemove = pm->cmd.upmove = 0;
+    }
+
+    // Check for ladders
+    PM_CheckLadder();
+
+    // Check for grapple hook
+    PM_CheckHook();
+
+    // Check for ducking
+    PM_CheckDuck();
+
+    // Check for water level, water type
+    PM_CheckWater();
+
+    // Check for ground
+    PM_CheckGround();
+
+    if (pm->state.flags & PMF_TIME_TELEPORT) {
+        // pause in place briefly
+    }
+    else if (pm->state.flags & PMF_TIME_WATER_JUMP) {
+        PM_WaterJumpMove();
+    }
+    else if (pm->state.flags & PMF_ON_LADDER) {
+        PM_LadderMove();
+    }
+    else if (pm->state.flags & PMF_ON_GROUND) {
+        PM_WalkMove();
+    }
+    else if (pm->waterLevel > WATER_FEET) {
+        PM_WaterMove();
+    }
+    else {
+        PM_AirMove();
+    }
+
+    // Check for ground at new spot
+    PM_CheckGround();
+
+    // Check for water level, water type at new spot
+    PM_CheckWater();
 }
 
 

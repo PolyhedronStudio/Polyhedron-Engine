@@ -213,8 +213,6 @@ typedef struct {
 
     // Clamped, and including kick and delta (out)
     vec3_t viewAngles;
-    // Viewheight. (in)
-    float       viewHeight;
 
     // Bounding box size (out)
     vec3_t mins, maxs;

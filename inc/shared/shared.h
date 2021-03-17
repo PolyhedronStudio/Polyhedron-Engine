@@ -737,6 +737,9 @@ typedef struct {
     uint16_t    gravity;
     uint16_t    delta_angles[3];    // add to command angles to get view direction
     // changed by spawns, rotating objects, and teleporters
+
+    // View offsets. (Only Z is used atm, beware.)
+    vec3_t view_offset;
 } pm_state_t;
 
 

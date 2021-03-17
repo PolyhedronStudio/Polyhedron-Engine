@@ -1633,7 +1633,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
             PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
         }
 
-        ent->viewheight = pm.viewHeight;
+        ent->viewheight = pm.state.view_offset[2];
         ent->waterlevel = pm.waterLevel;
         ent->watertype = pm.waterType;
         ent->groundentity = pm.groundEntity;
