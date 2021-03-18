@@ -157,6 +157,7 @@ static void PM_ClampAngles(void)
     short   temp;
     int     i;
 
+    // In case of teleporting, we wan't to reset pitch and roll, but maintain the yaw.
     if (pm->state.flags & PMF_TIME_TELEPORT) {
         pm->viewAngles[YAW] = SHORT2ANGLE(pm->cmd.angles[YAW] + pm->state.delta_angles[YAW]);
         pm->viewAngles[PITCH] = 0;
@@ -175,6 +176,8 @@ static void PM_ClampAngles(void)
         else if (pm->viewAngles[PITCH] < 271 && pm->viewAngles[PITCH] >= 180)
             pm->viewAngles[PITCH] = 271;
     }
+
+    // Calculate the angle vectors for movement.
     AngleVectors(pm->viewAngles, pml.forward, pml.right, pml.up);
 }
 
@@ -1328,7 +1331,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     // Check for special movements to execute.
     PM_CheckSpecialMovements();
 
-    // drop timing counter
+    // Used for "dropping" the player, ie, landing after jumps or falling off a ledge/slope.
     if (pm->state.time) {
         int     msec;
 
