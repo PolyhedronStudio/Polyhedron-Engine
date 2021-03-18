@@ -735,7 +735,7 @@ typedef struct {
     uint16_t    flags;       // ducked, jump_held, etc
     uint16_t    time;        // each unit = 8 ms
     uint16_t    gravity;
-    uint16_t    delta_angles[3];    // add to command angles to get view direction
+    int16_t     delta_angles[3];    // add to command angles to get view direction
     // changed by spawns, rotating objects, and teleporters
 
     // View offsets. (Only Z is used atm, beware.)
@@ -744,10 +744,13 @@ typedef struct {
 
 
 //
+// This needs some reorganizing. BUTTON_ENGINE (1 << 0) BUTTON_### (BUTTON_ENGINE << 0)
+//
 // button bits
 //
 #define BUTTON_ATTACK       1
 #define BUTTON_USE          2
+#define BUTTON_WALK         3           // PMOVE: Added for pmove.
 #define BUTTON_ANY          128         // any key whatsoever
 
 

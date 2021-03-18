@@ -54,7 +54,7 @@ public: // Utilities
 	Vector ToAngles(bool flipPitch = false) const;
 
 	// A cross product. What is there to say?
-	inline const Vector& CrossProduct(const Vector& op) const
+	inline const Vector CrossProduct(const Vector& op) const
 	{
 		return Vector(
 			(y * op.z - z * op.y),

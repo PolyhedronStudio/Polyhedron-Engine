@@ -16,38 +16,26 @@
 //================
 //
 void CLG_CheckPredictionError(int frame, unsigned int cmd) {
-    // N&C: FF Precision. (Used to be ints.)
     float delta[3];
     float len;
-    // compare what the server returned with what we had predicted it to be
+
+    // Compare what the server returned with what we had predicted it to be
     Vec3_Subtract(cl->frame.ps.pmove.origin, cl->predicted_origins[cmd & CMD_MASK], delta);
 
-    // save the prediction error for interpolation
-    // N&C: FF Precision. (1.0 / 8 = 0.125, 640 / 8 = 80)
     len = fabs(delta[0]) + fabs(delta[1]) + fabs(delta[2]);
     if (len < 0.125f  || len > 80.f) {
-    //len = abs(delta[0]) + abs(delta[1]) + abs(delta[2]);
-    //if (len < 1 || len > 640) {
-        // > 80 world units is a teleport or something
         Vec3_Clear(cl->prediction_error);
         return;
     }
 
-    // TODO: Add Debug functions to CG Module.
-    //SHOWMISS("prediction miss on %i: %i (%d %d %d)\n",
-    //    cl->frame.number, len, delta[0], delta[1], delta[2]);
-
-    // don't predict steps against server returned data
+    // Don't predict steps against server returned data
     if (cl->predicted_step_frame <= cmd)
         cl->predicted_step_frame = cmd + 1;
 
     Vec3_Copy(cl->frame.ps.pmove.origin, cl->predicted_origins[cmd & CMD_MASK]);
 
-    // N&C: FF Precision. No need to scale, just copy.
-    // save for error interpolation
+    // Save for error interpolation
     Vec3_Copy(delta, cl->prediction_error);
-    // save for error interpolation
-    //Vec3_Scale(delta, 0.125f, cl->prediction_error);
 }
 
 //
@@ -198,7 +186,7 @@ static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
 //================
 //
 void CLG_PredictMovement(unsigned int ack, unsigned int current) {
-    pm_move_t     pm;
+    pm_move_t   pm = {};
     float       step, oldz;     // N&C: FF Precision. These were ints.
     int         frame;
 
@@ -209,7 +197,6 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     memset(&pm, 0, sizeof(pm));
     pm.Trace = CLG_Trace;
     pm.PointContents = CLG_PointContents;
-
     pm.state = cl->frame.ps.pmove;
 #if USE_SMOOTH_DELTA_ANGLES
     Vec3_Copy(cl->delta_angles, pm.state.delta_angles);
@@ -248,11 +235,9 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     if (pm.state.type != PM_SPECTATOR && (pm.state.flags & PMF_ON_GROUND)) {
         oldz = cl->predicted_origins[cl->predicted_step_frame & CMD_MASK][2];
         step = pm.state.origin[2] - oldz;
-        // N&C: FF Precision.
+
         if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
             cl->predicted_step = step;
-        //if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f) {
-        //    cl->predicted_step = step * 0.125f;
             cl->predicted_step_time = clgi.GetRealTime();
             cl->predicted_step_frame = frame + 1;    // don't double step
         }
@@ -263,10 +248,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     }
 
     // copy results out for rendering
-    // N&C: FF Precision.
     Vec3_Copy(pm.state.origin, cl->predicted_origin);
     Vec3_Copy(pm.state.velocity, cl->predicted_velocity);
-    //Vec3_Scale(pm.state.origin, 0.125f, cl->predicted_origin);
-    //Vec3_Scale(pm.state.velocity, 0.125f, cl->predicted_velocity);
     Vec3_Copy(pm.viewAngles, cl->predicted_angles);
 }

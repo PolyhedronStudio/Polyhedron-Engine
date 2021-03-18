@@ -149,21 +149,34 @@ extern const vec3_t PM_MAXS;
 //
 // Game-specific flags for pm_state_t.flags.
 //
-#define PMF_DUCKED				(PMF_GAME << 0) // player is ducked
-#define PMF_JUMPED				(PMF_GAME << 1) // player jumped
-#define PMF_JUMP_HELD			(PMF_GAME << 2) // player's jump key is down
-#define PMF_ON_GROUND			(PMF_GAME << 3) // player is on ground
-#define PMF_ON_STAIRS			(PMF_GAME << 4) // player traversed step
-#define PMF_ON_LADDER			(PMF_GAME << 5) // player is on ladder
-#define PMF_UNDER_WATER			(PMF_GAME << 6) // player is under water
-#define PMF_TIME_PUSHED			(PMF_GAME << 7) // time before can seek ground
-#define PMF_TIME_TRICK_JUMP		(PMF_GAME << 8) // time eligible for trick jump
-#define PMF_TIME_WATER_JUMP		(PMF_GAME << 9) // time before control
-#define PMF_TIME_LAND			(PMF_GAME << 10) // time before jump eligible
-#define PMF_TIME_TELEPORT		(PMF_GAME << 11) // time frozen in place
-#define PMF_GIBLET				(PMF_GAME << 12) // player is a giblet
-#define PMF_HOOK_RELEASED		(PMF_GAME << 13) // player's hook key was released
-#define PMF_TIME_TRICK_START	(PMF_GAME << 14) // time until we can initiate a trick jump
+// Player Move Flags.
+#define PMF_GAME			(1 << 0)
+#define PMF_DUCKED          (PMF_GAME << 0) // Player is ducked.
+#define PMF_JUMP_HELD       (PMF_GAME << 1) // Player jump key is held.
+#define PMF_ON_GROUND       (PMF_GAME << 2) // Player is on-ground.
+#define PMF_ON_STAIRS		(PMF_GAME << 3) // Player is traversing stairs.
+#define PMF_TIME_WATERJUMP  (PMF_GAME << 4) // Value of: time is waterjump
+#define PMF_TIME_LAND       (PMF_GAME << 5) // Value of: time is time before rejump
+#define PMF_TIME_TELEPORT   (PMF_GAME << 6) // Value of: time is non-moving time
+#define PMF_NO_PREDICTION   (PMF_GAME << 7) // Temporarily disables prediction (used for grappling hook)
+#define PMF_TELEPORT_BIT    (PMF_GAME << 8) // Used by q2pro
+// NOTE: Any more flags requires changing the pmove states and networking code.
+
+//#define PMF_DUCKED				(PMF_GAME << 0) // player is ducked
+//#define PMF_JUMPED				(PMF_GAME << 1) // player jumped
+//#define PMF_JUMP_HELD			(PMF_GAME << 2) // player's jump key is down
+//#define PMF_ON_GROUND			(PMF_GAME << 3) // player is on ground
+//#define PMF_ON_STAIRS			(PMF_GAME << 4) // player traversed step
+//#define PMF_ON_LADDER			(PMF_GAME << 5) // player is on ladder
+//#define PMF_UNDER_WATER			(PMF_GAME << 6) // player is under water
+//#define PMF_TIME_PUSHED			(PMF_GAME << 7) // time before can seek ground
+//#define PMF_TIME_TRICK_JUMP		(PMF_GAME << 8) // time eligible for trick jump
+//#define PMF_TIME_WATER_JUMP		(PMF_GAME << 9) // time before control
+//#define PMF_TIME_LAND			(PMF_GAME << 10) // time before jump eligible
+//#define PMF_TIME_TELEPORT		(PMF_GAME << 11) // time frozen in place
+//#define PMF_GIBLET				(PMF_GAME << 12) // player is a giblet
+//#define PMF_HOOK_RELEASED		(PMF_GAME << 13) // player's hook key was released
+//#define PMF_TIME_TRICK_START	(PMF_GAME << 14) // time until we can initiate a trick jump
 
 //
 // The mask of pm_state_t.flags affecting pm_state_t.time.
