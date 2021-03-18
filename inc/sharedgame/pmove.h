@@ -150,7 +150,6 @@ extern const vec3_t PM_MAXS;
 // Game-specific flags for pm_state_t.flags.
 //
 // Player Move Flags.
-#define PMF_GAME			(1 << 0)
 #define PMF_DUCKED          (PMF_GAME << 0) // Player is ducked.
 #define PMF_JUMP_HELD       (PMF_GAME << 1) // Player jump key is held.
 #define PMF_ON_GROUND       (PMF_GAME << 2) // Player is on-ground.

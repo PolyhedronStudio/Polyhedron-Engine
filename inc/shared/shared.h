@@ -717,9 +717,9 @@ typedef enum {
 // Player movement flags.The game is free to define up to 16 bits.
 //
 #define PMF_ENGINE          (1 << 0)
-#define PMF_NO_PREDICTION   (PMF_ENGINE << 0)
-#define PMF_TELEPORT_BIT    (PMF_ENGINE << 1)
-#define PMF_GAME			(PMF_ENGINE << 2)
+//#define PMF_NO_PREDICTION   (PMF_ENGINE << 0)
+//#define PMF_TELEPORT_BIT    (PMF_ENGINE << 1)
+#define PMF_GAME			(PMF_ENGINE << 0)
 
 // this structure needs to be communicated bit-accurate
 // from the server to the client to guarantee that

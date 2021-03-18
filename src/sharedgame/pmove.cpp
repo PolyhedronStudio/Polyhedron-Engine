@@ -240,7 +240,7 @@ static void PM_StepDown(trace_t* trace) {
 
 //
 //===============
-// PM_StepSlideMove_
+// PM_SlideMove
 // 
 // Each intersection will try to step over the obstruction instead of
 // sliding along it.
@@ -251,7 +251,7 @@ static void PM_StepDown(trace_t* trace) {
 //
 #define MIN_STEP_NORMAL 0.7     // can't step up onto very steep slopes
 #define MAX_CLIP_PLANES 5
-static void PM_StepSlideMove_(void)
+static void PM_SlideMove(void)
 {
     int         bumpcount, numbumps;
     vec3_t      dir;
@@ -370,7 +370,7 @@ static void PM_StepSlideMove(void)
     Vec3_Copy(pml.origin, start_o);
     Vec3_Copy(pml.velocity, start_v);
 
-    PM_StepSlideMove_();
+    PM_SlideMove();
 
     Vec3_Copy(pml.origin, down_o);
     Vec3_Copy(pml.velocity, down_v);
@@ -386,7 +386,7 @@ static void PM_StepSlideMove(void)
     Vec3_Copy(up, pml.origin);
     Vec3_Copy(start_v, pml.velocity);
 
-    PM_StepSlideMove_();
+    PM_SlideMove();
 
     // push down the final amount
     Vec3_Copy(pml.origin, down);
