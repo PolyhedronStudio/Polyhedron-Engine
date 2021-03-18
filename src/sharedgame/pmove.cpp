@@ -238,20 +238,70 @@ static void PM_StepDown(trace_t* trace) {
     }
 }
 
+/**
+ * Adapted from Quake III, this function adjusts a trace so that if it starts inside of a wall,
+ * it is adjusted so that the trace begins outside of the solid it impacts.
+ * @return The actual trace.
+ */
+const trace_t PM_TraceCorrectAllSolid(vec3_t start, vec3_t end, vec3_t mins, vec3_t maxs) {
+
+    const int32_t offsets[] = { 0, 1, -1 };
+
+    // jitter around
+    for (uint32_t i = 0; i < 3; i++) {
+        for (uint32_t j = 0; j < 3; j++) {
+            for (uint32_t k = 0; k < 3; k++) {
+                vec3_t point;
+                vec3_t offsetVec = { offsets[i], offsets[j], offsets[k] };
+                Vec3_Add(start, offsetVec, point);
+                const trace_t trace = pm->Trace(point, end, mins, maxs);
+
+                if (!trace.allsolid) {
+
+                    if (i != 0 || j != 0 || k != 0) {
+                        Com_DPrintf("Fixed all-solid\n");
+                    }
+
+                    return trace;
+                }
+            }
+        }
+    }
+
+    Com_DPrintf("No good position\n");
+    return pm->Trace(start, end, mins, maxs);
+}
+
+//
+//===============
+// PM_ImpactPlane
+// 
+// Return True if `plane` is unique to `planes` and should be impacted, 
+// return false otherwise.
+//===============
+//
+static bool PM_ImpactPlane(vec3_t* planes, int32_t num_planes, const vec3_t plane) {
+
+    for (int32_t i = 0; i < num_planes; i++) {
+        if (Vec3_Dot(plane, planes[i]) > 1.0f - PM_STOP_EPSILON) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 //
 //===============
 // PM_SlideMove
 // 
-// Each intersection will try to step over the obstruction instead of
-// sliding along it.
-//
-// Returns a new origin, velocity, and contact entity
-// Does not modify any world state ?
+// Calculates a new origin, velocity, and contact entities based on the
+// movement commandand world state. Returns true if not blocked.
 //===============
 //
 #define MIN_STEP_NORMAL 0.7     // can't step up onto very steep slopes
 #define MAX_CLIP_PLANES 5
-static void PM_SlideMove(void)
+static bool PM_SlideMove(void)
 {
     int         bumpcount, numbumps;
     vec3_t      dir;
@@ -272,6 +322,11 @@ static void PM_SlideMove(void)
     time_left = pml.frametime;
 
     for (bumpcount = 0; bumpcount < numbumps; bumpcount++) {
+        // Break in case we have run out of time for this frame.
+        if (time_left <= 0.0f)
+            break;
+
+        // Vec3_FMAF
         for (i = 0; i < 3; i++)
             end[i] = pml.origin[i] + time_left * pml.velocity[i];
 
@@ -280,7 +335,7 @@ static void PM_SlideMove(void)
         if (trace.allsolid) {
             // entity is trapped in another solid
             pml.velocity[2] = 0;    // don't build up falling damage
-            return;
+            return true;
         }
 
         if (trace.fraction > 0) {
@@ -304,51 +359,124 @@ static void PM_SlideMove(void)
             break;
         }
 
-        Vec3_Copy(trace.plane.normal, planes[numplanes]);
-        numplanes++;
-
-        //
-        // modify original_velocity so it parallels all of the clip planes
-        //
-        for (i = 0; i < numplanes; i++) {
-            PM_ClipVelocity(pml.velocity, planes[i], pml.velocity, 1.01);
-            for (j = 0; j < numplanes; j++)
-                if (j != i) {
-                    if (Vec3_Dot(pml.velocity, planes[j]) < 0)
-                        break;  // not ok
-                }
-            if (j == numplanes)
-                break;
-        }
-
-        if (i != numplanes) {
-            // go along this plane
+        // Record the impacted plane, or nudge velocity out along it
+        if (PM_ImpactPlane(planes, numplanes, trace.plane.normal)) {
+            Vec3_Copy(trace.plane.normal, planes[numplanes]);
+            numplanes++;
         }
         else {
-            // go along the crease
-            if (numplanes != 2) {
-                //              Con_Printf ("clip velocity, numplanes == %i\n",numplanes);
-                Vec3_Copy(vec3_origin, pml.velocity);
-                break;
-            }
-            Vec3_Cross(planes[0], planes[1], dir);
-            d = Vec3_Dot(dir, pml.velocity);
-            Vec3_Scale(dir, d, pml.velocity);
+            // if we've seen this plane before, nudge our velocity out along it
+            //pm->state.velocity = Vec3_Add(pm->s.velocity, trace.plane.normal);
+            Vec3_Add(pm->state.velocity, trace.plane.normal, pm->state.velocity);
+            continue;
         }
 
-        //
-        // if velocity is against the original velocity, stop dead
-        // to avoid tiny occilations in sloping corners
-        //
-        if (Vec3_Dot(pml.velocity, primal_velocity) <= 0) {
-            Vec3_Copy(vec3_origin, pml.velocity);
+        // and modify velocity, clipping to all impacted planes
+        for (int32_t i = 0; i < numplanes; i++) {
+            vec3_t vel;
+
+            // If velocity doesn't impact this plane, skip it
+            if (Vec3_Dot(pm->state.velocity, planes[i]) >= 0.0f) {
+                continue;
+            }
+
+            // Slide along the plane
+            PM_ClipVelocity(pm->state.velocity, planes[i], vel, PM_CLIP_BOUNCE);
+
+            // See if there is a second plane that the new move enters
+            for (int32_t j = 0; j < numplanes; j++) {
+                vec3_t cross;
+
+                if (j == i) {
+                    continue;
+                }
+
+                // If the clipped velocity doesn't impact this plane, skip it
+                if (Vec3_Dot(vel, planes[j]) >= 0.0f) {
+                    continue;
+                }
+
+                // We are now intersecting a second plane
+                PM_ClipVelocity(vel, planes[j], vel, PM_CLIP_BOUNCE);
+
+                // But if we clip against it without being deflected back, we're okay
+                if (Vec3_Dot(vel, planes[i]) >= 0.0f) {
+                    continue;
+                }
+
+                // We must now slide along the crease (cross product of the planes)
+                Vec3_Cross(planes[i], planes[j], cross);
+                VectorNormalize(cross);//cross = Vec3_Normalize(cross);
+
+                const float scale = Vec3_Dot(cross, pm->state.velocity);
+                Vec3_Scale(cross, scale, vel);//vel = Vec3_Scale(cross, scale);
+
+                // See if there is a third plane the the new move enters
+                for (int32_t k = 0; k < numplanes; k++) {
+
+                    if (k == i || k == j) {
+                        continue;
+                    }
+
+                    if (Vec3_Dot(vel, planes[k]) >= 0.0f) {
+                        continue;
+                    }
+
+                    // Stop dead at a triple plane interaction
+                    Vec3_Copy(vec3_origin, pm->state.velocity);//pm->state.velocity = vec3_origin;
+                    return true;
+                }
+            }
+
+            // If we have fixed all interactions, try another move
+            Vec3_Copy(vel, pm->state.velocity);//pm->s.velocity = vel;
             break;
         }
     }
 
-    if (pm->state.time) {
-        Vec3_Copy(primal_velocity, pml.velocity);
-    }
+    return bumpcount == 0;
+        //
+        // modify original_velocity so it parallels all of the clip planes
+        //
+        //for (i = 0; i < numplanes; i++) {
+        //    PM_ClipVelocity(pml.velocity, planes[i], pml.velocity, 1.01);
+        //    for (j = 0; j < numplanes; j++)
+        //        if (j != i) {
+        //            if (Vec3_Dot(pml.velocity, planes[j]) < 0)
+        //                break;  // not ok
+        //        }
+        //    if (j == numplanes)
+        //        break;
+        //}
+
+        //if (i != numplanes) {
+        //    // go along this plane
+        //}
+        //else {
+        //    // go along the crease
+        //    if (numplanes != 2) {
+        //        //              Con_Printf ("clip velocity, numplanes == %i\n",numplanes);
+        //        Vec3_Copy(vec3_origin, pml.velocity);
+        //        break;
+        //    }
+        //    Vec3_Cross(planes[0], planes[1], dir);
+        //    d = Vec3_Dot(dir, pml.velocity);
+        //    Vec3_Scale(dir, d, pml.velocity);
+        //}
+
+        ////
+        //// if velocity is against the original velocity, stop dead
+        //// to avoid tiny occilations in sloping corners
+        ////
+        //if (Vec3_Dot(pml.velocity, primal_velocity) <= 0) {
+        //    Vec3_Copy(vec3_origin, pml.velocity);
+        //    break;
+        //}
+    //}
+
+    //if (pm->state.time) {
+    //    Vec3_Copy(primal_velocity, pml.velocity);
+    //}
 }
 
 //
@@ -360,58 +488,134 @@ static void PM_SlideMove(void)
 //
 static void PM_StepSlideMove(void)
 {
-    vec3_t      start_o, start_v;
-    vec3_t      down_o, down_v;
-    trace_t     trace;
-    float       down_dist, up_dist;
-    //  vec3_t      delta;
-    vec3_t      up, down;
+    vec3_t upV = { 0.f, 0.f, 1.f };
+    vec3_t downV = { 0.f, 0.f, -1.f };
 
-    Vec3_Copy(pml.origin, start_o);
-    Vec3_Copy(pml.velocity, start_v);
+    // Store pre-move parameters
+    vec3_t org0;
+    vec3_t vel0;
+    Vec3_Copy(pm->state.origin, org0);
+    Vec3_Copy(pm->state.velocity, vel0);
 
-    PM_SlideMove();
+    // Attempt to move; if nothing blocks us, we're done
+    if (PM_SlideMove()) {
 
-    Vec3_Copy(pml.origin, down_o);
-    Vec3_Copy(pml.velocity, down_v);
+        // Attempt to step down to remain on ground
+        if ((pm->state.flags & PMF_ON_GROUND) && pm->cmd.upmove <= 0) {
+            vec3_t down;
 
-    Vec3_Copy(start_o, up);
-    up[2] += PM_STEP_HEIGHT_MAX;
+            // Vec3_FMAF
+            for (int i = 0; i < 3; i++) down[i] = pm->state.origin[i] + (PM_STEP_HEIGHT + PM_GROUND_DIST) * downV[i];
 
-    trace = pm->Trace(up, pm->mins, pm->maxs, up);
-    if (trace.allsolid)
-        return;     // can't step up
+            // Exceute trace for determining whether to step or not.
+            trace_t step_down = pm->Trace(pm->state.origin, down, pm->mins, pm->maxs);
 
-    // try sliding above
-    Vec3_Copy(up, pml.origin);
-    Vec3_Copy(start_v, pml.velocity);
+            // Step if needed.
+            if (PM_CheckStep(&step_down)) {
+                PM_StepDown(&step_down);
+            }
+        }
 
-    PM_SlideMove();
-
-    // push down the final amount
-    Vec3_Copy(pml.origin, down);
-    down[2] -= PM_STEP_HEIGHT_MAX;
-    trace = pm->Trace(pml.origin, pm->mins, pm->maxs, down);
-    if (!trace.allsolid) {
-        Vec3_Copy(trace.endpos, pml.origin);
-    }
-
-    Vec3_Copy(pml.origin, up);
-
-    // decide which one went farther
-    down_dist = (down_o[0] - start_o[0]) * (down_o[0] - start_o[0])
-        + (down_o[1] - start_o[1]) * (down_o[1] - start_o[1]);
-    up_dist = (up[0] - start_o[0]) * (up[0] - start_o[0])
-        + (up[1] - start_o[1]) * (up[1] - start_o[1]);
-
-    if (down_dist > up_dist || trace.plane.normal[2] < PM_STEP_NORMAL) {
-        Vec3_Copy(down_o, pml.origin);
-        Vec3_Copy(down_v, pml.velocity);
         return;
     }
-    //!! Special case
-    // if we were walking along a plane, then we need to copy the Z over
-    pml.velocity[2] = down_v[2];
+
+    // We were blocked, so try to step over the obstacle
+    vec3_t org1;
+    vec3_t vel1;
+    Vec3_Copy(pm->state.origin, org1);
+    Vec3_Copy(pm->state.velocity, vel1);
+
+    
+    vec3_t up;
+    for (int i = 0; i < 3; i++) up[i] = org0[i] + PM_STEP_HEIGHT * upV[i];
+    
+    // Execute trace.
+    trace_t step_up = pm->Trace(org0, up, pm->mins, pm->maxs);
+
+    if (!step_up.allsolid) {
+
+        // Step from the higher position, with the original velocity
+        Vec3_Copy(step_up.endpos, pm->state.origin);
+        Vec3_Copy(vel0, pm->state.velocity);
+
+        PM_SlideMove();
+
+        // Settle to the new ground, keeping the step if and only if it was successful
+        vec3_t down;            // Vec3_FMAF
+        for (int i = 0; i < 3; i++) down[i] = org0[i] + PM_STEP_HEIGHT * upV[i];
+        
+        trace_t step_down = pm->Trace(pm->state.origin, down, pm->mins, pm->maxs);
+
+        if (PM_CheckStep(&step_down)) {
+            // Quake2 trick jump secret sauce
+            if ((pm->state.flags & PMF_ON_GROUND) || vel0[2] < PM_SPEED_UP) {
+                PM_StepDown(&step_down);
+            } else {
+                pm->step = pm->state.origin[2] - pml.previous_origin[2];
+                pm->state.flags |= PMF_ON_STAIRS;
+            }
+
+            return;
+        }
+    }
+
+    // Copy results into the actual state.
+    Vec3_Copy(org1, pm->state.origin);
+    Vec3_Copy(vel1, pm->state.velocity);
+//    pm->s.origin = org1;
+  //  pm->s.velocity = vel1;
+    //vec3_t      start_o, start_v;
+    //vec3_t      down_o, down_v;
+    //trace_t     trace;
+    //float       down_dist, up_dist;
+    //vec3_t      up, down;
+
+    //// Copy original origin and velocity for maths.
+    //Vec3_Copy(pml.origin, start_o);
+    //Vec3_Copy(pml.velocity, start_v);
+
+    //PM_SlideMove();
+
+    //Vec3_Copy(pml.origin, down_o);
+    //Vec3_Copy(pml.velocity, down_v);
+
+    //Vec3_Copy(start_o, up);
+    //up[2] += PM_STEP_HEIGHT_MAX;
+
+    //trace = pm->Trace(up, pm->mins, pm->maxs, up);
+    //if (trace.allsolid)
+    //    return;     // can't step up
+
+    //// try sliding above
+    //Vec3_Copy(up, pml.origin);
+    //Vec3_Copy(start_v, pml.velocity);
+
+    //PM_SlideMove();
+
+    //// push down the final amount
+    //Vec3_Copy(pml.origin, down);
+    //down[2] -= PM_STEP_HEIGHT_MAX;
+    //trace = pm->Trace(pml.origin, pm->mins, pm->maxs, down);
+    //if (!trace.allsolid) {
+    //    Vec3_Copy(trace.endpos, pml.origin);
+    //}
+
+    //Vec3_Copy(pml.origin, up);
+
+    //// decide which one went farther
+    //down_dist = (down_o[0] - start_o[0]) * (down_o[0] - start_o[0])
+    //    + (down_o[1] - start_o[1]) * (down_o[1] - start_o[1]);
+    //up_dist = (up[0] - start_o[0]) * (up[0] - start_o[0])
+    //    + (up[1] - start_o[1]) * (up[1] - start_o[1]);
+
+    //if (down_dist > up_dist || trace.plane.normal[2] < PM_STEP_NORMAL) {
+    //    Vec3_Copy(down_o, pml.origin);
+    //    Vec3_Copy(down_v, pml.velocity);
+    //    return;
+    //}
+    ////!! Special case
+    //// if we were walking along a plane, then we need to copy the Z over
+    //pml.velocity[2] = down_v[2];
 }
 
 
