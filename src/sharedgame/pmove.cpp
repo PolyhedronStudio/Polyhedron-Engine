@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 // Implements the player movement logic for both client and server game modules
 // 
-// The pml_t structure is used locally when processing the movement. Consider it
+// The pm_locals_t structure is used locally when processing the movement. Consider it
 // a temporary structure. The origin, prev_origin, and velocity are copied over
 // each frame from the player pmove state of the given entity.
 // 
@@ -69,12 +69,12 @@ typedef struct {
 
     vec3_t      previous_origin;
     qboolean    ladder;
-} pml_t;
+} pm_locals_t;
 
 
 // Static locals.
 static pmoveParams_t* pmp;  // Pointer to the player movement parameter settings.
-static pml_t pml;           // Local movement state variables.
+static pm_locals_t pml;           // Local movement state variables.
 static pm_move_t* pm;         // Pointer to the actual player move structure.
 
 // Player Movement Parameters
@@ -93,6 +93,74 @@ static const float  pm_waterspeed = 400;
 //
 //=============================================================================
 //
+//
+//===============
+// vtos
+//
+// A convenience function for printing vectors.
+//===============
+//
+char* vtos(const vec3_t v) {
+    static uint32_t index;
+    static char str[8][MAX_QPATH];
+
+    char* s = str[index++ % 8];
+    Q_scnprintf(s, MAX_QPATH, "(%4.2f %4.2f %4.2f)", v[0], v[1], v[2]);
+
+    return s;
+}
+
+//
+//===============
+// PM_Debug
+//
+// Can be enabled on/off for client AND server indistinctively.
+//===============
+//
+#ifdef CGAME_INCLUDE
+#define DEBUG_CLIENT_PMOVE 1
+#ifdef DEBUG_CLIENT_PMOVE
+// Client debug output.
+static void PM_Debug(const char* func, const char* fmt, ...) {
+
+    va_list args;
+    va_start(args, fmt);
+
+    std::string str = "[CLG_PM_Debug]: ";
+    str += func;
+    str += "(";
+    str += fmt;
+    str += ")";
+    Com_LPrintf(PRINT_DEVELOPER, str.c_str(), args);
+
+    va_end(args);
+}
+#else
+#define CLG_PMove_Debug (...) ()
+#endif // PMOVE_DEBUG
+#else
+#define DEBUG_SERVER_PMOVE 1
+#ifdef DEBUG_SERVER_PMOVE
+// Server debug output.
+static void PM_Debug(const char* func, const char* fmt, ...) {
+
+    va_list args;
+    va_start(args, fmt);
+
+    std::string str = "[SVG_PM_Debug]: ";
+    str += func;
+    str += "(";
+    str += fmt;
+    str += ")";
+    Com_LPrintf(PRINT_DEVELOPER, str.c_str(), args);
+
+    va_end(args);
+}
+#else
+#define SVG_PMove_Debug (...) ()
+#endif // PMOVE_DEBUG
+#endif // CGAME_INCLUDE
+
 //
 //===============
 // PM_ClipVelocity
