@@ -10,6 +10,7 @@ When finished we have a stable base to work from, one that we can start making t
   - [ ] Change the fact that message_packet_t now uses a short array, instead of a vec3_t for the position.
     - [ ] Fix emit_snd, and investigate all code related to svc_sound so that it uses vec3_t and MSG_xxxxFloat functions.
     - [ ] Change MSG_Write/ReadPos to use MSG_Write/ReadFloat instead, this is safe after fixing the above.
+    - [ ] Remove the 5 / 3 bits method in the network cmd. This way we can have 0-254 client and server commands being networked.
 - [ ] Math Library
   - [ ] Move macro functions over to inlined C functions.
   - [ ] Rename VectorClear, and alike functions to Vec#Clear, and so on.
@@ -33,6 +34,11 @@ When finished we have a stable base to work from, one that we can start making t
   - [ ] Figure out whether to keep large boundaries, or not. This depends on: Can we fix the bug? It seems brush splitting, or triangulation is off the rails. Windings etc.
 
 ## Goals for future versions:
+- [ ] Entities (Some things might make it to 0.2)
+  - This is a bit of a vague one. Basically, it is subject to more topics.
+  - It should be able to send and receive custom networked message events. This way we can have client side entities, react properly to their server side counterparts, visa versa.
+  - No more mallocs I suppose, we are preparing for inheritance.
+  - There's more, just can't think of it right now.
 - [ ] OpenAL Reverb stuff, this is partially around, but needs to be transformed so it uses the actual material system to base Reverb on.
 - [ ] C++ entity system. Expected in 0.3, maybe later.
 - [ ] RmlUi (This one, might make it into 0.2, it depends on how soon we have a R_DrawPolyPic function implemented)
