@@ -1,80 +1,50 @@
-# Nail & Crescent
+# Nail & Crescent - Engine 0.2 Branch
 
-Watch our [Teaser](https://www.youtube.com/watch?v=BIOJ6QURT5k) on Youtube, and see what the fuzz is all about.
+## Goals:
+The goals of this branch are to create a solid base, one that we can work uphill from without continuously running into problems created by the past. We are using an engine that spawns from 1998 after all.
 
-## Technology
+So far, during the process, we've been adding features with great success. However, running into limitations of the mathlib, pmove code, networking library, a lack of proper material support that plays well with Trenchbroom and WIDTools, over and over, is sooner or later going to be a bottleneck for our development process. In order to let perfect, not become the enemy of good. This branch exists.
 
-**Nail & Crescent** builds upon the beautiful [Quake II RTX](https://github.com/NVIDIA/Q2RTX) technology.
+When finished we have a stable base to work from, one that we can start making the actual game with. Over time we will continouously add features, using a similar iterative method. If wished for, these can then be used in our game N&C, or by other mods/games based on our project.
+- [ ] Messaging/Networking
+  - [ ] Change the fact that message_packet_t now uses a short array, instead of a vec3_t for the position.
+    - [ ] Fix emit_snd, and investigate all code related to svc_sound so that it uses vec3_t and MSG_xxxxFloat functions.
+    - [ ] Change MSG_Write/ReadPos to use MSG_Write/ReadFloat instead, this is safe after fixing the above.
+- [ ] Math Library
+  - [ ] Move macro functions over to inlined C functions.
+  - [ ] Rename VectorClear, and alike functions to Vec#Clear, and so on.
+  - [ ] Change the typedefs, so we use an actual union/struct.
+  - [ ] Take a look around at other engines, see what we might be missing out on, so we won't run into a lack of in the future.
+- [ ] PMove
+  - [ ] Footsteps, based on material.
+  - [ ] Implement stair stepping (StepDown method)
+    - [ ] Restructure the code.
+  - [ ] Implement a PM_FLYMOVE, which can be used for the future AI.
+- [ ] Game Modules
+  - [ ] Client
+    - [ ] Move into its own repository, and implement as a submodule. This should allow for our own repository and record of client game code.
+  - [ ] Server
+    - [ ] Move into its own repository, and implement as a submodule. This should allow for our own repository and record of server game code.
+    - [ ] Remove all needless entities.
+- [ ] Refresher
+  - [ ] Move over the refresher from PalmliX' fork to be.
+  - [ ] 
+- [ ] WIDTools, although it resides outside of this repository, it needs to go along with the 0.2 release.
+  - [ ] Figure out whether to keep large boundaries, or not. This depends on: Can we fix the bug? It seems brush splitting, or triangulation is off the rails. Windings etc.
 
-Using **Quake II RTX** its powerful renderer, with extra additions of our own we set off to
-improve the engine. There were two important goals that we had in mind, make it more fun and user friendly
-to work with the engine. Hereby inviting the oppertunity for mod developers to use our technology. But most
-of all, improvements to the engine in overall, so it has more modern features to match its unique modern render
-system.
-
-**Nail & Crescent** has introduced the following changes and features:
-- Own custom [BSP tooling](https://github.com/WatIsDeze/widtools/) based on the **qbism v220** toolset.
-- Client Game DLL interface. This allows for mods to have control over client side effects, something normally not possible in vanilla Quake 2.
-- OpenAL Audio support. Such as underwater effects.
-- Entities and player positions are networked using full floating point precision. No more drunk feeling due to entity positions being networked as shorts.
-- Larger world boundary limits, break free of the 4096x4096x4096 boundaries.
-- Shared player move code. The client game dll, and server game dll both share the player move code now. This allows for mods to implement custom movement. 
-- Highly restructured game code. 
-
-Here is a list of plans for the technology behind **Nail & Crescent**. Note that not all might make it in the end.:
-- Adjust BSP format to use ints instead of shorts, so we can extend its limits.
-- Add a material system, let Trenchbroom and the BSP tools support this.
-    - Will also contain a converter for the .csv file which is currently in use as the material database.
-- Implement libRmlUI and use it for the HUD, Console, MainMenu, and in-game menus.
-- Skeletal Animation support.
-- Player Movement AI (A proof of concept can be found in [this](https://github.com/WatIsDeze/Nail-Crescent/tree/AI-PMove) branch)
-    - Adding a Schedule, Task, and Waypoint system should greatly improve the proof of concept and bring it to decent modern standards.
-- Replace trace code by a physics library, ultimately improving collision detection overall and allowing for the option of several physics entities.
-    - This retains the actual Player Movement code as always and should not influence the gameplay negatively. In fact, it's not wished for.
-- Add RESTIR to the RTX renderer, hereby greatly reducing noise and making typical scenes with torches a reality.
-
-## License
-
-**Nail & Crescet** its code is licensed under the same terms as **Quake II RTX**. It's hard not to be.
-
-**Nail & Crescent** is licensed under the terms of the **GPL v.2** (GNU General Public License).
-You can find the entire license in the [license.txt](license.txt) file.
-
-## Additional Information
-Needs slight updating, but most still applies. We're initially a [Q2PRO](https://github.com/skullernet/q2pro) fork
-
-  * [Client Manual](doc/client.md)
-  * [Server Manual](doc/server.md)
-
-Also, some source files have comments that explain various parts of the renderer:
-
-  * [asvgf.glsl](src/refresh/vkpt/shader/asvgf.glsl) explains the denoiser filters
-  * [checkerboard_interleave.comp](src/refresh/vkpt/shader/checkerboard_interleave.comp) shows how checkerboarded rendering facilitates path tracing on multiple GPUs and helps with water and glass surfaces
-  * [path_tracer.h](src/refresh/vkpt/shader/path_tracer.h) gives an overview of the path tracer
-  * [tone_mapping_histogram.comp](src/refresh/vkpt/shader/tone_mapping_histogram.comp) explains the tone mapping solution 
-
-
-## Support and Feedback
-  * [Discord](https://discord.gg/5tadZ96cvY) feel free to join our Discord and ask any questions that you have.
-  * [GitHub Issue Tracker](https://github.com/WatIsDeze/Nail-Crescent/issues) this is on the main development repository.
-
-### Operating System
-
-|             | Windows    | Linux        |
-|-------------|------------|--------------|
-| Min Version | Win 7 x64  | Ubuntu 16.04 |
-
-Note: only the Windows 10 version has been extensively tested.
-
-### Software
-
-|                                                     | Min Version |
-|-----------------------------------------------------|-------------|
-| NVIDIA driver <br> https://www.geforce.com/drivers  | 430         |
-| git <br> https://git-scm.com/downloads              | 2.15        |
-| CMake <br> https://cmake.org/download/              | 3.8         |
-| Vulkan SDK <br> https://www.lunarg.com/vulkan-sdk/  | 1.1.92      |
-| vcpkg <br> https://github.com/microsoft/vcpkg       | If it works |
+## Goals for future versions:
+- [ ] OpenAL Reverb stuff, this is partially around, but needs to be transformed so it uses the actual material system to base Reverb on.
+- [ ] C++ entity system. Expected in 0.3, maybe later.
+- [ ] RmlUi (This one, might make it into 0.2, it depends on how soon we have a R_DrawPolyPic function implemented)
+  - [ ] Vulkan R_DrawPolyPic needs to be implemented.
+  - [ ] A client API that allows us to show contexts, determine whether they need to accept input or not, and that has Lua bindings for the CLGI API so it can be used for UI interactivity coding.
+- [ ] Skeletal Animation
+  - [ ] Requires IQM load code, this should not be too complex. 
+  - [ ] Needs to be implemented for both, OpenGL and Vulkan. Since OpenGL mode is useful for debugging, boots faster, and runs anywhere.
+- [ ] Physics Library.
+  - [ ] Replace tracing and other collision related code with this, so we can maintain the original gameplay.
+  - [ ] Add support for basic physics objects, and an API.
+  - [ ] Implement client and server side physics, so that important non synchronized objects can do physics on the client, off-loading networking bandwidth and server performance.
 
 ## Submodules
 
@@ -92,11 +62,10 @@ Although Linux support exists, and will be returning back soonly, as of right no
 2 months and may need some extra work. If you are feeling jolly, and want to lend us a hand, please contact
 us in our discord.
 
-### VS2019
+### Windows 10 - VS2019
 
   1. Clone the repository and its submodules from git :
-
-     `git clone --recursive https://github.com/NVIDIA/Q2RTX.git `
+     `git clone --branch Engine-0.2 --recursive https://github.com/WatIsDeze/Nail-Crescent `
 
   2. Start VS2019, and use the "Open Folder" method to open the project, as one normally would when using CMake projects.  
 
@@ -106,6 +75,16 @@ us in our discord.
 
   4. That should be all. Generate the CMake Cache if VS2019 isn't doing so already, and build the project.
   5. For resource files, please reach out to us on our [Discord](https://discord.gg/5tadZ96cvY).
+
+### Linux
+
+  1. Clone the repository and its submodules from git:
+  `git clone --branch Engine-0.2 --recursive https://github.com/WatIsDeze/Nail-Crescent `
+
+  2. Create a build folder inside your <PROJECT_ROOT> directory. Open a terminal in this location, and enter the following:
+  `cmake ../src && make`
+
+  3. If all goes well, you will now have a nac, nacded, basenac/clgame.so, and basenac/svgame.so. If not, we're still looking for help in this department. Feel free to reach out to us on our [Discord](https://discord.gg/5tadZ96cvY) if interested.
 
 ## Photo Mode
 
