@@ -67,7 +67,7 @@ static const DIDATAFORMAT mouseDataFormat = {
     sizeof(DIOBJECTDATAFORMAT),
     DIDF_RELAXIS,
     sizeof(DIMOUSESTATE2),
-    q_countof(mouseObjectDataFormat),
+    Q_COUNTOF(mouseObjectDataFormat),
     (LPDIOBJECTDATAFORMAT)mouseObjectDataFormat
 };
 

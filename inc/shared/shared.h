@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#ifndef SHARED_H
-#define SHARED_H
+#ifndef __SHARED_SHARED_H__
+#define __SHARED_SHARED_H__
 
 //
 // shared.h -- included first by ALL program modules
@@ -50,6 +50,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // C++ STL:
 #include <string>
+#include <numbers>
 #include <iostream>
 #include <sstream>
 #include <map>
@@ -59,50 +60,73 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <unordered_map>
 #include <unordered_set>
 
-
+// Ensure 
 #if HAVE_ENDIAN_H
 #include <endian.h>
 #endif
 
+// Platform specific includes.
 #include "shared/platform.h"
 
-#define q_countof(a)        (sizeof(a) / sizeof(a[0]))
 
+//
+//=============================================================================
+//
+//	Core Types and Definitions.
+//
+//=============================================================================
+//
+//
+// Utility Macros.
+//
+// Calculate the size of a typical C array, note that this method can be risky 
+// to use. It's only here for backwards compatibility reasons. Do NOT use :)
+#define Q_COUNTOF(a)        (sizeof(a) / sizeof(a[0]))
+
+//
+// Core
+//
+
+// "byte" - unsigned char
 typedef unsigned char byte;
-// CPP: Changed to int, since C has no strict standards to this enum it is...
-// odd to say the least. Code will crash too if we use a regular C++ boolean aka
-// byte lol
-typedef int qboolean;       //typedef enum { qfalse, qtrue } qboolean;
+// "qboolean" - Bool.
+typedef int qboolean;       //typedef enum { false, true } qboolean;
 #define qtrue 1
 #define qfalse 0
+                            //
+// Engine
+// 
+// "qhandle_t" - int - Used for storing handles to engine internal objects.
 typedef int qhandle_t;
+// "qhandle_t" - int - Used for error codes.
 typedef int qerror_t;
-
-#ifndef NULL
-#define NULL ((void *)0)
-#endif
-
-
+// "vec_t" - float - Used for vector components.
 typedef float vec_t;
-typedef vec_t vec2_t[2];
-typedef vec_t vec3_t[3];
-typedef vec_t vec4_t[4];
-typedef vec_t vec5_t[5];
 
-typedef float mat4_t[16];
 
-typedef union {
-    uint32_t u32;
-    uint8_t u8[4];
-} color_t;
+//
+//=============================================================================
+//
+//	Math Library.
+//
+//=============================================================================
+//
 
-typedef int fixed4_t;
-typedef int fixed8_t;
-typedef int fixed16_t;
+// Vectors
+#include "shared/math/vector2.h"
+#include "shared/math/vector3.h"
+#include "shared/math/vector4.h"
+#include "shared/math/vector5.h"
 
-#ifndef M_PI
-#define M_PI        3.14159265358979323846  // matches value in gcc v2 math.h
-#endif
+// Matrixes
+#include "shared/math/matrix4.h"
+
+// Colors
+#include "shared/math/color.h"
+
+//#ifndef M_PI
+//#define M_PI        3.14159265358979323846  // matches value in gcc v2 math.h
+//#endif
 
 struct cplane_s;
 

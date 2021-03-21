@@ -501,7 +501,7 @@ qboolean CL_CheckDownloadExtension(const char *ext)
     };
     int i;
 
-    for (i = 0; i < q_countof(allowed); i++)
+    for (i = 0; i < Q_COUNTOF(allowed); i++)
         if (!Q_stricmp(ext, allowed[i]))
             return qtrue;
 

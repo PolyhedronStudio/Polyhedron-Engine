@@ -320,7 +320,7 @@ const trace_t PM_TraceCorrectAllSolid(vec3_t start, vec3_t end, vec3_t mins, vec
         for (uint32_t j = 0; j < 3; j++) {
             for (uint32_t k = 0; k < 3; k++) {
                 vec3_t point;
-                vec3_t offsetVec = { offsets[i], offsets[j], offsets[k] };
+                vec3_t offsetVec = { (vec_t)offsets[i], (vec_t)offsets[j], (vec_t)offsets[k] };
                 Vec3_Add(start, offsetVec, point);
                 const trace_t trace = pm->Trace(point, end, mins, maxs);
 
@@ -1412,7 +1412,6 @@ static qboolean PM_TestPosition(void)
 {
     trace_t trace;
     vec3_t  origin, end;
-    int     i;
 
     // This check is not needed anymore. Whether to test for a position or not
     // can now be decided by calling PM_FinalizePosition with true as its arg. 

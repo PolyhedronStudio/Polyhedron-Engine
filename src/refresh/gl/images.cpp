@@ -66,7 +66,7 @@ static const glmode_t filterModes[] = {
     { "GL_LINEAR_MIPMAP_LINEAR", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR }
 };
 
-static const int numFilterModes = q_countof(filterModes);
+static const int numFilterModes = Q_COUNTOF(filterModes);
 
 static void gl_texturemode_changed(cvar_t *self)
 {

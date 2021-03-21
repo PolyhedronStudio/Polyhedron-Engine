@@ -197,11 +197,17 @@ void MSG_WriteString(const char *string)
 MSG_WritePos
 =============
 */
+#define COORD2SHORT(x)  ((int)((x)*8.0f))
+#define SHORT2COORD(x)  ((x)*(1.0f/8))
 void MSG_WritePos(const vec3_t pos)
 {
-    MSG_WriteFloat(pos[0]);
-    MSG_WriteFloat(pos[1]);
-    MSG_WriteFloat(pos[2]);
+    // MSG: !! Fix for now, needs to be resolved.
+    MSG_WriteShort(COORD2SHORT(pos[0]));
+    MSG_WriteShort(COORD2SHORT(pos[1]));
+    MSG_WriteShort(COORD2SHORT(pos[2]));
+    //MSG_WriteFloat(pos[0]);
+    //MSG_WriteFloat(pos[1]);
+    //MSG_WriteFloat(pos[2]);
 }
 
 /*
@@ -1613,9 +1619,13 @@ size_t MSG_ReadStringLine(char *dest, size_t size)
 
 void MSG_ReadPos(vec3_t pos)
 {
-    pos[0] = MSG_ReadFloat();
-    pos[1] = MSG_ReadFloat();
-    pos[2] = MSG_ReadFloat();
+    // MSG: !! Fix for now, needs to be resolved.
+    pos[0] = SHORT2COORD(MSG_ReadShort());
+    pos[1] = SHORT2COORD(MSG_ReadShort());
+    pos[2] = SHORT2COORD(MSG_ReadShort());
+    //pos[0] = MSG_ReadFloat();
+    //pos[1] = MSG_ReadFloat();
+    //pos[2] = MSG_ReadFloat();
 }
 
 static inline float MSG_ReadAngle(void)

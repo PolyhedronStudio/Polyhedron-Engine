@@ -1049,7 +1049,7 @@ static PhysicalSkyDesc_t skyPresets[3] = {
 
 PhysicalSkyDesc_t const * GetSkyPreset(uint16_t index)
 {
-    if (index >= 0 && index < q_countof(skyPresets))
+    if (index >= 0 && index < Q_COUNTOF(skyPresets))
         return &skyPresets[index];
 
     return &skyPresets[0];

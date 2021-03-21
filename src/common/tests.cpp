@@ -180,7 +180,7 @@ static const wildtest_t wildtests[] = {
     { "\\a\\b\\c",      "abc",              1 },
 };
 
-static const int numwildtests = q_countof(wildtests);
+static const int numwildtests = Q_COUNTOF(wildtests);
 
 static void Com_TestWild_f(void)
 {
@@ -255,7 +255,7 @@ static const normtest_t normtests[] = {
     { "foo/bar/../../../../baz/abc/../../zzz/../def/ghi",   "def/ghi"           },
 };
 
-static const int numnormtests = q_countof(normtests);
+static const int numnormtests = Q_COUNTOF(normtests);
 
 static void Com_TestNorm_f(void)
 {
@@ -330,7 +330,7 @@ static const info_validate_test_t info_validate_tests[] = {
         "abcdabcdabcdabcd",     0 },
 };
 
-static const int num_info_validate_tests = q_countof(info_validate_tests);
+static const int num_info_validate_tests = Q_COUNTOF(info_validate_tests);
 
 typedef struct {
     const char *string;
@@ -349,7 +349,7 @@ static const info_remove_test_t info_remove_tests[] = {
     { "\\\\value",                                  "",     ""               },
 };
 
-static const int num_info_remove_tests = q_countof(info_remove_tests);
+static const int num_info_remove_tests = Q_COUNTOF(info_remove_tests);
 
 typedef struct {
     const char *string;
@@ -384,7 +384,7 @@ static const info_set_test_t info_set_tests[] = {
     { "\\key1\\value1\\key2\\value2",               "key1",     "\r\n",         1,  "\\key2\\value2\\key1\\"        },
 };
 
-static const int num_info_set_tests = q_countof(info_set_tests);
+static const int num_info_set_tests = Q_COUNTOF(info_set_tests);
 
 static void Com_TestInfo_f(void)
 {
@@ -454,7 +454,7 @@ static const snprintf_test_t snprintf_tests[] = {
     { 0,  11,  0, 1, 1, "xxxxxxxxxxxxxxx" },
 };
 
-static const int num_snprintf_tests = q_countof(snprintf_tests);
+static const int num_snprintf_tests = Q_COUNTOF(snprintf_tests);
 
 static void Com_TestSnprintf_f(void)
 {
