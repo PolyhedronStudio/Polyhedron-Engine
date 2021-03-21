@@ -6,6 +6,14 @@ The goals of this branch are to create a solid base, one that we can work uphill
 So far, during the process, we've been adding features with great success. However, running into limitations of the mathlib, pmove code, networking library, a lack of proper material support that plays well with Trenchbroom and WIDTools, over and over, is sooner or later going to be a bottleneck for our development process. In order to let perfect, not become the enemy of good. This branch exists.
 
 When finished we have a stable base to work from, one that we can start making the actual game with. Over time we will continouously add features, using a similar iterative method. If wished for, these can then be used in our game N&C, or by other mods/games based on our project.
+- [ ] Headers need to be unique to their "owners". Or how do you say this... In either case, it'll result in way faster build times. 
+  - [ ] inc/shared/
+    - [ ] Move each part into its own sub header, include these in shared.h
+    - [ ] Move non-core related things into their own headers, include where required.
+  - [ ] Client Game
+    - Get rid of the g_local, and just have each .cpp file do its own .h file, include only those that are required.
+  - [ ] Server Game
+    - Get rid of the g_local, and just have each .cpp file do its own .h file, include only those that are required.
 - [ ] Messaging/Networking
   - [ ] Change the fact that message_packet_t now uses a short array, instead of a vec3_t for the position.
     - [ ] Fix emit_snd, and investigate all code related to svc_sound so that it uses vec3_t and MSG_xxxxFloat functions.
