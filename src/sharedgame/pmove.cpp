@@ -373,7 +373,7 @@ static bool PM_ImpactPlane(vec3_t* planes, int32_t num_planes, const vec3_t plan
 //===============
 //
 #define MIN_STEP_NORMAL 0.7     // can't step up onto very steep slopes
-#define MAX_CLIP_PLANES 6
+#define MAX_CLIP_PLANES 5
 static void PM_StepSlideMove_(void)
 {
     int         bumpcount, numbumps;
