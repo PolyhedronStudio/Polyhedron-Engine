@@ -794,82 +794,6 @@ void CL_CheckForIP(const char *s)
     }
 }
 
-static void CL_ParsePrint(void)
-{
-//    int level;
-//    char s[MAX_STRING_CHARS];
-//    const char *fmt;
-//
-//    level = MSG_ReadByte();
-//    MSG_ReadString(s, sizeof(s));
-//
-//    SHOWNET(2, "    %i \"%s\"\n", level, s);
-//
-//    if (level != PRINT_CHAT) {
-//        Com_Printf("%s", s);
-//        if (!cls.demo.playback && cl.serverstate != ss_broadcast) {
-//            COM_strclr(s);
-//            Cmd_ExecTrigger(s);
-//        }
-//        return;
-//    }
-//
-//    if (CL_CheckForIgnore(s)) {
-//        return;
-//    }
-//
-//#if USE_AUTOREPLY
-//    if (!cls.demo.playback && cl.serverstate != ss_broadcast) {
-//        CL_CheckForVersion(s);
-//    }
-//#endif
-//
-//    CL_CheckForIP(s);
-//
-//    // disable notify
-//    if (!cl_chat_notify->integer) {
-//        Con_SkipNotify(qtrue);
-//    }
-//
-//    // filter text
-//    if (cl_chat_filter->integer) {
-//        COM_strclr(s);
-//        fmt = "%s\n";
-//    } else {
-//        fmt = "%s";
-//    }
-//
-//    Com_LPrintf(PRINT_TALK, fmt, s);
-//
-//    Con_SkipNotify(qfalse);
-//
-//    SCR_AddToChatHUD(s);
-//
-//    // silence MVD spectator chat
-//    if (cl.serverstate == ss_broadcast && !strncmp(s, "[MVD] ", 6))
-//        return;
-//
-//    // play sound
-//    if (cl_chat_sound->integer > 1)
-//        S_StartLocalSound_("misc/talk1.wav");
-//    else if (cl_chat_sound->integer > 0)
-//        S_StartLocalSound_("misc/talk.wav");
-}
-
-static void CL_ParseCenterPrint(void)
-{
-    //char s[MAX_STRING_CHARS];
-
-    //MSG_ReadString(s, sizeof(s));
-    //SHOWNET(2, "    \"%s\"\n", s);
-    //SCR_CenterPrint(s);
-
-    //if (!cls.demo.playback && cl.serverstate != ss_broadcast) {
-    //    COM_strclr(s);
-    //    Cmd_ExecTrigger(s);
-    //}
-}
-
 static void CL_ParseStuffText(void)
 {
     char s[MAX_STRING_CHARS];
@@ -1089,14 +1013,6 @@ badbyte:
         case svc_reconnect:
             CL_ParseReconnect();
             return;
-
-        //case svc_print:
-        //    CL_ParsePrint();
-        //    break;
-
-        //case svc_centerprint:
-        //    CL_ParseCenterPrint();
-        //    break;
 
         case svc_stufftext:
             CL_ParseStuffText();

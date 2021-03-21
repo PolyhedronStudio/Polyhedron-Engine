@@ -31,40 +31,64 @@ typedef union {
     float f;
 } msg_float;
 
+//---------------
+// This is the actual packed entity data that is transferred over the network.
+// It is bit precise, sensitive, and any change here would required changes elsewhere.
+// 
+// Be careful, and only touch this if you know what you are doing.
+//---------------
 typedef struct {
     uint16_t    number;
     // N&C: Full float precision for entities.
     vec3_t      origin;
     vec3_t      angles;
     vec3_t      old_origin;
-    //int16_t     origin[3];
-    //int16_t     angles[3];
-    //int16_t     old_origin[3];
+
+    // Model indexes.
     uint8_t     modelindex;
     uint8_t     modelindex2;
     uint8_t     modelindex3;
     uint8_t     modelindex4;
+
+    // Rendering effects.
     uint32_t    skinnum;
     uint32_t    effects;
     uint32_t    renderfx;
     uint32_t    solid;
     uint16_t    frame;
+
+    // Sound ID, and Event ID.
     uint8_t     sound;
     uint8_t     event;
 } entity_packed_t;
 
+//---------------
+// This is the actual packed player data that is transferred over the network.
+// It is bit precise, sensitive, and any change here would required changes elsewhere.
+// 
+// Be careful, and only touch this if you know what you are doing.
+//---------------
 typedef struct {
-    pm_state_t   pmove;
+    // Player Move.
+    pm_state_t      pmove;
+
+    // View angles and offsets.
     int16_t         viewangles[3];
     int8_t          viewoffset[3];
     int8_t          kick_angles[3];
+
+    // Gun info.
     int8_t          gunangles[3];
     int8_t          gunoffset[3];
     uint8_t         gunindex;
     uint8_t         gunframe;
+
+    // View related.
     uint8_t         blend[4];
     uint8_t         fov;
     uint8_t         rdflags;
+
+    // Player status.
     int16_t         stats[MAX_STATS];
 } player_packed_t;
 

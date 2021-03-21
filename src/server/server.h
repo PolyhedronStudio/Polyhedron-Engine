@@ -230,7 +230,7 @@ typedef struct {
             uint8_t     volume;
             uint8_t     attenuation;
             uint8_t     timeofs;
-            int16_t     pos[3];     // saved in case entity is freed
+            vec3_t      pos;     // saved in case entity is freed // MSG: !! Modified from int16_t[3] to vec3_t
         };
     };
 } message_packet_t;

@@ -10,7 +10,8 @@ When finished we have a stable base to work from, one that we can start making t
   - [ ] Get it to build using CLang in vS2019, this should get us closer to being Linux compatible continuously 
 - [ ] CMake
   - Include our own libfreetype, libpng, and and liblua to accomodate libRmlUi.
-  - The alternative is, use stb_freetype since the libpng and libfreetype are a pain to begin with. Of course, this requires modifying their code._
+  - The alternative is, use stb_freetype since the libpng and libfreetype are a pain to begin with. Of course, this requires modifying their code.
+  - Include OpenAL-soft and have it build itself properly. In case this fails, at least include a binary for Windows guys. 
 - [ ] Headers need to be unique to their "owners". Or how do you say this... In either case, it'll result in way faster build times. 
   - [ ] inc/shared/
     - [ ] Move each part into its own sub header, include these in shared.h
@@ -19,13 +20,16 @@ When finished we have a stable base to work from, one that we can start making t
     - Get rid of the g_local, and just have each .cpp file do its own .h file, include only those that are required.
   - [ ] Server Game
     - Get rid of the g_local, and just have each .cpp file do its own .h file, include only those that are required.
-- [ ] Messaging/Networking
-  - [ ] Change the fact that message_packet_t now uses a short array, instead of a vec3_t for the position.
-    - [ ] Fix emit_snd, and investigate all code related to svc_sound so that it uses vec3_t and MSG_xxxxFloat functions.
-    - [ ] Change MSG_Write/ReadPos to use MSG_Write/ReadFloat instead, this is safe after fixing the above.
-    - [ ] Remove the 5 / 3 bits method in the network cmd. This way we can have 0-254 client and server commands being networked.
+- [ ] Messaging/Networking - Marked as // MSG: !! ...
+  - [ ] Remove the 5 / 3 bits method in the network cmd. This way we can have 0-254 client and server commands being networked.  
+  - [ ] Figure out all the ifdefs and what not for diff Q2 protocols. Remove them, choose the best option to keep, and set us up for our own version protocol.
+  - [X] Change the fact that message_packet_t now uses a short array, instead of a vec3_t for the position.
+    - [X] Fix emit_snd, and investigate all code related to svc_sound so that it uses vec3_t and MSG_xxxxFloat functions.
+    - [X] Change MSG_Write/ReadPos to use MSG_Write/ReadFloat instead, this is safe after fixing the above.
+    
 - [ ] Math Library
   - [ ] Move macro functions over to inlined C functions.
+  - [ ] Use references/pointers, and const correctness.
   - [ ] Rename VectorClear, and alike functions to Vec#Clear, and so on.
   - [ ] Change the typedefs, so we use an actual union/struct.
   - [ ] Take a look around at other engines, see what we might be missing out on, so we won't run into a lack of in the future.

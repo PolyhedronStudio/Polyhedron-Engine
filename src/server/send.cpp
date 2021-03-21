@@ -561,9 +561,7 @@ static void emit_snd(client_t *client, message_packet_t *msg)
     MSG_WriteShort(msg->sendchan);
 
     if (flags & SND_POS) {
-        for (i = 0; i < 3; i++) {
-            MSG_WriteShort(msg->pos[i]);
-        }
+        MSG_WritePos(msg->pos); // MSG: !! This was a for loop, iterating over the shorts passing them to MSG_WriteShort
     }
 }
 

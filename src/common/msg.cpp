@@ -163,13 +163,8 @@ void MSG_WriteLong(int c)
 //================
 //
 void MSG_WriteFloat(float c) {
-    // CPP: IMPORTANT: DANGER: CARE: This one is important that it works out just fine in C++
     msg_float vec;
     vec.f = c;
-    //const msg_float vec = {
-    //    .f = c
-    //};
-
     MSG_WriteLong(vec.i);
 }
 
@@ -199,28 +194,14 @@ void MSG_WriteString(const char *string)
 
 /*
 =============
-MSG_WriteCoord
-=============
-*/
-
-#define COORD2SHORT(x)  ((int)((x)*8.0f))
-#define SHORT2COORD(x)  ((x)*(1.0f/8))
-
-static inline void MSG_WriteCoord(float f)
-{
-    MSG_WriteShort(COORD2SHORT(f));
-}
-
-/*
-=============
 MSG_WritePos
 =============
 */
 void MSG_WritePos(const vec3_t pos)
 {
-    MSG_WriteCoord(pos[0]);
-    MSG_WriteCoord(pos[1]);
-    MSG_WriteCoord(pos[2]);
+    MSG_WriteFloat(pos[0]);
+    MSG_WriteFloat(pos[1]);
+    MSG_WriteFloat(pos[2]);
 }
 
 /*
@@ -1574,20 +1555,15 @@ int MSG_ReadLong(void)
 
 //
 //===============
-// MSG_WriteFloat
+// MSG_ReadFloat
 // 
 // The idea is smart and taken from Quetoo, use an union for memory mapping.
-// Write the float as an int32_t, use it after reading as a float.
+// Read the float as an int32_t, use the union struct trick to convert it to a float.
 //================
 //
 float MSG_ReadFloat(void) {
-    // CPP: IMPORTANT: DANGER: CARE: This one is important that it works out just fine in C++
     msg_float vec;
     vec.i = MSG_ReadLong();
-    //const msg_float vec = {
-    //    i = MSG_ReadLong()
-    //};
-
     return vec.f;
 }
 
@@ -1635,16 +1611,11 @@ size_t MSG_ReadStringLine(char *dest, size_t size)
     return len;
 }
 
-static inline float MSG_ReadCoord(void)
-{
-    return SHORT2COORD(MSG_ReadShort());
-}
-
 void MSG_ReadPos(vec3_t pos)
 {
-    pos[0] = MSG_ReadCoord();
-    pos[1] = MSG_ReadCoord();
-    pos[2] = MSG_ReadCoord();
+    pos[0] = MSG_ReadFloat();
+    pos[1] = MSG_ReadFloat();
+    pos[2] = MSG_ReadFloat();
 }
 
 static inline float MSG_ReadAngle(void)

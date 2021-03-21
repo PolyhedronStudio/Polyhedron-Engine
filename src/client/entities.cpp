@@ -202,42 +202,6 @@ static void entity_event(int number)
 {
     // N&C: Let the CG Module handle this.
     CL_GM_EntityEvent(number);
-//    centity_t *cent = &cs.entities[number];
-//
-//    // EF_TELEPORTER acts like an event, but is not cleared each frame
-//    if ((cent->current.effects & EF_TELEPORTER) && CL_FRAMESYNC) {
-//        CL_TeleporterParticles(cent->current.origin);
-//    }
-//
-//#if USE_FPS
-//    if (cent->event_frame != cl.frame.number)
-//        return;
-//#endif
-//
-//    switch (cent->current.event) {
-//    case EV_ITEM_RESPAWN:
-//        S_StartSound(NULL, number, CHAN_WEAPON, S_RegisterSound("items/respawn1.wav"), 1, ATTN_IDLE, 0);
-//        CL_ItemRespawnParticles(cent->current.origin);
-//        break;
-//    case EV_PLAYER_TELEPORT:
-//        S_StartSound(NULL, number, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_IDLE, 0);
-//        CL_TeleportParticles(cent->current.origin);
-//        break;
-//    case EV_FOOTSTEP:
-//        // WatIsDeze: Commented, will be implemented later when we move this over to CG module.
-//        //if (cl_footsteps->integer)
-//        //    S_StartSound(NULL, number, CHAN_BODY, cl_sfx_footsteps[rand() & 3], 1, ATTN_NORM, 0);
-//        break;
-//    case EV_FALLSHORT:
-//        S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("player/land1.wav"), 1, ATTN_NORM, 0);
-//        break;
-//    case EV_FALL:
-//        S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("*fall2.wav"), 1, ATTN_NORM, 0);
-//        break;
-//    case EV_FALLFAR:
-//        S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("*fall1.wav"), 1, ATTN_NORM, 0);
-//        break;
-//    }
 }
 
 static void set_active_state(void)
@@ -270,11 +234,8 @@ static void set_active_state(void)
         CL_FirstDemoFrame();
     } else {
         // set initial cl.predicted_origin and cl.predicted_angles
-        // N&C: FF Precision.
         Vec3_Copy(cl.frame.ps.pmove.origin, cl.predicted_origin);
         Vec3_Copy(cl.frame.ps.pmove.velocity, cl.predicted_velocity);
-        //Vec3_Scale(cl.frame.ps.pmove.origin, 0.125f, cl.predicted_origin);
-        //Vec3_Scale(cl.frame.ps.pmove.velocity, 0.125f, cl.predicted_velocity);
         if (cl.frame.ps.pmove.type < PM_DEAD &&
             cls.serverProtocol > PROTOCOL_VERSION_DEFAULT) {
             // enhanced servers don't send viewangles
@@ -327,17 +288,6 @@ player_update(server_frame_t *oldframe, server_frame_t *frame, int framediv)
         fabs((float)(ops->pmove.origin[2] - ps->pmove.origin[2])) > 256) {
         goto dup;
     }
-    //if (abs(ops->pmove.origin[0] - ps->pmove.origin[0]) > 256 ||
-    //    abs(ops->pmove.origin[1] - ps->pmove.origin[1]) > 256 ||
-    //    abs(ops->pmove.origin[2] - ps->pmove.origin[2]) > 256) {
-    //    goto dup;
-    //}
-    //if (abs(ops->pmove.origin[0] - ps->pmove.origin[0]) > 256 * 8 ||
-    //    abs(ops->pmove.origin[1] - ps->pmove.origin[1]) > 256 * 8 ||
-    //    abs(ops->pmove.origin[2] - ps->pmove.origin[2]) > 256 * 8) {
-    //    goto dup;
-    //}
- 
     // no lerping if player entity was teleported (event check)
     ent = &cs.entities[frame->clientNum + 1];
     if (ent->serverframe > oldnum &&
@@ -623,12 +573,6 @@ void CL_GetViewVelocity(vec3_t vel)
 {
     // N&C: FF Precision.
     Vec3_Copy(cl.frame.ps.pmove.velocity, vel);
-    // restore value from 12.3 fixed point
-	//const float scale_factor = 1.0f / 8.0f;
-
-	//vel[0] = (float)cl.frame.ps.pmove.velocity[0] * scale_factor;
-	//vel[1] = (float)cl.frame.ps.pmove.velocity[1] * scale_factor;
-	//vel[2] = (float)cl.frame.ps.pmove.velocity[2] * scale_factor;
 }
 
 void CL_GetEntitySoundVelocity(int ent, vec3_t vel)
