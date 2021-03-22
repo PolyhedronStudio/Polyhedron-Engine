@@ -46,10 +46,10 @@ remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices)
 		float l1 = Vec3_Length(e1);
 		float l2 = Vec3_Length(e2);
 
-		qboolean remove = qfalse;
+		qboolean remove = false;
 		if (l1 == 0)
 		{
-			remove = qtrue;
+			remove = true;
 		}
 		else if (l2 > 0)
 		{
@@ -58,7 +58,7 @@ remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices)
 
 			float dot = Vec3_Dot(e1, e2);
 			if (dot > 0.999f)
-				remove = qtrue;
+				remove = true;
 		}
 
 		if (remove)
@@ -277,7 +277,7 @@ static int filter_all(int flags)
 }
 
 // Computes a point at a small distance above the center of the triangle.
-// Returns qfalse if the triangle is degenerate, qtrue otherwise.
+// Returns false if the triangle is degenerate, true otherwise.
 qboolean
 get_triangle_off_center(const float* positions, float* center, float* anti_center)
 {
@@ -344,18 +344,18 @@ get_surf_plane_equation(mface_t* surf, float* plane)
 		{
 			Vec3_Scale(plane, 1.0f / len, plane);
 			plane[3] = -Vec3_Dot(plane, v0);
-			return qtrue;
+			return true;
 		}
 	}
 
-	return qfalse;
+	return false;
 }
 
 static qboolean
 is_sky_or_lava_cluster(bsp_mesh_t* wm, mface_t* surf, int cluster, int material_id)
 {
 	if (cluster < 0)
-		return qfalse;
+		return false;
 
 	if (MAT_IsKind(material_id, MATERIAL_KIND_LAVA) && wm->all_lava_emissive)
 	{
@@ -363,7 +363,7 @@ is_sky_or_lava_cluster(bsp_mesh_t* wm, mface_t* surf, int cluster, int material_
 		if (get_surf_plane_equation(surf, plane))
 		{
 			if (plane[2] < 0.f)
-				return qtrue;
+				return true;
 		}
 	}
 	else
@@ -372,12 +372,12 @@ is_sky_or_lava_cluster(bsp_mesh_t* wm, mface_t* surf, int cluster, int material_
 		{
 			if (wm->sky_clusters[i] == cluster)
 			{
-				return qtrue;
+				return true;
 			}
 		}
 	}
 
-	return qfalse;
+	return false;
 }
 
 static void merge_pvs_rows(bsp_t* bsp, char* src, char* dst)
@@ -458,7 +458,7 @@ collect_surfaces(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, int model_idx, int (*
 {
 	mface_t *surfaces = model_idx < 0 ? bsp->faces : bsp->models[model_idx].firstface;
 	int num_faces = model_idx < 0 ? bsp->numfaces : bsp->models[model_idx].numfaces;
-	qboolean any_pvs_patches = qfalse;
+	qboolean any_pvs_patches = false;
 
 	for (int i = 0; i < num_faces; i++) {
 		mface_t *surf = surfaces + i;
@@ -558,7 +558,7 @@ collect_surfaces(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, int model_idx, int (*
 							if (!Q_IsBitSet(pvs_cluster, anti_cluster) || !Q_IsBitSet(pvs_anti_cluster, cluster))
 							{
 								connect_pvs(bsp, cluster, pvs_cluster, anti_cluster, pvs_anti_cluster);
-								any_pvs_patches = qtrue;
+								any_pvs_patches = true;
 							}
 						}
 					}
@@ -998,7 +998,7 @@ collect_sky_and_lava_ligth_polys(bsp_mesh_t *wm, bsp_t* bsp)
 		if (surf->texinfo) flags |= surf->texinfo->c.flags;
 
 		qboolean is_sky = !!(flags & SURF_SKY);
-		qboolean is_lava = surf->texinfo->material ? MAT_IsKind(surf->texinfo->material->flags, MATERIAL_KIND_LAVA) : qfalse;
+		qboolean is_lava = surf->texinfo->material ? MAT_IsKind(surf->texinfo->material->flags, MATERIAL_KIND_LAVA) : false;
 
 		if (!is_sky && !is_lava)
 			continue;
@@ -1062,7 +1062,7 @@ static qboolean
 is_model_transparent(bsp_mesh_t *wm, bsp_model_t *model)
 {
 	if (model->idx_count == 0)
-		return qfalse;
+		return false;
 
 	for (int i = 0; i < model->idx_count / 3; i++)
 	{
@@ -1070,10 +1070,10 @@ is_model_transparent(bsp_mesh_t *wm, bsp_model_t *model)
 		int material = wm->materials[prim];
 
 		if (!(MAT_IsKind(material, MATERIAL_KIND_SLIME) || MAT_IsKind(material, MATERIAL_KIND_WATER) || MAT_IsKind(material, MATERIAL_KIND_GLASS) || MAT_IsKind(material, MATERIAL_KIND_TRANSPARENT)))
-			return qfalse;
+			return false;
 	}
 
-	return qtrue;
+	return true;
 }
 
 
@@ -1222,13 +1222,13 @@ static void
 load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name)
 {
 	wm->num_sky_clusters = 0;
-	wm->all_lava_emissive = qfalse;
+	wm->all_lava_emissive = false;
 
     // try a map-specific file first
     char filename[MAX_QPATH];
     Q_snprintf(filename, sizeof(filename), "maps/sky/%s.txt", map_name);
 
-    qboolean found_map = qfalse;
+    qboolean found_map = false;
 
     char* filebuf = NULL;
     FS_LoadFile(filename, (void**)&filebuf); // C++20: Added a cast.
@@ -1236,7 +1236,7 @@ load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name)
     if (filebuf)
     {
         // we have a map-specific file - no need to look for map name
-        found_map = qtrue;
+        found_map = true;
     }
     else
     {
@@ -1268,7 +1268,7 @@ load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name)
 
 				if (!found_map && matches)
 				{
-					found_map = qtrue;
+					found_map = true;
 				}
 				else if (found_map && !matches)
 				{
@@ -1281,7 +1281,7 @@ load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name)
 				assert(wm->num_sky_clusters < MAX_SKY_CLUSTERS);
 
 				if (!strcmp(word, "!all_lava"))
-					wm->all_lava_emissive = qtrue;
+					wm->all_lava_emissive = true;
 				else
 				{
 					int cluster = atoi(word);
@@ -1311,7 +1311,7 @@ load_cameras(bsp_mesh_t* wm, const char* map_name)
 
 	char const * ptr = (char const *)filebuf;
 	char linebuf[1024];
-	qboolean found_map = qfalse;
+	qboolean found_map = false;
 
 	while (sgets(linebuf, sizeof(linebuf), &ptr))
 	{
@@ -1328,7 +1328,7 @@ load_cameras(bsp_mesh_t* wm, const char* map_name)
 
 			if (!found_map && matches)
 			{
-				found_map = qtrue;
+				found_map = true;
 			}
 			else if (found_map && !matches)
 			{
@@ -1431,7 +1431,7 @@ light_affects_cluster(light_poly_t* light, aabb_t* aabb)
 {
 	// Empty cluster, nothing is visible
 	if (aabb->mins[0] > aabb->maxs[0])
-		return qfalse;
+		return false;
 
 	const float* v0 = light->positions + 0;
 	const float* v1 = light->positions + 3;
@@ -1446,7 +1446,7 @@ light_affects_cluster(light_poly_t* light, aabb_t* aabb)
 	
 	float plane_distance = -Vec3_Dot(normal, v0);
 
-	qboolean all_culled = qtrue;
+	qboolean all_culled = true;
 
 	// If all 8 corners of the cluster's AABB are behind the light, it's definitely invisible
 	for (int corner_idx = 0; corner_idx < 8; corner_idx++)
@@ -1456,15 +1456,15 @@ light_affects_cluster(light_poly_t* light, aabb_t* aabb)
 
 		float side = Vec3_Dot(normal, corner) + plane_distance;
 		if (side > 0)
-			all_culled = qfalse;
+			all_culled = false;
 	}
 
 	if (all_culled)
 	{
-		return qfalse;
+		return false;
 	}
 
-	return qtrue;
+	return true;
 }
 
 static void
@@ -1543,7 +1543,7 @@ bsp_mesh_load_custom_sky(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, const char* m
 	void* file_buffer = NULL;
 	ssize_t file_size = FS_LoadFile(filename, &file_buffer);
 	if (!file_buffer)
-		return qfalse;
+		return false;
 
 	tinyobj_attrib_t attrib;
 	tinyobj_shape_t* shapes = NULL;
@@ -1560,7 +1560,7 @@ bsp_mesh_load_custom_sky(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, const char* m
 
 	if (ret != TINYOBJ_SUCCESS) {
 		Com_WPrintf("Couldn't parse sky polygon definition file %s.\n", filename);
-		return qfalse;
+		return false;
 	}
 
 	int face_offset = 0;
@@ -1617,7 +1617,7 @@ bsp_mesh_load_custom_sky(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, const char* m
 	tinyobj_shapes_free(shapes, num_shapes);
 	tinyobj_materials_free(materials, num_materials);
 
-	return qtrue;
+	return true;
 }
 
 void

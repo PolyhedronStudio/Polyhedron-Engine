@@ -127,10 +127,10 @@ extern "C" {
         // Called at the start of receiving a server message.
         void        (*StartServerMessage) (void);
         // Actually parses the server message, and handles it accordingly.
-        // Returns qfalse in case the message was unkown, or corrupted, etc.
+        // Returns false in case the message was unkown, or corrupted, etc.
         qboolean    (*ParseServerMessage) (int serverCommand);
         // Handles the demo message during playback.
-        // Returns qfalse in case the message was unknown, or corrupted, etc.
+        // Returns false in case the message was unknown, or corrupted, etc.
         qboolean   (*SeekDemoMessage) (int demoCommand);
         // Called when we're done receiving a server message.
         void        (*EndServerMessage) (int realTime);
@@ -188,7 +188,7 @@ extern "C" {
         // Returns the protocol minor version.
         int             (*GetProtocolVersion) (void);
 
-        // Returns qtrue if we're in demo playback, qfalse otherwise.
+        // Returns true if we're in demo playback, false otherwise.
         qboolean        (*IsDemoPlayback) (void);
         
         // Updates the client's audio position values to the current

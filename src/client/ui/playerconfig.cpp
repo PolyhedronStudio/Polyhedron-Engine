@@ -269,7 +269,7 @@ static qboolean Push(menuFrameWork_t *self)
         PlayerModel_Load();
         if (!uis.numPlayerModels) {
             Com_Printf("No player models found.\n");
-            return qfalse;
+            return false;
         }
     }
 
@@ -328,7 +328,7 @@ static qboolean Push(menuFrameWork_t *self)
     m_player.oldTime = m_player.time;
     RunFrame();
 
-    return qtrue;
+    return true;
 }
 
 static void Free(menuFrameWork_t *self)

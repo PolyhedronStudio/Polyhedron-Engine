@@ -239,14 +239,14 @@ qboolean R_Init(qboolean total)
         R_InitImages();
         R_InitDraw();
         MOD_Init();
-        return qtrue;
+        return true;
     }
 
     Com_DPrintf("ref_soft " VERSION ", " __DATE__ "\n");
 
     // create the window
     if (!VID_Init())
-        return qfalse;
+        return false;
 
     R_Register();
 
@@ -258,18 +258,18 @@ qboolean R_Init(qboolean total)
 
     R_InitSkyBox();
 
-    view_clipplanes[0].leftedge = qtrue;
-    view_clipplanes[1].rightedge = qtrue;
+    view_clipplanes[0].leftedge = true;
+    view_clipplanes[1].rightedge = true;
     view_clipplanes[1].leftedge =
     view_clipplanes[2].leftedge =
-    view_clipplanes[3].leftedge = qfalse;
+    view_clipplanes[3].leftedge = false;
     view_clipplanes[0].rightedge =
     view_clipplanes[2].rightedge =
-    view_clipplanes[3].rightedge = qfalse;
+    view_clipplanes[3].rightedge = false;
 
     R_InitTurb();
 
-    return qtrue;
+    return true;
 }
 
 /*
@@ -656,7 +656,7 @@ static void R_DrawBEntitiesOnList(void)
         return;
 
     Vec3_Copy(modelorg, oldorigin);
-    insubmodel = qtrue;
+    insubmodel = true;
     r_dlightframecount = r_framecount;
 
     for (i = 0; i < r_newrefdef.num_entities; i++) {
@@ -719,7 +719,7 @@ static void R_DrawBEntitiesOnList(void)
         R_TransformFrustum();
     }
 
-    insubmodel = qfalse;
+    insubmodel = false;
 }
 
 

@@ -136,7 +136,7 @@ void Sys_Sleep(int msec)
 qboolean Sys_GetAntiCheatAPI(void)
 {
     Sys_Sleep(1500);
-    return qfalse;
+    return false;
 }
 #endif
 
@@ -153,7 +153,7 @@ static void term_handler(int signum)
     Com_Printf("Received signal %d, exiting\n", signum);
 #endif
 
-    terminate = qtrue;
+    terminate = true;
 }
 
 static void kill_handler(int signum)
@@ -182,11 +182,11 @@ Sys_IsDir(const char *path)
 	{
 		if (S_ISDIR(sb.st_mode))
 		{
-			return qtrue;
+			return true;
 		}
 	}
 
-	return qfalse;
+	return false;
 }
 
 qboolean
@@ -198,11 +198,11 @@ Sys_IsFile(const char *path)
 	{
 		if (S_ISREG(sb.st_mode))
 		{
-			return qtrue;
+			return true;
 		}
 	}
 
-	return qfalse;
+	return false;
 }
 
 /*

@@ -300,7 +300,7 @@ static void start_message_mode(chatMode_t mode)
 
     // starting messagemode closes console
     if (cls.key_dest & KEY_CONSOLE) {
-        Con_Close(qtrue);
+        Con_Close(true);
     }
 
     con.chat = mode;
@@ -479,7 +479,7 @@ void Con_Init(void)
 
     Con_CheckResize();
 
-    con.initialized = qtrue;
+    con.initialized = true;
 }
 
 void Con_PostInit(void)
@@ -1165,17 +1165,17 @@ void Key_Console(int key)
     }
 
     if (key == K_TAB) {
-        Prompt_CompleteCommand(&con.prompt, qtrue);
+        Prompt_CompleteCommand(&con.prompt, true);
         goto scroll;
     }
 
     if (key == 'r' && Key_IsDown(K_CTRL)) {
-        Prompt_CompleteHistory(&con.prompt, qfalse);
+        Prompt_CompleteHistory(&con.prompt, false);
         goto scroll;
     }
 
     if (key == 's' && Key_IsDown(K_CTRL)) {
-        Prompt_CompleteHistory(&con.prompt, qtrue);
+        Prompt_CompleteHistory(&con.prompt, true);
         goto scroll;
     }
 
@@ -1271,12 +1271,12 @@ void Key_Message(int key)
     }
 
     if (key == 'r' && Key_IsDown(K_CTRL)) {
-        Prompt_CompleteHistory(&con.chatPrompt, qfalse);
+        Prompt_CompleteHistory(&con.chatPrompt, false);
         return;
     }
 
     if (key == 's' && Key_IsDown(K_CTRL)) {
-        Prompt_CompleteHistory(&con.chatPrompt, qtrue);
+        Prompt_CompleteHistory(&con.chatPrompt, true);
         return;
     }
 

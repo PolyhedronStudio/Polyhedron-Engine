@@ -77,7 +77,7 @@ void door_hit_bottom(edict_t* self)
         self->s.sound = 0;
     }
     self->moveinfo.state = STATE_BOTTOM;
-    door_use_areaportals(self, qfalse);
+    door_use_areaportals(self, false);
 }
 
 void door_go_down(edict_t* self)
@@ -123,7 +123,7 @@ void door_go_up(edict_t* self, edict_t* activator)
         Brush_AngleMove_Calc(self, door_hit_top);
 
     G_UseTargets(self, activator);
-    door_use_areaportals(self, qtrue);
+    door_use_areaportals(self, true);
 }
 
 void door_use(edict_t* self, edict_t* other, edict_t* activator)
@@ -241,7 +241,7 @@ void Think_SpawnDoorTrigger(edict_t* ent)
     gi.linkentity(other);
 
     if (ent->spawnflags & DOOR_START_OPEN)
-        door_use_areaportals(ent, qtrue);
+        door_use_areaportals(ent, true);
 
     Think_CalcMoveSpeed(ent);
 }

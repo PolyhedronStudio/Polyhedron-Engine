@@ -85,7 +85,7 @@ static qboolean StringToFilter(const char *s, ipfilter_t *f) // C++20: STRING: A
     for (i = 0 ; i < 4 ; i++) {
         if (*s < '0' || *s > '9') {
             gi.cprintf(NULL, PRINT_HIGH, "Bad filter address: %s\n", s);
-            return qfalse;
+            return false;
         }
 
         j = 0;
@@ -105,7 +105,7 @@ static qboolean StringToFilter(const char *s, ipfilter_t *f) // C++20: STRING: A
     f->mask = *(unsigned *)m;
     f->compare = *(unsigned *)b;
 
-    return qtrue;
+    return true;
 }
 
 /*

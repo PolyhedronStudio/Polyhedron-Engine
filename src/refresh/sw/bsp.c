@@ -103,7 +103,7 @@ static void R_RecursiveClipBPoly(bedge_t *pedges, mnode_t *pnode, mface_t *psurf
 
     psideedges[0] = psideedges[1] = NULL;
 
-    makeclippededge = qfalse;
+    makeclippededge = false;
 
 // transform the BSP plane into model space
 // FIXME: cache these?
@@ -170,10 +170,10 @@ static void R_RecursiveClipBPoly(bedge_t *pedges, mnode_t *pnode, mface_t *psurf
             if (side == 0) {
                 // entering for front, exiting for back
                 pfrontenter = ptvert;
-                makeclippededge = qtrue;
+                makeclippededge = true;
             } else {
                 pfrontexit = ptvert;
-                makeclippededge = qtrue;
+                makeclippededge = true;
             }
         } else {
             // add the edge to the appropriate side

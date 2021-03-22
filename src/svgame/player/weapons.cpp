@@ -117,7 +117,7 @@ qboolean Pickup_Weapon(edict_t *ent, edict_t *other)
     if ((((int)(dmflags->value) & DF_WEAPONS_STAY) || coop->value)
         && other->client->pers.inventory[index]) {
         if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)))
-            return qfalse;   // leave the weapon for others to pickup
+            return false;   // leave the weapon for others to pickup
     }
 
     other->client->pers.inventory[index]++;
@@ -147,7 +147,7 @@ qboolean Pickup_Weapon(edict_t *ent, edict_t *other)
         (!deathmatch->value || other->client->pers.weapon == FindItem("blaster")))
         other->client->newweapon = ent->item;
 
-    return qtrue;
+    return true;
 }
 
 
@@ -166,7 +166,7 @@ void ChangeWeapon(edict_t *ent)
     if (ent->client->grenade_time) {
         ent->client->grenade_time = level.time;
         ent->client->weapon_sound = 0;
-        weapon_grenade_fire(ent, qfalse);
+        weapon_grenade_fire(ent, false);
         ent->client->grenade_time = 0;
     }
 

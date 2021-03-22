@@ -66,7 +66,7 @@ void WGL_Shutdown(void)
 qboolean WGL_Init(const char *dllname)
 {
     if ((glw.hinstOpenGL = LoadLibrary(dllname)) == NULL) {
-        return qfalse;
+        return false;
     }
 
     qwglDrawBuffer              = GPA("glDrawBuffer");
@@ -82,7 +82,7 @@ qboolean WGL_Init(const char *dllname)
     qwglGetProcAddress          = GPA("wglGetProcAddress");
     qwglMakeCurrent             = GPA("wglMakeCurrent");
 
-    return qtrue;
+    return true;
 }
 
 #undef GPA

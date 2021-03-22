@@ -143,7 +143,7 @@ qboolean QAL_Init(void)
 
     Sys_LoadLibrary(al_driver->string, NULL, &handle);
     if (!handle) {
-        return qfalse;
+        return false;
     }
 
 	// CPP: Added the (type) cast.
@@ -262,10 +262,10 @@ qboolean QAL_Init(void)
 
 	qalcCaptureStart(inputdevice);
 
-    return qtrue;
+    return true;
 
 fail:
     QAL_Shutdown();
-    return qfalse;
+    return false;
 }
 

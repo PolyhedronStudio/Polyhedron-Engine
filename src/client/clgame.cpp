@@ -246,7 +246,7 @@ qboolean _wrp_R_GetPicSize(int* w, int* h, qhandle_t pic) {
     //}
     //else {
     //    Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
-    //    return qfalse;
+    //    return false;
     //}
 }
 void _wrp_R_DrawPic(int x, int y, qhandle_t pic) {
@@ -800,7 +800,7 @@ qboolean CL_GM_UpdateConfigString (int index, const char *str) {
     if (cge)
         return cge->UpdateConfigString(index, str);
 
-    return qfalse;
+    return false;
 }
 
 //
@@ -815,7 +815,7 @@ qboolean CL_GM_ParseServerMessage (int serverCommand) {
     if (cge)
         return cge->ParseServerMessage(serverCommand);
 
-    return qfalse;
+    return false;
 }
 
 //
@@ -831,7 +831,7 @@ qboolean CL_GM_SeekDemoMessage (int demoCommand) {
     if (cge)
         return cge->SeekDemoMessage(demoCommand);
 
-    return qfalse;
+    return false;
 }
 
 //

@@ -137,12 +137,12 @@ qboolean VID_Init(void)
     if (!sww.dibdc) {
         Com_EPrintf("DIB_Init: CreateCompatibleDC failed with error %lu\n", GetLastError());
         Win_Shutdown();
-        return qfalse;
+        return false;
     }
 
     // call SWimp_ModeChanged and friends
     Win_ModeChanged();
-    return qtrue;
+    return true;
 }
 
 void VID_VideoWait(void)
@@ -151,7 +151,7 @@ void VID_VideoWait(void)
 
 qboolean VID_VideoSync(void)
 {
-    return qtrue;
+    return true;
 }
 
 void VID_BeginFrame(void)

@@ -998,7 +998,7 @@ static qboolean BSP_GetPatchedPVSFileName(const char* map_path, char pvs_path[MA
 {
 	int path_len = strlen(map_path);
 	if (path_len < 5 || strcmp(map_path + path_len - 4, ".bsp") != 0)
-		return qfalse;
+		return false;
 
 	const char* map_file = strrchr(map_path, '/');
 	if (map_file)
@@ -1012,7 +1012,7 @@ static qboolean BSP_GetPatchedPVSFileName(const char* map_path, char pvs_path[MA
 	strncat(pvs_path, map_file, strlen(map_file) - 4);
 	strcat(pvs_path, ".bin");
 
-	return qtrue;
+	return true;
 }
 
 // Loads the first- and second-order PVS matrices from a file called `maps/pvs/<mapname>.bin`
@@ -1021,20 +1021,20 @@ static qboolean BSP_LoadPatchedPVS(bsp_t *bsp)
 	char pvs_path[MAX_QPATH];
 
 	if (!BSP_GetPatchedPVSFileName(bsp->name, pvs_path))
-		return qfalse;
+		return false;
 
 	unsigned char* filebuf = 0;
 	ssize_t filelen = 0;
 	filelen = FS_LoadFile(pvs_path, (void**)&filebuf); // C++20: Repositioned the & and add a * to the original: &(void*)filebuf
 
 	if (filebuf == 0)
-		return qfalse;
+		return false;
 
 	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
 	if (filelen != matrix_size * 2)
 	{
 		FS_FreeFile(filebuf);
-		return qfalse;
+		return false;
 	}
 
 	bsp->pvs_matrix = (char*)Z_Malloc(matrix_size); // CPP: Cast
@@ -1044,7 +1044,7 @@ static qboolean BSP_LoadPatchedPVS(bsp_t *bsp)
 	memcpy(bsp->pvs2_matrix, filebuf + matrix_size, matrix_size);
 
 	FS_FreeFile(filebuf);
-	return qtrue;
+	return true;
 }
 
 // Saves the first- and second-order PVS matrices to a file called `maps/pvs/<mapname>.bin`
@@ -1053,13 +1053,13 @@ qboolean BSP_SavePatchedPVS(bsp_t *bsp)
 	char pvs_path[MAX_QPATH];
 
 	if (!BSP_GetPatchedPVSFileName(bsp->name, pvs_path))
-		return qfalse;
+		return false;
 
 	if (!bsp->pvs_matrix)
-		return qfalse;
+		return false;
 
 	if (!bsp->pvs2_matrix)
-		return qfalse;
+		return false;
 
 	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
 	unsigned char* filebuf = (unsigned char*)Z_Malloc(matrix_size * 2); // CPP: Cast
@@ -1072,9 +1072,9 @@ qboolean BSP_SavePatchedPVS(bsp_t *bsp)
 	Z_Free(filebuf);
 
 	if (err >= 0)
-		return qtrue;
+		return true;
 	else
-		return qfalse;
+		return false;
 }
 
 extern int num_entlights;
@@ -1207,7 +1207,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 	}
 	else
 	{
-		bsp->pvs_patched = qtrue;
+		bsp->pvs_patched = true;
 	}
 
     Hunk_End(&bsp->hunk);
@@ -1281,7 +1281,7 @@ static qboolean BSP_RecursiveLightPoint(mnode_t *node, float p1f, float p2f, vec
 
         // check near side
         if (BSP_RecursiveLightPoint(node->children[side], p1f, midf, p1, mid))
-            return qtrue;
+            return true;
 
         for (i = 0, surf = node->firstface; i < node->numfaces; i++, surf++) {
             if (!surf->lightmap)
@@ -1306,14 +1306,14 @@ static qboolean BSP_RecursiveLightPoint(mnode_t *node, float p1f, float p2f, vec
             light_point->s = s;
             light_point->t = t;
             light_point->fraction = midf;
-            return qtrue;
+            return true;
         }
 
         // check far side
         return BSP_RecursiveLightPoint(node->children[side ^ 1], midf, p2f, mid, p2);
     }
 
-    return qfalse;
+    return false;
 }
 
 void BSP_LightPoint(lightpoint_t *point, vec3_t start, vec3_t end, mnode_t *headnode)

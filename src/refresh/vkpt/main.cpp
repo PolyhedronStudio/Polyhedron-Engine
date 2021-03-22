@@ -103,7 +103,7 @@ UBO_CVAR_LIST
 
 static bsp_t *bsp_world_model;
 
-static qboolean temporal_frame_valid = qfalse;
+static qboolean temporal_frame_valid = false;
 
 static int world_anim_frame = 0;
 
@@ -113,7 +113,7 @@ static image_t *water_normal_texture = NULL;
 
 int num_accumulated_frames = 0;
 
-static qboolean frame_ready = qfalse;
+static qboolean frame_ready = false;
 
 static float sky_rotation = 0.f;
 static vec3_t sky_axis = { 0.f };
@@ -592,11 +592,11 @@ out:;
 	vkGetPhysicalDeviceSurfacePresentModesKHR(qvk.physical_device, qvk.surface, &num_present_modes, NULL);
 	VkPresentModeKHR *avail_present_modes = (VkPresentModeKHR*)alloca(sizeof(VkPresentModeKHR) * num_present_modes); // C++20 VKPT: alloca typecast
 	vkGetPhysicalDeviceSurfacePresentModesKHR(qvk.physical_device, qvk.surface, &num_present_modes, avail_present_modes);
-	qboolean immediate_mode_available = qfalse;
+	qboolean immediate_mode_available = false;
 
 	for (int i = 0; i < num_present_modes; i++) {
 		if (avail_present_modes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR) {
-			immediate_mode_available = qtrue;
+			immediate_mode_available = true;
 			break;
 		}
 	}
@@ -712,7 +712,7 @@ out:;
 		);
 	}
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 	vkpt_wait_idle(qvk.queue_graphics, &qvk.cmd_buffers_graphics);
 
 	num_accumulated_frames = 0;
@@ -758,7 +758,7 @@ create_command_pool_and_fences()
 			ATTACH_LABEL_VARIABLE(group->transfer_finished, SEMAPHORE);
 			ATTACH_LABEL_VARIABLE(group->trace_finished, SEMAPHORE);
 
-			group->trace_signaled = qfalse;
+			group->trace_signaled = false;
 		}
 	}
 
@@ -802,13 +802,13 @@ init_vulkan()
 
 	if (!SDL_Vulkan_GetInstanceExtensions(qvk.window, &qvk.num_sdl2_extensions, NULL)) {
 		Com_EPrintf("Couldn't get SDL2 Vulkan extension count\n");
-		return qfalse;
+		return false;
 	}
 
 	qvk.sdl2_extensions = (const char**)malloc(sizeof(char*) * qvk.num_sdl2_extensions); // C++20 VKPT: Added a malloc cast.
 	if (!SDL_Vulkan_GetInstanceExtensions(qvk.window, &qvk.num_sdl2_extensions, qvk.sdl2_extensions)) {
 		Com_EPrintf("Couldn't get SDL2 Vulkan extensions\n");
-		return qfalse;
+		return false;
 	}
 
 	Com_Printf("Vulkan instance extensions required by SDL2: \n");
@@ -842,13 +842,13 @@ init_vulkan()
 		.ppEnabledExtensionNames = (const char * const*)ext,
 	};
 
-	qvk.enable_validation = qfalse;
+	qvk.enable_validation = false;
 
 	if (cvar_vk_validation->integer)
 	{
 		inst_create_info.ppEnabledLayerNames = vk_validation_layers;
 		inst_create_info.enabledLayerCount = LENGTH(vk_validation_layers);
-		qvk.enable_validation = qtrue;
+		qvk.enable_validation = true;
 	}
 
 	VkResult result = vkCreateInstance(&inst_create_info, NULL, &qvk.instance);
@@ -861,7 +861,7 @@ init_vulkan()
 
 		inst_create_info.enabledLayerCount = 0;
 		result = vkCreateInstance(&inst_create_info, NULL, &qvk.instance);
-		qvk.enable_validation = qfalse;
+		qvk.enable_validation = false;
 	}
 	else if (cvar_vk_validation->integer)
 	{
@@ -871,7 +871,7 @@ init_vulkan()
 	if (result != VK_SUCCESS)
 	{
 		Com_Error(ERR_FATAL, "Failed to initialize a Vulkan instance.\nError code: %s", qvk_result_to_string(result));
-		return qfalse;
+		return false;
 	}
 
 #define VK_EXTENSION_DO(a) \
@@ -898,14 +898,14 @@ init_vulkan()
 	/* create surface */
 	if(!SDL_Vulkan_CreateSurface(qvk.window, qvk.instance, &qvk.surface)) {
 		Com_EPrintf("SDL2 could not create a surface!\n");
-		return qfalse;
+		return false;
 	}
 
 	/* pick physical device (iterate over all but pick device 0 anyways) */
 	uint32_t num_devices = 0;
 	_VK(vkEnumeratePhysicalDevices(qvk.instance, &num_devices, NULL));
 	if(num_devices == 0)
-		return qfalse;
+		return false;
 	VkPhysicalDevice *devices = (VkPhysicalDevice*)alloca(sizeof(VkPhysicalDevice) *num_devices); // C++20 VKPT: Added an alloca cast.
 	_VK(vkEnumeratePhysicalDevices(qvk.instance, &num_devices, devices));
 
@@ -924,7 +924,7 @@ init_vulkan()
 		_VK(vkEnumeratePhysicalDeviceGroups(qvk.instance, &num_device_groups, &device_group_info));
 
 		if (device_group_info.physicalDeviceCount > VKPT_MAX_GPUS) {
-			return qfalse;
+			return false;
 		}
 
 		device_group_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO;
@@ -942,7 +942,7 @@ init_vulkan()
 
 	int picked_device_with_khr = -1;
 	int picked_device_with_nv = -1;
-	qvk.use_khr_ray_tracing = qfalse;
+	qvk.use_khr_ray_tracing = false;
 
 	for(int i = 0; i < num_devices; i++) 
 	{
@@ -986,7 +986,7 @@ init_vulkan()
 	if ((!cvar_nv_ray_tracing->integer || picked_device_with_nv < 0) && picked_device_with_khr >= 0)
 	{
 		picked_device = picked_device_with_khr;
-		qvk.use_khr_ray_tracing = qtrue;
+		qvk.use_khr_ray_tracing = true;
 
 		if (cvar_nv_ray_tracing->integer)
 		{
@@ -997,7 +997,7 @@ init_vulkan()
 	else if(picked_device_with_nv >= 0)
 	{
 		picked_device = picked_device_with_nv;
-		qvk.use_khr_ray_tracing = qfalse;
+		qvk.use_khr_ray_tracing = false;
 	}
 
 	if (picked_device < 0)
@@ -1098,7 +1098,7 @@ init_vulkan()
 
 	if(qvk.queue_idx_graphics < 0 || qvk.queue_idx_compute < 0 || qvk.queue_idx_transfer < 0) {
 		Com_Error(ERR_FATAL, "Could not find a suitable Vulkan queue family!\n");
-		return qfalse;
+		return false;
 	}
 	
 	float queue_priorities = 1.0f;
@@ -1274,7 +1274,7 @@ init_vulkan()
 	if (result != VK_SUCCESS)
 	{
 		Com_Error(ERR_FATAL, "Failed to create a Vulkan device.\nError code: %s", qvk_result_to_string(result));
-		return qfalse;
+		return false;
 	}
 
 	vkGetDeviceQueue(qvk.device, qvk.queue_idx_graphics, 0, &qvk.queue_graphics);
@@ -1303,7 +1303,7 @@ init_vulkan()
 
 	Com_Printf("-----------------------\n");
 
-	return qtrue;
+	return true;
 }
 
 static VkShaderModule
@@ -1368,9 +1368,9 @@ vkpt_load_shader_modules()
 	}\
 	} while(0);
 
-#define IS_RT_SHADER qfalse
+#define IS_RT_SHADER false
 	LIST_SHADER_MODULES
-#define IS_RT_SHADER qtrue
+#define IS_RT_SHADER true
 	LIST_RT_SHADER_MODULES
 #undef IS_RT_SHADER
 
@@ -1826,7 +1826,7 @@ bsp_add_entlights(const bsp_t* bsp)
 		//char* inner;
 
 		num_keypairs = 0;
-		islight = qfalse;
+		islight = false;
 
 		com_token = COM_Parse_old(&entString);
 
@@ -1894,7 +1894,7 @@ bsp_add_entlights(const bsp_t* bsp)
 		for (i = 0; i < num_keypairs; i++)
 			if (!Q_stricmp(keypairs[i].key, "classname") && !Q_stricmp(keypairs[i].value, "light"))
 			{
-				islight = qtrue;
+				islight = true;
 			}
 
 		//only process light entities
@@ -1904,7 +1904,7 @@ bsp_add_entlights(const bsp_t* bsp)
 			dlightLS_t* elightLS;
 			qboolean parse_error;
 
-			parse_error = qfalse;
+			parse_error = false;
 
 			//examples:
 			//"_color" "0.97 0.54 0.01"
@@ -1946,7 +1946,7 @@ bsp_add_entlights(const bsp_t* bsp)
 
 					if (sscanf(keypairs[i].value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
 						//could not parse
-						parse_error = qtrue;
+						parse_error = true;
 						break;
 					}
 					if (!Q_stricmp(keypairs[i].key, "origin"))
@@ -1962,7 +1962,7 @@ bsp_add_entlights(const bsp_t* bsp)
 					else
 					{
 						//should be unreachable
-						parse_error = qtrue;
+						parse_error = true;
 						break;
 					}
 					//*v[0] = vec[0];
@@ -1981,7 +1981,7 @@ bsp_add_entlights(const bsp_t* bsp)
 
 					if (sscanf(keypairs[i].value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
 						//could not parse
-						parse_error = qtrue;
+						parse_error = true;
 						break;
 					}
 					Vec3_Copy(vec, elight->nacDirection);
@@ -2127,7 +2127,7 @@ bsp_add_entlights(const bsp_t* bsp)
 					f = atof(keypairs[i].value);
 					if (f == 0.0f)
 					{
-						parse_error = qtrue;
+						parse_error = true;
 						break;
 					}
 
@@ -2140,7 +2140,7 @@ bsp_add_entlights(const bsp_t* bsp)
 					f = atof(keypairs[i].value);
 					if (f == 0.0f)
 					{
-						parse_error = qtrue;
+						parse_error = true;
 						break;
 					}
 
@@ -2153,7 +2153,7 @@ bsp_add_entlights(const bsp_t* bsp)
 					f = atof(keypairs[i].value);
 					if (f == 0.0f)
 					{
-						parse_error = qtrue;
+						parse_error = true;
 						break;
 					}
 
@@ -2167,7 +2167,7 @@ bsp_add_entlights(const bsp_t* bsp)
 					f = atof(keypairs[i].value);
 					if (f == 0.0f)
 					{
-						parse_error = qtrue;
+						parse_error = true;
 						break;
 					}
 
@@ -2181,7 +2181,7 @@ bsp_add_entlights(const bsp_t* bsp)
 					f = atof(keypairs[i].value);
 					if (f == 0.0f)
 					{
-						parse_error = qtrue;
+						parse_error = true;
 						break;
 					}
 
@@ -2193,7 +2193,7 @@ bsp_add_entlights(const bsp_t* bsp)
 					//TODO: add in support for spot lights
 					//ignore spot lights for now
 					//additional spot light properties are "_cone" and "angle"; these should be interpretted like qrad3
-					parse_error = qtrue;
+					parse_error = true;
 				}
 				else if (!Q_stricmp(keypairs[i].key, "target"))
 				{
@@ -2205,7 +2205,7 @@ bsp_add_entlights(const bsp_t* bsp)
 
 			}
 
-			if (parse_error == qfalse && elight->radius != 0.00f)
+			if (parse_error == false && elight->radius != 0.00f)
 			{
 				//if not correct, redo this light definition with the next we find
 				//e.g. effectively ignore bad lights
@@ -2474,7 +2474,7 @@ static void process_bsp_entity(const entity_t* entity, int* bsp_mesh_idx, int* i
 	world_entity_ids[entity_frame_num][current_bsp_mesh_index] = entity->id;
 
 	float transform[16];
-	create_entity_matrix(transform, (entity_t*)entity, qfalse);
+	create_entity_matrix(transform, (entity_t*)entity, false);
 	BspMeshInstance* ubo_instance_info = uniform_instance_buffer->bsp_mesh_instances + current_bsp_mesh_index;
 	memcpy(&ubo_instance_info->M, transform, sizeof(transform));
 	ubo_instance_info->frame = entity->frame;
@@ -2594,7 +2594,7 @@ static void process_regular_entity(
 	int current_num_instanced_vert = *num_instanced_vert;
 
 	if (contains_transparent)
-		*contains_transparent = qfalse;
+		*contains_transparent = false;
 
 	for (int i = 0; i < model->nummeshes; i++)
 	{
@@ -2625,7 +2625,7 @@ static void process_regular_entity(
 		if (is_transparent_material(material_id))
 		{
 			if(contains_transparent)
-				*contains_transparent = qtrue;
+				*contains_transparent = true;
 
 			if(!(mesh_filter & MESH_FILTER_TRANSPARENT))
 				continue;
@@ -2736,8 +2736,8 @@ prepare_entities(EntityUploadInfo* upload_info)
 				explosion_indices[explosion_num++] = i;
 			else
 			{
-				qboolean contains_transparent = qfalse;
-				process_regular_entity(entity, model, qfalse, qfalse, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_OPAQUE, &contains_transparent);
+				qboolean contains_transparent = false;
+				process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_OPAQUE, &contains_transparent);
 
 				if(contains_transparent)
 					transparent_model_indices[transparent_model_num++] = i;
@@ -2759,7 +2759,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 		else
 		{
 			const model_t* model = MOD_ForHandle(entity->model);
-			process_regular_entity(entity, model, qfalse, qfalse, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_TRANSPARENT, NULL);
+			process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_TRANSPARENT, NULL);
 		}
 	}
 
@@ -2773,24 +2773,24 @@ prepare_entities(EntityUploadInfo* upload_info)
 		{
 			const entity_t* entity = vkpt_refdef.fd->entities + viewer_model_indices[i];
 			const model_t* model = MOD_ForHandle(entity->model);
-			process_regular_entity(entity, model, qfalse, qtrue, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
+			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 		}
 	}
 
 	upload_info->viewer_model_vertex_offset = viewer_model_base_vertex_num;
 	upload_info->viewer_model_vertex_num = num_instanced_vert - viewer_model_base_vertex_num;
 
-	upload_info->weapon_left_handed = qfalse;
+	upload_info->weapon_left_handed = false;
 
 	const uint32_t viewer_weapon_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < viewer_weapon_num; i++)
 	{
 		const entity_t* entity = vkpt_refdef.fd->entities + viewer_weapon_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
-		process_regular_entity(entity, model, qtrue, qfalse, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
+		process_regular_entity(entity, model, true, false, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 
 		if (entity->flags & RF_LEFTHAND)
-			upload_info->weapon_left_handed = qtrue;
+			upload_info->weapon_left_handed = true;
 	}
 
 	upload_info->viewer_weapon_vertex_offset = viewer_weapon_base_vertex_num;
@@ -2801,7 +2801,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	{
 		const entity_t* entity = vkpt_refdef.fd->entities + explosion_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
-		process_regular_entity(entity, model, qfalse, qfalse, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
+		process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 	}
 
 	upload_info->explosions_vertex_offset = explosion_base_vertex_num;
@@ -3056,7 +3056,7 @@ static qboolean make_framedump(const char *name, const char *ext,
 
 	f = create_framedump(buffer, sizeof(buffer), name, ext);
 	if (!f) {
-		return qfalse; // C++20 VKPT: ADDED RETURN qfalse to make_framedump
+		return false; // C++20 VKPT: ADDED RETURN false to make_framedump
 	}
 
 	pixels = IMG_ReadPixels(&w, &h, &rowbytes);
@@ -3067,10 +3067,10 @@ static qboolean make_framedump(const char *name, const char *ext,
 
 	if (ret < 0) {
 		Com_EPrintf("Couldn't write %s: %s\n", buffer, Q_ErrorString(ret));
-		return qfalse;
+		return false;
 	}
 	else {
-		return qtrue;
+		return true;
 	}
 }
 
@@ -3104,8 +3104,8 @@ evaluate_reference_mode(reference_mode_t* ref_mode)
 		const int num_warmup_frames = 5;
 		const int num_frames_to_accumulate = get_accumulation_rendering_framenum();
 
-		ref_mode->enable_accumulation = qtrue;
-		ref_mode->enable_denoiser = qfalse;
+		ref_mode->enable_accumulation = true;
+		ref_mode->enable_denoiser = false;
 		ref_mode->num_bounce_rays = 2;
 		ref_mode->temporal_blend_factor = 1.f / min(max(1, num_accumulated_frames - num_warmup_frames), num_frames_to_accumulate);
 		ref_mode->reflect_refract = max(4, cvar_pt_reflect_refract->integer);
@@ -3170,7 +3170,7 @@ evaluate_reference_mode(reference_mode_t* ref_mode)
 
 						num_accumulated_frames = 0;
 
-						ref_mode->enable_accumulation = qfalse;
+						ref_mode->enable_accumulation = false;
 						ref_mode->enable_denoiser = !!cvar_flt_enable->integer;
 						if (cvar_pt_num_bounce_rays->value == 0.5f)
 							ref_mode->num_bounce_rays = 0.5f;
@@ -3195,7 +3195,7 @@ evaluate_reference_mode(reference_mode_t* ref_mode)
 	{
 		num_accumulated_frames = 0;
 
-		ref_mode->enable_accumulation = qfalse;
+		ref_mode->enable_accumulation = false;
 		ref_mode->enable_denoiser = !!cvar_flt_enable->integer;
 		if (cvar_pt_num_bounce_rays->value == 0.5f)
 			ref_mode->num_bounce_rays = 0.5f;
@@ -3413,20 +3413,20 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	{
 		// figure out if DoF should be enabled in the current rendering mode
 
-		qboolean enable_dof = qtrue;
+		qboolean enable_dof = true;
 
 		switch (cvar_pt_dof->integer)
 		{
-		case 0: enable_dof = qfalse; break;
+		case 0: enable_dof = false; break;
 		case 1: enable_dof = ref_mode->enable_accumulation; break;
 		case 2: enable_dof = !ref_mode->enable_denoiser; break;
-		default: enable_dof = qtrue; break;
+		default: enable_dof = true; break;
 		}
 
 		if (cvar_pt_projection->integer != 0)
 		{
 			// DoF does not make physical sense with the cylindrical projection
-			enable_dof = qfalse;
+			enable_dof = false;
 		}
 
 		if (!enable_dof)
@@ -3529,7 +3529,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 
 	mleaf_t* viewleaf = bsp_world_model ? BSP_PointLeaf(bsp_world_model->nodes, fd->vieworg) : NULL;
 	
-	qboolean sun_visible_prev = qfalse;
+	qboolean sun_visible_prev = false;
 	static float prev_adapted_luminance = 0.f;
 	float adapted_luminance = 0.f;
 	process_render_feedback(&fd->feedback, viewleaf, &sun_visible_prev, &adapted_luminance);
@@ -3637,7 +3637,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 			qvk.device_count, transfer_semaphores, device_indices, 
 			VK_NULL_HANDLE);
 
-		*prev_trace_signaled = qfalse;
+		*prev_trace_signaled = false;
 	}
 
 	{
@@ -3759,7 +3759,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 			qvk.device_count, trace_semaphores, device_indices,
 			VK_NULL_HANDLE);
 
-		*curr_trace_signaled = qtrue;
+		*curr_trace_signaled = true;
 	}
 
 	{
@@ -3808,12 +3808,12 @@ R_RenderFrame_RTX(refdef_t *fd)
 
 		_VK(vkpt_profiler_query(post_cmd_buf, PROFILER_FRAME_TIME, PROFILER_STOP));
 
-		vkpt_submit_command_buffer_simple(post_cmd_buf, qvk.queue_graphics, qtrue);
+		vkpt_submit_command_buffer_simple(post_cmd_buf, qvk.queue_graphics, true);
 	}
 
 	temporal_frame_valid = ref_mode.enable_denoiser;
 	
-	frame_ready = qtrue;
+	frame_ready = true;
 
 	if (vkpt_refdef.fd && vkpt_refdef.fd->lightstyles) {
 		memcpy(vkpt_refdef.prev_lightstyles, vkpt_refdef.fd->lightstyles, sizeof(vkpt_refdef.prev_lightstyles));
@@ -3822,7 +3822,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 
 static void temporal_cvar_changed(cvar_t *self)
 {
-	temporal_frame_valid = qfalse;
+	temporal_frame_valid = false;
 }
 
 static void
@@ -4012,7 +4012,7 @@ retry:;
 
 		_VK(vkpt_profiler_next_frame(reset_cmd_buf));
 
-		vkpt_submit_command_buffer_simple(reset_cmd_buf, qvk.queue_graphics, qtrue);
+		vkpt_submit_command_buffer_simple(reset_cmd_buf, qvk.queue_graphics, true);
 	}
 
 	vkpt_textures_destroy_unused();
@@ -4054,7 +4054,7 @@ R_EndFrame_RTX(void)
 				vkpt_final_blit_filtered(cmd_buf);
 		}
 
-		frame_ready = qfalse;
+		frame_ready = false;
 	}
 
 	vkpt_draw_submit_stretch_pics(cmd_buf);
@@ -4184,7 +4184,7 @@ R_Init_RTX(qboolean total)
 
 	if (!VID_Init(GAPI_VULKAN)) {
 		Com_Error(ERR_FATAL, "VID_Init failed\n");
-		return qfalse;
+		return false;
 	}
 
 	extern SDL_Window *sdl_window;
@@ -4280,7 +4280,7 @@ R_Init_RTX(qboolean total)
 	
 	if(!init_vulkan()) {
 		Com_Error(ERR_FATAL, "Couldn't initialize Vulkan.\n");
-		return qfalse;
+		return false;
 	}
 
 	_VK(create_command_pool_and_fences());
@@ -4311,7 +4311,7 @@ R_Init_RTX(qboolean total)
 		taa_samples[i][1] = halton(3, i + 1) - 0.5f;
 	}
 
-	return qtrue;
+	return true;
 }
 
 /* called before the library is unloaded */
@@ -4438,7 +4438,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 		.subresourceRange = subresource_range,
 	);
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qfalse);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, false);
 	vkpt_wait_idle(qvk.queue_graphics, &qvk.cmd_buffers_graphics);
 
 	// C++20 VKPT: Order fix.

@@ -251,14 +251,14 @@ char *FS_ReplaceSeparators(char *s, int separator)
 static inline qboolean validate_char(int c)
 {
     if (!Q_isprint(c))
-        return qfalse;
+        return false;
 
 #ifdef _WIN32
     if (strchr("<>:\"|?*", c))
-        return qfalse;
+        return false;
 #endif
 
-    return qtrue;
+    return true;
 }
 
 /*
@@ -1059,7 +1059,7 @@ static ssize_t open_file_write(file_t *file, const char *name)
 
     file->type = FS_REAL;
     file->fp = fp;
-    file->unique = qtrue;
+    file->unique = true;
     file->error = Q_ERR_SUCCESS;
     file->length = 0;
 
@@ -1116,7 +1116,7 @@ static qerror_t check_header_coherency(FILE *fp, packfile_t *entry)
     }
 
     entry->filepos += ofs;
-    entry->coherent = qtrue;
+    entry->coherent = true;
     return Q_ERR_SUCCESS;
 }
 
@@ -1344,7 +1344,7 @@ static ssize_t open_from_disk(file_t *file, const char *fullpath)
 
     file->type = FS_REAL;
     file->fp = fp;
-    file->unique = qtrue;
+    file->unique = true;
     file->error = Q_ERR_SUCCESS;
     file->length = info.size;
 
@@ -1763,7 +1763,7 @@ ssize_t FS_FOpenFile(const char *name, qhandle_t *f, unsigned mode)
     file->mode = mode;
 
     if ((mode & FS_MODE_MASK) == FS_MODE_READ) {
-        ret = expand_open_file_read(file, name, qtrue);
+        ret = expand_open_file_read(file, name, true);
     } else {
         ret = open_file_write(file, name);
     }
@@ -1938,7 +1938,7 @@ ssize_t FS_LoadFileEx(const char *path, void **buffer, unsigned flags, memtag_t 
     file->mode = (flags & ~FS_MODE_MASK) | FS_MODE_READ;
 
     // look for it in the filesystem or pack files
-    len = expand_open_file_read(file, path, qfalse);
+    len = expand_open_file_read(file, path, false);
     if (len < 0) {
         return len;
     }
@@ -2017,7 +2017,7 @@ qboolean FS_EasyWriteFile(char *buf, size_t size, unsigned mode,
     // TODO: write to temp file perhaps?
     f = easy_open_write(buf, size, mode, dir, name, ext);
     if (!f) {
-        return qfalse;
+        return false;
     }
 
     write = FS_Write(data, len, f);
@@ -2027,10 +2027,10 @@ qboolean FS_EasyWriteFile(char *buf, size_t size, unsigned mode,
 
     if (ret) {
         Com_EPrintf("Couldn't write %s: %s\n", buf, Q_ErrorString(ret));
-        return qfalse;
+        return false;
     }
 
-    return qtrue;
+    return true;
 }
 
 #if USE_CLIENT
@@ -2254,7 +2254,7 @@ static pack_t *load_pak_file(const char *packfile)
         file->filepos = dfile->filepos;
         file->filelen = dfile->filelen;
 #if USE_ZLIB
-        file->coherent = qtrue;
+        file->coherent = true;
 #endif
 
         pack_hash_file(pack, file);
@@ -2504,7 +2504,7 @@ static pack_t *load_zip_file(const char *packfile)
         if (len) {
             // fix absolute position
             file->filepos += extra_bytes;
-            file->coherent = qfalse;
+            file->coherent = false;
 
             pack_hash_file(pack, file);
 
@@ -2685,14 +2685,14 @@ void **FS_CopyList(void **list, int count)
 qboolean FS_WildCmp(const char *filter, const char *string)
 {
     do {
-        if (Com_WildCmpEx(filter, string, ';', qtrue)) {
-            return qtrue;
+        if (Com_WildCmpEx(filter, string, ';', true)) {
+            return true;
         }
         filter = strchr(filter, ';');
         if (filter) filter++;
     } while (filter);
 
-    return qfalse;
+    return false;
 }
 
 qboolean FS_ExtCmp(const char *ext, const char *name)
@@ -2701,7 +2701,7 @@ qboolean FS_ExtCmp(const char *ext, const char *name)
     const char *e, *n, *l;
 
     if (!name[0] || !ext[0]) {
-        return qfalse;
+        return false;
     }
 
     for (l = name; l[1]; l++)
@@ -2730,15 +2730,15 @@ rescan:
                         goto rescan;
                     }
                 }
-                return qfalse;
+                return false;
             }
         }
         if (n < name) {
-            return qfalse;
+            return false;
         }
     } while (e >= ext);
 
-    return qtrue;
+    return true;
 }
 
 static int infocmp(const void *p1, const void *p2)
@@ -3635,7 +3635,7 @@ Console command to fully re-start the file system.
 */
 static void FS_Restart_f(void)
 {
-    CL_RestartFilesystem(qtrue);
+    CL_RestartFilesystem(true);
 }
 
 static const cmdreg_t c_fs[] = {
@@ -3737,7 +3737,7 @@ static void fs_game_changed(cvar_t *self)
     }
 
     // otherwise, restart the filesystem
-    CL_RestartFilesystem(qfalse);
+    CL_RestartFilesystem(false);
 
     // FIXME: if basenac/autoexec.cfg exists DO NOT exec default.cfg and config.cfg.
     // this assumes user prefers to do configuration via autoexec.cfg and doesn't

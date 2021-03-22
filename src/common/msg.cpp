@@ -80,7 +80,7 @@ void MSG_BeginWriting(void)
 {
     msg_write.cursize = 0;
     msg_write.bitpos = 0;
-    msg_write.overflowed = qfalse;
+    msg_write.overflowed = false;
 }
 
 /*
@@ -1791,10 +1791,10 @@ int MSG_ReadBits(int bits)
         }
     }
 
-    sgn = qfalse;
+    sgn = false;
     if (bits < 0) {
         bits = -bits;
-        sgn = qtrue;
+        sgn = true;
     }
 
     value = 0;

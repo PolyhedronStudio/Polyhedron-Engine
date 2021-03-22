@@ -114,55 +114,55 @@ typedef struct netstream_s {
 static inline qboolean NET_IsEqualAdr(const netadr_t *a, const netadr_t *b)
 {
     if (a->type != b->type) {
-        return qfalse;
+        return false;
     }
 
     switch (a->type) {
     case NA_LOOPBACK:
-        return qtrue;
+        return true;
     case NA_IP:
     case NA_BROADCAST:
         if (a->ip.u32[0] == b->ip.u32[0] && a->port == b->port) {
-            return qtrue;
+            return true;
         }
-        return qfalse;
+        return false;
     case NA_IP6:
         if (memcmp(a->ip.u8, b->ip.u8, 16) == 0 && a->port == b->port) {
-            return qtrue;
+            return true;
         }
-        return qfalse;
+        return false;
     default:
         break;
     }
 
-    return qfalse;
+    return false;
 }
 
 static inline qboolean NET_IsEqualBaseAdr(const netadr_t *a, const netadr_t *b)
 {
     if (a->type != b->type) {
-        return qfalse;
+        return false;
     }
 
     switch (a->type) {
     case NA_LOOPBACK:
-        return qtrue;
+        return true;
     case NA_IP:
     case NA_BROADCAST:
         if (a->ip.u32[0] == b->ip.u32[0]) {
-            return qtrue;
+            return true;
         }
-        return qfalse;
+        return false;
     case NA_IP6:
         if (memcmp(a->ip.u8, b->ip.u8, 16) == 0) {
-            return qtrue;
+            return true;
         }
-        return qfalse;
+        return false;
     default:
         break;
     }
 
-    return qfalse;
+    return false;
 }
 
 static inline qboolean NET_IsEqualBaseAdrMask(const netadr_t *a,
@@ -170,7 +170,7 @@ static inline qboolean NET_IsEqualBaseAdrMask(const netadr_t *a,
                                               const netadr_t *m)
 {
     if (a->type != b->type) {
-        return qfalse;
+        return false;
     }
 
     switch (a->type) {
@@ -190,43 +190,43 @@ static inline qboolean NET_IsEqualBaseAdrMask(const netadr_t *a,
         break;
     }
 
-    return qfalse;
+    return false;
 }
 
 static inline qboolean NET_IsLanAddress(const netadr_t *adr)
 {
     switch (adr->type) {
     case NA_LOOPBACK:
-        return qtrue;
+        return true;
     case NA_IP:
     case NA_BROADCAST:
         if (adr->ip.u8[0] == 127 || adr->ip.u8[0] == 10) {
-            return qtrue;
+            return true;
         }
         if (adr->ip.u16[0] == MakeRawShort(192, 168) ||
             adr->ip.u16[0] == MakeRawShort(172,  16)) {
-            return qtrue;
+            return true;
         }
-        return qfalse;
+        return false;
     case NA_IP6:
         if (adr->ip.u8[0] == 0xfe && (adr->ip.u8[1] & 0xc0) == 0x80) {
-            return qtrue;
+            return true;
         }
-        return qfalse;
+        return false;
     default:
         break;
     }
 
-    return qfalse;
+    return false;
 }
 
 static inline qboolean NET_IsLocalAddress(const netadr_t *adr)
 {
 #if USE_CLIENT && USE_SERVER
     if (adr->type == NA_LOOPBACK)
-        return qtrue;
+        return true;
 #endif
-    return qfalse;
+    return false;
 }
 
 void        NET_Init(void);

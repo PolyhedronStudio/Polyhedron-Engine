@@ -84,7 +84,7 @@ static qboolean _GL_LightPoint(vec3_t start, vec3_t color)
 
     bsp = gl_static.world.cache;
     if (!bsp || !bsp->lightmap)
-        return qfalse;
+        return false;
 
     end[0] = start[0];
     end[1] = start[1];
@@ -133,13 +133,13 @@ static qboolean _GL_LightPoint(vec3_t start, vec3_t color)
     }
 
     if (!glr.lightpoint.surf)
-        return qfalse;
+        return false;
 
     GL_SampleLightPoint(color);
 
     GL_AdjustColor(color);
 
-    return qtrue;
+    return true;
 }
 
 #if USE_DLIGHTS
@@ -449,7 +449,7 @@ static inline qboolean GL_ClipNode(mnode_t *node, int *clipflags)
     int i, bits, mask;
 
     if (flags == NODE_UNCLIPPED) {
-        return qtrue;
+        return true;
     }
     for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
         if (flags & mask) {
@@ -458,7 +458,7 @@ static inline qboolean GL_ClipNode(mnode_t *node, int *clipflags)
         bits = BoxOnPlaneSide(node->mins, node->maxs,
                               &glr.frustumPlanes[i]);
         if (bits == BOX_BEHIND) {
-            return qfalse;
+            return false;
         }
         if (bits == BOX_INFRONT) {
             flags |= mask;
@@ -467,7 +467,7 @@ static inline qboolean GL_ClipNode(mnode_t *node, int *clipflags)
 
     *clipflags = flags;
 
-    return qtrue;
+    return true;
 }
 
 static inline void GL_DrawLeaf(mleaf_t *leaf)

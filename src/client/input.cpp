@@ -89,29 +89,29 @@ const inputAPI_t* IN_GetAPI()
 static qboolean IN_GetCurrentGrab(void)
 {
     if (cls.active != ACT_ACTIVATED)
-        return qfalse;  // main window doesn't have focus
+        return false;  // main window doesn't have focus
 
     if (r_config.flags & QVF_FULLSCREEN)
-        return qtrue;   // full screen
+        return true;   // full screen
 
     if (cls.key_dest & (KEY_MENU | KEY_CONSOLE))
-        return qfalse;  // menu or console is up
+        return false;  // menu or console is up
 
     if (cls.state != ca_active && cls.state != ca_cinematic)
-        return qfalse;  // not connected
+        return false;  // not connected
 
     if (in_grab->integer >= 2) {
         if (cls.demo.playback && !Key_IsDown(K_SHIFT))
-            return qfalse;  // playing a demo (and not using freelook)
+            return false;  // playing a demo (and not using freelook)
 
         if (cl.frame.ps.pmove.type == PM_FREEZE)
-            return qfalse;  // spectator mode
+            return false;  // spectator mode
     }
 
     if (in_grab->integer >= 1)
-        return qtrue;   // regular playing mode
+        return true;   // regular playing mode
 
-    return qfalse;
+    return false;
 }
 
 /*
@@ -199,7 +199,7 @@ void IN_Shutdown(void)
 
 static void in_changed_hard(cvar_t *self)
 {
-    input.modified = qtrue;
+    input.modified = true;
 }
 
 static void in_changed_soft(cvar_t *self)
@@ -214,7 +214,7 @@ IN_Init
 */
 void IN_Init(void)
 {
-    qboolean ret = qfalse;
+    qboolean ret = false;
 
 #if USE_LIRC
     Lirc_Init();
@@ -417,7 +417,7 @@ static void IN_AttackDown(void)
     KeyDown(&in_attack);
 
     if (cl_instantpacket->integer && cls.state == ca_active && cls.netchan) {
-        cl.sendPacketNow = qtrue;
+        cl.sendPacketNow = true;
     }
 }
 
@@ -431,7 +431,7 @@ static void IN_UseDown(void)
     KeyDown(&in_use);
 
     if (cl_instantpacket->integer && cls.state == ca_active && cls.netchan) {
-        cl.sendPacketNow = qtrue;
+        cl.sendPacketNow = true;
     }
 }
 
@@ -452,12 +452,12 @@ static void IN_CenterView(void)
 
 static void IN_MLookDown(void)
 {
-    in_mlooking = qtrue;
+    in_mlooking = true;
 }
 
 static void IN_MLookUp(void)
 {
-    in_mlooking = qfalse;
+    in_mlooking = false;
 
     if (!freelook->integer && lookspring->integer)
         IN_CenterView();
@@ -892,13 +892,13 @@ static inline qboolean ready_to_send(void)
     unsigned msec;
 
     if (cl.sendPacketNow) {
-        return qtrue;
+        return true;
     }
     if (cls.netchan->message.cursize || cls.netchan->reliable_ack_pending) {
-        return qtrue;
+        return true;
     }
     if (!cl_maxpackets->integer) {
-        return qtrue;
+        return true;
     }
 
     if (cl_maxpackets->integer < 10) {
@@ -910,20 +910,20 @@ static inline qboolean ready_to_send(void)
         msec = 100 / (100 / msec);
     }
     if (cls.realtime - cl.lastTransmitTime < msec) {
-        return qfalse;
+        return false;
     }
 
-    return qtrue;
+    return true;
 }
 
 static inline qboolean ready_to_send_hacked(void)
 {
     if (!cl_fuzzhack->integer) {
-        return qtrue; // packet drop hack disabled
+        return true; // packet drop hack disabled
     }
 
     if (cl.cmdNumber - cl.lastTransmitCmdNumberReal > 2) {
-        return qtrue; // can't drop more than 2 cmds
+        return true; // can't drop more than 2 cmds
     }
 
     return ready_to_send();
@@ -1198,7 +1198,7 @@ void CL_SendCmd(void)
             CL_SendKeepAlive();
         }
 
-        cl.sendPacketNow = qfalse;
+        cl.sendPacketNow = false;
         return;
     }
 
@@ -1216,6 +1216,6 @@ void CL_SendCmd(void)
         CL_SendDefaultCmd();
     }
 
-    cl.sendPacketNow = qfalse;
+    cl.sendPacketNow = false;
 }
 

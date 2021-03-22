@@ -49,6 +49,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <ctime>
 
 // C++ STL:
+#include <numbers>
 #include <string>
 #include <numbers>
 #include <iostream>
@@ -90,16 +91,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // "byte" - unsigned char
 typedef unsigned char byte;
 // "qboolean" - Bool.
-typedef int qboolean;       //typedef enum { false, true } qboolean;
-#define qtrue 1
-#define qfalse 0
+typedef int32_t qboolean;       //typedef enum { false, true } qboolean;
                             //
 // Engine
 // 
-// "qhandle_t" - int - Used for storing handles to engine internal objects.
-typedef int qhandle_t;
-// "qhandle_t" - int - Used for error codes.
-typedef int qerror_t;
+// "qhandle_t" - int32_t - Used for storing handles to engine internal objects.
+typedef int32_t qhandle_t;
+// "qhandle_t" - int32_t - Used for error codes.
+typedef int32_t qerror_t;
 // "vec_t" - float - Used for vector components.
 typedef float vec_t;
 
@@ -711,8 +710,8 @@ typedef struct csurface_s {
 
 // a trace is returned when a box is swept through the world
 typedef struct {
-    qboolean    allsolid;   // if qtrue, plane is not valid
-    qboolean    startsolid; // if qtrue, the initial point was in a solid area
+    qboolean    allsolid;   // if true, plane is not valid
+    qboolean    startsolid; // if true, the initial point was in a solid area
     float       fraction;   // time completed, 1.0 = didn't hit anything
     vec3_t      endpos;     // final position
     cplane_t    plane;      // surface normal at impact

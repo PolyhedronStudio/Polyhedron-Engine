@@ -156,7 +156,7 @@ static void MVD_ParseMulticast(mvd_t *mvd, mvd_ops_t op, int extrabits)
     byte        mask[VIS_MAX_BYTES];
     mleaf_t     *leaf1, *leaf2;
     vec3_t      org;
-    qboolean    reliable = qfalse;
+    qboolean    reliable = false;
     player_state_t    *ps;
     byte        *data;
     int         length, leafnum;
@@ -166,13 +166,13 @@ static void MVD_ParseMulticast(mvd_t *mvd, mvd_ops_t op, int extrabits)
 
     switch (op) {
     case mvd_multicast_all_r:
-        reliable = qtrue;
+        reliable = true;
         // intentional fallthrough
     case mvd_multicast_all:
         leaf1 = NULL;
         break;
     case mvd_multicast_phs_r:
-        reliable = qtrue;
+        reliable = true;
         // intentional fallthrough
     case mvd_multicast_phs:
         leafnum = MSG_ReadWord();
@@ -184,7 +184,7 @@ static void MVD_ParseMulticast(mvd_t *mvd, mvd_ops_t op, int extrabits)
         BSP_ClusterVis(mvd->cm.cache, mask, leaf1->cluster, DVIS_PHS);
         break;
     case mvd_multicast_pvs_r:
-        reliable = qtrue;
+        reliable = true;
         // intentional fallthrough
     case mvd_multicast_pvs:
         leafnum = MSG_ReadWord();
@@ -439,7 +439,7 @@ static void MVD_ParseUnicast(mvd_t *mvd, mvd_ops_t op, int extrabits)
 
     player = &mvd->players[clientNum];
 
-    reliable = op == mvd_unicast_r ? qtrue : qfalse;
+    reliable = op == mvd_unicast_r ? true : false;
 
     while (msg_read.readcount < last) {
         cmd = MSG_ReadByte();
@@ -660,7 +660,7 @@ static void MVD_ParsePrint(mvd_t *mvd)
     MSG_ReadString(string, sizeof(string));
 
     if (level == PRINT_HIGH && strstr(string, "Match ended.")) {
-        match_ended_hack = qtrue;
+        match_ended_hack = true;
     }
 
     if (mvd->demoseeking)
@@ -757,11 +757,11 @@ static void MVD_ParsePacketEntities(mvd_t *mvd)
             if (!(ent->s.renderfx & RF_BEAM)) {
                 Vec3_Copy(ent->s.origin, ent->s.old_origin);
             }
-            ent->inuse = qfalse;
+            ent->inuse = false;
             continue;
         }
 
-        ent->inuse = qtrue;
+        ent->inuse = true;
         if (number >= mvd->pool.num_edicts) {
             mvd->pool.num_edicts = number + 1;
         }
@@ -810,11 +810,11 @@ static void MVD_ParsePacketPlayers(mvd_t *mvd)
 
         if (bits & PPS_REMOVE) {
             SHOWNET(2, "   remove: %d\n", number);
-            player->inuse = qfalse;
+            player->inuse = false;
             continue;
         }
 
-        player->inuse = qtrue;
+        player->inuse = true;
     }
 }
 
@@ -935,9 +935,9 @@ static void MVD_ChangeLevel(mvd_t *mvd)
 
     SZ_Clear(&msg_write);
 
-    mvd->intermission = qfalse;
+    mvd->intermission = false;
 
-    mvd_dirty = qtrue;
+    mvd_dirty = true;
 
     SV_SendAsyncPackets();
 }
@@ -952,7 +952,7 @@ static void MVD_ParseServerData(mvd_t *mvd, int extrabits)
     edict_t *ent;
 
     // clear the leftover from previous level
-    MVD_ClearState(mvd, qtrue);
+    MVD_ClearState(mvd, true);
 
     // parse major protocol version
     protocol = MSG_ReadLong();
@@ -1025,8 +1025,8 @@ static void MVD_ParseServerData(mvd_t *mvd, int extrabits)
             client->target = NULL;
             client->oldtarget = NULL;
             client->chase_mask = 0;
-            client->chase_auto = qfalse;
-            client->chase_wait = qfalse;
+            client->chase_auto = false;
+            client->chase_wait = false;
             memset(client->chase_bitmap, 0, sizeof(client->chase_bitmap));
         }
     }
@@ -1070,7 +1070,7 @@ static void MVD_ParseServerData(mvd_t *mvd, int extrabits)
     // init world entity
     ent = &mvd->edicts[0];
     ent->solid = SOLID_BSP;
-    ent->inuse = qtrue;
+    ent->inuse = true;
 
     if (mvd->cm.cache) {
         // get the spawn point for spectators
@@ -1107,7 +1107,7 @@ static void MVD_ParseServerData(mvd_t *mvd, int extrabits)
 qboolean MVD_ParseMessage(mvd_t *mvd)
 {
     int     cmd, extrabits;
-    qboolean ret = qfalse;
+    qboolean ret = false;
 
 #ifdef _DEBUG
     if (mvd_shownet->integer == 1) {
@@ -1120,7 +1120,7 @@ qboolean MVD_ParseMessage(mvd_t *mvd)
 //
 // parse the message
 //
-    match_ended_hack = qfalse;
+    match_ended_hack = false;
     while (1) {
         if (msg_read.readcount > msg_read.cursize) {
             MVD_Destroyf(mvd, "Read past end of message");
@@ -1143,7 +1143,7 @@ qboolean MVD_ParseMessage(mvd_t *mvd)
         switch (cmd) {
         case mvd_serverdata:
             MVD_ParseServerData(mvd, extrabits);
-            ret |= qtrue;
+            ret |= true;
             break;
         case mvd_multicast_all:
         case mvd_multicast_pvs:

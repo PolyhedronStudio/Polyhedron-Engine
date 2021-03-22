@@ -686,7 +686,7 @@ void AC_Info_f(void);
 #else
 #define AC_ClientConnect(cl)        ""
 #define AC_ClientDisconnect(cl)     (void)0
-#define AC_ClientBegin(cl)          qtrue
+#define AC_ClientBegin(cl)          true
 #define AC_ClientAnnounce(cl)       (void)0
 #define AC_ClientToken(cl, token)   (void)0
 

@@ -145,7 +145,7 @@ int	SmallestNode1(int numhnodes)
     if (bestnode == -1)
         return -1;
 
-    cin.h_used[bestnode] = qtrue;
+    cin.h_used[bestnode] = true;
     return bestnode;
 }
 
@@ -365,7 +365,7 @@ qhandle_t SCR_ReadNextFrame(void)
     if (command == 1)
     {	// read palette
         FS_Read(cin.palette, sizeof(cin.palette), cin.file);
-        cin.palette_active = qtrue;
+        cin.palette_active = true;
     }
 
     // decompress the next frame
@@ -534,7 +534,7 @@ void SCR_PlayCinematic(const char *name)
 
         Huff1TableInit();
 
-        cin.palette_active = qfalse;
+        cin.palette_active = false;
 
         // switch to 22 khz sound if necessary
         old_khz = Cvar_VariableValue("s_khz");
@@ -557,5 +557,5 @@ void SCR_PlayCinematic(const char *name)
     cls.state = ca_cinematic;
 
     SCR_EndLoadingPlaque();     // get rid of loading plaque
-    Con_Close(qfalse);          // get rid of connection screen
+    Con_Close(false);          // get rid of connection screen
 }

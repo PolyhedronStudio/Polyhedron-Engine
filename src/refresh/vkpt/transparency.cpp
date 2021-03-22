@@ -120,7 +120,7 @@ qboolean initialize_transparency()
 	create_buffers();
 
 	if (allocate_and_bind_memory_to_buffers() != VK_TRUE)
-		return qfalse;
+		return false;
 
 	// C++20 VKPT: void argument fix.
 	create_buffer_views();
@@ -128,7 +128,7 @@ qboolean initialize_transparency()
 	//create_buffer_views(transparency);
 	//fill_index_buffer(transparency);
 
-	return qtrue;
+	return true;
 }
 
 void destroy_transparency()
@@ -456,7 +456,7 @@ qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, in
 	for (int tri = 0; tri < 6; tri++)
 	{
 		if (*num_lights >= max_lights)
-			return qfalse;
+			return false;
 
 		int i0 = indices[tri * 3 + 0];
 		int i1 = indices[tri * 3 + 1];
@@ -481,7 +481,7 @@ qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, in
 		}
 	}
 
-	return qtrue;
+	return true;
 }
 
 void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, entity_t* entities, int num_entites, float adapted_luminance)
@@ -840,7 +840,7 @@ static qboolean allocate_and_bind_memory_to_buffers()
 	_VK(vkMapMemory(qvk.device, transparency.host_buffer_memory, 0, host_buffer_size, 0,
 		(void**)&transparency.mapped_host_buffer)); // C++20 VKPT: Added void cast.
 	
-	return qtrue;
+	return true;
 }
 
 static void create_buffer_views()
@@ -927,6 +927,6 @@ static void fill_index_buffer()
 	vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
 		0, 0, NULL, 1, &post_barrier, 0, NULL);
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_transfer, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_transfer, true);
 	vkpt_wait_idle(qvk.queue_transfer, &qvk.cmd_buffers_transfer);
 }

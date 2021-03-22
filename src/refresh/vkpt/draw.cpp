@@ -43,7 +43,7 @@ typedef struct {
 } StretchPic_t;
 
 static clipRect_t clip_rect;
-static qboolean clip_enable = qfalse;
+static qboolean clip_enable = false;
 
 static StretchPic_t stretch_pic_queue[MAX_STRETCH_PICS];
 
@@ -671,12 +671,12 @@ void R_SetClipRect_RTX(const clipRect_t *clip)
 { 
 	if (clip)
 	{
-		clip_enable = qtrue;
+		clip_enable = true;
 		clip_rect = *clip;
 	}
 	else
 	{
-		clip_enable = qfalse;
+		clip_enable = false;
 	}
 }
 

@@ -71,7 +71,7 @@ static time_t latched_local_time;
 
 static int current_preset = 0;
 
-static qboolean sdl_initialized = qfalse;
+static qboolean sdl_initialized = false;
 static SDL_GameController* game_controller = 0;
 
 void vkpt_physical_sky_latch_local_time()
@@ -298,7 +298,7 @@ vkpt_physical_sky_initialize()
 	if (!sdl_initialized)
 	{
 		SDL_InitSubSystem(SDL_INIT_JOYSTICK);
-		sdl_initialized = qtrue;
+		sdl_initialized = true;
 	}
 
 	for (int i = 0; i < SDL_NumJoysticks(); i++)
@@ -602,7 +602,7 @@ static void change_image_layouts(VkImage image, const VkImageSubresourceRange* s
 		.subresourceRange = *subresource_range,
 	);
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 	vkpt_wait_idle(qvk.queue_graphics, &qvk.cmd_buffers_graphics);
 }
 
@@ -809,7 +809,7 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 
 	light->angular_size_rad = max(1.f, min(10.f, sun_angle->value)) * M_PI / 180.f;
 
-	light->use_physical_sky = qtrue;
+	light->use_physical_sky = true;
 
 	// color before occlusion
 	vec3_t sunColor = { sun_color[0]->value, sun_color[1]->value, sun_color[2]->value };
@@ -817,7 +817,7 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 
 	// potentially visible - can be overridden if readback data says it's occluded
 	if (physical_sky_space->integer)
-		light->visible = qtrue;
+		light->visible = true;
 	else
 		light->visible = (light->direction_envmap[2] >= -sinf(light->angular_size_rad * 0.5f));
 

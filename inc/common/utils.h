@@ -36,7 +36,7 @@ typedef enum {
 extern const char *const colorNames[10];
 
 qboolean Com_WildCmpEx(const char *filter, const char *string, int term, qboolean ignorecase);
-#define Com_WildCmp(filter, string)  Com_WildCmpEx(filter, string, 0, qfalse)
+#define Com_WildCmp(filter, string)  Com_WildCmpEx(filter, string, 0, false)
 
 #if USE_CLIENT || USE_MVD_CLIENT
 qboolean Com_ParseTimespec(const char *s, int *frames);

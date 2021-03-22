@@ -69,7 +69,7 @@ qboolean fire_hit(edict_t *self, vec3_t aim, int damage, int kick)
     Vec3_Subtract(self->enemy->s.origin, self->s.origin, dir);
     range = Vec3_Length(dir);
     if (range > aim[0])
-        return qfalse;
+        return false;
 
     if (aim[1] > self->mins[0] && aim[1] < self->maxs[0]) {
         // the hit is straight on so back the range up to the edge of their bbox
@@ -87,7 +87,7 @@ qboolean fire_hit(edict_t *self, vec3_t aim, int damage, int kick)
     tr = gi.trace(self->s.origin, NULL, NULL, point, self, CONTENTS_MASK_SHOT);
     if (tr.fraction < 1) {
         if (!tr.ent->takedamage)
-            return qfalse;
+            return false;
         // if it will hit any client/monster then hit the one we wanted to hit
         if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
             tr.ent = self->enemy;
@@ -103,7 +103,7 @@ qboolean fire_hit(edict_t *self, vec3_t aim, int damage, int kick)
     T_Damage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DAMAGE_NO_KNOCKBACK, MOD_HIT);
 
     if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
-        return qfalse;
+        return false;
 
     // do our special form of knockback here
     Vec3_MA(self->enemy->absmin, 0.5, self->enemy->size, v);
@@ -112,7 +112,7 @@ qboolean fire_hit(edict_t *self, vec3_t aim, int damage, int kick)
     Vec3_MA(self->enemy->velocity, kick, v, self->enemy->velocity);
     if (self->enemy->velocity[2] > 0)
         self->enemy->groundentity = NULL;
-    return qtrue;
+    return true;
 }
 
 
@@ -132,7 +132,7 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
     float       r;
     float       u;
     vec3_t      water_start;
-    qboolean    water = qfalse;
+    qboolean    water = false;
     int         content_mask = CONTENTS_MASK_SHOT | CONTENTS_MASK_LIQUID;
 
     tr = gi.trace(self->s.origin, NULL, NULL, start, self, CONTENTS_MASK_SHOT);
@@ -147,7 +147,7 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
         Vec3_MA(end, u, up, end);
 
         if (gi.pointcontents(start) & CONTENTS_MASK_LIQUID) {
-            water = qtrue;
+            water = true;
             Vec3_Copy(start, water_start);
             content_mask &= ~CONTENTS_MASK_LIQUID;
         }
@@ -158,7 +158,7 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
         if (tr.contents & CONTENTS_MASK_LIQUID) {
             int     color;
 
-            water = qtrue;
+            water = true;
             Vec3_Copy(tr.endpos, water_start);
 
             if (!Vec3_Compare(start, tr.endpos)) {
@@ -624,14 +624,14 @@ void fire_rail(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
     Vec3_MA(start, 8192, aimdir, end);
     Vec3_Copy(start, from);
     ignore = self;
-    water = qfalse;
+    water = false;
     mask = CONTENTS_MASK_SHOT | CONTENTS_SLIME | CONTENTS_LAVA;
     while (ignore) {
         tr = gi.trace(from, NULL, NULL, end, ignore, mask);
 
         if (tr.contents & (CONTENTS_SLIME | CONTENTS_LAVA)) {
             mask &= ~(CONTENTS_SLIME | CONTENTS_LAVA);
-            water = qtrue;
+            water = true;
         } else {
             //ZOID--added so rail goes through SOLID_BBOX entities (gibs, etc)
             if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client) ||

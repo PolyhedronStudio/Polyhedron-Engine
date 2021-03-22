@@ -277,7 +277,7 @@ static void CLG_ParsePrint(void)
 
     // disable notify
     if (!cl_chat_notify->integer) {
-        clgi.Con_SkipNotify(qtrue);
+        clgi.Con_SkipNotify(true);
     }
 
     // filter text
@@ -291,7 +291,7 @@ static void CLG_ParsePrint(void)
 
     clgi.Com_LPrintf(PRINT_TALK, fmt, s);
 
-    clgi.Con_SkipNotify(qfalse);
+    clgi.Con_SkipNotify(false);
 
     SCR_AddToChatHUD(s);
 
@@ -342,37 +342,37 @@ static void CLG_ParseCenterPrint(void)
 // Called when a configstring has been parsed and is ready to be
 // loaded in again.
 //
-// Returns qtrue in case of having handled it, otherwise returns qfalse
+// Returns true in case of having handled it, otherwise returns false
 // and lets the client work it out.
 //===============
 //
 qboolean CLG_UpdateConfigString(int index, const char *str) {
     if (index == CS_AIRACCEL) {
         if (clg.pmoveParams.qwmode)
-            clg.pmoveParams.airaccelerate = qtrue;
+            clg.pmoveParams.airaccelerate = true;
         else
-            clg.pmoveParams.airaccelerate = atoi(str) ? qtrue : qfalse;
-        return qtrue;
+            clg.pmoveParams.airaccelerate = atoi(str) ? true : false;
+        return true;
     }
 
 #if USE_LIGHTSTYLES
     if (index >= CS_LIGHTS && index < CS_LIGHTS + MAX_LIGHTSTYLES) {
         CLG_SetLightStyle(index - CS_LIGHTS, str);
-        return qtrue;
+        return true;
     }
 #endif
     // In case we aren't precaching, but got updated configstrings by the
     // server, we reload them.
     if (clgi.GetClienState() < ca_precached) {
-        return qfalse;
+        return false;
     }
     
     if (index >= CS_PLAYERSKINS && index < CS_PLAYERSKINS + MAX_CLIENTS) {
         CLG_LoadClientInfo(&cl->clientinfo[index - CS_PLAYERSKINS], str);
-        return qtrue;
+        return true;
     }
 
-    return qfalse;
+    return false;
 }
 
 //
@@ -403,49 +403,49 @@ qboolean CLG_ParseServerMessage (int serverCommand) {
         // Client Print Messages.
         case svc_print:
             CLG_ParsePrint();
-            return qtrue;
+            return true;
             break;
 
         // Client Center Screen Print messages.
         case svc_centerprint:
             CLG_ParseCenterPrint();
-            return qtrue;
+            return true;
             break;
 
         // Client temporary entities. (Particles, etc.)
         case svg_temp_entity:
             CLG_ParseTempEntitiesPacket();
             CLG_ParseTempEntity();
-            return qtrue;
+            return true;
         break;
 
         // Client Muzzle Flash.
         case svg_muzzleflash:
             CLG_ParseMuzzleFlashPacket(MZ_SILENCED);
             CLG_MuzzleFlash();
-            return qtrue;
+            return true;
         break;
         // Entity Muzzle Flash.
         case svg_muzzleflash2:
             CLG_ParseMuzzleFlashPacket(0);
             CLG_MuzzleFlash2();
-            return qtrue;
+            return true;
         break;
 
         // Client inventory updates.
         case svg_inventory:
             CLG_ParseInventory();
-            return qtrue;
+            return true;
         break;
 
         // Client layout (Cruel, limited, ugly UI...) updates
         case svg_layout:
             CLG_ParseLayout();
-            return qtrue;
+            return true;
         break;
     // Fail by default.
     default:
-        return qfalse;
+        return false;
     }
 }
 
@@ -466,15 +466,15 @@ qboolean CLG_SeekDemoMessage(int demoCommand) {
     switch (demoCommand) {
     case svg_inventory:
         CLG_ParseInventory();
-        return qtrue;
+        return true;
         break;
     case svg_layout:
         CLG_ParseLayout();
-        return qtrue;
+        return true;
         break;
     // Return false for failure in case we've reached this checkpoint.
     default:
-        return qfalse;
+        return false;
     }
 }
 

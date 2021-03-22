@@ -72,7 +72,7 @@ static unsigned long R_AliasCheckFrameBBox(maliasframe_t *frame, float worldxf[3
     int           i;
     vec3_t        mins, maxs;
     vec3_t        transformed_min, transformed_max;
-    qboolean      zclipped = qfalse, zfullyclipped = qtrue;
+    qboolean      zclipped = false, zfullyclipped = true;
 
     /*
     ** get the exact frame bounding box
@@ -89,9 +89,9 @@ static unsigned long R_AliasCheckFrameBBox(maliasframe_t *frame, float worldxf[3
     R_AliasTransformVector(maxs, transformed_max, aliastransform);
 
     if (transformed_min[2] >= ALIAS_Z_CLIP_PLANE)
-        zfullyclipped = qfalse;
+        zfullyclipped = false;
     if (transformed_max[2] >= ALIAS_Z_CLIP_PLANE)
-        zfullyclipped = qfalse;
+        zfullyclipped = false;
 
     if (zfullyclipped) {
         return BBOX_TRIVIAL_REJECT;

@@ -274,8 +274,8 @@ color_index_t SCR_ParseColorIndex(const char* s, color_index_t last)
 // string color names: black, red, green, yellow, blue, cyan, magenta, white,
 // alt, none.
 //
-// If the color string is invalid, it returns qfalse. If it is valid, it will
-// return qtrue and assign the color value to the designated color pointer.
+// If the color string is invalid, it returns false. If it is valid, it will
+// return true and assign the color value to the designated color pointer.
 //===============
 //
 qboolean SCR_ParseColor(const char* s, color_t* color)
@@ -288,11 +288,11 @@ qboolean SCR_ParseColor(const char* s, color_t* color)
         s++;
         for (i = 0; s[i]; i++) {
             if (i == 8) {
-                return qfalse;
+                return false;
             }
             c[i] = Q_charhex(s[i]);
             if (c[i] == -1) {
-                return qfalse;
+                return false;
             }
         }
 
@@ -316,20 +316,20 @@ qboolean SCR_ParseColor(const char* s, color_t* color)
             color->u8[3] = c[7] | (c[6] << 4);
             break;
         default:
-            return qfalse;
+            return false;
         }
 
-        return qtrue;
+        return true;
     }
 
     // parse name or index
     i = SCR_ParseColorIndex(s, COLOR_WHITE);
     if (i == COLOR_NONE) {
-        return qfalse;
+        return false;
     }
 
     color->u32 = colorTable[i];
-    return qtrue;
+    return true;
 }
 
 //
@@ -1562,7 +1562,7 @@ void SCR_Init(void)
     scr_scale_changed(scr_scale);
 
     // We've initialized the screen.
-    scr.initialized = qtrue;
+    scr.initialized = true;
 }
 
 //
@@ -1675,5 +1675,5 @@ void CLG_DrawPauseScreen(void) {
 void SCR_Shutdown(void)
 {
     clgi.Cmd_Deregister(scr_cmds);
-    scr.initialized = qfalse;
+    scr.initialized = false;
 }

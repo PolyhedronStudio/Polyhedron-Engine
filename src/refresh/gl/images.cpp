@@ -214,7 +214,7 @@ static void Scrap_Shutdown(void)
         scrap_inuse[i] = 0;
     }
 
-    scrap_dirty = qfalse;
+    scrap_dirty = false;
 }
 
 void Scrap_Upload(void)
@@ -236,7 +236,7 @@ void Scrap_Upload(void)
         GL_SetFilterAndRepeat(IT_PIC, IF_SCRAP);
     }
 
-    scrap_dirty = qfalse;
+    scrap_dirty = false;
 }
 
 //=======================================================
@@ -352,24 +352,24 @@ static qboolean GL_TextureHasAlpha(byte *data, int width, int height)
     scan = data + 3;
     for (i = 0; i < c; i++, scan += 4) {
         if (*scan != 255) {
-            return qtrue;
+            return true;
         }
     }
 
-    return qfalse;
+    return false;
 }
 
 static qboolean GL_MakePowerOfTwo(int *width, int *height)
 {
     if (!(*width & (*width - 1)) && !(*height & (*height - 1)))
-        return qtrue;   // already power of two
+        return true;   // already power of two
 
     if (AT_LEAST_OPENGL(3, 0) && gl_texture_non_power_of_two->integer)
-        return qfalse;  // assume full NPOT texture support
+        return false;  // assume full NPOT texture support
 
     *width = npot32(*width);
     *height = npot32(*height);
-    return qfalse;
+    return false;
 }
 
 /*
@@ -438,9 +438,9 @@ static void GL_Upload32(byte *data, int width, int height, int baselevel, imaget
     }
 
     if (flags & IF_TRANSPARENT) {
-        upload_alpha = qtrue;
+        upload_alpha = true;
     } else if (flags & IF_OPAQUE) {
-        upload_alpha = qfalse;
+        upload_alpha = false;
     } else {
         // scan the texture for any non-255 alpha
         upload_alpha = GL_TextureHasAlpha(scaled, scaled_width, scaled_height);
@@ -556,7 +556,7 @@ static void GL_SetFilterAndRepeat(imagetype_t type, imageflags_t flags)
         qboolean    nearest;
 
         if (flags & IF_NEAREST) {
-            nearest = qtrue;
+            nearest = true;
         } else if (type == IT_FONT) {
             nearest = (gl_bilerp_chars->integer == 0);
         } else if (type == IT_PIC) {
@@ -565,7 +565,7 @@ static void GL_SetFilterAndRepeat(imagetype_t type, imageflags_t flags)
             else
                 nearest = (gl_bilerp_pics->integer == 0);
         } else {
-            nearest = qfalse;
+            nearest = false;
         }
 
         if ((flags & IF_UPSCALED) && AT_LEAST_OPENGL(1, 2)) {
@@ -646,7 +646,7 @@ void IMG_Load_GL(image_t *image, byte *pic)
         if (maxlevel)
             image->flags = (imageflags_t)(image->flags | IF_UPSCALED); // CPP: Bitflags
 
-        scrap_dirty = qtrue;
+        scrap_dirty = true;
     } else {
         qglGenTextures(1, &image->texnum);
         GL_ForceTexture(0, image->texnum);

@@ -246,7 +246,7 @@ void R_SetupFrame(void)
     vrect_t     vrect;
 
     if (r_fullbright->modified) {
-        r_fullbright->modified = qfalse;
+        r_fullbright->modified = false;
         D_FlushCaches();    // so all lighting changes
     }
 
@@ -266,9 +266,9 @@ void R_SetupFrame(void)
     }
 
     if (sw_waterwarp->integer && (r_newrefdef.rdflags & RDF_UNDERWATER))
-        r_dowarp = qtrue;
+        r_dowarp = true;
     else
-        r_dowarp = qfalse;
+        r_dowarp = false;
 
     if (r_dowarp) {
         // warp into off screen buffer

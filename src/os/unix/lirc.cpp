@@ -61,8 +61,8 @@ void Lirc_GetEvents(void)
             if (*str == '@') {
                 key = Key_StringToKeynum(str + 1);
                 if (key > 0) {
-                    Key_Event(key, qtrue, time);
-                    Key_Event(key, qfalse, time);
+                    Key_Event(key, true, time);
+                    Key_Event(key, false, time);
                 }
             } else {
                 Cbuf_AddText(&cmd_buffer, str);
@@ -110,14 +110,14 @@ qboolean Lirc_Init(void)
     //lirc_config->changed = lirc_param_changed;
 
     if (!lirc_enable->integer) {
-        return qfalse;
+        return false;
     }
 
     lirc.fd = lirc_init(APPLICATION, 0);
     if (lirc.fd == -1) {
         Com_EPrintf("Failed to initialize LIRC.\n");
         Cvar_Reset(lirc_enable);
-        return qfalse;
+        return false;
     }
 
     if (lirc_readconfig(lirc_config->string[0] ? lirc_config->string : NULL,
@@ -125,7 +125,7 @@ qboolean Lirc_Init(void)
         Com_EPrintf("Failed to read LIRC config.\n");
         lirc_deinit();
         Cvar_Reset(lirc_enable);
-        return qfalse;
+        return false;
     }
 
     // change it to non-blocking
@@ -134,12 +134,12 @@ qboolean Lirc_Init(void)
         fcntl(lirc.fd, F_SETFL, ret | O_NONBLOCK);
 
     lirc.io = NET_AddFd(lirc.fd);
-    lirc.io->wantread = qtrue;
+    lirc.io->wantread = true;
 
     Com_Printf("LIRC interface initialized.\n");
-    lirc.initialized = qtrue;
+    lirc.initialized = true;
 
-    return qtrue;
+    return true;
 }
 
 

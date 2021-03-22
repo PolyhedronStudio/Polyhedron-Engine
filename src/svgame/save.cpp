@@ -798,7 +798,7 @@ void WriteGame(const char *filename, qboolean autosave)
 
     game.autosaved = autosave;
     write_fields(f, gamefields, &game);
-    game.autosaved = qfalse;
+    game.autosaved = false;
 
     for (i = 0; i < game.maxclients; i++) {
         write_fields(f, clientfields, &game.clients[i]);
@@ -961,7 +961,7 @@ void ReadLevel(const char *filename)
 
         ent = &g_edicts[entnum];
         read_fields(f, entityfields, ent);
-        ent->inuse = qtrue;
+        ent->inuse = true;
         ent->s.number = entnum;
 
         // let the server rebuild world links for this ent
@@ -975,7 +975,7 @@ void ReadLevel(const char *filename)
     for (i = 0 ; i < maxclients->value ; i++) {
         ent = &g_edicts[i + 1];
         ent->client = game.clients + i;
-        ent->client->pers.connected = qfalse;
+        ent->client->pers.connected = false;
     }
 
     // do any load time things at this point

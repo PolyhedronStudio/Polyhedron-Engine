@@ -272,7 +272,7 @@ void GL_Setup2D(void)
 
     if (draw.scissor) {
         qglDisable(GL_SCISSOR_TEST);
-        draw.scissor = qfalse;
+        draw.scissor = false;
     }
 
     qglMatrixMode(GL_MODELVIEW);

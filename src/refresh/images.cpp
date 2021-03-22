@@ -222,13 +222,13 @@ IMG_Unpack8
 static int IMG_Unpack8(uint32_t *out, const uint8_t *in, int width, int height)
 {
     int         x, y, p;
-    qboolean    has_alpha = qfalse;
+    qboolean    has_alpha = false;
 
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
             p = *in;
             if (p == 255) {
-                has_alpha = qtrue;
+                has_alpha = true;
                 // transparent, so scan around for another color
                 // to avoid alpha fringes
                 if (y > 0 && *(in - width) != 255)

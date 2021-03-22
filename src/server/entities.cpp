@@ -478,7 +478,7 @@ void SV_BuildClientFrame(client_t *client)
             continue;
         }
 
-        ent_visible = qtrue;
+        ent_visible = true;
 
         // ignore if not touching a PV leaf
         if (ent != clent) {
@@ -487,7 +487,7 @@ void SV_BuildClientFrame(client_t *client)
                 // doors can legally straddle two areas, so
                 // we may need to check another one
                 if (!CM_AreasConnected(client->cm, clientarea, ent->areanum2)) {
-                    ent_visible = qfalse;        // blocked by a door
+                    ent_visible = false;        // blocked by a door
                 }
             }
 
@@ -497,11 +497,11 @@ void SV_BuildClientFrame(client_t *client)
                 if (ent->s.renderfx & RF_BEAM) {
                     l = ent->clusternums[0];
                     if (!Q_IsBitSet(clientphs, l))
-                        ent_visible = qfalse;
+                        ent_visible = false;
                 }
                 else {
                     if (cull_nonvisible_entities && !SV_EdictIsVisible(client->cm, ent, clientpvs)) {
-                        ent_visible = qfalse;
+                        ent_visible = false;
                     }
 
                     if (!ent->s.modelindex) {
@@ -512,7 +512,7 @@ void SV_BuildClientFrame(client_t *client)
                         Vec3_Subtract(org, ent->s.origin, delta);
                         len = Vec3_Length(delta);
                         if (len > 400)
-                            ent_visible = qfalse;
+                            ent_visible = false;
                     }
                 }
             }

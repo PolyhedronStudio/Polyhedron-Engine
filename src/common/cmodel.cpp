@@ -384,8 +384,8 @@ static void CM_ClipBoxToBrush(vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
     if (!brush->numsides)
         return;
 
-    getout = qfalse;
-    startout = qfalse;
+    getout = false;
+    startout = false;
     leadside = NULL;
 
     side = brush->firstbrushside;
@@ -417,9 +417,9 @@ static void CM_ClipBoxToBrush(vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
         d2 = Vec3_Dot(p2, plane->normal) - dist;
 
         if (d2 > 0)
-            getout = qtrue; // endpoint is not in solid
+            getout = true; // endpoint is not in solid
         if (d1 > 0)
-            startout = qtrue;
+            startout = true;
 
         // if completely in front of face, no intersection
         if (d1 > 0 && d2 >= d1)
@@ -447,9 +447,9 @@ static void CM_ClipBoxToBrush(vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 
     if (!startout) {
         // original point was inside brush
-        trace->startsolid = qtrue;
+        trace->startsolid = true;
         if (!getout) {
-            trace->allsolid = qtrue;
+            trace->allsolid = true;
             if (!map_allsolid_bug->integer) {
                 // original Q2 didn't set these
                 trace->fraction = 0;
@@ -546,7 +546,7 @@ static void CM_TestBoxInBrush(vec3_t mins, vec3_t maxs, vec3_t p1,
     }
 
     // inside this brush
-    trace->startsolid = trace->allsolid = qtrue;
+    trace->startsolid = trace->allsolid = true;
     trace->fraction = 0;
     trace->contents = brush->contents;
 }
@@ -764,10 +764,10 @@ void CM_BoxTrace(trace_t *trace, vec3_t start, vec3_t end,
     //
     if (mins[0] == 0 && mins[1] == 0 && mins[2] == 0
         && maxs[0] == 0 && maxs[1] == 0 && maxs[2] == 0) {
-        trace_ispoint = qtrue;
+        trace_ispoint = true;
         Vec3_Clear(trace_extents);
     } else {
-        trace_ispoint = qfalse;
+        trace_ispoint = false;
         trace_extents[0] = -mins[0] > maxs[0] ? -mins[0] : maxs[0];
         trace_extents[1] = -mins[1] > maxs[1] ? -mins[1] : maxs[1];
         trace_extents[2] = -mins[2] > maxs[2] ? -mins[2] : maxs[2];
@@ -839,9 +839,9 @@ void CM_TransformedBoxTrace(trace_t *trace, vec3_t start, vec3_t end,
     // rotate start and end into the models frame of reference
     if (headnode != box_headnode &&
         (angles[0] || angles[1] || angles[2]))
-        rotated = qtrue;
+        rotated = true;
     else
-        rotated = qfalse;
+        rotated = false;
 
     if (rotated) {
         AnglesToAxis(angles, axis);
@@ -954,23 +954,23 @@ qboolean CM_AreasConnected(cm_t *cm, int area1, int area2)
     bsp_t *cache = cm->cache;
 
     if (!cache) {
-        return qfalse;
+        return false;
     }
     if (map_noareas->integer) {
-        return qtrue;
+        return true;
     }
     if (area1 < 1 || area2 < 1) {
-        return qfalse;
+        return false;
     }
     if (area1 >= cache->numareas || area2 >= cache->numareas) {
         Com_EPrintf("%s: area > numareas\n", __func__);
-        return qfalse;
+        return false;
     }
     if (cm->floodnums[area1] == cm->floodnums[area2]) {
-        return qtrue;
+        return true;
     }
 
-    return qfalse;
+    return false;
 }
 
 
@@ -1051,7 +1051,7 @@ void CM_SetPortalStates(cm_t *cm, byte *buffer, int bytes)
 
     if (!bytes) {
         for (i = 0; i <= cm->cache->lastareaportal; i++) {
-            cm->portalopen[i] = qtrue;
+            cm->portalopen[i] = true;
         }
     } else {
         numportals = bytes << 3;
@@ -1071,7 +1071,7 @@ void CM_SetPortalStates(cm_t *cm, byte *buffer, int bytes)
 =============
 CM_HeadnodeVisible
 
-Returns qtrue if any leaf under headnode has a cluster that
+Returns true if any leaf under headnode has a cluster that
 is potentially visible
 =============
 */
@@ -1082,17 +1082,17 @@ qboolean CM_HeadnodeVisible(mnode_t *node, byte *visbits)
 
     while (node->plane) {
         if (CM_HeadnodeVisible(node->children[0], visbits))
-            return qtrue;
+            return true;
         node = node->children[1];
     }
 
     leaf = (mleaf_t *)node;
     cluster = leaf->cluster;
     if (cluster == -1)
-        return qfalse;
+        return false;
     if (Q_IsBitSet(visbits, cluster))
-        return qtrue;
-    return qfalse;
+        return true;
+    return false;
 }
 
 

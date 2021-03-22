@@ -65,7 +65,7 @@ qboolean DMA_Init(void)
         WAVE_FillAPI(&snddma);
         ret = snddma.Init();
         if (ret != SIS_SUCCESS) {
-            return qfalse;
+            return false;
         }
     }
 
@@ -75,7 +75,7 @@ qboolean DMA_Init(void)
 
     Com_Printf("sound sampling rate: %i\n", dma.speed);
 
-    return qtrue;
+    return true;
 }
 
 void DMA_Shutdown(void)

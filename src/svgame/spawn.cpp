@@ -431,10 +431,10 @@ static qboolean ED_ParseField(const spawn_field_t *fields, const char *key, cons
             default:
                 break;
             }
-            return qtrue;
+            return true;
         }
     }
-    return qfalse;
+    return false;
 }
 
 /*
@@ -450,7 +450,7 @@ void ED_ParseEdict(const char **data, edict_t *ent)
     qboolean    init;
     char        *key, *value;
 
-    init = qfalse;
+    init = false;
     memset(&st, 0, sizeof(st));
 
 // go through all the dictionary pairs
@@ -470,7 +470,7 @@ void ED_ParseEdict(const char **data, edict_t *ent)
         if (value[0] == '}')
             gi.error("%s: closing brace without data", __func__);
 
-        init = qtrue;
+        init = true;
 
         // keynames with a leading underscore are used for utility comments,
         // and are immediately discarded by quake
@@ -828,7 +828,7 @@ void SP_worldspawn(edict_t *ent)
 {
     ent->movetype = MOVETYPE_PUSH;
     ent->solid = SOLID_BSP;
-    ent->inuse = qtrue;          // since the world doesn't use G_Spawn()
+    ent->inuse = true;          // since the world doesn't use G_Spawn()
     ent->s.modelindex = 1;      // world model is always index 1
 
     //---------------

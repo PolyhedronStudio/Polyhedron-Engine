@@ -140,10 +140,10 @@ static qboolean find_dup(genctx_t *ctx, const char *s)
             r = strcmp(ctx->matches[i], s);
 
         if (!r)
-            return qtrue;
+            return true;
     }
 
-    return qfalse;
+    return false;
 }
 
 qboolean Prompt_AddMatch(genctx_t *ctx, const char *s)
@@ -151,7 +151,7 @@ qboolean Prompt_AddMatch(genctx_t *ctx, const char *s)
     int r;
 
     if (ctx->count >= ctx->size)
-        return qfalse;
+        return false;
 
     if (ctx->ignorecase)
         r = Q_strncasecmp(ctx->partial, s, ctx->length);
@@ -159,13 +159,13 @@ qboolean Prompt_AddMatch(genctx_t *ctx, const char *s)
         r = strncmp(ctx->partial, s, ctx->length);
 
     if (r)
-        return qtrue;
+        return true;
 
     if (ctx->ignoredups && find_dup(ctx, s))
-        return qtrue;
+        return true;
 
     ctx->matches[ctx->count++] = Z_CopyString(s);
-    return qtrue;
+    return true;
 }
 
 static qboolean needs_quotes(const char *s)
@@ -175,11 +175,11 @@ static qboolean needs_quotes(const char *s)
     while (*s) {
         c = *s++;
         if (c == '$' || c == ';' || !Q_isgraph(c)) {
-            return qtrue;
+            return true;
         }
     }
 
-    return qfalse;
+    return false;
 }
 
 /*
@@ -216,7 +216,7 @@ void Prompt_CompleteCommand(commandPrompt_t *prompt, qboolean backslash)
     }
 
     // parse the input line into tokens
-    Cmd_TokenizeString(text, qfalse);
+    Cmd_TokenizeString(text, false);
 
     argc = Cmd_Argc();
 
@@ -273,7 +273,7 @@ void Prompt_CompleteCommand(commandPrompt_t *prompt, qboolean backslash)
 
     if (!ctx.count) {
         pos = strlen(inputLine->text);
-        prompt->tooMany = qfalse;
+        prompt->tooMany = false;
         goto finish2; // nothing found
     }
 
@@ -297,18 +297,18 @@ void Prompt_CompleteCommand(commandPrompt_t *prompt, qboolean backslash)
             pos += Q_concat(text, size, matches[0], " ", s, NULL);
         }
         pos++;
-        prompt->tooMany = qfalse;
+        prompt->tooMany = false;
         goto finish1;
     }
 
     if (ctx.count > com_completion_treshold->integer && !prompt->tooMany) {
         prompt->printf("Press TAB again to display all %d possibilities.\n", ctx.count);
         pos = strlen(inputLine->text);
-        prompt->tooMany = qtrue;
+        prompt->tooMany = true;
         goto finish1;
     }
 
-    prompt->tooMany = qfalse;
+    prompt->tooMany = false;
 
     // sort matches alphabethically
     for (i = 0; i < ctx.count; i++) {
@@ -438,7 +438,7 @@ void Prompt_CompleteHistory(commandPrompt_t *prompt, qboolean forward)
 
 void Prompt_ClearState(commandPrompt_t *prompt)
 {
-    prompt->tooMany = qfalse;
+    prompt->tooMany = false;
     if (prompt->search) {
         Z_Free(prompt->search);
         prompt->search = NULL;

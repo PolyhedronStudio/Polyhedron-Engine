@@ -137,7 +137,7 @@ typedef struct pbr_materials_table_s {
 // C++20 VKPT: Initialize in order.
 static pbr_materials_table_t pbr_materials_table = { 
 	.num_materials = 0, 
-	.alpha_sorted = qtrue,
+	.alpha_sorted = true,
 	.num_custom_materials = 0, 
 };
 
@@ -170,7 +170,7 @@ static void MAT_Reset(pbr_material_t * mat, int mat_index)
 
 static qerror_t validateMaterialsTable(pbr_materials_table_t * table)
 {	
-	table->alpha_sorted = qtrue;
+	table->alpha_sorted = true;
 	for (int i = 1; i < table->num_materials; ++i)
 	{
 		pbr_material_t const * a = &table->materials[i - 1];
@@ -184,7 +184,7 @@ static qerror_t validateMaterialsTable(pbr_materials_table_t * table)
 		else if (cmp > 0)
 		{
 			Com_WPrintf("materials table '%s' is not sorted - fast search disabled\n", table->filename);
-			table->alpha_sorted = qfalse;
+			table->alpha_sorted = false;
 		}
 	}
 	return Q_ERR_SUCCESS;
@@ -332,7 +332,7 @@ static qerror_t parseMaterialsTable(char const * filename, pbr_materials_table_t
 
 	qerror_t status = validateMaterialsTable(table);
 
-	Com_Printf("Loaded '%s' (fast search = %s)\n", filename, table->alpha_sorted == qtrue ? "true" : "false");
+	Com_Printf("Loaded '%s' (fast search = %s)\n", filename, table->alpha_sorted == true ? "true" : "false");
 
 	FS_FreeFile(buffer);
 
@@ -596,7 +596,7 @@ qerror_t MAT_SetPBRMaterialAttribute(pbr_material_t * mat, char const * token, c
 	static int ntokens = sizeof(tokens) / sizeof(struct Token);
 	
 	struct Token const* t = NULL;
-	float fvalue = 0.f; qboolean bvalue = qfalse; char const* svalue = NULL;
+	float fvalue = 0.f; qboolean bvalue = false; char const* svalue = NULL;
 
 	if (token == NULL || value == NULL)
 		goto usage;
@@ -615,10 +615,10 @@ qerror_t MAT_SetPBRMaterialAttribute(pbr_material_t * mat, char const * token, c
 	}
 
 	// C++20 VKPT: Moved to top.
-	//float fvalue = 0.f; qboolean bvalue = qfalse; char const * svalue = NULL;
+	//float fvalue = 0.f; qboolean bvalue = false; char const * svalue = NULL;
 	switch (t->type)
 	{
-		case TOKEN_BOOL:   bvalue = atoi(value) == 0 ? qfalse : qtrue; break;
+		case TOKEN_BOOL:   bvalue = atoi(value) == 0 ? false : true; break;
 		case TOKEN_FLOAT:  fvalue = (float)atof(value); break;
 		case TOKEN_STRING: svalue = value; break;
 		default:
@@ -643,8 +643,8 @@ qerror_t MAT_SetPBRMaterialAttribute(pbr_material_t * mat, char const * token, c
 				return Q_ERR_FAILURE;
 			}
 		} break;
-		case 5: mat->flags = bvalue == qtrue ? mat->flags | MATERIAL_FLAG_LIGHT : mat->flags & ~(MATERIAL_FLAG_LIGHT); break;
-		case 6: mat->flags = bvalue == qtrue ? mat->flags | MATERIAL_FLAG_CORRECT_ALBEDO : mat->flags & ~(MATERIAL_FLAG_CORRECT_ALBEDO); break;
+		case 5: mat->flags = bvalue == true ? mat->flags | MATERIAL_FLAG_LIGHT : mat->flags & ~(MATERIAL_FLAG_LIGHT); break;
+		case 6: mat->flags = bvalue == true ? mat->flags | MATERIAL_FLAG_CORRECT_ALBEDO : mat->flags & ~(MATERIAL_FLAG_CORRECT_ALBEDO); break;
 	}
 
 	return Q_ERR_SUCCESS;

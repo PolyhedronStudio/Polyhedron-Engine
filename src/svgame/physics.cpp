@@ -95,16 +95,16 @@ qboolean SV_RunThink(edict_t *ent)
 
     thinktime = ent->nextthink;
     if (thinktime <= 0)
-        return qtrue;
+        return true;
     if (thinktime > level.time + 0.001)
-        return qtrue;
+        return true;
 
     ent->nextthink = 0;
     if (!ent->think)
         gi.error("NULL ent->think");
     ent->think(ent);
 
-    return qfalse;
+    return false;
 }
 
 /*
@@ -517,7 +517,7 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 #endif
             gi.linkentity(p->ent);
         }
-        return qfalse;
+        return false;
     }
 
 //FIXME: is there a better way to handle this?
@@ -525,7 +525,7 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
     for (p = pushed_p - 1 ; p >= pushed ; p--)
         G_TouchTriggers(p->ent);
 
-    return qtrue;
+    return true;
 }
 
 /*
@@ -750,7 +750,7 @@ all movement is done with discrete steps.
 
 This is also used for objects that have become still on the ground, but
 will fall if the floor is pulled out from under them.
-FIXME: is this qtrue?
+FIXME: is this true?
 =============
 */
 
@@ -782,7 +782,7 @@ void SV_AddRotationalFriction(edict_t *ent)
 void SV_Physics_Step(edict_t *ent)
 {
     qboolean    wasonground;
-    qboolean    hitsound = qfalse;
+    qboolean    hitsound = false;
     float       *vel;
     float       speed, newspeed, control;
     float       friction;
@@ -798,9 +798,9 @@ void SV_Physics_Step(edict_t *ent)
     SV_CheckVelocity(ent);
 
     if (groundentity)
-        wasonground = qtrue;
+        wasonground = true;
     else
-        wasonground = qfalse;
+        wasonground = false;
 
     if (ent->avelocity[0] || ent->avelocity[1] || ent->avelocity[2])
         SV_AddRotationalFriction(ent);
@@ -812,7 +812,7 @@ void SV_Physics_Step(edict_t *ent)
         if (!(ent->flags & FL_FLY))
             if (!((ent->flags & FL_SWIM) && (ent->waterlevel > 2))) {
                 if (ent->velocity[2] < sv_gravity->value * -0.1)
-                    hitsound = qtrue;
+                    hitsound = true;
                 if (ent->waterlevel == 0)
                     SV_AddGravity(ent);
             }

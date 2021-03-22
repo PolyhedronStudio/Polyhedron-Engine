@@ -51,7 +51,7 @@ typedef struct netchan_s {
 
     size_t      reliable_length;
 
-    qboolean    reliable_ack_pending;   // set to qtrue each time reliable is received
+    qboolean    reliable_ack_pending;   // set to true each time reliable is received
     qboolean    fragment_pending;
 
     // sequencing variables

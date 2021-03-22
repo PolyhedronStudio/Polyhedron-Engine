@@ -199,11 +199,11 @@ glCullResult_t GL_CullLocalBox(const vec3_t origin, vec3_t bounds[2])
 
     cull = CULL_IN;
     for (i = 0, p = glr.frustumPlanes; i < 4; i++, p++) {
-        infront = qfalse;
+        infront = false;
         for (j = 0; j < 8; j++) {
             dot = Vec3_Dot(points[j], p->normal);
             if (dot >= p->dist) {
-                infront = qtrue;
+                infront = true;
                 if (cull == CULL_CLIP) {
                     break;
                 }
@@ -274,7 +274,7 @@ qboolean GL_AllocBlock(int width, int height, int *inuse,
     }
 
     if (y + h > height) {
-        return qfalse;
+        return false;
     }
 
     for (i = 0; i < w; i++) {
@@ -283,7 +283,7 @@ qboolean GL_AllocBlock(int width, int height, int *inuse,
 
     *s = x;
     *t = y;
-    return qtrue;
+    return true;
 }
 
 // P = A * B
@@ -439,12 +439,12 @@ static void GL_DrawEntities(int mask)
 
         // convert angles to axis
         if (Vec3_Empty(ent->angles)) {
-            glr.entrotated = qfalse;
+            glr.entrotated = false;
             Vec3_Set(glr.entaxis[0], 1, 0, 0);
             Vec3_Set(glr.entaxis[1], 0, 1, 0);
             Vec3_Set(glr.entaxis[2], 0, 0, 1);
         } else {
-            glr.entrotated = qtrue;
+            glr.entrotated = true;
             AnglesToAxis(ent->angles, glr.entaxis);
         }
 
@@ -541,7 +541,7 @@ qboolean GL_ShowErrors(const char *func)
     GLenum err = qglGetError();
 
     if (err == GL_NO_ERROR) {
-        return qfalse;
+        return false;
     }
 
     do {
@@ -550,7 +550,7 @@ qboolean GL_ShowErrors(const char *func)
         }
     } while ((err = qglGetError()) != GL_NO_ERROR);
 
-    return qtrue;
+    return true;
 }
 
 void R_RenderFrame_GL(refdef_t *fd)
@@ -574,7 +574,7 @@ void R_RenderFrame_GL(refdef_t *fd)
 
     if (lm.dirty) {
         GL_RebuildLighting();
-        lm.dirty = qfalse;
+        lm.dirty = false;
     }
 
     GL_Setup3D();
@@ -659,7 +659,7 @@ void R_EndFrame_GL(void)
     if (gl_fragment_program->modified) {
         GL_ShutdownPrograms();
         GL_InitPrograms();
-        gl_fragment_program->modified = qfalse;
+        gl_fragment_program->modified = false;
     }
 
     GL_ShowErrors(__func__);
@@ -670,7 +670,7 @@ void R_EndFrame_GL(void)
             QGL_EnableLogging(gl_config.ext_enabled);
         else
             QGL_DisableLogging(gl_config.ext_enabled);
-        gl_log->modified = qfalse;
+        gl_log->modified = false;
     }
 #endif
 
@@ -706,7 +706,7 @@ static void gl_lightmap_changed(cvar_t *self)
         lm.comp = lm.scale ? GL_RGB : GL_LUMINANCE;
     lm.add = 255 * Cvar_ClampValue(gl_brightness, -1, 1);
     lm.modulate = gl_modulate->value * gl_modulate_world->value;
-    lm.dirty = qtrue; // rebuild all lightmaps next frame
+    lm.dirty = true; // rebuild all lightmaps next frame
 }
 
 static void gl_modulate_entities_changed(cvar_t *self)
@@ -759,7 +759,7 @@ static void GL_Register(void)
     gl_doublelight_entities = Cvar_Get("gl_doublelight_entities", "1", 0);
     gl_fragment_program = Cvar_Get("gl_fragment_program", "1", 0);
     gl_vertex_buffer_object = Cvar_Get("gl_vertex_buffer_object", "1", CVAR_FILES);
-    gl_vertex_buffer_object->modified = qtrue;
+    gl_vertex_buffer_object->modified = true;
     gl_fontshadow = Cvar_Get("gl_fontshadow", "0", 0);
 
     // development variables
@@ -817,7 +817,7 @@ static qboolean GL_SetupConfig(void)
     version = (const char *)qglGetString(GL_VERSION);
     if (!version || !*version) {
         Com_EPrintf("OpenGL returned NULL version string\n");
-        return qfalse;
+        return false;
     }
 
     // parse ES profile prefix
@@ -829,11 +829,11 @@ static qboolean GL_SetupConfig(void)
             version += 1;
         } else {
             Com_EPrintf("OpenGL returned invalid version string\n");
-            return qfalse;
+            return false;
         }
-        gl_config.es_profile = qtrue;
+        gl_config.es_profile = true;
     } else {
-        gl_config.es_profile = qfalse;
+        gl_config.es_profile = false;
     }
 
     // parse version
@@ -846,13 +846,13 @@ static qboolean GL_SetupConfig(void)
 
     if (gl_config.version_major < 1) {
         Com_EPrintf("OpenGL returned invalid version string\n");
-        return qfalse;
+        return false;
     }
 
     // OpenGL 1.0 doesn't have vertex arrays
     if (!AT_LEAST_OPENGL(1, 1) && !AT_LEAST_OPENGL_ES(1, 0)) {
         Com_EPrintf("OpenGL version 1.1 or higher required\n");
-        return qfalse;
+        return false;
     }
 
     // allow version override for debugging purposes
@@ -920,7 +920,7 @@ static qboolean GL_SetupConfig(void)
     qglGetIntegerv(GL_MAX_TEXTURE_SIZE, &integer);
     if (integer < 256) {
         Com_EPrintf("OpenGL reports invalid maximum texture size\n");
-        return qfalse;
+        return false;
     }
 
     if (integer & (integer - 1)) {
@@ -948,7 +948,7 @@ static qboolean GL_SetupConfig(void)
     gl_config.stencilbits = integer;
 
     GL_ShowErrors(__func__);
-    return qtrue;
+    return true;
 }
 
 static void GL_InitTables(void)
@@ -990,7 +990,7 @@ static void GL_PostInit(void)
         }
 
         // reset the modified flag
-        gl_vertex_buffer_object->modified = qfalse;
+        gl_vertex_buffer_object->modified = false;
     }
 
     GL_SetDefaultState();
@@ -1011,7 +1011,7 @@ qboolean R_Init_GL(qboolean total)
 
     if (!total) {
         GL_PostInit();
-        return qtrue;
+        return true;
     }
 
     Com_Printf("------- R_Init -------\n");
@@ -1020,7 +1020,7 @@ qboolean R_Init_GL(qboolean total)
     // initialize OS-specific parts of OpenGL
     // create the window and set up the context
     if (!VID_Init(GAPI_OPENGL)) {
-        return qfalse;
+        return false;
     }
 
     // initialize our QGL dynamic bindings
@@ -1040,25 +1040,25 @@ qboolean R_Init_GL(qboolean total)
     if (gl_log->integer) {
         QGL_EnableLogging(gl_config.ext_enabled);
     }
-    gl_log->modified = qfalse;
+    gl_log->modified = false;
 #endif
 
     GL_PostInit();
 
     GL_InitPrograms();
-    gl_fragment_program->modified = qfalse;
+    gl_fragment_program->modified = false;
 
     GL_InitTables();
 
     Com_Printf("----------------------\n");
 
-    return qtrue;
+    return true;
 
 fail:
     memset(&gl_config, 0, sizeof(gl_config));
     QGL_Shutdown();
     VID_Shutdown();
-    return qfalse;
+    return false;
 }
 
 /*
@@ -1107,7 +1107,7 @@ void R_BeginRegistration_GL(const char *name)
 {
     char fullname[MAX_QPATH];
 
-    gl_static.registering = qtrue;
+    gl_static.registering = true;
     registration_sequence++;
 
     memset(&glr, 0, sizeof(glr));
@@ -1127,7 +1127,7 @@ void R_EndRegistration_GL(const char *name)
     IMG_FreeUnused();
     MOD_FreeUnused();
     Scrap_Upload();
-    gl_static.registering = qfalse;
+    gl_static.registering = false;
 }
 
 /*
@@ -1143,7 +1143,7 @@ void R_ModeChanged_GL(int width, int height, int flags, int rowbytes, void *pixe
 }
 
 void R_AddDecal_GL(decal_t *d) {}
-qboolean R_InterceptKey_GL(unsigned key, qboolean down) { return qfalse; }
+qboolean R_InterceptKey_GL(unsigned key, qboolean down) { return false; }
 
 void R_RegisterFunctionsGL()
 {

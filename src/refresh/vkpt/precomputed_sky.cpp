@@ -259,7 +259,7 @@ VkResult UploadImage(void* FirstPixel, size_t total_size, unsigned int Width, un
 		.subresourceRange = subresource_range,
 	);
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 
 	// C++20 VKPT: Order fix.
 	VkDescriptorImageInfo desc_img_info = {
@@ -301,10 +301,10 @@ qboolean LoadImageFromDDS(const char* FileName, uint32_t Binding, struct ImageGP
 	if (!data)
 	{
 		Com_EPrintf("Couldn't read file %s\n", FileName);
-		return qfalse;
+		return false;
 	}
 
-	qboolean retval = qfalse;
+	qboolean retval = false;
 
 	const DDS_HEADER* dds = (DDS_HEADER*)data;
 	const DDS_HEADER_DXT10* dxt10 = (DDS_HEADER_DXT10*)(data + sizeof(DDS_HEADER));
@@ -905,7 +905,7 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 		.subresourceRange = { .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,.levelCount = 1,.layerCount = 1 },
 	);
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_transfer, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_transfer, true);
 
 	vkQueueWaitIdle(qvk.queue_transfer);
 	buffer_destroy(&upload_buffer);

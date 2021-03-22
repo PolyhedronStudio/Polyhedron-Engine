@@ -1830,11 +1830,11 @@ void PMoveInit(pmoveParams_t* pmp)
 //
 void PMoveEnableQW(pmoveParams_t* pmp)
 {
-    pmp->qwmode = qtrue;
+    pmp->qwmode = true;
     pmp->watermult = 0.7f;
     pmp->maxspeed = 320;
     //pmp->upspeed = (sv_qwmod->integer > 1) ? 310 : 350;
     pmp->friction = 4;
     pmp->waterfriction = 4;
-    pmp->airaccelerate = qtrue;
+    pmp->airaccelerate = true;
 }

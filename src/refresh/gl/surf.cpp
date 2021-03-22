@@ -320,7 +320,7 @@ static void LM_InitBlock(void)
         lm.inuse[i] = 0;
     }
 
-    lm.dirty = qfalse;
+    lm.dirty = false;
 }
 
 static void LM_UploadBlock(void)
@@ -445,7 +445,7 @@ static void LM_BuildSurface(mface_t *surf, vec_t *vbo)
         }
     }
 
-    lm.dirty = qtrue;
+    lm.dirty = true;
 
     // store the surface lightmap parameters
     surf->light_s = s;
@@ -726,7 +726,7 @@ static qboolean create_surface_vbo(size_t size)
     if (!qglGenBuffersARB || !qglBindBufferARB ||
         !qglBufferDataARB || !qglBufferSubDataARB ||
         !qglDeleteBuffersARB) {
-        return qfalse;
+        return false;
     }
 
     QGL_ClearErrors();
@@ -738,12 +738,12 @@ static qboolean create_surface_vbo(size_t size)
     if (GL_ShowErrors("Failed to create world model VBO")) {
         qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
         qglDeleteBuffersARB(1, &buf);
-        return qfalse;
+        return false;
     }
 
     gl_static.world.vertices = NULL;
     gl_static.world.bufnum = buf;
-    return qtrue;
+    return true;
 }
 
 static void upload_surface_vbo(int lastvert)
@@ -808,8 +808,8 @@ static void upload_world_surfaces(void)
         qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
     }
 
-    gl_fullbright->modified = qfalse;
-    gl_vertexlight->modified = qfalse;
+    gl_fullbright->modified = false;
+    gl_vertexlight->modified = false;
 }
 
 static void set_world_size(void)

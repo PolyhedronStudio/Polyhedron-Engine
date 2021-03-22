@@ -35,7 +35,7 @@ typedef HRESULT(WINAPI *LPDIRECTINPUTCREATE)(HINSTANCE, DWORD, LPDIRECTINPUT *, 
 
 static LPDIRECTINPUTCREATE pDirectInputCreate;
 
-static grab_t           di_grabbed; // qfalse when not focus app
+static grab_t           di_grabbed; // false when not focus app
 static qboolean         di_initialized;
 static LPDIRECTINPUT    di;
 static LPDIRECTINPUTDEVICE  di_mouse;
@@ -122,9 +122,9 @@ static void DI_GetMouseEvents(void)
             case DIMOFS_BUTTON7:
                 button = p->dwOfs - DIMOFS_BUTTON0;
                 if (p->dwData & 0x80) {
-                    Key_Event(K_MOUSE1 + button, qtrue, p->dwTimeStamp);
+                    Key_Event(K_MOUSE1 + button, true, p->dwTimeStamp);
                 } else {
-                    Key_Event(K_MOUSE1 + button, qfalse, p->dwTimeStamp);
+                    Key_Event(K_MOUSE1 + button, false, p->dwTimeStamp);
                 }
                 break;
             case DIMOFS_Z:
@@ -133,11 +133,11 @@ static void DI_GetMouseEvents(void)
                     break;
                 }
                 if (value > 0) {
-                    Key_Event(K_MWHEELUP, qtrue, p->dwTimeStamp);
-                    Key_Event(K_MWHEELUP, qfalse, p->dwTimeStamp);
+                    Key_Event(K_MWHEELUP, true, p->dwTimeStamp);
+                    Key_Event(K_MWHEELUP, false, p->dwTimeStamp);
                 } else {
-                    Key_Event(K_MWHEELDOWN, qtrue, p->dwTimeStamp);
-                    Key_Event(K_MWHEELDOWN, qfalse, p->dwTimeStamp);
+                    Key_Event(K_MWHEELDOWN, true, p->dwTimeStamp);
+                    Key_Event(K_MWHEELDOWN, false, p->dwTimeStamp);
                 }
                 break;
             default:
@@ -158,18 +158,18 @@ static qboolean DI_GetMouseMotion(int *dx, int *dy)
     HRESULT hr;
 
     if (di_grabbed != IN_GRAB) {
-        return qfalse;
+        return false;
     }
 
     hr = IDirectInputDevice_GetDeviceState(di_mouse, sizeof(state), &state);
     if (FAILED(hr)) {
         Com_EPrintf("GetDeviceState failed with error 0x%lX\n", hr);
-        return qfalse;
+        return false;
     }
 
     *dx = state.lX;
     *dy = state.lY;
-    return qtrue;
+    return true;
 }
 
 /*
@@ -192,8 +192,8 @@ static void DI_ShutdownMouse(void)
         IDirectInput_Release(di);
         di = NULL;
     }
-    di_grabbed = qfalse;
-    di_initialized = qfalse;
+    di_grabbed = false;
+    di_initialized = false;
 
 }
 
@@ -207,7 +207,7 @@ static qboolean DI_InitMouse(void)
     HRESULT hr;
 
     if (!win.wnd) {
-        return qfalse;
+        return false;
     }
 
     Com_Printf("Initializing DirectInput\n");
@@ -216,7 +216,7 @@ static qboolean DI_InitMouse(void)
         hDirectInput = LoadLibrary("dinput.dll");
         if (!hDirectInput) {
             Com_EPrintf("Failed to load dinput.dll\n");
-            return qfalse;
+            return false;
         }
 
         pDirectInputCreate = (LPDIRECTINPUTCREATE)
@@ -257,9 +257,9 @@ static qboolean DI_InitMouse(void)
         goto fail;
     }
 
-    di_initialized = qtrue;
+    di_initialized = true;
 
-    return qtrue;
+    return true;
 
 fail:
     if (di_mouse) {
@@ -270,7 +270,7 @@ fail:
         IDirectInput_Release(di);
         di = NULL;
     }
-    return qfalse;
+    return false;
 }
 
 /*

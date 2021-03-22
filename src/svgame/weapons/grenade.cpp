@@ -125,8 +125,8 @@ void Weapon_Grenade(edict_t* ent)
             // they waited too long, detonate it in their hand
             if (!ent->client->grenade_blew_up && level.time >= ent->client->grenade_time) {
                 ent->client->weapon_sound = 0;
-                weapon_grenade_fire(ent, qtrue);
-                ent->client->grenade_blew_up = qtrue;
+                weapon_grenade_fire(ent, true);
+                ent->client->grenade_blew_up = true;
             }
 
             if (ent->client->buttons & BUTTON_ATTACK)
@@ -135,7 +135,7 @@ void Weapon_Grenade(edict_t* ent)
             if (ent->client->grenade_blew_up) {
                 if (level.time >= ent->client->grenade_time) {
                     ent->client->ps.gunframe = 15;
-                    ent->client->grenade_blew_up = qfalse;
+                    ent->client->grenade_blew_up = false;
                 }
                 else {
                     return;
@@ -145,7 +145,7 @@ void Weapon_Grenade(edict_t* ent)
 
         if (ent->client->ps.gunframe == 12) {
             ent->client->weapon_sound = 0;
-            weapon_grenade_fire(ent, qfalse);
+            weapon_grenade_fire(ent, false);
         }
 
         if ((ent->client->ps.gunframe == 15) && (level.time < ent->client->grenade_time))

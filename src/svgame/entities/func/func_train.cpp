@@ -100,7 +100,7 @@ void train_next(edict_t* self)
     vec3_t      dest;
     qboolean    first;
 
-    first = qtrue;
+    first = true;
 again:
     if (!self->target) {
         //      gi.dprintf ("train_next: no next target\n");
@@ -121,7 +121,7 @@ again:
             gi.dprintf("connected teleport path_corners, see %s at %s\n", ent->classname, vtos(ent->s.origin));
             return;
         }
-        first = qfalse;
+        first = false;
         Vec3_Subtract(ent->s.origin, self->mins, self->s.origin);
         Vec3_Copy(self->s.origin, self->s.old_origin);
         self->s.event = EV_OTHER_TELEPORT;

@@ -185,7 +185,7 @@ vkpt_shadow_map_initialize()
 		},
 	);
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 
 	return VK_SUCCESS;
 }

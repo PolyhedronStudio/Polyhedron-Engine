@@ -204,7 +204,7 @@ static sndinitstat_t OSS_Init(void)
 
     dma.samplepos = 0;
 
-    snd_inited = qtrue;
+    snd_inited = true;
     return SIS_SUCCESS;
 
 fail:
@@ -219,7 +219,7 @@ static void OSS_Shutdown(void)
         ioctl(audio_fd, SNDCTL_DSP_RESET);
         munmap(dma.buffer, info.fragstotal * info.fragsize);
         close(audio_fd);
-        snd_inited = qfalse;
+        snd_inited = false;
     }
 }
 

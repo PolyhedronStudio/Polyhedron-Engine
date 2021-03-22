@@ -426,7 +426,7 @@ void CLG_Init() {
     info_name               = clgi.Cvar_Get("name", "Player", CVAR_USERINFO | CVAR_ARCHIVE);
     info_fov                = clgi.Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
     info_gender             = clgi.Cvar_Get("gender", "male", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_gender->modified   = qfalse; // clear this so we know when user sets it manually
+    info_gender->modified   = false; // clear this so we know when user sets it manually
     info_hand               = clgi.Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
     info_hand->changed      = cl_info_hand_changed;
     info_skin               = clgi.Cvar_Get("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
@@ -594,7 +594,7 @@ void CLG_UpdateUserInfo(cvar_t* var, from_t from) {
             clgi.Cvar_Set("gender", "female");
         else
             clgi.Cvar_Set("gender", "none");
-        info_gender->modified = qfalse;
+        info_gender->modified = false;
     }
 }
 

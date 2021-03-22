@@ -76,13 +76,13 @@ qboolean VID_GetFullscreen(vrect_t *rc, int *freq_p, int *depth_p)
         *depth_p = 0;
 
     if (!vid_modelist || !vid_fullscreen)
-        return qfalse;
+        return false;
 
     s = vid_modelist->string;
     while (Q_isspace(*s))
         s++;
     if (!*s)
-        return qfalse;
+        return false;
 
     mode = 1;
     while (1) {
@@ -90,14 +90,14 @@ qboolean VID_GetFullscreen(vrect_t *rc, int *freq_p, int *depth_p)
             s += 7;
             if (*s && !Q_isspace(*s)) {
                 Com_DPrintf("Mode %d is malformed\n", mode);
-                return qfalse;
+                return false;
             }
             w = h = freq = depth = 0;
         } else {
             w = strtoul(s, &s, 10);
             if (*s != 'x' && *s != 'X') {
                 Com_DPrintf("Mode %d is malformed\n", mode);
-                return qfalse;
+                return false;
             }
             h = strtoul(s + 1, &s, 10);
             freq = depth = 0;
@@ -120,7 +120,7 @@ qboolean VID_GetFullscreen(vrect_t *rc, int *freq_p, int *depth_p)
             s++;
         if (!*s) {
             Com_DPrintf("Mode %d not found\n", vid_fullscreen->integer);
-            return qfalse;
+            return false;
         }
         mode++;
     }
@@ -128,7 +128,7 @@ qboolean VID_GetFullscreen(vrect_t *rc, int *freq_p, int *depth_p)
     // sanity check
     if (w < 64 || w > 8192 || h < 64 || h > 8192 || freq > 1000 || depth > 32) {
         Com_DPrintf("Mode %lux%lu@%lu:%lu doesn't look sane\n", w, h, freq, depth);
-        return qfalse;
+        return false;
     }
 
     rc->width = w;
@@ -139,7 +139,7 @@ qboolean VID_GetFullscreen(vrect_t *rc, int *freq_p, int *depth_p)
     if (depth_p)
         *depth_p = depth;
 
-    return qtrue;
+    return true;
 }
 
 // 640x480
@@ -159,16 +159,16 @@ qboolean VID_GetGeometry(vrect_t *rc)
     rc->height = 720;
 
     if (!vid_geometry)
-        return qfalse;
+        return false;
 
     s = vid_geometry->string;
     if (!*s)
-        return qfalse;
+        return false;
 
     w = strtoul(s, &s, 10);
     if (*s != 'x' && *s != 'X') {
         Com_DPrintf("Geometry string is malformed\n");
-        return qfalse;
+        return false;
     }
     h = strtoul(s + 1, &s, 10);
 	x = rc->x;
@@ -183,7 +183,7 @@ qboolean VID_GetGeometry(vrect_t *rc)
     // sanity check
     if (w < 64 || w > 8192 || h < 64 || h > 8192) {
         Com_DPrintf("Geometry %lux%lu doesn't look sane\n", w, h);
-        return qfalse;
+        return false;
     }
 
     rc->x = x;
@@ -191,7 +191,7 @@ qboolean VID_GetGeometry(vrect_t *rc)
     rc->width = w;
     rc->height = h;
 
-    return qtrue;
+    return true;
 }
 
 void VID_SetGeometry(vrect_t *rc)
@@ -263,10 +263,10 @@ void CL_RunRefresh(void)
     }
 
     if (cvar_modified & CVAR_REFRESH) {
-        CL_RestartRefresh(qtrue);
+        CL_RestartRefresh(true);
         cvar_modified &= ~CVAR_REFRESH;
     } else if (cvar_modified & CVAR_FILES) {
-        CL_RestartRefresh(qfalse);
+        CL_RestartRefresh(false);
         cvar_modified &= ~CVAR_FILES;
     }
 }
@@ -347,11 +347,11 @@ void CL_InitRefresh(void)
 #error "REF_GL and REF_VKPT are both disabled, at least one has to be enableds"
 #endif
 
-    if (!R_Init(qtrue)) {
+    if (!R_Init(true)) {
         Com_Error(ERR_FATAL, "Couldn't initialize refresh: %s", Com_GetLastError());
     }
 
-    cls.ref_initialized = qtrue;
+    cls.ref_initialized = true;
 
     vid_geometry->changed = vid_geometry_changed;
     vid_fullscreen->changed = vid_fullscreen_changed;
@@ -405,9 +405,9 @@ void CL_ShutdownRefresh(void)
     vid_fullscreen->changed = NULL;
     vid_modelist->changed = NULL;
 
-    R_Shutdown(qtrue);
+    R_Shutdown(true);
 
-    cls.ref_initialized = qfalse;
+    cls.ref_initialized = false;
 
     // no longer active
     cls.active = ACT_MINIMIZED;

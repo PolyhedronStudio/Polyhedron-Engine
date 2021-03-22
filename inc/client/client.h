@@ -107,7 +107,7 @@ float V_CalcFOV(float fov_x, float width, float height);
 #define CL_UpdateUserinfo(var, from)    (void)0
 #define CL_ErrorEvent(from)             (void)0
 #define CL_RestartFilesystem(total)     FS_Restart(total)
-#define CL_ForwardToServer()            qfalse
+#define CL_ForwardToServer()            false
 #define CL_CheatsOK()                   (!!Cvar_VariableInteger("cheats"))
 
 #define Con_Init()                      (void)0

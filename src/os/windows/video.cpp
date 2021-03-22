@@ -73,7 +73,7 @@ static qboolean VID_SDL_GL_LoadLibrary(void)
 {
 #if USE_FIXED_LIBGL
     Cvar_Get("gl_driver", LIBGL, CVAR_ROM);
-    return qtrue;
+    return true;
 #else
     cvar_t *gl_driver = Cvar_Get("gl_driver", LIBGL, CVAR_REFRESH);
 
@@ -99,7 +99,7 @@ static qboolean VID_SDL_GL_LoadLibrary(void)
 
         Com_EPrintf("Couldn't load OpenGL library: %s\n", SDL_GetError());
         if (!strcmp(s, gl_driver->default_string)) {
-            return qfalse;
+            return false;
         }
 
         // attempt to recover
@@ -107,7 +107,7 @@ static qboolean VID_SDL_GL_LoadLibrary(void)
         Cvar_Reset(gl_driver);
     }
 
-    return qtrue;
+    return true;
 #endif
 }
 
@@ -263,7 +263,7 @@ void VID_VideoWait(void)
 
 qboolean VID_VideoSync(void)
 {
-    return qtrue;
+    return true;
 }
 
 void VID_BeginFrame(void)
@@ -449,7 +449,7 @@ qboolean VID_Init(graphics_api_t api)
 	vrect_t rc;
 
 	if (VID_SDL_InitSubSystem()) {
-		return qfalse;
+		return false;
 	}
 	
 #if REF_GL
@@ -480,7 +480,7 @@ qboolean VID_Init(graphics_api_t api)
 
 	if (!sdl_window) {
 		Com_EPrintf("Couldn't create SDL window: %s\n", SDL_GetError());
-		return qfalse;
+		return false;
 	}
 
 	SDL_SetWindowMinimumSize(sdl_window, 320, 240);
@@ -537,11 +537,11 @@ qboolean VID_Init(graphics_api_t api)
     }
 
     VID_SetMode();
-    return qtrue;
+    return true;
 
 fail:
 	VID_Shutdown();
-	return qfalse;
+	return false;
 }
 
 void VID_Shutdown(void)
@@ -695,19 +695,19 @@ static void mouse_button_event(SDL_MouseButtonEvent *event)
 static void mouse_wheel_event(SDL_MouseWheelEvent *event)
 {
     if (event->x > 0) {
-        Key_Event(K_MWHEELRIGHT, qtrue, event->timestamp);
-        Key_Event(K_MWHEELRIGHT, qfalse, event->timestamp);
+        Key_Event(K_MWHEELRIGHT, true, event->timestamp);
+        Key_Event(K_MWHEELRIGHT, false, event->timestamp);
     } else if (event->x < 0) {
-        Key_Event(K_MWHEELLEFT, qtrue, event->timestamp);
-        Key_Event(K_MWHEELLEFT, qfalse, event->timestamp);
+        Key_Event(K_MWHEELLEFT, true, event->timestamp);
+        Key_Event(K_MWHEELLEFT, false, event->timestamp);
     }
 
     if (event->y > 0) {
-        Key_Event(K_MWHEELUP, qtrue, event->timestamp);
-        Key_Event(K_MWHEELUP, qfalse, event->timestamp);
+        Key_Event(K_MWHEELUP, true, event->timestamp);
+        Key_Event(K_MWHEELUP, false, event->timestamp);
     } else if (event->y < 0) {
-        Key_Event(K_MWHEELDOWN, qtrue, event->timestamp);
-        Key_Event(K_MWHEELDOWN, qfalse, event->timestamp);
+        Key_Event(K_MWHEELDOWN, true, event->timestamp);
+        Key_Event(K_MWHEELDOWN, false, event->timestamp);
     }
 }
 
@@ -757,10 +757,10 @@ MOUSE
 static qboolean GetMouseMotion(int *dx, int *dy)
 {
     if (!SDL_GetRelativeMouseMode()) {
-        return qfalse;
+        return false;
     }
     SDL_GetRelativeMouseState(dx, dy);
-    return qtrue;
+    return true;
 }
 
 static void WarpMouse(int x, int y)
@@ -779,11 +779,11 @@ static void ShutdownMouse(void)
 static qboolean InitMouse(void)
 {
     if (SDL_WasInit(SDL_INIT_VIDEO) != SDL_INIT_VIDEO) {
-        return qfalse;
+        return false;
     }
 
     Com_Printf("SDL mouse initialized.\n");
-    return qtrue;
+    return true;
 }
 
 static void GrabMouse(qboolean grab)

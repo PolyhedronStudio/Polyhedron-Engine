@@ -357,7 +357,7 @@ static void Key_Name_g(genctx_t *ctx)
 {
     const keyname_t *k;
 
-    ctx->ignorecase = qtrue;
+    ctx->ignorecase = true;
     for (k = keynames; k->name; k++) {
         if (!Prompt_AddMatch(ctx, k->name)) {
             break;
@@ -369,7 +369,7 @@ static void Key_Bound_g(genctx_t *ctx)
 {
     int i;
 
-    ctx->ignorecase = qtrue;
+    ctx->ignorecase = true;
     for (i = 0; i < 256; i++) {
         if (keybindings[i]) {
             if (!Prompt_AddMatch(ctx, Key_KeynumToString(i))) {
@@ -674,7 +674,7 @@ void Key_Event(unsigned key, qboolean down, unsigned time)
 
         if (cls.key_dest == KEY_GAME &&
             cl.frame.ps.stats[STAT_LAYOUTS] &&
-            cls.demo.playback == qfalse) {
+            cls.demo.playback == false) {
             if (keydown[key] == 2) {
                 // force main menu if escape is held
                 UI_OpenMenu(UIMENU_GAME);
@@ -694,7 +694,7 @@ void Key_Event(unsigned key, qboolean down, unsigned time)
             if (cls.state < ca_active && !(cls.key_dest & KEY_MENU)) {
                 UI_OpenMenu(UIMENU_MAIN);
             } else {
-                Con_Close(qtrue);
+                Con_Close(true);
             }
         } else if (cls.key_dest & KEY_MENU) {
             UI_KeyEvent(key, down);
@@ -885,7 +885,7 @@ void Key_ClearStates(void)
 
     for (i = 0; i < 256; i++) {
         if (keydown[i])
-            Key_Event(i, qfalse, com_eventTime);
+            Key_Event(i, false, com_eventTime);
     }
 
     memset(buttondown, 0, sizeof(buttondown));

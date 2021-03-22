@@ -148,7 +148,7 @@ extern PFNGLUNLOCKARRAYSEXTPROC     qglUnlockArraysEXT;
 
 #define QGL_3_0_core_functions              (1 << 31)
 
-#define QGL_Init()                      qtrue
+#define QGL_Init()                      true
 #define QGL_Shutdown()                  QGL_ShutdownExtensions(~0)
 
 void QGL_InitExtensions(unsigned mask);

@@ -251,7 +251,7 @@ static void CLG_SetupFirstPersonView(void)
     // add the weapon
     CLG_AddViewWeapon();
 
-    cl->thirdPersonView = qfalse;
+    cl->thirdPersonView = false;
 }
 
 //
@@ -301,7 +301,7 @@ static void CLG_SetupThirdPersionView(void)
     cl->refdef.viewangles[PITCH] = -180 / M_PI * atan2(focus[2], dist);
     cl->refdef.viewangles[YAW] -= cl_thirdperson_angle->value;
 
-    cl->thirdPersonView = qtrue;
+    cl->thirdPersonView = true;
 }
 
 //

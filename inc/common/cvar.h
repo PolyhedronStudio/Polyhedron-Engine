@@ -69,7 +69,7 @@ void Cvar_FixCheats(void);
 
 void Cvar_Command(cvar_t *v);
 // called by Cmd_ExecuteString when Cmd_Argv(0) doesn't match a known
-// command.  Returns qtrue if the command was a variable reference that
+// command.  Returns true if the command was a variable reference that
 // was handled. (print or change)
 
 void Cvar_WriteVariables(qhandle_t f, int mask, qboolean modified);

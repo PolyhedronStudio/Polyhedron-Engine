@@ -447,7 +447,7 @@ vkpt_vertex_buffer_upload_models()
 {
 	int idx_offset = 0;
 	int vertex_offset = 0;
-	qboolean any_models_to_upload = qfalse;
+	qboolean any_models_to_upload = false;
 
 	for(int i = 0; i < MAX_MODELS; i++)
 	{
@@ -563,7 +563,7 @@ vkpt_vertex_buffer_upload_models()
 		buffer_unmap(&vbo->staging_buffer);
 
 		vbo->registration_sequence = r_models[i].registration_sequence;
-		any_models_to_upload = qtrue;
+		any_models_to_upload = true;
 	}
 
 	if (any_models_to_upload)
@@ -584,7 +584,7 @@ vkpt_vertex_buffer_upload_models()
 			}
 		}
 
-		vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+		vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 		vkQueueWaitIdle(qvk.queue_graphics);
 
 		for (int i = 0; i < MAX_MODELS; i++)

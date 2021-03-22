@@ -75,7 +75,7 @@ void UI_PushMenu(menuFrameWork_t *menu)
     // CPP: Keydest_t
     Key_SetDest((keydest_t)((Key_GetDest() & ~KEY_CONSOLE) | KEY_MENU));
 
-    Con_Close(qtrue);
+    Con_Close(true);
 
     if (!uis.activeMenu) {
         // opening menu moves cursor to the nice location
@@ -84,7 +84,7 @@ void UI_PushMenu(menuFrameWork_t *menu)
         uis.mouseCoords[0] = menu->mins[0];
         uis.mouseCoords[1] = menu->mins[1];
 
-        uis.entersound = qtrue;
+        uis.entersound = true;
     }
 
     uis.activeMenu = menu;
@@ -134,7 +134,7 @@ void UI_ForceMenuOff(void)
     uis.menuDepth = 0;
     uis.activeMenu = NULL;
     uis.mouseTracker = NULL;
-    uis.transparent = qfalse;
+    uis.transparent = false;
 }
 
 /*
@@ -179,11 +179,11 @@ UI_IsTransparent
 qboolean UI_IsTransparent(void)
 {
     if (!(Key_GetDest() & KEY_MENU)) {
-        return qtrue;
+        return true;
     }
 
     if (!uis.activeMenu) {
-        return qtrue;
+        return true;
     }
 
     return uis.activeMenu->transparent;
@@ -300,18 +300,18 @@ UI_CursorInRect
 qboolean UI_CursorInRect(vrect_t *rect)
 {
     if (uis.mouseCoords[0] < rect->x) {
-        return qfalse;
+        return false;
     }
     if (uis.mouseCoords[0] >= rect->x + rect->width) {
-        return qfalse;
+        return false;
     }
     if (uis.mouseCoords[1] < rect->y) {
-        return qfalse;
+        return false;
     }
     if (uis.mouseCoords[1] >= rect->y + rect->height) {
-        return qfalse;
+        return false;
     }
-    return qtrue;
+    return true;
 }
 
 void UI_DrawString(int x, int y, int flags, const char *string)
@@ -373,30 +373,30 @@ qboolean UI_DoHitTest(void)
     menuCommon_t *item;
 
     if (!uis.activeMenu) {
-        return qfalse;
+        return false;
     }
 
     if (uis.mouseTracker) {
         item = uis.mouseTracker;
     } else {
         if (!(item = Menu_HitTest(uis.activeMenu))) {
-            return qfalse;
+            return false;
         }
     }
 
     if (!UI_IsItemSelectable(item)) {
-        return qfalse;
+        return false;
     }
 
     Menu_MouseMove(item);
 
     if (item->flags & QMF_HASFOCUS) {
-        return qfalse;
+        return false;
     }
 
     Menu_SetFocus(item);
 
-    return qtrue;
+    return true;
 }
 
 /*
@@ -470,7 +470,7 @@ void UI_Draw(int realtime)
     // menu has been drawn, to avoid delay while
     // caching images
     if (uis.entersound) {
-        uis.entersound = qfalse;
+        uis.entersound = false;
         S_StartLocalSound("misc/menu1.wav");
     }
 
@@ -666,7 +666,7 @@ void UI_Init(void)
 
     Com_DPrintf("Registered %d menus.\n", List_Count(&ui_menus));
 
-    uis.initialized = qtrue;
+    uis.initialized = true;
 }
 
 /*

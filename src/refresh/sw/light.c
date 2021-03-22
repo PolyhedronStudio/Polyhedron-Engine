@@ -125,7 +125,7 @@ static qboolean _R_LightPoint(vec3_t start, vec3_t color)
 
     surf = lightpoint.surf;
     if (!surf)
-        return qfalse;
+        return false;
 
     fracu = lightpoint.s & 15;
     fracv = lightpoint.t & 15;
@@ -163,7 +163,7 @@ static qboolean _R_LightPoint(vec3_t start, vec3_t color)
         lightmap += size;
     }
 
-    return qtrue;
+    return true;
 }
 
 /*

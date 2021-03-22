@@ -116,20 +116,20 @@ static void evdev_read(evdev_t *dev)
                 break;
             case REL_WHEEL:
                 if ((int)ev[i].value == 1) {
-                    Key_Event(K_MWHEELUP, qtrue, time);
-                    Key_Event(K_MWHEELUP, qfalse, time);
+                    Key_Event(K_MWHEELUP, true, time);
+                    Key_Event(K_MWHEELUP, false, time);
                 } else if ((int)ev[i].value == -1) {
-                    Key_Event(K_MWHEELDOWN, qtrue, time);
-                    Key_Event(K_MWHEELDOWN, qfalse, time);
+                    Key_Event(K_MWHEELDOWN, true, time);
+                    Key_Event(K_MWHEELDOWN, false, time);
                 }
                 break;
             case REL_HWHEEL:
                 if ((int)ev[i].value == 1) {
-                    Key_Event(K_MWHEELRIGHT, qtrue, time);
-                    Key_Event(K_MWHEELRIGHT, qfalse, time);
+                    Key_Event(K_MWHEELRIGHT, true, time);
+                    Key_Event(K_MWHEELRIGHT, false, time);
                 } else if ((int)ev[i].value == -1) {
-                    Key_Event(K_MWHEELLEFT, qtrue, time);
-                    Key_Event(K_MWHEELLEFT, qfalse, time);
+                    Key_Event(K_MWHEELLEFT, true, time);
+                    Key_Event(K_MWHEELLEFT, false, time);
                 }
                 break;
             default:
@@ -158,14 +158,14 @@ static void GetMouseEvents(void)
 static qboolean GetMouseMotion(int *dx, int *dy)
 {
     if (!evdev.initialized || !evdev.grabbed) {
-        return qfalse;
+        return false;
     }
 
     *dx = evdev.dx;
     *dy = evdev.dy;
     evdev.dx = 0;
     evdev.dy = 0;
-    return qtrue;
+    return true;
 }
 
 static void ShutdownMouse(void)
@@ -286,7 +286,7 @@ static qboolean InitMouse(void)
     if (var->string[0]) {
         // add user specified device
         if (!evdev_add(var->string)) {
-            return qfalse;
+            return false;
         }
     } else {
 #if USE_UDEV
@@ -299,23 +299,23 @@ static qboolean InitMouse(void)
                 "usable mouse device. You may need to set the "
                 "'in_device' variable manually before direct "
                 "mouse input can be used.\n");
-            return qfalse;
+            return false;
         }
 #else
         Com_EPrintf(
             "No input device specified, and libudev support "
             "is not compiled in. Please set the 'in_device' variable "
             "manually before direct mouse input can be used.\n");
-        return qfalse;
+        return false;
 #endif
     }
 
     Cmd_AddCommand("evdevlist", ListDevices_f);
 
     Com_Printf("Evdev mouse initialized.\n");
-    evdev.initialized = qtrue;
+    evdev.initialized = true;
 
-    return qtrue;
+    return true;
 }
 
 static void GrabMouse(qboolean grab)

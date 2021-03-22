@@ -31,7 +31,7 @@ static qboolean match_raw(int c1, int c2, qboolean ignorecase)
 {
     if (c1 != c2) {
         if (!ignorecase) {
-            return qfalse;
+            return false;
         }
 #ifdef _WIN32
         // ugly hack for file listing
@@ -42,11 +42,11 @@ static qboolean match_raw(int c1, int c2, qboolean ignorecase)
         c2 = Q_tolower(c2);
 #endif
         if (c1 != c2) {
-            return qfalse;
+            return false;
         }
     }
 
-    return qtrue;
+    return true;
 }
 
 static qboolean match_char(int c1, int c2, qboolean ignorecase)
@@ -73,14 +73,14 @@ static qboolean match_part(const char *filter, const char *string,
         }
 
         if (!match) {
-            return qfalse;
+            return false;
         }
 
         filter++;
         string++;
     } while (--len);
 
-    return qtrue;
+    return true;
 }
 
 // match the longest possible part
@@ -146,12 +146,12 @@ qboolean Com_WildCmpEx(const char *filter, const char *string,
 
             // wildcard at the end matches everything
             if (!len) {
-                return qtrue;
+                return true;
             }
 
             string = match_filter(sub, string, len, ignorecase);
             if (!string) {
-                return qfalse;
+                return false;
             }
         } else {
             // skip over escape character
@@ -167,7 +167,7 @@ qboolean Com_WildCmpEx(const char *filter, const char *string,
 
             // match single character
             if (!match) {
-                return qfalse;
+                return false;
             }
 
             filter++;
@@ -300,36 +300,36 @@ qboolean Com_ParseTimespec(const char *s, int *frames)
     c1 = strtoul(s, &p, 10);
     if (!*p) {
         *frames = c1 * 10; // sec
-        return qtrue;
+        return true;
     }
 
     if (*p == '.') {
         c2 = strtoul(p + 1, &p, 10);
         if (*p)
-            return qfalse;
+            return false;
         *frames = c1 * 10 + c2; // sec.frac
-        return qtrue;
+        return true;
     }
 
     if (*p == ':') {
         c2 = strtoul(p + 1, &p, 10);
         if (!*p) {
             *frames = c1 * 600 + c2 * 10; // min:sec
-            return qtrue;
+            return true;
         }
 
         if (*p == '.') {
             c3 = strtoul(p + 1, &p, 10);
             if (*p)
-                return qfalse;
+                return false;
             *frames = c1 * 600 + c2 * 10 + c3; // min:sec.frac
-            return qtrue;
+            return true;
         }
 
-        return qfalse;
+        return false;
     }
 
-    return qfalse;
+    return false;
 }
 #endif
 

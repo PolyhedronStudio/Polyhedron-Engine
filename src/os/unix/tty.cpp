@@ -46,7 +46,7 @@ static void tty_fatal_error(const char *what)
 {
     // avoid recursive calls
     sys_console = NULL;
-    tty_enabled = qfalse;
+    tty_enabled = false;
     tty_io = NULL;
 
     Com_Error(ERR_FATAL, "%s: %s() failed: %s",
@@ -198,7 +198,7 @@ static void tty_parse_input(const char *text)
 
         if (key == '\t') {
             tty_hide_input();
-            Prompt_CompleteCommand(&tty_prompt, qfalse);
+            Prompt_CompleteCommand(&tty_prompt, false);
             f->cursorPos = strlen(f->text);   // FIXME
             tty_show_input();
             continue;
@@ -262,7 +262,7 @@ qboolean tty_init_input(void)
     // output by default if launched without one (from X session for example)
     sys_console = Cvar_Get("sys_console", is_tty ? "2" : "0", CVAR_NOSET);
     if (sys_console->integer == 0)
-        return qfalse;
+        return false;
 
     // change stdin to non-blocking
     ret = fcntl(STDIN_FILENO, F_GETFL, 0);
@@ -276,7 +276,7 @@ qboolean tty_init_input(void)
 
     // add stdin to the list of descriptors to wait on
     tty_io = NET_AddFd(STDIN_FILENO);
-    tty_io->wantread = qtrue;
+    tty_io->wantread = true;
 
     if (sys_console->integer == 1)
         goto no_tty1;
@@ -300,7 +300,7 @@ qboolean tty_init_input(void)
     width = tty_get_width();
     tty_prompt.widthInChars = width;
     tty_prompt.printf = Sys_Printf;
-    tty_enabled = qtrue;
+    tty_enabled = true;
 
     // figure out input line width
     width--;
@@ -310,13 +310,13 @@ qboolean tty_init_input(void)
 
     // display command prompt
     tty_stdout_write("]", 1);
-    return qtrue;
+    return true;
 
 no_tty2:
     Com_Printf("Couldn't initialize TTY support.\n");
     Cvar_Set("sys_console", "1");
 no_tty1:
-    return qtrue;
+    return true;
 }
 
 void tty_shutdown_input(void)
@@ -328,7 +328,7 @@ void tty_shutdown_input(void)
     if (tty_enabled) {
         tty_hide_input();
         tcsetattr(STDIN_FILENO, TCSADRAIN, &tty_orig);
-        tty_enabled = qfalse;
+        tty_enabled = false;
     }
 }
 
@@ -354,7 +354,7 @@ void Sys_RunConsole(void)
     }
 
     // make sure the next call will not block
-    tty_io->canread = qfalse;
+    tty_io->canread = false;
 
     if (ret < 0) {
         if (errno == EAGAIN || errno == EINTR) {

@@ -140,7 +140,7 @@ void Sys_RunConsole(void)
     while (1) {
         if (!GetNumberOfConsoleInputEvents(hinput, &numevents)) {
             Com_EPrintf("Error %lu getting number of console events.\n", GetLastError());
-            gotConsole = qfalse;
+            gotConsole = false;
             return;
         }
 
@@ -152,7 +152,7 @@ void Sys_RunConsole(void)
 
         if (!ReadConsoleInput(hinput, recs, numevents, &numread)) {
             Com_EPrintf("Error %lu reading console input.\n", GetLastError());
-            gotConsole = qfalse;
+            gotConsole = false;
             return;
         }
 
@@ -163,7 +163,7 @@ void Sys_RunConsole(void)
 
                 if (!width) {
                     Com_EPrintf("Invalid console buffer width.\n");
-                    gotConsole = qfalse;
+                    gotConsole = false;
                     return;
                 }
 
@@ -222,7 +222,7 @@ void Sys_RunConsole(void)
                 break;
             case VK_TAB:
                 hide_console_input();
-                Prompt_CompleteCommand(&sys_con, qfalse);
+                Prompt_CompleteCommand(&sys_con, false);
                 f->cursorPos = strlen(f->text);
                 show_console_input();
                 break;
@@ -376,7 +376,7 @@ static void Sys_ConsoleInit(void)
     }
     sys_con.widthInChars = width;
     sys_con.printf = Sys_Printf;
-    gotConsole = qtrue;
+    gotConsole = true;
 
     SetConsoleTitle(PRODUCT " console");
     SetConsoleCtrlHandler(Sys_ConsoleCtrlHandler, TRUE);
@@ -581,7 +581,7 @@ void Sys_Error(const char *error, ...)
     Q_vsnprintf(text, sizeof(text), error, argptr);
     va_end(argptr);
 
-    errorEntered = qtrue;
+    errorEntered = true;
 
 #if USE_CLIENT
     VID_Shutdown();
@@ -665,7 +665,7 @@ Sys_IsDir(const char *path)
 	DWORD fileAttributes = GetFileAttributesW(wpath);
 	if (fileAttributes == INVALID_FILE_ATTRIBUTES)
 	{
-		return qfalse;
+		return false;
 	}
 
 	return (fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
@@ -680,7 +680,7 @@ Sys_IsFile(const char *path)
 	DWORD fileAttributes = GetFileAttributesW(wpath);
 	if (fileAttributes == INVALID_FILE_ATTRIBUTES)
 	{
-		return qfalse;
+		return false;
 	}
 
 	// I guess the assumption that if it's not a file or device

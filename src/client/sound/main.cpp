@@ -363,7 +363,7 @@ void S_Shutdown(void)
 #endif
 
     s_started = SS_NOT;
-    s_active = qfalse;
+    s_active = false;
 
     s_auto_focus->changed = NULL;
 
@@ -483,7 +483,7 @@ S_BeginRegistration
 void S_BeginRegistration(void)
 {
     s_registration_sequence++;
-    s_registering = qtrue;
+    s_registering = true;
 }
 
 /*
@@ -667,7 +667,7 @@ void S_EndRegistration(void)
         S_LoadSound(sfx);
     }
 
-    s_registering = qfalse;
+    s_registering = false;
 }
 
 
@@ -961,9 +961,9 @@ void S_StartSound(const vec3_t origin, int entnum, int entchannel, qhandle_t hSf
 
     if (origin) {
         Vec3_Copy(origin, ps->origin);
-        ps->fixed_origin = qtrue;
+        ps->fixed_origin = true;
     } else {
-        ps->fixed_origin = qfalse;
+        ps->fixed_origin = false;
     }
 
     ps->entnum = entnum;
@@ -1168,7 +1168,7 @@ static void S_AddLoopSounds(void)
             right_total = 255;
         ch->leftvol = left_total;
         ch->rightvol = right_total;
-        ch->autosound = qtrue;  // remove next frame
+        ch->autosound = true;  // remove next frame
         ch->sfx = sfx;
         ch->pos = paintedtime % sc->length;
         ch->end = paintedtime + sc->length - ch->pos;

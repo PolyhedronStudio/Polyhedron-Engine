@@ -775,9 +775,9 @@ void R_DrawAlphaSurfaces(void)
         R_BuildPolygonFromSurface(s);
 
         if (s->texinfo->c.flags & SURF_TRANS66)
-            R_ClipAndDrawPoly(0.66f, (s->texinfo->c.flags & (SURF_WARP | SURF_FLOWING)), qtrue);
+            R_ClipAndDrawPoly(0.66f, (s->texinfo->c.flags & (SURF_WARP | SURF_FLOWING)), true);
         else
-            R_ClipAndDrawPoly(0.33f, (s->texinfo->c.flags & (SURF_WARP | SURF_FLOWING)), qtrue);
+            R_ClipAndDrawPoly(0.33f, (s->texinfo->c.flags & (SURF_WARP | SURF_FLOWING)), true);
 
         s = s->next;
     }
@@ -823,7 +823,7 @@ void R_IMFlatShadedQuad(vec3_t a, vec3_t b, vec3_t c, vec3_t d, color_t color, f
     r_polyblendcolor[1] = color.u8[1] * r_polydesc.alpha;
     r_polyblendcolor[2] = color.u8[2] * r_polydesc.alpha;
 
-    R_ClipAndDrawPoly(alpha, qfalse, qfalse);
+    R_ClipAndDrawPoly(alpha, false, false);
 }
 
 /*
@@ -902,8 +902,8 @@ void R_DrawSprite(void)
         textured = 1;
 
     if (currententity->flags & RF_TRANSLUCENT)
-        R_ClipAndDrawPoly(currententity->alpha, qfalse, textured);
+        R_ClipAndDrawPoly(currententity->alpha, false, textured);
     else
-        R_ClipAndDrawPoly(1.0F, qfalse, textured);
+        R_ClipAndDrawPoly(1.0F, false, textured);
 }
 

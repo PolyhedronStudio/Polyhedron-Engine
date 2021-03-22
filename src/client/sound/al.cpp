@@ -40,8 +40,8 @@ void AL_InitUnderwaterFilter(void);
 
 int active_buffers = 0;
 int active_voice_buffers = 0;
-qboolean streamPlaying = qfalse;
-qboolean voicePlaying = qfalse;
+qboolean streamPlaying = false;
+qboolean voicePlaying = false;
 static ALuint s_srcnums[MAX_CHANNELS];
 static ALuint streamSource = 0;
 static ALuint voiceSource = 0;
@@ -116,7 +116,7 @@ AL_StreamDie(void)
 	{
 		if (streamPlaying) {
 			qalSourceStop(streamSource);
-			streamPlaying = qfalse;
+			streamPlaying = false;
 		}
 
 		/* Un-queue any buffers, and delete them */
@@ -137,7 +137,7 @@ AL_StreamDie(void)
 	{
 		if (voicePlaying) {
 			qalSourceStop(voiceSource);
-			voicePlaying = qfalse;
+			voicePlaying = false;
 		}
 
 		/* Un-queue any buffers, and delete them */
@@ -169,7 +169,7 @@ AL_StreamUpdate(void)
 
 	if (state == AL_STOPPED)
 	{
-		streamPlaying = qfalse;
+		streamPlaying = false;
 	}
 	else
 	{
@@ -193,7 +193,7 @@ AL_StreamUpdate(void)
 	if (!streamPlaying && numBuffers)
 	{
 		qalSourcePlay(streamSource);
-		streamPlaying = qtrue;
+		streamPlaying = true;
 	}
 }
 
@@ -207,7 +207,7 @@ AL_VoiceUpdate(void)
 
 	if (state == AL_STOPPED)
 	{
-		voicePlaying = qfalse;
+		voicePlaying = false;
 	}
 	else
 	{
@@ -231,7 +231,7 @@ AL_VoiceUpdate(void)
 	if (!voicePlaying && numBuffers)
 	{
 		qalSourcePlay(voiceSource);
-		voicePlaying = qtrue;
+		voicePlaying = true;
 	}
 }
 
@@ -689,7 +689,7 @@ qboolean AL_Init(void)
 	{
 		Com_Printf("ERROR: Couldn't get a single Source.\n");
 		QAL_Shutdown();
-		return qfalse;
+		return false;
 	}
 	else
 	{
@@ -730,13 +730,13 @@ qboolean AL_Init(void)
 	}
 
 	Com_Printf("OpenAL initialized.\n");
-	return qtrue;
+	return true;
 
 fail1:
 	QAL_Shutdown();
 fail0:
 	Com_EPrintf("Failed to initialize OpenAL: %s\n", Com_GetLastError());
-	return qfalse;
+	return false;
 }
 
 void AL_Shutdown(void)
@@ -834,7 +834,7 @@ static void AL_Spatialize(channel_t *ch)
 	vec3_t distance;
 	float dist;
 	float final;
-	qboolean sourceoccluded = qfalse;
+	qboolean sourceoccluded = false;
 
 	// anything coming from the view entity will always be full volume
 	// no attenuation = no spatialization
@@ -874,7 +874,7 @@ static void AL_Spatialize(channel_t *ch)
 			if (!cl.snd_is_underwater && !ch->autosound) // OAL: snd_is_underwater moved to client struct.
 				qalSourcei(ch->srcnum, AL_DIRECT_FILTER, underwaterFilter);
 
-			sourceoccluded = qtrue;
+			sourceoccluded = true;
 		}
 		else
 		{
@@ -1043,7 +1043,7 @@ static void AL_AddLoopSounds(void)
 
 		ch2 = AL_FindLoopingSound(0, sfx);
 
-		ch->autosound = qtrue;  // remove next frame
+		ch->autosound = true;  // remove next frame
 		ch->autoframe = s_framecount;
 		ch->sfx = sfx;
 		ch->entnum = ent->number;
@@ -1069,21 +1069,21 @@ void oal_update_underwater()
 {
 	int i;
 	float gain_hf;
-	qboolean update = qfalse;
+	qboolean update = false;
 	ALuint filter;
 
 	if (underwaterFilter == 0)
 		return;
 
 	if (s_underwater->modified) {
-		update = qtrue;
-		s_underwater->modified = qfalse;
+		update = true;
+		s_underwater->modified = false;
 		cl.snd_is_underwater_enabled = ((int)s_underwater->value != 0); // OAL: snd_is_underwater moved to client struct.
 	}
 
 	if (s_underwater_gain_hf->modified) {
-		update = qtrue;
-		s_underwater_gain_hf->modified = qfalse;
+		update = true;
+		s_underwater_gain_hf->modified = false;
 	}
 
 	if (!update)
@@ -1135,8 +1135,8 @@ void AL_InitUnderwaterFilter(void)
 
 	qalFilterf(underwaterFilter, AL_LOWPASS_GAIN, AL_LOWPASS_DEFAULT_GAIN);
 
-	s_underwater->modified = qtrue;
-	s_underwater_gain_hf->modified = qtrue;
+	s_underwater->modified = true;
+	s_underwater_gain_hf->modified = true;
 }
 
 void AL_SpecialEffect_Underwater_Enable(void)

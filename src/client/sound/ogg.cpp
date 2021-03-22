@@ -410,7 +410,7 @@ OGG_PlayTrack(int trackNo)
 	}
 
 	int res = 0;
-	ogg_file = stb_vorbis_open_file(f, qtrue, &res, NULL);
+	ogg_file = stb_vorbis_open_file(f, true, &res, NULL);
 
 	if (res != 0)
 	{
@@ -600,12 +600,12 @@ OGG_SaveState(void)
 {
 	if (ogg_status != PLAY)
 	{
-		ogg_saved_state.saved = qfalse;
+		ogg_saved_state.saved = false;
 
 		return;
 	}
 
-	ogg_saved_state.saved = qtrue;
+	ogg_saved_state.saved = true;
 	ogg_saved_state.curfile = ogg_curfile;
 	ogg_saved_state.numsamples = ogg_numsamples;
 }
@@ -666,7 +666,7 @@ OGG_Init(void)
 	ogg_numsamples = 0;
 	ogg_status = STOP;
 
-	ogg_started = qtrue;
+	ogg_started = true;
 }
 
 /*
@@ -697,5 +697,5 @@ OGG_Shutdown(void)
 	// Remove console commands
 	Cmd_RemoveCommand("ogg");
 
-	ogg_started = qfalse;
+	ogg_started = false;
 }

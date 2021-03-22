@@ -327,7 +327,7 @@ void Cmd_Alias_f(void)
         return;
     }
 
-    if (Cvar_Exists(s, qtrue)) {
+    if (Cvar_Exists(s, true)) {
         Com_Printf("\"%s\" already defined as a cvar\n", s);
         return;
     }
@@ -580,7 +580,7 @@ void Cmd_ExecTrigger(const char *string)
 
     // execute matching triggers
     FOR_EACH_TRIGGER(trigger) {
-        match = Cmd_MacroExpandString(trigger->match, qfalse);
+        match = Cmd_MacroExpandString(trigger->match, false);
         if (match && Com_WildCmp(match, string)) {
             Cbuf_AddText(&cmd_buffer, trigger->command);
             Cbuf_AddText(&cmd_buffer, "\n");
@@ -773,7 +773,7 @@ void Cmd_AddMacro(const char *name, xmacro_t function)
     unsigned hash;
 
 // fail if the macro is a variable name
-    if (Cvar_Exists(name, qfalse)) {
+    if (Cvar_Exists(name, false)) {
         Com_WPrintf("%s: %s already defined as a cvar\n", __func__, name);
         return;
     }
@@ -1237,7 +1237,7 @@ char *Cmd_MacroExpandString(const char *text, qboolean aliasHack)
 
     scan = (char*)memcpy(expanded, text, len + 1); // CPP: Cast
 
-    inquote = qfalse;
+    inquote = false;
     count = 0;
 
     for (i = 0; i < len; i++) {
@@ -1304,7 +1304,7 @@ char *Cmd_MacroExpandString(const char *text, qboolean aliasHack)
             continue;
         }
 
-        rescan = qfalse;
+        rescan = false;
 
         if (aliasHack) {
             // expand positional parameters only
@@ -1343,7 +1343,7 @@ char *Cmd_MacroExpandString(const char *text, qboolean aliasHack)
                 var = Cvar_FindVar(temporary);
                 if (var && !(var->flags & CVAR_PRIVATE)) {
                     token = var->string;
-                    rescan = qtrue;
+                    rescan = true;
                 } else if (!strcmp(temporary, "qt")) {
                     token = (char*)"\""; // C++20: token = "\";
                 } else if (!strcmp(temporary, "sc")) {
@@ -1420,7 +1420,7 @@ void Cmd_TokenizeString(const char *text, qboolean macroExpand)
 
 // macro expand the text
     if (macroExpand) {
-        text = Cmd_MacroExpandString(text, qfalse);
+        text = Cmd_MacroExpandString(text, false);
         if (!text) {
             return;
         }
@@ -1526,7 +1526,7 @@ static void Cmd_RegCommand(const cmdreg_t *reg)
     unsigned hash;
 
 // fail if the command is a variable name
-    if (Cvar_Exists(reg->name, qfalse)) {
+    if (Cvar_Exists(reg->name, false)) {
         Com_WPrintf("%s: %s already defined as a cvar\n", __func__, reg->name);
         return;
     }
@@ -1614,7 +1614,7 @@ qboolean Cmd_Exists(const char *name)
 {
     cmd_function_t *cmd = Cmd_Find(name);
 
-    return cmd ? qtrue : qfalse;
+    return cmd ? true : false;
 }
 
 xcommand_t Cmd_FindFunction(const char *name)
@@ -1667,7 +1667,7 @@ void Cmd_ExecuteCommand(cmdbuf_t *buf)
             Com_WPrintf("Runaway alias loop\n");
             return;
         }
-        text = Cmd_MacroExpandString(a->value, qtrue);
+        text = Cmd_MacroExpandString(a->value, true);
         if (text) {
             buf->aliasCount++;
             Cbuf_InsertText(buf, text);
@@ -1697,7 +1697,7 @@ A complete command line has been parsed, so try to execute it
 */
 void Cmd_ExecuteString(cmdbuf_t *buf, const char *text)
 {
-    Cmd_TokenizeString(text, qtrue);
+    Cmd_TokenizeString(text, true);
 
     // execute the command line
     if (!cmd_argc) {
@@ -1883,7 +1883,7 @@ static void Cmd_EchoEx_f(void)
 {
     char buffer[MAX_STRING_CHARS];// , * s;
     const char* s;
-    qboolean escapes = qfalse;
+    qboolean escapes = false;
     color_index_t color = COLOR_NONE;
     const char *newline = "\n";
     int c;
@@ -1896,7 +1896,7 @@ static void Cmd_EchoEx_f(void)
             Cmd_PrintHelp(o_echo);
             return;
         case 'e':
-            escapes = qtrue;
+            escapes = true;
             break;
         case 'c':
             color = Com_ParseColor(cmd_optarg, COLOR_NONE);
@@ -1995,7 +1995,7 @@ static void Cmd_Complete_f(void)
     name = cmd_argv[1];
 
 // fail if the command is a variable name
-    if (Cvar_Exists(name, qtrue)) {
+    if (Cvar_Exists(name, true)) {
         Com_Printf("%s is already defined as a cvar\n", name);
         return;
     }

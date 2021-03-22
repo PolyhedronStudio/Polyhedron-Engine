@@ -1142,7 +1142,7 @@ void CLG_ParseTempEntity(void)
 
 	case TE_GRENADE_EXPLOSION:
 	case TE_GRENADE_EXPLOSION_WATER:
-		ex = CLG_PlainExplosion(qfalse);
+		ex = CLG_PlainExplosion(false);
 		if (!cl_explosion_sprites->integer)
 		{
 			ex->frames = 19;
@@ -1161,7 +1161,7 @@ void CLG_ParseTempEntity(void)
 		break;
 
 	case TE_EXPLOSION2:
-		ex = CLG_PlainExplosion(qfalse);
+		ex = CLG_PlainExplosion(false);
 		if (!cl_explosion_sprites->integer)
 		{
 			ex->frames = 19;
@@ -1172,14 +1172,14 @@ void CLG_ParseTempEntity(void)
 		break;
 
 	case TE_PLASMA_EXPLOSION:
-		CLG_PlainExplosion(qfalse);
+		CLG_PlainExplosion(false);
 		CLG_ExplosionParticles(teParameters.pos1);
 		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_ROCKET_EXPLOSION:
 	case TE_ROCKET_EXPLOSION_WATER:
-		ex = CLG_PlainExplosion(qfalse);
+		ex = CLG_PlainExplosion(false);
 		if (cl_disable_explosions->integer & NOEXP_ROCKET)
 			ex->type = explosion_t::ex_light;
 
@@ -1193,18 +1193,18 @@ void CLG_ParseTempEntity(void)
 		break;
 
 	case TE_EXPLOSION1:
-		CLG_PlainExplosion(qfalse);
+		CLG_PlainExplosion(false);
 		CLG_ExplosionParticles(teParameters.pos1);
 		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_EXPLOSION1_NP:
-		CLG_PlainExplosion(qfalse);
+		CLG_PlainExplosion(false);
 		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_EXPLOSION1_BIG:
-		ex = CLG_PlainExplosion(qtrue);
+		ex = CLG_PlainExplosion(true);
 		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
 		break;
 
@@ -1290,7 +1290,7 @@ void CLG_ParseTempEntity(void)
 		break;
 
 	case TE_PLAIN_EXPLOSION:
-		CLG_PlainExplosion(qfalse);
+		CLG_PlainExplosion(false);
 		break;
 
 	case TE_FLASHLIGHT:
@@ -1452,55 +1452,55 @@ void CLG_RegisterTempEntityModels(void)
 	//
 	model_t* model = clgi.MOD_ForHandle(cl_mod_explode);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_smoke);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_flash);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_parasite_segment);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_grapple_cable);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_explo4);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_bfg_explo);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_powerscreen);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_laser);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_dmspot);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_lightning);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_heatbeam);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_explo4_big);
 	if (model)
-		model->sprite_vertical = qtrue;
+		model->sprite_vertical = true;
 }
 
 //

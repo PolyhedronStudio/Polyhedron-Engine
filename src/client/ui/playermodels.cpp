@@ -37,10 +37,10 @@ static qboolean IconOfSkinExists(char *skin, char **pcxfiles, int npcxfiles)
 
     for (i = 0; i < npcxfiles; i++) {
         if (strcmp(pcxfiles[i], scratch) == 0)
-            return qtrue;
+            return true;
     }
 
-    return qfalse;
+    return false;
 }
 
 static int pmicmpfnc(const void *_a, const void *_b)

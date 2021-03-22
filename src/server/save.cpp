@@ -359,7 +359,7 @@ static int read_server_file(void)
     SV_Shutdown("Server restarted\n", ERR_RECONNECT);
 
     // the rest can't underflow
-    msg_read.allowunderflow = qfalse;
+    msg_read.allowunderflow = false;
 
     // read all CVAR_LATCH cvars
     // these will be things like coop, skill, deathmatch, etc
@@ -422,7 +422,7 @@ static int read_level_file(void)
     // any error will drop from this point
 
     // the rest can't underflow
-    msg_read.allowunderflow = qfalse;
+    msg_read.allowunderflow = false;
 
     // read all configstrings
     while (1) {
@@ -498,7 +498,7 @@ void SV_AutoSaveBegin(mapcmd_t *cmd)
         ent = EDICT_NUM(i + 1);
         if (ent->inuse) {
             Q_SetBit(bitmap, i);
-            ent->inuse = qfalse;
+            ent->inuse = false;
         }
     }
 
@@ -529,7 +529,7 @@ void SV_AutoSaveEnd(void)
 	}
 
     // save server state
-    if (write_server_file(qtrue)) {
+    if (write_server_file(true)) {
         Com_EPrintf("Couldn't write server file.\n");
         return;
     }
@@ -677,7 +677,7 @@ static void SV_Savegame_f(void)
     }
 
     // save server state
-    if (write_server_file(qfalse)) {
+    if (write_server_file(false)) {
         Com_Printf("Couldn't write server file.\n");
         return;
     }

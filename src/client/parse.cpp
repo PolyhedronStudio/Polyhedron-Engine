@@ -274,18 +274,18 @@ static void CL_ParseFrame(int extrabits)
             Com_DPrintf("%s: delta entities too old\n", __func__);
             cl.frameflags |= FF_OLDENT;
         } else {
-            frame.valid = qtrue; // valid delta parse
+            frame.valid = true; // valid delta parse
         }
         if (!frame.valid && cl.frame.valid && cls.demo.playback) {
             Com_DPrintf("%s: recovering broken demo\n", __func__);
             oldframe = &cl.frame;
             from = &oldframe->ps;
-            frame.valid = qtrue;
+            frame.valid = true;
         }
     } else {
         oldframe = NULL;
         from = NULL;
-        frame.valid = qtrue; // uncompressed frame
+        frame.valid = true; // uncompressed frame
         cl.frameflags |= FF_NODELTA;
     }
 
@@ -371,9 +371,9 @@ static void CL_ParseFrame(int extrabits)
 #endif
 
     if (!frame.valid) {
-        cl.frame.valid = qfalse;
+        cl.frame.valid = false;
 #if USE_FPS
-        cl.keyframe.valid = qfalse;
+        cl.keyframe.valid = false;
 #endif
         return; // do not change anything
     }
@@ -576,7 +576,7 @@ static void CL_ParseServerData(void)
         i = MSG_ReadByte();
         if (i) {
             Com_DPrintf("R1Q2 strafejump hack enabled\n");
-            cge->pmoveParams->strafehack = qtrue;
+            cge->pmoveParams->strafehack = true;
         }
         cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
         if (cls.protocolVersion >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
@@ -600,7 +600,7 @@ static void CL_ParseServerData(void)
         i = MSG_ReadByte();
         if (i) {
             Com_DPrintf("Q2PRO strafejump hack enabled\n");
-            cge->pmoveParams->strafehack = qtrue;
+            cge->pmoveParams->strafehack = true;
         }
         i = MSG_ReadByte(); //atu QWMod
         if (i) {
@@ -623,11 +623,11 @@ static void CL_ParseServerData(void)
             i = MSG_ReadByte();
             if (i) {
                 Com_DPrintf("Q2PRO waterjump hack enabled\n");
-                cge->pmoveParams->waterhack = qtrue;
+                cge->pmoveParams->waterhack = true;
             }
         }
         cge->pmoveParams->speedmult = 2;
-        cge->pmoveParams->flyhack = qtrue; // fly hack is unconditionally enabled
+        cge->pmoveParams->flyhack = true; // fly hack is unconditionally enabled
         cge->pmoveParams->flyfriction = 4;
     }
 
@@ -816,7 +816,7 @@ static void CL_ParseDownload(int cmd)
     size = MSG_ReadShort();
     percent = MSG_ReadByte();
     if (size == -1) {
-        CL_HandleDownload(NULL, size, percent, qfalse);
+        CL_HandleDownload(NULL, size, percent, false);
         return;
     }
 

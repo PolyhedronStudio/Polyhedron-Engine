@@ -670,14 +670,14 @@ void QGL_ShutdownExtensions(unsigned mask)
 qboolean QGL_Init(void)
 {
 #ifdef _DEBUG
-#define QGL(x)  if ((qgl##x = dll##x = GCA(x)) == NULL) return qfalse;
+#define QGL(x)  if ((qgl##x = dll##x = GCA(x)) == NULL) return false;
 #else
-#define QGL(x)  if ((qgl##x = GCA(x)) == NULL)          return qfalse;
+#define QGL(x)  if ((qgl##x = GCA(x)) == NULL)          return false;
 #endif
     QGL_core_IMP
 #undef QGL
 
-    return qtrue;
+    return true;
 }
 
 void QGL_InitExtensions(unsigned mask)

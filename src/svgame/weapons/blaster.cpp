@@ -64,7 +64,7 @@ void Weapon_Blaster_Fire(edict_t* ent)
         damage = 15;
     else
         damage = 10;
-    Blaster_Fire(ent, vec3_origin, damage, qfalse, EF_BLASTER);
+    Blaster_Fire(ent, vec3_origin, damage, false, EF_BLASTER);
     ent->client->ps.gunframe++;
 }
 

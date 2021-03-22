@@ -1200,7 +1200,7 @@ static void PM_CheckSpecialMovements(void)
     if (pm->state.time)
         return;
 
-    pml.ladder = qfalse;
+    pml.ladder = false;
 
     // check for ladder
     flatforward[0] = pml.forward[0];
@@ -1211,7 +1211,7 @@ static void PM_CheckSpecialMovements(void)
     Vec3_MA(pml.origin, 1, flatforward, spot);
     trace = pm->Trace(pml.origin, pm->mins, pm->maxs, spot);
     if ((trace.fraction < 1) && (trace.contents & CONTENTS_LADDER))
-        pml.ladder = qtrue;
+        pml.ladder = true;
 
     // check for water jump
     if (pm->waterLevel != 2)
@@ -1416,7 +1416,7 @@ static qboolean PM_TestPosition(void)
     // This check is not needed anymore. Whether to test for a position or not
     // can now be decided by calling PM_FinalizePosition with true as its arg. 
     //if (pm->state.type == PM_SPECTATOR)
-    //    return qtrue;
+    //    return true;
 
     // Copy over the s.origin to end and origin for trace testing.
     Vec3_Copy(pm->state.origin, origin);
@@ -1799,11 +1799,11 @@ void PMoveInit(pmoveParams_t* pmp)
 //
 void PMoveEnableQW(pmoveParams_t* pmp)
 {
-    pmp->qwmode = qtrue;
+    pmp->qwmode = true;
     pmp->watermult = 0.7f;
     pmp->maxspeed = 320;
     //pmp->upspeed = (sv_qwmod->integer > 1) ? 310 : 350;
     pmp->friction = 4;
     pmp->waterfriction = 4;
-    pmp->airaccelerate = qtrue;
+    pmp->airaccelerate = true;
 }

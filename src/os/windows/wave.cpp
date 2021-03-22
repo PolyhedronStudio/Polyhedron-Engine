@@ -86,7 +86,7 @@ static void WAVE_Shutdown(void)
     hWaveHdr = 0;
     lpData = NULL;
     lpWaveHdr = NULL;
-    wav_init = qfalse;
+    wav_init = false;
 }
 
 
@@ -222,7 +222,7 @@ static sndinitstat_t WAVE_Init(void)
     sample16 = (dma.samplebits / 8) - 1;
 
     Com_Printf("Wave sound initialized\n");
-    wav_init = qtrue;
+    wav_init = true;
 
     return SIS_SUCCESS;
 }

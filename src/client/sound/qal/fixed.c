@@ -66,9 +66,9 @@ qboolean QAL_Init(void)
 
     al_device->flags |= CVAR_SOUND;
 
-    return qtrue;
+    return true;
 
 fail:
     QAL_Shutdown();
-    return qfalse;
+    return false;
 }
