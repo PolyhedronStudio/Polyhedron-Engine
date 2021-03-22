@@ -433,7 +433,7 @@ void CL_CheckForResend(void)
     case PROTOCOL_VERSION_Q2PRO:
         Q_snprintf(tail, sizeof(tail), " %d %d %d %d",
                    maxmsglen, net_chantype->integer, USE_ZLIB,
-                   PROTOCOL_VERSION_Q2PRO_CURRENT);
+                   PROTOCOL_VERSION_NAC_CURRENT);
         cls.quakePort = net_qport->integer & 0xff;
         break;
     default:

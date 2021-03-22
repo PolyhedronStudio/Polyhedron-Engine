@@ -588,7 +588,7 @@ static void CL_ParseServerData(void)
         if (!Q2PRO_SUPPORTED(i)) {
             Com_Error(ERR_DROP,
                       "Q2PRO server reports unsupported protocol version %d.\n"
-                      "Current client version is %d.", i, PROTOCOL_VERSION_Q2PRO_CURRENT);
+                      "Current client version is %d.", i, PROTOCOL_VERSION_NAC_CURRENT);
         }
         Com_DPrintf("Using minor Q2PRO protocol version %d\n", i);
         cls.protocolVersion = i;
