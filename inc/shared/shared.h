@@ -77,6 +77,30 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 //=============================================================================
 //
+// Max String limits.
+//
+#define MAX_STRING_CHARS    4096    // max length of a string passed to Cmd_TokenizeString
+#define MAX_STRING_TOKENS   256     // max tokens resulting from Cmd_TokenizeString
+#define MAX_TOKEN_CHARS     1024    // max length of an individual token
+#define MAX_NET_STRING      2048    // max length of a string used in network protocol
+
+#define MAX_QPATH           256      // max length of a quake game pathname
+#define MAX_OSPATH          256     // max length of a filesystem pathname
+
+//
+// Per-level limits
+//
+#define MAX_CLIENTS         256     // absolute limit
+#define MAX_EDICTS          2048    // N&C: POOL: Was 1024 // must change protocol to increase more
+#define MAX_LIGHTSTYLES     256
+#define MAX_MODELS          256     // these are sent over the net as bytes
+#define MAX_SOUNDS          256     // so they cannot be blindly increased
+#define MAX_IMAGES          256
+#define MAX_ITEMS           256
+#define MAX_GENERAL         (MAX_CLIENTS * 2) // general config strings
+
+#define MAX_CLIENT_NAME     16
+
 //
 // Utility Macros.
 //
@@ -87,12 +111,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 // Core
 //
-
 // "byte" - unsigned char
 typedef unsigned char byte;
 // "qboolean" - Bool.
-typedef int32_t qboolean;       //typedef enum { false, true } qboolean;
-                            //
+typedef int32_t qboolean;
+
+//
 // Engine
 // 
 // "qhandle_t" - int32_t - Used for storing handles to engine internal objects.
@@ -123,48 +147,33 @@ typedef float vec_t;
 // Colors
 #include "shared/math/color.h"
 
-//#ifndef M_PI
-//#define M_PI        3.14159265358979323846  // matches value in gcc v2 math.h
-//#endif
+// Rectangles.
+#include "shared/math/rectangle.h"
 
+// Plane pre-definition.
 struct cplane_s;
 
+// Extern vec3_origin var.
 extern vec3_t vec3_origin;
 
-typedef struct vrect_s {
-    int             x, y, width, height;
-} vrect_t;
-
+// Not a number macro.
 #define nanmask (255<<23)
-
 #define IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
-// angle indexes
+// Angle indexes
 #define PITCH               0       // up / down
 #define YAW                 1       // left / right
 #define ROLL                2       // fall over
 
-#define MAX_STRING_CHARS    4096    // max length of a string passed to Cmd_TokenizeString
-#define MAX_STRING_TOKENS   256     // max tokens resulting from Cmd_TokenizeString
-#define MAX_TOKEN_CHARS     1024    // max length of an individual token
-#define MAX_NET_STRING      2048    // max length of a string used in network protocol
-
-#define MAX_QPATH           256      // max length of a quake game pathname
-#define MAX_OSPATH          256     // max length of a filesystem pathname
-
 //
-// per-level limits
+//=============================================================================
 //
-#define MAX_CLIENTS         256     // absolute limit
-#define MAX_EDICTS          2048    // N&C: POOL: Was 1024 // must change protocol to increase more
-#define MAX_LIGHTSTYLES     256
-#define MAX_MODELS          256     // these are sent over the net as bytes
-#define MAX_SOUNDS          256     // so they cannot be blindly increased
-#define MAX_IMAGES          256
-#define MAX_ITEMS           256
-#define MAX_GENERAL         (MAX_CLIENTS * 2) // general config strings
+//	Endian Swap Library.
+//
+//=============================================================================
+//
+#include "shared/endian.h"
 
-#define MAX_CLIENT_NAME     16
 
 typedef enum {
     ERR_FATAL,          // exit the entire game with a popup window
@@ -467,63 +476,6 @@ char    *va(const char *format, ...) q_printf(1, 2);
 
 //=============================================
 
-static inline uint16_t ShortSwap(uint16_t s)
-{
-    s = (s >> 8) | (s << 8);
-    return s;
-}
-
-static inline uint32_t LongSwap(uint32_t l)
-{
-    l = ((l >> 8) & 0x00ff00ff) | ((l << 8) & 0xff00ff00);
-    l = (l >> 16) | (l << 16);
-    return l;
-}
-
-static inline float FloatSwap(float f)
-{
-    union {
-        float f;
-        uint32_t l;
-    } dat1, dat2;
-
-    dat1.f = f;
-    dat2.l = LongSwap(dat1.l);
-    return dat2.f;
-}
-
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-#define BigShort    ShortSwap
-#define BigLong     LongSwap
-#define BigFloat    FloatSwap
-#define LittleShort(x)    ((uint16_t)(x))
-#define LittleLong(x)     ((uint32_t)(x))
-#define LittleFloat(x)    ((float)(x))
-#define MakeRawLong(b1,b2,b3,b4) (((b4)<<24)|((b3)<<16)|((b2)<<8)|(b1))
-#define MakeRawShort(b1,b2) (((b2)<<8)|(b1))
-#elif __BYTE_ORDER == __BIG_ENDIAN
-#define BigShort(x)     ((uint16_t)(x))
-#define BigLong(x)      ((uint32_t)(x))
-#define BigFloat(x)     ((float)(x))
-#define LittleShort ShortSwap
-#define LittleLong  LongSwap
-#define LittleFloat FloatSwap
-#define MakeRawLong(b1,b2,b3,b4) (((b1)<<24)|((b2)<<16)|((b3)<<8)|(b4))
-#define MakeRawShort(b1,b2) (((b1)<<8)|(b2))
-#else
-#error Unknown byte order
-#endif
-
-#define LittleLongMem(p) (((p)[3]<<24)|((p)[2]<<16)|((p)[1]<<8)|(p)[0])
-#define LittleShortMem(p) (((p)[1]<<8)|(p)[0])
-
-#define RawLongMem(p) MakeRawLong((p)[0],(p)[1],(p)[2],(p)[3])
-#define RawShortMem(p) MakeRawShort((p)[0],(p)[1])
-
-#define LittleVector(a,b) \
-    ((b)[0]=LittleFloat((a)[0]),\
-     (b)[1]=LittleFloat((a)[1]),\
-     (b)[2]=LittleFloat((a)[2]))
 
 #if USE_BGRA
 #define MakeColor(r, g, b, a)   (const uint32_t)MakeRawLong(b, g, r, a)

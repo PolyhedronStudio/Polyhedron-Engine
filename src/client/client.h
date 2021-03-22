@@ -682,7 +682,7 @@ void    CL_RunRefresh(void);
 //
 // screen.c
 //
-extern vrect_t      scr_vrect;        // position of render window
+extern rect_t      scr_vrect;        // position of render window
 
 void    SCR_Init(void);
 void    SCR_Shutdown(void);

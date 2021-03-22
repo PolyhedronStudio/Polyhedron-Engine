@@ -76,7 +76,7 @@ static cvar_t   *scr_graphscale;
 static cvar_t   *scr_graphshift;
 #endif
 
-vrect_t     scr_vrect;      // position of render window on screen
+rect_t     scr_vrect;      // position of render window on screen
 
 static const char *const sb_nums[2][STAT_PICS] = {
     {

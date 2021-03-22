@@ -73,7 +73,7 @@ static cvar_t* ch_alpha;        // Crosshair A color value.
 //-----
 // View Rectangle.
 //-----
-vrect_t     scr_vrect;      // position of render window on screen
+rect_t     scr_vrect;      // position of render window on screen
 
 // HUD image filenames, matching their corresponding number based on array access. (Exception for the -..)
 static const char* const sb_nums[2][STAT_PICS] = {

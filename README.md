@@ -8,11 +8,12 @@ So far, during the process, we've been adding features with great success. Howev
 When finished we have a stable base to work from, one that we can start making the actual game with. Over time we will continouously add features, using a similar iterative method. If wished for, these can then be used in our game N&C, or by other mods/games based on our project.
 - [ ] Building
   - [ ] Get it to build using CLang in vS2019, this should get us closer to being Linux compatible continuously 
+  - [ ] Fix all compiler warnings introduces since C++ 20: Including the C5056 one.
 - [ ] CMake
   - Include our own libfreetype, libpng, and and liblua to accomodate libRmlUi.
   - The alternative is, use stb_freetype since the libpng and libfreetype are a pain to begin with. Of course, this requires modifying their code.
   - Include OpenAL-soft and have it build itself properly. In case this fails, at least include a binary for Windows guys. 
-- [ ] Remove MDV, and GTV. I 
+- [ ] Remove MDV, and GTV. 
 - [ ] Headers need to be unique to their "owners". Or how do you say this... In either case, it'll result in way faster build times. 
   - [ ] inc/shared/
     - [ ] Move each part into its own sub header, include these in shared.h

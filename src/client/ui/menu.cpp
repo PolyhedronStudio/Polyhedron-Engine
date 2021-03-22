@@ -968,7 +968,7 @@ MenuList_Click
 static menuSound_t MenuList_Click(menuList_t *l)
 {
     int i, j;
-    vrect_t rect;
+    rect_t rect;
 
     if (!l->items) {
         return QMS_SILENT;
@@ -1542,7 +1542,7 @@ static void Slider_Init(menuSlider_t *s)
 
 static menuSound_t Slider_Click(menuSlider_t *s)
 {
-    vrect_t rect;
+    rect_t rect;
     float   pos;
     int     x;
 
@@ -1800,7 +1800,7 @@ static void UI_ClearBounds(int mins[2], int maxs[2])
     maxs[0] = maxs[1] = -9999;
 }
 
-static void UI_AddRectToBounds(const vrect_t *rc, int mins[2], int maxs[2])
+static void UI_AddRectToBounds(const rect_t *rc, int mins[2], int maxs[2])
 {
     if (mins[0] > rc->x) {
         mins[0] = rc->x;
@@ -1820,7 +1820,7 @@ void Menu_Init(menuFrameWork_t *menu)
     void *item;
     int i;
     int focus = 0;
-    vrect_t *rc;
+    rect_t *rc;
 
     menu->y1 = 0;
     menu->y2 = uis.height;

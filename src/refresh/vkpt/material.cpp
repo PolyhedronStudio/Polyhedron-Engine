@@ -332,7 +332,7 @@ static qerror_t parseMaterialsTable(char const * filename, pbr_materials_table_t
 
 	qerror_t status = validateMaterialsTable(table);
 
-	Com_Printf("Loaded '%s' (fast search = %s)\n", filename, table->alpha_sorted == true ? "true" : "false");
+	Com_Printf("Loaded '%s' (fast search = %s)\n", filename, table->alpha_sorted == (qboolean)true ? "true" : "false"); // E0.2: Added cast.
 
 	FS_FreeFile(buffer);
 
@@ -643,8 +643,8 @@ qerror_t MAT_SetPBRMaterialAttribute(pbr_material_t * mat, char const * token, c
 				return Q_ERR_FAILURE;
 			}
 		} break;
-		case 5: mat->flags = bvalue == true ? mat->flags | MATERIAL_FLAG_LIGHT : mat->flags & ~(MATERIAL_FLAG_LIGHT); break;
-		case 6: mat->flags = bvalue == true ? mat->flags | MATERIAL_FLAG_CORRECT_ALBEDO : mat->flags & ~(MATERIAL_FLAG_CORRECT_ALBEDO); break;
+		case 5: mat->flags = bvalue == (qboolean)true ? mat->flags | MATERIAL_FLAG_LIGHT : mat->flags & ~(MATERIAL_FLAG_LIGHT); break; // E0.2: Added cast.
+		case 6: mat->flags = bvalue == (qboolean)true ? mat->flags | MATERIAL_FLAG_CORRECT_ALBEDO : mat->flags & ~(MATERIAL_FLAG_CORRECT_ALBEDO); break; // E0.2: Added cast.
 	}
 
 	return Q_ERR_SUCCESS;

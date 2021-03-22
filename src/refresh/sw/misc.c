@@ -153,7 +153,7 @@ Called every time the vid structure or r_refdef changes.
 Guaranteed to be called before the first refresh
 ===============
 */
-static void R_ViewChanged(vrect_t *vr)
+static void R_ViewChanged(rect_t *vr)
 {
     float   fov_h, fov_v;
     int     i;
@@ -243,7 +243,7 @@ R_SetupFrame
 void R_SetupFrame(void)
 {
     int         i;
-    vrect_t     vrect;
+    rect_t     vrect;
 
     if (r_fullbright->modified) {
         r_fullbright->modified = false;

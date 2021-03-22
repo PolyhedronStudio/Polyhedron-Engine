@@ -297,7 +297,7 @@ char *UI_GetColumn(char *s, int n)
 UI_CursorInRect
 =================
 */
-qboolean UI_CursorInRect(vrect_t *rect)
+qboolean UI_CursorInRect(rect_t *rect)
 {
     if (uis.mouseCoords[0] < rect->x) {
         return false;
@@ -330,7 +330,7 @@ void UI_DrawChar(int x, int y, int flags, int ch)
     R_DrawChar(x, y, flags, ch, uis.fontHandle);
 }
 
-void UI_StringDimensions(vrect_t *rc, int flags, const char *string)
+void UI_StringDimensions(rect_t *rc, int flags, const char *string)
 {
     rc->height = CHAR_HEIGHT;
     rc->width = CHAR_WIDTH * strlen(string);
@@ -342,7 +342,7 @@ void UI_StringDimensions(vrect_t *rc, int flags, const char *string)
     }
 }
 
-void UI_DrawRect8(const vrect_t *rc, int border, int c)
+void UI_DrawRect8(const rect_t *rc, int border, int c)
 {
     R_DrawFill8(rc->x, rc->y, border, rc->height, c);   // left
     R_DrawFill8(rc->x + rc->width - border, rc->y, border, rc->height, c);   // right
@@ -351,7 +351,7 @@ void UI_DrawRect8(const vrect_t *rc, int border, int c)
 }
 
 #if 0
-void UI_DrawRect32(const vrect_t *rc, int border, uint32_t color)
+void UI_DrawRect32(const rect_t *rc, int border, uint32_t color)
 {
     R_DrawFill32(rc->x, rc->y, border, rc->height, color);   // left
     R_DrawFill32(rc->x + rc->width - border, rc->y, border, rc->height, color);   // right

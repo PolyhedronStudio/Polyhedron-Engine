@@ -58,7 +58,7 @@ HELPER FUNCTIONS
 // 640x480@75
 // 640x480@75:32
 // 640x480:32@75
-qboolean VID_GetFullscreen(vrect_t *rc, int *freq_p, int *depth_p)
+qboolean VID_GetFullscreen(rect_t *rc, int *freq_p, int *depth_p)
 {
     unsigned long w, h, freq, depth;
     char *s;
@@ -146,7 +146,7 @@ qboolean VID_GetFullscreen(vrect_t *rc, int *freq_p, int *depth_p)
 // 640x480+0
 // 640x480+0+0
 // 640x480-100-100
-qboolean VID_GetGeometry(vrect_t *rc)
+qboolean VID_GetGeometry(rect_t *rc)
 {
     unsigned long w, h;
     long x, y;
@@ -194,7 +194,7 @@ qboolean VID_GetGeometry(vrect_t *rc)
     return true;
 }
 
-void VID_SetGeometry(vrect_t *rc)
+void VID_SetGeometry(rect_t *rc)
 {
     char buffer[MAX_QPATH];
 

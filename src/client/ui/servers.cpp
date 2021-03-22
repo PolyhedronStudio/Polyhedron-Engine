@@ -804,9 +804,9 @@ static int playercmp(serverslot_t *s1, serverslot_t *s2)
 
 static int addresscmp(serverslot_t *s1, serverslot_t *s2)
 {
-    if (s1->address.ip.u32 > s2->address.ip.u32)
+    if (s1->address.ip.u32 > s2->address.ip.u32) // warning C5056: operator '>': deprecated for array types
         return 1;
-    if (s1->address.ip.u32 < s2->address.ip.u32)
+    if (s1->address.ip.u32 < s2->address.ip.u32) // warning C5056: operator '>': deprecated for array types
         return -1;
     if (s1->address.port > s2->address.port)
         return 1;

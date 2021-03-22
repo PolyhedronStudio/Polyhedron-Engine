@@ -115,16 +115,16 @@ typedef struct menuFrameWork_s {
     int maxs[2];
 
     qhandle_t banner;
-    vrect_t banner_rc;
+    rect_t banner_rc;
 
     qhandle_t plaque;
-    vrect_t plaque_rc;
+    rect_t plaque_rc;
 
     qhandle_t logo;
-    vrect_t logo_rc;
+    rect_t logo_rc;
 
 	qhandle_t footer;
-	vrect_t footer_rc;
+	rect_t footer_rc;
 
 	menuCondition_t current_condition;
 
@@ -143,7 +143,7 @@ typedef struct menuCommon_s {
     const char *name; // C++20: STRING: Added const to char*
     menuFrameWork_t *parent;
     color_t color;
-    vrect_t rect;
+    rect_t rect;
     const char *status; // C++20: STRING: Added const to char*
 
     int x, y;
@@ -330,14 +330,14 @@ void        UI_ForceMenuOff(void);
 void        UI_PopMenu(void);
 void        UI_StartSound(menuSound_t sound);
 qboolean    UI_DoHitTest(void);
-qboolean    UI_CursorInRect(vrect_t *rect);
+qboolean    UI_CursorInRect(rect_t *rect);
 void        *UI_FormatColumns(int extrasize, ...) q_sentinel;
 char        *UI_GetColumn(char *s, int n);
 void        UI_DrawString(int x, int y, int flags, const char *string);
 void        UI_DrawChar(int x, int y, int flags, int ch);
-void        UI_DrawRect8(const vrect_t *rect, int border, int c);
-//void        UI_DrawRect32(const vrect_t *rect, int border, uint32_t color);
-void        UI_StringDimensions(vrect_t *rc, int flags, const char *string);
+void        UI_DrawRect8(const rect_t *rect, int border, int c);
+//void        UI_DrawRect32(const rect_t *rect, int border, uint32_t color);
+void        UI_StringDimensions(rect_t *rc, int flags, const char *string);
 
 void        UI_LoadScript(void);
 menuFrameWork_t *UI_FindMenu(const char *name);

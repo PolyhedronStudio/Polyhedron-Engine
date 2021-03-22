@@ -215,7 +215,7 @@ static void VID_SDL_ModeChanged(void)
 static void VID_SDL_SetMode(void)
 {
     Uint32 flags;
-    vrect_t rc;
+    rect_t rc;
     int freq;
 
     if (vid_fullscreen->integer) {
@@ -446,7 +446,7 @@ qboolean VID_Init(graphics_api_t api)
 #endif
 
 	Uint32 flags = SDL_WINDOW_RESIZABLE;
-	vrect_t rc;
+	rect_t rc;
 
 	if (VID_SDL_InitSubSystem()) {
 		return false;
@@ -576,7 +576,7 @@ static void window_event(SDL_WindowEvent *event)
 {
     Uint32 flags = SDL_GetWindowFlags(sdl_window);
     active_t active;
-    vrect_t rc;
+    rect_t rc;
 
     switch (event->event) {
     case SDL_WINDOWEVENT_MINIMIZED:

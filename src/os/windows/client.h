@@ -93,7 +93,7 @@ typedef struct {
 
     // x and y specify position of non-client area on the screen
     // width and height specify size of client area
-    vrect_t rc;
+    rect_t rc;
 
     // rectangle of client area in screen coordinates
     RECT    screen_rc;

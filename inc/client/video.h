@@ -56,9 +56,9 @@ void    VID_SetClipboardData(const char *data);
 //
 // cl_ref.c
 //
-qboolean VID_GetFullscreen(vrect_t *rc, int *freq_p, int *depth_p);
-qboolean VID_GetGeometry(vrect_t *rc);
-void VID_SetGeometry(vrect_t *rc);
+qboolean VID_GetFullscreen(rect_t *rc, int *freq_p, int *depth_p);
+qboolean VID_GetGeometry(rect_t *rc);
+void VID_SetGeometry(rect_t *rc);
 void VID_ToggleFullscreen(void);
 
 #endif // VIDEO_H

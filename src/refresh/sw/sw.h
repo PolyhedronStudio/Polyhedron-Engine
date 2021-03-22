@@ -129,7 +129,7 @@ typedef struct {
 } viddef_t;
 
 typedef struct {
-    vrect_t         vrect;                          // subwindow in video for refresh
+    rect_t         vrect;                          // subwindow in video for refresh
     int             vrectright, vrectbottom;        // right & bottom screen coords
     float           vrectrightedge;                 // rightmost right edge we care about,
                                                     // for use in edge list
