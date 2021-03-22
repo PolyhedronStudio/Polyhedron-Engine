@@ -126,7 +126,7 @@ static void PM_Debug(const char* func, const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    std::string str = "[CLG_PM_Debug]: ";
+    std::string str = "[CLIENT -- PM_Debug]: ";
     str += func;
     str += "(";
     str += fmt;
@@ -147,7 +147,7 @@ static void PM_Debug(const char* func, const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    std::string str = "[SVG_PM_Debug]: ";
+    std::string str = "[SERVER -- PM_Debug]: ";
     str += func;
     str += "(";
     str += fmt;

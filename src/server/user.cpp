@@ -1157,16 +1157,16 @@ static void SV_OldClientExecuteMove(void)
     lastframe = MSG_ReadLong();
 
     // read all cmds
-    if (sv_client->protocol == PROTOCOL_VERSION_R1Q2 &&
-        sv_client->version >= PROTOCOL_VERSION_R1Q2_UCMD) {
-        MSG_ReadDeltaUsercmd_Hacked(NULL, &oldest);
-        MSG_ReadDeltaUsercmd_Hacked(&oldest, &oldcmd);
-        MSG_ReadDeltaUsercmd_Hacked(&oldcmd, &newcmd);
-    } else {
-        MSG_ReadDeltaUsercmd(NULL, &oldest);
-        MSG_ReadDeltaUsercmd(&oldest, &oldcmd);
-        MSG_ReadDeltaUsercmd(&oldcmd, &newcmd);
-    }
+    //if (sv_client->protocol == PROTOCOL_VERSION_R1Q2 &&       // MSG: !! Remove: PROTOCOL_VERSION_R1Q2_UCMD
+    //    sv_client->version >= PROTOCOL_VERSION_R1Q2_UCMD) {
+    //    MSG_ReadDeltaUsercmd_Hacked(NULL, &oldest);
+    //    MSG_ReadDeltaUsercmd_Hacked(&oldest, &oldcmd);
+    //    MSG_ReadDeltaUsercmd_Hacked(&oldcmd, &newcmd);
+    //} else {
+    MSG_ReadDeltaUsercmd(NULL, &oldest);
+    MSG_ReadDeltaUsercmd(&oldest, &oldcmd);
+    MSG_ReadDeltaUsercmd(&oldcmd, &newcmd);
+//    }
 
     if (sv_client->state != cs_spawned) {
         SV_SetLastFrame(-1);
