@@ -36,7 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PROTOCOL_VERSION_R1Q2_LONG_SOLID        1905    // b7759
 #define PROTOCOL_VERSION_R1Q2_CURRENT           1905    // b7759
 
-#define PROTOCOL_VERSION_Q2PRO_MINIMUM          1011    // r161
+#define PROTOCOL_VERSION_NAC_MINIMUM            1011    // r161
 #define PROTOCOL_VERSION_Q2PRO_UCMD             1012    // r179
 #define PROTOCOL_VERSION_Q2PRO_CLIENTNUM_FIX    1013    // r226
 #define PROTOCOL_VERSION_Q2PRO_LONG_SOLID       1014    // r243
@@ -58,7 +58,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
      (x) <= PROTOCOL_VERSION_R1Q2_CURRENT)
 
 #define Q2PRO_SUPPORTED(x) \
-    ((x) >= PROTOCOL_VERSION_Q2PRO_MINIMUM && \
+    ((x) >= PROTOCOL_VERSION_NAC_MINIMUM && \
      (x) <= PROTOCOL_VERSION_NAC_CURRENT)
 
 #define MVD_SUPPORTED(x) \

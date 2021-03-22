@@ -822,13 +822,13 @@ static qboolean parse_enhanced_params(conn_params_t *p)
         if (*s) {
             p->version = atoi(s);
             clamp(p->version,
-                  PROTOCOL_VERSION_Q2PRO_MINIMUM,
+                  PROTOCOL_VERSION_NAC_MINIMUM,
                   PROTOCOL_VERSION_NAC_CURRENT);
             if (p->version == PROTOCOL_VERSION_Q2PRO_RESERVED) {
                 p->version--; // never use this version
             }
         } else {
-            p->version = PROTOCOL_VERSION_Q2PRO_MINIMUM;
+            p->version = PROTOCOL_VERSION_NAC_MINIMUM;
         }
     }
 
