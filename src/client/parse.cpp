@@ -554,36 +554,37 @@ static void CL_ParseServerData(void)
     // setup default server state
     cl.serverstate = ss_game;
 
-    if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2) {
-        i = MSG_ReadByte();
-        if (i) {
-            Com_Error(ERR_DROP, "'Enhanced' R1Q2 servers are not supported");
-        }
-        i = MSG_ReadShort();
-        // for some reason, R1Q2 servers always report the highest protocol
-        // version they support, while still using the lower version
-        // client specified in the 'connect' packet. oh well...
-        if (!R1Q2_SUPPORTED(i)) {
-            Com_WPrintf(
-                "R1Q2 server reports unsupported protocol version %d.\n"
-                "Assuming it really uses our current client version %d.\n"
-                "Things will break if it does not!\n", i, PROTOCOL_VERSION_R1Q2_CURRENT);
-            clamp(i, PROTOCOL_VERSION_R1Q2_MINIMUM, PROTOCOL_VERSION_R1Q2_CURRENT);
-        }
-        Com_DPrintf("Using minor R1Q2 protocol version %d\n", i);
-        cls.protocolVersion = i;
-        MSG_ReadByte(); // used to be advanced deltas
-        i = MSG_ReadByte();
-        if (i) {
-            Com_DPrintf("R1Q2 strafejump hack enabled\n");
-            cge->pmoveParams->strafehack = true;
-        }
-        cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
-        //if (cls.protocolVersion >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
-            cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_LONGSOLID); // CPP: IMPROVE: cl.esFlags |= MSG_ES_LONGSOLID;
-        //}
-        cge->pmoveParams->speedmult = 2;
-    } else if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
+    //if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2) {    // MSG: !! Removed PROTOCOL_VERSION_R1Q2
+    //    i = MSG_ReadByte();
+    //    if (i) {
+    //        Com_Error(ERR_DROP, "'Enhanced' R1Q2 servers are not supported");
+    //    }
+    //    i = MSG_ReadShort();
+    //    // for some reason, R1Q2 servers always report the highest protocol
+    //    // version they support, while still using the lower version
+    //    // client specified in the 'connect' packet. oh well...
+    //    if (!R1Q2_SUPPORTED(i)) {
+    //        Com_WPrintf(
+    //            "R1Q2 server reports unsupported protocol version %d.\n"
+    //            "Assuming it really uses our current client version %d.\n"
+    //            "Things will break if it does not!\n", i, PROTOCOL_VERSION_R1Q2_CURRENT);
+    //        clamp(i, PROTOCOL_VERSION_R1Q2_MINIMUM, PROTOCOL_VERSION_R1Q2_CURRENT);
+    //    }
+    //    Com_DPrintf("Using minor R1Q2 protocol version %d\n", i);
+    //    cls.protocolVersion = i;
+    //    MSG_ReadByte(); // used to be advanced deltas
+    //    i = MSG_ReadByte();
+    //    if (i) {
+    //        Com_DPrintf("R1Q2 strafejump hack enabled\n");
+    //        cge->pmoveParams->strafehack = true;
+    //    }
+    //    cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
+    //    //if (cls.protocolVersion >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
+    //        cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_LONGSOLID); // CPP: IMPROVE: cl.esFlags |= MSG_ES_LONGSOLID;
+    //    //}
+    //    cge->pmoveParams->speedmult = 2;
+    //} else 
+    if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
         i = MSG_ReadShort();
         if (!Q2PRO_SUPPORTED(i)) {
             Com_Error(ERR_DROP,
@@ -822,11 +823,12 @@ static void CL_ParseDownload(int cmd)
 
     // read optional uncompressed packet size
     if (cmd == svc_zdownload) {
-        if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2) {
-            compressed = MSG_ReadShort();
-        } else {
+        // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+        //if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2) {
+        //    compressed = MSG_ReadShort();
+        //} else {
             compressed = -1;
-        }
+        //}
     } else {
         compressed = 0;
     }
@@ -1072,16 +1074,18 @@ badbyte:
         //    break;
 
         case svc_zpacket:
-            if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
-                goto badbyte;
-            }
+            // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+            //if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
+            //    goto badbyte;
+            //}
             CL_ParseZPacket();
             continue;
 
         case svc_zdownload:
-            if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
-                goto badbyte;
-            }
+            // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+            //if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
+            //    goto badbyte;
+            //}
             CL_ParseDownload(cmd);
             continue;
 
@@ -1093,9 +1097,10 @@ badbyte:
             continue;
 
         case svc_setting:
-            if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
-                goto badbyte;
-            }
+            // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+            //if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
+            //    goto badbyte;
+            //}
             CL_ParseSetting();
             continue;
         }

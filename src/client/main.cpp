@@ -243,9 +243,10 @@ void CL_UpdateRecordingSetting(void)
     if (!cls.netchan) {
         return;
     }
-    if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
-        return;
-    }
+    // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+    //if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
+    //    return;
+    //}
 
     if (cls.demo.recording) {
         rec = 1;
@@ -424,23 +425,24 @@ void CL_CheckForResend(void)
     }
 
     // add protocol dependent stuff
-    switch (cls.serverProtocol) {
-    case PROTOCOL_VERSION_R1Q2:
-        Q_snprintf(tail, sizeof(tail), " %d %d",
-                   maxmsglen, PROTOCOL_VERSION_R1Q2_CURRENT);
-        cls.quakePort = net_qport->integer & 0xff;
-        break;
-    case PROTOCOL_VERSION_Q2PRO:
+    //switch (cls.serverProtocol) {
+    //// MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+    ////case PROTOCOL_VERSION_R1Q2:
+    ////    Q_snprintf(tail, sizeof(tail), " %d %d",
+    ////               maxmsglen, PROTOCOL_VERSION_R1Q2_CURRENT);
+    ////    cls.quakePort = net_qport->integer & 0xff;
+    ////    break;
+    //case PROTOCOL_VERSION_Q2PRO:
         Q_snprintf(tail, sizeof(tail), " %d %d %d %d",
                    maxmsglen, net_chantype->integer, USE_ZLIB,
                    PROTOCOL_VERSION_NAC_CURRENT);
         cls.quakePort = net_qport->integer & 0xff;
-        break;
-    default:
-        tail[0] = 0;
-        cls.quakePort = net_qport->integer;
-        break;
-    }
+//        break;
+//    default:
+//        tail[0] = 0;
+//        cls.quakePort = net_qport->integer;
+//        break;
+//    }
 
     Cvar_BitInfo(userinfo, CVAR_USERINFO);
     Netchan_OutOfBand(NS_CLIENT, &cls.serverAddress,
@@ -1322,9 +1324,11 @@ static void CL_ConnectionlessPacket(void)
                 s += 2;
                 while (*s) {
                     k = strtoul(s, (char**)&s, 10);
-                    if (k == PROTOCOL_VERSION_R1Q2) {
+                    // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+/*                  if (k == PROTOCOL_VERSION_R1Q2) {
                         mask |= 1;
-                    } else if (k == PROTOCOL_VERSION_Q2PRO) {
+                    } else */
+                    if (k == PROTOCOL_VERSION_Q2PRO) {
                         mask |= 2;
                     }
                     s = strchr(s, ',');
@@ -1336,21 +1340,24 @@ static void CL_ConnectionlessPacket(void)
             }
         }
 
+        // MSG: Removed: PROTOCOL_VERSION_R1Q2
         // choose supported protocol
-        switch (cls.serverProtocol) {
-        case PROTOCOL_VERSION_Q2PRO:
-            if (mask & 2) {
-                break;
-            }
-            cls.serverProtocol = PROTOCOL_VERSION_R1Q2;
-        case PROTOCOL_VERSION_R1Q2:
-            if (mask & 1) {
-                break;
-            }
-        default:
-            cls.serverProtocol = PROTOCOL_VERSION_DEFAULT;
-            break;
-        }
+        //switch (cls.serverProtocol) {
+        //case PROTOCOL_VERSION_Q2PRO:
+        //    break;
+        //    // MSG: Removed: PROTOCOL_VERSION_R1Q2
+        //    //if (mask & 2) {
+        //    //    break;
+        //    //}
+        //    //cls.serverProtocol = PROTOCOL_VERSION_R1Q2;
+        ////case PROTOCOL_VERSION_R1Q2:
+        ////    if (mask & 1) {
+        ////        break;
+        ////    }
+        ////default:
+        ////    cls.serverProtocol = PROTOCOL_VERSION_DEFAULT;
+        ////    break;
+        //}
         Com_DPrintf("Selected protocol %d\n", cls.serverProtocol);
 
         CL_CheckForResend();

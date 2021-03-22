@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define PROTOCOL_VERSION_R1Q2_MINIMUM           1903    // b6377
 //#define PROTOCOL_VERSION_R1Q2_UCMD              1904    // b7387 // MSG:!! Removed.
-#define PROTOCOL_VERSION_R1Q2_LONG_SOLID        1905    // b7759
+//#define PROTOCOL_VERSION_R1Q2_LONG_SOLID        1905    // b7759 // MSG:!! Removed.
 #define PROTOCOL_VERSION_R1Q2_CURRENT           1905    // b7759
 
 #define PROTOCOL_VERSION_NAC_MINIMUM            1011    // r161

@@ -450,12 +450,13 @@ void SV_New_f(void)
 
     // send protocol specific stuff
     switch (sv_client->protocol) {
-    case PROTOCOL_VERSION_R1Q2:
-        MSG_WriteByte(0);   // not enhanced
-        MSG_WriteShort(sv_client->version);
-        MSG_WriteByte(0);   // no advanced deltas
-        MSG_WriteByte(sv_client->pmp.strafehack);
-        break;
+    // MSG: !! Removed:     PROTOCOL_VERSION_R1Q2    
+    //case PROTOCOL_VERSION_R1Q2:
+    //    MSG_WriteByte(0);   // not enhanced
+    //    MSG_WriteShort(sv_client->version);
+    //    MSG_WriteByte(0);   // no advanced deltas
+    //    MSG_WriteByte(sv_client->pmp.strafehack);
+    //    break;
     case PROTOCOL_VERSION_Q2PRO:
         MSG_WriteShort(sv_client->version);
         MSG_WriteByte(sv.state);
@@ -1566,8 +1567,9 @@ badbyte:
             break;
 
         case clc_setting:
-            if (client->protocol < PROTOCOL_VERSION_R1Q2)
-                goto badbyte;
+            // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+            //if (client->protocol < PROTOCOL_VERSION_R1Q2)
+            //    goto badbyte;
 
             SV_ParseClientSetting();
             break;

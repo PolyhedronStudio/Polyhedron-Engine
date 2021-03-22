@@ -755,7 +755,8 @@ static qboolean parse_packet_length(conn_params_t *p)
 
     // set maximum packet length
     p->maxlength = MAX_PACKETLEN_WRITABLE_DEFAULT;
-    if (p->protocol >= PROTOCOL_VERSION_R1Q2) {
+    // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+    //if (p->protocol >= PROTOCOL_VERSION_R1Q2) {
         s = Cmd_Argv(5); // C++20: Added cast.
         if (*s) {
             p->maxlength = atoi(s);
@@ -766,7 +767,7 @@ static qboolean parse_packet_length(conn_params_t *p)
             if (!p->maxlength)
                 p->maxlength = MAX_PACKETLEN_WRITABLE;
         }
-    }
+    //}
 
     if (!NET_IsLocalAddress(&net_from) && net_maxmsglen->integer > 0) {
         // cap to server defined maximum value
@@ -785,20 +786,21 @@ static qboolean parse_enhanced_params(conn_params_t *p)
 {
     const char *s;
 
-    if (p->protocol == PROTOCOL_VERSION_R1Q2) {
-        // set minor protocol version
-        s = Cmd_Argv(6);
-        if (*s) {
-            p->version = atoi(s);
-            clamp(p->version,
-                  PROTOCOL_VERSION_R1Q2_MINIMUM,
-                  PROTOCOL_VERSION_R1Q2_CURRENT);
-        } else {
-            p->version = PROTOCOL_VERSION_R1Q2_MINIMUM;
-        }
-        p->nctype = NETCHAN_OLD;
-        p->has_zlib = true;
-    } else if (p->protocol == PROTOCOL_VERSION_Q2PRO) {
+    //if (p->protocol == PROTOCOL_VERSION_R1Q2) {   // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+    //    // set minor protocol version
+    //    s = Cmd_Argv(6);
+    //    if (*s) {
+    //        p->version = atoi(s);
+    //        clamp(p->version,
+    //              PROTOCOL_VERSION_R1Q2_MINIMUM,
+    //              PROTOCOL_VERSION_R1Q2_CURRENT);
+    //    } else {
+    //        p->version = PROTOCOL_VERSION_R1Q2_MINIMUM;
+    //    }
+    //    p->nctype = NETCHAN_OLD;
+    //    p->has_zlib = true;
+    //} else 
+    if (p->protocol == PROTOCOL_VERSION_Q2PRO) {
         // set netchan type
         s = Cmd_Argv(6);
         if (*s) {
@@ -1003,19 +1005,21 @@ static void init_pmove_and_es_flags(client_t *newcl)
 
     // common extensions
     force = 2;
-    if (newcl->protocol >= PROTOCOL_VERSION_R1Q2) {
+    // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+    //if (newcl->protocol >= PROTOCOL_VERSION_R1Q2) {
         newcl->pmp.speedmult = 2;
         force = 1;
-    }
+    //}
     newcl->pmp.strafehack = sv_strafejump_hack->integer >= force ? true : false;
 
     // r1q2 extensions
-    if (newcl->protocol == PROTOCOL_VERSION_R1Q2) {
-        newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
-        //if (newcl->version >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
-            newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_LONGSOLID); // CPP: Cast bitflag
-        //}
-    }
+    // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+    //if (newcl->protocol == PROTOCOL_VERSION_R1Q2) {
+    //    newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
+    //    //if (newcl->version >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
+    //        newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_LONGSOLID); // CPP: Cast bitflag
+    //    //}
+    //}
 
     // q2pro extensions
     force = 2;

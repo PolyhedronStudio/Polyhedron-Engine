@@ -60,9 +60,9 @@ void _wrp_UpdateSetting(clientSetting_t setting, int value) {
         return;
     }
     // Ensure it matches our protocol.
-    if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
-        return;
-    }
+    //if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) { // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+    //    return;
+    //}
     
     // Write out message with a flush. (Saving few bytes on the network.)
     MSG_WriteByte(clc_setting);

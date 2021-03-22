@@ -260,19 +260,21 @@ static qboolean start_udp_download(dlqueue_t *q)
         cls.download.position = ret;
         // give the server an offset to start the download
         Com_DPrintf("[UDP] Resuming %s\n", q->path);
-#if USE_ZLIB
-        if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2)
-            CL_ClientCommand(va("download \"%s\" %" PRIz " udp-zlib", q->path, ret)); // CPP: WARNING: Had to put spaces in between the macro and strings. Unlike C which accepts it without.
-        else
-#endif
+// MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+//#if USE_ZLIB
+//        if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2)
+//            CL_ClientCommand(va("download \"%s\" %" PRIz " udp-zlib", q->path, ret)); // CPP: WARNING: Had to put spaces in between the macro and strings. Unlike C which accepts it without.
+//        else
+//#endif
             CL_ClientCommand(va("download \"%s\" %" PRIz, q->path, ret)); // CPP: WARNING: Had to put spaces in between the macro and strings. Unlike C which accepts it without.
     } else if (ret == Q_ERR_NOENT) {  // it doesn't exist
         Com_DPrintf("[UDP] Downloading %s\n", q->path);
-#if USE_ZLIB
-        if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2)
-            CL_ClientCommand(va("download \"%s\" %" PRIz " udp-zlib", q->path, (size_t)0)); // CPP: WARNING: Had to put spaces in between the macro and strings. Unlike C which accepts it without.
-        else
-#endif
+// MSG: !! Removed: PROTOCOL_VERSION_R1Q2
+//#if USE_ZLIB
+//        if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2)
+//            CL_ClientCommand(va("download \"%s\" %" PRIz " udp-zlib", q->path, (size_t)0)); // CPP: WARNING: Had to put spaces in between the macro and strings. Unlike C which accepts it without.
+//        else
+//#endif
             CL_ClientCommand(va("download \"%s\"", q->path));
     } else { // error happened
         Com_EPrintf("[UDP] Couldn't open %s for appending: %s\n",
