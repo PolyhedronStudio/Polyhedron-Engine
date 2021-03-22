@@ -579,9 +579,9 @@ static void CL_ParseServerData(void)
             cge->pmoveParams->strafehack = true;
         }
         cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
-        if (cls.protocolVersion >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
+        //if (cls.protocolVersion >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
             cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_LONGSOLID); // CPP: IMPROVE: cl.esFlags |= MSG_ES_LONGSOLID;
-        }
+        //}
         cge->pmoveParams->speedmult = 2;
     } else if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
         i = MSG_ReadShort();

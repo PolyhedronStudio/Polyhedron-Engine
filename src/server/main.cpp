@@ -1012,9 +1012,9 @@ static void init_pmove_and_es_flags(client_t *newcl)
     // r1q2 extensions
     if (newcl->protocol == PROTOCOL_VERSION_R1Q2) {
         newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
-        if (newcl->version >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
+        //if (newcl->version >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
             newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_LONGSOLID); // CPP: Cast bitflag
-        }
+        //}
     }
 
     // q2pro extensions
