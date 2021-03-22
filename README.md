@@ -32,6 +32,7 @@ When finished we have a stable base to work from, one that we can start making t
     
 - [ ] Math Library
   - [ ] Move macro functions over to inlined C functions.
+  - [ ] Change PITCH, YAW, ROLL defines to a vec3_t::PITCH, etc._
   - [ ] Use references/pointers, and const correctness.
   - [ ] Rename VectorClear, and alike functions to Vec#Clear, and so on.
   - [ ] Change the typedefs, so we use an actual union/struct.

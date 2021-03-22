@@ -264,7 +264,7 @@ static void MVD_LayoutMenu(mvd_client_t *client)
     size_t total;
 
     memset(cur, 0x20, sizeof(cur));
-    cur[clamp_menu_cursor(client)] = 0x8d;
+    cur[clamp_menu_cursor(client)] = (char)0x8d;
 
     total = Q_scnprintf(layout, sizeof(layout), format,
                         cur[0], client->target ? "Leave" : "Enter", cur[1],

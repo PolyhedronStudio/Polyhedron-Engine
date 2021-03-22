@@ -19,25 +19,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef __SHARED_SHARED_H__
 #define __SHARED_SHARED_H__
 
-//
+//-----------------
 // shared.h -- included first by ALL program modules
-//
+//-----------------
 
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-// C STDIO:
-//#include <math.h>
-//#include <ctype.h>
-//#include <stdio.h>
-//#include <stdarg.h>
-//#include <string.h>
-//#include <stdlib.h>
-//#include <stdint.h>
-//#include <inttypes.h>
-//#include <limits.h>
-//#include <time.h>
+//
+//=============================================================================
+//
+//	Main Includes.
+//
+//=============================================================================
+//
+//-----------------
+// C++ C STDIO
+//-----------------
 #include <cmath>
 #include <cctype>
 #include <cstdio>
@@ -48,7 +47,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <climits>
 #include <ctime>
 
-// C++ STL:
+//-----------------
+// C++ STL
+//-----------------
 #include <numbers>
 #include <string>
 #include <numbers>
@@ -61,12 +62,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <unordered_map>
 #include <unordered_set>
 
-// Ensure 
+//-----------------
+// System Endian include, if needed. 
+//-----------------
 #if HAVE_ENDIAN_H
 #include <endian.h>
 #endif
 
+//-----------------
 // Platform specific includes.
+//-----------------
 #include "shared/platform.h"
 
 
@@ -76,9 +81,31 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //	Core Types and Definitions.
 //
 //=============================================================================
-//
+// 
+//-----------------
+// Core
+//-----------------
+// "byte" - unsigned char
+typedef unsigned char byte;
+
+// "qboolean" - Bool.
+typedef bool qboolean;
+
+//-----------------
+// Engine
+//-----------------
+// "qhandle_t" - int32_t - Used for storing handles to engine internal objects.
+typedef int32_t qhandle_t;
+
+// "qhandle_t" - int32_t - Used for error codes.
+typedef int32_t qerror_t;
+
+// "vec_t" - float - Used for vector components.
+typedef float vec_t;
+
+//-----------------
 // Max String limits.
-//
+//-----------------
 #define MAX_STRING_CHARS    4096    // max length of a string passed to Cmd_TokenizeString
 #define MAX_STRING_TOKENS   256     // max tokens resulting from Cmd_TokenizeString
 #define MAX_TOKEN_CHARS     1024    // max length of an individual token
@@ -87,9 +114,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_QPATH           256      // max length of a quake game pathname
 #define MAX_OSPATH          256     // max length of a filesystem pathname
 
-//
+//-----------------
 // Per-level limits
-//
+//-----------------
 #define MAX_CLIENTS         256     // absolute limit
 #define MAX_EDICTS          2048    // N&C: POOL: Was 1024 // must change protocol to increase more
 #define MAX_LIGHTSTYLES     256
@@ -101,69 +128,36 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MAX_CLIENT_NAME     16
 
-//
-// Utility Macros.
-//
+//-----------------
+// General Utility Macros.
+//-----------------
 // Calculate the size of a typical C array, note that this method can be risky 
 // to use. It's only here for backwards compatibility reasons. Do NOT use :)
 #define Q_COUNTOF(a)        (sizeof(a) / sizeof(a[0]))
 
-//
-// Core
-//
-// "byte" - unsigned char
-typedef unsigned char byte;
-// "qboolean" - Bool.
-typedef int32_t qboolean;
+// Converts a floating point value to short, this brings certain limits with itself,
+// such as losing precision, and a value limit of -4096/+4096
+#define ANGLE2SHORT(x)  ((int)((x)*65536/360) & 65535)
 
-//
-// Engine
-// 
-// "qhandle_t" - int32_t - Used for storing handles to engine internal objects.
-typedef int32_t qhandle_t;
-// "qhandle_t" - int32_t - Used for error codes.
-typedef int32_t qerror_t;
-// "vec_t" - float - Used for vector components.
-typedef float vec_t;
+// Reversed of the above, converts a short to float.
+#define SHORT2ANGLE(x)  ((x)*(360.0/65536))
 
-
-//
-//=============================================================================
-//
-//	Math Library.
-//
-//=============================================================================
-//
-
-// Vectors
-#include "shared/math/vector2.h"
-#include "shared/math/vector3.h"
-#include "shared/math/vector4.h"
-#include "shared/math/vector5.h"
-
-// Matrixes
-#include "shared/math/matrix4.h"
-
-// Colors
-#include "shared/math/color.h"
-
-// Rectangles.
-#include "shared/math/rectangle.h"
-
-// Plane pre-definition.
-struct cplane_s;
-
-// Extern vec3_origin var.
-extern vec3_t vec3_origin;
-
-// Not a number macro.
-#define nanmask (255<<23)
-#define IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
-
-// Angle indexes
-#define PITCH               0       // up / down
-#define YAW                 1       // left / right
-#define ROLL                2       // fall over
+//-----------------
+// Fast "C" String Macros
+//-----------------
+#define Q_isupper(c)    ((c) >= 'A' && (c) <= 'Z')
+#define Q_islower(c)    ((c) >= 'a' && (c) <= 'z')
+#define Q_isdigit(c)    ((c) >= '0' && (c) <= '9')
+#define Q_isalpha(c)    (Q_isupper(c) || Q_islower(c))
+#define Q_isalnum(c)    (Q_isalpha(c) || Q_isdigit(c))
+#define Q_isprint(c)    ((c) >= 32 && (c) < 127)
+#define Q_isgraph(c)    ((c) > 32 && (c) < 127)
+#define Q_isspace(c)    (c == ' ' || c == '\f' || c == '\n' || \
+                         c == '\r' || c == '\t' || c == '\v')
+// Tests if specified character is valid quake path character
+#define Q_ispath(c)     (Q_isalnum(c) || (c) == '_' || (c) == '-')
+// Tests if specified character has special meaning to quake console
+#define Q_isspecial(c)  ((c) == '\r' || (c) == '\n' || (c) == 127)
 
 //
 //=============================================================================
@@ -175,23 +169,78 @@ extern vec3_t vec3_origin;
 #include "shared/endian.h"
 
 
-typedef enum {
-    ERR_FATAL,          // exit the entire game with a popup window
-    ERR_DROP,           // print to console and disconnect from game
-    ERR_DISCONNECT,     // like drop, but not an error
-    ERR_RECONNECT       // make server broadcast 'reconnect' message
-} error_type_t;
+//
+//=============================================================================
+//
+//	Math Library.
+//
+//=============================================================================
+//
+//-----------------
+// Vectors
+//-----------------
+#include "shared/math/vector2.h"
+#include "shared/math/vector3.h"
+#include "shared/math/vector4.h"
+#include "shared/math/vector5.h"
 
-typedef enum {
-    PRINT_ALL,          // general messages
-    PRINT_TALK,         // print in green color
-    PRINT_DEVELOPER,    // only print when "developer 1"
-    PRINT_WARNING,      // print in yellow color
-    PRINT_ERROR,        // print in red color
-    PRINT_NOTICE        // print in cyan color
-} print_type_t;
+//-----------------
+// Matrixes
+//-----------------
+#include "shared/math/matrix4.h"
 
+//-----------------
+// Colors
+//-----------------
+#include "shared/math/color.h"
+
+//-----------------
+// Rectangles.
+//-----------------
+#include "shared/math/rectangle.h"
+
+//-----------------
+// Plane pre-definition.
+//-----------------
+struct cplane_s;
+
+//-----------------
+// Vector 3 Origin variable.
+//-----------------
+extern vec3_t vec3_origin;
+
+//-----------------
+// NAN Macro - Use for checking NAN errors.
+#define nanmask (255<<23)
+#define IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
+
+// Easy array index accessors.
+#define PITCH               0       // up / down
+#define YAW                 1       // left / right
+#define ROLL                2       // fall over
+
+
+//
+//=============================================================================
+//
+//	Engine Tick Rate Settings.
+//
+//=============================================================================
+//
+//-----------------
+//N&C 20hz tick
+//-----------------
+#define BASE_FRAMERATE          20 //10
+#define BASE_FRAMETIME          50.0f //100
+#define BASE_1_FRAMETIME        0.02f //0.01f   // 1/BASE_FRAMETIME
+#define BASE_FRAMETIME_1000     0.05f //0.1f    // BASE_FRAMETIME/1000
+
+// maximum variable FPS factor
+#define MAX_FRAMEDIV    6
+
+//-----------------
 // variable server FPS
+//-----------------
 #if USE_FPS
 #define CL_FRAMETIME    cl.frametime
 #define CL_1_FRAMETIME  cl.frametime_inv
@@ -217,9 +266,35 @@ typedef enum {
 #endif
 #endif
 
+
 //
+//=============================================================================
+//
+//	Common Library.
+//
+//=============================================================================
+//
+typedef enum {
+    ERR_FATAL,          // exit the entire game with a popup window
+    ERR_DROP,           // print to console and disconnect from game
+    ERR_DISCONNECT,     // like drop, but not an error
+    ERR_RECONNECT       // make server broadcast 'reconnect' message
+} error_type_t;
+
+typedef enum {
+    PRINT_ALL,          // general messages
+    PRINT_TALK,         // print in green color
+    PRINT_DEVELOPER,    // only print when "developer 1"
+    PRINT_WARNING,      // print in yellow color
+    PRINT_ERROR,        // print in red color
+    PRINT_NOTICE        // print in cyan color
+} print_type_t;
+
+
+
+//-----------------
 // WATISDEZE: We don't want these defined in cl_game.h
-//
+//-----------------
 #ifndef CGAME_INCLUDE
 void    Com_LPrintf(print_type_t type, const char* fmt, ...)
 q_printf(2, 3);
@@ -238,8 +313,10 @@ q_noreturn q_printf(2, 3);
 #define PRINT_HIGH          2       // critical messages
 #define PRINT_CHAT          3       // chat messages    
 
-// memory tags to allow dynamic memory to be cleaned up
+//-----------------
+// Memory tags to allow dynamic memory to be cleaned up
 // game DLLs have separate tag namespace starting at TAG_MAX
+//-----------------
 typedef enum {
     TAG_FREE,       // should have never been set
     TAG_STATIC,
@@ -258,13 +335,29 @@ typedef enum {
     TAG_MAX
 } memtag_t;
 
-// Include keys definitions.
-#include "shared/keys.h"
-#include "shared/ui.h"
 
 //
-// Color defines, modify these as you please for custom colors.
+//=============================================================================
 //
+//	User Input
+//
+//=============================================================================
+//
+#include "shared/keys.h"
+
+
+//
+//=============================================================================
+//
+//  UI.
+//
+//=============================================================================
+//
+#include "shared/ui.h"
+
+//-----------------
+// Color defines, modify these as you please for custom colors.
+//-----------------
 #define U32_BLACK   MakeColor(  0,   0,   0, 255)
 #define U32_RED     MakeColor(255,   0,   0, 255)
 #define U32_GREEN   MakeColor(  0, 255,   0, 255)
@@ -274,7 +367,47 @@ typedef enum {
 #define U32_MAGENTA MakeColor(255,   0, 255, 255)
 #define U32_WHITE   MakeColor(255, 255, 255, 255)
 
-// WatIsDeze: Moved here for clgame.
+
+//
+//=============================================================================
+//
+//	Sound Channels & Attenuation
+//
+//=============================================================================
+//
+//-----------------
+// Sound channels
+// Channel 0 never willingly overrides
+// Other channels (1-7) allways override a playing sound on that channel
+//-----------------
+#define CHAN_AUTO               0
+#define CHAN_WEAPON             1
+#define CHAN_VOICE              2
+#define CHAN_ITEM               3
+#define CHAN_BODY               4
+
+//-----------------
+// Modifier flags
+//-----------------
+#define CHAN_NO_PHS_ADD         8   // send to all clients, not just ones in PHS (ATTN 0 will also do this)
+#define CHAN_RELIABLE           16  // send by reliable message, not datagram
+
+//-----------------
+// Sound attenuation values
+//-----------------
+#define ATTN_NONE               0   // full volume the entire level
+#define ATTN_NORM               1
+#define ATTN_IDLE               2
+#define ATTN_STATIC             3   // diminish very rapidly with distance
+
+
+//
+//=============================================================================
+//
+//	CVars (Console Variables)
+//
+//=============================================================================
+//
 #define CVAR_CHEAT          (1 << 5)  // can't be changed when connected
 #define CVAR_PRIVATE        (1 << 6)  // never macro expanded or saved to config
 #define CVAR_ROM            (1 << 7)  // can't be changed even from cmdline
@@ -291,8 +424,165 @@ typedef enum {
 #define CVAR_NOARCHIVEMASK  (CVAR_NOSET | CVAR_CHEAT | CVAR_PRIVATE | CVAR_ROM)
 #define CVAR_EXTENDED_MASK  (~31)
 
+// Only include here, in case CVar has not been defined yet? TODO: Investigate, this is CLG related.
+#ifndef CVAR
+#define CVAR
 
-// destination class for gi.multicast()
+#define CVAR_ARCHIVE    1   // set to cause it to be saved to vars.rc
+#define CVAR_USERINFO   2   // added to userinfo  when changed
+#define CVAR_SERVERINFO 4   // added to serverinfo when changed
+#define CVAR_NOSET      8   // don't allow change from console at all,
+// but can be set from the command line
+#define CVAR_LATCH      16  // save changes until server restart
+
+struct cvar_s;
+struct genctx_s;
+
+typedef void (*xchanged_t)(struct cvar_s*);
+typedef void (*xgenerator_t)(struct genctx_s*);
+
+// nothing outside the cvar.*() functions should modify these fields!
+typedef struct cvar_s {
+    char* name;
+    char* string;
+    char* latched_string;    // for CVAR_LATCH vars
+    int         flags;
+    qboolean    modified;   // set each time the cvar is changed
+    float       value;
+    struct cvar_s* next;
+
+    // ------ new stuff ------
+    int         integer;
+    char* default_string;
+    xchanged_t      changed;
+    xgenerator_t    generator;
+    struct cvar_s* hashNext;
+} cvar_t;
+#endif      // CVAR
+
+
+//
+//=============================================================================
+//
+//	Config Strings
+//
+//=============================================================================
+//
+//-----------------
+// Config Strings(CS) are a general means of communication from the server to
+// all connected clients. A config string can be at most MAX_QPATH characters.
+//-----------------
+#define CS_NAME             0
+#define CS_CDTRACK          1
+#define CS_SKY              2
+#define CS_SKYAXIS          3       // %f %f %f format
+#define CS_SKYROTATE        4
+#define CS_STATUSBAR        5       // display program string
+
+#define CS_AIRACCEL         29      // air acceleration control
+#define CS_MAXCLIENTS       30
+#define CS_MAPCHECKSUM      31      // for catching cheater maps
+
+#define CS_MODELS           32
+#define CS_SOUNDS           (CS_MODELS+MAX_MODELS)
+#define CS_IMAGES           (CS_SOUNDS+MAX_SOUNDS)
+#define CS_LIGHTS           (CS_IMAGES+MAX_IMAGES)
+#define CS_ITEMS            (CS_LIGHTS+MAX_LIGHTSTYLES)
+#define CS_PLAYERSKINS      (CS_ITEMS+MAX_ITEMS)
+#define CS_GENERAL          (CS_PLAYERSKINS+MAX_CLIENTS)
+#define MAX_CONFIGSTRINGS   (CS_GENERAL+MAX_GENERAL)
+
+// Some mods actually exploit CS_STATUSBAR to take space up to CS_AIRACCEL
+#define CS_SIZE(cs) \
+    ((cs) >= CS_STATUSBAR && (cs) < CS_AIRACCEL ? \
+      MAX_QPATH * (CS_AIRACCEL - (cs)) : MAX_QPATH)
+
+
+//
+//=============================================================================
+//
+//	Player Move - Shared between Client, Server, and Game Modules.
+//
+//=============================================================================
+//
+//-----------------
+// General player movement and capabilities classification.
+//-----------------
+typedef enum {
+    PM_NORMAL, // Walking, jumping, falling, swimming, etc.
+    PM_HOOK_PULL, // Pull hook
+    PM_HOOK_SWING, // Swing hook
+    PM_SPECTATOR, // Free-flying movement with acceleration and friction
+    PM_DEAD, // No movement, but the ability to rotate in place
+    PM_FREEZE, // No movement at all
+    PM_GIB,     // No movement, different bounding box
+} pm_type_t;
+
+//-----------------
+// Player movement flags.The game is free to define up to 16 bits.
+//-----------------
+#define PMF_ENGINE          (1 << 0)
+// Engine flags go here, remember to increment PMF_ENGINE in that case.
+//#define PMF_ENGINE_FLAG     (1 << 1) 
+#define PMF_GAME			(PMF_ENGINE << 0)
+
+//-----------------
+// This structure needs to be communicated bit-accurate from the server to the 
+// client to guarantee that prediction stays in sync, so no floats are used.
+// 
+// If any part of the game code modifies this struct, it will result in a 
+// prediction error of some degree.
+//-----------------
+typedef struct {
+    pm_type_t    type;
+
+    vec3_t      origin;
+    vec3_t      velocity;
+
+    uint16_t    flags;       // Ducked, jump_held, etc
+    uint16_t    time;        // Each unit = 8 ms
+    uint16_t    gravity;
+    int16_t     delta_angles[3];    // Add to command angles to get view direction
+    // Changed by spawns, rotating objects, and teleporters
+
+    // View offsets. (Only Z is used atm, beware.)
+    vec3_t view_offset;
+} pm_state_t;
+
+
+//-----------------
+// Button Bits
+// 
+// TODO: This needs some reorganizing. BUTTON_ENGINE (1 << 0) BUTTON_### (BUTTON_ENGINE << 0)
+//-----------------
+#define BUTTON_ATTACK       1
+#define BUTTON_USE          2
+#define BUTTON_WALK         3           // PMOVE: Added for pmove.
+#define BUTTON_ANY          128         // any key whatsoever
+
+//-----------------
+// usercmd_t is sent to the server each client frame
+//-----------------
+typedef struct usercmd_s {
+    byte    msec;
+    byte    buttons;
+    short   angles[3];
+    short   forwardmove, sidemove, upmove;
+    byte    impulse;        // remove?
+    byte    lightlevel;     // light level the player is standing on
+} usercmd_t;
+
+
+//
+//=============================================================================
+//
+//	Messaging/Network
+//
+//=============================================================================
+//
+//-----------------
+// Destination class for gi.multicast()
+//-----------------
 typedef enum {
     MULTICAST_ALL,
     MULTICAST_PHS,
@@ -302,7 +592,9 @@ typedef enum {
     MULTICAST_PVS_R
 } multicast_t;
 
-// WatIsDeze: connstate_t has been moved here, so it is known to the client game dll.
+//-----------------
+// Connection State of the client.
+//-----------------
 typedef enum {
     ca_uninitialized,
     ca_disconnected,    // not talking to a server
@@ -315,7 +607,9 @@ typedef enum {
     ca_cinematic        // running a cinematic
 } connstate_t;
 
-// WatIsDeze: server_state_t has been moved here, so it is known to the client game dll.
+//-----------------
+// Run State of the server.
+//-----------------
 typedef enum {
     ss_dead,            // no map loaded
     ss_loading,         // spawning level edicts
@@ -325,7 +619,95 @@ typedef enum {
     ss_cinematic,
 } server_state_t;
 
-// WatIsDeze: file_info_t has been moved here, so it is known to the client game dll.
+//-----------------
+// entity_state_t->event values
+// 
+// Entity events are for effects that take place relative to an existing 
+// entities origin. Very network efficient.
+// 
+// All muzzle flashes really should be converted to events...
+//-----------------
+typedef enum {
+    EV_NONE,
+    EV_ITEM_RESPAWN,
+    EV_FOOTSTEP,
+    EV_FALLSHORT,
+    EV_FALL,
+    EV_FALLFAR,
+    EV_PLAYER_TELEPORT,
+    EV_OTHER_TELEPORT
+} entity_event_t;
+
+//-----------------
+// entity_state_t is the information conveyed from the server
+// in an update message about entities that the client will
+// need to render in some way
+//-----------------
+typedef struct entity_state_s {
+    int     number;         // Edict index
+
+    vec3_t  origin;
+    vec3_t  angles;
+    vec3_t  old_origin;     // For lerping
+    int     modelindex;
+    int     modelindex2, modelindex3, modelindex4;  // Weapons, CTF flags, etc
+    int     frame;
+    int     skinnum;
+    unsigned int        effects;        // PGM - we're filling it, so it needs to be unsigned
+    int     renderfx;
+    int     solid;          // For client side prediction, 8*(bits 0-4) is x/y radius
+                            // 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
+                            // gi.linkentity sets this properly
+    int     sound;          // For looping sounds, to guarantee shutoff
+    int     event;          // Impulse events -- muzzle flashes, footsteps, etc
+                            // events only go out for a single frame, they
+                            // are automatically cleared each frame
+} entity_state_t;
+
+//-----------------
+// player_state_t is the information needed in addition to pm_state_t
+// to rendered a view.  There will only be 10 player_state_t sent each second,
+// but the number of pm_state_t changes will be reletive to client
+// frame rates
+//-----------------
+// Maximum amount of stats available to the player state.
+#define MAX_STATS               32
+
+typedef struct {
+    pm_state_t   pmove;         // For prediction
+
+    // These fields do not need to be communicated bit-precise
+
+    vec3_t      viewangles;     // For fixed views
+    vec3_t      viewoffset;     // Add to pmovestate->origin
+    vec3_t      kick_angles;    // Add to view direction to get render angles
+                                // Set by weapon kicks, pain effects, etc
+
+    vec3_t      gunangles;
+    vec3_t      gunoffset;
+    int         gunindex;
+    int         gunframe;
+
+    float       blend[4];       // RGBA full screen effect
+
+    float       fov;            // Horizontal field of view
+
+    int         rdflags;        // Refdef flags
+
+    short       stats[MAX_STATS]; // Fast status bar updates
+} player_state_t;
+
+
+//
+//=============================================================================
+//
+//	Filesystem
+//
+//=============================================================================
+//
+//-----------------
+// FileInfo structured, shared between engine and game modules.
+//-----------------
 typedef struct file_info_s {
     size_t  size;
     time_t  ctime;
@@ -334,41 +716,28 @@ typedef struct file_info_s {
 } file_info_t;
 
 
-// fast "C" macros
-#define Q_isupper(c)    ((c) >= 'A' && (c) <= 'Z')
-#define Q_islower(c)    ((c) >= 'a' && (c) <= 'z')
-#define Q_isdigit(c)    ((c) >= '0' && (c) <= '9')
-#define Q_isalpha(c)    (Q_isupper(c) || Q_islower(c))
-#define Q_isalnum(c)    (Q_isalpha(c) || Q_isdigit(c))
-#define Q_isprint(c)    ((c) >= 32 && (c) < 127)
-#define Q_isgraph(c)    ((c) > 32 && (c) < 127)
-#define Q_isspace(c)    (c == ' ' || c == '\f' || c == '\n' || \
-                         c == '\r' || c == '\t' || c == '\v')
-
-// tests if specified character is valid quake path character
-#define Q_ispath(c)     (Q_isalnum(c) || (c) == '_' || (c) == '-')
-
-// tests if specified character has special meaning to quake console
-#define Q_isspecial(c)  ((c) == '\r' || (c) == '\n' || (c) == 127)
-
-static inline int Q_tolower(int c)
-{
+//
+//=============================================================================
+//
+//	String Manipulation Utilities.
+//
+//=============================================================================
+//
+static inline int Q_tolower(int c) {
     if (Q_isupper(c)) {
         c += ('a' - 'A');
     }
     return c;
 }
 
-static inline int Q_toupper(int c)
-{
+static inline int Q_toupper(int c) {
     if (Q_islower(c)) {
         c -= ('a' - 'A');
     }
     return c;
 }
 
-static inline char *Q_strlwr(char *s)
-{
+static inline char *Q_strlwr(char *s) {
     char *p = s;
 
     while (*p) {
@@ -379,8 +748,7 @@ static inline char *Q_strlwr(char *s)
     return s;
 }
 
-static inline char *Q_strupr(char *s)
-{
+static inline char *Q_strupr(char *s) {
     char *p = s;
 
     while (*p) {
@@ -391,8 +759,7 @@ static inline char *Q_strupr(char *s)
     return s;
 }
 
-static inline int Q_charhex(int c)
-{
+static inline int Q_charhex(int c) {
     if (c >= 'A' && c <= 'F') {
         return 10 + (c - 'A');
     }
@@ -406,8 +773,7 @@ static inline int Q_charhex(int c)
 }
 
 // converts quake char to ASCII equivalent
-static inline int Q_charascii(int c)
-{
+static inline int Q_charascii(int c) {
     if (Q_isspace(c)) {
         // white-space chars are output as-is
         return c;
@@ -474,19 +840,13 @@ size_t Q_scnprintf(char *dest, size_t size, const char *fmt, ...) q_printf(3, 4)
 
 char    *va(const char *format, ...) q_printf(1, 2);
 
-//=============================================
-
-
-#if USE_BGRA
-#define MakeColor(r, g, b, a)   (const uint32_t)MakeRawLong(b, g, r, a)
-#else
-#define MakeColor(r, g, b, a)   (const uint32_t)MakeRawLong(r, g, b, a)
-#endif
-
-//=============================================
 
 //
-// key / value info strings
+//=============================================================================
+//
+//	Key / Value Info Strings
+//
+//=============================================================================
 //
 #define MAX_INFO_KEY        64
 #define MAX_INFO_VALUE      64
@@ -500,61 +860,20 @@ size_t  Info_SubValidate(const char *s);
 void    Info_NextPair(const char **string, char *key, char *value);
 void    Info_Print(const char *infostring);
 
-/*
-==========================================================
 
-CVARS (console variables)
-
-==========================================================
-*/
-
-#ifndef CVAR
-#define CVAR
-
-#define CVAR_ARCHIVE    1   // set to cause it to be saved to vars.rc
-#define CVAR_USERINFO   2   // added to userinfo  when changed
-#define CVAR_SERVERINFO 4   // added to serverinfo when changed
-#define CVAR_NOSET      8   // don't allow change from console at all,
-// but can be set from the command line
-#define CVAR_LATCH      16  // save changes until server restart
-
-struct cvar_s;
-struct genctx_s;
-
-typedef void (*xchanged_t)(struct cvar_s *);
-typedef void (*xgenerator_t)(struct genctx_s *);
-
-// nothing outside the cvar.*() functions should modify these fields!
-typedef struct cvar_s {
-    char        *name;
-    char        *string;
-    char        *latched_string;    // for CVAR_LATCH vars
-    int         flags;
-    qboolean    modified;   // set each time the cvar is changed
-    float       value;
-    struct cvar_s *next;
-
-// ------ new stuff ------
-    int         integer;
-    char        *default_string;
-    xchanged_t      changed;
-    xgenerator_t    generator;
-    struct cvar_s   *hashNext;
-} cvar_t;
-
-#endif      // CVAR
-
-/*
-==============================================================
-
-COLLISION DETECTION
-
-==============================================================
-*/
-
-// lower bits are stronger, and will eat weaker brushes completely
-#define CONTENTS_SOLID          1       // an eye is never valid in a solid
-#define CONTENTS_WINDOW         2       // translucent, but not watery
+//
+//=============================================================================
+//
+//	Collision Detection.
+//
+//=============================================================================
+//
+//-----------------
+// Brush content Flags.
+//-----------------
+// Lower bits are stronger, and will eat weaker brushes completely
+#define CONTENTS_SOLID          1       // An eye is never valid in a solid
+#define CONTENTS_WINDOW         2       // Translucent, but not watery
 #define CONTENTS_AUX            4
 #define CONTENTS_LAVA           8
 #define CONTENTS_SLIME          16
@@ -562,14 +881,19 @@ COLLISION DETECTION
 #define CONTENTS_MIST           64
 #define LAST_VISIBLE_CONTENTS   64
 
-// remaining contents are non-visible, and don't eat brushes
-
+// Remaining contents are non-visible, and don't eat brushes
 #define CONTENTS_AREAPORTAL     0x8000
-
 #define CONTENTS_PLAYERCLIP     0x10000
 #define CONTENTS_MONSTERCLIP    0x20000
 
-// currents can be added to any other contents, and may be mixed
+#define CONTENTS_ORIGIN         0x1000000   // Removed before bsping an entity
+#define CONTENTS_MONSTER        0x2000000   // Should never be on a brush, only in game
+#define CONTENTS_DEADMONSTER    0x4000000
+#define CONTENTS_DETAIL         0x8000000   // Brushes to be added after vis leafs
+#define CONTENTS_TRANSLUCENT    0x10000000  // Auto set if any surface has trans
+#define CONTENTS_LADDER         0x20000000
+
+// Currents can be added to any other contents, and may be mixed
 #define CONTENTS_CURRENT_0      0x40000
 #define CONTENTS_CURRENT_90     0x80000
 #define CONTENTS_CURRENT_180    0x100000
@@ -577,32 +901,9 @@ COLLISION DETECTION
 #define CONTENTS_CURRENT_UP     0x400000
 #define CONTENTS_CURRENT_DOWN   0x800000
 
-#define CONTENTS_ORIGIN         0x1000000   // removed before bsping an entity
-
-#define CONTENTS_MONSTER        0x2000000   // should never be on a brush, only in game
-#define CONTENTS_DEADMONSTER    0x4000000
-#define CONTENTS_DETAIL         0x8000000   // brushes to be added after vis leafs
-#define CONTENTS_TRANSLUCENT    0x10000000  // auto set if any surface has trans
-#define CONTENTS_LADDER         0x20000000
-
-
-
-#define SURF_LIGHT      0x1     // value will hold the light strength
-
-#define SURF_SLICK      0x2     // effects game physics
-
-#define SURF_SKY        0x4     // don't draw, but add to skybox
-#define SURF_WARP       0x8     // turbulent water warp
-#define SURF_TRANS33    0x10
-#define SURF_TRANS66    0x20
-#define SURF_FLOWING    0x40    // scroll towards angle
-#define SURF_NODRAW     0x80    // don't bother referencing the texture
-
-#define SURF_ALPHATEST  0x02000000  // used by kmquake2
-
-
-
-// content masks
+//-----------------
+// Sets of content masks
+//-----------------
 #define CONTENTS_MASK_ALL                (-1)
 #define CONTENTS_MASK_SOLID              (CONTENTS_SOLID|CONTENTS_WINDOW)
 #define CONTENTS_MASK_PLAYERSOLID        (CONTENTS_SOLID|CONTENTS_PLAYERCLIP|CONTENTS_WINDOW|CONTENTS_MONSTER)
@@ -613,15 +914,31 @@ COLLISION DETECTION
 #define CONTENTS_MASK_SHOT               (CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_WINDOW|CONTENTS_DEADMONSTER)
 #define CONTENTS_MASK_CURRENT            (CONTENTS_CURRENT_0|CONTENTS_CURRENT_90|CONTENTS_CURRENT_180|CONTENTS_CURRENT_270|CONTENTS_CURRENT_UP|CONTENTS_CURRENT_DOWN)
 
+//-----------------
+// Surface Flags.
+//-----------------
+#define SURF_LIGHT      0x1     // Value will hold the light strength
+#define SURF_SLICK      0x2     // Effects game physics
+#define SURF_SKY        0x4     // Don't draw, but add to skybox
+#define SURF_WARP       0x8     // Turbulent water warp
+#define SURF_TRANS33    0x10
+#define SURF_TRANS66    0x20
+#define SURF_FLOWING    0x40    // Scroll towards angle
+#define SURF_NODRAW     0x80    // Don't bother referencing the texture
+#define SURF_ALPHATEST  0x02000000  // used by kmquake2
 
+
+//-----------------
 // gi.BoxEdicts() can return a list of either solid or trigger entities
 // FIXME: eliminate AREA_ distinction?
+//-----------------
 #define AREA_SOLID      1
 #define AREA_TRIGGERS   2
 
 
+//-----------------
 // plane_t structure
-// !!! if this is changed, it must be changed in asm code too !!!
+//-----------------
 typedef struct cplane_s {
     vec3_t  normal;
     float   dist;
@@ -630,21 +947,23 @@ typedef struct cplane_s {
     byte    pad[2];
 } cplane_t;
 
+//-----------------
+// Planes.
+//-----------------
 // 0-2 are axial planes
-#define PLANE_X         0
+#define PLANE_X         0 // TODO: Change to cplane_t::PLANE::X?
 #define PLANE_Y         1
 #define PLANE_Z         2
-
 // 3-5 are non-axial planes snapped to the nearest
 #define PLANE_ANYX      3
 #define PLANE_ANYY      4
 #define PLANE_ANYZ      5
-
 // planes (x&~1) and (x&~1)+1 are always opposites
-
 #define PLANE_NON_AXIAL 6
 
-// structure offset for asm code
+//-----------------
+// Structure offset for asm code
+//-----------------
 #define CPLANE_NORMAL_X         0
 #define CPLANE_NORMAL_Y         4
 #define CPLANE_NORMAL_Z         8
@@ -654,110 +973,63 @@ typedef struct cplane_s {
 #define CPLANE_PAD0             18
 #define CPLANE_PAD1             19
 
+//-----------------
+// Surface Collision data.
+//-----------------
 typedef struct csurface_s {
-    char        name[16];
-    int         flags;
-    int         value;
+    char        name[16];   // The actual material name used for this surface.
+    int         flags;      // The surface flags.
+    int         value;      // The content vlags. (TODO: Is this correct?)
 } csurface_t;
 
-// a trace is returned when a box is swept through the world
+//-----------------
+// A trace is returned when a box is swept through the world
+//-----------------
 typedef struct {
-    qboolean    allsolid;   // if true, plane is not valid
-    qboolean    startsolid; // if true, the initial point was in a solid area
-    float       fraction;   // time completed, 1.0 = didn't hit anything
-    vec3_t      endpos;     // final position
-    cplane_t    plane;      // surface normal at impact
-    csurface_t  *surface;   // surface hit
-    int         contents;   // contents on other side of surface hit
-    struct edict_s  *ent;       // not set by CM_*() functions
+    qboolean    allsolid;   // If true, plane is not valid
+    qboolean    startsolid; // If true, the initial point was in a solid area
+    float       fraction;   // Time completed, 1.0 = didn't hit anything
+    vec3_t      endpos;     // Final position
+    cplane_t    plane;      // Surface normal at impact
+    csurface_t  *surface;   // Surface hit
+    int         contents;   // Contents on other side of surface hit
+    struct edict_s  *ent;   // Not set by CM_*() functions
 
     // N&C: Custom added.
     vec3_t		offsets[8];	// [signbits][x] = either size[0][x] or size[1][x]
 } trace_t;
 
-//
-// General player movement and capabilities classification.
-//
-typedef enum {
-    PM_NORMAL, // Walking, jumping, falling, swimming, etc.
-    PM_HOOK_PULL, // Pull hook
-    PM_HOOK_SWING, // Swing hook
-    PM_SPECTATOR, // Free-flying movement with acceleration and friction
-    PM_DEAD, // No movement, but the ability to rotate in place
-    PM_FREEZE, // No movement at all
-    PM_GIB,     // No movement, different bounding box
-} pm_type_t;
 
 //
-// Player movement flags.The game is free to define up to 16 bits.
+//=============================================================================
 //
-#define PMF_ENGINE          (1 << 0)
-//#define PMF_NO_PREDICTION   (PMF_ENGINE << 0)
-//#define PMF_TELEPORT_BIT    (PMF_ENGINE << 1)
-#define PMF_GAME			(PMF_ENGINE << 0)
-
-// this structure needs to be communicated bit-accurate
-// from the server to the client to guarantee that
-// prediction stays in sync, so no floats are used.
-// if any part of the game code modifies this struct, it
-// will result in a prediction error of some degree.
-typedef struct {
-    pm_type_t    type;
-
-    vec3_t      origin;
-    vec3_t      velocity;
-
-    uint16_t    flags;       // ducked, jump_held, etc
-    uint16_t    time;        // each unit = 8 ms
-    uint16_t    gravity;
-    int16_t     delta_angles[3];    // add to command angles to get view direction
-    // changed by spawns, rotating objects, and teleporters
-
-    // View offsets. (Only Z is used atm, beware.)
-    vec3_t view_offset;
-} pm_state_t;
-
-
+//	Math Library - TODO: This include should be moved upwards
 //
-// This needs some reorganizing. BUTTON_ENGINE (1 << 0) BUTTON_### (BUTTON_ENGINE << 0)
+//=============================================================================
 //
-// button bits
-//
-#define BUTTON_ATTACK       1
-#define BUTTON_USE          2
-#define BUTTON_WALK         3           // PMOVE: Added for pmove.
-#define BUTTON_ANY          128         // any key whatsoever
-
-
-// usercmd_t is sent to the server each client frame
-typedef struct usercmd_s {
-    byte    msec;
-    byte    buttons;
-    short   angles[3];
-    short   forwardmove, sidemove, upmove;
-    byte    impulse;        // remove?
-    byte    lightlevel;     // light level the player is standing on
-} usercmd_t;
-
-
-/*
-==============================================================
-
-MATHLIB
-
-==============================================================
-*/
-
 #include "shared/math.h"
 
-//=============================================
 
-
+//
+//=============================================================================
+//
+//	Game Related, some is shared with the client/server.
+// 
+// TODO: Clean up, ensure that the client/server do not need these flags.
+// So, do an ENGINE_ENTITY_FLAG, ENGINE_ENTITY_GIB, ENGINE_ENTITY_GAMEFLAG,
+// 
+// EF_SOMEFLAG = (ENGINE_ENTITY_GAMEFLAG << 0) etc.
+//
+//=============================================================================
+//
+//-----------------
 // entity_state_t->effects
-// Effects are things handled on the client side (lights, particles, frame animations)
-// that happen constantly on the given entity.
-// An entity that has effects will be sent to the client
-// even if it has a zero index model.
+// Effects are things handled on the client side (lights, particles, 
+// frame animations) that happen constantly on the given entity.
+// 
+// An entity that has effects will be sent to the client even if it has a zero
+// index model.
+//-----------------
 #define EF_ROTATE           0x00000001      // rotate (bonus items)
 #define EF_GIB              0x00000002      // leave a trail
 #define EF_BLASTER          0x00000008      // redlight + trail
@@ -825,9 +1097,9 @@ MATHLIB
 #define RDF_UVGOGGLES       8
 //ROGUE
 
-//
+//-----------------
 // muzzle flashes / player effects
-//
+//-----------------
 #define MZ_BLASTER          0
 #define MZ_MACHINEGUN       1
 #define MZ_SHOTGUN          2
@@ -866,9 +1138,9 @@ MATHLIB
 #define MZ_FLARE            40
 // Q2RTX
 
-//
+//-----------------
 // monster muzzle flashes
-//
+//-----------------
 #define MZ2_TANK_BLASTER_1              1
 #define MZ2_TANK_BLASTER_2              2
 #define MZ2_TANK_BLASTER_3              3
@@ -983,131 +1255,19 @@ MATHLIB
 #define MZ2_SOLDIER_SHOTGUN_8           99
 #define MZ2_SOLDIER_MACHINEGUN_8        100
 
-// --- Xian shit below ---
-#define MZ2_MAKRON_BFG                  101
-#define MZ2_MAKRON_BLASTER_1            102
-#define MZ2_MAKRON_BLASTER_2            103
-#define MZ2_MAKRON_BLASTER_3            104
-#define MZ2_MAKRON_BLASTER_4            105
-#define MZ2_MAKRON_BLASTER_5            106
-#define MZ2_MAKRON_BLASTER_6            107
-#define MZ2_MAKRON_BLASTER_7            108
-#define MZ2_MAKRON_BLASTER_8            109
-#define MZ2_MAKRON_BLASTER_9            110
-#define MZ2_MAKRON_BLASTER_10           111
-#define MZ2_MAKRON_BLASTER_11           112
-#define MZ2_MAKRON_BLASTER_12           113
-#define MZ2_MAKRON_BLASTER_13           114
-#define MZ2_MAKRON_BLASTER_14           115
-#define MZ2_MAKRON_BLASTER_15           116
-#define MZ2_MAKRON_BLASTER_16           117
-#define MZ2_MAKRON_BLASTER_17           118
-#define MZ2_MAKRON_RAILGUN_1            119
-#define MZ2_JORG_MACHINEGUN_L1          120
-#define MZ2_JORG_MACHINEGUN_L2          121
-#define MZ2_JORG_MACHINEGUN_L3          122
-#define MZ2_JORG_MACHINEGUN_L4          123
-#define MZ2_JORG_MACHINEGUN_L5          124
-#define MZ2_JORG_MACHINEGUN_L6          125
-#define MZ2_JORG_MACHINEGUN_R1          126
-#define MZ2_JORG_MACHINEGUN_R2          127
-#define MZ2_JORG_MACHINEGUN_R3          128
-#define MZ2_JORG_MACHINEGUN_R4          129
-#define MZ2_JORG_MACHINEGUN_R5          130
-#define MZ2_JORG_MACHINEGUN_R6          131
-#define MZ2_JORG_BFG_1                  132
-#define MZ2_BOSS2_MACHINEGUN_R1         133
-#define MZ2_BOSS2_MACHINEGUN_R2         134
-#define MZ2_BOSS2_MACHINEGUN_R3         135
-#define MZ2_BOSS2_MACHINEGUN_R4         136
-#define MZ2_BOSS2_MACHINEGUN_R5         137
-
-//ROGUE
-#define MZ2_CARRIER_MACHINEGUN_L1       138
-#define MZ2_CARRIER_MACHINEGUN_R1       139
-#define MZ2_CARRIER_GRENADE             140
-#define MZ2_TURRET_MACHINEGUN           141
-#define MZ2_TURRET_ROCKET               142
-#define MZ2_TURRET_BLASTER              143
-#define MZ2_STALKER_BLASTER             144
-#define MZ2_DAEDALUS_BLASTER            145
-#define MZ2_MEDIC_BLASTER_2             146
-#define MZ2_CARRIER_RAILGUN             147
-#define MZ2_WIDOW_DISRUPTOR             148
-#define MZ2_WIDOW_BLASTER               149
-#define MZ2_WIDOW_RAIL                  150
-#define MZ2_WIDOW_PLASMABEAM            151     // PMM - not used
-#define MZ2_CARRIER_MACHINEGUN_L2       152
-#define MZ2_CARRIER_MACHINEGUN_R2       153
-#define MZ2_WIDOW_RAIL_LEFT             154
-#define MZ2_WIDOW_RAIL_RIGHT            155
-#define MZ2_WIDOW_BLASTER_SWEEP1        156
-#define MZ2_WIDOW_BLASTER_SWEEP2        157
-#define MZ2_WIDOW_BLASTER_SWEEP3        158
-#define MZ2_WIDOW_BLASTER_SWEEP4        159
-#define MZ2_WIDOW_BLASTER_SWEEP5        160
-#define MZ2_WIDOW_BLASTER_SWEEP6        161
-#define MZ2_WIDOW_BLASTER_SWEEP7        162
-#define MZ2_WIDOW_BLASTER_SWEEP8        163
-#define MZ2_WIDOW_BLASTER_SWEEP9        164
-#define MZ2_WIDOW_BLASTER_100           165
-#define MZ2_WIDOW_BLASTER_90            166
-#define MZ2_WIDOW_BLASTER_80            167
-#define MZ2_WIDOW_BLASTER_70            168
-#define MZ2_WIDOW_BLASTER_60            169
-#define MZ2_WIDOW_BLASTER_50            170
-#define MZ2_WIDOW_BLASTER_40            171
-#define MZ2_WIDOW_BLASTER_30            172
-#define MZ2_WIDOW_BLASTER_20            173
-#define MZ2_WIDOW_BLASTER_10            174
-#define MZ2_WIDOW_BLASTER_0             175
-#define MZ2_WIDOW_BLASTER_10L           176
-#define MZ2_WIDOW_BLASTER_20L           177
-#define MZ2_WIDOW_BLASTER_30L           178
-#define MZ2_WIDOW_BLASTER_40L           179
-#define MZ2_WIDOW_BLASTER_50L           180
-#define MZ2_WIDOW_BLASTER_60L           181
-#define MZ2_WIDOW_BLASTER_70L           182
-#define MZ2_WIDOW_RUN_1                 183
-#define MZ2_WIDOW_RUN_2                 184
-#define MZ2_WIDOW_RUN_3                 185
-#define MZ2_WIDOW_RUN_4                 186
-#define MZ2_WIDOW_RUN_5                 187
-#define MZ2_WIDOW_RUN_6                 188
-#define MZ2_WIDOW_RUN_7                 189
-#define MZ2_WIDOW_RUN_8                 190
-#define MZ2_CARRIER_ROCKET_1            191
-#define MZ2_CARRIER_ROCKET_2            192
-#define MZ2_CARRIER_ROCKET_3            193
-#define MZ2_CARRIER_ROCKET_4            194
-#define MZ2_WIDOW2_BEAMER_1             195
-#define MZ2_WIDOW2_BEAMER_2             196
-#define MZ2_WIDOW2_BEAMER_3             197
-#define MZ2_WIDOW2_BEAMER_4             198
-#define MZ2_WIDOW2_BEAMER_5             199
-#define MZ2_WIDOW2_BEAM_SWEEP_1         200
-#define MZ2_WIDOW2_BEAM_SWEEP_2         201
-#define MZ2_WIDOW2_BEAM_SWEEP_3         202
-#define MZ2_WIDOW2_BEAM_SWEEP_4         203
-#define MZ2_WIDOW2_BEAM_SWEEP_5         204
-#define MZ2_WIDOW2_BEAM_SWEEP_6         205
-#define MZ2_WIDOW2_BEAM_SWEEP_7         206
-#define MZ2_WIDOW2_BEAM_SWEEP_8         207
-#define MZ2_WIDOW2_BEAM_SWEEP_9         208
-#define MZ2_WIDOW2_BEAM_SWEEP_10        209
-#define MZ2_WIDOW2_BEAM_SWEEP_11        210
-
-// ROGUE
-
+//-----------------
+// Extern - TODO: Remove, ofc.
+//-----------------
 extern  const vec3_t monster_flash_offset [];
 
 
-// temp entity events
+//-----------------
+// Temp Entity Events (TE)
 //
-// Temp entity events are for things that happen
-// at a location seperate from any existing entity.
-// Temporary entity messages are explicitly constructed
+// Temp entity events are for things that happen at a location seperate from 
+// any existing entity. Temporary entity messages are explicitly constructed
 // and broadcast.
+//-----------------
 typedef enum {
     TE_GUNSHOT,
     TE_BLOOD,
@@ -1174,6 +1334,9 @@ typedef enum {
     TE_NUM_ENTITIES
 } temp_event_t;
 
+//-----------------
+// Splash Types.
+//-----------------
 #define SPLASH_UNKNOWN      0
 #define SPLASH_SPARKS       1
 #define SPLASH_BLUE_WATER   2
@@ -1183,24 +1346,7 @@ typedef enum {
 #define SPLASH_BLOOD        6
 
 
-// sound channels
-// channel 0 never willingly overrides
-// other channels (1-7) allways override a playing sound on that channel
-#define CHAN_AUTO               0
-#define CHAN_WEAPON             1
-#define CHAN_VOICE              2
-#define CHAN_ITEM               3
-#define CHAN_BODY               4
-// modifier flags
-#define CHAN_NO_PHS_ADD         8   // send to all clients, not just ones in PHS (ATTN 0 will also do this)
-#define CHAN_RELIABLE           16  // send by reliable message, not datagram
 
-
-// sound attenuation values
-#define ATTN_NONE               0   // full volume the entire level
-#define ATTN_NORM               1
-#define ATTN_IDLE               2
-#define ATTN_STATIC             3   // diminish very rapidly with distance
 
 
 // player_state->stats[] indexes
@@ -1223,7 +1369,7 @@ typedef enum {
 #define STAT_CHASE              16
 #define STAT_SPECTATOR          17
 
-#define MAX_STATS               32
+
 
 
 // dmflags->value flags
@@ -1296,149 +1442,12 @@ ROGUE - VERSIONS
 #define UF_MUTE_MISC        32
 #define UF_PLAYERFOV        64
 
-/*
-==========================================================
 
-  ELEMENTS COMMUNICATED ACROSS THE NET
-
-==========================================================
-*/
-
-// default server FPS
-//#define BASE_FRAMERATE          10
-//#define BASE_FRAMETIME          100
-//#define BASE_1_FRAMETIME        0.01f   // 1/BASE_FRAMETIME
-//#define BASE_FRAMETIME_1000     0.1f    // BASE_FRAMETIME/1000
-
-//N&C 30hz tick
-//#define BASE_FRAMERATE          30 //10
-//#define BASE_FRAMETIME          33.33f //100
-//#define BASE_1_FRAMETIME        0.03f //0.01f   // 1/BASE_FRAMETIME
-//#define BASE_FRAMETIME_1000     0.03333f //0.1f    // BASE_FRAMETIME/1000
-
-//N&C 20hz tick
-#define BASE_FRAMERATE          20 //10
-#define BASE_FRAMETIME          50.0f //100
-#define BASE_1_FRAMETIME        0.02f //0.01f   // 1/BASE_FRAMETIME
-#define BASE_FRAMETIME_1000     0.05f //0.1f    // BASE_FRAMETIME/1000
-
-//N&C 24hz tick
-//#define BASE_FRAMERATE          24 //10
-//#define BASE_FRAMETIME          41.666f //100
-//#define BASE_1_FRAMETIME        0.024f //0.01f   // 1/BASE_FRAMETIME
-//#define BASE_FRAMETIME_1000     0.041666f //0.1f    // BASE_FRAMETIME/1000
-
-// maximum variable FPS factor
-#define MAX_FRAMEDIV    6
-
-#define ANGLE2SHORT(x)  ((int)((x)*65536/360) & 65535)
-#define SHORT2ANGLE(x)  ((x)*(360.0/65536))
-
-
-//
-// config strings are a general means of communication from
-// the server to all connected clients.
-// Each config string can be at most MAX_QPATH characters.
-//
-#define CS_NAME             0
-#define CS_CDTRACK          1
-#define CS_SKY              2
-#define CS_SKYAXIS          3       // %f %f %f format
-#define CS_SKYROTATE        4
-#define CS_STATUSBAR        5       // display program string
-
-#define CS_AIRACCEL         29      // air acceleration control
-#define CS_MAXCLIENTS       30
-#define CS_MAPCHECKSUM      31      // for catching cheater maps
-
-#define CS_MODELS           32
-#define CS_SOUNDS           (CS_MODELS+MAX_MODELS)
-#define CS_IMAGES           (CS_SOUNDS+MAX_SOUNDS)
-#define CS_LIGHTS           (CS_IMAGES+MAX_IMAGES)
-#define CS_ITEMS            (CS_LIGHTS+MAX_LIGHTSTYLES)
-#define CS_PLAYERSKINS      (CS_ITEMS+MAX_ITEMS)
-#define CS_GENERAL          (CS_PLAYERSKINS+MAX_CLIENTS)
-#define MAX_CONFIGSTRINGS   (CS_GENERAL+MAX_GENERAL)
-
-// Some mods actually exploit CS_STATUSBAR to take space up to CS_AIRACCEL
-#define CS_SIZE(cs) \
-    ((cs) >= CS_STATUSBAR && (cs) < CS_AIRACCEL ? \
-      MAX_QPATH * (CS_AIRACCEL - (cs)) : MAX_QPATH)
 
 
 //==============================================
 
 
-// entity_state_t->event values
-// ertity events are for effects that take place reletive
-// to an existing entities origin.  Very network efficient.
-// All muzzle flashes really should be converted to events...
-typedef enum {
-    EV_NONE,
-    EV_ITEM_RESPAWN,
-    EV_FOOTSTEP,
-    EV_FALLSHORT,
-    EV_FALL,
-    EV_FALLFAR,
-    EV_PLAYER_TELEPORT,
-    EV_OTHER_TELEPORT
-} entity_event_t;
-
-
-// entity_state_t is the information conveyed from the server
-// in an update message about entities that the client will
-// need to render in some way
-typedef struct entity_state_s {
-    int     number;         // edict index
-
-    vec3_t  origin;
-    vec3_t  angles;
-    vec3_t  old_origin;     // for lerping
-    int     modelindex;
-    int     modelindex2, modelindex3, modelindex4;  // weapons, CTF flags, etc
-    int     frame;
-    int     skinnum;
-    unsigned int        effects;        // PGM - we're filling it, so it needs to be unsigned
-    int     renderfx;
-    int     solid;          // for client side prediction, 8*(bits 0-4) is x/y radius
-                            // 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
-                            // gi.linkentity sets this properly
-    int     sound;          // for looping sounds, to guarantee shutoff
-    int     event;          // impulse events -- muzzle flashes, footsteps, etc
-                            // events only go out for a single frame, they
-                            // are automatically cleared each frame
-} entity_state_t;
-
-//==============================================
-
-
-// player_state_t is the information needed in addition to pm_state_t
-// to rendered a view.  There will only be 10 player_state_t sent each second,
-// but the number of pm_state_t changes will be reletive to client
-// frame rates
-typedef struct {
-    pm_state_t   pmove;      // for prediction
-
-    // these fields do not need to be communicated bit-precise
-
-    vec3_t      viewangles;     // for fixed views
-    vec3_t      viewoffset;     // add to pmovestate->origin
-    vec3_t      kick_angles;    // add to view direction to get render angles
-                                // set by weapon kicks, pain effects, etc
-
-    vec3_t      gunangles;
-    vec3_t      gunoffset;
-    int         gunindex;
-    int         gunframe;
-
-    float       blend[4];       // rgba full screen effect
-
-    float       fov;            // horizontal field of view
-
-    int         rdflags;        // refdef flags
-
-    short       stats[MAX_STATS];       // fast status bar updates
-} player_state_t;
 
 // WatIsDeze: Ifdef, for cgame dll.
 #ifdef CGAME_INCLUDE

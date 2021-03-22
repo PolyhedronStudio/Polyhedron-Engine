@@ -103,7 +103,7 @@ BAResult buddy_allocator_allocate(BuddyAllocator* allocator, uint64_t size, uint
 		return BA_NOT_ENOUGH_MEMORY;
 
 	// Every block is aligned to its size
-	const uint64_t block_size = (uint64_t)(1 << (level + allocator->base_level));
+	const uint64_t block_size = (uint64_t)(1 << (level + allocator->base_level)); // warning C4334: '<<': result of 32-bit shift implicitly converted to 64 bits (was 64-bit shift intended?)
 	const uint64_t alignment_size = block_size % alignment;
 
 	assert(alignment_size == 0);
@@ -136,7 +136,7 @@ BAResult buddy_allocator_allocate(BuddyAllocator* allocator, uint64_t size, uint
 void buddy_allocator_free(BuddyAllocator* allocator, uint64_t offset, uint64_t size)
 {
 	const uint32_t level = max((uint32_t)ceil(log2(size)), allocator->base_level) - allocator->base_level;
-	const uint64_t block_size = (uint64_t)(1 << (level + allocator->base_level));
+	const uint64_t block_size = (uint64_t)(1 << (level + allocator->base_level)); // warning C4334 : '<<' : result of 32 - bit shift implicitly converted to 64 bits(was 64 - bit shift intended ? )
 	const uint32_t block_index = offset / block_size;
 
 	const uint32_t level_block_offset = get_level_offset(allocator, level);

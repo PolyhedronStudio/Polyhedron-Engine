@@ -1289,7 +1289,7 @@ void ClientBegin(edict_t *ent)
 
     // if there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
-    if (ent->inuse == true) {
+    if (ent->inuse == true) { // warning C4805: '==': unsafe mix of type 'qboolean' and type 'bool' in operation
         // the client has cleared the client side viewangles upon
         // connecting to the server, which is different than the
         // state when the game is saved, so we need to compensate
