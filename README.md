@@ -21,6 +21,7 @@ When finished we have a stable base to work from, one that we can start making t
   - [ ] Server Game
     - Get rid of the g_local, and just have each .cpp file do its own .h file, include only those that are required.
 - [ ] Messaging/Networking - Marked as // MSG: !! ...
+  - [ ] Look into UDP packet size limit, what do we do about this?
   - [ ] Remove the 5 / 3 bits method in the network cmd. This way we can have 0-254 client and server commands being networked.  
   - [ ] Figure out all the ifdefs and what not for diff Q2 protocols. Remove them, choose the best option to keep, and set us up for our own version protocol.
   - [X] Change the fact that message_packet_t now uses a short array, instead of a vec3_t for the position.

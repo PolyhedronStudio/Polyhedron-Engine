@@ -217,7 +217,7 @@ void CL_EmitDemoFrame(void)
         cls.demo.frames_dropped++;
 
         // warn the user if drop rate is too high
-        if (cls.demo.frames_written < 20 && cls.demo.frames_dropped == 50)
+        if (cls.demo.frames_written < 10 && cls.demo.frames_dropped == 50)
             Com_WPrintf("Too many demo frames don't fit into %" PRIz " bytes.\n"
                         "Try to increase 'cl_demomsglen' value and restart recording.\n",
                         cls.demo.buffer.maxsize);
