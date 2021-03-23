@@ -243,10 +243,6 @@ void CL_UpdateRecordingSetting(void)
     if (!cls.netchan) {
         return;
     }
-    // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
-    //if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
-    //    return;
-    //}
 
     if (cls.demo.recording) {
         rec = 1;
@@ -425,24 +421,10 @@ void CL_CheckForResend(void)
     }
 
     // add protocol dependent stuff
-    //switch (cls.serverProtocol) {
-    //// MSG: !! Removed: PROTOCOL_VERSION_R1Q2
-    ////case PROTOCOL_VERSION_R1Q2:
-    ////    Q_snprintf(tail, sizeof(tail), " %d %d",
-    ////               maxmsglen, PROTOCOL_VERSION_R1Q2_CURRENT);
-    ////    cls.quakePort = net_qport->integer & 0xff;
-    ////    break;
-    //case PROTOCOL_VERSION_Q2PRO:
-        Q_snprintf(tail, sizeof(tail), " %d %d %d %d",
-                   maxmsglen, net_chantype->integer, USE_ZLIB,
-                   PROTOCOL_VERSION_NAC_CURRENT);
-        cls.quakePort = net_qport->integer & 0xff;
-//        break;
-//    default:
-//        tail[0] = 0;
-//        cls.quakePort = net_qport->integer;
-//        break;
-//    }
+    Q_snprintf(tail, sizeof(tail), " %d %d %d %d",
+                maxmsglen, net_chantype->integer, USE_ZLIB,
+                PROTOCOL_VERSION_NAC_CURRENT);
+    cls.quakePort = net_qport->integer & 0xff;
 
     Cvar_BitInfo(userinfo, CVAR_USERINFO);
     Netchan_OutOfBand(NS_CLIENT, &cls.serverAddress,
@@ -1316,20 +1298,19 @@ static void CL_ConnectionlessPacket(void)
         cls.connect_time -= CONNECT_INSTANT; // fire immediately
         //cls.connect_count = 0;
 
-        // parse additional parameters
+        // Parse additional parameters
+        bool protocolFound = 0; // N&C: Added in to ensure we find a protocol, otherwise warn the player.
+
         j = Cmd_Argc();
         for (i = 2; i < j; i++) {
             s = Cmd_Argv(i);
+            // Protocol version check, to ensure it is similar.
             if (!strncmp(s, "p=", 2)) {
                 s += 2;
                 while (*s) {
                     k = strtoul(s, (char**)&s, 10);
-                    // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
-/*                  if (k == PROTOCOL_VERSION_R1Q2) {
-                        mask |= 1;
-                    } else */
                     if (k == PROTOCOL_VERSION_Q2PRO) {
-                        mask |= 2;
+                        protocolFound = true;
                     }
                     s = strchr(s, ',');
                     if (s == NULL) {
@@ -1340,24 +1321,15 @@ static void CL_ConnectionlessPacket(void)
             }
         }
 
-        // MSG: Removed: PROTOCOL_VERSION_R1Q2
-        // choose supported protocol
-        //switch (cls.serverProtocol) {
-        //case PROTOCOL_VERSION_Q2PRO:
-        //    break;
-        //    // MSG: Removed: PROTOCOL_VERSION_R1Q2
-        //    //if (mask & 2) {
-        //    //    break;
-        //    //}
-        //    //cls.serverProtocol = PROTOCOL_VERSION_R1Q2;
-        ////case PROTOCOL_VERSION_R1Q2:
-        ////    if (mask & 1) {
-        ////        break;
-        ////    }
-        ////default:
-        ////    cls.serverProtocol = PROTOCOL_VERSION_DEFAULT;
-        ////    break;
-        //}
+        // Inform in case the protocol was not found, or not equal to our own.
+        if (protocolFound != true) {
+            Com_DPrintf("Challenging protocol: p=%i did not equal PROTOCOL_VERSION_Q2PRO(%i)\n", protocolFound, PROTOCOL_VERSION_Q2PRO);
+        }
+
+        // Setup to use our own protocol. However, if needed later on, here is a shot to change it.
+        // This might be useful for backward compatibilities etc.
+        cls.serverProtocol = PROTOCOL_VERSION_Q2PRO;
+
         Com_DPrintf("Selected protocol %d\n", cls.serverProtocol);
 
         CL_CheckForResend();

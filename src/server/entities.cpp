@@ -89,9 +89,10 @@ static void SV_EmitPacketEntities(client_t         *client,
                 Vec3_Copy(oldent->origin, newent->origin);
                 Vec3_Copy(oldent->angles, newent->angles);
             }
-            if (Q2PRO_SHORTANGLES(client, newnum)) {
+            // MSG: !! Removed: Q2PRO_SHORTANGLES
+            //if (Q2PRO_SHORTANGLES(client, newnum)) {
                 flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES);
-            }
+            //}
             MSG_WriteDeltaEntity(oldent, newent, flags);
             oldindex++;
             newindex++;
@@ -112,9 +113,10 @@ static void SV_EmitPacketEntities(client_t         *client,
                 Vec3_Copy(oldent->origin, newent->origin);
                 Vec3_Copy(oldent->angles, newent->angles);
             }
-            if (Q2PRO_SHORTANGLES(client, newnum)) {
+            // MSG: !! Removed: Q2PRO_SHORTANGLES
+            //if (Q2PRO_SHORTANGLES(client, newnum)) {
                 flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES); // CPP: Cast flags |= MSG_ES_SHORTANGLES;
-            }
+            //}
             MSG_WriteDeltaEntity(oldent, newent, flags);
             newindex++;
             continue;
@@ -290,18 +292,19 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
 
     if (client->protocol == PROTOCOL_VERSION_Q2PRO) {
         // delta encode the clientNum
-        if (client->version < PROTOCOL_VERSION_Q2PRO_CLIENTNUM_FIX) {
+        // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO
+        /*if (client->version < PROTOCOL_VERSION_Q2PRO_CLIENTNUM_FIX) {
             if (!oldframe || frame->clientNum != oldframe->clientNum) {
                 extraflags |= EPS_CLIENTNUM;
                 MSG_WriteByte(frame->clientNum);
             }
-        } else {
+        } else {*/
             int clientNum = oldframe ? oldframe->clientNum : 0;
             if (clientNum != frame->clientNum) {
                 extraflags |= EPS_CLIENTNUM;
                 MSG_WriteByte(frame->clientNum);
             }
-        }
+        //}
     }
 
     // save 3 high bits of extraflags
@@ -536,7 +539,7 @@ void SV_BuildClientFrame(client_t *client)
 
         // add it to the circular client_entities array
         state = &svs.entities[svs.next_entity % svs.num_entities];
-        MSG_PackEntity(state, &es, Q2PRO_SHORTANGLES(client, e));
+        MSG_PackEntity(state, &es, true); // MSG: !! Removed Q2PRO_SHORTANGLES - Modify packentity to always use short angles??
 
 #if USE_FPS
         // fix old entity origins for clients not running at

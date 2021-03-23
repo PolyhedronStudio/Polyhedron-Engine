@@ -198,7 +198,7 @@ static void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overboun
 static void PM_TouchEntity(struct edict_s* ent) {
     // Ensure it is valid.
     if (ent == NULL) {
-        Com_LPrintf(PRINT_DEVELOPER, "Pm_TouchEntity: ent = NULL\n", PM_MAX_TOUCH_ENTS);
+        //Com_LPrintf(PRINT_DEVELOPER, "Pm_TouchEntity: ent = NULL\n", PM_MAX_TOUCH_ENTS);
         return;
     }
 
@@ -209,7 +209,7 @@ static void PM_TouchEntity(struct edict_s* ent) {
     }
     else {
         // Developer print.
-        Com_LPrintf(PRINT_DEVELOPER, "PM_TouchEntity: PM_MAX_TOUCH_ENTS(%i) amount of entities reached for this frame.\n", PM_MAX_TOUCH_ENTS);
+        //Com_LPrintf(PRINT_DEVELOPER, "PM_TouchEntity: PM_MAX_TOUCH_ENTS(%i) amount of entities reached for this frame.\n", PM_MAX_TOUCH_ENTS);
     }
 }
 

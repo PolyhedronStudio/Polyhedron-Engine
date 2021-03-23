@@ -1,0 +1,1 @@
+nac.exe +set developer 1 +set game basenac +set sv_cheats 1 +set maxclients 4

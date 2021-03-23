@@ -942,12 +942,13 @@ static void MVD_Say_f(mvd_client_t *client, int argnum)
             continue;
         }
 
-        if (cl->protocol == PROTOCOL_VERSION_Q2PRO &&
-            cl->version >= PROTOCOL_VERSION_Q2PRO_SERVER_STATE) {
+        // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_SERVER_STATE
+        //if (cl->protocol == PROTOCOL_VERSION_Q2PRO &&
+        //    cl->version >= PROTOCOL_VERSION_Q2PRO_SERVER_STATE) {
             SV_ClientPrintf(cl, PRINT_CHAT, "%s\n", text);
-        } else {
+       /* } else {
             SV_ClientPrintf(cl, PRINT_HIGH, "%s\n", hightext);
-        }
+        }*/
     }
 }
 

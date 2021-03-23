@@ -25,37 +25,34 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MAX_MSGLEN  0x8000  // max length of a message, 32k
 
+#define PROTOCOL_VERSION_UNKNOWN    -1  // In case when during a connect challange the protocol version differs.
 #define PROTOCOL_VERSION_OLD        26
+// The DEFAULT version is the minimum allowed for connecting.
+// This means that, even if a protocol version number falls in between
+// PROTOCOL_VERSION_OLD and PROTOCOL_VERSION_Q2PRO, it still needs to be
+// equal or higher than PROTOCOL_VERSION_DEFAULT.
 #define PROTOCOL_VERSION_DEFAULT    34
-#define PROTOCOL_VERSION_R1Q2       35
 #define PROTOCOL_VERSION_Q2PRO      36
+
+
 #define PROTOCOL_VERSION_MVD        37 // not used for UDP connections
 
-#define PROTOCOL_VERSION_R1Q2_MINIMUM           1903    // b6377
-//#define PROTOCOL_VERSION_R1Q2_UCMD              1904    // b7387 // MSG:!! Removed.
-//#define PROTOCOL_VERSION_R1Q2_LONG_SOLID        1905    // b7759 // MSG:!! Removed.
-#define PROTOCOL_VERSION_R1Q2_CURRENT           1905    // b7759
-
 #define PROTOCOL_VERSION_NAC_MINIMUM            1011    // r161
-#define PROTOCOL_VERSION_Q2PRO_UCMD             1012    // r179
-#define PROTOCOL_VERSION_Q2PRO_CLIENTNUM_FIX    1013    // r226
+//#define PROTOCOL_VERSION_Q2PRO_UCMD             1012    // r179 // MSG: !! Removed.
+//#define PROTOCOL_VERSION_Q2PRO_CLIENTNUM_FIX    1013    // r226
 #define PROTOCOL_VERSION_Q2PRO_LONG_SOLID       1014    // r243
-#define PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK   1015    // r335
-#define PROTOCOL_VERSION_Q2PRO_RESERVED         1016    // r364
-#define PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN      1017    // r1037-8
-#define PROTOCOL_VERSION_Q2PRO_SHORT_ANGLES     1018    // r1037-44
-#define PROTOCOL_VERSION_Q2PRO_SERVER_STATE     1019    // r1302
-#define PROTOCOL_VERSION_Q2PRO_EXTENDED_LAYOUT  1020    // r1354
+//#define PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK   1015    // r335 // MSG: !! Removed.
+//#define PROTOCOL_VERSION_Q2PRO_RESERVED         1016    // r364 // MSG: !! Removed.
+//#define PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN      1017    // r1037-8 // MSG: !! Removed.
+//#define PROTOCOL_VERSION_Q2PRO_SHORT_ANGLES     1018    // r1037-44 Q2PRO_SHORTANGLES Q2PRO_SHORTANGLES
+//#define PROTOCOL_VERSION_Q2PRO_SERVER_STATE     1019    // r1302 // MSG:!! Removed.
+//#define PROTOCOL_VERSION_Q2PRO_EXTENDED_LAYOUT  1020    // r1354
 #define PROTOCOL_VERSION_Q2PRO_ZLIB_DOWNLOADS   1021    // r1358
 #define PROTOCOL_VERSION_NAC_FIRST              1337                          // Always name after PROTOCOL_VERSION_NAC_FEATUREUPDATENAME 
 #define PROTOCOL_VERSION_NAC_CURRENT            PROTOCOL_VERSION_NAC_FIRST    // Always set to the latest version.
 
 #define PROTOCOL_VERSION_MVD_MINIMUM            2009    // r168
 #define PROTOCOL_VERSION_MVD_CURRENT            2010    // r177
-
-#define R1Q2_SUPPORTED(x) \
-    ((x) >= PROTOCOL_VERSION_R1Q2_MINIMUM && \
-     (x) <= PROTOCOL_VERSION_R1Q2_CURRENT)
 
 #define Q2PRO_SUPPORTED(x) \
     ((x) >= PROTOCOL_VERSION_NAC_MINIMUM && \

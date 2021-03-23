@@ -296,10 +296,6 @@ void CL_UpdateBlendSetting(void)
     if (cls.state < ca_connected) {
         return;
     }
-    // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
-    //if (cls.serverProtocol < PROTOCOL_VERSION_R1Q2) {
-    //    return;
-    //}
 
     MSG_WriteByte(clc_setting);
     MSG_WriteShort(CLS_NOBLEND);

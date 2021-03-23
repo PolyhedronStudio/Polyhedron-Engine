@@ -107,7 +107,7 @@ static void create_baselines(void)
         }
 
         base = *chunk + (i & SV_BASELINES_MASK);
-        MSG_PackEntity(base, &ent->s, Q2PRO_SHORTANGLES(sv_client, i));
+        MSG_PackEntity(base, &ent->s, true); // MSG: !! Removed: Q2PRO_SHORTANGLES - Modify MSG_PackEntity to always use shortangles.
 
 #if USE_MVD_CLIENT
         if (sv.state == ss_broadcast) {
@@ -156,9 +156,10 @@ static void write_baseline(entity_packed_t *base)
 {
     msgEsFlags_t flags = (msgEsFlags_t)(sv_client->esFlags | MSG_ES_FORCE); // CPP: Cast
 
-    if (Q2PRO_SHORTANGLES(sv_client, base->number)) {
+    // MSG: !! Removed: Q2PRO_SHORTANGLES
+    //if (Q2PRO_SHORTANGLES(sv_client, base->number)) {
         flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES); //flags |= MSG_ES_SHORTANGLES;
-    }
+    //}
 
     MSG_WriteDeltaEntity(NULL, base, flags);
 }
@@ -450,21 +451,15 @@ void SV_New_f(void)
 
     // send protocol specific stuff
     switch (sv_client->protocol) {
-    // MSG: !! Removed:     PROTOCOL_VERSION_R1Q2    
-    //case PROTOCOL_VERSION_R1Q2:
-    //    MSG_WriteByte(0);   // not enhanced
-    //    MSG_WriteShort(sv_client->version);
-    //    MSG_WriteByte(0);   // no advanced deltas
-    //    MSG_WriteByte(sv_client->pmp.strafehack);
-    //    break;
     case PROTOCOL_VERSION_Q2PRO:
         MSG_WriteShort(sv_client->version);
         MSG_WriteByte(sv.state);
         MSG_WriteByte(sv_client->pmp.strafehack);
         MSG_WriteByte(sv_client->pmp.qwmode);
-        if (sv_client->version >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {
+        // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_WATERJUM_HACK
+        //if (sv_client->version >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {
             MSG_WriteByte(sv_client->pmp.waterhack);
-        }
+        //}
         break;
     default:
         break;
@@ -697,7 +692,7 @@ static void SV_BeginDownload_f(void)
 #if USE_ZLIB
     // prefer raw deflate stream from .pkz if supported
     if (sv_client->protocol == PROTOCOL_VERSION_Q2PRO &&
-        sv_client->version >= PROTOCOL_VERSION_Q2PRO_ZLIB_DOWNLOADS &&
+        //sv_client->version >= PROTOCOL_VERSION_Q2PRO_ZLIB_DOWNLOADS && // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_ZLIB_DOWNLOADS
         sv_client->has_zlib && offset == 0) {
         downloadsize = FS_FOpenFile(name, &f, FS_MODE_READ | FS_FLAG_DEFLATE);
         if (f) {
@@ -1157,17 +1152,9 @@ static void SV_OldClientExecuteMove(void)
 
     lastframe = MSG_ReadLong();
 
-    // read all cmds
-    //if (sv_client->protocol == PROTOCOL_VERSION_R1Q2 &&       // MSG: !! Remove: PROTOCOL_VERSION_R1Q2_UCMD
-    //    sv_client->version >= PROTOCOL_VERSION_R1Q2_UCMD) {
-    //    MSG_ReadDeltaUsercmd_Hacked(NULL, &oldest);
-    //    MSG_ReadDeltaUsercmd_Hacked(&oldest, &oldcmd);
-    //    MSG_ReadDeltaUsercmd_Hacked(&oldcmd, &newcmd);
-    //} else {
     MSG_ReadDeltaUsercmd(NULL, &oldest);
     MSG_ReadDeltaUsercmd(&oldest, &oldcmd);
     MSG_ReadDeltaUsercmd(&oldcmd, &newcmd);
-//    }
 
     if (sv_client->state != cs_spawned) {
         SV_SetLastFrame(-1);
@@ -1567,10 +1554,6 @@ badbyte:
             break;
 
         case clc_setting:
-            // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
-            //if (client->protocol < PROTOCOL_VERSION_R1Q2)
-            //    goto badbyte;
-
             SV_ParseClientSetting();
             break;
 

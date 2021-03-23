@@ -352,8 +352,9 @@ static qboolean compress_message(client_t *client, int flags)
     if (client->settings[CLS_RECORDING]) {
         if (client->protocol != PROTOCOL_VERSION_Q2PRO)
             return false;
-        if (client->version < PROTOCOL_VERSION_Q2PRO_EXTENDED_LAYOUT)
-            return false;
+        // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_EXTENDED_LAYOUT
+        //if (client->version < PROTOCOL_VERSION_Q2PRO_EXTENDED_LAYOUT)
+        //    return false;
     }
 
     // compress only sufficiently large layouts

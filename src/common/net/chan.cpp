@@ -230,10 +230,6 @@ static size_t NetchanOld_Transmit(netchan_t *netchan, size_t length, const void 
 #if USE_CLIENT
     // send the qport if we are a client
     if (netchan->sock == NS_CLIENT) {
-        // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
-/*        if (netchan->protocol < PROTOCOL_VERSION_R1Q2) {
-            SZ_WriteShort(&send, netchan->qport);
-        } else */
         if (netchan->qport) {
             SZ_WriteByte(&send, netchan->qport);
         }
@@ -300,10 +296,6 @@ static qboolean NetchanOld_Process(netchan_t *netchan)
     if (netchan->sock == NS_SERVER)
 #endif
     {
-        // MSG: !! Removed: PROTOCOL_VERSION_R1Q2
-/*        if (netchan->protocol < PROTOCOL_VERSION_R1Q2) {
-            MSG_ReadShort();
-        } else */
         if (netchan->qport) {
             MSG_ReadByte();
         }

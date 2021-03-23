@@ -262,7 +262,6 @@ int MSG_WriteDeltaUsercmd(const usercmd_t *from, const usercmd_t *cmd, int versi
 
     MSG_WriteByte(bits);
 
-    //if (version >= PROTOCOL_VERSION_R1Q2_UCMD) { MSG: !! Remove: PROTOCOL_VERSION_R1Q2_UCMD
     if (bits & CM_BUTTONS) {
         if ((bits & CM_FORWARD) && !(cmd->forwardmove % 5)) {
             buttons |= BUTTON_FORWARD;
@@ -275,7 +274,6 @@ int MSG_WriteDeltaUsercmd(const usercmd_t *from, const usercmd_t *cmd, int versi
         }
         MSG_WriteByte(buttons);
     }
-    //}
 
     if (bits & CM_ANGLE1)
         MSG_WriteShort(cmd->angles[0]);
@@ -306,10 +304,6 @@ int MSG_WriteDeltaUsercmd(const usercmd_t *from, const usercmd_t *cmd, int versi
         }
     }
 
-    //if (version < PROTOCOL_VERSION_R1Q2_UCMD) { // MSG: !! Remove: PROTOCOL_VERSION_R1Q2_UCMD
-    //    if (bits & CM_BUTTONS)
-    //        MSG_WriteByte(cmd->buttons);
-    //}
     if (bits & CM_IMPULSE)
         MSG_WriteByte(cmd->impulse);
 
@@ -436,11 +430,11 @@ int MSG_WriteDeltaUsercmd_Enhanced(const usercmd_t *from,
         MSG_WriteBits(cmd->angles[2], -16);
     }
 
-    if (version >= PROTOCOL_VERSION_Q2PRO_UCMD) {
+//    if (version >= PROTOCOL_VERSION_Q2PRO_UCMD) { // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_UCMD
         count = -10;
-    } else {
-        count = -16;
-    }
+    //} else {
+    //    count = -16;
+    //}
 
     if (bits & CM_FORWARD) {
         MSG_WriteBits(cmd->forwardmove, count);
@@ -1852,11 +1846,11 @@ void MSG_ReadDeltaUsercmd_Enhanced(const usercmd_t *from,
     }
 
 // read movement
-    if (version >= PROTOCOL_VERSION_Q2PRO_UCMD) {
+    //if (version >= PROTOCOL_VERSION_Q2PRO_UCMD) { // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_UCMD
         count = -10;
-    } else {
-        count = -16;
-    }
+    //} else {
+    //    count = -16;
+    //}
 
     if (bits & CM_FORWARD) {
         to->forwardmove = MSG_ReadBits(count);
