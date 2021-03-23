@@ -962,7 +962,7 @@ static void CL_SendDefaultCmd(void)
 
     // save the position for a checksum byte
     checksumIndex = 0;
-    // MSG: !! PROTOCOL 
+    // MSG: !! PROTOCOL - This one seemed to be needed for old protocol, and thus demo recording.
     //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
     //    checksumIndex = msg_write.cursize;
     //    SZ_GetSpace(&msg_write, 1);
@@ -992,7 +992,7 @@ static void CL_SendDefaultCmd(void)
     MSG_WriteDeltaUsercmd(oldcmd, cmd, cls.protocolVersion);
     MSG_WriteByte(cl.lightlevel);
 
-    // MSG: !! PROTOCOL
+    // MSG: !! PROTOCOL - This one seemed to be needed for old protocol, and thus demo recording.
     //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
     //    // calculate a checksum over the move commands
     //    msg_write.data[checksumIndex] = COM_BlockSequenceCRCByte(

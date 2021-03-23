@@ -236,7 +236,7 @@ static void set_active_state(void)
         // set initial cl.predicted_origin and cl.predicted_angles
         Vec3_Copy(cl.frame.ps.pmove.origin, cl.predicted_origin);
         Vec3_Copy(cl.frame.ps.pmove.velocity, cl.predicted_velocity);
-        // MSG: !!  && clgi.GetServerProtocol() > PROTOCOL_VERSION_DEFAULT
+
         if (cl.frame.ps.pmove.type < PM_DEAD) {
             // enhanced servers don't send viewangles
             // N&C: Let the client game module predict angles.

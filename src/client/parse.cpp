@@ -290,7 +290,7 @@ static void CL_ParseFrame(int extrabits)
         frame.areabytes = 0;
     }
 
-    // MSG: !!
+    // MSG: !! TODO: Look at demo code and see if we can remove NETCHAN_OLD.
     //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
     //    if (MSG_ReadByte() != svc_playerinfo) {
     //        Com_Error(ERR_DROP, "%s: not playerinfo", __func__);
@@ -525,7 +525,7 @@ static void CL_ParseServerData(void)
                     "NaC server reports unsupported protocol version %d.\n"
                     "Current client version is %d.", i, PROTOCOL_VERSION_NAC_CURRENT);
     }
-    Com_DPrintf("Using minor Q2PRO protocol version %d\n", i);
+    Com_DPrintf("Using minor NaC protocol version %d\n", i);
     cls.protocolVersion = i;
     
     // Parse N&C server state.

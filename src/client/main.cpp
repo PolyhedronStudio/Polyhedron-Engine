@@ -1353,7 +1353,7 @@ static void CL_ConnectionlessPacket(void)
             return;
         }
 
-        // MSG: !! TODO: Remove NETCHAN_OLD?
+        // MSG: !! TODO: Look at demo code and see if we can remove NETCHAN_OLD.
         if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
             type = NETCHAN_NEW;
         } else {

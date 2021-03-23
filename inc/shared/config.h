@@ -1,5 +1,5 @@
 //
-// Q2PRO configuration file for MSVC
+// Nail & Crescent configuration file for MSVC
 //
 
 // expand to generate version string
