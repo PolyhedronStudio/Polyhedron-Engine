@@ -26,7 +26,8 @@ When finished we have a stable base to work from, one that we can start making t
   - [ ] Look into UDP packet size limit, what do we do about this?
   - [ ] Remove the 5 / 3 bits method in the network cmd. This way we can have 0-254 client and server commands being networked.  
   - [ ] Look into ZLib downloading.
-  - [ ] Figure out all the ifdefs and what not for diff Q2 protocols. Remove them, choose the best option to keep, and set us up for our own version protocol.
+  - [ ] Look into the ES_ flags, most were from the Q2 protocols, they were used to enable/disable them depending on which version. We can use these slots for other things, obviously._
+  - [X] Figure out all the ifdefs and what not for diff Q2 protocols. Remove them, choose the best option to keep, and set us up for our own version protocol.
   - [X] Change the fact that message_packet_t now uses a short array, instead of a vec3_t for the position.
     - [X] Fix emit_snd, and investigate all code related to svc_sound so that it uses vec3_t and MSG_xxxxFloat functions.
     - [X] Change MSG_Write/ReadPos to use MSG_Write/ReadFloat instead, this is safe after fixing the above.
@@ -114,7 +115,11 @@ us in our discord.
 
   3. If all goes well, you will now have a nac, nacded, basenac/clgame.so, and basenac/svgame.so. If not, we're still looking for help in this department. Feel free to reach out to us on our [Discord](https://discord.gg/5tadZ96cvY) if interested.
 
-## Photo Mode
+## Demo Recording/Photo Mode
+
+Due to protocol changes being required, while Quake 2 Pro by default still records demo in the old vanilla protocol, this feature is of now broken.
+It'll likely make it back on a rainy day. For now, perfect must never be the enemy of good, and get in the way with our priorities. Which are making a fun game, and a kickass engine. 
+Feel free to help us out, fork our project, and hack away. In case of any questions related to this, please reach out to us on [Discord](https://discord.gg/5tadZ96cvY)
 
 When a single player game or demo playback is paused, normally with the `pause` key, the photo mode activates. 
 In this mode, denoisers and some other real-time rendering approximations are disabled, and the image is produced
