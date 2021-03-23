@@ -899,15 +899,21 @@ void CLG_CalcViewValues(void)
     if (clgi.IsDemoPlayback()) {
         LerpAngles(ops->viewangles, ps->viewangles, lerp, cl->refdef.viewangles);
     }
+    //else if (ops->pmove.type < PM_DEAD) {
+    //    // lerp from predicted angles, since enhanced servers
+    //    // do not send viewangles each frame
+    //    LerpAngles(cl->predicted_angles, ps->viewangles, lerp, cl->refdef.viewangles);
+    //}
+    // MSG: !! Removed: PROTOCOL_VERSION_DEFAULT
     else if (ps->pmove.type < PM_DEAD) {
         // use predicted values
         Vec3_Copy(cl->predicted_angles, cl->refdef.viewangles);
     }
-    else if (ops->pmove.type < PM_DEAD && clgi.GetServerProtocol() > PROTOCOL_VERSION_DEFAULT) {
-        // lerp from predicted angles, since enhanced servers
-        // do not send viewangles each frame
-        LerpAngles(cl->predicted_angles, ps->viewangles, lerp, cl->refdef.viewangles);
-    }
+    //else if (ops->pmove.type < PM_DEAD && clgi.GetServerProtocol() > PROTOCOL_VERSION_DEFAULT) {
+    //    // lerp from predicted angles, since enhanced servers
+    //    // do not send viewangles each frame
+    //    LerpAngles(cl->predicted_angles, ps->viewangles, lerp, cl->refdef.viewangles);
+    //}
     else {
         // just use interpolated values
         LerpAngles(ops->viewangles, ps->viewangles, lerp, cl->refdef.viewangles);

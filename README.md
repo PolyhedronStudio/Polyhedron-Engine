@@ -25,6 +25,7 @@ When finished we have a stable base to work from, one that we can start making t
 - [ ] Messaging/Networking - Marked as // MSG: !! ...
   - [ ] Look into UDP packet size limit, what do we do about this?
   - [ ] Remove the 5 / 3 bits method in the network cmd. This way we can have 0-254 client and server commands being networked.  
+  - [ ] Look into ZLib downloading.
   - [ ] Figure out all the ifdefs and what not for diff Q2 protocols. Remove them, choose the best option to keep, and set us up for our own version protocol.
   - [X] Change the fact that message_packet_t now uses a short array, instead of a vec3_t for the position.
     - [X] Fix emit_snd, and investigate all code related to svc_sound so that it uses vec3_t and MSG_xxxxFloat functions.

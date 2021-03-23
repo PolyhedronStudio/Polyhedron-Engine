@@ -37,7 +37,7 @@ FRAME PARSING
 
 static inline qboolean entity_optimized(const entity_state_t *state)
 {
-    if (cls.serverProtocol != PROTOCOL_VERSION_Q2PRO)
+    if (cls.serverProtocol != PROTOCOL_VERSION_NAC)
         return false;
 
     if (state->number != cl.frame.clientNum + 1)
@@ -236,8 +236,8 @@ static void set_active_state(void)
         // set initial cl.predicted_origin and cl.predicted_angles
         Vec3_Copy(cl.frame.ps.pmove.origin, cl.predicted_origin);
         Vec3_Copy(cl.frame.ps.pmove.velocity, cl.predicted_velocity);
-        if (cl.frame.ps.pmove.type < PM_DEAD &&
-            cls.serverProtocol > PROTOCOL_VERSION_DEFAULT) {
+        // MSG: !!  && clgi.GetServerProtocol() > PROTOCOL_VERSION_DEFAULT
+        if (cl.frame.ps.pmove.type < PM_DEAD) {
             // enhanced servers don't send viewangles
             // N&C: Let the client game module predict angles.
             CL_GM_PredictAngles();

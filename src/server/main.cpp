@@ -554,7 +554,7 @@ static void SVC_Info(void)
         return; // ignore in single player
 
     version = atoi(Cmd_Argv(1));
-    if (version < PROTOCOL_VERSION_DEFAULT || version > PROTOCOL_VERSION_Q2PRO)
+    if (version != PROTOCOL_VERSION_NAC)
         return; // ignore invalid versions
 
     len = Q_scnprintf(buffer, sizeof(buffer),
@@ -623,7 +623,7 @@ static void SVC_GetChallenge(void)
 
     // send it back
     Netchan_OutOfBand(NS_SERVER, &net_from,
-                      "challenge %u p=34,35,36", challenge);
+                      "challenge %i p=%i", challenge, PROTOCOL_VERSION_NAC);
 }
 
 /*
@@ -663,13 +663,12 @@ static qboolean parse_basic_params(conn_params_t *p)
     p->challenge = atoi(Cmd_Argv(3));
 
     // check for invalid protocol version
-    if (p->protocol < PROTOCOL_VERSION_OLD ||
-        p->protocol > PROTOCOL_VERSION_Q2PRO)
+    if (p->protocol != PROTOCOL_VERSION_NAC)
         return reject("Unsupported protocol version %d.\n", p->protocol);
 
     // check for valid, but outdated protocol version
     if (p->protocol < PROTOCOL_VERSION_DEFAULT)
-        return reject("You need Quake 2 version 3.19 or higher.\n");
+        return reject("Unsupported protocol version %i, You need protocol version (%i) or higher.\n", p->protocol, PROTOCOL_VERSION_DEFAULT);
 
     return true;
 }
@@ -784,39 +783,33 @@ static qboolean parse_enhanced_params(conn_params_t *p)
 {
     const char *s;
 
-    if (p->protocol == PROTOCOL_VERSION_Q2PRO) {
-        // set netchan type
-        s = Cmd_Argv(6);
-        if (*s) {
-            p->nctype = atoi(s);
-            if (p->nctype < NETCHAN_OLD || p->nctype > NETCHAN_NEW)
-                return reject("Invalid netchan type.\n");
-        } else {
-            p->nctype = NETCHAN_NEW;
-        }
+    // set netchan type
+    s = Cmd_Argv(6);
+    if (*s) {
+        p->nctype = atoi(s);
+        if (p->nctype < NETCHAN_OLD || p->nctype > NETCHAN_NEW)
+            return reject("Invalid netchan type.\n");
+    } else {
+        p->nctype = NETCHAN_NEW;
+    }
 
-        // set zlib
-        s = Cmd_Argv(7);
-        if (*s) {
-            p->has_zlib = !!atoi(s);
-        } else {
-            p->has_zlib = true;
-        }
+    // set zlib
+    s = Cmd_Argv(7);
+    if (*s) {
+        p->has_zlib = !!atoi(s);
+    } else {
+        p->has_zlib = true;
+    }
 
-        // set minor protocol version
-        s = Cmd_Argv(8);
-        if (*s) {
-            p->version = atoi(s);
-            clamp(p->version,
-                  PROTOCOL_VERSION_NAC_MINIMUM,
-                  PROTOCOL_VERSION_NAC_CURRENT);
-            // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_RESERVED
-            //if (p->version == PROTOCOL_VERSION_Q2PRO_RESERVED) {
-            //  p->version--; // never use this version
-            //}
-        } else {
-            p->version = PROTOCOL_VERSION_NAC_MINIMUM;
-        }
+    // set minor protocol version
+    s = Cmd_Argv(8);
+    if (*s) {
+        p->version = atoi(s);
+        clamp(p->version,
+                PROTOCOL_VERSION_NAC_MINIMUM,
+                PROTOCOL_VERSION_NAC_CURRENT);
+    } else {
+        p->version = PROTOCOL_VERSION_NAC_MINIMUM;
     }
 
     return true;
@@ -993,28 +986,16 @@ static void init_pmove_and_es_flags(client_t *newcl)
     force = 1;
     newcl->pmp.strafehack = sv_strafejump_hack->integer >= force ? true : false;
 
-    // q2pro extensions
-    force = 2;
-    if (newcl->protocol == PROTOCOL_VERSION_Q2PRO) {
-        if (sv_qwmod->integer) {
-            ge->PMoveEnableQW(&newcl->pmp);
-        }
-        newcl->pmp.flyhack = true;
-        newcl->pmp.flyfriction = 4;
-        newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_UMASK); // CPP: Cast bitflag
-        if (newcl->version >= PROTOCOL_VERSION_Q2PRO_LONG_SOLID) {
-            newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_LONGSOLID); // CPP: Cast bitflag
-        }
-        // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN)
-        //if (newcl->version >= PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN) {
-            newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
-        //}
-        // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_WATERJUM_HACK
-        //if (newcl->version >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {
-            force = 1;
-        //}
+    if (sv_qwmod->integer) {
+        ge->PMoveEnableQW(&newcl->pmp);
     }
-    newcl->pmp.waterhack = sv_waterjump_hack->integer >= force ? true : false;
+    newcl->pmp.flyhack = true;
+    newcl->pmp.flyfriction = 4;
+    newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_UMASK); // CPP: Cast bitflag
+    newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_LONGSOLID); // CPP: Cast bitflag
+    newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
+
+    newcl->pmp.waterhack = (sv_waterjump_hack->integer != 0 ? true : false);
 }
 
 static void send_connect_packet(client_t *newcl, int nctype)
@@ -1024,12 +1005,11 @@ static void send_connect_packet(client_t *newcl, int nctype)
     const char *dlstring1   = "";
     const char *dlstring2   = "";
 
-    if (newcl->protocol == PROTOCOL_VERSION_Q2PRO) {
-        if (nctype == NETCHAN_NEW)
-            ncstring = " nc=1";
-        else
-            ncstring = " nc=0";
-    }
+    // MSG: !! Removed: PROTOCOL_VERSION_NAC - TODO: NETCHAN_NEW?
+    if (nctype == NETCHAN_NEW)
+        ncstring = " nc=1";
+    else
+        ncstring = " nc=0";
 
     if (!sv_force_reconnect->string[0] || newcl->reconnect_var[0])
         acstring = AC_ClientConnect(newcl);
@@ -1155,11 +1135,12 @@ static void SVC_DirectConnect(void)
 
     SV_InitClientSend(newcl);
 
-    if (newcl->protocol == PROTOCOL_VERSION_DEFAULT) {
-        newcl->WriteFrame = SV_WriteFrameToClient_Default;
-    } else {
+    // MSG: !!
+    //if (newcl->protocol == PROTOCOL_VERSION_DEFAULT) {
+    //    newcl->WriteFrame = SV_WriteFrameToClient_Default;
+    //} else {
         newcl->WriteFrame = SV_WriteFrameToClient_Enhanced;
-    }
+//    }
 
     // loopback client doesn't need to reconnect
     if (NET_IsLocalAddress(&net_from)) {
@@ -1459,12 +1440,14 @@ static void SV_PacketEvent(void)
 
         // read the qport out of the message so we can fix up
         // stupid address translating routers
-        if (client->protocol == PROTOCOL_VERSION_DEFAULT) {
+        // MSG: !!
+/*        if (client->protocol == PROTOCOL_VERSION_DEFAULT) {
             qport = msg_read.data[8] | (msg_read.data[9] << 8);
             if (netchan->qport != qport) {
                 continue;
             }
-        } else if (netchan->qport) {
+        } else */
+        if (netchan->qport) {
             qport = msg_read.data[8];
             if (netchan->qport != qport) {
                 continue;

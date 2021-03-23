@@ -962,10 +962,11 @@ static void CL_SendDefaultCmd(void)
 
     // save the position for a checksum byte
     checksumIndex = 0;
-    if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
-        checksumIndex = msg_write.cursize;
-        SZ_GetSpace(&msg_write, 1);
-    }
+    // MSG: !! PROTOCOL 
+    //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
+    //    checksumIndex = msg_write.cursize;
+    //    SZ_GetSpace(&msg_write, 1);
+    //}
 
     // let the server know what the last frame we
     // got was, so the next message can be delta compressed
@@ -991,13 +992,14 @@ static void CL_SendDefaultCmd(void)
     MSG_WriteDeltaUsercmd(oldcmd, cmd, cls.protocolVersion);
     MSG_WriteByte(cl.lightlevel);
 
-    if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
-        // calculate a checksum over the move commands
-        msg_write.data[checksumIndex] = COM_BlockSequenceCRCByte(
-                                            msg_write.data + checksumIndex + 1,
-                                            msg_write.cursize - checksumIndex - 1,
-                                            cls.netchan->outgoing_sequence);
-    }
+    // MSG: !! PROTOCOL
+    //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
+    //    // calculate a checksum over the move commands
+    //    msg_write.data[checksumIndex] = COM_BlockSequenceCRCByte(
+    //                                        msg_write.data + checksumIndex + 1,
+    //                                        msg_write.cursize - checksumIndex - 1,
+    //                                        cls.netchan->outgoing_sequence);
+    //}
 
     P_FRAMES++;
 
@@ -1154,7 +1156,7 @@ static void CL_SendUserinfo(void)
         MSG_WriteByte(clc_userinfo);
         MSG_WriteData(userinfo, len + 1);
         MSG_FlushTo(&cls.netchan->message);
-    } else if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
+    } else if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
         Com_DDPrintf("%s: %u: %d updates\n", __func__, com_framenum,
                      cls.userinfo_modified);
         for (i = 0; i < cls.userinfo_modified; i++) {
@@ -1210,7 +1212,7 @@ void CL_SendCmd(void)
     // send a userinfo update if needed
     CL_SendUserinfo();
 
-    if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO && cl_batchcmds->integer) {
+    if (cls.serverProtocol == PROTOCOL_VERSION_NAC && cl_batchcmds->integer) {
         CL_SendBatchedCmd();
     } else {
         CL_SendDefaultCmd();

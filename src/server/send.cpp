@@ -349,13 +349,11 @@ static qboolean compress_message(client_t *client, int flags)
         return false;
 
     // older clients have problems seamlessly writing svc_zpackets
-    if (client->settings[CLS_RECORDING]) {
-        if (client->protocol != PROTOCOL_VERSION_Q2PRO)
-            return false;
-        // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_EXTENDED_LAYOUT
-        //if (client->version < PROTOCOL_VERSION_Q2PRO_EXTENDED_LAYOUT)
-        //    return false;
-    }
+    // MSG: !! TODO: SAFE?
+    //if (client->settings[CLS_RECORDING]) {
+    //    if (client->protocol != PROTOCOL_VERSION_NAC)
+    //        return false;
+    //}
 
     // compress only sufficiently large layouts
     if (msg_write.cursize < client->netchan->maxpacketlen / 2)
@@ -561,7 +559,7 @@ static void emit_snd(client_t *client, message_packet_t *msg)
     MSG_WriteShort(msg->sendchan);
 
     if (flags & SND_POS) {
-        MSG_WritePos(msg->pos); // MSG: !! This was a for loop, iterating over the shorts passing them to MSG_WriteShort
+        MSG_WritePos(msg->pos);
     }
 }
 

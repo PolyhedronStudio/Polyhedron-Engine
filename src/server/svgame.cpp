@@ -621,9 +621,10 @@ static void PF_StartSound(edict_t *edict, int channel,
         }
 
         // default client doesn't know that bmodels have weird origins
-        if (edict->solid == SOLID_BSP && client->protocol == PROTOCOL_VERSION_DEFAULT) {
-            flags |= SND_POS;
-        }
+        // MSG: !! Removed: PROTOCOL_VERSION_DEFAULT
+        //if (edict->solid == SOLID_BSP && client->protocol == PROTOCOL_VERSION_DEFAULT) {
+        //    flags |= SND_POS;
+        //}
 
         msg = LIST_FIRST(message_packet_t, &client->msg_free_list, entry);
 

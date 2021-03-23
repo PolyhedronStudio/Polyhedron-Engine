@@ -176,13 +176,6 @@ typedef struct {
 
 #define MAX_TOTAL_ENT_LEAFS        128
 
-// hack for smooth BSP model rotation
-// MSG: !! Removed: Q2PRO_SHORTANGLES
-//#define Q2PRO_SHORTANGLES(c, e) \
-//    ((c)->protocol == PROTOCOL_VERSION_Q2PRO && \
-//     sv.state == ss_game && \
-//     EDICT_POOL(c, e)->solid == SOLID_BSP)
-
 typedef enum {
     cs_free,        // can be reused for a new connection
     cs_zombie,      // client has been disconnected, but don't reuse
@@ -220,7 +213,7 @@ typedef enum {
 
 typedef struct {
     list_t              entry;
-    uint16_t            cursize;    // zero means sound packet
+    uint16_t            cursize;    // Zero means sound packet
     union {
         uint8_t         data[MSG_TRESHOLD];
         struct {
@@ -230,7 +223,7 @@ typedef struct {
             uint8_t     volume;
             uint8_t     attenuation;
             uint8_t     timeofs;
-            vec3_t      pos;     // saved in case entity is freed // MSG: !! Modified from int16_t[3] to vec3_t
+            vec3_t      pos;     // Saved in case entity is freed
         };
     };
 } message_packet_t;

@@ -597,9 +597,10 @@ static void MVD_ParseSound(mvd_t *mvd, int extrabits)
         }
 
         // default client doesn't know that bmodels have weird origins
-        if (entity->solid == SOLID_BSP && cl->protocol == PROTOCOL_VERSION_DEFAULT) {
-            flags |= SND_POS;
-        }
+        // MSG: !!
+        //if (entity->solid == SOLID_BSP && cl->protocol == PROTOCOL_VERSION_DEFAULT) {
+        //    flags |= SND_POS;
+        //}
 
         msg = LIST_FIRST(message_packet_t, &cl->msg_free_list, entry);
 

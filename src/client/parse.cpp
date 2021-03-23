@@ -205,43 +205,28 @@ static void CL_ParseFrame(int extrabits)
     cl.frameflags = 0;
 
     extraflags = 0;
-    if (cls.serverProtocol > PROTOCOL_VERSION_DEFAULT) {
-        bits = MSG_ReadLong();
+    bits = MSG_ReadLong();
 
-        currentframe = bits & FRAMENUM_MASK;
-        delta = bits >> FRAMENUM_BITS;
+    currentframe = bits & FRAMENUM_MASK;
+    delta = bits >> FRAMENUM_BITS;
 
-        if (delta == 31) {
-            deltaframe = -1;
-        } else {
-            deltaframe = currentframe - delta;
-        }
-
-        bits = MSG_ReadByte();
-
-        suppressed = bits & SUPPRESSCOUNT_MASK;
-        if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
-            if (suppressed & FF_CLIENTPRED) {
-                // CLIENTDROP is implied, don't draw both
-                suppressed &= ~FF_CLIENTDROP;
-            }
-            cl.frameflags |= suppressed;
-        } else if (suppressed) {
-            cl.frameflags |= FF_SUPPRESSED;
-        }
-        extraflags = (extrabits << 4) | (bits >> SUPPRESSCOUNT_BITS);
+    if (delta == 31) {
+        deltaframe = -1;
     } else {
-        currentframe = MSG_ReadLong();
-        deltaframe = MSG_ReadLong();
-
-        // BIG HACK to let old demos continue to work
-        if (cls.serverProtocol != PROTOCOL_VERSION_OLD) {
-            suppressed = MSG_ReadByte();
-            if (suppressed) {
-                cl.frameflags |= FF_SUPPRESSED;
-            }
-        }
+        deltaframe = currentframe - delta;
     }
+
+    bits = MSG_ReadByte();
+
+    suppressed = bits & SUPPRESSCOUNT_MASK;
+    if (suppressed & FF_CLIENTPRED) {
+        // CLIENTDROP is implied, don't draw both
+        suppressed &= ~FF_CLIENTDROP;
+    }
+    cl.frameflags |= suppressed;
+
+    extraflags = (extrabits << 4) | (bits >> SUPPRESSCOUNT_BITS);
+
 
     frame.number = currentframe;
     frame.delta = deltaframe;
@@ -305,50 +290,29 @@ static void CL_ParseFrame(int extrabits)
         frame.areabytes = 0;
     }
 
-    if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
-        if (MSG_ReadByte() != svc_playerinfo) {
-            Com_Error(ERR_DROP, "%s: not playerinfo", __func__);
-        }
-    }
+    // MSG: !!
+    //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
+    //    if (MSG_ReadByte() != svc_playerinfo) {
+    //        Com_Error(ERR_DROP, "%s: not playerinfo", __func__);
+    //    }
+    //}
 
     SHOWNET(2, "%3" PRIz ":playerinfo\n", msg_read.readcount - 1);
 
     // parse playerstate
     bits = MSG_ReadShort();
-    if (cls.serverProtocol > PROTOCOL_VERSION_DEFAULT) {
-        MSG_ParseDeltaPlayerstate_Enhanced(from, &frame.ps, bits, extraflags);
+    MSG_ParseDeltaPlayerstate_Enhanced(from, &frame.ps, bits, extraflags);
 #ifdef _DEBUG
-        if (cl_shownet->integer > 2 && (bits || extraflags)) {
-            MSG_ShowDeltaPlayerstateBits_Enhanced(bits, extraflags);
-            Com_LPrintf(PRINT_DEVELOPER, "\n");
-        }
-#endif
-        if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
-            // parse clientNum
-            if (extraflags & EPS_CLIENTNUM) {
-                frame.clientNum = MSG_ReadByte();
-            } else if (oldframe) {
-                frame.clientNum = oldframe->clientNum;
-            }
-        } else {
-            frame.clientNum = cl.clientNum;
-        }
-    } else {
-        MSG_ParseDeltaPlayerstate_Default(from, &frame.ps, bits);
-#ifdef _DEBUG
-        if (cl_shownet->integer > 2 && bits) {
-            MSG_ShowDeltaPlayerstateBits_Default(bits);
-            Com_LPrintf(PRINT_DEVELOPER, "\n");
-        }
-#endif
-        frame.clientNum = cl.clientNum;
+    if (cl_shownet->integer > 2 && (bits || extraflags)) {
+        MSG_ShowDeltaPlayerstateBits_Enhanced(bits, extraflags);
+        Com_LPrintf(PRINT_DEVELOPER, "\n");
     }
-
-    // parse packetentities
-    if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
-        if (MSG_ReadByte() != svc_packetentities) {
-            Com_Error(ERR_DROP, "%s: not packetentities", __func__);
-        }
+#endif
+    // parse clientNum
+    if (extraflags & EPS_CLIENTNUM) {
+        frame.clientNum = MSG_ReadByte();
+    } else if (oldframe) {
+        frame.clientNum = oldframe->clientNum;
     }
 
     SHOWNET(2, "%3" PRIz ":packetentities\n", msg_read.readcount - 1);
@@ -506,11 +470,10 @@ static void CL_ParseServerData(void)
         if (!cls.demo.playback) {
             Com_Error(ERR_DROP, "Requested protocol version %d, but server returned %d.",
                       cls.serverProtocol, protocol);
-        }
-        // BIG HACK to let demos from release work with the 3.0x patch!!!
-        if (protocol < PROTOCOL_VERSION_OLD || protocol > PROTOCOL_VERSION_Q2PRO) {
-            Com_Error(ERR_DROP, "Demo uses unsupported protocol version %d.", protocol);
-        }
+        }/* else {
+            Com_Error(ERR_DROP, "Demo uses unsupported protocol version %d", protocol);
+        }*/
+
         cls.serverProtocol = protocol;
     }
 
@@ -554,57 +517,47 @@ static void CL_ParseServerData(void)
     // setup default server state
     cl.serverstate = ss_game;
 
-    if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
-        i = MSG_ReadShort();
-        if (!Q2PRO_SUPPORTED(i)) {
-            Com_Error(ERR_DROP,
-                      "Q2PRO server reports unsupported protocol version %d.\n"
-                      "Current client version is %d.", i, PROTOCOL_VERSION_NAC_CURRENT);
-        }
-        Com_DPrintf("Using minor Q2PRO protocol version %d\n", i);
-        cls.protocolVersion = i;
-        i = MSG_ReadByte();
-        // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_SERVER_STATE
-        //if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_SERVER_STATE) {
-            Com_DPrintf("Q2PRO server state %d\n", i);
-            cl.serverstate = i;
-        //}
-        i = MSG_ReadByte();
-        if (i) {
-            Com_DPrintf("Q2PRO strafejump hack enabled\n");
-            cge->pmoveParams->strafehack = true;
-        }
-        i = MSG_ReadByte(); //atu QWMod
-        if (i) {
-            Com_DPrintf("Q2PRO QW mode enabled\n");
-            // N&C: Let the client game module handle this.
-            CL_GM_PMoveEnableQW(cge->pmoveParams);
-            //PMoveEnableQW(&cl.pmp);
-        }
-        cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_UMASK); // CPP: IMPROVE: cl.esFlags |= MSG_ES_UMASK;
-        if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_LONG_SOLID) {
-            cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_LONGSOLID); // CPP: IMPROVE: cl.esFlags |= MSG_ES_LONGSOLID;
-        }
-        // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN
-        //if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN) {
-            cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
-        //}
-        // MSG: !! Removed:PROTOCOL_VERSION_Q2PRO_SHORT_ANGLES
-        //if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_SHORT_ANGLES) {
-            cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_SHORTANGLES); // CPP: IMPROVE: cl.esFlags |= MSG_ES_SHORTANGLES;
-        //}
-        // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO_WATERJUM_HACK
-        //if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {
-            i = MSG_ReadByte();
-            if (i) {
-                Com_DPrintf("Q2PRO waterjump hack enabled\n");
-                cge->pmoveParams->waterhack = true;
-            }
-        //}
-        cge->pmoveParams->speedmult = 2;
-        cge->pmoveParams->flyhack = true; // fly hack is unconditionally enabled
-        cge->pmoveParams->flyfriction = 4;
+    // MSG: !! Removed: PROTOCOL_VERSION_NAC
+    //if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
+    i = MSG_ReadShort();
+    if (!NAC_PROTOCOL_SUPPORTED(i)) {
+        Com_Error(ERR_DROP,
+                    "NaC server reports unsupported protocol version %d.\n"
+                    "Current client version is %d.", i, PROTOCOL_VERSION_NAC_CURRENT);
     }
+    Com_DPrintf("Using minor Q2PRO protocol version %d\n", i);
+    cls.protocolVersion = i;
+    
+    // Parse N&C server state.
+    i = MSG_ReadByte();
+    Com_DPrintf("NaC server state %d\n", i);
+    cl.serverstate = i;
+
+    i = MSG_ReadByte();
+    if (i) {
+        Com_DPrintf("NaC strafejump hack enabled\n");
+        cge->pmoveParams->strafehack = true;
+    }
+    i = MSG_ReadByte(); //atu QWMod
+    if (i) {
+        Com_DPrintf("NaC QW mode enabled\n");
+        // N&C: Let the client game module handle this.
+        CL_GM_PMoveEnableQW(cge->pmoveParams);
+        //PMoveEnableQW(&cl.pmp);
+    }
+    cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_UMASK); // CPP: IMPROVE: cl.esFlags |= MSG_ES_UMASK;
+    cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_LONGSOLID); // CPP: IMPROVE: cl.esFlags |= MSG_ES_LONGSOLID;
+    cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
+    cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_SHORTANGLES); // CPP: IMPROVE: cl.esFlags |= MSG_ES_SHORTANGLES;
+    i = MSG_ReadByte();
+    if (i) {
+        Com_DPrintf("NaC waterjump hack enabled\n");
+        cge->pmoveParams->waterhack = true;
+    }
+
+    cge->pmoveParams->speedmult = 2;
+    cge->pmoveParams->flyhack = true; // fly hack is unconditionally enabled
+    cge->pmoveParams->flyfriction = 4;
 
     if (cl.clientNum == -1) {
         SCR_PlayCinematic(levelname);
@@ -1030,9 +983,6 @@ badbyte:
             continue;
 
         case svc_gamestate:
-            if (cls.serverProtocol != PROTOCOL_VERSION_Q2PRO) {
-                goto badbyte;
-            }
             CL_ParseGamestate();
             continue;
 

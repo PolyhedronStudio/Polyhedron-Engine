@@ -194,9 +194,6 @@ static void CL_UpdateGibSetting(void)
     if (!cls.netchan) {
         return;
     }
-    if (cls.serverProtocol != PROTOCOL_VERSION_Q2PRO) {
-        return;
-    }
 
     MSG_WriteByte(clc_setting);
     MSG_WriteShort(CLS_NOGIBS);
@@ -207,9 +204,6 @@ static void CL_UpdateGibSetting(void)
 static void CL_UpdatePredictSetting(void)
 {
     if (!cls.netchan) {
-        return;
-    }
-    if (cls.serverProtocol != PROTOCOL_VERSION_Q2PRO) {
         return;
     }
 
@@ -223,9 +217,6 @@ static void CL_UpdatePredictSetting(void)
 static void CL_UpdateRateSetting(void)
 {
     if (!cls.netchan) {
-        return;
-    }
-    if (cls.serverProtocol != PROTOCOL_VERSION_Q2PRO) {
         return;
     }
 
@@ -374,8 +365,8 @@ void CL_CheckForResend(void)
         cls.serverAddress.type = NA_LOOPBACK;
         cls.serverProtocol = cl_protocol->integer;
         if (cls.serverProtocol < PROTOCOL_VERSION_DEFAULT ||
-            cls.serverProtocol > PROTOCOL_VERSION_Q2PRO) {
-            cls.serverProtocol = PROTOCOL_VERSION_Q2PRO;
+            cls.serverProtocol > PROTOCOL_VERSION_NAC) {
+            cls.serverProtocol = PROTOCOL_VERSION_NAC;
         }
 
         // we don't need a challenge on the localhost
@@ -492,13 +483,13 @@ usage:
     if (argc > 2) {
         protocol = atoi(Cmd_Argv(2));
         if (protocol < PROTOCOL_VERSION_DEFAULT ||
-            protocol > PROTOCOL_VERSION_Q2PRO) {
+            protocol > PROTOCOL_VERSION_NAC) {
             goto usage;
         }
     } else {
         protocol = cl_protocol->integer;
         if (!protocol) {
-            protocol = PROTOCOL_VERSION_Q2PRO;
+            protocol = PROTOCOL_VERSION_NAC;
         }
     }
 
@@ -1299,7 +1290,7 @@ static void CL_ConnectionlessPacket(void)
         //cls.connect_count = 0;
 
         // Parse additional parameters
-        bool protocolFound = 0; // N&C: Added in to ensure we find a protocol, otherwise warn the player.
+        int protocolFound = 0; // N&C: Added in to ensure we find a protocol, otherwise warn the player.
 
         j = Cmd_Argc();
         for (i = 2; i < j; i++) {
@@ -1307,28 +1298,34 @@ static void CL_ConnectionlessPacket(void)
             // Protocol version check, to ensure it is similar.
             if (!strncmp(s, "p=", 2)) {
                 s += 2;
-                while (*s) {
-                    k = strtoul(s, (char**)&s, 10);
-                    if (k == PROTOCOL_VERSION_Q2PRO) {
-                        protocolFound = true;
-                    }
-                    s = strchr(s, ',');
-                    if (s == NULL) {
-                        break;
-                    }
-                    s++;
+                k = strtoul(s, NULL, 10);
+                Com_DPrintf("p=======%i", k);
+                if (k == PROTOCOL_VERSION_NAC) {
+                    protocolFound = k;
+                    break;
                 }
+                //while (*s) {
+                //    k = strtoul(s, (char**)&s, 10);
+                //    if (k == PROTOCOL_VERSION_NAC) {
+                //        protocolFound = true;
+                //    }
+                //    s = strchr(s, ',');
+                //    if (s == NULL) {
+                //        break;
+                //    }
+                //    s++;
+                //}
             }
         }
 
         // Inform in case the protocol was not found, or not equal to our own.
-        if (protocolFound != true) {
-            Com_DPrintf("Challenging protocol: p=%i did not equal PROTOCOL_VERSION_Q2PRO(%i)\n", protocolFound, PROTOCOL_VERSION_Q2PRO);
+        if (protocolFound != PROTOCOL_VERSION_NAC) {
+            Com_EPrintf("Challenging protocol: p=%i did not equal PROTOCOL_VERSION_NAC(%i)\n", protocolFound, PROTOCOL_VERSION_NAC);
         }
 
         // Setup to use our own protocol. However, if needed later on, here is a shot to change it.
         // This might be useful for backward compatibilities etc.
-        cls.serverProtocol = PROTOCOL_VERSION_Q2PRO;
+        cls.serverProtocol = PROTOCOL_VERSION_NAC;
 
         Com_DPrintf("Selected protocol %d\n", cls.serverProtocol);
 
@@ -1356,7 +1353,8 @@ static void CL_ConnectionlessPacket(void)
             return;
         }
 
-        if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
+        // MSG: !! TODO: Remove NETCHAN_OLD?
+        if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
             type = NETCHAN_NEW;
         } else {
             type = NETCHAN_OLD;
@@ -1598,7 +1596,7 @@ void CL_UpdateUserinfo(cvar_t *var, from_t from)
         return;
     }
 
-    if (cls.serverProtocol != PROTOCOL_VERSION_Q2PRO) {
+    if (cls.serverProtocol != PROTOCOL_VERSION_NAC) {
         // transmit at next oportunity
         cls.userinfo_modified = MAX_PACKET_USERINFOS;
         goto done;

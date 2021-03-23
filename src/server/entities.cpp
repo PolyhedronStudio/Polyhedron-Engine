@@ -29,7 +29,7 @@ Encode a client frame onto the network channel
 
 // some protocol optimizations are disabled when recording a demo
 #define Q2PRO_OPTIMIZE(c) \
-    ((c)->protocol == PROTOCOL_VERSION_Q2PRO && !(c)->settings[CLS_RECORDING])
+    ((c)->protocol == PROTOCOL_VERSION_NAC && !(c)->settings[CLS_RECORDING])
 
 /*
 =============
@@ -89,10 +89,9 @@ static void SV_EmitPacketEntities(client_t         *client,
                 Vec3_Copy(oldent->origin, newent->origin);
                 Vec3_Copy(oldent->angles, newent->angles);
             }
-            // MSG: !! Removed: Q2PRO_SHORTANGLES
-            //if (Q2PRO_SHORTANGLES(client, newnum)) {
-                flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES);
-            //}
+
+            flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES);
+
             MSG_WriteDeltaEntity(oldent, newent, flags);
             oldindex++;
             newindex++;
@@ -113,10 +112,7 @@ static void SV_EmitPacketEntities(client_t         *client,
                 Vec3_Copy(oldent->origin, newent->origin);
                 Vec3_Copy(oldent->angles, newent->angles);
             }
-            // MSG: !! Removed: Q2PRO_SHORTANGLES
-            //if (Q2PRO_SHORTANGLES(client, newnum)) {
-                flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES); // CPP: Cast flags |= MSG_ES_SHORTANGLES;
-            //}
+            flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES); // CPP: Cast flags |= MSG_ES_SHORTANGLES;
             MSG_WriteDeltaEntity(oldent, newent, flags);
             newindex++;
             continue;
@@ -275,36 +271,23 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
     }
 
     clientEntityNum = 0;
-    if (client->protocol == PROTOCOL_VERSION_Q2PRO) {
-        if (frame->ps.pmove.type < PM_DEAD && !client->settings[CLS_RECORDING]) {
-            clientEntityNum = frame->clientNum + 1;
-        }
-        if (client->settings[CLS_NOPREDICT]) {
-            psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_PREDICTION); // CPP: Cast
-        }
-        suppressed = client->frameflags;
-    } else {
-        suppressed = client->suppress_count;
+
+    if (frame->ps.pmove.type < PM_DEAD && !client->settings[CLS_RECORDING]) {
+        clientEntityNum = frame->clientNum + 1;
     }
+    if (client->settings[CLS_NOPREDICT]) {
+        psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_PREDICTION); // CPP: Cast
+    }
+    suppressed = client->frameflags;
+
 
     // delta encode the playerstate
     extraflags = MSG_WriteDeltaPlayerstate_Enhanced(oldstate, &frame->ps, psFlags);
 
-    if (client->protocol == PROTOCOL_VERSION_Q2PRO) {
-        // delta encode the clientNum
-        // MSG: !! Removed: PROTOCOL_VERSION_Q2PRO
-        /*if (client->version < PROTOCOL_VERSION_Q2PRO_CLIENTNUM_FIX) {
-            if (!oldframe || frame->clientNum != oldframe->clientNum) {
-                extraflags |= EPS_CLIENTNUM;
-                MSG_WriteByte(frame->clientNum);
-            }
-        } else {*/
-            int clientNum = oldframe ? oldframe->clientNum : 0;
-            if (clientNum != frame->clientNum) {
-                extraflags |= EPS_CLIENTNUM;
-                MSG_WriteByte(frame->clientNum);
-            }
-        //}
+    int clientNum = oldframe ? oldframe->clientNum : 0;
+    if (clientNum != frame->clientNum) {
+        extraflags |= EPS_CLIENTNUM;
+        MSG_WriteByte(frame->clientNum);
     }
 
     // save 3 high bits of extraflags
@@ -424,10 +407,6 @@ void SV_BuildClientFrame(client_t *client)
 
     // calculate the visible areas
     frame->areabytes = CM_WriteAreaBits(client->cm, frame->areabits, clientarea);
-    if (!frame->areabytes && client->protocol != PROTOCOL_VERSION_Q2PRO) {
-        frame->areabits[0] = 255;
-        frame->areabytes = 1;
-    }
 
     // grab the current player_state_t
     MSG_PackPlayer(&frame->ps, ps);

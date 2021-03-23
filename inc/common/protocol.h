@@ -26,35 +26,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_MSGLEN  0x8000  // max length of a message, 32k
 
 #define PROTOCOL_VERSION_UNKNOWN    -1  // In case when during a connect challange the protocol version differs.
-#define PROTOCOL_VERSION_OLD        26
-// The DEFAULT version is the minimum allowed for connecting.
-// This means that, even if a protocol version number falls in between
-// PROTOCOL_VERSION_OLD and PROTOCOL_VERSION_Q2PRO, it still needs to be
-// equal or higher than PROTOCOL_VERSION_DEFAULT.
-#define PROTOCOL_VERSION_DEFAULT    34
-#define PROTOCOL_VERSION_Q2PRO      36
 
+// The DEFAULT version is the minimum allowed for connecting.
+// equal or lower than PROTOCOL_VERSION_NAC.
+#define PROTOCOL_VERSION_DEFAULT    101
+#define PROTOCOL_VERSION_NAC        101
 
 #define PROTOCOL_VERSION_MVD        37 // not used for UDP connections
 
-#define PROTOCOL_VERSION_NAC_MINIMUM            1011    // r161
-//#define PROTOCOL_VERSION_Q2PRO_UCMD             1012    // r179 // MSG: !! Removed.
-//#define PROTOCOL_VERSION_Q2PRO_CLIENTNUM_FIX    1013    // r226
-#define PROTOCOL_VERSION_Q2PRO_LONG_SOLID       1014    // r243
-//#define PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK   1015    // r335 // MSG: !! Removed.
-//#define PROTOCOL_VERSION_Q2PRO_RESERVED         1016    // r364 // MSG: !! Removed.
-//#define PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN      1017    // r1037-8 // MSG: !! Removed.
-//#define PROTOCOL_VERSION_Q2PRO_SHORT_ANGLES     1018    // r1037-44 Q2PRO_SHORTANGLES Q2PRO_SHORTANGLES
-//#define PROTOCOL_VERSION_Q2PRO_SERVER_STATE     1019    // r1302 // MSG:!! Removed.
-//#define PROTOCOL_VERSION_Q2PRO_EXTENDED_LAYOUT  1020    // r1354
-#define PROTOCOL_VERSION_Q2PRO_ZLIB_DOWNLOADS   1021    // r1358
-#define PROTOCOL_VERSION_NAC_FIRST              1337                          // Always name after PROTOCOL_VERSION_NAC_FEATUREUPDATENAME 
-#define PROTOCOL_VERSION_NAC_CURRENT            PROTOCOL_VERSION_NAC_FIRST    // Always set to the latest version.
+// Minimum required "MINOR" protocol version for this client to be compatible to.
+#define PROTOCOL_VERSION_NAC_MINIMUM            1337
+#define PROTOCOL_VERSION_NAC_FIRST              1337
+// This is just an example, it is not used.
+#define PROTOCOL_VERSION_NAC_FEATURE_UPDATE     1338
+// Always set to the latest version.
+#define PROTOCOL_VERSION_NAC_CURRENT            PROTOCOL_VERSION_NAC_FIRST
 
 #define PROTOCOL_VERSION_MVD_MINIMUM            2009    // r168
 #define PROTOCOL_VERSION_MVD_CURRENT            2010    // r177
 
-#define Q2PRO_SUPPORTED(x) \
+// This is used to ensure that the protocols in use match up, and support each other.
+#define NAC_PROTOCOL_SUPPORTED(x) \
     ((x) >= PROTOCOL_VERSION_NAC_MINIMUM && \
      (x) <= PROTOCOL_VERSION_NAC_CURRENT)
 
