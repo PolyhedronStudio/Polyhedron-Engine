@@ -213,6 +213,11 @@ static void write_compressed_gamestate(void)
             length = MAX_QPATH;
         }
 
+        //// MSGFRAG: !! Check if this configstring will overflow
+        //if (msg_write.cursize + length + 64 > sv_client->netchan->maxpacketlen) {
+        //    SV_ClientAddMessage(sv_client, 0);
+        //}
+
         MSG_WriteShort(i);
         MSG_WriteData(string, length);
         MSG_WriteByte(0);
@@ -225,6 +230,10 @@ static void write_compressed_gamestate(void)
         if (!base) {
             continue;
         }
+        //// MSGFRAG: !! Check if this baseline will overflow
+        //if (msg_write.cursize + 64 > sv_client->netchan->maxpacketlen) {
+        //    SV_ClientAddMessage(sv_client, 0);
+        //}
         for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
             if (base->number) {
                 write_baseline(base);
@@ -256,6 +265,9 @@ static void write_compressed_gamestate(void)
     patch[0] = svs.z.total_out & 255;
     patch[1] = (svs.z.total_out >> 8) & 255;
     buf->cursize += svs.z.total_out;
+    
+    //// MSGFRAG: !! Add final send.
+    //SV_ClientAddMessage(sv_client, 0);
 }
 
 static inline int z_flush(byte *buffer)
