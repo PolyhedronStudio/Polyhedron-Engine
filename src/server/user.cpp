@@ -189,7 +189,7 @@ static void write_plain_baselines(void)
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
 }
 
-#if USE_ZLIB
+#if USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
 
 static void write_compressed_gamestate(void)
 {
@@ -337,7 +337,7 @@ fail:
     }
 }
 
-#endif // USE_ZLIB
+#endif // USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
 
 static void stuff_cmds(list_t *list)
 {
@@ -481,7 +481,7 @@ void SV_New_f(void)
     if (sv.state == ss_pic || sv.state == ss_cinematic)
         return;
 
-#if USE_ZLIB
+#if USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
     if (sv_client->has_zlib) {
         if (sv_client->netchan->type == NETCHAN_NEW) {
             write_compressed_gamestate();
@@ -491,7 +491,7 @@ void SV_New_f(void)
             write_plain_baselines();
         }
     } else
-#endif // USE_ZLIB
+#endif //USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
     {
         write_plain_configstrings();
         write_plain_baselines();
@@ -678,7 +678,8 @@ static void SV_BeginDownload_f(void)
 
 #if USE_ZLIB
     // prefer raw deflate stream from .pkz if supported
-    if (sv_client->has_zlib && offset == 0) {
+    //if (sv_client->has_zlib && offset == 0) {
+    if (offset == 0) { //#if USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
         downloadsize = FS_FOpenFile(name, &f, FS_MODE_READ | FS_FLAG_DEFLATE);
         if (f) {
             Com_DPrintf("Serving compressed download to %s\n", sv_client->name);

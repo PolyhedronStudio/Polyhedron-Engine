@@ -776,7 +776,7 @@ static void CL_ParseDownload(int cmd)
 
 static void CL_ParseZPacket(void)
 {
-#if USE_ZLIB
+#if USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
     sizebuf_t   temp;
     byte        buffer[MAX_MSGLEN];
     int         inlen, outlen;
@@ -818,7 +818,7 @@ static void CL_ParseZPacket(void)
 #else
     Com_Error(ERR_DROP, "Compressed server packet received, "
               "but no zlib support linked in.");
-#endif
+#endif // USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
 }
 
 #if USE_FPS

@@ -339,7 +339,7 @@ void SV_Multicast(vec3_t origin, multicast_t to)
 
 static qboolean compress_message(client_t *client, int flags)
 {
-#if USE_ZLIB
+#if USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
     byte    buffer[MAX_MSGLEN];
 
     if (!(flags & MSG_COMPRESS))

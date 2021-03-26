@@ -159,7 +159,7 @@ void Netchan_OutOfBand(netsrc_t sock, const netadr_t *address,
         return;
     }
 
-    // send the datagram
+    // send the datagram/
     NET_SendPacket(sock, &packet, len + 4, address);
 }
 
@@ -432,7 +432,6 @@ NetchanNew_TransmitNextFragment
 */
 static size_t NetchanNew_TransmitNextFragment(netchan_t *netchan)
 {
-    netchan_new_t *chan = (netchan_new_t *)netchan;
     sizebuf_t   send;
     byte        send_buf[MAX_PACKETLEN];
     qboolean    send_reliable;
@@ -441,9 +440,13 @@ static size_t NetchanNew_TransmitNextFragment(netchan_t *netchan)
     size_t      fragment_length;
     qboolean    more_fragments;
 
+    // Fetch and cast netchan from pointer.
+    netchan_new_t* chan = (netchan_new_t*)netchan;
+
+    // Should we send a reliable message, or not?
     send_reliable = netchan->reliable_length ? true : false;
 
-    // write the packet header
+    // Write the packet header
     w1 = (netchan->outgoing_sequence & 0x3FFFFFFF) | (1 << 30) |
          (send_reliable << 31);
     w2 = (netchan->incoming_sequence & 0x3FFFFFFF) | (0 << 30) |
@@ -455,29 +458,32 @@ static size_t NetchanNew_TransmitNextFragment(netchan_t *netchan)
     SZ_WriteLong(&send, w2);
 
 #if USE_CLIENT
-    // send the qport if we are a client
+    // Send the qport if we are a client
     if (netchan->sock == NS_CLIENT && netchan->qport) {
         SZ_WriteByte(&send, netchan->qport);
     }
 #endif
 
+    // Calculate Fragment length based on how much has been read so far.
+    // Ensure we do not exceed the max packet length.
     fragment_length = chan->fragment_out.cursize - chan->fragment_out.readcount;
     if (fragment_length > netchan->maxpacketlen) {
         fragment_length = netchan->maxpacketlen;
     }
 
+    // More 
     more_fragments = true;
     if (chan->fragment_out.readcount + fragment_length ==
         chan->fragment_out.cursize) {
         more_fragments = false;
     }
 
-    // write fragment offset
+    // Write fragment offset
     offset = (chan->fragment_out.readcount & 0x7FFF) |
              (more_fragments << 15);
     SZ_WriteShort(&send, offset);
 
-    // write fragment contents
+    // Write fragment contents
     SZ_Write(&send, chan->fragment_out.data + chan->fragment_out.readcount,
              fragment_length);
 
@@ -494,17 +500,18 @@ static size_t NetchanNew_TransmitNextFragment(netchan_t *netchan)
     }
     SHOWPACKET("\n");
 
+    // Increment read count with fragment length and store whether one more is pending or not.
     chan->fragment_out.readcount += fragment_length;
     netchan->fragment_pending = more_fragments;
 
-    // if the message has been sent completely, clear the fragment buffer
+    // If the message has been sent completely, clear the fragment buffer
     if (!netchan->fragment_pending) {
         netchan->outgoing_sequence++;
         netchan->last_sent = com_localTime;
         SZ_Clear(&chan->fragment_out);
     }
 
-    // send the datagram
+    // Send the datagram
     NET_SendPacket(netchan->sock, send.data, send.cursize,
                    &netchan->remote_address);
 

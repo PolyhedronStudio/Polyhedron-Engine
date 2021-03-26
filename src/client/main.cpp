@@ -413,7 +413,7 @@ void CL_CheckForResend(void)
 
     // add protocol dependent stuff
     Q_snprintf(tail, sizeof(tail), " %d %d %d %d",
-                maxmsglen, net_chantype->integer, USE_ZLIB,
+                maxmsglen, net_chantype->integer, USE_ZLIB_PACKET_COMPRESSION, // MSG: !! Changed from USE_ZLIB,
                 PROTOCOL_VERSION_NAC_CURRENT);
     cls.quakePort = net_qport->integer & 0xff;
 

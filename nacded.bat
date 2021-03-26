@@ -1,0 +1,1 @@
+nacded.exe +set game basenac +set sv_cheats 1 +set maxclients 4 +set coop 1 +set sv_savedir coop +set allow_download 1 +set allow_dowload_maps 1 
