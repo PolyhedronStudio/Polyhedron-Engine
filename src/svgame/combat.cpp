@@ -134,7 +134,7 @@ void SpawnDamage(int type, vec3_t origin, vec3_t normal, int damage)
 //  gi.WriteByte (damage);
     gi.WritePosition(origin);
     gi.WriteDir(normal);
-    gi.multicast(&origin, MULTICAST_PVS);
+    gi.Multicast(&origin, MULTICAST_PVS);
 }
 
 

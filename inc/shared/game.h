@@ -162,8 +162,8 @@ typedef struct {
     pmoveParams_t* (*GetPMoveParams) ();    // Used to call the shared PMove code with.
 
     // network messaging
-    void (*multicast)(const vec3_t *origin, multicast_t to);
-    void (*unicast)(edict_t *ent, qboolean reliable);
+    void (*Multicast)(const vec3_t *origin, multicast_t to);
+    void (*Unicast)(edict_t *ent, qboolean reliable);
     void (*WriteChar)(int c);
     void (*WriteByte)(int c);
     void (*WriteShort)(int c);

@@ -1016,7 +1016,7 @@ void ClientEndServerFrame(edict_t *ent)
     // if the scoreboard is up, update it
     if (ent->client->showscores && !(level.framenum & 31)) {
         DeathmatchScoreboardMessage(ent, ent->enemy);
-        gi.unicast(ent, false);
+        gi.Unicast(ent, false);
     }
 }
 

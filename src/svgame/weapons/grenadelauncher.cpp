@@ -50,7 +50,7 @@ void weapon_grenadelauncher_fire(edict_t* ent)
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MZ_GRENADE | is_silenced);
-    gi.multicast(ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(ent->s.origin, MULTICAST_PVS);
 
     ent->client->ps.gunframe++;
 

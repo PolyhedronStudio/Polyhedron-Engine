@@ -540,7 +540,7 @@ typedef struct usercmd_s {
 //=============================================================================
 //
 //-----------------
-// Destination class for gi.multicast()
+// Destination class for gi.Multicast()
 //-----------------
 typedef enum {
     MULTICAST_ALL,

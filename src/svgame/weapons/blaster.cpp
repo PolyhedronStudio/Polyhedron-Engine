@@ -50,7 +50,7 @@ void Blaster_Fire(edict_t* ent, vec3_t g_offset, int damage, qboolean hyper, int
         gi.WriteByte(MZ_HYPERBLASTER | is_silenced);
     else
         gi.WriteByte(MZ_BLASTER | is_silenced);
-    gi.multicast(ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(ent->s.origin, MULTICAST_PVS);
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 }

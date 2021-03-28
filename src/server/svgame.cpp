@@ -897,8 +897,8 @@ void SV_InitGameProgs(void)
         Com_Error(ERR_DROP, "Failed to load Server Game library");
 
     // load a new game dll
-    importAPI.multicast = SV_Multicast;
-    importAPI.unicast = PF_Unicast;
+    importAPI.Multicast = SV_Multicast;
+    importAPI.Unicast = PF_Unicast;
     importAPI.bprintf = PF_bprintf;
     importAPI.dprintf = PF_dprintf;
     importAPI.cprintf = PF_cprintf;

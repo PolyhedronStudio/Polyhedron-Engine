@@ -63,7 +63,7 @@ void target_laser_think(edict_t* self)
                 gi.WritePosition(tr.endpos);
                 gi.WriteDir(tr.plane.normal);
                 gi.WriteByte(self->s.skinnum);
-                gi.multicast(tr.endpos, MULTICAST_PVS);
+                gi.Multicast(tr.endpos, MULTICAST_PVS);
             }
             break;
         }

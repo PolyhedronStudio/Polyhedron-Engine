@@ -33,7 +33,7 @@ void monster_fire_bullet(edict_t *self, const vec3_t &start, const vec3_t &dir, 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(&start, MULTICAST_PVS);
+    gi.Multicast(&start, MULTICAST_PVS);
 }
 
 void monster_fire_shotgun(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int flashtype)
@@ -43,7 +43,7 @@ void monster_fire_shotgun(edict_t *self, const vec3_t &start, const vec3_t &aimd
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(&start, MULTICAST_PVS);
+    gi.Multicast(&start, MULTICAST_PVS);
 }
 
 void monster_fire_blaster(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, int flashtype, int effect)
@@ -53,7 +53,7 @@ void monster_fire_blaster(edict_t *self, const vec3_t &start, const vec3_t &dir,
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(&start, MULTICAST_PVS);
+    gi.Multicast(&start, MULTICAST_PVS);
 }
 
 void monster_fire_grenade(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int flashtype)
@@ -63,7 +63,7 @@ void monster_fire_grenade(edict_t *self, const vec3_t &start, const vec3_t &aimd
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(&start, MULTICAST_PVS);
+    gi.Multicast(&start, MULTICAST_PVS);
 }
 
 void monster_fire_rocket(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, int flashtype)
@@ -73,7 +73,7 @@ void monster_fire_rocket(edict_t *self, const vec3_t &start, const vec3_t &dir, 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(&start, MULTICAST_PVS);
+    gi.Multicast(&start, MULTICAST_PVS);
 }
 
 void monster_fire_railgun(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int flashtype)
@@ -83,7 +83,7 @@ void monster_fire_railgun(edict_t *self, const vec3_t &start, const vec3_t &aimd
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(&start, MULTICAST_PVS);
+    gi.Multicast(&start, MULTICAST_PVS);
 }
 
 void monster_fire_bfg(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int kick, float damage_radius, int flashtype)
@@ -93,7 +93,7 @@ void monster_fire_bfg(edict_t *self, const vec3_t &start, const vec3_t &aimdir, 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(&start, MULTICAST_PVS);
+    gi.Multicast(&start, MULTICAST_PVS);
 }
 
 
