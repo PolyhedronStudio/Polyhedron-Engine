@@ -35,7 +35,7 @@ void use_target_splash(edict_t* self, edict_t* other, edict_t* activator)
     gi.WritePosition(self->s.origin);
     gi.WriteDir(self->movedir);
     gi.WriteByte(self->sounds);
-    gi.Multicast(self->s.origin, MULTICAST_PVS);
+    gi.Multicast(&self->s.origin, MULTICAST_PVS);
 
     if (self->dmg)
         T_RadiusDamage(self, activator, self->dmg, NULL, self->dmg + 40, MOD_SPLASH);

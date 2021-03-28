@@ -20,7 +20,7 @@ void Use_Target_Tent(edict_t* ent, edict_t* other, edict_t* activator)
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(ent->style);
     gi.WritePosition(ent->s.origin);
-    gi.Multicast(ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 }
 
 void SP_target_temp_entity(edict_t* ent)
