@@ -125,13 +125,13 @@ typedef struct mnode_s {
     /* ======> */
     cplane_t            *plane;     // never NULL to differentiate from leafs
 #if USE_REF
-    union {
-        vec_t           minmaxs[6];
+//    union {
+//        vec_t           minmaxs[6];
         struct {
             vec3_t      mins;
             vec3_t      maxs;
         };
-    };
+    //};
 
     int                 visframe;
 #endif
