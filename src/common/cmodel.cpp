@@ -206,7 +206,7 @@ mnode_t *CM_HeadnodeForBox(const vec3_t &mins, const vec3_t &maxs)
 }
 
 
-mleaf_t *CM_PointLeaf(cm_t *cm, vec3_t p)
+mleaf_t *CM_PointLeaf(cm_t *cm, const vec3_t &p)
 {
     if (!cm->cache) {
         return &nullleaf;       // server may call this without map loaded
@@ -251,7 +251,7 @@ static void CM_BoxLeafs_r(mnode_t *node)
     }
 }
 
-static int CM_BoxLeafs_headnode(vec3_t mins, vec3_t maxs, mleaf_t **list, int listsize,
+static int CM_BoxLeafs_headnode(const vec3_t &mins, const vec3_t &maxs, mleaf_t **list, int listsize,
                                 mnode_t *headnode, mnode_t **topnode)
 {
     leaf_list = list;
@@ -270,7 +270,7 @@ static int CM_BoxLeafs_headnode(vec3_t mins, vec3_t maxs, mleaf_t **list, int li
     return leaf_count;
 }
 
-int CM_BoxLeafs(cm_t *cm, vec3_t mins, vec3_t maxs, mleaf_t **list, int listsize, mnode_t **topnode)
+int CM_BoxLeafs(cm_t *cm, const vec3_t &mins, const vec3_t &maxs, mleaf_t **list, int listsize, mnode_t **topnode)
 {
     if (!cm->cache)     // map not loaded
         return 0;
@@ -364,7 +364,7 @@ static qboolean trace_ispoint;      // optimized case
 CM_ClipBoxToBrush
 ================
 */
-static void CM_ClipBoxToBrush(vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
+static void CM_ClipBoxToBrush(const vec3_t %mins, const vec3_t &maxs, const vec3_t &p1, const vec3_t &p2,
                               trace_t *trace, mbrush_t *brush)
 {
     int         i, j;
@@ -618,7 +618,7 @@ CM_RecursiveHullCheck
 
 ==================
 */
-static void CM_RecursiveHullCheck(mnode_t *node, float p1f, float p2f, vec3_t p1, vec3_t p2)
+static void CM_RecursiveHullCheck(mnode_t *node, float p1f, float p2f, const vec3_t &p1, const vec3_t &p2)
 {
     cplane_t    *plane;
     float       t1, t2, offset;
@@ -712,8 +712,8 @@ recheck:
 CM_BoxTrace
 ==================
 */
-void CM_BoxTrace(trace_t *trace, vec3_t start, vec3_t end,
-                 vec3_t mins, vec3_t maxs,
+void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
+                 const vec3_t &mins, const vec3_t &maxs,
                  mnode_t *headnode, int brushmask)
 {
     checkcount++;       // for multi-check avoidance
