@@ -80,8 +80,8 @@ static void CLG_ParseTempEntitiesPacket(void)
     case TE_HEATBEAM_STEAM:
     case TE_MOREBLOOD:
     case TE_ELECTRIC_SPARKS:
-        clgi.MSG_ReadPos(teParameters.pos1);
-        clgi.MSG_ReadDir(teParameters.dir);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.dir = clgi.MSG_ReadDirection();
         break;
 
     case TE_SPLASH:
@@ -89,8 +89,8 @@ static void CLG_ParseTempEntitiesPacket(void)
     case TE_WELDING_SPARKS:
     case TE_TUNNEL_SPARKS:
         teParameters.count = clgi.MSG_ReadByte();
-        clgi.MSG_ReadPos(teParameters.pos1);
-        clgi.MSG_ReadDir(teParameters.dir);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.dir = clgi.MSG_ReadDirection();
         teParameters.color = clgi.MSG_ReadByte();
         break;
 
@@ -100,8 +100,8 @@ static void CLG_ParseTempEntitiesPacket(void)
     case TE_DEBUGTRAIL:
     case TE_BUBBLETRAIL2:
     case TE_BFG_LASER:
-        clgi.MSG_ReadPos(teParameters.pos1);
-        clgi.MSG_ReadPos(teParameters.pos2);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.pos2 = clgi.MSG_ReadPosition();
         break;
 
     case TE_GRENADE_EXPLOSION:
@@ -123,7 +123,7 @@ static void CLG_ParseTempEntitiesPacket(void)
     case TE_DBALL_GOAL:
     case TE_WIDOWSPLASH:
     case TE_NUKEBLAST:
-        clgi.MSG_ReadPos(teParameters.pos1);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
         break;
 
     case TE_PARASITE_ATTACK:
@@ -131,40 +131,40 @@ static void CLG_ParseTempEntitiesPacket(void)
     case TE_HEATBEAM:
     case TE_MONSTER_HEATBEAM:
         teParameters.entity1 = clgi.MSG_ReadShort();
-        clgi.MSG_ReadPos(teParameters.pos1);
-        clgi.MSG_ReadPos(teParameters.pos2);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.pos2 = clgi.MSG_ReadPosition();
         break;
 
     case TE_GRAPPLE_CABLE:
         teParameters.entity1 = clgi.MSG_ReadShort();
-        clgi.MSG_ReadPos(teParameters.pos1);
-        clgi.MSG_ReadPos(teParameters.pos2);
-        clgi.MSG_ReadPos(teParameters.offset);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.pos2 = clgi.MSG_ReadPosition();
+        teParameters.offset = clgi.MSG_ReadPosition();
         break;
 
     case TE_LIGHTNING:
         teParameters.entity1 = clgi.MSG_ReadShort();
         teParameters.entity2 = clgi.MSG_ReadShort();
-        clgi.MSG_ReadPos(teParameters.pos1);
-        clgi.MSG_ReadPos(teParameters.pos2);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.pos2 = clgi.MSG_ReadPosition();
         break;
 
     case TE_FLASHLIGHT:
-        clgi.MSG_ReadPos(teParameters.pos1);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
         teParameters.entity1 = clgi.MSG_ReadShort();
         break;
 
     case TE_FORCEWALL:
-        clgi.MSG_ReadPos(teParameters.pos1);
-        clgi.MSG_ReadPos(teParameters.pos2);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.pos2 = clgi.MSG_ReadPosition();
         teParameters.color = clgi.MSG_ReadByte();
         break;
 
     case TE_STEAM:
         teParameters.entity1 = clgi.MSG_ReadShort();
         teParameters.count = clgi.MSG_ReadByte();
-        clgi.MSG_ReadPos(teParameters.pos1);
-        clgi.MSG_ReadDir(teParameters.dir);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.dir = clgi.MSG_ReadDirection();
         teParameters.color = clgi.MSG_ReadByte();
         teParameters.entity2 = clgi.MSG_ReadShort();
         if (teParameters.entity1 != -1) {
@@ -174,14 +174,14 @@ static void CLG_ParseTempEntitiesPacket(void)
 
     case TE_WIDOWBEAMOUT:
         teParameters.entity1 = clgi.MSG_ReadShort();
-        clgi.MSG_ReadPos(teParameters.pos1);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
         break;
 
     case TE_FLARE:
         teParameters.entity1 = clgi.MSG_ReadShort();
         teParameters.count = clgi.MSG_ReadByte();
-        clgi.MSG_ReadPos(teParameters.pos1);
-        clgi.MSG_ReadDir(teParameters.dir);
+        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.dir = clgi.MSG_ReadDirection();
         break;
 
     default:

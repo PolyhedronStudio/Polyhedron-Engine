@@ -603,7 +603,7 @@ static void PF_StartSound(edict_t *edict, int channel,
                 MSG_WriteByte(timeofs * 1000);
 
             MSG_WriteShort(sendchan);
-            MSG_WritePos(origin);
+            MSG_WritePosition(origin);
 
             SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
             continue;
@@ -689,7 +689,7 @@ static void PF_PositionedSound(vec3_t origin, edict_t *entity, int channel,
         MSG_WriteByte(timeofs * 1000);
 
     MSG_WriteShort(sendchan);
-    MSG_WritePos(origin);
+    MSG_WritePosition(origin);
 
     // if the sound doesn't attenuate,send it to everyone
     // (global radio chatter, voiceovers, etc)
@@ -930,8 +930,8 @@ void SV_InitGameProgs(void)
     importAPI.WriteLong = MSG_WriteLong;
     importAPI.WriteFloat = PF_WriteFloat;
     importAPI.WriteString = MSG_WriteString;
-    importAPI.WritePosition = MSG_WritePos;
-    importAPI.WriteDir = MSG_WriteDir;
+    importAPI.WritePosition = MSG_WritePosition;
+    importAPI.WriteDir = MSG_WriteDirection;
     importAPI.WriteAngle = MSG_WriteAngle;
 
     importAPI.TagMalloc = PF_TagMalloc;

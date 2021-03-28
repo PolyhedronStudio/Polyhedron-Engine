@@ -534,14 +534,14 @@ void CL_InitGameProgs(void)
     importAPI.MSG_ReadWord = MSG_ReadWord;
     importAPI.MSG_ReadLong = MSG_ReadLong;
     importAPI.MSG_ReadString = MSG_ReadString;
-    importAPI.MSG_ReadDir = MSG_ReadDir;
-    importAPI.MSG_ReadPos = MSG_ReadPos;
+    importAPI.MSG_ReadDirection = MSG_ReadDirection;
+    importAPI.MSG_ReadPosition = MSG_ReadPosition;
     importAPI.MSG_WriteChar = MSG_WriteChar;
     importAPI.MSG_WriteByte = MSG_WriteByte;
     importAPI.MSG_WriteShort = MSG_WriteShort;
     importAPI.MSG_WriteLong = MSG_WriteLong;
     importAPI.MSG_WriteString = MSG_WriteString;
-    importAPI.MSG_WritePos = MSG_WritePos;
+    importAPI.MSG_WritePosition = MSG_WritePosition;
     importAPI.MSG_WriteAngle = MSG_WriteAngle;
 
     importAPI.MSG_FlushTo = _trp_MSG_FlushTo;

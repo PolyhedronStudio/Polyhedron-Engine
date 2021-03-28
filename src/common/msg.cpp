@@ -194,10 +194,10 @@ void MSG_WriteString(const char *string)
 
 /*
 =============
-MSG_WritePos
+MSG_WritePosition
 =============
 */
-void MSG_WritePos(const vec3_t pos)
+void MSG_WritePosition(const vec3_t &pos)
 {
     MSG_WriteFloat(pos[0]);
     MSG_WriteFloat(pos[1]);
@@ -453,7 +453,7 @@ int MSG_WriteDeltaUsercmd_Enhanced(const usercmd_t *from,
 
 #endif // USE_CLIENT
 
-void MSG_WriteDir(const vec3_t dir)
+void MSG_WriteDirection(const vec3_t dir)
 {
     int     best;
 
@@ -1605,11 +1605,12 @@ size_t MSG_ReadStringLine(char *dest, size_t size)
     return len;
 }
 
-void MSG_ReadPos(vec3_t pos)
-{
-    pos[0] = MSG_ReadFloat();
-    pos[1] = MSG_ReadFloat();
-    pos[2] = MSG_ReadFloat();
+vec3_t MSG_ReadPosition(void) {
+    return vec3_t{
+        MSG_ReadFloat(),
+        MSG_ReadFloat(),
+        MSG_ReadFloat()
+    };
 }
 
 static inline float MSG_ReadAngle(void)
@@ -1622,14 +1623,15 @@ static inline float MSG_ReadAngle16(void)
     return SHORT2ANGLE(MSG_ReadShort());
 }
 
-void MSG_ReadDir(vec3_t dir)
+vec3_t MSG_ReadDirection(void)
 {
     int     b;
-
+    
     b = MSG_ReadByte();
     if (b < 0 || b >= NUMVERTEXNORMALS)
-        Com_Error(ERR_DROP, "MSG_ReadDir: out of range");
-    VectorCopy(bytedirs[b], dir);
+        Com_Error(ERR_DROP, "MSG_ReadDirection: out of range");
+    
+    return bytedirs[b];
 }
 
 void MSG_ReadDeltaUsercmd(const usercmd_t *from, usercmd_t *to)
@@ -2014,11 +2016,7 @@ void MSG_ParseDeltaEntity(const entity_state_t *from,
 
     // N&C: Full float precision.
     if (bits & U_OLDORIGIN) {
-        to->old_origin[0] = MSG_ReadFloat();
-        to->old_origin[1] = MSG_ReadFloat();
-        to->old_origin[2] = MSG_ReadFloat();
-
-        //MSG_ReadPos(to->old_origin);
+        to->old_origin = MSG_ReadPosition(); // MSG: !! ReadPos
     }
 
     if (bits & U_SOUND) {

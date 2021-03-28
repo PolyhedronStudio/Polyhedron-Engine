@@ -631,7 +631,7 @@ static void CL_ParseStartSoundPacket(void)
 
     // positioned in space
     if (flags & SND_POS)
-        MSG_ReadPos(snd.pos);
+        snd.pos = MSG_ReadPosition();
 
     snd.flags = flags;
 

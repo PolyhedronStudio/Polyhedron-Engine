@@ -267,7 +267,7 @@ void R_AddSkySurface(mface_t *fa)
         }
     }
 
-    ClipSkyPolygon(fa->numsurfedges, verts[0], 0);
+    ClipSkyPolygon(fa->numsurfedges, verts, 0);
     skyfaces++;
 }
 

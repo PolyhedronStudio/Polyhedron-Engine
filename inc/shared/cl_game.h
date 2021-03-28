@@ -455,9 +455,9 @@ extern "C" {
         // Reads a string from the network.
         size_t		(*MSG_ReadString) (char *dest, size_t size);
         // Reads a direction from the network.
-        void		(*MSG_ReadDir) (vec3_t dir);
+        vec3_t		(*MSG_ReadDirection) (void);
         // Reads a position from the network.
-        void		(*MSG_ReadPos) (vec3_t pos);
+        vec3_t		(*MSG_ReadPosition) (void);
 
         // Writes a character over the network.
         void        (*MSG_WriteChar) (int c);
@@ -470,7 +470,7 @@ extern "C" {
         // Writes a string over the network.
         void        (*MSG_WriteString) (const char *s);
         // Writes a position over the network.
-        void        (*MSG_WritePos) (const vec3_t pos);
+        void        (*MSG_WritePosition) (const vec3_t &pos);
         // Writes an angle over the network.
         void        (*MSG_WriteAngle) (float f);
         // Flushes message.

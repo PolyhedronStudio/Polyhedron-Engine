@@ -584,7 +584,7 @@ static void MVD_ParseSound(mvd_t *mvd, int extrabits)
                 MSG_WriteByte(offset);
 
             MSG_WriteShort(sendchan);
-            MSG_WritePos(origin);
+            MSG_WritePosition(origin);
 
             SV_ClientAddMessage(cl, MSG_RELIABLE | MSG_CLEAR);
             continue;
