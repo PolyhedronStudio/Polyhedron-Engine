@@ -551,7 +551,7 @@ extern "C" {
 
         // Plays a sound at the given origin. If origin is NULL, the sound will
         // be dynamically sourced from the entity.
-        void            (*S_StartSound)(const vec3_t origin, int entnum, int entchannel,
+        void            (*S_StartSound)(const vec3_t *origin, int entnum, int entchannel,
                                        qhandle_t sfx, float fvol, float attenuation, float timeofs);
         // Plays a local 2D sound on entchannel 0.                               
         void            (*S_StartLocalSound) (const char *s);

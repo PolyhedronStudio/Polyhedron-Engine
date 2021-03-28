@@ -925,7 +925,7 @@ if pos is NULL, the sound will be dynamically sourced from the entity
 Entchannel 0 will never override a playing sound
 ====================
 */
-void S_StartSound(const vec3_t origin, int entnum, int entchannel, qhandle_t hSfx, float vol, float attenuation, float timeofs)
+void S_StartSound(const vec3_t *origin, int entnum, int entchannel, qhandle_t hSfx, float vol, float attenuation, float timeofs)
 {
     sfxcache_t  *sc;
     playsound_t *ps, *sort;
