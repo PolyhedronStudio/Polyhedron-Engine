@@ -136,7 +136,7 @@ static void DrawSkyPolygon(int nump, vec3_t *vecs)
 static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
 {
     const float     *norm;
-    float   *v;
+    vec3_t   *v; // MATHLIB: !!  from float*v to vec3_t *v
     qboolean        front, back;
     float   d, e;
     float   dists[MAX_CLIP_VERTS];
@@ -158,8 +158,8 @@ static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
 
     front = back = false;
     norm = skyclip[stage];
-    for (i = 0, v = vecs; i < nump; i++, v += 3) {
-        d = DotProduct(v, norm);
+    for (i = 0, v = vecs; i < nump; i++, v += 1) { // was v += 3
+        d = DotProduct(*v, norm);
         if (d > ON_EPSILON) {
             front = true;
             sides[i] = SIDE_FRONT;
