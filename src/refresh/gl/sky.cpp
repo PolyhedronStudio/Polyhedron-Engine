@@ -67,12 +67,12 @@ static void DrawSkyPolygon(int nump, vec3_t *vecs)
     vec3_t  v, av;
     float   s, t, dv;
     int     axis;
-    float   *vp;
+    vec3_t *vp;    // MATHLIB: !! Converted to vec3_t
 
     // decide which face it maps to
     VectorClear(v);
-    for (i = 0, vp = vecs; i < nump; i++, vp += 3) {
-        VectorAdd(vp, v, v);
+    for (i = 0, vp = vecs; i < nump; i++, vp += 1) {
+        VectorAdd(*vp, v, v);
     }
     av[0] = fabs(v[0]);
     av[1] = fabs(v[1]);

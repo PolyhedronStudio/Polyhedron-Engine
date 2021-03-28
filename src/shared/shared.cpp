@@ -108,6 +108,24 @@ vec_t VectorNormalize2(const vec3_t& v, vec3_t& out)
     return length;
 
 }
+// Wrapper for legacy code.
+vec_t VectorNormalize2(const vec3_t& v, vec_t *out)
+{
+    float    length, ilength;
+
+    length = v.xyz[0] * v.xyz[0] + v.xyz[1] * v.xyz[1] + v.xyz[2] * v.xyz[2];
+    length = sqrtf(length);         // FIXME
+
+    if (length) {
+        ilength = 1 / length;
+        out[0] = v.xyz[0] * ilength;
+        out[1] = v.xyz[1] * ilength;
+        out[2] = v.xyz[2] * ilength;
+    }
+
+    return length;
+
+}
 
 //
 //===============
