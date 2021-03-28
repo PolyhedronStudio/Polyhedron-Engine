@@ -80,7 +80,7 @@ void turret_breach_fire(edict_t *self)
     int     damage;
     int     speed;
 
-    AngleVectors(self->s.angles, f, r, u);
+    AngleVectors(self->s.angles, &f, &r, &u);
     VectorMA(self->s.origin, self->move_origin[0], f, start);
     VectorMA(start, self->move_origin[1], r, start);
     VectorMA(start, self->move_origin[2], u, start);

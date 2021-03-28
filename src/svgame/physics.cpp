@@ -402,7 +402,7 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 
 // we need this for pushing things later
     VectorSubtract(vec3_origin, amove, org);
-    AngleVectors(org, forward, right, up);
+    AngleVectors(org, &forward, &right, &up);
 
 // save the pusher's original position
     pushed_p->ent = pusher;

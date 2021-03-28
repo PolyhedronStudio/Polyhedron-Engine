@@ -184,7 +184,7 @@ static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
     VectorCopy(vecs, (vecs + (i * 3)));
     newc[0] = newc[1] = 0;
 
-    for (i = 0, v = vecs; i < nump; i++, v += 3) {
+    for (i = 0, v = vecs; i < nump; i++, v = v + 1) {
         switch (sides[i]) {
         case SIDE_FRONT:
             // MATHLIB: !!!! Changed VectorCopy(v, newv[0][newc[0]]);
@@ -211,7 +211,7 @@ static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
 
         d = dists[i] / (dists[i] - dists[i + 1]);
         for (j = 0; j < 3; j++) {
-            e = v[j] + d * (v[j + 3] - v[j]);
+            e = v[0][j] + d * (v[j + 3] - v[j]); // MATHLIB: !!! v[j] changed to v[0][j]
             newv[0][newc[0]][j] = e;
             newv[1][newc[1]][j] = e;
         }
