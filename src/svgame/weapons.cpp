@@ -56,7 +56,7 @@ fire_hit
 Used for all impact (hit/punch/slash) attacks
 =================
 */
-qboolean fire_hit(edict_t *self, vec3_t aim, int damage, int kick)
+qboolean fire_hit(edict_t *self, const vec3_t &aim, int damage, int kick)
 {
     trace_t     tr;
     vec3_t      forward, right, up;
@@ -123,7 +123,7 @@ fire_lead
 This is an internal support routine used for bullet/pellet based weapons.
 =================
 */
-static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int te_impact, int hspread, int vspread, int mod)
+static void fire_lead(edict_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int te_impact, int hspread, int vspread, int mod)
 {
     trace_t     tr;
     vec3_t      dir;
@@ -138,7 +138,7 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
     tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, start, self, CONTENTS_MASK_SHOT);
     if (!(tr.fraction < 1.0)) {
         vectoangles(aimdir, dir);
-        AngleVectors(dir, forward, right, up);
+        AngleVectors(dir, &forward, &right, &up);
 
         r = crandom() * hspread;
         u = crandom() * vspread;
@@ -252,7 +252,7 @@ Fires a single round.  Used for machinegun and chaingun.  Would be fine for
 pistols, rifles, etc....
 =================
 */
-void fire_bullet(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int mod)
+void fire_bullet(edict_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod)
 {
     fire_lead(self, start, aimdir, damage, kick, TE_GUNSHOT, hspread, vspread, mod);
 }
@@ -265,7 +265,7 @@ fire_shotgun
 Shoots shotgun pellets.  Used by shotgun and super shotgun.
 =================
 */
-void fire_shotgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod)
+void fire_shotgun(edict_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int count, int mod)
 {
     int     i;
 
@@ -316,7 +316,7 @@ void blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
     G_FreeEdict(self);
 }
 
-void fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, qboolean hyper)
+void fire_blaster(edict_t *self, const vec3_t& start, const vec3_t& dir, int damage, int speed, int effect, qboolean hyper)
 {
     edict_t *bolt;
     trace_t tr;
@@ -447,7 +447,7 @@ void Grenade_Touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
     Grenade_Explode(ent);
 }
 
-void fire_grenade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius)
+void fire_grenade(edict_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, float timer, float damage_radius)
 {
     edict_t *grenade;
     vec3_t  dir;
@@ -480,7 +480,7 @@ void fire_grenade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int sp
     gi.linkentity(grenade);
 }
 
-void fire_grenade2(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held)
+void fire_grenade2(edict_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, float timer, float damage_radius, qboolean held)
 {
     edict_t *grenade;
     vec3_t  dir;
@@ -574,7 +574,7 @@ void rocket_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *sur
     G_FreeEdict(ent);
 }
 
-void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
+void fire_rocket(edict_t *self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius, int radius_damage)
 {
     edict_t *rocket;
 
@@ -612,7 +612,7 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 fire_rail
 =================
 */
-void fire_rail(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
+void fire_rail(edict_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick)
 {
     vec3_t      from;
     vec3_t      end;
@@ -827,7 +827,7 @@ void bfg_think(edict_t *self)
 }
 
 
-void fire_bfg(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius)
+void fire_bfg(edict_t *self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius)
 {
     edict_t *bfg;
 
@@ -953,7 +953,7 @@ void flare_touch(edict_t *ent, edict_t *other,
 	VectorClear(ent->velocity);
 }
 
-void fire_flaregun(edict_t *self, vec3_t start, vec3_t aimdir,
+void fire_flaregun(edict_t *self, const vec3_t& start, const vec3_t& aimdir,
 	int damage, int speed, float timer,
 	float damage_radius)
 {
