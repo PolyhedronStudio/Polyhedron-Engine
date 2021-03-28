@@ -47,7 +47,7 @@ void UpdateChaseCam(edict_t *ent)
     VectorCopy(targ->client->v_angle, angles);
     if (angles[PITCH] > 56)
         angles[PITCH] = 56;
-    AngleVectors(angles, forward, right, NULL);
+    AngleVectors(angles, &forward, &right, NULL);
     VectorNormalize(forward);
     VectorMA(ownerv, -30, forward, o);
 

@@ -296,7 +296,7 @@ qboolean infront(edict_t *self, edict_t *other)
     float   dot;
     vec3_t  forward;
 
-    AngleVectors(self->s.angles, forward, NULL, NULL);
+    AngleVectors(self->s.angles, &forward, NULL, NULL);
     VectorSubtract(other->s.origin, self->s.origin, vec);
     VectorNormalize(vec);
     dot = DotProduct(vec, forward);
@@ -947,7 +947,7 @@ void ai_run(edict_t *self, float dist)
             center = tr.fraction;
             d2 = d1 * ((center + 1) / 2);
             self->s.angles[YAW] = self->ideal_yaw = vectoyaw(v);
-            AngleVectors(self->s.angles, v_forward, v_right, NULL);
+            AngleVectors(self->s.angles, &v_forward, &v_right, NULL);
 
             VectorSet(v, d2, -16, 0);
             left_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);
@@ -977,7 +977,7 @@ void ai_run(edict_t *self, float dist)
             } else if (right >= center && right > left) {
                 if (right < 1) {
                     VectorSet(v, d2 * right * 0.5, 16, 0);
-                    right_target G_ProjectSource(self->s.origin, v, v_forward, v_right);
+                    right_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);
 //                  gi.dprintf("incomplete path, go part way and adjust again\n");
                 }
                 VectorCopy(self->monsterinfo.last_sighting, self->monsterinfo.saved_goal);

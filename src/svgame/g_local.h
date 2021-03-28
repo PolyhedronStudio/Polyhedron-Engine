@@ -620,7 +620,7 @@ void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 // g_utils.c
 //
 qboolean    KillBox(edict_t *ent);
-void    G_ProjectSource(const vec3_t point, const vec3_t distance, const vec3_t forward, const vec3_t right, vec3_t result);
+vec3_t  G_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right);
 edict_t *G_Find(edict_t *from, int fieldofs, const char *match); // C++20: Added const to char*
 edict_t *findradius(edict_t *from, vec3_t org, float rad);
 edict_t *G_PickTarget(char *targetname);
