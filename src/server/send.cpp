@@ -311,12 +311,12 @@ void SV_Multicast(vec3_t origin, multicast_t to)
 #if 0
             player_state_t *ps = &client->edict->client->ps;
             // N&C: FF Precision.
-            Vec3_Add(ps->viewoffset, ps->pmove.origin, orig);
-            //Vec3_MA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
+            VectorAdd(ps->viewoffset, ps->pmove.origin, orig);
+            //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
 #else
             // FIXME: for some strange reason, game code assumes the server
             // uses entity origin for PVS/PHS culling, not the view origin
-            Vec3_Copy(client->edict->s.origin, org);
+            VectorCopy(client->edict->s.origin, org);
 #endif
             leaf2 = CM_PointLeaf(&sv.cm, org);
             if (!CM_AreasConnected(&sv.cm, leaf1->area, leaf2->area))

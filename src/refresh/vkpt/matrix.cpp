@@ -136,17 +136,17 @@ create_view_matrix(float matrix[16], refdef_t *fd)
 	matrix[0]  = -viewaxis[1][0];
 	matrix[4]  = -viewaxis[1][1];
 	matrix[8]  = -viewaxis[1][2];
-	matrix[12] = Vec3_Dot(viewaxis[1], fd->vieworg);
+	matrix[12] = DotProduct(viewaxis[1], fd->vieworg);
 
 	matrix[1]  = viewaxis[2][0];
 	matrix[5]  = viewaxis[2][1];
 	matrix[9]  = viewaxis[2][2];
-	matrix[13] = -Vec3_Dot(viewaxis[2], fd->vieworg);
+	matrix[13] = -DotProduct(viewaxis[2], fd->vieworg);
 
 	matrix[2]  = viewaxis[0][0];
 	matrix[6]  = viewaxis[0][1];
 	matrix[10] = viewaxis[0][2];
-	matrix[14] = -Vec3_Dot(viewaxis[0], fd->vieworg);
+	matrix[14] = -DotProduct(viewaxis[0], fd->vieworg);
 
 	matrix[3]  = 0;
 	matrix[7]  = 0;

@@ -25,9 +25,9 @@ void VelocityForDamage(int damage, vec3_t v)
     v[2] = 200.0 + 100.0 * random();
 
     if (damage < 50)
-        Vec3_Scale(v, 0.7, v);
+        VectorScale(v, 0.7, v);
     else
-        Vec3_Scale(v, 1.2, v);
+        VectorScale(v, 1.2, v);
 }
 
 void ClipGibVelocity(edict_t *ent)
@@ -102,8 +102,8 @@ void ThrowGib(edict_t *self, const char *gibname, int damage, int type)
 
     gib = G_Spawn();
 
-    Vec3_Scale(self->size, 0.5, size);
-    Vec3_Add(self->absmin, size, origin);
+    VectorScale(self->size, 0.5, size);
+    VectorAdd(self->absmin, size, origin);
     gib->s.origin[0] = origin[0] + crandom() * size[0];
     gib->s.origin[1] = origin[1] + crandom() * size[1];
     gib->s.origin[2] = origin[2] + crandom() * size[2];
@@ -125,7 +125,7 @@ void ThrowGib(edict_t *self, const char *gibname, int damage, int type)
     }
 
     VelocityForDamage(damage, vd);
-    Vec3_MA(self->velocity, vscale, vd, gib->velocity);
+    VectorMA(self->velocity, vscale, vd, gib->velocity);
     ClipGibVelocity(gib);
     gib->avelocity[0] = random() * 600;
     gib->avelocity[1] = random() * 600;
@@ -144,8 +144,8 @@ void ThrowHead(edict_t *self, const char *gibname, int damage, int type)
 
     self->s.skinnum = 0;
     self->s.frame = 0;
-    Vec3_Clear(self->mins);
-    Vec3_Clear(self->maxs);
+    VectorClear(self->mins);
+    VectorClear(self->maxs);
 
     self->s.modelindex2 = 0;
     gi.setmodel(self, gibname);
@@ -168,7 +168,7 @@ void ThrowHead(edict_t *self, const char *gibname, int damage, int type)
     }
 
     VelocityForDamage(damage, vd);
-    Vec3_MA(self->velocity, vscale, vd, self->velocity);
+    VectorMA(self->velocity, vscale, vd, self->velocity);
     ClipGibVelocity(self);
 
     self->avelocity[YAW] = crandom() * 600;
@@ -196,8 +196,8 @@ void ThrowClientHead(edict_t *self, int damage)
     self->s.origin[2] += 32;
     self->s.frame = 0;
     gi.setmodel(self, gibname);
-    Vec3_Set(self->mins, -16, -16, 0);
-    Vec3_Set(self->maxs, 16, 16, 16);
+    VectorSet(self->mins, -16, -16, 0);
+    VectorSet(self->maxs, 16, 16, 16);
 
     self->takedamage = DAMAGE_NO;
     self->solid = SOLID_NOT;
@@ -207,7 +207,7 @@ void ThrowClientHead(edict_t *self, int damage)
 
     self->movetype = MOVETYPE_BOUNCE;
     VelocityForDamage(damage, vd);
-    Vec3_Add(self->velocity, vd, self->velocity);
+    VectorAdd(self->velocity, vd, self->velocity);
 
     if (self->client) { // bodies in the queue don't have a client anymore
         self->client->anim_priority = ANIM_DEATH;
@@ -237,12 +237,12 @@ void ThrowDebris(edict_t *self, const char *modelname, float speed, vec3_t origi
     vec3_t  v;
 
     chunk = G_Spawn();
-    Vec3_Copy(origin, chunk->s.origin);
+    VectorCopy(origin, chunk->s.origin);
     gi.setmodel(chunk, modelname);
     v[0] = 100 * crandom();
     v[1] = 100 * crandom();
     v[2] = 100 + 100 * crandom();
-    Vec3_MA(self->velocity, speed, v, chunk->velocity);
+    VectorMA(self->velocity, speed, v, chunk->velocity);
     chunk->movetype = MOVETYPE_BOUNCE;
     chunk->solid = SOLID_NOT;
     chunk->avelocity[0] = random() * 600;

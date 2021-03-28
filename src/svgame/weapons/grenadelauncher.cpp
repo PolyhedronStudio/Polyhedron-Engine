@@ -38,11 +38,11 @@ void weapon_grenadelauncher_fire(edict_t* ent)
     if (is_quad)
         damage *= 4;
 
-    Vec3_Set(offset, 8, 8, ent->viewheight - 8);
+    VectorSet(offset, 8, 8, ent->viewheight - 8);
     AngleVectors(ent->client->v_angle, forward, right, NULL);
     P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
-    Vec3_Scale(forward, -2, ent->client->kick_origin);
+    VectorScale(forward, -2, ent->client->kick_origin);
     ent->client->kick_angles[0] = -1;
 
     fire_grenade(ent, start, forward, damage, 600, 2.5, radius);

@@ -98,7 +98,7 @@ static struct {
  */
 static vec3_t Pm_ClipVelocity(const vec3_t in, const vec3_t normal, float bounce) {
 
-	float backoff = Vec3_Dot(in, normal);
+	float backoff = DotProduct(in, normal);
 
 	if (backoff < 0.0f) {
 		backoff *= bounce;
@@ -107,7 +107,7 @@ static vec3_t Pm_ClipVelocity(const vec3_t in, const vec3_t normal, float bounce
 		backoff /= bounce;
 	}
 
-	return Vec3_Subtract(in, Vec3_Scale(normal, backoff));
+	return VectorSubtract(in, VectorScale(normal, backoff));
 }
 
 /**
@@ -147,7 +147,7 @@ static cm_trace_t Pm_TraceCorrectAllSolid(const vec3_t start, const vec3_t end, 
 	for (uint32_t i = 0; i < lengthof(offsets); i++) {
 		for (uint32_t j = 0; j < lengthof(offsets); j++) {
 			for (uint32_t k = 0; k < lengthof(offsets); k++) {
-				const vec3_t point = Vec3_Add(start, Vec3(offsets[i], offsets[j], offsets[k]));
+				const vec3_t point = VectorAdd(start, Vec3(offsets[i], offsets[j], offsets[k]));
 				const cm_trace_t trace = pm->Trace(point, end, mins, maxs);
 
 				if (!trace.all_solid) {
@@ -172,7 +172,7 @@ static cm_trace_t Pm_TraceCorrectAllSolid(const vec3_t start, const vec3_t end, 
 static _Bool Pm_ImpactPlane(vec3_t* planes, int32_t num_planes, const vec3_t plane) {
 
 	for (int32_t i = 0; i < num_planes; i++) {
-		if (Vec3_Dot(plane, planes[i]) > 1.0f - PM_STOP_EPSILON) {
+		if (DotProduct(plane, planes[i]) > 1.0f - PM_STOP_EPSILON) {
 			return false;
 		}
 	}
@@ -247,7 +247,7 @@ static _Bool Pm_SlideMove(void) {
 		}
 		else {
 			// if we've seen this plane before, nudge our velocity out along it
-			pm->s.velocity = Vec3_Add(pm->s.velocity, trace.plane.normal);
+			pm->s.velocity = VectorAdd(pm->s.velocity, trace.plane.normal);
 			continue;
 		}
 
@@ -256,7 +256,7 @@ static _Bool Pm_SlideMove(void) {
 			vec3_t vel;
 
 			// if velocity doesn't impact this plane, skip it
-			if (Vec3_Dot(pm->s.velocity, planes[i]) >= 0.0f) {
+			if (DotProduct(pm->s.velocity, planes[i]) >= 0.0f) {
 				continue;
 			}
 
@@ -272,7 +272,7 @@ static _Bool Pm_SlideMove(void) {
 				}
 
 				// if the clipped velocity doesn't impact this plane, skip it
-				if (Vec3_Dot(vel, planes[j]) >= 0.0f) {
+				if (DotProduct(vel, planes[j]) >= 0.0f) {
 					continue;
 				}
 
@@ -280,16 +280,16 @@ static _Bool Pm_SlideMove(void) {
 				vel = Pm_ClipVelocity(vel, planes[j], PM_CLIP_BOUNCE);
 
 				// but if we clip against it without being deflected back, we're okay
-				if (Vec3_Dot(vel, planes[i]) >= 0.0f) {
+				if (DotProduct(vel, planes[i]) >= 0.0f) {
 					continue;
 				}
 
 				// we must now slide along the crease (cross product of the planes)
-				cross = Vec3_Cross(planes[i], planes[j]);
+				cross = CrossProduct(planes[i], planes[j]);
 				cross = Vec3_Normalize(cross);
 
-				const float scale = Vec3_Dot(cross, pm->s.velocity);
-				vel = Vec3_Scale(cross, scale);
+				const float scale = DotProduct(cross, pm->s.velocity);
+				vel = VectorScale(cross, scale);
 
 				// see if there is a third plane the the new move enters
 				for (int32_t k = 0; k < num_planes; k++) {
@@ -298,7 +298,7 @@ static _Bool Pm_SlideMove(void) {
 						continue;
 					}
 
-					if (Vec3_Dot(vel, planes[k]) >= 0.0f) {
+					if (DotProduct(vel, planes[k]) >= 0.0f) {
 						continue;
 					}
 
@@ -429,7 +429,7 @@ static void Pm_Friction(void) {
 		vel.z = 0.0;
 	}
 
-	const float speed = Vec3_Length(vel);
+	const float speed = VectorLength(vel);
 
 	if (speed < 1.0f) {
 		pm->s.velocity.x = pm->s.velocity.y = 0.0f;
@@ -464,14 +464,14 @@ static void Pm_Friction(void) {
 	// scale the velocity, taking care to not reverse direction
 	const float scale = Maxf(0.0, speed - (friction * control * pm_locals.time)) / speed;
 
-	pm->s.velocity = Vec3_Scale(pm->s.velocity, scale);
+	pm->s.velocity = VectorScale(pm->s.velocity, scale);
 }
 
 /**
  * @brief Handles user intended acceleration.
  */
 static void Pm_Accelerate(const vec3_t dir, float speed, float accel) {
-	const float current_speed = Vec3_Dot(pm->s.velocity, dir);
+	const float current_speed = DotProduct(pm->s.velocity, dir);
 	const float add_speed = speed - current_speed;
 
 	if (add_speed <= 0.0f) {
@@ -632,7 +632,7 @@ static void Pm_CheckHook(void) {
 		// pull physics
 		const float dist = Vec3_DistanceDir(pm->s.hook_position, pm->s.origin, &pm->s.velocity);
 		if (dist > 8.0f && !Pm_CheckHookJump()) {
-			pm->s.velocity = Vec3_Scale(pm->s.velocity, pm->hook_pull_speed);
+			pm->s.velocity = VectorScale(pm->s.velocity, pm->hook_pull_speed);
 		}
 		else {
 			pm->s.velocity = Vec3_Zero();
@@ -668,8 +668,8 @@ static void Pm_CheckHook(void) {
 			pm->s.hook_length = Minf(pm->s.hook_length + hook_rate, PM_HOOK_MAX_DIST);
 		}
 
-		vec3_t chain_vec = Vec3_Subtract(pm->s.hook_position, pm->s.origin);
-		float chain_len = Vec3_Length(chain_vec);
+		vec3_t chain_vec = VectorSubtract(pm->s.hook_position, pm->s.origin);
+		float chain_len = VectorLength(chain_vec);
 
 		// if player's location is already within the chain's reach
 		if (chain_len <= pm->s.hook_length) {
@@ -680,25 +680,25 @@ static void Pm_CheckHook(void) {
 		vec3_t vel_part;
 
 		// determine player's velocity component of chain vector
-		vel_part = Vec3_Scale(chain_vec, Vec3_Dot(pm->s.velocity, chain_vec) / Vec3_Dot(chain_vec, chain_vec));
+		vel_part = VectorScale(chain_vec, DotProduct(pm->s.velocity, chain_vec) / DotProduct(chain_vec, chain_vec));
 
 		// restrainment default force
 		float force = (chain_len - pm->s.hook_length) * 5.0f;
 
 		// if player's velocity heading is away from the hook
-		if (Vec3_Dot(pm->s.velocity, chain_vec) < 0.0f) {
+		if (DotProduct(pm->s.velocity, chain_vec) < 0.0f) {
 
 			// if chain has streched for 24 units
 			if (chain_len > pm->s.hook_length + 24.0f) {
 
 				// remove player's velocity component moving away from hook
-				pm->s.velocity = Vec3_Subtract(pm->s.velocity, vel_part);
+				pm->s.velocity = VectorSubtract(pm->s.velocity, vel_part);
 			}
 		}
 		else { // if player's velocity heading is towards the hook
 
-			if (Vec3_Length(vel_part) < force) {
-				force -= Vec3_Length(vel_part);
+			if (VectorLength(vel_part) < force) {
+				force -= VectorLength(vel_part);
 			}
 			else {
 				force = 0.0f;
@@ -1178,7 +1178,7 @@ static void Pm_WaterMove(void) {
 	// disable water skiing
 	if (pm->s.type != PM_HOOK_PULL && pm->s.type != PM_HOOK_SWING) {
 		if (pm->water_level == WATER_WAIST) {
-			vec3_t view = Vec3_Add(pm->s.origin, pm->s.view_offset);
+			vec3_t view = VectorAdd(pm->s.origin, pm->s.view_offset);
 			view.z -= 4.0;
 
 			if (!(pm->PointContents(view) & CONTENTS_MASK_LIQUID)) {
@@ -1307,14 +1307,14 @@ static void Pm_WalkMove(void) {
 	Pm_Accelerate(dir, speed, accel);
 
 	// determine the speed after acceleration
-	speed = Vec3_Length(pm->s.velocity);
+	speed = VectorLength(pm->s.velocity);
 
 	// clip to the ground
 	pm->s.velocity = Pm_ClipVelocity(pm->s.velocity, pm_locals.ground.plane.normal, PM_CLIP_BOUNCE);
 
 	// and now scale by the speed to avoid slowing down on slopes
 	pm->s.velocity = Vec3_Normalize(pm->s.velocity);
-	pm->s.velocity = Vec3_Scale(pm->s.velocity, speed);
+	pm->s.velocity = VectorScale(pm->s.velocity, speed);
 
 	// and finally, step if moving in X/Y
 	if (pm->s.velocity.x || pm->s.velocity.y) {
@@ -1373,13 +1373,13 @@ static void Pm_Init(void) {
 			pm->maxs = PM_GIBLET_MAXS;
 		}
 		else {
-			pm->mins = Vec3_Scale(PM_DEAD_MINS, PM_SCALE);
-			pm->maxs = Vec3_Scale(PM_DEAD_MAXS, PM_SCALE);
+			pm->mins = VectorScale(PM_DEAD_MINS, PM_SCALE);
+			pm->maxs = VectorScale(PM_DEAD_MAXS, PM_SCALE);
 		}
 	}
 	else {
-		pm->mins = Vec3_Scale(PM_MINS, PM_SCALE);
-		pm->maxs = Vec3_Scale(PM_MAXS, PM_SCALE);
+		pm->mins = VectorScale(PM_MINS, PM_SCALE);
+		pm->maxs = VectorScale(PM_MAXS, PM_SCALE);
 	}
 
 	pm->angles = Vec3_Zero();
@@ -1419,7 +1419,7 @@ static void Pm_ClampAngles(void) {
 	pm->s.view_angles = pm->cmd.angles;
 
 	// add the delta angles
-	pm->angles = Vec3_Add(pm->cmd.angles, pm->s.delta_angles);
+	pm->angles = VectorAdd(pm->cmd.angles, pm->s.delta_angles);
 
 	// clamp pitch to prevent the player from looking up or down more than 90º
 	if (pm->angles.x > 90.0f && pm->angles.x < 270.0f) {

@@ -564,7 +564,7 @@ vkpt_extract_emissive_texture_info(image_t *image)
 
 	byte* current_pixel = image->pix_data;
 	vec3_t emissive_color;
-	Vec3_Clear(emissive_color);
+	VectorClear(emissive_color);
 
 	int min_x = w;
 	int max_x = -1;
@@ -584,7 +584,7 @@ vkpt_extract_emissive_texture_info(image_t *image)
 				color[1] = max(0.f, color[1] + EMISSIVE_TRANSFORM_BIAS);
 				color[2] = max(0.f, color[2] + EMISSIVE_TRANSFORM_BIAS);
 
-				Vec3_Add(emissive_color, color, emissive_color);
+				VectorAdd(emissive_color, color, emissive_color);
 
 				min_x = min(min_x, x);
 				min_y = min(min_y, y);
@@ -599,11 +599,11 @@ vkpt_extract_emissive_texture_info(image_t *image)
 	if (min_x <= max_x && min_y <= max_y)
 	{
 		float normalization = 1.f / (float)((max_x - min_x + 1) * (max_y - min_y + 1));
-		Vec3_Scale(emissive_color, normalization, image->light_color);
+		VectorScale(emissive_color, normalization, image->light_color);
 	}
 	else
 	{
-		Vec3_Set(image->light_color, 0.f, 0.f, 0.f);
+		VectorSet(image->light_color, 0.f, 0.f, 0.f);
 	}
 
 	image->min_light_texcoord[0] = (float)min_x / (float)w;

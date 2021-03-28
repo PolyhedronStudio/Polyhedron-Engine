@@ -1277,7 +1277,7 @@ static qboolean BSP_RecursiveLightPoint(mnode_t *node, float p1f, float p2f, vec
         // find crossing point
         frac = d1 / (d1 - d2);
         midf = p1f + (p2f - p1f) * frac;
-        Vec3_Lerp(p1, p2, frac, mid);
+        LerpVector(p1, p2, frac, mid);
 
         // check near side
         if (BSP_RecursiveLightPoint(node->children[side], p1f, midf, p1, mid))
@@ -1291,8 +1291,8 @@ static qboolean BSP_RecursiveLightPoint(mnode_t *node, float p1f, float p2f, vec
             if (texinfo->c.flags & SURF_NOLM_MASK)
                 continue;
 
-            s = Vec3_Dot(texinfo->axis[0], mid) + texinfo->offset[0];
-            t = Vec3_Dot(texinfo->axis[1], mid) + texinfo->offset[1];
+            s = DotProduct(texinfo->axis[0], mid) + texinfo->offset[0];
+            t = DotProduct(texinfo->axis[1], mid) + texinfo->offset[1];
 
             s -= surf->texturemins[0];
             t -= surf->texturemins[1];
@@ -1336,8 +1336,8 @@ void BSP_TransformedLightPoint(lightpoint_t *point, vec3_t start, vec3_t end,
     light_point->fraction = 1;
 
     // subtract origin offset
-    Vec3_Subtract(start, origin, start_l);
-    Vec3_Subtract(end, origin, end_l);
+    VectorSubtract(start, origin, start_l);
+    VectorSubtract(end, origin, end_l);
 
     // rotate start and end into the models frame of reference
     if (angles) {
@@ -1357,7 +1357,7 @@ void BSP_TransformedLightPoint(lightpoint_t *point, vec3_t start, vec3_t end,
     }
 
     // offset plane distance
-    point->plane.dist += Vec3_Dot(point->plane.normal, origin);
+    point->plane.dist += DotProduct(point->plane.normal, origin);
 }
 
 #endif

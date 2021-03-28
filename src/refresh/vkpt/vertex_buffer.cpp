@@ -239,9 +239,9 @@ copy_light(const light_poly_t* light, float* vblight, const float* sky_radiance)
 
 	float mat_scale = light->material ? light->material->emissive_scale : 1.f;
 
-	Vec3_Copy(light->positions + 0, vblight + 0);
-	Vec3_Copy(light->positions + 3, vblight + 4);
-	Vec3_Copy(light->positions + 6, vblight + 8);
+	VectorCopy(light->positions + 0, vblight + 0);
+	VectorCopy(light->positions + 3, vblight + 4);
+	VectorCopy(light->positions + 6, vblight + 8);
 
 	if (light->color[0] < 0.f)
 	{

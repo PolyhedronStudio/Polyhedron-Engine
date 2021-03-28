@@ -1695,10 +1695,10 @@ static int precache_spawncount;
 //===============
 //
 void CL_UpdateListenerOrigin(void) {
-    Vec3_Copy(cl.refdef.vieworg, listener_origin);
-    Vec3_Copy(cl.v_forward, listener_forward);
-    Vec3_Copy(cl.v_right, listener_right);
-    Vec3_Copy(cl.v_up, listener_up);
+    VectorCopy(cl.refdef.vieworg, listener_origin);
+    VectorCopy(cl.v_forward, listener_forward);
+    VectorCopy(cl.v_right, listener_right);
+    VectorCopy(cl.v_up, listener_up);
 }
 
 /*
@@ -2191,14 +2191,14 @@ static size_t CL_Ups_m(char *buffer, size_t size)
 
     if (!cls.demo.playback && cl.frame.clientNum == cl.clientNum &&
         cl_predict->integer) {
-        Vec3_Copy(cl.predicted_velocity, vel);
+        VectorCopy(cl.predicted_velocity, vel);
     } else {
         // N&C: FF Precision.
-        Vec3_Copy(cl.predicted_velocity, vel);
-       // Vec3_Scale(cl.frame.ps.pmove.velocity, 0.125f, vel);
+        VectorCopy(cl.predicted_velocity, vel);
+       // VectorScale(cl.frame.ps.pmove.velocity, 0.125f, vel);
     }
 
-    return Q_scnprintf(buffer, size, "%d", (int)Vec3_Length(vel));
+    return Q_scnprintf(buffer, size, "%d", (int)VectorLength(vel));
 }
 
 static size_t CL_Timer_m(char *buffer, size_t size)

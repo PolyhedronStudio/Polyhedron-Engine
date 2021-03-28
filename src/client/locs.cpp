@@ -150,8 +150,8 @@ static location_t *LOC_FindClosest(vec3_t pos)
     minDist = 99999;
     nearest = NULL;
     LIST_FOR_EACH(location_t, loc, &cl_locations, entry) {
-        Vec3_Subtract(pos, loc->origin, dir);
-        dist = Vec3_Length(dir);
+        VectorSubtract(pos, loc->origin, dir);
+        dist = VectorLength(dir);
 
         if (dist > loc_dist->value) {
             continue;
@@ -200,14 +200,14 @@ void LOC_AddLocationsToScene(void)
     }
 
     LIST_FOR_EACH(location_t, loc, &cl_locations, entry) {
-        Vec3_Subtract(cl.playerEntityOrigin, loc->origin, dir);
-        dist = Vec3_Length(dir);
+        VectorSubtract(cl.playerEntityOrigin, loc->origin, dir);
+        dist = VectorLength(dir);
 
         if (dist > loc_dist->integer) {
             continue;
         }
 
-        Vec3_Copy(loc->origin, ent.origin);
+        VectorCopy(loc->origin, ent.origin);
 
         if (loc == nearest) {
             ent.origin[2] += 10.0f * sin(cl.time * 0.01f);
@@ -258,7 +258,7 @@ static size_t LOC_There_m(char *buffer, size_t size)
         return ret;
     }
 
-    Vec3_MA(cl.playerEntityOrigin, 8192, cl.v_forward, pos);
+    VectorMA(cl.playerEntityOrigin, 8192, cl.v_forward, pos);
     CM_BoxTrace(&trace, cl.playerEntityOrigin, pos, vec3_origin, vec3_origin,
                 cl.bsp->nodes, CONTENTS_MASK_SOLID);
 
@@ -285,7 +285,7 @@ static void LOC_Add_f(void)
     }
 
     loc = LOC_Alloc(Cmd_Args());
-    Vec3_Copy(cl.playerEntityOrigin, loc->origin);
+    VectorCopy(cl.playerEntityOrigin, loc->origin);
     List_Append(&cl_locations, &loc->entry);
 }
 
@@ -329,7 +329,7 @@ static void LOC_Update_f(void)
     }
 
     newloc = LOC_Alloc(Cmd_Args());
-    Vec3_Copy(oldloc->origin, newloc->origin);
+    VectorCopy(oldloc->origin, newloc->origin);
     List_Link(oldloc->entry.prev, oldloc->entry.next, &newloc->entry);
     Z_Free(oldloc);
 }

@@ -37,14 +37,14 @@ void rotating_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* 
 
 void rotating_use(edict_t* self, edict_t* other, edict_t* activator)
 {
-    if (!Vec3_Compare(self->avelocity, vec3_origin)) {
+    if (!VectorCompare(self->avelocity, vec3_origin)) {
         self->s.sound = 0;
-        Vec3_Clear(self->avelocity);
+        VectorClear(self->avelocity);
         self->touch = NULL;
     }
     else {
         self->s.sound = self->moveinfo.sound_middle;
-        Vec3_Scale(self->movedir, self->speed, self->avelocity);
+        VectorScale(self->movedir, self->speed, self->avelocity);
         if (self->spawnflags & 16)
             self->touch = rotating_touch;
     }
@@ -59,7 +59,7 @@ void SP_func_rotating(edict_t* ent)
         ent->movetype = MOVETYPE_PUSH;
 
     // set the axis of rotation
-    Vec3_Clear(ent->movedir);
+    VectorClear(ent->movedir);
     if (ent->spawnflags & 4)
         ent->movedir[2] = 1.0;
     else if (ent->spawnflags & 8)
@@ -69,7 +69,7 @@ void SP_func_rotating(edict_t* ent)
 
     // check for reverse rotation
     if (ent->spawnflags & 2)
-        Vec3_Negate(ent->movedir, ent->movedir);
+        VectorNegate(ent->movedir, ent->movedir);
 
     if (!ent->speed)
         ent->speed = 100;

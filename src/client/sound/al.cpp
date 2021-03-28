@@ -598,17 +598,17 @@ void UpdateReverb(void)
 	CM_BoxTrace(&trace4, listener_origin, left, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
 	CM_BoxTrace(&trace5, listener_origin, right, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
 
-	Vec3_Subtract(trace1.endpos, listener_origin, length1);
-	Vec3_Subtract(trace2.endpos, listener_origin, length2);
-	Vec3_Subtract(trace3.endpos, listener_origin, length3);
-	Vec3_Subtract(trace4.endpos, listener_origin, length4);
-	Vec3_Subtract(trace5.endpos, listener_origin, length5);
+	VectorSubtract(trace1.endpos, listener_origin, length1);
+	VectorSubtract(trace2.endpos, listener_origin, length2);
+	VectorSubtract(trace3.endpos, listener_origin, length3);
+	VectorSubtract(trace4.endpos, listener_origin, length4);
+	VectorSubtract(trace5.endpos, listener_origin, length5);
 
-	dist1 = Vec3_Length(length1);
-	dist2 = Vec3_Length(length2);
-	dist3 = Vec3_Length(length3);
-	dist4 = Vec3_Length(length4);
-	dist5 = Vec3_Length(length5);
+	dist1 = VectorLength(length1);
+	dist2 = VectorLength(length2);
+	dist3 = VectorLength(length3);
+	dist4 = VectorLength(length4);
+	dist5 = VectorLength(length5);
 
 	average = (dist1 + dist2 + dist3 + dist4 + dist5) / 5;
 
@@ -839,10 +839,10 @@ static void AL_Spatialize(channel_t *ch)
 	// anything coming from the view entity will always be full volume
 	// no attenuation = no spatialization
 	if (ch->entnum == -1 || ch->entnum == listener_entnum || !ch->dist_mult) {
-		Vec3_Copy(listener_origin, origin);
+		VectorCopy(listener_origin, origin);
 	}
 	else if (ch->fixed_origin) {
-		Vec3_Copy(ch->origin, origin);
+		VectorCopy(ch->origin, origin);
 	}
 	else {
 		CL_GetEntitySoundOrigin(ch->entnum, origin);
@@ -850,7 +850,7 @@ static void AL_Spatialize(channel_t *ch)
 
 	if (s_doppler->value) {
 		CL_GetEntitySoundVelocity(ch->entnum, velocity);
-		Vec3_Scale(velocity, AL_METER_OF_Q2_UNIT, velocity);
+		VectorScale(velocity, AL_METER_OF_Q2_UNIT, velocity);
 		qalSource3f(ch->srcnum, AL_VELOCITY, AL_UnpackVector(velocity));
 	}
 
@@ -859,8 +859,8 @@ static void AL_Spatialize(channel_t *ch)
 		CM_BoxTrace(&trace, origin, listener_origin, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_PLAYERSOLID);
 		if (trace.fraction < 1.0 && !(ch->entnum == -1 || ch->entnum == listener_entnum || !ch->dist_mult))
 		{
-			Vec3_Subtract(origin, listener_origin, distance);
-			dist = Vec3_Length(distance);
+			VectorSubtract(origin, listener_origin, distance);
+			dist = VectorLength(distance);
 
 			//final = ch->master_vol - ((dist / 1000) * s_occlusion_strength->value);
 
@@ -869,7 +869,7 @@ static void AL_Spatialize(channel_t *ch)
 			qalSourcef(ch->srcnum, AL_GAIN, clamp(final, 0, 1));
 
 			if (!ch->autosound)
-				Vec3_Copy(trace.endpos, origin);
+				VectorCopy(trace.endpos, origin);
 
 			if (!cl.snd_is_underwater && !ch->autosound) // OAL: snd_is_underwater moved to client struct.
 				qalSourcei(ch->srcnum, AL_DIRECT_FILTER, underwaterFilter);
@@ -1030,7 +1030,7 @@ static void AL_AddLoopSounds(void)
 
 		// check attenuation before playing the sound
 		CL_GetEntitySoundOrigin(ent->number, origin);
-		Vec3_Subtract(origin, listener_origin, origin);
+		VectorSubtract(origin, listener_origin, origin);
 		dist = VectorNormalize(origin);
 		dist = (dist - SOUND_FULLVOLUME) * SOUND_LOOPATTENUATE;
 		if (dist >= 1.f)
@@ -1211,7 +1211,7 @@ void AL_Update(void)
 
 	if (s_doppler->value) {
 		CL_GetViewVelocity(listener_velocity);
-		Vec3_Scale(listener_velocity, AL_METER_OF_Q2_UNIT, listener_velocity);
+		VectorScale(listener_velocity, AL_METER_OF_Q2_UNIT, listener_velocity);
 		qalListener3f(AL_VELOCITY, AL_UnpackVector(listener_velocity));
 	}
 
@@ -1387,7 +1387,7 @@ AL_RawSamplesVoice(int samples, int rate, int width, int channels,
 		vec3_t velocity;
 
 		CL_GetEntitySoundVelocity(listener_entnum, velocity);
-		Vec3_Scale(velocity, AL_METER_OF_Q2_UNIT, velocity);
+		VectorScale(velocity, AL_METER_OF_Q2_UNIT, velocity);
 		qalSource3f(voiceSource, AL_VELOCITY, AL_UnpackVector(velocity));
 	}
 

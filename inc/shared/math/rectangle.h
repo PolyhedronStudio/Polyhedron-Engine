@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// shared/math/rect.h
+// shared/math/rectangle.h
 //
 // N&C Math Library: Rectangle
 //

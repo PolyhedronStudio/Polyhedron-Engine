@@ -167,13 +167,13 @@ static void CM_InitBoxHull(void)
         p = &box_planes[i * 2];
         p->type = i >> 1;
         p->signbits = 0;
-        Vec3_Clear(p->normal);
+        VectorClear(p->normal);
         p->normal[i >> 1] = 1;
 
         p = &box_planes[i * 2 + 1];
         p->type = 3 + (i >> 1);
         p->signbits = 0;
-        Vec3_Clear(p->normal);
+        VectorClear(p->normal);
         p->normal[i >> 1] = -1;
     }
 }
@@ -319,17 +319,17 @@ int CM_TransformedPointContents(vec3_t p, mnode_t *headnode, vec3_t origin, vec3
     }
 
     // subtract origin offset
-    Vec3_Subtract(p, origin, p_l);
+    VectorSubtract(p, origin, p_l);
 
     // rotate start and end into the models frame of reference
     if (headnode != box_headnode &&
         (angles[0] || angles[1] || angles[2])) {
         AngleVectors(angles, forward, right, up);
 
-        Vec3_Copy(p_l, temp);
-        p_l[0] = Vec3_Dot(temp, forward);
-        p_l[1] = -Vec3_Dot(temp, right);
-        p_l[2] = Vec3_Dot(temp, up);
+        VectorCopy(p_l, temp);
+        p_l[0] = DotProduct(temp, forward);
+        p_l[1] = -DotProduct(temp, right);
+        p_l[2] = DotProduct(temp, up);
     }
 
     leaf = BSP_PointLeaf(headnode, p_l);
@@ -406,15 +406,15 @@ static void CM_ClipBoxToBrush(vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
                 else
                     ofs[j] = mins[j];
             }
-            dist = Vec3_Dot(ofs, plane->normal);
+            dist = DotProduct(ofs, plane->normal);
             dist = plane->dist - dist;
         } else {
             // special point case
             dist = plane->dist;
         }
 
-        d1 = Vec3_Dot(p1, plane->normal) - dist;
-        d2 = Vec3_Dot(p2, plane->normal) - dist;
+        d1 = DotProduct(p1, plane->normal) - dist;
+        d2 = DotProduct(p2, plane->normal) - dist;
 
         if (d2 > 0)
             getout = true; // endpoint is not in solid
@@ -506,9 +506,9 @@ static void CM_TestBoxInBrush(vec3_t mins, vec3_t maxs, vec3_t p1,
     //    plane = side->plane;
 
     //    // adjust the plane distance appropriately for mins/maxs
-    //    dist = plane->dist - Vec3_Dot(trace->offsets[plane->signbits], plane->normal);
+    //    dist = plane->dist - DotProduct(trace->offsets[plane->signbits], plane->normal);
 
-    //    d1 = Vec3_Dot(p1, plane->normal) - dist;
+    //    d1 = DotProduct(p1, plane->normal) - dist;
 
     //    // if completely in front of face, no intersection
     //    if (d1 > 0) {
@@ -534,10 +534,10 @@ static void CM_TestBoxInBrush(vec3_t mins, vec3_t maxs, vec3_t p1,
             else
                 ofs[j] = mins[j];
         }
-        dist = Vec3_Dot(ofs, plane->normal);
+        dist = DotProduct(ofs, plane->normal);
         dist = plane->dist - dist;
 
-        d1 = Vec3_Dot(p1, plane->normal) - dist;
+        d1 = DotProduct(p1, plane->normal) - dist;
 
         // if completely in front of face, no intersection
         if (d1 > 0)
@@ -690,7 +690,7 @@ recheck:
     clamp(frac, 0, 1);
 
     midf = p1f + (p2f - p1f) * frac;
-    Vec3_Lerp(p1, p2, frac, mid);
+    LerpVector(p1, p2, frac, mid);
 
     CM_RecursiveHullCheck(node->children[side], p1f, midf, p1, mid);
 
@@ -698,7 +698,7 @@ recheck:
     clamp(frac2, 0, 1);
 
     midf = p1f + (p2f - p1f) * frac2;
-    Vec3_Lerp(p1, p2, frac2, mid);
+    LerpVector(p1, p2, frac2, mid);
 
     CM_RecursiveHullCheck(node->children[side ^ 1], midf, p2f, mid, p2);
 }
@@ -729,10 +729,10 @@ void CM_BoxTrace(trace_t *trace, vec3_t start, vec3_t end,
     }
 
     trace_contents = brushmask;
-    Vec3_Copy(start, trace_start);
-    Vec3_Copy(end, trace_end);
-    Vec3_Copy(mins, trace_mins);
-    Vec3_Copy(maxs, trace_maxs);
+    VectorCopy(start, trace_start);
+    VectorCopy(end, trace_end);
+    VectorCopy(mins, trace_mins);
+    VectorCopy(maxs, trace_maxs);
 
     //
     // check for position test special case
@@ -742,8 +742,8 @@ void CM_BoxTrace(trace_t *trace, vec3_t start, vec3_t end,
         int     i, numleafs;
         vec3_t  c1, c2;
 
-        Vec3_Add(start, mins, c1);
-        Vec3_Add(start, maxs, c2);
+        VectorAdd(start, mins, c1);
+        VectorAdd(start, maxs, c2);
         for (i = 0; i < 3; i++) {
             c1[i] -= 1;
             c2[i] += 1;
@@ -755,7 +755,7 @@ void CM_BoxTrace(trace_t *trace, vec3_t start, vec3_t end,
             if (trace_trace->allsolid)
                 break;
         }
-        Vec3_Copy(start, trace_trace->endpos);
+        VectorCopy(start, trace_trace->endpos);
         return;
     }
 
@@ -765,7 +765,7 @@ void CM_BoxTrace(trace_t *trace, vec3_t start, vec3_t end,
     if (mins[0] == 0 && mins[1] == 0 && mins[2] == 0
         && maxs[0] == 0 && maxs[1] == 0 && maxs[2] == 0) {
         trace_ispoint = true;
-        Vec3_Clear(trace_extents);
+        VectorClear(trace_extents);
     } else {
         trace_ispoint = false;
         trace_extents[0] = -mins[0] > maxs[0] ? -mins[0] : maxs[0];
@@ -773,7 +773,7 @@ void CM_BoxTrace(trace_t *trace, vec3_t start, vec3_t end,
         trace_extents[2] = -mins[2] > maxs[2] ? -mins[2] : maxs[2];
 
         // N&C: Q3 - FF Precision. Hopefully...
-        Vec3_Copy(maxs, trace_trace->offsets[0]);
+        VectorCopy(maxs, trace_trace->offsets[0]);
 
         trace_trace->offsets[1][0] = maxs[0];
         trace_trace->offsets[1][1] = mins[1];
@@ -799,7 +799,7 @@ void CM_BoxTrace(trace_t *trace, vec3_t start, vec3_t end,
         trace_trace->offsets[6][1] = maxs[1];
         trace_trace->offsets[6][2] = maxs[2];
 
-        Vec3_Copy(maxs, trace_trace->offsets[7]);
+        VectorCopy(maxs, trace_trace->offsets[7]);
 //        trace_trace->offsets[7] = maxs0;
     }
 
@@ -809,9 +809,9 @@ void CM_BoxTrace(trace_t *trace, vec3_t start, vec3_t end,
     CM_RecursiveHullCheck(headnode, 0, 1, start, end);
 
     if (trace_trace->fraction == 1)
-        Vec3_Copy(end, trace_trace->endpos);
+        VectorCopy(end, trace_trace->endpos);
     else
-        Vec3_Lerp(start, end, trace_trace->fraction, trace_trace->endpos);
+        LerpVector(start, end, trace_trace->fraction, trace_trace->endpos);
 }
 
 
@@ -833,8 +833,8 @@ void CM_TransformedBoxTrace(trace_t *trace, vec3_t start, vec3_t end,
     qboolean    rotated;
 
     // subtract origin offset
-    Vec3_Subtract(start, origin, start_l);
-    Vec3_Subtract(end, origin, end_l);
+    VectorSubtract(start, origin, start_l);
+    VectorSubtract(end, origin, end_l);
 
     // rotate start and end into the models frame of reference
     if (headnode != box_headnode &&
@@ -860,7 +860,7 @@ void CM_TransformedBoxTrace(trace_t *trace, vec3_t start, vec3_t end,
 
     // FIXME: offset plane distance?
 
-    Vec3_Lerp(start, end, trace->fraction, trace->endpos);
+    LerpVector(start, end, trace->fraction, trace->endpos);
 }
 
 void CM_ClipEntity(trace_t *dst, const trace_t *src, struct edict_s *ent)
@@ -869,7 +869,7 @@ void CM_ClipEntity(trace_t *dst, const trace_t *src, struct edict_s *ent)
     dst->startsolid |= src->startsolid;
     if (src->fraction < dst->fraction) {
         dst->fraction = src->fraction;
-        Vec3_Copy(src->endpos, dst->endpos);
+        VectorCopy(src->endpos, dst->endpos);
         dst->plane = src->plane;
         dst->surface = src->surface;
         dst->contents |= src->contents;

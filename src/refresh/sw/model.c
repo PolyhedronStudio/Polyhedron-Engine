@@ -40,8 +40,8 @@ static void ProcessTexinfo(bsp_t *bsp)
 
     tex = bsp->texinfo;
     for (i = 0; i < bsp->numtexinfo; i++, tex++) {
-        len1 = Vec3_Length(tex->axis[0]);
-        len2 = Vec3_Length(tex->axis[1]);
+        len1 = VectorLength(tex->axis[0]);
+        len2 = VectorLength(tex->axis[1]);
         len1 = (len1 + len2) / 2;
         if (len1 < 0.32)
             tex->mipadjust = 4;
@@ -87,7 +87,7 @@ static void CalcSurfaceExtents(mface_t *s)
     for (i = 0; i < s->numsurfedges; i++, e++) {
         v = e->edge->v[e->vert];
         for (j = 0; j < 2; j++) {
-            val = Vec3_Dot(v->point, tex->axis[j]) + tex->offset[j];
+            val = DotProduct(v->point, tex->axis[j]) + tex->offset[j];
             if (val < mins[j])
                 mins[j] = val;
             if (val > maxs[j])

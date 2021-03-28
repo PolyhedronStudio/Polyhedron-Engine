@@ -112,7 +112,7 @@ void Chaingun_Fire(edict_t* ent)
         AngleVectors(ent->client->v_angle, forward, right, up);
         r = 7 + crandom() * 4;
         u = crandom() * 4;
-        Vec3_Set(offset, 0, r, u + ent->viewheight - 8);
+        VectorSet(offset, 0, r, u + ent->viewheight - 8);
         P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
         fire_bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);

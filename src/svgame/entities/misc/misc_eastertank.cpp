@@ -28,8 +28,8 @@ void SP_misc_eastertank(edict_t* ent)
 {
     ent->movetype = MOVETYPE_NONE;
     ent->solid = SOLID_BBOX;
-    Vec3_Set(ent->mins, -32, -32, -16);
-    Vec3_Set(ent->maxs, 32, 32, 32);
+    VectorSet(ent->mins, -32, -32, -16);
+    VectorSet(ent->maxs, 32, 32, 32);
     ent->s.modelindex = gi.modelindex("models/monsters/tank/tris.md2");
     ent->s.frame = 254;
     ent->think = misc_eastertank_think;

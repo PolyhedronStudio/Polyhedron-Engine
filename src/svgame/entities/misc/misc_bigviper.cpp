@@ -18,8 +18,8 @@ void SP_misc_bigviper(edict_t* ent)
 {
     ent->movetype = MOVETYPE_NONE;
     ent->solid = SOLID_BBOX;
-    Vec3_Set(ent->mins, -176, -120, -24);
-    Vec3_Set(ent->maxs, 176, 120, 72);
+    VectorSet(ent->mins, -176, -120, -24);
+    VectorSet(ent->maxs, 176, 120, 72);
     ent->s.modelindex = gi.modelindex("models/ships/bigviper/tris.md2");
     gi.linkentity(ent);
 }

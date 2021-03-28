@@ -126,7 +126,7 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
     if (r_numdlights >= MAX_DLIGHTS)
         return;
     dl = &r_dlights[r_numdlights++];
-    Vec3_Copy(org, dl->origin);
+    VectorCopy(org, dl->origin);
     dl->intensity = intensity;
     dl->color[0] = r;
     dl->color[1] = g;
@@ -137,7 +137,7 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
 	{
 		particle_t* part = &r_particles[r_numparticles++];
 
-		Vec3_Copy(dl->origin, part->origin);
+		VectorCopy(dl->origin, part->origin);
 		part->radius = radius;
 		part->brightness = max(r, max(g, b));
 		part->color = -1;
@@ -258,11 +258,11 @@ static void V_TestLights(void)
         dl = &r_dlights[0];
         r_numdlights = 1;
 
-        Vec3_MA(cl.refdef.vieworg, 256, cl.v_forward, dl->origin);
+        VectorMA(cl.refdef.vieworg, 256, cl.v_forward, dl->origin);
         if (cl_testlights->integer == -1)
-            Vec3_Set(dl->color, -1, -1, -1);
+            VectorSet(dl->color, -1, -1, -1);
         else
-            Vec3_Set(dl->color, 1, 1, 1);
+            VectorSet(dl->color, 1, 1, 1);
         dl->intensity = 256;
         return;
     }

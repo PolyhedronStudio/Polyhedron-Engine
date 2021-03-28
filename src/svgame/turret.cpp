@@ -81,9 +81,9 @@ void turret_breach_fire(edict_t *self)
     int     speed;
 
     AngleVectors(self->s.angles, f, r, u);
-    Vec3_MA(self->s.origin, self->move_origin[0], f, start);
-    Vec3_MA(start, self->move_origin[1], r, start);
-    Vec3_MA(start, self->move_origin[2], u, start);
+    VectorMA(self->s.origin, self->move_origin[0], f, start);
+    VectorMA(start, self->move_origin[1], r, start);
+    VectorMA(start, self->move_origin[2], u, start);
 
     damage = 100 + random() * 50;
     speed = 550 + 50 * skill->value;
@@ -97,7 +97,7 @@ void turret_breach_think(edict_t *self)
     vec3_t  current_angles;
     vec3_t  delta;
 
-    Vec3_Copy(self->s.angles, current_angles);
+    VectorCopy(self->s.angles, current_angles);
     AnglesNormalize(current_angles);
 
     AnglesNormalize(self->move_angles);
@@ -129,7 +129,7 @@ void turret_breach_think(edict_t *self)
             self->move_angles[YAW] = self->pos2[YAW];
     }
 
-    Vec3_Subtract(self->move_angles, current_angles, delta);
+    VectorSubtract(self->move_angles, current_angles, delta);
     if (delta[0] < -180)
         delta[0] += 360;
     else if (delta[0] > 180)
@@ -149,7 +149,7 @@ void turret_breach_think(edict_t *self)
     if (delta[1] < -1 * self->speed * FRAMETIME)
         delta[1] = -1 * self->speed * FRAMETIME;
 
-    Vec3_Scale(delta, 1.0 / FRAMETIME, self->avelocity);
+    VectorScale(delta, 1.0 / FRAMETIME, self->avelocity);
 
     self->nextthink = level.time + FRAMETIME;
 
@@ -176,7 +176,7 @@ void turret_breach_think(edict_t *self)
         target[1] = (self->s.origin[1] + sin(angle) * self->owner->move_origin[0]); // SnapToEights(self->s.origin[1] + sin(angle) * self->owner->move_origin[0]);
         target[2] = self->owner->s.origin[2];
 
-        Vec3_Subtract(target, self->owner->s.origin, dir);
+        VectorSubtract(target, self->owner->s.origin, dir);
         self->owner->velocity[0] = dir[0] * 1.0 / FRAMETIME;
         self->owner->velocity[1] = dir[1] * 1.0 / FRAMETIME;
 
@@ -201,7 +201,7 @@ void turret_breach_finish_init(edict_t *self)
         gi.dprintf("%s at %s needs a target\n", self->classname, vtos(self->s.origin));
     } else {
         self->target_ent = G_PickTarget(self->target);
-        Vec3_Subtract(self->target_ent->s.origin, self->s.origin, self->move_origin);
+        VectorSubtract(self->target_ent->s.origin, self->s.origin, self->move_origin);
         G_FreeEdict(self->target_ent);
     }
 
@@ -319,9 +319,9 @@ void turret_driver_think(edict_t *self)
     }
 
     // let the turret know where we want it to aim
-    Vec3_Copy(self->enemy->s.origin, target);
+    VectorCopy(self->enemy->s.origin, target);
     target[2] += self->enemy->viewheight;
-    Vec3_Subtract(target, self->target_ent->s.origin, dir);
+    VectorSubtract(target, self->target_ent->s.origin, dir);
     vectoangles(dir, self->target_ent->move_angles);
 
     // decide if we should shoot
@@ -348,14 +348,14 @@ void turret_driver_link(edict_t *self)
     self->target_ent = G_PickTarget(self->target);
     self->target_ent->owner = self;
     self->target_ent->teammaster->owner = self;
-    Vec3_Copy(self->target_ent->s.angles, self->s.angles);
+    VectorCopy(self->target_ent->s.angles, self->s.angles);
 
     vec[0] = self->target_ent->s.origin[0] - self->s.origin[0];
     vec[1] = self->target_ent->s.origin[1] - self->s.origin[1];
     vec[2] = 0;
-    self->move_origin[0] = Vec3_Length(vec);
+    self->move_origin[0] = VectorLength(vec);
 
-    Vec3_Subtract(self->s.origin, self->target_ent->s.origin, vec);
+    VectorSubtract(self->s.origin, self->target_ent->s.origin, vec);
     vectoangles(vec, vec);
     AnglesNormalize(vec);
     self->move_origin[1] = vec[1];
@@ -380,8 +380,8 @@ void SP_turret_driver(edict_t *self)
     self->movetype = MOVETYPE_PUSH;
     self->solid = SOLID_BBOX;
     self->s.modelindex = gi.modelindex("models/monsters/infantry/tris.md2");
-    Vec3_Set(self->mins, -16, -16, -24);
-    Vec3_Set(self->maxs, 16, 16, 32);
+    VectorSet(self->mins, -16, -16, -24);
+    VectorSet(self->maxs, 16, 16, 32);
 
     self->health = 100;
     self->gib_health = 0;
@@ -400,7 +400,7 @@ void SP_turret_driver(edict_t *self)
     self->takedamage = DAMAGE_AIM;
     self->use = monster_use;
     self->clipmask = CONTENTS_MASK_MONSTERSOLID;
-    Vec3_Copy(self->s.origin, self->s.old_origin);
+    VectorCopy(self->s.origin, self->s.old_origin);
     self->monsterinfo.aiflags |= AI_STAND_GROUND | AI_DUCKED;
 
     if (st.item) {

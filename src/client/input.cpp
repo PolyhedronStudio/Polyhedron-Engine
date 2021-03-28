@@ -617,7 +617,7 @@ static void CL_BaseMove(vec3_t move)
 
 // adjust for speed key / running
     if ((in_speed.state & 1) ^ cl_run->integer) {
-        Vec3_Scale(move, 2, move);
+        VectorScale(move, 2, move);
     }
 }
 
@@ -666,7 +666,7 @@ Doesn't touch command forward/side/upmove, these are filled by CL_FinalizeCmd.
 */
 void CL_UpdateCmd(int msec)
 {
-    Vec3_Clear(cl.localmove);
+    VectorClear(cl.localmove);
 
     if (sv_paused->integer) {
         return;
@@ -840,7 +840,7 @@ void CL_FinalizeCmd(void)
     }
 
     // rebuild the movement vector
-    Vec3_Clear(move);
+    VectorClear(move);
 
     // get basic movement from keyboard
     CL_BaseMove(move);

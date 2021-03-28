@@ -26,7 +26,7 @@ void barrel_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* su
         return;
 
     ratio = (float)other->mass / (float)self->mass;
-    Vec3_Subtract(self->s.origin, other->s.origin, v);
+    VectorSubtract(self->s.origin, other->s.origin, v);
     M_walkmove(self, vectoyaw(v), 20 * ratio * FRAMETIME);
 }
 
@@ -38,8 +38,8 @@ void barrel_explode(edict_t* self)
 
     T_RadiusDamage(self, self->activator, self->dmg, NULL, self->dmg + 40, MOD_BARREL);
 
-    Vec3_Copy(self->s.origin, save);
-    Vec3_MA(self->absmin, 0.5, self->size, self->s.origin);
+    VectorCopy(self->s.origin, save);
+    VectorMA(self->absmin, 0.5, self->size, self->s.origin);
 
     // a few big chunks
     spd = 1.5 * (float)self->dmg / 200.0;
@@ -54,15 +54,15 @@ void barrel_explode(edict_t* self)
 
     // bottom corners
     spd = 1.75 * (float)self->dmg / 200.0;
-    Vec3_Copy(self->absmin, org);
+    VectorCopy(self->absmin, org);
     ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
-    Vec3_Copy(self->absmin, org);
+    VectorCopy(self->absmin, org);
     org[0] += self->size[0];
     ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
-    Vec3_Copy(self->absmin, org);
+    VectorCopy(self->absmin, org);
     org[1] += self->size[1];
     ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
-    Vec3_Copy(self->absmin, org);
+    VectorCopy(self->absmin, org);
     org[0] += self->size[0];
     org[1] += self->size[1];
     ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
@@ -102,7 +102,7 @@ void barrel_explode(edict_t* self)
     org[2] = self->s.origin[2] + crandom() * self->size[2];
     ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
 
-    Vec3_Copy(save, self->s.origin);
+    VectorCopy(save, self->s.origin);
     if (self->groundentity)
         BecomeExplosion2(self);
     else
@@ -134,8 +134,8 @@ void SP_misc_explobox(edict_t* self)
 
     self->model = "models/objects/barrels/tris.md2";
     self->s.modelindex = gi.modelindex(self->model);
-    Vec3_Set(self->mins, -16, -16, 0);
-    Vec3_Set(self->maxs, 16, 16, 40);
+    VectorSet(self->mins, -16, -16, 0);
+    VectorSet(self->maxs, 16, 16, 40);
 
     if (!self->mass)
         self->mass = 400;

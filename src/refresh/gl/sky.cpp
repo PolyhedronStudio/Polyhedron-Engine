@@ -70,9 +70,9 @@ static void DrawSkyPolygon(int nump, vec3_t vecs)
     float   *vp;
 
     // decide which face it maps to
-    Vec3_Clear(v);
+    VectorClear(v);
     for (i = 0, vp = vecs; i < nump; i++, vp += 3) {
-        Vec3_Add(vp, v, v);
+        VectorAdd(vp, v, v);
     }
     av[0] = fabs(v[0]);
     av[1] = fabs(v[1]);
@@ -158,7 +158,7 @@ static void ClipSkyPolygon(int nump, vec3_t vecs, int stage)
     front = back = false;
     norm = skyclip[stage];
     for (i = 0, v = vecs; i < nump; i++, v += 3) {
-        d = Vec3_Dot(v, norm);
+        d = DotProduct(v, norm);
         if (d > ON_EPSILON) {
             front = true;
             sides[i] = SIDE_FRONT;
@@ -180,23 +180,23 @@ static void ClipSkyPolygon(int nump, vec3_t vecs, int stage)
     // clip it
     sides[i] = sides[0];
     dists[i] = dists[0];
-    Vec3_Copy(vecs, (vecs + (i * 3)));
+    VectorCopy(vecs, (vecs + (i * 3)));
     newc[0] = newc[1] = 0;
 
     for (i = 0, v = vecs; i < nump; i++, v += 3) {
         switch (sides[i]) {
         case SIDE_FRONT:
-            Vec3_Copy(v, newv[0][newc[0]]);
+            VectorCopy(v, newv[0][newc[0]]);
             newc[0]++;
             break;
         case SIDE_BACK:
-            Vec3_Copy(v, newv[1][newc[1]]);
+            VectorCopy(v, newv[1][newc[1]]);
             newc[1]++;
             break;
         case SIDE_ON:
-            Vec3_Copy(v, newv[0][newc[0]]);
+            VectorCopy(v, newv[0][newc[0]]);
             newc[0]++;
-            Vec3_Copy(v, newv[1][newc[1]]);
+            VectorCopy(v, newv[1][newc[1]]);
             newc[1]++;
             break;
         }
@@ -252,13 +252,13 @@ void R_AddSkySurface(mface_t *fa)
 
         for (i = 0; i < fa->numsurfedges; i++, surfedge++) {
             vert = surfedge->edge->v[surfedge->vert];
-            Vec3_Subtract(vert->point, glr.fd.vieworg, temp);
+            VectorSubtract(vert->point, glr.fd.vieworg, temp);
             SkyInverseRotate(verts[i], temp);
         }
     } else {
         for (i = 0; i < fa->numsurfedges; i++, surfedge++) {
             vert = surfedge->edge->v[surfedge->vert];
-            Vec3_Subtract(vert->point, glr.fd.vieworg, verts[i]);
+            VectorSubtract(vert->point, glr.fd.vieworg, verts[i]);
         }
     }
 
@@ -301,11 +301,11 @@ static void MakeSkyVec(float s, float t, int axis, vec_t *out)
     }
 
     if (skyrotate) {
-        out[0] = Vec3_Dot(skymatrix[0], v) + glr.fd.vieworg[0];
-        out[1] = Vec3_Dot(skymatrix[1], v) + glr.fd.vieworg[1];
-        out[2] = Vec3_Dot(skymatrix[2], v) + glr.fd.vieworg[2];
+        out[0] = DotProduct(skymatrix[0], v) + glr.fd.vieworg[0];
+        out[1] = DotProduct(skymatrix[1], v) + glr.fd.vieworg[1];
+        out[2] = DotProduct(skymatrix[2], v) + glr.fd.vieworg[2];
     } else {
-        Vec3_Add(v, glr.fd.vieworg, out);
+        VectorAdd(v, glr.fd.vieworg, out);
     }
 
     // avoid bilerp seam

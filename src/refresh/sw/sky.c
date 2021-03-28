@@ -82,8 +82,8 @@ void R_InitSkyBox(void)
         r_skyplanes[i].normal[box_planes[i * 2]] = 1;
         r_skyplanes[i].dist = box_planes[i * 2 + 1];
 
-        Vec3_Copy(box_axis[i][0], r_skytexinfo[i].axis[0]);
-        Vec3_Copy(box_axis[i][1], r_skytexinfo[i].axis[1]);
+        VectorCopy(box_axis[i][0], r_skytexinfo[i].axis[0]);
+        VectorCopy(box_axis[i][1], r_skytexinfo[i].axis[1]);
 
         r_skyfaces[i].plane = &r_skyplanes[i];
         r_skyfaces[i].drawflags = box_flags[i] | DSURF_SKY;
@@ -139,8 +139,8 @@ void R_EmitSkyBox(void)
 
     // fix texture offsets
     for (i = 0; i < 6; i++) {
-        r_skytexinfo[i].offset[0] = -Vec3_Dot(r_origin, r_skytexinfo[i].axis[0]);
-        r_skytexinfo[i].offset[1] = -Vec3_Dot(r_origin, r_skytexinfo[i].axis[1]);
+        r_skytexinfo[i].offset[0] = -DotProduct(r_origin, r_skytexinfo[i].axis[0]);
+        r_skytexinfo[i].offset[1] = -DotProduct(r_origin, r_skytexinfo[i].axis[1]);
     }
 
     // emit the six faces
@@ -163,7 +163,7 @@ void R_SetSky(const char *name, float rotate, vec3_t axis)
     char    path[MAX_QPATH];
 
 //    sky_rotate = rotate;
-//    Vec3_Copy(axis, sky_axis);
+//    VectorCopy(axis, sky_axis);
 
     for (i = 0; i < 6; i++) {
         Q_concat(path, sizeof(path), "env/", name,

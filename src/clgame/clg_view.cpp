@@ -100,7 +100,7 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
     if (view.num_dlights >= MAX_DLIGHTS)
         return;
     dl = &view.dlights[view.num_dlights++];
-    Vec3_Copy(org, dl->origin);
+    VectorCopy(org, dl->origin);
     dl->intensity = intensity;
     dl->color[0] = r;
     dl->color[1] = g;
@@ -111,7 +111,7 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
 	{
 		particle_t* part = &view.particles[view.num_particles++];
 
-		Vec3_Copy(dl->origin, part->origin);
+		VectorCopy(dl->origin, part->origin);
 		part->radius = radius;
 		part->brightness = max(r, max(g, b));
 		part->color = -1;
@@ -245,7 +245,7 @@ static void CLG_SetupFirstPersonView(void)
         lerp = CL_KEYLERPFRAC;
 
         LerpAngles(ops->kick_angles, ps->kick_angles, lerp, kickangles);
-        Vec3_Add(cl->refdef.viewangles, kickangles, cl->refdef.viewangles);
+        VectorAdd(cl->refdef.viewangles, kickangles, cl->refdef.viewangles);
     }
 
     // add the weapon
@@ -275,7 +275,7 @@ static void CLG_SetupThirdPersionView(void)
         cl->refdef.viewangles[PITCH] = 10;
     }
 
-    Vec3_MA(cl->refdef.vieworg, 512, cl->v_forward, focus);
+    VectorMA(cl->refdef.vieworg, 512, cl->v_forward, focus);
 
     cl->refdef.vieworg[2] += 8;
 
@@ -286,16 +286,16 @@ static void CLG_SetupThirdPersionView(void)
     range = cl_thirdperson_range->value;
     fscale = cos(angle);
     rscale = sin(angle);
-    Vec3_MA(cl->refdef.vieworg, -range * fscale, cl->v_forward, cl->refdef.vieworg);
-    Vec3_MA(cl->refdef.vieworg, -range * rscale, cl->v_right, cl->refdef.vieworg);
+    VectorMA(cl->refdef.vieworg, -range * fscale, cl->v_forward, cl->refdef.vieworg);
+    VectorMA(cl->refdef.vieworg, -range * rscale, cl->v_right, cl->refdef.vieworg);
 
     clgi.CM_BoxTrace(&trace, cl->playerEntityOrigin, cl->refdef.vieworg,
         mins, maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
     if (trace.fraction != 1.0f) {
-        Vec3_Copy(trace.endpos, cl->refdef.vieworg);
+        VectorCopy(trace.endpos, cl->refdef.vieworg);
     }
 
-    Vec3_Subtract(focus, cl->refdef.vieworg, focus);
+    VectorSubtract(focus, cl->refdef.vieworg, focus);
     dist = sqrt(focus[0] * focus[0] + focus[1] * focus[1]);
 
     cl->refdef.viewangles[PITCH] = -180 / M_PI * atan2(focus[2], dist);

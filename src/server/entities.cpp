@@ -86,8 +86,8 @@ static void SV_EmitPacketEntities(client_t         *client,
             }
             if (newnum == clientEntityNum) {
                 flags = (msgEsFlags_t)(flags | MSG_ES_FIRSTPERSON);
-                Vec3_Copy(oldent->origin, newent->origin);
-                Vec3_Copy(oldent->angles, newent->angles);
+                VectorCopy(oldent->origin, newent->origin);
+                VectorCopy(oldent->angles, newent->angles);
             }
 
             flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES);
@@ -109,8 +109,8 @@ static void SV_EmitPacketEntities(client_t         *client,
             }
             if (newnum == clientEntityNum) {
                 flags = (msgEsFlags_t)(flags | MSG_ES_FIRSTPERSON); // CPP: Cast flags |= MSG_ES_FIRSTPERSON;
-                Vec3_Copy(oldent->origin, newent->origin);
-                Vec3_Copy(oldent->angles, newent->angles);
+                VectorCopy(oldent->origin, newent->origin);
+                VectorCopy(oldent->angles, newent->angles);
             }
             flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES); // CPP: Cast flags |= MSG_ES_SHORTANGLES;
             MSG_WriteDeltaEntity(oldent, newent, flags);
@@ -333,13 +333,13 @@ fix_old_origin(client_t *client, entity_packed_t *state, edict_t *ent, int e)
 
     if (state->event == EV_PLAYER_TELEPORT && !Q2PRO_OPTIMIZE(client)) {
         // other clients will lerp from old_origin on EV_PLAYER_TELEPORT...
-        Vec3_Copy(state->origin, state->old_origin);
+        VectorCopy(state->origin, state->old_origin);
         return;
     }
 
     if (sent->create_framenum > sv.framenum - client->framediv) {
         // created between client frames
-        Vec3_Scale(sent->create_origin, 8.0f, state->old_origin);
+        VectorScale(sent->create_origin, 8.0f, state->old_origin);
         return;
     }
 
@@ -348,7 +348,7 @@ fix_old_origin(client_t *client, entity_packed_t *state, edict_t *ent, int e)
         j = sv.framenum - (client->framediv - i);
         k = j & ENT_HISTORY_MASK;
         if (sent->history[k].framenum == j) {
-            Vec3_Scale(sent->history[k].origin, 8.0f, state->old_origin);
+            VectorScale(sent->history[k].origin, 8.0f, state->old_origin);
             return;
         }
     }
@@ -398,8 +398,8 @@ void SV_BuildClientFrame(client_t *client)
     // find the client's PVS
     ps = &clent->client->ps;
     // N&C: FF Precision.
-    Vec3_Add(ps->viewoffset, ps->pmove.origin, org);
-    //Vec3_MA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
+    VectorAdd(ps->viewoffset, ps->pmove.origin, org);
+    //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
 
     leaf = CM_PointLeaf(client->cm, org);
     clientarea = CM_LeafArea(leaf);
@@ -491,8 +491,8 @@ void SV_BuildClientFrame(client_t *client)
                         vec3_t    delta;
                         float    len;
 
-                        Vec3_Subtract(org, ent->s.origin, delta);
-                        len = Vec3_Length(delta);
+                        VectorSubtract(org, ent->s.origin, delta);
+                        len = VectorLength(delta);
                         if (len > 400)
                             ent_visible = false;
                     }

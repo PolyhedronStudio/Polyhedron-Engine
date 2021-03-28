@@ -131,7 +131,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PM_SNAP_DISTANCE		PM_GROUND_DIST
 
 //
-// Player bounding box scaling. mins = Vec3_Scale(PM_MINS, PM_SCALE)..
+// Player bounding box scaling. mins = VectorScale(PM_MINS, PM_SCALE)..
 //
 #define PM_SCALE 1.f
 

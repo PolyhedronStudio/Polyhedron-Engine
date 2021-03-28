@@ -31,14 +31,14 @@ void use_target_spawner(edict_t* self, edict_t* other, edict_t* activator)
 
     ent = G_Spawn();
     ent->classname = self->target;
-    Vec3_Copy(self->s.origin, ent->s.origin);
-    Vec3_Copy(self->s.angles, ent->s.angles);
+    VectorCopy(self->s.origin, ent->s.origin);
+    VectorCopy(self->s.angles, ent->s.angles);
     ED_CallSpawn(ent);
     gi.unlinkentity(ent);
     KillBox(ent);
     gi.linkentity(ent);
     if (self->speed)
-        Vec3_Copy(self->movedir, ent->velocity);
+        VectorCopy(self->movedir, ent->velocity);
 }
 
 void SP_target_spawner(edict_t* self)
@@ -47,6 +47,6 @@ void SP_target_spawner(edict_t* self)
     self->svflags = SVF_NOCLIENT;
     if (self->speed) {
         G_SetMovedir(self->s.angles, self->movedir);
-        Vec3_Scale(self->movedir, self->speed, self->movedir);
+        VectorScale(self->movedir, self->speed, self->movedir);
     }
 }

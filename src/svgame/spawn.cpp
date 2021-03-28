@@ -408,7 +408,7 @@ static qboolean ED_ParseField(const spawn_field_t *fields, const char *key, cons
             case F_VECTOR:
                 if (sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
                     gi.dprintf("%s: couldn't parse '%s'\n", __func__, key);
-                    Vec3_Clear(vec);
+                    VectorClear(vec);
                 }
                 ((float *)(b + f->ofs))[0] = vec[0];
                 ((float *)(b + f->ofs))[1] = vec[1];

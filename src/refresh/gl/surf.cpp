@@ -94,7 +94,7 @@ adjust_color_ub(byte *out, const vec_t *in)
 void GL_AdjustColor(vec3_t color)
 {
     adjust_color_f(color, color, gl_static.entity_modulate);
-    Vec3_Scale(color, (1.0f / 255), color);
+    VectorScale(color, (1.0f / 255), color);
 }
 
 /*
@@ -144,10 +144,10 @@ static void add_dynamic_lights(mface_t *surf)
             scale = 1;              // fall off from rad to minlight
         }
 
-        Vec3_MA(light->transformed, -dist, surf->plane->normal, point);
+        VectorMA(light->transformed, -dist, surf->plane->normal, point);
 
-        local[0] = Vec3_Dot(point, tex->axis[0]) + tex->offset[0];
-        local[1] = Vec3_Dot(point, tex->axis[1]) + tex->offset[1];
+        local[0] = DotProduct(point, tex->axis[0]) + tex->offset[0];
+        local[1] = DotProduct(point, tex->axis[1]) + tex->offset[1];
 
         local[0] -= surf->texturemins[0];
         local[1] -= surf->texturemins[1];
@@ -576,14 +576,14 @@ static void build_surface_poly(mface_t *surf, vec_t *vbo)
         src_surfedge++;
 
         // vertex coordinates
-        Vec3_Copy(src_vert->point, vbo);
+        VectorCopy(src_vert->point, vbo);
 
         // vertex color
         memcpy(vbo + 3, &color, sizeof(color));
 
         // texture0 coordinates
-        tc[0] = Vec3_Dot(vbo, texinfo->axis[0]) + texinfo->offset[0];
-        tc[1] = Vec3_Dot(vbo, texinfo->axis[1]) + texinfo->offset[1];
+        tc[0] = DotProduct(vbo, texinfo->axis[0]) + texinfo->offset[0];
+        tc[1] = DotProduct(vbo, texinfo->axis[1]) + texinfo->offset[1];
 
         if (mins[0] > tc[0]) mins[0] = tc[0];
         if (maxs[0] < tc[0]) maxs[0] = tc[0];

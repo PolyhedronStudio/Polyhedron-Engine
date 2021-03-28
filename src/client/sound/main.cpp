@@ -750,7 +750,7 @@ void S_SpatializeOrigin(const vec3_t origin, float master_vol, float dist_mult, 
     }
 
 // calculate stereo seperation and distance attenuation
-    Vec3_Subtract(origin, listener_origin, source_vec);
+    VectorSubtract(origin, listener_origin, source_vec);
 
     dist = VectorNormalize(source_vec);
     dist -= SOUND_FULLVOLUME;
@@ -758,7 +758,7 @@ void S_SpatializeOrigin(const vec3_t origin, float master_vol, float dist_mult, 
         dist = 0;           // close enough to be at full volume
     dist *= dist_mult;      // different attenuation levels
 
-    dot = Vec3_Dot(listener_right, source_vec);
+    dot = DotProduct(listener_right, source_vec);
     if (s_swapstereo->integer)
         dot = -dot;
 
@@ -802,7 +802,7 @@ static void S_Spatialize(channel_t *ch)
     }
 
     if (ch->fixed_origin) {
-        Vec3_Copy(ch->origin, origin);
+        VectorCopy(ch->origin, origin);
     } else {
         CL_GetEntitySoundOrigin(ch->entnum, origin);
     }
@@ -892,7 +892,7 @@ void S_IssuePlaysound(playsound_t *ps)
     ch->entnum = ps->entnum;
     ch->entchannel = ps->entchannel;
     ch->sfx = ps->sfx;
-    Vec3_Copy(ps->origin, ch->origin);
+    VectorCopy(ps->origin, ch->origin);
     ch->fixed_origin = ps->fixed_origin;
 
 #if USE_OPENAL
@@ -960,7 +960,7 @@ void S_StartSound(const vec3_t origin, int entnum, int entchannel, qhandle_t hSf
         return;
 
     if (origin) {
-        Vec3_Copy(origin, ps->origin);
+        VectorCopy(origin, ps->origin);
         ps->fixed_origin = true;
     } else {
         ps->fixed_origin = false;

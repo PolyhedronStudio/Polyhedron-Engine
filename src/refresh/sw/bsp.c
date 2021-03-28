@@ -56,10 +56,10 @@ static void R_EntityRotate(vec3_t vec)
 {
     vec3_t  tvec;
 
-    Vec3_Copy(vec, tvec);
-    vec[0] = Vec3_Dot(entity_rotation[0], tvec);
-    vec[1] = Vec3_Dot(entity_rotation[1], tvec);
-    vec[2] = Vec3_Dot(entity_rotation[2], tvec);
+    VectorCopy(vec, tvec);
+    vec[0] = DotProduct(entity_rotation[0], tvec);
+    vec[1] = DotProduct(entity_rotation[1], tvec);
+    vec[2] = DotProduct(entity_rotation[2], tvec);
 }
 
 
@@ -109,9 +109,9 @@ static void R_RecursiveClipBPoly(bedge_t *pedges, mnode_t *pnode, mface_t *psurf
 // FIXME: cache these?
     splitplane = pnode->plane;
     tplane.dist = -PlaneDiff(r_entorigin, splitplane);
-    tplane.normal[0] = Vec3_Dot(entity_rotation[0], splitplane->normal);
-    tplane.normal[1] = Vec3_Dot(entity_rotation[1], splitplane->normal);
-    tplane.normal[2] = Vec3_Dot(entity_rotation[2], splitplane->normal);
+    tplane.normal[0] = DotProduct(entity_rotation[0], splitplane->normal);
+    tplane.normal[1] = DotProduct(entity_rotation[1], splitplane->normal);
+    tplane.normal[2] = DotProduct(entity_rotation[2], splitplane->normal);
 
 // clip edges to BSP plane
     for (; pedges; pedges = pnextedge) {
@@ -143,7 +143,7 @@ static void R_RecursiveClipBPoly(bedge_t *pedges, mnode_t *pnode, mface_t *psurf
             // generate the clipped vertex
             frac = lastdist / (lastdist - dist);
             ptvert = &pbverts[numbverts++];
-            Vec3_Lerp(plastvert->point, pvert->point, frac, ptvert->point);
+            LerpVector(plastvert->point, pvert->point, frac, ptvert->point);
 
             // split into two edges, one on each side, and remember entering
             // and exiting points
@@ -485,7 +485,7 @@ void R_RenderWorld(void)
     r_worldentity.frame = (int)(r_newrefdef.time * 2);
     currententity = &r_worldentity;
 
-    Vec3_Copy(r_origin, modelorg);
+    VectorCopy(r_origin, modelorg);
 
     R_RecursiveWorldNode(r_worldmodel->nodes, 15);
 }

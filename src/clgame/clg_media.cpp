@@ -284,7 +284,7 @@ void CLG_SetSky(void)
     if (sscanf(cl->configstrings[CS_SKYAXIS], "%f %f %f",
         &axis[0], &axis[1], &axis[2]) != 3) {
         Com_DPrint("Couldn't parse CS_SKYAXIS\n");
-        Vec3_Clear(axis);
+        VectorClear(axis);
     }
 
     clgi.R_SetSky(cl->configstrings[CS_SKY], rotate, axis);

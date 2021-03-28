@@ -124,12 +124,12 @@ void SP_func_button(edict_t* ent)
     if (!st.lip)
         st.lip = 4;
 
-    Vec3_Copy(ent->s.origin, ent->pos1);
+    VectorCopy(ent->s.origin, ent->pos1);
     abs_movedir[0] = fabs(ent->movedir[0]);
     abs_movedir[1] = fabs(ent->movedir[1]);
     abs_movedir[2] = fabs(ent->movedir[2]);
     dist = abs_movedir[0] * ent->size[0] + abs_movedir[1] * ent->size[1] + abs_movedir[2] * ent->size[2] - st.lip;
-    Vec3_MA(ent->pos1, dist, ent->movedir, ent->pos2);
+    VectorMA(ent->pos1, dist, ent->movedir, ent->pos2);
 
     ent->use = button_use;
     ent->s.effects |= EF_ANIM01;
@@ -148,10 +148,10 @@ void SP_func_button(edict_t* ent)
     ent->moveinfo.accel = ent->accel;
     ent->moveinfo.decel = ent->decel;
     ent->moveinfo.wait = ent->wait;
-    Vec3_Copy(ent->pos1, ent->moveinfo.start_origin);
-    Vec3_Copy(ent->s.angles, ent->moveinfo.start_angles);
-    Vec3_Copy(ent->pos2, ent->moveinfo.end_origin);
-    Vec3_Copy(ent->s.angles, ent->moveinfo.end_angles);
+    VectorCopy(ent->pos1, ent->moveinfo.start_origin);
+    VectorCopy(ent->s.angles, ent->moveinfo.start_angles);
+    VectorCopy(ent->pos2, ent->moveinfo.end_origin);
+    VectorCopy(ent->s.angles, ent->moveinfo.end_angles);
 
     gi.linkentity(ent);
 }

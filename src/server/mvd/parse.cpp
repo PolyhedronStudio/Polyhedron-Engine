@@ -80,8 +80,8 @@ void MVD_ParseEntityString(mvd_t *mvd, const char *data)
         }
 
         classname[0] = 0;
-        Vec3_Clear(origin);
-        Vec3_Clear(angles);
+        VectorClear(origin);
+        VectorClear(angles);
         while (1) {
             p = COM_Parse(&data);
             if (p[0] == '}') {
@@ -135,15 +135,15 @@ void MVD_ParseEntityString(mvd_t *mvd, const char *data)
         }
 
         if (!strcmp(classname + 12, "intermission")) {
-            Vec3_Copy(origin, mvd->spawnOrigin);
-            Vec3_Copy(angles, mvd->spawnAngles);
+            VectorCopy(origin, mvd->spawnOrigin);
+            VectorCopy(angles, mvd->spawnAngles);
             break;
         }
 
         if (!strcmp(classname + 12, "start") ||
             !strcmp(classname + 12, "deathmatch")) {
-            Vec3_Copy(origin, mvd->spawnOrigin);
-            Vec3_Copy(angles, mvd->spawnAngles);
+            VectorCopy(origin, mvd->spawnOrigin);
+            VectorCopy(angles, mvd->spawnAngles);
         }
 
     }
@@ -226,15 +226,15 @@ static void MVD_ParseMulticast(mvd_t *mvd, mvd_ops_t op, int extrabits)
             ps = &client->ps;
 #if 0
             // N&C: FF Precision.
-            Vec3_Add(ps->viewoffset, ps->pmove.origin, org);
-            //Vec3_MA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
+            VectorAdd(ps->viewoffset, ps->pmove.origin, org);
+            //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
 #else
             // FIXME: for some strange reason, game code assumes the server
             // uses entity origin for PVS/PHS culling, not the view origin
             
             // N&C: FF Precision.
-            Vec3_Copy(ps->pmove.origin, org);
-            //Vec3_Scale(ps->pmove.origin, 0.125f, org);
+            VectorCopy(ps->pmove.origin, org);
+            //VectorScale(ps->pmove.origin, 0.125f, org);
 #endif
             leaf2 = CM_PointLeaf(&mvd->cm, org);
             if (!CM_AreasConnected(&mvd->cm, leaf1->area, leaf2->area))
@@ -544,8 +544,8 @@ static void MVD_ParseSound(mvd_t *mvd, int extrabits)
             // get client viewpos
             ps = &client->ps;
             // N&C: FF Precision.
-            Vec3_Add(ps->viewoffset, ps->pmove.origin, origin);
-            //Vec3_MA(ps->viewoffset, 0.125f, ps->pmove.origin, origin);
+            VectorAdd(ps->viewoffset, ps->pmove.origin, origin);
+            //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, origin);
             leaf = CM_PointLeaf(&mvd->cm, origin);
             area = CM_LeafArea(leaf);
             if (!CM_AreasConnected(&mvd->cm, area, entity->areanum)) {
@@ -563,10 +563,10 @@ static void MVD_ParseSound(mvd_t *mvd, int extrabits)
 
         // use the entity origin unless it is a bmodel
         if (entity->solid == SOLID_BSP) {
-            Vec3_Average(entity->mins, entity->maxs, origin);
-            Vec3_Add(entity->s.origin, origin, origin);
+            VectorAverage(entity->mins, entity->maxs, origin);
+            VectorAdd(entity->s.origin, origin, origin);
         } else {
-            Vec3_Copy(entity->s.origin, origin);
+            VectorCopy(entity->s.origin, origin);
         }
 
         // reliable sounds will always have position explicitly set,
@@ -613,7 +613,7 @@ static void MVD_ParseSound(mvd_t *mvd, int extrabits)
         msg->sendchan = sendchan;
 
         // N&C: FF Precision.
-        Vec3_Copy(msg->pos, origin);
+        VectorCopy(msg->pos, origin);
         //for (i = 0; i < 3; i++) {
         //    msg->pos[i] = origin[i] * 8;
         //}
@@ -756,7 +756,7 @@ static void MVD_ParsePacketEntities(mvd_t *mvd)
         if (bits & U_REMOVE) {
             SHOWNET(2, "   remove: %d\n", number);
             if (!(ent->s.renderfx & RF_BEAM)) {
-                Vec3_Copy(ent->s.origin, ent->s.old_origin);
+                VectorCopy(ent->s.origin, ent->s.old_origin);
             }
             ent->inuse = false;
             continue;

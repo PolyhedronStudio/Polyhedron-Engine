@@ -51,11 +51,11 @@ static void R_DrawParticle(void)
     /*
     ** transform the particle
     */
-    Vec3_Subtract(partparms.particle->origin, r_origin, local);
+    VectorSubtract(partparms.particle->origin, r_origin, local);
 
-    transformed[0] = Vec3_Dot(local, partparms.right);
-    transformed[1] = Vec3_Dot(local, partparms.up);
-    transformed[2] = Vec3_Dot(local, partparms.pn);
+    transformed[0] = DotProduct(local, partparms.right);
+    transformed[1] = DotProduct(local, partparms.up);
+    transformed[2] = DotProduct(local, partparms.pn);
 
     if (transformed[2] < PARTICLE_Z_CLIP)
         return;
@@ -122,9 +122,9 @@ void R_DrawParticles(void)
     int         i;
     int         alpha;
 
-    Vec3_Scale(vright, r_refdef.xscaleshrink, partparms.right);
-    Vec3_Scale(vup, r_refdef.yscaleshrink, partparms.up);
-    Vec3_Copy(vpn, partparms.pn);
+    VectorScale(vright, r_refdef.xscaleshrink, partparms.right);
+    VectorScale(vup, r_refdef.yscaleshrink, partparms.up);
+    VectorCopy(vpn, partparms.pn);
 
     for (p = r_newrefdef.particles, i = 0; i < r_newrefdef.num_particles; i++, p++) {
         partparms.particle = p;

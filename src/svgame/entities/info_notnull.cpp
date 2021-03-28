@@ -16,6 +16,6 @@ Used as a positional target for lightning.
 */
 void SP_info_notnull(edict_t* self)
 {
-    Vec3_Copy(self->s.origin, self->absmin);
-    Vec3_Copy(self->s.origin, self->absmax);
+    VectorCopy(self->s.origin, self->absmin);
+    VectorCopy(self->s.origin, self->absmax);
 }

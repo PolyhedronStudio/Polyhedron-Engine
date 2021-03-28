@@ -49,8 +49,8 @@ void SP_FixCoopSpots(edict_t *self)
             return;
         if (!spot->targetname)
             continue;
-        Vec3_Subtract(self->s.origin, spot->s.origin, d);
-        if (Vec3_Length(d) < 384) {
+        VectorSubtract(self->s.origin, spot->s.origin, d);
+        if (VectorLength(d) < 384) {
             if ((!self->targetname) || Q_stricmp(self->targetname, spot->targetname) != 0) {
 //              gi.dprintf("FixCoopSpots changed %s at %s targetname from %s to %s\n", self->classname, vtos(self->s.origin), self->targetname, spot->targetname);
                 self->targetname = spot->targetname;
@@ -446,9 +446,9 @@ void LookAtKiller(edict_t *self, edict_t *inflictor, edict_t *attacker)
     vec3_t      dir;
 
     if (attacker && attacker != world && attacker != self) {
-        Vec3_Subtract(attacker->s.origin, self->s.origin, dir);
+        VectorSubtract(attacker->s.origin, self->s.origin, dir);
     } else if (inflictor && inflictor != world && inflictor != self) {
-        Vec3_Subtract(inflictor->s.origin, self->s.origin, dir);
+        VectorSubtract(inflictor->s.origin, self->s.origin, dir);
     } else {
         self->client->killer_yaw = self->s.angles[YAW];
         return;
@@ -478,7 +478,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 {
     int     n;
 
-    Vec3_Clear(self->avelocity);
+    VectorClear(self->avelocity);
 
     self->takedamage = DAMAGE_YES;
     self->movetype = MOVETYPE_TOSS;
@@ -696,8 +696,8 @@ float   PlayersRangeFromSpot(edict_t *spot)
         if (player->health <= 0)
             continue;
 
-        Vec3_Subtract(spot->s.origin, player->s.origin, v);
-        playerdistance = Vec3_Length(v);
+        VectorSubtract(spot->s.origin, player->s.origin, v);
+        playerdistance = VectorLength(v);
 
         if (playerdistance < bestplayerdistance)
             bestplayerdistance = playerdistance;
@@ -877,9 +877,9 @@ void    SelectSpawnPoint(edict_t *ent, vec3_t origin, vec3_t angles)
         }
     }
 
-    Vec3_Copy(spot->s.origin, origin);
+    VectorCopy(spot->s.origin, origin);
     origin[2] += 9;
-    Vec3_Copy(spot->s.angles, angles);
+    VectorCopy(spot->s.angles, angles);
 }
 
 //======================================================================
@@ -936,13 +936,13 @@ void CopyToBodyQue(edict_t *ent)
     body->s.event = EV_OTHER_TELEPORT;
 
     body->svflags = ent->svflags;
-    Vec3_Copy(ent->mins, body->mins);
-    Vec3_Copy(ent->maxs, body->maxs);
-    Vec3_Copy(ent->absmin, body->absmin);
-    Vec3_Copy(ent->absmax, body->absmax);
-    Vec3_Copy(ent->size, body->size);
-    Vec3_Copy(ent->velocity, body->velocity);
-    Vec3_Copy(ent->avelocity, body->avelocity);
+    VectorCopy(ent->mins, body->mins);
+    VectorCopy(ent->maxs, body->maxs);
+    VectorCopy(ent->absmin, body->absmin);
+    VectorCopy(ent->absmax, body->absmax);
+    VectorCopy(ent->size, body->size);
+    VectorCopy(ent->velocity, body->velocity);
+    VectorCopy(ent->avelocity, body->avelocity);
     body->solid = ent->solid;
     body->clipmask = ent->clipmask;
     body->owner = ent->owner;
@@ -1159,15 +1159,15 @@ void PutClientInServer(edict_t *ent)
     ent->flags &= ~FL_NO_KNOCKBACK;
     ent->svflags &= ~SVF_DEADMONSTER;
 
-    Vec3_Copy(mins, ent->mins);
-    Vec3_Copy(maxs, ent->maxs);
-    Vec3_Clear(ent->velocity);
+    VectorCopy(mins, ent->mins);
+    VectorCopy(maxs, ent->maxs);
+    VectorClear(ent->velocity);
 
     // clear playerstate values
     memset(&ent->client->ps, 0, sizeof(client->ps));
 
     // N&C: FF Precision.
-    Vec3_Copy(spawn_origin, client->ps.pmove.origin);
+    VectorCopy(spawn_origin, client->ps.pmove.origin);
     //client->ps.pmove.origin[0] = spawn_origin[0] * 8;
     //client->ps.pmove.origin[1] = spawn_origin[1] * 8;
     //client->ps.pmove.origin[2] = spawn_origin[2] * 8;
@@ -1193,9 +1193,9 @@ void PutClientInServer(edict_t *ent)
     ent->s.skinnum = ent - g_edicts - 1;
 
     ent->s.frame = 0;
-    Vec3_Copy(spawn_origin, ent->s.origin);
+    VectorCopy(spawn_origin, ent->s.origin);
     ent->s.origin[2] += 1;  // make sure off ground
-    Vec3_Copy(ent->s.origin, ent->s.old_origin);
+    VectorCopy(ent->s.origin, ent->s.old_origin);
 
     // set the delta angle
     for (i = 0 ; i < 3 ; i++) {
@@ -1205,8 +1205,8 @@ void PutClientInServer(edict_t *ent)
     ent->s.angles[PITCH] = 0;
     ent->s.angles[YAW] = spawn_angles[YAW];
     ent->s.angles[ROLL] = 0;
-    Vec3_Copy(ent->s.angles, client->ps.viewangles);
-    Vec3_Copy(ent->s.angles, client->v_angle);
+    VectorCopy(ent->s.angles, client->ps.viewangles);
+    VectorCopy(ent->s.angles, client->v_angle);
 
     // spawn a spectator
     if (client->pers.spectator) {
@@ -1588,8 +1588,8 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         pm.state = client->ps.pmove;
 
         // N&C: FF Precision.
-        Vec3_Copy(ent->s.origin, pm.state.origin);
-        Vec3_Copy(ent->velocity, pm.state.velocity);
+        VectorCopy(ent->s.origin, pm.state.origin);
+        VectorCopy(ent->velocity, pm.state.velocity);
         //for (i = 0 ; i < 3 ; i++) {
         //    pm.state.origin[i] = ent->s.origin[i] * 8;
         //    pm.state.velocity[i] = ent->velocity[i] * 8;
@@ -1614,15 +1614,15 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         client->old_pmove = pm.state;
 
         // N&C: FF Precision.
-        Vec3_Copy(pm.state.origin, ent->s.origin);
-        Vec3_Copy(pm.state.velocity, ent->velocity);
+        VectorCopy(pm.state.origin, ent->s.origin);
+        VectorCopy(pm.state.velocity, ent->velocity);
         //for (i = 0 ; i < 3 ; i++) {
         //    ent->s.origin[i] = pm.state.origin[i] * 0.125;
         //    ent->velocity[i] = pm.state.velocity[i] * 0.125;
         //}
 
-        Vec3_Copy(pm.mins, ent->mins);
-        Vec3_Copy(pm.maxs, ent->maxs);
+        VectorCopy(pm.mins, ent->mins);
+        VectorCopy(pm.maxs, ent->maxs);
 
         client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
         client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
@@ -1645,8 +1645,8 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
             client->ps.viewangles[PITCH] = -15;
             client->ps.viewangles[YAW] = client->killer_yaw;
         } else {
-            Vec3_Copy(pm.viewAngles, client->v_angle);
-            Vec3_Copy(pm.viewAngles, client->ps.viewangles);
+            VectorCopy(pm.viewAngles, client->v_angle);
+            VectorCopy(pm.viewAngles, client->ps.viewangles);
         }
 
         gi.linkentity(ent);

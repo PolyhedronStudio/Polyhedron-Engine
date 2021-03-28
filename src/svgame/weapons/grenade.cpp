@@ -39,7 +39,7 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
     if (is_quad)
         damage *= 4;
 
-    Vec3_Set(offset, 8, 8, ent->viewheight - 8);
+    VectorSet(offset, 8, 8, ent->viewheight - 8);
     AngleVectors(ent->client->v_angle, forward, right, NULL);
     P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 

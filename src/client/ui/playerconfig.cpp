@@ -364,15 +364,15 @@ void M_Menu_PlayerConfig(void)
 
     m_player.entities[0].flags = RF_FULLBRIGHT;
 	m_player.entities[0].id = 1; // Q2RTX: add entity id to fix motion vectors
-    Vec3_Copy(angles, m_player.entities[0].angles);
-    Vec3_Copy(origin, m_player.entities[0].origin);
-    Vec3_Copy(origin, m_player.entities[0].oldorigin);
+    VectorCopy(angles, m_player.entities[0].angles);
+    VectorCopy(origin, m_player.entities[0].origin);
+    VectorCopy(origin, m_player.entities[0].oldorigin);
 
     m_player.entities[1].flags = RF_FULLBRIGHT;
 	m_player.entities[1].id = 2; // Q2RTX: add entity id to fix motion vectors
-	Vec3_Copy(angles, m_player.entities[1].angles);
-    Vec3_Copy(origin, m_player.entities[1].origin);
-    Vec3_Copy(origin, m_player.entities[1].oldorigin);
+	VectorCopy(angles, m_player.entities[1].angles);
+    VectorCopy(origin, m_player.entities[1].origin);
+    VectorCopy(origin, m_player.entities[1].oldorigin);
 
     m_player.refdef.num_entities = 0;
     m_player.refdef.entities = m_player.entities;

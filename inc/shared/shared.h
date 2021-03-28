@@ -46,6 +46,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <cinttypes>
 #include <climits>
 #include <ctime>
+#include <cfloat>
 
 //-----------------
 // C++ STL
@@ -176,49 +177,7 @@ typedef float vec_t;
 //
 //=============================================================================
 //
-//-----------------
-// Vectors
-//-----------------
-#include "shared/math/vector2.h"
-#include "shared/math/vector3.h"
-#include "shared/math/vector4.h"
-#include "shared/math/vector5.h"
-
-//-----------------
-// Matrixes
-//-----------------
-#include "shared/math/matrix4.h"
-
-//-----------------
-// Colors
-//-----------------
-#include "shared/math/color.h"
-
-//-----------------
-// Rectangles.
-//-----------------
-#include "shared/math/rectangle.h"
-
-//-----------------
-// Plane pre-definition.
-//-----------------
-struct cplane_s;
-
-//-----------------
-// Vector 3 Origin variable.
-//-----------------
-extern vec3_t vec3_origin;
-
-//-----------------
-// NAN Macro - Use for checking NAN errors.
-#define nanmask (255<<23)
-#define IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
-
-// Easy array index accessors.
-#define PITCH               0       // up / down
-#define YAW                 1       // left / right
-#define ROLL                2       // fall over
-
+#include "shared/math.h"
 
 //
 //=============================================================================
@@ -737,8 +696,8 @@ static inline int Q_toupper(int c) {
     return c;
 }
 
-static inline char *Q_strlwr(char *s) {
-    char *p = s;
+static inline char* Q_strlwr(char* s) {
+    char* p = s;
 
     while (*p) {
         *p = Q_tolower(*p);
@@ -748,8 +707,8 @@ static inline char *Q_strlwr(char *s) {
     return s;
 }
 
-static inline char *Q_strupr(char *s) {
-    char *p = s;
+static inline char* Q_strupr(char* s) {
+    char* p = s;
 
     while (*p) {
         *p = Q_toupper(*p);
@@ -784,61 +743,61 @@ static inline int Q_charascii(int c) {
     }
     switch (c) {
         // handle bold brackets
-        case 16: return '[';
-        case 17: return ']';
+    case 16: return '[';
+    case 17: return ']';
     }
     return '.'; // don't output control chars, etc
 }
 
 // portable case insensitive compare
-int Q_strcasecmp(const char *s1, const char *s2);
-int Q_strncasecmp(const char *s1, const char *s2, size_t n);
-char *Q_strcasestr(const char *s1, const char *s2);
+int Q_strcasecmp(const char* s1, const char* s2);
+int Q_strncasecmp(const char* s1, const char* s2, size_t n);
+char* Q_strcasestr(const char* s1, const char* s2);
 
 #define Q_stricmp   Q_strcasecmp
 #define Q_stricmpn  Q_strncasecmp
 #define Q_stristr   Q_strcasestr
 
-char *Q_strchrnul(const char *s, int c);
-void *Q_memccpy(void *dst, const void *src, int c, size_t size);
-void Q_setenv(const char *name, const char *value);
+char* Q_strchrnul(const char* s, int c);
+void* Q_memccpy(void* dst, const void* src, int c, size_t size);
+void Q_setenv(const char* name, const char* value);
 
-char *COM_SkipPath(const char *pathname);
-void COM_StripExtension(const char *in, char *out, size_t size);
-void COM_FileBase(char *in, char *out);
-void COM_FilePath(const char *in, char *out, size_t size);
-size_t COM_DefaultExtension(char *path, const char *ext, size_t size);
-char *COM_FileExtension(const char *in);
+char* COM_SkipPath(const char* pathname);
+void COM_StripExtension(const char* in, char* out, size_t size);
+void COM_FileBase(char* in, char* out);
+void COM_FilePath(const char* in, char* out, size_t size);
+size_t COM_DefaultExtension(char* path, const char* ext, size_t size);
+char* COM_FileExtension(const char* in);
 
 #define COM_CompareExtension(in, ext) \
     Q_strcasecmp(COM_FileExtension(in), ext)
 
-qboolean COM_IsFloat(const char *s);
-qboolean COM_IsUint(const char *s);
-qboolean COM_IsPath(const char *s);
-qboolean COM_IsWhite(const char *s);
+qboolean COM_IsFloat(const char* s);
+qboolean COM_IsUint(const char* s);
+qboolean COM_IsPath(const char* s);
+qboolean COM_IsWhite(const char* s);
 
-char *COM_Parse(const char **data_p);
+char* COM_Parse(const char** data_p);
 // data is an in/out parm, returns a parsed out token
-size_t COM_Compress(char *data);
+size_t COM_Compress(char* data);
 
-int SortStrcmp(const void *p1, const void *p2);
-int SortStricmp(const void *p1, const void *p2);
+int SortStrcmp(const void* p1, const void* p2);
+int SortStricmp(const void* p1, const void* p2);
 
-size_t COM_strclr(char *s);
+size_t COM_strclr(char* s);
 
 // buffer safe operations
-size_t Q_strlcpy(char *dst, const char *src, size_t size);
-size_t Q_strlcat(char *dst, const char *src, size_t size);
+size_t Q_strlcpy(char* dst, const char* src, size_t size);
+size_t Q_strlcat(char* dst, const char* src, size_t size);
 
-size_t Q_concat(char *dest, size_t size, ...) q_sentinel;
+size_t Q_concat(char* dest, size_t size, ...) q_sentinel;
 
-size_t Q_vsnprintf(char *dest, size_t size, const char *fmt, va_list argptr);
-size_t Q_vscnprintf(char *dest, size_t size, const char *fmt, va_list argptr);
-size_t Q_snprintf(char *dest, size_t size, const char *fmt, ...) q_printf(3, 4);
-size_t Q_scnprintf(char *dest, size_t size, const char *fmt, ...) q_printf(3, 4);
+size_t Q_vsnprintf(char* dest, size_t size, const char* fmt, va_list argptr);
+size_t Q_vscnprintf(char* dest, size_t size, const char* fmt, va_list argptr);
+size_t Q_snprintf(char* dest, size_t size, const char* fmt, ...) q_printf(3, 4);
+size_t Q_scnprintf(char* dest, size_t size, const char* fmt, ...) q_printf(3, 4);
 
-char    *va(const char *format, ...) q_printf(1, 2);
+char* va(const char* format, ...) q_printf(1, 2);
 
 
 //
@@ -852,13 +811,13 @@ char    *va(const char *format, ...) q_printf(1, 2);
 #define MAX_INFO_VALUE      64
 #define MAX_INFO_STRING     512
 
-char    *Info_ValueForKey(const char *s, const char *key);
-void    Info_RemoveKey(char *s, const char *key);
-qboolean    Info_SetValueForKey(char *s, const char *key, const char *value);
-qboolean    Info_Validate(const char *s);
-size_t  Info_SubValidate(const char *s);
-void    Info_NextPair(const char **string, char *key, char *value);
-void    Info_Print(const char *infostring);
+char* Info_ValueForKey(const char* s, const char* key);
+void    Info_RemoveKey(char* s, const char* key);
+qboolean    Info_SetValueForKey(char* s, const char* key, const char* value);
+qboolean    Info_Validate(const char* s);
+size_t  Info_SubValidate(const char* s);
+void    Info_NextPair(const char** string, char* key, char* value);
+void    Info_Print(const char* infostring);
 
 
 //
@@ -935,44 +894,6 @@ void    Info_Print(const char *infostring);
 #define AREA_SOLID      1
 #define AREA_TRIGGERS   2
 
-
-//-----------------
-// plane_t structure
-//-----------------
-typedef struct cplane_s {
-    vec3_t  normal;
-    float   dist;
-    byte    type;           // for fast side tests
-    byte    signbits;       // signx + (signy<<1) + (signz<<1)
-    byte    pad[2];
-} cplane_t;
-
-//-----------------
-// Planes.
-//-----------------
-// 0-2 are axial planes
-#define PLANE_X         0 // TODO: Change to cplane_t::PLANE::X?
-#define PLANE_Y         1
-#define PLANE_Z         2
-// 3-5 are non-axial planes snapped to the nearest
-#define PLANE_ANYX      3
-#define PLANE_ANYY      4
-#define PLANE_ANYZ      5
-// planes (x&~1) and (x&~1)+1 are always opposites
-#define PLANE_NON_AXIAL 6
-
-//-----------------
-// Structure offset for asm code
-//-----------------
-#define CPLANE_NORMAL_X         0
-#define CPLANE_NORMAL_Y         4
-#define CPLANE_NORMAL_Z         8
-#define CPLANE_DIST             12
-#define CPLANE_TYPE             16
-#define CPLANE_SIGNBITS         17
-#define CPLANE_PAD0             18
-#define CPLANE_PAD1             19
-
 //-----------------
 // Surface Collision data.
 //-----------------
@@ -991,24 +912,13 @@ typedef struct {
     float       fraction;   // Time completed, 1.0 = didn't hit anything
     vec3_t      endpos;     // Final position
     cplane_t    plane;      // Surface normal at impact
-    csurface_t  *surface;   // Surface hit
+    csurface_t* surface;   // Surface hit
     int         contents;   // Contents on other side of surface hit
-    struct edict_s  *ent;   // Not set by CM_*() functions
+    struct edict_s* ent;   // Not set by CM_*() functions
 
     // N&C: Custom added.
     vec3_t		offsets[8];	// [signbits][x] = either size[0][x] or size[1][x]
 } trace_t;
-
-
-//
-//=============================================================================
-//
-//	Math Library - TODO: This include should be moved upwards
-//
-//=============================================================================
-//
-#include "shared/math.h"
-
 
 //
 //=============================================================================
@@ -1258,7 +1168,7 @@ typedef struct {
 //-----------------
 // Extern - TODO: Remove, ofc.
 //-----------------
-extern  const vec3_t monster_flash_offset [];
+extern  const vec3_t monster_flash_offset[];
 
 
 //-----------------
@@ -1299,7 +1209,7 @@ typedef enum {
     TE_BLUEHYPERBLASTER,
     TE_PLASMA_EXPLOSION,
     TE_TUNNEL_SPARKS,
-//ROGUE
+    //ROGUE
     TE_BLASTER2,
     TE_RAILTRAIL2,
     TE_FLAME,
@@ -1326,10 +1236,10 @@ typedef enum {
     TE_EXPLOSION1_BIG,
     TE_EXPLOSION1_NP,
     TE_FLECHETTE,
-//ROGUE
-// Q2RTX
-	TE_FLARE,
-// Q2RTX
+    //ROGUE
+    // Q2RTX
+    TE_FLARE,
+    // Q2RTX
 
     TE_NUM_ENTITIES
 } temp_event_t;
@@ -1453,7 +1363,7 @@ ROGUE - VERSIONS
 #ifdef CGAME_INCLUDE
 #include "common/cmodel.h"
 #include "common/cmd.h"
-#include "common/math.h"
+//#include "common/math.h"
 #endif // CGAME_INCLUDE
 
 #endif // SHARED_H

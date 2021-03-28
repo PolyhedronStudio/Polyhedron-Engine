@@ -1579,8 +1579,8 @@ add_dlights(const dlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
 		dynlight_data[14] = light->radius;
 		dynlight_data[15] = 0.f;
 
-		Vec3_Copy(light->origin, center);
-		Vec3_Scale(light->color, light->intensity / 25.f, color);
+		VectorCopy(light->origin, center);
+		VectorScale(light->color, light->intensity / 25.f, color);
 		*radius = light->radius;
 
 		ubo->num_sphere_lights++;
@@ -1951,12 +1951,12 @@ bsp_add_entlights(const bsp_t* bsp)
 					}
 					if (!Q_stricmp(keypairs[i].key, "origin"))
 					{
-						Vec3_Copy(vec, elight->origin);
+						VectorCopy(vec, elight->origin);
 						//v = &elight->origin;
 					}
 					else if (!Q_stricmp(keypairs[i].key, "_color"))
 					{
-						Vec3_Copy(vec, elight->color);
+						VectorCopy(vec, elight->color);
 						//v = &elight->color;
 					}
 					else
@@ -1984,7 +1984,7 @@ bsp_add_entlights(const bsp_t* bsp)
 						parse_error = true;
 						break;
 					}
-					Vec3_Copy(vec, elight->nacDirection);
+					VectorCopy(vec, elight->nacDirection);
 					//v = &elight->color;
 
 					//*v[0] = vec[0];
@@ -2253,9 +2253,9 @@ static void ProcessLightLookAtTarget(dlight_t *elight, dlightLS_t *elightls)
 	// Calc vector normalized
 	vec3_t dir;
 
-	Vec3_Subtract(elight->origin, lightTarget->s.origin, dir);
+	VectorSubtract(elight->origin, lightTarget->s.origin, dir);
 	VectorNormalize(dir);
-	Vec3_Copy(dir, elight->nacDirection);
+	VectorCopy(dir, elight->nacDirection);
 }
 
 static void ProcessLightMovewith(dlight_t *elight, dlightLS_t *elightls)
@@ -2264,7 +2264,7 @@ static void ProcessLightMovewith(dlight_t *elight, dlightLS_t *elightls)
 	edict_t *light = (edict_t*)elight->nacLightBind;
 	if (!light) return;
 
-	Vec3_Copy(light->s.origin, elight->origin);
+	VectorCopy(light->s.origin, elight->origin);
 
 }
 
@@ -2416,8 +2416,8 @@ static void add_elights(refdef_t * fd, QVKUniformBuffer_t * ubo)
 		dynlight_data[14] = elight->nacLightMaxDist;
 		dynlight_data[15] = elight->nacLightType;
 
-		Vec3_Copy(elight->origin, center);
-		Vec3_Scale(elight->color, elight->intensity / 25.f, color);
+		VectorCopy(elight->origin, center);
+		VectorScale(elight->color, elight->intensity / 25.f, color);
 
 		*radius = elight->radius;
 
@@ -2427,7 +2427,7 @@ static void add_elights(refdef_t * fd, QVKUniformBuffer_t * ubo)
 		{
 			particle_t * part = &fd->particles[fd->num_particles]; //fd->particles + (fd->num_particles * sizeof(particle_t));
 
-			Vec3_Copy(elight->origin, part->origin);
+			VectorCopy(elight->origin, part->origin);
 			part->radius = elight->radius;
 			part->brightness = max(elight->color[0], max(elight->color[1], elight->color[2]));
 			part->color = -1;
@@ -2447,7 +2447,7 @@ static inline void transform_point(const float* p, const float* matrix, float* r
 	vec4_t point = { p[0], p[1], p[2], 1.f };
 	vec4_t transformed;
 	mult_matrix_vector(transformed, matrix, point);
-	Vec3_Copy(transformed, result); // vec4 -> vec3
+	VectorCopy(transformed, result); // vec4 -> vec3
 }
 
 static void process_bsp_entity(const entity_t* entity, int* bsp_mesh_idx, int* instance_idx, int* num_instanced_vert)
@@ -2547,7 +2547,7 @@ static void process_bsp_entity(const entity_t* entity, int* bsp_mesh_idx, int* i
 			continue;
 
 		// Copy the other light properties
-		Vec3_Copy(src_light->color, dst_light->color);
+		VectorCopy(src_light->color, dst_light->color);
 		dst_light->material = src_light->material;
 
 		num_model_lights++;
@@ -2669,7 +2669,7 @@ static void process_regular_entity(
 
 		mult_matrix_vector(begin, transform, offset1);
 		mult_matrix_vector(end, transform, offset2);
-		Vec3_Set(color, 0.25f, 0.5f, 0.07f);
+		VectorSet(color, 0.25f, 0.5f, 0.07f);
 
 		vkpt_build_cylinder_light(model_lights, &num_model_lights, MAX_MODEL_LIGHTS, bsp_world_model, begin, end, color, 1.5f);
 	}
@@ -2977,7 +2977,7 @@ process_render_feedback(ref_feedback_t *feedback, mleaf_t* viewleaf, qboolean* s
 			feedback->num_light_polys = light_offsets[1] - light_offsets[0];
 		}
 
-		Vec3_Copy(readback.hdr_color, feedback->hdr_color);
+		VectorCopy(readback.hdr_color, feedback->hdr_color);
 
 		*sun_visible = readback.sun_luminance > 0.f;
 		*adapted_luminance = readback.adapted_luminance;
@@ -3244,9 +3244,9 @@ prepare_sky_matrix(float time, vec3_t sky_matrix[3])
 	}
 	else
 	{
-		Vec3_Set(sky_matrix[0], 1.f, 0.f, 0.f);
-		Vec3_Set(sky_matrix[1], 0.f, 1.f, 0.f);
-		Vec3_Set(sky_matrix[2], 0.f, 0.f, 1.f);
+		VectorSet(sky_matrix[0], 1.f, 0.f, 0.f);
+		VectorSet(sky_matrix[1], 0.f, 1.f, 0.f);
+		VectorSet(sky_matrix[2], 0.f, 0.f, 1.f);
 	}
 }
 
@@ -3254,16 +3254,16 @@ static void
 prepare_camera(const vec3_t position, const vec3_t direction, mat4_t data)
 {
 	vec3_t forward, right, up;
-	Vec3_Copy(direction, forward);
+	VectorCopy(direction, forward);
 	VectorNormalize(forward);
 
 	if (fabs(forward[2]) < 0.99f)
-		Vec3_Set(up, 0.f, 0.f, 1.f);
+		VectorSet(up, 0.f, 0.f, 1.f);
 	else
-		Vec3_Set(up, 0.f, 1.f, 0.f);
+		VectorSet(up, 0.f, 1.f, 0.f);
 
-	Vec3_Cross(forward, up, right);
-	Vec3_Cross(right, forward, up);
+	CrossProduct(forward, up, right);
+	CrossProduct(right, forward, up);
 	VectorNormalize(up);
 	VectorNormalize(right);
 
@@ -3271,12 +3271,12 @@ prepare_camera(const vec3_t position, const vec3_t direction, mat4_t data)
 	float tan_half_fov_x = 1.f;
 	float tan_half_fov_y = tan_half_fov_x / aspect;
 
-	Vec3_Copy(position, data + 0);
-	Vec3_Copy(forward, data + 4);
-	Vec3_MA(data + 4, -tan_half_fov_x, right, data + 4);
-	Vec3_MA(data + 4, tan_half_fov_y, up, data + 4);
-	Vec3_Scale(right, 2.f * tan_half_fov_x, data + 8);
-	Vec3_Scale(up, -2.f * tan_half_fov_y, data + 12);
+	VectorCopy(position, data + 0);
+	VectorCopy(forward, data + 4);
+	VectorMA(data + 4, -tan_half_fov_x, right, data + 4);
+	VectorMA(data + 4, tan_half_fov_y, up, data + 4);
+	VectorScale(right, 2.f * tan_half_fov_x, data + 8);
+	VectorScale(up, -2.f * tan_half_fov_y, data + 12);
 }
 
 static void
@@ -3477,9 +3477,9 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	ubo->first_person_model = cl_player_model->integer == CL_PLAYER_MODEL_FIRST_PERSON;
 
 	memset(ubo->environment_rotation_matrix, 0, sizeof(ubo->environment_rotation_matrix));
-	Vec3_Copy(sky_matrix[0], ubo->environment_rotation_matrix + 0);
-	Vec3_Copy(sky_matrix[1], ubo->environment_rotation_matrix + 4);
-	Vec3_Copy(sky_matrix[2], ubo->environment_rotation_matrix + 8);
+	VectorCopy(sky_matrix[0], ubo->environment_rotation_matrix + 0);
+	VectorCopy(sky_matrix[1], ubo->environment_rotation_matrix + 4);
+	VectorCopy(sky_matrix[2], ubo->environment_rotation_matrix + 8);
 		
 	add_dlights(vkpt_refdef.fd->dlights, vkpt_refdef.fd->num_dlights, ubo);
 	add_elights(vkpt_refdef.fd, ubo);
@@ -3580,7 +3580,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	vkpt_bloom_update(ubo, frame_time, ubo->medium != MEDIUM_NONE, menu_mode);
 
 	vec3_t sky_radiance;
-	Vec3_Scale(avg_envmap_color, ubo->pt_env_scale, sky_radiance);
+	VectorScale(avg_envmap_color, ubo->pt_env_scale, sky_radiance);
 	vkpt_light_buffer_upload_to_staging(render_world, &vkpt_refdef.bsp_mesh_world, bsp_world_model, num_model_lights, model_lights, sky_radiance);
 	
 	float shadowmap_view_proj[16];
@@ -4556,7 +4556,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t axis)
 
 	float inv_num_pixels = 1.0f / (w_prev * h_prev * 6);
 
-	Vec3_Set(avg_envmap_color,
+	VectorSet(avg_envmap_color,
 		(float)avg_color[0] * inv_num_pixels / 255.f,
 		(float)avg_color[1] * inv_num_pixels / 255.f,
 		(float)avg_color[2] * inv_num_pixels / 255.f

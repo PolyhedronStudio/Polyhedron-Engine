@@ -448,7 +448,7 @@ static int R_DrawEntities(int translucent)
             modelorg[0] = -r_origin[0];
             modelorg[1] = -r_origin[1];
             modelorg[2] = -r_origin[2];
-            Vec3_Copy(vec3_origin, r_entorigin);
+            VectorCopy(vec3_origin, r_entorigin);
             R_DrawBeam(currententity);
         } else {
             if (currententity->model & 0x80000000) {
@@ -459,8 +459,8 @@ static int R_DrawEntities(int translucent)
                 R_DrawNullModel();
                 continue;
             }
-            Vec3_Copy(currententity->origin, r_entorigin);
-            Vec3_Subtract(r_origin, r_entorigin, modelorg);
+            VectorCopy(currententity->origin, r_entorigin);
+            VectorSubtract(r_origin, r_entorigin, modelorg);
 
             switch (currentmodel->type) {
             case MOD_ALIAS:
@@ -522,7 +522,7 @@ static int R_BmodelCheckBBox(float *minmaxs)
         rejectpt[1] = minmaxs[pindex[1]];
         rejectpt[2] = minmaxs[pindex[2]];
 
-        d = Vec3_Dot(rejectpt, view_clipplanes[i].normal);
+        d = DotProduct(rejectpt, view_clipplanes[i].normal);
         d -= view_clipplanes[i].dist;
 
         if (d <= 0)
@@ -532,7 +532,7 @@ static int R_BmodelCheckBBox(float *minmaxs)
         acceptpt[1] = minmaxs[pindex[3 + 1]];
         acceptpt[2] = minmaxs[pindex[3 + 2]];
 
-        d = Vec3_Dot(acceptpt, view_clipplanes[i].normal);
+        d = DotProduct(acceptpt, view_clipplanes[i].normal);
         d -= view_clipplanes[i].dist;
 
         if (d <= 0)
@@ -596,8 +596,8 @@ static void RotatedBBox(vec3_t mins, vec3_t maxs, vec3_t angles,
     vec3_t  forward, right, up;
 
     if (!angles[0] && !angles[1] && !angles[2]) {
-        Vec3_Copy(mins, tmins);
-        Vec3_Copy(maxs, tmaxs);
+        VectorCopy(mins, tmins);
+        VectorCopy(maxs, tmaxs);
         return;
     }
 
@@ -625,9 +625,9 @@ static void RotatedBBox(vec3_t mins, vec3_t maxs, vec3_t angles,
             tmp[2] = maxs[2];
 
 
-        Vec3_Scale(forward, tmp[0], v);
-        Vec3_MA(v, -tmp[1], right, v);
-        Vec3_MA(v, tmp[2], up, v);
+        VectorScale(forward, tmp[0], v);
+        VectorMA(v, -tmp[1], right, v);
+        VectorMA(v, tmp[2], up, v);
 
         for (j = 0; j < 3; j++) {
             if (v[j] < tmins[j])
@@ -655,7 +655,7 @@ static void R_DrawBEntitiesOnList(void)
     if (!r_drawentities->integer)
         return;
 
-    Vec3_Copy(modelorg, oldorigin);
+    VectorCopy(modelorg, oldorigin);
     insubmodel = true;
     r_dlightframecount = r_framecount;
 
@@ -679,8 +679,8 @@ static void R_DrawBEntitiesOnList(void)
         // trivial accept status
         RotatedBBox(model->mins, model->maxs,
                     currententity->angles, mins, maxs);
-        Vec3_Add(mins, currententity->origin, minmaxs);
-        Vec3_Add(maxs, currententity->origin, (minmaxs + 3));
+        VectorAdd(mins, currententity->origin, minmaxs);
+        VectorAdd(maxs, currententity->origin, (minmaxs + 3));
 
         clipflags = R_BmodelCheckBBox(minmaxs);
         if (clipflags == BMODEL_FULLY_CLIPPED)
@@ -690,8 +690,8 @@ static void R_DrawBEntitiesOnList(void)
         if (!topnode)
             continue;   // no part in a visible leaf
 
-        Vec3_Copy(currententity->origin, r_entorigin);
-        Vec3_Subtract(r_origin, r_entorigin, modelorg);
+        VectorCopy(currententity->origin, r_entorigin);
+        VectorSubtract(r_origin, r_entorigin, modelorg);
 
         // FIXME: stop transforming twice
         R_RotateBmodel();
@@ -712,10 +712,10 @@ static void R_DrawBEntitiesOnList(void)
 
         // put back world rotation and frustum clipping
         // FIXME: R_RotateBmodel should just work off base_vxx
-        Vec3_Copy(base_vpn, vpn);
-        Vec3_Copy(base_vup, vup);
-        Vec3_Copy(base_vright, vright);
-        Vec3_Copy(oldorigin, modelorg);
+        VectorCopy(base_vpn, vpn);
+        VectorCopy(base_vup, vup);
+        VectorCopy(base_vright, vright);
+        VectorCopy(oldorigin, modelorg);
         R_TransformFrustum();
     }
 
@@ -896,13 +896,13 @@ void R_DrawBeam(entity_t *e)
         return;
 
     PerpendicularVector(perpvec, normalized_direction);
-    Vec3_Scale(perpvec, e->frame / 2, perpvec);
+    VectorScale(perpvec, e->frame / 2, perpvec);
 
     for (i = 0; i < NUM_BEAM_SEGS; i++) {
         RotatePointAroundVector(start_points[i], normalized_direction,
                                 perpvec, (360.0f / NUM_BEAM_SEGS) * i);
-        Vec3_Add(start_points[i], origin, start_points[i]);
-        Vec3_Add(start_points[i], direction, end_points[i]);
+        VectorAdd(start_points[i], origin, start_points[i]);
+        VectorAdd(start_points[i], direction, end_points[i]);
     }
 
     if (e->skinnum == -1)

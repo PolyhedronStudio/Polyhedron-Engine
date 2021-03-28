@@ -20,7 +20,7 @@ void SP_misc_teleporter_dest(edict_t* ent)
     ent->s.skinnum = 0;
     ent->solid = SOLID_BBOX;
     //  ent->s.effects |= EF_FLIES;
-    Vec3_Set(ent->mins, -32, -32, -24);
-    Vec3_Set(ent->maxs, 32, 32, -16);
+    VectorSet(ent->mins, -32, -32, -24);
+    VectorSet(ent->maxs, 32, 32, -16);
     gi.linkentity(ent);
 }

@@ -55,7 +55,7 @@ void SP_trigger_multiple(edict_t* ent)
         ent->use = Use_Multi;
     }
 
-    if (!Vec3_Compare(ent->s.angles, vec3_origin))
+    if (!VectorCompare(ent->s.angles, vec3_origin))
         G_SetMovedir(ent->s.angles, ent->movedir);
 
     gi.setmodel(ent, ent->model);

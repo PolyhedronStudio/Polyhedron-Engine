@@ -1,9 +1,9 @@
 // LICENSE HERE.
 
 //
-// shared/math/color.h
+// shared/math/matrix4.h
 //
-// N&C Math Library: Color
+// N&C Math Library: Matrix4
 //
 #ifndef __INC_SHARED_MATH_MATRIX4_H__
 #define __INC_SHARED_MATH_MATRIX4_H__

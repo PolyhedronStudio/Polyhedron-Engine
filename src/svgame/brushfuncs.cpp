@@ -62,7 +62,7 @@
 
 void Brush_Move_Done(edict_t* ent)
 {
-    Vec3_Clear(ent->velocity);
+    VectorClear(ent->velocity);
     ent->moveinfo.endfunc(ent);
 }
 
@@ -73,7 +73,7 @@ void Brush_Move_Final(edict_t* ent)
         return;
     }
 
-    Vec3_Scale(ent->moveinfo.dir, ent->moveinfo.remaining_distance / FRAMETIME, ent->velocity);
+    VectorScale(ent->moveinfo.dir, ent->moveinfo.remaining_distance / FRAMETIME, ent->velocity);
 
     ent->think = Brush_Move_Done;
     ent->nextthink = level.time + FRAMETIME;
@@ -87,7 +87,7 @@ void Brush_Move_Begin(edict_t* ent)
         Brush_Move_Final(ent);
         return;
     }
-    Vec3_Scale(ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
+    VectorScale(ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
     frames = floor((ent->moveinfo.remaining_distance / ent->moveinfo.speed) / FRAMETIME);
     ent->moveinfo.remaining_distance -= frames * ent->moveinfo.speed * FRAMETIME;
     ent->nextthink = level.time + (frames * FRAMETIME);
@@ -98,8 +98,8 @@ void Think_AccelMove(edict_t* ent);
 
 void Brush_Move_Calc(edict_t* ent, vec3_t dest, void(*func)(edict_t*))
 {
-    Vec3_Clear(ent->velocity);
-    Vec3_Subtract(dest, ent->s.origin, ent->moveinfo.dir);
+    VectorClear(ent->velocity);
+    VectorSubtract(dest, ent->s.origin, ent->moveinfo.dir);
     ent->moveinfo.remaining_distance = VectorNormalize(ent->moveinfo.dir);
     ent->moveinfo.endfunc = func;
 
@@ -127,7 +127,7 @@ void Brush_Move_Calc(edict_t* ent, vec3_t dest, void(*func)(edict_t*))
 
 void Brush_AngleMove_Done(edict_t* ent)
 {
-    Vec3_Clear(ent->avelocity);
+    VectorClear(ent->avelocity);
     ent->moveinfo.endfunc(ent);
 }
 
@@ -136,16 +136,16 @@ void Brush_AngleMove_Final(edict_t* ent)
     vec3_t  move;
 
     if (ent->moveinfo.state == STATE_UP)
-        Vec3_Subtract(ent->moveinfo.end_angles, ent->s.angles, move);
+        VectorSubtract(ent->moveinfo.end_angles, ent->s.angles, move);
     else
-        Vec3_Subtract(ent->moveinfo.start_angles, ent->s.angles, move);
+        VectorSubtract(ent->moveinfo.start_angles, ent->s.angles, move);
 
-    if (Vec3_Compare(move, vec3_origin)) {
+    if (VectorCompare(move, vec3_origin)) {
         Brush_AngleMove_Done(ent);
         return;
     }
 
-    Vec3_Scale(move, 1.0 / FRAMETIME, ent->avelocity);
+    VectorScale(move, 1.0 / FRAMETIME, ent->avelocity);
 
     ent->think = Brush_AngleMove_Done;
     ent->nextthink = level.time + FRAMETIME;
@@ -160,12 +160,12 @@ void Brush_AngleMove_Begin(edict_t* ent)
 
     // set destdelta to the vector needed to move
     if (ent->moveinfo.state == STATE_UP)
-        Vec3_Subtract(ent->moveinfo.end_angles, ent->s.angles, destdelta);
+        VectorSubtract(ent->moveinfo.end_angles, ent->s.angles, destdelta);
     else
-        Vec3_Subtract(ent->moveinfo.start_angles, ent->s.angles, destdelta);
+        VectorSubtract(ent->moveinfo.start_angles, ent->s.angles, destdelta);
 
     // calculate length of vector
-    len = Vec3_Length(destdelta);
+    len = VectorLength(destdelta);
 
     // divide by speed to get time to reach dest
     traveltime = len / ent->moveinfo.speed;
@@ -178,7 +178,7 @@ void Brush_AngleMove_Begin(edict_t* ent)
     frames = floor(traveltime / FRAMETIME);
 
     // scale the destdelta vector by the time spent traveling to get velocity
-    Vec3_Scale(destdelta, 1.0 / traveltime, ent->avelocity);
+    VectorScale(destdelta, 1.0 / traveltime, ent->avelocity);
 
     // set nextthink to trigger a think when dest is reached
     ent->nextthink = level.time + frames * FRAMETIME;
@@ -187,7 +187,7 @@ void Brush_AngleMove_Begin(edict_t* ent)
 
 void Brush_AngleMove_Calc(edict_t* ent, void(*func)(edict_t*))
 {
-    Vec3_Clear(ent->avelocity);
+    VectorClear(ent->avelocity);
     ent->moveinfo.endfunc = func;
     if (level.current_entity == ((ent->flags & FL_TEAMSLAVE) ? ent->teammaster : ent)) {
         Brush_AngleMove_Begin(ent);
@@ -316,7 +316,7 @@ void Think_AccelMove(edict_t* ent)
         return;
     }
 
-    Vec3_Scale(ent->moveinfo.dir, ent->moveinfo.current_speed * 10, ent->velocity);
+    VectorScale(ent->moveinfo.dir, ent->moveinfo.current_speed * 10, ent->velocity);
     ent->nextthink = level.time + FRAMETIME;
     ent->think = Think_AccelMove;
 }

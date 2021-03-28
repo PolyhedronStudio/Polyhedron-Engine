@@ -41,10 +41,10 @@ void weapon_shotgun_fire(edict_t* ent)
 
     AngleVectors(ent->client->v_angle, forward, right, NULL);
 
-    Vec3_Scale(forward, -2, ent->client->kick_origin);
+    VectorScale(forward, -2, ent->client->kick_origin);
     ent->client->kick_angles[0] = -2;
 
-    Vec3_Set(offset, 0, 8, ent->viewheight - 8);
+    VectorSet(offset, 0, 8, ent->viewheight - 8);
     P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
     if (is_quad) {
