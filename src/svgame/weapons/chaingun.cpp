@@ -109,7 +109,7 @@ void Chaingun_Fire(edict_t* ent)
 
     for (i = 0; i < shots; i++) {
         // get start / end positions
-        AngleVectors(ent->client->v_angle, forward, right, up);
+        AngleVectors(ent->client->v_angle, &forward, &right, &up);
         r = 7 + crandom() * 4;
         u = crandom() * 4;
         VectorSet(offset, 0, r, u + ent->viewheight - 8);
@@ -122,7 +122,7 @@ void Chaingun_Fire(edict_t* ent)
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte((MZ_CHAINGUN1 + shots - 1) | is_silenced);
-    gi.Multicast(ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 

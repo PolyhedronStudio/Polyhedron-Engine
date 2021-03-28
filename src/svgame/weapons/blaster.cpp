@@ -33,7 +33,7 @@ void Blaster_Fire(edict_t* ent, vec3_t g_offset, int damage, qboolean hyper, int
 
     if (is_quad)
         damage *= 4;
-    AngleVectors(ent->client->v_angle, forward, right, NULL);
+    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
     VectorSet(offset, 24, 8, ent->viewheight - 8);
     VectorAdd(offset, g_offset, offset);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
@@ -50,7 +50,7 @@ void Blaster_Fire(edict_t* ent, vec3_t g_offset, int damage, qboolean hyper, int
         gi.WriteByte(MZ_HYPERBLASTER | is_silenced);
     else
         gi.WriteByte(MZ_BLASTER | is_silenced);
-    gi.Multicast(ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 }

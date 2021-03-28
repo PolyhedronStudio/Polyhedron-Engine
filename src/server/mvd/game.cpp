@@ -2072,8 +2072,8 @@ static void MVD_GameClientThink(edict_t *ent, usercmd_t *cmd)
         }
     } else {
         memset(&pm, 0, sizeof(pm));
-        pm.Trace = MVD_Trace;
-        pm.PointContents = MVD_PointContents;
+//        pm.Trace = MVD_Trace;
+     //   pm.PointContents = MVD_PointContents;
         pm.state = client->ps.pmove;
         pm.cmd = *cmd;
 
