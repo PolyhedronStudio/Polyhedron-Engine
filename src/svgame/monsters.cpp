@@ -26,74 +26,74 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // and we can mess it up based on skill.  Spread should be for normal
 // and we can tighten or loosen based on skill.  We could muck with
 // the damages too, but I'm not sure that's such a good idea.
-void monster_fire_bullet(edict_t *self, vec3_t start, vec3_t dir, int damage, int kick, int hspread, int vspread, int flashtype)
+void monster_fire_bullet(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int kick, int hspread, int vspread, int flashtype)
 {
     fire_bullet(self, start, dir, damage, kick, hspread, vspread, MOD_UNKNOWN);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    gi.multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_shotgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int flashtype)
+void monster_fire_shotgun(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int flashtype)
 {
     fire_shotgun(self, start, aimdir, damage, kick, hspread, vspread, count, MOD_UNKNOWN);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    gi.multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect)
+void monster_fire_blaster(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, int flashtype, int effect)
 {
     fire_blaster(self, start, dir, damage, speed, effect, false);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    gi.multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_grenade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int flashtype)
+void monster_fire_grenade(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int flashtype)
 {
     fire_grenade(self, start, aimdir, damage, speed, 2.5, damage + 40);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    gi.multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype)
+void monster_fire_rocket(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, int flashtype)
 {
     fire_rocket(self, start, dir, damage, speed, damage + 20, damage);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    gi.multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_railgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int flashtype)
+void monster_fire_railgun(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int flashtype)
 {
     fire_rail(self, start, aimdir, damage, kick);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    gi.multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_bfg(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int kick, float damage_radius, int flashtype)
+void monster_fire_bfg(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int kick, float damage_radius, int flashtype)
 {
     fire_bfg(self, start, aimdir, damage, speed, damage_radius);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    gi.multicast(&start, MULTICAST_PVS);
 }
 
 
