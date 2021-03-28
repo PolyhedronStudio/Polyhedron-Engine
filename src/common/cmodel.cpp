@@ -475,7 +475,7 @@ static void CM_ClipBoxToBrush(const vec3_t %mins, const vec3_t &maxs, const vec3
 CM_TestBoxInBrush
 ================
 */
-static void CM_TestBoxInBrush(vec3_t mins, vec3_t maxs, vec3_t p1,
+static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1,
                               trace_t *trace, mbrush_t *brush)
 {
     int         i, j;
@@ -823,10 +823,10 @@ Handles offseting and rotation of the end points for moving and
 rotating entities
 ==================
 */
-void CM_TransformedBoxTrace(trace_t *trace, vec3_t start, vec3_t end,
-                            vec3_t mins, vec3_t maxs,
+void CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
+                            const vec3_t &mins, const vec3_t &maxs,
                             mnode_t *headnode, int brushmask,
-                            vec3_t origin, vec3_t angles)
+                            const vec3_t &origin, const vec3_t &angles)
 {
     vec3_t      start_l, end_l;
     vec3_t      axis[3];

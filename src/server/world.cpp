@@ -484,7 +484,7 @@ SV_ClipMoveToEntities
 
 ====================
 */
-static void SV_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &vec3_t mins, const vec3_t &vec3_t maxs, const vec3_t &vec3_t end,
                                   edict_t *passedict, int contentmask, trace_t *tr)
 {
     vec3_t      boxmins, boxmaxs;
