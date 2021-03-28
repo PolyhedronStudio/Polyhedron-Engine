@@ -220,15 +220,15 @@ static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
     }
 
     // continue
-    ClipSkyPolygon(newc[0], newv[0][0], stage + 1);
-    ClipSkyPolygon(newc[1], newv[1][0], stage + 1);
+    ClipSkyPolygon(newc[0], &newv[0][0], stage + 1);
+    ClipSkyPolygon(newc[1], &newv[1][0], stage + 1);
 }
 
-static inline void SkyInverseRotate(vec3_t *out, const vec3_t *in)
+static inline void SkyInverseRotate(vec3_t &out, const vec3_t &in)
 {
-    out[0] = skymatrix[0][0] * in[0] + skymatrix[1][0] * in[1] + skymatrix[2][0] * in[2];
-    out[1] = skymatrix[0][1] * in[0] + skymatrix[1][1] * in[1] + skymatrix[2][1] * in[2];
-    out[2] = skymatrix[0][2] * in[0] + skymatrix[1][2] * in[1] + skymatrix[2][2] * in[2];
+    out.x = skymatrix[0].x * in.x + skymatrix[1].x * in.y + skymatrix[2].x * in.z;
+    out.y = skymatrix[0].y * in.x + skymatrix[1].y * in.y + skymatrix[2].y * in.z;
+    out.z = skymatrix[0].z * in.x + skymatrix[1].z * in.y + skymatrix[2].z * in.z;
 }
 
 /*

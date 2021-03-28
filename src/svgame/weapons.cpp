@@ -56,7 +56,7 @@ fire_hit
 Used for all impact (hit/punch/slash) attacks
 =================
 */
-qboolean fire_hit(edict_t *self, const vec3_t &aim, int damage, int kick)
+qboolean fire_hit(edict_t *self, vec3_t &aim, int damage, int kick)
 {
     trace_t     tr;
     vec3_t      forward, right, up;
@@ -181,13 +181,13 @@ static void fire_lead(edict_t *self, const vec3_t& start, const vec3_t& aimdir, 
                     gi.WritePosition(tr.endpos);
                     gi.WriteDir(tr.plane.normal);
                     gi.WriteByte(color);
-                    gi.multicast(tr.endpos, MULTICAST_PVS);
+                    gi.multicast(&tr.endpos, MULTICAST_PVS);
                 }
 
                 // change bullet's course when it enters water
                 VectorSubtract(end, start, dir);
                 vectoangles(dir, dir);
-                AngleVectors(dir, forward, right, up);
+                AngleVectors(dir, &forward, &right, &up);
                 r = crandom() * hspread * 2;
                 u = crandom() * vspread * 2;
                 VectorMA(water_start, 8192, forward, end);
