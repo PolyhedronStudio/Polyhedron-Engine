@@ -22,30 +22,38 @@ template<typename T> struct vec3_template {
         // XYZ array index accessor.
         T xyz[3];
 
-        // X Y Z designator accessors.
+        // X Y Z desegnator accessors.
         struct {
             T x, y, z;
         };
     };
+
+    //-----------------
+    // Constructors.
+    //-----------------
+    // Default.
     vec3_template() { x = y = z = 0; }
 
-    // Basic way of making a vector
-    vec3_template(float X, float Y, float Z) { x = X; y = Y; z = Z; }
+    // Assign.
+    vec3_template(T X, T Y, T Z) { x = X; y = Y; z = Z; }
 
-    // Vector from another vector
+    // Copy from.
     vec3_template(const vec3_template<T>& v) { x = v.x; y = v.y; z = v.z; }
 
-    // vec3_t support
-    vec3_template(float* vec) { x = vec[0]; y = vec[1]; z = vec[2]; }
-    vec3_template(const float* vec) { x = vec[0]; y = vec[1]; z = vec[2]; }
+    // Regular *vec_t support.
+    vec3_template(T* vec) { x = vec[0]; y = vec[1]; z = vec[2]; }
+    vec3_template(const T* vec) { x = vec[0]; y = vec[1]; z = vec[2]; }
 
-    //// OPERATOR: cast to float *
-    inline operator float* () { 
+    //-----------------
+    // Operators.
+    //-----------------
+    // Pointer.
+    inline operator T* () { 
         return &x;
     }
     
-    // OPERATOR: cast to const float*
-    inline operator const float* () const { 
+    // Pointer cast to const float*
+    inline operator const T* () const { 
         return &x;
     }
 
