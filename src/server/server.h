@@ -603,7 +603,7 @@ void SV_FlushRedirect(int redirected, char *outputbuf, size_t len);
 void SV_SendClientMessages(void);
 void SV_SendAsyncPackets(void);
 
-void SV_Multicast(vec3_t origin, multicast_t to);
+void SV_Multicast(vec3_t *origin, multicast_t to);
 void SV_ClientPrintf(client_t *cl, int level, const char *fmt, ...) q_printf(3, 4);
 void SV_BroadcastPrintf(int level, const char *fmt, ...) q_printf(2, 3);
 void SV_ClientCommand(client_t *cl, const char *fmt, ...) q_printf(2, 3);
