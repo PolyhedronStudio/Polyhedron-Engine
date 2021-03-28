@@ -788,11 +788,11 @@ qboolean SV_EdictIsVisible(cm_t *cm, edict_t *ent, byte *mask);
 //
 // functions that interact with everything apropriate
 //
-int SV_PointContents(vec3_t p);
+int SV_PointContents(const vec3_t &p);
 // returns the CONTENTS_* value from the world at the given point.
 // Quake 2 extends this to also check entities, to allow moving liquids
 
-trace_t q_gameabi SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
                            edict_t *passedict, int contentmask);
 // mins and maxs are relative
 

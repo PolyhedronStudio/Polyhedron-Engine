@@ -451,7 +451,7 @@ static mnode_t *SV_HullForEntity(edict_t *ent)
 SV_PointContents
 =============
 */
-int SV_PointContents(vec3_t p)
+int SV_PointContents(const vec3_t &p)
 {
     edict_t     *touch[MAX_EDICTS], *hit;
     int         i, num;
@@ -484,7 +484,7 @@ SV_ClipMoveToEntities
 
 ====================
 */
-static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &vec3_t mins, const vec3_t &vec3_t maxs, const vec3_t &vec3_t end,
+static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
                                   edict_t *passedict, int contentmask, trace_t *tr)
 {
     vec3_t      boxmins, boxmaxs;
@@ -543,7 +543,7 @@ Moves the given mins/maxs volume through the world from start to end.
 Passedict and edicts owned by passedict are explicitly not checked.
 ==================
 */
-trace_t q_gameabi SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
                            edict_t *passedict, int contentmask)
 {
     trace_t     trace;
@@ -562,11 +562,6 @@ trace_t q_gameabi SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
         sv.tracecount = 0;
         return trace;
     }
-
-    if (!mins)
-        mins = vec3_origin;
-    if (!maxs)
-        maxs = vec3_origin;
 
     // clip to world
     CM_BoxTrace(&trace, start, end, mins, maxs, sv.cm.cache->nodes, contentmask);

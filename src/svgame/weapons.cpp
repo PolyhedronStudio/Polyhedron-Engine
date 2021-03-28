@@ -40,7 +40,7 @@ static void check_dodge(edict_t *self, vec3_t start, vec3_t dir, int speed)
             return;
     }
     VectorMA(start, 8192, dir, end);
-    tr = gi.trace(start, NULL, NULL, end, self, CONTENTS_MASK_SHOT);
+    tr = gi.trace(start, vec3_origin, vec3_origin, end, self, CONTENTS_MASK_SHOT);
     if ((tr.ent) && (tr.ent->svflags & SVF_MONSTER) && (tr.ent->health > 0) && (tr.ent->monsterinfo.dodge) && infront(tr.ent, self)) {
         VectorSubtract(tr.endpos, start, v);
         eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
@@ -84,7 +84,7 @@ qboolean fire_hit(edict_t *self, vec3_t aim, int damage, int kick)
 
     VectorMA(self->s.origin, range, dir, point);
 
-    tr = gi.trace(self->s.origin, NULL, NULL, point, self, CONTENTS_MASK_SHOT);
+    tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, point, self, CONTENTS_MASK_SHOT);
     if (tr.fraction < 1) {
         if (!tr.ent->takedamage)
             return false;
@@ -135,7 +135,7 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
     qboolean    water = false;
     int         content_mask = CONTENTS_MASK_SHOT | CONTENTS_MASK_LIQUID;
 
-    tr = gi.trace(self->s.origin, NULL, NULL, start, self, CONTENTS_MASK_SHOT);
+    tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, start, self, CONTENTS_MASK_SHOT);
     if (!(tr.fraction < 1.0)) {
         vectoangles(aimdir, dir);
         AngleVectors(dir, forward, right, up);
@@ -152,7 +152,7 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
             content_mask &= ~CONTENTS_MASK_LIQUID;
         }
 
-        tr = gi.trace(start, NULL, NULL, end, self, content_mask);
+        tr = gi.trace(start, vec3_origin, vec3_origin, end, self, content_mask);
 
         // see if we hit water
         if (tr.contents & CONTENTS_MASK_LIQUID) {
@@ -196,7 +196,7 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
             }
 
             // re-trace ignoring water this time
-            tr = gi.trace(water_start, NULL, NULL, end, self, CONTENTS_MASK_SHOT);
+            tr = gi.trace(water_start, vec3_origin, vec3_origin, end, self, CONTENTS_MASK_SHOT);
         }
     }
 
@@ -230,7 +230,7 @@ static void fire_lead(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
         if (gi.pointcontents(pos) & CONTENTS_MASK_LIQUID)
             VectorCopy(pos, tr.endpos);
         else
-            tr = gi.trace(pos, NULL, NULL, water_start, tr.ent, CONTENTS_MASK_LIQUID);
+            tr = gi.trace(pos, vec3_origin, vec3_origin, water_start, tr.ent, CONTENTS_MASK_LIQUID);
 
         VectorAdd(water_start, tr.endpos, pos);
         VectorScale(pos, 0.5, pos);
@@ -355,7 +355,7 @@ void fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
     if (self->client)
         check_dodge(self, bolt->s.origin, dir, speed);
 
-    tr = gi.trace(self->s.origin, NULL, NULL, bolt->s.origin, bolt, CONTENTS_MASK_SHOT);
+    tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, bolt->s.origin, bolt, CONTENTS_MASK_SHOT);
     if (tr.fraction < 1.0) {
         VectorMA(bolt->s.origin, -10, dir, bolt->s.origin);
         bolt->touch(bolt, tr.ent, NULL, NULL);
@@ -627,7 +627,7 @@ void fire_rail(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
     water = false;
     mask = CONTENTS_MASK_SHOT | CONTENTS_SLIME | CONTENTS_LAVA;
     while (ignore) {
-        tr = gi.trace(from, NULL, NULL, end, ignore, mask);
+        tr = gi.trace(from, vec3_origin, vec3_origin, end, ignore, mask);
 
         if (tr.contents & (CONTENTS_SLIME | CONTENTS_LAVA)) {
             mask &= ~(CONTENTS_SLIME | CONTENTS_LAVA);
@@ -791,7 +791,7 @@ void bfg_think(edict_t *self)
         VectorCopy(self->s.origin, start);
         VectorMA(start, 2048, dir, end);
         while (1) {
-            tr = gi.trace(start, NULL, NULL, end, ignore, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_DEADMONSTER);
+            tr = gi.trace(start, vec3_origin, vec3_origin, end, ignore, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_DEADMONSTER);
 
             if (!tr.ent)
                 break;

@@ -494,7 +494,7 @@ qboolean FindTarget(edict_t *self)
             if (!visible(self, client))
                 return false;
         } else {
-            if (!gi.inPHS(self->s.origin, client->s.origin))
+            if (!gi.InPHS(self->s.origin, client->s.origin))
                 return false;
         }
 
@@ -563,7 +563,7 @@ qboolean M_CheckAttack(edict_t *self)
         VectorCopy(self->enemy->s.origin, spot2);
         spot2[2] += self->enemy->viewheight;
 
-        tr = gi.trace(spot1, NULL, NULL, spot2, self, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_SLIME | CONTENTS_LAVA | CONTENTS_WINDOW);
+        tr = gi.trace(spot1, vec3_origin, vec3_origin, spot2, self, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_SLIME | CONTENTS_LAVA | CONTENTS_WINDOW);
 
         // do we have a clear shot?
         if (tr.ent != self->enemy)

@@ -61,23 +61,23 @@ typedef struct {
     void        CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
                             const vec3_t &mins, const vec3_t &maxs,
                             mnode_t *headnode, int brushmask);
-    void        CM_TransformedBoxTrace(trace_t *trace, vec3_t start, vec3_t end,
-                                    vec3_t mins, vec3_t maxs,
+    void        CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
+                                    const vec3_t &mins, const vec3_t &maxs,
                                     mnode_t * headnode, int brushmask,
-                                    vec3_t origin, vec3_t angles);
+                                    const vec3_t &origin, const vec3_t &angles);
     void        CM_ClipEntity(trace_t *dst, const trace_t *src, struct edict_s *ent);
 
     // call with topnode set to the headnode, returns with topnode
     // set to the first node that splits the box
-    int         CM_BoxLeafs(cm_t *cm, vec3_t mins, vec3_t maxs, mleaf_t **list,
+    int         CM_BoxLeafs(cm_t *cm, const vec3_t &mins, const vec3_t &maxs, mleaf_t **list,
                             int listsize, mnode_t **topnode);
-    mleaf_t     *CM_PointLeaf(cm_t *cm, vec3_t p);
+    mleaf_t     *CM_PointLeaf(cm_t *cm, const vec3_t &p);
 
     #define CM_LeafContents(leaf)   (leaf)->contents
     #define CM_LeafCluster(leaf)    (leaf)->cluster
     #define CM_LeafArea(leaf)       (leaf)->area
 
-    byte        *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t org, int vis);
+    byte        *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t &org, int vis);
 
     void        CM_SetAreaPortalState(cm_t *cm, int portalnum, qboolean open);
     qboolean    CM_AreasConnected(cm_t *cm, int area1, int area2);

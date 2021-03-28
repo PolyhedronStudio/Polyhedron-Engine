@@ -454,7 +454,7 @@ PF_inPVS
 Also checks portalareas so that doors block sight
 =================
 */
-static qboolean PF_inPVS(vec3_t p1, vec3_t p2)
+static qboolean PF_InPVS(const vec3_t& p1, const vec3_t& p2)
 {
     return PF_inVIS(p1, p2, DVIS_PVS);
 }
@@ -466,7 +466,7 @@ PF_inPHS
 Also checks portalareas so that doors block sound
 =================
 */
-static qboolean PF_inPHS(vec3_t p1, vec3_t p2)
+static qboolean PF_InPHS(const vec3_t& p1, const vec3_t& p2)
 {
     return PF_inVIS(p1, p2, DVIS_PHS);
 }
@@ -911,8 +911,8 @@ void SV_InitGameProgs(void)
     importAPI.trace = SV_Trace;
     importAPI.pointcontents = SV_PointContents;
     importAPI.setmodel = PF_setmodel;
-    importAPI.inPVS = PF_inPVS;
-    importAPI.inPHS = PF_inPHS;
+    importAPI.InPVS = PF_InPVS;
+    importAPI.InPHS = PF_InPHS;
     //import.PMove = PF_PMove;
     importAPI.GetPMoveParams = PF_GetPMoveParams;
 

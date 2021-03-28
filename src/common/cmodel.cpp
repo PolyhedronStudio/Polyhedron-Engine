@@ -223,7 +223,7 @@ Fills in a list of all the leafs touched
 */
 static int      leaf_count, leaf_maxcount;
 static mleaf_t  **leaf_list;
-static float    *leaf_mins, *leaf_maxs;
+static const float    *leaf_mins, *leaf_maxs;
 static mnode_t  *leaf_topnode;
 
 static void CM_BoxLeafs_r(mnode_t *node)
@@ -364,7 +364,7 @@ static qboolean trace_ispoint;      // optimized case
 CM_ClipBoxToBrush
 ================
 */
-static void CM_ClipBoxToBrush(const vec3_t %mins, const vec3_t &maxs, const vec3_t &p1, const vec3_t &p2,
+static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1, const vec3_t &p2,
                               trace_t *trace, mbrush_t *brush)
 {
     int         i, j;
@@ -1104,7 +1104,7 @@ The client will interpolate the view position,
 so we can't use a single PVS point
 ===========
 */
-byte *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t org, int vis)
+byte *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t &org, int vis)
 {
     byte    temp[VIS_MAX_BYTES];
     mleaf_t *leafs[64];
