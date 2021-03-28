@@ -701,9 +701,9 @@ static void PF_PositionedSound(vec3_t origin, edict_t *entity, int channel,
         }
     } else {
         if (channel & CHAN_RELIABLE) {
-            SV_Multicast(origin, MULTICAST_PHS_R);
+            SV_Multicast(&origin, MULTICAST_PHS_R);
         } else {
-            SV_Multicast(origin, MULTICAST_PHS);
+            SV_Multicast(&origin, MULTICAST_PHS);
         }
     }
 }

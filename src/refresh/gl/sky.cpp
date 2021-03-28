@@ -61,7 +61,7 @@ static int          skyfaces;
 static const float  sky_min = 1.0f / 512.0f;
 static const float  sky_max = 511.0f / 512.0f;
 
-static void DrawSkyPolygon(int nump, vec3_t vecs)
+static void DrawSkyPolygon(int nump, vec3_t *vecs)
 {
     int     i, j;
     vec3_t  v, av;
@@ -132,7 +132,7 @@ static void DrawSkyPolygon(int nump, vec3_t vecs)
 #define SIDE_BACK       1
 #define SIDE_ON         2
 
-static void ClipSkyPolygon(int nump, vec3_t vecs, int stage)
+static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
 {
     const float     *norm;
     float   *v;
@@ -219,7 +219,7 @@ static void ClipSkyPolygon(int nump, vec3_t vecs, int stage)
     ClipSkyPolygon(newc[1], newv[1][0], stage + 1);
 }
 
-static inline void SkyInverseRotate(vec3_t out, const vec3_t in)
+static inline void SkyInverseRotate(vec3_t *out, const vec3_t *in)
 {
     out[0] = skymatrix[0][0] * in[0] + skymatrix[1][0] * in[1] + skymatrix[2][0] * in[2];
     out[1] = skymatrix[0][1] * in[0] + skymatrix[1][1] * in[1] + skymatrix[2][1] * in[2];
