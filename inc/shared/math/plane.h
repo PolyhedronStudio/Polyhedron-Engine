@@ -55,12 +55,11 @@ int BoxOnPlaneSide(const vec3_t& emins, const vec3_t& emaxs, cplane_t* p);
 
 //
 //===============
-// LEGACY: PlaneDiff_
+// Plane_Difference
 // 
-// ALTERNATIVE: Use PlaneDiff
 //===============
 //
-static inline vec_t PlaneDiff_(const vec3_t& v, cplane_s* p) {
+static inline vec_t Plane_Difference(const vec3_t& v, cplane_s* p) {
     return DotProduct(v, p->normal) - p->dist;
 }
 
@@ -79,7 +78,7 @@ static inline vec_t Plane_FastDifference(const vec3_t& v, cplane_t* p)
     }
 
     // slow generic case
-    return PlaneDiff_(v, p);
+    return Plane_Difference(v, p);
 }
 
 //

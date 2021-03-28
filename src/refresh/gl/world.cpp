@@ -150,7 +150,7 @@ static void GL_MarkLights_r(mnode_t *node, dlight_t *light, int lightbit)
     mface_t *face;
 
     while (node->plane) {
-        dot = PlaneDiffFast(light->transformed, node->plane);
+        dot = Plane_FastDifference(light->transformed, node->plane);
         if (dot > light->intensity - DLIGHT_CUTOFF) {
             node = node->children[0];
             continue;
@@ -406,7 +406,7 @@ void GL_DrawBspModel(mmodel_t *model)
     // draw visible faces
     last = model->firstface + model->numfaces;
     for (face = model->firstface; face < last; face++) {
-        dot = PlaneDiffFast(transformed, face->plane);
+        dot = Plane_FastDifference(transformed, face->plane);
         if (BSP_CullFace(face, dot)) {
             c.facesCulled++;
             continue;
@@ -538,7 +538,7 @@ static void GL_WorldNode_r(mnode_t *node, int clipflags)
             break;
         }
 
-        dot = PlaneDiffFast(glr.fd.vieworg, node->plane);
+        dot = Plane_FastDifference(glr.fd.vieworg, node->plane);
         side = dot < 0;
 
         GL_WorldNode_r(node->children[side], clipflags);

@@ -43,7 +43,7 @@ static void R_MarkLights_r(mnode_t *node, dlight_t *light,
     int         i;
 
     while (node->plane) {
-        dist = PlaneDiffFast(transformed, node->plane);
+        dist = Plane_FastDifference(transformed, node->plane);
         if (dist > light->intensity - DLIGHT_CUTOFF) {
             node = node->children[0];
             continue;
@@ -244,7 +244,7 @@ static void R_AddDynamicLights(void)
             VectorCopy(light->origin, transformed);
         }
 
-        dist = PlaneDiffFast(transformed, surf->plane);
+        dist = Plane_FastDifference(transformed, surf->plane);
         rad = light->intensity - fabs(dist);
         if (rad < DLIGHT_CUTOFF)
             continue;

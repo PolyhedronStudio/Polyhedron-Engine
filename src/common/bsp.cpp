@@ -1264,8 +1264,8 @@ static qboolean BSP_RecursiveLightPoint(mnode_t *node, float p1f, float p2f, vec
 
     while (node->plane) {
         // calculate distancies
-        d1 = PlaneDiffFast(p1, node->plane);
-        d2 = PlaneDiffFast(p2, node->plane);
+        d1 = Plane_FastDifference(p1, node->plane);
+        d2 = Plane_FastDifference(p2, node->plane);
         side = (d1 < 0);
 
         if ((d2 < 0) == side) {
@@ -1467,7 +1467,7 @@ mleaf_t *BSP_PointLeaf(mnode_t *node, vec3_t p)
     float d;
 
     while (node->plane) {
-        d = PlaneDiffFast(p, node->plane);
+        d = Plane_FastDifference(p, node->plane);
         if (d < 0)
             node = node->children[1];
         else

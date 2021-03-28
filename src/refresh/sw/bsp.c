@@ -423,7 +423,7 @@ static void R_RecursiveWorldNode(mnode_t *node, int clipflags)
         // find which side of the node we are on
         plane = node->plane;
 
-        dot = PlaneDiffFast(modelorg, plane);
+        dot = Plane_FastDifference(modelorg, plane);
 
         if (dot >= 0)
             side = 0;

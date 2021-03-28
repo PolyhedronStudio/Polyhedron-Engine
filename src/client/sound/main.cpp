@@ -960,7 +960,7 @@ void S_StartSound(const vec3_t *origin, int entnum, int entchannel, qhandle_t hS
         return;
 
     if (origin) {
-        VectorCopy(origin, ps->origin);
+        VectorCopy(*origin, ps->origin);
         ps->fixed_origin = true;
     } else {
         ps->fixed_origin = false;
