@@ -302,7 +302,7 @@ void G_SetMovedir(vec3_t angles, vec3_t movedir)
     } else if (VectorCompare(angles, VEC_DOWN)) {
         VectorCopy(MOVEDIR_DOWN, movedir);
     } else {
-        AngleVectors(angles, movedir, NULL, NULL);
+        AngleVectors(angles, &movedir, NULL, NULL);
     }
 
     VectorClear(angles);

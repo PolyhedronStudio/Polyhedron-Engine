@@ -93,7 +93,7 @@ qboolean fire_hit(edict_t *self, vec3_t aim, int damage, int kick)
             tr.ent = self->enemy;
     }
 
-    AngleVectors(self->s.angles, forward, right, up);
+    AngleVectors(self->s.angles, &forward, &right, &up);
     VectorMA(self->s.origin, range, forward, point);
     VectorMA(point, aim[1], right, point);
     VectorMA(point, aim[2], up, point);
