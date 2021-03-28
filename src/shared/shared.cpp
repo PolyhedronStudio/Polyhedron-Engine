@@ -181,7 +181,7 @@ vec_t RadiusFromBounds(const vec3_t& mins, const vec3_t& maxs)
         corner.xyz[i] = a > b ? a : b;
     }
 
-    return Vec3_Length_(corner);
+    return VectorLength(corner);
 }
 
 //====================================================================================

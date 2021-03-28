@@ -54,10 +54,10 @@ void MakeNormalVectors(const vec3_t& forward, vec3_t& right, vec3_t& up)
     right.xyz[2] = forward.xyz[1];
     right.xyz[0] = forward.xyz[2];
 
-    d = Vec3_Dot(right, forward);
-    Vec3_MA_(right, -d, forward, right);
+    d = DotProduct(right, forward);
+    VectorMA(right, -d, forward, right);
     VectorNormalize(right);
-    Vec3_Cross_(right, forward, up);
+    CrossProduct(right, forward, up);
 }
 
 //#endif  // USE_CLIENT
@@ -235,7 +235,7 @@ int DirToByte(const vec3_t& dir)
     bestd = 0;
     best = 0;
     for (i = 0; i < NUMVERTEXNORMALS; i++) {
-        d = Vec3_Dot(dir, bytedirs[i]); // VEC3_T !! May be broken.
+        d = DotProduct(dir, bytedirs[i]); // VEC3_T !! May be broken.
         if (d > bestd) {
             bestd = d;
             best = i;
@@ -303,9 +303,9 @@ void RotatePointAroundVector(vec3_t& dst, const vec3_t& dir, const vec3_t& point
 
     SetupRotationMatrix(matrix, dir, degrees);
 
-    dst.x = Vec3_Dot(matrix[0], point);
-    dst.y = Vec3_Dot(matrix[1], point);
-    dst.z = Vec3_Dot(matrix[2], point);
+    dst.x = DotProduct(matrix[0], point);
+    dst.y = DotProduct(matrix[1], point);
+    dst.z = DotProduct(matrix[2], point);
 }
 
 
@@ -319,9 +319,9 @@ void ProjectPointOnPlane(vec3_t& dst, const vec3_t& p, const vec3_t& normal)
     vec3_t n;
     float inv_denom;
 
-    inv_denom = 1.0F / Vec3_Dot(normal, normal);
+    inv_denom = 1.0F / DotProduct(normal, normal);
 
-    d = Vec3_Dot(normal, p) * inv_denom;
+    d = DotProduct(normal, p) * inv_denom;
 
     n[0] = normal[0] * inv_denom;
     n[1] = normal[1] * inv_denom;

@@ -324,7 +324,7 @@ int CM_TransformedPointContents(vec3_t p, mnode_t *headnode, vec3_t origin, vec3
     // rotate start and end into the models frame of reference
     if (headnode != box_headnode &&
         (angles[0] || angles[1] || angles[2])) {
-        AngleVectors(angles, forward, right, up);
+        AngleVectors(angles, &forward, &right, &up);
 
         VectorCopy(p_l, temp);
         p_l[0] = DotProduct(temp, forward);
