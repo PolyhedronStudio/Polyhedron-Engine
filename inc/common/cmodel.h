@@ -50,7 +50,7 @@ typedef struct {
     #define CM_NumNode(cm, node) ((node) ? ((node) - (cm)->cache->nodes) : -1)
 
     // creates a clipping hull for an arbitrary box
-    mnode_t     *CM_HeadnodeForBox(vec3_t mins, vec3_t maxs);
+    mnode_t     *CM_HeadnodeForBox(const vec3_t &mins, const vec3_t &maxs);
 
 
     // returns an ORed contents mask

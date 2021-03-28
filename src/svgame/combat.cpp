@@ -134,7 +134,7 @@ void SpawnDamage(int type, vec3_t origin, vec3_t normal, int damage)
 //  gi.WriteByte (damage);
     gi.WritePosition(origin);
     gi.WriteDir(normal);
-    gi.multicast(origin, MULTICAST_PVS);
+    gi.multicast(&origin, MULTICAST_PVS);
 }
 
 
@@ -206,7 +206,7 @@ static int CheckPowerArmor(edict_t *ent, vec3_t point, vec3_t normal, int damage
         vec3_t      forward;
 
         // only works if damage point is in front
-        AngleVectors(ent->s.angles, forward, NULL, NULL);
+        AngleVectors(ent->s.angles, &forward, NULL, NULL);
         VectorSubtract(point, ent->s.origin, vec);
         VectorNormalize(vec);
         dot = DotProduct(vec, forward);

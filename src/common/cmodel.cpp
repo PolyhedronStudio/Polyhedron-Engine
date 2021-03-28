@@ -187,7 +187,7 @@ To keep everything totally uniform, bounding boxes are turned into small
 BSP trees instead of being compared directly.
 ===================
 */
-mnode_t *CM_HeadnodeForBox(vec3_t mins, vec3_t maxs)
+mnode_t *CM_HeadnodeForBox(const vec3_t &mins, const vec3_t &maxs)
 {
     box_planes[0].dist = maxs[0];
     box_planes[1].dist = -maxs[0];

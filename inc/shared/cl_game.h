@@ -229,7 +229,7 @@ extern "C" {
         // Collision Model.
         //---------------------------------------------------------------------
         // Creates a clipping hull for an arbitrary box.
-        mnode_t     *(*CM_HeadnodeForBox) (vec3_t mins, vec3_t maxs);
+        mnode_t     *(*CM_HeadnodeForBox) (const vec3_t &mins, const vec3_t &maxs);
         // We need a way to share these values to cgame dll.
         mmodel_t    *(*CM_InlineModel) (cm_t *cm, const char *name);
         // TODO: Document.
