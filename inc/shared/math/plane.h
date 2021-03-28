@@ -106,5 +106,10 @@ static inline int BoxOnPlaneSideFast(const vec3_t& emins, const vec3_t& emaxs, c
     return BoxOnPlaneSide(emins, emaxs, p);
 }
 
+// Wrapper for legacy code.
+//static inline int BoxOnPlaneSideFast(const float *emins, const float *emaxs, cplane_t* p) {
+//    
+//
+//}
 #endif // __INC_SHARED_MATH_PLANE_H__
 

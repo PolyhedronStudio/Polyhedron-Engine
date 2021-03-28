@@ -73,13 +73,13 @@ static dlight_t dlights[] = {
     {
         { -120.f, -80.f, 80.f },    // Origin
         {1.f, 1.f, 1.f},            // Color
-        200.f,                      // Intensity
+        { 200.0f, 200.0f, 200.f },  // Intensity // MATHLIB: Had to change.
         20.f                        // Radius
     },
     {
         { 100.f, 80.f, 20.f },      // Origin
         {0.5f, 0.5f, 1.f},          // Color
-        200.f,                      // Intensity
+        { 200.0f, 200.0f, 200.f },  // Intensity // MATHLIB: Had to change.
         20.f                        // Radius
     }
 };

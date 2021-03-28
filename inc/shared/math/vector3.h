@@ -27,11 +27,22 @@ template<typename T> struct vec3_template {
             T x, y, z;
         };
     };
+    vec3_template() { x = y = z = 0; }
+
+    // Basic way of making a vector
+    vec3_template(float X, float Y, float Z) { x = X; y = Y; z = Z; }
+
+    // Vector from another vector
+    vec3_template(const vec3_template<T>& v) { x = v.x; y = v.y; z = v.z; }
+
+    // vec3_t support
+    vec3_template(float* vec) { x = vec[0]; y = vec[1]; z = vec[2]; }
+    vec3_template(const float* vec) { x = vec[0]; y = vec[1]; z = vec[2]; }
 
     //// OPERATOR: cast to float *
     inline operator float* () { 
         return &x;
-    } 
+    }
     
     // OPERATOR: cast to const float*
     inline operator const float* () const { 
