@@ -33,7 +33,7 @@ void weapon_supershotgun_fire(edict_t* ent)
     int         damage = 6;
     int         kick = 12;
 
-    AngleVectors(ent->client->v_angle, forward, right, NULL);
+    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
 
     VectorScale(forward, -2, ent->client->kick_origin);
     ent->client->kick_angles[0] = -2;
@@ -49,17 +49,17 @@ void weapon_supershotgun_fire(edict_t* ent)
     v[PITCH] = ent->client->v_angle[PITCH];
     v[YAW] = ent->client->v_angle[YAW] - 5;
     v[ROLL] = ent->client->v_angle[ROLL];
-    AngleVectors(v, forward, NULL, NULL);
+    AngleVectors(v, &forward, NULL, NULL);
     fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
     v[YAW] = ent->client->v_angle[YAW] + 5;
-    AngleVectors(v, forward, NULL, NULL);
+    AngleVectors(v, &forward, NULL, NULL);
     fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
 
     // send muzzle flash
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MZ_SSHOTGUN | is_silenced);
-    gi.Multicast(ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
     ent->client->ps.gunframe++;
     PlayerNoise(ent, start, PNOISE_WEAPON);

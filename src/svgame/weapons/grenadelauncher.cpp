@@ -39,7 +39,7 @@ void weapon_grenadelauncher_fire(edict_t* ent)
         damage *= 4;
 
     VectorSet(offset, 8, 8, ent->viewheight - 8);
-    AngleVectors(ent->client->v_angle, forward, right, NULL);
+    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
     VectorScale(forward, -2, ent->client->kick_origin);
@@ -50,7 +50,7 @@ void weapon_grenadelauncher_fire(edict_t* ent)
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MZ_GRENADE | is_silenced);
-    gi.Multicast(ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
     ent->client->ps.gunframe++;
 

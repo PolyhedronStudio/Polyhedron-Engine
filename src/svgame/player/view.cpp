@@ -920,7 +920,7 @@ void ClientEndServerFrame(edict_t *ent)
         return;
     }
 
-    AngleVectors(ent->client->v_angle, forward, right, up);
+    AngleVectors(ent->client->v_angle, &forward, &right, &up);
 
     // burn from lava, etc
     P_WorldEffects();

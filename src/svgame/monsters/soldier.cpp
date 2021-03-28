@@ -487,7 +487,7 @@ void soldier_fire(edict_t *self, int flash_number)
     else
         flash_index = machinegun_flash[flash_number];
 
-    AngleVectors(self->s.angles, forward, right, NULL);
+    AngleVectors(self->s.angles, &forward, &right, NULL);
     start = G_ProjectSource(self->s.origin, monster_flash_offset[flash_index], forward, right);
 
     if (flash_number == 5 || flash_number == 6) {
@@ -497,7 +497,7 @@ void soldier_fire(edict_t *self, int flash_number)
         end[2] += self->enemy->viewheight;
         VectorSubtract(end, start, aim);
         vectoangles(aim, dir);
-        AngleVectors(dir, forward, right, up);
+        AngleVectors(dir, &forward, &right, &up);
 
         r = crandom() * 1000;
         u = crandom() * 500;

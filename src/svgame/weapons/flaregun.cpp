@@ -42,7 +42,7 @@ void weapon_flaregun_fire(edict_t* ent)
     // Setup the parameters used in the call to fire_flaregun() 
      // 
     VectorSet(offset, 8, 8, ent->viewheight - 8);
-    AngleVectors(ent->client->v_angle, forward, right, NULL);
+    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
     VectorScale(forward, -2, ent->client->kick_origin);
@@ -55,7 +55,7 @@ void weapon_flaregun_fire(edict_t* ent)
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MZ_FLARE | is_silenced);
-    gi.Multicast(ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
     // Bump the gunframe 
      // 

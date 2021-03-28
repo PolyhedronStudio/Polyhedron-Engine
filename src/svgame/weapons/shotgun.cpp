@@ -39,7 +39,7 @@ void weapon_shotgun_fire(edict_t* ent)
         return;
     }
 
-    AngleVectors(ent->client->v_angle, forward, right, NULL);
+    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
 
     VectorScale(forward, -2, ent->client->kick_origin);
     ent->client->kick_angles[0] = -2;
@@ -61,7 +61,7 @@ void weapon_shotgun_fire(edict_t* ent)
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MZ_SHOTGUN | is_silenced);
-    gi.Multicast(ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
     ent->client->ps.gunframe++;
     PlayerNoise(ent, start, PNOISE_WEAPON);

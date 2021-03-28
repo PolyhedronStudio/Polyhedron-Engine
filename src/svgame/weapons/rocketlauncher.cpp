@@ -42,7 +42,7 @@ void Weapon_RocketLauncher_Fire(edict_t* ent)
         radius_damage *= 4;
     }
 
-    AngleVectors(ent->client->v_angle, forward, right, NULL);
+    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
 
     VectorScale(forward, -2, ent->client->kick_origin);
     ent->client->kick_angles[0] = -1;
@@ -55,7 +55,7 @@ void Weapon_RocketLauncher_Fire(edict_t* ent)
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MZ_ROCKET | is_silenced);
-    gi.Multicast(ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
     ent->client->ps.gunframe++;
 
