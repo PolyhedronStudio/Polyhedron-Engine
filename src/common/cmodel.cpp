@@ -286,7 +286,7 @@ CM_PointContents
 
 ==================
 */
-int CM_PointContents(vec3_t p, mnode_t *headnode)
+int CM_PointContents(const vec3_t &p, mnode_t *headnode)
 {
     mleaf_t     *leaf;
 
@@ -307,7 +307,7 @@ Handles offseting and rotation of the end points for moving and
 rotating entities
 ==================
 */
-int CM_TransformedPointContents(vec3_t p, mnode_t *headnode, vec3_t origin, vec3_t angles)
+int CM_TransformedPointContents(const vec3_t &p, mnode_t *headnode, const vec3_t& origin, const vec3_t& angles)
 {
     vec3_t      p_l;
     vec3_t      temp;
