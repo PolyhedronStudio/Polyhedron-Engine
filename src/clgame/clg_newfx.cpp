@@ -425,7 +425,7 @@ void CLG_TrackerTrail(vec3_t start, vec3_t end, int particleColor)
 
     VectorCopy(vec, forward);
     vectoangles2(forward, angle_dir);
-    AngleVectors(angle_dir, forward, right, up);
+    AngleVectors(angle_dir, &forward, &right, &up);
 
     dec = 3;
     VectorScale(vec, 3, vec);

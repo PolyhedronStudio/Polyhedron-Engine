@@ -246,7 +246,7 @@ static void PM_ClampAngles(void)
     }
 
     // Calculate the angle vectors for movement.
-    AngleVectors(pm->viewAngles, pml.forward, pml.right, pml.up);
+    AngleVectors(pm->viewAngles, &pml.forward, &pml.right, &pml.up);
 }
 
 
@@ -1748,7 +1748,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
                 angles[PITCH] = angles[PITCH] - 360;
             angles[PITCH] /= 3;
 
-            AngleVectors(angles, pml.forward, pml.right, pml.up);
+            AngleVectors(angles, &pml.forward, &pml.right, &pml.up);
 
             PM_AirMove();
         }

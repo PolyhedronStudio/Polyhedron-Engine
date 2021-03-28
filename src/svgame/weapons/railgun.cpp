@@ -49,7 +49,7 @@ void weapon_railgun_fire(edict_t* ent)
         kick *= 4;
     }
 
-    AngleVectors(ent->client->v_angle, forward, right, NULL);
+    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
 
     VectorScale(forward, -3, ent->client->kick_origin);
     ent->client->kick_angles[0] = -3;
@@ -62,7 +62,7 @@ void weapon_railgun_fire(edict_t* ent)
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MZ_RAILGUN | is_silenced);
-    gi.Multicast(ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
     ent->client->ps.gunframe++;
     PlayerNoise(ent, start, PNOISE_WEAPON);

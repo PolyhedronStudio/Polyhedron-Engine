@@ -341,7 +341,7 @@ static void CLG_AddExplosionLight(explosion_t* ex, float phase)
 
 	vec3_t origin;
 	vec3_t up;
-	AngleVectors(ex->ent.angles, NULL, NULL, up);
+	AngleVectors(ex->ent.angles, NULL, NULL, &up);
 	VectorMA(ex->ent.origin, offset, up, origin);
 
 	vec3_t color;
@@ -707,7 +707,7 @@ static void CLG_AddPlayerBeams(void)
 				tmp[0] = angles[0];
 				tmp[1] = angles[1] + 180.0;
 				tmp[2] = 0;
-				AngleVectors(tmp, f, r, u);
+				AngleVectors(tmp, &f, &r, &u);
 
 				VectorMA(org, -b->offset[0] + 1, r, org);
 				VectorMA(org, -b->offset[1], f, org);
@@ -1032,11 +1032,11 @@ void CLG_ParseTempEntity(void)
 			// impact sound
 			r = rand() & 15;
 			if (r == 1)
-				clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_ric1, 1, ATTN_NORM, 0);
+				clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_ric1, 1, ATTN_NORM, 0);
 			else if (r == 2)
-				clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_ric2, 1, ATTN_NORM, 0);
+				clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_ric2, 1, ATTN_NORM, 0);
 			else if (r == 3)
-				clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_ric3, 1, ATTN_NORM, 0);
+				clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_ric3, 1, ATTN_NORM, 0);
 		}
 		break;
 
@@ -1048,7 +1048,7 @@ void CLG_ParseTempEntity(void)
 		else
 			CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0xb0, 40);
 		//FIXME : replace or remove this sound
-		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_SHOTGUN:            // bullet hitting wall
@@ -1066,11 +1066,11 @@ void CLG_ParseTempEntity(void)
 		if (teParameters.color == SPLASH_SPARKS) {
 			r = rand() & 3;
 			if (r == 0)
-				clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_spark5, 1, ATTN_STATIC, 0);
+				clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_spark5, 1, ATTN_STATIC, 0);
 			else if (r == 1)
-				clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_spark6, 1, ATTN_STATIC, 0);
+				clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_spark6, 1, ATTN_STATIC, 0);
 			else
-				clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_spark7, 1, ATTN_STATIC, 0);
+				clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_spark7, 1, ATTN_STATIC, 0);
 		}
 		break;
 
@@ -1125,7 +1125,7 @@ void CLG_ParseTempEntity(void)
 
 		if (teParameters.type != TE_FLARE)
 		{
-			clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+			clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		}
 		else
 		{
@@ -1137,7 +1137,7 @@ void CLG_ParseTempEntity(void)
 
 	case TE_RAILTRAIL:          // railgun effect
 		CLG_RailTrail();
-		clgi.S_StartSound(teParameters.pos2, 0, 0, cl_sfx_railg, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos2, 0, 0, cl_sfx_railg, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_GRENADE_EXPLOSION:
@@ -1155,9 +1155,9 @@ void CLG_ParseTempEntity(void)
 			CLG_ExplosionParticles(teParameters.pos1);
 
 		if (teParameters.type == TE_GRENADE_EXPLOSION_WATER)
-			clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0);
+			clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0);
 		else
-			clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0);
+			clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_EXPLOSION2:
@@ -1168,13 +1168,13 @@ void CLG_ParseTempEntity(void)
 			ex->baseframe = 30;
 		}
 		CLG_ExplosionParticles(teParameters.pos1);
-		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_PLASMA_EXPLOSION:
 		CLG_PlainExplosion(false);
 		CLG_ExplosionParticles(teParameters.pos1);
-		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_ROCKET_EXPLOSION:
@@ -1187,25 +1187,25 @@ void CLG_ParseTempEntity(void)
 			CLG_ExplosionParticles(teParameters.pos1);
 
 		if (teParameters.type == TE_ROCKET_EXPLOSION_WATER)
-			clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0);
+			clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0);
 		else
-			clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+			clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_EXPLOSION1:
 		CLG_PlainExplosion(false);
 		CLG_ExplosionParticles(teParameters.pos1);
-		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_EXPLOSION1_NP:
 		CLG_PlainExplosion(false);
-		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_EXPLOSION1_BIG:
 		ex = CLG_PlainExplosion(true);
-		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_BFG_EXPLOSION:
@@ -1245,7 +1245,7 @@ void CLG_ParseTempEntity(void)
 
 	case TE_BOSSTPORT:          // boss teleporting to station
 		CLG_BigTeleportParticles(teParameters.pos1);
-		clgi.S_StartSound(teParameters.pos1, 0, 0, clgi.S_RegisterSound("misc/bigtele.wav"), 1, ATTN_NONE, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, clgi.S_RegisterSound("misc/bigtele.wav"), 1, ATTN_NONE, 0);
 		break;
 
 	case TE_GRAPPLE_CABLE:
@@ -1315,12 +1315,12 @@ void CLG_ParseTempEntity(void)
 
 	case TE_HEATBEAM_SPARKS:
 		CLG_ParticleSteamEffect(teParameters.pos1, teParameters.dir, 0x8, 50, 60);
-		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_HEATBEAM_STEAM:
 		CLG_ParticleSteamEffect(teParameters.pos1, teParameters.dir, 0xE0, 20, 60);
-		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_STEAM:
@@ -1329,7 +1329,7 @@ void CLG_ParseTempEntity(void)
 
 	case TE_BUBBLETRAIL2:
 		CLG_BubbleTrail2(teParameters.pos1, teParameters.pos2, 8);
-		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_MOREBLOOD:
@@ -1344,7 +1344,7 @@ void CLG_ParseTempEntity(void)
 	case TE_ELECTRIC_SPARKS:
 		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0x75, 40);
 		//FIXME : replace or remove this sound
-		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_TRACKER_EXPLOSION:
@@ -1352,7 +1352,7 @@ void CLG_ParseTempEntity(void)
 		CLG_ColorFlash(teParameters.pos1, 0, 150, -1, -1, -1);
 #endif
 		CLG_ColorExplosionParticles(teParameters.pos1, 0, 1);
-		clgi.S_StartSound(teParameters.pos1, 0, 0, cl_sfx_disrexp, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_disrexp, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_TELEPORT_EFFECT:

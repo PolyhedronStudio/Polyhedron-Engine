@@ -336,7 +336,7 @@ void CLG_MuzzleFlash() {
 #if USE_DLIGHTS
     dl = CLG_AllocDLight(mzParameters.entity);
     VectorCopy(pl->current.origin, dl->origin);
-    AngleVectors(pl->current.angles, fv, rv, NULL);
+    AngleVectors(pl->current.angles, &fv, &rv, NULL);
     VectorMA(dl->origin, 18, fv, dl->origin);
     VectorMA(dl->origin, 16, rv, dl->origin);
     if (mzParameters.silenced)
@@ -531,7 +531,7 @@ void CLG_MuzzleFlash2() {
 
     // locate the origin
     ent = &cs->entities[mzParameters.entity];
-    AngleVectors(ent->current.angles, forward, right, NULL);
+    AngleVectors(ent->current.angles, &forward, &right, NULL);
     ofs = monster_flash_offset[mzParameters.weapon];
     origin[0] = ent->current.origin[0] + forward[0] * ofs[0] + right[0] * ofs[1];
     origin[1] = ent->current.origin[1] + forward[1] * ofs[0] + right[1] * ofs[1];
