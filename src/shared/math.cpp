@@ -243,7 +243,7 @@ const vec3_t bytedirs[NUMVERTEXNORMALS] = {
     {-0.688191, -0.587785, -0.425325},
 };
 
-int DirToByte(const vec3_t dir)
+int DirToByte(const vec3_t &dir)
 {
     int     i, best;
     float   d, bestd;
@@ -276,42 +276,6 @@ void ByteToDir(int index, vec3_t dir)
 }
 #endif
 
-void SetPlaneType(cplane_t* plane)
-{
-    vec_t* normal = plane->normal;
-
-    if (normal[0] == 1) {
-        plane->type = PLANE_X;
-        return;
-    }
-    if (normal[1] == 1) {
-        plane->type = PLANE_Y;
-        return;
-    }
-    if (normal[2] == 1) {
-        plane->type = PLANE_Z;
-        return;
-    }
-
-    plane->type = PLANE_NON_AXIAL;
-}
-
-void SetPlaneSignbits(cplane_t* plane)
-{
-    int bits = 0;
-
-    if (plane->normal[0] < 0) {
-        bits |= 1;
-    }
-    if (plane->normal[1] < 0) {
-        bits |= 2;
-    }
-    if (plane->normal[2] < 0) {
-        bits |= 4;
-    }
-
-    plane->signbits = bits;
-}
 
 /*
 ==================
