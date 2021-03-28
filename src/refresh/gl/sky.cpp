@@ -94,25 +94,26 @@ static void DrawSkyPolygon(int nump, vec3_t *vecs)
             axis = 4;
     }
 
+    // MATHLIB: vecs->xyz?
     // project new texture coords
     for (i = 0; i < nump; i++, vecs += 3) {
         j = vec_to_st[axis][2];
         if (j > 0)
-            dv = vecs[j - 1];
+            dv = vecs->xyz[j - 1];
         else
-            dv = -vecs[-j - 1];
+            dv = -vecs->xyz[-j - 1];
         if (dv < 0.001)
             continue;    // don't divide by zero
         j = vec_to_st[axis][0];
         if (j < 0)
-            s = -vecs[-j - 1] / dv;
+            s = -vecs->xyz[-j - 1] / dv;
         else
-            s = vecs[j - 1] / dv;
+            s = vecs->xyz[j - 1] / dv;
         j = vec_to_st[axis][1];
         if (j < 0)
-            t = -vecs[-j - 1] / dv;
+            t = -vecs->xyz[-j - 1] / dv;
         else
-            t = vecs[j - 1] / dv;
+            t = vecs->xyz[j - 1] / dv;
 
         if (s < skymins[0][axis])
             skymins[0][axis] = s;
