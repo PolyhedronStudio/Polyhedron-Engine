@@ -187,7 +187,7 @@ static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
     for (i = 0, v = vecs; i < nump; i++, v += 3) {
         switch (sides[i]) {
         case SIDE_FRONT:
-            VectorCopy(v, newv[0][newc[0]]);
+            VectorCopy(v, *newv[0][newc[0]]);
             newc[0]++;
             break;
         case SIDE_BACK:

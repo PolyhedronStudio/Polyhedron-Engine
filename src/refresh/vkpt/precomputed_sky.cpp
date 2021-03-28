@@ -571,7 +571,7 @@ void UpdateTerrainShadowMapView(vec3_t forward)
 	float BoundingOffset = ShadowmapWorldSize * 0.75f;
 	create_centered_orthographic_matrix(Proj, -BoundingOffset, BoundingOffset, -BoundingOffset, BoundingOffset, -ShadowmapWorldSize * 0.75f, ShadowmapWorldSize * 0.75f);
 	vec3_t up = { 0, 0, 1.0f };
-	vec3_t origin = { 0.f };
+	vec3_t origin = { 0.f, 0.f, 0.f };
 	create_look_at_matrix(View, origin, forward, up);
 
 	mult_matrix_matrix(terrain_shadowmap_viewproj, Proj, View);
