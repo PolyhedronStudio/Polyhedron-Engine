@@ -950,12 +950,12 @@ void ai_run(edict_t *self, float dist)
             AngleVectors(self->s.angles, v_forward, v_right, NULL);
 
             VectorSet(v, d2, -16, 0);
-            G_ProjectSource(self->s.origin, v, v_forward, v_right, left_target);
+            left_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);
             tr = gi.trace(self->s.origin, self->mins, self->maxs, left_target, self, CONTENTS_MASK_PLAYERSOLID);
             left = tr.fraction;
 
             VectorSet(v, d2, 16, 0);
-            G_ProjectSource(self->s.origin, v, v_forward, v_right, right_target);
+            right_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);
             tr = gi.trace(self->s.origin, self->mins, self->maxs, right_target, self, CONTENTS_MASK_PLAYERSOLID);
             right = tr.fraction;
 
@@ -963,7 +963,7 @@ void ai_run(edict_t *self, float dist)
             if (left >= center && left > right) {
                 if (left < 1) {
                     VectorSet(v, d2 * left * 0.5, -16, 0);
-                    G_ProjectSource(self->s.origin, v, v_forward, v_right, left_target);
+                    left_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);
 //                  gi.dprintf("incomplete path, go part way and adjust again\n");
                 }
                 VectorCopy(self->monsterinfo.last_sighting, self->monsterinfo.saved_goal);
@@ -977,7 +977,7 @@ void ai_run(edict_t *self, float dist)
             } else if (right >= center && right > left) {
                 if (right < 1) {
                     VectorSet(v, d2 * right * 0.5, 16, 0);
-                    G_ProjectSource(self->s.origin, v, v_forward, v_right, right_target);
+                    right_target G_ProjectSource(self->s.origin, v, v_forward, v_right);
 //                  gi.dprintf("incomplete path, go part way and adjust again\n");
                 }
                 VectorCopy(self->monsterinfo.last_sighting, self->monsterinfo.saved_goal);

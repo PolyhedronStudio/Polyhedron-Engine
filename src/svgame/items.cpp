@@ -819,14 +819,14 @@ edict_t *Drop_Item(edict_t *ent, gitem_t *item)
     if (ent->client) {
         trace_t trace;
 
-        AngleVectors(ent->client->v_angle, forward, right, NULL);
+        AngleVectors(ent->client->v_angle, &forward, &right, NULL);
         VectorSet(offset, 24, 0, -16);
-        G_ProjectSource(ent->s.origin, offset, forward, right, dropped->s.origin);
+        dropped->s.origin = G_ProjectSource(ent->s.origin, offset, forward, right);
         trace = gi.trace(ent->s.origin, dropped->mins, dropped->maxs,
                          dropped->s.origin, ent, CONTENTS_SOLID);
         VectorCopy(trace.endpos, dropped->s.origin);
     } else {
-        AngleVectors(ent->s.angles, forward, right, NULL);
+        AngleVectors(ent->s.angles, &forward, &right, NULL);
         VectorCopy(ent->s.origin, dropped->s.origin);
     }
 

@@ -28,7 +28,7 @@ byte     is_silenced;
 void weapon_grenade_fire(edict_t *ent, qboolean held);
 
 
-void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
+vec3_t P_ProjectSource(gclient_t *client, const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right)
 {
     vec3_t  _distance;
 
@@ -37,7 +37,7 @@ void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance, vec3_t fo
         _distance[1] *= -1;
     else if (client->pers.hand == CENTER_HANDED)
         _distance[1] = 0;
-    G_ProjectSource(point, _distance, forward, right, result);
+    return G_ProjectSource(point, _distance, forward, right);
 }
 
 

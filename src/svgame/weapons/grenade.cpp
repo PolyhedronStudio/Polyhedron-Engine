@@ -41,7 +41,7 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
 
     VectorSet(offset, 8, 8, ent->viewheight - 8);
     AngleVectors(ent->client->v_angle, forward, right, NULL);
-    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+    start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
     timer = ent->client->grenade_time - level.time;
     speed = GRENADE_MINSPEED + (GRENADE_TIMER - timer) * ((GRENADE_MAXSPEED - GRENADE_MINSPEED) / GRENADE_TIMER);

@@ -45,7 +45,7 @@ void weapon_shotgun_fire(edict_t* ent)
     ent->client->kick_angles[0] = -2;
 
     VectorSet(offset, 0, 8, ent->viewheight - 8);
-    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+    start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
     if (is_quad) {
         damage *= 4;

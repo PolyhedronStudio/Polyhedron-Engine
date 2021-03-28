@@ -14,7 +14,7 @@ extern qboolean is_quad;
 extern byte     is_silenced;
 
 // Player project source.
-void P_ProjectSource(gclient_t* client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
+vec3_t P_ProjectSource(gclient_t* client, const vec3_t &point, const vec3_t& distance, const vec3_t& forward, const vec3_t& right);
 
 void PlayerNoise(edict_t* who, vec3_t where, int type);
 

@@ -43,7 +43,7 @@ void weapon_flaregun_fire(edict_t* ent)
      // 
     VectorSet(offset, 8, 8, ent->viewheight - 8);
     AngleVectors(ent->client->v_angle, forward, right, NULL);
-    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+    start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
     VectorScale(forward, -2, ent->client->kick_origin);
     ent->client->kick_angles[0] = -1;

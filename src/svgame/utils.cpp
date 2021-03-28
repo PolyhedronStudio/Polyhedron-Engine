@@ -20,11 +20,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "g_local.h"
 
 
-void G_ProjectSource(const vec3_t point, const vec3_t distance, const vec3_t forward, const vec3_t right, vec3_t result)
+vec3_t G_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right)
 {
-    result[0] = point[0] + forward[0] * distance[0] + right[0] * distance[1];
-    result[1] = point[1] + forward[1] * distance[0] + right[1] * distance[1];
-    result[2] = point[2] + forward[2] * distance[0] + right[2] * distance[1] + distance[2];
+    return vec3_t{
+        point[0] + forward[0] * distance[0] + right[0] * distance[1],
+        point[1] + forward[1] * distance[0] + right[1] * distance[1],
+        point[2] + forward[2] * distance[0] + right[2] * distance[1] + distance[2]
+    };
 }
 
 

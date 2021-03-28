@@ -78,7 +78,7 @@ void Machinegun_Fire(edict_t* ent)
     VectorAdd(ent->client->v_angle, ent->client->kick_angles, angles);
     AngleVectors(angles, forward, right, NULL);
     VectorSet(offset, 0, 8, ent->viewheight - 8);
-    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+    start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
     fire_bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
 
     gi.WriteByte(svg_muzzleflash);
