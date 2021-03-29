@@ -186,7 +186,7 @@ void M_CatagorizePosition(edict_t *ent)
     point[0] = ent->s.origin[0];
     point[1] = ent->s.origin[1];
     point[2] = ent->s.origin[2] + ent->mins[2] + 1;
-    cont = gi.pointcontents(point);
+    cont = gi.PointContents(point);
 
     if (!(cont & CONTENTS_MASK_LIQUID)) {
         ent->waterlevel = 0;
@@ -197,13 +197,13 @@ void M_CatagorizePosition(edict_t *ent)
     ent->watertype = cont;
     ent->waterlevel = 1;
     point[2] += 26;
-    cont = gi.pointcontents(point);
+    cont = gi.PointContents(point);
     if (!(cont & CONTENTS_MASK_LIQUID))
         return;
 
     ent->waterlevel = 2;
     point[2] += 22;
-    cont = gi.pointcontents(point);
+    cont = gi.PointContents(point);
     if (cont & CONTENTS_MASK_LIQUID)
         ent->waterlevel = 3;
 }

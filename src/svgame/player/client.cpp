@@ -1603,7 +1603,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         pm.cmd = *ucmd;
 
         pm.Trace = PM_trace;    // adds default parms
-        pm.PointContents = gi.pointcontents;
+        pm.PointContents = gi.PointContents;
 
         // perform a pmove
         //gi.PMove(&pm);

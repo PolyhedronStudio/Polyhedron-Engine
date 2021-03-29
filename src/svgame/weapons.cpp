@@ -146,7 +146,7 @@ static void fire_lead(edict_t *self, const vec3_t& start, const vec3_t& aimdir, 
         VectorMA(end, r, right, end);
         VectorMA(end, u, up, end);
 
-        if (gi.pointcontents(start) & CONTENTS_MASK_LIQUID) {
+        if (gi.PointContents(start) & CONTENTS_MASK_LIQUID) {
             water = true;
             VectorCopy(start, water_start);
             content_mask &= ~CONTENTS_MASK_LIQUID;
@@ -227,7 +227,7 @@ static void fire_lead(edict_t *self, const vec3_t& start, const vec3_t& aimdir, 
         VectorSubtract(tr.endpos, water_start, dir);
         VectorNormalize(dir);
         VectorMA(tr.endpos, -2, dir, pos);
-        if (gi.pointcontents(pos) & CONTENTS_MASK_LIQUID)
+        if (gi.PointContents(pos) & CONTENTS_MASK_LIQUID)
             VectorCopy(pos, tr.endpos);
         else
             tr = gi.trace(pos, vec3_origin, vec3_origin, water_start, tr.ent, CONTENTS_MASK_LIQUID);

@@ -137,7 +137,7 @@ typedef struct {
 
     // collision detection
     trace_t (* q_gameabi trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, edict_t *passent, int contentmask);
-    int (*pointcontents)(const vec3_t &point);
+    int (*PointContents)(const vec3_t &point);
     qboolean (*InPVS)(const vec3_t &p1, const vec3_t &p2);
     qboolean (*InPHS)(const vec3_t &p1, const vec3_t &p2);
     void (*SetAreaPortalState)(int portalnum, qboolean open);

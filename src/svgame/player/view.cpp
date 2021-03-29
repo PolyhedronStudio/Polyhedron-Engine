@@ -410,7 +410,7 @@ void SV_CalcBlend(edict_t *ent)
 
     // add for contents
     VectorAdd(ent->s.origin, ent->client->ps.viewoffset, vieworg);
-    contents = gi.pointcontents(vieworg);
+    contents = gi.PointContents(vieworg);
 
 	if (contents & (CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA))
         ent->client->ps.rdflags |= RDF_UNDERWATER;

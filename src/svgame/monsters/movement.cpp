@@ -50,7 +50,7 @@ qboolean M_CheckBottom(edict_t *ent)
         for (y = 0 ; y <= 1 ; y++) {
             start[0] = x ? maxs[0] : mins[0];
             start[1] = y ? maxs[1] : mins[1];
-            if (gi.pointcontents(start) != CONTENTS_SOLID)
+            if (gi.PointContents(start) != CONTENTS_SOLID)
                 goto realcheck;
         }
 
@@ -153,7 +153,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
                     test[0] = trace.endpos[0];
                     test[1] = trace.endpos[1];
                     test[2] = trace.endpos[2] + ent->mins[2] + 1;
-                    contents = gi.pointcontents(test);
+                    contents = gi.PointContents(test);
                     if (contents & CONTENTS_MASK_LIQUID)
                         return false;
                 }
@@ -165,7 +165,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
                     test[0] = trace.endpos[0];
                     test[1] = trace.endpos[1];
                     test[2] = trace.endpos[2] + ent->mins[2] + 1;
-                    contents = gi.pointcontents(test);
+                    contents = gi.PointContents(test);
                     if (!(contents & CONTENTS_MASK_LIQUID))
                         return false;
                 }
@@ -215,7 +215,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
         test[0] = trace.endpos[0];
         test[1] = trace.endpos[1];
         test[2] = trace.endpos[2] + ent->mins[2] + 1;
-        contents = gi.pointcontents(test);
+        contents = gi.PointContents(test);
 
         if (contents & CONTENTS_MASK_LIQUID)
             return false;
