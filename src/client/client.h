@@ -511,14 +511,14 @@ void V_RenderView(void);
 void V_AddEntity(entity_t *ent);
 void V_AddParticle(particle_t *p);
 #if USE_DLIGHTS
-void V_AddLight(vec3_t org, float intensity, float r, float g, float b);
-void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float radius);
+void V_AddLight(const vec3_t &org, float intensity, float r, float g, float b);
+void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius);
 #else
 #define V_AddLight(org, intensity, r, g, b)
 #define V_AddLightEx(org, intensity, r, g, b, radius)
 #endif
 #if USE_LIGHTSTYLES
-void V_AddLightStyle(int style, vec4_t value);
+void V_AddLightStyle(int style, const vec4_t &value);
 #endif
 void CL_UpdateBlendSetting(void);
 

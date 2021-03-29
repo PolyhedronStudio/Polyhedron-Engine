@@ -372,9 +372,9 @@ void V_Init(void);
 void V_Shutdown(void);
 
 void V_AddEntity(entity_t* ent);
-void V_AddLight(vec3_t org, float intensity, float r, float g, float b);
-void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float radius);
-void V_AddLightStyle (int style, vec4_t value);
+void V_AddLight(const vec3_t &org, float intensity, float r, float g, float b);
+void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius);
+void V_AddLightStyle (int style, const vec4_t &value);
 void V_AddParticle(particle_t* p);
 
 float CLG_CalcFOV(float fov_x, float width, float height);

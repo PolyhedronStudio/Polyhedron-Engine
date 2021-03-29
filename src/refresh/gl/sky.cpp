@@ -67,13 +67,15 @@ static void DrawSkyPolygon(int nump, vec3_t *vecs)
     vec3_t  v, av;
     float   s, t, dv;
     int     axis;
-    vec3_t *vp;    // MATHLIB: !! Converted to vec3_t
+    float *vp;    // MATHLIB: !! Converted to vec3_t
 
     // decide which face it maps to
     VectorClear(v);
-    for (i = 0, vp = vecs; i < nump; i++, vp += 1) {
+    for (i = 0, vp = &vecs->xyz[0]; i < nump; i++, vp += 3) {
         // MATHLIB: VectorAdd(*vp, v, v);
-        v += *vp;
+        v.x += vp[0];
+        v.y += vp[1];
+        v.z += vp[2];
     }
     av[0] = std::fabsf(v[0]);
     av[1] = std::fabsf(v[1]);
@@ -137,7 +139,7 @@ static void DrawSkyPolygon(int nump, vec3_t *vecs)
 static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
 {
     const float     *norm;
-    vec3_t   *v; // MATHLIB: !!  from float*v to vec3_t *v
+    float   *v; // MATHLIB: !!  from float*v to vec3_t *v
     qboolean        front, back;
     float   d, e;
     float   dists[MAX_CLIP_VERTS];
@@ -159,8 +161,8 @@ static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
 
     front = back = false;
     norm = skyclip[stage];
-    for (i = 0, v = vecs; i < nump; i++, v += 1) { // was v += 3
-        d = DotProduct(*v, norm);
+    for (i = 0, v = &vecs->xyz[0]; i < nump; i++, v += 3) { // was v += 3
+        d = DotProduct(v, norm);
         if (d > ON_EPSILON) {
             front = true;
             sides[i] = SIDE_FRONT;
@@ -187,24 +189,24 @@ static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
     *(vecs + 1) = temp;
     newc[0] = newc[1] = 0;
 
-    for (i = 0, v = vecs; i < nump; i++, v = v + 1) {
+    for (i = 0, v = &vecs->xyz[0]; i < nump; i++, v = v + 3) {
         switch (sides[i]) {
         case SIDE_FRONT:
             // MATHLIB: !!!! Changed VectorCopy(v, newv[0][newc[0]]);
-            v = &newv[0][newc[0]];
+            v = &newv[0][newc[0]].xyz[0];
             newc[0]++;
             break;
         case SIDE_BACK:
             // MATHLIB: !!!! Changed VectorCopy(v, newv[1][newc[1]]);
-            v = &newv[1][newc[1]];
+            v = &newv[1][newc[1]].xyz[0];
             newc[1]++;
             break;
         case SIDE_ON:
             // MATHLIB: !!!! Changed VectorCopy(v, newv[0][newc[0]]);
-            v = &newv[0][newc[0]];
+            v = &newv[0][newc[0]].xyz[0];
             newc[0]++;
             // MATHLIB: !!!! Changed VectorCopy(v, newv[1][newc[1]]);
-            v = &newv[1][newc[1]];
+            v = &newv[1][newc[1]].xyz[0];
             newc[1]++;
             break;
         }
@@ -214,7 +216,7 @@ static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
 
         d = dists[i] / (dists[i] - dists[i + 1]);
         for (j = 0; j < 3; j++) {
-            e = (*v)[j] + d * ((*v)[j + 3] - (*v)[j]); // MATHLIB: !!! v[j] changed to v[0][j]
+            e = v[j] + d * (v[j + 3] - v[j]); // MATHLIB: !!! v[j] changed to v[0][j]
             newv[0][newc[0]][j] = e;
             newv[1][newc[1]][j] = e;
         }
@@ -270,7 +272,7 @@ void R_AddSkySurface(mface_t *fa)
         }
     }
 
-    ClipSkyPolygon(fa->numsurfedges, verts, 0);
+    ClipSkyPolygon(fa->numsurfedges, &verts[0], 0);
     skyfaces++;
 }
 

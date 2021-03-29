@@ -93,7 +93,7 @@ void V_AddParticle(particle_t *p)
 // Add the light of given properties to the current scene frame.
 //===============
 //
-void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float radius)
+void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius)
 {
     dlight_t    *dl;
 
@@ -123,7 +123,7 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
 	}
 }
 
-void V_AddLight(vec3_t org, float intensity, float r, float g, float b)
+void V_AddLight(const vec3_t& org, float intensity, float r, float g, float b)
 {
 	V_AddLightEx(org, intensity, r, g, b, 10.f);
 }
@@ -138,7 +138,7 @@ void V_AddLight(vec3_t org, float intensity, float r, float g, float b)
 // Add the current lightstyle to the scene.
 //===============
 //
-void V_AddLightStyle(int style, vec4_t value)
+void V_AddLightStyle(int style, const vec4_t &value)
 {
     lightstyle_t    *ls;
 
