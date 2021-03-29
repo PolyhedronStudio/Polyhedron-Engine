@@ -109,7 +109,7 @@ void barrel_explode(edict_t* self)
         BecomeExplosion1(self);
 }
 
-void barrel_delay(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point)
+void barrel_delay(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t &point)
 {
     self->takedamage = DAMAGE_NO;
     self->nextthink = level.time + 2 * FRAMETIME;

@@ -20,7 +20,7 @@ void ClipGibVelocity(edict_t* ent);
 //
 void gib_think(edict_t* self);
 void gib_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-void gib_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point);
+void gib_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
 
 void ThrowHead(edict_t* self, const char* gibname, int damage, int type); // C++20: STRING: Added const to char*
 void ThrowClientHead(edict_t* self, int damage);

@@ -14,7 +14,7 @@
 /*QUAKED misc_deadsoldier (1 .5 0) (-16 -16 0) (16 16 16) ON_BACK ON_STOMACH BACK_DECAP FETAL_POS SIT_DECAP IMPALED
 This is the dead player model. Comes in 6 exciting different poses!
 */
-void misc_deadsoldier_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point)
+void misc_deadsoldier_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t &point)
 {
     int     n;
 

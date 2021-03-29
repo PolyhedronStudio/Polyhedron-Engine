@@ -91,7 +91,7 @@ void button_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* su
     button_fire(self);
 }
 
-void button_killed(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point)
+void button_killed(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t &point)
 {
     self->activator = attacker;
     self->health = self->max_health;

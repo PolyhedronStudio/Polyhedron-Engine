@@ -33,7 +33,7 @@ extern void Think_CalcMoveSpeed(edict_t* self);
 extern void Think_SpawnDoorTrigger(edict_t* ent);
 
 extern void door_blocked(edict_t* self, edict_t* other);
-extern void door_killed(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point);
+extern void door_killed(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t &point);
 extern void door_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
 
 #endif // __SVGAME_ENTITIES_FUNC_DOOR_H__

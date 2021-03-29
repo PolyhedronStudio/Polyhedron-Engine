@@ -24,7 +24,7 @@ mass defaults to 75.  This determines how much debris is emitted when
 it explodes.  You get one large chunk per 100 of mass (up to 8) and
 one small chunk per 25 of mass (up to 16).  So 800 gives the most.
 */
-void func_explosive_explode(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point)
+void func_explosive_explode(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t &point)
 {
     vec3_t  origin;
     vec3_t  chunkorigin;

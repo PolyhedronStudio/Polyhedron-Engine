@@ -1124,7 +1124,7 @@ mframe_t soldier_frames_death6 [] = {
 };
 mmove_t soldier_move_death6 = {FRAME_death601, FRAME_death610, soldier_frames_death6, soldier_dead};
 
-void soldier_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void soldier_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, const vec3_t& point)
 {
     int     n;
 

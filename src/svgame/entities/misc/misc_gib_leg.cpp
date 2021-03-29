@@ -11,7 +11,7 @@
 #include "../../g_local.h"
 
 // Declared in misc.c
-extern void gib_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point);
+extern void gib_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
 
 //=====================================================
 /*QUAKED misc_gib_leg (1 0 0) (-8 -8 -8) (8 8 8)
