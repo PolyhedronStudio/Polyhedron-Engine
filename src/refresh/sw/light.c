@@ -103,7 +103,7 @@ LIGHT SAMPLING
 =============================================================================
 */
 
-static qboolean _R_LightPoint(vec3_t start, vec3_t color)
+static qboolean _R_LightPoint(const vec3_t &start, vec3_t &color)
 {
     mface_t         *surf;
     int             s, t, maps;
@@ -171,7 +171,7 @@ static qboolean _R_LightPoint(vec3_t start, vec3_t color)
 R_LightPoint
 ===============
 */
-void R_LightPoint(vec3_t point, vec3_t color)
+void R_LightPoint(const vec3_t &point, vec3_t &color)
 {
     int         lnum;
     dlight_t    *dl;

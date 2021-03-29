@@ -514,7 +514,7 @@ extern blocklight_t     blocklights[MAX_BLOCKLIGHTS * LIGHTMAP_BYTES];   // allo
 
 void R_PrintAliasStats(void);
 void R_PrintTimes(void);
-void R_LightPoint(vec3_t p, vec3_t color);
+void R_LightPoint(const vec3_t &p, vec3_t &color);
 void R_SetupFrame(void);
 void R_BuildLightMap(void);
 

@@ -162,13 +162,13 @@ void _wrp_R_AddDecal(decal_t* d) {
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
 
-void _wrp_R_LightPoint(vec3_t origin, vec3_t light) {
+void _wrp_R_LightPoint(const vec3_t &origin, vec3_t &light) {
     if (R_LightPoint)
         R_LightPoint(origin, light);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
-void _wrp_R_SetSky(const char* name, float rotate, vec3_t axis) {
+void _wrp_R_SetSky(const char* name, float rotate, vec3_t &axis) {
     if (R_SetSky)
         R_SetSky(name, rotate, axis);
     else

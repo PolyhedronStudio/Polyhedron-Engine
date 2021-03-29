@@ -365,7 +365,12 @@ static void setup_color(void)
     } else if ((flags & RF_IR_VISIBLE) && (glr.fd.rdflags & RDF_IRGOGGLES)) {
         VectorSet(color, 1, 0, 0);
     } else {
-        GL_LightPoint(origin, color);
+        // MATHLIB: Quick workaround.
+        vec3_t tempColor = { color[0], color[1], color[2] };
+        GL_LightPoint(origin, tempColor);
+        color[0] = tempColor[0];
+        color[1] = tempColor[1];
+        color[2] = tempColor[2];
 
         if (flags & RF_MINLIGHT) {
             for (i = 0; i < 3; i++) {

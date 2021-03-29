@@ -506,8 +506,8 @@ extern "C" {
         // Rendering.
         //---------------------------------------------------------------------
         void        (*R_AddDecal) (decal_t* d);
-        void        (*R_LightPoint) (vec3_t origin, vec3_t light);
-        void        (*R_SetSky)(const char* name, float rotate, vec3_t axis);
+        void        (*R_LightPoint) (const vec3_t &origin, vec3_t &light);
+        void        (*R_SetSky)(const char* name, float rotate, vec3_t &axis);
 
         void        (*R_ClearColor) (void);
         void        (*R_SetAlpha) (float clpha);

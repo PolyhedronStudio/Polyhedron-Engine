@@ -157,7 +157,7 @@ void R_EmitSkyBox(void)
 R_SetSky
 ============
 */
-void R_SetSky(const char *name, float rotate, vec3_t axis)
+void R_SetSky(const char *name, float rotate, vec3_t &axis)
 {
     int     i;
     char    path[MAX_QPATH];

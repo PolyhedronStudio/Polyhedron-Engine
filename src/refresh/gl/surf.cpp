@@ -91,7 +91,7 @@ adjust_color_ub(byte *out, const vec_t *in)
     out[3] = 255;
 }
 
-void GL_AdjustColor(vec3_t color)
+void GL_AdjustColor(vec3_t &color)
 {
     adjust_color_f(color, color, gl_static.entity_modulate);
     VectorScale(color, (1.0f / 255), color);
