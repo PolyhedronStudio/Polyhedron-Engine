@@ -903,8 +903,8 @@ void SV_InitGameProgs(void)
     importAPI.linkentity = PF_LinkEdict;
     importAPI.unlinkentity = PF_UnlinkEdict;
     importAPI.BoxEdicts = SV_AreaEdicts;
-    importAPI.trace = SV_Trace;
-    importAPI.pointcontents = SV_PointContents;
+    importAPI.Trace = SV_Trace;
+    importAPI.PointContents = SV_PointContents;
     importAPI.setmodel = PF_setmodel;
     importAPI.InPVS = PF_InPVS;
     importAPI.InPHS = PF_InPHS;

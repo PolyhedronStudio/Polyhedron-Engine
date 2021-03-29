@@ -1046,7 +1046,7 @@ static qboolean PM_TestPosition(void)
     VectorCopy(pm->s.origin, end);
 
     // Do a trace test.
-    trace = pm->trace(origin, pm->mins, pm->maxs, end);
+    trace = pm->Trace(origin, pm->mins, pm->maxs, end);
 
     // Return whether not allsolid.
     return !trace.allsolid;

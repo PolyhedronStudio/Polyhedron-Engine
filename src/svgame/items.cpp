@@ -822,7 +822,7 @@ edict_t *Drop_Item(edict_t *ent, gitem_t *item)
         AngleVectors(ent->client->v_angle, &forward, &right, NULL);
         VectorSet(offset, 24, 0, -16);
         dropped->s.origin = G_ProjectSource(ent->s.origin, offset, forward, right);
-        trace = gi.trace(ent->s.origin, dropped->mins, dropped->maxs,
+        trace = gi.Trace(ent->s.origin, dropped->mins, dropped->maxs,
                          dropped->s.origin, ent, CONTENTS_SOLID);
         VectorCopy(trace.endpos, dropped->s.origin);
     } else {
@@ -868,13 +868,7 @@ void droptofloor(edict_t *ent)
 {
     trace_t     tr;
     vec3_t      dest;
-    float       *v;
 
-    // MATHLIB: Removed, no need for the tv func anymore.
-    //v = tv(-15, -15, -15);
-    //VectorCopy(v, ent->mins);
-    //v = tv(15, 15, 15);
-    //VectorCopy(v, ent->maxs);
     ent->mins = { -15.f, -15.f, -15.f };
     ent->maxs = { 15.f, 15.f, 15.f };
 
@@ -886,12 +880,10 @@ void droptofloor(edict_t *ent)
     ent->movetype = MOVETYPE_TOSS;
     ent->touch = Touch_Item;
 
-    // MATHLIB: Removed, no need for this anymore.
-    //v = tv(0, 0, -128);
-    //VectorAdd(ent->s.origin, v, dest);
+    // Calculate trace destination
     dest = ent->s.origin + vec3_t(0.f, 0.f, 128.f);
 
-    tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
+    tr = gi.Trace(ent->s.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
     if (tr.startsolid) {
         gi.dprintf("droptofloor: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
         G_FreeEdict(ent);

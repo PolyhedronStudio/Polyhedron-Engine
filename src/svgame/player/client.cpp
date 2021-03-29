@@ -845,7 +845,7 @@ SelectSpawnPoint
 Chooses a player start, deathmatch start, coop start, etc
 ============
 */
-void    SelectSpawnPoint(edict_t *ent, vec3_t origin, vec3_t angles)
+void    SelectSpawnPoint(edict_t *ent, vec3_t &origin, vec3_t &angles)
 {
     edict_t *spot = NULL;
 
@@ -1513,9 +1513,9 @@ edict_t *pm_passent;
 trace_t q_gameabi PM_trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end)
 {
     if (pm_passent->health > 0)
-        return gi.trace(start, mins, maxs, end, pm_passent, CONTENTS_MASK_PLAYERSOLID);
+        return gi.Trace(start, mins, maxs, end, pm_passent, CONTENTS_MASK_PLAYERSOLID);
     else
-        return gi.trace(start, mins, maxs, end, pm_passent, CONTENTS_MASK_DEADSOLID);
+        return gi.Trace(start, mins, maxs, end, pm_passent, CONTENTS_MASK_DEADSOLID);
 }
 
 unsigned CheckBlock(void *b, int c)

@@ -154,7 +154,7 @@ void M_CheckGround(edict_t *ent)
     point[1] = ent->s.origin[1];
     point[2] = ent->s.origin[2] - 0.25;
 
-    trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, point, ent, CONTENTS_MASK_MONSTERSOLID);
+    trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, point, ent, CONTENTS_MASK_MONSTERSOLID);
 
     // check steepness
     if (trace.plane.normal[2] < 0.7 && !trace.startsolid) {
@@ -292,7 +292,7 @@ void M_droptofloor(edict_t *ent)
     VectorCopy(ent->s.origin, end);
     end[2] -= 256;
 
-    trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
+    trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
 
     if (trace.fraction == 1 || trace.allsolid)
         return;

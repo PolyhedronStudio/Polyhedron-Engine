@@ -275,7 +275,7 @@ qboolean visible(edict_t *self, edict_t *other)
     spot1[2] += self->viewheight;
     VectorCopy(other->s.origin, spot2);
     spot2[2] += other->viewheight;
-    trace = gi.trace(spot1, vec3_origin, vec3_origin, spot2, self, CONTENTS_MASK_OPAQUE);
+    trace = gi.Trace(spot1, vec3_origin, vec3_origin, spot2, self, CONTENTS_MASK_OPAQUE);
 
     if (trace.fraction == 1.0)
         return true;
@@ -563,7 +563,7 @@ qboolean M_CheckAttack(edict_t *self)
         VectorCopy(self->enemy->s.origin, spot2);
         spot2[2] += self->enemy->viewheight;
 
-        tr = gi.trace(spot1, vec3_origin, vec3_origin, spot2, self, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_SLIME | CONTENTS_LAVA | CONTENTS_WINDOW);
+        tr = gi.Trace(spot1, vec3_origin, vec3_origin, spot2, self, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_SLIME | CONTENTS_LAVA | CONTENTS_WINDOW);
 
         // do we have a clear shot?
         if (tr.ent != self->enemy)
@@ -940,7 +940,7 @@ void ai_run(edict_t *self, float dist)
     if (isNew) {
 //      gi.dprintf("checking for course correction\n");
 
-        tr = gi.trace(self->s.origin, self->mins, self->maxs, self->monsterinfo.last_sighting, self, CONTENTS_MASK_PLAYERSOLID);
+        tr = gi.Trace(self->s.origin, self->mins, self->maxs, self->monsterinfo.last_sighting, self, CONTENTS_MASK_PLAYERSOLID);
         if (tr.fraction < 1) {
             VectorSubtract(self->goalentity->s.origin, self->s.origin, v);
             d1 = VectorLength(v);
@@ -951,12 +951,12 @@ void ai_run(edict_t *self, float dist)
 
             VectorSet(v, d2, -16, 0);
             left_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);
-            tr = gi.trace(self->s.origin, self->mins, self->maxs, left_target, self, CONTENTS_MASK_PLAYERSOLID);
+            tr = gi.Trace(self->s.origin, self->mins, self->maxs, left_target, self, CONTENTS_MASK_PLAYERSOLID);
             left = tr.fraction;
 
             VectorSet(v, d2, 16, 0);
             right_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);
-            tr = gi.trace(self->s.origin, self->mins, self->maxs, right_target, self, CONTENTS_MASK_PLAYERSOLID);
+            tr = gi.Trace(self->s.origin, self->mins, self->maxs, right_target, self, CONTENTS_MASK_PLAYERSOLID);
             right = tr.fraction;
 
             center = (d1 * center) / d2;

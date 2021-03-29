@@ -22,7 +22,7 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
     // Compare what the server returned with what we had predicted it to be
     VectorSubtract(cl->frame.ps.pmove.origin, cl->predicted_origins[cmd & CMD_MASK], delta);
 
-    len = fabs(delta[0]) + fabs(delta[1]) + fabs(delta[2]);
+    len = std::fabsf(delta[0]) + std::fabsf(delta[1]) + std::fabsf(delta[2]);
     if (len < 0.125f  || len > 80.f) {
         VectorClear(cl->prediction_error);
         return;
