@@ -737,7 +737,7 @@ S_SpatializeOrigin
 Used for spatializing channels and autosounds
 =================
 */
-void S_SpatializeOrigin(const vec3_t origin, float master_vol, float dist_mult, int *left_vol, int *right_vol)
+void S_SpatializeOrigin(const vec3_t &origin, float master_vol, float dist_mult, int *left_vol, int *right_vol)
 {
     vec_t       dot;
     vec_t       dist;
@@ -804,7 +804,7 @@ static void S_Spatialize(channel_t *ch)
     if (ch->fixed_origin) {
         VectorCopy(ch->origin, origin);
     } else {
-        CL_GetEntitySoundOrigin(ch->entnum, origin);
+        origin = CL_GetEntitySoundOrigin(ch->entnum);
     }
 
     S_SpatializeOrigin(origin, ch->master_vol, ch->dist_mult, &ch->leftvol, &ch->rightvol);
@@ -1136,7 +1136,7 @@ static void S_AddLoopSounds(void)
         ent = &cl.entityStates[num];
 
         // find the total contribution of all sounds of this type
-        CL_GetEntitySoundOrigin(ent->number, origin);
+        origin = CL_GetEntitySoundOrigin(ent->number);
         S_SpatializeOrigin(origin, 1.0, SOUND_LOOPATTENUATE,
                            &left_total, &right_total);
         for (j = i + 1; j < cl.frame.numEntities; j++) {
@@ -1147,7 +1147,7 @@ static void S_AddLoopSounds(void)
             num = (cl.frame.firstEntity + j) & PARSE_ENTITIES_MASK;
             ent = &cl.entityStates[num];
 
-            CL_GetEntitySoundOrigin(ent->number, origin);
+            origin = CL_GetEntitySoundOrigin(ent->number);
             S_SpatializeOrigin(origin, 1.0, SOUND_LOOPATTENUATE,
                                &left, &right);
             left_total += left;

@@ -283,9 +283,9 @@ player_update(server_frame_t *oldframe, server_frame_t *frame, int framediv)
     // no lerping if player entity was teleported (origin check)
     // N&C: FF Precision.
     // CPP: Added fabs instead of abs
-    if (fabs((float)(ops->pmove.origin[0] - ps->pmove.origin[0])) > 256 ||
-        fabs((float)(ops->pmove.origin[1] - ps->pmove.origin[1])) > 256 ||
-        fabs((float)(ops->pmove.origin[2] - ps->pmove.origin[2])) > 256) {
+    if (std::fabsf((float)(ops->pmove.origin[0] - ps->pmove.origin[0])) > 256 ||
+        std::fabsf((float)(ops->pmove.origin[1] - ps->pmove.origin[1])) > 256 ||
+        std::fabsf((float)(ops->pmove.origin[2] - ps->pmove.origin[2])) > 256) {
         goto dup;
     }
     // no lerping if player entity was teleported (event check)
@@ -538,11 +538,11 @@ CL_GetEntitySoundOrigin
 Called to get the sound spatialization origin
 ===============
 */
-void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
-{
+vec3_t CL_GetEntitySoundOrigin(int entnum) {
     centity_t   *ent;
     mmodel_t    *cm;
-    vec3_t      mid;
+    vec3_t      mid = { 0.f, 0.f, 0.f };
+    vec3_t      org = { 0.f, 0.f, 0.f };
 
     if (entnum < 0 || entnum >= MAX_EDICTS) {
         Com_Error(ERR_DROP, "%s: bad entnum: %d", __func__, entnum);
@@ -551,7 +551,7 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
     if (!entnum || entnum == listener_entnum) {
         // should this ever happen?
         VectorCopy(listener_origin, org);
-        return;
+        return org;
     }
 
     // interpolate origin
@@ -567,18 +567,24 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
             VectorAdd(org, mid, org);
         }
     }
+
+    // return origin
+    return org;
 }
 
-void CL_GetViewVelocity(vec3_t vel)
+vec3_t CL_GetViewVelocity(void)
 {
+    vec3_t vel;
     // N&C: FF Precision.
     VectorCopy(cl.frame.ps.pmove.velocity, vel);
+
+    return vel;
 }
 
-void CL_GetEntitySoundVelocity(int ent, vec3_t vel)
+vec3_t CL_GetEntitySoundVelocity(int ent)
 {
 	centity_t *old;
-
+    vec3_t vel = { 0.f, 0.f, 0.f };
 	if ((ent < 0) || (ent >= MAX_EDICTS))
 	{
 		Com_Error(ERR_DROP, "CL_GetEntitySoundVelocity: bad ent");
@@ -587,4 +593,5 @@ void CL_GetEntitySoundVelocity(int ent, vec3_t vel)
 	old = &cs.entities[ent];
 
 	VectorSubtract(old->current.origin, old->prev.origin, vel);
+    return vel;
 }

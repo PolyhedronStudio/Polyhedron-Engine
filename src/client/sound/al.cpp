@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 // CPP: WATISDEZE: Declared here, C didn't require it somehow...
-void CL_GetEntitySoundVelocity(int ent, vec3_t vel);
+vec3_t CL_GetEntitySoundVelocity(int ent);
 void AL_InitUnderwaterFilter(void);
 
 #define AL_METER_OF_Q2_UNIT 0.0315f
@@ -845,11 +845,11 @@ static void AL_Spatialize(channel_t *ch)
 		VectorCopy(ch->origin, origin);
 	}
 	else {
-		CL_GetEntitySoundOrigin(ch->entnum, origin);
+		origin = CL_GetEntitySoundOrigin(ch->entnum);
 	}
 
 	if (s_doppler->value) {
-		CL_GetEntitySoundVelocity(ch->entnum, velocity);
+		velocity = CL_GetEntitySoundVelocity(ch->entnum);
 		VectorScale(velocity, AL_METER_OF_Q2_UNIT, velocity);
 		qalSource3f(ch->srcnum, AL_VELOCITY, AL_UnpackVector(velocity));
 	}
@@ -1029,7 +1029,7 @@ static void AL_AddLoopSounds(void)
 		}
 
 		// check attenuation before playing the sound
-		CL_GetEntitySoundOrigin(ent->number, origin);
+		origin = CL_GetEntitySoundOrigin(ent->number);
 		VectorSubtract(origin, listener_origin, origin);
 		dist = VectorNormalize(origin);
 		dist = (dist - SOUND_FULLVOLUME) * SOUND_LOOPATTENUATE;
@@ -1210,7 +1210,7 @@ void AL_Update(void)
 	qalDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 
 	if (s_doppler->value) {
-		CL_GetViewVelocity(listener_velocity);
+		listener_velocity = CL_GetViewVelocity();
 		VectorScale(listener_velocity, AL_METER_OF_Q2_UNIT, listener_velocity);
 		qalListener3f(AL_VELOCITY, AL_UnpackVector(listener_velocity));
 	}
@@ -1386,7 +1386,7 @@ AL_RawSamplesVoice(int samples, int rate, int width, int channels,
 	if (s_doppler->value) {
 		vec3_t velocity;
 
-		CL_GetEntitySoundVelocity(listener_entnum, velocity);
+		velocity = CL_GetEntitySoundVelocity(listener_entnum);
 		VectorScale(velocity, AL_METER_OF_Q2_UNIT, velocity);
 		qalSource3f(voiceSource, AL_VELOCITY, AL_UnpackVector(velocity));
 	}

@@ -38,7 +38,7 @@ template<typename T> struct vec3_template {
     vec3_template(T X, T Y, T Z) { x = X; y = Y; z = Z; }
 
     // Copy from.
-    vec3_template(const vec3_template<T>& v) { x = v.x; y = v.y; z = v.z; }
+    //vec3_template(const vec3_template<T>& v) { x = v.x; y = v.y; z = v.z; }
 
     // Regular *vec_t support.
     vec3_template(T* vec) { x = vec[0]; y = vec[1]; z = vec[2]; }
