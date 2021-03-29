@@ -72,11 +72,12 @@ static void DrawSkyPolygon(int nump, vec3_t *vecs)
     // decide which face it maps to
     VectorClear(v);
     for (i = 0, vp = vecs; i < nump; i++, vp += 1) {
-        VectorAdd(*vp, v, v);
+        // MATHLIB: VectorAdd(*vp, v, v);
+        v += *vp;
     }
-    av[0] = fabs(v[0]);
-    av[1] = fabs(v[1]);
-    av[2] = fabs(v[2]);
+    av[0] = std::fabsf(v[0]);
+    av[1] = std::fabsf(v[1]);
+    av[2] = std::fabsf(v[2]);
     if (av[0] > av[1] && av[0] > av[2]) {
         if (v[0] < 0)
             axis = 1;
@@ -96,7 +97,7 @@ static void DrawSkyPolygon(int nump, vec3_t *vecs)
 
     // MATHLIB: vecs->xyz?
     // project new texture coords
-    for (i = 0; i < nump; i++, vecs += 3) {
+    for (i = 0; i < nump; i++, vecs += 1) {
         j = vec_to_st[axis][2];
         if (j > 0)
             dv = vecs->xyz[j - 1];
@@ -181,7 +182,9 @@ static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
     // clip it
     sides[i] = sides[0];
     dists[i] = dists[0];
-    VectorCopy(vecs, (vecs + (i * 3)));
+    //VectorCopy(vecs, (vecs + (i))); MATHLIB: This seemed wrong, so does the alternative but hey... 
+    vec3_t temp = *vecs;
+    *(vecs + 1) = temp;
     newc[0] = newc[1] = 0;
 
     for (i = 0, v = vecs; i < nump; i++, v = v + 1) {
