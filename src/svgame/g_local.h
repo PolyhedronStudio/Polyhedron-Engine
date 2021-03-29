@@ -625,7 +625,7 @@ edict_t *G_Find(edict_t *from, int fieldofs, const char *match); // C++20: Added
 edict_t *findradius(edict_t *from, vec3_t org, float rad);
 edict_t *G_PickTarget(char *targetname);
 void    G_UseTargets(edict_t *ent, edict_t *activator);
-void    G_SetMovedir(vec3_t angles, vec3_t movedir);
+void    G_SetMovedir(vec3_t &angles, vec3_t &movedir);
 
 void    G_InitEdict(edict_t *e);
 edict_t *G_Spawn(void);
