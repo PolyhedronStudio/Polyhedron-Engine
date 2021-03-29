@@ -65,15 +65,27 @@ template<typename T> struct vec3_template {
     //    return *this;
     //}
 
-    //// OPERATOR: -= vec3_template
-    //const vec3_template& operator -=(const vec3_template& other) {
-    //    x -= other.x;
-    //    y -= other.y;
-    //    z -= other.z;
-    //    return *this;
-    //}
+    // OPERATOR: + vec3_template
+    inline vec3_template operator+ (const vec3_template& operand) const
+    {
+        return vec3_template(x + operand.x, y + operand.y, z + operand.z);
+    }
 
-    //// OPERATOR: += float
+    // OPERATOR: - vec3_template
+    inline vec3_template operator- (const vec3_template& operand) const
+    {
+        return vec3_template(x - operand.x, y - operand.y, z - operand.z);
+    }
+
+    // OPERATOR: -= vec3_template
+    const vec3_template& operator -=(const vec3_template& other) {
+        x -= other.x;
+        y -= other.y;
+        z -= other.z;
+        return *this;
+    }
+
+    // OPERATOR: += float
     //const vec3_template& operator +=(const float& other) {
     //    x += other;
     //    y += other;
@@ -82,12 +94,12 @@ template<typename T> struct vec3_template {
     //}
 
     //// OPERATOR: += vec3_template
-    //const vec3_template& operator +=(const vec3_template& other) {
-    //    x += other.x;
-    //    y += other.y;
-    //    z += other.z;
-    //    return *this;
-    //}
+    const vec3_template& operator +=(const vec3_template& other) {
+        x += other.x;
+        y += other.y;
+        z += other.z;
+        return *this;
+    }
 };
 typedef vec3_template<byte> bvec3_t;
 typedef vec3_template<int> ivec3_t;

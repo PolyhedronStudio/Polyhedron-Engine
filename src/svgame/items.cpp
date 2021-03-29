@@ -870,10 +870,13 @@ void droptofloor(edict_t *ent)
     vec3_t      dest;
     float       *v;
 
-    v = tv(-15, -15, -15);
-    VectorCopy(v, ent->mins);
-    v = tv(15, 15, 15);
-    VectorCopy(v, ent->maxs);
+    // MATHLIB: Removed, no need for the tv func anymore.
+    //v = tv(-15, -15, -15);
+    //VectorCopy(v, ent->mins);
+    //v = tv(15, 15, 15);
+    //VectorCopy(v, ent->maxs);
+    ent->mins = { -15.f, -15.f, -15.f };
+    ent->maxs = { 15.f, 15.f, 15.f };
 
     if (ent->model)
         gi.setmodel(ent, ent->model);
@@ -883,8 +886,10 @@ void droptofloor(edict_t *ent)
     ent->movetype = MOVETYPE_TOSS;
     ent->touch = Touch_Item;
 
-    v = tv(0, 0, -128);
-    VectorAdd(ent->s.origin, v, dest);
+    // MATHLIB: Removed, no need for this anymore.
+    //v = tv(0, 0, -128);
+    //VectorAdd(ent->s.origin, v, dest);
+    dest = ent->s.origin + vec3_t(0.f, 0.f, 128.f);
 
     tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
     if (tr.startsolid) {

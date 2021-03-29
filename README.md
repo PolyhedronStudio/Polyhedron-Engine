@@ -33,6 +33,9 @@ When finished we have a stable base to work from, one that we can start making t
     - [X] Change MSG_Write/ReadPos to use MSG_Write/ReadFloat instead, this is safe after fixing the above.
     
 - [ ] Math Library
+  - [ ] Check svgame for vec3_t issues, since the game doesn't work well yet.
+    - [x] misc.cpp
+    - [ ] physics.cpp 
   - [ ] Rename Macro functions, for the old Vector lib, and create new inlined versions for the other vector types.
   - [ ] Change PITCH, YAW, ROLL defines to a vec3_t::PITCH, etc._
   - [ ] Use references/pointers, and const correctness.
