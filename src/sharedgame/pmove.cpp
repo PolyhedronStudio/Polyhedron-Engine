@@ -121,7 +121,7 @@ static const float  pm_waterspeed = 400;
 #define DEBUG_CLIENT_PMOVE 1
 #ifdef DEBUG_CLIENT_PMOVE
 // Client debug output.
-static void PM_Debug(const char* func, const char* fmt, ...) {
+static void CLGPM_Debug(const char* func, const char* fmt, ...) {
 
     va_list args;
     va_start(args, fmt);
@@ -135,29 +135,31 @@ static void PM_Debug(const char* func, const char* fmt, ...) {
 
     va_end(args);
 }
+#define PM_Debug(...) CLGM_Debug(__func__, __VA_ARGS__);
 #else
-#define CLG_PMove_Debug (...) ()
+#define PM_Debug () void(0)
 #endif // PMOVE_DEBUG
 #else
 #define DEBUG_SERVER_PMOVE 1
 #ifdef DEBUG_SERVER_PMOVE
 // Server debug output.
-static void PM_Debug(const char* func, const char* fmt, ...) {
+static void SVGPM_Debug(const char* func, const char* fmt, ...) {
 
     va_list args;
     va_start(args, fmt);
 
-    std::string str = "[SERVER -- PM_Debug]: ";
+    std::string str = "[SERVER PM_Debug:";
     str += func;
-    str += "(";
+    str += "] ";
     str += fmt;
-    str += ")";
+    str += ")\n";
     Com_LPrintf(PRINT_DEVELOPER, str.c_str(), args);
 
     va_end(args);
 }
+#define PM_Debug(...) SVGPM_Debug(__func__, __VA_ARGS__);
 #else
-#define SVG_PMove_Debug (...) ()
+#define PM_Debug () void(0)
 #endif // PMOVE_DEBUG
 #endif // CGAME_INCLUDE
 
@@ -201,7 +203,7 @@ static vec3_t PM_ClipVelocity(vec3_t &in, vec3_t &normal, float overbounce)
 static void PM_TouchEntity(struct edict_s* ent) {
     // Ensure it is valid.
     if (ent == NULL) {
-        //Com_LPrintf(PRINT_DEVELOPER, "Pm_TouchEntity: ent = NULL\n", PM_MAX_TOUCH_ENTS);
+        PM_Debug("ent = NULL");
         return;
     }
 
@@ -212,7 +214,7 @@ static void PM_TouchEntity(struct edict_s* ent) {
     }
     else {
         // Developer print.
-        //Com_LPrintf(PRINT_DEVELOPER, "PM_TouchEntity: PM_MAX_TOUCH_ENTS(%i) amount of entities reached for this frame.\n", PM_MAX_TOUCH_ENTS);
+        PM_Debug("PM_MAX_TOUCH_ENTS(%i) amount of entities reached for this frame.", PM_MAX_TOUCH_ENTS);
     }
 }
 
@@ -270,7 +272,7 @@ static void PM_ClampAngles(void)
 static bool PM_CheckStep(trace_t* trace) {
 
     if (!trace->allsolid) {
-        if (trace->ent && trace->plane.normal[2] >= PM_STEP_NORMAL) {
+        if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
             if (trace->ent != pm->groundEntity || trace->plane.dist != pml.groundplane.dist) {
                 return true;
             }
@@ -315,22 +317,23 @@ static void PM_StepDown(trace_t* trace) {
  * @return The actual trace.
  */
 const trace_t PM_TraceCorrectAllSolid(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs) {
-
     const int32_t offsets[] = { 0, 1, -1 };
 
-    // jitter around
+    // Jitter around
     for (uint32_t i = 0; i < 3; i++) {
         for (uint32_t j = 0; j < 3; j++) {
-            for (uint32_t k = 0; k < 3; k++) {
-                vec3_t point;
+            for (uint32_t k = 0; k < 3; k++) {               
+                // Calculate start.
                 vec3_t offsetVec = { (vec_t)offsets[i], (vec_t)offsets[j], (vec_t)offsets[k] };
-                VectorAdd(start, offsetVec, point);
+                vec3_t point = start + offsetVec;
+
+                // Execute trace.
                 const trace_t trace = pm->Trace(point, end, mins, maxs);
 
                 if (!trace.allsolid) {
 
                     if (i != 0 || j != 0 || k != 0) {
-                        Com_DPrintf("Fixed all-solid\n");
+                        PM_Debug("Fixed all-solid");
                     }
 
                     return trace;
@@ -339,7 +342,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t &start, const vec3_t &end, co
         }
     }
 
-    Com_DPrintf("No good position\n");
+    PM_Debug("No good position");
     return pm->Trace(start, end, mins, maxs);
 }
 
@@ -808,7 +811,7 @@ static void PM_StepSlideMove(void)
 //
 static void PM_Friction(void)
 {
-    float* vel;
+    vec3_t  vel;
     float   speed, newspeed, control;
     float   friction;
     float   drop;
@@ -845,6 +848,9 @@ static void PM_Friction(void)
     vel[0] = vel[0] * newspeed;
     vel[1] = vel[1] * newspeed;
     vel[2] = vel[2] * newspeed;
+
+    // Apply new velocity to pml.
+    pml.velocity = vel;
 }
 
 //
@@ -854,7 +860,7 @@ static void PM_Friction(void)
 // Accelerate function for on-ground.
 //===============
 //
-static void PM_Accelerate(vec3_t wishdir, float wishspeed, float accel)
+static void PM_Accelerate(vec3_t &wishdir, float wishspeed, float accel)
 {
     int         i;
     float       addspeed, accelspeed, currentspeed;
@@ -878,7 +884,7 @@ static void PM_Accelerate(vec3_t wishdir, float wishspeed, float accel)
 // Accelerate function for in-air.
 //===============
 //
-static void PM_AirAccelerate(vec3_t wishdir, float wishspeed, float accel)
+static void PM_AirAccelerate(vec3_t &wishdir, float wishspeed, float accel)
 {
     int         i;
     float       addspeed, accelspeed, currentspeed, wishspd = wishspeed;
@@ -1453,9 +1459,9 @@ static qboolean PM_TestPosition(void)
 //===============
 //
 static void PM_FinalizePosition(qboolean testForValid) {
-    // Copy over velocity and origin.
-    VectorCopy(pml.velocity, pm->state.velocity);
-    VectorCopy(pml.origin, pm->state.origin);
+    // Copy over origin and velocity.
+    pm->state.origin = pml.origin;
+    pm->state.velocity = pml.velocity;
 
     // Don't test for a valid position if not wished for.
     if (!testForValid)
@@ -1466,7 +1472,7 @@ static void PM_FinalizePosition(qboolean testForValid) {
         return;
 
     // Revert back to the previous origin.
-    VectorCopy(pml.previous_origin, pm->state.origin);
+    pm->state.origin = pml.previous_origin;
 }
 
 //
@@ -1513,12 +1519,13 @@ static void PM_FlyMove(void)
     vec3_t      wishdir;
     float       wishspeed;
 
-    pm->state.view_offset[2] = 22;
+    pm->state.view_offset.z = 22;
 
     // Friction
     speed = VectorLength(pml.velocity);
     if (speed < 1) {
-        VectorCopy(vec3_origin, pml.velocity);
+        // Reset velocity.
+        pml.velocity = { 0.f, 0.f, 0.f };
     }
     else {
         drop = 0;
@@ -1547,7 +1554,7 @@ static void PM_FlyMove(void)
         wishvel[i] = pml.forward[i] * fmove + pml.right[i] * smove;
     wishvel[2] += pm->cmd.upmove;
 
-    VectorCopy(wishvel, wishdir);
+    wishdir = wishvel;
     wishspeed = VectorNormalize(wishdir);
 
     //
@@ -1570,8 +1577,10 @@ static void PM_FlyMove(void)
         if (accelspeed > addspeed)
             accelspeed = addspeed;
 
-        for (i = 0; i < 3; i++)
-            pml.velocity[i] += accelspeed * wishdir[i];
+        // Apply to velocity.
+        pml.velocity.x += accelspeed * wishdir.x;
+        pml.velocity.y += accelspeed * wishdir.y;
+        pml.velocity.z += accelspeed * wishdir.z;
     }
 
 #if 0
@@ -1611,9 +1620,11 @@ static void PM_DeadMove(void)
     forward = VectorLength(pml.velocity);
     forward -= 20;
     if (forward <= 0) {
-        VectorClear(pml.velocity);
+        // Clear  velocity.
+        pml.velocity = { 0.f, 0.f, 0.f };
     }
     else {
+        // Normalize and scale towards direction.
         VectorNormalize(pml.velocity);
         VectorScale(pml.velocity, forward, pml.velocity);
     }
@@ -1655,8 +1666,8 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
 
     // clear results
     pm->numTouchedEntities = 0;
-    VectorClear(pm->viewAngles);
-    pm->state.view_offset[2] = 0;
+    pm->viewAngles = { 0.f, 0.f, 0.f };
+    pm->state.view_offset.z = 0;
     pm->groundEntity = NULL;
     pm->waterType = 0;
     pm->waterLevel = 0;
@@ -1669,9 +1680,11 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
 
     // Copy over the actual player state data we need into the
     // local player move data. This is where we'll be working with.
-    VectorCopy(pm->state.origin, pml.origin);
-    VectorCopy(pm->state.velocity, pml.velocity);
-    VectorCopy(pm->state.origin, pml.previous_origin);  // Save old origin, just in case we get stuck.
+    pml.origin = pm->state.origin;
+    pml.velocity = pm->state.velocity;
+
+    // Save in case we get stuck and wish to undo this move.
+    pml.previous_origin = pm->state.origin;
 
     // Clamp angles.
     PM_ClampAngles();
@@ -1749,9 +1762,8 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
         if (pm->waterLevel >= 2)
             PM_WaterMove();
         else {
-            vec3_t  angles;
-
-            VectorCopy(pm->viewAngles, angles);
+            // Fetch angles and create specific view vectors for air move.
+            vec3_t  angles = pm->viewAngles;
             if (angles[PITCH] > 180)
                 angles[PITCH] = angles[PITCH] - 360;
             angles[PITCH] /= 3;

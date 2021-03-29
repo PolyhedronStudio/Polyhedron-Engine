@@ -35,7 +35,8 @@ When finished we have a stable base to work from, one that we can start making t
 - [ ] Math Library
   - [ ] Check svgame for vec3_t issues, since the game doesn't work well yet.
     - [x] misc.cpp
-    - [ ] physics.cpp 
+    - [ ] physics.cpp
+  - [ ] Figure out why sometimes the plane is NULL in case of T_Damage, seems by T_RadiusDamage. 
   - [ ] Rename Macro functions, for the old Vector lib, and create new inlined versions for the other vector types.
   - [ ] Change PITCH, YAW, ROLL defines to a vec3_t::PITCH, etc._
   - [ ] Use references/pointers, and const correctness.

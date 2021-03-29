@@ -647,7 +647,7 @@ void vectoangles(const vec3_t &vec, vec3_t &angles);
 //
 qboolean OnSameTeam(edict_t *ent1, edict_t *ent2);
 qboolean CanDamage(edict_t *targ, edict_t *inflictor);
-void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, int dflags, int mod);
+void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockback, int dflags, int mod);
 void T_RadiusDamage(edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, int mod);
 
 // damage flags

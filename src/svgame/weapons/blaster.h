@@ -9,7 +9,7 @@
 #ifndef __SVGAME_WEAPONS_BLASTER_H__
 #define __SVGAME_WEAPONS_BLASTER_H__
 
-void Blaster_Fire(edict_t* ent, vec3_t g_offset, int damage, qboolean hyper, int effect);
+void Blaster_Fire(edict_t* ent, const vec3_t &g_offset, int damage, qboolean hyper, int effect);
 void Weapon_Blaster_Fire(edict_t* ent);
 void Weapon_Blaster(edict_t* ent);
 

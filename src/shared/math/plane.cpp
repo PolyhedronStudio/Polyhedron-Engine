@@ -52,17 +52,15 @@ Returns 1, 2, or 1 + 2
 */
 int BoxOnPlaneSide(const vec3_t& emins, const vec3_t& emaxs, cplane_t* p)
 {
-    // VEC3_T: !! DANGER - BoxOnPlaneSide may have issues.
-    const vec_t* bounds[2] = { &emins.xyz[0], &emaxs.xyz[0] };
+    const vec_t* bounds[2] = { emins, emaxs };
     int     i = p->signbits & 1;
     int     j = (p->signbits >> 1) & 1;
     int     k = (p->signbits >> 2) & 1;
 
-    // VEC3_T: !! DANGER - May be broken.
 #define P(i, j, k) \
-    p->normal.xyz[0] * bounds[i][0] + \
-    p->normal.xyz[1] * bounds[j][1] + \
-    p->normal.xyz[2] * bounds[k][2]
+    p->normal[0] * bounds[i][0] + \
+    p->normal[1] * bounds[j][1] + \
+    p->normal[2] * bounds[k][2]
 
     vec_t   dist1 = P(i ^ 1, j ^ 1, k ^ 1);
     vec_t   dist2 = P(i, j, k);

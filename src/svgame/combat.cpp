@@ -360,7 +360,7 @@ qboolean CheckTeamDamage(edict_t *targ, edict_t *attacker)
     return false;
 }
 
-void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, int dflags, int mod)
+void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockback, int dflags, int mod)
 {
     gclient_t   *client;
     int         take;
@@ -399,7 +399,9 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, 
     else
         te_sparks = TE_SPARKS;
 
-    VectorNormalize(dir);
+    // Retrieve normalized direction.
+    vec3_t dir;
+    VectorNormalize2(dmgDir, dir);
 
 // bonus damage for suprising a monster
     if (!(dflags & DAMAGE_RADIUS) && (targ->svflags & SVF_MONSTER) && (attacker->client) && (!targ->enemy) && (targ->health > 0))
@@ -538,6 +540,7 @@ void T_RadiusDamage(edict_t *inflictor, edict_t *attacker, float damage, edict_t
         if (points > 0) {
             if (CanDamage(ent, inflictor)) {
                 VectorSubtract(ent->s.origin, inflictor->s.origin, dir);
+
                 T_Damage(ent, inflictor, attacker, dir, inflictor->s.origin, vec3_origin, (int)points, (int)points, DAMAGE_RADIUS, mod);
             }
         }
