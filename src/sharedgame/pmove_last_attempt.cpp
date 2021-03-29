@@ -14,14 +14,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
+*/ 
 //
 // pmove.cpp
 //
 //
 // Implements the player movement logic for both client and server game modules
 // 
-// The pml_t structure is used locally when processing the movement. Consider it
+// The pm_locals_t structure is used locally when processing the movement. Consider it
 // a temporary structure. The origin, prev_origin, and velocity are copied over
 // each frame from the player pmove state of the given entity.
 // 
@@ -69,12 +69,12 @@ typedef struct {
 
     vec3_t      previous_origin;
     qboolean    ladder;
-} pml_t;
+} pm_locals_t;
 
 
 // Static locals.
 static pmoveParams_t* pmp;  // Pointer to the player movement parameter settings.
-static pml_t pml;           // Local movement state variables.
+static pm_locals_t pml;           // Local movement state variables.
 static pm_move_t* pm;         // Pointer to the actual player move structure.
 
 // Player Movement Parameters
@@ -174,7 +174,7 @@ static void SVGPM_Debug(const char* func, const char* fmt, ...) {
 //===============
 //
 #define STOP_EPSILON    0.1
-static vec3_t PM_ClipVelocity(vec3_t& in, vec3_t& normal, float overbounce)
+static vec3_t PM_ClipVelocity(vec3_t &in, vec3_t &normal, float overbounce)
 {
     vec3_t  result;
     float   backoff;
@@ -217,6 +217,7 @@ static void PM_TouchEntity(struct edict_s* ent) {
         PM_Debug("PM_MAX_TOUCH_ENTS(%i) amount of entities reached for this frame.", PM_MAX_TOUCH_ENTS);
     }
 }
+
 //
 //===============
 // PM_ClampAngles
@@ -229,6 +230,7 @@ static void PM_ClampAngles(void)
     short   temp;
     int     i;
 
+    // In case of teleporting, we wan't to reset pitch and roll, but maintain the yaw.
     if (pm->state.flags & PMF_TIME_TELEPORT) {
         pm->viewAngles[YAW] = SHORT2ANGLE(pm->cmd.angles[YAW] + pm->state.delta_angles[YAW]);
         pm->viewAngles[PITCH] = 0;
@@ -247,6 +249,8 @@ static void PM_ClampAngles(void)
         else if (pm->viewAngles[PITCH] < 271 && pm->viewAngles[PITCH] >= 180)
             pm->viewAngles[PITCH] = 271;
     }
+
+    // Calculate the angle vectors for movement.
     AngleVectors(pm->viewAngles, &pml.forward, &pml.right, &pml.up);
 }
 
@@ -291,7 +295,7 @@ static void PM_StepDown(trace_t* trace) {
     VectorCopy(pm->state.origin, trace->endpos);
 
     // Calculate step height.
-    pm->step = pm->state.origin.z - pml.previous_origin.z;
+    pm->step = pm->state.origin[2] - pml.previous_origin[2];
 
     // If we are above minimal step height, remove the PMF_ON_STAIRS flag.
     if (pm->step >= PM_STEP_HEIGHT_MIN) {
@@ -307,6 +311,62 @@ static void PM_StepDown(trace_t* trace) {
     }
 }
 
+/**
+ * Adapted from Quake III, this function adjusts a trace so that if it starts inside of a wall,
+ * it is adjusted so that the trace begins outside of the solid it impacts.
+ * @return The actual trace.
+ */
+const trace_t PM_TraceCorrectAllSolid(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs) {
+    const int32_t offsets[] = { 0, 1, -1 };
+
+    // Jitter around
+    for (uint32_t i = 0; i < 3; i++) {
+        for (uint32_t j = 0; j < 3; j++) {
+            for (uint32_t k = 0; k < 3; k++) {               
+                // Calculate start.
+                vec3_t offsetVec = { (vec_t)offsets[i], (vec_t)offsets[j], (vec_t)offsets[k] };
+                vec3_t point = start + offsetVec;
+
+                // Execute trace.
+                const trace_t trace = pm->Trace(point, end, mins, maxs);
+
+                if (!trace.allsolid) {
+
+                    if (i != 0 || j != 0 || k != 0) {
+                        PM_Debug("Fixed all-solid");
+                    }
+
+                    return trace;
+                }
+            }
+        }
+    }
+
+    PM_Debug("No good position");
+    return pm->Trace(start, end, mins, maxs);
+}
+
+//
+//===============
+// PM_ImpactPlane
+// 
+// Return True if `plane` is unique to `planes` and should be impacted, 
+// return false otherwise.
+//===============
+//
+static bool PM_ImpactPlane(vec3_t* planes, int32_t num_planes, const vec3_t &plane) {
+
+    for (int32_t i = 0; i < num_planes; i++) {
+        if (DotProduct(plane, planes[i]) > 1.0f - PM_STOP_EPSILON) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+#define OLD_SLIDE_MOVE 1
+#ifdef OLD_SLIDE_MOVE
 //
 //===============
 // PM_StepSlideMove_
@@ -341,22 +401,20 @@ static void PM_StepSlideMove_(void)
     time_left = pml.frametime;
 
     for (bumpcount = 0; bumpcount < numbumps; bumpcount++) {
-        //for (i = 0; i < 3; i++)
-        end.x = pml.origin.x + time_left * pml.velocity.x;
-        end.y = pml.origin.y + time_left * pml.velocity.y;
-        end.z = pml.origin.z + time_left * pml.velocity.z;
+        for (i = 0; i < 3; i++)
+            end[i] = pml.origin[i] + time_left * pml.velocity[i];
 
         trace = pm->Trace(pml.origin, pm->mins, pm->maxs, end);
 
         if (trace.allsolid) {
             // entity is trapped in another solid
-            pml.velocity.z = 0;    // don't build up falling damage
+            pml.velocity[2] = 0;    // don't build up falling damage
             return;
         }
 
         if (trace.fraction > 0) {
             // actually covered some distance
-            pml.origin = trace.endpos;//VectorCopy(trace.endpos, pml.origin);
+            VectorCopy(trace.endpos, pml.origin);
             numplanes = 0;
         }
 
@@ -371,18 +429,18 @@ static void PM_StepSlideMove_(void)
         // slide along this plane
         if (numplanes >= MAX_CLIP_PLANES) {
             // this shouldn't really happen
-            pml.velocity = { 0.f, 0.f, 0.f };//VectorCopy(vec3_origin, pml.velocity);
+            VectorCopy(vec3_origin, pml.velocity);
             break;
         }
 
-        planes[numplanes] = trace.plane.normal;//VectorCopy(trace.plane.normal, planes[numplanes]);
+        VectorCopy(trace.plane.normal, planes[numplanes]);
         numplanes++;
 
         //
         // modify original_velocity so it parallels all of the clip planes
         //
         for (i = 0; i < numplanes; i++) {
-            pml.velocity = PM_ClipVelocity(pml.velocity, planes[i], 1.01);
+            pml.velocity = PM_ClipVelocity(pml.velocity, planes[i], 1.01f);
             for (j = 0; j < numplanes; j++)
                 if (j != i) {
                     if (DotProduct(pml.velocity, planes[j]) < 0)
@@ -484,6 +542,257 @@ static void PM_StepSlideMove(void)
     // if we were walking along a plane, then we need to copy the Z over
     pml.velocity[2] = down_v[2];
 }
+#else
+//
+//===============
+// PM_SlideMove
+// 
+// Calculates a new origin, velocity, and contact entities based on the
+// movement commandand world state. Returns true if not blocked.
+//===============
+//
+#define MIN_STEP_NORMAL 0.7     // can't step up onto very steep slopes
+#define MAX_CLIP_PLANES 5
+static bool PM_SlideMove(void)
+{
+    int         bumpcount, numbumps;
+    vec3_t      dir;
+    float       d;
+    int         numplanes;
+    vec3_t      planes[MAX_CLIP_PLANES];
+    vec3_t      primal_velocity;
+    int         i, j;
+    trace_t     trace;
+    vec3_t      end;
+    float       time_left;
+
+    numbumps = 4;
+
+    VectorCopy(pml.velocity, primal_velocity);
+    numplanes = 0;
+
+    time_left = pml.frametime;
+
+    for (bumpcount = 0; bumpcount < numbumps; bumpcount++) {
+        // Break in case we have run out of time for this frame.
+        if (time_left <= 0.0f)
+            break;
+
+        // Project desired destination
+        VectorMA(pml.origin, time_left, pml.velocity, end);
+
+        // Trace to it.
+        trace = pm->Trace(pml.origin, pm->mins, pm->maxs, end);
+
+        // If the player is trapped in a solid, don't build up Z
+        if (trace.allsolid) {
+            // entity is trapped in another solid
+            pml.velocity[2] = 0;    // don't build up falling damage
+            return true;
+        }
+
+
+        // if the trace succeeded, move some distance
+        if (trace.fraction > 0.0f) {
+            VectorCopy(trace.endpos, pm->state.origin);
+
+            // if the trace didn't hit anything, we're done
+            if (trace.fraction == 1.0f) {
+                break;
+            }
+
+            // update the movement time remaining
+            time_left -= (time_left * trace.fraction);
+        }
+
+        // OLD FRACTION CODE.
+        //--------------------------------------------
+        //if (trace.fraction > 0) {
+        //    // actually covered some distance
+        //    VectorCopy(trace.endpos, pml.origin);
+        //    numplanes = 0;
+        //}
+
+        //if (trace.fraction == 1)
+        //    break;     // moved the entire distance
+        //--------------------------------------------
+
+        // Save entity for contact (touch) callbacks.
+        PM_TouchEntity(trace.ent);
+
+        time_left -= time_left * trace.fraction;
+
+        // slide along this plane
+        if (numplanes >= MAX_CLIP_PLANES) {
+            // this shouldn't really happen
+            VectorCopy(vec3_origin, pml.velocity);
+            break;
+        }
+
+        // Record the impacted plane, or nudge velocity out along it
+        if (PM_ImpactPlane(planes, numplanes, trace.plane.normal)) {
+            VectorCopy(trace.plane.normal, planes[numplanes]);
+            numplanes++;
+        }
+        else {
+            // if we've seen this plane before, nudge our velocity out along it
+            //pm->state.velocity = VectorAdd(pm->s.velocity, trace.plane.normal);
+            VectorAdd(pm->state.velocity, trace.plane.normal, pm->state.velocity);
+            continue;
+        }
+
+        // and modify velocity, clipping to all impacted planes
+        for (int32_t i = 0; i < numplanes; i++) {
+            vec3_t vel;
+
+            // If velocity doesn't impact this plane, skip it
+            if (DotProduct(pm->state.velocity, planes[i]) >= 0.0f) {
+                continue;
+            }
+
+            // Slide along the plane
+            vel = PM_ClipVelocity(pm->state.velocity, planes[i], PM_CLIP_BOUNCE);
+
+            // See if there is a second plane that the new move enters
+            for (int32_t j = 0; j < numplanes; j++) {
+                vec3_t cross;
+
+                if (j == i) {
+                    continue;
+                }
+
+                // If the clipped velocity doesn't impact this plane, skip it
+                if (DotProduct(vel, planes[j]) >= 0.0f) {
+                    continue;
+                }
+
+                // We are now intersecting a second plane
+                vel = PM_ClipVelocity(vel, planes[j], PM_CLIP_BOUNCE);
+
+                // But if we clip against it without being deflected back, we're okay
+                if (DotProduct(vel, planes[i]) >= 0.0f) {
+                    continue;
+                }
+
+                // We must now slide along the crease (cross product of the planes)
+                CrossProduct(planes[i], planes[j], cross);
+                VectorNormalize(cross);//cross = Vec3_Normalize(cross);
+
+                const float scale = DotProduct(cross, pm->state.velocity);
+                VectorScale(cross, scale, vel);//vel = VectorScale(cross, scale);
+
+                // See if there is a third plane the the new move enters
+                for (int32_t k = 0; k < numplanes; k++) {
+
+                    if (k == i || k == j) {
+                        continue;
+                    }
+
+                    if (DotProduct(vel, planes[k]) >= 0.0f) {
+                        continue;
+                    }
+
+                    // Stop dead at a triple plane interaction
+                    VectorCopy(vec3_origin, pm->state.velocity);//pm->state.velocity = vec3_origin;
+                    return true;
+                }
+            }
+
+            // If we have fixed all interactions, try another move
+            VectorCopy(vel, pm->state.velocity);//pm->s.velocity = vel;
+            break;
+        }
+    }
+
+    return bumpcount == 0;
+}
+
+//
+//===============
+// PM_StepSlideMove
+//
+// Executes the slide movement.
+//===============
+//
+static void PM_StepSlideMove(void)
+{
+    vec3_t upV = { 0.f, 0.f, 1.f };
+    vec3_t downV = { 0.f, 0.f, -1.f };
+
+    // Store pre-move parameters
+    vec3_t org0;
+    vec3_t vel0;
+    VectorCopy(pm->state.origin, org0);
+    VectorCopy(pm->state.velocity, vel0);
+
+    // Attempt to move; if nothing blocks us, we're done
+    if (PM_SlideMove()) {
+
+        // Attempt to step down to remain on ground
+        if ((pm->state.flags & PMF_ON_GROUND) && pm->cmd.upmove <= 0) {
+            vec3_t down;
+
+            // Vec3_FMAF
+            for (int i = 0; i < 3; i++) down[i] = pm->state.origin[i] + (PM_STEP_HEIGHT + PM_GROUND_DIST) * downV[i];
+
+            // Exceute trace for determining whether to step or not.
+            trace_t step_down = pm->Trace(pm->state.origin, down, pm->mins, pm->maxs);
+
+            // Step if needed.
+            if (PM_CheckStep(&step_down)) {
+                PM_StepDown(&step_down);
+            }
+        }
+
+        return;
+    }
+
+    // We were blocked, so try to step over the obstacle
+    vec3_t org1;
+    vec3_t vel1;
+    VectorCopy(pm->state.origin, org1);
+    VectorCopy(pm->state.velocity, vel1);
+
+
+    vec3_t up;
+    for (int i = 0; i < 3; i++) up[i] = org0[i] + PM_STEP_HEIGHT * upV[i];
+
+    // Execute trace.
+    trace_t step_up = pm->Trace(org0, up, pm->mins, pm->maxs);
+
+    if (!step_up.allsolid) {
+
+        // Step from the higher position, with the original velocity
+        VectorCopy(step_up.endpos, pm->state.origin);
+        VectorCopy(vel0, pm->state.velocity);
+
+        PM_SlideMove();
+
+        // Settle to the new ground, keeping the step if and only if it was successful
+        vec3_t down;            // Vec3_FMAF
+        for (int i = 0; i < 3; i++) down[i] = org0[i] + PM_STEP_HEIGHT * upV[i];
+
+        trace_t step_down = pm->Trace(pm->state.origin, down, pm->mins, pm->maxs);
+
+        if (PM_CheckStep(&step_down)) {
+            // Quake2 trick jump secret sauce
+            if ((pm->state.flags & PMF_ON_GROUND) || vel0[2] < PM_SPEED_UP) {
+                PM_StepDown(&step_down);
+            }
+            else {
+                pm->step = pm->state.origin[2] - pml.previous_origin[2];
+                pm->state.flags |= PMF_ON_STAIRS;
+            }
+
+            return;
+        }
+    }
+
+    // Copy results into the actual state.
+    VectorCopy(org1, pm->state.origin);
+    VectorCopy(vel1, pm->state.velocity);
+}
+#endif // OLD_SLIDE_MOVE
 
 
 //
@@ -502,14 +811,14 @@ static void PM_StepSlideMove(void)
 //
 static void PM_Friction(void)
 {
-    float* vel;
+    vec3_t  vel;
     float   speed, newspeed, control;
     float   friction;
     float   drop;
 
     vel = pml.velocity;
 
-    speed = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
+    speed = std::sqrtf(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
     if (speed < 1) {
         vel[0] = 0;
         vel[1] = 0;
@@ -539,6 +848,9 @@ static void PM_Friction(void)
     vel[0] = vel[0] * newspeed;
     vel[1] = vel[1] * newspeed;
     vel[2] = vel[2] * newspeed;
+
+    // Apply new velocity to pml.
+    pml.velocity = vel;
 }
 
 //
@@ -595,16 +907,19 @@ static void PM_AirAccelerate(vec3_t &wishdir, float wishspeed, float accel)
 //===============
 // PM_AddCurrents
 //
-// Adds all the active currents to our wished for velocity.
+// Returns the new velocity with all the active currents added to it:
 // - Ladders
 // - Water
 // - Conveyor Belts.
 //===============
 //
-static void PM_AddCurrents(vec3_t &wishvel)
+static vec3_t PM_AddCurrents(const vec3_t &vel)
 {
     vec3_t  v;
     float   s;
+
+    // Working copy.
+    vec3_t  wishvel = vel;
 
     // Ladders Velocities.
     if (pml.ladder && fabs(pml.velocity[2]) <= 200) {
@@ -673,8 +988,10 @@ static void PM_AddCurrents(vec3_t &wishvel)
         if (pml.groundcontents & CONTENTS_CURRENT_DOWN)
             v[2] -= 1;
 
-        VectorMA(wishvel, 100 /* pm->groundentity->speed */, v, wishvel);
+        VectorMA(wishvel, 100 /* pm->groundEntity->speed */, v, wishvel);
     }
+
+    return wishvel;
 }
 
 //
@@ -702,7 +1019,7 @@ static void PM_WaterMove(void)
     else
         wishvel[2] += pm->cmd.upmove;
 
-    PM_AddCurrents(wishvel);
+    wishvel = PM_AddCurrents(wishvel);
 
     VectorCopy(wishvel, wishdir);
     wishspeed = VectorNormalize(wishdir);
@@ -749,7 +1066,7 @@ static void PM_AirMove(void)
         wishvel[i] = pml.forward[i] * fmove + pml.right[i] * smove;
     wishvel[2] = 0;
 
-    PM_AddCurrents(wishvel);
+    wishvel = PM_AddCurrents(wishvel);
 
     VectorCopy(wishvel, wishdir);
     wishspeed = VectorNormalize(wishdir);
@@ -1008,7 +1325,7 @@ static void PM_CheckDuck(void)
 //   - In case its falling velocity is too high, check the pmove landing flag.
 // + Test for touching entities, and mark them.
 // + Test whether the player view is inside water, or not, and set the
-// waterlevel based on that accordingly. (1 to 3)
+// waterLevel based on that accordingly. (1 to 3)
 //===============
 //
 static void PM_CategorizePosition(void)
@@ -1070,7 +1387,7 @@ static void PM_CategorizePosition(void)
     }
 
     //
-    // get waterlevel, accounting for ducking
+    // get waterLevel, accounting for ducking
     //
     pm->waterLevel = 0;
     pm->waterType = 0;
@@ -1109,7 +1426,6 @@ static qboolean PM_TestPosition(void)
 {
     trace_t trace;
     vec3_t  origin, end;
-    int     i;
 
     // This check is not needed anymore. Whether to test for a position or not
     // can now be decided by calling PM_FinalizePosition with true as its arg. 
@@ -1143,9 +1459,9 @@ static qboolean PM_TestPosition(void)
 //===============
 //
 static void PM_FinalizePosition(qboolean testForValid) {
-    // Copy over velocity and origin.
-    VectorCopy(pml.velocity, pm->state.velocity);
-    VectorCopy(pml.origin, pm->state.origin);
+    // Copy over origin and velocity.
+    pm->state.origin = pml.origin;
+    pm->state.velocity = pml.velocity;
 
     // Don't test for a valid position if not wished for.
     if (!testForValid)
@@ -1156,7 +1472,7 @@ static void PM_FinalizePosition(qboolean testForValid) {
         return;
 
     // Revert back to the previous origin.
-    VectorCopy(pml.previous_origin, pm->state.origin);
+    pm->state.origin = pml.previous_origin;
 }
 
 //
@@ -1203,12 +1519,13 @@ static void PM_FlyMove(void)
     vec3_t      wishdir;
     float       wishspeed;
 
-    pm->state.view_offset[2] = 22;
+    pm->state.view_offset.z = 22;
 
     // Friction
     speed = VectorLength(pml.velocity);
     if (speed < 1) {
-        VectorCopy(vec3_origin, pml.velocity);
+        // Reset velocity.
+        pml.velocity = { 0.f, 0.f, 0.f };
     }
     else {
         drop = 0;
@@ -1237,7 +1554,7 @@ static void PM_FlyMove(void)
         wishvel[i] = pml.forward[i] * fmove + pml.right[i] * smove;
     wishvel[2] += pm->cmd.upmove;
 
-    VectorCopy(wishvel, wishdir);
+    wishdir = wishvel;
     wishspeed = VectorNormalize(wishdir);
 
     //
@@ -1260,8 +1577,10 @@ static void PM_FlyMove(void)
         if (accelspeed > addspeed)
             accelspeed = addspeed;
 
-        for (i = 0; i < 3; i++)
-            pml.velocity[i] += accelspeed * wishdir[i];
+        // Apply to velocity.
+        pml.velocity.x += accelspeed * wishdir.x;
+        pml.velocity.y += accelspeed * wishdir.y;
+        pml.velocity.z += accelspeed * wishdir.z;
     }
 
 #if 0
@@ -1269,7 +1588,7 @@ static void PM_FlyMove(void)
         for (i = 0; i < 3; i++)
             end[i] = pml.origin[i] + pml.frametime * pml.velocity[i];
 
-        trace = pm->trace(pml.origin, pm->mins, pm->maxs, end);
+        trace = pm->Trace(pml.origin, pm->mins, pm->maxs, end);
 
         VectorCopy(trace.endpos, pml.origin);
     }
@@ -1301,9 +1620,11 @@ static void PM_DeadMove(void)
     forward = VectorLength(pml.velocity);
     forward -= 20;
     if (forward <= 0) {
-        VectorClear(pml.velocity);
+        // Clear  velocity.
+        pml.velocity = { 0.f, 0.f, 0.f };
     }
     else {
+        // Normalize and scale towards direction.
         VectorNormalize(pml.velocity);
         VectorScale(pml.velocity, forward, pml.velocity);
     }
@@ -1345,8 +1666,8 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
 
     // clear results
     pm->numTouchedEntities = 0;
-    VectorClear(pm->viewAngles);
-    pm->state.view_offset[2] = 0;
+    pm->viewAngles = { 0.f, 0.f, 0.f };
+    pm->state.view_offset.z = 0;
     pm->groundEntity = NULL;
     pm->waterType = 0;
     pm->waterLevel = 0;
@@ -1359,9 +1680,11 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
 
     // Copy over the actual player state data we need into the
     // local player move data. This is where we'll be working with.
-    VectorCopy(pm->state.origin, pml.origin);
-    VectorCopy(pm->state.velocity, pml.velocity);
-    VectorCopy(pm->state.origin, pml.previous_origin);  // Save old origin, just in case we get stuck.
+    pml.origin = pm->state.origin;
+    pml.velocity = pm->state.velocity;
+
+    // Save in case we get stuck and wish to undo this move.
+    pml.previous_origin = pm->state.origin;
 
     // Clamp angles.
     PM_ClampAngles();
@@ -1391,7 +1714,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     if (pm->testInitial)
         PM_TestInitialPosition();
 
-    // set groundentity, watertype, and waterlevel
+    // set groundEntity, waterType, and waterLevel
     PM_CategorizePosition();
 
     // Check for whether we're dead, if so, call PM_DeadMove. It will stop
@@ -1402,7 +1725,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     // Check for special movements to execute.
     PM_CheckSpecialMovements();
 
-    // drop timing counter
+    // Used for "dropping" the player, ie, landing after jumps or falling off a ledge/slope.
     if (pm->state.time) {
         int     msec;
 
@@ -1439,9 +1762,8 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
         if (pm->waterLevel >= 2)
             PM_WaterMove();
         else {
-            vec3_t  angles;
-
-            VectorCopy(pm->viewAngles, angles);
+            // Fetch angles and create specific view vectors for air move.
+            vec3_t  angles = pm->viewAngles;
             if (angles[PITCH] > 180)
                 angles[PITCH] = angles[PITCH] - 360;
             angles[PITCH] /= 3;
@@ -1452,7 +1774,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
         }
     }
 
-    // set groundentity, watertype, and waterlevel for final spot
+    // set groundEntity, waterType, and waterLevel for final spot
     PM_CategorizePosition();
 
     //PM_UpdateClientSoundSpecialEffects();

@@ -419,11 +419,6 @@ static void PF_configstring(int index, const char *val)
     SZ_Clear(&msg_write);
 }
 
-static void PF_WriteFloat(float f)
-{
-    Com_Error(ERR_DROP, "PF_WriteFloat not implemented");
-}
-
 static qboolean PF_inVIS(vec3_t p1, vec3_t p2, int vis)
 {
     mleaf_t *leaf1 = NULL, *leaf2 = NULL;
@@ -928,7 +923,7 @@ void SV_InitGameProgs(void)
     importAPI.WriteByte = MSG_WriteByte;
     importAPI.WriteShort = MSG_WriteShort;
     importAPI.WriteLong = MSG_WriteLong;
-    importAPI.WriteFloat = PF_WriteFloat;
+    importAPI.WriteFloat = MSG_WriteFloat;
     importAPI.WriteString = MSG_WriteString;
     importAPI.WritePosition = MSG_WritePosition;
     importAPI.WriteDir = MSG_WriteDirection;
