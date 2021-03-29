@@ -42,7 +42,7 @@ typedef struct areanode_s {
 static areanode_t   sv_areanodes[AREA_NODES];
 static int          sv_numareanodes;
 
-static float    *area_mins, *area_maxs;
+static vec3_t    area_mins, area_maxs; // MATHLIB: No more float* pointers to local func arrays.
 static edict_t  **area_list;
 static int      area_count, area_maxcount;
 static int      area_type;
@@ -54,7 +54,7 @@ SV_CreateAreaNode
 Builds a uniformly subdivided tree for the given world size
 ===============
 */
-static areanode_t *SV_CreateAreaNode(int depth, vec3_t mins, vec3_t maxs)
+static areanode_t *SV_CreateAreaNode(int depth, const vec3_t &mins, const vec3_t &maxs)
 {
     areanode_t  *anode;
     vec3_t      size;
@@ -404,7 +404,7 @@ static void SV_AreaEdicts_r(areanode_t *node)
 SV_AreaEdicts
 ================
 */
-int SV_AreaEdicts(vec3_t mins, vec3_t maxs, edict_t **list,
+int SV_AreaEdicts(const vec3_t &mins, const vec3_t &maxs, edict_t **list,
                   int maxcount, int areatype)
 {
     area_mins = mins;

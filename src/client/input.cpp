@@ -594,47 +594,61 @@ static void CL_AdjustAngles(int msec)
 ================
 CL_BaseMove
 
-Build the intended movement vector
+Build and return the intended movement vector
 ================
 */
-static void CL_BaseMove(vec3_t move)
+static vec3_t CL_BaseMove(const vec3_t &inMove)
 {
+    vec3_t outMove = inMove;
+
     if (in_strafe.state & 1) {
-        move[1] += cl_sidespeed->value * CL_KeyState(&in_right);
-        move[1] -= cl_sidespeed->value * CL_KeyState(&in_left);
+        outMove[1] += cl_sidespeed->value * CL_KeyState(&in_right);
+        outMove[1] -= cl_sidespeed->value * CL_KeyState(&in_left);
     }
 
-    move[1] += cl_sidespeed->value * CL_KeyState(&in_moveright);
-    move[1] -= cl_sidespeed->value * CL_KeyState(&in_moveleft);
+    outMove[1] += cl_sidespeed->value * CL_KeyState(&in_moveright);
+    outMove[1] -= cl_sidespeed->value * CL_KeyState(&in_moveleft);
 
-    move[2] += cl_upspeed->value * CL_KeyState(&in_up);
-    move[2] -= cl_upspeed->value * CL_KeyState(&in_down);
+    outMove[2] += cl_upspeed->value * CL_KeyState(&in_up);
+    outMove[2] -= cl_upspeed->value * CL_KeyState(&in_down);
 
     if (!(in_klook.state & 1)) {
-        move[0] += cl_forwardspeed->value * CL_KeyState(&in_forward);
-        move[0] -= cl_forwardspeed->value * CL_KeyState(&in_back);
+        outMove[0] += cl_forwardspeed->value * CL_KeyState(&in_forward);
+        outMove[0] -= cl_forwardspeed->value * CL_KeyState(&in_back);
     }
 
-// adjust for speed key / running
+    // Adjust for speed key / running
     if ((in_speed.state & 1) ^ cl_run->integer) {
-        VectorScale(move, 2, move);
+        VectorScale(outMove, 2, outMove);
     }
+
+    return outMove;
 }
 
-static void CL_ClampSpeed(vec3_t move)
+/*
+================
+CL_ClampSpeed
+
+Returns the clamped movement speeds.
+================
+*/
+static vec3_t CL_ClampSpeed(const vec3_t &inMove)
 {
+    vec3_t outMove = inMove;
     if (!cge)
-        return;
+        return inMove;
 
     // N&C: This... can happen :P
     if (!cge->pmoveParams)
-        return;
+        return vec3_t{ 0.f, 0.f, 0.f };
 
     float speed = cge->pmoveParams->maxspeed;
 
-    clamp(move[0], -speed, speed);
-    clamp(move[1], -speed, speed);
-    clamp(move[2], -speed, speed);
+    clamp(outMove[0], -speed, speed);
+    clamp(outMove[1], -speed, speed);
+    clamp(outMove[2], -speed, speed);
+
+    return outMove;
 }
 
 static void CL_ClampPitch(void)
@@ -679,7 +693,7 @@ void CL_UpdateCmd(int msec)
     CL_AdjustAngles(msec);
 
     // get basic movement from keyboard
-    CL_BaseMove(cl.localmove);
+    cl.localmove = CL_BaseMove(cl.localmove);
 
     // allow mice to add to the move
     CL_MouseMove();
@@ -689,7 +703,7 @@ void CL_UpdateCmd(int msec)
     cl.localmove[1] += cl.mousemove[1];
 
     // clamp to server defined max speed
-    CL_ClampSpeed(cl.localmove);
+    cl.localmove = CL_ClampSpeed(cl.localmove);
 
     CL_ClampPitch();
 
@@ -843,14 +857,14 @@ void CL_FinalizeCmd(void)
     VectorClear(move);
 
     // get basic movement from keyboard
-    CL_BaseMove(move);
+    move = CL_BaseMove(move);
 
     // add mouse forward/side movement
     move[0] += cl.mousemove[0];
     move[1] += cl.mousemove[1];
 
     // clamp to server defined max speed
-    CL_ClampSpeed(move);
+    move = CL_ClampSpeed(move);
 
     // store the movement vector
     cl.cmd.forwardmove = move[0];

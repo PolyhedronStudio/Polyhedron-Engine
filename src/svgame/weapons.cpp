@@ -307,7 +307,7 @@ void blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
         gi.WriteByte(TE_BLASTER);
         gi.WritePosition(self->s.origin);
         if (!plane)
-            gi.WriteDirection(vec3_origin);
+            gi.WriteDirection({ 0.f, 0.f, 0.f });
         else
             gi.WriteDirection(plane->normal);
         gi.Multicast(&self->s.origin, MULTICAST_PVS);
