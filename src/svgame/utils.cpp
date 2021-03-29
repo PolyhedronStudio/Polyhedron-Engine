@@ -241,40 +241,13 @@ void G_UseTargets(edict_t *ent, edict_t *activator)
 
 /*
 =============
-TempVector
-
-This is just a convenience function
-for making temporary vectors for function calls
-=============
-*/
-float   *tv(float x, float y, float z)
-{
-    static  int     index;
-    static  vec3_t  vecs[8];
-    float   *v;
-
-    // use an array so that multiple tempvectors won't collide
-    // for a while
-    v = vecs[index];
-    index = (index + 1) & 7;
-
-    v[0] = x;
-    v[1] = y;
-    v[2] = z;
-
-    return v;
-}
-
-
-/*
-=============
 VectorToString
 
 This is just a convenience function
 for printing vectors
 =============
 */
-char    *vtos(const vec3_t &v)
+char    *vtos(const vec3_t &v, qboolean rounded = true)
 {
     static  int     index;
     static  char    str[8][32];
@@ -284,7 +257,10 @@ char    *vtos(const vec3_t &v)
     s = str[index];
     index = (index + 1) & 7;
 
-    Q_snprintf(s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
+    if (rounded)
+        Q_snprintf(s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
+    else
+        Q_snprintf(s, 32, "(%f %f %f)", v[0], v[1], v[2]);
 
     return s;
 }
