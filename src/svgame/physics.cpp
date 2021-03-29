@@ -139,7 +139,7 @@ returns the blocked flags (1 = floor, 2 = step / wall)
 */
 #define STOP_EPSILON    0.1
 
-int ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce)
+int ClipVelocity(const vec3_t &in, const vec3_t &normal, vec3_t &out, float overbounce)
 {
     float   backoff;
     float   change;

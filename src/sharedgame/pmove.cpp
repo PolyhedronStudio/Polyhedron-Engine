@@ -172,8 +172,9 @@ static void PM_Debug(const char* func, const char* fmt, ...) {
 //===============
 //
 #define STOP_EPSILON    0.1
-static void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce)
+static vec3_t PM_ClipVelocity(vec3_t &in, vec3_t &normal, float overbounce)
 {
+    vec3_t  result;
     float   backoff;
     float   change;
     int     i;
@@ -182,10 +183,12 @@ static void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overboun
 
     for (i = 0; i < 3; i++) {
         change = normal[i] * backoff;
-        out[i] = in[i] - change;
-        if (out[i] > -STOP_EPSILON && out[i] < STOP_EPSILON)
-            out[i] = 0;
+        result[i] = in[i] - change;
+        if (result[i] > -STOP_EPSILON && result[i] < STOP_EPSILON)
+            result[i] = 0;
     }
+
+    return result;
 }
 
 //
@@ -311,7 +314,7 @@ static void PM_StepDown(trace_t* trace) {
  * it is adjusted so that the trace begins outside of the solid it impacts.
  * @return The actual trace.
  */
-const trace_t PM_TraceCorrectAllSolid(vec3_t start, vec3_t end, vec3_t mins, vec3_t maxs) {
+const trace_t PM_TraceCorrectAllSolid(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs) {
 
     const int32_t offsets[] = { 0, 1, -1 };
 
@@ -348,7 +351,7 @@ const trace_t PM_TraceCorrectAllSolid(vec3_t start, vec3_t end, vec3_t mins, vec
 // return false otherwise.
 //===============
 //
-static bool PM_ImpactPlane(vec3_t* planes, int32_t num_planes, const vec3_t plane) {
+static bool PM_ImpactPlane(vec3_t* planes, int32_t num_planes, const vec3_t &plane) {
 
     for (int32_t i = 0; i < num_planes; i++) {
         if (DotProduct(plane, planes[i]) > 1.0f - PM_STOP_EPSILON) {
@@ -434,7 +437,7 @@ static void PM_StepSlideMove_(void)
         // modify original_velocity so it parallels all of the clip planes
         //
         for (i = 0; i < numplanes; i++) {
-            PM_ClipVelocity(pml.velocity, planes[i], pml.velocity, 1.01);
+            pml.velocity = PM_ClipVelocity(pml.velocity, planes[i], 1.01f);
             for (j = 0; j < numplanes; j++)
                 if (j != i) {
                     if (DotProduct(pml.velocity, planes[j]) < 0)
@@ -645,7 +648,7 @@ static bool PM_SlideMove(void)
             }
 
             // Slide along the plane
-            PM_ClipVelocity(pm->state.velocity, planes[i], vel, PM_CLIP_BOUNCE);
+            vel = PM_ClipVelocity(pm->state.velocity, planes[i], PM_CLIP_BOUNCE);
 
             // See if there is a second plane that the new move enters
             for (int32_t j = 0; j < numplanes; j++) {
@@ -661,7 +664,7 @@ static bool PM_SlideMove(void)
                 }
 
                 // We are now intersecting a second plane
-                PM_ClipVelocity(vel, planes[j], vel, PM_CLIP_BOUNCE);
+                vel = PM_ClipVelocity(vel, planes[j], PM_CLIP_BOUNCE);
 
                 // But if we clip against it without being deflected back, we're okay
                 if (DotProduct(vel, planes[i]) >= 0.0f) {
@@ -898,16 +901,19 @@ static void PM_AirAccelerate(vec3_t wishdir, float wishspeed, float accel)
 //===============
 // PM_AddCurrents
 //
-// Adds all the active currents to our wished for velocity.
+// Returns the new velocity with all the active currents added to it:
 // - Ladders
 // - Water
 // - Conveyor Belts.
 //===============
 //
-static void PM_AddCurrents(vec3_t wishvel)
+static vec3_t PM_AddCurrents(const vec3_t &vel)
 {
     vec3_t  v;
     float   s;
+
+    // Working copy.
+    vec3_t  wishvel = vel;
 
     // Ladders Velocities.
     if (pml.ladder && fabs(pml.velocity[2]) <= 200) {
@@ -978,6 +984,8 @@ static void PM_AddCurrents(vec3_t wishvel)
 
         VectorMA(wishvel, 100 /* pm->groundEntity->speed */, v, wishvel);
     }
+
+    return wishvel;
 }
 
 //
@@ -1005,7 +1013,7 @@ static void PM_WaterMove(void)
     else
         wishvel[2] += pm->cmd.upmove;
 
-    PM_AddCurrents(wishvel);
+    wishvel = PM_AddCurrents(wishvel);
 
     VectorCopy(wishvel, wishdir);
     wishspeed = VectorNormalize(wishdir);
@@ -1052,7 +1060,7 @@ static void PM_AirMove(void)
         wishvel[i] = pml.forward[i] * fmove + pml.right[i] * smove;
     wishvel[2] = 0;
 
-    PM_AddCurrents(wishvel);
+    wishvel = PM_AddCurrents(wishvel);
 
     VectorCopy(wishvel, wishdir);
     wishspeed = VectorNormalize(wishdir);
