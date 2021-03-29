@@ -292,10 +292,14 @@ static bool PM_CheckStep(trace_t* trace) {
 static void PM_StepDown(trace_t* trace) {
 
     // Copy the player move state origin 
-    VectorCopy(pm->state.origin, trace->endpos);
+    //VectorCopy(pm->state.origin, trace->endpos);
+
+    //// Calculate step height.
+    //pm->step = pm->state.origin[2] - pml.previous_origin[2];
+    pml.origin = trace->endpos;
 
     // Calculate step height.
-    pm->step = pm->state.origin[2] - pml.previous_origin[2];
+    pm->step = pml.origin[2] - pml.previous_origin[2];
 
     // If we are above minimal step height, remove the PMF_ON_STAIRS flag.
     if (pm->step >= PM_STEP_HEIGHT_MIN) {
@@ -517,14 +521,23 @@ static void PM_StepSlideMove(void)
 
     PM_StepSlideMove_();
 
-    // push down the final amount
+
+    // New stepdown code. (Works somewhat if you disable the check below duh)
+    //VectorCopy(pml.origin, down);
+    //down[2] -= PM_STEP_HEIGHT_MAX;
+    //trace_t step_down = pm->Trace(pml.origin, pm->mins, pm->maxs, down);
+    //if (PM_CheckStep(&step_down)) {
+    //    PM_StepDown(&step_down);
+    //}
+
+
+    //// push down the final amount
     VectorCopy(pml.origin, down);
     down[2] -= PM_STEP_HEIGHT_MAX;
     trace = pm->Trace(pml.origin, pm->mins, pm->maxs, down);
     if (!trace.allsolid) {
         VectorCopy(trace.endpos, pml.origin);
     }
-
     VectorCopy(pml.origin, up);
 
     // decide which one went farther

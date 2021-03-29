@@ -292,7 +292,7 @@ static bool PM_CheckStep(trace_t* trace) {
 static void PM_StepDown(trace_t* trace) {
 
     // Copy the player move state origin 
-    VectorCopy(pm->state.origin, trace->endpos);
+    pm->state.origin = trace->endpos);
 
     // Calculate step height.
     pm->step = pm->state.origin[2] - pml.previous_origin[2];
