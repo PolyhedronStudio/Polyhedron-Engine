@@ -44,22 +44,6 @@ void vectoangles2(const vec3_t& value1, vec3_t& angles)
     angles.xyz[ROLL] = 0;
 }
 
-void MakeNormalVectors(const vec3_t& forward, vec3_t& right, vec3_t& up)
-{
-    float       d;
-
-    // this rotate and negate guarantees a vector
-    // not colinear with the original
-    right.xyz[1] = -forward.xyz[0];
-    right.xyz[2] = forward.xyz[1];
-    right.xyz[0] = forward.xyz[2];
-
-    d = DotProduct(right, forward);
-    VectorMA(right, -d, forward, right);
-    VectorNormalize(right);
-    CrossProduct(right, forward, up);
-}
-
 /*
 ==================
 SetupRotationMatrix
