@@ -100,15 +100,15 @@ static const float  pm_waterspeed = 400;
 // A convenience function for printing vectors.
 //===============
 //
-char* vtos(const vec3_t v) {
-    static uint32_t index;
-    static char str[8][MAX_QPATH];
-
-    char* s = str[index++ % 8];
-    Q_scnprintf(s, MAX_QPATH, "(%4.2f %4.2f %4.2f)", v[0], v[1], v[2]);
-
-    return s;
-}
+//char* vtos(const vec3_t &v) {
+//    static uint32_t index;
+//    static char str[8][MAX_QPATH];
+//
+//    char* s = str[index++ % 8];
+//    Q_scnprintf(s, MAX_QPATH, "(%4.2f %4.2f %4.2f)", v[0], v[1], v[2]);
+//
+//    return s;
+//}
 
 //
 //===============

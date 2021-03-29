@@ -203,7 +203,7 @@ static inline void AnglesToAxis(const vec3_t& angles, vec3_t* axis)
 // Transpoes the vector axis.
 //===============
 //
-static inline void TransposeAxis(vec3_t* axis)
+static inline void TransposeAxis(vec3_t *axis)
 {
     vec_t temp;
 

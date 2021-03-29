@@ -274,7 +274,7 @@ This is just a convenience function
 for printing vectors
 =============
 */
-char    *vtos(vec3_t v)
+char    *vtos(const vec3_t &v)
 {
     static  int     index;
     static  char    str[8][32];
@@ -329,7 +329,7 @@ float vectoyaw(vec3_t vec)
 }
 
 
-void vectoangles(vec3_t value1, vec3_t angles)
+void vectoangles(const vec3_t &value1, const vec3_t &angles)
 {
     float   forward;
     float   yaw, pitch;

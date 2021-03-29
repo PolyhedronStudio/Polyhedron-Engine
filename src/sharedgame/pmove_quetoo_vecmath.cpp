@@ -1570,20 +1570,21 @@ This is just a convenience function
 for printing vectors
 =============
 */
-static char* vtos(vec3_t v)
-{
-    static  int     index;
-    static  char    str[8][32];
-    char* s;
-
-    // use an array so that multiple vtos won't collide
-    s = str[index];
-    index = (index + 1) & 7;
-
-    Q_snprintf(s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
-
-    return s;
-}
+//static char* vtos(const vec3_t &v)
+//{
+//    static  int     index;
+//    static  char    str[8][32];
+//    char* s;
+//
+//    // use an array so that multiple vtos won't collide
+//    s = str[index];
+//    index = (index + 1) & 7;
+//
+//    Q_snprintf(s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
+//
+//    return s;
+//}
+// 
 //
 //===============
 // PM_SpectatorMove
