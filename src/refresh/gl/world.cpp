@@ -80,7 +80,8 @@ static qboolean _GL_LightPoint(vec3_t start, vec3_t color)
     vec3_t          end, mins, maxs;
     entity_t        *ent;
     mmodel_t        *model;
-    vec_t           *angles;
+    //vec_t           *angles;
+    vec3_t          *angles;
 
     bsp = gl_static.world.cache;
     if (!bsp || !bsp->lightmap)
@@ -114,7 +115,7 @@ static qboolean _GL_LightPoint(vec3_t start, vec3_t color)
                 continue;
             if (fabs(start[1] - ent->origin[1]) > model->radius)
                 continue;
-            angles = ent->angles;
+            angles = &ent->angles;
         } else {
             VectorAdd(model->mins, ent->origin, mins);
             VectorAdd(model->maxs, ent->origin, maxs);

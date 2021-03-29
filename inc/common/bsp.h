@@ -304,7 +304,7 @@ typedef struct {
 } lightpoint_t;
 
 void BSP_LightPoint(lightpoint_t *point, vec3_t start, vec3_t end, mnode_t *headnode);
-void BSP_TransformedLightPoint(const vec3_t &start, const vec3_t &end,
+void BSP_TransformedLightPoint(lightpoint_t* point, const vec3_t &start, const vec3_t &end,
                                mnode_t *headnode, const vec3_t &origin, vec3_t *angles);
 #endif
 
