@@ -58,7 +58,7 @@ void CLG_PredictAngles(void) {
 // 
 //================
 //
-static void CLG_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, trace_t* tr)
+static void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, trace_t* tr)
 {
     int         i;
     trace_t     trace;
