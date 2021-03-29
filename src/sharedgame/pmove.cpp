@@ -812,7 +812,7 @@ static void PM_Friction(void)
 
     vel = pml.velocity;
 
-    speed = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
+    speed = std::sqrtf(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
     if (speed < 1) {
         vel[0] = 0;
         vel[1] = 0;

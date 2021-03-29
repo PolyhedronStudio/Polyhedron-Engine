@@ -849,7 +849,7 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
     ubo->sun_bounce_scale = sun_bounce->value;
 	ubo->sun_tan_half_angle = tanf(light->angular_size_rad * 0.5f);
 	ubo->sun_cos_half_angle = cosf(light->angular_size_rad * 0.5f);
-	ubo->sun_solid_angle = 2 * M_PI * (float)(1.0 - cos(light->angular_size_rad * 0.5)); // use double for precision
+	ubo->sun_solid_angle = 2 * M_PI * (float)(1.0 - std::cosf(light->angular_size_rad * 0.5)); // use double for precision
 	//ubo->sun_solid_angle = max(ubo->sun_solid_angle, 1e-3f);
 
 	VectorCopy(light->color, ubo->sun_color);

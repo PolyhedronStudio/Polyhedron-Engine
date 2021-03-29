@@ -900,8 +900,8 @@ static void CLG_RailSpiral(void)
 		VectorClear(p->accel);
 
 		d = i * 0.1;
-		c = cos(d);
-		s = sin(d);
+		c = std::cosf(d);
+		s = std::sinf(d);
 
 		VectorScale(right, c, dir);
 		VectorMA(dir, s, up, dir);

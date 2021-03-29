@@ -23,7 +23,7 @@
  * Forward declaration for fire_flaregun(), which is defined in
  * g_weapon.c.
  */
-void fire_flaregun(edict_t* self, vec3_t start, vec3_t aimdir, int damage,
+void fire_flaregun(edict_t* self, const vec3_t &start, const vec3_t &aimdir, int damage,
     int speed, float timer, float damage_radius);
 /*
  * weapon_flaregun_fire (edict_t *ent)

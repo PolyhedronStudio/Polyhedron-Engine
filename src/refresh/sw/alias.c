@@ -513,7 +513,7 @@ static void R_AliasSetupLighting(void)
         float   scale;
         float   min;
 
-        scale = 0.1 * sin(r_newrefdef.time * 7);
+        scale = 0.1 * std::sinf(r_newrefdef.time * 7);
         for (i = 0; i < 3; i++) {
             min = light[i] * 0.8;
             light[i] += scale;
@@ -531,10 +531,10 @@ static void R_AliasSetupLighting(void)
 
 // rotate the lighting vector into the model's frame of reference
     yaw = -DEG2RAD(currententity->angles[YAW]);
-    cy = cos(yaw);
-    sy = sin(yaw);
-    cp = cos(-M_PI / 4);
-    sp = sin(-M_PI / 4);
+    cy = std::cosf(yaw);
+    sy = std::sinf(yaw);
+    cp = std::cosf(-M_PI / 4);
+    sp = std::sinf(-M_PI / 4);
     r_plightvec[0] = cp * cy;
     r_plightvec[1] = cp * sy;
     r_plightvec[2] = -sp;

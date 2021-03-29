@@ -92,8 +92,8 @@ static void GL_SetupFrustum(void)
 
     // right/left
     angle = DEG2RAD(glr.fd.fov_x / 2);
-    sf = sin(angle);
-    cf = cos(angle);
+    sf = std::sinf(angle);
+    cf = std::cosf(angle);
 
     VectorScale(glr.viewaxis[0], sf, forward);
     VectorScale(glr.viewaxis[1], cf, left);
@@ -103,8 +103,8 @@ static void GL_SetupFrustum(void)
 
     // top/bottom
     angle = DEG2RAD(glr.fd.fov_y / 2);
-    sf = sin(angle);
-    cf = cos(angle);
+    sf = std::sinf(angle);
+    cf = std::cosf(angle);
 
     VectorScale(glr.viewaxis[0], sf, forward);
     VectorScale(glr.viewaxis[2], cf, up);
@@ -966,7 +966,7 @@ static void GL_InitTables(void)
     }
 
     for (i = 0; i < 256; i++) {
-        gl_static.sintab[i] = sin(i * (2 * M_PI / 255.0f));
+        gl_static.sintab[i] = std::sinf(i * (2 * M_PI / 255.0f));
     }
 }
 

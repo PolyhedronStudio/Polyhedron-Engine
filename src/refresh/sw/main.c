@@ -144,8 +144,8 @@ void R_InitTurb(void)
     int     i;
 
     for (i = 0; i < CYCLE * 2; i++) {
-        sintable[i] = AMP + sin(i * M_PI * 2 / CYCLE) * AMP;
-        intsintable[i] = AMP2 + sin(i * M_PI * 2 / CYCLE) * AMP2; // AMP2, not 20
+        sintable[i] = AMP + std::sinf(i * M_PI * 2 / CYCLE) * AMP;
+        intsintable[i] = AMP2 + std::sinf(i * M_PI * 2 / CYCLE) * AMP2; // AMP2, not 20
         blanktable[i] = 0;
     }
 }

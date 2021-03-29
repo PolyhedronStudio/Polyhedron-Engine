@@ -941,7 +941,7 @@ void ClientEndServerFrame(edict_t *ent)
     // calculate speed and cycle to be used for
     // all cyclic walking effects
     //
-    xyspeed = sqrt(ent->velocity[0] * ent->velocity[0] + ent->velocity[1] * ent->velocity[1]);
+    xyspeed = std::sqrtf(ent->velocity[0] * ent->velocity[0] + ent->velocity[1] * ent->velocity[1]);
 
     if (xyspeed < 5) {
         bobmove = 0;
@@ -970,7 +970,7 @@ void ClientEndServerFrame(edict_t *ent)
         bobtime *= 2;   // N&C: Footstep tweak.
 
     bobcycle = (int)bobtime;
-    bobfracsin = fabs(sin(bobtime * M_PI));
+    bobfracsin = std::fabsf(std::sinf(bobtime * M_PI));
 
     // detect hitting the floor
     P_FallingDamage(ent);

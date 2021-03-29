@@ -231,7 +231,7 @@ void debris_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     G_FreeEdict(self);
 }
 
-void ThrowDebris(edict_t *self, const char *modelname, float speed, vec3_t origin) // C++20: STRING: Added const to char*
+void ThrowDebris(edict_t *self, const char *modelname, float speed, const vec3_t &origin) // C++20: STRING: Added const to char*
 {
     edict_t *chunk;
     vec3_t  v;

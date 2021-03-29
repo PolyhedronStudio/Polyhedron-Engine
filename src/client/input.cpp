@@ -535,7 +535,7 @@ static void CL_MouseMove(void)
 
     Cvar_ClampValue(m_accel, 0, 1);
 
-    speed = sqrt(mx * mx + my * my);
+    speed = std::sqrtf(mx * mx + my * my);
     speed = sensitivity->value + speed * m_accel->value;
 
     mx *= speed;

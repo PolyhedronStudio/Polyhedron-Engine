@@ -284,8 +284,8 @@ static void CLG_SetupThirdPersionView(void)
 
     angle = DEG2RAD(cl_thirdperson_angle->value);
     range = cl_thirdperson_range->value;
-    fscale = cos(angle);
-    rscale = sin(angle);
+    fscale = std::cosf(angle);
+    rscale = std::sinf(angle);
     VectorMA(cl->refdef.vieworg, -range * fscale, cl->v_forward, cl->refdef.vieworg);
     VectorMA(cl->refdef.vieworg, -range * rscale, cl->v_right, cl->refdef.vieworg);
 
@@ -296,7 +296,7 @@ static void CLG_SetupThirdPersionView(void)
     }
 
     VectorSubtract(focus, cl->refdef.vieworg, focus);
-    dist = sqrt(focus[0] * focus[0] + focus[1] * focus[1]);
+    dist = std::sqrtf(focus[0] * focus[0] + focus[1] * focus[1]);
 
     cl->refdef.viewangles[PITCH] = -180.f / M_PI * std::atan2f(focus[2], dist);
     cl->refdef.viewangles[YAW] -= cl_thirdperson_angle->value;

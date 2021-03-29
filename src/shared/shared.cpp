@@ -32,14 +32,14 @@ void AngleVectors(const vec3_t& angles, vec3_t* forward, vec3_t* right, vec3_t* 
     float        sr, sp, sy, cr, cp, cy;
 
     angle = angles.xyz[YAW] * (M_PI * 2 / 360);
-    sy = sin(angle);
-    cy = cos(angle);
+    sy = std::sinf(angle);
+    cy = std::cosf(angle);
     angle = angles.xyz[PITCH] * (M_PI * 2 / 360);
-    sp = sin(angle);
-    cp = cos(angle);
+    sp = std::sinf(angle);
+    cp = std::cosf(angle);
     angle = angles.xyz[ROLL] * (M_PI * 2 / 360);
-    sr = sin(angle);
-    cr = cos(angle);
+    sr = std::sinf(angle);
+    cr = std::cosf(angle);
 
     if (forward) {
         forward->xyz[0] = cp * cy;
