@@ -247,7 +247,7 @@ This is just a convenience function
 for printing vectors
 =============
 */
-char    *vtos(const vec3_t &v, qboolean rounded = true)
+char    *vtos(const vec3_t &v, qboolean rounded)
 {
     static  int     index;
     static  char    str[8][32];

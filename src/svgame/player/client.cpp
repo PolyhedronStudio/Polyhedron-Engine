@@ -926,7 +926,7 @@ void CopyToBodyQue(edict_t *ent)
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_BLOOD);
         gi.WritePosition(body->s.origin);
-        gi.WriteDir(vec3_origin);
+        gi.WriteDirection(vec3_origin);
         gi.Multicast(&body->s.origin, MULTICAST_PVS);
     }
 

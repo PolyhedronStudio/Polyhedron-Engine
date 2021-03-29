@@ -179,7 +179,7 @@ static void fire_lead(edict_t *self, const vec3_t& start, const vec3_t& aimdir, 
                     gi.WriteByte(TE_SPLASH);
                     gi.WriteByte(8);
                     gi.WritePosition(tr.endpos);
-                    gi.WriteDir(tr.plane.normal);
+                    gi.WriteDirection(tr.plane.normal);
                     gi.WriteByte(color);
                     gi.Multicast(&tr.endpos, MULTICAST_PVS);
                 }
@@ -210,7 +210,7 @@ static void fire_lead(edict_t *self, const vec3_t& start, const vec3_t& aimdir, 
                     gi.WriteByte(svg_temp_entity);
                     gi.WriteByte(te_impact);
                     gi.WritePosition(tr.endpos);
-                    gi.WriteDir(tr.plane.normal);
+                    gi.WriteDirection(tr.plane.normal);
                     gi.Multicast(&tr.endpos, MULTICAST_PVS);
 
                     if (self->client)
@@ -307,9 +307,9 @@ void blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
         gi.WriteByte(TE_BLASTER);
         gi.WritePosition(self->s.origin);
         if (!plane)
-            gi.WriteDir(vec3_origin);
+            gi.WriteDirection(vec3_origin);
         else
-            gi.WriteDir(plane->normal);
+            gi.WriteDirection(plane->normal);
         gi.Multicast(&self->s.origin, MULTICAST_PVS);
     }
 
@@ -807,7 +807,7 @@ void bfg_think(edict_t *self)
                 gi.WriteByte(TE_LASER_SPARKS);
                 gi.WriteByte(4);
                 gi.WritePosition(tr.endpos);
-                gi.WriteDir(tr.plane.normal);
+                gi.WriteDirection(tr.plane.normal);
                 gi.WriteByte(self->s.skinnum);
                 gi.Multicast(&tr.endpos, MULTICAST_PVS);
                 break;
@@ -892,13 +892,13 @@ void flare_sparks(edict_t *self)
 		vectoangles(self->velocity, dir);
 		AngleVectors(dir, &forward, &right, &up);
 
-		gi.WriteDir(up);
+		gi.WriteDirection(up);
 	}
 	// If we're stopped, just write out the origin as our normal 
 	// 
 	else
 	{
-		gi.WriteDir(vec3_origin);
+		gi.WriteDirection(vec3_origin);
 	}
 	gi.Multicast(&self->s.origin, MULTICAST_PVS);
 }

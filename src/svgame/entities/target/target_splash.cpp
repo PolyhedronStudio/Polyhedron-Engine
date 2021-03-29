@@ -33,7 +33,7 @@ void use_target_splash(edict_t* self, edict_t* other, edict_t* activator)
     gi.WriteByte(TE_SPLASH);
     gi.WriteByte(self->count);
     gi.WritePosition(self->s.origin);
-    gi.WriteDir(self->movedir);
+    gi.WriteDirection(self->movedir);
     gi.WriteByte(self->sounds);
     gi.Multicast(&self->s.origin, MULTICAST_PVS);
 

@@ -636,7 +636,7 @@ void    G_TouchSolids(edict_t *ent);
 
 char    *G_CopyString(char *in);
 
-char    *vtos(const vec3_t &v, qboolean rounded);
+char    *vtos(const vec3_t &v, qboolean rounded = true);
 
 float vectoyaw(const vec3_t &vec);
 void vectoangles(const vec3_t &vec, vec3_t &angles);

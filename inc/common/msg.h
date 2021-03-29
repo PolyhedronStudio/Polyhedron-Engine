@@ -158,7 +158,7 @@ void    MSG_WriteBits(int value, int bits);
 int     MSG_WriteDeltaUsercmd(const usercmd_t *from, const usercmd_t *cmd, int version);
 int     MSG_WriteDeltaUsercmd_Enhanced(const usercmd_t *from, const usercmd_t *cmd, int version);
 #endif
-void    MSG_WriteDirection(const vec3_t vector);
+void    MSG_WriteDirection(const vec3_t &dir);
 void    MSG_PackEntity(entity_packed_t *out, const entity_state_t *in, qboolean short_angles);
 void    MSG_WriteDeltaEntity(const entity_packed_t *from, const entity_packed_t *to, msgEsFlags_t flags);
 void    MSG_PackPlayer(player_packed_t *out, const player_state_t *in);

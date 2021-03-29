@@ -453,7 +453,7 @@ int MSG_WriteDeltaUsercmd_Enhanced(const usercmd_t *from,
 
 #endif // USE_CLIENT
 
-void MSG_WriteDirection(const vec3_t dir)
+void MSG_WriteDirection(const vec3_t &dir)
 {
     int     best;
 
