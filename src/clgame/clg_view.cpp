@@ -298,7 +298,7 @@ static void CLG_SetupThirdPersionView(void)
     VectorSubtract(focus, cl->refdef.vieworg, focus);
     dist = sqrt(focus[0] * focus[0] + focus[1] * focus[1]);
 
-    cl->refdef.viewangles[PITCH] = -180 / M_PI * atan2(focus[2], dist);
+    cl->refdef.viewangles[PITCH] = -180.f / M_PI * std::atan2f(focus[2], dist);
     cl->refdef.viewangles[YAW] -= cl_thirdperson_angle->value;
 
     cl->thirdPersonView = true;
