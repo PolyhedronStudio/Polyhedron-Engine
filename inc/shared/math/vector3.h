@@ -168,7 +168,7 @@ void ProjectPointOnPlane(vec3_t& dst, const vec3_t& p, const vec3_t& normal);
 void PerpendicularVector(vec3_t& dst, const vec3_t& src);
 
 void AngleVectors(const vec3_t& angles, vec3_t* forward, vec3_t* right, vec3_t* up);
-vec_t VectorNormalize(vec3_t& v);        // returns vector length
+vec_t VectorNormalize(vec3_t &v);        // returns vector length
 vec_t VectorNormalize2(const vec3_t& v, vec3_t& out);
 vec_t VectorNormalize2(const vec3_t& v, vec_t *out);
 void ClearBounds(vec3_t& mins, vec3_t& maxs);

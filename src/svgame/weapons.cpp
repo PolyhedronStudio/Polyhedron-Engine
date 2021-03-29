@@ -316,12 +316,13 @@ void blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
     G_FreeEdict(self);
 }
 
-void fire_blaster(edict_t *self, const vec3_t& start, vec3_t &dir, int damage, int speed, int effect, qboolean hyper)
+void fire_blaster(edict_t *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int effect, qboolean hyper)
 {
     edict_t *bolt;
     trace_t tr;
+    vec3_t dir;
 
-    VectorNormalize(dir);
+    VectorNormalize2(aimdir, dir);
 
     bolt = G_Spawn();
     bolt->svflags = SVF_DEADMONSTER;

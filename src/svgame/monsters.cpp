@@ -46,9 +46,9 @@ void monster_fire_shotgun(edict_t *self, const vec3_t &start, const vec3_t &aimd
     gi.Multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_blaster(edict_t *self, const vec3_t &start, vec3_t dir, int damage, int speed, int flashtype, int effect)
+void monster_fire_blaster(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int flashtype, int effect)
 {
-    fire_blaster(self, start, dir, damage, speed, effect, false);
+    fire_blaster(self, start, aimdir, damage, speed, effect, false);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);

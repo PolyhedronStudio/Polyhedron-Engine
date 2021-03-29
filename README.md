@@ -33,11 +33,10 @@ When finished we have a stable base to work from, one that we can start making t
     - [X] Change MSG_Write/ReadPos to use MSG_Write/ReadFloat instead, this is safe after fixing the above.
     
 - [ ] Math Library
-  - [ ] Move macro functions over to inlined C functions.
+  - [ ] Rename Macro functions, for the old Vector lib, and create new inlined versions for the other vector types.
   - [ ] Change PITCH, YAW, ROLL defines to a vec3_t::PITCH, etc._
   - [ ] Use references/pointers, and const correctness.
-  - [ ] Rename VectorClear, and alike functions to Vec#Clear, and so on.
-  - [ ] Change the typedefs, so we use an actual union/struct.
+  - [X] Change the typedefs, so we use an actual union/struct. (Still needs to be done for the others, but vec3_t is done_)
   - [ ] Take a look around at other engines, see what we might be missing out on, so we won't run into a lack of in the future.
 - [ ] PMove
   - [ ] Footsteps, based on material.

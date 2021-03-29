@@ -18,16 +18,23 @@
 // Misc functions
 //=================
 //
-void VelocityForDamage(int damage, vec3_t v)
+vec3_t VelocityForDamage(int damage)
 {
-    v[0] = 100.0 * crandom();
-    v[1] = 100.0 * crandom();
-    v[2] = 200.0 + 100.0 * random();
+    // Pick random velocities.
+    vec3_t v = {
+        v[0] = 100.0 * crandom(),
+        v[1] = 100.0 * crandom(),
+        v[2] = 200.0 + 100.0 * random()
+    };
 
+    // Scale velocities.
     if (damage < 50)
         VectorScale(v, 0.7, v);
     else
         VectorScale(v, 1.2, v);
+
+    // Return.
+    return v;
 }
 
 void ClipGibVelocity(edict_t *ent)
@@ -124,7 +131,8 @@ void ThrowGib(edict_t *self, const char *gibname, int damage, int type)
         vscale = 1.0;
     }
 
-    VelocityForDamage(damage, vd);
+    // Calculate velocity for given damage.
+    vd = VelocityForDamage(damage);
     VectorMA(self->velocity, vscale, vd, gib->velocity);
     ClipGibVelocity(gib);
     gib->avelocity[0] = random() * 600;
@@ -167,7 +175,8 @@ void ThrowHead(edict_t *self, const char *gibname, int damage, int type)
         vscale = 1.0;
     }
 
-    VelocityForDamage(damage, vd);
+    // Calculate velocity for given damage.
+    vd = VelocityForDamage(damage);
     VectorMA(self->velocity, vscale, vd, self->velocity);
     ClipGibVelocity(self);
 
@@ -206,7 +215,8 @@ void ThrowClientHead(edict_t *self, int damage)
     self->flags |= FL_NO_KNOCKBACK;
 
     self->movetype = MOVETYPE_BOUNCE;
-    VelocityForDamage(damage, vd);
+    // Calculate velocity for given damage.
+    vd = VelocityForDamage(damage);
     VectorAdd(self->velocity, vd, self->velocity);
 
     if (self->client) { // bodies in the queue don't have a client anymore

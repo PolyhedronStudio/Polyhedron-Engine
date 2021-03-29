@@ -71,7 +71,7 @@
 void Brush_Move_Done(edict_t* ent);
 void Brush_Move_Final(edict_t* ent);
 void Brush_Move_Begin(edict_t* ent);
-void Brush_Move_Calc(edict_t* ent, vec3_t dest, void(*func)(edict_t*));
+void Brush_Move_Calc(edict_t* ent, const vec3_t &dest, void(*func)(edict_t*));
 
 //
 // Support routines for angular movement (changes in angle using avelocity)

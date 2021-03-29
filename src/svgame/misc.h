@@ -12,7 +12,7 @@
 //
 // Misc.
 //
-void VelocityForDamage(int damage, vec3_t v);
+vec3_t VelocityForDamage(int damage);
 void ClipGibVelocity(edict_t* ent);
 
 //
