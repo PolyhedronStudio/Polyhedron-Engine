@@ -373,19 +373,15 @@ void fire_blaster(edict_t *self, const vec3_t& start, const vec3_t &aimdir, int 
     bolt->solid = SOLID_BBOX;               // SOLID_BBOX
     bolt->s.effects |= effect;              // Apply effect argument to entity.
     
-    // Setup entity state origin to spawn at.
-    bolt->s.origin = start;
-    bolt->s.old_origin = start;
+    // Setup entity physics attribute values.
+    bolt->s.origin = start;     // Initial origin.
+    bolt->s.old_origin = start; // Initial origin, same to origin, since this entity had no frame life yet.
+    bolt->s.angles = vec3_euler(dir);       // Calculate euler radian entity satate angles.
+    bolt->velocity = vec3_scale(dir, speed);// Calculate entity state velocity.
+    bolt->mins = vec3_zero();   // Clear bounding mins.
+    bolt->maxs = vec3_zero();   // Clear bounding maxs.
 
-    // Calculate Euler Radian entity satate angles.
-    bolt->s.angles = vec3_euler(dir);//vectoangles(dir, bolt->s.angles);
-    bolt->velocity = vec3_scale(dir, speed);//Vec3_Scale(dir, speed, bolt->velocity);
-    
-    // Clear mins and maxs bounding box.
-    bolt->mins = vec3_zero();
-    bolt->maxs = vec3_zero();
-
-    // Setup model and sound to use. (Precache if needed)
+    // Setup (and precache) sound, and model.
     bolt->s.modelindex = gi.modelindex("models/objects/laser/tris.md2");
     bolt->s.sound = gi.soundindex("misc/lasfly.wav");
        
