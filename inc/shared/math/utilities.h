@@ -24,6 +24,7 @@
 #define DegreesScalar ((float) (180.0f / std::numbers::pi_v<float>))
 #define RadiansScalar ((float) (std::numbers::pi_v<float> / 180.0f))
 
+
 //
 //===============
 // Degrees
@@ -44,6 +45,18 @@ static inline float Degrees(float radians) {
 //
 static inline float Radians(float degrees) {
     return degrees * RadiansScalar;
+}
+
+//
+//===============
+// Radians
+// 
+// Does a sinf, cosf, for the radians, useful utility. (used in vec3_vectors)
+//===============
+//
+static inline void SinCosRadians(const float radians, float  &s, float &c) {
+    s = std::sinf(radians);
+    c = std::cosf(radians);
 }
 
 //
@@ -181,6 +194,22 @@ static inline float Mixf(float a, float b, float mix) {
 //
 static inline float Clampf(float f, float min = 0.f, float max = 1.f) {
     return Minf(Maxf(f, min), max);
+}
+
+//
+//===============
+// ClampEuler
+// 
+// The angle `theta` circularly clamped.
+//===============
+//
+static inline float ClampEuler(float theta) {
+    while (theta >= 360.f)
+        theta -= 360.f;
+    while (theta < 0.f)
+        theta += 360.f;
+
+    return theta;
 }
 
 //

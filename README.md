@@ -54,6 +54,7 @@ When finished we have a stable base to work from, one that we can start making t
     - [ ] Move into its own repository, and implement as a submodule. This should allow for our own repository and record of server game code.
     - [ ] Remove all needless entities.
 - [ ] Refresher
+  - [ ] Hook up DDS load code for general materials.
   - [ ] Move over the refresher from PalmliX' fork to be.
   - [ ] 
 - [ ] WIDTools, although it resides outside of this repository, it needs to go along with the 0.2 release.

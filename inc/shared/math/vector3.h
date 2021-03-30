@@ -55,30 +55,58 @@ template<typename T> struct vec3_template {
     }
 
     // OPERATOR: + vec3_template
-    inline vec3_template operator+ (const vec3_template& operand) const
+    inline vec3_template operator +(const vec3_template& operand) const
     {
         return vec3_template(x + operand.x, y + operand.y, z + operand.z);
     }
 
     // OPERATOR: - vec3_template
-    inline vec3_template operator- (const vec3_template& operand) const
+    inline vec3_template operator -(const vec3_template& operand) const
     {
         return vec3_template(x - operand.x, y - operand.y, z - operand.z);
     }
 
+    // OPERATOR: / vec3_template
+    inline vec3_template operator /(const vec3_template& operand) const
+    {
+        return vec3_template(x / operand.x, y / operand.y, z / operand.z);
+    }
+
+    // OPERATOR: * vec3_template
+    inline vec3_template operator *(const vec3_template& operand) const
+    {
+        return vec3_template(x * operand.x, y * operand.y, z * operand.z);
+    }
+
     // OPERATOR: -= vec3_template
-    const vec3_template& operator -=(const vec3_template& other) {
-        x -= other.x;
-        y -= other.y;
-        z -= other.z;
+    const vec3_template& operator -=(const vec3_template& operand) {
+        x -= operand.x;
+        y -= operand.y;
+        z -= operand.z;
         return *this;
     }
 
     //// OPERATOR: += vec3_template
-    const vec3_template& operator +=(const vec3_template& other) {
-        x += other.x;
-        y += other.y;
-        z += other.z;
+    const vec3_template& operator +=(const vec3_template& operand) {
+        x += operand.x;
+        y += operand.y;
+        z += operand.z;
+        return *this;
+    }
+
+    //// OPERATOR: /= vec3_template
+    const vec3_template& operator *=(const vec3_template& operand) {
+        x *= operand.x;
+        y *= operand.y;
+        z *= operand.z;
+        return *this;
+    }
+
+    //// OPERATOR: *= vec3_template
+    const vec3_template& operator /=(const vec3_template& operand) {
+        x /= operand.x;
+        y /= operand.y;
+        z /= operand.z;
         return *this;
     }
 };
@@ -243,53 +271,6 @@ static inline qboolean vec3_equal(const vec3_t &a, const vec3_t &b) {
 
 //
 //===============
-// vec3_euler
-//
-// Returns the euler angles, in radians, for the directional vector 'dir'.
-//===============
-//
-static inline vec3_t vec3_euler(const vec3_t &dir) {
-    float pitch;
-    float yaw;
-
-    if (dir.y == 0.f && dir.x == 0.f) {
-        yaw = 0.f;
-
-        if (dir.z > 0.f) {
-            pitch = 90.f;
-        } else {
-            pitch = 270.f;
-        }
-    } else {
-        if (dir.x) {
-            yaw = Degrees(std::atan2f(dir.y, dir.x));
-        } else if (dir.y > 0.f) {
-            yaw = 90.f;
-        } else {
-            yaw = 270.f;
-        }
-
-        if (yaw < 0.f) {
-            yaw += 360.f;
-        }
-
-        const float forward = std::sqrtf(dir.x * dir.x + dir.y * dir.y);
-        pitch = Degrees(std::atan2f(dir.z, forward));
-
-        if (pitch < 0.f) {
-            pitch += 360.f;
-        }
-    }
-
-    return vec3_t{
-        -pitch, 
-        yaw, 
-        0
-    };
-}
-
-//
-//===============
 // vec3_fabsf
 //
 // Returns a vector containing the absolute values of 'v'.
@@ -315,6 +296,36 @@ static inline vec3_t vec3_floorf(const vec3_t &v) {
         std::floorf(v.x),
         std::floorf(v.y),
         std::floorf(v.z)
+    };
+}
+
+//
+//===============
+// vec3_ceilf
+//
+// Returns a vector containing the components of `v`, rounded to the nearest higher integer.
+//===============
+//
+static inline vec3_t vec3_ceilf(const vec3_t &v) {
+    return vec3_t{
+        ceilf(v.x),
+        ceilf(v.y),
+        ceilf(v.z)
+    };
+}
+
+//
+//===============
+// vec3_clamp_euler
+//
+// Returns the specified Euler angles circularly clamped to '0.f - 360.f'.
+//===============
+//
+static inline vec3_t vec3_clamp_euler(const vec3_t &euler) {
+    return vec3_t{
+        ClampEuler(euler.x),
+        ClampEuler(euler.y),
+        ClampEuler(euler.z)
     };
 }
 
@@ -430,28 +441,13 @@ static inline vec3_t vec3_mix_euler(const vec3_t &a, const vec3_t &b, float mix)
 
 //
 //===============
-// vec3_multiply
-//
-// Returns the product 'a * b'.
-//===============
-//
-static inline vec3_t vec3_multiply(const vec3_t &a, const vec3_t &b) {
-    return vec3_t{
-        a.x * b.x, 
-        a.y * b.y, 
-        a.z * b.z
-    };
-}
-
-//
-//===============
-// vec3_multiply
+// vec3_mix3
 //
 // Returns the linear interpolation of `a` and `b` using the specified fractions.
 //===============
 //
-static inline vec3_t Vec3_Mix3(const vec3_t &a, const vec3_t &b, const vec3_t &mix) {
-    return a + vec3_multiply(b - a, mix);
+static inline vec3_t vec3_mix3(const vec3_t &a, const vec3_t &b, const vec3_t &mix) {
+    return a + ((b - a) * mix);
 }
 
 //
@@ -525,15 +521,121 @@ static inline vec3_t vec3_reflect(const vec3_t &a, const vec3_t &b) {
     return a + vec3_scale(b, -2.f * vec3_dot(a, b)));
 }
 
-/**
- * @return The forward, right and up vectors for the euler angles in radians.
- */
-static inline void Vec3_Vectors(const vec3_t euler, vec3_t* forward, vec3_t* right, vec3_t* up) {
+
+//
+//===============
+// vec3_length_squared
+//
+// Returns the squared length (magnitude) of 'v'.
+//===============
+//
+static inline float vec3_length_squared(const vec3_t &v) {
+    return vec3_dot(v, v);
+}
+
+//
+//===============
+// vec3_length_squared
+//
+// Returns the length (magnitude) of 'v'.
+//===============
+//
+static inline float vec3_length(const vec3_t &v) {
+    return std::sqrtf(vec3_length_squared(v));
+}
+
+//
+//===============
+// vec3_normalize_length
+//
+// Returns the normalized vector 'v', and sets the length reference value to
+// the vector 'length'.
+//===============
+//
+static inline vec3_t vec3_normalize_length(const vec3_t &v, float &length) {
+    length = vec3_length(v);
+    if (length > 0.f) {
+        return vec3_scale(v, 1.f / length);
+    }
+    else {
+        return vec3_zero();
+    }
+}
+
+//
+//===============
+// vec3_normalize
+//
+// Returns the normalized vector 'v'.
+//===============
+//
+static inline vec3_t vec3_normalize(const vec3_t &v) {
+    float length;
+    return vec3_normalize_length(v, length);
+}
+
+//
+//===============
+// vec3_distance_direction
+//
+// Returns the length of `a - b` as well as the normalized directional vector.
+//===============
+//
+static inline float vec3_distance_direction(const vec3_t &a, const vec3_t &b, vec3_t& dir) {
+    float length;
+
+    dir = vec3_normalize_length(a - b, &length);
+
+    return length;
+}
+
+//
+//===============
+// vec3_distance_direction
+//
+// Returns the normalized direction vector between points a and b.
+//===============
+//
+static inline vec3_t vec3_direction(const vec3_t &a, const vec3_t &b) {
+    return vec3_normalize(a - b);
+}
+
+
+//
+//===============
+// vec3_distance_squared
+//
+// Returns the squared length of the vector `a - b`.
+//===============
+//
+static inline float vec3_distance_squared(const vec3_t &a, const vec3_t &b) {
+    return vec3_length_squared(a - b);
+}
+
+//
+//===============
+// vec3_distance_squared
+//
+// Returns the length of the vector `a - b`.
+//===============
+//
+static inline float vec3_distance(const vec3_t &a, const vec3_t &b) {
+    return vec3_length(a - b);
+}
+
+//
+//===============
+// vec3_distance_squared
+//
+// Returns the forward, right and up vectors for the euler angles in radians.
+//===============
+//
+static inline void vec3_vectors(const vec3_t &euler, vec3_t *forward, vec3_t *right, vec3_t *up) {
     float sr, sp, sy, cr, cp, cy;
 
-    SinCosf(Radians(euler.x), &sp, &cp);
-    SinCosf(Radians(euler.y), &sy, &cy);
-    SinCosf(Radians(euler.z), &sr, &cr);
+    SinCosRadians(Radians(euler.x), sp, cp);
+    SinCosRadians(Radians(euler.y), sy, cy);
+    SinCosRadians(Radians(euler.z), sr, cr);
 
     if (forward) {
         forward->x = cp * cy;
