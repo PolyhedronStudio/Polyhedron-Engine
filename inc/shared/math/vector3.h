@@ -173,6 +173,185 @@ static inline vec3_t vec3_down(void) {
     return vec3_negate(vec3_up());
 }
 
+//
+//===============
+// vec3_equalepsilon
+//
+// Returns true if 'a'and 'b' are equal using the specified epsilon.
+//===============
+//
+static inline qboolean vec3_equalepsilon(const vec3_t &a, const vec3_t &b, float epsilon = FLT_EPSILON) {
+    return EqualEpsilonf(a.x, b.x, epsilon) &&
+        EqualEpsilonf(a.y, b.y, epsilon) &&
+        EqualEpsilonf(a.z, b.z, epsilon);
+}
+
+//
+//===============
+// vec3_equal
+//
+// Returns true if 'a' and 'b' are equal.
+//===============
+//
+static inline qboolean vec3_equal(const vec3_t &a, const vec3_t &b) {
+    return vec3_equalepsilon(a, b);
+}
+
+//
+//===============
+// vec3_euler
+//
+// Returns the euler angles, in radians, for the directional vector 'dir'.
+//===============
+//
+static inline vec3_t vec3_euler(const vec3_t &dir) {
+    float pitch, yaw;
+
+    if (dir.y == 0.f && dir.x == 0.f) {
+        yaw = 0.f;
+        if (dir.z > 0.f) {
+            pitch = 90.f;
+        }
+        else {
+            pitch = 270.f;
+        }
+    }
+    else {
+        if (dir.x) {
+            yaw = Degrees(std::atan2f(dir.y, dir.x));
+        }
+        else if (dir.y > 0.f) {
+            yaw = 90.f;
+        }
+        else {
+            yaw = 270.f;
+        }
+
+        if (yaw < 0.f) {
+            yaw += 360.f;
+        }
+
+        const float forward = std::sqrtf(dir.x * dir.x + dir.y * dir.y);
+        pitch = Degrees(std::atan2f(dir.z, forward));
+
+        if (pitch < 0.f) {
+            pitch += 360.f;
+        }
+    }
+
+    return vec3_t{
+        -pitch, 
+        yaw, 
+        0
+    };
+}
+
+//
+//===============
+// vec3_fabsf
+//
+// Returns a vector containing the absolute values of 'v'.
+//===============
+//
+static inline vec3_t vec3_fabsf(const vec3_t &v) {
+    return vec3_t{
+        std::fabsf(v.x),
+        std::fabsf(v.y),
+        std::fabsf(v.z)
+    };
+}
+
+//
+//===============
+// vec3_floorf
+//
+// Returns a vector containing the components of 'v', rounded to the nearest lower integer.
+//===============
+//
+static inline vec3_t vec3_floorf(const vec3_t &v) {
+    return vec3_t{
+        std::floorf(v.x),
+        std::floorf(v.y),
+        std::floorf(v.z)
+    };
+}
+
+//
+//===============
+// vec3_fmaf
+//
+// Returns The vector 'v' + ('add' * 'multiply').
+//===============
+//
+static inline vec3_t vec3_fmaf(const vec3_t &v, float multiply, const vec3_t &add) {
+    return vec3_t{
+        std::fmaf(add.x, multiply, v.x),
+        std::fmaf(add.y, multiply, v.y),
+        std::fmaf(add.z, multiply, v.z)
+    };
+}
+
+//
+//===============
+// vec3_maxf
+//
+// Returns a vector containing the max components of 'a' and 'b'.
+//===============
+//
+static inline vec3_t vec3_maxf(const vec3_t &a, const vec3_t &b) {
+    return vec3_t{
+        std::fmaxf(a.x, b.x), 
+        std::fmaxf(a.y, b.y),
+        std::fmaxf(a.z, b.z)
+    };
+}
+
+//
+//===============
+// vec3_maxs
+//
+// Returns the vector 'vec3_t { -FLT_MAX, -FLT_MAX, -FLT_MAX }'.
+//===============
+//
+static inline vec3_t vec3_maxs(void) {
+    return vec3_t{
+        -FLT_MAX,
+        -FLT_MAX,
+        -FLT_MAX
+    };
+}
+
+//
+//
+//===============
+// vec3_minf
+//
+// Return a vector containing the min components of 'a' and 'b'.
+//===============
+//
+static inline vec3_t vec3_minf(const vec3_t &a, const vec3_t &b) {
+    return vec3_t{
+        std::fminf(a.x, b.x),
+        std::fminf(a.y, b.y),
+        std::fminf(a.z, b.z)
+    };
+}
+
+//
+//===============
+// vec3_minf
+//
+// Returns the vector 'vec3_t { FLT_MAX, FLT_MAX, FLT_MAX }'.
+//===============
+//
+static inline vec3_t vec3_mins(void) {
+    return vec3_t{
+        FLT_MAX,
+        FLT_MAX,
+        FLT_MAX
+    };
+}
+
 
 //
 //=============================================================================
