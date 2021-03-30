@@ -125,7 +125,7 @@ void Killed(edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, ve
 SpawnDamage
 ================
 */
-void SpawnDamage(int type, vec3_t origin, vec3_t normal, int damage)
+void SpawnDamage(int type, const vec3_t &origin, const vec3_t &normal, int damage)
 {
     if (damage > 255)
         damage = 255;
@@ -531,23 +531,40 @@ void T_RadiusDamage(edict_t *inflictor, edict_t *attacker, float damage, edict_t
     vec3_t  v;
     vec3_t  dir;
 
+    // N&C: From Yamagi Q2, to prevent issues.
+    if (!inflictor || !attacker)
+    {
+        return;
+    }
+
+    // Find entities within radius.
     while ((ent = findradius(ent, inflictor->s.origin, radius)) != NULL) {
+        // Continue in case this entity has to be ignored from applying damage.
         if (ent == ignore)
             continue;
+        // Continue in case this entity CAN'T take any damage.
         if (!ent->takedamage)
             continue;
 
-        VectorAdd(ent->mins, ent->maxs, v);
-        VectorMA(ent->s.origin, 0.5, v, v);
-        VectorSubtract(inflictor->s.origin, v, v);
-        points = damage - 0.5 * VectorLength(v);
+        // Calculate damage points.
+        v = ent->mins + ent->maxs, v;
+        v = vec3_fmaf(ent->s.origin, 0.5, v);
+        v -= inflictor->s.origin;
+        points = damage - 0.5 * vec3_length(v);
+
+        // In case the attacker is the own entity, half damage.
         if (ent == attacker)
             points = points * 0.5;
-        if (points > 0) {
-            if (CanDamage(ent, inflictor)) {
-                VectorSubtract(ent->s.origin, inflictor->s.origin, dir);
 
-                T_Damage(ent, inflictor, attacker, dir, inflictor->s.origin, vec3_origin, (int)points, (int)points, DAMAGE_RADIUS, mod);
+        // Apply damage points.
+        if (points > 0) {
+            // Ensure whether we CAN actually apply damage.
+            if (CanDamage(ent, inflictor)) {
+                // Calculate direcion.
+                dir = ent->s.origin - inflictor->s.origin;
+
+                // Apply damages.
+                T_Damage(ent, inflictor, attacker, dir, inflictor->s.origin, vec3_zero(), (int)points, (int)points, DAMAGE_RADIUS, mod);
             }
         }
     }
