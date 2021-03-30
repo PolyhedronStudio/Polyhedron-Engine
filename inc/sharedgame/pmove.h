@@ -238,19 +238,6 @@ typedef struct {
     // Callback functions for collision with the world and solid entities
     trace_t (*q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end);
     int     (*PointContents)(const vec3_t &point);
-
-
-
-    //int             numtouch;               // Number of touched entities.
-    //struct edict_s* touchents[MAXTOUCH];   // Pointers to touched entities.
-
-    //struct edict_s* groundentity; // Pointer to the entity that is below the player.
-
-    //vec3_t      viewangles; // Clamped View Angles
-    //float       viewheight; // Viewheight.
-
-    //vec3_t      mins, maxs; // Bounding box size
-
 } pm_move_t;
 
 

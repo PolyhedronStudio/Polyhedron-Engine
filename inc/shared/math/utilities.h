@@ -228,7 +228,7 @@ static inline float Smoothf(float f, float min, float max) {
 //===============
 // EqualEpsilonf
 // 
-// Returns true if `fabsf(a - b) <= epsilon`.
+// Returns true if `std""fabsf(a - b) <= epsilon`.
 //===============
 //
 static inline bool EqualEpsilonf(float a, float b, float epsilon = FLT_EPSILON) {

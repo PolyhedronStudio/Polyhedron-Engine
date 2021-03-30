@@ -56,7 +56,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 //=========================================
 
-#define UPDATE_BACKUP   16  // copies of entity_state_t to keep buffered
+#define UPDATE_BACKUP   32  // copies of entity_state_t to keep buffered
                             // must be power of two
 #define UPDATE_MASK     (UPDATE_BACKUP - 1)
 
@@ -289,27 +289,27 @@ typedef enum {
 
 // entity_state_t communication
 
-// try to pack the common update flags into the first byte
-#define U_ORIGIN1   (1<<0)
-#define U_ORIGIN2   (1<<1)
-#define U_ANGLE2    (1<<2)
-#define U_ANGLE3    (1<<3)
+// Try to pack the common update flags into the first byte
+#define U_ORIGIN_X   (1<<0)        // was named: U_ORIGIN_X
+#define U_ORIGIN_Y   (1<<1)        // was named: U_ORIGIN_Y
+#define U_ANGLE_Y    (1<<2)        // was named: U_ANGLE_Y
+#define U_ANGLE_Z    (1<<3)        // was named: U_ANGLE_Z
 #define U_FRAME8    (1<<4)        // frame is a byte
 #define U_EVENT     (1<<5)
 #define U_REMOVE    (1<<6)        // REMOVE this entity, don't add it
 #define U_MOREBITS1 (1<<7)        // read one additional byte
 
-// second byte
+// Second byte
 #define U_NUMBER16  (1<<8)        // NUMBER8 is implicit if not set
-#define U_ORIGIN3   (1<<9)
-#define U_ANGLE1    (1<<10)
+#define U_ORIGIN_Z   (1<<9)          // was named: U_ORIGIN_Z
+#define U_ANGLE_X    (1<<10)         // was named: U_ANGLE_X
 #define U_MODEL     (1<<11)
 #define U_RENDERFX8 (1<<12)        // fullbright, etc
 #define U_ANGLE16   (1<<13)
 #define U_EFFECTS8  (1<<14)        // autorotate, trails, etc
 #define U_MOREBITS2 (1<<15)        // read one additional byte
 
-// third byte
+// Third byte
 #define U_SKIN8         (1<<16)
 #define U_FRAME16       (1<<17)     // frame is a short
 #define U_RENDERFX16    (1<<18)     // 8 + 16 = 32

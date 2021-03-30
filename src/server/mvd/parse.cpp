@@ -704,7 +704,7 @@ static void MVD_PlayerToEntityStates(mvd_t *mvd)
     }
 }
 
-#define RELINK_MASK        (U_MODEL|U_ORIGIN1|U_ORIGIN2|U_ORIGIN3|U_SOLID)
+#define RELINK_MASK        (U_MODEL|U_ORIGIN_X|U_ORIGIN_Y|U_ORIGIN_Z|U_SOLID)
 
 /*
 ==================
