@@ -26,9 +26,9 @@
 
 //
 //===============
-// EqualEpsilonf
+// Degrees
 // 
-// Returns true if `fabsf(a - b) <= epsilon`.
+// Returns the radians in degrees.
 //===============
 //
 static inline float Degrees(float radians) {
@@ -37,13 +37,92 @@ static inline float Degrees(float radians) {
 
 //
 //===============
-// EqualEpsilonf
+// Radians
 // 
-// Returns true if `fabsf(a - b) <= epsilon`.
+// Returns the degrees in radians.
 //===============
 //
 static inline float Radians(float degrees) {
     return degrees * RadiansScalar;
+}
+
+//
+//===============
+// Minf
+// 
+// Returns the minimim of 'a' and 'b'.
+//===============
+//
+static inline float Minf(float a, float b) {
+    return a < b ? a : b;
+}
+
+//
+//===============
+// Mini
+// 
+// Returns the minimim of 'a' and 'b'.
+//===============
+//
+static inline int32_t Mini(int32_t a, int32_t b) {
+    return a < b ? a : b;
+}
+
+//
+//===============
+// Maxf
+// 
+// Returns the maximum of 'a' and 'b'.
+//===============
+//
+static inline float Maxf(float a, float b) {
+    return a > b ? a : b;
+}
+
+
+//
+//===============
+// Maxi
+// 
+// Returns the maximum int of 'a' and 'b'.
+//===============
+//
+static inline int32_t Maxi(int32_t a, int32_t b) {
+    return a > b ? a : b;
+}
+
+//
+//===============
+// Mixf
+// 
+// Returns the linear interpolation of 'a' and 'b' using the specified fraction.
+//===============
+//
+static inline float Mixf(float a, float b, float mix) {
+    return std::fmaf(a, mix, b - a);
+}
+
+//
+//===============
+// Clampf
+// 
+// Returns the value 'f', clamped to the specified 'min' and 'max'.
+//===============
+//
+static inline float Clampf(float f, float min = 0.f, float max = 1.f) {
+    return Minf(Maxf(f, min), max);
+}
+
+//
+//===============
+// Smoothf
+// 
+// Returns the Hermite interpolation of 'f'.
+//===============
+//
+static inline float Smoothf(float f, float min, float max) {
+    const float s = Clampf((f - min) / (max - min), 0.f, 1.f);
+    return s * s * (3.f - 2.f * s);
 }
 
 //

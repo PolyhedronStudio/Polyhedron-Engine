@@ -523,7 +523,7 @@ static void PM_Friction(void) {
     }
 
     // Make sure that the "control" speed does not exceed PM_SPEED_STOP
-    const float control = std::fmaxf(PM_SPEED_STOP, speed);
+    const float control = Maxf(PM_SPEED_STOP, speed);
 
     // The actual friction value we'll be using, set it based on several
     // conditions.
@@ -551,7 +551,7 @@ static void PM_Friction(void) {
     }
 
     // Scale the velocity, taking care to not reverse direction
-    const float scale = std::fmaxf(0.0, speed - (friction * control * pm_locals.time)) / speed;
+    const float scale = Maxf(0.0, speed - (friction * control * pm_locals.time)) / speed;
 
     // Calculate new velocity.
     Vector vel2 = pm->state.velocity;

@@ -205,25 +205,23 @@ static inline qboolean vec3_equal(const vec3_t &a, const vec3_t &b) {
 //===============
 //
 static inline vec3_t vec3_euler(const vec3_t &dir) {
-    float pitch, yaw;
+    float pitch;
+    float yaw;
 
     if (dir.y == 0.f && dir.x == 0.f) {
         yaw = 0.f;
+
         if (dir.z > 0.f) {
             pitch = 90.f;
-        }
-        else {
+        } else {
             pitch = 270.f;
         }
-    }
-    else {
+    } else {
         if (dir.x) {
             yaw = Degrees(std::atan2f(dir.y, dir.x));
-        }
-        else if (dir.y > 0.f) {
+        } else if (dir.y > 0.f) {
             yaw = 90.f;
-        }
-        else {
+        } else {
             yaw = 270.f;
         }
 
@@ -300,9 +298,9 @@ static inline vec3_t vec3_fmaf(const vec3_t &v, float multiply, const vec3_t &ad
 //
 static inline vec3_t vec3_maxf(const vec3_t &a, const vec3_t &b) {
     return vec3_t{
-        std::fmaxf(a.x, b.x), 
-        std::fmaxf(a.y, b.y),
-        std::fmaxf(a.z, b.z)
+        Maxf(a.x, b.x), 
+        Maxf(a.y, b.y),
+        Maxf(a.z, b.z)
     };
 }
 
@@ -331,9 +329,9 @@ static inline vec3_t vec3_maxs(void) {
 //
 static inline vec3_t vec3_minf(const vec3_t &a, const vec3_t &b) {
     return vec3_t{
-        std::fminf(a.x, b.x),
-        std::fminf(a.y, b.y),
-        std::fminf(a.z, b.z)
+        Minf(a.x, b.x),
+        Minf(a.y, b.y),
+        Minf(a.z, b.z)
     };
 }
 
