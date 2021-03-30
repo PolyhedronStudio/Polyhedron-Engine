@@ -369,6 +369,11 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
     int         psave;
     int         te_sparks;
 
+    if (!targ || !inflictor || !attacker)
+    {
+        return;
+    }
+
     if (!targ->takedamage)
         return;
 
@@ -400,8 +405,9 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
         te_sparks = TE_SPARKS;
 
     // Retrieve normalized direction.
-    vec3_t dir;
-    VectorNormalize2(dmgDir, dir);
+    vec3_t dir = vec3_normalize(dmgDir);
+    //VectorNormalize2(dmgDir, dir);
+
 
 // bonus damage for suprising a monster
     if (!(dflags & DAMAGE_RADIUS) && (targ->svflags & SVF_MONSTER) && (attacker->client) && (!targ->enemy) && (targ->health > 0))

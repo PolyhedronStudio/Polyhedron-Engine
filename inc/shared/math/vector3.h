@@ -13,6 +13,8 @@
 // for legacy code to still be compatible. For any new code, use the new and
 // more programmer friendly Vec3_ functions. To increase readability, a rule of
 // standard is to declare a vec3_t like so: vec3_t x = { 1.f, 0.f, 0.f };
+// 
+// To add, subtract, divide or multiply a vector, simply use the designated 
 //
 #ifndef __INC_SHARED_MATH_VECTOR3_H__
 #define __INC_SHARED_MATH_VECTOR3_H__
@@ -524,7 +526,7 @@ static inline vec3_t vec3_clamp01(const vec3_t &v) {
 //===============
 //
 static inline vec3_t vec3_reflect(const vec3_t &a, const vec3_t &b) {
-    return a + vec3_scale(b, -2.f * vec3_dot(a, b)));
+    return a + vec3_scale(b, -2.f * vec3_dot(a, b));
 }
 
 
@@ -590,7 +592,7 @@ static inline vec3_t vec3_normalize(const vec3_t &v) {
 static inline float vec3_distance_direction(const vec3_t &a, const vec3_t &b, vec3_t& dir) {
     float length;
 
-    dir = vec3_normalize_length(a - b, &length);
+    dir = vec3_normalize_length(a - b, length);
 
     return length;
 }

@@ -287,7 +287,14 @@ Fires a single blaster bolt.  Used by the blaster and hyper blaster.
 */
 void blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-    int     mod;
+    int mod;
+
+    // N&C: From Yamagi Q2, this seems to resolve our random crashes at times.
+    if (!self || !other) // Plane and Surf can be NULL
+    {
+        G_FreeEdict(self);
+        return;
+    }
 
     if (other == self->owner)
         return;
@@ -305,7 +312,19 @@ void blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
             mod = MOD_HYPERBLASTER;
         else
             mod = MOD_BLASTER;
-        T_Damage(other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
+
+        // N&C: Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
+        if (plane)
+        {
+            T_Damage(other, self, self->owner, self->velocity, self->s.origin,
+                plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
+        }
+        else
+        {
+            T_Damage(other, self, self->owner, self->velocity, self->s.origin,
+                vec3_zero(), self->dmg, 1, DAMAGE_ENERGY, mod);
+        }
+
     } else {
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_BLASTER);
