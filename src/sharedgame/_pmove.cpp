@@ -1271,9 +1271,7 @@ static void PM_CheckDuck(void)
     else {
         // stand up if possible
         if (pm->state.flags & PMF_DUCKED) {
-            // try to stand up
-            pm->maxs.z = 32;
-            trace = pm->Trace(pml.origin, pm->mins, pm->maxs, pml.origin);
+
             if (!trace.allsolid)
                 pm->state.flags &= ~PMF_DUCKED;
         }

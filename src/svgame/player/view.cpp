@@ -283,8 +283,8 @@ void SV_CalcViewOffset(edict_t *ent)
     VectorClear(v);
 
     // add view height
-
     v[2] += ent->viewheight;
+    //v[2] += ent->client->ps.pmove.view_offset[2];
 
     // add fall height
 
