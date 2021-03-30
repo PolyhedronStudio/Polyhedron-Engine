@@ -103,6 +103,33 @@ typedef vec3_template<double> dvec3_t;
 //=============================================================================
 //
 
+
+//
+//===============
+// vec3_cross
+// 
+// Returns the cross product of 'a x b'.
+//===============
+//
+static inline vec3_t vec3_cross(const vec3_t &a, const vec3_t &b) {
+    return vec3_t{
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+    };
+}
+
+//
+//===============
+// vec3_dot
+// 
+// Returns the dot product of 'a · b'.
+//===============
+//
+static inline float vec3_dot(const vec3_t &a, const vec3_t &b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
 //
 //===============
 // vec3_scale
@@ -127,6 +154,23 @@ static inline vec3_t vec3_scale(const vec3_t &v, float scale) {
 //
 static inline vec3_t vec3_negate(const vec3_t &v) {
     return vec3_scale(v, -1.f);
+}
+
+
+//
+//===============
+// vec3_one
+// 
+// Returns a zero point origin vector:
+// `vec3_t { 1.f, 1.f, 1.f }`
+//===============
+//
+static inline vec3_t vec3_one(void) {
+    return vec3_t{
+        1.f,
+        1.f,
+        1.f
+    };
 }
 
 //
@@ -180,7 +224,7 @@ static inline vec3_t vec3_down(void) {
 // Returns true if 'a'and 'b' are equal using the specified epsilon.
 //===============
 //
-static inline qboolean vec3_equalepsilon(const vec3_t &a, const vec3_t &b, float epsilon = FLT_EPSILON) {
+static inline qboolean vec3_equal_epsilon(const vec3_t &a, const vec3_t &b, float epsilon = FLT_EPSILON) {
     return EqualEpsilonf(a.x, b.x, epsilon) &&
         EqualEpsilonf(a.y, b.y, epsilon) &&
         EqualEpsilonf(a.z, b.z, epsilon);
@@ -194,7 +238,7 @@ static inline qboolean vec3_equalepsilon(const vec3_t &a, const vec3_t &b, float
 //===============
 //
 static inline qboolean vec3_equal(const vec3_t &a, const vec3_t &b) {
-    return vec3_equalepsilon(a, b);
+    return vec3_equal_epsilon(a, b);
 }
 
 //
@@ -337,7 +381,7 @@ static inline vec3_t vec3_minf(const vec3_t &a, const vec3_t &b) {
 
 //
 //===============
-// vec3_minf
+// vec3_mins
 //
 // Returns the vector 'vec3_t { FLT_MAX, FLT_MAX, FLT_MAX }'.
 //===============
@@ -350,6 +394,165 @@ static inline vec3_t vec3_mins(void) {
     };
 }
 
+//
+//===============
+// vec3_mix
+//
+// Returns the linear interpolation of 'a' and 'b' using the specified fraction.
+//===============
+//
+static inline vec3_t vec3_mix(const vec3_t &a, const vec3_t &b, float mix) {
+    return vec3_fmaf(a, mix, b - a);
+}
+
+//
+//===============
+// vec3_mix_euler
+//
+// Returns the linear interpolation of 'a' and 'b' using the specified fraction.
+//===============
+//
+static inline vec3_t vec3_mix_euler(const vec3_t &a, const vec3_t &b, float mix) {
+
+    vec3_t _a = a;
+    vec3_t _b = b;
+
+    for (std::size_t i = 0; i < 3; i++) {
+        if (_b.xyz[i] - _a.xyz[i] >= 180.f) {
+            _a.xyz[i] += 360.f;
+        } else if (_b.xyz[i] - _a.xyz[i] <= -180.f) {
+            _b.xyz[i] += 360.f;
+        }
+    }
+
+    return vec3_mix(_a, _b, mix);
+}
+
+//
+//===============
+// vec3_multiply
+//
+// Returns the product 'a * b'.
+//===============
+//
+static inline vec3_t vec3_multiply(const vec3_t &a, const vec3_t &b) {
+    return vec3_t{
+        a.x * b.x, 
+        a.y * b.y, 
+        a.z * b.z
+    };
+}
+
+//
+//===============
+// vec3_multiply
+//
+// Returns the linear interpolation of `a` and `b` using the specified fractions.
+//===============
+//
+static inline vec3_t Vec3_Mix3(const vec3_t &a, const vec3_t &b, const vec3_t &mix) {
+    return a + vec3_multiply(b - a, mix);
+}
+
+//
+//===============
+// vec3_roundf
+//
+// Returns the vector `v` rounded to the nearest integer values.
+//===============
+//
+static inline vec3_t vec3_roundf(const vec3_t &v) {
+    return vec3_t{
+        std::roundf(v.x),
+        std::roundf(v.y),
+        std::roundf(v.z)
+    };
+}
+
+//
+//===============
+// vec3_clamp
+//
+// Returns the clamped vector `v` between vector 'min', and vector 'max'.
+//===============
+//
+static inline vec3_t vec3_clamp(const vec3_t &v, const vec3_t &min, const vec3_t &max) {
+    return vec3_t{
+        Clampf(v.x, min.x, max.x),
+        Clampf(v.y, min.z, max.y),
+        Clampf(v.z, min.z, max.z)
+    };
+}
+
+//
+//===============
+// vec3_clampf
+//
+// Returns the clamped vector `v` between float 'min', and float 'max'.
+//===============
+//
+static inline vec3_t vec3_clampf(const vec3_t& v, float min, float max) {
+    return vec3_t{
+        Clampf(v.x, min, max),
+        Clampf(v.y, min, max),
+        Clampf(v.z, min, max)
+    };
+}
+
+//
+//===============
+// vec3_clamp01
+//
+// Returns the clamped vector `v` between ranges 0. and 1.
+//===============
+//
+static inline vec3_t vec3_clamp01(const vec3_t &v) {
+    return vec3_t{
+        Clampf(v.x, 0.0, 1.0),
+        Clampf(v.y, 0.0, 1.0),
+        Clampf(v.z, 0.0, 1.0)
+    };
+}
+
+//
+//===============
+// vec3_reflect
+//
+// Returns the reflected vector of 'a' and 'b'.
+//===============
+//
+static inline vec3_t vec3_reflect(const vec3_t &a, const vec3_t &b) {
+    return a + vec3_scale(b, -2.f * vec3_dot(a, b)));
+}
+
+/**
+ * @return The forward, right and up vectors for the euler angles in radians.
+ */
+static inline void Vec3_Vectors(const vec3_t euler, vec3_t* forward, vec3_t* right, vec3_t* up) {
+    float sr, sp, sy, cr, cp, cy;
+
+    SinCosf(Radians(euler.x), &sp, &cp);
+    SinCosf(Radians(euler.y), &sy, &cy);
+    SinCosf(Radians(euler.z), &sr, &cr);
+
+    if (forward) {
+        forward->x = cp * cy;
+        forward->y = cp * sy;
+        forward->z = -sp;
+    }
+
+    if (right) {
+        right->x = (-1.f * sr * sp * cy + -1.f * cr * -sy);
+        right->y = (-1.f * sr * sp * sy + -1.f * cr * cy);
+        right->z = -1.f * sr * cp;
+    }
+
+    if (up) {
+        up->x = (cr * sp * cy + -sr * -sy);
+        up->y = (cr * sp * sy + -sr * cy);
+        up->z = cr * cp;
+    }
+}
 
 //
 //=============================================================================

@@ -48,6 +48,76 @@ static inline float Radians(float degrees) {
 
 //
 //===============
+// InitRandomNumberGenerator
+//
+// Initializes the Random Number generator for use with generating random
+// vector coordinates.
+//===============
+//
+static inline void InitRandomNumberGenerator() {
+    static qboolean isInitialized = false;
+    if (!isInitialized) {
+        std::srand(std::time(NULL));
+        isInitialized = true;
+    }
+}
+
+//
+//===============
+// Randomi
+//
+// Returns a psuedo random unsigned integral value between `0` and `UINT_MAX`.
+//===============
+//
+static inline uint32_t Randomui(void) {
+    // Make sure the random number generator is initialized.
+    InitRandomNumberGenerator();
+
+    return std::rand();
+}
+
+//
+//===============
+// Randomf
+//
+// Returns a psuedo random float value between `0` and 1/
+//===============
+//
+static inline uint32_t Randomf(void) {
+    // Make sure the random number generator is initialized.
+    InitRandomNumberGenerator();
+
+    return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+}
+
+
+//
+//===============
+// RandomRangef
+//
+// Returns a psuedo random float value between 'begin' and 'end'.
+//===============
+//
+static inline float RandomRangef(float begin, float end) {
+    // Make sure the random number generator is initialized.
+    InitRandomNumberGenerator();
+
+    return begin + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (begin - end)));
+}
+
+//
+//===============
+// RandomRangei
+//
+// Returns a psuedo random unsigned integral value between 'begin' and 'end'.
+//===============
+//
+static inline uint32_t RandomRangeui(uint32_t begin, uint32_t end) {
+    return begin + (rand() % (end - begin) + begin);
+}
+
+//
+//===============
 // Minf
 // 
 // Returns the minimim of 'a' and 'b'.
