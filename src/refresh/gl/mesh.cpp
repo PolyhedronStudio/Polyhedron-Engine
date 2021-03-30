@@ -55,7 +55,7 @@ static void setup_dotshading(void)
     shadelight = color;
 
     // matches the anormtab.h precalculations
-    yaw = -DEG2RAD(glr.ent->angles[YAW]);
+    yaw = -Radians(glr.ent->angles[YAW]);
     cy = std::cosf(yaw);
     sy = std::sinf(yaw);
     cp = std::cosf(-M_PI / 4);

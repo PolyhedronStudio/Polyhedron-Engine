@@ -56,7 +56,7 @@ void SetupRotationMatrix(vec3_t* matrix, const vec3_t& dir, float degrees)
 {
     vec_t   angle, s, c, one_c, xx, yy, zz, xy, yz, zx, xs, ys, zs;
 
-    angle = DEG2RAD(degrees);
+    angle = Radians(degrees);
     s = std::sinf(angle);
     c = std::cosf(angle);
     one_c = 1.0F - c;

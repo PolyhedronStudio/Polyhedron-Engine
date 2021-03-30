@@ -61,14 +61,4 @@ extern const vec3_t bytedirs[NUMVERTEXNORMALS];
 //-----------------
 extern vec3_t vec3_origin;
 
-//-----------------
-// NAN Macro - Use for checking NAN errors.
-#define nanmask (255<<23)
-#define IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
-
-// Easy array index accessors.
-#define PITCH               0       // up / down
-#define YAW                 1       // left / right
-#define ROLL                2       // fall over
-
 #endif // __SHARED__MATH_H__

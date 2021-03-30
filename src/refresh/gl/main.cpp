@@ -91,7 +91,7 @@ static void GL_SetupFrustum(void)
     int i;
 
     // right/left
-    angle = DEG2RAD(glr.fd.fov_x / 2);
+    angle = Radians(glr.fd.fov_x / 2);
     sf = std::sinf(angle);
     cf = std::cosf(angle);
 
@@ -102,7 +102,7 @@ static void GL_SetupFrustum(void)
     VectorSubtract(forward, left, glr.frustumPlanes[1].normal);
 
     // top/bottom
-    angle = DEG2RAD(glr.fd.fov_y / 2);
+    angle = Radians(glr.fd.fov_y / 2);
     sf = std::sinf(angle);
     cf = std::cosf(angle);
 

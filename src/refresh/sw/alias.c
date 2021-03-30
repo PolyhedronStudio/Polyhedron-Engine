@@ -530,7 +530,7 @@ static void R_AliasSetupLighting(void)
     r_aliasblendcolor[2] = light[2] * 255;
 
 // rotate the lighting vector into the model's frame of reference
-    yaw = -DEG2RAD(currententity->angles[YAW]);
+    yaw = -Radians(currententity->angles[YAW]);
     cy = std::cosf(yaw);
     sy = std::sinf(yaw);
     cp = std::cosf(-M_PI / 4);

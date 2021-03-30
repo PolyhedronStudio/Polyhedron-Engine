@@ -164,8 +164,8 @@ void vkpt_freecam_update(float frame_time)
 
 	VectorCopy(freecam_vieworg, vkpt_refdef.fd->vieworg);
 	VectorCopy(freecam_viewangles, vkpt_refdef.fd->viewangles);
-	vkpt_refdef.fd->fov_x = RAD2DEG(atanf(tanf(DEG2RAD(vkpt_refdef.fd->fov_x) * 0.5f) / freecam_zoom)) * 2.f;
-	vkpt_refdef.fd->fov_y = RAD2DEG(atanf(tanf(DEG2RAD(vkpt_refdef.fd->fov_y) * 0.5f) / freecam_zoom)) * 2.f;
+	vkpt_refdef.fd->fov_x = Degrees(std::atanf(std::tanf(Radians(vkpt_refdef.fd->fov_x) * 0.5f) / freecam_zoom)) * 2.f;
+	vkpt_refdef.fd->fov_y = Degrees(std::atanf(std::tanf(Radians(vkpt_refdef.fd->fov_y) * 0.5f) / freecam_zoom)) * 2.f;
 
 	if (!VectorCompare(freecam_vieworg, prev_vieworg) || !VectorCompare(freecam_viewangles, prev_viewangles))
 	{

@@ -512,7 +512,7 @@ load_blue_noise()
 static int
 get_num_miplevels(int w, int h)
 {
-	return 1 + log2(MAX(w, h));
+	return 1 + std::log2(std::max<int>(w, h));	// MATHLIB: Replaced MAX( with std::max<int> and log2 with std::log2
 }
 
 

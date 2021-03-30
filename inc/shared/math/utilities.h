@@ -3,21 +3,48 @@
 //
 // shared/math/utilities.h
 //
-// N&C Math Library: Vector3
+// N&C Math Library: Utilities
 // 
-// Functions that state LEGACY: should not be used, they have a viable more
-// preferenced alternative to use.
+// Contains utility functions used elsewhere by the math library, and/or in 
+// game and engine code. 
 //
 #ifndef __INC_SHARED_MATH_UTILITIES_H__
 #define __INC_SHARED_MATH_UTILITIES_H__
 
-// Degrees to Radians macro.
-#define DEG2RAD(a) (a * M_PI) / 180.0F
-#define RAD2DEG(a) (a * 180.0F) / M_PI 
+// NAN Macro - Use for checking NAN errors.
+#define nanmask (255<<23)
+#define IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define CLAMP(a, m, M) MIN(MAX(a, m), M)
+// Easy array index accessors.
+#define PITCH   0       // Up / Down
+#define YAW     1       // Left / Right
+#define ROLL    2       // Fall over
+
+// Conversion (Degrees, Radians) scalar values.
+#define DegreesScalar ((float) (180.0f / std::numbers::pi_v<float>))
+#define RadiansScalar ((float) (std::numbers::pi_v<float> / 180.0f))
+
+//
+//===============
+// EqualEpsilonf
+// 
+// Returns true if `fabsf(a - b) <= epsilon`.
+//===============
+//
+static inline float Degrees(float radians) {
+    return radians * DegreesScalar;
+}
+
+//
+//===============
+// EqualEpsilonf
+// 
+// Returns true if `fabsf(a - b) <= epsilon`.
+//===============
+//
+static inline float Radians(float degrees) {
+    return degrees * RadiansScalar;
+}
 
 //
 //===============

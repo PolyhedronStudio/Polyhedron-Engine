@@ -282,7 +282,7 @@ static void CLG_SetupThirdPersionView(void)
     cl->refdef.viewangles[PITCH] *= 0.5f;
     AngleVectors(cl->refdef.viewangles, &cl->v_forward, &cl->v_right, &cl->v_up);
 
-    angle = DEG2RAD(cl_thirdperson_angle->value);
+    angle = Radians(cl_thirdperson_angle->value);
     range = cl_thirdperson_range->value;
     fscale = std::cosf(angle);
     rscale = std::sinf(angle);
