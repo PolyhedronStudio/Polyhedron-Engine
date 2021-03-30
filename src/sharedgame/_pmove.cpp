@@ -402,7 +402,7 @@ static void PM_StepSlideMove_(void)
 
         if (trace.fraction > 0) {
             // actually covered some distance
-            pml.origin = trace.endpos; 
+            pml.origin = trace.endpos;
             numplanes = 0;
         }
 
@@ -444,7 +444,7 @@ static void PM_StepSlideMove_(void)
         else {
             // go along the crease
             if (numplanes != 2) {
-                PM_Debug("clip velocity, numplanes == %i",numplanes);
+                PM_Debug("clip velocity, numplanes == %i", numplanes);
                 pml.velocity = vec3_zero();
                 break;
             }
@@ -513,7 +513,7 @@ static void PM_StepSlideMove(void)
     if (!trace.allsolid) {
         pml.origin = trace.endpos;
     }
-    up = pml.origin; 
+    up = pml.origin;
 
     // decide which one went farther
     float down_dist = (down_o[0] - start_o[0]) * (down_o[0] - start_o[0])
@@ -1216,7 +1216,7 @@ static void PM_CheckSpecialMovements(void)
 
     spot = vec3_fmaf(pml.origin, 30, flatforward);
     spot[2] += 4;
-    
+
     int cont = pm->PointContents(spot);
     if (!(cont & CONTENTS_SOLID))
         return;
@@ -1386,15 +1386,15 @@ static void PM_CategorizePosition(void)
     if (cont & CONTENTS_MASK_LIQUID) {
         pm->waterType = cont;
         pm->waterLevel = 1;
-    
+
         point[2] = pml.origin[2] + pm->mins[2] + sample1;
         cont = pm->PointContents(point);
-        
+
         if (cont & CONTENTS_MASK_LIQUID) {
             pm->waterLevel = 2;
             point[2] = pml.origin[2] + pm->mins[2] + sample2;
             cont = pm->PointContents(point);
-        
+
             if (cont & CONTENTS_MASK_LIQUID)
                 pm->waterLevel = 3;
         }
@@ -1445,8 +1445,8 @@ static qboolean PM_TestPosition(void)
 //
 static void PM_FinalizePosition(qboolean testForValid) {
     // Copy over origin and velocity.
-    pm->state.origin    = pml.origin;
-    pm->state.velocity  = pml.velocity;
+    pm->state.origin = pml.origin;
+    pm->state.velocity = pml.velocity;
 
     // Don't test for a valid position if not wished for.
     if (!testForValid)
@@ -1473,7 +1473,7 @@ static void PM_TestInitialPosition(void)
     // Do 
     if (PM_TestPosition()) {
         // Copy over the state origin in case it is valid.
-        pml.origin          = pm->state.origin;
+        pml.origin = pm->state.origin;
         pml.previous_origin = pm->state.origin;
         return;
     }
@@ -1533,7 +1533,7 @@ static void PM_FlyMove(void)
     smove = pm->cmd.sidemove;
 
     pml.forward = vec3_normalize(pml.forward);
-    pml.right   = vec3_normalize(pml.right);
+    pml.right = vec3_normalize(pml.right);
 
     for (i = 0; i < 3; i++)
         wishvel[i] = pml.forward[i] * fmove + pml.right[i] * smove;
@@ -1731,7 +1731,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     // Teleport pause stays exactly in place
     if (pm->state.flags & PMF_TIME_TELEPORT) {
 
-    } 
+    }
     // waterjump has no control, but falls
     else if (pm->state.flags & PMF_TIME_WATERJUMP) {
         // Apply gravity.
