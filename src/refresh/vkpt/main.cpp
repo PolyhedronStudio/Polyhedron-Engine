@@ -107,7 +107,7 @@ static qboolean temporal_frame_valid = false;
 
 static int world_anim_frame = 0;
 
-static vec3_t avg_envmap_color = { 0.f, 0.f, 0.f };
+static vec3_t avg_envmap_color = vec3_zero();
 
 static image_t *water_normal_texture = NULL;
 
@@ -116,7 +116,7 @@ int num_accumulated_frames = 0;
 static qboolean frame_ready = false;
 
 static float sky_rotation = 0.f;
-static vec3_t sky_axis = { 0.f, 0.f, 0.f };
+static vec3_t sky_axis = vec3_zero();
 
 static dlight_t entlights[MAX_ENTLIGHTS];
 static dlightLS_t entlightstyles[MAX_ENTLIGHTS];

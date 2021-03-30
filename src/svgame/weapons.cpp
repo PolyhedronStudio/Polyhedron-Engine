@@ -311,7 +311,7 @@ void blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
         gi.WriteByte(TE_BLASTER);
         gi.WritePosition(self->s.origin);
         if (!plane)
-            gi.WriteDirection({ 0.f, 0.f, 0.f });
+            gi.WriteDirection(vec3_zero());
         else
             gi.WriteDirection(plane->normal);
         gi.Multicast(&self->s.origin, MULTICAST_PVS);
@@ -360,7 +360,7 @@ void fire_blaster(edict_t *self, const vec3_t& start, const vec3_t &aimdir, int 
     if (self->client)
         check_dodge(self, bolt->s.origin, dir, speed);
 
-    tr = gi.Trace(self->s.origin, vec3_origin, vec3_origin, bolt->s.origin, bolt, CONTENTS_MASK_SHOT);
+    tr = gi.Trace(self->s.origin, vec3_zero(), vec3_zero(), bolt->s.origin, bolt, CONTENTS_MASK_SHOT);
     if (tr.fraction < 1.0) {
         VectorMA(bolt->s.origin, -10, dir, bolt->s.origin);
         bolt->touch(bolt, tr.ent, NULL, NULL);

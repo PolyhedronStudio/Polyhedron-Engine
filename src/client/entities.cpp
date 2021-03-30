@@ -539,10 +539,13 @@ Called to get the sound spatialization origin
 ===============
 */
 vec3_t CL_GetEntitySoundOrigin(int entnum) {
+    // Pointers.
     centity_t   *ent;
     mmodel_t    *cm;
-    vec3_t      mid = { 0.f, 0.f, 0.f };
-    vec3_t      org = { 0.f, 0.f, 0.f };
+
+    // Vectors.
+    vec3_t mid = vec3_zero();
+    vec3_t org = vec3_zero();
 
     if (entnum < 0 || entnum >= MAX_EDICTS) {
         Com_Error(ERR_DROP, "%s: bad entnum: %d", __func__, entnum);
@@ -574,7 +577,8 @@ vec3_t CL_GetEntitySoundOrigin(int entnum) {
 
 vec3_t CL_GetViewVelocity(void)
 {
-    vec3_t vel;
+    vec3_t vel = vec3_zero();
+
     // N&C: FF Precision.
     VectorCopy(cl.frame.ps.pmove.velocity, vel);
 
@@ -584,7 +588,7 @@ vec3_t CL_GetViewVelocity(void)
 vec3_t CL_GetEntitySoundVelocity(int ent)
 {
 	centity_t *old;
-    vec3_t vel = { 0.f, 0.f, 0.f };
+    vec3_t vel = vec3_zero();
 	if ((ent < 0) || (ent >= MAX_EDICTS))
 	{
 		Com_Error(ERR_DROP, "CL_GetEntitySoundVelocity: bad ent");

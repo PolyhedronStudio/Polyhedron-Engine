@@ -31,8 +31,8 @@ player model is switched to third person.
 */
 
 
-static vec3_t freecam_vieworg = { 0.f, 0.f, 0.f };
-static vec3_t freecam_viewangles = { 0.f, 0.f, 0.f };
+static vec3_t freecam_vieworg		= vec3_zero();
+static vec3_t freecam_viewangles	= vec3_zero();
 static float freecam_zoom = 1.f;
 static qboolean freecam_keystate[6] = { 0, 0, 0, 0, 0, 0 };
 static qboolean freecam_active = false;
@@ -140,7 +140,7 @@ void vkpt_freecam_update(float frame_time)
 	VectorCopy(freecam_viewangles, prev_viewangles);
 	float prev_zoom = freecam_zoom;
 
-	vec3_t velocity = { 0.f, 0.f, 0.f };
+	vec3_t velocity = vec3_zero();
 	if (freecam_keystate[0]) velocity[0] += 1.f;
 	if (freecam_keystate[1]) velocity[0] -= 1.f;
 	if (freecam_keystate[2]) velocity[1] += 1.f;

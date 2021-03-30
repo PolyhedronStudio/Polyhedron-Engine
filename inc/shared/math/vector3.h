@@ -103,6 +103,75 @@ typedef vec3_template<double> dvec3_t;
 //=============================================================================
 //
 
+//
+//===============
+// vec3_scale
+// 
+// Returns the vector 'v' scaled by 'scale'.
+//===============
+//
+static inline vec3_t vec3_scale(const vec3_t &v, float scale) {
+    return vec3_t{
+        v.x * scale,
+        v.y * scale,
+        v.z * scale
+    };
+}
+
+//
+//===============
+// vec3_negate
+// 
+// Returns the negated vector 'v'.
+//===============
+//
+static inline vec3_t vec3_negate(const vec3_t &v) {
+    return vec3_scale(v, -1.f);
+}
+
+//
+//===============
+// vec3_zero
+// 
+// Returns a zero point origin vector:
+// `vec3_t { 0.f, 0.f, 0.f }`
+//===============
+//
+static inline vec3_t vec3_zero(void) {
+    return vec3_t{ 
+        0.f, 
+        0.f, 
+        0.f 
+    };
+}
+
+//
+//===============
+// vec3_up
+//
+// Returns the up vector:
+// `vec3_t { 0.f, 0.f, 1.f }`
+//===============
+//
+static inline vec3_t vec3_up(void) {
+    return vec3_t{
+        0.f,
+        0.f,
+        1.f
+    };
+}
+
+//
+//===============
+// vec3_down
+//
+// Returns the down vector - presumably vec_up, in its negated form is:
+// `vec3_t { 0.f, 0.f, -1.f }`
+//===============
+//
+static inline vec3_t vec3_down(void) {
+    return vec3_negate(vec3_up());
+}
 
 
 //

@@ -635,12 +635,13 @@ Returns the clamped movement speeds.
 static vec3_t CL_ClampSpeed(const vec3_t &inMove)
 {
     vec3_t outMove = inMove;
+
     if (!cge)
         return inMove;
 
     // N&C: This... can happen :P
     if (!cge->pmoveParams)
-        return vec3_t{ 0.f, 0.f, 0.f };
+        return vec3_zero();
 
     float speed = cge->pmoveParams->maxspeed;
 

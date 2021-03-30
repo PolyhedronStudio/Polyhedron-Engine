@@ -1538,7 +1538,7 @@ static void PM_FlyMove(void)
     speed = VectorLength(pml.velocity);
     if (speed < 1) {
         // Reset velocity.
-        pml.velocity = { 0.f, 0.f, 0.f };
+        pml.velocity = vec3_zero();
     }
     else {
         drop = 0;
@@ -1634,7 +1634,7 @@ static void PM_DeadMove(void)
     forward -= 20;
     if (forward <= 0) {
         // Clear  velocity.
-        pml.velocity = { 0.f, 0.f, 0.f };
+        pml.velocity = vec3_zero();
     }
     else {
         // Normalize and scale towards direction.
