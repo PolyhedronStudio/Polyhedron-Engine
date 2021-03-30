@@ -5,8 +5,14 @@
 //
 // N&C Math Library: Vector3
 // 
-// Functions that state LEGACY: should not be used, they have a viable more
-// preferenced alternative to use.
+// vec3_template is a templated union class which by use of several operators
+// allows for backwards compatibility support to most of the old Quake 2 based
+// legacy vector code.
+// 
+// The actual Q2 Vector Macros are defined at the bottom of this file and exist
+// for legacy code to still be compatible. For any new code, use the new and
+// more programmer friendly Vec3_ functions. To increase readability, a rule of
+// standard is to declare a vec3_t like so: vec3_t x = { 1.f, 0.f, 0.f };
 //
 #ifndef __INC_SHARED_MATH_VECTOR3_H__
 #define __INC_SHARED_MATH_VECTOR3_H__
