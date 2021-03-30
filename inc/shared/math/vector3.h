@@ -37,9 +37,6 @@ template<typename T> struct vec3_template {
     // Assign.
     vec3_template(T X, T Y, T Z) { x = X; y = Y; z = Z; }
 
-    // Copy from.
-    //vec3_template(const vec3_template<T>& v) { x = v.x; y = v.y; z = v.z; }
-
     // Regular *vec_t support.
     vec3_template(T* vec) { x = vec[0]; y = vec[1]; z = vec[2]; }
     vec3_template(const T* vec) { x = vec[0]; y = vec[1]; z = vec[2]; }
@@ -56,14 +53,6 @@ template<typename T> struct vec3_template {
     inline operator const T* () const { 
         return &x;
     }
-
-    //// OPERATOR: -= float
-    //const vec3_template& operator -=(const float& other) {
-    //    x += other;
-    //    y += other;
-    //    z += other;
-    //    return *this;
-    //}
 
     // OPERATOR: + vec3_template
     inline vec3_template operator+ (const vec3_template& operand) const
@@ -85,14 +74,6 @@ template<typename T> struct vec3_template {
         return *this;
     }
 
-    // OPERATOR: += float
-    //const vec3_template& operator +=(const float& other) {
-    //    x += other;
-    //    y += other;
-    //    z += other;
-    //    return *this;
-    //}
-
     //// OPERATOR: += vec3_template
     const vec3_template& operator +=(const vec3_template& other) {
         x += other.x;
@@ -101,12 +82,36 @@ template<typename T> struct vec3_template {
         return *this;
     }
 };
+// OPERATOR: += float
+//const vec3_template& operator +=(const float& other) {
+//    x += other;
+//    y += other;
+//    z += other;
+//    return *this;
+//}
 typedef vec3_template<byte> bvec3_t;
 typedef vec3_template<int> ivec3_t;
 typedef vec3_template<float> vec3_t;
 typedef vec3_template<double> dvec3_t;
 
+
+//
+//=============================================================================
+// 
+// Modern Vec3 Inline Functions:
+//
+//=============================================================================
+//
+
+
+
+//
+//=============================================================================
+// 
 // Legacy Vector Macro Functions:
+//
+//=============================================================================
+//
 #define DotProduct(x,y)         ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
 #define CrossProduct(v1,v2,cross) \
         ((cross)[0]=(v1)[1]*(v2)[2]-(v1)[2]*(v2)[1], \

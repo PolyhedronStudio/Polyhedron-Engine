@@ -27,7 +27,7 @@ a non-instant attack weapon.  It checks to see if a
 monster's dodge function should be called.
 =================
 */
-static void check_dodge(edict_t *self, vec3_t start, vec3_t dir, int speed)
+static void check_dodge(edict_t *self, const vec3_t &start, const vec3_t &dir, int speed)
 {
     vec3_t  end;
     vec3_t  v;
@@ -64,6 +64,10 @@ qboolean fire_hit(edict_t *self, vec3_t &aim, int damage, int kick)
     vec3_t      point;
     float       range;
     vec3_t      dir;
+
+    // Make sure we have an enemy..
+    if (!self->enemy)
+        return false;
 
     //see if enemy is in range
     VectorSubtract(self->enemy->s.origin, self->s.origin, dir);
