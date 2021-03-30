@@ -279,6 +279,55 @@ static inline qboolean vec3_equal(const vec3_t &a, const vec3_t &b) {
 
 //
 //===============
+// vec3_euler
+//
+// Returns the euler angles, in radians, for the directional vector `dir`.
+//===============
+//
+static inline vec3_t vec3_euler(const vec3_t &dir) {
+    float pitch, yaw;
+
+    if (dir.y == 0.f && dir.x == 0.f) {
+        yaw = 0.f;
+        if (dir.z > 0.f) {
+            pitch = 90.f;
+        }
+        else {
+            pitch = 270.f;
+        }
+    }
+    else {
+        if (dir.x) {
+            yaw = Degrees(std::atan2f(dir.y, dir.x));
+        }
+        else if (dir.y > 0.f) {
+            yaw = 90.f;
+        }
+        else {
+            yaw = 270.f;
+        }
+
+        if (yaw < 0.f) {
+            yaw += 360.f;
+        }
+
+        const float forward = std::sqrtf(dir.x * dir.x + dir.y * dir.y);
+        pitch = Degrees(std::atan2f(dir.z, forward));
+
+        if (pitch < 0.f) {
+            pitch += 360.f;
+        }
+    }
+
+    return vec3_t{
+        -pitch,
+        yaw,
+        0
+    };
+}
+
+//
+//===============
 // vec3_fabsf
 //
 // Returns a vector containing the absolute values of 'v'.
