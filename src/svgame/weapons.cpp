@@ -355,51 +355,58 @@ void fire_blaster(edict_t *self, const vec3_t& start, const vec3_t &aimdir, int 
     trace_t tr;
     
     // Calculate direction vector.
-    vec3_t dir = vec3_normalize(aimdir);     // VectorNormalize2(aimdir, dir);
+    vec3_t dir = vec3_normalize(aimdir);
 
     // Fetch first free entity slot to use, by calling G_Spawn.
     bolt = G_Spawn();
-    // Set Dead Monster flag so the projectiles won't clip against players.
-    bolt->svflags = SVF_DEADMONSTER;
-    // Setup movetype, clipmask, solid, and effects to use.
-    bolt->movetype = MOVETYPE_FLYMISSILE;
-    bolt->clipmask = CONTENTS_MASK_SHOT;
-    bolt->solid = SOLID_BBOX;
-    bolt->s.effects |= effect;
+
+    // Setup basic entity attributes.
+    bolt->classname = "bolt";   // Classname.
+    bolt->owner = self;         // Setup owner.
+    bolt->dmg = damage;         // Setup damage.
+    if (hyper)                  // Hyperblaster?
+        bolt->spawnflags = 1;
+    bolt->svflags = SVF_DEADMONSTER;    // Set Dead Monster flag so the projectiles 
+                                        // won't clip against players.
+    bolt->movetype = MOVETYPE_FLYMISSILE;   // Movetype FLYMISSILE
+    bolt->clipmask = CONTENTS_MASK_SHOT;    // CONTENTS_MASK_SHOT
+    bolt->solid = SOLID_BBOX;               // SOLID_BBOX
+    bolt->s.effects |= effect;              // Apply effect argument to entity.
+    
     // Setup entity state origin to spawn at.
-    bolt->s.origin = start; // VectorCopy(start, bolt->s.origin);
-    bolt->s.old_origin = start; //VectorCopy(start, bolt->s.old_origin);
+    bolt->s.origin = start;
+    bolt->s.old_origin = start;
+
     // Calculate Euler Radian entity satate angles.
     bolt->s.angles = vec3_euler(dir);//vectoangles(dir, bolt->s.angles);
     bolt->velocity = vec3_scale(dir, speed);//Vec3_Scale(dir, speed, bolt->velocity);
-        // Clear mins and maxs bounding box.
-    bolt->mins = vec3_zero(); //VectorClear(bolt->mins);
-    bolt->maxs = vec3_zero(); //VectorClear(bolt->maxs);
+    
+    // Clear mins and maxs bounding box.
+    bolt->mins = vec3_zero();
+    bolt->maxs = vec3_zero();
+
     // Setup model and sound to use. (Precache if needed)
     bolt->s.modelindex = gi.modelindex("models/objects/laser/tris.md2");
     bolt->s.sound = gi.soundindex("misc/lasfly.wav");
-    // Setup owner.
-    bolt->owner = self;
-    // Setup function pointers.
+       
+    // Setup touch and think function pointers.
     bolt->touch = blaster_touch;
     bolt->nextthink = level.time + 2;
     bolt->think = G_FreeEdict;
-    // Setup damage.
-    bolt->dmg = damage;
-    // Classname.
-    bolt->classname = "bolt";
-    // Hyperblaster?
-    if (hyper)
-        bolt->spawnflags = 1;
+    
     // Link entity in for collision.
     gi.linkentity(bolt);
 
+    // If a client is firing this bolt, let AI check for dodges.
     if (self->client)
         check_dodge(self, bolt->s.origin, dir, speed);
 
+    // Trace bolt.
     tr = gi.Trace(self->s.origin, vec3_zero(), vec3_zero(), bolt->s.origin, bolt, CONTENTS_MASK_SHOT);
+
+    // Did we hit anything?
     if (tr.fraction < 1.0) {
-        bolt->s.origin = vec3_fmaf(bolt->s.origin, -10, dir); //VectorMA(bolt->s.origin, -10, dir, bolt->s.origin);
+        bolt->s.origin = vec3_fmaf(bolt->s.origin, -10, dir);
         bolt->touch(bolt, tr.ent, NULL, NULL);
     }
 }
