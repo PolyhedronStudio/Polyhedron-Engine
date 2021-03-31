@@ -18,6 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 #include "../g_local.h" // Include SVGame header.
 #include "client.h"     // Include Player Client header.
+#include "hud.h"        // Include HUD header.
+
 
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.

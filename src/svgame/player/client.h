@@ -17,13 +17,18 @@ void InitClientPersistant(gclient_t* client);
 void InitClientResp(gclient_t* client);
 void BeginIntermission(edict_t* targ);
 
+// Initializes the body que for dead bodies.
 void InitBodyQue(void);
+
+// Respawns the actual client.
 void RespawnClient(edict_t* ent);
+
+// Tosses the client weapon.
 void TossClientWeapon(edict_t* self);
 
+// Updates the client obituary.
 void ClientUpdateObituary(edict_t* self, edict_t* inflictor, edict_t* attacker);
 void TossClientWeapon(edict_t* self);
-
 
 void ClientBegin(edict_t* ent);
 void ClientCommand(edict_t* ent);

@@ -15,9 +15,9 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#include "../g_local.h"          // Include SVGame header.
-#include "../player/client.h"    // Include Player Client header.
-
+#include "../g_local.h" // Include SVGame header.
+#include "client.h"     // Include Player Client header.
+#include "hud.h"        // Include HUD header.
 
 
 /*
@@ -349,16 +349,25 @@ void Cmd_Help_f(edict_t *ent)
 
 //=======================================================================
 
-/*
-===============
-G_SetStats
-===============
-*/
-void G_SetStats(edict_t *ent)
+//
+//===============
+// G_SetClientStats
+// 
+// Sets the entities client, player state, status array with the current
+// frame game state data. Such as ammo, etc, it also index/precaches images
+// and audio if required.
+//================
+//
+void G_SetClientStats(edict_t* ent)
 {
-    gitem_t     *item;
+    gitem_t* item;
     int         index, cells;
     int         power_armor_type;
+
+    // Ensure ent is valid.
+    if (!ent) {
+        return;
+    }
 
     //
     // health
@@ -372,7 +381,8 @@ void G_SetStats(edict_t *ent)
     if (!ent->client->ammo_index /* || !ent->client->pers.inventory[ent->client->ammo_index] */) {
         ent->client->ps.stats[STAT_AMMO_ICON] = 0;
         ent->client->ps.stats[STAT_AMMO] = 0;
-    } else {
+    }
+    else {
         item = &itemlist[ent->client->ammo_index];
         ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex(item->icon);
         ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
@@ -397,11 +407,13 @@ void G_SetStats(edict_t *ent)
         // flash between power armor and other armor icon
         ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex("i_powershield");
         ent->client->ps.stats[STAT_ARMOR] = cells;
-    } else if (index) {
+    }
+    else if (index) {
         item = GetItemByIndex(index);
         ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex(item->icon);
         ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.inventory[index];
-    } else {
+    }
+    else {
         ent->client->ps.stats[STAT_ARMOR_ICON] = 0;
         ent->client->ps.stats[STAT_ARMOR] = 0;
     }
@@ -420,16 +432,20 @@ void G_SetStats(edict_t *ent)
     if (ent->client->quad_framenum > level.framenum) {
         ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_quad");
         ent->client->ps.stats[STAT_TIMER] = (ent->client->quad_framenum - level.framenum) / 10;
-    } else if (ent->client->invincible_framenum > level.framenum) {
+    }
+    else if (ent->client->invincible_framenum > level.framenum) {
         ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_invulnerability");
         ent->client->ps.stats[STAT_TIMER] = (ent->client->invincible_framenum - level.framenum) / 10;
-    } else if (ent->client->enviro_framenum > level.framenum) {
+    }
+    else if (ent->client->enviro_framenum > level.framenum) {
         ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_envirosuit");
         ent->client->ps.stats[STAT_TIMER] = (ent->client->enviro_framenum - level.framenum) / 10;
-    } else if (ent->client->breather_framenum > level.framenum) {
+    }
+    else if (ent->client->breather_framenum > level.framenum) {
         ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_rebreather");
         ent->client->ps.stats[STAT_TIMER] = (ent->client->breather_framenum - level.framenum) / 10;
-    } else {
+    }
+    else {
         ent->client->ps.stats[STAT_TIMER_ICON] = 0;
         ent->client->ps.stats[STAT_TIMER] = 0;
     }
@@ -455,7 +471,8 @@ void G_SetStats(edict_t *ent)
             ent->client->ps.stats[STAT_LAYOUTS] |= 1;
         if (ent->client->showinventory && ent->client->pers.health > 0)
             ent->client->ps.stats[STAT_LAYOUTS] |= 2;
-    } else {
+    }
+    else {
         if (ent->client->showscores || ent->client->showhelp)
             ent->client->ps.stats[STAT_LAYOUTS] |= 1;
         if (ent->client->showinventory && ent->client->pers.health > 0)
@@ -470,13 +487,16 @@ void G_SetStats(edict_t *ent)
     //
     // help icon / current weapon if not shown
     //
-    if (ent->client->pers.helpchanged && (level.framenum & 8))
+    if (ent->client->pers.helpchanged && (level.framenum & 8)) {
         ent->client->ps.stats[STAT_HELPICON] = gi.imageindex("i_help");
-    else if ((ent->client->pers.hand == CENTER_HANDED || ent->client->ps.fov > 91)
-             && ent->client->pers.weapon)
+    } else if ((ent->client->pers.hand == CENTER_HANDED
+                || ent->client->ps.fov > 91)
+                && ent->client->pers.weapon) {
+
         ent->client->ps.stats[STAT_HELPICON] = gi.imageindex(ent->client->pers.weapon->icon);
-    else
+    } else {
         ent->client->ps.stats[STAT_HELPICON] = 0;
+    }
 
     ent->client->ps.stats[STAT_SPECTATOR] = 0;
 }
@@ -489,12 +509,20 @@ G_CheckChaseStats
 void G_CheckChaseStats(edict_t *ent)
 {
     int i;
-    gclient_t *cl;
+
+    if (!ent)    {
+        return;
+    }
 
     for (i = 1; i <= maxclients->value; i++) {
+        gclient_t* cl;
+
         cl = g_edicts[i].client;
-        if (!g_edicts[i].inuse || cl->chase_target != ent)
+
+        if (!g_edicts[i].inuse || (cl->chase_target != ent)) {
             continue;
+        }
+
         memcpy(cl->ps.stats, ent->client->ps.stats, sizeof(cl->ps.stats));
         G_SetSpectatorStats(g_edicts + i);
     }
@@ -507,26 +535,39 @@ G_SetSpectatorStats
 */
 void G_SetSpectatorStats(edict_t *ent)
 {
-    gclient_t *cl = ent->client;
+    if (!ent) {
+        return;
+    }
 
-    if (!cl->chase_target)
-        G_SetStats(ent);
+    gclient_t* cl = ent->client;
 
+    if (!cl->chase_target) {
+        G_SetClientStats(ent);
+    }
 
     cl->ps.stats[STAT_SPECTATOR] = 1;
 
-    // layouts are independant in spectator
+    /* layouts are independant in spectator */
     cl->ps.stats[STAT_LAYOUTS] = 0;
-    if (cl->pers.health <= 0 || level.intermissiontime || cl->showscores)
-        cl->ps.stats[STAT_LAYOUTS] |= 1;
-    if (cl->showinventory && cl->pers.health > 0)
-        cl->ps.stats[STAT_LAYOUTS] |= 2;
 
-    // C++20: FIX: Added a check for if cl->chase_target
-    if (cl->chase_target && cl->chase_target && cl->chase_target->inuse)
+    if ((cl->pers.health <= 0) || level.intermissiontime || cl->showscores)
+    {
+        cl->ps.stats[STAT_LAYOUTS] |= 1;
+    }
+
+    if (cl->showinventory && (cl->pers.health > 0))
+    {
+        cl->ps.stats[STAT_LAYOUTS] |= 2;
+    }
+
+    if (cl->chase_target && cl->chase_target->inuse)
+    {
         cl->ps.stats[STAT_CHASE] = CS_PLAYERSKINS +
-                                   (cl->chase_target - g_edicts) - 1;
+            (cl->chase_target - g_edicts) - 1;
+    }
     else
+    {
         cl->ps.stats[STAT_CHASE] = 0;
+    }
 }
 

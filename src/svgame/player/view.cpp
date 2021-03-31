@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "../g_local.h"
+#include "hud.h"
 #include "animations.h"
 
 
@@ -916,7 +917,7 @@ void ClientEndServerFrame(edict_t *ent)
         // FIXME: add view drifting here?
         current_client->ps.blend[3] = 0;
         current_client->ps.fov = 90;
-        G_SetStats(ent);
+        G_SetClientStats(ent);
         return;
     }
 
@@ -995,7 +996,7 @@ void ClientEndServerFrame(edict_t *ent)
     if (ent->client->resp.spectator)
         G_SetSpectatorStats(ent);
     else
-        G_SetStats(ent);
+        G_SetClientStats(ent);
     G_CheckChaseStats(ent);
 
     G_SetClientEvent(ent);
