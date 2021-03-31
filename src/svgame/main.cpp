@@ -16,8 +16,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "g_local.h"
+#include "g_local.h"          // Include SVGame header.
+#include "player/client.h"    // Include Player Client header.
 
+//-----------------
+// Global Game Variables.
+//
+// These are used all throughout the code. To store game state related
+// information, and callbacks to the engine server game API.
+//-----------------
 game_locals_t   game;
 level_locals_t  level;
 svgame_import_t   gi;       // CLEANUP: These were game_import_t and game_export_t
@@ -77,12 +84,7 @@ cvar_t  *sv_flaregun;
 cvar_t  *cl_monsterfootsteps;
 
 void SpawnEntities(const char *mapname, const char *entities, const char *spawnpoint);
-void ClientThink(edict_t *ent, usercmd_t *cmd);
-qboolean ClientConnect(edict_t *ent, char *userinfo);
-void ClientUserinfoChanged(edict_t *ent, char *userinfo);
-void ClientDisconnect(edict_t *ent);
-void ClientBegin(edict_t *ent);
-void ClientCommand(edict_t *ent);
+
 void RunEntity(edict_t *ent);
 void WriteGame(const char *filename, qboolean autosave);
 void ReadGame(const char *filename);

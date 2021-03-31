@@ -16,9 +16,11 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#include "../g_local.h"
-#include "sharedgame/pmove.h"
-#include "animations.h"
+#include "../g_local.h" // Include SVGame header.
+#include "client.h"     // Include Player Client header.
+
+#include "sharedgame/pmove.h"   // Include SG PMove.
+#include "animations.h"         // Include Player Client Animations.
 
 void ClientUserinfoChanged(edict_t *ent, char *userinfo);
 
@@ -955,7 +957,7 @@ void CopyToBodyQue(edict_t *ent)
     gi.linkentity(body);
 }
 
-void respawn(edict_t *self)
+void RespawnClient(edict_t *self)
 {
     if (deathmatch->value || coop->value) {
         // spectator's don't leave bodies
@@ -1159,9 +1161,9 @@ void PutClientInServer(edict_t *ent)
     ent->flags &= ~FL_NO_KNOCKBACK;
     ent->svflags &= ~SVF_DEADMONSTER;
 
-    VectorCopy(mins, ent->mins);
-    VectorCopy(maxs, ent->maxs);
-    VectorClear(ent->velocity);
+    ent->mins = vec3_scale(PM_MINS, PM_SCALE);
+    ent->maxs = vec3_scale(PM_MAXS, PM_SCALE);
+    ent->velocity = vec3_zero();
 
     // clear playerstate values
     memset(&ent->client->ps, 0, sizeof(client->ps));
@@ -1759,7 +1761,7 @@ void ClientBeginServerFrame(edict_t *ent)
 
             if ((client->latched_buttons & buttonMask) ||
                 (deathmatch->value && ((int)dmflags->value & DF_FORCE_RESPAWN))) {
-                respawn(ent);
+                RespawnClient(ent);
                 client->latched_buttons = 0;
             }
         }

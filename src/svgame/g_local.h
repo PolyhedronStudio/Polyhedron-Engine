@@ -745,13 +745,7 @@ edict_t *PlayerTrail_LastSpot(void);
 //
 // g_client.c
 //
-void respawn(edict_t *ent);
-void BeginIntermission(edict_t *targ);
-void PutClientInServer(edict_t *ent);
-void InitClientPersistant(gclient_t *client);
-void InitClientResp(gclient_t *client);
-void InitBodyQue(void);
-void ClientBeginServerFrame(edict_t *ent);
+
 
 //
 // g_player.c

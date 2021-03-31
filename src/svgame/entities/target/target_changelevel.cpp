@@ -7,8 +7,9 @@
 // target_changelevel entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"          // Include SVGame header.
+#include "../../player/client.h"    // Include Player Client header.
+
 
 //=====================================================
 /*QUAKED target_changelevel (1 0 0) (-8 -8 -8) (8 8 8)
