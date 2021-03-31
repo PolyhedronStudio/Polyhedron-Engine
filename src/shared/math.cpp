@@ -17,7 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "shared/shared.h"
-#include "common/math.h"
 
 //#if USE_CLIENT || CGAME_INCLUDE
 

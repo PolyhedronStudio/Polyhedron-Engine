@@ -22,7 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/cvar.h"
 #include "common/files.h"
-#include "common/math.h"
 #include "client/client.h"
 #include "client/video.h"
 #include "refresh/refresh.h"

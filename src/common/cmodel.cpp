@@ -23,7 +23,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/cmodel.h"
 #include "common/common.h"
 #include "common/cvar.h"
-#include "common/math.h"
 #include "common/zone.h"
 #include "system/hunk.h"
 

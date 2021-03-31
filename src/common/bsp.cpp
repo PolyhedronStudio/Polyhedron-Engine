@@ -27,7 +27,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/files.h"
 #include "common/bsp.h"
-#include "common/math.h"
 #include "common/utils.h"
 #include "common/mdfour.h"
 #include "system/hunk.h"

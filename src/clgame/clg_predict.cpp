@@ -177,6 +177,31 @@ static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
     }
 }
 
+/**
+ * @brief Setup step interpolation.
+ */
+typedef struct {
+    float height;
+    uint32_t time;
+    uint32_t timestamp;
+    uint32_t interval;
+    float delta_height;
+} cl_entity_step_t;
+void Cg_TraverseStep(cl_entity_step_t* step, uint32_t time, float height) {
+
+    const uint32_t delta = time - step->timestamp;
+
+    if (delta < step->interval) {
+        const float lerp = (step->interval - delta) / (float)step->interval;
+        step->height = step->height * (1.f - lerp) + height;
+    }
+    else {
+        step->height = height;
+        step->timestamp = time;
+    }
+
+    step->interval = 128.f * (fabsf(step->height) / PM_STEP_HEIGHT);
+}
 
 //
 //===============
@@ -185,13 +210,11 @@ static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
 // Predicts the actual client side movement.
 //================
 //
+cl_entity_step_t stepx;
 void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     pm_move_t   pm = {};
-    float       step, oldz;     // N&C: FF Precision. These were ints.
+    float       step, oldz;
     int         frame;
-
-    X86_PUSH_FPCW;
-    X86_SINGLE_FPCW;
 
     // copy current state to pmove
     memset(&pm, 0, sizeof(pm));
@@ -211,7 +234,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
         CLG_UpdateClientSoundSpecialEffects(&pm);
 
         // save for debug checking
-        VectorCopy(pm.state.origin, cl->predicted_origins[ack & CMD_MASK]);
+        cl->predicted_origins[ack & CMD_MASK] = pm.state.origin;
     }
 
     // run pending cmd
@@ -223,14 +246,25 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
         PMove(&pm, &clg.pmoveParams);
         frame = current;
 
+
         // save for debug checking
-        VectorCopy(pm.state.origin, cl->predicted_origins[(current + 1) & CMD_MASK]);
+        cl->predicted_origins[(current + 1) & CMD_MASK] = pm.state.origin;
     }
     else {
         frame = current - 1;
     }
 
-    X86_POP_FPCW;
+    // This only interpolates up step...
+    //if (pm.state.type != PM_SPECTATOR && (pm.state.flags & PMF_ON_GROUND)) {
+    //    oldz = cl->predicted_origins[cl->predicted_step_frame & CMD_MASK][2];
+    //    step = pm.state.origin[2] - oldz;
+
+    //    if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
+    //        cl->predicted_step = step;
+    //        cl->predicted_step_time = clgi.GetRealTime();
+    //        cl->predicted_step_frame = frame + 1;    // don't double step
+    //    }
+    //}
 
     if (pm.state.type != PM_SPECTATOR && (pm.state.flags & PMF_ON_GROUND)) {
         oldz = cl->predicted_origins[cl->predicted_step_frame & CMD_MASK][2];
@@ -238,17 +272,18 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
 
         if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
             cl->predicted_step = step;
-            cl->predicted_step_time = clgi.GetRealTime();
+            Cg_TraverseStep(&stepx, clgi.GetRealTime(), step);
             cl->predicted_step_frame = frame + 1;    // don't double step
+            stepx.time = clgi.GetRealTime();
         }
     }
-
+    
     if (cl->predicted_step_frame < frame) {
         cl->predicted_step_frame = frame;
     }
 
     // copy results out for rendering
-    VectorCopy(pm.state.origin, cl->predicted_origin);
-    VectorCopy(pm.state.velocity, cl->predicted_velocity);
-    VectorCopy(pm.viewAngles, cl->predicted_angles);
+    cl->predicted_origin = pm.state.origin;
+    cl->predicted_velocity = pm.state.velocity;
+    cl->predicted_angles = pm.viewAngles;
 }

@@ -1525,7 +1525,7 @@ static void PM_CheckDuck(void)
             pm->maxs.z = pm->maxs.z + pm->mins.z * 0.5f;
         }
         else {
-            const float target = pm->mins.z + height * 0.9f;
+            const float target = pm->mins.z + (height - 6) * 0.9f;
 
             if (pm->state.view_offset.z < target) { // go up
                 pm->state.view_offset.z += pm_locals.frameTime * PM_SPEED_DUCK_STAND;

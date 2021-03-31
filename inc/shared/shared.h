@@ -1363,7 +1363,6 @@ ROGUE - VERSIONS
 #ifdef CGAME_INCLUDE
 #include "common/cmodel.h"
 #include "common/cmd.h"
-//#include "common/math.h"
 #endif // CGAME_INCLUDE
 
 #endif // SHARED_H
