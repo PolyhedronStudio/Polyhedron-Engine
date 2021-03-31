@@ -15,7 +15,7 @@ void ClientDisconnect(edict_t* ent);
 void PutClientInServer(edict_t* ent);
 void InitClientPersistant(gclient_t* client);
 void InitClientResp(gclient_t* client);
-void BeginIntermission(edict_t* targ);
+void HUD_BeginIntermission(edict_t* targ);
 
 // Initializes the body que for dead bodies.
 void InitBodyQue(void);

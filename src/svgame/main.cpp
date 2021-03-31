@@ -340,7 +340,7 @@ void EndDMLevel(void)
 
     // stay on same level flag
     if ((int)dmflags->value & DF_SAME_LEVEL) {
-        BeginIntermission(CreateTargetChangeLevel(level.mapname));
+        HUD_BeginIntermission(CreateTargetChangeLevel(level.mapname));
         return;
     }
 
@@ -355,11 +355,11 @@ void EndDMLevel(void)
                 t = strtok(NULL, seps);
                 if (t == NULL) { // end of list, go to first one
                     if (f == NULL) // there isn't a first one, same level
-                        BeginIntermission(CreateTargetChangeLevel(level.mapname));
+                        HUD_BeginIntermission(CreateTargetChangeLevel(level.mapname));
                     else
-                        BeginIntermission(CreateTargetChangeLevel(f));
+                        HUD_BeginIntermission(CreateTargetChangeLevel(f));
                 } else
-                    BeginIntermission(CreateTargetChangeLevel(t));
+                    HUD_BeginIntermission(CreateTargetChangeLevel(t));
                 free(s);
                 return;
             }
@@ -371,16 +371,16 @@ void EndDMLevel(void)
     }
 
     if (level.nextmap[0]) // go to a specific map
-        BeginIntermission(CreateTargetChangeLevel(level.nextmap));
+        HUD_BeginIntermission(CreateTargetChangeLevel(level.nextmap));
     else {  // search for a changelevel
         ent = G_Find(NULL, FOFS(classname), "target_changelevel");
         if (!ent) {
             // the map designer didn't include a changelevel,
             // so create a fake ent that goes back to the same level
-            BeginIntermission(CreateTargetChangeLevel(level.mapname));
+            HUD_BeginIntermission(CreateTargetChangeLevel(level.mapname));
             return;
         }
-        BeginIntermission(ent);
+        HUD_BeginIntermission(ent);
     }
 }
 

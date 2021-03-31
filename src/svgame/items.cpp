@@ -183,7 +183,7 @@ void Drop_General(edict_t *ent, gitem_t *item)
 {
     Drop_Item(ent, item);
     ent->client->pers.inventory[ITEM_INDEX(item)]--;
-    ValidateSelectedItem(ent);
+    HUD_ValidateSelectedItem(ent);
 }
 
 
@@ -328,7 +328,7 @@ void Use_Quad(edict_t *ent, gitem_t *item)
     int     timeout;
 
     ent->client->pers.inventory[ITEM_INDEX(item)]--;
-    ValidateSelectedItem(ent);
+    HUD_ValidateSelectedItem(ent);
 
     if (quad_drop_timeout_hack) {
         timeout = quad_drop_timeout_hack;
@@ -350,7 +350,7 @@ void Use_Quad(edict_t *ent, gitem_t *item)
 void Use_Breather(edict_t *ent, gitem_t *item)
 {
     ent->client->pers.inventory[ITEM_INDEX(item)]--;
-    ValidateSelectedItem(ent);
+    HUD_ValidateSelectedItem(ent);
 
     if (ent->client->breather_framenum > level.framenum)
         ent->client->breather_framenum += 300;
@@ -365,7 +365,7 @@ void Use_Breather(edict_t *ent, gitem_t *item)
 void Use_Envirosuit(edict_t *ent, gitem_t *item)
 {
     ent->client->pers.inventory[ITEM_INDEX(item)]--;
-    ValidateSelectedItem(ent);
+    HUD_ValidateSelectedItem(ent);
 
     if (ent->client->enviro_framenum > level.framenum)
         ent->client->enviro_framenum += 300;
@@ -380,7 +380,7 @@ void Use_Envirosuit(edict_t *ent, gitem_t *item)
 void    Use_Invulnerability(edict_t *ent, gitem_t *item)
 {
     ent->client->pers.inventory[ITEM_INDEX(item)]--;
-    ValidateSelectedItem(ent);
+    HUD_ValidateSelectedItem(ent);
 
     if (ent->client->invincible_framenum > level.framenum)
         ent->client->invincible_framenum += 300;
@@ -395,7 +395,7 @@ void    Use_Invulnerability(edict_t *ent, gitem_t *item)
 void    Use_Silencer(edict_t *ent, gitem_t *item)
 {
     ent->client->pers.inventory[ITEM_INDEX(item)]--;
-    ValidateSelectedItem(ent);
+    HUD_ValidateSelectedItem(ent);
     ent->client->silencer_shots += 30;
 
 //  gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM, 0);
@@ -511,7 +511,7 @@ void Drop_Ammo(edict_t *ent, gitem_t *item)
     }
 
     ent->client->pers.inventory[index] -= dropped->count;
-    ValidateSelectedItem(ent);
+    HUD_ValidateSelectedItem(ent);
 }
 
 

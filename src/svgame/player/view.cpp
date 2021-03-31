@@ -917,7 +917,7 @@ void ClientEndServerFrame(edict_t *ent)
         // FIXME: add view drifting here?
         current_client->ps.blend[3] = 0;
         current_client->ps.fov = 90;
-        G_SetClientStats(ent);
+        HUD_SetClientStats(ent);
         return;
     }
 
@@ -994,10 +994,10 @@ void ClientEndServerFrame(edict_t *ent)
 
     // chase cam stuff
     if (ent->client->resp.spectator)
-        G_SetSpectatorStats(ent);
+        HUD_SetSpectatorStats(ent);
     else
-        G_SetClientStats(ent);
-    G_CheckChaseStats(ent);
+        HUD_SetClientStats(ent);
+    HUD_CheckChaseStats(ent);
 
     G_SetClientEvent(ent);
 
@@ -1016,7 +1016,7 @@ void ClientEndServerFrame(edict_t *ent)
 
     // if the scoreboard is up, update it
     if (ent->client->showscores && !(level.framenum & 31)) {
-        DeathmatchScoreboardMessage(ent, ent->enemy);
+        HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
         gi.Unicast(ent, false);
     }
 }

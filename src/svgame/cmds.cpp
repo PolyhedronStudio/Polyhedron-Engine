@@ -122,8 +122,13 @@ void SelectPrevItem(edict_t *ent, int itflags)
     cl->pers.selected_item = -1;
 }
 
-void ValidateSelectedItem(edict_t *ent)
+void HUD_ValidateSelectedItem(edict_t *ent)
 {
+    // Ensure these are valid.
+    if (!ent || !ent->client) {
+        return;
+    }
+
     gclient_t   *cl;
 
     cl = ent->client;
@@ -152,6 +157,11 @@ void Cmd_Give_f(edict_t *ent)
     int         i;
     qboolean    give_all;
     edict_t     *it_ent;
+
+    // Ensure these are valid.
+    if (!ent) {
+        return;
+    }
 
     if (deathmatch->value && !sv_cheats->value) {
         gi.cprintf(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
@@ -451,7 +461,7 @@ void Cmd_InvUse_f(edict_t *ent)
 {
     gitem_t     *it;
 
-    ValidateSelectedItem(ent);
+    HUD_ValidateSelectedItem(ent);
 
     if (ent->client->pers.selected_item == -1) {
         gi.cprintf(ent, PRINT_HIGH, "No item to use.\n");
@@ -572,7 +582,7 @@ void Cmd_InvDrop_f(edict_t *ent)
 {
     gitem_t     *it;
 
-    ValidateSelectedItem(ent);
+    HUD_ValidateSelectedItem(ent);
 
     if (ent->client->pers.selected_item == -1) {
         gi.cprintf(ent, PRINT_HIGH, "No item to drop.\n");

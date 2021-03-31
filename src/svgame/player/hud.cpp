@@ -28,18 +28,34 @@ INTERMISSION
 ======================================================================
 */
 
-void MoveClientToIntermission(edict_t *ent)
+//
+//===============
+// HUD_MoveClientToIntermission
+// 
+// Changes the client's movement type to PM_FREEZE while setting its
+// origin and viewangles to the previously fetched intermission entity 
+// values.
+//================
+//
+void HUD_MoveClientToIntermission(edict_t *ent)
 {
+    // Ensure it is a valid client entity.
+    if (!ent) {
+        return;
+    }
+    if (!ent->client) {
+        return;
+    }
+
     if (deathmatch->value || coop->value)
         ent->client->showscores = true;
-    VectorCopy(level.intermission_origin, ent->s.origin);
 
-    // N&C: FF Precision.
-    VectorCopy(level.intermission_origin, ent->client->ps.pmove.origin);
-    //ent->client->ps.pmove.origin[0] = level.intermission_origin[0] * 8;
-    //ent->client->ps.pmove.origin[1] = level.intermission_origin[1] * 8;
-    //ent->client->ps.pmove.origin[2] = level.intermission_origin[2] * 8;
-    VectorCopy(level.intermission_angle, ent->client->ps.viewangles);
+    // Copy over the previously fetched map intermission entity origin into
+    // the client player states positions.
+    ent->s.origin = level.intermission_origin;
+    ent->client->ps.pmove.origin = level.intermission_origin;
+    ent->client->ps.viewangles = level.intermission_angle;
+    // Setup the rest of the client player state.
     ent->client->ps.pmove.type = PM_FREEZE;
     ent->client->ps.gunindex = 0;
     ent->client->ps.blend[3] = 0;
@@ -62,32 +78,46 @@ void MoveClientToIntermission(edict_t *ent)
     ent->s.sound = 0;
     ent->solid = SOLID_NOT;
 
-    // add the layout
-
+    // Add the layout in case of a deathmatch or co-op gamemode.
     if (deathmatch->value || coop->value) {
-        DeathmatchScoreboardMessage(ent, NULL);
+        HUD_GenerateDMScoreboardLayout(ent, NULL);
         gi.Unicast(ent, true);
     }
 
 }
 
-void BeginIntermission(edict_t *targ)
+//
+//===============
+// HUD_BeginIntermission
+// 
+// Begins an intermission process for the given target entity.
+//================
+//
+void HUD_BeginIntermission(edict_t *targ)
 {
     int     i, n;
-    edict_t *ent, *client;
+    edict_t *client = nullptr;
 
-    if (level.intermissiontime)
+    // Ensure targ is valid.
+    if (!targ) {
+        return;
+    }
+
+    if (level.intermissiontime) {
         return;     // already activated
+    }
 
     game.autosaved = false;
 
     // respawn any dead clients
     for (i = 0 ; i < maxclients->value ; i++) {
         client = g_edicts + 1 + i;
-        if (!client->inuse)
+        if (!client->inuse) {
             continue;
-        if (client->health <= 0)
+        }
+        if (client->health <= 0) {
             RespawnClient(client);
+        }
     }
 
     level.intermissiontime = level.time;
@@ -97,12 +127,14 @@ void BeginIntermission(edict_t *targ)
         if (coop->value) {
             for (i = 0 ; i < maxclients->value ; i++) {
                 client = g_edicts + 1 + i;
-                if (!client->inuse)
+                if (!client->inuse) {
                     continue;
+                }
                 // strip players of all keys between units
                 for (n = 0; n < MAX_ITEMS; n++) {
-                    if (itemlist[n].flags & IT_KEY)
+                    if (itemlist[n].flags & IT_KEY) {
                         client->client->pers.inventory[n] = 0;
+                    }
                 }
             }
         }
@@ -115,43 +147,51 @@ void BeginIntermission(edict_t *targ)
 
     level.exitintermission = 0;
 
-    // find an intermission spot
-    ent = G_Find(NULL, FOFS(classname), "info_player_intermission");
-    if (!ent) {
+    // Fetch an intermission entity.
+    edict_t *intermissionEntity = G_Find(NULL, FOFS(classname), "info_player_intermission");
+    if (!intermissionEntity) {
         // the map creator forgot to put in an intermission point...
-        ent = G_Find(NULL, FOFS(classname), "info_player_start");
-        if (!ent)
-            ent = G_Find(NULL, FOFS(classname), "info_player_deathmatch");
+        intermissionEntity = G_Find(NULL, FOFS(classname), "info_player_start");
+        if (!intermissionEntity) {
+            intermissionEntity = G_Find(NULL, FOFS(classname), "info_player_deathmatch");
+        }
     } else {
         // chose one of four spots
         i = rand() & 3;
         while (i--) {
-            ent = G_Find(ent, FOFS(classname), "info_player_intermission");
-            if (!ent)   // wrap around the list
-                ent = G_Find(ent, FOFS(classname), "info_player_intermission");
+            intermissionEntity = G_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
+            if (!intermissionEntity) {  // wrap around the list 
+                intermissionEntity = G_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
+            }
         }
     }
 
-    VectorCopy(ent->s.origin, level.intermission_origin);
-    VectorCopy(ent->s.angles, level.intermission_angle);
+    level.intermission_origin = intermissionEntity->s.origin, level.intermission_origin;
+    level.intermission_angle = intermissionEntity->s.angles;
 
-    // move all clients to the intermission point
+    // Initiate the client intermission mode for all clients.
+    // (MoveType = PM_FREEZE, positioned at intermission entity view values.)
     for (i = 0 ; i < maxclients->value ; i++) {
+        // Fetch client.
         client = g_edicts + 1 + i;
+
+        // Ensure a client is in use, otherwise skip it.
         if (!client->inuse)
             continue;
-        MoveClientToIntermission(client);
+
+        // Switch to intermission.
+        HUD_MoveClientToIntermission(client);
     }
 }
 
 
 /*
 ==================
-DeathmatchScoreboardMessage
+HUD_GenerateDMScoreboardLayout
 
 ==================
 */
-void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
+void HUD_GenerateDMScoreboardLayout(edict_t *ent, edict_t *killer)
 {
     char    entry[1024];
     char    string[1400];
@@ -236,15 +276,14 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
 
 /*
 ==================
-DeathmatchScoreboard
+HUD_SendDMScoreboardMessage
 
-Draw instead of help message.
-Note that it isn't that hard to overflow the 1400 byte message limit!
+Sends the deatchmatch scoreboard svc_layout message.
 ==================
 */
-void DeathmatchScoreboard(edict_t *ent)
+void HUD_SendDMScoreboardMessage(edict_t *ent)
 {
-    DeathmatchScoreboardMessage(ent, ent->enemy);
+    HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
     gi.Unicast(ent, true);
 }
 
@@ -270,7 +309,7 @@ void Cmd_Score_f(edict_t *ent)
     }
 
     ent->client->showscores = true;
-    DeathmatchScoreboard(ent);
+    HUD_SendDMScoreboardMessage(ent);
 }
 
 
@@ -351,14 +390,14 @@ void Cmd_Help_f(edict_t *ent)
 
 //
 //===============
-// G_SetClientStats
+// HUD_SetClientStats
 // 
 // Sets the entities client, player state, status array with the current
 // frame game state data. Such as ammo, etc, it also index/precaches images
 // and audio if required.
 //================
 //
-void G_SetClientStats(edict_t* ent)
+void HUD_SetClientStats(edict_t* ent)
 {
     gitem_t* item;
     int         index, cells;
@@ -503,10 +542,10 @@ void G_SetClientStats(edict_t* ent)
 
 /*
 ===============
-G_CheckChaseStats
+HUD_CheckChaseStats
 ===============
 */
-void G_CheckChaseStats(edict_t *ent)
+void HUD_CheckChaseStats(edict_t *ent)
 {
     int i;
 
@@ -524,16 +563,16 @@ void G_CheckChaseStats(edict_t *ent)
         }
 
         memcpy(cl->ps.stats, ent->client->ps.stats, sizeof(cl->ps.stats));
-        G_SetSpectatorStats(g_edicts + i);
+        HUD_SetSpectatorStats(g_edicts + i);
     }
 }
 
 /*
 ===============
-G_SetSpectatorStats
+HUD_SetSpectatorStats
 ===============
 */
-void G_SetSpectatorStats(edict_t *ent)
+void HUD_SetSpectatorStats(edict_t *ent)
 {
     if (!ent) {
         return;
@@ -542,7 +581,7 @@ void G_SetSpectatorStats(edict_t *ent)
     gclient_t* cl = ent->client;
 
     if (!cl->chase_target) {
-        G_SetClientStats(ent);
+        HUD_SetClientStats(ent);
     }
 
     cl->ps.stats[STAT_SPECTATOR] = 1;

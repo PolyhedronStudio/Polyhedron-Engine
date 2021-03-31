@@ -1125,7 +1125,7 @@ void ClientBeginDeathmatch(edict_t *ent)
     PutClientInServer(ent);
 
     if (level.intermissiontime) {
-        MoveClientToIntermission(ent);
+        HUD_MoveClientToIntermission(ent);
     } else {
         // send effect
         gi.WriteByte(svg_muzzleflash);
@@ -1180,7 +1180,7 @@ void ClientBegin(edict_t *ent)
     }
 
     if (level.intermissiontime) {
-        MoveClientToIntermission(ent);
+        HUD_MoveClientToIntermission(ent);
     } else {
         // send effect if in a multiplayer game
         if (game.maxclients > 1) {
