@@ -1,18 +1,18 @@
 // LICENSE HERE.
 
 //
-// misc.h
+// effects.h
 //
 //
-// Contains misc declarations.
+// Gibs, to turning things into explosions.
 //
-#ifndef __SVGAME_MISC_H__
-#define __SVGAME_MISC_H__
+#ifndef __SVGAME_EFFECTS_H__
+#define __SVGAME_EFFECTS_H__
 
 //
 // Misc.
 //
-vec3_t VelocityForDamage(int damage);
+
 void ClipGibVelocity(edict_t* ent);
 
 //
@@ -22,9 +22,9 @@ void gib_think(edict_t* self);
 void gib_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
 void gib_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
 
-void ThrowHead(edict_t* self, const char* gibname, int damage, int type); // C++20: STRING: Added const to char*
+void ThrowHead(edict_t* self, const char* gibname, int damage, int type);
 void ThrowClientHead(edict_t* self, int damage);
-void ThrowGib(edict_t* self, const char* gibname, int damage, int type); // C++20: STRING: Added const to char*
+void ThrowGib(edict_t* self, const char* gibname, int damage, int type);
 
 //
 // Explosions.

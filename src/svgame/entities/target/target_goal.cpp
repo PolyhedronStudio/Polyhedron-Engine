@@ -7,8 +7,8 @@
 // target_goal entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
 
 //=====================================================
 /*QUAKED target_goal (1 0 1) (-8 -8 -8) (8 8 8)
@@ -24,7 +24,7 @@ void use_target_goal(edict_t* ent, edict_t* other, edict_t* activator)
     if (level.found_goals == level.total_goals)
         gi.configstring(CS_CDTRACK, "0");
 
-    G_UseTargets(ent, activator);
+    UTIL_UseTargets(ent, activator);
     G_FreeEdict(ent);
 }
 

@@ -7,8 +7,8 @@
 // path_corner entity implementation.
 //
 
-// Include local game header.
-#include "../g_local.h"
+#include "../g_local.h"      // SVGame funcs.
+#include "../utils.h"        // Util funcs.
 
 //=====================================================
 void path_corner_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf)
@@ -27,7 +27,7 @@ void path_corner_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_
 
         savetarget = self->target;
         self->target = self->pathtarget;
-        G_UseTargets(self, other);
+        UTIL_UseTargets(self, other);
         self->target = savetarget;
     }
 

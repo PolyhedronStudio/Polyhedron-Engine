@@ -17,10 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // g_turret.c
 
-#include "g_local.h"
+#include "g_local.h"         // Include SVGame funcs.
+#include "utils.h"           // Include Utilities funcs.
 
-
-void AnglesNormalize(vec3_t vec)
+static void AnglesWithinZeroAnd360(vec3_t &vec)
 {
     while (vec[0] > 360)
         vec[0] -= 360;
@@ -98,9 +98,9 @@ void turret_breach_think(edict_t *self)
     vec3_t  delta;
 
     VectorCopy(self->s.angles, current_angles);
-    AnglesNormalize(current_angles);
+    AnglesWithinZeroAnd360(current_angles);
 
-    AnglesNormalize(self->move_angles);
+    AnglesWithinZeroAnd360(self->move_angles);
     if (self->move_angles[PITCH] > 180)
         self->move_angles[PITCH] -= 360;
 
@@ -357,7 +357,7 @@ void turret_driver_link(edict_t *self)
 
     VectorSubtract(self->s.origin, self->target_ent->s.origin, vec);
     vectoangles(vec, vec);
-    AnglesNormalize(vec);
+    AnglesWithinZeroAnd360(vec);
     self->move_origin[1] = vec[1];
 
     self->move_origin[2] = self->s.origin[2] - self->target_ent->s.origin[2];

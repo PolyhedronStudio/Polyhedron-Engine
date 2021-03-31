@@ -7,9 +7,9 @@
 // func_button entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
-#include "../../brushfuncs.h"
+#include "../../g_local.h"      // Include SVGame funcs.
+#include "../../utils.h"        // Include Util funcs.
+#include "../../brushfuncs.h"   // Include Brush funcs.
 
 //=====================================================
 /*QUAKED func_button (0 .5 .8) ?
@@ -54,7 +54,7 @@ void button_wait(edict_t* self)
     self->s.effects &= ~EF_ANIM01;
     self->s.effects |= EF_ANIM23;
 
-    G_UseTargets(self, self->activator);
+    UTIL_UseTargets(self, self->activator);
     self->s.frame = 1;
     if (self->moveinfo.wait >= 0) {
         self->nextthink = level.time + self->moveinfo.wait;
@@ -104,7 +104,7 @@ void SP_func_button(edict_t* ent)
     vec3_t  abs_movedir;
     float   dist;
 
-    G_SetMovedir(ent->s.angles, ent->movedir);
+    UTIL_SetMoveDir(ent->s.angles, ent->movedir);
     ent->movetype = MOVETYPE_STOP;
     ent->solid = SOLID_BSP;
     gi.setmodel(ent, ent->model);

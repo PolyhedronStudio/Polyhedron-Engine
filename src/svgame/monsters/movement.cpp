@@ -17,7 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // m_move.c -- monster movement
 
-#include "../g_local.h"
+#include "../g_local.h"      // SVGame funcs.
+#include "../utils.h"        // Util funcs.
 
 #define STEPSIZE    18
 
@@ -175,7 +176,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
                 VectorCopy(trace.endpos, ent->s.origin);
                 if (relink) {
                     gi.linkentity(ent);
-                    G_TouchTriggers(ent);
+                    UTIL_TouchTriggers(ent);
                 }
                 return true;
             }
@@ -227,7 +228,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
             VectorAdd(ent->s.origin, move, ent->s.origin);
             if (relink) {
                 gi.linkentity(ent);
-                G_TouchTriggers(ent);
+                UTIL_TouchTriggers(ent);
             }
             ent->groundentity = NULL;
             return true;
@@ -245,7 +246,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
             // and is trying to correct
             if (relink) {
                 gi.linkentity(ent);
-                G_TouchTriggers(ent);
+                UTIL_TouchTriggers(ent);
             }
             return true;
         }
@@ -262,7 +263,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
 // the move is ok
     if (relink) {
         gi.linkentity(ent);
-        G_TouchTriggers(ent);
+        UTIL_TouchTriggers(ent);
     }
     return true;
 }
@@ -340,11 +341,11 @@ qboolean SV_StepDirection(edict_t *ent, float yaw, float dist)
             VectorCopy(oldorigin, ent->s.origin);
         }
         gi.linkentity(ent);
-        G_TouchTriggers(ent);
+        UTIL_TouchTriggers(ent);
         return true;
     }
     gi.linkentity(ent);
-    G_TouchTriggers(ent);
+    UTIL_TouchTriggers(ent);
     return false;
 }
 

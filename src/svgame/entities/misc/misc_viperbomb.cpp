@@ -9,6 +9,8 @@
 
 // Include local game header.
 #include "../../g_local.h"
+#include "../../effects.h"
+#include "../../utils.h"
 
 //=====================================================
 /*QUAKED misc_viper_bomb (1 0 0) (-8 -8 -8) (8 8 8)
@@ -16,7 +18,7 @@
 */
 void misc_viper_bomb_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf)
 {
-    G_UseTargets(self, self->activator);
+    UTIL_UseTargets(self, self->activator);
 
     self->s.origin[2] = self->absmin[2] + 1;
     T_RadiusDamage(self, self, self->dmg, NULL, self->dmg + 40, MOD_BOMB);

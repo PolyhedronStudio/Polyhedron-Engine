@@ -8,8 +8,8 @@
 //
 
 // Include local game header.
-#include "../../g_local.h"
-
+#include "../../g_local.h"      // Include SVGame funcs.
+#include "../../utils.h"        // Include Util funcs.
 //=====================================================
 /*QUAKED misc_viper (1 .5 0) (-16 -16 0) (16 16 32)
 This is the Viper for the flyby bombing.

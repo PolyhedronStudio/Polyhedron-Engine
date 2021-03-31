@@ -7,8 +7,9 @@
 // target_spawner entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
+
 
 //=====================================================
 /*QUAKED target_spawner (1 0 0) (-8 -8 -8) (8 8 8)
@@ -46,7 +47,7 @@ void SP_target_spawner(edict_t* self)
     self->use = use_target_spawner;
     self->svflags = SVF_NOCLIENT;
     if (self->speed) {
-        G_SetMovedir(self->s.angles, self->movedir);
+        UTIL_SetMoveDir(self->s.angles, self->movedir);
         VectorScale(self->movedir, self->speed, self->movedir);
     }
 }

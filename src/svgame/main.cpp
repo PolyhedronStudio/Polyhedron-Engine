@@ -543,3 +543,180 @@ void G_RunFrame(void)
     ClientEndServerFrames();
 }
 
+/*
+=============
+G_Find
+
+Searches all active entities for the next one that holds
+the matching string at fieldofs (use the FOFS() macro) in the structure.
+
+Searches beginning at the edict after from, or the beginning if NULL
+NULL will be returned if the end of the list is reached.
+
+=============
+*/
+edict_t* G_Find(edict_t* from, int fieldofs, const char* match)
+{
+    char* s;
+
+    if (!from)
+        from = g_edicts;
+    else
+        from++;
+
+    for (; from < &g_edicts[globals.num_edicts]; from++) {
+        if (!from->inuse)
+            continue;
+        s = *(char**)((byte*)from + fieldofs);
+        if (!s)
+            continue;
+        if (!Q_stricmp(s, match))
+            return from;
+    }
+
+    return NULL;
+}
+
+
+/*
+=================
+G_FindEntitiesWithinRadius
+
+Returns entities that have origins within a spherical area
+
+G_FindEntitiesWithinRadius (origin, radius)
+=================
+*/
+edict_t* G_FindEntitiesWithinRadius(edict_t* from, vec3_t org, float rad)
+{
+    vec3_t  eorg;
+    int     j;
+
+    if (!from)
+        from = g_edicts;
+    else
+        from++;
+    for (; from < &g_edicts[globals.num_edicts]; from++) {
+        if (!from->inuse)
+            continue;
+        if (from->solid == SOLID_NOT)
+            continue;
+        for (j = 0; j < 3; j++)
+            eorg[j] = org[j] - (from->s.origin[j] + (from->mins[j] + from->maxs[j]) * 0.5);
+        if (VectorLength(eorg) > rad)
+            continue;
+        return from;
+    }
+
+    return NULL;
+}
+
+
+/*
+=============
+G_PickTarget
+
+Searches all active entities for the next one that holds
+the matching string at fieldofs (use the FOFS() macro) in the structure.
+
+Searches beginning at the edict after from, or the beginning if NULL
+NULL will be returned if the end of the list is reached.
+
+=============
+*/
+#define MAXCHOICES  8
+
+edict_t* G_PickTarget(char* targetname)
+{
+    edict_t* ent = NULL;
+    int     num_choices = 0;
+    edict_t* choice[MAXCHOICES];
+
+    if (!targetname) {
+        gi.dprintf("G_PickTarget called with NULL targetname\n");
+        return NULL;
+    }
+
+    while (1) {
+        ent = G_Find(ent, FOFS(targetname), targetname);
+        if (!ent)
+            break;
+        choice[num_choices++] = ent;
+        if (num_choices == MAXCHOICES)
+            break;
+    }
+
+    if (!num_choices) {
+        gi.dprintf("G_PickTarget: target %s not found\n", targetname);
+        return NULL;
+    }
+
+    return choice[rand() % num_choices];
+}
+
+
+void G_InitEdict(edict_t* e)
+{
+    e->inuse = true;
+    e->classname = "noclass";
+    e->gravity = 1.0;
+    e->s.number = e - g_edicts;
+}
+
+/*
+=================
+G_Spawn
+
+Either finds a free edict, or allocates a new one.
+Try to avoid reusing an entity that was recently freed, because it
+can cause the client to think the entity morphed into something else
+instead of being removed and recreated, which can cause interpolated
+angles and bad trails.
+=================
+*/
+edict_t* G_Spawn(void)
+{
+    int         i;
+    edict_t* e;
+
+    e = &g_edicts[game.maxclients + 1];
+    for (i = game.maxclients + 1; i < globals.num_edicts; i++, e++) {
+        // the first couple seconds of server time can involve a lot of
+        // freeing and allocating, so relax the replacement policy
+        if (!e->inuse && (e->freetime < 2 || level.time - e->freetime > 0.5)) {
+            G_InitEdict(e);
+            return e;
+        }
+    }
+
+    if (i == game.maxentities)
+        gi.error("ED_Alloc: no free edicts");
+
+    globals.num_edicts++;
+    G_InitEdict(e);
+    return e;
+}
+
+/*
+=================
+G_FreeEdict
+
+Marks the edict as free
+=================
+*/
+void G_FreeEdict(edict_t* ed)
+{
+    gi.unlinkentity(ed);        // unlink from world
+
+    if ((ed - g_edicts) <= (maxclients->value + BODY_QUEUE_SIZE)) {
+        //      gi.dprintf("tried to free special edict\n");
+        return;
+    }
+
+    // C++-ify, reset the struct itself.
+    memset(ed, 0, sizeof(*ed));
+    //*ed = edict_t();
+    ed->classname = "freed";
+    ed->freetime = level.time;
+    ed->inuse = false;
+}

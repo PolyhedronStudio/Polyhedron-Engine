@@ -7,8 +7,8 @@
 // misc_teleporter entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
 
 //=====================================================
 

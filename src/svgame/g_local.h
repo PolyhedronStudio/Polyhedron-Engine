@@ -617,31 +617,6 @@ qboolean Add_Ammo(edict_t *ent, gitem_t *item, int count);
 void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
 
 //
-// g_utils.c
-//
-qboolean    KillBox(edict_t *ent);
-vec3_t  G_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right);
-edict_t *G_Find(edict_t *from, int fieldofs, const char *match); // C++20: Added const to char*
-edict_t *findradius(edict_t *from, vec3_t org, float rad);
-edict_t *G_PickTarget(char *targetname);
-void    G_UseTargets(edict_t *ent, edict_t *activator);
-void    G_SetMovedir(vec3_t &angles, vec3_t &movedir);
-
-void    G_InitEdict(edict_t *e);
-edict_t *G_Spawn(void);
-void    G_FreeEdict(edict_t *e);
-
-void    G_TouchTriggers(edict_t *ent);
-void    G_TouchSolids(edict_t *ent);
-
-char    *G_CopyString(char *in);
-
-char    *vtos(const vec3_t &v, qboolean rounded = true);
-
-float vectoyaw(const vec3_t &vec);
-void vectoangles(const vec3_t &vec, vec3_t &angles);
-
-//
 // g_combat.c
 //
 qboolean OnSameTeam(edict_t *ent1, edict_t *ent2);
@@ -686,19 +661,6 @@ void M_CatagorizePosition(edict_t *ent);
 qboolean M_CheckAttack(edict_t *self);
 void M_FlyCheck(edict_t *self);
 void M_CheckGround(edict_t *ent);
-
-//
-// g_misc.c
-//
-void ThrowHead(edict_t *self, const char *gibname, int damage, int type);
-void ThrowClientHead(edict_t *self, int damage);
-void ThrowGib(edict_t *self, const char *gibname, int damage, int type);
-void BecomeExplosion1(edict_t *self);
-void BecomeExplosion2(edict_t* self);
-   
-#define CLOCK_MESSAGE_SIZE  16
-void func_clock_think(edict_t *self);
-void func_clock_use(edict_t *self, edict_t *other, edict_t *activator);
 
 //
 // g_ai.c
@@ -787,6 +749,14 @@ void G_RunEntity(edict_t *ent);
 //
 void SaveClientData(void);
 void FetchClientEntData(edict_t *ent);
+
+edict_t* G_PickTarget(char* targetname);
+edict_t* G_Find(edict_t* from, int fieldofs, const char* match); // C++20: Added const to char*
+edict_t* G_FindEntitiesWithinRadius(edict_t* from, vec3_t org, float rad);
+
+void    G_InitEdict(edict_t* e);
+edict_t* G_Spawn(void);
+void    G_FreeEdict(edict_t* e);
 
 //
 // g_chase.c

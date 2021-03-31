@@ -15,7 +15,8 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#include "g_local.h"
+#include "g_local.h"         // Include SVGame funcs.
+#include "utils.h"           // Include Utilities funcs.
 
 
 //
@@ -483,7 +484,7 @@ void monster_death_use(edict_t *self)
     if (!self->target)
         return;
 
-    G_UseTargets(self, self->enemy);
+    UTIL_UseTargets(self, self->enemy);
 }
 
 

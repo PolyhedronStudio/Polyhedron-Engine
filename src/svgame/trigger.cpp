@@ -16,12 +16,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 #include "g_local.h"
+#include "utils.h"
 #include "trigger.h"
 
 void InitTrigger(edict_t *self)
 {
     if (!VectorCompare(self->s.angles, vec3_origin))
-        G_SetMovedir(self->s.angles, self->movedir);
+        UTIL_SetMoveDir(self->s.angles, self->movedir);
 
     self->solid = SOLID_TRIGGER;
     self->movetype = MOVETYPE_NONE;
@@ -45,7 +46,7 @@ void multi_trigger(edict_t *ent)
     if (ent->nextthink)
         return;     // already been triggered
 
-    G_UseTargets(ent, ent->activator);
+    UTIL_UseTargets(ent, ent->activator);
 
     if (ent->wait > 0) {
         ent->think = multi_wait;

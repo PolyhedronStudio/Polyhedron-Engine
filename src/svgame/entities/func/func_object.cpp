@@ -7,8 +7,8 @@
 // func_object entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // Include SVGame funcs.
+#include "../../utils.h"        // Include Util funcs.
 
 //=====================================================
 /*QUAKED func_object (0 .5 .8) ? TRIGGER_SPAWN ANIMATED ANIMATED_FAST

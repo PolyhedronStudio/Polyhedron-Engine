@@ -7,8 +7,9 @@
 // trigger_gravity entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
+#include "../../brushfuncs.h"   // Brush funcs.
 #include "../../trigger.h"
 
 //=====================================================

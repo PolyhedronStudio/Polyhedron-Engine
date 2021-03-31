@@ -7,8 +7,9 @@
 // trigger_key entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
+
 #include "../../trigger.h"
 
 //=====================================================
@@ -73,7 +74,7 @@ void trigger_key_use(edict_t* self, edict_t* other, edict_t* activator)
         activator->client->pers.inventory[index]--;
     }
 
-    G_UseTargets(self, activator);
+    UTIL_UseTargets(self, activator);
 
     self->use = NULL;
 }

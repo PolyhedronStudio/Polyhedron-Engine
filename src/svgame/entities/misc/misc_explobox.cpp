@@ -7,8 +7,9 @@
 // misc_explobox entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // Include SVGame funcs.
+#include "../../utils.h"        // Include Util funcs.
+#include "../../effects.h"
 
 //=====================================================
 /*QUAKED misc_explobox (0 .5 .8) (-16 -16 0) (16 16 40)

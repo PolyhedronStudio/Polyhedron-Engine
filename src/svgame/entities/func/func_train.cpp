@@ -7,14 +7,12 @@
 // func_train entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // Include SVGame funcs.
+#include "../../utils.h"        // Include Util funcs.
+#include "../../brushfuncs.h"   // Include Brush funcs.
+#include "../../effects.h"
 
-// Include Brush funcs header.
-#include "../../brushfuncs.h"
-
-// Include door header.
-#include "func_door.h"
+#include "func_door.h"          // Include func_door entity header.
 
 //=====================================================
 #define TRAIN_START_ON      1
@@ -62,7 +60,7 @@ void train_wait(edict_t* self)
         ent = self->target_ent;
         savetarget = ent->target;
         ent->target = ent->pathtarget;
-        G_UseTargets(ent, self->activator);
+        UTIL_UseTargets(ent, self->activator);
         ent->target = savetarget;
 
         // make sure we didn't get killed by a killtarget

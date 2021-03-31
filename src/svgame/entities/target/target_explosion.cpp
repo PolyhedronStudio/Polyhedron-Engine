@@ -7,8 +7,8 @@
 // target_explosion entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
 
 //=====================================================
 /*QUAKED target_explosion (1 0 0) (-8 -8 -8) (8 8 8)
@@ -30,7 +30,7 @@ void target_explosion_explode(edict_t* self)
 
     save = self->delay;
     self->delay = 0;
-    G_UseTargets(self, self->activator);
+    UTIL_UseTargets(self, self->activator);
     self->delay = save;
 }
 

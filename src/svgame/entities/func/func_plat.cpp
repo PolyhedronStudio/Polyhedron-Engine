@@ -10,6 +10,7 @@
 // Include local game header.
 #include "../../g_local.h"
 #include "../../brushfuncs.h"
+#include "../../effects.h"
 
 //=====================================================
 void plat_go_down(edict_t* ent);

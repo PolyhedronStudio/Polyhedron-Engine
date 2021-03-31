@@ -27,20 +27,6 @@ byte     is_silenced;
 
 void weapon_grenade_fire(edict_t *ent, qboolean held);
 
-
-vec3_t P_ProjectSource(gclient_t *client, const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right)
-{
-    vec3_t  _distance;
-
-    VectorCopy(distance, _distance);
-    if (client->pers.hand == LEFT_HANDED)
-        _distance[1] *= -1;
-    else if (client->pers.hand == CENTER_HANDED)
-        _distance[1] = 0;
-    return G_ProjectSource(point, _distance, forward, right);
-}
-
-
 /*
 ===============
 PlayerNoise

@@ -7,8 +7,8 @@
 // target_secret entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
 
 //=====================================================
 /*QUAKED target_secret (1 0 1) (-8 -8 -8) (8 8 8)
@@ -21,7 +21,7 @@ void use_target_secret(edict_t* ent, edict_t* other, edict_t* activator)
 
     level.found_secrets++;
 
-    G_UseTargets(ent, activator);
+    UTIL_UseTargets(ent, activator);
     G_FreeEdict(ent);
 }
 

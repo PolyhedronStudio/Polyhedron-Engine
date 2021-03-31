@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // g_phys.c
 
 #include "g_local.h"
+#include "utils.h"
 
 /*
 
@@ -360,7 +361,7 @@ retry:
     }
 
     if (ent->inuse)
-        G_TouchTriggers(ent);
+        UTIL_TouchTriggers(ent);
 
     return trace;
 }
@@ -523,7 +524,7 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 //FIXME: is there a better way to handle this?
     // see if anything we moved has touched a trigger
     for (p = pushed_p - 1 ; p >= pushed ; p--)
-        G_TouchTriggers(p->ent);
+        UTIL_TouchTriggers(p->ent);
 
     return true;
 }
@@ -869,7 +870,7 @@ void SV_Physics_Step(edict_t *ent)
         SV_FlyMove(ent, FRAMETIME, mask);
 
         gi.linkentity(ent);
-        G_TouchTriggers(ent);
+        UTIL_TouchTriggers(ent);
         if (!ent->inuse)
             return;
 

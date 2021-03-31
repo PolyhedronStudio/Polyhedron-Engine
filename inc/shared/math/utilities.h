@@ -126,6 +126,9 @@ static inline float RandomRangef(float begin, float end) {
 //===============
 //
 static inline uint32_t RandomRangeui(uint32_t begin, uint32_t end) {
+    // Make sure the random number generator is initialized.
+    InitRandomNumberGenerator();
+
     return begin + (rand() % (end - begin) + begin);
 }
 
@@ -295,6 +298,9 @@ static inline float anglemod(float a)
 //
 static inline int rand_byte(void)
 {
+    // Make sure the random number generator is initialized.
+    InitRandomNumberGenerator();
+
     int r = rand();
 
     int b1 = (r >> 24) & 255;

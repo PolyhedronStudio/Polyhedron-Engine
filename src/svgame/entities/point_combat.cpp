@@ -7,8 +7,8 @@
 // point_combat entity implementation.
 //
 
-// Include local game header.
-#include "../g_local.h"
+#include "../g_local.h"      // SVGame funcs.
+#include "../utils.h"        // Util funcs.
 
 //=====================================================
 
@@ -59,7 +59,7 @@ void point_combat_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface
             activator = other->activator;
         else
             activator = other;
-        G_UseTargets(self, activator);
+        UTIL_UseTargets(self, activator);
         self->target = savetarget;
     }
 }

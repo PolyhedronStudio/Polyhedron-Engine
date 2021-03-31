@@ -32,10 +32,11 @@ SET(SRC_SVGAME
 	svgame/chase.cpp
 	svgame/cmds.cpp
 	svgame/combat.cpp
+	svgame/effects.cpp
 	svgame/functionpointers.cpp
 	svgame/items.cpp
 	svgame/main.cpp
-	svgame/misc.cpp
+	svgame/effects.cpp
 	svgame/monsters.cpp
 	svgame/physics.cpp
 	svgame/save.cpp
@@ -147,7 +148,11 @@ SET(HEADERS_SVGAME
 	svgame/svgame.def
 
 	svgame/g_local.h
+	svgame/brushfuncs.h
+	svgame/effects.h
 	svgame/functionpointers.h
+	svgame/trigger.h
+	svgame/utils.h
 
 	svgame/entities/func/func_door.h
 

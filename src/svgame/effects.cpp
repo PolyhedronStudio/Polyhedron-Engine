@@ -7,35 +7,14 @@
 // Contains misc definitions.
 //
 
-#include "g_local.h"
-#include "misc.h"
+#include "g_local.h"         // Include SVGame funcs.
+#include "utils.h"           // Include Utilities funcs.
+#include "effects.h"
 
 //=====================================================
 
 
-//
-//=================
-// Misc functions
-//=================
-//
-vec3_t VelocityForDamage(int damage)
-{
-    // Pick random velocities.
-    vec3_t v = {
-        v[0] = 100.0 * crandom(),
-        v[1] = 100.0 * crandom(),
-        v[2] = 200.0 + 100.0 * random()
-    };
 
-    // Scale velocities.
-    if (damage < 50)
-        VectorScale(v, 0.7, v);
-    else
-        VectorScale(v, 1.2, v);
-
-    // Return.
-    return v;
-}
 
 void ClipGibVelocity(edict_t *ent)
 {

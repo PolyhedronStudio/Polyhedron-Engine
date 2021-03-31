@@ -7,8 +7,8 @@
 // target_lightramp entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
 
 //=====================================================
 /*QUAKED target_earthquake (1 0 0) (-8 -8 -8) (8 8 8)

@@ -7,8 +7,8 @@
 // target_splash entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
 
 //=====================================================
 /*QUAKED target_splash (1 0 0) (-8 -8 -8) (8 8 8)
@@ -44,7 +44,7 @@ void use_target_splash(edict_t* self, edict_t* other, edict_t* activator)
 void SP_target_splash(edict_t* self)
 {
     self->use = use_target_splash;
-    G_SetMovedir(self->s.angles, self->movedir);
+    UTIL_SetMoveDir(self->s.angles, self->movedir);
 
     if (!self->count)
         self->count = 32;

@@ -9,6 +9,7 @@
 
 // Include local game header.
 #include "../../g_local.h"
+#include "../../effects.h"
 
 //=====================================================
 /*QUAKED misc_deadsoldier (1 .5 0) (-16 -16 0) (16 16 16) ON_BACK ON_STOMACH BACK_DECAP FETAL_POS SIT_DECAP IMPALED

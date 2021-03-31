@@ -23,7 +23,9 @@ SOLDIER
 ==============================================================================
 */
 
-#include "../g_local.h"
+#include "../g_local.h"     // SVGame.
+#include "../effects.h"     // Effects.
+#include "../utils.h"       // Util.
 #include "soldier.h"
 
 

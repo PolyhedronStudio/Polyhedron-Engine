@@ -7,8 +7,8 @@
 // target_crosslevel_target entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
 
 //=====================================================
 /*QUAKED target_crosslevel_target (.5 .5 .5) (-8 -8 -8) (8 8 8) trigger1 trigger2 trigger3 trigger4 trigger5 trigger6 trigger7 trigger8
@@ -20,7 +20,7 @@ killtarget also work.
 void target_crosslevel_target_think(edict_t* self)
 {
     if (self->spawnflags == (game.serverflags & SFL_CROSS_TRIGGER_MASK & self->spawnflags)) {
-        G_UseTargets(self, self);
+        UTIL_UseTargets(self, self);
         G_FreeEdict(self);
     }
 }

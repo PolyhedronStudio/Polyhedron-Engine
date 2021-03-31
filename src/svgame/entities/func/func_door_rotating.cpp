@@ -7,14 +7,11 @@
 // func_door entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // Include SVGame funcs.
+#include "../../utils.h"        // Include Util funcs.
+#include "../../brushfuncs.h"   // Include Brush funcs.
 
-// Include Brush funcs header.
-#include "../../brushfuncs.h"
-
-// Include func_door header.
-#include "func_door.h"
+#include "func_door.h"          // Include func_door entity header.
 
 //=====================================================
 /*QUAKED func_door_rotating (0 .5 .8) ? START_OPEN REVERSE CRUSHER NOMONSTER ANIMATED TOGGLE X_AXIS Y_AXIS

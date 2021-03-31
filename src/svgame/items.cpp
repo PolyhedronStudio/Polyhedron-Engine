@@ -15,8 +15,9 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#include "g_local.h"         // Include SVGame header.
-#include "player/hud.h"      // Include HUD header.
+#include "g_local.h"         // Include SVGame funcs.
+#include "utils.h"           // Include Utilities funcs.
+#include "player/hud.h"      // Include HUD funcs.
 
 
 qboolean    Pickup_Weapon(edict_t *ent, edict_t *other);
@@ -762,7 +763,7 @@ void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
     }
 
     if (!(ent->spawnflags & ITEM_TARGETS_USED)) {
-        G_UseTargets(ent, other);
+        UTIL_UseTargets(ent, other);
         ent->spawnflags |= ITEM_TARGETS_USED;
     }
 

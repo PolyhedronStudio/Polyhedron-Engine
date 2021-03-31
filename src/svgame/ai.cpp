@@ -17,7 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // g_ai.c
 
-#include "g_local.h"
+#include "g_local.h"         // Include SVGame funcs.
+#include "utils.h"           // Include Utilities funcs.
 
 qboolean FindTarget(edict_t *self);
 extern cvar_t   *maxclients;

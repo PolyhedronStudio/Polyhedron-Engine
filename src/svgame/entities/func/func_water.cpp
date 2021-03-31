@@ -7,14 +7,12 @@
 // func_water entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
-
-// Include Brush funcs header.
-#include "../../brushfuncs.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
+#include "../../brushfuncs.h"   // Brush funcs.
 
 // Include door header.
-#include "func_door.h"
+#include "func_door.h"          // func_door entity.
 
 //=====================================================
 /*QUAKED func_water (0 .5 .8) ? START_OPEN
@@ -36,7 +34,7 @@ void SP_func_water(edict_t* self)
 {
     vec3_t  abs_movedir;
 
-    G_SetMovedir(self->s.angles, self->movedir);
+    UTIL_SetMoveDir(self->s.angles, self->movedir);
     self->movetype = MOVETYPE_PUSH;
     self->solid = SOLID_BSP;
     gi.setmodel(self, self->model);

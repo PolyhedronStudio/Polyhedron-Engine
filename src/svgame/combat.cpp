@@ -17,7 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // g_combat.c
 
-#include "g_local.h"
+#include "g_local.h"         // Include SVGame funcs.
+#include "utils.h"           // Include Utilities funcs.
 
 /*
 ============
@@ -538,7 +539,7 @@ void T_RadiusDamage(edict_t *inflictor, edict_t *attacker, float damage, edict_t
     }
 
     // Find entities within radius.
-    while ((ent = findradius(ent, inflictor->s.origin, radius)) != NULL) {
+    while ((ent = G_FindEntitiesWithinRadius(ent, inflictor->s.origin, radius)) != NULL) {
         // Continue in case this entity has to be ignored from applying damage.
         if (ent == ignore)
             continue;

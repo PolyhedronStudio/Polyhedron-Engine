@@ -7,8 +7,8 @@
 // func_timer entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // Include SVGame funcs.
+#include "../../utils.h"        // Include Util funcs.
 
 //=====================================================
 /*QUAKED func_timer (0.3 0.1 0.6) (-8 -8 -8) (8 8 8) START_ON
@@ -27,7 +27,7 @@ These can used but not touched.
 */
 void func_timer_think(edict_t* self)
 {
-    G_UseTargets(self, self->activator);
+    UTIL_UseTargets(self, self->activator);
     self->nextthink = level.time + self->wait + crandom() * self->random;
 }
 

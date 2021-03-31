@@ -16,9 +16,11 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#include "../g_local.h" // Include SVGame header.
-#include "client.h"     // Include Player Client header.
-#include "hud.h"        // Include HUD header.
+#include "../g_local.h"     // SVGame.
+#include "../effects.h"     // Effects.
+#include "../utils.h"       // Util funcs.
+#include "client.h"         // Include Player Client header.
+#include "hud.h"            // Include HUD header.
 
 
 #include "sharedgame/pmove.h"   // Include SG PMove.
@@ -757,19 +759,6 @@ void    SelectSpawnPoint(edict_t *ent, vec3_t &origin, vec3_t &angles)
 
 //======================================================================
 
-
-void InitBodyQue(void)
-{
-    int     i;
-    edict_t *ent;
-
-    level.body_que = 0;
-    for (i = 0; i < BODY_QUEUE_SIZE ; i++) {
-        ent = G_Spawn();
-        ent->classname = "bodyque";
-    }
-}
-
 void body_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, const vec3_t& point)
 {
     int n;
@@ -813,9 +802,10 @@ void CopyToBodyQue(edict_t *ent)
     VectorCopy(ent->maxs, body->maxs);
     VectorCopy(ent->absmin, body->absmin);
     VectorCopy(ent->absmax, body->absmax);
-    VectorCopy(ent->size, body->size);
-    VectorCopy(ent->velocity, body->velocity);
-    VectorCopy(ent->avelocity, body->avelocity);
+
+    body->size = ent->size; // VectorCopy(ent->size, body->size);
+    body->velocity = ent->velocity; // VectorCopy(ent->velocity, body->velocity);
+    body->avelocity = ent->avelocity; //  VectorCopy(ent->avelocity, body->avelocity);
     body->solid = ent->solid;
     body->clipmask = ent->clipmask;
     body->owner = ent->owner;
@@ -1525,7 +1515,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         gi.linkentity(ent);
 
         if (ent->movetype != MOVETYPE_NOCLIP)
-            G_TouchTriggers(ent);
+            UTIL_TouchTriggers(ent);
 
         // touch other objects
         for (i = 0 ; i < pm.numTouchedEntities; i++) {

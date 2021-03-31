@@ -7,14 +7,12 @@
 // func_door entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // Include SVGame funcs.
+#include "../../utils.h"        // Include Util funcs.
+#include "../../brushfuncs.h"   // Include Brush funcs.
+#include "../../effects.h"
 
-// Include Brush funcs header.
-#include "../../brushfuncs.h"
-
-// Include func_door header.
-#include "func_door.h"
+#include "func_door.h"          // Include func_door entity header.
 
 //=====================================================
 /*QUAKED func_door (0 .5 .8) ? START_OPEN x CRUSHER NOMONSTER ANIMATED TOGGLE ANIMATED_FAST
@@ -122,7 +120,7 @@ void door_go_up(edict_t* self, edict_t* activator)
     else if (strcmp(self->classname, "func_door_rotating") == 0)
         Brush_AngleMove_Calc(self, door_hit_top);
 
-    G_UseTargets(self, activator);
+    UTIL_UseTargets(self, activator);
     door_use_areaportals(self, true);
 }
 
@@ -313,7 +311,7 @@ void SP_func_door(edict_t* ent)
         ent->moveinfo.sound_end = gi.soundindex("doors/dr1_end.wav");
     }
 
-    G_SetMovedir(ent->s.angles, ent->movedir);
+    UTIL_SetMoveDir(ent->s.angles, ent->movedir);
     ent->movetype = MOVETYPE_PUSH;
     ent->solid = SOLID_BSP;
     gi.setmodel(ent, ent->model);

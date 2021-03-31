@@ -9,7 +9,7 @@
 
 #include "../../g_local.h"          // Include SVGame header.
 #include "../../player/client.h"    // Include Player Client header.
-
+#include "../../utils.h"
 
 //=====================================================
 /*QUAKED target_changelevel (1 0 0) (-8 -8 -8) (8 8 8)

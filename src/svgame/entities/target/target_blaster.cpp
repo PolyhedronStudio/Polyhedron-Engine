@@ -6,9 +6,8 @@
 //
 // target_blaster entity implementation.
 //
-
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"         // Include SVGame funcs.
+#include "../../utils.h"           // Include Utilities funcs.
 
 //=====================================================
 /*QUAKED target_blaster (1 0 0) (-8 -8 -8) (8 8 8) NOTRAIL NOEFFECTS
@@ -38,7 +37,7 @@ void use_target_blaster(edict_t* self, edict_t* other, edict_t* activator)
 void SP_target_blaster(edict_t* self)
 {
     self->use = use_target_blaster;
-    G_SetMovedir(self->s.angles, self->movedir);
+    UTIL_SetMoveDir(self->s.angles, self->movedir);
     self->noise_index = gi.soundindex("weapons/laser2.wav");
 
     if (!self->dmg)

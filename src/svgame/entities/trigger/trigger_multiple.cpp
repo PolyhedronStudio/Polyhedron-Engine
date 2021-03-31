@@ -7,8 +7,9 @@
 // trigger_multiple entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
+
 #include "../../trigger.h"
 
 //=====================================================
@@ -56,7 +57,7 @@ void SP_trigger_multiple(edict_t* ent)
     }
 
     if (!VectorCompare(ent->s.angles, vec3_origin))
-        G_SetMovedir(ent->s.angles, ent->movedir);
+        UTIL_SetMoveDir(ent->s.angles, ent->movedir);
 
     gi.setmodel(ent, ent->model);
     gi.linkentity(ent);

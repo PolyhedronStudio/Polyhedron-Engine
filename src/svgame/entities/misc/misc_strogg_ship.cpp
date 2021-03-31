@@ -7,8 +7,8 @@
 // misc_strogg_ship entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
 
 //=====================================================
 /*QUAKED misc_strogg_ship (1 .5 0) (-16 -16 0) (16 16 32)

@@ -17,9 +17,6 @@ void InitClientPersistant(gclient_t* client);
 void InitClientResp(gclient_t* client);
 void HUD_BeginIntermission(edict_t* targ);
 
-// Initializes the body que for dead bodies.
-void InitBodyQue(void);
-
 // Respawns the actual client.
 void RespawnClient(edict_t* ent);
 

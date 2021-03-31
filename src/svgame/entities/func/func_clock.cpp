@@ -106,7 +106,7 @@ void func_clock_think(edict_t* self)
     //        savemessage = self->message;
     //        self->target = self->pathtarget;
     //        self->message = NULL;
-    //        G_UseTargets(self, self->activator);
+    //        UTIL_UseTargets(self, self->activator);
     //        self->target = savetarget;
     //        self->message = savemessage;
     //    }

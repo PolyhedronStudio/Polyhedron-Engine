@@ -8,7 +8,9 @@
 //
 
 // Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // Include SVGame funcs.
+#include "../../effects.h"      // Include Effect funcs.
+#include "../../utils.h"        // Include Util funcs.
 
 //=====================================================
 /*QUAKED func_explosive (0 .5 .8) ? Trigger_Spawn ANIMATED ANIMATED_FAST
@@ -77,7 +79,7 @@ void func_explosive_explode(edict_t* self, edict_t* inflictor, edict_t* attacker
         ThrowDebris(self, "models/objects/debris2/tris.md2", 2, chunkorigin);
     }
 
-    G_UseTargets(self, attacker);
+    UTIL_UseTargets(self, attacker);
 
     if (self->dmg)
         BecomeExplosion1(self);

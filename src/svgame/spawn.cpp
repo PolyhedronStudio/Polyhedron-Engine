@@ -835,7 +835,11 @@ void SP_worldspawn(edict_t *ent)
     //---------------
 
     // reserve some spots for dead player bodies for coop / deathmatch
-    InitBodyQue();
+    level.body_que = 0;
+    for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
+        edict_t* ent = G_Spawn();
+        ent->classname = "bodyque";
+    }
 
     // set configstrings for items
     SetItemNames();

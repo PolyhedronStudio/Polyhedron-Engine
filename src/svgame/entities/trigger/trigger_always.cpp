@@ -7,8 +7,8 @@
 // trigger_always entity implementation.
 //
 
-// Include local game header.
-#include "../../g_local.h"
+#include "../../g_local.h"      // SVGame funcs.
+#include "../../utils.h"        // Util funcs.
 #include "../../trigger.h"
 
 //=====================================================
@@ -20,5 +20,5 @@ void SP_trigger_always(edict_t* ent)
     // we must have some delay to make sure our use targets are present
     if (ent->delay < 0.2)
         ent->delay = 0.2;
-    G_UseTargets(ent, ent);
+    UTIL_UseTargets(ent, ent);
 }

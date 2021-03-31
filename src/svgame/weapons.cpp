@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 #include "g_local.h"
-
+#include "utils.h"
 
 /*
 =================
@@ -727,7 +727,7 @@ void bfg_explode(edict_t *self)
     if (self->s.frame == 0) {
         // the BFG effect
         ent = NULL;
-        while ((ent = findradius(ent, self->s.origin, self->dmg_radius)) != NULL) {
+        while ((ent = G_FindEntitiesWithinRadius(ent, self->s.origin, self->dmg_radius)) != NULL) {
             if (!ent->takedamage)
                 continue;
             if (ent == self->owner)
@@ -814,7 +814,7 @@ void bfg_think(edict_t *self)
         dmg = 10;
 
     ent = NULL;
-    while ((ent = findradius(ent, self->s.origin, 256)) != NULL) {
+    while ((ent = G_FindEntitiesWithinRadius(ent, self->s.origin, 256)) != NULL) {
         if (ent == self)
             continue;
 
