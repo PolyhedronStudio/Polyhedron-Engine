@@ -9,43 +9,50 @@ When finished we have a stable base to work from, one that we can start making t
 - [ ] Building
   - [ ] Get it to build using CLang in vS2019, this should get us closer to being Linux compatible continuously 
   - [ ] Fix all compiler warnings introduces since C++ 20: Including the C5056 one.
+
 - [ ] CMake
   - Include our own libfreetype, libpng, and and liblua to accomodate libRmlUi.
   - The alternative is, use stb_freetype since the libpng and libfreetype are a pain to begin with. Of course, this requires modifying their code.
   - Include OpenAL-soft and have it build itself properly. In case this fails, at least include a binary for Windows guys. 
+
 - [ ] Remove MDV, and GTV. 
+
 - [ ] Headers need to be unique to their "owners". Or how do you say this... In either case, it'll result in way faster build times. 
   - [ ] inc/shared/
     - [ ] Move each part into its own sub header, include these in shared.h
-    - [ ] Move non-core related things into their own headers, include where required.
+    - [x] Move non-core related things into their own headers, include where required.
+      - Almost done, needs some work with regards to EF_ flags etc.
   - [ ] Client Game
     - Get rid of the g_local, and just have each .cpp file do its own .h file, include only those that are required.
   - [ ] Server Game
     - Get rid of the g_local, and just have each .cpp file do its own .h file, include only those that are required.
+
 - [ ] Messaging/Networking - Marked as // MSG: !! ...
   - [ ] Look into UDP packet size limit, what do we do about this?
   - [ ] Remove the 5 / 3 bits method in the network cmd. This way we can have 0-254 client and server commands being networked.  
   - [ ] Look into ZLib downloading.
   - [ ] Look into the ES_ flags, most were from the Q2 protocols, they were used to enable/disable them depending on which version. We can use these slots for other things, obviously._
+  - [ ] Restructure the client/server prediction code, so we can implement proper
   - [X] Figure out all the ifdefs and what not for diff Q2 protocols. Remove them, choose the best option to keep, and set us up for our own version protocol.
   - [X] Change the fact that message_packet_t now uses a short array, instead of a vec3_t for the position.
     - [X] Fix emit_snd, and investigate all code related to svc_sound so that it uses vec3_t and MSG_xxxxFloat functions.
     - [X] Change MSG_Write/ReadPos to use MSG_Write/ReadFloat instead, this is safe after fixing the above.
     
 - [ ] Math Library
-  - [ ] Check svgame for vec3_t issues, since the game doesn't work well yet.
-    - [x] misc.cpp
-    - [ ] physics.cpp
-  - [ ] Figure out why sometimes the plane is NULL in case of T_Damage, seems by T_RadiusDamage. 
-  - [ ] Rename Macro functions, for the old Vector lib, and create new inlined versions for the other vector types.
+  - [X] Figure out why sometimes the plane is NULL in case of T_Damage, seems by T_RadiusDamage. 
+  - [X] Create new inlined versions for the other vector types.
+    - [ ] vec2_t
+    - [x] vec3_t
+    - [ ] vec4_t
+    - [ ] vec5_t
   - [ ] Change PITCH, YAW, ROLL defines to a vec3_t::PITCH, etc._
   - [ ] Use references/pointers, and const correctness.
   - [X] Change the typedefs, so we use an actual union/struct. (Still needs to be done for the others, but vec3_t is done_)
-  - [ ] Take a look around at other engines, see what we might be missing out on, so we won't run into a lack of in the future.
+  - [ ] 
 - [ ] PMove
   - [ ] Footsteps, based on material.
-  - [ ] Implement stair stepping (StepDown method)
-    - [ ] Restructure the code.
+  - [X] Implement stair stepping (StepDown method)
+    - [ ] stair stepping interpolation.
   - [ ] Implement a PM_FLYMOVE, which can be used for the future AI.
 - [ ] Game Modules
   - [ ] Client
@@ -55,8 +62,6 @@ When finished we have a stable base to work from, one that we can start making t
     - [ ] Remove all needless entities.
 - [ ] Refresher
   - [ ] Hook up DDS load code for general materials.
-  - [ ] Move over the refresher from PalmliX' fork to be.
-  - [ ] 
 - [ ] WIDTools, although it resides outside of this repository, it needs to go along with the 0.2 release.
   - [ ] Figure out whether to keep large boundaries, or not. This depends on: Can we fix the bug? It seems brush splitting, or triangulation is off the rails. Windings etc.
 
