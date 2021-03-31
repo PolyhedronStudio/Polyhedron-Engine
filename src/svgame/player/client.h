@@ -19,6 +19,11 @@ void BeginIntermission(edict_t* targ);
 
 void InitBodyQue(void);
 void RespawnClient(edict_t* ent);
+void TossClientWeapon(edict_t* self);
+
+void ClientUpdateObituary(edict_t* self, edict_t* inflictor, edict_t* attacker);
+void TossClientWeapon(edict_t* self);
+
 
 void ClientBegin(edict_t* ent);
 void ClientCommand(edict_t* ent);

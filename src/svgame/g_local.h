@@ -743,11 +743,6 @@ edict_t *PlayerTrail_PickNext(edict_t *self);
 edict_t *PlayerTrail_LastSpot(void);
 
 //
-// g_client.c
-//
-
-
-//
 // g_player.c
 //
 void player_pain(edict_t *self, edict_t *other, float kick, int damage);

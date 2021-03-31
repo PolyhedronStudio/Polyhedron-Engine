@@ -125,6 +125,7 @@ SET(SRC_SVGAME
 	svgame/player/client.cpp
 	svgame/player/hud.cpp
 	svgame/player/trail.cpp
+	svgame/player/player.cpp
 	svgame/player/view.cpp
 	svgame/player/weapons.cpp
 
@@ -153,6 +154,8 @@ SET(HEADERS_SVGAME
 	svgame/monsters/soldier.h
 
 	svgame/player/animations.h
+	svgame/player/client.h
+	svgame/player/player.h
 	svgame/player/weapons.h
 
 	svgame/weapons/bfg10k.h
