@@ -2283,7 +2283,11 @@ void MVD_PrepWorldFrame(void)
 
 
 svgame_export_t mvd_ge = {
-    GAME_API_VERSION,
+    {SVGAME_API_VERSION_MAJOR,
+    SVGAME_API_VERSION_MINOR,
+    SVGAME_API_VERSION_POINT
+    },
+
 
     MVD_GameInit,
     MVD_GameShutdown,

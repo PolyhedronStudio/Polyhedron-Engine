@@ -31,8 +31,8 @@
 #include "sharedgame/pmove.h" // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
 
 // Shared Client Game Headers.
-#include "shared/cl_types.h"
-#include "shared/cl_game.h"
+#include "shared/cltypes.h"
+#include "shared/clgame.h"
 
 // Shared Game Headers.
 #include "sharedgame/pmove.h"

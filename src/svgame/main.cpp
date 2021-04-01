@@ -124,6 +124,7 @@ is loaded.
 */
 void InitGame(void)
 {
+
     gi.dprintf("==== InitServerGame ====\n");
 
     gun_x = gi.cvar("gun_x", "0", 0);
@@ -223,7 +224,13 @@ svgame_export_t* GetServerGameAPI(svgame_import_t* import)
 {
     gi = *import;
 
-    globals.apiversion = GAME_API_VERSION;
+    // Setup the API version.
+    globals.apiversion = {
+        SVGAME_API_VERSION_MAJOR,
+        SVGAME_API_VERSION_MINOR,
+        SVGAME_API_VERSION_POINT,
+    };
+
     globals.Init = InitGame;
     globals.Shutdown = ShutdownGame;
     globals.SpawnEntities = SpawnEntities;

@@ -27,7 +27,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // game.h -- game dll information visible to server
 //
 
-#define GAME_API_VERSION    3
+#define SVGAME_API_VERSION_MAJOR VERSION_MAJOR
+#define SVGAME_API_VERSION_MINOR VERSION_MINOR
+#define SVGAME_API_VERSION_POINT VERSION_POINT
 
 // edict->svflags
 
@@ -112,6 +114,31 @@ struct edict_s {
 // functions provided by the main engine
 //
 typedef struct {
+    //---------------------------------------------------------------------
+    // API Version.
+    // 
+    // The version numbers will always be equal to those that were set in 
+    // CMake at the time of building the engine/game(dll/so) binaries.
+    // 
+    // In an ideal world, we comply to proper version releasing rules.
+    // For Nail & Crescent, the general following rules apply:
+    // --------------------------------------------------------------------
+    // MAJOR: Ground breaking new features, you can expect anything to be 
+    // incompatible at that.
+    // 
+    // MINOR : Everytime we have added a new feature, or if the API between
+    // the Client / Server and belonging game counter-parts has actually 
+    // changed.
+    // 
+    // POINT : Whenever changes have been made, and the above condition 
+    // is not met.
+    //---------------------------------------------------------------------
+    struct {
+        int32_t major;
+        int32_t minor;
+        int32_t point;
+    } apiversion;
+
     // special messages
     void (* q_printf(2, 3) bprintf)(int printlevel, const char *fmt, ...);
     void (* q_printf(1, 2) dprintf)(const char *fmt, ...);
@@ -211,7 +238,30 @@ typedef struct {
 } edict_pool_t;
 
 typedef struct {
-    int         apiversion;
+    //---------------------------------------------------------------------
+    // API Version.
+    // 
+    // The version numbers will always be equal to those that were set in 
+    // CMake at the time of building the engine/game(dll/so) binaries.
+    // 
+    // In an ideal world, we comply to proper version releasing rules.
+    // For Nail & Crescent, the general following rules apply:
+    // --------------------------------------------------------------------
+    // MAJOR: Ground breaking new features, you can expect anything to be 
+    // incompatible at that.
+    // 
+    // MINOR : Everytime we have added a new feature, or if the API between
+    // the Client / Server and belonging game counter-parts has actually 
+    // changed.
+    // 
+    // POINT : Whenever changes have been made, and the above condition 
+    // is not met.
+    //---------------------------------------------------------------------
+    struct {
+        int32_t major;
+        int32_t minor;
+        int32_t point;
+    } apiversion;
 
     // the init function will only be called when a game starts,
     // not each time a level is loaded.  Persistant data for clients

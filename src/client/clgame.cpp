@@ -25,8 +25,8 @@
 
 // (Client/Game) related.
 #include "client/gamemodule.h"   // TODO: How come it can find client.h??
-#include "shared/cl_types.h"
-#include "shared/cl_game.h"
+#include "shared/cltypes.h"
+#include "shared/clgame.h"
 
 // Contains the functions being exported to client game dll.
 clgame_export_t *cge;
@@ -393,7 +393,11 @@ void CL_InitGameProgs(void)
         Com_Error(ERR_DROP, "Failed to load Client Game library");
 
     // API Version.
-    importAPI.apiversion = CGAME_API_VERSION;
+    importAPI.apiversion = {
+        CGAME_API_VERSION_MAJOR,
+        CGAME_API_VERSION_MINOR,
+        CGAME_API_VERSION_POINT,
+    };
 
     //
     // Setup the function pointers for the cgame dll.
@@ -606,9 +610,10 @@ void CL_InitGameProgs(void)
         return;
     }
 
-    if (cge->apiversion != CGAME_API_VERSION) {
-        Com_Error(ERR_DROP, "Client Game DLL is version %d, expected %d",
-            cge->apiversion, CGAME_API_VERSION);
+    if (cge->apiversion.major != CGAME_API_VERSION_MAJOR ||
+        cge->apiversion.minor != CGAME_API_VERSION_MINOR) {
+        Com_Error(ERR_DROP, "Client Game DLL is version %i.%i.%i, expected %i.%i.%i",
+            cge->apiversion, cge->apiversion.major, cge->apiversion.minor, cge->apiversion.point, CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT);
         return;
     }
 

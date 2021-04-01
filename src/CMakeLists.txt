@@ -340,11 +340,11 @@ SET(HEADERS_SHARED
 	../inc/shared/math/vector4.h
 	../inc/shared/math/vector5.h
 
-	../inc/shared/cl_game.h
-	../inc/shared/cl_types.h
+	../inc/shared/clgame.h
+	../inc/shared/cltypes.h
 	../inc/shared/config.h
 	../inc/shared/endian.h 
-	../inc/shared/game.h 
+	../inc/shared/svgame.h 
 	../inc/shared/keys.h 
 	../inc/shared/list.h 
 	../inc/shared/math.h 

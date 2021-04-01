@@ -252,7 +252,7 @@ typedef enum {
 
 
 //-----------------
-// WATISDEZE: We don't want these defined in cl_game.h
+// WATISDEZE: We don't want these defined in clgame.h
 //-----------------
 #ifndef CGAME_INCLUDE
 void    Com_LPrintf(print_type_t type, const char* fmt, ...)

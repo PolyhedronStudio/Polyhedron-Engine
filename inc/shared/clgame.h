@@ -2,27 +2,17 @@
 // LICENSE HERE.
 
 //
-// clg_game.h
+// inc/shared/clgame.h
 //
 // Contains the client game related code that is shared with and by the engine.
 //
 */
-#ifndef __CLGAME_CGAME_H__
-#define __CLGAME_CGAME_H__
+#ifndef __INC_SHARED_CLGAME_H__
+#define __INC_SHARED_CLGAME_H__
 
-#define CGAME_API_VERSION 1
-
-//
-//=============================================================================
-//
-// SHARED ENGINE/CLIENT DEFINITIONS.
-//
-// These should never be tampered with, unless you intend to recompile the
-// whole engine afterwards, with the risk of possibly breaking any 
-// compatibility with current mods.
-//=============================================================================
-//
-// TODO: Luckily there are none here yet! ;-)
+#define CGAME_API_VERSION_MAJOR VERSION_MAJOR
+#define CGAME_API_VERSION_MINOR VERSION_MINOR
+#define CGAME_API_VERSION_POINT VERSION_POINT
 
 //
 //=============================================================================
@@ -38,9 +28,28 @@ extern "C" {
     typedef struct clg_export_s {
         //---------------------------------------------------------------------
         // API Version.
+        // 
+        // The version numbers will always be equal to those that were set in 
+        // CMake at the time of building the engine/game(dll/so) binaries.
+        // 
+        // In an ideal world, we comply to proper version releasing rules.
+        // For Nail & Crescent, the general following rules apply:
+        // --------------------------------------------------------------------
+        // MAJOR: Ground breaking new features, you can expect anything to be 
+        // incompatible at that.
+        // 
+        // MINOR : Everytime we have added a new feature, or if the API between
+        // the Client / Server and belonging game counter-parts has actually 
+        // changed.
+        // 
+        // POINT : Whenever changes have been made, and the above condition 
+        // is not met.
         //---------------------------------------------------------------------
-        // Should always be the same as the import's struct api_version.
-        int apiversion;
+        struct {
+            int32_t major;         
+            int32_t minor;
+            int32_t point;
+        } apiversion;
 
         //---------------------------------------------------------------------
         // Pointers to CG Module.
@@ -167,8 +176,28 @@ extern "C" {
     typedef struct clg_import_s {
         //---------------------------------------------------------------------
         // API Version.
+        // 
+        // The version numbers will always be equal to those that were set in 
+        // CMake at the time of building the engine/game(dll/so) binaries.
+        // 
+        // In an ideal world, we comply to proper version releasing rules.
+        // For Nail & Crescent, the general following rules apply:
+        // --------------------------------------------------------------------
+        // MAJOR: Ground breaking new features, you can expect anything to be 
+        // incompatible at that.
+        // 
+        // MINOR : Everytime we have added a new feature, or if the API between
+        // the Client / Server and belonging game counter-parts has actually 
+        // changed.
+        // 
+        // POINT : Whenever changes have been made, and the above condition 
+        // is not met.
         //---------------------------------------------------------------------
-        int apiversion;                // Should always be the same as the extport's struct api_version.
+        struct {
+            int32_t major;
+            int32_t minor;
+            int32_t point;
+        } apiversion;
 
         //---------------------------------------------------------------------
         // Client.
@@ -583,4 +612,4 @@ extern "C" {
 };  // Extern C.
 #endif
 
-#endif
+#endif // __INC_SHARED_CL_GAME_H__

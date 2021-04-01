@@ -97,15 +97,20 @@ q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     cs  = clgimp->cs;
 
     // Setup the API version.
-    clge.apiversion                 = CGAME_API_VERSION;
+    clge.apiversion = {
+        CGAME_API_VERSION_MAJOR,
+        CGAME_API_VERSION_MINOR,
+        CGAME_API_VERSION_POINT,
+    };
 
     // Export the player move parameters.
     clge.pmoveParams                = &clg.pmoveParams;
 
     // Test if it is compatible, if not, return clge with only the apiversion set.
     // The client will handle the issue from there on.
-    if (clgimp->apiversion != CGAME_API_VERSION) {
-        clge.apiversion = -1;
+    if (clgimp->apiversion.major != CGAME_API_VERSION_MAJOR ||
+        clgimp->apiversion.minor != CGAME_API_VERSION_MINOR) {
+        clge.apiversion = { CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT };
         return &clge;
     }
 

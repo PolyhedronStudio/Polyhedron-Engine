@@ -59,7 +59,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // N&C: Most structures related to the client have been moved over here.
 // They are shared to the client game dll, since it is tightly coupled.
-#include "shared/cl_types.h"
+#include "shared/cltypes.h"
 
 // N&C: TODO: REMOVE ONCE ALL OF THIS HAS MOVED TO THE GAME MODULE.
 extern explosion_t  cl_explosions[MAX_EXPLOSIONS];
@@ -421,7 +421,7 @@ void        CL_SetLoadState (load_state_t state);   // WATISDEZE Added for CG Mo
 // precache.c
 //
 
-// WatIsDeze: Moved to shared/cl_types.h
+// WatIsDeze: Moved to shared/cltypes.h
 // typedef enum {
 //     LOAD_NONE,
 //     LOAD_MAP,

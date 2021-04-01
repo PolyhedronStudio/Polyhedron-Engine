@@ -892,6 +892,11 @@ void SV_InitGameProgs(void)
         Com_Error(ERR_DROP, "Failed to load Server Game library");
 
     // load a new game dll
+    importAPI.apiversion = {
+        SVGAME_API_VERSION_MAJOR,
+        SVGAME_API_VERSION_MINOR,
+        SVGAME_API_VERSION_POINT
+    };
     importAPI.Multicast = SV_Multicast;
     importAPI.Unicast = PF_Unicast;
     importAPI.bprintf = PF_bprintf;
@@ -955,9 +960,10 @@ void SV_InitGameProgs(void)
         Com_Error(ERR_DROP, "Server Game DLL returned NULL exports");
     }
 
-    if (ge->apiversion != GAME_API_VERSION) {
-        Com_Error(ERR_DROP, "Server Game DLL is version %d, expected %d",
-                  ge->apiversion, GAME_API_VERSION);
+    if (ge->apiversion.major != SVGAME_API_VERSION_MAJOR ||
+        ge->apiversion.minor != SVGAME_API_VERSION_MINOR) {
+        Com_Error(ERR_DROP, "Server Game DLL is version %i.%i.%i, expected %i.%i.%i",
+            ge->apiversion.major, ge->apiversion.minor, ge->apiversion.point, SVGAME_API_VERSION_MAJOR, SVGAME_API_VERSION_MINOR, SVGAME_API_VERSION_POINT);
     }
 
     // initialize

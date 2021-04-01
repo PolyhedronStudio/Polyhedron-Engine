@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // short, server-visible gclient_t and edict_t structures,
 // because we define the full size ones in this file
 #define GAME_INCLUDE
-#include "shared/game.h"
+#include "shared/svgame.h"
 #include "sharedgame/protocol.h"
 
 // features this game supports

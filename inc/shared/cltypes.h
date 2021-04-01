@@ -7,8 +7,8 @@
 // Contains shared structures between the client and the game module.
 //
 */
-#ifndef __SHARED_CL_TYPES_H__
-#define __SHARED_CL_TYPES_H__
+#ifndef __INC_SHARED_CLTYPES_H__
+#define __INC_SHARED_CLTYPES_H__
 
 //
 //=============================================================================

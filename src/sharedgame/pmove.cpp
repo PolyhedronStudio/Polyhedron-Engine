@@ -93,7 +93,11 @@ static const float  pm_accelerate = 10;
 static const float  pm_wateraccelerate = 10;
 static const float  pm_waterspeed = 400;
 
-// Bounding boxes.
+//
+// PM_MINS and PM_MAXS are the default bounding box, scaled by PM_SCALE
+// in Pm_Init. They are referenced in a few other places e.g. to create effects
+// at a certain body position on the player model.
+//
 const vec3_t PM_MINS = { -16.f, -16.f, -24.f };
 const vec3_t PM_MAXS = {  16.f,  16.f,  32.f };
 
@@ -327,7 +331,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t& start, const vec3_t& mins, c
         for (uint32_t j = 0; j < 3; j++) {
             for (uint32_t k = 0; k < 3; k++) {
                 // Calculate start.
-                vec3_t point = start + vec3_t {
+                const vec3_t point = start + vec3_t {
                     offsets[i],
                     offsets[j],
                     offsets[k]
@@ -400,19 +404,19 @@ static qboolean PM_StepSlideMove_(void)
         numPlanes++;
     }
 
+    vec3_t primal_velocity = pm_locals.velocity;
+
     // or our original velocity
     planes[numPlanes] = vec3_normalize(pm_locals.velocity);
     numPlanes++;
 
     for (bump = 0; bump < numBumps; bump++) {
-        vec3_t pos;
-
-        if (timeRemaining <= 0.0f) { // out of time
+        if (timeRemaining < (FLT_EPSILON - 1.0f)) { // out of time
             break;
         }
 
         // project desired destination
-        pos = vec3_fmaf(pm_locals.origin, timeRemaining, pm_locals.velocity);
+        vec3_t pos = vec3_fmaf(pm_locals.origin, timeRemaining, pm_locals.velocity);
 
         // trace to it
         const trace_t trace = pm->Trace(pm_locals.origin, pm->mins, pm->maxs, pos);
@@ -424,7 +428,7 @@ static qboolean PM_StepSlideMove_(void)
         }
 
         // if the trace succeeded, move some distance
-        if (trace.fraction > 0.0f) {
+        if (trace.fraction > (FLT_EPSILON - 1.0f)) {
             pm_locals.origin = trace.endpos;
 
             // if the trace didn't hit anything, we're done
@@ -455,7 +459,7 @@ static qboolean PM_StepSlideMove_(void)
             vec3_t vel;
 
             // if velocity doesn't impact this plane, skip it
-            if (vec3_dot(pm_locals.velocity, planes[i]) >= 0.0f) {
+            if (vec3_dot(pm_locals.velocity, planes[i]) > (FLT_EPSILON - 1.0f)) {
                 continue;
             }
 
@@ -471,7 +475,7 @@ static qboolean PM_StepSlideMove_(void)
                 }
 
                 // if the clipped velocity doesn't impact this plane, skip it
-                if (vec3_dot(vel, planes[j]) >= 0.0f) {
+                if (vec3_dot(vel, planes[j]) > (FLT_EPSILON - 1.0f)) {
                     continue;
                 }
 
@@ -479,7 +483,7 @@ static qboolean PM_StepSlideMove_(void)
                 vel = PM_ClipVelocity(vel, planes[j], PM_CLIP_BOUNCE);
 
                 // but if we clip against it without being deflected back, we're okay
-                if (vec3_dot(vel, planes[i]) >= 0.0f) {
+                if (vec3_dot(vel, planes[i]) > (FLT_EPSILON - 1.0f)) {
                     continue;
                 }
 
@@ -497,7 +501,7 @@ static qboolean PM_StepSlideMove_(void)
                         continue;
                     }
 
-                    if (vec3_dot(vel, planes[k]) >= 0.0f) {
+                    if (vec3_dot(vel, planes[k]) > (FLT_EPSILON - 1.0f)) {
                         continue;
                     }
 
@@ -528,23 +532,23 @@ static void PM_StepSlideMove(void)
     vec3_t start_o = pm_locals.origin;
     vec3_t start_v = pm_locals.velocity;
 
-    //PM_StepSlideMove_();
+    PM_StepSlideMove_();
     // Attempt to move; if nothing blocks us, we're done
-    if (PM_StepSlideMove_()) {
+    //if (PM_StepSlideMove_()) {
 
-        // attempt to step down to remain on ground
-        if ((pm->state.flags & PMF_ON_GROUND) && pm->cmd.upmove <= 0) {
+    //    // attempt to step down to remain on ground
+    //    if ((pm->state.flags & PMF_ON_GROUND) && pm->cmd.upmove <= 0) {
 
-            const vec3_t down = vec3_fmaf(pm_locals.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
-            const trace_t step_down = pm->Trace(pm_locals.origin, pm->mins, pm->maxs, down);
+    //        const vec3_t down = vec3_fmaf(pm_locals.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
+    //        const trace_t step_down = pm->Trace(pm_locals.origin, pm->mins, pm->maxs, down);
 
-            if (PM_CheckStep(&step_down)) {
-                PM_StepDown(&step_down);
-            }
-        }
+    //        if (PM_CheckStep(&step_down)) {
+    //            PM_StepDown(&step_down);
+    //        }
+    //    }
 
-        return;
-    }
+    //    return;
+    //}
 
     vec3_t down_o = pm_locals.origin;
     vec3_t down_v = pm_locals.velocity;
@@ -561,14 +565,6 @@ static void PM_StepSlideMove(void)
     pm_locals.velocity = start_v;
 
     PM_StepSlideMove_();
-
-    // New stepdown code. (Works somewhat if you disable the check below duh)
-    //down = pm_locals.origin; 
-    //down.z -= PM_STEP_HEIGHT_MAX;
-    //trace_t step_down = pm->Trace(pm_locals.origin, pm->mins, pm->maxs, down);
-    //if (PM_CheckStep(&step_down)) {
-    //    PM_StepDown(&step_down);
-    //}
 
     // Push down the final amount
     vec3_t down = pm_locals.origin;
