@@ -1895,43 +1895,8 @@ static void PM_SpectatorMove(void) {
 // Initializes the current set PMove pointer for another frame iteration.
 //===============
 //
-static void PM_Init(pm_move_t* pmove) {
-    // Store pmove ptr.
-    pm = pmove;
+static void PM_Init(void) {
 
-    // Set the default bounding box
-    if (pm->state.type >= PM_DEAD) {
-        if (pm->state.type == PM_GIB) {
-            pm->mins = PM_GIBLET_MINS;
-            pm->maxs = PM_GIBLET_MAXS;
-        }
-        else {
-            pm->mins = vec3_scale(PM_DEAD_MINS, PM_SCALE);
-            pm->maxs = vec3_scale(PM_DEAD_MAXS, PM_SCALE);
-        }
-    }
-    else {
-        pm->mins = vec3_scale(PM_MINS, PM_SCALE);
-        pm->maxs = vec3_scale(PM_MAXS, PM_SCALE);
-    }
-
-    // Clear out previous PM iteration results
-    pm->viewAngles = vec3_zero();
-
-    pm->numTouchedEntities = 0;
-    pm->groundEntity = NULL;
-
-    pm->waterType = 0;
-    pm->waterLevel = 0;
-
-    // Reset the flags, and step, values. These are set on a per frame basis.
-    pm->state.flags &= ~(PMF_ON_GROUND | PMF_ON_STAIRS | PMF_DUCKED);
-    pm->step = 0.0f;
-
-    // Jump "held" also, in case its key was released.
-    if (pm->cmd.upmove < 1) {
-        pm->state.flags &= ~PMF_JUMP_HELD;
-    }
 }
 
 //
@@ -1942,32 +1907,81 @@ static void PM_Init(pm_move_t* pmove) {
 //===============
 //
 static void PM_ClampAngles(void) {
-    // TODO: Store viewangles in state, for prediction usages.
-    // pm->state.viewAngles = pm->cmd.angles; // 
-    // copy the command angles into the outgoing state
-    for (int i = 0; i < 3; i++) {
-        float temp = pm->cmd.angles[i] + pm->state.delta_angles[i];
-        pm->viewAngles[i] = SHORT2ANGLE(temp);
+    short   temp;
+    int     i;
+
+    // In case of teleporting, we wan't to reset pitch and roll, but maintain the yaw.
+    if (pm->state.flags & PMF_TIME_TELEPORT) {
+        pm->viewAngles[YAW] = SHORT2ANGLE(pm->cmd.angles[YAW] + pm->state.delta_angles[YAW]);
+        pm->viewAngles[PITCH] = 0;
+        pm->viewAngles[ROLL] = 0;
+    }
+    else {
+        // circularly clamp the angles with deltas
+        for (i = 0; i < 3; i++) {
+            temp = pm->cmd.angles[i] + pm->state.delta_angles[i];
+            pm->viewAngles[i] = SHORT2ANGLE(temp);
+        }
+
+        // don't let the player look up or down more than 90 degrees
+        if (pm->viewAngles[PITCH] > 89 && pm->viewAngles[PITCH] < 180)
+            pm->viewAngles[PITCH] = 89;
+        else if (pm->viewAngles[PITCH] < 271 && pm->viewAngles[PITCH] >= 180)
+            pm->viewAngles[PITCH] = 271;
     }
 
-    // clamp pitch to prevent the player from looking up or down more than 90º
-    if (pm->viewAngles.x > 90.0f && pm->viewAngles.x < 270.0f) {
-        pm->viewAngles.x = 90.0f;
-    }
-    else if (pm->viewAngles.x <= 360.0f && pm->viewAngles.x >= 270.0f) {
-        pm->viewAngles.x -= 360.0f;
-    }
+    // Calculate the angle vectors for movement.
+    vec3_vectors(pm->viewAngles, &pm_locals.forward, &pm_locals.right, &pm_locals.up);
 }
 
+
+
 //
 //===============
-// PM_InitLocal
+// PMove
 // 
-// Resets the current local pmove values, and stores the required data for
-// reverting an invalid pmove command.
+// Can be called by either the server or the client
 //===============
 //
-static void PM_InitLocal() {
+void PMove(pm_move_t* pmove, pmoveParams_t* params)
+{
+    // Store pointers for local usage.
+    pm = pmove;
+    pmp = params;
+
+    // clear results
+    pm->numTouchedEntities = 0;
+    pm->viewAngles = { 0.f, 0.f, 0.f };
+    //pm->state.view_offset.z = 0;
+    pm->groundEntity = NULL;
+    pm->waterType = 0;
+    pm->waterLevel = 0;
+
+    // ---
+    // Reset the PMF_ON_STAIRS flag that we test for every move.
+    pm->state.flags &= ~(PMF_ON_GROUND | PMF_ON_STAIRS | PMF_DUCKED);
+    pm->step = 0.0f;
+
+    if (pm->cmd.upmove < 1) { // jump key released
+        pm->state.flags &= ~PMF_JUMP_HELD;
+    }
+
+    // set the default bounding box
+    if (pm->state.type >= PM_DEAD) {
+        if (pm->state.type & PM_GIB) {
+            pm->mins = PM_GIBLET_MINS;
+            pm->maxs = PM_GIBLET_MAXS;
+        } else {
+            pm->mins = vec3_scale(PM_DEAD_MINS, PM_SCALE);
+            pm->maxs = vec3_scale(PM_DEAD_MAXS, PM_SCALE);
+        }
+    }
+    else {
+        pm->mins = vec3_scale(PM_MINS, PM_SCALE);
+        pm->maxs = vec3_scale(PM_MAXS, PM_SCALE);
+    }
+    // ----
+
     // clear all pmove local vars
     pm_locals = {};
 
@@ -1979,33 +1993,8 @@ static void PM_InitLocal() {
     // Save in case we get stuck and wish to undo this move.
     pm_locals.previousOrigin = pm->state.origin;
 
-    // Calculate the directional vectors for this move
-    vec3_vectors(pm->viewAngles, &pm_locals.forward, &pm_locals.right, &pm_locals.up);
-
-    // And calculate the directional vectors in the XY plane
-    //Vec3_Vectors(Vec3(0.f, pm->angles.y, 0.f), &pm_locals.forward_xy, &pm_locals.right_xy, NULL);
-}
-
-//
-//===============
-// PMove
-// 
-// Can be called by either the server or the client
-//===============
-//
-void PMove(pm_move_t* pmove, pmoveParams_t* params)
-{
-    // TODO: When PMOVE is finished, remove this useless pmoveParams thing.
-    pmp = params;
-
-    // Initialize the PMove.
-    PM_Init(pmove);
-    
-    // Ensure angles are clamped.
+    // Clamp angles.
     PM_ClampAngles();
-
-    // Initialize the locals.
-    PM_InitLocal();
 
     // Special spectator movement handling.
     if (pm->state.type == PM_SPECTATOR) {
@@ -2149,17 +2138,10 @@ void PMoveInit(pmoveParams_t* pmp)
 void PMoveEnableQW(pmoveParams_t* pmp)
 {
     pmp->qwmode = true;
-    pmp->watermult = PM_GRAVITY_WATER;
-    pmp->maxspeed = PM_SPEED_RUN;
+    pmp->watermult = 0.7f;
+    pmp->maxspeed = 320;
     //pmp->upspeed = (sv_qwmod->integer > 1) ? 310 : 350;
-    pmp->friction = PM_FRICT_GROUND;
-    pmp->waterfriction = PM_FRICT_WATER;
+    pmp->friction = 4;
+    pmp->waterfriction = 4;
     pmp->airaccelerate = true;
-    //pmp->qwmode = true;
-    //pmp->watermult = 0.7f;
-    //pmp->maxspeed = 320;
-    ////pmp->upspeed = (sv_qwmod->integer > 1) ? 310 : 350;
-    //pmp->friction = 4;
-    //pmp->waterfriction = 4;
-    //pmp->airaccelerate = true;
 }
