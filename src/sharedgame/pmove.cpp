@@ -745,7 +745,7 @@ static qboolean PM_CheckLadder(void) {
     }
 
     // Calculate a trace for determining whether there is a ladder in front of us.
-    const vec3_t pos = vec3_fmaf(pm->state.origin, 4.f, playerMoveLocals.forwardXY);
+    const vec3_t pos = vec3_fmaf(pm->state.origin, 1, playerMoveLocals.forwardXY);
     const trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
 
     // Found one, engage ladder state.
@@ -1599,17 +1599,13 @@ static void PM_Init(pm_move_t* pmove) {
     // Decrement the movement timer, used for "dropping" the player, landing after jumps, 
     // or falling off a ledge/slope, by the duration of the command.
     if (pm->state.time) {
-        int     msec;
-
-        msec = pm->cmd.msec >> 3;
-        if (!msec)
-            msec = 1;
-        if (msec >= pm->state.time) {
-            pm->state.flags &= ~(PMF_TIME_WATER_JUMP | PMF_TIME_LAND | PMF_TIME_TELEPORT);
+        if (pm->cmd.msec >= pm->state.time) { // clear the timer and timed flags
+            pm->state.flags &= ~PMF_TIME_MASK;
             pm->state.time = 0;
         }
-        else
-            pm->state.time -= msec;
+        else { // or just decrement the timer
+            pm->state.time -= pm->cmd.msec;
+        }
     }
 }
 
