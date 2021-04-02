@@ -464,6 +464,18 @@ typedef struct cvar_s {
 //
 //=============================================================================
 //
+
+//-----------------
+// Brief Water Level.
+//-----------------
+typedef enum {
+    WATER_UNKNOWN = -1,
+    WATER_NONE,
+    WATER_FEET,
+    WATER_WAIST,
+    WATER_UNDER
+} pm_water_level_t;
+
 //-----------------
 // General player movement and capabilities classification.
 //-----------------
@@ -472,7 +484,8 @@ typedef enum {
     PM_HOOK_PULL, // Pull hook
     PM_HOOK_SWING, // Swing hook
     PM_SPECTATOR, // Free-flying movement with acceleration and friction
-    PM_DEAD, // No movement, but the ability to rotate in place
+    // All slots up till 32 are free for custom game PM_ defines.
+    PM_DEAD = 32, // No movement, but the ability to rotate in place
     PM_FREEZE, // No movement at all
     PM_GIB,     // No movement, different bounding box
 } pm_type_t;
@@ -480,10 +493,10 @@ typedef enum {
 //-----------------
 // Player movement flags.The game is free to define up to 16 bits.
 //-----------------
-#define PMF_ENGINE          (1 << 0)
-// Engine flags go here, remember to increment PMF_ENGINE in that case.
-//#define PMF_ENGINE_FLAG     (1 << 1) 
-#define PMF_GAME			(PMF_ENGINE << 0)
+constexpr int32_t PMF_ENGINE        = (1 << 0);         // Engine flags first.
+constexpr int32_t PMF_TIME_TELEPORT = (PMF_ENGINE << 1);// time frozen in place
+constexpr int32_t PMF_NO_PREDICTION = (PMF_ENGINE << 2);// temporarily disables client side prediction
+constexpr int32_t PMF_GAME          = (PMF_ENGINE << 3);// Game flags start from here.
 
 //-----------------
 // This structure needs to be communicated bit-accurate from the server to the 

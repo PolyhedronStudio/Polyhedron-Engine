@@ -35,105 +35,82 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 // Acceleration Constants.
 //
-#define PM_ACCEL_AIR			2.125f
-#define PM_ACCEL_AIR_MOD_DUCKED	0.125f
-#define PM_ACCEL_GROUND			10.f
-#define PM_ACCEL_GROUND_SLICK	4.375f
-#define PM_ACCEL_LADDER			16.f
-#define PM_ACCEL_SPECTATOR		2.5f
-#define PM_ACCEL_WATER			2.8f
+constexpr float PM_ACCEL_AIR            = 2.125f;
+constexpr float PM_ACCEL_AIR_MOD_DUCKED = 0.125f;
+constexpr float PM_ACCEL_GROUND         = 10.f;
+constexpr float PM_ACCEL_GROUND_SLICK   = 4.375f;
+constexpr float PM_ACCEL_LADDER         = 16.f;
+constexpr float PM_ACCEL_SPECTATOR      = 2.5f;
+constexpr float PM_ACCEL_WATER          = 2.8f;
 
 //
 // Bounce constant when clipping against solids.
 //
-#define PM_CLIP_BOUNCE			1.01f
+constexpr float PM_CLIP_BOUNCE			= 1.01f;
 
 //
 // Friction constants.
 //
-#define PM_FRICT_AIR			0.1f
-#define PM_FRICT_GROUND			6.f
-#define PM_FRICT_GROUND_SLICK	2.f
-#define PM_FRICT_LADDER			5.f
-#define PM_FRICT_SPECTATOR		2.5f
-#define PM_FRICT_WATER			2.f
+constexpr float PM_FRICT_AIR            = 0.1f;
+constexpr float PM_FRICT_GROUND			= 6.f;
+constexpr float PM_FRICT_GROUND_SLICK   = 2.f;
+constexpr float PM_FRICT_LADDER			= 5.f;
+constexpr float PM_FRICT_SPECTATOR		= 2.5f;
+constexpr float PM_FRICT_WATER			= 2.f;
 
 //
 // Water gravity constant.
 //
-#define PM_GRAVITY_WATER		0.33f
+constexpr float PM_GRAVITY_WATER		= 0.33f;
 
 //
 // Distances traced when seeking ground.
 //
-#define PM_GROUND_DIST			.25f
-#define PM_GROUND_DIST_TRICK	16.f
+constexpr float PM_GROUND_DIST			= .25f;
+constexpr float PM_GROUND_DIST_TRICK	= 16.f;
 
 //
 // Speed constants; intended velocities are clipped to these.
 //
-#define PM_SPEED_AIR			350.f
-#define PM_SPEED_CURRENT		100.f
-#define PM_SPEED_DUCK_STAND		200.f
-#define PM_SPEED_DUCKED			140.f
-#define PM_SPEED_FALL			-700.f
-#define PM_SPEED_FALL_FAR		-900.f
-#define PM_SPEED_JUMP			270.f
-#define PM_SPEED_LADDER			125.f
-#define PM_SPEED_LAND			-280.f
-#define PM_SPEED_RUN			300.f
-#define PM_SPEED_SPECTATOR		500.f
-#define PM_SPEED_STOP			100.f
-#define PM_SPEED_UP				0.1f
-#define PM_SPEED_TRICK_JUMP		0.f
-#define PM_SPEED_WATER			118.f
-#define PM_SPEED_WATER_JUMP		420.f
-#define PM_SPEED_WATER_SINK		-16.f
+constexpr float PM_SPEED_AIR			= 350.f;
+constexpr float PM_SPEED_CURRENT		= 100.f;
+constexpr float PM_SPEED_DUCK_STAND		= 200.f;
+constexpr float PM_SPEED_DUCKED			= 140.f;
+constexpr float PM_SPEED_FALL			= -700.f;
+constexpr float PM_SPEED_FALL_FAR		= -900.f;
+constexpr float PM_SPEED_JUMP			= 270.f;
+constexpr float PM_SPEED_LADDER			= 125.f;
+constexpr float PM_SPEED_LAND			= -280.f;
+constexpr float PM_SPEED_RUN			= 300.f;
+constexpr float PM_SPEED_SPECTATOR		= 500.f;
+constexpr float PM_SPEED_STOP			= 100.f;
+constexpr float PM_SPEED_UP				= 0.1f;
+constexpr float PM_SPEED_TRICK_JUMP		= 0.f;
+constexpr float PM_SPEED_WATER			= 118.f;
+constexpr float PM_SPEED_WATER_JUMP		= 420.f;
+constexpr float PM_SPEED_WATER_SINK		= -16.f;
 
 //
-// The walk modifier slows all user-controlled speeds.
-//
-#define PM_SPEED_MOD_WALK		0.66f
+// General.
+// 
+constexpr float PM_SPEED_MOD_WALK = 0.66f;// The walk modifier slows all user-controlled speeds.
+constexpr float PM_SPEED_JUMP_MOD_WATER = 0.66f;// Water reduces jumping ability.
+constexpr float PM_STOP_EPSILON = 0.1f; // Velocity is cleared when less than this.
+constexpr float PM_NUDGE_DIST = 1.f;  // Invalid player positions are nudged to find a valid position.
+constexpr float PM_SNAP_DISTANCE = PM_GROUND_DIST; // Valid player positions are snapped a small distance away from planes.
+
 
 //
-// Water reduces jumping ability.
-//
-#define PM_SPEED_JUMP_MOD_WATER	0.66f
-
-//
-// The vertical distance afforded in step climbing.
-//
-#define PM_STEP_HEIGHT			16.f
-
-//
-// The smallest step that will be interpolated by the client.
-//
-#define PM_STEP_HEIGHT_MIN		4.f
-
-//
-// The minimum Z plane normal component required for standing.
-//
-#define PM_STEP_NORMAL			0.7f
-
-//
-// Velocity is cleared when less than this.
-//
-#define PM_STOP_EPSILON			0.1f
-
-//
-// Invalid player positions are nudged to find a valid position.
-//
-#define PM_NUDGE_DIST			1.f
-
-//
-// Valid player positions are snapped a small distance away from planes.
-//
-#define PM_SNAP_DISTANCE		PM_GROUND_DIST
+// Step Climbing.
+// 
+constexpr float PM_STEP_HEIGHT			= 16.f; // The vertical distance afforded in step climbing.
+constexpr float PM_STEP_HEIGHT_MIN		= 4.f;  // The smallest step that will be interpolated by the client.
+constexpr float PM_STEP_NORMAL			= 0.7f; // The minimum Z plane normal component required for standing.
 
 //
 // Player bounding box scaling. mins = VectorScale(PM_MINS, PM_SCALE)..
 //
-#define PM_SCALE 1.f
+constexpr float PM_SCALE = 1.f;
 
 extern const vec3_t PM_MINS;
 extern const vec3_t PM_MAXS;
@@ -150,49 +127,34 @@ extern const vec3_t PM_MAXS;
 // Game-specific flags for pm_state_t.flags.
 //
 // Player Move Flags.
-#define PMF_DUCKED          (PMF_GAME << 0) // Player is ducked.
-#define PMF_JUMP_HELD       (PMF_GAME << 1) // Player jump key is held.
-#define PMF_ON_GROUND       (PMF_GAME << 2) // Player is on-ground.
-#define PMF_ON_STAIRS		(PMF_GAME << 3) // Player is traversing stairs.
-#define PMF_TIME_WATERJUMP  (PMF_GAME << 4) // Value of: time is waterjump
-#define PMF_TIME_LAND       (PMF_GAME << 5) // Value of: time is time before rejump
-#define PMF_TIME_TELEPORT   (PMF_GAME << 6) // Value of: time is non-moving time
-#define PMF_NO_PREDICTION   (PMF_GAME << 7) // Temporarily disables prediction (used for grappling hook)
-#define PMF_TELEPORT_BIT    (PMF_GAME << 8) // Used by q2pro
-// NOTE: Any more flags requires changing the pmove states and networking code.
-
-//#define PMF_DUCKED				(PMF_GAME << 0) // player is ducked
-//#define PMF_JUMPED				(PMF_GAME << 1) // player jumped
-//#define PMF_JUMP_HELD			(PMF_GAME << 2) // player's jump key is down
-//#define PMF_ON_GROUND			(PMF_GAME << 3) // player is on ground
-//#define PMF_ON_STAIRS			(PMF_GAME << 4) // player traversed step
-//#define PMF_ON_LADDER			(PMF_GAME << 5) // player is on ladder
-//#define PMF_UNDER_WATER			(PMF_GAME << 6) // player is under water
-//#define PMF_TIME_PUSHED			(PMF_GAME << 7) // time before can seek ground
-//#define PMF_TIME_TRICK_JUMP		(PMF_GAME << 8) // time eligible for trick jump
-//#define PMF_TIME_WATER_JUMP		(PMF_GAME << 9) // time before control
-//#define PMF_TIME_LAND			(PMF_GAME << 10) // time before jump eligible
-//#define PMF_TIME_TELEPORT		(PMF_GAME << 11) // time frozen in place
-//#define PMF_GIBLET				(PMF_GAME << 12) // player is a giblet
-//#define PMF_HOOK_RELEASED		(PMF_GAME << 13) // player's hook key was released
-//#define PMF_TIME_TRICK_START	(PMF_GAME << 14) // time until we can initiate a trick jump
+constexpr int32_t PMF_DUCKED            = (PMF_GAME << 0);  // Player is ducked
+constexpr int32_t PMF_JUMPED			= (PMF_GAME << 1);  // Player jumped
+constexpr int32_t PMF_JUMP_HELD         = (PMF_GAME << 2);  // Player's jump key is down
+constexpr int32_t PMF_ON_GROUND         = (PMF_GAME << 3);  // Player is on ground
+constexpr int32_t PMF_ON_STAIRS         = (PMF_GAME << 4);  // Player traversed step
+constexpr int32_t PMF_ON_LADDER         = (PMF_GAME << 5);  // Player is on ladder
+constexpr int32_t PMF_UNDER_WATER       = (PMF_GAME << 6);  // Player is under water
+constexpr int32_t PMF_TIME_PUSHED       = (PMF_GAME << 7);  // Time before can seek ground
+constexpr int32_t PMF_TIME_TRICK_JUMP   = (PMF_GAME << 8);  // Time eligible for trick jump
+constexpr int32_t PMF_TIME_WATER_JUMP   = (PMF_GAME << 9);  // Time before control
+constexpr int32_t PMF_TIME_LAND         = (PMF_GAME << 10); // Time before jump eligible
+constexpr int32_t PMF_GIBLET            = (PMF_GAME << 11); // Player is a giblet
+constexpr int32_t PMF_TIME_TRICK_START  = (PMF_GAME << 12); // Time until we can initiate a trick jump
 
 //
 // The mask of pm_state_t.flags affecting pm_state_t.time.
 //
-#define PMF_TIME_MASK ( \
-                        PMF_TIME_PUSHED | \
-                        PMF_TIME_TRICK_JUMP | \
-                        PMF_TIME_WATER_JUMP | \
-                        PMF_TIME_LAND | \
-                        PMF_TIME_TELEPORT | \
-						PMF_TIME_TRICK_START \
-                      )
+constexpr int32_t PMF_TIME_MASK = (
+    PMF_TIME_PUSHED |
+    PMF_TIME_TRICK_START |
+    PMF_TIME_TRICK_JUMP | PMF_TIME_WATER_JUMP | PMF_TIME_LAND |
+    PMF_TIME_TELEPORT
+);
 
 //
 // The maximum number of entities any single player movement can impact.
 //
-#define PM_MAX_TOUCH_ENTS 32
+constexpr int32_t PM_MAX_TOUCH_ENTS = 32;
 
 
 //-------------------

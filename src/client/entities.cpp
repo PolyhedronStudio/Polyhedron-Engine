@@ -302,7 +302,7 @@ player_update(server_frame_t *oldframe, server_frame_t *frame, int framediv)
     }
 
     // no lerping if teleport bit was flipped
-    if ((ops->pmove.flags ^ ps->pmove.flags) & PMF_TELEPORT_BIT)
+    if ((ops->pmove.flags ^ ps->pmove.flags) & PMF_TIME_TELEPORT)
         goto dup;
     // no lerping if POV number changed
     if (oldframe->clientNum != frame->clientNum)

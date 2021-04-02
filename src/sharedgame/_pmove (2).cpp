@@ -1444,15 +1444,14 @@ static void PM_CheckSpecialMovements(void)
 //
 static void PM_CheckDuck(void)
 {
-    //if (pm->state.type == PM_DEAD) {
-    //    //if (pm->state.flags & PMF_GIBLET) {
-    //    //    pm->state.view_offset.z = 0.0f;
-    //    //}
-    //    //else {
-    //        pm->state.view_offset.z = -16.0f;
-    //    }
-    //}
-    //else {
+    if (pm->state.type >= PM_DEAD) {
+        if (pm->state.flags == PM_GIB) {
+            pm->state.view_offset.z = 0.0f;
+        } else {
+            pm->state.view_offset.z = -16.0f;
+        }
+    }
+    else {
 
         const qboolean is_ducking = pm->state.flags & PMF_DUCKED;
         const qboolean wants_ducking = (pm->cmd.upmove < 0) && !(pm_locals.ladder);
@@ -1495,52 +1494,9 @@ static void PM_CheckDuck(void)
                 pm->state.view_offset.z = target;
             }
         }
-   // }
+    }
 
     pm->state.view_offset = pm->state.view_offset;
-    //trace_t trace;
-
-    //pm->mins.x = -16;
-    //pm->mins.y = -16;
-
-    //pm->maxs.x = 16;
-    //pm->maxs.y = 16;
-
-    //if (pm->state.type == PM_GIB) {
-    //    pm->mins.z = 0;
-    //    pm->maxs.z = 16;
-    //    pm->state.view_offset.z = 8;
-    //    return;
-    //}
-
-    //pm->mins.z = -24;
-
-    //if (pm->state.type == PM_DEAD) {
-    //    pm->state.flags |= PMF_DUCKED;
-    //}
-    //else if (pm->cmd.upmove < 0 && (pm->state.flags & PMF_ON_GROUND)) {
-    //    // duck
-    //    pm->state.flags |= PMF_DUCKED;
-    //}
-    //else {
-    //    // stand up if possible
-    //    if (pm->state.flags & PMF_DUCKED) {
-    //        // try to stand up
-    //        pm->maxs.z = 32;
-    //        trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, pm_locals.origin);
-    //        if (!trace.allsolid)
-    //            pm->state.flags &= ~PMF_DUCKED;
-    //    }
-    //}
-
-    //if (pm->state.flags & PMF_DUCKED) {
-    //    pm->maxs.z = 4;
-    //    pm->state.view_offset.z = -2;
-    //}
-    //else {
-    //    pm->maxs.z = 32;
-    //    pm->state.view_offset.z = 22;
-    //}
 }
 
 
@@ -1573,87 +1529,86 @@ static void PM_CategorizePosition(void)
     // is on ground
 
     // See if standing on something solid
-    vec3_t point = {
-        pm_locals.origin.x,
-        pm_locals.origin.y,
-        pm_locals.origin.z - 0.25f
-    };
+    //vec3_t point = {
+    //    pm_locals.origin.x,
+    //    pm_locals.origin.y,
+    //    pm_locals.origin.z - 0.25f
+    //};
 
-    if (pm_locals.velocity.z > 180) { //!!ZOID changed from 100 to 180 (ramp accel)
-        pm->state.flags &= ~PMF_ON_GROUND;
-        pm->groundEntity = NULL;
-    }
-    else {
-        // Execute trace.
-        trace_t trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, point);
+    //if (pm_locals.velocity.z > 180) { //!!ZOID changed from 100 to 180 (ramp accel)
+    //    pm->state.flags &= ~PMF_ON_GROUND;
+    //    pm->groundEntity = NULL;
+    //}
+    //else {
+    //    // Execute trace.
+    //    trace_t trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, point);
 
-        // Set results in pm_locals.
-        pm_locals.ground.plane = trace.plane;
-        pm_locals.ground.surface = trace.surface;
-        pm_locals.ground.contents = trace.contents;
+    //    // Set results in pm_locals.
+    //    pm_locals.ground.plane = trace.plane;
+    //    pm_locals.ground.surface = trace.surface;
+    //    pm_locals.ground.contents = trace.contents;
 
-        // No ent, or place normal is under PM_STEP_NORMAL.
-        if (!trace.ent || (trace.plane.normal.z < PM_STEP_NORMAL && !trace.startsolid)) {
-            pm->groundEntity = NULL;
-            pm->state.flags &= ~PMF_ON_GROUND;
-        }
-        else {
-            pm->groundEntity = trace.ent;
+    //    // No ent, or place normal is under PM_STEP_NORMAL.
+    //    if (!trace.ent || (trace.plane.normal.z < PM_STEP_NORMAL && !trace.startsolid)) {
+    //        pm->groundEntity = NULL;
+    //        pm->state.flags &= ~PMF_ON_GROUND;
+    //    }
+    //    else {
+    //        pm->groundEntity = trace.ent;
 
-            // hitting solid ground will end a waterjump
-            if (pm->state.flags & PMF_TIME_WATERJUMP) {
-                pm->state.flags &= ~(PMF_TIME_WATERJUMP | PMF_TIME_LAND | PMF_TIME_TELEPORT);
-                pm->state.time = 0;
-            }
+    //        // hitting solid ground will end a waterjump
+    //        if (pm->state.flags & PMF_TIME_WATERJUMP) {
+    //            pm->state.flags &= ~(PMF_TIME_WATERJUMP | PMF_TIME_LAND | PMF_TIME_TELEPORT);
+    //            pm->state.time = 0;
+    //        }
 
-            if (!(pm->state.flags & PMF_ON_GROUND)) {
-                // just hit the ground
-                pm->state.flags |= PMF_ON_GROUND;
-                // don't do landing time if we were just going down a slope
-                if (pm_locals.velocity.z < -200 && !pmp->strafehack) {
-                    pm->state.flags |= PMF_TIME_LAND;
-                    // don't allow another jump for a little while
-                    if (pm_locals.velocity.z < -400)
-                        pm->state.time = 25;
-                    else
-                        pm->state.time = 18;
-                }
-            }
-        }
+    //        if (!(pm->state.flags & PMF_ON_GROUND)) {
+    //            // just hit the ground
+    //            pm->state.flags |= PMF_ON_GROUND;
+    //            // don't do landing time if we were just going down a slope
+    //            if (pm_locals.velocity.z < -200 && !pmp->strafehack) {
+    //                pm->state.flags |= PMF_TIME_LAND;
+    //                // don't allow another jump for a little while
+    //                if (pm_locals.velocity.z < -400)
+    //                    pm->state.time = 25;
+    //                else
+    //                    pm->state.time = 18;
+    //            }
+    //        }
+    //    }
 
-        // PMOVE: Touchentity.
-        PM_TouchEntity(trace.ent);
-    }
+    //    // PMOVE: Touchentity.
+    //    PM_TouchEntity(trace.ent);
+    //}
 
-    //
-    // get waterLevel, accounting for ducking
-    //
-    point.z = pm_locals.origin.z + pm->mins.z + 1;
-    int cont = pm->PointContents(point);
+    ////
+    //// get waterLevel, accounting for ducking
+    ////
+    //point.z = pm_locals.origin.z + pm->mins.z + 1;
+    //int cont = pm->PointContents(point);
 
-    int sample2 = pm->state.view_offset.z - pm->mins.z;
-    int sample1 = sample2 / 2;
+    //int sample2 = pm->state.view_offset.z - pm->mins.z;
+    //int sample1 = sample2 / 2;
 
-    pm->waterLevel = 0;
-    pm->waterType = 0;
+    //pm->waterLevel = 0;
+    //pm->waterType = 0;
 
-    if (cont & CONTENTS_MASK_LIQUID) {
-        pm->waterType = cont;
-        pm->waterLevel = 1;
+    //if (cont & CONTENTS_MASK_LIQUID) {
+    //    pm->waterType = cont;
+    //    pm->waterLevel = 1;
 
-        point.z = pm_locals.origin.z + pm->mins.z + sample1;
-        cont = pm->PointContents(point);
+    //    point.z = pm_locals.origin.z + pm->mins.z + sample1;
+    //    cont = pm->PointContents(point);
 
-        if (cont & CONTENTS_MASK_LIQUID) {
-            pm->waterLevel = 2;
-            point.z = pm_locals.origin.z + pm->mins.z + sample2;
-            cont = pm->PointContents(point);
+    //    if (cont & CONTENTS_MASK_LIQUID) {
+    //        pm->waterLevel = 2;
+    //        point.z = pm_locals.origin.z + pm->mins.z + sample2;
+    //        cont = pm->PointContents(point);
 
-            if (cont & CONTENTS_MASK_LIQUID)
-                pm->waterLevel = 3;
-        }
-    }
-
+    //        if (cont & CONTENTS_MASK_LIQUID)
+    //            pm->waterLevel = 3;
+    //    }
+    //}
 }
 
 //

@@ -158,7 +158,7 @@ extern const vec3_t PM_MAXS;
 #define PMF_TIME_LAND       (PMF_GAME << 5) // Value of: time is time before rejump
 #define PMF_TIME_TELEPORT   (PMF_GAME << 6) // Value of: time is non-moving time
 #define PMF_NO_PREDICTION   (PMF_GAME << 7) // Temporarily disables prediction (used for grappling hook)
-#define PMF_TELEPORT_BIT    (PMF_GAME << 8) // Used by q2pro
+#define PMF_TIME_TELEPORT    (PMF_GAME << 8) // Used by q2pro
 // NOTE: Any more flags requires changing the pmove states and networking code.
 
 //#define PMF_DUCKED				(PMF_GAME << 0) // player is ducked
