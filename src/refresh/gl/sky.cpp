@@ -186,27 +186,23 @@ static void ClipSkyPolygon(int nump, vec3_t *vecs, int stage)
     dists[i] = dists[0];
     //VectorCopy(vecs, (vecs + (i))); MATHLIB: This seemed wrong, so does the alternative but hey... 
     vec3_t temp = *vecs;
-    *(vecs + 1) = temp;
+    *(vecs + i) = temp;
     newc[0] = newc[1] = 0;
 
     for (i = 0, v = &vecs->xyz[0]; i < nump; i++, v = v + 3) {
         switch (sides[i]) {
         case SIDE_FRONT:
-            // MATHLIB: !!!! Changed VectorCopy(v, newv[0][newc[0]]);
-            v = &newv[0][newc[0]].xyz[0];
+            newv[0][newc[0]] = v;
             newc[0]++;
             break;
         case SIDE_BACK:
-            // MATHLIB: !!!! Changed VectorCopy(v, newv[1][newc[1]]);
-            v = &newv[1][newc[1]].xyz[0];
+            newv[1][newc[1]] = v;
             newc[1]++;
             break;
         case SIDE_ON:
-            // MATHLIB: !!!! Changed VectorCopy(v, newv[0][newc[0]]);
-            v = &newv[0][newc[0]].xyz[0];
+            newv[0][newc[0]] = v;
             newc[0]++;
-            // MATHLIB: !!!! Changed VectorCopy(v, newv[1][newc[1]]);
-            v = &newv[1][newc[1]].xyz[0];
+            newv[1][newc[1]] = v;
             newc[1]++;
             break;
         }
@@ -262,13 +258,15 @@ void R_AddSkySurface(mface_t *fa)
 
         for (i = 0; i < fa->numsurfedges; i++, surfedge++) {
             vert = surfedge->edge->v[surfedge->vert];
-            VectorSubtract(vert->point, glr.fd.vieworg, temp);
+            //VectorSubtract(vert->point, glr.fd.vieworg, temp);
+            temp = vert->point - glr.fd.vieworg;
             SkyInverseRotate(verts[i], temp);
         }
     } else {
         for (i = 0; i < fa->numsurfedges; i++, surfedge++) {
             vert = surfedge->edge->v[surfedge->vert];
-            VectorSubtract(vert->point, glr.fd.vieworg, verts[i]);
+            //VectorSubtract(vert->point, glr.fd.vieworg, verts[i]);
+            verts[i] = vert->point - glr.fd.vieworg;
         }
     }
 
