@@ -28,7 +28,7 @@ void point_combat_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface
         other->target = self->target;
         other->goalentity = other->movetarget = G_PickTarget(other->target);
         if (!other->goalentity) {
-            gi.dprintf("%s at %s target %s does not exist\n", self->classname, vtos(self->s.origin), self->target);
+            gi.dprintf("%s at %s target %s does not exist\n", self->classname, Vec3ToString(self->s.origin), self->target);
             other->movetarget = self;
         }
         self->target = NULL;

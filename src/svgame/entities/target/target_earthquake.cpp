@@ -57,7 +57,7 @@ void target_earthquake_use(edict_t* self, edict_t* other, edict_t* activator)
 void SP_target_earthquake(edict_t* self)
 {
     if (!self->targetname)
-        gi.dprintf("untargeted %s at %s\n", self->classname, vtos(self->s.origin));
+        gi.dprintf("untargeted %s at %s\n", self->classname, Vec3ToString(self->s.origin));
 
     if (!self->count)
         self->count = 5;

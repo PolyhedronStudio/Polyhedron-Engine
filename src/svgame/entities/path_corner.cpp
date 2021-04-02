@@ -71,7 +71,7 @@ Pathtarget: gets used when an entity that has
 void SP_path_corner(edict_t* self)
 {
     if (!self->targetname) {
-        gi.dprintf("path_corner with no targetname at %s\n", vtos(self->s.origin));
+        gi.dprintf("path_corner with no targetname at %s\n", Vec3ToString(self->s.origin));
         G_FreeEdict(self);
         return;
     }

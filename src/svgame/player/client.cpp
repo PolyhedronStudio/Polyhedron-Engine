@@ -58,7 +58,7 @@ void SP_FixCoopSpots(edict_t *self)
         VectorSubtract(self->s.origin, spot->s.origin, d);
         if (VectorLength(d) < 384) {
             if ((!self->targetname) || Q_stricmp(self->targetname, spot->targetname) != 0) {
-//              gi.dprintf("FixCoopSpots changed %s at %s targetname from %s to %s\n", self->classname, vtos(self->s.origin), self->targetname, spot->targetname);
+//              gi.dprintf("FixCoopSpots changed %s at %s targetname from %s to %s\n", self->classname, Vec3ToString(self->s.origin), self->targetname, spot->targetname);
                 self->targetname = spot->targetname;
             }
             return;

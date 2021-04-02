@@ -32,7 +32,7 @@ void misc_strogg_ship_use(edict_t* self, edict_t* other, edict_t* activator)
 void SP_misc_strogg_ship(edict_t* ent)
 {
     if (!ent->target) {
-        gi.dprintf("%s without a target at %s\n", ent->classname, vtos(ent->absmin));
+        gi.dprintf("%s without a target at %s\n", ent->classname, Vec3ToString(ent->absmin));
         G_FreeEdict(ent);
         return;
     }

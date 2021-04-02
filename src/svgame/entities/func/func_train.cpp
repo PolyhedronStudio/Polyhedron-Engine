@@ -242,6 +242,6 @@ void SP_func_train(edict_t* self)
         self->think = func_train_find;
     }
     else {
-        gi.dprintf("func_train without a target at %s\n", vtos(self->absmin));
+        gi.dprintf("func_train without a target at %s\n", Vec3ToString(self->absmin));
     }
 }

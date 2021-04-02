@@ -716,10 +716,9 @@ static inline void vec3_vectors(const vec3_t &euler, vec3_t *forward, vec3_t *ri
 
 /*
 =============
-VectorToString
+vec3_to_str
 
-This is just a convenience function
-for printing vectors
+Slight convenience function, for simplicity.
 =============
 */
 inline const std::string vec3_to_str(const vec3_t& v, qboolean rounded = true)
@@ -732,11 +731,6 @@ inline const std::string vec3_to_str(const vec3_t& v, qboolean rounded = true)
         sstream << "(" << v.x << " " << v.y << " " << v.z << ")";
 
     return sstream.str();
-}
-// Legacy function
-inline std::string vtos(const vec3_t& v) {
-    std::string s = vec3_to_str(v, true);
-    return s;
 }
 
 //

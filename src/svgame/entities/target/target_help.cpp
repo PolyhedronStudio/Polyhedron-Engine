@@ -34,7 +34,7 @@ void SP_target_help(edict_t* ent)
     }
 
     if (!ent->message) {
-        gi.dprintf("%s with no message at %s\n", ent->classname, vtos(ent->s.origin));
+        gi.dprintf("%s with no message at %s\n", ent->classname, Vec3ToString(ent->s.origin));
         G_FreeEdict(ent);
         return;
     }

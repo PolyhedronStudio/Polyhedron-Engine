@@ -58,7 +58,7 @@ void SP_func_timer(edict_t* self)
 
     if (self->random >= self->wait) {
         self->random = self->wait - FRAMETIME;
-        gi.dprintf("func_timer at %s has random >= wait\n", vtos(self->s.origin));
+        gi.dprintf("func_timer at %s has random >= wait\n", Vec3ToString(self->s.origin));
     }
 
     if (self->spawnflags & 1) {

@@ -61,7 +61,7 @@ void SP_func_door_rotating(edict_t* ent)
         VectorNegate(ent->movedir, ent->movedir);
 
     if (!st.distance) {
-        gi.dprintf("%s at %s with no distance set\n", ent->classname, vtos(ent->s.origin));
+        gi.dprintf("%s at %s with no distance set\n", ent->classname, Vec3ToString(ent->s.origin));
         st.distance = 90;
     }
 

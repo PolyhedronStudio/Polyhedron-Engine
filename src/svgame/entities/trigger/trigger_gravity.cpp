@@ -27,7 +27,7 @@ void trigger_gravity_touch(edict_t* self, edict_t* other, cplane_t* plane, csurf
 void SP_trigger_gravity(edict_t* self)
 {
     if (st.gravity == 0) {
-        gi.dprintf("trigger_gravity without gravity set at %s\n", vtos(self->s.origin));
+        gi.dprintf("trigger_gravity without gravity set at %s\n", Vec3ToString(self->s.origin));
         G_FreeEdict(self);
         return;
     }

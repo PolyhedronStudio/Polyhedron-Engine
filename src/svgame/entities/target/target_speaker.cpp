@@ -53,7 +53,7 @@ void SP_target_speaker(edict_t* ent)
     char    buffer[MAX_QPATH];
 
     if (!st.noise) {
-        gi.dprintf("target_speaker with no noise set at %s\n", vtos(ent->s.origin));
+        gi.dprintf("target_speaker with no noise set at %s\n", Vec3ToString(ent->s.origin));
         return;
     }
     if (!strstr(st.noise, ".wav"))

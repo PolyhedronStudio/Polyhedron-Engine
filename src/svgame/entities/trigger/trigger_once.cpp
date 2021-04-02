@@ -41,7 +41,7 @@ void SP_trigger_once(edict_t* ent)
         VectorMA(ent->mins, 0.5, ent->size, v);
         ent->spawnflags &= ~1;
         ent->spawnflags |= 4;
-        gi.dprintf("fixed TRIGGERED flag on %s at %s\n", ent->classname, vtos(v));
+        gi.dprintf("fixed TRIGGERED flag on %s at %s\n", ent->classname, Vec3ToString(v));
     }
 
     ent->wait = -1;

@@ -47,7 +47,7 @@ void use_target_changelevel(edict_t* self, edict_t* other, edict_t* activator)
 void SP_target_changelevel(edict_t* ent)
 {
     if (!ent->map) {
-        gi.dprintf("target_changelevel with no map at %s\n", vtos(ent->s.origin));
+        gi.dprintf("target_changelevel with no map at %s\n", Vec3ToString(ent->s.origin));
         G_FreeEdict(ent);
         return;
     }

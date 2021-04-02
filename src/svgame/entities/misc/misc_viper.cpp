@@ -31,7 +31,7 @@ void misc_viper_use(edict_t* self, edict_t* other, edict_t* activator)
 void SP_misc_viper(edict_t* ent)
 {
     if (!ent->target) {
-        gi.dprintf("misc_viper without a target at %s\n", vtos(ent->absmin));
+        gi.dprintf("misc_viper without a target at %s\n", Vec3ToString(ent->absmin));
         G_FreeEdict(ent);
         return;
     }

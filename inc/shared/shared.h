@@ -810,6 +810,8 @@ size_t Q_vscnprintf(char* dest, size_t size, const char* fmt, va_list argptr);
 size_t Q_snprintf(char* dest, size_t size, const char* fmt, ...) q_printf(3, 4);
 size_t Q_scnprintf(char* dest, size_t size, const char* fmt, ...) q_printf(3, 4);
 
+const char* Vec3ToString(const vec3_t& v);
+
 char* va(const char* format, ...) q_printf(1, 2);
 
 

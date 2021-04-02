@@ -136,13 +136,13 @@ void func_clock_use(edict_t* self, edict_t* other, edict_t* activator)
 void SP_func_clock(edict_t* self)
 {
     //if (!self->target) {
-    //    gi.dprintf("%s with no target at %s\n", self->classname, vtos(self->s.origin));
+    //    gi.dprintf("%s with no target at %s\n", self->classname, Vec3ToString(self->s.origin));
     //    G_FreeEdict(self);
     //    return;
     //}
 
     //if ((self->spawnflags & 2) && (!self->count)) {
-    //    gi.dprintf("%s with no count at %s\n", self->classname, vtos(self->s.origin));
+    //    gi.dprintf("%s with no count at %s\n", self->classname, Vec3ToString(self->s.origin));
     //    G_FreeEdict(self);
     //    return;
     //}

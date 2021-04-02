@@ -892,7 +892,7 @@ void ai_run(edict_t *self, float dist)
 
     if (!(self->monsterinfo.aiflags & AI_LOST_SIGHT)) {
         // just lost sight of the player, decide where to go first
-//      dprint("lost sight of player, last seen at "); dprint(vtos(self.last_sighting)); dprint("\n");
+//      dprint("lost sight of player, last seen at "); dprint(Vec3ToString(self.last_sighting)); dprint("\n");
         self->monsterinfo.aiflags |= (AI_LOST_SIGHT | AI_PURSUIT_LAST_SEEN);
         self->monsterinfo.aiflags &= ~(AI_PURSUE_NEXT | AI_PURSUE_TEMP);
         isNew = true;
@@ -900,7 +900,7 @@ void ai_run(edict_t *self, float dist)
 
     if (self->monsterinfo.aiflags & AI_PURSUE_NEXT) {
         self->monsterinfo.aiflags &= ~AI_PURSUE_NEXT;
-//      dprint("reached current goal: "); dprint(vtos(self.origin)); dprint(" "); dprint(vtos(self.last_sighting)); dprint(" "); dprint(ftos(vlen(self.origin - self.last_sighting))); dprint("\n");
+//      dprint("reached current goal: "); dprint(Vec3ToString(self.origin)); dprint(" "); dprint(Vec3ToString(self.last_sighting)); dprint(" "); dprint(ftos(vlen(self.origin - self.last_sighting))); dprint("\n");
 
         // give ourself more time since we got this far
         self->monsterinfo.search_time = level.time + 5;
