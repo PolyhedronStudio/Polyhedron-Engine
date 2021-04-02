@@ -22,8 +22,6 @@ void    UTIL_SetMoveDir(vec3_t& angles, vec3_t& movedir);
 void    UTIL_TouchTriggers(edict_t* ent);
 void    UTIL_TouchSolids(edict_t* ent);
 
-char* vtos(const vec3_t& v, qboolean rounded = true);
-
 float vectoyaw(const vec3_t& vec);
 void vectoangles(const vec3_t& vec, vec3_t& angles);
 

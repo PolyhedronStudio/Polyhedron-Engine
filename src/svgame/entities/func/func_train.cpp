@@ -116,7 +116,7 @@ again:
     // check for a teleport path_corner
     if (ent->spawnflags & 1) {
         if (!first) {
-            gi.dprintf("connected teleport path_corners, see %s at %s\n", ent->classname, vtos(ent->s.origin));
+            gi.dprintf("connected teleport path_corners, see %s at %s\n", ent->classname, vec3_to_str(ent->s.origin));
             return;
         }
         first = false;

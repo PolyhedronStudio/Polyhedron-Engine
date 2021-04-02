@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 // Implements the player movement logic for both client and server game modules
 // 
-// The pm_locals_t structure is used locally when processing the movement. Consider it
+// The playerMoveLocals_t structure is used locally when processing the movement. Consider it
 // a temporary structure. The origin, prev_origin, and velocity are copied over
 // each frame from the player pmove state of the given entity.
 // 
@@ -79,7 +79,7 @@ static struct {
         cplane_t plane;
         int contents;
     } ground;
-} pm_locals;
+} playerMoveLocals;
 
 
 // Static locals.
@@ -243,7 +243,7 @@ static bool PM_CheckStep(const trace_t* trace) {
 
     if (!trace->allsolid) {
         if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
-            if (trace->ent != pm->groundEntity || trace->plane.dist != pm_locals.ground.plane.dist) {
+            if (trace->ent != pm->groundEntity || trace->plane.dist != playerMoveLocals.ground.plane.dist) {
                 return true;
             }
         }
@@ -261,8 +261,8 @@ static bool PM_CheckStep(const trace_t* trace) {
 //
 static void PM_StepDown(const trace_t* trace) {
     // Calculate step height.
-    pm_locals.origin = trace->endpos;
-    pm->step = pm_locals.origin.z - pm_locals.previousOrigin.z;
+    playerMoveLocals.origin = trace->endpos;
+    pm->step = playerMoveLocals.origin.z - playerMoveLocals.previousOrigin.z;
 
     // If we are above minimal step height, remove the PMF_ON_STAIRS flag.
     if (pm->step >= PM_STEP_HEIGHT_MIN) {
@@ -359,19 +359,19 @@ static qboolean PM_StepSlideMove_(void)
     vec3_t planes[MAX_CLIP_PLANES];
     int32_t bump;
 
-    float timeRemaining = pm_locals.frameTime;
+    float timeRemaining = playerMoveLocals.frameTime;
     int32_t numPlanes = 0;
 
     // never turn against our ground plane
     if (pm->state.flags & PMF_ON_GROUND) {
-        planes[numPlanes] = pm_locals.ground.plane.normal;
+        planes[numPlanes] = playerMoveLocals.ground.plane.normal;
         numPlanes++;
     }
 
-    vec3_t primal_velocity = pm_locals.velocity;
+    vec3_t primal_velocity = playerMoveLocals.velocity;
 
     // or our original velocity
-    planes[numPlanes] = vec3_normalize(pm_locals.velocity);
+    planes[numPlanes] = vec3_normalize(playerMoveLocals.velocity);
     numPlanes++;
 
     for (bump = 0; bump < numBumps; bump++) {
@@ -380,20 +380,20 @@ static qboolean PM_StepSlideMove_(void)
         }
 
         // project desired destination
-        vec3_t pos = vec3_fmaf(pm_locals.origin, timeRemaining, pm_locals.velocity);
+        vec3_t pos = vec3_fmaf(playerMoveLocals.origin, timeRemaining, playerMoveLocals.velocity);
 
         // trace to it
-        const trace_t trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, pos);
+        const trace_t trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, pos);
 
         // if the player is trapped in a solid, don't build up Z
         if (trace.allsolid) {
-            pm_locals.velocity.z = 0.0f;
+            playerMoveLocals.velocity.z = 0.0f;
             return true;
         }
 
         // if the trace succeeded, move some distance
         if (trace.fraction > (FLT_EPSILON - 1.0f)) {
-            pm_locals.origin = trace.endpos;
+            playerMoveLocals.origin = trace.endpos;
 
             // if the trace didn't hit anything, we're done
             if (trace.fraction == 1.0f) {
@@ -414,7 +414,7 @@ static qboolean PM_StepSlideMove_(void)
         }
         else {
             // if we've seen this plane before, nudge our velocity out along it
-            pm_locals.velocity += trace.plane.normal;
+            playerMoveLocals.velocity += trace.plane.normal;
             continue;
         }
 
@@ -423,12 +423,12 @@ static qboolean PM_StepSlideMove_(void)
             vec3_t vel;
 
             // if velocity doesn't impact this plane, skip it
-            if (vec3_dot(pm_locals.velocity, planes[i]) > (FLT_EPSILON - 1.0f)) {
+            if (vec3_dot(playerMoveLocals.velocity, planes[i]) > (FLT_EPSILON - 1.0f)) {
                 continue;
             }
 
             // slide along the plane
-            vel = PM_ClipVelocity(pm_locals.velocity, planes[i], PM_CLIP_BOUNCE);
+            vel = PM_ClipVelocity(playerMoveLocals.velocity, planes[i], PM_CLIP_BOUNCE);
 
             // see if there is a second plane that the new move enters
             for (int32_t j = 0; j < numPlanes; j++) {
@@ -455,7 +455,7 @@ static qboolean PM_StepSlideMove_(void)
                 cross = vec3_cross(planes[i], planes[j]);
                 cross = vec3_normalize(cross);
 
-                const float scale = vec3_dot(cross, pm_locals.velocity);
+                const float scale = vec3_dot(cross, playerMoveLocals.velocity);
                 vel = vec3_scale(cross, scale);
 
                 // see if there is a third plane the the new move enters
@@ -470,13 +470,13 @@ static qboolean PM_StepSlideMove_(void)
                     }
 
                     // stop dead at a triple plane interaction
-                    pm_locals.velocity = vec3_zero();
+                    playerMoveLocals.velocity = vec3_zero();
                     return true;
                 }
             }
 
             // if we have fixed all interactions, try another move
-            pm_locals.velocity = vel;
+            playerMoveLocals.velocity = vel;
             break;
         }
     }
@@ -493,8 +493,8 @@ static qboolean PM_StepSlideMove_(void)
 //
 static void PM_StepSlideMove(void)
 {
-    vec3_t start_o = pm_locals.origin;
-    vec3_t start_v = pm_locals.velocity;
+    vec3_t start_o = playerMoveLocals.origin;
+    vec3_t start_v = playerMoveLocals.velocity;
 
     //PM_StepSlideMove_();
     // Attempt to move; if nothing blocks us, we're done
@@ -503,8 +503,8 @@ static void PM_StepSlideMove(void)
         // attempt to step down to remain on ground
         if ((pm->state.flags & PMF_ON_GROUND) && pm->cmd.upmove <= 0) {
 
-            const vec3_t down = vec3_fmaf(pm_locals.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
-            const trace_t step_down = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, down);
+            const vec3_t down = vec3_fmaf(playerMoveLocals.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
+            const trace_t step_down = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, down);
 
             if (PM_CheckStep(&step_down)) {
                 PM_StepDown(&step_down);
@@ -514,8 +514,8 @@ static void PM_StepSlideMove(void)
         return;
     }
 
-    vec3_t down_o = pm_locals.origin;
-    vec3_t down_v = pm_locals.velocity;
+    vec3_t down_o = playerMoveLocals.origin;
+    vec3_t down_v = playerMoveLocals.velocity;
 
     vec3_t up = start_o;
     up.z += PM_STEP_HEIGHT_MAX;
@@ -525,19 +525,19 @@ static void PM_StepSlideMove(void)
         return;     // Can't step up
 
     // Try sliding above
-    pm_locals.origin = up;
-    pm_locals.velocity = start_v;
+    playerMoveLocals.origin = up;
+    playerMoveLocals.velocity = start_v;
 
     PM_StepSlideMove_();
 
     // Push down the final amount
-    vec3_t down = pm_locals.origin;
+    vec3_t down = playerMoveLocals.origin;
     down.z -= PM_STEP_HEIGHT_MAX;
-    trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, down);
+    trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, down);
     if (!trace.allsolid) {
-        pm_locals.origin = trace.endpos;
+        playerMoveLocals.origin = trace.endpos;
     }
-    up = pm_locals.origin;
+    up = playerMoveLocals.origin;
 
     // decide which one went farther
     float down_dist = (down_o.x - start_o.x) * (down_o.x - start_o.x)
@@ -546,13 +546,13 @@ static void PM_StepSlideMove(void)
         + (up.y - start_o.y) * (up.y - start_o.y);
 
     if (down_dist > up_dist || trace.plane.normal.z < PM_STEP_NORMAL) {
-        pm_locals.origin = down_o;
-        pm_locals.velocity = down_v;
+        playerMoveLocals.origin = down_o;
+        playerMoveLocals.velocity = down_v;
         return;
     }
     //!! Special case
     // if we were walking along a plane, then we need to copy the Z over
-    pm_locals.velocity.z = down_v.z;
+    playerMoveLocals.velocity.z = down_v.z;
 }
 #elif OLD_SLIDE_MOVE == 1
 //
@@ -581,28 +581,28 @@ static void PM_StepSlideMove_(void)
     vec3_t      end;
     float       timeLeft;
 
-    primal_velocity = pm_locals.velocity;
+    primal_velocity = playerMoveLocals.velocity;
 
     numBumps = 4;
     numPlanes = 0;
 
-    timeLeft = pm_locals.frameTime;
+    timeLeft = playerMoveLocals.frameTime;
 
     for (bumpCount = 0; bumpCount < numBumps; bumpCount++) {
         for (i = 0; i < 3; i++)
-            end[i] = pm_locals.origin[i] + timeLeft * pm_locals.velocity[i];
+            end[i] = playerMoveLocals.origin[i] + timeLeft * playerMoveLocals.velocity[i];
 
-        trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, end);
+        trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, end);
 
         if (trace.allsolid) {
             // entity is trapped in another solid
-            pm_locals.velocity.z = 0;    // don't build up falling damage
+            playerMoveLocals.velocity.z = 0;    // don't build up falling damage
             return;
         }
 
         if (trace.fraction > 0) {
             // actually covered some distance
-            pm_locals.origin = trace.endpos;
+            playerMoveLocals.origin = trace.endpos;
             numPlanes = 0;
         }
 
@@ -617,7 +617,7 @@ static void PM_StepSlideMove_(void)
         // slide along this plane
         if (numPlanes >= MAX_CLIP_PLANES) {
             // this shouldn't really happen
-            pm_locals.velocity = vec3_zero();
+            playerMoveLocals.velocity = vec3_zero();
             break;
         }
 
@@ -628,10 +628,10 @@ static void PM_StepSlideMove_(void)
         // modify original_velocity so it parallels all of the clip planes
         //
         for (i = 0; i < numPlanes; i++) {
-            pm_locals.velocity = PM_ClipVelocity(pm_locals.velocity, planes[i], 1.01f);
+            playerMoveLocals.velocity = PM_ClipVelocity(playerMoveLocals.velocity, planes[i], 1.01f);
             for (j = 0; j < numPlanes; j++)
                 if (j != i) {
-                    if (vec3_dot(pm_locals.velocity, planes[j]) < 0)
+                    if (vec3_dot(playerMoveLocals.velocity, planes[j]) < 0)
                         break;  // not ok
                 }
             if (j == numPlanes)
@@ -645,26 +645,26 @@ static void PM_StepSlideMove_(void)
             // go along the crease
             if (numPlanes != 2) {
                 PM_Debug("clip velocity, numPlanes == %i", numPlanes);
-                pm_locals.velocity = vec3_zero();
+                playerMoveLocals.velocity = vec3_zero();
                 break;
             }
             dir = vec3_cross(planes[0], planes[1]);
-            d = vec3_dot(dir, pm_locals.velocity);
-            pm_locals.velocity = vec3_scale(dir, d);
+            d = vec3_dot(dir, playerMoveLocals.velocity);
+            playerMoveLocals.velocity = vec3_scale(dir, d);
         }
 
         //
         // if velocity is against the original velocity, stop dead
         // to avoid tiny occilations in sloping corners
         //
-        if (vec3_dot(pm_locals.velocity, primal_velocity) <= 0) {
-            pm_locals.velocity = vec3_zero();
+        if (vec3_dot(playerMoveLocals.velocity, primal_velocity) <= 0) {
+            playerMoveLocals.velocity = vec3_zero();
             break;
         }
     }
 
     if (pm->state.time) {
-        pm_locals.velocity = primal_velocity;
+        playerMoveLocals.velocity = primal_velocity;
     }
 }
 
@@ -677,13 +677,13 @@ static void PM_StepSlideMove_(void)
 //
 static void PM_StepSlideMove(void)
 {
-    vec3_t start_o = pm_locals.origin;
-    vec3_t start_v = pm_locals.velocity;
+    vec3_t start_o = playerMoveLocals.origin;
+    vec3_t start_v = playerMoveLocals.velocity;
 
     PM_StepSlideMove_();
 
-    vec3_t down_o = pm_locals.origin;
-    vec3_t down_v = pm_locals.velocity;
+    vec3_t down_o = playerMoveLocals.origin;
+    vec3_t down_v = playerMoveLocals.velocity;
 
     vec3_t up = start_o;
     up.z += PM_STEP_HEIGHT_MAX;
@@ -693,27 +693,27 @@ static void PM_StepSlideMove(void)
         return;     // Can't step up
 
     // Try sliding above
-    pm_locals.origin = up;
-    pm_locals.velocity = start_v;
+    playerMoveLocals.origin = up;
+    playerMoveLocals.velocity = start_v;
 
     PM_StepSlideMove_();
 
     // New stepdown code. (Works somewhat if you disable the check below duh)
-    //down = pm_locals.origin; 
+    //down = playerMoveLocals.origin; 
     //down.z -= PM_STEP_HEIGHT_MAX;
-    //trace_t step_down = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, down);
+    //trace_t step_down = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, down);
     //if (PM_CheckStep(&step_down)) {
     //    PM_StepDown(&step_down);
     //}
 
     // Push down the final amount
-    vec3_t down = pm_locals.origin;
+    vec3_t down = playerMoveLocals.origin;
     down.z -= PM_STEP_HEIGHT_MAX;
-    trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, down);
+    trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, down);
     if (!trace.allsolid) {
-        pm_locals.origin = trace.endpos;
+        playerMoveLocals.origin = trace.endpos;
     }
-    up = pm_locals.origin;
+    up = playerMoveLocals.origin;
 
     // decide which one went farther
     float down_dist = (down_o.x - start_o.x) * (down_o.x - start_o.x)
@@ -722,13 +722,13 @@ static void PM_StepSlideMove(void)
         + (up.y - start_o.y) * (up.y - start_o.y);
 
     if (down_dist > up_dist || trace.plane.normal.z < PM_STEP_NORMAL) {
-        pm_locals.origin = down_o;
-        pm_locals.velocity = down_v;
+        playerMoveLocals.origin = down_o;
+        playerMoveLocals.velocity = down_v;
         return;
     }
     //!! Special case
     // if we were walking along a plane, then we need to copy the Z over
-    pm_locals.velocity.z = down_v.z;
+    playerMoveLocals.velocity.z = down_v.z;
 }
 #else
 //
@@ -756,10 +756,10 @@ static bool PM_SlideMove(void)
     int bumpCount = 0;
     int numBumps = 4;
     int numPlanes = 0;
-    float timeLeft = pm_locals.frameTime;
+    float timeLeft = playerMoveLocals.frameTime;
 
     // Store primal velocity.
-    vec3_t primal_velocity = pm_locals.velocity;
+    vec3_t primal_velocity = playerMoveLocals.velocity;
 
     for (int bumpCount = 0; bumpCount < numBumps; bumpCount++) {
         // Break in case we have run out of time for this frame.
@@ -767,15 +767,15 @@ static bool PM_SlideMove(void)
             break;
 
         // Project desired destination
-        end = vec3_fmaf(pm_locals.origin, timeLeft, pm_locals.velocity);
+        end = vec3_fmaf(playerMoveLocals.origin, timeLeft, playerMoveLocals.velocity);
 
         // Trace to it.
-        trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, end);
+        trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, end);
 
         // If the player is trapped in a solid, don't build up Z
         if (trace.allsolid) {
             // entity is trapped in another solid
-            pm_locals.velocity.z = 0;    // don't build up falling damage
+            playerMoveLocals.velocity.z = 0;    // don't build up falling damage
             return true;
         }
 
@@ -797,7 +797,7 @@ static bool PM_SlideMove(void)
         //--------------------------------------------
         //if (trace.fraction > 0) {
         //    // actually covered some distance
-        //    VectorCopy(trace.endpos, pm_locals.origin);
+        //    VectorCopy(trace.endpos, playerMoveLocals.origin);
         //    numPlanes = 0;
         //}
 
@@ -813,7 +813,7 @@ static bool PM_SlideMove(void)
         // slide along this plane
         if (numPlanes >= MAX_CLIP_PLANES) {
             // this shouldn't really happen
-            VectorCopy(vec3_origin, pm_locals.velocity);
+            VectorCopy(vec3_origin, playerMoveLocals.velocity);
             break;
         }
 
@@ -968,7 +968,7 @@ static void PM_StepSlideMove(void)
                 PM_StepDown(&step_down);
             }
             else {
-                pm->step = pm->state.origin.z - pm_locals.previousOrigin.z;
+                pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
                 pm->state.flags |= PMF_ON_STAIRS;
             }
 
@@ -1004,7 +1004,7 @@ static void PM_Friction(void)
     float   friction;
     float   drop;
 
-    vel = pm_locals.velocity;
+    vel = playerMoveLocals.velocity;
 
     speed = vec3_length(vel);
     if (speed < 1) {
@@ -1016,15 +1016,15 @@ static void PM_Friction(void)
     drop = 0;
 
     // apply ground friction
-    if ((pm->groundEntity && pm_locals.ground.surface && !(pm_locals.ground.surface->flags & SURF_SLICK)) || (pm_locals.ladder)) {
+    if ((pm->groundEntity && playerMoveLocals.ground.surface && !(playerMoveLocals.ground.surface->flags & SURF_SLICK)) || (playerMoveLocals.ladder)) {
         friction = pmp->friction;
         control = speed < pm_stopspeed ? pm_stopspeed : speed;
-        drop += control * friction * pm_locals.frameTime;
+        drop += control * friction * playerMoveLocals.frameTime;
     }
 
     // apply water friction
-    if (pm->waterLevel && !pm_locals.ladder)
-        drop += speed * pmp->waterfriction * pm->waterLevel * pm_locals.frameTime;
+    if (pm->waterLevel && !playerMoveLocals.ladder)
+        drop += speed * pmp->waterfriction * pm->waterLevel * playerMoveLocals.frameTime;
 
     // scale the velocity
     newspeed = speed - drop;
@@ -1037,8 +1037,8 @@ static void PM_Friction(void)
     vel.y = vel.y * newspeed;
     vel.z = vel.z * newspeed;
 
-    // Apply new velocity to pm_locals.
-    pm_locals.velocity = vel;
+    // Apply new velocity to playerMoveLocals.
+    playerMoveLocals.velocity = vel;
 }
 
 //
@@ -1053,16 +1053,16 @@ static void PM_Accelerate(vec3_t& wishdir, float wishspeed, float accel)
     int         i;
     float       addspeed, accelspeed, currentspeed;
 
-    currentspeed = DotProduct(pm_locals.velocity, wishdir);
+    currentspeed = DotProduct(playerMoveLocals.velocity, wishdir);
     addspeed = wishspeed - currentspeed;
     if (addspeed <= 0)
         return;
-    accelspeed = accel * pm_locals.frameTime * wishspeed;
+    accelspeed = accel * playerMoveLocals.frameTime * wishspeed;
     if (accelspeed > addspeed)
         accelspeed = addspeed;
 
     for (i = 0; i < 3; i++)
-        pm_locals.velocity[i] += accelspeed * wishdir[i];
+        playerMoveLocals.velocity[i] += accelspeed * wishdir[i];
 }
 
 //
@@ -1079,16 +1079,16 @@ static void PM_AirAccelerate(vec3_t& wishdir, float wishspeed, float accel)
 
     if (wishspd > 30)
         wishspd = 30;
-    currentspeed = DotProduct(pm_locals.velocity, wishdir);
+    currentspeed = DotProduct(playerMoveLocals.velocity, wishdir);
     addspeed = wishspd - currentspeed;
     if (addspeed <= 0)
         return;
-    accelspeed = accel * wishspeed * pm_locals.frameTime;
+    accelspeed = accel * wishspeed * playerMoveLocals.frameTime;
     if (accelspeed > addspeed)
         accelspeed = addspeed;
 
     for (i = 0; i < 3; i++)
-        pm_locals.velocity[i] += accelspeed * wishdir[i];
+        playerMoveLocals.velocity[i] += accelspeed * wishdir[i];
 }
 
 //
@@ -1110,7 +1110,7 @@ static vec3_t PM_AddCurrents(const vec3_t& vel)
     vec3_t  wishvel = vel;
 
     // Ladders Velocities.
-    if (pm_locals.ladder && fabs(pm_locals.velocity.z) <= 200) {
+    if (playerMoveLocals.ladder && fabs(playerMoveLocals.velocity.z) <= 200) {
         if ((pm->viewAngles[PITCH] <= -15) && (pm->cmd.forwardmove > 0))
             wishvel.z = 200;
         else if ((pm->viewAngles[PITCH] >= 15) && (pm->cmd.forwardmove > 0))
@@ -1163,17 +1163,17 @@ static vec3_t PM_AddCurrents(const vec3_t& vel)
     if (pm->groundEntity) {
         VectorClear(v);
 
-        if (pm_locals.ground.contents & CONTENTS_CURRENT_0)
+        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_0)
             v.x += 1;
-        if (pm_locals.ground.contents & CONTENTS_CURRENT_90)
+        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_90)
             v.y += 1;
-        if (pm_locals.ground.contents & CONTENTS_CURRENT_180)
+        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_180)
             v.x -= 1;
-        if (pm_locals.ground.contents & CONTENTS_CURRENT_270)
+        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_270)
             v.y -= 1;
-        if (pm_locals.ground.contents & CONTENTS_CURRENT_UP)
+        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_UP)
             v.z += 1;
-        if (pm_locals.ground.contents & CONTENTS_CURRENT_DOWN)
+        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_DOWN)
             v.z -= 1;
 
         wishvel = vec3_fmaf(wishvel, 100 /* pm->groundEntity->speed */, v);
@@ -1200,7 +1200,7 @@ static void PM_WaterMove(void)
     // user intentions
     //
     for (i = 0; i < 3; i++)
-        wishvel[i] = pm_locals.forward[i] * pm->cmd.forwardmove + pm_locals.right[i] * pm->cmd.sidemove;
+        wishvel[i] = playerMoveLocals.forward[i] * pm->cmd.forwardmove + playerMoveLocals.right[i] * pm->cmd.sidemove;
 
     if (!pm->cmd.forwardmove && !pm->cmd.sidemove && !pm->cmd.upmove)
         wishvel.z -= 60;       // drift towards bottom
@@ -1244,14 +1244,14 @@ static void PM_AirMove(void)
 
     //!!!!! pitch should be 1/3 so this isn't needed??!
 #if 0
-    pm_locals.forward.z = 0;
-    pm_locals.right.z = 0;
-    VectorNormalize(pm_locals.forward);
-    VectorNormalize(pm_locals.right);
+    playerMoveLocals.forward.z = 0;
+    playerMoveLocals.right.z = 0;
+    VectorNormalize(playerMoveLocals.forward);
+    VectorNormalize(playerMoveLocals.right);
 #endif
 
     for (i = 0; i < 2; i++)
-        wishvel[i] = pm_locals.forward[i] * fmove + pm_locals.right[i] * smove;
+        wishvel[i] = playerMoveLocals.forward[i] * fmove + playerMoveLocals.right[i] * smove;
     wishvel.z = 0;
 
     wishdir = wishvel = PM_AddCurrents(wishvel);
@@ -1267,37 +1267,37 @@ static void PM_AirMove(void)
         wishspeed = maxspeed;
     }
 
-    if (pm_locals.ladder) {
+    if (playerMoveLocals.ladder) {
         PM_Accelerate(wishdir, wishspeed, pm_accelerate);
         if (!wishvel.z) {
-            if (pm_locals.velocity.z > 0) {
-                pm_locals.velocity.z -= pm->state.gravity * pm_locals.frameTime;
-                if (pm_locals.velocity.z < 0)
-                    pm_locals.velocity.z = 0;
+            if (playerMoveLocals.velocity.z > 0) {
+                playerMoveLocals.velocity.z -= pm->state.gravity * playerMoveLocals.frameTime;
+                if (playerMoveLocals.velocity.z < 0)
+                    playerMoveLocals.velocity.z = 0;
             }
             else {
-                pm_locals.velocity.z += pm->state.gravity * pm_locals.frameTime;
-                if (pm_locals.velocity.z > 0)
-                    pm_locals.velocity.z = 0;
+                playerMoveLocals.velocity.z += pm->state.gravity * playerMoveLocals.frameTime;
+                if (playerMoveLocals.velocity.z > 0)
+                    playerMoveLocals.velocity.z = 0;
             }
         }
         PM_StepSlideMove();
     }
     else if (pm->groundEntity) {
         // walking on ground
-        pm_locals.velocity.z = 0; //!!! this is before the accel
+        playerMoveLocals.velocity.z = 0; //!!! this is before the accel
         PM_Accelerate(wishdir, wishspeed, pm_accelerate);
 
 
         // PGM  -- fix for negative trigger_gravity fields
-        //      pm_locals.velocity.z = 0;
+        //      playerMoveLocals.velocity.z = 0;
         if (pm->state.gravity > 0)
-            pm_locals.velocity.z = 0;
+            playerMoveLocals.velocity.z = 0;
         else
-            pm_locals.velocity.z -= pm->state.gravity * pm_locals.frameTime;
+            playerMoveLocals.velocity.z -= pm->state.gravity * playerMoveLocals.frameTime;
         // PGM
 
-        if (!pm_locals.velocity.x && !pm_locals.velocity.y)
+        if (!playerMoveLocals.velocity.x && !playerMoveLocals.velocity.y)
             return;
         PM_StepSlideMove();
     }
@@ -1308,7 +1308,7 @@ static void PM_AirMove(void)
         else
             PM_Accelerate(wishdir, wishspeed, 1);
         // add gravity
-        pm_locals.velocity.z -= pm->state.gravity * pm_locals.frameTime;
+        playerMoveLocals.velocity.z -= pm->state.gravity * playerMoveLocals.frameTime;
         PM_StepSlideMove();
     }
 }
@@ -1355,17 +1355,17 @@ static void PM_CheckJump(void)
         if (pmp->waterhack)
             return;
 
-        if (pm_locals.velocity.z <= -300)
+        if (playerMoveLocals.velocity.z <= -300)
             return;
 
         // FIXME: makes velocity dependent on client FPS,
         // even causes prediction misses
         if (pm->waterType == CONTENTS_WATER)
-            pm_locals.velocity.z = 100;
+            playerMoveLocals.velocity.z = 100;
         else if (pm->waterType == CONTENTS_SLIME)
-            pm_locals.velocity.z = 80;
+            playerMoveLocals.velocity.z = 80;
         else
-            pm_locals.velocity.z = 50;
+            playerMoveLocals.velocity.z = 50;
         return;
     }
 
@@ -1376,9 +1376,9 @@ static void PM_CheckJump(void)
 
     pm->groundEntity = NULL;
     pm->state.flags &= ~PMF_ON_GROUND;
-    pm_locals.velocity.z += 270;
-    if (pm_locals.velocity.z < 270)
-        pm_locals.velocity.z = 270;
+    playerMoveLocals.velocity.z += 270;
+    if (playerMoveLocals.velocity.z < 270)
+        playerMoveLocals.velocity.z = 270;
 }
 
 //
@@ -1395,26 +1395,26 @@ static void PM_CheckSpecialMovements(void)
     if (pm->state.time)
         return;
 
-    pm_locals.ladder = false;
+    playerMoveLocals.ladder = false;
 
     // Check for ladder
     vec3_t flatforward = {
-        pm_locals.forward.x,
-        pm_locals.forward.y,
+        playerMoveLocals.forward.x,
+        playerMoveLocals.forward.y,
         0.f
     };
     flatforward = vec3_normalize(flatforward);
 
-    vec3_t spot = vec3_fmaf(pm_locals.origin, 1, flatforward);
-    trace_t trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, spot);
+    vec3_t spot = vec3_fmaf(playerMoveLocals.origin, 1, flatforward);
+    trace_t trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, spot);
     if ((trace.fraction < 1) && (trace.contents & CONTENTS_LADDER))
-        pm_locals.ladder = true;
+        playerMoveLocals.ladder = true;
 
     // Check for water jump
     if (pm->waterLevel != 2)
         return;
 
-    spot = vec3_fmaf(pm_locals.origin, 30, flatforward);
+    spot = vec3_fmaf(playerMoveLocals.origin, 30, flatforward);
     spot.z += 4;
 
     int cont = pm->PointContents(spot);
@@ -1427,8 +1427,8 @@ static void PM_CheckSpecialMovements(void)
         return;
 
     // Jump out of water
-    pm_locals.velocity = vec3_scale(flatforward, 50);
-    pm_locals.velocity.z = 350;
+    playerMoveLocals.velocity = vec3_scale(flatforward, 50);
+    playerMoveLocals.velocity.z = 350;
 
     pm->state.flags |= PMF_TIME_WATERJUMP;
     pm->state.time = 255;
@@ -1444,24 +1444,25 @@ static void PM_CheckSpecialMovements(void)
 //
 static void PM_CheckDuck(void)
 {
-    //if (pm->state.type == PM_DEAD) {
-    //    //if (pm->state.flags & PMF_GIBLET) {
-    //    //    pm->state.view_offset.z = 0.0f;
-    //    //}
-    //    //else {
-    //        pm->state.view_offset.z = -16.0f;
-    //    }
-    //}
-    //else {
+    // Any state after dead, can be checked for here.
+    if (pm->state.type >= PM_DEAD) {
+        if (pm->state.type == PM_GIB) {
+            pm->state.view_offset.z = 0.0f;
+        }
+        else {
+            pm->state.view_offset.z = -16.0f;
+        }
+    // Other states go here :)
+    } else {
 
         const qboolean is_ducking = pm->state.flags & PMF_DUCKED;
-        const qboolean wants_ducking = (pm->cmd.upmove < 0) && !(pm_locals.ladder);
+        const qboolean wants_ducking = (pm->cmd.upmove < 0) && !(playerMoveLocals.ladder);
 
         if (!is_ducking && wants_ducking) {
             pm->state.flags |= PMF_DUCKED;
         }
         else if (is_ducking && !wants_ducking) {
-            const trace_t trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, pm_locals.origin);
+            const trace_t trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, playerMoveLocals.origin);
 
             if (!trace.allsolid && !trace.startsolid) {
                 pm->state.flags &= ~PMF_DUCKED;
@@ -1470,32 +1471,45 @@ static void PM_CheckDuck(void)
 
         const float height = pm->maxs.z - pm->mins.z;
 
-        if (pm->state.flags & PMF_DUCKED) { // ducked, reduce height
-            const float target = pm->mins.z + height * 0.5f;
+        // For either case, ducked, or not ducked. We first change the target 
+        // view height.
+        // 
+        // This doesn't reflect the actual bbox, since in real life your eyes 
+        // aren't at the top of your skull either.
+        // 
+        // Considering games == faking effects to get a nice real feel... Here we go.
+        if (pm->state.flags & PMF_DUCKED) {
+            // A nice view height value.
+            const float targetViewHeight = pm->mins.z + height * 0.45f;
 
-            if (pm->state.view_offset.z > target) { // go down
-                pm->state.view_offset.z -= pm_locals.frameTime * PM_SPEED_DUCK_STAND;
+            // LERP it.
+            if (pm->state.view_offset.z > targetViewHeight) { // go down
+                pm->state.view_offset.z -= playerMoveLocals.frameTime * PM_SPEED_DUCK_STAND;
             }
 
-            if (pm->state.view_offset.z < target) {
-                pm->state.view_offset.z = target;
+            if (pm->state.view_offset.z < targetViewHeight) {
+                pm->state.view_offset.z = targetViewHeight;
             }
 
-            // change the bounding box to reflect ducking
-            pm->maxs.z = pm->maxs.z + pm->mins.z * 0.5f;
+            // Change the actual bounding box to reflect ducking
+            pm->maxs.z = pm->maxs.z + pm->mins.z * 0.35f;
         }
         else {
-            const float target = pm->mins.z + (height - 6) * 0.9f;
+            // A nice view height value.
+            const float targetViewHeight = pm->mins.z + (height - 6) * 0.9f;
 
-            if (pm->state.view_offset.z < target) { // go up
-                pm->state.view_offset.z += pm_locals.frameTime * PM_SPEED_DUCK_STAND;
+            // LERP it.
+            if (pm->state.view_offset.z < targetViewHeight) { // go up
+                pm->state.view_offset.z += playerMoveLocals.frameTime * PM_SPEED_DUCK_STAND;
             }
 
-            if (pm->state.view_offset.z > target) {
-                pm->state.view_offset.z = target;
+            if (pm->state.view_offset.z > targetViewHeight) {
+                pm->state.view_offset.z = targetViewHeight;
             }
+
+            // No need to change the bounding box, it has already been initialized at the start of the frame.
         }
-   // }
+    }
 
     pm->state.view_offset = pm->state.view_offset;
     //trace_t trace;
@@ -1527,7 +1541,7 @@ static void PM_CheckDuck(void)
     //    if (pm->state.flags & PMF_DUCKED) {
     //        // try to stand up
     //        pm->maxs.z = 32;
-    //        trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, pm_locals.origin);
+    //        trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, playerMoveLocals.origin);
     //        if (!trace.allsolid)
     //            pm->state.flags &= ~PMF_DUCKED;
     //    }
@@ -1574,23 +1588,23 @@ static void PM_CategorizePosition(void)
 
     // See if standing on something solid
     vec3_t point = {
-        pm_locals.origin.x,
-        pm_locals.origin.y,
-        pm_locals.origin.z - 0.25f
+        playerMoveLocals.origin.x,
+        playerMoveLocals.origin.y,
+        playerMoveLocals.origin.z - 0.25f
     };
 
-    if (pm_locals.velocity.z > 180) { //!!ZOID changed from 100 to 180 (ramp accel)
+    if (playerMoveLocals.velocity.z > 180) { //!!ZOID changed from 100 to 180 (ramp accel)
         pm->state.flags &= ~PMF_ON_GROUND;
         pm->groundEntity = NULL;
     }
     else {
         // Execute trace.
-        trace_t trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, point);
+        trace_t trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, point);
 
-        // Set results in pm_locals.
-        pm_locals.ground.plane = trace.plane;
-        pm_locals.ground.surface = trace.surface;
-        pm_locals.ground.contents = trace.contents;
+        // Set results in playerMoveLocals.
+        playerMoveLocals.ground.plane = trace.plane;
+        playerMoveLocals.ground.surface = trace.surface;
+        playerMoveLocals.ground.contents = trace.contents;
 
         // No ent, or place normal is under PM_STEP_NORMAL.
         if (!trace.ent || (trace.plane.normal.z < PM_STEP_NORMAL && !trace.startsolid)) {
@@ -1610,10 +1624,10 @@ static void PM_CategorizePosition(void)
                 // just hit the ground
                 pm->state.flags |= PMF_ON_GROUND;
                 // don't do landing time if we were just going down a slope
-                if (pm_locals.velocity.z < -200 && !pmp->strafehack) {
+                if (playerMoveLocals.velocity.z < -200 && !pmp->strafehack) {
                     pm->state.flags |= PMF_TIME_LAND;
                     // don't allow another jump for a little while
-                    if (pm_locals.velocity.z < -400)
+                    if (playerMoveLocals.velocity.z < -400)
                         pm->state.time = 25;
                     else
                         pm->state.time = 18;
@@ -1628,7 +1642,7 @@ static void PM_CategorizePosition(void)
     //
     // get waterLevel, accounting for ducking
     //
-    point.z = pm_locals.origin.z + pm->mins.z + 1;
+    point.z = playerMoveLocals.origin.z + pm->mins.z + 1;
     int cont = pm->PointContents(point);
 
     int sample2 = pm->state.view_offset.z - pm->mins.z;
@@ -1641,12 +1655,12 @@ static void PM_CategorizePosition(void)
         pm->waterType = cont;
         pm->waterLevel = 1;
 
-        point.z = pm_locals.origin.z + pm->mins.z + sample1;
+        point.z = playerMoveLocals.origin.z + pm->mins.z + sample1;
         cont = pm->PointContents(point);
 
         if (cont & CONTENTS_MASK_LIQUID) {
             pm->waterLevel = 2;
-            point.z = pm_locals.origin.z + pm->mins.z + sample2;
+            point.z = playerMoveLocals.origin.z + pm->mins.z + sample2;
             cont = pm->PointContents(point);
 
             if (cont & CONTENTS_MASK_LIQUID)
@@ -1699,8 +1713,8 @@ static qboolean PM_TestPosition(void)
 //
 static void PM_FinalizePosition(qboolean testForValid) {
     // Copy over origin and velocity.
-    pm->state.origin = pm_locals.origin;
-    pm->state.velocity = pm_locals.velocity;
+    pm->state.origin = playerMoveLocals.origin;
+    pm->state.velocity = playerMoveLocals.velocity;
 
     // Don't test for a valid position if not wished for.
     if (!testForValid)
@@ -1711,7 +1725,7 @@ static void PM_FinalizePosition(qboolean testForValid) {
         return;
 
     // Revert back to the previous origin.
-    pm->state.origin = pm_locals.previousOrigin;
+    pm->state.origin = playerMoveLocals.previousOrigin;
 }
 
 //
@@ -1727,8 +1741,8 @@ static void PM_TestInitialPosition(void)
     // Do 
     if (PM_TestPosition()) {
         // Copy over the state origin in case it is valid.
-        pm_locals.origin = pm->state.origin;
-        pm_locals.previousOrigin = pm->state.origin;
+        playerMoveLocals.origin = pm->state.origin;
+        playerMoveLocals.previousOrigin = pm->state.origin;
         return;
     }
 }
@@ -1761,17 +1775,17 @@ static void PM_FlyMove(void)
     pm->state.view_offset.z = 22;
 
     // Friction
-    speed = vec3_length(pm_locals.velocity);
+    speed = vec3_length(playerMoveLocals.velocity);
     if (speed < 1) {
         // Reset velocity.
-        pm_locals.velocity = vec3_zero();
+        playerMoveLocals.velocity = vec3_zero();
     }
     else {
         drop = 0;
 
         friction = pmp->flyfriction;
         control = speed < pm_stopspeed ? pm_stopspeed : speed;
-        drop += control * friction * pm_locals.frameTime;
+        drop += control * friction * playerMoveLocals.frameTime;
 
         // scale the velocity
         newspeed = speed - drop;
@@ -1779,18 +1793,18 @@ static void PM_FlyMove(void)
             newspeed = 0;
         newspeed /= speed;
 
-        pm_locals.velocity = vec3_scale(pm_locals.velocity, newspeed);
+        playerMoveLocals.velocity = vec3_scale(playerMoveLocals.velocity, newspeed);
     }
 
     // accelerate
     fmove = pm->cmd.forwardmove;
     smove = pm->cmd.sidemove;
 
-    pm_locals.forward = vec3_normalize(pm_locals.forward);
-    pm_locals.right = vec3_normalize(pm_locals.right);
+    playerMoveLocals.forward = vec3_normalize(playerMoveLocals.forward);
+    playerMoveLocals.right = vec3_normalize(playerMoveLocals.right);
 
     for (i = 0; i < 3; i++)
-        wishvel[i] = pm_locals.forward[i] * fmove + pm_locals.right[i] * smove;
+        wishvel[i] = playerMoveLocals.forward[i] * fmove + playerMoveLocals.right[i] * smove;
     wishvel.z += pm->cmd.upmove;
 
     wishdir = wishvel;
@@ -1804,7 +1818,7 @@ static void PM_FlyMove(void)
         wishspeed = pmp->maxspeed;
     }
 
-    currentspeed = DotProduct(pm_locals.velocity, wishdir);
+    currentspeed = DotProduct(playerMoveLocals.velocity, wishdir);
     addspeed = wishspeed - currentspeed;
     if (addspeed <= 0) {
         if (!pmp->flyhack) {
@@ -1813,29 +1827,29 @@ static void PM_FlyMove(void)
     }
     else {
         // Calculate new acceleration speed.
-        accelspeed = pm_accelerate * pm_locals.frameTime * wishspeed;
+        accelspeed = pm_accelerate * playerMoveLocals.frameTime * wishspeed;
         if (accelspeed > addspeed)
             accelspeed = addspeed;
 
         // Apply to velocity.
-        pm_locals.velocity.x += accelspeed * wishdir.x;
-        pm_locals.velocity.y += accelspeed * wishdir.y;
-        pm_locals.velocity.z += accelspeed * wishdir.z;
+        playerMoveLocals.velocity.x += accelspeed * wishdir.x;
+        playerMoveLocals.velocity.y += accelspeed * wishdir.y;
+        playerMoveLocals.velocity.z += accelspeed * wishdir.z;
     }
 
 #if 0
     if (doclip) {
         //for (i = 0; i < 3; i++)
-        //    end[i] = pm_locals.origin[i] + pm_locals.frameTime * pm_locals.velocity[i];
-        end = vec3_fmaf(pm_locals.origin, pm_locals.frameTime, pm_locals.velocity);
-        trace = PM_TraceCorrectAllSolid(pm_locals.origin, pm->mins, pm->maxs, end);
-        pm_locals.origin = trace.endpos;
+        //    end[i] = playerMoveLocals.origin[i] + playerMoveLocals.frameTime * playerMoveLocals.velocity[i];
+        end = vec3_fmaf(playerMoveLocals.origin, playerMoveLocals.frameTime, playerMoveLocals.velocity);
+        trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, end);
+        playerMoveLocals.origin = trace.endpos;
     }
     else
 #endif
     {
         // move
-        pm_locals.origin = vec3_fmaf(pm_locals.origin, pm_locals.frameTime, pm_locals.velocity);
+        playerMoveLocals.origin = vec3_fmaf(playerMoveLocals.origin, playerMoveLocals.frameTime, playerMoveLocals.velocity);
     }
 }
 
@@ -1856,16 +1870,16 @@ static void PM_DeadMove(void)
         return;
 
     // extra friction
-    forward = vec3_length(pm_locals.velocity);
+    forward = vec3_length(playerMoveLocals.velocity);
     forward -= 20;
     if (forward <= 0) {
         // Clear  velocity.
-        pm_locals.velocity = vec3_zero();
+        playerMoveLocals.velocity = vec3_zero();
     }
     else {
         // Normalize and scale towards direction.
-        pm_locals.velocity = vec3_normalize(pm_locals.velocity);
-        pm_locals.velocity = vec3_scale(pm_locals.velocity, forward);
+        playerMoveLocals.velocity = vec3_normalize(playerMoveLocals.velocity);
+        playerMoveLocals.velocity = vec3_scale(playerMoveLocals.velocity, forward);
     }
 }
 
@@ -1878,7 +1892,7 @@ static void PM_DeadMove(void)
 //
 static void PM_SpectatorMove(void) {
     // Setup a different frameTime for movement.
-    pm_locals.frameTime = pmp->speedmult * pm->cmd.msec * 0.001f;
+    playerMoveLocals.frameTime = pmp->speedmult * pm->cmd.msec * 0.001f;
 
     // Execute typical fly movement.
     PM_FlyMove();
@@ -1886,6 +1900,21 @@ static void PM_SpectatorMove(void) {
     // Finalize the position. Do no position testing, a spectator is free to
     // roam where he pleases.
     PM_FinalizePosition(false);
+}
+
+//
+//===============
+// PM_FreezeMove
+// 
+// Freeze Player movement/
+//===============
+//
+static void PM_FreezeMove(void) {
+    PM_Debug("%s", vec3_to_str(pm->state.origin));
+    // Other than that call.... It's empty.
+    // Or, what else did you expect to find here?
+    //
+    // The miracles of the universe? Try the vkpt folder for that.
 }
 
 //
@@ -1932,6 +1961,22 @@ static void PM_Init(pm_move_t* pmove) {
     if (pm->cmd.upmove < 1) {
         pm->state.flags &= ~PMF_JUMP_HELD;
     }
+
+    // Decrement the movement timer, used for "dropping" the player, landing after jumps, 
+    // or falling off a ledge/slope, by the duration of the command.
+    if (pm->state.time) {
+        int     msec;
+
+        msec = pm->cmd.msec >> 3;
+        if (!msec)
+            msec = 1;
+        if (msec >= pm->state.time) {
+            pm->state.flags &= ~(PMF_TIME_WATERJUMP | PMF_TIME_LAND | PMF_TIME_TELEPORT);
+            pm->state.time = 0;
+        }
+        else
+            pm->state.time -= msec;
+    }
 }
 
 //
@@ -1969,21 +2014,21 @@ static void PM_ClampAngles(void) {
 //
 static void PM_InitLocal() {
     // clear all pmove local vars
-    pm_locals = {};
+    playerMoveLocals = {};
 
     // Copy over the actual player state data we need into the
     // local player move data. This is where we'll be working with.
-    pm_locals.origin = pm->state.origin;
-    pm_locals.velocity = pm->state.velocity;
+    playerMoveLocals.origin = pm->state.origin;
+    playerMoveLocals.velocity = pm->state.velocity;
 
     // Save in case we get stuck and wish to undo this move.
-    pm_locals.previousOrigin = pm->state.origin;
+    playerMoveLocals.previousOrigin = pm->state.origin;
 
     // Calculate the directional vectors for this move
-    vec3_vectors(pm->viewAngles, &pm_locals.forward, &pm_locals.right, &pm_locals.up);
+    vec3_vectors(pm->viewAngles, &playerMoveLocals.forward, &playerMoveLocals.right, &playerMoveLocals.up);
 
     // And calculate the directional vectors in the XY plane
-    //Vec3_Vectors(Vec3(0.f, pm->angles.y, 0.f), &pm_locals.forward_xy, &pm_locals.right_xy, NULL);
+    //Vec3_Vectors(Vec3(0.f, pm->angles.y, 0.f), &playerMoveLocals.forward_xy, &playerMoveLocals.right_xy, NULL);
 }
 
 //
@@ -2007,25 +2052,27 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     // Initialize the locals.
     PM_InitLocal();
 
-    // Special spectator movement handling.
+    // Increase frame time based on seconds.
+    playerMoveLocals.frameTime = pm->cmd.msec * 0.001f;
+
+    // Special PM_FREEZE(Player Movement is frozen, idle, not happening!) treatment.
+    if (pm->state.type == PM_FREEZE) {
+        PM_FreezeMove();
+        return;
+    }
+
+    // Special PM_SPECTATOR(Spectator Movement, viewing a match, etc) treatment.
     if (pm->state.type == PM_SPECTATOR) {
         PM_SpectatorMove();
         return;
     }
-
-    // Increase frame time based on seconds.
-    pm_locals.frameTime = pm->cmd.msec * 0.001f;
-
+    
     // Erase input direction values in case we are dead, or something alike.
     if (pm->state.type >= PM_DEAD) {
         pm->cmd.forwardmove = 0;
         pm->cmd.sidemove = 0;
         pm->cmd.upmove = 0;
     }
-
-    // No movement if type == PM_FREEZE
-    if (pm->state.type == PM_FREEZE)
-        return;
 
     // set mins, maxs, and viewheight
     PM_CheckDuck();
@@ -2046,21 +2093,6 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     // Check for special movements to execute.
     PM_CheckSpecialMovements();
 
-    // Used for "dropping" the player, ie, landing after jumps or falling off a ledge/slope.
-    if (pm->state.time) {
-        int     msec;
-
-        msec = pm->cmd.msec >> 3;
-        if (!msec)
-            msec = 1;
-        if (msec >= pm->state.time) {
-            pm->state.flags &= ~(PMF_TIME_WATERJUMP | PMF_TIME_LAND | PMF_TIME_TELEPORT);
-            pm->state.time = 0;
-        }
-        else
-            pm->state.time -= msec;
-    }
-
     // Teleport pause stays exactly in place
     if (pm->state.flags & PMF_TIME_TELEPORT) {
 
@@ -2068,10 +2100,10 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     // waterjump has no control, but falls
     else if (pm->state.flags & PMF_TIME_WATERJUMP) {
         // Apply gravity.
-        pm_locals.velocity.z -= pm->state.gravity * pm_locals.frameTime;
+        playerMoveLocals.velocity.z -= pm->state.gravity * playerMoveLocals.frameTime;
 
         // Cancel as soon as we are falling down again
-        if (pm_locals.velocity.z < 0) {
+        if (playerMoveLocals.velocity.z < 0) {
             pm->state.flags &= ~(PMF_TIME_WATERJUMP | PMF_TIME_LAND | PMF_TIME_TELEPORT);
             pm->state.time = 0;
         }
@@ -2097,7 +2129,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
             angles[PITCH] /= 3;
 
             // Calculate view vectors to move into.
-            vec3_vectors(angles, &pm_locals.forward, &pm_locals.right, &pm_locals.up);
+            vec3_vectors(angles, &playerMoveLocals.forward, &playerMoveLocals.right, &playerMoveLocals.up);
 
             // Airmove.
             PM_AirMove();
@@ -2131,12 +2163,20 @@ void PMoveInit(pmoveParams_t* pmp)
     // set up default pmove parameters
     memset(pmp, 0, sizeof(*pmp));
 
-    pmp->speedmult = 1;
-    pmp->watermult = 0.5f;
-    pmp->maxspeed = 300;
-    pmp->friction = 6;
-    pmp->waterfriction = 1;
+    pmp->qwmode = true;
+    pmp->watermult = PM_GRAVITY_WATER;
+    pmp->maxspeed = PM_SPEED_RUN;
+    //pmp->upspeed = (sv_qwmod->integer > 1) ? 310 : 350;
+    pmp->friction = PM_FRICT_GROUND;
+    pmp->waterfriction = PM_FRICT_WATER;
+    pmp->airaccelerate = true;
     pmp->flyfriction = 9;
+    //pmp->speedmult = 1;
+    //pmp->watermult = 0.5f;
+    //pmp->maxspeed = 300;
+    //pmp->friction = 6;
+    //pmp->waterfriction = 1;
+    //pmp->flyfriction = 9;
 }
 
 //
