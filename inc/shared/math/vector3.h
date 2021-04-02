@@ -724,21 +724,19 @@ for printing vectors
 */
 inline const std::string vec3_to_str(const vec3_t& v, qboolean rounded = true)
 {
-    std::stringstream sstream;
-    std::string vstr;
+    std::ostringstream sstream;
 
     if (rounded)
         sstream << "(" << (int)v.x << " " << (int)v.y << " " << (int)v.z << ")";
     else
         sstream << "(" << v.x << " " << v.y << " " << v.z << ")";
 
-    // Feed to temp vstr.
-    sstream >> vstr;
-    return vstr;
+    return sstream.str();
 }
 // Legacy function
-inline const char* vtos(const vec3_t& v) {
-    return vec3_to_str(v, true).c_str();
+inline std::string vtos(const vec3_t& v) {
+    std::string s = vec3_to_str(v, true);
+    return s;
 }
 
 //
