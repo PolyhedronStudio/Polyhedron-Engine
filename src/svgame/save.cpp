@@ -153,7 +153,7 @@ static const save_field_t entityfields[] = {
 
     E(chain),
     E(enemy),
-    E(oldenemy),
+    E(oldEnemy),
     E(activator),
     E(groundentity),
     I(groundentity_linkcount),
@@ -237,7 +237,7 @@ static const save_field_t entityfields[] = {
     I(monsterinfo.attack_state),
     I(monsterinfo.lefty),
     F(monsterinfo.idle_time),
-    I(monsterinfo.linkcount),
+    I(monsterinfo.linkCount),
 
     I(monsterinfo.power_armor_type),
     I(monsterinfo.power_armor_power),
@@ -300,9 +300,9 @@ static const save_field_t clientfields[] = {
     S(ps.pmove.gravity),
     SA(ps.pmove.delta_angles, 3),
 
-    V(ps.viewangles),
+    V(ps.viewAngles),
     V(ps.viewoffset),
-    V(ps.kick_angles),
+    V(ps.kickAngles),
 
     V(ps.gunangles),
     V(ps.gunoffset),
@@ -367,8 +367,8 @@ static const save_field_t clientfields[] = {
 
     I(weaponstate),
 
-    V(kick_angles),
-    V(kick_origin),
+    V(kickAngles),
+    V(kickOrigin),
     F(v_dmg_roll),
     F(v_dmg_pitch),
     F(v_dmg_time),
@@ -379,8 +379,8 @@ static const save_field_t clientfields[] = {
     V(damage_blend),
     V(v_angle),
     F(bobtime),
-    V(oldviewangles),
-    V(oldvelocity),
+    V(oldViewAngles),
+    V(oldVelocity),
 
     F(next_drown_time),
     I(old_waterlevel),
@@ -882,7 +882,7 @@ void WriteLevel(const char *filename)
     // write out all the entities
     for (i = 0; i < globals.num_edicts; i++) {
         ent = &g_edicts[i];
-        if (!ent->inuse)
+        if (!ent->inUse)
             continue;
         write_int(f, i);
         write_fields(f, entityfields, ent);
@@ -961,7 +961,7 @@ void ReadLevel(const char *filename)
 
         ent = &g_edicts[entnum];
         read_fields(f, entityfields, ent);
-        ent->inuse = true;
+        ent->inUse = true;
         ent->s.number = entnum;
 
         // let the server rebuild world links for this ent
@@ -982,7 +982,7 @@ void ReadLevel(const char *filename)
     for (i = 0 ; i < globals.num_edicts ; i++) {
         ent = &g_edicts[i];
 
-        if (!ent->inuse)
+        if (!ent->inUse)
             continue;
 
         // fire any cross-level triggers

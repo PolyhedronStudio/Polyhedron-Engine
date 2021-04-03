@@ -491,14 +491,14 @@ void SV_AutoSaveBegin(mapcmd_t *cmd)
 
     memset(bitmap, 0, sizeof(bitmap));
 
-    // clear all the client inuse flags before saving so that
+    // clear all the client inUse flags before saving so that
     // when the level is re-entered, the clients will spawn
     // at spawn points instead of occupying body shells
     for (i = 0; i < sv_maxclients->integer; i++) {
         ent = EDICT_NUM(i + 1);
-        if (ent->inuse) {
+        if (ent->inUse) {
             Q_SetBit(bitmap, i);
-            ent->inuse = false;
+            ent->inUse = false;
         }
     }
 
@@ -509,7 +509,7 @@ void SV_AutoSaveBegin(mapcmd_t *cmd)
     // we must restore these for clients to transfer over correctly
     for (i = 0; i < sv_maxclients->integer; i++) {
         ent = EDICT_NUM(i + 1);
-        ent->inuse = Q_IsBitSet(bitmap, i);
+        ent->inUse = Q_IsBitSet(bitmap, i);
     }
 }
 

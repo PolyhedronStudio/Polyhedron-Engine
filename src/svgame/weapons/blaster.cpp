@@ -38,8 +38,8 @@ void Blaster_Fire(edict_t* ent, const vec3_t &g_offset, int damage, qboolean hyp
     VectorAdd(offset, g_offset, offset);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
-    VectorScale(forward, -2, ent->client->kick_origin);
-    ent->client->kick_angles[0] = -1;
+    VectorScale(forward, -2, ent->client->kickOrigin);
+    ent->client->kickAngles[0] = -1;
 
     fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
 

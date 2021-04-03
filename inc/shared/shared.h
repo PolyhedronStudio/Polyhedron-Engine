@@ -650,9 +650,9 @@ typedef struct {
 
     // These fields do not need to be communicated bit-precise
 
-    vec3_t      viewangles;     // For fixed views
+    vec3_t      viewAngles;     // For fixed views
     vec3_t      viewoffset;     // Add to pmovestate->origin
-    vec3_t      kick_angles;    // Add to view direction to get render angles
+    vec3_t      kickAngles;    // Add to view direction to get render angles
                                 // Set by weapon kicks, pain effects, etc
 
     vec3_t      gunangles;

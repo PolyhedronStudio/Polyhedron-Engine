@@ -249,7 +249,7 @@ void GL_DrawBox(const vec3_t origin, vec3_t bounds[2])
 #endif
 
 // shared between lightmap and scrap allocators
-qboolean GL_AllocBlock(int width, int height, int *inuse,
+qboolean GL_AllocBlock(int width, int height, int *inUse,
                        int w, int h, int *s, int *t)
 {
     int i, j, k, x, y, max_inuse, min_inuse;
@@ -259,7 +259,7 @@ qboolean GL_AllocBlock(int width, int height, int *inuse,
     for (i = 0; i < width - w; i++) {
         max_inuse = 0;
         for (j = 0; j < w; j++) {
-            k = inuse[i + j];
+            k = inUse[i + j];
             if (k >= min_inuse) {
                 break;
             }
@@ -278,7 +278,7 @@ qboolean GL_AllocBlock(int width, int height, int *inuse,
     }
 
     for (i = 0; i < w; i++) {
-        inuse[x + i] = y + h;
+        inUse[x + i] = y + h;
     }
 
     *s = x;

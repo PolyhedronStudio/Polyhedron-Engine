@@ -310,14 +310,14 @@ LIGHTMAPS BUILDING
 */
 
 #define LM_AllocBlock(w, h, s, t) \
-    GL_AllocBlock(LM_BLOCK_WIDTH, LM_BLOCK_HEIGHT, lm.inuse, w, h, s, t)
+    GL_AllocBlock(LM_BLOCK_WIDTH, LM_BLOCK_HEIGHT, lm.inUse, w, h, s, t)
 
 static void LM_InitBlock(void)
 {
     int i;
 
     for (i = 0; i < LM_BLOCK_WIDTH; i++) {
-        lm.inuse[i] = 0;
+        lm.inUse[i] = 0;
     }
 
     lm.dirty = false;

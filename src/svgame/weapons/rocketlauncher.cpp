@@ -44,8 +44,8 @@ void Weapon_RocketLauncher_Fire(edict_t* ent)
 
     AngleVectors(ent->client->v_angle, &forward, &right, NULL);
 
-    VectorScale(forward, -2, ent->client->kick_origin);
-    ent->client->kick_angles[0] = -1;
+    VectorScale(forward, -2, ent->client->kickOrigin);
+    ent->client->kickAngles[0] = -1;
 
     VectorSet(offset, 8, 8, ent->viewheight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);

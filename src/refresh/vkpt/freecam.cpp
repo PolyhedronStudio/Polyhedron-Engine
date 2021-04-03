@@ -128,7 +128,7 @@ void vkpt_freecam_update(float frame_time)
 	if (!freecam_active)
 	{
 		VectorCopy(vkpt_refdef.fd->vieworg, freecam_vieworg);
-		VectorCopy(vkpt_refdef.fd->viewangles, freecam_viewangles);
+		VectorCopy(vkpt_refdef.fd->viewAngles, freecam_viewangles);
 		freecam_zoom = 1.f;
 		freecam_player_model = cl_player_model->integer;
 		freecam_active = true;
@@ -163,7 +163,7 @@ void vkpt_freecam_update(float frame_time)
 	vkpt_freecam_mousemove();
 
 	VectorCopy(freecam_vieworg, vkpt_refdef.fd->vieworg);
-	VectorCopy(freecam_viewangles, vkpt_refdef.fd->viewangles);
+	VectorCopy(freecam_viewangles, vkpt_refdef.fd->viewAngles);
 	vkpt_refdef.fd->fov_x = Degrees(std::atanf(std::tanf(Radians(vkpt_refdef.fd->fov_x) * 0.5f) / freecam_zoom)) * 2.f;
 	vkpt_refdef.fd->fov_y = Degrees(std::atanf(std::tanf(Radians(vkpt_refdef.fd->fov_y) * 0.5f) / freecam_zoom)) * 2.f;
 

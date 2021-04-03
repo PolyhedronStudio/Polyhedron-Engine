@@ -329,7 +329,7 @@ typedef struct client_state_s {
     // the server sends a delta each frame which is added to the locally
     // tracked view angles to account for standing on rotating objects,
     // and teleport direction changes
-    vec3_t      viewangles;
+    vec3_t      viewAngles;
 
     // interpolated movement vector used for local prediction,
     // never sent to server, rebuilt each client frame

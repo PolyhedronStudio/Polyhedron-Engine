@@ -203,7 +203,7 @@ typedef struct mmodel_s {
 #endif
     vec3_t          mins, maxs;
     vec3_t          origin;        // for sounds or lights
-    mnode_t         *headnode;
+    mnode_t         *headNode;
 
 #if USE_REF
     float           radius;
@@ -303,9 +303,9 @@ typedef struct {
     float       fraction;
 } lightpoint_t;
 
-void BSP_LightPoint(lightpoint_t *point, const vec3_t &start, const vec3_t &end, mnode_t *headnode);
+void BSP_LightPoint(lightpoint_t *point, const vec3_t &start, const vec3_t &end, mnode_t *headNode);
 void BSP_TransformedLightPoint(lightpoint_t* point, const vec3_t &start, const vec3_t &end,
-                               mnode_t *headnode, const vec3_t &origin, vec3_t *angles);
+                               mnode_t *headNode, const vec3_t &origin, vec3_t *angles);
 #endif
 
 byte *BSP_ClusterVis(bsp_t *bsp, byte *mask, int cluster, int vis);

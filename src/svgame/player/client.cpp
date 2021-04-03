@@ -448,7 +448,7 @@ void SaveClientData(void)
 
     for (i = 0 ; i < game.maxclients ; i++) {
         ent = &g_edicts[1 + i];
-        if (!ent->inuse)
+        if (!ent->inUse)
             continue;
         game.clients[i].pers.health = ent->health;
         game.clients[i].pers.max_health = ent->max_health;
@@ -498,7 +498,7 @@ float   PlayersRangeFromSpot(edict_t *spot)
     for (n = 1; n <= maxclients->value; n++) {
         player = &g_edicts[n];
 
-        if (!player->inuse)
+        if (!player->inUse)
             continue;
 
         if (player->health <= 0)
@@ -805,7 +805,7 @@ void spectator_respawn(edict_t *ent)
 
         // Count actual active spectators
         for (i = 1, numspec = 0; i <= maxclients->value; i++)
-            if (g_edicts[i].inuse && g_edicts[i].client->pers.spectator)
+            if (g_edicts[i].inUse && g_edicts[i].client->pers.spectator)
                 numspec++;
 
         if (numspec >= maxspectators->value) {
@@ -940,7 +940,7 @@ void PutClientInServer(edict_t *ent)
     ent->takedamage = DAMAGE_AIM;
     ent->movetype = MOVETYPE_WALK;
     ent->viewheight = 22;
-    ent->inuse = true;
+    ent->inUse = true;
     ent->classname = "player";
     ent->mass = 200;
     ent->solid = SOLID_BBOX;
@@ -1001,7 +1001,7 @@ void PutClientInServer(edict_t *ent)
     ent->s.angles[vec3_t::Pitch] = 0;
     ent->s.angles[vec3_t::Yaw] = spawn_angles[vec3_t::Yaw];
     ent->s.angles[vec3_t::Roll] = 0;
-    VectorCopy(ent->s.angles, client->ps.viewangles);
+    VectorCopy(ent->s.angles, client->ps.viewAngles);
     VectorCopy(ent->s.angles, client->v_angle);
 
     // spawn a spectator
@@ -1085,13 +1085,13 @@ void ClientBegin(edict_t *ent)
 
     // if there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
-    if (ent->inuse == true) { // warning C4805: '==': unsafe mix of type 'qboolean' and type 'bool' in operation
-        // the client has cleared the client side viewangles upon
+    if (ent->inUse == true) { // warning C4805: '==': unsafe mix of type 'qboolean' and type 'bool' in operation
+        // the client has cleared the client side viewAngles upon
         // connecting to the server, which is different than the
         // state when the game is saved, so we need to compensate
         // with deltaangles
         for (i = 0 ; i < 3 ; i++)
-            ent->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(ent->client->ps.viewangles[i]);
+            ent->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(ent->client->ps.viewAngles[i]);
     } else {
         // a spawn point will completely reinitialize the entity
         // except for the persistant data that was initialized at
@@ -1219,7 +1219,7 @@ qboolean ClientConnect(edict_t *ent, char *userinfo)
 
         // count spectators
         for (i = numspec = 0; i < maxclients->value; i++)
-            if (g_edicts[i + 1].inuse && g_edicts[i + 1].client->pers.spectator)
+            if (g_edicts[i + 1].inUse && g_edicts[i + 1].client->pers.spectator)
                 numspec++;
 
         if (numspec >= maxspectators->value) {
@@ -1242,7 +1242,7 @@ qboolean ClientConnect(edict_t *ent, char *userinfo)
 
     // if there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
-    if (ent->inuse == false) {
+    if (ent->inUse == false) {
         // clear the respawning variables
         InitClientResp(ent->client);
         if (!game.autosaved || !ent->client->pers.weapon)
@@ -1277,7 +1277,7 @@ void ClientDisconnect(edict_t *ent)
     gi.bprintf(PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
 
     // send effect
-    if (ent->inuse) {
+    if (ent->inUse) {
         gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
         gi.WriteByte(MZ_LOGOUT);
@@ -1290,7 +1290,7 @@ void ClientDisconnect(edict_t *ent)
     ent->s.event = 0;
     ent->s.effects = 0;
     ent->solid = SOLID_NOT;
-    ent->inuse = false;
+    ent->inUse = false;
     ent->classname = "disconnected";
     ent->client->pers.connected = false;
 
@@ -1434,15 +1434,15 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         ent->watertype = pm.waterType;
         ent->groundentity = pm.groundEntity;
         if (pm.groundEntity)
-            ent->groundentity_linkcount = pm.groundEntity->linkcount;
+            ent->groundentity_linkcount = pm.groundEntity->linkCount;
 
         if (ent->deadflag) {
-            client->ps.viewangles[vec3_t::Roll] = 40;
-            client->ps.viewangles[vec3_t::Pitch] = -15;
-            client->ps.viewangles[vec3_t::Yaw] = client->killer_yaw;
+            client->ps.viewAngles[vec3_t::Roll] = 40;
+            client->ps.viewAngles[vec3_t::Pitch] = -15;
+            client->ps.viewAngles[vec3_t::Yaw] = client->killer_yaw;
         } else {
             VectorCopy(pm.viewAngles, client->v_angle);
-            VectorCopy(pm.viewAngles, client->ps.viewangles);
+            VectorCopy(pm.viewAngles, client->ps.viewAngles);
         }
 
         gi.linkentity(ent);
@@ -1507,7 +1507,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
     // update chase cam if being followed
     for (i = 1; i <= maxclients->value; i++) {
         other = g_edicts + i;
-        if (other->inuse && other->client->chase_target == ent)
+        if (other->inUse && other->client->chase_target == ent)
             UpdateChaseCam(other);
     }
 }

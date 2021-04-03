@@ -164,13 +164,13 @@ void M_CheckGround(edict_t *ent)
     }
 
 //  ent->groundentity = trace.ent;
-//  ent->groundentity_linkcount = trace.ent->linkcount;
+//  ent->groundentity_linkcount = trace.ent->linkCount;
 //  if (!trace.startsolid && !trace.allsolid)
 //      VectorCopy (trace.endpos, ent->s.origin);
     if (!trace.startsolid && !trace.allsolid) {
         VectorCopy(trace.endpos, ent->s.origin);
         ent->groundentity = trace.ent;
-        ent->groundentity_linkcount = trace.ent->linkcount;
+        ent->groundentity_linkcount = trace.ent->linkCount;
         ent->velocity[2] = 0;
     }
 }
@@ -383,8 +383,8 @@ void M_MoveFrame(edict_t *self)
 void monster_think(edict_t *self)
 {
     M_MoveFrame(self);
-    if (self->linkcount != self->monsterinfo.linkcount) {
-        self->monsterinfo.linkcount = self->linkcount;
+    if (self->linkCount != self->monsterinfo.linkCount) {
+        self->monsterinfo.linkCount = self->linkCount;
         M_CheckGround(self);
     }
     M_CatagorizePosition(self);

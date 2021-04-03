@@ -448,14 +448,14 @@ static void MVD_FollowStop(mvd_client_t *client)
     mvd_t *mvd = client->mvd;
     int i;
 
-    client->ps.viewangles[vec3_t::Roll] = 0;
+    client->ps.viewAngles[vec3_t::Roll] = 0;
 
     for (i = 0; i < 3; i++) {
         client->ps.pmove.delta_angles[i] = ANGLE2SHORT(
-                                               client->ps.viewangles[i]) - client->lastcmd.angles[i];
+                                               client->ps.viewAngles[i]) - client->lastcmd.angles[i];
     }
 
-    VectorClear(client->ps.kick_angles);
+    VectorClear(client->ps.kickAngles);
     Vec4_Clear(client->ps.blend);
     client->ps.pmove.flags = 0;
     client->ps.pmove.type = (pm_type_t)mvd->type; // CPP: Cast
@@ -503,7 +503,7 @@ static qboolean MVD_TestTarget(mvd_client_t *client, mvd_player_t *target)
     if (!target)
         return false;
 
-    if (!target->inuse)
+    if (!target->inUse)
         return false;
 
     if (target == mvd->dummy)
@@ -588,7 +588,7 @@ static mvd_player_t *MVD_MostFollowed(mvd_t *mvd)
         }
     }
     for (i = 0, player = mvd->players; i < mvd->maxclients; i++, player++) {
-        if (player->inuse && player != mvd->dummy && maxcount < count[i]) {
+        if (player->inUse && player != mvd->dummy && maxcount < count[i]) {
             maxcount = count[i];
             target = player;
         }
@@ -607,7 +607,7 @@ static void MVD_UpdateTarget(mvd_client_t *client)
     if (client->chase_mask && !mvd->intermission) {
         for (i = 0; i < mvd->maxclients; i++) {
             target = &mvd->players[i];
-            if (!target->inuse || target == mvd->dummy) {
+            if (!target->inUse || target == mvd->dummy) {
                 continue;
             }
             ent = &mvd->edicts[i + 1].s;
@@ -621,7 +621,7 @@ static void MVD_UpdateTarget(mvd_client_t *client)
     // check if current target is still active
     target = client->target;
     if (target) {
-        if (target->inuse) {
+        if (target->inUse) {
             return;
         }
         if (!MVD_FollowNext(client, target)) {
@@ -642,7 +642,7 @@ static void MVD_UpdateTarget(mvd_client_t *client)
     }
 
     // if the map has just started, try to return to the previous target
-    if (target && target->inuse && client->chase_wait) {
+    if (target && target->inUse && client->chase_wait) {
         MVD_FollowStart(client, target);
     }
 }
@@ -969,7 +969,7 @@ static void MVD_Observe_f(mvd_client_t *client)
         return;
     }
 
-    if (client->oldtarget && client->oldtarget->inuse) {
+    if (client->oldtarget && client->oldtarget->inUse) {
         MVD_FollowStart(client, client->oldtarget);
         return;
     }
@@ -995,7 +995,7 @@ static mvd_player_t *MVD_SetPlayer(mvd_client_t *client, const char *s)
         }
 
         player = &mvd->players[i];
-        if (!player->inuse || player == mvd->dummy) {
+        if (!player->inUse || player == mvd->dummy) {
             SV_ClientPrintf(client->cl, PRINT_HIGH,
                             "[MVD] Player slot number %d is not active.\n", i);
             return NULL;
@@ -1008,7 +1008,7 @@ static mvd_player_t *MVD_SetPlayer(mvd_client_t *client, const char *s)
     match = NULL;
     count = 0;
     for (i = 0, player = mvd->players; i < mvd->maxclients; i++, player++) {
-        if (!player->inuse || !player->name[0] || player == mvd->dummy) {
+        if (!player->inUse || !player->name[0] || player == mvd->dummy) {
             continue;
         }
         if (!Q_stricmp(player->name, s)) {
@@ -1077,7 +1077,7 @@ static void MVD_Follow_f(mvd_client_t *client)
             goto match;
         case 'p':
             if (client->oldtarget) {
-                if (client->oldtarget->inuse) {
+                if (client->oldtarget->inUse) {
                     MVD_FollowStart(client, client->oldtarget);
                 } else {
                     SV_ClientPrintf(client->cl, PRINT_HIGH,
@@ -1355,7 +1355,7 @@ static void print_channel(client_t *cl, mvd_t *mvd)
     total = 0;
     for (i = 0; i < mvd->maxclients; i++) {
         player = &mvd->players[i];
-        if (!player->inuse || player == mvd->dummy) {
+        if (!player->inUse || player == mvd->dummy) {
             continue;
         }
         len = strlen(player->name);
@@ -1880,13 +1880,13 @@ static void MVD_GameClientBegin(edict_t *ent)
         client->target = mvd->dummy;
         MVD_SetFollowLayout(client);
         MVD_UpdateClient(client);
-    } else if (target && target->inuse) {
+    } else if (target && target->inUse) {
         // start normal chase cam mode
         MVD_FollowStart(client, target);
     } else {
         // spawn the spectator
         VectorScale(mvd->spawnOrigin, 8, client->ps.pmove.origin);
-        VectorCopy(mvd->spawnAngles, client->ps.viewangles);
+        VectorCopy(mvd->spawnAngles, client->ps.viewAngles);
         MVD_FollowStop(client);
 
         // if the map has just changed, player might not have spawned yet.
@@ -1972,7 +1972,7 @@ static mvd_player_t *MVD_HitPlayer(mvd_client_t *client)
 
     // N&C: FF Precision.
     VectorAdd(client->ps.viewoffset, client->ps.pmove.origin, start);
-    AngleVectors(client->ps.viewangles, &forward, NULL, NULL);
+    AngleVectors(client->ps.viewAngles, &forward, NULL, NULL);
     VectorMA(start, 8192, forward, end);
 
     if (mvd->cm.cache) {
@@ -1986,11 +1986,11 @@ static mvd_player_t *MVD_HitPlayer(mvd_client_t *client)
     target = NULL;
     for (i = 0; i < mvd->maxclients; i++) {
         player = &mvd->players[i];
-        if (!player->inuse || player == mvd->dummy)
+        if (!player->inUse || player == mvd->dummy)
             continue;
 
         ent = &mvd->edicts[i + 1];
-        if (!ent->inuse)
+        if (!ent->inUse)
             continue;
 
         if (ent->solid != SOLID_BBOX)
@@ -2083,7 +2083,7 @@ static void MVD_GameClientThink(edict_t *ent, usercmd_t *cmd)
 
         client->ps.pmove = pm.state;
         if (pm.state.type != PM_FREEZE) {
-            VectorCopy(pm.viewAngles, client->ps.viewangles);
+            VectorCopy(pm.viewAngles, client->ps.viewAngles);
         }
     }
 
@@ -2136,7 +2136,7 @@ static void MVD_IntermissionStop(mvd_t *mvd)
             client->layout_type = (mvd_layout_t)0; // CPP: Cast
         }
         target = client->oldtarget;
-        if (target && target->inuse) {
+        if (target && target->inUse) {
             // start normal chase cam mode
             MVD_FollowStart(client, target);
         } else {
@@ -2270,7 +2270,7 @@ void MVD_PrepWorldFrame(void)
     FOR_EACH_MVD(mvd) {
         for (i = 1; i < mvd->pool.num_edicts; i++) {
             ent = &mvd->edicts[i];
-            if (!ent->inuse) {
+            if (!ent->inUse) {
                 continue;
             }
             if (!(ent->s.renderfx & RF_BEAM)) {

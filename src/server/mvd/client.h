@@ -61,7 +61,7 @@ typedef struct mvd_cs_s {
 
 typedef struct {
     player_state_t ps;
-    qboolean inuse;
+    qboolean inUse;
     char name[16];
     mvd_cs_t *configstrings;
 } mvd_player_t;

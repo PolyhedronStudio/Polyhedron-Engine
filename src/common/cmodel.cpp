@@ -251,7 +251,7 @@ static void CM_BoxLeafs_r(mnode_t *node)
 }
 
 static int CM_BoxLeafs_headnode(const vec3_t &mins, const vec3_t &maxs, mleaf_t **list, int listsize,
-                                mnode_t *headnode, mnode_t **topnode)
+                                mnode_t *headNode, mnode_t **topnode)
 {
     leaf_list = list;
     leaf_count = 0;
@@ -261,7 +261,7 @@ static int CM_BoxLeafs_headnode(const vec3_t &mins, const vec3_t &maxs, mleaf_t 
 
     leaf_topnode = NULL;
 
-    CM_BoxLeafs_r(headnode);
+    CM_BoxLeafs_r(headNode);
 
     if (topnode)
         *topnode = leaf_topnode;
@@ -285,15 +285,15 @@ CM_PointContents
 
 ==================
 */
-int CM_PointContents(const vec3_t &p, mnode_t *headnode)
+int CM_PointContents(const vec3_t &p, mnode_t *headNode)
 {
     mleaf_t     *leaf;
 
-    if (!headnode) {
+    if (!headNode) {
         return 0;
     }
 
-    leaf = BSP_PointLeaf(headnode, p);
+    leaf = BSP_PointLeaf(headNode, p);
 
     return leaf->contents;
 }
@@ -306,14 +306,14 @@ Handles offseting and rotation of the end points for moving and
 rotating entities
 ==================
 */
-int CM_TransformedPointContents(const vec3_t &p, mnode_t *headnode, const vec3_t& origin, const vec3_t& angles)
+int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t& origin, const vec3_t& angles)
 {
     vec3_t      p_l;
     vec3_t      temp;
     vec3_t      forward, right, up;
     mleaf_t     *leaf;
 
-    if (!headnode) {
+    if (!headNode) {
         return 0;
     }
 
@@ -321,7 +321,7 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headnode, const vec3_t
     VectorSubtract(p, origin, p_l);
 
     // rotate start and end into the models frame of reference
-    if (headnode != box_headnode &&
+    if (headNode != box_headnode &&
         (angles[0] || angles[1] || angles[2])) {
         AngleVectors(angles, &forward, &right, &up);
 
@@ -331,7 +331,7 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headnode, const vec3_t
         p_l[2] = DotProduct(temp, up);
     }
 
-    leaf = BSP_PointLeaf(headnode, p_l);
+    leaf = BSP_PointLeaf(headNode, p_l);
 
     return leaf->contents;
 }
@@ -713,7 +713,7 @@ CM_BoxTrace
 */
 void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
                  const vec3_t &mins, const vec3_t &maxs,
-                 mnode_t *headnode, int brushmask)
+                 mnode_t *headNode, int brushmask)
 {
     checkcount++;       // for multi-check avoidance
 
@@ -723,7 +723,7 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
     trace_trace->fraction = 1;
     trace_trace->surface = &(nulltexinfo.c);
 
-    if (!headnode) {
+    if (!headNode) {
         return;
     }
 
@@ -748,7 +748,7 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
             c2[i] += 1;
         }
 
-        numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, 1024, headnode, NULL);
+        numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, 1024, headNode, NULL);
         for (i = 0; i < numleafs; i++) {
             CM_TestInLeaf(leafs[i]);
             if (trace_trace->allsolid)
@@ -805,7 +805,7 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
     //
     // general sweeping through world
     //
-    CM_RecursiveHullCheck(headnode, 0, 1, start, end);
+    CM_RecursiveHullCheck(headNode, 0, 1, start, end);
 
     if (trace_trace->fraction == 1)
         VectorCopy(end, trace_trace->endpos);
@@ -824,7 +824,7 @@ rotating entities
 */
 void CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
                             const vec3_t &mins, const vec3_t &maxs,
-                            mnode_t *headnode, int brushmask,
+                            mnode_t *headNode, int brushmask,
                             const vec3_t &origin, const vec3_t &angles)
 {
     vec3_t      start_l, end_l;
@@ -836,7 +836,7 @@ void CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &e
     VectorSubtract(end, origin, end_l);
 
     // rotate start and end into the models frame of reference
-    if (headnode != box_headnode &&
+    if (headNode != box_headnode &&
         (angles[0] || angles[1] || angles[2]))
         rotated = true;
     else
@@ -849,7 +849,7 @@ void CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &e
     }
 
     // sweep the box through the model
-    CM_BoxTrace(trace, start_l, end_l, mins, maxs, headnode, brushmask);
+    CM_BoxTrace(trace, start_l, end_l, mins, maxs, headNode, brushmask);
 
     // rotate plane normal into the worlds frame of reference
     if (rotated && trace->fraction != 1.0) {
@@ -1070,7 +1070,7 @@ void CM_SetPortalStates(cm_t *cm, byte *buffer, int bytes)
 =============
 CM_HeadnodeVisible
 
-Returns true if any leaf under headnode has a cluster that
+Returns true if any leaf under headNode has a cluster that
 is potentially visible
 =============
 */

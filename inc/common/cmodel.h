@@ -54,20 +54,20 @@ typedef struct {
 
 
     // returns an ORed contents mask
-    int         CM_PointContents(const vec3_t &p, mnode_t *headnode);
-    int         CM_TransformedPointContents(const vec3_t &p, mnode_t *headnode,
+    int         CM_PointContents(const vec3_t &p, mnode_t *headNode);
+    int         CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode,
                                             const vec3_t &origin, const vec3_t &angles);
 
     void        CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
                             const vec3_t &mins, const vec3_t &maxs,
-                            mnode_t *headnode, int brushmask);
+                            mnode_t *headNode, int brushmask);
     void        CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
                                     const vec3_t &mins, const vec3_t &maxs,
-                                    mnode_t * headnode, int brushmask,
+                                    mnode_t * headNode, int brushmask,
                                     const vec3_t &origin, const vec3_t &angles);
     void        CM_ClipEntity(trace_t *dst, const trace_t *src, struct edict_s *ent);
 
-    // call with topnode set to the headnode, returns with topnode
+    // call with topnode set to the headNode, returns with topnode
     // set to the first node that splits the box
     int         CM_BoxLeafs(cm_t *cm, const vec3_t &mins, const vec3_t &maxs, mleaf_t **list,
                             int listsize, mnode_t **topnode);
@@ -85,7 +85,7 @@ typedef struct {
     int         CM_WriteAreaBits(cm_t *cm, byte *buffer, int area);
     int         CM_WritePortalBits(cm_t *cm, byte *buffer);
     void        CM_SetPortalStates(cm_t *cm, byte *buffer, int bytes);
-    qboolean    CM_HeadnodeVisible(mnode_t *headnode, byte *visbits);
+    qboolean    CM_HeadnodeVisible(mnode_t *headNode, byte *visbits);
 
     void        CM_WritePortalState(cm_t *cm, qhandle_t f);
     void        CM_ReadPortalState(cm_t *cm, qhandle_t f);

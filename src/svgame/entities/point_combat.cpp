@@ -53,8 +53,8 @@ void point_combat_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface
         self->target = self->pathtarget;
         if (other->enemy && other->enemy->client)
             activator = other->enemy;
-        else if (other->oldenemy && other->oldenemy->client)
-            activator = other->oldenemy;
+        else if (other->oldEnemy && other->oldEnemy->client)
+            activator = other->oldEnemy;
         else if (other->activator && other->activator->client)
             activator = other->activator;
         else

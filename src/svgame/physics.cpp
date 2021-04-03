@@ -230,7 +230,7 @@ int SV_FlyMove(edict_t *ent, float time, int mask)
             blocked |= 1;       // floor
             if (hit->solid == SOLID_BSP) {
                 ent->groundentity = hit;
-                ent->groundentity_linkcount = hit->linkcount;
+                ent->groundentity_linkcount = hit->linkCount;
             }
         }
         if (!trace.plane.normal[2]) {
@@ -241,7 +241,7 @@ int SV_FlyMove(edict_t *ent, float time, int mask)
 // run the impact function
 //
         SV_Impact(ent, &trace);
-        if (!ent->inuse)
+        if (!ent->inUse)
             break;      // removed by the impact function
 
 
@@ -352,7 +352,7 @@ retry:
         SV_Impact(ent, &trace);
 
         // if the pushed entity went away and the pusher is still there
-        if (!trace.ent->inuse && ent->inuse) {
+        if (!trace.ent->inUse && ent->inUse) {
             // move the pusher back and try again
             VectorCopy(start, ent->s.origin);
             gi.linkentity(ent);
@@ -360,7 +360,7 @@ retry:
         }
     }
 
-    if (ent->inuse)
+    if (ent->inUse)
         UTIL_TouchTriggers(ent);
 
     return trace;
@@ -423,7 +423,7 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 // see if any solid entities are inside the final position
     check = g_edicts + 1;
     for (e = 1; e < globals.num_edicts; e++, check++) {
-        if (!check->inuse)
+        if (!check->inUse)
             continue;
         if (check->movetype == MOVETYPE_PUSH
             || check->movetype == MOVETYPE_STOP
@@ -579,7 +579,7 @@ void SV_Physics_Pusher(edict_t *ent)
             part->blocked(part, obstacle);
 #if 0
         // if the pushed entity went away and the pusher is still there
-        if (!obstacle->inuse && part->inuse)
+        if (!obstacle->inUse && part->inUse)
             goto retry;
 #endif
     } else {
@@ -617,7 +617,7 @@ void SV_Physics_Noclip(edict_t *ent)
 // regular thinking
     if (!SV_RunThink(ent))
         return;
-    if (!ent->inuse)
+    if (!ent->inUse)
         return;
 
     VectorMA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
@@ -653,7 +653,7 @@ void SV_Physics_Toss(edict_t *ent)
 
 // regular thinking
     SV_RunThink(ent);
-    if (!ent->inuse)
+    if (!ent->inUse)
         return;
 
     // if not a team captain, so movement will be handled elsewhere
@@ -665,7 +665,7 @@ void SV_Physics_Toss(edict_t *ent)
 
 // check for the groundentity going away
     if (ent->groundentity)
-        if (!ent->groundentity->inuse)
+        if (!ent->groundentity->inUse)
             ent->groundentity = NULL;
 
 // if onground, return without moving
@@ -687,7 +687,7 @@ void SV_Physics_Toss(edict_t *ent)
 // move origin
     VectorScale(ent->velocity, FRAMETIME, move);
     trace = SV_PushEntity(ent, move);
-    if (!ent->inuse)
+    if (!ent->inUse)
         return;
 
     if (trace.fraction < 1) {
@@ -702,7 +702,7 @@ void SV_Physics_Toss(edict_t *ent)
         if (trace.plane.normal[2] > 0.7) {
             if (ent->velocity[2] < 60 || ent->movetype != MOVETYPE_BOUNCE) {
                 ent->groundentity = trace.ent;
-                ent->groundentity_linkcount = trace.ent->linkcount;
+                ent->groundentity_linkcount = trace.ent->linkCount;
                 VectorCopy(vec3_origin, ent->velocity);
                 VectorCopy(vec3_origin, ent->avelocity);
             }
@@ -871,7 +871,7 @@ void SV_Physics_Step(edict_t *ent)
 
         gi.linkentity(ent);
         UTIL_TouchTriggers(ent);
-        if (!ent->inuse)
+        if (!ent->inUse)
             return;
 
         if (ent->groundentity)

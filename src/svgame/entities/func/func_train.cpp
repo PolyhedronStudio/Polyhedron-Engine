@@ -64,7 +64,7 @@ void train_wait(edict_t* self)
         ent->target = savetarget;
 
         // make sure we didn't get killed by a killtarget
-        if (!self->inuse)
+        if (!self->inUse)
             return;
     }
 

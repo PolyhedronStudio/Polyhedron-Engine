@@ -126,7 +126,7 @@ static qboolean _GL_LightPoint(const vec3_t &start, vec3_t &color)
             angles = NULL;
         }
 
-        BSP_TransformedLightPoint(&pt, start, end, model->headnode,
+        BSP_TransformedLightPoint(&pt, start, end, model->headNode,
                                   ent->origin, angles);
 
         if (pt.fraction < glr.lightpoint.fraction)
@@ -207,7 +207,7 @@ static void GL_TransformLights(mmodel_t *model)
         light->transformed[0] = DotProduct(temp, glr.entaxis[0]);
         light->transformed[1] = DotProduct(temp, glr.entaxis[1]);
         light->transformed[2] = DotProduct(temp, glr.entaxis[2]);
-        GL_MarkLights_r(model->headnode, light, 1 << i);
+        GL_MarkLights_r(model->headNode, light, 1 << i);
     }
 }
 

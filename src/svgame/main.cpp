@@ -307,7 +307,7 @@ void ClientEndServerFrames(void)
     // and damage has been added
     for (i = 0 ; i < maxclients->value ; i++) {
         ent = g_edicts + 1 + i;
-        if (!ent->inuse || !ent->client)
+        if (!ent->inUse || !ent->client)
             continue;
         ClientEndServerFrame(ent);
     }
@@ -444,7 +444,7 @@ void CheckDMRules(void)
     if (fraglimit->value) {
         for (i = 0 ; i < maxclients->value ; i++) {
             cl = game.clients + i;
-            if (!g_edicts[i + 1].inuse)
+            if (!g_edicts[i + 1].inUse)
                 continue;
 
             if (cl->resp.score >= fraglimit->value) {
@@ -478,7 +478,7 @@ void ExitLevel(void)
     // clear some things before going to next level
     for (i = 0 ; i < maxclients->value ; i++) {
         ent = g_edicts + 1 + i;
-        if (!ent->inuse)
+        if (!ent->inUse)
             continue;
         if (ent->health > ent->client->pers.max_health)
             ent->health = ent->client->pers.max_health;
@@ -517,7 +517,7 @@ void G_RunFrame(void)
     //
     ent = &g_edicts[0];
     for (i = 0 ; i < globals.num_edicts ; i++, ent++) {
-        if (!ent->inuse)
+        if (!ent->inUse)
             continue;
 
         level.current_entity = ent;
@@ -525,7 +525,7 @@ void G_RunFrame(void)
         VectorCopy(ent->s.origin, ent->s.old_origin);
 
         // if the ground entity moved, make sure we are still on it
-        if ((ent->groundentity) && (ent->groundentity->linkcount != ent->groundentity_linkcount)) {
+        if ((ent->groundentity) && (ent->groundentity->linkCount != ent->groundentity_linkcount)) {
             ent->groundentity = NULL;
             if (!(ent->flags & (FL_SWIM | FL_FLY)) && (ent->svflags & SVF_MONSTER)) {
                 M_CheckGround(ent);
@@ -572,7 +572,7 @@ edict_t* G_Find(edict_t* from, int fieldofs, const char* match)
         from++;
 
     for (; from < &g_edicts[globals.num_edicts]; from++) {
-        if (!from->inuse)
+        if (!from->inUse)
             continue;
         s = *(char**)((byte*)from + fieldofs);
         if (!s)
@@ -604,7 +604,7 @@ edict_t* G_FindEntitiesWithinRadius(edict_t* from, vec3_t org, float rad)
     else
         from++;
     for (; from < &g_edicts[globals.num_edicts]; from++) {
-        if (!from->inuse)
+        if (!from->inUse)
             continue;
         if (from->solid == SOLID_NOT)
             continue;
@@ -664,7 +664,7 @@ edict_t* G_PickTarget(char* targetname)
 
 void G_InitEdict(edict_t* e)
 {
-    e->inuse = true;
+    e->inUse = true;
     e->classname = "noclass";
     e->gravity = 1.0;
     e->s.number = e - g_edicts;
@@ -690,7 +690,7 @@ edict_t* G_Spawn(void)
     for (i = game.maxclients + 1; i < globals.num_edicts; i++, e++) {
         // the first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
-        if (!e->inuse && (e->freetime < 2 || level.time - e->freetime > 0.5)) {
+        if (!e->inUse && (e->freetime < 2 || level.time - e->freetime > 0.5)) {
             G_InitEdict(e);
             return e;
         }
@@ -725,5 +725,5 @@ void G_FreeEdict(edict_t* ed)
     //*ed = edict_t();
     ed->classname = "freed";
     ed->freetime = level.time;
-    ed->inuse = false;
+    ed->inUse = false;
 }

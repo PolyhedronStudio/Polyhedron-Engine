@@ -525,7 +525,7 @@ static void PF_StartSound(edict_t *edict, int channel,
 
     ent = NUM_FOR_EDICT(edict);
 
-    if ((g_features->integer & GMF_PROPERINUSE) && !edict->inuse) {
+    if ((g_features->integer & GMF_PROPERINUSE) && !edict->inUse) {
         Com_DPrintf("%s: entnum not in use: %d\n", __func__, ent);
         return;
     }

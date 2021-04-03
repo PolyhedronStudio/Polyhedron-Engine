@@ -106,7 +106,7 @@ typedef struct {
 typedef struct {
     float       mins[3], maxs[3];
     float       origin[3];              // for sounds or lights
-    uint32_t    headnode;
+    uint32_t    headNode;
     uint32_t    firstface, numfaces;    // submodels just draw faces
                                         // without walking the bsp tree
 } dmodel_t;

@@ -696,13 +696,13 @@ static void SCR_TimeRefresh_f(void)
         // run without page flipping
         R_BeginFrame();
         for (i = 0; i < 128; i++) {
-            cl.refdef.viewangles[1] = i / 128.0f * 360.0f;
+            cl.refdef.viewAngles[1] = i / 128.0f * 360.0f;
             R_RenderFrame(&cl.refdef);
         }
         R_EndFrame();
     } else {
         for (i = 0; i < 128; i++) {
-            cl.refdef.viewangles[1] = i / 128.0f * 360.0f;
+            cl.refdef.viewAngles[1] = i / 128.0f * 360.0f;
 
             R_BeginFrame();
             R_RenderFrame(&cl.refdef);

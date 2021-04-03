@@ -61,11 +61,11 @@ void Machinegun_Fire(edict_t* ent)
     }
 
     for (i = 1; i < 3; i++) {
-        ent->client->kick_origin[i] = crandom() * 0.35;
-        ent->client->kick_angles[i] = crandom() * 0.7;
+        ent->client->kickOrigin[i] = crandom() * 0.35;
+        ent->client->kickAngles[i] = crandom() * 0.7;
     }
-    ent->client->kick_origin[0] = crandom() * 0.35;
-    ent->client->kick_angles[0] = ent->client->machinegun_shots * -1.5;
+    ent->client->kickOrigin[0] = crandom() * 0.35;
+    ent->client->kickAngles[0] = ent->client->machinegun_shots * -1.5;
 
     // raise the gun as it is firing
     if (!deathmatch->value) {
@@ -75,7 +75,7 @@ void Machinegun_Fire(edict_t* ent)
     }
 
     // get start / end positions
-    VectorAdd(ent->client->v_angle, ent->client->kick_angles, angles);
+    VectorAdd(ent->client->v_angle, ent->client->kickAngles, angles);
     AngleVectors(angles, &forward, &right, NULL);
     VectorSet(offset, 0, 8, ent->viewheight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);

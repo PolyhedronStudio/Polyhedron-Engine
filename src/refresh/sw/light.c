@@ -73,7 +73,7 @@ static void R_MarkLights_r(mnode_t *node, dlight_t *light,
 R_MarkLights
 =============
 */
-void R_MarkLights(mnode_t *headnode)
+void R_MarkLights(mnode_t *headNode)
 {
     dlight_t    *light;
     vec3_t      transformed;
@@ -91,7 +91,7 @@ void R_MarkLights(mnode_t *headnode)
         } else {
             VectorCopy(light->origin, transformed);
         }
-        R_MarkLights_r(headnode, light, transformed, 1 << i);
+        R_MarkLights_r(headNode, light, transformed, 1 << i);
     }
 }
 

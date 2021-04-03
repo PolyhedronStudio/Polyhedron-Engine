@@ -49,7 +49,7 @@ void trigger_key_use(edict_t* self, edict_t* other, edict_t* activator)
                     break;
             for (player = 1; player <= game.maxclients; player++) {
                 ent = &g_edicts[player];
-                if (!ent->inuse)
+                if (!ent->inUse)
                     continue;
                 if (!ent->client)
                     continue;
@@ -62,7 +62,7 @@ void trigger_key_use(edict_t* self, edict_t* other, edict_t* activator)
         else {
             for (player = 1; player <= game.maxclients; player++) {
                 ent = &g_edicts[player];
-                if (!ent->inuse)
+                if (!ent->inUse)
                     continue;
                 if (!ent->client)
                     continue;

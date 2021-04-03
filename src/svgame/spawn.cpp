@@ -476,7 +476,7 @@ void G_FindTeams(void)
     c = 0;
     c2 = 0;
     for (i = 1, e = g_edicts + i ; i < globals.num_edicts ; i++, e++) {
-        if (!e->inuse)
+        if (!e->inUse)
             continue;
         if (!e->team)
             continue;
@@ -487,7 +487,7 @@ void G_FindTeams(void)
         c++;
         c2++;
         for (j = i + 1, e2 = e + 1 ; j < globals.num_edicts ; j++, e2++) {
-            if (!e2->inuse)
+            if (!e2->inUse)
                 continue;
             if (!e2->team)
                 continue;
@@ -607,7 +607,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
     i = 1;
     ent = EDICT_NUM(i);
     while (i < globals.pool.num_edicts) {
-        if (ent->inuse != 0 || ent->inuse != 1)
+        if (ent->inUse != 0 || ent->inUse != 1)
             Com_DPrintf("Invalid entity %d\n", i);
         i++, ent++;
     }
@@ -796,7 +796,7 @@ void SP_worldspawn(edict_t *ent)
 {
     ent->movetype = MOVETYPE_PUSH;
     ent->solid = SOLID_BSP;
-    ent->inuse = true;          // since the world doesn't use G_Spawn()
+    ent->inUse = true;          // since the world doesn't use G_Spawn()
     ent->s.modelindex = 1;      // world model is always index 1
 
     //---------------

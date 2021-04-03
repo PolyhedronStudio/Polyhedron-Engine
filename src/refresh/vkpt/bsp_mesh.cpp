@@ -1387,8 +1387,8 @@ compute_sky_visibility(bsp_mesh_t *wm, bsp_t *bsp)
 static void
 compute_cluster_aabbs(bsp_mesh_t* wm)
 {
-	wm->cluster_aabbs = (aabb_t*)Z_Malloc(wm->num_clusters * sizeof(aabb_t)); // C++20 VKPT: Added a cast.
-	for (int c = 0; c < wm->num_clusters; c++)
+	wm->cluster_aabbs = (aabb_t*)Z_Malloc(wm->numClusters * sizeof(aabb_t)); // C++20 VKPT: Added a cast.
+	for (int c = 0; c < wm->numClusters; c++)
 	{
 		VectorSet(wm->cluster_aabbs[c].mins, FLT_MAX, FLT_MAX, FLT_MAX);
 		VectorSet(wm->cluster_aabbs[c].maxs, -FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -1398,7 +1398,7 @@ compute_cluster_aabbs(bsp_mesh_t* wm)
 	{
 		int c = wm->clusters[tri];
 
-		if(c < 0 || c >= wm->num_clusters)
+		if(c < 0 || c >= wm->numClusters)
 			continue;
 
 		aabb_t* aabb = wm->cluster_aabbs + c;
@@ -1471,8 +1471,8 @@ static void
 collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 {
 #define MAX_LIGHTS_PER_CLUSTER 1024
-	int* cluster_lights = (int*)Z_Malloc(MAX_LIGHTS_PER_CLUSTER * wm->num_clusters * sizeof(int)); // C++20 VKPT: Added a cast.
-	int* cluster_light_counts = (int*)Z_Mallocz(wm->num_clusters * sizeof(int)); // C++20 VKPT: Added a cast.
+	int* cluster_lights = (int*)Z_Malloc(MAX_LIGHTS_PER_CLUSTER * wm->numClusters * sizeof(int)); // C++20 VKPT: Added a cast.
+	int* cluster_light_counts = (int*)Z_Mallocz(wm->numClusters * sizeof(int)); // C++20 VKPT: Added a cast.
 
 	// Construct an array of visible lights for each cluster.
 	// The array is in `cluster_lights`, with MAX_LIGHTS_PER_CLUSTER stride.
@@ -1503,20 +1503,20 @@ collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 	// Count the total number of cluster <-> light relations to allocate memory
 
 	wm->num_cluster_lights = 0;
-	for (int cluster = 0; cluster < wm->num_clusters; cluster++)
+	for (int cluster = 0; cluster < wm->numClusters; cluster++)
 	{
 		wm->num_cluster_lights += cluster_light_counts[cluster];
 	}
 
 	wm->cluster_lights = (int*)Z_Mallocz(wm->num_cluster_lights * sizeof(int)); // C++20 VKPT: Added a cast.
-	wm->cluster_light_offsets = (int*)Z_Mallocz((wm->num_clusters + 1) * sizeof(int)); // C++20 VKPT: Added a cast.
+	wm->cluster_light_offsets = (int*)Z_Mallocz((wm->numClusters + 1) * sizeof(int)); // C++20 VKPT: Added a cast.
 
 	// Com_Printf("Total interactions: %d, culled bbox: %d, culled proj: %d\n", wm->num_cluster_lights, lights_culled_bbox, lights_culled_proj);
 
 	// Compact the previously constructed array into wm->cluster_lights
 
 	int list_offset = 0;
-	for (int cluster = 0; cluster < wm->num_clusters; cluster++)
+	for (int cluster = 0; cluster < wm->numClusters; cluster++)
 	{
 		assert(list_offset >= 0);
 		wm->cluster_light_offsets[cluster] = list_offset;
@@ -1527,7 +1527,7 @@ collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 			count * sizeof(int));
 		list_offset += count;
 	}
-	wm->cluster_light_offsets[wm->num_clusters] = list_offset;
+	wm->cluster_light_offsets[wm->numClusters] = list_offset;
 
 	Z_Free(cluster_lights);
 	Z_Free(cluster_light_counts);
@@ -1638,11 +1638,11 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 	memset(wm->models, 0, bsp->nummodels * sizeof(bsp_model_t));
 
     wm->num_models = bsp->nummodels;
-	wm->num_clusters = bsp->vis->numclusters;
+	wm->numClusters = bsp->vis->numclusters;
 
-	if (wm->num_clusters + 1 >= MAX_LIGHT_LISTS)
+	if (wm->numClusters + 1 >= MAX_LIGHT_LISTS)
 	{
-		Com_Error(ERR_FATAL, "The BSP model has too many clusters (%d)", wm->num_clusters);
+		Com_Error(ERR_FATAL, "The BSP model has too many clusters (%d)", wm->numClusters);
 	}
 
     wm->num_vertices = 0;

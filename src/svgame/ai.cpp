@@ -61,7 +61,7 @@ void AI_SetSightClient(void)
         if (check > game.maxclients)
             check = 1;
         ent = &g_edicts[check];
-        if (ent->inuse
+        if (ent->inUse
             && ent->health > 0
             && !(ent->flags & FL_NOTARGET)) {
             level.sight_client = ent;
@@ -390,7 +390,7 @@ qboolean FindTarget(edict_t *self)
     int         r;
 
     if (self->monsterinfo.aiflags & AI_GOOD_GUY) {
-        if (self->goalentity && self->goalentity->inuse && self->goalentity->classname) {
+        if (self->goalentity && self->goalentity->inUse && self->goalentity->classname) {
             if (strcmp(self->goalentity->classname, "target_actor") == 0)
                 return false;
         }
@@ -429,7 +429,7 @@ qboolean FindTarget(edict_t *self)
     }
 
     // if the entity went away, forget it
-    if (!client->inuse)
+    if (!client->inUse)
         return false;
 
     if (client == self->enemy)
@@ -732,7 +732,7 @@ qboolean ai_checkattack(edict_t *self, float dist)
 
 // see if the enemy is dead
     hesDeadJim = false;
-    if ((!self->enemy) || (!self->enemy->inuse)) {
+    if ((!self->enemy) || (!self->enemy->inUse)) {
         hesDeadJim = true;
     } else if (self->monsterinfo.aiflags & AI_MEDIC) {
         if (self->enemy->health > 0) {
@@ -752,9 +752,9 @@ qboolean ai_checkattack(edict_t *self, float dist)
     if (hesDeadJim) {
         self->enemy = NULL;
         // FIXME: look all around for other targets
-        if (self->oldenemy && self->oldenemy->health > 0) {
-            self->enemy = self->oldenemy;
-            self->oldenemy = NULL;
+        if (self->oldEnemy && self->oldEnemy->health > 0) {
+            self->enemy = self->oldEnemy;
+            self->oldEnemy = NULL;
             HuntTarget(self);
         } else {
             if (self->movetarget) {

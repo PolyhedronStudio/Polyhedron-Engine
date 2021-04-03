@@ -82,15 +82,15 @@ struct gclient_s {
 struct edict_s {
     entity_state_t  s;
     struct gclient_s    *client;
-    qboolean    inuse;
-    int         linkcount;
+    qboolean    inUse;
+    int         linkCount;
 
     // FIXME: move these fields to a server private sv_entity_t
     list_t      area;               // linked to a division node or leaf
 
-    int         num_clusters;       // if -1, use headnode instead
-    int         clusternums[MAX_ENT_CLUSTERS];
-    int         headnode;           // unused if num_clusters != -1
+    int         numClusters;       // if -1, use headNode instead
+    int         clusterNumbers[MAX_ENT_CLUSTERS];
+    int         headNode;           // unused if numClusters != -1
     int         areanum, areanum2;
 
     //================================

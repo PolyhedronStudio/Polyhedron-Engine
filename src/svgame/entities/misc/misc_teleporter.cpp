@@ -47,7 +47,7 @@ void teleporter_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t
     }
 
     VectorClear(other->s.angles);
-    VectorClear(other->client->ps.viewangles);
+    VectorClear(other->client->ps.viewAngles);
     VectorClear(other->client->v_angle);
 
     // kill anything at the destination

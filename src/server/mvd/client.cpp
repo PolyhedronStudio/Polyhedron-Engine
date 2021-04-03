@@ -1799,7 +1799,7 @@ static inline int player_flags(mvd_t *mvd, mvd_player_t *player)
 {
     int flags = 0;
 
-    if (!player->inuse)
+    if (!player->inUse)
         flags |= MSG_PS_REMOVE;
 
     return flags;
@@ -1809,11 +1809,11 @@ static inline int entity_flags(mvd_t *mvd, edict_t *ent)
 {
     int flags = MSG_ES_UMASK;
 
-    if (!ent->inuse) {
+    if (!ent->inUse) {
         flags |= MSG_ES_REMOVE;
     } else if (ent->s.number <= mvd->maxclients) {
         mvd_player_t *player = &mvd->players[ent->s.number - 1];
-        if (player->inuse && player->ps.pmove.type == PM_NORMAL)
+        if (player->inUse && player->ps.pmove.type == PM_NORMAL)
             flags |= MSG_ES_FIRSTPERSON;
     }
 
@@ -2302,7 +2302,7 @@ static void MVD_Seek_f(void)
     // init world entity
     ent = &mvd->edicts[0];
     ent->solid = SOLID_BSP;
-    ent->inuse = true;
+    ent->inUse = true;
 
     // relink all seen entities, reset old origins and events
     for (i = 1; i < MAX_EDICTS; i++) {
@@ -2311,7 +2311,7 @@ static void MVD_Seek_f(void)
         if (ent->svflags & SVF_MONSTER)
             MVD_LinkEdict(mvd, ent);
 
-        if (!ent->inuse)
+        if (!ent->inUse)
             continue;
 
         if (!(ent->s.renderfx & RF_BEAM))

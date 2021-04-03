@@ -119,14 +119,14 @@ vkpt_vertex_buffer_upload_bsp_mesh_to_staging(bsp_mesh_t *bsp_mesh)
 	memcpy(vbo->clusters_bsp, bsp_mesh->clusters, num_vertices * sizeof(uint32_t) / 3);
 	memcpy(vbo->texel_density_bsp, bsp_mesh->texel_density, num_vertices * sizeof(float) / 3);
 
-	int num_clusters = bsp_mesh->num_clusters;
-	if (num_clusters > MAX_LIGHT_LISTS)
+	int numClusters = bsp_mesh->numClusters;
+	if (numClusters > MAX_LIGHT_LISTS)
 	{
 		assert(!"Visibility buffer overflow");
-		num_clusters = MAX_LIGHT_LISTS;
+		numClusters = MAX_LIGHT_LISTS;
 	}
 
-	memcpy(vbo->sky_visibility, bsp_mesh->sky_visibility, (num_clusters + 7) / 8);
+	memcpy(vbo->sky_visibility, bsp_mesh->sky_visibility, (numClusters + 7) / 8);
 
 	buffer_unmap(&qvk.buf_vertex_bsp_staging);
 	vbo = NULL;
@@ -149,8 +149,8 @@ void vkpt_light_buffer_reset_counts()
 void
 inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, light_poly_t* transformed_model_lights, int model_light_offset, uint32_t* dst_list_offsets, uint32_t* dst_lists)
 {
-	memset(local_light_counts, 0, bsp_mesh->num_clusters * sizeof(int));
-	memset(cluster_light_counts, 0, bsp_mesh->num_clusters * sizeof(int));
+	memset(local_light_counts, 0, bsp_mesh->numClusters * sizeof(int));
+	memset(cluster_light_counts, 0, bsp_mesh->numClusters * sizeof(int));
 
 	// Count the number of model lights per cluster
 
@@ -161,7 +161,7 @@ inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, ligh
 
 	// Count the number of model lights visible from each cluster, using the PVS
 
-	for (int c = 0; c < bsp_mesh->num_clusters; c++)
+	for (int c = 0; c < bsp_mesh->numClusters; c++)
 	{
 		if (local_light_counts[c])
 		{
@@ -180,7 +180,7 @@ inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, ligh
 
 	// Update the max light counts per cluster
 
-	for (int c = 0; c < bsp_mesh->num_clusters; c++)
+	for (int c = 0; c < bsp_mesh->numClusters; c++)
 	{
 		max_cluster_model_lights[c] = max(max_cluster_model_lights[c], cluster_light_counts[c]);
 	}
@@ -188,7 +188,7 @@ inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, ligh
 	// Copy the static light lists, and make room in these lists to inject the model lights
 
 	int tail = 0;
-	for (int c = 0; c < bsp_mesh->num_clusters; c++)
+	for (int c = 0; c < bsp_mesh->numClusters; c++)
 	{
 		int original_size = bsp_mesh->cluster_light_offsets[c + 1] - bsp_mesh->cluster_light_offsets[c];
 
@@ -201,7 +201,7 @@ inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, ligh
 		light_list_tails[c] = tail;
 		tail += max_cluster_model_lights[c];
 	}
-	dst_list_offsets[bsp_mesh->num_clusters] = tail;
+	dst_list_offsets[bsp_mesh->numClusters] = tail;
 
 	// Write the model light indices into the light lists
 
@@ -330,7 +330,7 @@ vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t *bsp_mesh,
 
 	if (render_world)
 	{
-		assert(bsp_mesh->num_clusters + 1 < MAX_LIGHT_LISTS);
+		assert(bsp_mesh->numClusters + 1 < MAX_LIGHT_LISTS);
 		assert(bsp_mesh->num_cluster_lights < MAX_LIGHT_LIST_NODES);
 		assert(MAT_GetNumPBRMaterials() < MAX_PBR_MATERIALS);
 		assert(bsp_mesh->num_light_polys + num_model_lights < MAX_LIGHT_POLYS);
@@ -347,7 +347,7 @@ vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t *bsp_mesh,
 		}
 		else
 		{
-			memcpy(lbo->light_list_offsets, bsp_mesh->cluster_light_offsets, (bsp_mesh->num_clusters + 1) * sizeof(uint32_t));
+			memcpy(lbo->light_list_offsets, bsp_mesh->cluster_light_offsets, (bsp_mesh->numClusters + 1) * sizeof(uint32_t));
 			memcpy(lbo->light_list_lights, bsp_mesh->cluster_lights, bsp_mesh->num_cluster_lights * sizeof(uint32_t));
 		}
 
@@ -878,7 +878,7 @@ VkResult vkpt_light_stats_create(bsp_mesh_t *bsp_mesh)
 	vkpt_light_stats_destroy();
 
 	// Light statistics: 2 uints (shadowed, unshadowed) per light per surface orientation (6) per cluster.
-	uint32_t num_stats = bsp_mesh->num_clusters * bsp_mesh->num_light_polys * 6 * 2;
+	uint32_t num_stats = bsp_mesh->numClusters * bsp_mesh->num_light_polys * 6 * 2;
 
     // Handle rare cases when the map has zero lights
     if (num_stats == 0)

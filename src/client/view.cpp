@@ -629,7 +629,7 @@ static void V_Viewpos_f(void)
 {
     Com_Printf("(%i %i %i) : %i\n", (int)cl.refdef.vieworg[0],
                (int)cl.refdef.vieworg[1], (int)cl.refdef.vieworg[2],
-               (int)cl.refdef.viewangles[vec3_t::Yaw]);
+               (int)cl.refdef.viewAngles[vec3_t::Yaw]);
 }
 
 static const cmdreg_t v_cmds[] = {

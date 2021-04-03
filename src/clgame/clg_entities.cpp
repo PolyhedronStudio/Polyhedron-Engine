@@ -652,7 +652,7 @@ void CLG_AddViewWeapon(void)
     for (i = 0; i < 3; i++) {
         gun.origin[i] = cl->refdef.vieworg[i] + ops->gunoffset[i] +
             CL_KEYLERPFRAC * (ps->gunoffset[i] - ops->gunoffset[i]);
-        gun.angles[i] = cl->refdef.viewangles[i] + LerpAngle(ops->gunangles[i],
+        gun.angles[i] = cl->refdef.viewAngles[i] + LerpAngle(ops->gunangles[i],
             ps->gunangles[i], CL_KEYLERPFRAC);
     }
 
@@ -672,7 +672,7 @@ void CLG_AddViewWeapon(void)
         trace_t trace;
         static vec3_t mins = { -4, -4, -4 }, maxs = { 4, 4, 4 };
 
-        AngleVectors(cl->refdef.viewangles, &view_dir, &right_dir, &up_dir);
+        AngleVectors(cl->refdef.viewAngles, &view_dir, &right_dir, &up_dir);
         VectorMA(gun.origin, gun_right, right_dir, gun_real_pos);
         VectorMA(gun_real_pos, gun_up, up_dir, gun_real_pos);
         VectorMA(gun_real_pos, gun_length, view_dir, gun_tip);
@@ -897,15 +897,15 @@ void CLG_CalcViewValues(void)
 
     // if not running a demo or on a locked frame, add the local angle movement
     if (clgi.IsDemoPlayback()) {
-        LerpAngles(ops->viewangles, ps->viewangles, lerp, cl->refdef.viewangles);
+        LerpAngles(ops->viewAngles, ps->viewAngles, lerp, cl->refdef.viewAngles);
     }
     else if (ps->pmove.type < PM_DEAD) {
         // use predicted values
-        VectorCopy(cl->predicted_angles, cl->refdef.viewangles);
+        VectorCopy(cl->predicted_angles, cl->refdef.viewAngles);
     }
     else {
         // just use interpolated values
-        LerpAngles(ops->viewangles, ps->viewangles, lerp, cl->refdef.viewangles);
+        LerpAngles(ops->viewAngles, ps->viewAngles, lerp, cl->refdef.viewAngles);
     }
 
 #if USE_SMOOTH_DELTA_ANGLES
@@ -930,10 +930,10 @@ void CLG_CalcViewValues(void)
 
     LerpVector(ops->viewoffset, ps->viewoffset, lerp, viewoffset);
 
-    AngleVectors(cl->refdef.viewangles, &cl->v_forward, &cl->v_right, &cl->v_up);
+    AngleVectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
 
     VectorCopy(cl->refdef.vieworg, cl->playerEntityOrigin);
-    VectorCopy(cl->refdef.viewangles, cl->playerEntityAngles);
+    VectorCopy(cl->refdef.viewAngles, cl->playerEntityAngles);
 
     if (cl->playerEntityAngles[vec3_t::Pitch] > 180) {
         cl->playerEntityAngles[vec3_t::Pitch] -= 360;

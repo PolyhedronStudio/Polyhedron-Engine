@@ -311,10 +311,10 @@ void M_ReactToDamage(edict_t *targ, edict_t *attacker)
         // only switch if can't see the current enemy
         if (targ->enemy && targ->enemy->client) {
             if (visible(targ, targ->enemy)) {
-                targ->oldenemy = attacker;
+                targ->oldEnemy = attacker;
                 return;
             }
-            targ->oldenemy = targ->enemy;
+            targ->oldEnemy = targ->enemy;
         }
         targ->enemy = attacker;
         if (!(targ->monsterinfo.aiflags & AI_DUCKED))
@@ -331,7 +331,7 @@ void M_ReactToDamage(edict_t *targ, edict_t *attacker)
         (strcmp(attacker->classname, "monster_makron") != 0) &&
         (strcmp(attacker->classname, "monster_jorg") != 0)) {
         if (targ->enemy && targ->enemy->client)
-            targ->oldenemy = targ->enemy;
+            targ->oldEnemy = targ->enemy;
         targ->enemy = attacker;
         if (!(targ->monsterinfo.aiflags & AI_DUCKED))
             FoundTarget(targ);
@@ -339,7 +339,7 @@ void M_ReactToDamage(edict_t *targ, edict_t *attacker)
     // if they *meant* to shoot us, then shoot back
     else if (attacker->enemy == targ) {
         if (targ->enemy && targ->enemy->client)
-            targ->oldenemy = targ->enemy;
+            targ->oldEnemy = targ->enemy;
         targ->enemy = attacker;
         if (!(targ->monsterinfo.aiflags & AI_DUCKED))
             FoundTarget(targ);
@@ -347,7 +347,7 @@ void M_ReactToDamage(edict_t *targ, edict_t *attacker)
     // otherwise get mad at whoever they are mad at (help our buddy) unless it is us!
     else if (attacker->enemy && attacker->enemy != targ) {
         if (targ->enemy && targ->enemy->client)
-            targ->oldenemy = targ->enemy;
+            targ->oldEnemy = targ->enemy;
         targ->enemy = attacker->enemy;
         if (!(targ->monsterinfo.aiflags & AI_DUCKED))
             FoundTarget(targ);

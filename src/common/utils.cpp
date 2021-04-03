@@ -274,12 +274,12 @@ void Com_PlayerToEntityState(const player_state_t *ps, entity_state_t *es)
     VectorCopy(ps->pmove.origin, es->origin);
     //VectorScale(ps->pmove.origin, 0.125f, es->origin);
 
-    pitch = ps->viewangles[vec3_t::Pitch];
+    pitch = ps->viewAngles[vec3_t::Pitch];
     if (pitch > 180) {
         pitch -= 360;
     }
     es->angles[vec3_t::Pitch] = pitch / 3;
-    es->angles[vec3_t::Yaw] = ps->viewangles[vec3_t::Yaw];
+    es->angles[vec3_t::Yaw] = ps->viewAngles[vec3_t::Yaw];
     es->angles[vec3_t::Roll] = 0;
 }
 

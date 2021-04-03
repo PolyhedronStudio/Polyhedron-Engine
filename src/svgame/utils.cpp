@@ -125,7 +125,7 @@ void UTIL_UseTargets(edict_t *ent, edict_t *activator)
         t = NULL;
         while ((t = G_Find(t, FOFS(targetname), ent->killtarget))) {
             G_FreeEdict(t);
-            if (!ent->inuse) {
+            if (!ent->inUse) {
                 gi.dprintf("entity was removed while using killtargets\n");
                 return;
             }
@@ -149,7 +149,7 @@ void UTIL_UseTargets(edict_t *ent, edict_t *activator)
                 if (t->use)
                     t->use(t, ent, activator);
             }
-            if (!ent->inuse) {
+            if (!ent->inUse) {
                 gi.dprintf("entity was removed while using targets\n");
                 return;
             }
@@ -251,7 +251,7 @@ void    UTIL_TouchTriggers(edict_t *ent)
     // list removed before we get to it (killtriggered)
     for (i = 0 ; i < num ; i++) {
         hit = touch[i];
-        if (!hit->inuse)
+        if (!hit->inUse)
             continue;
         if (!hit->touch)
             continue;
@@ -279,11 +279,11 @@ void    G_TouchSolids(edict_t *ent)
     // list removed before we get to it (killtriggered)
     for (i = 0 ; i < num ; i++) {
         hit = touch[i];
-        if (!hit->inuse)
+        if (!hit->inUse)
             continue;
         if (ent->touch)
             ent->touch(hit, ent, NULL, NULL);
-        if (!ent->inuse)
+        if (!ent->inUse)
             break;
     }
 }

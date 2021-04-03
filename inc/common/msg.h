@@ -73,9 +73,9 @@ typedef struct {
     pm_state_t      pmove;
 
     // View angles and offsets.
-    int16_t         viewangles[3];
+    int16_t         viewAngles[3];
     int8_t          viewoffset[3];
-    int8_t          kick_angles[3];
+    int8_t          kickAngles[3];
 
     // Gun info.
     int8_t          gunangles[3];

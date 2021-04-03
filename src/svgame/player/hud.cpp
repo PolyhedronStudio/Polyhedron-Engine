@@ -33,7 +33,7 @@ INTERMISSION
 // HUD_MoveClientToIntermission
 // 
 // Changes the client's movement type to PM_FREEZE while setting its
-// origin and viewangles to the previously fetched intermission entity 
+// origin and viewAngles to the previously fetched intermission entity 
 // values.
 //================
 //
@@ -54,7 +54,7 @@ void HUD_MoveClientToIntermission(edict_t *ent)
     // the client player states positions.
     ent->s.origin = level.intermission_origin;
     ent->client->ps.pmove.origin = level.intermission_origin;
-    ent->client->ps.viewangles = level.intermission_angle;
+    ent->client->ps.viewAngles = level.intermission_angle;
     // Setup the rest of the client player state.
     ent->client->ps.pmove.type = PM_FREEZE;
     ent->client->ps.gunindex = 0;
@@ -112,7 +112,7 @@ void HUD_BeginIntermission(edict_t *targ)
     // respawn any dead clients
     for (i = 0 ; i < maxclients->value ; i++) {
         client = g_edicts + 1 + i;
-        if (!client->inuse) {
+        if (!client->inUse) {
             continue;
         }
         if (client->health <= 0) {
@@ -127,7 +127,7 @@ void HUD_BeginIntermission(edict_t *targ)
         if (coop->value) {
             for (i = 0 ; i < maxclients->value ; i++) {
                 client = g_edicts + 1 + i;
-                if (!client->inuse) {
+                if (!client->inUse) {
                     continue;
                 }
                 // strip players of all keys between units
@@ -176,7 +176,7 @@ void HUD_BeginIntermission(edict_t *targ)
         client = g_edicts + 1 + i;
 
         // Ensure a client is in use, otherwise skip it.
-        if (!client->inuse)
+        if (!client->inUse)
             continue;
 
         // Switch to intermission.
@@ -209,7 +209,7 @@ void HUD_GenerateDMScoreboardLayout(edict_t *ent, edict_t *killer)
     total = 0;
     for (i = 0 ; i < game.maxclients ; i++) {
         cl_ent = g_edicts + 1 + i;
-        if (!cl_ent->inuse || game.clients[i].resp.spectator)
+        if (!cl_ent->inUse || game.clients[i].resp.spectator)
             continue;
         score = game.clients[i].resp.score;
         for (j = 0 ; j < total ; j++) {
@@ -558,7 +558,7 @@ void HUD_CheckChaseStats(edict_t *ent)
 
         cl = g_edicts[i].client;
 
-        if (!g_edicts[i].inuse || (cl->chase_target != ent)) {
+        if (!g_edicts[i].inUse || (cl->chase_target != ent)) {
             continue;
         }
 
@@ -599,7 +599,7 @@ void HUD_SetSpectatorStats(edict_t *ent)
         cl->ps.stats[STAT_LAYOUTS] |= 2;
     }
 
-    if (cl->chase_target && cl->chase_target->inuse)
+    if (cl->chase_target && cl->chase_target->inUse)
     {
         cl->ps.stats[STAT_CHASE] = CS_PLAYERSKINS +
             (cl->chase_target - g_edicts) - 1;

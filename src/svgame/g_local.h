@@ -436,7 +436,7 @@ typedef struct {
     int         attack_state;
     int         lefty;
     float       idle_time;
-    int         linkcount;
+    int         linkCount;
 
     int         power_armor_type;
     int         power_armor_power;
@@ -863,8 +863,8 @@ struct gclient_s {
     float       killer_yaw;         // when dead, look at killer
 
     weaponstate_t   weaponstate;
-    vec3_t      kick_angles;    // weapon kicks
-    vec3_t      kick_origin;
+    vec3_t      kickAngles;    // weapon kicks
+    vec3_t      kickOrigin;
     float       v_dmg_roll, v_dmg_pitch, v_dmg_time;    // damage kicks
     float       fall_time, fall_value;      // for view drop on fall
     float       damage_alpha;
@@ -872,8 +872,8 @@ struct gclient_s {
     vec3_t      damage_blend;
     vec3_t      v_angle;            // aiming direction
     float       bobtime;            // so off-ground doesn't change it
-    vec3_t      oldviewangles;
-    vec3_t      oldvelocity;
+    vec3_t      oldViewAngles;
+    vec3_t      oldVelocity;
 
     float       next_drown_time;
     int         old_waterlevel;
@@ -918,15 +918,15 @@ struct edict_s {
                                     // of gclient_s to be a player_state_t
                                     // but the rest of it is opaque
 
-    qboolean    inuse;
-    int         linkcount;
+    qboolean    inUse;
+    int         linkCount;
 
     // FIXME: move these fields to a server private sv_entity_t
     list_t      area;               // linked to a division node or leaf
 
-    int         num_clusters;       // if -1, use headnode instead
-    int         clusternums[MAX_ENT_CLUSTERS];
-    int         headnode;           // unused if num_clusters != -1
+    int         numClusters;       // if -1, use headNode instead
+    int         clusterNumbers[MAX_ENT_CLUSTERS];
+    int         headNode;           // unused if numClusters != -1
     int         areanum, areanum2;
 
     //================================
@@ -1019,7 +1019,7 @@ struct edict_s {
 
     edict_t     *chain;
     edict_t     *enemy;
-    edict_t     *oldenemy;
+    edict_t     *oldEnemy;
     edict_t     *activator;
     edict_t     *groundentity;
     int         groundentity_linkcount;

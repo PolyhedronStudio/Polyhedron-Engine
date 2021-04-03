@@ -65,7 +65,7 @@ void weapon_bfg_fire(edict_t* ent)
 
     AngleVectors(ent->client->v_angle, &forward, &right, NULL);
 
-    VectorScale(forward, -2, ent->client->kick_origin);
+    VectorScale(forward, -2, ent->client->kickOrigin);
 
     // make a big pitch kick with an inverse fall
     ent->client->v_dmg_pitch = -40;

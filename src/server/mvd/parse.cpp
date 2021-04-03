@@ -523,7 +523,7 @@ static void MVD_ParseSound(mvd_t *mvd, int extrabits)
     }
 
     entity = &mvd->edicts[entnum];
-    if (!entity->inuse) {
+    if (!entity->inUse) {
         Com_DPrintf("%s: entnum not in use: %d\n", __func__, entnum);
         return;
     }
@@ -683,7 +683,7 @@ static void MVD_PlayerToEntityStates(mvd_t *mvd)
 
     mvd->numplayers = 0;
     for (i = 1, player = mvd->players; i <= mvd->maxclients; i++, player++) {
-        if (!player->inuse || player == mvd->dummy) {
+        if (!player->inUse || player == mvd->dummy) {
             continue;
         }
 
@@ -694,7 +694,7 @@ static void MVD_PlayerToEntityStates(mvd_t *mvd)
         }
 
         edict = &mvd->edicts[i];
-        if (!edict->inuse) {
+        if (!edict->inUse) {
             continue; // not present in this frame
         }
 
@@ -735,7 +735,7 @@ static void MVD_ParsePacketEntities(mvd_t *mvd)
 
 #ifdef _DEBUG
         if (mvd_shownet->integer > 2) {
-            Com_Printf("   %s: %d ", ent->inuse ?
+            Com_Printf("   %s: %d ", ent->inUse ?
                        "delta" : "baseline", number);
             MSG_ShowDeltaEntityBits(bits);
             Com_Printf("\n");
@@ -758,11 +758,11 @@ static void MVD_ParsePacketEntities(mvd_t *mvd)
             if (!(ent->s.renderfx & RF_BEAM)) {
                 VectorCopy(ent->s.origin, ent->s.old_origin);
             }
-            ent->inuse = false;
+            ent->inUse = false;
             continue;
         }
 
-        ent->inuse = true;
+        ent->inUse = true;
         if (number >= mvd->pool.num_edicts) {
             mvd->pool.num_edicts = number + 1;
         }
@@ -800,7 +800,7 @@ static void MVD_ParsePacketPlayers(mvd_t *mvd)
 
 #ifdef _DEBUG
         if (mvd_shownet->integer > 2) {
-            Com_Printf("   %s: %d ", player->inuse ?
+            Com_Printf("   %s: %d ", player->inUse ?
                        "delta" : "baseline", number);
             MSG_ShowDeltaPlayerstateBits_Packet(bits);
             Com_Printf("\n");
@@ -811,11 +811,11 @@ static void MVD_ParsePacketPlayers(mvd_t *mvd)
 
         if (bits & PPS_REMOVE) {
             SHOWNET(2, "   remove: %d\n", number);
-            player->inuse = false;
+            player->inUse = false;
             continue;
         }
 
-        player->inuse = true;
+        player->inUse = true;
     }
 }
 
@@ -1071,7 +1071,7 @@ static void MVD_ParseServerData(mvd_t *mvd, int extrabits)
     // init world entity
     ent = &mvd->edicts[0];
     ent->solid = SOLID_BSP;
-    ent->inuse = true;
+    ent->inUse = true;
 
     if (mvd->cm.cache) {
         // get the spawn point for spectators

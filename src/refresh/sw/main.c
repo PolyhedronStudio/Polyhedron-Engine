@@ -697,7 +697,7 @@ static void R_DrawBEntitiesOnList(void)
         R_RotateBmodel();
 
         // calculate dynamic lighting for bmodel
-        R_MarkLights(model->headnode);
+        R_MarkLights(model->headNode);
 
         if (topnode->plane) {
             // not a leaf; has to be clipped to the world BSP

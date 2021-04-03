@@ -131,7 +131,7 @@ void
 create_view_matrix(float matrix[16], refdef_t *fd)
 {
 	vec3_t viewaxis[3];
-	AnglesToAxis(fd->viewangles, viewaxis);
+	AnglesToAxis(fd->viewAngles, viewaxis);
 
 	matrix[0]  = -viewaxis[1][0];
 	matrix[4]  = -viewaxis[1][1];

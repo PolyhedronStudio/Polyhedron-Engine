@@ -103,8 +103,8 @@ void Chaingun_Fire(edict_t* ent)
     }
 
     for (i = 0; i < 3; i++) {
-        ent->client->kick_origin[i] = crandom() * 0.35;
-        ent->client->kick_angles[i] = crandom() * 0.7;
+        ent->client->kickOrigin[i] = crandom() * 0.35;
+        ent->client->kickAngles[i] = crandom() * 0.7;
     }
 
     for (i = 0; i < shots; i++) {

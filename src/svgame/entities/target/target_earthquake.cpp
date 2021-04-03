@@ -29,7 +29,7 @@ void target_earthquake_think(edict_t* self)
     }
 
     for (i = 1, e = g_edicts + i; i < globals.num_edicts; i++, e++) {
-        if (!e->inuse)
+        if (!e->inUse)
             continue;
         if (!e->client)
             continue;

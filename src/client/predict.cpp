@@ -62,7 +62,7 @@ static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
 {
     int         i;
     trace_t     trace;
-    mnode_t     *headnode;
+    mnode_t     *headNode;
     centity_t   *ent;
     mmodel_t    *cmodel;
 
@@ -74,16 +74,16 @@ static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
             cmodel = cl.model_clip[ent->current.modelindex];
             if (!cmodel)
                 continue;
-            headnode = cmodel->headnode;
+            headNode = cmodel->headNode;
         } else {
-            headnode = CM_HeadnodeForBox(ent->mins, ent->maxs);
+            headNode = CM_HeadnodeForBox(ent->mins, ent->maxs);
         }
 
         if (tr->allsolid)
             return;
 
         CM_TransformedBoxTrace(&trace, start, end,
-                               mins, maxs, headnode,  CONTENTS_MASK_PLAYERSOLID,
+                               mins, maxs, headNode,  CONTENTS_MASK_PLAYERSOLID,
                                ent->current.origin, ent->current.angles);
 
         CM_ClipEntity(tr, &trace, (struct edict_s *)ent);
@@ -131,7 +131,7 @@ static int CL_PointContents(const vec3_t &point)
             continue;
 
         contents |= CM_TransformedPointContents(
-                        point, cmodel->headnode,
+                        point, cmodel->headNode,
                         ent->current.origin,
                         ent->current.angles);
     }
@@ -148,9 +148,9 @@ Sets cl.predicted_origin and cl.predicted_angles
 */
 void CL_PredictAngles(void)
 {
-    //cl.predicted_angles[0] = cl.viewangles[0] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[0]);
-    //cl.predicted_angles[1] = cl.viewangles[1] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[1]);
-    //cl.predicted_angles[2] = cl.viewangles[2] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[2]);
+    //cl.predicted_angles[0] = cl.viewAngles[0] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[0]);
+    //cl.predicted_angles[1] = cl.viewAngles[1] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[1]);
+    //cl.predicted_angles[2] = cl.viewAngles[2] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[2]);
 }
 
 void CL_PredictMovement(void)

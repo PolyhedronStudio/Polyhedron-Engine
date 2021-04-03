@@ -672,7 +672,7 @@ ioentry_t *NET_AddFd(qsocket_t fd)
 {
     ioentry_t *e = os_add_io(fd);
 
-    e->inuse = true;
+    e->inUse = true;
     return e;
 }
 
@@ -692,7 +692,7 @@ void NET_RemoveFd(qsocket_t fd)
 
     for (i = io_numfds - 1; i >= 0; i--) {
         e = &io_entries[i];
-        if (e->inuse) {
+        if (e->inUse) {
             break;
         }
     }
@@ -728,7 +728,7 @@ int NET_Sleep(int msec)
     FD_ZERO(&efds);
 
     for (i = 0, e = io_entries; i < io_numfds; i++, e++) {
-        if (!e->inuse) {
+        if (!e->inUse) {
             continue;
         }
         fd = os_get_fd(e);
@@ -754,7 +754,7 @@ int NET_Sleep(int msec)
 
     for (i = 0; i < io_numfds; i++) {
         e = &io_entries[i];
-        if (!e->inuse) {
+        if (!e->inUse) {
             continue;
         }
         fd = os_get_fd(e);
@@ -795,7 +795,7 @@ int NET_Sleepv(int msec, ...)
             break;
         }
         e = os_get_io(fd);
-        if (!e->inuse) {
+        if (!e->inUse) {
             continue;
         }
         e->canread = false;
@@ -826,7 +826,7 @@ int NET_Sleepv(int msec, ...)
             break;
         }
         e = os_get_io(fd);
-        if (!e->inuse) {
+        if (!e->inUse) {
             continue;
         }
         if (FD_ISSET(fd, &rfds)) e->canread = true;

@@ -223,19 +223,19 @@ void SV_CalcViewOffset(edict_t *ent)
 //===================================
 
     // base angles
-    angles = ent->client->ps.kick_angles;
+    angles = ent->client->ps.kickAngles;
 
     // if dead, fix the angle and don't add any kick
     if (ent->deadflag) {
         VectorClear(angles);
 
-        ent->client->ps.viewangles[vec3_t::Roll] = 40;
-        ent->client->ps.viewangles[vec3_t::Pitch] = -15;
-        ent->client->ps.viewangles[vec3_t::Yaw] = ent->client->killer_yaw;
+        ent->client->ps.viewAngles[vec3_t::Roll] = 40;
+        ent->client->ps.viewAngles[vec3_t::Pitch] = -15;
+        ent->client->ps.viewAngles[vec3_t::Yaw] = ent->client->killer_yaw;
     } else {
         // add angles based on weapon kick
 
-        VectorCopy(ent->client->kick_angles, angles);
+        VectorCopy(ent->client->kickAngles, angles);
 
         // add angles based on damage kick
 
@@ -304,7 +304,7 @@ void SV_CalcViewOffset(edict_t *ent)
 
     // add kick offset
 
-    VectorAdd(v, ent->client->kick_origin, v);
+    VectorAdd(v, ent->client->kickOrigin, v);
 
     // absolutely bound offsets
     // so the view can never be outside the player box
@@ -347,7 +347,7 @@ void SV_CalcGunOffset(edict_t *ent)
 
     // gun angles from delta movement
     for (i = 0 ; i < 3 ; i++) {
-        delta = ent->client->oldviewangles[i] - ent->client->ps.viewangles[i];
+        delta = ent->client->oldViewAngles[i] - ent->client->ps.viewAngles[i];
         if (delta > 180)
             delta -= 360;
         if (delta < -180)
@@ -489,12 +489,12 @@ void P_FallingDamage(edict_t *ent)
     if (ent->movetype == MOVETYPE_NOCLIP)
         return;
 
-    if ((ent->client->oldvelocity[2] < 0) && (ent->velocity[2] > ent->client->oldvelocity[2]) && (!ent->groundentity)) {
-        delta = ent->client->oldvelocity[2];
+    if ((ent->client->oldVelocity[2] < 0) && (ent->velocity[2] > ent->client->oldVelocity[2]) && (!ent->groundentity)) {
+        delta = ent->client->oldVelocity[2];
     } else {
         if (!ent->groundentity)
             return;
-        delta = ent->velocity[2] - ent->client->oldvelocity[2];
+        delta = ent->velocity[2] - ent->client->oldVelocity[2];
     }
     delta = delta * delta * 0.0001;
 
@@ -992,11 +992,12 @@ void ClientEndServerFrame(edict_t *ent)
     // should be determined by the client
     SV_CalcBlend(ent);
 
-    // chase cam stuff
+    // Set the stats to display for this client (one of the chase spectator stats or...)
     if (ent->client->resp.spectator)
         HUD_SetSpectatorStats(ent);
     else
         HUD_SetClientStats(ent);
+
     HUD_CheckChaseStats(ent);
 
     G_SetClientEvent(ent);
@@ -1007,12 +1008,12 @@ void ClientEndServerFrame(edict_t *ent)
 
     G_SetClientFrame(ent);
 
-    VectorCopy(ent->velocity, ent->client->oldvelocity);
-    VectorCopy(ent->client->ps.viewangles, ent->client->oldviewangles);
+    ent->client->oldVelocity = ent->velocity;
+    ent->client->oldViewAngles = ent->client->ps.viewAngles;
 
-    // clear weapon kicks
-    VectorClear(ent->client->kick_origin);
-    VectorClear(ent->client->kick_angles);
+    // Clear weapon kicks
+    ent->client->kickOrigin = vec3_zero();
+    ent->client->kickAngles = vec3_zero();
 
     // if the scoreboard is up, update it
     if (ent->client->showscores && !(level.framenum & 31)) {

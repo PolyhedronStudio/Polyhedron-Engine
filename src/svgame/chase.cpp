@@ -27,7 +27,7 @@ void UpdateChaseCam(edict_t *ent)
     vec3_t angles;
 
     // is our chase target gone?
-    if (!ent->client->chase_target->inuse
+    if (!ent->client->chase_target->inUse
         || ent->client->chase_target->client->resp.spectator) {
         edict_t *old = ent->client->chase_target;
         ChaseNext(ent);
@@ -91,11 +91,11 @@ void UpdateChaseCam(edict_t *ent)
         ent->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(targ->client->v_angle[i] - ent->client->resp.cmd_angles[i]);
 
     if (targ->deadflag) {
-        ent->client->ps.viewangles[vec3_t::Roll] = 40;
-        ent->client->ps.viewangles[vec3_t::Pitch] = -15;
-        ent->client->ps.viewangles[vec3_t::Yaw] = targ->client->killer_yaw;
+        ent->client->ps.viewAngles[vec3_t::Roll] = 40;
+        ent->client->ps.viewAngles[vec3_t::Pitch] = -15;
+        ent->client->ps.viewAngles[vec3_t::Yaw] = targ->client->killer_yaw;
     } else {
-        VectorCopy(targ->client->v_angle, ent->client->ps.viewangles);
+        VectorCopy(targ->client->v_angle, ent->client->ps.viewAngles);
         VectorCopy(targ->client->v_angle, ent->client->v_angle);
     }
 
@@ -118,7 +118,7 @@ void ChaseNext(edict_t *ent)
         if (i > maxclients->value)
             i = 1;
         e = g_edicts + i;
-        if (!e->inuse)
+        if (!e->inUse)
             continue;
         if (!e->client->resp.spectator)
             break;
@@ -142,7 +142,7 @@ void ChasePrev(edict_t *ent)
         if (i < 1)
             i = maxclients->value;
         e = g_edicts + i;
-        if (!e->inuse)
+        if (!e->inUse)
             continue;
         if (!e->client->resp.spectator)
             break;
@@ -159,7 +159,7 @@ void GetChaseTarget(edict_t *ent)
 
     for (i = 1; i <= maxclients->value; i++) {
         other = g_edicts + i;
-        if (other->inuse && !other->client->resp.spectator) {
+        if (other->inUse && !other->client->resp.spectator) {
             ent->client->chase_target = other;
             ent->client->update_chase = true;
             UpdateChaseCam(ent);

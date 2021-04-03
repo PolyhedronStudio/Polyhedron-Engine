@@ -298,7 +298,7 @@ void turret_driver_think(edict_t *self)
 
     self->nextthink = level.time + FRAMETIME;
 
-    if (self->enemy && (!self->enemy->inuse || self->enemy->health <= 0))
+    if (self->enemy && (!self->enemy->inUse || self->enemy->health <= 0))
         self->enemy = NULL;
 
     if (!self->enemy) {

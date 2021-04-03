@@ -258,7 +258,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
         ent->flags &= ~FL_PARTIALGROUND;
     }
     ent->groundentity = trace.ent;
-    ent->groundentity_linkcount = trace.ent->linkcount;
+    ent->groundentity_linkcount = trace.ent->linkCount;
 
 // the move is ok
     if (relink) {
@@ -490,7 +490,7 @@ void M_MoveToGoal(edict_t *ent, float dist)
 
 // bump around...
     if ((rand() & 3) == 1 || !SV_StepDirection(ent, ent->ideal_yaw, dist)) {
-        if (ent->inuse)
+        if (ent->inUse)
             SV_NewChaseDir(ent, goal, dist);
     }
 }

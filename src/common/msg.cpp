@@ -735,15 +735,15 @@ void MSG_PackPlayer(player_packed_t *out, const player_state_t *in)
     int i;
 
     out->pmove = in->pmove;
-    out->viewangles[0] = ANGLE2SHORT(in->viewangles.x);
-    out->viewangles[1] = ANGLE2SHORT(in->viewangles.y);
-    out->viewangles[2] = ANGLE2SHORT(in->viewangles.z);
+    out->viewAngles[0] = ANGLE2SHORT(in->viewAngles.x);
+    out->viewAngles[1] = ANGLE2SHORT(in->viewAngles.y);
+    out->viewAngles[2] = ANGLE2SHORT(in->viewAngles.z);
     out->viewoffset[0] = in->viewoffset[0] * 4;
     out->viewoffset[1] = in->viewoffset[1] * 4;
     out->viewoffset[2] = in->viewoffset[2] * 4;
-    out->kick_angles[0] = in->kick_angles[0] * 4;
-    out->kick_angles[1] = in->kick_angles[1] * 4;
-    out->kick_angles[2] = in->kick_angles[2] * 4;
+    out->kickAngles[0] = in->kickAngles[0] * 4;
+    out->kickAngles[1] = in->kickAngles[1] * 4;
+    out->kickAngles[2] = in->kickAngles[2] * 4;
     out->gunoffset[0] = in->gunoffset[0] * 4;
     out->gunoffset[1] = in->gunoffset[1] * 4;
     out->gunoffset[2] = in->gunoffset[2] * 4;
@@ -811,14 +811,14 @@ void MSG_WriteDeltaPlayerstate_Default(const player_packed_t *from, const player
         to->viewoffset[2] != from->viewoffset[2])
         pflags |= PS_VIEWOFFSET;
 
-    if (to->viewangles[0] != from->viewangles[0] ||
-        to->viewangles[1] != from->viewangles[1] ||
-        to->viewangles[2] != from->viewangles[2])
+    if (to->viewAngles[0] != from->viewAngles[0] ||
+        to->viewAngles[1] != from->viewAngles[1] ||
+        to->viewAngles[2] != from->viewAngles[2])
         pflags |= PS_VIEWANGLES;
 
-    if (to->kick_angles[0] != from->kick_angles[0] ||
-        to->kick_angles[1] != from->kick_angles[1] ||
-        to->kick_angles[2] != from->kick_angles[2])
+    if (to->kickAngles[0] != from->kickAngles[0] ||
+        to->kickAngles[1] != from->kickAngles[1] ||
+        to->kickAngles[2] != from->kickAngles[2])
         pflags |= PS_KICKANGLES;
 
     if (to->blend[0] != from->blend[0] ||
@@ -893,15 +893,15 @@ void MSG_WriteDeltaPlayerstate_Default(const player_packed_t *from, const player
     }
 
     if (pflags & PS_VIEWANGLES) {
-        MSG_WriteShort(to->viewangles[0]);
-        MSG_WriteShort(to->viewangles[1]);
-        MSG_WriteShort(to->viewangles[2]);
+        MSG_WriteShort(to->viewAngles[0]);
+        MSG_WriteShort(to->viewAngles[1]);
+        MSG_WriteShort(to->viewAngles[2]);
     }
 
     if (pflags & PS_KICKANGLES) {
-        MSG_WriteChar(to->kick_angles[0]);
-        MSG_WriteChar(to->kick_angles[1]);
-        MSG_WriteChar(to->kick_angles[2]);
+        MSG_WriteChar(to->kickAngles[0]);
+        MSG_WriteChar(to->kickAngles[1]);
+        MSG_WriteChar(to->kickAngles[2]);
     }
 
     if (pflags & PS_WEAPONINDEX)
@@ -1012,22 +1012,22 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
         pflags |= PS_VIEWOFFSET;
 
     if (!(flags & MSG_PS_IGNORE_VIEWANGLES)) {
-        if (from->viewangles[0] != to->viewangles[0] ||
-            from->viewangles[1] != to->viewangles[1])
+        if (from->viewAngles[0] != to->viewAngles[0] ||
+            from->viewAngles[1] != to->viewAngles[1])
             pflags |= PS_VIEWANGLES;
 
-        if (from->viewangles[2] != to->viewangles[2])
+        if (from->viewAngles[2] != to->viewAngles[2])
             eflags |= EPS_VIEWANGLE2;
     } else {
         // save previous state
-        to->viewangles[0] = from->viewangles[0];
-        to->viewangles[1] = from->viewangles[1];
-        to->viewangles[2] = from->viewangles[2];
+        to->viewAngles[0] = from->viewAngles[0];
+        to->viewAngles[1] = from->viewAngles[1];
+        to->viewAngles[2] = from->viewAngles[2];
     }
 
-    if (from->kick_angles[0] != to->kick_angles[0] ||
-        from->kick_angles[1] != to->kick_angles[1] ||
-        from->kick_angles[2] != to->kick_angles[2])
+    if (from->kickAngles[0] != to->kickAngles[0] ||
+        from->kickAngles[1] != to->kickAngles[1] ||
+        from->kickAngles[2] != to->kickAngles[2])
         pflags |= PS_KICKANGLES;
 
     if (!(flags & MSG_PS_IGNORE_BLEND)) {
@@ -1144,17 +1144,17 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
     }
 
     if (pflags & PS_VIEWANGLES) {
-        MSG_WriteShort(to->viewangles[0]);
-        MSG_WriteShort(to->viewangles[1]);
+        MSG_WriteShort(to->viewAngles[0]);
+        MSG_WriteShort(to->viewAngles[1]);
     }
 
     if (eflags & EPS_VIEWANGLE2)
-        MSG_WriteShort(to->viewangles[2]);
+        MSG_WriteShort(to->viewAngles[2]);
 
     if (pflags & PS_KICKANGLES) {
-        MSG_WriteChar(to->kick_angles[0]);
-        MSG_WriteChar(to->kick_angles[1]);
-        MSG_WriteChar(to->kick_angles[2]);
+        MSG_WriteChar(to->kickAngles[0]);
+        MSG_WriteChar(to->kickAngles[1]);
+        MSG_WriteChar(to->kickAngles[2]);
     }
 
     if (pflags & PS_WEAPONINDEX)
@@ -1255,18 +1255,18 @@ void MSG_WriteDeltaPlayerstate_Packet(const player_packed_t *from,
         pflags |= PPS_VIEWOFFSET;
 
     // View Angles X Y.
-    if (from->viewangles[0] != to->viewangles[0] ||
-        from->viewangles[1] != to->viewangles[1])
+    if (from->viewAngles[0] != to->viewAngles[0] ||
+        from->viewAngles[1] != to->viewAngles[1])
         pflags |= PPS_VIEWANGLES;
 
     // View Angles Z.
-    if (from->viewangles[2] != to->viewangles[2])
+    if (from->viewAngles[2] != to->viewAngles[2])
         pflags |= PPS_VIEWANGLE2;
 
     // Kick Angles.
-    if (from->kick_angles[0] != to->kick_angles[0] ||
-        from->kick_angles[1] != to->kick_angles[1] ||
-        from->kick_angles[2] != to->kick_angles[2])
+    if (from->kickAngles[0] != to->kickAngles[0] ||
+        from->kickAngles[1] != to->kickAngles[1] ||
+        from->kickAngles[2] != to->kickAngles[2])
         pflags |= PPS_KICKANGLES;
 
     // Blend.
@@ -1358,19 +1358,19 @@ void MSG_WriteDeltaPlayerstate_Packet(const player_packed_t *from,
 
     // View Angles X Y.
     if (pflags & PPS_VIEWANGLES) {
-        MSG_WriteShort(to->viewangles[0]);
-        MSG_WriteShort(to->viewangles[1]);
+        MSG_WriteShort(to->viewAngles[0]);
+        MSG_WriteShort(to->viewAngles[1]);
     }
 
     // View Angles Z.
     if (pflags & PPS_VIEWANGLE2)
-        MSG_WriteShort(to->viewangles[2]);
+        MSG_WriteShort(to->viewAngles[2]);
 
     // Kick Angles.
     if (pflags & PPS_KICKANGLES) {
-        MSG_WriteChar(to->kick_angles[0]);
-        MSG_WriteChar(to->kick_angles[1]);
-        MSG_WriteChar(to->kick_angles[2]);
+        MSG_WriteChar(to->kickAngles[0]);
+        MSG_WriteChar(to->kickAngles[1]);
+        MSG_WriteChar(to->kickAngles[2]);
     }
 
     // Weapon Index.
@@ -2081,16 +2081,16 @@ void MSG_ParseDeltaPlayerstate_Default(const player_state_t *from,
 
     // View Angles.
     if (flags & PS_VIEWANGLES) {
-        to->viewangles[0] = MSG_ReadAngle16();
-        to->viewangles[1] = MSG_ReadAngle16();
-        to->viewangles[2] = MSG_ReadAngle16();
+        to->viewAngles[0] = MSG_ReadAngle16();
+        to->viewAngles[1] = MSG_ReadAngle16();
+        to->viewAngles[2] = MSG_ReadAngle16();
     }
 
     // Kick Angles.
     if (flags & PS_KICKANGLES) {
-        to->kick_angles[0] = MSG_ReadChar() * 0.25f;
-        to->kick_angles[1] = MSG_ReadChar() * 0.25f;
-        to->kick_angles[2] = MSG_ReadChar() * 0.25f;
+        to->kickAngles[0] = MSG_ReadChar() * 0.25f;
+        to->kickAngles[1] = MSG_ReadChar() * 0.25f;
+        to->kickAngles[2] = MSG_ReadChar() * 0.25f;
     }
 
     // Weapon Index.
@@ -2217,20 +2217,20 @@ void MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t    *from,
 
     // View Angles X Y.
     if (flags & PS_VIEWANGLES) {
-        to->viewangles[0] = MSG_ReadAngle16();
-        to->viewangles[1] = MSG_ReadAngle16();
+        to->viewAngles[0] = MSG_ReadAngle16();
+        to->viewAngles[1] = MSG_ReadAngle16();
     }
     
     // ViewAngles Z.
     if (extraflags & EPS_VIEWANGLE2) {
-        to->viewangles[2] = MSG_ReadAngle16();
+        to->viewAngles[2] = MSG_ReadAngle16();
     }
 
     // Kick Angles.
     if (flags & PS_KICKANGLES) {
-        to->kick_angles[0] = MSG_ReadChar() * 0.25f;
-        to->kick_angles[1] = MSG_ReadChar() * 0.25f;
-        to->kick_angles[2] = MSG_ReadChar() * 0.25f;
+        to->kickAngles[0] = MSG_ReadChar() * 0.25f;
+        to->kickAngles[1] = MSG_ReadChar() * 0.25f;
+        to->kickAngles[2] = MSG_ReadChar() * 0.25f;
     }
     
     // Weapon Index.
@@ -2342,20 +2342,20 @@ void MSG_ParseDeltaPlayerstate_Packet(const player_state_t *from,
 
     // View Angles X Y.
     if (flags & PPS_VIEWANGLES) {
-        to->viewangles[0] = MSG_ReadAngle16();
-        to->viewangles[1] = MSG_ReadAngle16();
+        to->viewAngles[0] = MSG_ReadAngle16();
+        to->viewAngles[1] = MSG_ReadAngle16();
     }
 
     // View Angles Z.
     if (flags & PPS_VIEWANGLE2) {
-        to->viewangles[2] = MSG_ReadAngle16();
+        to->viewAngles[2] = MSG_ReadAngle16();
     }
 
     // Kick Angles/
     if (flags & PPS_KICKANGLES) {
-        to->kick_angles[0] = MSG_ReadChar() * 0.25f;
-        to->kick_angles[1] = MSG_ReadChar() * 0.25f;
-        to->kick_angles[2] = MSG_ReadChar() * 0.25f;
+        to->kickAngles[0] = MSG_ReadChar() * 0.25f;
+        to->kickAngles[1] = MSG_ReadChar() * 0.25f;
+        to->kickAngles[2] = MSG_ReadChar() * 0.25f;
     }
 
     // Weapon Index.
@@ -2437,8 +2437,8 @@ void MSG_ShowDeltaPlayerstateBits_Default(int flags)
     S(M_GRAVITY,        "pmove.gravity");
     S(M_DELTA_ANGLES,   "pmove.delta_angles");
     S(VIEWOFFSET,       "viewoffset");
-    S(VIEWANGLES,       "viewangles");
-    S(KICKANGLES,       "kick_angles");
+    S(VIEWANGLES,       "viewAngles");
+    S(KICKANGLES,       "kickAngles");
     S(WEAPONINDEX,      "gunindex");
     S(WEAPONFRAME,      "gunframe");
     S(BLEND,            "blend");
@@ -2461,9 +2461,9 @@ void MSG_ShowDeltaPlayerstateBits_Enhanced(int flags, int extraflags)
     SP(M_GRAVITY,       "pmove.gravity");
     SP(M_DELTA_ANGLES,  "pmove.delta_angles");
     SP(VIEWOFFSET,      "viewoffset");
-    SP(VIEWANGLES,      "viewangles[0,1]");
-    SE(VIEWANGLE2,      "viewangles[2]");
-    SP(KICKANGLES,      "kick_angles");
+    SP(VIEWANGLES,      "viewAngles[0,1]");
+    SE(VIEWANGLE2,      "viewAngles[2]");
+    SP(KICKANGLES,      "kickAngles");
     SP(WEAPONINDEX,     "gunindex");
     SP(WEAPONFRAME,     "gunframe");
     SE(GUNOFFSET,       "gunoffset");
@@ -2553,9 +2553,9 @@ void MSG_ShowDeltaPlayerstateBits_Packet(int flags)
     S(M_ORIGIN,     "pmove.origin[0,1]");
     S(M_ORIGIN2,    "pmove.origin[2]");
     S(VIEWOFFSET,   "viewoffset");
-    S(VIEWANGLES,   "viewangles[0,1]");
-    S(VIEWANGLE2,   "viewangles[2]");
-    S(KICKANGLES,   "kick_angles");
+    S(VIEWANGLES,   "viewAngles[0,1]");
+    S(VIEWANGLE2,   "viewAngles[2]");
+    S(KICKANGLES,   "kickAngles");
     S(WEAPONINDEX,  "gunindex");
     S(WEAPONFRAME,  "gunframe");
     S(GUNOFFSET,    "gunoffset");

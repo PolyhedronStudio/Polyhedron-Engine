@@ -330,7 +330,7 @@ static void GL_RotateForViewer(void)
 {
     GLfloat *matrix = glr.viewmatrix;
 
-    AnglesToAxis(glr.fd.viewangles, glr.viewaxis);
+    AnglesToAxis(glr.fd.viewAngles, glr.viewaxis);
 
     matrix[0] = -glr.viewaxis[1][0];
     matrix[4] = -glr.viewaxis[1][1];

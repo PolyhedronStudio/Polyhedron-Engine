@@ -233,7 +233,7 @@ void Cmd_Give_f(edict_t *ent)
         it_ent->classname = it->classname;
         SpawnItem(it_ent, it);
         Touch_Item(it_ent, ent, NULL, NULL);
-        if (it_ent->inuse)
+        if (it_ent->inUse)
             G_FreeEdict(it_ent);
 
         if (!give_all)
@@ -279,7 +279,7 @@ void Cmd_Give_f(edict_t *ent)
         it_ent->classname = it->classname;
         SpawnItem(it_ent, it);
         Touch_Item(it_ent, ent, NULL, NULL);
-        if (it_ent->inuse)
+        if (it_ent->inUse)
             G_FreeEdict(it_ent);
     }
 }
@@ -805,7 +805,7 @@ void Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 
     for (j = 1; j <= game.maxclients; j++) {
         other = &g_edicts[j];
-        if (!other->inuse)
+        if (!other->inUse)
             continue;
         if (!other->client)
             continue;
@@ -827,7 +827,7 @@ void Cmd_PlayerList_f(edict_t *ent)
     // connect time, ping, score, name
     *text = 0;
     for (i = 0, e2 = g_edicts + 1; i < maxclients->value; i++, e2++) {
-        if (!e2->inuse)
+        if (!e2->inUse)
             continue;
 
         Q_snprintf(st, sizeof(st), "%02d:%02d %4d %3d %s%s\n",

@@ -41,8 +41,8 @@ void weapon_shotgun_fire(edict_t* ent)
 
     AngleVectors(ent->client->v_angle, &forward, &right, NULL);
 
-    VectorScale(forward, -2, ent->client->kick_origin);
-    ent->client->kick_angles[0] = -2;
+    VectorScale(forward, -2, ent->client->kickOrigin);
+    ent->client->kickAngles[0] = -2;
 
     VectorSet(offset, 0, 8, ent->viewheight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);

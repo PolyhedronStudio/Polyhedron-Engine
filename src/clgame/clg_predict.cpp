@@ -23,7 +23,7 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
     if (cl->frame.number == 0) {
         cl->predicted_origin = cl->frame.ps.pmove.origin;
         cl->predicted_velocity = cl->frame.ps.pmove.velocity;
-        cl->predicted_angles = cl->frame.ps.viewangles;
+        cl->predicted_angles = cl->frame.ps.viewAngles;
     }
 
     // Compare what the server returned with what we had predicted it to be
@@ -31,26 +31,18 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
 
     // Length is 
     len = vec3_length(cl->prediction_error);
-    //if (len < 0.125f  || len > 80.f) {
-
-    //    cl->prediction_error = vec3_zero();
-    //    return;
-    //}
     if (len > .1f) {
-        if (len > 2400.f / (1.0f / 40)) {
-            //Com_DPrint("MAX_DELTA_ORIGIN: (%i,%i,%i)\n", (int)cl->prediction_error.x, cl->prediction_error.y, cl->prediction_error.z);
+        if (len > 2400.f / (1.0f / BASE_FRAMERATE)) {
+            Com_DPrint("MAX_DELTA_ORIGIN: %s\n", vec3_to_str(cl->prediction_error).c_str());
 
             cl->predicted_origin = cl->frame.ps.pmove.origin;
             cl->predicted_velocity = cl->frame.ps.pmove.velocity;
-            cl->viewangles = cl->frame.ps.viewangles;
-            
-            //out->view.offset = in->view_offset;
-            //out->view.angles = in->view_angles;
+            cl->viewAngles = cl->frame.ps.viewAngles;
 
             cl->prediction_error = vec3_zero();
         }
         else {
-            //Com_DPrint("(%i,%i,%i)\n", (int)cl->prediction_error.x, cl->prediction_error.y, cl->prediction_error.z);
+            Com_DPrint("CLG_CheckPredictionError: %s\n", vec3_to_str(cl->prediction_error).c_str());
         }
     }
 
@@ -59,9 +51,6 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
         cl->predicted_step_frame = cmd + 1;
 
     cl->predicted_origins[cmd & CMD_MASK] = cl->frame.ps.pmove.origin;
-
-    // Save for error interpolation
-//    VectorCopy(delta, cl->prediction_error);
 }
 
 //
@@ -72,9 +61,9 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
 //================
 //
 void CLG_PredictAngles(void) {
-    cl->predicted_angles[0] = cl->viewangles[0] + SHORT2ANGLE(cl->frame.ps.pmove.delta_angles[0]);
-    cl->predicted_angles[1] = cl->viewangles[1] + SHORT2ANGLE(cl->frame.ps.pmove.delta_angles[1]);
-    cl->predicted_angles[2] = cl->viewangles[2] + SHORT2ANGLE(cl->frame.ps.pmove.delta_angles[2]);
+    cl->predicted_angles[0] = cl->viewAngles[0] + SHORT2ANGLE(cl->frame.ps.pmove.delta_angles[0]);
+    cl->predicted_angles[1] = cl->viewAngles[1] + SHORT2ANGLE(cl->frame.ps.pmove.delta_angles[1]);
+    cl->predicted_angles[2] = cl->viewAngles[2] + SHORT2ANGLE(cl->frame.ps.pmove.delta_angles[2]);
 }
 
 //
@@ -88,7 +77,7 @@ static void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, cons
 {
     int         i;
     trace_t     trace;
-    mnode_t* headnode;
+    mnode_t* headNode;
     centity_t* ent;
     mmodel_t* cmodel;
 
@@ -100,17 +89,17 @@ static void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, cons
             cmodel = cl->model_clip[ent->current.modelindex];
             if (!cmodel)
                 continue;
-            headnode = cmodel->headnode;
+            headNode = cmodel->headNode;
         }
         else {
-            headnode = clgi.CM_HeadnodeForBox(ent->mins, ent->maxs);
+            headNode = clgi.CM_HeadnodeForBox(ent->mins, ent->maxs);
         }
 
         if (tr->allsolid)
             return;
 
         clgi.CM_TransformedBoxTrace(&trace, start, end,
-            mins, maxs, headnode, CONTENTS_MASK_PLAYERSOLID,
+            mins, maxs, headNode, CONTENTS_MASK_PLAYERSOLID,
             ent->current.origin, ent->current.angles);
 
         clgi.CM_ClipEntity(tr, &trace, (struct edict_s*)ent);
@@ -157,7 +146,7 @@ static int CLG_PointContents(const vec3_t &point)
             continue;
 
         contents |= clgi.CM_TransformedPointContents(
-            point, cmodel->headnode,
+            point, cmodel->headNode,
             ent->current.origin,
             ent->current.angles);
     }

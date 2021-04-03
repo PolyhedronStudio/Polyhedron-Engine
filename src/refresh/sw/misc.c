@@ -257,7 +257,7 @@ void R_SetupFrame(void)
     VectorCopy(r_newrefdef.vieworg, modelorg);
     VectorCopy(r_newrefdef.vieworg, r_origin);
 
-    AngleVectors(r_newrefdef.viewangles, vpn, vright, vup);
+    AngleVectors(r_newrefdef.viewAngles, vpn, vright, vup);
 
 // current viewleaf
     if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) {

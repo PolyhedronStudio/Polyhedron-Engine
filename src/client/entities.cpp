@@ -238,12 +238,12 @@ static void set_active_state(void)
         VectorCopy(cl.frame.ps.pmove.velocity, cl.predicted_velocity);
 
         if (cl.frame.ps.pmove.type < PM_DEAD) {
-            // enhanced servers don't send viewangles
+            // enhanced servers don't send viewAngles
             // N&C: Let the client game module predict angles.
             CL_GM_PredictAngles();
         } else {
             // just use what server provided
-            VectorCopy(cl.frame.ps.viewangles, cl.predicted_angles);
+            VectorCopy(cl.frame.ps.viewAngles, cl.predicted_angles);
         }
     }
 
@@ -374,7 +374,7 @@ void CL_DeltaFrame(void)
         CL_GTV_EmitFrame();
 
     if (cls.demo.playback) {
-        // this delta has nothing to do with local viewangles,
+        // this delta has nothing to do with local viewAngles,
         // clear it to avoid interfering with demo freelook hack
         VectorClear(cl.frame.ps.pmove.delta_angles);
     }

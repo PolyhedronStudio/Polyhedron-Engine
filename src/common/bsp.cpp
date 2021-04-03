@@ -627,7 +627,7 @@ LOAD(Submodels)
     dmodel_t    *in;
     mmodel_t    *out;
     int         i, j;
-    uint32_t    headnode;
+    uint32_t    headNode;
 #if USE_REF
     uint32_t    firstface, numfaces, lastface;
 #endif
@@ -649,21 +649,21 @@ LOAD(Submodels)
             out->maxs[j] = LittleFloat(in->maxs[j]) + 1;
             out->origin[j] = LittleFloat(in->origin[j]);
         }
-        headnode = LittleLong(in->headnode);
-        if (headnode & 0x80000000) {
+        headNode = LittleLong(in->headNode);
+        if (headNode & 0x80000000) {
             // be careful, some models have no nodes, just a leaf
-            headnode = ~headnode;
-            if (headnode >= bsp->numleafs) {
+            headNode = ~headNode;
+            if (headNode >= bsp->numleafs) {
                 DEBUG("bad headleaf");
                 return Q_ERR_BAD_INDEX;
             }
-            out->headnode = (mnode_t *)(bsp->leafs + headnode);
+            out->headNode = (mnode_t *)(bsp->leafs + headNode);
         } else {
-            if (headnode >= bsp->numnodes) {
-                DEBUG("bad headnode");
+            if (headNode >= bsp->numnodes) {
+                DEBUG("bad headNode");
                 return Q_ERR_BAD_INDEX;
             }
-            out->headnode = bsp->nodes + headnode;
+            out->headNode = bsp->nodes + headNode;
         }
 #if USE_REF
         if (i == 0) {
@@ -878,12 +878,12 @@ static qerror_t BSP_ValidateTree(bsp_t *bsp)
 #endif
 
     for (i = 0, mod = bsp->models; i < bsp->nummodels; i++, mod++) {
-        if (i == 0 && mod->headnode != bsp->nodes) {
-            DEBUG("map model 0 headnode is not the first node");
+        if (i == 0 && mod->headNode != bsp->nodes) {
+            DEBUG("map model 0 headNode is not the first node");
             return Q_ERR_INVALID_FORMAT;
         }
 
-        ret = BSP_SetParent(mod->headnode, ~i);
+        ret = BSP_SetParent(mod->headNode, ~i);
         if (ret) {
             return ret;
         }
@@ -1315,17 +1315,17 @@ static qboolean BSP_RecursiveLightPoint(mnode_t *node, float p1f, float p2f, con
     return false;
 }
 
-void BSP_LightPoint(lightpoint_t *point, const vec3_t &start, const vec3_t &end, mnode_t *headnode)
+void BSP_LightPoint(lightpoint_t *point, const vec3_t &start, const vec3_t &end, mnode_t *headNode)
 {
     light_point = point;
     light_point->surf = NULL;
     light_point->fraction = 1;
 
-    BSP_RecursiveLightPoint(headnode, 0, 1, start, end);
+    BSP_RecursiveLightPoint(headNode, 0, 1, start, end);
 }
 
 void BSP_TransformedLightPoint(lightpoint_t *point, const vec3_t &start, const vec3_t &end,
-                               mnode_t *headnode, const vec3_t &origin, vec3_t *angles)
+                               mnode_t *headNode, const vec3_t &origin, vec3_t *angles)
 {
     vec3_t start_l, end_l;
     vec3_t axis[3];
@@ -1346,7 +1346,7 @@ void BSP_TransformedLightPoint(lightpoint_t *point, const vec3_t &start, const v
     }
 
     // sweep the line through the model
-    if (!BSP_RecursiveLightPoint(headnode, 0, 1, start_l, end_l))
+    if (!BSP_RecursiveLightPoint(headNode, 0, 1, start_l, end_l))
         return;
 
     // rotate plane normal into the worlds frame of reference

@@ -52,7 +52,7 @@ typedef struct {
 #ifdef _WIN32
     qsocket_t fd;
 #endif
-    qboolean inuse: 1;
+    qboolean inUse: 1;
     qboolean canread: 1;
     qboolean canwrite: 1;
     qboolean canexcept: 1;

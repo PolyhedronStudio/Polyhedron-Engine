@@ -198,7 +198,7 @@ glCullResult_t GL_CullLocalBox(const vec3_t origin, vec3_t bounds[2]);
 
 //void GL_DrawBox(const vec3_t origin, vec3_t bounds[2]);
 
-qboolean GL_AllocBlock(int width, int height, int *inuse,
+qboolean GL_AllocBlock(int width, int height, int *inUse,
                        int w, int h, int *s, int *t);
 
 void GL_MultMatrix(GLfloat *out, const GLfloat *a, const GLfloat *b);
@@ -255,7 +255,7 @@ typedef struct maliasmesh_s {
 #define LM_BLOCK_HEIGHT     256
 
 typedef struct {
-    int         inuse[LM_BLOCK_WIDTH];
+    int         inUse[LM_BLOCK_WIDTH];
     byte        buffer[LM_BLOCK_WIDTH * LM_BLOCK_HEIGHT * 4];
     qboolean    dirty;
     int         comp;

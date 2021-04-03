@@ -1987,7 +1987,7 @@ static void PM_Init(pm_move_t* pmove) {
 //===============
 //
 static void PM_ClampAngles(void) {
-    // TODO: Store viewangles in state, for prediction usages.
+    // TODO: Store viewAngles in state, for prediction usages.
     // pm->state.viewAngles = pm->cmd.angles; // 
     // copy the command angles into the outgoing state
     for (int i = 0; i < 3; i++) {

@@ -480,7 +480,7 @@ static qboolean player_is_active(const edict_t *ent)
 {
     int num;
 
-    if ((g_features->integer & GMF_PROPERINUSE) && !ent->inuse) {
+    if ((g_features->integer & GMF_PROPERINUSE) && !ent->inUse) {
         return false;
     }
 
@@ -546,7 +546,7 @@ static qboolean player_is_active(const edict_t *ent)
 
 static qboolean entity_is_active(const edict_t *ent)
 {
-    if ((g_features->integer & GMF_PROPERINUSE) && !ent->inuse) {
+    if ((g_features->integer & GMF_PROPERINUSE) && !ent->inUse) {
         return false;
     }
 

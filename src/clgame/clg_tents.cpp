@@ -685,7 +685,7 @@ static void CLG_AddPlayerBeams(void)
 			if (info_hand->integer == 2)
 				VectorMA(org, -1, cl->v_up, org);
 
-			// FIXME: use cl.refdef.viewangles?
+			// FIXME: use cl.refdef.viewAngles?
 			vectoangles2(dist, angles);
 
 			// if it's the heatbeam, draw the particle effect

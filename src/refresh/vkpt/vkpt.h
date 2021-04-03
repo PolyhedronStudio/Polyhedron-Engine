@@ -372,7 +372,7 @@ typedef struct bsp_mesh_s {
 	int num_indices;
 	int num_vertices;
 
-	int num_clusters;
+	int numClusters;
 	int *clusters;
 
 	int num_cluster_lights;

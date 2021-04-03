@@ -322,7 +322,7 @@ fix_old_origin(client_t *client, entity_packed_t *state, edict_t *ent, int e)
     if (ent->s.renderfx & RF_BEAM)
         return;
 
-    if (!ent->linkcount)
+    if (!ent->linkCount)
         return; // not linked in anywhere
 
     if (sent->create_framenum >= sv.framenum) {
@@ -438,7 +438,7 @@ void SV_BuildClientFrame(client_t *client)
         ent = EDICT_POOL(client, e);
 
         // ignore entities not in use
-        if (!ent->inuse && (g_features->integer & GMF_PROPERINUSE)) {
+        if (!ent->inUse && (g_features->integer & GMF_PROPERINUSE)) {
             continue;
         }
 
@@ -477,7 +477,7 @@ void SV_BuildClientFrame(client_t *client)
             {
                 // beams just check one point for PHS
                 if (ent->s.renderfx & RF_BEAM) {
-                    l = ent->clusternums[0];
+                    l = ent->clusterNumbers[0];
                     if (!Q_IsBitSet(clientphs, l))
                         ent_visible = false;
                 }

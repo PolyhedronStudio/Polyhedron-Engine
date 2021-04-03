@@ -281,7 +281,7 @@ typedef struct
 	int			attack_state;
 	int			lefty;
 	float		idle_time;
-	int			linkcount;
+	int			linkCount;
 
 	int			power_armor_type;
 	int			power_armor_power;
@@ -375,15 +375,15 @@ struct edict_s
 									// of gclient_s to be a player_state_t
 									// but the rest of it is opaque
 
-	qboolean	inuse;
-	int			linkcount;
+	qboolean	inUse;
+	int			linkCount;
 
 	// FIXME: move these fields to a server private sv_entity_t
 	link_t		area;				// linked to a division node or leaf
 
-	int			num_clusters;		// if -1, use headnode instead
-	int			clusternums[MAX_ENT_CLUSTERS];
-	int			headnode;			// unused if num_clusters != -1
+	int			numClusters;		// if -1, use headNode instead
+	int			clusterNumbers[MAX_ENT_CLUSTERS];
+	int			headNode;			// unused if numClusters != -1
 	int			areanum, areanum2;
 
 	//================================
@@ -501,7 +501,7 @@ struct edict_s
 
 	edict_t		*chain;
 	edict_t		*enemy;
-	edict_t		*oldenemy;
+	edict_t		*oldEnemy;
 	edict_t		*activator;
 	edict_t		*groundentity;
 	int			groundentity_linkcount;
@@ -576,7 +576,7 @@ struct edict_s
 	char		*datafile;
 
 	// func_pushable
-	vec3_t      oldvelocity;    // Added for TREMOR to figure falling damage
+	vec3_t      oldVelocity;    // Added for TREMOR to figure falling damage
 	vec3_t      offset;         // Added for TREMOR - offset from func_pushable to pusher
 	float       density;
 	float		bob;            // bobbing in water amplitude

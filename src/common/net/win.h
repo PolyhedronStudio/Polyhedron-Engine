@@ -335,7 +335,7 @@ static ioentry_t *os_add_io(qsocket_t fd)
     int i;
 
     for (i = 0, e = io_entries; i < io_numfds; i++, e++) {
-        if (!e->inuse)
+        if (!e->inUse)
             break;
     }
 
@@ -354,7 +354,7 @@ static ioentry_t *os_get_io(qsocket_t fd)
     int i;
 
     for (i = 0, e = io_entries; i < io_numfds; i++, e++) {
-        if (!e->inuse)
+        if (!e->inUse)
             continue;
         if (e->fd == fd)
             return e;

@@ -262,15 +262,15 @@ extern "C" {
         // We need a way to share these values to cgame dll.
         mmodel_t    *(*CM_InlineModel) (cm_t *cm, const char *name);
         // TODO: Document.
-        int         (*CM_PointContents) (const vec3_t &p, mnode_t *headnode);
-        int         (*CM_TransformedPointContents) (const vec3_t &p, mnode_t *headnode,
+        int         (*CM_PointContents) (const vec3_t &p, mnode_t *headNode);
+        int         (*CM_TransformedPointContents) (const vec3_t &p, mnode_t *headNode,
                                                     const vec3_t &origin, const vec3_t &angles);
         void        (*CM_BoxTrace)(trace_t *trace, const vec3_t &start, const vec3_t &end,
                                     const vec3_t &mins, const vec3_t &maxs,
-                                    mnode_t *headnode, int brushmask);
+                                    mnode_t *headNode, int brushmask);
         void        (*CM_TransformedBoxTrace) (trace_t *trace, const vec3_t &start, const vec3_t &end,
                                                 const vec3_t &mins, const vec3_t &maxs,
-                                                mnode_t * headnode, int brushmask,
+                                                mnode_t * headNode, int brushmask,
                                                 const vec3_t &origin, const vec3_t &angles);
         void        (*CM_ClipEntity) (trace_t* dst, const trace_t* src, struct edict_s* ent);
 

@@ -130,14 +130,14 @@ qboolean SV_EdictIsVisible(cm_t *cm, edict_t *ent, byte *mask)
 {
     int i;
 
-    if (ent->num_clusters == -1) {
-        // too many leafs for individual check, go by headnode
-        return CM_HeadnodeVisible(CM_NodeNum(cm, ent->headnode), mask);
+    if (ent->numClusters == -1) {
+        // too many leafs for individual check, go by headNode
+        return CM_HeadnodeVisible(CM_NodeNum(cm, ent->headNode), mask);
     }
 
     // check individual leafs
-    for (i = 0; i < ent->num_clusters; i++) {
-        if (Q_IsBitSet(mask, ent->clusternums[i])) {
+    for (i = 0; i < ent->numClusters; i++) {
+        if (Q_IsBitSet(mask, ent->clusterNumbers[i])) {
             return true;
         }
     }
@@ -201,7 +201,7 @@ void SV_LinkEdict(cm_t *cm, edict_t *ent)
     ent->absmax[2] += 1;
 
 // link to PVS leafs
-    ent->num_clusters = 0;
+    ent->numClusters = 0;
     ent->areanum = 0;
     ent->areanum2 = 0;
 
@@ -228,11 +228,11 @@ void SV_LinkEdict(cm_t *cm, edict_t *ent)
     }
 
     if (num_leafs >= MAX_TOTAL_ENT_LEAFS) {
-        // assume we missed some leafs, and mark by headnode
-        ent->num_clusters = -1;
-        ent->headnode = CM_NumNode(cm, topnode);
+        // assume we missed some leafs, and mark by headNode
+        ent->numClusters = -1;
+        ent->headNode = CM_NumNode(cm, topnode);
     } else {
-        ent->num_clusters = 0;
+        ent->numClusters = 0;
         for (i = 0; i < num_leafs; i++) {
             if (clusters[i] == -1)
                 continue;        // not a visible leaf
@@ -240,14 +240,14 @@ void SV_LinkEdict(cm_t *cm, edict_t *ent)
                 if (clusters[j] == clusters[i])
                     break;
             if (j == i) {
-                if (ent->num_clusters == MAX_ENT_CLUSTERS) {
-                    // assume we missed some leafs, and mark by headnode
-                    ent->num_clusters = -1;
-                    ent->headnode = CM_NumNode(cm, topnode);
+                if (ent->numClusters == MAX_ENT_CLUSTERS) {
+                    // assume we missed some leafs, and mark by headNode
+                    ent->numClusters = -1;
+                    ent->headNode = CM_NumNode(cm, topnode);
                     break;
                 }
 
-                ent->clusternums[ent->num_clusters++] = clusters[i];
+                ent->clusterNumbers[ent->numClusters++] = clusters[i];
             }
         }
     }
@@ -276,7 +276,7 @@ void PF_LinkEdict(edict_t *ent)
     if (ent == ge->edicts)
         return;        // don't add the world
 
-    if (!ent->inuse) {
+    if (!ent->inUse) {
         Com_DPrintf("%s: entity %d is not in use\n", __func__, NUM_FOR_EDICT(ent));
         return;
     }
@@ -312,14 +312,14 @@ void PF_LinkEdict(edict_t *ent)
     SV_LinkEdict(&sv.cm, ent);
 
     // if first time, make sure old_origin is valid
-    if (!ent->linkcount) {
+    if (!ent->linkCount) {
         VectorCopy(ent->s.origin, ent->s.old_origin);
 #if USE_FPS
         VectorCopy(ent->s.origin, sent->create_origin);
         sent->create_framenum = sv.framenum;
 #endif
     }
-    ent->linkcount++;
+    ent->linkCount++;
 
 #if USE_FPS
     // save origin for later recovery
@@ -426,7 +426,7 @@ int SV_AreaEdicts(const vec3_t &mins, const vec3_t &maxs, edict_t **list,
 ================
 SV_HullForEntity
 
-Returns a headnode that can be used for testing or clipping an
+Returns a headNode that can be used for testing or clipping an
 object of mins/maxs size.
 ================
 */
@@ -439,7 +439,7 @@ static mnode_t *SV_HullForEntity(edict_t *ent)
         if (i <= 0 || i >= sv.cm.cache->nummodels)
             Com_Error(ERR_DROP, "%s: inline model %d out of range", __func__, i);
 
-        return sv.cm.cache->models[i].headnode;
+        return sv.cm.cache->models[i].headNode;
     }
 
     // create a temp hull from bounding box sizes
