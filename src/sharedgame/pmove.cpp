@@ -22,14 +22,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Implements the player movement logic for both client and server game modules
 // 
 // The playerMoveLocals_t structure is used locally when processing the movement. Consider it
-// a temporary structure. The origin, prev_origin, and velocity are copied over
-// each frame from the player pmove state of the given entity.
+// a temporary structure. The prev origin and velocity are copied in there for storage.
 // 
-// Afterwards the actual player state is tested after applying the needed tran-
-// slations. In case of success, the move is kept. Otherwise, reverted.
+// At the start of pmove we initialize certain pm-> variables, and the playerMoveLocals.
 // 
-// Finally, we copy the results over into the player pmove state. This should
-// sort if sum up the method of action that's used for player movement.
+// After that, we check for whether we are on a ladder, ducking, on-ground, in-water,
+// and/or in air. We execute the right movement according to that.
 //
 #include "shared/shared.h"
 #include "sharedgame/pmove.h"

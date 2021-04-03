@@ -931,15 +931,11 @@ for printing vectors
 */
 const char* Vec3ToString(const vec3_t& v)
 {
-    static  int     index;
-    static  char    str[8][MAX_QPATH];
-    char* s;
+    static uint32_t index;
+    static char str[8][MAX_QPATH];
 
-    // use an array so that multiple Vec3ToString won't collide
-    s = str[index];
-    index = (index + 1) & 7;
-
-    Q_snprintf(s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
+    char* s = str[index++ % 8];
+    snprintf(s, MAX_QPATH, "(%4.2f %4.2f %4.2f)", v.x, v.y, v.z);
 
     return s;
 }

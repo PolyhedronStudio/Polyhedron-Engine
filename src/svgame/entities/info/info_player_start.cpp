@@ -11,6 +11,8 @@
 #include "../../g_local.h"
 
 //=====================================================
+extern void SP_CreateCoopSpots(edict_t* self);
+
 /*QUAKED info_player_start (1 0 0) (-16 -16 -24) (16 16 32)
 The normal starting point for a level.
 */
@@ -23,6 +25,4 @@ void SP_info_player_start(edict_t* self)
         self->think = SP_CreateCoopSpots;
         self->nextthink = level.time + FRAMETIME;
     }
-}
-
 }

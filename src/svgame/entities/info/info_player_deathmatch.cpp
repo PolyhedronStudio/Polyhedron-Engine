@@ -11,6 +11,8 @@
 #include "../../g_local.h"
 
 //=====================================================
+void SP_misc_teleporter_dest(edict_t* ent);
+
 /*QUAKED info_player_deathmatch (1 0 1) (-16 -16 -24) (16 16 32)
 potential spawning position for deathmatch games
 */

@@ -227,12 +227,7 @@ extern void Grenade_Explode(edict_t* self);
 extern void MegaHealth_think(edict_t* self);
 extern void M_FliesOff(edict_t* self);
 extern void M_FliesOn(edict_t* self);
-extern void misc_banner_think(edict_t* self);
 extern void misc_blackhole_think(edict_t* self);
-extern void misc_easterchick2_think(edict_t* self);
-extern void misc_easterchick_think(edict_t* self);
-extern void misc_eastertank_think(edict_t* self);
-extern void misc_satellite_dish_think(edict_t* self);
 //extern void monster_think(void); // CPP: Remove cuz of overloaded func error.
 extern void monster_triggered_spawn(edict_t* self);
 extern void Brush_Move_Begin(edict_t* self);
@@ -303,7 +298,6 @@ extern void func_wall_use(edict_t* self, edict_t* other, edict_t* activator);
 extern void hurt_use(edict_t* self, edict_t* other, edict_t* activator);
 extern void light_use(edict_t* self, edict_t* other, edict_t* activator);
 extern void misc_blackhole_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void misc_satellite_dish_use(edict_t* self, edict_t* other, edict_t* activator);
 extern void misc_strogg_ship_use(edict_t* self, edict_t* other, edict_t* activator);
 extern void misc_viper_bomb_use(edict_t* self, edict_t* other, edict_t* activator);
 extern void misc_viper_use(edict_t* self, edict_t* other, edict_t* activator);
@@ -438,12 +432,7 @@ const save_ptr_t save_ptrs[] = {
 { P_think, MegaHealth_think },
 { P_think, M_FliesOff },
 { P_think, M_FliesOn },
-{ P_think, misc_banner_think },
 { P_think, misc_blackhole_think },
-{ P_think, misc_easterchick2_think },
-{ P_think, misc_easterchick_think },
-{ P_think, misc_eastertank_think },
-{ P_think, misc_satellite_dish_think },
 { P_think, monster_think },
 { P_think, monster_triggered_spawn },
 { P_think, Brush_Move_Begin },
@@ -520,7 +509,6 @@ const save_ptr_t save_ptrs[] = {
 { P_use, light_use },
 
 { P_use, misc_blackhole_use },
-{ P_use, misc_satellite_dish_use },
 { P_use, misc_strogg_ship_use },
 { P_use, misc_viper_bomb_use },
 { P_use, misc_viper_use },
