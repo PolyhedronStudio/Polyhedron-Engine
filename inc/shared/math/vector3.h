@@ -754,6 +754,9 @@ inline const std::string vec3_to_str(const vec3_t& v, qboolean rounded = true)
 
     return sstream.str();
 }
+inline const char* vtos(const vec3_t& v) {
+    return vec3_to_str(v).c_str();
+}
 
 //
 //=============================================================================

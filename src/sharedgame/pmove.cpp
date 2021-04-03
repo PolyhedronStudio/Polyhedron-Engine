@@ -115,24 +115,26 @@ static const vec3_t PM_GIBLET_MAXS = {  8.f,  8.f,  8.f };
 //===============
 //
 #ifdef CGAME_INCLUDE
-#define DEBUG_CLIENT_PMOVE 0
+#define DEBUG_CLIENT_PMOVE 1
 #if DEBUG_CLIENT_PMOVE == 1
 // Client debug output.
 static void CLGPM_Debug(const char* func, const char* fmt, ...) {
+    char buffer[MAX_STRING_CHARS];
 
     va_list args;
     va_start(args, fmt);
 
-    std::string str = "[CLIENT -- PM_Debug]: ";
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    std::string str = "[CLG PM_Debug:";
     str += func;
-    str += "(";
-    str += fmt;
-    str += ")";
-    Com_LPrintf(PRINT_DEVELOPER, str.c_str(), args);
+    str += "] ";
+    str += buffer;
+    str += "\n";
+    Com_DPrintf(str.c_str());
 
     va_end(args);
 }
-#define PM_Debug(...) CLGM_Debug(__func__, __VA_ARGS__);
+#define PM_Debug(...) CLGPM_Debug(__func__, __VA_ARGS__);
 #else
 static void CLGPM_Debug(const char* func, const char* fmt, ...) {
 
@@ -140,25 +142,27 @@ static void CLGPM_Debug(const char* func, const char* fmt, ...) {
     va_start(args, fmt);
 
     va_end(args);
-}
-#define PM_Debug(...) CLGM_Debug(__func__, __VA_ARGS__);
+CLGPM_Debug
+#define PM_Debug(...) CLGPM_Debug(__func__, __VA_ARGS__);
 //#define PM_Debug () void(0)
 #endif // PMOVE_DEBUG
 #else
-#define DEBUG_SERVER_PMOVE 0
+#define DEBUG_SERVER_PMOVE 1
 #if DEBUG_SERVER_PMOVE == 1
 // Server debug output.
 static void SVGPM_Debug(const char* func, const char* fmt, ...) {
+    char buffer[MAX_STRING_CHARS];
 
     va_list args;
     va_start(args, fmt);
 
-    std::string str = "[SERVER PM_Debug:";
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    std::string str = "[SVG PM_Debug:";
     str += func;
     str += "] ";
-    str += fmt;
-    str += ")\n";
-    Com_LPrintf(PRINT_DEVELOPER, str.c_str(), args);
+    str += buffer;
+    str += "\n";
+    Com_DPrintf(str.c_str());
 
     va_end(args);
 }
@@ -1372,7 +1376,7 @@ static void PM_WalkMove(void) {
         return;
     }
 
-    PM_Debug("%s\n", Vec3ToString(pm->state.origin));
+    PM_Debug("%s", vec3_to_str(pm->state.origin));
 
     PM_Friction();
 
