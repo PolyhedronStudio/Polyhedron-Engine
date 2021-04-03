@@ -41,8 +41,8 @@ When finished we have a stable base to work from, one that we can start making t
 - [ ] Math Library
   - [X] Figure out why sometimes the plane is NULL in case of T_Damage, seems by T_RadiusDamage. 
   - [X] Create new inlined versions for the other vector types.
-    - [ ] vec2_t
-    - [x] vec3_t
+    - [X] vec2_t
+    - [X] vec3_t
     - [ ] vec4_t
     - [ ] vec5_t
   - [ ] Change PITCH, YAW, ROLL defines to a vec3_t::PITCH, etc._
@@ -61,6 +61,7 @@ When finished we have a stable base to work from, one that we can start making t
     - [ ] Move into its own repository, and implement as a submodule. This should allow for our own repository and record of server game code.
     - [ ] Remove all needless entities.
 - [ ] Refresher
+  - [ ] Remove RTX code, reimplement Q2RTX 1.5.0
   - [ ] Hook up DDS load code for general materials.
 - [ ] WIDTools, although it resides outside of this repository, it needs to go along with the 0.2 release.
   - [ ] Figure out whether to keep large boundaries, or not. This depends on: Can we fix the bug? It seems brush splitting, or triangulation is off the rails. Windings etc.

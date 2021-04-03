@@ -65,25 +65,41 @@ template<typename T> struct vec3_template {
     // OPERATOR: + vec3_template
     inline vec3_template operator +(const vec3_template& operand) const
     {
-        return vec3_template(x + operand.x, y + operand.y, z + operand.z);
+        return vec3_template{
+            x + operand.x,
+            y + operand.y,
+            z + operand.z
+        };
     }
 
     // OPERATOR: - vec3_template
     inline vec3_template operator -(const vec3_template& operand) const
     {
-        return vec3_template(x - operand.x, y - operand.y, z - operand.z);
+        return vec3_template{
+            x - operand.x,
+            y - operand.y,
+            z - operand.z
+        };
     }
 
     // OPERATOR: / vec3_template
     inline vec3_template operator /(const vec3_template& operand) const
     {
-        return vec3_template(x / operand.x, y / operand.y, z / operand.z);
+        return vec3_template{
+            x / operand.x,
+            y / operand.y,
+            z / operand.z
+        };
     }
 
     // OPERATOR: * vec3_template
     inline vec3_template operator *(const vec3_template& operand) const
     {
-        return vec3_template(x * operand.x, y * operand.y, z * operand.z);
+        return vec3_template{
+            x * operand.x,
+            y * operand.y,
+            z * operand.z
+        };
     }
 
     // OPERATOR: -= vec3_template
