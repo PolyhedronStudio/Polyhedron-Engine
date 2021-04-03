@@ -239,7 +239,7 @@ static inline vec3_t vec3_one(void) {
 // `vec3_t { 0.f, 0.f, 0.f }`
 //===============
 //
-static inline vec3_t vec3_zero(void) {
+static inline const vec3_t vec3_zero(void) {
     return vec3_t{ 
         0.f, 
         0.f, 
@@ -255,7 +255,7 @@ static inline vec3_t vec3_zero(void) {
 // `vec3_t { 0.f, 0.f, 1.f }`
 //===============
 //
-static inline vec3_t vec3_up(void) {
+static inline const vec3_t vec3_up(void) {
     return vec3_t{
         0.f,
         0.f,
@@ -271,7 +271,7 @@ static inline vec3_t vec3_up(void) {
 // `vec3_t { 0.f, 0.f, -1.f }`
 //===============
 //
-static inline vec3_t vec3_down(void) {
+static inline const vec3_t vec3_down(void) {
     return vec3_negate(vec3_up());
 }
 
@@ -306,7 +306,7 @@ static inline qboolean vec3_equal(const vec3_t &a, const vec3_t &b) {
 // Returns the euler angles, in radians, for the directional vector `dir`.
 //===============
 //
-static inline vec3_t vec3_euler(const vec3_t &dir) {
+static inline const vec3_t vec3_euler(const vec3_t &dir) {
     float pitch, yaw;
 
     if (dir.y == 0.f && dir.x == 0.f) {
@@ -355,7 +355,7 @@ static inline vec3_t vec3_euler(const vec3_t &dir) {
 // Returns a vector containing the absolute values of 'v'.
 //===============
 //
-static inline vec3_t vec3_fabsf(const vec3_t &v) {
+static inline const vec3_t vec3_fabsf(const vec3_t &v) {
     return vec3_t{
         std::fabsf(v.x),
         std::fabsf(v.y),
@@ -370,7 +370,7 @@ static inline vec3_t vec3_fabsf(const vec3_t &v) {
 // Returns a vector containing the components of 'v', rounded to the nearest lower integer.
 //===============
 //
-static inline vec3_t vec3_floorf(const vec3_t &v) {
+static inline const vec3_t vec3_floorf(const vec3_t &v) {
     return vec3_t{
         std::floorf(v.x),
         std::floorf(v.y),
@@ -385,7 +385,7 @@ static inline vec3_t vec3_floorf(const vec3_t &v) {
 // Returns a vector containing the components of `v`, rounded to the nearest higher integer.
 //===============
 //
-static inline vec3_t vec3_ceilf(const vec3_t &v) {
+static inline const vec3_t vec3_ceilf(const vec3_t &v) {
     return vec3_t{
         ceilf(v.x),
         ceilf(v.y),
@@ -400,7 +400,7 @@ static inline vec3_t vec3_ceilf(const vec3_t &v) {
 // Returns the specified Euler angles circularly clamped to '0.f - 360.f'.
 //===============
 //
-static inline vec3_t vec3_clamp_euler(const vec3_t &euler) {
+static inline const vec3_t vec3_clamp_euler(const vec3_t &euler) {
     return vec3_t{
         ClampEuler(euler.x),
         ClampEuler(euler.y),
@@ -415,7 +415,7 @@ static inline vec3_t vec3_clamp_euler(const vec3_t &euler) {
 // Returns The vector 'v' + ('add' * 'multiply').
 //===============
 //
-static inline vec3_t vec3_fmaf(const vec3_t &v, float multiply, const vec3_t &add) {
+static inline const vec3_t vec3_fmaf(const vec3_t &v, float multiply, const vec3_t &add) {
     return vec3_t{
         std::fmaf(add.x, multiply, v.x),
         std::fmaf(add.y, multiply, v.y),
@@ -430,7 +430,7 @@ static inline vec3_t vec3_fmaf(const vec3_t &v, float multiply, const vec3_t &ad
 // Returns a vector containing the max components of 'a' and 'b'.
 //===============
 //
-static inline vec3_t vec3_maxf(const vec3_t &a, const vec3_t &b) {
+static inline const vec3_t vec3_maxf(const vec3_t &a, const vec3_t &b) {
     return vec3_t{
         Maxf(a.x, b.x), 
         Maxf(a.y, b.y),
@@ -445,7 +445,7 @@ static inline vec3_t vec3_maxf(const vec3_t &a, const vec3_t &b) {
 // Returns the vector 'vec3_t { -FLT_MAX, -FLT_MAX, -FLT_MAX }'.
 //===============
 //
-static inline vec3_t vec3_maxs(void) {
+static inline const vec3_t vec3_maxs(void) {
     return vec3_t{
         -FLT_MAX,
         -FLT_MAX,
@@ -461,7 +461,7 @@ static inline vec3_t vec3_maxs(void) {
 // Return a vector containing the min components of 'a' and 'b'.
 //===============
 //
-static inline vec3_t vec3_minf(const vec3_t &a, const vec3_t &b) {
+static inline const vec3_t vec3_minf(const vec3_t &a, const vec3_t &b) {
     return vec3_t{
         Minf(a.x, b.x),
         Minf(a.y, b.y),
@@ -476,7 +476,7 @@ static inline vec3_t vec3_minf(const vec3_t &a, const vec3_t &b) {
 // Returns the vector 'vec3_t { FLT_MAX, FLT_MAX, FLT_MAX }'.
 //===============
 //
-static inline vec3_t vec3_mins(void) {
+static inline const vec3_t vec3_mins(void) {
     return vec3_t{
         FLT_MAX,
         FLT_MAX,
@@ -491,7 +491,7 @@ static inline vec3_t vec3_mins(void) {
 // Returns the linear interpolation of 'a' and 'b' using the specified fraction.
 //===============
 //
-static inline vec3_t vec3_mix(const vec3_t &a, const vec3_t &b, float mix) {
+static inline const vec3_t vec3_mix(const vec3_t &a, const vec3_t &b, float mix) {
     return vec3_fmaf(a, mix, b - a);
 }
 
@@ -502,7 +502,7 @@ static inline vec3_t vec3_mix(const vec3_t &a, const vec3_t &b, float mix) {
 // Returns the linear interpolation of 'a' and 'b' using the specified fraction.
 //===============
 //
-static inline vec3_t vec3_mix_euler(const vec3_t &a, const vec3_t &b, float mix) {
+static inline const vec3_t vec3_mix_euler(const vec3_t &a, const vec3_t &b, float mix) {
 
     vec3_t _a = a;
     vec3_t _b = b;
@@ -525,7 +525,7 @@ static inline vec3_t vec3_mix_euler(const vec3_t &a, const vec3_t &b, float mix)
 // Returns the linear interpolation of `a` and `b` using the specified fractions.
 //===============
 //
-static inline vec3_t vec3_mix3(const vec3_t &a, const vec3_t &b, const vec3_t &mix) {
+static inline const vec3_t vec3_mix3(const vec3_t &a, const vec3_t &b, const vec3_t &mix) {
     return a + ((b - a) * mix);
 }
 
@@ -536,7 +536,7 @@ static inline vec3_t vec3_mix3(const vec3_t &a, const vec3_t &b, const vec3_t &m
 // Returns the vector `v` rounded to the nearest integer values.
 //===============
 //
-static inline vec3_t vec3_roundf(const vec3_t &v) {
+static inline const vec3_t vec3_roundf(const vec3_t &v) {
     return vec3_t{
         std::roundf(v.x),
         std::roundf(v.y),
@@ -551,7 +551,7 @@ static inline vec3_t vec3_roundf(const vec3_t &v) {
 // Returns the clamped vector `v` between vector 'min', and vector 'max'.
 //===============
 //
-static inline vec3_t vec3_clamp(const vec3_t &v, const vec3_t &min, const vec3_t &max) {
+static inline const vec3_t vec3_clamp(const vec3_t &v, const vec3_t &min, const vec3_t &max) {
     return vec3_t{
         Clampf(v.x, min.x, max.x),
         Clampf(v.y, min.z, max.y),
@@ -566,7 +566,7 @@ static inline vec3_t vec3_clamp(const vec3_t &v, const vec3_t &min, const vec3_t
 // Returns the clamped vector `v` between float 'min', and float 'max'.
 //===============
 //
-static inline vec3_t vec3_clampf(const vec3_t& v, float min, float max) {
+static inline const vec3_t vec3_clampf(const vec3_t& v, float min, float max) {
     return vec3_t{
         Clampf(v.x, min, max),
         Clampf(v.y, min, max),
@@ -581,7 +581,7 @@ static inline vec3_t vec3_clampf(const vec3_t& v, float min, float max) {
 // Returns the clamped vector `v` between ranges 0. and 1.
 //===============
 //
-static inline vec3_t vec3_clamp01(const vec3_t &v) {
+static inline const vec3_t vec3_clamp01(const vec3_t &v) {
     return vec3_t{
         Clampf(v.x, 0.0, 1.0),
         Clampf(v.y, 0.0, 1.0),
@@ -596,7 +596,7 @@ static inline vec3_t vec3_clamp01(const vec3_t &v) {
 // Returns the reflected vector of 'a' and 'b'.
 //===============
 //
-static inline vec3_t vec3_reflect(const vec3_t &a, const vec3_t &b) {
+static inline const vec3_t vec3_reflect(const vec3_t &a, const vec3_t &b) {
     return a + vec3_scale(b, -2.f * vec3_dot(a, b));
 }
 
