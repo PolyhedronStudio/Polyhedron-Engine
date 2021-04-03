@@ -50,7 +50,7 @@ static void set_frame_time(void)
     clamp(framediv, 1, MAX_FRAMEDIV);
 
     sv.framerate = framediv * BASE_FRAMERATE;
-    sv.frametime = BASE_FRAMETIME / framediv;
+    sv.frameTime = BASE_FRAMETIME / framediv;
     sv.framediv = framediv;
 
     Cvar_SetInteger(sv_fps, sv.framerate, FROM_CODE);
@@ -377,8 +377,8 @@ void SV_InitGame(unsigned mvd_spawn)
         memset(&sv, 0, sizeof(sv));
 
 #if USE_FPS
-        // set up default frametime for main loop
-        sv.frametime = BASE_FRAMETIME;
+        // set up default frameTime for main loop
+        sv.frameTime = BASE_FRAMETIME;
 #endif
     }
 

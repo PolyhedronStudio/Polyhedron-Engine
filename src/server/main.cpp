@@ -1812,7 +1812,7 @@ SV_Frame
 Some things like MVD client connections and command buffer
 processing are run even when server is not yet initalized.
 
-Returns amount of extra frametime available for sleeping on IO.
+Returns amount of extra frameTime available for sleeping on IO.
 ==================
 */
 unsigned SV_Frame(unsigned msec)
@@ -2155,8 +2155,8 @@ void SV_Init(void)
     init_rate_limits();
 
 #if USE_FPS
-    // set up default frametime for main loop
-    sv.frametime = BASE_FRAMETIME;
+    // set up default frameTime for main loop
+    sv.frameTime = BASE_FRAMETIME;
 #endif
 
     // set up default pmove parameters
@@ -2278,8 +2278,8 @@ void SV_Shutdown(const char *finalmsg, error_type_t type)
     init_rate_limits();
 
 #if USE_FPS
-    // set up default frametime for main loop
-    sv.frametime = BASE_FRAMETIME;
+    // set up default frameTime for main loop
+    sv.frameTime = BASE_FRAMETIME;
 #endif
 
     sv_client = NULL;

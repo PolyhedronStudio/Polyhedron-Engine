@@ -236,13 +236,13 @@ static explosion_t* CLG_PlainExplosion(qboolean big)
 	{
 		ex->ent.model = cl_mod_explosions[model_idx];
 		ex->frames = sprite_model->numframes;
-		ex->frametime = cl_explosion_frametime->integer;
+		ex->frameTime = cl_explosion_frametime->integer;
 	}
 	else
 	{
 		ex->ent.model = big ? cl_mod_explo4_big : cl_mod_explo4;
 		if (frand() < 0.5)
-			ex->baseframe = 15;
+			ex->baseFrame = 15;
 		ex->frames = 15;
 	}
 
@@ -365,7 +365,7 @@ static void CLG_AddExplosions(void)
 	for (i = 0, ex = clg_explosions; i < MAX_EXPLOSIONS; i++, ex++) {
 		if (ex->type == explosion_t::ex_free) // CPP: Cast
 			continue;
-		float inv_frametime = ex->frametime ? 1.f / (float)ex->frametime : BASE_1_FRAMETIME;
+		float inv_frametime = ex->frameTime ? 1.f / (float)ex->frameTime : BASE_1_FRAMETIME;
 		frac = (cl->time - ex->start) * inv_frametime;
 		f = floor(frac);
 
@@ -447,8 +447,8 @@ static void CLG_AddExplosions(void)
 
 			if (f < 0)
 				f = 0;
-			ent->frame = ex->baseframe + f + 1;
-			ent->oldframe = ex->baseframe + f;
+			ent->frame = ex->baseFrame + f + 1;
+			ent->oldframe = ex->baseFrame + f;
 			ent->backlerp = 1.0 - (frac - f);
 
 			V_AddEntity(ent);
@@ -1146,7 +1146,7 @@ void CLG_ParseTempEntity(void)
 		if (!cl_explosion_sprites->integer)
 		{
 			ex->frames = 19;
-			ex->baseframe = 30;
+			ex->baseFrame = 30;
 		}
 		if (cl_disable_explosions->integer & NOEXP_GRENADE)
 			ex->type = explosion_t::ex_light;
@@ -1165,7 +1165,7 @@ void CLG_ParseTempEntity(void)
 		if (!cl_explosion_sprites->integer)
 		{
 			ex->frames = 19;
-			ex->baseframe = 30;
+			ex->baseFrame = 30;
 		}
 		CLG_ExplosionParticles(teParameters.pos1);
 		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0);

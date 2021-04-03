@@ -72,7 +72,7 @@ unsigned _wrp_GetRealTime(void) {
     return cls.realtime;
 }
 float _wrp_GetFrameTime(void) {
-    return cls.frametime;
+    return cls.frameTime;
 }
 qboolean _wrp_IsDemoPlayback(void) {
     return cls.demo.playback;

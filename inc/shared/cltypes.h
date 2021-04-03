@@ -46,8 +46,8 @@ typedef struct {
 	float       light;
 	vec3_t      lightcolor;
 	float       start;
-	int         baseframe;
-	int         frametime; /* in milliseconds */
+	int         baseFrame;
+	int         frameTime; /* in milliseconds */
 } explosion_t;
 
 // Maximum amount of explosions.
@@ -400,9 +400,9 @@ typedef struct client_state_s {
     //pmoveParams_t *pmp;
 
 #if USE_FPS
-    int         frametime;      // variable server frame time
-    float       frametime_inv;  // 1/frametime
-    int         framediv;       // BASE_FRAMETIME/frametime
+    int         frameTime;      // variable server frame time
+    float       frametime_inv;  // 1/frameTime
+    int         framediv;       // BASE_FRAMETIME/frameTime
 #endif
 
     char        baseconfigstrings[MAX_CONFIGSTRINGS][MAX_QPATH];

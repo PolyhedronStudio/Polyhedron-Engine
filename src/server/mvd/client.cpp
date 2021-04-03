@@ -1668,7 +1668,7 @@ void MVD_Spawn(void)
 #if USE_FPS
     // just fixed base FPS
     sv.framerate = BASE_FRAMERATE;
-    sv.frametime = BASE_FRAMETIME;
+    sv.frameTime = BASE_FRAMETIME;
     sv.framediv = 1;
 #endif
 

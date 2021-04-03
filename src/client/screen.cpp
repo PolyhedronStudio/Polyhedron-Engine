@@ -1033,7 +1033,7 @@ void SCR_UpdateScreen(void)
 #ifdef _DEBUG
     // draw debug graphs
     if (scr_timegraph->integer)
-        SCR_DebugGraph(cls.frametime * 300, 0);
+        SCR_DebugGraph(cls.frameTime * 300, 0);
 
     if (scr_debuggraph->integer || scr_timegraph->integer || scr_netgraph->integer)
         SCR_DrawDebugGraph();

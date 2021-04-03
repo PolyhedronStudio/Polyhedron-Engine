@@ -3515,7 +3515,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	float frame_time = min(1.f, max(0.f, fd->time - previous_time));
 	previous_time = fd->time;
 
-	vkpt_freecam_update(cls.frametime);
+	vkpt_freecam_update(cls.frameTime);
 
 	static unsigned previous_wallclock_time = 0;
 	unsigned current_wallclock_time = Sys_Milliseconds();

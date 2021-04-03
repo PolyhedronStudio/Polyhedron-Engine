@@ -201,7 +201,7 @@ typedef float vec_t;
 // variable server FPS
 //-----------------
 #if USE_FPS
-#define CL_FRAMETIME    cl.frametime
+#define CL_FRAMETIME    cl.frameTime
 #define CL_1_FRAMETIME  cl.frametime_inv
 #define CL_FRAMEDIV     cl.framediv
 #define CL_FRAMESYNC    !(cl.frame.number % cl.framediv)

@@ -151,7 +151,7 @@ typedef struct client_static_s {
 
     int         framecount;
     unsigned    realtime;           // always increasing, no clamping, etc
-    float       frametime;          // seconds since last frame
+    float       frameTime;          // seconds since last frame
 
 // preformance measurement
 #define C_FPS   cls.measure.fps[0]

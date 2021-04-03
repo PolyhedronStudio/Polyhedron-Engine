@@ -22,8 +22,8 @@
 double RmlUISystemInterface::GetElapsedTime() {
     // Cheap hack for now.
     //static double elapsedTime = 0.0f;
-    //if (elapsedTime < cls.frametime)
-    //	elapsedTime += cls.frametime;
+    //if (elapsedTime < cls.frameTime)
+    //	elapsedTime += cls.frameTime;
 
     //return elapsedTime;
     return double(SDL_GetTicks()) / 1000.0;

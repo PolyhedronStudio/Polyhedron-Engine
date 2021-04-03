@@ -3179,10 +3179,10 @@ unsigned CL_Frame(unsigned msec)
                    phys_frame, phys_extra);
 
     // decide the simulation time
-    cls.frametime = main_extra * 0.001f;
+    cls.frameTime = main_extra * 0.001f;
 
-    if (cls.frametime > 1.0 / 5)
-        cls.frametime = 1.0 / 5;
+    if (cls.frameTime > 1.0 / 5)
+        cls.frameTime = 1.0 / 5;
 
 	if (!sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
         cl.time += main_extra;

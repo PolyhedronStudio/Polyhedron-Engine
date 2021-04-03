@@ -131,7 +131,7 @@ typedef struct {
 // variable server FPS
 #if USE_FPS
 #define SV_FRAMERATE        sv.framerate
-#define SV_FRAMETIME        sv.frametime
+#define SV_FRAMETIME        sv.frameTime
 #define SV_FRAMEDIV         sv.framediv
 #define SV_FRAMESYNC        !(sv.framenum % sv.framediv)
 #define SV_CLIENTSYNC(cl)   !(sv.framenum % (cl)->framediv)
@@ -149,7 +149,7 @@ typedef struct {
 
 #if USE_FPS
     int         framerate;
-    int         frametime;
+    int         frameTime;
     int         framediv;
 #endif
 

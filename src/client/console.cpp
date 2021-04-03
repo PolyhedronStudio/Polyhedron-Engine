@@ -1019,12 +1019,12 @@ void Con_RunConsole(void)
     }
 
     if (con.currentHeight > con.destHeight) {
-        con.currentHeight -= con_speed->value * cls.frametime;
+        con.currentHeight -= con_speed->value * cls.frameTime;
         if (con.currentHeight < con.destHeight) {
             con.currentHeight = con.destHeight;
         }
     } else if (con.currentHeight < con.destHeight) {
-        con.currentHeight += con_speed->value * cls.frametime;
+        con.currentHeight += con_speed->value * cls.frameTime;
         if (con.currentHeight > con.destHeight) {
             con.currentHeight = con.destHeight;
         }

@@ -509,7 +509,7 @@ static void CL_ParseServerData(void)
 
 #if USE_FPS
     // setup default frame times
-    cl.frametime = BASE_FRAMETIME;
+    cl.frameTime = BASE_FRAMETIME;
     cl.frametime_inv = BASE_1_FRAMETIME;
     cl.framediv = 1;
 #endif
@@ -828,13 +828,13 @@ static void set_server_fps(int value)
 
     clamp(framediv, 1, MAX_FRAMEDIV);
 
-    cl.frametime = BASE_FRAMETIME / framediv;
+    cl.frameTime = BASE_FRAMETIME / framediv;
     cl.frametime_inv = framediv * BASE_1_FRAMETIME;
     cl.framediv = framediv;
 
     // fix time delta
     if (cls.state == ca_active) {
-        int delta = cl.frame.number - cl.servertime / cl.frametime;
+        int delta = cl.frame.number - cl.servertime / cl.frameTime;
         cl.serverdelta = Q_align(delta, framediv);
     }
 

@@ -60,7 +60,7 @@ typedef struct {
     vec3_t      velocity;
 
     vec3_t      forward, right, up;
-    float       frametime;
+    float       frameTime;
 
 
     csurface_t* groundsurface;
@@ -386,7 +386,7 @@ static void PM_StepSlideMove_(void)
     numBumps = 4;
     numPlanes = 0;
 
-    timeLeft = pml.frametime;
+    timeLeft = pml.frameTime;
 
     for (bumpCount = 0; bumpCount < numBumps; bumpCount++) {
         for (i = 0; i < 3; i++)
@@ -556,7 +556,7 @@ static bool PM_SlideMove(void)
     int bumpCount = 0;
     int numBumps = 4;
     int numPlanes = 0;
-    float timeLeft = pml.frametime;
+    float timeLeft = pml.frameTime;
 
     // Store primal velocity.
     vec3_t primal_velocity = pml.velocity;
@@ -819,12 +819,12 @@ static void PM_Friction(void)
     if ((pm->groundEntityPtr && pml.groundsurface && !(pml.groundsurface->flags & SURF_SLICK)) || (pml.ladder)) {
         friction = pmp->friction;
         control = speed < pm_stopspeed ? pm_stopspeed : speed;
-        drop += control * friction * pml.frametime;
+        drop += control * friction * pml.frameTime;
     }
 
     // apply water friction
     if (pm->waterLevel && !pml.ladder)
-        drop += speed * pmp->waterfriction * pm->waterLevel * pml.frametime;
+        drop += speed * pmp->waterfriction * pm->waterLevel * pml.frameTime;
 
     // scale the velocity
     newspeed = speed - drop;
@@ -857,7 +857,7 @@ static void PM_Accelerate(vec3_t& wishdir, float wishspeed, float accel)
     addspeed = wishspeed - currentspeed;
     if (addspeed <= 0)
         return;
-    accelspeed = accel * pml.frametime * wishspeed;
+    accelspeed = accel * pml.frameTime * wishspeed;
     if (accelspeed > addspeed)
         accelspeed = addspeed;
 
@@ -883,7 +883,7 @@ static void PM_AirAccelerate(vec3_t& wishdir, float wishspeed, float accel)
     addspeed = wishspd - currentspeed;
     if (addspeed <= 0)
         return;
-    accelspeed = accel * wishspeed * pml.frametime;
+    accelspeed = accel * wishspeed * pml.frameTime;
     if (accelspeed > addspeed)
         accelspeed = addspeed;
 
@@ -1071,12 +1071,12 @@ static void PM_AirMove(void)
         PM_Accelerate(wishdir, wishspeed, pm_accelerate);
         if (!wishvel.z) {
             if (pml.velocity.z > 0) {
-                pml.velocity.z -= pm->state.gravity * pml.frametime;
+                pml.velocity.z -= pm->state.gravity * pml.frameTime;
                 if (pml.velocity.z < 0)
                     pml.velocity.z = 0;
             }
             else {
-                pml.velocity.z += pm->state.gravity * pml.frametime;
+                pml.velocity.z += pm->state.gravity * pml.frameTime;
                 if (pml.velocity.z > 0)
                     pml.velocity.z = 0;
             }
@@ -1094,7 +1094,7 @@ static void PM_AirMove(void)
         if (pm->state.gravity > 0)
             pml.velocity.z = 0;
         else
-            pml.velocity.z -= pm->state.gravity * pml.frametime;
+            pml.velocity.z -= pm->state.gravity * pml.frameTime;
         // PGM
 
         if (!pml.velocity.x && !pml.velocity.y)
@@ -1108,7 +1108,7 @@ static void PM_AirMove(void)
         else
             PM_Accelerate(wishdir, wishspeed, 1);
         // add gravity
-        pml.velocity.z -= pm->state.gravity * pml.frametime;
+        pml.velocity.z -= pm->state.gravity * pml.frameTime;
         PM_StepSlideMove();
     }
 }
@@ -1515,7 +1515,7 @@ static void PM_FlyMove(void)
 
         friction = pmp->flyfriction;
         control = speed < pm_stopspeed ? pm_stopspeed : speed;
-        drop += control * friction * pml.frametime;
+        drop += control * friction * pml.frameTime;
 
         // scale the velocity
         newspeed = speed - drop;
@@ -1557,7 +1557,7 @@ static void PM_FlyMove(void)
     }
     else {
         // Calculate new acceleration speed.
-        accelspeed = pm_accelerate * pml.frametime * wishspeed;
+        accelspeed = pm_accelerate * pml.frameTime * wishspeed;
         if (accelspeed > addspeed)
             accelspeed = addspeed;
 
@@ -1570,8 +1570,8 @@ static void PM_FlyMove(void)
 #if 0
     if (doclip) {
         //for (i = 0; i < 3; i++)
-        //    end[i] = pml.origin[i] + pml.frametime * pml.velocity[i];
-        end = vec3_fmaf(pml.origin, pml.frametime, pml.velocity);
+        //    end[i] = pml.origin[i] + pml.frameTime * pml.velocity[i];
+        end = vec3_fmaf(pml.origin, pml.frameTime, pml.velocity);
         trace = pm->Trace(pml.origin, pm->mins, pm->maxs, end);
         pml.origin = trace.endpos;
     }
@@ -1579,7 +1579,7 @@ static void PM_FlyMove(void)
 #endif
     {
         // move
-        pml.origin = vec3_fmaf(pml.origin, pml.frametime, pml.velocity);
+        pml.origin = vec3_fmaf(pml.origin, pml.frameTime, pml.velocity);
     }
 }
 
@@ -1622,8 +1622,8 @@ static void PM_DeadMove(void)
 //
 static void PM_SpectatorMove(void)
 {
-    // Setup a different frametime for movement.
-    pml.frametime = pmp->speedmult * pm->cmd.msec * 0.001f;
+    // Setup a different frameTime for movement.
+    pml.frameTime = pmp->speedmult * pm->cmd.msec * 0.001f;
 
     // Execute typical fly movement.
     PM_FlyMove();
@@ -1679,7 +1679,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     }
 
     // Increase frame time based on seconds.
-    pml.frametime = pm->cmd.msec * 0.001f;
+    pml.frameTime = pm->cmd.msec * 0.001f;
 
     // Erase input direction values in case we are dead, or something alike.
     if (pm->state.type >= PM_DEAD) {
@@ -1733,7 +1733,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     // waterjump has no control, but falls
     else if (pm->state.flags & PMF_TIME_WATERJUMP) {
         // Apply gravity.
-        pml.velocity.z -= pm->state.gravity * pml.frametime;
+        pml.velocity.z -= pm->state.gravity * pml.frameTime;
 
         // Cancel as soon as we are falling down again
         if (pml.velocity.z < 0) {
