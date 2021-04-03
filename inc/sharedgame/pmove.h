@@ -51,7 +51,7 @@ constexpr float PM_CLIP_BOUNCE			= 1.01f;
 //
 // Friction constants.
 //
-constexpr float PM_FRICT_AIR            = 0.1f;
+constexpr float PM_FRICT_AIR            = 0.075f; // N&C: Tweaked - old value: 0.1
 constexpr float PM_FRICT_GROUND			= 6.f;
 constexpr float PM_FRICT_GROUND_SLICK   = 2.f;
 constexpr float PM_FRICT_LADDER			= 5.f;
@@ -72,7 +72,7 @@ constexpr float PM_GROUND_DIST_TRICK	= 16.f;
 //
 // Speed constants; intended velocities are clipped to these.
 //
-constexpr float PM_SPEED_AIR			= 350.f;
+constexpr float PM_SPEED_AIR			= 285.f; // N&C: Tweaked - old value: 350
 constexpr float PM_SPEED_CURRENT		= 100.f;
 constexpr float PM_SPEED_DUCK_STAND		= 200.f;
 constexpr float PM_SPEED_DUCKED			= 140.f;
