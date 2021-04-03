@@ -394,9 +394,9 @@ static void R_AliasSetUpTransform(void)
 // TODO: should use a look-up table
 // TODO: could cache lazily, stored in the entity
 //
-    angles[ROLL] = currententity->angles[ROLL];
-    angles[PITCH] = currententity->angles[PITCH];
-    angles[YAW] = currententity->angles[YAW];
+    angles[vec3_t::Roll] = currententity->angles[vec3_t::Roll];
+    angles[vec3_t::Pitch] = currententity->angles[vec3_t::Pitch];
+    angles[vec3_t::Yaw] = currententity->angles[vec3_t::Yaw];
     AngleVectors(angles, s_alias_forward, s_alias_right, s_alias_up);
 
 // TODO: can do this with simple matrix rearrangement
@@ -530,7 +530,7 @@ static void R_AliasSetupLighting(void)
     r_aliasblendcolor[2] = light[2] * 255;
 
 // rotate the lighting vector into the model's frame of reference
-    yaw = -Radians(currententity->angles[YAW]);
+    yaw = -Radians(currententity->angles[vec3_t::Yaw]);
     cy = std::cosf(yaw);
     sy = std::sinf(yaw);
     cp = std::cosf(-M_PI / 4);

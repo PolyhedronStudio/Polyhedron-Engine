@@ -12,7 +12,7 @@
 // The actual Q2 Vector Macros are defined at the bottom of this file and exist
 // for legacy code to still be compatible. For any new code, use the new and
 // more programmer friendly Vec2_ functions. To increase readability, a rule of
-// standard is to declare a vec2_t like so: vec2_t x = { 1.f, 0.f, 0.f };
+// standard is to declare a vec2_t like so: vec2_t x = { 1.f, 0.f };
 // 
 // To add, subtract, divide or multiply a vector, simply use the designated 
 //
@@ -20,7 +20,7 @@
 #define __INC_SHARED_MATH_VECTOR2_H__
 
 //-----------------
-// Vector 2 type definiton. (X, Y, Z)
+// Vector 2 type definiton. (X, Y)
 //
 // The vector is implemented like a union class.
 //-----------------
@@ -137,7 +137,7 @@ typedef vec2_template<double> dvec2_t;
 //
 //=============================================================================
 // 
-// Modern Vec2 Inline Functions:
+// Modern vec2_t Inline Functions:
 //
 //=============================================================================
 //
@@ -340,6 +340,14 @@ static inline vec2_t vec2_zero(void) {
     };
 }
 
+
+//
+//=============================================================================
+// 
+// Legacy Vector Macro Functions:
+//
+//=============================================================================
+//
 #define Vec2_Subtract(a,b,c)  ((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1])
 #define Vec2_Add(a,b,c)       ((c)[0]=(a)[0]+(b)[0],(c)[1]=(a)[1]+(b)[1])
 

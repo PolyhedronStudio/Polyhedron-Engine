@@ -353,16 +353,16 @@ void TossClientWeapon(edict_t *self)
         spread = 0.0;
 
     if (item) {
-        self->client->v_angle[YAW] -= spread;
+        self->client->v_angle[vec3_t::Yaw] -= spread;
         drop = Drop_Item(self, item);
-        self->client->v_angle[YAW] += spread;
+        self->client->v_angle[vec3_t::Yaw] += spread;
         drop->spawnflags = DROPPED_PLAYER_ITEM;
     }
 
     if (quad) {
-        self->client->v_angle[YAW] += spread;
+        self->client->v_angle[vec3_t::Yaw] += spread;
         drop = Drop_Item(self, FindItemByClassname("item_quad"));
-        self->client->v_angle[YAW] -= spread;
+        self->client->v_angle[vec3_t::Yaw] -= spread;
         drop->spawnflags |= DROPPED_PLAYER_ITEM;
 
         drop->touch = Touch_Item;
@@ -998,9 +998,9 @@ void PutClientInServer(edict_t *ent)
         client->ps.pmove.delta_angles[i] = ANGLE2SHORT(spawn_angles[i] - client->resp.cmd_angles[i]);
     }
 
-    ent->s.angles[PITCH] = 0;
-    ent->s.angles[YAW] = spawn_angles[YAW];
-    ent->s.angles[ROLL] = 0;
+    ent->s.angles[vec3_t::Pitch] = 0;
+    ent->s.angles[vec3_t::Yaw] = spawn_angles[vec3_t::Yaw];
+    ent->s.angles[vec3_t::Roll] = 0;
     VectorCopy(ent->s.angles, client->ps.viewangles);
     VectorCopy(ent->s.angles, client->v_angle);
 
@@ -1437,9 +1437,9 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
             ent->groundentity_linkcount = pm.groundEntity->linkcount;
 
         if (ent->deadflag) {
-            client->ps.viewangles[ROLL] = 40;
-            client->ps.viewangles[PITCH] = -15;
-            client->ps.viewangles[YAW] = client->killer_yaw;
+            client->ps.viewangles[vec3_t::Roll] = 40;
+            client->ps.viewangles[vec3_t::Pitch] = -15;
+            client->ps.viewangles[vec3_t::Yaw] = client->killer_yaw;
         } else {
             VectorCopy(pm.viewAngles, client->v_angle);
             VectorCopy(pm.viewAngles, client->ps.viewangles);

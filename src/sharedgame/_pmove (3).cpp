@@ -1111,9 +1111,9 @@ static vec3_t PM_AddCurrents(const vec3_t& vel)
 
     // Ladders Velocities.
     if (playerMoveLocals.ladder && fabs(playerMoveLocals.velocity.z) <= 200) {
-        if ((pm->viewAngles[PITCH] <= -15) && (pm->cmd.forwardmove > 0))
+        if ((pm->viewAngles[vec3_t::Pitch] <= -15) && (pm->cmd.forwardmove > 0))
             wishvel.z = 200;
-        else if ((pm->viewAngles[PITCH] >= 15) && (pm->cmd.forwardmove > 0))
+        else if ((pm->viewAngles[vec3_t::Pitch] >= 15) && (pm->cmd.forwardmove > 0))
             wishvel.z = -200;
         else if (pm->cmd.upmove > 0)
             wishvel.z = 200;
@@ -2122,9 +2122,9 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
         else {
             // Fetch angles and create specific view vectors for air move.
             vec3_t angles = pm->viewAngles;
-            if (angles[PITCH] > 180)
-                angles[PITCH] = angles[PITCH] - 360;
-            angles[PITCH] /= 3;
+            if (angles[vec3_t::Pitch] > 180)
+                angles[vec3_t::Pitch] = angles[vec3_t::Pitch] - 360;
+            angles[vec3_t::Pitch] /= 3;
 
             // Calculate view vectors to move into.
             vec3_vectors(angles, &playerMoveLocals.forward, &playerMoveLocals.right, &playerMoveLocals.up);

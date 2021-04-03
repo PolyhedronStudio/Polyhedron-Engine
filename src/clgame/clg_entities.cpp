@@ -293,7 +293,7 @@ void CLG_AddPacketEntities(void)
 
             // mimic original ref_gl "leaning" bug (uuugly!)
             if (s1->modelindex == 255 && cl_rollhack->integer) {
-                ent.angles[ROLL] = -ent.angles[ROLL];
+                ent.angles[vec3_t::Roll] = -ent.angles[vec3_t::Roll];
             }
         }
 
@@ -935,11 +935,11 @@ void CLG_CalcViewValues(void)
     VectorCopy(cl->refdef.vieworg, cl->playerEntityOrigin);
     VectorCopy(cl->refdef.viewangles, cl->playerEntityAngles);
 
-    if (cl->playerEntityAngles[PITCH] > 180) {
-        cl->playerEntityAngles[PITCH] -= 360;
+    if (cl->playerEntityAngles[vec3_t::Pitch] > 180) {
+        cl->playerEntityAngles[vec3_t::Pitch] -= 360;
     }
 
-    cl->playerEntityAngles[PITCH] = cl->playerEntityAngles[PITCH] / 3;
+    cl->playerEntityAngles[vec3_t::Pitch] = cl->playerEntityAngles[vec3_t::Pitch] / 3;
 
     VectorAdd(cl->refdef.vieworg, viewoffset, cl->refdef.vieworg);
 

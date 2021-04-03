@@ -15,10 +15,29 @@
 #define nanmask (255<<23)
 #define IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
-// Easy array index accessors.
-#define PITCH   0       // Up / Down
-#define YAW     1       // Left / Right
-#define ROLL    2       // Fall over
+// Clamp.// These need to be replaced.
+#define clamp(a,b,c)    ((a)<(b)?(a)=(b):(a)>(c)?(a)=(c):(a))
+#define cclamp(a,b,c)   ((b)>(c)?clamp(a,c,b):clamp(a,b,c))
+
+// These need to be replaced.
+#ifndef max
+#define max(a,b) ((a)>(b)?(a):(b))
+#endif
+
+// These need to be replaced.
+#ifndef min
+#define min(a,b) ((a)<(b)?(a):(b))
+#endif
+
+// These need to be replaced.
+#define frand()     ((rand() & 32767) * (1.0 / 32767))
+#define crand()     ((rand() & 32767) * (2.0 / 32767) - 1)
+#define Q_rint(x)   ((x) < 0 ? ((int)((x) - 0.5f)) : ((int)((x) + 0.5f)))
+
+// These need to be replaced.
+#define Q_IsBitSet(data, bit)   (((data)[(bit) >> 3] & (1 << ((bit) & 7))) != 0)
+#define Q_SetBit(data, bit)     ((data)[(bit) >> 3] |= (1 << ((bit) & 7)))
+#define Q_ClearBit(data, bit)   ((data)[(bit) >> 3] &= ~(1 << ((bit) & 7)))
 
 // Conversion (Degrees, Radians) scalar values.
 #define DegreesScalar ((float) (180.0f / std::numbers::pi_v<float>))
@@ -340,25 +359,5 @@ static inline int Q_gcd(int a, int b)
     }
     return a;
 }
-
-#define clamp(a,b,c)    ((a)<(b)?(a)=(b):(a)>(c)?(a)=(c):(a))
-#define cclamp(a,b,c)   ((b)>(c)?clamp(a,c,b):clamp(a,b,c))
-
-#ifndef max
-#define max(a,b) ((a)>(b)?(a):(b))
-#endif
-
-#ifndef min
-#define min(a,b) ((a)<(b)?(a):(b))
-#endif
-
-#define frand()     ((rand() & 32767) * (1.0 / 32767))
-#define crand()     ((rand() & 32767) * (2.0 / 32767) - 1)
-
-#define Q_rint(x)   ((x) < 0 ? ((int)((x) - 0.5f)) : ((int)((x) + 0.5f)))
-
-#define Q_IsBitSet(data, bit)   (((data)[(bit) >> 3] & (1 << ((bit) & 7))) != 0)
-#define Q_SetBit(data, bit)     ((data)[(bit) >> 3] |= (1 << ((bit) & 7)))
-#define Q_ClearBit(data, bit)   ((data)[(bit) >> 3] &= ~(1 << ((bit) & 7)))
 
 #endif // __INC_SHARED_MATH_UTILITIES_H__

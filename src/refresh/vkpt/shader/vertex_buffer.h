@@ -119,7 +119,7 @@ struct ToneMappingBuffer
 
 #ifndef VKPT_SHADER
 //typedef int ivec3_t[3];	// MATHLIB: !! Removed typedef int ivec3_t[3]; from vertex_buffer.h
-typedef int ivec4_t[4];
+//typedef int ivec4_t[4]; // MATHLIB: !! COMMENTED OUT, IS ALREADY DEFINED IN vector4.h
 #else
 #define ivec3_t ivec3
 #define ivec4_t ivec4

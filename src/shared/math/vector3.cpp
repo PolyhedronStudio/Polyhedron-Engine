@@ -39,9 +39,9 @@ void vectoangles2(const vec3_t& value1, vec3_t& angles)
             pitch += 360;
     }
 
-    angles.xyz[PITCH] = -pitch;
-    angles.xyz[YAW] = yaw;
-    angles.xyz[ROLL] = 0;
+    angles.xyz[vec3_t::Pitch] = -pitch;
+    angles.xyz[vec3_t::Yaw] = yaw;
+    angles.xyz[vec3_t::Roll] = 0;
 }
 
 /*

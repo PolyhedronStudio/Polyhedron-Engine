@@ -181,14 +181,14 @@ float vectoyaw(const vec3_t &vec)
 {
     float   yaw;
 
-    if (/*vec[YAW] == 0 &&*/ vec[PITCH] == 0) {
+    if (/*vec[vec3_t::Yaw] == 0 &&*/ vec[vec3_t::Pitch] == 0) {
         yaw = 0;
-        if (vec[YAW] > 0)
+        if (vec[vec3_t::Yaw] > 0)
             yaw = 90;
-        else if (vec[YAW] < 0)
+        else if (vec[vec3_t::Yaw] < 0)
             yaw = -90;
     } else {
-        yaw = (int)(std::atan2f(vec[YAW], vec[PITCH]) * 180.f / M_PI);
+        yaw = (int)(std::atan2f(vec[vec3_t::Yaw], vec[vec3_t::Pitch]) * 180.f / M_PI);
         if (yaw < 0)
             yaw += 360;
     }
@@ -224,9 +224,9 @@ void vectoangles(const vec3_t &value1, vec3_t &angles)
             pitch += 360;
     }
 
-    angles[PITCH] = -pitch;
-    angles[YAW] = yaw;
-    angles[ROLL] = 0;
+    angles[vec3_t::Pitch] = -pitch;
+    angles[vec3_t::Yaw] = yaw;
+    angles[vec3_t::Roll] = 0;
 }
 
 /*

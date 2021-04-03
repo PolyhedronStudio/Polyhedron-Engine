@@ -86,7 +86,7 @@ This replaces the QC functions: ai_forward, ai_back, ai_pain, and ai_painforward
 */
 void ai_move(edict_t *self, float dist)
 {
-    M_walkmove(self, self->s.angles[YAW], dist);
+    M_walkmove(self, self->s.angles[vec3_t::Yaw], dist);
 }
 
 
@@ -103,13 +103,13 @@ void ai_stand(edict_t *self, float dist)
     vec3_t  v;
 
     if (dist)
-        M_walkmove(self, self->s.angles[YAW], dist);
+        M_walkmove(self, self->s.angles[vec3_t::Yaw], dist);
 
     if (self->monsterinfo.aiflags & AI_STAND_GROUND) {
         if (self->enemy) {
             VectorSubtract(self->enemy->s.origin, self->s.origin, v);
             self->ideal_yaw = vectoyaw(v);
-            if (self->s.angles[YAW] != self->ideal_yaw && self->monsterinfo.aiflags & AI_TEMP_STAND_GROUND) {
+            if (self->s.angles[vec3_t::Yaw] != self->ideal_yaw && self->monsterinfo.aiflags & AI_TEMP_STAND_GROUND) {
                 self->monsterinfo.aiflags &= ~(AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
                 self->monsterinfo.run(self);
             }
@@ -182,7 +182,7 @@ void ai_charge(edict_t *self, float dist)
     M_ChangeYaw(self);
 
     if (dist)
-        M_walkmove(self, self->s.angles[YAW], dist);
+        M_walkmove(self, self->s.angles[vec3_t::Yaw], dist);
 }
 
 
@@ -197,7 +197,7 @@ Distance is for slight position adjustments needed by the animations
 void ai_turn(edict_t *self, float dist)
 {
     if (dist)
-        M_walkmove(self, self->s.angles[YAW], dist);
+        M_walkmove(self, self->s.angles[vec3_t::Yaw], dist);
 
     if (FindTarget(self))
         return;
@@ -542,7 +542,7 @@ qboolean FacingIdeal(edict_t *self)
 {
     float   delta;
 
-    delta = anglemod(self->s.angles[YAW] - self->ideal_yaw);
+    delta = anglemod(self->s.angles[vec3_t::Yaw] - self->ideal_yaw);
     if (delta > 45 && delta < 315)
         return false;
     return true;
@@ -921,7 +921,7 @@ void ai_run(edict_t *self, float dist)
         if (marker) {
             VectorCopy(marker->s.origin, self->monsterinfo.last_sighting);
             self->monsterinfo.trail_time = marker->timestamp;
-            self->s.angles[YAW] = self->ideal_yaw = marker->s.angles[YAW];
+            self->s.angles[vec3_t::Yaw] = self->ideal_yaw = marker->s.angles[vec3_t::Yaw];
 //          dprint("heading is "); dprint(ftos(self.ideal_yaw)); dprint("\n");
 
 //          debug_drawline(self.origin, self.last_sighting, 52);
@@ -947,7 +947,7 @@ void ai_run(edict_t *self, float dist)
             d1 = VectorLength(v);
             center = tr.fraction;
             d2 = d1 * ((center + 1) / 2);
-            self->s.angles[YAW] = self->ideal_yaw = vectoyaw(v);
+            self->s.angles[vec3_t::Yaw] = self->ideal_yaw = vectoyaw(v);
             AngleVectors(self->s.angles, &v_forward, &v_right, NULL);
 
             VectorSet(v, d2, -16, 0);
@@ -972,7 +972,7 @@ void ai_run(edict_t *self, float dist)
                 VectorCopy(left_target, self->goalentity->s.origin);
                 VectorCopy(left_target, self->monsterinfo.last_sighting);
                 VectorSubtract(self->goalentity->s.origin, self->s.origin, v);
-                self->s.angles[YAW] = self->ideal_yaw = vectoyaw(v);
+                self->s.angles[vec3_t::Yaw] = self->ideal_yaw = vectoyaw(v);
 //              gi.dprintf("adjusted left\n");
 //              debug_drawline(self.origin, self.last_sighting, 152);
             } else if (right >= center && right > left) {
@@ -986,7 +986,7 @@ void ai_run(edict_t *self, float dist)
                 VectorCopy(right_target, self->goalentity->s.origin);
                 VectorCopy(right_target, self->monsterinfo.last_sighting);
                 VectorSubtract(self->goalentity->s.origin, self->s.origin, v);
-                self->s.angles[YAW] = self->ideal_yaw = vectoyaw(v);
+                self->s.angles[vec3_t::Yaw] = self->ideal_yaw = vectoyaw(v);
 //              gi.dprintf("adjusted right\n");
 //              debug_drawline(self.origin, self.last_sighting, 152);
             }

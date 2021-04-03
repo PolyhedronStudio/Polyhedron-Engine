@@ -44,8 +44,8 @@ void SP_trigger_monsterjump(edict_t* self)
         self->speed = 200;
     if (!st.height)
         st.height = 200;
-    if (self->s.angles[YAW] == 0)
-        self->s.angles[YAW] = 360;
+    if (self->s.angles[vec3_t::Yaw] == 0)
+        self->s.angles[vec3_t::Yaw] = 360;
     InitTrigger(self);
     self->touch = trigger_monsterjump_touch;
     self->movedir[2] = st.height;

@@ -229,9 +229,9 @@ void SV_CalcViewOffset(edict_t *ent)
     if (ent->deadflag) {
         VectorClear(angles);
 
-        ent->client->ps.viewangles[ROLL] = 40;
-        ent->client->ps.viewangles[PITCH] = -15;
-        ent->client->ps.viewangles[YAW] = ent->client->killer_yaw;
+        ent->client->ps.viewangles[vec3_t::Roll] = 40;
+        ent->client->ps.viewangles[vec3_t::Pitch] = -15;
+        ent->client->ps.viewangles[vec3_t::Yaw] = ent->client->killer_yaw;
     } else {
         // add angles based on weapon kick
 
@@ -245,36 +245,36 @@ void SV_CalcViewOffset(edict_t *ent)
             ent->client->v_dmg_pitch = 0;
             ent->client->v_dmg_roll = 0;
         }
-        angles[PITCH] += ratio * ent->client->v_dmg_pitch;
-        angles[ROLL] += ratio * ent->client->v_dmg_roll;
+        angles[vec3_t::Pitch] += ratio * ent->client->v_dmg_pitch;
+        angles[vec3_t::Roll] += ratio * ent->client->v_dmg_roll;
 
         // add pitch based on fall kick
 
         ratio = (ent->client->fall_time - level.time) / FALL_TIME;
         if (ratio < 0)
             ratio = 0;
-        angles[PITCH] += ratio * ent->client->fall_value;
+        angles[vec3_t::Pitch] += ratio * ent->client->fall_value;
 
         // add angles based on velocity
 
         delta = DotProduct(ent->velocity, forward);
-        angles[PITCH] += delta * run_pitch->value;
+        angles[vec3_t::Pitch] += delta * run_pitch->value;
 
         delta = DotProduct(ent->velocity, right);
-        angles[ROLL] += delta * run_roll->value;
+        angles[vec3_t::Roll] += delta * run_roll->value;
 
         // add angles based on bob
 
         delta = bobfracsin * bob_pitch->value * xyspeed;
         if (ent->client->ps.pmove.flags & PMF_DUCKED)
             delta *= 6;     // crouching
-        angles[PITCH] += delta;
+        angles[vec3_t::Pitch] += delta;
         delta = bobfracsin * bob_roll->value * xyspeed;
         if (ent->client->ps.pmove.flags & PMF_DUCKED)
             delta *= 6;     // crouching
         if (bobcycle & 1)
             delta = -delta;
-        angles[ROLL] += delta;
+        angles[vec3_t::Roll] += delta;
     }
 
 //===================================
@@ -336,14 +336,14 @@ void SV_CalcGunOffset(edict_t *ent)
     float   delta;
 
     // gun angles from bobbing
-    ent->client->ps.gunangles[ROLL] = xyspeed * bobfracsin * 0.005;
-    ent->client->ps.gunangles[YAW] = xyspeed * bobfracsin * 0.01;
+    ent->client->ps.gunangles[vec3_t::Roll] = xyspeed * bobfracsin * 0.005;
+    ent->client->ps.gunangles[vec3_t::Yaw] = xyspeed * bobfracsin * 0.01;
     if (bobcycle & 1) {
-        ent->client->ps.gunangles[ROLL] = -ent->client->ps.gunangles[ROLL];
-        ent->client->ps.gunangles[YAW] = -ent->client->ps.gunangles[YAW];
+        ent->client->ps.gunangles[vec3_t::Roll] = -ent->client->ps.gunangles[vec3_t::Roll];
+        ent->client->ps.gunangles[vec3_t::Yaw] = -ent->client->ps.gunangles[vec3_t::Yaw];
     }
 
-    ent->client->ps.gunangles[PITCH] = xyspeed * bobfracsin * 0.005;
+    ent->client->ps.gunangles[vec3_t::Pitch] = xyspeed * bobfracsin * 0.005;
 
     // gun angles from delta movement
     for (i = 0 ; i < 3 ; i++) {
@@ -356,8 +356,8 @@ void SV_CalcGunOffset(edict_t *ent)
             delta = 45;
         if (delta < -45)
             delta = -45;
-        if (i == YAW)
-            ent->client->ps.gunangles[ROLL] += 0.1 * delta;
+        if (i == vec3_t::Yaw)
+            ent->client->ps.gunangles[vec3_t::Roll] += 0.1 * delta;
         ent->client->ps.gunangles[i] += 0.2 * delta;
     }
 
@@ -930,13 +930,13 @@ void ClientEndServerFrame(edict_t *ent)
     // set model angles from view angles so other things in
     // the world can tell which direction you are looking
     //
-    if (ent->client->v_angle[PITCH] > 180)
-        ent->s.angles[PITCH] = (-360 + ent->client->v_angle[PITCH]) / 3;
+    if (ent->client->v_angle[vec3_t::Pitch] > 180)
+        ent->s.angles[vec3_t::Pitch] = (-360 + ent->client->v_angle[vec3_t::Pitch]) / 3;
     else
-        ent->s.angles[PITCH] = ent->client->v_angle[PITCH] / 3;
-    ent->s.angles[YAW] = ent->client->v_angle[YAW];
-    ent->s.angles[ROLL] = 0;
-    ent->s.angles[ROLL] = SV_CalcRoll(ent->s.angles, ent->velocity) * 4;
+        ent->s.angles[vec3_t::Pitch] = ent->client->v_angle[vec3_t::Pitch] / 3;
+    ent->s.angles[vec3_t::Yaw] = ent->client->v_angle[vec3_t::Yaw];
+    ent->s.angles[vec3_t::Roll] = 0;
+    ent->s.angles[vec3_t::Roll] = SV_CalcRoll(ent->s.angles, ent->velocity) * 4;
 
     //
     // calculate speed and cycle to be used for

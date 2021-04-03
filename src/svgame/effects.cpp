@@ -159,7 +159,7 @@ void ThrowHead(edict_t *self, const char *gibname, int damage, int type)
     VectorMA(self->velocity, vscale, vd, self->velocity);
     ClipGibVelocity(self);
 
-    self->avelocity[YAW] = crandom() * 600;
+    self->avelocity[vec3_t::Yaw] = crandom() * 600;
 
     self->think = G_FreeEdict;
     self->nextthink = level.time + 10 + random() * 10;

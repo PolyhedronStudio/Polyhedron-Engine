@@ -447,7 +447,7 @@ static void IN_Impulse(void)
 
 static void IN_CenterView(void)
 {
-    cl.viewangles[PITCH] = -SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[PITCH]);
+    cl.viewangles.x = -SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[0]);
 }
 
 static void IN_MLookDown(void)
@@ -550,11 +550,11 @@ static void CL_MouseMove(void)
     if ((in_strafe.state & 1) || (lookstrafe->integer && !in_mlooking)) {
         cl.mousemove[1] += m_side->value * mx;
     } else {
-        cl.viewangles[YAW] -= m_yaw->value * mx;
+        cl.viewangles[vec3_t::Yaw] -= m_yaw->value * mx;
     }
 
     if ((in_mlooking || freelook->integer) && !(in_strafe.state & 1)) {
-        cl.viewangles[PITCH] += m_pitch->value * my * (m_invert->integer ? -1.f : 1.f);
+        cl.viewangles[vec3_t::Pitch] += m_pitch->value * my * (m_invert->integer ? -1.f : 1.f);
     } else {
         cl.mousemove[0] -= m_forward->value * my;
     }
@@ -578,16 +578,16 @@ static void CL_AdjustAngles(int msec)
         speed = msec * 0.001f;
 
     if (!(in_strafe.state & 1)) {
-        cl.viewangles[YAW] -= speed * cl_yawspeed->value * CL_KeyState(&in_right);
-        cl.viewangles[YAW] += speed * cl_yawspeed->value * CL_KeyState(&in_left);
+        cl.viewangles[vec3_t::Yaw] -= speed * cl_yawspeed->value * CL_KeyState(&in_right);
+        cl.viewangles[vec3_t::Yaw] += speed * cl_yawspeed->value * CL_KeyState(&in_left);
     }
     if (in_klook.state & 1) {
-        cl.viewangles[PITCH] -= speed * cl_pitchspeed->value * CL_KeyState(&in_forward);
-        cl.viewangles[PITCH] += speed * cl_pitchspeed->value * CL_KeyState(&in_back);
+        cl.viewangles[vec3_t::Pitch] -= speed * cl_pitchspeed->value * CL_KeyState(&in_forward);
+        cl.viewangles[vec3_t::Pitch] += speed * cl_pitchspeed->value * CL_KeyState(&in_back);
     }
 
-    cl.viewangles[PITCH] -= speed * cl_pitchspeed->value * CL_KeyState(&in_lookup);
-    cl.viewangles[PITCH] += speed * cl_pitchspeed->value * CL_KeyState(&in_lookdown);
+    cl.viewangles[vec3_t::Pitch] -= speed * cl_pitchspeed->value * CL_KeyState(&in_lookup);
+    cl.viewangles[vec3_t::Pitch] += speed * cl_pitchspeed->value * CL_KeyState(&in_lookdown);
 }
 
 /*
@@ -656,19 +656,19 @@ static void CL_ClampPitch(void)
 {
     float pitch;
 
-    pitch = SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[PITCH]);
+    pitch = SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[vec3_t::Pitch]);
     if (pitch > 180)
         pitch -= 360;
 
-    if (cl.viewangles[PITCH] + pitch < -360)
-        cl.viewangles[PITCH] += 360; // wrapped
-    if (cl.viewangles[PITCH] + pitch > 360)
-        cl.viewangles[PITCH] -= 360; // wrapped
+    if (cl.viewangles[vec3_t::Pitch] + pitch < -360)
+        cl.viewangles[vec3_t::Pitch] += 360; // wrapped
+    if (cl.viewangles[vec3_t::Pitch] + pitch > 360)
+        cl.viewangles[vec3_t::Pitch] -= 360; // wrapped
 
-    if (cl.viewangles[PITCH] + pitch > 89)
-        cl.viewangles[PITCH] = 89 - pitch;
-    if (cl.viewangles[PITCH] + pitch < -89)
-        cl.viewangles[PITCH] = -89 - pitch;
+    if (cl.viewangles[vec3_t::Pitch] + pitch > 89)
+        cl.viewangles[vec3_t::Pitch] = 89 - pitch;
+    if (cl.viewangles[vec3_t::Pitch] + pitch < -89)
+        cl.viewangles[vec3_t::Pitch] = -89 - pitch;
 }
 
 /*

@@ -49,6 +49,13 @@ template<typename T> struct vec3_template {
     vec3_template(T* vec) { x = vec[0]; y = vec[1]; z = vec[2]; }
     vec3_template(const T* vec) { x = vec[0]; y = vec[1]; z = vec[2]; }
 
+    // Easy vec3_t array index accessors.
+    enum PYR {
+        Pitch = 0,
+        Yaw = 1,
+        Roll = 2
+    };
+
     //-----------------
     // Operators.
     //-----------------
@@ -144,13 +151,12 @@ template<typename T> struct vec3_template {
 typedef vec3_template<byte> bvec3_t;
 typedef vec3_template<int> ivec3_t;
 typedef vec3_template<float> vec3_t;
-typedef vec3_template<double> dvec3_t;
-
+typedef vec3_template<double> dvec35_t;
 
 //
 //=============================================================================
 // 
-// Modern Vec3 Inline Functions:
+// Modern vec3_t Inline Functions:
 //
 //=============================================================================
 //

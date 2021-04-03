@@ -85,7 +85,7 @@ static void vkpt_freecam_mousemove()
 	if (Key_IsDown(K_MOUSE1) && Key_IsDown(K_MOUSE2))
 	{
 		mx *= sensitivity->value;
-		freecam_viewangles[ROLL] += m_yaw->value * mx;
+		freecam_viewangles[vec3_t::Roll] += m_yaw->value * mx;
 	}
 	else if (Key_IsDown(K_MOUSE1))
 	{
@@ -105,10 +105,10 @@ static void vkpt_freecam_mousemove()
 		mx /= freecam_zoom;
 		my /= freecam_zoom;
 
-		freecam_viewangles[YAW] -= m_yaw->value * mx;
-		freecam_viewangles[PITCH] += m_pitch->value * my * (m_invert->integer ? -1.f : 1.f);
+		freecam_viewangles[vec3_t::Yaw] -= m_yaw->value * mx;
+		freecam_viewangles[vec3_t::Pitch] += m_pitch->value * my * (m_invert->integer ? -1.f : 1.f);
 
-		freecam_viewangles[PITCH] = max(-90.f, min(90.f, freecam_viewangles[PITCH]));
+		freecam_viewangles[vec3_t::Pitch] = max(-90.f, min(90.f, freecam_viewangles[vec3_t::Pitch]));
 	}
 	else if (Key_IsDown(K_MOUSE2))
 	{

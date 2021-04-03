@@ -33,7 +33,7 @@ void LookAtKiller(edict_t* self, edict_t* inflictor, edict_t* attacker)
         VectorSubtract(inflictor->s.origin, self->s.origin, dir);
     }
     else {
-        self->client->killer_yaw = self->s.angles[YAW];
+        self->client->killer_yaw = self->s.angles[vec3_t::Yaw];
         return;
     }
 

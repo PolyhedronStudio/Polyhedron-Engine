@@ -101,32 +101,32 @@ void turret_breach_think(edict_t *self)
     AnglesWithinZeroAnd360(current_angles);
 
     AnglesWithinZeroAnd360(self->move_angles);
-    if (self->move_angles[PITCH] > 180)
-        self->move_angles[PITCH] -= 360;
+    if (self->move_angles[vec3_t::Pitch] > 180)
+        self->move_angles[vec3_t::Pitch] -= 360;
 
     // clamp angles to mins & maxs
-    if (self->move_angles[PITCH] > self->pos1[PITCH])
-        self->move_angles[PITCH] = self->pos1[PITCH];
-    else if (self->move_angles[PITCH] < self->pos2[PITCH])
-        self->move_angles[PITCH] = self->pos2[PITCH];
+    if (self->move_angles[vec3_t::Pitch] > self->pos1[vec3_t::Pitch])
+        self->move_angles[vec3_t::Pitch] = self->pos1[vec3_t::Pitch];
+    else if (self->move_angles[vec3_t::Pitch] < self->pos2[vec3_t::Pitch])
+        self->move_angles[vec3_t::Pitch] = self->pos2[vec3_t::Pitch];
 
-    if ((self->move_angles[YAW] < self->pos1[YAW]) || (self->move_angles[YAW] > self->pos2[YAW])) {
+    if ((self->move_angles[vec3_t::Yaw] < self->pos1[vec3_t::Yaw]) || (self->move_angles[vec3_t::Yaw] > self->pos2[vec3_t::Yaw])) {
         float   dmin, dmax;
 
-        dmin = fabs(self->pos1[YAW] - self->move_angles[YAW]);
+        dmin = fabs(self->pos1[vec3_t::Yaw] - self->move_angles[vec3_t::Yaw]);
         if (dmin < -180)
             dmin += 360;
         else if (dmin > 180)
             dmin -= 360;
-        dmax = fabs(self->pos2[YAW] - self->move_angles[YAW]);
+        dmax = fabs(self->pos2[vec3_t::Yaw] - self->move_angles[vec3_t::Yaw]);
         if (dmax < -180)
             dmax += 360;
         else if (dmax > 180)
             dmax -= 360;
         if (fabs(dmin) < fabs(dmax))
-            self->move_angles[YAW] = self->pos1[YAW];
+            self->move_angles[vec3_t::Yaw] = self->pos1[vec3_t::Yaw];
         else
-            self->move_angles[YAW] = self->pos2[YAW];
+            self->move_angles[vec3_t::Yaw] = self->pos2[vec3_t::Yaw];
     }
 
     VectorSubtract(self->move_angles, current_angles, delta);
@@ -181,7 +181,7 @@ void turret_breach_think(edict_t *self)
         self->owner->velocity[1] = dir[1] * 1.0 / FRAMETIME;
 
         // z
-        angle = self->s.angles[PITCH] * (M_PI * 2 / 360);
+        angle = self->s.angles[vec3_t::Pitch] * (M_PI * 2 / 360);
         target_z = SnapToEights(self->s.origin[2] + self->owner->move_origin[0] * tan(angle) + self->owner->move_origin[2]);
 
         diff = target_z - self->owner->s.origin[2];
@@ -228,13 +228,13 @@ void SP_turret_breach(edict_t *self)
     if (!st.maxyaw)
         st.maxyaw = 360;
 
-    self->pos1[PITCH] = -1 * st.minpitch;
-    self->pos1[YAW]   = st.minyaw;
-    self->pos2[PITCH] = -1 * st.maxpitch;
-    self->pos2[YAW]   = st.maxyaw;
+    self->pos1[vec3_t::Pitch] = -1 * st.minpitch;
+    self->pos1[vec3_t::Yaw]   = st.minyaw;
+    self->pos2[vec3_t::Pitch] = -1 * st.maxpitch;
+    self->pos2[vec3_t::Yaw]   = st.maxyaw;
 
-    self->ideal_yaw = self->s.angles[YAW];
-    self->move_angles[YAW] = self->ideal_yaw;
+    self->ideal_yaw = self->s.angles[vec3_t::Yaw];
+    self->move_angles[vec3_t::Yaw] = self->ideal_yaw;
 
     self->blocked = turret_blocked;
 

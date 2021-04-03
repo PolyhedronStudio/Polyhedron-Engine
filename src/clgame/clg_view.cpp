@@ -271,15 +271,15 @@ static void CLG_SetupThirdPersionView(void)
 
     // if dead, set a nice view angle
     if (cl->frame.ps.stats[STAT_HEALTH] <= 0) {
-        cl->refdef.viewangles[ROLL] = 0;
-        cl->refdef.viewangles[PITCH] = 10;
+        cl->refdef.viewangles[vec3_t::Roll] = 0;
+        cl->refdef.viewangles[vec3_t::Pitch] = 10;
     }
 
     VectorMA(cl->refdef.vieworg, 512, cl->v_forward, focus);
 
     cl->refdef.vieworg[2] += 8;
 
-    cl->refdef.viewangles[PITCH] *= 0.5f;
+    cl->refdef.viewangles[vec3_t::Pitch] *= 0.5f;
     AngleVectors(cl->refdef.viewangles, &cl->v_forward, &cl->v_right, &cl->v_up);
 
     angle = Radians(cl_thirdperson_angle->value);
@@ -298,8 +298,8 @@ static void CLG_SetupThirdPersionView(void)
     VectorSubtract(focus, cl->refdef.vieworg, focus);
     dist = std::sqrtf(focus[0] * focus[0] + focus[1] * focus[1]);
 
-    cl->refdef.viewangles[PITCH] = -180.f / M_PI * std::atan2f(focus[2], dist);
-    cl->refdef.viewangles[YAW] -= cl_thirdperson_angle->value;
+    cl->refdef.viewangles[vec3_t::Pitch] = -180.f / M_PI * std::atan2f(focus[2], dist);
+    cl->refdef.viewangles[vec3_t::Yaw] -= cl_thirdperson_angle->value;
 
     cl->thirdPersonView = true;
 }

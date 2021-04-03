@@ -45,8 +45,8 @@ void UpdateChaseCam(edict_t *ent)
     ownerv[2] += targ->viewheight;
 
     VectorCopy(targ->client->v_angle, angles);
-    if (angles[PITCH] > 56)
-        angles[PITCH] = 56;
+    if (angles[vec3_t::Pitch] > 56)
+        angles[vec3_t::Pitch] = 56;
     AngleVectors(angles, &forward, &right, NULL);
     VectorNormalize(forward);
     VectorMA(ownerv, -30, forward, o);
@@ -91,9 +91,9 @@ void UpdateChaseCam(edict_t *ent)
         ent->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(targ->client->v_angle[i] - ent->client->resp.cmd_angles[i]);
 
     if (targ->deadflag) {
-        ent->client->ps.viewangles[ROLL] = 40;
-        ent->client->ps.viewangles[PITCH] = -15;
-        ent->client->ps.viewangles[YAW] = targ->client->killer_yaw;
+        ent->client->ps.viewangles[vec3_t::Roll] = 40;
+        ent->client->ps.viewangles[vec3_t::Pitch] = -15;
+        ent->client->ps.viewangles[vec3_t::Yaw] = targ->client->killer_yaw;
     } else {
         VectorCopy(targ->client->v_angle, ent->client->ps.viewangles);
         VectorCopy(targ->client->v_angle, ent->client->v_angle);

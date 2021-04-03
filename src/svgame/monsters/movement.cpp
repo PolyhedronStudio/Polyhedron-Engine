@@ -284,7 +284,7 @@ void M_ChangeYaw(edict_t *ent)
     float   move;
     float   speed;
 
-    current = anglemod(ent->s.angles[YAW]);
+    current = anglemod(ent->s.angles[vec3_t::Yaw]);
     ideal = ent->ideal_yaw;
 
     if (current == ideal)
@@ -307,7 +307,7 @@ void M_ChangeYaw(edict_t *ent)
             move = -speed;
     }
 
-    ent->s.angles[YAW] = anglemod(current + move);
+    ent->s.angles[vec3_t::Yaw] = anglemod(current + move);
 }
 
 
@@ -335,7 +335,7 @@ qboolean SV_StepDirection(edict_t *ent, float yaw, float dist)
 
     VectorCopy(ent->s.origin, oldorigin);
     if (SV_movestep(ent, move, false)) {
-        delta = ent->s.angles[YAW] - ent->ideal_yaw;
+        delta = ent->s.angles[vec3_t::Yaw] - ent->ideal_yaw;
         if (delta > 45 && delta < 315) {
             // not turned far enough, so don't take the step
             VectorCopy(oldorigin, ent->s.origin);

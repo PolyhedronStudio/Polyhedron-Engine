@@ -38,17 +38,16 @@ When finished we have a stable base to work from, one that we can start making t
     - [X] Fix emit_snd, and investigate all code related to svc_sound so that it uses vec3_t and MSG_xxxxFloat functions.
     - [X] Change MSG_Write/ReadPos to use MSG_Write/ReadFloat instead, this is safe after fixing the above.
     
-- [ ] Math Library
+- [X] Math Library
   - [X] Figure out why sometimes the plane is NULL in case of T_Damage, seems by T_RadiusDamage. 
   - [X] Create new inlined versions for the other vector types.
     - [X] vec2_t
     - [X] vec3_t
-    - [ ] vec4_t
-    - [ ] vec5_t
-  - [ ] Change PITCH, YAW, ROLL defines to a vec3_t::PITCH, etc._
-  - [ ] Use references/pointers, and const correctness.
-  - [X] Change the typedefs, so we use an actual union/struct. (Still needs to be done for the others, but vec3_t is done_)
-  - [ ] 
+    - [X] vec4_t
+    - [X] vec5_t
+  - [X] Change pitch, yaw, roll defines to a vec3_t::Pitch, etc._
+  - [X] Use references/pointers, and const correctness.
+  - [X] Change the typedefs, so we use an actual union/struct. (Still needs to be done for the others, but vec3_t is done_) 
 - [ ] PMove
   - [ ] Footsteps, based on material.
   - [X] Implement stair stepping (StepDown method)

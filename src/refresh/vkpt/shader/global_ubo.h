@@ -264,7 +264,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 typedef uint32_t uvec4_t[4];
-typedef int ivec4_t[4];
+//typedef int ivec4_t[4]; // MATHLIB: !! COMMENTED OUT, IS ALREADY DEFINED IN vector4.h
 typedef uint32_t uint;
 
 typedef struct {

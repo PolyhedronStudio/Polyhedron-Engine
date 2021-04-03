@@ -46,12 +46,12 @@ void weapon_supershotgun_fire(edict_t* ent)
         kick *= 4;
     }
 
-    v[PITCH] = ent->client->v_angle[PITCH];
-    v[YAW] = ent->client->v_angle[YAW] - 5;
-    v[ROLL] = ent->client->v_angle[ROLL];
+    v[vec3_t::Pitch] = ent->client->v_angle[vec3_t::Pitch];
+    v[vec3_t::Yaw] = ent->client->v_angle[vec3_t::Yaw] - 5;
+    v[vec3_t::Roll] = ent->client->v_angle[vec3_t::Roll];
     AngleVectors(v, &forward, NULL, NULL);
     fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
-    v[YAW] = ent->client->v_angle[YAW] + 5;
+    v[vec3_t::Yaw] = ent->client->v_angle[vec3_t::Yaw] + 5;
     AngleVectors(v, &forward, NULL, NULL);
     fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
 

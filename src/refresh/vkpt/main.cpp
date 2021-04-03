@@ -2670,7 +2670,11 @@ static void process_regular_entity(
 		mult_matrix_vector(end, transform, offset2);
 		VectorSet(color, 0.25f, 0.5f, 0.07f);
 
-		vkpt_build_cylinder_light(model_lights, &num_model_lights, MAX_MODEL_LIGHTS, bsp_world_model, begin, end, color, 1.5f);
+		// MATHLIB: !! This one speaks for itself right?
+		vec3_t v3begin = { begin.x, begin.y, begin.z };
+		vec3_t v3end = { end.x, end.y, end.z };
+		vec3_t v3color = { color.x, color.y, color.z };
+		vkpt_build_cylinder_light(model_lights, &num_model_lights, MAX_MODEL_LIGHTS, bsp_world_model, v3begin, v3end, v3color, 1.5f);
 	}
 
 	*model_instance_idx = current_model_instance_index;

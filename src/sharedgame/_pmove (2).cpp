@@ -1111,9 +1111,9 @@ static vec3_t PM_AddCurrents(const vec3_t& vel)
 
     // Ladders Velocities.
     if (pm_locals.ladder && fabs(pm_locals.velocity.z) <= 200) {
-        if ((pm->viewAngles[PITCH] <= -15) && (pm->cmd.forwardmove > 0))
+        if ((pm->viewAngles[vec3_t::Pitch] <= -15) && (pm->cmd.forwardmove > 0))
             wishvel.z = 200;
-        else if ((pm->viewAngles[PITCH] >= 15) && (pm->cmd.forwardmove > 0))
+        else if ((pm->viewAngles[vec3_t::Pitch] >= 15) && (pm->cmd.forwardmove > 0))
             wishvel.z = -200;
         else if (pm->cmd.upmove > 0)
             wishvel.z = 200;
@@ -1867,9 +1867,9 @@ static void PM_ClampAngles(void) {
 
     // In case of teleporting, we wan't to reset pitch and roll, but maintain the yaw.
     if (pm->state.flags & PMF_TIME_TELEPORT) {
-        pm->viewAngles[YAW] = SHORT2ANGLE(pm->cmd.angles[YAW] + pm->state.delta_angles[YAW]);
-        pm->viewAngles[PITCH] = 0;
-        pm->viewAngles[ROLL] = 0;
+        pm->viewAngles[vec3_t::Yaw] = SHORT2ANGLE(pm->cmd.angles[vec3_t::Yaw] + pm->state.delta_angles[vec3_t::Yaw]);
+        pm->viewAngles[vec3_t::Pitch] = 0;
+        pm->viewAngles[vec3_t::Roll] = 0;
     }
     else {
         // circularly clamp the angles with deltas
@@ -1879,10 +1879,10 @@ static void PM_ClampAngles(void) {
         }
 
         // don't let the player look up or down more than 90 degrees
-        if (pm->viewAngles[PITCH] > 89 && pm->viewAngles[PITCH] < 180)
-            pm->viewAngles[PITCH] = 89;
-        else if (pm->viewAngles[PITCH] < 271 && pm->viewAngles[PITCH] >= 180)
-            pm->viewAngles[PITCH] = 271;
+        if (pm->viewAngles[vec3_t::Pitch] > 89 && pm->viewAngles[vec3_t::Pitch] < 180)
+            pm->viewAngles[vec3_t::Pitch] = 89;
+        else if (pm->viewAngles[vec3_t::Pitch] < 271 && pm->viewAngles[vec3_t::Pitch] >= 180)
+            pm->viewAngles[vec3_t::Pitch] = 271;
     }
 
     // Calculate the angle vectors for movement.
@@ -2036,9 +2036,9 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
         else {
             // Fetch angles and create specific view vectors for air move.
             vec3_t angles = pm->viewAngles;
-            if (angles[PITCH] > 180)
-                angles[PITCH] = angles[PITCH] - 360;
-            angles[PITCH] /= 3;
+            if (angles[vec3_t::Pitch] > 180)
+                angles[vec3_t::Pitch] = angles[vec3_t::Pitch] - 360;
+            angles[vec3_t::Pitch] /= 3;
 
             // Calculate view vectors to move into.
             vec3_vectors(angles, &pm_locals.forward, &pm_locals.right, &pm_locals.up);

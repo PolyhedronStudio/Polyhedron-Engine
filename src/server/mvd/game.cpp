@@ -448,7 +448,7 @@ static void MVD_FollowStop(mvd_client_t *client)
     mvd_t *mvd = client->mvd;
     int i;
 
-    client->ps.viewangles[ROLL] = 0;
+    client->ps.viewangles[vec3_t::Roll] = 0;
 
     for (i = 0; i < 3; i++) {
         client->ps.pmove.delta_angles[i] = ANGLE2SHORT(

@@ -54,9 +54,9 @@ void vectoangles2(const vec3_t value1, vec3_t angles)
             pitch += 360;
     }
 
-    angles[PITCH] = -pitch;
-    angles[YAW] = yaw;
-    angles[ROLL] = 0;
+    angles[vec3_t::Pitch] = -pitch;
+    angles[vec3_t::Yaw] = yaw;
+    angles[vec3_t::Roll] = 0;
 }
 
 void MakeNormalVectors(const vec3_t& forward, vec3_t& right, vec3_t& up)
