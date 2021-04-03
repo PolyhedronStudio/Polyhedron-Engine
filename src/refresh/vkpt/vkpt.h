@@ -431,7 +431,7 @@ typedef struct sun_light_s {
 
 void mult_matrix_matrix(float *p, const float *a, const float *b);
 void mult_matrix_vector(float *p, const float *a, const float *b);
-void create_entity_matrix(float matrix[16], entity_t *e, qboolean enable_left_hand);
+void create_entity_matrix(float matrix[16], r_entity_t *e, qboolean enable_left_hand);
 void create_projection_matrix(float matrix[16], float znear, float zfar, float fov_x, float fov_y);
 void create_view_matrix(float matrix[16], refdef_t *fd);
 void inverse(const float *m, float *inv);
@@ -654,7 +654,7 @@ qboolean initialize_transparency();
 void destroy_transparency();
 
 void update_transparency(VkCommandBuffer command_buffer, const float* view_matrix,
-	const particle_t* particles, int particle_num, const entity_t* entities, int entity_num);
+	const particle_t* particles, int particle_num, const r_entity_t* entities, int entity_num);
 
 typedef enum {
 	VKPT_TRANSPARENCY_PARTICLES,
@@ -677,7 +677,7 @@ VkBufferView get_transparency_particle_color_buffer_view();
 VkBufferView get_transparency_beam_color_buffer_view();
 VkBufferView get_transparency_sprite_info_buffer_view();
 void get_transparency_counts(int* particle_num, int* beam_num, int* sprite_num);
-void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, entity_t* entities, int num_entites, float adapted_luminance);
+void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, r_entity_t* entities, int num_entites, float adapted_luminance);
 qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, vec3_t begin, vec3_t end, vec3_t color, float radius);
 qboolean get_triangle_off_center(const float* positions, float* center, float* anti_center);
 

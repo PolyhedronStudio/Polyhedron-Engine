@@ -590,8 +590,8 @@ static void SCR_DrawDebugStats(void)
     x = CHAR_WIDTH;
     y = (scr.hud_height - j * CHAR_HEIGHT) / 2;
     for (i = 0; i < j; i++) {
-        Q_snprintf(buffer, sizeof(buffer), "%2d: %d", i, cl.frame.ps.stats[i]);
-        if (cl.oldframe.ps.stats[i] != cl.frame.ps.stats[i]) {
+        Q_snprintf(buffer, sizeof(buffer), "%2d: %d", i, cl.frame.playerState.stats[i]);
+        if (cl.oldframe.playerState.stats[i] != cl.frame.playerState.stats[i]) {
             R_SetColor(U32_RED);
         }
         R_DrawString(x, y, 0, MAX_STRING_CHARS, buffer, scr.font_pic);
@@ -619,14 +619,14 @@ static void SCR_DrawDebugPMove(void)
     x = CHAR_WIDTH;
     y = (scr.hud_height - 2 * CHAR_HEIGHT) / 2;
 
-    i = cl.frame.ps.pmove.type;
+    i = cl.frame.playerState.pmove.type;
     if (i > PM_FREEZE)
         i = PM_FREEZE;
 
     R_DrawString(x, y, 0, MAX_STRING_CHARS, types[i], scr.font_pic);
     y += CHAR_HEIGHT;
 
-    j = cl.frame.ps.pmove.flags;
+    j = cl.frame.playerState.pmove.flags;
     for (i = 0; i < 8; i++) {
         if (j & (1 << i)) {
             x = R_DrawString(x, y, 0, MAX_STRING_CHARS, flags[i], scr.font_pic);

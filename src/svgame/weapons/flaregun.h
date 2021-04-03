@@ -9,7 +9,7 @@
 #ifndef __SVGAME_WEAPONS_FLAREGUN_H__
 #define __SVGAME_WEAPONS_FLAREGUN_H__
 
-void weapon_flaregun_fire(edict_t* ent);
-void Weapon_FlareGun(edict_t* ent);
+void weapon_flaregun_fire(entity_t* ent);
+void Weapon_FlareGun(entity_t* ent);
 
 #endif // __SVGAME_WEAPONS_FLAREGUN_H__

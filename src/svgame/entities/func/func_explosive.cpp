@@ -26,7 +26,7 @@ mass defaults to 75.  This determines how much debris is emitted when
 it explodes.  You get one large chunk per 100 of mass (up to 8) and
 one small chunk per 25 of mass (up to 16).  So 800 gives the most.
 */
-void func_explosive_explode(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t &point)
+void func_explosive_explode(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t &point)
 {
     vec3_t  origin;
     vec3_t  chunkorigin;
@@ -36,7 +36,7 @@ void func_explosive_explode(edict_t* self, edict_t* inflictor, edict_t* attacker
 
     // bmodel origins are (0 0 0), we need to adjust that here
     VectorScale(self->size, 0.5, size);
-    VectorAdd(self->absmin, size, origin);
+    VectorAdd(self->absMin, size, origin);
     VectorCopy(origin, self->s.origin);
 
     self->takedamage = DAMAGE_NO;
@@ -84,60 +84,60 @@ void func_explosive_explode(edict_t* self, edict_t* inflictor, edict_t* attacker
     if (self->dmg)
         BecomeExplosion1(self);
     else
-        G_FreeEdict(self);
+        G_FreeEntity(self);
 }
 
-void func_explosive_use(edict_t* self, edict_t* other, edict_t* activator)
+void func_explosive_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     func_explosive_explode(self, other, activator, self->health, vec3_origin);
 }
 
-void func_explosive_spawn(edict_t* self, edict_t* other, edict_t* activator)
+void func_explosive_spawn(entity_t* self, entity_t* other, entity_t* activator)
 {
     self->solid = SOLID_BSP;
-    self->svflags &= ~SVF_NOCLIENT;
-    self->use = NULL;
+    self->svFlags &= ~SVF_NOCLIENT;
+    self->Use = NULL;
     KillBox(self);
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 }
 
-void SP_func_explosive(edict_t* self)
+void SP_func_explosive(entity_t* self)
 {
     if (deathmatch->value) {
         // auto-remove for deathmatch
-        G_FreeEdict(self);
+        G_FreeEntity(self);
         return;
     }
 
-    self->movetype = MOVETYPE_PUSH;
+    self->moveType = MOVETYPE_PUSH;
 
-    gi.modelindex("models/objects/debris1/tris.md2");
-    gi.modelindex("models/objects/debris2/tris.md2");
+    gi.ModelIndex("models/objects/debris1/tris.md2");
+    gi.ModelIndex("models/objects/debris2/tris.md2");
 
-    gi.setmodel(self, self->model);
+    gi.SetModel(self, self->model);
 
-    if (self->spawnflags & 1) {
-        self->svflags |= SVF_NOCLIENT;
+    if (self->spawnFlags & 1) {
+        self->svFlags |= SVF_NOCLIENT;
         self->solid = SOLID_NOT;
-        self->use = func_explosive_spawn;
+        self->Use = func_explosive_spawn;
     }
     else {
         self->solid = SOLID_BSP;
-        if (self->targetname)
-            self->use = func_explosive_use;
+        if (self->targetName)
+            self->Use = func_explosive_use;
     }
 
-    if (self->spawnflags & 2)
+    if (self->spawnFlags & 2)
         self->s.effects |= EF_ANIM_ALL;
-    if (self->spawnflags & 4)
+    if (self->spawnFlags & 4)
         self->s.effects |= EF_ANIM_ALLFAST;
 
-    if (self->use != func_explosive_use) {
+    if (self->Use != func_explosive_use) {
         if (!self->health)
             self->health = 100;
-        self->die = func_explosive_explode;
+        self->Die = func_explosive_explode;
         self->takedamage = DAMAGE_YES;
     }
 
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 }

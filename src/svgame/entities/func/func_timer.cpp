@@ -25,46 +25,46 @@ so, the basic time between firing is a random time between
 
 These can used but not touched.
 */
-void func_timer_think(edict_t* self)
+void func_timer_think(entity_t* self)
 {
     UTIL_UseTargets(self, self->activator);
-    self->nextthink = level.time + self->wait + crandom() * self->random;
+    self->nextThink = level.time + self->wait + crandom() * self->random;
 }
 
-void func_timer_use(edict_t* self, edict_t* other, edict_t* activator)
+void func_timer_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     self->activator = activator;
 
     // if on, turn it off
-    if (self->nextthink) {
-        self->nextthink = 0;
+    if (self->nextThink) {
+        self->nextThink = 0;
         return;
     }
 
     // turn it on
     if (self->delay)
-        self->nextthink = level.time + self->delay;
+        self->nextThink = level.time + self->delay;
     else
         func_timer_think(self);
 }
 
-void SP_func_timer(edict_t* self)
+void SP_func_timer(entity_t* self)
 {
     if (!self->wait)
         self->wait = 1.0;
 
-    self->use = func_timer_use;
-    self->think = func_timer_think;
+    self->Use = func_timer_use;
+    self->Think = func_timer_think;
 
     if (self->random >= self->wait) {
         self->random = self->wait - FRAMETIME;
-        gi.dprintf("func_timer at %s has random >= wait\n", Vec3ToString(self->s.origin));
+        gi.DPrintf("func_timer at %s has random >= wait\n", Vec3ToString(self->s.origin));
     }
 
-    if (self->spawnflags & 1) {
-        self->nextthink = level.time + 1.0 + st.pausetime + self->delay + self->wait + crandom() * self->random;
+    if (self->spawnFlags & 1) {
+        self->nextThink = level.time + 1.0 + st.pausetime + self->delay + self->wait + crandom() * self->random;
         self->activator = self;
     }
 
-    self->svflags = SVF_NOCLIENT;
+    self->svFlags = SVF_NOCLIENT;
 }

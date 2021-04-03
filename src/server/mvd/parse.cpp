@@ -223,7 +223,7 @@ static void MVD_ParseMulticast(mvd_t *mvd, mvd_ops_t op, int extrabits)
 
         if (leaf1) {
             // find the client's PVS
-            ps = &client->ps;
+            ps = &client->playerState;
 #if 0
             // N&C: FF Precision.
             VectorAdd(ps->viewoffset, ps->pmove.origin, org);
@@ -502,7 +502,7 @@ static void MVD_ParseSound(mvd_t *mvd, int extrabits)
     int         area;
     player_state_t      *ps;
     message_packet_t    *msg;
-    edict_t     *entity;
+    entity_t     *entity;
 
     flags = MSG_ReadByte();
     index = MSG_ReadByte();
@@ -542,21 +542,21 @@ static void MVD_ParseSound(mvd_t *mvd, int extrabits)
         // PHS cull this sound
         if (!(extrabits & 1)) {
             // get client viewpos
-            ps = &client->ps;
+            ps = &client->playerState;
             // N&C: FF Precision.
             VectorAdd(ps->viewoffset, ps->pmove.origin, origin);
             //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, origin);
             leaf = CM_PointLeaf(&mvd->cm, origin);
             area = CM_LeafArea(leaf);
-            if (!CM_AreasConnected(&mvd->cm, area, entity->areanum)) {
+            if (!CM_AreasConnected(&mvd->cm, area, entity->areaNumber)) {
                 // doors can legally straddle two areas, so
                 // we may need to check another one
-                if (!entity->areanum2 || !CM_AreasConnected(&mvd->cm, area, entity->areanum2)) {
-                    continue;        // blocked by a door
+                if (!entity->areaNumber2 || !CM_AreasConnected(&mvd->cm, area, entity->areaNumber2)) {
+                    continue;        // Blocked by a door
                 }
             }
             BSP_ClusterVis(mvd->cm.cache, mask, leaf->cluster, DVIS_PHS);
-            if (!SV_EdictIsVisible(&mvd->cm, entity, mask)) {
+            if (!SV_EntityIsVisible(&mvd->cm, entity, mask)) {
                 continue; // not in PHS
             }
         }
@@ -678,7 +678,7 @@ extracting data from player state.
 static void MVD_PlayerToEntityStates(mvd_t *mvd)
 {
     mvd_player_t *player;
-    edict_t *edict;
+    entity_t *edict;
     int i;
 
     mvd->numplayers = 0;
@@ -688,7 +688,7 @@ static void MVD_PlayerToEntityStates(mvd_t *mvd)
         }
 
         mvd->numplayers++;
-        if (player->ps.pmove.type != PM_NORMAL) {
+        if (player->playerState.pmove.type != PM_NORMAL) {
             continue;   // can be out of sync, in this case
             // server should provide valid data
         }
@@ -698,9 +698,9 @@ static void MVD_PlayerToEntityStates(mvd_t *mvd)
             continue; // not present in this frame
         }
 
-        Com_PlayerToEntityState(&player->ps, &edict->s);
+        Com_PlayerToEntityState(&player->playerState, &edict->s);
 
-        MVD_LinkEdict(mvd, edict);
+        MVD_LinkEntity(mvd, edict);
     }
 }
 
@@ -715,7 +715,7 @@ static void MVD_ParsePacketEntities(mvd_t *mvd)
 {
     int     number;
     int     bits;
-    edict_t *ent;
+    entity_t *ent;
 
     while (1) {
         if (msg_read.readcount > msg_read.cursize) {
@@ -746,11 +746,11 @@ static void MVD_ParsePacketEntities(mvd_t *mvd)
 
         // lazily relink even if removed
         if ((bits & RELINK_MASK) && !mvd->demoseeking) {
-            MVD_LinkEdict(mvd, ent);
+            MVD_LinkEntity(mvd, ent);
         }
 
         // mark this entity as seen even if removed
-        ent->svflags |= SVF_MONSTER;
+        ent->svFlags |= SVF_MONSTER;
 
         // shuffle current origin to old if removed
         if (bits & U_REMOVE) {
@@ -807,7 +807,7 @@ static void MVD_ParsePacketPlayers(mvd_t *mvd)
         }
 #endif
 
-        MSG_ParseDeltaPlayerstate_Packet(&player->ps, &player->ps, bits);
+        MSG_ParseDeltaPlayerstate_Packet(&player->playerState, &player->playerState, bits);
 
         if (bits & PPS_REMOVE) {
             SHOWNET(2, "   remove: %d\n", number);
@@ -950,7 +950,7 @@ static void MVD_ParseServerData(mvd_t *mvd, int extrabits)
     char *string;
     int index;
     qerror_t ret;
-    edict_t *ent;
+    entity_t *ent;
 
     // clear the leftover from previous level
     MVD_ClearState(mvd, true);

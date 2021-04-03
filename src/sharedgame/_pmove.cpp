@@ -154,7 +154,7 @@ static void SVGPM_Debug(const char* func, const char* fmt, ...) {
 // Walking up a step should kill some velocity.
 //  
 // Slide off of the impacting object
-// returns the blocked flags(1 = floor, 2 = step / wall)
+// returns the Blocked flags(1 = floor, 2 = step / wall)
 //===============
 //
 #define STOP_EPSILON    0.1
@@ -184,7 +184,7 @@ static vec3_t PM_ClipVelocity(vec3_t& in, vec3_t& normal, float overbounce)
 // Marks the specified entity as touched.
 //===============
 //
-static void PM_TouchEntity(struct edict_s* ent) {
+static void PM_TouchEntity(struct entity_s* ent) {
     // Ensure it is valid.
     if (ent == NULL) {
         PM_Debug("ent = NULL");
@@ -257,7 +257,7 @@ static bool PM_CheckStep(trace_t* trace) {
 
     if (!trace->allsolid) {
         if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
-            if (trace->ent != pm->groundEntity || trace->plane.dist != pml.groundplane.dist) {
+            if (trace->ent != pm->groundEntityPtr || trace->plane.dist != pml.groundplane.dist) {
                 return true;
             }
         }
@@ -536,7 +536,7 @@ static void PM_StepSlideMove(void)
 // PM_SlideMove
 // 
 // Calculates a new origin, velocity, and contact entities based on the
-// movement command and world state. Returns true if not blocked.
+// movement command and world state. Returns true if not Blocked.
 //===============
 //
 #define MIN_STEP_NORMAL 0.7     // can't step up onto very steep slopes
@@ -735,7 +735,7 @@ static void PM_StepSlideMove(void)
         return;
     }
 
-    // We were blocked, so try to step over the obstacle
+    // We were Blocked, so try to step over the obstacle
     vec3_t org1;
     vec3_t vel1;
     VectorCopy(pm->state.origin, org1);
@@ -816,7 +816,7 @@ static void PM_Friction(void)
     drop = 0;
 
     // apply ground friction
-    if ((pm->groundEntity && pml.groundsurface && !(pml.groundsurface->flags & SURF_SLICK)) || (pml.ladder)) {
+    if ((pm->groundEntityPtr && pml.groundsurface && !(pml.groundsurface->flags & SURF_SLICK)) || (pml.ladder)) {
         friction = pmp->friction;
         control = speed < pm_stopspeed ? pm_stopspeed : speed;
         drop += control * friction * pml.frametime;
@@ -953,14 +953,14 @@ static vec3_t PM_AddCurrents(const vec3_t& vel)
             v.z -= 1;
 
         s = pm_waterspeed;
-        if ((pm->waterLevel == 1) && (pm->groundEntity))
+        if ((pm->waterLevel == 1) && (pm->groundEntityPtr))
             s /= 2;
 
         wishvel = vec3_fmaf(wishvel, s, v);
     }
 
     // Conveyor Belt Velocities.
-    if (pm->groundEntity) {
+    if (pm->groundEntityPtr) {
         VectorClear(v);
 
         if (pml.groundcontents & CONTENTS_CURRENT_0)
@@ -976,7 +976,7 @@ static vec3_t PM_AddCurrents(const vec3_t& vel)
         if (pml.groundcontents & CONTENTS_CURRENT_DOWN)
             v.z -= 1;
 
-        wishvel = vec3_fmaf(wishvel, 100 /* pm->groundEntity->speed */, v);
+        wishvel = vec3_fmaf(wishvel, 100 /* pm->groundEntityPtr->speed */, v);
     }
 
     return wishvel;
@@ -1083,7 +1083,7 @@ static void PM_AirMove(void)
         }
         PM_StepSlideMove();
     }
-    else if (pm->groundEntity) {
+    else if (pm->groundEntityPtr) {
         // walking on ground
         pml.velocity.z = 0; //!!! this is before the accel
         PM_Accelerate(wishdir, wishspeed, pm_accelerate);
@@ -1150,7 +1150,7 @@ static void PM_CheckJump(void)
 
     if (pm->waterLevel >= 2) {
         // swimming, not jumping
-        pm->groundEntity = NULL;
+        pm->groundEntityPtr = NULL;
 
         if (pmp->waterhack)
             return;
@@ -1169,12 +1169,12 @@ static void PM_CheckJump(void)
         return;
     }
 
-    if (pm->groundEntity == NULL)
+    if (pm->groundEntityPtr == NULL)
         return;     // in air, so no effect
 
     pm->state.flags |= PMF_JUMP_HELD;
 
-    pm->groundEntity = NULL;
+    pm->groundEntityPtr = NULL;
     pm->state.flags &= ~PMF_ON_GROUND;
     pml.velocity.z += 270;
     if (pml.velocity.z < 270)
@@ -1239,7 +1239,7 @@ static void PM_CheckSpecialMovements(void)
 // PM_CheckDuck
 //
 // Sets the wished for values to crouch:
-// pm->mins, pm->maxs, and pm->viewheight
+// pm->mins, pm->maxs, and pm->viewHeight
 //===============
 //
 static void PM_CheckDuck(void)
@@ -1325,7 +1325,7 @@ static void PM_CategorizePosition(void)
 
     if (pml.velocity.z > 180) { //!!ZOID changed from 100 to 180 (ramp accel)
         pm->state.flags &= ~PMF_ON_GROUND;
-        pm->groundEntity = NULL;
+        pm->groundEntityPtr = NULL;
     }
     else {
         // Execute trace.
@@ -1338,11 +1338,11 @@ static void PM_CategorizePosition(void)
 
         // No ent, or place normal is under PM_STEP_NORMAL.
         if (!trace.ent || (trace.plane.normal.z < PM_STEP_NORMAL && !trace.startsolid)) {
-            pm->groundEntity = NULL;
+            pm->groundEntityPtr = NULL;
             pm->state.flags &= ~PMF_ON_GROUND;
         }
         else {
-            pm->groundEntity = trace.ent;
+            pm->groundEntityPtr = trace.ent;
 
             // hitting solid ground will end a waterjump
             if (pm->state.flags & PMF_TIME_WATERJUMP) {
@@ -1596,7 +1596,7 @@ static void PM_DeadMove(void)
     float   forward;
 
     // Return if not on the ground.
-    if (!pm->groundEntity)
+    if (!pm->groundEntityPtr)
         return;
 
     // extra friction
@@ -1651,7 +1651,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     pm->numTouchedEntities = 0;
     pm->viewAngles = { 0.f, 0.f, 0.f };
     pm->state.view_offset.z = 0;
-    pm->groundEntity = NULL;
+    pm->groundEntityPtr = NULL;
     pm->waterType = 0;
     pm->waterLevel = 0;
 
@@ -1692,7 +1692,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     if (pm->state.type == PM_FREEZE)
         return;
 
-    // set mins, maxs, and viewheight
+    // set mins, maxs, and viewHeight
     PM_CheckDuck();
 
     // Check whether we need to test the initial position, in case it has been modified outside of
@@ -1700,7 +1700,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     if (pm->testInitial)
         PM_TestInitialPosition();
 
-    // Set groundEntity, waterType, and waterLevel
+    // Set groundEntityPtr, waterType, and waterLevel
     PM_CategorizePosition();
 
     // Check for whether we're dead, if so, call PM_DeadMove. It will stop
@@ -1769,7 +1769,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
         }
     }
 
-    // Set groundEntity, waterType, and waterLevel for final spot
+    // Set groundEntityPtr, waterType, and waterLevel for final spot
     PM_CategorizePosition();
 
     // Finalize position, do testing with the pml results, and apply if valid.

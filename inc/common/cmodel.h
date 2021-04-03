@@ -65,7 +65,7 @@ typedef struct {
                                     const vec3_t &mins, const vec3_t &maxs,
                                     mnode_t * headNode, int brushmask,
                                     const vec3_t &origin, const vec3_t &angles);
-    void        CM_ClipEntity(trace_t *dst, const trace_t *src, struct edict_s *ent);
+    void        CM_ClipEntity(trace_t *dst, const trace_t *src, struct entity_s *ent);
 
     // call with topnode set to the headNode, returns with topnode
     // set to the first node that splits the box

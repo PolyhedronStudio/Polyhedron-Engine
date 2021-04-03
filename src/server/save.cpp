@@ -474,7 +474,7 @@ int SV_NoSaveGames(void)
 void SV_AutoSaveBegin(mapcmd_t *cmd)
 {
     byte        bitmap[MAX_CLIENTS / CHAR_BIT];
-    edict_t     *ent;
+    entity_t     *ent;
     int         i;
 
     // check for clearing the current savegame
@@ -652,7 +652,7 @@ static void SV_Savegame_f(void)
         return;
     }
 
-    if (sv_maxclients->integer == 1 && svs.client_pool[0].edict->client->ps.stats[STAT_HEALTH] <= 0) {
+    if (sv_maxclients->integer == 1 && svs.client_pool[0].edict->client->playerState.stats[STAT_HEALTH] <= 0) {
         Com_Printf("Can't savegame while dead!\n");
         return;
     }

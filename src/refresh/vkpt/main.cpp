@@ -1473,7 +1473,7 @@ static int world_entity_id_count[2];
 static int num_model_lights = 0;
 static light_poly_t model_lights[MAX_MODEL_LIGHTS];
 
-static pbr_material_t const * get_mesh_material(const entity_t* entity, const maliasmesh_t* mesh)
+static pbr_material_t const * get_mesh_material(const r_entity_t* entity, const maliasmesh_t* mesh)
 {
 	if (entity->skin)
 	{
@@ -1487,7 +1487,7 @@ static pbr_material_t const * get_mesh_material(const entity_t* entity, const ma
 	return mesh->materials[skinnum];
 }
 
-static inline uint32_t fill_model_instance(const entity_t* entity, const model_t* model, const maliasmesh_t* mesh,
+static inline uint32_t fill_model_instance(const r_entity_t* entity, const model_t* model, const maliasmesh_t* mesh,
 	const float* transform, int model_instance_index, qboolean is_viewer_weapon, qboolean is_double_sided)
 {
 	pbr_material_t const * material = get_mesh_material(entity, mesh);
@@ -1841,7 +1841,7 @@ bsp_add_entlights(const bsp_t* bsp)
 		//inner = entString;
 		num_keypairs = 0;
 
-		//replicate ED_ParseEdict() logic of game DLL
+		//replicate ED_ParseEntity() logic of game DLL
 		for (;; ) //loop over properties
 		{
 			EntityKVPair_t keypair;
@@ -2238,208 +2238,208 @@ void bsp_reset_entlights(const bsp_t* bsp)
 
 }
 
-#define NUM_ACTOR_SOUNDS   13
-#define	MAX_ENT_CLUSTERS	16
+//#define NUM_ACTOR_SOUNDS   13
+//#define	MAX_ENT_CLUSTERS	16
+//
+//#include "game_copy.h"
+//
+//static void ProcessLightLookAtTarget(dlight_t *elight, dlightLS_t *elightls)
+//{
+//	// Get target pos
+//	entity_t *lightTarget = (entity_t*)elight->nacTargetBind;
+//	if (!lightTarget) return;
+//
+//	// Calc vector normalized
+//	vec3_t dir;
+//
+//	VectorSubtract(elight->origin, lightTarget->s.origin, dir);
+//	VectorNormalize(dir);
+//	VectorCopy(dir, elight->nacDirection);
+//}
+//
+//static void ProcessLightMovewith(dlight_t *elight, dlightLS_t *elightls)
+//{
+//	// Get target pos
+//	entity_t *light = (entity_t*)elight->nacLightBind;
+//	if (!light) return;
+//
+//	VectorCopy(light->s.origin, elight->origin);
+//
+//}
+//
+//static void ProcessLightStlye(dlight_t *elight, dlightLS_t *elightls)
+//{
+//	const float conversion = 1.0f / 26.0f;
+//
+//	char c = 0;
+//
+//	if (elight->nacusecustom == 1)
+//	{
+//		if (elight->nacCustomEnabled == 1)
+//			c = elight->nacCustom[elightls->frame] - 'a';
+//		else
+//			c = 'z' - 'a';
+//	}
+//	else
+//	{
+//		c = elightls->lightstyle[elightls->frame] - 'a';
+//	}
+//
+//	float cc = conversion * c;
+//	if(elightls->done == 0) elight->nacLightPower = elightls->power * cc;
+//	
+//	if (cl.time - elightls->lastCtime >= elightls->hzOver1k)
+//	{
+//		if (elightls->frame + 1 == elightls->length && elight->nacLsDirection == 1)
+//		{
+//			// Done playing the anim forward
+//			if (elight->nacCustomLoopEnabled == 1 && 
+//				elight->nacCustomToggleEnabled == 0)
+//				elightls->frame = 0;
+//			
+//			if (elight->nacCustomToggleEnabled == 1)
+//			{
+//				elight->nacLsDirection = -1;
+//				//elightls->frame--;
+//			}
+//			
+//		}
+//		else if (elightls->frame - 1 == -1 && elight->nacLsDirection == -1)
+//		{
+//			// Done playing the anim backward
+//			if (elight->nacCustomLoopEnabled == 1)
+//				elight->nacLsDirection = 1;
+//			else
+//			{   
+//				elight->nacCustomToggleEnabled = 0;
+//				elight->nacLsDirection = 1;
+//				elightls->frame = elightls->length - 1;
+//				elightls->done = 1;
+//			}
+//		}
+//		else
+//		{
+//			elightls->frame += elight->nacLsDirection;
+//		}
+//
+//		elightls->lastCtime = cl.time;
+//	}
+//}
+//
+//static void ProcessTargetLightStlye(dlight_t *elight, dlightLS_t *elightls)
+//{
+//	entity_t *targetLS = (entity_t*)elight->nacTargetLightLSBind;
+//	if (targetLS)
+//	{
+//		if (targetLS->changeLightLS == 1)
+//		{
+//			strcpy(elight->nacCustom, targetLS->nacCustom);
+//			elight->nacCustomEnabled = targetLS->nacCustomEnabled;
+//			elight->nacCustomLoopEnabled = targetLS->nacCustomLoopEnabled;
+//			elight->nacCustomToggleEnabled = targetLS->nacCustomToggleEnabled;
+//			elightls->hzOver1k = 1000.0f / targetLS->nacHz;
+//			elightls->length = strlen(elight->nacCustom) + 1;
+//			if (targetLS->nacCustomEnabled)
+//				elight->nacusecustom = 1;
+//
+//			targetLS->changeLightLS = 0;
+//		}
+//	}
+//}
+//
+//static void ProcessTargetLight(dlight_t *elight, dlightLS_t *elightls)
+//{
+//	entity_t *targetL = (entity_t*)elight->nacTargetLightBind;
+//	if (targetL)
+//	{
+//		if (targetL->changeLight == 1)
+//		{
+//			elight->color[0] = targetL->color[0];
+//			elight->color[1] = targetL->color[1];
+//			elight->color[2] = targetL->color[2];
+//
+//			elight->nacDirection[0] = targetL->nacdirectionX;
+//			elight->nacDirection[1] = targetL->nacdirectionY;
+//			elight->nacDirection[2] = targetL->nacdirectionZ;
+//			elight->nacUmbra = targetL->nacumbraangle;
+//			elight->nacPenumbra = targetL->nacpenumbraangle;
+//
+//			elight->nacLightPower = targetL->naclightpow;
+//			elight->nacLightMaxDist = targetL->naclightmax;
+//			elight->naclightStyle = targetL->naclighttype;
+//
+//			targetL->changeLight = 0;
+//		}
+//	}
+//}
 
-#include "game_copy.h"
-
-static void ProcessLightLookAtTarget(dlight_t *elight, dlightLS_t *elightls)
-{
-	// Get target pos
-	edict_t *lightTarget = (edict_t*)elight->nacTargetBind;
-	if (!lightTarget) return;
-
-	// Calc vector normalized
-	vec3_t dir;
-
-	VectorSubtract(elight->origin, lightTarget->s.origin, dir);
-	VectorNormalize(dir);
-	VectorCopy(dir, elight->nacDirection);
-}
-
-static void ProcessLightMovewith(dlight_t *elight, dlightLS_t *elightls)
-{
-	// Get target pos
-	edict_t *light = (edict_t*)elight->nacLightBind;
-	if (!light) return;
-
-	VectorCopy(light->s.origin, elight->origin);
-
-}
-
-static void ProcessLightStlye(dlight_t *elight, dlightLS_t *elightls)
-{
-	const float conversion = 1.0f / 26.0f;
-
-	char c = 0;
-
-	if (elight->nacusecustom == 1)
-	{
-		if (elight->nacCustomEnabled == 1)
-			c = elight->nacCustom[elightls->frame] - 'a';
-		else
-			c = 'z' - 'a';
-	}
-	else
-	{
-		c = elightls->lightstyle[elightls->frame] - 'a';
-	}
-
-	float cc = conversion * c;
-	if(elightls->done == 0) elight->nacLightPower = elightls->power * cc;
-	
-	if (cl.time - elightls->lastCtime >= elightls->hzOver1k)
-	{
-		if (elightls->frame + 1 == elightls->length && elight->nacLsDirection == 1)
-		{
-			// Done playing the anim forward
-			if (elight->nacCustomLoopEnabled == 1 && 
-				elight->nacCustomToggleEnabled == 0)
-				elightls->frame = 0;
-			
-			if (elight->nacCustomToggleEnabled == 1)
-			{
-				elight->nacLsDirection = -1;
-				//elightls->frame--;
-			}
-			
-		}
-		else if (elightls->frame - 1 == -1 && elight->nacLsDirection == -1)
-		{
-			// Done playing the anim backward
-			if (elight->nacCustomLoopEnabled == 1)
-				elight->nacLsDirection = 1;
-			else
-			{   
-				elight->nacCustomToggleEnabled = 0;
-				elight->nacLsDirection = 1;
-				elightls->frame = elightls->length - 1;
-				elightls->done = 1;
-			}
-		}
-		else
-		{
-			elightls->frame += elight->nacLsDirection;
-		}
-
-		elightls->lastCtime = cl.time;
-	}
-}
-
-static void ProcessTargetLightStlye(dlight_t *elight, dlightLS_t *elightls)
-{
-	edict_t *targetLS = (edict_t*)elight->nacTargetLightLSBind;
-	if (targetLS)
-	{
-		if (targetLS->changeLightLS == 1)
-		{
-			strcpy(elight->nacCustom, targetLS->nacCustom);
-			elight->nacCustomEnabled = targetLS->nacCustomEnabled;
-			elight->nacCustomLoopEnabled = targetLS->nacCustomLoopEnabled;
-			elight->nacCustomToggleEnabled = targetLS->nacCustomToggleEnabled;
-			elightls->hzOver1k = 1000.0f / targetLS->nacHz;
-			elightls->length = strlen(elight->nacCustom) + 1;
-			if (targetLS->nacCustomEnabled)
-				elight->nacusecustom = 1;
-
-			targetLS->changeLightLS = 0;
-		}
-	}
-}
-
-static void ProcessTargetLight(dlight_t *elight, dlightLS_t *elightls)
-{
-	edict_t *targetL = (edict_t*)elight->nacTargetLightBind;
-	if (targetL)
-	{
-		if (targetL->changeLight == 1)
-		{
-			elight->color[0] = targetL->color[0];
-			elight->color[1] = targetL->color[1];
-			elight->color[2] = targetL->color[2];
-
-			elight->nacDirection[0] = targetL->nacdirectionX;
-			elight->nacDirection[1] = targetL->nacdirectionY;
-			elight->nacDirection[2] = targetL->nacdirectionZ;
-			elight->nacUmbra = targetL->nacumbraangle;
-			elight->nacPenumbra = targetL->nacpenumbraangle;
-
-			elight->nacLightPower = targetL->naclightpow;
-			elight->nacLightMaxDist = targetL->naclightmax;
-			elight->naclightStyle = targetL->naclighttype;
-
-			targetL->changeLight = 0;
-		}
-	}
-}
-
-static void add_elights(refdef_t * fd, QVKUniformBuffer_t * ubo)
-{
-	
-
-	for (int i = 0; i < num_entlights && ubo->num_sphere_lights < MAX_LIGHT_SOURCES; i++)
-	{
-		dlight_t *elight = &entlights[i];
-		dlightLS_t *elightls = &entlightstyles[i];
-
-		// Process Target_LightStyle 
-		ProcessTargetLightStlye(elight, elightls);
-		
-		// Process Target_Light
-		ProcessTargetLight(elight, elightls);
-
-		// Process LightStyle
-		ProcessLightStlye(elight, elightls);
-
-		// Process Light movewith
-		if (elight->nacLightBind)
-			ProcessLightMovewith(elight, elightls);
-
-		// Process Light LookAt Target
-		if (elight->nacLightType != 0 && elight->nacTargetBind)
-			ProcessLightLookAtTarget(elight, elightls);
-
-		float* dynlight_data = (float*)(ubo->sphere_light_data + ubo->num_sphere_lights * 4);
-		float* center = dynlight_data;
-		float* radius = dynlight_data + 3;
-		float* color = dynlight_data + 4;
-		dynlight_data[7] = 0.f;
-
-		dynlight_data[8] = elight->nacDirection[0];
-		dynlight_data[9] = elight->nacDirection[1];
-		dynlight_data[10] = elight->nacDirection[2];
-		dynlight_data[11] = elight->nacLightPower;
-
-		dynlight_data[12] = elight->nacUmbra;
-		dynlight_data[13] = elight->nacPenumbra;
-		dynlight_data[14] = elight->nacLightMaxDist;
-		dynlight_data[15] = elight->nacLightType;
-
-		VectorCopy(elight->origin, center);
-		VectorScale(elight->color, elight->intensity / 25.f, color);
-
-		*radius = elight->radius;
-
-		ubo->num_sphere_lights++;
-
-		if (cvar_show_entlights->integer && fd->num_particles < MAX_PARTICLES)
-		{
-			particle_t * part = &fd->particles[fd->num_particles]; //fd->particles + (fd->num_particles * sizeof(particle_t));
-
-			VectorCopy(elight->origin, part->origin);
-			part->radius = elight->radius;
-			part->brightness = max(elight->color[0], max(elight->color[1], elight->color[2]));
-			part->color = -1;
-			part->rgba.u8[0] = (uint8_t)max(0.00f, min(255.00f, elight->color[0] / part->brightness * 255.00f));
-			part->rgba.u8[1] = (uint8_t)max(0.00f, min(255.00f, elight->color[1] / part->brightness * 255.00f));
-			part->rgba.u8[2] = (uint8_t)max(0.00f, min(255.00f, elight->color[2] / part->brightness * 255.00f));
-			part->rgba.u8[3] = 255;
-			part->alpha = 1.00f;
-
-			fd->num_particles++;
-		}
-	}
-}
+//static void add_elights(refdef_t * fd, QVKUniformBuffer_t * ubo)
+//{
+//	
+//
+//	for (int i = 0; i < num_entlights && ubo->num_sphere_lights < MAX_LIGHT_SOURCES; i++)
+//	{
+//		dlight_t *elight = &entlights[i];
+//		dlightLS_t *elightls = &entlightstyles[i];
+//
+//		// Process Target_LightStyle 
+//		ProcessTargetLightStlye(elight, elightls);
+//		
+//		// Process Target_Light
+//		ProcessTargetLight(elight, elightls);
+//
+//		// Process LightStyle
+//		ProcessLightStlye(elight, elightls);
+//
+//		// Process Light movewith
+//		if (elight->nacLightBind)
+//			ProcessLightMovewith(elight, elightls);
+//
+//		// Process Light LookAt Target
+//		if (elight->nacLightType != 0 && elight->nacTargetBind)
+//			ProcessLightLookAtTarget(elight, elightls);
+//
+//		float* dynlight_data = (float*)(ubo->sphere_light_data + ubo->num_sphere_lights * 4);
+//		float* center = dynlight_data;
+//		float* radius = dynlight_data + 3;
+//		float* color = dynlight_data + 4;
+//		dynlight_data[7] = 0.f;
+//
+//		dynlight_data[8] = elight->nacDirection[0];
+//		dynlight_data[9] = elight->nacDirection[1];
+//		dynlight_data[10] = elight->nacDirection[2];
+//		dynlight_data[11] = elight->nacLightPower;
+//
+//		dynlight_data[12] = elight->nacUmbra;
+//		dynlight_data[13] = elight->nacPenumbra;
+//		dynlight_data[14] = elight->nacLightMaxDist;
+//		dynlight_data[15] = elight->nacLightType;
+//
+//		VectorCopy(elight->origin, center);
+//		VectorScale(elight->color, elight->intensity / 25.f, color);
+//
+//		*radius = elight->radius;
+//
+//		ubo->num_sphere_lights++;
+//
+//		if (cvar_show_entlights->integer && fd->num_particles < MAX_PARTICLES)
+//		{
+//			particle_t * part = &fd->particles[fd->num_particles]; //fd->particles + (fd->num_particles * sizeof(particle_t));
+//
+//			VectorCopy(elight->origin, part->origin);
+//			part->radius = elight->radius;
+//			part->brightness = max(elight->color[0], max(elight->color[1], elight->color[2]));
+//			part->color = -1;
+//			part->rgba.u8[0] = (uint8_t)max(0.00f, min(255.00f, elight->color[0] / part->brightness * 255.00f));
+//			part->rgba.u8[1] = (uint8_t)max(0.00f, min(255.00f, elight->color[1] / part->brightness * 255.00f));
+//			part->rgba.u8[2] = (uint8_t)max(0.00f, min(255.00f, elight->color[2] / part->brightness * 255.00f));
+//			part->rgba.u8[3] = 255;
+//			part->alpha = 1.00f;
+//
+//			fd->num_particles++;
+//		}
+//	}
+//}
 
 static inline void transform_point(const float* p, const float* matrix, float* result)
 {
@@ -2449,7 +2449,7 @@ static inline void transform_point(const float* p, const float* matrix, float* r
 	VectorCopy(transformed, result); // vec4 -> vec3
 }
 
-static void process_bsp_entity(const entity_t* entity, int* bsp_mesh_idx, int* instance_idx, int* num_instanced_vert)
+static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int* instance_idx, int* num_instanced_vert)
 {
 	QVKInstanceBuffer_t* uniform_instance_buffer = &vkpt_refdef.uniform_instance_buffer;
 	uint32_t* ubo_bsp_cluster_id = (uint32_t*)uniform_instance_buffer->bsp_cluster_id;
@@ -2473,7 +2473,7 @@ static void process_bsp_entity(const entity_t* entity, int* bsp_mesh_idx, int* i
 	world_entity_ids[entity_frame_num][current_bsp_mesh_index] = entity->id;
 
 	float transform[16];
-	create_entity_matrix(transform, (entity_t*)entity, false);
+	create_entity_matrix(transform, (r_entity_t*)entity, false);
 	BspMeshInstance* ubo_instance_info = uniform_instance_buffer->bsp_mesh_instances + current_bsp_mesh_index;
 	memcpy(&ubo_instance_info->M, transform, sizeof(transform));
 	ubo_instance_info->frame = entity->frame;
@@ -2569,7 +2569,7 @@ static inline qboolean is_transparent_material(uint32_t material)
 #define MESH_FILTER_ALL 3
 
 static void process_regular_entity(
-	const entity_t* entity, 
+	const r_entity_t* entity,
 	const model_t* model, 
 	qboolean is_viewer_weapon, 
 	qboolean is_double_sided, 
@@ -2586,7 +2586,7 @@ static void process_regular_entity(
 	uint32_t* ubo_model_cluster_id = (uint32_t*)uniform_instance_buffer->model_cluster_id;
 
 	float transform[16];
-	create_entity_matrix(transform, (entity_t*)entity, is_viewer_weapon);
+	create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
 	
 	int current_model_instance_index = *model_instance_idx;
 	int current_instance_index = *instance_idx;
@@ -2644,7 +2644,7 @@ static void process_regular_entity(
 
 		uint32_t cluster_id = ~0u;
 		if(bsp_world_model) 
-			cluster_id = BSP_PointLeaf(bsp_world_model->nodes, ((entity_t*)entity)->origin)->cluster;
+			cluster_id = BSP_PointLeaf(bsp_world_model->nodes, ((r_entity_t*)entity)->origin)->cluster;
 		ubo_model_cluster_id[current_model_instance_index] = cluster_id;
 
 		ubo_model_idx_offset[current_model_instance_index] = mesh->idx_offset;
@@ -2715,7 +2715,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 
 	for (int i = 0; i < vkpt_refdef.fd->num_entities; i++)
 	{
-		const entity_t* entity = vkpt_refdef.fd->entities + i;
+		const r_entity_t* entity = vkpt_refdef.fd->entities + i;
 
 		if (entity->model & 0x80000000)
 		{
@@ -2753,7 +2753,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	const uint32_t transparent_model_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < transparent_model_num; i++)
 	{
-		const entity_t* entity = vkpt_refdef.fd->entities + transparent_model_indices[i];
+		const r_entity_t* entity = vkpt_refdef.fd->entities + transparent_model_indices[i];
 
 		if (entity->model & 0x80000000)
 		{
@@ -2774,7 +2774,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	{
 		for (int i = 0; i < viewer_model_num; i++)
 		{
-			const entity_t* entity = vkpt_refdef.fd->entities + viewer_model_indices[i];
+			const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_model_indices[i];
 			const model_t* model = MOD_ForHandle(entity->model);
 			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 		}
@@ -2788,7 +2788,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	const uint32_t viewer_weapon_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < viewer_weapon_num; i++)
 	{
-		const entity_t* entity = vkpt_refdef.fd->entities + viewer_weapon_indices[i];
+		const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_weapon_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
 		process_regular_entity(entity, model, true, false, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 
@@ -2802,7 +2802,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	const uint32_t explosion_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < explosion_num; i++)
 	{
-		const entity_t* entity = vkpt_refdef.fd->entities + explosion_indices[i];
+		const r_entity_t* entity = vkpt_refdef.fd->entities + explosion_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
 		process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 	}
@@ -3485,7 +3485,7 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	VectorCopy(sky_matrix[2], ubo->environment_rotation_matrix + 8);
 		
 	add_dlights(vkpt_refdef.fd->dlights, vkpt_refdef.fd->num_dlights, ubo);
-	add_elights(vkpt_refdef.fd, ubo);
+	//add_elights(vkpt_refdef.fd, ubo);
 
 	const bsp_mesh_t* wm = &vkpt_refdef.bsp_mesh_world;
 	if (wm->num_cameras > 0)

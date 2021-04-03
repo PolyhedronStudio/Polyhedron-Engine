@@ -88,7 +88,7 @@ typedef struct {
     int             viewcluster1;
     int             viewcluster2;
     cplane_t        frustumPlanes[4];
-    entity_t        *ent;
+    r_entity_t        *ent;
     qboolean        entrotated;
     vec3_t          entaxis[3];
     GLfloat         entmatrix[16];
@@ -127,7 +127,7 @@ extern glStatic_t gl_static;
 extern glConfig_t gl_config;
 extern glRefdef_t glr;
 
-extern entity_t gl_world;
+extern r_entity_t gl_world;
 
 typedef struct {
     int nodesVisible;

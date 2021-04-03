@@ -17,7 +17,7 @@
 A relay trigger that only fires it's targets if player has the proper key.
 Use "item" to specify the required key, for example "key_data_cd"
 */
-void trigger_key_use(edict_t* self, edict_t* other, edict_t* activator)
+void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     int         index;
 
@@ -28,18 +28,18 @@ void trigger_key_use(edict_t* self, edict_t* other, edict_t* activator)
 
     index = ITEM_INDEX(self->item);
     if (!activator->client->pers.inventory[index]) {
-        if (level.time < self->touch_debounce_time)
+        if (level.time < self->debounceTouchTime)
             return;
-        self->touch_debounce_time = level.time + 5.0;
-        gi.centerprintf(activator, "You need the %s", self->item->pickup_name);
-        gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/keytry.wav"), 1, ATTN_NORM, 0);
+        self->debounceTouchTime = level.time + 5.0;
+        gi.CenterPrintf(activator, "You need the %s", self->item->pickupName);
+        gi.Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/keytry.wav"), 1, ATTN_NORM, 0);
         return;
     }
 
-    gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/keyuse.wav"), 1, ATTN_NORM, 0);
+    gi.Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/keyuse.wav"), 1, ATTN_NORM, 0);
     if (coop->value) {
         int     player;
-        edict_t* ent;
+        entity_t* ent;
 
         if (strcmp(self->item->classname, "key_power_cube") == 0) {
             int cube;
@@ -76,29 +76,29 @@ void trigger_key_use(edict_t* self, edict_t* other, edict_t* activator)
 
     UTIL_UseTargets(self, activator);
 
-    self->use = NULL;
+    self->Use = NULL;
 }
 
-void SP_trigger_key(edict_t* self)
+void SP_trigger_key(entity_t* self)
 {
     if (!st.item) {
-        gi.dprintf("no key item for trigger_key at %s\n", Vec3ToString(self->s.origin));
+        gi.DPrintf("no key item for trigger_key at %s\n", Vec3ToString(self->s.origin));
         return;
     }
     self->item = FindItemByClassname(st.item);
 
     if (!self->item) {
-        gi.dprintf("item %s not found for trigger_key at %s\n", st.item, Vec3ToString(self->s.origin));
+        gi.DPrintf("item %s not found for trigger_key at %s\n", st.item, Vec3ToString(self->s.origin));
         return;
     }
 
     if (!self->target) {
-        gi.dprintf("%s at %s has no target\n", self->classname, Vec3ToString(self->s.origin));
+        gi.DPrintf("%s at %s has no target\n", self->classname, Vec3ToString(self->s.origin));
         return;
     }
 
-    gi.soundindex("misc/keytry.wav");
-    gi.soundindex("misc/keyuse.wav");
+    gi.SoundIndex("misc/keytry.wav");
+    gi.SoundIndex("misc/keyuse.wav");
 
-    self->use = trigger_key_use;
+    self->Use = trigger_key_use;
 }

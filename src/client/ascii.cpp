@@ -236,7 +236,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             if (value < 0 || value >= MAX_STATS) {
                 Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
             }
-            value = cl.frame.ps.stats[value];
+            value = cl.frame.playerState.stats[value];
             TH_DrawNumber(dst, x, y, width, value);
             continue;
         }
@@ -247,7 +247,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             if (index < 0 || index >= MAX_STATS) {
                 Com_Error(ERR_DROP, "%s: invalid string index", __func__);
             }
-            index = cl.frame.ps.stats[index];
+            index = cl.frame.playerState.stats[index];
             if (index < 0 || index >= MAX_CONFIGSTRINGS) {
                 Com_Error(ERR_DROP, "%s: invalid string index", __func__);
             }
@@ -276,7 +276,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             if (value < 0 || value >= MAX_STATS) {
                 Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
             }
-            value = cl.frame.ps.stats[value];
+            value = cl.frame.playerState.stats[value];
             if (!value) {   // skip to endif
                 while (strcmp(token, "endif")) {
                     token = COM_Parse(&s);

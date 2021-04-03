@@ -23,34 +23,34 @@ The brush should be have a surface with at least one current content enabled.
 speed   default 100
 */
 
-void func_conveyor_use(edict_t* self, edict_t* other, edict_t* activator)
+void func_conveyor_use(entity_t* self, entity_t* other, entity_t* activator)
 {
-    if (self->spawnflags & 1) {
+    if (self->spawnFlags & 1) {
         self->speed = 0;
-        self->spawnflags &= ~1;
+        self->spawnFlags &= ~1;
     }
     else {
         self->speed = self->count;
-        self->spawnflags |= 1;
+        self->spawnFlags |= 1;
     }
 
-    if (!(self->spawnflags & 2))
+    if (!(self->spawnFlags & 2))
         self->count = 0;
 }
 
-void SP_func_conveyor(edict_t* self)
+void SP_func_conveyor(entity_t* self)
 {
     if (!self->speed)
         self->speed = 100;
 
-    if (!(self->spawnflags & 1)) {
+    if (!(self->spawnFlags & 1)) {
         self->count = self->speed;
         self->speed = 0;
     }
 
-    self->use = func_conveyor_use;
+    self->Use = func_conveyor_use;
 
-    gi.setmodel(self, self->model);
+    gi.SetModel(self, self->model);
     self->solid = SOLID_BSP;
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 }

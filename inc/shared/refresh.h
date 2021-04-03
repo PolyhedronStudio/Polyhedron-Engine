@@ -64,7 +64,7 @@ typedef struct refresh_geometry_s {
 } refresh_geometry_t;
 
 
-typedef struct entity_s {
+typedef struct r_entity_s {
     //
     // Model.
     //
@@ -101,7 +101,7 @@ typedef struct entity_s {
 	int                 tent_type;  // Temporary Entity Type.
 
 	float               scale;      // Entity Scale.
-} entity_t;
+} r_entity_t;
 
 typedef struct dlight_s {
     vec3_t  origin;
@@ -198,7 +198,7 @@ typedef struct refdef_s {
     lightstyle_t    *lightstyles;   // [MAX_LIGHTSTYLES]
 
     int         num_entities;
-    entity_t    *entities;
+    r_entity_t    *entities;
 
     int         num_dlights;
     dlight_t    *dlights;

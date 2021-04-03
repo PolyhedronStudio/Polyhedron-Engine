@@ -14,8 +14,8 @@
 /*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
 Used as a positional target for lightning.
 */
-void SP_info_notnull(edict_t* self)
+void SP_info_notnull(entity_t* self)
 {
-    VectorCopy(self->s.origin, self->absmin);
-    VectorCopy(self->s.origin, self->absmax);
+    VectorCopy(self->s.origin, self->absMin);
+    VectorCopy(self->s.origin, self->absMax);
 }

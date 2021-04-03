@@ -41,7 +41,7 @@ void CL_CheckPredictionError(void)
         return;
     }
 
-    if (!cl_predict->integer || (cl.frame.ps.pmove.flags & PMF_NO_PREDICTION))
+    if (!cl_predict->integer || (cl.frame.playerState.pmove.flags & PMF_NO_PREDICTION))
         return;
 
     // calculate the last usercmd_t we sent that the server has processed
@@ -63,7 +63,7 @@ static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
     int         i;
     trace_t     trace;
     mnode_t     *headNode;
-    centity_t   *ent;
+    cl_entity_t   *ent;
     mmodel_t    *cmodel;
 
     for (i = 0; i < cl.numSolidEntities; i++) {
@@ -86,7 +86,7 @@ static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
                                mins, maxs, headNode,  CONTENTS_MASK_PLAYERSOLID,
                                ent->current.origin, ent->current.angles);
 
-        CM_ClipEntity(tr, &trace, (struct edict_s *)ent);
+        CM_ClipEntity(tr, &trace, (struct entity_s *)ent);
     }
 }
 
@@ -103,7 +103,7 @@ static trace_t q_gameabi CL_Trace(const vec3_t& start, const vec3_t& mins, const
     // check against world
     CM_BoxTrace(&t, start, end, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_PLAYERSOLID);
     if (t.fraction < 1.0)
-        t.ent = (struct edict_s *)1;
+        t.ent = (struct entity_s *)1;
 
     // check all other solid models
     CL_ClipMoveToEntities(start, mins, maxs, end, &t);
@@ -114,7 +114,7 @@ static trace_t q_gameabi CL_Trace(const vec3_t& start, const vec3_t& mins, const
 static int CL_PointContents(const vec3_t &point)
 {
     int         i;
-    centity_t   *ent;
+    cl_entity_t   *ent;
     mmodel_t    *cmodel;
     int         contents;
 
@@ -148,9 +148,9 @@ Sets cl.predicted_origin and cl.predicted_angles
 */
 void CL_PredictAngles(void)
 {
-    //cl.predicted_angles[0] = cl.viewAngles[0] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[0]);
-    //cl.predicted_angles[1] = cl.viewAngles[1] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[1]);
-    //cl.predicted_angles[2] = cl.viewAngles[2] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[2]);
+    //cl.predicted_angles[0] = cl.viewAngles[0] + SHORT2ANGLE(cl.frame.playerState.pmove.delta_angles[0]);
+    //cl.predicted_angles[1] = cl.viewAngles[1] + SHORT2ANGLE(cl.frame.playerState.pmove.delta_angles[1]);
+    //cl.predicted_angles[2] = cl.viewAngles[2] + SHORT2ANGLE(cl.frame.playerState.pmove.delta_angles[2]);
 }
 
 void CL_PredictMovement(void)
@@ -169,7 +169,7 @@ void CL_PredictMovement(void)
         return;
     }
 
-    if (!cl_predict->integer || (cl.frame.ps.pmove.flags & PMF_NO_PREDICTION)) {
+    if (!cl_predict->integer || (cl.frame.playerState.pmove.flags & PMF_NO_PREDICTION)) {
         // N&C: Call into the CG Module to let it handle this.
         // just set angles
         CL_GM_PredictAngles();

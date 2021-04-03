@@ -476,7 +476,7 @@ and the given player state should be captured into MVD stream.
 Entire function is a nasty hack. Ideally a compatible game DLL
 should do it for us by providing some SVF_* flag or something.
 */
-static qboolean player_is_active(const edict_t *ent)
+static qboolean player_is_active(const entity_t *ent)
 {
     int num;
 
@@ -503,7 +503,7 @@ static qboolean player_is_active(const edict_t *ent)
     }
 
     // first of all, make sure player_state_t is valid
-    if (!ent->client->ps.fov) {
+    if (!ent->client->playerState.fov) {
         return false;
     }
 
@@ -513,12 +513,12 @@ static qboolean player_is_active(const edict_t *ent)
     }
 
     // never capture spectators
-    if (ent->client->ps.pmove.type == PM_SPECTATOR) {
+    if (ent->client->playerState.pmove.type == PM_SPECTATOR) {
         return false;
     }
 
     // check entity visibility
-    if ((ent->svflags & SVF_NOCLIENT) || !ES_INUSE(&ent->s)) {
+    if ((ent->svFlags & SVF_NOCLIENT) || !ES_INUSE(&ent->s)) {
         // never capture invisible entities
         if (sv_mvd_capture_flags->integer & 2) {
             return false;
@@ -531,26 +531,26 @@ static qboolean player_is_active(const edict_t *ent)
     }
 
     // they are likely following someone in case of PM_FREEZE
-    if (ent->client->ps.pmove.type == PM_FREEZE) {
+    if (ent->client->playerState.pmove.type == PM_FREEZE) {
         return false;
     }
 
     // they are likely following someone if PMF_NO_PREDICTION is set
     // PMOVE: Removed..
-    //if (ent->client->ps.pmove.flags & PMF_NO_PREDICTION) {
+    //if (ent->client->playerState.pmove.flags & PMF_NO_PREDICTION) {
     //    return false;
     //}
 
     return true;
 }
 
-static qboolean entity_is_active(const edict_t *ent)
+static qboolean entity_is_active(const entity_t *ent)
 {
     if ((g_features->integer & GMF_PROPERINUSE) && !ent->inUse) {
         return false;
     }
 
-    if (ent->svflags & SVF_NOCLIENT) {
+    if (ent->svFlags & SVF_NOCLIENT) {
         return false;
     }
 
@@ -560,7 +560,7 @@ static qboolean entity_is_active(const edict_t *ent)
 // Initializes MVD delta compressor for the first time on this map.
 static void build_gamestate(void)
 {
-    edict_t *ent;
+    entity_t *ent;
     int i;
 
     memset(mvd.players, 0, sizeof(player_packed_t) * sv_maxclients->integer);
@@ -574,7 +574,7 @@ static void build_gamestate(void)
             continue;
         }
 
-        MSG_PackPlayer(&mvd.players[i], &ent->client->ps);
+        MSG_PackPlayer(&mvd.players[i], &ent->client->playerState);
         PPS_INUSE(&mvd.players[i]) = true;
     }
 
@@ -713,7 +713,7 @@ static void emit_frame(void)
 {
     player_packed_t *oldps, newps;
     entity_packed_t *oldes, newes;
-    edict_t *ent;
+    entity_t *ent;
     int flags, portalbytes;
     byte portalbits[MAX_MAP_PORTAL_BYTES];
     int i;
@@ -748,7 +748,7 @@ static void emit_frame(void)
         }
 
         // quantize
-        MSG_PackPlayer(&newps, &ent->client->ps);
+        MSG_PackPlayer(&newps, &ent->client->playerState);
 
         if (PPS_INUSE(oldps)) {
             // delta update from old position
@@ -869,7 +869,7 @@ static void resume_streams(void)
 static qboolean players_active(void)
 {
     int i;
-    edict_t *ent;
+    entity_t *ent;
 
     for (i = 0; i < sv_maxclients->integer; i++) {
         ent = EDICT_NUM(i + 1);
@@ -1147,7 +1147,7 @@ void SV_MvdMulticast(int leafnum, multicast_t to)
 
 // Performs some basic filtering of the unicast data that would be
 // otherwise discarded by the MVD client.
-static qboolean filter_unicast_data(edict_t *ent)
+static qboolean filter_unicast_data(entity_t *ent)
 {
     int cmd = msg_write.data[0];
 
@@ -1182,7 +1182,7 @@ static qboolean filter_unicast_data(edict_t *ent)
 SV_MvdUnicast
 ==============
 */
-void SV_MvdUnicast(edict_t *ent, int clientNum, qboolean reliable)
+void SV_MvdUnicast(entity_t *ent, int clientNum, qboolean reliable)
 {
     mvd_ops_t   op;
     sizebuf_t   *buf;

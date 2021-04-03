@@ -21,29 +21,29 @@ Default _cone value is 10 (used to set size of light for spotlights)
 
 #define START_OFF   1
 
-void light_use(edict_t* self, edict_t* other, edict_t* activator)
+void light_use(entity_t* self, entity_t* other, entity_t* activator)
 {
-    if (self->spawnflags & START_OFF) {
+    if (self->spawnFlags & START_OFF) {
         gi.configstring(CS_LIGHTS + self->style, "m");
-        self->spawnflags &= ~START_OFF;
+        self->spawnFlags &= ~START_OFF;
     }
     else {
         gi.configstring(CS_LIGHTS + self->style, "a");
-        self->spawnflags |= START_OFF;
+        self->spawnFlags |= START_OFF;
     }
 }
 
-void SP_light(edict_t* self)
+void SP_light(entity_t* self)
 {
     // no targeted lights in deathmatch, because they cause global messages
-    if (!self->targetname || deathmatch->value) {
-        G_FreeEdict(self);
+    if (!self->targetName || deathmatch->value) {
+        G_FreeEntity(self);
         return;
     }
 
     if (self->style >= 32) {
-        self->use = light_use;
-        if (self->spawnflags & START_OFF)
+        self->Use = light_use;
+        if (self->spawnFlags & START_OFF)
             gi.configstring(CS_LIGHTS + self->style, "a");
         else
             gi.configstring(CS_LIGHTS + self->style, "m");

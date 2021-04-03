@@ -70,8 +70,8 @@ static void fill_index_buffer();
 
 // update
 static void write_particle_geometry(const float* view_matrix, const particle_t* particles, int particle_num);
-static void write_beam_geometry(const float* view_matrix, const entity_t* entities, int entity_num);
-static void write_sprite_geometry(const float* view_matrix, const entity_t* entities, int entity_num);
+static void write_beam_geometry(const float* view_matrix, const r_entity_t* entities, int entity_num);
+static void write_sprite_geometry(const float* view_matrix, const r_entity_t* entities, int entity_num);
 static void upload_geometry(VkCommandBuffer command_buffer);
 
 cvar_t* cvar_pt_particle_size = NULL;
@@ -147,7 +147,7 @@ void destroy_transparency()
 }
 
 void update_transparency(VkCommandBuffer command_buffer, const float* view_matrix,
-	const particle_t* particles, int particle_num, const entity_t* entities, int entity_num)
+	const particle_t* particles, int particle_num, const r_entity_t* entities, int entity_num)
 {
 	transparency.host_frame_index = (transparency.host_frame_index + 1) % transparency.host_buffered_frame_num;
 	particle_num = min(particle_num, TR_PARTICLE_MAX_NUM);
@@ -317,7 +317,7 @@ static void write_particle_geometry(const float* view_matrix, const particle_t* 
 	}
 }
 
-static void write_beam_geometry(const float* view_matrix, const entity_t* entities, int entity_num)
+static void write_beam_geometry(const float* view_matrix, const r_entity_t* entities, int entity_num)
 {
 	const float beam_width = cvar_pt_beam_width->value;
 	const float hdr_factor = cvar_pt_particle_emissive->value;
@@ -342,7 +342,7 @@ static void write_beam_geometry(const float* view_matrix, const entity_t* entiti
 		if ((entities[i].flags & RF_BEAM) == 0)
 			continue;
 
-		const entity_t* beam = entities + i;
+		const r_entity_t* beam = entities + i;
 
 		cast_u32_to_f32_color(beam->skinnum, &beam->rgba, beam_colors, hdr_factor);
 		beam_colors[3] = beam->alpha;
@@ -382,8 +382,8 @@ static void write_beam_geometry(const float* view_matrix, const entity_t* entiti
 
 static int compare_beams(const void* _a, const void* _b)
 {
-	const entity_t* a = (const entity_t*)*(void**)_a; // C++20 VKPT: Added const entity_t* cast.
-	const entity_t* b = (const entity_t*)*(void**)_b; // C++20 VKPT: Added const entity_t* cast.
+	const r_entity_t* a = (const r_entity_t*)*(void**)_a; // C++20 VKPT: Added const entity_t* cast.
+	const r_entity_t* b = (const r_entity_t*)*(void**)_b; // C++20 VKPT: Added const entity_t* cast.
 
 	if (a->origin[0] < b->origin[0]) return -1;
 	if (a->origin[0] > b->origin[0]) return 1;
@@ -484,7 +484,7 @@ qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, in
 	return true;
 }
 
-void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, entity_t* entities, int num_entites, float adapted_luminance)
+void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, r_entity_t* entities, int num_entites, float adapted_luminance)
 {
 	const float beam_width = cvar_pt_beam_width->value;
 	const float hdr_factor = cvar_pt_beam_lights->value * adapted_luminance * 20.f;
@@ -494,7 +494,7 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 
 	int num_beams = 0;
 
-	static entity_t* beams[MAX_BEAMS];
+	static r_entity_t* beams[MAX_BEAMS];
 
 	for (int i = 0; i < num_entites; i++)
 	{
@@ -508,14 +508,14 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 	if (num_beams == 0)
 		return;
 
-	qsort(beams, num_beams, sizeof(entity_t*), compare_beams);
+	qsort(beams, num_beams, sizeof(r_entity_t*), compare_beams);
 
 	for (int i = 0; i < num_beams; i++)
 	{
 		if (*num_lights >= max_lights)
 			return;
 		
-		const entity_t* beam = beams[i];
+		const r_entity_t* beam = beams[i];
 
 		vec3_t begin;
 		vec3_t end;
@@ -538,7 +538,7 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 	}
 }
 
-static void write_sprite_geometry(const float* view_matrix, const entity_t* entities, int entity_num)
+static void write_sprite_geometry(const float* view_matrix, const r_entity_t* entities, int entity_num)
 {
 	if (transparency.sprite_num == 0)
 		return;
@@ -561,7 +561,7 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 	int sprite_count = 0;
 	for (int i = 0; i < entity_num; i++)
 	{
-		const entity_t *e = entities + i;
+		const r_entity_t *e = entities + i;
 
 		if (e->model & 0x80000000)
 			continue;

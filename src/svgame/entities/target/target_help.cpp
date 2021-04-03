@@ -12,9 +12,9 @@
 
 //=====================================================
 
-void Use_Target_Help(edict_t* ent, edict_t* other, edict_t* activator)
+void Use_Target_Help(entity_t* ent, entity_t* other, entity_t* activator)
 {
-    if (ent->spawnflags & 1)
+    if (ent->spawnFlags & 1)
         strncpy(game.helpmessage1, ent->message, sizeof(game.helpmessage2) - 1);
     else
         strncpy(game.helpmessage2, ent->message, sizeof(game.helpmessage1) - 1);
@@ -25,18 +25,18 @@ void Use_Target_Help(edict_t* ent, edict_t* other, edict_t* activator)
 /*QUAKED target_help (1 0 1) (-16 -16 -24) (16 16 24) help1
 When fired, the "message" key becomes the current personal computer string, and the message light will be set on all clients status bars.
 */
-void SP_target_help(edict_t* ent)
+void SP_target_help(entity_t* ent)
 {
     if (deathmatch->value) {
         // auto-remove for deathmatch
-        G_FreeEdict(ent);
+        G_FreeEntity(ent);
         return;
     }
 
     if (!ent->message) {
-        gi.dprintf("%s with no message at %s\n", ent->classname, Vec3ToString(ent->s.origin));
-        G_FreeEdict(ent);
+        gi.DPrintf("%s with no message at %s\n", ent->classname, Vec3ToString(ent->s.origin));
+        G_FreeEntity(ent);
         return;
     }
-    ent->use = Use_Target_Help;
+    ent->Use = Use_Target_Help;
 }

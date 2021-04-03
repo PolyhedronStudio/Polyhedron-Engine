@@ -30,7 +30,7 @@ LIST_DECL(sv_filterlist);
 LIST_DECL(sv_clientlist);   // linked list of non-free clients
 
 client_t    *sv_client;         // current client
-edict_t     *sv_player;         // current client edict
+entity_t     *sv_player;         // current client edict
 
 qboolean     sv_pending_autosave = 0;
 
@@ -463,7 +463,7 @@ static size_t SV_StatusString(char *status)
             }
             len = Q_snprintf(entry, sizeof(entry),
                              "%i %i \"%s\"\n",
-                             cl->edict->client->ps.stats[STAT_FRAGS],
+                             cl->edict->client->playerState.stats[STAT_FRAGS],
                              cl->ping, cl->name);
             if (len >= sizeof(entry)) {
                 continue;
@@ -1085,7 +1085,7 @@ static void SVC_DirectConnect(void)
     newcl->gamedir = fs_game->string;
     newcl->mapname = sv.name;
     newcl->configstrings = (char *)sv.configstrings;
-    newcl->pool = (edict_pool_t*)&ge->edicts; // N&C: Edict_pool_t change
+    newcl->pool = (entity_pool_t*)&ge->edicts; // N&C: Edict_pool_t change
     newcl->cm = &sv.cm;
     newcl->spawncount = sv.spawncount;
     newcl->maxclients = sv_maxclients->integer;
@@ -1632,7 +1632,7 @@ player processing happens outside RunWorldFrame
 */
 static void SV_PrepWorldFrame(void)
 {
-    edict_t    *ent;
+    entity_t    *ent;
     int        i;
 
 #if USE_MVD_CLIENT
@@ -1864,7 +1864,7 @@ unsigned SV_Frame(unsigned msec)
         // give the clients some timeslices
         SV_GiveMsec();
 
-        // let everything in the world think and move
+        // let everything in the world Think and move
         SV_RunGameFrame();
 
         // send messages back to the UDP clients

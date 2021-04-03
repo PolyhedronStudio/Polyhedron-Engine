@@ -18,7 +18,7 @@
 #include "bfg10k.h"
 
 // This is actually declared in grenade.c
-void weapon_grenade_fire(edict_t* ent, qboolean held);
+void weapon_grenade_fire(entity_t* ent, qboolean held);
 
 //
 //======================================================================
@@ -28,7 +28,7 @@ void weapon_grenade_fire(edict_t* ent, qboolean held);
 //======================================================================
 //
 
-void weapon_bfg_fire(edict_t* ent)
+void weapon_bfg_fire(entity_t* ent)
 {
     vec3_t  offset, start;
     vec3_t  forward, right;
@@ -40,14 +40,14 @@ void weapon_bfg_fire(edict_t* ent)
     else
         damage = 500;
 
-    if (ent->client->ps.gunframe == 9) {
+    if (ent->client->playerState.gunframe == 9) {
         // send muzzle flash
         gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
         gi.WriteByte(MZ_BFG | is_silenced);
         gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
-        ent->client->ps.gunframe++;
+        ent->client->playerState.gunframe++;
 
         PlayerNoise(ent, start, PNOISE_WEAPON);
         return;
@@ -56,7 +56,7 @@ void weapon_bfg_fire(edict_t* ent)
     // cells can go down during windup (from power armor hits), so
     // check again and abort firing if we don't have enough now
     if (ent->client->pers.inventory[ent->client->ammo_index] < 50) {
-        ent->client->ps.gunframe++;
+        ent->client->playerState.gunframe++;
         return;
     }
 
@@ -72,11 +72,11 @@ void weapon_bfg_fire(edict_t* ent)
     ent->client->v_dmg_roll = crandom() * 8;
     ent->client->v_dmg_time = level.time + DAMAGE_TIME;
 
-    VectorSet(offset, 8, 8, ent->viewheight - 8);
+    VectorSet(offset, 8, 8, ent->viewHeight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
     fire_bfg(ent, start, forward, damage, 400, damage_radius);
 
-    ent->client->ps.gunframe++;
+    ent->client->playerState.gunframe++;
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
@@ -84,7 +84,7 @@ void weapon_bfg_fire(edict_t* ent)
         ent->client->pers.inventory[ent->client->ammo_index] -= 50;
 }
 
-void Weapon_BFG(edict_t* ent)
+void Weapon_BFG(entity_t* ent)
 {
     static int  pause_frames[] = { 39, 45, 50, 55, 0 };
     static int  fire_frames[] = { 9, 17, 0 };

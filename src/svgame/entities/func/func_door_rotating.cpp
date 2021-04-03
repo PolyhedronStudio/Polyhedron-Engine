@@ -31,11 +31,11 @@ REVERSE will cause the door to rotate in the opposite direction.
 
 "message"   is printed when the door is touched if it is a trigger door and it hasn't been fired yet
 "angle"     determines the opening direction
-"targetname" if set, no touch field will be spawned and a remote button or trigger field activates the door.
+"targetName" if set, no touch field will be spawned and a remote button or trigger field activates the door.
 "health"    if set, door must be shot open
 "speed"     movement speed (100 default)
 "wait"      wait before returning (3 default, -1 = never return)
-"dmg"       damage to inflict when blocked (2 default)
+"dmg"       damage to inflict when Blocked (2 default)
 "sounds"
 1)  silent
 2)  light
@@ -43,38 +43,38 @@ REVERSE will cause the door to rotate in the opposite direction.
 4)  heavy
 */
 
-void SP_func_door_rotating(edict_t* ent)
+void SP_func_door_rotating(entity_t* ent)
 {
     VectorClear(ent->s.angles);
 
     // set the axis of rotation
-    VectorClear(ent->movedir);
-    if (ent->spawnflags & DOOR_X_AXIS)
-        ent->movedir[2] = 1.0;
-    else if (ent->spawnflags & DOOR_Y_AXIS)
-        ent->movedir[0] = 1.0;
+    VectorClear(ent->moveDirection);
+    if (ent->spawnFlags & DOOR_X_AXIS)
+        ent->moveDirection[2] = 1.0;
+    else if (ent->spawnFlags & DOOR_Y_AXIS)
+        ent->moveDirection[0] = 1.0;
     else // Z_AXIS
-        ent->movedir[1] = 1.0;
+        ent->moveDirection[1] = 1.0;
 
     // check for reverse rotation
-    if (ent->spawnflags & DOOR_REVERSE)
-        VectorNegate(ent->movedir, ent->movedir);
+    if (ent->spawnFlags & DOOR_REVERSE)
+        VectorNegate(ent->moveDirection, ent->moveDirection);
 
     if (!st.distance) {
-        gi.dprintf("%s at %s with no distance set\n", ent->classname, Vec3ToString(ent->s.origin));
+        gi.DPrintf("%s at %s with no distance set\n", ent->classname, Vec3ToString(ent->s.origin));
         st.distance = 90;
     }
 
     VectorCopy(ent->s.angles, ent->pos1);
-    VectorMA(ent->s.angles, st.distance, ent->movedir, ent->pos2);
-    ent->moveinfo.distance = st.distance;
+    VectorMA(ent->s.angles, st.distance, ent->moveDirection, ent->pos2);
+    ent->moveInfo.distance = st.distance;
 
-    ent->movetype = MOVETYPE_PUSH;
+    ent->moveType = MOVETYPE_PUSH;
     ent->solid = SOLID_BSP;
-    gi.setmodel(ent, ent->model);
+    gi.SetModel(ent, ent->model);
 
-    ent->blocked = door_blocked;
-    ent->use = door_use;
+    ent->Blocked = door_blocked;
+    ent->Use = door_use;
 
     if (!ent->speed)
         ent->speed = 100;
@@ -89,52 +89,52 @@ void SP_func_door_rotating(edict_t* ent)
         ent->dmg = 2;
 
     if (ent->sounds != 1) {
-        ent->moveinfo.sound_start = gi.soundindex("doors/dr1_strt.wav");
-        ent->moveinfo.sound_middle = gi.soundindex("doors/dr1_mid.wav");
-        ent->moveinfo.sound_end = gi.soundindex("doors/dr1_end.wav");
+        ent->moveInfo.sound_start = gi.SoundIndex("doors/dr1_strt.wav");
+        ent->moveInfo.sound_middle = gi.SoundIndex("doors/dr1_mid.wav");
+        ent->moveInfo.sound_end = gi.SoundIndex("doors/dr1_end.wav");
     }
 
     // if it starts open, switch the positions
-    if (ent->spawnflags & DOOR_START_OPEN) {
+    if (ent->spawnFlags & DOOR_START_OPEN) {
         VectorCopy(ent->pos2, ent->s.angles);
         VectorCopy(ent->pos1, ent->pos2);
         VectorCopy(ent->s.angles, ent->pos1);
-        VectorNegate(ent->movedir, ent->movedir);
+        VectorNegate(ent->moveDirection, ent->moveDirection);
     }
 
     if (ent->health) {
         ent->takedamage = DAMAGE_YES;
-        ent->die = door_killed;
-        ent->max_health = ent->health;
+        ent->Die = door_killed;
+        ent->maxHealth = ent->health;
     }
 
-    if (ent->targetname && ent->message) {
-        gi.soundindex("misc/talk.wav");
-        ent->touch = door_touch;
+    if (ent->targetName && ent->message) {
+        gi.SoundIndex("misc/talk.wav");
+        ent->Touch = door_touch;
     }
 
-    ent->moveinfo.state = STATE_BOTTOM;
-    ent->moveinfo.speed = ent->speed;
-    ent->moveinfo.accel = ent->accel;
-    ent->moveinfo.decel = ent->decel;
-    ent->moveinfo.wait = ent->wait;
-    VectorCopy(ent->s.origin, ent->moveinfo.start_origin);
-    VectorCopy(ent->pos1, ent->moveinfo.start_angles);
-    VectorCopy(ent->s.origin, ent->moveinfo.end_origin);
-    VectorCopy(ent->pos2, ent->moveinfo.end_angles);
+    ent->moveInfo.state = STATE_BOTTOM;
+    ent->moveInfo.speed = ent->speed;
+    ent->moveInfo.accel = ent->accel;
+    ent->moveInfo.decel = ent->decel;
+    ent->moveInfo.wait = ent->wait;
+    VectorCopy(ent->s.origin, ent->moveInfo.start_origin);
+    VectorCopy(ent->pos1, ent->moveInfo.start_angles);
+    VectorCopy(ent->s.origin, ent->moveInfo.end_origin);
+    VectorCopy(ent->pos2, ent->moveInfo.end_angles);
 
-    if (ent->spawnflags & 16)
+    if (ent->spawnFlags & 16)
         ent->s.effects |= EF_ANIM_ALL;
 
     // to simplify logic elsewhere, make non-teamed doors into a team of one
     if (!ent->team)
-        ent->teammaster = ent;
+        ent->teamMasterPtr = ent;
 
-    gi.linkentity(ent);
+    gi.LinkEntity(ent);
 
-    ent->nextthink = level.time + FRAMETIME;
-    if (ent->health || ent->targetname)
-        ent->think = Think_CalcMoveSpeed;
+    ent->nextThink = level.time + FRAMETIME;
+    if (ent->health || ent->targetName)
+        ent->Think = Think_CalcMoveSpeed;
     else
-        ent->think = Think_SpawnDoorTrigger;
+        ent->Think = Think_SpawnDoorTrigger;
 }

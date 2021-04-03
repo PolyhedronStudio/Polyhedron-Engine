@@ -25,7 +25,7 @@ qboolean is_quad;
 byte     is_silenced;
 
 
-void weapon_grenade_fire(edict_t *ent, qboolean held);
+void weapon_grenade_fire(entity_t *ent, qboolean held);
 
 /*
 ===============
@@ -39,9 +39,9 @@ Monsters that don't directly see the player can move
 to a noise in hopes of seeing the player from there.
 ===============
 */
-void PlayerNoise(edict_t *who, vec3_t where, int type)
+void PlayerNoise(entity_t *who, vec3_t where, int type)
 {
-    edict_t     *noise;
+    entity_t     *noise;
 
     if (type == PNOISE_WEAPON) {
         if (who->client->silencer_shots) {
@@ -57,43 +57,43 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
         return;
 
 
-    if (!who->mynoise) {
+    if (!who->myNoise) {
         noise = G_Spawn();
         noise->classname = "player_noise";
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
         noise->owner = who;
-        noise->svflags = SVF_NOCLIENT;
-        who->mynoise = noise;
+        noise->svFlags = SVF_NOCLIENT;
+        who->myNoise = noise;
 
         noise = G_Spawn();
         noise->classname = "player_noise";
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
         noise->owner = who;
-        noise->svflags = SVF_NOCLIENT;
-        who->mynoise2 = noise;
+        noise->svFlags = SVF_NOCLIENT;
+        who->myNoise2 = noise;
     }
 
     if (type == PNOISE_SELF || type == PNOISE_WEAPON) {
-        noise = who->mynoise;
+        noise = who->myNoise;
         level.sound_entity = noise;
         level.sound_entity_framenum = level.framenum;
     } else { // type == PNOISE_IMPACT
-        noise = who->mynoise2;
+        noise = who->myNoise2;
         level.sound2_entity = noise;
         level.sound2_entity_framenum = level.framenum;
     }
 
     VectorCopy(where, noise->s.origin);
-    VectorSubtract(where, noise->maxs, noise->absmin);
-    VectorAdd(where, noise->maxs, noise->absmax);
-    noise->teleport_time = level.time;
-    gi.linkentity(noise);
+    VectorSubtract(where, noise->maxs, noise->absMin);
+    VectorAdd(where, noise->maxs, noise->absMax);
+    noise->teleportTime = level.time;
+    gi.LinkEntity(noise);
 }
 
 
-qboolean Pickup_Weapon(edict_t *ent, edict_t *other)
+qboolean Pickup_Weapon(entity_t *ent, entity_t *other)
 {
     int         index;
     gitem_t     *ammo;
@@ -102,13 +102,13 @@ qboolean Pickup_Weapon(edict_t *ent, edict_t *other)
 
     if ((((int)(dmflags->value) & DF_WEAPONS_STAY) || coop->value)
         && other->client->pers.inventory[index]) {
-        if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)))
+        if (!(ent->spawnFlags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)))
             return false;   // leave the weapon for others to pickup
     }
 
     other->client->pers.inventory[index]++;
 
-    if (!(ent->spawnflags & DROPPED_ITEM)) {
+    if (!(ent->spawnFlags & DROPPED_ITEM)) {
         // give them some ammo with it
         ammo = FindItem(ent->item->ammo);
         if ((int)dmflags->value & DF_INFINITE_AMMO)
@@ -116,7 +116,7 @@ qboolean Pickup_Weapon(edict_t *ent, edict_t *other)
         else
             Add_Ammo(other, ammo, ammo->quantity);
 
-        if (!(ent->spawnflags & DROPPED_PLAYER_ITEM)) {
+        if (!(ent->spawnFlags & DROPPED_PLAYER_ITEM)) {
             if (deathmatch->value) {
                 if ((int)(dmflags->value) & DF_WEAPONS_STAY)
                     ent->flags |= FL_RESPAWN;
@@ -145,7 +145,7 @@ The old weapon has been dropped all the way, so make the new one
 current
 ===============
 */
-void ChangeWeapon(edict_t *ent)
+void ChangeWeapon(entity_t *ent)
 {
     int i;
 
@@ -164,7 +164,7 @@ void ChangeWeapon(edict_t *ent)
     // set visible model
     if (ent->s.modelindex == 255) {
         if (ent->client->pers.weapon)
-            i = ((ent->client->pers.weapon->weapmodel & 0xff) << 8);
+            i = ((ent->client->pers.weapon->weaponModel & 0xff) << 8);
         else
             i = 0;
         ent->s.skinnum = (ent - g_edicts - 1) | i;
@@ -177,16 +177,16 @@ void ChangeWeapon(edict_t *ent)
 
     if (!ent->client->pers.weapon) {
         // dead
-        ent->client->ps.gunindex = 0;
+        ent->client->playerState.gunindex = 0;
         return;
     }
 
     ent->client->weaponstate = WEAPON_ACTIVATING;
-    ent->client->ps.gunframe = 0;
-    ent->client->ps.gunindex = gi.modelindex(ent->client->pers.weapon->view_model);
+    ent->client->playerState.gunframe = 0;
+    ent->client->playerState.gunindex = gi.ModelIndex(ent->client->pers.weapon->viewModel);
 
     ent->client->anim_priority = ANIM_PAIN;
-    if (ent->client->ps.pmove.flags & PMF_DUCKED) {
+    if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
         ent->s.frame = FRAME_crpain1;
         ent->client->anim_end = FRAME_crpain4;
     } else {
@@ -201,7 +201,7 @@ void ChangeWeapon(edict_t *ent)
 NoAmmoWeaponChange
 =================
 */
-void NoAmmoWeaponChange(edict_t *ent)
+void NoAmmoWeaponChange(entity_t *ent)
 {
     if (ent->client->pers.inventory[ITEM_INDEX(FindItem("slugs"))]
         &&  ent->client->pers.inventory[ITEM_INDEX(FindItem("railgun"))]) {
@@ -243,7 +243,7 @@ Think_Weapon
 Called by ClientBeginServerFrame and ClientThink
 =================
 */
-void Think_Weapon(edict_t *ent)
+void Think_Weapon(entity_t *ent)
 {
     // if just died, put the weapon away
     if (ent->health < 1) {
@@ -251,14 +251,14 @@ void Think_Weapon(edict_t *ent)
         ChangeWeapon(ent);
     }
 
-    // call active weapon think routine
-    if (ent->client->pers.weapon && ent->client->pers.weapon->weaponthink) {
+    // call active weapon Think routine
+    if (ent->client->pers.weapon && ent->client->pers.weapon->WeaponThink) {
         is_quad = (ent->client->quad_framenum > level.framenum);
         if (ent->client->silencer_shots)
             is_silenced = MZ_SILENCED;
         else
             is_silenced = 0;
-        ent->client->pers.weapon->weaponthink(ent);
+        ent->client->pers.weapon->WeaponThink(ent);
     }
 }
 
@@ -270,7 +270,7 @@ Use_Weapon
 Make the weapon ready if there is ammo
 ================
 */
-void Use_Weapon(edict_t *ent, gitem_t *item)
+void Use_Weapon(entity_t *ent, gitem_t *item)
 {
     int         ammo_index;
     gitem_t     *ammo_item;
@@ -284,12 +284,12 @@ void Use_Weapon(edict_t *ent, gitem_t *item)
         ammo_index = ITEM_INDEX(ammo_item);
 
         if (!ent->client->pers.inventory[ammo_index]) {
-            gi.cprintf(ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
+            gi.CPrintf(ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickupName, item->pickupName);
             return;
         }
 
         if (ent->client->pers.inventory[ammo_index] < item->quantity) {
-            gi.cprintf(ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
+            gi.CPrintf(ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickupName, item->pickupName);
             return;
         }
     }
@@ -305,7 +305,7 @@ void Use_Weapon(edict_t *ent, gitem_t *item)
 Drop_Weapon
 ================
 */
-void Drop_Weapon(edict_t *ent, gitem_t *item)
+void Drop_Weapon(entity_t *ent, gitem_t *item)
 {
     int     index;
 
@@ -315,7 +315,7 @@ void Drop_Weapon(edict_t *ent, gitem_t *item)
     index = ITEM_INDEX(item);
     // see if we're already using it
     if (((item == ent->client->pers.weapon) || (item == ent->client->newweapon)) && (ent->client->pers.inventory[index] == 1)) {
-        gi.cprintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
+        gi.CPrintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
         return;
     }
 
@@ -335,21 +335,21 @@ A generic function to handle the basics of weapon thinking
 #define FRAME_IDLE_FIRST        (FRAME_FIRE_LAST + 1)
 #define FRAME_DEACTIVATE_FIRST  (FRAME_IDLE_LAST + 1)
 
-void Weapon_Generic(edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent))
+void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(entity_t *ent))
 {
     int     n;
 
-    if (ent->deadflag || ent->s.modelindex != 255) { // VWep animations screw up corpses
+    if (ent->deadFlag || ent->s.modelindex != 255) { // VWep animations screw up corpses
         return;
     }
 
     if (ent->client->weaponstate == WEAPON_DROPPING) {
-        if (ent->client->ps.gunframe == FRAME_DEACTIVATE_LAST) {
+        if (ent->client->playerState.gunframe == FRAME_DEACTIVATE_LAST) {
             ChangeWeapon(ent);
             return;
-        } else if ((FRAME_DEACTIVATE_LAST - ent->client->ps.gunframe) == 4) {
+        } else if ((FRAME_DEACTIVATE_LAST - ent->client->playerState.gunframe) == 4) {
             ent->client->anim_priority = ANIM_REVERSE;
-            if (ent->client->ps.pmove.flags & PMF_DUCKED) {
+            if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
                 ent->s.frame = FRAME_crpain4 + 1;
                 ent->client->anim_end = FRAME_crpain1;
             } else {
@@ -359,28 +359,28 @@ void Weapon_Generic(edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, 
             }
         }
 
-        ent->client->ps.gunframe++;
+        ent->client->playerState.gunframe++;
         return;
     }
 
     if (ent->client->weaponstate == WEAPON_ACTIVATING) {
-        if (ent->client->ps.gunframe == FRAME_ACTIVATE_LAST) {
+        if (ent->client->playerState.gunframe == FRAME_ACTIVATE_LAST) {
             ent->client->weaponstate = WEAPON_READY;
-            ent->client->ps.gunframe = FRAME_IDLE_FIRST;
+            ent->client->playerState.gunframe = FRAME_IDLE_FIRST;
             return;
         }
 
-        ent->client->ps.gunframe++;
+        ent->client->playerState.gunframe++;
         return;
     }
 
     if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING)) {
         ent->client->weaponstate = WEAPON_DROPPING;
-        ent->client->ps.gunframe = FRAME_DEACTIVATE_FIRST;
+        ent->client->playerState.gunframe = FRAME_DEACTIVATE_FIRST;
 
         if ((FRAME_DEACTIVATE_LAST - FRAME_DEACTIVATE_FIRST) < 4) {
             ent->client->anim_priority = ANIM_REVERSE;
-            if (ent->client->ps.pmove.flags & PMF_DUCKED) {
+            if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
                 ent->s.frame = FRAME_crpain4 + 1;
                 ent->client->anim_end = FRAME_crpain1;
             } else {
@@ -397,12 +397,12 @@ void Weapon_Generic(edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, 
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
             if ((!ent->client->ammo_index) ||
                 (ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity)) {
-                ent->client->ps.gunframe = FRAME_FIRE_FIRST;
+                ent->client->playerState.gunframe = FRAME_FIRE_FIRST;
                 ent->client->weaponstate = WEAPON_FIRING;
 
                 // start the animation
                 ent->client->anim_priority = ANIM_ATTACK;
-                if (ent->client->ps.pmove.flags & PMF_DUCKED) {
+                if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
                     ent->s.frame = FRAME_crattak1 - 1;
                     ent->client->anim_end = FRAME_crattak9;
                 } else {
@@ -410,37 +410,37 @@ void Weapon_Generic(edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, 
                     ent->client->anim_end = FRAME_attack8;
                 }
             } else {
-                if (level.time >= ent->pain_debounce_time) {
-                    gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-                    ent->pain_debounce_time = level.time + 1;
+                if (level.time >= ent->debouncePainTime) {
+                    gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    ent->debouncePainTime = level.time + 1;
                 }
                 NoAmmoWeaponChange(ent);
             }
         } else {
-            if (ent->client->ps.gunframe == FRAME_IDLE_LAST) {
-                ent->client->ps.gunframe = FRAME_IDLE_FIRST;
+            if (ent->client->playerState.gunframe == FRAME_IDLE_LAST) {
+                ent->client->playerState.gunframe = FRAME_IDLE_FIRST;
                 return;
             }
 
             if (pause_frames) {
                 for (n = 0; pause_frames[n]; n++) {
-                    if (ent->client->ps.gunframe == pause_frames[n]) {
+                    if (ent->client->playerState.gunframe == pause_frames[n]) {
                         if (rand() & 15)
                             return;
                     }
                 }
             }
 
-            ent->client->ps.gunframe++;
+            ent->client->playerState.gunframe++;
             return;
         }
     }
 
     if (ent->client->weaponstate == WEAPON_FIRING) {
         for (n = 0; fire_frames[n]; n++) {
-            if (ent->client->ps.gunframe == fire_frames[n]) {
+            if (ent->client->playerState.gunframe == fire_frames[n]) {
                 if (ent->client->quad_framenum > level.framenum)
-                    gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM, 0);
+                    gi.Sound(ent, CHAN_ITEM, gi.SoundIndex("items/damage3.wav"), 1, ATTN_NORM, 0);
 
                 fire(ent);
                 break;
@@ -448,9 +448,9 @@ void Weapon_Generic(edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, 
         }
 
         if (!fire_frames[n])
-            ent->client->ps.gunframe++;
+            ent->client->playerState.gunframe++;
 
-        if (ent->client->ps.gunframe == FRAME_IDLE_FIRST + 1)
+        if (ent->client->playerState.gunframe == FRAME_IDLE_FIRST + 1)
             ent->client->weaponstate = WEAPON_READY;
     }
 }

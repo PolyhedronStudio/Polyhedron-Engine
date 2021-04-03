@@ -41,7 +41,7 @@ typedef struct {
 		ex_flare
 	} type;
 
-	entity_t    ent;
+	r_entity_t    ent;
 	int         frames;
 	float       light;
 	vec3_t      lightcolor;
@@ -67,7 +67,7 @@ typedef struct {
 //
 // Local client entity structure, temporary entities.
 //
-typedef struct centity_s {
+typedef struct cl_entity_s {
     entity_state_t    current;
     entity_state_t    prev;            // will always be valid, but might just be a copy of current
 
@@ -88,7 +88,7 @@ typedef struct centity_s {
     int             fly_stoptime;
 
     int             id;
-} centity_t;
+} cl_entity_t;
 
 //
 // Temporarl Entity parameters.
@@ -139,14 +139,14 @@ typedef struct cl_sustain_s {
     int     id;
     int     type;
     int     endtime;
-    int     nextthink;
+    int     nextThink;
     int     thinkinterval;
     vec3_t  org;
     vec3_t  dir;
     int     color;
     int     count;
     int     magnitude;
-    void    (*think)(struct cl_sustain_s *self);
+    void    (*Think)(struct cl_sustain_s *self);
 } cl_sustain_t;
 
 //
@@ -229,7 +229,7 @@ typedef struct {
     byte            areabits[MAX_MAP_AREA_BYTES];   // Area bits of this frame.
     int             areabytes;                      // Area bytes.
 
-    player_state_t  ps;         // The player state.
+    player_state_t  playerState;         // The player state.
     int             clientNum;  // The client number.
 
     int             numEntities;    // The number of entities in the frame.
@@ -254,7 +254,7 @@ typedef enum {
 //
 typedef struct client_shared_s {
     // Stores the entities.
-    centity_t entities[MAX_ENTITIES];
+    cl_entity_t entities[MAX_ENTITIES];
     int num_entities;
 } client_shared_t;
 
@@ -298,7 +298,7 @@ typedef struct client_state_s {
     vec3_t      prediction_error;
 
     // rebuilt each valid frame
-    centity_t       *solidEntities[MAX_PACKET_ENTITIES];
+    cl_entity_t       *solidEntities[MAX_PACKET_ENTITIES];
     int             numSolidEntities;
 
     entity_state_t  baselines[MAX_EDICTS];

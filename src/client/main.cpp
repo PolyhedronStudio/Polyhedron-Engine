@@ -2195,7 +2195,7 @@ static size_t CL_Ups_m(char *buffer, size_t size)
     } else {
         // N&C: FF Precision.
         VectorCopy(cl.predicted_velocity, vel);
-       // VectorScale(cl.frame.ps.pmove.velocity, 0.125f, vel);
+       // VectorScale(cl.frame.playerState.pmove.velocity, 0.125f, vel);
     }
 
     return Q_scnprintf(buffer, size, "%d", (int)VectorLength(vel));
@@ -2543,7 +2543,7 @@ static void exec_server_string(cmdbuf_t *buf, const char *text)
     Cmd_ExecuteCommand(buf);
 }
 
-static void cl_predict_changed(cvar_t *self)
+static void cl_prentity_changed(cvar_t *self)
 {
     CL_UpdatePredictSetting();
 }
@@ -2663,7 +2663,7 @@ static void CL_InitLocal(void)
     // register our variables
     //
     cl_predict = Cvar_Get("cl_predict", "1", 0);
-    cl_predict->changed = cl_predict_changed;
+    cl_predict->changed = cl_prentity_changed;
     cl_kickangles = Cvar_Get("cl_kickangles", "1", CVAR_CHEAT);
     cl_maxfps = Cvar_Get("cl_maxfps", "60", 0);
     cl_maxfps->changed = cl_sync_changed;

@@ -24,7 +24,7 @@
 //
 //======================================================================
 //
-void weapon_supershotgun_fire(edict_t* ent)
+void weapon_supershotgun_fire(entity_t* ent)
 {
     vec3_t      start;
     vec3_t      forward, right;
@@ -38,7 +38,7 @@ void weapon_supershotgun_fire(edict_t* ent)
     VectorScale(forward, -2, ent->client->kickOrigin);
     ent->client->kickAngles[0] = -2;
 
-    VectorSet(offset, 0, 8, ent->viewheight - 8);
+    VectorSet(offset, 0, 8, ent->viewHeight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
     if (is_quad) {
@@ -61,14 +61,14 @@ void weapon_supershotgun_fire(edict_t* ent)
     gi.WriteByte(MZ_SSHOTGUN | is_silenced);
     gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
-    ent->client->ps.gunframe++;
+    ent->client->playerState.gunframe++;
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DF_INFINITE_AMMO))
         ent->client->pers.inventory[ent->client->ammo_index] -= 2;
 }
 
-void Weapon_SuperShotgun(edict_t* ent)
+void Weapon_SuperShotgun(entity_t* ent)
 {
     static int  pause_frames[] = { 29, 42, 57, 0 };
     static int  fire_frames[] = { 7, 0 };

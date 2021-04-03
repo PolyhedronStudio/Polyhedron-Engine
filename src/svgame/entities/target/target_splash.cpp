@@ -27,13 +27,13 @@ Set "sounds" to one of the following:
         useful for lava/sparks
 */
 
-void use_target_splash(edict_t* self, edict_t* other, edict_t* activator)
+void use_target_splash(entity_t* self, entity_t* other, entity_t* activator)
 {
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_SPLASH);
     gi.WriteByte(self->count);
     gi.WritePosition(self->s.origin);
-    gi.WriteDirection(self->movedir);
+    gi.WriteDirection(self->moveDirection);
     gi.WriteByte(self->sounds);
     gi.Multicast(&self->s.origin, MULTICAST_PVS);
 
@@ -41,13 +41,13 @@ void use_target_splash(edict_t* self, edict_t* other, edict_t* activator)
         T_RadiusDamage(self, activator, self->dmg, NULL, self->dmg + 40, MOD_SPLASH);
 }
 
-void SP_target_splash(edict_t* self)
+void SP_target_splash(entity_t* self)
 {
-    self->use = use_target_splash;
-    UTIL_SetMoveDir(self->s.angles, self->movedir);
+    self->Use = use_target_splash;
+    UTIL_SetMoveDir(self->s.angles, self->moveDirection);
 
     if (!self->count)
         self->count = 32;
 
-    self->svflags = SVF_NOCLIENT;
+    self->svFlags = SVF_NOCLIENT;
 }

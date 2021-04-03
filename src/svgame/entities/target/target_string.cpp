@@ -14,14 +14,14 @@
 /*QUAKED target_string (0 0 1) (-8 -8 -8) (8 8 8)
 */
 
-void target_string_use(edict_t* self, edict_t* other, edict_t* activator)
+void target_string_use(entity_t* self, entity_t* other, entity_t* activator)
 {
-    edict_t* e;
+    entity_t* e;
     int     n, l;
     char    c;
 
     l = strlen(self->message);
-    for (e = self->teammaster; e; e = e->teamchain) {
+    for (e = self->teamMasterPtr; e; e = e->teamChainPtr) {
         if (!e->count)
             continue;
         n = e->count - 1;
@@ -42,9 +42,9 @@ void target_string_use(edict_t* self, edict_t* other, edict_t* activator)
     }
 }
 
-void SP_target_string(edict_t* self)
+void SP_target_string(entity_t* self)
 {
     if (!self->message)
         self->message = "";
-    self->use = target_string_use;
+    self->Use = target_string_use;
 }

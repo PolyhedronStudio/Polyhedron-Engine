@@ -11,26 +11,26 @@
 #include "../../g_local.h"
 
 // Declared in misc.c
-extern void gib_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
+extern void gib_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 
 //=====================================================
 /*QUAKED misc_gib_head (1 0 0) (-8 -8 -8) (8 8 8)
 Intended for use with the target_spawner
 */
-void SP_misc_gib_head(edict_t* ent)
+void SP_misc_gib_head(entity_t* ent)
 {
-    gi.setmodel(ent, "models/objects/gibs/head/tris.md2");
+    gi.SetModel(ent, "models/objects/gibs/head/tris.md2");
     ent->solid = SOLID_NOT;
     ent->s.effects |= EF_GIB;
     ent->takedamage = DAMAGE_YES;
-    ent->die = gib_die;
-    ent->movetype = MOVETYPE_TOSS;
-    ent->svflags |= SVF_MONSTER;
-    ent->deadflag = DEAD_DEAD;
+    ent->Die = gib_die;
+    ent->moveType = MOVETYPE_TOSS;
+    ent->svFlags |= SVF_MONSTER;
+    ent->deadFlag = DEAD_DEAD;
     ent->avelocity[0] = random() * 200;
     ent->avelocity[1] = random() * 200;
     ent->avelocity[2] = random() * 200;
-    ent->think = G_FreeEdict;
-    ent->nextthink = level.time + 30;
-    gi.linkentity(ent);
+    ent->Think = G_FreeEntity;
+    ent->nextThink = level.time + 30;
+    gi.LinkEntity(ent);
 }

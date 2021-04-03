@@ -78,7 +78,7 @@ Sends the contents of the mutlicast buffer to a single client.
 Archived in MVD stream.
 ===============
 */
-static void PF_Unicast(edict_t *ent, qboolean reliable)
+static void PF_Unicast(entity_t *ent, qboolean reliable)
 {
     client_t    *client;
     int         cmd, flags, clientNum;
@@ -208,7 +208,7 @@ Print to a single client if the level passes.
 Archived in MVD stream.
 ===============
 */
-static void PF_cprintf(edict_t *ent, int level, const char *fmt, ...)
+static void PF_cprintf(entity_t *ent, int level, const char *fmt, ...)
 {
     char        msg[MAX_STRING_CHARS];
     va_list     argptr;
@@ -263,7 +263,7 @@ Centerprint to a single client.
 Archived in MVD stream.
 ===============
 */
-static void PF_centerprintf(edict_t *ent, const char *fmt, ...)
+static void PF_centerprintf(entity_t *ent, const char *fmt, ...)
 {
     char        msg[MAX_STRING_CHARS];
     va_list     argptr;
@@ -323,7 +323,7 @@ PF_setmodel
 Also sets mins and maxs for inline bmodels
 =================
 */
-static void PF_setmodel(edict_t *ent, const char *name)
+static void PF_setmodel(entity_t *ent, const char *name)
 {
     int         i;
     mmodel_t    *mod;
@@ -340,7 +340,7 @@ static void PF_setmodel(edict_t *ent, const char *name)
         mod = CM_InlineModel(&sv.cm, name);
         VectorCopy(mod->mins, ent->mins);
         VectorCopy(mod->maxs, ent->maxs);
-        PF_LinkEdict(ent);
+        PF_LinkEntity(ent);
     }
 
 }
@@ -503,7 +503,7 @@ or the midpoint of the entity box for bmodels.
     if (soundindex < 0 || soundindex >= MAX_SOUNDS) \
         Com_Error(ERR_DROP, "%s: soundindex = %d", __func__, soundindex);
 
-static void PF_StartSound(edict_t *edict, int channel,
+static void PF_StartSound(entity_t *edict, int channel,
                           int soundindex, float volume,
                           float attenuation, float timeofs)
 {
@@ -556,21 +556,21 @@ static void PF_StartSound(edict_t *edict, int channel,
         // PHS cull this sound
         if (!(channel & CHAN_NO_PHS_ADD)) {
             // get client viewpos
-            ps = &client->edict->client->ps;
+            ps = &client->edict->client->playerState;
             // N&C: FF Precision.
             VectorAdd(ps->viewoffset, ps->pmove.origin, origin);
             //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, origin);
             leaf = CM_PointLeaf(&sv.cm, origin);
             area = CM_LeafArea(leaf);
-            if (!CM_AreasConnected(&sv.cm, area, edict->areanum)) {
+            if (!CM_AreasConnected(&sv.cm, area, edict->areaNumber)) {
                 // doors can legally straddle two areas, so
                 // we may need to check another one
-                if (!edict->areanum2 || !CM_AreasConnected(&sv.cm, area, edict->areanum2)) {
-                    continue;        // blocked by a door
+                if (!edict->areaNumber2 || !CM_AreasConnected(&sv.cm, area, edict->areaNumber2)) {
+                    continue;        // Blocked by a door
                 }
             }
             BSP_ClusterVis(sv.cm.cache, mask, leaf->cluster, DVIS_PHS);
-            if (!SV_EdictIsVisible(&sv.cm, edict, mask)) {
+            if (!SV_EntityIsVisible(&sv.cm, edict, mask)) {
                 continue; // not in PHS
             }
         }
@@ -611,7 +611,7 @@ static void PF_StartSound(edict_t *edict, int channel,
         }
 
         // send origin for invisible entities
-        if (edict->svflags & SVF_NOCLIENT) {
+        if (edict->svFlags & SVF_NOCLIENT) {
             flags |= SND_POS;
         }
 
@@ -647,7 +647,7 @@ static void PF_StartSound(edict_t *edict, int channel,
                      volume * 255, attenuation * 64, timeofs * 1000);
 }
 
-static void PF_PositionedSound(vec3_t origin, edict_t *entity, int channel,
+static void PF_PositionedSound(vec3_t origin, entity_t *entity, int channel,
                                int soundindex, float volume,
                                float attenuation, float timeofs)
 {
@@ -737,7 +737,7 @@ static cvar_t *PF_cvar(const char *name, const char *value, int flags)
 // Stuff Cmd implementation like other Quake engines have for the server module.
 //===============
 //
-static void PF_stuffcmd(edict_t* pent, const char* pszCommand) {
+static void PF_stuffcmd(entity_t* pent, const char* pszCommand) {
     MSG_WriteByte(svc_stufftext);
     MSG_WriteString(pszCommand);
 
@@ -899,30 +899,30 @@ void SV_InitGameProgs(void)
     };
     importAPI.Multicast = SV_Multicast;
     importAPI.Unicast = PF_Unicast;
-    importAPI.bprintf = PF_bprintf;
-    importAPI.dprintf = PF_dprintf;
-    importAPI.cprintf = PF_cprintf;
-    importAPI.centerprintf = PF_centerprintf;
-    importAPI.error = PF_error;
+    importAPI.BPrintf = PF_bprintf;
+    importAPI.DPrintf = PF_dprintf;
+    importAPI.CPrintf = PF_cprintf;
+    importAPI.CenterPrintf = PF_centerprintf;
+    importAPI.Error = PF_error;
 
-    importAPI.linkentity = PF_LinkEdict;
-    importAPI.unlinkentity = PF_UnlinkEdict;
-    importAPI.BoxEdicts = SV_AreaEdicts;
+    importAPI.LinkEntity = PF_LinkEntity;
+    importAPI.UnlinkEntity = PF_UnlinkEntity;
+    importAPI.BoxEntities = SV_AreaEntities;
     importAPI.Trace = SV_Trace;
     importAPI.PointContents = SV_PointContents;
-    importAPI.setmodel = PF_setmodel;
+    importAPI.SetModel = PF_setmodel;
     importAPI.InPVS = PF_InPVS;
     importAPI.InPHS = PF_InPHS;
     //import.PMove = PF_PMove;
     importAPI.GetPMoveParams = PF_GetPMoveParams;
 
-    importAPI.modelindex = PF_ModelIndex;
-    importAPI.soundindex = PF_SoundIndex;
-    importAPI.imageindex = PF_ImageIndex;
+    importAPI.ModelIndex = PF_ModelIndex;
+    importAPI.SoundIndex = PF_SoundIndex;
+    importAPI.ImageIndex = PF_ImageIndex;
 
     importAPI.configstring = PF_configstring;
-    importAPI.sound = PF_StartSound;
-    importAPI.positioned_sound = PF_PositionedSound;
+    importAPI.Sound = PF_StartSound;
+    importAPI.PositionedSound = PF_PositionedSound;
 
     importAPI.WriteChar = MSG_WriteChar;
     importAPI.WriteByte = MSG_WriteByte;
@@ -948,8 +948,8 @@ void SV_InitGameProgs(void)
     importAPI.args = Cmd_RawArgs;
     importAPI.AddCommandString = PF_AddCommandString;
 
-    // N&C: stuffcmd
-    importAPI.stuffcmd = PF_stuffcmd;
+    // N&C: StuffCmd
+    importAPI.StuffCmd = PF_stuffcmd;
 
     importAPI.DebugGraph = PF_DebugGraph;
     importAPI.SetAreaPortalState = PF_SetAreaPortalState;
@@ -969,14 +969,14 @@ void SV_InitGameProgs(void)
     // initialize
     ge->Init();
 
-    // sanitize edict_size
-    if (ge->edict_size < sizeof(edict_t) || ge->edict_size > SIZE_MAX / MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Server Game DLL returned bad size of edict_t");
+    // sanitize entity_size
+    if (ge->entity_size < sizeof(entity_t) || ge->entity_size > SIZE_MAX / MAX_EDICTS) {
+        Com_Error(ERR_DROP, "Server Game DLL returned bad size of entity_t");
     }
 
     // sanitize max_edicts
-    if (ge->edict_size <= sv_maxclients->integer || ge->edict_size > MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Server Game DLL returned bad number of max_edicts %i   %i", ge->edict_size, sizeof(edict_t));
+    if (ge->entity_size <= sv_maxclients->integer || ge->entity_size > MAX_EDICTS) {
+        Com_Error(ERR_DROP, "Server Game DLL returned bad number of max_edicts %i   %i", ge->entity_size, sizeof(entity_t));
     }
 }
 

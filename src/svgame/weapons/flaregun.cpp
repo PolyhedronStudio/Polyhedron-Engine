@@ -23,17 +23,17 @@
  * Forward declaration for fire_flaregun(), which is defined in
  * g_weapon.c.
  */
-void fire_flaregun(edict_t* self, const vec3_t &start, const vec3_t &aimdir, int damage,
+void fire_flaregun(entity_t* self, const vec3_t &start, const vec3_t &aimdir, int damage,
     int speed, float timer, float damage_radius);
 /*
- * weapon_flaregun_fire (edict_t *ent)
+ * weapon_flaregun_fire (entity_t *ent)
  *
  * Basically used to wrap the call to fire_flaregun(), this function
  * calculates all the parameters needed by fire_flaregun.  Calls
  * fire_flaregun and then subtracts 1 from the firing entity's
  * cell stash.
  */
-void weapon_flaregun_fire(edict_t* ent)
+void weapon_flaregun_fire(entity_t* ent)
 {
     vec3_t offset;
     vec3_t forward, right;
@@ -41,7 +41,7 @@ void weapon_flaregun_fire(edict_t* ent)
 
     // Setup the parameters used in the call to fire_flaregun() 
      // 
-    VectorSet(offset, 8, 8, ent->viewheight - 8);
+    VectorSet(offset, 8, 8, ent->viewHeight - 8);
     AngleVectors(ent->client->v_angle, &forward, &right, NULL);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
@@ -59,7 +59,7 @@ void weapon_flaregun_fire(edict_t* ent)
 
     // Bump the gunframe 
      // 
-    ent->client->ps.gunframe++;
+    ent->client->playerState.gunframe++;
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
@@ -69,7 +69,7 @@ void weapon_flaregun_fire(edict_t* ent)
 }
 
 /*
- * Weapon_FlareGun (edict_t *ent)
+ * Weapon_FlareGun (entity_t *ent)
  *
  * This is the function that is referenced in the itemlist structure
  * defined in g_items.c.  It is called every frame when our weapon is
@@ -78,7 +78,7 @@ void weapon_flaregun_fire(edict_t* ent)
  * into Weapon_Generic()'s responsiblities... if someone has insight
  * drop me a line :)
  */
-void Weapon_FlareGun(edict_t* ent)
+void Weapon_FlareGun(entity_t* ent)
 {
     static int pause_frames[] = { 39, 45, 50, 53, 0 };
     static int fire_frames[] = { 9, 17, 0 };

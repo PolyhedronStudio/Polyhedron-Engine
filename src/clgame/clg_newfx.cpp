@@ -400,7 +400,7 @@ void CLG_ParticleSteamEffect2(cl_sustain_t* self)
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);
     }
 
-    self->nextthink += self->thinkinterval;
+    self->nextThink += self->thinkinterval;
 }
 
 /*
@@ -888,7 +888,7 @@ void CLG_IonripperTrail(vec3_t start, vec3_t ent)
 CLG_TrapParticles
 ===============
 */
-void CLG_TrapParticles(entity_t* ent)
+void CLG_TrapParticles(r_entity_t* ent)
 {
     vec3_t      move;
     vec3_t      vec;

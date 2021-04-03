@@ -48,7 +48,7 @@
 //  ---------------------------------------------
 //  movetype_push, or movetype_stop
 //  action when touched
-//  action when blocked
+//  action when Blocked
 //  action when used
 //    disabled?
 //  auto trigger spawning
@@ -68,21 +68,21 @@
 // Support routines for movement (changes in origin using velocity)
 //
 
-void Brush_Move_Done(edict_t* ent);
-void Brush_Move_Final(edict_t* ent);
-void Brush_Move_Begin(edict_t* ent);
-void Brush_Move_Calc(edict_t* ent, const vec3_t &dest, void(*func)(edict_t*));
+void Brush_Move_Done(entity_t* ent);
+void Brush_Move_Final(entity_t* ent);
+void Brush_Move_Begin(entity_t* ent);
+void Brush_Move_Calc(entity_t* ent, const vec3_t &dest, void(*func)(entity_t*));
 
 //
 // Support routines for angular movement (changes in angle using avelocity)
 //
-void Brush_AngleMove_Done(edict_t* ent);
-void Brush_AngleMove_Final(edict_t* ent);
-void Brush_AngleMove_Begin(edict_t* ent);
-void Brush_AngleMove_Calc(edict_t* ent, void(*func)(edict_t*));
+void Brush_AngleMove_Done(entity_t* ent);
+void Brush_AngleMove_Final(entity_t* ent);
+void Brush_AngleMove_Begin(entity_t* ent);
+void Brush_AngleMove_Calc(entity_t* ent, void(*func)(entity_t*));
 
 void plat_CalcAcceleratedMove(moveinfo_t* moveinfo);
 void plat_Accelerate(moveinfo_t* moveinfo);
-void Think_AccelMove(edict_t* ent);
+void Think_AccelMove(entity_t* ent);
 
 #endif // __SVGAME_PLAYER_WEAPONS_H__

@@ -51,7 +51,7 @@ typedef struct gtv_s {
     char        name[MAX_MVD_NAME];
     gtv_state_t state;
     mvd_t       *mvd;
-    void (*drop)(struct gtv_s *);
+    void (*Drop)(struct gtv_s *);
     void (*destroy)(struct gtv_s *);
     void (*run)(struct gtv_s *);
 
@@ -293,7 +293,7 @@ gtv_dropf(gtv_t *gtv, const char *fmt, ...)
 
     Com_Printf("[%s] =!= %s\n", gtv->name, text);
 
-    gtv->drop(gtv);
+    gtv->Drop(gtv);
 
     longjmp(mvd_jmpbuf, -1);
 }
@@ -324,7 +324,7 @@ static mvd_t *create_channel(gtv_t *gtv)
     mvd->id = gtv->id;
     Q_strlcpy(mvd->name, gtv->name, sizeof(mvd->name));
     mvd->pool.edicts = mvd->edicts;
-    mvd->pool.edict_size = sizeof(edict_t);
+    mvd->pool.entity_size = sizeof(entity_t);
     mvd->pool.max_edicts = MAX_EDICTS;
     mvd->type = PM_SPECTATOR;
     mvd->min_packets = mvd_wait_delay->value * 10;
@@ -1805,7 +1805,7 @@ static inline int player_flags(mvd_t *mvd, mvd_player_t *player)
     return flags;
 }
 
-static inline int entity_flags(mvd_t *mvd, edict_t *ent)
+static inline int entity_flags(mvd_t *mvd, entity_t *ent)
 {
     int flags = MSG_ES_UMASK;
 
@@ -1813,7 +1813,7 @@ static inline int entity_flags(mvd_t *mvd, edict_t *ent)
         flags |= MSG_ES_REMOVE;
     } else if (ent->s.number <= mvd->maxclients) {
         mvd_player_t *player = &mvd->players[ent->s.number - 1];
-        if (player->inUse && player->ps.pmove.type == PM_NORMAL)
+        if (player->inUse && player->playerState.pmove.type == PM_NORMAL)
             flags |= MSG_ES_FIRSTPERSON;
     }
 
@@ -1822,7 +1822,7 @@ static inline int entity_flags(mvd_t *mvd, edict_t *ent)
 
 static void emit_base_frame(mvd_t *mvd)
 {
-    edict_t         *ent;
+    entity_t         *ent;
     mvd_player_t    *player;
     int             i, portalbytes;
     byte            portalbits[MAX_MAP_PORTAL_BYTES];
@@ -1836,7 +1836,7 @@ static void emit_base_frame(mvd_t *mvd)
     // send base player states
     for (i = 0; i < mvd->maxclients; i++) {
         player = &mvd->players[i];
-        MSG_PackPlayer(&ps, &player->ps);
+        MSG_PackPlayer(&ps, &player->playerState);
         MSG_WriteDeltaPlayerstate_Packet(NULL, &ps, i, (msgPsFlags_t)player_flags(mvd, player)); // CPP: Cast
     }
     MSG_WriteByte(CLIENTNUM_NONE);
@@ -1844,7 +1844,7 @@ static void emit_base_frame(mvd_t *mvd)
     // send base entity states
     for (i = 1; i < MAX_EDICTS; i++) {
         ent = &mvd->edicts[i];
-        if (!(ent->svflags & SVF_MONSTER))
+        if (!(ent->svFlags & SVF_MONSTER))
             continue;   // entity never seen
         ent->s.number = i;
         MSG_PackEntity(&es, &ent->s, false);
@@ -2058,7 +2058,7 @@ static void MVD_Connect_f(void)
     gtv->stream = stream;
     gtv->last_sent = gtv->last_rcvd = svs.realtime;
     gtv->run = gtv_run;
-    gtv->drop = gtv_drop;
+    gtv->Drop = gtv_drop;
     gtv->destroy = gtv_destroy;
     gtv->username = MVD_CopyString(username);
     gtv->password = MVD_CopyString(password);
@@ -2162,7 +2162,7 @@ static void MVD_Seek_f(void)
     mvd_snap_t *snap;
     int i, j, ret, index, frames, dest;
     char *from, *to;
-    edict_t *ent;
+    entity_t *ent;
     qboolean gamestate;
 
     if (Cmd_Argc() < 2) {
@@ -2308,8 +2308,8 @@ static void MVD_Seek_f(void)
     for (i = 1; i < MAX_EDICTS; i++) {
         ent = &mvd->edicts[i];
 
-        if (ent->svflags & SVF_MONSTER)
-            MVD_LinkEdict(mvd, ent);
+        if (ent->svFlags & SVF_MONSTER)
+            MVD_LinkEntity(mvd, ent);
 
         if (!ent->inUse)
             continue;
@@ -2498,7 +2498,7 @@ static void MVD_Play_f(void)
         gtv = (gtv_t*)MVD_Mallocz(sizeof(*gtv)); // CPP: Cast
         gtv->id = mvd_chanid++;
         gtv->state = GTV_READING;
-        gtv->drop = demo_destroy;
+        gtv->Drop = demo_destroy;
         gtv->destroy = demo_destroy;
         gtv->demoloop = 1;
         Q_snprintf(gtv->name, sizeof(gtv->name), "dem%d", gtv->id);

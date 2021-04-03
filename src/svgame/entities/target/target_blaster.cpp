@@ -17,33 +17,33 @@ dmg     default is 15
 speed   default is 1000
 */
 
-void use_target_blaster(edict_t* self, edict_t* other, edict_t* activator)
+void use_target_blaster(entity_t* self, entity_t* other, entity_t* activator)
 {
 #if 0
     int effect;
 
-    if (self->spawnflags & 2)
+    if (self->spawnFlags & 2)
         effect = 0;
-    else if (self->spawnflags & 1)
+    else if (self->spawnFlags & 1)
         effect = EF_HYPERBLASTER;
     else
         effect = EF_BLASTER;
 #endif
 
-    fire_blaster(self, self->s.origin, self->movedir, self->dmg, self->speed, EF_BLASTER, MOD_TARGET_BLASTER);
-    gi.sound(self, CHAN_VOICE, self->noise_index, 1, ATTN_NORM, 0);
+    fire_blaster(self, self->s.origin, self->moveDirection, self->dmg, self->speed, EF_BLASTER, MOD_TARGET_BLASTER);
+    gi.Sound(self, CHAN_VOICE, self->noiseIndex, 1, ATTN_NORM, 0);
 }
 
-void SP_target_blaster(edict_t* self)
+void SP_target_blaster(entity_t* self)
 {
-    self->use = use_target_blaster;
-    UTIL_SetMoveDir(self->s.angles, self->movedir);
-    self->noise_index = gi.soundindex("weapons/laser2.wav");
+    self->Use = use_target_blaster;
+    UTIL_SetMoveDir(self->s.angles, self->moveDirection);
+    self->noiseIndex = gi.SoundIndex("weapons/laser2.wav");
 
     if (!self->dmg)
         self->dmg = 15;
     if (!self->speed)
         self->speed = 1000;
 
-    self->svflags = SVF_NOCLIENT;
+    self->svFlags = SVF_NOCLIENT;
 }

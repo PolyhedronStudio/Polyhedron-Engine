@@ -101,7 +101,7 @@ typedef struct {
     int         number;
     unsigned    num_entities;
     unsigned    first_entity;
-    player_packed_t ps;
+    player_packed_t playerState;
     int         clientNum;
     int         areabytes;
     byte        areabits[MAX_MAP_AREA_BYTES];  // portalarea visibility bits
@@ -169,10 +169,10 @@ typedef struct {
     unsigned    tracecount;
 } server_t;
 
-#define EDICT_POOL(c, n) ((edict_t *)((byte *)(c)->pool->edicts + (c)->pool->edict_size*(n)))
+#define EDICT_POOL(c, n) ((entity_t *)((byte *)(c)->pool->edicts + (c)->pool->entity_size*(n)))
 
-#define EDICT_NUM(n) ((edict_t *)((byte *)ge->edicts + ge->edict_size*(n)))
-#define NUM_FOR_EDICT(e) ((int)(((byte *)(e) - (byte *)ge->edicts) / ge->edict_size))
+#define EDICT_NUM(n) ((entity_t *)((byte *)ge->edicts + ge->entity_size*(n)))
+#define NUM_FOR_EDICT(e) ((int)(((byte *)(e) - (byte *)ge->edicts) / ge->entity_size))
 
 #define MAX_TOTAL_ENT_LEAFS        128
 
@@ -252,7 +252,7 @@ typedef struct client_s {
 
     // core info
     clstate_t       state;
-    edict_t         *edict;     // EDICT_NUM(clientnum+1)
+    entity_t         *edict;     // EDICT_NUM(clientnum+1)
     int             number;     // client slot number
 
     // client flags
@@ -336,7 +336,7 @@ typedef struct client_s {
     // server state pointers (hack for MVD channels implementation)
     char            *configstrings;
     char            *gamedir, *mapname;
-    edict_pool_t    *pool;
+    entity_pool_t    *pool;
     cm_t            *cm;
     int             slot;
     int             spawncount;
@@ -545,7 +545,7 @@ extern cvar_t       *sv_zombietime;
 extern cvar_t       *sv_ghostime;
 
 extern client_t     *sv_client;
-extern edict_t      *sv_player;
+extern entity_t      *sv_player;
 
 extern qboolean     sv_pending_autosave;
 
@@ -626,7 +626,7 @@ void SV_MvdStatus_f(void);
 void SV_MvdMapChanged(void);
 void SV_MvdClientDropped(client_t *client);
 
-void SV_MvdUnicast(edict_t *ent, int clientNum, qboolean reliable);
+void SV_MvdUnicast(entity_t *ent, int clientNum, qboolean reliable);
 void SV_MvdMulticast(int leafnum, multicast_t to);
 void SV_MvdConfigstring(int index, const char *string, size_t len);
 void SV_MvdBroadcastPrint(int level, const char *string);
@@ -739,7 +739,7 @@ extern    svgame_export_t    *ge;
 
 void SV_InitGameProgs(void);
 void SV_ShutdownGameProgs(void);
-void SV_InitEdict(edict_t *e);
+void SV_InitEntity(entity_t *e);
 
 //void PF_PMove(pm_move_t *pm);
 
@@ -761,19 +761,19 @@ int SV_NoSaveGames(void);
 void SV_ClearWorld(void);
 // called after the world model has been loaded, before linking any entities
 
-void PF_UnlinkEdict(edict_t *ent);
+void PF_UnlinkEntity(entity_t *ent);
 // call before removing an entity, and before trying to move one,
 // so it doesn't clip against itself
 
-void SV_LinkEdict(cm_t *cm, edict_t *ent);
-void PF_LinkEdict(edict_t *ent);
+void SV_LinkEntity(cm_t *cm, entity_t *ent);
+void PF_LinkEntity(entity_t *ent);
 // Needs to be called any time an entity changes origin, mins, maxs,
 // or solid.  Automatically unlinks if needed.
-// sets ent->v.absmin and ent->v.absmax
+// sets ent->v.absMin and ent->v.absMax
 // sets ent->leafnums[] for pvs determination even if the entity
 // is not solid
 
-int SV_AreaEdicts(const vec3_t &mins, const vec3_t &maxs, edict_t **list, int maxcount, int areatype);
+int SV_AreaEntities(const vec3_t &mins, const vec3_t &maxs, entity_t **list, int maxcount, int areatype);
 // fills in a table of edict pointers with edicts that have bounding boxes
 // that intersect the given area.  It is possible for a non-axial bmodel
 // to be returned that doesn't actually intersect the area on an exact
@@ -781,7 +781,7 @@ int SV_AreaEdicts(const vec3_t &mins, const vec3_t &maxs, edict_t **list, int ma
 // returns the number of pointers filled in
 // ??? does this always return the world?
 
-qboolean SV_EdictIsVisible(cm_t *cm, edict_t *ent, byte *mask);
+qboolean SV_EntityIsVisible(cm_t *cm, entity_t *ent, byte *mask);
 
 //===================================================================
 
@@ -793,7 +793,7 @@ int SV_PointContents(const vec3_t &p);
 // Quake 2 extends this to also check entities, to allow moving liquids
 
 trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
-                           edict_t *passedict, int contentmask);
+                           entity_t *passedict, int contentmask);
 // mins and maxs are relative
 
 // if the entire move stays in a solid volume, trace.allsolid will be set,

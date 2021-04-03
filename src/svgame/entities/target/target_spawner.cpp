@@ -24,30 +24,30 @@ For gibs:
     speed how fast it should be moving otherwise it
     will just be dropped
 */
-void ED_CallSpawn(edict_t* ent);
+void ED_CallSpawn(entity_t* ent);
 
-void use_target_spawner(edict_t* self, edict_t* other, edict_t* activator)
+void use_target_spawner(entity_t* self, entity_t* other, entity_t* activator)
 {
-    edict_t* ent;
+    entity_t* ent;
 
     ent = G_Spawn();
     ent->classname = self->target;
     VectorCopy(self->s.origin, ent->s.origin);
     VectorCopy(self->s.angles, ent->s.angles);
     ED_CallSpawn(ent);
-    gi.unlinkentity(ent);
+    gi.UnlinkEntity(ent);
     KillBox(ent);
-    gi.linkentity(ent);
+    gi.LinkEntity(ent);
     if (self->speed)
-        VectorCopy(self->movedir, ent->velocity);
+        VectorCopy(self->moveDirection, ent->velocity);
 }
 
-void SP_target_spawner(edict_t* self)
+void SP_target_spawner(entity_t* self)
 {
-    self->use = use_target_spawner;
-    self->svflags = SVF_NOCLIENT;
+    self->Use = use_target_spawner;
+    self->svFlags = SVF_NOCLIENT;
     if (self->speed) {
-        UTIL_SetMoveDir(self->s.angles, self->movedir);
-        VectorScale(self->movedir, self->speed, self->movedir);
+        UTIL_SetMoveDir(self->s.angles, self->moveDirection);
+        VectorScale(self->moveDirection, self->speed, self->moveDirection);
     }
 }

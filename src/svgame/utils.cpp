@@ -62,10 +62,10 @@ vec3_t VelocityForDamage(int damage)
     return v;
 }
 
-void Think_Delay(edict_t *ent)
+void Think_Delay(entity_t *ent)
 {
     UTIL_UseTargets(ent, ent->activator);
-    G_FreeEdict(ent);
+    G_FreeEntity(ent);
 }
 
 /*
@@ -79,14 +79,14 @@ do the SUB_UseTargets after that many seconds have passed.
 
 Centerprints any self.message to the activator.
 
-Search for (string)targetname in all entities that
+Search for (string)targetName in all entities that
 match (string)self.target and call their .use function
 
 ==============================
 */
-void UTIL_UseTargets(edict_t *ent, edict_t *activator)
+void UTIL_UseTargets(entity_t *ent, entity_t *activator)
 {
-    edict_t     *t;
+    entity_t     *t;
 
 //
 // check for a delay
@@ -95,14 +95,14 @@ void UTIL_UseTargets(edict_t *ent, edict_t *activator)
         // create a temp object to fire at a later time
         t = G_Spawn();
         t->classname = "DelayedUse";
-        t->nextthink = level.time + ent->delay;
-        t->think = Think_Delay;
+        t->nextThink = level.time + ent->delay;
+        t->Think = Think_Delay;
         t->activator = activator;
         if (!activator)
-            gi.dprintf("Think_Delay with no activator\n");
+            gi.DPrintf("Think_Delay with no activator\n");
         t->message = ent->message;
         t->target = ent->target;
-        t->killtarget = ent->killtarget;
+        t->killTarget = ent->killTarget;
         return;
     }
 
@@ -110,23 +110,23 @@ void UTIL_UseTargets(edict_t *ent, edict_t *activator)
 //
 // print the message
 //
-    if ((ent->message) && !(activator->svflags & SVF_MONSTER)) {
-        gi.centerprintf(activator, "%s", ent->message);
-        if (ent->noise_index)
-            gi.sound(activator, CHAN_AUTO, ent->noise_index, 1, ATTN_NORM, 0);
+    if ((ent->message) && !(activator->svFlags & SVF_MONSTER)) {
+        gi.CenterPrintf(activator, "%s", ent->message);
+        if (ent->noiseIndex)
+            gi.Sound(activator, CHAN_AUTO, ent->noiseIndex, 1, ATTN_NORM, 0);
         else
-            gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+            gi.Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
     }
 
 //
 // kill killtargets
 //
-    if (ent->killtarget) {
+    if (ent->killTarget) {
         t = NULL;
-        while ((t = G_Find(t, FOFS(targetname), ent->killtarget))) {
-            G_FreeEdict(t);
+        while ((t = G_Find(t, FOFS(targetName), ent->killTarget))) {
+            G_FreeEntity(t);
             if (!ent->inUse) {
-                gi.dprintf("entity was removed while using killtargets\n");
+                gi.DPrintf("entity was removed while using killtargets\n");
                 return;
             }
         }
@@ -137,20 +137,20 @@ void UTIL_UseTargets(edict_t *ent, edict_t *activator)
 //
     if (ent->target) {
         t = NULL;
-        while ((t = G_Find(t, FOFS(targetname), ent->target))) {
+        while ((t = G_Find(t, FOFS(targetName), ent->target))) {
             // doors fire area portals in a specific way
             if (!Q_stricmp(t->classname, "func_areaportal") &&
                 (!Q_stricmp(ent->classname, "func_door") || !Q_stricmp(ent->classname, "func_door_rotating")))
                 continue;
 
             if (t == ent) {
-                gi.dprintf("WARNING: Entity used itself.\n");
+                gi.DPrintf("WARNING: Entity used itself.\n");
             } else {
-                if (t->use)
-                    t->use(t, ent, activator);
+                if (t->Use)
+                    t->Use(t, ent, activator);
             }
             if (!ent->inUse) {
-                gi.dprintf("entity was removed while using targets\n");
+                gi.DPrintf("entity was removed while using targets\n");
                 return;
             }
         }
@@ -163,14 +163,14 @@ vec3_t MOVEDIR_UP   = {0, 0, 1};
 vec3_t VEC_DOWN     = {0, -2, 0};
 vec3_t MOVEDIR_DOWN = {0, 0, -1};
 
-void UTIL_SetMoveDir(vec3_t &angles, vec3_t &movedir)
+void UTIL_SetMoveDir(vec3_t &angles, vec3_t &moveDirection)
 {
     if (VectorCompare(angles, VEC_UP)) {
-        VectorCopy(MOVEDIR_UP, movedir);
+        VectorCopy(MOVEDIR_UP, moveDirection);
     } else if (VectorCompare(angles, VEC_DOWN)) {
-        VectorCopy(MOVEDIR_DOWN, movedir);
+        VectorCopy(MOVEDIR_DOWN, moveDirection);
     } else {
-        AngleVectors(angles, &movedir, NULL, NULL);
+        AngleVectors(angles, &moveDirection, NULL, NULL);
     }
 
     VectorClear(angles);
@@ -235,16 +235,16 @@ G_TouchTriggers
 
 ============
 */
-void    UTIL_TouchTriggers(edict_t *ent)
+void    UTIL_TouchTriggers(entity_t *ent)
 {
     int         i, num;
-    edict_t     *touch[MAX_EDICTS], *hit;
+    entity_t     *touch[MAX_EDICTS], *hit;
 
     // dead things don't activate triggers!
-    if ((ent->client || (ent->svflags & SVF_MONSTER)) && (ent->health <= 0))
+    if ((ent->client || (ent->svFlags & SVF_MONSTER)) && (ent->health <= 0))
         return;
 
-    num = gi.BoxEdicts(ent->absmin, ent->absmax, touch
+    num = gi.BoxEntities(ent->absMin, ent->absMax, touch
                        , MAX_EDICTS, AREA_TRIGGERS);
 
     // be careful, it is possible to have an entity in this
@@ -253,9 +253,9 @@ void    UTIL_TouchTriggers(edict_t *ent)
         hit = touch[i];
         if (!hit->inUse)
             continue;
-        if (!hit->touch)
+        if (!hit->Touch)
             continue;
-        hit->touch(hit, ent, NULL, NULL);
+        hit->Touch(hit, ent, NULL, NULL);
     }
 }
 
@@ -267,12 +267,12 @@ Call after linking a new trigger in during gameplay
 to force all entities it covers to immediately touch it
 ============
 */
-void    G_TouchSolids(edict_t *ent)
+void    G_TouchSolids(entity_t *ent)
 {
     int         i, num;
-    edict_t     *touch[MAX_EDICTS], *hit;
+    entity_t     *touch[MAX_EDICTS], *hit;
 
-    num = gi.BoxEdicts(ent->absmin, ent->absmax, touch
+    num = gi.BoxEntities(ent->absMin, ent->absMax, touch
                        , MAX_EDICTS, AREA_SOLID);
 
     // be careful, it is possible to have an entity in this
@@ -281,8 +281,8 @@ void    G_TouchSolids(edict_t *ent)
         hit = touch[i];
         if (!hit->inUse)
             continue;
-        if (ent->touch)
-            ent->touch(hit, ent, NULL, NULL);
+        if (ent->Touch)
+            ent->Touch(hit, ent, NULL, NULL);
         if (!ent->inUse)
             break;
     }
@@ -307,7 +307,7 @@ Kills all entities that would touch the proposed new positioning
 of ent.  Ent should be unlinked before calling this!
 =================
 */
-qboolean KillBox(edict_t *ent)
+qboolean KillBox(entity_t *ent)
 {
     trace_t     tr;
 

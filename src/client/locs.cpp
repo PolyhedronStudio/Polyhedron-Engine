@@ -184,7 +184,7 @@ void LOC_AddLocationsToScene(void)
     location_t *loc, *nearest;
     vec3_t dir;
     float dist;
-    entity_t ent;
+    r_entity_t ent;
 
     if (!loc_draw->integer) {
         return;

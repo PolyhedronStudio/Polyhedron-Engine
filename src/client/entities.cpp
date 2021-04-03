@@ -43,14 +43,14 @@ static inline qboolean entity_optimized(const entity_state_t *state)
     if (state->number != cl.frame.clientNum + 1)
         return false;
 
-    if (cl.frame.ps.pmove.type >= PM_DEAD)
+    if (cl.frame.playerState.pmove.type >= PM_DEAD)
         return false;
 
     return true;
 }
 
 static inline void
-entity_update_new(centity_t *ent, const entity_state_t *state, const vec_t *origin)
+entity_update_new(cl_entity_t *ent, const entity_state_t *state, const vec_t *origin)
 {
     static int entity_ctr;
     ent->id = ++entity_ctr;
@@ -78,7 +78,7 @@ entity_update_new(centity_t *ent, const entity_state_t *state, const vec_t *orig
 }
 
 static inline void
-entity_update_old(centity_t *ent, const entity_state_t *state, const vec_t *origin)
+entity_update_old(cl_entity_t *ent, const entity_state_t *state, const vec_t *origin)
 {
     int event = state->event;
 
@@ -131,7 +131,7 @@ entity_update_old(centity_t *ent, const entity_state_t *state, const vec_t *orig
     ent->prev = ent->current;
 }
 
-static inline qboolean entity_new(const centity_t *ent)
+static inline qboolean entity_new(const cl_entity_t *ent)
 {
     if (!cl.oldframe.valid)
         return true;   // last received frame was invalid
@@ -153,7 +153,7 @@ static inline qboolean entity_new(const centity_t *ent)
 
 static void entity_update(const entity_state_t *state)
 {
-    centity_t *ent = &cs.entities[state->number];
+    cl_entity_t *ent = &cs.entities[state->number];
     const vec_t *origin;
     vec3_t origin_v;
 
@@ -174,8 +174,8 @@ static void entity_update(const entity_state_t *state)
     // work around Q2PRO server bandwidth optimization
     if (entity_optimized(state)) {
         // N&C: FF Precision.
-        VectorCopy(cl.frame.ps.pmove.origin, origin_v);
-        //VectorScale(cl.frame.ps.pmove.origin, 0.125f, origin_v);
+        VectorCopy(cl.frame.playerState.pmove.origin, origin_v);
+        //VectorScale(cl.frame.playerState.pmove.origin, 0.125f, origin_v);
         origin = origin_v;
     } else {
         origin = state->origin;
@@ -193,7 +193,7 @@ static void entity_update(const entity_state_t *state)
 
     // work around Q2PRO server bandwidth optimization
     if (entity_optimized(state)) {
-        Com_PlayerToEntityState(&cl.frame.ps, &ent->current);
+        Com_PlayerToEntityState(&cl.frame.playerState, &ent->current);
     }
 }
 
@@ -217,10 +217,10 @@ static void set_active_state(void)
 
     // initialize oldframe so lerping doesn't hurt anything
     cl.oldframe.valid = false;
-    cl.oldframe.ps = cl.frame.ps;
+    cl.oldframe.playerState = cl.frame.playerState;
 #if USE_FPS
     cl.oldkeyframe.valid = false;
-    cl.oldkeyframe.ps = cl.keyframe.ps;
+    cl.oldkeyframe.playerState = cl.keyframe.playerState;
 #endif
 
     cl.frameflags = 0;
@@ -234,16 +234,16 @@ static void set_active_state(void)
         CL_FirstDemoFrame();
     } else {
         // set initial cl.predicted_origin and cl.predicted_angles
-        VectorCopy(cl.frame.ps.pmove.origin, cl.predicted_origin);
-        VectorCopy(cl.frame.ps.pmove.velocity, cl.predicted_velocity);
+        VectorCopy(cl.frame.playerState.pmove.origin, cl.predicted_origin);
+        VectorCopy(cl.frame.playerState.pmove.velocity, cl.predicted_velocity);
 
-        if (cl.frame.ps.pmove.type < PM_DEAD) {
+        if (cl.frame.playerState.pmove.type < PM_DEAD) {
             // enhanced servers don't send viewAngles
             // N&C: Let the client game module predict angles.
             CL_GM_PredictAngles();
         } else {
             // just use what server provided
-            VectorCopy(cl.frame.ps.viewAngles, cl.predicted_angles);
+            VectorCopy(cl.frame.playerState.viewAngles, cl.predicted_angles);
         }
     }
 
@@ -265,12 +265,12 @@ static void
 player_update(server_frame_t *oldframe, server_frame_t *frame, int framediv)
 {
     player_state_t *ps, *ops;
-    centity_t *ent;
+    cl_entity_t *ent;
     int oldnum;
 
     // find states to interpolate between
-    ps = &frame->ps;
-    ops = &oldframe->ps;
+    ps = &frame->playerState;
+    ops = &oldframe->playerState;
 
     // no lerping if previous frame was dropped or invalid
     if (!oldframe->valid)
@@ -327,7 +327,7 @@ A valid frame has been parsed.
 */
 void CL_DeltaFrame(void)
 {
-    centity_t           *ent;
+    cl_entity_t           *ent;
     entity_state_t      *state;
     int                 i, j;
     int                 framenum;
@@ -351,7 +351,7 @@ void CL_DeltaFrame(void)
     // this is needed in situations when player entity is invisible, but
     // server sends an effect referencing it's origin (such as MZ_LOGIN, etc)
     ent = &cs.entities[cl.frame.clientNum + 1];
-    Com_PlayerToEntityState(&cl.frame.ps, &ent->current);
+    Com_PlayerToEntityState(&cl.frame.playerState, &ent->current);
 
     for (i = 0; i < cl.frame.numEntities; i++) {
         j = (cl.frame.firstEntity + i) & PARSE_ENTITIES_MASK;
@@ -376,10 +376,10 @@ void CL_DeltaFrame(void)
     if (cls.demo.playback) {
         // this delta has nothing to do with local viewAngles,
         // clear it to avoid interfering with demo freelook hack
-        VectorClear(cl.frame.ps.pmove.delta_angles);
+        VectorClear(cl.frame.playerState.pmove.delta_angles);
     }
 
-    if (cl.oldframe.ps.pmove.type != cl.frame.ps.pmove.type) {
+    if (cl.oldframe.playerState.pmove.type != cl.frame.playerState.pmove.type) {
         IN_Activate();
     }
 
@@ -400,7 +400,7 @@ void CL_DeltaFrame(void)
 // for debugging problems when out-of-date entity origin is referenced
 void CL_CheckEntityPresent(int entnum, const char *what)
 {
-    centity_t *e;
+    cl_entity_t *e;
 
     if (entnum == cl.frame.clientNum + 1) {
         return; // player entity = current
@@ -540,7 +540,7 @@ Called to get the sound spatialization origin
 */
 vec3_t CL_GetEntitySoundOrigin(int entnum) {
     // Pointers.
-    centity_t   *ent;
+    cl_entity_t   *ent;
     mmodel_t    *cm;
 
     // Vectors.
@@ -580,14 +580,14 @@ vec3_t CL_GetViewVelocity(void)
     vec3_t vel = vec3_zero();
 
     // N&C: FF Precision.
-    VectorCopy(cl.frame.ps.pmove.velocity, vel);
+    VectorCopy(cl.frame.playerState.pmove.velocity, vel);
 
     return vel;
 }
 
 vec3_t CL_GetEntitySoundVelocity(int ent)
 {
-	centity_t *old;
+	cl_entity_t *old;
     vec3_t vel = vec3_zero();
 	if ((ent < 0) || (ent >= MAX_EDICTS))
 	{

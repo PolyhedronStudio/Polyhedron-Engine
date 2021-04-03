@@ -26,7 +26,7 @@
 //======================================================================
 //
 
-void weapon_railgun_fire(edict_t* ent)
+void weapon_railgun_fire(entity_t* ent)
 {
     vec3_t      start;
     vec3_t      forward, right;
@@ -54,7 +54,7 @@ void weapon_railgun_fire(edict_t* ent)
     VectorScale(forward, -3, ent->client->kickOrigin);
     ent->client->kickAngles[0] = -3;
 
-    VectorSet(offset, 0, 7, ent->viewheight - 8);
+    VectorSet(offset, 0, 7, ent->viewHeight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
     fire_rail(ent, start, forward, damage, kick);
 
@@ -64,7 +64,7 @@ void weapon_railgun_fire(edict_t* ent)
     gi.WriteByte(MZ_RAILGUN | is_silenced);
     gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
-    ent->client->ps.gunframe++;
+    ent->client->playerState.gunframe++;
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DF_INFINITE_AMMO))
@@ -72,7 +72,7 @@ void weapon_railgun_fire(edict_t* ent)
 }
 
 
-void Weapon_Railgun(edict_t* ent)
+void Weapon_Railgun(entity_t* ent)
 {
     static int  pause_frames[] = { 56, 0 };
     static int  fire_frames[] = { 4, 0 };

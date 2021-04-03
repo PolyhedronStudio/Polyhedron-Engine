@@ -25,7 +25,7 @@
 //======================================================================
 //
 
-void Blaster_Fire(edict_t* ent, const vec3_t &g_offset, int damage, qboolean hyper, int effect)
+void Blaster_Fire(entity_t* ent, const vec3_t &g_offset, int damage, qboolean hyper, int effect)
 {
     vec3_t  forward, right;
     vec3_t  start;
@@ -34,7 +34,7 @@ void Blaster_Fire(edict_t* ent, const vec3_t &g_offset, int damage, qboolean hyp
     if (is_quad)
         damage *= 4;
     AngleVectors(ent->client->v_angle, &forward, &right, NULL);
-    VectorSet(offset, 24, 8, ent->viewheight - 8);
+    VectorSet(offset, 24, 8, ent->viewHeight - 8);
     VectorAdd(offset, g_offset, offset);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
@@ -56,7 +56,7 @@ void Blaster_Fire(edict_t* ent, const vec3_t &g_offset, int damage, qboolean hyp
 }
 
 
-void Weapon_Blaster_Fire(edict_t* ent)
+void Weapon_Blaster_Fire(entity_t* ent)
 {
     int     damage;
 
@@ -65,10 +65,10 @@ void Weapon_Blaster_Fire(edict_t* ent)
     else
         damage = 10;
     Blaster_Fire(ent, vec3_origin, damage, false, EF_BLASTER);
-    ent->client->ps.gunframe++;
+    ent->client->playerState.gunframe++;
 }
 
-void Weapon_Blaster(edict_t* ent)
+void Weapon_Blaster(entity_t* ent)
 {
     static int  pause_frames[] = { 19, 32, 0 };
     static int  fire_frames[] = { 5, 0 };

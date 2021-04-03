@@ -13,24 +13,24 @@
 //=====================================================
 /*QUAKED target_crosslevel_target (.5 .5 .5) (-8 -8 -8) (8 8 8) trigger1 trigger2 trigger3 trigger4 trigger5 trigger6 trigger7 trigger8
 Triggered by a trigger_crosslevel elsewhere within a unit.  If multiple triggers are checked, all must be true.  Delay, target and
-killtarget also work.
+killTarget also work.
 
 "delay"     delay before using targets if the trigger has been activated (default 1)
 */
-void target_crosslevel_target_think(edict_t* self)
+void target_crosslevel_target_think(entity_t* self)
 {
-    if (self->spawnflags == (game.serverflags & SFL_CROSS_TRIGGER_MASK & self->spawnflags)) {
+    if (self->spawnFlags == (game.serverflags & SFL_CROSS_TRIGGER_MASK & self->spawnFlags)) {
         UTIL_UseTargets(self, self);
-        G_FreeEdict(self);
+        G_FreeEntity(self);
     }
 }
 
-void SP_target_crosslevel_target(edict_t* self)
+void SP_target_crosslevel_target(entity_t* self)
 {
     if (!self->delay)
         self->delay = 1;
-    self->svflags = SVF_NOCLIENT;
+    self->svFlags = SVF_NOCLIENT;
 
-    self->think = target_crosslevel_target_think;
-    self->nextthink = level.time + self->delay;
+    self->Think = target_crosslevel_target_think;
+    self->nextThink = level.time + self->delay;
 }

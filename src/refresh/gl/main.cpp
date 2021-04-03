@@ -29,7 +29,7 @@ glStatic_t gl_static;
 glConfig_t gl_config;
 statCounters_t  c;
 
-entity_t gl_world;
+r_entity_t gl_world;
 
 int registration_sequence;
 
@@ -336,7 +336,7 @@ void GL_RotateForEntity(vec3_t origin, float scale)
 static void GL_DrawSpriteModel(model_t *model)
 {
     static const vec_t tcoords[8] = { 0, 1, 0, 0, 1, 1, 1, 0 };
-    entity_t *e = glr.ent;
+    r_entity_t *e = glr.ent;
     mspriteframe_t *frame = &model->spriteframes[e->frame % model->numframes];
     image_t *image = frame->image;
     float alpha = (e->flags & RF_TRANSLUCENT) ? e->alpha : 1;
@@ -395,7 +395,7 @@ static void GL_DrawNullModel(void)
         U32_GREEN, U32_GREEN,
         U32_BLUE, U32_BLUE
     };
-    entity_t *e = glr.ent;
+    r_entity_t *e = glr.ent;
     vec3_t points[6];
 
     VectorCopy(e->origin, points[0]);
@@ -417,7 +417,7 @@ static void GL_DrawNullModel(void)
 
 static void GL_DrawEntities(int mask)
 {
-    entity_t *ent, *last;
+    r_entity_t *ent, *last;
     model_t *model;
 
     if (!gl_drawentities->integer) {

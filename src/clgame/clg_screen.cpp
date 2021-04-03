@@ -474,7 +474,7 @@ void SCR_SetCrosshairColor(void)
         return;
     }
 
-    health = cl->frame.ps.stats[STAT_HEALTH];
+    health = cl->frame.playerState.stats[STAT_HEALTH];
     if (health <= 0) {
         VectorSet(scr.crosshair_color.u8, 0, 0, 0);
         return;
@@ -969,10 +969,10 @@ static void SCR_DrawInventory(void)
     int     selected;
     int     top;
 
-    if (!(cl->frame.ps.stats[STAT_LAYOUTS] & 2))
+    if (!(cl->frame.playerState.stats[STAT_LAYOUTS] & 2))
         return;
 
-    selected = cl->frame.ps.stats[STAT_SELECTED_ITEM];
+    selected = cl->frame.playerState.stats[STAT_SELECTED_ITEM];
 
     num = 0;
     selected_num = 0;
@@ -1131,7 +1131,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             if (value < 0 || value >= MAX_STATS) {
                 Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
             }
-            index = cl->frame.ps.stats[value];
+            index = cl->frame.playerState.stats[value];
             if (index < 0 || index >= MAX_IMAGES) {
                 Com_Error(ERR_DROP, "%s: invalid pic index", __func__);
             }
@@ -1142,7 +1142,7 @@ static void SCR_ExecuteLayoutString(const char* s)
 
             if (value == STAT_SELECTED_ICON && scr_showitemname->integer)
             {
-                SCR_DrawSelectedItemName(x + 32, y + 8, cl->frame.ps.stats[STAT_SELECTED_ITEM]);
+                SCR_DrawSelectedItemName(x + 32, y + 8, cl->frame.playerState.stats[STAT_SELECTED_ITEM]);
             }
             continue;
         }
@@ -1239,7 +1239,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             if (value < 0 || value >= MAX_STATS) {
                 Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
             }
-            value = cl->frame.ps.stats[value];
+            value = cl->frame.playerState.stats[value];
             HUD_DrawNumber(x, y, 0, width, value);
             continue;
         }
@@ -1249,7 +1249,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             int     color;
 
             width = 3;
-            value = cl->frame.ps.stats[STAT_HEALTH];
+            value = cl->frame.playerState.stats[STAT_HEALTH];
             if (value > 25)
                 color = 0;  // green
             else if (value > 0)
@@ -1257,7 +1257,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             else
                 color = 1;
 
-            if (cl->frame.ps.stats[STAT_FLASHES] & 1)
+            if (cl->frame.playerState.stats[STAT_FLASHES] & 1)
                 clgi.R_DrawPic(x, y, scr.field_pic);
 
             HUD_DrawNumber(x, y, color, width, value);
@@ -1269,7 +1269,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             int     color;
 
             width = 3;
-            value = cl->frame.ps.stats[STAT_AMMO];
+            value = cl->frame.playerState.stats[STAT_AMMO];
             if (value > 5)
                 color = 0;  // green
             else if (value >= 0)
@@ -1277,7 +1277,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             else
                 continue;   // negative number = don't show
 
-            if (cl->frame.ps.stats[STAT_FLASHES] & 4)
+            if (cl->frame.playerState.stats[STAT_FLASHES] & 4)
                 clgi.R_DrawPic(x, y, scr.field_pic);
 
             HUD_DrawNumber(x, y, color, width, value);
@@ -1289,13 +1289,13 @@ static void SCR_ExecuteLayoutString(const char* s)
             int     color;
 
             width = 3;
-            value = cl->frame.ps.stats[STAT_ARMOR];
+            value = cl->frame.playerState.stats[STAT_ARMOR];
             if (value < 1)
                 continue;
 
             color = 0;  // green
 
-            if (cl->frame.ps.stats[STAT_FLASHES] & 2)
+            if (cl->frame.playerState.stats[STAT_FLASHES] & 2)
                 clgi.R_DrawPic(x, y, scr.field_pic);
 
             HUD_DrawNumber(x, y, color, width, value);
@@ -1308,7 +1308,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             if (index < 0 || index >= MAX_STATS) {
                 Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
             }
-            index = cl->frame.ps.stats[index];
+            index = cl->frame.playerState.stats[index];
             if (index < 0 || index >= MAX_CONFIGSTRINGS) {
                 Com_Error(ERR_DROP, "%s: invalid string index", __func__);
             }
@@ -1346,7 +1346,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             if (value < 0 || value >= MAX_STATS) {
                 Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
             }
-            value = cl->frame.ps.stats[value];
+            value = cl->frame.playerState.stats[value];
             if (!value) {   // skip to endif
                 while (strcmp(token, "endif")) {
                     token = COM_Parse(&s);
@@ -1414,7 +1414,7 @@ static void SCR_DrawLayout(void)
     if (clgi.IsDemoPlayback() && clgi.Key_IsDown(K_F1))
         goto draw;
 
-    if (!(cl->frame.ps.stats[STAT_LAYOUTS] & 1))
+    if (!(cl->frame.playerState.stats[STAT_LAYOUTS] & 1))
         return;
 
 draw:

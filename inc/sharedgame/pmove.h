@@ -109,11 +109,11 @@ typedef struct {
     float hookPullSpeed;
 
     // Entities touched (out)
-    struct edict_s* touchedEntities[PM_MAX_TOUCH_ENTS];
+    struct entity_s* touchedEntities[PM_MAX_TOUCH_ENTS];
     int32_t numTouchedEntities;
 
     // Pointer to the entity that is below the player. (out)
-    struct edict_s* groundEntity; 
+    struct entity_s* groundEntityPtr; 
 
     // Clamped, and including kick and delta (out)
     vec3_t viewAngles;

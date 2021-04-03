@@ -388,7 +388,7 @@ static void MVD_UpdateLayouts(mvd_t *mvd)
         if (client->cl->state != cs_spawned) {
             continue;
         }
-        client->ps.stats[STAT_LAYOUTS] = client->layout_type ? 1 : 0;
+        client->playerState.stats[STAT_LAYOUTS] = client->layout_type ? 1 : 0;
         switch (client->layout_type) {
         case LAYOUT_FOLLOW:
             if (!client->layout_time) {
@@ -448,20 +448,20 @@ static void MVD_FollowStop(mvd_client_t *client)
     mvd_t *mvd = client->mvd;
     int i;
 
-    client->ps.viewAngles[vec3_t::Roll] = 0;
+    client->playerState.viewAngles[vec3_t::Roll] = 0;
 
     for (i = 0; i < 3; i++) {
-        client->ps.pmove.delta_angles[i] = ANGLE2SHORT(
-                                               client->ps.viewAngles[i]) - client->lastcmd.angles[i];
+        client->playerState.pmove.delta_angles[i] = ANGLE2SHORT(
+                                               client->playerState.viewAngles[i]) - client->lastcmd.angles[i];
     }
 
-    VectorClear(client->ps.kickAngles);
-    Vec4_Clear(client->ps.blend);
-    client->ps.pmove.flags = 0;
-    client->ps.pmove.type = (pm_type_t)mvd->type; // CPP: Cast
-    client->ps.rdflags = 0;
-    client->ps.gunindex = 0;
-    client->ps.fov = client->fov;
+    VectorClear(client->playerState.kickAngles);
+    Vec4_Clear(client->playerState.blend);
+    client->playerState.pmove.flags = 0;
+    client->playerState.pmove.type = (pm_type_t)mvd->type; // CPP: Cast
+    client->playerState.rdflags = 0;
+    client->playerState.gunindex = 0;
+    client->playerState.fov = client->fov;
 
     // send delta configstrings
     if (mvd->dummy)
@@ -657,18 +657,18 @@ static void MVD_UpdateClient(mvd_client_t *client)
         // copy stats of the dummy MVD observer
         if (mvd->dummy) {
             for (i = 0; i < MAX_STATS; i++) {
-                client->ps.stats[i] = mvd->dummy->ps.stats[i];
+                client->playerState.stats[i] = mvd->dummy->playerState.stats[i];
             }
         }
     } else {
         // copy entire player state
-        client->ps = target->ps;
+        client->playerState = target->playerState;
         if ((client->uf & UF_LOCALFOV) || (!(client->uf & UF_PLAYERFOV)
-                                           && client->ps.fov >= 90)) {
-            client->ps.fov = client->fov;
+                                           && client->playerState.fov >= 90)) {
+            client->playerState.fov = client->fov;
         }
-        client->ps.pmove.flags |= PMF_NO_PREDICTION;
-        client->ps.pmove.type = PM_FREEZE;
+        client->playerState.pmove.flags |= PMF_NO_PREDICTION;
+        client->playerState.pmove.type = PM_FREEZE;
         client->clientNum = target - mvd->players;
 
         if (target != mvd->dummy) {
@@ -676,7 +676,7 @@ static void MVD_UpdateClient(mvd_client_t *client)
                 // copy stats of the dummy MVD observer
                 for (i = 0; i < MAX_STATS; i++) {
                     if (mvd_stats_hack->integer & (1 << i)) {
-                        client->ps.stats[i] = mvd->dummy->ps.stats[i];
+                        client->playerState.stats[i] = mvd->dummy->playerState.stats[i];
                     }
                 }
             }
@@ -689,10 +689,10 @@ static void MVD_UpdateClient(mvd_client_t *client)
     // override score
     switch (mvd_stats_score->integer) {
     case 0:
-        client->ps.stats[STAT_FRAGS] = 0;
+        client->playerState.stats[STAT_FRAGS] = 0;
         break;
     case 1:
-        client->ps.stats[STAT_FRAGS] = mvd->id;
+        client->playerState.stats[STAT_FRAGS] = mvd->id;
         break;
     }
 }
@@ -1418,7 +1418,7 @@ static void MVD_Commands_f(mvd_client_t *client)
                    );
 }
 
-static void MVD_GameClientCommand(edict_t *ent)
+static void MVD_GameClientCommand(entity_t *ent)
 {
     mvd_client_t *client = EDICT_MVDCL(ent);
     const char *cmd;
@@ -1646,7 +1646,7 @@ MISC GAME FUNCTIONS
 ==============================================================================
 */
 
-void MVD_LinkEdict(mvd_t *mvd, edict_t *ent)
+void MVD_LinkEntity(mvd_t *mvd, entity_t *ent)
 {
     int         index;
     mmodel_t    *cm;
@@ -1676,7 +1676,7 @@ void MVD_LinkEdict(mvd_t *mvd, edict_t *ent)
         ent->solid = SOLID_NOT;
     }
 
-    SV_LinkEdict(&mvd->cm, ent);
+    SV_LinkEntity(&mvd->cm, ent);
 }
 
 void MVD_RemoveClient(client_t *client)
@@ -1693,7 +1693,7 @@ void MVD_RemoveClient(client_t *client)
 static void MVD_GameInit(void)
 {
     mvd_t *mvd = &mvd_waitingRoom;
-    edict_t *edicts;
+    entity_t *edicts;
     cvar_t *mvd_default_map;
     char buffer[MAX_QPATH];
     unsigned checksum;
@@ -1717,12 +1717,12 @@ static void MVD_GameInit(void)
     mvd_chase_prefix = Cvar_Get("mvd_chase_prefix", "xv 0 yb -64", 0);
     Cvar_Set("g_features", va("%d", MVD_FEATURES));
 
-    Z_TagReserve((sizeof(edict_t) +
+    Z_TagReserve((sizeof(entity_t) +
                   sizeof(mvd_client_t)) * sv_maxclients->integer +
-                 sizeof(edict_t), TAG_MVD);
+                 sizeof(entity_t), TAG_MVD);
     mvd_clients = (mvd_client_t*)Z_ReservedAllocz(sizeof(mvd_client_t) * // CPP: Cast
                                    sv_maxclients->integer);
-    edicts = (edict_t*)Z_ReservedAllocz(sizeof(edict_t) * // CPP: Cast
+    edicts = (entity_t*)Z_ReservedAllocz(sizeof(entity_t) * // CPP: Cast
                               (sv_maxclients->integer + 1));
 
     for (i = 0; i < sv_maxclients->integer; i++) {
@@ -1731,7 +1731,7 @@ static void MVD_GameInit(void)
     }
 
     mvd_ge.edicts = edicts;
-    mvd_ge.edict_size = sizeof(edict_t);
+    mvd_ge.entity_size = sizeof(entity_t);
     mvd_ge.num_edicts = sv_maxclients->integer + 1;
     mvd_ge.max_edicts = sv_maxclients->integer + 1;
 
@@ -1787,7 +1787,7 @@ static void MVD_GameShutdown(void)
     MVD_Shutdown();
 
     mvd_ge.edicts = NULL;
-    mvd_ge.edict_size = 0;
+    mvd_ge.entity_size = 0;
     mvd_ge.num_edicts = 0;
     mvd_ge.max_edicts = 0;
 
@@ -1810,7 +1810,7 @@ static void MVD_GameReadLevel(const char *filename)
 {
 }
 
-static qboolean MVD_GameClientConnect(edict_t *ent, char *userinfo)
+static qboolean MVD_GameClientConnect(entity_t *ent, char *userinfo)
 {
     mvd_client_t *client = EDICT_MVDCL(ent);
     mvd_t *mvd;
@@ -1834,7 +1834,7 @@ static qboolean MVD_GameClientConnect(edict_t *ent, char *userinfo)
     return true;
 }
 
-static void MVD_GameClientBegin(edict_t *ent)
+static void MVD_GameClientBegin(entity_t *ent)
 {
     mvd_client_t *client = EDICT_MVDCL(ent);
     mvd_t *mvd = client->mvd;
@@ -1843,7 +1843,7 @@ static void MVD_GameClientBegin(edict_t *ent)
     client->floodTime = 0;
     client->floodHead = 0;
     memset(&client->lastcmd, 0, sizeof(client->lastcmd));
-    memset(&client->ps, 0, sizeof(client->ps));
+    memset(&client->playerState, 0, sizeof(client->playerState));
     client->jump_held = 0;
     client->layout_type = LAYOUT_NONE;
     client->layout_time = 0;
@@ -1885,8 +1885,8 @@ static void MVD_GameClientBegin(edict_t *ent)
         MVD_FollowStart(client, target);
     } else {
         // spawn the spectator
-        VectorScale(mvd->spawnOrigin, 8, client->ps.pmove.origin);
-        VectorCopy(mvd->spawnAngles, client->ps.viewAngles);
+        VectorScale(mvd->spawnOrigin, 8, client->playerState.pmove.origin);
+        VectorCopy(mvd->spawnAngles, client->playerState.viewAngles);
         MVD_FollowStop(client);
 
         // if the map has just changed, player might not have spawned yet.
@@ -1898,7 +1898,7 @@ static void MVD_GameClientBegin(edict_t *ent)
     mvd_dirty = true;
 }
 
-static void MVD_GameClientUserinfoChanged(edict_t *ent, char *userinfo)
+static void MVD_GameClientUserinfoChanged(entity_t *ent, char *userinfo)
 {
     mvd_client_t *client = EDICT_MVDCL(ent);
     float fov;
@@ -1913,10 +1913,10 @@ static void MVD_GameClientUserinfoChanged(edict_t *ent, char *userinfo)
     }
     client->fov = fov;
     if (!client->target)
-        client->ps.fov = fov;
+        client->playerState.fov = fov;
 }
 
-void MVD_GameClientNameChanged(edict_t *ent, const char *name)
+void MVD_GameClientNameChanged(entity_t *ent, const char *name)
 {
     mvd_client_t *client = EDICT_MVDCL(ent);
     client_t *cl = client->cl;
@@ -1928,7 +1928,7 @@ void MVD_GameClientNameChanged(edict_t *ent, const char *name)
 }
 
 // called early from SV_DropClient to prevent multiple disconnect messages
-void MVD_GameClientDrop(edict_t *ent, const char *prefix, const char *reason)
+void MVD_GameClientDrop(entity_t *ent, const char *prefix, const char *reason)
 {
     mvd_client_t *client = EDICT_MVDCL(ent);
     client_t *cl = client->cl;
@@ -1941,7 +1941,7 @@ void MVD_GameClientDrop(edict_t *ent, const char *prefix, const char *reason)
     client->begin_time = 0;
 }
 
-static void MVD_GameClientDisconnect(edict_t *ent)
+static void MVD_GameClientDisconnect(entity_t *ent)
 {
     mvd_client_t *client = EDICT_MVDCL(ent);
     client_t *cl = client->cl;
@@ -1960,7 +1960,7 @@ static mvd_player_t *MVD_HitPlayer(mvd_client_t *client)
     trace_t trace;
     vec3_t start, end, forward;
     mvd_player_t *player, *target;
-    edict_t *ent;
+    entity_t *ent;
     float fraction;
     int i;
 
@@ -1971,8 +1971,8 @@ static mvd_player_t *MVD_HitPlayer(mvd_client_t *client)
         return NULL;
 
     // N&C: FF Precision.
-    VectorAdd(client->ps.viewoffset, client->ps.pmove.origin, start);
-    AngleVectors(client->ps.viewAngles, &forward, NULL, NULL);
+    VectorAdd(client->playerState.viewoffset, client->playerState.pmove.origin, start);
+    AngleVectors(client->playerState.viewAngles, &forward, NULL, NULL);
     VectorMA(start, 8192, forward, end);
 
     if (mvd->cm.cache) {
@@ -2025,7 +2025,7 @@ static int MVD_PointContents(vec3_t p)
     return 0;
 }
 
-static void MVD_GameClientThink(edict_t *ent, usercmd_t *cmd)
+static void MVD_GameClientThink(entity_t *ent, usercmd_t *cmd)
 {
     mvd_client_t *client = EDICT_MVDCL(ent);
     usercmd_t *old = &client->lastcmd;
@@ -2074,16 +2074,16 @@ static void MVD_GameClientThink(edict_t *ent, usercmd_t *cmd)
         memset(&pm, 0, sizeof(pm));
 //        pm.Trace = MVD_Trace;
      //   pm.PointContents = MVD_PointContents;
-        pm.state = client->ps.pmove;
+        pm.state = client->playerState.pmove;
         pm.cmd = *cmd;
 
         // N&C: changed to support the new PMove shared method.
         //PF_PMove(&pm);
 //        PMove(&pm, GetPMoveParams());
 
-        client->ps.pmove = pm.state;
+        client->playerState.pmove = pm.state;
         if (pm.state.type != PM_FREEZE) {
-            VectorCopy(pm.viewAngles, client->ps.viewAngles);
+            VectorCopy(pm.viewAngles, client->playerState.viewAngles);
         }
     }
 
@@ -2179,10 +2179,10 @@ void MVD_UpdateClients(mvd_t *mvd)
     // check for intermission
     if (mvd_freeze_hack->integer && mvd->dummy) {
         if (!mvd->intermission) {
-            if (mvd->dummy->ps.pmove.type == PM_FREEZE) {
+            if (mvd->dummy->playerState.pmove.type == PM_FREEZE) {
                 MVD_IntermissionStart(mvd);
             }
-        } else if (mvd->dummy->ps.pmove.type != PM_FREEZE) {
+        } else if (mvd->dummy->playerState.pmove.type != PM_FREEZE) {
             MVD_IntermissionStop(mvd);
         }
     } else if (mvd->intermission) {
@@ -2263,7 +2263,7 @@ static void MVD_GameServerCommand(pmoveParams_t *) // CPP: Fix, but wtf do we do
 void MVD_PrepWorldFrame(void)
 {
     mvd_t *mvd;
-    edict_t *ent;
+    entity_t *ent;
     int i;
 
     // reset events and old origins

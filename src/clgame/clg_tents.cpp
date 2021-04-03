@@ -125,7 +125,7 @@ static laser_t* CLG_AllocLaser(void)
 static void CLG_AddLasers(void)
 {
 	laser_t* l;
-	entity_t    ent;
+	r_entity_t    ent;
 	int         i;
 	int         time;
 
@@ -354,7 +354,7 @@ static void CLG_AddExplosionLight(explosion_t* ex, float phase)
 
 static void CLG_AddExplosions(void)
 {
-	entity_t* ent;
+	r_entity_t* ent;
 	int         i;
 	explosion_t* ex;
 	float       frac;
@@ -554,7 +554,7 @@ static void CLG_AddBeams(void)
 	beam_t* b;
 	vec3_t      dist, org;
 	float       d;
-	entity_t    ent;
+	r_entity_t    ent;
 	vec3_t      angles;
 	float       len, steps;
 	float       model_length;
@@ -637,7 +637,7 @@ static void CLG_AddPlayerBeams(void)
 	beam_t* b;
 	vec3_t      dist, org;
 	float       d;
-	entity_t    ent;
+	r_entity_t    ent;
 	vec3_t      angles;
 	float       len, steps;
 	int         framenum;
@@ -784,8 +784,8 @@ static void CLG_ProcessSustain(void)
 
 	for (i = 0, s = clg_sustains; i < MAX_SUSTAINS; i++, s++) {
 		if (s->id) {
-			if ((s->endtime >= cl->time) && (cl->time >= s->nextthink))
-				s->think(s);
+			if ((s->endtime >= cl->time) && (cl->time >= s->nextThink))
+				s->Think(s);
 			else if (s->endtime < cl->time)
 				s->id = 0;
 		}
@@ -812,9 +812,9 @@ static void CLG_ParseSteam(void)
 	s->color = teParameters.color & 0xff;
 	s->magnitude = teParameters.entity2;
 	s->endtime = cl->time + teParameters.time;
-	s->think = CLG_ParticleSteamEffect2;
+	s->Think = CLG_ParticleSteamEffect2;
 	s->thinkinterval = 100;
-	s->nextthink = cl->time;
+	s->nextThink = cl->time;
 }
 
 static void CLG_ParseWidow(void)
@@ -828,9 +828,9 @@ static void CLG_ParseWidow(void)
 	s->id = teParameters.entity1;
 	VectorCopy(teParameters.pos1, s->org);
 	s->endtime = cl->time + 2100;
-	s->think = CLG_Widowbeamout;
+	s->Think = CLG_Widowbeamout;
 	s->thinkinterval = 1;
-	s->nextthink = cl->time;
+	s->nextThink = cl->time;
 }
 
 static void CLG_ParseNuke(void)
@@ -844,9 +844,9 @@ static void CLG_ParseNuke(void)
 	s->id = 21000;
 	VectorCopy(teParameters.pos1, s->org);
 	s->endtime = cl->time + 1000;
-	s->think = CLG_Nukeblast;
+	s->Think = CLG_Nukeblast;
 	s->thinkinterval = 1;
-	s->nextthink = cl->time;
+	s->nextThink = cl->time;
 }
 
 //

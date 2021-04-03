@@ -232,23 +232,23 @@ static void CL_Skins_f(void)
 //---------------
 static size_t CL_Health_m(char* buffer, size_t size)
 {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.ps.stats[STAT_HEALTH]);
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_HEALTH]);
 }
 
 static size_t CL_Ammo_m(char* buffer, size_t size)
 {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.ps.stats[STAT_AMMO]);
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_AMMO]);
 }
 
 static size_t CL_Armor_m(char* buffer, size_t size)
 {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.ps.stats[STAT_ARMOR]);
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_ARMOR]);
 }
 
 static size_t CL_WeaponModel_m(char* buffer, size_t size)
 {
     return Q_scnprintf(buffer, size, "%s",
-        cl->configstrings[cl->frame.ps.gunindex + CS_MODELS]);
+        cl->configstrings[cl->frame.playerState.gunindex + CS_MODELS]);
 }
 
 //---------------

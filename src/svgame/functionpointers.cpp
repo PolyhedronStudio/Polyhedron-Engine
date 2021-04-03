@@ -39,32 +39,32 @@ extern mmove_t soldier_move_start_run;
 extern mmove_t soldier_move_walk1;
 extern mmove_t soldier_move_walk2;
 
-extern void door_blocked(edict_t* self, edict_t* other);
+extern void door_blocked(entity_t* self, entity_t* other);
 //extern void door_secret_blocked(void);
-extern void plat_blocked(edict_t* self, edict_t* other);
-extern void rotating_blocked(edict_t* self, edict_t* other);
-extern void train_blocked(edict_t* self, edict_t* other);
-extern void turret_blocked(edict_t* self, edict_t* other);
+extern void plat_blocked(entity_t* self, entity_t* other);
+extern void rotating_blocked(entity_t* self, entity_t* other);
+extern void train_blocked(entity_t* self, entity_t* other);
+extern void turret_blocked(entity_t* self, entity_t* other);
 //extern void actor_die(void);
-extern void barrel_delay(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
+extern void barrel_delay(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 //extern void berserk_die(void);
-extern void body_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
+extern void body_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 //extern void boss2_die(void);
 //extern void brain_die(void);
-extern void button_killed(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
+extern void button_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 //extern void chick_die(void);
-extern void debris_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
-extern void door_killed(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
+extern void debris_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
+extern void door_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 //extern void door_secret_die(void);
 extern void flipper_die(void);
 extern void floater_die(void);
 extern void flyer_die(void);
-extern void func_explosive_explode(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
-extern void gib_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
-extern void misc_deadsoldier_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
+extern void func_explosive_explode(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
+extern void gib_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
+extern void misc_deadsoldier_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 // extern void player_die(void); v 
-extern void soldier_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
-extern void turret_driver_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point);
+extern void soldier_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
+extern void turret_driver_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 //extern void actor_attack(void);
 //extern void boss2_attack(void);
 //extern void chick_attack(void);
@@ -79,7 +79,7 @@ extern void turret_driver_die(edict_t* self, edict_t* inflictor, edict_t* attack
 //extern void medic_attack(void);
 //extern void mutant_jump(void);
 //extern void parasite_attack(void);
-extern void soldier_attack(edict_t *self);
+extern void soldier_attack(entity_t *self);
 //extern void supertank_attack(void);
 //extern void tank_attack(void);
 extern void Boss2_CheckAttack(void);
@@ -88,7 +88,7 @@ extern void Makron_CheckAttack(void);
 // extern void M_CheckAttack(void); // CPP: Remove cuz of overloaded func error.
 extern void medic_checkattack(void);
 extern void mutant_checkattack(void);
-extern void soldier_dodge(edict_t* self, edict_t* attacker, float eta);
+extern void soldier_dodge(entity_t* self, entity_t* attacker, float eta);
 //extern void brain_idle(void);
 //extern void floater_idle(void);
 //extern void flyer_idle(void);
@@ -124,7 +124,7 @@ extern void soldier_dodge(edict_t* self, edict_t* attacker, float eta);
 //extern void medic_run(void);
 //extern void mutant_run(void);
 //extern void parasite_start_run(void);
-extern void soldier_run(edict_t *self);
+extern void soldier_run(entity_t *self);
 //extern void supertank_run(void);
 //extern void tank_run(void);
 //extern void berserk_search(void);
@@ -151,7 +151,7 @@ extern void soldier_run(edict_t *self);
 //extern void medic_sight(void);
 //extern void mutant_sight(void);
 //extern void parasite_sight(void);
-extern void soldier_sight(edict_t* self, edict_t* other);
+extern void soldier_sight(entity_t* self, entity_t* other);
 //extern void tank_sight(void);
 //extern void actor_stand(void);
 //extern void berserk_stand(void);
@@ -171,7 +171,7 @@ extern void soldier_sight(edict_t* self, edict_t* other);
 //extern void medic_stand(void);
 //extern void mutant_stand(void);
 //extern void parasite_stand(void);
-extern void soldier_stand(edict_t *self);
+extern void soldier_stand(entity_t *self);
 //extern void supertank_stand(void);
 //extern void tank_stand(void);
 //extern void actor_walk(void);
@@ -192,155 +192,155 @@ extern void soldier_stand(edict_t *self);
 //extern void medic_walk(void);
 //extern void mutant_walk(void);
 //extern void parasite_start_walk(void);
-extern void soldier_walk(edict_t *self);
+extern void soldier_walk(entity_t *self);
 //extern void supertank_walk(void);
 
 //extern void player_pain(void); // CPP: Remove cuz of overloaded func error.
-extern void soldier_pain(edict_t* self, edict_t* other, float kick, int damage);
+extern void soldier_pain(entity_t* self, entity_t* other, float kick, int damage);
 //extern void supertank_pain(void);
 //extern void tank_pain(void);
-extern void misc_viper_bomb_prethink(edict_t *self);
-extern void Brush_AngleMove_Begin(edict_t* self);
-extern void Brush_AngleMove_Done(edict_t* self);
-extern void Brush_AngleMove_Final(edict_t* self);
-extern void barrel_explode(edict_t* self);
-extern void bfg_explode(edict_t* self);
-extern void bfg_think(edict_t* self);
+extern void misc_viper_bomb_prethink(entity_t *self);
+extern void Brush_AngleMove_Begin(entity_t* self);
+extern void Brush_AngleMove_Done(entity_t* self);
+extern void Brush_AngleMove_Final(entity_t* self);
+extern void barrel_explode(entity_t* self);
+extern void bfg_explode(entity_t* self);
+extern void bfg_think(entity_t* self);
 
-extern void button_return(edict_t* self);
+extern void button_return(entity_t* self);
 
-extern void door_go_down(edict_t* self);
+extern void door_go_down(entity_t* self);
 
-extern void DoRespawn(edict_t* self);
-extern void drop_make_touchable(edict_t* self);
-extern void droptofloor(edict_t* self);
-extern void flymonster_start_go(edict_t* self);
+extern void DoRespawn(entity_t* self);
+extern void drop_make_touchable(entity_t* self);
+extern void droptofloor(entity_t* self);
+extern void flymonster_start_go(entity_t* self);
 //extern void func_clock_think(void);// CPP: Remove cuz of overloaded func error.
-extern void func_object_release(edict_t* self);
-extern void func_timer_think(edict_t* self);
-extern void func_train_find(edict_t* self);
-//extern void G_FreeEdict(void); // CPP: Remove cuz of overloaded func error.
-extern void gib_think(edict_t* self);
-extern void Grenade_Explode(edict_t* self);
+extern void func_object_release(entity_t* self);
+extern void func_timer_think(entity_t* self);
+extern void func_train_find(entity_t* self);
+//extern void G_FreeEntity(void); // CPP: Remove cuz of overloaded func error.
+extern void gib_think(entity_t* self);
+extern void Grenade_Explode(entity_t* self);
 
 // extern void M_droptofloor(void); // CPP: Remove cuz of overloaded func error.
-extern void MegaHealth_think(edict_t* self);
-extern void M_FliesOff(edict_t* self);
-extern void M_FliesOn(edict_t* self);
-extern void misc_blackhole_think(edict_t* self);
+extern void MegaHealth_think(entity_t* self);
+extern void M_FliesOff(entity_t* self);
+extern void M_FliesOn(entity_t* self);
+extern void misc_blackhole_think(entity_t* self);
 //extern void monster_think(void); // CPP: Remove cuz of overloaded func error.
-extern void monster_triggered_spawn(edict_t* self);
-extern void Brush_Move_Begin(edict_t* self);
-extern void Brush_Move_Done(edict_t* self);
-extern void Brush_Move_Final(edict_t* self);
-extern void multi_wait(edict_t* self);
-extern void plat_go_down(edict_t* self);
-extern void SP_CreateCoopSpots(edict_t* self);
-extern void SP_FixCoopSpots(edict_t* self);
-extern void swimmonster_start_go(edict_t* self);
-extern void target_crosslevel_target_think(edict_t* self);
-extern void target_earthquake_think(edict_t* self);
-extern void target_explosion_explode(edict_t* self);
-extern void target_laser_start(edict_t* self);
-extern void target_laser_think(edict_t* self);
-extern void target_lightramp_think(edict_t* self);
-extern void Think_AccelMove(edict_t* self);
+extern void monster_triggered_spawn(entity_t* self);
+extern void Brush_Move_Begin(entity_t* self);
+extern void Brush_Move_Done(entity_t* self);
+extern void Brush_Move_Final(entity_t* self);
+extern void multi_wait(entity_t* self);
+extern void plat_go_down(entity_t* self);
+extern void SP_CreateCoopSpots(entity_t* self);
+extern void SP_FixCoopSpots(entity_t* self);
+extern void swimmonster_start_go(entity_t* self);
+extern void target_crosslevel_target_think(entity_t* self);
+extern void target_earthquake_think(entity_t* self);
+extern void target_explosion_explode(entity_t* self);
+extern void target_laser_start(entity_t* self);
+extern void target_laser_think(entity_t* self);
+extern void target_lightramp_think(entity_t* self);
+extern void Think_AccelMove(entity_t* self);
 
-extern void Think_CalcMoveSpeed(edict_t* self);
-extern void Think_Delay(edict_t* self);
-extern void Think_SpawnDoorTrigger(edict_t* self);
-extern void TH_viewthing(edict_t* self);
-extern void train_next(edict_t* self);
-extern void trigger_elevator_init(edict_t* self);
-extern void turret_breach_finish_init(edict_t* self);
-extern void turret_breach_think(edict_t* self);
-extern void turret_driver_link(edict_t* self);
-extern void turret_driver_think(edict_t* self);
-extern void walkmonster_start_go(edict_t* self);
-extern void barrel_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void bfg_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void blaster_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void button_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void door_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void drop_temp_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void func_object_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void gib_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void Grenade_Touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void hurt_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void misc_viper_bomb_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
+extern void Think_CalcMoveSpeed(entity_t* self);
+extern void Think_Delay(entity_t* self);
+extern void Think_SpawnDoorTrigger(entity_t* self);
+extern void TH_viewthing(entity_t* self);
+extern void train_next(entity_t* self);
+extern void trigger_elevator_init(entity_t* self);
+extern void turret_breach_finish_init(entity_t* self);
+extern void turret_breach_think(entity_t* self);
+extern void turret_driver_link(entity_t* self);
+extern void turret_driver_think(entity_t* self);
+extern void walkmonster_start_go(entity_t* self);
+extern void barrel_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void bfg_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void blaster_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void button_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void door_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void drop_temp_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void func_object_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void gib_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void Grenade_Touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void hurt_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void misc_viper_bomb_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 
-extern void path_corner_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void point_combat_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void rocket_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void rotating_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
+extern void path_corner_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void point_combat_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void rocket_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void rotating_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 
-extern void teleporter_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void Touch_DoorTrigger(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
+extern void teleporter_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void Touch_DoorTrigger(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 //extern void Touch_Item(void); // CPP: Remove cuz of overloaded func error.
-extern void Touch_Multi(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void Touch_Plat_Center(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void trigger_gravity_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void trigger_monsterjump_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void trigger_push_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
+extern void Touch_Multi(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void Touch_Plat_Center(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void trigger_gravity_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void trigger_monsterjump_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void trigger_push_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 
-extern void button_use(edict_t* self, edict_t* other, edict_t* activator);
+extern void button_use(entity_t* self, entity_t* other, entity_t* activator);
 //extern void commander_body_use(void);
 //extern void door_secret_use(void);
-extern void door_use(edict_t* self, edict_t* other, edict_t* activator);
+extern void door_use(entity_t* self, entity_t* other, entity_t* activator);
 //extern void func_clock_use(void); // CPP: Remove cuz of overloaded func error.
-//extern void func_conveyor_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void func_conveyor_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void func_explosive_spawn(edict_t* self, edict_t* other, edict_t* activator);
-extern void func_explosive_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void func_object_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void func_timer_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void func_wall_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void hurt_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void light_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void misc_blackhole_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void misc_strogg_ship_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void misc_viper_bomb_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void misc_viper_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void monster_triggered_spawn_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void monster_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void rotating_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void target_earthquake_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void target_laser_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void target_lightramp_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void target_string_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void train_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void trigger_counter_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void trigger_crosslevel_trigger_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void trigger_elevator_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void trigger_enable(edict_t* self, edict_t* other, edict_t* activator);
-extern void trigger_key_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void trigger_relay_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void Use_Areaportal(edict_t* self, edict_t* other, edict_t* activator);
+//extern void func_conveyor_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void func_conveyor_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void func_explosive_spawn(entity_t* self, entity_t* other, entity_t* activator);
+extern void func_explosive_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void func_object_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void func_timer_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void func_wall_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void hurt_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void light_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void misc_blackhole_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void misc_strogg_ship_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void misc_viper_bomb_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void misc_viper_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void monster_triggered_spawn_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void monster_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void rotating_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void target_earthquake_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void target_laser_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void target_lightramp_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void target_string_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void train_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void trigger_counter_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void trigger_crosslevel_trigger_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void trigger_elevator_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void trigger_enable(entity_t* self, entity_t* other, entity_t* activator);
+extern void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void trigger_relay_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void Use_Areaportal(entity_t* self, entity_t* other, entity_t* activator);
 
-extern void Use_Item(edict_t* ent, edict_t* other, edict_t* activator);
-extern void use_killbox(edict_t* ent, edict_t* other, edict_t* activator);
-extern void Use_Multi(edict_t* ent, edict_t* other, edict_t* activator);
-extern void Use_Plat(edict_t* ent, edict_t* other, edict_t* activator);
-extern void use_target_blaster(edict_t* ent, edict_t* other, edict_t* activator);
-extern void use_target_changelevel(edict_t* ent, edict_t* other, edict_t* activator);
-extern void use_target_explosion(edict_t* ent, edict_t* other, edict_t* activator);
-extern void use_target_goal(edict_t* ent, edict_t* other, edict_t* activator);
-extern void Use_Target_Help(edict_t* ent, edict_t* other, edict_t* activator);
-extern void use_target_secret(edict_t* ent, edict_t* other, edict_t* activator);
-extern void use_target_spawner(edict_t* ent, edict_t* other, edict_t* activator);
-extern void Use_Target_Speaker(edict_t* ent, edict_t* other, edict_t* activator);
-extern void use_target_splash(edict_t* ent, edict_t* other, edict_t* activator);
-extern void Use_Target_Tent(edict_t* ent, edict_t* other, edict_t* activator);
-extern void plat_hit_bottom(edict_t* self);
-extern void plat_hit_top(edict_t* self);
-extern void button_done(edict_t* self);
-extern void button_wait(edict_t* self);
-extern void door_hit_bottom(edict_t* self);
-extern void door_hit_top(edict_t* self);
-extern void train_wait(edict_t* self);
+extern void Use_Item(entity_t* ent, entity_t* other, entity_t* activator);
+extern void use_killbox(entity_t* ent, entity_t* other, entity_t* activator);
+extern void Use_Multi(entity_t* ent, entity_t* other, entity_t* activator);
+extern void Use_Plat(entity_t* ent, entity_t* other, entity_t* activator);
+extern void use_target_blaster(entity_t* ent, entity_t* other, entity_t* activator);
+extern void use_target_changelevel(entity_t* ent, entity_t* other, entity_t* activator);
+extern void use_target_explosion(entity_t* ent, entity_t* other, entity_t* activator);
+extern void use_target_goal(entity_t* ent, entity_t* other, entity_t* activator);
+extern void Use_Target_Help(entity_t* ent, entity_t* other, entity_t* activator);
+extern void use_target_secret(entity_t* ent, entity_t* other, entity_t* activator);
+extern void use_target_spawner(entity_t* ent, entity_t* other, entity_t* activator);
+extern void Use_Target_Speaker(entity_t* ent, entity_t* other, entity_t* activator);
+extern void use_target_splash(entity_t* ent, entity_t* other, entity_t* activator);
+extern void Use_Target_Tent(entity_t* ent, entity_t* other, entity_t* activator);
+extern void plat_hit_bottom(entity_t* self);
+extern void plat_hit_top(entity_t* self);
+extern void button_done(entity_t* self);
+extern void button_wait(entity_t* self);
+extern void door_hit_bottom(entity_t* self);
+extern void door_hit_top(entity_t* self);
+extern void train_wait(entity_t* self);
 
-extern void flare_think(edict_t* self); // Q2RTX
-extern void flare_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf); // Q2RTX
+extern void flare_think(entity_t* self); // Q2RTX
+extern void flare_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf); // Q2RTX
 
 const save_ptr_t save_ptrs[] = {
 { P_blocked, door_blocked },
@@ -424,7 +424,7 @@ const save_ptr_t save_ptrs[] = {
 { P_think, func_object_release },
 { P_think, func_timer_think },
 { P_think, func_train_find },
-{ P_think, G_FreeEdict },
+{ P_think, G_FreeEntity },
 { P_think, gib_think },
 { P_think, Grenade_Explode },
 

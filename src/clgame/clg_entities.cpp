@@ -82,12 +82,12 @@ static int adjust_shell_fx(int renderfx)
 //
 void CLG_AddPacketEntities(void)
 {
-    entity_t            ent;
+    r_entity_t            ent;
     entity_state_t* s1;
     float               autorotate;
     int                 i;
     int                 pnum;
-    centity_t* cent;
+    cl_entity_t* cent;
     int                 autoanim;
     clientinfo_t* ci;
     unsigned int        effects, renderfx;
@@ -585,7 +585,7 @@ void CLG_AddPacketEntities(void)
 
 static int shell_effect_hack(void)
 {
-    centity_t* ent;
+    cl_entity_t* ent;
     int         flags = 0;
 
     if (cl->frame.clientNum == CLIENTNUM_NONE)
@@ -618,7 +618,7 @@ CLG_AddViewWeapon
 void CLG_AddViewWeapon(void)
 {
     player_state_t* ps, * ops;
-    entity_t    gun;        // view model
+    r_entity_t    gun;        // view model
     int         i, shell_flags;
 
     // allow the gun to be completely removed
@@ -775,7 +775,7 @@ void CLG_AddEntities(void)
 //===============
 //
 void CLG_EntityEvent(int number) {
-    centity_t *cent = &cs->entities[number];
+    cl_entity_t *cent = &cs->entities[number];
     
     // EF_TELEPORTER acts like an event, but is not cleared each frame
     if ((cent->current.effects & EF_TELEPORTER) && CL_FRAMESYNC) {
@@ -858,8 +858,8 @@ void CLG_CalcViewValues(void)
     }
 
     // find states to interpolate between
-    ps = &cl->frame.ps;
-    ops = &cl->oldframe.ps;
+    ps = &cl->frame.playerState;
+    ops = &cl->oldframe.playerState;
 
     lerp = cl->lerpfrac;
 
@@ -918,8 +918,8 @@ void CLG_CalcViewValues(void)
     Vec4_Copy(ps->blend, cl->refdef.blend);
 
 #if USE_FPS
-    ps = &cl->keyframe.ps;
-    ops = &cl->oldkeyframe.ps;
+    ps = &cl->keyframe.playerState;
+    ops = &cl->oldkeyframe.playerState;
 
     lerp = cl->keylerpfrac;
 #endif

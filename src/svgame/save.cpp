@@ -69,41 +69,41 @@ static const save_field_t entityfields[] = {
 
     // [...]
 
-    I(svflags),
+    I(svFlags),
     V(mins),
     V(maxs),
-    V(absmin),
-    V(absmax),
+    V(absMin),
+    V(absMax),
     V(size),
     I(solid),
-    I(clipmask),
+    I(clipMask),
     E(owner),
 
-    I(movetype),
+    I(moveType),
     I(flags),
 
     L(model),
-    F(freetime),
+    F(freeTime),
 
     L(message),
     L(classname),
-    I(spawnflags),
+    I(spawnFlags),
 
     F(timestamp),
 
     L(target),
-    L(targetname),
-    L(killtarget),
+    L(targetName),
+    L(killTarget),
     L(team),
-    L(pathtarget),
-    L(deathtarget),
-    L(combattarget),
-    E(target_ent),
+    L(pathTarget),
+    L(deathTarget),
+    L(combatTarget),
+    E(targetEntityPtr),
 
     F(speed),
     F(accel),
     F(decel),
-    V(movedir),
+    V(moveDirection),
     V(pos1),
     V(pos2),
 
@@ -113,37 +113,37 @@ static const save_field_t entityfields[] = {
     F(air_finished),
     F(gravity),
 
-    E(goalentity),
-    E(movetarget),
-    F(yaw_speed),
-    F(ideal_yaw),
+    E(goalEntityPtr),
+    E(moveTargetPtr),
+    F(yawSpeed),
+    F(idealYaw),
 
-    F(nextthink),
-    P(prethink, P_prethink),
-    P(think, P_think),
-    P(blocked, P_blocked),
-    P(touch, P_touch),
-    P(use, P_use),
-    P(pain, P_pain),
-    P(die, P_die),
+    F(nextThink),
+    P(PreThink, P_prethink),
+    P(Think, P_think),
+    P(Blocked, P_blocked),
+    P(Touch, P_touch),
+    P(Use, P_use),
+    P(Pain, P_pain),
+    P(Die, P_die),
 
-    F(touch_debounce_time),
-    F(pain_debounce_time),
-    F(damage_debounce_time),
-    F(fly_sound_debounce_time),
-    F(last_move_time),
+    F(debounceTouchTime),
+    F(debouncePainTime),
+    F(debounceDamageTime),
+    F(debounceSoundTime),
+    F(lastMoveTime),
 
     I(health),
-    I(max_health),
-    I(gib_health),
-    I(deadflag),
-    I(show_hostile),
+    I(maxHealth),
+    I(gibHealth),
+    I(deadFlag),
+    I(showHostile),
 
     F(powerarmor_time),
 
     L(map),
 
-    I(viewheight),
+    I(viewHeight),
     I(takedamage),
     I(dmg),
     I(radius_dmg),
@@ -153,18 +153,18 @@ static const save_field_t entityfields[] = {
 
     E(chain),
     E(enemy),
-    E(oldEnemy),
+    E(oldEnemyPtr),
     E(activator),
-    E(groundentity),
-    I(groundentity_linkcount),
-    E(teamchain),
-    E(teammaster),
+    E(groundEntityPtr),
+    I(groundEntityLinkCount),
+    E(teamChainPtr),
+    E(teamMasterPtr),
 
-    E(mynoise),
-    E(mynoise2),
+    E(myNoise),
+    E(myNoise2),
 
-    I(noise_index),
-    I(noise_index2),
+    I(noiseIndex),
+    I(noiseIndex2),
     F(volume),
     F(attenuation),
 
@@ -172,75 +172,75 @@ static const save_field_t entityfields[] = {
     F(delay),
     F(random),
 
-    F(teleport_time),
+    F(teleportTime),
 
-    I(watertype),
-    I(waterlevel),
+    I(waterType),
+    I(waterLevel),
 
-    V(move_origin),
-    V(move_angles),
+    V(moveOrigin),
+    V(moveAngles),
 
-    I(light_level),
+    I(lightLevel),
 
     I(style),
 
     T(item),
 
-    V(moveinfo.start_origin),
-    V(moveinfo.start_angles),
-    V(moveinfo.end_origin),
-    V(moveinfo.end_angles),
+    V(moveInfo.start_origin),
+    V(moveInfo.start_angles),
+    V(moveInfo.end_origin),
+    V(moveInfo.end_angles),
 
-    I(moveinfo.sound_start),
-    I(moveinfo.sound_middle),
-    I(moveinfo.sound_end),
+    I(moveInfo.sound_start),
+    I(moveInfo.sound_middle),
+    I(moveInfo.sound_end),
 
-    F(moveinfo.accel),
-    F(moveinfo.speed),
-    F(moveinfo.decel),
-    F(moveinfo.distance),
+    F(moveInfo.accel),
+    F(moveInfo.speed),
+    F(moveInfo.decel),
+    F(moveInfo.distance),
 
-    F(moveinfo.wait),
+    F(moveInfo.wait),
 
-    I(moveinfo.state),
-    V(moveinfo.dir),
-    F(moveinfo.current_speed),
-    F(moveinfo.move_speed),
-    F(moveinfo.next_speed),
-    F(moveinfo.remaining_distance),
-    F(moveinfo.decel_distance),
-    P(moveinfo.endfunc, P_moveinfo_endfunc),
+    I(moveInfo.state),
+    V(moveInfo.dir),
+    F(moveInfo.current_speed),
+    F(moveInfo.move_speed),
+    F(moveInfo.next_speed),
+    F(moveInfo.remaining_distance),
+    F(moveInfo.decel_distance),
+    P(moveInfo.endfunc, P_moveinfo_endfunc),
 
-    P(monsterinfo.currentmove, P_monsterinfo_currentmove),
-    I(monsterinfo.aiflags),
-    I(monsterinfo.nextframe),
-    F(monsterinfo.scale),
+    P(monsterInfo.currentmove, P_monsterinfo_currentmove),
+    I(monsterInfo.aiflags),
+    I(monsterInfo.nextframe),
+    F(monsterInfo.scale),
 
-    P(monsterinfo.stand, P_monsterinfo_stand),
-    P(monsterinfo.idle, P_monsterinfo_idle),
-    P(monsterinfo.search, P_monsterinfo_search),
-    P(monsterinfo.walk, P_monsterinfo_walk),
-    P(monsterinfo.run, P_monsterinfo_run),
-    P(monsterinfo.dodge, P_monsterinfo_dodge),
-    P(monsterinfo.attack, P_monsterinfo_attack),
-    P(monsterinfo.melee, P_monsterinfo_melee),
-    P(monsterinfo.sight, P_monsterinfo_sight),
-    P(monsterinfo.checkattack, P_monsterinfo_checkattack),
+    P(monsterInfo.stand, P_monsterinfo_stand),
+    P(monsterInfo.idle, P_monsterinfo_idle),
+    P(monsterInfo.search, P_monsterinfo_search),
+    P(monsterInfo.walk, P_monsterinfo_walk),
+    P(monsterInfo.run, P_monsterinfo_run),
+    P(monsterInfo.dodge, P_monsterinfo_dodge),
+    P(monsterInfo.attack, P_monsterinfo_attack),
+    P(monsterInfo.melee, P_monsterinfo_melee),
+    P(monsterInfo.sight, P_monsterinfo_sight),
+    P(monsterInfo.checkattack, P_monsterinfo_checkattack),
 
-    F(monsterinfo.pausetime),
-    F(monsterinfo.attack_finished),
+    F(monsterInfo.pausetime),
+    F(monsterInfo.attack_finished),
 
-    V(monsterinfo.saved_goal),
-    F(monsterinfo.search_time),
-    F(monsterinfo.trail_time),
-    V(monsterinfo.last_sighting),
-    I(monsterinfo.attack_state),
-    I(monsterinfo.lefty),
-    F(monsterinfo.idle_time),
-    I(monsterinfo.linkCount),
+    V(monsterInfo.saved_goal),
+    F(monsterInfo.search_time),
+    F(monsterInfo.trail_time),
+    V(monsterInfo.last_sighting),
+    I(monsterInfo.attack_state),
+    I(monsterInfo.lefty),
+    F(monsterInfo.idle_time),
+    I(monsterInfo.linkCount),
 
-    I(monsterinfo.power_armor_type),
-    I(monsterinfo.power_armor_power),
+    I(monsterInfo.power_armor_type),
+    I(monsterInfo.power_armor_power),
 
     {(fieldtype_t)0}
 #undef _OFS
@@ -291,31 +291,31 @@ static const save_field_t levelfields[] = {
 
 static const save_field_t clientfields[] = {
 #define _OFS CLOFS
-    I(ps.pmove.type),
+    I(playerState.pmove.type),
 
-    SA(ps.pmove.origin, 3),
-    SA(ps.pmove.velocity, 3),
-    B(ps.pmove.flags),
-    B(ps.pmove.time),
-    S(ps.pmove.gravity),
-    SA(ps.pmove.delta_angles, 3),
+    SA(playerState.pmove.origin, 3),
+    SA(playerState.pmove.velocity, 3),
+    B(playerState.pmove.flags),
+    B(playerState.pmove.time),
+    S(playerState.pmove.gravity),
+    SA(playerState.pmove.delta_angles, 3),
 
-    V(ps.viewAngles),
-    V(ps.viewoffset),
-    V(ps.kickAngles),
+    V(playerState.viewAngles),
+    V(playerState.viewoffset),
+    V(playerState.kickAngles),
 
-    V(ps.gunangles),
-    V(ps.gunoffset),
-    I(ps.gunindex),
-    I(ps.gunframe),
+    V(playerState.gunangles),
+    V(playerState.gunoffset),
+    I(playerState.gunindex),
+    I(playerState.gunframe),
 
-    FA(ps.blend, 4),
+    FA(playerState.blend, 4),
 
-    F(ps.fov),
+    F(playerState.fov),
 
-    I(ps.rdflags),
+    I(playerState.rdflags),
 
-    SA(ps.stats, MAX_STATS),
+    SA(playerState.stats, MAX_STATS),
 
     SZ(pers.userinfo, MAX_INFO_STRING),
     SZ(pers.netname, 16),
@@ -324,7 +324,7 @@ static const save_field_t clientfields[] = {
     I(pers.connected),
 
     I(pers.health),
-    I(pers.max_health),
+    I(pers.maxHealth),
     I(pers.savedFlags),
 
     I(pers.selected_item),
@@ -433,7 +433,7 @@ static const save_field_t gamefields[] = {
 static void write_data(void *buf, size_t len, FILE *f)
 {
     if (fwrite(buf, 1, len, f) != len) {
-        gi.error("%s: couldn't write %" PRIz " bytes", __func__, len); // CPP: String fix.
+        gi.Error("%s: couldn't write %" PRIz " bytes", __func__, len); // CPP: String fix.
     }
 }
 
@@ -486,12 +486,12 @@ static void write_index(FILE *f, void *p, size_t size, void *start, int max_inde
     }
 
     if (p < start || (byte *)p > (byte *)start + max_index * size) {
-        gi.error("%s: pointer out of range: %p", __func__, p);
+        gi.Error("%s: pointer out of range: %p", __func__, p);
     }
 
     diff = (byte *)p - (byte *)start;
     if (diff % size) {
-        gi.error("%s: misaligned pointer: %p", __func__, p);
+        gi.Error("%s: misaligned pointer: %p", __func__, p);
     }
     write_int(f, (int)(diff / size));
 }
@@ -513,7 +513,7 @@ static void write_pointer(FILE *f, void *p, ptr_type_t type)
         }
     }
 
-    gi.error("%s: unknown pointer: %p", __func__, p);
+    gi.Error("%s: unknown pointer: %p", __func__, p);
 }
 
 static void write_field(FILE *f, const save_field_t *field, void *base)
@@ -552,7 +552,7 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     case F_EDICT:
-        write_index(f, *(void **)p, sizeof(edict_t), g_edicts, MAX_EDICTS - 1);
+        write_index(f, *(void **)p, sizeof(entity_t), g_edicts, MAX_EDICTS - 1);
         break;
     case F_CLIENT:
         write_index(f, *(void **)p, sizeof(gclient_t), game.clients, game.maxclients - 1);
@@ -566,7 +566,7 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     default:
-        gi.error("%s: unknown field type", __func__);
+        gi.Error("%s: unknown field type", __func__);
     }
 }
 
@@ -582,7 +582,7 @@ static void write_fields(FILE *f, const save_field_t *fields, void *base)
 static void read_data(void *buf, size_t len, FILE *f)
 {
     if (fread(buf, 1, len, f) != len) {
-        gi.error("%s: couldn't read %" PRIz " bytes", __func__, len); // CPP: String fix.
+        gi.Error("%s: couldn't read %" PRIz " bytes", __func__, len); // CPP: String fix.
     }
 }
 
@@ -628,7 +628,7 @@ static char *read_string(FILE *f)
     }
 
     if (len < 0 || len > 65536) {
-        gi.error("%s: bad length", __func__);
+        gi.Error("%s: bad length", __func__);
     }
 
     s = (char*)gi.TagMalloc(len + 1, TAG_LEVEL); // CPP: Casts
@@ -644,7 +644,7 @@ static void read_zstring(FILE *f, char *s, size_t size)
 
     len = read_int(f);
     if (len < 0 || len >= size) {
-        gi.error("%s: bad length", __func__);
+        gi.Error("%s: bad length", __func__);
     }
 
     read_data(s, len, f);
@@ -669,7 +669,7 @@ static void *read_index(FILE *f, size_t size, void *start, int max_index)
     }
 
     if (index < 0 || index > max_index) {
-        gi.error("%s: bad index", __func__);
+        gi.Error("%s: bad index", __func__);
     }
 
     p = (byte *)start + index * size;
@@ -687,12 +687,12 @@ static void *read_pointer(FILE *f, ptr_type_t type)
     }
 
     if (index < 0 || index >= num_save_ptrs) {
-        gi.error("%s: bad index", __func__);
+        gi.Error("%s: bad index", __func__);
     }
 
     ptr = &save_ptrs[index];
     if (ptr->type != type) {
-        gi.error("%s: type mismatch", __func__);
+        gi.Error("%s: type mismatch", __func__);
     }
 
     return ptr->ptr;
@@ -734,7 +734,7 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     case F_EDICT:
-        *(edict_t **)p = (edict_t*)read_index(f, sizeof(edict_t), g_edicts, game.maxentities - 1); // CPP: Cast
+        *(entity_t **)p = (entity_t*)read_index(f, sizeof(entity_t), g_edicts, game.maxentities - 1); // CPP: Cast
         break;
     case F_CLIENT:
         *(gclient_t **)p = (gclient_t*)read_index(f, sizeof(gclient_t), game.clients, game.maxclients - 1); // CPP: Cast
@@ -748,7 +748,7 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     default:
-        gi.error("%s: unknown field type", __func__);
+        gi.Error("%s: unknown field type", __func__);
     }
 }
 
@@ -791,7 +791,7 @@ void WriteGame(const char *filename, qboolean autosave)
 
     f = fopen(filename, "wb");
     if (!f)
-        gi.error("Couldn't open %s", filename);
+        gi.Error("Couldn't open %s", filename);
 
     write_int(f, SAVE_MAGIC1);
     write_int(f, SAVE_VERSION);
@@ -816,18 +816,18 @@ void ReadGame(const char *filename)
 
     f = fopen(filename, "rb");
     if (!f)
-        gi.error("Couldn't open %s", filename);
+        gi.Error("Couldn't open %s", filename);
 
     i = read_int(f);
     if (i != SAVE_MAGIC1) {
         fclose(f);
-        gi.error("Not a save game");
+        gi.Error("Not a save game");
     }
 
     i = read_int(f);
     if (i != SAVE_VERSION) {
         fclose(f);
-        gi.error("Savegame from an older version");
+        gi.Error("Savegame from an older version");
     }
 
     read_fields(f, gamefields, &game);
@@ -835,14 +835,14 @@ void ReadGame(const char *filename)
     // should agree with server's version
     if (game.maxclients != (int)maxclients->value) {
         fclose(f);
-        gi.error("Savegame has bad maxclients");
+        gi.Error("Savegame has bad maxclients");
     }
     if (game.maxentities <= game.maxclients || game.maxentities > MAX_EDICTS) {
         fclose(f);
-        gi.error("Savegame has bad maxentities");
+        gi.Error("Savegame has bad maxentities");
     }
 
-    g_edicts = (edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
+    g_edicts = (entity_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
     globals.edicts = g_edicts;
     globals.max_edicts = game.maxentities;
 
@@ -866,12 +866,12 @@ WriteLevel
 void WriteLevel(const char *filename)
 {
     int     i;
-    edict_t *ent;
+    entity_t *ent;
     FILE    *f;
 
     f = fopen(filename, "wb");
     if (!f)
-        gi.error("Couldn't open %s", filename);
+        gi.Error("Couldn't open %s", filename);
 
     write_int(f, SAVE_MAGIC2);
     write_int(f, SAVE_VERSION);
@@ -914,7 +914,7 @@ void ReadLevel(const char *filename)
     int     entnum;
     FILE    *f;
     int     i;
-    edict_t *ent;
+    entity_t *ent;
 
     // free any dynamic memory allocated by loading the level
     // base state
@@ -922,12 +922,12 @@ void ReadLevel(const char *filename)
 
     f = fopen(filename, "rb");
     if (!f)
-        gi.error("Couldn't open %s", filename);
+        gi.Error("Couldn't open %s", filename);
 
     // wipe all the entities
     // WatIs: C++-ify: Note that this may be a problem maker.
     /*for (int i = 0; i < game.maxentities; i++) {
-        g_edicts[i] = edict_t();
+        g_edicts[i] = entity_t();
     }
     */
     memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
@@ -936,13 +936,13 @@ void ReadLevel(const char *filename)
     i = read_int(f);
     if (i != SAVE_MAGIC2) {
         fclose(f);
-        gi.error("Not a save game");
+        gi.Error("Not a save game");
     }
 
     i = read_int(f);
     if (i != SAVE_VERSION) {
         fclose(f);
-        gi.error("Savegame from an older version");
+        gi.Error("Savegame from an older version");
     }
 
     // load the level locals
@@ -954,7 +954,7 @@ void ReadLevel(const char *filename)
         if (entnum == -1)
             break;
         if (entnum < 0 || entnum >= game.maxentities) {
-            gi.error("%s: bad entity number", __func__);
+            gi.Error("%s: bad entity number", __func__);
         }
         if (entnum >= globals.num_edicts)
             globals.num_edicts = entnum + 1;
@@ -966,7 +966,7 @@ void ReadLevel(const char *filename)
 
         // let the server rebuild world links for this ent
         memset(&ent->area, 0, sizeof(ent->area));
-        gi.linkentity(ent);
+        gi.LinkEntity(ent);
     }
 
     fclose(f);
@@ -988,9 +988,9 @@ void ReadLevel(const char *filename)
         // fire any cross-level triggers
         if (ent->classname)
             if (strcmp(ent->classname, "target_crosslevel_target") == 0)
-                ent->nextthink = level.time + ent->delay;
+                ent->nextThink = level.time + ent->delay;
 
-        //if (ent->think == func_clock_think || ent->use == func_clock_use) {
+        //if (ent->Think == func_clock_think || ent->Use == func_clock_use) {
         //    const char *msg = ent->message;
         //    ent->message = (const char)gi.TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL); // CPP: Cast
         //    if (msg) {

@@ -26,7 +26,7 @@
 //======================================================================
 //
 
-void Weapon_RocketLauncher_Fire(edict_t* ent)
+void Weapon_RocketLauncher_Fire(entity_t* ent)
 {
     vec3_t  offset, start;
     vec3_t  forward, right;
@@ -47,7 +47,7 @@ void Weapon_RocketLauncher_Fire(edict_t* ent)
     VectorScale(forward, -2, ent->client->kickOrigin);
     ent->client->kickAngles[0] = -1;
 
-    VectorSet(offset, 8, 8, ent->viewheight - 8);
+    VectorSet(offset, 8, 8, ent->viewHeight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
     fire_rocket(ent, start, forward, damage, 650, damage_radius, radius_damage);
 
@@ -57,7 +57,7 @@ void Weapon_RocketLauncher_Fire(edict_t* ent)
     gi.WriteByte(MZ_ROCKET | is_silenced);
     gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
-    ent->client->ps.gunframe++;
+    ent->client->playerState.gunframe++;
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
@@ -65,7 +65,7 @@ void Weapon_RocketLauncher_Fire(edict_t* ent)
         ent->client->pers.inventory[ent->client->ammo_index]--;
 }
 
-void Weapon_RocketLauncher(edict_t* ent)
+void Weapon_RocketLauncher(entity_t* ent)
 {
     static int  pause_frames[] = { 25, 33, 42, 50, 0 };
     static int  fire_frames[] = { 5, 0 };

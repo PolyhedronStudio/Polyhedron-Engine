@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "vkpt.h"
 
 void
-create_entity_matrix(float matrix[16], entity_t *e, qboolean enable_left_hand)
+create_entity_matrix(float matrix[16], r_entity_t *e, qboolean enable_left_hand)
 {
 	vec3_t axis[3];
 	vec3_t origin;

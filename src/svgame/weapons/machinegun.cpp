@@ -24,7 +24,7 @@
 //
 //======================================================================
 //
-void Machinegun_Fire(edict_t* ent)
+void Machinegun_Fire(entity_t* ent)
 {
     int i;
     vec3_t      start;
@@ -36,20 +36,20 @@ void Machinegun_Fire(edict_t* ent)
 
     if (!(ent->client->buttons & BUTTON_ATTACK)) {
         ent->client->machinegun_shots = 0;
-        ent->client->ps.gunframe++;
+        ent->client->playerState.gunframe++;
         return;
     }
 
-    if (ent->client->ps.gunframe == 5)
-        ent->client->ps.gunframe = 4;
+    if (ent->client->playerState.gunframe == 5)
+        ent->client->playerState.gunframe = 4;
     else
-        ent->client->ps.gunframe = 5;
+        ent->client->playerState.gunframe = 5;
 
     if (ent->client->pers.inventory[ent->client->ammo_index] < 1) {
-        ent->client->ps.gunframe = 6;
-        if (level.time >= ent->pain_debounce_time) {
-            gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-            ent->pain_debounce_time = level.time + 1;
+        ent->client->playerState.gunframe = 6;
+        if (level.time >= ent->debouncePainTime) {
+            gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+            ent->debouncePainTime = level.time + 1;
         }
         NoAmmoWeaponChange(ent);
         return;
@@ -77,7 +77,7 @@ void Machinegun_Fire(edict_t* ent)
     // get start / end positions
     VectorAdd(ent->client->v_angle, ent->client->kickAngles, angles);
     AngleVectors(angles, &forward, &right, NULL);
-    VectorSet(offset, 0, 8, ent->viewheight - 8);
+    VectorSet(offset, 0, 8, ent->viewHeight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
     fire_bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
 
@@ -92,7 +92,7 @@ void Machinegun_Fire(edict_t* ent)
         ent->client->pers.inventory[ent->client->ammo_index]--;
 
     ent->client->anim_priority = ANIM_ATTACK;
-    if (ent->client->ps.pmove.flags & PMF_DUCKED) {
+    if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
         ent->s.frame = FRAME_crattak1 - (int)(random() + 0.25);
         ent->client->anim_end = FRAME_crattak9;
     }
@@ -102,7 +102,7 @@ void Machinegun_Fire(edict_t* ent)
     }
 }
 
-void Weapon_Machinegun(edict_t* ent)
+void Weapon_Machinegun(entity_t* ent)
 {
     static int  pause_frames[] = { 23, 45, 0 };
     static int  fire_frames[] = { 4, 5, 0 };

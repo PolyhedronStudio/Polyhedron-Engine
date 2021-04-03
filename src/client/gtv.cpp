@@ -30,13 +30,13 @@ static byte     gtv_message_buffer[MAX_MSGLEN];
 
 static void build_gamestate(void)
 {
-    centity_t *ent;
+    cl_entity_t *ent;
     int i;
 
     memset(cls.gtv.entities, 0, sizeof(cls.gtv.entities));
 
     // set base player states
-    MSG_PackPlayer(&cls.gtv.ps, &cl.frame.ps);
+    MSG_PackPlayer(&cls.gtv.playerState, &cl.frame.playerState);
 
     // set base entity states
     for (i = 1; i < MAX_EDICTS; i++) {
@@ -87,7 +87,7 @@ static void emit_gamestate(void)
     MSG_WriteByte(0);
 
     // send player state
-    MSG_WriteDeltaPlayerstate_Packet(NULL, &cls.gtv.ps,
+    MSG_WriteDeltaPlayerstate_Packet(NULL, &cls.gtv.playerState,
                                      cl.clientNum, MSG_PS_FORCE);
     MSG_WriteByte(CLIENTNUM_NONE);
 
@@ -108,7 +108,7 @@ void CL_GTV_EmitFrame(void)
 {
     player_packed_t newps;
     entity_packed_t *oldes, newes;
-    centity_t *ent;
+    cl_entity_t *ent;
     int i, flags;
 
     if (cls.gtv.state != ca_active)
@@ -126,13 +126,13 @@ void CL_GTV_EmitFrame(void)
     MSG_WriteByte(0);
 
     // send player state
-    MSG_PackPlayer(&newps, &cl.frame.ps);
+    MSG_PackPlayer(&newps, &cl.frame.playerState);
 
-    MSG_WriteDeltaPlayerstate_Packet(&cls.gtv.ps, &newps,
+    MSG_WriteDeltaPlayerstate_Packet(&cls.gtv.playerState, &newps,
                                      cl.clientNum, MSG_PS_FORCE);
 
     // shuffle current state to previous
-    cls.gtv.ps = newps;
+    cls.gtv.playerState = newps;
 
     MSG_WriteByte(CLIENTNUM_NONE);      // end of packetplayers
 

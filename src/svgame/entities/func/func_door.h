@@ -17,23 +17,23 @@
 #define DOOR_X_AXIS         64
 #define DOOR_Y_AXIS         128
 
-extern void door_use_areaportals(edict_t* self, qboolean open);
-extern void door_go_down(edict_t* self);
+extern void door_use_areaportals(entity_t* self, qboolean open);
+extern void door_go_down(entity_t* self);
 
-extern void door_hit_top(edict_t* self);
+extern void door_hit_top(entity_t* self);
 
-extern void door_hit_bottom(edict_t* self);
-extern void door_go_down(edict_t* self);
+extern void door_hit_bottom(entity_t* self);
+extern void door_go_down(entity_t* self);
 
-extern void door_go_up(edict_t* self, edict_t* activator);
-extern void door_use(edict_t* self, edict_t* other, edict_t* activator);
+extern void door_go_up(entity_t* self, entity_t* activator);
+extern void door_use(entity_t* self, entity_t* other, entity_t* activator);
 
-extern void Touch_DoorTrigger(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
-extern void Think_CalcMoveSpeed(edict_t* self);
-extern void Think_SpawnDoorTrigger(edict_t* ent);
+extern void Touch_DoorTrigger(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void Think_CalcMoveSpeed(entity_t* self);
+extern void Think_SpawnDoorTrigger(entity_t* ent);
 
-extern void door_blocked(edict_t* self, edict_t* other);
-extern void door_killed(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t &point);
-extern void door_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf);
+extern void door_blocked(entity_t* self, entity_t* other);
+extern void door_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t &point);
+extern void door_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 
 #endif // __SVGAME_ENTITIES_FUNC_DOOR_H__

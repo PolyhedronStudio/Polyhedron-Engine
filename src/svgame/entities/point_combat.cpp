@@ -17,44 +17,44 @@ Makes this the target of a monster and it will head here
 when first activated before going after the activator.  If
 hold is selected, it will stay here.
 */
-void point_combat_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf)
+void point_combat_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
 {
-    edict_t* activator;
+    entity_t* activator;
 
-    if (other->movetarget != self)
+    if (other->moveTargetPtr != self)
         return;
 
     if (self->target) {
         other->target = self->target;
-        other->goalentity = other->movetarget = G_PickTarget(other->target);
-        if (!other->goalentity) {
-            gi.dprintf("%s at %s target %s does not exist\n", self->classname, Vec3ToString(self->s.origin), self->target);
-            other->movetarget = self;
+        other->goalEntityPtr = other->moveTargetPtr = G_PickTarget(other->target);
+        if (!other->goalEntityPtr) {
+            gi.DPrintf("%s at %s target %s does not exist\n", self->classname, Vec3ToString(self->s.origin), self->target);
+            other->moveTargetPtr = self;
         }
         self->target = NULL;
     }
-    else if ((self->spawnflags & 1) && !(other->flags & (FL_SWIM | FL_FLY))) {
-        other->monsterinfo.pausetime = level.time + 100000000;
-        other->monsterinfo.aiflags |= AI_STAND_GROUND;
-        other->monsterinfo.stand(other);
+    else if ((self->spawnFlags & 1) && !(other->flags & (FL_SWIM | FL_FLY))) {
+        other->monsterInfo.pausetime = level.time + 100000000;
+        other->monsterInfo.aiflags |= AI_STAND_GROUND;
+        other->monsterInfo.stand(other);
     }
 
-    if (other->movetarget == self) {
+    if (other->moveTargetPtr == self) {
         other->target = NULL;
-        other->movetarget = NULL;
-        other->goalentity = other->enemy;
-        other->monsterinfo.aiflags &= ~AI_COMBAT_POINT;
+        other->moveTargetPtr = NULL;
+        other->goalEntityPtr = other->enemy;
+        other->monsterInfo.aiflags &= ~AI_COMBAT_POINT;
     }
 
-    if (self->pathtarget) {
+    if (self->pathTarget) {
         char* savetarget;
 
         savetarget = self->target;
-        self->target = self->pathtarget;
+        self->target = self->pathTarget;
         if (other->enemy && other->enemy->client)
             activator = other->enemy;
-        else if (other->oldEnemy && other->oldEnemy->client)
-            activator = other->oldEnemy;
+        else if (other->oldEnemyPtr && other->oldEnemyPtr->client)
+            activator = other->oldEnemyPtr;
         else if (other->activator && other->activator->client)
             activator = other->activator;
         else
@@ -64,16 +64,16 @@ void point_combat_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface
     }
 }
 
-void SP_point_combat(edict_t* self)
+void SP_point_combat(entity_t* self)
 {
     if (deathmatch->value) {
-        G_FreeEdict(self);
+        G_FreeEntity(self);
         return;
     }
     self->solid = SOLID_TRIGGER;
-    self->touch = point_combat_touch;
+    self->Touch = point_combat_touch;
     VectorSet(self->mins, -8, -8, -16);
     VectorSet(self->maxs, 8, 8, 16);
-    self->svflags = SVF_NOCLIENT;
-    gi.linkentity(self);
+    self->svFlags = SVF_NOCLIENT;
+    gi.LinkEntity(self);
 }

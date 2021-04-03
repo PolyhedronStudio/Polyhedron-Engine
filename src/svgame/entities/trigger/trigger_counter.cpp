@@ -20,7 +20,7 @@ If nomessage is not set, t will print "1 more.. " etc when triggered and "sequen
 After the counter has been triggered "count" times (default 2), it will fire all of it's targets and remove itself.
 */
 
-void trigger_counter_use(edict_t* self, edict_t* other, edict_t* activator)
+void trigger_counter_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     if (self->count == 0)
         return;
@@ -28,26 +28,26 @@ void trigger_counter_use(edict_t* self, edict_t* other, edict_t* activator)
     self->count--;
 
     if (self->count) {
-        if (!(self->spawnflags & 1)) {
-            gi.centerprintf(activator, "%i more to go...", self->count);
-            gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+        if (!(self->spawnFlags & 1)) {
+            gi.CenterPrintf(activator, "%i more to go...", self->count);
+            gi.Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
         }
         return;
     }
 
-    if (!(self->spawnflags & 1)) {
-        gi.centerprintf(activator, "Sequence completed!");
-        gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+    if (!(self->spawnFlags & 1)) {
+        gi.CenterPrintf(activator, "Sequence completed!");
+        gi.Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
     }
     self->activator = activator;
     multi_trigger(self);
 }
 
-void SP_trigger_counter(edict_t* self)
+void SP_trigger_counter(entity_t* self)
 {
     self->wait = -1;
     if (!self->count)
         self->count = 2;
 
-    self->use = trigger_counter_use;
+    self->Use = trigger_counter_use;
 }

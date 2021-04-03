@@ -16,7 +16,7 @@ target a target_string with this
 
 The default is to be a time of day clock
 
-TIMER_UP and TIMER_DOWN run for "count" seconds and the fire "pathtarget"
+TIMER_UP and TIMER_DOWN run for "count" seconds and the fire "pathTarget"
 If START_OFF, this entity must be used before it starts
 
 "style"     0 "xx"
@@ -24,20 +24,20 @@ If START_OFF, this entity must be used before it starts
             2 "xx:xx:xx"
 */
 
-static void func_clock_reset(edict_t* self)
+static void func_clock_reset(entity_t* self)
 {
     //self->activator = NULL;
-    //if (self->spawnflags & 1) {
+    //if (self->spawnFlags & 1) {
     //    self->health = 0;
     //    self->wait = self->count;
     //}
-    //else if (self->spawnflags & 2) {
+    //else if (self->spawnFlags & 2) {
     //    self->health = self->count;
     //    self->wait = 0;
     //}
 }
 
-static void func_clock_format_countdown(edict_t* self)
+static void func_clock_format_countdown(entity_t* self)
 {
     //if (self->style == 0) {
     //    Q_snprintf(self->message, CLOCK_MESSAGE_SIZE, "%2i", self->health);
@@ -61,19 +61,19 @@ static void func_clock_format_countdown(edict_t* self)
     //}
 }
 
-void func_clock_think(edict_t* self)
+void func_clock_think(entity_t* self)
 {
     //if (!self->enemy) {
-    //    self->enemy = G_Find(NULL, FOFS(targetname), self->target);
+    //    self->enemy = G_Find(NULL, FOFS(targetName), self->target);
     //    if (!self->enemy)
     //        return;
     //}
 
-    //if (self->spawnflags & 1) {
+    //if (self->spawnFlags & 1) {
     //    func_clock_format_countdown(self);
     //    self->health++;
     //}
-    //else if (self->spawnflags & 2) {
+    //else if (self->spawnFlags & 2) {
     //    func_clock_format_countdown(self);
     //    self->health--;
     //}
@@ -94,70 +94,70 @@ void func_clock_think(edict_t* self)
     //}
 
     //self->enemy->message = self->message;
-    //self->enemy->use(self->enemy, self, self);
+    //self->enemy->Use(self->enemy, self, self);
 
-    //if (((self->spawnflags & 1) && (self->health > self->wait)) ||
-    //    ((self->spawnflags & 2) && (self->health < self->wait))) {
-    //    if (self->pathtarget) {
+    //if (((self->spawnFlags & 1) && (self->health > self->wait)) ||
+    //    ((self->spawnFlags & 2) && (self->health < self->wait))) {
+    //    if (self->pathTarget) {
     //        char* savetarget;
     //        char* savemessage;
 
     //        savetarget = self->target;
     //        savemessage = self->message;
-    //        self->target = self->pathtarget;
+    //        self->target = self->pathTarget;
     //        self->message = NULL;
     //        UTIL_UseTargets(self, self->activator);
     //        self->target = savetarget;
     //        self->message = savemessage;
     //    }
 
-    //    if (!(self->spawnflags & 8))
+    //    if (!(self->spawnFlags & 8))
     //        return;
 
     //    func_clock_reset(self);
 
-    //    if (self->spawnflags & 4)
+    //    if (self->spawnFlags & 4)
     //        return;
     //}
 
-    //self->nextthink = level.time + 1;
+    //self->nextThink = level.time + 1;
 }
 
-void func_clock_use(edict_t* self, edict_t* other, edict_t* activator)
+void func_clock_use(entity_t* self, entity_t* other, entity_t* activator)
 {
-    //if (!(self->spawnflags & 8))
-    //    self->use = NULL;
+    //if (!(self->spawnFlags & 8))
+    //    self->Use = NULL;
     //if (self->activator)
     //    return;
     //self->activator = activator;
-    //self->think(self);
+    //self->Think(self);
 }
 
-void SP_func_clock(edict_t* self)
+void SP_func_clock(entity_t* self)
 {
     //if (!self->target) {
-    //    gi.dprintf("%s with no target at %s\n", self->classname, Vec3ToString(self->s.origin));
-    //    G_FreeEdict(self);
+    //    gi.DPrintf("%s with no target at %s\n", self->classname, Vec3ToString(self->s.origin));
+    //    G_FreeEntity(self);
     //    return;
     //}
 
-    //if ((self->spawnflags & 2) && (!self->count)) {
-    //    gi.dprintf("%s with no count at %s\n", self->classname, Vec3ToString(self->s.origin));
-    //    G_FreeEdict(self);
+    //if ((self->spawnFlags & 2) && (!self->count)) {
+    //    gi.DPrintf("%s with no count at %s\n", self->classname, Vec3ToString(self->s.origin));
+    //    G_FreeEntity(self);
     //    return;
     //}
 
-    //if ((self->spawnflags & 1) && (!self->count))
+    //if ((self->spawnFlags & 1) && (!self->count))
     //    self->count = 60 * 60;;
 
     //func_clock_reset(self);
 
     //self->message = (char*)gi.TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL); // CPP: Cast
 
-    //self->think = func_clock_think;
+    //self->Think = func_clock_think;
 
-    //if (self->spawnflags & 4)
-    //    self->use = func_clock_use;
+    //if (self->spawnFlags & 4)
+    //    self->Use = func_clock_use;
     //else
-    //    self->nextthink = level.time + 1;
+    //    self->nextThink = level.time + 1;
 }

@@ -12,58 +12,58 @@
 #include "../../trigger.h"
 
 // extern, is in func_train.c
-extern void train_resume(edict_t* self);
+extern void train_resume(entity_t* self);
 
 //=====================================================
 /*QUAKED trigger_elevator (0.3 0.1 0.6) (-8 -8 -8) (8 8 8)
 */
-void trigger_elevator_use(edict_t* self, edict_t* other, edict_t* activator)
+void trigger_elevator_use(entity_t* self, entity_t* other, entity_t* activator)
 {
-    edict_t* target;
+    entity_t* target;
 
-    if (self->movetarget->nextthink) {
-        //      gi.dprintf("elevator busy\n");
+    if (self->moveTargetPtr->nextThink) {
+        //      gi.DPrintf("elevator busy\n");
         return;
     }
 
-    if (!other->pathtarget) {
-        gi.dprintf("elevator used with no pathtarget\n");
+    if (!other->pathTarget) {
+        gi.DPrintf("elevator used with no pathTarget\n");
         return;
     }
 
-    target = G_PickTarget(other->pathtarget);
+    target = G_PickTarget(other->pathTarget);
     if (!target) {
-        gi.dprintf("elevator used with bad pathtarget: %s\n", other->pathtarget);
+        gi.DPrintf("elevator used with bad pathTarget: %s\n", other->pathTarget);
         return;
     }
 
-    self->movetarget->target_ent = target;
-    train_resume(self->movetarget);
+    self->moveTargetPtr->targetEntityPtr = target;
+    train_resume(self->moveTargetPtr);
 }
 
-void trigger_elevator_init(edict_t* self)
+void trigger_elevator_init(entity_t* self)
 {
     if (!self->target) {
-        gi.dprintf("trigger_elevator has no target\n");
+        gi.DPrintf("trigger_elevator has no target\n");
         return;
     }
-    self->movetarget = G_PickTarget(self->target);
-    if (!self->movetarget) {
-        gi.dprintf("trigger_elevator unable to find target %s\n", self->target);
+    self->moveTargetPtr = G_PickTarget(self->target);
+    if (!self->moveTargetPtr) {
+        gi.DPrintf("trigger_elevator unable to find target %s\n", self->target);
         return;
     }
-    if (strcmp(self->movetarget->classname, "func_train") != 0) {
-        gi.dprintf("trigger_elevator target %s is not a train\n", self->target);
+    if (strcmp(self->moveTargetPtr->classname, "func_train") != 0) {
+        gi.DPrintf("trigger_elevator target %s is not a train\n", self->target);
         return;
     }
 
-    self->use = trigger_elevator_use;
-    self->svflags = SVF_NOCLIENT;
+    self->Use = trigger_elevator_use;
+    self->svFlags = SVF_NOCLIENT;
 
 }
 
-void SP_trigger_elevator(edict_t* self)
+void SP_trigger_elevator(entity_t* self)
 {
-    self->think = trigger_elevator_init;
-    self->nextthink = level.time + FRAMETIME;
+    self->Think = trigger_elevator_init;
+    self->nextThink = level.time + FRAMETIME;
 }

@@ -25,61 +25,61 @@ START_ON        only valid for TRIGGER_SPAWN walls
                 the wall will initially be present
 */
 
-void func_wall_use(edict_t* self, edict_t* other, edict_t* activator)
+void func_wall_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     if (self->solid == SOLID_NOT) {
         self->solid = SOLID_BSP;
-        self->svflags &= ~SVF_NOCLIENT;
+        self->svFlags &= ~SVF_NOCLIENT;
         KillBox(self);
     }
     else {
         self->solid = SOLID_NOT;
-        self->svflags |= SVF_NOCLIENT;
+        self->svFlags |= SVF_NOCLIENT;
     }
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 
-    if (!(self->spawnflags & 2))
-        self->use = NULL;
+    if (!(self->spawnFlags & 2))
+        self->Use = NULL;
 }
 
-void SP_func_wall(edict_t* self)
+void SP_func_wall(entity_t* self)
 {
-    self->movetype = MOVETYPE_PUSH;
-    gi.setmodel(self, self->model);
+    self->moveType = MOVETYPE_PUSH;
+    gi.SetModel(self, self->model);
 
-    if (self->spawnflags & 8)
+    if (self->spawnFlags & 8)
         self->s.effects |= EF_ANIM_ALL;
-    if (self->spawnflags & 16)
+    if (self->spawnFlags & 16)
         self->s.effects |= EF_ANIM_ALLFAST;
 
     // just a wall
-    if ((self->spawnflags & 7) == 0) {
+    if ((self->spawnFlags & 7) == 0) {
         self->solid = SOLID_BSP;
-        gi.linkentity(self);
+        gi.LinkEntity(self);
         return;
     }
 
     // it must be TRIGGER_SPAWN
-    if (!(self->spawnflags & 1)) {
-        //      gi.dprintf("func_wall missing TRIGGER_SPAWN\n");
-        self->spawnflags |= 1;
+    if (!(self->spawnFlags & 1)) {
+        //      gi.DPrintf("func_wall missing TRIGGER_SPAWN\n");
+        self->spawnFlags |= 1;
     }
 
-    // yell if the spawnflags are odd
-    if (self->spawnflags & 4) {
-        if (!(self->spawnflags & 2)) {
-            gi.dprintf("func_wall START_ON without TOGGLE\n");
-            self->spawnflags |= 2;
+    // yell if the spawnFlags are odd
+    if (self->spawnFlags & 4) {
+        if (!(self->spawnFlags & 2)) {
+            gi.DPrintf("func_wall START_ON without TOGGLE\n");
+            self->spawnFlags |= 2;
         }
     }
 
-    self->use = func_wall_use;
-    if (self->spawnflags & 4) {
+    self->Use = func_wall_use;
+    if (self->spawnFlags & 4) {
         self->solid = SOLID_BSP;
     }
     else {
         self->solid = SOLID_NOT;
-        self->svflags |= SVF_NOCLIENT;
+        self->svFlags |= SVF_NOCLIENT;
     }
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 }

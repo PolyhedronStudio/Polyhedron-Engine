@@ -24,7 +24,7 @@
 //
 //======================================================================
 //
-void Chaingun_Fire(edict_t* ent)
+void Chaingun_Fire(entity_t* ent)
 {
     int         i;
     int         shots;
@@ -40,43 +40,43 @@ void Chaingun_Fire(edict_t* ent)
     else
         damage = 8;
 
-    if (ent->client->ps.gunframe == 5)
-        gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnu1a.wav"), 1, ATTN_IDLE, 0);
+    if (ent->client->playerState.gunframe == 5)
+        gi.Sound(ent, CHAN_AUTO, gi.SoundIndex("weapons/chngnu1a.wav"), 1, ATTN_IDLE, 0);
 
-    if ((ent->client->ps.gunframe == 14) && !(ent->client->buttons & BUTTON_ATTACK)) {
-        ent->client->ps.gunframe = 32;
+    if ((ent->client->playerState.gunframe == 14) && !(ent->client->buttons & BUTTON_ATTACK)) {
+        ent->client->playerState.gunframe = 32;
         ent->client->weapon_sound = 0;
         return;
     }
-    else if ((ent->client->ps.gunframe == 21) && (ent->client->buttons & BUTTON_ATTACK)
+    else if ((ent->client->playerState.gunframe == 21) && (ent->client->buttons & BUTTON_ATTACK)
         && ent->client->pers.inventory[ent->client->ammo_index]) {
-        ent->client->ps.gunframe = 15;
+        ent->client->playerState.gunframe = 15;
     }
     else {
-        ent->client->ps.gunframe++;
+        ent->client->playerState.gunframe++;
     }
 
-    if (ent->client->ps.gunframe == 22) {
+    if (ent->client->playerState.gunframe == 22) {
         ent->client->weapon_sound = 0;
-        gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnd1a.wav"), 1, ATTN_IDLE, 0);
+        gi.Sound(ent, CHAN_AUTO, gi.SoundIndex("weapons/chngnd1a.wav"), 1, ATTN_IDLE, 0);
     }
     else {
-        ent->client->weapon_sound = gi.soundindex("weapons/chngnl1a.wav");
+        ent->client->weapon_sound = gi.SoundIndex("weapons/chngnl1a.wav");
     }
 
     ent->client->anim_priority = ANIM_ATTACK;
-    if (ent->client->ps.pmove.flags & PMF_DUCKED) {
-        ent->s.frame = FRAME_crattak1 - (ent->client->ps.gunframe & 1);
+    if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
+        ent->s.frame = FRAME_crattak1 - (ent->client->playerState.gunframe & 1);
         ent->client->anim_end = FRAME_crattak9;
     }
     else {
-        ent->s.frame = FRAME_attack1 - (ent->client->ps.gunframe & 1);
+        ent->s.frame = FRAME_attack1 - (ent->client->playerState.gunframe & 1);
         ent->client->anim_end = FRAME_attack8;
     }
 
-    if (ent->client->ps.gunframe <= 9)
+    if (ent->client->playerState.gunframe <= 9)
         shots = 1;
-    else if (ent->client->ps.gunframe <= 14) {
+    else if (ent->client->playerState.gunframe <= 14) {
         if (ent->client->buttons & BUTTON_ATTACK)
             shots = 2;
         else
@@ -89,9 +89,9 @@ void Chaingun_Fire(edict_t* ent)
         shots = ent->client->pers.inventory[ent->client->ammo_index];
 
     if (!shots) {
-        if (level.time >= ent->pain_debounce_time) {
-            gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-            ent->pain_debounce_time = level.time + 1;
+        if (level.time >= ent->debouncePainTime) {
+            gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+            ent->debouncePainTime = level.time + 1;
         }
         NoAmmoWeaponChange(ent);
         return;
@@ -112,7 +112,7 @@ void Chaingun_Fire(edict_t* ent)
         AngleVectors(ent->client->v_angle, &forward, &right, &up);
         r = 7 + crandom() * 4;
         u = crandom() * 4;
-        VectorSet(offset, 0, r, u + ent->viewheight - 8);
+        VectorSet(offset, 0, r, u + ent->viewHeight - 8);
         start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
         fire_bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
@@ -131,7 +131,7 @@ void Chaingun_Fire(edict_t* ent)
 }
 
 
-void Weapon_Chaingun(edict_t* ent)
+void Weapon_Chaingun(entity_t* ent)
 {
     static int  pause_frames[] = { 38, 43, 51, 61, 0 };
     static int  fire_frames[] = { 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0 };

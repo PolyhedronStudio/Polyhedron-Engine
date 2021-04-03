@@ -11,16 +11,16 @@
 #include "../../g_local.h"
 
 //=====================================================
-extern void SP_FixCoopSpots(edict_t* self);
+extern void SP_FixCoopSpots(entity_t* self);
 
 /*QUAKED info_player_coop (1 0 1) (-16 -16 -24) (16 16 32)
 potential spawning position for coop games
 */
 
-void SP_info_player_coop(edict_t* self)
+void SP_info_player_coop(entity_t* self)
 {
     if (!coop->value) {
-        G_FreeEdict(self);
+        G_FreeEntity(self);
         return;
     }
 
@@ -39,8 +39,8 @@ void SP_info_player_coop(edict_t* self)
         (Q_stricmp(level.mapname, "power2") == 0) ||
         (Q_stricmp(level.mapname, "strike") == 0)) {
         // invoke one of our gross, ugly, disgusting hacks
-        self->think = SP_FixCoopSpots;
-        self->nextthink = level.time + FRAMETIME;
+        self->Think = SP_FixCoopSpots;
+        self->nextThink = level.time + FRAMETIME;
     }
 }
 

@@ -517,7 +517,7 @@ static void dump_clients(void)
         "--- ----- ---- --------------- ------- --------------------- ----- -- ---\n");
     FOR_EACH_CLIENT(client) {
         Com_Printf("%3i %5i ", client->number,
-                   client->edict->client->ps.stats[STAT_FRAGS]);
+                   client->edict->client->playerState.stats[STAT_FRAGS]);
 
         switch (client->state) {
         case cs_zombie:
@@ -1241,7 +1241,7 @@ static list_t *SV_FindStuffList(void)
     if (!strcmp(s, "begin")) {
         return &sv_cmdlist_begin;
     }
-    Com_Printf("Unknown stuffcmd list: %s\n", s);
+    Com_Printf("Unknown StuffCmd list: %s\n", s);
     return NULL;
 }
 
@@ -1300,12 +1300,12 @@ static void SV_DelStuffCmd_f(void)
     }
     i = atoi(s);
     if (i < 1) {
-        Com_Printf("Bad stuffcmd index: %d\n", i);
+        Com_Printf("Bad StuffCmd index: %d\n", i);
         return;
     }
     stuff = LIST_INDEX(stuffcmd_t, i - 1, list, entry);
     if (!stuff) {
-        Com_Printf("No such stuffcmd index: %d\n", i);
+        Com_Printf("No such StuffCmd index: %d\n", i);
         return;
     }
 

@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 typedef struct {
     const char    *name; // C++20: STRING: Added const
-    void (*spawn)(edict_t *ent);
+    void (*spawn)(entity_t *ent);
 } spawn_func_t;
 
 typedef struct {
@@ -31,97 +31,97 @@ typedef struct {
     fieldtype_t type;
 } spawn_field_t;
 
-void SP_item_health(edict_t *self);
-void SP_item_health_small(edict_t *self);
-void SP_item_health_large(edict_t *self);
-void SP_item_health_mega(edict_t *self);
+void SP_item_health(entity_t *self);
+void SP_item_health_small(entity_t *self);
+void SP_item_health_large(entity_t *self);
+void SP_item_health_mega(entity_t *self);
 
-void SP_info_player_start(edict_t *ent);
-void SP_info_player_deathmatch(edict_t *ent);
-void SP_info_player_coop(edict_t *ent);
-void SP_info_player_intermission(edict_t *ent);
+void SP_info_player_start(entity_t *ent);
+void SP_info_player_deathmatch(entity_t *ent);
+void SP_info_player_coop(entity_t *ent);
+void SP_info_player_intermission(entity_t *ent);
 
-void SP_func_plat(edict_t *ent);
-void SP_func_rotating(edict_t *ent);
-void SP_func_button(edict_t *ent);
-void SP_func_door(edict_t *ent);
+void SP_func_plat(entity_t *ent);
+void SP_func_rotating(entity_t *ent);
+void SP_func_button(entity_t *ent);
+void SP_func_door(entity_t *ent);
 
-void SP_func_door_rotating(edict_t *ent);
-void SP_func_water(edict_t *ent);
-void SP_func_train(edict_t *ent);
-void SP_func_conveyor(edict_t *self);
-void SP_func_wall(edict_t *self);
-void SP_func_object(edict_t *self);
-void SP_func_explosive(edict_t *self);
-void SP_func_timer(edict_t *self);
-void SP_func_areaportal(edict_t *ent);
-void SP_func_clock(edict_t *ent);
-void SP_func_killbox(edict_t *ent);
+void SP_func_door_rotating(entity_t *ent);
+void SP_func_water(entity_t *ent);
+void SP_func_train(entity_t *ent);
+void SP_func_conveyor(entity_t *self);
+void SP_func_wall(entity_t *self);
+void SP_func_object(entity_t *self);
+void SP_func_explosive(entity_t *self);
+void SP_func_timer(entity_t *self);
+void SP_func_areaportal(entity_t *ent);
+void SP_func_clock(entity_t *ent);
+void SP_func_killbox(entity_t *ent);
 
-void SP_trigger_always(edict_t *ent);
-void SP_trigger_once(edict_t *ent);
-void SP_trigger_multiple(edict_t *ent);
-void SP_trigger_relay(edict_t *ent);
-void SP_trigger_push(edict_t *ent);
-void SP_trigger_hurt(edict_t *ent);
-void SP_trigger_key(edict_t *ent);
-void SP_trigger_counter(edict_t *ent);
-void SP_trigger_elevator(edict_t *ent);
-void SP_trigger_gravity(edict_t *ent);
-void SP_trigger_monsterjump(edict_t *ent);
+void SP_trigger_always(entity_t *ent);
+void SP_trigger_once(entity_t *ent);
+void SP_trigger_multiple(entity_t *ent);
+void SP_trigger_relay(entity_t *ent);
+void SP_trigger_push(entity_t *ent);
+void SP_trigger_hurt(entity_t *ent);
+void SP_trigger_key(entity_t *ent);
+void SP_trigger_counter(entity_t *ent);
+void SP_trigger_elevator(entity_t *ent);
+void SP_trigger_gravity(entity_t *ent);
+void SP_trigger_monsterjump(entity_t *ent);
 
-void SP_target_temp_entity(edict_t *ent);
-void SP_target_speaker(edict_t *ent);
-void SP_target_explosion(edict_t *ent);
-void SP_target_changelevel(edict_t *ent);
-void SP_target_secret(edict_t *ent);
-void SP_target_goal(edict_t *ent);
-void SP_target_splash(edict_t *ent);
-void SP_target_spawner(edict_t *ent);
-void SP_target_blaster(edict_t *ent);
-void SP_target_crosslevel_trigger(edict_t *ent);
-void SP_target_crosslevel_target(edict_t *ent);
-void SP_target_laser(edict_t *self);
-void SP_target_help(edict_t *ent);
+void SP_target_temp_entity(entity_t *ent);
+void SP_target_speaker(entity_t *ent);
+void SP_target_explosion(entity_t *ent);
+void SP_target_changelevel(entity_t *ent);
+void SP_target_secret(entity_t *ent);
+void SP_target_goal(entity_t *ent);
+void SP_target_splash(entity_t *ent);
+void SP_target_spawner(entity_t *ent);
+void SP_target_blaster(entity_t *ent);
+void SP_target_crosslevel_trigger(entity_t *ent);
+void SP_target_crosslevel_target(entity_t *ent);
+void SP_target_laser(entity_t *self);
+void SP_target_help(entity_t *ent);
 
-void SP_target_lightramp(edict_t *self);
-void SP_target_earthquake(edict_t *ent);
-void SP_target_character(edict_t *ent);
-void SP_target_string(edict_t *ent);
+void SP_target_lightramp(entity_t *self);
+void SP_target_earthquake(entity_t *ent);
+void SP_target_character(entity_t *ent);
+void SP_target_string(entity_t *ent);
 
-void SP_worldspawn(edict_t *ent);
-void SP_viewthing(edict_t *ent);
+void SP_worldspawn(entity_t *ent);
+void SP_viewthing(entity_t *ent);
 
-void SP_light(edict_t *self);
-void SP_light_mine1(edict_t *ent);
-void SP_light_mine2(edict_t *ent);
-void SP_info_null(edict_t *self);
-void SP_info_notnull(edict_t *self);
-void SP_path_corner(edict_t *self);
-void SP_point_combat(edict_t *self);
+void SP_light(entity_t *self);
+void SP_light_mine1(entity_t *ent);
+void SP_light_mine2(entity_t *ent);
+void SP_info_null(entity_t *self);
+void SP_info_notnull(entity_t *self);
+void SP_path_corner(entity_t *self);
+void SP_point_combat(entity_t *self);
 
-void SP_misc_explobox(edict_t *self);
+void SP_misc_explobox(entity_t *self);
 
-void SP_misc_gib_arm(edict_t *self);
-void SP_misc_gib_leg(edict_t *self);
-void SP_misc_gib_head(edict_t *self);
+void SP_misc_gib_arm(entity_t *self);
+void SP_misc_gib_leg(entity_t *self);
+void SP_misc_gib_head(entity_t *self);
 
-void SP_misc_deadsoldier(edict_t *self);
-void SP_misc_viper(edict_t *self);
-void SP_misc_viper_bomb(edict_t *self);
-void SP_misc_strogg_ship(edict_t *self);
-void SP_misc_teleporter(edict_t *self);
-void SP_misc_teleporter_dest(edict_t *self);
-void SP_misc_blackhole(edict_t *self);
+void SP_misc_deadsoldier(entity_t *self);
+void SP_misc_viper(entity_t *self);
+void SP_misc_viper_bomb(entity_t *self);
+void SP_misc_strogg_ship(entity_t *self);
+void SP_misc_teleporter(entity_t *self);
+void SP_misc_teleporter_dest(entity_t *self);
+void SP_misc_blackhole(entity_t *self);
 
 
-void SP_monster_soldier_light(edict_t *self);
-void SP_monster_soldier(edict_t *self);
-void SP_monster_soldier_ss(edict_t *self);
+void SP_monster_soldier_light(entity_t *self);
+void SP_monster_soldier(entity_t *self);
+void SP_monster_soldier_ss(entity_t *self);
 
-void SP_turret_breach(edict_t *self);
-void SP_turret_base(edict_t *self);
-void SP_turret_driver(edict_t *self);
+void SP_turret_breach(entity_t *self);
+void SP_turret_base(entity_t *self);
+void SP_turret_driver(entity_t *self);
 
 static const spawn_func_t spawn_funcs[] = {
     {"item_health", SP_item_health},
@@ -222,23 +222,23 @@ static const spawn_func_t spawn_funcs[] = {
 static const spawn_field_t spawn_fields[] = {
     {"classname", FOFS(classname), F_LSTRING},
     {"model", FOFS(model), F_LSTRING},
-    {"spawnflags", FOFS(spawnflags), F_INT},
+    {"spawnFlags", FOFS(spawnFlags), F_INT},
     {"speed", FOFS(speed), F_FLOAT},
     {"accel", FOFS(accel), F_FLOAT},
     {"decel", FOFS(decel), F_FLOAT},
     {"target", FOFS(target), F_LSTRING},
-    {"targetname", FOFS(targetname), F_LSTRING},
-    {"pathtarget", FOFS(pathtarget), F_LSTRING},
-    {"deathtarget", FOFS(deathtarget), F_LSTRING},
-    {"killtarget", FOFS(killtarget), F_LSTRING},
-    {"combattarget", FOFS(combattarget), F_LSTRING},
+    {"targetName", FOFS(targetName), F_LSTRING},
+    {"pathTarget", FOFS(pathTarget), F_LSTRING},
+    {"deathTarget", FOFS(deathTarget), F_LSTRING},
+    {"killTarget", FOFS(killTarget), F_LSTRING},
+    {"combatTarget", FOFS(combatTarget), F_LSTRING},
     {"message", FOFS(message), F_LSTRING},
     {"team", FOFS(team), F_LSTRING},
     {"wait", FOFS(wait), F_FLOAT},
     {"delay", FOFS(delay), F_FLOAT},
     {"random", FOFS(random), F_FLOAT},
-    {"move_origin", FOFS(move_origin), F_VECTOR},
-    {"move_angles", FOFS(move_angles), F_VECTOR},
+    {"moveOrigin", FOFS(moveOrigin), F_VECTOR},
+    {"moveAngles", FOFS(moveAngles), F_VECTOR},
     {"style", FOFS(style), F_INT},
     {"count", FOFS(count), F_INT},
     {"health", FOFS(health), F_INT},
@@ -286,14 +286,14 @@ ED_CallSpawn
 Finds the spawn function for the entity and calls it
 ===============
 */
-void ED_CallSpawn(edict_t *ent)
+void ED_CallSpawn(entity_t *ent)
 {
     const spawn_func_t *s;
     gitem_t *item;
     int     i;
 
     if (!ent->classname) {
-        gi.dprintf("ED_CallSpawn: NULL classname\n");
+        gi.DPrintf("ED_CallSpawn: NULL classname\n");
         return;
     }
 
@@ -316,7 +316,7 @@ void ED_CallSpawn(edict_t *ent)
             return;
         }
     }
-    gi.dprintf("%s doesn't have a spawn function\n", ent->classname);
+    gi.DPrintf("%s doesn't have a spawn function\n", ent->classname);
 }
 
 /*
@@ -375,7 +375,7 @@ static qboolean ED_ParseField(const spawn_field_t *fields, const char *key, cons
                 break;
             case F_VECTOR:
                 if (sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
-                    gi.dprintf("%s: couldn't parse '%s'\n", __func__, key);
+                    gi.DPrintf("%s: couldn't parse '%s'\n", __func__, key);
                     VectorClear(vec);
                 }
                 ((float *)(b + f->ofs))[0] = vec[0];
@@ -413,7 +413,7 @@ Parses an edict out of the given string, returning the new position
 ed should be a properly initialized empty edict.
 ====================
 */
-void ED_ParseEdict(const char **data, edict_t *ent)
+void ED_ParseEntity(const char **data, entity_t *ent)
 {
     qboolean    init;
     char        *key, *value;
@@ -428,15 +428,15 @@ void ED_ParseEdict(const char **data, edict_t *ent)
         if (key[0] == '}')
             break;
         if (!*data)
-            gi.error("%s: EOF without closing brace", __func__);
+            gi.Error("%s: EOF without closing brace", __func__);
 
         // parse value
         value = COM_Parse(data);
         if (!*data)
-            gi.error("%s: EOF without closing brace", __func__);
+            gi.Error("%s: EOF without closing brace", __func__);
 
         if (value[0] == '}')
-            gi.error("%s: closing brace without data", __func__);
+            gi.Error("%s: closing brace without data", __func__);
 
         init = true;
 
@@ -447,7 +447,7 @@ void ED_ParseEdict(const char **data, edict_t *ent)
 
         if (!ED_ParseField(spawn_fields, key, value, (byte *)ent)) {
             if (!ED_ParseField(temp_fields, key, value, (byte *)&st)) {
-                gi.dprintf("%s: %s is not a field\n", __func__, key);
+                gi.DPrintf("%s: %s is not a field\n", __func__, key);
             }
         }
     }
@@ -469,7 +469,7 @@ All but the last will have the teamchain field set to the next one
 */
 void G_FindTeams(void)
 {
-    edict_t *e, *e2, *chain;
+    entity_t *e, *e2, *chain;
     int     i, j;
     int     c, c2;
 
@@ -483,7 +483,7 @@ void G_FindTeams(void)
         if (e->flags & FL_TEAMSLAVE)
             continue;
         chain = e;
-        e->teammaster = e;
+        e->teamMasterPtr = e;
         c++;
         c2++;
         for (j = i + 1, e2 = e + 1 ; j < globals.num_edicts ; j++, e2++) {
@@ -495,15 +495,15 @@ void G_FindTeams(void)
                 continue;
             if (!strcmp(e->team, e2->team)) {
                 c2++;
-                chain->teamchain = e2;
-                e2->teammaster = e;
+                chain->teamChainPtr = e2;
+                e2->teamMasterPtr = e;
                 chain = e2;
                 e2->flags |= FL_TEAMSLAVE;
             }
         }
     }
 
-    gi.dprintf("%i teams with %i entities\n", c, c2);
+    gi.DPrintf("%i teams with %i entities\n", c, c2);
 }
 
 /*
@@ -516,7 +516,7 @@ parsing textual entity definitions out of an ent file.
 */
 void SpawnEntities(const char *mapname, const char *entities, const char *spawnpoint)
 {
-    edict_t     *ent;
+    entity_t     *ent;
     int         inhibit;
     char        *com_token;
     int         i;
@@ -537,7 +537,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
     memset(&level, 0, sizeof(level));
     // WatIs: C++-ify: Note that this may be a problem maker.
     //for (int i = 0; i < game.maxentities; i++) {
-    //    g_edicts[i] = edict_t();
+    //    g_edicts[i] = entity_t();
     //}
     memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0])); // WatIs: C++-ify: Note that this may be a problem maker.
 
@@ -558,50 +558,50 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
         if (!entities)
             break;
         if (com_token[0] != '{')
-            gi.error("ED_LoadFromFile: found %s when expecting {", com_token);
+            gi.Error("ED_LoadFromFile: found %s when expecting {", com_token);
 
         if (!ent)
             ent = g_edicts;
         else
             ent = G_Spawn();
-        ED_ParseEdict(&entities, ent);
+        ED_ParseEntity(&entities, ent);
 
         // yet another map hack
         if (!Q_stricmp(level.mapname, "command") && !Q_stricmp(ent->classname, "trigger_once") && !Q_stricmp(ent->model, "*27"))
-            ent->spawnflags &= ~SPAWNFLAG_NOT_HARD;
+            ent->spawnFlags &= ~SPAWNFLAG_NOT_HARD;
 
         // remove things (except the world) from different skill levels or deathmatch
         if (ent != g_edicts) {
 			if (nomonsters->value && (strstr(ent->classname, "monster") || strstr(ent->classname, "misc_deadsoldier") || strstr(ent->classname, "misc_insane"))) {
-				G_FreeEdict(ent);
+				G_FreeEntity(ent);
 				inhibit++;
 				continue;
 			}
             if (deathmatch->value) {
-                if (ent->spawnflags & SPAWNFLAG_NOT_DEATHMATCH) {
-                    G_FreeEdict(ent);
+                if (ent->spawnFlags & SPAWNFLAG_NOT_DEATHMATCH) {
+                    G_FreeEntity(ent);
                     inhibit++;
                     continue;
                 }
             } else {
-                if ( /* ((coop->value) && (ent->spawnflags & SPAWNFLAG_NOT_COOP)) || */
-                    ((skill->value == 0) && (ent->spawnflags & SPAWNFLAG_NOT_EASY)) ||
-                    ((skill->value == 1) && (ent->spawnflags & SPAWNFLAG_NOT_MEDIUM)) ||
-                    (((skill->value == 2) || (skill->value == 3)) && (ent->spawnflags & SPAWNFLAG_NOT_HARD))
+                if ( /* ((coop->value) && (ent->spawnFlags & SPAWNFLAG_NOT_COOP)) || */
+                    ((skill->value == 0) && (ent->spawnFlags & SPAWNFLAG_NOT_EASY)) ||
+                    ((skill->value == 1) && (ent->spawnFlags & SPAWNFLAG_NOT_MEDIUM)) ||
+                    (((skill->value == 2) || (skill->value == 3)) && (ent->spawnFlags & SPAWNFLAG_NOT_HARD))
                 ) {
-                    G_FreeEdict(ent);
+                    G_FreeEntity(ent);
                     inhibit++;
                     continue;
                 }
             }
 
-            ent->spawnflags &= ~(SPAWNFLAG_NOT_EASY | SPAWNFLAG_NOT_MEDIUM | SPAWNFLAG_NOT_HARD | SPAWNFLAG_NOT_COOP | SPAWNFLAG_NOT_DEATHMATCH);
+            ent->spawnFlags &= ~(SPAWNFLAG_NOT_EASY | SPAWNFLAG_NOT_MEDIUM | SPAWNFLAG_NOT_HARD | SPAWNFLAG_NOT_COOP | SPAWNFLAG_NOT_DEATHMATCH);
         }
 
         ED_CallSpawn(ent);
     }
 
-    gi.dprintf("%i entities inhibited\n", inhibit);
+    gi.DPrintf("%i entities inhibited\n", inhibit);
 
 #ifdef DEBUG
     i = 1;
@@ -792,9 +792,9 @@ Only used for the world.
 "gravity"   800 is default gravity
 "message"   text to print at user logon
 */
-void SP_worldspawn(edict_t *ent)
+void SP_worldspawn(entity_t *ent)
 {
-    ent->movetype = MOVETYPE_PUSH;
+    ent->moveType = MOVETYPE_PUSH;
     ent->solid = SOLID_BSP;
     ent->inUse = true;          // since the world doesn't use G_Spawn()
     ent->s.modelindex = 1;      // world model is always index 1
@@ -804,7 +804,7 @@ void SP_worldspawn(edict_t *ent)
     // reserve some spots for dead player bodies for coop / deathmatch
     level.body_que = 0;
     for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
-        edict_t* ent = G_Spawn();
+        entity_t* ent = G_Spawn();
         ent->classname = "bodyque";
     }
 
@@ -846,96 +846,96 @@ void SP_worldspawn(edict_t *ent)
 
 
     // help icon for statusbar
-    gi.imageindex("i_help");
-    level.pic_health = gi.imageindex("i_health");
-    gi.imageindex("help");
-    gi.imageindex("field_3");
+    gi.ImageIndex("i_help");
+    level.pic_health = gi.ImageIndex("i_health");
+    gi.ImageIndex("help");
+    gi.ImageIndex("field_3");
 
     if (!st.gravity)
         gi.cvar_set("sv_gravity", "750");
     else
         gi.cvar_set("sv_gravity", st.gravity);
 
-    snd_fry = gi.soundindex("player/fry.wav");  // standing in lava / slime
+    snd_fry = gi.SoundIndex("player/fry.wav");  // standing in lava / slime
 
     PrecacheItem(FindItem("Blaster"));
 
-    gi.soundindex("player/lava1.wav");
-    gi.soundindex("player/lava2.wav");
+    gi.SoundIndex("player/lava1.wav");
+    gi.SoundIndex("player/lava2.wav");
 
-    gi.soundindex("misc/pc_up.wav");
-    gi.soundindex("misc/talk1.wav");
+    gi.SoundIndex("misc/pc_up.wav");
+    gi.SoundIndex("misc/talk1.wav");
 
-    gi.soundindex("misc/udeath.wav");
+    gi.SoundIndex("misc/udeath.wav");
 
     // gibs
-    gi.soundindex("items/respawn1.wav");
+    gi.SoundIndex("items/respawn1.wav");
 
     // sexed sounds
-    gi.soundindex("*death1.wav");
-    gi.soundindex("*death2.wav");
-    gi.soundindex("*death3.wav");
-    gi.soundindex("*death4.wav");
-    gi.soundindex("*fall1.wav");
-    gi.soundindex("*fall2.wav");
-    gi.soundindex("*gurp1.wav");        // drowning damage
-    gi.soundindex("*gurp2.wav");
-    gi.soundindex("*jump1.wav");        // player jump
-    gi.soundindex("*pain25_1.wav");
-    gi.soundindex("*pain25_2.wav");
-    gi.soundindex("*pain50_1.wav");
-    gi.soundindex("*pain50_2.wav");
-    gi.soundindex("*pain75_1.wav");
-    gi.soundindex("*pain75_2.wav");
-    gi.soundindex("*pain100_1.wav");
-    gi.soundindex("*pain100_2.wav");
+    gi.SoundIndex("*death1.wav");
+    gi.SoundIndex("*death2.wav");
+    gi.SoundIndex("*death3.wav");
+    gi.SoundIndex("*death4.wav");
+    gi.SoundIndex("*fall1.wav");
+    gi.SoundIndex("*fall2.wav");
+    gi.SoundIndex("*gurp1.wav");        // drowning damage
+    gi.SoundIndex("*gurp2.wav");
+    gi.SoundIndex("*jump1.wav");        // player jump
+    gi.SoundIndex("*pain25_1.wav");
+    gi.SoundIndex("*pain25_2.wav");
+    gi.SoundIndex("*pain50_1.wav");
+    gi.SoundIndex("*pain50_2.wav");
+    gi.SoundIndex("*pain75_1.wav");
+    gi.SoundIndex("*pain75_2.wav");
+    gi.SoundIndex("*pain100_1.wav");
+    gi.SoundIndex("*pain100_2.wav");
 
     // sexed models
     // THIS ORDER MUST MATCH THE DEFINES IN g_local.h
     // you can add more, max 15
-    gi.modelindex("#w_blaster.md2");
-    gi.modelindex("#w_shotgun.md2");
-    gi.modelindex("#w_sshotgun.md2");
-    gi.modelindex("#w_machinegun.md2");
-    gi.modelindex("#w_chaingun.md2");
-    gi.modelindex("#a_grenades.md2");
-    gi.modelindex("#w_glauncher.md2");
-    gi.modelindex("#w_rlauncher.md2");
-    gi.modelindex("#w_hyperblaster.md2");
-    gi.modelindex("#w_railgun.md2");
-    gi.modelindex("#w_bfg.md2");
+    gi.ModelIndex("#w_blaster.md2");
+    gi.ModelIndex("#w_shotgun.md2");
+    gi.ModelIndex("#w_sshotgun.md2");
+    gi.ModelIndex("#w_machinegun.md2");
+    gi.ModelIndex("#w_chaingun.md2");
+    gi.ModelIndex("#a_grenades.md2");
+    gi.ModelIndex("#w_glauncher.md2");
+    gi.ModelIndex("#w_rlauncher.md2");
+    gi.ModelIndex("#w_hyperblaster.md2");
+    gi.ModelIndex("#w_railgun.md2");
+    gi.ModelIndex("#w_bfg.md2");
 
     //-------------------
 
-    gi.soundindex("player/gasp1.wav");      // gasping for air
-    gi.soundindex("player/gasp2.wav");      // head breaking surface, not gasping
+    gi.SoundIndex("player/gasp1.wav");      // gasping for air
+    gi.SoundIndex("player/gasp2.wav");      // head breaking surface, not gasping
 
-    gi.soundindex("player/watr_in.wav");    // feet hitting water
-    gi.soundindex("player/watr_out.wav");   // feet leaving water
+    gi.SoundIndex("player/watr_in.wav");    // feet hitting water
+    gi.SoundIndex("player/watr_out.wav");   // feet leaving water
 
-    gi.soundindex("player/watr_un.wav");    // head going underwater
+    gi.SoundIndex("player/watr_un.wav");    // head going underwater
 
-    gi.soundindex("player/u_breath1.wav");
-    gi.soundindex("player/u_breath2.wav");
+    gi.SoundIndex("player/u_breath1.wav");
+    gi.SoundIndex("player/u_breath2.wav");
 
-    gi.soundindex("items/pkup.wav");        // bonus item pickup
-    gi.soundindex("world/land.wav");        // landing thud
-    gi.soundindex("misc/h2ohit1.wav");      // landing splash
+    gi.SoundIndex("items/pkup.wav");        // bonus item pickup
+    gi.SoundIndex("world/land.wav");        // landing thud
+    gi.SoundIndex("misc/h2ohit1.wav");      // landing splash
 
-    gi.soundindex("items/damage.wav");
-    gi.soundindex("items/protect.wav");
-    gi.soundindex("items/protect4.wav");
-    gi.soundindex("weapons/noammo.wav");
+    gi.SoundIndex("items/damage.wav");
+    gi.SoundIndex("items/protect.wav");
+    gi.SoundIndex("items/protect4.wav");
+    gi.SoundIndex("weapons/noammo.wav");
 
-    gi.soundindex("infantry/inflies1.wav");
+    gi.SoundIndex("infantry/inflies1.wav");
 
-    sm_meat_index = gi.modelindex("models/objects/gibs/sm_meat/tris.md2");
-    gi.modelindex("models/objects/gibs/arm/tris.md2");
-    gi.modelindex("models/objects/gibs/bone/tris.md2");
-    gi.modelindex("models/objects/gibs/bone2/tris.md2");
-    gi.modelindex("models/objects/gibs/chest/tris.md2");
-    gi.modelindex("models/objects/gibs/skull/tris.md2");
-    gi.modelindex("models/objects/gibs/head2/tris.md2");
+    sm_meat_index = gi.ModelIndex("models/objects/gibs/sm_meat/tris.md2");
+    gi.ModelIndex("models/objects/gibs/arm/tris.md2");
+    gi.ModelIndex("models/objects/gibs/bone/tris.md2");
+    gi.ModelIndex("models/objects/gibs/bone2/tris.md2");
+    gi.ModelIndex("models/objects/gibs/chest/tris.md2");
+    gi.ModelIndex("models/objects/gibs/skull/tris.md2");
+    gi.ModelIndex("models/objects/gibs/head2/tris.md2");
 
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is doublebright.

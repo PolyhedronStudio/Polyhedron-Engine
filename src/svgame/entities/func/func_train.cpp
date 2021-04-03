@@ -29,11 +29,11 @@ dmg     default 2
 noise   looping sound to play when the train is in motion
 
 */
-void train_next(edict_t* self);
+void train_next(entity_t* self);
 
-void train_blocked(edict_t* self, edict_t* other)
+void train_blocked(entity_t* self, entity_t* other)
 {
-    if (!(other->svflags & SVF_MONSTER) && (!other->client)) {
+    if (!(other->svFlags & SVF_MONSTER) && (!other->client)) {
         // give it a chance to go away on it's own terms (like gibs)
         T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
         // if it's still there, nuke it
@@ -42,47 +42,47 @@ void train_blocked(edict_t* self, edict_t* other)
         return;
     }
 
-    if (level.time < self->touch_debounce_time)
+    if (level.time < self->debounceTouchTime)
         return;
 
     if (!self->dmg)
         return;
-    self->touch_debounce_time = level.time + 0.5;
+    self->debounceTouchTime = level.time + 0.5;
     T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
-void train_wait(edict_t* self)
+void train_wait(entity_t* self)
 {
-    if (self->target_ent->pathtarget) {
+    if (self->targetEntityPtr->pathTarget) {
         char* savetarget;
-        edict_t* ent;
+        entity_t* ent;
 
-        ent = self->target_ent;
+        ent = self->targetEntityPtr;
         savetarget = ent->target;
-        ent->target = ent->pathtarget;
+        ent->target = ent->pathTarget;
         UTIL_UseTargets(ent, self->activator);
         ent->target = savetarget;
 
-        // make sure we didn't get killed by a killtarget
+        // make sure we didn't get killed by a killTarget
         if (!self->inUse)
             return;
     }
 
-    if (self->moveinfo.wait) {
-        if (self->moveinfo.wait > 0) {
-            self->nextthink = level.time + self->moveinfo.wait;
-            self->think = train_next;
+    if (self->moveInfo.wait) {
+        if (self->moveInfo.wait > 0) {
+            self->nextThink = level.time + self->moveInfo.wait;
+            self->Think = train_next;
         }
-        else if (self->spawnflags & TRAIN_TOGGLE) { // && wait < 0
+        else if (self->spawnFlags & TRAIN_TOGGLE) { // && wait < 0
             train_next(self);
-            self->spawnflags &= ~TRAIN_START_ON;
+            self->spawnFlags &= ~TRAIN_START_ON;
             VectorClear(self->velocity);
-            self->nextthink = 0;
+            self->nextThink = 0;
         }
 
         if (!(self->flags & FL_TEAMSLAVE)) {
-            if (self->moveinfo.sound_end)
-                gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+            if (self->moveInfo.sound_end)
+                gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_end, 1, ATTN_STATIC, 0);
             self->s.sound = 0;
         }
     }
@@ -92,156 +92,156 @@ void train_wait(edict_t* self)
 
 }
 
-void train_next(edict_t* self)
+void train_next(entity_t* self)
 {
-    edict_t* ent;
+    entity_t* ent;
     vec3_t      dest;
     qboolean    first;
 
     first = true;
 again:
     if (!self->target) {
-        //      gi.dprintf ("train_next: no next target\n");
+        //      gi.DPrintf ("train_next: no next target\n");
         return;
     }
 
     ent = G_PickTarget(self->target);
     if (!ent) {
-        gi.dprintf("train_next: bad target %s\n", self->target);
+        gi.DPrintf("train_next: bad target %s\n", self->target);
         return;
     }
 
     self->target = ent->target;
 
     // check for a teleport path_corner
-    if (ent->spawnflags & 1) {
+    if (ent->spawnFlags & 1) {
         if (!first) {
-            gi.dprintf("connected teleport path_corners, see %s at %s\n", ent->classname, vec3_to_str(ent->s.origin));
+            gi.DPrintf("connected teleport path_corners, see %s at %s\n", ent->classname, vec3_to_str(ent->s.origin));
             return;
         }
         first = false;
         VectorSubtract(ent->s.origin, self->mins, self->s.origin);
         VectorCopy(self->s.origin, self->s.old_origin);
         self->s.event = EV_OTHER_TELEPORT;
-        gi.linkentity(self);
+        gi.LinkEntity(self);
         goto again;
     }
 
-    self->moveinfo.wait = ent->wait;
-    self->target_ent = ent;
+    self->moveInfo.wait = ent->wait;
+    self->targetEntityPtr = ent;
 
     if (!(self->flags & FL_TEAMSLAVE)) {
-        if (self->moveinfo.sound_start)
-            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
-        self->s.sound = self->moveinfo.sound_middle;
+        if (self->moveInfo.sound_start)
+            gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_start, 1, ATTN_STATIC, 0);
+        self->s.sound = self->moveInfo.sound_middle;
     }
 
     VectorSubtract(ent->s.origin, self->mins, dest);
-    self->moveinfo.state = STATE_TOP;
-    VectorCopy(self->s.origin, self->moveinfo.start_origin);
-    VectorCopy(dest, self->moveinfo.end_origin);
+    self->moveInfo.state = STATE_TOP;
+    VectorCopy(self->s.origin, self->moveInfo.start_origin);
+    VectorCopy(dest, self->moveInfo.end_origin);
     Brush_Move_Calc(self, dest, train_wait);
-    self->spawnflags |= TRAIN_START_ON;
+    self->spawnFlags |= TRAIN_START_ON;
 }
 
-void train_resume(edict_t* self)
+void train_resume(entity_t* self)
 {
-    edict_t* ent;
+    entity_t* ent;
     vec3_t  dest;
 
-    ent = self->target_ent;
+    ent = self->targetEntityPtr;
 
     VectorSubtract(ent->s.origin, self->mins, dest);
-    self->moveinfo.state = STATE_TOP;
-    VectorCopy(self->s.origin, self->moveinfo.start_origin);
-    VectorCopy(dest, self->moveinfo.end_origin);
+    self->moveInfo.state = STATE_TOP;
+    VectorCopy(self->s.origin, self->moveInfo.start_origin);
+    VectorCopy(dest, self->moveInfo.end_origin);
     Brush_Move_Calc(self, dest, train_wait);
-    self->spawnflags |= TRAIN_START_ON;
+    self->spawnFlags |= TRAIN_START_ON;
 }
 
-void func_train_find(edict_t* self)
+void func_train_find(entity_t* self)
 {
-    edict_t* ent;
+    entity_t* ent;
 
     if (!self->target) {
-        gi.dprintf("train_find: no target\n");
+        gi.DPrintf("train_find: no target\n");
         return;
     }
     ent = G_PickTarget(self->target);
     if (!ent) {
-        gi.dprintf("train_find: target %s not found\n", self->target);
+        gi.DPrintf("train_find: target %s not found\n", self->target);
         return;
     }
     self->target = ent->target;
 
     VectorSubtract(ent->s.origin, self->mins, self->s.origin);
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 
     // if not triggered, start immediately
-    if (!self->targetname)
-        self->spawnflags |= TRAIN_START_ON;
+    if (!self->targetName)
+        self->spawnFlags |= TRAIN_START_ON;
 
-    if (self->spawnflags & TRAIN_START_ON) {
-        self->nextthink = level.time + FRAMETIME;
-        self->think = train_next;
+    if (self->spawnFlags & TRAIN_START_ON) {
+        self->nextThink = level.time + FRAMETIME;
+        self->Think = train_next;
         self->activator = self;
     }
 }
 
-void train_use(edict_t* self, edict_t* other, edict_t* activator)
+void train_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     self->activator = activator;
 
-    if (self->spawnflags & TRAIN_START_ON) {
-        if (!(self->spawnflags & TRAIN_TOGGLE))
+    if (self->spawnFlags & TRAIN_START_ON) {
+        if (!(self->spawnFlags & TRAIN_TOGGLE))
             return;
-        self->spawnflags &= ~TRAIN_START_ON;
+        self->spawnFlags &= ~TRAIN_START_ON;
         VectorClear(self->velocity);
-        self->nextthink = 0;
+        self->nextThink = 0;
     }
     else {
-        if (self->target_ent)
+        if (self->targetEntityPtr)
             train_resume(self);
         else
             train_next(self);
     }
 }
 
-void SP_func_train(edict_t* self)
+void SP_func_train(entity_t* self)
 {
-    self->movetype = MOVETYPE_PUSH;
+    self->moveType = MOVETYPE_PUSH;
 
     VectorClear(self->s.angles);
-    self->blocked = train_blocked;
-    if (self->spawnflags & TRAIN_BLOCK_STOPS)
+    self->Blocked = train_blocked;
+    if (self->spawnFlags & TRAIN_BLOCK_STOPS)
         self->dmg = 0;
     else {
         if (!self->dmg)
             self->dmg = 100;
     }
     self->solid = SOLID_BSP;
-    gi.setmodel(self, self->model);
+    gi.SetModel(self, self->model);
 
     if (st.noise)
-        self->moveinfo.sound_middle = gi.soundindex(st.noise);
+        self->moveInfo.sound_middle = gi.SoundIndex(st.noise);
 
     if (!self->speed)
         self->speed = 100;
 
-    self->moveinfo.speed = self->speed;
-    self->moveinfo.accel = self->moveinfo.decel = self->moveinfo.speed;
+    self->moveInfo.speed = self->speed;
+    self->moveInfo.accel = self->moveInfo.decel = self->moveInfo.speed;
 
-    self->use = train_use;
+    self->Use = train_use;
 
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 
     if (self->target) {
         // start trains on the second frame, to make sure their targets have had
         // a chance to spawn
-        self->nextthink = level.time + FRAMETIME;
-        self->think = func_train_find;
+        self->nextThink = level.time + FRAMETIME;
+        self->Think = func_train_find;
     }
     else {
-        gi.dprintf("func_train without a target at %s\n", Vec3ToString(self->absmin));
+        gi.DPrintf("func_train without a target at %s\n", Vec3ToString(self->absMin));
     }
 }

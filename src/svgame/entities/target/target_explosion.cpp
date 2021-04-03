@@ -17,7 +17,7 @@ Spawns an explosion temporary entity when used.
 "delay"     wait this long before going off
 "dmg"       how much radius damage should be done, defaults to 0
 */
-void target_explosion_explode(edict_t* self)
+void target_explosion_explode(entity_t* self)
 {
     float       save;
 
@@ -34,7 +34,7 @@ void target_explosion_explode(edict_t* self)
     self->delay = save;
 }
 
-void use_target_explosion(edict_t* self, edict_t* other, edict_t* activator)
+void use_target_explosion(entity_t* self, entity_t* other, entity_t* activator)
 {
     self->activator = activator;
 
@@ -43,12 +43,12 @@ void use_target_explosion(edict_t* self, edict_t* other, edict_t* activator)
         return;
     }
 
-    self->think = target_explosion_explode;
-    self->nextthink = level.time + self->delay;
+    self->Think = target_explosion_explode;
+    self->nextThink = level.time + self->delay;
 }
 
-void SP_target_explosion(edict_t* ent)
+void SP_target_explosion(entity_t* ent)
 {
-    ent->use = use_target_explosion;
-    ent->svflags = SVF_NOCLIENT;
+    ent->Use = use_target_explosion;
+    ent->svFlags = SVF_NOCLIENT;
 }

@@ -26,7 +26,7 @@ GRENADE LAUNCHER
 ======================================================================
 */
 
-void weapon_grenadelauncher_fire(edict_t* ent)
+void weapon_grenadelauncher_fire(entity_t* ent)
 {
     vec3_t  offset;
     vec3_t  forward, right;
@@ -38,7 +38,7 @@ void weapon_grenadelauncher_fire(edict_t* ent)
     if (is_quad)
         damage *= 4;
 
-    VectorSet(offset, 8, 8, ent->viewheight - 8);
+    VectorSet(offset, 8, 8, ent->viewHeight - 8);
     AngleVectors(ent->client->v_angle, &forward, &right, NULL);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
@@ -52,7 +52,7 @@ void weapon_grenadelauncher_fire(edict_t* ent)
     gi.WriteByte(MZ_GRENADE | is_silenced);
     gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
-    ent->client->ps.gunframe++;
+    ent->client->playerState.gunframe++;
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
@@ -60,7 +60,7 @@ void weapon_grenadelauncher_fire(edict_t* ent)
         ent->client->pers.inventory[ent->client->ammo_index]--;
 }
 
-void Weapon_GrenadeLauncher(edict_t* ent)
+void Weapon_GrenadeLauncher(entity_t* ent)
 {
     static int  pause_frames[] = { 34, 51, 59, 0 };
     static int  fire_frames[] = { 6, 0 };

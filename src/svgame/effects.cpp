@@ -16,7 +16,7 @@
 
 
 
-void ClipGibVelocity(edict_t *ent)
+void ClipGibVelocity(entity_t *ent)
 {
     if (ent->velocity[0] < -300)
         ent->velocity[0] = -300;
@@ -38,28 +38,28 @@ void ClipGibVelocity(edict_t *ent)
 // Gibs
 //=================
 //
-void gib_think(edict_t *self)
+void gib_think(entity_t *self)
 {
     self->s.frame++;
-    self->nextthink = level.time + FRAMETIME;
+    self->nextThink = level.time + FRAMETIME;
 
     if (self->s.frame == 10) {
-        self->think = G_FreeEdict;
-        self->nextthink = level.time + 8 + random() * 10;
+        self->Think = G_FreeEntity;
+        self->nextThink = level.time + 8 + random() * 10;
     }
 }
 
-void gib_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+void gib_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t *surf)
 {
     vec3_t  normal_angles, right;
 
-    if (!self->groundentity)
+    if (!self->groundEntityPtr)
         return;
 
-    self->touch = NULL;
+    self->Touch = NULL;
 
     if (plane) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
+        gi.Sound(self, CHAN_VOICE, gi.SoundIndex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
 
         vectoangles(plane->normal, normal_angles);
         AngleVectors(normal_angles, NULL, &right, NULL);
@@ -67,20 +67,20 @@ void gib_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 
         if (self->s.modelindex == sm_meat_index) {
             self->s.frame++;
-            self->think = gib_think;
-            self->nextthink = level.time + FRAMETIME;
+            self->Think = gib_think;
+            self->nextThink = level.time + FRAMETIME;
         }
     }
 }
 
-void gib_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, const vec3_t& point)
+void gib_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int damage, const vec3_t& point)
 {
-    G_FreeEdict(self);
+    G_FreeEntity(self);
 }
 
-void ThrowGib(edict_t *self, const char *gibname, int damage, int type)
+void ThrowGib(entity_t *self, const char *gibname, int damage, int type)
 {
-    edict_t *gib;
+    entity_t *gib;
     vec3_t  vd;
     vec3_t  origin;
     vec3_t  size;
@@ -89,24 +89,24 @@ void ThrowGib(edict_t *self, const char *gibname, int damage, int type)
     gib = G_Spawn();
 
     VectorScale(self->size, 0.5, size);
-    VectorAdd(self->absmin, size, origin);
+    VectorAdd(self->absMin, size, origin);
     gib->s.origin[0] = origin[0] + crandom() * size[0];
     gib->s.origin[1] = origin[1] + crandom() * size[1];
     gib->s.origin[2] = origin[2] + crandom() * size[2];
 
-    gi.setmodel(gib, gibname);
+    gi.SetModel(gib, gibname);
     gib->solid = SOLID_NOT;
     gib->s.effects |= EF_GIB;
     gib->flags |= FL_NO_KNOCKBACK;
     gib->takedamage = DAMAGE_YES;
-    gib->die = gib_die;
+    gib->Die = gib_die;
 
     if (type == GIB_ORGANIC) {
-        gib->movetype = MOVETYPE_TOSS;
-        gib->touch = gib_touch;
+        gib->moveType = MOVETYPE_TOSS;
+        gib->Touch = gib_touch;
         vscale = 0.5;
     } else {
-        gib->movetype = MOVETYPE_BOUNCE;
+        gib->moveType = MOVETYPE_BOUNCE;
         vscale = 1.0;
     }
 
@@ -118,13 +118,13 @@ void ThrowGib(edict_t *self, const char *gibname, int damage, int type)
     gib->avelocity[1] = random() * 600;
     gib->avelocity[2] = random() * 600;
 
-    gib->think = G_FreeEdict;
-    gib->nextthink = level.time + 10 + random() * 10;
+    gib->Think = G_FreeEntity;
+    gib->nextThink = level.time + 10 + random() * 10;
 
-    gi.linkentity(gib);
+    gi.LinkEntity(gib);
 }
 
-void ThrowHead(edict_t *self, const char *gibname, int damage, int type)
+void ThrowHead(entity_t *self, const char *gibname, int damage, int type)
 {
     vec3_t  vd;
     float   vscale;
@@ -135,22 +135,22 @@ void ThrowHead(edict_t *self, const char *gibname, int damage, int type)
     VectorClear(self->maxs);
 
     self->s.modelindex2 = 0;
-    gi.setmodel(self, gibname);
+    gi.SetModel(self, gibname);
     self->solid = SOLID_NOT;
     self->s.effects |= EF_GIB;
     self->s.effects &= ~EF_FLIES;
     self->s.sound = 0;
     self->flags |= FL_NO_KNOCKBACK;
-    self->svflags &= ~SVF_MONSTER;
+    self->svFlags &= ~SVF_MONSTER;
     self->takedamage = DAMAGE_YES;
-    self->die = gib_die;
+    self->Die = gib_die;
 
     if (type == GIB_ORGANIC) {
-        self->movetype = MOVETYPE_TOSS;
-        self->touch = gib_touch;
+        self->moveType = MOVETYPE_TOSS;
+        self->Touch = gib_touch;
         vscale = 0.5;
     } else {
-        self->movetype = MOVETYPE_BOUNCE;
+        self->moveType = MOVETYPE_BOUNCE;
         vscale = 1.0;
     }
 
@@ -161,14 +161,14 @@ void ThrowHead(edict_t *self, const char *gibname, int damage, int type)
 
     self->avelocity[vec3_t::Yaw] = crandom() * 600;
 
-    self->think = G_FreeEdict;
-    self->nextthink = level.time + 10 + random() * 10;
+    self->Think = G_FreeEntity;
+    self->nextThink = level.time + 10 + random() * 10;
 
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 }
 
 
-void ThrowClientHead(edict_t *self, int damage)
+void ThrowClientHead(entity_t *self, int damage)
 {
     vec3_t  vd;
     const char    *gibname; // C++20 VKPT: added const.
@@ -183,7 +183,7 @@ void ThrowClientHead(edict_t *self, int damage)
 
     self->s.origin[2] += 32;
     self->s.frame = 0;
-    gi.setmodel(self, gibname);
+    gi.SetModel(self, gibname);
     VectorSet(self->mins, -16, -16, 0);
     VectorSet(self->maxs, 16, 16, 16);
 
@@ -193,7 +193,7 @@ void ThrowClientHead(edict_t *self, int damage)
     self->s.sound = 0;
     self->flags |= FL_NO_KNOCKBACK;
 
-    self->movetype = MOVETYPE_BOUNCE;
+    self->moveType = MOVETYPE_BOUNCE;
     // Calculate velocity for given damage.
     vd = VelocityForDamage(damage);
     VectorAdd(self->velocity, vd, self->velocity);
@@ -202,11 +202,11 @@ void ThrowClientHead(edict_t *self, int damage)
         self->client->anim_priority = ANIM_DEATH;
         self->client->anim_end = self->s.frame;
     } else {
-        self->think = NULL;
-        self->nextthink = 0;
+        self->Think = NULL;
+        self->nextThink = 0;
     }
 
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 }
 
 
@@ -215,56 +215,56 @@ void ThrowClientHead(edict_t *self, int damage)
 // Debris
 //=================
 //
-void debris_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, const vec3_t& point)
+void debris_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int damage, const vec3_t& point)
 {
-    G_FreeEdict(self);
+    G_FreeEntity(self);
 }
 
-void ThrowDebris(edict_t *self, const char *modelname, float speed, const vec3_t &origin) // C++20: STRING: Added const to char*
+void ThrowDebris(entity_t *self, const char *modelname, float speed, const vec3_t &origin) // C++20: STRING: Added const to char*
 {
-    edict_t *chunk;
+    entity_t *chunk;
     vec3_t  v;
 
     chunk = G_Spawn();
     VectorCopy(origin, chunk->s.origin);
-    gi.setmodel(chunk, modelname);
+    gi.SetModel(chunk, modelname);
     v[0] = 100 * crandom();
     v[1] = 100 * crandom();
     v[2] = 100 + 100 * crandom();
     VectorMA(self->velocity, speed, v, chunk->velocity);
-    chunk->movetype = MOVETYPE_BOUNCE;
+    chunk->moveType = MOVETYPE_BOUNCE;
     chunk->solid = SOLID_NOT;
     chunk->avelocity[0] = random() * 600;
     chunk->avelocity[1] = random() * 600;
     chunk->avelocity[2] = random() * 600;
-    chunk->think = G_FreeEdict;
-    chunk->nextthink = level.time + 5 + random() * 5;
+    chunk->Think = G_FreeEntity;
+    chunk->nextThink = level.time + 5 + random() * 5;
     chunk->s.frame = 0;
     chunk->flags = 0;
     chunk->classname = "debris";
     chunk->takedamage = DAMAGE_YES;
-    chunk->die = debris_die;
-    gi.linkentity(chunk);
+    chunk->Die = debris_die;
+    gi.LinkEntity(chunk);
 }
 
 
-void BecomeExplosion1(edict_t *self)
+void BecomeExplosion1(entity_t *self)
 {
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_EXPLOSION1);
     gi.WritePosition(self->s.origin);
     gi.Multicast(&self->s.origin, MULTICAST_PVS);
 
-    G_FreeEdict(self);
+    G_FreeEntity(self);
 }
 
 
-void BecomeExplosion2(edict_t *self)
+void BecomeExplosion2(entity_t *self)
 {
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_EXPLOSION2);
     gi.WritePosition(self->s.origin);
     gi.Multicast(&self->s.origin, MULTICAST_PVS);
 
-    G_FreeEdict(self);
+    G_FreeEntity(self);
 }

@@ -18,38 +18,38 @@ There must be a path for it to follow once it is activated.
 
 "speed"     How fast the Viper should fly
 */
-extern void train_use(edict_t* self, edict_t* other, edict_t* activator);
-extern void func_train_find(edict_t* self);
+extern void train_use(entity_t* self, entity_t* other, entity_t* activator);
+extern void func_train_find(entity_t* self);
 
-void misc_viper_use(edict_t* self, edict_t* other, edict_t* activator)
+void misc_viper_use(entity_t* self, entity_t* other, entity_t* activator)
 {
-    self->svflags &= ~SVF_NOCLIENT;
-    self->use = train_use;
+    self->svFlags &= ~SVF_NOCLIENT;
+    self->Use = train_use;
     train_use(self, other, activator);
 }
 
-void SP_misc_viper(edict_t* ent)
+void SP_misc_viper(entity_t* ent)
 {
     if (!ent->target) {
-        gi.dprintf("misc_viper without a target at %s\n", Vec3ToString(ent->absmin));
-        G_FreeEdict(ent);
+        gi.DPrintf("misc_viper without a target at %s\n", Vec3ToString(ent->absMin));
+        G_FreeEntity(ent);
         return;
     }
 
     if (!ent->speed)
         ent->speed = 300;
 
-    ent->movetype = MOVETYPE_PUSH;
+    ent->moveType = MOVETYPE_PUSH;
     ent->solid = SOLID_NOT;
-    ent->s.modelindex = gi.modelindex("models/ships/viper/tris.md2");
+    ent->s.modelindex = gi.ModelIndex("models/ships/viper/tris.md2");
     VectorSet(ent->mins, -16, -16, 0);
     VectorSet(ent->maxs, 16, 16, 32);
 
-    ent->think = func_train_find;
-    ent->nextthink = level.time + FRAMETIME;
-    ent->use = misc_viper_use;
-    ent->svflags |= SVF_NOCLIENT;
-    ent->moveinfo.accel = ent->moveinfo.decel = ent->moveinfo.speed = ent->speed;
+    ent->Think = func_train_find;
+    ent->nextThink = level.time + FRAMETIME;
+    ent->Use = misc_viper_use;
+    ent->svFlags |= SVF_NOCLIENT;
+    ent->moveInfo.accel = ent->moveInfo.decel = ent->moveInfo.speed = ent->speed;
 
-    gi.linkentity(ent);
+    gi.LinkEntity(ent);
 }

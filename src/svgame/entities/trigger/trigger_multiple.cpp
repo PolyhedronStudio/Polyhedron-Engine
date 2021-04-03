@@ -24,41 +24,41 @@ sounds
 4)
 set "message" to text string
 */
-void trigger_enable(edict_t* self, edict_t* other, edict_t* activator)
+void trigger_enable(entity_t* self, entity_t* other, entity_t* activator)
 {
     self->solid = SOLID_TRIGGER;
-    self->use = Use_Multi;
-    gi.linkentity(self);
+    self->Use = Use_Multi;
+    gi.LinkEntity(self);
 }
 
-void SP_trigger_multiple(edict_t* ent)
+void SP_trigger_multiple(entity_t* ent)
 {
     if (ent->sounds == 1)
-        ent->noise_index = gi.soundindex("misc/secret.wav");
+        ent->noiseIndex = gi.SoundIndex("misc/secret.wav");
     else if (ent->sounds == 2)
-        ent->noise_index = gi.soundindex("misc/talk.wav");
+        ent->noiseIndex = gi.SoundIndex("misc/talk.wav");
     else if (ent->sounds == 3)
-        ent->noise_index = gi.soundindex("misc/trigger1.wav");
+        ent->noiseIndex = gi.SoundIndex("misc/trigger1.wav");
 
     if (!ent->wait)
         ent->wait = 0.2;
-    ent->touch = Touch_Multi;
-    ent->movetype = MOVETYPE_NONE;
-    ent->svflags |= SVF_NOCLIENT;
+    ent->Touch = Touch_Multi;
+    ent->moveType = MOVETYPE_NONE;
+    ent->svFlags |= SVF_NOCLIENT;
 
 
-    if (ent->spawnflags & 4) {
+    if (ent->spawnFlags & 4) {
         ent->solid = SOLID_NOT;
-        ent->use = trigger_enable;
+        ent->Use = trigger_enable;
     }
     else {
         ent->solid = SOLID_TRIGGER;
-        ent->use = Use_Multi;
+        ent->Use = Use_Multi;
     }
 
     if (!VectorCompare(ent->s.angles, vec3_origin))
-        UTIL_SetMoveDir(ent->s.angles, ent->movedir);
+        UTIL_SetMoveDir(ent->s.angles, ent->moveDirection);
 
-    gi.setmodel(ent, ent->model);
-    gi.linkentity(ent);
+    gi.SetModel(ent, ent->model);
+    gi.LinkEntity(ent);
 }

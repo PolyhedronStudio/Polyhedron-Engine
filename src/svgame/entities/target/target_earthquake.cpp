@@ -18,14 +18,14 @@ All players and monsters are affected.
 "count"     duration of the quake (default:5)
 */
 
-void target_earthquake_think(edict_t* self)
+void target_earthquake_think(entity_t* self)
 {
     int     i;
-    edict_t* e;
+    entity_t* e;
 
-    if (self->last_move_time < level.time) {
-        gi.positioned_sound(self->s.origin, self, CHAN_AUTO, self->noise_index, 1.0, ATTN_NONE, 0);
-        self->last_move_time = level.time + 0.5;
+    if (self->lastMoveTime < level.time) {
+        gi.PositionedSound(self->s.origin, self, CHAN_AUTO, self->noiseIndex, 1.0, ATTN_NONE, 0);
+        self->lastMoveTime = level.time + 0.5;
     }
 
     for (i = 1, e = g_edicts + i; i < globals.num_edicts; i++, e++) {
@@ -33,31 +33,31 @@ void target_earthquake_think(edict_t* self)
             continue;
         if (!e->client)
             continue;
-        if (!e->groundentity)
+        if (!e->groundEntityPtr)
             continue;
 
-        e->groundentity = NULL;
+        e->groundEntityPtr = NULL;
         e->velocity[0] += crandom() * 150;
         e->velocity[1] += crandom() * 150;
         e->velocity[2] = self->speed * (100.0 / e->mass);
     }
 
     if (level.time < self->timestamp)
-        self->nextthink = level.time + FRAMETIME;
+        self->nextThink = level.time + FRAMETIME;
 }
 
-void target_earthquake_use(edict_t* self, edict_t* other, edict_t* activator)
+void target_earthquake_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     self->timestamp = level.time + self->count;
-    self->nextthink = level.time + FRAMETIME;
+    self->nextThink = level.time + FRAMETIME;
     self->activator = activator;
-    self->last_move_time = 0;
+    self->lastMoveTime = 0;
 }
 
-void SP_target_earthquake(edict_t* self)
+void SP_target_earthquake(entity_t* self)
 {
-    if (!self->targetname)
-        gi.dprintf("untargeted %s at %s\n", self->classname, Vec3ToString(self->s.origin));
+    if (!self->targetName)
+        gi.DPrintf("untargeted %s at %s\n", self->classname, Vec3ToString(self->s.origin));
 
     if (!self->count)
         self->count = 5;
@@ -65,9 +65,9 @@ void SP_target_earthquake(edict_t* self)
     if (!self->speed)
         self->speed = 200;
 
-    self->svflags |= SVF_NOCLIENT;
-    self->think = target_earthquake_think;
-    self->use = target_earthquake_use;
+    self->svFlags |= SVF_NOCLIENT;
+    self->Think = target_earthquake_think;
+    self->Use = target_earthquake_use;
 
-    self->noise_index = gi.soundindex("world/quake.wav");
+    self->noiseIndex = gi.SoundIndex("world/quake.wav");
 }

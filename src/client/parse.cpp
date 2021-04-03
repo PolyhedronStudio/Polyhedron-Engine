@@ -240,7 +240,7 @@ static void CL_ParseFrame(int extrabits)
     // ask for a non-compressed message
     if (deltaframe > 0) {
         oldframe = &cl.frames[deltaframe & UPDATE_MASK];
-        from = &oldframe->ps;
+        from = &oldframe->playerState;
         if (deltaframe == currentframe) {
             // old servers may cause this on map change
             Com_DPrintf("%s: delta from current frame\n", __func__);
@@ -264,7 +264,7 @@ static void CL_ParseFrame(int extrabits)
         if (!frame.valid && cl.frame.valid && cls.demo.playback) {
             Com_DPrintf("%s: recovering broken demo\n", __func__);
             oldframe = &cl.frame;
-            from = &oldframe->ps;
+            from = &oldframe->playerState;
             frame.valid = true;
         }
     } else {
@@ -301,7 +301,7 @@ static void CL_ParseFrame(int extrabits)
 
     // parse playerstate
     bits = MSG_ReadShort();
-    MSG_ParseDeltaPlayerstate_Enhanced(from, &frame.ps, bits, extraflags);
+    MSG_ParseDeltaPlayerstate_Enhanced(from, &frame.playerState, bits, extraflags);
 #ifdef _DEBUG
     if (cl_shownet->integer > 2 && (bits || extraflags)) {
         MSG_ShowDeltaPlayerstateBits_Enhanced(bits, extraflags);
@@ -342,7 +342,7 @@ static void CL_ParseFrame(int extrabits)
         return; // do not change anything
     }
 
-    if (!frame.ps.fov) {
+    if (!frame.playerState.fov) {
         // fail out early to prevent spurious errors later
         Com_Error(ERR_DROP, "%s: bad fov", __func__);
     }

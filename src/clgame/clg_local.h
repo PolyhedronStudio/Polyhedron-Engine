@@ -52,7 +52,7 @@
 //-------------------
 typedef struct clg_view_s {
     // Stores the entities.
-    entity_t entities[MAX_ENTITIES];
+    r_entity_t entities[MAX_ENTITIES];
     int num_entities;
 
     // Holds all the dynamic lights currently in the view frame.
@@ -201,22 +201,22 @@ void CLG_SetLightStyle(int index, const char* s);
 void CLG_MuzzleFlash(void);
 void CLG_MuzzleFlash2(void);
 void CLG_BFGExplosionParticles(vec3_t org);
-void CLG_BfgParticles(entity_t* ent);
+void CLG_BfgParticles(r_entity_t* ent);
 void CLG_BigTeleportParticles(vec3_t org);
 void CLG_BlasterTrail(vec3_t start, vec3_t end);
 void CLG_BlasterParticles(vec3_t org, vec3_t dir);
 void CLG_BloodParticleEffect(vec3_t org, vec3_t dir, int color, int count);
 void CLG_BubbleTrail(vec3_t start, vec3_t end);
-void CLG_DiminishingTrail(vec3_t start, vec3_t end, centity_t* old, int flags);
+void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags);
 void CLG_ExplosionParticles(vec3_t org);
 void CLG_FlagTrail(vec3_t start, vec3_t end, int color);
-void CLG_FlyEffect(centity_t* ent, vec3_t origin);
+void CLG_FlyEffect(cl_entity_t* ent, vec3_t origin);
 void CLG_ItemRespawnParticles(vec3_t org);
 void CLG_OldRailTrail(void);
 void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count);
 void CLG_ParticleEffect2(vec3_t org, vec3_t dir, int color, int count);
 void CLG_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count);
-void CLG_RocketTrail(vec3_t start, vec3_t end, centity_t* old);
+void CLG_RocketTrail(vec3_t start, vec3_t end, cl_entity_t* old);
 void CLG_TeleportParticles(vec3_t org);
 void CLG_TeleporterParticles(vec3_t org);
 
@@ -297,7 +297,7 @@ void CLG_ParticleSmokeEffect(vec3_t org, vec3_t dir, int color, int count, int m
 void CLG_BlasterParticles2(vec3_t org, vec3_t dir, unsigned int color);
 void CLG_BlasterTrail2(vec3_t start, vec3_t end);
 void CLG_IonripperTrail(vec3_t start, vec3_t ent);
-void CLG_TrapParticles(entity_t* ent);
+void CLG_TrapParticles(r_entity_t* ent);
 void CLG_ParticleEffect3(vec3_t org, vec3_t dir, int color, int count);
 
 
@@ -367,7 +367,7 @@ extern qhandle_t   gun_model;
 void V_Init(void);
 void V_Shutdown(void);
 
-void V_AddEntity(entity_t* ent);
+void V_AddEntity(r_entity_t* ent);
 void V_AddLight(const vec3_t &org, float intensity, float r, float g, float b);
 void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius);
 void V_AddLightStyle (int style, const vec4_t &value);

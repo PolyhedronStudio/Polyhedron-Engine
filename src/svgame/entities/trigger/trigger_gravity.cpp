@@ -19,20 +19,20 @@ the value of "gravity".  1.0 is standard
 gravity for the level.
 */
 
-void trigger_gravity_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf)
+void trigger_gravity_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
 {
     other->gravity = self->gravity;
 }
 
-void SP_trigger_gravity(edict_t* self)
+void SP_trigger_gravity(entity_t* self)
 {
     if (st.gravity == 0) {
-        gi.dprintf("trigger_gravity without gravity set at %s\n", Vec3ToString(self->s.origin));
-        G_FreeEdict(self);
+        gi.DPrintf("trigger_gravity without gravity set at %s\n", Vec3ToString(self->s.origin));
+        G_FreeEntity(self);
         return;
     }
 
     InitTrigger(self);
     self->gravity = atoi(st.gravity);
-    self->touch = trigger_gravity_touch;
+    self->Touch = trigger_gravity_touch;
 }

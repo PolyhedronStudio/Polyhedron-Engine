@@ -56,7 +56,7 @@ static cvar_t* cl_adjustfov;
 // Add the entity to the current scene frame.
 //===============
 //
-void V_AddEntity(entity_t *ent)
+void V_AddEntity(r_entity_t *ent)
 {
     // Ensure we aren't exceeding boundary limits.
     if (view.num_entities >= MAX_ENTITIES)
@@ -270,7 +270,7 @@ static void CLG_SetupThirdPersionView(void)
     static vec3_t mins = { -4, -4, -4 }, maxs = { 4, 4, 4 };
 
     // if dead, set a nice view angle
-    if (cl->frame.ps.stats[STAT_HEALTH] <= 0) {
+    if (cl->frame.playerState.stats[STAT_HEALTH] <= 0) {
         cl->refdef.viewAngles[vec3_t::Roll] = 0;
         cl->refdef.viewAngles[vec3_t::Pitch] = 10;
     }
@@ -313,7 +313,7 @@ static void CLG_SetupThirdPersionView(void)
 //
 static void CLG_FinishViewValues(void)
 {
-    centity_t* ent;
+    cl_entity_t* ent;
 
     if (cl_player_model->integer != CL_PLAYER_MODEL_THIRD_PERSON)
         goto first;

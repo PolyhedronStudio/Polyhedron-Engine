@@ -30,66 +30,66 @@ START_OPEN causes the water to move to its destination when spawned and operate 
 2)  lava
 */
 
-void SP_func_water(edict_t* self)
+void SP_func_water(entity_t* self)
 {
     vec3_t  abs_movedir;
 
-    UTIL_SetMoveDir(self->s.angles, self->movedir);
-    self->movetype = MOVETYPE_PUSH;
+    UTIL_SetMoveDir(self->s.angles, self->moveDirection);
+    self->moveType = MOVETYPE_PUSH;
     self->solid = SOLID_BSP;
-    gi.setmodel(self, self->model);
+    gi.SetModel(self, self->model);
 
     switch (self->sounds) {
     default:
         break;
 
     case 1: // water
-        self->moveinfo.sound_start = gi.soundindex("world/mov_watr.wav");
-        self->moveinfo.sound_end = gi.soundindex("world/stp_watr.wav");
+        self->moveInfo.sound_start = gi.SoundIndex("world/mov_watr.wav");
+        self->moveInfo.sound_end = gi.SoundIndex("world/stp_watr.wav");
         break;
 
     case 2: // lava
-        self->moveinfo.sound_start = gi.soundindex("world/mov_watr.wav");
-        self->moveinfo.sound_end = gi.soundindex("world/stp_watr.wav");
+        self->moveInfo.sound_start = gi.SoundIndex("world/mov_watr.wav");
+        self->moveInfo.sound_end = gi.SoundIndex("world/stp_watr.wav");
         break;
     }
 
     // calculate second position
     VectorCopy(self->s.origin, self->pos1);
-    abs_movedir[0] = fabs(self->movedir[0]);
-    abs_movedir[1] = fabs(self->movedir[1]);
-    abs_movedir[2] = fabs(self->movedir[2]);
-    self->moveinfo.distance = abs_movedir[0] * self->size[0] + abs_movedir[1] * self->size[1] + abs_movedir[2] * self->size[2] - st.lip;
-    VectorMA(self->pos1, self->moveinfo.distance, self->movedir, self->pos2);
+    abs_movedir[0] = fabs(self->moveDirection[0]);
+    abs_movedir[1] = fabs(self->moveDirection[1]);
+    abs_movedir[2] = fabs(self->moveDirection[2]);
+    self->moveInfo.distance = abs_movedir[0] * self->size[0] + abs_movedir[1] * self->size[1] + abs_movedir[2] * self->size[2] - st.lip;
+    VectorMA(self->pos1, self->moveInfo.distance, self->moveDirection, self->pos2);
 
     // if it starts open, switch the positions
-    if (self->spawnflags & DOOR_START_OPEN) {
+    if (self->spawnFlags & DOOR_START_OPEN) {
         VectorCopy(self->pos2, self->s.origin);
         VectorCopy(self->pos1, self->pos2);
         VectorCopy(self->s.origin, self->pos1);
     }
 
-    VectorCopy(self->pos1, self->moveinfo.start_origin);
-    VectorCopy(self->s.angles, self->moveinfo.start_angles);
-    VectorCopy(self->pos2, self->moveinfo.end_origin);
-    VectorCopy(self->s.angles, self->moveinfo.end_angles);
+    VectorCopy(self->pos1, self->moveInfo.start_origin);
+    VectorCopy(self->s.angles, self->moveInfo.start_angles);
+    VectorCopy(self->pos2, self->moveInfo.end_origin);
+    VectorCopy(self->s.angles, self->moveInfo.end_angles);
 
-    self->moveinfo.state = STATE_BOTTOM;
+    self->moveInfo.state = STATE_BOTTOM;
 
     if (!self->speed)
         self->speed = 25;
-    self->moveinfo.accel = self->moveinfo.decel = self->moveinfo.speed = self->speed;
+    self->moveInfo.accel = self->moveInfo.decel = self->moveInfo.speed = self->speed;
 
     if (!self->wait)
         self->wait = -1;
-    self->moveinfo.wait = self->wait;
+    self->moveInfo.wait = self->wait;
 
-    self->use = door_use;
+    self->Use = door_use;
 
     if (self->wait == -1)
-        self->spawnflags |= DOOR_TOGGLE;
+        self->spawnFlags |= DOOR_TOGGLE;
 
     self->classname = "func_door";
 
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 }

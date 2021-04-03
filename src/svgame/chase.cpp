@@ -17,10 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 #include "g_local.h"
 
-void UpdateChaseCam(edict_t *ent)
+void UpdateChaseCam(entity_t *ent)
 {
     vec3_t o, ownerv, goal;
-    edict_t *targ;
+    entity_t *targ;
     vec3_t forward, right;
     trace_t trace;
     int i;
@@ -29,11 +29,11 @@ void UpdateChaseCam(edict_t *ent)
     // is our chase target gone?
     if (!ent->client->chase_target->inUse
         || ent->client->chase_target->client->resp.spectator) {
-        edict_t *old = ent->client->chase_target;
+        entity_t *old = ent->client->chase_target;
         ChaseNext(ent);
         if (ent->client->chase_target == old) {
             ent->client->chase_target = NULL;
-            ent->client->ps.pmove.flags &= ~PMF_NO_PREDICTION;
+            ent->client->playerState.pmove.flags &= ~PMF_NO_PREDICTION;
             return;
         }
     }
@@ -42,7 +42,7 @@ void UpdateChaseCam(edict_t *ent)
 
     VectorCopy(targ->s.origin, ownerv);
 
-    ownerv[2] += targ->viewheight;
+    ownerv[2] += targ->viewHeight;
 
     VectorCopy(targ->client->v_angle, angles);
     if (angles[vec3_t::Pitch] > 56)
@@ -55,7 +55,7 @@ void UpdateChaseCam(edict_t *ent)
         o[2] = targ->s.origin[2] + 20;
 
     // jump animation lifts
-    if (!targ->groundentity)
+    if (!targ->groundEntityPtr)
         o[2] += 16;
 
     trace = gi.Trace(ownerv, vec3_origin, vec3_origin, o, targ, CONTENTS_MASK_SOLID);
@@ -81,33 +81,33 @@ void UpdateChaseCam(edict_t *ent)
         goal[2] += 6;
     }
 
-    if (targ->deadflag)
-        ent->client->ps.pmove.type = PM_DEAD;
+    if (targ->deadFlag)
+        ent->client->playerState.pmove.type = PM_DEAD;
     else
-        ent->client->ps.pmove.type = PM_FREEZE;
+        ent->client->playerState.pmove.type = PM_FREEZE;
 
     VectorCopy(goal, ent->s.origin);
     for (i = 0 ; i < 3 ; i++)
-        ent->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(targ->client->v_angle[i] - ent->client->resp.cmd_angles[i]);
+        ent->client->playerState.pmove.delta_angles[i] = ANGLE2SHORT(targ->client->v_angle[i] - ent->client->resp.cmd_angles[i]);
 
-    if (targ->deadflag) {
-        ent->client->ps.viewAngles[vec3_t::Roll] = 40;
-        ent->client->ps.viewAngles[vec3_t::Pitch] = -15;
-        ent->client->ps.viewAngles[vec3_t::Yaw] = targ->client->killer_yaw;
+    if (targ->deadFlag) {
+        ent->client->playerState.viewAngles[vec3_t::Roll] = 40;
+        ent->client->playerState.viewAngles[vec3_t::Pitch] = -15;
+        ent->client->playerState.viewAngles[vec3_t::Yaw] = targ->client->killer_yaw;
     } else {
-        VectorCopy(targ->client->v_angle, ent->client->ps.viewAngles);
+        VectorCopy(targ->client->v_angle, ent->client->playerState.viewAngles);
         VectorCopy(targ->client->v_angle, ent->client->v_angle);
     }
 
-    ent->viewheight = 0;
-    ent->client->ps.pmove.flags |= PMF_NO_PREDICTION;
-    gi.linkentity(ent);
+    ent->viewHeight = 0;
+    ent->client->playerState.pmove.flags |= PMF_NO_PREDICTION;
+    gi.LinkEntity(ent);
 }
 
-void ChaseNext(edict_t *ent)
+void ChaseNext(entity_t *ent)
 {
     int i;
-    edict_t *e;
+    entity_t *e;
 
     if (!ent->client->chase_target)
         return;
@@ -128,10 +128,10 @@ void ChaseNext(edict_t *ent)
     ent->client->update_chase = true;
 }
 
-void ChasePrev(edict_t *ent)
+void ChasePrev(entity_t *ent)
 {
     int i;
-    edict_t *e;
+    entity_t *e;
 
     if (!ent->client->chase_target)
         return;
@@ -152,10 +152,10 @@ void ChasePrev(edict_t *ent)
     ent->client->update_chase = true;
 }
 
-void GetChaseTarget(edict_t *ent)
+void GetChaseTarget(entity_t *ent)
 {
     int i;
-    edict_t *other;
+    entity_t *other;
 
     for (i = 1; i <= maxclients->value; i++) {
         other = g_edicts + i;
@@ -166,6 +166,6 @@ void GetChaseTarget(edict_t *ent)
             return;
         }
     }
-    gi.centerprintf(ent, "No other players to chase.");
+    gi.CenterPrintf(ent, "No other players to chase.");
 }
 

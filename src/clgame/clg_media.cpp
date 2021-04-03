@@ -5,7 +5,7 @@
 //
 //
 // Media load handling, usually happens when the renderer initializes, or
-// restarts (think about changing screen mode, or other settings).
+// restarts (Think about changing screen mode, or other settings).
 //
 #include "clg_local.h"
 

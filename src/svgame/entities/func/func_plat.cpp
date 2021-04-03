@@ -13,56 +13,56 @@
 #include "../../effects.h"
 
 //=====================================================
-void plat_go_down(edict_t* ent);
+void plat_go_down(entity_t* ent);
 
-void plat_hit_top(edict_t* ent)
+void plat_hit_top(entity_t* ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
-        if (ent->moveinfo.sound_end)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+        if (ent->moveInfo.sound_end)
+            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_end, 1, ATTN_STATIC, 0);
         ent->s.sound = 0;
     }
-    ent->moveinfo.state = STATE_TOP;
+    ent->moveInfo.state = STATE_TOP;
 
-    ent->think = plat_go_down;
-    ent->nextthink = level.time + 3;
+    ent->Think = plat_go_down;
+    ent->nextThink = level.time + 3;
 }
 
-void plat_hit_bottom(edict_t* ent)
+void plat_hit_bottom(entity_t* ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
-        if (ent->moveinfo.sound_end)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+        if (ent->moveInfo.sound_end)
+            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_end, 1, ATTN_STATIC, 0);
         ent->s.sound = 0;
     }
-    ent->moveinfo.state = STATE_BOTTOM;
+    ent->moveInfo.state = STATE_BOTTOM;
 }
 
-void plat_go_down(edict_t* ent)
+void plat_go_down(entity_t* ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
-        if (ent->moveinfo.sound_start)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
-        ent->s.sound = ent->moveinfo.sound_middle;
+        if (ent->moveInfo.sound_start)
+            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_start, 1, ATTN_STATIC, 0);
+        ent->s.sound = ent->moveInfo.sound_middle;
     }
-    ent->moveinfo.state = STATE_DOWN;
-    Brush_Move_Calc(ent, ent->moveinfo.end_origin, plat_hit_bottom);
+    ent->moveInfo.state = STATE_DOWN;
+    Brush_Move_Calc(ent, ent->moveInfo.end_origin, plat_hit_bottom);
 }
 
-void plat_go_up(edict_t* ent)
+void plat_go_up(entity_t* ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
-        if (ent->moveinfo.sound_start)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
-        ent->s.sound = ent->moveinfo.sound_middle;
+        if (ent->moveInfo.sound_start)
+            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_start, 1, ATTN_STATIC, 0);
+        ent->s.sound = ent->moveInfo.sound_middle;
     }
-    ent->moveinfo.state = STATE_UP;
-    Brush_Move_Calc(ent, ent->moveinfo.start_origin, plat_hit_top);
+    ent->moveInfo.state = STATE_UP;
+    Brush_Move_Calc(ent, ent->moveInfo.start_origin, plat_hit_top);
 }
 
-void plat_blocked(edict_t* self, edict_t* other)
+void plat_blocked(entity_t* self, entity_t* other)
 {
-    if (!(other->svflags & SVF_MONSTER) && (!other->client)) {
+    if (!(other->svFlags & SVF_MONSTER) && (!other->client)) {
         // give it a chance to go away on it's own terms (like gibs)
         T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
         // if it's still there, nuke it
@@ -73,22 +73,22 @@ void plat_blocked(edict_t* self, edict_t* other)
 
     T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 
-    if (self->moveinfo.state == STATE_UP)
+    if (self->moveInfo.state == STATE_UP)
         plat_go_down(self);
-    else if (self->moveinfo.state == STATE_DOWN)
+    else if (self->moveInfo.state == STATE_DOWN)
         plat_go_up(self);
 }
 
 
-void Use_Plat(edict_t* ent, edict_t* other, edict_t* activator)
+void Use_Plat(entity_t* ent, entity_t* other, entity_t* activator)
 {
-    if (ent->think)
+    if (ent->Think)
         return;     // already down
     plat_go_down(ent);
 }
 
 
-void Touch_Plat_Center(edict_t* ent, edict_t* other, cplane_t* plane, csurface_t* surf)
+void Touch_Plat_Center(entity_t* ent, entity_t* other, cplane_t* plane, csurface_t* surf)
 {
     if (!other->client)
         return;
@@ -97,23 +97,23 @@ void Touch_Plat_Center(edict_t* ent, edict_t* other, cplane_t* plane, csurface_t
         return;
 
     ent = ent->enemy;   // now point at the plat, not the trigger
-    if (ent->moveinfo.state == STATE_BOTTOM)
+    if (ent->moveInfo.state == STATE_BOTTOM)
         plat_go_up(ent);
-    else if (ent->moveinfo.state == STATE_TOP)
-        ent->nextthink = level.time + 1;    // the player is still on the plat, so delay going down
+    else if (ent->moveInfo.state == STATE_TOP)
+        ent->nextThink = level.time + 1;    // the player is still on the plat, so delay going down
 }
 
-void plat_spawn_inside_trigger(edict_t* ent)
+void plat_spawn_inside_trigger(entity_t* ent)
 {
-    edict_t* trigger;
+    entity_t* trigger;
     vec3_t  tmin, tmax;
 
     //
     // middle trigger
     //
     trigger = G_Spawn();
-    trigger->touch = Touch_Plat_Center;
-    trigger->movetype = MOVETYPE_NONE;
+    trigger->Touch = Touch_Plat_Center;
+    trigger->moveType = MOVETYPE_NONE;
     trigger->solid = SOLID_TRIGGER;
     trigger->enemy = ent;
 
@@ -127,7 +127,7 @@ void plat_spawn_inside_trigger(edict_t* ent)
 
     tmin[2] = tmax[2] - (ent->pos1[2] - ent->pos2[2] + st.lip);
 
-    if (ent->spawnflags & PLAT_LOW_TRIGGER)
+    if (ent->spawnFlags & PLAT_LOW_TRIGGER)
         tmax[2] = tmin[2] + 8;
 
     if (tmax[0] - tmin[0] <= 0) {
@@ -142,7 +142,7 @@ void plat_spawn_inside_trigger(edict_t* ent)
     VectorCopy(tmin, trigger->mins);
     VectorCopy(tmax, trigger->maxs);
 
-    gi.linkentity(trigger);
+    gi.LinkEntity(trigger);
 }
 
 
@@ -163,15 +163,15 @@ Set "sounds" to one of the following:
 1) base fast
 2) chain slow
 */
-void SP_func_plat(edict_t* ent)
+void SP_func_plat(entity_t* ent)
 {
     VectorClear(ent->s.angles);
     ent->solid = SOLID_BSP;
-    ent->movetype = MOVETYPE_PUSH;
+    ent->moveType = MOVETYPE_PUSH;
 
-    gi.setmodel(ent, ent->model);
+    gi.SetModel(ent, ent->model);
 
-    ent->blocked = plat_blocked;
+    ent->Blocked = plat_blocked;
 
     if (!ent->speed)
         ent->speed = 20;
@@ -202,29 +202,29 @@ void SP_func_plat(edict_t* ent)
     else
         ent->pos2[2] -= (ent->maxs[2] - ent->mins[2]) - st.lip;
 
-    ent->use = Use_Plat;
+    ent->Use = Use_Plat;
 
     plat_spawn_inside_trigger(ent);     // the "start moving" trigger
 
-    if (ent->targetname) {
-        ent->moveinfo.state = STATE_UP;
+    if (ent->targetName) {
+        ent->moveInfo.state = STATE_UP;
     }
     else {
         VectorCopy(ent->pos2, ent->s.origin);
-        gi.linkentity(ent);
-        ent->moveinfo.state = STATE_BOTTOM;
+        gi.LinkEntity(ent);
+        ent->moveInfo.state = STATE_BOTTOM;
     }
 
-    ent->moveinfo.speed = ent->speed;
-    ent->moveinfo.accel = ent->accel;
-    ent->moveinfo.decel = ent->decel;
-    ent->moveinfo.wait = ent->wait;
-    VectorCopy(ent->pos1, ent->moveinfo.start_origin);
-    VectorCopy(ent->s.angles, ent->moveinfo.start_angles);
-    VectorCopy(ent->pos2, ent->moveinfo.end_origin);
-    VectorCopy(ent->s.angles, ent->moveinfo.end_angles);
+    ent->moveInfo.speed = ent->speed;
+    ent->moveInfo.accel = ent->accel;
+    ent->moveInfo.decel = ent->decel;
+    ent->moveInfo.wait = ent->wait;
+    VectorCopy(ent->pos1, ent->moveInfo.start_origin);
+    VectorCopy(ent->s.angles, ent->moveInfo.start_angles);
+    VectorCopy(ent->pos2, ent->moveInfo.end_origin);
+    VectorCopy(ent->s.angles, ent->moveInfo.end_angles);
 
-    ent->moveinfo.sound_start = gi.soundindex("plats/pt1_strt.wav");
-    ent->moveinfo.sound_middle = gi.soundindex("plats/pt1_mid.wav");
-    ent->moveinfo.sound_end = gi.soundindex("plats/pt1_end.wav");
+    ent->moveInfo.sound_start = gi.SoundIndex("plats/pt1_strt.wav");
+    ent->moveInfo.sound_middle = gi.SoundIndex("plats/pt1_mid.wav");
+    ent->moveInfo.sound_end = gi.SoundIndex("plats/pt1_end.wav");
 }

@@ -551,7 +551,7 @@ static void draw_shadow(maliasmesh_t *mesh)
 
 static int texnum_for_mesh(maliasmesh_t *mesh)
 {
-    entity_t *ent = glr.ent;
+    r_entity_t *ent = glr.ent;
 
     if (ent->flags & RF_SHELL_MASK)
         return TEXNUM_WHITE;
@@ -627,7 +627,7 @@ static void draw_alias_mesh(maliasmesh_t *mesh)
 
 void GL_DrawAliasModel(model_t *model)
 {
-    entity_t *ent = glr.ent;
+    r_entity_t *ent = glr.ent;
     glCullResult_t cull;
     int i;
 

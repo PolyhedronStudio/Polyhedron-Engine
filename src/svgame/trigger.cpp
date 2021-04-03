@@ -19,69 +19,69 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "utils.h"
 #include "trigger.h"
 
-void InitTrigger(edict_t *self)
+void InitTrigger(entity_t *self)
 {
     if (!VectorCompare(self->s.angles, vec3_origin))
-        UTIL_SetMoveDir(self->s.angles, self->movedir);
+        UTIL_SetMoveDir(self->s.angles, self->moveDirection);
 
     self->solid = SOLID_TRIGGER;
-    self->movetype = MOVETYPE_NONE;
-    gi.setmodel(self, self->model);
-    self->svflags = SVF_NOCLIENT;
+    self->moveType = MOVETYPE_NONE;
+    gi.SetModel(self, self->model);
+    self->svFlags = SVF_NOCLIENT;
 }
 
 
 // the wait time has passed, so set back up for another activation
-void multi_wait(edict_t *ent)
+void multi_wait(entity_t *ent)
 {
-    ent->nextthink = 0;
+    ent->nextThink = 0;
 }
 
 
 // the trigger was just activated
 // ent->activator should be set to the activator so it can be held through a delay
 // so wait for the delay time before firing
-void multi_trigger(edict_t *ent)
+void multi_trigger(entity_t *ent)
 {
-    if (ent->nextthink)
+    if (ent->nextThink)
         return;     // already been triggered
 
     UTIL_UseTargets(ent, ent->activator);
 
     if (ent->wait > 0) {
-        ent->think = multi_wait;
-        ent->nextthink = level.time + ent->wait;
+        ent->Think = multi_wait;
+        ent->nextThink = level.time + ent->wait;
     } else {
         // we can't just remove (self) here, because this is a touch function
         // called while looping through area links...
-        ent->touch = NULL;
-        ent->nextthink = level.time + FRAMETIME;
-        ent->think = G_FreeEdict;
+        ent->Touch = NULL;
+        ent->nextThink = level.time + FRAMETIME;
+        ent->Think = G_FreeEntity;
     }
 }
 
-void Use_Multi(edict_t *ent, edict_t *other, edict_t *activator)
+void Use_Multi(entity_t *ent, entity_t *other, entity_t *activator)
 {
     ent->activator = activator;
     multi_trigger(ent);
 }
 
-void Touch_Multi(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+void Touch_Multi(entity_t *self, entity_t *other, cplane_t *plane, csurface_t *surf)
 {
     if (other->client) {
-        if (self->spawnflags & 2)
+        if (self->spawnFlags & 2)
             return;
-    } else if (other->svflags & SVF_MONSTER) {
-        if (!(self->spawnflags & 1))
+    } else if (other->svFlags & SVF_MONSTER) {
+        if (!(self->spawnFlags & 1))
             return;
     } else
         return;
 
-    if (!VectorCompare(self->movedir, vec3_origin)) {
+    if (!VectorCompare(self->moveDirection, vec3_origin)) {
         vec3_t  forward;
 
         AngleVectors(other->s.angles, &forward, NULL, NULL);
-        if (DotProduct(forward, self->movedir) < 0)
+        if (DotProduct(forward, self->moveDirection) < 0)
             return;
     }
 

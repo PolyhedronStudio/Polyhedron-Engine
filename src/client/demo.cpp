@@ -161,9 +161,9 @@ static void emit_delta_frame(server_frame_t *from, server_frame_t *to,
 
     // delta encode the playerstate
     MSG_WriteByte(svc_playerinfo);
-    MSG_PackPlayer(&newpack, &to->ps);
+    MSG_PackPlayer(&newpack, &to->playerState);
     if (from) {
-        MSG_PackPlayer(&oldpack, &from->ps);
+        MSG_PackPlayer(&oldpack, &from->playerState);
         MSG_WriteDeltaPlayerstate_Default(&oldpack, &newpack);
     } else {
         MSG_WriteDeltaPlayerstate_Default(NULL, &newpack);

@@ -253,7 +253,7 @@ static void SVGPM_Debug(const char* func, const char* fmt, ...) {
 // Walking up a step should kill some velocity.
 //  
 // Slide off of the impacting object
-// returns the blocked flags(1 = floor, 2 = step / wall)
+// returns the Blocked flags(1 = floor, 2 = step / wall)
 //===============
 //
 #define STOP_EPSILON    0.1
@@ -283,7 +283,7 @@ static vec3_t PM_ClipVelocity(vec3_t& in, vec3_t& normal, float overbounce)
 // Marks the specified entity as touched.
 //===============
 //
-static void PM_TouchEntity(struct edict_s* ent) {
+static void PM_TouchEntity(struct entity_s* ent) {
     // Ensure it is valid.
     if (ent == NULL) {
         PM_Debug("ent = NULL");
@@ -320,7 +320,7 @@ static bool PM_CheckStep(const trace_t* trace) {
 
     if (!trace->allsolid) {
         if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
-            if (trace->ent != pm->groundEntity || trace->plane.dist != playerMoveLocals.ground.plane.dist) {
+            if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.ground.plane.dist) {
                 return true;
             }
         }
@@ -647,7 +647,7 @@ static void PM_StepSlideMove(void)
 //
 static qboolean PM_CheckTrickJump(void) {
     // False in the following conditions.
-    if (pm->groundEntity) { return false; }
+    if (pm->groundEntityPtr) { return false; }
     if (playerMoveLocals.previousVelocity.z < PM_SPEED_UP) { return false; }
     if (pm->cmd.upmove < 1) { return false; }
     if (pm->state.flags & PMF_JUMP_HELD) { return false; }
@@ -716,7 +716,7 @@ static qboolean PM_CheckJump(void) {
 
     // clear the ground indicators
     pm->state.flags &= ~PMF_ON_GROUND;
-    pm->groundEntity = NULL;
+    pm->groundEntityPtr = NULL;
 
     // we can trick jump soon
     pm->state.flags |= PMF_TIME_TRICK_START;
@@ -730,7 +730,7 @@ static qboolean PM_CheckJump(void) {
 // PM_CheckDuck
 //
 // Sets the wished for values to crouch:
-// pm->mins, pm->maxs, and pm->viewheight
+// pm->mins, pm->maxs, and pm->viewHeight
 //===============
 //
 static void PM_CheckDuck(void) {
@@ -830,7 +830,7 @@ static qboolean PM_CheckLadder(void) {
         pm->state.flags |= PMF_ON_LADDER;
 
         // No ground entity, obviously.
-        pm->groundEntity = NULL;
+        pm->groundEntityPtr = NULL;
 
         // Remove ducked and possible ON_GROUND flags.
         pm->state.flags &= ~(PMF_ON_GROUND | PMF_DUCKED);
@@ -879,7 +879,7 @@ static qboolean PM_CheckWaterJump(void) {
         trace = PM_TraceCorrectAllSolid(pos, pm->mins, pm->maxs, pos);
 
         if (trace.startsolid) {
-            PM_Debug("Can't exit water: blocked");
+            PM_Debug("Can't exit water: Blocked");
             return false;
         }
 
@@ -999,7 +999,7 @@ static void PM_CheckGround(void) {
     if (trace.ent && trace.plane.normal.z >= PM_STEP_NORMAL) {
 
         // If we had no ground, then handle landing events
-        if (!pm->groundEntity) {
+        if (!pm->groundEntityPtr) {
 
             // Any landing terminates the water jump
             if (pm->state.flags & PMF_TIME_WATER_JUMP) {
@@ -1031,7 +1031,7 @@ static void PM_CheckGround(void) {
 
         // Save a reference to the ground
         pm->state.flags |= PMF_ON_GROUND;
-        pm->groundEntity = trace.ent;
+        pm->groundEntityPtr = trace.ent;
 
         // Sink down to it if not trick jumping
         if (!(pm->state.flags & PMF_TIME_TRICK_JUMP)) {
@@ -1042,7 +1042,7 @@ static void PM_CheckGround(void) {
     }
     else {
         pm->state.flags &= ~PMF_ON_GROUND;
-        pm->groundEntity = NULL;
+        pm->groundEntityPtr = NULL;
     }
 
     // Always touch the entity, even if we couldn't stand on it
@@ -1188,7 +1188,7 @@ static void PM_ApplyCurrents(void) {
     }
 
     // add conveyer belt velocities
-    if (pm->groundEntity) {
+    if (pm->groundEntityPtr) {
         if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_0) {
             current.x += 1.0;
         }
@@ -1587,7 +1587,7 @@ static void PM_Init(pm_move_t* pmove) {
     pm->viewAngles = vec3_zero();
 
     pm->numTouchedEntities = 0;
-    pm->groundEntity = NULL;
+    pm->groundEntityPtr = NULL;
 
     pm->waterType = 0;
     pm->waterLevel = 0;
@@ -1707,7 +1707,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
     // Check for Ladders.
     PM_CheckLadder();
 
-    // Set mins, maxs, and viewheight
+    // Set mins, maxs, and viewHeight
     PM_CheckDuck();
 
     // Check for water.

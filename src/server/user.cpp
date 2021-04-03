@@ -76,7 +76,7 @@ baseline will be transmitted
 static void create_baselines(void)
 {
     int        i;
-    edict_t    *ent;
+    entity_t    *ent;
     entity_packed_t *base, **chunk;
 
     // clear baselines from previous level

@@ -33,7 +33,7 @@ is not a staircase.
 */
 int c_yes, c_no;
 
-qboolean M_CheckBottom(edict_t *ent)
+qboolean M_CheckBottom(entity_t *ent)
 {
     vec3_t  mins, maxs, start, stop;
     trace_t trace;
@@ -106,7 +106,7 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 */
 //FIXME since we need to test end position contents here, can we avoid doing
 //it again later in catagorize position?
-qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
+qboolean SV_movestep(entity_t *ent, vec3_t move, qboolean relink)
 {
     float       dz;
     vec3_t      oldorg, neworg, end;
@@ -126,13 +126,13 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
         for (i = 0 ; i < 2 ; i++) {
             VectorAdd(ent->s.origin, move, neworg);
             if (i == 0 && ent->enemy) {
-                if (!ent->goalentity)
-                    ent->goalentity = ent->enemy;
-                dz = ent->s.origin[2] - ent->goalentity->s.origin[2];
-                if (ent->goalentity->client) {
+                if (!ent->goalEntityPtr)
+                    ent->goalEntityPtr = ent->enemy;
+                dz = ent->s.origin[2] - ent->goalEntityPtr->s.origin[2];
+                if (ent->goalEntityPtr->client) {
                     if (dz > 40)
                         neworg[2] -= 8;
-                    if (!((ent->flags & FL_SWIM) && (ent->waterlevel < 2)))
+                    if (!((ent->flags & FL_SWIM) && (ent->waterLevel < 2)))
                         if (dz < 30)
                             neworg[2] += 8;
                 } else {
@@ -150,7 +150,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
 
             // fly monsters don't enter water voluntarily
             if (ent->flags & FL_FLY) {
-                if (!ent->waterlevel) {
+                if (!ent->waterLevel) {
                     test[0] = trace.endpos[0];
                     test[1] = trace.endpos[1];
                     test[2] = trace.endpos[2] + ent->mins[2] + 1;
@@ -162,7 +162,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
 
             // swim monsters don't exit water voluntarily
             if (ent->flags & FL_SWIM) {
-                if (ent->waterlevel < 2) {
+                if (ent->waterLevel < 2) {
                     test[0] = trace.endpos[0];
                     test[1] = trace.endpos[1];
                     test[2] = trace.endpos[2] + ent->mins[2] + 1;
@@ -175,7 +175,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
             if (trace.fraction == 1) {
                 VectorCopy(trace.endpos, ent->s.origin);
                 if (relink) {
-                    gi.linkentity(ent);
+                    gi.LinkEntity(ent);
                     UTIL_TouchTriggers(ent);
                 }
                 return true;
@@ -189,7 +189,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
     }
 
 // push down from a step height above the wished position
-    if (!(ent->monsterinfo.aiflags & AI_NOSTEP))
+    if (!(ent->monsterInfo.aiflags & AI_NOSTEP))
         stepsize = STEPSIZE;
     else
         stepsize = 1;
@@ -212,7 +212,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
 
 
     // don't go in to water
-    if (ent->waterlevel == 0) {
+    if (ent->waterLevel == 0) {
         test[0] = trace.endpos[0];
         test[1] = trace.endpos[1];
         test[2] = trace.endpos[2] + ent->mins[2] + 1;
@@ -227,10 +227,10 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
         if (ent->flags & FL_PARTIALGROUND) {
             VectorAdd(ent->s.origin, move, ent->s.origin);
             if (relink) {
-                gi.linkentity(ent);
+                gi.LinkEntity(ent);
                 UTIL_TouchTriggers(ent);
             }
-            ent->groundentity = NULL;
+            ent->groundEntityPtr = NULL;
             return true;
         }
 
@@ -245,7 +245,7 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
             // entity had floor mostly pulled out from underneath it
             // and is trying to correct
             if (relink) {
-                gi.linkentity(ent);
+                gi.LinkEntity(ent);
                 UTIL_TouchTriggers(ent);
             }
             return true;
@@ -257,12 +257,12 @@ qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink)
     if (ent->flags & FL_PARTIALGROUND) {
         ent->flags &= ~FL_PARTIALGROUND;
     }
-    ent->groundentity = trace.ent;
-    ent->groundentity_linkcount = trace.ent->linkCount;
+    ent->groundEntityPtr = trace.ent;
+    ent->groundEntityLinkCount = trace.ent->linkCount;
 
 // the move is ok
     if (relink) {
-        gi.linkentity(ent);
+        gi.LinkEntity(ent);
         UTIL_TouchTriggers(ent);
     }
     return true;
@@ -277,7 +277,7 @@ M_ChangeYaw
 
 ===============
 */
-void M_ChangeYaw(edict_t *ent)
+void M_ChangeYaw(entity_t *ent)
 {
     float   ideal;
     float   current;
@@ -285,13 +285,13 @@ void M_ChangeYaw(edict_t *ent)
     float   speed;
 
     current = anglemod(ent->s.angles[vec3_t::Yaw]);
-    ideal = ent->ideal_yaw;
+    ideal = ent->idealYaw;
 
     if (current == ideal)
         return;
 
     move = ideal - current;
-    speed = ent->yaw_speed;
+    speed = ent->yawSpeed;
     if (ideal > current) {
         if (move >= 180)
             move = move - 360;
@@ -320,12 +320,12 @@ facing it.
 
 ======================
 */
-qboolean SV_StepDirection(edict_t *ent, float yaw, float dist)
+qboolean SV_StepDirection(entity_t *ent, float yaw, float dist)
 {
     vec3_t      move, oldorigin;
     float       delta;
 
-    ent->ideal_yaw = yaw;
+    ent->idealYaw = yaw;
     M_ChangeYaw(ent);
 
     yaw = yaw * M_PI * 2 / 360;
@@ -335,16 +335,16 @@ qboolean SV_StepDirection(edict_t *ent, float yaw, float dist)
 
     VectorCopy(ent->s.origin, oldorigin);
     if (SV_movestep(ent, move, false)) {
-        delta = ent->s.angles[vec3_t::Yaw] - ent->ideal_yaw;
+        delta = ent->s.angles[vec3_t::Yaw] - ent->idealYaw;
         if (delta > 45 && delta < 315) {
             // not turned far enough, so don't take the step
             VectorCopy(oldorigin, ent->s.origin);
         }
-        gi.linkentity(ent);
+        gi.LinkEntity(ent);
         UTIL_TouchTriggers(ent);
         return true;
     }
-    gi.linkentity(ent);
+    gi.LinkEntity(ent);
     UTIL_TouchTriggers(ent);
     return false;
 }
@@ -355,7 +355,7 @@ SV_FixCheckBottom
 
 ======================
 */
-void SV_FixCheckBottom(edict_t *ent)
+void SV_FixCheckBottom(entity_t *ent)
 {
     ent->flags |= FL_PARTIALGROUND;
 }
@@ -369,7 +369,7 @@ SV_NewChaseDir
 ================
 */
 #define DI_NODIR    -1
-void SV_NewChaseDir(edict_t *actor, edict_t *enemy, float dist)
+void SV_NewChaseDir(entity_t *actor, entity_t *enemy, float dist)
 {
     float   deltax, deltay;
     float   d[3];
@@ -379,7 +379,7 @@ void SV_NewChaseDir(edict_t *actor, edict_t *enemy, float dist)
     if (!enemy)
         return;
 
-    olddir = anglemod((int)(actor->ideal_yaw / 45) * 45);
+    olddir = anglemod((int)(actor->idealYaw / 45) * 45);
     turnaround = anglemod(olddir - 180);
 
     deltax = enemy->s.origin[0] - actor->s.origin[0];
@@ -441,7 +441,7 @@ void SV_NewChaseDir(edict_t *actor, edict_t *enemy, float dist)
     if (turnaround != DI_NODIR && SV_StepDirection(actor, turnaround, dist))
         return;
 
-    actor->ideal_yaw = olddir;      // can't move
+    actor->idealYaw = olddir;      // can't move
 
 // if a bridge was pulled out from underneath a monster, it may not have
 // a valid standing position at all
@@ -456,14 +456,14 @@ SV_CloseEnough
 
 ======================
 */
-qboolean SV_CloseEnough(edict_t *ent, edict_t *goal, float dist)
+qboolean SV_CloseEnough(entity_t *ent, entity_t *goal, float dist)
 {
     int     i;
 
     for (i = 0 ; i < 3 ; i++) {
-        if (goal->absmin[i] > ent->absmax[i] + dist)
+        if (goal->absMin[i] > ent->absMax[i] + dist)
             return false;
-        if (goal->absmax[i] < ent->absmin[i] - dist)
+        if (goal->absMax[i] < ent->absMin[i] - dist)
             return false;
     }
     return true;
@@ -475,13 +475,13 @@ qboolean SV_CloseEnough(edict_t *ent, edict_t *goal, float dist)
 M_MoveToGoal
 ======================
 */
-void M_MoveToGoal(edict_t *ent, float dist)
+void M_MoveToGoal(entity_t *ent, float dist)
 {
-    edict_t     *goal;
+    entity_t     *goal;
 
-    goal = ent->goalentity;
+    goal = ent->goalEntityPtr;
 
-    if (!ent->groundentity && !(ent->flags & (FL_FLY | FL_SWIM)))
+    if (!ent->groundEntityPtr && !(ent->flags & (FL_FLY | FL_SWIM)))
         return;
 
 // if the next step hits the enemy, return immediately
@@ -489,7 +489,7 @@ void M_MoveToGoal(edict_t *ent, float dist)
         return;
 
 // bump around...
-    if ((rand() & 3) == 1 || !SV_StepDirection(ent, ent->ideal_yaw, dist)) {
+    if ((rand() & 3) == 1 || !SV_StepDirection(ent, ent->idealYaw, dist)) {
         if (ent->inUse)
             SV_NewChaseDir(ent, goal, dist);
     }
@@ -501,11 +501,11 @@ void M_MoveToGoal(edict_t *ent, float dist)
 M_walkmove
 ===============
 */
-qboolean M_walkmove(edict_t *ent, float yaw, float dist)
+qboolean M_walkmove(entity_t *ent, float yaw, float dist)
 {
     vec3_t  move;
 
-    if (!ent->groundentity && !(ent->flags & (FL_FLY | FL_SWIM)))
+    if (!ent->groundEntityPtr && !(ent->flags & (FL_FLY | FL_SWIM)))
         return false;
 
     yaw = yaw * M_PI * 2 / 360;

@@ -35,7 +35,7 @@ int sm_meat_index;
 int snd_fry;
 int meansOfDeath;
 
-edict_t     *g_edicts;
+entity_t     *g_edicts;
 
 cvar_t  *deathmatch;
 cvar_t  *coop;
@@ -85,7 +85,7 @@ cvar_t  *cl_monsterfootsteps;
 
 void SpawnEntities(const char *mapname, const char *entities, const char *spawnpoint);
 
-void RunEntity(edict_t *ent);
+void RunEntity(entity_t *ent);
 void WriteGame(const char *filename, qboolean autosave);
 void ReadGame(const char *filename);
 void WriteLevel(const char *filename);
@@ -99,7 +99,7 @@ void G_RunFrame(void);
 
 void ShutdownGame(void)
 {
-    gi.dprintf("==== ShutdownGame ====\n");
+    gi.DPrintf("==== ShutdownGame ====\n");
 
     // WatIs: C++-ify: Delete the edicts and clients arrays, they are allocated using new [], so need a delete[]
     //if (g_edicts)
@@ -125,7 +125,7 @@ is loaded.
 void InitGame(void)
 {
 
-    gi.dprintf("==== InitServerGame ====\n");
+    gi.DPrintf("==== InitServerGame ====\n");
 
     gun_x = gi.cvar("gun_x", "0", 0);
     gun_y = gi.cvar("gun_y", "0", 0);
@@ -201,7 +201,7 @@ void InitGame(void)
     // initialize all entities for this game
     game.maxentities = maxentities->value;
     clamp(game.maxentities, (int)maxclients->value + 1, MAX_EDICTS);
-    g_edicts = (edict_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
+    g_edicts = (entity_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
     globals.edicts = g_edicts;
     globals.max_edicts = game.maxentities;
 
@@ -254,7 +254,7 @@ svgame_export_t* GetServerGameAPI(svgame_import_t* import)
 
     globals.ServerCommand = ServerCommand;
 
-    globals.edict_size = sizeof(edict_t);
+    globals.entity_size = sizeof(entity_t);
 
     return &globals;
 }
@@ -274,7 +274,7 @@ void Com_LPrintf(print_type_t type, const char *fmt, ...)
     Q_vsnprintf(text, sizeof(text), fmt, argptr);
     va_end(argptr);
 
-    gi.dprintf("%s", text);
+    gi.DPrintf("%s", text);
 }
 
 void Com_Error(error_type_t type, const char *fmt, ...)
@@ -286,7 +286,7 @@ void Com_Error(error_type_t type, const char *fmt, ...)
     Q_vsnprintf(text, sizeof(text), fmt, argptr);
     va_end(argptr);
 
-    gi.error("%s", text);
+    gi.Error("%s", text);
 }
 #endif
 
@@ -301,7 +301,7 @@ ClientEndServerFrames
 void ClientEndServerFrames(void)
 {
     int     i;
-    edict_t *ent;
+    entity_t *ent;
 
     // calc the player views now that all pushing
     // and damage has been added
@@ -321,9 +321,9 @@ CreateTargetChangeLevel
 Returns the created target changelevel
 =================
 */
-edict_t *CreateTargetChangeLevel(char *map)
+entity_t *CreateTargetChangeLevel(char *map)
 {
-    edict_t *ent;
+    entity_t *ent;
 
     ent = G_Spawn();
     ent->classname = (char*)"target_changelevel"; // C++20: Added a cast.
@@ -341,7 +341,7 @@ The timelimit or fraglimit has been exceeded
 */
 void EndDMLevel(void)
 {
-    edict_t     *ent;
+    entity_t     *ent;
     char *s, *t, *f;
     static const char *seps = " ,\n\r";
 
@@ -435,7 +435,7 @@ void CheckDMRules(void)
 
     if (timelimit->value) {
         if (level.time >= timelimit->value * 60) {
-            gi.bprintf(PRINT_HIGH, "Timelimit hit.\n");
+            gi.BPrintf(PRINT_HIGH, "Timelimit hit.\n");
             EndDMLevel();
             return;
         }
@@ -448,7 +448,7 @@ void CheckDMRules(void)
                 continue;
 
             if (cl->resp.score >= fraglimit->value) {
-                gi.bprintf(PRINT_HIGH, "Fraglimit hit.\n");
+                gi.BPrintf(PRINT_HIGH, "Fraglimit hit.\n");
                 EndDMLevel();
                 return;
             }
@@ -465,7 +465,7 @@ ExitLevel
 void ExitLevel(void)
 {
     int     i;
-    edict_t *ent;
+    entity_t *ent;
     char    command [256];
 
     Q_snprintf(command, sizeof(command), "gamemap \"%s\"\n", level.changemap);
@@ -480,8 +480,8 @@ void ExitLevel(void)
         ent = g_edicts + 1 + i;
         if (!ent->inUse)
             continue;
-        if (ent->health > ent->client->pers.max_health)
-            ent->health = ent->client->pers.max_health;
+        if (ent->health > ent->client->pers.maxHealth)
+            ent->health = ent->client->pers.maxHealth;
     }
 
 }
@@ -496,7 +496,7 @@ Advances the world by 0.1 seconds
 void G_RunFrame(void)
 {
     int     i;
-    edict_t *ent;
+    entity_t *ent;
 
     level.framenum++;
     level.time = level.framenum * FRAMETIME;
@@ -513,7 +513,7 @@ void G_RunFrame(void)
 
     //
     // treat each object in turn
-    // even the world gets a chance to think
+    // even the world gets a chance to Think
     //
     ent = &g_edicts[0];
     for (i = 0 ; i < globals.num_edicts ; i++, ent++) {
@@ -525,9 +525,9 @@ void G_RunFrame(void)
         VectorCopy(ent->s.origin, ent->s.old_origin);
 
         // if the ground entity moved, make sure we are still on it
-        if ((ent->groundentity) && (ent->groundentity->linkCount != ent->groundentity_linkcount)) {
-            ent->groundentity = NULL;
-            if (!(ent->flags & (FL_SWIM | FL_FLY)) && (ent->svflags & SVF_MONSTER)) {
+        if ((ent->groundEntityPtr) && (ent->groundEntityPtr->linkCount != ent->groundEntityLinkCount)) {
+            ent->groundEntityPtr = NULL;
+            if (!(ent->flags & (FL_SWIM | FL_FLY)) && (ent->svFlags & SVF_MONSTER)) {
                 M_CheckGround(ent);
             }
         }
@@ -562,7 +562,7 @@ NULL will be returned if the end of the list is reached.
 
 =============
 */
-edict_t* G_Find(edict_t* from, int fieldofs, const char* match)
+entity_t* G_Find(entity_t* from, int fieldofs, const char* match)
 {
     char* s;
 
@@ -594,7 +594,7 @@ Returns entities that have origins within a spherical area
 G_FindEntitiesWithinRadius (origin, radius)
 =================
 */
-edict_t* G_FindEntitiesWithinRadius(edict_t* from, vec3_t org, float rad)
+entity_t* G_FindEntitiesWithinRadius(entity_t* from, vec3_t org, float rad)
 {
     vec3_t  eorg;
     int     j;
@@ -633,19 +633,19 @@ NULL will be returned if the end of the list is reached.
 */
 #define MAXCHOICES  8
 
-edict_t* G_PickTarget(char* targetname)
+entity_t* G_PickTarget(char* targetName)
 {
-    edict_t* ent = NULL;
+    entity_t* ent = NULL;
     int     num_choices = 0;
-    edict_t* choice[MAXCHOICES];
+    entity_t* choice[MAXCHOICES];
 
-    if (!targetname) {
-        gi.dprintf("G_PickTarget called with NULL targetname\n");
+    if (!targetName) {
+        gi.DPrintf("G_PickTarget called with NULL targetName\n");
         return NULL;
     }
 
     while (1) {
-        ent = G_Find(ent, FOFS(targetname), targetname);
+        ent = G_Find(ent, FOFS(targetName), targetName);
         if (!ent)
             break;
         choice[num_choices++] = ent;
@@ -654,7 +654,7 @@ edict_t* G_PickTarget(char* targetname)
     }
 
     if (!num_choices) {
-        gi.dprintf("G_PickTarget: target %s not found\n", targetname);
+        gi.DPrintf("G_PickTarget: target %s not found\n", targetName);
         return NULL;
     }
 
@@ -662,7 +662,7 @@ edict_t* G_PickTarget(char* targetname)
 }
 
 
-void G_InitEdict(edict_t* e)
+void G_InitEntity(entity_t* e)
 {
     e->inUse = true;
     e->classname = "noclass";
@@ -676,54 +676,54 @@ G_Spawn
 
 Either finds a free edict, or allocates a new one.
 Try to avoid reusing an entity that was recently freed, because it
-can cause the client to think the entity morphed into something else
+can cause the client to Think the entity morphed into something else
 instead of being removed and recreated, which can cause interpolated
 angles and bad trails.
 =================
 */
-edict_t* G_Spawn(void)
+entity_t* G_Spawn(void)
 {
     int         i;
-    edict_t* e;
+    entity_t* e;
 
     e = &g_edicts[game.maxclients + 1];
     for (i = game.maxclients + 1; i < globals.num_edicts; i++, e++) {
         // the first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
-        if (!e->inUse && (e->freetime < 2 || level.time - e->freetime > 0.5)) {
-            G_InitEdict(e);
+        if (!e->inUse && (e->freeTime < 2 || level.time - e->freeTime > 0.5)) {
+            G_InitEntity(e);
             return e;
         }
     }
 
     if (i == game.maxentities)
-        gi.error("ED_Alloc: no free edicts");
+        gi.Error("ED_Alloc: no free edicts");
 
     globals.num_edicts++;
-    G_InitEdict(e);
+    G_InitEntity(e);
     return e;
 }
 
 /*
 =================
-G_FreeEdict
+G_FreeEntity
 
 Marks the edict as free
 =================
 */
-void G_FreeEdict(edict_t* ed)
+void G_FreeEntity(entity_t* ed)
 {
-    gi.unlinkentity(ed);        // unlink from world
+    gi.UnlinkEntity(ed);        // unlink from world
 
     if ((ed - g_edicts) <= (maxclients->value + BODY_QUEUE_SIZE)) {
-        //      gi.dprintf("tried to free special edict\n");
+        //      gi.DPrintf("tried to free special edict\n");
         return;
     }
 
     // C++-ify, reset the struct itself.
     memset(ed, 0, sizeof(*ed));
-    //*ed = edict_t();
+    //*ed = entity_t();
     ed->classname = "freed";
-    ed->freetime = level.time;
+    ed->freeTime = level.time;
     ed->inUse = false;
 }

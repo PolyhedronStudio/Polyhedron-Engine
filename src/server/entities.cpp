@@ -181,7 +181,7 @@ void SV_WriteFrameToClient_Default(client_t *client)
     // this is the frame we are delta'ing from
     oldframe = get_last_frame(client);
     if (oldframe) {
-        oldstate = &oldframe->ps;
+        oldstate = &oldframe->playerState;
         lastframe = client->lastframe;
     } else {
         oldstate = NULL;
@@ -201,7 +201,7 @@ void SV_WriteFrameToClient_Default(client_t *client)
 
     // delta encode the playerstate
     MSG_WriteByte(svc_playerinfo);
-    MSG_WriteDeltaPlayerstate_Default(oldstate, &frame->ps);
+    MSG_WriteDeltaPlayerstate_Default(oldstate, &frame->playerState);
 
     // delta encode the entities
     MSG_WriteByte(svc_packetentities);
@@ -229,7 +229,7 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
     // this is the frame we are delta'ing from
     oldframe = get_last_frame(client);
     if (oldframe) {
-        oldstate = &oldframe->ps;
+        oldstate = &oldframe->playerState;
         delta = client->framenum - client->lastframe;
     } else {
         oldstate = NULL;
@@ -260,8 +260,8 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
         if (client->settings[CLS_NOBLEND]) {
             psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_BLEND);  // CPP: Cast
         }
-        if (frame->ps.pmove.type < PM_DEAD) {
-            if (!(frame->ps.pmove.flags & PMF_NO_PREDICTION)) {
+        if (frame->playerState.pmove.type < PM_DEAD) {
+            if (!(frame->playerState.pmove.flags & PMF_NO_PREDICTION)) {
                 psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_VIEWANGLES);  // CPP: Cast
             }
         } else {
@@ -272,7 +272,7 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
 
     clientEntityNum = 0;
 
-    if (frame->ps.pmove.type < PM_DEAD && !client->settings[CLS_RECORDING]) {
+    if (frame->playerState.pmove.type < PM_DEAD && !client->settings[CLS_RECORDING]) {
         clientEntityNum = frame->clientNum + 1;
     }
     if (client->settings[CLS_NOPREDICT]) {
@@ -282,7 +282,7 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
 
 
     // delta encode the playerstate
-    extraflags = MSG_WriteDeltaPlayerstate_Enhanced(oldstate, &frame->ps, psFlags);
+    extraflags = MSG_WriteDeltaPlayerstate_Enhanced(oldstate, &frame->playerState, psFlags);
 
     int clientNum = oldframe ? oldframe->clientNum : 0;
     if (clientNum != frame->clientNum) {
@@ -314,7 +314,7 @@ Build a client frame structure
 
 #if USE_FPS
 static void
-fix_old_origin(client_t *client, entity_packed_t *state, edict_t *ent, int e)
+fix_old_origin(client_t *client, entity_packed_t *state, entity_t *ent, int e)
 {
     server_entity_t *sent = &sv.entities[e];
     int i, j, k;
@@ -369,8 +369,8 @@ void SV_BuildClientFrame(client_t *client)
 {
     int         e;
     vec3_t      org;
-    edict_t     *ent;
-    edict_t     *clent;
+    entity_t     *ent;
+    entity_t     *clent;
     client_frame_t  *frame;
     entity_packed_t *state;
     player_state_t  *ps;
@@ -396,7 +396,7 @@ void SV_BuildClientFrame(client_t *client)
     client->frames_sent++;
 
     // find the client's PVS
-    ps = &clent->client->ps;
+    ps = &clent->client->playerState;
     // N&C: FF Precision.
     VectorAdd(ps->viewoffset, ps->pmove.origin, org);
     //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
@@ -409,7 +409,7 @@ void SV_BuildClientFrame(client_t *client)
     frame->areabytes = CM_WriteAreaBits(client->cm, frame->areabits, clientarea);
 
     // grab the current player_state_t
-    MSG_PackPlayer(&frame->ps, ps);
+    MSG_PackPlayer(&frame->playerState, ps);
 
     // grab the current clientNum
     if (g_features->integer & GMF_CLIENTNUM) {
@@ -443,7 +443,7 @@ void SV_BuildClientFrame(client_t *client)
         }
 
         // ignore ents without visible models
-        if (ent->svflags & SVF_NOCLIENT)
+        if (ent->svFlags & SVF_NOCLIENT)
             continue;
 
         // ignore ents without visible models unless they have an effect
@@ -465,11 +465,11 @@ void SV_BuildClientFrame(client_t *client)
         // ignore if not touching a PV leaf
         if (ent != clent) {
             // check area
-			if (clientcluster >= 0 && !CM_AreasConnected(client->cm, clientarea, ent->areanum)) {
+			if (clientcluster >= 0 && !CM_AreasConnected(client->cm, clientarea, ent->areaNumber)) {
                 // doors can legally straddle two areas, so
                 // we may need to check another one
-                if (!CM_AreasConnected(client->cm, clientarea, ent->areanum2)) {
-                    ent_visible = false;        // blocked by a door
+                if (!CM_AreasConnected(client->cm, clientarea, ent->areaNumber2)) {
+                    ent_visible = false;        // Blocked by a door
                 }
             }
 
@@ -482,7 +482,7 @@ void SV_BuildClientFrame(client_t *client)
                         ent_visible = false;
                 }
                 else {
-                    if (cull_nonvisible_entities && !SV_EdictIsVisible(client->cm, ent, clientpvs)) {
+                    if (cull_nonvisible_entities && !SV_EntityIsVisible(client->cm, ent, clientpvs)) {
                         ent_visible = false;
                     }
 

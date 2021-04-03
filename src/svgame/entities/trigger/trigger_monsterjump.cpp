@@ -18,27 +18,27 @@ Walking monsters that touch this will jump in the direction of the trigger's ang
 "height" default to 200, the speed thrown upwards
 */
 
-void trigger_monsterjump_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf)
+void trigger_monsterjump_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
 {
     if (other->flags & (FL_FLY | FL_SWIM))
         return;
-    if (other->svflags & SVF_DEADMONSTER)
+    if (other->svFlags & SVF_DEADMONSTER)
         return;
-    if (!(other->svflags & SVF_MONSTER))
+    if (!(other->svFlags & SVF_MONSTER))
         return;
 
     // set XY even if not on ground, so the jump will clear lips
-    other->velocity[0] = self->movedir[0] * self->speed;
-    other->velocity[1] = self->movedir[1] * self->speed;
+    other->velocity[0] = self->moveDirection[0] * self->speed;
+    other->velocity[1] = self->moveDirection[1] * self->speed;
 
-    if (!other->groundentity)
+    if (!other->groundEntityPtr)
         return;
 
-    other->groundentity = NULL;
-    other->velocity[2] = self->movedir[2];
+    other->groundEntityPtr = NULL;
+    other->velocity[2] = self->moveDirection[2];
 }
 
-void SP_trigger_monsterjump(edict_t* self)
+void SP_trigger_monsterjump(entity_t* self)
 {
     if (!self->speed)
         self->speed = 200;
@@ -47,6 +47,6 @@ void SP_trigger_monsterjump(edict_t* self)
     if (self->s.angles[vec3_t::Yaw] == 0)
         self->s.angles[vec3_t::Yaw] = 360;
     InitTrigger(self);
-    self->touch = trigger_monsterjump_touch;
-    self->movedir[2] = st.height;
+    self->Touch = trigger_monsterjump_touch;
+    self->moveDirection[2] = st.height;
 }

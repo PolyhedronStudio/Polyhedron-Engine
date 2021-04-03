@@ -12,7 +12,7 @@
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
 
-void player_pain(edict_t* self, edict_t* other, float kick, int damage)
+void player_pain(entity_t* self, entity_t* other, float kick, int damage)
 {
     // player pain is handled at the end of the frame in P_DamageFeedback
 }
@@ -22,7 +22,7 @@ void player_pain(edict_t* self, edict_t* other, float kick, int damage)
 LookAtKiller
 ==================
 */
-void LookAtKiller(edict_t* self, edict_t* inflictor, edict_t* attacker)
+void LookAtKiller(entity_t* self, entity_t* inflictor, entity_t* attacker)
 {
     vec3_t      dir;
 
@@ -57,14 +57,14 @@ void LookAtKiller(edict_t* self, edict_t* inflictor, edict_t* attacker)
 player_die
 ==================
 */
-void player_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point)
+void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point)
 {
     int     n;
 
     VectorClear(self->avelocity);
 
     self->takedamage = DAMAGE_YES;
-    self->movetype = MOVETYPE_TOSS;
+    self->moveType = MOVETYPE_TOSS;
 
     self->s.modelindex2 = 0;    // remove linked weapon model
 
@@ -77,12 +77,12 @@ void player_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
     self->maxs[2] = -8;
 
     //  self->solid = SOLID_NOT;
-    self->svflags |= SVF_DEADMONSTER;
+    self->svFlags |= SVF_DEADMONSTER;
 
-    if (!self->deadflag) {
+    if (!self->deadFlag) {
         self->client->respawn_time = level.time + 1.0;
         LookAtKiller(self, inflictor, attacker);
-        self->client->ps.pmove.type = PM_DEAD;
+        self->client->playerState.pmove.type = PM_DEAD;
         ClientUpdateObituary(self, inflictor, attacker);
         TossClientWeapon(self);
         if (deathmatch->value)
@@ -106,7 +106,7 @@ void player_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
 
     if (self->health < -40) {
         // gib
-        gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.Sound(self, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 4; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         ThrowClientHead(self, damage);
@@ -115,13 +115,13 @@ void player_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
     }
     else {
         // normal death
-        if (!self->deadflag) {
+        if (!self->deadFlag) {
             static int i;
 
             i = (i + 1) % 3;
             // start a death animation
             self->client->anim_priority = ANIM_DEATH;
-            if (self->client->ps.pmove.flags & PMF_DUCKED) {
+            if (self->client->playerState.pmove.flags & PMF_DUCKED) {
                 self->s.frame = FRAME_crdeath1 - 1;
                 self->client->anim_end = FRAME_crdeath5;
             }
@@ -139,11 +139,11 @@ void player_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage
                 self->client->anim_end = FRAME_death308;
                 break;
             }
-            gi.sound(self, CHAN_VOICE, gi.soundindex(va("*death%i.wav", (rand() % 4) + 1)), 1, ATTN_NORM, 0);
+            gi.Sound(self, CHAN_VOICE, gi.SoundIndex(va("*death%i.wav", (rand() % 4) + 1)), 1, ATTN_NORM, 0);
         }
     }
 
-    self->deadflag = DEAD_DEAD;
+    self->deadFlag = DEAD_DEAD;
 
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 }

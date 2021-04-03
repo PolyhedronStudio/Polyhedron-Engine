@@ -21,13 +21,13 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
 
     // First frame.
     if (cl->frame.number == 0) {
-        cl->predicted_origin = cl->frame.ps.pmove.origin;
-        cl->predicted_velocity = cl->frame.ps.pmove.velocity;
-        cl->predicted_angles = cl->frame.ps.viewAngles;
+        cl->predicted_origin = cl->frame.playerState.pmove.origin;
+        cl->predicted_velocity = cl->frame.playerState.pmove.velocity;
+        cl->predicted_angles = cl->frame.playerState.viewAngles;
     }
 
     // Compare what the server returned with what we had predicted it to be
-    cl->prediction_error = cl->frame.ps.pmove.origin - cl->predicted_origins[cmd & CMD_MASK];
+    cl->prediction_error = cl->frame.playerState.pmove.origin - cl->predicted_origins[cmd & CMD_MASK];
 
     // Length is 
     len = vec3_length(cl->prediction_error);
@@ -35,9 +35,9 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
         if (len > 2400.f / (1.0f / BASE_FRAMERATE)) {
             Com_DPrint("MAX_DELTA_ORIGIN: %s\n", vec3_to_str(cl->prediction_error).c_str());
 
-            cl->predicted_origin = cl->frame.ps.pmove.origin;
-            cl->predicted_velocity = cl->frame.ps.pmove.velocity;
-            cl->viewAngles = cl->frame.ps.viewAngles;
+            cl->predicted_origin = cl->frame.playerState.pmove.origin;
+            cl->predicted_velocity = cl->frame.playerState.pmove.velocity;
+            cl->viewAngles = cl->frame.playerState.viewAngles;
 
             cl->prediction_error = vec3_zero();
         }
@@ -50,7 +50,7 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
     if (cl->predicted_step_frame <= cmd)
         cl->predicted_step_frame = cmd + 1;
 
-    cl->predicted_origins[cmd & CMD_MASK] = cl->frame.ps.pmove.origin;
+    cl->predicted_origins[cmd & CMD_MASK] = cl->frame.playerState.pmove.origin;
 }
 
 //
@@ -61,9 +61,9 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
 //================
 //
 void CLG_PredictAngles(void) {
-    cl->predicted_angles[0] = cl->viewAngles[0] + SHORT2ANGLE(cl->frame.ps.pmove.delta_angles[0]);
-    cl->predicted_angles[1] = cl->viewAngles[1] + SHORT2ANGLE(cl->frame.ps.pmove.delta_angles[1]);
-    cl->predicted_angles[2] = cl->viewAngles[2] + SHORT2ANGLE(cl->frame.ps.pmove.delta_angles[2]);
+    cl->predicted_angles[0] = cl->viewAngles[0] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[0]);
+    cl->predicted_angles[1] = cl->viewAngles[1] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[1]);
+    cl->predicted_angles[2] = cl->viewAngles[2] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[2]);
 }
 
 //
@@ -78,7 +78,7 @@ static void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, cons
     int         i;
     trace_t     trace;
     mnode_t* headNode;
-    centity_t* ent;
+    cl_entity_t* ent;
     mmodel_t* cmodel;
 
     for (i = 0; i < cl->numSolidEntities; i++) {
@@ -102,7 +102,7 @@ static void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, cons
             mins, maxs, headNode, CONTENTS_MASK_PLAYERSOLID,
             ent->current.origin, ent->current.angles);
 
-        clgi.CM_ClipEntity(tr, &trace, (struct edict_s*)ent);
+        clgi.CM_ClipEntity(tr, &trace, (struct entity_s*)ent);
     }
 }
 
@@ -118,7 +118,7 @@ static trace_t q_gameabi CLG_Trace(const vec3_t &start, const vec3_t &mins, cons
     // check against world
     clgi.CM_BoxTrace(&t, start, end, mins, maxs, cl->bsp->nodes, CONTENTS_MASK_PLAYERSOLID);
     if (t.fraction < 1.0)
-        t.ent = (struct edict_s*)1;
+        t.ent = (struct entity_s*)1;
 
     // check all other solid models
     CLG_ClipMoveToEntities(start, mins, maxs, end, &t);
@@ -129,7 +129,7 @@ static trace_t q_gameabi CLG_Trace(const vec3_t &start, const vec3_t &mins, cons
 static int CLG_PointContents(const vec3_t &point)
 {
     int         i;
-    centity_t* ent;
+    cl_entity_t* ent;
     mmodel_t* cmodel;
     int         contents;
 
@@ -226,7 +226,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     memset(&pm, 0, sizeof(pm));
     pm.Trace = CLG_Trace;
     pm.PointContents = CLG_PointContents;
-    pm.state = cl->frame.ps.pmove;
+    pm.state = cl->frame.playerState.pmove;
 #if USE_SMOOTH_DELTA_ANGLES
     VectorCopy(cl->delta_angles, pm.state.delta_angles);
 #endif

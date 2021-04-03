@@ -11,22 +11,22 @@
 #include "../utils.h"        // Util funcs.
 
 //=====================================================
-void path_corner_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf)
+void path_corner_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
 {
     vec3_t      v;
-    edict_t* next;
+    entity_t* next;
 
-    if (other->movetarget != self)
+    if (other->moveTargetPtr != self)
         return;
 
     if (other->enemy)
         return;
 
-    if (self->pathtarget) {
+    if (self->pathTarget) {
         char* savetarget;
 
         savetarget = self->target;
-        self->target = self->pathtarget;
+        self->target = self->pathTarget;
         UTIL_UseTargets(self, other);
         self->target = savetarget;
     }
@@ -36,7 +36,7 @@ void path_corner_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_
     else
         next = NULL;
 
-    if ((next) && (next->spawnflags & 1)) {
+    if ((next) && (next->spawnFlags & 1)) {
         VectorCopy(next->s.origin, v);
         v[2] += next->mins[2];
         v[2] -= other->mins[2];
@@ -45,21 +45,21 @@ void path_corner_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_
         other->s.event = EV_OTHER_TELEPORT;
     }
 
-    other->goalentity = other->movetarget = next;
+    other->goalEntityPtr = other->moveTargetPtr = next;
 
     if (self->wait) {
-        other->monsterinfo.pausetime = level.time + self->wait;
-        other->monsterinfo.stand(other);
+        other->monsterInfo.pausetime = level.time + self->wait;
+        other->monsterInfo.stand(other);
         return;
     }
 
-    if (!other->movetarget) {
-        other->monsterinfo.pausetime = level.time + 100000000;
-        other->monsterinfo.stand(other);
+    if (!other->moveTargetPtr) {
+        other->monsterInfo.pausetime = level.time + 100000000;
+        other->monsterInfo.stand(other);
     }
     else {
-        VectorSubtract(other->goalentity->s.origin, other->s.origin, v);
-        other->ideal_yaw = vectoyaw(v);
+        VectorSubtract(other->goalEntityPtr->s.origin, other->s.origin, v);
+        other->idealYaw = vectoyaw(v);
     }
 }
 
@@ -68,18 +68,18 @@ Target: next path corner
 Pathtarget: gets used when an entity that has
     this path_corner targeted touches it
 */
-void SP_path_corner(edict_t* self)
+void SP_path_corner(entity_t* self)
 {
-    if (!self->targetname) {
-        gi.dprintf("path_corner with no targetname at %s\n", Vec3ToString(self->s.origin));
-        G_FreeEdict(self);
+    if (!self->targetName) {
+        gi.DPrintf("path_corner with no targetName at %s\n", Vec3ToString(self->s.origin));
+        G_FreeEntity(self);
         return;
     }
 
     self->solid = SOLID_TRIGGER;
-    self->touch = path_corner_touch;
+    self->Touch = path_corner_touch;
     VectorSet(self->mins, -8, -8, -8);
     VectorSet(self->maxs, 8, 8, 8);
-    self->svflags |= SVF_NOCLIENT;
-    gi.linkentity(self);
+    self->svFlags |= SVF_NOCLIENT;
+    gi.LinkEntity(self);
 }

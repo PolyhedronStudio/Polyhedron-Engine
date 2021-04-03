@@ -322,7 +322,7 @@ void CLG_MuzzleFlash() {
     vec3_t      fv, rv;
     cdlight_t* dl;
 #endif
-    centity_t* pl;
+    cl_entity_t* pl;
     float       volume;
     char        soundname[MAX_QPATH];
 
@@ -520,7 +520,7 @@ void CLG_MuzzleFlash() {
 //===============
 //
 void CLG_MuzzleFlash2() {
-    centity_t* ent;
+    cl_entity_t* ent;
     vec3_t      origin;
     const vec_t* ofs;
 #if USE_DLIGHTS
@@ -1384,7 +1384,7 @@ CLG_DiminishingTrail
 
 ===============
 */
-void CLG_DiminishingTrail(vec3_t start, vec3_t end, centity_t* old, int flags)
+void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags)
 {
     vec3_t      move;
     vec3_t      vec;
@@ -1483,7 +1483,7 @@ CLG_RocketTrail
 
 ===============
 */
-void CLG_RocketTrail(vec3_t start, vec3_t end, centity_t* old)
+void CLG_RocketTrail(vec3_t start, vec3_t end, cl_entity_t* old)
 {
     vec3_t      move;
     vec3_t      vec;
@@ -1719,7 +1719,7 @@ static void CLG_FlyParticles(vec3_t origin, int count)
     }
 }
 
-void CLG_FlyEffect(centity_t* ent, vec3_t origin)
+void CLG_FlyEffect(cl_entity_t* ent, vec3_t origin)
 {
     int     n;
     int     count;
@@ -1752,7 +1752,7 @@ void CLG_FlyEffect(centity_t* ent, vec3_t origin)
 CLG_BfgParticles
 ===============
 */
-void CLG_BfgParticles(entity_t* ent)
+void CLG_BfgParticles(r_entity_t* ent)
 {
     int         i;
     cparticle_t* p;

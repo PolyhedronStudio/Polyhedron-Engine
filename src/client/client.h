@@ -63,7 +63,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // N&C: TODO: REMOVE ONCE ALL OF THIS HAS MOVED TO THE GAME MODULE.
 extern explosion_t  cl_explosions[MAX_EXPLOSIONS];
-extern centity_t    cl_entities[MAX_EDICTS];
+extern cl_entity_t    cl_entities[MAX_EDICTS];
 
 // locally calculated frame flags for debug display
 #define FF_SERVERDROP   (1<<4)
@@ -242,7 +242,7 @@ typedef struct client_static_s {
         netstream_t     stream;
         size_t          msglen;
 
-        player_packed_t     ps;
+        player_packed_t     playerState;
         entity_packed_t     entities[MAX_EDICTS];
 
         sizebuf_t       message;
@@ -507,7 +507,7 @@ extern    qhandle_t gun_model;
 void V_Init(void);
 void V_Shutdown(void);
 void V_RenderView(void);
-void V_AddEntity(entity_t *ent);
+void V_AddEntity(r_entity_t *ent);
 void V_AddParticle(particle_t *p);
 #if USE_DLIGHTS
 void V_AddLight(const vec3_t &org, float intensity, float r, float g, float b);
@@ -549,10 +549,10 @@ void CL_CheckPredictionError(void);
 
 
 void CL_BigTeleportParticles(vec3_t org);
-void CL_RocketTrail(vec3_t start, vec3_t end, centity_t *old);
-void CL_DiminishingTrail(vec3_t start, vec3_t end, centity_t *old, int flags);
-void CL_FlyEffect(centity_t *ent, vec3_t origin);
-void CL_BfgParticles(entity_t *ent);
+void CL_RocketTrail(vec3_t start, vec3_t end, cl_entity_t *old);
+void CL_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t *old, int flags);
+void CL_FlyEffect(cl_entity_t *ent, vec3_t origin);
+void CL_BfgParticles(r_entity_t *ent);
 void CL_ItemRespawnParticles(vec3_t org);
 void CL_InitEffects(void);
 void CL_ClearEffects(void);
@@ -617,7 +617,7 @@ void CL_Widowbeamout(cl_sustain_t *self);
 void CL_Nukeblast(cl_sustain_t *self);
 void CL_WidowSplash(void);
 void CL_IonripperTrail(vec3_t start, vec3_t end);
-void CL_TrapParticles(entity_t *ent);
+void CL_TrapParticles(r_entity_t *ent);
 void CL_ParticleEffect3(vec3_t org, vec3_t dir, int color, int count);
 void CL_ParticleSteamEffect2(cl_sustain_t *self);
 

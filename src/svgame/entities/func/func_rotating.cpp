@@ -18,78 +18,78 @@ the point around which it is rotated. It will rotate around the Z axis by defaul
 check either the X_AXIS or Y_AXIS box to change that.
 
 "speed" determines how fast it moves; default value is 100.
-"dmg"   damage to inflict when blocked (2 default)
+"dmg"   damage to inflict when Blocked (2 default)
 
 REVERSE will cause the it to rotate in the opposite direction.
 STOP mean it will stop moving instead of pushing entities
 */
 
-void rotating_blocked(edict_t* self, edict_t* other)
+void rotating_blocked(entity_t* self, entity_t* other)
 {
     T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
-void rotating_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf)
+void rotating_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
 {
     if (self->avelocity[0] || self->avelocity[1] || self->avelocity[2])
         T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
-void rotating_use(edict_t* self, edict_t* other, edict_t* activator)
+void rotating_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     if (!VectorCompare(self->avelocity, vec3_origin)) {
         self->s.sound = 0;
         VectorClear(self->avelocity);
-        self->touch = NULL;
+        self->Touch = NULL;
     }
     else {
-        self->s.sound = self->moveinfo.sound_middle;
-        VectorScale(self->movedir, self->speed, self->avelocity);
-        if (self->spawnflags & 16)
-            self->touch = rotating_touch;
+        self->s.sound = self->moveInfo.sound_middle;
+        VectorScale(self->moveDirection, self->speed, self->avelocity);
+        if (self->spawnFlags & 16)
+            self->Touch = rotating_touch;
     }
 }
 
-void SP_func_rotating(edict_t* ent)
+void SP_func_rotating(entity_t* ent)
 {
     ent->solid = SOLID_BSP;
-    if (ent->spawnflags & 32)
-        ent->movetype = MOVETYPE_STOP;
+    if (ent->spawnFlags & 32)
+        ent->moveType = MOVETYPE_STOP;
     else
-        ent->movetype = MOVETYPE_PUSH;
+        ent->moveType = MOVETYPE_PUSH;
 
     // set the axis of rotation
-    VectorClear(ent->movedir);
-    if (ent->spawnflags & 4)
-        ent->movedir[2] = 1.0;
-    else if (ent->spawnflags & 8)
-        ent->movedir[0] = 1.0;
+    VectorClear(ent->moveDirection);
+    if (ent->spawnFlags & 4)
+        ent->moveDirection[2] = 1.0;
+    else if (ent->spawnFlags & 8)
+        ent->moveDirection[0] = 1.0;
     else // Z_AXIS
-        ent->movedir[1] = 1.0;
+        ent->moveDirection[1] = 1.0;
 
     // check for reverse rotation
-    if (ent->spawnflags & 2)
-        VectorNegate(ent->movedir, ent->movedir);
+    if (ent->spawnFlags & 2)
+        VectorNegate(ent->moveDirection, ent->moveDirection);
 
     if (!ent->speed)
         ent->speed = 100;
     if (!ent->dmg)
         ent->dmg = 2;
 
-    //  ent->moveinfo.sound_middle = "doors/hydro1.wav";
+    //  ent->moveInfo.sound_middle = "doors/hydro1.wav";
 
-    ent->use = rotating_use;
+    ent->Use = rotating_use;
     if (ent->dmg)
-        ent->blocked = rotating_blocked;
+        ent->Blocked = rotating_blocked;
 
-    if (ent->spawnflags & 1)
-        ent->use(ent, NULL, NULL);
+    if (ent->spawnFlags & 1)
+        ent->Use(ent, NULL, NULL);
 
-    if (ent->spawnflags & 64)
+    if (ent->spawnFlags & 64)
         ent->s.effects |= EF_ANIM_ALL;
-    if (ent->spawnflags & 128)
+    if (ent->spawnFlags & 128)
         ent->s.effects |= EF_ANIM_ALLFAST;
 
-    gi.setmodel(ent, ent->model);
-    gi.linkentity(ent);
+    gi.SetModel(ent, ent->model);
+    gi.LinkEntity(ent);
 }

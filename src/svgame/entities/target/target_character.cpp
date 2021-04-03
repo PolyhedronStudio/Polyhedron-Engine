@@ -16,12 +16,12 @@ used with target_string (must be on same "team")
 "count" is position in the string (starts at 1)
 */
 
-void SP_target_character(edict_t* self)
+void SP_target_character(entity_t* self)
 {
-    self->movetype = MOVETYPE_PUSH;
-    gi.setmodel(self, self->model);
+    self->moveType = MOVETYPE_PUSH;
+    gi.SetModel(self, self->model);
     self->solid = SOLID_BSP;
     self->s.frame = 12;
-    gi.linkentity(self);
+    gi.LinkEntity(self);
     return;
 }

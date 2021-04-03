@@ -104,7 +104,7 @@ static qboolean IN_GetCurrentGrab(void)
         if (cls.demo.playback && !Key_IsDown(K_SHIFT))
             return false;  // playing a demo (and not using freelook)
 
-        if (cl.frame.ps.pmove.type == PM_FREEZE)
+        if (cl.frame.playerState.pmove.type == PM_FREEZE)
             return false;  // spectator mode
     }
 
@@ -447,7 +447,7 @@ static void IN_Impulse(void)
 
 static void IN_CenterView(void)
 {
-    cl.viewAngles.x = -SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[0]);
+    cl.viewAngles.x = -SHORT2ANGLE(cl.frame.playerState.pmove.delta_angles[0]);
 }
 
 static void IN_MLookDown(void)
@@ -656,7 +656,7 @@ static void CL_ClampPitch(void)
 {
     float pitch;
 
-    pitch = SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[vec3_t::Pitch]);
+    pitch = SHORT2ANGLE(cl.frame.playerState.pmove.delta_angles[vec3_t::Pitch]);
     if (pitch > 180)
         pitch -= 360;
 

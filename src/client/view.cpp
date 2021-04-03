@@ -57,7 +57,7 @@ dlight_t    r_dlights[MAX_DLIGHTS];
 #endif
 
 int         r_numentities;
-entity_t    r_entities[MAX_ENTITIES];
+r_entity_t    r_entities[MAX_ENTITIES];
 
 int         r_numparticles;
 particle_t  r_particles[MAX_PARTICLES];
@@ -90,7 +90,7 @@ V_AddEntity
 
 =====================
 */
-void V_AddEntity(entity_t *ent)
+void V_AddEntity(r_entity_t *ent)
 {
     if (r_numentities >= MAX_ENTITIES)
         return;
@@ -336,8 +336,8 @@ static void V_Gun_Model_f(void)
 
 static int entitycmpfnc(const void *_a, const void *_b)
 {
-    const entity_t *a = (const entity_t *)_a;
-    const entity_t *b = (const entity_t *)_b;
+    const r_entity_t *a = (const r_entity_t *)_a;
+    const r_entity_t *b = (const r_entity_t *)_b;
 
     // all other models are sorted by model then skin
     if (a->model == b->model)
@@ -488,7 +488,7 @@ void V_RenderView(void)
         //  cl.refdef.lightstyles = r_lightstyles;
         // #endif
 
-        cl.refdef.rdflags = cl.frame.ps.rdflags;
+        cl.refdef.rdflags = cl.frame.playerState.rdflags;
 
         // sort entities for better cache locality
         qsort(cl.refdef.entities, cl.refdef.num_entities, sizeof(cl.refdef.entities[0]), entitycmpfnc);
@@ -600,7 +600,7 @@ N&C: This is the old actual client render function.
 //         cl.refdef.lightstyles = r_lightstyles;
 // #endif
 
-//         cl.refdef.rdflags = cl.frame.ps.rdflags;
+//         cl.refdef.rdflags = cl.frame.playerState.rdflags;
 
 //         // sort entities for better cache locality
 //         qsort(cl.refdef.entities, cl.refdef.num_entities, sizeof(cl.refdef.entities[0]), entitycmpfnc);

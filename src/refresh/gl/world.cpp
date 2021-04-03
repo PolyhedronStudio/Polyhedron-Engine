@@ -78,7 +78,7 @@ static qboolean _GL_LightPoint(const vec3_t &start, vec3_t &color)
     int             i, index;
     lightpoint_t    pt;
     vec3_t          end, mins, maxs;
-    entity_t        *ent;
+    r_entity_t        *ent;
     mmodel_t        *model;
     //vec_t           *angles;
     vec3_t          *angles;
@@ -362,7 +362,7 @@ void GL_DrawBspModel(mmodel_t *model)
     vec3_t bounds[2];
     vec_t dot;
     vec3_t transformed, temp;
-    entity_t *ent = glr.ent;
+    r_entity_t *ent = glr.ent;
     glCullResult_t cull;
 
     if (!model->numfaces)

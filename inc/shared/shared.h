@@ -205,8 +205,8 @@ typedef float vec_t;
 #define CL_1_FRAMETIME  cl.frametime_inv
 #define CL_FRAMEDIV     cl.framediv
 #define CL_FRAMESYNC    !(cl.frame.number % cl.framediv)
-#define CL_KEYPS        &cl.keyframe.ps
-#define CL_OLDKEYPS     &cl.oldkeyframe.ps
+#define CL_KEYPS        &cl.keyframe.playerState
+#define CL_OLDKEYPS     &cl.oldkeyframe.playerState
 #define CL_KEYLERPFRAC  cl.keylerpfrac
 #else
 // N&C: Moved here instead of client.h, for CG Module.
@@ -215,12 +215,12 @@ typedef float vec_t;
 #define CL_FRAMEDIV     1
 #define CL_FRAMESYNC    1
 #if CGAME_INCLUDE
-#define CL_KEYPS        &cl->frame.ps
-#define CL_OLDKEYPS     &cl->oldframe.ps
+#define CL_KEYPS        &cl->frame.playerState
+#define CL_OLDKEYPS     &cl->oldframe.playerState
 #define CL_KEYLERPFRAC  cl->lerpfrac
 #else
-#define CL_KEYPS        &cl.frame.ps
-#define CL_OLDKEYPS     &cl.oldframe.ps
+#define CL_KEYPS        &cl.frame.playerState
+#define CL_OLDKEYPS     &cl.oldframe.playerState
 #define CL_KEYLERPFRAC  cl.lerpfrac
 #endif
 #endif
@@ -616,7 +616,7 @@ typedef enum {
 // need to render in some way
 //-----------------
 typedef struct entity_state_s {
-    int     number;         // Edict index
+    int     number;         // Entity index
 
     vec3_t  origin;
     vec3_t  angles;
@@ -629,7 +629,7 @@ typedef struct entity_state_s {
     int     renderfx;
     int     solid;          // For client side prediction, 8*(bits 0-4) is x/y radius
                             // 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
-                            // gi.linkentity sets this properly
+                            // gi.LinkEntity sets this properly
     int     sound;          // For looping sounds, to guarantee shutoff
     int     event;          // Impulse events -- muzzle flashes, footsteps, etc
                             // events only go out for a single frame, they
@@ -908,7 +908,7 @@ void    Info_Print(const char* infostring);
 
 
 //-----------------
-// gi.BoxEdicts() can return a list of either solid or trigger entities
+// gi.BoxEntities() can return a list of either solid or trigger entities
 // FIXME: eliminate AREA_ distinction?
 //-----------------
 #define AREA_SOLID      1
@@ -934,7 +934,7 @@ typedef struct {
     cplane_t    plane;      // Surface normal at impact
     csurface_t* surface;   // Surface hit
     int         contents;   // Contents on other side of surface hit
-    struct edict_s* ent;   // Not set by CM_*() functions
+    struct entity_s* ent;   // Not set by CM_*() functions
 
     // N&C: Custom added.
     vec3_t		offsets[8];	// [signbits][x] = either size[0][x] or size[1][x]

@@ -17,14 +17,14 @@
 /*QUAKED func_killbox (1 0 0) ?
 Kills everything inside when fired, irrespective of protection.
 */
-void use_killbox(edict_t* self, edict_t* other, edict_t* activator)
+void use_killbox(entity_t* self, entity_t* other, entity_t* activator)
 {
     KillBox(self);
 }
 
-void SP_func_killbox(edict_t* ent)
+void SP_func_killbox(entity_t* ent)
 {
-    gi.setmodel(ent, ent->model);
-    ent->use = use_killbox;
-    ent->svflags = SVF_NOCLIENT;
+    gi.SetModel(ent, ent->model);
+    ent->Use = use_killbox;
+    ent->svFlags = SVF_NOCLIENT;
 }

@@ -41,7 +41,7 @@ typedef struct m_player_s {
 	menuSpinControl_t   view;
 
     refdef_t    refdef;
-    entity_t    entities[2];
+    r_entity_t    entities[2];
 
     int        time;
     int        oldTime;

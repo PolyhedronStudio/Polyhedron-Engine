@@ -24,20 +24,20 @@ NO_PROTECTION   *nothing* stops the damage
 "dmg"           default 5 (whole numbers only)
 
 */
-void hurt_use(edict_t* self, edict_t* other, edict_t* activator)
+void hurt_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     if (self->solid == SOLID_NOT)
         self->solid = SOLID_TRIGGER;
     else
         self->solid = SOLID_NOT;
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 
-    if (!(self->spawnflags & 2))
-        self->use = NULL;
+    if (!(self->spawnFlags & 2))
+        self->Use = NULL;
 }
 
 
-void hurt_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf)
+void hurt_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
 {
     int     dflags;
 
@@ -47,40 +47,40 @@ void hurt_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf
     if (self->timestamp > level.time)
         return;
 
-    if (self->spawnflags & 16)
+    if (self->spawnFlags & 16)
         self->timestamp = level.time + 1;
     else
         self->timestamp = level.time + FRAMETIME;
 
-    if (!(self->spawnflags & 4)) {
+    if (!(self->spawnFlags & 4)) {
         if ((level.framenum % 10) == 0)
-            gi.sound(other, CHAN_AUTO, self->noise_index, 1, ATTN_NORM, 0);
+            gi.Sound(other, CHAN_AUTO, self->noiseIndex, 1, ATTN_NORM, 0);
     }
 
-    if (self->spawnflags & 8)
+    if (self->spawnFlags & 8)
         dflags = DAMAGE_NO_PROTECTION;
     else
         dflags = 0;
     T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, self->dmg, dflags, MOD_TRIGGER_HURT);
 }
 
-void SP_trigger_hurt(edict_t* self)
+void SP_trigger_hurt(entity_t* self)
 {
     InitTrigger(self);
 
-    self->noise_index = gi.soundindex("world/electro.wav");
-    self->touch = hurt_touch;
+    self->noiseIndex = gi.SoundIndex("world/electro.wav");
+    self->Touch = hurt_touch;
 
     if (!self->dmg)
         self->dmg = 5;
 
-    if (self->spawnflags & 1)
+    if (self->spawnFlags & 1)
         self->solid = SOLID_NOT;
     else
         self->solid = SOLID_TRIGGER;
 
-    if (self->spawnflags & 2)
-        self->use = hurt_use;
+    if (self->spawnFlags & 2)
+        self->Use = hurt_use;
 
-    gi.linkentity(self);
+    gi.LinkEntity(self);
 }

@@ -60,7 +60,7 @@ typedef struct mvd_cs_s {
 } mvd_cs_t;
 
 typedef struct {
-    player_state_t ps;
+    player_state_t playerState;
     qboolean inUse;
     char name[16];
     mvd_cs_t *configstrings;
@@ -68,7 +68,7 @@ typedef struct {
 
 typedef struct {
     /* =================== */
-    player_state_t ps;
+    player_state_t playerState;
     int ping;
     int clientNum;
     /* =================== */
@@ -153,7 +153,7 @@ typedef struct mvd_s {
     char    mapname[MAX_QPATH];
     int     servercount;
     int     maxclients;
-    edict_pool_t pool;
+    entity_pool_t pool;
     cm_t    cm;
     vec3_t  spawnOrigin;
     vec3_t  spawnAngles;
@@ -161,7 +161,7 @@ typedef struct mvd_s {
     byte            dcs[CS_BITMAP_BYTES];
     char            baseconfigstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
     char            configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
-    edict_t         edicts[MAX_EDICTS];
+    entity_t         edicts[MAX_EDICTS];
     mvd_player_t    *players; // [maxclients]
     mvd_player_t    *dummy; // &players[clientNum]
     int             numplayers; // number of active players in frame
@@ -230,11 +230,11 @@ void MVD_RemoveClient(client_t *client);
 void MVD_BroadcastPrintf(mvd_t *mvd, int level,
                          int mask, const char *fmt, ...) q_printf(4, 5);
 void MVD_PrepWorldFrame(void);
-void MVD_GameClientNameChanged(edict_t *ent, const char *name);
-void MVD_GameClientDrop(edict_t *ent, const char *prefix, const char *reason);
+void MVD_GameClientNameChanged(entity_t *ent, const char *name);
+void MVD_GameClientDrop(entity_t *ent, const char *prefix, const char *reason);
 void MVD_UpdateClients(mvd_t *mvd);
 void MVD_FreePlayer(mvd_player_t *player);
 void MVD_UpdateConfigstring(mvd_t *mvd, int index);
 void MVD_SetPlayerNames(mvd_t *mvd);
-void MVD_LinkEdict(mvd_t *mvd, edict_t *ent);
+void MVD_LinkEntity(mvd_t *mvd, entity_t *ent);
 
