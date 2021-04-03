@@ -86,14 +86,6 @@ static struct {
 // Static locals.
 static pmoveParams_t* pmp;      // Pointer to the player movement parameter settings.
 
-
-// Player Movement Parameters
-static const float  pm_stopspeed = 100;
-static const float  pm_duckspeed = 100;
-static const float  pm_accelerate = 10;
-static const float  pm_wateraccelerate = 10;
-static const float  pm_waterspeed = 400;
-
 //
 // PM_MINS and PM_MAXS are the default bounding box, scaled by PM_SCALE
 // in Pm_Init. They are referenced in a few other places e.g. to create effects
@@ -125,8 +117,8 @@ static const vec3_t PM_GIBLET_MAXS = {  8.f,  8.f,  8.f };
 //===============
 //
 #ifdef CGAME_INCLUDE
-#define DEBUG_CLIENT_PMOVE 1
-#ifdef DEBUG_CLIENT_PMOVE
+#define DEBUG_CLIENT_PMOVE 0
+#if DEBUG_CLIENT_PMOVE == 1
 // Client debug output.
 static void CLGPM_Debug(const char* func, const char* fmt, ...) {
 
@@ -144,11 +136,19 @@ static void CLGPM_Debug(const char* func, const char* fmt, ...) {
 }
 #define PM_Debug(...) CLGM_Debug(__func__, __VA_ARGS__);
 #else
-#define PM_Debug () void(0)
+static void CLGPM_Debug(const char* func, const char* fmt, ...) {
+
+    va_list args;
+    va_start(args, fmt);
+
+    va_end(args);
+}
+#define PM_Debug(...) CLGM_Debug(__func__, __VA_ARGS__);
+//#define PM_Debug () void(0)
 #endif // PMOVE_DEBUG
 #else
-#define DEBUG_SERVER_PMOVE 1
-#ifdef DEBUG_SERVER_PMOVE
+#define DEBUG_SERVER_PMOVE 0
+#if DEBUG_SERVER_PMOVE == 1
 // Server debug output.
 static void SVGPM_Debug(const char* func, const char* fmt, ...) {
 
@@ -166,7 +166,16 @@ static void SVGPM_Debug(const char* func, const char* fmt, ...) {
 }
 #define PM_Debug(...) SVGPM_Debug(__func__, __VA_ARGS__);
 #else
-#define PM_Debug () void(0)
+// Server debug output.
+static void SVGPM_Debug(const char* func, const char* fmt, ...) {
+
+    va_list args;
+    va_start(args, fmt);
+
+    va_end(args);
+}
+#define PM_Debug(...) SVGPM_Debug(__func__, __VA_ARGS__);
+//#define PM_Debug (...) void(0)
 #endif // PMOVE_DEBUG
 #endif // CGAME_INCLUDE
 

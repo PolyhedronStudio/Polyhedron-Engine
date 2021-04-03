@@ -258,6 +258,17 @@ typedef struct client_shared_s {
     int num_entities;
 } client_shared_t;
 
+/**
+ * @brief Setup step interpolation.
+ */
+typedef struct {
+    float height;
+    uint32_t time;
+    uint32_t timestamp;
+    uint32_t interval;
+    float delta_height;
+} client_entity_step_t;
+
 //
 // The client structure is cleared at each level load, and is exposed to
 // * the client game module to provide access to media and other client state.
