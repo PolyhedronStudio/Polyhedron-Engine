@@ -922,25 +922,6 @@ size_t Q_snprintf(char* dest, size_t size, const char* fmt, ...)
 }
 
 /*
-=============
-Vec3ToString
-
-This is just a convenience function
-for printing vectors
-=============
-*/
-const char* Vec3ToString(const vec3_t& v)
-{
-    static uint32_t index;
-    static char str[8][MAX_QPATH];
-
-    char* s = str[index++ % 8];
-    snprintf(s, MAX_QPATH, "(%4.2f %4.2f %4.2f)", v.x, v.y, v.z);
-
-    return s;
-}
-
-/*
 ===============
 Q_scnprintf
 

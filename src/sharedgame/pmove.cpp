@@ -157,9 +157,9 @@ static void SVGPM_Debug(const char* func, const char* fmt, ...) {
     va_start(args, fmt);
 
     vsnprintf(buffer, sizeof(buffer), fmt, args);
-    std::string str = "[SVG PM_Debug:";
+    std::string str = "[SVGPM_Debug:{";
     str += func;
-    str += "] ";
+    str += "}] ";
     str += buffer;
     str += "\n";
     Com_DPrintf(str.c_str());
@@ -1324,7 +1324,7 @@ static void PM_WaterMove(void) {
 //
 static void PM_AirMove(void) {
 
-    PM_Debug("%s\n", Vec3ToString(pm->state.origin));
+    PM_Debug("%s", Vec3ToString(pm->state.origin));
 
     PM_Friction();
 

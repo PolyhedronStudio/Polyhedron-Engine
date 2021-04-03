@@ -30,11 +30,6 @@
 #endif
 
 // These need to be replaced.
-#define frand()     ((rand() & 32767) * (1.0 / 32767))
-#define crand()     ((rand() & 32767) * (2.0 / 32767) - 1)
-#define Q_rint(x)   ((x) < 0 ? ((int)((x) - 0.5f)) : ((int)((x) + 0.5f)))
-
-// These need to be replaced.
 #define Q_IsBitSet(data, bit)   (((data)[(bit) >> 3] & (1 << ((bit) & 7))) != 0)
 #define Q_SetBit(data, bit)     ((data)[(bit) >> 3] |= (1 << ((bit) & 7)))
 #define Q_ClearBit(data, bit)   ((data)[(bit) >> 3] &= ~(1 << ((bit) & 7)))
@@ -359,5 +354,12 @@ static inline int Q_gcd(int a, int b)
     }
     return a;
 }
+
+// These need to be replaced.
+//#define frand()     ((rand() & 32767) * (1.0 / 32767))
+#define frand()     Randomf()
+//#define crand()     ((rand() & 32767) * (2.0 / 32767) - 1)
+#define crand()     Randomui()
+#define Q_rint(x)   ((x) < 0 ? ((int)((x) - 0.5f)) : ((int)((x) + 0.5f)))
 
 #endif // __INC_SHARED_MATH_UTILITIES_H__
