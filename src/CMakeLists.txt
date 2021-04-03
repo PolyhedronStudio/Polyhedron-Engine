@@ -64,18 +64,19 @@ SET(SRC_SVGAME
 	svgame/entities/func/func_wall.cpp
 	svgame/entities/func/func_water.cpp
 	
-	svgame/entities/misc/misc_banner.cpp 
-	svgame/entities/misc/misc_bigviper.cpp 
+	svgame/entities/info/info_notnull.cpp
+	svgame/entities/info/info_null.cpp
+	svgame/entities/info/info_player_coop.cpp
+	svgame/entities/info/info_player_deathmatch.cpp
+	svgame/entities/info/info_player_intermission.cpp
+	svgame/entities/info/info_player_start.cpp
+
 	svgame/entities/misc/misc_blackhole.cpp 
 	svgame/entities/misc/misc_deadsoldier.cpp 
-	svgame/entities/misc/misc_easterchick.cpp 
-	svgame/entities/misc/misc_easterchick2.cpp 
-	svgame/entities/misc/misc_eastertank.cpp 
 	svgame/entities/misc/misc_explobox.cpp 
 	svgame/entities/misc/misc_gib_arm.cpp 
 	svgame/entities/misc/misc_gib_leg.cpp 
 	svgame/entities/misc/misc_gib_head.cpp 
-	svgame/entities/misc/misc_satellite_dish.cpp 
 	svgame/entities/misc/misc_strogg_ship.cpp 
 	svgame/entities/misc/misc_teleporter.cpp
 	svgame/entities/misc/misc_teleporter_dest.cpp
@@ -111,8 +112,6 @@ SET(SRC_SVGAME
 	svgame/entities/trigger/trigger_push.cpp
 	svgame/entities/trigger/trigger_relay.cpp
 	
-	svgame/entities/info_notnull.cpp
-	svgame/entities/info_null.cpp
 	svgame/entities/light.cpp
 	svgame/entities/light_mine1.cpp
 	svgame/entities/light_mine2.cpp

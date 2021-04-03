@@ -8,7 +8,7 @@
 //
 
 // Include local game header.
-#include "../g_local.h"
+#include "../../g_local.h"
 
 //=====================================================
 /*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)

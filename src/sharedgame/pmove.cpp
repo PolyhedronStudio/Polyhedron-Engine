@@ -829,11 +829,12 @@ static qboolean PM_CheckWaterJump(void) {
             return false;
         }
 
-        // jump out of water
+        // Set up water velocity.
         pm->state.velocity.z = PM_SPEED_WATER_JUMP;
 
+        // Set up the time state, JUMP == HELD, WATER JUMPING == ACTIVE
         pm->state.flags |= PMF_TIME_WATER_JUMP | PMF_JUMP_HELD;
-        pm->state.time = 2000;
+        pm->state.time = 2000; // 2 seconds.
 
         return true;
     }
@@ -849,30 +850,40 @@ static qboolean PM_CheckWaterJump(void) {
 //===============
 //
 static void PM_CheckWater(void) {
+    // When checking for water level we first reset all to defaults for this frame.
     pm->waterLevel = WATER_NONE;
     pm->waterType = 0;
 
-    vec3_t pos = pm->state.origin;
-    pos.z = pm->state.origin.z + pm->mins.z + PM_GROUND_DIST;
+    // Create the position for testing.
+    vec3_t contentPosition = {
+        pm->state.origin.x,
+        pm->state.origin.y,
+        // Pick the mins bounding box Z, PM_GROUND_DIST and add it to our current Z to use for testing.
+        // (This should give us about the feet pos)
+        pm->state.origin.z + pm->mins.z + PM_GROUND_DIST
+    };
 
-    int32_t contents = pm->PointContents(pos);
+    // Perform the actual test.
+    int32_t contents = pm->PointContents(contentPosition);
+
+    // Are we in liquid? Hallelujah!
     if (contents & CONTENTS_MASK_LIQUID) {
-
+        // Watertype is whichever ocntents type we are in with at least our feet.
         pm->waterType = contents;
         pm->waterLevel = WATER_FEET;
 
-        pos.z = pm->state.origin.z;
+        contentPosition.z = pm->state.origin.z;
 
-        contents = pm->PointContents(pos);
+        contents = pm->PointContents(contentPosition);
 
         if (contents & CONTENTS_MASK_LIQUID) {
 
             pm->waterType |= contents;
             pm->waterLevel = WATER_WAIST;
 
-            pos.z = pm->state.origin.z + pm->state.view_offset.z + 1.0f;
+            contentPosition.z = pm->state.origin.z + pm->state.view_offset.z + 1.0f;
 
-            contents = pm->PointContents(pos);
+            contents = pm->PointContents(contentPosition);
 
             if (contents & CONTENTS_MASK_LIQUID) {
                 pm->waterType |= contents;
@@ -975,100 +986,18 @@ static void PM_CheckGround(void) {
 //
 //=============================================================================
 //
-//	POSITION TESTING
-//
-//=============================================================================
-//
-//
-//===============
-// PM_TestPosition
-// 
-// Tests for whether the position is valid, or not.
-// (In a wall, or object, etc.) 
-//===============
-//
-static qboolean PM_TestPosition(void)
-{
-    // This check is not needed anymore. Whether to test for a position or not
-    // can now be decided by calling PM_FinalizePosition with true as its arg. 
-    //if (pm->state.type == PM_SPECTATOR)
-    //    return true;
-
-    // Copy over the s.origin to end and origin for trace testing.
-    vec3_t origin = pm->state.origin;
-    vec3_t end = pm->state.origin;
-
-    // Do a trace test.
-    trace_t trace = PM_TraceCorrectAllSolid(origin, pm->mins, pm->maxs, end);
-
-    // Return whether not allsolid.
-    return !trace.allsolid;
-}
-
-//
-//===============
-// PM_FinalizePosition
-// 
-// Copies over the velocity and origin back into the player movement pmove
-// state. 
-// 
-// If testForValid is true, it'll do some extra work. Where in case of a 
-// good position, the function returns and is done. If invalid, it'll revert to
-// the old origin. By doing so, we prevent from moving into objects and walls.
-// 
-// The PM_SpectatorMove for example does NOT test for a valid position, it is 
-// free to move wherever it pleases.
-//===============
-//
-static qboolean PM_FinalizePosition(qboolean testForValid) {
-
-
-    // Don't test for a valid position if not wished for.
-    if (!testForValid)
-        return true;
-
-    // Check to see if the position is valid.
-    if (PM_TestPosition())
-        return true;
-
-    // Revert back to the previous origin.
-    pm->state.origin = playerMoveLocals.previousOrigin;
-
-    return false;
-}
-
-//
-//===============
-// PM_TestInitialPosition
-// 
-// In case the position has been changed outside of PMove, it'll test its new
-// position and copy it over in case it is valid.
-//===============
-//
-static void PM_TestInitialPosition(void)
-{
-    // Do 
-    if (PM_TestPosition()) {
-        // Copy over the state origin in case it is valid.
-        pm->state.origin = pm->state.origin;
-        playerMoveLocals.previousOrigin = pm->state.origin;
-        return;
-    }
-}
-
-
-
-//
-//=============================================================================
-//
 //	PHYSICS - ACCELERATION/FRICTION/GRAVITY
 //
 //=============================================================================
 //
 
-/**
- * @brief Handles friction against user intentions, and based on contents.
- */
+//
+//===============
+// PM_Friction
+// 
+// Handles friction against user intentions, and based on contents.
+//===============
+//
 static void PM_Friction(void) {
     vec3_t vel = pm->state.velocity;
 
@@ -1087,24 +1016,25 @@ static void PM_Friction(void) {
 
     float friction = 0.0;
 
-    if (pm->state.type == PM_SPECTATOR) { // spectator friction
+    // SPECTATOR friction
+    if (pm->state.type == PM_SPECTATOR) {
         friction = PM_FRICT_SPECTATOR;
-    }
-    else if (pm->state.flags & PMF_ON_LADDER) { // ladder friction
+    // LADDER friction
+    } else if (pm->state.flags & PMF_ON_LADDER) {
         friction = PM_FRICT_LADDER;
-    }
-    else if (pm->waterLevel > WATER_FEET) { // water friction
+    // WATER friction.
+    } else if (pm->waterLevel > WATER_FEET) {
         friction = PM_FRICT_WATER;
-    }
-    else if (pm->state.flags & PMF_ON_GROUND) { // ground friction
+    // GROUND friction.
+    } else if (pm->state.flags & PMF_ON_GROUND) {
         if (playerMoveLocals.ground.surface && (playerMoveLocals.ground.surface->flags & SURF_SLICK)) {
             friction = PM_FRICT_GROUND_SLICK;
         }
         else {
             friction = PM_FRICT_GROUND;
         }
-    }
-    else { // everything else friction
+    // OTHER friction
+    } else { 
         friction = PM_FRICT_AIR;
     }
 
@@ -1116,7 +1046,7 @@ static void PM_Friction(void) {
 
 //
 //===============
-// PM_Gravity
+// PM_Accelerate
 // 
 // Returns the newly user intended velocity
 //===============
