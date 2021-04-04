@@ -2253,7 +2253,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //	vec3_t dir;
 //
 //	VectorSubtract(elight->origin, lightTarget->s.origin, dir);
-//	VectorNormalize(dir);
+//	dir = vec3_normalize(dir);
 //	VectorCopy(dir, elight->nacDirection);
 //}
 //
@@ -3258,7 +3258,7 @@ prepare_camera(const vec3_t position, const vec3_t direction, mat4_t data)
 {
 	vec3_t forward, right, up;
 	VectorCopy(direction, forward);
-	VectorNormalize(forward);
+	forward = vec3_normalize(forward);
 
 	if (fabs(forward[2]) < 0.99f)
 		VectorSet(up, 0.f, 0.f, 1.f);
@@ -3267,8 +3267,8 @@ prepare_camera(const vec3_t position, const vec3_t direction, mat4_t data)
 
 	CrossProduct(forward, up, right);
 	CrossProduct(right, forward, up);
-	VectorNormalize(up);
-	VectorNormalize(right);
+	up = vec3_normalize(up);
+	right = vec3_normalize(right);
 
 	float aspect = 1.75f;
 	float tan_half_fov_x = 1.f;
@@ -4510,7 +4510,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t &axis)
 	byte *data = NULL;
 
 	sky_rotation = rotate;
-	VectorNormalize2(axis, sky_axis);
+	sky_axis = vec3_normalize(axis);
 
 	int avg_color[3] = { 0 };
 	int w_prev, h_prev;

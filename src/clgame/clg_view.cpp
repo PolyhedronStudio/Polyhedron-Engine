@@ -280,7 +280,7 @@ static void CLG_SetupThirdPersionView(void)
     cl->refdef.vieworg[2] += 8;
 
     cl->refdef.viewAngles[vec3_t::Pitch] *= 0.5f;
-    AngleVectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
+    vec3_vectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
 
     angle = Radians(cl_thirdperson_angle->value);
     range = cl_thirdperson_range->value;
@@ -292,7 +292,7 @@ static void CLG_SetupThirdPersionView(void)
     clgi.CM_BoxTrace(&trace, cl->playerEntityOrigin, cl->refdef.vieworg,
         mins, maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
     if (trace.fraction != 1.0f) {
-        VectorCopy(trace.endpos, cl->refdef.vieworg);
+        VectorCopy(trace.endPosition, cl->refdef.vieworg);
     }
 
     VectorSubtract(focus, cl->refdef.vieworg, focus);

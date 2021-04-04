@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "g_local.h"         // Include SVGame funcs.
 #include "utils.h"           // Include Utilities funcs.
 
-qboolean FindTarget(entity_t *self);
+qboolean AI_FindTarget(entity_t *self);
 extern cvar_t   *maxclients;
 
 qboolean ai_checkattack(entity_t *self, float dist);
@@ -78,13 +78,13 @@ void AI_SetSightClient(void)
 
 /*
 =============
-ai_move
+AI_Move
 
 Move the specified distance at current facing.
 This replaces the QC functions: ai_forward, ai_back, ai_pain, and ai_painforward
 ==============
 */
-void ai_move(entity_t *self, float dist)
+void AI_Move(entity_t *self, float dist)
 {
     M_walkmove(self, self->s.angles[vec3_t::Yaw], dist);
 }
@@ -92,35 +92,35 @@ void ai_move(entity_t *self, float dist)
 
 /*
 =============
-ai_stand
+AI_Stand
 
 Used for standing around and looking for players
 Distance is for slight position adjustments needed by the animations
 ==============
 */
-void ai_stand(entity_t *self, float dist)
+void AI_Stand(entity_t *self, float dist)
 {
     vec3_t  v;
 
     if (dist)
         M_walkmove(self, self->s.angles[vec3_t::Yaw], dist);
 
-    if (self->monsterInfo.aiflags & AI_STAND_GROUND) {
+    if (self->monsterInfo.aiflags & AI_Stand_GROUND) {
         if (self->enemy) {
             VectorSubtract(self->enemy->s.origin, self->s.origin, v);
             self->idealYaw = vectoyaw(v);
             if (self->s.angles[vec3_t::Yaw] != self->idealYaw && self->monsterInfo.aiflags & AI_TEMP_STAND_GROUND) {
-                self->monsterInfo.aiflags &= ~(AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
+                self->monsterInfo.aiflags &= ~(AI_Stand_GROUND | AI_TEMP_STAND_GROUND);
                 self->monsterInfo.run(self);
             }
             M_ChangeYaw(self);
             ai_checkattack(self, 0);
         } else
-            FindTarget(self);
+            AI_FindTarget(self);
         return;
     }
 
-    if (FindTarget(self))
+    if (AI_FindTarget(self))
         return;
 
     if (level.time > self->monsterInfo.pausetime) {
@@ -141,17 +141,17 @@ void ai_stand(entity_t *self, float dist)
 
 /*
 =============
-ai_walk
+AI_Walk
 
 The monster is walking it's beat
 =============
 */
-void ai_walk(entity_t *self, float dist)
+void AI_Walk(entity_t *self, float dist)
 {
     M_MoveToGoal(self, dist);
 
     // check for noticing a player
-    if (FindTarget(self))
+    if (AI_FindTarget(self))
         return;
 
     if ((self->monsterInfo.search) && (level.time > self->monsterInfo.idle_time)) {
@@ -167,13 +167,13 @@ void ai_walk(entity_t *self, float dist)
 
 /*
 =============
-ai_charge
+AI_Charge
 
 Turns towards target and advances
 Use this call with a distnace of 0 to replace ai_face
 ==============
 */
-void ai_charge(entity_t *self, float dist)
+void AI_Charge(entity_t *self, float dist)
 {
     vec3_t  v;
 
@@ -188,18 +188,18 @@ void ai_charge(entity_t *self, float dist)
 
 /*
 =============
-ai_turn
+AI_Turn
 
 don't move, but turn towards ideal_yaw
 Distance is for slight position adjustments needed by the animations
 =============
 */
-void ai_turn(entity_t *self, float dist)
+void AI_Turn(entity_t *self, float dist)
 {
     if (dist)
         M_walkmove(self, self->s.angles[vec3_t::Yaw], dist);
 
-    if (FindTarget(self))
+    if (AI_FindTarget(self))
         return;
 
     M_ChangeYaw(self);
@@ -234,7 +234,7 @@ walkmove(angle, speed) primitive is all or nothing
 
 /*
 =============
-range
+AI_GetEntityRangeCategory
 
 returns the range catagorization of an entity reletive to self
 0   melee range, will become hostile even if back is turned
@@ -243,13 +243,13 @@ returns the range catagorization of an entity reletive to self
 3   only triggered by damage
 =============
 */
-int range(entity_t *self, entity_t *other)
+int AI_GetEntityRangeCategory(entity_t *self, entity_t *other)
 {
     vec3_t  v;
     float   len;
 
-    VectorSubtract(self->s.origin, other->s.origin, v);
-    len = VectorLength(v);
+    len = vec3_distance(self->s.origin, other->s.origin);
+
     if (len < MELEE_DISTANCE)
         return RANGE_MELEE;
     if (len < 500)
@@ -261,12 +261,12 @@ int range(entity_t *self, entity_t *other)
 
 /*
 =============
-visible
+AI_IsEntityVisibleToSelf
 
 returns 1 if the entity is visible to self, even if not infront ()
 =============
 */
-qboolean visible(entity_t *self, entity_t *other)
+qboolean AI_IsEntityVisibleToSelf(entity_t *self, entity_t *other)
 {
     vec3_t  spot1;
     vec3_t  spot2;
@@ -276,7 +276,7 @@ qboolean visible(entity_t *self, entity_t *other)
     spot1[2] += self->viewHeight;
     VectorCopy(other->s.origin, spot2);
     spot2[2] += other->viewHeight;
-    trace = gi.Trace(spot1, vec3_origin, vec3_origin, spot2, self, CONTENTS_MASK_OPAQUE);
+    trace = gi.Trace(spot1, vec3_zero(), vec3_zero(), spot2, self, CONTENTS_MASK_OPAQUE);
 
     if (trace.fraction == 1.0)
         return true;
@@ -286,20 +286,20 @@ qboolean visible(entity_t *self, entity_t *other)
 
 /*
 =============
-infront
+AI_IsEntityInFrontOfSelf
 
 returns 1 if the entity is in front (in sight) of self
 =============
 */
-qboolean infront(entity_t *self, entity_t *other)
+qboolean AI_IsEntityInFrontOfSelf(entity_t *self, entity_t *other)
 {
     vec3_t  vec;
     float   dot;
     vec3_t  forward;
 
-    AngleVectors(self->s.angles, &forward, NULL, NULL);
+    vec3_vectors(self->s.angles, &forward, NULL, NULL);
     VectorSubtract(other->s.origin, self->s.origin, vec);
-    VectorNormalize(vec);
+    vec = vec3_normalize(vec);
     dot = DotProduct(vec, forward);
 
     if (dot > 0.3)
@@ -310,23 +310,23 @@ qboolean infront(entity_t *self, entity_t *other)
 
 //============================================================================
 
-void HuntTarget(entity_t *self)
+void AI_HuntTarget(entity_t *self)
 {
     vec3_t  vec;
 
     self->goalEntityPtr = self->enemy;
-    if (self->monsterInfo.aiflags & AI_STAND_GROUND)
+    if (self->monsterInfo.aiflags & AI_Stand_GROUND)
         self->monsterInfo.stand(self);
     else
         self->monsterInfo.run(self);
     VectorSubtract(self->enemy->s.origin, self->s.origin, vec);
     self->idealYaw = vectoyaw(vec);
     // wait a while before first attack
-    if (!(self->monsterInfo.aiflags & AI_STAND_GROUND))
+    if (!(self->monsterInfo.aiflags & AI_Stand_GROUND))
         AttackFinished(self, 1);
 }
 
-void FoundTarget(entity_t *self)
+void AI_FoundTarget(entity_t *self)
 {
     // let other monsters see this monster for a while
     if (self->enemy->client) {
@@ -341,14 +341,14 @@ void FoundTarget(entity_t *self)
     self->monsterInfo.trail_time = level.time;
 
     if (!self->combatTarget) {
-        HuntTarget(self);
+        AI_HuntTarget(self);
         return;
     }
 
     self->goalEntityPtr = self->moveTargetPtr = G_PickTarget(self->combatTarget);
     if (!self->moveTargetPtr) {
         self->goalEntityPtr = self->moveTargetPtr = self->enemy;
-        HuntTarget(self);
+        AI_HuntTarget(self);
         gi.DPrintf("%s at %s, combatTarget %s not found\n", self->classname, vec3_to_str(self->s.origin), self->combatTarget);
         return;
     }
@@ -368,7 +368,7 @@ void FoundTarget(entity_t *self)
 
 /*
 ===========
-FindTarget
+AI_FindTarget
 
 Self is currently not attacking anything, so try to find a target
 
@@ -383,7 +383,7 @@ checked each frame.  This means multi player games will have slightly
 slower noticing monsters.
 ============
 */
-qboolean FindTarget(entity_t *self)
+qboolean AI_FindTarget(entity_t *self)
 {
     entity_t     *client;
     qboolean    heardit;
@@ -450,7 +450,7 @@ qboolean FindTarget(entity_t *self)
         return false;
 
     if (!heardit) {
-        r = range(self, client);
+        r = AI_GetEntityRangeCategory(self, client);
 
         if (r == RANGE_FAR)
             return false;
@@ -461,16 +461,16 @@ qboolean FindTarget(entity_t *self)
         if (client->lightLevel <= 5)
             return false;
 
-        if (!visible(self, client)) {
+        if (!AI_IsEntityVisibleToSelf(self, client)) {
             return false;
         }
 
         if (r == RANGE_NEAR) {
-            if (client->showHostile < level.time && !infront(self, client)) {
+            if (client->showHostile < level.time && !AI_IsEntityInFrontOfSelf(self, client)) {
                 return false;
             }
         } else if (r == RANGE_MID) {
-            if (!infront(self, client)) {
+            if (!AI_IsEntityInFrontOfSelf(self, client)) {
                 return false;
             }
         }
@@ -492,7 +492,7 @@ qboolean FindTarget(entity_t *self)
         vec3_t  temp;
 
         if (self->spawnFlags & 1) {
-            if (!visible(self, client))
+            if (!AI_IsEntityVisibleToSelf(self, client))
                 return false;
         } else {
             if (!gi.InPHS(self->s.origin, client->s.origin))
@@ -521,7 +521,7 @@ qboolean FindTarget(entity_t *self)
 //
 // got one
 //
-    FoundTarget(self);
+    AI_FoundTarget(self);
 
     if (!(self->monsterInfo.aiflags & AI_SOUND_TARGET) && (self->monsterInfo.sight))
         self->monsterInfo.sight(self, self->enemy);
@@ -564,7 +564,7 @@ qboolean M_CheckAttack(entity_t *self)
         VectorCopy(self->enemy->s.origin, spot2);
         spot2[2] += self->enemy->viewHeight;
 
-        tr = gi.Trace(spot1, vec3_origin, vec3_origin, spot2, self, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_SLIME | CONTENTS_LAVA | CONTENTS_WINDOW);
+        tr = gi.Trace(spot1, vec3_zero(), vec3_zero(), spot2, self, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_SLIME | CONTENTS_LAVA | CONTENTS_WINDOW);
 
         // do we have a clear shot?
         if (tr.ent != self->enemy)
@@ -593,7 +593,7 @@ qboolean M_CheckAttack(entity_t *self)
     if (enemy_range == RANGE_FAR)
         return false;
 
-    if (self->monsterInfo.aiflags & AI_STAND_GROUND) {
+    if (self->monsterInfo.aiflags & AI_Stand_GROUND) {
         chance = 0.4;
     } else if (enemy_range == RANGE_MELEE) {
         chance = 0.2;
@@ -629,12 +629,12 @@ qboolean M_CheckAttack(entity_t *self)
 
 /*
 =============
-ai_run_melee
+AI_Run_melee
 
 Turn and close until within an angle to launch a melee attack
 =============
 */
-void ai_run_melee(entity_t *self)
+void AI_Run_melee(entity_t *self)
 {
     self->idealYaw = enemy_yaw;
     M_ChangeYaw(self);
@@ -648,12 +648,12 @@ void ai_run_melee(entity_t *self)
 
 /*
 =============
-ai_run_missile
+AI_Run_missile
 
 Turn in place until within an angle to launch a missile attack
 =============
 */
-void ai_run_missile(entity_t *self)
+void AI_Run_missile(entity_t *self)
 {
     self->idealYaw = enemy_yaw;
     M_ChangeYaw(self);
@@ -667,12 +667,12 @@ void ai_run_missile(entity_t *self)
 
 /*
 =============
-ai_run_slide
+AI_Run_slide
 
 Strafe sideways, but stay at aproximately the same range
 =============
 */
-void ai_run_slide(entity_t *self, float distance)
+void AI_Run_slide(entity_t *self, float distance)
 {
     float   ofs;
 
@@ -697,7 +697,7 @@ void ai_run_slide(entity_t *self, float distance)
 ai_checkattack
 
 Decides if we're going to attack or do something else
-used by ai_run and ai_stand
+used by AI_Run and AI_Stand
 =============
 */
 qboolean ai_checkattack(entity_t *self, float dist)
@@ -720,7 +720,7 @@ qboolean ai_checkattack(entity_t *self, float dist)
                 }
                 self->monsterInfo.aiflags &= ~AI_SOUND_TARGET;
                 if (self->monsterInfo.aiflags & AI_TEMP_STAND_GROUND)
-                    self->monsterInfo.aiflags &= ~(AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
+                    self->monsterInfo.aiflags &= ~(AI_Stand_GROUND | AI_TEMP_STAND_GROUND);
             } else {
                 self->showHostile = level.time + 1;
                 return false;
@@ -755,7 +755,7 @@ qboolean ai_checkattack(entity_t *self, float dist)
         if (self->oldEnemyPtr && self->oldEnemyPtr->health > 0) {
             self->enemy = self->oldEnemyPtr;
             self->oldEnemyPtr = NULL;
-            HuntTarget(self);
+            AI_HuntTarget(self);
         } else {
             if (self->moveTargetPtr) {
                 self->goalEntityPtr = self->moveTargetPtr;
@@ -775,7 +775,7 @@ qboolean ai_checkattack(entity_t *self, float dist)
     self->showHostile = level.time + 1;        // wake up other monsters
 
 // check knowledge of enemy
-    enemy_vis = visible(self, self->enemy);
+    enemy_vis = AI_IsEntityVisibleToSelf(self, self->enemy);
     if (enemy_vis) {
         self->monsterInfo.search_time = level.time + 5;
         VectorCopy(self->enemy->s.origin, self->monsterInfo.last_sighting);
@@ -784,11 +784,11 @@ qboolean ai_checkattack(entity_t *self, float dist)
 // look for other coop players here
 //  if (coop && self->monsterInfo.search_time < level.time)
 //  {
-//      if (FindTarget (self))
+//      if (AI_FindTarget (self))
 //          return true;
 //  }
 
-    enemy_range = range(self, self->enemy);
+    enemy_range = AI_GetEntityRangeCategory(self, self->enemy);
     VectorSubtract(self->enemy->s.origin, self->s.origin, temp);
     enemy_yaw = vectoyaw(temp);
 
@@ -796,11 +796,11 @@ qboolean ai_checkattack(entity_t *self, float dist)
     // JDC self->idealYaw = enemy_yaw;
 
     if (self->monsterInfo.attack_state == AS_MISSILE) {
-        ai_run_missile(self);
+        AI_Run_missile(self);
         return true;
     }
     if (self->monsterInfo.attack_state == AS_MELEE) {
-        ai_run_melee(self);
+        AI_Run_melee(self);
         return true;
     }
 
@@ -814,12 +814,12 @@ qboolean ai_checkattack(entity_t *self, float dist)
 
 /*
 =============
-ai_run
+AI_Run
 
 The monster has an enemy it is trying to kill
 =============
 */
-void ai_run(entity_t *self, float dist)
+void AI_Run(entity_t *self, float dist)
 {
     vec3_t      v;
     entity_t     *tempgoal;
@@ -841,14 +841,14 @@ void ai_run(entity_t *self, float dist)
     if (self->monsterInfo.aiflags & AI_SOUND_TARGET) {
         VectorSubtract(self->s.origin, self->enemy->s.origin, v);
         if (VectorLength(v) < 64) {
-            self->monsterInfo.aiflags |= (AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
+            self->monsterInfo.aiflags |= (AI_Stand_GROUND | AI_TEMP_STAND_GROUND);
             self->monsterInfo.stand(self);
             return;
         }
 
         M_MoveToGoal(self, dist);
 
-        if (!FindTarget(self))
+        if (!AI_FindTarget(self))
             return;
     }
 
@@ -856,7 +856,7 @@ void ai_run(entity_t *self, float dist)
         return;
 
     if (self->monsterInfo.attack_state == AS_SLIDING) {
-        ai_run_slide(self, dist);
+        AI_Run_slide(self, dist);
         return;
     }
 
@@ -873,7 +873,7 @@ void ai_run(entity_t *self, float dist)
     // coop will change to another enemy if visible
     if (coop->value) {
         // FIXME: insane guys get mad with this, which causes crashes!
-        if (FindTarget(self))
+        if (AI_FindTarget(self))
             return;
     }
 
@@ -948,7 +948,7 @@ void ai_run(entity_t *self, float dist)
             center = tr.fraction;
             d2 = d1 * ((center + 1) / 2);
             self->s.angles[vec3_t::Yaw] = self->idealYaw = vectoyaw(v);
-            AngleVectors(self->s.angles, &v_forward, &v_right, NULL);
+            vec3_vectors(self->s.angles, &v_forward, &v_right, NULL);
 
             VectorSet(v, d2, -16, 0);
             left_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);

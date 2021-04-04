@@ -513,7 +513,7 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
             continue;
         if (touch == passedict)
             continue;
-        if (tr->allsolid)
+        if (tr->allSolid)
             return;
         if (passedict) {
             if (touch->owner == passedict)
@@ -558,7 +558,7 @@ trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t
         memset(&trace, 0, sizeof(trace));
         trace.fraction = 1;
         trace.ent = ge->edicts;
-        VectorCopy(end, trace.endpos);
+        VectorCopy(end, trace.endPosition);
         sv.tracecount = 0;
         return trace;
     }

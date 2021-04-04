@@ -606,7 +606,7 @@ static void RotatedBBox(vec3_t mins, vec3_t maxs, vec3_t angles,
         tmaxs[i] = -99999;
     }
 
-    AngleVectors(angles, forward, right, up);
+    vec3_vectors(angles, forward, right, up);
 
     for (i = 0; i < 8; i++) {
         if (i & 1)
@@ -892,8 +892,8 @@ void R_DrawBeam(entity_t *e)
     normalized_direction[1] = direction[1] = oldorigin[1] - origin[1];
     normalized_direction[2] = direction[2] = oldorigin[2] - origin[2];
 
-    if (VectorNormalize(normalized_direction) == 0)
-        return;
+    //if (vec3_normalize(normalized_direction) == 0)
+    //    return;
 
     PerpendicularVector(perpvec, normalized_direction);
     VectorScale(perpvec, e->frame / 2, perpvec);

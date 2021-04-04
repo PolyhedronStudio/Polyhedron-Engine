@@ -402,7 +402,7 @@ void R_SetSky_GL(const char *name, float rotate, vec3_t &axis)
     }
 
     skyrotate = rotate;
-    VectorNormalize2(axis, skyaxis);
+    skyaxis = vec3_normalize(axis);
 
     for (i = 0; i < 6; i++) {
         len = Q_concat(pathname, sizeof(pathname),

@@ -76,10 +76,10 @@ void Machinegun_Fire(entity_t* ent)
 
     // get start / end positions
     VectorAdd(ent->client->v_angle, ent->client->kickAngles, angles);
-    AngleVectors(angles, &forward, &right, NULL);
+    vec3_vectors(angles, &forward, &right, NULL);
     VectorSet(offset, 0, 8, ent->viewHeight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
-    fire_bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+    Fire_Bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
 
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);

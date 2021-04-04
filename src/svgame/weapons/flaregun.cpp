@@ -42,7 +42,7 @@ void weapon_flaregun_fire(entity_t* ent)
     // Setup the parameters used in the call to fire_flaregun() 
      // 
     VectorSet(offset, 8, 8, ent->viewHeight - 8);
-    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
+    vec3_vectors(ent->client->v_angle, &forward, &right, NULL);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
     VectorScale(forward, -2, ent->client->kickOrigin);

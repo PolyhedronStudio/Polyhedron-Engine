@@ -109,13 +109,13 @@ void Chaingun_Fire(entity_t* ent)
 
     for (i = 0; i < shots; i++) {
         // get start / end positions
-        AngleVectors(ent->client->v_angle, &forward, &right, &up);
+        vec3_vectors(ent->client->v_angle, &forward, &right, &up);
         r = 7 + crandom() * 4;
         u = crandom() * 4;
         VectorSet(offset, 0, r, u + ent->viewHeight - 8);
         start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
-        fire_bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
+        Fire_Bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
     }
 
     // send muzzle flash

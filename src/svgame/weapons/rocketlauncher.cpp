@@ -42,14 +42,14 @@ void Weapon_RocketLauncher_Fire(entity_t* ent)
         radius_damage *= 4;
     }
 
-    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
+    vec3_vectors(ent->client->v_angle, &forward, &right, NULL);
 
     VectorScale(forward, -2, ent->client->kickOrigin);
     ent->client->kickAngles[0] = -1;
 
     VectorSet(offset, 8, 8, ent->viewHeight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
-    fire_rocket(ent, start, forward, damage, 650, damage_radius, radius_damage);
+    Fire_Rocket(ent, start, forward, damage, 650, damage_radius, radius_damage);
 
     // send muzzle flash
     gi.WriteByte(svg_muzzleflash);

@@ -318,7 +318,7 @@ static void PM_TouchEntity(struct entity_s* ent) {
 //
 static bool PM_CheckStep(const trace_t* trace) {
 
-    if (!trace->allsolid) {
+    if (!trace->allSolid) {
         if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
             if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.ground.plane.dist) {
                 return true;
@@ -338,7 +338,7 @@ static bool PM_CheckStep(const trace_t* trace) {
 //
 static void PM_StepDown(const trace_t* trace) {
     // Calculate step height.
-    pm->state.origin = trace->endpos;
+    pm->state.origin = trace->endPosition;
     pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
 
     // If we are above minimal step height, remove the PMF_ON_STAIRS flag.
@@ -365,6 +365,11 @@ static void PM_StepDown(const trace_t* trace) {
 //===============
 //
 const trace_t PM_TraceCorrectAllSolid(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end) {
+// Disabled, no need, seems to work fine at this moment without it.
+// Not getting stuck into rotating objects, etc.
+//
+// The other alternative might otherwise be to do a -0.25f like M_CheckGround did...
+#if 0
     const vec3_t offsets = { 0.f, 1.f, -1.f };
 
     // Jitter around
@@ -381,7 +386,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t& start, const vec3_t& mins, c
                 // Execute trace.
                 const trace_t trace = pm->Trace(point, mins, maxs, end);
 
-                if (!trace.allsolid) {
+                if (!trace.allSolid) {
 
                     if (i != 0 || j != 0 || k != 0) {
                         PM_Debug("Fixed all-solid");
@@ -395,6 +400,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t& start, const vec3_t& mins, c
 
     PM_Debug("No good position");
     return pm->Trace(start, mins, maxs, end);
+#endif
 }
 
 //
@@ -461,14 +467,14 @@ static qboolean PM_StepSlideMove_(void)
         const trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
 
         // if the player is trapped in a solid, don't build up Z
-        if (trace.allsolid) {
+        if (trace.allSolid) {
             pm->state.velocity.z = 0.0f;
             return true;
         }
 
         // if the trace succeeded, move some distance
         if (trace.fraction > (FLT_EPSILON - 1.0f)) {
-            pm->state.origin = trace.endpos;
+            pm->state.origin = trace.endPosition;
 
             // if the trace didn't hit anything, we're done
             if (trace.fraction == 1.0f) {
@@ -596,7 +602,7 @@ static void PM_StepSlideMove(void)
     up.z += PM_STEP_HEIGHT;
 
     trace_t trace = PM_TraceCorrectAllSolid(up, pm->mins, pm->maxs, up);
-    if (trace.allsolid)
+    if (trace.allSolid)
         return;     // Can't step up
 
     // Try sliding above
@@ -609,8 +615,8 @@ static void PM_StepSlideMove(void)
     vec3_t down = pm->state.origin;
     down.z -= PM_STEP_HEIGHT;
     trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
-    if (!trace.allsolid) {
-        pm->state.origin = trace.endpos;
+    if (!trace.allSolid) {
+        pm->state.origin = trace.endPosition;
     }
     up = pm->state.origin;
 
@@ -755,7 +761,7 @@ static void PM_CheckDuck(void) {
         else if (is_ducking && !wants_ducking) {
             const trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pm->state.origin);
 
-            if (!trace.allsolid && !trace.startsolid) {
+            if (!trace.allSolid && !trace.startSolid) {
                 pm->state.flags &= ~PMF_DUCKED;
             }
         }
@@ -878,7 +884,7 @@ static qboolean PM_CheckWaterJump(void) {
 
         trace = PM_TraceCorrectAllSolid(pos, pm->mins, pm->maxs, pos);
 
-        if (trace.startsolid) {
+        if (trace.startSolid) {
             PM_Debug("Can't exit water: Blocked");
             return false;
         }
@@ -1035,7 +1041,7 @@ static void PM_CheckGround(void) {
 
         // Sink down to it if not trick jumping
         if (!(pm->state.flags & PMF_TIME_TRICK_JUMP)) {
-            pm->state.origin = trace.endpos;
+            pm->state.origin = trace.endPosition;
 
             pm->state.velocity = PM_ClipVelocity(pm->state.velocity, trace.plane.normal, PM_CLIP_BOUNCE);
         }
@@ -1441,7 +1447,7 @@ static void PM_WalkMove(void) {
         return;
     }
 
-    PM_Debug("%s", vec3_to_str(pm->state.origin));
+    PM_Debug("%s", Vec3ToString(pm->state.origin));
 
     PM_Friction();
 

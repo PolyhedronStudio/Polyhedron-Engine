@@ -91,146 +91,146 @@ void soldier_cock(entity_t *self)
 void soldier_stand(entity_t *self);
 
 mframe_t soldier_frames_stand1 [] = {
-    { ai_stand, 0, soldier_idle },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
+    { AI_Stand, 0, soldier_idle },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
 
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
 
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL }
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL }
 };
 mmove_t soldier_move_stand1 = {FRAME_stand101, FRAME_stand130, soldier_frames_stand1, soldier_stand};
 
 mframe_t soldier_frames_stand3 [] = {
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
 
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
 
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, soldier_cock },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, soldier_cock },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
 
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL }
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL }
 };
 mmove_t soldier_move_stand3 = {FRAME_stand301, FRAME_stand339, soldier_frames_stand3, soldier_stand};
 
 #if 0
 mframe_t soldier_frames_stand4 [] = {
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
 
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
 
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
 
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
 
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 4, NULL },
-    { ai_stand, 1, NULL },
-    { ai_stand, -1, NULL },
-    { ai_stand, -2, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 4, NULL },
+    { AI_Stand, 1, NULL },
+    { AI_Stand, -1, NULL },
+    { AI_Stand, -2, NULL },
 
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL }
+    { AI_Stand, 0, NULL },
+    { AI_Stand, 0, NULL }
 };
 mmove_t soldier_move_stand4 = {FRAME_stand401, FRAME_stand452, soldier_frames_stand4, NULL};
 #endif
@@ -255,53 +255,53 @@ void soldier_walk1_random(entity_t *self)
 }
 
 mframe_t soldier_frames_walk1 [] = {
-    { ai_walk, 3,  NULL },
-    { ai_walk, 6,  NULL },
-    { ai_walk, 2,  NULL },
-    { ai_walk, 2,  soldier_footstep },
-    { ai_walk, 2,  NULL },
-    { ai_walk, 1,  NULL },
-    { ai_walk, 6,  NULL },
-    { ai_walk, 5,  NULL },
-    { ai_walk, 3,  soldier_footstep },
-    { ai_walk, -1, soldier_walk1_random },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL },
-    { ai_walk, 0,  NULL }
+    { AI_Walk, 3,  NULL },
+    { AI_Walk, 6,  NULL },
+    { AI_Walk, 2,  NULL },
+    { AI_Walk, 2,  soldier_footstep },
+    { AI_Walk, 2,  NULL },
+    { AI_Walk, 1,  NULL },
+    { AI_Walk, 6,  NULL },
+    { AI_Walk, 5,  NULL },
+    { AI_Walk, 3,  soldier_footstep },
+    { AI_Walk, -1, soldier_walk1_random },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL },
+    { AI_Walk, 0,  NULL }
 };
 mmove_t soldier_move_walk1 = {FRAME_walk101, FRAME_walk133, soldier_frames_walk1, NULL};
 
 mframe_t soldier_frames_walk2 [] = {
-    { ai_walk, 4,  soldier_footstep },
-    { ai_walk, 4,  NULL },
-    { ai_walk, 9,  NULL },
-    { ai_walk, 8,  NULL },
-    { ai_walk, 5,  soldier_footstep },
-    { ai_walk, 1,  NULL },
-    { ai_walk, 3,  NULL },
-    { ai_walk, 7,  NULL },
-    { ai_walk, 6,  NULL },
-    { ai_walk, 7,  NULL }
+    { AI_Walk, 4,  soldier_footstep },
+    { AI_Walk, 4,  NULL },
+    { AI_Walk, 9,  NULL },
+    { AI_Walk, 8,  NULL },
+    { AI_Walk, 5,  soldier_footstep },
+    { AI_Walk, 1,  NULL },
+    { AI_Walk, 3,  NULL },
+    { AI_Walk, 7,  NULL },
+    { AI_Walk, 6,  NULL },
+    { AI_Walk, 7,  NULL }
 };
 mmove_t soldier_move_walk2 = {FRAME_walk209, FRAME_walk218, soldier_frames_walk2, NULL};
 
@@ -321,24 +321,24 @@ void soldier_walk(entity_t *self)
 void soldier_run(entity_t *self);
 
 mframe_t soldier_frames_start_run [] = {
-    { ai_run, 7,  NULL },
-    { ai_run, 5,  NULL }
+    { AI_Run, 7,  NULL },
+    { AI_Run, 5,  NULL }
 };
 mmove_t soldier_move_start_run = {FRAME_run01, FRAME_run02, soldier_frames_start_run, soldier_run};
 
 mframe_t soldier_frames_run [] = {
-    { ai_run, 10, NULL },
-    { ai_run, 11, soldier_footstep },
-    { ai_run, 11, NULL },
-    { ai_run, 16, NULL },
-    { ai_run, 10, soldier_footstep },
-    { ai_run, 15, NULL }
+    { AI_Run, 10, NULL },
+    { AI_Run, 11, soldier_footstep },
+    { AI_Run, 11, NULL },
+    { AI_Run, 16, NULL },
+    { AI_Run, 10, soldier_footstep },
+    { AI_Run, 15, NULL }
 };
 mmove_t soldier_move_run = {FRAME_run03, FRAME_run08, soldier_frames_run, NULL};
 
 void soldier_run(entity_t *self)
 {
-    if (self->monsterInfo.aiflags & AI_STAND_GROUND) {
+    if (self->monsterInfo.aiflags & AI_Stand_GROUND) {
         self->monsterInfo.currentmove = &soldier_move_stand1;
         return;
     }
@@ -358,65 +358,65 @@ void soldier_run(entity_t *self)
 //
 
 mframe_t soldier_frames_pain1 [] = {
-    { ai_move, -3, NULL },
-    { ai_move, 4,  NULL },
-    { ai_move, 1,  NULL },
-    { ai_move, 1,  NULL },
-    { ai_move, 0,  NULL }
+    { AI_Move, -3, NULL },
+    { AI_Move, 4,  NULL },
+    { AI_Move, 1,  NULL },
+    { AI_Move, 1,  NULL },
+    { AI_Move, 0,  NULL }
 };
 mmove_t soldier_move_pain1 = {FRAME_pain101, FRAME_pain105, soldier_frames_pain1, soldier_run};
 
 mframe_t soldier_frames_pain2 [] = {
-    { ai_move, -13, NULL },
-    { ai_move, -1,  NULL },
-    { ai_move, 2,   NULL },
-    { ai_move, 4,   NULL },
-    { ai_move, 2,   NULL },
-    { ai_move, 3,   NULL },
-    { ai_move, 2,   NULL }
+    { AI_Move, -13, NULL },
+    { AI_Move, -1,  NULL },
+    { AI_Move, 2,   NULL },
+    { AI_Move, 4,   NULL },
+    { AI_Move, 2,   NULL },
+    { AI_Move, 3,   NULL },
+    { AI_Move, 2,   NULL }
 };
 mmove_t soldier_move_pain2 = {FRAME_pain201, FRAME_pain207, soldier_frames_pain2, soldier_run};
 
 mframe_t soldier_frames_pain3 [] = {
-    { ai_move, -8, NULL },
-    { ai_move, 10, NULL },
-    { ai_move, -4, soldier_footstep },
-    { ai_move, -1, NULL },
-    { ai_move, -3, NULL },
-    { ai_move, 0,  NULL },
-    { ai_move, 3,  NULL },
-    { ai_move, 0,  NULL },
-    { ai_move, 0,  NULL },
-    { ai_move, 0,  NULL },
-    { ai_move, 0,  NULL },
-    { ai_move, 1,  NULL },
-    { ai_move, 0,  NULL },
-    { ai_move, 1,  NULL },
-    { ai_move, 2,  NULL },
-    { ai_move, 4,  NULL },
-    { ai_move, 3,  NULL },
-    { ai_move, 2,  soldier_footstep }
+    { AI_Move, -8, NULL },
+    { AI_Move, 10, NULL },
+    { AI_Move, -4, soldier_footstep },
+    { AI_Move, -1, NULL },
+    { AI_Move, -3, NULL },
+    { AI_Move, 0,  NULL },
+    { AI_Move, 3,  NULL },
+    { AI_Move, 0,  NULL },
+    { AI_Move, 0,  NULL },
+    { AI_Move, 0,  NULL },
+    { AI_Move, 0,  NULL },
+    { AI_Move, 1,  NULL },
+    { AI_Move, 0,  NULL },
+    { AI_Move, 1,  NULL },
+    { AI_Move, 2,  NULL },
+    { AI_Move, 4,  NULL },
+    { AI_Move, 3,  NULL },
+    { AI_Move, 2,  soldier_footstep }
 };
 mmove_t soldier_move_pain3 = {FRAME_pain301, FRAME_pain318, soldier_frames_pain3, soldier_run};
 
 mframe_t soldier_frames_pain4 [] = {
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, -10, NULL },
-    { ai_move, -6,  NULL },
-    { ai_move, 8,   NULL },
-    { ai_move, 4,   NULL },
-    { ai_move, 1,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 2,   NULL },
-    { ai_move, 5,   NULL },
-    { ai_move, 2,   NULL },
-    { ai_move, -1,  NULL },
-    { ai_move, -1,  NULL },
-    { ai_move, 3,   NULL },
-    { ai_move, 2,   NULL },
-    { ai_move, 0,   NULL }
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, -10, NULL },
+    { AI_Move, -6,  NULL },
+    { AI_Move, 8,   NULL },
+    { AI_Move, 4,   NULL },
+    { AI_Move, 1,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 2,   NULL },
+    { AI_Move, 5,   NULL },
+    { AI_Move, 2,   NULL },
+    { AI_Move, -1,  NULL },
+    { AI_Move, -1,  NULL },
+    { AI_Move, 3,   NULL },
+    { AI_Move, 2,   NULL },
+    { AI_Move, 0,   NULL }
 };
 mmove_t soldier_move_pain4 = {FRAME_pain401, FRAME_pain417, soldier_frames_pain4, soldier_run};
 
@@ -489,7 +489,7 @@ void soldier_fire(entity_t *self, int flash_number)
     else
         flash_index = machinegun_flash[flash_number];
 
-    AngleVectors(self->s.angles, &forward, &right, NULL);
+    vec3_vectors(self->s.angles, &forward, &right, NULL);
     start = G_ProjectSource(self->s.origin, monster_flash_offset[flash_index], forward, right);
 
     if (flash_number == 5 || flash_number == 6) {
@@ -499,7 +499,7 @@ void soldier_fire(entity_t *self, int flash_number)
         end[2] += self->enemy->viewHeight;
         VectorSubtract(end, start, aim);
         vectoangles(aim, dir);
-        AngleVectors(dir, &forward, &right, &up);
+        vec3_vectors(dir, &forward, &right, &up);
 
         r = crandom() * 1000;
         u = crandom() * 500;
@@ -507,14 +507,14 @@ void soldier_fire(entity_t *self, int flash_number)
         VectorMA(end, r, right, end);
         VectorMA(end, u, up, end);
 
-        VectorSubtract(end, start, aim);
-        VectorNormalize(aim);
+        aim = end - start;
+        aim = vec3_normalize(aim);
     }
 
     if (self->s.skinnum <= 1) {
-        monster_fire_blaster(self, start, aim, 5, 600, flash_index, EF_BLASTER);
+        monster_Fire_Blaster(self, start, aim, 5, 600, flash_index, EF_BLASTER);
     } else if (self->s.skinnum <= 3) {
-        monster_fire_shotgun(self, start, aim, 2, 1, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SHOTGUN_COUNT, flash_index);
+        monster_Fire_Shotgun(self, start, aim, 2, 1, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SHOTGUN_COUNT, flash_index);
     } else {
         if (!(self->monsterInfo.aiflags & AI_HOLD_FRAME))
             self->monsterInfo.pausetime = level.time + (3 + rand() % 8) * FRAMETIME;
@@ -543,7 +543,7 @@ void soldier_attack1_refire1(entity_t *self)
     if (self->enemy->health <= 0)
         return;
 
-    if (((skill->value == 3) && (random() < 0.5)) || (range(self, self->enemy) == RANGE_MELEE))
+    if (((skill->value == 3) && (random() < 0.5)) || (AI_GetEntityRangeCategory(self, self->enemy) == RANGE_MELEE))
         self->monsterInfo.nextframe = FRAME_attak102;
     else
         self->monsterInfo.nextframe = FRAME_attak110;
@@ -557,23 +557,23 @@ void soldier_attack1_refire2(entity_t *self)
     if (self->enemy->health <= 0)
         return;
 
-    if (((skill->value == 3) && (random() < 0.5)) || (range(self, self->enemy) == RANGE_MELEE))
+    if (((skill->value == 3) && (random() < 0.5)) || (AI_GetEntityRangeCategory(self, self->enemy) == RANGE_MELEE))
         self->monsterInfo.nextframe = FRAME_attak102;
 }
 
 mframe_t soldier_frames_attack1 [] = {
-    { ai_charge, 0,  NULL },
-    { ai_charge, 0,  NULL },
-    { ai_charge, 0,  soldier_fire1 },
-    { ai_charge, 0,  NULL },
-    { ai_charge, 0,  NULL },
-    { ai_charge, 0,  soldier_attack1_refire1 },
-    { ai_charge, 0,  NULL },
-    { ai_charge, 0,  soldier_cock },
-    { ai_charge, 0,  soldier_attack1_refire2 },
-    { ai_charge, 0,  NULL },
-    { ai_charge, 0,  NULL },
-    { ai_charge, 0,  NULL }
+    { AI_Charge, 0,  NULL },
+    { AI_Charge, 0,  NULL },
+    { AI_Charge, 0,  soldier_fire1 },
+    { AI_Charge, 0,  NULL },
+    { AI_Charge, 0,  NULL },
+    { AI_Charge, 0,  soldier_attack1_refire1 },
+    { AI_Charge, 0,  NULL },
+    { AI_Charge, 0,  soldier_cock },
+    { AI_Charge, 0,  soldier_attack1_refire2 },
+    { AI_Charge, 0,  NULL },
+    { AI_Charge, 0,  NULL },
+    { AI_Charge, 0,  NULL }
 };
 mmove_t soldier_move_attack1 = {FRAME_attak101, FRAME_attak112, soldier_frames_attack1, soldier_run};
 
@@ -592,7 +592,7 @@ void soldier_attack2_refire1(entity_t *self)
     if (self->enemy->health <= 0)
         return;
 
-    if (((skill->value == 3) && (random() < 0.5)) || (range(self, self->enemy) == RANGE_MELEE))
+    if (((skill->value == 3) && (random() < 0.5)) || (AI_GetEntityRangeCategory(self, self->enemy) == RANGE_MELEE))
         self->monsterInfo.nextframe = FRAME_attak204;
     else
         self->monsterInfo.nextframe = FRAME_attak216;
@@ -606,29 +606,29 @@ void soldier_attack2_refire2(entity_t *self)
     if (self->enemy->health <= 0)
         return;
 
-    if (((skill->value == 3) && (random() < 0.5)) || (range(self, self->enemy) == RANGE_MELEE))
+    if (((skill->value == 3) && (random() < 0.5)) || (AI_GetEntityRangeCategory(self, self->enemy) == RANGE_MELEE))
         self->monsterInfo.nextframe = FRAME_attak204;
 }
 
 mframe_t soldier_frames_attack2 [] = {
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, soldier_fire2 },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, soldier_attack2_refire1 },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, soldier_cock },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, soldier_attack2_refire2 },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL }
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, soldier_fire2 },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, soldier_attack2_refire1 },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, soldier_cock },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, soldier_attack2_refire2 },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL }
 };
 mmove_t soldier_move_attack2 = {FRAME_attak201, FRAME_attak218, soldier_frames_attack2, soldier_run};
 
@@ -640,7 +640,7 @@ void soldier_duck_down(entity_t *self)
         return;
     self->monsterInfo.aiflags |= AI_DUCKED;
     self->maxs[2] -= 32;
-    self->takedamage = DAMAGE_YES;
+    self->takeDamage = DAMAGE_YES;
     self->monsterInfo.pausetime = level.time + 1;
     gi.LinkEntity(self);
 }
@@ -649,7 +649,7 @@ void soldier_duck_up(entity_t *self)
 {
     self->monsterInfo.aiflags &= ~AI_DUCKED;
     self->maxs[2] += 32;
-    self->takedamage = DAMAGE_AIM;
+    self->takeDamage = DAMAGE_AIM;
     gi.LinkEntity(self);
 }
 
@@ -666,15 +666,15 @@ void soldier_attack3_refire(entity_t *self)
 }
 
 mframe_t soldier_frames_attack3 [] = {
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, soldier_fire3 },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, soldier_attack3_refire },
-    { ai_charge, 0, soldier_duck_up },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL }
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, soldier_fire3 },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, soldier_attack3_refire },
+    { AI_Charge, 0, soldier_duck_up },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL }
 };
 mmove_t soldier_move_attack3 = {FRAME_attak301, FRAME_attak309, soldier_frames_attack3, soldier_run};
 
@@ -687,17 +687,17 @@ void soldier_fire4(entity_t *self)
 //  if (self->enemy->health <= 0)
 //      return;
 //
-//  if ( ((skill->value == 3) && (random() < 0.5)) || (range(self, self->enemy) == RANGE_MELEE) )
+//  if ( ((skill->value == 3) && (random() < 0.5)) || (AI_GetEntityRangeCategory(self, self->enemy) == RANGE_MELEE) )
 //      self->monsterInfo.nextframe = FRAME_attak402;
 }
 
 mframe_t soldier_frames_attack4 [] = {
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, soldier_footstep },
-    { ai_charge, 0, soldier_fire4 },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, soldier_footstep }
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, soldier_footstep },
+    { AI_Charge, 0, soldier_fire4 },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, soldier_footstep }
 };
 mmove_t soldier_move_attack4 = {FRAME_attak401, FRAME_attak406, soldier_frames_attack4, soldier_run};
 
@@ -714,19 +714,19 @@ void soldier_attack5_refire(entity_t *self)
     if (self->enemy->health <= 0)
         return;
 
-    if (((skill->value == 3) && (random() < 0.5)) || (range(self, self->enemy) == RANGE_MELEE))
+    if (((skill->value == 3) && (random() < 0.5)) || (AI_GetEntityRangeCategory(self, self->enemy) == RANGE_MELEE))
         self->monsterInfo.nextframe = FRAME_attak505;
 }
 
 mframe_t soldier_frames_attack5 [] = {
-    { ai_charge, 8, NULL },
-    { ai_charge, 8, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, soldier_fire5 },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, soldier_attack5_refire }
+    { AI_Charge, 8, NULL },
+    { AI_Charge, 8, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, soldier_fire5 },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, NULL },
+    { AI_Charge, 0, soldier_attack5_refire }
 };
 mmove_t soldier_move_attack5 = {FRAME_attak501, FRAME_attak508, soldier_frames_attack5, soldier_run};
 #endif
@@ -743,7 +743,7 @@ void soldier_attack6_refire(entity_t *self)
     if (self->enemy->health <= 0)
         return;
 
-    if (range(self, self->enemy) < RANGE_MID)
+    if (AI_GetEntityRangeCategory(self, self->enemy) < RANGE_MID)
         return;
 
     if (skill->value == 3)
@@ -751,20 +751,20 @@ void soldier_attack6_refire(entity_t *self)
 }
 
 mframe_t soldier_frames_attack6 [] = {
-    { ai_charge, 10, NULL },
-    { ai_charge,  4, NULL },
-    { ai_charge, 12, soldier_footstep },
-    { ai_charge, 11, soldier_fire8 },
-    { ai_charge, 13, NULL },
-    { ai_charge, 18, NULL },
-    { ai_charge, 15, soldier_footstep },
-    { ai_charge, 14, NULL },
-    { ai_charge, 11, NULL },
-    { ai_charge,  8, soldier_footstep },
-    { ai_charge, 11, NULL },
-    { ai_charge, 12, NULL },
-    { ai_charge, 12, soldier_footstep },
-    { ai_charge, 17, soldier_attack6_refire }
+    { AI_Charge, 10, NULL },
+    { AI_Charge,  4, NULL },
+    { AI_Charge, 12, soldier_footstep },
+    { AI_Charge, 11, soldier_fire8 },
+    { AI_Charge, 13, NULL },
+    { AI_Charge, 18, NULL },
+    { AI_Charge, 15, soldier_footstep },
+    { AI_Charge, 14, NULL },
+    { AI_Charge, 11, NULL },
+    { AI_Charge,  8, soldier_footstep },
+    { AI_Charge, 11, NULL },
+    { AI_Charge, 12, NULL },
+    { AI_Charge, 12, soldier_footstep },
+    { AI_Charge, 17, soldier_attack6_refire }
 };
 mmove_t soldier_move_attack6 = {FRAME_runs01, FRAME_runs14, soldier_frames_attack6, soldier_run};
 
@@ -792,7 +792,7 @@ void soldier_sight(entity_t *self, entity_t *other)
     else
         gi.Sound(self, CHAN_VOICE, sound_sight2, 1, ATTN_NORM, 0);
 
-    if ((skill->value > 0) && (range(self, self->enemy) >= RANGE_MID)) {
+    if ((skill->value > 0) && (AI_GetEntityRangeCategory(self, self->enemy) >= RANGE_MID)) {
         if (random() > 0.5)
             self->monsterInfo.currentmove = &soldier_move_attack6;
     }
@@ -811,11 +811,11 @@ void soldier_duck_hold(entity_t *self)
 }
 
 mframe_t soldier_frames_duck [] = {
-    { ai_move, 5, soldier_duck_down },
-    { ai_move, -1, soldier_duck_hold },
-    { ai_move, 1,  NULL },
-    { ai_move, 0,  soldier_duck_up },
-    { ai_move, 5,  NULL }
+    { AI_Move, 5, soldier_duck_down },
+    { AI_Move, -1, soldier_duck_hold },
+    { AI_Move, 1,  NULL },
+    { AI_Move, 0,  soldier_duck_up },
+    { AI_Move, 5,  NULL }
 };
 mmove_t soldier_move_duck = {FRAME_duck01, FRAME_duck05, soldier_frames_duck, soldier_run};
 
@@ -883,246 +883,246 @@ void soldier_dead(entity_t *self)
 }
 
 mframe_t soldier_frames_death1 [] = {
-    { ai_move, 0,   NULL },
-    { ai_move, -10, NULL },
-    { ai_move, -10, NULL },
-    { ai_move, -10, NULL },
-    { ai_move, -5,  NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, -10, NULL },
+    { AI_Move, -10, NULL },
+    { AI_Move, -10, NULL },
+    { AI_Move, -5,  NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   soldier_fire6 },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   soldier_fire7 },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   soldier_fire6 },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   soldier_fire7 },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL }
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL }
 };
 mmove_t soldier_move_death1 = {FRAME_death101, FRAME_death136, soldier_frames_death1, soldier_dead};
 
 mframe_t soldier_frames_death2 [] = {
-    { ai_move, -5,  NULL },
-    { ai_move, -5,  NULL },
-    { ai_move, -5,  NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, -5,  NULL },
+    { AI_Move, -5,  NULL },
+    { AI_Move, -5,  NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL }
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL }
 };
 mmove_t soldier_move_death2 = {FRAME_death201, FRAME_death235, soldier_frames_death2, soldier_dead};
 
 mframe_t soldier_frames_death3 [] = {
-    { ai_move, -5,  NULL },
-    { ai_move, -5,  NULL },
-    { ai_move, -5,  NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, -5,  NULL },
+    { AI_Move, -5,  NULL },
+    { AI_Move, -5,  NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 };
 mmove_t soldier_move_death3 = {FRAME_death301, FRAME_death345, soldier_frames_death3, soldier_dead};
 
 mframe_t soldier_frames_death4 [] = {
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL }
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL }
 };
 mmove_t soldier_move_death4 = {FRAME_death401, FRAME_death453, soldier_frames_death4, soldier_dead};
 
 mframe_t soldier_frames_death5 [] = {
-    { ai_move, -5,  NULL },
-    { ai_move, -5,  NULL },
-    { ai_move, -5,  NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, -5,  NULL },
+    { AI_Move, -5,  NULL },
+    { AI_Move, -5,  NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
 
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL }
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL }
 };
 mmove_t soldier_move_death5 = {FRAME_death501, FRAME_death524, soldier_frames_death5, soldier_dead};
 
 mframe_t soldier_frames_death6 [] = {
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL },
-    { ai_move, 0,   NULL }
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL },
+    { AI_Move, 0,   NULL }
 };
 mmove_t soldier_move_death6 = {FRAME_death601, FRAME_death610, soldier_frames_death6, soldier_dead};
 
@@ -1146,7 +1146,7 @@ void soldier_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int da
 
 // regular death
     self->deadFlag = DEAD_DEAD;
-    self->takedamage = DAMAGE_YES;
+    self->takeDamage = DAMAGE_YES;
     self->s.skinnum |= 1;
 
     if (self->s.skinnum == 1)

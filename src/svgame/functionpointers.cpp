@@ -62,7 +62,7 @@ extern void flyer_die(void);
 extern void func_explosive_explode(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void gib_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void misc_deadsoldier_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
-// extern void player_die(void); v 
+// extern void Player_Die(void); v 
 extern void soldier_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void turret_driver_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 //extern void actor_attack(void);
@@ -195,7 +195,7 @@ extern void soldier_stand(entity_t *self);
 extern void soldier_walk(entity_t *self);
 //extern void supertank_walk(void);
 
-//extern void player_pain(void); // CPP: Remove cuz of overloaded func error.
+//extern void Player_Pain(void); // CPP: Remove cuz of overloaded func error.
 extern void soldier_pain(entity_t* self, entity_t* other, float kick, int damage);
 //extern void supertank_pain(void);
 //extern void tank_pain(void);
@@ -359,7 +359,7 @@ const save_ptr_t save_ptrs[] = {
 
 { P_die, gib_die },
 { P_die, misc_deadsoldier_die },
-{ P_die, player_die },
+{ P_die, Player_Die },
 { P_die, soldier_die },
 { P_die, turret_driver_die },
 
@@ -401,7 +401,7 @@ const save_ptr_t save_ptrs[] = {
 
 { P_monsterinfo_walk, soldier_walk },
 
-{ P_pain, player_pain },
+{ P_pain, Player_Pain },
 { P_pain, soldier_pain },
 
 { P_prethink, misc_viper_bomb_prethink },

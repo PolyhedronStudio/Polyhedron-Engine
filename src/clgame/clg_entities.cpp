@@ -280,7 +280,7 @@ void CLG_AddPacketEntities(void)
             ent.angles[1] = anglemod(cl->time / 2) + s1->angles[1];
             ent.angles[2] = 180;
 
-            AngleVectors(ent.angles, &forward, NULL, NULL);
+            vec3_vectors(ent.angles, &forward, NULL, NULL);
             VectorMA(ent.origin, 64, forward, start);
             V_AddLight(start, 100, 1, 0, 0);
         }
@@ -321,7 +321,7 @@ void CLG_AddPacketEntities(void)
             // offset the model back a bit to make the view point located in front of the head
             vec3_t angles = { 0.f, ent.angles[1], 0.f };
             vec3_t forward;
-            AngleVectors(angles, &forward, NULL, NULL);
+            vec3_vectors(angles, &forward, NULL, NULL);
 
             float offset = -15.f;
             VectorMA(ent.origin, offset, forward, ent.origin);
@@ -672,7 +672,7 @@ void CLG_AddViewWeapon(void)
         trace_t trace;
         static vec3_t mins = { -4, -4, -4 }, maxs = { 4, 4, 4 };
 
-        AngleVectors(cl->refdef.viewAngles, &view_dir, &right_dir, &up_dir);
+        vec3_vectors(cl->refdef.viewAngles, &view_dir, &right_dir, &up_dir);
         VectorMA(gun.origin, gun_right, right_dir, gun_real_pos);
         VectorMA(gun_real_pos, gun_up, up_dir, gun_real_pos);
         VectorMA(gun_real_pos, gun_length, view_dir, gun_tip);
@@ -681,7 +681,7 @@ void CLG_AddViewWeapon(void)
 
         if (trace.fraction != 1.0f)
         {
-            VectorMA(trace.endpos, -gun_length, view_dir, gun.origin);
+            VectorMA(trace.endPosition, -gun_length, view_dir, gun.origin);
             VectorMA(gun.origin, -gun_right, right_dir, gun.origin);
             VectorMA(gun.origin, -gun_up, up_dir, gun.origin);
         }
@@ -930,7 +930,7 @@ void CLG_CalcViewValues(void)
 
     LerpVector(ops->viewoffset, ps->viewoffset, lerp, viewoffset);
 
-    AngleVectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
+    vec3_vectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
 
     VectorCopy(cl->refdef.vieworg, cl->playerEntityOrigin);
     VectorCopy(cl->refdef.viewAngles, cl->playerEntityAngles);

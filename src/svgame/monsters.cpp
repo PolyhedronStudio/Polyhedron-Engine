@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // the damages too, but I'm not sure that's such a good idea.
 void monster_fire_bullet(entity_t *self, const vec3_t &start, const vec3_t &dir, int damage, int kick, int hspread, int vspread, int flashtype)
 {
-    fire_bullet(self, start, dir, damage, kick, hspread, vspread, MOD_UNKNOWN);
+    Fire_Bullet(self, start, dir, damage, kick, hspread, vspread, MOD_UNKNOWN);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
@@ -37,9 +37,9 @@ void monster_fire_bullet(entity_t *self, const vec3_t &start, const vec3_t &dir,
     gi.Multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_shotgun(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int flashtype)
+void monster_Fire_Shotgun(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int flashtype)
 {
-    fire_shotgun(self, start, aimdir, damage, kick, hspread, vspread, count, MOD_UNKNOWN);
+    Fire_Shotgun(self, start, aimdir, damage, kick, hspread, vspread, count, MOD_UNKNOWN);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
@@ -47,9 +47,9 @@ void monster_fire_shotgun(entity_t *self, const vec3_t &start, const vec3_t &aim
     gi.Multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_blaster(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int flashtype, int effect)
+void monster_Fire_Blaster(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int flashtype, int effect)
 {
-    fire_blaster(self, start, aimdir, damage, speed, effect, false);
+    Fire_Blaster(self, start, aimdir, damage, speed, effect, false);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
@@ -57,9 +57,9 @@ void monster_fire_blaster(entity_t *self, const vec3_t &start, const vec3_t &aim
     gi.Multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_grenade(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int flashtype)
+void monster_Fire_Grenade(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int flashtype)
 {
-    fire_grenade(self, start, aimdir, damage, speed, 2.5, damage + 40);
+    Fire_Grenade(self, start, aimdir, damage, speed, 2.5, damage + 40);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
@@ -67,9 +67,9 @@ void monster_fire_grenade(entity_t *self, const vec3_t &start, const vec3_t &aim
     gi.Multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_rocket(entity_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, int flashtype)
+void monster_Fire_Rocket(entity_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, int flashtype)
 {
-    fire_rocket(self, start, dir, damage, speed, damage + 20, damage);
+    Fire_Rocket(self, start, dir, damage, speed, damage + 20, damage);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
@@ -77,9 +77,9 @@ void monster_fire_rocket(entity_t *self, const vec3_t &start, const vec3_t &dir,
     gi.Multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_railgun(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int flashtype)
+void monster_Fire_Railgun(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int flashtype)
 {
-    fire_rail(self, start, aimdir, damage, kick);
+    Fire_Rail(self, start, aimdir, damage, kick);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
@@ -87,9 +87,9 @@ void monster_fire_railgun(entity_t *self, const vec3_t &start, const vec3_t &aim
     gi.Multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_bfg(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int kick, float damage_radius, int flashtype)
+void monster_Fire_BFG(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int kick, float damage_radius, int flashtype)
 {
-    fire_bfg(self, start, aimdir, damage, speed, damage_radius);
+    Fire_BFG(self, start, aimdir, damage, speed, damage_radius);
 
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
@@ -142,6 +142,9 @@ void M_CheckGround(entity_t *ent)
     vec3_t      point;
     trace_t     trace;
 
+    if (!ent)
+        return;
+
     if (ent->flags & (FL_SWIM | FL_FLY))
         return;
 
@@ -151,24 +154,26 @@ void M_CheckGround(entity_t *ent)
     }
 
 // if the hull point one-quarter unit down is solid the entity is on ground
-    point[0] = ent->s.origin[0];
-    point[1] = ent->s.origin[1];
-    point[2] = ent->s.origin[2] - 0.25;
+    point = {
+        ent->s.origin[0],
+        ent->s.origin[1],
+        ent->s.origin[2] - 0.25f
+    };
 
     trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, point, ent, CONTENTS_MASK_MONSTERSOLID);
 
     // check steepness
-    if (trace.plane.normal[2] < 0.7 && !trace.startsolid) {
+    if (trace.plane.normal[2] < 0.7 && !trace.startSolid) {
         ent->groundEntityPtr = NULL;
         return;
     }
 
 //  ent->groundEntityPtr = trace.ent;
 //  ent->groundEntityLinkCount = trace.ent->linkCount;
-//  if (!trace.startsolid && !trace.allsolid)
-//      VectorCopy (trace.endpos, ent->s.origin);
-    if (!trace.startsolid && !trace.allsolid) {
-        VectorCopy(trace.endpos, ent->s.origin);
+//  if (!trace.startSolid && !trace.allSolid)
+//      VectorCopy (trace.endPosition, ent->s.origin);
+    if (!trace.startSolid && !trace.allSolid) {
+        VectorCopy(trace.endPosition, ent->s.origin);
         ent->groundEntityPtr = trace.ent;
         ent->groundEntityLinkCount = trace.ent->linkCount;
         ent->velocity[2] = 0;
@@ -224,7 +229,7 @@ void M_WorldEffects(entity_t *ent)
                     dmg = 2 + 2 * floor(level.time - ent->air_finished);
                     if (dmg > 15)
                         dmg = 15;
-                    T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
+                    T_Damage(ent, world, world, vec3_zero(), ent->s.origin, vec3_zero(), dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
                     ent->debouncePainTime = level.time + 1;
                 }
             }
@@ -237,7 +242,7 @@ void M_WorldEffects(entity_t *ent)
                     dmg = 2 + 2 * floor(level.time - ent->air_finished);
                     if (dmg > 15)
                         dmg = 15;
-                    T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
+                    T_Damage(ent, world, world, vec3_zero(), ent->s.origin, vec3_zero(), dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
                     ent->debouncePainTime = level.time + 1;
                 }
             }
@@ -255,13 +260,13 @@ void M_WorldEffects(entity_t *ent)
     if ((ent->waterType & CONTENTS_LAVA) && !(ent->flags & FL_IMMUNE_LAVA)) {
         if (ent->debounceDamageTime < level.time) {
             ent->debounceDamageTime = level.time + 0.2;
-            T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 10 * ent->waterLevel, 0, 0, MOD_LAVA);
+            T_Damage(ent, world, world, vec3_zero(), ent->s.origin, vec3_zero(), 10 * ent->waterLevel, 0, 0, MOD_LAVA);
         }
     }
     if ((ent->waterType & CONTENTS_SLIME) && !(ent->flags & FL_IMMUNE_SLIME)) {
         if (ent->debounceDamageTime < level.time) {
             ent->debounceDamageTime = level.time + 1;
-            T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 4 * ent->waterLevel, 0, 0, MOD_SLIME);
+            T_Damage(ent, world, world, vec3_zero(), ent->s.origin, vec3_zero(), 4 * ent->waterLevel, 0, 0, MOD_SLIME);
         }
     }
 
@@ -295,10 +300,10 @@ void M_droptofloor(entity_t *ent)
 
     trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
 
-    if (trace.fraction == 1 || trace.allsolid)
+    if (trace.fraction == 1 || trace.allSolid)
         return;
 
-    VectorCopy(trace.endpos, ent->s.origin);
+    VectorCopy(trace.endPosition, ent->s.origin);
 
     gi.LinkEntity(ent);
     M_CheckGround(ent);
@@ -413,7 +418,7 @@ void monster_use(entity_t *self, entity_t *other, entity_t *activator)
 
 // delay reaction so if the monster is teleported, its sound is still heard
     self->enemy = activator;
-    FoundTarget(self);
+    AI_FoundTarget(self);
 }
 
 
@@ -434,7 +439,7 @@ void monster_triggered_spawn(entity_t *self)
     monster_start_go(self);
 
     if (self->enemy && !(self->spawnFlags & 1) && !(self->enemy->flags & FL_NOTARGET)) {
-        FoundTarget(self);
+        AI_FoundTarget(self);
     } else {
         self->enemy = NULL;
     }
@@ -509,7 +514,7 @@ qboolean monster_start(entity_t *self)
     self->nextThink = level.time + FRAMETIME;
     self->svFlags |= SVF_MONSTER;
     self->s.renderfx |= RF_FRAMELERP;
-    self->takedamage = DAMAGE_AIM;
+    self->takeDamage = DAMAGE_AIM;
     self->air_finished = level.time + 12;
     self->Use = monster_use;
     self->maxHealth = self->health;

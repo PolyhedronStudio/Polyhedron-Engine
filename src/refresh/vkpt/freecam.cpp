@@ -154,7 +154,7 @@ void vkpt_freecam_update(float frame_time)
 		VectorScale(velocity, 0.1f, velocity);
 
 	vec3_t forward, right, up;
-	AngleVectors(freecam_viewangles, &forward, &right, &up);
+	vec3_vectors(freecam_viewangles, &forward, &right, &up);
 	float speed = 100.f;
 	VectorMA(freecam_vieworg, velocity[0] * frame_time * speed, forward, freecam_vieworg);
 	VectorMA(freecam_vieworg, velocity[1] * frame_time * speed, right, freecam_vieworg);

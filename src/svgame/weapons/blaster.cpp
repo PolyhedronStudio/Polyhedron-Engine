@@ -33,7 +33,7 @@ void Blaster_Fire(entity_t* ent, const vec3_t &g_offset, int damage, qboolean hy
 
     if (is_quad)
         damage *= 4;
-    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
+    vec3_vectors(ent->client->v_angle, &forward, &right, NULL);
     VectorSet(offset, 24, 8, ent->viewHeight - 8);
     VectorAdd(offset, g_offset, offset);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
@@ -41,7 +41,7 @@ void Blaster_Fire(entity_t* ent, const vec3_t &g_offset, int damage, qboolean hy
     VectorScale(forward, -2, ent->client->kickOrigin);
     ent->client->kickAngles[0] = -1;
 
-    fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
+    Fire_Blaster(ent, start, forward, damage, 1000, effect, hyper);
 
     // send muzzle flash
     gi.WriteByte(svg_muzzleflash);
@@ -64,7 +64,7 @@ void Weapon_Blaster_Fire(entity_t* ent)
         damage = 15;
     else
         damage = 10;
-    Blaster_Fire(ent, vec3_origin, damage, false, EF_BLASTER);
+    Blaster_Fire(ent, vec3_zero(), damage, false, EF_BLASTER);
     ent->client->playerState.gunframe++;
 }
 

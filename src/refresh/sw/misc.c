@@ -230,8 +230,8 @@ static void R_ViewChanged(rect_t *vr)
     screenedge[3].normal[2] = 1;
     screenedge[3].type = PLANE_ANYZ;
 
-    for (i = 0; i < 4; i++)
-        VectorNormalize(screenedge[i].normal);
+    //for (i = 0; i < 4; i++)
+    //    vec3_normalize(screenedge[i].normal);
 }
 
 
@@ -257,7 +257,7 @@ void R_SetupFrame(void)
     VectorCopy(r_newrefdef.vieworg, modelorg);
     VectorCopy(r_newrefdef.vieworg, r_origin);
 
-    AngleVectors(r_newrefdef.viewAngles, vpn, vright, vup);
+    vec3_vectors(r_newrefdef.viewAngles, vpn, vright, vup);
 
 // current viewleaf
     if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) {

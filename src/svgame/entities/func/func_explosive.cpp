@@ -39,14 +39,14 @@ void func_explosive_explode(entity_t* self, entity_t* inflictor, entity_t* attac
     VectorAdd(self->absMin, size, origin);
     VectorCopy(origin, self->s.origin);
 
-    self->takedamage = DAMAGE_NO;
+    self->takeDamage = DAMAGE_NO;
 
     if (self->dmg)
         T_RadiusDamage(self, attacker, self->dmg, NULL, self->dmg + 40, MOD_EXPLOSIVE);
 
     VectorSubtract(self->s.origin, inflictor->s.origin, self->velocity);
-    VectorNormalize(self->velocity);
-    VectorScale(self->velocity, 150, self->velocity);
+    self->velocity = vec3_scale(vec3_normalize(self->velocity), 150);
+    //VectorScale(self->velocity, 150, self->velocity);
 
     // start chunks towards the center
     VectorScale(size, 0.5, size);
@@ -89,7 +89,7 @@ void func_explosive_explode(entity_t* self, entity_t* inflictor, entity_t* attac
 
 void func_explosive_use(entity_t* self, entity_t* other, entity_t* activator)
 {
-    func_explosive_explode(self, other, activator, self->health, vec3_origin);
+    func_explosive_explode(self, other, activator, self->health, vec3_zero());
 }
 
 void func_explosive_spawn(entity_t* self, entity_t* other, entity_t* activator)
@@ -136,7 +136,7 @@ void SP_func_explosive(entity_t* self)
         if (!self->health)
             self->health = 100;
         self->Die = func_explosive_explode;
-        self->takedamage = DAMAGE_YES;
+        self->takeDamage = DAMAGE_YES;
     }
 
     gi.LinkEntity(self);

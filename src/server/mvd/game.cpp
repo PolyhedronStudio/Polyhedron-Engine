@@ -1972,7 +1972,7 @@ static mvd_player_t *MVD_HitPlayer(mvd_client_t *client)
 
     // N&C: FF Precision.
     VectorAdd(client->playerState.viewoffset, client->playerState.pmove.origin, start);
-    AngleVectors(client->playerState.viewAngles, &forward, NULL, NULL);
+    vec3_vectors(client->playerState.viewAngles, &forward, NULL, NULL);
     VectorMA(start, 8192, forward, end);
 
     if (mvd->cm.cache) {
@@ -2014,7 +2014,7 @@ static trace_t q_gameabi MVD_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_
     trace_t trace;
 
     memset(&trace, 0, sizeof(trace));
-    VectorCopy(end, trace.endpos);
+    VectorCopy(end, trace.endPosition);
     trace.fraction = 1;
 
     return trace;

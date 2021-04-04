@@ -172,7 +172,7 @@ void P_DamageFeedback(entity_t *player)
             kick = 50;
 
         VectorSubtract(client->damage_from, player->s.origin, v);
-        VectorNormalize(v);
+        v = vec3_normalize(v);
 
         side = DotProduct(v, right);
         client->v_dmg_roll = kick * side * 0.3;
@@ -533,7 +533,7 @@ void P_FallingDamage(entity_t *ent)
         VectorSet(dir, 0, 0, 1);
 
         if (!deathmatch->value || !((int)dmflags->value & DF_NO_FALLING))
-            T_Damage(ent, world, world, dir, ent->s.origin, vec3_origin, damage, 0, 0, MOD_FALLING);
+            T_Damage(ent, world, world, dir, ent->s.origin, vec3_zero(), damage, 0, 0, MOD_FALLING);
     } else {
         ent->s.event = EV_FALLSHORT;
         return;
@@ -653,7 +653,7 @@ void P_WorldEffects(void)
 
                 current_player->debouncePainTime = level.time;
 
-                T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, current_player->dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
+                T_Damage(current_player, world, world, vec3_zero(), current_player->s.origin, vec3_zero(), current_player->dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
             }
         }
     } else {
@@ -677,15 +677,15 @@ void P_WorldEffects(void)
             }
 
             if (envirosuit) // take 1/3 damage with envirosuit
-                T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1 * waterlevel, 0, 0, MOD_LAVA);
+                T_Damage(current_player, world, world, vec3_zero(), current_player->s.origin, vec3_zero(), 1 * waterlevel, 0, 0, MOD_LAVA);
             else
-                T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 3 * waterlevel, 0, 0, MOD_LAVA);
+                T_Damage(current_player, world, world, vec3_zero(), current_player->s.origin, vec3_zero(), 3 * waterlevel, 0, 0, MOD_LAVA);
         }
 
         if (current_player->waterType & CONTENTS_SLIME) {
             if (!envirosuit) {
                 // no damage from slime with envirosuit
-                T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1 * waterlevel, 0, 0, MOD_SLIME);
+                T_Damage(current_player, world, world, vec3_zero(), current_player->s.origin, vec3_zero(), 1 * waterlevel, 0, 0, MOD_SLIME);
             }
         }
     }
@@ -921,7 +921,7 @@ void ClientEndServerFrame(entity_t *ent)
         return;
     }
 
-    AngleVectors(ent->client->v_angle, &forward, &right, &up);
+    vec3_vectors(ent->client->v_angle, &forward, &right, &up);
 
     // burn from lava, etc
     P_WorldEffects();

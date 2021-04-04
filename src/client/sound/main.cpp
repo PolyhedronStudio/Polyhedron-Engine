@@ -752,7 +752,7 @@ void S_SpatializeOrigin(const vec3_t &origin, float master_vol, float dist_mult,
 // calculate stereo seperation and distance attenuation
     VectorSubtract(origin, listener_origin, source_vec);
 
-    dist = VectorNormalize(source_vec);
+    source_vec = vec3_normalize_length(source_vec, dist);
     dist -= SOUND_FULLVOLUME;
     if (dist < 0)
         dist = 0;           // close enough to be at full volume

@@ -124,7 +124,7 @@ static void computeTangents(model_t * model)
                 vec3_t t;
                 VectorScale(normal, DotProduct(normal, stan), t);
                 VectorSubtract(stan, t, t);
-                VectorNormalize2(t, tangent); // Graham-Schmidt : t = normalize(t - n * (n.t))
+				tangent = vec3_normalize(t); // Graham-Schmidt : t = normalize(t - n * (n.t))
 
                 vec3_t cross;
                 CrossProduct(normal, t, cross);
@@ -443,7 +443,7 @@ qerror_t MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length)
 				VectorSubtract(*p1, *p0, e1);
 				VectorSubtract(*p2, *p0, e2);
 				CrossProduct(e2, e1, n);
-				VectorNormalize(n);
+				n = vec3_normalize(n);
 
 				VectorCopy(n, dst_mesh->normals[i0]);
 				VectorCopy(n, dst_mesh->normals[i1]);
@@ -609,7 +609,7 @@ static qerror_t MOD_LoadMD3Mesh(model_t *model, maliasmesh_t *mesh,
 			(*dst_norm)[1] = TAB_SIN(lat) * TAB_SIN(lng);
 			(*dst_norm)[2] = TAB_COS(lat);
 
-			VectorNormalize(*dst_norm);
+			*dst_norm = vec3_normalize(*dst_norm);
 
 			(*dst_tc)[0] = LittleFloat(src_tc->st[0]);
 			(*dst_tc)[1] = LittleFloat(src_tc->st[1]);

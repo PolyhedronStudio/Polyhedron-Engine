@@ -80,7 +80,7 @@ void Touch_Multi(entity_t *self, entity_t *other, cplane_t *plane, csurface_t *s
     if (!VectorCompare(self->moveDirection, vec3_origin)) {
         vec3_t  forward;
 
-        AngleVectors(other->s.angles, &forward, NULL, NULL);
+        vec3_vectors(other->s.angles, &forward, NULL, NULL);
         if (DotProduct(forward, self->moveDirection) < 0)
             return;
     }

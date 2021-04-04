@@ -35,7 +35,7 @@ void point_combat_touch(entity_t* self, entity_t* other, cplane_t* plane, csurfa
     }
     else if ((self->spawnFlags & 1) && !(other->flags & (FL_SWIM | FL_FLY))) {
         other->monsterInfo.pausetime = level.time + 100000000;
-        other->monsterInfo.aiflags |= AI_STAND_GROUND;
+        other->monsterInfo.aiflags |= AI_Stand_GROUND;
         other->monsterInfo.stand(other);
     }
 

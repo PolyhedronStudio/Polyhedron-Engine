@@ -821,14 +821,14 @@ entity_t *Drop_Item(entity_t *ent, gitem_t *item)
     if (ent->client) {
         trace_t trace;
 
-        AngleVectors(ent->client->v_angle, &forward, &right, NULL);
+        vec3_vectors(ent->client->v_angle, &forward, &right, NULL);
         VectorSet(offset, 24, 0, -16);
         dropped->s.origin = G_ProjectSource(ent->s.origin, offset, forward, right);
         trace = gi.Trace(ent->s.origin, dropped->mins, dropped->maxs,
                          dropped->s.origin, ent, CONTENTS_SOLID);
-        VectorCopy(trace.endpos, dropped->s.origin);
+        VectorCopy(trace.endPosition, dropped->s.origin);
     } else {
-        AngleVectors(ent->s.angles, &forward, &right, NULL);
+        vec3_vectors(ent->s.angles, &forward, &right, NULL);
         VectorCopy(ent->s.origin, dropped->s.origin);
     }
 
@@ -886,13 +886,13 @@ void droptofloor(entity_t *ent)
     dest = ent->s.origin + vec3_t(0.f, 0.f, 128.f);
 
     tr = gi.Trace(ent->s.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
-    if (tr.startsolid) {
+    if (tr.startSolid) {
         gi.DPrintf("droptofloor: %s startsolid at %s\n", ent->classname, Vec3ToString(ent->s.origin));
         G_FreeEntity(ent);
         return;
     }
 
-    VectorCopy(tr.endpos, ent->s.origin);
+    VectorCopy(tr.endPosition, ent->s.origin);
 
     if (ent->team) {
         ent->flags &= ~FL_TEAMSLAVE;

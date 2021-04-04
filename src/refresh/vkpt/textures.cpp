@@ -635,7 +635,9 @@ vkpt_normalize_normal_map(image_t *image)
             color[0] = color[0] * 2.f - 1.f;
             color[1] = color[1] * 2.f - 1.f;
 
-            if (VectorNormalize(color) == 0.f)
+			float colorLength;
+			color = vec3_normalize_length(color, colorLength);
+            if (colorLength == 0.f)
             {
                 color[0] = 0.f;
                 color[1] = 0.f;

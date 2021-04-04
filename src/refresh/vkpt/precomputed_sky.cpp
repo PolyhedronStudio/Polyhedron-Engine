@@ -498,19 +498,18 @@ void create_identity_matrix(float matrix[16])
 
 void create_look_at_matrix(float matrix[16], vec3_t EyePosition, vec3_t EyeDirection, vec3_t UpDirection)
 {
-	vec3_t f; 
-	VectorNormalize2(EyeDirection, f);
+	vec3_t f = vec3_normalize(EyeDirection); 
 
-	vec3_t s;
-	CrossProduct(UpDirection, f, s);
-	VectorNormalize2(s, s);
+	vec3_t s = vec3_normalize(vec3_cross(UpDirection, f));
+	//CrossProduct(UpDirection, f, s);
+	//VectorNormalize2(s, s);
 
-	vec3_t u;
-	CrossProduct(f, s, u);
+	vec3_t u = vec3_cross(f, s);
+	//CrossProduct(f, s, u);
 
-	float D0 = DotProduct(s, EyePosition);
-	float D1 = DotProduct(u, EyePosition);
-	float D2 = DotProduct(f, EyePosition);
+	float D0 = vec3_dot(s, EyePosition);
+	float D1 = vec3_dot(u, EyePosition);
+	float D2 = vec3_dot(f, EyePosition);
 
 	// Set identity
 	create_identity_matrix(matrix);

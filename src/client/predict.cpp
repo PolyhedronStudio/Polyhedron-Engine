@@ -79,7 +79,7 @@ static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
             headNode = CM_HeadnodeForBox(ent->mins, ent->maxs);
         }
 
-        if (tr->allsolid)
+        if (tr->allSolid)
             return;
 
         CM_TransformedBoxTrace(&trace, start, end,

@@ -12,7 +12,7 @@
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
 
-void player_pain(entity_t* self, entity_t* other, float kick, int damage)
+void Player_Pain(entity_t* self, entity_t* other, float kick, int damage)
 {
     // player pain is handled at the end of the frame in P_DamageFeedback
 }
@@ -54,16 +54,16 @@ void LookAtKiller(entity_t* self, entity_t* inflictor, entity_t* attacker)
 
 /*
 ==================
-player_die
+Player_Die
 ==================
 */
-void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point)
+void Player_Die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point)
 {
     int     n;
 
     VectorClear(self->avelocity);
 
-    self->takedamage = DAMAGE_YES;
+    self->takeDamage = DAMAGE_YES;
     self->moveType = MOVETYPE_TOSS;
 
     self->s.modelindex2 = 0;    // remove linked weapon model
@@ -111,7 +111,7 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         ThrowClientHead(self, damage);
 
-        self->takedamage = DAMAGE_NO;
+        self->takeDamage = DAMAGE_NO;
     }
     else {
         // normal death

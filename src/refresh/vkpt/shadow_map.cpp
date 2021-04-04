@@ -498,14 +498,14 @@ void vkpt_shadow_map_setup(const sun_light_t* light, const float* bbox_min, cons
 	if (light->direction[2] >= 0.99f)
 		VectorSet(up_dir, 1.f, 0.f, 0.f);
 
-	vec3_t look_dir;
-	VectorScale(light->direction, -1.f, look_dir);
-	VectorNormalize(look_dir);
-	vec3_t left_dir;
+	vec3_t look_dir = vec3_normalize(vec3_scale(light->direction, -1.0f));
+	//VectorScale(light->direction, -1.f, look_dir);
+	//vec3_normalize(look_dir);
+	vec3_t left_dir = vec3_normalize(vec3_cross(up_dir, look_dir)); 
+	/*vec3_t left_dir;
 	CrossProduct(up_dir, look_dir, left_dir);
-	VectorNormalize(left_dir);
-	CrossProduct(look_dir, left_dir, up_dir);
-	VectorNormalize(up_dir);
+	vec3_normalize(left_dir);*/
+	up_dir = vec3_normalize(vec3_cross(look_dir, left_dir));
 
 	if (random_sampling)
 	{
@@ -515,12 +515,12 @@ void vkpt_shadow_map_setup(const sun_light_t* light, const float* bbox_min, cons
 		VectorMA(look_dir, u * light->angular_size_rad * 0.5f, left_dir, look_dir);
 		VectorMA(look_dir, v * light->angular_size_rad * 0.5f, up_dir, look_dir);
 
-		VectorNormalize(look_dir);
+		look_dir = vec3_normalize(look_dir);
 
 		CrossProduct(up_dir, look_dir, left_dir);
-		VectorNormalize(left_dir);
+		left_dir = vec3_normalize(left_dir);
 		CrossProduct(look_dir, left_dir, up_dir);
-		VectorNormalize(up_dir);
+		up_dir = vec3_normalize(up_dir);
 	}
 
 	float view_matrix[16] = {

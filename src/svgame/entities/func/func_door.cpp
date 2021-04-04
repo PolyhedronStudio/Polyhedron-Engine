@@ -17,7 +17,7 @@
 //=====================================================
 /*QUAKED func_door (0 .5 .8) ? START_OPEN x CRUSHER NOMONSTER ANIMATED TOGGLE ANIMATED_FAST
 TOGGLE      wait in both the start and end states for a trigger event.
-START_OPEN  the door to moves to its destination when spawned, and operate in reverse.  It is used to temporarily or permanently close off an area when triggered (not useful for touch or takedamage doors).
+START_OPEN  the door to moves to its destination when spawned, and operate in reverse.  It is used to temporarily or permanently close off an area when triggered (not useful for touch or takeDamage doors).
 NOMONSTER   monsters will not trigger this door
 
 "message"   is printed when the door is touched if it is a trigger door and it hasn't been fired yet
@@ -86,7 +86,7 @@ void door_go_down(entity_t* self)
         self->s.sound = self->moveInfo.sound_middle;
     }
     if (self->maxHealth) {
-        self->takedamage = DAMAGE_YES;
+        self->takeDamage = DAMAGE_YES;
         self->health = self->maxHealth;
     }
 
@@ -250,14 +250,14 @@ void door_blocked(entity_t* self, entity_t* other)
 
     if (!(other->svFlags & SVF_MONSTER) && (!other->client)) {
         // give it a chance to go away on it's own terms (like gibs)
-        T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+        T_Damage(other, self, self, vec3_zero(), other->s.origin, vec3_zero(), 100000, 1, 0, MOD_CRUSH);
         // if it's still there, nuke it
         if (other)
             BecomeExplosion1(other);
         return;
     }
 
-    T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_zero(), other->s.origin, vec3_zero(), self->dmg, 1, 0, MOD_CRUSH);
 
     if (self->spawnFlags & DOOR_CRUSHER)
         return;
@@ -283,7 +283,7 @@ void door_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int da
 
     for (ent = self->teamMasterPtr; ent; ent = ent->teamChainPtr) {
         ent->health = ent->maxHealth;
-        ent->takedamage = DAMAGE_NO;
+        ent->takeDamage = DAMAGE_NO;
     }
     door_use(self->teamMasterPtr, attacker, attacker);
 }
@@ -354,7 +354,7 @@ void SP_func_door(entity_t* ent)
     ent->moveInfo.state = STATE_BOTTOM;
 
     if (ent->health) {
-        ent->takedamage = DAMAGE_YES;
+        ent->takeDamage = DAMAGE_YES;
         ent->Die = door_killed;
         ent->maxHealth = ent->health;
     }

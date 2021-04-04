@@ -127,7 +127,7 @@ typedef enum {
 #define GIB_METALLIC            1
 
 //monster ai flags
-#define AI_STAND_GROUND         0x00000001
+#define AI_Stand_GROUND         0x00000001
 #define AI_TEMP_STAND_GROUND    0x00000002
 #define AI_SOUND_TARGET         0x00000004
 #define AI_LOST_SIGHT           0x00000008
@@ -644,12 +644,12 @@ void T_RadiusDamage(entity_t *inflictor, entity_t *attacker, float damage, entit
 // g_monster.c
 //
 void monster_fire_bullet(entity_t *self, const vec3_t &start, const vec3_t &dir, int damage, int kick, int hspread, int vspread, int flashtype);
-void monster_fire_shotgun(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int flashtype);
-void monster_fire_blaster(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int flashtype, int effect);
-void monster_fire_grenade(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int flashtype);
-void monster_fire_rocket(entity_t *self, const vec3_t& start, const vec3_t &dir, int damage, int speed, int flashtype);
-void monster_fire_railgun(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int flashtype);
-void monster_fire_bfg(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int kick, float damage_radius, int flashtype);
+void monster_Fire_Shotgun(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int flashtype);
+void monster_Fire_Blaster(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int flashtype, int effect);
+void monster_Fire_Grenade(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int flashtype);
+void monster_Fire_Rocket(entity_t *self, const vec3_t& start, const vec3_t &dir, int damage, int speed, int flashtype);
+void monster_Fire_Railgun(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int flashtype);
+void monster_Fire_BFG(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int kick, float damage_radius, int flashtype);
 void M_droptofloor(entity_t *ent);
 void monster_think(entity_t *self);
 void walkmonster_start(entity_t *self);
@@ -667,32 +667,32 @@ void M_CheckGround(entity_t *ent);
 //
 void AI_SetSightClient(void);
 
-void ai_stand(entity_t *self, float dist);
-void ai_move(entity_t *self, float dist);
-void ai_walk(entity_t *self, float dist);
-void ai_turn(entity_t *self, float dist);
-void ai_run(entity_t *self, float dist);
-void ai_charge(entity_t *self, float dist);
-int range(entity_t *self, entity_t *other);
+void AI_Stand(entity_t *self, float dist);
+void AI_Move(entity_t *self, float dist);
+void AI_Walk(entity_t *self, float dist);
+void AI_Turn(entity_t *self, float dist);
+void AI_Run(entity_t *self, float dist);
+void AI_Charge(entity_t *self, float dist);
+int AI_GetEntityRangeCategory(entity_t *self, entity_t *other);
 
-void FoundTarget(entity_t *self);
-qboolean infront(entity_t *self, entity_t *other);
-qboolean visible(entity_t *self, entity_t *other);
+void AI_FoundTarget(entity_t *self);
+qboolean AI_IsEntityInFrontOfSelf(entity_t *self, entity_t *other);
+qboolean AI_IsEntityVisibleToSelf(entity_t *self, entity_t *other);
 qboolean FacingIdeal(entity_t *self);
 
 //
 // g_weapon.c
 //
 void ThrowDebris(entity_t *self, const char *modelname, float speed, const vec3_t& origin);
-qboolean fire_hit(entity_t *self, vec3_t &aim, int damage, int kick);
-void fire_bullet(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod);
-void fire_shotgun(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
-void fire_blaster(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int effect, qboolean hyper);
-void fire_grenade(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, float timer, float damage_radius);
-void fire_grenade2(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
-void fire_rocket(entity_t *self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius, int radius_damage);
-void fire_rail(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick);
-void fire_bfg(entity_t *self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius);
+qboolean Fire_Hit(entity_t *self, vec3_t &aim, int damage, int kick);
+void Fire_Bullet(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod);
+void Fire_Shotgun(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
+void Fire_Blaster(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int effect, qboolean hyper);
+void Fire_Grenade(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, float timer, float damage_radius);
+void Fire_Grenade2(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
+void Fire_Rocket(entity_t *self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius, int radius_damage);
+void Fire_Rail(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick);
+void Fire_BFG(entity_t *self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius);
 
 //
 // g_ptrail.c
@@ -707,8 +707,8 @@ entity_t *PlayerTrail_LastSpot(void);
 //
 // g_player.c
 //
-void player_pain(entity_t *self, entity_t *other, float kick, int damage);
-void player_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int damage, const vec3_t& point);
+void Player_Pain(entity_t *self, entity_t *other, float kick, int damage);
+void Player_Die(entity_t *self, entity_t *inflictor, entity_t *attacker, int damage, const vec3_t& point);
 
 //
 // g_svcmds.c
@@ -1010,10 +1010,10 @@ struct entity_s {
     const char        *map;           // target_changelevel // C++20: STRING: Added const to char *
 
     int         viewHeight;     // height above origin where eyesight is determined
-    int         takedamage;
+    int         takeDamage;
     int         dmg;
-    int         radius_dmg;
-    float       dmg_radius;
+    int         explosionDamage;
+    float       explosionRadius;
     int         sounds;         // make this a spawntemp var?
     int         count;
 

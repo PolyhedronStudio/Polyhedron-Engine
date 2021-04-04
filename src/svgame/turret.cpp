@@ -48,12 +48,12 @@ void turret_blocked(entity_t *self, entity_t *other)
 {
     entity_t *attacker;
 
-    if (other->takedamage) {
+    if (other->takeDamage) {
         if (self->teamMasterPtr->owner)
             attacker = self->teamMasterPtr->owner;
         else
             attacker = self->teamMasterPtr;
-        T_Damage(other, self, attacker, vec3_origin, other->s.origin, vec3_origin, self->teamMasterPtr->dmg, 10, 0, MOD_CRUSH);
+        T_Damage(other, self, attacker, vec3_zero(), other->s.origin, vec3_zero(), self->teamMasterPtr->dmg, 10, 0, MOD_CRUSH);
     }
 }
 
@@ -80,14 +80,14 @@ void turret_breach_fire(entity_t *self)
     int     damage;
     int     speed;
 
-    AngleVectors(self->s.angles, &f, &r, &u);
+    vec3_vectors(self->s.angles, &f, &r, &u);
     VectorMA(self->s.origin, self->moveOrigin[0], f, start);
     VectorMA(start, self->moveOrigin[1], r, start);
     VectorMA(start, self->moveOrigin[2], u, start);
 
     damage = 100 + random() * 50;
     speed = 550 + 50 * skill->value;
-    fire_rocket(self->teamMasterPtr->owner, start, f, damage, speed, 150, damage);
+    Fire_Rocket(self->teamMasterPtr->owner, start, f, damage, speed, 150, damage);
     gi.PositionedSound(start, self, CHAN_WEAPON, gi.SoundIndex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 }
 
@@ -288,7 +288,7 @@ void turret_driver_die(entity_t *self, entity_t *inflictor, entity_t *attacker, 
     //infantry_die(self, inflictor, attacker, damage, point);
 }
 
-qboolean FindTarget(entity_t *self);
+qboolean AI_FindTarget(entity_t *self);
 
 void turret_driver_think(entity_t *self)
 {
@@ -302,12 +302,12 @@ void turret_driver_think(entity_t *self)
         self->enemy = NULL;
 
     if (!self->enemy) {
-        if (!FindTarget(self))
+        if (!AI_FindTarget(self))
             return;
         self->monsterInfo.trail_time = level.time;
         self->monsterInfo.aiflags &= ~AI_LOST_SIGHT;
     } else {
-        if (visible(self, self->enemy)) {
+        if (AI_IsEntityVisibleToSelf(self, self->enemy)) {
             if (self->monsterInfo.aiflags & AI_LOST_SIGHT) {
                 self->monsterInfo.trail_time = level.time;
                 self->monsterInfo.aiflags &= ~AI_LOST_SIGHT;
@@ -397,11 +397,11 @@ void SP_turret_driver(entity_t *self)
 
     self->svFlags |= SVF_MONSTER;
     self->s.renderfx |= RF_FRAMELERP;
-    self->takedamage = DAMAGE_AIM;
+    self->takeDamage = DAMAGE_AIM;
     self->Use = monster_use;
     self->clipMask = CONTENTS_MASK_MONSTERSOLID;
     VectorCopy(self->s.origin, self->s.old_origin);
-    self->monsterInfo.aiflags |= AI_STAND_GROUND | AI_DUCKED;
+    self->monsterInfo.aiflags |= AI_Stand_GROUND | AI_DUCKED;
 
     if (st.item) {
         self->item = FindItemByClassname(st.item);

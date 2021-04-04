@@ -62,7 +62,7 @@ void gib_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t *sur
         gi.Sound(self, CHAN_VOICE, gi.SoundIndex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
 
         vectoangles(plane->normal, normal_angles);
-        AngleVectors(normal_angles, NULL, &right, NULL);
+        vec3_vectors(normal_angles, NULL, &right, NULL);
         vectoangles(right, self->s.angles);
 
         if (self->s.modelindex == sm_meat_index) {
@@ -98,7 +98,7 @@ void ThrowGib(entity_t *self, const char *gibname, int damage, int type)
     gib->solid = SOLID_NOT;
     gib->s.effects |= EF_GIB;
     gib->flags |= FL_NO_KNOCKBACK;
-    gib->takedamage = DAMAGE_YES;
+    gib->takeDamage = DAMAGE_YES;
     gib->Die = gib_die;
 
     if (type == GIB_ORGANIC) {
@@ -142,7 +142,7 @@ void ThrowHead(entity_t *self, const char *gibname, int damage, int type)
     self->s.sound = 0;
     self->flags |= FL_NO_KNOCKBACK;
     self->svFlags &= ~SVF_MONSTER;
-    self->takedamage = DAMAGE_YES;
+    self->takeDamage = DAMAGE_YES;
     self->Die = gib_die;
 
     if (type == GIB_ORGANIC) {
@@ -187,7 +187,7 @@ void ThrowClientHead(entity_t *self, int damage)
     VectorSet(self->mins, -16, -16, 0);
     VectorSet(self->maxs, 16, 16, 16);
 
-    self->takedamage = DAMAGE_NO;
+    self->takeDamage = DAMAGE_NO;
     self->solid = SOLID_NOT;
     self->s.effects = EF_GIB;
     self->s.sound = 0;
@@ -242,7 +242,7 @@ void ThrowDebris(entity_t *self, const char *modelname, float speed, const vec3_
     chunk->s.frame = 0;
     chunk->flags = 0;
     chunk->classname = "debris";
-    chunk->takedamage = DAMAGE_YES;
+    chunk->takeDamage = DAMAGE_YES;
     chunk->Die = debris_die;
     gi.LinkEntity(chunk);
 }

@@ -810,10 +810,10 @@ void R_IMFlatShadedQuad(vec3_t a, vec3_t b, vec3_t c, vec3_t d, color_t color, f
     r_clip_verts[0][2][4] = 0;
     r_clip_verts[0][3][4] = 0;
 
-    VectorSubtract(d, c, s0);
-    VectorSubtract(c, b, s1);
-    CrossProduct(s0, s1, r_polydesc.vpn);
-    VectorNormalize(r_polydesc.vpn);
+    //VectorSubtract(d, c, s0);
+    //VectorSubtract(c, b, s1);
+    //CrossProduct(s0, s1, r_polydesc.vpn);
+    //vec3_normalize(r_polydesc.vpn);
 
     r_polydesc.dist = DotProduct(r_polydesc.vpn, r_clip_verts[0][0]);
 

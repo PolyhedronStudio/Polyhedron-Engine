@@ -37,7 +37,7 @@ qboolean CanDamage(entity_t *targ, entity_t *inflictor)
     if (targ->moveType == MOVETYPE_PUSH) {
         VectorAdd(targ->absMin, targ->absMax, dest);
         VectorScale(dest, 0.5, dest);
-        trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+        trace = gi.Trace(inflictor->s.origin, vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
         if (trace.fraction == 1.0)
             return true;
         if (trace.ent == targ)
@@ -45,35 +45,35 @@ qboolean CanDamage(entity_t *targ, entity_t *inflictor)
         return false;
     }
 
-    trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, targ->s.origin, inflictor, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(inflictor->s.origin, vec3_zero(), vec3_zero(), targ->s.origin, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     VectorCopy(targ->s.origin, dest);
     dest[0] += 15.0;
     dest[1] += 15.0;
-    trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(inflictor->s.origin, vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     VectorCopy(targ->s.origin, dest);
     dest[0] += 15.0;
     dest[1] -= 15.0;
-    trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(inflictor->s.origin, vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     VectorCopy(targ->s.origin, dest);
     dest[0] -= 15.0;
     dest[1] += 15.0;
-    trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(inflictor->s.origin, vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     VectorCopy(targ->s.origin, dest);
     dest[0] -= 15.0;
     dest[1] -= 15.0;
-    trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(inflictor->s.origin, vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
@@ -207,9 +207,9 @@ static int CheckPowerArmor(entity_t *ent, vec3_t point, vec3_t normal, int damag
         vec3_t      forward;
 
         // only works if damage point is in front
-        AngleVectors(ent->s.angles, &forward, NULL, NULL);
+        vec3_vectors(ent->s.angles, &forward, NULL, NULL);
         VectorSubtract(point, ent->s.origin, vec);
-        VectorNormalize(vec);
+        vec = vec3_normalize(vec);
         dot = DotProduct(vec, forward);
         if (dot <= 0.3)
             return 0;
@@ -310,7 +310,7 @@ void M_ReactToDamage(entity_t *targ, entity_t *attacker)
         // this can only happen in coop (both new and old enemies are clients)
         // only switch if can't see the current enemy
         if (targ->enemy && targ->enemy->client) {
-            if (visible(targ, targ->enemy)) {
+            if (AI_IsEntityVisibleToSelf(targ, targ->enemy)) {
                 targ->oldEnemyPtr = attacker;
                 return;
             }
@@ -318,7 +318,7 @@ void M_ReactToDamage(entity_t *targ, entity_t *attacker)
         }
         targ->enemy = attacker;
         if (!(targ->monsterInfo.aiflags & AI_DUCKED))
-            FoundTarget(targ);
+            AI_FoundTarget(targ);
         return;
     }
 
@@ -334,7 +334,7 @@ void M_ReactToDamage(entity_t *targ, entity_t *attacker)
             targ->oldEnemyPtr = targ->enemy;
         targ->enemy = attacker;
         if (!(targ->monsterInfo.aiflags & AI_DUCKED))
-            FoundTarget(targ);
+            AI_FoundTarget(targ);
     }
     // if they *meant* to shoot us, then shoot back
     else if (attacker->enemy == targ) {
@@ -342,7 +342,7 @@ void M_ReactToDamage(entity_t *targ, entity_t *attacker)
             targ->oldEnemyPtr = targ->enemy;
         targ->enemy = attacker;
         if (!(targ->monsterInfo.aiflags & AI_DUCKED))
-            FoundTarget(targ);
+            AI_FoundTarget(targ);
     }
     // otherwise get mad at whoever they are mad at (help our buddy) unless it is us!
     else if (attacker->enemy && attacker->enemy != targ) {
@@ -350,7 +350,7 @@ void M_ReactToDamage(entity_t *targ, entity_t *attacker)
             targ->oldEnemyPtr = targ->enemy;
         targ->enemy = attacker->enemy;
         if (!(targ->monsterInfo.aiflags & AI_DUCKED))
-            FoundTarget(targ);
+            AI_FoundTarget(targ);
     }
 }
 
@@ -375,7 +375,7 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
         return;
     }
 
-    if (!targ->takedamage)
+    if (!targ->takeDamage)
         return;
 
     // friendly fire avoidance
@@ -544,7 +544,7 @@ void T_RadiusDamage(entity_t *inflictor, entity_t *attacker, float damage, entit
         if (ent == ignore)
             continue;
         // Continue in case this entity CAN'T take any damage.
-        if (!ent->takedamage)
+        if (!ent->takeDamage)
             continue;
 
         // Calculate damage points.

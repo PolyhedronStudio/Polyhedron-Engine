@@ -47,8 +47,8 @@ void UpdateChaseCam(entity_t *ent)
     VectorCopy(targ->client->v_angle, angles);
     if (angles[vec3_t::Pitch] > 56)
         angles[vec3_t::Pitch] = 56;
-    AngleVectors(angles, &forward, &right, NULL);
-    VectorNormalize(forward);
+    vec3_vectors(angles, &forward, &right, NULL);
+    forward = vec3_normalize(forward);
     VectorMA(ownerv, -30, forward, o);
 
     if (o[2] < targ->s.origin[2] + 20)
@@ -58,26 +58,26 @@ void UpdateChaseCam(entity_t *ent)
     if (!targ->groundEntityPtr)
         o[2] += 16;
 
-    trace = gi.Trace(ownerv, vec3_origin, vec3_origin, o, targ, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(ownerv, vec3_zero(), vec3_zero(), o, targ, CONTENTS_MASK_SOLID);
 
-    VectorCopy(trace.endpos, goal);
+    VectorCopy(trace.endPosition, goal);
 
     VectorMA(goal, 2, forward, goal);
 
     // pad for floors and ceilings
     VectorCopy(goal, o);
     o[2] += 6;
-    trace = gi.Trace(goal, vec3_origin, vec3_origin, o, targ, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(goal, vec3_zero(), vec3_zero(), o, targ, CONTENTS_MASK_SOLID);
     if (trace.fraction < 1) {
-        VectorCopy(trace.endpos, goal);
+        VectorCopy(trace.endPosition, goal);
         goal[2] -= 6;
     }
 
     VectorCopy(goal, o);
     o[2] -= 6;
-    trace = gi.Trace(goal, vec3_origin, vec3_origin, o, targ, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(goal, vec3_zero(), vec3_zero(), o, targ, CONTENTS_MASK_SOLID);
     if (trace.fraction < 1) {
-        VectorCopy(trace.endpos, goal);
+        VectorCopy(trace.endPosition, goal);
         goal[2] += 6;
     }
 

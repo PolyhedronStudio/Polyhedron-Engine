@@ -39,7 +39,7 @@ void weapon_shotgun_fire(entity_t* ent)
         return;
     }
 
-    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
+    vec3_vectors(ent->client->v_angle, &forward, &right, NULL);
 
     VectorScale(forward, -2, ent->client->kickOrigin);
     ent->client->kickAngles[0] = -2;
@@ -53,9 +53,9 @@ void weapon_shotgun_fire(entity_t* ent)
     }
 
     if (deathmatch->value)
-        fire_shotgun(ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
+        Fire_Shotgun(ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
     else
-        fire_shotgun(ent, start, forward, damage, kick, 500, 500, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
+        Fire_Shotgun(ent, start, forward, damage, kick, 500, 500, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
 
     // send muzzle flash
     gi.WriteByte(svg_muzzleflash);
