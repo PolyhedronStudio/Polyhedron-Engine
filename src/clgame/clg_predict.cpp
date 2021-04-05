@@ -193,7 +193,14 @@ static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
 }
 
 
-void CLG_TraverseStep(client_entity_step_t* step, uint32_t time, float height) {
+//
+//================
+// CLG_TraverseEntityStep
+//
+// Setup an entity's step interpolation.
+//================
+//
+void CLG_TraverseEntityStep(client_entity_step_t* step, uint32_t time, float height) {
 
     const uint32_t delta = time - step->timestamp;
 
@@ -206,9 +213,28 @@ void CLG_TraverseStep(client_entity_step_t* step, uint32_t time, float height) {
         step->timestamp = time;
     }
 
-    step->interval = 128.f * (fabsf(step->height) / PM_STEP_HEIGHT);
+    step->interval = 128.f * (std::fabsf(step->height) / PM_STEP_HEIGHT);
 }
 
+//
+//================
+// CLG_InterpolateStep
+//
+// Interpolate the entity's step for the current frame.
+//================
+//
+void CLG_InterpolateStep(client_entity_step_t* step) {
+
+    const uint32_t delta = clgi.GetRealTime() - step->timestamp; //cl->time ->unclamped_time - step->timestamp;
+
+    if (delta < step->interval) {
+        const float lerp = (step->interval - delta) / (float)step->interval;
+        step->delta_height = lerp * step->height;
+    }
+    else {
+        step->delta_height = 0.0;
+    }
+}
 //
 //===============
 // CLG_PredictMovement
@@ -287,7 +313,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
 
         if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
             cl->predicted_step = step;
-            CLG_TraverseStep(&stepx, clgi.GetRealTime(), step);
+            CLG_TraverseEntityStep(&stepx, clgi.GetRealTime(), step);
             cl->predicted_step_frame = frame + 1;    // don't double step
             stepx.time = clgi.GetRealTime();
         }

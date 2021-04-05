@@ -110,7 +110,7 @@ template<typename T> struct vec3_template {
     }
 
     // OPERATOR: -= vec3_template
-    const vec3_template& operator -=(const vec3_template& operand) {
+    inline const vec3_template& operator -=(const vec3_template& operand) {
         x -= operand.x;
         y -= operand.y;
         z -= operand.z;
@@ -118,7 +118,7 @@ template<typename T> struct vec3_template {
     }
 
     //// OPERATOR: += vec3_template
-    const vec3_template& operator +=(const vec3_template& operand) {
+    inline const vec3_template& operator +=(const vec3_template& operand) {
         x += operand.x;
         y += operand.y;
         z += operand.z;
@@ -126,7 +126,7 @@ template<typename T> struct vec3_template {
     }
 
     //// OPERATOR: /= vec3_template
-    const vec3_template& operator *=(const vec3_template& operand) {
+    inline const vec3_template& operator *=(const vec3_template& operand) {
         x *= operand.x;
         y *= operand.y;
         z *= operand.z;
@@ -134,7 +134,7 @@ template<typename T> struct vec3_template {
     }
 
     //// OPERATOR: *= vec3_template
-    const vec3_template& operator /=(const vec3_template& operand) {
+    inline const vec3_template& operator /=(const vec3_template& operand) {
         x /= operand.x;
         y /= operand.y;
         z /= operand.z;

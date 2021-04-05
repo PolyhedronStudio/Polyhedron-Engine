@@ -39,6 +39,9 @@ When finished we have a stable base to work from, one that we can start making t
     - [X] Change MSG_Write/ReadPos to use MSG_Write/ReadFloat instead, this is safe after fixing the above.
     
 - [X] Math Library
+  - [X] Add Matrix3 from QFusion (in our C++ style ofc! ;-))
+  - [ ] Add Quaternion from QFusion (in our C++ style ofc! ;-))
+  - [ ] Add Dual Quaternion from QFusion (in our C++ style ofc! ;-))
   - [X] Figure out why sometimes the plane is NULL in case of T_Damage, seems by T_RadiusDamage. 
   - [X] Create new inlined versions for the other vector types.
     - [X] vec2_t

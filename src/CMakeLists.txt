@@ -330,6 +330,7 @@ SET(SRC_SHAREDGAME
 SET(HEADERS_SHARED
 	# Math shared .cpp lib here.
 	../inc/shared/math/color.h
+	../inc/shared/math/matrix3.h
 	../inc/shared/math/matrix4.h
 	../inc/shared/math/plane.h
 	../inc/shared/math/rectangle.h

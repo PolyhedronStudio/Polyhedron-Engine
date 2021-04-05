@@ -39,6 +39,7 @@ extern const vec3_t bytedirs[NUMVERTEXNORMALS];
 //-----------------
 // Matrixes
 //-----------------
+#include "shared/math/matrix3.h"
 #include "shared/math/matrix4.h"
 
 //-----------------
