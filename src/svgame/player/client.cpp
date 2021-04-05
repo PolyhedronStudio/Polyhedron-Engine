@@ -702,7 +702,7 @@ void body_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int damag
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         self->s.origin[2] -= 48;
         ThrowClientHead(self, damage);
-        self->takeDamage = DAMAGE_NO;
+        self->takedamage = DAMAGE_NO;
     }
 }
 
@@ -721,7 +721,7 @@ void CopyToBodyQue(entity_t *ent)
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_BLOOD);
         gi.WritePosition(body->s.origin);
-        gi.WriteDirection(vec3_zero());
+        gi.WriteDirection(vec3_origin);
         gi.Multicast(&body->s.origin, MULTICAST_PVS);
     }
 
@@ -746,7 +746,7 @@ void CopyToBodyQue(entity_t *ent)
     body->groundEntityPtr = ent->groundEntityPtr;
 
     body->Die = body_die;
-    body->takeDamage = DAMAGE_YES;
+    body->takedamage = DAMAGE_YES;
 
     gi.LinkEntity(body);
 }
@@ -937,7 +937,7 @@ void PutClientInServer(entity_t *ent)
     // clear entity values
     ent->groundEntityPtr = NULL;
     ent->client = &game.clients[index];
-    ent->takeDamage = DAMAGE_AIM;
+    ent->takedamage = DAMAGE_AIM;
     ent->moveType = MOVETYPE_WALK;
     ent->viewHeight = 22;
     ent->inUse = true;
@@ -948,8 +948,8 @@ void PutClientInServer(entity_t *ent)
     ent->air_finished = level.time + 12;
     ent->clipMask = CONTENTS_MASK_PLAYERSOLID;
     ent->model = "players/male/tris.md2";
-    ent->Pain = Player_Pain;
-    ent->Die = Player_Die;
+    ent->Pain = player_pain;
+    ent->Die = player_die;
     ent->waterLevel = 0;
     ent->waterType = 0;
     ent->flags &= ~FL_NO_KNOCKBACK;
@@ -1564,7 +1564,7 @@ void ClientBeginServerFrame(entity_t *ent)
 
     // add player trail so monsters can follow
     if (!deathmatch->value)
-        if (!AI_IsEntityVisibleToSelf(ent, PlayerTrail_LastSpot()))
+        if (!visible(ent, PlayerTrail_LastSpot()))
             PlayerTrail_Add(ent->s.old_origin);
 
     client->latched_buttons = 0;

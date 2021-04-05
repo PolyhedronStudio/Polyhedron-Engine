@@ -20,6 +20,112 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 vec3_t vec3_origin = { 0, 0, 0 };
 
+//
+//===============
+// AngleVectors
+// 
+// Calculate the forward, right, and up vectors for the given angles.
+//===============
+//
+void AngleVectors(const vec3_t& angles, vec3_t* forward, vec3_t* right, vec3_t* up) {
+    float        angle;
+    float        sr, sp, sy, cr, cp, cy;
+
+    angle = angles.xyz[vec3_t::Yaw] * (M_PI * 2 / 360);
+    sy = std::sinf(angle);
+    cy = std::cosf(angle);
+    angle = angles.xyz[vec3_t::Pitch] * (M_PI * 2 / 360);
+    sp = std::sinf(angle);
+    cp = std::cosf(angle);
+    angle = angles.xyz[vec3_t::Roll] * (M_PI * 2 / 360);
+    sr = std::sinf(angle);
+    cr = std::cosf(angle);
+
+    if (forward) {
+        forward->xyz[0] = cp * cy;
+        forward->xyz[1] = cp * sy;
+        forward->xyz[2] = -sp;
+    }
+    if (right) {
+        right->xyz[0] = (-1 * sr * sp * cy + -1 * cr * -sy);
+        right->xyz[1] = (-1 * sr * sp * sy + -1 * cr * cy);
+        right->xyz[2] = -1 * sr * cp;
+    }
+    if (up) {
+        up->xyz[0] = (cr * sp * cy + -sr * -sy);
+        up->xyz[1] = (cr * sp * sy + -sr * cy);
+        up->xyz[2] = cr * cp;
+    }
+}
+
+//
+//===============
+// VectorNormalize
+// 
+// Normalizes the input vector ptr, and returns its length.
+//===============
+//
+vec_t VectorNormalize(vec3_t &v)
+{
+    float    length, ilength;
+
+    length = v.xyz[0] * v.xyz[0] + v.xyz[1] * v.xyz[1] + v.xyz[2] * v.xyz[2];
+    length = sqrtf(length);         // FIXME
+
+    if (length) {
+        ilength = 1 / length;
+        v.xyz[0] *= ilength;
+        v.xyz[1] *= ilength;
+        v.xyz[2] *= ilength;
+    }
+
+    return length;
+
+}
+
+//
+//===============
+// VectorNormalize
+// 
+// Normalizes the input vector, and stores its results in the out ptr.
+// Returns the vector's length.
+//===============
+//
+vec_t VectorNormalize2(const vec3_t& v, vec3_t& out)
+{
+    float    length, ilength;
+
+    length = v.xyz[0] * v.xyz[0] + v.xyz[1] * v.xyz[1] + v.xyz[2] * v.xyz[2];
+    length = sqrtf(length);         // FIXME
+
+    if (length) {
+        ilength = 1 / length;
+        out.xyz[0] = v.xyz[0] * ilength;
+        out.xyz[1] = v.xyz[1] * ilength;
+        out.xyz[2] = v.xyz[2] * ilength;
+    }
+
+    return length;
+
+}
+// Wrapper for legacy code.
+vec_t VectorNormalize2(const vec3_t& v, vec_t *out)
+{
+    float    length, ilength;
+
+    length = v.xyz[0] * v.xyz[0] + v.xyz[1] * v.xyz[1] + v.xyz[2] * v.xyz[2];
+    length = sqrtf(length);         // FIXME
+
+    if (length) {
+        ilength = 1 / length;
+        out[0] = v.xyz[0] * ilength;
+        out[1] = v.xyz[1] * ilength;
+        out[2] = v.xyz[2] * ilength;
+    }
+
+    return length;
+
+}
 
 //
 //===============

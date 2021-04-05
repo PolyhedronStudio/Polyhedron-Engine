@@ -33,7 +33,7 @@ void weapon_supershotgun_fire(entity_t* ent)
     int         damage = 6;
     int         kick = 12;
 
-    vec3_vectors(ent->client->v_angle, &forward, &right, NULL);
+    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
 
     VectorScale(forward, -2, ent->client->kickOrigin);
     ent->client->kickAngles[0] = -2;
@@ -49,11 +49,11 @@ void weapon_supershotgun_fire(entity_t* ent)
     v[vec3_t::Pitch] = ent->client->v_angle[vec3_t::Pitch];
     v[vec3_t::Yaw] = ent->client->v_angle[vec3_t::Yaw] - 5;
     v[vec3_t::Roll] = ent->client->v_angle[vec3_t::Roll];
-    vec3_vectors(v, &forward, NULL, NULL);
-    Fire_Shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
+    AngleVectors(v, &forward, NULL, NULL);
+    fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
     v[vec3_t::Yaw] = ent->client->v_angle[vec3_t::Yaw] + 5;
-    vec3_vectors(v, &forward, NULL, NULL);
-    Fire_Shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
+    AngleVectors(v, &forward, NULL, NULL);
+    fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
 
     // send muzzle flash
     gi.WriteByte(svg_muzzleflash);

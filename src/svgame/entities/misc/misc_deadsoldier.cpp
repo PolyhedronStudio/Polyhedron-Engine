@@ -57,7 +57,7 @@ void SP_misc_deadsoldier(entity_t* ent)
     VectorSet(ent->mins, -16, -16, 0);
     VectorSet(ent->maxs, 16, 16, 16);
     ent->deadFlag = DEAD_DEAD;
-    ent->takeDamage = DAMAGE_YES;
+    ent->takedamage = DAMAGE_YES;
     ent->svFlags |= SVF_MONSTER | SVF_DEADMONSTER;
     ent->Die = misc_deadsoldier_die;
     ent->monsterInfo.aiflags |= AI_GOOD_GUY;

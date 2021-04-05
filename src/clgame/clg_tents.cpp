@@ -341,7 +341,7 @@ static void CLG_AddExplosionLight(explosion_t* ex, float phase)
 
 	vec3_t origin;
 	vec3_t up;
-	vec3_vectors(ex->ent.angles, NULL, NULL, &up);
+	AngleVectors(ex->ent.angles, NULL, NULL, &up);
 	VectorMA(ex->ent.origin, offset, up, origin);
 
 	vec3_t color;
@@ -575,7 +575,7 @@ static void CLG_AddBeams(void)
 		vectoangles2(dist, angles);
 
 		// add new entities for the beams
-		dist = vec3_normalize_length(dist, d);
+		d = VectorNormalize(dist);
 		if (b->model == cl_mod_lightning) {
 			model_length = 35.0;
 			d -= 20.0; // correction so it doesn't end in middle of tesla
@@ -707,7 +707,7 @@ static void CLG_AddPlayerBeams(void)
 				tmp[0] = angles[0];
 				tmp[1] = angles[1] + 180.0;
 				tmp[2] = 0;
-				vec3_vectors(tmp, &f, &r, &u);
+				AngleVectors(tmp, &f, &r, &u);
 
 				VectorMA(org, -b->offset[0] + 1, r, org);
 				VectorMA(org, -b->offset[1], f, org);
@@ -722,7 +722,7 @@ static void CLG_AddPlayerBeams(void)
 		}
 
 		// add new entities for the beams
-		dist = vec3_normalize_length(dist, d);
+		d = VectorNormalize(dist);
 		model_length = 32.0;
 		steps = ceil(d / model_length);
 		len = (d - model_length) / (steps - 1);
@@ -887,7 +887,7 @@ static void CLG_RailSpiral(void)
 
 	VectorCopy(teParameters.pos1, move);
 	VectorSubtract(teParameters.pos2, teParameters.pos1, vec);
-	vec = vec3_normalize_length(vec, len);
+	len = VectorNormalize(vec);
 
 	MakeNormalVectors(vec, right, up);
 
@@ -933,7 +933,7 @@ static void CLG_RailLights(color_t color)
 
 	VectorCopy(teParameters.pos1, move);
 	VectorSubtract(teParameters.pos2, teParameters.pos1, vec);
-	vec = vec3_normalize_length(vec, len);
+	len = VectorNormalize(vec);
 
 	float num_segments = ceilf(len / 100.f);
 	float segment_size = len / num_segments;

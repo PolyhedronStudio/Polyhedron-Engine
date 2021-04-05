@@ -69,11 +69,11 @@ realcheck:
     start[0] = stop[0] = (mins[0] + maxs[0]) * 0.5;
     start[1] = stop[1] = (mins[1] + maxs[1]) * 0.5;
     stop[2] = start[2] - 2 * STEPSIZE;
-    trace = gi.Trace(start, vec3_zero(), vec3_zero(), stop, ent, CONTENTS_MASK_MONSTERSOLID);
+    trace = gi.Trace(start, vec3_origin, vec3_origin, stop, ent, CONTENTS_MASK_MONSTERSOLID);
 
     if (trace.fraction == 1.0)
         return false;
-    mid = bottom = trace.endPosition[2];
+    mid = bottom = trace.endpos[2];
 
 // the corners must be within 16 of the midpoint
     for (x = 0 ; x <= 1 ; x++)
@@ -81,11 +81,11 @@ realcheck:
             start[0] = stop[0] = x ? maxs[0] : mins[0];
             start[1] = stop[1] = y ? maxs[1] : mins[1];
 
-            trace = gi.Trace(start, vec3_zero(), vec3_zero(), stop, ent, CONTENTS_MASK_MONSTERSOLID);
+            trace = gi.Trace(start, vec3_origin, vec3_origin, stop, ent, CONTENTS_MASK_MONSTERSOLID);
 
-            if (trace.fraction != 1.0 && trace.endPosition[2] > bottom)
-                bottom = trace.endPosition[2];
-            if (trace.fraction == 1.0 || mid - trace.endPosition[2] > STEPSIZE)
+            if (trace.fraction != 1.0 && trace.endpos[2] > bottom)
+                bottom = trace.endpos[2];
+            if (trace.fraction == 1.0 || mid - trace.endpos[2] > STEPSIZE)
                 return false;
         }
 
@@ -151,9 +151,9 @@ qboolean SV_movestep(entity_t *ent, vec3_t move, qboolean relink)
             // fly monsters don't enter water voluntarily
             if (ent->flags & FL_FLY) {
                 if (!ent->waterLevel) {
-                    test[0] = trace.endPosition[0];
-                    test[1] = trace.endPosition[1];
-                    test[2] = trace.endPosition[2] + ent->mins[2] + 1;
+                    test[0] = trace.endpos[0];
+                    test[1] = trace.endpos[1];
+                    test[2] = trace.endpos[2] + ent->mins[2] + 1;
                     contents = gi.PointContents(test);
                     if (contents & CONTENTS_MASK_LIQUID)
                         return false;
@@ -163,9 +163,9 @@ qboolean SV_movestep(entity_t *ent, vec3_t move, qboolean relink)
             // swim monsters don't exit water voluntarily
             if (ent->flags & FL_SWIM) {
                 if (ent->waterLevel < 2) {
-                    test[0] = trace.endPosition[0];
-                    test[1] = trace.endPosition[1];
-                    test[2] = trace.endPosition[2] + ent->mins[2] + 1;
+                    test[0] = trace.endpos[0];
+                    test[1] = trace.endpos[1];
+                    test[2] = trace.endpos[2] + ent->mins[2] + 1;
                     contents = gi.PointContents(test);
                     if (!(contents & CONTENTS_MASK_LIQUID))
                         return false;
@@ -173,7 +173,7 @@ qboolean SV_movestep(entity_t *ent, vec3_t move, qboolean relink)
             }
 
             if (trace.fraction == 1) {
-                VectorCopy(trace.endPosition, ent->s.origin);
+                VectorCopy(trace.endpos, ent->s.origin);
                 if (relink) {
                     gi.LinkEntity(ent);
                     UTIL_TouchTriggers(ent);
@@ -200,22 +200,22 @@ qboolean SV_movestep(entity_t *ent, vec3_t move, qboolean relink)
 
     trace = gi.Trace(neworg, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
 
-    if (trace.allSolid)
+    if (trace.allsolid)
         return false;
 
-    if (trace.startSolid) {
+    if (trace.startsolid) {
         neworg[2] -= stepsize;
         trace = gi.Trace(neworg, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
-        if (trace.allSolid || trace.startSolid)
+        if (trace.allsolid || trace.startsolid)
             return false;
     }
 
 
     // don't go in to water
     if (ent->waterLevel == 0) {
-        test[0] = trace.endPosition[0];
-        test[1] = trace.endPosition[1];
-        test[2] = trace.endPosition[2] + ent->mins[2] + 1;
+        test[0] = trace.endpos[0];
+        test[1] = trace.endpos[1];
+        test[2] = trace.endpos[2] + ent->mins[2] + 1;
         contents = gi.PointContents(test);
 
         if (contents & CONTENTS_MASK_LIQUID)
@@ -238,7 +238,7 @@ qboolean SV_movestep(entity_t *ent, vec3_t move, qboolean relink)
     }
 
 // check point traces down for dangling corners
-    VectorCopy(trace.endPosition, ent->s.origin);
+    VectorCopy(trace.endpos, ent->s.origin);
 
     if (!M_CheckBottom(ent)) {
         if (ent->flags & FL_PARTIALGROUND) {

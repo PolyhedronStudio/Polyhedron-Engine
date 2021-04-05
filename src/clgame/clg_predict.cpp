@@ -95,7 +95,7 @@ static void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, cons
             headNode = clgi.CM_HeadnodeForBox(ent->mins, ent->maxs);
         }
 
-        if (tr->allSolid)
+        if (tr->allsolid)
             return;
 
         clgi.CM_TransformedBoxTrace(&trace, start, end,

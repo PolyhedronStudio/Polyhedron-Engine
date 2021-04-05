@@ -598,11 +598,11 @@ void UpdateReverb(void)
 	CM_BoxTrace(&trace4, listener_origin, left, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
 	CM_BoxTrace(&trace5, listener_origin, right, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
 
-	VectorSubtract(trace1.endPosition, listener_origin, length1);
-	VectorSubtract(trace2.endPosition, listener_origin, length2);
-	VectorSubtract(trace3.endPosition, listener_origin, length3);
-	VectorSubtract(trace4.endPosition, listener_origin, length4);
-	VectorSubtract(trace5.endPosition, listener_origin, length5);
+	VectorSubtract(trace1.endpos, listener_origin, length1);
+	VectorSubtract(trace2.endpos, listener_origin, length2);
+	VectorSubtract(trace3.endpos, listener_origin, length3);
+	VectorSubtract(trace4.endpos, listener_origin, length4);
+	VectorSubtract(trace5.endpos, listener_origin, length5);
 
 	dist1 = VectorLength(length1);
 	dist2 = VectorLength(length2);
@@ -869,7 +869,7 @@ static void AL_Spatialize(channel_t *ch)
 			qalSourcef(ch->srcnum, AL_GAIN, clamp(final, 0, 1));
 
 			if (!ch->autosound)
-				VectorCopy(trace.endPosition, origin);
+				VectorCopy(trace.endpos, origin);
 
 			if (!cl.snd_is_underwater && !ch->autosound) // OAL: snd_is_underwater moved to client struct.
 				qalSourcei(ch->srcnum, AL_DIRECT_FILTER, underwaterFilter);
@@ -1031,7 +1031,7 @@ static void AL_AddLoopSounds(void)
 		// check attenuation before playing the sound
 		origin = CL_GetEntitySoundOrigin(ent->number);
 		VectorSubtract(origin, listener_origin, origin);
-		origin = vec3_normalize_length(origin, dist);
+		dist = VectorNormalize(origin);
 		dist = (dist - SOUND_FULLVOLUME) * SOUND_LOOPATTENUATE;
 		if (dist >= 1.f)
 			continue; // completely attenuated

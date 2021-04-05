@@ -796,8 +796,8 @@ trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t
                            entity_t *passedict, int contentmask);
 // mins and maxs are relative
 
-// if the entire move stays in a solid volume, trace.allSolid will be set,
-// trace.startSolid will be set, and trace.fraction will be 0
+// if the entire move stays in a solid volume, trace.allsolid will be set,
+// trace.startsolid will be set, and trace.fraction will be 0
 
 // if the starting point is in a solid, it will be allowed to move out
 // to an open area

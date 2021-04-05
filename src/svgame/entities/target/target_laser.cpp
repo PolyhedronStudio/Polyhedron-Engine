@@ -35,7 +35,7 @@ void target_laser_think(entity_t* self)
         VectorCopy(self->moveDirection, last_movedir);
         VectorMA(self->enemy->absMin, 0.5, self->enemy->size, point);
         VectorSubtract(point, self->s.origin, self->moveDirection);
-        self->moveDirection = vec3_normalize(self->moveDirection);
+        VectorNormalize(self->moveDirection);
         if (!VectorCompare(self->moveDirection, last_movedir))
             self->spawnFlags |= 0x80000000;
     }
@@ -44,14 +44,14 @@ void target_laser_think(entity_t* self)
     VectorCopy(self->s.origin, start);
     VectorMA(start, 2048, self->moveDirection, end);
     while (1) {
-        tr = gi.Trace(start, vec3_zero(), vec3_zero(), end, ignore, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_DEADMONSTER);
+        tr = gi.Trace(start, vec3_origin, vec3_origin, end, ignore, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_DEADMONSTER);
 
         if (!tr.ent)
             break;
 
         // hurt it if we can
-        if ((tr.ent->takeDamage) && !(tr.ent->flags & FL_IMMUNE_LASER))
-            T_Damage(tr.ent, self, self->activator, self->moveDirection, tr.endPosition, vec3_zero(), self->dmg, 1, DAMAGE_ENERGY, MOD_TARGET_LASER);
+        if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER))
+            T_Damage(tr.ent, self, self->activator, self->moveDirection, tr.endpos, vec3_origin, self->dmg, 1, DAMAGE_ENERGY, MOD_TARGET_LASER);
 
         // if we hit something that's not a monster or player or is immune to lasers, we're done
         if (!(tr.ent->svFlags & SVF_MONSTER) && (!tr.ent->client)) {
@@ -60,19 +60,19 @@ void target_laser_think(entity_t* self)
                 gi.WriteByte(svg_temp_entity);
                 gi.WriteByte(TE_LASER_SPARKS);
                 gi.WriteByte(count);
-                gi.WritePosition(tr.endPosition);
+                gi.WritePosition(tr.endpos);
                 gi.WriteDirection(tr.plane.normal);
                 gi.WriteByte(self->s.skinnum);
-                gi.Multicast(&tr.endPosition, MULTICAST_PVS);
+                gi.Multicast(&tr.endpos, MULTICAST_PVS);
             }
             break;
         }
 
         ignore = tr.ent;
-        VectorCopy(tr.endPosition, start);
+        VectorCopy(tr.endpos, start);
     }
 
-    VectorCopy(tr.endPosition, self->s.old_origin);
+    VectorCopy(tr.endpos, self->s.old_origin);
 
     self->nextThink = level.time + FRAMETIME;
 }

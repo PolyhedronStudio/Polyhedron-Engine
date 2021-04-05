@@ -281,7 +281,7 @@ static void write_particle_geometry(const float* view_matrix, const particle_t* 
 
 		vec3_t z_axis;
 		VectorSubtract(view_origin, origin, z_axis);
-		z_axis = vec3_normalize(z_axis);
+		VectorNormalize(z_axis);
 
 		vec3_t x_axis;
 		vec3_t y_axis;
@@ -358,22 +358,17 @@ static void write_beam_geometry(const float* view_matrix, const r_entity_t* enti
 
 		vec3_t norm_dir;
 		VectorCopy(to_end, norm_dir);
-		norm_dir = vec3_normalize(norm_dir);
+		VectorNormalize(norm_dir);
 		VectorMA(begin, -5.f, norm_dir, begin);
 		VectorMA(end, 5.f, norm_dir, end);
 
 		vec3_t to_view;
 		VectorSubtract(view_origin, begin, to_view);
 
-		vec3_t x_axis = vec3_scale(
-			vec3_normalize(
-				vec3_cross(to_end, to_view)
-			), 
-			beam_width
-		);
-		//CrossProduct(to_end, to_view, x_axis);
-		//x_axis = vec3_normalize(x_axis);
-		//VectorScale(x_axis, beam_width, x_axis);
+		vec3_t x_axis;
+		CrossProduct(to_end, to_view, x_axis);
+		VectorNormalize(x_axis);
+		VectorScale(x_axis, beam_width, x_axis);
 
 		VectorSubtract(end, x_axis, vertex_positions[0]);
 		VectorAdd(end, x_axis, vertex_positions[1]);
@@ -410,23 +405,23 @@ qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, in
 	vec3_t dir, norm_dir;
 	VectorSubtract(end, begin, dir);
 	VectorCopy(dir, norm_dir);
-	norm_dir = vec3_normalize(norm_dir);
+	VectorNormalize(norm_dir);
 
 	vec3_t up = { 0.f, 0.f, 1.f };
 	vec3_t left = { 1.f, 0.f, 0.f };
 	if (fabsf(norm_dir[2]) < 0.9f)
 	{
 		CrossProduct(up, norm_dir, left);
-		left = vec3_normalize(left);
+		VectorNormalize(left);
 		CrossProduct(norm_dir, left, up);
-		up = vec3_normalize(up);
+		VectorNormalize(up);
 	}
 	else
 	{
 		CrossProduct(norm_dir, left, up);
-		up = vec3_normalize(up);
+		VectorNormalize(up);
 		CrossProduct(up, norm_dir, left);
-		left = vec3_normalize(left);
+		VectorNormalize(left);
 	}
 
 
@@ -532,7 +527,7 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 
 		vec3_t norm_dir;
 		VectorCopy(to_end, norm_dir);
-		norm_dir = vec3_normalize(norm_dir);
+		VectorNormalize(norm_dir);
 		VectorMA(begin, -5.f, norm_dir, begin);
 		VectorMA(end, 5.f, norm_dir, end);
 
@@ -596,7 +591,7 @@ static void write_sprite_geometry(const float* view_matrix, const r_entity_t* en
 			
 			vec3_t cyl_x;
 			CrossProduct(world_y, to_camera, cyl_x);
-			cyl_x = vec3_normalize(cyl_x);
+			VectorNormalize(cyl_x);
 
 			VectorScale(cyl_x, frame->origin_x, left);
 			VectorScale(cyl_x, frame->origin_x - frame->width, right);

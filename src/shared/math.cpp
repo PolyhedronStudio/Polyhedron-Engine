@@ -71,7 +71,7 @@ void MakeNormalVectors(const vec3_t& forward, vec3_t& right, vec3_t& up)
 
     d = DotProduct(right, forward);
     VectorMA(right, -d, forward, right);
-    right = vec3_normalize(right);
+    VectorNormalize(right);
     CrossProduct(right, forward, up);
 }
 

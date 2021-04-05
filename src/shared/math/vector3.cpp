@@ -150,7 +150,7 @@ void PerpendicularVector(vec3_t& dst, const vec3_t& src)
     /*
     ** normalize the result
     */
-    dst = vec3_normalize(dst);
+    VectorNormalize(dst);
 }
 
 #endif  // USE_REF == REF_SOFT

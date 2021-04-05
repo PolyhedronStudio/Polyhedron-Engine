@@ -112,7 +112,7 @@ void barrel_explode(entity_t* self)
 
 void barrel_delay(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t &point)
 {
-    self->takeDamage = DAMAGE_NO;
+    self->takedamage = DAMAGE_NO;
     self->nextThink = level.time + 2 * FRAMETIME;
     self->Think = barrel_explode;
     self->activator = attacker;
@@ -146,7 +146,7 @@ void SP_misc_explobox(entity_t* self)
         self->dmg = 150;
 
     self->Die = barrel_delay;
-    self->takeDamage = DAMAGE_YES;
+    self->takedamage = DAMAGE_YES;
     self->monsterInfo.aiflags = AI_NOSTEP;
 
     self->Touch = barrel_touch;

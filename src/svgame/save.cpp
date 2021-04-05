@@ -144,10 +144,10 @@ static const save_field_t entityfields[] = {
     L(map),
 
     I(viewHeight),
-    I(takeDamage),
+    I(takedamage),
     I(dmg),
-    I(explosionDamage),
-    F(explosionRadius),
+    I(radius_dmg),
+    F(dmg_radius),
     I(sounds),
     I(count),
 

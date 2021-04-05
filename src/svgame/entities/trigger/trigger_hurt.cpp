@@ -41,7 +41,7 @@ void hurt_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* su
 {
     int     dflags;
 
-    if (!other->takeDamage)
+    if (!other->takedamage)
         return;
 
     if (self->timestamp > level.time)
@@ -61,7 +61,7 @@ void hurt_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* su
         dflags = DAMAGE_NO_PROTECTION;
     else
         dflags = 0;
-    T_Damage(other, self, self, vec3_zero(), other->s.origin, vec3_zero(), self->dmg, self->dmg, dflags, MOD_TRIGGER_HURT);
+    T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, self->dmg, dflags, MOD_TRIGGER_HURT);
 }
 
 void SP_trigger_hurt(entity_t* self)

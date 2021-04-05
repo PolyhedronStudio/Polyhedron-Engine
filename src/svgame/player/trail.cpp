@@ -105,11 +105,11 @@ entity_t *PlayerTrail_PickFirst(entity_t *self)
             break;
     }
 
-    if (AI_IsEntityVisibleToSelf(self, trail[marker])) {
+    if (visible(self, trail[marker])) {
         return trail[marker];
     }
 
-    if (AI_IsEntityVisibleToSelf(self, trail[PREV(marker)])) {
+    if (visible(self, trail[PREV(marker)])) {
         return trail[PREV(marker)];
     }
 

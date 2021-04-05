@@ -298,8 +298,7 @@ get_triangle_off_center(const float* positions, float* center, float* anti_cente
 	VectorSubtract(v1, v0, e1);
 	VectorSubtract(v2, v0, e2);
 	CrossProduct(e1, e2, normal);
-	float length;
-	normal = vec3_normalize_length(normal, length);
+	float length = VectorNormalize(normal);
 
 	// Offset the center by one normal to make sure that the point is
 	// inside a BSP leaf and not on a boundary plane.
@@ -841,7 +840,7 @@ collect_ligth_polys(bsp_mesh_t *wm, bsp_t *bsp, int model_idx, int* num_lights, 
 		// Find the normal of the texture plane
 		vec3_t tex_normal;
 		CrossProduct(tex_axis0, tex_axis1, tex_normal);
-		tex_normal = vec3_normalize(tex_normal);
+		VectorNormalize(tex_normal);
 
 		float surf_normal_dot_tex_normal = DotProduct(tex_normal, plane);
 
@@ -1175,14 +1174,14 @@ compute_world_tangents(bsp_mesh_t* wm)
 
 		vec3_t normal;
 		CrossProduct(dP0, dP1, normal);
-		normal = vec3_normalize(normal);
+		VectorNormalize(normal);
 
 		vec3_t tangent;
 
 		vec3_t t;
 		VectorScale(normal, DotProduct(normal, sdir), t);
 		VectorSubtract(sdir, t, t);
-		tangent = vec3_normalize(t); // Graham-Schmidt : t = normalize(t - n * (n.t))
+		VectorNormalize2(t, tangent); // Graham-Schmidt : t = normalize(t - n * (n.t))
 
 		VectorSet(&wm->tangents[idx_tri * 3], tangent[0], tangent[1], tangent[2]);
 
@@ -1443,7 +1442,7 @@ light_affects_cluster(light_poly_t* light, aabb_t* aabb)
 	VectorSubtract(v1, v0, e1);
 	VectorSubtract(v2, v0, e2);
 	CrossProduct(e1, e2, normal);
-	normal = vec3_normalize(normal);
+	VectorNormalize(normal);
 	
 	float plane_distance = -DotProduct(normal, v0);
 

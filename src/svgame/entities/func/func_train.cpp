@@ -35,7 +35,7 @@ void train_blocked(entity_t* self, entity_t* other)
 {
     if (!(other->svFlags & SVF_MONSTER) && (!other->client)) {
         // give it a chance to go away on it's own terms (like gibs)
-        T_Damage(other, self, self, vec3_zero(), other->s.origin, vec3_zero(), 100000, 1, 0, MOD_CRUSH);
+        T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
         // if it's still there, nuke it
         if (other)
             BecomeExplosion1(other);
@@ -48,7 +48,7 @@ void train_blocked(entity_t* self, entity_t* other)
     if (!self->dmg)
         return;
     self->debounceTouchTime = level.time + 0.5;
-    T_Damage(other, self, self, vec3_zero(), other->s.origin, vec3_zero(), self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
 void train_wait(entity_t* self)

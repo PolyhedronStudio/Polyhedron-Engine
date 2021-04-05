@@ -30,7 +30,7 @@ void use_target_blaster(entity_t* self, entity_t* other, entity_t* activator)
         effect = EF_BLASTER;
 #endif
 
-    Fire_Blaster(self, self->s.origin, self->moveDirection, self->dmg, self->speed, EF_BLASTER, MOD_TARGET_BLASTER);
+    fire_blaster(self, self->s.origin, self->moveDirection, self->dmg, self->speed, EF_BLASTER, MOD_TARGET_BLASTER);
     gi.Sound(self, CHAN_VOICE, self->noiseIndex, 1, ATTN_NORM, 0);
 }
 

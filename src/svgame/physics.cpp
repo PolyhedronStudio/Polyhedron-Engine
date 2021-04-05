@@ -56,7 +56,7 @@ entity_t *SV_TestEntityPosition(entity_t *ent)
         mask = CONTENTS_MASK_SOLID;
     trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, mask);
 
-    if (trace.startSolid)
+    if (trace.startsolid)
         return g_edicts;
 
     return NULL;
@@ -208,15 +208,15 @@ int SV_FlyMove(entity_t *ent, float time, int mask)
 
         trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, end, ent, mask);
 
-        if (trace.allSolid) {
+        if (trace.allsolid) {
             // entity is trapped in another solid
-            ent->velocity = vec3_zero();
+            VectorCopy(vec3_origin, ent->velocity);
             return 3;
         }
 
         if (trace.fraction > 0) {
             // actually covered some distance
-            VectorCopy(trace.endPosition, ent->s.origin);
+            VectorCopy(trace.endpos, ent->s.origin);
             VectorCopy(ent->velocity, original_velocity);
             numplanes = 0;
         }
@@ -250,7 +250,7 @@ int SV_FlyMove(entity_t *ent, float time, int mask)
         // cliped to another plane
         if (numplanes >= MAX_CLIP_PLANES) {
             // this shouldn't really happen
-            ent->velocity = vec3_zero();
+            VectorCopy(vec3_origin, ent->velocity);
             return 3;
         }
 
@@ -279,7 +279,7 @@ int SV_FlyMove(entity_t *ent, float time, int mask)
             // go along the crease
             if (numplanes != 2) {
 //              gi.DPrintf ("clip velocity, numplanes == %i\n",numplanes);
-                ent->velocity = vec3_zero();
+                VectorCopy(vec3_origin, ent->velocity);
                 return 7;
             }
             CrossProduct(planes[0], planes[1], dir);
@@ -292,7 +292,7 @@ int SV_FlyMove(entity_t *ent, float time, int mask)
 // to avoid tiny occilations in sloping corners
 //
         if (DotProduct(ent->velocity, primal_velocity) <= 0) {
-            ent->velocity = vec3_zero();
+            VectorCopy(vec3_origin, ent->velocity);
             return Blocked;
         }
     }
@@ -345,7 +345,7 @@ retry:
 
     trace = gi.Trace(start, ent->mins, ent->maxs, end, ent, mask);
 
-    VectorCopy(trace.endPosition, ent->s.origin);
+    VectorCopy(trace.endpos, ent->s.origin);
     gi.LinkEntity(ent);
 
     if (trace.fraction != 1.0) {
@@ -402,8 +402,8 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
     }
 
 // we need this for pushing things later
-    org = amove; // VectorSubtract(vec3_origin, amove, org);
-    vec3_vectors(org, &forward, &right, &up);
+    VectorSubtract(vec3_origin, amove, org);
+    AngleVectors(org, &forward, &right, &up);
 
 // save the pusher's original position
     pushed_p->ent = pusher;
@@ -703,8 +703,8 @@ void SV_Physics_Toss(entity_t *ent)
             if (ent->velocity[2] < 60 || ent->moveType != MOVETYPE_BOUNCE) {
                 ent->groundEntityPtr = trace.ent;
                 ent->groundEntityLinkCount = trace.ent->linkCount;
-                ent->velocity = vec3_zero();
-                ent->avelocity = vec3_zero();
+                VectorCopy(vec3_origin, ent->velocity);
+                VectorCopy(vec3_origin, ent->avelocity);
             }
         }
 

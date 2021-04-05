@@ -100,7 +100,7 @@ void Brush_Move_Calc(entity_t* ent, const vec3_t &dest, void(*func)(entity_t*))
 {
     VectorClear(ent->velocity);
     VectorSubtract(dest, ent->s.origin, ent->moveInfo.dir);
-    ent->moveInfo.dir = vec3_normalize_length(ent->moveInfo.dir, ent->moveInfo.remaining_distance);
+    ent->moveInfo.remaining_distance = VectorNormalize(ent->moveInfo.dir);
     ent->moveInfo.endfunc = func;
 
     if (ent->moveInfo.speed == ent->moveInfo.accel && ent->moveInfo.speed == ent->moveInfo.decel) {

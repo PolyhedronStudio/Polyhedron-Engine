@@ -40,8 +40,8 @@ void CLG_EffectsInit(void)
     int i, j;
 
     // Fetch cvars.
-    cvar_pt_particle_emissive   = clgi.Cvar_Get("cvar_pt_particle_emissive", "", 0);
-    cl_particle_num_factor      = clgi.Cvar_Get("cl_particle_num_factor", "", 0);
+    cvar_pt_particle_emissive = clgi.Cvar_Get("cvar_pt_particle_emissive", "", 0);
+    cl_particle_num_factor = clgi.Cvar_Get("cl_particle_num_factor", "", 0);
 
     // Generate a random numbered angular velocities table.
     // This is used for rotations etc, so they vary each time
@@ -326,17 +326,17 @@ void CLG_MuzzleFlash() {
     float       volume;
     char        soundname[MAX_QPATH];
 
-//#ifdef _DEBUG
-//    if (developer->integer)
-//        CL_CheckEntityPresent(mzParameters.entity, "muzzleflash");
-//#endif
+    //#ifdef _DEBUG
+    //    if (developer->integer)
+    //        CL_CheckEntityPresent(mzParameters.entity, "muzzleflash");
+    //#endif
 
     pl = &cs->entities[mzParameters.entity];
 
 #if USE_DLIGHTS
     dl = CLG_AllocDLight(mzParameters.entity);
     VectorCopy(pl->current.origin, dl->origin);
-    vec3_vectors(pl->current.angles, &fv, &rv, NULL);
+    AngleVectors(pl->current.angles, &fv, &rv, NULL);
     VectorMA(dl->origin, 18, fv, dl->origin);
     VectorMA(dl->origin, 16, rv, dl->origin);
     if (mzParameters.silenced)
@@ -531,7 +531,7 @@ void CLG_MuzzleFlash2() {
 
     // locate the origin
     ent = &cs->entities[mzParameters.entity];
-    vec3_vectors(ent->current.angles, &forward, &right, NULL);
+    AngleVectors(ent->current.angles, &forward, &right, NULL);
     ofs = monster_flash_offset[mzParameters.weapon];
     origin[0] = ent->current.origin[0] + forward[0] * ofs[0] + right[0] * ofs[1];
     origin[1] = ent->current.origin[1] + forward[1] * ofs[0] + right[1] * ofs[1];
@@ -812,7 +812,7 @@ void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
 
         vec3_t velocity;
         VectorSubtract(origin, org, velocity);
-        velocity = vec3_normalize(velocity);
+        VectorNormalize(velocity);
         VectorScale(velocity, dirt_base_velocity + frand() * dirt_rand_velocity, p->vel);
 
         p->accel[0] = p->accel[1] = 0;
@@ -841,7 +841,7 @@ void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
 
         vec3_t velocity;
         VectorSubtract(origin, org, velocity);
-        velocity = vec3_normalize(velocity);
+        VectorNormalize(velocity);
         VectorScale(velocity, spark_base_velocity + powf(frand(), 2.0f) * spark_rand_velocity, p->vel);
 
         p->accel[0] = p->accel[1] = 0;
@@ -888,7 +888,7 @@ void CLG_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count)
 
         vec3_t velocity;
         VectorSubtract(origin, org, velocity);
-        velocity = vec3_normalize(velocity);
+        VectorNormalize(velocity);
         VectorScale(velocity, water_base_velocity + frand() * water_rand_velocity, p->vel);
 
         p->accel[0] = p->accel[1] = 0;
@@ -1247,11 +1247,9 @@ void CLG_BlasterTrail(vec3_t start, vec3_t end)
     int         j;
     cparticle_t* p;
     int         dec;
-
     VectorCopy(start, move);
     VectorSubtract(end, start, vec);
-    //len = VectorNormalize(vec);
-    vec = vec3_normalize_length(vec, len);
+    len = VectorNormalize(vec);
 
     dec = 5;
     VectorScale(vec, 5, vec);
@@ -1291,14 +1289,16 @@ CLG_QuadTrail
 */
 void CLG_QuadTrail(vec3_t start, vec3_t end)
 {
+    vec3_t      move;
+    vec3_t      vec;
+    float       len;
     int         j;
     cparticle_t* p;
     int         dec;
 
-    vec3_t      move = start;
-    vec3_t      vec = end - start;
-    float       len;
-    vec = vec3_normalize_length(vec, len); // Mathlib.
+    VectorCopy(start, move);
+    VectorSubtract(end, start, vec);
+    len = VectorNormalize(vec);
 
     dec = 5;
     VectorScale(vec, 5, vec);
@@ -1337,14 +1337,16 @@ CLG_FlagTrail
 */
 void CLG_FlagTrail(vec3_t start, vec3_t end, int color)
 {
+    vec3_t      move;
+    vec3_t      vec;
+    float       len;
     int         j;
     cparticle_t* p;
     int         dec;
 
-    vec3_t      move = start;
-    vec3_t      vec = end - start;
-    float       len;
-    vec = vec3_normalize_length(vec, len); // Mathlib.
+    VectorCopy(start, move);
+    VectorSubtract(end, start, vec);
+    len = VectorNormalize(vec);
 
     dec = 5;
     VectorScale(vec, 5, vec);
@@ -1383,16 +1385,18 @@ CLG_DiminishingTrail
 */
 void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags)
 {
+    vec3_t      move;
+    vec3_t      vec;
+    float       len;
     int         j;
     cparticle_t* p;
     float       dec;
     float       orgscale;
     float       velscale;
 
-    vec3_t      move = start;
-    vec3_t      vec = end - start;
-    float       len;
-    vec = vec3_normalize_length(vec, len); // Mathlib.
+    VectorCopy(start, move);
+    VectorSubtract(end, start, vec);
+    len = VectorNormalize(vec);
 
     dec = 0.5;
     VectorScale(vec, dec, vec);
@@ -1480,6 +1484,9 @@ CLG_RocketTrail
 */
 void CLG_RocketTrail(vec3_t start, vec3_t end, cl_entity_t* old)
 {
+    vec3_t      move;
+    vec3_t      vec;
+    float       len;
     int         j;
     cparticle_t* p;
     float       dec;
@@ -1487,10 +1494,10 @@ void CLG_RocketTrail(vec3_t start, vec3_t end, cl_entity_t* old)
     // smoke
     CLG_DiminishingTrail(start, end, old, EF_ROCKET);
 
-    vec3_t      move = start;
-    vec3_t      vec = end - start;
-    float       len;
-    vec = vec3_normalize_length(vec, len); // Mathlib.
+    // fire
+    VectorCopy(start, move);
+    VectorSubtract(end, start, vec);
+    len = VectorNormalize(vec);
 
     dec = 1;
     VectorScale(vec, dec, vec);
@@ -1530,6 +1537,9 @@ CLG_RailTrail
 */
 void CLG_OldRailTrail(void)
 {
+    vec3_t      move;
+    vec3_t      vec;
+    float       len;
     int         j;
     cparticle_t* p;
     float       dec;
@@ -1539,10 +1549,9 @@ void CLG_OldRailTrail(void)
     vec3_t      dir;
     byte        clr = 0x74;
 
-    vec3_t      move = teParameters.pos1;
-    vec3_t      vec = teParameters.pos2 - move;
-    float       len;
-    vec = vec3_normalize_length(vec, len); // Mathlib.
+    VectorCopy(teParameters.pos1, move);
+    VectorSubtract(teParameters.pos2, teParameters.pos1, vec);
+    len = VectorNormalize(vec);
 
     MakeNormalVectors(vec, right, up);
 
@@ -1612,15 +1621,18 @@ CLG_BubbleTrail
 
 ===============
 */
-void CLG_BubbleTrail(vec3_t start, vec3_t end) {
+void CLG_BubbleTrail(vec3_t start, vec3_t end)
+{
+    vec3_t      move;
+    vec3_t      vec;
+    float       len;
     int         i, j;
     cparticle_t* p;
     float       dec;
 
-    vec3_t      move = start;
-    vec3_t      vec = end - start;
-    float       len;
-    vec = vec3_normalize_length(vec, len); // Mathlib.
+    VectorCopy(start, move);
+    VectorSubtract(end, start, vec);
+    len = VectorNormalize(vec);
 
     dec = 32;
     VectorScale(vec, dec, vec);
@@ -1864,7 +1876,7 @@ void CLG_TeleportParticles(vec3_t org)
                 dir[1] = i * 8;
                 dir[2] = k * 8;
 
-                dir = dir = vec3_normalize(dir);
+                VectorNormalize(dir);
                 vel = 50 + (rand() & 63);
                 VectorScale(dir, vel, p->vel);
 

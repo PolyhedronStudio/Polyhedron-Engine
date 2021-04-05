@@ -1224,7 +1224,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 	inittargetlightbind->changed = inittargetlightbind_changed;
 
 	num_entlights = 0;
-	//bsp_add_entlights(bsp);
+	bsp_add_entlights(bsp);
 
     List_Append(&bsp_cache, &bsp->entry);
 

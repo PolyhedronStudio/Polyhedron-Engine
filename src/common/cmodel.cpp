@@ -323,7 +323,7 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
     // rotate start and end into the models frame of reference
     if (headNode != box_headnode &&
         (angles[0] || angles[1] || angles[2])) {
-        vec3_vectors(angles, &forward, &right, &up);
+        AngleVectors(angles, &forward, &right, &up);
 
         VectorCopy(p_l, temp);
         p_l[0] = DotProduct(temp, forward);
@@ -446,9 +446,9 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
 
     if (!startout) {
         // original point was inside brush
-        trace->startSolid = true;
+        trace->startsolid = true;
         if (!getout) {
-            trace->allSolid = true;
+            trace->allsolid = true;
             if (!map_allsolid_bug->integer) {
                 // original Q2 didn't set these
                 trace->fraction = 0;
@@ -545,7 +545,7 @@ static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
     }
 
     // inside this brush
-    trace->startSolid = trace->allSolid = true;
+    trace->startsolid = trace->allsolid = true;
     trace->fraction = 0;
     trace->contents = brush->contents;
 }
@@ -751,10 +751,10 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
         numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, 1024, headNode, NULL);
         for (i = 0; i < numleafs; i++) {
             CM_TestInLeaf(leafs[i]);
-            if (trace_trace->allSolid)
+            if (trace_trace->allsolid)
                 break;
         }
-        VectorCopy(start, trace_trace->endPosition);
+        VectorCopy(start, trace_trace->endpos);
         return;
     }
 
@@ -808,9 +808,9 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
     CM_RecursiveHullCheck(headNode, 0, 1, start, end);
 
     if (trace_trace->fraction == 1)
-        VectorCopy(end, trace_trace->endPosition);
+        VectorCopy(end, trace_trace->endpos);
     else
-        LerpVector(start, end, trace_trace->fraction, trace_trace->endPosition);
+        LerpVector(start, end, trace_trace->fraction, trace_trace->endpos);
 }
 
 
@@ -859,16 +859,16 @@ void CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &e
 
     // FIXME: offset plane distance?
 
-    LerpVector(start, end, trace->fraction, trace->endPosition);
+    LerpVector(start, end, trace->fraction, trace->endpos);
 }
 
 void CM_ClipEntity(trace_t *dst, const trace_t *src, struct entity_s *ent)
 {
-    dst->allSolid |= src->allSolid;
-    dst->startSolid |= src->startSolid;
+    dst->allsolid |= src->allsolid;
+    dst->startsolid |= src->startsolid;
     if (src->fraction < dst->fraction) {
         dst->fraction = src->fraction;
-        VectorCopy(src->endPosition, dst->endPosition);
+        VectorCopy(src->endpos, dst->endpos);
         dst->plane = src->plane;
         dst->surface = src->surface;
         dst->contents |= src->contents;

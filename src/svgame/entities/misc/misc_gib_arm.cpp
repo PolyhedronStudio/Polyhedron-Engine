@@ -22,7 +22,7 @@ void SP_misc_gib_arm(entity_t* ent)
     gi.SetModel(ent, "models/objects/gibs/arm/tris.md2");
     ent->solid = SOLID_NOT;
     ent->s.effects |= EF_GIB;
-    ent->takeDamage = DAMAGE_YES;
+    ent->takedamage = DAMAGE_YES;
     ent->Die = gib_die;
     ent->moveType = MOVETYPE_TOSS;
     ent->svFlags |= SVF_MONSTER;

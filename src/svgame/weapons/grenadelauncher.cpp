@@ -39,13 +39,13 @@ void weapon_grenadelauncher_fire(entity_t* ent)
         damage *= 4;
 
     VectorSet(offset, 8, 8, ent->viewHeight - 8);
-    vec3_vectors(ent->client->v_angle, &forward, &right, NULL);
+    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
 
     VectorScale(forward, -2, ent->client->kickOrigin);
     ent->client->kickAngles[0] = -1;
 
-    Fire_Grenade(ent, start, forward, damage, 600, 2.5, radius);
+    fire_grenade(ent, start, forward, damage, 600, 2.5, radius);
 
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);

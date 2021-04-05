@@ -170,7 +170,7 @@ void UTIL_SetMoveDir(vec3_t &angles, vec3_t &moveDirection)
     } else if (VectorCompare(angles, VEC_DOWN)) {
         VectorCopy(MOVEDIR_DOWN, moveDirection);
     } else {
-        vec3_vectors(angles, &moveDirection, NULL, NULL);
+        AngleVectors(angles, &moveDirection, NULL, NULL);
     }
 
     VectorClear(angles);
@@ -317,7 +317,7 @@ qboolean KillBox(entity_t *ent)
             break;
 
         // nail it
-        T_Damage(tr.ent, ent, ent, vec3_zero(), ent->s.origin, vec3_zero(), 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+        T_Damage(tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
 
         // if we didn't kill it, fail
         if (tr.ent->solid)

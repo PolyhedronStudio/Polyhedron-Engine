@@ -22,9 +22,9 @@ void func_object_touch(entity_t* self, entity_t* other, cplane_t* plane, csurfac
         return;
     if (plane->normal[2] < 1.0)
         return;
-    if (other->takeDamage == DAMAGE_NO)
+    if (other->takedamage == DAMAGE_NO)
         return;
-    T_Damage(other, self, self, vec3_zero(), self->s.origin, vec3_zero(), self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, self->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
 void func_object_release(entity_t* self)

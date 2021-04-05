@@ -26,13 +26,13 @@ STOP mean it will stop moving instead of pushing entities
 
 void rotating_blocked(entity_t* self, entity_t* other)
 {
-    T_Damage(other, self, self, vec3_zero(), other->s.origin, vec3_zero(), self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
 void rotating_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
 {
     if (self->avelocity[0] || self->avelocity[1] || self->avelocity[2])
-        T_Damage(other, self, self, vec3_zero(), other->s.origin, vec3_zero(), self->dmg, 1, 0, MOD_CRUSH);
+        T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
 void rotating_use(entity_t* self, entity_t* other, entity_t* activator)

@@ -63,7 +63,7 @@ void weapon_bfg_fire(entity_t* ent)
     if (is_quad)
         damage *= 4;
 
-    vec3_vectors(ent->client->v_angle, &forward, &right, NULL);
+    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
 
     VectorScale(forward, -2, ent->client->kickOrigin);
 
@@ -74,7 +74,7 @@ void weapon_bfg_fire(entity_t* ent)
 
     VectorSet(offset, 8, 8, ent->viewHeight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
-    Fire_BFG(ent, start, forward, damage, 400, damage_radius);
+    fire_bfg(ent, start, forward, damage, 400, damage_radius);
 
     ent->client->playerState.gunframe++;
 

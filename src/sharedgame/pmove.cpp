@@ -155,13 +155,13 @@ static pmoveParams_t* pmp;      // Pointer to the player movement parameter sett
 // at a certain body position on the player model.
 //
 const vec3_t PM_MINS = { -16.f, -16.f, -24.f };
-const vec3_t PM_MAXS = {  16.f,  16.f,  32.f };
+const vec3_t PM_MAXS = { 16.f,  16.f,  32.f };
 
 static const vec3_t PM_DEAD_MINS = { -16.f, -16.f, -24.f };
-static const vec3_t PM_DEAD_MAXS = {  16.f,  16.f,  -4.f };
+static const vec3_t PM_DEAD_MAXS = { 16.f,  16.f,  -4.f };
 
 static const vec3_t PM_GIBLET_MINS = { -8.f, -8.f, -8.f };
-static const vec3_t PM_GIBLET_MAXS = {  8.f,  8.f,  8.f };
+static const vec3_t PM_GIBLET_MAXS = { 8.f,  8.f,  8.f };
 
 
 //
@@ -207,9 +207,9 @@ static void CLGPM_Debug(const char* func, const char* fmt, ...) {
     va_start(args, fmt);
 
     va_end(args);
-CLGPM_Debug
+    CLGPM_Debug
 #define PM_Debug(...) CLGPM_Debug(__func__, __VA_ARGS__);
-//#define PM_Debug () void(0)
+        //#define PM_Debug () void(0)
 #endif // PMOVE_DEBUG
 #else
 #define DEBUG_SERVER_PMOVE 1
@@ -257,7 +257,7 @@ static void SVGPM_Debug(const char* func, const char* fmt, ...) {
 //===============
 //
 #define STOP_EPSILON    0.1
-static vec3_t PM_ClipVelocity(vec3_t& in, vec3_t& normal, float overbounce)
+static vec3_t PM_ClipVelocity(vec3_t & in, vec3_t & normal, float overbounce)
 {
     vec3_t  result;
     float   backoff;
@@ -316,9 +316,9 @@ static void PM_TouchEntity(struct entity_s* ent) {
 // Check whether the player just stepped off of something, or not.
 //===============
 //
-static bool PM_CheckStep(const trace_t* trace) {
+static bool PM_CheckStep(const trace_t * trace) {
 
-    if (!trace->allSolid) {
+    if (!trace->allsolid) {
         if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
             if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.ground.plane.dist) {
                 return true;
@@ -336,9 +336,9 @@ static bool PM_CheckStep(const trace_t* trace) {
 // Steps the player down, for slope/stair handling.
 //===============
 //
-static void PM_StepDown(const trace_t* trace) {
+static void PM_StepDown(const trace_t * trace) {
     // Calculate step height.
-    pm->state.origin = trace->endPosition;
+    pm->state.origin = trace->endpos;
     pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
 
     // If we are above minimal step height, remove the PMF_ON_STAIRS flag.
@@ -360,17 +360,6 @@ static void PM_StepDown(const trace_t* trace) {
 // PM_TraceCorrectAllSolid
 // 
 // Adapted from Quake III, this function adjusts a trace so that if it starts inside of a wall,
-// it is adjusted so that the trace begins outside of the solid it impacts.
-// Returns the actual trace.
-//===============
-//
-const trace_t PM_TraceCorrectAllSolid(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end) {
-// Disabled, no need, seems to work fine at this moment without it.
-// Not getting stuck into rotating objects, etc.
-//
-// The other alternative might otherwise be to do a -0.25f like M_CheckGround did...
-    return pm->Trace(start, mins, maxs, end);
-#if 0
     const vec3_t offsets = { 0.f, 1.f, -1.f };
 
     // Jitter around
@@ -378,7 +367,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t& start, const vec3_t& mins, c
         for (uint32_t j = 0; j < 3; j++) {
             for (uint32_t k = 0; k < 3; k++) {
                 // Calculate start.
-                const vec3_t point = start + vec3_t {
+                const vec3_t point = start + vec3_t{
                     offsets[i],
                     offsets[j],
                     offsets[k]
@@ -387,7 +376,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t& start, const vec3_t& mins, c
                 // Execute trace.
                 const trace_t trace = pm->Trace(point, mins, maxs, end);
 
-                if (!trace.allSolid) {
+                if (!trace.allsolid) {
 
                     if (i != 0 || j != 0 || k != 0) {
                         PM_Debug("Fixed all-solid");
@@ -401,7 +390,6 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t& start, const vec3_t& mins, c
 
     PM_Debug("No good position");
     return pm->Trace(start, mins, maxs, end);
-#endif
 }
 
 //
@@ -412,7 +400,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t& start, const vec3_t& mins, c
 // return false otherwise.
 //===============
 //
-static bool PM_ImpactPlane(vec3_t* planes, int32_t num_planes, const vec3_t& plane) {
+static bool PM_ImpactPlane(vec3_t * planes, int32_t num_planes, const vec3_t & plane) {
 
     for (int32_t i = 0; i < num_planes; i++) {
         if (vec3_dot(plane, planes[i]) > 1.0f - PM_STOP_EPSILON) {
@@ -468,14 +456,14 @@ static qboolean PM_StepSlideMove_(void)
         const trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
 
         // if the player is trapped in a solid, don't build up Z
-        if (trace.allSolid) {
+        if (trace.allsolid) {
             pm->state.velocity.z = 0.0f;
             return true;
         }
 
         // if the trace succeeded, move some distance
         if (trace.fraction > (FLT_EPSILON - 1.0f)) {
-            pm->state.origin = trace.endPosition;
+            pm->state.origin = trace.endpos;
 
             // if the trace didn't hit anything, we're done
             if (trace.fraction == 1.0f) {
@@ -603,7 +591,7 @@ static void PM_StepSlideMove(void)
     up.z += PM_STEP_HEIGHT;
 
     trace_t trace = PM_TraceCorrectAllSolid(up, pm->mins, pm->maxs, up);
-    if (trace.allSolid)
+    if (trace.allsolid)
         return;     // Can't step up
 
     // Try sliding above
@@ -616,8 +604,8 @@ static void PM_StepSlideMove(void)
     vec3_t down = pm->state.origin;
     down.z -= PM_STEP_HEIGHT;
     trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
-    if (!trace.allSolid) {
-        pm->state.origin = trace.endPosition;
+    if (!trace.allsolid) {
+        pm->state.origin = trace.endpos;
     }
     up = pm->state.origin;
 
@@ -762,7 +750,7 @@ static void PM_CheckDuck(void) {
         else if (is_ducking && !wants_ducking) {
             const trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pm->state.origin);
 
-            if (!trace.allSolid && !trace.startSolid) {
+            if (!trace.allsolid && !trace.startsolid) {
                 pm->state.flags &= ~PMF_DUCKED;
             }
         }
@@ -885,7 +873,7 @@ static qboolean PM_CheckWaterJump(void) {
 
         trace = PM_TraceCorrectAllSolid(pos, pm->mins, pm->maxs, pos);
 
-        if (trace.startSolid) {
+        if (trace.startsolid) {
             PM_Debug("Can't exit water: Blocked");
             return false;
         }
@@ -1042,7 +1030,7 @@ static void PM_CheckGround(void) {
 
         // Sink down to it if not trick jumping
         if (!(pm->state.flags & PMF_TIME_TRICK_JUMP)) {
-            pm->state.origin = trace.endPosition;
+            pm->state.origin = trace.endpos;
 
             pm->state.velocity = PM_ClipVelocity(pm->state.velocity, trace.plane.normal, PM_CLIP_BOUNCE);
         }
@@ -1093,22 +1081,26 @@ static void PM_Friction(void) {
     // SPECTATOR friction
     if (pm->state.type == PM_SPECTATOR) {
         friction = PM_FRICT_SPECTATOR;
-    // LADDER friction
-    } else if (pm->state.flags & PMF_ON_LADDER) {
+        // LADDER friction
+    }
+    else if (pm->state.flags & PMF_ON_LADDER) {
         friction = PM_FRICT_LADDER;
-    // WATER friction.
-    } else if (pm->waterLevel > WATER_FEET) {
+        // WATER friction.
+    }
+    else if (pm->waterLevel > WATER_FEET) {
         friction = PM_FRICT_WATER;
-    // GROUND friction.
-    } else if (pm->state.flags & PMF_ON_GROUND) {
+        // GROUND friction.
+    }
+    else if (pm->state.flags & PMF_ON_GROUND) {
         if (playerMoveLocals.ground.surface && (playerMoveLocals.ground.surface->flags & SURF_SLICK)) {
             friction = PM_FRICT_GROUND_SLICK;
         }
         else {
             friction = PM_FRICT_GROUND;
         }
-    // OTHER friction
-    } else { 
+        // OTHER friction
+    }
+    else {
         friction = PM_FRICT_AIR;
     }
 
@@ -1125,7 +1117,7 @@ static void PM_Friction(void) {
 // Returns the newly user intended velocity
 //===============
 //
-static void PM_Accelerate(const vec3_t &dir, float speed, float accel) {
+static void PM_Accelerate(const vec3_t & dir, float speed, float accel) {
     const float current_speed = vec3_dot(pm->state.velocity, dir);
     const float add_speed = speed - current_speed;
 
@@ -1262,13 +1254,17 @@ static void PM_LadderMove(void) {
 
         if ((pm->viewAngles.x <= -15.0f) && (pm->cmd.forwardmove > 0)) {
             vel.z = PM_SPEED_LADDER;
-        } else if ((pm->viewAngles.x >= 15.0f) && (pm->cmd.forwardmove > 0)) {
+        }
+        else if ((pm->viewAngles.x >= 15.0f) && (pm->cmd.forwardmove > 0)) {
             vel.z = -PM_SPEED_LADDER;
-        } else if (pm->cmd.upmove > 0) {
+        }
+        else if (pm->cmd.upmove > 0) {
             vel.z = PM_SPEED_LADDER;
-        } else if (pm->cmd.upmove < 0) {
+        }
+        else if (pm->cmd.upmove < 0) {
             vel.z = -PM_SPEED_LADDER;
-        } else {
+        }
+        else {
             vel.z = 0.0;
         }
     }
@@ -1448,7 +1444,7 @@ static void PM_WalkMove(void) {
         return;
     }
 
-    PM_Debug("%s", Vec3ToString(pm->state.origin));
+    PM_Debug("%s", vec3_to_str(pm->state.origin));
 
     PM_Friction();
 
@@ -1570,7 +1566,7 @@ static void PM_FreezeMove(void) {
 // Initializes the current set PMove pointer for another frame iteration.
 //===============
 //
-static void PM_Init(pm_move_t* pmove) {
+static void PM_Init(pm_move_t * pmove) {
     // Store pmove ptr.
     pm = pmove;
 
@@ -1678,14 +1674,14 @@ static void PM_InitLocal() {
 // Can be called by either the server or the client
 //===============
 //
-void PMove(pm_move_t* pmove, pmoveParams_t* params)
+void PMove(pm_move_t * pmove, pmoveParams_t * params)
 {
     // TODO: When PMOVE is finished, remove this useless pmoveParams thing.
     pmp = params;
 
     // Initialize the PMove.
     PM_Init(pmove);
-    
+
     // Ensure angles are clamped.
     PM_ClampAngles();
 
@@ -1703,7 +1699,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
         PM_SpectatorMove();
         return;
     }
-    
+
     // Erase input direction values in case we are dead, or something alike.
     if (pm->state.type >= PM_DEAD) {
         pm->cmd.forwardmove = 0;
@@ -1725,15 +1721,20 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
 
     if (pm->state.flags & PMF_TIME_TELEPORT) {
         // pause in place briefly
-    } else if (pm->state.flags & PMF_TIME_WATER_JUMP) {
+    }
+    else if (pm->state.flags & PMF_TIME_WATER_JUMP) {
         PM_WaterJumpMove();
-    } else if (pm->state.flags & PMF_ON_LADDER) {
+    }
+    else if (pm->state.flags & PMF_ON_LADDER) {
         PM_LadderMove();
-    } else if (pm->state.flags & PMF_ON_GROUND) {
+    }
+    else if (pm->state.flags & PMF_ON_GROUND) {
         PM_WalkMove();
-    } else if (pm->waterLevel > WATER_FEET) {
+    }
+    else if (pm->waterLevel > WATER_FEET) {
         PM_WaterMove();
-    } else {
+    }
+    else {
         PM_AirMove();
     }
 
@@ -1759,7 +1760,7 @@ void PMove(pm_move_t* pmove, pmoveParams_t* params)
 // Initializes the pmp structure.
 //===============
 //
-void PMoveInit(pmoveParams_t* pmp)
+void PMoveInit(pmoveParams_t * pmp)
 {
     // set up default pmove parameters
     memset(pmp, 0, sizeof(*pmp));
@@ -1787,7 +1788,7 @@ void PMoveInit(pmoveParams_t* pmp)
 // Enables QuakeWorld movement on the pmp.
 //===============
 //
-void PMoveEnableQW(pmoveParams_t* pmp)
+void PMoveEnableQW(pmoveParams_t * pmp)
 {
     pmp->qwmode = true;
     pmp->watermult = PM_GRAVITY_WATER;

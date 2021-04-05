@@ -866,9 +866,9 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
         vec3_t up;
         VectorSet(up, 0.f, 0.f, 1.f);
         CrossProduct(light->direction, up, ubo->sun_tangent);
-        ubo->sun_tangent = vec3_normalize(ubo->sun_tangent);
+        VectorNormalize(ubo->sun_tangent);
         CrossProduct(light->direction, ubo->sun_tangent, ubo->sun_bitangent);
-        ubo->sun_bitangent = vec3_normalize(ubo->sun_bitangent);
+        VectorNormalize(ubo->sun_bitangent);
     }
 	// clouds
 

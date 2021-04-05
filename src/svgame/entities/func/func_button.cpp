@@ -45,7 +45,7 @@ void button_return(entity_t* self)
     self->s.frame = 0;
 
     if (self->health)
-        self->takeDamage = DAMAGE_YES;
+        self->takedamage = DAMAGE_YES;
 }
 
 void button_wait(entity_t* self)
@@ -95,7 +95,7 @@ void button_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int 
 {
     self->activator = attacker;
     self->health = self->maxHealth;
-    self->takeDamage = DAMAGE_NO;
+    self->takedamage = DAMAGE_NO;
     button_fire(self);
 }
 
@@ -137,7 +137,7 @@ void SP_func_button(entity_t* ent)
     if (ent->health) {
         ent->maxHealth = ent->health;
         ent->Die = button_killed;
-        ent->takeDamage = DAMAGE_YES;
+        ent->takedamage = DAMAGE_YES;
     }
     else if (!ent->targetName)
         ent->Touch = button_touch;

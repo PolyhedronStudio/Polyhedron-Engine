@@ -49,14 +49,14 @@ void weapon_railgun_fire(entity_t* ent)
         kick *= 4;
     }
 
-    vec3_vectors(ent->client->v_angle, &forward, &right, NULL);
+    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
 
     VectorScale(forward, -3, ent->client->kickOrigin);
     ent->client->kickAngles[0] = -3;
 
     VectorSet(offset, 0, 7, ent->viewHeight - 8);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
-    Fire_Rail(ent, start, forward, damage, kick);
+    fire_rail(ent, start, forward, damage, kick);
 
     // send muzzle flash
     gi.WriteByte(svg_muzzleflash);

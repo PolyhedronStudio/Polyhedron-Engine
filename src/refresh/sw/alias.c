@@ -397,7 +397,7 @@ static void R_AliasSetUpTransform(void)
     angles[vec3_t::Roll] = currententity->angles[vec3_t::Roll];
     angles[vec3_t::Pitch] = currententity->angles[vec3_t::Pitch];
     angles[vec3_t::Yaw] = currententity->angles[vec3_t::Yaw];
-    vec3_vectors(angles, s_alias_forward, s_alias_right, s_alias_up);
+    AngleVectors(angles, s_alias_forward, s_alias_right, s_alias_up);
 
 // TODO: can do this with simple matrix rearrangement
 
@@ -583,7 +583,7 @@ static void R_AliasSetUpLerpData(float backlerp)
     /*
     ** convert entity's angles into discrete vectors for R, U, and F
     */
-    vec3_vectors(currententity->angles, vectors[0], vectors[1], vectors[2]);
+    AngleVectors(currententity->angles, vectors[0], vectors[1], vectors[2]);
 
     /*
     ** translation is the vector from last position to this position
