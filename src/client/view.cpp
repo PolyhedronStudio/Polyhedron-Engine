@@ -220,7 +220,7 @@ static void V_TestEntities(void)
 {
     int         i, j;
     float       f, r;
-    entity_t    *ent;
+    r_entity_t    *ent;
 
     r_numentities = 32;
     memset(r_entities, 0, sizeof(r_entities));

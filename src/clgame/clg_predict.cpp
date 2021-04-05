@@ -33,7 +33,7 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
     len = vec3_length(cl->prediction_error);
     if (len > .1f) {
         if (len > 2400.f / (1.0f / BASE_FRAMERATE)) {
-            Com_DPrint("MAX_DELTA_ORIGIN: %s\n", vec3_to_str(cl->prediction_error).c_str());
+            Com_DPrint("MAX_DELTA_ORIGIN: %s\n", Vec3ToString(cl->prediction_error));
 
             cl->predicted_origin = cl->frame.playerState.pmove.origin;
             cl->predicted_velocity = cl->frame.playerState.pmove.velocity;
@@ -42,7 +42,7 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
             cl->prediction_error = vec3_zero();
         }
         else {
-            Com_DPrint("CLG_CheckPredictionError: %s\n", vec3_to_str(cl->prediction_error).c_str());
+            Com_DPrint("CLG_CheckPredictionError: %s\n", Vec3ToString(cl->prediction_error));
         }
     }
 

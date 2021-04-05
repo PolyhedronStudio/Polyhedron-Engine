@@ -811,10 +811,14 @@ size_t Q_snprintf(char* dest, size_t size, const char* fmt, ...) q_printf(3, 4);
 size_t Q_scnprintf(char* dest, size_t size, const char* fmt, ...) q_printf(3, 4);
 
 // Inline utility.
-inline const char* Vec3ToString(const vec3_t& v) {
-    std::string str;
-    str = vec3_to_str(v);
-    return str.c_str();
+inline const char* Vec3ToString(const vec3_t& v, qboolean rounded = true) {
+    // 64 should be enough, no? This function shouldn't be used outside of
+    // debugging purposes anyhow...
+    static std::string str[64];
+    static int strIndex = 0;
+
+    str[strIndex = (strIndex > 7 ? 0 : strIndex + 1)] = vec3_to_str(v, rounded);
+    return str[strIndex].c_str();
 }
 
 char* va(const char* format, ...) q_printf(1, 2);

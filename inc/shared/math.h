@@ -32,10 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared/math/vector4.h"
 #include "shared/math/vector5.h"
 
-// TODO: Move elsewhere.
-#define NUMVERTEXNORMALS    162
-extern const vec3_t bytedirs[NUMVERTEXNORMALS];
-
 //-----------------
 // Matrixes
 //-----------------
@@ -58,8 +54,10 @@ extern const vec3_t bytedirs[NUMVERTEXNORMALS];
 #include "shared/math/rectangle.h"
 
 //-----------------
-// Vector 3 Origin variable.
+// TODO: These should ultimately be removed and/or replaced.
 //-----------------
+#define NUMVERTEXNORMALS    162
+extern const vec3_t bytedirs[NUMVERTEXNORMALS];
 extern vec3_t vec3_origin;
 
 #endif // __SHARED__MATH_H__

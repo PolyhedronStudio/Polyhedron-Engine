@@ -1526,7 +1526,7 @@ static void PM_WalkMove(void) {
 //===============
 //
 static void PM_SpectatorMove(void) {
-    PM_Debug("%s", vec3_to_str(pm->state.origin));
+    PM_Debug("%s", Vec3ToString(pm->state.origin));
 
     PM_Friction();
 
@@ -1564,7 +1564,7 @@ static void PM_SpectatorMove(void) {
 //===============
 //
 static void PM_FreezeMove(void) {
-    PM_Debug("%s", vec3_to_str(pm->state.origin));
+    PM_Debug("%s", Vec3ToString(pm->state.origin));
     // Other than that call.... It's empty.
     // Or, what else did you expect to find here?
     //
