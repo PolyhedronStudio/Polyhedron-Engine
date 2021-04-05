@@ -1241,16 +1241,20 @@ CLG_BlasterTrail
 */
 void CLG_BlasterTrail(vec3_t start, vec3_t end)
 {
+    vec3_t      move;
+    vec3_t      vec;
+    float       len;
     int         j;
     cparticle_t* p;
+    int         dec;
 
-    vec3_t      move = start;
-    vec3_t      vec = end - start;
-    float       len;
-    vec = vec3_normalize_length(vec, len); // Mathlib.
+    VectorCopy(start, move);
+    VectorSubtract(end, start, vec);
+    //len = VectorNormalize(vec);
+    vec = vec3_normalize_length(vec, len);
 
-    int dec = 5;
-    vec = vec3_scale(vec, dec);
+    dec = 5;
+    VectorScale(vec, 5, vec);
 
     // FIXME: this is a really silly way to have a loop
     while (len > 0) {

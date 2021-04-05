@@ -369,6 +369,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t& start, const vec3_t& mins, c
 // Not getting stuck into rotating objects, etc.
 //
 // The other alternative might otherwise be to do a -0.25f like M_CheckGround did...
+    return pm->Trace(start, mins, maxs, end);
 #if 0
     const vec3_t offsets = { 0.f, 1.f, -1.f };
 
