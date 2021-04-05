@@ -2014,7 +2014,7 @@ static trace_t q_gameabi MVD_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_
     trace_t trace;
 
     memset(&trace, 0, sizeof(trace));
-    VectorCopy(end, trace.endpos);
+    VectorCopy(end, trace.endPosition);
     trace.fraction = 1;
 
     return trace;

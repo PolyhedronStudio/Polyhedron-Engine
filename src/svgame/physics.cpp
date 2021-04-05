@@ -56,7 +56,7 @@ entity_t *SV_TestEntityPosition(entity_t *ent)
         mask = CONTENTS_MASK_SOLID;
     trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, mask);
 
-    if (trace.startsolid)
+    if (trace.startSolid)
         return g_edicts;
 
     return NULL;
@@ -208,7 +208,7 @@ int SV_FlyMove(entity_t *ent, float time, int mask)
 
         trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, end, ent, mask);
 
-        if (trace.allsolid) {
+        if (trace.allSolid) {
             // entity is trapped in another solid
             VectorCopy(vec3_origin, ent->velocity);
             return 3;
@@ -216,7 +216,7 @@ int SV_FlyMove(entity_t *ent, float time, int mask)
 
         if (trace.fraction > 0) {
             // actually covered some distance
-            VectorCopy(trace.endpos, ent->s.origin);
+            VectorCopy(trace.endPosition, ent->s.origin);
             VectorCopy(ent->velocity, original_velocity);
             numplanes = 0;
         }
@@ -345,7 +345,7 @@ retry:
 
     trace = gi.Trace(start, ent->mins, ent->maxs, end, ent, mask);
 
-    VectorCopy(trace.endpos, ent->s.origin);
+    VectorCopy(trace.endPosition, ent->s.origin);
     gi.LinkEntity(ent);
 
     if (trace.fraction != 1.0) {

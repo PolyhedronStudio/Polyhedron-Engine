@@ -42,7 +42,7 @@ static void check_dodge(entity_t *self, const vec3_t &start, const vec3_t &dir, 
     VectorMA(start, 8192, dir, end);
     tr = gi.Trace(start, vec3_origin, vec3_origin, end, self, CONTENTS_MASK_SHOT);
     if ((tr.ent) && (tr.ent->svFlags & SVF_MONSTER) && (tr.ent->health > 0) && (tr.ent->monsterInfo.dodge) && infront(tr.ent, self)) {
-        VectorSubtract(tr.endpos, start, v);
+        VectorSubtract(tr.endPosition, start, v);
         eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
         tr.ent->monsterInfo.dodge(tr.ent, self, eta);
     }
@@ -163,9 +163,9 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
             int     color;
 
             water = true;
-            VectorCopy(tr.endpos, water_start);
+            VectorCopy(tr.endPosition, water_start);
 
-            if (!VectorCompare(start, tr.endpos)) {
+            if (!VectorCompare(start, tr.endPosition)) {
                 if (tr.contents & CONTENTS_WATER) {
                     if (strcmp(tr.surface->name, "*brwater") == 0)
                         color = SPLASH_BROWN_WATER;
@@ -182,10 +182,10 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
                     gi.WriteByte(svg_temp_entity);
                     gi.WriteByte(TE_SPLASH);
                     gi.WriteByte(8);
-                    gi.WritePosition(tr.endpos);
+                    gi.WritePosition(tr.endPosition);
                     gi.WriteDirection(tr.plane.normal);
                     gi.WriteByte(color);
-                    gi.Multicast(&tr.endpos, MULTICAST_PVS);
+                    gi.Multicast(&tr.endPosition, MULTICAST_PVS);
                 }
 
                 // change bullet's course when it enters water
@@ -208,17 +208,17 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
     if (!((tr.surface) && (tr.surface->flags & SURF_SKY))) {
         if (tr.fraction < 1.0) {
             if (tr.ent->takedamage) {
-                T_Damage(tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, DAMAGE_BULLET, mod);
+                T_Damage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DAMAGE_BULLET, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
                     gi.WriteByte(svg_temp_entity);
                     gi.WriteByte(te_impact);
-                    gi.WritePosition(tr.endpos);
+                    gi.WritePosition(tr.endPosition);
                     gi.WriteDirection(tr.plane.normal);
-                    gi.Multicast(&tr.endpos, MULTICAST_PVS);
+                    gi.Multicast(&tr.endPosition, MULTICAST_PVS);
 
                     if (self->client)
-                        PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
+                        PlayerNoise(self, tr.endPosition, PNOISE_IMPACT);
                 }
             }
         }
@@ -228,21 +228,21 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
     if (water) {
         vec3_t  pos;
 
-        VectorSubtract(tr.endpos, water_start, dir);
+        VectorSubtract(tr.endPosition, water_start, dir);
         VectorNormalize(dir);
-        VectorMA(tr.endpos, -2, dir, pos);
+        VectorMA(tr.endPosition, -2, dir, pos);
         if (gi.PointContents(pos) & CONTENTS_MASK_LIQUID)
-            VectorCopy(pos, tr.endpos);
+            VectorCopy(pos, tr.endPosition);
         else
             tr = gi.Trace(pos, vec3_origin, vec3_origin, water_start, tr.ent, CONTENTS_MASK_LIQUID);
 
-        VectorAdd(water_start, tr.endpos, pos);
+        VectorAdd(water_start, tr.endPosition, pos);
         VectorScale(pos, 0.5, pos);
 
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_BUBBLETRAIL);
         gi.WritePosition(water_start);
-        gi.WritePosition(tr.endpos);
+        gi.WritePosition(tr.endPosition);
         gi.Multicast(&pos, MULTICAST_PVS);
     }
 }
@@ -686,29 +686,29 @@ void fire_rail(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int da
                 ignore = NULL;
 
             if ((tr.ent != self) && (tr.ent->takedamage))
-                T_Damage(tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_RAILGUN);
+                T_Damage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, 0, MOD_RAILGUN);
         }
 
-        VectorCopy(tr.endpos, from);
+        VectorCopy(tr.endPosition, from);
     }
 
     // send gun puff / flash
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_RAILTRAIL);
     gi.WritePosition(start);
-    gi.WritePosition(tr.endpos);
+    gi.WritePosition(tr.endPosition);
     gi.Multicast(&self->s.origin, MULTICAST_PHS);
 //  gi.multicast (start, MULTICAST_PHS);
     if (water) {
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_RAILTRAIL);
         gi.WritePosition(start);
-        gi.WritePosition(tr.endpos);
-        gi.Multicast(&tr.endpos, MULTICAST_PHS);
+        gi.WritePosition(tr.endPosition);
+        gi.Multicast(&tr.endPosition, MULTICAST_PHS);
     }
 
     if (self->client)
-        PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
+        PlayerNoise(self, tr.endPosition, PNOISE_IMPACT);
 }
 
 
@@ -843,28 +843,28 @@ void bfg_think(entity_t *self)
 
             // hurt it if we can
             if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER) && (tr.ent != self->owner))
-                T_Damage(tr.ent, self, self->owner, dir, tr.endpos, vec3_origin, dmg, 1, DAMAGE_ENERGY, MOD_BFG_LASER);
+                T_Damage(tr.ent, self, self->owner, dir, tr.endPosition, vec3_origin, dmg, 1, DAMAGE_ENERGY, MOD_BFG_LASER);
 
             // if we hit something that's not a monster or player we're done
             if (!(tr.ent->svFlags & SVF_MONSTER) && (!tr.ent->client)) {
                 gi.WriteByte(svg_temp_entity);
                 gi.WriteByte(TE_LASER_SPARKS);
                 gi.WriteByte(4);
-                gi.WritePosition(tr.endpos);
+                gi.WritePosition(tr.endPosition);
                 gi.WriteDirection(tr.plane.normal);
                 gi.WriteByte(self->s.skinnum);
-                gi.Multicast(&tr.endpos, MULTICAST_PVS);
+                gi.Multicast(&tr.endPosition, MULTICAST_PVS);
                 break;
             }
 
             ignore = tr.ent;
-            VectorCopy(tr.endpos, start);
+            VectorCopy(tr.endPosition, start);
         }
 
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_BFG_LASER);
         gi.WritePosition(self->s.origin);
-        gi.WritePosition(tr.endpos);
+        gi.WritePosition(tr.endPosition);
         gi.Multicast(&self->s.origin, MULTICAST_PHS);
     }
 

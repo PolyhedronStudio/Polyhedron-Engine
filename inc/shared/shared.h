@@ -924,21 +924,39 @@ typedef struct csurface_s {
 } csurface_t;
 
 //-----------------
-// A trace is returned when a box is swept through the world
+// Traces are discrete movements through world space, clipped to the
+// BSP planes they intersect.This is the basis for all collision detection
+// within Quake.
 //-----------------
 typedef struct {
-    qboolean    allsolid;   // If true, plane is not valid
-    qboolean    startsolid; // If true, the initial point was in a solid area
-    float       fraction;   // Time completed, 1.0 = didn't hit anything
-    vec3_t      endpos;     // Final position
-    cplane_t    plane;      // Surface normal at impact
-    csurface_t* surface;   // Surface hit
-    int         contents;   // Contents on other side of surface hit
+    // If true, the trace startedand ended within the same solid.
+    qboolean    allSolid;
+    // If true, the trace started within a solid, but exited it.
+    qboolean    startSolid;
+    // The fraction of the desired distance traveled(0.0 - 1.0).If
+    // 1.0, no plane was impacted.
+    float       fraction;
+
+    // The destination position.
+    vec3_t      endPosition;
+
+    // The impacted plane, or empty.Note that a copy of the plane is
+    // returned, rather than a pointer.This is because the plane may belong to
+    // an inline BSP model or the box hull of a solid entity, in which case it must
+    // be transformed by the entity's current position.
+    cplane_t    plane;
+    // The impacted surface, or `NULL`.
+    csurface_t* surface;
+    // The contents mask of the impacted brush, or 0.
+    int         contents;
+
+    // The impacted entity, or `NULL`.
     struct entity_s* ent;   // Not set by CM_*() functions
 
     // N&C: Custom added.
     vec3_t		offsets[8];	// [signbits][x] = either size[0][x] or size[1][x]
 } trace_t;
+
 
 //
 //=============================================================================

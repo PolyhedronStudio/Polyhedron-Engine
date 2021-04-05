@@ -158,17 +158,17 @@ void M_CheckGround(entity_t *ent)
     trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, point, ent, CONTENTS_MASK_MONSTERSOLID);
 
     // check steepness
-    if (trace.plane.normal[2] < 0.7 && !trace.startsolid) {
+    if (trace.plane.normal[2] < 0.7 && !trace.startSolid) {
         ent->groundEntityPtr = NULL;
         return;
     }
 
 //  ent->groundEntityPtr = trace.ent;
 //  ent->groundEntityLinkCount = trace.ent->linkCount;
-//  if (!trace.startsolid && !trace.allsolid)
-//      VectorCopy (trace.endpos, ent->s.origin);
-    if (!trace.startsolid && !trace.allsolid) {
-        VectorCopy(trace.endpos, ent->s.origin);
+//  if (!trace.startSolid && !trace.allSolid)
+//      VectorCopy (trace.endPosition, ent->s.origin);
+    if (!trace.startSolid && !trace.allSolid) {
+        VectorCopy(trace.endPosition, ent->s.origin);
         ent->groundEntityPtr = trace.ent;
         ent->groundEntityLinkCount = trace.ent->linkCount;
         ent->velocity[2] = 0;
@@ -295,10 +295,10 @@ void M_droptofloor(entity_t *ent)
 
     trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
 
-    if (trace.fraction == 1 || trace.allsolid)
+    if (trace.fraction == 1 || trace.allSolid)
         return;
 
-    VectorCopy(trace.endpos, ent->s.origin);
+    VectorCopy(trace.endPosition, ent->s.origin);
 
     gi.LinkEntity(ent);
     M_CheckGround(ent);

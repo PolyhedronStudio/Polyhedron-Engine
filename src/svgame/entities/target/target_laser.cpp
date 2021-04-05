@@ -51,7 +51,7 @@ void target_laser_think(entity_t* self)
 
         // hurt it if we can
         if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER))
-            T_Damage(tr.ent, self, self->activator, self->moveDirection, tr.endpos, vec3_origin, self->dmg, 1, DAMAGE_ENERGY, MOD_TARGET_LASER);
+            T_Damage(tr.ent, self, self->activator, self->moveDirection, tr.endPosition, vec3_origin, self->dmg, 1, DAMAGE_ENERGY, MOD_TARGET_LASER);
 
         // if we hit something that's not a monster or player or is immune to lasers, we're done
         if (!(tr.ent->svFlags & SVF_MONSTER) && (!tr.ent->client)) {
@@ -60,19 +60,19 @@ void target_laser_think(entity_t* self)
                 gi.WriteByte(svg_temp_entity);
                 gi.WriteByte(TE_LASER_SPARKS);
                 gi.WriteByte(count);
-                gi.WritePosition(tr.endpos);
+                gi.WritePosition(tr.endPosition);
                 gi.WriteDirection(tr.plane.normal);
                 gi.WriteByte(self->s.skinnum);
-                gi.Multicast(&tr.endpos, MULTICAST_PVS);
+                gi.Multicast(&tr.endPosition, MULTICAST_PVS);
             }
             break;
         }
 
         ignore = tr.ent;
-        VectorCopy(tr.endpos, start);
+        VectorCopy(tr.endPosition, start);
     }
 
-    VectorCopy(tr.endpos, self->s.old_origin);
+    VectorCopy(tr.endPosition, self->s.old_origin);
 
     self->nextThink = level.time + FRAMETIME;
 }

@@ -262,7 +262,7 @@ static size_t LOC_There_m(char *buffer, size_t size)
     CM_BoxTrace(&trace, cl.playerEntityOrigin, pos, vec3_origin, vec3_origin,
                 cl.bsp->nodes, CONTENTS_MASK_SOLID);
 
-    loc = LOC_FindClosest(trace.endpos);
+    loc = LOC_FindClosest(trace.endPosition);
     if (loc) {
         ret = Q_strlcpy(buffer, loc->name, size);
     }

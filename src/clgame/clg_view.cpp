@@ -292,7 +292,7 @@ static void CLG_SetupThirdPersionView(void)
     clgi.CM_BoxTrace(&trace, cl->playerEntityOrigin, cl->refdef.vieworg,
         mins, maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
     if (trace.fraction != 1.0f) {
-        VectorCopy(trace.endpos, cl->refdef.vieworg);
+        VectorCopy(trace.endPosition, cl->refdef.vieworg);
     }
 
     VectorSubtract(focus, cl->refdef.vieworg, focus);

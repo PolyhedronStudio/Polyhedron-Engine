@@ -241,7 +241,7 @@ static void PM_TouchEntity(struct entity_s* ent) {
 //
 static bool PM_CheckStep(const trace_t* trace) {
 
-    if (!trace->allsolid) {
+    if (!trace->allSolid) {
         if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
             if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.ground.plane.dist) {
                 return true;
@@ -261,7 +261,7 @@ static bool PM_CheckStep(const trace_t* trace) {
 //
 static void PM_StepDown(const trace_t* trace) {
     // Calculate step height.
-    playerMoveLocals.origin = trace->endpos;
+    playerMoveLocals.origin = trace->endPosition;
     pm->step = playerMoveLocals.origin.z - playerMoveLocals.previousOrigin.z;
 
     // If we are above minimal step height, remove the PMF_ON_STAIRS flag.
@@ -304,7 +304,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t& start, const vec3_t& mins, c
                 // Execute trace.
                 const trace_t trace = pm->Trace(point, mins, maxs, end);
 
-                if (!trace.allsolid) {
+                if (!trace.allSolid) {
 
                     if (i != 0 || j != 0 || k != 0) {
                         PM_Debug("Fixed all-solid");
@@ -386,14 +386,14 @@ static qboolean PM_StepSlideMove_(void)
         const trace_t trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, pos);
 
         // if the player is trapped in a solid, don't build up Z
-        if (trace.allsolid) {
+        if (trace.allSolid) {
             playerMoveLocals.velocity.z = 0.0f;
             return true;
         }
 
         // if the trace succeeded, move some distance
         if (trace.fraction > (FLT_EPSILON - 1.0f)) {
-            playerMoveLocals.origin = trace.endpos;
+            playerMoveLocals.origin = trace.endPosition;
 
             // if the trace didn't hit anything, we're done
             if (trace.fraction == 1.0f) {
@@ -521,7 +521,7 @@ static void PM_StepSlideMove(void)
     up.z += PM_STEP_HEIGHT_MAX;
 
     trace_t trace = PM_TraceCorrectAllSolid(up, pm->mins, pm->maxs, up);
-    if (trace.allsolid)
+    if (trace.allSolid)
         return;     // Can't step up
 
     // Try sliding above
@@ -534,8 +534,8 @@ static void PM_StepSlideMove(void)
     vec3_t down = playerMoveLocals.origin;
     down.z -= PM_STEP_HEIGHT_MAX;
     trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, down);
-    if (!trace.allsolid) {
-        playerMoveLocals.origin = trace.endpos;
+    if (!trace.allSolid) {
+        playerMoveLocals.origin = trace.endPosition;
     }
     up = playerMoveLocals.origin;
 
@@ -594,7 +594,7 @@ static void PM_StepSlideMove_(void)
 
         trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, end);
 
-        if (trace.allsolid) {
+        if (trace.allSolid) {
             // entity is trapped in another solid
             playerMoveLocals.velocity.z = 0;    // don't build up falling damage
             return;
@@ -602,7 +602,7 @@ static void PM_StepSlideMove_(void)
 
         if (trace.fraction > 0) {
             // actually covered some distance
-            playerMoveLocals.origin = trace.endpos;
+            playerMoveLocals.origin = trace.endPosition;
             numPlanes = 0;
         }
 
@@ -689,7 +689,7 @@ static void PM_StepSlideMove(void)
     up.z += PM_STEP_HEIGHT_MAX;
 
     trace_t trace = PM_TraceCorrectAllSolid(up, pm->mins, pm->maxs, up);
-    if (trace.allsolid)
+    if (trace.allSolid)
         return;     // Can't step up
 
     // Try sliding above
@@ -710,8 +710,8 @@ static void PM_StepSlideMove(void)
     vec3_t down = playerMoveLocals.origin;
     down.z -= PM_STEP_HEIGHT_MAX;
     trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, down);
-    if (!trace.allsolid) {
-        playerMoveLocals.origin = trace.endpos;
+    if (!trace.allSolid) {
+        playerMoveLocals.origin = trace.endPosition;
     }
     up = playerMoveLocals.origin;
 
@@ -773,7 +773,7 @@ static bool PM_SlideMove(void)
         trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, end);
 
         // If the player is trapped in a solid, don't build up Z
-        if (trace.allsolid) {
+        if (trace.allSolid) {
             // entity is trapped in another solid
             playerMoveLocals.velocity.z = 0;    // don't build up falling damage
             return true;
@@ -782,7 +782,7 @@ static bool PM_SlideMove(void)
 
         // if the trace succeeded, move some distance
         if (trace.fraction > 0.0f) {
-            VectorCopy(trace.endpos, pm->state.origin);
+            VectorCopy(trace.endPosition, pm->state.origin);
 
             // if the trace didn't hit anything, we're done
             if (trace.fraction == 1.0f) {
@@ -797,7 +797,7 @@ static bool PM_SlideMove(void)
         //--------------------------------------------
         //if (trace.fraction > 0) {
         //    // actually covered some distance
-        //    VectorCopy(trace.endpos, playerMoveLocals.origin);
+        //    VectorCopy(trace.endPosition, playerMoveLocals.origin);
         //    numPlanes = 0;
         //}
 
@@ -948,10 +948,10 @@ static void PM_StepSlideMove(void)
     // Execute trace.
     trace_t step_up = PM_TraceCorrectAllSolid(org0, up, pm->mins, pm->maxs);
 
-    if (!step_up.allsolid) {
+    if (!step_up.allSolid) {
 
         // Step from the higher position, with the original velocity
-        VectorCopy(step_up.endpos, pm->state.origin);
+        VectorCopy(step_up.endPosition, pm->state.origin);
         VectorCopy(vel0, pm->state.velocity);
 
         PM_SlideMove();
@@ -1464,7 +1464,7 @@ static void PM_CheckDuck(void)
         else if (is_ducking && !wants_ducking) {
             const trace_t trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, playerMoveLocals.origin);
 
-            if (!trace.allsolid && !trace.startsolid) {
+            if (!trace.allSolid && !trace.startSolid) {
                 pm->state.flags &= ~PMF_DUCKED;
             }
         }
@@ -1542,7 +1542,7 @@ static void PM_CheckDuck(void)
     //        // try to stand up
     //        pm->maxs.z = 32;
     //        trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, playerMoveLocals.origin);
-    //        if (!trace.allsolid)
+    //        if (!trace.allSolid)
     //            pm->state.flags &= ~PMF_DUCKED;
     //    }
     //}
@@ -1607,7 +1607,7 @@ static void PM_CategorizePosition(void)
         playerMoveLocals.ground.contents = trace.contents;
 
         // No ent, or place normal is under PM_STEP_NORMAL.
-        if (!trace.ent || (trace.plane.normal.z < PM_STEP_NORMAL && !trace.startsolid)) {
+        if (!trace.ent || (trace.plane.normal.z < PM_STEP_NORMAL && !trace.startSolid)) {
             pm->groundEntityPtr = NULL;
             pm->state.flags &= ~PMF_ON_GROUND;
         }
@@ -1693,7 +1693,7 @@ static qboolean PM_TestPosition(void)
     trace_t trace = PM_TraceCorrectAllSolid(origin, pm->mins, pm->maxs, end);
 
     // Return whether not allsolid.
-    return !trace.allsolid;
+    return !trace.allSolid;
 }
 
 //
@@ -1843,7 +1843,7 @@ static void PM_FlyMove(void)
         //    end[i] = playerMoveLocals.origin[i] + playerMoveLocals.frameTime * playerMoveLocals.velocity[i];
         end = vec3_fmaf(playerMoveLocals.origin, playerMoveLocals.frameTime, playerMoveLocals.velocity);
         trace = PM_TraceCorrectAllSolid(playerMoveLocals.origin, pm->mins, pm->maxs, end);
-        playerMoveLocals.origin = trace.endpos;
+        playerMoveLocals.origin = trace.endPosition;
     }
     else
 #endif

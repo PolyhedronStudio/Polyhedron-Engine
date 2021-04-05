@@ -60,7 +60,7 @@ void UpdateChaseCam(entity_t *ent)
 
     trace = gi.Trace(ownerv, vec3_origin, vec3_origin, o, targ, CONTENTS_MASK_SOLID);
 
-    VectorCopy(trace.endpos, goal);
+    VectorCopy(trace.endPosition, goal);
 
     VectorMA(goal, 2, forward, goal);
 
@@ -69,7 +69,7 @@ void UpdateChaseCam(entity_t *ent)
     o[2] += 6;
     trace = gi.Trace(goal, vec3_origin, vec3_origin, o, targ, CONTENTS_MASK_SOLID);
     if (trace.fraction < 1) {
-        VectorCopy(trace.endpos, goal);
+        VectorCopy(trace.endPosition, goal);
         goal[2] -= 6;
     }
 
@@ -77,7 +77,7 @@ void UpdateChaseCam(entity_t *ent)
     o[2] -= 6;
     trace = gi.Trace(goal, vec3_origin, vec3_origin, o, targ, CONTENTS_MASK_SOLID);
     if (trace.fraction < 1) {
-        VectorCopy(trace.endpos, goal);
+        VectorCopy(trace.endPosition, goal);
         goal[2] += 6;
     }
 

@@ -681,7 +681,7 @@ void CLG_AddViewWeapon(void)
 
         if (trace.fraction != 1.0f)
         {
-            VectorMA(trace.endpos, -gun_length, view_dir, gun.origin);
+            VectorMA(trace.endPosition, -gun_length, view_dir, gun.origin);
             VectorMA(gun.origin, -gun_right, right_dir, gun.origin);
             VectorMA(gun.origin, -gun_up, up_dir, gun.origin);
         }
