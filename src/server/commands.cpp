@@ -710,8 +710,6 @@ static void SV_Status_f(void)
         }
     }
     Com_Printf("\n");
-
-    SV_MvdStatus_f();
 }
 
 /*
@@ -1521,26 +1519,24 @@ static void SV_Record_c(genctx_t *ctx, int argnum)
 
 static void SV_Record_f(void)
 {
-#if USE_MVD_CLIENT
-    if (sv.state == ss_broadcast) {
-        MVD_StreamedRecord_f();
-        return;
-    }
-#endif
-
-    SV_MvdRecord_f();
+//#if USE_MVD_CLIENT
+//    if (sv.state == ss_broadcast) {
+//        MVD_StreamedRecord_f();
+//        return;
+//    }
+//#endif
+//
+//    SV_MvdRecord_f();
 }
 
 static void SV_Stop_f(void)
 {
-#if USE_MVD_CLIENT
-    if (sv.state == ss_broadcast) {
-        MVD_StreamedStop_f();
-        return;
-    }
-#endif
-
-    SV_MvdStop_f();
+//#if USE_MVD_CLIENT
+//    if (sv.state == ss_broadcast) {
+//        MVD_StreamedStop_f();
+//        return;
+//    }
+//#endif
 }
 
 #endif

@@ -252,9 +252,6 @@ void SV_SpawnServer(mapcmd_t *cmd)
     // all precaches are complete
     sv.state = cmd->state;
 
-    // respawn dummy MVD client, set base states, etc
-    SV_MvdMapChanged();
-
     // set serverinfo variable
     SV_InfoSet("mapname", sv.name);
     SV_InfoSet("port", net_port->string);
@@ -431,10 +428,6 @@ void SV_InitGame(unsigned mvd_spawn)
     svs.num_entities = sv_maxclients->integer * UPDATE_BACKUP * MAX_PACKET_ENTITIES;
     svs.entities = (entity_packed_t*)SV_Mallocz(sizeof(entity_packed_t) * svs.num_entities); // CPP: Cast
 
-    // initialize MVD server
-    if (!mvd_spawn) {
-        SV_MvdInit();
-    }
 
     Cvar_ClampInteger(sv_reserved_slots, 0, sv_maxclients->integer - 1);
 

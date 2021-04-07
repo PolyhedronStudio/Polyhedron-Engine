@@ -261,9 +261,6 @@ void SV_DropClient(client_t *client, const char *reason)
     SV_CleanClient(client);
 
     Com_DPrintf("Going to cs_zombie for %s\n", client->name);
-
-    // give MVD server a chance to detect if its dummy client was dropped
-    SV_MvdClientDropped(client);
 }
 
 
@@ -1700,9 +1697,6 @@ SV_RunGameFrame
 */
 static void SV_RunGameFrame(void)
 {
-    // save the entire world state if recording a serverdemo
-    SV_MvdBeginFrame();
-
 #if USE_CLIENT
     if (host_speeds->integer)
         time_before_game = Sys_Milliseconds();
@@ -1726,9 +1720,6 @@ static void SV_RunGameFrame(void)
                     msg_write.cursize);
         SZ_Clear(&msg_write);
     }
-
-    // save the entire world state if recording a serverdemo
-    SV_MvdEndFrame();
 }
 
 /*
@@ -1840,9 +1831,6 @@ unsigned SV_Frame(unsigned msec)
     if (svs.initialized) {
         // run connection to the anticheat server
         AC_Run();
-
-        // run connections from MVD/GTV clients
-        SV_MvdRunClients();
 
         // deliver fragments and reliable messages for connecting clients
         SV_SendAsyncPackets();
@@ -2053,11 +2041,9 @@ void SV_Init(void)
 {
     SV_InitOperatorCommands();
 
-    SV_MvdRegister();
-
-#if USE_MVD_CLIENT
-    MVD_Register();
-#endif
+//#if USE_MVD_CLIENT
+//    MVD_Register();
+//#endif
 
     AC_Register();
 
@@ -2244,18 +2230,16 @@ void SV_Shutdown(const char *finalmsg, error_type_t type)
     if (!sv_registered)
         return;
 
-#if USE_MVD_CLIENT
-    if (ge != &mvd_ge && !(type & MVD_SPAWN_INTERNAL)) {
-        // shutdown MVD client now if not already running the built-in MVD game module
-        // don't shutdown if called from internal MVD spawn function (ugly hack)!
-        MVD_Shutdown();
-    }
-    type = (error_type_t)(type & ~MVD_SPAWN_MASK);// &= ~MVD_SPAWN_MASK; // CPP: Cast type &= ~MVD_SPAWN_MASK;
-#endif
+//#if USE_MVD_CLIENT
+//    if (ge != &mvd_ge && !(type & MVD_SPAWN_INTERNAL)) {
+//        // shutdown MVD client now if not already running the built-in MVD game module
+//        // don't shutdown if called from internal MVD spawn function (ugly hack)!
+//        MVD_Shutdown();
+//    }
+//    type = (error_type_t)(type & ~MVD_SPAWN_MASK);// &= ~MVD_SPAWN_MASK; // CPP: Cast type &= ~MVD_SPAWN_MASK;
+//#endif
 
     AC_Disconnect();
-
-    SV_MvdShutdown(type);
 
     SV_FinalMessage(finalmsg, type);
     SV_MasterShutdown();
