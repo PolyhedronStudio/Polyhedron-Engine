@@ -1,5 +1,14 @@
 # Nail & Crescent - Engine 0.2 Branch
 
+## Scratchpad - Things to do or not forget:
+You can skip these if you aren't me, an ADHD minded person :P
+- [ ] Move these over out of FX_Init and remove src/client/effects.c it is a waste file.
+`   // Move these over?
+    cvar_pt_particle_emissive = Cvar_Get("pt_particle_emissive", "10.0", 0);
+	cl_particle_num_factor = Cvar_Get("cl_particle_num_factor", "1", 0);`
+- [ ] Check out header files some more, organize some more.
+- [ ] Do not forget RTX Q2 1.5, how could you? :)
+
 ## Goals:
 The goals of this branch are to create a solid base, one that we can work uphill from without continuously running into problems created by the past. We are using an engine that spawns from 1998 after all.
 
