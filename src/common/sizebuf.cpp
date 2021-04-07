@@ -106,24 +106,3 @@ void SZ_WriteLong(sizebuf_t *sb, int c)
     buf[2] = (c >> 16) & 0xff;
     buf[3] = c >> 24;
 }
-
-#if USE_MVD_SERVER
-void SZ_WriteString(sizebuf_t *sb, const char *s)
-{
-    size_t len;
-
-    if (!s) {
-        SZ_WriteByte(sb, 0);
-        return;
-    }
-
-    len = strlen(s);
-    if (len >= MAX_NET_STRING) {
-        Com_WPrintf("%s: overflow: %" PRIz " chars", __func__, len); // CPP: String fix
-        SZ_WriteByte(sb, 0);
-        return;
-    }
-
-    SZ_Write(sb, s, len + 1);
-}
-#endif

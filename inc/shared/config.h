@@ -56,7 +56,6 @@
 
 #if USE_SERVER
 #define USE_AC_SERVER !USE_CLIENT
-//#define USE_MVD_SERVER 1
 #define USE_PACKETDUP 1
 #define USE_WINSVC !USE_CLIENT
 #endif
