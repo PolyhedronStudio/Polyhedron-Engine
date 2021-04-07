@@ -180,8 +180,9 @@ static const vec3_t PM_GIBLET_MAXS = { 8.f,  8.f,  8.f };
 //===============
 //
 #ifdef CGAME_INCLUDE
-#define DEBUG_CLIENT_PMOVE 1
+#define DEBUG_CLIENT_PMOVE 0
 #if DEBUG_CLIENT_PMOVE == 1
+
 // Client debug output.
 static void CLGPM_Debug(const char* func, const char* fmt, ...) {
     char buffer[MAX_STRING_CHARS];
@@ -212,10 +213,13 @@ static void CLGPM_Debug(const char* func, const char* fmt, ...) {
         //#define PM_Debug () void(0)
 #endif // PMOVE_DEBUG
 #else
-#define DEBUG_SERVER_PMOVE 1
+#define DEBUG_SERVER_PMOVE 0
 #if DEBUG_SERVER_PMOVE == 1
-// Server debug output.
+
 static void SVGPM_Debug(const char* func, const char* fmt, ...) {
+    if (!developer->value)
+        return;
+
     char buffer[MAX_STRING_CHARS];
 
     va_list args;

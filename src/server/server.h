@@ -83,9 +83,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 // game features this server supports
-#define SV_FEATURES (GMF_CLIENTNUM | GMF_PROPERINUSE | GMF_MVDSPEC | \
-                     GMF_WANT_ALL_DISCONNECTS | GMF_ENHANCED_SAVEGAMES | \
-                     SV_GMF_VARIABLE_FPS | GMF_EXTRA_USERINFO)
+#define SV_FEATURES (GMF_ENHANCED_SAVEGAMES | SV_GMF_VARIABLE_FPS | GMF_EXTRA_USERINFO)
 
 // ugly hack for SV_Shutdown
 #define MVD_SPAWN_DISABLED  0

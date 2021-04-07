@@ -238,11 +238,11 @@ void SV_DropClient(client_t *client, const char *reason)
     MSG_WriteByte(svc_disconnect);
     SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
 
-    if (oldstate == cs_spawned || (g_features->integer & GMF_WANT_ALL_DISCONNECTS)) {
+    //if (oldstate == cs_spawned || (g_features->integer & GMF_WANT_ALL_DISCONNECTS)) {
         // call the prog function for removing a client
         // this will remove the body, among other things
         ge->ClientDisconnect(client->edict);
-    }
+    //}
 
     AC_ClientDisconnect(client);
 

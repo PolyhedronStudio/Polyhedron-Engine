@@ -412,11 +412,11 @@ void SV_BuildClientFrame(client_t *client)
     MSG_PackPlayer(&frame->playerState, ps);
 
     // grab the current clientNum
-    if (g_features->integer & GMF_CLIENTNUM) {
+//    if (g_features->integer & GMF_CLIENTNUM) {
         frame->clientNum = clent->client->clientNum;
-    } else {
-        frame->clientNum = client->number;
-    }
+    //} else {
+    //    frame->clientNum = client->number;
+    //}
 
 	if (clientcluster >= 0)
 	{
@@ -438,7 +438,7 @@ void SV_BuildClientFrame(client_t *client)
         ent = EDICT_POOL(client, e);
 
         // ignore entities not in use
-        if (!ent->inUse && (g_features->integer & GMF_PROPERINUSE)) {
+        if (!ent->inUse) {
             continue;
         }
 
@@ -533,8 +533,8 @@ void SV_BuildClientFrame(client_t *client)
         }
 
         // hide POV entity from renderer, unless this is player's own entity
-        if (e == frame->clientNum + 1 && ent != clent &&
-            (g_features->integer & GMF_CLIENTNUM) && !Q2PRO_OPTIMIZE(client)) {
+        if (e == frame->clientNum + 1 && ent != clent) {
+            //&& (g_features->integer & GMF_CLIENTNUM) && !Q2PRO_OPTIMIZE(client)) {
             state->modelindex = 0;
         }
 

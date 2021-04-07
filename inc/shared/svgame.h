@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#ifndef GAME_H
-#define GAME_H
+#ifndef __INC_SHARED__SVGAME_H__
+#define __INC_SHARED__SVGAME_H__
 
 #include "shared/list.h"
 #include "sharedgame/pmove.h"
@@ -48,10 +48,10 @@ typedef enum {
 
 // extended features
 
-#define GMF_CLIENTNUM               0x00000001
-#define GMF_PROPERINUSE             0x00000002
-#define GMF_MVDSPEC                 0x00000004
-#define GMF_WANT_ALL_DISCONNECTS    0x00000008
+//#define GMF_CLIENTNUM               0x00000001
+//#define GMF_PROPERINUSE             0x00000002
+//#define GMF_MVDSPEC                 0x00000004
+//#define GMF_WANT_ALL_DISCONNECTS    0x00000008
 
 #define GMF_ENHANCED_SAVEGAMES      0x00000400
 #define GMF_VARIABLE_FPS            0x00000800
@@ -322,4 +322,4 @@ typedef struct {
     int         max_edicts;
 } svgame_export_t;
 
-#endif // GAME_H
+#endif // __INC_SHARED__SVGAME_H__

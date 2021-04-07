@@ -32,7 +32,7 @@ When finished we have a stable base to work from, one that we can start making t
   - The alternative is, use stb_freetype since the libpng and libfreetype are a pain to begin with. Of course, this requires modifying their code.
   - Include OpenAL-soft and have it build itself properly. In case this fails, at least include a binary for Windows guys. 
 
-- [ ] Remove MDV, and GTV. 
+- [X] Remove MDV, and GTV. 
 
 - [ ] Headers need to be unique to their "owners". Or how do you say this... In either case, it'll result in way faster build times. 
   - [ ] inc/shared/
@@ -45,11 +45,14 @@ When finished we have a stable base to work from, one that we can start making t
     - Get rid of the g_local, and just have each .cpp file do its own .h file, include only those that are required.
 
 - [ ] Messaging/Networking - Marked as // MSG: !! ...
-  - [ ] Look into UDP packet size limit, what do we do about this?
+  - [X] Look into UDP packet size limit, what do we do about this?
+    ```For now we just do not spawn 8 entities on the server in case of explosions. The amount of new entities in a frame is too much in such cases.```
+
+    ```Later on we can look into QFusion which has proper packet fragmenting```
   - [ ] Remove the 5 / 3 bits method in the network cmd. This way we can have 0-254 client and server commands being networked.  
   - [ ] Look into ZLib downloading.
   - [ ] Look into the ES_ flags, most were from the Q2 protocols, they were used to enable/disable them depending on which version. We can use these slots for other things, obviously._
-  - [ ] Restructure the client/server prediction code, so we can implement proper
+  - [ ] Restructure the client/server prediction code, so we can implement proper stairstep interpolation
   - [X] Figure out all the ifdefs and what not for diff Q2 protocols. Remove them, choose the best option to keep, and set us up for our own version protocol.
   - [X] Change the fact that message_packet_t now uses a short array, instead of a vec3_t for the position.
     - [X] Fix emit_snd, and investigate all code related to svc_sound so that it uses vec3_t and MSG_xxxxFloat functions.
