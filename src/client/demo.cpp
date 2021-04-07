@@ -679,9 +679,6 @@ static int parse_next_message(int wait)
         CL_WriteDemoMessage(&cls.demo.buffer);
     }
 
-    // if running GTV server, transmit to client
-    CL_GTV_Transmit();
-
     // save a snapshot once the full packet is parsed
     CL_EmitDemoSnapshot();
 

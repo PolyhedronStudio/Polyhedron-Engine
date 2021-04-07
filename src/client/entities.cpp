@@ -368,11 +368,6 @@ void CL_DeltaFrame(void)
         CL_EmitDemoFrame();
     }
 
-    if (prevstate == ca_precached)
-        CL_GTV_Resume();
-    else
-        CL_GTV_EmitFrame();
-
     if (cls.demo.playback) {
         // this delta has nothing to do with local viewAngles,
         // clear it to avoid interfering with demo freelook hack

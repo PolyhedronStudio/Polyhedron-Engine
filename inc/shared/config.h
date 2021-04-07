@@ -51,7 +51,6 @@
 #define USE_SNDDMA 1
 //#define USE_CURL 0
 #define USE_AUTOREPLY 1
-//#define USE_CLIENT_GTV 1
 #endif
 
 #if USE_SERVER

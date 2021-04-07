@@ -235,19 +235,6 @@ typedef struct client_static_s {
 		char		file_name[MAX_OSPATH];
     } demo;
 
-#if USE_CLIENT_GTV
-    struct {
-        connstate_t     state;
-
-        netstream_t     stream;
-        size_t          msglen;
-
-        player_packed_t     playerState;
-        entity_packed_t     entities[MAX_EDICTS];
-
-        sizebuf_t       message;
-    } gtv;
-#endif
 } client_static_t;
 
 extern client_static_t    cls;
@@ -744,26 +731,6 @@ void HTTP_CleanupDownloads(void);
 //
 // gtv.c
 //
-
-#if USE_CLIENT_GTV
-void CL_GTV_EmitFrame(void);
-void CL_GTV_WriteMessage(byte *data, size_t len);
-void CL_GTV_Resume(void);
-void CL_GTV_Suspend(void);
-void CL_GTV_Transmit(void);
-void CL_GTV_Run(void);
-void CL_GTV_Init(void);
-void CL_GTV_Shutdown(void);
-#else
-#define CL_GTV_EmitFrame()              (void)0
-#define CL_GTV_WriteMessage(data, len)  (void)0
-#define CL_GTV_Resume()                 (void)0
-#define CL_GTV_Suspend()                (void)0
-#define CL_GTV_Transmit()               (void)0
-#define CL_GTV_Run()                    (void)0
-#define CL_GTV_Init()                   (void)0
-#define CL_GTV_Shutdown()               (void)0
-#endif
 
 //
 // crc.c

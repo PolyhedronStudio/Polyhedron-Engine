@@ -1007,10 +1007,6 @@ badbyte:
 
         // WATISDEZE: Inform game module about beginning of message parsing.
         CL_GM_EndServerMessage();
-        
-        // if running GTV server, add current message
-        CL_GTV_WriteMessage(msg_read.data + readcount,
-                            msg_read.readcount - readcount);
     }
 }
 

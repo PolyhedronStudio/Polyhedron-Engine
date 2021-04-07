@@ -241,12 +241,6 @@ void CL_UpdateRecordingSetting(void)
         rec = 0;
     }
 
-#if USE_CLIENT_GTV
-    if (cls.gtv.state == ca_active) {
-        rec |= 1;
-    }
-#endif
-
     MSG_WriteByte(clc_setting);
     MSG_WriteShort(CLS_RECORDING);
     MSG_WriteShort(rec);
@@ -770,8 +764,6 @@ void CL_Disconnect(error_type_t type)
     CL_CleanupDownloads();
 
     CL_ClearState();
-
-    CL_GTV_Suspend();
 
     cls.state = ca_disconnected;
 
@@ -1511,9 +1503,6 @@ static void CL_PacketEvent(void)
     if (cls.demo.recording && !cls.demo.paused && CL_FRAMESYNC) {
         CL_WriteDemoMessage(&cls.demo.buffer);
     }
-
-    // if running GTV server, transmit to client
-    CL_GTV_Transmit();
 
     if (!cls.netchan)
         return;     // might have disconnected
@@ -3291,8 +3280,6 @@ qboolean CL_ProcessEvents(void)
 
     HTTP_RunDownloads();
 
-    CL_GTV_Run();
-
     return cl.sendPacketNow;
 }
 
@@ -3386,8 +3373,6 @@ void CL_Shutdown(void)
 
     // N&C: Notify the CG Module.
     CL_GM_Shutdown();
-
-    CL_GTV_Shutdown();
 
     CL_Disconnect(ERR_FATAL);
 
