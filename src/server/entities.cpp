@@ -538,13 +538,6 @@ void SV_BuildClientFrame(client_t *client)
             state->modelindex = 0;
         }
 
-#if USE_MVD_CLIENT
-        if (sv.state == ss_broadcast) {
-            // spectators only need to know about inline BSP models
-            if (state->solid != PACKED_BSP)
-                state->solid = 0;
-        } else
-#endif
         if (ent->owner == clent) {
             // don't mark players missiles as solid
             state->solid = 0;

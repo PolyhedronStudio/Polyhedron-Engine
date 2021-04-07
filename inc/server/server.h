@@ -44,11 +44,6 @@ void SV_SetConsoleTitle(void);
 server_state_t	SV_GetState (void);                 // WATISDEZE: Added for client game dll
 void            SV_SetState (server_state_t state); // WATISDEZE: Added for client game dll
 
-
-#if USE_MVD_CLIENT && USE_CLIENT
-int MVD_GetDemoPercent(qboolean *paused, int *framenum);
-#endif
-
 #if USE_CLIENT
 char *SV_GetSaveInfo(const char *dir);
 #endif

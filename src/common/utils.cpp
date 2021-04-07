@@ -283,7 +283,7 @@ void Com_PlayerToEntityState(const player_state_t *ps, entity_state_t *es)
     es->angles[vec3_t::Roll] = 0;
 }
 
-#if USE_CLIENT || USE_MVD_CLIENT
+#if USE_CLIENT
 /*
 ================
 Com_ParseTimespec

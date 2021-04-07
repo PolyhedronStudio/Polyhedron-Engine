@@ -375,12 +375,6 @@ static void draw_percent_bar(int percent, qboolean paused, int framenum)
 
 static void SCR_DrawDemo(void)
 {
-#if USE_MVD_CLIENT
-    int percent;
-    qboolean paused;
-    int framenum;
-#endif
-
     if (!scr_demobar->integer) {
         return;
     }
@@ -396,22 +390,6 @@ static void SCR_DrawDemo(void)
         }
         return;
     }
-
-#if USE_MVD_CLIENT
-    if (sv_running->integer != ss_broadcast) {
-        return;
-    }
-
-    if ((percent = MVD_GetDemoPercent(&paused, &framenum)) == -1) {
-        return;
-    }
-
-    if (sv_paused->integer && cl_paused->integer && scr_showpause->integer == 2) {
-        paused |= true;
-    }
-
-    draw_percent_bar(percent, paused, framenum);
-#endif
 }
 
 /*

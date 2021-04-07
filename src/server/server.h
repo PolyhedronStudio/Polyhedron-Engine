@@ -42,10 +42,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server/server.h"
 #include "system/system.h"
 
-//#if USE_MVD_CLIENT
-//#include "server/mvd/client.h"
-//#endif
-
 #if USE_ZLIB
 #include <zlib.h>
 #endif
@@ -663,9 +659,6 @@ void SV_AlignKeyFrames(client_t *client);
 //
 // sv_ccmds.c
 //
-//#if USE_MVD_CLIENT || USE_MVD_SERVER
-//extern const cmd_option_t o_record[];
-//#endif
 
 void SV_AddMatch_f(list_t *list);
 void SV_DelMatch_f(list_t *list);

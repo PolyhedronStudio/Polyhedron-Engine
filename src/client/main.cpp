@@ -322,13 +322,6 @@ CL_Pause_f
 */
 void CL_Pause_f(void)
 {
-#if USE_MVD_CLIENT
-    if (sv_running->integer == ss_broadcast) {
-        Cbuf_InsertText(&cmd_buffer, "mvdpause @@\n");
-        return;
-    }
-#endif
-
     // activate manual pause
     if (cl_paused->integer == 2) {
         Cvar_Set("cl_paused", "0");
@@ -2222,10 +2215,7 @@ static size_t CL_DemoPos_m(char *buffer, size_t size)
     if (cls.demo.playback)
         framenum = cls.demo.frames_read;
     else
-#if USE_MVD_CLIENT
-        if (MVD_GetDemoPercent(NULL, &framenum) == -1)
-#endif
-            framenum = 0;
+        framenum = 0;  
 
     sec = framenum / 10; framenum %= 10;
     min = sec / 60; sec %= 60;
@@ -2775,12 +2765,6 @@ qboolean CL_CheatsOK(void)
     // single player can cheat
     if (cls.state > ca_connected && cl.maxclients == 1)
         return true;
-
-#if USE_MVD_CLIENT
-    // can cheat when playing MVD
-    if (MVD_GetDemoPercent(NULL, NULL) != -1)
-        return true;
-#endif
 
     return false;
 }

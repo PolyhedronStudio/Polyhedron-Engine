@@ -717,12 +717,9 @@ static void CL_PlayDemo_f(void)
         return;
     }
 
+    // TODO: Obviously, there is no MVD, and demo protocol needs a rewrite so..
     if (type == 1) {
-#if USE_MVD_CLIENT
-        Cbuf_InsertText(&cmd_buffer, va("mvdplay --replace @@ \"/%s\"\n", name));
-#else
         Com_Printf("MVD support was not compiled in.\n");
-#endif
         FS_FCloseFile(f);
         return;
     }
@@ -917,13 +914,6 @@ static void CL_Seek_f(void)
         Com_Printf("Usage: %s [+-]<timespec>\n", Cmd_Argv(0));
         return;
     }
-
-#if USE_MVD_CLIENT
-    if (sv_running->integer == ss_broadcast) {
-        Cbuf_InsertText(&cmd_buffer, va("mvdseek \"%s\" @@\n", Cmd_Argv(1)));
-        return;
-    }
-#endif
 
     if (!cls.demo.playback) {
         Com_Printf("Not playing a demo.\n");

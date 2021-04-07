@@ -326,9 +326,6 @@ static void SV_DemoMap_f(void)
 #if USE_CLIENT
     Com_Printf("To play a client demo, use 'demo' command instead.\n");
 #endif
-#if USE_MVD_CLIENT
-    Com_Printf("To play a MVD, use 'mvdplay' command.\n");
-#endif
 }
 
 /*
@@ -1499,48 +1496,6 @@ static void SV_ListFilterCmds_f(void)
     }
 }
 
-#if USE_MVD_CLIENT || USE_MVD_SERVER
-
-const cmd_option_t o_record[] = {
-    { "h", "help", "display this message" },
-    { "z", "compress", "compress file with gzip" },
-    { NULL }
-};
-
-static void SV_Record_c(genctx_t *ctx, int argnum)
-{
-#if USE_MVD_CLIENT
-    // TODO
-    if (argnum == 1) {
-        MVD_File_g(ctx);
-    }
-#endif
-}
-
-static void SV_Record_f(void)
-{
-//#if USE_MVD_CLIENT
-//    if (sv.state == ss_broadcast) {
-//        MVD_StreamedRecord_f();
-//        return;
-//    }
-//#endif
-//
-//    SV_MvdRecord_f();
-}
-
-static void SV_Stop_f(void)
-{
-//#if USE_MVD_CLIENT
-//    if (sv.state == ss_broadcast) {
-//        MVD_StreamedStop_f();
-//        return;
-//    }
-//#endif
-}
-
-#endif
-
 //===========================================================
 
 static const cmdreg_t c_server[] = {
@@ -1574,10 +1529,6 @@ static const cmdreg_t c_server[] = {
     { "addfiltercmd", SV_AddFilterCmd_f, SV_AddFilterCmd_c },
     { "delfiltercmd", SV_DelFilterCmd_f, SV_DelFilterCmd_c },
     { "listfiltercmds", SV_ListFilterCmds_f },
-#if USE_MVD_CLIENT || USE_MVD_SERVER
-    { "mvdrecord", SV_Record_f, SV_Record_c },
-    { "mvdstop", SV_Stop_f },
-#endif
 
     { NULL }
 };

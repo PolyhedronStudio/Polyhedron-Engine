@@ -440,16 +440,6 @@ void SV_InitGame(unsigned mvd_spawn)
     }
 #endif
 
-    // init game
-#if USE_MVD_CLIENT
-    if (mvd_spawn) {
-        if (ge) {
-            SV_ShutdownGameProgs();
-        }
-        ge = &mvd_ge;
-        ge->Init();
-    } else
-#endif
         SV_InitGameProgs();
 
     // N&C: PMove init here.
