@@ -51,13 +51,13 @@
 #define USE_SNDDMA 1
 //#define USE_CURL 0
 #define USE_AUTOREPLY 1
-#define USE_CLIENT_GTV 1
+//#define USE_CLIENT_GTV 1
 #endif
 
 #if USE_SERVER
 #define USE_AC_SERVER !USE_CLIENT
-#define USE_MVD_SERVER 1
-#define USE_MVD_CLIENT 1
+//#define USE_MVD_SERVER 1
+//#define USE_MVD_CLIENT 1
 #define USE_PACKETDUP 1
 #define USE_WINSVC !USE_CLIENT
 #endif

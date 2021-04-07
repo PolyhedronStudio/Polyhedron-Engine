@@ -8,6 +8,14 @@ You can skip these if you aren't me, an ADHD minded person :P
 	cl_particle_num_factor = Cvar_Get("cl_particle_num_factor", "1", 0);`
 - [ ] Check out header files some more, organize some more.
 - [ ] Do not forget RTX Q2 1.5, how could you? :)
+- [ ] Investigate BSP Tools to one day have less triangles (They used to generate more because of software rendering mode in Q2??)
+- [ ] Remove software renderer.
+- [ ] Remove the USE_FPS, if needed, can always be added back in later..._
+- [ ] Remove useless bytes in CL_ParseServerData for the pmove stuff q2pro had.
+- [ ] Remove MSG_ES stuff
+- [ ] Revisit the send and receive functions.
+- [ ] Try and implement the above functions for specific entities?
+- [ ] Case properly functions for cvar and others in svgame imports.
 
 ## Goals:
 The goals of this branch are to create a solid base, one that we can work uphill from without continuously running into problems created by the past. We are using an engine that spawns from 1998 after all.
