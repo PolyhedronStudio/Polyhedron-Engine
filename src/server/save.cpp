@@ -380,10 +380,6 @@ static int read_server_file(void)
     // start a new game fresh with new cvars
     SV_InitGame(MVD_SPAWN_DISABLED);
 
-    // error out immediately if game doesn't support safe savegames
-    if (!(g_features->integer & GMF_ENHANCED_SAVEGAMES))
-        Com_Error(ERR_DROP, "Game does not support enhanced savegames");
-
     // read game state
     len = Q_snprintf(name, MAX_OSPATH,
                      "%s/%s/%s/game.ssv", fs_gamedir, sv_savedir->string, SAVE_CURRENT);
@@ -460,9 +456,6 @@ static int read_level_file(void)
 int SV_NoSaveGames(void)
 {
 	if (dedicated->integer && !Cvar_VariableInteger("coop"))
-        return 1;
-
-    if (!(g_features->integer & GMF_ENHANCED_SAVEGAMES))
         return 1;
 
     if (Cvar_VariableInteger("deathmatch"))
@@ -638,12 +631,6 @@ static void SV_Savegame_f(void)
 
     if (dedicated->integer) {
         Com_Printf("Savegames are for listen servers only.\n");
-        return;
-    }
-
-    // don't bother saving if we can't read them back!
-    if (!(g_features->integer & GMF_ENHANCED_SAVEGAMES)) {
-        Com_Printf("Game does not support enhanced savegames.\n");
         return;
     }
 

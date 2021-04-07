@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sharedgame/protocol.h"
 
 // features this game supports
-#define G_FEATURES  (GMF_ENHANCED_SAVEGAMES)
+#define G_FEATURES  (0)
 
 // the "gameversion" client command will print this plus compile date
 #define GAMEVERSION "basenac"
