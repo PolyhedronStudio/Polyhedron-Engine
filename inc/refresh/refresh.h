@@ -54,7 +54,7 @@ qhandle_t R_RegisterRawImage(const char *name, int width, int height, byte* pic,
                           imageflags_t flags);
 void R_UnregisterImage(qhandle_t handle);
 
-extern void    (*R_SetSky)(const char *name, float rotate, vec3_t &axis);
+extern void    (*R_SetSky)(const char *name, float rotate, vec3_t *axis);
 extern void    (*R_EndRegistration)(const char *name);
 
 #define R_RegisterPic(name)     R_RegisterImage(name, IT_PIC, (imageflags_t)(IF_PERMANENT | IF_SRGB), NULL)
@@ -63,7 +63,7 @@ extern void    (*R_EndRegistration)(const char *name);
 #define R_RegisterSkin(name)    R_RegisterImage(name, IT_SKIN, (imageflags_t)IF_SRGB, NULL)
 
 extern void    (*R_RenderFrame)(refdef_t *fd);
-extern void    (*R_LightPoint)(const vec3_t &origin, vec3_t &light);
+extern void    (*R_LightPoint)(const vec3_t *origin, vec3_t *light);
 
 extern void    (*R_ClearColor)(void);
 extern void    (*R_SetAlpha)(float clpha);

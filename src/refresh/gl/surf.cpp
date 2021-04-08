@@ -91,10 +91,10 @@ adjust_color_ub(byte *out, const vec_t *in)
     out[3] = 255;
 }
 
-void GL_AdjustColor(vec3_t &color)
+void GL_AdjustColor(vec3_t *color)
 {
-    adjust_color_f(color, color, gl_static.entity_modulate);
-    VectorScale(color, (1.0f / 255), color);
+    adjust_color_f(*color, *color, gl_static.entity_modulate);
+    VectorScale(*color, (1.0f / 255), *color);
 }
 
 /*
@@ -626,7 +626,7 @@ static void sample_surface_verts(mface_t *surf, vec_t *vbo)
         glr.lightpoint.s = (int)vbo[6] - surf->texturemins[0];
         glr.lightpoint.t = (int)vbo[7] - surf->texturemins[1];
 
-        GL_SampleLightPoint(color);
+        GL_SampleLightPoint(&color);
         adjust_color_ub((byte *)(vbo + 3), color);
 
         vbo += VERTEX_SIZE;

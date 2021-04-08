@@ -699,16 +699,20 @@ pmoveParams_t* PF_GetPMoveParams(void) {
     return (sv_client ? &sv_client->pmp : &sv_pmp);
 }
 
-// N&C: This has been removed, we now call the shared PMove in SVGame.
-// We pass PF_GetPMoveParams into it.
-//void PF_PMove(pm_move_t *pm)
-//{
-//    if (sv_client) {
-//        PMove(pm, &sv_client->pmp);
-//    } else {
-//        PMove(pm, &sv_pmp);
-//    }
-//}
+//
+//===============
+// PF_WritePosition & PF_WriteDirection &
+// 
+// Stuff Cmd implementation like other Quake engines have for the server module.
+//===============
+//
+static void PF_WritePosition(const vec3_t *pos) {
+    MSG_WritePosition(*pos);
+}
+static void PF_WriteDirection(const vec3_t *dir) {
+    MSG_WriteDirection(*dir);
+}
+
 
 static cvar_t *PF_cvar(const char *name, const char *value, int flags)
 {
@@ -920,8 +924,8 @@ void SV_InitGameProgs(void)
     importAPI.WriteLong = MSG_WriteLong;
     importAPI.WriteFloat = MSG_WriteFloat;
     importAPI.WriteString = MSG_WriteString;
-    importAPI.WritePosition = MSG_WritePosition;
-    importAPI.WriteDirection = MSG_WriteDirection;
+    importAPI.WritePosition = PF_WritePosition;
+    importAPI.WriteDirection = PF_WriteDirection;
     importAPI.WriteAngle = MSG_WriteAngle;
 
     importAPI.TagMalloc = PF_TagMalloc;

@@ -266,7 +266,7 @@ typedef struct {
 
 extern lightmap_builder_t lm;
 
-void GL_AdjustColor(vec3_t &color);
+void GL_AdjustColor(vec3_t *color);
 void GL_PushLights(mface_t *surf);
 
 void GL_RebuildLighting(void);
@@ -491,9 +491,9 @@ void GL_ClearSolidFaces(void);
  */
 void GL_DrawBspModel(mmodel_t *model);
 void GL_DrawWorld(void);
-void GL_SampleLightPoint(vec3_t &color);
-void GL_LightPoint(const vec3_t &origin, vec3_t &color);
-void R_LightPoint_GL(const vec3_t &origin, vec3_t &color);
+void GL_SampleLightPoint(vec3_t *color);
+void GL_LightPoint(const vec3_t *origin, vec3_t *light);
+void R_LightPoint_GL(const vec3_t *origin, vec3_t *light);
 
 /*
  * gl_sky.c
@@ -502,7 +502,7 @@ void R_LightPoint_GL(const vec3_t &origin, vec3_t &color);
 void R_AddSkySurface(mface_t *surf);
 void R_ClearSkyBox(void);
 void R_DrawSkyBox(void);
-void R_SetSky_GL(const char *name, float rotate, vec3_t &axis);
+void R_SetSky_GL(const char *name, float rotate, vec3_t *axis);
 
 /*
  * gl_mesh.c

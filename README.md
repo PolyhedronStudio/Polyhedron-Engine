@@ -2,6 +2,7 @@
 
 ## Scratchpad - Things to do or not forget:
 You can skip these if you aren't me, an ADHD minded person :P
+- [ ] Use an interface class for game and engine import/exports
 - [ ] Move these over out of FX_Init and remove src/client/effects.c it is a waste file.
 `   // Move these over?
     cvar_pt_particle_emissive = Cvar_Get("pt_particle_emissive", "10.0", 0);
@@ -16,6 +17,7 @@ You can skip these if you aren't me, an ADHD minded person :P
 - [ ] Revisit the send and receive functions.
 - [ ] Try and implement the above functions for specific entities?
 - [ ] Case properly functions for cvar and others in svgame imports.
+- [ ] Clean server/svgame some day
 
 ## Goals:
 The goals of this branch are to create a solid base, one that we can work uphill from without continuously running into problems created by the past. We are using an engine that spawns from 1998 after all.

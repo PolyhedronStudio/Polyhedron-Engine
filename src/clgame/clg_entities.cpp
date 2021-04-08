@@ -648,7 +648,7 @@ void CLG_AddViewWeapon(void)
         VectorMA(gun_real_pos, gun_up, up_dir, gun_real_pos);
         VectorMA(gun_real_pos, gun_length, view_dir, gun_tip);
 
-        clgi.CM_BoxTrace(&trace, gun_real_pos, gun_tip, mins, maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
+        clgi.CM_BoxTrace(&trace, &gun_real_pos, &gun_tip, &mins, &maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
 
         if (trace.fraction != 1.0f)
         {

@@ -220,7 +220,13 @@ Returns a pointer to the structure with all entry points
 and global variables
 =================
 */
-svgame_export_t* GetServerGameAPI(svgame_import_t* import)
+// CPP: These might need to be re-enabled on Linux.
+#if defined(__linux__)
+#ifdef __cplusplus
+extern "C" {
+#endif
+#endif
+q_exported svgame_export_t* GetServerGameAPI(svgame_import_t* import)
 {
     gi = *import;
 
@@ -258,6 +264,11 @@ svgame_export_t* GetServerGameAPI(svgame_import_t* import)
 
     return &globals;
 }
+#if defined(__linux__)
+#ifdef __cplusplus
+}; // extern "c"
+#endif
+#endif
 
 #ifndef GAME_HARD_LINKED
 // this is only here so the functions in q_shared.c can link

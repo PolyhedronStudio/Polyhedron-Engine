@@ -720,8 +720,8 @@ void CopyToBodyQue(entity_t *ent)
     if (body->s.modelindex) {
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_BLOOD);
-        gi.WritePosition(body->s.origin);
-        gi.WriteDirection(vec3_origin);
+        gi.WritePosition(&body->s.origin);
+        gi.WriteDirection(&vec3_origin);
         gi.Multicast(&body->s.origin, MULTICAST_PVS);
     }
 

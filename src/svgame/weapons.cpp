@@ -182,8 +182,8 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
                     gi.WriteByte(svg_temp_entity);
                     gi.WriteByte(TE_SPLASH);
                     gi.WriteByte(8);
-                    gi.WritePosition(tr.endPosition);
-                    gi.WriteDirection(tr.plane.normal);
+                    gi.WritePosition(&tr.endPosition);
+                    gi.WriteDirection(&tr.plane.normal);
                     gi.WriteByte(color);
                     gi.Multicast(&tr.endPosition, MULTICAST_PVS);
                 }
@@ -213,8 +213,8 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
                     gi.WriteByte(svg_temp_entity);
                     gi.WriteByte(te_impact);
-                    gi.WritePosition(tr.endPosition);
-                    gi.WriteDirection(tr.plane.normal);
+                    gi.WritePosition(&tr.endPosition);
+                    gi.WriteDirection(&tr.plane.normal);
                     gi.Multicast(&tr.endPosition, MULTICAST_PVS);
 
                     if (self->client)
@@ -241,8 +241,8 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
 
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_BUBBLETRAIL);
-        gi.WritePosition(water_start);
-        gi.WritePosition(tr.endPosition);
+        gi.WritePosition(&water_start);
+        gi.WritePosition(&tr.endPosition);
         gi.Multicast(&pos, MULTICAST_PVS);
     }
 }
@@ -328,11 +328,13 @@ void blaster_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t 
     } else {
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_BLASTER);
-        gi.WritePosition(self->s.origin);
-        if (!plane)
-            gi.WriteDirection(vec3_zero());
-        else
-            gi.WriteDirection(plane->normal);
+        gi.WritePosition(&self->s.origin);
+        if (!plane) {
+            vec3_t dir = vec3_zero();
+            gi.WriteDirection(&dir);
+        } else {
+            gi.WriteDirection(&plane->normal);
+        }
         gi.Multicast(&self->s.origin, MULTICAST_PVS);
     }
 
@@ -460,7 +462,7 @@ void Grenade_Explode(entity_t *ent)
         else
             gi.WriteByte(TE_ROCKET_EXPLOSION);
     }
-    gi.WritePosition(origin);
+    gi.WritePosition(&origin);
     gi.Multicast(&ent->s.origin, MULTICAST_PHS);
 
     G_FreeEntity(ent);
@@ -613,7 +615,7 @@ void rocket_touch(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t *s
         gi.WriteByte(TE_ROCKET_EXPLOSION_WATER);
     else
         gi.WriteByte(TE_ROCKET_EXPLOSION);
-    gi.WritePosition(origin);
+    gi.WritePosition(&origin);
     gi.Multicast(&ent->s.origin, MULTICAST_PHS);
 
     G_FreeEntity(ent);
@@ -695,15 +697,15 @@ void fire_rail(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int da
     // send gun puff / flash
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_RAILTRAIL);
-    gi.WritePosition(start);
-    gi.WritePosition(tr.endPosition);
+    gi.WritePosition(&start);
+    gi.WritePosition(&tr.endPosition);
     gi.Multicast(&self->s.origin, MULTICAST_PHS);
 //  gi.multicast (start, MULTICAST_PHS);
     if (water) {
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_RAILTRAIL);
-        gi.WritePosition(start);
-        gi.WritePosition(tr.endPosition);
+        gi.WritePosition(&start);
+        gi.WritePosition(&tr.endPosition);
         gi.Multicast(&tr.endPosition, MULTICAST_PHS);
     }
 
@@ -747,7 +749,7 @@ void bfg_explode(entity_t *self)
 
             gi.WriteByte(svg_temp_entity);
             gi.WriteByte(TE_BFG_EXPLOSION);
-            gi.WritePosition(ent->s.origin);
+            gi.WritePosition(&ent->s.origin);
             gi.Multicast(&ent->s.origin, MULTICAST_PHS);
             T_Damage(ent, self, self->owner, self->velocity, ent->s.origin, vec3_origin, (int)points, 0, DAMAGE_ENERGY, MOD_BFG_EFFECT);
         }
@@ -792,7 +794,7 @@ void bfg_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t *sur
 
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_BFG_BIGEXPLOSION);
-    gi.WritePosition(self->s.origin);
+    gi.WritePosition(&self->s.origin);
     gi.Multicast(&self->s.origin, MULTICAST_PVS);
 }
 
@@ -850,8 +852,8 @@ void bfg_think(entity_t *self)
                 gi.WriteByte(svg_temp_entity);
                 gi.WriteByte(TE_LASER_SPARKS);
                 gi.WriteByte(4);
-                gi.WritePosition(tr.endPosition);
-                gi.WriteDirection(tr.plane.normal);
+                gi.WritePosition(&tr.endPosition);
+                gi.WriteDirection(&tr.plane.normal);
                 gi.WriteByte(self->s.skinnum);
                 gi.Multicast(&tr.endPosition, MULTICAST_PVS);
                 break;
@@ -863,8 +865,8 @@ void bfg_think(entity_t *self)
 
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TE_BFG_LASER);
-        gi.WritePosition(self->s.origin);
-        gi.WritePosition(tr.endPosition);
+        gi.WritePosition(&self->s.origin);
+        gi.WritePosition(&tr.endPosition);
         gi.Multicast(&self->s.origin, MULTICAST_PHS);
     }
 
@@ -926,7 +928,7 @@ void flare_sparks(entity_t *self)
     // if this is the first tick of flare, set count to 1 to start the sound
     gi.WriteByte( self->timestamp - level.time < 14.75 ? 0 : 1);
 
-    gi.WritePosition(self->s.origin);
+    gi.WritePosition(&self->s.origin);
 
 	// If we are still moving, calculate the normal to the direction 
 	 // we are travelling. 
@@ -936,13 +938,13 @@ void flare_sparks(entity_t *self)
 		vectoangles(self->velocity, dir);
 		AngleVectors(dir, &forward, &right, &up);
 
-		gi.WriteDirection(up);
+		gi.WriteDirection(&up);
 	}
 	// If we're stopped, just write out the origin as our normal 
 	// 
 	else
 	{
-		gi.WriteDirection(vec3_origin);
+		gi.WriteDirection(&vec3_origin);
 	}
 	gi.Multicast(&self->s.origin, MULTICAST_PVS);
 }

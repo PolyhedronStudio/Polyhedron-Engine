@@ -367,7 +367,7 @@ static void setup_color(void)
     } else {
         // MATHLIB: Quick workaround.
         vec3_t tempColor = { color[0], color[1], color[2] };
-        GL_LightPoint(origin, tempColor);
+        GL_LightPoint(&origin, &tempColor);
         color[0] = tempColor[0];
         color[1] = tempColor[1];
         color[2] = tempColor[2];

@@ -258,20 +258,20 @@ extern "C" {
         // Collision Model.
         //---------------------------------------------------------------------
         // Creates a clipping hull for an arbitrary box.
-        mnode_t     *(*CM_HeadnodeForBox) (const vec3_t &mins, const vec3_t &maxs);
+        mnode_t     *(*CM_HeadnodeForBox) (const vec3_t *mins, const vec3_t *maxs);
         // We need a way to share these values to cgame dll.
         mmodel_t    *(*CM_InlineModel) (cm_t *cm, const char *name);
         // TODO: Document.
-        int         (*CM_PointContents) (const vec3_t &p, mnode_t *headNode);
-        int         (*CM_TransformedPointContents) (const vec3_t &p, mnode_t *headNode,
-                                                    const vec3_t &origin, const vec3_t &angles);
-        void        (*CM_BoxTrace)(trace_t *trace, const vec3_t &start, const vec3_t &end,
-                                    const vec3_t &mins, const vec3_t &maxs,
+        int         (*CM_PointContents) (const vec3_t *p, mnode_t *headNode);
+        int         (*CM_TransformedPointContents) (const vec3_t *p, mnode_t *headNode,
+                                                    const vec3_t *origin, const vec3_t *angles);
+        void        (*CM_BoxTrace)(trace_t *trace, const vec3_t *start, const vec3_t *end,
+                                    const vec3_t *mins, const vec3_t *maxs,
                                     mnode_t *headNode, int brushmask);
-        void        (*CM_TransformedBoxTrace) (trace_t *trace, const vec3_t &start, const vec3_t &end,
-                                                const vec3_t &mins, const vec3_t &maxs,
+        void        (*CM_TransformedBoxTrace) (trace_t *trace, const vec3_t *start, const vec3_t *end,
+                                                const vec3_t *mins, const vec3_t *maxs,
                                                 mnode_t * headNode, int brushmask,
-                                                const vec3_t &origin, const vec3_t &angles);
+                                                const vec3_t *origin, const vec3_t *angles);
         void        (*CM_ClipEntity) (trace_t* dst, const trace_t* src, struct entity_s* ent);
 
         //---------------------------------------------------------------------
@@ -499,7 +499,7 @@ extern "C" {
         // Writes a string over the network.
         void        (*MSG_WriteString) (const char *s);
         // Writes a position over the network.
-        void        (*MSG_WritePosition) (const vec3_t &pos);
+        void        (*MSG_WritePosition) (const vec3_t *pos);
         // Writes an angle over the network.
         void        (*MSG_WriteAngle) (float f);
         // Flushes message.
@@ -535,8 +535,8 @@ extern "C" {
         // Rendering.
         //---------------------------------------------------------------------
         void        (*R_AddDecal) (decal_t* d);
-        void        (*R_LightPoint) (const vec3_t &origin, vec3_t &light);
-        void        (*R_SetSky)(const char* name, float rotate, vec3_t &axis);
+        void        (*R_LightPoint) (const vec3_t *origin, vec3_t *light);
+        void        (*R_SetSky)(const char* name, float rotate, vec3_t *axis);
 
         void        (*R_ClearColor) (void);
         void        (*R_SetAlpha) (float clpha);

@@ -550,9 +550,9 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         write_string(f, *(char **)p);
         break;
 
-    // case F_EDICT:
-    //     write_index(f, *(void **)p, sizeof(entity_t), g_edicts, MAX_EDICTS - 1);
-    //     break;
+    case F_EDICT:
+//        write_index(f, *(void **)p, sizeof(entity_t), g_edicts, MAX_EDICTS - 1);
+        break;
     case F_CLIENT:
         write_index(f, *(void **)p, sizeof(gclient_t), game.clients, game.maxclients - 1);
         break;
@@ -560,9 +560,9 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         write_index(f, *(void **)p, sizeof(gitem_t), itemlist, game.num_items - 1);
         break;
 
-    // case F_POINTER:
-    //     write_pointer(f, *(void **)p, (ptr_type_t)field->size); // CPP: Cast
-    //     break;
+    case F_POINTER:
+//        write_pointer(f, *(void **)p, (ptr_type_t)field->size); // CPP: Cast
+        break;
 
     default:
         gi.Error("%s: unknown field type", __func__);

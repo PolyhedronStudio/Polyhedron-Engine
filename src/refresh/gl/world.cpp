@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "gl.h"
 
-void GL_SampleLightPoint(vec3_t &color)
+void GL_SampleLightPoint(vec3_t *color)
 {
     mface_t         *surf;
     int             s, t, i;
@@ -48,7 +48,7 @@ void GL_SampleLightPoint(vec3_t &color)
     tmax = T_MAX(surf);
     size = smax * tmax * 3;
 
-    VectorClear(color);
+    VectorClear(*color);
 
     // add all the lightmaps with bilinear filtering
     lightmap = surf->lightmap;
@@ -64,20 +64,20 @@ void GL_SampleLightPoint(vec3_t &color)
 
         style = LIGHT_STYLE(surf, i);
 
-        color[0] += temp[0] * style->rgb[0];
-        color[1] += temp[1] * style->rgb[1];
-        color[2] += temp[2] * style->rgb[2];
+        *color[0] += temp[0] * style->rgb[0];
+        *color[1] += temp[1] * style->rgb[1];
+        *color[2] += temp[2] * style->rgb[2];
 
         lightmap += size;
     }
 }
 
-static qboolean _GL_LightPoint(const vec3_t &start, vec3_t &color)
+static qboolean _GL_LightPoint(const vec3_t *start, vec3_t *color)
 {
     bsp_t           *bsp;
     int             i, index;
     lightpoint_t    pt;
-    vec3_t          end, mins, maxs;
+    vec3_t          _start, _end, mins, maxs;
     r_entity_t        *ent;
     mmodel_t        *model;
     //vec_t           *angles;
@@ -87,12 +87,13 @@ static qboolean _GL_LightPoint(const vec3_t &start, vec3_t &color)
     if (!bsp || !bsp->lightmap)
         return false;
 
-    end[0] = start[0];
-    end[1] = start[1];
-    end[2] = start[2] - 8192;
+    _start = *start;
+    _end[0] = *start[0];
+    _end[1] = *start[1];
+    _end[2] = *start[2] - 8192;
 
     // get base lightpoint from world
-    BSP_LightPoint(&glr.lightpoint, start, end, bsp->nodes);
+    BSP_LightPoint(&glr.lightpoint, _start, _end, bsp->nodes);
 
     // trace to other BSP models
     for (i = 0; i < glr.fd.num_entities; i++) {
@@ -111,22 +112,22 @@ static qboolean _GL_LightPoint(const vec3_t &start, vec3_t &color)
 
         // cull in X/Y plane
         if (ent->angles[0] || ent->angles[1] || ent->angles[2]) {
-            if (fabs(start[0] - ent->origin[0]) > model->radius)
+            if (fabs(*start[0] - ent->origin[0]) > model->radius)
                 continue;
-            if (fabs(start[1] - ent->origin[1]) > model->radius)
+            if (fabs(*start[1] - ent->origin[1]) > model->radius)
                 continue;
             angles = &ent->angles;
         } else {
             VectorAdd(model->mins, ent->origin, mins);
             VectorAdd(model->maxs, ent->origin, maxs);
-            if (start[0] < mins[0] || start[0] > maxs[0])
+            if (*start[0] < mins[0] || *start[0] > maxs[0])
                 continue;
-            if (start[1] < mins[1] || start[1] > maxs[1])
+            if (*start[1] < mins[1] || *start[1] > maxs[1])
                 continue;
             angles = NULL;
         }
 
-        BSP_TransformedLightPoint(&pt, start, end, model->headNode,
+        BSP_TransformedLightPoint(&pt, _start, _end, model->headNode,
                                   ent->origin, angles);
 
         if (pt.fraction < glr.lightpoint.fraction)
@@ -211,17 +212,17 @@ static void GL_TransformLights(mmodel_t *model)
     }
 }
 
-static void GL_AddLights(vec3_t origin, vec3_t &color)
+static void GL_AddLights(const vec3_t *origin, vec3_t *color)
 {
     dlight_t *light;
     vec_t f;
     int i;
 
     for (i = 0, light = glr.fd.dlights; i < glr.fd.num_dlights; i++, light++) {
-        f = light->intensity - DLIGHT_CUTOFF - Distance(light->origin, origin);
+        f = light->intensity - DLIGHT_CUTOFF - Distance(light->origin, *origin);
         if (f > 0) {
             f *= (1.0f / 255);
-            VectorMA(color, f, light->color, color);
+            VectorMA(*color, f, light->color, *color);
         }
     }
 }
@@ -231,16 +232,16 @@ static void GL_AddLights(vec3_t origin, vec3_t &color)
 #define GL_AddLights(origin, color) (void)0
 #endif
 
-void GL_LightPoint(const vec3_t &origin, vec3_t &color)
+void GL_LightPoint(const vec3_t *origin, vec3_t *color)
 {
     if (gl_fullbright->integer) {
-        VectorSet(color, 1, 1, 1);
+        VectorSet(*color, 1, 1, 1);
         return;
     }
 
     // get lighting from world
     if (!_GL_LightPoint(origin, color)) {
-        VectorSet(color, 1, 1, 1);
+        VectorSet(*color, 1, 1, 1);
     }
 
     // add dynamic lights
@@ -248,18 +249,18 @@ void GL_LightPoint(const vec3_t &origin, vec3_t &color)
 
     if (gl_doublelight_entities->integer) {
         // apply modulate twice to mimic original ref_gl behavior
-        VectorScale(color, gl_static.entity_modulate, color);
+        VectorScale(*color, gl_static.entity_modulate, *color);
     }
 }
 
-void R_LightPoint_GL(const vec3_t &origin, vec3_t &color)
+void R_LightPoint_GL(const vec3_t *origin, vec3_t *color)
 {
     int i;
 
     GL_LightPoint(origin, color);
 
     for (i = 0; i < 3; i++) {
-        clamp(color[i], 0, 1);
+        clamp(*color[i], 0, 1);
     }
 }
 
