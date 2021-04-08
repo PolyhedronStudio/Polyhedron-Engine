@@ -370,7 +370,7 @@ void SV_BuildClientFrame(client_t *client)
 //    if (g_features->integer & GMF_CLIENTNUM) {
         frame->clientNum = clent->client->clientNum;
     //} else {
-    //    frame->clientNum = client->number;
+        frame->clientNum = client->number;
     //}
 
 	if (clientcluster >= 0)
@@ -481,8 +481,7 @@ void SV_BuildClientFrame(client_t *client)
         }
 
         // hide POV entity from renderer, unless this is player's own entity
-        if (e == frame->clientNum + 1 && ent != clent) {
-            //&& (g_features->integer & GMF_CLIENTNUM) && !Q2PRO_OPTIMIZE(client)) {
+        if (e == frame->clientNum + 1 && ent != clent && !client->settings[CLS_RECORDING]) {
             state->modelindex = 0;
         }
 

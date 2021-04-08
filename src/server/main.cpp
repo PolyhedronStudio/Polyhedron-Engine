@@ -236,10 +236,12 @@ void SV_DropClient(client_t *client, const char *reason)
     SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
 
     //if (oldstate == cs_spawned || (g_features->integer & GMF_WANT_ALL_DISCONNECTS)) {
+    if (oldstate == cs_spawned) {
         // call the prog function for removing a client
-        // this will remove the body, among other things
+            // this will remove the body, among other things
         ge->ClientDisconnect(client->edict);
-    //}
+        //}
+    }
 
     AC_ClientDisconnect(client);
 
@@ -800,19 +802,6 @@ static qboolean parse_enhanced_params(conn_params_t *p)
 static char *userinfo_ip_string(void)
 {
     static char s[MAX_QPATH];
-
-    // fake up reserved IPv4 address to prevent IPv6 unaware mods from exploding
-    if (net_from.type == NA_IP6 && !(g_features->integer & GMF_IPV6_ADDRESS_AWARE)) {
-        uint8_t res = 0;
-        int i;
-
-        // stuff /48 network part into the last byte
-        for (i = 0; i < 48 / CHAR_BIT; i++)
-            res ^= net_from.ip.u8[i];
-
-        Q_snprintf(s, sizeof(s), "198.51.100.%u:%u", res, BigShort(net_from.port));
-        return s;
-    }
 
     return NET_AdrToString(&net_from);
 }
