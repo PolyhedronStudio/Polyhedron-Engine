@@ -548,8 +548,6 @@ void SV_Begin_f(void)
     sv_client->suppress_count = 0;
     sv_client->http_download = false;
 
-    SV_AlignKeyFrames(sv_client);
-
     stuff_cmds(&sv_cmdlist_begin);
 
     // call the game begin function
@@ -784,7 +782,6 @@ static void SV_StopDownload_f(void)
     Com_DPrintf("Download of %s to %s stopped by user request\n",
                 sv_client->downloadname, sv_client->name);
     SV_CloseDownload(sv_client);
-    SV_AlignKeyFrames(sv_client);
 }
 
 //============================================================================
@@ -849,7 +846,6 @@ static void SV_ShowMiscInfo_f(void)
 static void SV_NoGameData_f(void)
 {
     sv_client->nodata ^= 1;
-    SV_AlignKeyFrames(sv_client);
 }
 
 static void SV_Lag_f(void)
@@ -1404,51 +1400,6 @@ static void SV_ParseDeltaUserinfo(void)
     SV_UpdateUserinfo();
 }
 
-#if USE_FPS
-void SV_AlignKeyFrames(client_t *client)
-{
-    int framediv = sv.framediv / client->framediv;
-    int framenum = sv.framenum / client->framediv;
-    int frameofs = framenum % framediv;
-    int newnum = frameofs + Q_align(client->framenum, framediv);
-
-    Com_DPrintf("[%d] align %d --> %d (num = %d, div = %d, ofs = %d)\n",
-                sv.framenum, client->framenum, newnum, framenum, framediv, frameofs);
-    client->framenum = newnum;
-}
-
-static void set_client_fps(int value)
-{
-    int framediv, framerate;
-
-    // 0 means highest
-    if (!value)
-        value = sv.framerate;
-
-    framediv = value / BASE_FRAMERATE;
-
-    clamp(framediv, 1, MAX_FRAMEDIV);
-
-    framediv = sv.framediv / Q_gcd(sv.framediv, framediv);
-    framerate = sv.framerate / framediv;
-
-    Com_DPrintf("[%d] client div=%d, server div=%d, rate=%d\n",
-                sv.framenum, framediv, sv.framediv, framerate);
-
-    sv_client->framediv = framediv;
-
-    SV_AlignKeyFrames(sv_client);
-
-    // save for status inspection
-    sv_client->settings[CLS_FPS] = framerate;
-
-    MSG_WriteByte(svc_setting);
-    MSG_WriteLong(SVS_FPS);
-    MSG_WriteLong(framerate);
-    SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
-}
-#endif
-
 static void SV_ParseClientSetting(void)
 {
     int idx, value;
@@ -1462,11 +1413,6 @@ static void SV_ParseClientSetting(void)
         return;
 
     sv_client->settings[idx] = value;
-
-#if USE_FPS
-    if (idx == CLS_FPS)
-        set_client_fps(value);
-#endif
 }
 
 static void SV_ParseClientCommand(void)

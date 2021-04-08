@@ -64,9 +64,6 @@ cvar_t  *cl_changemapcmd;
 cvar_t  *cl_beginmapcmd;
 
 cvar_t  *cl_gibs;
-#if USE_FPS
-cvar_t  *cl_updaterate;
-#endif
 
 cvar_t  *cl_protocol;
 
@@ -212,20 +209,6 @@ static void CL_UpdatePredictSetting(void)
     MSG_WriteShort(!cl_predict->integer);
     MSG_FlushTo(&cls.netchan->message);
 }
-
-#if USE_FPS
-static void CL_UpdateRateSetting(void)
-{
-    if (!cls.netchan) {
-        return;
-    }
-
-    MSG_WriteByte(clc_setting);
-    MSG_WriteShort(CLS_FPS);
-    MSG_WriteShort(cl_updaterate->integer);
-    MSG_FlushTo(&cls.netchan->message);
-}
-#endif
 
 void CL_UpdateRecordingSetting(void)
 {
@@ -1706,19 +1689,15 @@ void CL_Begin(void)
     // N&C: Prepare media loading.
     CL_PrepareMedia();
 
-    // N&C: Move over to the CG Module.
+    // TODO: Move over to the CG Module.
     LOC_LoadLocations();
 
+    // Set state to precached and send over a begin command.
     CL_LoadState(LOAD_NONE);
     cls.state = ca_precached;
-
-#if USE_FPS
-    CL_UpdateRateSetting();
-#endif
-
     CL_ClientCommand(va("begin %i\n", precache_spawncount));
 
-    // N&C: notify the CGModule.
+    // Inform CG Module.
     CL_GM_ClientBegin();
     //CL_UpdateGunSetting();
     //CL_UpdateGibSetting();
@@ -2527,13 +2506,6 @@ static void cl_prentity_changed(cvar_t *self)
     CL_UpdatePredictSetting();
 }
 
-#if USE_FPS
-static void cl_updaterate_changed(cvar_t *self)
-{
-    CL_UpdateRateSetting();
-}
-#endif
-
 static void cl_sync_changed(cvar_t *self)
 {
     CL_UpdateFrameTimes();
@@ -2671,11 +2643,6 @@ static void CL_InitLocal(void)
     rcon_address = Cvar_Get("rcon_address", "", CVAR_PRIVATE);
     rcon_address->generator = Com_Address_g;
 
-#if USE_FPS
-    cl_updaterate = Cvar_Get("cl_updaterate", "0", 0);
-    cl_updaterate->changed = cl_updaterate_changed;
-#endif
-
     cl_disconnectcmd = Cvar_Get("cl_disconnectcmd", "", 0);
     cl_changemapcmd = Cvar_Get("cl_changemapcmd", "", 0);
     cl_beginmapcmd = Cvar_Get("cl_beginmapcmd", "", 0);
@@ -2785,10 +2752,6 @@ static void CL_SetClientTime(void)
     if (com_timedemo->integer) {
         cl.time = cl.servertime;
         cl.lerpfrac = 1.0f;
-#if USE_FPS
-        cl.keytime = cl.keyservertime;
-        cl.keylerpfrac = 1.0f;
-#endif
         return;
     }
 
@@ -2807,24 +2770,6 @@ static void CL_SetClientTime(void)
 
     SHOWCLAMP(2, "time %d %d, lerpfrac %.3f\n",
               cl.time, cl.servertime, cl.lerpfrac);
-
-#if USE_FPS
-    prevtime = cl.keyservertime - BASE_FRAMETIME;
-    if (cl.keytime > cl.keyservertime) {
-        SHOWCLAMP(1, "high keyclamp %i\n", cl.keytime - cl.keyservertime);
-        cl.keytime = cl.keyservertime;
-        cl.keylerpfrac = 1.0f;
-    } else if (cl.keytime < prevtime) {
-        SHOWCLAMP(1, "low keyclamp %i\n", prevtime - cl.keytime);
-        cl.keytime = prevtime;
-        cl.keylerpfrac = 0;
-    } else {
-        cl.keylerpfrac = (cl.keytime - prevtime) * BASE_1_FRAMETIME;
-    }
-
-    SHOWCLAMP(2, "keytime %d %d keylerpfrac %.3f\n",
-              cl.keytime, cl.keyservertime, cl.keylerpfrac);
-#endif
 }
 
 static void CL_MeasureStats(void)
@@ -3159,9 +3104,6 @@ unsigned CL_Frame(unsigned msec)
 
 	if (!sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
         cl.time += main_extra;
-#if USE_FPS
-        cl.keytime += main_extra;
-#endif
     }
 
     // read next demo frame

@@ -183,35 +183,6 @@ void CLG_AddPacketEntities(void)
                     cl->lerpfrac, ent.origin);
                 VectorCopy(ent.origin, ent.oldorigin);
             }
-
-#if USE_FPS
-            // run alias model animation
-            if (cent->prev_frame != s1->frame) {
-                int delta = cl->time - cent->anim_start;
-                float frac;
-
-                if (delta > BASE_FRAMETIME) {
-                    Com_DDPrintf("[%d] anim end %d: %d --> %d\n",
-                        cl->time, s1->number,
-                        cent->prev_frame, s1->frame);
-                    cent->prev_frame = s1->frame;
-                    frac = 1;
-                }
-                else if (delta > 0) {
-                    frac = delta * BASE_1_FRAMETIME;
-                    Com_DDPrintf("[%d] anim run %d: %d --> %d [%f]\n",
-                        cl->time, s1->number,
-                        cent->prev_frame, s1->frame,
-                        frac);
-                }
-                else {
-                    frac = 0;
-                }
-
-                ent.oldframe = cent->prev_frame;
-                ent.backlerp = 1.0 - frac;
-            }
-#endif
         }
 
         if ((effects & EF_GIB) && !cl_gibs->integer) {
@@ -781,12 +752,7 @@ void CLG_EntityEvent(int number) {
     if ((cent->current.effects & EF_TELEPORTER) && CL_FRAMESYNC) {
         CLG_TeleporterParticles(cent->current.origin);
     }
-    
-#if USE_FPS
-    if (cent->event_frame != cl.frame.number)
-        return;
-#endif
-    
+        
     switch (cent->current.event) {
     case EV_ITEM_RESPAWN:
         clgi.S_StartSound(NULL, number, CHAN_WEAPON, clgi.S_RegisterSound("items/respawn1.wav"), 1, ATTN_IDLE, 0);
@@ -916,13 +882,6 @@ void CLG_CalcViewValues(void)
 
     // don't interpolate blend color
     Vec4_Copy(ps->blend, cl->refdef.blend);
-
-#if USE_FPS
-    ps = &cl->keyframe.playerState;
-    ops = &cl->oldkeyframe.playerState;
-
-    lerp = cl->keylerpfrac;
-#endif
 
     // interpolate field of view
     cl->fov_x = lerp_client_fov(ops->fov, ps->fov, lerp);

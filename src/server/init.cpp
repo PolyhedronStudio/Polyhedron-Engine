@@ -37,26 +37,6 @@ void SV_ClientReset(client_t *client)
     memset(&client->lastcmd, 0, sizeof(client->lastcmd));
 }
 
-static void set_frame_time(void)
-{
-#if USE_FPS
-    int framediv;
-
-    if (g_features->integer & GMF_VARIABLE_FPS)
-        framediv = sv_fps->integer / BASE_FRAMERATE;
-    else
-        framediv = 1;
-
-    clamp(framediv, 1, MAX_FRAMEDIV);
-
-    sv.framerate = framediv * BASE_FRAMERATE;
-    sv.frameTime = BASE_FRAMETIME / framediv;
-    sv.framediv = framediv;
-
-    Cvar_SetInteger(sv_fps, sv.framerate, FROM_CODE);
-#endif
-}
-
 static void resolve_masters(void)
 {
 #if !USE_CLIENT
@@ -182,9 +162,6 @@ void SV_SpawnServer(mapcmd_t *cmd)
 
     // reset entity counter
     svs.next_entity = 0;
-
-    // set framerate parameters
-    set_frame_time();
 
     // save name for levels that don't set message
     Q_strlcpy(sv.configstrings[CS_NAME], cmd->server, MAX_QPATH);
@@ -373,10 +350,6 @@ void SV_InitGame(unsigned mvd_spawn)
         SV_FreeFile(sv.entitystring);
         memset(&sv, 0, sizeof(sv));
 
-#if USE_FPS
-        // set up default frameTime for main loop
-        sv.frameTime = BASE_FRAMETIME;
-#endif
     }
 
     // get any latched variable changes (maxclients, etc)

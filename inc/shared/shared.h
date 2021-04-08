@@ -198,17 +198,8 @@ typedef float vec_t;
 #define MAX_FRAMEDIV    6
 
 //-----------------
-// variable server FPS
+// Client FPS
 //-----------------
-#if USE_FPS
-#define CL_FRAMETIME    cl.frameTime
-#define CL_1_FRAMETIME  cl.frametime_inv
-#define CL_FRAMEDIV     cl.framediv
-#define CL_FRAMESYNC    !(cl.frame.number % cl.framediv)
-#define CL_KEYPS        &cl.keyframe.playerState
-#define CL_OLDKEYPS     &cl.oldkeyframe.playerState
-#define CL_KEYLERPFRAC  cl.keylerpfrac
-#else
 // N&C: Moved here instead of client.h, for CG Module.
 #define CL_FRAMETIME    BASE_FRAMETIME
 #define CL_1_FRAMETIME  BASE_1_FRAMETIME
@@ -222,7 +213,6 @@ typedef float vec_t;
 #define CL_KEYPS        &cl.frame.playerState
 #define CL_OLDKEYPS     &cl.oldframe.playerState
 #define CL_KEYLERPFRAC  cl.lerpfrac
-#endif
 #endif
 
 

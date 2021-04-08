@@ -78,13 +78,6 @@ typedef struct cl_entity_s {
     int             trailcount;         // for diminishing grenade trails
     vec3_t          lerp_origin;        // for trails (variable hz)
 
-#if USE_FPS
-    int             prev_frame;
-    int             anim_start;
-
-    int             event_frame;
-#endif
-
     int             fly_stoptime;
 
     int             id;
@@ -316,12 +309,6 @@ typedef struct client_state_s {
     int             servertime;
     int             serverdelta;
 
-#if USE_FPS
-    server_frame_t  keyframe;
-    server_frame_t  oldkeyframe;
-    int             keyservertime;
-#endif
-
     byte            dcs[CS_BITMAP_BYTES];
 
     // the client maintains its own idea of view angles, which are
@@ -346,11 +333,6 @@ typedef struct client_state_s {
     int         time;           // this is the time value that the client
                                 // is rendering at.  always <= cl.servertime
     float       lerpfrac;       // between oldframe and frame
-
-#if USE_FPS
-    int         keytime;
-    float       keylerpfrac;
-#endif
 
     //
     // Client Sound Variables.
@@ -392,18 +374,6 @@ typedef struct client_state_s {
     char        gamedir[MAX_QPATH];
     int         clientNum;            // never changed during gameplay, set by serverdata packet
     int         maxclients;
-
-    // N&C: This has moved over to the client game exports.
-    // It has been changed in to a pointer. By doing so we can prevent
-    // this structure from turning inconsistent if the game decides to
-    // add extra parameters to this structure.
-    //pmoveParams_t *pmp;
-
-#if USE_FPS
-    int         frameTime;      // variable server frame time
-    float       frametime_inv;  // 1/frameTime
-    int         framediv;       // BASE_FRAMETIME/frameTime
-#endif
 
     char        baseconfigstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
     char        configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];

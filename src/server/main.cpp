@@ -36,9 +36,6 @@ qboolean     sv_pending_autosave = 0;
 
 cvar_t  *sv_enforcetime;
 cvar_t  *sv_allow_nodelta;
-#if USE_FPS
-cvar_t  *sv_fps;
-#endif
 
 cvar_t  *sv_timeout;            // seconds without any message
 cvar_t  *sv_zombietime;         // seconds to sink messages after disconnect
@@ -874,19 +871,19 @@ static qboolean parse_userinfo(conn_params_t *params, char *userinfo)
     Q_strlcpy(userinfo, info, MAX_INFO_STRING);
 
     // mvdspec, ip, etc are passed in extra userinfo if supported
-    if (!(g_features->integer & GMF_EXTRA_USERINFO)) {
-        // make sure mvdspec key is not set
-        Info_RemoveKey(userinfo, "mvdspec");
+    //if (!(g_features->integer & GMF_EXTRA_USERINFO)) {
+    //    // make sure mvdspec key is not set
+    //    Info_RemoveKey(userinfo, "mvdspec");
 
-        if (sv_password->string[0] || sv_reserved_password->string[0]) {
-            // unset password key to make game mod happy
-            Info_RemoveKey(userinfo, "password");
-        }
+    //    if (sv_password->string[0] || sv_reserved_password->string[0]) {
+    //        // unset password key to make game mod happy
+    //        Info_RemoveKey(userinfo, "password");
+    //    }
 
-        // force the IP key/value pair so the game can filter based on ip
-        if (!Info_SetValueForKey(userinfo, "ip", userinfo_ip_string()))
-            return reject("Oversize userinfo string.\n");
-    }
+    //    // force the IP key/value pair so the game can filter based on ip
+    //    if (!Info_SetValueForKey(userinfo, "ip", userinfo_ip_string()))
+    //        return reject("Oversize userinfo string.\n");
+    //}
 
     return true;
 }
@@ -1013,10 +1010,10 @@ static void send_connect_packet(client_t *newcl, int nctype)
 // then access these parameters in ClientConnect callback.
 static void append_extra_userinfo(conn_params_t *params, char *userinfo)
 {
-    if (!(g_features->integer & GMF_EXTRA_USERINFO)) {
-        userinfo[strlen(userinfo) + 1] = 0;
-        return;
-    }
+    //if (!(g_features->integer & GMF_EXTRA_USERINFO)) {
+    //    userinfo[strlen(userinfo) + 1] = 0;
+    //    return;
+    //}
 
     Q_snprintf(userinfo + strlen(userinfo) + 1, MAX_INFO_STRING,
                "\\challenge\\%d\\ip\\%s"
@@ -1077,10 +1074,6 @@ static void SVC_DirectConnect(void)
 	newcl->last_valid_cluster = -1;
     strcpy(newcl->reconnect_var, params.reconnect_var);
     strcpy(newcl->reconnect_val, params.reconnect_val);
-#if USE_FPS
-    newcl->framediv = sv.framediv;
-    newcl->settings[CLS_FPS] = BASE_FRAMERATE;
-#endif
 
     init_pmove_and_es_flags(newcl);
 
@@ -2035,9 +2028,7 @@ void SV_Init(void)
     sv_showclamp = Cvar_Get("showclamp", "0", 0);
     sv_enforcetime = Cvar_Get("sv_enforcetime", "1", 0);
     sv_allow_nodelta = Cvar_Get("sv_allow_nodelta", "1", 0);
-#if USE_FPS
-    sv_fps = Cvar_Get("sv_fps", "10", CVAR_LATCH);
-#endif
+
     sv_force_reconnect = Cvar_Get("sv_force_reconnect", "", CVAR_LATCH);
     sv_show_name_changes = Cvar_Get("sv_show_name_changes", "0", 0);
 
@@ -2102,16 +2093,6 @@ void SV_Init(void)
     map_override_path = Cvar_Get("map_override_path", "", 0);
 
     init_rate_limits();
-
-#if USE_FPS
-    // set up default frameTime for main loop
-    sv.frameTime = BASE_FRAMETIME;
-#endif
-
-    // set up default pmove parameters
-    // N&C: Moved over to the SV_InitGameProgs
-    //PMoveInit(&sv_pmp);
-    //ge->PMoveInit(&sv_pmp);
 
 #if USE_SYSCON
     SV_SetConsoleTitle();
@@ -2214,11 +2195,6 @@ void SV_Shutdown(const char *finalmsg, error_type_t type)
 
     // reset rate limits
     init_rate_limits();
-
-#if USE_FPS
-    // set up default frameTime for main loop
-    sv.frameTime = BASE_FRAMETIME;
-#endif
 
     sv_client = NULL;
     sv_player = NULL;

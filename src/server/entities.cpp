@@ -312,51 +312,6 @@ Build a client frame structure
 =============================================================================
 */
 
-#if USE_FPS
-static void
-fix_old_origin(client_t *client, entity_packed_t *state, entity_t *ent, int e)
-{
-    server_entity_t *sent = &sv.entities[e];
-    int i, j, k;
-
-    if (ent->s.renderfx & RF_BEAM)
-        return;
-
-    if (!ent->linkCount)
-        return; // not linked in anywhere
-
-    if (sent->create_framenum >= sv.framenum) {
-        // created this frame. unfortunate for projectiles: they will move only
-        // with 1/client->framediv fraction of their normal speed on the client
-        return;
-    }
-
-    if (state->event == EV_PLAYER_TELEPORT && !Q2PRO_OPTIMIZE(client)) {
-        // other clients will lerp from old_origin on EV_PLAYER_TELEPORT...
-        VectorCopy(state->origin, state->old_origin);
-        return;
-    }
-
-    if (sent->create_framenum > sv.framenum - client->framediv) {
-        // created between client frames
-        VectorScale(sent->create_origin, 8.0f, state->old_origin);
-        return;
-    }
-
-    // find the oldest valid origin
-    for (i = 0; i < client->framediv - 1; i++) {
-        j = sv.framenum - (client->framediv - i);
-        k = j & ENT_HISTORY_MASK;
-        if (sent->history[k].framenum == j) {
-            VectorScale(sent->history[k].origin, 8.0f, state->old_origin);
-            return;
-        }
-    }
-
-    // no valid old_origin, just use what game provided
-}
-#endif
-
 /*
 =============
 SV_BuildClientFrame
@@ -519,13 +474,6 @@ void SV_BuildClientFrame(client_t *client)
         // add it to the circular client_entities array
         state = &svs.entities[svs.next_entity % svs.num_entities];
         MSG_PackEntity(state, &es, true); // MSG: !! Removed Q2PRO_SHORTANGLES - Modify packentity to always use short angles??
-
-#if USE_FPS
-        // fix old entity origins for clients not running at
-        // full server frame rate
-        if (client->framediv != 1)
-            fix_old_origin(client, state, ent, e);
-#endif
 
         // clear footsteps
         if (state->event == EV_FOOTSTEP && client->settings[CLS_NOFOOTSTEPS]) {

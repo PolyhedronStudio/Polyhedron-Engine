@@ -10,7 +10,7 @@ You can skip these if you aren't me, an ADHD minded person :P
 - [ ] Do not forget RTX Q2 1.5, how could you? :)
 - [ ] Investigate BSP Tools to one day have less triangles (They used to generate more because of software rendering mode in Q2??)
 - [ ] Remove software renderer.
-- [ ] Remove the USE_FPS, if needed, can always be added back in later..._
+- [X] Remove the USE_FPS, if needed, can always be added back in later..._
 - [ ] Remove useless bytes in CL_ParseServerData for the pmove stuff q2pro had.
 - [ ] Remove MSG_ES stuff
 - [ ] Revisit the send and receive functions.
@@ -33,7 +33,7 @@ When finished we have a stable base to work from, one that we can start making t
   - Include OpenAL-soft and have it build itself properly. In case this fails, at least include a binary for Windows guys. 
 
 - [X] Remove MDV, and GTV. 
-
+- [ ] Move LOC_ code over to CG Module, or remove it hehe.
 - [ ] Headers need to be unique to their "owners". Or how do you say this... In either case, it'll result in way faster build times. 
   - [ ] inc/shared/
     - [ ] Move each part into its own sub header, include these in shared.h
@@ -72,6 +72,7 @@ When finished we have a stable base to work from, one that we can start making t
   - [X] Use references/pointers, and const correctness.
   - [X] Change the typedefs, so we use an actual union/struct. (Still needs to be done for the others, but vec3_t is done_) 
 - [ ] PMove
+  - [ ] Fix CLG_PredictionError vs other entities :)_
   - [ ] Footsteps, based on material.
   - [X] Implement stair stepping (StepDown method)
     - [ ] stair stepping interpolation.

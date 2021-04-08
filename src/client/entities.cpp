@@ -58,10 +58,6 @@ entity_update_new(cl_entity_t *ent, const entity_state_t *state, const vec_t *or
 
     // duplicate the current state so lerping doesn't hurt anything
     ent->prev = *state;
-#if USE_FPS
-    ent->prev_frame = state->frame;
-    ent->event_frame = cl.frame.number;
-#endif
 
     if (state->event == EV_PLAYER_TELEPORT ||
         state->event == EV_OTHER_TELEPORT ||
@@ -82,16 +78,6 @@ entity_update_old(cl_entity_t *ent, const entity_state_t *state, const vec_t *or
 {
     int event = state->event;
 
-#if USE_FPS
-    // check for new event
-    if (state->event != ent->current.event)
-        ent->event_frame = cl.frame.number; // new
-    else if (cl.frame.number - ent->event_frame >= cl.framediv)
-        ent->event_frame = cl.frame.number; // refreshed
-    else
-        event = 0; // duplicated
-#endif
-
     if (state->modelindex != ent->current.modelindex
         || state->modelindex2 != ent->current.modelindex2
         || state->modelindex3 != ent->current.modelindex3
@@ -107,25 +93,11 @@ entity_update_old(cl_entity_t *ent, const entity_state_t *state, const vec_t *or
 
         // duplicate the current state so lerping doesn't hurt anything
         ent->prev = *state;
-#if USE_FPS
-        ent->prev_frame = state->frame;
-#endif
+
         // no lerping if teleported or morphed
         VectorCopy(origin, ent->lerp_origin);
         return;
     }
-
-#if USE_FPS
-    // start alias model animation
-    if (state->frame != ent->current.frame) {
-        ent->prev_frame = ent->current.frame;
-        ent->anim_start = cl.servertime - cl.frameTime;
-        Com_DDPrintf("[%d] anim start %d: %d --> %d [%d]\n",
-                     ent->anim_start, state->number,
-                     ent->prev_frame, state->frame,
-                     cl.frame.number);
-    }
-#endif
 
     // shuffle the last state to previous
     ent->prev = ent->current;
@@ -210,19 +182,10 @@ static void set_active_state(void)
 
     cl.serverdelta = Q_align(cl.frame.number, CL_FRAMEDIV);
     cl.time = cl.servertime = 0; // set time, needed for demos
-#if USE_FPS
-    cl.keytime = cl.keyservertime = 0;
-    cl.keyframe = cl.frame; // initialize keyframe to make sure it's valid
-#endif
 
     // initialize oldframe so lerping doesn't hurt anything
     cl.oldframe.valid = false;
     cl.oldframe.playerState = cl.frame.playerState;
-#if USE_FPS
-    cl.oldkeyframe.valid = false;
-    cl.oldkeyframe.playerState = cl.keyframe.playerState;
-#endif
-
     cl.frameflags = 0;
 
     if (cls.netchan) {
@@ -292,10 +255,6 @@ player_update(server_frame_t *oldframe, server_frame_t *frame, int framediv)
     ent = &cs.entities[frame->clientNum + 1];
     if (ent->serverframe > oldnum &&
         ent->serverframe <= frame->number &&
-#if USE_FPS
-        ent->event_frame > oldnum &&
-        ent->event_frame <= frame->number &&
-#endif
         (ent->current.event == EV_PLAYER_TELEPORT
          || ent->current.event == EV_OTHER_TELEPORT)) {
         goto dup;
@@ -340,9 +299,6 @@ void CL_DeltaFrame(void)
     // set server time
     framenum = cl.frame.number - cl.serverdelta;
     cl.servertime = framenum * CL_FRAMETIME;
-#if USE_FPS
-    cl.keyservertime = (framenum / cl.framediv) * BASE_FRAMETIME;
-#endif
 
     // rebuild the list of solid entities for this frame
     cl.numSolidEntities = 0;
@@ -379,11 +335,6 @@ void CL_DeltaFrame(void)
     }
 
     player_update(&cl.oldframe, &cl.frame, 1);
-
-#if USE_FPS
-    if (CL_FRAMESYNC)
-        player_update(&cl.oldkeyframe, &cl.keyframe, cl.framediv);
-#endif
 
     CL_CheckPredictionError();
 
@@ -572,12 +523,7 @@ vec3_t CL_GetEntitySoundOrigin(int entnum) {
 
 vec3_t CL_GetViewVelocity(void)
 {
-    vec3_t vel = vec3_zero();
-
-    // N&C: FF Precision.
-    VectorCopy(cl.frame.playerState.pmove.velocity, vel);
-
-    return vel;
+    return cl.frame.playerState.pmove.velocity;
 }
 
 vec3_t CL_GetEntitySoundVelocity(int ent)
@@ -590,7 +536,8 @@ vec3_t CL_GetEntitySoundVelocity(int ent)
 	}
 
 	old = &cs.entities[ent];
+    
+    vel = old->current.origin - old->prev.origin;
 
-	VectorSubtract(old->current.origin, old->prev.origin, vel);
     return vel;
 }

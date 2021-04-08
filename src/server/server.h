@@ -76,14 +76,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SV_PAUSED 0
 #endif
 
-#if USE_FPS
-#define SV_GMF_VARIABLE_FPS GMF_VARIABLE_FPS
-#else
-#define SV_GMF_VARIABLE_FPS 0
-#endif
-
 // game features this server supports
-#define SV_FEATURES (SV_GMF_VARIABLE_FPS | GMF_EXTRA_USERINFO)
+#define SV_FEATURES (0)
 
 // ugly hack for SV_Shutdown
 #define MVD_SPAWN_DISABLED  0
@@ -105,47 +99,18 @@ typedef struct {
 
 typedef struct {
     int         solid32;
-
-#if USE_FPS
-
-// must be > MAX_FRAMEDIV
-#define ENT_HISTORY_SIZE    8
-#define ENT_HISTORY_MASK    (ENT_HISTORY_SIZE - 1)
-
-    struct {
-        vec3_t  origin;
-        int     framenum;
-    } history[ENT_HISTORY_SIZE];
-
-    vec3_t      create_origin;
-    int         create_framenum;
-#endif
 } server_entity_t;
 
-// variable server FPS
-#if USE_FPS
-#define SV_FRAMERATE        sv.framerate
-#define SV_FRAMETIME        sv.frameTime
-#define SV_FRAMEDIV         sv.framediv
-#define SV_FRAMESYNC        !(sv.framenum % sv.framediv)
-#define SV_CLIENTSYNC(cl)   !(sv.framenum % (cl)->framediv)
-#else
+// Server FPS
 #define SV_FRAMERATE        BASE_FRAMERATE
 #define SV_FRAMETIME        BASE_FRAMETIME
 #define SV_FRAMEDIV         1
 #define SV_FRAMESYNC        1
 #define SV_CLIENTSYNC(cl)   1
-#endif
 
 typedef struct {
     server_state_t  state;      // precache commands are only valid during load
     int             spawncount; // random number generated each server spawn
-
-#if USE_FPS
-    int         framerate;
-    int         frameTime;
-    int         framediv;
-#endif
 
     int         framenum;
     unsigned    frameresidual;
@@ -222,7 +187,8 @@ typedef struct {
     };
 } message_packet_t;
 
-#define RATE_MESSAGES   10
+// This is best to match the actual server game frame rate.
+#define SERVER_MESSAGES_TICKRATE   10
 
 #define FOR_EACH_CLIENT(client) \
     LIST_FOR_EACH(client_t, client, &sv_clientlist, entry)
@@ -289,13 +255,11 @@ typedef struct client_s {
     client_frame_t  frames[UPDATE_BACKUP];    // updates can be delta'd from here
     unsigned        frames_sent, frames_acked, frames_nodelta;
     int             framenum;
-#if USE_FPS
-    int             framediv;
-#endif
+
     unsigned        frameflags;
 
     // rate dropping
-    size_t          message_size[RATE_MESSAGES];    // used to rate drop normal packets
+    size_t          message_size[SERVER_MESSAGES_TICKRATE];    // used to rate drop normal packets
     int             suppress_count;                 // number of messages rate suppressed
     unsigned        send_time, send_delta;          // used to rate drop async packets
 
@@ -497,9 +461,7 @@ extern cvar_t       *sv_reserved_slots;
 extern cvar_t       *sv_airaccelerate;        // development tool
 extern cvar_t       *sv_qwmod;                // atu QW Physics modificator
 extern cvar_t       *sv_enforcetime;
-#if USE_FPS
-extern cvar_t       *sv_fps;
-#endif
+
 extern cvar_t       *sv_force_reconnect;
 extern cvar_t       *sv_iplimit;
 
@@ -648,11 +610,6 @@ void SV_New_f(void);
 void SV_Begin_f(void);
 void SV_ExecuteClientMessage(client_t *cl);
 void SV_CloseDownload(client_t *client);
-#if USE_FPS
-void SV_AlignKeyFrames(client_t *client);
-#else
-#define SV_AlignKeyFrames(client) (void)0
-#endif
 
 //
 // sv_ccmds.c

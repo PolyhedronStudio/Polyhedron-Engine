@@ -65,20 +65,16 @@ static qboolean SV_RateDrop(client_t *client)
     }
 
     total = 0;
-    for (i = 0; i < RATE_MESSAGES; i++) {
+    for (i = 0; i < SERVER_MESSAGES_TICKRATE; i++) {
         total += client->message_size[i];
     }
-
-#if USE_FPS
-    total = total * sv.framediv / client->framediv;
-#endif
 
     if (total > client->rate) {
         SV_DPrintf(0, "Frame %d suppressed for %s (total = %" PRIz ")\n",
                    client->framenum, client->name, total);
         client->frameflags |= FF_SUPPRESSED;
         client->suppress_count++;
-        client->message_size[client->framenum % RATE_MESSAGES] = 0;
+        client->message_size[client->framenum % SERVER_MESSAGES_TICKRATE] = 0;
         return true;
     }
 
@@ -95,7 +91,7 @@ static void SV_CalcSendTime(client_t *client, size_t size)
     }
 
     if (client->state == cs_spawned)
-        client->message_size[client->framenum % RATE_MESSAGES] = size;
+        client->message_size[client->framenum % SERVER_MESSAGES_TICKRATE] = size;
 
     client->send_time = svs.realtime;
     client->send_delta = size * 1000 / client->rate;
@@ -849,21 +845,6 @@ static void finish_frame(client_t *client)
     client->msg_unreliable_bytes = 0;
 }
 
-#if (defined _DEBUG) && USE_FPS
-static void check_key_sync(client_t *client)
-{
-    int div = sv.framediv / client->framediv;
-    int key1 = !(sv.framenum % sv.framediv);
-    int key2 = !(client->framenum % div);
-
-    if (key1 != key2) {
-        Com_LPrintf(PRINT_DEVELOPER,
-                    "[%d] frame %d for %s not synced (%d != %d)\n",
-                    sv.framenum, client->framenum, client->name, key1, key2);
-    }
-}
-#endif
-
 /*
 =======================
 SV_SendClientMessages
@@ -884,11 +865,6 @@ void SV_SendClientMessages(void)
 
         if (!SV_CLIENTSYNC(client))
             continue;
-
-#if (defined _DEBUG) && USE_FPS
-        if (developer->integer)
-            check_key_sync(client);
-#endif
 
         // if the reliable message overflowed,
         // drop the client (should never happen)
@@ -963,7 +939,6 @@ static void write_pending_download(client_t *client)
 
     if (client->downloadcount == client->downloadsize) {
         SV_CloseDownload(client);
-        SV_AlignKeyFrames(client);
     }
 }
 

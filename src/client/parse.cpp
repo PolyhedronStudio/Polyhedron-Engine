@@ -336,9 +336,6 @@ static void CL_ParseFrame(int extrabits)
 
     if (!frame.valid) {
         cl.frame.valid = false;
-#if USE_FPS
-        cl.keyframe.valid = false;
-#endif
         return; // do not change anything
     }
 
@@ -352,13 +349,6 @@ static void CL_ParseFrame(int extrabits)
 
     cl.oldframe = cl.frame;
     cl.frame = frame;
-
-#if USE_FPS
-    if (CL_FRAMESYNC) {
-        cl.oldkeyframe = cl.keyframe;
-        cl.keyframe = cl.frame;
-    }
-#endif
 
     cls.demo.frames_read++;
 
@@ -503,16 +493,8 @@ static void CL_ParseServerData(void)
     MSG_ReadString(levelname, sizeof(levelname));
 
     // setup default pmove parameters
-     // N&C: Let the client game module handle this.
+    // N&C: Let the client game module handle this.
     CL_GM_PMoveInit(cge->pmoveParams);
-    //PMoveInit(&cl.pmp);
-
-#if USE_FPS
-    // setup default frame times
-    cl.frameTime = BASE_FRAMETIME;
-    cl.frametime_inv = BASE_1_FRAMETIME;
-    cl.framediv = 1;
-#endif
 
     // setup default server state
     cl.serverstate = ss_game;
@@ -821,28 +803,6 @@ static void CL_ParseZPacket(void)
 #endif // USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
 }
 
-#if USE_FPS
-static void set_server_fps(int value)
-{
-    int framediv = value / BASE_FRAMERATE;
-
-    clamp(framediv, 1, MAX_FRAMEDIV);
-
-    cl.frameTime = BASE_FRAMETIME / framediv;
-    cl.frametime_inv = framediv * BASE_1_FRAMETIME;
-    cl.framediv = framediv;
-
-    // fix time delta
-    if (cls.state == ca_active) {
-        int delta = cl.frame.number - cl.servertime / cl.frameTime;
-        cl.serverdelta = Q_align(delta, framediv);
-    }
-
-    Com_DPrintf("client framediv=%d time=%d delta=%d\n",
-                framediv, cl.servertime, cl.serverdelta);
-}
-#endif
-
 static void CL_ParseSetting(void)
 {
     int index q_unused;
@@ -851,23 +811,10 @@ static void CL_ParseSetting(void)
     index = MSG_ReadLong();
     value = MSG_ReadLong();
 
-    // N&C: Server setting parsing commented out. 
-    // USE_FPS isn't enabled by us, so..
-#if USE_FPS
-    switch (index) {
-    case SVS_FPS:
-        set_server_fps(value);
-        break;
-    default:
-        break;
-    }
-#endif
 //    switch (index) {
-//#if USE_FPS
-//    case SVS_FPS:
-//        set_server_fps(value);
+//    case SVS_SOME_SETTING:
+//          .....
 //        break;
-//#endif
 //    default:
 //        break;
 //    }

@@ -783,9 +783,6 @@ void SV_PrintMiscInfo(void)
     Com_Printf("netchan type         %s\n", sv_client->netchan->type ? "new" : "old");
     Com_Printf("ping                 %d\n", sv_client->ping);
     Com_Printf("movement fps         %d\n", sv_client->moves_per_sec);
-#if USE_FPS
-    Com_Printf("update rate          %d\n", sv_client->settings[CLS_FPS]);
-#endif
     Com_Printf("RTT (min/avg/max)    %d/%d/%d ms\n",
                sv_client->min_ping, AVG_PING(sv_client), sv_client->max_ping);
     Com_Printf("PL server to client  %.2f%% (approx)\n", PL_S2C(sv_client));
