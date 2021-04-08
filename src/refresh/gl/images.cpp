@@ -792,7 +792,7 @@ static void GL_InitParticleTexture(void)
         for (j = 0; j < 16; j++) {
             x = j - 16 / 2 + 0.5f;
             y = i - 16 / 2 + 0.5f;
-            f = std::sqrtf(x * x + y * y);
+            f = sqrtf(x * x + y * y);
             f = 1.0f - f / (16 / 2 - 0.5f);
             dst[0] = 255;
             dst[1] = 255;

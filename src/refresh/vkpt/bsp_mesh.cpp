@@ -1206,8 +1206,8 @@ compute_world_tangents(bsp_mesh_t* wm)
 
 			float WL0 = VectorLength(dP0);
 			float WL1 = VectorLength(dP1);
-			float TL0 = std::sqrtf(dt0[0] * dt0[0] + dt0[1] * dt0[1]);
-			float TL1 = std::sqrtf(dt1[0] * dt1[0] + dt1[1] * dt1[1]);
+			float TL0 = sqrtf(dt0[0] * dt0[0] + dt0[1] * dt0[1]);
+			float TL1 = sqrtf(dt1[0] * dt1[0] + dt1[1] * dt1[1]);
 			float L0 = (WL0 > 0) ? (TL0 / WL0) : 0.f;
 			float L1 = (WL1 > 0) ? (TL1 / WL1) : 0.f;
 
@@ -1554,7 +1554,7 @@ bsp_mesh_load_custom_sky(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, const char* m
 	// N&C: Updated the tinyobj-c lib, now is multi-thread compatible. We use none, so we pass NULL to the context pointer.
 	unsigned int flags = TINYOBJ_FLAG_TRIANGULATE;
 	int ret = tinyobj_parse_obj(&attrib, &shapes, &num_shapes, &materials,
-		&num_materials, (const char*)file_buffer, NULL, flags);
+		&num_materials, (const char*)file_buffer, 0, flags);
 
 	FS_FreeFile(file_buffer);
 

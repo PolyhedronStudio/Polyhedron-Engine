@@ -141,12 +141,19 @@ us in our discord.
 ### Linux
 
   1. Clone the repository and its submodules from git:
-  `git clone --branch Engine-0.2 --recursive https://github.com/WatIsDeze/Nail-Crescent `
+  `git clone --branch Engine_0.2.1 --recursive https://github.com/WatIsDeze/Nail-Crescent `
 
-  2. Create a build folder inside your <PROJECT_ROOT> directory. Open a terminal in this location, and enter the following:
+  2. In case of a fresh OS, remember to install OpenGL and Vulkan dev libs. Google how to for your Distro and GPU Vendor.
+  We will need libsdl2-dev so we have all the dependencies required to build our NaC-SDL
+  `sudo apt-get install libgl1-mesa-dev libvulkan-dev libxext-dev libsdl2-dev`
+
+  3. Install dependencies.:
+  `sudo apt-get install libfreetype-dev liblua5.3-dev`
+
+  4. Create a build folder inside your <PROJECT_ROOT> directory. Open a terminal in this location, and enter the following:
   `cmake ../src && make`
 
-  3. If all goes well, you will now have a nac, nacded, basenac/clgame.so, and basenac/svgame.so. If not, we're still looking for help in this department. Feel free to reach out to us on our [Discord](https://discord.gg/5tadZ96cvY) if interested.
+  5. If all goes well, you will now have a nac, nacded, basenac/clgame.so, and basenac/svgame.so. If not, we're still looking for help in this department. Feel free to reach out to us on our [Discord](https://discord.gg/5tadZ96cvY) if interested.
 
 ## Demo Recording/Photo Mode
 

@@ -127,7 +127,6 @@ void        Com_AddConfigFile(const char *name, unsigned flags);
     if (developer && developer->integer > 3) \
         Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
 #else
-#define Com_DPrintf(...)
 #define Com_DDPrintf(...)
 #define Com_DDDPrintf(...)
 #define Com_DDDDPrintf(...)

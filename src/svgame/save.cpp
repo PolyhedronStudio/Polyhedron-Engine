@@ -17,7 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "g_local.h"
-#include "functionpointers.h"
 
 //#define _DEBUG
 typedef struct {
@@ -119,13 +118,13 @@ static const save_field_t entityfields[] = {
     F(idealYaw),
 
     F(nextThink),
-    P(PreThink, P_prethink),
-    P(Think, P_think),
-    P(Blocked, P_blocked),
-    P(Touch, P_touch),
-    P(Use, P_use),
-    P(Pain, P_pain),
-    P(Die, P_die),
+    // P(PreThink, P_prethink),
+    // P(Think, P_think),
+    // P(Blocked, P_blocked),
+    // P(Touch, P_touch),
+    // P(Use, P_use),
+    // P(Pain, P_pain),
+    // P(Die, P_die),
 
     F(debounceTouchTime),
     F(debouncePainTime),
@@ -209,23 +208,23 @@ static const save_field_t entityfields[] = {
     F(moveInfo.next_speed),
     F(moveInfo.remaining_distance),
     F(moveInfo.decel_distance),
-    P(moveInfo.endfunc, P_moveinfo_endfunc),
+    // P(moveInfo.endfunc, P_moveinfo_endfunc),
 
-    P(monsterInfo.currentmove, P_monsterinfo_currentmove),
+    // P(monsterInfo.currentmove, P_monsterinfo_currentmove),
     I(monsterInfo.aiflags),
     I(monsterInfo.nextframe),
     F(monsterInfo.scale),
 
-    P(monsterInfo.stand, P_monsterinfo_stand),
-    P(monsterInfo.idle, P_monsterinfo_idle),
-    P(monsterInfo.search, P_monsterinfo_search),
-    P(monsterInfo.walk, P_monsterinfo_walk),
-    P(monsterInfo.run, P_monsterinfo_run),
-    P(monsterInfo.dodge, P_monsterinfo_dodge),
-    P(monsterInfo.attack, P_monsterinfo_attack),
-    P(monsterInfo.melee, P_monsterinfo_melee),
-    P(monsterInfo.sight, P_monsterinfo_sight),
-    P(monsterInfo.checkattack, P_monsterinfo_checkattack),
+    // P(monsterInfo.stand, P_monsterinfo_stand),
+    // P(monsterInfo.idle, P_monsterinfo_idle),
+    // P(monsterInfo.search, P_monsterinfo_search),
+    // P(monsterInfo.walk, P_monsterinfo_walk),
+    // P(monsterInfo.run, P_monsterinfo_run),
+    // P(monsterInfo.dodge, P_monsterinfo_dodge),
+    // P(monsterInfo.attack, P_monsterinfo_attack),
+    // P(monsterInfo.melee, P_monsterinfo_melee),
+    // P(monsterInfo.sight, P_monsterinfo_sight),
+    // P(monsterInfo.checkattack, P_monsterinfo_checkattack),
 
     F(monsterInfo.pausetime),
     F(monsterInfo.attack_finished),
@@ -496,25 +495,25 @@ static void write_index(FILE *f, void *p, size_t size, void *start, int max_inde
     write_int(f, (int)(diff / size));
 }
 
-static void write_pointer(FILE *f, void *p, ptr_type_t type)
-{
-    const save_ptr_t *ptr;
-    int i;
+// static void write_pointer(FILE *f, void *p, ptr_type_t type)
+// {
+//     const save_ptr_t *ptr;
+//     int i;
 
-    if (!p) {
-        write_int(f, -1);
-        return;
-    }
+//     if (!p) {
+//         write_int(f, -1);
+//         return;
+//     }
 
-    for (i = 0, ptr = save_ptrs; i < num_save_ptrs; i++, ptr++) {
-        if (ptr->type == type && ptr->ptr == p) {
-            write_int(f, i);
-            return;
-        }
-    }
+//     for (i = 0, ptr = save_ptrs; i < num_save_ptrs; i++, ptr++) {
+//         if (ptr->type == type && ptr->ptr == p) {
+//             write_int(f, i);
+//             return;
+//         }
+//     }
 
-    gi.Error("%s: unknown pointer: %p", __func__, p);
-}
+//     gi.Error("%s: unknown pointer: %p", __func__, p);
+// }
 
 static void write_field(FILE *f, const save_field_t *field, void *base)
 {
@@ -551,9 +550,9 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         write_string(f, *(char **)p);
         break;
 
-    case F_EDICT:
-        write_index(f, *(void **)p, sizeof(entity_t), g_edicts, MAX_EDICTS - 1);
-        break;
+    // case F_EDICT:
+    //     write_index(f, *(void **)p, sizeof(entity_t), g_edicts, MAX_EDICTS - 1);
+    //     break;
     case F_CLIENT:
         write_index(f, *(void **)p, sizeof(gclient_t), game.clients, game.maxclients - 1);
         break;
@@ -561,9 +560,9 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         write_index(f, *(void **)p, sizeof(gitem_t), itemlist, game.num_items - 1);
         break;
 
-    case F_POINTER:
-        write_pointer(f, *(void **)p, (ptr_type_t)field->size); // CPP: Cast
-        break;
+    // case F_POINTER:
+    //     write_pointer(f, *(void **)p, (ptr_type_t)field->size); // CPP: Cast
+    //     break;
 
     default:
         gi.Error("%s: unknown field type", __func__);
@@ -676,27 +675,27 @@ static void *read_index(FILE *f, size_t size, void *start, int max_index)
     return p;
 }
 
-static void *read_pointer(FILE *f, ptr_type_t type)
-{
-    int index;
-    const save_ptr_t *ptr;
+// static void *read_pointer(FILE *f, ptr_type_t type)
+// {
+//     int index;
+//     const save_ptr_t *ptr;
 
-    index = read_int(f);
-    if (index == -1) {
-        return NULL;
-    }
+//     index = read_int(f);
+//     if (index == -1) {
+//         return NULL;
+//     }
 
-    if (index < 0 || index >= num_save_ptrs) {
-        gi.Error("%s: bad index", __func__);
-    }
+//     if (index < 0 || index >= num_save_ptrs) {
+//         gi.Error("%s: bad index", __func__);
+//     }
 
-    ptr = &save_ptrs[index];
-    if (ptr->type != type) {
-        gi.Error("%s: type mismatch", __func__);
-    }
+//     ptr = &save_ptrs[index];
+//     if (ptr->type != type) {
+//         gi.Error("%s: type mismatch", __func__);
+//     }
 
-    return ptr->ptr;
-}
+//     return ptr->ptr;
+// }
 
 static void read_field(FILE *f, const save_field_t *field, void *base)
 {
@@ -743,9 +742,9 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         *(gitem_t **)p = (gitem_t*)read_index(f, sizeof(gitem_t), itemlist, game.num_items - 1); // CPP: Cast
         break;
 
-    case F_POINTER:
-        *(void **)p = read_pointer(f, (ptr_type_t)field->size); // CPP: Cast
-        break;
+    // case F_POINTER:
+    //     *(void **)p = read_pointer(f, (ptr_type_t)field->size); // CPP: Cast
+    //     break;
 
     default:
         gi.Error("%s: unknown field type", __func__);

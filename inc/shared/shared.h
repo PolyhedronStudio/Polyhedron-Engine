@@ -38,6 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // C++ C STDIO
 //-----------------
 #include <cmath>
+#include <cstring>
 #include <cctype>
 #include <cstdio>
 #include <cstdarg>
@@ -51,9 +52,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 // C++ STL
 //-----------------
-#include <numbers>
 #include <string>
-#include <numbers>
 #include <iostream>
 #include <sstream>
 #include <map>

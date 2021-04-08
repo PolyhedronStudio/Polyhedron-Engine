@@ -47,9 +47,9 @@ void Weapon_HyperBlaster_Fire(entity_t* ent)
         }
         else {
             rotation = (ent->client->playerState.gunframe - 5) * 2 * M_PI / 6;
-            offset[0] = -4 * std::sinf(rotation);
+            offset[0] = -4 * sinf(rotation);
             offset[1] = 0;
-            offset[2] = 4 * std::cosf(rotation);
+            offset[2] = 4 * cosf(rotation);
 
             if ((ent->client->playerState.gunframe == 6) || (ent->client->playerState.gunframe == 9))
                 effect = EF_HYPERBLASTER;

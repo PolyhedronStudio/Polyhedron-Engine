@@ -146,7 +146,7 @@ typedef vec2_template<double> dvec2_t;
 //===============
 // vec2_dot
 // 
-// Returns the dot product of 'a · b'.
+// Returns the dot product of 'a ï¿½ b'.
 //===============
 //
 static inline float vec2_dot(const vec2_t &a, const vec2_t &b) {
@@ -172,7 +172,7 @@ static inline float vec2_length_squared(const vec2_t &v) {
 //===============
 //
 static inline float vec2_length(const vec2_t &v) {
-    return std::sqrtf(vec2_length_squared(v));
+    return sqrtf(vec2_length_squared(v));
 }
 
 //
@@ -299,8 +299,8 @@ static inline vec2_t vec2_scale(const vec2_t &v, float scale) {
 //
 static inline vec2_t vec2_fmaf(const vec2_t& v, float multiply, const vec2_t& add) {
     return vec2_t {
-        std::fmaf(add.x, multiply, v.x),
-        std::fmaf(add.y, multiply, v.y)
+        fmaf(add.x, multiply, v.x),
+        fmaf(add.y, multiply, v.y)
     };
 }
 

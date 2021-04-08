@@ -692,30 +692,31 @@ Cmd_OpenURL_f
 */
 static void Cmd_OpenURL_f(void)
 {
-	if (Cmd_Argc() != 2)
-	{
-		Com_Printf("openurl expects a single argument that is the URL to open");
-		return;
-	}
+    Com_Printf("OpenURL needs to be re-implemented.");
+// 	if (Cmd_Argc() != 2)
+// 	{
+// 		Com_Printf("openurl expects a single argument that is the URL to open");
+// 		return;
+// 	}
 
-	const char* url = Cmd_Argv(1);
-	if (Q_stricmpn(url, "http://", 7) && Q_stricmpn(url, "https://", 8))
-	{
-		Com_Printf("the URL must start with http:// or https://");
-		return;
-	}
+// 	const char* url = Cmd_Argv(1);
+// 	if (Q_stricmpn(url, "http://", 7) && Q_stricmpn(url, "https://", 8))
+// 	{
+// 		Com_Printf("the URL must start with http:// or https://");
+// 		return;
+// 	}
 
 
-#ifdef __linux__
-    pid_t pid = fork();
-    if (pid == 0) {
-	char * args[] = { "xdg-open", url, NULL};
-	execv("/usr/bin/xdg-open", args);
-	exit(0);
-    }
-#elif _WINDOWS
-	ShellExecuteA(0, 0, url, 0, 0, SW_SHOW);
-#endif
+// #ifdef __linux__
+//     pid_t pid = fork();
+//     if (pid == 0) {
+// 	char * const *args[] = { "xdg-open", url, NULL};
+// 	execv("/usr/bin/xdg-open", &args);
+// 	exit(0);
+//     }
+// #elif _WINDOWS
+// 	ShellExecuteA(0, 0, url, 0, 0, SW_SHOW);
+// #endif
 }
 
 /*

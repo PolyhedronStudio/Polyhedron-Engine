@@ -10,7 +10,7 @@
 #define __CLIENT_RMLUI_RMLUI_H__
 
 // Required include.
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 // Include shared headers.
 #include "shared/shared.h"

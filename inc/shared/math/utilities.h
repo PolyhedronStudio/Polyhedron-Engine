@@ -35,8 +35,8 @@
 #define Q_ClearBit(data, bit)   ((data)[(bit) >> 3] &= ~(1 << ((bit) & 7)))
 
 // Conversion (Degrees, Radians) scalar values.
-#define DegreesScalar ((float) (180.0f / std::numbers::pi_v<float>))
-#define RadiansScalar ((float) (std::numbers::pi_v<float> / 180.0f))
+#define DegreesScalar ((float) (180.0f / M_PI))
+#define RadiansScalar ((float) (M_PI / 180.0f))
 
 
 //
@@ -69,8 +69,8 @@ static inline float Radians(float degrees) {
 //===============
 //
 static inline void SinCosRadians(const float radians, float  &s, float &c) {
-    s = std::sinf(radians);
-    c = std::cosf(radians);
+    s = sinf(radians);
+    c = cosf(radians);
 }
 
 //
@@ -84,7 +84,7 @@ static inline void SinCosRadians(const float radians, float  &s, float &c) {
 static inline void InitRandomNumberGenerator() {
     static qboolean isInitialized = false;
     if (!isInitialized) {
-        std::srand(std::time(NULL));
+        srand(time(NULL));
         isInitialized = true;
     }
 }
@@ -100,7 +100,7 @@ static inline uint32_t Randomui(void) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
 
-    return std::rand();
+    return rand();
 }
 
 //
@@ -114,7 +114,7 @@ static inline uint32_t Randomf(void) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
 
-    return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 }
 
 
@@ -129,7 +129,7 @@ static inline float RandomRangef(float begin, float end) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
 
-    return begin + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (begin - end)));
+    return begin + static_cast<float>(rand()) / (static_cast<float>((float)RAND_MAX / (float)(begin - end)));
 }
 
 //
@@ -199,7 +199,7 @@ static inline int32_t Maxi(int32_t a, int32_t b) {
 //===============
 //
 static inline float Mixf(float a, float b, float mix) {
-    return std::fmaf(a, mix, b - a);
+    return fmaf(a, mix, b - a);
 }
 
 //
@@ -249,7 +249,7 @@ static inline float Smoothf(float f, float min, float max) {
 //===============
 //
 static inline bool EqualEpsilonf(float a, float b, float epsilon = FLT_EPSILON) {
-    return std::fabsf(a - b) <= epsilon;
+    return fabsf(a - b) <= epsilon;
 }
 
 //

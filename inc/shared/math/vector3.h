@@ -181,7 +181,7 @@ static inline vec3_t vec3_cross(const vec3_t &a, const vec3_t &b) {
 //===============
 // vec3_dot
 // 
-// Returns the dot product of 'a · b'.
+// Returns the dot product of 'a ï¿½ b'.
 //===============
 //
 static inline float vec3_dot(const vec3_t &a, const vec3_t &b) {
@@ -320,7 +320,7 @@ static inline const vec3_t vec3_euler(const vec3_t &dir) {
     }
     else {
         if (dir.x) {
-            yaw = Degrees(std::atan2f(dir.y, dir.x));
+            yaw = Degrees(atan2f(dir.y, dir.x));
         }
         else if (dir.y > 0.f) {
             yaw = 90.f;
@@ -333,8 +333,8 @@ static inline const vec3_t vec3_euler(const vec3_t &dir) {
             yaw += 360.f;
         }
 
-        const float forward = std::sqrtf(dir.x * dir.x + dir.y * dir.y);
-        pitch = Degrees(std::atan2f(dir.z, forward));
+        const float forward = sqrtf(dir.x * dir.x + dir.y * dir.y);
+        pitch = Degrees(atan2f(dir.z, forward));
 
         if (pitch < 0.f) {
             pitch += 360.f;
@@ -357,9 +357,9 @@ static inline const vec3_t vec3_euler(const vec3_t &dir) {
 //
 static inline const vec3_t vec3_fabsf(const vec3_t &v) {
     return vec3_t{
-        std::fabsf(v.x),
-        std::fabsf(v.y),
-        std::fabsf(v.z)
+        fabsf(v.x),
+        fabsf(v.y),
+        fabsf(v.z)
     };
 }
 
@@ -372,9 +372,9 @@ static inline const vec3_t vec3_fabsf(const vec3_t &v) {
 //
 static inline const vec3_t vec3_floorf(const vec3_t &v) {
     return vec3_t{
-        std::floorf(v.x),
-        std::floorf(v.y),
-        std::floorf(v.z)
+        floorf(v.x),
+        floorf(v.y),
+        floorf(v.z)
     };
 }
 
@@ -417,9 +417,9 @@ static inline const vec3_t vec3_clamp_euler(const vec3_t &euler) {
 //
 static inline const vec3_t vec3_fmaf(const vec3_t &v, float multiply, const vec3_t &add) {
     return vec3_t{
-        std::fmaf(add.x, multiply, v.x),
-        std::fmaf(add.y, multiply, v.y),
-        std::fmaf(add.z, multiply, v.z)
+        fmaf(add.x, multiply, v.x),
+        fmaf(add.y, multiply, v.y),
+        fmaf(add.z, multiply, v.z)
     };
 }
 
@@ -507,7 +507,7 @@ static inline const vec3_t vec3_mix_euler(const vec3_t &a, const vec3_t &b, floa
     vec3_t _a = a;
     vec3_t _b = b;
 
-    for (std::size_t i = 0; i < 3; i++) {
+    for (size_t i = 0; i < 3; i++) {
         if (_b.xyz[i] - _a.xyz[i] >= 180.f) {
             _a.xyz[i] += 360.f;
         } else if (_b.xyz[i] - _a.xyz[i] <= -180.f) {
@@ -538,9 +538,9 @@ static inline const vec3_t vec3_mix3(const vec3_t &a, const vec3_t &b, const vec
 //
 static inline const vec3_t vec3_roundf(const vec3_t &v) {
     return vec3_t{
-        std::roundf(v.x),
-        std::roundf(v.y),
-        std::roundf(v.z)
+        roundf(v.x),
+        roundf(v.y),
+        roundf(v.z)
     };
 }
 
@@ -620,7 +620,7 @@ static inline float vec3_length_squared(const vec3_t &v) {
 //===============
 //
 static inline float vec3_length(const vec3_t &v) {
-    return std::sqrtf(vec3_length_squared(v));
+    return sqrtf(vec3_length_squared(v));
 }
 
 //
@@ -798,7 +798,7 @@ inline const std::string vec3_to_str(const vec3_t& v, qboolean rounded = true)
          (d)[2]=(a)[2]+(b)[2]*(c)[2])
 #define VectorEmpty(v) ((v)[0]==0&&(v)[1]==0&&(v)[2]==0)
 #define VectorCompare(v1,v2)    ((v1)[0]==(v2)[0]&&(v1)[1]==(v2)[1]&&(v1)[2]==(v2)[2])
-#define VectorLength(v)     (std::sqrtf(DotProduct((v),(v))))
+#define VectorLength(v)     (sqrtf(DotProduct((v),(v))))
 #define VectorLengthSquared(v)      (DotProduct((v),(v)))
 #define VectorScale(in,scale,out) \
         ((out)[0]=(in)[0]*(scale), \
@@ -812,7 +812,7 @@ inline const std::string vec3_to_str(const vec3_t& v, qboolean rounded = true)
         (((v1)[0]-(v2)[0])*((v1)[0]-(v2)[0])+ \
         ((v1)[1]-(v2)[1])*((v1)[1]-(v2)[1])+ \
         ((v1)[2]-(v2)[2])*((v1)[2]-(v2)[2]))
-#define Distance(v1,v2) (std::sqrtf(DistanceSquared(v1,v2)))
+#define Distance(v1,v2) (sqrtf(DistanceSquared(v1,v2)))
 #define LerpAngles(a,b,c,d) \
         ((d)[0]=LerpAngle((a)[0],(b)[0],c), \
          (d)[1]=LerpAngle((a)[1],(b)[1],c), \

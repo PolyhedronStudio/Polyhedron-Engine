@@ -32,14 +32,14 @@ void AngleVectors(const vec3_t& angles, vec3_t* forward, vec3_t* right, vec3_t* 
     float        sr, sp, sy, cr, cp, cy;
 
     angle = angles.xyz[vec3_t::Yaw] * (M_PI * 2 / 360);
-    sy = std::sinf(angle);
-    cy = std::cosf(angle);
+    sy = sinf(angle);
+    cy = cosf(angle);
     angle = angles.xyz[vec3_t::Pitch] * (M_PI * 2 / 360);
-    sp = std::sinf(angle);
-    cp = std::cosf(angle);
+    sp = sinf(angle);
+    cp = cosf(angle);
     angle = angles.xyz[vec3_t::Roll] * (M_PI * 2 / 360);
-    sr = std::sinf(angle);
-    cr = std::cosf(angle);
+    sr = sinf(angle);
+    cr = cosf(angle);
 
     if (forward) {
         forward->xyz[0] = cp * cy;
@@ -194,8 +194,8 @@ vec_t RadiusFromBounds(const vec3_t& mins, const vec3_t& maxs)
     vec_t   a, b;
 
     for (i = 0; i < 3; i++) {
-        a = std::fabsf(mins.xyz[i]); // MATHLIB: !! WARNING: Q_fabs replaced by std::fabs
-        b = std::fabsf(maxs.xyz[i]); // MATHLIB: !! WARNING: Q_fabs replaced by std::fabs
+        a = fabsf(mins.xyz[i]); // MATHLIB: !! WARNING: Q_fabs replaced by fabs
+        b = fabsf(maxs.xyz[i]); // MATHLIB: !! WARNING: Q_fabs replaced by fabs
         corner.xyz[i] = a > b ? a : b;
     }
 

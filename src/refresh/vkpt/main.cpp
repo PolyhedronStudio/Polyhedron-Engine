@@ -375,7 +375,7 @@ vkpt_set_material()
 	pbr_material_t * mat = MAT_FindPBRMaterial(vkpt_refdef.fd->feedback.view_material);
 	if (!mat)
 	{
-		Com_EPrintf("Cannot find material '%s' in table\n");
+		Com_EPrintf("Cannot find material '%s' in table\n", mat->name);
 		return;
 	}
 
@@ -391,7 +391,7 @@ vkpt_print_material()
 	pbr_material_t * mat = MAT_FindPBRMaterial(vkpt_refdef.fd->feedback.view_material);
 	if (!mat)
 	{
-		Com_EPrintf("Cannot find material '%s' in table\n");
+		Com_EPrintf("Cannot find material '%s' in table\n", mat->name);
 		return;
 	}
 	MAT_PrintMaterialProperties(mat);
@@ -1369,6 +1369,7 @@ vkpt_load_shader_modules()
 
 #define IS_RT_SHADER false
 	LIST_SHADER_MODULES
+#undef IS_RT_SHADER
 #define IS_RT_SHADER true
 	LIST_RT_SHADER_MODULES
 #undef IS_RT_SHADER
@@ -3396,7 +3397,7 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 
 		if (ref_mode->enable_accumulation)
 		{
-			ubo->pt_texture_lod_bias = -log2(std::sqrtf(get_accumulation_rendering_framenum()));
+			ubo->pt_texture_lod_bias = -log2(sqrtf(get_accumulation_rendering_framenum()));
 
 			// disable the other stabilization hacks
 			ubo->pt_specular_anti_flicker = 0.f;
