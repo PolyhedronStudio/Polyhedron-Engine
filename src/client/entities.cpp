@@ -463,7 +463,7 @@ Emits all entities, particles, and lights to the refresh
 */
 void CL_AddEntities(void)
 {
-    // CL_CalcViewValues(); // N&C: Moved to V_RenderView so CG Module can use these too.
+    // CL_CalculateViewValues(); // N&C: Moved to V_RenderView so CG Module can use these too.
    // CL_FinishViewValues();
     //CL_AddPacketEntities();
    // CL_AddTEnts();

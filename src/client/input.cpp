@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "system/lirc.h"
 
 // N&C: Cheesy hack, we need to actually make this extern in a header.
-extern clgame_export_t* cge;
+extern IClientGameExports* cge;
 
 static cvar_t    *cl_nodelta;
 static cvar_t    *cl_maxpackets;
@@ -723,7 +723,7 @@ static void m_autosens_changed(cvar_t *self)
         fov = 90.0f;
 
     autosens_x = 1.0f / fov;
-    autosens_y = 1.0f / CL_GM_CalcFOV(fov, 4, 3);
+    autosens_y = 1.0f / CL_GM_CalculateFOV(fov, 4, 3);
 }
 
 /*
