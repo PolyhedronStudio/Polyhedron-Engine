@@ -1319,15 +1319,15 @@ static void PM_WaterJumpMove(void) {
 
     PM_Gravity();
 
-    // check for a usable spot directly in front of us
+    // Check for a usable spot directly in front of us
     const vec3_t pos = vec3_fmaf(pm->state.origin, 30.f, playerMoveLocals.forwardXY);
 
-    // if we've reached a usable spot, clamp the jump to avoid launching
+    // If we've reached a usable spot, clamp the jump to avoid launching
     if (PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos).fraction == 1.0f) {
         pm->state.velocity.z = Clampf(pm->state.velocity.z, 0.f, PM_SPEED_JUMP);
     }
 
-    // if we're falling back down, clear the timer to regain control
+    // If we're falling back down, clear the timer to regain control
     if (pm->state.velocity.z <= 0.0f) {
         pm->state.flags &= ~PMF_TIME_MASK;
         pm->state.time = 0;

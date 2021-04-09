@@ -10,6 +10,8 @@
 #ifndef __INC_SHARED_CLGAME_H__
 #define __INC_SHARED_CLGAME_H__
 
+#include "shared/client/IClientGameExports.hpp"
+
 #define CGAME_API_VERSION_MAJOR VERSION_MAJOR
 #define CGAME_API_VERSION_MINOR VERSION_MINOR
 #define CGAME_API_VERSION_POINT VERSION_POINT
@@ -17,7 +19,7 @@
 //
 //=============================================================================
 //
-//	CLIENT GAME IMPORT AND EXPORT STRUCTURES.
+//	CLIENT GAME IMPORT AND EXPORT INTERFACES.
 //
 //=============================================================================
 //
@@ -25,7 +27,7 @@
 extern "C" {
 #endif
     // Structure containing all the client dll game function pointers for the engine to work with.
-    typedef struct clg_export_s {
+    struct CLGGameExports : public IClientGameExports {
         //---------------------------------------------------------------------
         // API Version.
         // 
@@ -51,15 +53,7 @@ extern "C" {
             int32_t point;
         } apiversion;
 
-        //---------------------------------------------------------------------
-        // Pointers to CG Module.
-        //---------------------------------------------------------------------
-        // Shared player move parameters.
-        // N&C: This has moved over to the client game exports.
-        // It has been changed in to a pointer. By doing so we can prevent
-        // this structure from turning inconsistent if the game decides to
-        // add extra parameters to this structure.
-        pmoveParams_t* pmoveParams; // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
+
 
         //---------------------------------------------------------------------
         // Core.
@@ -170,7 +164,7 @@ extern "C" {
         // finish up its current frame loop iteration.
         void        (*PostRenderView) (void);
 
-    } clgame_export_t;
+    };
 
     // Structure containing all the engine function pointers for the client dll to work with.
     typedef struct clg_import_s {
