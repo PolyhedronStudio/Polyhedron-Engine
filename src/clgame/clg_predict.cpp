@@ -208,7 +208,7 @@ void CLG_TraverseClientStep(client_entity_step_t* step, uint32_t time, float hei
         step->timestamp = time;
     }
 
-    step->interval = 128.f * (fabsf(step->height) / PM_STEP_HEIGHT);
+    step->interval = 128.f * (std::fabsf(step->height) / PM_STEP_HEIGHT);
 }
 
 //
@@ -310,7 +310,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
 
         if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
             cl->predicted_step = step;
-            CLG_TraverseClientStep(&stepx, clgi.GetRealTime(), step);
+            CLG_TraverseEntityStep(&stepx, clgi.GetRealTime(), step);
             cl->predicted_step_frame = frame + 1;    // don't double step
             stepx.time = clgi.GetRealTime();
         }

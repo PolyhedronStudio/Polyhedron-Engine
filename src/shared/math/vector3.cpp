@@ -24,7 +24,7 @@ void vectoangles2(const vec3_t& value1, vec3_t& angles)
     }
     else {
         if (value1.xyz[0])
-            yaw = atan2f(value1.xyz[1], value1.xyz[0]) * 180.f / M_PI;
+            yaw = std::atan2f(value1.xyz[1], value1.xyz[0]) * 180.f / M_PI;
         else if (value1.xyz[1] > 0)
             yaw = 90;
         else
@@ -33,8 +33,8 @@ void vectoangles2(const vec3_t& value1, vec3_t& angles)
         if (yaw < 0)
             yaw += 360;
 
-        forward = sqrtf(value1.xyz[0] * value1.xyz[0] + value1.xyz[1] * value1.xyz[1]);
-        pitch = atan2f(value1.xyz[2], forward) * 180.f / M_PI;
+        forward = std::sqrtf(value1.xyz[0] * value1.xyz[0] + value1.xyz[1] * value1.xyz[1]);
+        pitch = std::atan2f(value1.xyz[2], forward) * 180.f / M_PI;
         if (pitch < 0)
             pitch += 360;
     }
@@ -57,8 +57,8 @@ void SetupRotationMatrix(vec3_t* matrix, const vec3_t& dir, float degrees)
     vec_t   angle, s, c, one_c, xx, yy, zz, xy, yz, zx, xs, ys, zs;
 
     angle = Radians(degrees);
-    s = sinf(angle);
-    c = cosf(angle);
+    s = std::sinf(angle);
+    c = std::cosf(angle);
     one_c = 1.0F - c;
 
     xx = dir.xyz[0] * dir.xyz[0];

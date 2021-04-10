@@ -172,8 +172,8 @@ void turret_breach_think(entity_t *self)
         angle = self->s.angles[1] + self->owner->moveOrigin[1];
         angle *= (M_PI * 2 / 360);
         // N&C: FF Precision.
-        target[0] = (self->s.origin[0] + cosf(angle) * self->owner->moveOrigin[0]); //SnapToEights(self->s.origin[0] + cos(angle) * self->owner->moveOrigin[0]);
-        target[1] = (self->s.origin[1] + sinf(angle) * self->owner->moveOrigin[0]); // SnapToEights(self->s.origin[1] + sin(angle) * self->owner->moveOrigin[0]);
+        target[0] = (self->s.origin[0] + std::cosf(angle) * self->owner->moveOrigin[0]); //SnapToEights(self->s.origin[0] + cos(angle) * self->owner->moveOrigin[0]);
+        target[1] = (self->s.origin[1] + std::sinf(angle) * self->owner->moveOrigin[0]); // SnapToEights(self->s.origin[1] + sin(angle) * self->owner->moveOrigin[0]);
         target[2] = self->owner->s.origin[2];
 
         VectorSubtract(target, self->owner->s.origin, dir);

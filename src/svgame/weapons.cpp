@@ -741,7 +741,7 @@ void bfg_explode(entity_t *self)
             VectorMA(ent->s.origin, 0.5, v, v);
             VectorSubtract(self->s.origin, v, v);
             dist = VectorLength(v);
-            points = self->radius_dmg * (1.0 - sqrtf(dist / self->dmg_radius));
+            points = self->radius_dmg * (1.0 - std::sqrtf(dist / self->dmg_radius));
             if (ent == self->owner)
                 points = points * 0.5;
 

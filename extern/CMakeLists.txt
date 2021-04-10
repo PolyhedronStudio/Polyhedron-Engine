@@ -17,24 +17,20 @@ endif()
 # SDL 2
 #
 
-# IF(WIN32)
-    option(SDL_SHARED"" OFF)
-    option(SDL_STATIC"" ON)
-    option(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
+option(SDL_SHARED"" OFF)
+option(SDL_STATIC"" ON)
+option(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
 
-    if (CONFIG_LINUX_STEAM_RUNTIME_SUPPORT)
-        option(INPUT_TSLIB OFF)
-    endif()
+if (CONFIG_LINUX_STEAM_RUNTIME_SUPPORT)
+	option(INPUT_TSLIB OFF)
+endif()
 
-    add_subdirectory(NaC-SDL)
+add_subdirectory(NaC-SDL)
 
-    set_target_properties(SDL2main PROPERTIES FOLDER extern)
-    set_target_properties(SDL2-static PROPERTIES FOLDER extern)
-    set_target_properties(uninstall PROPERTIES FOLDER extern)
-# else()
-#     find_package(SDL2 REQUIRED)
+set_target_properties(SDL2main PROPERTIES FOLDER extern)
+set_target_properties(SDL2-static PROPERTIES FOLDER extern)
+set_target_properties(uninstall PROPERTIES FOLDER extern)
 
-# endif()
 
 #
 # CURL - On Windows it'll search for the extern/win64 library and header files.

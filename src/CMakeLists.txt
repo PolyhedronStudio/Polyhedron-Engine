@@ -33,6 +33,7 @@ SET(SRC_SVGAME
 	svgame/cmds.cpp
 	svgame/combat.cpp
 	svgame/effects.cpp
+	svgame/functionpointers.cpp
 	svgame/items.cpp
 	svgame/main.cpp
 	svgame/effects.cpp
@@ -148,6 +149,7 @@ SET(HEADERS_SVGAME
 	svgame/g_local.h
 	svgame/brushfuncs.h
 	svgame/effects.h
+	svgame/functionpointers.h
 	svgame/trigger.h
 	svgame/utils.h
 
@@ -658,16 +660,8 @@ TARGET_INCLUDE_DIRECTORIES(client PRIVATE "/extern/stb/")
 # TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
 # TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
 # endif()
-# if (WIN32)
 TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
 TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
-# else()
-# TARGET_LINK_LIBRARIES(client dl ${SDL2_LIBRARIES} zlibstatic)
-# TARGET_LINK_LIBRARIES(server dl ${SDL2_LIBRARIES} zlibstatic)
-# target_include_directories(client PUBLIC ${SDL2_INCLUDE_DIRS})
-# target_include_directories(server PUBLIC ${SDL2_INCLUDE_DIRS})
-# link_libraries()
-# endif()
 
 SET_TARGET_PROPERTIES(client
     PROPERTIES

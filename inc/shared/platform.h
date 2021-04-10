@@ -26,7 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef _WIN32
 #include <io.h>
 #include <direct.h>
-#include <intrin.h>
 #else
 #include <unistd.h>
 #endif

@@ -486,10 +486,10 @@ static void sample_disk(float* u, float* v)
 	float b = frand();
 
 	float theta = 2.0 * M_PI * a;
-	float r = sqrtf(b);
+	float r = std::sqrtf(b);
 
-	*u = r * cosf(theta);
-	*v = r * sinf(theta);
+	*u = r * std::cosf(theta);
+	*v = r * std::sinf(theta);
 }
 
 void vkpt_shadow_map_setup(const sun_light_t* light, const float* bbox_min, const float* bbox_max, float* VP, float* depth_scale, qboolean random_sampling)

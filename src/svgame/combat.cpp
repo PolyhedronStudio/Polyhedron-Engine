@@ -548,7 +548,7 @@ void T_RadiusDamage(entity_t *inflictor, entity_t *attacker, float damage, entit
             continue;
 
         // Calculate damage points.
-        v = ent->mins + ent->maxs;
+        v = ent->mins + ent->maxs, v;
         v = vec3_fmaf(ent->s.origin, 0.5, v);
         v -= inflictor->s.origin;
         points = damage - 0.5 * vec3_length(v);

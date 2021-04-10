@@ -15,6 +15,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
+
+// CPP: Required include for _ReturnAddress();
+#include <intrin.h>
+
 #include "shared/shared.h"
 #include "common/common.h"
 #include "common/zone.h"

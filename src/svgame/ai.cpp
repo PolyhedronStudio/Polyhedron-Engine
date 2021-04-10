@@ -349,7 +349,7 @@ void FoundTarget(entity_t *self)
     if (!self->moveTargetPtr) {
         self->goalEntityPtr = self->moveTargetPtr = self->enemy;
         HuntTarget(self);
-        gi.DPrintf("%s at %s, combatTarget %s not found\n", self->classname, Vec3ToString(self->s.origin), self->combatTarget);
+        gi.DPrintf("%s at %s, combatTarget %s not found\n", self->classname, vec3_to_str(self->s.origin), self->combatTarget);
         return;
     }
 

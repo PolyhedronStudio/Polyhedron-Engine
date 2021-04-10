@@ -1175,13 +1175,13 @@ void CLG_BigTeleportParticles(vec3_t org)
 
         angle = M_PI * 2 * (rand() & 1023) / 1023.0;
         dist = rand() & 31;
-        p->org[0] = org[0] + cosf(angle) * dist;
-        p->vel[0] = cosf(angle) * (70 + (rand() & 63));
-        p->accel[0] = -cosf(angle) * 100;
+        p->org[0] = org[0] + std::cosf(angle) * dist;
+        p->vel[0] = std::cosf(angle) * (70 + (rand() & 63));
+        p->accel[0] = -std::cosf(angle) * 100;
 
-        p->org[1] = org[1] + sinf(angle) * dist;
-        p->vel[1] = sinf(angle) * (70 + (rand() & 63));
-        p->accel[1] = -sinf(angle) * 100;
+        p->org[1] = org[1] + std::sinf(angle) * dist;
+        p->vel[1] = std::sinf(angle) * (70 + (rand() & 63));
+        p->accel[1] = -std::sinf(angle) * 100;
 
         p->org[2] = org[2] + 8 + (rand() % 90);
         p->vel[2] = -100 + (rand() & 31);
@@ -1564,8 +1564,8 @@ void CLG_OldRailTrail(void)
         VectorClear(p->accel);
 
         d = i * 0.1;
-        c = cosf(d);
-        s = sinf(d);
+        c = std::cosf(d);
+        s = std::sinf(d);
 
         VectorScale(right, c, dir);
         VectorMA(dir, s, up, dir);
@@ -1686,11 +1686,11 @@ static void CLG_FlyParticles(vec3_t origin, int count)
     ltime = (float)cl->time / 1000.0;
     for (i = 0; i < count; i += 2) {
         angle = ltime * avelocities[i][0];
-        sy = sinf(angle);
-        cy = cosf(angle);
+        sy = std::sinf(angle);
+        cy = std::cosf(angle);
         angle = ltime * avelocities[i][1];
-        sp = sinf(angle);
-        cp = cosf(angle);
+        sp = std::sinf(angle);
+        cp = std::cosf(angle);
 
         forward[0] = cp * cy;
         forward[1] = cp * sy;
@@ -1702,7 +1702,7 @@ static void CLG_FlyParticles(vec3_t origin, int count)
 
         p->time = cl->time;
 
-        dist = sinf(ltime + i) * 64;
+        dist = std::sinf(ltime + i) * 64;
         p->org[0] = origin[0] + bytedirs[i][0] * dist + forward[0] * BEAMLENGTH;
         p->org[1] = origin[1] + bytedirs[i][1] * dist + forward[1] * BEAMLENGTH;
         p->org[2] = origin[2] + bytedirs[i][2] * dist + forward[2] * BEAMLENGTH;
@@ -1767,11 +1767,11 @@ void CLG_BfgParticles(r_entity_t* ent)
     ltime = (float)cl->time / 1000.0;
     for (i = 0; i < count; i++) {
         angle = ltime * avelocities[i][0];
-        sy = sinf(angle);
-        cy = cosf(angle);
+        sy = std::sinf(angle);
+        cy = std::cosf(angle);
         angle = ltime * avelocities[i][1];
-        sp = sinf(angle);
-        cp = cosf(angle);
+        sp = std::sinf(angle);
+        cp = std::cosf(angle);
 
         forward[0] = cp * cy;
         forward[1] = cp * sy;
@@ -1783,7 +1783,7 @@ void CLG_BfgParticles(r_entity_t* ent)
 
         p->time = cl->time;
 
-        dist = sinf(ltime + i) * 64;
+        dist = std::sinf(ltime + i) * 64;
         p->org[0] = ent->origin[0] + bytedirs[i][0] * dist + forward[0] * BEAMLENGTH;
         p->org[1] = ent->origin[1] + bytedirs[i][1] * dist + forward[1] * BEAMLENGTH;
         p->org[2] = ent->origin[2] + bytedirs[i][2] * dist + forward[2] * BEAMLENGTH;

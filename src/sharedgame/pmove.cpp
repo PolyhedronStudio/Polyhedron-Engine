@@ -191,7 +191,7 @@ static void CLGPM_Debug(const char* func, const char* fmt, ...) {
     va_start(args, fmt);
 
     vsnprintf(buffer, sizeof(buffer), fmt, args);
-    string str = "[CLG PM_Debug:";
+    std::string str = "[CLG PM_Debug:";
     str += func;
     str += "] ";
     str += buffer;
@@ -226,7 +226,7 @@ static void SVGPM_Debug(const char* func, const char* fmt, ...) {
     va_start(args, fmt);
 
     vsnprintf(buffer, sizeof(buffer), fmt, args);
-    string str = "[SVGPM_Debug:{";
+    std::string str = "[SVGPM_Debug:{";
     str += func;
     str += "}] ";
     str += buffer;
@@ -1268,7 +1268,7 @@ static void PM_LadderMove(void) {
     vel.z = 0.f;
 
     // handle Z intentions differently
-    if (fabsf(pm->state.velocity.z) < PM_SPEED_LADDER) {
+    if (std::fabsf(pm->state.velocity.z) < PM_SPEED_LADDER) {
 
         if ((pm->viewAngles.x <= -15.0f) && (pm->cmd.forwardmove > 0)) {
             vel.z = PM_SPEED_LADDER;
@@ -1652,7 +1652,7 @@ static void PM_ClampAngles(void) {
         pm->viewAngles[i] = SHORT2ANGLE(temp);
     }
 
-    // clamp pitch to prevent the player from looking up or down more than 90ï¿½
+    // clamp pitch to prevent the player from looking up or down more than 90º
     if (pm->viewAngles.x > 90.0f && pm->viewAngles.x < 270.0f) {
         pm->viewAngles.x = 90.0f;
     }

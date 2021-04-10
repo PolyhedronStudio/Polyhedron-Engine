@@ -498,7 +498,7 @@ void CLG_AddPacketEntities(void)
 #if USE_DLIGHTS
                     float intensity;
 
-                    intensity = 50 + (500 * (sinf(cl->time / 500.0) + 1.0));
+                    intensity = 50 + (500 * (std::sinf(cl->time / 500.0) + 1.0));
                     V_AddLight(ent.origin, intensity, -1.0, -1.0, -1.0);
 #endif
                 }

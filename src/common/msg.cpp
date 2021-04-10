@@ -37,9 +37,9 @@ byte        msg_write_buffer[MAX_MSGLEN];
 sizebuf_t   msg_read;
 byte        msg_read_buffer[MAX_MSGLEN];
 
-const entity_packed_t   nullEntityState = {};
-const player_packed_t   nullPlayerState = {};
-const usercmd_t         nullUserCmd = {};
+const entity_packed_t   nullEntityState;
+const player_packed_t   nullPlayerState;
+const usercmd_t         nullUserCmd;
 
 /*
 =============
