@@ -87,15 +87,15 @@ static void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, cons
             headNode = cmodel->headNode;
         }
         else {
-            headNode = clgi.CM_HeadnodeForBox(&ent->mins, &ent->maxs);
+            headNode = clgi.CM_HeadnodeForBox(ent->mins, ent->maxs);
         }
 
         if (tr->allSolid)
             return;
 
-        clgi.CM_TransformedBoxTrace(&trace, &start, &end,
-            &mins, &maxs, headNode, CONTENTS_MASK_PLAYERSOLID,
-            &ent->current.origin, &ent->current.angles);
+        clgi.CM_TransformedBoxTrace(&trace, start, end,
+            mins, maxs, headNode, CONTENTS_MASK_PLAYERSOLID,
+            ent->current.origin, ent->current.angles);
 
         clgi.CM_ClipEntity(tr, &trace, (struct entity_s*)ent);
     }
@@ -111,7 +111,7 @@ static trace_t q_gameabi CLG_Trace(const vec3_t &start, const vec3_t &mins, cons
     trace_t    t;
 
     // check against world
-    clgi.CM_BoxTrace(&t, &start, &end, &mins, &maxs, cl->bsp->nodes, CONTENTS_MASK_PLAYERSOLID);
+    clgi.CM_BoxTrace(&t, start, end, mins, maxs, cl->bsp->nodes, CONTENTS_MASK_PLAYERSOLID);
     if (t.fraction < 1.0)
         t.ent = (struct entity_s*)1;
 
@@ -128,7 +128,7 @@ static int CLG_PointContents(const vec3_t &point)
     mmodel_t* cmodel;
     int         contents;
 
-    contents = clgi.CM_PointContents(&point, cl->bsp->nodes);
+    contents = clgi.CM_PointContents(point, cl->bsp->nodes);
 
     for (i = 0; i < cl->numSolidEntities; i++) {
         ent = cl->solidEntities[i];
@@ -141,9 +141,9 @@ static int CLG_PointContents(const vec3_t &point)
             continue;
 
         contents |= clgi.CM_TransformedPointContents(
-            &point, cmodel->headNode,
-            &ent->current.origin,
-            &ent->current.angles);
+            point, cmodel->headNode,
+            ent->current.origin,
+            ent->current.angles);
     }
 
     return contents;

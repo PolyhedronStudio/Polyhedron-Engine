@@ -387,7 +387,7 @@ static void R_UnsetSky(void)
 R_SetSky
 ============
 */
-void R_SetSky_GL(const char *name, float rotate, vec3_t *axis)
+void R_SetSky_GL(const char *name, float rotate, vec3_t &axis)
 {
     int     i;
     char    pathname[MAX_QPATH];
@@ -402,7 +402,7 @@ void R_SetSky_GL(const char *name, float rotate, vec3_t *axis)
     }
 
     skyrotate = rotate;
-    VectorNormalize2(*axis, skyaxis);
+    VectorNormalize2(axis, skyaxis);
 
     for (i = 0; i < 6; i++) {
         len = Q_concat(pathname, sizeof(pathname),

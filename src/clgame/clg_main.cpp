@@ -83,11 +83,9 @@ cvar_t* vid_rtx = NULL;
 //
 
 // CPP: These might need to be re-enabled on Linux.
-#if defined(__linux__)
-#ifdef __cplusplus
-extern "C" {
-#endif
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 {
@@ -175,11 +173,9 @@ q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     return &clge;
 }
 
-#if defined(__linux__)
-#ifdef __cplusplus
-}; // extern "c"
-#endif
-#endif
+//#ifdef __cplusplus
+//}; // Extern "C"
+//#endif
 
 //
 //=============================================================================

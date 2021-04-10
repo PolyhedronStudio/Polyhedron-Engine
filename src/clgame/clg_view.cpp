@@ -205,7 +205,7 @@ static void V_SetLightLevel(void)
     vec3_t shadelight;
 
     // save off light value for server to look at (BIG HACK!)
-    clgi.R_LightPoint(&cl->refdef.vieworg, &shadelight);
+    clgi.R_LightPoint(cl->refdef.vieworg, shadelight);
 
     // pick the greatest component, which should be the same
     // as the mono value returned by software
@@ -289,8 +289,8 @@ static void CLG_SetupThirdPersionView(void)
     VectorMA(cl->refdef.vieworg, -range * fscale, cl->v_forward, cl->refdef.vieworg);
     VectorMA(cl->refdef.vieworg, -range * rscale, cl->v_right, cl->refdef.vieworg);
 
-    clgi.CM_BoxTrace(&trace, &cl->playerEntityOrigin, &cl->refdef.vieworg,
-        &mins, &maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
+    clgi.CM_BoxTrace(&trace, cl->playerEntityOrigin, cl->refdef.vieworg,
+        mins, maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
     if (trace.fraction != 1.0f) {
         VectorCopy(trace.endPosition, cl->refdef.vieworg);
     }

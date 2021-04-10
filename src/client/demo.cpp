@@ -212,7 +212,7 @@ void CL_EmitDemoFrame(void)
     emit_delta_frame(oldframe, &cl.frame, lastframe, FRAME_CUR);
 
     if (cls.demo.buffer.cursize + msg_write.cursize > cls.demo.buffer.maxsize) {
-        Com_DPrintf("Demo frame overflowed (%" PRIz " + %" PRIz " > %" PRIz ")\n",
+        Com_DPrintf("Demo frame overflowed (% " PRIz " + %" PRIz " > %" PRIz ")\n",
                     cls.demo.buffer.cursize, msg_write.cursize, cls.demo.buffer.maxsize);
         cls.demo.frames_dropped++;
 

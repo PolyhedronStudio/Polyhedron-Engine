@@ -1472,7 +1472,7 @@ static void SCR_Sky_f(void)
     else
         VectorSet(axis, 0, 0, 1);
 
-    clgi.R_SetSky(name, rotate, &axis);
+    clgi.R_SetSky(name, rotate, axis);
 }
 
 static void SCR_CalcVRect(void) {

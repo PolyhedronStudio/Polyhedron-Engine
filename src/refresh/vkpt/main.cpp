@@ -4501,7 +4501,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 }
 
 void
-R_SetSky_RTX(const char *name, float rotate, vec3_t *axis)
+R_SetSky_RTX(const char *name, float rotate, vec3_t &axis)
 {
 	int     i;
 	char    pathname[MAX_QPATH];
@@ -4511,8 +4511,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t *axis)
 	byte *data = NULL;
 
 	sky_rotation = rotate;
-	vec3_t axis_in = *axis;
-	VectorNormalize2(axis_in, sky_axis);
+	VectorNormalize2(axis, sky_axis);
 
 	int avg_color[3] = { 0 };
 	int w_prev, h_prev;

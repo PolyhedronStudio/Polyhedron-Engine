@@ -16,7 +16,7 @@
 //
 // TODO: On a sunny day, take some rest. BUT On a rainy sunday, try and 
 // replace all the defined function bodies with an actual function. 
-// This way, we can remove the PF_ functions from this file and have 
+// This way, we can remove the _wrp_ functions from this file and have 
 // the function pointers point to the actual functions.
 //
 #include "client.h"
@@ -41,70 +41,20 @@ extern int CL_GetResolutionScale(void);
 //
 //=============================================================================
 //
-//	Prog Func wrappers, these are there for various reasons.
-//  Refresh module functions are sometimes assigned later on, in which case,
-//  they run outdated in the client game code.
-//  Other and most important reasons are compatibilities with regards to dll/so
-//  file linkage on all platforms.
+//	WRAPPER CODE FOR CERTAIN FUNCTIONALITIES SUCH AS COMMAND BUFFERS ETC.
 //
 //=============================================================================
-//-----------------
-// Collision Model PF
-//-----------------
-mnode_t *PF_HeadnodeForBox(const vec3_t *mins, const vec3_t *maxs) {
-    const vec3_t _mins = *mins;
-    const vec3_t _maxs = *maxs;
-
-    return CM_HeadnodeForBox(_mins, _maxs);
-}
-int PF_PointContents(const vec3_t *p, mnode_t *headNode) {
-    const vec3_t _p = *p;
-    return CM_PointContents(_p, headNode);
-}
-
-int PF_TransformedPointContents(const vec3_t *p, mnode_t *headNode, const vec3_t *origin, const vec3_t *angles) {
-    const vec3_t _p = *p;
-    const vec3_t _origin = *origin;
-    const vec3_t _angles = *angles;
-    return CM_TransformedPointContents(_p, headNode, _origin, _angles);
-}
-void PF_BoxTrace(trace_t *trace, const vec3_t *start, const vec3_t *end,
-                 const vec3_t *mins, const vec3_t *maxs,
-                 mnode_t *headNode, int brushmask) {
-    const vec3_t _start = *start;
-    const vec3_t _end = *end;
-    const vec3_t _mins = *mins;
-    const vec3_t _maxs = *maxs;
-
-    CM_BoxTrace(trace, _start, _end, _mins, _maxs, headNode, brushmask);
-}
-
-void PF_TransformedBoxTrace(trace_t *trace, const vec3_t *start, const vec3_t *end,
-                            const vec3_t *mins, const vec3_t *maxs,
-                            mnode_t *headNode, int brushmask,
-                            const vec3_t *origin, const vec3_t *angles) {
-    const vec3_t _start = *start;
-    const vec3_t _end = *end;
-    const vec3_t _mins = *mins;
-    const vec3_t _maxs = *maxs;
-    const vec3_t _origin = *origin;
-    const vec3_t _angles = *angles;
-    CM_TransformedBoxTrace(trace, _start, _end, _mins, _maxs, headNode, brushmask, _origin, _angles);
-}
-
-//-----------------
-// Client PF.
-//-----------------
-int PF_GetServerProtocol(void) {
+// CLIENT.
+int _wrp_GetServerProtocol(void) {
     return cls.serverProtocol;
 }
-int PF_GetProtocolVersion(void) {
+int _wrp_GetProtocolVersion(void) {
     return cls.protocolVersion;
 }
-int PF_GetServerState(void) {
+int _wrp_GetServerState(void) {
     return cl.serverstate;
 }
-void PF_UpdateSetting(clientSetting_t setting, int value) {
+void _wrp_UpdateSetting(clientSetting_t setting, int value) {
     // Ensure there is a valid netchan.
     if (!cls.netchan) {
         return;
@@ -118,45 +68,45 @@ void PF_UpdateSetting(clientSetting_t setting, int value) {
 }
 
 
-unsigned PF_GetRealTime(void) {
+unsigned _wrp_GetRealTime(void) {
     return cls.realtime;
 }
-float PF_GetFrameTime(void) {
+float _wrp_GetFrameTime(void) {
     return cls.frameTime;
 }
-qboolean PF_IsDemoPlayback(void) {
+qboolean _wrp_IsDemoPlayback(void) {
     return cls.demo.playback;
 }
 
 // CBUF_
-void PF_Cbuf_AddText(char *text) {
+void _wrp_Cbuf_AddText(char *text) {
 	Cbuf_AddText(&cmd_buffer, text);
 }
-void PF_Cbuf_Execute() {
+void _wrp_Cbuf_Execute() {
 	Cbuf_Execute(&cmd_buffer);
 }
-void PF_Cbuf_InsertText(char *text) {
+void _wrp_Cbuf_InsertText(char *text) {
 	Cbuf_InsertText(&cmd_buffer, text);
 }
 
 // CVAR_
-void PF_Cvar_Reset(cvar_t *var) {
+void _wrp_Cvar_Reset(cvar_t *var) {
 	Cvar_Reset(var);
 }
 
 // CMODEL
-mmodel_t *PF_CM_InlineModel(cm_t *cm, const char *name) {
+mmodel_t *_wrp_CM_InlineModel(cm_t *cm, const char *name) {
     return CM_InlineModel(cm, name);
 }
 
 // FILES
-qhandle_t PF_FS_FileExists(const char *path) {
+qhandle_t _wrp_FS_FileExists(const char *path) {
     return FS_FileExists(path);
 }
-qhandle_t PF_FS_FileExistsEx(const char *path, unsigned flags) {
+qhandle_t _wrp_FS_FileExistsEx(const char *path, unsigned flags) {
     return FS_FileExistsEx(path, flags);
 }
-ssize_t PF_FS_FPrintf(qhandle_t f, const char *format, ...) {
+ssize_t _wrp_FS_FPrintf(qhandle_t f, const char *format, ...) {
     ssize_t ret;
     va_list args;
     va_start (args, format);
@@ -166,99 +116,96 @@ ssize_t PF_FS_FPrintf(qhandle_t f, const char *format, ...) {
 }
 
 // NETWORKING
-static void PF_WritePosition(const vec3_t *pos) {
-    MSG_WritePosition(*pos);
-}
-static void PF_MSG_FlushTo(sizebuf_t *buf) {
+void _trp_MSG_FlushTo(sizebuf_t *buf) {
     MSG_FlushTo(buf);
 }
 
 // REGISTER
-qhandle_t PF_R_RegisterPic(const char *name) {
+qhandle_t _wrp_R_RegisterPic(const char *name) {
     // CPP: Explicit cast required.
     return (qhandle_t)R_RegisterPic(name);
 }
-qhandle_t PF_R_RegisterPic2(const char *name) {
+qhandle_t _wrp_R_RegisterPic2(const char *name) {
     // CPP: Explicit cast required.
     return (qhandle_t)R_RegisterPic2(name);
 }
-qhandle_t PF_R_RegisterFont(const char *name) {
+qhandle_t _wrp_R_RegisterFont(const char *name) {
     // CPP: Explicit cast required.
     return (qhandle_t)R_RegisterFont(name);
 }
-qhandle_t PF_R_RegisterSkin(const char *name) {
+qhandle_t _wrp_R_RegisterSkin(const char *name) {
     // CPP: Explicit cast required.
     return (qhandle_t)R_RegisterSkin(name);
 }
 
-qhandle_t PF_R_RegisterModel(const char *name) {
+qhandle_t _wrp_R_RegisterModel(const char *name) {
     return R_RegisterModel(name);
 }
-qhandle_t PF_R_RegisterImage(const char *name, imagetype_t type,
+qhandle_t _wrp_R_RegisterImage(const char *name, imagetype_t type,
                                         imageflags_t flags, qerror_t *err_p) {
     return R_RegisterImage(name, type, flags, err_p);
 }
-qhandle_t PF_R_RegisterRawImage(const char *name, int width, int height, byte* pic, imagetype_t type,
+qhandle_t _wrp_R_RegisterRawImage(const char *name, int width, int height, byte* pic, imagetype_t type,
                                         imageflags_t flags) {
     return R_RegisterRawImage(name, width, height, pic, type, flags);
 }
-void PF_R_UnregisterImage(qhandle_t image) {
+void _wrp_R_UnregisterImage(qhandle_t image) {
     R_UnregisterImage(image);
 }
 
 // REFRESH - These are wrapped, since some of the actual function pointers 
 // get loaded in later in at boot time. 
-void PF_R_AddDecal(decal_t* d) {
+void _wrp_R_AddDecal(decal_t* d) {
     if (R_AddDecal)
         R_AddDecal(d);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
 
-void PF_R_LightPoint(const vec3_t *origin, vec3_t *light) {
+void _wrp_R_LightPoint(const vec3_t &origin, vec3_t &light) {
     if (R_LightPoint)
         R_LightPoint(origin, light);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
-void PF_R_SetSky(const char* name, float rotate, vec3_t *axis) {
+void _wrp_R_SetSky(const char* name, float rotate, vec3_t &axis) {
     if (R_SetSky)
         R_SetSky(name, rotate, axis);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
 
-void PF_R_ClearColor(void) {
+void _wrp_R_ClearColor(void) {
     if (R_ClearColor)
         R_ClearColor();
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
-void PF_R_SetAlpha(float alpha) {
+void _wrp_R_SetAlpha(float alpha) {
     if (R_SetAlpha)
         R_SetAlpha(alpha);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
-void PF_R_SetAlphaScale(float scale) {
+void _wrp_R_SetAlphaScale(float scale) {
     if (R_SetAlphaScale)
         R_SetAlphaScale(scale);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
-void PF_R_SetColor(uint32_t color) {
+void _wrp_R_SetColor(uint32_t color) {
     if (R_SetColor)
         R_SetColor(color);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
-void PF_R_SetClipRect(const clipRect_t* clip) {
+void _wrp_R_SetClipRect(const clipRect_t* clip) {
     if (R_SetClipRect)
         R_SetClipRect(clip);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
-float PF_R_ClampScale(cvar_t *var) {
+float _wrp_R_ClampScale(cvar_t *var) {
     // CPP: This was a bug I guess in the C code, there is no funcptr check.
     //if (R_ClampScale) {
         return R_ClampScale(var);
@@ -267,19 +214,19 @@ float PF_R_ClampScale(cvar_t *var) {
     //    return 0.0f;
     //}
 }
-void PF_R_SetScale(float scale) {
+void _wrp_R_SetScale(float scale) {
     if (R_SetScale)
         R_SetScale(scale);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
-void PF_R_DrawChar(int x, int y, int flags, int ch, qhandle_t font) {
+void _wrp_R_DrawChar(int x, int y, int flags, int ch, qhandle_t font) {
     if (R_DrawChar)
         R_DrawChar(x, y, flags, ch, font);
     else
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
 }
-int PF_R_DrawString(int x, int y, int flags, size_t maxChars,
+int _wrp_R_DrawString(int x, int y, int flags, size_t maxChars,
                                     const char* string, qhandle_t font) {
     if (R_DrawString)
         return R_DrawString(x, y, flags, maxChars, string, font);
@@ -288,7 +235,7 @@ int PF_R_DrawString(int x, int y, int flags, size_t maxChars,
 
     return 0;
 }
-qboolean PF_R_GetPicSize(int* w, int* h, qhandle_t pic) {
+qboolean _wrp_R_GetPicSize(int* w, int* h, qhandle_t pic) {
     // CPP: Bug in the old code I guess.
 //    if (R_GetPicSize) {
         return R_GetPicSize(w, h, pic);
@@ -298,14 +245,14 @@ qboolean PF_R_GetPicSize(int* w, int* h, qhandle_t pic) {
     //    return false;
     //}
 }
-void PF_R_DrawPic(int x, int y, qhandle_t pic) {
+void _wrp_R_DrawPic(int x, int y, qhandle_t pic) {
     if (R_DrawPic) {
         R_DrawPic(x, y, pic);
     } else {
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
     }
 }
-void PF_R_DrawStretchPic(int x, int y, int w, int h, qhandle_t pic) {
+void _wrp_R_DrawStretchPic(int x, int y, int w, int h, qhandle_t pic) {
     if (R_DrawStretchPic) {
         R_DrawStretchPic(x, y, w, h, pic);
     }
@@ -313,7 +260,7 @@ void PF_R_DrawStretchPic(int x, int y, int w, int h, qhandle_t pic) {
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
     }
 }
-void PF_R_TileClear(int x, int y, int w, int h, qhandle_t pic) {
+void _wrp_R_TileClear(int x, int y, int w, int h, qhandle_t pic) {
     if (R_TileClear) {
         R_TileClear(x, y, w, h, pic);
     }
@@ -321,7 +268,7 @@ void PF_R_TileClear(int x, int y, int w, int h, qhandle_t pic) {
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
     }
 }
-void PF_R_DrawFill8(int x, int y, int w, int h, int c) {
+void _wrp_R_DrawFill8(int x, int y, int w, int h, int c) {
     if (R_DrawFill8) {
         R_DrawFill8(x, y, w, h, c);
     }
@@ -329,7 +276,7 @@ void PF_R_DrawFill8(int x, int y, int w, int h, int c) {
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
     }
 }
-void PF_R_DrawFill32(int x, int y, int w, int h, uint32_t color) {
+void _wrp_R_DrawFill32(int x, int y, int w, int h, uint32_t color) {
     if (R_DrawFill32) {
         R_DrawFill32(x, y, w, h, color);
     }
@@ -339,11 +286,11 @@ void PF_R_DrawFill32(int x, int y, int w, int h, uint32_t color) {
 }
 // SOUND
 extern void AL_SpecialEffect_Underwater_Disable();
-void PF_SFX_Underwater_Disable(void) {
+void _wrp_SFX_Underwater_Disable(void) {
     AL_SpecialEffect_Underwater_Disable();
 }
 extern void AL_SpecialEffect_Underwater_Enable();
-void PF_SFX_Underwater_Enable(void) {
+void _wrp_SFX_Underwater_Enable(void) {
     AL_SpecialEffect_Underwater_Enable();
 }
 
@@ -459,20 +406,20 @@ void CL_InitGameProgs(void)
     importAPI.cs = &cs;
 
     // Client.
-    importAPI.GetFrameTime = PF_GetFrameTime;
-    importAPI.GetRealTime = PF_GetRealTime;
+    importAPI.GetFrameTime = _wrp_GetFrameTime;
+    importAPI.GetRealTime = _wrp_GetRealTime;
 
     importAPI.GetFramesPerSecond = CL_GetFps;
     importAPI.GetResolutionScale = CL_GetResolutionScale;
 
-    importAPI.GetServerState = PF_GetServerState;
-    importAPI.GetServerProtocol = PF_GetServerProtocol;
-    importAPI.GetProtocolVersion = PF_GetProtocolVersion;
+    importAPI.GetServerState = _wrp_GetServerState;
+    importAPI.GetServerProtocol = _wrp_GetServerProtocol;
+    importAPI.GetProtocolVersion = _wrp_GetProtocolVersion;
 
-    importAPI.IsDemoPlayback = PF_IsDemoPlayback;
+    importAPI.IsDemoPlayback = _wrp_IsDemoPlayback;
 
     importAPI.UpdateListenerOrigin = CL_UpdateListenerOrigin;
-    importAPI.UpdateSetting = PF_UpdateSetting;
+    importAPI.UpdateSetting = _wrp_UpdateSetting;
 
     importAPI.SetClientLoadState = CL_SetLoadState;
     importAPI.GetClienState = CL_GetState;
@@ -481,18 +428,18 @@ void CL_InitGameProgs(void)
     importAPI.CheckForIP = CL_CheckForIP;
 
     // Command Buffer.
-    importAPI.Cbuf_AddText = PF_Cbuf_AddText;
-    importAPI.Cbuf_InsertText = PF_Cbuf_InsertText;
-    importAPI.Cbuf_Execute = PF_Cbuf_Execute;
+    importAPI.Cbuf_AddText = _wrp_Cbuf_AddText;
+    importAPI.Cbuf_InsertText = _wrp_Cbuf_InsertText;
+    importAPI.Cbuf_Execute = _wrp_Cbuf_Execute;
     importAPI.CL_ForwardToServer = CL_ForwardToServer;
 
     // Collision Model.
-    importAPI.CM_HeadnodeForBox = PF_HeadnodeForBox;
-    importAPI.CM_InlineModel = PF_CM_InlineModel;
-    importAPI.CM_PointContents = PF_PointContents;
-    importAPI.CM_TransformedPointContents = PF_TransformedPointContents;
-    importAPI.CM_BoxTrace = PF_BoxTrace;
-    importAPI.CM_TransformedBoxTrace = PF_TransformedBoxTrace;
+    importAPI.CM_HeadnodeForBox = CM_HeadnodeForBox;
+    importAPI.CM_InlineModel = _wrp_CM_InlineModel;
+    importAPI.CM_PointContents = CM_PointContents;
+    importAPI.CM_TransformedPointContents = CM_TransformedPointContents;
+    importAPI.CM_BoxTrace = CM_BoxTrace;
+    importAPI.CM_TransformedBoxTrace = CM_TransformedBoxTrace;
     importAPI.CM_ClipEntity = CM_ClipEntity;
 
     // Command.
@@ -536,7 +483,7 @@ void CL_InitGameProgs(void)
     importAPI.Cvar_SetValue = Cvar_SetValue;
     importAPI.Cvar_SetInteger = Cvar_SetInteger;
     importAPI.Cvar_UserSet = Cvar_UserSet;
-    importAPI.Cvar_Reset = PF_Cvar_Reset;
+    importAPI.Cvar_Reset = _wrp_Cvar_Reset;
     importAPI.Cvar_ClampInteger = Cvar_ClampInteger;
     importAPI.Cvar_ClampValue = Cvar_ClampValue;
 
@@ -549,13 +496,13 @@ void CL_InitGameProgs(void)
     importAPI.FS_FOpenFile = FS_FOpenFile;
     importAPI.FS_FCloseFile = FS_FCloseFile;
     importAPI.FS_EasyOpenFile = FS_EasyOpenFile;
-    importAPI.FS_FileExists = PF_FS_FileExists;
-    importAPI.FS_FileExistsEx = PF_FS_FileExistsEx;
+    importAPI.FS_FileExists = _wrp_FS_FileExists;
+    importAPI.FS_FileExistsEx = _wrp_FS_FileExistsEx;
     importAPI.FS_WriteFile = FS_WriteFile;
     importAPI.FS_EasyWriteFile = FS_EasyWriteFile;
     importAPI.FS_Read = FS_Read;
     importAPI.FS_Write = FS_Write;
-    importAPI.FS_FPrintf = PF_FS_FPrintf;
+    importAPI.FS_FPrintf = _wrp_FS_FPrintf;
     importAPI.FS_ReadLine = FS_ReadLine;
     importAPI.FS_Flush = FS_Flush;
     importAPI.FS_Tell = FS_Tell;
@@ -598,44 +545,44 @@ void CL_InitGameProgs(void)
     importAPI.MSG_WriteShort = MSG_WriteShort;
     importAPI.MSG_WriteLong = MSG_WriteLong;
     importAPI.MSG_WriteString = MSG_WriteString;
-    importAPI.MSG_WritePosition = PF_WritePosition;
+    importAPI.MSG_WritePosition = MSG_WritePosition;
     importAPI.MSG_WriteAngle = MSG_WriteAngle;
 
-    importAPI.MSG_FlushTo = PF_MSG_FlushTo;
+    importAPI.MSG_FlushTo = _trp_MSG_FlushTo;
 
     // Register.
-    importAPI.R_RegisterModel = PF_R_RegisterModel;
-    importAPI.R_RegisterImage = PF_R_RegisterImage;
-    importAPI.R_RegisterRawImage = PF_R_RegisterRawImage;
-    importAPI.R_UnregisterImage = PF_R_UnregisterImage;
+    importAPI.R_RegisterModel = _wrp_R_RegisterModel;
+    importAPI.R_RegisterImage = _wrp_R_RegisterImage;
+    importAPI.R_RegisterRawImage = _wrp_R_RegisterRawImage;
+    importAPI.R_UnregisterImage = _wrp_R_UnregisterImage;
 
-    importAPI.R_RegisterPic = PF_R_RegisterPic;
-    importAPI.R_RegisterPic2 = PF_R_RegisterPic2;
-    importAPI.R_RegisterFont = PF_R_RegisterFont;
-    importAPI.R_RegisterSkin = PF_R_RegisterSkin;
+    importAPI.R_RegisterPic = _wrp_R_RegisterPic;
+    importAPI.R_RegisterPic2 = _wrp_R_RegisterPic2;
+    importAPI.R_RegisterFont = _wrp_R_RegisterFont;
+    importAPI.R_RegisterSkin = _wrp_R_RegisterSkin;
 
     importAPI.MOD_ForHandle = MOD_ForHandle;
 
     // Rendering
-    importAPI.R_AddDecal = PF_R_AddDecal;
-    importAPI.R_LightPoint = PF_R_LightPoint;
-    importAPI.R_SetSky = PF_R_SetSky;
+    importAPI.R_AddDecal = _wrp_R_AddDecal;
+    importAPI.R_LightPoint = _wrp_R_LightPoint;
+    importAPI.R_SetSky = _wrp_R_SetSky;
 
-    importAPI.R_ClearColor = PF_R_ClearColor;
-    importAPI.R_SetAlpha = PF_R_SetAlpha;
-    importAPI.R_SetAlphaScale = PF_R_SetAlphaScale;
-    importAPI.R_SetColor = PF_R_SetColor;
-    importAPI.R_SetClipRect = PF_R_SetClipRect;
-    importAPI.R_ClampScale = PF_R_ClampScale;
-    importAPI.R_SetScale = PF_R_SetScale;
-    importAPI.R_DrawChar = PF_R_DrawChar;
-    importAPI.R_DrawString = PF_R_DrawString;
-    importAPI.R_GetPicSize = PF_R_GetPicSize;
-    importAPI.R_DrawPic = PF_R_DrawPic;
-    importAPI.R_DrawStretchPic = PF_R_DrawStretchPic;
-    importAPI.R_TileClear = PF_R_TileClear;
-    importAPI.R_DrawFill8 = PF_R_DrawFill8;
-    importAPI.R_DrawFill32 = PF_R_DrawFill32;
+    importAPI.R_ClearColor = _wrp_R_ClearColor;
+    importAPI.R_SetAlpha = _wrp_R_SetAlpha;
+    importAPI.R_SetAlphaScale = _wrp_R_SetAlphaScale;
+    importAPI.R_SetColor = _wrp_R_SetColor;
+    importAPI.R_SetClipRect = _wrp_R_SetClipRect;
+    importAPI.R_ClampScale = _wrp_R_ClampScale;
+    importAPI.R_SetScale = _wrp_R_SetScale;
+    importAPI.R_DrawChar = _wrp_R_DrawChar;
+    importAPI.R_DrawString = _wrp_R_DrawString;
+    importAPI.R_GetPicSize = _wrp_R_GetPicSize;
+    importAPI.R_DrawPic = _wrp_R_DrawPic;
+    importAPI.R_DrawStretchPic = _wrp_R_DrawStretchPic;
+    importAPI.R_TileClear = _wrp_R_TileClear;
+    importAPI.R_DrawFill8 = _wrp_R_DrawFill8;
+    importAPI.R_DrawFill32 = _wrp_R_DrawFill32;
 
     // Screen.
     importAPI.SCR_UpdateScreen = SCR_UpdateScreen;
@@ -652,8 +599,8 @@ void CL_InitGameProgs(void)
     importAPI.S_StartLocalSound = S_StartLocalSound;
     importAPI.S_StartLocalSound_ = S_StartLocalSound_;
 
-    importAPI.SFX_Underwater_Disable = PF_SFX_Underwater_Enable;
-    importAPI.SFX_Underwater_Enable = PF_SFX_Underwater_Enable;
+    importAPI.SFX_Underwater_Disable = _wrp_SFX_Underwater_Enable;
+    importAPI.SFX_Underwater_Enable = _wrp_SFX_Underwater_Enable;
 
     // Load up the cgame dll.
     cge = entry(&importAPI);

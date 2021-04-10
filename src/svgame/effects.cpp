@@ -252,7 +252,7 @@ void BecomeExplosion1(entity_t *self)
 {
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_EXPLOSION1);
-    gi.WritePosition(&self->s.origin);
+    gi.WritePosition(self->s.origin);
     gi.Multicast(&self->s.origin, MULTICAST_PVS);
 
     G_FreeEntity(self);
@@ -263,7 +263,7 @@ void BecomeExplosion2(entity_t *self)
 {
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TE_EXPLOSION2);
-    gi.WritePosition(&self->s.origin);
+    gi.WritePosition(self->s.origin);
     gi.Multicast(&self->s.origin, MULTICAST_PVS);
 
     G_FreeEntity(self);

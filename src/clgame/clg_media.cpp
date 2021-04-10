@@ -287,7 +287,7 @@ void CLG_SetSky(void)
         VectorClear(axis);
     }
 
-    clgi.R_SetSky(cl->configstrings[CS_SKY], rotate, &axis);
+    clgi.R_SetSky(cl->configstrings[CS_SKY], rotate, axis);
 }
 
 //

@@ -60,8 +60,8 @@ void target_laser_think(entity_t* self)
                 gi.WriteByte(svg_temp_entity);
                 gi.WriteByte(TE_LASER_SPARKS);
                 gi.WriteByte(count);
-                gi.WritePosition(&tr.endPosition);
-                gi.WriteDirection(&tr.plane.normal);
+                gi.WritePosition(tr.endPosition);
+                gi.WriteDirection(tr.plane.normal);
                 gi.WriteByte(self->s.skinnum);
                 gi.Multicast(&tr.endPosition, MULTICAST_PVS);
             }

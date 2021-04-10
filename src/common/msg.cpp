@@ -197,9 +197,9 @@ MSG_WritePosition
 */
 void MSG_WritePosition(const vec3_t &pos)
 {
-    MSG_WriteFloat(pos.x);
-    MSG_WriteFloat(pos.y);
-    MSG_WriteFloat(pos.z);
+    MSG_WriteFloat(pos[0]);
+    MSG_WriteFloat(pos[1]);
+    MSG_WriteFloat(pos[2]);
 }
 
 /*
