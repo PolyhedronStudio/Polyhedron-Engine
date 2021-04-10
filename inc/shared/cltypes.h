@@ -334,8 +334,6 @@ typedef struct client_state_s {
                                 // is rendering at.  always <= cl.servertime
     float       lerpfrac;       // between oldframe and frame
 
-    client_entity_step_t step;
-
     //
     // Client Sound Variables.
     //

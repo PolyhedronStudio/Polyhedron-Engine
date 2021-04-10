@@ -16,36 +16,41 @@
 //================
 //
 void CLG_CheckPredictionError(int frame, unsigned int cmd) {
-    // N&C: FF Precision. (Used to be ints.)
-    float delta[3];
+    vec3_t delta;
     float len;
-    // compare what the server returned with what we had predicted it to be
-    VectorSubtract(cl->frame.playerState.pmove.origin, cl->predicted_origins[cmd & CMD_MASK], delta);
 
-    // save the prediction error for interpolation
-    // N&C: FF Precision. (1.0 / 8 = 0.125, 640 / 8 = 80)
-    len = fabs(delta[0]) + fabs(delta[1]) + fabs(delta[2]);
-    if (len < 0.125f || len > 80.f) {
-        //len = abs(delta[0]) + abs(delta[1]) + abs(delta[2]);
-        //if (len < 1 || len > 640) {
-            // > 80 world units is a teleport or something
-        VectorClear(cl->prediction_error);
-        return;
+    // First frame.
+    if (cl->frame.number == 0) {
+        cl->predicted_origin = cl->frame.playerState.pmove.origin;
+        cl->predicted_velocity = cl->frame.playerState.pmove.velocity;
+        cl->predicted_angles = cl->frame.playerState.viewAngles;
     }
 
-    // TODO: Add Debug functions to CG Module.
-    //SHOWMISS("prediction miss on %i: %i (%d %d %d)\n",
-    //    cl->frame.number, len, delta[0], delta[1], delta[2]);
+    // Compare what the server returned with what we had predicted it to be
+    cl->prediction_error = cl->frame.playerState.pmove.origin - cl->predicted_origins[cmd & CMD_MASK];
 
-    // don't predict steps against server returned data
+    // Length is 
+    len = vec3_length(cl->prediction_error);
+    if (len > .1f) {
+        if (len > 2400.f / (1.0f / BASE_FRAMERATE)) {
+            Com_DPrint("MAX_DELTA_ORIGIN: %s\n", Vec3ToString(cl->prediction_error));
+
+            cl->predicted_origin = cl->frame.playerState.pmove.origin;
+            cl->predicted_velocity = cl->frame.playerState.pmove.velocity;
+            cl->viewAngles = cl->frame.playerState.viewAngles;
+
+            cl->prediction_error = vec3_zero();
+        }
+        else {
+            Com_DPrint("CLG_CheckPredictionError: %s\n", Vec3ToString(cl->prediction_error));
+        }
+    }
+
+    // Don't predict steps against server returned data
     if (cl->predicted_step_frame <= cmd)
         cl->predicted_step_frame = cmd + 1;
 
-    VectorCopy(cl->frame.playerState.pmove.origin, cl->predicted_origins[cmd & CMD_MASK]);
-
-    // N&C: FF Precision. No need to scale, just copy.
-    // save for error interpolation
-    VectorCopy(delta, cl->prediction_error);
+    cl->predicted_origins[cmd & CMD_MASK] = cl->frame.playerState.pmove.origin;
 }
 
 //
@@ -190,12 +195,12 @@ static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
 
 //
 //================
-// CLG_TraverseClientStep
+// CLG_TraverseEntityStep
 //
 // Setup an entity's step interpolation.
 //================
 //
-void CLG_TraverseClientStep(client_entity_step_t* step, uint32_t time, float height) {
+void CLG_TraverseEntityStep(client_entity_step_t* step, uint32_t time, float height) {
 
     const uint32_t delta = time - step->timestamp;
 
@@ -213,12 +218,12 @@ void CLG_TraverseClientStep(client_entity_step_t* step, uint32_t time, float hei
 
 //
 //================
-// CLG_InterpolateEntityStep
+// CLG_InterpolateStep
 //
 // Interpolate the entity's step for the current frame.
 //================
 //
-void CLG_InterpolateEntityStep(client_entity_step_t* step) {
+void CLG_InterpolateStep(client_entity_step_t* step) {
 
     const uint32_t delta = clgi.GetRealTime() - step->timestamp; //cl->time ->unclamped_time - step->timestamp;
 
@@ -285,7 +290,13 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
         //    // ensure we only count each step once
         //    cl->step.time = cmd->time;
         //}
-    //if (pm.state.type != PM_SPECTATOR && (pm.state.flags & PMF_ON_STAIRS)) {
+    }
+    else {
+        frame = current - 1;
+    }
+
+    // This only interpolates up step...
+    //if (pm.state.type != PM_SPECTATOR && (pm.state.flags & PMF_ON_GROUND)) {
     //    oldz = cl->predicted_origins[cl->predicted_step_frame & CMD_MASK][2];
     //    step = pm.state.origin[2] - oldz;
 
@@ -295,14 +306,6 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     //        cl->predicted_step_frame = frame + 1;    // don't double step
     //    }
     //}
-
-    }
-    else {
-        frame = current - 1;
-    }
-
-    // This only interpolates up step...
-
 
     if (pm.state.type != PM_SPECTATOR) {
         oldz = cl->predicted_origins[cl->predicted_step_frame & CMD_MASK][2];
