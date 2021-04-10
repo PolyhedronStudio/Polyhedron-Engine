@@ -6,60 +6,11 @@
 //
 // Movement prediction implementation for the client side.
 //
+// Local includes (shared, & other game defines.)
 #include "clg_local.h"
 
-//
-//===============
-// CLG_CheckPredictionError
-// 
-// Checks for prediction errors.
-//================
-//
-void CLG_CheckPredictionError(int frame, unsigned int cmd) {
-    // N&C: FF Precision. (Used to be ints.)
-    float delta[3];
-    float len;
-    // compare what the server returned with what we had predicted it to be
-    VectorSubtract(cl->frame.playerState.pmove.origin, cl->predicted_origins[cmd & CMD_MASK], delta);
-
-    // save the prediction error for interpolation
-    // N&C: FF Precision. (1.0 / 8 = 0.125, 640 / 8 = 80)
-    len = fabs(delta[0]) + fabs(delta[1]) + fabs(delta[2]);
-    if (len < 0.125f || len > 80.f) {
-        //len = abs(delta[0]) + abs(delta[1]) + abs(delta[2]);
-        //if (len < 1 || len > 640) {
-            // > 80 world units is a teleport or something
-        VectorClear(cl->prediction_error);
-        return;
-    }
-
-    // TODO: Add Debug functions to CG Module.
-    //SHOWMISS("prediction miss on %i: %i (%d %d %d)\n",
-    //    cl->frame.number, len, delta[0], delta[1], delta[2]);
-
-    // don't predict steps against server returned data
-    if (cl->predicted_step_frame <= cmd)
-        cl->predicted_step_frame = cmd + 1;
-
-    VectorCopy(cl->frame.playerState.pmove.origin, cl->predicted_origins[cmd & CMD_MASK]);
-
-    // N&C: FF Precision. No need to scale, just copy.
-    // save for error interpolation
-    VectorCopy(delta, cl->prediction_error);
-}
-
-//
-//===============
-// CLG_PredictAngles
-// 
-// Sets the predicted angles.
-//================
-//
-void CLG_PredictAngles(void) {
-    cl->predicted_angles[0] = cl->viewAngles[0] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[0]);
-    cl->predicted_angles[1] = cl->viewAngles[1] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[1]);
-    cl->predicted_angles[2] = cl->viewAngles[2] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[2]);
-}
+// The actual Implementation.
+#include "IEAPI/ClientGameExports.hpp"
 
 //
 //===============
@@ -230,15 +181,76 @@ void CLG_InterpolateEntityStep(client_entity_step_t* step) {
         step->delta_height = 0.0;
     }
 }
+
+//
+//=============================================================================
+//
+//	CLIENT GAME MODULE 'PREDICT' ENTRY POINTS.
+//
+//=============================================================================
+//
 //
 //===============
-// CLG_PredictMovement
+// ClientGameExports::CheckPredictionError
+// 
+// Checks for prediction errors.
+//================
+//
+void ClientGameExports::CheckPredictionError(int frame, unsigned int cmd) {
+    // N&C: FF Precision. (Used to be ints.)
+    float delta[3];
+    float len;
+    // compare what the server returned with what we had predicted it to be
+    VectorSubtract(cl->frame.playerState.pmove.origin, cl->predicted_origins[cmd & CMD_MASK], delta);
+
+    // save the prediction error for interpolation
+    // N&C: FF Precision. (1.0 / 8 = 0.125, 640 / 8 = 80)
+    len = fabs(delta[0]) + fabs(delta[1]) + fabs(delta[2]);
+    if (len < 0.125f || len > 80.f) {
+        //len = abs(delta[0]) + abs(delta[1]) + abs(delta[2]);
+        //if (len < 1 || len > 640) {
+            // > 80 world units is a teleport or something
+        VectorClear(cl->prediction_error);
+        return;
+    }
+
+    // TODO: Add Debug functions to CG Module.
+    //SHOWMISS("prediction miss on %i: %i (%d %d %d)\n",
+    //    cl->frame.number, len, delta[0], delta[1], delta[2]);
+
+    // don't predict steps against server returned data
+    if (cl->predicted_step_frame <= cmd)
+        cl->predicted_step_frame = cmd + 1;
+
+    VectorCopy(cl->frame.playerState.pmove.origin, cl->predicted_origins[cmd & CMD_MASK]);
+
+    // N&C: FF Precision. No need to scale, just copy.
+    // save for error interpolation
+    VectorCopy(delta, cl->prediction_error);
+}
+
+//
+//===============
+// ClientGameExports::PredictAngles
+// 
+// Sets the predicted angles.
+//================
+//
+void ClientGameExports::PredictAngles(void) {
+    cl->predicted_angles[0] = cl->viewAngles[0] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[0]);
+    cl->predicted_angles[1] = cl->viewAngles[1] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[1]);
+    cl->predicted_angles[2] = cl->viewAngles[2] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[2]);
+}
+
+//
+//===============
+// ClientGameExports::PredictMovement
 // 
 // Predicts the actual client side movement.
 //================
 //
 client_entity_step_t stepx;
-void CLG_PredictMovement(unsigned int ack, unsigned int current) {
+void ClientGameExports::PredictMovement(unsigned int ack, unsigned int current) {
     pm_move_t   pm = {};
     float       step, oldz;
     int         frame;

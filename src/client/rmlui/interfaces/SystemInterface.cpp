@@ -108,6 +108,10 @@ bool RmlUISystemInterface::LogMessage(Rml::Log::Type type, const Rml::String& me
     case Rml::Log::Type::LT_DEBUG:
         Com_DPrintf("[RmlUI - DEBUG]: %s\n", message.c_str());
         break;
+    case Rml::Log::Type::LT_MAX:
+    default:
+            Com_DPrintf("[RmlUI - Default/LT_MAX]: %s\n", message.c_str());
+        break;
     }
 
     return true;

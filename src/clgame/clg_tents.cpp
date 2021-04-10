@@ -6,7 +6,11 @@
 //
 // Handles the temporary entities. Explions, Beams, etc.
 //
+// Local includes (shared, & other game defines.)
 #include "clg_local.h"
+
+// The actual Implementation.
+#include "IEAPI/ClientGameExports.hpp"
 
 //
 // CVars.

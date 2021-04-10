@@ -6,7 +6,11 @@
 //
 // View handling on a per frame basis.
 //
+// Local includes (shared, & other game defines.)
 #include "clg_local.h"
+
+// The actual Implementation.
+#include "IEAPI/ClientGameExports.hpp"
 
 clg_view_t  view;
 //=============
@@ -43,7 +47,7 @@ static cvar_t* cl_adjustfov;
 //
 //=============================================================================
 //
-// CLIENT MODULE VIEW COMMAND FUNCTIONS.
+// CLIENT GAME MODULE VIEW COMMAND FUNCTIONS.
 //
 //=============================================================================
 // 
@@ -364,14 +368,6 @@ static void CLG_AddEntities (void) {
 }
 
 //
-//=============================================================================
-//
-// CLIENT MODULE VIEW ENTRY FUNCTIONS.
-//
-//=============================================================================
-//
-
-//
 //===============
 // CLG_CalculateFOV
 // 
@@ -394,26 +390,47 @@ float CLG_CalculateFOV(float fov_x, float width, float height)
     return a;
 }
 
+
+//
+//=============================================================================
+//
+// CLIENT GAME MODULE VIEW ENTRY FUNCTIONS.
+//
+//=============================================================================
+//
+
 //
 //===============
-// CLG_PreRenderView
+// ClientGameExports::CalculateFOV
+// 
+// Calculates the Field Of View.
+//===============
+//
+float ClientGameExports::CalculateFOV(float fov_x, float width, float height)
+{
+    return CLG_CalculateFOV(fov_x, width, height);
+}
+
+//
+//===============
+// ClientGameExports::PreRenderView
 // 
 // Called right after the engine clears the scene, and begins a new one.
 //===============
 //
-void CLG_PreRenderView (void) {
+void ClientGameExports::PreRenderView (void) {
 
 }
 
 //
 //===============
-// CLG_ClearScene
+// ClientGameExports::ClearScene
 // 
 // Called when the engine wants to clear the frame.
 // It also specifies the model that will be used as the world.
 //===============
 //
-void CLG_ClearScene(void)
+void ClientGameExports::ClearScene(void)
 {
 #if USE_DLIGHTS
     view.num_dlights = 0;
@@ -424,13 +441,13 @@ void CLG_ClearScene(void)
 
 //
 //===============
-// CLG_RenderView
+// ClientGameExports::RenderView
 // 
 // Called whenever the engine wants to render a newly parsed valid frame.
 // Fill the scene with entities you want rendered to the client here.
 //===============
 //
-void CLG_RenderView (void) {
+void ClientGameExports::RenderView (void) {
     // Add our view entities.
     CLG_AddEntities();
 
@@ -451,12 +468,12 @@ void CLG_RenderView (void) {
 
 //
 //===============
-// CLG_PostRenderView
+// ClientGameExports::PostRenderView
 // 
 // Called right after the engine renders the scene, and prepares to
 // finish up its current frame loop iteration.
 //===============
 //
-void CLG_PostRenderView (void) {
+void ClientGameExports::PostRenderView (void) {
     V_SetLightLevel();
 }

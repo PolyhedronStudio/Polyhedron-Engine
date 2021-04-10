@@ -1771,6 +1771,7 @@ void PMove(pm_move_t * pmove, pmoveParams_t * params)
 //
 //=============================================================================
 //
+
 //
 //===============
 // PMoveInit
@@ -1778,7 +1779,8 @@ void PMove(pm_move_t * pmove, pmoveParams_t * params)
 // Initializes the pmp structure.
 //===============
 //
-void PMoveInit(pmoveParams_t * pmp)
+extern "C" {
+q_exported void PMoveInit(pmoveParams_t * pmp)
 {
     // set up default pmove parameters
     memset(pmp, 0, sizeof(*pmp));
@@ -1806,7 +1808,7 @@ void PMoveInit(pmoveParams_t * pmp)
 // Enables QuakeWorld movement on the pmp.
 //===============
 //
-void PMoveEnableQW(pmoveParams_t * pmp)
+q_exported void PMoveEnableQW(pmoveParams_t * pmp)
 {
     pmp->qwmode = true;
     pmp->watermult = PM_GRAVITY_WATER;
@@ -1823,3 +1825,4 @@ void PMoveEnableQW(pmoveParams_t * pmp)
     //pmp->waterfriction = 4;
     //pmp->airaccelerate = true;
 }
+};

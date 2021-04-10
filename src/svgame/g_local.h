@@ -507,7 +507,7 @@ extern  entity_t         *g_edicts;
 #define CLOFS(x) q_offsetof(gclient_t, x)
 
 #define random()    ((rand () & RAND_MAX) / ((float)RAND_MAX))
-#define crandom()   (2.0 * (random() - 0.5))
+#define crandom()   (2.0f * (random() - 0.5f))
 
 extern  cvar_t  *maxentities;
 extern  cvar_t  *deathmatch;

@@ -166,7 +166,7 @@ void HUD_BeginIntermission(entity_t *targ)
         }
     }
 
-    level.intermission_origin = intermissionEntity->s.origin, level.intermission_origin;
+    level.intermission_origin = intermissionEntity->s.origin;
     level.intermission_angle = intermissionEntity->s.angles;
 
     // Initiate the client intermission mode for all clients.

@@ -6,7 +6,11 @@
 //
 // Handles parsing of the Server Messages.
 //
+// Local includes (shared, & other game defines.)
 #include "clg_local.h"
+
+// The actual Implementation.
+#include "IEAPI/ClientGameExports.hpp"
 
 
 //
@@ -331,13 +335,13 @@ static void CLG_ParseCenterPrint(void)
 //
 //=============================================================================
 //
-//	CLIENT MODULE 'PARSE' ENTRY POINTS.
+//	CLIENT GAME MODULE 'PARSE' ENTRY POINTS.
 //
 //=============================================================================
 //
 //
 //===============
-// CLG_UpdateConfigString
+// ClientGameExports::UpdateConfigString
 // 
 // Called when a configstring has been parsed and is ready to be
 // loaded in again.
@@ -346,7 +350,7 @@ static void CLG_ParseCenterPrint(void)
 // and lets the client work it out.
 //===============
 //
-qboolean CLG_UpdateConfigString(int index, const char *str) {
+qboolean ClientGameExports::UpdateConfigString(int index, const char *str) {
     if (index == CS_AIRACCEL) {
         if (clg.pmoveParams.qwmode)
             clg.pmoveParams.airaccelerate = true;
@@ -377,18 +381,18 @@ qboolean CLG_UpdateConfigString(int index, const char *str) {
 
 //
 //===============
-// CLG_StartServerMessage
+// ClientGameExports::StartServerMessage
 // 
 // Called when a server message comes in.
 //===============
 //
-void CLG_StartServerMessage (void) {
+void ClientGameExports::StartServerMessage (void) {
 
 }
 
 //
 //===============
-// CLG_StartServerMessage
+// ClientGameExports::ParseServerMessage
 // 
 // Called when a server message hasn't been parsed by the client yet.
 // Returns true on success, returns false in case of error.
@@ -396,7 +400,7 @@ void CLG_StartServerMessage (void) {
 // When returning false, the client will notify about the error.
 //===============
 //
-qboolean CLG_ParseServerMessage (int serverCommand) {
+qboolean ClientGameExports::ParseServerMessage (int serverCommand) {
     // Switch cmd.
     switch (serverCommand) {
 
@@ -451,7 +455,7 @@ qboolean CLG_ParseServerMessage (int serverCommand) {
 
 //
 //===============
-// CLG_SeekDemoMessage
+// ClientGameExportsSeekDemoMessage
 //
 // A variant of ParseServerMessage that skips over non-important action messages,
 // used for seeking in demos.
@@ -461,7 +465,7 @@ qboolean CLG_ParseServerMessage (int serverCommand) {
 // just to name a few examples.
 //===============
 //
-qboolean CLG_SeekDemoMessage(int demoCommand) {
+qboolean ClientGameExports::SeekDemoMessage(int demoCommand) {
     // Switch cmd.
     switch (demoCommand) {
     case svg_inventory:
@@ -480,11 +484,11 @@ qboolean CLG_SeekDemoMessage(int demoCommand) {
 
 //
 //===============
-// CLG_EndServerMessage
+// ClientGameExports::EndServerMessage
 // 
 // Called when the end of parsing a server message has been reached.
 //===============
 //
-void CLG_EndServerMessage (int realTime) {
+void ClientGameExports::EndServerMessage (int realTime) {
 
 }

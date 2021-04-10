@@ -90,7 +90,7 @@ extern "C" {
         //
         // Client state.
         // Sets the client load state.
-        void            (*SetClientLoadState) (load_state_t state);
+        void            (*SetClientLoadState) (client_load_state_t state);
         // Returns the current state of the client.
         connstate_t     (*GetClienState) (void);
 

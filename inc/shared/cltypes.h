@@ -240,7 +240,7 @@ typedef enum {
     LOAD_IMAGES,
     LOAD_CLIENTS,
     LOAD_SOUNDS
-} load_state_t;
+} client_load_state_t;
 
 //
 // This structure contains all (persistent)shared data with the client.

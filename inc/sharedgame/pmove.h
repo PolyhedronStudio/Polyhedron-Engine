@@ -140,6 +140,7 @@ typedef struct {
 // Each client has their own individual pmove parameters.
 // To add your own, add them below the comment.
 //-------------------
+extern "C" {
 typedef struct {
     qboolean    qwmode;
     qboolean    airaccelerate;
@@ -153,7 +154,7 @@ typedef struct {
     float       waterfriction;
     float       flyfriction;
 } pmoveParams_t;
-
+};
 
 //
 // PMove functions.
@@ -161,7 +162,9 @@ typedef struct {
 void PMove(pm_move_t* pmove, pmoveParams_t* params);
 
 // TODO: 
-void PMoveInit(pmoveParams_t* pmp);
-void PMoveEnableQW(pmoveParams_t* pmp);
+extern "C" {
+    void PMoveInit(pmoveParams_t* pmp);
+    void PMoveEnableQW(pmoveParams_t* pmp);
+};
 
 #endif // PMOVE_H

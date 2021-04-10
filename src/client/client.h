@@ -375,7 +375,7 @@ typedef struct console_s {
     netadr_t remoteAddress;
     char *remotePassword;
 
-    load_state_t loadstate;
+    client_load_state_t loadstate;
 } console_t;
 extern console_t con;
 //=============================================================================
@@ -402,7 +402,7 @@ qboolean CL_CheckForIgnore(const char *s);
 void CL_WriteConfig(void);
 connstate_t CL_GetState (void);                     // WATISDEZE Added for CG Module.
 void        CL_SetState (connstate_t state);        // WATISDEZE Added for CG Module.
-void        CL_SetLoadState (load_state_t state);   // WATISDEZE Added for CG Module.
+void        CL_SetLoadState (client_load_state_t state);   // WATISDEZE Added for CG Module.
 
 //
 // precache.c
@@ -416,10 +416,10 @@ void        CL_SetLoadState (load_state_t state);   // WATISDEZE Added for CG Mo
 //     LOAD_IMAGES,
 //     LOAD_CLIENTS,
 //     LOAD_SOUNDS
-// } load_state_t;
+// } client_load_state_t;
 
 void CL_ParsePlayerSkin(char *name, char *model, char *skin, const char *s);
-void CL_LoadState(load_state_t state);
+void CL_LoadState(client_load_state_t state);
 void CL_RegisterSounds(void);
 void CL_RegisterBspModels(void);
 void CL_RegisterVWepModels(void);

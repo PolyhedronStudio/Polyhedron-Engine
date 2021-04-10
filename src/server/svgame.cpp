@@ -970,7 +970,7 @@ void SV_InitGameProgs(void)
 
     // sanitize max_edicts
     if (ge->entity_size <= sv_maxclients->integer || ge->entity_size > MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Server Game DLL returned bad number of max_edicts %i   %i", ge->entity_size, sizeof(entity_t));
+        Com_Error(ERR_DROP, "Server Game DLL returned bad number of max_edicts %i   %lu", ge->entity_size, sizeof(entity_t));
     }
 }
 
