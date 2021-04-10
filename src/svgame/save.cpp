@@ -293,8 +293,8 @@ static const save_field_t clientfields[] = {
 #define _OFS CLOFS
     I(playerState.pmove.type),
 
-    SA(playerState.pmove.origin, 3),
-    SA(playerState.pmove.velocity, 3),
+    V(playerState.pmove.origin),
+    V(playerState.pmove.velocity),
     B(playerState.pmove.flags),
     B(playerState.pmove.time),
     S(playerState.pmove.gravity),
@@ -916,7 +916,7 @@ void ReadLevel(const char *filename)
     int     i;
     entity_t *ent;
 
-    // free any dynamic memory allocated by loading the level
+    // Free any dynamic memory allocated by loading the level
     // base state
     gi.FreeTags(TAG_LEVEL);
 
@@ -924,13 +924,10 @@ void ReadLevel(const char *filename)
     if (!f)
         gi.Error("Couldn't open %s", filename);
 
-    // wipe all the entities
-    // WatIs: C++-ify: Note that this may be a problem maker.
-    /*for (int i = 0; i < game.maxentities; i++) {
-        g_edicts[i] = entity_t();
-    }
-    */
+    // Ensure all entities have a clean slate in memory.
     memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
+
+    // Set the number of edicts to be maxclients + 1. (They are soon to be in-use after all)
     globals.num_edicts = maxclients->value + 1;
 
     i = read_int(f);
