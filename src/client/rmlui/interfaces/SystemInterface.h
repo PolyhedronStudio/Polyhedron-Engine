@@ -35,7 +35,7 @@ public:
 	//virtual int TranslateString(Rml::String& translated, const Rml::String& input);
 
 	//// Log the specified message.
-	virtual bool LogMessage(Rml::Log::Type type, const Rml::String& message) override;
+	virtual bool LogMessage(Rml::Log::Type type, const Rml::String& message);
 
 	// Translate key.
 	Rml::Input::KeyIdentifier TranslateKey(SDL_Keycode sdlkey);

@@ -7,8 +7,6 @@ cmake_minimum_required (VERSION 3.8)
 ###############################################################################
 ###################### CLIENT GAME
 SET(SRC_CLGAME
-	clgame/IEAPI/ClientGameExports.cpp
-
 	clgame/clg_effects.cpp
 	clgame/clg_entities.cpp
 	clgame/clg_main.cpp
@@ -24,8 +22,6 @@ SET(SRC_CLGAME
 )
 
 SET(HEADERS_CLGAME
-	clgame/IEAPI/ClientGameExports.hpp
-
 	clgame/clg_local.h
 )
 
@@ -328,9 +324,6 @@ SET(SRC_SHAREDGAME
 
 ###################### Shared Folder.
 SET(HEADERS_SHARED
-	# Client IEAPI.
-	../inc/shared/client/IClientGameExports.hpp
-
 	# Math shared .cpp lib here.
 	../inc/shared/math/color.h
 	../inc/shared/math/matrix3.h

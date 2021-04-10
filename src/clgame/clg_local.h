@@ -233,7 +233,7 @@ void CLG_ClientDisconnect(void);
 void CLG_ClearState(void);
 void CLG_DemoSeek(void);
 
-void CLG_UpdateUserinfo(cvar_t* var, from_t from);
+void CLG_UpdateUserInfo(cvar_t* var, from_t from);
 
 void Com_Print(const char *fmt, ...);
 void Com_DPrint(const char *fmt, ...);
@@ -264,7 +264,7 @@ void CLG_LoadClientInfo(clientinfo_t* ci, const char* str);
 void CLG_SetSky(void);
 
 void CLG_InitMedia(void);
-char *CLG_GetMediaLoadStateName(client_load_state_t state);
+char *CLG_GetMediaLoadStateName(load_state_t state);
 void CLG_LoadScreenMedia(void);
 void CLG_LoadWorldMedia(void);
 void CLG_ShutdownMedia(void);

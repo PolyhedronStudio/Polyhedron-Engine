@@ -30,7 +30,6 @@
 
     // Structure containing all the client dll game function pointers for the engine to work with.
     class IClientGameExports {
-    public:
         //---------------------------------------------------------------------
         // Important VIRTUAL Destructor
         //---------------------------------------------------------------------
@@ -44,16 +43,6 @@
             int32_t minor;
             int32_t point;
         } apiversion;
-
-        //-----------------------------------------------------s----------------
-        // Pointers to CG Module.
-        //---------------------------------------------------------------------
-        // Shared player move parameters.
-        // N&C: This has moved over to the client game exports.
-        // It has been changed in to a pointer. By doing so we can prevent
-        // this structure from turning inconsistent if the game decides to
-        // add extra parameters to this structure.
-        pmoveParams_t* pmoveParams; // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
 
         //---------------------------------------------------------------------
         // Core.
@@ -94,7 +83,7 @@
         // Media.
         //---------------------------------------------------------------------
         // Called when the client wants to know the name of a custom load stat.
-        virtual char *GetMediaLoadStateName (int state) = 0;
+        virtual char *GetMediaLoadStateName (load_state_t state) = 0;
         // Called when the renderer initializes.
         virtual void InitMedia (void) = 0;
         // Called whenever the screen media has te reinitialize.
@@ -162,6 +151,7 @@
         // Called right after the engine renders the scene, and prepares to
         // finish up its current frame loop iteration.
         virtual void PostRenderView (void) = 0;
+
     };
 
 #endif

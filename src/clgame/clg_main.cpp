@@ -6,10 +6,7 @@
 //
 // Handles the main initialisation of the client game dll.
 //
-// Local includes (shared, & other game defines.)
 #include "clg_local.h"
-
-// The actual Implementation.
 #include "IEAPI/ClientGameExports.hpp"
 
 //
@@ -93,7 +90,7 @@ extern "C" {
 #endif
 #endif
 
-q_exported void *GetClientGameAPI (clgame_import_t *clgimp)
+q_exported IClientGameExports *GetClientGameAPI (clgame_import_t *clgimp)
 {
     // Store a copy of the engine imported function pointer struct.
     clgi = *clgimp;
@@ -105,8 +102,71 @@ q_exported void *GetClientGameAPI (clgame_import_t *clgimp)
     // Export the player move parameters.
     clge.pmoveParams                = &clg.pmoveParams;
 
+    // Test if it is compatible, if not, return clge with only the apiversion set.
+    // The client will handle the issue from there on.
+    if (clgimp->apiversion.major != CGAME_API_VERSION_MAJOR ||
+        clgimp->apiversion.minor != CGAME_API_VERSION_MINOR) {
+        clge.apiversion = { CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT };
+        return &clge;
+    }
+
+    // Setup the game export function pointers.
+    // Core.
+    clge.Init                       = CLG_Init;
+    clge.Shutdown                   = CLG_Shutdown;
+
+    clge.CalculateFOV                    = CLG_CalculateFOV;
+    clge.CalculateViewValues             = CLG_CalculateViewValues;
+    clge.ClearState                 = CLG_ClearState;
+    clge.DemoSeek                   = CLG_DemoSeek;
+
+    clge.ClientBegin                = CLG_ClientBegin;
+    clge.ClientDeltaFrame           = CLG_ClientDeltaFrame;
+    clge.ClientFrame                = CLG_ClientFrame;
+    clge.ClientDisconnect           = CLG_ClientDisconnect;
+
+    clge.UpdateUserinfo             = CLG_UpdateUserInfo;
+
+    // Entities.
+    clge.EntityEvent                = CLG_EntityEvent;
+
+    // Media.
+    clge.InitMedia                  = CLG_InitMedia;
+    clge.GetMediaLoadStateName      = CLG_GetMediaLoadStateName;
+    clge.LoadScreenMedia            = CLG_LoadScreenMedia;
+    clge.LoadWorldMedia             = CLG_LoadWorldMedia;
+    clge.ShutdownMedia              = CLG_ShutdownMedia;
+
+    // Player Movement. (Client Side)
+    clge.PMoveInit                  = PMoveInit;
+    clge.PMoveEnableQW              = PMoveEnableQW;
+
+    // Predict Movement (Client Side)
+    clge.CheckPredictionError       = CLG_CheckPredictionError;
+    clge.PredictAngles              = CLG_PredictAngles;
+    clge.PredictMovement            = CLG_PredictMovement;
+
+    // ServerMessage.
+    clge.UpdateConfigString         = CLG_UpdateConfigString;
+    clge.StartServerMessage         = CLG_StartServerMessage;
+    clge.ParseServerMessage         = CLG_ParseServerMessage;
+    clge.SeekDemoMessage            = CLG_SeekDemoMessage;
+    clge.EndServerMessage           = CLG_EndServerMessage;
+
+    // Screen.
+    clge.RenderScreen               = CLG_RenderScreen;
+    clge.ScreenModeChanged          = CLG_ScreenModeChanged;
+    clge.DrawLoadScreen             = CLG_DrawLoadScreen;
+    clge.DrawPauseScreen            = CLG_DrawPauseScreen;
+
+    // View.
+    clge.PreRenderView              = CLG_PreRenderView;
+    clge.ClearScene                 = CLG_ClearScene;
+    clge.RenderView                 = CLG_RenderView;
+    clge.PostRenderView             = CLG_PostRenderView;
+
     // Return cgame function pointer struct.
-    return (void*)&clge;
+    return &clge;
 }
 
 #if defined(__linux__)
@@ -314,12 +374,12 @@ static void cl_vwep_changed(cvar_t* self)
 
 //
 //===============
-// ClientGameExports::Init
+// CLG_Init
 // 
 // Handles the initialisation of the CG Module.
 //===============
 //
-void ClientGameExports::Init() {
+void CLG_Init() {
     // Begin init log.
     Com_Print("\n%s\n", "==== InitCLGame ====");
 
@@ -417,7 +477,7 @@ void ClientGameExports::Init() {
 // Not used for demos.
 //===============
 //
-void ClientGameExports::ClientBegin() {
+void CLG_ClientBegin() {
     // Update settings.
     CLG_UpdateFootstepsSetting();
     CLG_UpdateGunSettings();
@@ -431,7 +491,7 @@ void ClientGameExports::ClientBegin() {
 // Called each VALID client frame. Handle per VALID frame basis things here.
 //===============
 //
-void ClientGameExports::ClientDeltaFrame(void) {
+void CLG_ClientDeltaFrame(void) {
     // Called each time a valid client frame has been 
     SCR_SetCrosshairColor();
 }
@@ -443,7 +503,7 @@ void ClientGameExports::ClientDeltaFrame(void) {
 // Called when the client gets disconnected, for whichever reasons.
 //===============
 //
-void ClientGameExports::ClientDisconnect(void) {
+void CLG_ClientDisconnect(void) {
     // Clear the chat hud.
     SCR_ClearChatHUD_f();
 }
@@ -455,7 +515,7 @@ void ClientGameExports::ClientDisconnect(void) {
 // Called each client frame. Handle per frame basis things here.
 //===============
 //
-void ClientGameExports::ClientFrame() {
+void CLG_ClientFrame() {
     // Advance local effects.
 #if USE_DLIGHTS
     CLG_RunDLights();
@@ -474,7 +534,7 @@ void ClientGameExports::ClientFrame() {
 // for whichever reasons.
 // ===============
 //
-void ClientGameExports::ClearState(void) {
+void CLG_ClearState(void) {
     // Clear Effects.
     CLG_ClearEffects();
 
@@ -493,7 +553,7 @@ void ClientGameExports::ClearState(void) {
 // Used to clear the scene from effects and temporary entities.
 // ===============
 //
-void ClientGameExports::DemoSeek(void) {
+void CLG_DemoSeek(void) {
     // Clear Effects.
     CLG_ClearEffects();
     // Clear Temp Entities.
@@ -502,12 +562,12 @@ void ClientGameExports::DemoSeek(void) {
 
 //
 //===============
-// ClientGameExports::Shutdown
+// CLG_Shutdown
 // 
 // Handles the shutdown of the CG Module.
 // ===============
 //
-void ClientGameExports::Shutdown(void) {
+void CLG_Shutdown(void) {
     // Deregister commands.
     clgi.Cmd_Deregister(cmd_cgmodule);
 }
@@ -515,14 +575,14 @@ void ClientGameExports::Shutdown(void) {
 
 //
 //===============
-// ClientGameExports::UpdateUserinfo
+// CLG_UpdateUserInfo
 // 
 // Called when the client has changed user info.
 // Here we can fix up the gender for example before all data gets applied and
 // send to the other clients.
 //===============
 //
-void ClientGameExports::UpdateUserinfo(cvar_t* var, from_t from) {
+void CLG_UpdateUserInfo(cvar_t* var, from_t from) {
     // If there is a skin change, and the gender setting is set to auto find it...
     if (var == info_skin && from > FROM_CONSOLE && gender_auto->integer) {
         char* p;
@@ -540,32 +600,6 @@ void ClientGameExports::UpdateUserinfo(cvar_t* var, from_t from) {
         info_gender->modified = false;
     }
 }
-
-//
-//===============
-// ClientGameExports::CalculateViewValues
-// 
-// Called when the client has changed user info.
-// Here we can fix up the gender for example before all data gets applied and
-// send to the other clients.
-//===============
-//
-void ClientGameExports::CalculateViewValues(void) {
-    CLG_CalculateViewValues();
-}
-
-/////////////////////////////////////////////////////////////////////
-// These are to be removed still, later on.
-//-------------------------------------------------------------------
-extern "C" {
-void ClientGameExports::PMoveInit(pmoveParams_t *pmp) {
-    //PMoveInit(pmp);
-}
-
-void ClientGameExports::PMoveEnableQW(pmoveParams_t *pmp) {
-    //PMoveEnableQW(pmp);
-}
-};
 
 //
 //=============================================================================

@@ -7,11 +7,7 @@
 // Media load handling, usually happens when the renderer initializes, or
 // restarts (Think about changing screen mode, or other settings).
 //
-// Local includes (shared, & other game defines.)
 #include "clg_local.h"
-
-// The actual Implementation.
-#include "IEAPI/ClientGameExports.hpp"
 
 //
 //===============
@@ -297,20 +293,20 @@ void CLG_SetSky(void)
 //
 //=============================================================================
 //
-// CLIENT GAME MODULE MEDIA ENTRY FUNCTIONS.
+// CLIENT MODULE MEDIA ENTRY FUNCTIONS.
 //
 //=============================================================================
 //
 
 //
 //===============
-// ClientGameExports::GetMediaLoadStateName
+// CLG_GetMediaLoadStateName
 //
 // Return a string name for the custom load state type.
 // Return NULL if unknown.
 //===============
 //
-char *ClientGameExports::GetMediaLoadStateName (int state) {
+char *CLG_GetMediaLoadStateName(load_state_t state) {
     // CPP: Compiler hates a switch with just a default.
     return NULL;
     //switch (state)
@@ -323,7 +319,7 @@ char *ClientGameExports::GetMediaLoadStateName (int state) {
 
 //
 //===============
-// ClientGameExports::InitMedia
+// CLG_InitMedia
 // 
 // This is called upon every time the renderer initializes, or does a total
 // hard restart.
@@ -332,7 +328,7 @@ char *ClientGameExports::GetMediaLoadStateName (int state) {
 // register certain CVars related to.
 //===============
 //
-void ClientGameExports::InitMedia(void)
+void CLG_InitMedia(void)
 {
     // Initialize FX Data.
     CLG_EffectsInit();
@@ -346,7 +342,7 @@ void ClientGameExports::InitMedia(void)
 
 //
 //===============
-// ClientGameExports::LoadScreenMedia
+// CLG_LoadScreenMedia
 // 
 // This is called when the client starts, but also when the renderer has had
 // modified settings.
@@ -354,14 +350,14 @@ void ClientGameExports::InitMedia(void)
 // It should register the basic screen media, 2D icons etc.
 //===============
 //
-void ClientGameExports::LoadScreenMedia(void)
+void CLG_LoadScreenMedia(void)
 {
     SCR_RegisterMedia();
 }
 
 //
 //===============
-// ClientGameExports::LoadWorldMedia
+// CLG_LoadWorldMedia
 // 
 // This is called when the client spawns into a server,
 //
@@ -369,7 +365,7 @@ void ClientGameExports::LoadScreenMedia(void)
 // used in-game, or view models, or sounds, etc.
 //===============
 //
-void ClientGameExports::LoadWorldMedia(void)
+void CLG_LoadWorldMedia(void)
 {
     int i;
     char* filename;
@@ -450,13 +446,13 @@ void ClientGameExports::LoadWorldMedia(void)
 
 //
 //===============
-// ClientGameExports::ShutdownMedia
+// CLG_ShutdownMedia
 // 
 // This is called when the client stops the renderer.
 // Use this to unload remaining data.
 //===============
 //
-void ClientGameExports::ShutdownMedia (void) {
+void CLG_ShutdownMedia (void) {
     // Shutdown View Data.
     V_Shutdown();
 

@@ -641,7 +641,7 @@ void CL_SetState (connstate_t state) {
 // Sets the current load state of the client.
 //===============
 //
-void CL_SetLoadState (client_load_state_t state) {
+void CL_SetLoadState (load_state_t state) {
     CL_LoadState(state);
 }
 
@@ -1552,7 +1552,7 @@ void CL_UpdateUserinfo(cvar_t *var, from_t from)
     int i;
 
     // N&C: Allow the CG Module to work with it.
-    CL_GM_UpdateUserinfo(var, from);
+    CL_GM_UpdateUserInfo(var, from);
     //if (var == info_skin && from > FROM_CONSOLE && gender_auto->integer) {
     //    CL_FixUpGender();
     //}

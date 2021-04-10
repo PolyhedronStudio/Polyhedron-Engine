@@ -6,11 +6,7 @@
 //
 // Client Screen Implementation.
 //
-// Local includes (shared, & other game defines.)
 #include "clg_local.h"
-
-// The actual Implementation.
-#include "IEAPI/ClientGameExports.hpp"
 
 // Number of "sb_pics"
 #define STAT_PICS   11              // Number of "sb_pics"
@@ -1428,7 +1424,7 @@ draw:
 //
 //=============================================================================
 //
-// CLIENT GAME MODULE SCREEN COMMAND FUNCTIONS.
+// CLIENT MODULE SCREEN COMMAND FUNCTIONS.
 //
 //=============================================================================
 // 
@@ -1486,6 +1482,14 @@ static void SCR_CalcVRect(void) {
     scr_vrect.y = 0;
 }
 
+
+//
+//=============================================================================
+//
+// CLIENT MODULE SCREEN ENTRY FUNCTIONS.
+//
+//=============================================================================
+//
 static const cmdreg_t scr_cmds[] = {
     //{ "timerefresh", SCR_TimeRefresh_f },
     //{ "sizeup", SCR_SizeUp_f },
@@ -1563,32 +1567,12 @@ void SCR_Init(void)
 
 //
 //===============
-// SCR_Shutdown
-// 
-// 
-//================
-//
-void SCR_Shutdown(void)
-{
-    clgi.Cmd_Deregister(scr_cmds);
-    scr.initialized = false;
-}
-
-//
-//=============================================================================
-//
-// CLIENT GAME MODULE 'SCREEN' ENTRY FUNCTIONS.
-//
-//=============================================================================
-//
-//
-//===============
-// ClientGameExports::ScreenModeChanged
+// CLG_ScreenModeChanged
 //
 // 
 //===============
 //
-void ClientGameExports::ScreenModeChanged(void) {
+void CLG_ScreenModeChanged(void) {
     if (scr.initialized)
         scr.hud_scale = clgi.R_ClampScale(scr_scale);
 
@@ -1597,12 +1581,12 @@ void ClientGameExports::ScreenModeChanged(void) {
 
 //
 //===============
-// ClientGameExports::RenderScreen
+// CLG_RenderScreen
 //
 // 
 //===============
 //
-void ClientGameExports::RenderScreen(void) {
+void CLG_RenderScreen(void) {
     // start with full screen HUD
     scr.hud_width = cl->refdef.width;
     scr.hud_height = cl->refdef.height;
@@ -1653,7 +1637,7 @@ void ClientGameExports::RenderScreen(void) {
 // 
 //================
 //
-void ClientGameExports::DrawLoadScreen(void) {
+void CLG_DrawLoadScreen(void) {
     int x, y;
 
     clgi.R_SetScale(scr.hud_scale);
@@ -1672,7 +1656,7 @@ void ClientGameExports::DrawLoadScreen(void) {
 // 
 //================
 //
-void ClientGameExports::DrawPauseScreen(void) {
+void CLG_DrawPauseScreen(void) {
     int x, y;
 
     x = (scr.hud_width - scr.pause_width) / 2;
@@ -1681,3 +1665,15 @@ void ClientGameExports::DrawPauseScreen(void) {
     clgi.R_DrawPic(x, y, scr.pause_pic);
 }
 
+//
+//===============
+// SCR_Shutdown
+// 
+// 
+//================
+//
+void SCR_Shutdown(void)
+{
+    clgi.Cmd_Deregister(scr_cmds);
+    scr.initialized = false;
+}

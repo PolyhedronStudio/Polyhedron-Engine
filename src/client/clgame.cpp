@@ -656,7 +656,7 @@ void CL_InitGameProgs(void)
     importAPI.SFX_Underwater_Enable = PF_SFX_Underwater_Enable;
 
     // Load up the cgame dll.
-    cge = (IClientGameExports*)entry(&importAPI);
+    cge = entry(&importAPI);
 
     if (!cge) {
         Com_Error(ERR_DROP, "Client Game DLL returned NULL exports");
@@ -666,7 +666,7 @@ void CL_InitGameProgs(void)
     if (cge->apiversion.major != CGAME_API_VERSION_MAJOR ||
         cge->apiversion.minor != CGAME_API_VERSION_MINOR) {
         Com_Error(ERR_DROP, "Client Game DLL is version %i.%i.%i, expected %i.%i.%i",
-            cge->apiversion.major, cge->apiversion.minor, cge->apiversion.point, CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT);
+            cge->apiversion, cge->apiversion.major, cge->apiversion.minor, cge->apiversion.point, CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT);
         return;
     }
 
@@ -818,14 +818,14 @@ void CL_GM_DemoSeek(void) {
 
 //
 //===============
-// CL_GM_UpdateUserinfo
+// CL_GM_UpdateUserInfo
 // 
 // Called when the client has changed user info.
 // Here we can fix up the gender for example before all data gets applied and
 // send to the other clients.
 //===============
 //
-void CL_GM_UpdateUserinfo(cvar_t* var, from_t from) {
+void CL_GM_UpdateUserInfo(cvar_t* var, from_t from) {
     if (cge)
         cge->UpdateUserinfo(var, from);
 }
@@ -956,7 +956,7 @@ void CL_GM_InitMedia(void)
 // Call into the CG Module for notifying about "Media Load State Name"
 //===============
 //
-const char *CL_GM_GetMediaLoadStateName(client_load_state_t state)
+const char *CL_GM_GetMediaLoadStateName(load_state_t state)
 {
     if (cge)
         return cge->GetMediaLoadStateName(state);
@@ -1095,8 +1095,8 @@ void CL_GM_ClearScene() {
 //===============
 //
 void CL_GM_PreRenderView() {
-    // if (cge)
-    //     cge->PreRenderView();
+    if (cge)
+        cge->PreRenderView();
 }
 
 //

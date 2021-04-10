@@ -33,7 +33,7 @@ void		CL_GM_ClientFrame(void);
 void		CL_GM_ClientDisconnect(void);
 void		CL_GM_ClearState(void);
 void		CL_GM_DemoSeek(void);
-void		CL_GM_UpdateUserinfo(cvar_t* var, from_t from);
+void		CL_GM_UpdateUserInfo(cvar_t* var, from_t from);
 
 //
 // Entities.
@@ -44,7 +44,7 @@ void		CL_GM_EntityEvent(int number);
 // Media
 //
 void        CL_GM_InitMedia(void);
-const char	*CL_GM_GetMediaLoadStateName(client_load_state_t state);
+const char	*CL_GM_GetMediaLoadStateName(load_state_t state);
 void        CL_GM_LoadScreenMedia(void);
 void        CL_GM_LoadWorldMedia(void);
 void        CL_GM_ShutdownMedia(void);
@@ -87,6 +87,6 @@ void		CL_GM_ClearScene(void);
 
 void		CL_GM_PreRenderView(void);
 void		CL_GM_RenderView(void);
-extern "C" void		CL_GM_PostRenderView(void);
+void		CL_GM_PostRenderView(void);
 
 #endif //  __CLIENT_CGMODULE_H__

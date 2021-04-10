@@ -47,16 +47,16 @@ vec3_t VelocityForDamage(int damage)
 {
     // Pick random velocities.
     vec3_t v = {
-        100.0f * crandom(),
-        100.0f * crandom(),
-        200.0f + 100.0f * random()
+        v[0] = 100.0 * crandom(),
+        v[1] = 100.0 * crandom(),
+        v[2] = 200.0 + 100.0 * random()
     };
 
     // Scale velocities.
     if (damage < 50)
-        VectorScale(v, 0.7f, v);
+        VectorScale(v, 0.7, v);
     else
-        VectorScale(v, 1.2f, v);
+        VectorScale(v, 1.2, v);
 
     // Return.
     return v;

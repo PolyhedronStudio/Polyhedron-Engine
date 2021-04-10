@@ -6,11 +6,7 @@
 //
 // Takes care of entity management.
 //
-// Local includes (shared, & other game defines.)
 #include "clg_local.h"
-
-// The actual Implementation.
-#include "IEAPI/ClientGameExports.hpp"
 
 extern qhandle_t cl_mod_powerscreen;
 extern qhandle_t cl_mod_laser;
@@ -739,17 +735,17 @@ void CLG_AddEntities(void)
 //
 //=============================================================================
 //
-// CLIENT GAME MODULE ENTITY ENTRY FUNCTIONS.
+// CLIENT MODULE ENTITY ENTRY FUNCTIONS.
 //
 //=============================================================================}
 //
 //===============
-// ClientGameExports::EntityEvent
+// CLG_EntityEvent
 //
 // Handles specific events on an entity.
 //===============
 //
-void ClientGameExports::EntityEvent(int number) {
+void CLG_EntityEvent(int number) {
     cl_entity_t *cent = &cs->entities[number];
     
     // EF_TELEPORTER acts like an event, but is not cleared each frame
@@ -817,7 +813,8 @@ static inline float lerp_client_fov(float ofov, float nfov, float lerp)
 // loop if rendering is disabled but sound is running.
 //===============
 //
-void CLG_CalculateViewValues(void) {
+void CLG_CalculateViewValues(void)
+{
     player_state_t* ps, * ops;
     vec3_t viewoffset;
     float lerp;
@@ -907,8 +904,4 @@ void CLG_CalculateViewValues(void) {
 
     // Update the client's listener origin values.
     clgi.UpdateListenerOrigin();
-}
-
-void ClientGameExports::CalculateViewValues(void) {
-    CLG_CalculateViewValues();
 }

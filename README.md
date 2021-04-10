@@ -3,7 +3,6 @@
 ## Scratchpad - Things to do or not forget:
 You can skip these if you aren't me, an ADHD minded person :P
 - [ ] Use an interface class for game and engine import/exports
-  `ClientGameExports is already in tha house, now the other 3 are remaining :)`
 - [ ] Move these over out of FX_Init and remove src/client/effects.c it is a waste file.
 `   // Move these over?
     cvar_pt_particle_emissive = Cvar_Get("pt_particle_emissive", "10.0", 0);
