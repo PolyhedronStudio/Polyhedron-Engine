@@ -176,7 +176,7 @@ void CLG_EntityEvent(int number);
 
 void CLG_AddPacketEntities(void);
 void CLG_AddViewWeapon(void);
-void CLG_CalculateViewValues(void);
+void CLG_CalcViewValues(void);
 
 //
 // clg_effects.c
@@ -373,8 +373,8 @@ void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b,
 void V_AddLightStyle (int style, const vec4_t &value);
 void V_AddParticle(particle_t* p);
 
-float CLG_CalculateFOV(float fov_x, float width, float height);
-void CLG_CalculateViewValues(void);
+float CLG_CalcFOV(float fov_x, float width, float height);
+void CLG_CalcViewValues(void);
 
 void CLG_PreRenderView(void);
 void CLG_ClearScene(void);

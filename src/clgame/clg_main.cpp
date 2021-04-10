@@ -7,7 +7,6 @@
 // Handles the main initialisation of the client game dll.
 //
 #include "clg_local.h"
-#include "IEAPI/ClientGameExports.hpp"
 
 //
 // Core.
@@ -15,7 +14,7 @@
 // Contains the function pointers being passed in from the engine.
 clgame_import_t clgi;
 // Static export variable, lives as long as the client game dll lives.
-ClientGameExports clge;
+clgame_export_t clge;
 
 // Pointer to the actual client frame state.
 client_state_t* cl = NULL;
@@ -90,7 +89,7 @@ extern "C" {
 #endif
 #endif
 
-q_exported IClientGameExports *GetClientGameAPI (clgame_import_t *clgimp)
+q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
 {
     // Store a copy of the engine imported function pointer struct.
     clgi = *clgimp;
@@ -98,6 +97,13 @@ q_exported IClientGameExports *GetClientGameAPI (clgame_import_t *clgimp)
     // Store pointers to client  data.
     cl  = clgimp->cl;
     cs  = clgimp->cs;
+
+    // Setup the API version.
+    clge.apiversion = {
+        CGAME_API_VERSION_MAJOR,
+        CGAME_API_VERSION_MINOR,
+        CGAME_API_VERSION_POINT,
+    };
 
     // Export the player move parameters.
     clge.pmoveParams                = &clg.pmoveParams;
@@ -115,8 +121,8 @@ q_exported IClientGameExports *GetClientGameAPI (clgame_import_t *clgimp)
     clge.Init                       = CLG_Init;
     clge.Shutdown                   = CLG_Shutdown;
 
-    clge.CalculateFOV                    = CLG_CalculateFOV;
-    clge.CalculateViewValues             = CLG_CalculateViewValues;
+    clge.CalcFOV                    = CLG_CalcFOV;
+    clge.CalcViewValues             = CLG_CalcViewValues;
     clge.ClearState                 = CLG_ClearState;
     clge.DemoSeek                   = CLG_DemoSeek;
 

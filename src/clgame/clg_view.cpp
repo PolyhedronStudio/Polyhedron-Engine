@@ -344,7 +344,7 @@ first:
 //
 static void CLG_AddEntities (void) {
     // Calculate client view values.
-    CLG_CalculateViewValues();
+    CLG_CalcViewValues();
 
     // Finish calculating view values.
     CLG_FinishViewValues();
@@ -373,12 +373,12 @@ static void CLG_AddEntities (void) {
 
 //
 //===============
-// CLG_CalculateFOV
+// CLG_CalcFOV
 // 
 // Calculates the Field Of View.
 //===============
 //
-float CLG_CalculateFOV(float fov_x, float width, float height)
+float CLG_CalcFOV(float fov_x, float width, float height)
 {
     float    a;
     float    x;

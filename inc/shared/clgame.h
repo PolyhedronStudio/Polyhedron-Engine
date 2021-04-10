@@ -23,13 +23,150 @@
 //
 //=============================================================================
 //
-#include "shared/client/IClientGameExports.hpp"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+    // Structure containing all the client dll game function pointers for the engine to work with.
+    struct CLGGameExports : public IClientGameExports {
+        //---------------------------------------------------------------------
+        // API Version.
+        // 
+        // The version numbers will always be equal to those that were set in 
+        // CMake at the time of building the engine/game(dll/so) binaries.
+        // 
+        // In an ideal world, we comply to proper version releasing rules.
+        // For Nail & Crescent, the general following rules apply:
+        // --------------------------------------------------------------------
+        // MAJOR: Ground breaking new features, you can expect anything to be 
+        // incompatible at that.
+        // 
+        // MINOR : Everytime we have added a new feature, or if the API between
+        // the Client / Server and belonging game counter-parts has actually 
+        // changed.
+        // 
+        // POINT : Whenever changes have been made, and the above condition 
+        // is not met.
+        //---------------------------------------------------------------------
+        struct {
+            int32_t major;         
+            int32_t minor;
+            int32_t point;
+        } apiversion;
+
+
+
+        //---------------------------------------------------------------------
+        // Core.
+        //---------------------------------------------------------------------
+        // Initializes the client game dll.
+        void		(*Init) ();
+        // Shuts down the client game dll.
+        void		(*Shutdown) (void); 
+
+        // Can be called by the engine too.
+        float       (*CalcFOV) (float fov_x, float width, float height);
+        // Called when the client (and/is) disconnected for whichever reasons.
+        void        (*ClearState) (void);
+        // Can be called by the engine too for updating audio positioning.
+        void        (*CalcViewValues) (void);
+        // Called by the engine when a demo is being seeked.
+        void        (*DemoSeek) (void);
+        
+        // Called after all downloads are done. (Aka, a map has started.)
+        // Not used for demos.
+        void        (*ClientBegin) (void);
+        // Called each VALID client frame. Handle per VALID frame basis 
+        // things here.
+        void        (*ClientDeltaFrame) (void);
+        // Called each client frame. Handle per frame basis things here.
+        void        (*ClientFrame) (void);
+        // Called when a disconnect even occures. Including those for Com_Error
+        void        (*ClientDisconnect) (void);
+
+        // Called when there is a needed retransmit of user info variables.
+        void        (*UpdateUserinfo) (cvar_t* var, from_t from);
+
+        //---------------------------------------------------------------------
+        // Entities.
+        //---------------------------------------------------------------------
+        void        (*EntityEvent) (int number);
+
+        //---------------------------------------------------------------------
+        // Media.
+        //---------------------------------------------------------------------
+        // Called when the client wants to know the name of a custom load stat.
+        char        *(*GetMediaLoadStateName) (load_state_t state);
+        // Called when the renderer initializes.
+        void        (*InitMedia) (void);
+        // Called whenever the screen media has te reinitialize.
+        // Load all HUD/Menu related media here. 2D Images, sounds
+        // for HUD, etc.
+        void        (*LoadScreenMedia) (void);
+        // Called during map load, register world data here such as particles,
+        // view models, sounds for entities, etc.
+        void        (*LoadWorldMedia) (void);
+        // Called when the renderer shutsdown. Should unload all media.
+        void        (*ShutdownMedia) (void);
+
+        // Called by the client to initialize PMove.
+        void        (*PMoveInit) (pmoveParams_t* pmp);
+        // Called by the client when the enable QW movement is toggled.
+        void        (*PMoveEnableQW) (pmoveParams_t* pmp);
+
+        //---------------------------------------------------------------------
+        // Predict Movement (Client Side)
+        //---------------------------------------------------------------------
+        void		(*CheckPredictionError) (int frame, unsigned int cmd);
+        void		(*PredictAngles) (void);
+        void        (*PredictMovement) (unsigned int ack, unsigned int current);
+
+        //---------------------------------------------------------------------
+        // ServerMessage Parsing.
+        //---------------------------------------------------------------------
+        // Called when a configstring update has been parsed and still left
+        // unhandled by the client.
+        qboolean    (*UpdateConfigString) (int index, const char* str);
+
+        // Called at the start of receiving a server message.
+        void        (*StartServerMessage) (void);
+        // Actually parses the server message, and handles it accordingly.
+        // Returns false in case the message was unkown, or corrupted, etc.
+        qboolean    (*ParseServerMessage) (int serverCommand);
+        // Handles the demo message during playback.
+        // Returns false in case the message was unknown, or corrupted, etc.
+        qboolean   (*SeekDemoMessage) (int demoCommand);
+        // Called when we're done receiving a server message.
+        void        (*EndServerMessage) (int realTime);
+
+        //---------------------------------------------------------------------
+        // Screen
+        //---------------------------------------------------------------------
+        // Called when the engine decides to render the 2D display.
+        void        (*RenderScreen) (void);
+        // Called when the screen mode has changed.
+        void        (*ScreenModeChanged) (void);
+        // Called when the client wants to render the loading screen.
+        void        (*DrawLoadScreen) (void);
+        // Called when the client wants to render the pause screen.
+        void        (*DrawPauseScreen) (void);
+        
+
+        //---------------------------------------------------------------------
+        // View
+        //---------------------------------------------------------------------
+        // Called right after the engine clears the scene, and begins a new one.
+        void        (*PreRenderView) (void);
+        // Called whenever the engine wants to clear the scene.
+        void        (*ClearScene) (void);
+        // Called whenever the engine wants to render a valid frame.
+        void        (*RenderView) (void);
+        // Called right after the engine renders the scene, and prepares to
+        // finish up its current frame loop iteration.
+        void        (*PostRenderView) (void);
+
+    };
+
     // Structure containing all the engine function pointers for the client dll to work with.
-    
     typedef struct clg_import_s {
         //---------------------------------------------------------------------
         // API Version.
@@ -464,7 +601,7 @@ extern "C" {
     } clgame_import_t;
 
     // Function pointer type for handling the actual import function.
-    typedef IClientGameExports (*GetClientGameAPI_t) (clgame_import_t);
+    typedef clgame_export_t (*GetClientGameAPI_t) (clgame_import_t);
 #ifdef __cplusplus
 };  // Extern C.
 #endif

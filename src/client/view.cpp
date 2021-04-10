@@ -349,10 +349,10 @@ static int entitycmpfnc(const void *_a, const void *_b)
 
 /*
 ====================
-V_CalculateFOV
+V_CalcFOV
 ====================
 */
-float V_CalculateFOV(float fov_x, float width, float height)
+float V_CalcFOV(float fov_x, float width, float height)
 {
     float    a;
     float    x;
@@ -406,7 +406,7 @@ void V_RenderView(void)
 
         // N&C: Calculate the view values (v_forward, v_up, v_right) so the
         // before calling into the CG Module.
-        //CL_CalculateViewValues();
+        //CL_CalcViewValues();
 
         // Add Engine Client entities.
         //CL_AddEntities();
@@ -414,7 +414,7 @@ void V_RenderView(void)
         // Add CG Module entities.
         CL_GM_RenderView();
 //         // build a refresh entity list and calc cl.sim*
-//         // this also calls CL_CalculateViewValues which loads
+//         // this also calls CL_CalcViewValues which loads
 //         // v_forward, etc.
 //         CL_AddEntities();
 
@@ -450,10 +450,10 @@ void V_RenderView(void)
         // adjust for non-4/3 screens
         if (cl_adjustfov->integer) {
             cl.refdef.fov_y = cl.fov_y;
-            cl.refdef.fov_x = CL_GM_CalculateFOV(cl.refdef.fov_y, cl.refdef.height, cl.refdef.width);
+            cl.refdef.fov_x = CL_GM_CalcFOV(cl.refdef.fov_y, cl.refdef.height, cl.refdef.width);
         } else {
             cl.refdef.fov_x = cl.fov_x;
-            cl.refdef.fov_y = CL_GM_CalculateFOV(cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
+            cl.refdef.fov_y = CL_GM_CalcFOV(cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
         }
 
         cl.refdef.time = cl.time * 0.001;
@@ -527,7 +527,7 @@ N&C: This is the old actual client render function.
 //         V_ClearScene();
 
 //         // build a refresh entity list and calc cl.sim*
-//         // this also calls CL_CalculateViewValues which loads
+//         // this also calls CL_CalcViewValues which loads
 //         // v_forward, etc.
 //         CL_AddEntities();
 
@@ -563,10 +563,10 @@ N&C: This is the old actual client render function.
 //         // adjust for non-4/3 screens
 //         if (cl_adjustfov->integer) {
 //             cl.refdef.fov_y = cl.fov_y;
-//             cl.refdef.fov_x = V_CalculateFOV(cl.refdef.fov_y, cl.refdef.height, cl.refdef.width);
+//             cl.refdef.fov_x = V_CalcFOV(cl.refdef.fov_y, cl.refdef.height, cl.refdef.width);
 //         } else {
 //             cl.refdef.fov_x = cl.fov_x;
-//             cl.refdef.fov_y = V_CalculateFOV(cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
+//             cl.refdef.fov_y = V_CalcFOV(cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
 //         }
 
 //         cl.refdef.time = cl.time * 0.001;

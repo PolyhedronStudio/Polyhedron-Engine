@@ -53,11 +53,11 @@
         virtual void Shutdown (void) = 0; 
 
         // Can be called by the engine too.
-        virtual float CalculateFOV (float fov_x, float width, float height) = 0;
+        virtual float CalcFOV (float fov_x, float width, float height) = 0;
         // Called when the client (and/is) disconnected for whichever reasons.
         virtual void ClearState (void) = 0;
         // Can be called by the engine too for updating audio positioning.
-        virtual void CalculateViewValues (void) = 0;
+        virtual void CalcViewValues (void) = 0;
         // Called by the engine when a demo is being seeked.
         virtual void DemoSeek (void) = 0;
         

@@ -779,7 +779,7 @@ void CLG_EntityEvent(int number) {
 }
 
 
-// Utility function for CLG_CalculateViewValues
+// Utility function for CLG_CalcViewValues
 static inline float lerp_client_fov(float ofov, float nfov, float lerp)
 {
     if (clgi.IsDemoPlayback()) {
@@ -806,14 +806,14 @@ static inline float lerp_client_fov(float ofov, float nfov, float lerp)
 
 //
 //===============
-// CLG_CalculateViewValues
+// CLG_CalcViewValues
 //
 // Sets cl->refdef view values and sound spatialization params.
 // Usually called from V_AddEntities, but may be directly called from the main
 // loop if rendering is disabled but sound is running.
 //===============
 //
-void CLG_CalculateViewValues(void)
+void CLG_CalcViewValues(void)
 {
     player_state_t* ps, * ops;
     vec3_t viewoffset;
@@ -885,7 +885,7 @@ void CLG_CalculateViewValues(void)
 
     // interpolate field of view
     cl->fov_x = lerp_client_fov(ops->fov, ps->fov, lerp);
-    cl->fov_y = CLG_CalculateFOV(cl->fov_x, 4, 3);
+    cl->fov_y = CLG_CalcFOV(cl->fov_x, 4, 3);
 
     LerpVector(ops->viewoffset, ps->viewoffset, lerp, viewoffset);
 

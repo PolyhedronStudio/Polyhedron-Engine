@@ -3181,7 +3181,7 @@ run_fx:
         SCR_RunCinematic();
     } else if (sync_mode == SYNC_SLEEP_10) {
         // force audio and effects update if not rendering
-        CL_GM_CalculateViewValues();
+        CL_GM_CalcViewValues();
         goto run_fx;
     }
 

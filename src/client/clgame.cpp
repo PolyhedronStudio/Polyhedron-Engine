@@ -29,7 +29,7 @@
 #include "shared/clgame.h"
 
 // Contains the functions being exported to client game dll.
-IClientGameExports *cge;
+clgame_export_t *cge;
 
 // Operating System handle to the cgame library.
 static void *cgame_library;
@@ -422,23 +422,23 @@ void CL_ShutdownGameProgs(void)
 void CL_InitGameProgs(void)
 {
     clgame_import_t   importAPI;
-    IClientGameExports* (*entry)(clgame_import_t*) = NULL;
+    clgame_export_t* (*entry)(clgame_import_t*) = NULL;
 
     // unload anything we have now
     CL_ShutdownGameProgs();
 
     // for debugging or `proxy' mods
     if (sys_forcecgamelib->string[0])
-        entry = (IClientGameExports * (*)(clgame_import_t*))_CL_LoadGameLibrary(sys_forcecgamelib->string); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
+        entry = (clgame_export_t * (*)(clgame_import_t*))_CL_LoadGameLibrary(sys_forcecgamelib->string); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
 
     // try game first
     if (!entry && fs_game->string[0]) {
-        entry = (IClientGameExports * (*)(clgame_import_t*))CL_LoadGameLibrary(fs_game->string, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
+        entry = (clgame_export_t * (*)(clgame_import_t*))CL_LoadGameLibrary(fs_game->string, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
     }
 
     // then try basenac
     if (!entry) {
-        entry = (IClientGameExports * (*)(clgame_import_t*))CL_LoadGameLibrary(BASEGAME, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
+        entry = (clgame_export_t * (*)(clgame_import_t*))CL_LoadGameLibrary(BASEGAME, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
     }
 
     // all paths failed
@@ -719,28 +719,28 @@ void CL_GM_Shutdown (void) {
 
 //
 //===============
-// CL_GM_CalculateFOV
+// CL_GM_CalcFOV
 //
 // Called whenever the FOV has to be calculated.
 //===============
 //
-float CL_GM_CalculateFOV(float fov_x, float width, float height) {
+float CL_GM_CalcFOV(float fov_x, float width, float height) {
     if (cge)
-        return cge->CalculateFOV(fov_x, width, height);
+        return cge->CalcFOV(fov_x, width, height);
     else
         return 0.f;
 }
 
 //
 //===============
-// CL_GM_CalculateViewValues
+// CL_GM_CalcViewValues
 // 
 // Called by the client in case it wants to update audio positioning.
 //===============
 //
-void CL_GM_CalculateViewValues(void) {
+void CL_GM_CalcViewValues(void) {
     if (cge)
-        cge->CalculateViewValues();
+        cge->CalcViewValues();
 }
 
 //
