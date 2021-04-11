@@ -9,7 +9,7 @@ You can skip these if you aren't me, an ADHD minded person :P
 - [ ] Check out header files some more, organize some more.
 - [ ] Do not forget RTX Q2 1.5, how could you? :)
 - [ ] Investigate BSP Tools to one day have less triangles (They used to generate more because of software rendering mode in Q2??)
-- [ ] Remove software renderer.
+- [X] Remove software renderer.
 - [X] Remove the USE_FPS, if needed, can always be added back in later..._
 - [ ] Remove useless bytes in CL_ParseServerData for the pmove stuff q2pro had.
 - [ ] Remove MSG_ES stuff
@@ -81,6 +81,7 @@ When finished we have a stable base to work from, one that we can start making t
   - [ ] Client
     - [ ] Move into its own repository, and implement as a submodule. This should allow for our own repository and record of client game code.
   - [ ] Server
+    - [ ] Fix save.cpp since it is C++ incompatible with the void pointer technique.
     - [ ] Move into its own repository, and implement as a submodule. This should allow for our own repository and record of server game code.
     - [ ] Remove all needless entities.
 - [ ] Refresher

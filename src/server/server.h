@@ -188,7 +188,7 @@ typedef struct {
 } message_packet_t;
 
 // This is best to match the actual server game frame rate.
-#define SERVER_MESSAGES_TICKRATE   10
+#define SERVER_MESSAGES_TICKRATE   20
 
 #define FOR_EACH_CLIENT(client) \
     LIST_FOR_EACH(client_t, client, &sv_clientlist, entry)
