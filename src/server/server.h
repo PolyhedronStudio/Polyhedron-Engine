@@ -551,7 +551,7 @@ void SV_PrintMiscInfo(void);
 
 void SV_BuildProxyClientFrame(client_t *client);
 void SV_BuildClientFrame(client_t *client);
-void SV_WriteFrameToClient_Default(client_t *client);
+void __OLD_SV_WriteFrameToClient_Default(client_t *client);
 void SV_WriteFrameToClient_Enhanced(client_t *client);
 
 //

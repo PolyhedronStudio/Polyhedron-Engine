@@ -1088,7 +1088,7 @@ static void SVC_DirectConnect(void)
 
     // MSG: !!
     //if (newcl->protocol == PROTOCOL_VERSION_DEFAULT) {
-    //    newcl->WriteFrame = SV_WriteFrameToClient_Default;
+    //    newcl->WriteFrame = __OLD_SV_WriteFrameToClient_Default;
     //} else {
         newcl->WriteFrame = SV_WriteFrameToClient_Enhanced;
 //    }

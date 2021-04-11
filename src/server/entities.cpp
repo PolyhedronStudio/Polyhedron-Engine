@@ -166,10 +166,10 @@ static client_frame_t *get_last_frame(client_t *client)
 
 /*
 ==================
-SV_WriteFrameToClient_Default
+__OLD_SV_WriteFrameToClient_Default
 ==================
 */
-void SV_WriteFrameToClient_Default(client_t *client)
+void __OLD_SV_WriteFrameToClient_Default(client_t *client)
 {
     client_frame_t  *frame, *oldframe;
     player_packed_t *oldstate;
