@@ -374,7 +374,6 @@ SET(SRC_UNIX_CLIENT
 
 ###################### Windows Client Specific.
 SET(SRC_WINDOWS
-	os/windows/ac.cpp
 	os/windows/debug.cpp
 	os/windows/hunk.cpp
 	os/windows/system.cpp
@@ -534,7 +533,6 @@ ADD_EXECUTABLE(server
 	${SRC_SHARED} ${HEADERS_SHARED}
 	${SRC_WINDOWS} ${HEADERS_WINDOWS}
 	${SRC_SERVER} ${HEADERS_SERVER}
-	server/ac.cpp
 	client/null.cpp
 	#os/sdl2/time.cpp
 	os/res/nacded.rc
@@ -553,7 +551,6 @@ ADD_EXECUTABLE(server
 	${SRC_SHARED} ${HEADERS_SHARED}
 	${SRC_UNIX}
 	${SRC_SERVER} ${HEADERS_SERVER}
-	server/ac.c
 	client/null.c
 )
 ENDIF()

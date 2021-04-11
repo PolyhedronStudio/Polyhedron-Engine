@@ -125,15 +125,6 @@ void SV_RemoveClient(client_t *client)
 void SV_CleanClient(client_t *client)
 {
     int i;
-#if USE_AC_SERVER
-    string_entry_t *bad, *next;
-
-    for (bad = client->ac_bad_files; bad; bad = next) {
-        next = bad->next;
-        Z_Free(bad);
-    }
-    client->ac_bad_files = NULL;
-#endif
 
     // close any existing donwload
     SV_CloseDownload(client);
@@ -240,8 +231,6 @@ void SV_DropClient(client_t *client, const char *reason)
         // this will remove the body, among other things
         ge->ClientDisconnect(client->edict);
     }
-
-    AC_ClientDisconnect(client);
 
     SV_CleanClient(client);
 
@@ -979,9 +968,6 @@ static void send_connect_packet(client_t *newcl, int nctype)
         ncstring = " nc=1";
     else
         ncstring = " nc=0";
-
-    if (!sv_force_reconnect->string[0] || newcl->reconnect_var[0])
-        acstring = AC_ClientConnect(newcl);
 
     if (sv_downloadserver->string[0]) {
         dlstring1 = " dlserver=";
@@ -1780,9 +1766,6 @@ unsigned SV_Frame(unsigned msec)
     NET_GetPackets(NS_SERVER, SV_PacketEvent);
 
     if (svs.initialized) {
-        // run connection to the anticheat server
-        AC_Run();
-
         // deliver fragments and reliable messages for connecting clients
         SV_SendAsyncPackets();
     }
@@ -1988,8 +1971,6 @@ void SV_Init(void)
 {
     SV_InitOperatorCommands();
 
-    AC_Register();
-
     SV_RegisterSavegames();
 
     Cvar_Get("protocol", STRINGIFY(PROTOCOL_VERSION_DEFAULT), CVAR_SERVERINFO | CVAR_ROM);
@@ -2160,8 +2141,6 @@ void SV_Shutdown(const char *finalmsg, error_type_t type)
 {
     if (!sv_registered)
         return;
-
-    AC_Disconnect();
 
     SV_FinalMessage(finalmsg, type);
     SV_MasterShutdown();

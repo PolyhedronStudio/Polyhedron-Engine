@@ -1371,28 +1371,6 @@ static void CL_ConnectionlessPacket(void)
         cls.netchan = Netchan_Setup(NS_CLIENT, type, &cls.serverAddress,
                                     cls.quakePort, 1024, cls.serverProtocol);
 
-#if USE_AC_CLIENT
-        if (anticheat) {
-            MSG_WriteByte(clc_nop);
-            MSG_FlushTo(&cls.netchan->message);
-            cls.netchan->Transmit(cls.netchan, 0, NULL, 3);
-            S_StopAllSounds();
-            cls.connect_count = -1;
-            Com_Printf("Loading anticheat, this may take a few moments...\n");
-            SCR_UpdateScreen();
-            if (!Sys_GetAntiCheatAPI()) {
-                Com_Printf("Trying to connect without anticheat.\n");
-            } else {
-                Com_LPrintf(PRINT_NOTICE, "Anticheat loaded successfully.\n");
-            }
-        }
-#else
-        if (anticheat >= 2) {
-            Com_Printf("Anticheat required by server, "
-                       "but no anticheat support linked in.\n");
-        }
-#endif
-
         CL_ClientCommand("new");
         cls.state = ca_connected;
         cls.connect_count = 0;

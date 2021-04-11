@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 // Player Movement(PM) Code.
 //
-// Common between server and client so prediction matches
+// Common between server and client so prediction matches.
 //
 //==============================================================
 //

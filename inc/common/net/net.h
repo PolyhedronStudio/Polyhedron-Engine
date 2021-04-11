@@ -259,9 +259,6 @@ void        NET_UpdateStream(netstream_t *s);
 ioentry_t   *NET_AddFd(qsocket_t fd);
 void        NET_RemoveFd(qsocket_t fd);
 int         NET_Sleep(int msec);
-#if USE_AC_SERVER
-int         NET_Sleepv(int msec, ...);
-#endif
 
 extern cvar_t       *net_ip;
 extern cvar_t       *net_port;

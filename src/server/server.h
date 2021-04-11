@@ -31,8 +31,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/msg.h"
 #include "common/net/net.h"
 #include "common/net/chan.h"
-//#include "common/pmove.h"
-//#include "shared/pmove.h"
 #include "common/prompt.h"
 #include "common/protocol.h"
 #include "common/x86/fpu.h"
@@ -144,22 +142,6 @@ typedef enum {
     cs_primed,      // sent serverdata, client is precaching
     cs_spawned      // client is fully in game
 } clstate_t;
-
-#if USE_AC_SERVER
-
-typedef enum {
-    AC_NORMAL,
-    AC_REQUIRED,
-    AC_EXEMPT
-} ac_required_t;
-
-typedef enum {
-    AC_QUERY_UNSENT,
-    AC_QUERY_SENT,
-    AC_QUERY_DONE
-} ac_query_t;
-
-#endif // USE_AC_SERVER
 
 #define MSG_POOLSIZE        1024
 #define MSG_TRESHOLD        (64 - 10)   // keep pmsg_s 64 bytes aligned
@@ -312,17 +294,6 @@ typedef struct client_s {
     // misc
     time_t          connect_time; // time of initial connect
 	int             last_valid_cluster;
-
-#if USE_AC_SERVER
-    qboolean        ac_valid;
-    ac_query_t      ac_query_sent;
-    ac_required_t   ac_required;
-    int             ac_file_failures;
-    unsigned        ac_query_time;
-    int             ac_client_type;
-    string_entry_t  *ac_bad_files;
-    char            *ac_token;
-#endif
 } client_t;
 
 // a client can leave the server in one of four ways:
@@ -436,21 +407,6 @@ extern list_t      sv_clientlist; // linked list of non-free clients
 
 extern server_static_t     svs;        // persistant server info
 extern server_t            sv;         // local server
-
-//// N&C: Server pMoveParams struct.
-//typedef struct {
-//    qboolean    qwmode;
-//    qboolean    airaccelerate;
-//    qboolean    strafehack;
-//    qboolean    flyhack;
-//    qboolean    waterhack;
-//    float       speedmult;
-//    float       watermult;
-//    float       maxspeed;
-//    float       friction;
-//    float       waterfriction;
-//    float       flyfriction;
-//} pmoveParams_t;
 
 extern pmoveParams_t    sv_pmp;
 
@@ -567,41 +523,6 @@ void SV_BroadcastCommand(const char *fmt, ...) q_printf(1, 2);
 void SV_ClientAddMessage(client_t *client, int flags);
 void SV_ShutdownClientSend(client_t *client);
 void SV_InitClientSend(client_t *newcl);
-
-//
-// sv_ac.c
-//
-#if USE_AC_SERVER
-const char *AC_ClientConnect(client_t *cl);
-void AC_ClientDisconnect(client_t *cl);
-qboolean AC_ClientBegin(client_t *cl);
-void AC_ClientAnnounce(client_t *cl);
-void AC_ClientToken(client_t *cl, const char *token);
-
-void AC_Register(void);
-void AC_Disconnect(void);
-void AC_Connect(unsigned mvd_spawn);
-void AC_Run(void);
-
-void AC_List_f(void);
-void AC_Info_f(void);
-#else
-#define AC_ClientConnect(cl)        ""
-#define AC_ClientDisconnect(cl)     (void)0
-#define AC_ClientBegin(cl)          true
-#define AC_ClientAnnounce(cl)       (void)0
-#define AC_ClientToken(cl, token)   (void)0
-
-#define AC_Register()               (void)0
-#define AC_Disconnect()             (void)0
-#define AC_Connect(mvd_spawn)       (void)0
-#define AC_Run()                    (void)0
-
-#define AC_List_f() \
-    Com_Printf("This server does not support anticheat.\n")
-#define AC_Info_f() \
-    Com_Printf("This server does not support anticheat.\n")
-#endif
 
 //
 // sv_user.c

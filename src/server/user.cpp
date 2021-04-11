@@ -463,11 +463,7 @@ void SV_New_f(void)
 
     // send version string request
     if (oldstate == cs_assigned) {
-        SV_ClientCommand(sv_client, "cmd \177c version $version\n"
-#if USE_AC_SERVER
-                         "cmd \177c actoken $actoken\n"
-#endif
-                        );
+        SV_ClientCommand(sv_client, "cmd \177c version $version\n");
         stuff_cmds(&sv_cmdlist_connect);
     }
 
@@ -536,10 +532,6 @@ void SV_Begin_f(void)
         return;
     }
 
-    if (!AC_ClientBegin(sv_client)) {
-        return;
-    }
-
     Com_DPrintf("Going from cs_primed to cs_spawned for %s\n",
                 sv_client->name);
     sv_client->state = cs_spawned;
@@ -552,8 +544,6 @@ void SV_Begin_f(void)
 
     // call the game begin function
     ge->ClientBegin(sv_player);
-
-    AC_ClientAnnounce(sv_client);
 
 	// Try binding light here with message
 	
@@ -914,8 +904,6 @@ static void SV_CvarResult_f(void)
                 sv_client->reconnected = true;
             }
         }
-    } else if (!strcmp(c, "actoken")) {
-        AC_ClientToken(sv_client, Cmd_Argv(2));
     } else if (!strcmp(c, "console")) {
         if (sv_client->console_queries > 0) {
             Com_Printf("%s[%s]: \"%s\" is \"%s\"\n", sv_client->name,
@@ -924,20 +912,6 @@ static void SV_CvarResult_f(void)
             sv_client->console_queries--;
         }
     }
-}
-
-static void SV_AC_List_f(void)
-{
-    SV_ClientRedirect();
-    AC_List_f();
-    Com_EndRedirect();
-}
-
-static void SV_AC_Info_f(void)
-{
-    SV_ClientRedirect();
-    AC_Info_f();
-    Com_EndRedirect();
 }
 
 static const ucmd_t ucmds[] = {
@@ -963,8 +937,6 @@ static const ucmd_t ucmds[] = {
 #if USE_PACKETDUP
     { "packetdup", SV_PacketdupHack_f },
 #endif
-    { "aclist", SV_AC_List_f },
-    { "acinfo", SV_AC_Info_f },
 
     { NULL, NULL }
 };

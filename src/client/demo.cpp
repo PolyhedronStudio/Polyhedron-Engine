@@ -1130,33 +1130,7 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
         }
 
         info->mvd = false;
-    } else {
-        if ((MSG_ReadByte() & SVCMD_MASK) != mvd_serverdata) {
-            goto fail;
-        }
-        if (MSG_ReadLong() != PROTOCOL_VERSION_MVD) {
-            goto fail;
-        }
-        MSG_ReadShort();
-        MSG_ReadLong();
-        MSG_ReadString(NULL, 0);
-        clientNum = MSG_ReadShort();
-
-        while (1) {
-            index = MSG_ReadShort();
-            if (index == MAX_CONFIGSTRINGS) {
-                break;
-            }
-            if (index < 0 || index >= MAX_CONFIGSTRINGS) {
-                goto fail;
-            }
-            MSG_ReadString(string, sizeof(string));
-            parse_info_string(info, clientNum, index, string);
-        }
-
-        info->mvd = true;
     }
-
     FS_FCloseFile(f);
     return info;
 

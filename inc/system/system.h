@@ -56,10 +56,6 @@ void    Sys_ListFiles_r(const char *path, const char *filter,
 
 void    Sys_DebugBreak(void);
 
-#if USE_AC_CLIENT
-qboolean Sys_GetAntiCheatAPI(void);
-#endif
-
 extern cvar_t   *sys_basedir;
 extern cvar_t   *sys_libdir;
 extern cvar_t   *sys_homedir;

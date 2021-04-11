@@ -32,8 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PROTOCOL_VERSION_DEFAULT    101
 #define PROTOCOL_VERSION_NAC        101
 
-#define PROTOCOL_VERSION_MVD        37 // not used for UDP connections
-
 // Minimum required "MINOR" protocol version for this client to be compatible to.
 #define PROTOCOL_VERSION_NAC_MINIMUM            1337
 #define PROTOCOL_VERSION_NAC_FIRST              1337
@@ -42,17 +40,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Always set to the latest version.
 #define PROTOCOL_VERSION_NAC_CURRENT            PROTOCOL_VERSION_NAC_FIRST
 
-#define PROTOCOL_VERSION_MVD_MINIMUM            2009    // r168
-#define PROTOCOL_VERSION_MVD_CURRENT            2010    // r177
-
 // This is used to ensure that the protocols in use match up, and support each other.
 #define NAC_PROTOCOL_SUPPORTED(x) \
     ((x) >= PROTOCOL_VERSION_NAC_MINIMUM && \
      (x) <= PROTOCOL_VERSION_NAC_CURRENT)
-
-#define MVD_SUPPORTED(x) \
-    ((x) >= PROTOCOL_VERSION_MVD_MINIMUM && \
-     (x) <= PROTOCOL_VERSION_MVD_CURRENT)
 
 //=========================================
 
