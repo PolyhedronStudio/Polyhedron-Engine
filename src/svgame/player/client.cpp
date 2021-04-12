@@ -878,8 +878,6 @@ a deathmatch.
 */
 void PutClientInServer(entity_t *ent)
 {
-    vec3_t  mins = { -16, -16, -24};
-    vec3_t  maxs = {16, 16, 32};
     int     index;
     vec3_t  spawn_origin, spawn_angles;
     gclient_t   *client;

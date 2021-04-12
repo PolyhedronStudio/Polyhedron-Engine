@@ -26,25 +26,26 @@ static  entity_t     *current_player;
 static  gclient_t   *current_client;
 
 static  vec3_t  forward, right, up;
-float   xyspeed;
+static float   xyspeed;
 
-float   bobmove;
-int     bobcycle;       // odd cycles are right foot going forward
-float   bobfracsin;     // sin(bobfrac*M_PI)
+static float   bobmove;
+static int     bobcycle;       // odd cycles are right foot going forward
+static float   bobfracsin;     // sin(bobfrac*M_PI)
 
-/*
-===============
-SV_CalcRoll
-
-===============
-*/
-float SV_CalcRoll(vec3_t angles, vec3_t velocity)
+//
+//===============
+// SV_CalcRoll
+// 
+//
+//===============
+//
+static float SV_CalcRoll(vec3_t angles, vec3_t velocity)
 {
     float   sign;
     float   side;
     float   value;
 
-    side = DotProduct(velocity, right);
+    side = vec3_dot(velocity, right);
     sign = side < 0 ? -1 : 1;
     side = fabs(side);
 
@@ -59,15 +60,14 @@ float SV_CalcRoll(vec3_t angles, vec3_t velocity)
 
 }
 
-
-/*
-===============
-P_ApplyDamageFeedback
-
-Handles color blends and view kicks
-===============
-*/
-void P_ApplyDamageFeedback(entity_t *player)
+//
+//===============
+// P_ApplyDamageFeedback
+// 
+// Handles color blends and view kicks
+//===============
+//
+static void P_ApplyDamageFeedback(entity_t *player)
 {
     gclient_t   *client;
     float   side;
@@ -123,7 +123,7 @@ void P_ApplyDamageFeedback(entity_t *player)
     if (count < 10)
         count = 10; // always make a visible effect
 
-    // play an apropriate pain sound
+    // Play an apropriate pain sound
     if ((level.time > player->debouncePainTime) && !(player->flags & FL_GODMODE) && (client->invincible_framenum <= level.framenum)) {
         r = 1 + (rand() & 1);
         player->debouncePainTime = level.time + 0.7;
@@ -138,7 +138,7 @@ void P_ApplyDamageFeedback(entity_t *player)
         gi.Sound(player, CHAN_VOICE, gi.SoundIndex(va("*pain%i_%i.wav", l, r)), 1, ATTN_NORM, 0);
     }
 
-    // the total alpha of the blend is always proportional to count
+    // The total alpha of the blend is always proportional to count.
     if (client->damage_alpha < 0)
         client->damage_alpha = 0;
     client->damage_alpha += count * 0.01;
@@ -147,20 +147,20 @@ void P_ApplyDamageFeedback(entity_t *player)
     if (client->damage_alpha > 0.6)
         client->damage_alpha = 0.6;     // don't go too saturated
 
-    // the color of the blend will vary based on how much was absorbed
-    // by different armors
-    VectorClear(v);
+    // The color of the blend will vary based on how much was absorbed
+    // by different armors.
+    vec3_t blendColor = vec3_zero();
     if (client->damage_parmor)
-        VectorMA(v, (float)client->damage_parmor / realcount, power_color, v);
+        blendColor = vec3_fmaf(blendColor, (float)client->damage_parmor / realcount, power_color);
     if (client->damage_armor)
-        VectorMA(v, (float)client->damage_armor / realcount,  acolor, v);
+        blendColor = vec3_fmaf(blendColor, (float)client->damage_armor / realcount, acolor);
     if (client->damage_blood)
-        VectorMA(v, (float)client->damage_blood / realcount,  bcolor, v);
-    VectorCopy(v, client->damage_blend);
+        blendColor = vec3_fmaf(blendColor, (float)client->damage_blood / realcount, bcolor);
+    client->damage_blend = blendColor;
 
 
     //
-    // calculate view angle kicks
+    // Calculate view angle kicks
     //
     kick = abs(client->damage_knockback);
     if (kick && player->health > 0) { // kick of 0 means no view adjust at all
@@ -171,13 +171,13 @@ void P_ApplyDamageFeedback(entity_t *player)
         if (kick > 50)
             kick = 50;
 
-        VectorSubtract(client->damage_from, player->s.origin, v);
-        VectorNormalize(v);
+        vec3_t kickVec = client->damage_from - player->s.origin;
+        kickVec = vec3_normalize(kickVec);
 
-        side = DotProduct(v, right);
+        side = DotProduct(kickVec, right);
         client->v_dmg_roll = kick * side * 0.3;
 
-        side = -DotProduct(v, forward);
+        side = -DotProduct(kickVec, forward);
         client->v_dmg_pitch = kick * side * 0.3;
 
         client->v_dmg_time = level.time + DAMAGE_TIME;
@@ -191,10 +191,6 @@ void P_ApplyDamageFeedback(entity_t *player)
     client->damage_parmor = 0;
     client->damage_knockback = 0;
 }
-
-
-
-
 
 //
 //===============
@@ -212,7 +208,7 @@ void P_ApplyDamageFeedback(entity_t *player)
 // 
 //===============
 //
-void SV_CalculateViewOffset(entity_t *ent)
+static void SV_CalculateViewOffset(entity_t *ent)
 {
     float       bob;
     float       ratio;
@@ -272,51 +268,56 @@ void SV_CalculateViewOffset(entity_t *ent)
     //
     // Calculate new view offset.
     //
-    vec3_t newViewOffset = vec3_zero();
-
-    // Add view base viewHeight (set by pmove.)
-    newViewOffset.z += ent->viewHeight;
-    
+    // Start off with the base entity viewheight. (Set by Player Move code.)
+    vec3_t newViewOffset = {
+        0.f,
+        0.f,
+        (float)ent->viewHeight
+    };
+        
     // Add fall impact view punch height.
     ratio = (ent->client->fall_time - level.time) / FALL_TIME;
     if (ratio < 0)
         ratio = 0;
     newViewOffset.z -= ratio * ent->client->fall_value * 0.4f;
 
-    // Add bob heigh.
+    // Add bob height.
     bob = bobfracsin * xyspeed * bob_up->value;
     if (bob > 6)
         bob = 6;
     newViewOffset.z += bob;
 
-    // Sdd kick offset
+    // Add kick offset
     newViewOffset += ent->client->kickOrigin;
 
     // Clamp the new view offsets, and finally assign them to the player state.
     // Clamping ensures that they never exceed the non visible, but physically 
     // there, player bounding box.
     ent->client->playerState.viewoffset = vec3_clamp(newViewOffset,
-        { -14, -14, -22 },
-        { 14,  14, 30 }
+        //{ -14, -14, -22 },
+        //{ 14,  14, 30 }
+        ent->mins,
+        ent->maxs
     );
 }
 
-/*
-==============
-SV_CalculateGunOffset
-==============
-*/
-void SV_CalculateGunOffset(entity_t *ent)
+//
+//===============
+// SV_CalculateGunOffset
+// 
+//===============
+//
+static void SV_CalculateGunOffset(entity_t *ent)
 {
     int     i;
     float   delta;
 
     // gun angles from bobbing
     ent->client->playerState.gunangles[vec3_t::Roll] = xyspeed * bobfracsin * 0.005;
-    ent->client->playerState.gunangles[vec3_t::Yaw] = xyspeed * bobfracsin * 0.01;
+    ent->client->playerState.gunangles[vec3_t::Yaw]  = xyspeed * bobfracsin * 0.01;
     if (bobcycle & 1) {
         ent->client->playerState.gunangles[vec3_t::Roll] = -ent->client->playerState.gunangles[vec3_t::Roll];
-        ent->client->playerState.gunangles[vec3_t::Yaw] = -ent->client->playerState.gunangles[vec3_t::Yaw];
+        ent->client->playerState.gunangles[vec3_t::Yaw]  = -ent->client->playerState.gunangles[vec3_t::Yaw];
     }
 
     ent->client->playerState.gunangles[vec3_t::Pitch] = xyspeed * bobfracsin * 0.005;
@@ -349,13 +350,13 @@ void SV_CalculateGunOffset(entity_t *ent)
     }
 }
 
-
-/*
-=============
-SV_AddBlend
-=============
-*/
-void SV_AddBlend(float r, float g, float b, float a, float *v_blend)
+//
+//===============
+// SV_AddBlend
+// 
+//===============
+//
+static void SV_AddBlend(float r, float g, float b, float a, float *v_blend)
 {
     float   a2, a3;
 
@@ -370,13 +371,13 @@ void SV_AddBlend(float r, float g, float b, float a, float *v_blend)
     v_blend[3] = a2;
 }
 
-
-/*
-=============
-SV_CalculateBlend
-=============
-*/
-void SV_CalculateBlend(entity_t *ent)
+//
+//===============
+// SV_CalculateBlend
+// 
+//===============
+//
+static void SV_CalculateBlend(entity_t *ent)
 {
     int     contents;
     vec3_t  vieworg;
@@ -447,13 +448,13 @@ void SV_CalculateBlend(entity_t *ent)
         ent->client->bonus_alpha = 0;
 }
 
-
-/*
-=================
-P_CheckFallingDamage
-=================
-*/
-void P_CheckFallingDamage(entity_t *ent)
+//
+//===============
+// P_CheckFallingDamage
+// 
+//===============
+//
+static void P_CheckFallingDamage(entity_t *ent)
 {
     float   delta;
     int     damage;
@@ -516,14 +517,13 @@ void P_CheckFallingDamage(entity_t *ent)
     }
 }
 
-
-
-/*
-=============
-P_CheckWorldEffects
-=============
-*/
-void P_CheckWorldEffects(void)
+//
+//===============
+// P_CheckWorldEffects
+// 
+//===============
+//
+static void P_CheckWorldEffects(void)
 {
     qboolean    breather;
     qboolean    envirosuit;
@@ -667,13 +667,13 @@ void P_CheckWorldEffects(void)
     }
 }
 
-
-/*
-===============
-G_SetClientEffects
-===============
-*/
-void G_SetClientEffects(entity_t *ent)
+//
+//===============
+// G_SetClientEffects
+// 
+//===============
+//
+static void G_SetClientEffects(entity_t *ent)
 {
     int     pa_type;
     int     remaining;
@@ -713,13 +713,13 @@ void G_SetClientEffects(entity_t *ent)
     }
 }
 
-
-/*
-===============
-G_SetClientEvent
-===============
-*/
-void G_SetClientEvent(entity_t *ent)
+//
+//===============
+// G_SetClientEvent
+// 
+//===============
+//
+static void G_SetClientEvent(entity_t *ent)
 {
     if (ent->s.event)
         return;
@@ -730,12 +730,13 @@ void G_SetClientEvent(entity_t *ent)
     }
 }
 
-/*
-===============
-G_SetClientSound
-===============
-*/
-void G_SetClientSound(entity_t *ent)
+//
+//===============
+// G_SetClientSound
+// 
+//===============
+//
+static void G_SetClientSound(entity_t *ent)
 {
     const char    *weap; // C++20: STRING: Added const to char*
 
@@ -768,12 +769,13 @@ void G_SetClientSound(entity_t *ent)
         ent->s.sound = 0;
 }
 
-/*
-===============
-G_SetClientFrame
-===============
-*/
-void G_SetClientFrame(entity_t *ent)
+//
+//===============
+// G_SetClientFrame
+// 
+//===============
+//
+static void G_SetClientFrame(entity_t *ent)
 {
     gclient_t   *client;
     qboolean    duck, run;
@@ -854,15 +856,14 @@ newanim:
     }
 }
 
-
-/*
-=================
-ClientEndServerFrame
-
-Called for each player at the end of the server frame
-and right after spawning
-=================
-*/
+//
+//===============
+// ClientEndServerFrame
+//
+// Called for each player at the end of the server frame and right 
+// after spawning.
+//===============
+//
 void ClientEndServerFrame(entity_t *ent)
 {
     float   bobtime;
