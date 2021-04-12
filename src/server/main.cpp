@@ -93,8 +93,6 @@ cvar_t  *sv_restrict_rtx;
 
 cvar_t  *sv_allow_unconnected_cmds;
 
-cvar_t  *g_features;
-
 cvar_t  *map_override_path;
 
 qboolean sv_registered;
@@ -846,21 +844,6 @@ static qboolean parse_userinfo(conn_params_t *params, char *userinfo)
     // copy userinfo off
     Q_strlcpy(userinfo, info, MAX_INFO_STRING);
 
-    // mvdspec, ip, etc are passed in extra userinfo if supported
-    //if (!(g_features->integer & GMF_EXTRA_USERINFO)) {
-    //    // make sure mvdspec key is not set
-    //    Info_RemoveKey(userinfo, "mvdspec");
-
-    //    if (sv_password->string[0] || sv_reserved_password->string[0]) {
-    //        // unset password key to make game mod happy
-    //        Info_RemoveKey(userinfo, "password");
-    //    }
-
-    //    // force the IP key/value pair so the game can filter based on ip
-    //    if (!Info_SetValueForKey(userinfo, "ip", userinfo_ip_string()))
-    //        return reject("Oversize userinfo string.\n");
-    //}
-
     return true;
 }
 
@@ -983,11 +966,6 @@ static void send_connect_packet(client_t *newcl, int nctype)
 // then access these parameters in ClientConnect callback.
 static void append_extra_userinfo(conn_params_t *params, char *userinfo)
 {
-    //if (!(g_features->integer & GMF_EXTRA_USERINFO)) {
-    //    userinfo[strlen(userinfo) + 1] = 0;
-    //    return;
-    //}
-
     Q_snprintf(userinfo + strlen(userinfo) + 1, MAX_INFO_STRING,
                "\\challenge\\%d\\ip\\%s"
                "\\major\\%d\\minor\\%d\\netchan\\%d"
@@ -2054,9 +2032,6 @@ void SV_Init(void)
 	sv_restrict_rtx = Cvar_Get("sv_restrict_rtx", "1", 0);
 
     sv_allow_unconnected_cmds = Cvar_Get("sv_allow_unconnected_cmds", "0", 0);
-
-    Cvar_Get("sv_features", va("%d", SV_FEATURES), CVAR_ROM);
-    g_features = Cvar_Get("g_features", "0", CVAR_ROM);
 
     map_override_path = Cvar_Get("map_override_path", "", 0);
 

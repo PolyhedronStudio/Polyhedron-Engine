@@ -699,17 +699,6 @@ pmoveParams_t* PF_GetPMoveParams(void) {
     return (sv_client ? &sv_client->pmp : &sv_pmp);
 }
 
-// N&C: This has been removed, we now call the shared PMove in SVGame.
-// We pass PF_GetPMoveParams into it.
-//void PF_PMove(pm_move_t *pm)
-//{
-//    if (sv_client) {
-//        PMove(pm, &sv_client->pmp);
-//    } else {
-//        PMove(pm, &sv_pmp);
-//    }
-//}
-
 static cvar_t *PF_cvar(const char *name, const char *value, int flags)
 {
     if (flags & CVAR_EXTENDED_MASK) {
@@ -805,7 +794,6 @@ void SV_ShutdownGameProgs(void)
         Sys_FreeLibrary(game_library);
         game_library = NULL;
     }
-    Cvar_Set("g_features", "0");
 }
 
 static void *_SV_LoadGameLibrary(const char *path)

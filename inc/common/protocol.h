@@ -238,10 +238,6 @@ typedef enum {
 #define PPS_STATS           (1<<14)
 #define PPS_REMOVE          (1<<15)
 
-// this is just a small hack to store inUse flag
-// in a field left otherwise unused by MVD code
-#define PPS_INUSE(ps)       (ps)->pmove.time
-
 //==============================================
 
 // user_cmd_t communication

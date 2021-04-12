@@ -62,12 +62,12 @@ float SV_CalcRoll(vec3_t angles, vec3_t velocity)
 
 /*
 ===============
-P_DamageFeedback
+P_ApplyDamageFeedback
 
 Handles color blends and view kicks
 ===============
 */
-void P_DamageFeedback(entity_t *player)
+void P_ApplyDamageFeedback(entity_t *player)
 {
     gclient_t   *client;
     float   side;
@@ -195,142 +195,118 @@ void P_DamageFeedback(entity_t *player)
 
 
 
-/*
-===============
-SV_CalcViewOffset
 
-Auto pitching on slopes?
-
-  fall from 128: 400 = 160000
-  fall from 256: 580 = 336400
-  fall from 384: 720 = 518400
-  fall from 512: 800 = 640000
-  fall from 640: 960 =
-
-  damage = deltavelocity*deltavelocity  * 0.0001
-
-===============
-*/
-void SV_CalcViewOffset(entity_t *ent)
+//
+//===============
+// SV_CalculateViewOffset
+// 
+// Calculates t
+//
+// fall from 128 : 400 = 160000
+// fall from 256 : 580 = 336400
+// fall from 384 : 720 = 518400
+// fall from 512 : 800 = 640000
+// fall from 640 : 960 =
+//
+// damage = deltavelocity * deltavelocity * 0.0001
+// 
+//===============
+//
+void SV_CalculateViewOffset(entity_t *ent)
 {
-    float       *angles;
     float       bob;
     float       ratio;
     float       delta;
-    vec3_t      v;
 
-
-//===================================
-
-    // base angles
-    angles = ent->client->playerState.kickAngles;
-
-    // if dead, fix the angle and don't add any kick
+    //
+    // Calculate new kick angle vales. (
+    // 
+    // If dead, set a fixed angle and don't add any kick
     if (ent->deadFlag) {
-        VectorClear(angles);
+        ent->client->playerState.kickAngles = vec3_zero();
 
         ent->client->playerState.viewAngles[vec3_t::Roll] = 40;
         ent->client->playerState.viewAngles[vec3_t::Pitch] = -15;
         ent->client->playerState.viewAngles[vec3_t::Yaw] = ent->client->killer_yaw;
     } else {
-        // add angles based on weapon kick
+        // Fetch client kick angles.
+        vec3_t newKickAngles = ent->client->kickAngles; //ent->client->playerState.kickAngles;
 
-        VectorCopy(ent->client->kickAngles, angles);
-
-        // add angles based on damage kick
-
+        // Add pitch(X) and roll(Z) angles based on damage kick
         ratio = (ent->client->v_dmg_time - level.time) / DAMAGE_TIME;
         if (ratio < 0) {
-            ratio = 0;
-            ent->client->v_dmg_pitch = 0;
-            ent->client->v_dmg_roll = 0;
+            ratio = ent->client->v_dmg_pitch = ent->client->v_dmg_roll = 0;
         }
-        angles[vec3_t::Pitch] += ratio * ent->client->v_dmg_pitch;
-        angles[vec3_t::Roll] += ratio * ent->client->v_dmg_roll;
+        newKickAngles[vec3_t::Pitch] += ratio * ent->client->v_dmg_pitch;
+        newKickAngles[vec3_t::Roll] += ratio * ent->client->v_dmg_roll;
 
-        // add pitch based on fall kick
-
+        // Add pitch based on fall kick
         ratio = (ent->client->fall_time - level.time) / FALL_TIME;
         if (ratio < 0)
             ratio = 0;
-        angles[vec3_t::Pitch] += ratio * ent->client->fall_value;
+        newKickAngles[vec3_t::Pitch] += ratio * ent->client->fall_value;
 
-        // add angles based on velocity
+        // Add angles based on velocity
+        delta = vec3_dot(ent->velocity, forward);
+        newKickAngles[vec3_t::Pitch] += delta * run_pitch->value;
 
-        delta = DotProduct(ent->velocity, forward);
-        angles[vec3_t::Pitch] += delta * run_pitch->value;
+        delta = vec3_dot(ent->velocity, right);
+        newKickAngles[vec3_t::Roll] += delta * run_roll->value;
 
-        delta = DotProduct(ent->velocity, right);
-        angles[vec3_t::Roll] += delta * run_roll->value;
-
-        // add angles based on bob
-
+        // Add angles based on bob
         delta = bobfracsin * bob_pitch->value * xyspeed;
         if (ent->client->playerState.pmove.flags & PMF_DUCKED)
             delta *= 6;     // crouching
-        angles[vec3_t::Pitch] += delta;
+        newKickAngles[vec3_t::Pitch] += delta;
         delta = bobfracsin * bob_roll->value * xyspeed;
         if (ent->client->playerState.pmove.flags & PMF_DUCKED)
             delta *= 6;     // crouching
         if (bobcycle & 1)
             delta = -delta;
-        angles[vec3_t::Roll] += delta;
+        newKickAngles[vec3_t::Roll] += delta;
+
+        // Last but not least, assign new kickangles to player state.
+        ent->client->playerState.kickAngles = newKickAngles;
     }
 
-//===================================
+    //
+    // Calculate new view offset.
+    //
+    vec3_t newViewOffset = vec3_zero();
 
-    // base origin
-
-    VectorClear(v);
-
-    // add view height
-    v[2] += ent->viewHeight;
-    //v[2] += ent->client->playerState.pmove.view_offset[2];
-
-    // add fall height
-
+    // Add view base viewHeight (set by pmove.)
+    newViewOffset.z += ent->viewHeight;
+    
+    // Add fall impact view punch height.
     ratio = (ent->client->fall_time - level.time) / FALL_TIME;
     if (ratio < 0)
         ratio = 0;
-    v[2] -= ratio * ent->client->fall_value * 0.4;
+    newViewOffset.z -= ratio * ent->client->fall_value * 0.4f;
 
-    // add bob height
-
+    // Add bob heigh.
     bob = bobfracsin * xyspeed * bob_up->value;
     if (bob > 6)
         bob = 6;
-    //gi.DebugGraph (bob *2, 255);
-    v[2] += bob;
+    newViewOffset.z += bob;
 
-    // add kick offset
+    // Sdd kick offset
+    newViewOffset += ent->client->kickOrigin;
 
-    VectorAdd(v, ent->client->kickOrigin, v);
-
-    // absolutely bound offsets
-    // so the view can never be outside the player box
-
-    if (v[0] < -14)
-        v[0] = -14;
-    else if (v[0] > 14)
-        v[0] = 14;
-    if (v[1] < -14)
-        v[1] = -14;
-    else if (v[1] > 14)
-        v[1] = 14;
-    if (v[2] < -22)
-        v[2] = -22;
-    else if (v[2] > 30)
-        v[2] = 30;
-
-    VectorCopy(v, ent->client->playerState.viewoffset);
+    // Clamp the new view offsets, and finally assign them to the player state.
+    // Clamping ensures that they never exceed the non visible, but physically 
+    // there, player bounding box.
+    ent->client->playerState.viewoffset = vec3_clamp(newViewOffset,
+        { -14, -14, -22 },
+        { 14,  14, 30 }
+    );
 }
 
 /*
 ==============
-SV_CalcGunOffset
+SV_CalculateGunOffset
 ==============
 */
-void SV_CalcGunOffset(entity_t *ent)
+void SV_CalculateGunOffset(entity_t *ent)
 {
     int     i;
     float   delta;
@@ -397,10 +373,10 @@ void SV_AddBlend(float r, float g, float b, float a, float *v_blend)
 
 /*
 =============
-SV_CalcBlend
+SV_CalculateBlend
 =============
 */
-void SV_CalcBlend(entity_t *ent)
+void SV_CalculateBlend(entity_t *ent)
 {
     int     contents;
     vec3_t  vieworg;
@@ -474,10 +450,10 @@ void SV_CalcBlend(entity_t *ent)
 
 /*
 =================
-P_FallingDamage
+P_CheckFallingDamage
 =================
 */
-void P_FallingDamage(entity_t *ent)
+void P_CheckFallingDamage(entity_t *ent)
 {
     float   delta;
     int     damage;
@@ -544,10 +520,10 @@ void P_FallingDamage(entity_t *ent)
 
 /*
 =============
-P_WorldEffects
+P_CheckWorldEffects
 =============
 */
-void P_WorldEffects(void)
+void P_CheckWorldEffects(void)
 {
     qboolean    breather;
     qboolean    envirosuit;
@@ -921,10 +897,10 @@ void ClientEndServerFrame(entity_t *ent)
         return;
     }
 
-    AngleVectors(ent->client->v_angle, &forward, &right, &up);
+    vec3_vectors(ent->client->v_angle, &forward, &right, &up);
 
     // burn from lava, etc
-    P_WorldEffects();
+    P_CheckWorldEffects();
 
     //
     // set model angles from view angles so other things in
@@ -973,24 +949,24 @@ void ClientEndServerFrame(entity_t *ent)
     bobcycle = (int)bobtime;
     bobfracsin = std::fabsf(std::sinf(bobtime * M_PI));
 
-    // detect hitting the floor
-    P_FallingDamage(ent);
+    // Detect hitting the floor, and apply damage appropriately.
+    P_CheckFallingDamage(ent);
 
-    // apply all the damage taken this frame
-    P_DamageFeedback(ent);
+    // Apply all other the damage taken this frame
+    P_ApplyDamageFeedback(ent);
 
-    // determine the view offsets
-    SV_CalcViewOffset(ent);
+    // Determine the new frame's view offsets
+    SV_CalculateViewOffset(ent);
 
-    // determine the gun offsets
-    SV_CalcGunOffset(ent);
+    // Determine the gun offsets
+    SV_CalculateGunOffset(ent);
 
-    // determine the full screen color blend
+    // Determine the full screen color blend
     // must be after viewoffset, so eye contents can be
     // accurately determined
     // FIXME: with client prediction, the contents
     // should be determined by the client
-    SV_CalcBlend(ent);
+    SV_CalculateBlend(ent);
 
     // Set the stats to display for this client (one of the chase spectator stats or...)
     if (ent->client->resp.spectator)
@@ -1008,10 +984,11 @@ void ClientEndServerFrame(entity_t *ent)
 
     G_SetClientFrame(ent);
 
+    // Store velocity and view angles.
     ent->client->oldVelocity = ent->velocity;
     ent->client->oldViewAngles = ent->client->playerState.viewAngles;
 
-    // Clear weapon kicks
+    // Reset weapon kicks to zer0.
     ent->client->kickOrigin = vec3_zero();
     ent->client->kickAngles = vec3_zero();
 

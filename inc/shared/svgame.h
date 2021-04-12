@@ -46,18 +46,6 @@ typedef enum {
     SOLID_BSP           // bsp clip, touch on edge
 } solid_t;
 
-// extended features
-
-//#define GMF_CLIENTNUM               0x00000001
-//#define GMF_PROPERINUSE             0x00000002
-//#define GMF_MVDSPEC                 0x00000004
-//#define GMF_WANT_ALL_DISCONNECTS    0x00000008
-
-//#define GMF_ENHANCED_SAVEGAMES      0x00000400
-//#define GMF_VARIABLE_FPS            0x00000800
-//#define GMF_EXTRA_USERINFO          0x00001000
-//#define GMF_IPV6_ADDRESS_AWARE      0x00002000
-
 //===============================================================
 
 #define MAX_ENT_CLUSTERS    16

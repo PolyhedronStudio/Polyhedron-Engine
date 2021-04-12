@@ -14,7 +14,7 @@
 
 void player_pain(entity_t* self, entity_t* other, float kick, int damage)
 {
-    // player pain is handled at the end of the frame in P_DamageFeedback
+    // player pain is handled at the end of the frame in P_ApplyDamageFeedback
 }
 
 /*

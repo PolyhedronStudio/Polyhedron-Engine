@@ -370,7 +370,7 @@ void SV_BuildClientFrame(client_t *client)
 //    if (g_features->integer & GMF_CLIENTNUM) {
         frame->clientNum = clent->client->clientNum;
     //} else {
-        frame->clientNum = client->number;
+        //frame->clientNum = client->number;
     //}
 
 	if (clientcluster >= 0)

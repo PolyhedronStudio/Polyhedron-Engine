@@ -189,9 +189,6 @@ void InitGame(void)
 	sv_flaregun = gi.cvar("sv_flaregun", "1", 0);
 	cl_monsterfootsteps = gi.cvar("cl_monsterfootsteps", "1", 0);
 
-    // export our own features
-    gi.cvar_forceset("g_features", va("%d", G_FEATURES));
-
     // items
     InitItems();
 

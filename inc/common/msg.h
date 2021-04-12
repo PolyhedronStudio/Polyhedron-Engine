@@ -109,7 +109,7 @@ typedef enum {
 //---------------
 // Entity state messaging flags.
 //---------------
-typedef enum msgEsFlags_s : int32_t {
+typedef enum msgEsFlags_s {
     MSG_ES_FORCE = (1 << 0),
     MSG_ES_NEWENTITY = (1 << 1),
     MSG_ES_FIRSTPERSON = (1 << 2),
