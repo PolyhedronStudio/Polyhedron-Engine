@@ -225,7 +225,7 @@ MSG_WriteDeltaUsercmd
 */
 int MSG_WriteDeltaUsercmd(const usercmd_t *from, const usercmd_t *cmd, int version)
 {
-    int     bits, buttons = cmd->buttons & BUTTON_MASK;
+    int     bits, buttons = cmd->buttons;
 
     if (!from) {
         from = &nullUserCmd;
@@ -1445,7 +1445,7 @@ void MSG_ReadDeltaUsercmd_Hacked(const usercmd_t *from, usercmd_t *to)
 // read buttons
     if (bits & CM_BUTTONS) {
         buttons = MSG_ReadByte();
-        to->buttons = buttons & BUTTON_MASK;
+        to->buttons = buttons;
     }
 
 // read current angles

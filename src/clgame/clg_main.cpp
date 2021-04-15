@@ -7,6 +7,7 @@
 // Handles the main initialisation of the client game dll.
 //
 #include "clg_local.h"
+#include "clg_input.h"
 
 //
 // Core.
@@ -384,6 +385,9 @@ static void cl_vwep_changed(cvar_t* self)
 void CLG_Init() {
     // Begin init log.
     Com_Print("\n%s\n", "==== InitCLGame ====");
+
+    // Register user input.
+    CLG_RegisterInput();
 
     // Here we fetch cvars that were created by the client.
     // These are nescessary for certain CG Module functionalities.

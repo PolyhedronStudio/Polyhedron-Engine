@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client.h"         // Include Player Client header.
 #include "hud.h"            // Include HUD header.
 
-
+#include "sharedgame/sharedgame.h" // Include SG Base.
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
 
@@ -957,15 +957,17 @@ void PutClientInServer(entity_t *ent)
     ent->maxs = vec3_scale(PM_MAXS, PM_SCALE);
     ent->velocity = vec3_zero();
 
-    // clear playerstate values
-    memset(&ent->client->playerState, 0, sizeof(client->playerState));
+    // Clear playerstate values
+    //memset(&ent->client->playerState, 0, sizeof(client->playerState));
+    client->playerState = {};
 
-    // N&C: FF Precision.
-    VectorCopy(spawn_origin, client->playerState.pmove.origin);
-    //client->playerState.pmove.origin[0] = spawn_origin[0] * 8;
-    //client->playerState.pmove.origin[1] = spawn_origin[1] * 8;
-    //client->playerState.pmove.origin[2] = spawn_origin[2] * 8;
+    // Assign spawn origin to player state origin.
+    client->playerState.pmove.origin = spawn_origin;
+    
+    // Assign spawn origin to the entity state origin, ensure that it is off-ground.
+    ent->s.origin = ent->s.old_origin = spawn_origin + vec3_t{ 0.f, 0.f, 1.f };
 
+    // Set FOV, fixed, or custom.
     if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV)) {
         client->playerState.fov = 90;
     } else {
@@ -978,18 +980,16 @@ void PutClientInServer(entity_t *ent)
 
     client->playerState.gunindex = gi.ModelIndex(client->pers.weapon->viewModel);
 
-    // clear entity state values
+    // Clear certain entity state values
     ent->s.effects = 0;
-    ent->s.modelindex = 255;        // will use the skin specified model
-    ent->s.modelindex2 = 255;       // custom gun model
+    ent->s.modelindex = 255;        // Will use the skin specified model
+    ent->s.modelindex2 = 255;       // Custom gun model
     // sknum is player num and weapon number
     // weapon number will be added in changeweapon
     ent->s.skinnum = ent - g_edicts - 1;
 
     ent->s.frame = 0;
-    VectorCopy(spawn_origin, ent->s.origin);
-    ent->s.origin[2] += 1;  // make sure off ground
-    VectorCopy(ent->s.origin, ent->s.old_origin);
+
 
     // set the delta angle
     for (i = 0 ; i < 3 ; i++) {
@@ -1114,7 +1114,7 @@ void ClientBegin(entity_t *ent)
         }
     }
 
-    // make sure all view stuff is valid
+    // Called to make sure all view stuff is valid
     ClientEndServerFrame(ent);
 }
 

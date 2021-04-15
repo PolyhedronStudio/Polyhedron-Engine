@@ -28,15 +28,16 @@
 #include "common/msg.h"
 #include "common/protocol.h"
 
-#include "sharedgame/pmove.h" // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
+// Shared Game Headers.
+#include "sharedgame/sharedgame.h" // Include SG Base.
+#include "sharedgame/pmove.h"
+#include "sharedgame/protocol.h"
 
 // Shared Client Game Headers.
 #include "shared/cltypes.h"
 #include "shared/clgame.h"
 
-// Shared Game Headers.
-#include "sharedgame/pmove.h"
-#include "sharedgame/protocol.h"
+
 
 
 //

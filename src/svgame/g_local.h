@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // because we define the full size ones in this file
 #define GAME_INCLUDE
 #include "shared/svgame.h"
+#include "sharedgame/sharedgame.h" // Include SG Base.
 #include "sharedgame/protocol.h"
 
 // the "gameversion" client command will print this plus compile date

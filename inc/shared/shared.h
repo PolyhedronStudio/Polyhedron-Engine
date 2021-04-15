@@ -454,7 +454,6 @@ typedef struct cvar_s {
 //
 //=============================================================================
 //
-
 //-----------------
 // Brief Water Level.
 //-----------------
@@ -471,13 +470,13 @@ typedef enum {
 //-----------------
 typedef enum {
     PM_NORMAL, // Walking, jumping, falling, swimming, etc.
-    PM_HOOK_PULL, // Pull hook
-    PM_HOOK_SWING, // Swing hook
-    PM_SPECTATOR, // Free-flying movement with acceleration and friction
+    PM_HOOK_PULL,   // Pull hook
+    PM_HOOK_SWING,  // Swing hook
+    PM_SPECTATOR,   // Free-flying movement with acceleration and friction
     // All slots up till 32 are free for custom game PM_ defines.
     PM_DEAD = 32, // No movement, but the ability to rotate in place
-    PM_FREEZE, // No movement at all
-    PM_GIB,     // No movement, different bounding box
+    PM_FREEZE,    // No movement at all
+    PM_GIB,       // No movement, different bounding box
 } pm_type_t;
 
 //-----------------
@@ -510,17 +509,6 @@ typedef struct {
     // View offsets. (Only Z is used atm, beware.)
     vec3_t view_offset;
 } pm_state_t;
-
-
-//-----------------
-// Button Bits
-// 
-// TODO: This needs some reorganizing. BUTTON_ENGINE (1 << 0) BUTTON_### (BUTTON_ENGINE << 0)
-//-----------------
-#define BUTTON_ATTACK       1
-#define BUTTON_USE          2
-#define BUTTON_WALK         3           // PMOVE: Added for pmove.
-#define BUTTON_ANY          128         // any key whatsoever
 
 //-----------------
 // usercmd_t is sent to the server each client frame

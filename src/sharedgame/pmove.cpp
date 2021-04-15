@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // and/or in air. We execute the right movement according to that.
 //
 #include "shared/shared.h"
+#include "sharedgame/sharedgame.h"
 #include "sharedgame/pmove.h"
 #include "client/client.h"
 

@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../g_local.h"
 #include "animations.h"
 
+#include "sharedgame/sharedgame.h" // Include SG Base.
 
 qboolean is_quad;
 byte     is_silenced;

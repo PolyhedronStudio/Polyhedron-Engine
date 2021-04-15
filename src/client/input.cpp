@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client.h"
 #include "client/gamemodule.h"
 #include "shared/clgame.h"
+#include "sharedgame/sharedgame.h"
 #include "system/lirc.h"
 
 // N&C: Cheesy hack, we need to actually make this extern in a header.
@@ -152,10 +153,6 @@ void IN_Frame(void)
     if (input.api.GetEvents) {
         input.api.GetEvents();
     }
-
-#if USE_LIRC
-    Lirc_GetEvents();
-#endif
 }
 
 /*
@@ -190,10 +187,6 @@ void IN_Shutdown(void)
         input.api.Shutdown();
     }
 
-#if USE_LIRC
-    Lirc_Shutdown();
-#endif
-
     memset(&input, 0, sizeof(input));
 }
 
@@ -215,10 +208,6 @@ IN_Init
 void IN_Init(void)
 {
     qboolean ret = false;
-
-#if USE_LIRC
-    Lirc_Init();
-#endif
 
     in_enable = Cvar_Get("in_enable", "1", 0);
     in_enable->changed = in_changed_hard;
