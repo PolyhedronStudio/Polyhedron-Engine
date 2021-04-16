@@ -605,6 +605,9 @@ static vec3_t CL_BaseMove(const vec3_t &inMove)
     // Adjust for speed key / running
     if ((in_speed.state & 1) ^ cl_run->integer) {
         VectorScale(outMove, 2, outMove);
+        cl.cmd.buttons |= BUTTON_WALK;
+    } else {
+        cl.cmd.buttons |= BUTTON_WALK;
     }
 
     return outMove;

@@ -523,8 +523,19 @@ void CL_InitGameProgs(void)
     // Keys.
     extern void KeyUp(KeyBinding* b);
     extern void KeyDown(KeyBinding* b);
+    importAPI.Key_GetOverstrikeMode = Key_GetOverstrikeMode;
+    importAPI.Key_SetOverstrikeMode = Key_SetOverstrikeMode;
+    importAPI.Key_GetDest = Key_GetDest;
+    importAPI.Key_SetDest = Key_SetDest;
     importAPI.Key_IsDown = Key_IsDown;
+    importAPI.Key_AnyKeyDown = Key_AnyKeyDown;
+    importAPI.Key_StringToKeynum = Key_StringToKeynum;
+    importAPI.Key_KeynumToString = Key_KeynumToString;
     importAPI.Key_GetBinding = Key_GetBinding;
+    importAPI.Key_GetBindingForKey = Key_GetBindingForKey;
+    importAPI.Key_EnumBindings = Key_EnumBindings;
+    importAPI.Key_SetBinding = Key_SetBinding;
+
     importAPI.KeyBindingDown = KeyDown;
     importAPI.KeyBindingUp = KeyUp;
 

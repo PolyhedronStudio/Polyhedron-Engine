@@ -444,10 +444,40 @@ extern "C" {
         //---------------------------------------------------------------------
         // Key/User input.
         //---------------------------------------------------------------------
-        // Returns whether a key is down or not.
+        //// Returns whether a key is down or not.
+        //int         (*Key_IsDown) (int key);
+        //// Returns total number of keys down.
+        //int         (*Key_AnyKeyDown) (void);
+        //// Returns the ASCII value of the key belonging to the binding.
+        //const char  *(*Key_GetBinding) (const char* binding);
+        // Returns whether in overstrike mode.
+        qboolean    (*Key_GetOverstrikeMode) (void);
+        // Sets key in overstrike mode.
+        void        (*Key_SetOverstrikeMode) (qboolean overstrike);
+        // Returns the current client state key destination.
+        keydest_t(*Key_GetDest) (void);
+        // Sets the key destination.
+        void        (*Key_SetDest) (keydest_t dest);
+        // Returns key down status: if > 1, it is auto-repeating
         int         (*Key_IsDown) (int key);
-        // Returns the ASCII value of the key belonging to the binding.
-        const char  *(*Key_GetBinding) (const char* binding);
+        // Returns total number of keys down.
+        int         (*Key_AnyKeyDown) (void);
+        // Returns a key number to be used to index keybindings[] by looking at
+        // the given string.  Single ascii characters return themselves, while
+        // the K_* names are matched up.
+        int         (*Key_StringToKeynum) (const char* str);
+        // Returns a string (either a single ascii char, or a K_* name) for the
+        // given keynum.
+        const char* (*Key_KeynumToString) (int keynum);
+        //Returns the name of the first key found.
+        const char* (*Key_GetBinding) (const char* binding);
+        // Returns the command bound to a given key.
+        const char* (*Key_GetBindingForKey) (int keynum);
+        // Fills the binding string with the name of the binding matching to the key.
+        // Returns -1 in case nothing was found.
+        int         (*Key_EnumBindings) (int key, const char* binding);
+        // Sets keybinding for the given keynum.
+        void        (*Key_SetBinding) (int keynum, const char* binding);
 
         // Performs "down" behavior actions for the given key binding.
         void        (*KeyBindingDown) (KeyBinding* b);
