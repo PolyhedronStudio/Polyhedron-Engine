@@ -217,7 +217,7 @@ void MSG_WriteAngle(float f)
 }
 
 #include "sharedgame/sharedgame.h"
-#define BUTTON_MASK     (BUTTON_ATTACK|BUTTON_USE|BUTTON_ANY)
+#define BUTTON_MASK     (BUTTON_ATTACK|BUTTON_WALK|BUTTON_USE|BUTTON_ANY)
 
 #if USE_CLIENT
 

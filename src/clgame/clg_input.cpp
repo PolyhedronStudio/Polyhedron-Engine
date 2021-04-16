@@ -501,8 +501,8 @@ void CLG_BuildFrameMoveCommand(int msec)
 //
 void CLG_RegisterInput(void)
 {
+    // Register Input Key bind Commands.
     clgi.Cmd_AddCommand("centerview", IN_CenterView);
-
     clgi.Cmd_AddCommand("+moveup", IN_UpDown);
     clgi.Cmd_AddCommand("-moveup", IN_UpUp);
     clgi.Cmd_AddCommand("+movedown", IN_DownDown);
@@ -537,16 +537,6 @@ void CLG_RegisterInput(void)
     clgi.Cmd_AddCommand("+mlook", IN_MLookDown);
     clgi.Cmd_AddCommand("-mlook", IN_MLookUp);
 
-//    cl_nodelta = Cvar_Get("cl_nodelta", "0", 0);
-//    cl_maxpackets = Cvar_Get("cl_maxpackets", "30", 0);
-//    cl_fuzzhack = Cvar_Get("cl_fuzzhack", "0", 0);
-//    cl_packetdup = Cvar_Get("cl_packetdup", "1", 0);
-//#ifdef _DEBUG
-//    cl_showpackets = Cvar_Get("cl_showpackets", "0", 0);
-//#endif
-
-//    cl_batchcmds = Cvar_Get("cl_batchcmds", "1", 0);
-//
     // Create Cvars.
     cl_upspeed = clgi.Cvar_Get("cl_upspeed", "300", 0);
     cl_forwardspeed = clgi.Cvar_Get("cl_forwardspeed", "300", 0);
