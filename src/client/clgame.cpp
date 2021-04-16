@@ -99,6 +99,11 @@ mmodel_t *_wrp_CM_InlineModel(cm_t *cm, const char *name) {
     return CM_InlineModel(cm, name);
 }
 
+// COMMON
+unsigned _prt_Com_GetEventTime(void) {
+    return com_eventTime;
+}
+
 // FILES
 qhandle_t _wrp_FS_FileExists(const char *path) {
     return FS_FileExists(path);
@@ -467,6 +472,7 @@ void CL_InitGameProgs(void)
     importAPI.Com_LPrintf = Com_LPrintf;
 
     importAPI.Com_ErrorString = Q_ErrorString;
+    importAPI.Com_GetEventTime = _prt_Com_GetEventTime;
 
     // Console.
     importAPI.Con_ClearNotify = Con_ClearNotify_f;
@@ -521,8 +527,6 @@ void CL_InitGameProgs(void)
     importAPI.FS_SanitizeFilenameVariable = FS_SanitizeFilenameVariable;
 
     // Keys.
-    extern void KeyUp(KeyBinding* b);
-    extern void KeyDown(KeyBinding* b);
     importAPI.Key_GetOverstrikeMode = Key_GetOverstrikeMode;
     importAPI.Key_SetOverstrikeMode = Key_SetOverstrikeMode;
     importAPI.Key_GetDest = Key_GetDest;
@@ -536,8 +540,8 @@ void CL_InitGameProgs(void)
     importAPI.Key_EnumBindings = Key_EnumBindings;
     importAPI.Key_SetBinding = Key_SetBinding;
 
-    importAPI.KeyBindingDown = KeyDown;
-    importAPI.KeyBindingUp = KeyUp;
+    // Mouse.
+    importAPI.Mouse_GetMotion = CL_GetMouseMotion;
 
     // Memory.
     importAPI.Z_TagMalloc = Z_TagMalloc;
@@ -872,6 +876,32 @@ void CL_GM_EndServerMessage () {
 void CL_GM_CheckPredictionError(int frame, unsigned int cmd) {
     if (cge)
         cge->CheckPredictionError(frame, cmd);
+}
+
+//
+//===============
+// CL_GM_BuildFrameMoveCommand
+// 
+// Called by the client to build up the movement command for
+// the current frame.
+//===============
+//
+void CL_GM_BuildFrameMoveCommand(int msec) {
+    if (cge)
+        cge->BuildFrameMoveCommand(msec);
+}
+
+//
+//===============
+// CL_GM_FinalizeFrameMoveCommand
+// 
+// Called by the client to finalize the move command for this current
+// frame.
+//===============
+//
+void CL_GM_FinalizeFrameMoveCommand(void) {
+    if (cge)
+        cge->FinalizeFrameMoveCommand();
 }
 
 //

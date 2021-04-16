@@ -50,6 +50,12 @@ void        CL_GM_LoadWorldMedia(void);
 void        CL_GM_ShutdownMedia(void);
 
 //
+// Movement.
+// 
+void CL_GM_BuildFrameMoveCommand(int msec);
+void CL_GM_FinalizeFrameMoveCommand(void);
+
+//
 // PMove.
 //
 void		CL_GM_PMoveInit(pmoveParams_t* pmp);

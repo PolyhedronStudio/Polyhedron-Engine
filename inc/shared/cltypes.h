@@ -358,6 +358,12 @@ typedef struct client_state_s {
     qboolean    snd_is_underwater_enabled;
 
     //
+    // Client Input Variables.
+    //
+    float       autosens_x;
+    float       autosens_y;
+
+    //
     // Client Rendering Variables.
     //
     refdef_t    refdef;

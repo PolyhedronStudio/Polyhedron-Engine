@@ -135,6 +135,10 @@ q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     // Entities.
     clge.EntityEvent                = CLG_EntityEvent;
 
+    // Movement Command.
+    clge.BuildFrameMoveCommand      = CLG_BuildFrameMoveCommand;
+    clge.FinalizeFrameMoveCommand   = CLG_FinalizeFrameMoveCommand;
+
     // Media.
     clge.InitMedia                  = CLG_InitMedia;
     clge.GetMediaLoadStateName      = CLG_GetMediaLoadStateName;

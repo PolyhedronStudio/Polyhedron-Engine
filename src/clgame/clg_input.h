@@ -11,4 +11,7 @@
 
 void CLG_RegisterInput(void);
 
+void CLG_BuildFrameMoveCommand(int msec);
+void CLG_FinalizeFrameMoveCommand(void);
+
 #endif // __CLGAME_INPUT_H__

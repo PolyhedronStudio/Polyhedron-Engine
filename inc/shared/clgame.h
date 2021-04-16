@@ -98,6 +98,16 @@ extern "C" {
         void        (*EntityEvent) (int number);
 
         //---------------------------------------------------------------------
+        // 
+        //---------------------------------------------------------------------
+        // Called when the movement command needs to be build for the given
+        // client networking frame.
+        void        (*BuildFrameMoveCommand) (int msec);
+        // Finished off building the actual movement vector before sending it
+        // to server.
+        void        (*FinalizeFrameMoveCommand) (void);
+
+        //---------------------------------------------------------------------
         // Media.
         //---------------------------------------------------------------------
         // Called when the client wants to know the name of a custom load stat.
@@ -324,6 +334,8 @@ extern "C" {
 
         // Returns a string description value of the given qerror_t type.
         const char  *(*Com_ErrorString) (qerror_t type);
+        // Returns the event time between "common event frames" engine internal.
+        unsigned    (*Com_GetEventTime) (void);
 
         //---------------------------------------------------------------------
         // Console.
@@ -479,10 +491,10 @@ extern "C" {
         // Sets keybinding for the given keynum.
         void        (*Key_SetBinding) (int keynum, const char* binding);
 
-        // Performs "down" behavior actions for the given key binding.
-        void        (*KeyBindingDown) (KeyBinding* b);
-        // Performs "up" behavior actions for the given key binding.
-        void        (*KeyBindingUp) (KeyBinding* b);
+        //---------------------------------------------------------------------
+        // Mouse.
+        //---------------------------------------------------------------------
+        qboolean        (*Mouse_GetMotion) (int *deltaX, int *deltaY);
 
         //---------------------------------------------------------------------
         // Memory.
