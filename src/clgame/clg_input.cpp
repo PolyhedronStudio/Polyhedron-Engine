@@ -419,11 +419,11 @@ static vec3_t CL_ClampSpeed(const vec3_t& inMove)
 {
     vec3_t outMove = inMove;
 
-    float speed = cl_forwardspeed->value; // TODO: FIX PM_ //pmoveParams->maxspeed;
+    //float speed = cl_forwardspeed->value; // TODO: FIX PM_ //pmoveParams->maxspeed;
 
-    outMove[0] = Clampf(outMove[0], -speed, speed);
-    outMove[1] = Clampf(outMove[1], -speed, speed);
-    outMove[2] = Clampf(outMove[2], -speed, speed);
+    //outMove[0] = Clampf(outMove[0], -speed, speed);
+    //outMove[1] = Clampf(outMove[1], -speed, speed);
+    //outMove[2] = Clampf(outMove[2], -speed, speed);
 
     return outMove;
 }

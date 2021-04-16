@@ -1491,7 +1491,10 @@ static void PM_WalkMove(void) {
     // Accounting for walk modulus
     if (pm->cmd.buttons & BUTTON_WALK) {
         max_speed *= PM_SPEED_MOD_WALK;
-        PM_Debug("WELL HELLO THERE PM_MOD_SPEED_WALK");
+        PM_Debug("BUTTON WALK HA");
+    }
+    else {
+        PM_Debug("PMOVE_NOBUUTTONWALK");
     }
 
     // Clamp the speed to min/max speed
@@ -1556,9 +1559,9 @@ static void PM_SpectatorMove(void) {
     PM_Accelerate(vel, speed, PM_ACCEL_SPECTATOR);
 
     // do the move
-    if (pm->state.velocity.x || pm->state.velocity.y) {
+    //if (pm->state.velocity.x || pm->state.velocity.y) {
         PM_StepSlideMove();
-    }
+    //}
     //pm->state.origin = vec3_fmaf(pm->state.origin, playerMoveLocals.frameTime, pm->state.velocity);
 }
 
