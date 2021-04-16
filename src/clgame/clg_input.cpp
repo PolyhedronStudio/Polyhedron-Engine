@@ -484,19 +484,6 @@ void CLG_BuildFrameMoveCommand(int msec)
     cl->cmd.angles[2] = ANGLE2SHORT(cl->viewAngles[2]);
 }
 
-static void m_autosens_changed(cvar_t* self)
-{
-    float fov;
-
-    if (self->value > 90.0f && self->value <= 179.0f)
-        fov = self->value;
-    else
-        fov = 90.0f;
-
-    cl->autosens_x = 1.0f / fov;
-    cl->autosens_y = 1.0f / CLG_CalcFOV(fov, 4, 3);
-}
-
 //
 //===============
 // CLG_RegisterInput
@@ -555,29 +542,29 @@ void CLG_RegisterInput(void)
 //    cl_instantpacket = Cvar_Get("cl_instantpacket", "1", 0);
 //    cl_batchcmds = Cvar_Get("cl_batchcmds", "1", 0);
 //
-    cl_upspeed = clgi.Cvar_Get("cl_upspeed", "200", 0);
+    // Create Cvars.
+    cl_upspeed = clgi.Cvar_Get("cl_upspeed", "300", 0);
     cl_forwardspeed = clgi.Cvar_Get("cl_forwardspeed", "300", 0);
-    cl_sidespeed = clgi.Cvar_Get("cl_sidespeed", "200", 0);
-    cl_yawspeed = clgi.Cvar_Get("cl_yawspeed", "140", 0);
-    cl_pitchspeed = clgi.Cvar_Get("cl_pitchspeed", "150", CVAR_CHEAT);
+    cl_sidespeed = clgi.Cvar_Get("cl_sidespeed", "300", 0);
+    cl_yawspeed = clgi.Cvar_Get("cl_yawspeed", "0.140", 0);
+    cl_pitchspeed = clgi.Cvar_Get("cl_pitchspeed", "0.150", CVAR_CHEAT);
     cl_anglespeedkey = clgi.Cvar_Get("cl_anglespeedkey", "1.5", CVAR_CHEAT);
     cl_run = clgi.Cvar_Get("cl_run", "1", CVAR_ARCHIVE);
 
     freelook = clgi.Cvar_Get("freelook", "1", CVAR_ARCHIVE);
     lookspring = clgi.Cvar_Get("lookspring", "0", CVAR_ARCHIVE);
     lookstrafe = clgi.Cvar_Get("lookstrafe", "0", CVAR_ARCHIVE);
-    sensitivity = clgi.Cvar_Get("sensitivity", "3", CVAR_ARCHIVE);
 
-    m_pitch = clgi.Cvar_Get("m_pitch", "0.022", CVAR_ARCHIVE);
-    m_invert = clgi.Cvar_Get("m_invert", "0", CVAR_ARCHIVE);
-    m_yaw = clgi.Cvar_Get("m_yaw", "0.022", 0);
-    m_forward = clgi.Cvar_Get("m_forward", "1", 0);
-    m_side = clgi.Cvar_Get("m_side", "1", 0);
-    m_filter = clgi.Cvar_Get("m_filter", "0", 0);
-    m_accel = clgi.Cvar_Get("m_accel", "0", 0);
+    // Fetch CVars.
+    sensitivity = clgi.Cvar_Get("sensitivity", "0", 0);
     m_autosens = clgi.Cvar_Get("m_autosens", "0", 0);
-    m_autosens->changed = m_autosens_changed;
-    m_autosens_changed(m_autosens);
+    m_pitch = clgi.Cvar_Get("m_pitch", "", 0);
+    m_invert = clgi.Cvar_Get("m_invert", "", 0);
+    m_yaw = clgi.Cvar_Get("m_yaw", "", 0);
+    m_forward = clgi.Cvar_Get("m_forward", "", 0);
+    m_side = clgi.Cvar_Get("m_side", "", 0);
+    m_filter = clgi.Cvar_Get("m_filter", "", 0);
+    m_accel = clgi.Cvar_Get("m_accel", "", 0);
 }
 
 /*

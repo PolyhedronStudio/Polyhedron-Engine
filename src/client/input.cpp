@@ -40,17 +40,6 @@ static cvar_t    *m_filter;
        cvar_t    *m_accel;
        cvar_t    *m_autosens;
 
-static cvar_t    *cl_upspeed;
-static cvar_t    *cl_forwardspeed;
-static cvar_t    *cl_sidespeed;
-static cvar_t    *cl_yawspeed;
-static cvar_t    *cl_pitchspeed;
-static cvar_t    *cl_run;
-static cvar_t    *cl_anglespeedkey;
-
-static cvar_t    *freelook;
-static cvar_t    *lookspring;
-static cvar_t    *lookstrafe;
        cvar_t    *sensitivity;
 
        cvar_t    *m_pitch;
@@ -308,37 +297,22 @@ Doesn't touch command forward/side/upmove, these are filled by CL_FinalizeCmd.
 void CL_UpdateCmd(int msec)
 {
     CL_GM_BuildFrameMoveCommand(msec);
-    //VectorClear(cl.localmove);
-
-    //if (sv_paused->integer) {
-    //    return;
-    //}
-
-    //// Add to milliseconds of time to apply the move
-    //cl.cmd.msec += msec;
-
-    //// Adjust viewAngles
-    //CL_AdjustAngles(msec);
-
-    //// Get basic movement from keyboard
-    //cl.localmove = CL_BaseMove(cl.localmove);
-
-    //// Allow mice to add to the move
-    //CL_MouseMove();
-
-    //// Add accumulated mouse forward/side movement
-    //cl.localmove[0] += cl.mousemove[0];
-    //cl.localmove[1] += cl.mousemove[1];
-
-    //// Clamp to server defined max speed
-    //cl.localmove = CL_ClampSpeed(cl.localmove);
-
-    //CL_ClampPitch();
-
-    //cl.cmd.angles[0] = ANGLE2SHORT(cl.viewAngles[0]);
-    //cl.cmd.angles[1] = ANGLE2SHORT(cl.viewAngles[1]);
-    //cl.cmd.angles[2] = ANGLE2SHORT(cl.viewAngles[2]);
 }
+
+
+static void m_autosens_changed(cvar_t* self)
+{
+    float fov;
+
+    if (self->value > 90.0f && self->value <= 179.0f)
+        fov = self->value;
+    else
+        fov = 90.0f;
+
+    cl.autosens_x = 1.0f / fov;
+    cl.autosens_y = 1.0f / CL_GM_CalcFOV(fov, 4, 3);
+}
+
 /*
 ============
 CL_RegisterInput
@@ -358,17 +332,6 @@ void CL_RegisterInput(void)
     cl_instantpacket = Cvar_Get("cl_instantpacket", "1", 0);
     cl_batchcmds = Cvar_Get("cl_batchcmds", "1", 0);
 
-    cl_upspeed = Cvar_Get("cl_upspeed", "200", 0);
-    cl_forwardspeed = Cvar_Get("cl_forwardspeed", "200", 0);
-    cl_sidespeed = Cvar_Get("cl_sidespeed", "200", 0);
-    cl_yawspeed = Cvar_Get("cl_yawspeed", "140", 0);
-    cl_pitchspeed = Cvar_Get("cl_pitchspeed", "150", CVAR_CHEAT);
-    cl_anglespeedkey = Cvar_Get("cl_anglespeedkey", "1.5", CVAR_CHEAT);
-    cl_run = Cvar_Get("cl_run", "1", CVAR_ARCHIVE);
-
-    freelook = Cvar_Get("freelook", "1", CVAR_ARCHIVE);
-    lookspring = Cvar_Get("lookspring", "0", CVAR_ARCHIVE);
-    lookstrafe = Cvar_Get("lookstrafe", "0", CVAR_ARCHIVE);
     sensitivity = Cvar_Get("sensitivity", "3", CVAR_ARCHIVE);
 
     m_pitch = Cvar_Get("m_pitch", "0.022", CVAR_ARCHIVE);
@@ -378,6 +341,11 @@ void CL_RegisterInput(void)
     m_side = Cvar_Get("m_side", "1", 0);
     m_filter = Cvar_Get("m_filter", "0", 0);
     m_accel = Cvar_Get("m_accel", "0", 0);
+
+
+    m_autosens = Cvar_Get("m_autosens", "0", 0);
+    m_autosens->changed = m_autosens_changed;
+    m_autosens_changed(m_autosens);
 }
 
 /*
@@ -399,82 +367,6 @@ void CL_FinalizeCmd(void)
     }
 
     CL_GM_FinalizeFrameMoveCommand();
-    vec3_t move;
-
-    //    if (cls.state != ca_active) {
-//        return; // not talking to a server
-//    }
-//
-//    if (sv_paused->integer) {
-//        return;
-//    }
-//
-////
-//// figure button bits
-////
-//
-//    if (in_attack.state & 3)
-//        cl.cmd.buttons |= BUTTON_ATTACK;
-//    if (in_use.state & 3)
-//        cl.cmd.buttons |= BUTTON_USE;
-//
-//    in_attack.state &= ~2;
-//    in_use.state &= ~2;
-//
-//    if (cls.key_dest == KEY_GAME && Key_AnyKeyDown()) {
-//        cl.cmd.buttons |= BUTTON_ANY;
-//    }
-//
-//    if (cl.cmd.msec > 250) {
-//        cl.cmd.msec = 100;        // time was unreasonable
-//    }
-//
-//    // rebuild the movement vector
-//    VectorClear(move);
-//
-//    // get basic movement from keyboard
-//    move = CL_BaseMove(move);
-//
-//    // add mouse forward/side movement
-//    move[0] += cl.mousemove[0];
-//    move[1] += cl.mousemove[1];
-//
-//    // clamp to server defined max speed
-//    move = CL_ClampSpeed(move);
-//
-//    // store the movement vector
-//    cl.cmd.forwardmove = move[0];
-//    cl.cmd.sidemove = move[1];
-//    cl.cmd.upmove = move[2];
-//
-//    // clear all states
-//    cl.mousemove[0] = 0;
-//    cl.mousemove[1] = 0;
-//
-//    KeyClear(&in_right);
-//    KeyClear(&in_left);
-//
-//    KeyClear(&in_moveright);
-//    KeyClear(&in_moveleft);
-//
-//    KeyClear(&in_up);
-//    KeyClear(&in_down);
-//
-//    KeyClear(&in_forward);
-//    KeyClear(&in_back);
-//
-//    KeyClear(&in_lookup);
-//    KeyClear(&in_lookdown);
-//
-//    cl.cmd.impulse = in_impulse;
-//    in_impulse = 0;
-//
-//    // save this command off for prediction
-//    cl.cmdNumber++;
-//    cl.cmds[cl.cmdNumber & CMD_MASK] = cl.cmd;
-//
-//    // clear pending cmd
-//    memset(&cl.cmd, 0, sizeof(cl.cmd));
 }
 
 static inline qboolean ready_to_send(void)
