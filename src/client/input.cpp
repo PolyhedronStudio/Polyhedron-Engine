@@ -273,23 +273,17 @@ Key_Event (int key, qboolean down, unsigned time);
 ===============================================================================
 */
 
-typedef struct kbutton_s {
-    int         down[2];        // key nums holding it down
-    unsigned    downtime;        // msec timestamp
-    unsigned    msec;            // msec down this frame
-    int         state;
-} kbutton_t;
 
-static kbutton_t    in_klook;
-static kbutton_t    in_left, in_right, in_forward, in_back;
-static kbutton_t    in_lookup, in_lookdown, in_moveleft, in_moveright;
-static kbutton_t    in_strafe, in_speed, in_use, in_attack;
-static kbutton_t    in_up, in_down;
+static KeyBinding    in_klook;
+static KeyBinding in_left, in_right, in_forward, in_back;
+static KeyBinding in_lookup, in_lookdown, in_moveleft, in_moveright;
+static KeyBinding in_strafe, in_speed, in_use, in_attack;
+static KeyBinding in_up, in_down;
 
 static int          in_impulse;
 static qboolean     in_mlooking;
 
-static void KeyDown(kbutton_t *b)
+void KeyDown(KeyBinding *b)
 {
     int k;
     const char *c; // C++20: STRING: Added const to char*
@@ -300,19 +294,19 @@ static void KeyDown(kbutton_t *b)
     else
         k = -1;        // typed manually at the console for continuous down
 
-    if (k == b->down[0] || k == b->down[1])
+    if (k == b->keys[0] || k == b->keys[1])
         return;        // repeating key
 
-    if (!b->down[0])
-        b->down[0] = k;
-    else if (!b->down[1])
-        b->down[1] = k;
+    if (!b->keys[0])
+        b->keys[0] = k;
+    else if (!b->keys[1])
+        b->keys[1] = k;
     else {
         Com_WPrintf("Three keys down for a button!\n");
         return;
     }
 
-    if (b->state & 1)
+    if (b->state & BUTTON_STATE_HELD)
         return;        // still down
 
     // save timestamp
@@ -322,10 +316,10 @@ static void KeyDown(kbutton_t *b)
         b->downtime = com_eventTime - 100;
     }
 
-    b->state |= 1 + 2;    // down + impulse down
+    b->state |= BUTTON_STATE_HELD + BUTTON_STATE_DOWN;    // down + impulse down
 }
 
-static void KeyUp(kbutton_t *b)
+void KeyUp(KeyBinding *b)
 {
     int k;
     const char *c; // C++20: STRING: Added const to char*
@@ -336,21 +330,21 @@ static void KeyUp(kbutton_t *b)
         k = atoi(c);
     else {
         // typed manually at the console, assume for unsticking, so clear all
-        b->down[0] = b->down[1] = 0;
+        b->keys[0] = b->keys[1] = 0;
         b->state = 0;    // impulse up
         return;
     }
 
-    if (b->down[0] == k)
-        b->down[0] = 0;
-    else if (b->down[1] == k)
-        b->down[1] = 0;
+    if (b->keys[0] == k)
+        b->keys[0] = 0;
+    else if (b->keys[1] == k)
+        b->keys[1] = 0;
     else
         return;        // key up without coresponding down (menu pass through)
-    if (b->down[0] || b->down[1])
+    if (b->keys[0] || b->keys[1])
         return;        // some other key is still holding it down
 
-    if (!(b->state & 1))
+    if (!(b->state & BUTTON_STATE_HELD))
         return;        // still up (this should not happen)
 
     // save timestamp
@@ -362,14 +356,14 @@ static void KeyUp(kbutton_t *b)
         b->msec += uptime - b->downtime;
     }
 
-    b->state &= ~1;        // now up
+    b->state &= ~BUTTON_STATE_HELD;        // now up
 }
 
-static void KeyClear(kbutton_t *b)
+static void KeyClear(KeyBinding *b)
 {
     b->msec = 0;
-    b->state &= ~2;        // clear impulses
-    if (b->state & 1) {
+    b->state &= ~BUTTON_STATE_DOWN;        // clear impulses
+    if (b->state & BUTTON_STATE_HELD) {
         b->downtime = com_eventTime; // still down
     }
 }
@@ -459,12 +453,12 @@ CL_KeyState
 Returns the fraction of the frame that the key was down
 ===============
 */
-static float CL_KeyState(kbutton_t *key)
+static float CL_KeyState(KeyBinding *key)
 {
     unsigned msec = key->msec;
     float val;
 
-    if (key->state & 1) {
+    if (key->state & BUTTON_STATE_HELD) {
         // still down
         if (com_eventTime > key->downtime) {
             msec += com_eventTime - key->downtime;
@@ -473,13 +467,15 @@ static float CL_KeyState(kbutton_t *key)
 
     // special case for instant packet
     if (!cl.cmd.msec) {
-        return (float)(key->state & 1);
+        return (float)(key->state & BUTTON_STATE_HELD);
     }
 
     val = (float)msec / cl.cmd.msec;
 
-    return clamp(val, 0, 1);
+    return Clampf(val, 0, 1);
 }
+
+
 
 //==========================================================================
 
@@ -561,7 +557,7 @@ static void CL_AdjustAngles(int msec)
 {
     float speed;
 
-    if (in_speed.state & 1)
+    if (in_speed.state & BUTTON_STATE_HELD)
         speed = msec * cl_anglespeedkey->value * 0.001f;
     else
         speed = msec * 0.001f;
@@ -676,23 +672,23 @@ void CL_UpdateCmd(int msec)
         return;
     }
 
-    // add to milliseconds of time to apply the move
+    // Add to milliseconds of time to apply the move
     cl.cmd.msec += msec;
 
-    // adjust viewAngles
+    // Adjust viewAngles
     CL_AdjustAngles(msec);
 
-    // get basic movement from keyboard
+    // Get basic movement from keyboard
     cl.localmove = CL_BaseMove(cl.localmove);
 
-    // allow mice to add to the move
+    // Allow mice to add to the move
     CL_MouseMove();
 
-    // add accumulated mouse forward/side movement
+    // Add accumulated mouse forward/side movement
     cl.localmove[0] += cl.mousemove[0];
     cl.localmove[1] += cl.mousemove[1];
 
-    // clamp to server defined max speed
+    // Clamp to server defined max speed
     cl.localmove = CL_ClampSpeed(cl.localmove);
 
     CL_ClampPitch();
@@ -783,8 +779,8 @@ void CL_RegisterInput(void)
     lookstrafe = Cvar_Get("lookstrafe", "0", CVAR_ARCHIVE);
     sensitivity = Cvar_Get("sensitivity", "3", CVAR_ARCHIVE);
 
-	m_pitch = Cvar_Get("m_pitch", "0.022", CVAR_ARCHIVE);
-	m_invert = Cvar_Get("m_invert", "0", CVAR_ARCHIVE);
+    m_pitch = Cvar_Get("m_pitch", "0.022", CVAR_ARCHIVE);
+    m_invert = Cvar_Get("m_invert", "0", CVAR_ARCHIVE);
     m_yaw = Cvar_Get("m_yaw", "0.022", 0);
     m_forward = Cvar_Get("m_forward", "1", 0);
     m_side = Cvar_Get("m_side", "1", 0);

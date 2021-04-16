@@ -9,6 +9,7 @@ cmake_minimum_required (VERSION 3.8)
 SET(SRC_CLGAME
 	clgame/clg_effects.cpp
 	clgame/clg_entities.cpp
+	clgame/clg_input.cpp
 	clgame/clg_main.cpp
 	clgame/clg_media.cpp
 	clgame/clg_newfx.cpp

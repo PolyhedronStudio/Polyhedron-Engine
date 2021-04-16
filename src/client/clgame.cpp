@@ -12,7 +12,7 @@
 // workaround that for now.
 //
 // Also contains the function definitions for all the game client module 
-// interactionfunctionality.
+// interaction functionalities.
 //
 // TODO: On a sunny day, take some rest. BUT On a rainy sunday, try and 
 // replace all the defined function bodies with an actual function. 
@@ -521,8 +521,12 @@ void CL_InitGameProgs(void)
     importAPI.FS_SanitizeFilenameVariable = FS_SanitizeFilenameVariable;
 
     // Keys.
+    extern void KeyUp(KeyBinding* b);
+    extern void KeyDown(KeyBinding* b);
     importAPI.Key_IsDown = Key_IsDown;
     importAPI.Key_GetBinding = Key_GetBinding;
+    importAPI.KeyBindingDown = KeyDown;
+    importAPI.KeyBindingUp = KeyUp;
 
     // Memory.
     importAPI.Z_TagMalloc = Z_TagMalloc;

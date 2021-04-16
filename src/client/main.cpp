@@ -844,24 +844,24 @@ static void CL_ParseStatusResponse(serverStatus_t *status, const char *string)
     const char *s;
     size_t infolen;
 
-    // parse '\n' terminated infostring
+    // Parse '\n' terminated infostring
     s = Q_strchrnul(string, '\n');
 
-    // due to off-by-one error in the original version of Info_SetValueForKey,
+    // Due to off-by-one error in the original version of Info_SetValueForKey,
     // some servers produce infostrings up to 512 characters long. work this
     // bug around by cutting off the last character(s).
     infolen = s - string;
     if (infolen >= MAX_INFO_STRING)
         infolen = MAX_INFO_STRING - 1;
 
-    // copy infostring off
+    // Copy infostring off
     memcpy(status->infostring, string, infolen);
     status->infostring[infolen] = 0;
 
     if (!Info_Validate(status->infostring))
         strcpy(status->infostring, "\\hostname\\badinfo");
 
-    // parse optional player list
+    // Parse optional player list
     status->numPlayers = 0;
     while (status->numPlayers < MAX_STATUS_PLAYERS) {
         player = &status->players[status->numPlayers];
@@ -873,7 +873,7 @@ static void CL_ParseStatusResponse(serverStatus_t *status, const char *string)
         status->numPlayers++;
     }
 
-    // sort players by frags
+    // Sort players by frags
     qsort(status->players, status->numPlayers,
           sizeof(status->players[0]), SortPlayers);
 }
@@ -934,7 +934,7 @@ static void CL_ParsePrintMessage(void)
         return;
     }
 
-    // finally, check is this is response from the server we are connecting to
+    // Finally, check is this is response from the server we are connecting to
     // and if so, start channenge cycle again
     if ((cls.state == ca_challenging || cls.state == ca_connecting) &&
         NET_IsEqualBaseAdr(&net_from, &cls.serverAddress)) {
@@ -3016,26 +3016,26 @@ unsigned CL_Frame(unsigned msec)
     ref_frame = phys_frame = true;
     switch (sync_mode) {
     case SYNC_FULL:
-        // timedemo just runs at full speed
+        // Timedemo just runs at full speed
         break;
     case SYNC_SLEEP_10:
-        // don't run refresh at all
+        // Don't run refresh at all
         ref_frame = false;
-        // fall through
+        // Fall through
     case SYNC_SLEEP_60:
-        // run at limited fps if not active
+        // Run at limited fps if not active
         if (main_extra < main_msec) {
             return main_msec - main_extra;
         }
         break;
     case SYNC_SLEEP_VIDEO:
-        // wait for vertical retrace if not active
+        // Wait for vertical retrace if not active
         VID_VideoWait();
         break;
     case ASYNC_VIDEO:
     case ASYNC_MAXFPS:
     case ASYNC_FULL:
-        // run physics and refresh separately
+        // Run physics and refresh separately
         phys_extra += main_extra;
         if (phys_extra < phys_msec) {
             phys_frame = false;
@@ -3044,7 +3044,7 @@ unsigned CL_Frame(unsigned msec)
         }
 
         if (sync_mode == ASYNC_VIDEO) {
-            // sync refresh to vertical retrace
+            // Sync refresh to vertical retrace
             ref_frame = VID_VideoSync();
         } else {
             ref_extra += main_extra;
@@ -3056,7 +3056,7 @@ unsigned CL_Frame(unsigned msec)
         }
         break;
     case SYNC_MAXFPS:
-        // everything ticks in sync with refresh
+        // Everything ticks in sync with refresh
         if (main_extra < main_msec) {
             if (!cl.sendPacketNow) {
                 return 0;
@@ -3074,7 +3074,7 @@ unsigned CL_Frame(unsigned msec)
                    main_extra, ref_frame, ref_extra,
                    phys_frame, phys_extra);
 
-    // decide the simulation time
+    // Decide the simulation time
     cls.frameTime = main_extra * 0.001f;
 
     if (cls.frameTime > 1.0 / 5)
@@ -3084,33 +3084,33 @@ unsigned CL_Frame(unsigned msec)
         cl.time += main_extra;
     }
 
-    // read next demo frame
+    // Read next demo frame
     if (cls.demo.playback)
         CL_DemoFrame(main_extra);
 
-    // calculate local time
+    // Calculate local time
 	if (cls.state == ca_active && !sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2))
         CL_SetClientTime();
 
 #if USE_AUTOREPLY
-    // check for version reply
+    // Check for version reply
     CL_CheckForReply();
 #endif
 
-    // resend a connection request if necessary
+    // Resend a connection request if necessary
     CL_CheckForResend();
 
-    // read user intentions
+    // Read user intentions
     CL_UpdateCmd(main_extra);
 
-    // finalize pending cmd
+    // Finalize pending cmd
     phys_frame |= cl.sendPacketNow;
     if (phys_frame) {
         CL_FinalizeCmd();
         phys_extra -= phys_msec;
         M_FRAMES++;
 
-        // don't let the time go too far off
+        // Don't let the time go too far off
         // this can happen due to cl.sendPacketNow
         if (phys_extra < -phys_msec * 4) {
             phys_extra = 0;
@@ -3123,10 +3123,10 @@ unsigned CL_Frame(unsigned msec)
 		CL_CheckForPause();
 	}
 
-    // send pending cmds
+    // Send pending cmds
     CL_SendCmd();
 
-    // predict all unacknowledged movements
+    // Predict all unacknowledged movements
     CL_PredictMovement();
 
     Con_RunConsole();
@@ -3137,7 +3137,7 @@ unsigned CL_Frame(unsigned msec)
     UI_Frame(main_extra);
 
     if (ref_frame) {
-        // update the screen
+        // Update the screen
         if (host_speeds->integer)
             time_before_ref = Sys_Milliseconds();
 
@@ -3150,20 +3150,20 @@ unsigned CL_Frame(unsigned msec)
         R_FRAMES++;
 
 run_fx:
-        // update audio after the 3D view was drawn
+        // Update audio after the 3D view was drawn
         S_Update();
 
-        // N&C: Advance local game effects for next frame
+        // Advance local game effects for next frame
         CL_GM_ClientFrame();
 
         SCR_RunCinematic();
     } else if (sync_mode == SYNC_SLEEP_10) {
-        // force audio and effects update if not rendering
+        // Force audio and effects update if not rendering
         CL_GM_CalcViewValues();
         goto run_fx;
     }
 
-    // check connection timeout
+    // Check connection timeout
     if (cls.netchan)
         CL_CheckTimeout();
 

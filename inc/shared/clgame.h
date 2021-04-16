@@ -251,7 +251,10 @@ extern "C" {
         void        (*Cbuf_InsertText) (char *text);
         // Executes the current command buffer.
         void        (*Cbuf_Execute) ();
-        // Forwards current command buffer to the server for processing (skips client processing).
+        // Adds the current command line text as a clc_stringcmd to the client 
+        // message. Things like godmode, noclip, etc, are commands directed to 
+        // the server, so when they are typed in at the console, they will 
+        // need to be forwarded.
         qboolean    (*CL_ForwardToServer) ();
                  
         //---------------------------------------------------------------------
@@ -446,6 +449,10 @@ extern "C" {
         // Returns the ASCII value of the key belonging to the binding.
         const char  *(*Key_GetBinding) (const char* binding);
 
+        // Performs "down" behavior actions for the given key binding.
+        void        (*KeyBindingDown) (KeyBinding* b);
+        // Performs "up" behavior actions for the given key binding.
+        void        (*KeyBindingUp) (KeyBinding* b);
 
         //---------------------------------------------------------------------
         // Memory.

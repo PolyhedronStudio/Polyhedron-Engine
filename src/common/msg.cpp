@@ -216,6 +216,9 @@ void MSG_WriteAngle(float f)
     MSG_WriteByte(ANGLE2BYTE(f));
 }
 
+#include "sharedgame/sharedgame.h"
+#define BUTTON_MASK     (BUTTON_ATTACK|BUTTON_USE|BUTTON_ANY)
+
 #if USE_CLIENT
 
 /*
@@ -225,7 +228,7 @@ MSG_WriteDeltaUsercmd
 */
 int MSG_WriteDeltaUsercmd(const usercmd_t *from, const usercmd_t *cmd, int version)
 {
-    int     bits, buttons = cmd->buttons;
+    int     bits, buttons = cmd->buttons & BUTTON_MASK;
 
     if (!from) {
         from = &nullUserCmd;
@@ -1445,7 +1448,7 @@ void MSG_ReadDeltaUsercmd_Hacked(const usercmd_t *from, usercmd_t *to)
 // read buttons
     if (bits & CM_BUTTONS) {
         buttons = MSG_ReadByte();
-        to->buttons = buttons;
+        to->buttons = buttons & BUTTON_MASK;
     }
 
 // read current angles
