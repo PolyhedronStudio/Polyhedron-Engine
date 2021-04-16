@@ -25,6 +25,6 @@ constexpr uint32_t BUTTON_UNUSED_0		= (1 << 3);
 constexpr uint32_t BUTTON_UNUSED_1		= (1 << 4);
 constexpr uint32_t BUTTON_UNUSED_2		= (1 << 5);
 constexpr uint32_t BUTTON_UNUSED_3		= (1 << 6);
-constexpr uint32_t BUTTON_ANY	= (1 << 7);
+constexpr uint32_t BUTTON_ANY			= (1 << 7);
 
 #endif // __SHAREDGAME_SHAREDGAME_H__

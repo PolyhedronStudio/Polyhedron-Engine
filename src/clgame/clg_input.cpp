@@ -22,6 +22,8 @@ static cvar_t* cl_pitchspeed;
 static cvar_t* cl_run;
 static cvar_t* cl_anglespeedkey;
 
+static cvar_t* cl_instantpacket;
+
 static cvar_t* freelook;
 static cvar_t* lookspring;
 static cvar_t* lookstrafe;
@@ -194,10 +196,9 @@ static void IN_AttackDown(void)
 {
     KeyDown(&in_attack);
 
-    //if (cl_instantpacket->integer&& clgi.GetClienState() == ca_active && cls->netchan) {
-    //    cl->sendPacketNow = true;
-    //}
-    cl->sendPacketNow = true;
+    if (cl_instantpacket->integer && clgi.GetClienState() == ca_active) {// && cls->netchan) {
+        cl->sendPacketNow = true;
+    }
 }
 
 static void IN_AttackUp(void)
@@ -209,10 +210,9 @@ static void IN_UseDown(void)
 {
     KeyDown(&in_use);
 
-    //if (cl_instantpacket->integer && cls.state == ca_active && cls.netchan) {
-    //    cl.sendPacketNow = true;
-    //}
-    cl->sendPacketNow = true;
+    if (cl_instantpacket->integer && clgi.GetClienState() == ca_active) {// && cls.netchan) {
+        cl->sendPacketNow = true;
+    }
 }
 
 static void IN_UseUp(void)
@@ -396,9 +396,14 @@ static vec3_t CL_BaseMove(const vec3_t& inMove)
     }
 
     // Adjust for speed key / running
-    if ((in_speed.state & 1) ^ cl_run->integer) {
-        VectorScale(outMove, 2, outMove);
-    }
+    //if ((in_speed.state & 1) ^ cl_run->integer) {
+    //    cl->cmd.buttons |= BUTTON_WALK;
+    //    //VectorScale(outMove, 2, outMove);
+    //    //Com_Print("HELLO IN_SPEED");
+    //}
+    //else {
+
+    //}
 
     return outMove;
 }
@@ -539,7 +544,7 @@ void CLG_RegisterInput(void)
 //#ifdef _DEBUG
 //    cl_showpackets = Cvar_Get("cl_showpackets", "0", 0);
 //#endif
-//    cl_instantpacket = Cvar_Get("cl_instantpacket", "1", 0);
+
 //    cl_batchcmds = Cvar_Get("cl_batchcmds", "1", 0);
 //
     // Create Cvars.
@@ -556,7 +561,10 @@ void CLG_RegisterInput(void)
     lookstrafe = clgi.Cvar_Get("lookstrafe", "0", CVAR_ARCHIVE);
 
     // Fetch CVars.
+    cl_instantpacket = clgi.Cvar_Get("cl_instantpacket", "0", 0);
+
     sensitivity = clgi.Cvar_Get("sensitivity", "0", 0);
+
     m_autosens = clgi.Cvar_Get("m_autosens", "0", 0);
     m_pitch = clgi.Cvar_Get("m_pitch", "", 0);
     m_invert = clgi.Cvar_Get("m_invert", "", 0);
@@ -577,8 +585,6 @@ and angles are already set for this frame by CL_UpdateCmd.
 */
 void CLG_FinalizeFrameMoveCommand(void)
 {
-    vec3_t move = vec3_zero();
-
     if (clgi.GetClienState() != ca_active) {
         return; // not talking to a server
     }
@@ -590,12 +596,22 @@ void CLG_FinalizeFrameMoveCommand(void)
     //
     // figure button bits
     //
-    if (in_speed.state & 3)
-        cl->cmd.buttons |= BUTTON_WALK;
-    if (in_attack.state & 3)
+    if (in_attack.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
         cl->cmd.buttons |= BUTTON_ATTACK;
-    if (in_use.state & 3)
+
+    if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
         cl->cmd.buttons |= BUTTON_USE;
+
+    if (cl_run->value) {
+        if (in_speed.state & BUTTON_STATE_HELD) {
+            cl->cmd.buttons |= BUTTON_WALK;
+        }
+    }
+    else {
+        if (!(in_speed.state & BUTTON_STATE_HELD)) {
+            cl->cmd.buttons |= BUTTON_WALK;
+        }
+    }
 
     in_attack.state &= ~2;
     in_use.state &= ~2;
@@ -609,7 +625,7 @@ void CLG_FinalizeFrameMoveCommand(void)
     }
 
     // rebuild the movement vector
-    VectorClear(move);
+    vec3_t move = vec3_zero();
 
     // get basic movement from keyboard
     move = CL_BaseMove(move);

@@ -1491,6 +1491,7 @@ static void PM_WalkMove(void) {
     // Accounting for walk modulus
     if (pm->cmd.buttons & BUTTON_WALK) {
         max_speed *= PM_SPEED_MOD_WALK;
+        PM_Debug("WELL HELLO THERE PM_MOD_SPEED_WALK");
     }
 
     // Clamp the speed to min/max speed

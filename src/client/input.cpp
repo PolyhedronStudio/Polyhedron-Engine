@@ -334,9 +334,9 @@ void CL_RegisterInput(void)
 
     sensitivity = Cvar_Get("sensitivity", "3", CVAR_ARCHIVE);
 
-    m_pitch = Cvar_Get("m_pitch", "0.022", CVAR_ARCHIVE);
+    m_pitch = Cvar_Get("m_pitch", "0.15", CVAR_ARCHIVE);
     m_invert = Cvar_Get("m_invert", "0", CVAR_ARCHIVE);
-    m_yaw = Cvar_Get("m_yaw", "0.022", 0);
+    m_yaw = Cvar_Get("m_yaw", "0.15", 0);
     m_forward = Cvar_Get("m_forward", "1", 0);
     m_side = Cvar_Get("m_side", "1", 0);
     m_filter = Cvar_Get("m_filter", "0", 0);
