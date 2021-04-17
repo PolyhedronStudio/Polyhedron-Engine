@@ -36,9 +36,10 @@ static cvar_t* m_forward;
 static cvar_t* m_side;
 
 typedef struct {
-    int         old_dx;
-    int         old_dy;
+    int         oldDeltaX;
+    int         oldDeltaY;
 } in_state_t;
+
 static in_state_t inputState;
 
 //
@@ -321,16 +322,16 @@ static void CLG_MouseMove() {
     }
 
     if (m_filter->integer) {
-        motionX = (deltaX + inputState.old_dx) * 0.5f;
-        motionY = (deltaY + inputState.old_dy) * 0.5f;
+        motionX = (deltaX + inputState.oldDeltaX) * 0.5f;
+        motionY = (deltaY + inputState.oldDeltaY) * 0.5f;
     }
     else {
         motionX = deltaX;
         motionY = deltaY;
     }
 
-    inputState.old_dx = deltaX;
-    inputState.old_dy = deltaY;
+    inputState.oldDeltaX = deltaX;
+    inputState.oldDeltaY = deltaY;
 
     if (!motionX && !motionY) {
         return;
@@ -652,7 +653,7 @@ void CLG_FinalizeFrameMoveCommand(void)
     }
 
     // Always send in case any button was down at all in-game.
-    if (clgi.Key_GetDest() == KEY_GAME && clgi.Key_AnyCLG_KeyDown()) {
+    if (clgi.Key_GetDest() == KEY_GAME && clgi.Key_AnyKeyDown()) {
         cl->cmd.buttons |= BUTTON_ANY;
     }
 

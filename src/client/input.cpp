@@ -23,9 +23,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sharedgame/sharedgame.h"
 #include "system/lirc.h"
 
-// N&C: Cheesy hack, we need to actually make this extern in a header.
-extern clgame_export_t* cge;
-
 static cvar_t    *cl_nodelta;
 static cvar_t    *cl_maxpackets;
 static cvar_t    *cl_packetdup;
