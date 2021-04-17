@@ -61,7 +61,8 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
 {
     int     n;
 
-    VectorClear(self->avelocity);
+    // Clear out angular velocity.
+    self->avelocity = vec3_zero();
 
     self->takedamage = DAMAGE_YES;
     self->moveType = MOVETYPE_TOSS;

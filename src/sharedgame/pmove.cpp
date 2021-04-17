@@ -114,7 +114,6 @@ constexpr float PM_SNAP_DISTANCE = PM_GROUND_DIST; // Valid player positions are
 constexpr float PM_STEP_HEIGHT_MIN = 4.f;  // The smallest step that will be interpolated by the client.
 constexpr float PM_STEP_NORMAL = 0.7f; // The minimum Z plane normal component required for standing.
 
-
 //--------------------------------------------------
 // Pointer to the actual (client-/npc-)entity PlayerMove(PM) structure.
 //--------------------------------------------------
@@ -588,7 +587,6 @@ static void PM_StepSlideMove(void)
 
     // Attempt to move; if nothing blocks us, we're done
     if (PM_StepSlideMove_()) {
-
         // attempt to step down to remain on ground
         if ((pm->state.flags & PMF_ON_GROUND) && pm->cmd.upmove <= 0) {
 
@@ -713,15 +711,13 @@ static qboolean PM_CheckJump(void) {
         pm->state.time = 0;
 
         PM_Debug("Trick jump: %i", pm->cmd.upmove);
-    }
-    else {
+    } else {
         PM_Debug("Jump: %i", pm->cmd.upmove);
     }
 
     if (pm->state.velocity.z < 0.0f) {
         pm->state.velocity.z = jump;
-    }
-    else {
+    } else {
         pm->state.velocity.z += jump;
     }
 
@@ -993,8 +989,7 @@ static void PM_CheckGround(void) {
     if (trick_jump) {
         pos = vec3_fmaf(pm->state.origin, playerMoveLocals.frameTime, pm->state.velocity);
         pos.z -= PM_GROUND_DIST_TRICK;
-    }
-    else {
+    } else {
         pos = pm->state.origin;
         pos.z -= PM_GROUND_DIST;
     }
@@ -1030,8 +1025,7 @@ static void PM_CheckGround(void) {
                         pm->state.time = 256;
                     }
                 }
-            }
-            else {
+            } else {
                 // Soft landings with upward momentum grant trick jumps
                 if (trick_jump) {
                     pm->state.flags |= PMF_TIME_TRICK_JUMP;
@@ -1050,8 +1044,7 @@ static void PM_CheckGround(void) {
 
             pm->state.velocity = PM_ClipVelocity(pm->state.velocity, trace.plane.normal, PM_CLIP_BOUNCE);
         }
-    }
-    else {
+    } else {
         pm->state.flags &= ~PMF_ON_GROUND;
         pm->groundEntityPtr = NULL;
     }
@@ -1098,25 +1091,20 @@ static void PM_Friction(void) {
     if (pm->state.type == PM_SPECTATOR) {
         friction = PM_FRICT_SPECTATOR;
         // LADDER friction
-    }
-    else if (pm->state.flags & PMF_ON_LADDER) {
+    } else if (pm->state.flags & PMF_ON_LADDER) {
         friction = PM_FRICT_LADDER;
         // WATER friction.
-    }
-    else if (pm->waterLevel > WATER_FEET) {
+    } else if (pm->waterLevel > WATER_FEET) {
         friction = PM_FRICT_WATER;
         // GROUND friction.
-    }
-    else if (pm->state.flags & PMF_ON_GROUND) {
+    } else if (pm->state.flags & PMF_ON_GROUND) {
         if (playerMoveLocals.ground.surface && (playerMoveLocals.ground.surface->flags & SURF_SLICK)) {
             friction = PM_FRICT_GROUND_SLICK;
-        }
-        else {
+        } else {
             friction = PM_FRICT_GROUND;
         }
         // OTHER friction
-    }
-    else {
+    } else {
         friction = PM_FRICT_AIR;
     }
 

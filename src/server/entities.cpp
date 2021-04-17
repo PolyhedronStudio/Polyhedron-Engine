@@ -352,9 +352,7 @@ void SV_BuildClientFrame(client_t *client)
 
     // find the client's PVS
     ps = &clent->client->playerState;
-    // N&C: FF Precision.
-    VectorAdd(ps->viewoffset, ps->pmove.origin, org);
-    //VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
+    org = ps->viewoffset + ps->pmove.origin;
 
     leaf = CM_PointLeaf(client->cm, org);
     clientarea = CM_LeafArea(leaf);
@@ -366,11 +364,14 @@ void SV_BuildClientFrame(client_t *client)
     // grab the current player_state_t
     MSG_PackPlayer(&frame->playerState, ps);
 
-    // grab the current clientNum
-//    if (g_features->integer & GMF_CLIENTNUM) {
-        frame->clientNum = clent->client->clientNum;
+    // Grab the current clientNum
+    // MSG: NOTE: !! In case of seeing a client model where one should not
+    // it may be worth investigating this piece of code. 
+    frame->clientNum = client->number;
+    //if (g_features->integer & GMF_CLIENTNUM) {
+    //    frame->clientNum = clent->client->clientNum;
     //} else {
-        //frame->clientNum = client->number;
+    //    frame->clientNum = client->number;
     //}
 
 	if (clientcluster >= 0)
@@ -446,8 +447,8 @@ void SV_BuildClientFrame(client_t *client)
                         vec3_t    delta;
                         float    len;
 
-                        VectorSubtract(org, ent->s.origin, delta);
-                        len = VectorLength(delta);
+                        delta = org - ent->s.origin;
+                        len = vec3_length(delta);
                         if (len > 400)
                             ent_visible = false;
                     }

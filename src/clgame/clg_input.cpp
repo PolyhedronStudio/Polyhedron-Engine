@@ -24,9 +24,6 @@ static cvar_t* cl_anglespeedkey;
 
 static cvar_t* cl_instantpacket;
 
-static cvar_t* freelook;
-static cvar_t* lookspring;
-static cvar_t* lookstrafe;
 static cvar_t* sensitivity;
 
 static cvar_t* m_pitch;
@@ -289,8 +286,8 @@ static void IN_MLookUp(void)
 {
     in_mlooking = false;
 
-    if (!freelook->integer && lookspring->integer)
-        IN_CenterView();
+    //if (!freelook->integer && lookspring->integer)
+    //    IN_CenterView();
 }
 
 
@@ -351,19 +348,22 @@ static void CLG_MouseMove() {
     }
 
     // Add mouse X/Y movement
-    if ((in_strafe.state & 1) || (lookstrafe->integer && !in_mlooking)) {
-        cl->mousemove[1] += m_side->value * motionX;
-    }
-    else {
-        cl->viewAngles[vec3_t::Yaw] -= m_yaw->value * motionX;
-    }
+    cl->viewAngles[vec3_t::Yaw] -= m_yaw->value * motionX;
+    cl->viewAngles[vec3_t::Pitch] += m_pitch->value * motionY * (m_invert->integer ? -1.f : 1.f);
 
-    if ((in_mlooking || freelook->integer) && !(in_strafe.state & 1)) {
-        cl->viewAngles[vec3_t::Pitch] += m_pitch->value * motionY * (m_invert->integer ? -1.f : 1.f);
-    }
-    else {
-        cl->mousemove[0] -= m_forward->value * motionY;
-    }
+    //if ((in_strafe.state & 1) || (lookstrafe->integer && !in_mlooking)) {
+    //    cl->mousemove[1] += m_side->value * motionX;
+    //}
+    //else {
+//        cl->viewAngles[vec3_t::Yaw] -= m_yaw->value * motionX;
+//  //  }
+//
+////    if ((in_mlooking || freelook->integer) && !(in_strafe.state & 1)) {
+//        cl->viewAngles[vec3_t::Pitch] += m_pitch->value * motionY * (m_invert->integer ? -1.f : 1.f);
+    //}
+    //else {
+    //    cl->mousemove[0] -= m_forward->value * motionY;
+    //}
 }
 
 //
@@ -382,14 +382,14 @@ static void CLG_AdjustAngles(int msec)
     else
         speed = msec * 0.001f;
 
-    if (!(in_strafe.state & 1)) {
+//if (!(in_strafe.state & 1)) {
         cl->viewAngles[vec3_t::Yaw] -= speed * cl_yawspeed->value * CLG_KeyState(&in_right);
         cl->viewAngles[vec3_t::Yaw] += speed * cl_yawspeed->value * CLG_KeyState(&in_left);
-    }
-    if (in_klook.state & 1) {
-        cl->viewAngles[vec3_t::Pitch] -= speed * cl_pitchspeed->value * CLG_KeyState(&in_forward);
-        cl->viewAngles[vec3_t::Pitch] += speed * cl_pitchspeed->value * CLG_KeyState(&in_back);
-    }
+//    }
+//if (in_klook.state & 1) {
+//        cl->viewAngles[vec3_t::Pitch] -= speed * cl_pitchspeed->value * CLG_KeyState(&in_forward);
+//        cl->viewAngles[vec3_t::Pitch] += speed * cl_pitchspeed->value * CLG_KeyState(&in_back);
+// }
 
     cl->viewAngles[vec3_t::Pitch] -= speed * cl_pitchspeed->value * CLG_KeyState(&in_lookup);
     cl->viewAngles[vec3_t::Pitch] += speed * cl_pitchspeed->value * CLG_KeyState(&in_lookdown);
@@ -538,9 +538,9 @@ void CLG_RegisterInput(void)
     cl_anglespeedkey = clgi.Cvar_Get("cl_anglespeedkey", "1.5", CVAR_CHEAT);
     cl_run = clgi.Cvar_Get("cl_run", "1", CVAR_ARCHIVE);
 
-    freelook = clgi.Cvar_Get("freelook", "1", CVAR_ARCHIVE);
-    lookspring = clgi.Cvar_Get("lookspring", "0", CVAR_ARCHIVE);
-    lookstrafe = clgi.Cvar_Get("lookstrafe", "0", CVAR_ARCHIVE);
+    //freelook = clgi.Cvar_Get("freelook", "1", CVAR_ARCHIVE);
+    //lookspring = clgi.Cvar_Get("lookspring", "0", CVAR_ARCHIVE);
+    //lookstrafe = clgi.Cvar_Get("lookstrafe", "0", CVAR_ARCHIVE);
 
     // Fetch CVars.
     cl_instantpacket = clgi.Cvar_Get("cl_instantpacket", "0", 0);

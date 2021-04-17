@@ -844,7 +844,7 @@ void CLG_CalcViewValues(void)
         }
         // N&C: FF Precision.
         if (delta < (100.0f)) {
-            cl->refdef.vieworg[2] -= cl->predicted_step * ((100.0f) - delta) * 0.01f;
+            cl->refdef.vieworg[2] = cl->predicted_step * delta;
         }
         //if (delta < 100) {
         //  cl->refdef.vieworg[2] -= cl->predicted_step * (100 - delta) * 0.01f;

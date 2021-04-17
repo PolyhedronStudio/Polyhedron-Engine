@@ -70,6 +70,16 @@ add_library(tinyobjloader INTERFACE)
 target_include_directories(tinyobjloader INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/nac-tinyobjloader-c)
 
 #
+# OpenAL
+#
+if (UNIX)
+	FIND_PACKAGE(OpenAL)
+	if (NOT OPENAL_INCLUDE_DIR)
+		message(FATAL_ERROR "Can't find OpenAL. Please install the libopenal-dev package.")
+	endif()
+endif()
+
+#
 # libRmlUI
 #
 if (CONFIG_ENABLE_RMLUI)

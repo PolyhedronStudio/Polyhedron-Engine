@@ -685,9 +685,11 @@ void    SelectSpawnPoint(entity_t *ent, vec3_t &origin, vec3_t &angles)
         }
     }
 
-    VectorCopy(spot->s.origin, origin);
-    origin[2] += 9;
-    VectorCopy(spot->s.angles, angles);
+    if (spot) {
+        origin = spot->s.origin;
+        origin.z += 9;
+        angles = spot->s.angles;
+    }
 }
 
 //======================================================================
@@ -901,7 +903,7 @@ void PutClientInServer(entity_t *ent)
         memcpy(userinfo, client->pers.userinfo, sizeof(userinfo));
         InitClientPersistant(client);
         ClientUserinfoChanged(ent, userinfo);
-    } else {
+    } else if (coop->value) {
 //      int         n;
         char        userinfo[MAX_INFO_STRING];
 
@@ -919,7 +921,9 @@ void PutClientInServer(entity_t *ent)
         ClientUserinfoChanged(ent, userinfo);
         if (resp.score > client->pers.score)
             client->pers.score = resp.score;
-    } 
+    } else {
+        resp = {};
+    }
 
     // clear everything but the persistant data
     saved = client->pers;
@@ -1403,20 +1407,15 @@ void ClientThink(entity_t *ent, usercmd_t *ucmd)
         //gi.PMove(&pm);
         PMove(&pm, gi.GetPMoveParams());
 
-        // save results of pmove
+        // Save results of pmove
         client->playerState.pmove = pm.state;
         client->old_pmove = pm.state;
 
-        // N&C: FF Precision.
-        VectorCopy(pm.state.origin, ent->s.origin);
-        VectorCopy(pm.state.velocity, ent->velocity);
-        //for (i = 0 ; i < 3 ; i++) {
-        //    ent->s.origin[i] = pm.state.origin[i] * 0.125;
-        //    ent->velocity[i] = pm.state.velocity[i] * 0.125;
-        //}
-
-        VectorCopy(pm.mins, ent->mins);
-        VectorCopy(pm.maxs, ent->maxs);
+        // Move over results to entity.
+        ent->s.origin = pm.state.origin;
+        ent->velocity = pm.state.velocity;
+        ent->mins = pm.mins;
+        ent->maxs = pm.maxs;
 
         client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
         client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);

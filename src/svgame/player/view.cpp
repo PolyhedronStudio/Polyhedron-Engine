@@ -74,9 +74,9 @@ static void P_ApplyDamageFeedback(entity_t *player)
     float   realcount, count, kick;
     vec3_t  v;
     int     r, l;
-    static  vec3_t  power_color = {0.0, 1.0, 0.0};
-    static  vec3_t  acolor = {1.0, 1.0, 1.0};
-    static  vec3_t  bcolor = {1.0, 0.0, 0.0};
+    static  vec3_t  power_color = {0.0f, 1.0f, 0.0f};
+    static  vec3_t  acolor = {1.0f, 1.0f, 1.0f};
+    static  vec3_t  bcolor = {1.0f, 0.0f, 0.0f};
 
     client = player->client;
 
@@ -126,7 +126,7 @@ static void P_ApplyDamageFeedback(entity_t *player)
     // Play an apropriate pain sound
     if ((level.time > player->debouncePainTime) && !(player->flags & FL_GODMODE) && (client->invincible_framenum <= level.framenum)) {
         r = 1 + (rand() & 1);
-        player->debouncePainTime = level.time + 0.7;
+        player->debouncePainTime = level.time + 0.7f;
         if (player->health < 25)
             l = 25;
         else if (player->health < 50)
@@ -139,13 +139,13 @@ static void P_ApplyDamageFeedback(entity_t *player)
     }
 
     // The total alpha of the blend is always proportional to count.
-    if (client->damage_alpha < 0)
-        client->damage_alpha = 0;
-    client->damage_alpha += count * 0.01;
-    if (client->damage_alpha < 0.2)
-        client->damage_alpha = 0.2;
-    if (client->damage_alpha > 0.6)
-        client->damage_alpha = 0.6;     // don't go too saturated
+    if (client->damage_alpha < 0.f)
+        client->damage_alpha = 0.f;
+    client->damage_alpha += count * 0.01f;
+    if (client->damage_alpha < 0.2f)
+        client->damage_alpha = 0.2f;
+    if (client->damage_alpha > 0.6f)
+        client->damage_alpha = 0.6f;     // don't go too saturated
 
     // The color of the blend will vary based on how much was absorbed
     // by different armors.
@@ -166,8 +166,8 @@ static void P_ApplyDamageFeedback(entity_t *player)
     if (kick && player->health > 0) { // kick of 0 means no view adjust at all
         kick = kick * 100 / player->health;
 
-        if (kick < count * 0.5)
-            kick = count * 0.5;
+        if (kick < count * 0.5f)
+            kick = count * 0.5f;
         if (kick > 50)
             kick = 50;
 
@@ -175,10 +175,10 @@ static void P_ApplyDamageFeedback(entity_t *player)
         kickVec = vec3_normalize(kickVec);
 
         side = DotProduct(kickVec, right);
-        client->v_dmg_roll = kick * side * 0.3;
+        client->v_dmg_roll = kick * side * 0.3f;
 
         side = -DotProduct(kickVec, forward);
-        client->v_dmg_pitch = kick * side * 0.3;
+        client->v_dmg_pitch = kick * side * 0.3f;
 
         client->v_dmg_time = level.time + DAMAGE_TIME;
     }
@@ -226,7 +226,7 @@ static void SV_CalculateViewOffset(entity_t *ent)
         ent->client->playerState.viewAngles[vec3_t::Yaw] = ent->client->killer_yaw;
     } else {
         // Fetch client kick angles.
-        vec3_t newKickAngles = ent->client->kickAngles; //ent->client->playerState.kickAngles;
+        vec3_t newKickAngles = ent->client->playerState.kickAngles = ent->client->kickAngles; //ent->client->playerState.kickAngles;
 
         // Add pitch(X) and roll(Z) angles based on damage kick
         ratio = (ent->client->v_dmg_time - level.time) / DAMAGE_TIME;
