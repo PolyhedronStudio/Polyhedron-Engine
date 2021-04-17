@@ -43,17 +43,13 @@ extern void door_blocked(entity_t* self, entity_t* other);
 extern void plat_blocked(entity_t* self, entity_t* other);
 extern void rotating_blocked(entity_t* self, entity_t* other);
 extern void train_blocked(entity_t* self, entity_t* other);
-extern void turret_blocked(entity_t* self, entity_t* other);
-extern void barrel_delay(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void body_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void button_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void debris_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void door_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void func_explosive_explode(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void gib_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
-extern void misc_deadsoldier_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void soldier_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
-extern void turret_driver_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 
 extern void soldier_attack(entity_t *self);
 extern void soldier_dodge(entity_t* self, entity_t* attacker, float eta);
@@ -62,12 +58,10 @@ extern void soldier_sight(entity_t* self, entity_t* other);
 extern void soldier_stand(entity_t *self);
 extern void soldier_walk(entity_t *self);
 extern void soldier_pain(entity_t* self, entity_t* other, float kick, int damage);
-
-extern void misc_viper_bomb_prethink(entity_t *self);
+;
 extern void Brush_AngleMove_Begin(entity_t* self);
 extern void Brush_AngleMove_Done(entity_t* self);
 extern void Brush_AngleMove_Final(entity_t* self);
-extern void barrel_explode(entity_t* self);
 
 extern void button_return(entity_t* self);
 
@@ -87,7 +81,6 @@ extern void gib_think(entity_t* self);
 extern void MegaHealth_think(entity_t* self);
 extern void M_FliesOff(entity_t* self);
 extern void M_FliesOn(entity_t* self);
-extern void misc_blackhole_think(entity_t* self);
 
 extern void monster_triggered_spawn(entity_t* self);
 extern void Brush_Move_Begin(entity_t* self);
@@ -112,12 +105,7 @@ extern void Think_SpawnDoorTrigger(entity_t* self);
 extern void TH_viewthing(entity_t* self);
 extern void train_next(entity_t* self);
 extern void trigger_elevator_init(entity_t* self);
-extern void turret_breach_finish_init(entity_t* self);
-extern void turret_breach_think(entity_t* self);
-extern void turret_driver_link(entity_t* self);
-extern void turret_driver_think(entity_t* self);
 extern void walkmonster_start_go(entity_t* self);
-extern void barrel_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void blaster_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void button_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void door_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
@@ -125,15 +113,11 @@ extern void drop_temp_touch(entity_t* self, entity_t* other, cplane_t* plane, cs
 extern void func_object_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void gib_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void hurt_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
-extern void misc_viper_bomb_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 
-extern void path_corner_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
-extern void point_combat_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void rotating_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 
 extern void teleporter_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void Touch_DoorTrigger(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
-//extern void Touch_Item(void); // CPP: Remove cuz of overloaded func error.
 extern void Touch_Multi(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void Touch_Plat_Center(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void trigger_gravity_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
@@ -141,11 +125,7 @@ extern void trigger_monsterjump_touch(entity_t* self, entity_t* other, cplane_t*
 extern void trigger_push_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 
 extern void button_use(entity_t* self, entity_t* other, entity_t* activator);
-//extern void commander_body_use(void);
-//extern void door_secret_use(void);
 extern void door_use(entity_t* self, entity_t* other, entity_t* activator);
-//extern void func_clock_use(void); // CPP: Remove cuz of overloaded func error.
-//extern void func_conveyor_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void func_conveyor_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void func_explosive_spawn(entity_t* self, entity_t* other, entity_t* activator);
 extern void func_explosive_use(entity_t* self, entity_t* other, entity_t* activator);
@@ -154,10 +134,6 @@ extern void func_timer_use(entity_t* self, entity_t* other, entity_t* activator)
 extern void func_wall_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void hurt_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void light_use(entity_t* self, entity_t* other, entity_t* activator);
-extern void misc_blackhole_use(entity_t* self, entity_t* other, entity_t* activator);
-extern void misc_strogg_ship_use(entity_t* self, entity_t* other, entity_t* activator);
-extern void misc_viper_bomb_use(entity_t* self, entity_t* other, entity_t* activator);
-extern void misc_viper_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void monster_triggered_spawn_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void monster_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void rotating_use(entity_t* self, entity_t* other, entity_t* activator);
@@ -204,9 +180,7 @@ const save_ptr_t save_ptrs[] = {
 { P_blocked, plat_blocked },
 { P_blocked, rotating_blocked },
 { P_blocked, train_blocked },
-{ P_blocked, turret_blocked },
 
-{ P_die, barrel_delay },
 { P_die, body_die },
 { P_die, button_killed },
 { P_die, debris_die },
@@ -215,10 +189,8 @@ const save_ptr_t save_ptrs[] = {
 { P_die, func_explosive_explode },
 
 { P_die, gib_die },
-{ P_die, misc_deadsoldier_die },
 { P_die, player_die },
 { P_die, soldier_die },
-{ P_die, turret_driver_die },
 
 { P_monsterinfo_attack, soldier_attack },
 
@@ -261,11 +233,9 @@ const save_ptr_t save_ptrs[] = {
 { P_pain, player_pain },
 { P_pain, soldier_pain },
 
-{ P_prethink, misc_viper_bomb_prethink },
 { P_think, Brush_AngleMove_Begin },
 { P_think, Brush_AngleMove_Done },
 { P_think, Brush_AngleMove_Final },
-{ P_think, barrel_explode },
 
 { P_think, button_return },
 
@@ -286,7 +256,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, MegaHealth_think },
 { P_think, M_FliesOff },
 { P_think, M_FliesOn },
-{ P_think, misc_blackhole_think },
 { P_think, monster_think },
 { P_think, monster_triggered_spawn },
 { P_think, Brush_Move_Begin },
@@ -311,14 +280,9 @@ const save_ptr_t save_ptrs[] = {
 { P_think, TH_viewthing },
 { P_think, train_next },
 { P_think, trigger_elevator_init },
-{ P_think, turret_breach_finish_init },
-{ P_think, turret_breach_think },
-{ P_think, turret_driver_link },
-{ P_think, turret_driver_think },
 { P_think, walkmonster_start_go },
 { P_think, flare_think }, // Q2RTX
 { P_touch, flare_touch }, // Q2RTX
-{ P_touch, barrel_touch },
 { P_touch, blaster_touch },
 { P_touch, button_touch },
 { P_touch, door_touch },
@@ -326,10 +290,7 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, func_object_touch },
 { P_touch, gib_touch },
 { P_touch, hurt_touch },
-{ P_touch, misc_viper_bomb_touch },
 
-{ P_touch, path_corner_touch },
-{ P_touch, point_combat_touch },
 { P_touch, rotating_touch },
 
 
@@ -358,11 +319,6 @@ const save_ptr_t save_ptrs[] = {
 
 { P_use, hurt_use },
 { P_use, light_use },
-
-{ P_use, misc_blackhole_use },
-{ P_use, misc_strogg_ship_use },
-{ P_use, misc_viper_bomb_use },
-{ P_use, misc_viper_use },
 
 { P_use, monster_triggered_spawn_use },
 { P_use, monster_use },

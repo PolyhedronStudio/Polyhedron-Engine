@@ -44,7 +44,7 @@ SET(SRC_SVGAME
 	svgame/spawn.cpp
 	svgame/svcmds.cpp
 	svgame/trigger.cpp
-	svgame/turret.cpp
+	
 	svgame/utils.cpp
 	svgame/weapons.cpp
 
@@ -72,17 +72,17 @@ SET(SRC_SVGAME
 	svgame/entities/info/info_player_intermission.cpp
 	svgame/entities/info/info_player_start.cpp
 
-	svgame/entities/misc/misc_blackhole.cpp 
-	svgame/entities/misc/misc_deadsoldier.cpp 
-	svgame/entities/misc/misc_explobox.cpp 
+	 
+	 
+	 
 	svgame/entities/misc/misc_gib_arm.cpp 
 	svgame/entities/misc/misc_gib_leg.cpp 
 	svgame/entities/misc/misc_gib_head.cpp 
-	svgame/entities/misc/misc_strogg_ship.cpp 
+	 
 	svgame/entities/misc/misc_teleporter.cpp
 	svgame/entities/misc/misc_teleporter_dest.cpp
-	svgame/entities/misc/misc_viper.cpp
-	svgame/entities/misc/misc_viperbomb.cpp
+	
+	
 
 	svgame/entities/target/target_blaster.cpp
 	svgame/entities/target/target_changelevel.cpp
@@ -114,10 +114,10 @@ SET(SRC_SVGAME
 	svgame/entities/trigger/trigger_relay.cpp
 	
 	svgame/entities/light.cpp
-	svgame/entities/light_mine1.cpp
-	svgame/entities/light_mine2.cpp
-	svgame/entities/path_corner.cpp
-	svgame/entities/point_combat.cpp
+	
+	
+	
+	
 	svgame/entities/viewthing.cpp
 
 	svgame/monsters/movement.cpp

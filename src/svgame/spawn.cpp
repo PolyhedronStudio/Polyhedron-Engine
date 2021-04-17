@@ -186,35 +186,21 @@ static const spawn_func_t spawn_funcs[] = {
     {"viewthing", SP_viewthing},
 
     {"light", SP_light},
-    {"light_mine1", SP_light_mine1},
-    {"light_mine2", SP_light_mine2},
     {"info_null", SP_info_null},
     {"func_group", SP_info_null},
     {"info_notnull", SP_info_notnull},
-    {"path_corner", SP_path_corner},
-    {"point_combat", SP_point_combat},
-
-    {"misc_explobox", SP_misc_explobox},
 
     {"misc_gib_arm", SP_misc_gib_arm},
     {"misc_gib_leg", SP_misc_gib_leg},
     {"misc_gib_head", SP_misc_gib_head},
 
-    {"misc_deadsoldier", SP_misc_deadsoldier},
-    {"misc_viper", SP_misc_viper},
-    {"misc_viper_bomb", SP_misc_viper_bomb},
-    {"misc_strogg_ship", SP_misc_strogg_ship},
     {"misc_teleporter", SP_misc_teleporter},
     {"misc_teleporter_dest", SP_misc_teleporter_dest},
-    {"misc_blackhole", SP_misc_blackhole},
+
 
     {"monster_soldier_light", SP_monster_soldier_light},
     {"monster_soldier", SP_monster_soldier},
     {"monster_soldier_ss", SP_monster_soldier_ss},
-
-    {"turret_breach", SP_turret_breach},
-    {"turret_base", SP_turret_base},
-    {"turret_driver", SP_turret_driver},
 
     {NULL, NULL}
 };
