@@ -183,38 +183,6 @@ static request_t *CL_FindRequest(void)
 
 //======================================================================
 
-static void CL_UpdatePredictSetting(void)
-{
-    if (!cls.netchan) {
-        return;
-    }
-
-    MSG_WriteByte(clc_setting);
-    MSG_WriteShort(CLS_NOPREDICT);
-    MSG_WriteShort(!cl_predict->integer);
-    MSG_FlushTo(&cls.netchan->message);
-}
-
-void CL_UpdateRecordingSetting(void)
-{
-    int rec;
-
-    if (!cls.netchan) {
-        return;
-    }
-
-    if (cls.demo.recording) {
-        rec = 1;
-    } else {
-        rec = 0;
-    }
-
-    MSG_WriteByte(clc_setting);
-    MSG_WriteShort(CLS_RECORDING);
-    MSG_WriteShort(rec);
-    MSG_FlushTo(&cls.netchan->message);
-}
-
 /*
 ===================
 CL_ClientCommand
@@ -1638,15 +1606,6 @@ Called after all downloads are done. Not used for demos.
 */
 void CL_Begin(void)
 {
-#if USE_REF == REF_GL
-    if (!Q_stricmp(cl.gamedir, "gloom")) {
-        // cheat protect our custom modulate cvars
-        gl_modulate_world->flags |= CVAR_CHEAT;
-        gl_modulate_entities->flags |= CVAR_CHEAT;
-        gl_brightness->flags |= CVAR_CHEAT;
-    }
-#endif
-
     Cvar_FixCheats();
 
     // N&C: Prepare media loading.
@@ -1662,11 +1621,6 @@ void CL_Begin(void)
 
     // Inform CG Module.
     CL_GM_ClientBegin();
-    //CL_UpdateGunSetting();
-    //CL_UpdateGibSetting();
-    CL_UpdateBlendSetting();
-    CL_UpdatePredictSetting();
-    CL_UpdateRecordingSetting();
 }
 
 /*
@@ -1688,16 +1642,10 @@ static void CL_Precache_f(void)
 
     S_StopAllSounds();
 
-    // WatIsDeze: Moved to CL_PrepareMedia.
-    //CL_RegisterVWepModels();
-
-    // demos use different precache sequence
+    // Demos use different precache sequence
     if (cls.demo.playback) {
         CL_RegisterBspModels();
         CL_PrepareMedia();
-        // Moved to CL_PrepareMedia.
-        // CL_LoadState(LOAD_SOUNDS);
-        // CL_RegisterSounds();
         CL_LoadState(LOAD_NONE);
         cls.state = ca_precached;
         return;
@@ -2464,11 +2412,6 @@ static void exec_server_string(cmdbuf_t *buf, const char *text)
     Cmd_ExecuteCommand(buf);
 }
 
-static void cl_prentity_changed(cvar_t *self)
-{
-    CL_UpdatePredictSetting();
-}
-
 static void cl_sync_changed(cvar_t *self)
 {
     CL_UpdateFrameTimes();
@@ -2577,7 +2520,6 @@ static void CL_InitLocal(void)
     // register our variables
     //
     cl_predict = Cvar_Get("cl_predict", "1", 0);
-    cl_predict->changed = cl_prentity_changed;
     cl_kickangles = Cvar_Get("cl_kickangles", "1", CVAR_CHEAT);
     cl_maxfps = Cvar_Get("cl_maxfps", "60", 0);
     cl_maxfps->changed = cl_sync_changed;

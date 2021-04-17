@@ -294,9 +294,6 @@ void CL_Stop_f(void)
 
 // print some statistics
     Com_Printf("Stopped demo (%s).\n", buffer);
-
-// tell the server we finished recording
-    CL_UpdateRecordingSetting();
 }
 
 static const cmd_option_t o_record[] = {
@@ -389,9 +386,6 @@ static void CL_Record_f(void)
 
     // clear dirty configstrings
     memset(cl.dcs, 0, sizeof(cl.dcs));
-
-    // tell the server we are recording
-    CL_UpdateRecordingSetting();
 
     //
     // write out messages to hold the startup information

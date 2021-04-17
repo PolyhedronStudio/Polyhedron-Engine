@@ -341,13 +341,6 @@ static qboolean compress_message(client_t *client, int flags)
     if (!client->has_zlib)
         return false;
 
-    // older clients have problems seamlessly writing svc_zpackets
-    // MSG: !! TODO: SAFE?
-    //if (client->settings[CLS_RECORDING]) {
-    //    if (client->protocol != PROTOCOL_VERSION_NAC)
-    //        return false;
-    //}
-
     // compress only sufficiently large layouts
     if (msg_write.cursize < client->netchan->maxpacketlen / 2)
         return false;

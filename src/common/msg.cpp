@@ -1033,19 +1033,11 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
         from->kickAngles[2] != to->kickAngles[2])
         pflags |= PS_KICKANGLES;
 
-    if (!(flags & MSG_PS_IGNORE_BLEND)) {
-        if (from->blend[0] != to->blend[0] ||
-            from->blend[1] != to->blend[1] ||
-            from->blend[2] != to->blend[2] ||
-            from->blend[3] != to->blend[3])
-            pflags |= PS_BLEND;
-    } else {
-        // save previous state
-        to->blend[0] = from->blend[0];
-        to->blend[1] = from->blend[1];
-        to->blend[2] = from->blend[2];
-        to->blend[3] = from->blend[3];
-    }
+    if (from->blend[0] != to->blend[0] ||
+        from->blend[1] != to->blend[1] ||
+        from->blend[2] != to->blend[2] ||
+        from->blend[3] != to->blend[3])
+        pflags |= PS_BLEND;
 
     if (from->fov != to->fov)
         pflags |= PS_FOV;
@@ -1056,18 +1048,18 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
     if (to->gunindex != from->gunindex)
         pflags |= PS_WEAPONINDEX;
 
-        if (to->gunframe != from->gunframe)
-            pflags |= PS_WEAPONFRAME;
+    if (to->gunframe != from->gunframe)
+        pflags |= PS_WEAPONFRAME;
 
-        if (from->gunoffset[0] != to->gunoffset[0] ||
-            from->gunoffset[1] != to->gunoffset[1] ||
-            from->gunoffset[2] != to->gunoffset[2])
-            eflags |= EPS_GUNOFFSET;
+    if (from->gunoffset[0] != to->gunoffset[0] ||
+        from->gunoffset[1] != to->gunoffset[1] ||
+        from->gunoffset[2] != to->gunoffset[2])
+        eflags |= EPS_GUNOFFSET;
 
-        if (from->gunangles[0] != to->gunangles[0] ||
-            from->gunangles[1] != to->gunangles[1] ||
-            from->gunangles[2] != to->gunangles[2])
-            eflags |= EPS_GUNANGLES;
+    if (from->gunangles[0] != to->gunangles[0] ||
+        from->gunangles[1] != to->gunangles[1] ||
+        from->gunangles[2] != to->gunangles[2])
+        eflags |= EPS_GUNANGLES;
 
     statbits = 0;
     for (i = 0; i < MAX_STATS; i++)

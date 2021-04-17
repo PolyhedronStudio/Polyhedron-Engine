@@ -133,9 +133,6 @@ typedef enum {
     clc_userinfo,           // [userinfo string]
     clc_stringcmd,          // [string] message
 
-    // r1q2 specific operations
-    clc_setting,
-
     // q2pro specific operations
     clc_move_nodelta = 10,
     clc_move_batched,
@@ -286,16 +283,6 @@ typedef enum {
 #define PACKED_BSP      31
 
 typedef enum {
-    // r1q2 specific
-    CLS_NOBLEND,
-    CLS_RECORDING,
-    CLS_PLAYERUPDATES,
-    CLS_FPS,
-
-    // q2pro specific
-    CLS_NOFOOTSTEPS,
-    CLS_NOPREDICT,
-
     CLS_MAX
 } clientSetting_t;
 

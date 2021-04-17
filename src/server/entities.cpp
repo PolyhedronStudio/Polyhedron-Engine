@@ -27,10 +27,6 @@ Encode a client frame onto the network channel
 =============================================================================
 */
 
-// some protocol optimizations are disabled when recording a demo
-#define Q2PRO_OPTIMIZE(c) \
-    ((c)->protocol == PROTOCOL_VERSION_NAC && !(c)->settings[CLS_RECORDING])
-
 /*
 =============
 SV_EmitPacketEntities
@@ -250,27 +246,19 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
 
     // ignore some parts of playerstate if not recording demo
     psFlags = (msgPsFlags_t)0; // CPP: Cast
-    if (!client->settings[CLS_RECORDING]) {
-        if (client->settings[CLS_NOBLEND]) {
-            psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_BLEND);  // CPP: Cast
+    if (frame->playerState.pmove.type < PM_DEAD) {
+        if (!(frame->playerState.pmove.flags & PMF_NO_PREDICTION)) {
+            psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_VIEWANGLES);  // CPP: Cast
         }
-        if (frame->playerState.pmove.type < PM_DEAD) {
-            if (!(frame->playerState.pmove.flags & PMF_NO_PREDICTION)) {
-                psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_VIEWANGLES);  // CPP: Cast
-            }
-        } else {
-            // lying dead on a rotating platform?
-            psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_DELTAANGLES);  // CPP: Cast
-        }
+    } else {
+        // lying dead on a rotating platform?
+        psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_DELTAANGLES);  // CPP: Cast
     }
 
+    // Fetch client entity number.
     clientEntityNum = 0;
-
-    if (frame->playerState.pmove.type < PM_DEAD && !client->settings[CLS_RECORDING]) {
+    if (frame->playerState.pmove.type < PM_DEAD) {
         clientEntityNum = frame->clientNum + 1;
-    }
-    if (client->settings[CLS_NOPREDICT]) {
-        psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_PREDICTION); // CPP: Cast
     }
     suppressed = client->frameflags;
 
@@ -401,9 +389,6 @@ void SV_BuildClientFrame(client_t *client)
             if (!ent->s.event) {
                 continue;
             }
-            if (ent->s.event == EV_FOOTSTEP && client->settings[CLS_NOFOOTSTEPS]) {
-                continue;
-            }
         }
 
         ent_visible = true;
@@ -466,13 +451,8 @@ void SV_BuildClientFrame(client_t *client)
         state = &svs.entities[svs.next_entity % svs.num_entities];
         MSG_PackEntity(state, &es, true); // MSG: !! Removed Q2PRO_SHORTANGLES - Modify packentity to always use short angles??
 
-        // clear footsteps
-        if (state->event == EV_FOOTSTEP && client->settings[CLS_NOFOOTSTEPS]) {
-            state->event = 0;
-        }
-
         // hide POV entity from renderer, unless this is player's own entity
-        if (e == frame->clientNum + 1 && ent != clent && !client->settings[CLS_RECORDING]) {
+        if (e == frame->clientNum + 1 && ent != clent) {
             state->modelindex = 0;
         }
 

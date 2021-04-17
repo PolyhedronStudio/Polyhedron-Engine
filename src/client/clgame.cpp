@@ -54,19 +54,6 @@ int _wrp_GetProtocolVersion(void) {
 int _wrp_GetServerState(void) {
     return cl.serverstate;
 }
-void _wrp_UpdateSetting(clientSetting_t setting, int value) {
-    // Ensure there is a valid netchan.
-    if (!cls.netchan) {
-        return;
-    }
-
-    // Write out message with a flush. (Saving few bytes on the network.)
-    MSG_WriteByte(clc_setting);
-    MSG_WriteShort(setting);
-    MSG_WriteShort(value);
-    MSG_FlushTo(&cls.netchan->message);
-}
-
 
 unsigned _wrp_GetRealTime(void) {
     return cls.realtime;
@@ -424,7 +411,6 @@ void CL_InitGameProgs(void)
     importAPI.IsDemoPlayback = _wrp_IsDemoPlayback;
 
     importAPI.UpdateListenerOrigin = CL_UpdateListenerOrigin;
-    importAPI.UpdateSetting = _wrp_UpdateSetting;
 
     importAPI.SetClientLoadState = CL_SetLoadState;
     importAPI.GetClienState = CL_GetState;

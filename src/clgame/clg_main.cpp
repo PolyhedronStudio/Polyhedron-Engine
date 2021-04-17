@@ -295,11 +295,6 @@ static const cmdreg_t cmd_cgmodule[] = {
 // as the actual player they are spectating due to the settings being shared
 // to the server.
 //---------------
-static void CLG_UpdateFootstepsSetting(void)
-{
-    clgi.UpdateSetting(CLS_NOFOOTSTEPS, !cl_footsteps->integer);
-}
-
 static void cl_chat_sound_changed(cvar_t* self)
 {
     if (!*self->string)
@@ -310,11 +305,6 @@ static void cl_chat_sound_changed(cvar_t* self)
         self->integer = 2;
     else if (!self->integer && !COM_IsUint(self->string))
         self->integer = 1;
-}
-
-static void cl_footsteps_changed(cvar_t* self)
-{
-    CLG_UpdateFootstepsSetting();
 }
 
 static void cl_noskins_changed(cvar_t* self)
@@ -379,7 +369,6 @@ void CLG_Init() {
     gender_auto              = clgi.Cvar_Get("gender_auto", "1", CVAR_ARCHIVE);
 
     cl_footsteps             = clgi.Cvar_Get("cl_footsteps", "1", 0);
-    cl_footsteps->changed    = cl_footsteps_changed;
     cl_gunalpha              = clgi.Cvar_Get("cl_gunalpha", "1", 0);
     // TODO: This one was never implemented at all!!
     cl_monsterfootsteps      = clgi.Cvar_Get("cl_monsterfootsteps", "1", 0);
@@ -455,8 +444,7 @@ void CLG_Init() {
 //===============
 //
 void CLG_ClientBegin() {
-    // Update settings.
-    CLG_UpdateFootstepsSetting();
+
 }
 
 //

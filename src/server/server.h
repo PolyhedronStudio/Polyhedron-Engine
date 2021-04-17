@@ -257,7 +257,6 @@ typedef struct client_s {
     int             challenge;  // challenge of this user, randomly generated
     int             protocol;   // major version
     int             version;    // minor version
-    int             settings[CLS_MAX];
 
     pmoveParams_t   pmp;        // spectator speed, etc
     msgEsFlags_t    esFlags;    // entity protocol flags
