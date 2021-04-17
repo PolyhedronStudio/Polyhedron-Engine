@@ -158,100 +158,12 @@ constexpr uint32_t BUTTON_ANY			= (1 << 7);
 //-----------------
 // monster muzzle flashes
 //-----------------
-#define MZ2_TANK_BLASTER_1              1
-#define MZ2_TANK_BLASTER_2              2
-#define MZ2_TANK_BLASTER_3              3
-#define MZ2_TANK_MACHINEGUN_1           4
-#define MZ2_TANK_MACHINEGUN_2           5
-#define MZ2_TANK_MACHINEGUN_3           6
-#define MZ2_TANK_MACHINEGUN_4           7
-#define MZ2_TANK_MACHINEGUN_5           8
-#define MZ2_TANK_MACHINEGUN_6           9
-#define MZ2_TANK_MACHINEGUN_7           10
-#define MZ2_TANK_MACHINEGUN_8           11
-#define MZ2_TANK_MACHINEGUN_9           12
-#define MZ2_TANK_MACHINEGUN_10          13
-#define MZ2_TANK_MACHINEGUN_11          14
-#define MZ2_TANK_MACHINEGUN_12          15
-#define MZ2_TANK_MACHINEGUN_13          16
-#define MZ2_TANK_MACHINEGUN_14          17
-#define MZ2_TANK_MACHINEGUN_15          18
-#define MZ2_TANK_MACHINEGUN_16          19
-#define MZ2_TANK_MACHINEGUN_17          20
-#define MZ2_TANK_MACHINEGUN_18          21
-#define MZ2_TANK_MACHINEGUN_19          22
-#define MZ2_TANK_ROCKET_1               23
-#define MZ2_TANK_ROCKET_2               24
-#define MZ2_TANK_ROCKET_3               25
-
-#define MZ2_INFANTRY_MACHINEGUN_1       26
-#define MZ2_INFANTRY_MACHINEGUN_2       27
-#define MZ2_INFANTRY_MACHINEGUN_3       28
-#define MZ2_INFANTRY_MACHINEGUN_4       29
-#define MZ2_INFANTRY_MACHINEGUN_5       30
-#define MZ2_INFANTRY_MACHINEGUN_6       31
-#define MZ2_INFANTRY_MACHINEGUN_7       32
-#define MZ2_INFANTRY_MACHINEGUN_8       33
-#define MZ2_INFANTRY_MACHINEGUN_9       34
-#define MZ2_INFANTRY_MACHINEGUN_10      35
-#define MZ2_INFANTRY_MACHINEGUN_11      36
-#define MZ2_INFANTRY_MACHINEGUN_12      37
-#define MZ2_INFANTRY_MACHINEGUN_13      38
-
 #define MZ2_SOLDIER_BLASTER_1           39
 #define MZ2_SOLDIER_BLASTER_2           40
 #define MZ2_SOLDIER_SHOTGUN_1           41
 #define MZ2_SOLDIER_SHOTGUN_2           42
 #define MZ2_SOLDIER_MACHINEGUN_1        43
 #define MZ2_SOLDIER_MACHINEGUN_2        44
-
-#define MZ2_GUNNER_MACHINEGUN_1         45
-#define MZ2_GUNNER_MACHINEGUN_2         46
-#define MZ2_GUNNER_MACHINEGUN_3         47
-#define MZ2_GUNNER_MACHINEGUN_4         48
-#define MZ2_GUNNER_MACHINEGUN_5         49
-#define MZ2_GUNNER_MACHINEGUN_6         50
-#define MZ2_GUNNER_MACHINEGUN_7         51
-#define MZ2_GUNNER_MACHINEGUN_8         52
-#define MZ2_GUNNER_GRENADE_1            53
-#define MZ2_GUNNER_GRENADE_2            54
-#define MZ2_GUNNER_GRENADE_3            55
-#define MZ2_GUNNER_GRENADE_4            56
-
-#define MZ2_CHICK_ROCKET_1              57
-
-#define MZ2_FLYER_BLASTER_1             58
-#define MZ2_FLYER_BLASTER_2             59
-
-#define MZ2_MEDIC_BLASTER_1             60
-
-#define MZ2_GLADIATOR_RAILGUN_1         61
-
-#define MZ2_HOVER_BLASTER_1             62
-
-#define MZ2_ACTOR_MACHINEGUN_1          63
-
-#define MZ2_SUPERTANK_MACHINEGUN_1      64
-#define MZ2_SUPERTANK_MACHINEGUN_2      65
-#define MZ2_SUPERTANK_MACHINEGUN_3      66
-#define MZ2_SUPERTANK_MACHINEGUN_4      67
-#define MZ2_SUPERTANK_MACHINEGUN_5      68
-#define MZ2_SUPERTANK_MACHINEGUN_6      69
-#define MZ2_SUPERTANK_ROCKET_1          70
-#define MZ2_SUPERTANK_ROCKET_2          71
-#define MZ2_SUPERTANK_ROCKET_3          72
-
-#define MZ2_BOSS2_MACHINEGUN_L1         73
-#define MZ2_BOSS2_MACHINEGUN_L2         74
-#define MZ2_BOSS2_MACHINEGUN_L3         75
-#define MZ2_BOSS2_MACHINEGUN_L4         76
-#define MZ2_BOSS2_MACHINEGUN_L5         77
-#define MZ2_BOSS2_ROCKET_1              78
-#define MZ2_BOSS2_ROCKET_2              79
-#define MZ2_BOSS2_ROCKET_3              80
-#define MZ2_BOSS2_ROCKET_4              81
-
-#define MZ2_FLOAT_BLASTER_1             82
 
 #define MZ2_SOLDIER_BLASTER_3           83
 #define MZ2_SOLDIER_SHOTGUN_3           84
@@ -362,16 +274,9 @@ typedef enum {
 #define SPLASH_LAVA         5
 #define SPLASH_BLOOD        6
 
-
-
-
-
-
-
-
-
-
-// dmflags->value flags
+//-----------------
+// Deathmatch GameMode Setting Flags
+//-----------------
 #define DF_NO_HEALTH        0x00000001  // 1
 #define DF_NO_ITEMS         0x00000002  // 2
 #define DF_WEAPONS_STAY     0x00000004  // 4
@@ -388,56 +293,5 @@ typedef enum {
 #define DF_INFINITE_AMMO    0x00002000  // 8192
 #define DF_QUAD_DROP        0x00004000  // 16384
 #define DF_FIXED_FOV        0x00008000  // 32768
-
-// RAFAEL
-#define DF_QUADFIRE_DROP    0x00010000  // 65536
-
-//ROGUE
-#define DF_NO_MINES         0x00020000
-#define DF_NO_STACK_DOUBLE  0x00040000
-#define DF_NO_NUKES         0x00080000
-#define DF_NO_SPHERES       0x00100000
-//ROGUE
-
-/*
-ROGUE - VERSIONS
-1234    08/13/1998      Activision
-1235    08/14/1998      Id Software
-1236    08/15/1998      Steve Tietze
-1237    08/15/1998      Phil Dobranski
-1238    08/15/1998      John Sheley
-1239    08/17/1998      Barrett Alexander
-1230    08/17/1998      Brandon Fish
-1245    08/17/1998      Don MacAskill
-1246    08/17/1998      David "Zoid" Kirsch
-1247    08/17/1998      Manu Smith
-1248    08/17/1998      Geoff Scully
-1249    08/17/1998      Andy Van Fossen
-1240    08/20/1998      Activision Build 2
-1256    08/20/1998      Ranger Clan
-1257    08/20/1998      Ensemble Studios
-1258    08/21/1998      Robert Duffy
-1259    08/21/1998      Stephen Seachord
-1250    08/21/1998      Stephen Heaslip
-1267    08/21/1998      Samir Sandesara
-1268    08/21/1998      Oliver Wyman
-1269    08/21/1998      Steven Marchegiano
-1260    08/21/1998      Build #2 for Nihilistic
-1278    08/21/1998      Build #2 for Ensemble
-
-9999    08/20/1998      Internal Use
-*/
-#define ROGUE_VERSION_ID        1278
-
-#define ROGUE_VERSION_STRING    "08/21/1998 Beta 2 for Ensemble"
-
-// ROGUE
-
-
-
-
-
-//==============================================
-
 
 #endif // __SHAREDGAME_SHAREDGAME_H__
