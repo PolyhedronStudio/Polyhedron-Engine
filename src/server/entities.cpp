@@ -251,12 +251,6 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
     // ignore some parts of playerstate if not recording demo
     psFlags = (msgPsFlags_t)0; // CPP: Cast
     if (!client->settings[CLS_RECORDING]) {
-        if (client->settings[CLS_NOGUN]) {
-            psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_GUNFRAMES);  // CPP: Cast
-            if (client->settings[CLS_NOGUN] != 2) {
-                psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_GUNINDEX);  // CPP: Cast
-            }
-        }
         if (client->settings[CLS_NOBLEND]) {
             psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_BLEND);  // CPP: Cast
         }

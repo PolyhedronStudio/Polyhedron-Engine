@@ -96,14 +96,12 @@ typedef struct {
 // Player state messaging flags.
 //---------------
 typedef enum {
-    MSG_PS_IGNORE_GUNINDEX      = (1 << 0),
-    MSG_PS_IGNORE_GUNFRAMES     = (1 << 1),
-    MSG_PS_IGNORE_BLEND         = (1 << 2),
-    MSG_PS_IGNORE_VIEWANGLES    = (1 << 3),
-    MSG_PS_IGNORE_DELTAANGLES   = (1 << 4),
-    MSG_PS_IGNORE_PREDICTION    = (1 << 5),      // mutually exclusive with IGNORE_VIEWANGLES
-    MSG_PS_FORCE                = (1 << 7),
-    MSG_PS_REMOVE               = (1 << 8)
+    MSG_PS_IGNORE_BLEND         = (1 << 0),
+    MSG_PS_IGNORE_VIEWANGLES    = (1 << 1),
+    MSG_PS_IGNORE_DELTAANGLES   = (1 << 2),
+    MSG_PS_IGNORE_PREDICTION    = (1 << 3),      // mutually exclusive with IGNORE_VIEWANGLES
+    MSG_PS_FORCE                = (1 << 4),
+    MSG_PS_REMOVE               = (1 << 5)
 } msgPsFlags_t;
 
 //---------------

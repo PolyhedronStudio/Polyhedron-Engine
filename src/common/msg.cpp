@@ -1053,15 +1053,9 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
     if (to->rdflags != from->rdflags)
         pflags |= PS_RDFLAGS;
 
-    if (!(flags & MSG_PS_IGNORE_GUNINDEX)) {
-        if (to->gunindex != from->gunindex)
-            pflags |= PS_WEAPONINDEX;
-    } else {
-        // save previous state
-        to->gunindex = from->gunindex;
-    }
+    if (to->gunindex != from->gunindex)
+        pflags |= PS_WEAPONINDEX;
 
-    if (!(flags & MSG_PS_IGNORE_GUNFRAMES)) {
         if (to->gunframe != from->gunframe)
             pflags |= PS_WEAPONFRAME;
 
@@ -1074,18 +1068,6 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t    *from,
             from->gunangles[1] != to->gunangles[1] ||
             from->gunangles[2] != to->gunangles[2])
             eflags |= EPS_GUNANGLES;
-    } else {
-        // save previous state
-        to->gunframe = from->gunframe;
-
-        to->gunoffset[0] = from->gunoffset[0];
-        to->gunoffset[1] = from->gunoffset[1];
-        to->gunoffset[2] = from->gunoffset[2];
-
-        to->gunangles[0] = from->gunangles[0];
-        to->gunangles[1] = from->gunangles[1];
-        to->gunangles[2] = from->gunangles[2];
-    }
 
     statbits = 0;
     for (i = 0; i < MAX_STATS; i++)

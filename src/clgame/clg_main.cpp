@@ -25,51 +25,47 @@ client_shared_t* cs = NULL;
 // Actual client game state (Contains the view for example).
 clientgame_t clg;
 
-//
-// Game.
-//
-
 
 //
 // CVar.
 //
-cvar_t *cl_chat_notify = NULL;
-cvar_t *cl_chat_sound = NULL;
-cvar_t *cl_chat_filter = NULL;
-cvar_t *cl_disable_particles = NULL;
-cvar_t *cl_disable_explosions = NULL;
-cvar_t *cl_explosion_sprites = NULL;
-cvar_t *cl_explosion_frametime = NULL;
-cvar_t *cl_footsteps = NULL;
-cvar_t *cl_gunalpha = NULL;
-cvar_t *cl_kickangles = NULL;
+cvar_t *cl_chat_notify  = NULL;
+cvar_t *cl_chat_sound   = NULL;
+cvar_t *cl_chat_filter  = NULL;
+cvar_t *cl_disable_particles    = NULL;
+cvar_t *cl_disable_explosions   = NULL;
+cvar_t *cl_explosion_sprites    = NULL;
+cvar_t *cl_explosion_frametime  = NULL;
+cvar_t *cl_footsteps    = NULL;
+cvar_t *cl_gunalpha     = NULL;
+cvar_t *cl_kickangles   = NULL;
 cvar_t *cl_monsterfootsteps = NULL;
-cvar_t *cl_noglow = NULL;
-cvar_t *cl_noskins = NULL;
+cvar_t *cl_noglow   = NULL;
+cvar_t *cl_noskins  = NULL;
 cvar_t *cl_player_model = NULL;
-cvar_t *cl_predict = NULL;
+cvar_t *cl_predict  = NULL;
 cvar_t *cl_rollhack = NULL;
-cvar_t *cl_thirdperson_angle = NULL;
-cvar_t *cl_thirdperson_range = NULL;
-cvar_t *cl_vwep = NULL;
+cvar_t *cl_thirdperson_angle    = NULL;
+cvar_t *cl_thirdperson_range    = NULL;
+cvar_t *cl_vwep     = NULL;
 
 // Refresh.
 cvar_t* cvar_pt_beam_lights = NULL;
 
 // Server.
-cvar_t *sv_paused = NULL;
+cvar_t *sv_paused   = NULL;
 
 // User Info.
-cvar_t *gender_auto = NULL;
-cvar_t *info_fov = NULL;
-cvar_t *info_hand = NULL;
-cvar_t *info_gender = NULL;
-cvar_t *info_msg = NULL;
-cvar_t *info_name = NULL;
-cvar_t *info_password = NULL;
-cvar_t *info_skin = NULL;
-cvar_t *info_spectator = NULL;
-cvar_t *info_uf = NULL;
+cvar_t *gender_auto     = NULL;
+cvar_t *info_fov        = NULL;
+cvar_t *info_hand       = NULL;
+cvar_t *info_gender     = NULL;
+cvar_t *info_msg        = NULL;
+cvar_t *info_name       = NULL;
+cvar_t *info_password   = NULL;
+cvar_t *info_skin       = NULL;
+cvar_t *info_spectator  = NULL;
+cvar_t *info_uf         = NULL;
 
 // Video.
 cvar_t* vid_rtx = NULL;
@@ -304,15 +300,6 @@ static void CLG_UpdateFootstepsSetting(void)
     clgi.UpdateSetting(CLS_NOFOOTSTEPS, !cl_footsteps->integer);
 }
 
-static void CLG_UpdateGunSettings() {
-    if (cl_player_model->integer == CL_PLAYER_MODEL_DISABLED || info_hand->integer == 2) {
-        clgi.UpdateSetting(CLS_NOGUN, 1);
-    }
-    else {
-        clgi.UpdateSetting(CLS_NOGUN, 0);
-    }
-}
-
 static void cl_chat_sound_changed(cvar_t* self)
 {
     if (!*self->string)
@@ -328,11 +315,6 @@ static void cl_chat_sound_changed(cvar_t* self)
 static void cl_footsteps_changed(cvar_t* self)
 {
     CLG_UpdateFootstepsSetting();
-}
-
-static void cl_info_hand_changed(cvar_t* self)
-{
-    CLG_UpdateGunSettings();
 }
 
 static void cl_noskins_changed(cvar_t* self)
@@ -356,7 +338,7 @@ static void cl_noskins_changed(cvar_t* self)
 
 static void cl_player_model_changed(cvar_t* self)
 {
-    CLG_UpdateGunSettings();
+
 }
 
 static void cl_vwep_changed(cvar_t* self)
@@ -427,7 +409,6 @@ void CLG_Init() {
     info_gender             = clgi.Cvar_Get("gender", "male", CVAR_USERINFO | CVAR_ARCHIVE);
     info_gender->modified   = false; // clear this so we know when user sets it manually
     info_hand               = clgi.Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_hand->changed      = cl_info_hand_changed;
     info_skin               = clgi.Cvar_Get("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
     info_uf                 = clgi.Cvar_Get("uf", "", CVAR_USERINFO);
     
@@ -476,7 +457,6 @@ void CLG_Init() {
 void CLG_ClientBegin() {
     // Update settings.
     CLG_UpdateFootstepsSetting();
-    CLG_UpdateGunSettings();
 }
 
 //

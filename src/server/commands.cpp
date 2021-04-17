@@ -661,7 +661,6 @@ static void dump_settings(void)
     opt[6] = ' ';
     opt[7] = 0;
     FOR_EACH_CLIENT(cl) {
-        opt[0] = cl->settings[CLS_NOGUN]          ? 'G' : ' ';
         opt[1] = cl->settings[CLS_NOBLEND]        ? 'B' : ' ';
         opt[2] = cl->settings[CLS_RECORDING]      ? 'R' : ' ';
         opt[4] = cl->settings[CLS_NOFOOTSTEPS]    ? 'F' : ' ';
