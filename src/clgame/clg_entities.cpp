@@ -763,7 +763,7 @@ qboolean CLG_IsClientViewEntity(const cl_entity_t* ent) {
 
             if (ent->current.number == cl->clientNum) {
                 return true;
-            }
+            } 
 
             const int16_t chase = cl->frame.playerState.stats[STAT_CHASE] - CS_PLAYERSKINS;
 
