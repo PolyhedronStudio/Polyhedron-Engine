@@ -1957,7 +1957,7 @@ void SV_Init(void)
     Cvar_Get("deathmatch", "1", CVAR_SERVERINFO | CVAR_LATCH);
     Cvar_Get("coop", "0", /*CVAR_SERVERINFO|*/CVAR_LATCH);
     Cvar_Get("cheats", "0", CVAR_SERVERINFO | CVAR_LATCH);
-    Cvar_Get("dmflags", va("%i", DF_INSTANT_ITEMS), CVAR_SERVERINFO);
+    Cvar_Get("dmflags", "16", CVAR_SERVERINFO); // 16 = DF_INSTANT_ITEMS
     Cvar_Get("fraglimit", "0", CVAR_SERVERINFO);
     Cvar_Get("timelimit", "0", CVAR_SERVERINFO);
 

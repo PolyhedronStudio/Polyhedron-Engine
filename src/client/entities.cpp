@@ -430,30 +430,6 @@ static inline float LerpShort(int a2, int a1, float frac)
 }
 #endif
 
-static inline float lerp_client_fov(float ofov, float nfov, float lerp)
-{
-    if (cls.demo.playback) {
-        float fov = info_fov->value;
-
-        if (fov < 1)
-            fov = 90;
-        else if (fov > 160)
-            fov = 160;
-
-        if (info_uf->integer & UF_LOCALFOV)
-            return fov;
-
-        if (!(info_uf->integer & UF_PLAYERFOV)) {
-            if (ofov >= 90)
-                ofov = fov;
-            if (nfov >= 90)
-                nfov = fov;
-        }
-    }
-
-    return ofov + lerp * (nfov - ofov);
-}
-
 /*
 ===============
 CL_AddEntities

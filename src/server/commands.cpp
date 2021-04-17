@@ -664,7 +664,6 @@ static void dump_settings(void)
         opt[0] = cl->settings[CLS_NOGUN]          ? 'G' : ' ';
         opt[1] = cl->settings[CLS_NOBLEND]        ? 'B' : ' ';
         opt[2] = cl->settings[CLS_RECORDING]      ? 'R' : ' ';
-        opt[3] = cl->settings[CLS_NOGIBS]         ? 'I' : ' ';
         opt[4] = cl->settings[CLS_NOFOOTSTEPS]    ? 'F' : ' ';
         opt[5] = cl->settings[CLS_NOPREDICT]      ? 'P' : ' ';
         Com_Printf("%3i %-15.15s %5d %s %3d %3d\n",

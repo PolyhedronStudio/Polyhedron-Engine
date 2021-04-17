@@ -658,12 +658,6 @@ static void repack_unreliables(client_t *client, size_t maxsize)
         if (!msg->cursize || msg->data[0] != svg_temp_entity) {
             continue;
         }
-        // ignore some low-priority effects, these checks come from r1q2
-        if (msg->data[1] == TE_BLOOD || msg->data[1] == TE_SPLASH ||
-            msg->data[1] == TE_GUNSHOT || msg->data[1] == TE_BULLET_SPARKS ||
-            msg->data[1] == TE_SHOTGUN) {
-            continue;
-        }
         write_msg(client, msg, maxsize);
     }
 

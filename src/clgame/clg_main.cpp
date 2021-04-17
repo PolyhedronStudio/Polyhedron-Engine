@@ -41,7 +41,6 @@ cvar_t *cl_disable_explosions = NULL;
 cvar_t *cl_explosion_sprites = NULL;
 cvar_t *cl_explosion_frametime = NULL;
 cvar_t *cl_footsteps = NULL;
-cvar_t *cl_gibs = NULL;
 cvar_t *cl_gunalpha = NULL;
 cvar_t *cl_kickangles = NULL;
 cvar_t *cl_monsterfootsteps = NULL;
@@ -326,18 +325,9 @@ static void cl_chat_sound_changed(cvar_t* self)
         self->integer = 1;
 }
 
-static void CLG_UpdateGibSettings() {
-    clgi.UpdateSetting(CLS_NOGIBS, !cl_gibs->integer);
-}
-
 static void cl_footsteps_changed(cvar_t* self)
 {
     CLG_UpdateFootstepsSetting();
-}
-
-static void cl_gibs_changed(cvar_t* self)
-{
-    CLG_UpdateGibSettings();
 }
 
 static void cl_info_hand_changed(cvar_t* self)
@@ -395,8 +385,6 @@ void CLG_Init() {
 
     // Here we fetch cvars that were created by the client.
     // These are nescessary for certain CG Module functionalities.
-    cl_gibs                  = clgi.Cvar_Get("cl_gibs", "1", 0);
-    cl_gibs->changed         = cl_gibs_changed;
     cl_kickangles            = clgi.Cvar_Get("cl_kickangles", NULL, 0);
     cl_noglow                = clgi.Cvar_Get("cl_noglow", NULL, 0);
     cl_noskins               = clgi.Cvar_Get("cl_noskins", "0", 0);
@@ -428,8 +416,6 @@ void CLG_Init() {
     cl_disable_explosions    = clgi.Cvar_Get("cl_disable_explosions", "0", 0);
     cl_explosion_sprites     = clgi.Cvar_Get("cl_explosion_sprites", "1", 0);
     cl_explosion_frametime   = clgi.Cvar_Get("cl_explosion_frametime", "20", 0);
-    cl_gibs                  = clgi.Cvar_Get("cl_gibs", "1", 0);
-    cl_gibs->changed         = cl_gibs_changed;
     cl_vwep                  = clgi.Cvar_Get("cl_vwep", "1", CVAR_ARCHIVE);
     cl_vwep->changed         = cl_vwep_changed;
 
@@ -491,7 +477,6 @@ void CLG_ClientBegin() {
     // Update settings.
     CLG_UpdateFootstepsSetting();
     CLG_UpdateGunSettings();
-    CLG_UpdateGibSettings();
 }
 
 //

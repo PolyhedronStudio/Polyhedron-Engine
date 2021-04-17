@@ -185,10 +185,6 @@ void CLG_AddPacketEntities(void)
             }
         }
 
-        if ((effects & EF_GIB) && !cl_gibs->integer) {
-            goto skip;
-        }
-
         // create a new entity
 
         // tweak the color of beams

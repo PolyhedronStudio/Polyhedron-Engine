@@ -8,7 +8,7 @@
 // awesome big banging explosions!
 //
 #include "clg_local.h"
-
+#include "sharedgame/sharedgame.h"
 static void CLG_LogoutEffect(vec3_t org, int type);
 
 static vec3_t avelocities[NUMVERTEXNORMALS];
@@ -532,7 +532,7 @@ void CLG_MuzzleFlash2() {
     // locate the origin
     ent = &cs->entities[mzParameters.entity];
     AngleVectors(ent->current.angles, &forward, &right, NULL);
-    ofs = monster_flash_offset[mzParameters.weapon];
+    ofs = vec3_t { 10.6f * 1.2f, 7.7f * 1.2f, 7.8f * 1.2f };
     origin[0] = ent->current.origin[0] + forward[0] * ofs[0] + right[0] * ofs[1];
     origin[1] = ent->current.origin[1] + forward[1] * ofs[0] + right[1] * ofs[1];
     origin[2] = ent->current.origin[2] + forward[2] * ofs[0] + right[2] * ofs[1] + ofs[2];

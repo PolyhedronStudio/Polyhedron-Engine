@@ -63,8 +63,6 @@ cvar_t  *cl_disconnectcmd;
 cvar_t  *cl_changemapcmd;
 cvar_t  *cl_beginmapcmd;
 
-cvar_t  *cl_gibs;
-
 cvar_t  *cl_protocol;
 
 cvar_t  *gender_auto;
@@ -184,19 +182,6 @@ static request_t *CL_FindRequest(void)
 }
 
 //======================================================================
-
-
-static void CL_UpdateGibSetting(void)
-{
-    if (!cls.netchan) {
-        return;
-    }
-
-    MSG_WriteByte(clc_setting);
-    MSG_WriteShort(CLS_NOGIBS);
-    MSG_WriteShort(!cl_gibs->integer);
-    MSG_FlushTo(&cls.netchan->message);
-}
 
 static void CL_UpdatePredictSetting(void)
 {

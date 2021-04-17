@@ -27,7 +27,7 @@ SOLDIER
 #include "../effects.h"     // Effects.
 #include "../utils.h"       // Util.
 #include "soldier.h"
-
+#include "sharedgame/sharedgame.h"
 
 static int  sound_idle;
 static int  sound_sight1;
@@ -490,7 +490,7 @@ void soldier_fire(entity_t *self, int flash_number)
         flash_index = machinegun_flash[flash_number];
 
     AngleVectors(self->s.angles, &forward, &right, NULL);
-    start = G_ProjectSource(self->s.origin, monster_flash_offset[flash_index], forward, right);
+    start = G_ProjectSource(self->s.origin, { 10.6 * 1.2, 7.7 * 1.2, 7.8 * 1.2 }, forward, right);
 
     if (flash_number == 5 || flash_number == 6) {
         VectorCopy(forward, aim);

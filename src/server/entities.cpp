@@ -412,10 +412,6 @@ void SV_BuildClientFrame(client_t *client)
             }
         }
 
-        if ((ent->s.effects & EF_GIB) && client->settings[CLS_NOGIBS]) {
-            continue;
-        }
-
         ent_visible = true;
 
         // ignore if not touching a PV leaf

@@ -294,7 +294,6 @@ typedef enum {
     CLS_FPS,
 
     // q2pro specific
-    CLS_NOGIBS            = 10,
     CLS_NOFOOTSTEPS,
     CLS_NOPREDICT,
 

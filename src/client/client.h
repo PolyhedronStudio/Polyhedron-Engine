@@ -290,8 +290,6 @@ extern cvar_t    *cl_disconnectcmd;
 extern cvar_t    *cl_changemapcmd;
 extern cvar_t    *cl_beginmapcmd;
 
-extern cvar_t    *cl_gibs;
-
 #define CL_PLAYER_MODEL_DISABLED     0
 #define CL_PLAYER_MODEL_ONLY_GUN     1
 #define CL_PLAYER_MODEL_FIRST_PERSON 2
