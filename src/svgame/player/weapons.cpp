@@ -270,20 +270,20 @@ void Use_Weapon(entity_t *ent, gitem_t *item)
     if (item == ent->client->pers.weapon)
         return;
 
-    //if (item->ammo && !g_select_empty->value && !(item->flags & IT_AMMO)) {
-    //    ammo_item = FindItem(item->ammo);
-    //    ammo_index = ITEM_INDEX(ammo_item);
+    if (item->ammo && !g_select_empty->value && !(item->flags & IT_AMMO)) {
+        ammo_item = FindItem(item->ammo);
+        ammo_index = ITEM_INDEX(ammo_item);
 
-    //    if (!ent->client->pers.inventory[ammo_index]) {
-    //        gi.CPrintf(ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickupName, item->pickupName);
-    //        return;
-    //    }
+        if (!ent->client->pers.inventory[ammo_index]) {
+            gi.CPrintf(ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickupName, item->pickupName);
+            return;
+        }
 
-    //    if (ent->client->pers.inventory[ammo_index] < item->quantity) {
-    //        gi.CPrintf(ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickupName, item->pickupName);
-    //        return;
-    //    }
-    //}
+        if (ent->client->pers.inventory[ammo_index] < item->quantity) {
+            gi.CPrintf(ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickupName, item->pickupName);
+            return;
+        }
+    }
 
     // change to this weapon when down
     ent->client->newweapon = item;

@@ -13,9 +13,6 @@
 
 //=====================================================
 
-
-
-
 void ClipGibVelocity(entity_t *ent)
 {
     if (ent->velocity[0] < -300)
