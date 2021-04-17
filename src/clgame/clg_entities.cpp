@@ -269,9 +269,7 @@ void CLG_AddPacketEntities(void)
         }
 
         if (s1->number == cl->frame.clientNum + 1) {
-            if (effects & EF_FLAG1)
-                V_AddLight(ent.origin, 225, 1.0, 0.1, 0.1);
-            else if (effects & EF_FLAG2)
+            if (effects & EF_FLAG2)
                 V_AddLight(ent.origin, 225, 0.1, 0.1, 1.0);
             else if (effects & EF_TAGTRAIL)
                 V_AddLight(ent.origin, 225, 1.0, 1.0, 0.0);
@@ -480,10 +478,6 @@ void CLG_AddPacketEntities(void)
                 i = (rand() % 100) + 100;
                 V_AddLight(ent.origin, i, 1, 0.8, 0.1);
 #endif
-            }
-            else if (effects & EF_FLAG1) {
-                CLG_FlagTrail(cent->lerp_origin, ent.origin, 242);
-                V_AddLight(ent.origin, 225, 1, 0.1, 0.1);
             }
             else if (effects & EF_FLAG2) {
                 CLG_FlagTrail(cent->lerp_origin, ent.origin, 115);
@@ -744,7 +738,7 @@ cl_entity_t* CLG_GetClientViewEntity(void) {
     int32_t index = cl->clientNum;
 
     if (cl->frame.playerState.stats[STAT_CHASE]) {
-        index = cl->frame.playerState.stats[STAT_CHASE] - CS_CLIENTS;
+        index = cl->frame.playerState.stats[STAT_CHASE] - CS_PLAYERSKINS;
     }
 
     return &cs->entities[index + 1];
@@ -771,7 +765,7 @@ qboolean CLG_IsClientViewEntity(const cl_entity_t* ent) {
                 return true;
             }
 
-            const int16_t chase = cl->frame.playerState.stats[STAT_CHASE] - CS_CLIENTS;
+            const int16_t chase = cl->frame.playerState.stats[STAT_CHASE] - CS_PLAYERSKINS;
 
             if (ent->current.number == chase) {
                 return true;

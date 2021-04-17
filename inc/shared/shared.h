@@ -977,7 +977,7 @@ typedef struct {
 #define EF_QUAD             0x00008000
 #define EF_PENT             0x00010000
 #define EF_TELEPORTER       0x00020000      // particle fountain
-#define EF_FLAG1            0x00040000
+#define EF_CORPSE           0x00040000      // to differentiate own corpse from self
 #define EF_FLAG2            0x00080000
 // RAFAEL
 #define EF_IONRIPPER        0x00100000
