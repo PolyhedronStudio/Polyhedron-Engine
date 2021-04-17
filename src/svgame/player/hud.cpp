@@ -61,14 +61,6 @@ void HUD_MoveClientToIntermission(entity_t *ent)
     ent->client->playerState.blend[3] = 0;
     ent->client->playerState.rdflags &= ~RDF_UNDERWATER;
 
-    // clean up powerup info
-    ent->client->quad_framenum = 0;
-    ent->client->invincible_framenum = 0;
-    ent->client->breather_framenum = 0;
-    ent->client->enviro_framenum = 0;
-    ent->client->grenade_blew_up = false;
-    ent->client->grenade_time = 0;
-
     ent->viewHeight = 0;
     ent->s.modelindex = 0;
     ent->s.modelindex2 = 0;
@@ -444,26 +436,8 @@ void HUD_SetClientStats(entity_t* ent)
     //
     // timers
     //
-    if (ent->client->quad_framenum > level.framenum) {
-        ent->client->playerState.stats[STAT_TIMER_ICON] = gi.ImageIndex("p_quad");
-        ent->client->playerState.stats[STAT_TIMER] = (ent->client->quad_framenum - level.framenum) / 10;
-    }
-    else if (ent->client->invincible_framenum > level.framenum) {
-        ent->client->playerState.stats[STAT_TIMER_ICON] = gi.ImageIndex("p_invulnerability");
-        ent->client->playerState.stats[STAT_TIMER] = (ent->client->invincible_framenum - level.framenum) / 10;
-    }
-    else if (ent->client->enviro_framenum > level.framenum) {
-        ent->client->playerState.stats[STAT_TIMER_ICON] = gi.ImageIndex("p_envirosuit");
-        ent->client->playerState.stats[STAT_TIMER] = (ent->client->enviro_framenum - level.framenum) / 10;
-    }
-    else if (ent->client->breather_framenum > level.framenum) {
-        ent->client->playerState.stats[STAT_TIMER_ICON] = gi.ImageIndex("p_rebreather");
-        ent->client->playerState.stats[STAT_TIMER] = (ent->client->breather_framenum - level.framenum) / 10;
-    }
-    else {
-        ent->client->playerState.stats[STAT_TIMER_ICON] = 0;
-        ent->client->playerState.stats[STAT_TIMER] = 0;
-    }
+    ent->client->playerState.stats[STAT_TIMER_ICON] = 0;
+    ent->client->playerState.stats[STAT_TIMER] = 0;
 
     //
     // selected item

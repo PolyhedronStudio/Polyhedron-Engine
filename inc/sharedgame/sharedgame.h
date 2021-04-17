@@ -289,7 +289,7 @@ typedef enum {
 #define DF_NO_ARMOR         0x00000800  // 2048
 #define DF_ALLOW_EXIT       0x00001000  // 4096
 #define DF_INFINITE_AMMO    0x00002000  // 8192
-#define DF_QUAD_DROP        0x00004000  // 16384
-#define DF_FIXED_FOV        0x00008000  // 32768
+#define DF_FIXED_FOV        0x00004000  // 16384
+#define DF_UNUSED           0x00008000  // 32768
 
 #endif // __SHAREDGAME_SHAREDGAME_H__

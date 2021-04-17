@@ -394,14 +394,6 @@ static const save_field_t clientfields[] = {
     I(anim_run),
 
     // powerup timers
-    I(quad_framenum),
-    I(invincible_framenum),
-    I(breather_framenum),
-    I(enviro_framenum),
-
-    I(grenade_blew_up),
-    F(grenade_time),
-    I(silencer_shots),
     I(weapon_sound),
 
     F(pickup_msg_time),

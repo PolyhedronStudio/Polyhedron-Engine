@@ -84,7 +84,7 @@ static void P_ApplyDamageFeedback(entity_t *player)
     client->playerState.stats[STAT_FLASHES] = 0;
     if (client->damage_blood)
         client->playerState.stats[STAT_FLASHES] |= 1;
-    if (client->damage_armor && !(player->flags & FL_GODMODE) && (client->invincible_framenum <= level.framenum))
+    if (client->damage_armor && !(player->flags & FL_GODMODE))
         client->playerState.stats[STAT_FLASHES] |= 2;
 
     // total points of damage shot at the player this frame
@@ -124,7 +124,7 @@ static void P_ApplyDamageFeedback(entity_t *player)
         count = 10; // always make a visible effect
 
     // Play an apropriate pain sound
-    if ((level.time > player->debouncePainTime) && !(player->flags & FL_GODMODE) && (client->invincible_framenum <= level.framenum)) {
+    if ((level.time > player->debouncePainTime) && !(player->flags & FL_GODMODE)) {
         r = 1 + (rand() & 1);
         player->debouncePainTime = level.time + 0.7f;
         if (player->health < 25)
@@ -381,7 +381,6 @@ static void SV_CalculateBlend(entity_t *ent)
 {
     int     contents;
     vec3_t  vieworg;
-    int     remaining;
 
     ent->client->playerState.blend[0] = ent->client->playerState.blend[1] =
                                    ent->client->playerState.blend[2] = ent->client->playerState.blend[3] = 0;
@@ -401,33 +400,6 @@ static void SV_CalculateBlend(entity_t *ent)
         SV_AddBlend(0.0, 0.1, 0.05, 0.6, ent->client->playerState.blend);
     else if (contents & CONTENTS_WATER)
         SV_AddBlend(0.5, 0.3, 0.2, 0.4, ent->client->playerState.blend);
-
-    // add for powerups
-    if (ent->client->quad_framenum > level.framenum) {
-        remaining = ent->client->quad_framenum - level.framenum;
-        if (remaining == 30)    // beginning to fade
-            gi.Sound(ent, CHAN_ITEM, gi.SoundIndex("items/damage2.wav"), 1, ATTN_NORM, 0);
-        if (remaining > 30 || (remaining & 4))
-            SV_AddBlend(0, 0, 1, 0.08, ent->client->playerState.blend);
-    } else if (ent->client->invincible_framenum > level.framenum) {
-        remaining = ent->client->invincible_framenum - level.framenum;
-        if (remaining == 30)    // beginning to fade
-            gi.Sound(ent, CHAN_ITEM, gi.SoundIndex("items/protect2.wav"), 1, ATTN_NORM, 0);
-        if (remaining > 30 || (remaining & 4))
-            SV_AddBlend(1, 1, 0, 0.08, ent->client->playerState.blend);
-    } else if (ent->client->enviro_framenum > level.framenum) {
-        remaining = ent->client->enviro_framenum - level.framenum;
-        if (remaining == 30)    // beginning to fade
-            gi.Sound(ent, CHAN_ITEM, gi.SoundIndex("items/airout.wav"), 1, ATTN_NORM, 0);
-        if (remaining > 30 || (remaining & 4))
-            SV_AddBlend(0, 1, 0, 0.08, ent->client->playerState.blend);
-    } else if (ent->client->breather_framenum > level.framenum) {
-        remaining = ent->client->breather_framenum - level.framenum;
-        if (remaining == 30)    // beginning to fade
-            gi.Sound(ent, CHAN_ITEM, gi.SoundIndex("items/airout.wav"), 1, ATTN_NORM, 0);
-        if (remaining > 30 || (remaining & 4))
-            SV_AddBlend(0.4, 1, 0.4, 0.04, ent->client->playerState.blend);
-    }
 
     // add for damage
     if (ent->client->damage_alpha > 0)
@@ -525,8 +497,6 @@ static void P_CheckFallingDamage(entity_t *ent)
 //
 static void P_CheckWorldEffects(void)
 {
-    qboolean    breather;
-    qboolean    envirosuit;
     int         waterlevel, old_waterlevel;
 
     if (current_player->moveType == MOVETYPE_NOCLIP) {
@@ -537,9 +507,6 @@ static void P_CheckWorldEffects(void)
     waterlevel = current_player->waterLevel;
     old_waterlevel = current_client->old_waterlevel;
     current_client->old_waterlevel = waterlevel;
-
-    breather = current_client->breather_framenum > level.framenum;
-    envirosuit = current_client->enviro_framenum > level.framenum;
 
     //
     // if just entered a water volume, play a sound
@@ -592,21 +559,6 @@ static void P_CheckWorldEffects(void)
     // check for drowning
     //
     if (waterlevel == 3) {
-        // breather or envirosuit give air
-        if (breather || envirosuit) {
-            current_player->air_finished = level.time + 10;
-
-            if (((int)(current_client->breather_framenum - level.framenum) % 25) == 0) {
-                if (!current_client->breather_sound)
-                    gi.Sound(current_player, CHAN_AUTO, gi.SoundIndex("player/u_breath1.wav"), 1, ATTN_NORM, 0);
-                else
-                    gi.Sound(current_player, CHAN_AUTO, gi.SoundIndex("player/u_breath2.wav"), 1, ATTN_NORM, 0);
-                current_client->breather_sound ^= 1;
-                PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
-                //FIXME: release a bubble?
-            }
-        }
-
         // if out of air, start drowning
         if (current_player->air_finished < level.time) {
             // drown!
@@ -643,8 +595,7 @@ static void P_CheckWorldEffects(void)
     if (waterlevel && (current_player->waterType & (CONTENTS_LAVA | CONTENTS_SLIME))) {
         if (current_player->waterType & CONTENTS_LAVA) {
             if (current_player->health > 0
-                && current_player->debouncePainTime <= level.time
-                && current_client->invincible_framenum < level.framenum) {
+                && current_player->debouncePainTime <= level.time) {
                 if (rand() & 1)
                     gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/burn1.wav"), 1, ATTN_NORM, 0);
                 else
@@ -652,17 +603,11 @@ static void P_CheckWorldEffects(void)
                 current_player->debouncePainTime = level.time + 1;
             }
 
-            if (envirosuit) // take 1/3 damage with envirosuit
-                T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1 * waterlevel, 0, 0, MOD_LAVA);
-            else
-                T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 3 * waterlevel, 0, 0, MOD_LAVA);
+            T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 3 * waterlevel, 0, 0, MOD_LAVA);
         }
 
         if (current_player->waterType & CONTENTS_SLIME) {
-            if (!envirosuit) {
-                // no damage from slime with envirosuit
-                T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1 * waterlevel, 0, 0, MOD_SLIME);
-            }
+            T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1 * waterlevel, 0, 0, MOD_SLIME);
         }
     }
 }
@@ -675,26 +620,11 @@ static void P_CheckWorldEffects(void)
 //
 static void G_SetClientEffects(entity_t *ent)
 {
-    int     pa_type;
-    int     remaining;
-
     ent->s.effects = 0;
     ent->s.renderfx = 0;
 
     if (ent->health <= 0 || level.intermissiontime)
         return;
-
-    if (ent->client->quad_framenum > level.framenum) {
-        remaining = ent->client->quad_framenum - level.framenum;
-        if (remaining > 30 || (remaining & 4))
-            ent->s.effects |= EF_QUAD;
-    }
-
-    if (ent->client->invincible_framenum > level.framenum) {
-        remaining = ent->client->invincible_framenum - level.framenum;
-        if (remaining > 30 || (remaining & 4))
-            ent->s.effects |= EF_PENT;
-    }
 
     // show cheaters!!!
     if (ent->flags & FL_GODMODE) {

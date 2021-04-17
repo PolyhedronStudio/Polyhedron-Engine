@@ -101,10 +101,6 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
     }
 
     // remove powerups
-    self->client->quad_framenum = 0;
-    self->client->invincible_framenum = 0;
-    self->client->breather_framenum = 0;
-    self->client->enviro_framenum = 0;
     self->flags &= ~FL_POWER_ARMOR;
 
     if (self->health < -40) {

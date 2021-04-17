@@ -861,14 +861,6 @@ struct gclient_s {
     qboolean    anim_run;
 
     // powerup timers
-    int         quad_framenum;
-    int         invincible_framenum;
-    int         breather_framenum;
-    int         enviro_framenum;
-
-    qboolean    grenade_blew_up;
-    float       grenade_time;
-    int         silencer_shots;
     int         weapon_sound;
 
     float       pickup_msg_time;

@@ -342,11 +342,6 @@ void TossClientWeapon(entity_t *self)
     if (item && (strcmp(item->pickupName, "Blaster") == 0))
         item = NULL;
 
-    if (!((int)(dmflags->value) & DF_QUAD_DROP))
-        quad = false;
-    else
-        quad = (self->client->quad_framenum > (level.framenum + 10));
-
     if (item && quad)
         spread = 22.5;
     else
@@ -357,17 +352,6 @@ void TossClientWeapon(entity_t *self)
         drop = Drop_Item(self, item);
         self->client->v_angle[vec3_t::Yaw] += spread;
         drop->spawnFlags = DROPPED_PLAYER_ITEM;
-    }
-
-    if (quad) {
-        self->client->v_angle[vec3_t::Yaw] += spread;
-        drop = Drop_Item(self, FindItemByClassname("item_quad"));
-        self->client->v_angle[vec3_t::Yaw] -= spread;
-        drop->spawnFlags |= DROPPED_PLAYER_ITEM;
-
-        drop->Touch = Touch_Item;
-        drop->nextThink = level.time + (self->client->quad_framenum - level.framenum) * FRAMETIME;
-        drop->Think = G_FreeEntity;
     }
 }
 

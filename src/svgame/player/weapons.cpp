@@ -41,13 +41,6 @@ void PlayerNoise(entity_t *who, vec3_t where, int type)
 {
     entity_t     *noise;
 
-    if (type == PNOISE_WEAPON) {
-        if (who->client->silencer_shots) {
-            who->client->silencer_shots--;
-            return;
-        }
-    }
-
     if (deathmatch->value)
         return;
 
@@ -194,34 +187,9 @@ NoAmmoWeaponChange
 */
 void NoAmmoWeaponChange(entity_t *ent)
 {
-    if (ent->client->pers.inventory[ITEM_INDEX(FindItem("slugs"))]
-        &&  ent->client->pers.inventory[ITEM_INDEX(FindItem("railgun"))]) {
-        ent->client->newweapon = FindItem("railgun");
-        return;
-    }
-    if (ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))]
-        &&  ent->client->pers.inventory[ITEM_INDEX(FindItem("hyperblaster"))]) {
-        ent->client->newweapon = FindItem("hyperblaster");
-        return;
-    }
-    if (ent->client->pers.inventory[ITEM_INDEX(FindItem("bullets"))]
-        &&  ent->client->pers.inventory[ITEM_INDEX(FindItem("chaingun"))]) {
-        ent->client->newweapon = FindItem("chaingun");
-        return;
-    }
     if (ent->client->pers.inventory[ITEM_INDEX(FindItem("bullets"))]
         &&  ent->client->pers.inventory[ITEM_INDEX(FindItem("machinegun"))]) {
         ent->client->newweapon = FindItem("machinegun");
-        return;
-    }
-    if (ent->client->pers.inventory[ITEM_INDEX(FindItem("shells"))] > 1
-        &&  ent->client->pers.inventory[ITEM_INDEX(FindItem("super shotgun"))]) {
-        ent->client->newweapon = FindItem("super shotgun");
-        return;
-    }
-    if (ent->client->pers.inventory[ITEM_INDEX(FindItem("shells"))]
-        &&  ent->client->pers.inventory[ITEM_INDEX(FindItem("shotgun"))]) {
-        ent->client->newweapon = FindItem("shotgun");
         return;
     }
     ent->client->newweapon = FindItem("blaster");
@@ -244,11 +212,6 @@ void Think_Weapon(entity_t *ent)
 
     // call active weapon Think routine
     if (ent->client->pers.weapon && ent->client->pers.weapon->WeaponThink) {
-        is_quad = (ent->client->quad_framenum > level.framenum);
-        if (ent->client->silencer_shots)
-            is_silenced = MZ_SILENCED;
-        else
-            is_silenced = 0;
         ent->client->pers.weapon->WeaponThink(ent);
     }
 }
@@ -430,9 +393,6 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
     if (ent->client->weaponstate == WEAPON_FIRING) {
         for (n = 0; fire_frames[n]; n++) {
             if (ent->client->playerState.gunframe == fire_frames[n]) {
-                if (ent->client->quad_framenum > level.framenum)
-                    gi.Sound(ent, CHAN_ITEM, gi.SoundIndex("items/damage3.wav"), 1, ATTN_NORM, 0);
-
                 fire(ent);
                 break;
             }
