@@ -87,16 +87,6 @@ void monster_fire_railgun(entity_t *self, const vec3_t &start, const vec3_t &aim
     gi.Multicast(&start, MULTICAST_PVS);
 }
 
-void monster_fire_bfg(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int kick, float damage_radius, int flashtype)
-{
-    fire_bfg(self, start, aimdir, damage, speed, damage_radius);
-
-    gi.WriteByte(svg_muzzleflash2);
-    gi.WriteShort(self - g_edicts);
-    gi.WriteByte(flashtype);
-    gi.Multicast(&start, MULTICAST_PVS);
-}
-
 
 
 //

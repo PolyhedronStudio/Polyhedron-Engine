@@ -130,7 +130,7 @@ SET(SRC_SVGAME
 	svgame/player/view.cpp
 	svgame/player/weapons.cpp
 
-	svgame/weapons/bfg10k.cpp
+	
 	svgame/weapons/blaster.cpp
 	svgame/weapons/chaingun.cpp
 	svgame/weapons/flaregun.cpp
@@ -163,7 +163,7 @@ SET(HEADERS_SVGAME
 	svgame/player/player.h
 	svgame/player/weapons.h
 
-	svgame/weapons/bfg10k.h
+	
 	svgame/weapons/blaster.h
 	svgame/weapons/chaingun.h
 	svgame/weapons/flaregun.h

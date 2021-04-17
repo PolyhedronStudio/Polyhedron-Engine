@@ -1677,43 +1677,6 @@ void CLG_BfgParticles(r_entity_t* ent)
 
 /*
 ===============
-CLG_BFGExplosionParticles
-===============
-*/
-//FIXME combined with CLG_ExplosionParticles
-void CLG_BFGExplosionParticles(vec3_t org)
-{
-    int         i, j;
-    cparticle_t* p;
-
-    const int count = 256 * cl_particle_num_factor->value;
-
-    for (i = 0; i < count; i++) {
-        p = CLG_AllocParticle();
-        if (!p)
-            return;
-
-        p->time = cl->time;
-
-        p->color = 0xd0 + (rand() & 7);
-        p->brightness = cvar_pt_particle_emissive->value;
-
-        for (j = 0; j < 3; j++) {
-            p->org[j] = org[j] + ((rand() % 32) - 16);
-            p->vel[j] = (rand() % 384) - 192;
-        }
-
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
-        p->alpha = 1.0;
-
-        p->alphavel = -0.8 / (0.5 + frand() * 0.3);
-    }
-}
-
-
-/*
-===============
 CLG_TeleportParticles
 
 ===============

@@ -40,172 +40,34 @@ extern mmove_t soldier_move_walk1;
 extern mmove_t soldier_move_walk2;
 
 extern void door_blocked(entity_t* self, entity_t* other);
-//extern void door_secret_blocked(void);
 extern void plat_blocked(entity_t* self, entity_t* other);
 extern void rotating_blocked(entity_t* self, entity_t* other);
 extern void train_blocked(entity_t* self, entity_t* other);
 extern void turret_blocked(entity_t* self, entity_t* other);
-//extern void actor_die(void);
 extern void barrel_delay(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
-//extern void berserk_die(void);
 extern void body_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
-//extern void boss2_die(void);
-//extern void brain_die(void);
 extern void button_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
-//extern void chick_die(void);
 extern void debris_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void door_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
-//extern void door_secret_die(void);
-extern void flipper_die(void);
-extern void floater_die(void);
-extern void flyer_die(void);
 extern void func_explosive_explode(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void gib_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void misc_deadsoldier_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
-// extern void player_die(void); v 
 extern void soldier_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
 extern void turret_driver_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
-//extern void actor_attack(void);
-//extern void boss2_attack(void);
-//extern void chick_attack(void);
-//extern void floater_attack(void);
-//extern void flyer_attack(void);
-//extern void gladiator_attack(void);
-//extern void gunner_attack(void);
-//extern void hover_start_attack(void);
-//extern void infantry_attack(void);
-//extern void jorg_attack(void);
-//extern void makron_attack(void);
-//extern void medic_attack(void);
-//extern void mutant_jump(void);
-//extern void parasite_attack(void);
-extern void soldier_attack(entity_t *self);
-//extern void supertank_attack(void);
-//extern void tank_attack(void);
-extern void Boss2_CheckAttack(void);
-extern void Jorg_CheckAttack(void);
-extern void Makron_CheckAttack(void);
-// extern void M_CheckAttack(void); // CPP: Remove cuz of overloaded func error.
-extern void medic_checkattack(void);
-extern void mutant_checkattack(void);
-extern void soldier_dodge(entity_t* self, entity_t* attacker, float eta);
-//extern void brain_idle(void);
-//extern void floater_idle(void);
-//extern void flyer_idle(void);
-//extern void gladiator_idle(void);
-//extern void infantry_fidget(void);
-//extern void medic_idle(void);
-//extern void mutant_idle(void);
-//extern void parasite_idle(void);
-//extern void tank_idle(void);
-//extern void berserk_melee(void);
-//extern void brain_melee(void);
-//extern void chick_melee(void);
-//extern void flipper_melee(void);
-//extern void floater_melee(void);
-//extern void flyer_melee(void);
-//extern void gladiator_melee(void);
-//extern void mutant_melee(void);
-//extern void actor_run(void);
-//extern void berserk_run(void);
-//extern void boss2_run(void);
-//extern void brain_run(void);
-//extern void chick_run(void);
-//extern void flipper_start_run(void);
-//extern void floater_run(void);
-//extern void flyer_run(void);
-//extern void gladiator_run(void);
-//extern void gunner_run(void);
-//extern void hover_run(void);
-//extern void infantry_run(void);
-//extern void insane_run(void);
-//extern void jorg_run(void);
-//extern void makron_run(void);
-//extern void medic_run(void);
-//extern void mutant_run(void);
-//extern void parasite_start_run(void);
-extern void soldier_run(entity_t *self);
-//extern void supertank_run(void);
-//extern void tank_run(void);
-//extern void berserk_search(void);
-//extern void boss2_search(void);
-//extern void brain_search(void);
-//extern void gladiator_search(void);
-//extern void gunner_search(void);
-//extern void hover_search(void);
-//extern void jorg_search(void);
-//extern void medic_search(void);
-//extern void mutant_search(void);
-//extern void supertank_search(void);
-//extern void berserk_sight(void);
-//extern void brain_sight(void);
-//extern void chick_sight(void);
-//extern void flipper_sight(void);
-//extern void floater_sight(void);
-//extern void flyer_sight(void);
-//extern void gladiator_sight(void);
-//extern void gunner_sight(void);
-//extern void hover_sight(void);
-//extern void infantry_sight(void);
-//extern void makron_sight(void);
-//extern void medic_sight(void);
-//extern void mutant_sight(void);
-//extern void parasite_sight(void);
-extern void soldier_sight(entity_t* self, entity_t* other);
-//extern void tank_sight(void);
-//extern void actor_stand(void);
-//extern void berserk_stand(void);
-//extern void boss2_stand(void);
-//extern void brain_stand(void);
-//extern void chick_stand(void);
-//extern void flipper_stand(void);
-//extern void floater_stand(void);
-//extern void flyer_stand(void);
-//extern void gladiator_stand(void);
-//extern void gunner_stand(void);
-//extern void hover_stand(void);
-//extern void infantry_stand(void);
-//extern void insane_stand(void);
-//extern void jorg_stand(void);
-//extern void makron_stand(void);
-//extern void medic_stand(void);
-//extern void mutant_stand(void);
-//extern void parasite_stand(void);
-extern void soldier_stand(entity_t *self);
-//extern void supertank_stand(void);
-//extern void tank_stand(void);
-//extern void actor_walk(void);
-//extern void berserk_walk(void);
-//extern void boss2_walk(void);
-//extern void brain_walk(void);
-//extern void chick_walk(void);
-//extern void flipper_walk(void);
-//extern void floater_walk(void);
-//extern void flyer_walk(void);
-//extern void gladiator_walk(void);
-//extern void gunner_walk(void);
-//extern void hover_walk(void);
-//extern void infantry_walk(void);
-//extern void insane_walk(void);
-//extern void jorg_walk(void);
-//extern void makron_walk(void);
-//extern void medic_walk(void);
-//extern void mutant_walk(void);
-//extern void parasite_start_walk(void);
-extern void soldier_walk(entity_t *self);
-//extern void supertank_walk(void);
 
-//extern void player_pain(void); // CPP: Remove cuz of overloaded func error.
+extern void soldier_attack(entity_t *self);
+extern void soldier_dodge(entity_t* self, entity_t* attacker, float eta);
+extern void soldier_run(entity_t *self);
+extern void soldier_sight(entity_t* self, entity_t* other);
+extern void soldier_stand(entity_t *self);
+extern void soldier_walk(entity_t *self);
 extern void soldier_pain(entity_t* self, entity_t* other, float kick, int damage);
-//extern void supertank_pain(void);
-//extern void tank_pain(void);
+
 extern void misc_viper_bomb_prethink(entity_t *self);
 extern void Brush_AngleMove_Begin(entity_t* self);
 extern void Brush_AngleMove_Done(entity_t* self);
 extern void Brush_AngleMove_Final(entity_t* self);
 extern void barrel_explode(entity_t* self);
-extern void bfg_explode(entity_t* self);
-extern void bfg_think(entity_t* self);
 
 extern void button_return(entity_t* self);
 
@@ -215,20 +77,19 @@ extern void DoRespawn(entity_t* self);
 extern void drop_make_touchable(entity_t* self);
 extern void droptofloor(entity_t* self);
 extern void flymonster_start_go(entity_t* self);
-//extern void func_clock_think(void);// CPP: Remove cuz of overloaded func error.
+
 extern void func_object_release(entity_t* self);
 extern void func_timer_think(entity_t* self);
 extern void func_train_find(entity_t* self);
-//extern void G_FreeEntity(void); // CPP: Remove cuz of overloaded func error.
+
 extern void gib_think(entity_t* self);
 extern void Grenade_Explode(entity_t* self);
 
-// extern void M_droptofloor(void); // CPP: Remove cuz of overloaded func error.
 extern void MegaHealth_think(entity_t* self);
 extern void M_FliesOff(entity_t* self);
 extern void M_FliesOn(entity_t* self);
 extern void misc_blackhole_think(entity_t* self);
-//extern void monster_think(void); // CPP: Remove cuz of overloaded func error.
+
 extern void monster_triggered_spawn(entity_t* self);
 extern void Brush_Move_Begin(entity_t* self);
 extern void Brush_Move_Done(entity_t* self);
@@ -258,7 +119,6 @@ extern void turret_driver_link(entity_t* self);
 extern void turret_driver_think(entity_t* self);
 extern void walkmonster_start_go(entity_t* self);
 extern void barrel_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
-extern void bfg_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void blaster_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void button_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void door_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
@@ -409,8 +269,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, Brush_AngleMove_Done },
 { P_think, Brush_AngleMove_Final },
 { P_think, barrel_explode },
-{ P_think, bfg_explode },
-{ P_think, bfg_think },
 
 { P_think, button_return },
 
@@ -465,7 +323,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, flare_think }, // Q2RTX
 { P_touch, flare_touch }, // Q2RTX
 { P_touch, barrel_touch },
-{ P_touch, bfg_touch },
 { P_touch, blaster_touch },
 { P_touch, button_touch },
 { P_touch, door_touch },

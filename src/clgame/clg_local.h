@@ -200,7 +200,6 @@ void CLG_SetLightStyle(int index, const char* s);
 
 void CLG_MuzzleFlash(void);
 void CLG_MuzzleFlash2(void);
-void CLG_BFGExplosionParticles(vec3_t org);
 void CLG_BfgParticles(r_entity_t* ent);
 void CLG_BigTeleportParticles(vec3_t org);
 void CLG_BlasterTrail(vec3_t start, vec3_t end);

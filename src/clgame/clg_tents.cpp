@@ -50,7 +50,6 @@ qhandle_t   cl_mod_flash;
 qhandle_t   cl_mod_parasite_segment;
 qhandle_t   cl_mod_grapple_cable;
 qhandle_t   cl_mod_explo4;
-qhandle_t   cl_mod_bfg_explo;
 qhandle_t   cl_mod_powerscreen;
 qhandle_t   cl_mod_laser;
 qhandle_t   cl_mod_dmspot;
@@ -1208,26 +1207,6 @@ void CLG_ParseTempEntity(void)
 		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_BFG_EXPLOSION:
-		ex = CLG_AllocExplosion();
-		VectorCopy(teParameters.pos1, ex->ent.origin);
-		ex->type = explosion_t::ex_poly;
-		ex->ent.flags = RF_FULLBRIGHT;
-		ex->start = cl->servertime - CL_FRAMETIME;
-		ex->light = 350;
-		ex->lightcolor[0] = 0.0;
-		ex->lightcolor[1] = 1.0;
-		ex->lightcolor[2] = 0.0;
-		ex->ent.model = cl_mod_bfg_explo;
-		ex->ent.flags |= RF_TRANSLUCENT;
-		ex->ent.alpha = 0.80;
-		ex->frames = 4;
-		break;
-
-	case TE_BFG_BIGEXPLOSION:
-		CLG_BFGExplosionParticles(teParameters.pos1);
-		break;
-
 	case TE_BFG_LASER:
 		CLG_ParseLaser(0xd0d1d2d3);
 		break;
@@ -1438,7 +1417,6 @@ void CLG_RegisterTempEntityModels(void)
 	cl_mod_explosions[1] = clgi.R_RegisterModel("sprites/rocket_1.sp2");
 	cl_mod_explosions[2] = clgi.R_RegisterModel("sprites/rocket_5.sp2");
 	cl_mod_explosions[3] = clgi.R_RegisterModel("sprites/rocket_6.sp2");
-	cl_mod_bfg_explo = clgi.R_RegisterModel("sprites/s_bfg2.sp2");
 	cl_mod_powerscreen = clgi.R_RegisterModel("models/items/armor/effect/tris.md2");
 	cl_mod_laser = clgi.R_RegisterModel("models/objects/laser/tris.md2");
 	cl_mod_dmspot = clgi.R_RegisterModel("models/objects/dmspot/tris.md2");
@@ -1471,10 +1449,6 @@ void CLG_RegisterTempEntityModels(void)
 		model->sprite_vertical = true;
 
 	model = clgi.MOD_ForHandle(cl_mod_explo4);
-	if (model)
-		model->sprite_vertical = true;
-
-	model = clgi.MOD_ForHandle(cl_mod_bfg_explo);
 	if (model)
 		model->sprite_vertical = true;
 

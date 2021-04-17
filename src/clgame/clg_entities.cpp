@@ -451,22 +451,6 @@ void CLG_AddPacketEntities(void)
             else if (effects & EF_FLIES) {
                 CLG_FlyEffect(cent, ent.origin);
             }
-            else if (effects & EF_BFG) {
-                if (effects & EF_ANIM_ALLFAST) {
-                    CLG_BfgParticles(&ent);
-#if USE_DLIGHTS
-                    i = 100;
-                }
-                else {
-                    static const int bfg_lightramp[6] = { 300, 400, 600, 300, 150, 75 };
-
-                    i = s1->frame; clamp(i, 0, 5);
-                    i = bfg_lightramp[i];
-#endif
-                }
-                const vec3_t nvgreen = { 0.2716f, 0.5795f, 0.04615f };
-                V_AddLightEx(ent.origin, i, nvgreen[0], nvgreen[1], nvgreen[2], 20.f);
-            }
             else if (effects & EF_TRAP) {
                 ent.origin[2] += 32;
                 CLG_TrapParticles(&ent);

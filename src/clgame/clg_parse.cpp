@@ -113,8 +113,6 @@ static void CLG_ParseTempEntitiesPacket(void)
     case TE_EXPLOSION1:
     case TE_EXPLOSION1_NP:
     case TE_EXPLOSION1_BIG:
-    case TE_BFG_EXPLOSION:
-    case TE_BFG_BIGEXPLOSION:
     case TE_BOSSTPORT:
     case TE_PLAIN_EXPLOSION:
     case TE_CHAINFIST_SMOKE:

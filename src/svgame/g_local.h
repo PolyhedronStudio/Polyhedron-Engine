@@ -647,7 +647,6 @@ void monster_fire_blaster(entity_t *self, const vec3_t& start, const vec3_t& aim
 void monster_fire_grenade(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int flashtype);
 void monster_fire_rocket(entity_t *self, const vec3_t& start, const vec3_t &dir, int damage, int speed, int flashtype);
 void monster_fire_railgun(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int flashtype);
-void monster_fire_bfg(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int kick, float damage_radius, int flashtype);
 void M_droptofloor(entity_t *ent);
 void monster_think(entity_t *self);
 void walkmonster_start(entity_t *self);
@@ -690,8 +689,6 @@ void fire_grenade(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int
 void fire_grenade2(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
 void fire_rocket(entity_t *self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius, int radius_damage);
 void fire_rail(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick);
-void fire_bfg(entity_t *self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius);
-
 //
 // g_ptrail.c
 //
