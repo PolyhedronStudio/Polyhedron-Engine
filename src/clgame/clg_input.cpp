@@ -5,14 +5,14 @@
 // clg_input.c
 //
 //
-// Handles the game specific related input areas.
+// Handles the client specific Player Move(PM) input processing.
 //
 #include "clg_local.h"
 #include "clg_input.h"
 
 static cvar_t* m_filter;
-cvar_t* m_accel;
-cvar_t* m_autosens;
+static cvar_t* m_accel;
+static cvar_t* m_autosens;
 
 static cvar_t* cl_upspeed;
 static cvar_t* cl_forwardspeed;
@@ -27,11 +27,11 @@ static cvar_t* cl_instantpacket;
 static cvar_t* freelook;
 static cvar_t* lookspring;
 static cvar_t* lookstrafe;
-cvar_t* sensitivity;
+static cvar_t* sensitivity;
 
-cvar_t* m_pitch;
-cvar_t* m_invert;
-cvar_t* m_yaw;
+static cvar_t* m_pitch;
+static cvar_t* m_invert;
+static cvar_t* m_yaw;
 static cvar_t* m_forward;
 static cvar_t* m_side;
 
@@ -41,43 +41,48 @@ typedef struct {
 } in_state_t;
 static in_state_t inputState;
 
-/*
-===============================================================================
-
-KEY BUTTONS
-
-Continuous button event tracking is complicated by the fact that two different
-input sources (say, mouse button 1 and the control key) can both press the
-same button, but the button should only be released when both of the
-pressing key have been released.
-
-When a key event issues a button command (+forward, +attack, etc), it appends
-its key number as a parameter to the command so it can be matched up with
-the release.
-
-state bit 0 is the current state of the key
-state bit 1 is edge triggered on the up to down transition
-state bit 2 is edge triggered on the down to up transition
-
-
-Key_Event (int key, qboolean down, unsigned time);
-
-  +mlook src time
-
-===============================================================================
-*/
-
-
-static KeyBinding    in_klook;
+//
+//=============================================================================
+//
+// KEY INPUT SAMPLING
+//
+// Continuous button event tracking is complicated by the fact that two different
+// input sources (say, mouse button 1 and the control key) can both press the
+// same button, but the button should only be released when both of the
+// pressing key have been released.
+// 
+// When a key event issues a button command (+forward, +attack, etc), it appends
+// its key number as a parameter to the command so it can be matched up with
+// the release.
+// 
+// state bit 0 is the current state of the key
+// state bit 1 is edge triggered on the up to down transition
+// state bit 2 is edge triggered on the down to up transition
+// 
+// 
+// Key_Event (int key, qboolean down, unsigned time);
+// 
+// +mlook src time
+// 
+//==============================================================================
+// 
+static KeyBinding in_klook;
 static KeyBinding in_left, in_right, in_forward, in_back;
 static KeyBinding in_lookup, in_lookdown, in_moveleft, in_moveright;
 static KeyBinding in_strafe, in_speed, in_use, in_attack;
 static KeyBinding in_up, in_down;
 
-static int          in_impulse;
-static qboolean     in_mlooking;
+static int        in_impulse;
+static qboolean   in_mlooking;
 
-void KeyDown(KeyBinding* b)
+//
+//===============
+// CLG_KeyDown
+// 
+// Processes the 'down' state of the key binding.
+//================
+//
+static void CLG_KeyDown(KeyBinding* b)
 {
     int k;
     unsigned com_eventTime = clgi.Com_GetEventTime();
@@ -114,7 +119,14 @@ void KeyDown(KeyBinding* b)
     b->state |= BUTTON_STATE_HELD + BUTTON_STATE_DOWN;    // down + impulse down
 }
 
-void KeyUp(KeyBinding* b)
+//
+//===============
+// CLG_KeyUp
+// 
+// Processes the 'up' state of the key binding.
+//================
+//
+static void CLG_KeyUp(KeyBinding* b)
 {
     int k;
     const char* c; // C++20: STRING: Added const to char*
@@ -155,7 +167,14 @@ void KeyUp(KeyBinding* b)
     b->state &= ~BUTTON_STATE_HELD;        // now up
 }
 
-static void KeyClear(KeyBinding* b)
+//
+//===============
+// CLG_KeyClear
+// 
+// Clears the key binding state.
+//================
+//
+static void CLG_KeyClear(KeyBinding* b)
 {
     unsigned com_eventTime = clgi.Com_GetEventTime();
     b->msec = 0;
@@ -165,92 +184,14 @@ static void KeyClear(KeyBinding* b)
     }
 }
 
-static void IN_KLookDown(void) { KeyDown(&in_klook); }
-static void IN_KLookUp(void) { KeyUp(&in_klook); }
-static void IN_UpDown(void) { KeyDown(&in_up); }
-static void IN_UpUp(void) { KeyUp(&in_up); }
-static void IN_DownDown(void) { KeyDown(&in_down); }
-static void IN_DownUp(void) { KeyUp(&in_down); }
-static void IN_LeftDown(void) { KeyDown(&in_left); }
-static void IN_LeftUp(void) { KeyUp(&in_left); }
-static void IN_RightDown(void) { KeyDown(&in_right); }
-static void IN_RightUp(void) { KeyUp(&in_right); }
-static void IN_ForwardDown(void) { KeyDown(&in_forward); }
-static void IN_ForwardUp(void) { KeyUp(&in_forward); }
-static void IN_BackDown(void) { KeyDown(&in_back); }
-static void IN_BackUp(void) { KeyUp(&in_back); }
-static void IN_LookupDown(void) { KeyDown(&in_lookup); }
-static void IN_LookupUp(void) { KeyUp(&in_lookup); }
-static void IN_LookdownDown(void) { KeyDown(&in_lookdown); }
-static void IN_LookdownUp(void) { KeyUp(&in_lookdown); }
-static void IN_MoveleftDown(void) { KeyDown(&in_moveleft); }
-static void IN_MoveleftUp(void) { KeyUp(&in_moveleft); }
-static void IN_MoverightDown(void) { KeyDown(&in_moveright); }
-static void IN_MoverightUp(void) { KeyUp(&in_moveright); }
-static void IN_SpeedDown(void) { KeyDown(&in_speed); }
-static void IN_SpeedUp(void) { KeyUp(&in_speed); }
-static void IN_StrafeDown(void) { KeyDown(&in_strafe); }
-static void IN_StrafeUp(void) { KeyUp(&in_strafe); }
-
-static void IN_AttackDown(void)
-{
-    KeyDown(&in_attack);
-
-    if (cl_instantpacket->integer && clgi.GetClienState() == ca_active) {// && cls->netchan) {
-        cl->sendPacketNow = true;
-    }
-}
-
-static void IN_AttackUp(void)
-{
-    KeyUp(&in_attack);
-}
-
-static void IN_UseDown(void)
-{
-    KeyDown(&in_use);
-
-    if (cl_instantpacket->integer && clgi.GetClienState() == ca_active) {// && cls.netchan) {
-        cl->sendPacketNow = true;
-    }
-}
-
-static void IN_UseUp(void)
-{
-    KeyUp(&in_use);
-}
-
-static void IN_Impulse(void)
-{
-    in_impulse = atoi(clgi.Cmd_Argv(1));
-}
-
-static void IN_CenterView(void)
-{
-    cl->viewAngles.x = -SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[0]);
-}
-
-static void IN_MLookDown(void)
-{
-    in_mlooking = true;
-}
-
-static void IN_MLookUp(void)
-{
-    in_mlooking = false;
-
-    if (!freelook->integer && lookspring->integer)
-        IN_CenterView();
-}
-
-/*
-===============
-CL_KeyState
-
-Returns the fraction of the frame that the key was down
-===============
-*/
-static float CL_KeyState(KeyBinding* key)
+//
+//===============
+// CLG_KeyState
+// 
+// Returns the fraction of the frame that the key was down
+//================
+//
+static float CLG_KeyState(KeyBinding* key)
 {
     unsigned com_eventTime = clgi.Com_GetEventTime();
     unsigned msec = key->msec;
@@ -274,13 +215,99 @@ static float CL_KeyState(KeyBinding* key)
 }
 
 
+//
+//=============================================================================
+//
+//	KEY INPUT SAMPLER FUNCTIONS.
+//
+//=============================================================================
+//
+static void IN_KLookDown(void) { CLG_KeyDown(&in_klook); }
+static void IN_KLookUp(void) { CLG_KeyUp(&in_klook); }
+static void IN_UpDown(void) { CLG_KeyDown(&in_up); }
+static void IN_UpUp(void) { CLG_KeyUp(&in_up); }
+static void IN_DownDown(void) { CLG_KeyDown(&in_down); }
+static void IN_DownUp(void) { CLG_KeyUp(&in_down); }
+static void IN_LeftDown(void) { CLG_KeyDown(&in_left); }
+static void IN_LeftUp(void) { CLG_KeyUp(&in_left); }
+static void IN_RightDown(void) { CLG_KeyDown(&in_right); }
+static void IN_RightUp(void) { CLG_KeyUp(&in_right); }
+static void IN_ForwardDown(void) { CLG_KeyDown(&in_forward); }
+static void IN_ForwardUp(void) { CLG_KeyUp(&in_forward); }
+static void IN_BackDown(void) { CLG_KeyDown(&in_back); }
+static void IN_BackUp(void) { CLG_KeyUp(&in_back); }
+static void IN_LookupDown(void) { CLG_KeyDown(&in_lookup); }
+static void IN_LookupUp(void) { CLG_KeyUp(&in_lookup); }
+static void IN_LookdownDown(void) { CLG_KeyDown(&in_lookdown); }
+static void IN_LookdownUp(void) { CLG_KeyUp(&in_lookdown); }
+static void IN_MoveleftDown(void) { CLG_KeyDown(&in_moveleft); }
+static void IN_MoveleftUp(void) { CLG_KeyUp(&in_moveleft); }
+static void IN_MoverightDown(void) { CLG_KeyDown(&in_moveright); }
+static void IN_MoverightUp(void) { CLG_KeyUp(&in_moveright); }
+static void IN_SpeedDown(void) { CLG_KeyDown(&in_speed); }
+static void IN_SpeedUp(void) { CLG_KeyUp(&in_speed); }
+static void IN_StrafeDown(void) { CLG_KeyDown(&in_strafe); }
+static void IN_StrafeUp(void) { CLG_KeyUp(&in_strafe); }
+static void IN_AttackDown(void)
+{
+    CLG_KeyDown(&in_attack);
 
-//==========================================================================
-/*
-================
-CL_MouseMove
-================
-*/
+    if (cl_instantpacket->integer && clgi.GetClienState() == ca_active) {// && cls->netchan) {
+        cl->sendPacketNow = true;
+    }
+}
+static void IN_AttackUp(void)
+{
+    CLG_KeyUp(&in_attack);
+}
+static void IN_UseDown(void)
+{
+    CLG_KeyDown(&in_use);
+
+    if (cl_instantpacket->integer && clgi.GetClienState() == ca_active) {// && cls.netchan) {
+        cl->sendPacketNow = true;
+    }
+}
+static void IN_UseUp(void)
+{
+    CLG_KeyUp(&in_use);
+}
+static void IN_Impulse(void)
+{
+    in_impulse = atoi(clgi.Cmd_Argv(1));
+}
+static void IN_CenterView(void)
+{
+    cl->viewAngles.x = -SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[0]);
+}
+static void IN_MLookDown(void)
+{
+    in_mlooking = true;
+}
+static void IN_MLookUp(void)
+{
+    in_mlooking = false;
+
+    if (!freelook->integer && lookspring->integer)
+        IN_CenterView();
+}
+
+
+
+//
+//=============================================================================
+//
+//	SAMPLED INPUT PROCESSING
+//
+//=============================================================================
+//
+//
+//===============
+// CLG_MouseMove
+// 
+// Handles the mouse move based input adjustment.
+//================
+//
 static void CLG_MouseMove() {
     int deltaX, deltaY;
     float motionX, motionY;
@@ -322,7 +349,7 @@ static void CLG_MouseMove() {
         motionY *= cl->fov_y * cl->autosens_y;
     }
 
-    // add mouse X/Y movement
+    // Add mouse X/Y movement
     if ((in_strafe.state & 1) || (lookstrafe->integer && !in_mlooking)) {
         cl->mousemove[1] += m_side->value * motionX;
     }
@@ -338,15 +365,14 @@ static void CLG_MouseMove() {
     }
 }
 
-
-/*
-================
-CL_AdjustAngles
-
-Moves the local angle positions
-================
-*/
-static void CL_AdjustAngles(int msec)
+//
+//===============
+// CLG_AdjustAngles
+// 
+// Moves the local angle positions
+//================
+//
+static void CLG_AdjustAngles(int msec)
 {
     float speed;
 
@@ -356,43 +382,43 @@ static void CL_AdjustAngles(int msec)
         speed = msec * 0.001f;
 
     if (!(in_strafe.state & 1)) {
-        cl->viewAngles[vec3_t::Yaw] -= speed * cl_yawspeed->value * CL_KeyState(&in_right);
-        cl->viewAngles[vec3_t::Yaw] += speed * cl_yawspeed->value * CL_KeyState(&in_left);
+        cl->viewAngles[vec3_t::Yaw] -= speed * cl_yawspeed->value * CLG_KeyState(&in_right);
+        cl->viewAngles[vec3_t::Yaw] += speed * cl_yawspeed->value * CLG_KeyState(&in_left);
     }
     if (in_klook.state & 1) {
-        cl->viewAngles[vec3_t::Pitch] -= speed * cl_pitchspeed->value * CL_KeyState(&in_forward);
-        cl->viewAngles[vec3_t::Pitch] += speed * cl_pitchspeed->value * CL_KeyState(&in_back);
+        cl->viewAngles[vec3_t::Pitch] -= speed * cl_pitchspeed->value * CLG_KeyState(&in_forward);
+        cl->viewAngles[vec3_t::Pitch] += speed * cl_pitchspeed->value * CLG_KeyState(&in_back);
     }
 
-    cl->viewAngles[vec3_t::Pitch] -= speed * cl_pitchspeed->value * CL_KeyState(&in_lookup);
-    cl->viewAngles[vec3_t::Pitch] += speed * cl_pitchspeed->value * CL_KeyState(&in_lookdown);
+    cl->viewAngles[vec3_t::Pitch] -= speed * cl_pitchspeed->value * CLG_KeyState(&in_lookup);
+    cl->viewAngles[vec3_t::Pitch] += speed * cl_pitchspeed->value * CLG_KeyState(&in_lookdown);
 }
 
-/*
-================
-CL_BaseMove
-
-Build and return the intended movement vector
-================
-*/
-static vec3_t CL_BaseMove(const vec3_t& inMove)
+//
+//===============
+// CLG_BaseMove
+// 
+// Build and return the intended movement vector
+//================
+//
+static vec3_t CLG_BaseMove(const vec3_t& inMove)
 {
     vec3_t outMove = inMove;
 
     if (in_strafe.state & 1) {
-        outMove[1] += cl_sidespeed->value * CL_KeyState(&in_right);
-        outMove[1] -= cl_sidespeed->value * CL_KeyState(&in_left);
+        outMove[1] += cl_sidespeed->value * CLG_KeyState(&in_right);
+        outMove[1] -= cl_sidespeed->value * CLG_KeyState(&in_left);
     }
 
-    outMove[1] += cl_sidespeed->value * CL_KeyState(&in_moveright);
-    outMove[1] -= cl_sidespeed->value * CL_KeyState(&in_moveleft);
+    outMove[1] += cl_sidespeed->value * CLG_KeyState(&in_moveright);
+    outMove[1] -= cl_sidespeed->value * CLG_KeyState(&in_moveleft);
 
-    outMove[2] += cl_upspeed->value * CL_KeyState(&in_up);
-    outMove[2] -= cl_upspeed->value * CL_KeyState(&in_down);
+    outMove[2] += cl_upspeed->value * CLG_KeyState(&in_up);
+    outMove[2] -= cl_upspeed->value * CLG_KeyState(&in_down);
 
     if (!(in_klook.state & 1)) {
-        outMove[0] += cl_forwardspeed->value * CL_KeyState(&in_forward);
-        outMove[0] -= cl_forwardspeed->value * CL_KeyState(&in_back);
+        outMove[0] += cl_forwardspeed->value * CLG_KeyState(&in_forward);
+        outMove[0] -= cl_forwardspeed->value * CLG_KeyState(&in_back);
     }
 
     // Adjust for speed key / running
@@ -408,14 +434,14 @@ static vec3_t CL_BaseMove(const vec3_t& inMove)
     return outMove;
 }
 
-/*
-================
-CL_ClampSpeed
-
-Returns the clamped movement speeds.
-================
-*/
-static vec3_t CL_ClampSpeed(const vec3_t& inMove)
+//
+//===============
+// CLG_ClampSpeed
+// 
+// Returns the clamped movement speeds.
+//================
+//
+static vec3_t CLG_ClampSpeed(const vec3_t& inMove)
 {
     vec3_t outMove = inMove;
 
@@ -428,7 +454,14 @@ static vec3_t CL_ClampSpeed(const vec3_t& inMove)
     return outMove;
 }
 
-static void CL_ClampPitch(void)
+//
+//===============
+// CLG_ClampPitch
+// 
+// Ensures the Pitch is clamped to prevent camera issues.
+//================
+//
+static void CLG_ClampPitch(void)
 {
     float pitch;
 
@@ -447,54 +480,12 @@ static void CL_ClampPitch(void)
         cl->viewAngles[vec3_t::Pitch] = -89 - pitch;
 }
 
-/*
-=================
-CLG_BuildFrameMoveCommand
-
-Updates msec, angles and builds interpolated movement vector for local prediction.
-Doesn't touch command forward/side/upmove, these are filled by CLG_BuildMovementCommand.
-=================
-*/
-void CLG_BuildFrameMoveCommand(int msec)
-{
-    cl->localmove = vec3_zero();
-
-    if (sv_paused->integer) {
-        return;
-    }
-
-    // Add to milliseconds of time to apply the move
-    cl->cmd.msec += msec;
-
-    // Adjust viewAngles
-    CL_AdjustAngles(msec);
-
-    // Get basic movement from keyboard
-    cl->localmove = CL_BaseMove(cl->localmove);
-
-    // Allow mice to add to the move
-    CLG_MouseMove();
-
-    // Add accumulated mouse forward/side movement
-    cl->localmove[0] += cl->mousemove[0];
-    cl->localmove[1] += cl->mousemove[1];
-
-    // Clamp to server defined max speed
-    cl->localmove = CL_ClampSpeed(cl->localmove);
-
-    CL_ClampPitch();
-
-    cl->cmd.angles[0] = ANGLE2SHORT(cl->viewAngles[0]);
-    cl->cmd.angles[1] = ANGLE2SHORT(cl->viewAngles[1]);
-    cl->cmd.angles[2] = ANGLE2SHORT(cl->viewAngles[2]);
-}
-
 //
 //===============
 // CLG_RegisterInput
 // 
-// Registered input messages and binds them to a callback function.
-// Bindings are set in the config files, or the options menu.
+// Register input messages and binds them to a callback function.
+// Bindings are set in the config files, and/or the options menu.
 // 
 // For more information, it still works like in q2pro.
 //===============
@@ -565,14 +556,65 @@ void CLG_RegisterInput(void)
     m_accel = clgi.Cvar_Get("m_accel", "", 0);
 }
 
-/*
-=================
-CLG_FinalizeFrameMoveCommand
 
-Builds the actual movement vector for sending to server. Assumes that msec
-and angles are already set for this frame by CL_UpdateCmd.
-=================
-*/
+//
+//=============================================================================
+//
+//	INPUT MODULE ENTRY FUNCTIONS.
+//
+//=============================================================================
+//
+//
+//===============
+// CLG_BuildFrameMoveCommand
+// 
+// Updates msec, anglesand builds interpolated movement vector for local 
+// prediction. Doesn't touch command forward/side/upmove, these are filled
+// by CLG_BuildMovementCommand.
+//================
+//
+void CLG_BuildFrameMoveCommand(int msec)
+{
+    cl->localmove = vec3_zero();
+
+    if (sv_paused->integer) {
+        return;
+    }
+
+    // Add to milliseconds of time to apply the move
+    cl->cmd.msec += msec;
+
+    // Adjust viewAngles
+    CLG_AdjustAngles(msec);
+
+    // Get basic movement from keyboard
+    cl->localmove = CLG_BaseMove(cl->localmove);
+
+    // Allow mice to add to the move
+    CLG_MouseMove();
+
+    // Add accumulated mouse forward/side movement
+    cl->localmove[0] += cl->mousemove[0];
+    cl->localmove[1] += cl->mousemove[1];
+
+    // Clamp to server defined max speed
+    cl->localmove = CLG_ClampSpeed(cl->localmove);
+
+    CLG_ClampPitch();
+
+    cl->cmd.angles[0] = ANGLE2SHORT(cl->viewAngles[0]);
+    cl->cmd.angles[1] = ANGLE2SHORT(cl->viewAngles[1]);
+    cl->cmd.angles[2] = ANGLE2SHORT(cl->viewAngles[2]);
+}
+
+//
+//===============
+// CLG_FinalizeFrameMoveCommand
+// 
+// Builds the actual movement vector for sending to server.Assumes that msec
+// and angles are already set for this frame by CL_UpdateCmd.
+//================
+//
 void CLG_FinalizeFrameMoveCommand(void)
 {
     if (clgi.GetClienState() != ca_active) {
@@ -592,6 +634,12 @@ void CLG_FinalizeFrameMoveCommand(void)
     if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
         cl->cmd.buttons |= BUTTON_USE;
 
+    // Undo the button_state_down for the next frame, it needs a repress for
+    // that to be re-enabled.
+    in_attack.state &= ~BUTTON_STATE_DOWN;
+    in_use.state &= ~BUTTON_STATE_DOWN;
+
+    // Whether to run or not, depends on whether auto-run is on or off.
     if (cl_run->value) {
         if (in_speed.state & BUTTON_STATE_HELD) {
             cl->cmd.buttons |= BUTTON_WALK;
@@ -603,10 +651,8 @@ void CLG_FinalizeFrameMoveCommand(void)
         }
     }
 
-    in_attack.state &= ~2;
-    in_use.state &= ~2;
-
-    if (clgi.Key_GetDest() == KEY_GAME && clgi.Key_AnyKeyDown()) {
+    // Always send in case any button was down at all in-game.
+    if (clgi.Key_GetDest() == KEY_GAME && clgi.Key_AnyCLG_KeyDown()) {
         cl->cmd.buttons |= BUTTON_ANY;
     }
 
@@ -614,50 +660,50 @@ void CLG_FinalizeFrameMoveCommand(void)
         cl->cmd.msec = 100;        // time was unreasonable
     }
 
-    // rebuild the movement vector
+    // Rebuild the movement vector
     vec3_t move = vec3_zero();
 
-    // get basic movement from keyboard
-    move = CL_BaseMove(move);
+    // Get basic movement from keyboard
+    move = CLG_BaseMove(move);
 
-    // add mouse forward/side movement
+    // Add mouse forward/side movement
     move[0] += cl->mousemove[0];
     move[1] += cl->mousemove[1];
 
-    // clamp to server defined max speed
-    move = CL_ClampSpeed(move);
+    // Clamp to server defined max speed
+    move = CLG_ClampSpeed(move);
 
-    // store the movement vector
+    // Store the movement vector
     cl->cmd.forwardmove = move[0];
     cl->cmd.sidemove = move[1];
     cl->cmd.upmove = move[2];
 
-    // clear all states
+    // Clear all states
     cl->mousemove[0] = 0;
     cl->mousemove[1] = 0;
-
-    KeyClear(&in_right);
-    KeyClear(&in_left);
-
-    KeyClear(&in_moveright);
-    KeyClear(&in_moveleft);
-
-    KeyClear(&in_up);
-    KeyClear(&in_down);
-
-    KeyClear(&in_forward);
-    KeyClear(&in_back);
-
-    KeyClear(&in_lookup);
-    KeyClear(&in_lookdown);
-
+    
     cl->cmd.impulse = in_impulse;
     in_impulse = 0;
 
-    // save this command off for prediction
+    CLG_KeyClear(&in_right);
+    CLG_KeyClear(&in_left);
+
+    CLG_KeyClear(&in_moveright);
+    CLG_KeyClear(&in_moveleft);
+
+    CLG_KeyClear(&in_up);
+    CLG_KeyClear(&in_down);
+
+    CLG_KeyClear(&in_forward);
+    CLG_KeyClear(&in_back);
+
+    CLG_KeyClear(&in_lookup);
+    CLG_KeyClear(&in_lookdown);
+
+    // Save this command off for prediction
     cl->cmdNumber++;
     cl->cmds[cl->cmdNumber & CMD_MASK] = cl->cmd;
 
-    // clear pending cmd
+    // Clear pending cmd
     memset(&cl->cmd, 0, sizeof(cl->cmd));
 }

@@ -312,8 +312,9 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
         step = pm.state.origin[2] - oldz;
 
         if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
-            cl->predicted_step = step;
+
             CLG_TraverseEntityStep(&stepx, clgi.GetRealTime(), step);
+            cl->predicted_step = step;
             cl->predicted_step_frame = frame + 1;    // don't double step
             stepx.time = clgi.GetRealTime();
         }

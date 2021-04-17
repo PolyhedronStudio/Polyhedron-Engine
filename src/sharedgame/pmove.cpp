@@ -370,10 +370,13 @@ static void PM_StepDown(const trace_t * trace) {
 //===============
 //
 const trace_t PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins, const vec3_t & maxs, const vec3_t & end) {
-    // Disabled, no need, seems to work fine at this moment without it.
-    // Not getting stuck into rotating objects, etc.
+    // Disabled, for this we have no need. It seems to work fine at this moment without it.
+    // Not getting stuck into rotating objects or what have we....
     //
-    // The other alternative might otherwise be to do a -0.25f like M_CheckGround did...
+    // If we do end up running into trouble, we may first want to look at the old
+    // M_CheckGround function instead. (Seems related to a -0.25f).
+    // 
+    // And otherwise, we got this solution below, which... is seemingly slow in certain cases...
     return pm->Trace(start, mins, maxs, end);
 #if 0
     const vec3_t offsets = { 0.f, 1.f, -1.f };
@@ -583,7 +586,6 @@ static void PM_StepSlideMove(void)
     vec3_t start_o = pm->state.origin;
     vec3_t start_v = pm->state.velocity;
 
-    //PM_StepSlideMove_();
     // Attempt to move; if nothing blocks us, we're done
     if (PM_StepSlideMove_()) {
 
@@ -750,21 +752,18 @@ static void PM_CheckDuck(void) {
     if (pm->state.type >= PM_DEAD) {
         if (pm->state.type == PM_GIB) {
             pm->state.view_offset.z = 0.0f;
-        }
-        else {
+        } else {
             pm->state.view_offset.z = -16.0f;
         }
         // Other states go here :)
-    }
-    else {
+    } else {
 
         const qboolean is_ducking = pm->state.flags & PMF_DUCKED;
         const qboolean wants_ducking = (pm->cmd.upmove < 0) && !(playerMoveLocals.ladder);
 
         if (!is_ducking && wants_ducking) {
             pm->state.flags |= PMF_DUCKED;
-        }
-        else if (is_ducking && !wants_ducking) {
+        } else if (is_ducking && !wants_ducking) {
             const trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pm->state.origin);
 
             if (!trace.allSolid && !trace.startSolid) {
@@ -1506,22 +1505,22 @@ static void PM_WalkMove(void) {
         speed = 0.0;
     }
 
-    // accelerate based on slickness of ground surface
+    // Accelerate based on slickness of ground surface
     const float accel = (playerMoveLocals.ground.surface->flags & SURF_SLICK) ? PM_ACCEL_GROUND_SLICK : PM_ACCEL_GROUND;
 
     PM_Accelerate(dir, speed, accel);
 
-    // determine the speed after acceleration
+    // Determine the speed after acceleration
     speed = vec3_length(pm->state.velocity);
 
     // Clip to the ground
     pm->state.velocity = PM_ClipVelocity(pm->state.velocity, playerMoveLocals.ground.plane.normal, PM_CLIP_BOUNCE);
 
-    // and now scale by the speed to avoid slowing down on slopes
+    // And now scale by the speed to avoid slowing down on slopes
     pm->state.velocity = vec3_normalize(pm->state.velocity);
     pm->state.velocity = vec3_scale(pm->state.velocity, speed);
 
-    // and finally, step if moving in X/Y
+    // And finally, step if moving in X/Y
     if (pm->state.velocity.x || pm->state.velocity.y) {
         PM_StepSlideMove();
     }
@@ -1539,12 +1538,12 @@ static void PM_SpectatorMove(void) {
 
     PM_Friction();
 
-    // user intentions on X/Y/Z
+    // User intentions on X/Y/Z
     vec3_t vel = vec3_zero();
     vel = vec3_fmaf(vel, pm->cmd.forwardmove, playerMoveLocals.forward);
     vel = vec3_fmaf(vel, pm->cmd.sidemove, playerMoveLocals.right);
 
-    // add explicit Z
+    // Add explicit Z
     vel.z += pm->cmd.upmove;
 
     float speed;
@@ -1555,14 +1554,11 @@ static void PM_SpectatorMove(void) {
         speed = 0.0;
     }
 
-    // accelerate
+    // Accelerate
     PM_Accelerate(vel, speed, PM_ACCEL_SPECTATOR);
 
-    // do the move
-    //if (pm->state.velocity.x || pm->state.velocity.y) {
-        PM_StepSlideMove();
-    //}
-    //pm->state.origin = vec3_fmaf(pm->state.origin, playerMoveLocals.frameTime, pm->state.velocity);
+    // Do the move
+    PM_StepSlideMove();
 }
 
 //
@@ -1647,15 +1643,13 @@ static void PM_Init(pm_move_t * pmove) {
 //===============
 //
 static void PM_ClampAngles(void) {
-    // TODO: Store viewAngles in state, for prediction usages.
-    // pm->state.viewAngles = pm->cmd.angles; // 
-    // copy the command angles into the outgoing state
+    // Copy the command angles into the outgoing state
     for (int i = 0; i < 3; i++) {
         float temp = pm->cmd.angles[i] + pm->state.delta_angles[i];
         pm->viewAngles[i] = SHORT2ANGLE(temp);
     }
 
-    // clamp pitch to prevent the player from looking up or down more than 90º
+    // Clamp pitch to prevent the player from looking up or down more than 90º
     if (pm->viewAngles.x > 90.0f && pm->viewAngles.x < 270.0f) {
         pm->viewAngles.x = 90.0f;
     }
@@ -1673,7 +1667,7 @@ static void PM_ClampAngles(void) {
 //===============
 //
 static void PM_InitLocal() {
-    // clear all PM local vars
+    // Clear all PM local vars
     playerMoveLocals = {};
 
     // Increase frame time based on seconds.
@@ -1783,7 +1777,7 @@ void PMove(pm_move_t * pmove, pmoveParams_t * params)
 //
 void PMoveInit(pmoveParams_t * pmp)
 {
-    // set up default pmove parameters
+    // Set up default pmove parameters
     memset(pmp, 0, sizeof(*pmp));
 
     pmp->qwmode = true;
