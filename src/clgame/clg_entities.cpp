@@ -733,6 +733,56 @@ void CLG_AddEntities(void)
 }
 
 //
+//===============
+// CLG_GetClientViewEntity
+// 
+// Returns the entity that is bound to the client's view.
+//===============
+//
+cl_entity_t* CLG_GetClientViewEntity(void) {
+
+    int32_t index = cl->clientNum;
+
+    if (cl->frame.playerState.stats[STAT_CHASE]) {
+        index = cl->frame.playerState.stats[STAT_CHASE] - CS_CLIENTS;
+    }
+
+    return &cs->entities[index + 1];
+}
+
+//
+//===============
+// CLG_IsClientViewEntity
+// 
+// Returns true if the specified entity is bound to the local client's view.
+//===============
+//
+qboolean CLG_IsClientViewEntity(const cl_entity_t* ent) {
+
+    if (ent->current.number == cl->clientNum + 1) {
+        return true;
+    }
+
+    if ((ent->current.effects & EF_CORPSE) == 0) {
+
+        if (ent->current.modelindex == 255) {
+
+            if (ent->current.number == cl->clientNum) {
+                return true;
+            }
+
+            const int16_t chase = cl->frame.playerState.stats[STAT_CHASE] - CS_CLIENTS;
+
+            if (ent->current.number == chase) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+//
 //=============================================================================
 //
 // CLIENT MODULE ENTITY ENTRY FUNCTIONS.

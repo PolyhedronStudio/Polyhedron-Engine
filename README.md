@@ -9,7 +9,7 @@ You can skip these if you aren't me, an ADHD minded person :P
 - [ ] Check out header files some more, organize some more.
 - [ ] Do not forget RTX Q2 1.5, how could you? :)
 - [ ] Investigate BSP Tools to one day have less triangles (They used to generate more because of software rendering mode in Q2??)
-- [ ] Clean up the clg_input.cpp after all pmove stuff is verified to work._
+- [X] Clean up the clg_input.cpp after all pmove stuff is verified to work._
 - [X] Move user input to CLGame and get the pmove to reply to SHIFT for run/walk. It does, but has prediction errors.
 - [X] Move BUTTON_KEY defines.
 - [X] Remove software renderer.

@@ -68,6 +68,8 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
     self->moveType = MOVETYPE_TOSS;
 
     self->s.modelindex2 = 0;    // remove linked weapon model
+    
+    self->s.effects = EF_CORPSE;
 
     self->s.angles[0] = 0;
     self->s.angles[2] = 0;
