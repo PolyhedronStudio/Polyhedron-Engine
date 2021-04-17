@@ -512,9 +512,7 @@ void soldier_fire(entity_t *self, int flash_number)
     }
 
     if (self->s.skinnum <= 1) {
-        monster_fire_blaster(self, start, aim, 5, 600, flash_index, EF_BLASTER);
-    } else if (self->s.skinnum <= 3) {
-        monster_fire_shotgun(self, start, aim, 2, 1, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SHOTGUN_COUNT, flash_index);
+        //monster_fire_blaster(self, start, aim, 5, 600, flash_index, EF_BLASTER);
     } else {
         if (!(self->monsterInfo.aiflags & AI_HOLD_FRAME))
             self->monsterInfo.pausetime = level.time + (3 + rand() % 8) * FRAMETIME;

@@ -87,7 +87,6 @@ void turret_breach_fire(entity_t *self)
 
     damage = 100 + random() * 50;
     speed = 550 + 50 * skill->value;
-    fire_rocket(self->teamMasterPtr->owner, start, f, damage, speed, 150, damage);
     gi.PositionedSound(start, self, CHAN_WEAPON, gi.SoundIndex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 }
 

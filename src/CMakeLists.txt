@@ -132,16 +132,16 @@ SET(SRC_SVGAME
 
 	
 	svgame/weapons/blaster.cpp
-	svgame/weapons/chaingun.cpp
+	
 	svgame/weapons/flaregun.cpp
-	svgame/weapons/grenade.cpp
-	svgame/weapons/grenadelauncher.cpp
-	svgame/weapons/hyperblaster.cpp
+	
+	
+	
 	svgame/weapons/machinegun.cpp
-	svgame/weapons/railgun.cpp
-	svgame/weapons/rocketlauncher.cpp
-	svgame/weapons/shotgun.cpp
-	svgame/weapons/supershotgun.cpp
+	
+	
+	
+	
 )
 
 SET(HEADERS_SVGAME
@@ -165,16 +165,16 @@ SET(HEADERS_SVGAME
 
 	
 	svgame/weapons/blaster.h
-	svgame/weapons/chaingun.h
+	
 	svgame/weapons/flaregun.h
-	svgame/weapons/grenade.h
-	svgame/weapons/grenadelauncher.h
-	svgame/weapons/hyperblaster.h
+	
+	
+	
 	svgame/weapons/machinegun.h
-	svgame/weapons/railgun.h
-	svgame/weapons/rocketlauncher.h
-	svgame/weapons/shotgun.h
-	svgame/weapons/supershotgun.h
+	
+	
+	
+	
 )
 
 ###################### Client.

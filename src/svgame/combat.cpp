@@ -184,13 +184,7 @@ static int CheckPowerArmor(entity_t *ent, vec3_t point, vec3_t normal, int damag
 
     index = 0;  // shut up gcc
 
-    if (client) {
-        power_armor_type = PowerArmorType(ent);
-        if (power_armor_type != POWER_ARMOR_NONE) {
-            index = ITEM_INDEX(FindItem("Cells"));
-            power = client->pers.inventory[index];
-        }
-    } else if (ent->svFlags & SVF_MONSTER) {
+    if (ent->svFlags & SVF_MONSTER) {
         power_armor_type = ent->monsterInfo.power_armor_type;
         power = ent->monsterInfo.power_armor_power;
     } else

@@ -210,42 +210,12 @@ void Cmd_Give_f(entity_t *ent)
             return;
     }
 
-    if (give_all || Q_stricmp(name, "armor") == 0) {
-        gitem_armor_t   *info;
-
-        it = FindItem("Jacket Armor");
-        ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-        it = FindItem("Combat Armor");
-        ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-        it = FindItem("Body Armor");
-        info = (gitem_armor_t *)it->info;
-        ent->client->pers.inventory[ITEM_INDEX(it)] = info->max_count;
-
-        if (!give_all)
-            return;
-    }
-
-    if (give_all || Q_stricmp(name, "Power Shield") == 0) {
-        it = FindItem("Power Shield");
-        it_ent = G_Spawn();
-        it_ent->classname = it->classname;
-        SpawnItem(it_ent, it);
-        Touch_Item(it_ent, ent, NULL, NULL);
-        if (it_ent->inUse)
-            G_FreeEntity(it_ent);
-
-        if (!give_all)
-            return;
-    }
-
     if (give_all) {
         for (i = 0 ; i < game.num_items ; i++) {
             it = itemlist + i;
             if (!it->Pickup)
                 continue;
-            if (it->flags & (IT_ARMOR | IT_WEAPON | IT_AMMO))
+            if (it->flags & (IT_WEAPON | IT_AMMO))
                 continue;
             ent->client->pers.inventory[i] = 1;
         }

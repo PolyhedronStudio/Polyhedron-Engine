@@ -219,17 +219,8 @@ typedef struct {
 
 // gitem_t->weaponModel for weapons indicates model index
 #define WEAP_BLASTER            1
-#define WEAP_SHOTGUN            2
-#define WEAP_SUPERSHOTGUN       3
-#define WEAP_MACHINEGUN         4
-#define WEAP_CHAINGUN           5
-#define WEAP_GRENADES           6
-#define WEAP_GRENADELAUNCHER    7
-#define WEAP_ROCKETLAUNCHER     8
-#define WEAP_HYPERBLASTER       9
-#define WEAP_RAILGUN            10
-#define WEAP_BFG                11
-#define WEAP_FLAREGUN           12
+#define WEAP_MACHINEGUN         2
+#define WEAP_FLAREGUN           3
 
 // C++20: STRING: Added const to the chars.
 typedef struct gitem_s {
@@ -609,7 +600,6 @@ void ChangeWeapon(entity_t *ent);
 void SpawnItem(entity_t *ent, gitem_t *item);
 void Think_Weapon(entity_t *ent);
 int ArmorIndex(entity_t *ent);
-int PowerArmorType(entity_t *ent);
 gitem_t *GetItemByIndex(int index);
 qboolean Add_Ammo(entity_t *ent, gitem_t *item, int count);
 void Touch_Item(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t *surf);
@@ -632,21 +622,13 @@ void T_RadiusDamage(entity_t *inflictor, entity_t *attacker, float damage, entit
 
 #define DEFAULT_BULLET_HSPREAD  300
 #define DEFAULT_BULLET_VSPREAD  500
-#define DEFAULT_SHOTGUN_HSPREAD 1000
-#define DEFAULT_SHOTGUN_VSPREAD 500
-#define DEFAULT_DEATHMATCH_SHOTGUN_COUNT    12
-#define DEFAULT_SHOTGUN_COUNT   12
-#define DEFAULT_SSHOTGUN_COUNT  20
+
 
 //
 // g_monster.c
 //
 void monster_fire_bullet(entity_t *self, const vec3_t &start, const vec3_t &dir, int damage, int kick, int hspread, int vspread, int flashtype);
-void monster_fire_shotgun(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int flashtype);
 void monster_fire_blaster(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int flashtype, int effect);
-void monster_fire_grenade(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int flashtype);
-void monster_fire_rocket(entity_t *self, const vec3_t& start, const vec3_t &dir, int damage, int speed, int flashtype);
-void monster_fire_railgun(entity_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int flashtype);
 void M_droptofloor(entity_t *ent);
 void monster_think(entity_t *self);
 void walkmonster_start(entity_t *self);
@@ -683,12 +665,8 @@ qboolean FacingIdeal(entity_t *self);
 void ThrowDebris(entity_t *self, const char *modelname, float speed, const vec3_t& origin);
 qboolean fire_hit(entity_t *self, vec3_t &aim, int damage, int kick);
 void fire_bullet(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod);
-void fire_shotgun(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
 void fire_blaster(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int effect, qboolean hyper);
-void fire_grenade(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, float timer, float damage_radius);
-void fire_grenade2(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
-void fire_rocket(entity_t *self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius, int radius_damage);
-void fire_rail(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick);
+
 //
 // g_ptrail.c
 //

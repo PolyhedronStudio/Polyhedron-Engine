@@ -430,32 +430,8 @@ void HUD_SetClientStats(entity_t* ent)
     //
     // armor
     //
-    power_armor_type = PowerArmorType(ent);
-    if (power_armor_type) {
-        cells = ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))];
-        if (cells == 0) {
-            // ran out of cells for power armor
-            ent->flags &= ~FL_POWER_ARMOR;
-            gi.Sound(ent, CHAN_ITEM, gi.SoundIndex("misc/power2.wav"), 1, ATTN_NORM, 0);
-            power_armor_type = 0;;
-        }
-    }
-
-    index = ArmorIndex(ent);
-    if (power_armor_type && (!index || (level.framenum & 8))) {
-        // flash between power armor and other armor icon
-        ent->client->playerState.stats[STAT_ARMOR_ICON] = gi.ImageIndex("i_powershield");
-        ent->client->playerState.stats[STAT_ARMOR] = cells;
-    }
-    else if (index) {
-        item = GetItemByIndex(index);
-        ent->client->playerState.stats[STAT_ARMOR_ICON] = gi.ImageIndex(item->icon);
-        ent->client->playerState.stats[STAT_ARMOR] = ent->client->pers.inventory[index];
-    }
-    else {
-        ent->client->playerState.stats[STAT_ARMOR_ICON] = 0;
-        ent->client->playerState.stats[STAT_ARMOR] = 0;
-    }
+    ent->client->playerState.stats[STAT_ARMOR_ICON] = 0;
+    ent->client->playerState.stats[STAT_ARMOR] = 0;
 
     //
     // pickup message

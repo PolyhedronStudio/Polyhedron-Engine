@@ -83,7 +83,6 @@ extern void func_timer_think(entity_t* self);
 extern void func_train_find(entity_t* self);
 
 extern void gib_think(entity_t* self);
-extern void Grenade_Explode(entity_t* self);
 
 extern void MegaHealth_think(entity_t* self);
 extern void M_FliesOff(entity_t* self);
@@ -125,13 +124,11 @@ extern void door_touch(entity_t* self, entity_t* other, cplane_t* plane, csurfac
 extern void drop_temp_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void func_object_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void gib_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
-extern void Grenade_Touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void hurt_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void misc_viper_bomb_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 
 extern void path_corner_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void point_combat_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
-extern void rocket_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void rotating_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 
 extern void teleporter_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
@@ -284,7 +281,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, func_train_find },
 { P_think, G_FreeEntity },
 { P_think, gib_think },
-{ P_think, Grenade_Explode },
 
 { P_think, M_droptofloor },
 { P_think, MegaHealth_think },
@@ -329,13 +325,11 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, drop_temp_touch },
 { P_touch, func_object_touch },
 { P_touch, gib_touch },
-{ P_touch, Grenade_Touch },
 { P_touch, hurt_touch },
 { P_touch, misc_viper_bomb_touch },
 
 { P_touch, path_corner_touch },
 { P_touch, point_combat_touch },
-{ P_touch, rocket_touch },
 { P_touch, rotating_touch },
 
 
