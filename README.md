@@ -1,4 +1,4 @@
-# Nail & Crescent - Engine 0.2 Branch
+# Nail & Crescent - Development Branch
 
 ## Scratchpad - Things to do or not forget:
 You can skip these if you aren't me, an ADHD minded person :P
