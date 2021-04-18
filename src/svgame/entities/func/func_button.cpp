@@ -33,8 +33,8 @@ When a button is touched, it moves some distance in the direction of it's angle,
 void button_done(entity_t* self)
 {
     self->moveInfo.state = STATE_BOTTOM;
-    self->s.effects &= ~EntityEffects::AnimCycleFrames23hz2;
-    self->s.effects |= EntityEffects::AnimCycleFrames01hz2;
+    self->s.effects &= ~EntityEffectType::AnimCycleFrames23hz2;
+    self->s.effects |= EntityEffectType::AnimCycleFrames01hz2;
 }
 
 void button_return(entity_t* self)

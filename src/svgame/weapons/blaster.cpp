@@ -64,7 +64,7 @@ void Weapon_Blaster_Fire(entity_t* ent)
         damage = 15;
     else
         damage = 10;
-    Blaster_Fire(ent, vec3_origin, damage, false, EntityEffects::Blaster);
+    Blaster_Fire(ent, vec3_origin, damage, false, EntityEffectType::Blaster);
     ent->client->playerState.gunframe++;
 }
 

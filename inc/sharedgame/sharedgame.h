@@ -68,7 +68,7 @@ typedef enum {
 
     // Maximum last effect slot, feel free to rename it and use it.
     Max = (1 << 31),
-} EntityEffects;
+} EntityEffectType;
 
 // player_state_t->refdef flags
 #define RDF_UNDERWATER      1       // warp the screen as apropriate
@@ -82,31 +82,16 @@ typedef enum {
 //-----------------
 // muzzle flashes / player effects
 //-----------------
+typedef enum {
+    
+} MuzzleFlashType;
 #define MZ_BLASTER          0
 #define MZ_MACHINEGUN       1
-#define MZ_SHOTGUN          2
-#define MZ_CHAINGUN1        3
-#define MZ_CHAINGUN2        4
-#define MZ_CHAINGUN3        5
-#define MZ_RAILGUN          6
-#define MZ_ROCKET           7
-#define MZ_GRENADE          8
+#define MZ_GRENADE          2
 #define MZ_LOGIN            9
 #define MZ_LOGOUT           10
 #define MZ_RESPAWN          11
-#define MZ_BFG              12
-#define MZ_SSHOTGUN         13
-#define MZ_HYPERBLASTER     14
 #define MZ_ITEMRESPAWN      15
-// RAFAEL
-#define MZ_IONRIPPER        16
-#define MZ_BLUEHYPERBLASTER 17
-#define MZ_PHALANX          18
-#define MZ_SILENCED         128     // bit flag ORed with one of the above numbers
-
-//ROGUE
-#define MZ_ETF_RIFLE        30
-//ROGUE
 // Q2RTX
 #define MZ_FLARE            40
 // Q2RTX

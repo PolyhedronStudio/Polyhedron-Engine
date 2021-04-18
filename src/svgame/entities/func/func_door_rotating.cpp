@@ -124,7 +124,7 @@ void SP_func_door_rotating(entity_t* ent)
     VectorCopy(ent->pos2, ent->moveInfo.end_angles);
 
     if (ent->spawnFlags & 16)
-        ent->s.effects |= EntityEffects::AnimCycleAll2hz;
+        ent->s.effects |= EntityEffectType::AnimCycleAll2hz;
 
     // to simplify logic elsewhere, make non-teamed doors into a team of one
     if (!ent->team)

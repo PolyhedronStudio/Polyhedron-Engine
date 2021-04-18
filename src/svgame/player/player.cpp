@@ -69,7 +69,7 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
 
     self->s.modelindex2 = 0;    // remove linked weapon model
     
-    self->s.effects = EntityEffects::Corpse;
+    self->s.effects = EntityEffectType::Corpse;
 
     self->s.angles[0] = 0;
     self->s.angles[2] = 0;

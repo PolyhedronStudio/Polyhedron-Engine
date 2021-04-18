@@ -897,12 +897,12 @@ struct entity_s {
     int         flags;
 
     const char  *model;       // C++20: STRING: Added const to char*
-    float       freeTime;           // sv.time when the object was freed
+    float       freeTime;     // sv.time when the object was freed
 
     //
     // only used locally in game, not by server
     //
-    const char        *message; // C++20: STRING: Added const to char *
+    const char        *message;     // C++20: STRING: Added const to char *
     const char        *classname;   // C++20: STRING: Made const.
     int         spawnFlags;
 

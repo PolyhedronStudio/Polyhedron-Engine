@@ -95,7 +95,6 @@ extern void Think_AccelMove(entity_t* self);
 extern void Think_CalcMoveSpeed(entity_t* self);
 extern void Think_Delay(entity_t* self);
 extern void Think_SpawnDoorTrigger(entity_t* self);
-extern void TH_viewthing(entity_t* self);
 extern void train_next(entity_t* self);
 extern void trigger_elevator_init(entity_t* self);
 extern void walkmonster_start_go(entity_t* self);
@@ -260,7 +259,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, Think_CalcMoveSpeed },
 { P_think, Think_Delay },
 { P_think, Think_SpawnDoorTrigger },
-{ P_think, TH_viewthing },
 { P_think, train_next },
 { P_think, trigger_elevator_init },
 { P_think, walkmonster_start_go },
