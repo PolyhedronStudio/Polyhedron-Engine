@@ -822,38 +822,6 @@ static void CLG_ParseSteam(void)
 	s->nextThink = cl->time;
 }
 
-static void CLG_ParseWidow(void)
-{
-	cl_sustain_t* s;
-
-	s = CLG_AllocSustain();
-	if (!s)
-		return;
-
-	s->id = teParameters.entity1;
-	VectorCopy(teParameters.pos1, s->org);
-	s->endtime = cl->time + 2100;
-	s->Think = CLG_Widowbeamout;
-	s->thinkinterval = 1;
-	s->nextThink = cl->time;
-}
-
-static void CLG_ParseNuke(void)
-{
-	cl_sustain_t* s;
-
-	s = CLG_AllocSustain();
-	if (!s)
-		return;
-
-	s->id = 21000;
-	VectorCopy(teParameters.pos1, s->org);
-	s->endtime = cl->time + 1000;
-	s->Think = CLG_Nukeblast;
-	s->thinkinterval = 1;
-	s->nextThink = cl->time;
-}
-
 //
 //=============================================================================
 //
@@ -1061,17 +1029,7 @@ void CLG_ParseTempEntity(void)
 		}
 		break;
 
-	case TE_LASER_SPARKS:
-		CLG_ParticleEffect2(teParameters.pos1, teParameters.dir, teParameters.color, teParameters.count);
-		break;
-
-	case TE_BLUEHYPERBLASTER:
-		CLG_BlasterParticles(teParameters.pos1, teParameters.dir);
-		break;
-
 	case TE_BLASTER:            // blaster hitting wall
-	case TE_BLASTER2:           // green blaster hitting wall
-	case TE_FLECHETTE:          // flechette
 	case TE_FLARE:              // flare
 		ex = CLG_AllocExplosion();
 		VectorCopy(teParameters.pos1, ex->ent.origin);
@@ -1080,30 +1038,17 @@ void CLG_ParseTempEntity(void)
 		ex->ent.flags = RenderEffects::FullBright | RenderEffects::Translucent;
 		ex->ent.tent_type = teParameters.type;
 		switch (teParameters.type) {
-		case TE_BLASTER:
-			CLG_BlasterParticles(teParameters.pos1, teParameters.dir);
-			ex->lightcolor[0] = 1;
-			ex->lightcolor[1] = 1;
-			break;
-		case TE_BLASTER2:
-			CLG_BlasterParticles2(teParameters.pos1, teParameters.dir, 0xd0);
-			ex->ent.skinnum = 1;
-			ex->lightcolor[1] = 1;
-			break;
-		case TE_FLECHETTE:
-			ex->type = explosion_t::ex_blaster;
-			CLG_BlasterParticles2(teParameters.pos1, teParameters.dir, 0x6f);  // 75
-			ex->ent.skinnum = 2;
-			ex->lightcolor[0] = 0.19;
-			ex->lightcolor[1] = 0.41;
-			ex->lightcolor[2] = 0.75;
-			break;
-		case TE_FLARE:
-			CLG_BlasterParticles2(teParameters.pos1, teParameters.dir, 0xd0);
-			ex->lightcolor[0] = 1;
-			ex->lightcolor[1] = 1;
-			ex->type = explosion_t::ex_flare;
-			break;
+			case TE_BLASTER:
+				CLG_BlasterParticles(teParameters.pos1, teParameters.dir);
+				ex->lightcolor[0] = 1;
+				ex->lightcolor[1] = 1;
+				break;
+			case TE_FLARE:
+				CLG_BlasterParticles2(teParameters.pos1, teParameters.dir, 0xd0);
+				ex->lightcolor[0] = 1;
+				ex->lightcolor[1] = 1;
+				ex->type = explosion_t::ex_flare;
+				break;
 		}
 		ex->start = cl->servertime - CL_FRAMETIME;
 		ex->light = 150;
@@ -1133,12 +1078,6 @@ void CLG_ParseTempEntity(void)
 		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_PLASMA_EXPLOSION:
-		CLG_PlainExplosion(false);
-		CLG_ExplosionParticles(teParameters.pos1);
-		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
-		break;
-
 	case TE_EXPLOSION1:
 		CLG_PlainExplosion(false);
 		CLG_ExplosionParticles(teParameters.pos1);
@@ -1155,61 +1094,8 @@ void CLG_ParseTempEntity(void)
 		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_BFG_LASER:
-		CLG_ParseLaser(0xd0d1d2d3);
-		break;
-
 	case TE_BUBBLETRAIL:
 		CLG_BubbleTrail(teParameters.pos1, teParameters.pos2);
-		break;
-
-	case TE_PARASITE_ATTACK:
-	case TE_MEDIC_CABLE_ATTACK:
-		VectorClear(teParameters.offset);
-		teParameters.entity2 = 0;
-		CLG_ParseBeam(cl_mod_parasite_segment);
-		break;
-
-	case TE_BOSSTPORT:          // boss teleporting to station
-		CLG_BigTeleportParticles(teParameters.pos1);
-		clgi.S_StartSound(&teParameters.pos1, 0, 0, clgi.S_RegisterSound("misc/bigtele.wav"), 1, ATTN_NONE, 0);
-		break;
-
-	case TE_GRAPPLE_CABLE:
-		teParameters.entity2 = 0;
-		CLG_ParseBeam(cl_mod_grapple_cable);
-		break;
-
-	case TE_WELDING_SPARKS:
-		CLG_ParticleEffect2(teParameters.pos1, teParameters.dir, teParameters.color, teParameters.count);
-
-		ex = CLG_AllocExplosion();
-		VectorCopy(teParameters.pos1, ex->ent.origin);
-		ex->type = explosion_t::ex_flash;
-		// note to self
-		// we need a better no draw flag
-		ex->ent.flags = RenderEffects::Beam;
-		ex->start = cl->servertime - CL_FRAMETIME;
-		ex->light = 100 + (rand() % 75);
-		ex->lightcolor[0] = 1.0;
-		ex->lightcolor[1] = 1.0;
-		ex->lightcolor[2] = 0.3;
-		ex->ent.model = cl_mod_flash;
-		ex->frames = 2;
-		break;
-
-	case TE_GREENBLOOD:
-		CLG_ParticleEffect2(teParameters.pos1, teParameters.dir, 0xdf, 30);
-		break;
-
-	case TE_TUNNEL_SPARKS:
-		CLG_ParticleEffect3(teParameters.pos1, teParameters.dir, teParameters.color, teParameters.count);
-		break;
-
-	case TE_LIGHTNING:
-		clgi.S_StartSound(NULL, teParameters.entity1, CHAN_WEAPON, cl_sfx_lightning, 1, ATTN_NORM, 0);
-		VectorClear(teParameters.offset);
-		CLG_ParseBeam(cl_mod_lightning);
 		break;
 
 	case TE_DEBUGTRAIL:
@@ -1220,34 +1106,8 @@ void CLG_ParseTempEntity(void)
 		CLG_PlainExplosion(false);
 		break;
 
-	case TE_FLASHLIGHT:
-#if USE_DLIGHTS
-		CLG_Flashlight(teParameters.entity1, teParameters.pos1);
-#endif
-		break;
-
 	case TE_FORCEWALL:
 		CLG_ForceWall(teParameters.pos1, teParameters.pos2, teParameters.color);
-		break;
-
-	case TE_HEATBEAM:
-		VectorSet(teParameters.offset, 2, 7, -3);
-		CLG_ParsePlayerBeam(cl_mod_heatbeam);
-		break;
-
-	case TE_MONSTER_HEATBEAM:
-		VectorClear(teParameters.offset);
-		CLG_ParsePlayerBeam(cl_mod_heatbeam);
-		break;
-
-	case TE_HEATBEAM_SPARKS:
-		CLG_ParticleSteamEffect(teParameters.pos1, teParameters.dir, 0x8, 50, 60);
-		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
-		break;
-
-	case TE_HEATBEAM_STEAM:
-		CLG_ParticleSteamEffect(teParameters.pos1, teParameters.dir, 0xE0, 20, 60);
-		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_STEAM:
@@ -1263,40 +1123,14 @@ void CLG_ParseTempEntity(void)
 		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0xe8, 250);
 		break;
 
-	case TE_CHAINFIST_SMOKE:
-		VectorSet(teParameters.dir, 0, 0, 1);
-		CLG_ParticleSmokeEffect(teParameters.pos1, teParameters.dir, 0, 20, 20);
-		break;
-
 	case TE_ELECTRIC_SPARKS:
 		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0x75, 40);
 		//FIXME : replace or remove this sound
 		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_TRACKER_EXPLOSION:
-#if USE_DLIGHTS
-		CLG_ColorFlash(teParameters.pos1, 0, 150, -1, -1, -1);
-#endif
-		CLG_ColorExplosionParticles(teParameters.pos1, 0, 1);
-		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_disrexp, 1, ATTN_NORM, 0);
-		break;
-
 	case TE_TELEPORT_EFFECT:
-	case TE_DBALL_GOAL:
 		CLG_TeleportParticles(teParameters.pos1);
-		break;
-
-	case TE_WIDOWBEAMOUT:
-		CLG_ParseWidow();
-		break;
-
-	case TE_NUKEBLAST:
-		CLG_ParseNuke();
-		break;
-
-	case TE_WIDOWSPLASH:
-		CLG_WidowSplash();
 		break;
 
 	default:

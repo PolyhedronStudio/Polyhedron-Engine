@@ -71,81 +71,38 @@ static void CLG_ParseTempEntitiesPacket(void)
     teParameters.type = clgi.MSG_ReadByte();
 
     switch (teParameters.type) {
-    case TE_BLOOD:
+    case TE_BLASTER:
     case TE_GUNSHOT:
+    case TE_BLOOD:
+    case TE_MOREBLOOD:
     case TE_SPARKS:
     case TE_BULLET_SPARKS:
-    case TE_BLASTER:
-    case TE_GREENBLOOD:
-    case TE_BLASTER2:
-    case TE_FLECHETTE:
-    case TE_HEATBEAM_SPARKS:
-    case TE_HEATBEAM_STEAM:
-    case TE_MOREBLOOD:
     case TE_ELECTRIC_SPARKS:
         teParameters.pos1 = clgi.MSG_ReadPosition();
         teParameters.dir = clgi.MSG_ReadDirection();
         break;
 
     case TE_SPLASH:
-    case TE_LASER_SPARKS:
-    case TE_WELDING_SPARKS:
-    case TE_TUNNEL_SPARKS:
         teParameters.count = clgi.MSG_ReadByte();
         teParameters.pos1 = clgi.MSG_ReadPosition();
         teParameters.dir = clgi.MSG_ReadDirection();
         teParameters.color = clgi.MSG_ReadByte();
         break;
 
-    case TE_BUBBLETRAIL:
     case TE_DEBUGTRAIL:
+    case TE_BUBBLETRAIL:
     case TE_BUBBLETRAIL2:
         teParameters.pos1 = clgi.MSG_ReadPosition();
         teParameters.pos2 = clgi.MSG_ReadPosition();
         break;
 
     case TE_EXPLOSION2:
-    case TE_PLASMA_EXPLOSION:
     case TE_EXPLOSION1:
     case TE_EXPLOSION1_NP:
     case TE_EXPLOSION1_BIG:
-    case TE_BOSSTPORT:
     case TE_PLAIN_EXPLOSION:
-    case TE_CHAINFIST_SMOKE:
-    case TE_TRACKER_EXPLOSION:
     case TE_TELEPORT_EFFECT:
-    case TE_DBALL_GOAL:
-    case TE_WIDOWSPLASH:
-    case TE_NUKEBLAST:
         teParameters.pos1 = clgi.MSG_ReadPosition();
-        break;
-
-    case TE_PARASITE_ATTACK:
-    case TE_MEDIC_CABLE_ATTACK:
-    case TE_HEATBEAM:
-    case TE_MONSTER_HEATBEAM:
-        teParameters.entity1 = clgi.MSG_ReadShort();
-        teParameters.pos1 = clgi.MSG_ReadPosition();
-        teParameters.pos2 = clgi.MSG_ReadPosition();
-        break;
-
-    case TE_GRAPPLE_CABLE:
-        teParameters.entity1 = clgi.MSG_ReadShort();
-        teParameters.pos1 = clgi.MSG_ReadPosition();
-        teParameters.pos2 = clgi.MSG_ReadPosition();
-        teParameters.offset = clgi.MSG_ReadPosition();
-        break;
-
-    case TE_LIGHTNING:
-        teParameters.entity1 = clgi.MSG_ReadShort();
-        teParameters.entity2 = clgi.MSG_ReadShort();
-        teParameters.pos1 = clgi.MSG_ReadPosition();
-        teParameters.pos2 = clgi.MSG_ReadPosition();
-        break;
-
-    case TE_FLASHLIGHT:
-        teParameters.pos1 = clgi.MSG_ReadPosition();
-        teParameters.entity1 = clgi.MSG_ReadShort();
         break;
 
     case TE_FORCEWALL:
@@ -164,11 +121,6 @@ static void CLG_ParseTempEntitiesPacket(void)
         if (teParameters.entity1 != -1) {
             teParameters.time = clgi.MSG_ReadLong();
         }
-        break;
-
-    case TE_WIDOWBEAMOUT:
-        teParameters.entity1 = clgi.MSG_ReadShort();
-        teParameters.pos1 = clgi.MSG_ReadPosition();
         break;
 
     case TE_FLARE:

@@ -575,35 +575,6 @@ void CLG_Nukeblast(cl_sustain_t* self)
     }
 }
 
-void CLG_WidowSplash(void)
-{
-    static const byte   colortable[4] = { 2 * 8, 13 * 8, 21 * 8, 18 * 8 };
-    int         i;
-    cparticle_t* p;
-    vec3_t      dir;
-
-    for (i = 0; i < 256; i++) {
-        p = CLG_AllocParticle();
-        if (!p)
-            return;
-
-        p->time = cl->time;
-        p->color = colortable[rand() & 3];
-
-        dir[0] = crand();
-        dir[1] = crand();
-        dir[2] = crand();
-        VectorNormalize(dir);
-        VectorMA(teParameters.pos1, 45.0, dir, p->org);
-        VectorMA(vec3_origin, 40.0, dir, p->vel);
-
-        p->accel[0] = p->accel[1] = 0;
-        p->alpha = 1.0;
-
-        p->alphavel = -0.8 / (0.5 + frand() * 0.3);
-    }
-}
-
 void CLG_Tracker_Explode(vec3_t  origin)
 {
     vec3_t          dir, backdir;

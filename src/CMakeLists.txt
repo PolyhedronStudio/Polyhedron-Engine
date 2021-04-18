@@ -66,7 +66,7 @@ SET(SRC_SVGAME
 	svgame/entities/func/func_door.cpp 
 	svgame/entities/func/func_door_rotating.cpp
 	svgame/entities/func/func_explosive.cpp 
-	svgame/entities/func/func_group.cpp
+	
 	svgame/entities/func/func_killbox.cpp
 	svgame/entities/func/func_object.cpp
 	svgame/entities/func/func_plat.cpp

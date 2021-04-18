@@ -26,7 +26,6 @@ void CLG_Tracker_Shell(vec3_t origin);
 void CLG_MonsterPlasma_Shell(vec3_t origin);
 void CLG_Widowbeamout(cl_sustain_t* self);
 void CLG_Nukeblast(cl_sustain_t* self);
-void CLG_WidowSplash(void);
 void CLG_Tracker_Explode(vec3_t  origin);
 void CLG_TagTrail(vec3_t start, vec3_t end, int color);
 void CLG_ColorExplosionParticles(vec3_t org, int color, int run);
