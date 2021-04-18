@@ -148,9 +148,6 @@ extern void Use_Plat(entity_t* ent, entity_t* other, entity_t* activator);
 extern void use_target_blaster(entity_t* ent, entity_t* other, entity_t* activator);
 extern void use_target_changelevel(entity_t* ent, entity_t* other, entity_t* activator);
 extern void use_target_explosion(entity_t* ent, entity_t* other, entity_t* activator);
-extern void use_target_goal(entity_t* ent, entity_t* other, entity_t* activator);
-extern void Use_Target_Help(entity_t* ent, entity_t* other, entity_t* activator);
-extern void use_target_secret(entity_t* ent, entity_t* other, entity_t* activator);
 extern void use_target_spawner(entity_t* ent, entity_t* other, entity_t* activator);
 extern void Use_Target_Speaker(entity_t* ent, entity_t* other, entity_t* activator);
 extern void use_target_splash(entity_t* ent, entity_t* other, entity_t* activator);
@@ -329,9 +326,6 @@ const save_ptr_t save_ptrs[] = {
 { P_use, use_target_blaster },
 { P_use, use_target_changelevel },
 { P_use, use_target_explosion },
-{ P_use, use_target_goal },
-{ P_use, Use_Target_Help },
-{ P_use, use_target_secret },
 { P_use, use_target_spawner },
 { P_use, Use_Target_Speaker },
 { P_use, use_target_splash },

@@ -337,8 +337,8 @@ void HelpComputer(entity_t *ent)
                "xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" ",
                sk,
                level.level_name,
-               game.helpmessage1,
-               game.helpmessage2,
+               "game.helpmessage1",
+               "game.helpmessage2",
                level.killed_monsters, level.total_monsters,
                level.found_goals, level.total_goals,
                0, 0);
@@ -347,36 +347,6 @@ void HelpComputer(entity_t *ent)
     gi.WriteString(string);
     gi.Unicast(ent, true);
 }
-
-
-/*
-==================
-Cmd_Help_f
-
-Display the current help message
-==================
-*/
-void Cmd_Help_f(entity_t *ent)
-{
-    // this is for backwards compatability
-    if (deathmatch->value) {
-        Cmd_Score_f(ent);
-        return;
-    }
-
-    ent->client->showinventory = false;
-    ent->client->showscores = false;
-
-    if (ent->client->showhelp && (ent->client->pers.game_helpchanged == game.helpchanged)) {
-        ent->client->showhelp = false;
-        return;
-    }
-
-    ent->client->showhelp = true;
-    ent->client->pers.helpchanged = 0;
-    HelpComputer(ent);
-}
-
 
 //=======================================================================
 
@@ -476,9 +446,7 @@ void HUD_SetClientStats(entity_t* ent)
     //
     // help icon / current weapon if not shown
     //
-    if (ent->client->pers.helpchanged && (level.framenum & 8)) {
-        ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex("i_help");
-    } else if ((ent->client->pers.hand == CENTER_HANDED
+    if ((ent->client->pers.hand == CENTER_HANDED
                 || ent->client->playerState.fov > 91)
                 && ent->client->pers.weapon) {
 

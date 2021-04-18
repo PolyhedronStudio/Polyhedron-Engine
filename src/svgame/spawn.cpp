@@ -73,19 +73,16 @@ void SP_target_temp_entity(entity_t *ent);
 void SP_target_speaker(entity_t *ent);
 void SP_target_explosion(entity_t *ent);
 void SP_target_changelevel(entity_t *ent);
-void SP_target_goal(entity_t *ent);
 void SP_target_splash(entity_t *ent);
 void SP_target_spawner(entity_t *ent);
 void SP_target_blaster(entity_t *ent);
 void SP_target_crosslevel_trigger(entity_t *ent);
 void SP_target_crosslevel_target(entity_t *ent);
-void SP_target_help(entity_t *ent);
 
 void SP_target_lightramp(entity_t *self);
 void SP_target_earthquake(entity_t *ent);
 
 void SP_worldspawn(entity_t *ent);
-void SP_viewthing(entity_t *ent);
 
 void SP_light(entity_t *self);
 void SP_info_null(entity_t *self);
@@ -145,19 +142,16 @@ static const spawn_func_t spawn_funcs[] = {
     {"target_speaker", SP_target_speaker},
     {"target_explosion", SP_target_explosion},
     {"target_changelevel", SP_target_changelevel},
-    {"target_goal", SP_target_goal},
     {"target_splash", SP_target_splash},
     {"target_spawner", SP_target_spawner},
     {"target_blaster", SP_target_blaster},
     {"target_crosslevel_trigger", SP_target_crosslevel_trigger},
     {"target_crosslevel_target", SP_target_crosslevel_target},
-    {"target_help", SP_target_help},
 
     {"target_lightramp", SP_target_lightramp},
     {"target_earthquake", SP_target_earthquake},
 
     {"worldspawn", SP_worldspawn},
-    {"viewthing", SP_viewthing},
 
     {"light", SP_light},
     {"info_null", SP_info_null},

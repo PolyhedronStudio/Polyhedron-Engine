@@ -257,11 +257,6 @@ typedef struct gitem_s {
 // the server.ssv file for savegames
 //
 typedef struct {
-    char        helpmessage1[512];
-    char        helpmessage2[512];
-    int         helpchanged;    // flash F1 icon if non 0, play sound
-                                // and increment only if 1, 2, or 3
-
     gclient_t   *clients;       // [maxclients]
 
     // can't store spawnpoint in level, because
@@ -576,7 +571,6 @@ extern  gitem_t itemlist[];
 //
 // g_cmds.c
 //
-void Cmd_Help_f(entity_t *ent);
 void Cmd_Score_f(entity_t *ent);
 
 //
@@ -775,9 +769,6 @@ typedef struct {
 
     int         power_cubes;    // used for tracking the cubes in coop games
     int         score;          // for calculating total unit score in coop games
-
-    int         game_helpchanged;
-    int         helpchanged;
 
     qboolean    spectator;          // client is a spectator
 } client_persistant_t;

@@ -97,8 +97,8 @@ SET(SRC_SVGAME
 	svgame/entities/target/target_crosslevel_trigger.cpp
 	svgame/entities/target/target_earthquake.cpp
 	svgame/entities/target/target_explosion.cpp
-	svgame/entities/target/target_goal.cpp
-	svgame/entities/target/target_help.cpp
+	
+	
 	
 	svgame/entities/target/target_lightramp.cpp
 	
@@ -121,7 +121,7 @@ SET(SRC_SVGAME
 	svgame/entities/trigger/trigger_relay.cpp
 	
 	svgame/entities/light.cpp
-	svgame/entities/viewthing.cpp
+	
 
 	svgame/monsters/movement.cpp
 	svgame/monsters/soldier.cpp

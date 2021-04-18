@@ -192,9 +192,6 @@ void InitGame(void)
     // items
     InitItems();
 
-    game.helpmessage1[0] = 0;
-    game.helpmessage2[0] = 0;
-
     // initialize all entities for this game
     game.maxentities = maxentities->value;
     clamp(game.maxentities, (int)maxclients->value + 1, MAX_EDICTS);

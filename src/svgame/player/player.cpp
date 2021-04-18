@@ -89,7 +89,7 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
         ClientUpdateObituary(self, inflictor, attacker);
         TossClientWeapon(self);
         if (deathmatch->value)
-            Cmd_Help_f(self);       // show scores
+            Cmd_Score_f(self);       // show scores
 
         // clear inventory
         // this is kind of ugly, but it's how we want to handle keys in coop

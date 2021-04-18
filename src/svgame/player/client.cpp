@@ -896,8 +896,6 @@ void PutClientInServer(entity_t *ent)
 //          if (itemlist[n].flags & IT_KEY)
 //              resp.coop_respawn.inventory[n] = client->pers.inventory[n];
 //      }
-        resp.coop_respawn.game_helpchanged = client->pers.game_helpchanged;
-        resp.coop_respawn.helpchanged = client->pers.helpchanged;
         client->pers = resp.coop_respawn;
         ClientUserinfoChanged(ent, userinfo);
         if (resp.score > client->pers.score)

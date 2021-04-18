@@ -340,9 +340,6 @@ static const save_field_t clientfields[] = {
     I(pers.power_cubes),
     I(pers.score),
 
-    I(pers.game_helpchanged),
-    I(pers.helpchanged),
-
     I(pers.spectator),
 
     I(showscores),
@@ -401,9 +398,6 @@ static const save_field_t clientfields[] = {
 
 static const save_field_t gamefields[] = {
 #define _OFS GLOFS
-    SZ(helpmessage1, 512),
-    SZ(helpmessage2, 512),
-
     I(maxclients),
     I(maxentities),
 

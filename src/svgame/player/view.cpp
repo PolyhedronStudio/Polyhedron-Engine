@@ -659,18 +659,6 @@ static void G_SetClientSound(entity_t *ent)
 {
     const char    *weap; // C++20: STRING: Added const to char*
 
-    if (ent->client->pers.game_helpchanged != game.helpchanged) {
-        ent->client->pers.game_helpchanged = game.helpchanged;
-        ent->client->pers.helpchanged = 1;
-    }
-
-    // help beep (no more than ONE time - that's annoying enough)
-    if (ent->client->pers.helpchanged && ent->client->pers.helpchanged <= 1 && !(level.framenum & 63)) {
-        ent->client->pers.helpchanged++;
-        gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
-    }
-
-
     if (ent->client->pers.weapon)
         weap = ent->client->pers.weapon->classname;
     else
