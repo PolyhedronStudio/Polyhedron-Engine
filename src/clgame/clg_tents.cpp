@@ -1043,11 +1043,6 @@ void CLG_ParseTempEntity(void)
 		}
 		break;
 
-	case TE_SHOTGUN:            // bullet hitting wall
-		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0, 20);
-		CLG_SmokeAndFlash(teParameters.pos1);
-		break;
-
 	case TE_SPLASH:         // bullet hitting water
 		if (teParameters.color < 0 || teParameters.color > 6)
 			r = 0x00;

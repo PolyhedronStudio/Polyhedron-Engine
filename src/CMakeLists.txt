@@ -99,7 +99,7 @@ SET(SRC_SVGAME
 	svgame/entities/target/target_explosion.cpp
 	svgame/entities/target/target_goal.cpp
 	svgame/entities/target/target_help.cpp
-	svgame/entities/target/target_laser.cpp
+	
 	svgame/entities/target/target_lightramp.cpp
 	svgame/entities/target/target_secret.cpp
 	svgame/entities/target/target_spawner.cpp

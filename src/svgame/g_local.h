@@ -156,8 +156,6 @@ typedef enum {
 
 // power armor types
 #define POWER_ARMOR_NONE        0
-#define POWER_ARMOR_SCREEN      1
-#define POWER_ARMOR_SHIELD      2
 
 // handedness values
 #define RIGHT_HANDED            0
@@ -478,7 +476,6 @@ extern  int snd_fry;
 #define MOD_BOMB            27
 #define MOD_EXIT            28
 #define MOD_SPLASH          29
-#define MOD_TARGET_LASER    30
 #define MOD_TRIGGER_HURT    31
 #define MOD_HIT             32
 #define MOD_TARGET_BLASTER  33

@@ -195,28 +195,6 @@ static int CheckPowerArmor(entity_t *ent, vec3_t point, vec3_t normal, int damag
     if (!power)
         return 0;
 
-    if (power_armor_type == POWER_ARMOR_SCREEN) {
-        vec3_t      vec;
-        float       dot;
-        vec3_t      forward;
-
-        // only works if damage point is in front
-        AngleVectors(ent->s.angles, &forward, NULL, NULL);
-        VectorSubtract(point, ent->s.origin, vec);
-        VectorNormalize(vec);
-        dot = DotProduct(vec, forward);
-        if (dot <= 0.3)
-            return 0;
-
-        damagePerCell = 1;
-        pa_te_type = TE_SCREEN_SPARKS;
-        damage = damage / 3;
-    } else {
-        damagePerCell = 2;
-        pa_te_type = TE_SHIELD_SPARKS;
-        damage = (2 * damage) / 3;
-    }
-
     save = power * damagePerCell;
     if (!save)
         return 0;

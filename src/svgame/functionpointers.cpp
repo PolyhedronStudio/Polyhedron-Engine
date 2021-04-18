@@ -92,8 +92,6 @@ extern void swimmonster_start_go(entity_t* self);
 extern void target_crosslevel_target_think(entity_t* self);
 extern void target_earthquake_think(entity_t* self);
 extern void target_explosion_explode(entity_t* self);
-extern void target_laser_start(entity_t* self);
-extern void target_laser_think(entity_t* self);
 extern void target_lightramp_think(entity_t* self);
 extern void Think_AccelMove(entity_t* self);
 
@@ -136,7 +134,6 @@ extern void monster_triggered_spawn_use(entity_t* self, entity_t* other, entity_
 extern void monster_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void rotating_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void target_earthquake_use(entity_t* self, entity_t* other, entity_t* activator);
-extern void target_laser_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void target_lightramp_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void target_string_use(entity_t* self, entity_t* other, entity_t* activator);
 extern void train_use(entity_t* self, entity_t* other, entity_t* activator);
@@ -265,8 +262,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, target_crosslevel_target_think },
 { P_think, target_earthquake_think },
 { P_think, target_explosion_explode },
-{ P_think, target_laser_start },
-{ P_think, target_laser_think },
 { P_think, target_lightramp_think },
 { P_think, Think_AccelMove },
 
@@ -322,7 +317,6 @@ const save_ptr_t save_ptrs[] = {
 { P_use, rotating_use },
 
 { P_use, target_earthquake_use },
-{ P_use, target_laser_use },
 { P_use, target_lightramp_use },
 { P_use, target_string_use },
 { P_use, train_use },

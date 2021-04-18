@@ -81,7 +81,6 @@ void SP_target_spawner(entity_t *ent);
 void SP_target_blaster(entity_t *ent);
 void SP_target_crosslevel_trigger(entity_t *ent);
 void SP_target_crosslevel_target(entity_t *ent);
-void SP_target_laser(entity_t *self);
 void SP_target_help(entity_t *ent);
 
 void SP_target_lightramp(entity_t *self);
@@ -174,7 +173,6 @@ static const spawn_func_t spawn_funcs[] = {
     {"target_blaster", SP_target_blaster},
     {"target_crosslevel_trigger", SP_target_crosslevel_trigger},
     {"target_crosslevel_target", SP_target_crosslevel_target},
-    {"target_laser", SP_target_laser},
     {"target_help", SP_target_help},
 
     {"target_lightramp", SP_target_lightramp},

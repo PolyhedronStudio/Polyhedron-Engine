@@ -178,9 +178,6 @@ void ClientUpdateObituary(entity_t *self, entity_t *inflictor, entity_t *attacke
         case MOD_EXIT:
             message = "found a way out";
             break;
-        case MOD_TARGET_LASER:
-            message = "saw the light";
-            break;
         case MOD_TARGET_BLASTER:
             message = "got blasted";
             break;
