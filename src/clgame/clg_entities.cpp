@@ -172,8 +172,7 @@ void CLG_AddPacketEntities(void)
             ent.alpha = 0.30;
             ent.skinnum = (s1->skinnum >> ((rand() % 4) * 8)) & 0xff;
             ent.model = 0;
-        }
-        else {
+        } else {
             // set skin
             if (s1->modelindex == 255) {
                 // use custom player skin

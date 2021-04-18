@@ -141,12 +141,6 @@ typedef enum {
 #define MZ2_SOLDIER_MACHINEGUN_8        100
 
 //-----------------
-// Extern - TODO: Remove, ofc.
-//-----------------
-extern  const vec3_t monster_flash_offset[];
-
-
-//-----------------
 // Temp Entity Events (TE)
 //
 // Temp entity events are for things that happen at a location seperate from 

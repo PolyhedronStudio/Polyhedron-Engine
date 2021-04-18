@@ -367,7 +367,7 @@ SET(SRC_SHARED
 	shared/math/plane.cpp
 	shared/math/vector3.cpp
 
-	shared/m_flash.cpp
+	
 	shared/math.cpp
 	shared/shared.cpp
 )
