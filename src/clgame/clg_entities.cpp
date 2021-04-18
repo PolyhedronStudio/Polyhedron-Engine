@@ -7,6 +7,8 @@
 // Takes care of entity management.
 //
 #include "clg_local.h"
+#include "clg_effects.h"
+#include "clg_entities.h"
 
 extern qhandle_t cl_mod_powerscreen;
 extern qhandle_t cl_mod_laser;

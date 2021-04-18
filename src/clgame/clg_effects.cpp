@@ -8,7 +8,8 @@
 // awesome big banging explosions!
 //
 #include "clg_local.h"
-#include "sharedgame/sharedgame.h"
+#include "clg_effects.h"
+
 static void CLG_LogoutEffect(vec3_t org, int type);
 
 static vec3_t avelocities[NUMVERTEXNORMALS];
