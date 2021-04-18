@@ -379,12 +379,12 @@ static void CLG_AddEntities (void) {
 
 //
 //===============
-// CLG_CalcFOV
+// CLG_CalculateFOV
 // 
 // Calculates the Field Of View.
 //===============
 //
-float CLG_CalcFOV(float fov_x, float width, float height)
+float CLG_CalculateFOV(float fov_x, float width, float height)
 {
     float    a;
     float    x;

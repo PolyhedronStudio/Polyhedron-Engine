@@ -18,7 +18,7 @@ void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b,
 void V_AddLightStyle(int style, const vec4_t& value);
 void V_AddParticle(particle_t* p);
 
-float CLG_CalcFOV(float fov_x, float width, float height);
+float CLG_CalculateFOV(float fov_x, float width, float height);
 void CLG_CalcViewValues(void);
 
 void CLG_PreRenderView(void);

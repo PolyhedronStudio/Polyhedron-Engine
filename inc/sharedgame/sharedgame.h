@@ -106,15 +106,6 @@ typedef enum {
 
 //ROGUE
 #define MZ_ETF_RIFLE        30
-#define MZ_UNUSED           31
-#define MZ_SHOTGUN2         32
-#define MZ_HEATBEAM         33
-#define MZ_BLASTER2         34
-#define MZ_TRACKER          35
-#define MZ_NUKE1            36
-#define MZ_NUKE2            37
-#define MZ_NUKE4            38
-#define MZ_NUKE8            39
 //ROGUE
 // Q2RTX
 #define MZ_FLARE            40

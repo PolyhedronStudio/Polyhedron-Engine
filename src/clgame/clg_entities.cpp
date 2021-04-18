@@ -721,7 +721,7 @@ void CLG_CalcViewValues(void)
 
     // interpolate field of view
     cl->fov_x = lerp_client_fov(ops->fov, ps->fov, lerp);
-    cl->fov_y = CLG_CalcFOV(cl->fov_x, 4, 3);
+    cl->fov_y = CLG_CalculateFOV(cl->fov_x, 4, 3);
 
     LerpVector(ops->viewoffset, ps->viewoffset, lerp, viewoffset);
 

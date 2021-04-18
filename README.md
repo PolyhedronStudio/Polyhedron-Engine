@@ -37,7 +37,7 @@ When finished we have a stable base to work from, one that we can start making t
     - [ ] Move each part into its own sub header, include these in shared.h
     - [x] Move non-core related things into their own headers, include where required.
       - Almost done, needs some work with regards to EF_ flags etc.
-  - [ ] Client Game
+  - [X] Client Game
     - Get rid of the g_local, and just have each .cpp file do its own .h file, include only those that are required.
   - [ ] Server Game
     - Get rid of the g_local, and just have each .cpp file do its own .h file, include only those that are required.

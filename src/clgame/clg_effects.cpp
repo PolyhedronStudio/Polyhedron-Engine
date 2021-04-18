@@ -370,71 +370,10 @@ void CLG_MuzzleFlash() {
         DL_COLOR(1, 1, 0);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/blastf1a.wav"), volume, ATTN_NORM, 0);
         break;
-    case MZ_BLUEHYPERBLASTER:
-        DL_COLOR(0, 0, 1);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/hyprbf1a.wav"), volume, ATTN_NORM, 0);
-        break;
-    case MZ_HYPERBLASTER:
-        DL_COLOR(1, 1, 0);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/hyprbf1a.wav"), volume, ATTN_NORM, 0);
-        break;
     case MZ_MACHINEGUN:
         DL_COLOR(1, 1, 0);
         Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound(soundname), volume, ATTN_NORM, 0);
-        break;
-    case MZ_SHOTGUN:
-        DL_COLOR(1, 1, 0);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/shotgf1b.wav"), volume, ATTN_NORM, 0);
-        //  S_StartSound(NULL, mzParameters.entity, CHAN_AUTO,   S_RegisterSound("weapons/shotgr1b.wav"), volume, ATTN_NORM, 0.1);
-        break;
-    case MZ_SSHOTGUN:
-        DL_COLOR(1, 1, 0);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/sshotf1b.wav"), volume, ATTN_NORM, 0);
-        break;
-    case MZ_CHAINGUN1:
-        DL_RADIUS(200 + (rand() & 31));
-        DL_COLOR(1, 0.25, 0);
-        Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound(soundname), volume, ATTN_NORM, 0);
-        break;
-    case MZ_CHAINGUN2:
-        DL_RADIUS(225 + (rand() & 31));
-        DL_COLOR(1, 0.5, 0);
-        DL_DIE(0.1);   // long delay
-        Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound(soundname), volume, ATTN_NORM, 0);
-        Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound(soundname), volume, ATTN_NORM, 0.05);
-        break;
-    case MZ_CHAINGUN3:
-        DL_RADIUS(250 + (rand() & 31));
-        DL_COLOR(1, 1, 0);
-        DL_DIE(0.1);   // long delay
-        Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound(soundname), volume, ATTN_NORM, 0);
-        Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound(soundname), volume, ATTN_NORM, 0.033);
-        Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound(soundname), volume, ATTN_NORM, 0.066);
-        break;
-    case MZ_RAILGUN:
-        DL_COLOR(0.5, 0.5, 1.0);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/railgf1a.wav"), volume, ATTN_NORM, 0);
-        break;
-    case MZ_ROCKET:
-        DL_COLOR(1, 0.5, 0.2);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/rocklf1a.wav"), volume, ATTN_NORM, 0);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_AUTO, clgi.S_RegisterSound("weapons/rocklr1b.wav"), volume, ATTN_NORM, 0.1);
-        break;
-    case MZ_GRENADE:
-        DL_COLOR(1, 0.5, 0);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), volume, ATTN_NORM, 0);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_AUTO, clgi.S_RegisterSound("weapons/grenlr1b.wav"), volume, ATTN_NORM, 0.1);
-        break;
-    case MZ_BFG:
-        DL_COLOR(0, 1, 0);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/bfg__f1y.wav"), volume, ATTN_NORM, 0);
         break;
     case MZ_LOGIN:
         DL_COLOR(0, 1, 0);
@@ -454,61 +393,10 @@ void CLG_MuzzleFlash() {
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
         CLG_LogoutEffect(pl->current.origin, mzParameters.weapon);
         break;
-    case MZ_PHALANX:
-        DL_COLOR(1, 0.5, 0.5);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/plasshot.wav"), volume, ATTN_NORM, 0);
-        break;
-    case MZ_IONRIPPER:
-        DL_COLOR(1, 0.5, 0.5);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/rippfiref.wav"), volume, ATTN_NORM, 0);
-        break;
-
-    case MZ_ETF_RIFLE:
-        DL_COLOR(0.9, 0.7, 0);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/nail1.wav"), volume, ATTN_NORM, 0);
-        break;
-    case MZ_SHOTGUN2:
-        DL_COLOR(1, 1, 0);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/shotg2.wav"), volume, ATTN_NORM, 0);
-        break;
-    case MZ_HEATBEAM:
-        DL_COLOR(1, 1, 0);
-        DL_DIE(100);
-        //      S_StartSound (NULL, mzParameters.entity, CHAN_WEAPON, S_RegisterSound("weapons/bfg__l1a.wav"), volume, ATTN_NORM, 0);
-        break;
-    case MZ_BLASTER2:
-        DL_COLOR(0, 1, 0);
-        // FIXME - different sound for blaster2 ??
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/blastf1a.wav"), volume, ATTN_NORM, 0);
-        break;
-    case MZ_TRACKER:
-        // negative flashes handled the same in gl/soft until CL_AddDLights
-        DL_COLOR(-1, -1, -1);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/disint2.wav"), volume, ATTN_NORM, 0);
-        break;
-    case MZ_NUKE1:
-        DL_COLOR(1, 0, 0);
-        DL_DIE(100);
-        break;
-    case MZ_NUKE2:
-        DL_COLOR(1, 1, 0);
-        DL_DIE(100);
-        break;
-    case MZ_NUKE4:
-        DL_COLOR(0, 0, 1);
-        DL_DIE(100);
-        break;
-    case MZ_NUKE8:
-        DL_COLOR(0, 1, 1);
-        DL_DIE(100);
-        break;
-
-        // Q2RTX
     case MZ_FLARE:
         DL_RADIUS(0);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/flaregun.wav"), volume, ATTN_NORM, 0);
         break;
-        // Q2RTX
     }
 
     if (vid_rtx->integer)
