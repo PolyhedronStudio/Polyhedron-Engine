@@ -9,6 +9,10 @@
 //
 #include "clg_local.h"
 
+#include "clg_effects.h"
+#include "clg_media.h"
+#include "clg_main.h"
+
 //
 //===============
 // CLG_RegisterVWepModels

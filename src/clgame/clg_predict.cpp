@@ -8,6 +8,8 @@
 //
 #include "clg_local.h"
 
+#include "clg_main.h"
+
 //
 //===============
 // CLG_CheckPredictionError

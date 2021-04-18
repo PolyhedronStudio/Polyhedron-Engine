@@ -8,8 +8,12 @@
 //
 #include "clg_local.h"
 
+#include "clg_effects.h"
 #include "clg_entities.h"
 #include "clg_input.h"
+#include "clg_main.h"
+#include "clg_media.h"
+#include "clg_parse.h"
 
 //
 // Core.

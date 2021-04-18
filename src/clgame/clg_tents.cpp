@@ -8,6 +8,10 @@
 //
 #include "clg_local.h"
 
+#include "clg_effects.h"
+#include "clg_main.h"
+#include "clg_newfx.h"
+
 //
 // CVars.
 //

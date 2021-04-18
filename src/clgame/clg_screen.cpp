@@ -8,6 +8,9 @@
 //
 #include "clg_local.h"
 
+#include "clg_main.h"
+#include "clg_media.h"
+
 // Number of "sb_pics"
 #define STAT_PICS   11              // Number of "sb_pics"
 #define STAT_MINUS  (STAT_PICS - 1) // Index into the sb_pics array pointing at the pic name for the '-'

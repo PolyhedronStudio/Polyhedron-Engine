@@ -95,6 +95,19 @@ typedef struct clientgame_s {
 
 extern clientgame_t clg;
 
+// Custom load state enumerator.
+//
+// Rename LOAD_CUSTOM_# or add your own.
+// Once the load stage is set, the client will inquire the
+// CLG_GetMediaLoadStateName function for a matching display string.
+typedef enum {
+    LOAD_CUSTOM_START = LOAD_SOUNDS + 1,    // DO NOT TOUCH.
+    LOAD_CUSTOM_0,  // Let thy will be known, rename to your hearts content.
+    LOAD_CUSTOM_1,  // Let thy will be known, rename to your hearts content.
+    LOAD_CUSTOM_2   // Let thy will be known, rename to your hearts content.
+    // You can add more here if you desire so.
+} clg_load_state_t;
+
 //-------------------
 // Client player model settings.
 //-------------------
@@ -172,130 +185,24 @@ extern cvar_t* vid_rtx;
 
 
 //
-// clg_effects.c
-//
-void CLG_ClearEffects(void);
-void CLG_EffectsInit(void);
-
-cparticle_t* CLG_AllocParticle(void);
-void CLG_AddParticles(void);
-#if USE_DLIGHTS
-cdlight_t* CLG_AllocDLight(int key);
-void CLG_AddDLights(void);
-void CLG_RunDLights(void);
-#endif
-#if USE_LIGHTSTYLES
-void CLG_ClearLightStyles(void);
-void CLG_AddLightStyles(void);
-void CLG_RunLightStyles(void);
-void CLG_SetLightStyle(int index, const char* s);
-#endif
-
-void CLG_MuzzleFlash(void);
-void CLG_MuzzleFlash2(void);
-void CLG_BigTeleportParticles(vec3_t org);
-void CLG_BlasterTrail(vec3_t start, vec3_t end);
-void CLG_BlasterParticles(vec3_t org, vec3_t dir);
-void CLG_BloodParticleEffect(vec3_t org, vec3_t dir, int color, int count);
-void CLG_BubbleTrail(vec3_t start, vec3_t end);
-void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags);
-void CLG_ExplosionParticles(vec3_t org);
-void CLG_ItemRespawnParticles(vec3_t org);
-void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count);
-void CLG_ParticleEffect2(vec3_t org, vec3_t dir, int color, int count);
-void CLG_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count);
-void CLG_TeleportParticles(vec3_t org);
-void CLG_TeleporterParticles(vec3_t org);
-
-//
 // clg_main.c
 //
-void CLG_Init();
-void CLG_Shutdown(void);
 
-void CLG_ClientDeltaFrame(void);
-void CLG_ClientFrame(void);
-void CLG_ClientBegin(void);
-void CLG_ClientDisconnect(void);
-void CLG_ClearState(void);
-void CLG_DemoSeek(void);
-
-void CLG_UpdateUserInfo(cvar_t* var, from_t from);
-
-void Com_Print(const char *fmt, ...);
-void Com_DPrint(const char *fmt, ...);
-void Com_WPrint(const char *fmt, ...);
-void Com_EPrint(const char *fmt, ...);
-void Com_Error (error_type_t code, const char *fmt, ...);
-void Com_LPrintf(print_type_t type, const char* fmt, ...);
 
 //
 // clg_media.c
 //
 
-// Custom load state enumerator.
-//
-// Rename LOAD_CUSTOM_# or add your own.
-// Once the load stage is set, the client will inquire the
-// CLG_GetMediaLoadStateName function for a matching display string.
-typedef enum {
-    LOAD_CUSTOM_START = LOAD_SOUNDS + 1,    // DO NOT TOUCH.
-    LOAD_CUSTOM_0,  // Let thy will be known, rename to your hearts content.
-    LOAD_CUSTOM_1,  // Let thy will be known, rename to your hearts content.
-    LOAD_CUSTOM_2   // Let thy will be known, rename to your hearts content.
-    // You can add more here if you desire so.
-} clg_load_state_t;
-
-void CLG_RegisterVWepModels();
-void CLG_LoadClientInfo(clientinfo_t* ci, const char* str);
-void CLG_SetSky(void);
-
-void CLG_InitMedia(void);
-char *CLG_GetMediaLoadStateName(load_state_t state);
-void CLG_LoadScreenMedia(void);
-void CLG_LoadWorldMedia(void);
-void CLG_ShutdownMedia(void);
-
 //
 // clg_newfx.c
 //
-#if USE_DLIGHTS
-void CLG_Flashlight(int ent, vec3_t pos);
-void CLG_ColorFlash(vec3_t pos, int ent, int intensity, float r, float g, float b);
-#endif
-void CLG_DebugTrail(vec3_t start, vec3_t end);
-void CLG_SmokeTrail(vec3_t start, vec3_t end, int colorStart, int colorRun, int spacing);
-void CLG_ForceWall(vec3_t start, vec3_t end, int color);
-void CLG_GenericParticleEffect(vec3_t org, vec3_t dir, int color, int count, int numcolors, int dirspread, float alphavel);
-void CLG_BubbleTrail2(vec3_t start, vec3_t end, int dist);
-void CLG_Heatbeam(vec3_t start, vec3_t forward);
-void CLG_ParticleSteamEffect(vec3_t org, vec3_t dir, int color, int count, int magnitude);
-void CLG_ParticleSteamEffect2(cl_sustain_t* self);
-void CLG_TrackerTrail(vec3_t start, vec3_t end, int particleColor);
-void CLG_Tracker_Shell(vec3_t origin);
-void CLG_MonsterPlasma_Shell(vec3_t origin);
-void CLG_Widowbeamout(cl_sustain_t* self);
-void CLG_Nukeblast(cl_sustain_t* self);
-void CLG_WidowSplash(void);
-void CLG_Tracker_Explode(vec3_t  origin);
-void CLG_TagTrail(vec3_t start, vec3_t end, int color);
-void CLG_ColorExplosionParticles(vec3_t org, int color, int run);
-void CLG_ParticleSmokeEffect(vec3_t org, vec3_t dir, int color, int count, int magnitude);
-void CLG_BlasterParticles2(vec3_t org, vec3_t dir, unsigned int color);
-void CLG_BlasterTrail2(vec3_t start, vec3_t end);
-void CLG_IonripperTrail(vec3_t start, vec3_t ent);
-void CLG_TrapParticles(r_entity_t* ent);
-void CLG_ParticleEffect3(vec3_t org, vec3_t dir, int color, int count);
+
 
 
 //
 // clg_parse.c
 //
-qboolean CLG_UpdateConfigString(int index, const char* str);
-void CLG_StartServerMessage(void);
-qboolean CLG_ParseServerMessage(int serverCommand);
-qboolean CLG_SeekDemoMessage(int demoCommand);
-void CLG_EndServerMessage(int realTime);
+
 
 
 //

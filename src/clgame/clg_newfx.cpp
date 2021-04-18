@@ -11,6 +11,9 @@
 //
 #include "clg_local.h"
 
+#include "clg_effects.h"
+#include "clg_main.h"
+
 #if USE_DLIGHTS
 void CLG_Flashlight(int ent, vec3_t pos)
 {

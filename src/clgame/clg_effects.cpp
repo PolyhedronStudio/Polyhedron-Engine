@@ -8,7 +8,9 @@
 // awesome big banging explosions!
 //
 #include "clg_local.h"
+
 #include "clg_effects.h"
+#include "clg_main.h"
 
 static void CLG_LogoutEffect(vec3_t org, int type);
 

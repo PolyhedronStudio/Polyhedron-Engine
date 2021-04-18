@@ -8,7 +8,9 @@
 // Handles the client specific Player Move(PM) input processing.
 //
 #include "clg_local.h"
+
 #include "clg_input.h"
+#include "clg_main.h"
 
 static cvar_t* m_filter;
 static cvar_t* m_accel;

@@ -7,7 +7,10 @@
 // View handling on a per frame basis.
 //
 #include "clg_local.h"
+
+#include "clg_effects.h"
 #include "clg_entities.h"
+#include "clg_main.h"
 
 clg_view_t  view;
 //=============
