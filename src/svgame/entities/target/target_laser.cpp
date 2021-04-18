@@ -108,7 +108,7 @@ void target_laser_start(entity_t* self)
 
     self->moveType = MOVETYPE_NONE;
     self->solid = SOLID_NOT;
-    self->s.renderfx |= RF_BEAM | RF_TRANSLUCENT;
+    self->s.renderfx |= RenderEffects::Beam | RenderEffects::Translucent;
     self->s.modelindex = 1;         // must be non-zero
 
     // set the beam diameter

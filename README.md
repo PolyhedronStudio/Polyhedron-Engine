@@ -77,6 +77,7 @@ When finished we have a stable base to work from, one that we can start making t
   - [ ] Implement a PM_FLYMOVE, which can be used for the future AI.
 - [ ] Game Modules
   - [ ] Client
+    - [X] Headerify.
     - [ ] Move into its own repository, and implement as a submodule. This should allow for our own repository and record of client game code.
   - [ ] Server
     - [ ] Fix save.cpp since it is C++ incompatible with the void pointer technique.

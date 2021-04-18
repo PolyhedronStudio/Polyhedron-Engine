@@ -190,7 +190,7 @@ void GL_DrawBeams(void)
 
     numverts = numindices = 0;
     for (i = 0, ent = glr.fd.entities; i < glr.fd.num_entities; i++, ent++) {
-        if (!(ent->flags & RF_BEAM)) {
+        if (!(ent->flags & RenderEffects::Beam)) {
             continue;
         }
 

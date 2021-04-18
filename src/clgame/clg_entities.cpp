@@ -48,26 +48,26 @@ static int adjust_shell_fx(int renderfx)
     //if (!strcmp(fs_game->string, "rogue")) {
     //    // all of the solo colors are fine.  we need to catch any of the combinations that look bad
     //    // (double & half) and turn them into the appropriate color, and make double/quad something special
-    //    if (renderfx & RF_SHELL_HALF_DAM) {
+    //    if (renderfx & RenderEffects::HalfDamShell) {
     //        // ditch the half damage shell if any of red, blue, or double are on
-    //        if (renderfx & (RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE))
-    //            renderfx &= ~RF_SHELL_HALF_DAM;
+    //        if (renderfx & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::DoubleShell))
+    //            renderfx &= ~RenderEffects::HalfDamShell;
     //    }
 
-    //    if (renderfx & RF_SHELL_DOUBLE) {
+    //    if (renderfx & RenderEffects::DoubleShell) {
     //        // lose the yellow shell if we have a red, blue, or green shell
-    //        if (renderfx & (RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_GREEN))
-    //            renderfx &= ~RF_SHELL_DOUBLE;
+    //        if (renderfx & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::GreenShell))
+    //            renderfx &= ~RenderEffects::DoubleShell;
     //        // if we have a red shell, turn it to purple by adding blue
-    //        if (renderfx & RF_SHELL_RED)
-    //            renderfx |= RF_SHELL_BLUE;
+    //        if (renderfx & RenderEffects::RedShell)
+    //            renderfx |= RenderEffects::BlueShell;
     //        // if we have a blue shell (and not a red shell), turn it to cyan by adding green
-    //        else if (renderfx & RF_SHELL_BLUE) {
+    //        else if (renderfx & RenderEffects::BlueShell) {
     //            // go to green if it's on already, otherwise do cyan (flash green)
-    //            if (renderfx & RF_SHELL_GREEN)
-    //                renderfx &= ~RF_SHELL_BLUE;
+    //            if (renderfx & RenderEffects::GreenShell)
+    //                renderfx &= ~RenderEffects::BlueShell;
     //            else
-    //                renderfx |= RF_SHELL_GREEN;
+    //                renderfx |= RenderEffects::GreenShell;
     //        }
     //    }
     //}
@@ -132,18 +132,18 @@ void CLG_AddPacketEntities(void)
 
         // optionally remove the glowing effect
         if (cl_noglow->integer)
-            renderfx &= ~RF_GLOW;
+            renderfx &= ~RenderEffects::Glow;
 
         ent.oldframe = cent->prev.frame;
         ent.backlerp = 1.0 - cl->lerpfrac;
 
-        if (renderfx & RF_FRAMELERP) {
+        if (renderfx & RenderEffects::FrameLerp) {
             // step origin discretely, because the frames
             // do the animation properly
             VectorCopy(cent->current.origin, ent.origin);
             VectorCopy(cent->current.old_origin, ent.oldorigin);  // FIXME
         }
-        else if (renderfx & RF_BEAM) {
+        else if (renderfx & RenderEffects::Beam) {
             // interpolate start and end points for beams
             LerpVector(cent->prev.origin, cent->current.origin,
                 cl->lerpfrac, ent.origin);
@@ -167,7 +167,7 @@ void CLG_AddPacketEntities(void)
         // create a new entity
 
         // tweak the color of beams
-        if (renderfx & RF_BEAM) {
+        if (renderfx & RenderEffects::Beam) {
             // the four beam colors are encoded in 32 bits of skinnum (hack)
             ent.alpha = 0.30;
             ent.skinnum = (s1->skinnum >> ((rand() % 4) * 8)) & 0xff;
@@ -186,7 +186,7 @@ void CLG_AddPacketEntities(void)
                     ent.model = cl->baseclientinfo.model;
                     ci = &cl->baseclientinfo;
                 }
-                if (renderfx & RF_USE_DISGUISE) {
+                if (renderfx & RenderEffects::UseDisguise) {
                     char buffer[MAX_QPATH];
 
                     Q_concat(buffer, sizeof(buffer), "players/", ci->model_name, "/disguise.pcx", NULL);
@@ -203,7 +203,7 @@ void CLG_AddPacketEntities(void)
         }
 
         // only used for black hole model right now, FIXME: do better
-        if ((renderfx & RF_TRANSLUCENT) && !(renderfx & RF_BEAM))
+        if ((renderfx & RenderEffects::Translucent) && !(renderfx & RenderEffects::Beam))
             ent.alpha = 0.70;
 
         // render effects (fullbright, translucent, etc)
@@ -234,7 +234,7 @@ void CLG_AddPacketEntities(void)
             if (!cl->thirdPersonView)
             {
                 if (vid_rtx->integer)
-                    base_entity_flags |= RF_VIEWERMODEL;    // only draw from mirrors
+                    base_entity_flags |= RenderEffects::ViewerModel;    // only draw from mirrors
                 else
                     goto skip;
             }
@@ -292,7 +292,7 @@ void CLG_AddPacketEntities(void)
         // color shells generate a separate entity for the main model
         if ((effects & EntityEffects::ColorShell) && !vid_rtx->integer) {
             renderfx = adjust_shell_fx(renderfx);
-            ent.flags = renderfx | RF_TRANSLUCENT | base_entity_flags;
+            ent.flags = renderfx | RenderEffects::Translucent | base_entity_flags;
             ent.alpha = 0.30;
             V_AddEntity(&ent);
         }
@@ -325,7 +325,7 @@ void CLG_AddPacketEntities(void)
             // PMM - check for the defender sphere shell .. make it translucent
             if (!Q_strcasecmp(cl->configstrings[CS_MODELS + (s1->modelindex2)], "models/items/shell/tris.md2")) {
                 ent.alpha = 0.32;
-                ent.flags = RF_TRANSLUCENT;
+                ent.flags = RenderEffects::Translucent;
             }
 
             if ((effects & EntityEffects::ColorShell) && vid_rtx->integer) {
@@ -464,14 +464,14 @@ void CLG_AddViewWeapon(void)
         }
     }
 
-    gun.flags = RF_MINLIGHT | RF_DEPTHHACK | RF_WEAPONMODEL;
+    gun.flags = RenderEffects::MinimalLight | RenderEffects::DepthHack | RenderEffects::WeaponModel;
     if (info_hand->integer == 1) {
         gun.flags |= RF_LEFTHAND;
     }
 
     if (cl_gunalpha->value != 1) {
         gun.alpha = clgi.Cvar_ClampValue(cl_gunalpha, 0.1f, 1.0f);
-        gun.flags |= RF_TRANSLUCENT;
+        gun.flags |= RenderEffects::Translucent;
     }
 
     // same entity in rtx mode
@@ -488,7 +488,7 @@ void CLG_AddViewWeapon(void)
     // separate entity in non-rtx mode
     if (shell_flags && !vid_rtx->integer) {
         gun.alpha = 0.30f * cl_gunalpha->value;
-        gun.flags |= shell_flags | RF_TRANSLUCENT;
+        gun.flags |= shell_flags | RenderEffects::Translucent;
         V_AddEntity(&gun);
     }
 }

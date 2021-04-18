@@ -61,7 +61,7 @@ entity_update_new(cl_entity_t *ent, const entity_state_t *state, const vec_t *or
 
     if (state->event == EV_PLAYER_TELEPORT ||
         state->event == EV_OTHER_TELEPORT ||
-        (state->renderfx & (RF_FRAMELERP | RF_BEAM))) {
+        (state->renderfx & (RenderEffects::FrameLerp | RenderEffects::Beam))) {
         // no lerping if teleported
         VectorCopy(origin, ent->lerp_origin);
         return;
@@ -392,26 +392,26 @@ static int adjust_shell_fx(int renderfx)
 	if (!strcmp(fs_game->string, "rogue")) {
 		// all of the solo colors are fine.  we need to catch any of the combinations that look bad
 		// (double & half) and turn them into the appropriate color, and make double/quad something special
-		if (renderfx & RF_SHELL_HALF_DAM) {
+		if (renderfx & RenderEffects::HalfDamShell) {
 			// ditch the half damage shell if any of red, blue, or double are on
-			if (renderfx & (RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE))
-				renderfx &= ~RF_SHELL_HALF_DAM;
+			if (renderfx & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::DoubleShell))
+				renderfx &= ~RenderEffects::HalfDamShell;
 		}
 
-		if (renderfx & RF_SHELL_DOUBLE) {
+		if (renderfx & RenderEffects::DoubleShell) {
 			// lose the yellow shell if we have a red, blue, or green shell
-			if (renderfx & (RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_GREEN))
-				renderfx &= ~RF_SHELL_DOUBLE;
+			if (renderfx & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::GreenShell))
+				renderfx &= ~RenderEffects::DoubleShell;
 			// if we have a red shell, turn it to purple by adding blue
-			if (renderfx & RF_SHELL_RED)
-				renderfx |= RF_SHELL_BLUE;
+			if (renderfx & RenderEffects::RedShell)
+				renderfx |= RenderEffects::BlueShell;
 			// if we have a blue shell (and not a red shell), turn it to cyan by adding green
-			else if (renderfx & RF_SHELL_BLUE) {
+			else if (renderfx & RenderEffects::BlueShell) {
 				// go to green if it's on already, otherwise do cyan (flash green)
-				if (renderfx & RF_SHELL_GREEN)
-					renderfx &= ~RF_SHELL_BLUE;
+				if (renderfx & RenderEffects::GreenShell)
+					renderfx &= ~RenderEffects::BlueShell;
 				else
-					renderfx |= RF_SHELL_GREEN;
+					renderfx |= RenderEffects::GreenShell;
 			}
 		}
 	}
@@ -480,7 +480,7 @@ vec3_t CL_GetEntitySoundOrigin(int entnum) {
     }
 
     // interpolate origin
-    // FIXME: what should be the sound origin point for RF_BEAM entities?
+    // FIXME: what should be the sound origin point for RenderEffects::Beam entities?
     ent = &cs.entities[entnum];
     LerpVector(ent->prev.origin, ent->current.origin, cl.lerpfrac, org);
 

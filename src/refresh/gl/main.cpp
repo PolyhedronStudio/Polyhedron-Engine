@@ -339,7 +339,7 @@ static void GL_DrawSpriteModel(model_t *model)
     r_entity_t *e = glr.ent;
     mspriteframe_t *frame = &model->spriteframes[e->frame % model->numframes];
     image_t *image = frame->image;
-    float alpha = (e->flags & RF_TRANSLUCENT) ? e->alpha : 1;
+    float alpha = (e->flags & RenderEffects::Translucent) ? e->alpha : 1;
     int bits = GLS_DEPTHMASK_FALSE;
     vec3_t up, down, left, right;
     vec3_t points[4];
@@ -426,12 +426,12 @@ static void GL_DrawEntities(int mask)
 
     last = glr.fd.entities + glr.fd.num_entities;
     for (ent = glr.fd.entities; ent != last; ent++) {
-        if (ent->flags & RF_BEAM) {
+        if (ent->flags & RenderEffects::Beam) {
             // beams are drawn elsewhere in single batch
             glr.num_beams++;
             continue;
         }
-        if ((ent->flags & RF_TRANSLUCENT) != mask) {
+        if ((ent->flags & RenderEffects::Translucent) != mask) {
             continue;
         }
 
@@ -593,7 +593,7 @@ void R_RenderFrame_GL(refdef_t *fd)
 
     GL_DrawParticles();
 
-    GL_DrawEntities(RF_TRANSLUCENT);
+    GL_DrawEntities(RenderEffects::Translucent);
 
     if (!(glr.fd.rdflags & RDF_NOWORLDMODEL)) {
         GL_DrawAlphaFaces();

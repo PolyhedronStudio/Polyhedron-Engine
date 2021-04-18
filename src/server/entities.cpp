@@ -407,7 +407,7 @@ void SV_BuildClientFrame(client_t *client)
             if (ent_visible)
             {
                 // beams just check one point for PHS
-                if (ent->s.renderfx & RF_BEAM) {
+                if (ent->s.renderfx & RenderEffects::Beam) {
                     l = ent->clusterNumbers[0];
                     if (!Q_IsBitSet(clientphs, l))
                         ent_visible = false;

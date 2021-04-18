@@ -27,7 +27,7 @@ void SP_viewthing(entity_t* ent)
 
     ent->moveType = MOVETYPE_NONE;
     ent->solid = SOLID_BBOX;
-    ent->s.renderfx = RF_FRAMELERP;
+    ent->s.renderfx = RenderEffects::FrameLerp;
     VectorSet(ent->mins, -16, -16, -24);
     VectorSet(ent->maxs, 16, 16, 32);
     ent->s.modelindex = gi.ModelIndex("models/objects/banner/tris.md2");

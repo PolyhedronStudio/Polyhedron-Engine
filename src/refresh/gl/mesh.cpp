@@ -342,27 +342,27 @@ static void setup_color(void)
 
     if (flags & RF_SHELL_MASK) {
         VectorClear(color);
-        if (flags & RF_SHELL_HALF_DAM) {
+        if (flags & RenderEffects::HalfDamShell) {
             color[0] = 0.56f;
             color[1] = 0.59f;
             color[2] = 0.45f;
         }
-        if (flags & RF_SHELL_DOUBLE) {
+        if (flags & RenderEffects::DoubleShell) {
             color[0] = 0.9f;
             color[1] = 0.7f;
         }
-        if (flags & RF_SHELL_RED) {
+        if (flags & RenderEffects::RedShell) {
             color[0] = 1;
         }
-        if (flags & RF_SHELL_GREEN) {
+        if (flags & RenderEffects::GreenShell) {
             color[1] = 1;
         }
-        if (flags & RF_SHELL_BLUE) {
+        if (flags & RenderEffects::BlueShell) {
             color[2] = 1;
         }
-    } else if (flags & RF_FULLBRIGHT) {
+    } else if (flags & RenderEffects::FullBright) {
         VectorSet(color, 1, 1, 1);
-    } else if ((flags & RF_IR_VISIBLE) && (glr.fd.rdflags & RDF_IRGOGGLES)) {
+    } else if ((flags & RenderEffects::InfraRedVisible) && (glr.fd.rdflags & RDF_IRGOGGLES)) {
         VectorSet(color, 1, 0, 0);
     } else {
         // MATHLIB: Quick workaround.
@@ -372,7 +372,7 @@ static void setup_color(void)
         color[1] = tempColor[1];
         color[2] = tempColor[2];
 
-        if (flags & RF_MINLIGHT) {
+        if (flags & RenderEffects::MinimalLight) {
             for (i = 0; i < 3; i++) {
                 if (color[i] > 0.1f) {
                     break;
@@ -383,7 +383,7 @@ static void setup_color(void)
             }
         }
 
-        if (flags & RF_GLOW) {
+        if (flags & RenderEffects::Glow) {
             f = 0.1f * std::sinf(glr.fd.time * 7);
             for (i = 0; i < 3; i++) {
                 m = color[i] * 0.8f;
@@ -398,7 +398,7 @@ static void setup_color(void)
         }
     }
 
-    if (flags & RF_TRANSLUCENT) {
+    if (flags & RenderEffects::Translucent) {
         color[3] = glr.ent->alpha;
     } else {
         color[3] = 1;
@@ -415,7 +415,7 @@ static void setup_celshading(void)
     if (value == 0)
         return;
 
-    if (glr.ent->flags & (RF_TRANSLUCENT | RF_SHELL_MASK))
+    if (glr.ent->flags & (RenderEffects::Translucent | RF_SHELL_MASK))
         return;
 
     VectorSubtract(origin, glr.fd.vieworg, dir);
@@ -453,7 +453,7 @@ static void setup_shadow(void)
     if (!gl_shadows->integer)
         return;
 
-    if (glr.ent->flags & (RF_WEAPONMODEL | RF_NOSHADOW))
+    if (glr.ent->flags & (RenderEffects::WeaponModel | RF_NOSHADOW))
         return;
 
     if (!glr.lightpoint.surf)
@@ -583,7 +583,7 @@ static void draw_alias_mesh(maliasmesh_t *mesh)
     if (shadelight)
         state = (glStateBits_t)(state | GLS_SHADE_SMOOTH); // CPP: Bitflag cast
 
-    if (glr.ent->flags & RF_TRANSLUCENT)
+    if (glr.ent->flags & RenderEffects::Translucent)
         state = (glStateBits_t)(state | GLS_BLEND_BLEND | GLS_DEPTHMASK_FALSE); // CPP: Bitflag cast
 
     GL_StateBits(state);
@@ -651,7 +651,7 @@ void GL_DrawAliasModel(model_t *model)
         oldframenum = newframenum;
 
     // interpolate origin, if necessarry
-    if (ent->flags & RF_FRAMELERP)
+    if (ent->flags & RenderEffects::FrameLerp)
         LerpVector2(ent->oldorigin, ent->origin,
                     backlerp, frontlerp, origin);
     else
@@ -673,7 +673,7 @@ void GL_DrawAliasModel(model_t *model)
 
     // select proper tessfunc
     if (ent->flags & RF_SHELL_MASK) {
-        shellscale = (ent->flags & RF_WEAPONMODEL) ?
+        shellscale = (ent->flags & RenderEffects::WeaponModel) ?
             WEAPONSHELL_SCALE : POWERSUIT_SCALE;
         tessfunc = newframenum == oldframenum ?
             tess_static_shell : tess_lerped_shell;
@@ -691,26 +691,26 @@ void GL_DrawAliasModel(model_t *model)
 
     GL_RotateForEntity(origin, scale);
 
-    if ((ent->flags & (RF_WEAPONMODEL | RF_LEFTHAND)) ==
-        (RF_WEAPONMODEL | RF_LEFTHAND)) {
+    if ((ent->flags & (RenderEffects::WeaponModel | RF_LEFTHAND)) ==
+        (RenderEffects::WeaponModel | RF_LEFTHAND)) {
         qglMatrixMode(GL_PROJECTION);
         qglScalef(-1, 1, 1);
         qglMatrixMode(GL_MODELVIEW);
         qglFrontFace(GL_CCW);
     }
 
-    if (ent->flags & RF_DEPTHHACK)
+    if (ent->flags & RenderEffects::DepthHack)
         qglDepthRange(0, 0.25f);
 
     // draw all the meshes
     for (i = 0; i < model->nummeshes; i++)
         draw_alias_mesh(&model->meshes[i]);
 
-    if (ent->flags & RF_DEPTHHACK)
+    if (ent->flags & RenderEffects::DepthHack)
         qglDepthRange(0, 1);
 
-    if ((ent->flags & (RF_WEAPONMODEL | RF_LEFTHAND)) ==
-        (RF_WEAPONMODEL | RF_LEFTHAND)) {
+    if ((ent->flags & (RenderEffects::WeaponModel | RF_LEFTHAND)) ==
+        (RenderEffects::WeaponModel | RF_LEFTHAND)) {
         qglMatrixMode(GL_PROJECTION);
         qglScalef(-1, 1, 1);
         qglMatrixMode(GL_MODELVIEW);

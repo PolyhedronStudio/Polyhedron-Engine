@@ -156,7 +156,7 @@ void update_transparency(VkCommandBuffer command_buffer, const float* view_matri
 	uint32_t sprite_num = 0;
 	for (int i = 0; i < entity_num; i++)
 	{
-		if (entities[i].flags & RF_BEAM)
+		if (entities[i].flags & RenderEffects::Beam)
 			++beam_num;
 		else if ((entities[i].model & 0x80000000) == 0)
 		{
@@ -339,7 +339,7 @@ static void write_beam_geometry(const float* view_matrix, const r_entity_t* enti
 
 	for (int i = 0; i < entity_num; i++)
 	{
-		if ((entities[i].flags & RF_BEAM) == 0)
+		if ((entities[i].flags & RenderEffects::Beam) == 0)
 			continue;
 
 		const r_entity_t* beam = entities + i;
@@ -501,7 +501,7 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 		if(num_beams == MAX_BEAMS)
 			break;
 
-		if ((entities[i].flags & RF_BEAM) != 0)
+		if ((entities[i].flags & RenderEffects::Beam) != 0)
 			beams[num_beams++] = entities + i;
 	}
 

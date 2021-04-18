@@ -225,7 +225,7 @@ void M_droptofloor(entity_t *ent)
 
 void M_SetEffects(entity_t *ent)
 {
-    ent->s.renderfx &= ~(RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE);
+    ent->s.renderfx &= ~(RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell);
 }
 
 
@@ -407,7 +407,7 @@ qboolean monster_start(entity_t *self)
 
     self->nextThink = level.time + FRAMETIME;
     self->svFlags |= SVF_MONSTER;
-    self->s.renderfx |= RF_FRAMELERP;
+    self->s.renderfx |= RenderEffects::FrameLerp;
     self->takedamage = DAMAGE_AIM;
     self->air_finished = level.time + 12;
     self->Use = monster_use;

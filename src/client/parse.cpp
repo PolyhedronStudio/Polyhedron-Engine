@@ -58,7 +58,7 @@ static inline void CL_ParseDeltaEntity(server_frame_t  *frame,
     MSG_ParseDeltaEntity(old, state, newnum, bits, cl.esFlags);
 
     // shuffle previous origin to old
-    if (!(bits & U_OLDORIGIN) && !(state->renderfx & RF_BEAM))
+    if (!(bits & U_OLDORIGIN) && !(state->renderfx & RenderEffects::Beam))
         VectorCopy(old->origin, state->old_origin);
 }
 

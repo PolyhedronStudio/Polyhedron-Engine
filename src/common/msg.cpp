@@ -606,9 +606,9 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
     if (to->sound != from->sound)
         bits |= U_SOUND;
 
-    if (to->renderfx & RF_FRAMELERP) {
+    if (to->renderfx & RenderEffects::FrameLerp) {
         bits |= U_OLDORIGIN;
-    } else if (to->renderfx & RF_BEAM) {
+    } else if (to->renderfx & RenderEffects::Beam) {
         if (flags & MSG_ES_BEAMORIGIN) {
             if (!EqualEpsilonf(to->old_origin[0], from->old_origin[0]) ||
                 !EqualEpsilonf(to->old_origin[1], from->old_origin[1]) ||

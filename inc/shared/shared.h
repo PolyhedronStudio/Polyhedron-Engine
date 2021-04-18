@@ -939,27 +939,39 @@ typedef struct {
     vec3_t		offsets[8];	// [signbits][x] = either size[0][x] or size[1][x]
 } trace_t;
 
-// entity_state_t->renderfx flags
-#define RF_MINLIGHT         1       // allways have some light (viewmodel)
-#define RF_VIEWERMODEL      2       // don't draw through eyes, only mirrors
-#define RF_WEAPONMODEL      4       // only draw through eyes
-#define RF_FULLBRIGHT       8       // allways draw full intensity
-#define RF_DEPTHHACK        16      // for view weapon Z crunching
-#define RF_TRANSLUCENT      32
-#define RF_FRAMELERP        64
-#define RF_BEAM             128
-#define RF_CUSTOMSKIN       256     // skin is an index in image_precache
-#define RF_GLOW             512     // pulse lighting for bonus items
-#define RF_SHELL_RED        1024
-#define RF_SHELL_GREEN      2048
-#define RF_SHELL_BLUE       4096
 
-//ROGUE
-#define RF_IR_VISIBLE       0x00008000      // 32768
-#define RF_SHELL_DOUBLE     0x00010000      // 65536
-#define RF_SHELL_HALF_DAM   0x00020000
-#define RF_USE_DISGUISE     0x00040000
-//ROGUE
+//-----------------
+// entity_state_t->renderfx
+//
+// The render effects are useful for tweaking the way how an entity is displayed.
+// It may be favored for it to only be visible in mirrors, or fullbright, name it.
+// 
+// This is t he place to look for in-game entity rendering effects to apply.
+//-----------------
+typedef enum {
+    ViewerModel     = (1 << 0),     // Don't draw through eyes, only mirrors.
+    WeaponModel     = (1 << 1),     // Only draw through eyes.
+
+    MinimalLight    = (1 << 2),     // Allways have some light. (Used for viewmodels)
+    FullBright      = (1 << 3),     // Always draw the model at full light intensity.
+
+    DepthHack       = (1 << 4),     // For view weapon Z crunching.
+    Translucent     = (1 << 5),     // Translucent.
+
+    FrameLerp       = (1 << 6),     // Linear Interpolation between animation frames.
+    Beam            = (1 << 7),     // Special rendering hand: origin = to, old_origin = from.
+
+    CustomSkin      = (1 << 8),     // If CustomSkin is set, ent->skin is an index in image_precache.
+    Glow            = (1 << 9),     // Pulse lighting. Used for items.
+    RedShell        = (1 << 10),    // Red shell color effect.
+    GreenShell      = (1 << 11),    // Green shell color effect.
+    BlueShell       = (1 << 12),    // Blue shell color effect.
+
+    InfraRedVisible = (1 << 13),    // Infrared rendering.
+    DoubleShell     = (1 << 14),    // Double shell rendering.
+    HalfDamShell    = (1 << 15),    // Half dam shell.
+    UseDisguise     = (1 << 16),    // Use disguise.
+} RenderEffects;
 
 // player_state_t->refdef flags
 #define RDF_UNDERWATER      1       // warp the screen as apropriate

@@ -1521,17 +1521,17 @@ static inline uint32_t fill_model_instance(const r_entity_t* entity, const model
 	if (!MAT_IsKind(material_id, MATERIAL_KIND_GLASS))
 	{
 		//add in RF_IRVISIBLE support
-		if ((entity->flags & RF_IR_VISIBLE) && (vkpt_refdef.fd->rdflags & RDF_IRGOGGLES))
+		if ((entity->flags & RenderEffects::InfraRedVisible) && (vkpt_refdef.fd->rdflags & RDF_IRGOGGLES))
 		{
 			material_id |= MATERIAL_FLAG_SHELL_RED;
 		}
 		else
 		{
-			if (entity->flags & RF_SHELL_RED)
+			if (entity->flags & RenderEffects::RedShell)
 				material_id |= MATERIAL_FLAG_SHELL_RED;
-			if (entity->flags & RF_SHELL_GREEN)
+			if (entity->flags & RenderEffects::GreenShell)
 				material_id |= MATERIAL_FLAG_SHELL_GREEN;
-			if (entity->flags & RF_SHELL_BLUE)
+			if (entity->flags & RenderEffects::BlueShell)
 				material_id |= MATERIAL_FLAG_SHELL_BLUE;
 		}
 	}
@@ -1550,7 +1550,7 @@ static inline uint32_t fill_model_instance(const r_entity_t* entity, const model
 	instance->offset_prev = mesh->vertex_offset + oldframe * mesh->numverts * (sizeof(model_vertex_t) / sizeof(uint32_t));
 	instance->backlerp = entity->backlerp;
 	instance->material = material_id;
-	instance->alpha = (entity->flags & RF_TRANSLUCENT) ? entity->alpha : 1.0f;
+	instance->alpha = (entity->flags & RenderEffects::Translucent) ? entity->alpha : 1.0f;
 
 	return material_id;
 }
@@ -2731,9 +2731,9 @@ prepare_entities(EntityUploadInfo* upload_info)
 			if (model == NULL || model->meshes == NULL)
 				continue;
 
-			if (entity->flags & RF_VIEWERMODEL)
+			if (entity->flags & RenderEffects::ViewerModel)
 				viewer_model_indices[viewer_model_num++] = i;
-			else if (first_person_model && entity->flags & RF_WEAPONMODEL)
+			else if (first_person_model && entity->flags & RenderEffects::WeaponModel)
 				viewer_weapon_indices[viewer_weapon_num++] = i;
 			else if (model->model_class == MCLASS_EXPLOSION || model->model_class == MCLASS_SMOKE)
 				explosion_indices[explosion_num++] = i;

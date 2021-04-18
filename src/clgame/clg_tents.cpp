@@ -156,7 +156,7 @@ static void CLG_AddLasers(void)
 		}
 
 		ent.skinnum = l->color;
-		ent.flags = RF_TRANSLUCENT | RF_BEAM;
+		ent.flags = RenderEffects::Translucent | RenderEffects::Beam;
 		VectorCopy(l->start, ent.origin);
 		VectorCopy(l->end, ent.oldorigin);
 		ent.frame = l->width;
@@ -228,7 +228,7 @@ static explosion_t* CLG_PlainExplosion(qboolean big)
 	ex = CLG_AllocExplosion();
 	VectorCopy(teParameters.pos1, ex->ent.origin);
 	ex->type = explosion_t::ex_poly; // CPP: Enum
-	ex->ent.flags = RF_FULLBRIGHT;
+	ex->ent.flags = RenderEffects::FullBright;
 	ex->start = cl->servertime - CL_FRAMETIME;
 	ex->light = 350;
 	VectorSet(ex->lightcolor, 1.0, 0.5, 0.5);
@@ -267,14 +267,14 @@ void CLG_SmokeAndFlash(vec3_t origin)
 	VectorCopy(origin, ex->ent.origin);
 	ex->type = explosion_t::ex_misc; // CPP: Enum
 	ex->frames = 4;
-	ex->ent.flags = RF_TRANSLUCENT | RF_NOSHADOW;
+	ex->ent.flags = RenderEffects::Translucent | RF_NOSHADOW;
 	ex->start = cl->servertime - CL_FRAMETIME;
 	ex->ent.model = cl_mod_smoke;
 
 	ex = CLG_AllocExplosion();
 	VectorCopy(origin, ex->ent.origin);
 	ex->type = explosion_t::ex_flash; // CPP: Enum
-	ex->ent.flags = RF_FULLBRIGHT;
+	ex->ent.flags = RenderEffects::FullBright;
 	ex->frames = 2;
 	ex->start = cl->servertime - CL_FRAMETIME;
 	ex->ent.model = cl_mod_flash;
@@ -414,7 +414,7 @@ static void CLG_AddExplosions(void)
 					ent->skinnum = 0;
 			}
 			else {
-				ent->flags |= RF_TRANSLUCENT;
+				ent->flags |= RenderEffects::Translucent;
 				if (f < 13)
 					ent->skinnum = 5;
 				else
@@ -429,7 +429,7 @@ static void CLG_AddExplosions(void)
 
 			ent->alpha = (5.0 - (float)f) / 5.0;
 			ent->skinnum = 0;
-			ent->flags |= RF_TRANSLUCENT;
+			ent->flags |= RenderEffects::Translucent;
 			break;
 		default:
 			break;
@@ -599,7 +599,7 @@ static void CLG_AddBeams(void)
 		// through the tesla mine (instead it goes through the target)
 		if ((b->model == cl_mod_lightning) && (d <= model_length)) {
 			VectorCopy(b->end, ent.origin);
-			ent.flags = RF_FULLBRIGHT;
+			ent.flags = RenderEffects::FullBright;
 			ent.angles[0] = angles[0];
 			ent.angles[1] = angles[1];
 			ent.angles[2] = rand() % 360;
@@ -610,7 +610,7 @@ static void CLG_AddBeams(void)
 		while (d > 0) {
 			VectorCopy(org, ent.origin);
 			if (b->model == cl_mod_lightning) {
-				ent.flags = RF_FULLBRIGHT;
+				ent.flags = RenderEffects::FullBright;
 				ent.angles[0] = -angles[0];
 				ent.angles[1] = angles[1] + 180.0;
 				ent.angles[2] = rand() % 360;
@@ -735,7 +735,7 @@ static void CLG_AddPlayerBeams(void)
 		memset(&ent, 0, sizeof(ent));
 		ent.model = b->model;
 		ent.frame = framenum;
-		ent.flags = RF_FULLBRIGHT;
+		ent.flags = RenderEffects::FullBright;
 		ent.angles[0] = -angles[0];
 		ent.angles[1] = angles[1] + 180.0;
 		ent.angles[2] = cl->time % 360;
@@ -1093,7 +1093,7 @@ void CLG_ParseTempEntity(void)
 		VectorCopy(teParameters.pos1, ex->ent.origin);
 		dirtoangles(ex->ent.angles);
 		ex->type = explosion_t::ex_blaster;
-		ex->ent.flags = RF_FULLBRIGHT | RF_TRANSLUCENT;
+		ex->ent.flags = RenderEffects::FullBright | RenderEffects::Translucent;
 		ex->ent.tent_type = teParameters.type;
 		switch (teParameters.type) {
 		case TE_BLASTER:
@@ -1244,7 +1244,7 @@ void CLG_ParseTempEntity(void)
 		ex->type = explosion_t::ex_flash;
 		// note to self
 		// we need a better no draw flag
-		ex->ent.flags = RF_BEAM;
+		ex->ent.flags = RenderEffects::Beam;
 		ex->start = cl->servertime - CL_FRAMETIME;
 		ex->light = 100 + (rand() % 75);
 		ex->lightcolor[0] = 1.0;

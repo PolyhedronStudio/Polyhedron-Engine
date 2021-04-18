@@ -467,7 +467,7 @@ entity_t *Drop_Item(entity_t *ent, gitem_t *item)
     dropped->item = item;
     dropped->spawnFlags = DROPPED_ITEM;
     dropped->s.effects = item->worldModelFlags;
-    dropped->s.renderfx = RF_GLOW;
+    dropped->s.renderfx = RenderEffects::Glow;
     VectorSet(dropped->mins, -15, -15, -15);
     VectorSet(dropped->maxs, 15, 15, 15);
     gi.SetModel(dropped, dropped->item->worldModel);
@@ -569,7 +569,7 @@ void droptofloor(entity_t *ent)
         ent->solid = SOLID_BBOX;
         ent->Touch = NULL;
         ent->s.effects &= ~EntityEffects::Rotate;
-        ent->s.renderfx &= ~RF_GLOW;
+        ent->s.renderfx &= ~RenderEffects::Glow;
     }
 
     if (ent->spawnFlags & ITEM_TRIGGER_SPAWN) {
@@ -710,7 +710,7 @@ void SpawnItem(entity_t *ent, gitem_t *item)
     ent->nextThink = level.time + 2 * FRAMETIME;    // items start after other solids
     ent->Think = droptofloor;
     ent->s.effects = item->worldModelFlags;
-    ent->s.renderfx = RF_GLOW;
+    ent->s.renderfx = RenderEffects::Glow;
     if (ent->model)
         gi.ModelIndex(ent->model);
 }

@@ -44,8 +44,8 @@
 #define RF_LEFTHAND         0x80000000
 #define RF_NOSHADOW         0x80000000
 
-#define RF_SHELL_MASK       (RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | \
-                             RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM)
+#define RF_SHELL_MASK       (RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell | \
+                             RenderEffects::DoubleShell | RenderEffects::HalfDamShell)
 
 #define DLIGHT_CUTOFF       64
 
@@ -74,23 +74,23 @@ typedef struct r_entity_s {
     //
     // Most recent data
     //
-    vec3_t              origin;  // The entity origin -  also used as RF_BEAM's "from"
-    int                 frame;   // The entity frame - also used as RF_BEAM's diameter
+    vec3_t              origin;  // The entity origin -  also used as RenderEffects::Beam's "from"
+    int                 frame;   // The entity frame - also used as RenderEffects::Beam's diameter
 
     //
     // Previous data for lerping
     //
-    vec3_t              oldorigin;  // The old entity origin - also used as RF_BEAM's "to"
+    vec3_t              oldorigin;  // The old entity origin - also used as RenderEffects::Beam's "to"
     int                 oldframe;   // The old entity frame.
 
     //
     // Misc.
     //
     float               backlerp;   // 0.0 = current, 1.0 = old
-    int                 skinnum;    // also used as RF_BEAM's palette index,
+    int                 skinnum;    // also used as RenderEffects::Beam's palette index,
                                     // -1 => use rgba
 
-    float               alpha;      // ignore if RF_TRANSLUCENT isn't set
+    float               alpha;      // ignore if RenderEffects::Translucent isn't set
     color_t             rgba;
 
     qhandle_t           skin;       // NULL for inline skin
