@@ -8,6 +8,7 @@
 //
 
 #include "../../g_local.h"      // Include SVGame funcs.
+#include "sharedgame/sharedgame.h"
 #include "../../utils.h"        // Include Util funcs.
 #include "../../brushfuncs.h"   // Include Brush funcs.
 #include "../../effects.h"
@@ -373,9 +374,9 @@ void SP_func_door(entity_t* ent)
     VectorCopy(ent->s.angles, ent->moveInfo.end_angles);
 
     if (ent->spawnFlags & 16)
-        ent->s.effects |= EF_ANIM_ALL;
+        ent->s.effects |= EntityEffects::AnimCycleAll2hz;
     if (ent->spawnFlags & 64)
-        ent->s.effects |= EF_ANIM_ALLFAST;
+        ent->s.effects |= EntityEffects::AnimCycleAll30hz;
 
     // to simplify logic elsewhere, make non-teamed doors into a team of one
     if (!ent->team)

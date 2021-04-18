@@ -963,8 +963,6 @@ static void CLG_RailTrail(void)
 	if (!cl_railtrail_type->integer)
 	{
 		rail_color.u32 = d_8to24table[0x74];
-
-		CLG_OldRailTrail();
 	}
 	else
 	{

@@ -79,8 +79,6 @@ extern void func_train_find(entity_t* self);
 extern void gib_think(entity_t* self);
 
 extern void MegaHealth_think(entity_t* self);
-extern void M_FliesOff(entity_t* self);
-extern void M_FliesOn(entity_t* self);
 
 extern void monster_triggered_spawn(entity_t* self);
 extern void Brush_Move_Begin(entity_t* self);
@@ -254,8 +252,6 @@ const save_ptr_t save_ptrs[] = {
 
 { P_think, M_droptofloor },
 { P_think, MegaHealth_think },
-{ P_think, M_FliesOff },
-{ P_think, M_FliesOn },
 { P_think, monster_think },
 { P_think, monster_triggered_spawn },
 { P_think, Brush_Move_Begin },

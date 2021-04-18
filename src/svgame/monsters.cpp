@@ -42,32 +42,10 @@ void monster_fire_bullet(entity_t *self, const vec3_t &start, const vec3_t &dir,
 // Monster utility functions
 //
 
-void M_FliesOff(entity_t *self)
-{
-    self->s.effects &= ~EF_FLIES;
-    self->s.sound = 0;
-}
-
-void M_FliesOn(entity_t *self)
-{
-    if (self->waterLevel)
-        return;
-    self->s.effects |= EF_FLIES;
-    self->s.sound = gi.SoundIndex("infantry/inflies1.wav");
-    self->Think = M_FliesOff;
-    self->nextThink = level.time + 60;
-}
 
 void M_FlyCheck(entity_t *self)
 {
-    if (self->waterLevel)
-        return;
 
-    if (random() > 0.5)
-        return;
-
-    self->Think = M_FliesOn;
-    self->nextThink = level.time + 5 + 10 * random();
 }
 
 void AttackFinished(entity_t *self, float time)
@@ -247,25 +225,7 @@ void M_droptofloor(entity_t *ent)
 
 void M_SetEffects(entity_t *ent)
 {
-    ent->s.effects &= ~(EF_COLOR_SHELL | EF_POWERSCREEN);
     ent->s.renderfx &= ~(RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE);
-
-    if (ent->monsterInfo.aiflags & AI_RESURRECTING) {
-        ent->s.effects |= EF_COLOR_SHELL;
-        ent->s.renderfx |= RF_SHELL_RED;
-    }
-
-    if (ent->health <= 0)
-        return;
-
-    if (ent->powerarmor_time > level.time) {
-        if (ent->monsterInfo.power_armor_type == POWER_ARMOR_SCREEN) {
-            ent->s.effects |= EF_POWERSCREEN;
-        } else if (ent->monsterInfo.power_armor_type == POWER_ARMOR_SHIELD) {
-            ent->s.effects |= EF_COLOR_SHELL;
-            ent->s.renderfx |= RF_SHELL_GREEN;
-        }
-    }
 }
 
 

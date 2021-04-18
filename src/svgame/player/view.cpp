@@ -628,7 +628,6 @@ static void G_SetClientEffects(entity_t *ent)
 
     // show cheaters!!!
     if (ent->flags & FL_GODMODE) {
-        ent->s.effects |= EF_COLOR_SHELL;
         ent->s.renderfx |= (RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE);
     }
 }

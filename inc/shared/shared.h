@@ -594,22 +594,22 @@ typedef enum {
 // need to render in some way
 //-----------------
 typedef struct entity_state_s {
-    int     number;         // Entity index
+    int32_t number;         // Entity index
 
     vec3_t  origin;
     vec3_t  angles;
     vec3_t  old_origin;     // For lerping
-    int     modelindex;
-    int     modelindex2, modelindex3, modelindex4;  // Weapons, CTF flags, etc
-    int     frame;
-    int     skinnum;
-    unsigned int        effects;        // PGM - we're filling it, so it needs to be unsigned
-    int     renderfx;
-    int     solid;          // For client side prediction, 8*(bits 0-4) is x/y radius
+    int32_t modelindex;
+    int32_t modelindex2, modelindex3, modelindex4;  // Weapons, CTF flags, etc
+    int32_t frame;
+    int32_t skinnum;
+    uint32_t effects;        // PGM - we're filling it, so it needs to be unsigned
+    int32_t renderfx;
+    int32_t solid;          // For client side prediction, 8*(bits 0-4) is x/y radius
                             // 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
                             // gi.LinkEntity sets this properly
-    int     sound;          // For looping sounds, to guarantee shutoff
-    int     event;          // Impulse events -- muzzle flashes, footsteps, etc
+    int32_t sound;          // For looping sounds, to guarantee shutoff
+    int32_t event;          // Impulse events -- muzzle flashes, footsteps, etc
                             // events only go out for a single frame, they
                             // are automatically cleared each frame
 } entity_state_t;

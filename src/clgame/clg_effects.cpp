@@ -37,7 +37,7 @@ static cvar_t* cl_particle_num_factor = NULL;
 //
 void CLG_EffectsInit(void)
 {
-    int i, j;
+    int i, j; 
 
     // Fetch cvars.
     cvar_pt_particle_emissive = clgi.Cvar_Get("cvar_pt_particle_emissive", "", 0);
@@ -527,7 +527,6 @@ void CLG_MuzzleFlash2() {
     cdlight_t* dl;
 #endif
     vec3_t      forward, right;
-    char        soundname[MAX_QPATH];
 
     // locate the origin
     ent = &cs->entities[mzParameters.entity];
@@ -1155,102 +1154,6 @@ void CLG_BlasterTrail(vec3_t start, vec3_t end)
 
 /*
 ===============
-CLG_QuadTrail
-
-===============
-*/
-void CLG_QuadTrail(vec3_t start, vec3_t end)
-{
-    vec3_t      move;
-    vec3_t      vec;
-    float       len;
-    int         j;
-    cparticle_t* p;
-    int         dec;
-
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
-    len = VectorNormalize(vec);
-
-    dec = 5;
-    VectorScale(vec, 5, vec);
-
-    while (len > 0) {
-        len -= dec;
-
-        p = CLG_AllocParticle();
-        if (!p)
-            return;
-        VectorClear(p->accel);
-
-        p->time = cl->time;
-
-        p->alpha = 1.0;
-        p->alphavel = -1.0 / (0.8 + frand() * 0.2);
-
-        p->color = 115;
-        p->brightness = cvar_pt_particle_emissive->value;
-
-        for (j = 0; j < 3; j++) {
-            p->org[j] = move[j] + crand() * 16;
-            p->vel[j] = crand() * 5;
-            p->accel[j] = 0;
-        }
-
-        VectorAdd(move, vec, move);
-    }
-}
-
-/*
-===============
-CLG_FlagTrail
-
-===============
-*/
-void CLG_FlagTrail(vec3_t start, vec3_t end, int color)
-{
-    vec3_t      move;
-    vec3_t      vec;
-    float       len;
-    int         j;
-    cparticle_t* p;
-    int         dec;
-
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
-    len = VectorNormalize(vec);
-
-    dec = 5;
-    VectorScale(vec, 5, vec);
-
-    while (len > 0) {
-        len -= dec;
-
-        p = CLG_AllocParticle();
-        if (!p)
-            return;
-        VectorClear(p->accel);
-
-        p->time = cl->time;
-
-        p->alpha = 1.0;
-        p->alphavel = -1.0 / (0.8 + frand() * 0.2);
-
-        p->color = color;
-        p->brightness = 1.0f;
-
-        for (j = 0; j < 3; j++) {
-            p->org[j] = move[j] + crand() * 16;
-            p->vel[j] = crand() * 5;
-            p->accel[j] = 0;
-        }
-
-        VectorAdd(move, vec, move);
-    }
-}
-
-/*
-===============
 CLG_DiminishingTrail
 
 ===============
@@ -1298,7 +1201,7 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags)
 
             p->time = cl->time;
 
-            if (flags & EF_GIB) {
+            if (flags & EntityEffects::Gib) {
                 p->alpha = 1.0;
                 p->alphavel = -1.0 / (1 + frand() * 0.4);
 
@@ -1311,22 +1214,7 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags)
                     p->accel[j] = 0;
                 }
                 p->vel[2] -= PARTICLE_GRAVITY;
-            }
-            else if (flags & EF_GREENGIB) {
-                p->alpha = 1.0;
-                p->alphavel = -1.0 / (1 + frand() * 0.4);
-
-                p->color = 0xdb + (rand() & 7);
-                p->brightness = 1.0f;
-
-                for (j = 0; j < 3; j++) {
-                    p->org[j] = move[j] + crand() * orgscale;
-                    p->vel[j] = crand() * velscale;
-                    p->accel[j] = 0;
-                }
-                p->vel[2] -= PARTICLE_GRAVITY;
-            }
-            else {
+            } else {
                 p->alpha = 1.0;
                 p->alphavel = -1.0 / (1 + frand() * 0.2);
 
@@ -1347,145 +1235,6 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags)
         VectorAdd(move, vec, move);
     }
 }
-
-/*
-===============
-CLG_RocketTrail
-
-===============
-*/
-void CLG_RocketTrail(vec3_t start, vec3_t end, cl_entity_t* old)
-{
-    vec3_t      move;
-    vec3_t      vec;
-    float       len;
-    int         j;
-    cparticle_t* p;
-    float       dec;
-
-    // smoke
-    CLG_DiminishingTrail(start, end, old, EF_ROCKET);
-
-    // fire
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
-    len = VectorNormalize(vec);
-
-    dec = 1;
-    VectorScale(vec, dec, vec);
-
-    while (len > 0) {
-        len -= dec;
-
-        if ((rand() & 7) == 0) {
-            p = CLG_AllocParticle();
-            if (!p)
-                return;
-
-            VectorClear(p->accel);
-            p->time = cl->time;
-
-            p->alpha = 1.0;
-            p->alphavel = -1.0 / (1 + frand() * 0.2);
-
-            p->color = 0xdc + (rand() & 3);
-            p->brightness = cvar_pt_particle_emissive->value;
-
-            for (j = 0; j < 3; j++) {
-                p->org[j] = move[j] + crand() * 5;
-                p->vel[j] = crand() * 20;
-            }
-            p->accel[2] = -PARTICLE_GRAVITY;
-        }
-        VectorAdd(move, vec, move);
-    }
-}
-
-/*
-===============
-CLG_RailTrail
-
-===============
-*/
-void CLG_OldRailTrail(void)
-{
-    vec3_t      move;
-    vec3_t      vec;
-    float       len;
-    int         j;
-    cparticle_t* p;
-    float       dec;
-    vec3_t      right, up;
-    int         i;
-    float       d, c, s;
-    vec3_t      dir;
-    byte        clr = 0x74;
-
-    VectorCopy(teParameters.pos1, move);
-    VectorSubtract(teParameters.pos2, teParameters.pos1, vec);
-    len = VectorNormalize(vec);
-
-    MakeNormalVectors(vec, right, up);
-
-    for (i = 0; i < len; i++) {
-        p = CLG_AllocParticle();
-        if (!p)
-            return;
-
-        p->time = cl->time;
-        VectorClear(p->accel);
-
-        d = i * 0.1;
-        c = std::cosf(d);
-        s = std::sinf(d);
-
-        VectorScale(right, c, dir);
-        VectorMA(dir, s, up, dir);
-
-        p->alpha = 1.0;
-        p->alphavel = -1.0 / (1 + frand() * 0.2);
-
-        p->color = clr + (rand() & 7);
-        p->brightness = cvar_pt_particle_emissive->value;
-
-        for (j = 0; j < 3; j++) {
-            p->org[j] = move[j] + dir[j] * 3;
-            p->vel[j] = dir[j] * 6;
-        }
-
-        VectorAdd(move, vec, move);
-    }
-
-    dec = 0.75;
-    VectorScale(vec, dec, vec);
-    VectorCopy(teParameters.pos1, move);
-
-    while (len > 0) {
-        len -= dec;
-
-        p = CLG_AllocParticle();
-        if (!p)
-            return;
-
-        p->time = cl->time;
-        VectorClear(p->accel);
-
-        p->alpha = 1.0;
-        p->alphavel = -1.0 / (0.6 + frand() * 0.2);
-
-        p->color = rand() & 15;
-        p->brightness = 1.0f;
-
-        for (j = 0; j < 3; j++) {
-            p->org[j] = move[j] + crand() * 3;
-            p->vel[j] = crand() * 3;
-            p->accel[j] = 0;
-        }
-
-        VectorAdd(move, vec, move);
-    }
-}
-
 
 /*
 ===============
@@ -1530,147 +1279,6 @@ void CLG_BubbleTrail(vec3_t start, vec3_t end)
         p->vel[2] += 6;
 
         VectorAdd(move, vec, move);
-    }
-}
-
-
-/*
-===============
-CLG_FlyParticles
-===============
-*/
-
-#define BEAMLENGTH  16
-
-static void CLG_FlyParticles(vec3_t origin, int count)
-{
-    int         i;
-    cparticle_t* p;
-    float       angle;
-    float       sp, sy, cp, cy;
-    vec3_t      forward;
-    float       dist = 64;
-    float       ltime;
-
-    if (count > NUMVERTEXNORMALS)
-        count = NUMVERTEXNORMALS;
-
-    ltime = (float)cl->time / 1000.0;
-    for (i = 0; i < count; i += 2) {
-        angle = ltime * avelocities[i][0];
-        sy = std::sinf(angle);
-        cy = std::cosf(angle);
-        angle = ltime * avelocities[i][1];
-        sp = std::sinf(angle);
-        cp = std::cosf(angle);
-
-        forward[0] = cp * cy;
-        forward[1] = cp * sy;
-        forward[2] = -sp;
-
-        p = CLG_AllocParticle();
-        if (!p)
-            return;
-
-        p->time = cl->time;
-
-        dist = std::sinf(ltime + i) * 64;
-        p->org[0] = origin[0] + bytedirs[i][0] * dist + forward[0] * BEAMLENGTH;
-        p->org[1] = origin[1] + bytedirs[i][1] * dist + forward[1] * BEAMLENGTH;
-        p->org[2] = origin[2] + bytedirs[i][2] * dist + forward[2] * BEAMLENGTH;
-
-        VectorClear(p->vel);
-        VectorClear(p->accel);
-
-        p->color = 0;
-        p->brightness = 1.0f;
-
-        p->alpha = 1;
-        p->alphavel = INSTANT_PARTICLE;
-    }
-}
-
-void CLG_FlyEffect(cl_entity_t* ent, vec3_t origin)
-{
-    int     n;
-    int     count;
-    int     starttime;
-
-    if (ent->fly_stoptime < cl->time) {
-        starttime = cl->time;
-        ent->fly_stoptime = cl->time + 60000;
-    }
-    else {
-        starttime = ent->fly_stoptime - 60000;
-    }
-
-    n = cl->time - starttime;
-    if (n < 20000)
-        count = n * 162 / 20000.0;
-    else {
-        n = ent->fly_stoptime - cl->time;
-        if (n < 20000)
-            count = n * 162 / 20000.0;
-        else
-            count = 162;
-    }
-
-    CLG_FlyParticles(origin, count);
-}
-
-/*
-===============
-CLG_BfgParticles
-===============
-*/
-void CLG_BfgParticles(r_entity_t* ent)
-{
-    int         i;
-    cparticle_t* p;
-    float       angle;
-    float       sp, sy, cp, cy;
-    vec3_t      forward;
-    float       dist = 64;
-    vec3_t      v;
-    float       ltime;
-
-    const int count = NUMVERTEXNORMALS * cl_particle_num_factor->value;
-
-    ltime = (float)cl->time / 1000.0;
-    for (i = 0; i < count; i++) {
-        angle = ltime * avelocities[i][0];
-        sy = std::sinf(angle);
-        cy = std::cosf(angle);
-        angle = ltime * avelocities[i][1];
-        sp = std::sinf(angle);
-        cp = std::cosf(angle);
-
-        forward[0] = cp * cy;
-        forward[1] = cp * sy;
-        forward[2] = -sp;
-
-        p = CLG_AllocParticle();
-        if (!p)
-            return;
-
-        p->time = cl->time;
-
-        dist = std::sinf(ltime + i) * 64;
-        p->org[0] = ent->origin[0] + bytedirs[i][0] * dist + forward[0] * BEAMLENGTH;
-        p->org[1] = ent->origin[1] + bytedirs[i][1] * dist + forward[1] * BEAMLENGTH;
-        p->org[2] = ent->origin[2] + bytedirs[i][2] * dist + forward[2] * BEAMLENGTH;
-
-        VectorClear(p->vel);
-        VectorClear(p->accel);
-
-        VectorSubtract(p->org, ent->origin, v);
-        dist = VectorLength(v) / 90.0;
-
-        p->color = floor(0xd0 + dist * 7);
-        p->brightness = cvar_pt_particle_emissive->value;
-
-        p->alpha = 1.0 - dist;
-        p->alphavel = INSTANT_PARTICLE;
     }
 }
 

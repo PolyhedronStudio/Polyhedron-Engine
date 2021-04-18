@@ -70,9 +70,9 @@ void SP_func_object(entity_t* self)
     }
 
     if (self->spawnFlags & 2)
-        self->s.effects |= EF_ANIM_ALL;
+        self->s.effects |= EntityEffects::AnimCycleAll2hz;
     if (self->spawnFlags & 4)
-        self->s.effects |= EF_ANIM_ALLFAST;
+        self->s.effects |= EntityEffects::AnimCycleAll30hz;
 
     self->clipMask = CONTENTS_MASK_MONSTERSOLID;
 

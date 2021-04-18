@@ -113,43 +113,19 @@ void CLG_AddPacketEntities(void)
         effects = s1->effects;
         renderfx = s1->renderfx;
 
-        // set frame
-        if (effects & EF_ANIM01)
+        //
+        // Frame Animation Effects.
+        //
+        if (effects & EntityEffects::AnimCycleFrames01hz2)
             ent.frame = autoanim & 1;
-        else if (effects & EF_ANIM23)
+        else if (effects & EntityEffects::AnimCycleFrames23hz2)
             ent.frame = 2 + (autoanim & 1);
-        else if (effects & EF_ANIM_ALL)
+        else if (effects & EntityEffects::AnimCycleAll2hz)
             ent.frame = autoanim;
-        else if (effects & EF_ANIM_ALLFAST)
-            ent.frame = (cl->time / 33.33f); //30 fps
-      //        ent.frame = (cl->time / 50.0f); //20 fps
+        else if (effects & EntityEffects::AnimCycleAll30hz)
+            ent.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
         else
             ent.frame = s1->frame;
-
-        // quad and pent can do different things on client
-        if (effects & EF_PENT) {
-            effects &= ~EF_PENT;
-            effects |= EF_COLOR_SHELL;
-            renderfx |= RF_SHELL_RED;
-        }
-
-        if (effects & EF_QUAD) {
-            effects &= ~EF_QUAD;
-            effects |= EF_COLOR_SHELL;
-            renderfx |= RF_SHELL_BLUE;
-        }
-
-        if (effects & EF_DOUBLE) {
-            effects &= ~EF_DOUBLE;
-            effects |= EF_COLOR_SHELL;
-            renderfx |= RF_SHELL_DOUBLE;
-        }
-
-        if (effects & EF_HALF_DAMAGE) {
-            effects &= ~EF_HALF_DAMAGE;
-            effects |= EF_COLOR_SHELL;
-            renderfx |= RF_SHELL_HALF_DAM;
-        }
 
         // optionally remove the glowing effect
         if (cl_noglow->integer)
@@ -228,33 +204,19 @@ void CLG_AddPacketEntities(void)
             ent.alpha = 0.70;
 
         // render effects (fullbright, translucent, etc)
-        if ((effects & EF_COLOR_SHELL))
+        if ((effects & EntityEffects::ColorShell))
             ent.flags = 0;  // renderfx go on color shell entity
         else
             ent.flags = renderfx;
 
         // calculate angles
-        if (effects & EF_ROTATE) {  // some bonus items auto-rotate
+        if (effects & EntityEffects::Rotate) {  // some bonus items auto-rotate
             ent.angles[0] = 0;
             ent.angles[1] = autorotate;
             ent.angles[2] = 0;
-        }
-        else if (effects & EF_SPINNINGLIGHTS) {
-            vec3_t forward;
-            vec3_t start;
-
-            ent.angles[0] = 0;
-            ent.angles[1] = anglemod(cl->time / 2) + s1->angles[1];
-            ent.angles[2] = 180;
-
-            AngleVectors(ent.angles, &forward, NULL, NULL);
-            VectorMA(ent.origin, 64, forward, start);
-            V_AddLight(start, 100, 1, 0, 0);
-        }
-        else if (s1->number == cl->frame.clientNum + 1) {
+        } else if (s1->number == cl->frame.clientNum + 1) {
             VectorCopy(cl->playerEntityAngles, ent.angles);      // use predicted angles
-        }
-        else { // interpolate angles
+        } else { // interpolate angles
             LerpAngles(cent->prev.angles, cent->current.angles,
                 cl->lerpfrac, ent.angles);
 
@@ -264,14 +226,8 @@ void CLG_AddPacketEntities(void)
             }
         }
 
+        // Entity Effects for in case the entity is the actual client.
         if (s1->number == cl->frame.clientNum + 1) {
-            if (effects & EF_FLAG2)
-                V_AddLight(ent.origin, 225, 0.1, 0.1, 1.0);
-            else if (effects & EF_TAGTRAIL)
-                V_AddLight(ent.origin, 225, 1.0, 1.0, 0.0);
-            else if (effects & EF_TRACKERTRAIL)
-                V_AddLight(ent.origin, 225, -1.0, -1.0, -1.0);
-
             if (!cl->thirdPersonView)
             {
                 if (vid_rtx->integer)
@@ -298,28 +254,10 @@ void CLG_AddPacketEntities(void)
             goto skip;
         }
 
-        if (effects & EF_BFG) {
-            ent.flags |= RF_TRANSLUCENT;
-            ent.alpha = 0.30;
-        }
-
-        if (effects & EF_PLASMA) {
-            ent.flags |= RF_TRANSLUCENT;
-            ent.alpha = 0.6;
-        }
-
-        if (effects & EF_SPHERETRANS) {
-            ent.flags |= RF_TRANSLUCENT;
-            if (effects & EF_TRACKERTRAIL)
-                ent.alpha = 0.6;
-            else
-                ent.alpha = 0.3;
-        }
-
         ent.flags |= base_entity_flags;
 
         // in rtx mode, the base entity has the renderfx for shells
-        if ((effects & EF_COLOR_SHELL) && vid_rtx->integer) {
+        if ((effects & EntityEffects::ColorShell) && vid_rtx->integer) {
             renderfx = adjust_shell_fx(renderfx);
             ent.flags |= renderfx;
         }
@@ -349,7 +287,7 @@ void CLG_AddPacketEntities(void)
         }
 
         // color shells generate a separate entity for the main model
-        if ((effects & EF_COLOR_SHELL) && !vid_rtx->integer) {
+        if ((effects & EntityEffects::ColorShell) && !vid_rtx->integer) {
             renderfx = adjust_shell_fx(renderfx);
             ent.flags = renderfx | RF_TRANSLUCENT | base_entity_flags;
             ent.alpha = 0.30;
@@ -361,7 +299,8 @@ void CLG_AddPacketEntities(void)
         ent.flags = base_entity_flags;
         ent.alpha = 0;
 
-        // duplicate for linked models
+        // Add an entity to the current rendering frame that has model index 2 attached to it.
+        // Duplicate for linked models
         if (s1->modelindex2) {
             if (s1->modelindex2 == 255) {
                 // custom weapon
@@ -386,7 +325,7 @@ void CLG_AddPacketEntities(void)
                 ent.flags = RF_TRANSLUCENT;
             }
 
-            if ((effects & EF_COLOR_SHELL) && vid_rtx->integer) {
+            if ((effects & EntityEffects::ColorShell) && vid_rtx->integer) {
                 ent.flags |= renderfx;
             }
 
@@ -397,126 +336,26 @@ void CLG_AddPacketEntities(void)
             ent.alpha = 0;
         }
 
+        // Add an entity to the current rendering frame that has model index 3 attached to it.
         if (s1->modelindex3) {
             ent.model = cl->model_draw[s1->modelindex3];
             V_AddEntity(&ent);
         }
 
+        // Add an entity to the current rendering frame that has model index 4 attached to it.
         if (s1->modelindex4) {
             ent.model = cl->model_draw[s1->modelindex4];
             V_AddEntity(&ent);
         }
 
-        if (effects & EF_POWERSCREEN) {
-            ent.model = cl_mod_powerscreen;
-            ent.oldframe = 0;
-            ent.frame = 0;
-            ent.flags |= (RF_TRANSLUCENT | RF_SHELL_GREEN);
-            ent.alpha = 0.30;
-            V_AddEntity(&ent);
-        }
 
-        // add automatic particle trails
-        if (effects & ~EF_ROTATE) {
-            if (effects & EF_ROCKET) {
-                if (!(cl_disable_particles->integer & NOPART_ROCKET_TRAIL)) {
-                    CLG_RocketTrail(cent->lerp_origin, ent.origin, cent);
-                }
+        // Add automatic particle trail effects where desired.
+        if (effects & ~EntityEffects::Rotate) {
+            if (effects & EntityEffects::Blaster) {
+                CLG_BlasterTrail(cent->lerp_origin, ent.origin);
                 V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
-            }
-            else if (effects & EF_BLASTER) {
-                if (effects & EF_TRACKER) {
-                    CLG_BlasterTrail2(cent->lerp_origin, ent.origin);
-                    V_AddLight(ent.origin, 200, 0.1f, 0.4f, 0.12f);
-                }
-                else {
-                    CLG_BlasterTrail(cent->lerp_origin, ent.origin);
-                    V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
-                }
-            }
-            else if (effects & EF_HYPERBLASTER) {
-                if (effects & EF_TRACKER)
-                    V_AddLight(ent.origin, 200, 0.1f, 0.4f, 0.12f);
-                else
-                    V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
-            }
-            else if (effects & EF_GIB) {
+            } else if (effects & EntityEffects::Gib) {
                 CLG_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
-            }
-            else if (effects & EF_GRENADE) {
-                if (!(cl_disable_particles->integer & NOPART_GRENADE_TRAIL)) {
-                    CLG_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
-                }
-            }
-            else if (effects & EF_FLIES) {
-                CLG_FlyEffect(cent, ent.origin);
-            }
-            else if (effects & EF_TRAP) {
-                ent.origin[2] += 32;
-                CLG_TrapParticles(&ent);
-#if USE_DLIGHTS
-                i = (rand() % 100) + 100;
-                V_AddLight(ent.origin, i, 1, 0.8, 0.1);
-#endif
-            }
-            else if (effects & EF_FLAG2) {
-                CLG_FlagTrail(cent->lerp_origin, ent.origin, 115);
-                V_AddLight(ent.origin, 225, 0.1, 0.1, 1);
-            }
-            else if (effects & EF_TAGTRAIL) {
-                CLG_TagTrail(cent->lerp_origin, ent.origin, 220);
-                V_AddLight(ent.origin, 225, 1.0, 1.0, 0.0);
-            }
-            else if (effects & EF_TRACKERTRAIL) {
-                if (effects & EF_TRACKER) {
-#if USE_DLIGHTS
-                    float intensity;
-
-                    intensity = 50 + (500 * (std::sinf(cl->time / 500.0) + 1.0));
-                    V_AddLight(ent.origin, intensity, -1.0, -1.0, -1.0);
-#endif
-                }
-                else {
-                    CLG_Tracker_Shell(cent->lerp_origin);
-                    V_AddLight(ent.origin, 155, -1.0, -1.0, -1.0);
-                }
-            }
-            else if (effects & EF_TRACKER) {
-                CLG_TrackerTrail(cent->lerp_origin, ent.origin, 0);
-                V_AddLight(ent.origin, 200, -1, -1, -1);
-            }
-            else if (effects & EF_GREENGIB) {
-                CLG_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
-            }
-            else if (effects & EF_IONRIPPER) { // N&C - Turned into flickering candle light
-                float anim = sinf((float)ent.id + ((float)cl->time / 60.f + frand() * 3.2)) / (3.24356 - (frand() / 3.24356));
-
-                float offset = anim * 0.0f;
-                float brightness = anim * 1.2f + 1.6f;
-
-                vec3_t origin;
-                VectorCopy(ent.origin, origin);
-                origin[2] += offset;
-
-                V_AddLightEx(origin, 25.f, 1.0f * brightness, 0.52f * brightness, 0.1f * brightness, 1.0f);
-            }
-            else if (effects & EF_BLUEHYPERBLASTER) { // N&C - Turned into flickering flame light
-                float anim = sinf((float)ent.id + ((float)cl->time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
-
-                float offset = anim * 0.0f;
-                float brightness = anim * 1.2f + 1.6f;
-
-                vec3_t origin;
-                VectorCopy(ent.origin, origin);
-                origin[2] += offset;
-
-                V_AddLightEx(origin, 25.f, 1.0f * brightness, 0.425f * brightness, 0.1f * brightness, 3.6f);
-            }
-            else if (effects & EF_PLASMA) {
-                if (effects & EF_ANIM_ALLFAST) {
-                    CLG_BlasterTrail(cent->lerp_origin, ent.origin);
-                }
-                V_AddLight(ent.origin, 130, 1, 0.5, 0.5);
             }
         }
 
@@ -528,33 +367,6 @@ void CLG_AddPacketEntities(void)
     }
 }
 
-static int shell_effect_hack(void)
-{
-    cl_entity_t* ent;
-    int         flags = 0;
-
-    if (cl->frame.clientNum == CLIENTNUM_NONE)
-        return 0;
-
-    ent = &cs->entities[cl->frame.clientNum + 1];
-    if (ent->serverframe != cl->frame.number)
-        return 0;
-
-    if (!ent->current.modelindex)
-        return 0;
-
-    if (ent->current.effects & EF_PENT)
-        flags |= RF_SHELL_RED;
-    if (ent->current.effects & EF_QUAD)
-        flags |= RF_SHELL_BLUE;
-    if (ent->current.effects & EF_DOUBLE)
-        flags |= RF_SHELL_DOUBLE;
-    if (ent->current.effects & EF_HALF_DAMAGE)
-        flags |= RF_SHELL_HALF_DAM;
-
-    return flags;
-}
-
 /*
 ==============
 CLG_AddViewWeapon
@@ -564,7 +376,7 @@ void CLG_AddViewWeapon(void)
 {
     player_state_t* ps, * ops;
     r_entity_t    gun;        // view model
-    int         i, shell_flags;
+    int         i, shell_flags = 0;
 
     // allow the gun to be completely removed
     if (cl_player_model->integer == CL_PLAYER_MODEL_DISABLED) {
@@ -659,9 +471,6 @@ void CLG_AddViewWeapon(void)
         gun.flags |= RF_TRANSLUCENT;
     }
 
-    // add shell effect from player entity
-    shell_flags = shell_effect_hack();
-
     // same entity in rtx mode
     if (vid_rtx->integer) {
         gun.flags |= shell_flags;
@@ -737,7 +546,7 @@ qboolean CLG_IsClientViewEntity(const cl_entity_t* ent) {
         return true;
     }
 
-    if ((ent->current.effects & EF_CORPSE) == 0) {
+    if ((ent->current.effects & EntityEffects::Corpse) == 0) {
 
         if (ent->current.modelindex == 255) {
 
@@ -773,7 +582,7 @@ void CLG_EntityEvent(int number) {
     cl_entity_t *cent = &cs->entities[number];
     
     // EF_TELEPORTER acts like an event, but is not cleared each frame
-    if ((cent->current.effects & EF_TELEPORTER) && CL_FRAMESYNC) {
+    if ((cent->current.effects & EntityEffects::Teleporter) && CL_FRAMESYNC) {
         CLG_TeleporterParticles(cent->current.origin);
     }
         

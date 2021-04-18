@@ -48,9 +48,9 @@ void SP_func_wall(entity_t* self)
     gi.SetModel(self, self->model);
 
     if (self->spawnFlags & 8)
-        self->s.effects |= EF_ANIM_ALL;
+        self->s.effects |= EntityEffects::AnimCycleAll2hz;
     if (self->spawnFlags & 16)
-        self->s.effects |= EF_ANIM_ALLFAST;
+        self->s.effects |= EntityEffects::AnimCycleAll30hz;
 
     // just a wall
     if ((self->spawnFlags & 7) == 0) {
