@@ -83,17 +83,12 @@ SET(SRC_SVGAME
 	svgame/entities/info/info_player_intermission.cpp
 	svgame/entities/info/info_player_start.cpp
 
-	 
-	 
-	 
 	svgame/entities/misc/misc_gib_arm.cpp 
 	svgame/entities/misc/misc_gib_leg.cpp 
 	svgame/entities/misc/misc_gib_head.cpp 
 	 
 	svgame/entities/misc/misc_teleporter.cpp
 	svgame/entities/misc/misc_teleporter_dest.cpp
-	
-	
 
 	svgame/entities/target/target_blaster.cpp
 	svgame/entities/target/target_changelevel.cpp
@@ -112,6 +107,7 @@ SET(SRC_SVGAME
 	svgame/entities/target/target_splash.cpp
 	svgame/entities/target/target_string.cpp
 	svgame/entities/target/target_temp_entity.cpp
+
 	svgame/entities/trigger/trigger_always.cpp
 	svgame/entities/trigger/trigger_counter.cpp
 	svgame/entities/trigger/trigger_elevator.cpp
@@ -125,10 +121,6 @@ SET(SRC_SVGAME
 	svgame/entities/trigger/trigger_relay.cpp
 	
 	svgame/entities/light.cpp
-	
-	
-	
-	
 	svgame/entities/viewthing.cpp
 
 	svgame/monsters/movement.cpp
@@ -140,19 +132,10 @@ SET(SRC_SVGAME
 	svgame/player/player.cpp
 	svgame/player/view.cpp
 	svgame/player/weapons.cpp
-
 	
 	svgame/weapons/blaster.cpp
-	
 	svgame/weapons/flaregun.cpp
-	
-	
-	
 	svgame/weapons/machinegun.cpp
-	
-	
-	
-	
 )
 
 SET(HEADERS_SVGAME
@@ -173,19 +156,10 @@ SET(HEADERS_SVGAME
 	svgame/player/client.h
 	svgame/player/player.h
 	svgame/player/weapons.h
-
 	
 	svgame/weapons/blaster.h
-	
 	svgame/weapons/flaregun.h
-	
-	
-	
 	svgame/weapons/machinegun.h
-	
-	
-	
-	
 )
 
 ###################### Client.
