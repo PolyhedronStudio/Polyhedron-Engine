@@ -271,10 +271,7 @@ static const save_field_t levelfields[] = {
     I(sound2_entity_framenum),
 
     I(pic_health),
-
-    I(total_secrets),
-    I(found_secrets),
-
+    
     I(total_goals),
     I(found_goals),
 

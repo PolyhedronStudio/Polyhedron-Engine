@@ -341,7 +341,7 @@ void HelpComputer(entity_t *ent)
                game.helpmessage2,
                level.killed_monsters, level.total_monsters,
                level.found_goals, level.total_goals,
-               level.found_secrets, level.total_secrets);
+               0, 0);
 
     gi.WriteByte(svg_layout);
     gi.WriteString(string);

@@ -73,7 +73,6 @@ void SP_target_temp_entity(entity_t *ent);
 void SP_target_speaker(entity_t *ent);
 void SP_target_explosion(entity_t *ent);
 void SP_target_changelevel(entity_t *ent);
-void SP_target_secret(entity_t *ent);
 void SP_target_goal(entity_t *ent);
 void SP_target_splash(entity_t *ent);
 void SP_target_spawner(entity_t *ent);
@@ -146,7 +145,6 @@ static const spawn_func_t spawn_funcs[] = {
     {"target_speaker", SP_target_speaker},
     {"target_explosion", SP_target_explosion},
     {"target_changelevel", SP_target_changelevel},
-    {"target_secret", SP_target_secret},
     {"target_goal", SP_target_goal},
     {"target_splash", SP_target_splash},
     {"target_spawner", SP_target_spawner},

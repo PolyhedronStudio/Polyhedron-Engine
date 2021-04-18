@@ -312,9 +312,6 @@ typedef struct {
 
     int         pic_health;
 
-    int         total_secrets;
-    int         found_secrets;
-
     int         total_goals;
     int         found_goals;
 
