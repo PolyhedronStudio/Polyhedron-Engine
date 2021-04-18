@@ -367,7 +367,7 @@ qboolean CLG_ParseServerMessage (int serverCommand) {
 
         // Client Muzzle Flash.
         case svg_muzzleflash:
-            CLG_ParseMuzzleFlashPacket(MZ_SILENCED);
+            CLG_ParseMuzzleFlashPacket(0);
             CLG_MuzzleFlash();
             return true;
         break;

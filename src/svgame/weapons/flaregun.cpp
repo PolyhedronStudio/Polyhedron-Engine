@@ -54,7 +54,7 @@ void weapon_flaregun_fire(entity_t* ent)
 
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
-    gi.WriteByte(MZ_FLARE | is_silenced);
+    gi.WriteByte(MuzzleFlashType::MFT_Flare | is_silenced);
     gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
     // Bump the gunframe 

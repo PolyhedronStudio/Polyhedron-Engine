@@ -374,9 +374,9 @@ void SP_func_door(entity_t* ent)
     VectorCopy(ent->s.angles, ent->moveInfo.end_angles);
 
     if (ent->spawnFlags & 16)
-        ent->s.effects |= EntityEffectType::AnimCycleAll2hz;
+        ent->s.effects |= EntityEffectType::EET_AnimCycleAll2hz;
     if (ent->spawnFlags & 64)
-        ent->s.effects |= EntityEffectType::AnimCycleAll30hz;
+        ent->s.effects |= EntityEffectType::EET_AnimCycleAll30hz;
 
     // to simplify logic elsewhere, make non-teamed doors into a team of one
     if (!ent->team)

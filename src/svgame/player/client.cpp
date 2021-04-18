@@ -832,7 +832,7 @@ void spectator_respawn(entity_t *ent)
         // send effect
         gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
-        gi.WriteByte(MZ_LOGIN);
+        gi.WriteByte(MuzzleFlashType::MFT_Login);
         gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
         // hold in place briefly
@@ -1034,7 +1034,7 @@ void ClientBeginDeathmatch(entity_t *ent)
         // send effect
         gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
-        gi.WriteByte(MZ_LOGIN);
+        gi.WriteByte(MuzzleFlashType::MFT_Login);
         gi.Multicast(&ent->s.origin, MULTICAST_PVS);
     }
 
@@ -1090,7 +1090,7 @@ void ClientBegin(entity_t *ent)
         if (game.maxclients > 1) {
             gi.WriteByte(svg_muzzleflash);
             gi.WriteShort(ent - g_edicts);
-            gi.WriteByte(MZ_LOGIN);
+            gi.WriteByte(MuzzleFlashType::MFT_Login);
             gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
             gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
@@ -1261,7 +1261,7 @@ void ClientDisconnect(entity_t *ent)
     if (ent->inUse) {
         gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
-        gi.WriteByte(MZ_LOGOUT);
+        gi.WriteByte(MuzzleFlashType::MFT_Logout);
         gi.Multicast(&ent->s.origin, MULTICAST_PVS);
     }
 

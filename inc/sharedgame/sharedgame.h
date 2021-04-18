@@ -49,25 +49,25 @@ constexpr uint32_t BUTTON_ANY			= (1 << 7);
 //-----------------
 typedef enum {
     // Animation Effects.
-    AnimCycleFrames01hz2    = (1 << 0), // Auto cycle between the frames 0, and 1, at 2 hz.
-    AnimCycleFrames23hz2    = (1 << 1), // Auto cycle between the frames 2, and 3, at 2 hz.
-    AnimCycleAll2hz         = (1 << 2), // Auto cycle through all frames at 2 hz.
-    AnimCycleAll30hz        = (1 << 3), // Auto cycle through all frames at 30 hz.
+    EET_AnimCycleFrames01hz2    = (1 << 0), // Auto cycle between the frames 0, and 1, at 2 hz.
+    EET_AnimCycleFrames23hz2    = (1 << 1), // Auto cycle between the frames 2, and 3, at 2 hz.
+    EET_AnimCycleAll2hz         = (1 << 2), // Auto cycle through all frames at 2 hz.
+    EET_AnimCycleAll30hz        = (1 << 3), // Auto cycle through all frames at 30 hz.
     
-    ColorShell              = (1 << 6), // Color Shell around model.
+    EET_ColorShell              = (1 << 6), // Color Shell around model.
 
-    Rotate                  = (1 << 8), // Rotate (Items.)
+    EET_Rotate                  = (1 << 8), // Rotate (Items.)
 
     // Entity 'type' Effects that dictate special entity 'type' treatment.
-    Gib     = (1 << 10),    // Entity is of type 'gib', and needs special treatment.
-    Corpse  = (1 << 11),    // Entity is of type 'corpse', and needs special treatment.
+    EET_Gib     = (1 << 10),    // Entity is of type 'gib', and needs special treatment.
+    EET_Corpse  = (1 << 11),    // Entity is of type 'corpse', and needs special treatment.
 
     // 'Other' Effects. (Mostly null model entity stuff, weapon particles.)
-    Blaster     = (1 << 16),
-    Teleporter  = (1 << 24),
+    EET_Blaster     = (1 << 16),
+    EET_Teleporter  = (1 << 24),
 
     // Maximum last effect slot, feel free to rename it and use it.
-    Max = (1 << 31),
+    EET_Max = (1 << 31),
 } EntityEffectType;
 
 // player_state_t->refdef flags
@@ -83,18 +83,20 @@ typedef enum {
 // muzzle flashes / player effects
 //-----------------
 typedef enum {
-    
+
+
+    // These aren't weapons, but are effects displayed in the player's view.
+    // Hence, as such, they are actually treated as muzzleflashes.
+    MFT_Respawn = 0,
+    MFT_ItemRespawn,
+    MFT_Login,
+    MFT_Logout,
+
+    // Weapon Muzzleflashes.
+    MFT_Blaster,
+    MFT_MachineGun,
+    MFT_Flare,
 } MuzzleFlashType;
-#define MZ_BLASTER          0
-#define MZ_MACHINEGUN       1
-#define MZ_GRENADE          2
-#define MZ_LOGIN            9
-#define MZ_LOGOUT           10
-#define MZ_RESPAWN          11
-#define MZ_ITEMRESPAWN      15
-// Q2RTX
-#define MZ_FLARE            40
-// Q2RTX
 
 //-----------------
 // monster muzzle flashes
@@ -156,7 +158,7 @@ typedef enum {
     TE_FLARE,
 
     TE_NUM_ENTITIES
-} temp_event_t;
+} TempEntityEvent;
 
 //-----------------
 // Splash Types.

@@ -83,7 +83,7 @@ void Machinegun_Fire(entity_t* ent)
 
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
-    gi.WriteByte(MZ_MACHINEGUN | is_silenced);
+    gi.WriteByte(MuzzleFlashType::MFT_MachineGun | is_silenced);
     gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
     PlayerNoise(ent, start, PNOISE_WEAPON);

@@ -33,8 +33,8 @@ When a button is touched, it moves some distance in the direction of it's angle,
 void button_done(entity_t* self)
 {
     self->moveInfo.state = STATE_BOTTOM;
-    self->s.effects &= ~EntityEffectType::AnimCycleFrames23hz2;
-    self->s.effects |= EntityEffectType::AnimCycleFrames01hz2;
+    self->s.effects &= ~EntityEffectType::EET_AnimCycleFrames23hz2;
+    self->s.effects |= EntityEffectType::EET_AnimCycleFrames01hz2;
 }
 
 void button_return(entity_t* self)
@@ -52,8 +52,8 @@ void button_return(entity_t* self)
 void button_wait(entity_t* self)
 {
     self->moveInfo.state = STATE_TOP;
-    self->s.effects &= ~AnimCycleFrames01hz2;
-    self->s.effects |= AnimCycleFrames23hz2;
+    self->s.effects &= ~EntityEffectType::EET_AnimCycleFrames01hz2;
+    self->s.effects |= EntityEffectType::EET_AnimCycleFrames23hz2;
 
     UTIL_UseTargets(self, self->activator);
     self->s.frame = 1;
@@ -133,7 +133,7 @@ void SP_func_button(entity_t* ent)
     VectorMA(ent->pos1, dist, ent->moveDirection, ent->pos2);
 
     ent->Use = button_use;
-    ent->s.effects |= AnimCycleFrames01hz2;
+    ent->s.effects |= EntityEffectType::EET_AnimCycleFrames01hz2;
 
     if (ent->health) {
         ent->maxHealth = ent->health;

@@ -86,9 +86,9 @@ void SP_func_rotating(entity_t* ent)
         ent->Use(ent, NULL, NULL);
 
     if (ent->spawnFlags & 64)
-        ent->s.effects |= EntityEffectType::AnimCycleAll2hz;
+        ent->s.effects |= EntityEffectType::EET_AnimCycleAll2hz;
     if (ent->spawnFlags & 128)
-        ent->s.effects |= EntityEffectType::AnimCycleAll30hz;
+        ent->s.effects |= EntityEffectType::EET_AnimCycleAll30hz;
 
     gi.SetModel(ent, ent->model);
     gi.LinkEntity(ent);

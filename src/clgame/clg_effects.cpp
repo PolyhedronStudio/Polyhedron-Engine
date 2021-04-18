@@ -366,34 +366,34 @@ void CLG_MuzzleFlash() {
         volume = 1;
 
     switch (mzParameters.weapon) {
-    case MZ_BLASTER:
+    case MuzzleFlashType::MFT_Blaster:
         DL_COLOR(1, 1, 0);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/blastf1a.wav"), volume, ATTN_NORM, 0);
         break;
-    case MZ_MACHINEGUN:
+    case MuzzleFlashType::MFT_MachineGun:
         DL_COLOR(1, 1, 0);
         Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound(soundname), volume, ATTN_NORM, 0);
         break;
-    case MZ_LOGIN:
+    case MuzzleFlashType::MFT_Login:
         DL_COLOR(0, 1, 0);
         DL_DIE(1.0);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
         CLG_LogoutEffect(pl->current.origin, mzParameters.weapon);
         break;
-    case MZ_LOGOUT:
+    case MuzzleFlashType::MFT_Logout:
         DL_COLOR(1, 0, 0);
         DL_DIE(1.0);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
         CLG_LogoutEffect(pl->current.origin, mzParameters.weapon);
         break;
-    case MZ_RESPAWN:
+    case MuzzleFlashType::MFT_Respawn:
         DL_COLOR(1, 1, 0);
         DL_DIE(1.0);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
         CLG_LogoutEffect(pl->current.origin, mzParameters.weapon);
         break;
-    case MZ_FLARE:
+    case MuzzleFlashType::MFT_Flare:
         DL_RADIUS(0);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/flaregun.wav"), volume, ATTN_NORM, 0);
         break;
@@ -816,9 +816,9 @@ static void CLG_LogoutEffect(vec3_t org, int type)
         p->time = cl->time;
 
         int color;
-        if (type == MZ_LOGIN)
+        if (type == MuzzleFlashType::MFT_Login)
             color = 0xd0 + (rand() & 7); // green
-        else if (type == MZ_LOGOUT)
+        else if (type == MuzzleFlashType::MFT_Logout)
             color = 0x40 + (rand() & 7); // red
         else
             color = 0xe0 + (rand() & 7); // yellow
@@ -1095,7 +1095,7 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags)
 
             p->time = cl->time;
 
-            if (flags & EntityEffectType::Gib) {
+            if (flags & EntityEffectType::EET_Gib) {
                 p->alpha = 1.0;
                 p->alphavel = -1.0 / (1 + frand() * 0.4);
 
