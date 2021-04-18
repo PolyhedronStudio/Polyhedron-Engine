@@ -7,6 +7,8 @@
 // Handles the main initialisation of the client game dll.
 //
 #include "clg_local.h"
+
+#include "clg_entities.h"
 #include "clg_input.h"
 
 //

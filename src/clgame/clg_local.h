@@ -169,14 +169,7 @@ extern cvar_t* vid_rtx;
 //
 //=============================================================================
 //
-//
-// clg_entities.c
-//
-void CLG_EntityEvent(int number);
 
-void CLG_AddPacketEntities(void);
-void CLG_AddViewWeapon(void);
-void CLG_CalcViewValues(void);
 
 //
 // clg_effects.c
