@@ -55,7 +55,6 @@ void SP_func_object(entity_t *self);
 void SP_func_explosive(entity_t *self);
 void SP_func_timer(entity_t *self);
 void SP_func_areaportal(entity_t *ent);
-void SP_func_clock(entity_t *ent);
 void SP_func_killbox(entity_t *ent);
 
 void SP_trigger_always(entity_t *ent);
@@ -85,42 +84,24 @@ void SP_target_help(entity_t *ent);
 
 void SP_target_lightramp(entity_t *self);
 void SP_target_earthquake(entity_t *ent);
-void SP_target_character(entity_t *ent);
-void SP_target_string(entity_t *ent);
 
 void SP_worldspawn(entity_t *ent);
 void SP_viewthing(entity_t *ent);
 
 void SP_light(entity_t *self);
-void SP_light_mine1(entity_t *ent);
-void SP_light_mine2(entity_t *ent);
 void SP_info_null(entity_t *self);
 void SP_info_notnull(entity_t *self);
-void SP_path_corner(entity_t *self);
-void SP_point_combat(entity_t *self);
-
-void SP_misc_explobox(entity_t *self);
 
 void SP_misc_gib_arm(entity_t *self);
 void SP_misc_gib_leg(entity_t *self);
 void SP_misc_gib_head(entity_t *self);
 
-void SP_misc_deadsoldier(entity_t *self);
-void SP_misc_viper(entity_t *self);
-void SP_misc_viper_bomb(entity_t *self);
-void SP_misc_strogg_ship(entity_t *self);
 void SP_misc_teleporter(entity_t *self);
 void SP_misc_teleporter_dest(entity_t *self);
-void SP_misc_blackhole(entity_t *self);
-
 
 void SP_monster_soldier_light(entity_t *self);
 void SP_monster_soldier(entity_t *self);
 void SP_monster_soldier_ss(entity_t *self);
-
-void SP_turret_breach(entity_t *self);
-void SP_turret_base(entity_t *self);
-void SP_turret_driver(entity_t *self);
 
 static const spawn_func_t spawn_funcs[] = {
     {"item_health", SP_item_health},
@@ -143,7 +124,6 @@ static const spawn_func_t spawn_funcs[] = {
     {"func_water", SP_func_water},
     {"func_conveyor", SP_func_conveyor},
     {"func_areaportal", SP_func_areaportal},
-    {"func_clock", SP_func_clock},
     {"func_wall", SP_func_wall},
     {"func_object", SP_func_object},
     {"func_timer", SP_func_timer},
@@ -177,8 +157,6 @@ static const spawn_func_t spawn_funcs[] = {
 
     {"target_lightramp", SP_target_lightramp},
     {"target_earthquake", SP_target_earthquake},
-    {"target_character", SP_target_character},
-    {"target_string", SP_target_string},
 
     {"worldspawn", SP_worldspawn},
     {"viewthing", SP_viewthing},

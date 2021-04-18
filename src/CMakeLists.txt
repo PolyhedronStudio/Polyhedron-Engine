@@ -61,7 +61,7 @@ SET(SRC_SVGAME
 
 	svgame/entities/func/func_areaportal.cpp
 	svgame/entities/func/func_button.cpp
-	svgame/entities/func/func_clock.cpp
+	
 	svgame/entities/func/func_conveyor.cpp
 	svgame/entities/func/func_door.cpp 
 	svgame/entities/func/func_door_rotating.cpp
@@ -92,7 +92,7 @@ SET(SRC_SVGAME
 
 	svgame/entities/target/target_blaster.cpp
 	svgame/entities/target/target_changelevel.cpp
-	svgame/entities/target/target_character.cpp
+	
 	svgame/entities/target/target_crosslevel_target.cpp
 	svgame/entities/target/target_crosslevel_trigger.cpp
 	svgame/entities/target/target_earthquake.cpp
@@ -105,7 +105,7 @@ SET(SRC_SVGAME
 	svgame/entities/target/target_spawner.cpp
 	svgame/entities/target/target_speaker.cpp
 	svgame/entities/target/target_splash.cpp
-	svgame/entities/target/target_string.cpp
+	
 	svgame/entities/target/target_temp_entity.cpp
 
 	svgame/entities/trigger/trigger_always.cpp
