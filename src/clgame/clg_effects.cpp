@@ -11,6 +11,9 @@
 
 #include "clg_effects.h"
 #include "clg_main.h"
+#include "clg_newfx.h"
+#include "clg_tents.h"
+#include "clg_view.h"
 
 static void CLG_LogoutEffect(vec3_t org, int type);
 

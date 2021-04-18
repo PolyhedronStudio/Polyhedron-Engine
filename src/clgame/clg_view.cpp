@@ -11,6 +11,8 @@
 #include "clg_effects.h"
 #include "clg_entities.h"
 #include "clg_main.h"
+#include "clg_tents.h"
+#include "clg_view.h"
 
 clg_view_t  view;
 //=============

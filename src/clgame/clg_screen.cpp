@@ -10,6 +10,7 @@
 
 #include "clg_main.h"
 #include "clg_media.h"
+#include "clg_screen.h"
 
 // Number of "sb_pics"
 #define STAT_PICS   11              // Number of "sb_pics"

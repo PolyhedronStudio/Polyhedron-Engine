@@ -12,6 +12,8 @@
 #include "clg_main.h"
 #include "clg_media.h"
 #include "clg_parse.h"
+#include "clg_screen.h"
+#include "clg_tents.h"
 
 //
 //=============================================================================

@@ -121,7 +121,7 @@ typedef enum {
 //-------------------
 extern clgame_import_t  clgi;
 extern client_state_t   *cl;
-extern client_shared_t* cs;
+extern client_shared_t  *cs;
 
 //-------------------
 // Game - Specific to the game itself.
@@ -158,8 +158,10 @@ extern cvar_t* cl_vwep;
 
 // Refresh... TODO: Move.
 extern cvar_t* cvar_pt_beam_lights;
+
 // Server.
 extern cvar_t* sv_paused;
+
 // User Info.
 extern cvar_t* gender_auto;
 extern cvar_t* info_fov;
@@ -171,108 +173,8 @@ extern cvar_t* info_password;
 extern cvar_t* info_skin;
 extern cvar_t* info_spectator;
 extern cvar_t* info_uf;
+
 // Video.
-extern cvar_t* vid_rtx;
-
-
-//
-//=============================================================================
-//
-//	Client Game Function declarations.
-//
-//=============================================================================
-//
-
-
-//
-// clg_main.c
-//
-
-
-//
-// clg_media.c
-//
-
-//
-// clg_newfx.c
-//
-
-
-
-//
-// clg_parse.c
-//
-
-
-
-//
-// clg_predict.c
-//
-void CLG_CheckPredictionError(int frame, unsigned int cmd);
-void CLG_PredictAngles(void);
-void CLG_PredictMovement(unsigned int ack, unsigned int current);
-
-
-//
-// clg_screen.c
-//
-void SCR_SetCrosshairColor(void);
-void SCR_AddToChatHUD(const char* text);
-void SCR_CenterPrint(const char* str);
-void SCR_ClearChatHUD_f(void);
-
-void SCR_RegisterMedia(void);
-
-void SCR_Init(void);
-void SCR_Shutdown(void);
-
-void CLG_RenderScreen(void);
-void CLG_ScreenModeChanged(void);
-void CLG_DrawLoadScreen(void);
-void CLG_DrawPauseScreen(void);
-
-//
-// clg_tent.c
-//
-void CLG_ParseTempEntity(void);
-void CLG_SmokeAndFlash(vec3_t origin);
-
-void CLG_RegisterTempEntityModels(void);
-void CLG_RegisterTempEntitySounds(void);
-
-void CLG_ClearTempEntities(void);
-void CLG_AddTempEntities(void);
-void CLG_InitTempEntities(void);
-
-
-//
-// clg_tests.c
-//
-void CLG_ExecuteTests (void);
-
-
-//
-// clg_view.c
-//
-// For debugging purposes.
-extern int         gun_frame;
-extern qhandle_t   gun_model;
-
-void V_Init(void);
-void V_Shutdown(void);
-
-void V_AddEntity(r_entity_t* ent);
-void V_AddLight(const vec3_t &org, float intensity, float r, float g, float b);
-void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius);
-void V_AddLightStyle (int style, const vec4_t &value);
-void V_AddParticle(particle_t* p);
-
-float CLG_CalcFOV(float fov_x, float width, float height);
-void CLG_CalcViewValues(void);
-
-void CLG_PreRenderView(void);
-void CLG_ClearScene(void);
-void CLG_RenderView(void);
-void CLG_PostRenderView(void);
+extern cvar_t* vid_rtx;     // 1 if we're in RTX mode, 0 if not.
 
 #endif // __CLGAME_LOCAL_H__

@@ -23,7 +23,18 @@ SET(SRC_CLGAME
 )
 
 SET(HEADERS_CLGAME
+	clgame/clg_effects.h
+	clgame/clg_entities.h
+	clgame/clg_input.h
 	clgame/clg_local.h
+	clgame/clg_main.h
+	clgame/clg_media.h
+	clgame/clg_newfx.h
+	clgame/clg_parse.h
+	clgame/clg_predict.h
+	clgame/clg_screen.h
+	clgame/clg_tents.h
+	clgame/clg_view.h
 )
 
 ###################### SERVER GAME
