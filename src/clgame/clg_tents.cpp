@@ -39,9 +39,9 @@ qhandle_t   cl_sfx_spark5;
 qhandle_t   cl_sfx_spark6;
 qhandle_t   cl_sfx_spark7;
 qhandle_t   cl_sfx_railg;
-qhandle_t   cl_sfx_rockexp;
+qhandle_t   cl_sfx_explosion;
 qhandle_t   cl_sfx_grenexp;
-qhandle_t   cl_sfx_watrexp;
+qhandle_t   cl_sfx_water_explosion;
 qhandle_t   cl_sfx_footsteps[4];
 
 qhandle_t   cl_sfx_lightning;
@@ -1043,17 +1043,6 @@ void CLG_ParseTempEntity(void)
 		}
 		break;
 
-
-	case TE_SCREEN_SPARKS:
-	case TE_SHIELD_SPARKS:
-		if (teParameters.type == TE_SCREEN_SPARKS)
-			CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0xd0, 40);
-		else
-			CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0xb0, 40);
-		//FIXME : replace or remove this sound
-		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
-		break;
-
 	case TE_SHOTGUN:            // bullet hitting wall
 		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0, 20);
 		CLG_SmokeAndFlash(teParameters.pos1);
@@ -1138,31 +1127,6 @@ void CLG_ParseTempEntity(void)
 		}
 		break;
 
-	case TE_RAILTRAIL:          // railgun effect
-		CLG_RailTrail();
-		clgi.S_StartSound(&teParameters.pos2, 0, 0, cl_sfx_railg, 1, ATTN_NORM, 0);
-		break;
-
-	case TE_GRENADE_EXPLOSION:
-	case TE_GRENADE_EXPLOSION_WATER:
-		ex = CLG_PlainExplosion(false);
-		if (!cl_explosion_sprites->integer)
-		{
-			ex->frames = 19;
-			ex->baseFrame = 30;
-		}
-		if (cl_disable_explosions->integer & NOEXP_GRENADE)
-			ex->type = explosion_t::ex_light;
-
-		if (!(cl_disable_particles->integer & NOPART_GRENADE_EXPLOSION))
-			CLG_ExplosionParticles(teParameters.pos1);
-
-		if (teParameters.type == TE_GRENADE_EXPLOSION_WATER)
-			clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0);
-		else
-			clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0);
-		break;
-
 	case TE_EXPLOSION2:
 		ex = CLG_PlainExplosion(false);
 		if (!cl_explosion_sprites->integer)
@@ -1177,38 +1141,23 @@ void CLG_ParseTempEntity(void)
 	case TE_PLASMA_EXPLOSION:
 		CLG_PlainExplosion(false);
 		CLG_ExplosionParticles(teParameters.pos1);
-		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
-		break;
-
-	case TE_ROCKET_EXPLOSION:
-	case TE_ROCKET_EXPLOSION_WATER:
-		ex = CLG_PlainExplosion(false);
-		if (cl_disable_explosions->integer & NOEXP_ROCKET)
-			ex->type = explosion_t::ex_light;
-
-		if (!(cl_disable_particles->integer & NOPART_ROCKET_EXPLOSION))
-			CLG_ExplosionParticles(teParameters.pos1);
-
-		if (teParameters.type == TE_ROCKET_EXPLOSION_WATER)
-			clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0);
-		else
-			clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_EXPLOSION1:
 		CLG_PlainExplosion(false);
 		CLG_ExplosionParticles(teParameters.pos1);
-		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_EXPLOSION1_NP:
 		CLG_PlainExplosion(false);
-		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_EXPLOSION1_BIG:
 		ex = CLG_PlainExplosion(true);
-		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_BFG_LASER:
@@ -1382,9 +1331,9 @@ void CLG_RegisterTempEntitySounds(void)
 	cl_sfx_spark6 = clgi.S_RegisterSound("world/spark6.wav");
 	cl_sfx_spark7 = clgi.S_RegisterSound("world/spark7.wav");
 	cl_sfx_railg = clgi.S_RegisterSound("weapons/railgf1a.wav");
-	cl_sfx_rockexp = clgi.S_RegisterSound("weapons/rocklx1a.wav");
+	cl_sfx_explosion = clgi.S_RegisterSound("weapons/rocklx1a.wav");
 	cl_sfx_grenexp = clgi.S_RegisterSound("weapons/grenlx1a.wav");
-	cl_sfx_watrexp = clgi.S_RegisterSound("weapons/xpld_wat.wav");
+	cl_sfx_water_explosion = clgi.S_RegisterSound("weapons/xpld_wat.wav");
 
 	// Register Player sounds.
 	clgi.S_RegisterSound("player/land1.wav");

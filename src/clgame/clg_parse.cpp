@@ -75,9 +75,6 @@ static void CLG_ParseTempEntitiesPacket(void)
     case TE_GUNSHOT:
     case TE_SPARKS:
     case TE_BULLET_SPARKS:
-    case TE_SCREEN_SPARKS:
-    case TE_SHIELD_SPARKS:
-    case TE_SHOTGUN:
     case TE_BLASTER:
     case TE_GREENBLOOD:
     case TE_BLASTER2:
@@ -100,22 +97,15 @@ static void CLG_ParseTempEntitiesPacket(void)
         teParameters.color = clgi.MSG_ReadByte();
         break;
 
-    case TE_BLUEHYPERBLASTER:
-    case TE_RAILTRAIL:
     case TE_BUBBLETRAIL:
     case TE_DEBUGTRAIL:
     case TE_BUBBLETRAIL2:
-    case TE_BFG_LASER:
         teParameters.pos1 = clgi.MSG_ReadPosition();
         teParameters.pos2 = clgi.MSG_ReadPosition();
         break;
 
-    case TE_GRENADE_EXPLOSION:
-    case TE_GRENADE_EXPLOSION_WATER:
     case TE_EXPLOSION2:
     case TE_PLASMA_EXPLOSION:
-    case TE_ROCKET_EXPLOSION:
-    case TE_ROCKET_EXPLOSION_WATER:
     case TE_EXPLOSION1:
     case TE_EXPLOSION1_NP:
     case TE_EXPLOSION1_BIG:
