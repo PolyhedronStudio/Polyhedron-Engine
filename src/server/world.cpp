@@ -166,7 +166,7 @@ void SV_LinkEntity(cm_t *cm, entity_t *ent)
     VectorSubtract(ent->maxs, ent->mins, ent->size);
 
     // set the abs box
-    if (ent->solid == SOLID_BSP &&
+    if (ent->solid == Solid::BSP &&
         (ent->s.angles[0] || ent->s.angles[1] || ent->s.angles[2])) {
         // expand for rotation
         float   max, v;
@@ -287,7 +287,7 @@ void PF_LinkEntity(entity_t *ent)
 
     // encode the size into the entity_state for client prediction
     switch (ent->solid) {
-    case SOLID_BBOX:
+    case Solid::BoundingBox:
         if ((ent->svFlags & SVF_DEADMONSTER) || VectorCompare(ent->mins, ent->maxs)) {
             ent->s.solid = 0;
             sent->solid32 = 0;
@@ -296,8 +296,8 @@ void PF_LinkEntity(entity_t *ent)
             sent->solid32 = MSG_PackSolid32(ent->mins, ent->maxs);
         }
         break;
-    case SOLID_BSP:
-        ent->s.solid = PACKED_BSP;      // a SOLID_BBOX will never create this value
+    case Solid::BSP:
+        ent->s.solid = PACKED_BSP;      // a Solid::BoundingBox will never create this value
         sent->solid32 = PACKED_BSP;     // FIXME: use 255?
         break;
     default:
@@ -314,7 +314,7 @@ void PF_LinkEntity(entity_t *ent)
     }
     ent->linkCount++;
 
-    if (ent->solid == SOLID_NOT)
+    if (ent->solid == Solid::Not)
         return;
 
 // find the first node that the ent's box crosses
@@ -331,7 +331,7 @@ void PF_LinkEntity(entity_t *ent)
     }
 
     // link it in
-    if (ent->solid == SOLID_TRIGGER)
+    if (ent->solid == Solid::Trigger)
         List_Append(&node->trigger_edicts, &ent->area);
     else
         List_Append(&node->solid_edicts, &ent->area);
@@ -356,7 +356,7 @@ static void SV_AreaEntities_r(areanode_t *node)
         start = &node->trigger_edicts;
 
     LIST_FOR_EACH(entity_t, check, start, area) {
-        if (check->solid == SOLID_NOT)
+        if (check->solid == Solid::Not)
             continue;        // deactivated
         if (check->absMin[0] > area_maxs[0]
             || check->absMin[1] > area_maxs[1]
@@ -418,7 +418,7 @@ object of mins/maxs size.
 */
 static mnode_t *SV_HullForEntity(entity_t *ent)
 {
-    if (ent->solid == SOLID_BSP) {
+    if (ent->solid == Solid::BSP) {
         int i = ent->s.modelindex - 1;
 
         // explicit hulls in the BSP model
@@ -495,7 +495,7 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
     // list removed before we get to it (killtriggered)
     for (i = 0; i < num; i++) {
         touch = touchlist[i];
-        if (touch->solid == SOLID_NOT)
+        if (touch->solid == Solid::Not)
             continue;
         if (touch == passedict)
             continue;

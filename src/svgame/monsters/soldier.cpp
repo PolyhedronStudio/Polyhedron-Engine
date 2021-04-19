@@ -1186,7 +1186,7 @@ void SP_monster_soldier_x(entity_t *self)
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 32);
     self->moveType = MOVETYPE_STEP;
-    self->solid = SOLID_BBOX;
+    self->solid = Solid::BoundingBox;
 
     sound_idle =    gi.SoundIndex("soldier/solidle1.wav");
     sound_sight1 =  gi.SoundIndex("soldier/solsght1.wav");

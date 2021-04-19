@@ -27,13 +27,13 @@ START_ON        only valid for TRIGGER_SPAWN walls
 
 void func_wall_use(entity_t* self, entity_t* other, entity_t* activator)
 {
-    if (self->solid == SOLID_NOT) {
-        self->solid = SOLID_BSP;
+    if (self->solid == Solid::Not) {
+        self->solid = Solid::BSP;
         self->svFlags &= ~SVF_NOCLIENT;
         KillBox(self);
     }
     else {
-        self->solid = SOLID_NOT;
+        self->solid = Solid::Not;
         self->svFlags |= SVF_NOCLIENT;
     }
     gi.LinkEntity(self);
@@ -54,7 +54,7 @@ void SP_func_wall(entity_t* self)
 
     // just a wall
     if ((self->spawnFlags & 7) == 0) {
-        self->solid = SOLID_BSP;
+        self->solid = Solid::BSP;
         gi.LinkEntity(self);
         return;
     }
@@ -75,10 +75,10 @@ void SP_func_wall(entity_t* self)
 
     self->Use = func_wall_use;
     if (self->spawnFlags & 4) {
-        self->solid = SOLID_BSP;
+        self->solid = Solid::BSP;
     }
     else {
-        self->solid = SOLID_NOT;
+        self->solid = Solid::Not;
         self->svFlags |= SVF_NOCLIENT;
     }
     gi.LinkEntity(self);

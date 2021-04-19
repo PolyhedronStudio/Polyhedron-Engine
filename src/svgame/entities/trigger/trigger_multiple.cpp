@@ -26,7 +26,7 @@ set "message" to text string
 */
 void trigger_enable(entity_t* self, entity_t* other, entity_t* activator)
 {
-    self->solid = SOLID_TRIGGER;
+    self->solid = Solid::Trigger;
     self->Use = Use_Multi;
     gi.LinkEntity(self);
 }
@@ -48,11 +48,11 @@ void SP_trigger_multiple(entity_t* ent)
 
 
     if (ent->spawnFlags & 4) {
-        ent->solid = SOLID_NOT;
+        ent->solid = Solid::Not;
         ent->Use = trigger_enable;
     }
     else {
-        ent->solid = SOLID_TRIGGER;
+        ent->solid = Solid::Trigger;
         ent->Use = Use_Multi;
     }
 

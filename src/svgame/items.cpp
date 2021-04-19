@@ -115,7 +115,7 @@ void DoRespawn(entity_t *ent)
     }
 
     ent->svFlags &= ~SVF_NOCLIENT;
-    ent->solid = SOLID_TRIGGER;
+    ent->solid = Solid::Trigger;
     gi.LinkEntity(ent);
 
     // send an effect
@@ -126,7 +126,7 @@ void SetRespawn(entity_t *ent, float delay)
 {
     ent->flags |= FL_RESPAWN;
     ent->svFlags |= SVF_NOCLIENT;
-    ent->solid = SOLID_NOT;
+    ent->solid = Solid::Not;
     ent->nextThink = level.time + delay;
     ent->Think = DoRespawn;
     gi.LinkEntity(ent);
@@ -291,7 +291,7 @@ qboolean Pickup_Health(entity_t *ent, entity_t *other)
         ent->owner = other;
         ent->flags |= FL_RESPAWN;
         ent->svFlags |= SVF_NOCLIENT;
-        ent->solid = SOLID_NOT;
+        ent->solid = Solid::Not;
     } else {
         if (!(ent->spawnFlags & DROPPED_ITEM) && (deathmatch->value))
             SetRespawn(ent, 30);
@@ -471,7 +471,7 @@ entity_t *Drop_Item(entity_t *ent, gitem_t *item)
     VectorSet(dropped->mins, -15, -15, -15);
     VectorSet(dropped->maxs, 15, 15, 15);
     gi.SetModel(dropped, dropped->item->worldModel);
-    dropped->solid = SOLID_TRIGGER;
+    dropped->solid = Solid::Trigger;
     dropped->moveType = MOVETYPE_TOSS;
     dropped->Touch = drop_temp_touch;
     dropped->owner = ent;
@@ -507,10 +507,10 @@ void Use_Item(entity_t *ent, entity_t *other, entity_t *activator)
     ent->Use = NULL;
 
     if (ent->spawnFlags & ITEM_NO_TOUCH) {
-        ent->solid = SOLID_BBOX;
+        ent->solid = Solid::BoundingBox;
         ent->Touch = NULL;
     } else {
-        ent->solid = SOLID_TRIGGER;
+        ent->solid = Solid::Trigger;
         ent->Touch = Touch_Item;
     }
 
@@ -536,7 +536,7 @@ void droptofloor(entity_t *ent)
         gi.SetModel(ent, ent->model);
     else
         gi.SetModel(ent, ent->item->worldModel);
-    ent->solid = SOLID_TRIGGER;
+    ent->solid = Solid::Trigger;
     ent->moveType = MOVETYPE_TOSS;
     ent->Touch = Touch_Item;
 
@@ -558,7 +558,7 @@ void droptofloor(entity_t *ent)
         ent->teamChainPtr = NULL;
 
         ent->svFlags |= SVF_NOCLIENT;
-        ent->solid = SOLID_NOT;
+        ent->solid = Solid::Not;
         if (ent == ent->teamMasterPtr) {
             ent->nextThink = level.time + FRAMETIME;
             ent->Think = DoRespawn;
@@ -566,7 +566,7 @@ void droptofloor(entity_t *ent)
     }
 
     if (ent->spawnFlags & ITEM_NO_TOUCH) {
-        ent->solid = SOLID_BBOX;
+        ent->solid = Solid::BoundingBox;
         ent->Touch = NULL;
         ent->s.effects &= ~EntityEffectType::Rotate;
         ent->s.renderfx &= ~RenderEffects::Glow;
@@ -574,7 +574,7 @@ void droptofloor(entity_t *ent)
 
     if (ent->spawnFlags & ITEM_TRIGGER_SPAWN) {
         ent->svFlags |= SVF_NOCLIENT;
-        ent->solid = SOLID_NOT;
+        ent->solid = Solid::Not;
         ent->Use = Use_Item;
     }
 

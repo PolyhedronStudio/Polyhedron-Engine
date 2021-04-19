@@ -353,7 +353,7 @@ void fire_blaster(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int
                                         // won't clip against players.
     bolt->moveType = MOVETYPE_FLYMISSILE;   // Movetype FLYMISSILE
     bolt->clipMask = CONTENTS_MASK_SHOT;    // CONTENTS_MASK_SHOT
-    bolt->solid = SOLID_BBOX;               // SOLID_BBOX
+    bolt->solid = Solid::BoundingBox;               // Solid::BoundingBox
     bolt->s.effects |= effect;              // Apply effect argument to entity.
     
     // Setup entity physics attribute values.
@@ -497,7 +497,7 @@ void fire_flaregun(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
 	VectorSet(flare->avelocity, 300, 300, 300);
 	flare->moveType = MOVETYPE_BOUNCE;
 	flare->clipMask = CONTENTS_MASK_SHOT;
-	flare->solid = SOLID_BBOX;
+	flare->solid = Solid::BoundingBox;
 
 	const float size = 4;
 	VectorSet(flare->mins, -size, -size, -size);

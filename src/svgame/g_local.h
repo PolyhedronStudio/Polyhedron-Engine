@@ -884,7 +884,7 @@ struct entity_s {
     int         svFlags;
     vec3_t      mins, maxs;
     vec3_t      absMin, absMax, size;
-    solid_t     solid;
+    uint32_t    solid;
     int         clipMask;
     entity_t     *owner;
 

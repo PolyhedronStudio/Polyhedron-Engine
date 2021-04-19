@@ -73,7 +73,7 @@ void SP_misc_teleporter(entity_t* ent)
     ent->s.skinnum = 1;
     ent->s.effects = EntityEffectType::Teleporter;
     ent->s.sound = gi.SoundIndex("world/amb10.wav");
-    ent->solid = SOLID_BBOX;
+    ent->solid = Solid::BoundingBox;
 
     VectorSet(ent->mins, -32, -32, -24);
     VectorSet(ent->maxs, 32, 32, -16);
@@ -81,7 +81,7 @@ void SP_misc_teleporter(entity_t* ent)
 
     trig = G_Spawn();
     trig->Touch = teleporter_touch;
-    trig->solid = SOLID_TRIGGER;
+    trig->solid = Solid::Trigger;
     trig->target = ent->target;
     trig->owner = ent;
     VectorCopy(ent->s.origin, trig->s.origin);

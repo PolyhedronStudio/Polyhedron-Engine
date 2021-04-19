@@ -79,7 +79,7 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
 
     self->maxs[2] = -8;
 
-    //  self->solid = SOLID_NOT;
+    //  self->solid = Solid::Not;
     self->svFlags |= SVF_DEADMONSTER;
 
     if (!self->deadFlag) {

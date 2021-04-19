@@ -24,7 +24,7 @@ void InitTrigger(entity_t *self)
     if (!VectorCompare(self->s.angles, vec3_origin))
         UTIL_SetMoveDir(self->s.angles, self->moveDirection);
 
-    self->solid = SOLID_TRIGGER;
+    self->solid = Solid::Trigger;
     self->moveType = MOVETYPE_NONE;
     gi.SetModel(self, self->model);
     self->svFlags = SVF_NOCLIENT;

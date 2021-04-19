@@ -149,8 +149,6 @@ static void write_baseline(entity_packed_t *base)
 {
     msgEsFlags_t flags = (msgEsFlags_t)(sv_client->esFlags | MSG_ES_FORCE); // CPP: Cast
 
-    flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES); //flags |= MSG_ES_SHORTANGLES;
-
     MSG_WriteDeltaEntity(NULL, base, flags);
 }
 

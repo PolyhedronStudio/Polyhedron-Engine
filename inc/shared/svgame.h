@@ -33,18 +33,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // edict->svFlags
 
-#define SVF_NOCLIENT            0x00000001  // don't send entity to clients, even if it has effects
-#define SVF_DEADMONSTER         0x00000002  // treat as CONTENTS_DEADMONSTER for collision
-#define SVF_MONSTER             0x00000004  // treat as CONTENTS_MONSTER for collision
+static constexpr uint32_t SVF_NOCLIENT      = 0x00000001;  // don't send entity to clients, even if it has effects
+static constexpr uint32_t SVF_DEADMONSTER   = 0x00000002;  // treat as CONTENTS_DEADMONSTER for collision
+static constexpr uint32_t SVF_MONSTER       = 0x00000004;  // treat as CONTENTS_MONSTER for collision
 
 // edict->solid values
-
-typedef enum {
-    SOLID_NOT,          // no interaction with other objects
-    SOLID_TRIGGER,      // only touch when inside, after moving
-    SOLID_BBOX,         // touch on edge
-    SOLID_BSP           // bsp clip, touch on edge
-} solid_t;
+struct Solid {
+    static constexpr uint32_t Not       = 0;    // no interaction with other objects
+    static constexpr uint32_t Trigger   = 1;    // only touch when inside, after moving
+    static constexpr uint32_t BoundingBox = 2;  // touch on edge
+    static constexpr uint32_t BSP       = 3;    // bsp clip, touch on edge
+};
 
 //===============================================================
 
@@ -86,7 +85,7 @@ struct entity_s {
     int         svFlags;            // SVF_NOCLIENT, SVF_DEADMONSTER, SVF_MONSTER, etc
     vec3_t      mins, maxs;
     vec3_t      absMin, absMax, size;
-    solid_t     solid;
+    uint32_t    solid;
     int         clipMask;
     entity_t     *owner;
 

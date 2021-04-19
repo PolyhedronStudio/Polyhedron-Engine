@@ -219,7 +219,7 @@ void SP_func_train(entity_t* self)
         if (!self->dmg)
             self->dmg = 100;
     }
-    self->solid = SOLID_BSP;
+    self->solid = Solid::BSP;
     gi.SetModel(self, self->model);
 
     if (st.noise)

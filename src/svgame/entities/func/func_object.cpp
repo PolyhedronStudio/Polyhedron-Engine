@@ -35,7 +35,7 @@ void func_object_release(entity_t* self)
 
 void func_object_use(entity_t* self, entity_t* other, entity_t* activator)
 {
-    self->solid = SOLID_BSP;
+    self->solid = Solid::BSP;
     self->svFlags &= ~SVF_NOCLIENT;
     self->Use = NULL;
     KillBox(self);
@@ -57,13 +57,13 @@ void SP_func_object(entity_t* self)
         self->dmg = 100;
 
     if (self->spawnFlags == 0) {
-        self->solid = SOLID_BSP;
+        self->solid = Solid::BSP;
         self->moveType = MOVETYPE_PUSH;
         self->Think = func_object_release;
         self->nextThink = level.time + 2 * FRAMETIME;
     }
     else {
-        self->solid = SOLID_NOT;
+        self->solid = Solid::Not;
         self->moveType = MOVETYPE_PUSH;
         self->Use = func_object_use;
         self->svFlags |= SVF_NOCLIENT;

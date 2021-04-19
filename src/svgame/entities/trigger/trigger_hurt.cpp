@@ -26,10 +26,10 @@ NO_PROTECTION   *nothing* stops the damage
 */
 void hurt_use(entity_t* self, entity_t* other, entity_t* activator)
 {
-    if (self->solid == SOLID_NOT)
-        self->solid = SOLID_TRIGGER;
+    if (self->solid == Solid::Not)
+        self->solid = Solid::Trigger;
     else
-        self->solid = SOLID_NOT;
+        self->solid = Solid::Not;
     gi.LinkEntity(self);
 
     if (!(self->spawnFlags & 2))
@@ -75,9 +75,9 @@ void SP_trigger_hurt(entity_t* self)
         self->dmg = 5;
 
     if (self->spawnFlags & 1)
-        self->solid = SOLID_NOT;
+        self->solid = Solid::Not;
     else
-        self->solid = SOLID_TRIGGER;
+        self->solid = Solid::Trigger;
 
     if (self->spawnFlags & 2)
         self->Use = hurt_use;

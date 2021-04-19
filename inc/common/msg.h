@@ -113,7 +113,6 @@ typedef enum msgEsFlags_s {
     MSG_ES_LONGSOLID = (1 << 3),
     MSG_ES_UMASK = (1 << 4),
     MSG_ES_BEAMORIGIN = (1 << 5),
-    MSG_ES_SHORTANGLES = (1 << 6),
     MSG_ES_REMOVE = (1 << 7)
 } msgEsFlags_t;
 

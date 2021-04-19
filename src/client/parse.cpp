@@ -530,7 +530,6 @@ static void CL_ParseServerData(void)
     cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_UMASK); // CPP: IMPROVE: cl.esFlags |= MSG_ES_UMASK;
     cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_LONGSOLID); // CPP: IMPROVE: cl.esFlags |= MSG_ES_LONGSOLID;
     cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
-    cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_SHORTANGLES); // CPP: IMPROVE: cl.esFlags |= MSG_ES_SHORTANGLES;
     i = MSG_ReadByte();
     if (i) {
         Com_DPrintf("NaC waterjump hack enabled\n");

@@ -107,7 +107,7 @@ void SP_func_button(entity_t* ent)
 
     UTIL_SetMoveDir(ent->s.angles, ent->moveDirection);
     ent->moveType = MOVETYPE_STOP;
-    ent->solid = SOLID_BSP;
+    ent->solid = Solid::BSP;
     gi.SetModel(ent, ent->model);
 
     if (ent->sounds != 1)

@@ -279,7 +279,7 @@ typedef enum {
 #define CLIENTNUM_NONE        (MAX_CLIENTS - 1)
 #define CLIENTNUM_RESERVED    (MAX_CLIENTS - 1)
 
-// a SOLID_BBOX will never create this value
+// a Solid::BoundingBox will never create this value
 #define PACKED_BSP      31
 
 typedef enum {

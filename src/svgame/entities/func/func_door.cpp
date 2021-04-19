@@ -234,7 +234,7 @@ void Think_SpawnDoorTrigger(entity_t* ent)
     VectorCopy(mins, other->mins);
     VectorCopy(maxs, other->maxs);
     other->owner = ent;
-    other->solid = SOLID_TRIGGER;
+    other->solid = Solid::Trigger;
     other->moveType = MOVETYPE_NONE;
     other->Touch = Touch_DoorTrigger;
     gi.LinkEntity(other);
@@ -314,7 +314,7 @@ void SP_func_door(entity_t* ent)
 
     UTIL_SetMoveDir(ent->s.angles, ent->moveDirection);
     ent->moveType = MOVETYPE_PUSH;
-    ent->solid = SOLID_BSP;
+    ent->solid = Solid::BSP;
     gi.SetModel(ent, ent->model);
 
     ent->Blocked = door_blocked;

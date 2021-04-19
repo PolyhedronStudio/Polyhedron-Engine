@@ -924,7 +924,7 @@ void PutClientInServer(entity_t *ent)
     ent->inUse = true;
     ent->classname = "player";
     ent->mass = 200;
-    ent->solid = SOLID_BBOX;
+    ent->solid = Solid::BoundingBox;
     ent->deadFlag = DEAD_NO;
     ent->air_finished = level.time + 12;
     ent->clipMask = CONTENTS_MASK_PLAYERSOLID;
@@ -992,7 +992,7 @@ void PutClientInServer(entity_t *ent)
         client->resp.spectator = true;
 
         ent->moveType = MOVETYPE_NOCLIP;
-        ent->solid = SOLID_NOT;
+        ent->solid = Solid::Not;
         ent->svFlags |= SVF_NOCLIENT;
         ent->client->playerState.gunindex = 0;
         gi.LinkEntity(ent);
@@ -1270,7 +1270,7 @@ void ClientDisconnect(entity_t *ent)
     ent->s.sound = 0;
     ent->s.event = 0;
     ent->s.effects = 0;
-    ent->solid = SOLID_NOT;
+    ent->solid = Solid::Not;
     ent->inUse = false;
     ent->classname = "disconnected";
     ent->client->pers.connected = false;

@@ -600,7 +600,7 @@ entity_t* G_FindEntitiesWithinRadius(entity_t* from, vec3_t org, float rad)
     for (; from < &g_edicts[globals.num_edicts]; from++) {
         if (!from->inUse)
             continue;
-        if (from->solid == SOLID_NOT)
+        if (from->solid == Solid::Not)
             continue;
         for (j = 0; j < 3; j++)
             eorg[j] = org[j] - (from->s.origin[j] + (from->mins[j] + from->maxs[j]) * 0.5);

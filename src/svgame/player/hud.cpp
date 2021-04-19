@@ -68,7 +68,7 @@ void HUD_MoveClientToIntermission(entity_t *ent)
     ent->s.modelindex = 0;
     ent->s.effects = 0;
     ent->s.sound = 0;
-    ent->solid = SOLID_NOT;
+    ent->solid = Solid::Not;
 
     // Add the layout in case of a deathmatch or co-op gamemode.
     if (deathmatch->value || coop->value) {

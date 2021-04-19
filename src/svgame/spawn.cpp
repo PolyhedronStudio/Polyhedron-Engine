@@ -749,7 +749,7 @@ Only used for the world.
 void SP_worldspawn(entity_t *ent)
 {
     ent->moveType = MOVETYPE_PUSH;
-    ent->solid = SOLID_BSP;
+    ent->solid = Solid::BSP;
     ent->inUse = true;          // since the world doesn't use G_Spawn()
     ent->s.modelindex = 1;      // world model is always index 1
 

@@ -52,7 +52,7 @@ void rotating_use(entity_t* self, entity_t* other, entity_t* activator)
 
 void SP_func_rotating(entity_t* ent)
 {
-    ent->solid = SOLID_BSP;
+    ent->solid = Solid::BSP;
     if (ent->spawnFlags & 32)
         ent->moveType = MOVETYPE_STOP;
     else

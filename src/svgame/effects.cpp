@@ -92,7 +92,7 @@ void ThrowGib(entity_t *self, const char *gibname, int damage, int type)
     gib->s.origin[2] = origin[2] + crandom() * size[2];
 
     gi.SetModel(gib, gibname);
-    gib->solid = SOLID_NOT;
+    gib->solid = Solid::Not;
     gib->s.effects |= EntityEffectType::Gib;
     gib->flags |= FL_NO_KNOCKBACK;
     gib->takedamage = DAMAGE_YES;
@@ -133,7 +133,7 @@ void ThrowHead(entity_t *self, const char *gibname, int damage, int type)
 
     self->s.modelindex2 = 0;
     gi.SetModel(self, gibname);
-    self->solid = SOLID_NOT;
+    self->solid = Solid::Not;
     self->s.effects |= EntityEffectType::Gib;
     self->s.sound = 0;
     self->flags |= FL_NO_KNOCKBACK;
@@ -184,7 +184,7 @@ void ThrowClientHead(entity_t *self, int damage)
     VectorSet(self->maxs, 16, 16, 16);
 
     self->takedamage = DAMAGE_NO;
-    self->solid = SOLID_NOT;
+    self->solid = Solid::Not;
     self->s.effects = EntityEffectType::Gib;
     self->s.sound = 0;
     self->flags |= FL_NO_KNOCKBACK;
@@ -229,7 +229,7 @@ void ThrowDebris(entity_t *self, const char *modelname, float speed, const vec3_
     v[2] = 100 + 100 * crandom();
     VectorMA(self->velocity, speed, v, chunk->velocity);
     chunk->moveType = MOVETYPE_BOUNCE;
-    chunk->solid = SOLID_NOT;
+    chunk->solid = Solid::Not;
     chunk->avelocity[0] = random() * 600;
     chunk->avelocity[1] = random() * 600;
     chunk->avelocity[2] = random() * 600;

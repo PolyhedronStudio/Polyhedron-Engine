@@ -36,7 +36,7 @@ void SP_func_water(entity_t* self)
 
     UTIL_SetMoveDir(self->s.angles, self->moveDirection);
     self->moveType = MOVETYPE_PUSH;
-    self->solid = SOLID_BSP;
+    self->solid = Solid::BSP;
     gi.SetModel(self, self->model);
 
     switch (self->sounds) {

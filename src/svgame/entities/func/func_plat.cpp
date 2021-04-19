@@ -114,7 +114,7 @@ void plat_spawn_inside_trigger(entity_t* ent)
     trigger = G_Spawn();
     trigger->Touch = Touch_Plat_Center;
     trigger->moveType = MOVETYPE_NONE;
-    trigger->solid = SOLID_TRIGGER;
+    trigger->solid = Solid::Trigger;
     trigger->enemy = ent;
 
     tmin[0] = ent->mins[0] + 25;
@@ -166,7 +166,7 @@ Set "sounds" to one of the following:
 void SP_func_plat(entity_t* ent)
 {
     VectorClear(ent->s.angles);
-    ent->solid = SOLID_BSP;
+    ent->solid = Solid::BSP;
     ent->moveType = MOVETYPE_PUSH;
 
     gi.SetModel(ent, ent->model);

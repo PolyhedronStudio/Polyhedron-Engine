@@ -94,7 +94,7 @@ void func_explosive_use(entity_t* self, entity_t* other, entity_t* activator)
 
 void func_explosive_spawn(entity_t* self, entity_t* other, entity_t* activator)
 {
-    self->solid = SOLID_BSP;
+    self->solid = Solid::BSP;
     self->svFlags &= ~SVF_NOCLIENT;
     self->Use = NULL;
     KillBox(self);
@@ -118,11 +118,11 @@ void SP_func_explosive(entity_t* self)
 
     if (self->spawnFlags & 1) {
         self->svFlags |= SVF_NOCLIENT;
-        self->solid = SOLID_NOT;
+        self->solid = Solid::Not;
         self->Use = func_explosive_spawn;
     }
     else {
-        self->solid = SOLID_BSP;
+        self->solid = Solid::BSP;
         if (self->targetName)
             self->Use = func_explosive_use;
     }

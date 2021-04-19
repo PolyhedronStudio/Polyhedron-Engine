@@ -704,7 +704,6 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
         MSG_WriteFloat(to->origin[2]);
 
     // N&C: Full float precision.
-    //if ((flags & MSG_ES_SHORTANGLES) && (bits & U_ANGLE16)) {
     if (bits & U_ANGLE16) {
         if (bits & U_ANGLE_X)
             MSG_WriteFloat(to->angles[0]);

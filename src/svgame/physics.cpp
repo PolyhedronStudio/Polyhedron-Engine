@@ -27,10 +27,10 @@ pushmove objects do not obey gravity, and do not interact with each other or tri
 
 onground is set for toss objects when they come to a complete rest.  it is set for steping or walking objects
 
-doors, plats, etc are SOLID_BSP, and MOVETYPE_PUSH
-bonus items are SOLID_TRIGGER touch, and MOVETYPE_TOSS
-corpses are SOLID_NOT and MOVETYPE_TOSS
-crates are SOLID_BBOX and MOVETYPE_TOSS
+doors, plats, etc are Solid::BSP, and MOVETYPE_PUSH
+bonus items are Solid::Trigger touch, and MOVETYPE_TOSS
+corpses are Solid::Not and MOVETYPE_TOSS
+crates are Solid::BoundingBox and MOVETYPE_TOSS
 walking monsters are SOLID_SLIDEBOX and MOVETYPE_STEP
 flying/floating monsters are SOLID_SLIDEBOX and MOVETYPE_FLY
 
@@ -122,10 +122,10 @@ void SV_Impact(entity_t *e1, trace_t *trace)
 
     e2 = trace->ent;
 
-    if (e1->Touch && e1->solid != SOLID_NOT)
+    if (e1->Touch && e1->solid != Solid::Not)
         e1->Touch(e1, e2, &trace->plane, trace->surface);
 
-    if (e2->Touch && e2->solid != SOLID_NOT)
+    if (e2->Touch && e2->solid != Solid::Not)
         e2->Touch(e2, e1, NULL, NULL);
 }
 
@@ -228,7 +228,7 @@ int SV_FlyMove(entity_t *ent, float time, int mask)
 
         if (trace.plane.normal[2] > 0.7) {
             Blocked |= 1;       // floor
-            if (hit->solid == SOLID_BSP) {
+            if (hit->solid == Solid::BSP) {
                 ent->groundEntityPtr = hit;
                 ent->groundEntityLinkCount = hit->linkCount;
             }

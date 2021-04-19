@@ -86,8 +86,6 @@ static void SV_EmitPacketEntities(client_t         *client,
                 VectorCopy(oldent->angles, newent->angles);
             }
 
-            flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES);
-
             MSG_WriteDeltaEntity(oldent, newent, flags);
             oldindex++;
             newindex++;
@@ -108,7 +106,7 @@ static void SV_EmitPacketEntities(client_t         *client,
                 VectorCopy(oldent->origin, newent->origin);
                 VectorCopy(oldent->angles, newent->angles);
             }
-            flags = (msgEsFlags_t)(flags | MSG_ES_SHORTANGLES); // CPP: Cast flags |= MSG_ES_SHORTANGLES;
+
             MSG_WriteDeltaEntity(oldent, newent, flags);
             newindex++;
             continue;

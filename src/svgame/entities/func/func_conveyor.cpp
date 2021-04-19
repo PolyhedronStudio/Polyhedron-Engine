@@ -51,6 +51,6 @@ void SP_func_conveyor(entity_t* self)
     self->Use = func_conveyor_use;
 
     gi.SetModel(self, self->model);
-    self->solid = SOLID_BSP;
+    self->solid = Solid::BSP;
     gi.LinkEntity(self);
 }

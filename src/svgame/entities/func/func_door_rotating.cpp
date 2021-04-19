@@ -70,7 +70,7 @@ void SP_func_door_rotating(entity_t* ent)
     ent->moveInfo.distance = st.distance;
 
     ent->moveType = MOVETYPE_PUSH;
-    ent->solid = SOLID_BSP;
+    ent->solid = Solid::BSP;
     gi.SetModel(ent, ent->model);
 
     ent->Blocked = door_blocked;

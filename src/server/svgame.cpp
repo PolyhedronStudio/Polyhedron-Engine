@@ -569,7 +569,7 @@ static void PF_StartSound(entity_t *edict, int channel,
         }
 
         // use the entity origin unless it is a bmodel
-        if (edict->solid == SOLID_BSP) {
+        if (edict->solid == Solid::BSP) {
             VectorAverage(edict->mins, edict->maxs, origin);
             VectorAdd(edict->s.origin, origin, origin);
         } else {
@@ -610,7 +610,7 @@ static void PF_StartSound(entity_t *edict, int channel,
 
         // default client doesn't know that bmodels have weird origins
         // MSG: !! Removed: PROTOCOL_VERSION_DEFAULT
-        //if (edict->solid == SOLID_BSP && client->protocol == PROTOCOL_VERSION_DEFAULT) {
+        //if (edict->solid == Solid::BSP && client->protocol == PROTOCOL_VERSION_DEFAULT) {
         //    flags |= SND_POS;
         //}
 

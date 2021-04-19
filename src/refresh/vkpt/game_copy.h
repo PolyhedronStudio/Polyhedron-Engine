@@ -7,10 +7,10 @@ typedef struct link_s
 
 typedef enum
 {
-	SOLID_NOT,			// no interaction with other objects
-	SOLID_TRIGGER,		// only touch when inside, after moving
-	SOLID_BBOX,			// touch on edge
-	SOLID_BSP			// bsp clip, touch on edge
+	Solid::Not,			// no interaction with other objects
+	Solid::Trigger,		// only touch when inside, after moving
+	Solid::BoundingBox,			// touch on edge
+	Solid::BSP			// bsp clip, touch on edge
 } solid_t;
 typedef enum
 {
