@@ -247,7 +247,7 @@ void ThrowDebris(entity_t *self, const char *modelname, float speed, const vec3_
 void BecomeExplosion1(entity_t *self)
 {
     gi.WriteByte(svg_temp_entity);
-    gi.WriteByte(TE_EXPLOSION1);
+    gi.WriteByte(TempEntityEvent::Explosion1);
     gi.WritePosition(self->s.origin);
     gi.Multicast(&self->s.origin, MULTICAST_PVS);
 
@@ -258,7 +258,7 @@ void BecomeExplosion1(entity_t *self)
 void BecomeExplosion2(entity_t *self)
 {
     gi.WriteByte(svg_temp_entity);
-    gi.WriteByte(TE_EXPLOSION2);
+    gi.WriteByte(TempEntityEvent::Explosion2);
     gi.WritePosition(self->s.origin);
     gi.Multicast(&self->s.origin, MULTICAST_PVS);
 

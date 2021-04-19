@@ -71,47 +71,47 @@ static void CLG_ParseTempEntitiesPacket(void)
     teParameters.type = clgi.MSG_ReadByte();
 
     switch (teParameters.type) {
-    case TE_BLASTER:
-    case TE_GUNSHOT:
-    case TE_BLOOD:
-    case TE_MOREBLOOD:
-    case TE_SPARKS:
-    case TE_BULLET_SPARKS:
-    case TE_ELECTRIC_SPARKS:
+    case TempEntityEvent::Blaster:
+    case TempEntityEvent::Gunshot:
+    case TempEntityEvent::Blood:
+    case TempEntityEvent::MoreBlood:
+    case TempEntityEvent::Sparks:
+    case TempEntityEvent::BulletSparks:
+    case TempEntityEvent::ElectricSparks:
         teParameters.pos1 = clgi.MSG_ReadPosition();
         teParameters.dir = clgi.MSG_ReadDirection();
         break;
 
-    case TE_SPLASH:
+    case TempEntityEvent::Splash:
         teParameters.count = clgi.MSG_ReadByte();
         teParameters.pos1 = clgi.MSG_ReadPosition();
         teParameters.dir = clgi.MSG_ReadDirection();
         teParameters.color = clgi.MSG_ReadByte();
         break;
 
-    case TE_DEBUGTRAIL:
-    case TE_BUBBLETRAIL:
-    case TE_BUBBLETRAIL2:
+    case TempEntityEvent::DebugTrail:
+    case TempEntityEvent::BubbleTrail:
+    case TempEntityEvent::BubbleTrail2:
         teParameters.pos1 = clgi.MSG_ReadPosition();
         teParameters.pos2 = clgi.MSG_ReadPosition();
         break;
 
-    case TE_EXPLOSION2:
-    case TE_EXPLOSION1:
-    case TE_EXPLOSION1_NP:
-    case TE_EXPLOSION1_BIG:
-    case TE_PLAIN_EXPLOSION:
-    case TE_TELEPORT_EFFECT:
+    case TempEntityEvent::Explosion2:
+    case TempEntityEvent::Explosion1:
+    case TempEntityEvent::NPExplosion1:
+    case TempEntityEvent::BigExplosion1:
+    case TempEntityEvent::PlainExplosion:
+    case TempEntityEvent::TeleportEffect:
         teParameters.pos1 = clgi.MSG_ReadPosition();
         break;
 
-    case TE_FORCEWALL:
+    case TempEntityEvent::ForceWall:
         teParameters.pos1 = clgi.MSG_ReadPosition();
         teParameters.pos2 = clgi.MSG_ReadPosition();
         teParameters.color = clgi.MSG_ReadByte();
         break;
 
-    case TE_STEAM:
+    case TempEntityEvent::Steam:
         teParameters.entity1 = clgi.MSG_ReadShort();
         teParameters.count = clgi.MSG_ReadByte();
         teParameters.pos1 = clgi.MSG_ReadPosition();
@@ -123,7 +123,7 @@ static void CLG_ParseTempEntitiesPacket(void)
         }
         break;
 
-    case TE_FLARE:
+    case TempEntityEvent::Flare:
         teParameters.entity1 = clgi.MSG_ReadShort();
         teParameters.count = clgi.MSG_ReadByte();
         teParameters.pos1 = clgi.MSG_ReadPosition();

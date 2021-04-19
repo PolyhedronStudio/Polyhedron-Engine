@@ -46,7 +46,7 @@ void Blaster_Fire(entity_t* ent, const vec3_t &g_offset, int damage, qboolean hy
     // send muzzle flash
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
-    gi.WriteByte(MuzzleFlashType::MFT_Blaster | is_silenced);
+    gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
     gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
     PlayerNoise(ent, start, PNOISE_WEAPON);

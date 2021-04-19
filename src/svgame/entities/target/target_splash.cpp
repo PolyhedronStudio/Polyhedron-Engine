@@ -30,7 +30,7 @@ Set "sounds" to one of the following:
 void use_target_splash(entity_t* self, entity_t* other, entity_t* activator)
 {
     gi.WriteByte(svg_temp_entity);
-    gi.WriteByte(TE_SPLASH);
+    gi.WriteByte(TempEntityEvent::Splash);
     gi.WriteByte(self->count);
     gi.WritePosition(self->s.origin);
     gi.WriteDirection(self->moveDirection);

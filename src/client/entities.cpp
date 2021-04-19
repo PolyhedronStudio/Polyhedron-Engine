@@ -305,7 +305,7 @@ void CL_DeltaFrame(void)
 
     // initialize position of the player's own entity from playerstate.
     // this is needed in situations when player entity is invisible, but
-    // server sends an effect referencing it's origin (such as MuzzleFlashType::MFT_Login, etc)
+    // server sends an effect referencing it's origin (such as MuzzleFlashType::Login, etc)
     ent = &cs.entities[cl.frame.clientNum + 1];
     Com_PlayerToEntityState(&cl.frame.playerState, &ent->current);
 

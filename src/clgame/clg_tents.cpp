@@ -983,7 +983,7 @@ void CLG_ParseTempEntity(void)
 	int r;
 
 	switch (teParameters.type) {
-	case TE_BLOOD:          // bullet hitting flesh
+	case TempEntityEvent::Blood:          // bullet hitting flesh
 		if (!(cl_disable_particles->integer & NOPART_BLOOD))
 		{
 			// CL_ParticleEffect(teParameters.pos1, teParameters.dir, 0xe8, 60);
@@ -991,13 +991,13 @@ void CLG_ParseTempEntity(void)
 		}
 		break;
 
-	case TE_GUNSHOT:            // bullet hitting wall
+	case TempEntityEvent::Gunshot:            // bullet hitting wall
 		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0, 40);
-	case TE_SPARKS:
-	case TE_BULLET_SPARKS:
+	case TempEntityEvent::Sparks:
+	case TempEntityEvent::BulletSparks:
 		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0xe0, 6);
 
-		if (teParameters.type != TE_SPARKS) {
+		if (teParameters.type != TempEntityEvent::Sparks) {
 			CLG_SmokeAndFlash(teParameters.pos1);
 
 			// impact sound
@@ -1011,7 +1011,7 @@ void CLG_ParseTempEntity(void)
 		}
 		break;
 
-	case TE_SPLASH:         // bullet hitting water
+	case TempEntityEvent::Splash:         // bullet hitting water
 		if (teParameters.color < 0 || teParameters.color > 6)
 			r = 0x00;
 		else
@@ -1029,8 +1029,8 @@ void CLG_ParseTempEntity(void)
 		}
 		break;
 
-	case TE_BLASTER:            // blaster hitting wall
-	case TE_FLARE:              // flare
+	case TempEntityEvent::Blaster:            // blaster hitting wall
+	case TempEntityEvent::Flare:              // flare
 		ex = CLG_AllocExplosion();
 		VectorCopy(teParameters.pos1, ex->ent.origin);
 		dirtoangles(ex->ent.angles);
@@ -1038,12 +1038,12 @@ void CLG_ParseTempEntity(void)
 		ex->ent.flags = RenderEffects::FullBright | RenderEffects::Translucent;
 		ex->ent.tent_type = teParameters.type;
 		switch (teParameters.type) {
-			case TE_BLASTER:
+			case TempEntityEvent::Blaster:
 				CLG_BlasterParticles(teParameters.pos1, teParameters.dir);
 				ex->lightcolor[0] = 1;
 				ex->lightcolor[1] = 1;
 				break;
-			case TE_FLARE:
+			case TempEntityEvent::Flare:
 				CLG_BlasterParticles2(teParameters.pos1, teParameters.dir, 0xd0);
 				ex->lightcolor[0] = 1;
 				ex->lightcolor[1] = 1;
@@ -1055,7 +1055,7 @@ void CLG_ParseTempEntity(void)
 		ex->ent.model = cl_mod_explode;
 		ex->frames = 4;
 
-		if (teParameters.type != TE_FLARE)
+		if (teParameters.type != TempEntityEvent::Flare)
 		{
 			clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		}
@@ -1067,7 +1067,7 @@ void CLG_ParseTempEntity(void)
 		}
 		break;
 
-	case TE_EXPLOSION2:
+	case TempEntityEvent::Explosion2:
 		ex = CLG_PlainExplosion(false);
 		if (!cl_explosion_sprites->integer)
 		{
@@ -1078,58 +1078,58 @@ void CLG_ParseTempEntity(void)
 		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_EXPLOSION1:
+	case TempEntityEvent::Explosion1:
 		CLG_PlainExplosion(false);
 		CLG_ExplosionParticles(teParameters.pos1);
 		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_EXPLOSION1_NP:
+	case TempEntityEvent::NPExplosion1:
 		CLG_PlainExplosion(false);
 		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_EXPLOSION1_BIG:
+	case TempEntityEvent::BigExplosion1:
 		ex = CLG_PlainExplosion(true);
 		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_BUBBLETRAIL:
+	case TempEntityEvent::BubbleTrail:
 		CLG_BubbleTrail(teParameters.pos1, teParameters.pos2);
 		break;
 
-	case TE_DEBUGTRAIL:
+	case TempEntityEvent::DebugTrail:
 		CLG_DebugTrail(teParameters.pos1, teParameters.pos2);
 		break;
 
-	case TE_PLAIN_EXPLOSION:
+	case TempEntityEvent::PlainExplosion:
 		CLG_PlainExplosion(false);
 		break;
 
-	case TE_FORCEWALL:
+	case TempEntityEvent::ForceWall:
 		CLG_ForceWall(teParameters.pos1, teParameters.pos2, teParameters.color);
 		break;
 
-	case TE_STEAM:
+	case TempEntityEvent::Steam:
 		CLG_ParseSteam();
 		break;
 
-	case TE_BUBBLETRAIL2:
+	case TempEntityEvent::BubbleTrail2:
 		CLG_BubbleTrail2(teParameters.pos1, teParameters.pos2, 8);
 		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_MOREBLOOD:
+	case TempEntityEvent::MoreBlood:
 		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0xe8, 250);
 		break;
 
-	case TE_ELECTRIC_SPARKS:
+	case TempEntityEvent::ElectricSparks:
 		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0x75, 40);
 		//FIXME : replace or remove this sound
 		clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_TELEPORT_EFFECT:
+	case TempEntityEvent::TeleportEffect:
 		CLG_TeleportParticles(teParameters.pos1);
 		break;
 

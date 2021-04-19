@@ -180,7 +180,7 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
 
                 if (color != SPLASH_UNKNOWN) {
                     gi.WriteByte(svg_temp_entity);
-                    gi.WriteByte(TE_SPLASH);
+                    gi.WriteByte(TempEntityEvent::Splash);
                     gi.WriteByte(8);
                     gi.WritePosition(tr.endPosition);
                     gi.WriteDirection(tr.plane.normal);
@@ -240,7 +240,7 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
         VectorScale(pos, 0.5, pos);
 
         gi.WriteByte(svg_temp_entity);
-        gi.WriteByte(TE_BUBBLETRAIL);
+        gi.WriteByte(TempEntityEvent::BubbleTrail);
         gi.WritePosition(water_start);
         gi.WritePosition(tr.endPosition);
         gi.Multicast(&pos, MULTICAST_PVS);
@@ -258,7 +258,7 @@ pistols, rifles, etc....
 */
 void fire_bullet(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod)
 {
-    fire_lead(self, start, aimdir, damage, kick, TE_GUNSHOT, hspread, vspread, mod);
+    fire_lead(self, start, aimdir, damage, kick, TempEntityEvent::Gunshot, hspread, vspread, mod);
 }
 
 /*
@@ -310,7 +310,7 @@ void blaster_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t 
 
     } else {
         gi.WriteByte(svg_temp_entity);
-        gi.WriteByte(TE_BLASTER);
+        gi.WriteByte(TempEntityEvent::Blaster);
         gi.WritePosition(self->s.origin);
         if (!plane)
             gi.WriteDirection(vec3_zero());
@@ -402,7 +402,7 @@ void flare_sparks(entity_t *self)
 	// be fine for single player. 
 	// 
 	gi.WriteByte(svg_temp_entity);
-	gi.WriteByte(TE_FLARE);
+	gi.WriteByte(TempEntityEvent::Flare);
 
     gi.WriteShort(self - g_edicts);
     // if this is the first tick of flare, set count to 1 to start the sound

@@ -373,9 +373,9 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
     client = targ->client;
 
     if (dflags & DAMAGE_BULLET)
-        te_sparks = TE_BULLET_SPARKS;
+        te_sparks = TempEntityEvent::BulletSparks;
     else
-        te_sparks = TE_SPARKS;
+        te_sparks = TempEntityEvent::Sparks;
 
     // Retrieve normalized direction.
     vec3_t dir = vec3_normalize(dmgDir);
@@ -436,8 +436,8 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
     if (take) {
         if ((targ->svFlags & SVF_MONSTER) || (client))
         {
-            // SpawnDamage(TE_BLOOD, point, normal, take);
-            SpawnDamage(TE_BLOOD, point, dir, take);
+            // SpawnDamage(TempEntityEvent::Blood, point, normal, take);
+            SpawnDamage(TempEntityEvent::Blood, point, dir, take);
         }
         else
             SpawnDamage(te_sparks, point, normal, take);

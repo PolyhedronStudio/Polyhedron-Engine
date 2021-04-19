@@ -18,14 +18,14 @@
 // These are used for game logic. They are set in clg_input.cpp. One is free
 // to use up the remaining slots for their own custom needs.
 //-----------------
-constexpr uint32_t BUTTON_ATTACK		= (1 << 0);
-constexpr uint32_t BUTTON_USE			= (1 << 1);
-constexpr uint32_t BUTTON_WALK			= (1 << 2);
-constexpr uint32_t BUTTON_UNUSED_0		= (1 << 3);
-constexpr uint32_t BUTTON_UNUSED_1		= (1 << 4);
-constexpr uint32_t BUTTON_UNUSED_2		= (1 << 5);
-constexpr uint32_t BUTTON_UNUSED_3		= (1 << 6);
-constexpr uint32_t BUTTON_ANY			= (1 << 7);
+constexpr uint8_t BUTTON_ATTACK		= (1 << 0);
+constexpr uint8_t BUTTON_USE			= (1 << 1);
+constexpr uint8_t BUTTON_WALK			= (1 << 2);
+constexpr uint8_t BUTTON_UNUSED_0		= (1 << 3);
+constexpr uint8_t BUTTON_UNUSED_1		= (1 << 4);
+constexpr uint8_t BUTTON_UNUSED_2		= (1 << 5);
+constexpr uint8_t BUTTON_UNUSED_3		= (1 << 6);
+constexpr uint8_t BUTTON_ANY			= (1 << 7);
 
 //
 //=============================================================================
@@ -49,25 +49,25 @@ constexpr uint32_t BUTTON_ANY			= (1 << 7);
 //-----------------
 struct EntityEffectType {
     // Animation Effects.
-    static constexpr int32_t AnimCycleFrames01hz2    = (1 << 0); // Auto cycle between the frames 0, and 1, at 2 hz.
-    static constexpr int32_t AnimCycleFrames23hz2    = (1 << 1); // Auto cycle between the frames 2, and 3, at 2 hz.
-    static constexpr int32_t AnimCycleAll2hz         = (1 << 2); // Auto cycle through all frames at 2 hz.
-    static constexpr int32_t AnimCycleAll30hz        = (1 << 3); // Auto cycle through all frames at 30 hz.
+    static constexpr uint32_t AnimCycleFrames01hz2    = (1 << 0); // Auto cycle between the frames 0, and 1, at 2 hz.
+    static constexpr uint32_t AnimCycleFrames23hz2    = (1 << 1); // Auto cycle between the frames 2, and 3, at 2 hz.
+    static constexpr uint32_t AnimCycleAll2hz         = (1 << 2); // Auto cycle through all frames at 2 hz.
+    static constexpr uint32_t AnimCycleAll30hz        = (1 << 3); // Auto cycle through all frames at 30 hz.
     
-    static constexpr int32_t ColorShell              = (1 << 6); // Color Shell around model.
+    static constexpr uint32_t ColorShell              = (1 << 6); // Color Shell around model.
 
-    static constexpr int32_t Rotate                  = (1 << 8); // Rotate (Items.)
+    static constexpr uint32_t Rotate                  = (1 << 8); // Rotate (Items.)
 
     // Entity 'type' Effects that dictate special entity 'type' treatment.
-    static constexpr int32_t Gib     = (1 << 10);    // Entity is of type 'gib', and needs special treatment.
-    static constexpr int32_t Corpse  = (1 << 11);    // Entity is of type 'corpse', and needs special treatment.
+    static constexpr uint32_t Gib     = (1 << 10);    // Entity is of type 'gib', and needs special treatment.
+    static constexpr uint32_t Corpse  = (1 << 11);    // Entity is of type 'corpse', and needs special treatment.
 
     // 'Other' Effects. (Mostly null model entity stuff, weapon particles.)
-    static constexpr int32_t Blaster     = (1 << 16);
-    static constexpr int32_t Teleporter  = (1 << 24);
+    static constexpr uint32_t Blaster     = (1 << 16);
+    static constexpr uint32_t Teleporter  = (1 << 24);
 
     // Maximum last effect slot, feel free to rename it and use it.
-    static constexpr int32_t Max = (1 << 31);
+    static constexpr uint32_t Max = (1 << 31);
 };
 
 // player_state_t->refdef flags
@@ -82,21 +82,21 @@ struct EntityEffectType {
 //-----------------
 // muzzle flashes / player effects
 //-----------------
-typedef enum {
+struct MuzzleFlashType {
 
 
     // These aren't weapons, but are effects displayed in the player's view.
     // Hence, as such, they are actually treated as muzzleflashes.
-    MFT_Respawn = 0,
-    MFT_ItemRespawn,
-    MFT_Login,
-    MFT_Logout,
+    static constexpr uint8_t Respawn = 0;
+    static constexpr uint8_t ItemRespawn = 1;
+    static constexpr uint8_t Login = 2;
+    static constexpr uint8_t Logout = 3;
 
     // Weapon Muzzleflashes.
-    MFT_Blaster,
-    MFT_MachineGun,
-    MFT_Flare,
-} MuzzleFlashType;
+    static constexpr uint8_t Blaster = 16;
+    static constexpr uint8_t MachineGun = 17;
+    static constexpr uint8_t Flare = 18;
+};
 
 //-----------------
 // monster muzzle flashes
@@ -134,31 +134,31 @@ typedef enum {
 // any existing entity. Temporary entity messages are explicitly constructed
 // and broadcast.
 //-----------------
-typedef enum {
-    TE_GUNSHOT,
-    TE_BLOOD,
-    TE_BLASTER,
-    TE_EXPLOSION1,
-    TE_EXPLOSION2,
-    TE_SPARKS,
-    TE_SPLASH,
-    TE_BUBBLETRAIL,
-    TE_BULLET_SPARKS,
-    TE_FLAME,
-    TE_DEBUGTRAIL,
-    TE_PLAIN_EXPLOSION,
-    TE_FORCEWALL,
-    TE_STEAM,
-    TE_BUBBLETRAIL2,
-    TE_MOREBLOOD,
-    TE_ELECTRIC_SPARKS,
-    TE_TELEPORT_EFFECT,
-    TE_EXPLOSION1_BIG,
-    TE_EXPLOSION1_NP,
-    TE_FLARE,
+struct TempEntityEvent {
+    static constexpr uint8_t Gunshot = 0;
+    static constexpr uint8_t Blood = 1;
+    static constexpr uint8_t Blaster = 2;
+    static constexpr uint8_t Explosion1= 3;
+    static constexpr uint8_t Explosion2 = 4;
+    static constexpr uint8_t Sparks = 5;
+    static constexpr uint8_t Splash = 6;
+    static constexpr uint8_t BubbleTrail = 7;
+    static constexpr uint8_t BulletSparks = 8;
+    static constexpr uint8_t Flame = 9;
+    static constexpr uint8_t DebugTrail = 10;
+    static constexpr uint8_t PlainExplosion= 11;
+    static constexpr uint8_t ForceWall = 12;
+    static constexpr uint8_t Steam = 13; 
+    static constexpr uint8_t BubbleTrail2 = 14;
+    static constexpr uint8_t MoreBlood = 15;
+    static constexpr uint8_t ElectricSparks = 16;
+    static constexpr uint8_t TeleportEffect  = 17;
+    static constexpr uint8_t BigExplosion1 = 18;
+    static constexpr uint8_t NPExplosion1 = 19;
+    static constexpr uint8_t Flare = 20;
 
-    TE_NUM_ENTITIES
-} TempEntityEvent;
+    static constexpr uint8_t Max = 255;
+};
 
 //-----------------
 // Splash Types.

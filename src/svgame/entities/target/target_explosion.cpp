@@ -22,7 +22,7 @@ void target_explosion_explode(entity_t* self)
     float       save;
 
     gi.WriteByte(svg_temp_entity);
-    gi.WriteByte(TE_EXPLOSION1);
+    gi.WriteByte(TempEntityEvent::Explosion1);
     gi.WritePosition(self->s.origin);
     gi.Multicast(&self->s.origin, MULTICAST_PHS);
 
