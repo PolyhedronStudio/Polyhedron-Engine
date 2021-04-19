@@ -109,9 +109,7 @@ static void create_baselines(void)
         base = *chunk + (i & SV_BASELINES_MASK);
         MSG_PackEntity(base, &ent->s, true); // MSG: !! Removed: Q2PRO_SHORTANGLES - Modify MSG_PackEntity to always use shortangles.
 
-        if (sv_client->esFlags & MSG_ES_LONGSOLID) {
-            base->solid = sv.entities[i].solid32;
-        }
+        base->solid = sv.entities[i].solid32;
     }
 }
 

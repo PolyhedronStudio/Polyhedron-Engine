@@ -528,7 +528,6 @@ static void CL_ParseServerData(void)
         //PMoveEnableQW(&cl.pmp);
     }
     cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_UMASK); // CPP: IMPROVE: cl.esFlags |= MSG_ES_UMASK;
-    cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_LONGSOLID); // CPP: IMPROVE: cl.esFlags |= MSG_ES_LONGSOLID;
     cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
     i = MSG_ReadByte();
     if (i) {

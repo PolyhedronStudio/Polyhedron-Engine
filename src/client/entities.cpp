@@ -134,12 +134,8 @@ static void entity_update(const entity_state_t *state)
         && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
         cl.solidEntities[cl.numSolidEntities++] = ent;
         if (state->solid != PACKED_BSP) {
-            // encoded bbox
-            if (cl.esFlags & MSG_ES_LONGSOLID) {
-                MSG_UnpackSolid32(state->solid, ent->mins, ent->maxs);
-            } else {
-                MSG_UnpackSolid16(state->solid, ent->mins, ent->maxs);
-            }
+            // 32 bit encoded bbox
+            MSG_UnpackSolid32(state->solid, ent->mins, ent->maxs);
         }
     }
 

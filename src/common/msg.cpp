@@ -725,10 +725,7 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
     if (bits & U_EVENT)
         MSG_WriteByte(to->event);
     if (bits & U_SOLID) {
-        if (flags & MSG_ES_LONGSOLID)
-            MSG_WriteLong(to->solid);
-        else
-            MSG_WriteShort(to->solid);
+        MSG_WriteLong(to->solid);
     }
 }
 
@@ -1746,11 +1743,7 @@ void MSG_ParseDeltaEntity(const entity_state_t *from,
 
     // Solid.
     if (bits & U_SOLID) {
-        if (flags & MSG_ES_LONGSOLID) {
-            to->solid = MSG_ReadLong();
-        } else {
-            to->solid = MSG_ReadWord();
-        }
+        to->solid = MSG_ReadLong();
     }
 }
 
