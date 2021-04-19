@@ -932,7 +932,7 @@ static void init_pmove_and_es_flags(client_t *newcl)
     }
     newcl->pmp.flyhack = true;
     newcl->pmp.flyfriction = 4;
-    newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_UMASK); // CPP: Cast bitflag
+    //newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_UMASK); // CPP: Cast bitflag
     newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
 
     newcl->pmp.waterhack = (sv_waterjump_hack->integer != 0 ? true : false);
