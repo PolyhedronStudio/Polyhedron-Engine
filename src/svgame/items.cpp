@@ -568,7 +568,7 @@ void droptofloor(entity_t *ent)
     if (ent->spawnFlags & ITEM_NO_TOUCH) {
         ent->solid = SOLID_BBOX;
         ent->Touch = NULL;
-        ent->s.effects &= ~EntityEffectType::EET_Rotate;
+        ent->s.effects &= ~EntityEffectType::Rotate;
         ent->s.renderfx &= ~RenderEffects::Glow;
     }
 
@@ -735,7 +735,7 @@ gitem_t itemlist[] = {
         NULL,
         NULL,
         "misc/ar1_pkup.wav",
-        "models/items/armor/body/tris.md2", EntityEffectType::EET_Rotate,
+        "models/items/armor/body/tris.md2", EntityEffectType::Rotate,
         NULL,
         /* icon */      "i_bodyarmor",
         /* pickup */    "Body Armor",
@@ -786,7 +786,7 @@ gitem_t itemlist[] = {
         Drop_Weapon,
         Weapon_Machinegun,
         "misc/w_pkup.wav",
-        "models/weapons/g_machn/tris.md2", EntityEffectType::EET_Rotate,
+        "models/weapons/g_machn/tris.md2", EntityEffectType::Rotate,
         "models/weapons/v_machn/tris.md2",
         /* icon */      "w_machinegun",
         /* pickup */    "Machinegun",

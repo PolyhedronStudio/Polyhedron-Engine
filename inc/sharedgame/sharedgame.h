@@ -47,28 +47,28 @@ constexpr uint32_t BUTTON_ANY			= (1 << 7);
 // An entity that has effects will be sent to the client even if it has a zero
 // index model.
 //-----------------
-typedef enum {
+struct EntityEffectType {
     // Animation Effects.
-    EET_AnimCycleFrames01hz2    = (1 << 0), // Auto cycle between the frames 0, and 1, at 2 hz.
-    EET_AnimCycleFrames23hz2    = (1 << 1), // Auto cycle between the frames 2, and 3, at 2 hz.
-    EET_AnimCycleAll2hz         = (1 << 2), // Auto cycle through all frames at 2 hz.
-    EET_AnimCycleAll30hz        = (1 << 3), // Auto cycle through all frames at 30 hz.
+    static constexpr int32_t AnimCycleFrames01hz2    = (1 << 0); // Auto cycle between the frames 0, and 1, at 2 hz.
+    static constexpr int32_t AnimCycleFrames23hz2    = (1 << 1); // Auto cycle between the frames 2, and 3, at 2 hz.
+    static constexpr int32_t AnimCycleAll2hz         = (1 << 2); // Auto cycle through all frames at 2 hz.
+    static constexpr int32_t AnimCycleAll30hz        = (1 << 3); // Auto cycle through all frames at 30 hz.
     
-    EET_ColorShell              = (1 << 6), // Color Shell around model.
+    static constexpr int32_t ColorShell              = (1 << 6); // Color Shell around model.
 
-    EET_Rotate                  = (1 << 8), // Rotate (Items.)
+    static constexpr int32_t Rotate                  = (1 << 8); // Rotate (Items.)
 
     // Entity 'type' Effects that dictate special entity 'type' treatment.
-    EET_Gib     = (1 << 10),    // Entity is of type 'gib', and needs special treatment.
-    EET_Corpse  = (1 << 11),    // Entity is of type 'corpse', and needs special treatment.
+    static constexpr int32_t Gib     = (1 << 10);    // Entity is of type 'gib', and needs special treatment.
+    static constexpr int32_t Corpse  = (1 << 11);    // Entity is of type 'corpse', and needs special treatment.
 
     // 'Other' Effects. (Mostly null model entity stuff, weapon particles.)
-    EET_Blaster     = (1 << 16),
-    EET_Teleporter  = (1 << 24),
+    static constexpr int32_t Blaster     = (1 << 16);
+    static constexpr int32_t Teleporter  = (1 << 24);
 
     // Maximum last effect slot, feel free to rename it and use it.
-    EET_Max = (1 << 31),
-} EntityEffectType;
+    static constexpr int32_t Max = (1 << 31);
+};
 
 // player_state_t->refdef flags
 #define RDF_UNDERWATER      1       // warp the screen as apropriate

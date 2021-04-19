@@ -119,13 +119,13 @@ void CLG_AddPacketEntities(void)
         //
         // Frame Animation Effects.
         //
-        if (effects & EntityEffectType::EET_AnimCycleFrames01hz2)
+        if (effects & EntityEffectType::AnimCycleFrames01hz2)
             ent.frame = autoanim & 1;
-        else if (effects & EntityEffectType::EET_AnimCycleFrames23hz2)
+        else if (effects & EntityEffectType::AnimCycleFrames23hz2)
             ent.frame = 2 + (autoanim & 1);
-        else if (effects & EntityEffectType::EET_AnimCycleAll2hz)
+        else if (effects & EntityEffectType::AnimCycleAll2hz)
             ent.frame = autoanim;
-        else if (effects & EntityEffectType::EET_AnimCycleAll30hz)
+        else if (effects & EntityEffectType::AnimCycleAll30hz)
             ent.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
         else
             ent.frame = s1->frame;
@@ -206,13 +206,13 @@ void CLG_AddPacketEntities(void)
             ent.alpha = 0.70;
 
         // render effects (fullbright, translucent, etc)
-        if ((effects & EntityEffectType::EET_ColorShell))
+        if ((effects & EntityEffectType::ColorShell))
             ent.flags = 0;  // renderfx go on color shell entity
         else
             ent.flags = renderfx;
 
         // calculate angles
-        if (effects & EntityEffectType::EET_Rotate) {  // some bonus items auto-rotate
+        if (effects & EntityEffectType::Rotate) {  // some bonus items auto-rotate
             ent.angles[0] = 0;
             ent.angles[1] = autorotate;
             ent.angles[2] = 0;
@@ -259,7 +259,7 @@ void CLG_AddPacketEntities(void)
         ent.flags |= base_entity_flags;
 
         // in rtx mode, the base entity has the renderfx for shells
-        if ((effects & EntityEffectType::EET_ColorShell) && vid_rtx->integer) {
+        if ((effects & EntityEffectType::ColorShell) && vid_rtx->integer) {
             renderfx = adjust_shell_fx(renderfx);
             ent.flags |= renderfx;
         }
@@ -289,7 +289,7 @@ void CLG_AddPacketEntities(void)
         }
 
         // color shells generate a separate entity for the main model
-        if ((effects & EntityEffectType::EET_ColorShell) && !vid_rtx->integer) {
+        if ((effects & EntityEffectType::ColorShell) && !vid_rtx->integer) {
             renderfx = adjust_shell_fx(renderfx);
             ent.flags = renderfx | RenderEffects::Translucent | base_entity_flags;
             ent.alpha = 0.30;
@@ -327,7 +327,7 @@ void CLG_AddPacketEntities(void)
                 ent.flags = RenderEffects::Translucent;
             }
 
-            if ((effects & EntityEffectType::EET_ColorShell) && vid_rtx->integer) {
+            if ((effects & EntityEffectType::ColorShell) && vid_rtx->integer) {
                 ent.flags |= renderfx;
             }
 
@@ -352,11 +352,11 @@ void CLG_AddPacketEntities(void)
 
 
         // Add automatic particle trail effects where desired.
-        if (effects & ~EntityEffectType::EET_Rotate) {
-            if (effects & EntityEffectType::EET_Blaster) {
+        if (effects & ~EntityEffectType::Rotate) {
+            if (effects & EntityEffectType::Blaster) {
                 CLG_BlasterTrail(cent->lerp_origin, ent.origin);
                 V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
-            } else if (effects & EntityEffectType::EET_Gib) {
+            } else if (effects & EntityEffectType::Gib) {
                 CLG_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
             }
         }
@@ -548,7 +548,7 @@ qboolean CLG_IsClientViewEntity(const cl_entity_t* ent) {
         return true;
     }
 
-    if ((ent->current.effects & EntityEffectType::EET_Corpse) == 0) {
+    if ((ent->current.effects & EntityEffectType::Corpse) == 0) {
 
         if (ent->current.modelindex == 255) {
 
@@ -584,7 +584,7 @@ void CLG_EntityEvent(int number) {
     cl_entity_t *cent = &cs->entities[number];
     
     // EF_TELEPORTER acts like an event, but is not cleared each frame
-    if ((cent->current.effects & EntityEffectType::EET_Teleporter) && CL_FRAMESYNC) {
+    if ((cent->current.effects & EntityEffectType::Teleporter) && CL_FRAMESYNC) {
         CLG_TeleporterParticles(cent->current.origin);
     }
         

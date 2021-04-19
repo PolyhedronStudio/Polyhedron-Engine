@@ -1095,7 +1095,7 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags)
 
             p->time = cl->time;
 
-            if (flags & EntityEffectType::EET_Gib) {
+            if (flags & EntityEffectType::Gib) {
                 p->alpha = 1.0;
                 p->alphavel = -1.0 / (1 + frand() * 0.4);
 

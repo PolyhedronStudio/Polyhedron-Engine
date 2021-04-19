@@ -71,7 +71,7 @@ void SP_misc_teleporter(entity_t* ent)
 
     gi.SetModel(ent, "models/objects/dmspot/tris.md2");
     ent->s.skinnum = 1;
-    ent->s.effects = EntityEffectType::EET_Teleporter;
+    ent->s.effects = EntityEffectType::Teleporter;
     ent->s.sound = gi.SoundIndex("world/amb10.wav");
     ent->solid = SOLID_BBOX;
 

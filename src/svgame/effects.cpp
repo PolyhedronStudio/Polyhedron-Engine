@@ -93,7 +93,7 @@ void ThrowGib(entity_t *self, const char *gibname, int damage, int type)
 
     gi.SetModel(gib, gibname);
     gib->solid = SOLID_NOT;
-    gib->s.effects |= EntityEffectType::EET_Gib;
+    gib->s.effects |= EntityEffectType::Gib;
     gib->flags |= FL_NO_KNOCKBACK;
     gib->takedamage = DAMAGE_YES;
     gib->Die = gib_die;
@@ -134,7 +134,7 @@ void ThrowHead(entity_t *self, const char *gibname, int damage, int type)
     self->s.modelindex2 = 0;
     gi.SetModel(self, gibname);
     self->solid = SOLID_NOT;
-    self->s.effects |= EntityEffectType::EET_Gib;
+    self->s.effects |= EntityEffectType::Gib;
     self->s.sound = 0;
     self->flags |= FL_NO_KNOCKBACK;
     self->svFlags &= ~SVF_MONSTER;
@@ -185,7 +185,7 @@ void ThrowClientHead(entity_t *self, int damage)
 
     self->takedamage = DAMAGE_NO;
     self->solid = SOLID_NOT;
-    self->s.effects = EntityEffectType::EET_Gib;
+    self->s.effects = EntityEffectType::Gib;
     self->s.sound = 0;
     self->flags |= FL_NO_KNOCKBACK;
 

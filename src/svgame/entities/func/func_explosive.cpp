@@ -128,9 +128,9 @@ void SP_func_explosive(entity_t* self)
     }
 
     if (self->spawnFlags & 2)
-        self->s.effects |= EntityEffectType::EET_AnimCycleAll2hz;
+        self->s.effects |= EntityEffectType::AnimCycleAll2hz;
     if (self->spawnFlags & 4)
-        self->s.effects |= EntityEffectType::EET_AnimCycleAll30hz;
+        self->s.effects |= EntityEffectType::AnimCycleAll30hz;
 
     if (self->Use != func_explosive_use) {
         if (!self->health)
