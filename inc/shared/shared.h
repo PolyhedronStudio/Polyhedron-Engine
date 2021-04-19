@@ -107,27 +107,27 @@ typedef float vec_t;
 //-----------------
 // Max String limits.
 //-----------------
-#define MAX_STRING_CHARS    4096    // max length of a string passed to Cmd_TokenizeString
-#define MAX_STRING_TOKENS   256     // max tokens resulting from Cmd_TokenizeString
-#define MAX_TOKEN_CHARS     1024    // max length of an individual token
-#define MAX_NET_STRING      2048    // max length of a string used in network protocol
+constexpr int32_t MAX_STRING_CHARS  = 4096;  // max length of a string passed to Cmd_TokenizeString
+constexpr int32_t MAX_STRING_TOKENS = 256;  // max tokens resulting from Cmd_TokenizeString
+constexpr int32_t MAX_TOKEN_CHARS   = 1024;   // max length of an individual token
+constexpr int32_t MAX_NET_STRING    = 2048;    // max length of a string used in network protocol
 
-#define MAX_QPATH           256      // max length of a quake game pathname
-#define MAX_OSPATH          256     // max length of a filesystem pathname
+constexpr int32_t MAX_QPATH     = 256;  // max length of a quake game pathname
+constexpr int32_t MAX_OSPATH    = 256; // max length of a filesystem pathname
 
 //-----------------
 // Per-level limits
 //-----------------
-#define MAX_CLIENTS         256     // absolute limit
-#define MAX_EDICTS          2048    // N&C: POOL: Was 1024 // must change protocol to increase more
-#define MAX_LIGHTSTYLES     256
-#define MAX_MODELS          256     // these are sent over the net as bytes
-#define MAX_SOUNDS          256     // so they cannot be blindly increased
-#define MAX_IMAGES          256
-#define MAX_ITEMS           256
-#define MAX_GENERAL         (MAX_CLIENTS * 2) // general config strings
+constexpr int32_t MAX_CLIENTS   = 256;    // absolute limit
+constexpr int32_t MAX_EDICTS    = 2048;    // N&C: POOL: Was 1024 // must change protocol to increase more
+constexpr int32_t MAX_LIGHTSTYLES   = 256;
+constexpr int32_t MAX_MODELS    = 256; // these are sent over the net as bytes
+constexpr int32_t MAX_SOUNDS    = 256;// so they cannot be blindly increased
+constexpr int32_t MAX_IMAGES    = 256;
+constexpr int32_t MAX_ITEMS     = 256;
+constexpr int32_t MAX_GENERAL   = (MAX_CLIENTS * 2);// general config strings
 
-#define MAX_CLIENT_NAME     16
+constexpr int32_t MAX_CLIENT_NAME = 16;
 
 //-----------------
 // General Utility Macros.
@@ -189,13 +189,13 @@ typedef float vec_t;
 //-----------------
 //N&C 20hz tick
 //-----------------
-#define BASE_FRAMERATE          20 //10
-#define BASE_FRAMETIME          50.0f //100
-#define BASE_1_FRAMETIME        0.02f //0.01f   // 1/BASE_FRAMETIME
-#define BASE_FRAMETIME_1000     0.05f //0.1f    // BASE_FRAMETIME/1000
+static constexpr uint32_t BASE_FRAMERATE = 20; //10
+static constexpr float BASE_FRAMETIME = 50.0f; //100
+static constexpr float BASE_1_FRAMETIME = 0.02f; //0.01f   // 1/BASE_FRAMETIME
+static constexpr float BASE_FRAMETIME_1000 = 0.05f; //0.1f    // BASE_FRAMETIME/1000
 
 // maximum variable FPS factor
-#define MAX_FRAMEDIV    6
+static constexpr uint32_t MAX_FRAMEDIV = 6;
 
 //-----------------
 // Client FPS
