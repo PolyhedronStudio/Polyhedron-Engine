@@ -378,7 +378,7 @@ static int read_server_file(void)
     }
 
     // start a new game fresh with new cvars
-    SV_InitGame(MVD_SPAWN_DISABLED);
+    SV_InitGame();
 
     // read game state
     len = Q_snprintf(name, MAX_OSPATH,

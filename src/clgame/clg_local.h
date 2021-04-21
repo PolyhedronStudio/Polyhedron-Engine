@@ -58,12 +58,12 @@ typedef struct clg_view_s {
 
     // Holds all the dynamic lights currently in the view frame.
 #if USE_DLIGHTS
-    dlight_t dlights[MAX_DLIGHTS];
+    rdlight_t dlights[MAX_DLIGHTS];
     int num_dlights;
 #endif
 
     // Holds all the particles currently in the view frame.
-    particle_t particles[MAX_PARTICLES];
+    rparticle_t particles[MAX_PARTICLES];
     int num_particles;
 
     // Holds all the explosions currently in the view frame.

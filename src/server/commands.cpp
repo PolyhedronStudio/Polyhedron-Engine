@@ -291,7 +291,7 @@ static void SV_Map(qboolean restart)
 
     // any error will drop from this point
     if ((sv.state != ss_game && sv.state != ss_pic && sv.state != ss_cinematic) || restart)
-        SV_InitGame(MVD_SPAWN_DISABLED);    // the game is just starting
+        SV_InitGame();    // the game is just starting
 
     // clear pending CM
     Com_AbortFunc(NULL, NULL);
@@ -489,7 +489,7 @@ static void SV_Kick_f(void)
 
     // optionally ban their IP address
     if (!strcmp(Cmd_Argv(0), "kickban")) {
-        netadr_t *addr = &sv_client->netchan->remote_address;
+        netadr_t *addr = &sv_client->netchan->remoteAddress;
         if (addr->type == NA_IP || addr->type == NA_IP6) {
             addrmatch_t *match = (addrmatch_t*)Z_Malloc(sizeof(*match)); // CPP: Cast
             match->addr = *addr;
@@ -543,7 +543,7 @@ static void dump_clients(void)
         Com_Printf("%-15.15s ", client->name);
         Com_Printf("%7u ", svs.realtime - client->lastmessage);
         Com_Printf("%-21s ", NET_AdrToString(
-                       &client->netchan->remote_address));
+                       &client->netchan->remoteAddress));
         Com_Printf("%5" PRIz " ", client->rate);
         Com_Printf("%2i ", client->protocol);
         Com_Printf("%3i ", client->moves_per_sec);
@@ -645,7 +645,7 @@ static void dump_protocols(void)
                    cl->number, cl->name, cl->protocol, cl->version,
                    cl->netchan->maxpacketlen,
                    cl->has_zlib ? "yes" : "no ",
-                   cl->netchan->type ? "new" : "old");
+                   "1");
     }
 }
 
@@ -755,7 +755,7 @@ void SV_PrintMiscInfo(void)
                sv_client->protocol, sv_client->version);
     Com_Printf("maxmsglen            %" PRIz "\n", sv_client->netchan->maxpacketlen);
     Com_Printf("zlib support         %s\n", sv_client->has_zlib ? "yes" : "no");
-    Com_Printf("netchan type         %s\n", sv_client->netchan->type ? "new" : "old");
+    Com_Printf("netchan type         %s\n", "1");
     Com_Printf("ping                 %d\n", sv_client->ping);
     Com_Printf("movement fps         %d\n", sv_client->moves_per_sec);
     Com_Printf("RTT (min/avg/max)    %d/%d/%d ms\n",

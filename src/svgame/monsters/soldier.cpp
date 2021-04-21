@@ -503,7 +503,7 @@ void soldier_fire(entity_t *self, int flash_number)
 
         r = crandom() * 1000;
         u = crandom() * 500;
-        VectorMA(start, 8192, forward, end);
+        VectorMA(start, WORLD_SIZE, forward, end);
         VectorMA(end, r, right, end);
         VectorMA(end, u, up, end);
 

@@ -45,7 +45,7 @@ void CL_CheckPredictionError(void)
         return;
 
     // calculate the last usercmd_t we sent that the server has processed
-    frame = cls.netchan->incoming_acknowledged & CMD_MASK;
+    frame = cls.netchan->incomingAcknowledged & CMD_MASK;
     cmd = cl.history[frame].cmdNumber;
 
     // N&C: Call into the CG Module to let it handle this.
@@ -176,7 +176,7 @@ void CL_PredictMovement(void)
         return;
     }
 
-    ack = cl.history[cls.netchan->incoming_acknowledged & CMD_MASK].cmdNumber;
+    ack = cl.history[cls.netchan->incomingAcknowledged & CMD_MASK].cmdNumber;
     current = cl.cmdNumber;
 
     // if we are too far out of date, just freeze

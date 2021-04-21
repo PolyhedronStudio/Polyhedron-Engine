@@ -356,10 +356,12 @@ static inline int Q_gcd(int a, int b)
 }
 
 // These need to be replaced.
-//#define frand()     ((rand() & 32767) * (1.0 / 32767))
-#define frand()     Randomf()
-//#define crand()     ((rand() & 32767) * (2.0 / 32767) - 1)
-#define crand()     Randomui()
+
+
+#define frand()     ((rand() & 32767) * (1.0 / 32767))
+//#define frand()     Randomf()
+#define crand()     ((rand() & 32767) * (2.0 / 32767) - 1)
+//#define crand()     Randomui()
 #define Q_rint(x)   ((x) < 0 ? ((int)((x) - 0.5f)) : ((int)((x) + 0.5f)))
 
 #endif // __INC_SHARED_MATH_UTILITIES_H__

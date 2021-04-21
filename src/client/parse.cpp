@@ -326,7 +326,7 @@ static void CL_ParseFrame(int extrabits)
     if (cl_shownet->integer > 2) {
         int rtt = 0;
         if (cls.netchan) {
-            int seq = cls.netchan->incoming_acknowledged & CMD_MASK;
+            int seq = cls.netchan->incomingAcknowledged & CMD_MASK;
             rtt = cls.realtime - cl.history[seq].sent;
         }
         Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":frame:%d  delta:%d  rtt:%d\n",   // CPP: String concat.

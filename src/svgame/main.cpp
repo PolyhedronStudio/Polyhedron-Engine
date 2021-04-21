@@ -78,8 +78,6 @@ cvar_t  *flood_waitdelay;
 
 cvar_t  *sv_maplist;
 
-cvar_t  *sv_features;
-
 cvar_t  *sv_flaregun;
 cvar_t  *cl_monsterfootsteps;
 
@@ -178,9 +176,6 @@ void InitGame(void)
 
     // dm map list
     sv_maplist = gi.cvar("sv_maplist", "", 0);
-
-    // obtain server features
-    sv_features = gi.cvar("sv_features", NULL, 0);
 
 	// flare gun switch: 
 	//   0 = no flare gun
@@ -340,7 +335,7 @@ void EndDMLevel(void)
     static const char *seps = " ,\n\r";
 
     // stay on same level flag
-    if ((int)dmflags->value & DF_SAME_LEVEL) {
+    if ((int)dmflags->value & DeathMatchFlags::SameLevel) {
         HUD_BeginIntermission(CreateTargetChangeLevel(level.mapname));
         return;
     }

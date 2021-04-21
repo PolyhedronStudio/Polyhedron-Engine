@@ -117,7 +117,7 @@ static qboolean frame_ready = false;
 static float sky_rotation = 0.f;
 static vec3_t sky_axis = vec3_zero();
 
-static dlight_t entlights[MAX_ENTLIGHTS];
+static rdlight_t entlights[MAX_ENTLIGHTS];
 static dlightLS_t entlightstyles[MAX_ENTLIGHTS];
 int num_entlights = 0;
 #define NUM_TAA_SAMPLES 128
@@ -1556,13 +1556,13 @@ static inline uint32_t fill_model_instance(const r_entity_t* entity, const model
 }
 
 static void
-add_dlights(const dlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
+add_dlights(const rdlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
 {
 	ubo->num_sphere_lights = 0;
 
 	for (int i = 0; i < num_lights && ubo->num_sphere_lights < MAX_LIGHT_SOURCES; i++)
 	{
-		const dlight_t* light = lights + i;
+		const rdlight_t* light = lights + i;
 
 		float* dynlight_data = (float*)(ubo->sphere_light_data + ubo->num_sphere_lights * 4);
 		float* center = dynlight_data;
@@ -1686,7 +1686,7 @@ void inittargetlightLSbind_changed(cvar_t *self)
 	// Find mathing light
 	for (int i = 0; i < num_entlights; i++)
 	{
-		dlight_t *elight = &entlights[i];
+		rdlight_t *elight = &entlights[i];
 
 		// Assign tracker pointer
 		if (!Q_stricmp(buffer, elight->nacTargetName))
@@ -1708,7 +1708,7 @@ void inittargetlightbind_changed(cvar_t *self)
 	// Find mathing light
 	for (int i = 0; i < num_entlights; i++)
 	{
-		dlight_t *elight = &entlights[i];
+		rdlight_t *elight = &entlights[i];
 
 		// Assign tracker pointer
 		if (!Q_stricmp(buffer, elight->nacTargetName))
@@ -1730,7 +1730,7 @@ void initlight_changed(cvar_t *self)
 	// Find mathing light
 	for (int i = 0; i < num_entlights; i++)
 	{
-		dlight_t *elight = &entlights[i];
+		rdlight_t *elight = &entlights[i];
 
 		// Assign tracker pointer
 		if (!Q_stricmp(buffer, elight->nacTarget))
@@ -1752,7 +1752,7 @@ void initlightbind_changed(cvar_t *self)
 	// Find mathing light
 	for (int i = 0; i < num_entlights; i++)
 	{
-		dlight_t *elight = &entlights[i];
+		rdlight_t *elight = &entlights[i];
 
 		// Assign Light pointer
 		if (!Q_stricmp(buffer, elight->nacTargetName))
@@ -1799,10 +1799,10 @@ bsp_add_entlights(const bsp_t* bsp)
 	num_entlights = 0;
 	for (el = 0; el < MAX_ENTLIGHTS; el++)
 	{
-		dlight_t* elight;
-		//elight = (dlight_t*)(entlights + el);
-		elight = &entlights[el]; // (dlight_t*)(entlights + (el * sizeof(dlight_t)));
-		//elight = (dlight_t*)(entlights + (el * sizeof(dlight_t)));
+		rdlight_t* elight;
+		//elight = (rdlight_t*)(entlights + el);
+		elight = &entlights[el]; // (rdlight_t*)(entlights + (el * sizeof(rdlight_t)));
+		//elight = (rdlight_t*)(entlights + (el * sizeof(rdlight_t)));
 		elight->origin[0] = 0.00f;
 		elight->origin[1] = 0.00f;
 		elight->origin[2] = 0.00f;
@@ -1899,7 +1899,7 @@ bsp_add_entlights(const bsp_t* bsp)
 		//only process light entities
 		if (islight && num_entlights < MAX_ENTLIGHTS)
 		{
-			dlight_t* elight;
+			rdlight_t* elight;
 			dlightLS_t* elightLS;
 			qboolean parse_error;
 
@@ -1910,11 +1910,11 @@ bsp_add_entlights(const bsp_t* bsp)
 			//"light" "300" - F_INT
 			//"origin" "-1632 320 256" - F_VECTOR
 
-			//elight = (dlight_t*)(entlights + i);
+			//elight = (rdlight_t*)(entlights + i);
 			elight = &entlights[num_entlights];
 			elightLS = &entlightstyles[num_entlights];
-			// (dlight_t*)(entlights + (el * sizeof(dlight_t)));
-			//elight = (dlight_t*)(entlights + (num_entlights * sizeof(dlight_t)));
+			// (rdlight_t*)(entlights + (el * sizeof(rdlight_t)));
+			//elight = (rdlight_t*)(entlights + (num_entlights * sizeof(rdlight_t)));
 			elight->intensity = 300.0f; //original qrad3 default
 			elight->radius = elight->intensity * entity_scale;
 			elight->color[0] = 1.00f;
@@ -2243,7 +2243,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //
 //#include "game_copy.h"
 //
-//static void ProcessLightLookAtTarget(dlight_t *elight, dlightLS_t *elightls)
+//static void ProcessLightLookAtTarget(rdlight_t *elight, dlightLS_t *elightls)
 //{
 //	// Get target pos
 //	entity_t *lightTarget = (entity_t*)elight->nacTargetBind;
@@ -2257,7 +2257,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //	VectorCopy(dir, elight->nacDirection);
 //}
 //
-//static void ProcessLightMovewith(dlight_t *elight, dlightLS_t *elightls)
+//static void ProcessLightMovewith(rdlight_t *elight, dlightLS_t *elightls)
 //{
 //	// Get target pos
 //	entity_t *light = (entity_t*)elight->nacLightBind;
@@ -2267,7 +2267,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //
 //}
 //
-//static void ProcessLightStlye(dlight_t *elight, dlightLS_t *elightls)
+//static void ProcessLightStlye(rdlight_t *elight, dlightLS_t *elightls)
 //{
 //	const float conversion = 1.0f / 26.0f;
 //
@@ -2326,7 +2326,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //	}
 //}
 //
-//static void ProcessTargetLightStlye(dlight_t *elight, dlightLS_t *elightls)
+//static void ProcessTargetLightStlye(rdlight_t *elight, dlightLS_t *elightls)
 //{
 //	entity_t *targetLS = (entity_t*)elight->nacTargetLightLSBind;
 //	if (targetLS)
@@ -2347,7 +2347,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //	}
 //}
 //
-//static void ProcessTargetLight(dlight_t *elight, dlightLS_t *elightls)
+//static void ProcessTargetLight(rdlight_t *elight, dlightLS_t *elightls)
 //{
 //	entity_t *targetL = (entity_t*)elight->nacTargetLightBind;
 //	if (targetL)
@@ -2379,7 +2379,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //
 //	for (int i = 0; i < num_entlights && ubo->num_sphere_lights < MAX_LIGHT_SOURCES; i++)
 //	{
-//		dlight_t *elight = &entlights[i];
+//		rdlight_t *elight = &entlights[i];
 //		dlightLS_t *elightls = &entlightstyles[i];
 //
 //		// Process Target_LightStyle 
@@ -2424,7 +2424,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //
 //		if (cvar_show_entlights->integer && fd->num_particles < MAX_PARTICLES)
 //		{
-//			particle_t * part = &fd->particles[fd->num_particles]; //fd->particles + (fd->num_particles * sizeof(particle_t));
+//			rparticle_t * part = &fd->particles[fd->num_particles]; //fd->particles + (fd->num_particles * sizeof(rparticle_t));
 //
 //			VectorCopy(elight->origin, part->origin);
 //			part->radius = elight->radius;

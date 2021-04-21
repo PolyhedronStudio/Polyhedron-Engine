@@ -83,6 +83,7 @@ SET(SRC_SVGAME
 	svgame/entities/info/info_player_intermission.cpp
 	svgame/entities/info/info_player_start.cpp
 
+	svgame/entities/misc/misc_explobox.cpp
 	svgame/entities/misc/misc_gib_arm.cpp 
 	svgame/entities/misc/misc_gib_leg.cpp 
 	svgame/entities/misc/misc_gib_head.cpp 
@@ -136,6 +137,8 @@ SET(SRC_SVGAME
 	svgame/weapons/blaster.cpp
 	svgame/weapons/flaregun.cpp
 	svgame/weapons/machinegun.cpp
+	svgame/weapons/shotgun.cpp
+	svgame/weapons/supershotgun.cpp
 )
 
 SET(HEADERS_SVGAME
@@ -160,6 +163,8 @@ SET(HEADERS_SVGAME
 	svgame/weapons/blaster.h
 	svgame/weapons/flaregun.h
 	svgame/weapons/machinegun.h
+	svgame/weapons/shotgun.h
+	svgame/weapons/supershotgun.h
 )
 
 ###################### Client.

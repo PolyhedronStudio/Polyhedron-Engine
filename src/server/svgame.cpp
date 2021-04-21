@@ -910,7 +910,6 @@ void SV_InitGameProgs(void)
     importAPI.WriteString = MSG_WriteString;
     importAPI.WritePosition = MSG_WritePosition;
     importAPI.WriteDirection = MSG_WriteDirection;
-    importAPI.WriteAngle = MSG_WriteAngle;
 
     importAPI.TagMalloc = PF_TagMalloc;
     importAPI.TagFree = Z_Free;

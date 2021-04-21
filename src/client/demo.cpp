@@ -148,7 +148,7 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
 static void emit_delta_frame(server_frame_t *from, server_frame_t *to,
                              int fromnum, int tonum)
 {
-    player_packed_t oldpack, newpack;
+    player_state_t oldPlayerState, newPlayerState;
 
     MSG_WriteByte(svc_frame);
     MSG_WriteLong(tonum);
@@ -161,12 +161,14 @@ static void emit_delta_frame(server_frame_t *from, server_frame_t *to,
 
     // delta encode the playerstate
     MSG_WriteByte(svc_playerinfo);
-    MSG_PackPlayer(&newpack, &to->playerState);
+    //MSG_PackPlayer(&newpack, &to->playerState);
+    newPlayerState = to->playerState;
     if (from) {
-        MSG_PackPlayer(&oldpack, &from->playerState);
-        MSG_WriteDeltaPlayerstate_Default(&oldpack, &newpack);
+        //MSG_PackPlayer(&oldpack, &from->playerState);
+        oldPlayerState = from->playerState;
+        MSG_WriteDeltaPlayerstate_Default(&oldPlayerState, &newPlayerState);
     } else {
-        MSG_WriteDeltaPlayerstate_Default(NULL, &newpack);
+        MSG_WriteDeltaPlayerstate_Default(NULL, &newPlayerState);
     }
 
     // delta encode the entities

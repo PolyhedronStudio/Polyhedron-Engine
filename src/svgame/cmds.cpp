@@ -34,7 +34,7 @@ char *ClientTeam(entity_t *ent)
     if (!p)
         return value;
 
-    if ((int)(dmflags->value) & DF_MODELTEAMS) {
+    if ((int)(dmflags->value) & DeathMatchFlags::ModelTeams) {
         *p = 0;
         return value;
     }
@@ -48,7 +48,7 @@ qboolean OnSameTeam(entity_t *ent1, entity_t *ent2)
     char    ent1Team [512];
     char    ent2Team [512];
 
-    if (!((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS)))
+    if (!((int)(dmflags->value) & (DeathMatchFlags::ModelTeams | DeathMatchFlags::SkinTeams)))
         return false;
 
     strcpy(ent1Team, ClientTeam(ent1));
@@ -719,7 +719,7 @@ void Cmd_Say_f(entity_t *ent, qboolean team, qboolean arg0)
     if (gi.argc() < 2 && !arg0)
         return;
 
-    if (!((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS)))
+    if (!((int)(dmflags->value) & (DeathMatchFlags::ModelTeams | DeathMatchFlags::SkinTeams)))
         team = false;
 
     if (team)

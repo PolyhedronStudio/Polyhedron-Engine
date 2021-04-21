@@ -417,7 +417,7 @@ void SV_New_f(void)
 
     // stuff some junk, drop them and expect them to be back soon
     if (sv_force_reconnect->string[0] && !sv_client->reconnect_var[0] &&
-        !NET_IsLocalAddress(&sv_client->netchan->remote_address)) {
+        !NET_IsLocalAddress(&sv_client->netchan->remoteAddress)) {
         stuff_junk();
         SV_DropClient(sv_client, NULL);
         return;
@@ -480,13 +480,13 @@ void SV_New_f(void)
 
 #if USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
     if (sv_client->has_zlib) {
-        if (sv_client->netchan->type == NETCHAN_NEW) {
+        //if (sv_client->netchan->type == NETCHAN_NEW) {
             write_compressed_gamestate();
-        } else {
-            // FIXME: Z_SYNC_FLUSH is not efficient for baselines
-            write_compressed_configstrings();
-            write_plain_baselines();
-        }
+        //} else {
+        //    // FIXME: Z_SYNC_FLUSH is not efficient for baselines
+        //    write_compressed_configstrings();
+        //    write_plain_baselines();
+        //}
     } else
 #endif //USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
     {
@@ -890,7 +890,7 @@ static void SV_CvarResult_f(void)
             v = (char*)Cmd_RawArgsFrom(2); // C++20: Added a cast.
             if (COM_DEDICATED) {
                 Com_Printf("%s[%s]: %s\n", sv_client->name,
-                           NET_AdrToString(&sv_client->netchan->remote_address), v);
+                           NET_AdrToString(&sv_client->netchan->remoteAddress), v);
             }
             sv_client->version_string = SV_CopyString(v);
         }
@@ -903,7 +903,7 @@ static void SV_CvarResult_f(void)
     } else if (!strcmp(c, "console")) {
         if (sv_client->console_queries > 0) {
             Com_Printf("%s[%s]: \"%s\" is \"%s\"\n", sv_client->name,
-                       NET_AdrToString(&sv_client->netchan->remote_address),
+                       NET_AdrToString(&sv_client->netchan->remoteAddress),
                        Cmd_Argv(2), Cmd_RawArgsFrom(3));
             sv_client->console_queries--;
         }
@@ -1085,10 +1085,10 @@ static void SV_SetLastFrame(int lastframe)
 
 /*
 ==================
-SV_OldClientExecuteMove
+SV_ExecuteMove
 ==================
 */
-static void SV_OldClientExecuteMove(void)
+static void SV_ExecuteMove(void)
 {
     usercmd_t   oldest, oldcmd, newcmd;
     int         lastframe;
@@ -1142,109 +1142,6 @@ static void SV_OldClientExecuteMove(void)
     SV_ClientThink(&newcmd);
 
     sv_client->lastcmd = newcmd;
-}
-
-/*
-==================
-SV_NewClientExecuteMove
-==================
-*/
-static void SV_NewClientExecuteMove(int c)
-{
-    usercmd_t   cmds[MAX_PACKET_FRAMES][MAX_PACKET_USERCMDS];
-    usercmd_t   *lastcmd, *cmd;
-    int         lastframe;
-    int         numCmds[MAX_PACKET_FRAMES], numDups;
-    int         i, j, lightlevel;
-    int         net_drop;
-
-    if (moveIssued) {
-        SV_DropClient(sv_client, "multiple clc_move commands in packet");
-        return;     // someone is trying to cheat...
-    }
-
-    moveIssued = true;
-
-    numDups = c >> SVCMD_BITS;
-    c &= SVCMD_MASK;
-
-    if (numDups >= MAX_PACKET_FRAMES) {
-        SV_DropClient(sv_client, "too many frames in packet");
-        return;
-    }
-
-    if (c == clc_move_nodelta) {
-        lastframe = -1;
-    } else {
-        lastframe = MSG_ReadLong();
-    }
-
-    lightlevel = MSG_ReadByte();
-
-    // read all cmds
-    lastcmd = NULL;
-    for (i = 0; i <= numDups; i++) {
-        numCmds[i] = MSG_ReadBits(5);
-        if (numCmds[i] == -1) {
-            SV_DropClient(sv_client, "read past end of message");
-            return;
-        }
-        if (numCmds[i] >= MAX_PACKET_USERCMDS) {
-            SV_DropClient(sv_client, "too many usercmds in frame");
-            return;
-        }
-        for (j = 0; j < numCmds[i]; j++) {
-            if (msg_read.readcount > msg_read.cursize) {
-                SV_DropClient(sv_client, "read past end of message");
-                return;
-            }
-            cmd = &cmds[i][j];
-            MSG_ReadDeltaUsercmd_Enhanced(lastcmd, cmd, sv_client->version);
-            cmd->lightlevel = lightlevel;
-            lastcmd = cmd;
-        }
-    }
-
-    if (sv_client->state != cs_spawned) {
-        SV_SetLastFrame(-1);
-        return;
-    }
-
-    SV_SetLastFrame(lastframe);
-
-    if (q_unlikely(!lastcmd)) {
-        return; // should never happen
-    }
-
-    net_drop = sv_client->netchan->dropped;
-    if (net_drop > numDups) {
-        sv_client->frameflags |= FF_CLIENTPRED;
-    }
-
-    if (net_drop < 20) {
-        // run lastcmd multiple times if no backups available
-        while (net_drop > numDups) {
-            SV_ClientThink(&sv_client->lastcmd);
-            net_drop--;
-        }
-
-        // run backup cmds, if any
-        while (net_drop > 0) {
-            i = numDups - net_drop;
-            for (j = 0; j < numCmds[i]; j++) {
-                SV_ClientThink(&cmds[i][j]);
-            }
-            net_drop--;
-        }
-
-    }
-
-    // run new cmds
-    for (j = 0; j < numCmds[numDups]; j++) {
-        SV_ClientThink(&cmds[numDups][j]);
-    }
-
-    sv_client->lastcmd = *lastcmd;
 }
 
 /*
@@ -1433,16 +1330,11 @@ void SV_ExecuteClientMessage(client_t *client)
             break;
 
         case clc_move:
-            SV_OldClientExecuteMove();
+            SV_ExecuteMove();
             break;
 
         case clc_stringcmd:
             SV_ParseClientCommand();
-            break;
-
-        case clc_move_nodelta:
-        case clc_move_batched:
-            SV_NewClientExecuteMove(c);
             break;
 
         case clc_userinfo_delta:

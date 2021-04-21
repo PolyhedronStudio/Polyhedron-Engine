@@ -328,7 +328,7 @@ void TossClientWeapon(entity_t *self)
     gitem_t     *item;
     entity_t     *drop;
     qboolean    quad;
-    float       spread;
+    float       spread = 1.5f;
 
     if (!deathmatch->value)
         return;
@@ -338,11 +338,6 @@ void TossClientWeapon(entity_t *self)
         item = NULL;
     if (item && (strcmp(item->pickupName, "Blaster") == 0))
         item = NULL;
-
-    if (item && quad)
-        spread = 22.5;
-    else
-        spread = 0.0;
 
     if (item) {
         self->client->v_angle[vec3_t::Yaw] -= spread;
@@ -584,7 +579,7 @@ entity_t *SelectFarthestDeathmatchSpawnPoint(void)
 
 entity_t *SelectDeathmatchSpawnPoint(void)
 {
-    if ((int)(dmflags->value) & DF_SPAWN_FARTHEST)
+    if ((int)(dmflags->value) & DeathMatchFlags::SpawnFarthest)
         return SelectFarthestDeathmatchSpawnPoint();
     else
         return SelectRandomDeathmatchSpawnPoint();
@@ -951,7 +946,7 @@ void PutClientInServer(entity_t *ent)
     ent->s.origin = ent->s.old_origin = spawn_origin + vec3_t{ 0.f, 0.f, 1.f };
 
     // Set FOV, fixed, or custom.
-    if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV)) {
+    if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::FixedFOV)) {
         client->playerState.fov = 90;
     } else {
         client->playerState.fov = atoi(Info_ValueForKey(client->pers.userinfo, "fov"));
@@ -1142,7 +1137,7 @@ void ClientUserinfoChanged(entity_t *ent, char *userinfo)
     gi.configstring(CS_PLAYERSKINS + playernum, va("%s\\%s", ent->client->pers.netname, s));
 
     // fov
-    if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV)) {
+    if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::FixedFOV)) {
         ent->client->playerState.fov = 90;
     } else {
         ent->client->playerState.fov = atoi(Info_ValueForKey(userinfo, "fov"));
@@ -1530,7 +1525,7 @@ void ClientBeginServerFrame(entity_t *ent)
                 buttonMask = -1;
 
             if ((client->latched_buttons & buttonMask) ||
-                (deathmatch->value && ((int)dmflags->value & DF_FORCE_RESPAWN))) {
+                (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::ForceRespawn))) {
                 RespawnClient(ent);
                 client->latched_buttons = 0;
             }

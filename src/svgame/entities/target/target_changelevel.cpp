@@ -26,7 +26,7 @@ void use_target_changelevel(entity_t* self, entity_t* other, entity_t* activator
     }
 
     // if noexit, do a ton of damage to other
-    if (deathmatch->value && !((int)dmflags->value & DF_ALLOW_EXIT) && other != world) {
+    if (deathmatch->value && !((int)dmflags->value & DeathMatchFlags::AllowExit) && other != world) {
         T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 10 * other->maxHealth, 1000, 0, MOD_EXIT);
         return;
     }

@@ -89,7 +89,7 @@ constexpr float PM_SPEED_FALL_FAR = -900.f;
 constexpr float PM_SPEED_JUMP = 270.f;
 constexpr float PM_SPEED_LADDER = 125.f;
 constexpr float PM_SPEED_LAND = -280.f;
-constexpr float PM_SPEED_RUN = 300.f;
+constexpr float PM_SPEED_RUN = 300.f; // This is the wished for running speed. Changing it, also impacts walking speed.
 constexpr float PM_SPEED_SPECTATOR = 500.f;
 constexpr float PM_SPEED_STOP = 100.f;
 constexpr float PM_SPEED_UP = 0.1f;
@@ -101,8 +101,8 @@ constexpr float PM_SPEED_WATER_SINK = -16.f;
 //-----------------
 // General.
 //-----------------
-constexpr float PM_SPEED_MOD_WALK = 0.66f;// The walk modifier slows all user-controlled speeds.
-constexpr float PM_SPEED_JUMP_MOD_WATER = 0.66f;// Water reduces jumping ability.
+constexpr float PM_SPEED_MOD_WALK = 0.48f;// The walk modifier slows all user-controlled speeds.
+constexpr float PM_SPEED_JUMP_MOD_WATER = 0.66;// Water reduces jumping ability.
 constexpr float PM_STOP_EPSILON = 0.1f; // Velocity is cleared when less than this.
 constexpr float PM_NUDGE_DIST = 1.f;  // Invalid player positions are nudged to find a valid position.
 constexpr float PM_SNAP_DISTANCE = PM_GROUND_DIST; // Valid player positions are snapped a small distance away from planes.

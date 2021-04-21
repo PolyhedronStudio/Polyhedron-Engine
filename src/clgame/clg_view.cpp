@@ -80,7 +80,7 @@ void V_AddEntity(r_entity_t *ent)
 // Add the particle effect to the current scene frame.
 //===============
 //
-void V_AddParticle(particle_t *p)
+void V_AddParticle(rparticle_t *p)
 {
     // Ensure we aren't exceeding boundary limits.
     if (view.num_particles >= MAX_PARTICLES)
@@ -101,7 +101,7 @@ void V_AddParticle(particle_t *p)
 //
 void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius)
 {
-    dlight_t    *dl;
+    rdlight_t    *dl;
 
     if (view.num_dlights >= MAX_DLIGHTS)
         return;
@@ -115,7 +115,7 @@ void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b,
 
 	if (cl_show_lights->integer && view.num_particles < MAX_PARTICLES)
 	{
-		particle_t* part = &view.particles[view.num_particles++];
+		rparticle_t* part = &view.particles[view.num_particles++];
 
 		VectorCopy(dl->origin, part->origin);
 		part->radius = radius;

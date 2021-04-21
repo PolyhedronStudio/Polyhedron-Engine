@@ -278,7 +278,7 @@ void CL_AddNetgraph(void)
     //  SCR_DebugGraph (30, 0xdf);
 
     // see what the latency was on this packet
-    in = cls.netchan->incoming_acknowledged & CMD_MASK;
+    in = cls.netchan->incomingAcknowledged & CMD_MASK;
     ping = cls.realtime - cl.history[in].sent;
     ping /= 30;
     if (ping > 30)
@@ -422,7 +422,7 @@ void SCR_LagClear(void)
 
 void SCR_LagSample(void)
 {
-    int i = cls.netchan->incoming_acknowledged & CMD_MASK;
+    int i = cls.netchan->incomingAcknowledged & CMD_MASK;
     client_history_t *h = &cl.history[i];
     unsigned ping;
 
@@ -500,7 +500,7 @@ static void SCR_DrawNet(void)
     }
 
     // draw phone jack
-    if (cls.netchan && cls.netchan->outgoing_sequence - cls.netchan->incoming_acknowledged >= CMD_BACKUP) {
+    if (cls.netchan && cls.netchan->outgoingSequence - cls.netchan->incomingAcknowledged >= CMD_BACKUP) {
         if ((cls.realtime >> 8) & 3) {
             R_DrawStretchPic(x, y, LAG_WIDTH, LAG_HEIGHT, scr.net_pic);
         }

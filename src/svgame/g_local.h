@@ -218,7 +218,9 @@ typedef struct {
 // gitem_t->weaponModel for weapons indicates model index
 #define WEAP_BLASTER            1
 #define WEAP_MACHINEGUN         2
-#define WEAP_FLAREGUN           3
+#define WEAP_SHOTGUN            3
+#define WEAP_SUPERSHOTGUN       4
+#define WEAP_FLAREGUN           5
 
 // C++20: STRING: Added const to the chars.
 typedef struct gitem_s {
@@ -526,8 +528,6 @@ extern  cvar_t  *flood_waitdelay;
 
 extern  cvar_t  *sv_maplist;
 
-extern  cvar_t  *sv_features;
-
 extern  cvar_t  *sv_flaregun;
 
 extern  cvar_t  *cl_monsterfootsteps;
@@ -608,9 +608,13 @@ void T_RadiusDamage(entity_t *inflictor, entity_t *attacker, float damage, entit
 #define DAMAGE_BULLET           0x00000010  // damage is from a bullet (used for ricochets)
 #define DAMAGE_NO_PROTECTION    0x00000020  // armor, shields, invulnerability, and godmode have no effect
 
-#define DEFAULT_BULLET_HSPREAD  300
-#define DEFAULT_BULLET_VSPREAD  500
-
+constexpr int32_t DEFAULT_BULLET_HSPREAD = 300;
+constexpr int32_t DEFAULT_BULLET_VSPREAD = 500;
+constexpr int32_t DEFAULT_SHOTGUN_HSPREAD = 1000;
+constexpr int32_t DEFAULT_SHOTGUN_VSPREAD = 500;
+constexpr int32_t DEFAULT_DEATHMATCH_SHOTGUN_COUNT = 12;
+constexpr int32_t DEFAULT_SHOTGUN_COUNT = 12;
+constexpr int32_t DEFAULT_SSHOTGUN_COUNT = 20;
 
 //
 // g_monster.c
@@ -653,6 +657,7 @@ qboolean FacingIdeal(entity_t *self);
 void ThrowDebris(entity_t *self, const char *modelname, float speed, const vec3_t& origin);
 qboolean fire_hit(entity_t *self, vec3_t &aim, int damage, int kick);
 void fire_bullet(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod);
+void fire_shotgun(entity_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
 void fire_blaster(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int effect, qboolean hyper);
 
 //

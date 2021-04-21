@@ -185,7 +185,7 @@ static void set_active_state(void)
     cl.frameflags = 0;
 
     if (cls.netchan) {
-        cl.initialSeq = cls.netchan->outgoing_sequence;
+        cl.initialSeq = cls.netchan->outgoingSequence;
     }
 
     if (cls.demo.playback) {

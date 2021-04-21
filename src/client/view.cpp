@@ -53,14 +53,14 @@ static cvar_t   *cl_adjustfov;
 
 #if USE_DLIGHTS
 int         r_numdlights;
-dlight_t    r_dlights[MAX_DLIGHTS];
+rdlight_t    r_dlights[MAX_DLIGHTS];
 #endif
 
 int         r_numentities;
 r_entity_t    r_entities[MAX_ENTITIES];
 
 int         r_numparticles;
-particle_t  r_particles[MAX_PARTICLES];
+rparticle_t  r_particles[MAX_PARTICLES];
 
 #if USE_LIGHTSTYLES
 lightstyle_t    r_lightstyles[MAX_LIGHTSTYLES];
@@ -105,7 +105,7 @@ V_AddParticle
 
 =====================
 */
-void V_AddParticle(particle_t *p)
+void V_AddParticle(rparticle_t *p)
 {
     if (r_numparticles >= MAX_PARTICLES)
         return;
@@ -121,7 +121,7 @@ V_AddLight
 */
 void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius)
 {
-    dlight_t    *dl;
+    rdlight_t    *dl;
 
     if (r_numdlights >= MAX_DLIGHTS)
         return;
@@ -135,7 +135,7 @@ void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b,
 
 	if (cl_show_lights->integer && r_numparticles < MAX_PARTICLES)
 	{
-		particle_t* part = &r_particles[r_numparticles++];
+		rparticle_t* part = &r_particles[r_numparticles++];
 
 		VectorCopy(dl->origin, part->origin);
 		part->radius = radius;
@@ -189,7 +189,7 @@ If cl_testparticles is set, create 4096 particles in the view
 */
 static void V_TestParticles(void)
 {
-    particle_t  *p;
+    rparticle_t  *p;
     int         i, j;
     float       d, r, u;
 
@@ -252,7 +252,7 @@ static void V_TestLights(void)
 {
     int         i, j;
     float       f, r;
-    dlight_t    *dl;
+    rdlight_t    *dl;
 
     if (cl_testlights->integer != 1) {
         dl = &r_dlights[0];

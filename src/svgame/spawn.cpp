@@ -99,6 +99,8 @@ void SP_monster_soldier_light(entity_t *self);
 void SP_monster_soldier(entity_t *self);
 void SP_monster_soldier_ss(entity_t *self);
 
+void SP_misc_explobox(entity_t* self);
+
 static const spawn_func_t spawn_funcs[] = {
     {"item_health", SP_item_health},
     {"item_health_small", SP_item_health_small},
@@ -164,7 +166,7 @@ static const spawn_func_t spawn_funcs[] = {
 
     {"misc_teleporter", SP_misc_teleporter},
     {"misc_teleporter_dest", SP_misc_teleporter_dest},
-
+    {"misc_explobox", SP_misc_explobox},
 
     {"monster_soldier_light", SP_monster_soldier_light},
     {"monster_soldier", SP_monster_soldier},

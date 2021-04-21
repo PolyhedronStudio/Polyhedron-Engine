@@ -654,7 +654,7 @@ qboolean initialize_transparency();
 void destroy_transparency();
 
 void update_transparency(VkCommandBuffer command_buffer, const float* view_matrix,
-	const particle_t* particles, int particle_num, const r_entity_t* entities, int entity_num);
+	const rparticle_t* particles, int particle_num, const r_entity_t* entities, int entity_num);
 
 typedef enum {
 	VKPT_TRANSPARENCY_PARTICLES,

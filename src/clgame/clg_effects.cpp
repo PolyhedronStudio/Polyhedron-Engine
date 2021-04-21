@@ -375,6 +375,15 @@ void CLG_MuzzleFlash() {
         Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound(soundname), volume, ATTN_NORM, 0);
         break;
+    case MuzzleFlashType::Shotgun:
+        DL_COLOR(1, 1, 0);
+        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/shotgf1b.wav"), volume, ATTN_NORM, 0);
+        //  S_StartSound(NULL, mzParameters.entity, CHAN_AUTO,   S_RegisterSound("weapons/shotgr1b.wav"), volume, ATTN_NORM, 0.1);
+        break;
+    case MuzzleFlashType::SuperShotgun:
+        DL_COLOR(1, 1, 0);
+        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/sshotf1b.wav"), volume, ATTN_NORM, 0);
+        break;
     case MuzzleFlashType::Login:
         DL_COLOR(0, 1, 0);
         DL_DIE(1.0);
@@ -1234,7 +1243,7 @@ void CLG_AddParticles(void)
     float           time = 0, time2;
     int             color;
     cparticle_t* active, * tail;
-    particle_t* part;
+    rparticle_t* part;
 
     active = NULL;
     tail = NULL;

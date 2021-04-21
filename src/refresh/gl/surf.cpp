@@ -114,7 +114,7 @@ static float blocklights[MAX_BLOCKLIGHTS * 3];
 #if USE_DLIGHTS
 static void add_dynamic_lights(mface_t *surf)
 {
-    dlight_t    *light;
+    rdlight_t    *light;
     mtexinfo_t  *tex;
     vec3_t      point;
     int         local[2];
@@ -824,10 +824,8 @@ static void set_world_size(void)
             size = temp;
     }
 
-    if (size > 4096)
-        gl_static.world.size = 8192;
-    else if (size > 2048)
-        gl_static.world.size = 4096;
+    if (size > MAX_WORLD_COORD)
+        gl_static.world.size = MAX_WORLD_COORD;
     else
         gl_static.world.size = 2048;
 }

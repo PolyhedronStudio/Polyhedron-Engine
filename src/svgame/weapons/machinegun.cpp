@@ -88,7 +88,7 @@ void Machinegun_Fire(entity_t* ent)
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
-    if (!((int)dmflags->value & DF_INFINITE_AMMO))
+    if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
         ent->client->pers.inventory[ent->client->ammo_index]--;
 
     ent->client->anim_priority = ANIM_ATTACK;

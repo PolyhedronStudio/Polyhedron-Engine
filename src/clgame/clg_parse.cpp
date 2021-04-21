@@ -73,6 +73,7 @@ static void CLG_ParseTempEntitiesPacket(void)
     switch (teParameters.type) {
     case TempEntityEvent::Blaster:
     case TempEntityEvent::Gunshot:
+    case TempEntityEvent::Shotgun:
     case TempEntityEvent::Blood:
     case TempEntityEvent::MoreBlood:
     case TempEntityEvent::Sparks:

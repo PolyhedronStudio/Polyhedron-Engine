@@ -63,44 +63,14 @@ typedef struct {
 } entity_packed_t;
 
 //---------------
-// This is the actual packed player data that is transferred over the network.
-// It is bit precise, sensitive, and any change here would required changes elsewhere.
-// 
-// Be careful, and only touch this if you know what you are doing.
-//---------------
-typedef struct {
-    // Player Move.
-    pm_state_t      pmove;
-
-    // View angles and offsets.
-    int16_t         viewAngles[3];
-    int8_t          viewoffset[3];
-    int8_t          kickAngles[3];
-
-    // Gun info.
-    int8_t          gunangles[3];
-    int8_t          gunoffset[3];
-    uint8_t         gunindex;
-    uint8_t         gunframe;
-
-    // View related.
-    uint8_t         blend[4];
-    uint8_t         fov;
-    uint8_t         rdflags;
-
-    // Player status.
-    int16_t         stats[MAX_STATS];
-} player_packed_t;
-
-//---------------
 // Player state messaging flags.
 //---------------
 typedef enum {
-    MSG_PS_IGNORE_VIEWANGLES    = (1 << 0),
-    MSG_PS_IGNORE_DELTAANGLES   = (1 << 1),
-    MSG_PS_IGNORE_PREDICTION    = (1 << 2),      // mutually exclusive with IGNORE_VIEWANGLES
-    MSG_PS_FORCE                = (1 << 3),
-    MSG_PS_REMOVE               = (1 << 4)
+    MSG_PS_IGNORE_VIEWANGLES = (1 << 0),
+    MSG_PS_IGNORE_DELTAANGLES = (1 << 1),
+    MSG_PS_IGNORE_PREDICTION = (1 << 2),      // mutually exclusive with IGNORE_VIEWANGLES
+    MSG_PS_FORCE = (1 << 3),
+    MSG_PS_REMOVE = (1 << 4)
 } msgPsFlags_t;
 
 //---------------
@@ -134,7 +104,7 @@ extern sizebuf_t    msg_read;
 extern byte         msg_read_buffer[MAX_MSGLEN];
 
 extern const entity_packed_t    nullEntityState;
-extern const player_packed_t    nullPlayerState;
+extern const player_state_t     nullPlayerState;
 extern const usercmd_t          nullUserCmd;
 
 void    MSG_Init(void);
@@ -145,58 +115,50 @@ void    MSG_WriteByte(int c);
 void    MSG_WriteShort(int c);
 void    MSG_WriteLong(int c);
 void    MSG_WriteFloat(float c);
-void    MSG_WriteString(const char *s);
-void    MSG_WritePosition(const vec3_t &pos);
-void    MSG_WriteAngle(float f);
+void    MSG_WriteString(const char* s);
+void    MSG_WritePosition(const vec3_t& pos);
 #if USE_CLIENT
 void    MSG_WriteBits(int value, int bits);
-int     MSG_WriteDeltaUsercmd(const usercmd_t *from, const usercmd_t *cmd, int version);
-int     MSG_WriteDeltaUsercmd_Enhanced(const usercmd_t *from, const usercmd_t *cmd, int version);
+int     MSG_WriteDeltaUsercmd(const usercmd_t* from, const usercmd_t* cmd);
 #endif
-void    MSG_WriteDirection(const vec3_t &dir);
-void    MSG_PackEntity(entity_packed_t *out, const entity_state_t *in, qboolean short_angles);
-void    MSG_WriteDeltaEntity(const entity_packed_t *from, const entity_packed_t *to, msgEsFlags_t flags);
-void    MSG_PackPlayer(player_packed_t *out, const player_state_t *in);
-void    MSG_WriteDeltaPlayerstate_Default(const player_packed_t *from, const player_packed_t *to);
-int     MSG_WriteDeltaPlayerstate_Enhanced(const player_packed_t *from, player_packed_t *to, msgPsFlags_t flags);
-void    MSG_WriteDeltaPlayerstate_Packet(const player_packed_t *from, const player_packed_t *to, int number, msgPsFlags_t flags);
+void    MSG_WriteDirection(const vec3_t& dir);
+void    MSG_PackEntity(entity_packed_t* out, const entity_state_t* in, qboolean short_angles);
+void    MSG_WriteDeltaEntity(const entity_packed_t* from, const entity_packed_t* to, msgEsFlags_t flags);
+void    MSG_WriteDeltaPlayerstate_Default(const player_state_t* from, const player_state_t* to);
+int     MSG_WriteDeltaPlayerstate_Enhanced(const player_state_t* from, player_state_t* to, msgPsFlags_t flags);
 
-static inline void *MSG_WriteData(const void *data, size_t len)
+static inline void* MSG_WriteData(const void* data, size_t len)
 {
     return memcpy(SZ_GetSpace(&msg_write, len), data, len);
 }
 
-static inline void MSG_FlushTo(sizebuf_t *buf)
+static inline void MSG_FlushTo(sizebuf_t* buf)
 {
     SZ_Write(buf, msg_write.data, msg_write.cursize);
     SZ_Clear(&msg_write);
 }
 
 void    MSG_BeginReading(void);
-byte    *MSG_ReadData(size_t len);
+byte* MSG_ReadData(size_t len);
 int     MSG_ReadChar(void);
 int     MSG_ReadByte(void);
 int     MSG_ReadShort(void);
 int     MSG_ReadWord(void);
 int     MSG_ReadLong(void);
 float   MSG_ReadFloat(void);
-size_t  MSG_ReadString(char *dest, size_t size);
-size_t  MSG_ReadStringLine(char *dest, size_t size);
+size_t  MSG_ReadString(char* dest, size_t size);
+size_t  MSG_ReadStringLine(char* dest, size_t size);
 #if USE_CLIENT
 vec3_t  MSG_ReadPosition(void);
 vec3_t  MSG_ReadDirection(void);
 #endif
-int     MSG_ReadBits(int bits);
-void    MSG_ReadDeltaUsercmd(const usercmd_t *from, usercmd_t *cmd);
-void    MSG_ReadDeltaUsercmd_Hacked(const usercmd_t *from, usercmd_t *to);
-void    MSG_ReadDeltaUsercmd_Enhanced(const usercmd_t *from, usercmd_t *to, int version);
-int     MSG_ParseEntityBits(int *bits);
-void    MSG_ParseDeltaEntity(const entity_state_t *from, entity_state_t *to, int number, int bits, msgEsFlags_t flags);
+void    MSG_ReadDeltaUsercmd(const usercmd_t* from, usercmd_t* cmd);
+int     MSG_ParseEntityBits(int* bits);
+void    MSG_ParseDeltaEntity(const entity_state_t* from, entity_state_t* to, int number, int bits, msgEsFlags_t flags);
 #if USE_CLIENT
-void    MSG_ParseDeltaPlayerstate_Default(const player_state_t *from, player_state_t *to, int flags);
-void    MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t *from, player_state_t *to, int flags, int extraflags);
+void    MSG_ParseDeltaPlayerstate_Default(const player_state_t* from, player_state_t* to, int flags);
+void    MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t* from, player_state_t* to, int flags, int extraflags);
 #endif
-void    MSG_ParseDeltaPlayerstate_Packet(const player_state_t *from, player_state_t *to, int flags);
 
 #ifdef _DEBUG
 #if USE_CLIENT
@@ -207,7 +169,7 @@ void    MSG_ShowDeltaUsercmdBits_Enhanced(int bits);
 #if USE_CLIENT
 void    MSG_ShowDeltaEntityBits(int bits);
 void    MSG_ShowDeltaPlayerstateBits_Packet(int flags);
-const char *MSG_ServerCommandString(int cmd);
+const char* MSG_ServerCommandString(int cmd);
 #define MSG_ShowSVC(cmd) \
     Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":%s\n", msg_read.readcount - 1, \
         MSG_ServerCommandString(cmd))

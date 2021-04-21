@@ -993,6 +993,11 @@ void CLG_ParseTempEntity(void)
 
 	case TempEntityEvent::Gunshot:            // bullet hitting wall
 		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0, 40);
+	case TempEntityEvent::Shotgun:            // bullet hitting wall
+		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0, 20);
+		CLG_SmokeAndFlash(teParameters.pos1);
+		break;
+
 	case TempEntityEvent::Sparks:
 	case TempEntityEvent::BulletSparks:
 		CLG_ParticleEffect(teParameters.pos1, teParameters.dir, 0xe0, 6);
@@ -1018,7 +1023,7 @@ void CLG_ParseTempEntity(void)
 			r = splash_color[teParameters.color];
 		CLG_ParticleEffectWaterSplash(teParameters.pos1, teParameters.dir, r, teParameters.count);
 
-		if (teParameters.color == SPLASH_SPARKS) {
+		if (teParameters.color == SplashType::Sparks) {
 			r = rand() & 3;
 			if (r == 0)
 				clgi.S_StartSound(&teParameters.pos1, 0, 0, cl_sfx_spark5, 1, ATTN_STATIC, 0);

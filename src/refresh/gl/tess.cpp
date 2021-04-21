@@ -78,7 +78,7 @@ void GL_Flush2D(void)
 
 void GL_DrawParticles(void)
 {
-    particle_t *p;
+    rparticle_t *p;
     int total, count;
     vec3_t transformed;
     vec_t scale, dist;

@@ -551,7 +551,6 @@ void CL_InitGameProgs(void)
     importAPI.MSG_WriteLong = MSG_WriteLong;
     importAPI.MSG_WriteString = MSG_WriteString;
     importAPI.MSG_WritePosition = MSG_WritePosition;
-    importAPI.MSG_WriteAngle = MSG_WriteAngle;
 
     importAPI.MSG_FlushTo = _trp_MSG_FlushTo;
 

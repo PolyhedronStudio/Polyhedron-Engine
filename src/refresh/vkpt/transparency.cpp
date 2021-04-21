@@ -69,7 +69,7 @@ static void create_buffer_views();
 static void fill_index_buffer();
 
 // update
-static void write_particle_geometry(const float* view_matrix, const particle_t* particles, int particle_num);
+static void write_particle_geometry(const float* view_matrix, const rparticle_t* particles, int particle_num);
 static void write_beam_geometry(const float* view_matrix, const r_entity_t* entities, int entity_num);
 static void write_sprite_geometry(const float* view_matrix, const r_entity_t* entities, int entity_num);
 static void upload_geometry(VkCommandBuffer command_buffer);
@@ -147,7 +147,7 @@ void destroy_transparency()
 }
 
 void update_transparency(VkCommandBuffer command_buffer, const float* view_matrix,
-	const particle_t* particles, int particle_num, const r_entity_t* entities, int entity_num)
+	const rparticle_t* particles, int particle_num, const r_entity_t* entities, int entity_num)
 {
 	transparency.host_frame_index = (transparency.host_frame_index + 1) % transparency.host_buffered_frame_num;
 	particle_num = min(particle_num, TR_PARTICLE_MAX_NUM);
@@ -255,7 +255,7 @@ void get_transparency_counts(int* particle_num, int* beam_num, int* sprite_num)
 	*sprite_num = transparency.sprite_num;
 }
 
-static void write_particle_geometry(const float* view_matrix, const particle_t* particles, int particle_num)
+static void write_particle_geometry(const float* view_matrix, const rparticle_t* particles, int particle_num)
 {
 	const float particle_size = cvar_pt_particle_size->value;
 
@@ -270,7 +270,7 @@ static void write_particle_geometry(const float* view_matrix, const particle_t* 
 
 	for (int i = 0; i < particle_num; i++)
 	{
-		const particle_t* particle = particles + i;
+		const rparticle_t* particle = particles + i;
 
 		cast_u32_to_f32_color(particle->color, &particle->rgba, particle_colors, particle->brightness);
 		particle_colors[3] = particle->alpha;

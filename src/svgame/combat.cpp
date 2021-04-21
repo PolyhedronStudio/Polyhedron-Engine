@@ -353,9 +353,9 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
     // friendly fire avoidance
     // if enabled you can't hurt teammates (but you can hurt yourself)
     // knockback still occurs
-    if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS))) || coop->value)) {
+    if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (DeathMatchFlags::ModelTeams | DeathMatchFlags::SkinTeams))) || coop->value)) {
         if (OnSameTeam(targ, attacker)) {
-            if ((int)(dmflags->value) & DF_NO_FRIENDLY_FIRE)
+            if ((int)(dmflags->value) & DeathMatchFlags::NoFriendlyFire)
                 damage = 0;
             else
                 mod |= MOD_FRIENDLY_FIRE;

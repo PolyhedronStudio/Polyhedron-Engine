@@ -39,7 +39,7 @@ static void check_dodge(entity_t *self, const vec3_t &start, const vec3_t &dir, 
         if (random() > 0.25)
             return;
     }
-    VectorMA(start, 8192, dir, end);
+    VectorMA(start, WORLD_SIZE, dir, end);
     tr = gi.Trace(start, vec3_origin, vec3_origin, end, self, CONTENTS_MASK_SHOT);
     if ((tr.ent) && (tr.ent->svFlags & SVF_MONSTER) && (tr.ent->health > 0) && (tr.ent->monsterInfo.dodge) && infront(tr.ent, self)) {
         VectorSubtract(tr.endPosition, start, v);
@@ -146,7 +146,7 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
 
         r = crandom() * hspread;
         u = crandom() * vspread;
-        VectorMA(start, 8192, forward, end);
+        VectorMA(start, WORLD_SIZE, forward, end);
         VectorMA(end, r, right, end);
         VectorMA(end, u, up, end);
 
@@ -168,17 +168,17 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
             if (!VectorCompare(start, tr.endPosition)) {
                 if (tr.contents & CONTENTS_WATER) {
                     if (strcmp(tr.surface->name, "*brwater") == 0)
-                        color = SPLASH_BROWN_WATER;
+                        color = SplashType::BrownWater;
                     else
-                        color = SPLASH_BLUE_WATER;
+                        color = SplashType::BlueWater;
                 } else if (tr.contents & CONTENTS_SLIME)
-                    color = SPLASH_SLIME;
+                    color = SplashType::Slime;
                 else if (tr.contents & CONTENTS_LAVA)
-                    color = SPLASH_LAVA;
+                    color = SplashType::Lava;
                 else
-                    color = SPLASH_UNKNOWN;
+                    color = SplashType::Unknown;
 
-                if (color != SPLASH_UNKNOWN) {
+                if (color != SplashType::Unknown) {
                     gi.WriteByte(svg_temp_entity);
                     gi.WriteByte(TempEntityEvent::Splash);
                     gi.WriteByte(8);
@@ -194,7 +194,7 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
                 AngleVectors(dir, &forward, &right, &up);
                 r = crandom() * hspread * 2;
                 u = crandom() * vspread * 2;
-                VectorMA(water_start, 8192, forward, end);
+                VectorMA(water_start, WORLD_SIZE, forward, end);
                 VectorMA(end, r, right, end);
                 VectorMA(end, u, up, end);
             }
@@ -261,13 +261,28 @@ void fire_bullet(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int 
     fire_lead(self, start, aimdir, damage, kick, TempEntityEvent::Gunshot, hspread, vspread, mod);
 }
 
-/*
-=================
-fire_blaster
+//
+//===============
+// fire_shotgun
+// 
+// Shoots shotgun pellets.  Used by shotgun and super shotgun.
+//===============
+//
+void fire_shotgun(entity_t* self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int mod)
+{
+    int		i;
 
-Fires a single blaster bolt.  Used by the blaster and hyper blaster.
-=================
-*/
+    for (i = 0; i < count; i++)
+        fire_lead(self, start, aimdir, damage, kick, TempEntityEvent::Shotgun, hspread, vspread, mod);
+}
+
+//
+//===============
+// fire_blaster
+// 
+// Fires a single blaster bolt.  Used by the blaster and hyper blaster.
+//===============
+//
 void blaster_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t *surf)
 {
     int mod;

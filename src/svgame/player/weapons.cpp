@@ -91,7 +91,7 @@ qboolean Pickup_Weapon(entity_t *ent, entity_t *other)
 
     index = ITEM_INDEX(ent->item);
 
-    if ((((int)(dmflags->value) & DF_WEAPONS_STAY) || coop->value)
+    if ((((int)(dmflags->value) & DeathMatchFlags::WeaponsStay) || coop->value)
         && other->client->pers.inventory[index]) {
         if (!(ent->spawnFlags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)))
             return false;   // leave the weapon for others to pickup
@@ -102,14 +102,14 @@ qboolean Pickup_Weapon(entity_t *ent, entity_t *other)
     if (!(ent->spawnFlags & DROPPED_ITEM)) {
         // give them some ammo with it
         ammo = FindItem(ent->item->ammo);
-        if ((int)dmflags->value & DF_INFINITE_AMMO)
+        if ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo)
             Add_Ammo(other, ammo, 1000);
         else
             Add_Ammo(other, ammo, ammo->quantity);
 
         if (!(ent->spawnFlags & DROPPED_PLAYER_ITEM)) {
             if (deathmatch->value) {
-                if ((int)(dmflags->value) & DF_WEAPONS_STAY)
+                if ((int)(dmflags->value) & DeathMatchFlags::WeaponsStay)
                     ent->flags |= FL_RESPAWN;
                 else
                     SetRespawn(ent, 30);
@@ -263,7 +263,7 @@ void Drop_Weapon(entity_t *ent, gitem_t *item)
 {
     int     index;
 
-    if ((int)(dmflags->value) & DF_WEAPONS_STAY)
+    if ((int)(dmflags->value) & DeathMatchFlags::WeaponsStay)
         return;
 
     index = ITEM_INDEX(item);

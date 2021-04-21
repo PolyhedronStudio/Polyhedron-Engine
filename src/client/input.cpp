@@ -373,7 +373,7 @@ static inline qboolean ready_to_send(void)
     if (cl.sendPacketNow) {
         return true;
     }
-    if (cls.netchan->message.cursize || cls.netchan->reliable_ack_pending) {
+    if (cls.netchan->message.cursize || cls.netchan->reliableAckPending) {
         return true;
     }
     if (!cl_maxpackets->integer) {
@@ -410,17 +410,17 @@ static inline qboolean ready_to_send_hacked(void)
 
 /*
 =================
-CL_SendDefaultCmd
+CL_SendUserCommand
 =================
 */
-static void CL_SendDefaultCmd(void)
+static void CL_SendUserCommand(void)
 {
     size_t cursize q_unused, checksumIndex;
     usercmd_t *cmd, *oldcmd;
     client_history_t *history;
 
     // archive this packet
-    history = &cl.history[cls.netchan->outgoing_sequence & CMD_MASK];
+    history = &cl.history[cls.netchan->outgoingSequence & CMD_MASK];
     history->cmdNumber = cl.cmdNumber;
     history->sent = cls.realtime;    // for ping calculation
     history->rcvd = 0;
@@ -429,7 +429,7 @@ static void CL_SendDefaultCmd(void)
 
     // see if we are ready to send this packet
     if (!ready_to_send_hacked()) {
-        cls.netchan->outgoing_sequence++; // just drop the packet
+        cls.netchan->outgoingSequence++; // just drop the packet
         return;
     }
 
@@ -458,18 +458,15 @@ static void CL_SendDefaultCmd(void)
     // send this and the previous cmds in the message, so
     // if the last packet was dropped, it can be recovered
     cmd = &cl.cmds[(cl.cmdNumber - 2) & CMD_MASK];
-    MSG_WriteDeltaUsercmd(NULL, cmd, cls.protocolVersion);
-    MSG_WriteByte(cl.lightlevel);
+    MSG_WriteDeltaUsercmd(NULL, cmd);
     oldcmd = cmd;
 
     cmd = &cl.cmds[(cl.cmdNumber - 1) & CMD_MASK];
-    MSG_WriteDeltaUsercmd(oldcmd, cmd, cls.protocolVersion);
-    MSG_WriteByte(cl.lightlevel);
+    MSG_WriteDeltaUsercmd(oldcmd, cmd);
     oldcmd = cmd;
 
     cmd = &cl.cmds[cl.cmdNumber & CMD_MASK];
-    MSG_WriteDeltaUsercmd(oldcmd, cmd, cls.protocolVersion);
-    MSG_WriteByte(cl.lightlevel);
+    MSG_WriteDeltaUsercmd(oldcmd, cmd);
 
     // MSG: !! PROTOCOL - This one seemed to be needed for old protocol, and thus demo recording.
     //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
@@ -477,7 +474,7 @@ static void CL_SendDefaultCmd(void)
     //    msg_write.data[checksumIndex] = COM_BlockSequenceCRCByte(
     //                                        msg_write.data + checksumIndex + 1,
     //                                        msg_write.cursize - checksumIndex - 1,
-    //                                        cls.netchan->outgoing_sequence);
+    //                                        cls.netchan->outgoingSequence);
     //}
 
     P_FRAMES++;
@@ -485,111 +482,10 @@ static void CL_SendDefaultCmd(void)
     //
     // deliver the message
     //
-    cursize = cls.netchan->Transmit(cls.netchan, msg_write.cursize, msg_write.data, 1);
+    cursize = Netchan_Transmit(cls.netchan, msg_write.cursize, msg_write.data, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
         Com_Printf("%" PRIz " ", cursize); // C++20: String concat fix.
-    }
-#endif
-
-    SZ_Clear(&msg_write);
-}
-
-/*
-=================
-CL_SendBatchedCmd
-=================
-*/
-static void CL_SendBatchedCmd(void)
-{
-    int i, j, seq, bits q_unused;
-    int numCmds, numDups;
-    int totalCmds, totalMsec;
-    size_t cursize q_unused;
-    usercmd_t *cmd, *oldcmd;
-    client_history_t *history, *oldest;
-    byte *patch;
-
-    // see if we are ready to send this packet
-    if (!ready_to_send()) {
-        return;
-    }
-
-    // archive this packet
-    seq = cls.netchan->outgoing_sequence;
-    history = &cl.history[seq & CMD_MASK];
-    history->cmdNumber = cl.cmdNumber;
-    history->sent = cls.realtime;    // for ping calculation
-    history->rcvd = 0;
-
-    cl.lastTransmitTime = cls.realtime;
-    cl.lastTransmitCmdNumber = cl.cmdNumber;
-    cl.lastTransmitCmdNumberReal = cl.cmdNumber;
-
-    // begin a client move command
-    // CPP: 
-    patch = (byte*)SZ_GetSpace(&msg_write, 1);
-
-    // let the server know what the last frame we
-    // got was, so the next message can be delta compressed
-    if (cl_nodelta->integer || !cl.frame.valid /*|| cls.demowaiting*/) {
-        *patch = clc_move_nodelta; // no compression
-    } else {
-        *patch = clc_move_batched;
-        MSG_WriteLong(cl.frame.number);
-    }
-
-    Cvar_ClampInteger(cl_packetdup, 0, MAX_PACKET_FRAMES - 1);
-    numDups = cl_packetdup->integer;
-
-    *patch |= numDups << SVCMD_BITS;
-
-    // send lightlevel
-    MSG_WriteByte(cl.lightlevel);
-
-    // send this and the previous cmds in the message, so
-    // if the last packet was dropped, it can be recovered
-    oldcmd = NULL;
-    totalCmds = 0;
-    totalMsec = 0;
-    for (i = seq - numDups; i <= seq; i++) {
-        oldest = &cl.history[(i - 1) & CMD_MASK];
-        history = &cl.history[i & CMD_MASK];
-
-        numCmds = history->cmdNumber - oldest->cmdNumber;
-        if (numCmds >= MAX_PACKET_USERCMDS) {
-            Com_WPrintf("%s: MAX_PACKET_USERCMDS exceeded\n", __func__);
-            SZ_Clear(&msg_write);
-            break;
-        }
-        totalCmds += numCmds;
-        MSG_WriteBits(numCmds, 5);
-        for (j = oldest->cmdNumber + 1; j <= history->cmdNumber; j++) {
-            cmd = &cl.cmds[j & CMD_MASK];
-            totalMsec += cmd->msec;
-            bits = MSG_WriteDeltaUsercmd_Enhanced(oldcmd, cmd, cls.protocolVersion);
-#ifdef _DEBUG
-            if (cl_showpackets->integer == 3) {
-                MSG_ShowDeltaUsercmdBits_Enhanced(bits);
-            }
-#endif
-            oldcmd = cmd;
-        }
-    }
-
-    P_FRAMES++;
-
-    //
-    // deliver the message
-    //
-    cursize = cls.netchan->Transmit(cls.netchan, msg_write.cursize, msg_write.data, 1);
-#ifdef _DEBUG
-    if (cl_showpackets->integer == 1) {
-        Com_Printf("%" PRIz "(%i) ", cursize, totalCmds);
-    } else if (cl_showpackets->integer == 2) {
-        Com_Printf("%" PRIz "(%i) ", cursize, totalMsec);
-    } else if (cl_showpackets->integer == 3) {
-        Com_Printf(" | ");
     }
 #endif
 
@@ -602,7 +498,7 @@ static void CL_SendKeepAlive(void)
     size_t cursize q_unused;
 
     // archive this packet
-    history = &cl.history[cls.netchan->outgoing_sequence & CMD_MASK];
+    history = &cl.history[cls.netchan->outgoingSequence & CMD_MASK];
     history->cmdNumber = cl.cmdNumber;
     history->sent = cls.realtime;    // for ping calculation
     history->rcvd = 0;
@@ -611,7 +507,7 @@ static void CL_SendKeepAlive(void)
     cl.lastTransmitCmdNumber = cl.cmdNumber;
     cl.lastTransmitCmdNumberReal = cl.cmdNumber;
 
-    cursize = cls.netchan->Transmit(cls.netchan, 0, NULL, 1);
+    cursize = Netchan_Transmit(cls.netchan, 0, NULL, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
         Com_Printf("%" PRIz " ", cursize);
@@ -675,7 +571,7 @@ void CL_SendCmd(void)
         CL_SendUserinfo();
 
         // just keepalive or update reliable
-        if (cls.netchan->ShouldUpdate(cls.netchan)) {
+        if (Netchan_ShouldUpdate(cls.netchan)) {
             CL_SendKeepAlive();
         }
 
@@ -691,11 +587,7 @@ void CL_SendCmd(void)
     // send a userinfo update if needed
     CL_SendUserinfo();
 
-    if (cls.serverProtocol == PROTOCOL_VERSION_NAC && cl_batchcmds->integer) {
-        CL_SendBatchedCmd();
-    } else {
-        CL_SendDefaultCmd();
-    }
+    CL_SendUserCommand();
 
     cl.sendPacketNow = false;
 }

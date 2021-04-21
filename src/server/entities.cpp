@@ -166,7 +166,7 @@ __OLD_SV_WriteFrameToClient_Default
 void __OLD_SV_WriteFrameToClient_Default(client_t *client)
 {
     client_frame_t  *frame, *oldframe;
-    player_packed_t *oldstate;
+    player_state_t *oldstate;
     int             lastframe;
 
     // this is the frame we are creating
@@ -210,7 +210,7 @@ SV_WriteFrameToClient_Enhanced
 void SV_WriteFrameToClient_Enhanced(client_t *client)
 {
     client_frame_t  *frame, *oldframe;
-    player_packed_t *oldstate;
+    player_state_t *oldPlayerState;
     uint32_t        extraflags;
     int             delta, suppressed;
     byte            *b1, *b2;
@@ -223,10 +223,10 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
     // this is the frame we are delta'ing from
     oldframe = get_last_frame(client);
     if (oldframe) {
-        oldstate = &oldframe->playerState;
+        oldPlayerState = &oldframe->playerState;
         delta = client->framenum - client->lastframe;
     } else {
-        oldstate = NULL;
+        oldPlayerState = NULL;
         delta = 31;
     }
 
@@ -262,7 +262,7 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
 
 
     // delta encode the playerstate
-    extraflags = MSG_WriteDeltaPlayerstate_Enhanced(oldstate, &frame->playerState, psFlags);
+    extraflags = MSG_WriteDeltaPlayerstate_Enhanced(oldPlayerState, &frame->playerState, psFlags);
 
     int clientNum = oldframe ? oldframe->clientNum : 0;
     if (clientNum != frame->clientNum) {
@@ -342,7 +342,8 @@ void SV_BuildClientFrame(client_t *client)
     frame->areabytes = CM_WriteAreaBits(client->cm, frame->areabits, clientarea);
 
     // grab the current player_state_t
-    MSG_PackPlayer(&frame->playerState, ps);
+    frame->playerState = *ps;
+    //MSG_PackPlayer(&frame->playerState, ps);
 
     // Grab the current clientNum
     // MSG: NOTE: !! In case of seeing a client model where one should not

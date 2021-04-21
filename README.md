@@ -10,8 +10,18 @@ You can skip these if you aren't me, an ADHD minded person :P
     - We can keep this one on the list and uncheck it after several iterations, who knows.
 - [ ] Do not forget RTX Q2 1.5, how could you? :)
 - [ ] Investigate BSP Tools to one day have less triangles (They used to generate more because of software rendering mode in Q2??)
+
+- [X] Fix particles, most if not all seem to be disappearing (blood, blaster projectile, bullet wall crumbles etc)
+- [ ] 
+
 - [ ] Remove useless bytes in CL_ParseServerData for the pmove stuff q2pro had.
+
 - [ ] Remove MSG_ES stuff
+- [ ] Remove the packing of entities and players.
+- [ ] Network the data properly.
+- [ ] Add in QFusion like networking, which works by frame states, sending only the changed bits.
+    - Would this require fragmenting instantly if we did so??? Hmmm...
+
 - [ ] Revisit the send and receive functions.
 - [ ] Try and implement send/receive aka Write and Read Ent/Player state functions so that entities can have their own :)
 - [ ] Case properly functions for cvar and others in svgame imports.

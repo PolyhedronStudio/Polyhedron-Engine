@@ -130,6 +130,14 @@ constexpr int32_t MAX_GENERAL   = (MAX_CLIENTS * 2);// general config strings
 constexpr int32_t MAX_CLIENT_NAME = 16;
 
 //-----------------
+// Max World Size.
+//-----------------
+constexpr int32_t MAX_WORLD_COORD = (16384);
+constexpr int32_t MIN_WORLD_COORD = (-16384);
+
+constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
+
+//-----------------
 // General Utility Macros.
 //-----------------
 // Calculate the size of a typical C array, note that this method can be risky 

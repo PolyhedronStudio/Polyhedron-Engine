@@ -493,7 +493,7 @@ void V_Init(void);
 void V_Shutdown(void);
 void V_RenderView(void);
 void V_AddEntity(r_entity_t *ent);
-void V_AddParticle(particle_t *p);
+void V_AddParticle(rparticle_t *p);
 #if USE_DLIGHTS
 void V_AddLight(const vec3_t &org, float intensity, float r, float g, float b);
 void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius);

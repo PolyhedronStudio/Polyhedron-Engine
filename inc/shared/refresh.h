@@ -131,7 +131,7 @@ typedef struct dlight_s {
 	int     nacCustomEnabled;
 	int     nacCustomLoopEnabled;
 	int     nacCustomToggleEnabled;
-} dlight_t;
+} rdlight_t;
 
 typedef struct dlightLS_s {
 	int		frame;
@@ -151,7 +151,7 @@ typedef struct particle_s {
     color_t rgba;
 	float   brightness;
 	float   radius;
-} particle_t;
+} rparticle_t;
 
 typedef struct lightstyle_s {
     float           white;          // highest of RGB
@@ -201,10 +201,10 @@ typedef struct refdef_s {
     r_entity_t    *entities;
 
     int         num_dlights;
-    dlight_t    *dlights;
+    rdlight_t    *dlights;
 
     int         num_particles;
-    particle_t  *particles;
+    rparticle_t  *particles;
 
     int         decal_beg;
     int         decal_end;

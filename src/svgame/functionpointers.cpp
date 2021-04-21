@@ -162,6 +162,10 @@ extern void train_wait(entity_t* self);
 extern void flare_think(entity_t* self); // Q2RTX
 extern void flare_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf); // Q2RTX
 
+extern void barrel_explode(entity_t* self);
+extern void barrel_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
+extern void barrel_delay(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
+
 const save_ptr_t save_ptrs[] = {
 { P_blocked, door_blocked },
 { P_blocked, plat_blocked },
@@ -172,6 +176,7 @@ const save_ptr_t save_ptrs[] = {
 { P_die, button_killed },
 { P_die, debris_die },
 { P_die, door_killed },
+	{ P_die, barrel_delay },
 
 { P_die, func_explosive_explode },
 
@@ -209,7 +214,7 @@ const save_ptr_t save_ptrs[] = {
 
 { P_monsterinfo_dodge, soldier_dodge },
 
-{ P_monsterinfo_run, soldier_run }, 
+{ P_monsterinfo_run, soldier_run },
 
 { P_monsterinfo_sight, soldier_sight },
 
@@ -256,6 +261,8 @@ const save_ptr_t save_ptrs[] = {
 { P_think, target_lightramp_think },
 { P_think, Think_AccelMove },
 
+	{ P_think, barrel_explode},
+
 { P_think, Think_CalcMoveSpeed },
 { P_think, Think_Delay },
 { P_think, Think_SpawnDoorTrigger },
@@ -271,7 +278,7 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, func_object_touch },
 { P_touch, gib_touch },
 { P_touch, hurt_touch },
-
+	{ P_touch, barrel_touch },
 { P_touch, rotating_touch },
 
 

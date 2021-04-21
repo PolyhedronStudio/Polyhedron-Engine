@@ -481,7 +481,7 @@ static void P_CheckFallingDamage(entity_t *ent)
             damage = 1;
         VectorSet(dir, 0, 0, 1);
 
-        if (!deathmatch->value || !((int)dmflags->value & DF_NO_FALLING))
+        if (!deathmatch->value || !((int)dmflags->value & DeathMatchFlags::NoFalling))
             T_Damage(ent, world, world, dir, ent->s.origin, vec3_origin, damage, 0, 0, MOD_FALLING);
     } else {
         ent->s.event = EV_FALLSHORT;

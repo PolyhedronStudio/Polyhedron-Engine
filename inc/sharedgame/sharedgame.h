@@ -32,11 +32,6 @@ constexpr uint8_t BUTTON_ANY			= (1 << 7);
 //
 //	Game Related, some is shared with the client/server.
 // 
-// TODO: Clean up, ensure that the client/server do not need these flags.
-// So, do an ENGINE_ENTITY_FLAG, ENGINE_ENTITY_GIB, ENGINE_ENTITY_GAMEFLAG,
-// 
-// EF_SOMEFLAG = (ENGINE_ENTITY_GAMEFLAG << 0) etc.
-//
 //=============================================================================
 //
 //-----------------
@@ -95,7 +90,9 @@ struct MuzzleFlashType {
     // Weapon Muzzleflashes.
     static constexpr uint8_t Blaster = 16;
     static constexpr uint8_t MachineGun = 17;
-    static constexpr uint8_t Flare = 18;
+    static constexpr uint8_t Shotgun = 18;
+    static constexpr uint8_t SuperShotgun = 19;
+    static constexpr uint8_t Flare = 20;
 };
 
 //-----------------
@@ -136,26 +133,33 @@ struct MuzzleFlashType {
 //-----------------
 struct TempEntityEvent {
     static constexpr uint8_t Gunshot = 0;
-    static constexpr uint8_t Blood = 1;
+    static constexpr uint8_t Shotgun = 1;
     static constexpr uint8_t Blaster = 2;
-    static constexpr uint8_t Explosion1= 3;
-    static constexpr uint8_t Explosion2 = 4;
-    static constexpr uint8_t Sparks = 5;
-    static constexpr uint8_t Splash = 6;
-    static constexpr uint8_t BubbleTrail = 7;
-    static constexpr uint8_t BulletSparks = 8;
-    static constexpr uint8_t Flame = 9;
-    static constexpr uint8_t DebugTrail = 10;
-    static constexpr uint8_t PlainExplosion= 11;
-    static constexpr uint8_t ForceWall = 12;
-    static constexpr uint8_t Steam = 13; 
-    static constexpr uint8_t BubbleTrail2 = 14;
-    static constexpr uint8_t MoreBlood = 15;
-    static constexpr uint8_t ElectricSparks = 16;
-    static constexpr uint8_t TeleportEffect  = 17;
-    static constexpr uint8_t BigExplosion1 = 18;
-    static constexpr uint8_t NPExplosion1 = 19;
-    static constexpr uint8_t Flare = 20;
+    static constexpr uint8_t Flare = 3;
+    static constexpr uint8_t Blood = 10;
+    static constexpr uint8_t MoreBlood = 11;
+
+    static constexpr uint8_t Explosion1= 20;
+    static constexpr uint8_t Explosion2 = 21;
+    static constexpr uint8_t PlainExplosion = 22;
+    static constexpr uint8_t BigExplosion1 = 23;
+    static constexpr uint8_t NPExplosion1 = 24;
+
+    static constexpr uint8_t Sparks = 50;
+    static constexpr uint8_t BulletSparks = 51;
+    static constexpr uint8_t ElectricSparks = 52;
+    static constexpr uint8_t Splash = 60;
+
+    static constexpr uint8_t BubbleTrail = 70;
+    static constexpr uint8_t BubbleTrail2 = 71;
+    static constexpr uint8_t DebugTrail = 79;
+
+    static constexpr uint8_t Flame = 80;
+    static constexpr uint8_t Steam = 90; 
+
+    static constexpr uint8_t ForceWall = 100;
+    static constexpr uint8_t TeleportEffect  = 101;
+
 
     static constexpr uint8_t Max = 255;
 };
@@ -163,32 +167,35 @@ struct TempEntityEvent {
 //-----------------
 // Splash Types.
 //-----------------
-#define SPLASH_UNKNOWN      0
-#define SPLASH_SPARKS       1
-#define SPLASH_BLUE_WATER   2
-#define SPLASH_BROWN_WATER  3
-#define SPLASH_SLIME        4
-#define SPLASH_LAVA         5
-#define SPLASH_BLOOD        6
+struct SplashType {
+    static constexpr uint8_t Unknown = 0;
+    static constexpr uint8_t Sparks = 1;
+    static constexpr uint8_t BlueWater = 2;
+    static constexpr uint8_t BrownWater = 3;
+    static constexpr uint8_t Slime = 4;
+    static constexpr uint8_t Lava = 5;
+    static constexpr uint8_t Blood = 6;
+};
 
 //-----------------
 // Deathmatch GameMode Setting Flags
 //-----------------
-#define DF_NO_HEALTH        0x00000001  // 1
-#define DF_NO_ITEMS         0x00000002  // 2
-#define DF_WEAPONS_STAY     0x00000004  // 4
-#define DF_NO_FALLING       0x00000008  // 8
-#define DF_INSTANT_ITEMS    0x00000010  // 16
-#define DF_SAME_LEVEL       0x00000020  // 32
-#define DF_SKINTEAMS        0x00000040  // 64
-#define DF_MODELTEAMS       0x00000080  // 128
-#define DF_NO_FRIENDLY_FIRE 0x00000100  // 256
-#define DF_SPAWN_FARTHEST   0x00000200  // 512
-#define DF_FORCE_RESPAWN    0x00000400  // 1024
-#define DF_NO_ARMOR         0x00000800  // 2048
-#define DF_ALLOW_EXIT       0x00001000  // 4096
-#define DF_INFINITE_AMMO    0x00002000  // 8192
-#define DF_FIXED_FOV        0x00004000  // 16384
-#define DF_UNUSED           0x00008000  // 32768
+struct DeathMatchFlags {
+    static constexpr int16_t NoHealth       = (1 << 0);
+    static constexpr int16_t NoItems        = (1 << 1);
+    static constexpr int16_t WeaponsStay    = (1 << 2);
+    static constexpr int16_t NoFalling      = (1 << 3);
+    static constexpr int16_t InstantItems   = (1 << 4);
+    static constexpr int16_t SameLevel      = (1 << 5);
+    static constexpr int16_t SkinTeams      = (1 << 6);
+    static constexpr int16_t ModelTeams     = (1 << 7);
+    static constexpr int16_t NoFriendlyFire = (1 << 8);
+    static constexpr int16_t SpawnFarthest  = (1 << 9);
+    static constexpr int16_t ForceRespawn   = (1 << 10);
+    static constexpr int16_t NoArmor        = (1 << 11);
+    static constexpr int16_t AllowExit      = (1 << 12);
+    static constexpr int16_t InfiniteAmmo   = (1 << 13);
+    static constexpr int16_t FixedFOV       = (1 << 14);
+};
 
 #endif // __SHAREDGAME_SHAREDGAME_H__

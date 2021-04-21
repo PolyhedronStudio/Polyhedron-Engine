@@ -19,16 +19,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "utils.h"           // Include Utilities funcs.
 #include "player/hud.h"      // Include HUD funcs.
 
+#include "weapons/blaster.h"
+#include "weapons/flaregun.h"
+#include "weapons/machinegun.h"
+#include "weapons/shotgun.h"
+#include "weapons/supershotgun.h"
 
 qboolean    Pickup_Weapon(entity_t *ent, entity_t *other);
 void        Use_Weapon(entity_t *ent, gitem_t *inv);
 void        Drop_Weapon(entity_t *ent, gitem_t *inv);
 
-void Weapon_Blaster(entity_t *ent);
-void Weapon_Machinegun(entity_t *ent);
-void Weapon_FlareGun(entity_t *ent);
-
-gitem_armor_t bodyarmor_info    = {100, 200, .80, .60, ARMOR_BODY};
+gitem_armor_t bodyarmor_info    = {100, 200, .80f, .60f, ARMOR_BODY};
 
 static int  body_armor_index;
 #define HEALTH_IGNORE_MAX   1
@@ -98,6 +99,9 @@ gitem_t *FindItem(const char *pickup_name) // C++20: STRING: Added const to char
 
 void DoRespawn(entity_t *ent)
 {
+    if (!ent)
+        return;
+
     if (ent->team) {
         entity_t *master;
         int count;
@@ -124,6 +128,9 @@ void DoRespawn(entity_t *ent)
 
 void SetRespawn(entity_t *ent, float delay)
 {
+    if (!ent)
+        return;
+
     ent->flags |= FL_RESPAWN;
     ent->svFlags |= SVF_NOCLIENT;
     ent->solid = Solid::Not;
@@ -170,6 +177,9 @@ qboolean Add_Ammo(entity_t *ent, gitem_t *item, int count)
     int         index;
     int         max;
 
+    if (!ent)
+        return false;
+
     if (!ent->client)
         return false;
 
@@ -208,7 +218,7 @@ qboolean Pickup_Ammo(entity_t *ent, entity_t *other)
     qboolean    weapon;
 
     weapon = (ent->item->flags & IT_WEAPON);
-    if ((weapon) && ((int)dmflags->value & DF_INFINITE_AMMO))
+    if ((weapon) && ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
         count = 1000;
     else if (ent->count)
         count = ent->count;
@@ -670,25 +680,25 @@ void SpawnItem(entity_t *ent, gitem_t *item)
 
     // some items will be prevented in deathmatch
     if (deathmatch->value) {
-        if ((int)dmflags->value & DF_NO_ARMOR) {
+        if ((int)dmflags->value & DeathMatchFlags::NoArmor) {
             if (item->Pickup == Pickup_Armor) {
                 G_FreeEntity(ent);
                 return;
             }
         }
-        if ((int)dmflags->value & DF_NO_ITEMS) {
+        if ((int)dmflags->value & DeathMatchFlags::NoItems) {
             if (item->Pickup == Pickup_Powerup) {
                 G_FreeEntity(ent);
                 return;
             }
         }
-        if ((int)dmflags->value & DF_NO_HEALTH) {
+        if ((int)dmflags->value & DeathMatchFlags::NoHealth) {
             if (item->Pickup == Pickup_Health) {
                 G_FreeEntity(ent);
                 return;
             }
         }
-        if ((int)dmflags->value & DF_INFINITE_AMMO) {
+        if ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo) {
             if ((item->flags == IT_AMMO)) {
                 G_FreeEntity(ent);
                 return;
@@ -800,6 +810,52 @@ gitem_t itemlist[] = {
         /* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/machgf5b.wav"
     },
 
+    /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    {
+        "weapon_shotgun",
+        Pickup_Weapon,
+        Use_Weapon,
+        Drop_Weapon,
+        Weapon_Shotgun,
+        "misc/w_pkup.wav",
+        "models/weapons/g_shotg/tris.md2", EntityEffectType::Rotate,
+        "models/weapons/v_shotg/tris.md2",
+        /* icon */      "w_shotgun",
+        /* pickup */    "Shotgun",
+        0,
+        1,
+        "Shells",
+        IT_WEAPON | IT_STAY_COOP,
+        WEAP_SHOTGUN,
+        NULL,
+        0,
+        /* precache */ "weapons/shotgf1b.wav weapons/shotgr1b.wav"
+    },
+
+    /*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    {
+        "weapon_supershotgun",
+        Pickup_Weapon,
+        Use_Weapon,
+        Drop_Weapon,
+        Weapon_SuperShotgun,
+        "misc/w_pkup.wav",
+        "models/weapons/g_shotg2/tris.md2", EntityEffectType::Rotate,
+        "models/weapons/v_shotg2/tris.md2",
+        /* icon */      "w_sshotgun",
+        /* pickup */    "Super Shotgun",
+        0,
+        2,
+        "Shells",
+        IT_WEAPON | IT_STAY_COOP,
+        WEAP_SUPERSHOTGUN,
+        NULL,
+        0,
+        /* precache */ "weapons/sshotf1b.wav"
+    },
+
     //
     // AMMO ITEMS
     //
@@ -880,7 +936,7 @@ gitem_t itemlist[] = {
 */
 void SP_item_health(entity_t *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH)) {
+    if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
         G_FreeEntity(self);
         return;
     }
@@ -895,7 +951,7 @@ void SP_item_health(entity_t *self)
 */
 void SP_item_health_small(entity_t *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH)) {
+    if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
         G_FreeEntity(self);
         return;
     }
@@ -911,7 +967,7 @@ void SP_item_health_small(entity_t *self)
 */
 void SP_item_health_large(entity_t *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH)) {
+    if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
         G_FreeEntity(self);
         return;
     }
@@ -926,7 +982,7 @@ void SP_item_health_large(entity_t *self)
 */
 void SP_item_health_mega(entity_t *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH)) {
+    if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
         G_FreeEntity(self);
         return;
     }

@@ -192,7 +192,7 @@ static void print_drop_reason(client_t *client, const char *reason, clstate_t ol
     // print to server console
     if (COM_DEDICATED && client->netchan)
         Com_Printf("%s[%s]%s%s\n", client->name,
-                   NET_AdrToString(&client->netchan->remote_address),
+                   NET_AdrToString(&client->netchan->remoteAddress),
                    prefix, reason);
 }
 
@@ -692,7 +692,7 @@ static qboolean permit_connection(conn_params_t *p)
     if (sv_iplimit->integer > 0) {
         count = 0;
         FOR_EACH_CLIENT(cl) {
-            netadr_t *adr = &cl->netchan->remote_address;
+            netadr_t *adr = &cl->netchan->remoteAddress;
 
             if (net_from.type != adr->type)
                 continue;
@@ -756,10 +756,10 @@ static qboolean parse_enhanced_params(conn_params_t *p)
     s = Cmd_Argv(6);
     if (*s) {
         p->nctype = atoi(s);
-        if (p->nctype < NETCHAN_OLD || p->nctype > NETCHAN_NEW)
+        if (p->nctype != 1)
             return reject("Invalid netchan type.\n");
     } else {
-        p->nctype = NETCHAN_NEW;
+        p->nctype = 1;
     }
 
     // set zlib
@@ -873,7 +873,7 @@ static client_t *find_client_slot(conn_params_t *params)
 
     // if there is already a slot for this ip, reuse it
     FOR_EACH_CLIENT(cl) {
-        if (NET_IsEqualAdr(&net_from, &cl->netchan->remote_address)) {
+        if (NET_IsEqualAdr(&net_from, &cl->netchan->remoteAddress)) {
             if (cl->state == cs_zombie) {
                 strcpy(params->reconnect_var, cl->reconnect_var);
                 strcpy(params->reconnect_val, cl->reconnect_val);
@@ -946,10 +946,10 @@ static void send_connect_packet(client_t *newcl, int nctype)
     const char *dlstring2   = "";
 
     // MSG: !! Removed: PROTOCOL_VERSION_NAC - TODO: NETCHAN_NEW?
-    if (nctype == NETCHAN_NEW)
+    //if (nctype == NETCHAN_NEW)
         ncstring = " nc=1";
-    else
-        ncstring = " nc=0";
+    //else
+    //    ncstring = " nc=0";
 
     if (sv_downloadserver->string[0]) {
         dlstring1 = " dlserver=";
@@ -1046,10 +1046,7 @@ static void SVC_DirectConnect(void)
     }
 
     // setup netchan
-    newcl->netchan = Netchan_Setup(NS_SERVER, (netchan_type_t)params.nctype, // CPP: Cast
-                                   &net_from, params.qport,
-                                   params.maxlength,
-                                   params.protocol);
+    newcl->netchan = Netchan_Setup(NS_SERVER, &net_from, params.qport, params.maxlength, params.protocol);
     newcl->numpackets = 1;
 
     // parse some info from the info strings
@@ -1362,7 +1359,7 @@ static void SV_PacketEvent(void)
     // check for packets from connected clients
     FOR_EACH_CLIENT(client) {
         netchan = client->netchan;
-        if (!NET_IsEqualBaseAdr(&net_from, &netchan->remote_address)) {
+        if (!NET_IsEqualBaseAdr(&net_from, &netchan->remoteAddress)) {
             continue;
         }
 
@@ -1381,18 +1378,18 @@ static void SV_PacketEvent(void)
                 continue;
             }
         } else {
-            if (netchan->remote_address.port != net_from.port) {
+            if (netchan->remoteAddress.port != net_from.port) {
                 continue;
             }
         }
 
-        if (netchan->remote_address.port != net_from.port) {
+        if (netchan->remoteAddress.port != net_from.port) {
             Com_DPrintf("Fixing up a translated port for %s: %d --> %d\n",
-                        client->name, netchan->remote_address.port, net_from.port);
-            netchan->remote_address.port = net_from.port;
+                        client->name, netchan->remoteAddress.port, net_from.port);
+            netchan->remoteAddress.port = net_from.port;
         }
 
-        if (!netchan->Process(netchan))
+        if (!Netchan_Process(netchan))
             break;
 
         if (client->state == cs_zombie)
@@ -1431,7 +1428,7 @@ static void update_client_mtu(client_t *client, int ee_info)
     if (netchan->type == NETCHAN_OLD)
         return;
 
-    if (!netchan->reliable_length)
+    if (!netchan->reliableLength)
         return;
 
     newpacketlen = ee_info - 64;
@@ -1465,10 +1462,10 @@ void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info)
             continue; // already a zombie
         }
         netchan = client->netchan;
-        if (!NET_IsEqualBaseAdr(from, &netchan->remote_address)) {
+        if (!NET_IsEqualBaseAdr(from, &netchan->remoteAddress)) {
             continue;
         }
-        if (from->port && netchan->remote_address.port != from->port) {
+        if (from->port && netchan->remoteAddress.port != from->port) {
             continue;
         }
 #if USE_PMTUDISC
@@ -1507,7 +1504,7 @@ static void SV_CheckTimeouts(void)
 
     FOR_EACH_CLIENT(client) {
         // never timeout local clients
-        if (NET_IsLocalAddress(&client->netchan->remote_address)) {
+        if (NET_IsLocalAddress(&client->netchan->remoteAddress)) {
             continue;
         }
         // NOTE: delta calculated this way is not sensitive to overflow
@@ -1833,7 +1830,7 @@ void SV_UserinfoChanged(client_t *cl)
     if (cl->name[0] && strcmp(cl->name, name)) {
         if (COM_DEDICATED) {
             Com_Printf("%s[%s] changed name to %s\n", cl->name,
-                       NET_AdrToString(&cl->netchan->remote_address), name);
+                       NET_AdrToString(&cl->netchan->remoteAddress), name);
         }
 
         if (sv_show_name_changes->integer) {
@@ -1853,13 +1850,13 @@ void SV_UserinfoChanged(client_t *cl)
     }
 
     // never drop over the loopback
-    if (NET_IsLocalAddress(&cl->netchan->remote_address)) {
+    if (NET_IsLocalAddress(&cl->netchan->remoteAddress)) {
         cl->rate = 0;
     }
 
     // don't drop over LAN connections
     if (sv_lan_force_rate->integer &&
-        NET_IsLanAddress(&cl->netchan->remote_address)) {
+        NET_IsLanAddress(&cl->netchan->remoteAddress)) {
         cl->rate = 0;
     }
 
@@ -2083,10 +2080,10 @@ static void SV_FinalMessage(const char *message, error_type_t type)
                 continue;
             }
             netchan = client->netchan;
-            while (netchan->fragment_pending) {
-                netchan->TransmitNextFragment(netchan);
+            while (netchan->fragmentPending) {
+                Netchan_TransmitNextFragment(netchan);
             }
-            netchan->Transmit(netchan, msg_write.cursize, msg_write.data, 1);
+            Netchan_Transmit(netchan, msg_write.cursize, msg_write.data, 1);
         }
     }
 

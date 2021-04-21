@@ -60,34 +60,54 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SV_DPrintf(...)
 #endif
 
-#define SV_BASELINES_SHIFT      6
-#define SV_BASELINES_PER_CHUNK  (1 << SV_BASELINES_SHIFT)
-#define SV_BASELINES_MASK       (SV_BASELINES_PER_CHUNK - 1)
-#define SV_BASELINES_CHUNKS     (MAX_EDICTS >> SV_BASELINES_SHIFT)
-
-#define SV_InfoSet(var, val) \
-    Cvar_FullSet(var, val, CVAR_SERVERINFO|CVAR_ROM, FROM_CODE)
-
 #if USE_CLIENT
 #define SV_PAUSED (sv_paused->integer != 0)
 #else
 #define SV_PAUSED 0
 #endif
 
-// game features this server supports
-#define SV_FEATURES (0)
+// Cheesy macro.
+#define SV_InfoSet(var, val) \
+    Cvar_FullSet(var, val, CVAR_SERVERINFO|CVAR_ROM, FROM_CODE)
 
-// ugly hack for SV_Shutdown
-#define MVD_SPAWN_DISABLED  0
-#define MVD_SPAWN_ENABLED   0x40000000
-#define MVD_SPAWN_INTERNAL  0x80000000
-#define MVD_SPAWN_MASK      0xc0000000
 
+//=============================================================================
+#define EDICT_POOL(c, n) ((entity_t *)((byte *)(c)->pool->edicts + (c)->pool->entity_size*(n)))
+
+#define EDICT_NUM(n) ((entity_t *)((byte *)ge->edicts + ge->entity_size*(n)))
+#define NUM_FOR_EDICT(e) ((int)(((byte *)(e) - (byte *)ge->edicts) / ge->entity_size))
+
+
+//=============================================================================
+// Master/heartbeat settings.
+static constexpr uint32_t MAX_MASTERS = 8;       // max recipients for heartbeat packets
+static constexpr int32_t HEARTBEAT_SECONDS = 300;
+
+// Baseline settings per packet.
+static constexpr uint32_t SV_BASELINES_SHIFT = 6;
+static constexpr uint32_t SV_BASELINES_PER_CHUNK = (1 << SV_BASELINES_SHIFT);
+static constexpr uint32_t SV_BASELINES_MASK = (SV_BASELINES_PER_CHUNK - 1);
+static constexpr uint32_t SV_BASELINES_CHUNKS = (MAX_EDICTS >> SV_BASELINES_SHIFT);
+
+// Server FPS
+constexpr uint32_t SV_FRAMERATE = BASE_FRAMERATE;
+constexpr uint32_t SV_FRAMETIME = BASE_FRAMETIME;
+constexpr uint32_t SV_FRAMEDIV = 1;
+constexpr uint32_t SV_FRAMESYNC = 1;
+#define SV_CLIENTSYNC(cl)   1
+
+// Entity leaf settings.
+static constexpr uint32_t MAX_TOTAL_ENT_LEAFS = 128;
+//=============================================================================
+
+//-----------------
+// A client svc_frame message.
+//-----------------
 typedef struct {
     int         number;
     unsigned    num_entities;
     unsigned    first_entity;
-    player_packed_t playerState;
+    player_state_t playerState;
     int         clientNum;
     int         areabytes;
     byte        areabits[MAX_MAP_AREA_BYTES];  // portalarea visibility bits
@@ -95,17 +115,17 @@ typedef struct {
     int         latency;
 } client_frame_t;
 
+//-----------------
+// Server side Entity.
+//-----------------
 typedef struct {
     int         solid32;
 } server_entity_t;
 
-// Server FPS
-#define SV_FRAMERATE        BASE_FRAMERATE
-#define SV_FRAMETIME        BASE_FRAMETIME
-#define SV_FRAMEDIV         1
-#define SV_FRAMESYNC        1
-#define SV_CLIENTSYNC(cl)   1
 
+//-----------------
+// Main server structure.
+//-----------------
 typedef struct {
     server_state_t  state;      // precache commands are only valid during load
     int             spawncount; // random number generated each server spawn
@@ -126,12 +146,6 @@ typedef struct {
     unsigned    tracecount;
 } server_t;
 
-#define EDICT_POOL(c, n) ((entity_t *)((byte *)(c)->pool->edicts + (c)->pool->entity_size*(n)))
-
-#define EDICT_NUM(n) ((entity_t *)((byte *)ge->edicts + ge->entity_size*(n)))
-#define NUM_FOR_EDICT(e) ((int)(((byte *)(e) - (byte *)ge->edicts) / ge->entity_size))
-
-#define MAX_TOTAL_ENT_LEAFS        128
 
 typedef enum {
     cs_free,        // can be reused for a new connection
@@ -143,15 +157,18 @@ typedef enum {
     cs_spawned      // client is fully in game
 } clstate_t;
 
-#define MSG_POOLSIZE        1024
-#define MSG_TRESHOLD        (64 - 10)   // keep pmsg_s 64 bytes aligned
+constexpr uint32_t MSG_POOLSIZE = 1024;
+constexpr uint32_t MSG_TRESHOLD = (64 - 10);   // keep pmsg_s 64 bytes aligned
 
-#define MSG_RELIABLE    1
-#define MSG_CLEAR       2
-#define MSG_COMPRESS    4
+constexpr uint32_t MSG_RELIABLE = 1;
+constexpr uint32_t MSG_CLEAR = 2;
+constexpr uint32_t MSG_COMPRESS = 4;
 
-#define MAX_SOUND_PACKET   14
+constexpr uint32_t MAX_SOUND_PACKET = 14;
 
+//-----------------
+// The actual networking message packets.
+//-----------------
 typedef struct {
     list_t              entry;
     uint16_t            cursize;    // Zero means sound packet
@@ -170,15 +187,15 @@ typedef struct {
 } message_packet_t;
 
 // This is best to match the actual server game frame rate.
-#define SERVER_MESSAGES_TICKRATE   20
+static constexpr uint32_t SERVER_MESSAGES_TICKRATE = 20;
 
 #define FOR_EACH_CLIENT(client) \
     LIST_FOR_EACH(client_t, client, &sv_clientlist, entry)
 
 #define PL_S2C(cl) (cl->frames_sent ? \
     (1.0f - (float)cl->frames_acked / cl->frames_sent) * 100.0f : 0.0f)
-#define PL_C2S(cl) (cl->netchan->total_received ? \
-    ((float)cl->netchan->total_dropped / cl->netchan->total_received) * 100.0f : 0.0f)
+#define PL_C2S(cl) (cl->netchan->totalReceived ? \
+    ((float)cl->netchan->totalDropped / cl->netchan->totalReceived) * 100.0f : 0.0f)
 #define AVG_PING(cl) (cl->avg_ping_count ? \
     cl->avg_ping_time / cl->avg_ping_count : cl->ping)
 
@@ -306,7 +323,7 @@ typedef struct client_s {
 // MAX_CHALLENGES is made large to prevent a denial
 // of service attack that could cycle all of them
 // out before legitimate users connected
-#define    MAX_CHALLENGES    1024
+static constexpr uint32_t    MAX_CHALLENGES = 1024;
 
 typedef struct {
     netadr_t    adr;
@@ -344,9 +361,6 @@ typedef struct {
     char            *comment;
     char            string[1];
 } filtercmd_t;
-
-#define MAX_MASTERS         8       // max recipients for heartbeat packets
-#define HEARTBEAT_SECONDS   300
 
 typedef struct {
     list_t entry;
@@ -491,7 +505,7 @@ void SV_zfree(voidpf opaque, voidpf address);
 void SV_ClientReset(client_t *client);
 void SV_SpawnServer(mapcmd_t *cmd);
 qboolean SV_ParseMapCmd(mapcmd_t *cmd);
-void SV_InitGame(unsigned mvd_spawn);
+void SV_InitGame();
 
 //
 // sv_send.c
