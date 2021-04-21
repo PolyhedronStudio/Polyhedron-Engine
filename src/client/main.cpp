@@ -651,7 +651,7 @@ This is also called on Com_Error, so it shouldn't cause any errors
 
 //qboolean snd_is_underwater; // OAL: Moved to client.
 
-void CL_Disconnect(error_type_t type)
+void CL_Disconnect(ErrorType type)
 {
     if (!cls.state) {
         return;

@@ -236,7 +236,7 @@ typedef enum {
     ERR_DROP,           // print to console and disconnect from game
     ERR_DISCONNECT,     // like drop, but not an error
     ERR_RECONNECT       // make server broadcast 'reconnect' message
-} error_type_t;
+} ErrorType;
 
 typedef enum {
     PRINT_ALL,          // general messages
@@ -245,7 +245,7 @@ typedef enum {
     PRINT_WARNING,      // print in yellow color
     PRINT_ERROR,        // print in red color
     PRINT_NOTICE        // print in cyan color
-} print_type_t;
+} PrintType;
 
 
 
@@ -253,9 +253,9 @@ typedef enum {
 // WATISDEZE: We don't want these defined in clgame.h
 //-----------------
 #ifndef CGAME_INCLUDE
-void    Com_LPrintf(print_type_t type, const char* fmt, ...)
+void    Com_LPrintf(PrintType type, const char* fmt, ...)
 q_printf(2, 3);
-void    Com_Error(error_type_t code, const char* fmt, ...)
+void    Com_Error(ErrorType code, const char* fmt, ...)
 q_noreturn q_printf(2, 3);
 
 #define Com_Printf(...) Com_LPrintf(PRINT_ALL, __VA_ARGS__)

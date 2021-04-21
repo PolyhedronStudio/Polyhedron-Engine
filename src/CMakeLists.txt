@@ -271,7 +271,6 @@ SET(SRC_COMMON
 	common/zone.cpp
 	common/net/chan.cpp
 	common/net/net.cpp
-	common/x86/fpu.cpp
 )
 SET(HEADERS_COMMON
 	common/net/inet_ntop.h

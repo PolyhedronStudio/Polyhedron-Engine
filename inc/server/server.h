@@ -35,7 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info);
 #endif
 void SV_Init(void);
-void SV_Shutdown(const char *finalmsg, error_type_t type);
+void SV_Shutdown(const char *finalmsg, ErrorType type);
 unsigned SV_Frame(unsigned msec);
 #if USE_SYSCON
 void SV_SetConsoleTitle(void);

@@ -751,7 +751,7 @@ static qboolean finish_download(void)
     char        temp[MAX_OSPATH];
     qboolean    fatal_error = false;
     const char  *err;
-    print_type_t level;
+    PrintType level;
 
     do {
         msg = curl_multi_info_read(curl_multi, &msgs_in_queue);

@@ -619,7 +619,7 @@ void Com_EPrint(const char *fmt, ...) {
 }
 
 // Triggers an error code of type. Using variable arg formatting.
-void Com_Error (error_type_t code, const char *fmt, ...) {
+void Com_Error (ErrorType code, const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);
@@ -629,7 +629,7 @@ void Com_Error (error_type_t code, const char *fmt, ...) {
 }
 
 // Prints a message of a type of your own liking. Using variable arg formatting
-void Com_LPrintf(print_type_t type, const char* fmt, ...) {
+void Com_LPrintf(PrintType type, const char* fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start(args, fmt);

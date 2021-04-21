@@ -208,17 +208,12 @@ void SV_SpawnServer(mapcmd_t *cmd)
     // map initialization
     sv.state = ss_loading;
 
-    X86_PUSH_FPCW;
-    X86_SINGLE_FPCW;
-
     // load and spawn all other entities
     ge->SpawnEntities(sv.name, entitystring, cmd->spawnpoint);
 
     // run two frames to allow everything to settle
     ge->RunFrame(); sv.framenum++;
     ge->RunFrame(); sv.framenum++;
-
-    X86_POP_FPCW;
 
     // make sure maxclients string is correct
     sprintf(sv.configstrings[CS_MAXCLIENTS], "%d", sv_maxclients->integer);
@@ -340,7 +335,7 @@ void SV_InitGame()
 
     if (svs.initialized) {
         // cause any connected clients to reconnect
-        SV_Shutdown("Server restarted\n", (error_type_t)(ERR_RECONNECT));
+        SV_Shutdown("Server restarted\n", (ErrorType)(ERR_RECONNECT));
     } else {
         // make sure the client is down
         CL_Disconnect(ERR_RECONNECT);

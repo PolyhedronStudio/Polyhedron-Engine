@@ -1618,12 +1618,7 @@ static void SV_RunGameFrame(void)
         time_before_game = Sys_Milliseconds();
 #endif
 
-    X86_PUSH_FPCW;
-    X86_SINGLE_FPCW;
-
     ge->RunFrame();
-
-    X86_POP_FPCW;
 
 #if USE_CLIENT
     if (host_speeds->integer)
@@ -2052,7 +2047,7 @@ server is going to totally exit after returning from this function.
 Also resposible for freeing all clients.
 ==================
 */
-static void SV_FinalMessage(const char *message, error_type_t type)
+static void SV_FinalMessage(const char *message, ErrorType type)
 {
     client_t    *client;
     netchan_t   *netchan;
@@ -2108,7 +2103,7 @@ Called when each game quits, from Com_Quit or Com_Error.
 Should be safe to call even if server is not fully initalized yet.
 ================
 */
-void SV_Shutdown(const char *finalmsg, error_type_t type)
+void SV_Shutdown(const char *finalmsg, ErrorType type)
 {
     if (!sv_registered)
         return;

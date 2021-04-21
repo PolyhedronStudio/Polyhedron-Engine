@@ -250,7 +250,7 @@ svgame_export_t* GetServerGameAPI(svgame_import_t* import)
 
 #ifndef GAME_HARD_LINKED
 // this is only here so the functions in q_shared.c can link
-void Com_LPrintf(print_type_t type, const char *fmt, ...)
+void Com_LPrintf(PrintType type, const char *fmt, ...)
 {
     va_list     argptr;
     char        text[MAX_STRING_CHARS];
@@ -266,7 +266,7 @@ void Com_LPrintf(print_type_t type, const char *fmt, ...)
     gi.DPrintf("%s", text);
 }
 
-void Com_Error(error_type_t type, const char *fmt, ...)
+void Com_Error(ErrorType type, const char *fmt, ...)
 {
     va_list     argptr;
     char        text[MAX_STRING_CHARS];

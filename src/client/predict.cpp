@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "client.h"
 #include "client/gamemodule.h"
-#include "common/x86/fpu.h"
 
 /*
 ===================

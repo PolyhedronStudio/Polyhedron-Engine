@@ -41,7 +41,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/protocol.h"
 #include "common/tests.h"
 #include "common/utils.h"
-#include "common/x86/fpu.h"
 #include "common/zone.h"
 
 #include "client/client.h"
@@ -284,7 +283,7 @@ static size_t format_local_time(char *buffer, size_t size, const char *fmt)
     return strftime(buffer, size, fmt, tm);
 }
 
-static void logfile_write(print_type_t type, const char *s)
+static void logfile_write(PrintType type, const char *s)
 {
     char text[MAXPRINTMSG];
     char buf[MAX_QPATH];
@@ -400,7 +399,7 @@ Both client and server can use this, and it will output
 to the apropriate place.
 =============
 */
-void Com_LPrintf(print_type_t type, const char *fmt, ...)
+void Com_LPrintf(PrintType type, const char *fmt, ...)
 {
     va_list     argptr;
     char        msg[MAXPRINTMSG];
@@ -492,7 +491,7 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Error(error_type_t code, const char *fmt, ...)
+void Com_Error(ErrorType code, const char *fmt, ...)
 {
     char            msg[MAXERRORMSG];
     va_list         argptr;
@@ -533,8 +532,6 @@ void Com_Error(error_type_t code, const char *fmt, ...)
 
     // reset Com_Printf recursion level
     com_printEntered = 0;
-
-    X86_POP_FPCW;
 
     if (code == ERR_DISCONNECT || code == ERR_RECONNECT) {
         Com_WPrintf("%s\n", com_errorMsg);
@@ -605,10 +602,10 @@ Both client and server can use this, and it will
 do the apropriate things. This function never returns.
 =============
 */
-void Com_Quit(const char *reason, error_type_t type)
+void Com_Quit(const char *reason, ErrorType type)
 {
     char buffer[MAX_STRING_CHARS];
-    const char* what = (type == error_type_t::ERR_DISCONNECT ? "restarted" : "quit"); // C++20: char *what = type == ERR_RECONNECT ? "restarted" : "quit";
+    const char* what = (type == ErrorType::ERR_DISCONNECT ? "restarted" : "quit"); // C++20: char *what = type == ERR_RECONNECT ? "restarted" : "quit";
 
     if (reason && *reason) {
         Q_snprintf(buffer, sizeof(buffer),
@@ -898,8 +895,6 @@ void Qcommon_Init(int argc, char **argv)
     com_argv = argv;
 
     Com_SetLastError(NULL);
-
-    X86_SetFPCW();
 
     srand(time(NULL));
 

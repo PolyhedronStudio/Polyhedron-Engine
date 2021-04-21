@@ -1299,9 +1299,6 @@ void SV_ExecuteClientMessage(client_t *client)
 {
     int c;
 
-    X86_PUSH_FPCW;
-    X86_SINGLE_FPCW;
-
     sv_client = client;
     sv_player = sv_client->edict;
 
@@ -1348,7 +1345,5 @@ void SV_ExecuteClientMessage(client_t *client)
 
     sv_client = NULL;
     sv_player = NULL;
-
-    X86_POP_FPCW;
 }
 

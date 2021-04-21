@@ -23,8 +23,7 @@
 #include "shared/list.h"
 #include "shared/refresh.h"
 
-// // Common.
-#include "common/x86/fpu.h"
+// Common.
 #include "common/msg.h"
 #include "common/protocol.h"
 
