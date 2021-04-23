@@ -584,24 +584,186 @@ static inline void write_unreliables(client_t *client, size_t maxsize)
 /*
 ===============================================================================
 
-FRAME UPDATES 
+FRAME UPDATES - OLD NETCHAN
 
 ===============================================================================
 */
 
-static void SV_AddMessage(client_t *client, byte *data,
+static void add_message_old(client_t *client, byte *data,
                             size_t len, qboolean reliable)
 {
-//    if (reliable) {
-        // don't packetize, netchan level will do fragmentation as needed
-        SZ_Write(&client->netchan->message, data, len);
-    //} else {
-    //    // still have to packetize, relative sounds need special processing
-    //    add_msg_packet(client, data, len, false);
-    //}
+    if (len > client->netchan->maxpacketlen) {
+        if (reliable) {
+            SV_DropClient(client, "oversize reliable message");
+        } else {
+            Com_DPrintf("Dumped oversize unreliable for %s\n", client->name);
+        }
+        return;
+    }
+
+    add_msg_packet(client, data, len, reliable);
 }
 
-static void SV_WriteDatagram(client_t *client)
+// this should be the only place data is ever written to netchan message for old clients
+static void write_reliables_old(client_t *client, size_t maxsize)
+{
+    message_packet_t *msg, *next;
+    int count;
+
+    if (client->netchan->reliableLength) {
+        SV_DPrintf(1, "%s to %s: unacked\n", __func__, client->name);
+        return;    // there is still outgoing reliable message pending
+    }
+
+    // find at least one reliable message to send
+    count = 0;
+    FOR_EACH_MSG_SAFE(&client->msg_reliable_list) {
+        // stop if this msg doesn't fit (reliables must be delivered in order)
+        if (client->netchan->message.cursize + msg->cursize > maxsize) {
+            if (!count) {
+                // this should never happen
+                Com_WPrintf("%s to %s: overflow on the first message\n",
+                            __func__, client->name);
+            }
+            break;
+        }
+
+        SV_DPrintf(1, "%s to %s: writing msg %d: %d bytes\n",
+                   __func__, client->name, count, msg->cursize);
+
+        SZ_Write(&client->netchan->message, msg->data, msg->cursize);
+        free_msg_packet(client, msg);
+        count++;
+    }
+}
+
+// unreliable portion doesn't fit, then throw out low priority effects
+static void repack_unreliables(client_t *client, size_t maxsize)
+{
+    message_packet_t *msg, *next;
+
+    if (msg_write.cursize + 4 > maxsize) {
+        return;
+    }
+
+    // temp entities first
+    FOR_EACH_MSG_SAFE(&client->msg_unreliable_list) {
+        if (!msg->cursize || msg->data[0] != svg_temp_entity) {
+            continue;
+        }
+        write_msg(client, msg, maxsize);
+    }
+
+    if (msg_write.cursize + 4 > maxsize) {
+        return;
+    }
+
+    // then entity sounds
+    FOR_EACH_MSG_SAFE(&client->msg_unreliable_list) {
+        if (!msg->cursize) {
+            write_snd(client, msg, maxsize);
+        }
+    }
+
+    if (msg_write.cursize + 4 > maxsize) {
+        return;
+    }
+
+    // then positioned sounds
+    FOR_EACH_MSG_SAFE(&client->msg_unreliable_list) {
+        if (msg->cursize && msg->data[0] == svc_sound) {
+            write_msg(client, msg, maxsize);
+        }
+    }
+
+    if (msg_write.cursize + 4 > maxsize) {
+        return;
+    }
+
+    // then everything else left
+    FOR_EACH_MSG_SAFE(&client->msg_unreliable_list) {
+        if (msg->cursize) {
+            write_msg(client, msg, maxsize);
+        }
+    }
+}
+
+static void write_datagram_old(client_t *client)
+{
+    message_packet_t *msg;
+    size_t maxsize, cursize;
+
+    // determine how much space is left for unreliable data
+    maxsize = client->netchan->maxpacketlen;
+    if (client->netchan->reliableLength) {
+        // there is still unacked reliable message pending
+        maxsize -= client->netchan->reliableLength;
+    } else {
+        // find at least one reliable message to send
+        // and make sure to reserve space for it
+        if (!LIST_EMPTY(&client->msg_reliable_list)) {
+            msg = MSG_FIRST(&client->msg_reliable_list);
+            maxsize -= msg->cursize;
+        }
+    }
+
+    // send over all the relevant entity_state_t
+    // and the player_state_t
+    client->WriteFrame(client);
+    if (msg_write.cursize > maxsize) {
+        SV_DPrintf(0, "Frame %d overflowed for %s: %" PRIz " > %" PRIz"\n",
+                   client->framenum, client->name, msg_write.cursize, maxsize);
+        SZ_Clear(&msg_write);
+    }
+
+    // now write unreliable messages
+    // it is necessary for this to be after the WriteFrame
+    // so that entity references will be current
+    if (msg_write.cursize + client->msg_unreliable_bytes > maxsize) {
+        // throw out some low priority effects
+        repack_unreliables(client, maxsize);
+    } else {
+        // all messages fit, write them in order
+        write_unreliables(client, maxsize);
+    }
+
+    // write at least one reliable message
+    write_reliables_old(client, client->netchan->maxpacketlen - msg_write.cursize);
+
+    // send the datagram
+    cursize = Netchan_Transmit(client->netchan,
+                                        msg_write.cursize,
+                                        msg_write.data,
+                                        client->numpackets);
+
+    // record the size for rate estimation
+    SV_CalcSendTime(client, cursize);
+
+    // clear the write buffer
+    SZ_Clear(&msg_write);
+}
+
+/*
+===============================================================================
+
+FRAME UPDATES - NEW NETCHAN
+
+===============================================================================
+*/
+
+static void add_message_new(client_t *client, byte *data,
+                            size_t len, qboolean reliable)
+{
+    if (reliable) {
+        // don't packetize, netchan level will do fragmentation as needed
+        SZ_Write(&client->netchan->message, data, len);
+    } else {
+        // still have to packetize, relative sounds need special processing
+        add_msg_packet(client, data, len, false);
+    }
+}
+
+static void write_datagram_new(client_t *client)
 {
     size_t cursize;
 
@@ -847,8 +1009,8 @@ void SV_InitClientSend(client_t *newcl)
 
     // setup protocol
 //    if (newcl->netchan->type == NETCHAN_NEW) {
-        newcl->AddMessage = SV_AddMessage;
-        newcl->WriteDatagram = SV_WriteDatagram;
+        newcl->AddMessage = add_message_new;
+        newcl->WriteDatagram = write_datagram_new;
     //} else {
     //    newcl->AddMessage = add_message_old;
     //    newcl->WriteDatagram = write_datagram_old;

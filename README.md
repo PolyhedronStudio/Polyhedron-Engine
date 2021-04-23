@@ -16,8 +16,11 @@ You can skip these if you aren't me, an ADHD minded person :P
 
 - [ ] Remove useless bytes in CL_ParseServerData for the pmove stuff q2pro had.
 
-- [ ] Remove MSG_ES stuff
-- [ ] Remove the packing of entities and players.
+- [X] Remove MSG_ES stuff
+    - MSG_ES_UMASK is still there, for the reason below.
+- [X] Remove the packing of entities and players.
+    - Keeping the entity packing it does for now, other than floating point origin and angles.
+      With the future in mind, we can always return to this part later. KISS, if it works for now, it works.
 - [ ] Network the data properly.
 - [ ] Add in QFusion like networking, which works by frame states, sending only the changed bits.
     - Would this require fragmenting instantly if we did so??? Hmmm...

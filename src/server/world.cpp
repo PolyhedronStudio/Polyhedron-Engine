@@ -292,7 +292,7 @@ void PF_LinkEntity(entity_t *ent)
             ent->s.solid = 0;
             sent->solid32 = 0;
         } else {
-            ent->s.solid = MSG_PackSolid16(ent->mins, ent->maxs);
+            ent->s.solid = MSG_PackSolid32(ent->mins, ent->maxs);
             sent->solid32 = MSG_PackSolid32(ent->mins, ent->maxs);
         }
         break;
