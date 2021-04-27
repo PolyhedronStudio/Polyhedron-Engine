@@ -734,8 +734,3 @@ void HTTP_CleanupDownloads(void);
 // crc.c
 //
 byte COM_BlockSequenceCRCByte(byte *base, size_t length, int sequence);
-
-//
-// effects.c
-//
-void FX_Init(void);

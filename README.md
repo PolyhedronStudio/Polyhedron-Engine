@@ -2,7 +2,7 @@
 
 ## Scratchpad - Things to do or not forget:
 You can skip these if you aren't me, an ADHD minded person :P
-- [ ] Move these over out of FX_Init and remove src/client/effects.c it is a waste file.
+- [X] Move these over out of FX_Init and remove src/client/effects.c it is a waste file.
 `   // Move these over?
     cvar_pt_particle_emissive = Cvar_Get("pt_particle_emissive", "10.0", 0);
 	cl_particle_num_factor = Cvar_Get("cl_particle_num_factor", "1", 0);`

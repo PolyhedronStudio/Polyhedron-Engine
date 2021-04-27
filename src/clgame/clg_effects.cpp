@@ -46,8 +46,8 @@ void CLG_EffectsInit(void)
     int i, j; 
 
     // Fetch cvars.
-    cvar_pt_particle_emissive = clgi.Cvar_Get("cvar_pt_particle_emissive", "", 0);
-    cl_particle_num_factor = clgi.Cvar_Get("cl_particle_num_factor", "", 0);
+    cvar_pt_particle_emissive = clgi.Cvar_Get("pt_particle_emissive", "10.0", 0);
+    cl_particle_num_factor = clgi.Cvar_Get("cl_particle_num_factor", "1", 0);
 
     // Generate a random numbered angular velocities table.
     // This is used for rotations etc, so they vary each time
