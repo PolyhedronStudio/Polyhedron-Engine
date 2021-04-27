@@ -1088,7 +1088,7 @@ static void PM_Friction(void) {
     float friction = 0.0;
 
     // SPECTATOR friction
-    if (pm->state.type == PM_SPECTATOR) {
+    if (pm->state.type == PM_SPECTATOR || pm->state.type == PM_NOCLIP) {
         friction = PM_FRICT_SPECTATOR;
         // LADDER friction
     } else if (pm->state.flags & PMF_ON_LADDER) {
@@ -1551,6 +1551,39 @@ static void PM_SpectatorMove(void) {
 
 //
 //===============
+// PM_NoclipMove
+// 
+// Handles special noclip movement.
+//===============
+//
+static void PM_NoclipMove() {
+    PM_Friction();
+
+    // User intentions on X/Y/Z
+    vec3_t vel = vec3_zero();
+    vel = vec3_fmaf( vel, pm->cmd.forwardmove, playerMoveLocals.forward );
+    vel = vec3_fmaf( vel, pm->cmd.sidemove, playerMoveLocals.right );
+
+    // Add explicit Z
+    vel.z += pm->cmd.upmove;
+
+    float speed;
+    vel = vec3_normalize_length( vel, speed );
+    speed = Clampf( speed, 0.0, PM_SPEED_SPECTATOR );
+
+    if ( speed < PM_STOP_EPSILON ) {
+        speed = 0.0;
+    }
+
+    // Accelerate
+    PM_Accelerate( vel, speed, PM_ACCEL_SPECTATOR );
+
+    // Do the move
+    pm->state.origin += vec3_scale( pm->state.velocity, playerMoveLocals.frameTime );
+}
+
+//
+//===============
 // PM_FreezeMove
 // 
 // Freeze Player movement/
@@ -1700,6 +1733,11 @@ void PMove(pm_move_t * pmove, pmoveParams_t * params)
     // Special PM_SPECTATOR(Spectator Movement, viewing a match, etc) treatment.
     if (pm->state.type == PM_SPECTATOR) {
         PM_SpectatorMove();
+        return;
+    }
+
+    if (pm->state.type == PM_NOCLIP) {
+        PM_NoclipMove();
         return;
     }
 

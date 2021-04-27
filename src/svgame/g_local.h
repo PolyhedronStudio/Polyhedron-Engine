@@ -184,6 +184,7 @@ typedef enum {
 // edict->moveType values
 typedef enum {
     MOVETYPE_NONE,          // never moves
+    MOVETYPE_SPECTATOR,     // special movetype for spectators to not go through walls
     MOVETYPE_NOCLIP,        // origin and angles change with no interaction
     MOVETYPE_PUSH,          // no clip to world, push on box contact
     MOVETYPE_STOP,          // no clip to world, stops on box contact

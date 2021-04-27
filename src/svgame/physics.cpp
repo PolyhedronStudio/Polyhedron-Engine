@@ -428,7 +428,8 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
         if (check->moveType == MOVETYPE_PUSH
             || check->moveType == MOVETYPE_STOP
             || check->moveType == MOVETYPE_NONE
-            || check->moveType == MOVETYPE_NOCLIP)
+            || check->moveType == MOVETYPE_NOCLIP
+            || check->moveType == MOVETYPE_SPECTATOR)
             continue;
 
         if (!check->area.prev)
@@ -905,6 +906,7 @@ void G_RunEntity(entity_t *ent)
         SV_Physics_None(ent);
         break;
     case MOVETYPE_NOCLIP:
+    case MOVETYPE_SPECTATOR:
         SV_Physics_Noclip(ent);
         break;
     case MOVETYPE_STEP:
