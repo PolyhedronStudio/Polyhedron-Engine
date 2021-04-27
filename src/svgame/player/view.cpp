@@ -435,7 +435,7 @@ static void P_CheckFallingDamage(entity_t *ent)
     if (ent->s.modelindex != 255)
         return;     // not in the player model
 
-    if (ent->moveType == MOVETYPE_NOCLIP)
+    if (ent->moveType == MOVETYPE_NOCLIP || ent->moveType == MOVETYPE_SPECTATOR)
         return;
 
     if ((ent->client->oldVelocity[2] < 0) && (ent->velocity[2] > ent->client->oldVelocity[2]) && (!ent->groundEntityPtr)) {
@@ -499,7 +499,7 @@ static void P_CheckWorldEffects(void)
 {
     int         waterlevel, old_waterlevel;
 
-    if (current_player->moveType == MOVETYPE_NOCLIP) {
+    if (current_player->moveType == MOVETYPE_NOCLIP || current_player->moveType == MOVETYPE_SPECTATOR) {
         current_player->air_finished = level.time + 12; // don't need air
         return;
     }

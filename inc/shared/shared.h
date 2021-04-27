@@ -481,6 +481,7 @@ typedef enum {
     PM_HOOK_PULL,   // Pull hook
     PM_HOOK_SWING,  // Swing hook
     PM_SPECTATOR,   // Free-flying movement with acceleration and friction
+    PM_NOCLIP,      // Like PM_SPECTATOR, but noclips through walls
     // All slots up till 32 are free for custom game PM_ defines.
     PM_DEAD = 32, // No movement, but the ability to rotate in place
     PM_FREEZE,    // No movement at all

@@ -733,7 +733,7 @@ void RespawnClient(entity_t *self)
 {
     if (deathmatch->value || coop->value) {
         // spectator's don't leave bodies
-        if (self->moveType != MOVETYPE_NOCLIP)
+        if (self->moveType != MOVETYPE_NOCLIP && self->moveType != MOVETYPE_SPECTATOR)
             CopyToBodyQue(self);
         self->svFlags &= ~SVF_NOCLIENT;
         PutClientInServer(self);
@@ -986,7 +986,7 @@ void PutClientInServer(entity_t *ent)
 
         client->resp.spectator = true;
 
-        ent->moveType = MOVETYPE_NOCLIP;
+        ent->moveType = MOVETYPE_SPECTATOR;
         ent->solid = Solid::Not;
         ent->svFlags |= SVF_NOCLIENT;
         ent->client->playerState.gunindex = 0;
@@ -1347,11 +1347,13 @@ void ClientThink(entity_t *ent, usercmd_t *ucmd)
         // set up for pmove
         memset(&pm, 0, sizeof(pm));
 
-        if (ent->moveType == MOVETYPE_NOCLIP)
+        if ( ent->moveType == MOVETYPE_NOCLIP )
+            client->playerState.pmove.type = PM_NOCLIP;
+        else if ( ent->moveType == MOVETYPE_SPECTATOR )
             client->playerState.pmove.type = PM_SPECTATOR;
-        else if (ent->s.modelindex != 255)
+        else if ( ent->s.modelindex != 255 )
             client->playerState.pmove.type = PM_GIB;
-        else if (ent->deadFlag)
+        else if ( ent->deadFlag )
             client->playerState.pmove.type = PM_DEAD;
         else
             client->playerState.pmove.type = PM_NORMAL;
@@ -1418,7 +1420,7 @@ void ClientThink(entity_t *ent, usercmd_t *ucmd)
 
         gi.LinkEntity(ent);
 
-        if (ent->moveType != MOVETYPE_NOCLIP)
+        if (ent->moveType != MOVETYPE_NOCLIP && ent->moveType != MOVETYPE_SPECTATOR)
             UTIL_TouchTriggers(ent);
 
         // touch other objects

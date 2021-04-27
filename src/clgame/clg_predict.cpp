@@ -309,7 +309,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     //    }
     //}
 
-    if (pm.state.type != PM_SPECTATOR) {
+    if (pm.state.type != PM_SPECTATOR || pm.state.type != PM_NOCLIP) {
         oldz = cl->predicted_origins[cl->predicted_step_frame & CMD_MASK][2];
         step = pm.state.origin[2] - oldz;
 
