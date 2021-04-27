@@ -176,7 +176,7 @@ SET(SRC_CLIENT
 	client/crc.cpp
 	client/demo.cpp
 	client/download.cpp
-	client/effects.cpp
+	#client/effects.cpp
 	client/entities.cpp
 	#client/gtv.cpp
 	client/input.cpp

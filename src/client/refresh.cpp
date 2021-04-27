@@ -37,6 +37,10 @@ cvar_t      *_vid_fullscreen;
 cvar_t      *vid_display;
 cvar_t      *vid_displaylist;
 
+// Admer: Moved over from the now-gone effects.cpp
+// Original comment: Leftover from the q2rtx code, this variable maintains the sound effect parsing parameters...
+snd_params_t    snd;
+
 // used in gl and vkpt renderers
 extern int registration_sequence; // CPP: Extern
 
@@ -358,9 +362,6 @@ void CL_InitRefresh(void)
     vid_modelist->changed = vid_modelist_changed;
 
     mode_changed = 0;
-
-    // This registers the PT cvars, so we'll do this before InitMedia.
-    FX_Init();
 
     // N&C: Initialize these first, we fetch certain cvars in the CG Module.
     V_Init();
