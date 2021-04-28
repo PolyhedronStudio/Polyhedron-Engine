@@ -137,7 +137,7 @@ typedef enum {
 typedef enum {
     clc_bad,
     clc_nop,
-    clc_move,               // [usercmd_t]
+    clc_move,               // [cl_cmd_t]
     clc_userinfo,           // [userinfo string]
     clc_stringcmd,          // [string] message
 

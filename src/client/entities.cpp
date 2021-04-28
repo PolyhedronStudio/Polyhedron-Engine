@@ -193,8 +193,8 @@ static void set_active_state(void)
         CL_FirstDemoFrame();
     } else {
         // set initial cl.predicted_origin and cl.predicted_angles
-        cl.predicted.origin = cl.frame.playerState.pmove.origin;
-        cl.predicted.velocity = cl.frame.playerState.pmove.velocity;
+        cl.predictedState.viewOrigin = cl.frame.playerState.pmove.origin;
+        cl.predictedState.velocity = cl.frame.playerState.pmove.velocity;
 
         if (cl.frame.playerState.pmove.type < PM_DEAD) {
             // enhanced servers don't send viewAngles
@@ -202,7 +202,7 @@ static void set_active_state(void)
             CL_GM_PredictAngles();
         } else {
             // just use what server provided
-            cl.predicted.viewAngles = cl.frame.playerState.viewAngles;
+            cl.predictedState.viewAngles = cl.frame.playerState.viewAngles;
         }
     }
 
@@ -323,7 +323,7 @@ void CL_DeltaFrame(void)
     if (cls.demo.playback) {
         // this delta has nothing to do with local viewAngles,
         // clear it to avoid interfering with demo freelook hack
-        VectorClear(cl.frame.playerState.pmove.delta_angles);
+        //VectorClear(cl.frame.playerState.pmove.deltaAngles);
     }
 
     if (cl.oldframe.playerState.pmove.type != cl.frame.playerState.pmove.type) {

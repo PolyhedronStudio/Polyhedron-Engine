@@ -18,47 +18,41 @@
 //================
 //
 void CLG_CheckPredictionError(int frame, unsigned int cmd) {
-    vec3_t delta;
-    float len;
+    //vec3_t delta;
+    //float len;
 
-    // First frame.
-    if (cl->frame.number == 0) {
-        cl->predicted.origin = cl->frame.playerState.pmove.origin;
-        cl->predicted.velocity = cl->frame.playerState.pmove.velocity;
-        cl->predicted.viewAngles = cl->frame.playerState.viewAngles;
-        cl->predicted.viewOffset = cl->frame.playerState.viewoffset;
+    //// First frame.
+    //if (cl->frame.number == 0) {
+    //    cl->predictedState.viewOrigin = cl->frame.playerState.pmove.origin;
+    //    cl->predictedState.viewOffset = cl->frame.playerState.viewOffset;
+    //    cl->predictedState.viewAngles = cl->frame.playerState.viewAngles;
+    //    cl->predictedState.stepOffset = 0.f;
 
-        cl->predicted.stepOffset = 0.f;
-        cl->predicted.error = vec3_zero();
-    }
+    //    cl->predictedState.error = vec3_zero();
+    //}
 
-    // Compare what the server returned with what we had predicted it to be
-    cl->predicted.error = cl->frame.playerState.pmove.origin - cl->predicted_origins[cmd & CMD_MASK];
+    //// Compare what the server returned with what we had predicted it to be
+    //cl->predictedState.error = cl->frame.playerState.pmove.origin - cl->predicted_origins[cmd & CMD_MASK];
 
-    // Length is 
-    len = vec3_length(cl->predicted.error);
-    if (len > .1f) {
-        if (len > 2400.f * (1.0f / BASE_FRAMERATE)) {
-            Com_DPrint("MAX_DELTA_ORIGIN: %s\n", Vec3ToString(cl->predicted.error));
+    //// Length is 
+    //len = vec3_length(cl->predictedState.error);
+    //if (len > .1f) {
+    //    if (len > 2400.f * (1.0f / BASE_FRAMERATE)) {
+    //        Com_DPrint("MAX_DELTA_ORIGIN: %s\n", Vec3ToString(cl->predictedState.error));
 
-            cl->predicted.origin     = cl->frame.playerState.pmove.origin;
-            cl->predicted.velocity   = cl->frame.playerState.pmove.velocity;
-            cl->predicted.viewAngles = cl->frame.playerState.viewAngles;
-            cl->predicted.viewOffset = cl->frame.playerState.viewoffset;
-            
-            cl->predicted.stepOffset    = 0.f;
-            cl->predicted.error         = vec3_zero();
-        }
-        else {
-            Com_DPrint("CLG_CheckPredictionError: %s len:%f\n", Vec3ToString(cl->predicted.error), len);
-        }
-    }
+    //        cl->predictedState.viewOrigin = cl->frame.playerState.pmove.origin;
+    //        cl->predictedState.viewOffset = cl->frame.playerState.viewOffset;
+    //        cl->predictedState.viewAngles = cl->frame.playerState.viewAngles;
+    //        cl->predictedState.stepOffset = 0.f;
 
-    // Don't predict steps against server returned data
-    if (cl->predicted.step_frame <= cmd)
-        cl->predicted.step_frame = cmd + 1;
+    //        cl->predictedState.error         = vec3_zero();
+    //    }
+    //    else {
+    //        Com_DPrint("CLG_CheckPredictionError: %s len:%f\n", Vec3ToString(cl->predictedState.error), len);
+    //    }
+    //}
 
-    cl->predicted_origins[cmd & CMD_MASK] = cl->frame.playerState.pmove.origin;
+    //cl->predicted_origins[cmd & CMD_MASK] = cl->frame.playerState.pmove.origin;
 }
 
 //
@@ -69,9 +63,9 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
 //================
 //
 void CLG_PredictAngles(void) {
-    cl->predicted.viewAngles[0] = cl->viewAngles[0] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[0]);
-    cl->predicted.viewAngles[1] = cl->viewAngles[1] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[1]);
-    cl->predicted.viewAngles[2] = cl->viewAngles[2] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[2]);
+    cl->predictedState.viewAngles[0] = cl->viewAngles[0] + cl->frame.playerState.pmove.deltaAngles[0];
+    cl->predictedState.viewAngles[1] = cl->viewAngles[1] + cl->frame.playerState.pmove.deltaAngles[1];
+    cl->predictedState.viewAngles[2] = cl->viewAngles[2] + cl->frame.playerState.pmove.deltaAngles[2];
 }
 
 //
@@ -217,7 +211,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
     pm.PointContents = CLG_PointContents;
     pm.state = cl->frame.playerState.pmove;
 #if USE_SMOOTH_DELTA_ANGLES
-    VectorCopy(cl->delta_angles, pm.state.delta_angles);
+    VectorCopy(cl->deltaAngles, pm.state.deltaAngles);
 #endif
 
     // run frames
@@ -233,11 +227,11 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
     }
 
     // run pending cmd
-    if (cl->cmd.msec) {
+    if (cl->cmd.cmd.msec) {
         pm.cmd = cl->cmd;
-        pm.cmd.forwardmove = cl->localmove[0];
-        pm.cmd.sidemove = cl->localmove[1];
-        pm.cmd.upmove = cl->localmove[2];
+        pm.cmd.cmd.forwardmove = cl->localmove[0];
+        pm.cmd.cmd.rightmove = cl->localmove[1];
+        pm.cmd.cmd.upmove = cl->localmove[2];
         PMove(&pm, &clg.pmoveParams);
         frameIndex = currentFrame;
 
@@ -248,39 +242,10 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
         frameIndex = currentFrame - 1;
     }
 
-    // This only interpolates up step...
-    //if (pm.state.type != PM_SPECTATOR && (pm.state.flags & PMF_ON_GROUND)) {
-    //    oldz = cl->predicted_origins[cl->predicted_step_frame & CMD_MASK][2];
-    //    step = pm.state.origin[2] - oldz;
-
-    //    if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
-    //        cl->predicted_step = step;
-    //        cl->predicted_step_time = clgi.GetRealTime();
-    //        cl->predicted_step_frame = frame + 1;    // don't double step
-    //    }
-    //}
-
-    //if (pm.state.type != PM_SPECTATOR || pm.state.type != PM_NOCLIP) {
-    //    oldz = cl->predicted_origins[cl->predicted.step_frame & CMD_MASK][2];
-    //    step = pm.state.origin[2] - oldz;
-
-    //    //if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
-
-    //    //    //CLG_TraverseEntityStep(&stepx, clgi.GetRealTime(), step);
-    //    //    cl->predicted_step = step;
-    //    //    cl->predicted_step_frame = frame + 1;    // don't double step
-    //    //    stepx.time = clgi.GetRealTime();
-    //    //}
-    //}
-    //
-    //if (cl->predicted.step_frame < frame) {
-    //    cl->predicted.step_frame = frame;
-    //}
-
     // copy results out for rendering
-    cl->predicted.origin      = pm.state.origin;
-    cl->predicted.velocity    = pm.state.velocity;
-    cl->predicted.stepOffset = pm.state.stepOffset;
-    cl->predicted.viewOffset  = pm.state.viewOffset;
-    cl->predicted.viewAngles  = pm.viewAngles;
+    cl->predictedState.viewOrigin  = pm.state.origin;
+    cl->predictedState.velocity    = pm.state.velocity;
+    cl->predictedState.stepOffset  = pm.state.stepOffset;
+    cl->predictedState.viewOffset  = pm.state.viewOffset;
+    cl->predictedState.viewAngles  = pm.viewAngles;
 }

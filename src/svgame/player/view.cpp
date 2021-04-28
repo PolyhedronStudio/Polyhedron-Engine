@@ -293,7 +293,7 @@ static void SV_CalculateViewOffset(entity_t *ent)
     // Clamp the new view offsets, and finally assign them to the player state.
     // Clamping ensures that they never exceed the non visible, but physically 
     // there, player bounding box.
-    ent->client->playerState.viewoffset = vec3_clamp(newViewOffset,
+    ent->client->playerState.viewOffset = vec3_clamp(newViewOffset,
         //{ -14, -14, -22 },
         //{ 14,  14, 30 }
         ent->mins,
@@ -386,7 +386,7 @@ static void SV_CalculateBlend(entity_t *ent)
                                    ent->client->playerState.blend[2] = ent->client->playerState.blend[3] = 0;
 
     // add for contents
-    VectorAdd(ent->s.origin, ent->client->playerState.viewoffset, vieworg);
+    VectorAdd(ent->s.origin, ent->client->playerState.viewOffset, vieworg);
     contents = gi.PointContents(vieworg);
 
 	if (contents & (CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA))
@@ -870,7 +870,7 @@ void ClientEndServerFrame(entity_t *ent)
     SV_CalculateGunOffset(ent);
 
     // Determine the full screen color blend
-    // must be after viewoffset, so eye contents can be
+    // must be after viewOffset, so eye contents can be
     // accurately determined
     // FIXME: with client prediction, the contents
     // should be determined by the client

@@ -411,7 +411,7 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
     VectorCopy(pusher->s.angles, pushed_p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
     if (pusher->client)
-        pushed_p->deltayaw = pusher->client->playerState.pmove.delta_angles[vec3_t::Yaw];
+        pushed_p->deltayaw = pusher->client->playerState.pmove.deltaAngles[vec3_t::Yaw];
 #endif
     pushed_p++;
 
@@ -458,7 +458,7 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
             VectorCopy(check->s.angles, pushed_p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
             if (check->client)
-                pushed_p->deltayaw = check->client->playerState.pmove.delta_angles[vec3_t::Yaw];
+                pushed_p->deltayaw = check->client->playerState.pmove.deltaAngles[vec3_t::Yaw];
 #endif
             pushed_p++;
 
@@ -468,7 +468,7 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
             if (check->client) {
                 // FIXME: doesn't rotate monsters?
                 // FIXME: skuller: needs client side interpolation
-                check->client->playerState.pmove.delta_angles[vec3_t::Yaw] += ANGLE2SHORT(amove[vec3_t::Yaw]);
+                check->client->playerState.pmove.deltaAngles[vec3_t::Yaw] += ANGLE2SHORT(amove[vec3_t::Yaw]);
             }
 #endif
 
@@ -514,7 +514,7 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
             VectorCopy(p->angles, p->ent->s.angles);
 #if USE_SMOOTH_DELTA_ANGLES
             if (p->ent->client) {
-                p->ent->client->playerState.pmove.delta_angles[vec3_t::Yaw] = p->deltayaw;
+                p->ent->client->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltayaw;
             }
 #endif
             gi.LinkEntity(p->ent);

@@ -39,7 +39,7 @@ byte        msg_read_buffer[MAX_MSGLEN];
 
 const entity_packed_t   nullEntityState;
 const player_state_t    nullPlayerState;
-const usercmd_t         nullUserCmd;
+const cl_cmd_t         nullUserCmd;
 
 /*
 =============
@@ -231,7 +231,7 @@ void MSG_WriteAngle(float f)
 // 
 //===============
 //
-int MSG_WriteDeltaUsercmd(const usercmd_t* from, const usercmd_t* cmd)
+int MSG_WriteDeltaUsercmd(const cl_cmd_t* from, const cl_cmd_t* cmd)
 {
     // Send a null message in case we had none.
     if (!from) {
@@ -244,48 +244,48 @@ int MSG_WriteDeltaUsercmd(const usercmd_t* from, const usercmd_t* cmd)
     //
     int32_t bits = 0;
 
-    if (cmd->angles[0] != from->angles[0])
+    if (cmd->cmd.angles[0] != from->cmd.angles[0])
         bits |= CM_ANGLE1;
-    if (cmd->angles[1] != from->angles[1])
+    if (cmd->cmd.angles[1] != from->cmd.angles[1])
         bits |= CM_ANGLE2;
-    if (cmd->angles[2] != from->angles[2])
+    if (cmd->cmd.angles[2] != from->cmd.angles[2])
         bits |= CM_ANGLE3;
-    if (cmd->forwardmove != from->forwardmove)
+    if (cmd->cmd.forwardmove != from->cmd.forwardmove)
         bits |= CM_FORWARD;
-    if (cmd->sidemove != from->sidemove)
+    if (cmd->cmd.rightmove != from->cmd.rightmove)
         bits |= CM_SIDE;
-    if (cmd->upmove != from->upmove)
+    if (cmd->cmd.upmove != from->cmd.upmove)
         bits |= CM_UP;
-    if (cmd->buttons != from->buttons)
+    if (cmd->cmd.buttons != from->cmd.buttons)
         bits |= CM_BUTTONS;
-    if (cmd->impulse != from->impulse)
+    if (cmd->cmd.impulse != from->cmd.impulse)
         bits |= CM_IMPULSE;
 
     // Write out the changed bits.
     MSG_WriteByte(bits);
 
     if (bits & CM_ANGLE1)
-        MSG_WriteShort(cmd->angles[0]);
+        MSG_WriteShort(cmd->cmd.angles[0]);
     if (bits & CM_ANGLE2)
-        MSG_WriteShort(cmd->angles[1]);
+        MSG_WriteShort(cmd->cmd.angles[1]);
     if (bits & CM_ANGLE3)
-        MSG_WriteShort(cmd->angles[2]);
+        MSG_WriteShort(cmd->cmd.angles[2]);
 
     if (bits & CM_FORWARD)
-        MSG_WriteShort(cmd->forwardmove);
+        MSG_WriteShort(cmd->cmd.forwardmove);
     if (bits & CM_SIDE)
-        MSG_WriteShort(cmd->sidemove);
+        MSG_WriteShort(cmd->cmd.rightmove);
     if (bits & CM_UP)
-        MSG_WriteShort(cmd->upmove);
+        MSG_WriteShort(cmd->cmd.upmove);
 
     if (bits & CM_BUTTONS)
-        MSG_WriteByte(cmd->buttons);
+        MSG_WriteByte(cmd->cmd.buttons);
 
     if (bits & CM_IMPULSE)
-        MSG_WriteByte(cmd->impulse);
+        MSG_WriteByte(cmd->cmd.impulse);
 
-    MSG_WriteByte(cmd->msec);
-    MSG_WriteByte(cmd->lightlevel);
+    MSG_WriteByte(cmd->cmd.msec);
+    MSG_WriteByte(cmd->cmd.lightlevel);
 
     // (Returned bits isn't used anywhere, but might as well keep it around.)
     return bits;
@@ -626,19 +626,19 @@ int MSG_WriteDeltaPlayerstate(const player_state_t* from, player_state_t* to, ms
     }
 
     if (!(flags & MSG_PS_IGNORE_DELTAANGLES)) {
-        if (to->pmove.delta_angles[0] != from->pmove.delta_angles[0] ||
-            to->pmove.delta_angles[1] != from->pmove.delta_angles[1] ||
-            to->pmove.delta_angles[2] != from->pmove.delta_angles[2])
+        if (!EqualEpsilonf(to->pmove.deltaAngles.x, from->pmove.deltaAngles.x) ||
+            !EqualEpsilonf(to->pmove.deltaAngles.y, from->pmove.deltaAngles.y) ||
+            !EqualEpsilonf(to->pmove.deltaAngles.z, from->pmove.deltaAngles.z))
             pflags |= PS_PM_DELTA_ANGLES;
     }
     else {
         // save previous state
-        VectorCopy(from->pmove.delta_angles, to->pmove.delta_angles);
+        VectorCopy(from->pmove.deltaAngles, to->pmove.deltaAngles);
     }
 
-    if (from->viewoffset[0] != to->viewoffset[0] ||
-        from->viewoffset[1] != to->viewoffset[1] ||
-        from->viewoffset[2] != to->viewoffset[2])
+    if (from->viewOffset[0] != to->viewOffset[0] ||
+        from->viewOffset[1] != to->viewOffset[1] ||
+        from->viewOffset[2] != to->viewOffset[2])
         pflags |= PS_VIEWOFFSET;
 
     if (!(flags & MSG_PS_IGNORE_VIEWANGLES)) {
@@ -734,18 +734,18 @@ int MSG_WriteDeltaPlayerstate(const player_state_t* from, player_state_t* to, ms
         MSG_WriteShort(to->pmove.gravity);
 
     if (pflags & PS_PM_DELTA_ANGLES) {
-        MSG_WriteShort(to->pmove.delta_angles[0]);
-        MSG_WriteShort(to->pmove.delta_angles[1]);
-        MSG_WriteShort(to->pmove.delta_angles[2]);
+        MSG_WriteFloat(to->pmove.deltaAngles.x);
+        MSG_WriteFloat(to->pmove.deltaAngles.y);
+        MSG_WriteFloat(to->pmove.deltaAngles.z);
     }
 
     //
     // write the rest of the player_state_t
     //
     if (pflags & PS_VIEWOFFSET) {
-        MSG_WriteFloat(to->viewoffset[0]);
-        MSG_WriteFloat(to->viewoffset[1]);
-        MSG_WriteFloat(to->viewoffset[2]);
+        MSG_WriteFloat(to->viewOffset[0]);
+        MSG_WriteFloat(to->viewOffset[1]);
+        MSG_WriteFloat(to->viewOffset[2]);
     }
 
     if (pflags & PS_VIEWANGLES) {
@@ -988,7 +988,7 @@ vec3_t MSG_ReadDirection(void)
     return bytedirs[b];
 }
 
-void MSG_ReadDeltaUsercmd(const usercmd_t* from, usercmd_t* to)
+void MSG_ReadDeltaUsercmd(const cl_cmd_t* from, cl_cmd_t* to)
 {
     int bits;
 
@@ -1003,32 +1003,32 @@ void MSG_ReadDeltaUsercmd(const usercmd_t* from, usercmd_t* to)
 
     // read current angles
     if (bits & CM_ANGLE1)
-        to->angles[0] = MSG_ReadShort();
+        to->cmd.angles[0] = MSG_ReadShort();
     if (bits & CM_ANGLE2)
-        to->angles[1] = MSG_ReadShort();
+        to->cmd.angles[1] = MSG_ReadShort();
     if (bits & CM_ANGLE3)
-        to->angles[2] = MSG_ReadShort();
+        to->cmd.angles[2] = MSG_ReadShort();
 
     // read movement
     if (bits & CM_FORWARD)
-        to->forwardmove = MSG_ReadShort();
+        to->cmd.forwardmove = MSG_ReadShort();
     if (bits & CM_SIDE)
-        to->sidemove = MSG_ReadShort();
+        to->cmd.rightmove = MSG_ReadShort();
     if (bits & CM_UP)
-        to->upmove = MSG_ReadShort();
+        to->cmd.upmove = MSG_ReadShort();
 
     // read buttons
     if (bits & CM_BUTTONS)
-        to->buttons = MSG_ReadByte();
+        to->cmd.buttons = MSG_ReadByte();
 
     if (bits & CM_IMPULSE)
-        to->impulse = MSG_ReadByte();
+        to->cmd.impulse = MSG_ReadByte();
 
     // read time to run command
-    to->msec = MSG_ReadByte();
+    to->cmd.msec = MSG_ReadByte();
 
     // read the light level
-    to->lightlevel = MSG_ReadByte();
+    to->cmd.lightlevel = MSG_ReadByte();
 }
 
 #if USE_CLIENT
@@ -1258,9 +1258,9 @@ void MSG_ParseDeltaPlayerstate(const player_state_t* from,
 
     // PM Delta Angles.
     if (flags & PS_PM_DELTA_ANGLES) {
-        to->pmove.delta_angles[0] = MSG_ReadShort();
-        to->pmove.delta_angles[1] = MSG_ReadShort();
-        to->pmove.delta_angles[2] = MSG_ReadShort();
+        to->pmove.deltaAngles.x = MSG_ReadFloat();
+        to->pmove.deltaAngles.y = MSG_ReadFloat();
+        to->pmove.deltaAngles.z = MSG_ReadFloat();
     }
 
     //
@@ -1268,9 +1268,9 @@ void MSG_ParseDeltaPlayerstate(const player_state_t* from,
     //
     // View Offset.
     if (flags & PS_VIEWOFFSET) {
-        to->viewoffset[0] = MSG_ReadFloat();
-        to->viewoffset[1] = MSG_ReadFloat();
-        to->viewoffset[2] = MSG_ReadFloat();
+        to->viewOffset[0] = MSG_ReadFloat();
+        to->viewOffset[1] = MSG_ReadFloat();
+        to->viewOffset[2] = MSG_ReadFloat();
     }
 
     // View Angles X Y.
@@ -1372,8 +1372,8 @@ void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
     SP(PM_TIME, "pmove.time");
     SP(PM_FLAGS, "pmove.flags");
     SP(PM_GRAVITY, "pmove.gravity");
-    SP(PM_DELTA_ANGLES, "pmove.delta_angles");
-    SP(VIEWOFFSET, "viewoffset");
+    SP(PM_DELTA_ANGLES, "pmove.deltaAngles");
+    SP(VIEWOFFSET, "viewOffset");
     SP(VIEWANGLES, "viewAngles[0,1]");
     SE(VIEWANGLE2, "viewAngles[2]");
     SP(KICKANGLES, "kickAngles");
@@ -1465,7 +1465,7 @@ void MSG_ShowDeltaPlayerstateBits_Packet(int flags)
 //    S(M_TYPE, "pmove.type");
 //    S(M_ORIGIN, "pmove.origin[0,1]");
 //    S(M_ORIGIN2, "pmove.origin[2]");
-//    S(VIEWOFFSET, "viewoffset");
+//    S(VIEWOFFSET, "viewOffset");
 //    S(VIEWANGLES, "viewAngles[0,1]");
 //    S(VIEWANGLE2, "viewAngles[2]");
 //    S(KICKANGLES, "kickAngles");

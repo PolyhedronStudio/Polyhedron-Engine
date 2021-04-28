@@ -512,11 +512,12 @@ typedef struct {
     uint16_t    flags;       // Ducked, jump_held, etc
     uint16_t    time;        // Each unit = 8 ms
     uint16_t    gravity;
-    int16_t     delta_angles[3];    // Add to command angles to get view direction
+    vec3_t      deltaAngles;    // Add to command angles to get view direction
     // Changed by spawns, rotating objects, and teleporters
 
     // View offsets. (Only Z is used atm, beware.)
     vec3_t viewOffset;
+    vec3_t viewAngles;
 
     // Step offset, used for stair interpolations.
     float stepOffset;
@@ -524,16 +525,30 @@ typedef struct {
 } pm_state_t;
 
 //-----------------
-// usercmd_t is sent to the server each client frame
+// pm_cmd_t is part of each client user cmd.
 //-----------------
-typedef struct usercmd_s {
-    byte    msec;
-    byte    buttons;
-    short   angles[3];
-    short   forwardmove, sidemove, upmove;
-    byte    impulse;        // remove?
-    byte    lightlevel;     // light level the player is standing on
-} usercmd_t;
+typedef struct {
+    uint8_t msec;   // Duration of the command, in milliseconds
+    vec3_t angles;  // The final view angles for this command
+    int16_t forwardmove, rightmove, upmove; // Directional intentions
+    uint8_t buttons;    // Bit mask of buttons down
+    uint8_t impulse;    // Impulse cmd.
+    uint8_t lightlevel; // Lightlevel.
+} pm_cmd_t;
+
+//-----------------
+// cl_cmd_t is sent to the server each client frame
+//-----------------
+typedef struct {
+    pm_cmd_t cmd;       // the movement command
+    uint32_t time;      // simulation time when the command was sent
+    uint32_t timeStamp; // system time when the command was sent
+    struct {
+        uint32_t time;  // The simulation time when prediction was run
+        vec3_t origin;  // The predicted origin for this command
+        vec3_t error;   // The prediction error for this command
+    } prediction;
+} cl_cmd_t;
 
 
 //
@@ -642,7 +657,7 @@ typedef struct {
     // These fields do not need to be communicated bit-precise
 
     vec3_t      viewAngles;     // For fixed views
-    vec3_t      viewoffset;     // Add to pmovestate->origin
+    vec3_t      viewOffset;     // Add to pmovestate->origin
     vec3_t      kickAngles;    // Add to view direction to get render angles
                                 // Set by weapon kicks, pain effects, etc
 

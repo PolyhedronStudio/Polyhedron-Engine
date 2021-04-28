@@ -2057,10 +2057,10 @@ static size_t CL_Ups_m(char *buffer, size_t size)
 
     if (!cls.demo.playback && cl.frame.clientNum == cl.clientNum &&
         cl_predict->integer) {
-        vel = cl.predicted.velocity;
+        vel = cl.predictedState.velocity;
     } else {
         // N&C: FF Precision.
-        vel = cl.predicted.velocity;
+        VectorCopy(cl.predictedState.velocity, vel);
        // VectorScale(cl.frame.playerState.pmove.velocity, 0.125f, vel);
     }
 

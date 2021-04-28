@@ -95,7 +95,7 @@ constexpr int32_t PM_MAX_TOUCH_ENTS = 32;
 //-------------------
 typedef struct {
     // Movement command (in)
-    usercmd_t cmd;  
+    cl_cmd_t cmd;  
 
     // Movement state (in/out)
     pm_state_t state;

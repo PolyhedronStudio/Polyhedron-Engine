@@ -1031,11 +1031,11 @@ static int         userinfoUpdateCount;
 SV_ClientThink
 ==================
 */
-static inline void SV_ClientThink(usercmd_t *cmd)
+static inline void SV_ClientThink(cl_cmd_t *cmd)
 {
-    usercmd_t *old = &sv_client->lastcmd;
+    cl_cmd_t *old = &sv_client->lastcmd;
 
-    sv_client->command_msec -= cmd->msec;
+    sv_client->command_msec -= cmd->cmd.msec;
     sv_client->num_moves++;
 
     if (sv_client->command_msec < 0 && sv_enforcetime->integer) {
@@ -1044,10 +1044,10 @@ static inline void SV_ClientThink(usercmd_t *cmd)
         return;
     }
 
-    if (cmd->buttons != old->buttons
-        || cmd->forwardmove != old->forwardmove
-        || cmd->sidemove != old->sidemove
-        || cmd->upmove != old->upmove) {
+    if (cmd->cmd.buttons != old->cmd.buttons
+        || cmd->cmd.forwardmove != old->cmd.forwardmove
+        || cmd->cmd.rightmove != old->cmd.rightmove
+        || cmd->cmd.upmove != old->cmd.upmove) {
         // don't timeout
         sv_client->lastactivity = svs.realtime;
     }
@@ -1090,7 +1090,7 @@ SV_ExecuteMove
 */
 static void SV_ExecuteMove(void)
 {
-    usercmd_t   oldest, oldcmd, newcmd;
+    cl_cmd_t   oldest, oldcmd, newcmd;
     int         lastframe;
     int         net_drop;
 

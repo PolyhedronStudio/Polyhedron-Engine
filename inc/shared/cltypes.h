@@ -265,6 +265,26 @@ typedef struct client_shared_s {
 } client_shared_t;
 
 //
+// Contains the predicted state (view origin, offset, angles, etc) of the client.
+//
+struct cl_predicted_state_t {
+    // These are the actual predicted results that should align with the server's.
+    vec3_t viewOrigin;  // Predicted view origin.
+    vec3_t viewOffset;  // Predicted view offset.
+    vec3_t viewAngles;  // Predicted view angles.
+    float stepOffset;   // Predicted stepping offset. (Up or down)
+
+    // Predicted velocity.
+    vec3_t velocity;
+
+    // Ground entity pointer of the predicted frame.
+    struct g_entity_s* groundEntityPtr;
+
+    // Prediction error that is interpolated over the server frame.
+    vec3_t error;
+};
+
+//
 // The client structure is cleared at each level load, and is exposed to
 // * the client game module to provide access to media and other client state.
 //
@@ -276,28 +296,17 @@ typedef struct client_state_s {
     unsigned    lastTransmitCmdNumberReal;
     qboolean    sendPacketNow;
 
-    usercmd_t    cmd;
-    usercmd_t    cmds[CMD_BACKUP];    // each mesage will send several old cmds
+    cl_cmd_t    cmd;
+    cl_cmd_t    cmds[CMD_BACKUP];    // each mesage will send several old cmds
     unsigned     cmdNumber;
     vec3_t       predicted_origins[CMD_BACKUP];    // for debug comparing against server
     client_history_t    history[CMD_BACKUP];
     int         initialSeq;
 
-    struct {
-        float stepOffset;
-        uint32_t step_time;
-        uint32_t step_frame;
-
-        // These are the actual predicted results that should align with the server's.
-        vec3_t origin;
-        vec3_t velocity;
-
-        vec3_t viewAngles;
-        vec3_t viewOffset;
-
-        // Prediction error adjustment.
-        vec3_t error;
-    } predicted;
+    //
+    // Predicated state.
+    //
+    cl_predicted_state_t predictedState;
 
     // rebuilt each valid frame
     cl_entity_t       *solidEntities[MAX_PACKET_ENTITIES];
@@ -334,10 +343,6 @@ typedef struct client_state_s {
     // accumulated mouse forward/side movement, added to both
     // localmove and pending cmd, cleared each time cmd is finalized
     vec2_t      mousemove;
-
-#if USE_SMOOTH_DELTA_ANGLES
-    short       delta_angles[3]; // interpolated
-#endif
 
     int         time;           // this is the time value that the client
                                 // is rendering at.  always <= cl.servertime

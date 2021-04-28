@@ -970,7 +970,7 @@ void PutClientInServer(entity_t *ent)
 
     // set the delta angle
     for (i = 0 ; i < 3 ; i++) {
-        client->playerState.pmove.delta_angles[i] = ANGLE2SHORT(spawn_angles[i] - client->resp.cmd_angles[i]);
+        client->playerState.pmove.deltaAngles[i] = ANGLE2SHORT(spawn_angles[i] - client->resp.cmd_angles[i]);
     }
 
     ent->s.angles[vec3_t::Pitch] = 0;
@@ -1066,7 +1066,7 @@ void ClientBegin(entity_t *ent)
         // state when the game is saved, so we need to compensate
         // with deltaangles
         for (i = 0 ; i < 3 ; i++)
-            ent->client->playerState.pmove.delta_angles[i] = ANGLE2SHORT(ent->client->playerState.viewAngles[i]);
+            ent->client->playerState.pmove.deltaAngles[i] = ANGLE2SHORT(ent->client->playerState.viewAngles[i]);
     } else {
         // a spawn point will completely reinitialize the entity
         // except for the persistant data that was initialized at
@@ -1303,7 +1303,7 @@ void PrintPMove(pm_move_t *pm)
 
     c1 = CheckBlock(&pm->state, sizeof(pm->state));
     c2 = CheckBlock(&pm->cmd, sizeof(pm->cmd));
-    Com_Printf("sv %3i:%i %i\n", pm->cmd.impulse, c1, c2);
+    Com_Printf("sv %3i:%i %i\n", pm->cmd.cmd.impulse, c1, c2);
 }
 
 /*
@@ -1314,7 +1314,7 @@ This will be called once for each client frame, which will
 usually be a couple times for each server frame.
 ==============
 */
-void ClientThink(entity_t *ent, usercmd_t *ucmd)
+void ClientThink(entity_t *ent, cl_cmd_t *ucmd)
 {
     gclient_t   *client;
     entity_t *other;
@@ -1328,7 +1328,7 @@ void ClientThink(entity_t *ent, usercmd_t *ucmd)
         client->playerState.pmove.type = PM_FREEZE;
         // can exit intermission after five seconds
         if (level.time > level.intermissiontime + 5.0
-            && (ucmd->buttons & BUTTON_ANY))
+            && (ucmd->cmd.buttons & BUTTON_ANY))
             level.exitintermission = true;
         return;
     }
@@ -1337,9 +1337,9 @@ void ClientThink(entity_t *ent, usercmd_t *ucmd)
 
     if (ent->client->chase_target) {
 
-        client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
-        client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
-        client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
+        client->resp.cmd_angles[0] = ucmd->cmd.angles[0];
+        client->resp.cmd_angles[1] = ucmd->cmd.angles[1];
+        client->resp.cmd_angles[2] = ucmd->cmd.angles[2];
 
     } else {
 
@@ -1392,11 +1392,11 @@ void ClientThink(entity_t *ent, usercmd_t *ucmd)
         ent->mins = pm.mins;
         ent->maxs = pm.maxs;
 
-        client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
-        client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
-        client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
+        client->resp.cmd_angles[0] = ucmd->cmd.angles[0];
+        client->resp.cmd_angles[1] = ucmd->cmd.angles[1];
+        client->resp.cmd_angles[2] = ucmd->cmd.angles[2];
 
-        if (ent->groundEntityPtr && !pm.groundEntityPtr && (pm.cmd.upmove >= 10) && (pm.waterLevel == 0)) {
+        if (ent->groundEntityPtr && !pm.groundEntityPtr && (pm.cmd.cmd.upmove >= 10) && (pm.waterLevel == 0)) {
             gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("*jump1.wav"), 1, ATTN_NORM, 0);
             PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
         }
@@ -1438,12 +1438,12 @@ void ClientThink(entity_t *ent, usercmd_t *ucmd)
     }
 
     client->oldbuttons = client->buttons;
-    client->buttons = ucmd->buttons;
+    client->buttons = ucmd->cmd.buttons;
     client->latched_buttons |= client->buttons & ~client->oldbuttons;
 
     // save light level the player is standing on for
     // monster sighting AI
-    ent->lightLevel = ucmd->lightlevel;
+    ent->lightLevel = ucmd->cmd.lightlevel;
 
     // fire weapon from final position if needed
     if (client->latched_buttons & BUTTON_ATTACK) {
@@ -1464,7 +1464,7 @@ void ClientThink(entity_t *ent, usercmd_t *ucmd)
     }
 
     if (client->resp.spectator) {
-        if (ucmd->upmove >= 10) {
+        if (ucmd->cmd.upmove >= 10) {
             if (!(client->playerState.pmove.flags & PMF_JUMP_HELD)) {
                 client->playerState.pmove.flags |= PMF_JUMP_HELD;
                 if (client->chase_target)

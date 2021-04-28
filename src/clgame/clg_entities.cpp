@@ -666,22 +666,21 @@ void CLG_CalcViewValues(void)
     currentPlayerState = &cl->frame.playerState;
     previousPlayerState = &cl->oldframe.playerState;
 
-    lerpFraction = cl->lerpfrac;
-
     //
     // Origin
     //
     if (!clgi.IsDemoPlayback() 
         && cl_predict->integer 
         && !(currentPlayerState->pmove.flags & PMF_NO_PREDICTION)) {
-
+        // TODO: ENABLE THE VIEWOFFSET BELOW, BUT FIRST MAKE SURE WE DO PROPER PREDICTIONS FOR ERRORS TOO.
         // Add view offset to view org.
-        cl->refdef.vieworg = cl->predicted.origin;// +cl->predicted.viewOffset;
+        cl_predicted_state_t* predictedState = &cl->predictedState;
+        cl->refdef.vieworg = predictedState->viewOrigin; //+ predictedState->viewOffset;
 
-        const vec3_t error = vec3_scale(cl->predicted.error, 1.f - lerpFraction);
-        cl->refdef.vieworg = cl->refdef.vieworg + error;
+        const vec3_t error = vec3_scale(predictedState->error, 1.f - lerpFraction);
+        cl->refdef.vieworg += error;
 
-        cl->refdef.vieworg.z -= cl->predicted.stepOffset;
+        cl->refdef.vieworg.z -= predictedState->stepOffset;
     }
     else {
         // just use interpolated values
@@ -693,10 +692,10 @@ void CLG_CalcViewValues(void)
         //cl->refdef.vieworg[2] = previousPlayerState->pmove.origin[2] +
         //    lerpFraction * (currentPlayerState->pmove.origin[2] - previousPlayerState->pmove.origin[2]);
         // Adjust origins to keep stepOffset in mind.
-        vec3_t oldOrigin = previousPlayerState->pmove.origin += previousPlayerState->viewoffset;
-        oldOrigin.z -= cl->predicted.stepOffset;
-        vec3_t newOrigin = currentPlayerState->pmove.origin += currentPlayerState->viewoffset;
-        newOrigin.z -= cl->predicted.stepOffset;
+        vec3_t oldOrigin = previousPlayerState->pmove.origin += previousPlayerState->viewOffset;
+        oldOrigin.z -= cl->predictedState.stepOffset;
+        vec3_t newOrigin = currentPlayerState->pmove.origin += currentPlayerState->viewOffset;
+        newOrigin.z -= cl->predictedState.stepOffset;
 
         // Calculate final origin.
         cl->refdef.vieworg = vec3_mix(oldOrigin, newOrigin, lerpFraction);
@@ -711,7 +710,7 @@ void CLG_CalcViewValues(void)
     }
     else if (currentPlayerState->pmove.type < PM_DEAD) {
         // use predicted values
-        cl->refdef.viewAngles = cl->predicted.viewAngles;
+        cl->refdef.viewAngles = cl->predictedState.viewAngles;
     }
     else {
         // just use interpolated values
@@ -719,9 +718,9 @@ void CLG_CalcViewValues(void)
     }
 
 #if USE_SMOOTH_DELTA_ANGLES
-    cl->delta_angles[0] = LerpShort(ops->pmove.delta_angles[0], ps->pmove.delta_angles[0], lerpFraction);
-    cl->delta_angles[1] = LerpShort(ops->pmove.delta_angles[1], ps->pmove.delta_angles[1], lerpFraction);
-    cl->delta_angles[2] = LerpShort(ops->pmove.delta_angles[2], ps->pmove.delta_angles[2], lerpFraction);
+    cl->deltaAngles[0] = LerpShort(ops->pmove.deltaAngles[0], ps->pmove.deltaAngles[0], lerpFraction);
+    cl->deltaAngles[1] = LerpShort(ops->pmove.deltaAngles[1], ps->pmove.deltaAngles[1], lerpFraction);
+    cl->deltaAngles[2] = LerpShort(ops->pmove.deltaAngles[2], ps->pmove.deltaAngles[2], lerpFraction);
 #endif
 
     // don't interpolate blend color
@@ -731,7 +730,7 @@ void CLG_CalcViewValues(void)
     cl->fov_x = lerp_client_fov(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);
     cl->fov_y = CLG_CalculateFOV(cl->fov_x, 4, 3);
 
-    LerpVector(previousPlayerState->viewoffset, currentPlayerState->viewoffset, lerpFraction, viewOffset);
+    //LerpVector(previousPlayerState->viewOffset, currentPlayerState->viewOffset, lerpFraction, viewOffset);
 
     AngleVectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
 
@@ -745,7 +744,7 @@ void CLG_CalcViewValues(void)
     cl->playerEntityAngles[vec3_t::Pitch] = cl->playerEntityAngles[vec3_t::Pitch] / 3;
 
     // Add view offset.
-    cl->refdef.vieworg += viewOffset;
+    //cl->refdef.vieworg += viewOffset;
 
     // Update the client's listener origin values.
     clgi.UpdateListenerOrigin();

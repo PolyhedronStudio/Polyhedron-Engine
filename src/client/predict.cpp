@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client.h"
 #include "client/gamemodule.h"
 
+#define MAX_DELTA_ORIGIN (2400.f * (1.0f / BASE_FRAMERATE))
+
 /*
 ===================
 CL_CheckPredictionError
@@ -26,29 +28,67 @@ CL_CheckPredictionError
 */
 void CL_CheckPredictionError(void)
 {
-    int         frame;
-    //int         delta[3];
-    unsigned    cmd;
-    //int         len;
+    const pm_state_t* in = &cl.frame.playerState.pmove;
+    cl_predicted_state_t* out = &cl.predictedState;
 
-    if (!cls.netchan) {
+    // Calculate the last cl_cmd_t we sent that the server has processed
+    cl_cmd_t* cmd = &cl.cmds[cls.netchan->incomingAcknowledged & CMD_MASK];
+
+    // if prediction was not run (just spawned), don't sweat it
+    if (cmd->prediction.time == 0) {
+
+        out->viewOrigin = in->origin;
+        out->viewOffset = in->viewOffset;
+        out->viewAngles = in->viewAngles;
+        out->stepOffset = 0.f;
+
+        out->error = vec3_zero();
         return;
     }
 
-    if (sv_paused->integer) {
-        cl.predicted.error = vec3_zero();
-        return;
+    // Subtract what the server returned from our predicted origin for that frame
+    out->error = cmd->prediction.error = (cmd->prediction.origin - in->origin);
+
+    // If the error is too large, it was likely a teleport or respawn, so ignore it
+    const float len = vec3_length(out->error);
+    if (len > .1f) {
+        if (len > MAX_DELTA_ORIGIN) {
+            Com_DPrintf("MAX_DELTA_ORIGIN: %s", Vec3ToString(out->error));
+
+            out->viewOrigin = in->origin;
+            out->viewOffset = in->viewOffset;
+            out->viewAngles = in->viewAngles;
+            out->stepOffset = 0.f;
+
+            out->error = vec3_zero();
+        }
+        else {
+            Com_DPrintf("%s\n", Vec3ToString(out->error));
+        }
     }
+    //int         frame;
+    ////int         delta[3];
+    //unsigned    cmd;
+    ////int         len;
 
-    if (!cl_predict->integer || (cl.frame.playerState.pmove.flags & PMF_NO_PREDICTION))
-        return;
+    //if (!cls.netchan) {
+    //    return;
+    //}
 
-    // calculate the last usercmd_t we sent that the server has processed
-    frame = cls.netchan->incomingAcknowledged & CMD_MASK;
-    cmd = cl.history[frame].cmdNumber;
+    //if (sv_paused->integer) {
+    //    cl.predictedState.error = vec3_zero();
+    //    return;
+    //}
 
-    // N&C: Call into the CG Module to let it handle this.
-    CL_GM_CheckPredictionError(frame, cmd);
+    //if (!cl_predict->integer || (cl.frame.playerState.pmove.flags & PMF_NO_PREDICTION))
+    //    return;
+
+    //// calculate the last cl_cmd_t we sent that the server has processed
+    //frame = cls.netchan->incomingAcknowledged & CMD_MASK;
+    //cmd = cl.history[frame].cmdNumber;
+
+    //// N&C: Call into the CG Module to let it handle this.
+    //CL_GM_CheckPredictionError(frame, cmd);
 }
 
 /*
@@ -147,9 +187,9 @@ Sets cl.predicted_origin and cl.predicted_angles
 */
 void CL_PredictAngles(void)
 {
-    //cl.predicted_angles[0] = cl.viewAngles[0] + SHORT2ANGLE(cl.frame.playerState.pmove.delta_angles[0]);
-    //cl.predicted_angles[1] = cl.viewAngles[1] + SHORT2ANGLE(cl.frame.playerState.pmove.delta_angles[1]);
-    //cl.predicted_angles[2] = cl.viewAngles[2] + SHORT2ANGLE(cl.frame.playerState.pmove.delta_angles[2]);
+    //cl.predicted_angles[0] = cl.viewAngles[0] + SHORT2ANGLE(cl.frame.playerState.pmove.deltaAngles[0]);
+    //cl.predicted_angles[1] = cl.viewAngles[1] + SHORT2ANGLE(cl.frame.playerState.pmove.deltaAngles[1]);
+    //cl.predicted_angles[2] = cl.viewAngles[2] + SHORT2ANGLE(cl.frame.playerState.pmove.deltaAngles[2]);
 }
 
 void CL_PredictMovement(void)
@@ -184,7 +224,7 @@ void CL_PredictMovement(void)
         return;
     }
 
-    if (!cl.cmd.msec && currentFrameIndex == ack) {
+    if (!cl.cmd.cmd.msec && currentFrameIndex == ack) {
         SHOWMISS("%i: not moved\n", cl.frame.number);
         return;
     }

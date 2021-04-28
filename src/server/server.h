@@ -240,7 +240,7 @@ typedef struct client_s {
     unsigned        lastmessage;    // svs.realtime when packet was last received
     unsigned        lastactivity;   // svs.realtime when user activity was last seen
     int             lastframe;      // for delta compression
-    usercmd_t       lastcmd;        // for filling in big drops
+    cl_cmd_t       lastcmd;        // for filling in big drops
     int             command_msec;   // every seconds this is reset, if user
                                     // commands exhaust it, assume time cheating
     int             num_moves;      // reset every 10 seconds

@@ -205,11 +205,11 @@ static float CLG_KeyState(KeyBinding* key)
     }
 
     // special case for instant packet
-    if (!cl->cmd.msec) {
+    if (!cl->cmd.cmd.msec) {
         return (float)(key->state & BUTTON_STATE_HELD);
     }
 
-    val = (float)msec / cl->cmd.msec;
+    val = (float)msec / cl->cmd.cmd.msec;
 
     return Clampf(val, 0, 1);
 }
@@ -278,7 +278,7 @@ static void IN_Impulse(void)
 }
 static void IN_CenterView(void)
 {
-    cl->viewAngles.x = -SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[0]);
+    cl->viewAngles.x = -SHORT2ANGLE(cl->frame.playerState.pmove.deltaAngles[0]);
 }
 static void IN_MLookDown(void)
 {
@@ -468,7 +468,7 @@ static void CLG_ClampPitch(void)
 {
     float pitch;
 
-    pitch = SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[vec3_t::Pitch]);
+    pitch = SHORT2ANGLE(cl->frame.playerState.pmove.deltaAngles[vec3_t::Pitch]);
     if (pitch > 180)
         pitch -= 360;
 
@@ -585,7 +585,7 @@ void CLG_BuildFrameMoveCommand(int msec)
     }
 
     // Add to milliseconds of time to apply the move
-    cl->cmd.msec += msec;
+    cl->cmd.cmd.msec += msec;
 
     // Adjust viewAngles
     CLG_AdjustAngles(msec);
@@ -605,9 +605,9 @@ void CLG_BuildFrameMoveCommand(int msec)
 
     CLG_ClampPitch();
 
-    cl->cmd.angles[0] = ANGLE2SHORT(cl->viewAngles[0]);
-    cl->cmd.angles[1] = ANGLE2SHORT(cl->viewAngles[1]);
-    cl->cmd.angles[2] = ANGLE2SHORT(cl->viewAngles[2]);
+    cl->cmd.cmd.angles[0] = cl->viewAngles[0];
+    cl->cmd.cmd.angles[1] = cl->viewAngles[1];
+    cl->cmd.cmd.angles[2] = cl->viewAngles[2];
 }
 
 //
@@ -632,10 +632,10 @@ void CLG_FinalizeFrameMoveCommand(void)
     // figure button bits
     //
     if (in_attack.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->cmd.buttons |= BUTTON_ATTACK;
+        cl->cmd.cmd.buttons |= BUTTON_ATTACK;
 
     if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->cmd.buttons |= BUTTON_USE;
+        cl->cmd.cmd.buttons |= BUTTON_USE;
 
     // Undo the button_state_down for the next frame, it needs a repress for
     // that to be re-enabled.
@@ -645,22 +645,22 @@ void CLG_FinalizeFrameMoveCommand(void)
     // Whether to run or not, depends on whether auto-run is on or off.
     if (cl_run->value) {
         if (in_speed.state & BUTTON_STATE_HELD) {
-            cl->cmd.buttons |= BUTTON_WALK;
+            cl->cmd.cmd.buttons |= BUTTON_WALK;
         }
     }
     else {
         if (!(in_speed.state & BUTTON_STATE_HELD)) {
-            cl->cmd.buttons |= BUTTON_WALK;
+            cl->cmd.cmd.buttons |= BUTTON_WALK;
         }
     }
 
     // Always send in case any button was down at all in-game.
     if (clgi.Key_GetDest() == KEY_GAME && clgi.Key_AnyKeyDown()) {
-        cl->cmd.buttons |= BUTTON_ANY;
+        cl->cmd.cmd.buttons |= BUTTON_ANY;
     }
 
-    if (cl->cmd.msec > 250) {
-        cl->cmd.msec = 100;        // time was unreasonable
+    if (cl->cmd.cmd.msec > 250) {
+        cl->cmd.cmd.msec = 100;        // time was unreasonable
     }
 
     // Rebuild the movement vector
@@ -677,15 +677,15 @@ void CLG_FinalizeFrameMoveCommand(void)
     move = CLG_ClampSpeed(move);
 
     // Store the movement vector
-    cl->cmd.forwardmove = move[0];
-    cl->cmd.sidemove = move[1];
-    cl->cmd.upmove = move[2];
+    cl->cmd.cmd.forwardmove = move[0];
+    cl->cmd.cmd.rightmove = move[1];
+    cl->cmd.cmd.upmove = move[2];
 
     // Clear all states
     cl->mousemove[0] = 0;
     cl->mousemove[1] = 0;
     
-    cl->cmd.impulse = in_impulse;
+    cl->cmd.cmd.impulse = in_impulse;
     in_impulse = 0;
 
     CLG_KeyClear(&in_right);
