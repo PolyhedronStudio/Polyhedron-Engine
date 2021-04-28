@@ -590,31 +590,31 @@ void MSG_WriteDeltaPlayerstate_Default(const player_state_t* from, const player_
     pflags = 0;
 
     if (to->pmove.type != from->pmove.type)
-        pflags |= PS_M_TYPE;
+        pflags |= PS_PM_TYPE;
 
     if (!EqualEpsilonf(to->pmove.origin[0], from->pmove.origin[0]) ||
         !EqualEpsilonf(to->pmove.origin[1], from->pmove.origin[1]) ||
         !EqualEpsilonf(to->pmove.origin[2], from->pmove.origin[2]))
-        pflags |= PS_M_ORIGIN;
+        pflags |= PS_PM_ORIGIN;
 
     if (!EqualEpsilonf(to->pmove.velocity[0], from->pmove.velocity[0]) ||
         !EqualEpsilonf(to->pmove.velocity[1], from->pmove.velocity[1]) ||
         !EqualEpsilonf(to->pmove.velocity[2], from->pmove.velocity[2]))
-        pflags |= PS_M_VELOCITY;
+        pflags |= PS_PM_VELOCITY;
 
     if (to->pmove.time != from->pmove.time)
-        pflags |= PS_M_TIME;
+        pflags |= PS_PM_TIME;
 
     if (to->pmove.flags != from->pmove.flags)
-        pflags |= PS_M_FLAGS;
+        pflags |= PS_PM_FLAGS;
 
     if (to->pmove.gravity != from->pmove.gravity)
-        pflags |= PS_M_GRAVITY;
+        pflags |= PS_PM_GRAVITY;
 
     if (to->pmove.delta_angles[0] != from->pmove.delta_angles[0] ||
         to->pmove.delta_angles[1] != from->pmove.delta_angles[1] ||
         to->pmove.delta_angles[2] != from->pmove.delta_angles[2])
-        pflags |= PS_M_DELTA_ANGLES;
+        pflags |= PS_PM_DELTA_ANGLES;
 
     if (to->viewoffset[0] != from->viewoffset[0] ||
         to->viewoffset[1] != from->viewoffset[1] ||
@@ -663,31 +663,31 @@ void MSG_WriteDeltaPlayerstate_Default(const player_state_t* from, const player_
     //
     // write the pm_state_t
     //
-    if (pflags & PS_M_TYPE)
+    if (pflags & PS_PM_TYPE)
         MSG_WriteByte(to->pmove.type);
 
-    if (pflags & PS_M_ORIGIN) {
+    if (pflags & PS_PM_ORIGIN) {
         MSG_WriteFloat(to->pmove.origin[0]);
         MSG_WriteFloat(to->pmove.origin[1]);
         MSG_WriteFloat(to->pmove.origin[2]);
     }
 
-    if (pflags & PS_M_VELOCITY) {
+    if (pflags & PS_PM_VELOCITY) {
         MSG_WriteFloat(to->pmove.velocity[0]);
         MSG_WriteFloat(to->pmove.velocity[1]);
         MSG_WriteFloat(to->pmove.velocity[2]);
     }
 
-    if (pflags & PS_M_TIME)
+    if (pflags & PS_PM_TIME)
         MSG_WriteShort(to->pmove.time);
 
-    if (pflags & PS_M_FLAGS)
+    if (pflags & PS_PM_FLAGS)
         MSG_WriteShort(to->pmove.flags);
 
-    if (pflags & PS_M_GRAVITY)
+    if (pflags & PS_PM_GRAVITY)
         MSG_WriteShort(to->pmove.gravity);
 
-    if (pflags & PS_M_DELTA_ANGLES) {
+    if (pflags & PS_PM_DELTA_ANGLES) {
         MSG_WriteShort(to->pmove.delta_angles[0]);
         MSG_WriteShort(to->pmove.delta_angles[1]);
         MSG_WriteShort(to->pmove.delta_angles[2]);
@@ -773,11 +773,11 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_state_t* from,
     eflags = 0;
 
     if (to->pmove.type != from->pmove.type)
-        pflags |= PS_M_TYPE;
+        pflags |= PS_PM_TYPE;
 
     if (!EqualEpsilonf(to->pmove.origin[0], from->pmove.origin[0]) ||
         !EqualEpsilonf(to->pmove.origin[1], from->pmove.origin[1]))
-        pflags |= PS_M_ORIGIN;
+        pflags |= PS_PM_ORIGIN;
 
     if (!EqualEpsilonf(to->pmove.origin[2], from->pmove.origin[2]))
         eflags |= EPS_M_ORIGIN2;
@@ -785,19 +785,19 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_state_t* from,
     if (!(flags & MSG_PS_IGNORE_PREDICTION)) {
         if (!EqualEpsilonf(to->pmove.velocity[0], from->pmove.velocity[0]) ||
             !EqualEpsilonf(to->pmove.velocity[1], from->pmove.velocity[1]))
-            pflags |= PS_M_VELOCITY;
+            pflags |= PS_PM_VELOCITY;
 
         if (!EqualEpsilonf(to->pmove.velocity[2], from->pmove.velocity[2]))
             eflags |= EPS_M_VELOCITY2;
 
         if (to->pmove.time != from->pmove.time)
-            pflags |= PS_M_TIME;
+            pflags |= PS_PM_TIME;
 
         if (to->pmove.flags != from->pmove.flags)
-            pflags |= PS_M_FLAGS;
+            pflags |= PS_PM_FLAGS;
 
         if (to->pmove.gravity != from->pmove.gravity)
-            pflags |= PS_M_GRAVITY;
+            pflags |= PS_PM_GRAVITY;
     }
     else {
         // save previous state
@@ -811,7 +811,7 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_state_t* from,
         if (to->pmove.delta_angles[0] != from->pmove.delta_angles[0] ||
             to->pmove.delta_angles[1] != from->pmove.delta_angles[1] ||
             to->pmove.delta_angles[2] != from->pmove.delta_angles[2])
-            pflags |= PS_M_DELTA_ANGLES;
+            pflags |= PS_PM_DELTA_ANGLES;
     }
     else {
         // save previous state
@@ -887,10 +887,10 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_state_t* from,
     //
     // write the pm_state_t
     //
-    if (pflags & PS_M_TYPE)
+    if (pflags & PS_PM_TYPE)
         MSG_WriteByte(to->pmove.type);
 
-    if (pflags & PS_M_ORIGIN) {
+    if (pflags & PS_PM_ORIGIN) {
         MSG_WriteFloat(to->pmove.origin[0]);
         MSG_WriteFloat(to->pmove.origin[1]);
     }
@@ -898,7 +898,7 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_state_t* from,
     if (eflags & EPS_M_ORIGIN2)
         MSG_WriteFloat(to->pmove.origin[2]);
 
-    if (pflags & PS_M_VELOCITY) {
+    if (pflags & PS_PM_VELOCITY) {
         MSG_WriteFloat(to->pmove.velocity[0]);
         MSG_WriteFloat(to->pmove.velocity[1]);
     }
@@ -906,16 +906,16 @@ int MSG_WriteDeltaPlayerstate_Enhanced(const player_state_t* from,
     if (eflags & EPS_M_VELOCITY2)
         MSG_WriteFloat(to->pmove.velocity[2]);
 
-    if (pflags & PS_M_TIME)
+    if (pflags & PS_PM_TIME)
         MSG_WriteShort(to->pmove.time);
 
-    if (pflags & PS_M_FLAGS)
+    if (pflags & PS_PM_FLAGS)
         MSG_WriteShort(to->pmove.flags);
 
-    if (pflags & PS_M_GRAVITY)
+    if (pflags & PS_PM_GRAVITY)
         MSG_WriteShort(to->pmove.gravity);
 
-    if (pflags & PS_M_DELTA_ANGLES) {
+    if (pflags & PS_PM_DELTA_ANGLES) {
         MSG_WriteShort(to->pmove.delta_angles[0]);
         MSG_WriteShort(to->pmove.delta_angles[1]);
         MSG_WriteShort(to->pmove.delta_angles[2]);
@@ -1404,37 +1404,37 @@ void MSG_ParseDeltaPlayerstate_Default(const player_state_t* from,
     // parse the pm_state_t
     //
     // PM Type.
-    if (flags & PS_M_TYPE)
+    if (flags & PS_PM_TYPE)
         to->pmove.type = (pm_type_t)MSG_ReadByte(); // CPP: Cast
 
     // Origin.
-    if (flags & PS_M_ORIGIN) {
+    if (flags & PS_PM_ORIGIN) {
         to->pmove.origin[0] = MSG_ReadFloat();
         to->pmove.origin[1] = MSG_ReadFloat();
         to->pmove.origin[2] = MSG_ReadFloat();
     }
 
     // Velocity.
-    if (flags & PS_M_VELOCITY) {
+    if (flags & PS_PM_VELOCITY) {
         to->pmove.velocity[0] = MSG_ReadFloat();
         to->pmove.velocity[1] = MSG_ReadFloat();
         to->pmove.velocity[2] = MSG_ReadFloat();
     }
 
     // Time.
-    if (flags & PS_M_TIME)
+    if (flags & PS_PM_TIME)
         to->pmove.time = MSG_ReadShort();
 
     // PM Flags.
-    if (flags & PS_M_FLAGS)
+    if (flags & PS_PM_FLAGS)
         to->pmove.flags = MSG_ReadShort();
 
     // PM Gravity.
-    if (flags & PS_M_GRAVITY)
+    if (flags & PS_PM_GRAVITY)
         to->pmove.gravity = MSG_ReadShort();
 
     // PM Delta Angles.
-    if (flags & PS_M_DELTA_ANGLES) {
+    if (flags & PS_PM_DELTA_ANGLES) {
         to->pmove.delta_angles[0] = MSG_ReadShort();
         to->pmove.delta_angles[1] = MSG_ReadShort();
         to->pmove.delta_angles[2] = MSG_ReadShort();
@@ -1533,11 +1533,11 @@ void MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t* from,
     // parse the pm_state_t
     //
     // PM Type
-    if (flags & PS_M_TYPE)
+    if (flags & PS_PM_TYPE)
         to->pmove.type = (pm_type_t)MSG_ReadByte(); // CPP: Cast
 
     // Origin X Y.
-    if (flags & PS_M_ORIGIN) {
+    if (flags & PS_PM_ORIGIN) {
         to->pmove.origin[0] = MSG_ReadFloat();
         to->pmove.origin[1] = MSG_ReadFloat();
     }
@@ -1548,7 +1548,7 @@ void MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t* from,
     }
 
     // Velocity X Y.
-    if (flags & PS_M_VELOCITY) {
+    if (flags & PS_PM_VELOCITY) {
         to->pmove.velocity[0] = MSG_ReadFloat();
         to->pmove.velocity[1] = MSG_ReadFloat();
     }
@@ -1559,19 +1559,19 @@ void MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t* from,
     }
 
     // PM Time.
-    if (flags & PS_M_TIME)
+    if (flags & PS_PM_TIME)
         to->pmove.time = MSG_ReadShort();
 
     // PM Flags.
-    if (flags & PS_M_FLAGS)
+    if (flags & PS_PM_FLAGS)
         to->pmove.flags = MSG_ReadShort();
 
     // PM Gravity.
-    if (flags & PS_M_GRAVITY)
+    if (flags & PS_PM_GRAVITY)
         to->pmove.gravity = MSG_ReadShort();
 
     // PM Delta Angles.
-    if (flags & PS_M_DELTA_ANGLES) {
+    if (flags & PS_PM_DELTA_ANGLES) {
         to->pmove.delta_angles[0] = MSG_ReadShort();
         to->pmove.delta_angles[1] = MSG_ReadShort();
         to->pmove.delta_angles[2] = MSG_ReadShort();
@@ -1677,13 +1677,13 @@ void MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t* from,
 void MSG_ShowDeltaPlayerstateBits_Default(int flags)
 {
 #define S(b,s) if(flags&PS_##b) SHOWBITS(s)
-    S(M_TYPE, "pmove.type");
-    S(M_ORIGIN, "pmove.origin");
-    S(M_VELOCITY, "pmove.velocity");
-    S(M_TIME, "pmove.time");
-    S(M_FLAGS, "pmove.flags");
-    S(M_GRAVITY, "pmove.gravity");
-    S(M_DELTA_ANGLES, "pmove.delta_angles");
+    S(PM_TYPE, "pmove.type");
+    S(PM_ORIGIN, "pmove.origin");
+    S(PM_VELOCITY, "pmove.velocity");
+    S(PM_TIME, "pmove.time");
+    S(PM_FLAGS, "pmove.flags");
+    S(PM_GRAVITY, "pmove.gravity");
+    S(PM_DELTA_ANGLES, "pmove.delta_angles");
     S(VIEWOFFSET, "viewoffset");
     S(VIEWANGLES, "viewAngles");
     S(KICKANGLES, "kickAngles");
@@ -1699,15 +1699,15 @@ void MSG_ShowDeltaPlayerstateBits_Enhanced(int flags, int extraflags)
 {
 #define SP(b,s) if(flags&PS_##b) SHOWBITS(s)
 #define SE(b,s) if(extraflags&EPS_##b) SHOWBITS(s)
-    SP(M_TYPE, "pmove.type");
-    SP(M_ORIGIN, "pmove.origin[0,1]");
+    SP(PM_TYPE, "pmove.type");
+    SP(PM_ORIGIN, "pmove.origin[0,1]");
     SE(M_ORIGIN2, "pmove.origin[2]");
-    SP(M_VELOCITY, "pmove.velocity[0,1]");
+    SP(PM_VELOCITY, "pmove.velocity[0,1]");
     SE(M_VELOCITY2, "pmove.velocity[2]");
-    SP(M_TIME, "pmove.time");
-    SP(M_FLAGS, "pmove.flags");
-    SP(M_GRAVITY, "pmove.gravity");
-    SP(M_DELTA_ANGLES, "pmove.delta_angles");
+    SP(PM_TIME, "pmove.time");
+    SP(PM_FLAGS, "pmove.flags");
+    SP(PM_GRAVITY, "pmove.gravity");
+    SP(PM_DELTA_ANGLES, "pmove.delta_angles");
     SP(VIEWOFFSET, "viewoffset");
     SP(VIEWANGLES, "viewAngles[0,1]");
     SE(VIEWANGLE2, "viewAngles[2]");
@@ -1796,23 +1796,23 @@ void MSG_ShowDeltaEntityBits(int bits)
 
 void MSG_ShowDeltaPlayerstateBits_Packet(int flags)
 {
-#define S(b,s) if(flags&PPS_##b) SHOWBITS(s)
-    S(M_TYPE, "pmove.type");
-    S(M_ORIGIN, "pmove.origin[0,1]");
-    S(M_ORIGIN2, "pmove.origin[2]");
-    S(VIEWOFFSET, "viewoffset");
-    S(VIEWANGLES, "viewAngles[0,1]");
-    S(VIEWANGLE2, "viewAngles[2]");
-    S(KICKANGLES, "kickAngles");
-    S(WEAPONINDEX, "gunindex");
-    S(WEAPONFRAME, "gunframe");
-    S(GUNOFFSET, "gunoffset");
-    S(GUNANGLES, "gunangles");
-    S(BLEND, "blend");
-    S(FOV, "fov");
-    S(RDFLAGS, "rdflags");
-    S(STATS, "stats");
-#undef S
+//#define S(b,s) if(flags&PPS_##b) SHOWBITS(s)
+//    S(M_TYPE, "pmove.type");
+//    S(M_ORIGIN, "pmove.origin[0,1]");
+//    S(M_ORIGIN2, "pmove.origin[2]");
+//    S(VIEWOFFSET, "viewoffset");
+//    S(VIEWANGLES, "viewAngles[0,1]");
+//    S(VIEWANGLE2, "viewAngles[2]");
+//    S(KICKANGLES, "kickAngles");
+//    S(WEAPONINDEX, "gunindex");
+//    S(WEAPONFRAME, "gunframe");
+//    S(GUNOFFSET, "gunoffset");
+//    S(GUNANGLES, "gunangles");
+//    S(BLEND, "blend");
+//    S(FOV, "fov");
+//    S(RDFLAGS, "rdflags");
+//    S(STATS, "stats");
+//#undef S
 }
 
 const char* MSG_ServerCommandString(int cmd)

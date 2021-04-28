@@ -550,17 +550,17 @@ static int read_first_message(qhandle_t f)
     }
 
     // determine demo type
-/*    if (ul == MVD_MAGIC) {
-        read = FS_Read(&us, 2, f);
-        if (read != 2) {
-            return read < 0 ? read : Q_ERR_UNEXPECTED_EOF;
-        }
-        if (!us) {
-            return Q_ERR_UNEXPECTED_EOF;
-        }
-        msglen = LittleShort(us);
-        type = 1;
-    } else*/ {
+    //if (ul == MVD_MAGIC) {
+       // read = FS_Read(&us, 2, f);
+       // if (read != 2) {
+         //   return read < 0 ? read : Q_ERR_UNEXPECTED_EOF;
+        //}
+       // if (!us) {
+       //     return Q_ERR_UNEXPECTED_EOF;
+      //  }
+     //   msglen = LittleShort(us);
+    //    type = 1;
+    //} else {
         if (ul == (uint32_t)-1) {
             return Q_ERR_UNEXPECTED_EOF;
         }

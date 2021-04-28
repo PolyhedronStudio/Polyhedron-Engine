@@ -20,66 +20,76 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PROTOCOL_H
 
 //
-// protocol.h -- communications protocols
+// Protocol Configuration.
 //
+// The maximum length of a message on the network: 32k.
+constexpr uint32_t MAX_MSGLEN = 0x8000;
 
-#define MAX_MSGLEN  0x8000  // max length of a message, 32k
-
-#define PROTOCOL_VERSION_UNKNOWN    -1  // In case when during a connect challange the protocol version differs.
+// Used to refer when during a connection challenge the protocols differ.
+constexpr int32_t   PROTOCOL_VERSION_UNKNOWN = -1;
 
 // The DEFAULT version is the minimum allowed for connecting.
-// equal or lower than PROTOCOL_VERSION_NAC.
-#define PROTOCOL_VERSION_DEFAULT    101
-#define PROTOCOL_VERSION_NAC        101
+constexpr uint32_t  PROTOCOL_VERSION_DEFAULT = 101;
+constexpr uint32_t  PROTOCOL_VERSION_NAC     = 101;
 
 // Minimum required "MINOR" protocol version for this client to be compatible to.
-#define PROTOCOL_VERSION_NAC_MINIMUM            1337
-#define PROTOCOL_VERSION_NAC_FIRST              1337
-// This is just an example, it is not used.
-#define PROTOCOL_VERSION_NAC_FEATURE_UPDATE     1338
-// Always set to the latest version.
-#define PROTOCOL_VERSION_NAC_CURRENT            PROTOCOL_VERSION_NAC_FIRST
+constexpr uint32_t PROTOCOL_VERSION_NAC_MINIMUM = 1337;
+
+// The "FIRST" protocol version we ever had for Nail & Crescent.
+constexpr uint32_t PROTOCOL_VERSION_NAC_FIRST   = 1337;
+
+// EXAMPLE of what an update would then resemble in our code. Ofc, We then also change
+// the PROTOCOL_VERSION_NAC_CURRENT to accomodate.
+constexpr uint32_t PROTOCOL_VERSION_NAC_FEATURE_UPDATE = 1338;
+
+// Current actual protocol version that is in use.
+constexpr uint32_t PROTOCOL_VERSION_NAC_CURRENT = PROTOCOL_VERSION_NAC_FIRST;
 
 // This is used to ensure that the protocols in use match up, and support each other.
-#define NAC_PROTOCOL_SUPPORTED(x) \
-    ((x) >= PROTOCOL_VERSION_NAC_MINIMUM && \
-     (x) <= PROTOCOL_VERSION_NAC_CURRENT)
+qboolean static inline NAC_PROTOCOL_SUPPORTED(uint32_t x) {
+    return x >= PROTOCOL_VERSION_NAC_MINIMUM && x <= PROTOCOL_VERSION_NAC_CURRENT;
+}
 
-//=========================================
-
-#define UPDATE_BACKUP   32  // copies of entity_state_t to keep buffered
-                            // must be power of two
-#define UPDATE_MASK     (UPDATE_BACKUP - 1)
-
-#define CMD_BACKUP      128 // allow a lot of command backups for very fast systems
-                            // increased from 64
-#define CMD_MASK        (CMD_BACKUP - 1)
-
-
-#define SVCMD_BITS              5
-#define SVCMD_MASK              ((1 << SVCMD_BITS) - 1)
-
-#define FRAMENUM_BITS           27
-#define FRAMENUM_MASK           ((1 << FRAMENUM_BITS) - 1)
-
-#define SUPPRESSCOUNT_BITS      4
-#define SUPPRESSCOUNT_MASK      ((1 << SUPPRESSCOUNT_BITS) - 1)
-
-#define MAX_PACKET_ENTITIES     1024
-#define MAX_PARSE_ENTITIES      (MAX_PACKET_ENTITIES * UPDATE_BACKUP)
-#define PARSE_ENTITIES_MASK     (MAX_PARSE_ENTITIES - 1)
-
-#define MAX_PACKET_USERCMDS     32
-#define MAX_PACKET_FRAMES       4
-
-#define MAX_PACKET_STRINGCMDS   8
-#define MAX_PACKET_USERINFOS    8
-
-#define CS_BITMAP_BYTES         (MAX_CONFIGSTRINGS / 8) // 260
-#define CS_BITMAP_LONGS         (CS_BITMAP_BYTES / 4)
+//==============================================
 
 //
-// server to client
+// Protocol Configuration.
+//
+// Number of copies of entity_state_t to keep buffered.
+constexpr int32_t UPDATE_BACKUP = 32;  // Must be Power Of Two. 
+constexpr int32_t UPDATE_MASK = (UPDATE_BACKUP - 1);
+
+// Allow a lot of command backups for very fast systems, used to be 64.
+constexpr int32_t CMD_BACKUP = 128; 
+constexpr int32_t CMD_MASK = (CMD_BACKUP - 1);
+
+
+constexpr int32_t SVCMD_BITS = 5;
+constexpr int32_t SVCMD_MASK = ((1 << SVCMD_BITS) - 1);
+
+constexpr int32_t FRAMENUM_BITS = 27;
+constexpr int32_t FRAMENUM_MASK = ((1 << FRAMENUM_BITS) - 1);
+
+constexpr int32_t SUPPRESSCOUNT_BITS = 4;
+constexpr int32_t SUPPRESSCOUNT_MASK = ((1 << SUPPRESSCOUNT_BITS) - 1);
+
+constexpr int32_t MAX_PACKET_ENTITIES = 1024;
+constexpr int32_t MAX_PARSE_ENTITIES = (MAX_PACKET_ENTITIES * UPDATE_BACKUP);
+constexpr int32_t PARSE_ENTITIES_MASK = (MAX_PARSE_ENTITIES - 1);
+
+constexpr int32_t MAX_PACKET_USERCMDS = 32;
+constexpr int32_t MAX_PACKET_FRAMES = 4;
+
+constexpr int32_t MAX_PACKET_STRINGCMDS = 8;
+constexpr int32_t MAX_PACKET_USERINFOS = 8;
+
+constexpr int32_t CS_BITMAP_BYTES = (MAX_CONFIGSTRINGS / 8); // 260
+constexpr int32_t CS_BITMAP_LONGS = (CS_BITMAP_BYTES / 4);
+
+//==============================================
+
+//
+// Server to Client commands.
 //
 typedef enum {
     svc_bad,
@@ -122,7 +132,7 @@ typedef enum {
 //==============================================
 
 //
-// client to server
+// Client to Server commands.
 //
 typedef enum {
     clc_bad,
@@ -139,13 +149,13 @@ typedef enum {
 
 // player_state_t communication
 
-#define PS_M_TYPE           (1<<0)
-#define PS_M_ORIGIN         (1<<1)
-#define PS_M_VELOCITY       (1<<2)
-#define PS_M_TIME           (1<<3)
-#define PS_M_FLAGS          (1<<4)
-#define PS_M_GRAVITY        (1<<5)
-#define PS_M_DELTA_ANGLES   (1<<6)
+#define PS_PM_TYPE           (1<<0)
+#define PS_PM_ORIGIN         (1<<1)
+#define PS_PM_VELOCITY       (1<<2)
+#define PS_PM_TIME           (1<<3)
+#define PS_PM_FLAGS          (1<<4)
+#define PS_PM_GRAVITY        (1<<5)
+#define PS_PM_DELTA_ANGLES   (1<<6)
 
 #define PS_VIEWOFFSET       (1<<7)
 #define PS_VIEWANGLES       (1<<8)
@@ -256,10 +266,16 @@ typedef enum {
 // a Solid::BoundingBox will never create this value
 #define PACKED_BSP      31
 
+//
+// Client Settings that can be communicated to servers.
+//
 typedef enum {
     CLS_MAX
 } clientSetting_t;
 
+//
+// Server Settings that can be communicated to clients.
+//
 typedef enum {
     // r1q2 specific
     SVS_PLAYERUPDATES,
