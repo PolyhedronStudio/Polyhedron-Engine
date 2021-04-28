@@ -177,9 +177,8 @@ static const vec3_t PM_GIBLET_MAXS = { 8.f,  8.f,  8.f };
 //===============
 //
 #ifdef CGAME_INCLUDE
-#define DEBUG_CLIENT_PMOVE 0
+#define DEBUG_CLIENT_PMOVE 1
 #if DEBUG_CLIENT_PMOVE == 1
-
 // Client debug output.
 static void CLGPM_Debug(const char* func, const char* fmt, ...) {
     char buffer[MAX_STRING_CHARS];
@@ -210,13 +209,9 @@ static void CLGPM_Debug(const char* func, const char* fmt, ...) {
         //#define PM_Debug () void(0)
 #endif // PMOVE_DEBUG
 #else
-#define DEBUG_SERVER_PMOVE 0
+#define DEBUG_SERVER_PMOVE 1
 #if DEBUG_SERVER_PMOVE == 1
-
 static void SVGPM_Debug(const char* func, const char* fmt, ...) {
-    if (!developer->value)
-        return;
-
     char buffer[MAX_STRING_CHARS];
 
     va_list args;
@@ -1475,10 +1470,6 @@ static void PM_WalkMove(void) {
     // Accounting for walk modulus
     if (pm->cmd.buttons & BUTTON_WALK) {
         max_speed *= PM_SPEED_MOD_WALK;
-        PM_Debug("BUTTON WALK HA");
-    }
-    else {
-        PM_Debug("PMOVE_NOBUUTTONWALK");
     }
 
     // Clamp the speed to min/max speed
@@ -1812,6 +1803,9 @@ void PMove(pm_move_t * pmove, pmoveParams_t * params)
 
     // Check for view step changes, if so, interpolate.
     PM_CheckViewStep();
+
+
+    PM_Debug("pm->step = %f pm->state.origin = %s", pm->step, Vec3ToString(pm->state.origin));
 }
 
 
