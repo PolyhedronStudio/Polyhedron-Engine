@@ -968,7 +968,6 @@ void PutClientInServer(entity_t *ent)
 
     ent->s.frame = 0;
 
-
     // set the delta angle
     for (i = 0 ; i < 3 ; i++) {
         client->playerState.pmove.delta_angles[i] = ANGLE2SHORT(spawn_angles[i] - client->resp.cmd_angles[i]);
@@ -1371,11 +1370,11 @@ void ClientThink(entity_t *ent, usercmd_t *ucmd)
 
         if (memcmp(&client->old_pmove, &pm.state, sizeof(pm.state))) {
             pm.testInitial = true;
-            //      gi.DPrintf ("pmove changed!\n");
+            gi.DPrintf ("pmove changed!\n");
         }
 
         pm.cmd = *ucmd;
-
+        pm.groundEntityPtr = ent->groundEntityPtr;
         pm.Trace = PM_Trace;    // adds default parms
         pm.PointContents = gi.PointContents;
 
@@ -1402,7 +1401,7 @@ void ClientThink(entity_t *ent, usercmd_t *ucmd)
             PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
         }
 
-        ent->viewHeight = pm.state.view_offset[2];
+        ent->viewHeight = pm.state.viewOffset[2];
         ent->waterLevel = pm.waterLevel;
         ent->waterType = pm.waterType;
         ent->groundEntityPtr = pm.groundEntityPtr;

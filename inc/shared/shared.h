@@ -516,10 +516,10 @@ typedef struct {
     // Changed by spawns, rotating objects, and teleporters
 
     // View offsets. (Only Z is used atm, beware.)
-    vec3_t view_offset;
+    vec3_t viewOffset;
 
     // Step offset, used for stair interpolations.
-    float step_offset;
+    float stepOffset;
 
 } pm_state_t;
 

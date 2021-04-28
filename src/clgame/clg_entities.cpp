@@ -674,14 +674,14 @@ void CLG_CalcViewValues(void)
     if (!clgi.IsDemoPlayback() 
         && cl_predict->integer 
         && !(currentPlayerState->pmove.flags & PMF_NO_PREDICTION)) {
-        // use predicted values
-        unsigned delta = clgi.GetRealTime() - cl->predicted.step_time;
-        float backlerp = lerpFraction - 1.0;
 
-        cl->refdef.vieworg = vec3_fmaf(cl->predicted.origin, backlerp, cl->predicted.error);
+        // Add view offset to view org.
+        cl->refdef.vieworg = cl->predicted.origin;// +cl->predicted.viewOffset;
 
-        //// smooth out stair climbing
-        cl->refdef.vieworg.z -= cl->predicted.step_offset;
+        const vec3_t error = vec3_scale(cl->predicted.error, 1.f - lerpFraction);
+        cl->refdef.vieworg = cl->refdef.vieworg + error;
+
+        cl->refdef.vieworg.z -= cl->predicted.stepOffset;
     }
     else {
         // just use interpolated values
@@ -692,11 +692,11 @@ void CLG_CalcViewValues(void)
         //    lerpFraction * (currentPlayerState->pmove.origin[1] - previousPlayerState->pmove.origin[1]);
         //cl->refdef.vieworg[2] = previousPlayerState->pmove.origin[2] +
         //    lerpFraction * (currentPlayerState->pmove.origin[2] - previousPlayerState->pmove.origin[2]);
-        // Adjust origins to keep step_offset in mind.
-        vec3_t oldOrigin = previousPlayerState->pmove.origin;
-        oldOrigin.z -= cl->predicted.step_offset;
-        vec3_t newOrigin = currentPlayerState->pmove.origin;
-        newOrigin.z -= cl->predicted.step_offset;
+        // Adjust origins to keep stepOffset in mind.
+        vec3_t oldOrigin = previousPlayerState->pmove.origin += previousPlayerState->viewoffset;
+        oldOrigin.z -= cl->predicted.stepOffset;
+        vec3_t newOrigin = currentPlayerState->pmove.origin += currentPlayerState->viewoffset;
+        newOrigin.z -= cl->predicted.stepOffset;
 
         // Calculate final origin.
         cl->refdef.vieworg = vec3_mix(oldOrigin, newOrigin, lerpFraction);

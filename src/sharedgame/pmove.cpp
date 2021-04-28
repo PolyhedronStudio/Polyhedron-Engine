@@ -97,7 +97,7 @@ constexpr float PM_SPEED_TRICK_JUMP = 0.f;
 constexpr float PM_SPEED_WATER = 118.f;
 constexpr float PM_SPEED_WATER_JUMP = 420.f;
 constexpr float PM_SPEED_WATER_SINK = -16.f;
-constexpr float PM_SPEED_STEP = 150.f;
+constexpr float PM_SPEED_STEP = 30.f;
 
 //-----------------
 // General.
@@ -574,64 +574,57 @@ static qboolean PM_StepSlideMove_(void)
 //
 static void PM_StepSlideMove(void)
 {
-    vec3_t start_o = pm->state.origin;
-    vec3_t start_v = pm->state.velocity;
+    // Store pre-move parameters
+    const vec3_t org0 = pm->state.origin;
+    const vec3_t vel0 = pm->state.velocity;
 
     // Attempt to move; if nothing blocks us, we're done
-    if (PM_StepSlideMove_()) {
-        // attempt to step down to remain on ground
-        if ((pm->state.flags & PMF_ON_GROUND) && pm->cmd.upmove <= 0) {
-
-            const vec3_t down = vec3_fmaf(pm->state.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
-            const trace_t step_down = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
-
-            if (PM_CheckStep(&step_down)) {
-                PM_StepDown(&step_down);
-            }
-        }
-
-        return;
-    }
-
-    vec3_t down_o = pm->state.origin;
-    vec3_t down_v = pm->state.velocity;
-
-    vec3_t up = start_o;
-    up.z += PM_STEP_HEIGHT;
-
-    trace_t trace = PM_TraceCorrectAllSolid(up, pm->mins, pm->maxs, up);
-    if (trace.allSolid)
-        return;     // Can't step up
-
-    // Try sliding above
-    pm->state.origin = up;
-    pm->state.velocity = start_v;
-
     PM_StepSlideMove_();
 
-    // Push down the final amount
-    vec3_t down = pm->state.origin;
-    down.z -= PM_STEP_HEIGHT;
-    trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
-    if (!trace.allSolid) {
-        pm->state.origin = trace.endPosition;
-    }
-    up = pm->state.origin;
+    // Attempt to step down to remain on ground
+    if ((pm->state.flags & PMF_ON_GROUND) && pm->cmd.upmove <= 0) {
+        const vec3_t down = vec3_fmaf(pm->state.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
+        const trace_t downTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
 
-    // decide which one went farther
-    float down_dist = (down_o.x - start_o.x) * (down_o.x - start_o.x)
-        + (down_o.y - start_o.y) * (down_o.y - start_o.y);
-    float up_dist = (up.x - start_o.x) * (up.x - start_o.x)
-        + (up.y - start_o.y) * (up.y - start_o.y);
-
-    if (down_dist > up_dist || trace.plane.normal.z < PM_STEP_NORMAL) {
-        pm->state.origin = down_o;
-        pm->state.velocity = down_v;
-        return;
+        if (PM_CheckStep(&downTrace)) {
+            PM_StepDown(&downTrace);
+        }
     }
-    //!! Special case
-    // if we were walking along a plane, then we need to copy the Z over
-    pm->state.velocity.z = down_v.z;
+
+    // If we are blocked, we will try to step over the obstacle.
+    const vec3_t org1 = pm->state.origin;
+    const vec3_t vel1 = pm->state.velocity;
+
+    const vec3_t up = vec3_fmaf(org0, PM_STEP_HEIGHT, vec3_up());
+    const trace_t upTrace = PM_TraceCorrectAllSolid(org0, pm->mins, pm->maxs, up);
+
+    if (!upTrace.allSolid) {
+        // Step from the higher position, with the original velocity
+        pm->state.origin = upTrace.endPosition;
+        pm->state.velocity = vel0;
+
+        PM_StepSlideMove_();
+
+        // Settle to the new ground, keeping the step if and only if it was successful
+        const vec3_t down = vec3_fmaf(pm->state.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
+        const trace_t downTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
+
+        if (PM_CheckStep(&downTrace)) {
+            // Quake2 trick jump secret sauce
+            if ((pm->state.flags & PMF_ON_GROUND) || vel0.z < PM_SPEED_UP) {
+                PM_StepDown(&downTrace);
+            }
+            else {
+                pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
+            }
+
+            return;
+        }
+    }
+
+    // Save end results.
+    pm->state.origin = org1;
+    pm->state.velocity = vel1;
 }
 
 //
@@ -739,9 +732,9 @@ static void PM_CheckDuck(void) {
     // Any state after dead, can be checked for here.
     if (pm->state.type >= PM_DEAD) {
         if (pm->state.type == PM_GIB) {
-            pm->state.view_offset.z = 0.0f;
+            pm->state.viewOffset.z = 0.0f;
         } else {
-            pm->state.view_offset.z = -16.0f;
+            pm->state.viewOffset.z = -16.0f;
         }
         // Other states go here :)
     } else {
@@ -773,12 +766,12 @@ static void PM_CheckDuck(void) {
             const float targetViewHeight = pm->mins.z + height * 0.5f;
 
             // LERP it.
-            if (pm->state.view_offset.z > targetViewHeight) { // go down
-                pm->state.view_offset.z -= playerMoveLocals.frameTime * PM_SPEED_DUCK_STAND;
+            if (pm->state.viewOffset.z > targetViewHeight) { // go down
+                pm->state.viewOffset.z -= playerMoveLocals.frameTime * PM_SPEED_DUCK_STAND;
             }
 
-            if (pm->state.view_offset.z < targetViewHeight) {
-                pm->state.view_offset.z = targetViewHeight;
+            if (pm->state.viewOffset.z < targetViewHeight) {
+                pm->state.viewOffset.z = targetViewHeight;
             }
 
             // Change the actual bounding box to reflect ducking
@@ -789,19 +782,19 @@ static void PM_CheckDuck(void) {
             const float targetViewHeight = pm->mins.z + (height - 6) * 0.9f;
 
             // LERP it.
-            if (pm->state.view_offset.z < targetViewHeight) { // go up
-                pm->state.view_offset.z += playerMoveLocals.frameTime * PM_SPEED_DUCK_STAND;
+            if (pm->state.viewOffset.z < targetViewHeight) { // go up
+                pm->state.viewOffset.z += playerMoveLocals.frameTime * PM_SPEED_DUCK_STAND;
             }
 
-            if (pm->state.view_offset.z > targetViewHeight) {
-                pm->state.view_offset.z = targetViewHeight;
+            if (pm->state.viewOffset.z > targetViewHeight) {
+                pm->state.viewOffset.z = targetViewHeight;
             }
 
             // No need to change the bounding box, it has already been initialized at the start of the frame.
         }
     }
 
-    pm->state.view_offset = pm->state.view_offset;
+    pm->state.viewOffset = pm->state.viewOffset;
 }
 
 
@@ -947,7 +940,7 @@ static void PM_CheckWater(void) {
             pm->waterType |= contents;
             pm->waterLevel = WATER_WAIST;
 
-            contentPosition.z = pm->state.origin.z + pm->state.view_offset.z + 1.0f;
+            contentPosition.z = pm->state.origin.z + pm->state.viewOffset.z + 1.0f;
 
             contents = pm->PointContents(contentPosition);
 
@@ -1353,7 +1346,7 @@ static void PM_WaterMove(void) {
 
     // disable water skiing
     if (pm->waterLevel == WATER_WAIST) {
-        vec3_t view = pm->state.origin + pm->state.view_offset;
+        vec3_t view = pm->state.origin + pm->state.viewOffset;
         view.z -= 4.0;
 
         if (!(pm->PointContents(view) & CONTENTS_MASK_LIQUID)) {
@@ -1475,10 +1468,10 @@ static void PM_WalkMove(void) {
     // Clamp the speed to min/max speed
     float speed;
     const vec3_t dir = vec3_normalize_length(vel, speed);
-    speed = Clampf(speed, 0.0, max_speed);
+    speed = Clampf(speed, 0.0f, max_speed);
 
     if (speed < PM_STOP_EPSILON) {
-        speed = 0.0;
+        speed = 0.0f;
     }
 
     // Accelerate based on slickness of ground surface
@@ -1524,10 +1517,10 @@ static void PM_SpectatorMove(void) {
 
     float speed;
     vel = vec3_normalize_length(vel, speed);
-    speed = Clampf(speed, 0.0, PM_SPEED_SPECTATOR);
+    speed = Clampf(speed, 0.0f, PM_SPEED_SPECTATOR);
 
     if (speed < PM_STOP_EPSILON) {
-        speed = 0.0;
+        speed = 0.0f;
     }
 
     // Accelerate
@@ -1557,10 +1550,10 @@ static void PM_NoclipMove() {
 
     float speed;
     vel = vec3_normalize_length( vel, speed );
-    speed = Clampf( speed, 0.0, PM_SPEED_SPECTATOR );
+    speed = Clampf( speed, 0.0f, PM_SPEED_SPECTATOR );
 
     if ( speed < PM_STOP_EPSILON ) {
-        speed = 0.0;
+        speed = 0.0f;
     }
 
     // Accelerate
@@ -1678,19 +1671,19 @@ static void PM_ClampAngles(void) {
 static void PM_CheckViewStep(void) {
     // Add the step offset we've made on this frame
     if (pm->step) {
-        pm->state.step_offset += pm->step;
+        pm->state.stepOffset += pm->step;
     }
 
     // Calculate change to the step offset
-    if (pm->state.step_offset) {
+    if (pm->state.stepOffset) {
         // Calculate the step speed to interpolate at.
-        const float step_speed = playerMoveLocals.frameTime * (PM_SPEED_STEP * (Maxf(1.f, fabsf(pm->state.step_offset) / PM_STEP_HEIGHT)));
+        const float step_speed = playerMoveLocals.frameTime * (PM_SPEED_STEP * (Maxf(1.f, fabsf(pm->state.stepOffset) / PM_STEP_HEIGHT)));
 
         // Are we interpolating upwards, or downwards?
-        if (pm->state.step_offset > 0) {
-            pm->state.step_offset = Maxf(0.f, pm->state.step_offset - step_speed);
+        if (pm->state.stepOffset > 0) {
+            pm->state.stepOffset = Maxf(0.f, pm->state.stepOffset - step_speed);
         } else {
-            pm->state.step_offset = Minf(0.f, pm->state.step_offset + step_speed);
+            pm->state.stepOffset = Minf(0.f, pm->state.stepOffset + step_speed);
         }
     }
 }

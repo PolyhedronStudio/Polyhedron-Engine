@@ -154,7 +154,7 @@ void CL_PredictAngles(void)
 
 void CL_PredictMovement(void)
 {
-    unsigned    ack, current;
+    uint32_t    ack, currentFrameIndex;
 
     if (cls.state != ca_active) {
         return;
@@ -176,20 +176,20 @@ void CL_PredictMovement(void)
     }
 
     ack = cl.history[cls.netchan->incomingAcknowledged & CMD_MASK].cmdNumber;
-    current = cl.cmdNumber;
+    currentFrameIndex = cl.cmdNumber;
 
     // if we are too far out of date, just freeze
-    if (current - ack > CMD_BACKUP - 1) {
+    if (currentFrameIndex - ack > CMD_BACKUP - 1) {
         SHOWMISS("%i: exceeded CMD_BACKUP\n", cl.frame.number);
         return;
     }
 
-    if (!cl.cmd.msec && current == ack) {
+    if (!cl.cmd.msec && currentFrameIndex == ack) {
         SHOWMISS("%i: not moved\n", cl.frame.number);
         return;
     }
 
     // N&C: Call into the CG Module to let it handle this.
-    CL_GM_PredictMovement(ack, current);
+    CL_GM_PredictMovement(ack, currentFrameIndex);
 }
 

@@ -26,8 +26,9 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
         cl->predicted.origin = cl->frame.playerState.pmove.origin;
         cl->predicted.velocity = cl->frame.playerState.pmove.velocity;
         cl->predicted.viewAngles = cl->frame.playerState.viewAngles;
+        cl->predicted.viewOffset = cl->frame.playerState.viewoffset;
 
-        cl->predicted.step_offset = 0.f;
+        cl->predicted.stepOffset = 0.f;
         cl->predicted.error = vec3_zero();
     }
 
@@ -43,8 +44,9 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
             cl->predicted.origin     = cl->frame.playerState.pmove.origin;
             cl->predicted.velocity   = cl->frame.playerState.pmove.velocity;
             cl->predicted.viewAngles = cl->frame.playerState.viewAngles;
+            cl->predicted.viewOffset = cl->frame.playerState.viewoffset;
             
-            cl->predicted.step_offset   = 0.f;
+            cl->predicted.stepOffset    = 0.f;
             cl->predicted.error         = vec3_zero();
         }
         else {
@@ -278,6 +280,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
     // copy results out for rendering
     cl->predicted.origin      = pm.state.origin;
     cl->predicted.velocity    = pm.state.velocity;
-    cl->predicted.step_offset = pm.state.step_offset;
+    cl->predicted.stepOffset = pm.state.stepOffset;
+    cl->predicted.viewOffset  = pm.state.viewOffset;
     cl->predicted.viewAngles  = pm.viewAngles;
 }

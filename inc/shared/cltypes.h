@@ -284,14 +284,16 @@ typedef struct client_state_s {
     int         initialSeq;
 
     struct {
-        float step_offset;
+        float stepOffset;
         uint32_t step_time;
         uint32_t step_frame;
 
         // These are the actual predicted results that should align with the server's.
         vec3_t origin;
-        vec3_t viewAngles;
         vec3_t velocity;
+
+        vec3_t viewAngles;
+        vec3_t viewOffset;
 
         // Prediction error adjustment.
         vec3_t error;
