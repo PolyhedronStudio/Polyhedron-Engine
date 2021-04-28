@@ -23,34 +23,34 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
 
     // First frame.
     if (cl->frame.number == 0) {
-        cl->predicted_origin = cl->frame.playerState.pmove.origin;
-        cl->predicted_velocity = cl->frame.playerState.pmove.velocity;
-        cl->predicted_angles = cl->frame.playerState.viewAngles;
+        cl->predicted.origin = cl->frame.playerState.pmove.origin;
+        cl->predicted.velocity = cl->frame.playerState.pmove.velocity;
+        cl->predicted.viewAngles = cl->frame.playerState.viewAngles;
     }
 
     // Compare what the server returned with what we had predicted it to be
-    cl->prediction_error = cl->frame.playerState.pmove.origin - cl->predicted_origins[cmd & CMD_MASK];
+    cl->predicted.error = cl->frame.playerState.pmove.origin - cl->predicted_origins[cmd & CMD_MASK];
 
     // Length is 
-    len = vec3_length(cl->prediction_error);
+    len = vec3_length(cl->predicted.error);
     if (len > .1f) {
         if (len > 2400.f * (1.0f / BASE_FRAMERATE)) {
-            Com_DPrint("MAX_DELTA_ORIGIN: %s\n", Vec3ToString(cl->prediction_error));
+            Com_DPrint("MAX_DELTA_ORIGIN: %s\n", Vec3ToString(cl->predicted.error));
 
-            cl->predicted_origin = cl->frame.playerState.pmove.origin;
-            cl->predicted_velocity = cl->frame.playerState.pmove.velocity;
+            cl->predicted.origin = cl->frame.playerState.pmove.origin;
+            cl->predicted.velocity = cl->frame.playerState.pmove.velocity;
             cl->viewAngles = cl->frame.playerState.viewAngles;
 
-            cl->prediction_error = vec3_zero();
+            cl->predicted.error = vec3_zero();
         }
         else {
-            Com_DPrint("CLG_CheckPredictionError: %s len:%f\n", Vec3ToString(cl->prediction_error), len);
+            Com_DPrint("CLG_CheckPredictionError: %s len:%f\n", Vec3ToString(cl->predicted.error), len);
         }
     }
 
     // Don't predict steps against server returned data
-    if (cl->predicted_step_frame <= cmd)
-        cl->predicted_step_frame = cmd + 1;
+    if (cl->predicted.step_frame <= cmd)
+        cl->predicted.step_frame = cmd + 1;
 
     cl->predicted_origins[cmd & CMD_MASK] = cl->frame.playerState.pmove.origin;
 }
@@ -63,9 +63,9 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
 //================
 //
 void CLG_PredictAngles(void) {
-    cl->predicted_angles[0] = cl->viewAngles[0] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[0]);
-    cl->predicted_angles[1] = cl->viewAngles[1] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[1]);
-    cl->predicted_angles[2] = cl->viewAngles[2] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[2]);
+    cl->predicted.viewAngles[0] = cl->viewAngles[0] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[0]);
+    cl->predicted.viewAngles[1] = cl->viewAngles[1] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[1]);
+    cl->predicted.viewAngles[2] = cl->viewAngles[2] + SHORT2ANGLE(cl->frame.playerState.pmove.delta_angles[2]);
 }
 
 //
@@ -194,49 +194,6 @@ static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
     }
 }
 
-
-//
-//================
-// CLG_TraverseEntityStep
-//
-// Setup an entity's step interpolation.
-//================
-//
-void CLG_TraverseEntityStep(client_entity_step_t* step, uint32_t time, float height) {
-
-    const uint32_t delta = time - step->timestamp;
-
-    if (delta < step->interval) {
-        const float lerp = (step->interval - delta) / (float)step->interval;
-        step->height = step->height * (1.f - lerp) + height;
-    }
-    else {
-        step->height = height;
-        step->timestamp = time;
-    }
-
-    step->interval = 128.f * (std::fabsf(step->height) / PM_STEP_HEIGHT);
-}
-
-//
-//================
-// CLG_InterpolateStep
-//
-// Interpolate the entity's step for the current frame.
-//================
-//
-void CLG_InterpolateStep(client_entity_step_t* step) {
-
-    const uint32_t delta = clgi.GetRealTime() - step->timestamp; //cl->time ->unclamped_time - step->timestamp;
-
-    if (delta < step->interval) {
-        const float lerp = (step->interval - delta) / (float)step->interval;
-        step->delta_height = lerp * step->height;
-    }
-    else {
-        step->delta_height = 0.0;
-    }
-}
 //
 //===============
 // CLG_PredictMovement
@@ -244,7 +201,6 @@ void CLG_InterpolateStep(client_entity_step_t* step) {
 // Predicts the actual client side movement.
 //================
 //
-client_entity_step_t stepx;
 void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     pm_move_t   pm = {};
     float       step, oldz;
@@ -283,15 +239,6 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
 
         // save for debug checking
         cl->predicted_origins[(current + 1) & CMD_MASK] = pm.state.origin;
-
-        // for each movement, check for stair interaction and interpolate
-        //if ((pm.state.flags & PMF_ON_STAIRS) && (cmd->frameTime > cl->step.time)) {
-
-        //    Cg_TraverseStep(&cl->step, cmd->timestamp, pm.step);
-
-        //    // ensure we only count each step once
-        //    cl->step.time = cmd->time;
-        //}
     }
     else {
         frame = current - 1;
@@ -310,24 +257,24 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     //}
 
     if (pm.state.type != PM_SPECTATOR || pm.state.type != PM_NOCLIP) {
-        oldz = cl->predicted_origins[cl->predicted_step_frame & CMD_MASK][2];
+        oldz = cl->predicted_origins[cl->predicted.step_frame & CMD_MASK][2];
         step = pm.state.origin[2] - oldz;
 
-        if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
+        //if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
 
-            CLG_TraverseEntityStep(&stepx, clgi.GetRealTime(), step);
-            cl->predicted_step = step;
-            cl->predicted_step_frame = frame + 1;    // don't double step
-            stepx.time = clgi.GetRealTime();
-        }
+        //    //CLG_TraverseEntityStep(&stepx, clgi.GetRealTime(), step);
+        //    cl->predicted_step = step;
+        //    cl->predicted_step_frame = frame + 1;    // don't double step
+        //    stepx.time = clgi.GetRealTime();
+        //}
     }
     
-    if (cl->predicted_step_frame < frame) {
-        cl->predicted_step_frame = frame;
+    if (cl->predicted.step_frame < frame) {
+        cl->predicted.step_frame = frame;
     }
 
     // copy results out for rendering
-    cl->predicted_origin = pm.state.origin;
-    cl->predicted_velocity = pm.state.velocity;
-    cl->predicted_angles = pm.viewAngles;
+    cl->predicted.origin     = pm.state.origin;
+    cl->predicted.velocity   = pm.state.velocity;
+    cl->predicted.viewAngles = pm.viewAngles;
 }

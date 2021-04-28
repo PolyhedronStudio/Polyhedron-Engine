@@ -667,19 +667,19 @@ void CLG_CalcViewValues(void)
     // calculate the origin
     if (!clgi.IsDemoPlayback() && cl_predict->integer && !(ps->pmove.flags & PMF_NO_PREDICTION)) {
         // use predicted values
-        unsigned delta = clgi.GetRealTime() - cl->predicted_step_time;
+        unsigned delta = clgi.GetRealTime() - cl->predicted.step_time;
         float backlerp = lerp - 1.0;
 
-        VectorMA(cl->predicted_origin, backlerp, cl->prediction_error, cl->refdef.vieworg);
+        VectorMA(cl->predicted.origin, backlerp, cl->predicted.error, cl->refdef.vieworg);
 
         // smooth out stair climbing
         // N&C: FF Precision.
-        if (cl->predicted_step < (127.0f / 8.0f)) {         //if (cl->predicted_step < 127 * 0.125f) {
+        if (cl->predicted.step < (127.0f / 8.0f)) {         //if (cl->predicted_step < 127 * 0.125f) {
             delta *= 0.5;                                   //  delta <<= 1; // small steps
         }
         // N&C: FF Precision.
         if (delta < (100.0f)) {
-            cl->refdef.vieworg[2] = cl->predicted_step * delta;
+            cl->refdef.vieworg[2] = cl->predicted.step * delta;
         }
         //if (delta < 100) {
         //  cl->refdef.vieworg[2] -= cl->predicted_step * (100 - delta) * 0.01f;
@@ -702,7 +702,7 @@ void CLG_CalcViewValues(void)
     }
     else if (ps->pmove.type < PM_DEAD) {
         // use predicted values
-        VectorCopy(cl->predicted_angles, cl->refdef.viewAngles);
+        cl->refdef.viewAngles = cl->predicted.viewAngles;
     }
     else {
         // just use interpolated values

@@ -193,8 +193,8 @@ static void set_active_state(void)
         CL_FirstDemoFrame();
     } else {
         // set initial cl.predicted_origin and cl.predicted_angles
-        VectorCopy(cl.frame.playerState.pmove.origin, cl.predicted_origin);
-        VectorCopy(cl.frame.playerState.pmove.velocity, cl.predicted_velocity);
+        cl.predicted.origin = cl.frame.playerState.pmove.origin;
+        cl.predicted.velocity = cl.frame.playerState.pmove.velocity;
 
         if (cl.frame.playerState.pmove.type < PM_DEAD) {
             // enhanced servers don't send viewAngles
@@ -202,7 +202,7 @@ static void set_active_state(void)
             CL_GM_PredictAngles();
         } else {
             // just use what server provided
-            VectorCopy(cl.frame.playerState.viewAngles, cl.predicted_angles);
+            cl.predicted.viewAngles = cl.frame.playerState.viewAngles;
         }
     }
 
