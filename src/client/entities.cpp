@@ -202,7 +202,7 @@ static void set_active_state(void)
             CL_GM_PredictAngles();
         } else {
             // just use what server provided
-            cl.predictedState.viewAngles = cl.frame.playerState.viewAngles;
+            cl.predictedState.viewAngles = cl.frame.playerState.pmove.viewAngles;
         }
     }
 

@@ -976,7 +976,7 @@ void PutClientInServer(entity_t *ent)
     ent->s.angles[vec3_t::Pitch] = 0;
     ent->s.angles[vec3_t::Yaw] = spawn_angles[vec3_t::Yaw];
     ent->s.angles[vec3_t::Roll] = 0;
-    VectorCopy(ent->s.angles, client->playerState.viewAngles);
+    VectorCopy(ent->s.angles, client->playerState.pmove.viewAngles);
     VectorCopy(ent->s.angles, client->v_angle);
 
     // spawn a spectator
@@ -1066,7 +1066,7 @@ void ClientBegin(entity_t *ent)
         // state when the game is saved, so we need to compensate
         // with deltaangles
         for (i = 0 ; i < 3 ; i++)
-            ent->client->playerState.pmove.deltaAngles[i] = ANGLE2SHORT(ent->client->playerState.viewAngles[i]);
+            ent->client->playerState.pmove.deltaAngles[i] = ent->client->playerState.pmove.viewAngles[i];
     } else {
         // a spawn point will completely reinitialize the entity
         // except for the persistant data that was initialized at
@@ -1409,12 +1409,12 @@ void ClientThink(entity_t *ent, cl_cmd_t *ucmd)
             ent->groundEntityLinkCount = pm.groundEntityPtr->linkCount;
 
         if (ent->deadFlag) {
-            client->playerState.viewAngles[vec3_t::Roll] = 40;
-            client->playerState.viewAngles[vec3_t::Pitch] = -15;
-            client->playerState.viewAngles[vec3_t::Yaw] = client->killer_yaw;
+            client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
+            client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
+            client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killer_yaw;
         } else {
             VectorCopy(pm.viewAngles, client->v_angle);
-            VectorCopy(pm.viewAngles, client->playerState.viewAngles);
+            VectorCopy(pm.viewAngles, client->playerState.pmove.viewAngles);
         }
 
         gi.LinkEntity(ent);

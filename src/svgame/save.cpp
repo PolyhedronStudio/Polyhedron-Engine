@@ -297,8 +297,8 @@ static const save_field_t clientfields[] = {
     S(playerState.pmove.gravity),
     SA(playerState.pmove.deltaAngles, 3),
 
-    V(playerState.viewAngles),
-    V(playerState.viewOffset),
+    V(playerState.pmove.viewAngles),
+    V(playerState.pmove.viewOffset),
     V(playerState.kickAngles),
 
     V(playerState.gunangles),

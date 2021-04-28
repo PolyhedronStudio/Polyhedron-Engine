@@ -54,7 +54,7 @@ void HUD_MoveClientToIntermission(entity_t *ent)
     // the client player states positions.
     ent->s.origin = level.intermission_origin;
     ent->client->playerState.pmove.origin = level.intermission_origin;
-    ent->client->playerState.viewAngles = level.intermission_angle;
+    ent->client->playerState.pmove.viewAngles = level.intermission_angle;
     // Setup the rest of the client player state.
     ent->client->playerState.pmove.type = PM_FREEZE;
     ent->client->playerState.gunindex = 0;

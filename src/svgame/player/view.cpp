@@ -221,9 +221,9 @@ static void SV_CalculateViewOffset(entity_t *ent)
     if (ent->deadFlag) {
         ent->client->playerState.kickAngles = vec3_zero();
 
-        ent->client->playerState.viewAngles[vec3_t::Roll] = 40;
-        ent->client->playerState.viewAngles[vec3_t::Pitch] = -15;
-        ent->client->playerState.viewAngles[vec3_t::Yaw] = ent->client->killer_yaw;
+        ent->client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
+        ent->client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
+        ent->client->playerState.pmove.viewAngles[vec3_t::Yaw] = ent->client->killer_yaw;
     } else {
         // Fetch client kick angles.
         vec3_t newKickAngles = ent->client->playerState.kickAngles = ent->client->kickAngles; //ent->client->playerState.kickAngles;
@@ -293,7 +293,7 @@ static void SV_CalculateViewOffset(entity_t *ent)
     // Clamp the new view offsets, and finally assign them to the player state.
     // Clamping ensures that they never exceed the non visible, but physically 
     // there, player bounding box.
-    ent->client->playerState.viewOffset = vec3_clamp(newViewOffset,
+    ent->client->playerState.pmove.viewOffset = vec3_clamp(newViewOffset,
         //{ -14, -14, -22 },
         //{ 14,  14, 30 }
         ent->mins,
@@ -324,7 +324,7 @@ static void SV_CalculateGunOffset(entity_t *ent)
 
     // gun angles from delta movement
     for (i = 0 ; i < 3 ; i++) {
-        delta = ent->client->oldViewAngles[i] - ent->client->playerState.viewAngles[i];
+        delta = ent->client->oldViewAngles[i] - ent->client->playerState.pmove.viewAngles[i];
         if (delta > 180)
             delta -= 360;
         if (delta < -180)
@@ -386,7 +386,7 @@ static void SV_CalculateBlend(entity_t *ent)
                                    ent->client->playerState.blend[2] = ent->client->playerState.blend[3] = 0;
 
     // add for contents
-    VectorAdd(ent->s.origin, ent->client->playerState.viewOffset, vieworg);
+    VectorAdd(ent->s.origin, ent->client->playerState.pmove.viewOffset, vieworg);
     contents = gi.PointContents(vieworg);
 
 	if (contents & (CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA))
@@ -894,7 +894,7 @@ void ClientEndServerFrame(entity_t *ent)
 
     // Store velocity and view angles.
     ent->client->oldVelocity = ent->velocity;
-    ent->client->oldViewAngles = ent->client->playerState.viewAngles;
+    ent->client->oldViewAngles = ent->client->playerState.pmove.viewAngles;
 
     // Reset weapon kicks to zer0.
     ent->client->kickOrigin = vec3_zero();

@@ -551,7 +551,7 @@ static void PF_StartSound(entity_t *edict, int channel,
             // get client viewpos
             ps = &client->edict->client->playerState;
             // N&C: FF Precision.
-            VectorAdd(ps->viewOffset, ps->pmove.origin, origin);
+            VectorAdd(ps->pmove.viewOffset, ps->pmove.origin, origin);
             //VectorMA(ps->viewOffset, 0.125f, ps->pmove.origin, origin);
             leaf = CM_PointLeaf(&sv.cm, origin);
             area = CM_LeafArea(leaf);

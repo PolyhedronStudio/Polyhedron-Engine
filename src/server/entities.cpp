@@ -288,7 +288,7 @@ void SV_BuildClientFrame(client_t *client)
 
     // find the client's PVS
     ps = &clent->client->playerState;
-    org = ps->viewOffset + ps->pmove.origin;
+    org = ps->pmove.origin + ps->pmove.viewOffset;
 
     leaf = CM_PointLeaf(client->cm, org);
     clientarea = CM_LeafArea(leaf);

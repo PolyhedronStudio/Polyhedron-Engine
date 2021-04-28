@@ -636,24 +636,22 @@ int MSG_WriteDeltaPlayerstate(const player_state_t* from, player_state_t* to, ms
         VectorCopy(from->pmove.deltaAngles, to->pmove.deltaAngles);
     }
 
-    if (from->viewOffset[0] != to->viewOffset[0] ||
-        from->viewOffset[1] != to->viewOffset[1] ||
-        from->viewOffset[2] != to->viewOffset[2])
-        pflags |= PS_VIEWOFFSET;
+    if (!EqualEpsilonf(to->pmove.viewOffset.x, from->pmove.viewOffset.x) ||
+        !EqualEpsilonf(to->pmove.viewOffset.y, from->pmove.viewOffset.y) ||
+        !EqualEpsilonf(to->pmove.viewOffset.z, from->pmove.viewOffset.z))
+        pflags |= PS_PM_VIEW_OFFSET;
 
     if (!(flags & MSG_PS_IGNORE_VIEWANGLES)) {
-        if (from->viewAngles[0] != to->viewAngles[0] ||
-            from->viewAngles[1] != to->viewAngles[1])
-            pflags |= PS_VIEWANGLES;
-
-        if (from->viewAngles[2] != to->viewAngles[2])
-            eflags |= EPS_VIEWANGLE2;
+        if (!EqualEpsilonf(to->pmove.viewAngles.x, from->pmove.viewAngles.x) ||
+            !EqualEpsilonf(to->pmove.viewAngles.y, from->pmove.viewAngles.y) ||
+            !EqualEpsilonf(to->pmove.viewAngles.z, from->pmove.viewAngles.z))
+            pflags |= PS_PM_VIEW_ANGLES;
     }
     else {
         // save previous state
-        to->viewAngles[0] = from->viewAngles[0];
-        to->viewAngles[1] = from->viewAngles[1];
-        to->viewAngles[2] = from->viewAngles[2];
+        to->pmove.viewAngles[0] = from->pmove.viewAngles[0];
+        to->pmove.viewAngles[1] = from->pmove.viewAngles[1];
+        to->pmove.viewAngles[2] = from->pmove.viewAngles[2];
     }
 
     if (from->kickAngles[0] != to->kickAngles[0] ||
@@ -742,19 +740,16 @@ int MSG_WriteDeltaPlayerstate(const player_state_t* from, player_state_t* to, ms
     //
     // write the rest of the player_state_t
     //
-    if (pflags & PS_VIEWOFFSET) {
-        MSG_WriteFloat(to->viewOffset[0]);
-        MSG_WriteFloat(to->viewOffset[1]);
-        MSG_WriteFloat(to->viewOffset[2]);
+    if (pflags & PS_PM_VIEW_OFFSET) {
+        MSG_WriteFloat(to->pmove.viewOffset[0]);
+        MSG_WriteFloat(to->pmove.viewOffset[1]);
+        MSG_WriteFloat(to->pmove.viewOffset[2]);
     }
 
-    if (pflags & PS_VIEWANGLES) {
-        MSG_WriteFloat(to->viewAngles[0]);
-        MSG_WriteFloat(to->viewAngles[1]);
+    if (pflags & PS_PM_VIEW_ANGLES) {
+        MSG_WriteFloat(to->pmove.viewAngles[0]);
+        MSG_WriteFloat(to->pmove.viewAngles[1]);
     }
-
-    if (eflags & EPS_VIEWANGLE2)
-        MSG_WriteFloat(to->viewAngles[2]);
 
     if (pflags & PS_KICKANGLES) {
         MSG_WriteFloat(to->kickAngles[0]);
@@ -1267,21 +1262,17 @@ void MSG_ParseDeltaPlayerstate(const player_state_t* from,
     // parse the rest of the player_state_t
     //
     // View Offset.
-    if (flags & PS_VIEWOFFSET) {
-        to->viewOffset[0] = MSG_ReadFloat();
-        to->viewOffset[1] = MSG_ReadFloat();
-        to->viewOffset[2] = MSG_ReadFloat();
+    if (flags & PS_PM_VIEW_OFFSET) {
+        to->pmove.viewOffset.x = MSG_ReadFloat();
+        to->pmove.viewOffset.y = MSG_ReadFloat();
+        to->pmove.viewOffset.z = MSG_ReadFloat();
     }
 
-    // View Angles X Y.
-    if (flags & PS_VIEWANGLES) {
-        to->viewAngles[0] = MSG_ReadFloat();
-        to->viewAngles[1] = MSG_ReadFloat();
-    }
-
-    // ViewAngles Z.
-    if (extraflags & EPS_VIEWANGLE2) {
-        to->viewAngles[2] = MSG_ReadFloat();
+    // View Angles X Y Z.
+    if (flags & PS_PM_VIEW_ANGLES) {
+        to->pmove.viewAngles.x = MSG_ReadFloat();
+        to->pmove.viewAngles.y = MSG_ReadFloat();
+        to->pmove.viewAngles.z = MSG_ReadFloat();
     }
 
     // Kick Angles.
@@ -1373,9 +1364,8 @@ void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
     SP(PM_FLAGS, "pmove.flags");
     SP(PM_GRAVITY, "pmove.gravity");
     SP(PM_DELTA_ANGLES, "pmove.deltaAngles");
-    SP(VIEWOFFSET, "viewOffset");
-    SP(VIEWANGLES, "viewAngles[0,1]");
-    SE(VIEWANGLE2, "viewAngles[2]");
+    SP(PM_VIEW_OFFSET, "pmove.viewOffset");
+    SP(PM_VIEW_ANGLES, "pmove.viewAngles");
     SP(KICKANGLES, "kickAngles");
     SP(WEAPONINDEX, "gunindex");
     SP(WEAPONFRAME, "gunframe");

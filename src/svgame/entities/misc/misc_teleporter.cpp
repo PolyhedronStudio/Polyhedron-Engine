@@ -43,11 +43,11 @@ void teleporter_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface
 
     // set angles
     for (i = 0; i < 3; i++) {
-        other->client->playerState.pmove.deltaAngles[i] = ANGLE2SHORT(dest->s.angles[i] - other->client->resp.cmd_angles[i]);
+        other->client->playerState.pmove.deltaAngles[i] = dest->s.angles[i] - other->client->resp.cmd_angles[i];
     }
 
     VectorClear(other->s.angles);
-    VectorClear(other->client->playerState.viewAngles);
+    VectorClear(other->client->playerState.pmove.viewAngles);
     VectorClear(other->client->v_angle);
 
     // kill anything at the destination

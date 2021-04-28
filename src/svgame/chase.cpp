@@ -91,11 +91,11 @@ void UpdateChaseCam(entity_t *ent)
         ent->client->playerState.pmove.deltaAngles[i] = ANGLE2SHORT(targ->client->v_angle[i] - ent->client->resp.cmd_angles[i]);
 
     if (targ->deadFlag) {
-        ent->client->playerState.viewAngles[vec3_t::Roll] = 40;
-        ent->client->playerState.viewAngles[vec3_t::Pitch] = -15;
-        ent->client->playerState.viewAngles[vec3_t::Yaw] = targ->client->killer_yaw;
+        ent->client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
+        ent->client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
+        ent->client->playerState.pmove.viewAngles[vec3_t::Yaw] = targ->client->killer_yaw;
     } else {
-        VectorCopy(targ->client->v_angle, ent->client->playerState.viewAngles);
+        VectorCopy(targ->client->v_angle, ent->client->playerState.pmove.viewAngles);
         VectorCopy(targ->client->v_angle, ent->client->v_angle);
     }
 

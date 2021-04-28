@@ -675,7 +675,7 @@ void CLG_CalcViewValues(void)
         // TODO: ENABLE THE VIEWOFFSET BELOW, BUT FIRST MAKE SURE WE DO PROPER PREDICTIONS FOR ERRORS TOO.
         // Add view offset to view org.
         cl_predicted_state_t* predictedState = &cl->predictedState;
-        cl->refdef.vieworg = predictedState->viewOrigin; //+ predictedState->viewOffset;
+        cl->refdef.vieworg = predictedState->viewOrigin + predictedState->viewOffset;
 
         const vec3_t error = vec3_scale(predictedState->error, 1.f - lerpFraction);
         cl->refdef.vieworg += error;
@@ -692,9 +692,9 @@ void CLG_CalcViewValues(void)
         //cl->refdef.vieworg[2] = previousPlayerState->pmove.origin[2] +
         //    lerpFraction * (currentPlayerState->pmove.origin[2] - previousPlayerState->pmove.origin[2]);
         // Adjust origins to keep stepOffset in mind.
-        vec3_t oldOrigin = previousPlayerState->pmove.origin += previousPlayerState->viewOffset;
+        vec3_t oldOrigin = previousPlayerState->pmove.origin += previousPlayerState->pmove.viewOffset;
         oldOrigin.z -= cl->predictedState.stepOffset;
-        vec3_t newOrigin = currentPlayerState->pmove.origin += currentPlayerState->viewOffset;
+        vec3_t newOrigin = currentPlayerState->pmove.origin += currentPlayerState->pmove.viewOffset;
         newOrigin.z -= cl->predictedState.stepOffset;
 
         // Calculate final origin.
@@ -706,7 +706,7 @@ void CLG_CalcViewValues(void)
     //
     // if not running a demo or on a locked frame, add the local angle movement
     if (clgi.IsDemoPlayback()) {
-        LerpAngles(previousPlayerState->viewAngles, currentPlayerState->viewAngles, lerpFraction, cl->refdef.viewAngles);
+        LerpAngles(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction, cl->refdef.viewAngles);
     }
     else if (currentPlayerState->pmove.type < PM_DEAD) {
         // use predicted values
@@ -714,7 +714,7 @@ void CLG_CalcViewValues(void)
     }
     else {
         // just use interpolated values
-        LerpAngles(previousPlayerState->viewAngles, currentPlayerState->viewAngles, lerpFraction, cl->refdef.viewAngles);
+        LerpAngles(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction, cl->refdef.viewAngles);
     }
 
 #if USE_SMOOTH_DELTA_ANGLES
