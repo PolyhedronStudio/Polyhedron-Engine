@@ -683,14 +683,7 @@ void CLG_CalcViewValues(void)
         cl->refdef.vieworg.z -= predictedState->stepOffset;
     }
     else {
-        // just use interpolated values
-        // N&C: FF Precision.
-        //cl->refdef.vieworg[0] = previousPlayerState->pmove.origin[0] +
-        //    lerpFraction * (currentPlayerState->pmove.origin[0] - previousPlayerState->pmove.origin[0]);
-        //cl->refdef.vieworg[1] = previousPlayerState->pmove.origin[1] +
-        //    lerpFraction * (currentPlayerState->pmove.origin[1] - previousPlayerState->pmove.origin[1]);
-        //cl->refdef.vieworg[2] = previousPlayerState->pmove.origin[2] +
-        //    lerpFraction * (currentPlayerState->pmove.origin[2] - previousPlayerState->pmove.origin[2]);
+        // Just use interpolated values
         // Adjust origins to keep stepOffset in mind.
         vec3_t oldOrigin = previousPlayerState->pmove.origin += previousPlayerState->pmove.viewOffset;
         oldOrigin.z -= cl->predictedState.stepOffset;
@@ -726,14 +719,14 @@ void CLG_CalcViewValues(void)
     // don't interpolate blend color
     Vec4_Copy(currentPlayerState->blend, cl->refdef.blend);
 
-    // interpolate field of view
+    // Interpolate field of view
     cl->fov_x = lerp_client_fov(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);
     cl->fov_y = CLG_CalculateFOV(cl->fov_x, 4, 3);
 
-    //LerpVector(previousPlayerState->viewOffset, currentPlayerState->viewOffset, lerpFraction, viewOffset);
+    // Calculate new client forward, right, and up vectors.
+    vec3_vectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
 
-    AngleVectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
-
+    // Setup player entity origin and angles accordingly to update the client's listener origins with.
     cl->playerEntityOrigin = cl->refdef.vieworg;
     cl->playerEntityAngles = cl->refdef.viewAngles;
 
@@ -743,8 +736,6 @@ void CLG_CalcViewValues(void)
 
     cl->playerEntityAngles[vec3_t::Pitch] = cl->playerEntityAngles[vec3_t::Pitch] / 3;
 
-    // Add view offset.
-    //cl->refdef.vieworg += viewOffset;
 
     // Update the client's listener origin values.
     clgi.UpdateListenerOrigin();
