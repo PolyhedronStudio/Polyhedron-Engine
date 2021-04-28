@@ -97,7 +97,7 @@ constexpr float PM_SPEED_TRICK_JUMP = 0.f;
 constexpr float PM_SPEED_WATER = 118.f;
 constexpr float PM_SPEED_WATER_JUMP = 420.f;
 constexpr float PM_SPEED_WATER_SINK = -16.f;
-constexpr float PM_SPEED_STEP = 30.f;
+constexpr float PM_SPEED_STEP = 150.f;
 
 //-----------------
 // General.

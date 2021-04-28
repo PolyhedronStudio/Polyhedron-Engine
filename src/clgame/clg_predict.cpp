@@ -10,6 +10,9 @@
 
 #include "clg_main.h"
 
+// Distance that is allowed to be taken as a delta before we reset it.
+#define MAX_DELTA_ORIGIN (2400.f * (1.0f / BASE_FRAMERATE))
+
 //
 //===============
 // CLG_CheckPredictionError
@@ -17,42 +20,42 @@
 // Checks for prediction errors.
 //================
 //
-void CLG_CheckPredictionError(int frame, unsigned int cmd) {
-    //vec3_t delta;
-    //float len;
+void CLG_CheckPredictionError(cl_cmd_t *clientUserCommand) {
+    const pm_state_t* in = &cl->frame.playerState.pmove;
+    cl_predicted_state_t* out = &cl->predictedState;
 
-    //// First frame.
-    //if (cl->frame.number == 0) {
-    //    cl->predictedState.viewOrigin = cl->frame.playerState.pmove.origin;
-    //    cl->predictedState.viewOffset = cl->frame.playerState.viewOffset;
-    //    cl->predictedState.viewAngles = cl->frame.playerState.viewAngles;
-    //    cl->predictedState.stepOffset = 0.f;
+    // if prediction was not run (just spawned), don't sweat it
+    if (clientUserCommand->prediction.time == 0) {
 
-    //    cl->predictedState.error = vec3_zero();
-    //}
+        out->viewOrigin = in->origin;
+        out->viewOffset = in->viewOffset;
+        out->viewAngles = in->viewAngles;
+        out->stepOffset = 0.f;
 
-    //// Compare what the server returned with what we had predicted it to be
-    //cl->predictedState.error = cl->frame.playerState.pmove.origin - cl->predicted_origins[cmd & CMD_MASK];
+        out->error = vec3_zero();
+        return;
+    }
 
-    //// Length is 
-    //len = vec3_length(cl->predictedState.error);
-    //if (len > .1f) {
-    //    if (len > 2400.f * (1.0f / BASE_FRAMERATE)) {
-    //        Com_DPrint("MAX_DELTA_ORIGIN: %s\n", Vec3ToString(cl->predictedState.error));
+    // Subtract what the server returned from our predicted origin for that frame
+    out->error = clientUserCommand->prediction.error = (clientUserCommand->prediction.origin - in->origin);
 
-    //        cl->predictedState.viewOrigin = cl->frame.playerState.pmove.origin;
-    //        cl->predictedState.viewOffset = cl->frame.playerState.viewOffset;
-    //        cl->predictedState.viewAngles = cl->frame.playerState.viewAngles;
-    //        cl->predictedState.stepOffset = 0.f;
+    // If the error is too large, it was likely a teleport or respawn, so ignore it
+    const float len = vec3_length(out->error);
+    if (len > .1f) {
+        if (len > MAX_DELTA_ORIGIN) {
+            Com_DPrint("MAX_DELTA_ORIGIN: %s", Vec3ToString(out->error));
 
-    //        cl->predictedState.error         = vec3_zero();
-    //    }
-    //    else {
-    //        Com_DPrint("CLG_CheckPredictionError: %s len:%f\n", Vec3ToString(cl->predictedState.error), len);
-    //    }
-    //}
+            out->viewOrigin = in->origin;
+            out->viewOffset = in->viewOffset;
+            out->viewAngles = in->viewAngles;
+            out->stepOffset = 0.f;
 
-    //cl->predicted_origins[cmd & CMD_MASK] = cl->frame.playerState.pmove.origin;
+            out->error = vec3_zero();
+        }
+        else {
+            Com_DPrint("%s\n", Vec3ToString(out->error));
+        }
+    }
 }
 
 //
