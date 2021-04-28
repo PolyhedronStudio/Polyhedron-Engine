@@ -124,8 +124,7 @@ int     MSG_WriteDeltaUsercmd(const usercmd_t* from, const usercmd_t* cmd);
 void    MSG_WriteDirection(const vec3_t& dir);
 void    MSG_PackEntity(entity_packed_t* out, const entity_state_t* in, qboolean short_angles);
 void    MSG_WriteDeltaEntity(const entity_packed_t* from, const entity_packed_t* to, msgEsFlags_t flags);
-void    MSG_WriteDeltaPlayerstate_Default(const player_state_t* from, const player_state_t* to);
-int     MSG_WriteDeltaPlayerstate_Enhanced(const player_state_t* from, player_state_t* to, msgPsFlags_t flags);
+int     MSG_WriteDeltaPlayerstate(const player_state_t* from, player_state_t* to, msgPsFlags_t flags);
 
 static inline void* MSG_WriteData(const void* data, size_t len)
 {
@@ -156,15 +155,13 @@ void    MSG_ReadDeltaUsercmd(const usercmd_t* from, usercmd_t* cmd);
 int     MSG_ParseEntityBits(int* bits);
 void    MSG_ParseDeltaEntity(const entity_state_t* from, entity_state_t* to, int number, int bits, msgEsFlags_t flags);
 #if USE_CLIENT
-void    MSG_ParseDeltaPlayerstate_Default(const player_state_t* from, player_state_t* to, int flags);
-void    MSG_ParseDeltaPlayerstate_Enhanced(const player_state_t* from, player_state_t* to, int flags, int extraflags);
+void    MSG_ParseDeltaPlayerstate(const player_state_t* from, player_state_t* to, int flags, int extraflags);
 #endif
 
 #ifdef _DEBUG
 #if USE_CLIENT
-void    MSG_ShowDeltaPlayerstateBits_Default(int flags);
-void    MSG_ShowDeltaPlayerstateBits_Enhanced(int flags, int extraflags);
-void    MSG_ShowDeltaUsercmdBits_Enhanced(int bits);
+void    MSG_ShowDeltaPlayerstateBits(int flags, int extraflags);
+void    MSG_ShowDeltaUsercmdBits(int bits);
 #endif
 #if USE_CLIENT
 void    MSG_ShowDeltaEntityBits(int bits);

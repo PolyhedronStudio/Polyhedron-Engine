@@ -160,54 +160,10 @@ static client_frame_t *get_last_frame(client_t *client)
 
 /*
 ==================
-__OLD_SV_WriteFrameToClient_Default
-==================
-*/
-void __OLD_SV_WriteFrameToClient_Default(client_t *client)
-{
-    client_frame_t  *frame, *oldframe;
-    player_state_t *oldstate;
-    int             lastframe;
-
-    // this is the frame we are creating
-    frame = &client->frames[client->framenum & UPDATE_MASK];
-
-    // this is the frame we are delta'ing from
-    oldframe = get_last_frame(client);
-    if (oldframe) {
-        oldstate = &oldframe->playerState;
-        lastframe = client->lastframe;
-    } else {
-        oldstate = NULL;
-        lastframe = -1;
-    }
-
-    MSG_WriteByte(svc_frame);
-    MSG_WriteLong(client->framenum);
-    MSG_WriteLong(lastframe);   // what we are delta'ing from
-    MSG_WriteByte(client->suppress_count);  // rate dropped packets
-    client->suppress_count = 0;
-    client->frameflags = 0;
-
-    // send over the areabits
-    MSG_WriteByte(frame->areabytes);
-    MSG_WriteData(frame->areabits, frame->areabytes);
-
-    // delta encode the playerstate
-    MSG_WriteByte(svc_playerinfo);
-    MSG_WriteDeltaPlayerstate_Default(oldstate, &frame->playerState);
-
-    // delta encode the entities
-    MSG_WriteByte(svc_packetentities);
-    SV_EmitPacketEntities(client, oldframe, frame, 0);
-}
-
-/*
-==================
 SV_WriteFrameToClient_Enhanced
 ==================
 */
-void SV_WriteFrameToClient_Enhanced(client_t *client)
+void SV_WriteFrameToClient(client_t *client)
 {
     client_frame_t  *frame, *oldframe;
     player_state_t *oldPlayerState;
@@ -262,7 +218,7 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
 
 
     // delta encode the playerstate
-    extraflags = MSG_WriteDeltaPlayerstate_Enhanced(oldPlayerState, &frame->playerState, psFlags);
+    extraflags = MSG_WriteDeltaPlayerstate(oldPlayerState, &frame->playerState, psFlags);
 
     int clientNum = oldframe ? oldframe->clientNum : 0;
     if (clientNum != frame->clientNum) {

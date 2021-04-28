@@ -301,10 +301,10 @@ static void CL_ParseFrame(int extrabits)
 
     // parse playerstate
     bits = MSG_ReadShort();
-    MSG_ParseDeltaPlayerstate_Enhanced(from, &frame.playerState, bits, extraflags);
+    MSG_ParseDeltaPlayerstate(from, &frame.playerState, bits, extraflags);
 #ifdef _DEBUG
     if (cl_shownet->integer > 2 && (bits || extraflags)) {
-        MSG_ShowDeltaPlayerstateBits_Enhanced(bits, extraflags);
+        MSG_ShowDeltaPlayerstateBits(bits, extraflags);
         Com_LPrintf(PRINT_DEVELOPER, "\n");
     }
 #endif

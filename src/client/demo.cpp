@@ -166,9 +166,9 @@ static void emit_delta_frame(server_frame_t *from, server_frame_t *to,
     if (from) {
         //MSG_PackPlayer(&oldpack, &from->playerState);
         oldPlayerState = from->playerState;
-        MSG_WriteDeltaPlayerstate_Default(&oldPlayerState, &newPlayerState);
+        //MSG_WriteDeltaPlayerstate_Default(&oldPlayerState, &newPlayerState);
     } else {
-        MSG_WriteDeltaPlayerstate_Default(NULL, &newPlayerState);
+        //MSG_WriteDeltaPlayerstate_Default(NULL, &newPlayerState);
     }
 
     // delta encode the entities

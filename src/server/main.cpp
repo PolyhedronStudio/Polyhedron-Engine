@@ -1064,7 +1064,7 @@ static void SVC_DirectConnect(void)
     //if (newcl->protocol == PROTOCOL_VERSION_DEFAULT) {
     //    newcl->WriteFrame = __OLD_SV_WriteFrameToClient_Default;
     //} else {
-        newcl->WriteFrame = SV_WriteFrameToClient_Enhanced;
+        newcl->WriteFrame = SV_WriteFrameToClient;
 //    }
 
     // loopback client doesn't need to reconnect
