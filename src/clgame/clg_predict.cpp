@@ -26,6 +26,9 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
         cl->predicted.origin = cl->frame.playerState.pmove.origin;
         cl->predicted.velocity = cl->frame.playerState.pmove.velocity;
         cl->predicted.viewAngles = cl->frame.playerState.viewAngles;
+
+        cl->predicted.step_offset = 0.f;
+        cl->predicted.error = vec3_zero();
     }
 
     // Compare what the server returned with what we had predicted it to be
@@ -37,11 +40,12 @@ void CLG_CheckPredictionError(int frame, unsigned int cmd) {
         if (len > 2400.f * (1.0f / BASE_FRAMERATE)) {
             Com_DPrint("MAX_DELTA_ORIGIN: %s\n", Vec3ToString(cl->predicted.error));
 
-            cl->predicted.origin = cl->frame.playerState.pmove.origin;
-            cl->predicted.velocity = cl->frame.playerState.pmove.velocity;
-            cl->viewAngles = cl->frame.playerState.viewAngles;
-
-            cl->predicted.error = vec3_zero();
+            cl->predicted.origin     = cl->frame.playerState.pmove.origin;
+            cl->predicted.velocity   = cl->frame.playerState.pmove.velocity;
+            cl->predicted.viewAngles = cl->frame.playerState.viewAngles;
+            
+            cl->predicted.step_offset   = 0.f;
+            cl->predicted.error         = vec3_zero();
         }
         else {
             Com_DPrint("CLG_CheckPredictionError: %s len:%f\n", Vec3ToString(cl->predicted.error), len);
@@ -201,10 +205,9 @@ static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
 // Predicts the actual client side movement.
 //================
 //
-void CLG_PredictMovement(unsigned int ack, unsigned int current) {
+void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
     pm_move_t   pm = {};
-    float       step, oldz;
-    int         frame;
+    uint32_t    frameIndex;
 
     // copy current state to pmove
     memset(&pm, 0, sizeof(pm));
@@ -216,7 +219,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
 #endif
 
     // run frames
-    while (++ack <= current) {
+    while (++ack <= currentFrame) {
         pm.cmd = cl->cmds[ack & CMD_MASK];
         PMove(&pm, &clg.pmoveParams);
 
@@ -234,14 +237,13 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
         pm.cmd.sidemove = cl->localmove[1];
         pm.cmd.upmove = cl->localmove[2];
         PMove(&pm, &clg.pmoveParams);
-        frame = current;
+        frameIndex = currentFrame;
 
 
         // save for debug checking
-        cl->predicted_origins[(current + 1) & CMD_MASK] = pm.state.origin;
-    }
-    else {
-        frame = current - 1;
+        cl->predicted_origins[(currentFrame + 1) & CMD_MASK] = pm.state.origin;
+    } else {
+        frameIndex = currentFrame - 1;
     }
 
     // This only interpolates up step...
@@ -256,25 +258,26 @@ void CLG_PredictMovement(unsigned int ack, unsigned int current) {
     //    }
     //}
 
-    if (pm.state.type != PM_SPECTATOR || pm.state.type != PM_NOCLIP) {
-        oldz = cl->predicted_origins[cl->predicted.step_frame & CMD_MASK][2];
-        step = pm.state.origin[2] - oldz;
+    //if (pm.state.type != PM_SPECTATOR || pm.state.type != PM_NOCLIP) {
+    //    oldz = cl->predicted_origins[cl->predicted.step_frame & CMD_MASK][2];
+    //    step = pm.state.origin[2] - oldz;
 
-        //if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
+    //    //if (step > (63.0f / 8.0f) && step < (160.0f / 8.0f)) {
 
-        //    //CLG_TraverseEntityStep(&stepx, clgi.GetRealTime(), step);
-        //    cl->predicted_step = step;
-        //    cl->predicted_step_frame = frame + 1;    // don't double step
-        //    stepx.time = clgi.GetRealTime();
-        //}
-    }
-    
-    if (cl->predicted.step_frame < frame) {
-        cl->predicted.step_frame = frame;
-    }
+    //    //    //CLG_TraverseEntityStep(&stepx, clgi.GetRealTime(), step);
+    //    //    cl->predicted_step = step;
+    //    //    cl->predicted_step_frame = frame + 1;    // don't double step
+    //    //    stepx.time = clgi.GetRealTime();
+    //    //}
+    //}
+    //
+    //if (cl->predicted.step_frame < frame) {
+    //    cl->predicted.step_frame = frame;
+    //}
 
     // copy results out for rendering
-    cl->predicted.origin     = pm.state.origin;
-    cl->predicted.velocity   = pm.state.velocity;
-    cl->predicted.viewAngles = pm.viewAngles;
+    cl->predicted.origin      = pm.state.origin;
+    cl->predicted.velocity    = pm.state.velocity;
+    cl->predicted.step_offset = pm.state.step_offset;
+    cl->predicted.viewAngles  = pm.viewAngles;
 }

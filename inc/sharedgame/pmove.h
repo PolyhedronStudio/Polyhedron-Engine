@@ -61,15 +61,14 @@ constexpr int32_t PMF_DUCKED            = (PMF_GAME << 0);  // Player is ducked
 constexpr int32_t PMF_JUMPED			= (PMF_GAME << 1);  // Player jumped
 constexpr int32_t PMF_JUMP_HELD         = (PMF_GAME << 2);  // Player's jump key is down
 constexpr int32_t PMF_ON_GROUND         = (PMF_GAME << 3);  // Player is on ground
-constexpr int32_t PMF_ON_STAIRS         = (PMF_GAME << 4);  // Player traversed step
-constexpr int32_t PMF_ON_LADDER         = (PMF_GAME << 5);  // Player is on ladder
-constexpr int32_t PMF_UNDER_WATER       = (PMF_GAME << 6);  // Player is under water
-constexpr int32_t PMF_TIME_PUSHED       = (PMF_GAME << 7);  // Time before can seek ground
-constexpr int32_t PMF_TIME_TRICK_JUMP   = (PMF_GAME << 8);  // Time eligible for trick jump
-constexpr int32_t PMF_TIME_WATER_JUMP   = (PMF_GAME << 9);  // Time before control
-constexpr int32_t PMF_TIME_LAND         = (PMF_GAME << 10); // Time before jump eligible
-constexpr int32_t PMF_GIBLET            = (PMF_GAME << 11); // Player is a giblet
-constexpr int32_t PMF_TIME_TRICK_START  = (PMF_GAME << 12); // Time until we can initiate a trick jump
+constexpr int32_t PMF_ON_LADDER         = (PMF_GAME << 4);  // Player is on ladder
+constexpr int32_t PMF_UNDER_WATER       = (PMF_GAME << 5);  // Player is under water
+constexpr int32_t PMF_TIME_PUSHED       = (PMF_GAME << 6);  // Time before can seek ground
+constexpr int32_t PMF_TIME_TRICK_JUMP   = (PMF_GAME << 7);  // Time eligible for trick jump
+constexpr int32_t PMF_TIME_WATER_JUMP   = (PMF_GAME << 8);  // Time before control
+constexpr int32_t PMF_TIME_LAND         = (PMF_GAME << 9); // Time before jump eligible
+constexpr int32_t PMF_GIBLET            = (PMF_GAME << 10); // Player is a giblet
+constexpr int32_t PMF_TIME_TRICK_START  = (PMF_GAME << 11); // Time until we can initiate a trick jump
 
 //
 // The mask of pm_state_t.flags affecting pm_state_t.time.

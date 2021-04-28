@@ -97,6 +97,7 @@ constexpr float PM_SPEED_TRICK_JUMP = 0.f;
 constexpr float PM_SPEED_WATER = 118.f;
 constexpr float PM_SPEED_WATER_JUMP = 420.f;
 constexpr float PM_SPEED_WATER_SINK = -16.f;
+constexpr float PM_SPEED_STEP = 150.f;
 
 //-----------------
 // General.
@@ -135,14 +136,10 @@ static struct {
 
     vec3_t      previousOrigin;
     vec3_t      previousVelocity;
-    qboolean    ladder;
+    qboolean    isClimbingLadder;
 
     // Ground trace results.
-    struct {
-        csurface_t* surface;
-        cplane_t plane;
-        int contents;
-    } ground;
+    trace_t groundTrace;
 } playerMoveLocals;
 
 
@@ -324,7 +321,7 @@ static bool PM_CheckStep(const trace_t * trace) {
 
     if (!trace->allSolid) {
         if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
-            if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.ground.plane.dist) {
+            if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.groundTrace.plane.dist) {
                 return true;
             }
         }
@@ -345,18 +342,18 @@ static void PM_StepDown(const trace_t * trace) {
     pm->state.origin = trace->endPosition;
     pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
 
-    // If we are above minimal step height, remove the PMF_ON_STAIRS flag.
-    if (pm->step >= PM_STEP_HEIGHT_MIN) {
-        pm->state.flags |= PMF_ON_STAIRS;
-    }
-    // If we are stepping down more rapidly than PM_STEP_HEIGHT_MIN then remove the stairs flag.
-    else if (pm->step <= -PM_STEP_HEIGHT_MIN && (pm->state.flags & PMF_ON_GROUND)) {
-        pm->state.flags |= PMF_ON_STAIRS;
-    }
-    // Nothing to deal with, set it to 0.
-    else {
-        pm->step = 0.0;
-    }
+    //// If we are above minimal step height, remove the PMF_ON_STAIRS flag.
+    //if (pm->step >= PM_STEP_HEIGHT_MIN) {
+    //    pm->state.flags |= PMF_ON_STAIRS;
+    //}
+    //// If we are stepping down more rapidly than PM_STEP_HEIGHT_MIN then remove the stairs flag.
+    //else if (pm->step <= -PM_STEP_HEIGHT_MIN && (pm->state.flags & PMF_ON_GROUND)) {
+    //    pm->state.flags |= PMF_ON_STAIRS;
+    //}
+    //// Nothing to deal with, set it to 0.
+    //else {
+    //    pm->step = 0.0;
+    //}
 }
 
 //
@@ -453,7 +450,7 @@ static qboolean PM_StepSlideMove_(void)
 
     // never turn against our ground plane
     if (pm->state.flags & PMF_ON_GROUND) {
-        planes[numPlanes] = playerMoveLocals.ground.plane.normal;
+        planes[numPlanes] = playerMoveLocals.groundTrace.plane.normal;
         numPlanes++;
     }
 
@@ -755,7 +752,7 @@ static void PM_CheckDuck(void) {
     } else {
 
         const qboolean is_ducking = pm->state.flags & PMF_DUCKED;
-        const qboolean wants_ducking = (pm->cmd.upmove < 0) && !(playerMoveLocals.ladder);
+        const qboolean wants_ducking = (pm->cmd.upmove < 0) && !(playerMoveLocals.isClimbingLadder);
 
         if (!is_ducking && wants_ducking) {
             pm->state.flags |= PMF_DUCKED;
@@ -817,8 +814,8 @@ static void PM_CheckDuck(void) {
 //===============
 // PM_CheckLadder
 //
-// Check for ladder interaction.
-// Returns true if the player is on a ladder.
+// Check for isClimbingLadder interaction.
+// Returns true if the player is on a isClimbingLadder.
 //===============
 //
 static qboolean PM_CheckLadder(void) {
@@ -827,13 +824,13 @@ static qboolean PM_CheckLadder(void) {
         return false;
     }
 
-    // Calculate a trace for determining whether there is a ladder in front of us.
+    // Calculate a trace for determining whether there is a isClimbingLadder in front of us.
     const vec3_t pos = vec3_fmaf(pm->state.origin, 1, playerMoveLocals.forwardXY);
     const trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
 
-    // Found one, engage ladder state.
+    // Found one, engage isClimbingLadder state.
     if ((trace.fraction < 1.0f) && (trace.contents & CONTENTS_LADDER)) {
-        // Add ladder flag.
+        // Add isClimbingLadder flag.
         pm->state.flags |= PMF_ON_LADDER;
 
         // No ground entity, obviously.
@@ -995,11 +992,7 @@ static void PM_CheckGround(void) {
     }
 
     // Seek the ground
-    trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
-
-    playerMoveLocals.ground.plane = trace.plane;
-    playerMoveLocals.ground.surface = trace.surface;
-    playerMoveLocals.ground.contents = trace.contents;
+    trace_t trace = playerMoveLocals.groundTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
 
     // If we hit an upward facing plane, make it our ground
     if (trace.ent && trace.plane.normal.z >= PM_STEP_NORMAL) {
@@ -1098,7 +1091,7 @@ static void PM_Friction(void) {
         friction = PM_FRICT_WATER;
         // GROUND friction.
     } else if (pm->state.flags & PMF_ON_GROUND) {
-        if (playerMoveLocals.ground.surface && (playerMoveLocals.ground.surface->flags & SURF_SLICK)) {
+        if (playerMoveLocals.groundTrace.surface && (playerMoveLocals.groundTrace.surface->flags & SURF_SLICK)) {
             friction = PM_FRICT_GROUND_SLICK;
         } else {
             friction = PM_FRICT_GROUND;
@@ -1192,22 +1185,22 @@ static void PM_ApplyCurrents(void) {
 
     // add conveyer belt velocities
     if (pm->groundEntityPtr) {
-        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_0) {
+        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_0) {
             current.x += 1.0;
         }
-        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_90) {
+        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_90) {
             current.y += 1.0;
         }
-        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_180) {
+        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_180) {
             current.x -= 1.0;
         }
-        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_270) {
+        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_270) {
             current.y -= 1.0;
         }
-        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_UP) {
+        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_UP) {
             current.z += 1.0;
         }
-        if (playerMoveLocals.ground.contents & CONTENTS_CURRENT_DOWN) {
+        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_DOWN) {
             current.z -= 1.0;
         }
     }
@@ -1231,7 +1224,7 @@ static void PM_ApplyCurrents(void) {
 //===============
 // PM_LadderMove
 // 
-// Called when the player is climbing a ladder.
+// Called when the player is climbing a isClimbingLadder.
 //===============
 //
 static void PM_LadderMove(void) {
@@ -1248,7 +1241,7 @@ static void PM_LadderMove(void) {
 
     const float s = PM_SPEED_LADDER * 0.125f;
 
-    // limit horizontal speed when on a ladder
+    // limit horizontal speed when on a isClimbingLadder
     vel.x = Clampf(vel.x, -s, s);
     vel.y = Clampf(vel.y, -s, s);
     vel.z = 0.f;
@@ -1338,16 +1331,21 @@ static void PM_WaterMove(void) {
 
     PM_Debug("%s\n", Vec3ToString(pm->state.origin));
 
-    // apply friction, slowing rapidly when first entering the water
-    PM_Friction();
+    // Apply friction, slowing rapidly when first entering the water
+	float speed = vec3_length(pm->state.velocity);
 
-    // and sink if idle
+	for (int32_t i = speed / PM_SPEED_WATER; i >= 0; i--) {
+		PM_Friction();
+	}
+
+    // And sink if idle
     if (!pm->cmd.forwardmove && !pm->cmd.sidemove && !pm->cmd.upmove) {
         if (pm->state.velocity.z > PM_SPEED_WATER_SINK) {
             PM_Gravity();
         }
     }
 
+    // Apply currents.
     PM_ApplyCurrents();
 
     // user intentions on X/Y/Z
@@ -1369,7 +1367,6 @@ static void PM_WaterMove(void) {
         }
     }
 
-    float speed;
     const vec3_t dir = vec3_normalize_length(vel, speed);
     speed = Clampf(speed, 0, PM_SPEED_WATER);
 
@@ -1455,8 +1452,8 @@ static void PM_WalkMove(void) {
     PM_ApplyCurrents();
 
     // Project the desired movement into the X/Y plane
-    const vec3_t forward = vec3_normalize(PM_ClipVelocity(playerMoveLocals.forwardXY, playerMoveLocals.ground.plane.normal, PM_CLIP_BOUNCE));
-    const vec3_t right = vec3_normalize(PM_ClipVelocity(playerMoveLocals.rightXY, playerMoveLocals.ground.plane.normal, PM_CLIP_BOUNCE));
+    const vec3_t forward = vec3_normalize(PM_ClipVelocity(playerMoveLocals.forwardXY, playerMoveLocals.groundTrace.plane.normal, PM_CLIP_BOUNCE));
+    const vec3_t right = vec3_normalize(PM_ClipVelocity(playerMoveLocals.rightXY, playerMoveLocals.groundTrace.plane.normal, PM_CLIP_BOUNCE));
 
     vec3_t vel = vec3_zero();
     vel = vec3_fmaf(vel, pm->cmd.forwardmove, forward);
@@ -1494,7 +1491,7 @@ static void PM_WalkMove(void) {
     }
 
     // Accelerate based on slickness of ground surface
-    const float accel = (playerMoveLocals.ground.surface->flags & SURF_SLICK) ? PM_ACCEL_GROUND_SLICK : PM_ACCEL_GROUND;
+    const float accel = (playerMoveLocals.groundTrace.surface->flags & SURF_SLICK) ? PM_ACCEL_GROUND_SLICK : PM_ACCEL_GROUND;
 
     PM_Accelerate(dir, speed, accel);
 
@@ -1502,7 +1499,7 @@ static void PM_WalkMove(void) {
     speed = vec3_length(pm->state.velocity);
 
     // Clip to the ground
-    pm->state.velocity = PM_ClipVelocity(pm->state.velocity, playerMoveLocals.ground.plane.normal, PM_CLIP_BOUNCE);
+    pm->state.velocity = PM_ClipVelocity(pm->state.velocity, playerMoveLocals.groundTrace.plane.normal, PM_CLIP_BOUNCE);
 
     // And now scale by the speed to avoid slowing down on slopes
     pm->state.velocity = vec3_normalize(pm->state.velocity);
@@ -1627,14 +1624,15 @@ static void PM_Init(pm_move_t * pmove) {
     // Clear out previous PM iteration results
     pm->viewAngles = vec3_zero();
 
+    // This is important too.
     pm->numTouchedEntities = 0;
-    pm->groundEntityPtr = NULL;
-
+    
+    // Reset water states.
     pm->waterType = 0;
     pm->waterLevel = 0;
 
     // Reset the flags, and step, values. These are set on a per frame basis.
-    pm->state.flags &= ~(PMF_ON_GROUND | PMF_ON_STAIRS | PMF_ON_LADDER);
+    pm->state.flags &= ~(PMF_ON_GROUND | PMF_ON_LADDER);
     pm->state.flags &= ~(PMF_JUMPED | PMF_UNDER_WATER);
     pm->step = 0.0f;
 
@@ -1676,6 +1674,33 @@ static void PM_ClampAngles(void) {
     }
     else if (pm->viewAngles.x <= 360.0f && pm->viewAngles.x >= 270.0f) {
         pm->viewAngles.x -= 360.0f;
+    }
+}
+
+//
+//===============
+// PM_CheckViewStep
+// 
+// Caculate the view step value that we are at when stepping up and down a ledge/slope/stairs.
+//===============
+//
+static void PM_CheckViewStep(void) {
+    // Add the step offset we've made on this frame
+    if (pm->step) {
+        pm->state.step_offset += pm->step;
+    }
+
+    // Calculate change to the step offset
+    if (pm->state.step_offset) {
+        // Calculate the step speed to interpolate at.
+        const float step_speed = playerMoveLocals.frameTime * (PM_SPEED_STEP * (Maxf(1.f, fabsf(pm->state.step_offset) / PM_STEP_HEIGHT)));
+
+        // Are we interpolating upwards, or downwards?
+        if (pm->state.step_offset > 0) {
+            pm->state.step_offset = Maxf(0.f, pm->state.step_offset - step_speed);
+        } else {
+            pm->state.step_offset = Minf(0.f, pm->state.step_offset + step_speed);
+        }
     }
 }
 
@@ -1784,6 +1809,9 @@ void PMove(pm_move_t * pmove, pmoveParams_t * params)
 
     // Check for water at new spot.
     PM_CheckWater();
+
+    // Check for view step changes, if so, interpolate.
+    PM_CheckViewStep();
 }
 
 

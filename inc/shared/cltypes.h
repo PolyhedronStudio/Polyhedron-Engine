@@ -284,7 +284,7 @@ typedef struct client_state_s {
     int         initialSeq;
 
     struct {
-        float step;
+        float step_offset;
         uint32_t step_time;
         uint32_t step_frame;
 
