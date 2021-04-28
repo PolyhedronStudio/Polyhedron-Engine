@@ -650,84 +650,84 @@ static inline float lerp_client_fov(float ofov, float nfov, float lerp)
 //
 void CLG_CalcViewValues(void)
 {
-    player_state_t* ps, * ops;
-    vec3_t viewoffset;
-    float lerp;
+    player_state_t *currentPlayerState = NULL;
+    player_state_t *previousPlayerState = NULL;
 
+    vec3_t viewOffset = vec3_zero();
+
+    float lerpFraction = cl->lerpfrac;
+
+    // Only do this if we had a valid frame.
     if (!cl->frame.valid) {
         return;
     }
 
-    // find states to interpolate between
-    ps = &cl->frame.playerState;
-    ops = &cl->oldframe.playerState;
+    // Find states to interpolate between
+    currentPlayerState = &cl->frame.playerState;
+    previousPlayerState = &cl->oldframe.playerState;
 
-    lerp = cl->lerpfrac;
+    lerpFraction = cl->lerpfrac;
 
-    // calculate the origin
-    if (!clgi.IsDemoPlayback() && cl_predict->integer && !(ps->pmove.flags & PMF_NO_PREDICTION)) {
+    //
+    // Origin
+    //
+    if (!clgi.IsDemoPlayback() 
+        && cl_predict->integer 
+        && !(currentPlayerState->pmove.flags & PMF_NO_PREDICTION)) {
         // use predicted values
         unsigned delta = clgi.GetRealTime() - cl->predicted.step_time;
-        float backlerp = lerp - 1.0;
+        float backlerp = lerpFraction - 1.0;
 
-        VectorMA(cl->predicted.origin, backlerp, cl->predicted.error, cl->refdef.vieworg);
+        cl->refdef.vieworg = vec3_fmaf(cl->predicted.origin, backlerp, cl->predicted.error);
 
-        // smooth out stair climbing
-        // N&C: FF Precision.
-        if (cl->predicted.step < (127.0f / 8.0f)) {         //if (cl->predicted_step < 127 * 0.125f) {
-            delta *= 0.5;                                   //  delta <<= 1; // small steps
-        }
-        // N&C: FF Precision.
-        if (delta < (100.0f)) {
-            cl->refdef.vieworg[2] = cl->predicted.step * delta;
-        }
-        //if (delta < 100) {
-        //  cl->refdef.vieworg[2] -= cl->predicted_step * (100 - delta) * 0.01f;
-        //}
+        //// smooth out stair climbing
     }
     else {
         // just use interpolated values
         // N&C: FF Precision.
-        cl->refdef.vieworg[0] = ops->pmove.origin[0] +
-            lerp * (ps->pmove.origin[0] - ops->pmove.origin[0]);
-        cl->refdef.vieworg[1] = ops->pmove.origin[1] +
-            lerp * (ps->pmove.origin[1] - ops->pmove.origin[1]);
-        cl->refdef.vieworg[2] = ops->pmove.origin[2] +
-            lerp * (ps->pmove.origin[2] - ops->pmove.origin[2]);
+        cl->refdef.vieworg[0] = previousPlayerState->pmove.origin[0] +
+            lerpFraction * (currentPlayerState->pmove.origin[0] - previousPlayerState->pmove.origin[0]);
+        cl->refdef.vieworg[1] = previousPlayerState->pmove.origin[1] +
+            lerpFraction * (currentPlayerState->pmove.origin[1] - previousPlayerState->pmove.origin[1]);
+        cl->refdef.vieworg[2] = previousPlayerState->pmove.origin[2] +
+            lerpFraction * (currentPlayerState->pmove.origin[2] - previousPlayerState->pmove.origin[2]);
     }
 
+    //
+    // View Angles.
+    //
     // if not running a demo or on a locked frame, add the local angle movement
     if (clgi.IsDemoPlayback()) {
-        LerpAngles(ops->viewAngles, ps->viewAngles, lerp, cl->refdef.viewAngles);
+        LerpAngles(previousPlayerState->viewAngles, currentPlayerState->viewAngles, lerpFraction, cl->refdef.viewAngles);
     }
-    else if (ps->pmove.type < PM_DEAD) {
+    else if (currentPlayerState->pmove.type < PM_DEAD) {
         // use predicted values
         cl->refdef.viewAngles = cl->predicted.viewAngles;
     }
     else {
         // just use interpolated values
-        LerpAngles(ops->viewAngles, ps->viewAngles, lerp, cl->refdef.viewAngles);
+        LerpAngles(previousPlayerState->viewAngles, currentPlayerState->viewAngles, lerpFraction, cl->refdef.viewAngles);
     }
 
 #if USE_SMOOTH_DELTA_ANGLES
-    cl->delta_angles[0] = LerpShort(ops->pmove.delta_angles[0], ps->pmove.delta_angles[0], lerp);
-    cl->delta_angles[1] = LerpShort(ops->pmove.delta_angles[1], ps->pmove.delta_angles[1], lerp);
-    cl->delta_angles[2] = LerpShort(ops->pmove.delta_angles[2], ps->pmove.delta_angles[2], lerp);
+    cl->delta_angles[0] = LerpShort(ops->pmove.delta_angles[0], ps->pmove.delta_angles[0], lerpFraction);
+    cl->delta_angles[1] = LerpShort(ops->pmove.delta_angles[1], ps->pmove.delta_angles[1], lerpFraction);
+    cl->delta_angles[2] = LerpShort(ops->pmove.delta_angles[2], ps->pmove.delta_angles[2], lerpFraction);
 #endif
 
     // don't interpolate blend color
-    Vec4_Copy(ps->blend, cl->refdef.blend);
+    Vec4_Copy(currentPlayerState->blend, cl->refdef.blend);
 
     // interpolate field of view
-    cl->fov_x = lerp_client_fov(ops->fov, ps->fov, lerp);
+    cl->fov_x = lerp_client_fov(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);
     cl->fov_y = CLG_CalculateFOV(cl->fov_x, 4, 3);
 
-    LerpVector(ops->viewoffset, ps->viewoffset, lerp, viewoffset);
+    LerpVector(previousPlayerState->viewoffset, currentPlayerState->viewoffset, lerpFraction, viewOffset);
 
     AngleVectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
 
-    VectorCopy(cl->refdef.vieworg, cl->playerEntityOrigin);
-    VectorCopy(cl->refdef.viewAngles, cl->playerEntityAngles);
+    cl->playerEntityOrigin = cl->refdef.vieworg;
+    cl->playerEntityAngles = cl->refdef.viewAngles;
 
     if (cl->playerEntityAngles[vec3_t::Pitch] > 180) {
         cl->playerEntityAngles[vec3_t::Pitch] -= 360;
@@ -735,7 +735,8 @@ void CLG_CalcViewValues(void)
 
     cl->playerEntityAngles[vec3_t::Pitch] = cl->playerEntityAngles[vec3_t::Pitch] / 3;
 
-    VectorAdd(cl->refdef.vieworg, viewoffset, cl->refdef.vieworg);
+    // Add view offset.
+    cl->refdef.vieworg += viewOffset;
 
     // Update the client's listener origin values.
     clgi.UpdateListenerOrigin();
