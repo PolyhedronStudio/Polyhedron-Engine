@@ -77,8 +77,9 @@ static void upload_geometry(VkCommandBuffer command_buffer);
 cvar_t* cvar_pt_particle_size = NULL;
 cvar_t* cvar_pt_beam_width = NULL;
 cvar_t* cvar_pt_beam_lights = NULL;
+cvar_t* cvar_pt_particle_emissive = NULL;
 extern cvar_t* cvar_pt_enable_particles;
-extern cvar_t* cvar_pt_particle_emissive;
+
 extern cvar_t* cvar_pt_projection;
 
 void cast_u32_to_f32_color(int color_index, const color_t* pcolor, float* color_f32, float hdr_factor)
@@ -98,6 +99,7 @@ qboolean initialize_transparency()
 	cvar_pt_particle_size = Cvar_Get("pt_particle_size", "0.35", 0);
 	cvar_pt_beam_width = Cvar_Get("pt_beam_width", "1.0", 0);
 	cvar_pt_beam_lights = Cvar_Get("pt_beam_lights", "1.0", 0);
+	cvar_pt_particle_emissive = Cvar_Get("pt_particle_emissive", "1", 0);
 
 	memset(&transparency, 0, sizeof(transparency));
 
