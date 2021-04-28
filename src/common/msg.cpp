@@ -265,11 +265,11 @@ int MSG_WriteDeltaUsercmd(const cl_cmd_t* from, const cl_cmd_t* cmd)
     MSG_WriteByte(bits);
 
     if (bits & CM_ANGLE1)
-        MSG_WriteShort(cmd->cmd.angles[0]);
+        MSG_WriteFloat(cmd->cmd.angles[0]);
     if (bits & CM_ANGLE2)
-        MSG_WriteShort(cmd->cmd.angles[1]);
+        MSG_WriteFloat(cmd->cmd.angles[1]);
     if (bits & CM_ANGLE3)
-        MSG_WriteShort(cmd->cmd.angles[2]);
+        MSG_WriteFloat(cmd->cmd.angles[2]);
 
     if (bits & CM_FORWARD)
         MSG_WriteShort(cmd->cmd.forwardmove);
@@ -1003,11 +1003,11 @@ void MSG_ReadDeltaUsercmd(const cl_cmd_t* from, cl_cmd_t* to)
 
     // read current angles
     if (bits & CM_ANGLE1)
-        to->cmd.angles[0] = MSG_ReadShort();
+        to->cmd.angles[0] = MSG_ReadFloat();
     if (bits & CM_ANGLE2)
-        to->cmd.angles[1] = MSG_ReadShort();
+        to->cmd.angles[1] = MSG_ReadFloat();
     if (bits & CM_ANGLE3)
-        to->cmd.angles[2] = MSG_ReadShort();
+        to->cmd.angles[2] = MSG_ReadFloat();
 
     // read movement
     if (bits & CM_FORWARD)
