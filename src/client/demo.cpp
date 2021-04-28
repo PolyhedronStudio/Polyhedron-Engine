@@ -550,7 +550,7 @@ static int read_first_message(qhandle_t f)
     }
 
     // determine demo type
-    if (ul == MVD_MAGIC) {
+/*    if (ul == MVD_MAGIC) {
         read = FS_Read(&us, 2, f);
         if (read != 2) {
             return read < 0 ? read : Q_ERR_UNEXPECTED_EOF;
@@ -560,13 +560,13 @@ static int read_first_message(qhandle_t f)
         }
         msglen = LittleShort(us);
         type = 1;
-    } else {
+    } else*/ {
         if (ul == (uint32_t)-1) {
             return Q_ERR_UNEXPECTED_EOF;
         }
         msglen = LittleLong(ul);
         type = 0;
-    }
+  //  }
 
     // if (msglen < 64 || msglen > sizeof(msg_read_buffer)) {
     if (msglen > sizeof(msg_read_buffer)) {
