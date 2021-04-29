@@ -749,6 +749,7 @@ int MSG_WriteDeltaPlayerstate(const player_state_t* from, player_state_t* to, ms
     if (pflags & PS_PM_VIEW_ANGLES) {
         MSG_WriteFloat(to->pmove.viewAngles[0]);
         MSG_WriteFloat(to->pmove.viewAngles[1]);
+        MSG_WriteFloat(to->pmove.viewAngles[2]);
     }
 
     if (pflags & PS_KICKANGLES) {
