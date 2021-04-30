@@ -621,8 +621,8 @@ void SV_Physics_Noclip(entity_t *ent)
     if (!ent->inUse)
         return;
 
-    VectorMA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
-    VectorMA(ent->s.origin, FRAMETIME, ent->velocity, ent->s.origin);
+    ent->s.angles = vec3_fmaf(ent->s.angles, FRAMETIME, ent->avelocity);
+    ent->s.origin = vec3_fmaf(ent->s.origin, FRAMETIME, ent->velocity);
 
     gi.LinkEntity(ent);
 }
@@ -648,45 +648,46 @@ void SV_Physics_Toss(entity_t *ent)
     vec3_t      move;
     float       backoff;
     entity_t     *slave;
-    qboolean    wasinwater;
-    qboolean    isinwater;
+    qboolean    wasInWater;
+    qboolean    isInWater;
     vec3_t      old_origin;
 
-// regular thinking
+    // Regular thinking
     SV_RunThink(ent);
     if (!ent->inUse)
         return;
 
-    // if not a team captain, so movement will be handled elsewhere
+    // If not a team captain, so movement will be handled elsewhere
     if (ent->flags & FL_TEAMSLAVE)
         return;
 
     if (ent->velocity[2] > 0)
         ent->groundEntityPtr = NULL;
 
-// check for the groundentity going away
+    // Check for the groundentity going away
     if (ent->groundEntityPtr)
         if (!ent->groundEntityPtr->inUse)
             ent->groundEntityPtr = NULL;
 
-// if onground, return without moving
+    // If onground, return without moving
     if (ent->groundEntityPtr)
         return;
 
-    VectorCopy(ent->s.origin, old_origin);
+    // Store ent->s.origin as the old origin
+    old_origin = ent->s.origin;
 
     SV_CheckVelocity(ent);
 
-// add gravity
+    // Add gravity
     if (ent->moveType != MOVETYPE_FLY
         && ent->moveType != MOVETYPE_FLYMISSILE)
         SV_AddGravity(ent);
 
-// move angles
-    VectorMA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
+    // Move angles
+    ent->s.angles = vec3_fmaf(ent->s.angles, FRAMETIME, ent->avelocity);
 
-// move origin
-    VectorScale(ent->velocity, FRAMETIME, move);
+    // Move origin
+    move = vec3_scale(ent->velocity, FRAMETIME);
     trace = SV_PushEntity(ent, move);
     if (!ent->inUse)
         return;
@@ -713,24 +714,25 @@ void SV_Physics_Toss(entity_t *ent)
 //          ent->Touch (ent, trace.ent, &trace.plane, trace.surface);
     }
 
-// check for water transition
-    wasinwater = (ent->waterType & CONTENTS_MASK_LIQUID);
+    // Check for water transition
+    wasInWater = (ent->waterType & CONTENTS_MASK_LIQUID);
     ent->waterType = gi.PointContents(ent->s.origin);
-    isinwater = ent->waterType & CONTENTS_MASK_LIQUID;
+    isInWater = ent->waterType & CONTENTS_MASK_LIQUID;
 
-    if (isinwater)
+    if (isInWater)
         ent->waterLevel = 1;
     else
         ent->waterLevel = 0;
 
-    if (!wasinwater && isinwater)
+    if (!wasInWater && isInWater)
         gi.PositionedSound(old_origin, g_edicts, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
-    else if (wasinwater && !isinwater)
+    else if (wasInWater && !isInWater)
         gi.PositionedSound(ent->s.origin, g_edicts, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 
-// move teamslaves
+    // Move teamslaves
     for (slave = ent->teamChainPtr; slave; slave = slave->teamChainPtr) {
-        VectorCopy(ent->s.origin, slave->s.origin);
+        // Set origin and link them in.
+        slave->s.origin = ent->s.origin;
         gi.LinkEntity(slave);
     }
 }
@@ -766,7 +768,7 @@ void SV_AddRotationalFriction(entity_t *ent)
     int     n;
     float   adjustment;
 
-    VectorMA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
+    ent->s.angles = vec3_fmaf(ent->s.angles, FRAMETIME, ent->avelocity);
     adjustment = FRAMETIME * sv_stopspeed * sv_friction;
     for (n = 0; n < 3; n++) {
         if (ent->avelocity[n] > 0) {
