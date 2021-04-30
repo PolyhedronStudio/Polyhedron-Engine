@@ -472,7 +472,7 @@ void CL_SeekDemoMessage(void);
 //
 void CL_DeltaFrame(void);
 void CL_AddEntities(void);
-void CL_CalcViewValues(void);
+void CL_UpdateOrigin(void);
 
 #ifdef _DEBUG
 void CL_CheckEntityPresent(int entnum, const char *what);

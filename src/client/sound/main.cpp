@@ -1209,7 +1209,7 @@ void S_Update(void)
     }
 
     // set listener entity number
-    // other parameters should be already set up by CL_CalcViewValues
+    // other parameters should be already set up by CL_UpdateOrigin
     if (cl.clientNum == -1 || cl.frame.clientNum == CLIENTNUM_NONE) {
         listener_entnum = -1;
     } else {

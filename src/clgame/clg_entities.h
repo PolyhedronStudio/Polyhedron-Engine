@@ -13,6 +13,6 @@ void CLG_EntityEvent(int number);
 
 void CLG_AddPacketEntities(void);
 void CLG_AddViewWeapon(void);
-void CLG_CalcViewValues(void);
+void CLG_UpdateOrigin(void);
 
 #endif // __CLGAME_ENTITIES_H__

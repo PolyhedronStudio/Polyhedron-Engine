@@ -3080,7 +3080,7 @@ run_fx:
         SCR_RunCinematic();
     } else if (sync_mode == SYNC_SLEEP_20) {
         // Force audio and effects update if not rendering
-        CL_GM_CalcViewValues();
+        CL_GM_UpdateOrigin();
         goto run_fx;
     }
 
