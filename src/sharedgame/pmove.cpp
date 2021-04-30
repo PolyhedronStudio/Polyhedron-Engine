@@ -368,8 +368,8 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins,
     // M_CheckGround function instead. (Seems related to a -0.25f).
     // 
     // And otherwise, we got this solution below, which... is seemingly slow in certain cases...
-    return pm->Trace(start, mins, maxs, end);
-#if 0
+    //return pm->Trace(start, mins, maxs, end);
+#if 1
     const vec3_t offsets = { 0.f, 1.f, -1.f };
 
     // Jitter around
@@ -1216,7 +1216,7 @@ static void PM_ApplyCurrents(void) {
 //===============
 //
 static void PM_LadderMove(void) {
-    PM_Debug("%s", Vec3ToString(pm->state.origin));
+    //PM_Debug("%s", Vec3ToString(pm->state.origin));
 
     PM_Friction();
 
@@ -1279,8 +1279,7 @@ static void PM_LadderMove(void) {
 //===============
 //
 static void PM_WaterJumpMove(void) {
-
-    PM_Debug("%s\n", Vec3ToString(pm->state.origin));
+    //PM_Debug("%s\n", Vec3ToString(pm->state.origin));
 
     PM_Friction();
 
@@ -1317,7 +1316,7 @@ static void PM_WaterMove(void) {
         return;
     }
 
-    PM_Debug("%s\n", Vec3ToString(pm->state.origin));
+    //PM_Debug("%s\n", Vec3ToString(pm->state.origin));
 
     // Apply friction, slowing rapidly when first entering the water
 	float speed = vec3_length(pm->state.velocity);
@@ -1381,7 +1380,7 @@ static void PM_WaterMove(void) {
 //
 static void PM_AirMove(void) {
 
-    PM_Debug("%s", Vec3ToString(pm->state.origin));
+    //PM_Debug("%s", Vec3ToString(pm->state.origin));
 
     PM_Friction();
 
@@ -1433,7 +1432,7 @@ static void PM_WalkMove(void) {
         return;
     }
 
-    PM_Debug("%s", Vec3ToString(pm->state.origin));
+    //PM_Debug("%s", Vec3ToString(pm->state.origin));
 
     PM_Friction();
 
@@ -1503,7 +1502,7 @@ static void PM_WalkMove(void) {
 //===============
 //
 static void PM_SpectatorMove(void) {
-    PM_Debug("%s", Vec3ToString(pm->state.origin));
+    //PM_Debug("%s", Vec3ToString(pm->state.origin));
 
     PM_Friction();
 
@@ -1571,7 +1570,7 @@ static void PM_NoclipMove() {
 //===============
 //
 static void PM_FreezeMove(void) {
-    PM_Debug("%s", Vec3ToString(pm->state.origin));
+    //PM_Debug("%s", Vec3ToString(pm->state.origin));
     // Other than that call.... It's empty.
     // Or, what else did you expect to find here?
     //
@@ -1798,7 +1797,7 @@ void PMove(pm_move_t * pmove, pmoveParams_t * params)
     PM_CheckViewStep();
 
 
-    PM_Debug("pm->step = %f pm->state.origin = %s", pm->step, Vec3ToString(pm->state.origin));
+    //PM_Debug("pm->step = %f pm->state.origin = %s", pm->step, Vec3ToString(pm->state.origin));
 }
 
 

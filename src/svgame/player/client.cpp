@@ -1358,19 +1358,16 @@ void ClientThink(entity_t *ent, cl_cmd_t *ucmd)
             client->playerState.pmove.type = PM_NORMAL;
 
         client->playerState.pmove.gravity = sv_gravity->value;
+        
+        // Copy over the latest playerstate its pmove state.
         pm.state = client->playerState.pmove;
 
-        // N&C: FF Precision.
-        VectorCopy(ent->s.origin, pm.state.origin);
-        VectorCopy(ent->velocity, pm.state.velocity);
-        //for (i = 0 ; i < 3 ; i++) {
-        //    pm.state.origin[i] = ent->s.origin[i] * 8;
-        //    pm.state.velocity[i] = ent->velocity[i] * 8;
-        //}
+        // Move over entity state values into the player move state so it is up to date.
+        pm.state.origin = ent->s.origin;
+        pm.state.velocity = ent->velocity;
 
         if (memcmp(&client->old_pmove, &pm.state, sizeof(pm.state))) {
             pm.testInitial = true;
-            gi.DPrintf ("pmove changed!\n");
         }
 
         pm.cmd = *ucmd;

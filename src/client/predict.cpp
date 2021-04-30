@@ -20,11 +20,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/gamemodule.h"
 
 
-/*
-===================
-CL_CheckPredictionError
-===================
-*/
+//
+//===============
+// CLG_CheckPredictionError
+// 
+// Checks for prediction errors. Calls into the CG Module.
+//================
+//
 void CL_CheckPredictionError(void)
 {
     if (!cls.netchan) {
@@ -42,96 +44,10 @@ void CL_CheckPredictionError(void)
     // Calculate the last cl_cmd_t we sent that the server has processed
     cl_cmd_t* cmd = &cl.cmds[cls.netchan->incomingAcknowledged & CMD_MASK];
 
-    // N&C: Call into the CG Module to let it handle this.
+    // Call into the CG Module to let it handle this.
     CL_GM_CheckPredictionError(cmd);
 }
 
-/*
-====================
-CL_ClipMoveToEntities
-
-====================
-*/
-static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, trace_t *tr)
-{
-    int         i;
-    trace_t     trace;
-    mnode_t     *headNode;
-    cl_entity_t   *ent;
-    mmodel_t    *cmodel;
-
-    for (i = 0; i < cl.numSolidEntities; i++) {
-        ent = cl.solidEntities[i];
-
-        if (ent->current.solid == PACKED_BSP) {
-            // special value for bmodel
-            cmodel = cl.model_clip[ent->current.modelindex];
-            if (!cmodel)
-                continue;
-            headNode = cmodel->headNode;
-        } else {
-            headNode = CM_HeadnodeForBox(ent->mins, ent->maxs);
-        }
-
-        if (tr->allSolid)
-            return;
-
-        CM_TransformedBoxTrace(&trace, start, end,
-                               mins, maxs, headNode,  CONTENTS_MASK_PLAYERSOLID,
-                               ent->current.origin, ent->current.angles);
-
-        CM_ClipEntity(tr, &trace, (struct entity_s *)ent);
-    }
-}
-
-
-/*
-================
-CL_PMTrace
-================
-*/
-static trace_t q_gameabi CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end)
-{
-    trace_t    t;
-
-    // check against world
-    CM_BoxTrace(&t, start, end, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_PLAYERSOLID);
-    if (t.fraction < 1.0)
-        t.ent = (struct entity_s *)1;
-
-    // check all other solid models
-    CL_ClipMoveToEntities(start, mins, maxs, end, &t);
-
-    return t;
-}
-
-static int CL_PointContents(const vec3_t &point)
-{
-    int         i;
-    cl_entity_t   *ent;
-    mmodel_t    *cmodel;
-    int         contents;
-
-    contents = CM_PointContents(point, cl.bsp->nodes);
-
-    for (i = 0; i < cl.numSolidEntities; i++) {
-        ent = cl.solidEntities[i];
-
-        if (ent->current.solid != PACKED_BSP) // special value for bmodel
-            continue;
-
-        cmodel = cl.model_clip[ent->current.modelindex];
-        if (!cmodel)
-            continue;
-
-        contents |= CM_TransformedPointContents(
-                        point, cmodel->headNode,
-                        ent->current.origin,
-                        ent->current.angles);
-    }
-
-    return contents;
-}
 
 /*
 =================
@@ -166,18 +82,19 @@ void CL_PredictMovement(void)
     ack = cl.history[cls.netchan->incomingAcknowledged & CMD_MASK].commandNumber;
     currentFrameIndex = cl.commandNumber;
 
-    // if we are too far out of date, just freeze
+    // If we are too far out of date, just freeze
     if (currentFrameIndex - ack > CMD_BACKUP - 1) {
         SHOWMISS("%i: exceeded CMD_BACKUP\n", cl.frame.number);
         return;
     }
 
+    // Ensure we had moved.
     if (!cl.cmd.cmd.msec && currentFrameIndex == ack) {
         SHOWMISS("%i: not moved\n", cl.frame.number);
         return;
     }
 
-    // N&C: Call into the CG Module to let it handle this.
+    // Call into the CG Module to let it handle this.
     CL_GM_PredictMovement(ack, currentFrameIndex);
 }
 
