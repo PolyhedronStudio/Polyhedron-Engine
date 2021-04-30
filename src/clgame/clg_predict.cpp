@@ -206,12 +206,15 @@ static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
 //
 void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
     pm_move_t   pm = {};
-    uint32_t    frameIndex;
 
-    // copy current state to pmove
-    memset(&pm, 0, sizeof(pm));
+    // Setup base trace calls.
     pm.Trace = CLG_Trace;
     pm.PointContents = CLG_PointContents;
+    
+    // Restore ground entity for this frame.
+    pm.groundEntityPtr = cl->predictedState.groundEntityPtr;
+
+    // Copy current state to pmove
     pm.state = cl->frame.playerState.pmove;
 #if USE_SMOOTH_DELTA_ANGLES
     pm.state.deltaAngles = cl->deltaAngles;
@@ -229,30 +232,30 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
         // Update player move client side audio effects.
         CLG_UpdateClientSoundSpecialEffects(&pm);
 
-        // save for debug checking
-        cl->predicted_origins[ack & CMD_MASK] = pm.state.origin;
+        // Save for error detection
+        cl->cmd.prediction.error = pm.state.origin;
     }
 
-    // run pending cmd
+    // Run pending cmd
     if (cl->cmd.cmd.msec) {
+        // save for debug checking
+        cl->cmd.time = cl->time;
+
         pm.cmd = cl->cmd;
         pm.cmd.cmd.forwardmove = cl->localmove[0];
         pm.cmd.cmd.rightmove = cl->localmove[1];
         pm.cmd.cmd.upmove = cl->localmove[2];
         PMove(&pm, &clg.pmoveParams);
-        frameIndex = currentFrame;
-
-
-        // save for debug checking
-        cl->predicted_origins[(currentFrame + 1) & CMD_MASK] = pm.state.origin;
-    } else {
-        frameIndex = currentFrame - 1;
     }
 
-    // copy results out for rendering
+    // Save for error detection
+    cl->cmd.prediction.error = pm.state.origin;
+
+    // Copy results out for rendering
     cl->predictedState.viewOrigin  = pm.state.origin;
     cl->predictedState.velocity    = pm.state.velocity;
     cl->predictedState.stepOffset  = pm.state.stepOffset;
     cl->predictedState.viewOffset  = pm.state.viewOffset;
     cl->predictedState.viewAngles  = pm.viewAngles;
+    cl->predictedState.groundEntityPtr = pm.groundEntityPtr;
 }

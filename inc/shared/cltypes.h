@@ -278,7 +278,7 @@ struct cl_predicted_state_t {
     vec3_t velocity;
 
     // Ground entity pointer of the predicted frame.
-    struct g_entity_s* groundEntityPtr;
+    struct entity_s* groundEntityPtr;
 
     // Prediction error that is interpolated over the server frame.
     vec3_t error;
