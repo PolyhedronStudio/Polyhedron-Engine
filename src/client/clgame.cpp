@@ -908,25 +908,10 @@ void CL_GM_PredictAngles(void) {
 // Called by the client to predict the actual movement.
 //===============
 //
-void CL_GM_PredictMovement(const std::vector<cl_cmd_t*> &userCommands) {
+void CL_GM_PredictMovement(unsigned int ack, unsigned int current) {
     if (cge)
-        cge->PredictMovement(userCommands);
+        cge->PredictMovement(ack, current);
 }
-
-//
-//===============
-// CL_GM_UsePrediction
-// 
-// Called by the client to predict the actual movement.
-//===============
-//
-qboolean CL_GM_UsePrediction(void) {
-    if (cge)
-        return cge->UsePrediction();
-    else
-        return false;
-}
-
 
 //
 //===============

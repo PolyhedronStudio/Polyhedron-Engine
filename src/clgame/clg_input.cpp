@@ -615,7 +615,7 @@ void CLG_BuildFrameMoveCommand(int msec)
 // CLG_FinalizeFrameMoveCommand
 // 
 // Builds the actual movement vector for sending to server.Assumes that msec
-// and angles are already set for this frame by CL_UpdateClientUserCommands.
+// and angles are already set for this frame by CL_UpdateCmd.
 //================
 //
 void CLG_FinalizeFrameMoveCommand(void)

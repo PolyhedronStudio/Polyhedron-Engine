@@ -21,10 +21,6 @@
 //================
 //
 qboolean CLG_UsePrediction(void) {
-    // If paused we don't need to predict.
-    if (sv_paused->integer) 
-        return false;
-
     // Don't use prediction when we are in third person mode.
     if (cl_player_model->value == CL_PLAYER_MODEL_THIRD_PERSON) // TODO: This one might brick.
         return false;
@@ -39,10 +35,6 @@ qboolean CLG_UsePrediction(void) {
 
     // Don't use prediction when our movetype is FREEZE, duh.
     if (cl->frame.playerState.pmove.type == PM_FREEZE)
-        return false;
-
-    // Don't use prediction in case it has been set as a player move flag.
-    if (cl->frame.playerState.pmove.flags & PMF_NO_PREDICTION)
         return false;
 
     // Success, use prediction.
@@ -240,8 +232,12 @@ static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
 // Predicts the actual client side movement.
 //================
 //
-void CLG_PredictMovement(const std::vector<cl_cmd_t*>& userCommands) {
-    pm_move_t pm = {};
+void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
+    pm_move_t   pm = {};
+    uint32_t    frameIndex;
+
+    // copy current state to pmove
+    memset(&pm, 0, sizeof(pm));
     pm.Trace = CLG_Trace;
     pm.PointContents = CLG_PointContents;
     pm.state = cl->frame.playerState.pmove;
@@ -249,31 +245,35 @@ void CLG_PredictMovement(const std::vector<cl_cmd_t*>& userCommands) {
     VectorCopy(cl->deltaAngles, pm.state.deltaAngles);
 #endif
 
-    // Run the commands.
-    for (auto command : userCommands) {
-        if (!command)
-            break;
+    // run frames
+    while (++ack <= currentFrame) {
+        pm.cmd = cl->cmds[ack & CMD_MASK];
+        PMove(&pm, &clg.pmoveParams);
 
-        // Only if it has time ofc.
-        if (command->cmd.msec) {
-            command->prediction.time = cl->time;
+        // Update player move client side audio effects.
+        CLG_UpdateClientSoundSpecialEffects(&pm);
 
-            // Setup the pmove for further use.
-            pm.cmd = *command;
-            pm.cmd.cmd.forwardmove = cl->localmove[0];
-            pm.cmd.cmd.rightmove = cl->localmove[1];
-            pm.cmd.cmd.upmove = cl->localmove[2];
-            PMove(&pm, &clg.pmoveParams);
-
-            // Update player move client side audio effects.
-            CLG_UpdateClientSoundSpecialEffects(&pm);
-        }
-
-        // Save for error detection.
-        command->prediction.origin = pm.state.origin;
+        // save for debug checking
+        cl->predicted_origins[ack & CMD_MASK] = pm.state.origin;
     }
 
-    // Copy results out for rendering
+    // run pending cmd
+    if (cl->cmd.cmd.msec) {
+        pm.cmd = cl->cmd;
+        pm.cmd.cmd.forwardmove = cl->localmove[0];
+        pm.cmd.cmd.rightmove = cl->localmove[1];
+        pm.cmd.cmd.upmove = cl->localmove[2];
+        PMove(&pm, &clg.pmoveParams);
+        frameIndex = currentFrame;
+
+
+        // save for debug checking
+        cl->predicted_origins[(currentFrame + 1) & CMD_MASK] = pm.state.origin;
+    } else {
+        frameIndex = currentFrame - 1;
+    }
+
+    // copy results out for rendering
     cl->predictedState.viewOrigin  = pm.state.origin;
     cl->predictedState.velocity    = pm.state.velocity;
     cl->predictedState.stepOffset  = pm.state.stepOffset;

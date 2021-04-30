@@ -66,8 +66,7 @@ void		CL_GM_PMoveEnableQW(pmoveParams_t* pmp);
 //
 void		CL_GM_CheckPredictionError(cl_cmd_t* clientUserCommand);
 void		CL_GM_PredictAngles(void);
-void		CL_GM_PredictMovement(const std::vector<cl_cmd_t*>& userCommands);
-qboolean	CL_GM_UsePrediction(void);
+void		CL_GM_PredictMovement(unsigned int ack, unsigned int current);
 
 //
 // Parse

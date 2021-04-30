@@ -291,9 +291,15 @@ struct cl_predicted_state_t {
 typedef struct client_state_s {
     int         timeoutcount;
 
+    unsigned    lastTransmitTime;
+    unsigned    lastTransmitCmdNumber;
+    unsigned    lastTransmitCmdNumberReal;
+    qboolean    sendPacketNow;
+
     cl_cmd_t    cmd;
     cl_cmd_t    cmds[CMD_BACKUP];    // each mesage will send several old cmds
     unsigned     commandNumber;
+    vec3_t       predicted_origins[CMD_BACKUP];    // for debug comparing against server
     client_history_t    history[CMD_BACKUP];
     int         initialSeq;
 
@@ -414,7 +420,6 @@ typedef struct client_state_s {
 
     char    weaponModels[MAX_CLIENTWEAPONMODELS][MAX_QPATH]; // Weapon Models string paths.
     int     numWeaponModels;    // Number of weapon models.
-    qboolean sendPacketNow;
 } client_state_t;
 
 #endif // __SHARED_CL_TYPES_H__

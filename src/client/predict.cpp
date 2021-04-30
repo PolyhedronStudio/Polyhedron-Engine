@@ -132,64 +132,51 @@ CL_PredictMovement
 Sets cl.predicted_origin and cl.predicted_angles
 =================
 */
+void CL_PredictAngles(void)
+{
+    //cl.predicted_angles[0] = cl.viewAngles[0] + SHORT2ANGLE(cl.frame.playerState.pmove.deltaAngles[0]);
+    //cl.predicted_angles[1] = cl.viewAngles[1] + SHORT2ANGLE(cl.frame.playerState.pmove.deltaAngles[1]);
+    //cl.predicted_angles[2] = cl.viewAngles[2] + SHORT2ANGLE(cl.frame.playerState.pmove.deltaAngles[2]);
+}
+
 void CL_PredictMovement(void)
 {
-    
-    //uint32_t    ack, currentFrameIndex;
+    uint32_t    ack, currentFrameIndex;
 
-    // Ensure we are in an active game state.
     if (cls.state != ca_active) {
         return;
     }
 
-    //if (!cl_predict->integer || (cl.frame.playerState.pmove.flags & PMF_NO_PREDICTION)) {
-    //    // N&C: Call into the CG Module to let it handle this.
-    //    // just set angles
-    //    CL_GM_PredictAngles();
-    //    return;
-    //}
-
-    //ack = cl.history[cls.netchan->incomingAcknowledged & CMD_MASK].commandNumber;
-    //currentFrameIndex = cl.commandNumber;
-
-    //// if we are too far out of date, just freeze
-    //if (currentFrameIndex - ack > CMD_BACKUP - 1) {
-    //    SHOWMISS("%i: exceeded CMD_BACKUP\n", cl.frame.number);
-    //    return;
-    //}
-
-    //if (!cl.cmd.cmd.msec && currentFrameIndex == ack) {
-    //    SHOWMISS("%i: not moved\n", cl.frame.number);
-    //    return;
-    //}
-
-    //// N&C: Call into the CG Module to let it handle this.
-    //CL_GM_PredictMovement(ack, currentFrameIndex);
-    if (!cls.netchan)
-        return;
-
-    if (!CL_GM_UsePrediction()) {
+    if (cls.demo.playback) {
         return;
     }
 
-    const uint32_t last = cls.netchan->outgoingSequence;
-    uint32_t ack = cls.netchan->incomingAcknowledged;
-
-    // If we are too far out of date, just freeze in place
-    if (last - ack >= CMD_BACKUP) {
-        Com_DPrintf("Exceeded CMD_BACKUP\n");
+    if (sv_paused->integer) {
         return;
     }
 
-    // Collect all commands and pass them over for prediction processing.
-    std::vector<cl_cmd_t*> userCommands;
-
-    while (++ack <= last) {
-        userCommands.push_back(&cl.cmds[ack & CMD_MASK]);
+    if (!cl_predict->integer || (cl.frame.playerState.pmove.flags & PMF_NO_PREDICTION)) {
+        // N&C: Call into the CG Module to let it handle this.
+        // just set angles
+        CL_GM_PredictAngles();
+        return;
     }
 
-    if (userCommands.size()) {
-        CL_GM_PredictMovement(userCommands);
+    ack = cl.history[cls.netchan->incomingAcknowledged & CMD_MASK].commandNumber;
+    currentFrameIndex = cl.commandNumber;
+
+    // if we are too far out of date, just freeze
+    if (currentFrameIndex - ack > CMD_BACKUP - 1) {
+        SHOWMISS("%i: exceeded CMD_BACKUP\n", cl.frame.number);
+        return;
     }
+
+    if (!cl.cmd.cmd.msec && currentFrameIndex == ack) {
+        SHOWMISS("%i: not moved\n", cl.frame.number);
+        return;
+    }
+
+    // N&C: Call into the CG Module to let it handle this.
+    CL_GM_PredictMovement(ack, currentFrameIndex);
 }
 

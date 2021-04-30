@@ -134,7 +134,7 @@ extern "C" {
         //---------------------------------------------------------------------
         void		(*CheckPredictionError) (cl_cmd_t* clientUserCommand);
         void		(*PredictAngles) (void);
-        void        (*PredictMovement) (const std::vector<cl_cmd_t*>& userCommands);
+        void        (*PredictMovement) (unsigned int ack, unsigned int current);
         qboolean    (*UsePrediction) (void);
 
         //---------------------------------------------------------------------
