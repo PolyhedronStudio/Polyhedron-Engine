@@ -135,6 +135,7 @@ extern "C" {
         void		(*CheckPredictionError) (cl_cmd_t* clientUserCommand);
         void		(*PredictAngles) (void);
         void        (*PredictMovement) (unsigned int ack, unsigned int current);
+        qboolean    (*UsePrediction) (void);
 
         //---------------------------------------------------------------------
         // ServerMessage Parsing.

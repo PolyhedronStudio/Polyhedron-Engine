@@ -970,7 +970,7 @@ void PutClientInServer(entity_t *ent)
 
     // set the delta angle
     for (i = 0 ; i < 3 ; i++) {
-        client->playerState.pmove.deltaAngles[i] = ANGLE2SHORT(spawn_angles[i] - client->resp.cmd_angles[i]);
+        client->playerState.pmove.deltaAngles[i] = spawn_angles[i] - client->resp.cmd_angles[i];
     }
 
     ent->s.angles[vec3_t::Pitch] = 0;

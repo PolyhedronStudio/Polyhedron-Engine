@@ -159,6 +159,7 @@ q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     clge.CheckPredictionError       = CLG_CheckPredictionError;
     clge.PredictAngles              = CLG_PredictAngles;
     clge.PredictMovement            = CLG_PredictMovement;
+    clge.UsePrediction              = CLG_UsePrediction;
 
     // ServerMessage.
     clge.UpdateConfigString         = CLG_UpdateConfigString;

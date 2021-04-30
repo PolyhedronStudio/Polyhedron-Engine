@@ -88,7 +88,7 @@ void UpdateChaseCam(entity_t *ent)
 
     VectorCopy(goal, ent->s.origin);
     for (i = 0 ; i < 3 ; i++)
-        ent->client->playerState.pmove.deltaAngles[i] = ANGLE2SHORT(targ->client->v_angle[i] - ent->client->resp.cmd_angles[i]);
+        ent->client->playerState.pmove.deltaAngles[i] = targ->client->v_angle[i] - ent->client->resp.cmd_angles[i];
 
     if (targ->deadFlag) {
         ent->client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
