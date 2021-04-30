@@ -278,7 +278,7 @@ static void IN_Impulse(void)
 }
 static void IN_CenterView(void)
 {
-    cl->viewAngles.x = -cl->frame.playerState.pmove.deltaAngles[0];
+    cl->viewAngles.x = -SHORT2ANGLE(cl->frame.playerState.pmove.deltaAngles[0]);
 }
 static void IN_MLookDown(void)
 {
@@ -468,7 +468,7 @@ static void CLG_ClampPitch(void)
 {
     float pitch;
 
-    pitch = cl->frame.playerState.pmove.deltaAngles[vec3_t::Pitch];
+    pitch = SHORT2ANGLE(cl->frame.playerState.pmove.deltaAngles[vec3_t::Pitch]);
     if (pitch > 180)
         pitch -= 360;
 

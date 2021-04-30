@@ -468,7 +468,7 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
             if (check->client) {
                 // FIXME: doesn't rotate monsters?
                 // FIXME: skuller: needs client side interpolation
-                check->client->playerState.pmove.deltaAngles[vec3_t::Yaw] += amove[vec3_t::Yaw];
+                check->client->playerState.pmove.deltaAngles[vec3_t::Yaw] += ANGLE2SHORT(amove[vec3_t::Yaw]);
             }
 #endif
 

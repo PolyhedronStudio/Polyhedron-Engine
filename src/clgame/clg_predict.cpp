@@ -15,34 +15,6 @@
 
 //
 //===============
-// CLG_UsePrediction
-// 
-// Checks for prediction errors.
-//================
-//
-qboolean CLG_UsePrediction(void) {
-    // Don't use prediction when we are in third person mode.
-    if (cl_player_model->value == CL_PLAYER_MODEL_THIRD_PERSON) // TODO: This one might brick.
-        return false;
-
-    // Don't use prediction when in a demo playback.
-    if (clgi.IsDemoPlayback())
-        return false;
-
-    // Did we purposely disable prediction?
-    if (!cl_predict->value)
-        return false;
-
-    // Don't use prediction when our movetype is FREEZE, duh.
-    if (cl->frame.playerState.pmove.type == PM_FREEZE)
-        return false;
-
-    // Success, use prediction.
-    return true;
-}
-
-//
-//===============
 // CLG_CheckPredictionError
 // 
 // Checks for prediction errors.
