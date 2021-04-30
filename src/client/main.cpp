@@ -610,6 +610,13 @@ void CL_ClearState(void)
     //  WatIsDeze: Inform the CG Module.
     CL_GM_ClearState();
 
+//    CL_ClearEffects();
+//#if USE_LIGHTSTYLES
+//    CL_ClearLightStyles();
+//#endif
+//    CL_ClearTEnts();
+    //LOC_FreeLocations();
+
     // wipe the entire cl structure
     BSP_Free(cl.bsp);
     memset(&cl, 0, sizeof(cl));
@@ -1598,6 +1605,9 @@ void CL_Begin(void)
     // N&C: Prepare media loading.
     CL_PrepareMedia();
 
+    // TODO: Move over to the CG Module.
+    LOC_LoadLocations();
+
     // Set state to precached and send over a begin command.
     CL_LoadState(LOAD_NONE);
     cls.state = ca_precached;
@@ -2487,6 +2497,7 @@ static void CL_InitLocal(void)
     // Initialize the rest of the client.
     CL_RegisterInput();
     CL_InitDemos();
+    LOC_Init();
     CL_InitAscii();
     CL_InitDownloads();
 
@@ -3069,7 +3080,7 @@ run_fx:
         SCR_RunCinematic();
     } else if (sync_mode == SYNC_SLEEP_10) {
         // Force audio and effects update if not rendering
-        CL_GM_UpdateOrigin();
+        CL_GM_CalcViewValues();
         goto run_fx;
     }
 

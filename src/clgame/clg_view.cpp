@@ -350,7 +350,7 @@ first:
 //
 static void CLG_AddEntities (void) {
     // Calculate client view values.
-    CLG_UpdateOrigin();
+    CLG_CalcViewValues();
 
     // Finish calculating view values.
     CLG_FinishViewValues();

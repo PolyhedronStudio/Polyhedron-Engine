@@ -126,7 +126,7 @@ q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     clge.Shutdown                   = CLG_Shutdown;
 
     clge.CalcFOV                    = CLG_CalculateFOV;
-    clge.UpdateOrigin             = CLG_UpdateOrigin;
+    clge.CalcViewValues             = CLG_CalcViewValues;
     clge.ClearState                 = CLG_ClearState;
     clge.DemoSeek                   = CLG_DemoSeek;
 

@@ -26,7 +26,7 @@ void        CL_GM_Init();
 void        CL_GM_Shutdown(void);
 
 float		CL_GM_CalcFOV(float fov_x, float width, float height);
-void		CL_GM_UpdateOrigin(void);
+void		CL_GM_CalcViewValues(void);
 void		CL_GM_ClientBegin(void);
 void		CL_GM_ClientDeltaFrame(void);
 void		CL_GM_ClientFrame(void);
