@@ -2968,9 +2968,6 @@ unsigned CL_Frame(unsigned msec)
     case SYNC_MAXFPS:
         // Everything ticks in sync with refresh
         if (main_extra < main_msec) {
-            if (!cl.sendPacketNow) {
-                return 0;
-            }
             ref_frame = false;
         }
         break;
@@ -3046,7 +3043,6 @@ unsigned CL_Frame(unsigned msec)
 
     // Update the old UI another frame.
     UI_Frame(main_extra);
-
 
     if (ref_frame) {
         // Update the screen
@@ -3218,27 +3214,21 @@ void CL_Shutdown(void)
 #if USE_ZLIB
     inflateEnd(&cls.z);
 #endif
-    // Shutdown libCURL.
+
     HTTP_Shutdown();
 
-    // Shut down audio, user input, and the console.
     S_Shutdown();  
     IN_Shutdown();
     Con_Shutdown();
     
-    // Finally the refresh module.
     CL_ShutdownRefresh();
-    
-    // Now we still got to shutdown the game.
+    // N&C: Unload the client game dll.
     CL_ShutdownGameProgs();
 
-    // And we're ready to go.
     CL_WriteConfig();
 
-    // Clear client static data.
     memset(&cls, 0, sizeof(cls));
 
-    // No more running cvar.
     Cvar_Set("cl_running", "0");
 
     isdown = false;
