@@ -2801,7 +2801,7 @@ void CL_CheckForPause(void)
 typedef enum {
     SYNC_FULL,
     SYNC_MAXFPS,
-    SYNC_SLEEP_10,
+    SYNC_SLEEP_20,
     SYNC_SLEEP_60,
     SYNC_SLEEP_VIDEO,
     ASYNC_VIDEO,
@@ -2813,7 +2813,7 @@ typedef enum {
 static const char *const sync_names[] = {
     "SYNC_FULL",
     "SYNC_MAXFPS",
-    "SYNC_SLEEP_10",
+    "SYNC_SLEEP_20",
     "SYNC_SLEEP_60",
     "SYNC_SLEEP_VIDEO",
     "ASYNC_VIDEO",
@@ -2859,10 +2859,10 @@ void CL_UpdateFrameTimes(void)
         ref_msec = phys_msec = main_msec = 0;
         sync_mode = SYNC_FULL;
     } else if (cls.active == ACT_MINIMIZED) {
-        // run at 10 fps if minimized
+        // run at 20 fps if minimized
         ref_msec = phys_msec = 0;
-        main_msec = fps_to_msec(10);
-        sync_mode = SYNC_SLEEP_10;
+        main_msec = fps_to_msec(20);
+        sync_mode = SYNC_SLEEP_20;
     } else if (cls.active == ACT_RESTORED || cls.state != ca_active) {
         // run at 60 fps if not active
         ref_msec = phys_msec = 0;
@@ -2875,12 +2875,12 @@ void CL_UpdateFrameTimes(void)
         }
     } else if (cl_async->integer > 0) {
         // run physics and refresh separately
-        phys_msec = fps_to_msec(Cvar_ClampInteger(cl_maxfps, 10, 120));
+        phys_msec = fps_to_msec(Cvar_ClampInteger(cl_maxfps, 20, 120));
         if (cl_async->integer > 1) {
             ref_msec = 0;
             sync_mode = ASYNC_VIDEO;
         } else if (r_maxfps->integer) {
-            ref_msec = fps_to_msec(Cvar_ClampInteger(r_maxfps, 10, 1000));
+            ref_msec = fps_to_msec(Cvar_ClampInteger(r_maxfps, 20, 1000));
             sync_mode = ASYNC_MAXFPS;
         } else {
             ref_msec = 1;
@@ -2891,7 +2891,7 @@ void CL_UpdateFrameTimes(void)
         // everything ticks in sync with refresh
         phys_msec = ref_msec = 0;
         if (cl_maxfps->integer) {
-            main_msec = fps_to_msec(Cvar_ClampInteger(cl_maxfps, 10, 1000));
+            main_msec = fps_to_msec(Cvar_ClampInteger(cl_maxfps, 20, 1000));
             sync_mode = SYNC_MAXFPS;
         } else {
             main_msec = 1;
@@ -2939,7 +2939,7 @@ unsigned CL_Frame(unsigned msec)
     case SYNC_FULL:
         // Timedemo just runs at full speed
         break;
-    case SYNC_SLEEP_10:
+    case SYNC_SLEEP_20:
         // Don't run refresh at all
         ref_frame = false;
         // Fall through
@@ -3078,7 +3078,7 @@ run_fx:
         CL_GM_ClientFrame();
 
         SCR_RunCinematic();
-    } else if (sync_mode == SYNC_SLEEP_10) {
+    } else if (sync_mode == SYNC_SLEEP_20) {
         // Force audio and effects update if not rendering
         CL_GM_CalcViewValues();
         goto run_fx;

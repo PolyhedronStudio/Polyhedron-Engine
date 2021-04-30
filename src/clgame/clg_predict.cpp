@@ -214,12 +214,17 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
     pm.PointContents = CLG_PointContents;
     pm.state = cl->frame.playerState.pmove;
 #if USE_SMOOTH_DELTA_ANGLES
-    VectorCopy(cl->deltaAngles, pm.state.deltaAngles);
+    pm.state.deltaAngles = cl->deltaAngles;
+    //VectorCopy(cl->deltaAngles, pm.state.deltaAngles);
 #endif
 
-    // run frames
+    // Run frames in order.
     while (++ack <= currentFrame) {
-        pm.cmd = cl->cmds[ack & CMD_MASK];
+        // Fetch the command.
+        cl_cmd_t* cmd = &cl->cmds[ack & CMD_MASK];
+
+        // Execute a pmove with it.
+        pm.cmd = *cmd;
         PMove(&pm, &clg.pmoveParams);
 
         // Update player move client side audio effects.
