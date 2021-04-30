@@ -23,27 +23,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sharedgame/sharedgame.h"
 #include "system/lirc.h"
 
-static cvar_t    *cl_nodelta;
-static cvar_t    *cl_maxpackets;
-static cvar_t    *cl_packetdup;
-static cvar_t    *cl_fuzzhack;
+static cvar_t* cl_nodelta;
+static cvar_t* cl_maxpackets;
+static cvar_t* cl_packetdup;
+static cvar_t* cl_fuzzhack;
 #ifdef _DEBUG
-static cvar_t    *cl_showpackets;
+static cvar_t* cl_showpackets;
 #endif
-static cvar_t    *cl_instantpacket;
-static cvar_t    *cl_batchcmds;
+static cvar_t* cl_instantpacket;
+static cvar_t* cl_batchcmds;
 
-static cvar_t    *m_filter;
-       cvar_t    *m_accel;
-       cvar_t    *m_autosens;
+static cvar_t* m_filter;
+cvar_t* m_accel;
+cvar_t* m_autosens;
 
-       cvar_t    *sensitivity;
+cvar_t* sensitivity;
 
-       cvar_t    *m_pitch;
-       cvar_t    *m_invert;
-       cvar_t    *m_yaw;
-static cvar_t    *m_forward;
-static cvar_t    *m_side;
+cvar_t* m_pitch;
+cvar_t* m_invert;
+cvar_t* m_yaw;
+static cvar_t* m_forward;
+static cvar_t* m_side;
 
 /*
 ===============================================================================
@@ -62,15 +62,15 @@ typedef struct {
 
 static in_state_t   input;
 
-static cvar_t    *in_enable;
+static cvar_t* in_enable;
 #if USE_DINPUT
-static cvar_t    *in_direct;
+static cvar_t* in_direct;
 #endif
-static cvar_t    *in_grab;
+static cvar_t* in_grab;
 
 const inputAPI_t* IN_GetAPI()
 {
-	return &input.api;
+    return &input.api;
 }
 
 static qboolean IN_GetCurrentGrab(void)
@@ -158,7 +158,7 @@ void IN_WarpMouse(int x, int y)
 IN_GetOldMouseDelta
 ================
 */
-void IN_GetOldMouseDelta(int &x, int &y)
+void IN_GetOldMouseDelta(int& x, int& y)
 {
     if (input.api.Warp) {
         input.api.Warp(x, y);
@@ -189,12 +189,12 @@ void IN_Shutdown(void)
     memset(&input, 0, sizeof(input));
 }
 
-static void in_changed_hard(cvar_t *self)
+static void in_changed_hard(cvar_t* self)
 {
     input.modified = true;
 }
 
-static void in_changed_soft(cvar_t *self)
+static void in_changed_soft(cvar_t* self)
 {
     IN_Activate();
 }
@@ -276,7 +276,7 @@ Key_Event (int key, qboolean down, unsigned time);
 //==========================================================================
 
 // MOUSE
-qboolean CL_GetMouseMotion(int *deltaX, int *deltaY) {
+qboolean CL_GetMouseMotion(int* deltaX, int* deltaY) {
     if (input.api.GetMotion)
         return input.api.GetMotion(deltaX, deltaY);
     else
@@ -288,7 +288,7 @@ qboolean CL_GetMouseMotion(int *deltaX, int *deltaY) {
 CL_UpdateClientUserCommands
 
 Updates msec, angles and builds interpolated movement vector for local prediction.
-Doesn't touch command forward/side/upmove, these are filled by CL_FinalizeClientUserCommand.
+Doesn't touch command forward/side/upmove, these are filled by CL_FinalizeCmd.
 =================
 */
 void CL_UpdateClientUserCommands(int msec)
@@ -350,7 +350,7 @@ void CL_RegisterInput(void)
 CL_FinalizeClientUserCommand
 
 Builds the actual movement vector for sending to server. Assumes that msec
-and angles are already set for this frame by CL_UpdateClientUserCommands.
+and angles are already set for this frame by CL_UpdateCmd.
 =================
 */
 void CL_FinalizeClientUserCommand(void)
@@ -366,22 +366,75 @@ void CL_FinalizeClientUserCommand(void)
     CL_GM_FinalizeFrameMoveCommand();
 }
 
+static inline qboolean ready_to_send(void)
+{
+    unsigned msec;
+
+    if (cl.sendPacketNow) {
+        return true;
+    }
+    if (cls.netchan->message.cursize || cls.netchan->reliableAckPending) {
+        return true;
+    }
+    if (!cl_maxpackets->integer) {
+        return true;
+    }
+
+    if (cl_maxpackets->integer < 10) {
+        Cvar_Set("cl_maxpackets", "10");
+    }
+
+    msec = 1000 / cl_maxpackets->integer;
+    if (msec) {
+        msec = 100 / (100 / msec);
+    }
+    if (cls.realtime - cl.lastTransmitTime < msec) {
+        return false;
+    }
+
+    return true;
+}
+
+static inline qboolean ready_to_send_hacked(void)
+{
+    if (!cl_fuzzhack->integer) {
+        return true; // packet drop hack disabled
+    }
+
+    if (cl.commandNumber - cl.lastTransmitCmdNumberReal > 2) {
+        return true; // can't drop more than 2 cmds
+    }
+
+    return ready_to_send();
+}
+
 /*
 =================
-CL_SendClientUserCommand
+CL_SendUserCommand
 =================
 */
-static void CL_SendClientUserCommand(void)
+static void CL_SendUserCommand(void)
 {
-    size_t cursize, checksumIndex;
-    cl_cmd_t *currentCommand, *oldCommand;
-    client_history_t *history;
+    size_t cursize q_unused, checksumIndex;
+    cl_cmd_t* cmd, * oldcmd;
+    client_history_t* history;
 
     // archive this packet
     history = &cl.history[cls.netchan->outgoingSequence & CMD_MASK];
     history->commandNumber = cl.commandNumber;
     history->sent = cls.realtime;    // for ping calculation
     history->rcvd = 0;
+
+    cl.lastTransmitCmdNumber = cl.commandNumber;
+
+    // see if we are ready to send this packet
+    if (!ready_to_send_hacked()) {
+        cls.netchan->outgoingSequence++; // just drop the packet
+        return;
+    }
+
+    cl.lastTransmitTime = cls.realtime;
+    cl.lastTransmitCmdNumberReal = cl.commandNumber;
 
     // begin a client move command
     MSG_WriteByte(clc_move);
@@ -398,15 +451,16 @@ static void CL_SendClientUserCommand(void)
     // got was, so the next message can be delta compressed
     if (cl_nodelta->integer || !cl.frame.valid /*|| cls.demowaiting*/) {
         MSG_WriteLong(-1);   // no compression
-    } else {
+    }
+    else {
         MSG_WriteLong(cl.frame.number);
     }
 
     // send this and the previous cmds in the message, so
     // if the last packet was dropped, it can be recovered
-    cl_cmd_t *cmd = &cl.cmds[(cl.commandNumber - 2) & CMD_MASK];
+    cmd = &cl.cmds[(cl.commandNumber - 2) & CMD_MASK];
     MSG_WriteDeltaUsercmd(NULL, cmd);
-    cl_cmd_t *oldcmd = cmd;
+    oldcmd = cmd;
 
     cmd = &cl.cmds[(cl.commandNumber - 1) & CMD_MASK];
     MSG_WriteDeltaUsercmd(oldcmd, cmd);
@@ -441,7 +495,7 @@ static void CL_SendClientUserCommand(void)
 
 static void CL_SendKeepAlive(void)
 {
-    client_history_t *history;
+    client_history_t* history;
     size_t cursize q_unused;
 
     // archive this packet
@@ -449,6 +503,10 @@ static void CL_SendKeepAlive(void)
     history->commandNumber = cl.commandNumber;
     history->sent = cls.realtime;    // for ping calculation
     history->rcvd = 0;
+
+    cl.lastTransmitTime = cls.realtime;
+    cl.lastTransmitCmdNumber = cl.commandNumber;
+    cl.lastTransmitCmdNumberReal = cl.commandNumber;
 
     cursize = Netchan_Transmit(cls.netchan, 0, NULL, 1);
 #ifdef _DEBUG
@@ -461,7 +519,7 @@ static void CL_SendKeepAlive(void)
 static void CL_SendUserinfo(void)
 {
     char userinfo[MAX_INFO_STRING];
-    cvar_t *var;
+    cvar_t* var;
     int i;
 
     if (!cls.userinfo_modified) {
@@ -474,24 +532,27 @@ static void CL_SendUserinfo(void)
         MSG_WriteByte(clc_userinfo);
         MSG_WriteData(userinfo, len + 1);
         MSG_FlushTo(&cls.netchan->message);
-    } else if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
+    }
+    else if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
         Com_DDPrintf("%s: %u: %d updates\n", __func__, com_framenum,
-                     cls.userinfo_modified);
+            cls.userinfo_modified);
         for (i = 0; i < cls.userinfo_modified; i++) {
             var = cls.userinfo_updates[i];
             MSG_WriteByte(clc_userinfo_delta);
             MSG_WriteString(var->name);
             if (var->flags & CVAR_USERINFO) {
                 MSG_WriteString(var->string);
-            } else {
+            }
+            else {
                 // no longer in userinfo
                 MSG_WriteString(NULL);
             }
         }
         MSG_FlushTo(&cls.netchan->message);
-    } else {
+    }
+    else {
         Com_WPrintf("%s: update count is %d, should never happen.\n",
-                    __func__, cls.userinfo_modified);
+            __func__, cls.userinfo_modified);
     }
 
     cls.userinfo_modified = 0;
@@ -499,12 +560,11 @@ static void CL_SendUserinfo(void)
 
 void CL_SendClientUserCommands(void)
 {
-    // Not talking to a server so...
     if (cls.state < ca_connected) {
-        return;
+        return; // not talking to a server
     }
 
-    // Generate usercmds while playing a demo,
+    // generate usercmds while playing a demo,
     // but do not send them
     if (!cls.netchan) {
         return;
@@ -519,13 +579,20 @@ void CL_SendClientUserCommands(void)
             CL_SendKeepAlive();
         }
 
+        cl.sendPacketNow = false;
         return;
     }
 
-    // Send a userinfo update if needed
+    // are there any new usercmds to send after all?
+    if (cl.lastTransmitCmdNumber == cl.commandNumber) {
+        return; // nothing to send
+    }
+
+    // send a userinfo update if needed
     CL_SendUserinfo();
-    
-    // Send the client user command.
-    CL_SendClientUserCommand();
+
+    CL_SendUserCommand();
+
+    cl.sendPacketNow = false;
 }
 
