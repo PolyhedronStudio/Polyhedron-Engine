@@ -614,7 +614,7 @@ void CLG_EntityEvent(int number) {
 }
 
 
-// Utility function for CLG_CalcViewValues
+// Utility function for CLG_UpdateOrigin
 static inline float lerp_client_fov(float ofov, float nfov, float lerp)
 {
     if (clgi.IsDemoPlayback()) {
@@ -641,14 +641,14 @@ static inline float lerp_client_fov(float ofov, float nfov, float lerp)
 
 //
 //===============
-// CLG_CalcViewValues
+// CLG_UpdateOrigin
 //
 // Sets cl->refdef view values and sound spatialization params.
 // Usually called from V_AddEntities, but may be directly called from the main
 // loop if rendering is disabled but sound is running.
 //===============
 //
-void CLG_CalcViewValues(void)
+void CLG_UpdateOrigin(void)
 {
     player_state_t *currentPlayerState = NULL;
     player_state_t *previousPlayerState = NULL;

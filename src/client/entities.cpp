@@ -423,28 +423,6 @@ static inline float LerpShort(int a2, int a1, float frac)
 }
 #endif
 
-/*
-===============
-CL_AddEntities
-
-Emits all entities, particles, and lights to the refresh
-===============
-*/
-void CL_AddEntities(void)
-{
-    // CL_CalcViewValues(); // N&C: Moved to V_RenderView so CG Module can use these too.
-   // CL_FinishViewValues();
-    //CL_AddPacketEntities();
-   // CL_AddTEnts();
-//   // CL_AddParticles();
-//#if USE_DLIGHTS
-//    CL_AddDLights();
-//#endif
-//#if USE_LIGHTSTYLES
-//    CL_AddLightStyles();
-//#endif
-    LOC_AddLocationsToScene();
-}
 
 /*
 ===============

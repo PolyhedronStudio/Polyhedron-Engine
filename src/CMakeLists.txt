@@ -181,7 +181,6 @@ SET(SRC_CLIENT
 	#client/gtv.cpp
 	client/input.cpp
 	client/keys.cpp
-	client/locs.cpp
 	client/main.cpp
 	client/parse.cpp
 	client/precache.cpp

@@ -684,14 +684,14 @@ float CL_GM_CalcFOV(float fov_x, float width, float height) {
 
 //
 //===============
-// CL_GM_CalcViewValues
+// CL_GM_UpdateOrigin
 // 
 // Called by the client in case it wants to update audio positioning.
 //===============
 //
-void CL_GM_CalcViewValues(void) {
+void CL_GM_UpdateOrigin(void) {
     if (cge)
-        cge->CalcViewValues();
+        cge->UpdateOrigin();
 }
 
 //

@@ -472,7 +472,7 @@ void CL_SeekDemoMessage(void);
 //
 void CL_DeltaFrame(void);
 void CL_AddEntities(void);
-void CL_CalcViewValues(void);
+void CL_UpdateOrigin(void);
 
 #ifdef _DEBUG
 void CL_CheckEntityPresent(int entnum, const char *what);
@@ -619,16 +619,6 @@ void CL_EmitDemoSnapshot(void);
 void CL_FirstDemoFrame(void);
 void CL_Stop_f(void);
 demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info);
-
-
-//
-// locs.c
-//
-void LOC_Init(void);
-void LOC_LoadLocations(void);
-void LOC_FreeLocations(void);
-void LOC_UpdateCvars(void);
-void LOC_AddLocationsToScene(void);
 
 
 //
