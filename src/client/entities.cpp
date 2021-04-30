@@ -63,14 +63,14 @@ entity_update_new(cl_entity_t *ent, const entity_state_t *state, const vec_t *or
         state->event == EV_OTHER_TELEPORT ||
         (state->renderfx & (RenderEffects::FrameLerp | RenderEffects::Beam))) {
         // no lerping if teleported
-        VectorCopy(origin, ent->lerp_origin);
+        ent->lerp_origin = origin;
         return;
     }
 
     // old_origin is valid for new entities,
     // so use it as starting point for interpolating between
-    VectorCopy(state->old_origin, ent->prev.origin);
-    VectorCopy(state->old_origin, ent->lerp_origin);
+    ent->prev.origin = state->old_origin;
+    ent->lerp_origin = state->old_origin;
 }
 
 static inline void
@@ -95,7 +95,7 @@ entity_update_old(cl_entity_t *ent, const entity_state_t *state, const vec_t *or
         ent->prev = *state;
 
         // no lerping if teleported or morphed
-        VectorCopy(origin, ent->lerp_origin);
+        ent->lerp_origin = origin;
         return;
     }
 
@@ -141,10 +141,7 @@ static void entity_update(const entity_state_t *state)
 
     // work around Q2PRO server bandwidth optimization
     if (entity_optimized(state)) {
-        // N&C: FF Precision.
-        VectorCopy(cl.frame.playerState.pmove.origin, origin_v);
-        //VectorScale(cl.frame.playerState.pmove.origin, 0.125f, origin_v);
-        origin = origin_v;
+        origin = origin_v = cl.frame.playerState.pmove.origin;
     } else {
         origin = state->origin;
     }
@@ -323,7 +320,7 @@ void CL_DeltaFrame(void)
     if (cls.demo.playback) {
         // this delta has nothing to do with local viewAngles,
         // clear it to avoid interfering with demo freelook hack
-        //VectorClear(cl.frame.playerState.pmove.deltaAngles);
+        cl.frame.playerState.pmove.deltaAngles = vec3_zero();
     }
 
     if (cl.oldframe.playerState.pmove.type != cl.frame.playerState.pmove.type) {

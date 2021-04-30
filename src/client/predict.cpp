@@ -27,8 +27,12 @@ CL_CheckPredictionError
 */
 void CL_CheckPredictionError(void)
 {
+    // calculate the last usercmd_t we sent that the server has processed
+    uint32_t frameIndex = cls.netchan->incomingAcknowledged & CMD_MASK;
+    uint32_t commandIndex = cl.history[frameIndex].commandNumber;
+
     // Calculate the last cl_cmd_t we sent that the server has processed
-    cl_cmd_t* cmd = &cl.cmds[cls.netchan->incomingAcknowledged & CMD_MASK];
+    cl_cmd_t* cmd = &cl.cmds[commandIndex];
 
     // N&C: Call into the CG Module to let it handle this.
     CL_GM_CheckPredictionError(cmd);
@@ -158,8 +162,8 @@ void CL_PredictMovement(void)
         return;
     }
 
-    ack = cl.history[cls.netchan->incomingAcknowledged & CMD_MASK].cmdNumber;
-    currentFrameIndex = cl.cmdNumber;
+    ack = cl.history[cls.netchan->incomingAcknowledged & CMD_MASK].commandNumber;
+    currentFrameIndex = cl.commandNumber;
 
     // if we are too far out of date, just freeze
     if (currentFrameIndex - ack > CMD_BACKUP - 1) {

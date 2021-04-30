@@ -427,7 +427,7 @@ void SCR_LagSample(void)
     unsigned ping;
 
     h->rcvd = cls.realtime;
-    if (!h->cmdNumber || h->rcvd < h->sent) {
+    if (!h->commandNumber || h->rcvd < h->sent) {
         return;
     }
 

@@ -219,7 +219,7 @@ typedef struct clientinfo_s {
 typedef struct {
     unsigned    sent;           // time sent, for calculating pings
     unsigned    rcvd;           // time rcvd, for calculating pings
-    unsigned    cmdNumber;      // current cmdNumber for this frame
+    unsigned    commandNumber;      // current commandNumber for this frame
 } client_history_t;
 
 //
@@ -298,7 +298,7 @@ typedef struct client_state_s {
 
     cl_cmd_t    cmd;
     cl_cmd_t    cmds[CMD_BACKUP];    // each mesage will send several old cmds
-    unsigned     cmdNumber;
+    unsigned     commandNumber;
     vec3_t       predicted_origins[CMD_BACKUP];    // for debug comparing against server
     client_history_t    history[CMD_BACKUP];
     int         initialSeq;
