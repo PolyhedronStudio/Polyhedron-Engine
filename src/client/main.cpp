@@ -2968,9 +2968,6 @@ unsigned CL_Frame(unsigned msec)
     case SYNC_MAXFPS:
         // Everything ticks in sync with refresh
         if (main_extra < main_msec) {
-            if (!cl.sendPacketNow) {
-                return 0;
-            }
             ref_frame = false;
         }
         break;
@@ -3011,12 +3008,11 @@ unsigned CL_Frame(unsigned msec)
     CL_CheckForResend();
 
     // Read user intentions
-    CL_UpdateCmd(main_extra);
+    CL_UpdateClientUserCommands(main_extra);
 
     // Finalize pending cmd
-    phys_frame |= cl.sendPacketNow;
     if (phys_frame) {
-        CL_FinalizeCmd();
+        CL_FinalizeClientUserCommand();
         phys_extra -= phys_msec;
         M_FRAMES++;
 
@@ -3033,17 +3029,19 @@ unsigned CL_Frame(unsigned msec)
 		CL_CheckForPause();
 	}
 
-    // Send pending cmds
-    CL_SendCmd();
+    // Send pending client user input commands.
+    CL_SendClientUserCommands();
 
     // Predict all unacknowledged movements
     CL_PredictMovement();
 
+    // Give the console a run of the mill.
     Con_RunConsole();
 
-    // Update RMLUI
+    // Update RMLUI another frame.
     RMLUI_UpdateFrame();
 
+    // Update the old UI another frame.
     UI_Frame(main_extra);
 
     if (ref_frame) {
@@ -3130,14 +3128,13 @@ void CL_Init(void)
         return;
     }
 
-    // all archived variables will now be loaded
-
-    // start with full screen console
+    // Set our keyboard input destination to be the console.
     cls.key_dest = KEY_CONSOLE;
     
-    // N&C: Load our client game module here.
+    // Load our client game module here.
     CL_InitGameProgs();
 
+    // Initialize sound and refresh modules.
 #ifdef _WIN32
     CL_InitRefresh();
     S_Init();   // sound must be initialized after window is created
@@ -3146,7 +3143,10 @@ void CL_Init(void)
     CL_InitRefresh();
 #endif
 
+    // Start initializing the client locally.
     CL_InitLocal();
+
+    // Start initializing user input.
     IN_Init();
 
 #if USE_ZLIB
@@ -3155,25 +3155,30 @@ void CL_Init(void)
     }
 #endif
 
+    // Load in the download filter paths. (These are disalloed to be used.)
     CL_LoadDownloadIgnores();
 
+    // Initialize libcurl.
     HTTP_Init();
 
     // Initialize RMLUI
     RMLUI_Init();
 
+    // Open the default menu.
     UI_OpenMenu(UIMENU_DEFAULT);
 
+    // Post init and start running the console.
     Con_PostInit();
     Con_RunConsole();
 
+    // Setup the client commandbuffer.
     cl_cmdbuf.from = FROM_STUFFTEXT;
     cl_cmdbuf.text = cl_cmdbuf_text;
     cl_cmdbuf.maxsize = sizeof(cl_cmdbuf_text);
     cl_cmdbuf.exec = exec_server_string;
 
+    // Enable the running cvar.
     Cvar_Set("cl_running", "1");
-
 }
 
 /*
