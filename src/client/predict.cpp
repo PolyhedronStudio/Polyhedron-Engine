@@ -140,13 +140,6 @@ CL_PredictMovement
 Sets cl.predicted_origin and cl.predicted_angles
 =================
 */
-void CL_PredictAngles(void)
-{
-    //cl.predicted_angles[0] = cl.viewAngles[0] + SHORT2ANGLE(cl.frame.playerState.pmove.deltaAngles[0]);
-    //cl.predicted_angles[1] = cl.viewAngles[1] + SHORT2ANGLE(cl.frame.playerState.pmove.deltaAngles[1]);
-    //cl.predicted_angles[2] = cl.viewAngles[2] + SHORT2ANGLE(cl.frame.playerState.pmove.deltaAngles[2]);
-}
-
 void CL_PredictMovement(void)
 {
     uint32_t    ack, currentFrameIndex;
