@@ -279,7 +279,7 @@ void CL_AddNetgraph(void)
 
     // see what the latency was on this packet
     in = cls.netchan->incomingAcknowledged & CMD_MASK;
-    ping = cls.realtime - cl.history[in].sent;
+    ping = cls.realtime - cl.clientCommandHistory[in].timeSent;
     ping /= 30;
     if (ping > 30)
         ping = 30;
@@ -423,15 +423,15 @@ void SCR_LagClear(void)
 void SCR_LagSample(void)
 {
     int i = cls.netchan->incomingAcknowledged & CMD_MASK;
-    client_history_t *h = &cl.history[i];
+    client_command_history_t *h = &cl.clientCommandHistory[i];
     unsigned ping;
 
-    h->rcvd = cls.realtime;
-    if (!h->commandNumber || h->rcvd < h->sent) {
+    h->timeReceived = cls.realtime;
+    if (!h->commandNumber || h->timeReceived < h->timeSent) {
         return;
     }
 
-    ping = h->rcvd - h->sent;
+    ping = h->timeReceived - h->timeSent;
     for (i = 0; i < cls.netchan->dropped; i++) {
         lag.samples[lag.head % LAG_WIDTH] = ping | LAG_CRIT_BIT;
         lag.head++;

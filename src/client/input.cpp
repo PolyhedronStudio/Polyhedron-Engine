@@ -401,7 +401,7 @@ static inline qboolean ready_to_send_hacked(void)
         return true; // packet drop hack disabled
     }
 
-    if (cl.commandNumber - cl.lastTransmitCmdNumberReal > 2) {
+    if (cl.currentClientCommandNumber - cl.lastTransmitCmdNumberReal > 2) {
         return true; // can't drop more than 2 cmds
     }
 
@@ -417,15 +417,15 @@ static void CL_SendUserCommand(void)
 {
     size_t cursize q_unused, checksumIndex;
     cl_cmd_t *cmd, *oldcmd;
-    client_history_t *history;
+    client_command_history_t*history;
 
     // archive this packet
-    history = &cl.history[cls.netchan->outgoingSequence & CMD_MASK];
-    history->commandNumber = cl.commandNumber;
-    history->sent = cls.realtime;    // for ping calculation
-    history->rcvd = 0;
+    history = &cl.clientCommandHistory[cls.netchan->outgoingSequence & CMD_MASK];
+    history->commandNumber = cl.currentClientCommandNumber;
+    history->timeSent = cls.realtime;    // for ping calculation
+    history->timeReceived = 0;
 
-    cl.lastTransmitCmdNumber = cl.commandNumber;
+    cl.lastTransmitCmdNumber = cl.currentClientCommandNumber;
 
     // see if we are ready to send this packet
     if (!ready_to_send_hacked()) {
@@ -434,7 +434,7 @@ static void CL_SendUserCommand(void)
     }
 
     cl.lastTransmitTime = cls.realtime;
-    cl.lastTransmitCmdNumberReal = cl.commandNumber;
+    cl.lastTransmitCmdNumberReal = cl.currentClientCommandNumber;
 
     // begin a client move command
     MSG_WriteByte(clc_move);
@@ -457,15 +457,15 @@ static void CL_SendUserCommand(void)
 
     // send this and the previous cmds in the message, so
     // if the last packet was dropped, it can be recovered
-    cmd = &cl.cmds[(cl.commandNumber - 2) & CMD_MASK];
+    cmd = &cl.cmds[(cl.currentClientCommandNumber - 2) & CMD_MASK];
     MSG_WriteDeltaUsercmd(NULL, cmd);
     oldcmd = cmd;
 
-    cmd = &cl.cmds[(cl.commandNumber - 1) & CMD_MASK];
+    cmd = &cl.cmds[(cl.currentClientCommandNumber - 1) & CMD_MASK];
     MSG_WriteDeltaUsercmd(oldcmd, cmd);
     oldcmd = cmd;
 
-    cmd = &cl.cmds[cl.commandNumber & CMD_MASK];
+    cmd = &cl.cmds[cl.currentClientCommandNumber & CMD_MASK];
     MSG_WriteDeltaUsercmd(oldcmd, cmd);
 
     // MSG: !! PROTOCOL - This one seemed to be needed for old protocol, and thus demo recording.
@@ -494,18 +494,18 @@ static void CL_SendUserCommand(void)
 
 static void CL_SendKeepAlive(void)
 {
-    client_history_t *history;
+    client_command_history_t *history;
     size_t cursize q_unused;
 
     // archive this packet
-    history = &cl.history[cls.netchan->outgoingSequence & CMD_MASK];
-    history->commandNumber = cl.commandNumber;
-    history->sent = cls.realtime;    // for ping calculation
-    history->rcvd = 0;
+    history = &cl.clientCommandHistory[cls.netchan->outgoingSequence & CMD_MASK];
+    history->commandNumber = cl.currentClientCommandNumber;
+    history->timeSent = cls.realtime;    // for ping calculation
+    history->timeReceived = 0;
 
     cl.lastTransmitTime = cls.realtime;
-    cl.lastTransmitCmdNumber = cl.commandNumber;
-    cl.lastTransmitCmdNumberReal = cl.commandNumber;
+    cl.lastTransmitCmdNumber = cl.currentClientCommandNumber;
+    cl.lastTransmitCmdNumberReal = cl.currentClientCommandNumber;
 
     cursize = Netchan_Transmit(cls.netchan, 0, NULL, 1);
 #ifdef _DEBUG
@@ -580,7 +580,7 @@ void CL_SendCmd(void)
     }
 
     // are there any new usercmds to send after all?
-    if (cl.lastTransmitCmdNumber == cl.commandNumber) {
+    if (cl.lastTransmitCmdNumber == cl.currentClientCommandNumber) {
         return; // nothing to send
     }
 

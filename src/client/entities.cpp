@@ -180,11 +180,9 @@ static void set_active_state(void)
     cl.oldframe.valid = false;
     cl.oldframe.playerState = cl.frame.playerState;
     cl.frameflags = 0;
-
     if (cls.netchan) {
-        cl.initialSeq = cls.netchan->outgoingSequence;
+        cl.initialSequence = cls.netchan->outgoingSequence;
     }
-
     if (cls.demo.playback) {
         // init some demo things
         CL_FirstDemoFrame();

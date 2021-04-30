@@ -704,8 +704,8 @@ void CLG_FinalizeFrameMoveCommand(void)
     CLG_KeyClear(&in_lookdown);
 
     // Save this command off for prediction
-    cl->commandNumber++;
-    cl->cmds[cl->commandNumber & CMD_MASK] = cl->cmd;
+    cl->currentClientCommandNumber++;
+    cl->cmds[cl->currentClientCommandNumber & CMD_MASK] = cl->cmd;
 
     // Clear pending cmd
     memset(&cl->cmd, 0, sizeof(cl->cmd));

@@ -217,10 +217,10 @@ typedef struct clientinfo_s {
 // Used for storing client input commands.
 //
 typedef struct {
-    unsigned    sent;           // time sent, for calculating pings
-    unsigned    rcvd;           // time rcvd, for calculating pings
+    unsigned    timeSent;           // time sent, for calculating pings
+    unsigned    timeReceived;           // time rcvd, for calculating pings
     unsigned    commandNumber;      // current commandNumber for this frame
-} client_history_t;
+} client_command_history_t;
 
 //
 // The server frame structure contains information about the frame
@@ -292,7 +292,7 @@ typedef struct client_state_s {
     //
     // Client User Command Related.
     // 
-    int         timeoutcount;
+    int         timeoutCount;
 
     // The time we last transmitted a user command.
     unsigned    lastTransmitTime;
@@ -308,17 +308,16 @@ typedef struct client_state_s {
     // Actual current client user command list.
     cl_cmd_t    cmds[CMD_BACKUP];    // each mesage will send several old cmds
     // Current command number.
-    unsigned     commandNumber;
-
-    vec3_t       predicted_origins[CMD_BACKUP];    // for debug comparing against server
-    client_history_t    history[CMD_BACKUP];
-    int         initialSeq;
+    unsigned     currentClientCommandNumber;
+    // History book of time sent, received, and command number.
+    client_command_history_t clientCommandHistory[CMD_BACKUP];
+    // Initial outgoing sequence number.
+    int initialSequence;
 
     // Predicted Client State. (Used for movement.)
     cl_predicted_state_t predictedState;
 
-
-    //
+        //
     // Entity States.
     // 
     // Solid Entities, these are REBUILT during EACH FRAME.

@@ -2686,13 +2686,13 @@ static void CL_MeasureStats(void)
         int j, k = 0;
 
         i = ack - 16 + 1;
-        if (i < cl.initialSeq) {
-            i = cl.initialSeq;
+        if (i < cl.initialSequence) {
+            i = cl.initialSequence;
         }
         for (j = i; j <= ack; j++) {
-            client_history_t *h = &cl.history[j & CMD_MASK];
-            if (h->rcvd > h->sent) {
-                ping += h->rcvd - h->sent;
+            client_command_history_t *h = &cl.clientCommandHistory[j & CMD_MASK];
+            if (h->timeReceived > h->timeSent) {
+                ping += h->timeReceived - h->timeSent;
                 k++;
             }
         }
@@ -2746,11 +2746,11 @@ static void CL_CheckTimeout(void)
     delta = cl_timeout->value * 1000;
     if (delta && com_localTime - cls.netchan->lastReceived > delta)  {
         // timeoutcount saves debugger
-        if (++cl.timeoutcount > 5) {
+        if (++cl.timeoutCount > 5) {
             Com_Error(ERR_DISCONNECT, "Server connection timed out.");
         }
     } else {
-        cl.timeoutcount = 0;
+        cl.timeoutCount = 0;
     }
 }
 
