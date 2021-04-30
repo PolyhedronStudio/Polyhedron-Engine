@@ -27,6 +27,18 @@ CL_CheckPredictionError
 */
 void CL_CheckPredictionError(void)
 {
+    if (!cls.netchan) {
+        return;
+    }
+
+    if (sv_paused->integer) {
+        cl.predictedState.error = vec3_zero();
+        return;
+    }
+
+    if (!cl_predict->integer || (cl.frame.playerState.pmove.flags & PMF_NO_PREDICTION))
+        return;
+
     // Calculate the last cl_cmd_t we sent that the server has processed
     cl_cmd_t* cmd = &cl.cmds[cls.netchan->incomingAcknowledged & CMD_MASK];
 
