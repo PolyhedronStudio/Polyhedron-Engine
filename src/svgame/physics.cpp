@@ -759,9 +759,9 @@ FIXME: is this true?
 */
 
 //FIXME: hacked in for E3 demo
-#define sv_stopspeed        100
-#define sv_friction         6
-#define sv_waterfriction    1
+constexpr int32_t sv_stopspeed = 100;
+constexpr int32_t sv_friction = 6;
+constexpr int32_t sv_waterfriction = 1;
 
 void SV_AddRotationalFriction(entity_t *ent)
 {

@@ -45,45 +45,45 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //==================================================================
 
 // view pitching times
-#define DAMAGE_TIME     0.5f
-#define FALL_TIME       0.3f
+constexpr float DAMAGE_TIME = 0.5f;
+constexpr float FALL_TIME = 0.3f;
 
 
 // edict->spawnFlags
 // these are set with checkboxes on each entity in the map editor
-#define SPAWNFLAG_NOT_EASY          0x00000100
-#define SPAWNFLAG_NOT_MEDIUM        0x00000200
-#define SPAWNFLAG_NOT_HARD          0x00000400
-#define SPAWNFLAG_NOT_DEATHMATCH    0x00000800
-#define SPAWNFLAG_NOT_COOP          0x00001000
+constexpr int32_t  SPAWNFLAG_NOT_EASY = 0x00000100;
+constexpr int32_t  SPAWNFLAG_NOT_MEDIUM = 0x00000200;
+constexpr int32_t  SPAWNFLAG_NOT_HARD = 0x00000400;
+constexpr int32_t  SPAWNFLAG_NOT_DEATHMATCH = 0x00000800;
+constexpr int32_t  SPAWNFLAG_NOT_COOP = 0x00001000;
 
 // edict->flags
-#define FL_FLY                  0x00000001
-#define FL_SWIM                 0x00000002  // implied immunity to drowining
-#define FL_IMMUNE_LASER         0x00000004
-#define FL_INWATER              0x00000008
-#define FL_GODMODE              0x00000010
-#define FL_NOTARGET             0x00000020
-#define FL_IMMUNE_SLIME         0x00000040
-#define FL_IMMUNE_LAVA          0x00000080
-#define FL_PARTIALGROUND        0x00000100  // not all corners are valid
-#define FL_WATERJUMP            0x00000200  // player jumping out of water
-#define FL_TEAMSLAVE            0x00000400  // not the first on the team
-#define FL_NO_KNOCKBACK         0x00000800
-#define FL_POWER_ARMOR          0x00001000  // power armor (if any) is active
-#define FL_RESPAWN              0x80000000  // used for item respawning
+constexpr int32_t  FL_FLY = 0x00000001;
+constexpr int32_t  FL_SWIM = 0x00000002;  // implied immunity to drowining
+constexpr int32_t  FL_IMMUNE_LASER = 0x00000004;
+constexpr int32_t  FL_INWATER = 0x00000008;
+constexpr int32_t  FL_GODMODE = 0x00000010;
+constexpr int32_t  FL_NOTARGET = 0x00000020;
+constexpr int32_t  FL_IMMUNE_SLIME = 0x00000040;
+constexpr int32_t  FL_IMMUNE_LAVA = 0x00000080;
+constexpr int32_t  FL_PARTIALGROUND = 0x00000100;  // not all corners are valid
+constexpr int32_t  FL_WATERJUMP = 0x00000200;  // player jumping out of water
+constexpr int32_t  FL_TEAMSLAVE = 0x00000400;  // not the first on the team
+constexpr int32_t  FL_NO_KNOCKBACK = 0x00000800;
+constexpr int32_t  FL_POWER_ARMOR = 0x00001000;  // power armor (if any) is active
+constexpr int32_t  FL_RESPAWN = 0x80000000;  // used for item respawning
 
 
-#define FRAMETIME       0.1
+constexpr float FRAMETIME = 0.1f;
 
 // memory tags to allow dynamic memory to be cleaned up
-#define TAG_GAME    765     // clear when unloading the dll
-#define TAG_LEVEL   766     // clear when loading a new level
+constexpr int32_t  TAG_GAME = 765;     // clear when unloading the dll
+constexpr int32_t  TAG_LEVEL = 766;     // clear when loading a new level
 
 
-#define MELEE_DISTANCE  80
+constexpr int32_t  MELEE_DISTANCE = 80;
 
-#define BODY_QUEUE_SIZE     8
+constexpr int32_t  BODY_QUEUE_SIZE = 8;
 
 typedef enum {
     DAMAGE_NO,
@@ -109,76 +109,76 @@ typedef enum {
 
 
 //deadFlag
-#define DEAD_NO                 0
-#define DEAD_DYING              1
-#define DEAD_DEAD               2
-#define DEAD_RESPAWNABLE        3
+constexpr int32_t  DEAD_NO = 0;
+constexpr int32_t  DEAD_DYING = 1;
+constexpr int32_t  DEAD_DEAD = 2;
+constexpr int32_t  DEAD_RESPAWNABLE = 3;
 
 //range
-#define RANGE_MELEE             0
-#define RANGE_NEAR              1
-#define RANGE_MID               2
-#define RANGE_FAR               3
+constexpr int32_t  RANGE_MELEE = 0;
+constexpr int32_t  RANGE_NEAR = 1;
+constexpr int32_t  RANGE_MID = 2;
+constexpr int32_t  RANGE_FAR = 3;
 
 //gib types
-#define GIB_ORGANIC             0
-#define GIB_METALLIC            1
+constexpr int32_t GIB_ORGANIC = 0;
+constexpr int32_t GIB_METALLIC = 1;
 
 //monster ai flags
-#define AI_STAND_GROUND         0x00000001
-#define AI_TEMP_STAND_GROUND    0x00000002
-#define AI_SOUND_TARGET         0x00000004
-#define AI_LOST_SIGHT           0x00000008
-#define AI_PURSUIT_LAST_SEEN    0x00000010
-#define AI_PURSUE_NEXT          0x00000020
-#define AI_PURSUE_TEMP          0x00000040
-#define AI_HOLD_FRAME           0x00000080
-#define AI_GOOD_GUY             0x00000100
-#define AI_BRUTAL               0x00000200
-#define AI_NOSTEP               0x00000400
-#define AI_DUCKED               0x00000800
-#define AI_COMBAT_POINT         0x00001000
-#define AI_MEDIC                0x00002000
-#define AI_RESURRECTING         0x00004000
+constexpr int32_t AI_STAND_GROUND = 0x00000001;
+constexpr int32_t AI_TEMP_STAND_GROUND = 0x00000002;
+constexpr int32_t AI_SOUND_TARGET = 0x00000004;
+constexpr int32_t AI_LOST_SIGHT = 0x00000008;
+constexpr int32_t AI_PURSUIT_LAST_SEEN = 0x00000010;
+constexpr int32_t AI_PURSUE_NEXT = 0x00000020;
+constexpr int32_t AI_PURSUE_TEMP = 0x00000040;
+constexpr int32_t AI_HOLD_FRAME = 0x00000080;
+constexpr int32_t AI_GOOD_GUY = 0x00000100;
+constexpr int32_t  AI_BRUTAL = 0x00000200;
+constexpr int32_t  AI_NOSTEP = 0x00000400;
+constexpr int32_t  AI_DUCKED = 0x00000800;
+constexpr int32_t  AI_COMBAT_POINT = 0x00001000;
+constexpr int32_t  AI_MEDIC = 0x00002000;
+constexpr int32_t  AI_RESURRECTING = 0x00004000;
 
 //monster attack state
-#define AS_STRAIGHT             1
-#define AS_SLIDING              2
-#define AS_MELEE                3
-#define AS_MISSILE              4
+constexpr int32_t  AS_STRAIGHT = 1;
+constexpr int32_t  AS_SLIDING = 2;
+constexpr int32_t  AS_MELEE = 3;
+constexpr int32_t  AS_MISSILE = 4;
 
 // armor types
-#define ARMOR_NONE              0
-#define ARMOR_JACKET            1
-#define ARMOR_COMBAT            2
-#define ARMOR_BODY              3
-#define ARMOR_SHARD             4
+constexpr int32_t  ARMOR_NONE = 0;
+constexpr int32_t  ARMOR_JACKET = 1;
+constexpr int32_t  ARMOR_COMBAT = 2;
+constexpr int32_t  ARMOR_BODY = 3;
+constexpr int32_t  ARMOR_SHARD = 4;
 
 // power armor types
-#define POWER_ARMOR_NONE        0
+constexpr int32_t  POWER_ARMOR_NONE = 0;
 
 // handedness values
-#define RIGHT_HANDED            0
-#define LEFT_HANDED             1
-#define CENTER_HANDED           2
+constexpr int32_t  RIGHT_HANDED = 0;
+constexpr int32_t  LEFT_HANDED = 1;
+constexpr int32_t  CENTER_HANDED = 2;
 
 
 // game.serverflags values
-#define SFL_CROSS_TRIGGER_1     0x00000001
-#define SFL_CROSS_TRIGGER_2     0x00000002
-#define SFL_CROSS_TRIGGER_3     0x00000004
-#define SFL_CROSS_TRIGGER_4     0x00000008
-#define SFL_CROSS_TRIGGER_5     0x00000010
-#define SFL_CROSS_TRIGGER_6     0x00000020
-#define SFL_CROSS_TRIGGER_7     0x00000040
-#define SFL_CROSS_TRIGGER_8     0x00000080
-#define SFL_CROSS_TRIGGER_MASK  0x000000ff
+constexpr int32_t  SFL_CROSS_TRIGGER_1 = 0x00000001;
+constexpr int32_t  SFL_CROSS_TRIGGER_2 = 0x00000002;
+constexpr int32_t  SFL_CROSS_TRIGGER_3 = 0x00000004;
+constexpr int32_t  SFL_CROSS_TRIGGER_4 = 0x00000008;
+constexpr int32_t  SFL_CROSS_TRIGGER_5 = 0x00000010;
+constexpr int32_t  SFL_CROSS_TRIGGER_6 = 0x00000020;
+constexpr int32_t  SFL_CROSS_TRIGGER_7 = 0x00000040;
+constexpr int32_t  SFL_CROSS_TRIGGER_8 = 0x00000080;
+constexpr int32_t  SFL_CROSS_TRIGGER_MASK = 0x000000ff;
 
 
 // noise types for PlayerNoise
-#define PNOISE_SELF             0
-#define PNOISE_WEAPON           1
-#define PNOISE_IMPACT           2
+constexpr int32_t  PNOISE_SELF = 0;
+constexpr int32_t  PNOISE_WEAPON = 1;
+constexpr int32_t  PNOISE_IMPACT = 2;
 
 
 // edict->moveType values
@@ -209,19 +209,19 @@ typedef struct {
 
 
 // gitem_t->flags
-#define IT_WEAPON       1       // use makes active weapon
-#define IT_AMMO         2
-#define IT_ARMOR        4
-#define IT_STAY_COOP    8
-#define IT_KEY          16
-#define IT_POWERUP      32
+constexpr int32_t IT_WEAPON = 1;       // use makes active weapon
+constexpr int32_t IT_AMMO = 2;
+constexpr int32_t IT_ARMOR = 4;
+constexpr int32_t IT_STAY_COOP = 8;
+constexpr int32_t IT_KEY = 16;
+constexpr int32_t IT_POWERUP = 32;
 
 // gitem_t->weaponModel for weapons indicates model index
-#define WEAP_BLASTER            1
-#define WEAP_MACHINEGUN         2
-#define WEAP_SHOTGUN            3
-#define WEAP_SUPERSHOTGUN       4
-#define WEAP_FLAREGUN           5
+constexpr int32_t WEAP_BLASTER = 1;
+constexpr int32_t WEAP_MACHINEGUN = 2;
+constexpr int32_t WEAP_SHOTGUN = 3;
+constexpr int32_t WEAP_SUPERSHOTGUN = 4;
+constexpr int32_t WEAP_FLAREGUN = 5;
 
 // C++20: STRING: Added const to the chars.
 typedef struct gitem_s {
