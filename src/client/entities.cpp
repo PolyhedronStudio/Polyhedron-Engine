@@ -174,7 +174,7 @@ static void set_active_state(void)
     cls.state = ca_active;
 
     cl.serverdelta = Q_align(cl.frame.number, CL_FRAMEDIV);
-    cl.time = cl.servertime = 0; // set time, needed for demos
+    cl.time = cl.serverTime = 0; // set time, needed for demos
 
     // initialize oldframe so lerping doesn't hurt anything
     cl.oldframe.valid = false;
@@ -291,7 +291,7 @@ void CL_DeltaFrame(void)
 
     // set server time
     framenum = cl.frame.number - cl.serverdelta;
-    cl.servertime = framenum * CL_FRAMETIME;
+    cl.serverTime = framenum * CL_FRAMETIME;
 
     // rebuild the list of solid entities for this frame
     cl.numSolidEntities = 0;

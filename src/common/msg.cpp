@@ -303,7 +303,7 @@ void MSG_WriteDirection(const vec3_t& dir)
 
 void MSG_PackEntity(entity_packed_t* out, const entity_state_t* in, qboolean short_angles)
 {
-    // allow 0 to accomodate empty baselines
+    // allow 0 to accomodate empty entityBaselines
     if (in->number < 0 || in->number >= MAX_EDICTS)
         Com_Error(ERR_DROP, "%s: bad number: %d", __func__, in->number);
 

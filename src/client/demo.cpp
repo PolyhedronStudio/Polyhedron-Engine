@@ -126,7 +126,7 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
 
         if (newnum < oldnum) {
             // this is a new entity, send it from the baseline
-            MSG_PackEntity(&oldpack, &cl.baselines[newnum], false);
+            MSG_PackEntity(&oldpack, &cl.entityBaselines[newnum], false);
             MSG_PackEntity(&newpack, newent, false);
             MSG_WriteDeltaEntity(&oldpack, &newpack, (msgEsFlags_t)(MSG_ES_FORCE | MSG_ES_NEWENTITY));  // CPP: WARNING: msgEsFlags_t cast.
             newindex++;
@@ -423,9 +423,9 @@ static void CL_Record_f(void)
         MSG_WriteByte(0);
     }
 
-    // baselines
+    // entityBaselines
     for (i = 1; i < MAX_EDICTS; i++) {
-        ent = &cl.baselines[i];
+        ent = &cl.entityBaselines[i];
         if (!ent->number)
             continue;
 
@@ -1195,7 +1195,7 @@ void CL_DemoFrame(int msec)
 
     if (com_timedemo->integer) {
         parse_next_message(0);
-        cl.time = cl.servertime;
+        cl.time = cl.serverTime;
         cls.demo.time_frames++;
         return;
     }
@@ -1209,7 +1209,7 @@ void CL_DemoFrame(int msec)
 
     // cl.time has already been advanced for this client frame
     // read the next frame to start lerp cycle again
-    while (cl.servertime < cl.time) {
+    while (cl.serverTime < cl.time) {
         if (parse_next_message(cl_demowait->integer))
             break;
         if (cls.state != ca_active)

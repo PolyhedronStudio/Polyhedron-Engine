@@ -229,7 +229,7 @@ static explosion_t* CLG_PlainExplosion(qboolean big)
 	VectorCopy(teParameters.pos1, ex->ent.origin);
 	ex->type = explosion_t::ex_poly; // CPP: Enum
 	ex->ent.flags = RenderEffects::FullBright;
-	ex->start = cl->servertime - CL_FRAMETIME;
+	ex->start = cl->serverTime - CL_FRAMETIME;
 	ex->light = 350;
 	VectorSet(ex->lightcolor, 1.0, 0.5, 0.5);
 	ex->ent.angles[1] = rand() % 360;
@@ -268,7 +268,7 @@ void CLG_SmokeAndFlash(vec3_t origin)
 	ex->type = explosion_t::ex_misc; // CPP: Enum
 	ex->frames = 4;
 	ex->ent.flags = RenderEffects::Translucent | RF_NOSHADOW;
-	ex->start = cl->servertime - CL_FRAMETIME;
+	ex->start = cl->serverTime - CL_FRAMETIME;
 	ex->ent.model = cl_mod_smoke;
 
 	ex = CLG_AllocExplosion();
@@ -276,7 +276,7 @@ void CLG_SmokeAndFlash(vec3_t origin)
 	ex->type = explosion_t::ex_flash; // CPP: Enum
 	ex->ent.flags = RenderEffects::FullBright;
 	ex->frames = 2;
-	ex->start = cl->servertime - CL_FRAMETIME;
+	ex->start = cl->serverTime - CL_FRAMETIME;
 	ex->ent.model = cl_mod_flash;
 }
 
@@ -1055,7 +1055,7 @@ void CLG_ParseTempEntity(void)
 				ex->type = explosion_t::ex_flare;
 				break;
 		}
-		ex->start = cl->servertime - CL_FRAMETIME;
+		ex->start = cl->serverTime - CL_FRAMETIME;
 		ex->light = 150;
 		ex->ent.model = cl_mod_explode;
 		ex->frames = 4;

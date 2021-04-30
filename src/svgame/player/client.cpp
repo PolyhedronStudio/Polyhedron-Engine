@@ -1316,13 +1316,24 @@ usually be a couple times for each server frame.
 */
 void ClientThink(entity_t *ent, cl_cmd_t *ucmd)
 {
-    gclient_t   *client;
-    entity_t *other;
-    int     i, j;
-    pm_move_t pm;
+    gclient_t* client = nullptr;
+    entity_t* other = nullptr;
 
+    pm_move_t pm = {};
+    
+    // Sanity checks.
+    if (!ent) {
+        Com_Error(ErrorType::ERR_DROP, "%s: has a NULL *ent!\n", __FUNCTION__);
+    }
+    if (!ent->client)
+        Com_Error(ErrorType::ERR_DROP, "%s: *ent has no client to think with!\n", __FUNCTION__);
+
+    // Store the current entity to be run from G_RunFrame.
     level.current_entity = ent;
+
+    // Fetch the entity client.
     client = ent->client;
+
 
     if (level.intermissiontime) {
         client->playerState.pmove.type = PM_FREEZE;
@@ -1336,11 +1347,10 @@ void ClientThink(entity_t *ent, cl_cmd_t *ucmd)
     pm_passent = ent;
 
     if (ent->client->chase_target) {
-
+        // Angles are fetched from the client we are chasing.
         client->resp.cmd_angles[0] = ucmd->cmd.angles[0];
         client->resp.cmd_angles[1] = ucmd->cmd.angles[1];
         client->resp.cmd_angles[2] = ucmd->cmd.angles[2];
-
     } else {
 
         // set up for pmove
@@ -1389,6 +1399,8 @@ void ClientThink(entity_t *ent, cl_cmd_t *ucmd)
         ent->mins = pm.mins;
         ent->maxs = pm.maxs;
 
+        // Copy over the user command angles so they are stored for respawns.
+        // (Used when going into a new map etc.)
         client->resp.cmd_angles[0] = ucmd->cmd.angles[0];
         client->resp.cmd_angles[1] = ucmd->cmd.angles[1];
         client->resp.cmd_angles[2] = ucmd->cmd.angles[2];
@@ -1420,6 +1432,8 @@ void ClientThink(entity_t *ent, cl_cmd_t *ucmd)
             UTIL_TouchTriggers(ent);
 
         // touch other objects
+        int i = 0;
+        int j = 0;
         for (i = 0 ; i < pm.numTouchedEntities; i++) {
             other = pm.touchedEntities[i];
             for (j = 0 ; j < i ; j++)
@@ -1474,7 +1488,7 @@ void ClientThink(entity_t *ent, cl_cmd_t *ucmd)
     }
 
     // update chase cam if being followed
-    for (i = 1; i <= maxclients->value; i++) {
+    for (int i = 1; i <= maxclients->value; i++) {
         other = g_edicts + i;
         if (other->inUse && other->client->chase_target == ent)
             UpdateChaseCam(other);

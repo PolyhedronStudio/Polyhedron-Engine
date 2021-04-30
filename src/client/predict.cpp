@@ -58,8 +58,6 @@ Sets cl.predicted_origin and cl.predicted_angles
 */
 void CL_PredictMovement(void)
 {
-    uint32_t    ack, currentFrameIndex;
-
     if (cls.state != ca_active) {
         return;
     }
@@ -79,8 +77,9 @@ void CL_PredictMovement(void)
         return;
     }
 
-    ack = cl.history[cls.netchan->incomingAcknowledged & CMD_MASK].commandNumber;
-    currentFrameIndex = cl.commandNumber;
+    // Fetch acknowledged command and frame.
+    uint32_t ack = cl.history[cls.netchan->incomingAcknowledged & CMD_MASK].commandNumber;
+    uint32_t currentFrameIndex = cl.commandNumber;
 
     // If we are too far out of date, just freeze
     if (currentFrameIndex - ack > CMD_BACKUP - 1) {

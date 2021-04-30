@@ -2649,15 +2649,15 @@ static void CL_SetClientTime(void)
     int prevtime;
 
     if (com_timedemo->integer) {
-        cl.time = cl.servertime;
+        cl.time = cl.serverTime;
         cl.lerpfrac = 1.0f;
         return;
     }
 
-    prevtime = cl.servertime - CL_FRAMETIME;
-    if (cl.time > cl.servertime) {
-        SHOWCLAMP(1, "high clamp %i\n", cl.time - cl.servertime);
-        cl.time = cl.servertime;
+    prevtime = cl.serverTime - CL_FRAMETIME;
+    if (cl.time > cl.serverTime) {
+        SHOWCLAMP(1, "high clamp %i\n", cl.time - cl.serverTime);
+        cl.time = cl.serverTime;
         cl.lerpfrac = 1.0f;
     } else if (cl.time < prevtime) {
         SHOWCLAMP(1, "low clamp %i\n", prevtime - cl.time);
@@ -2668,7 +2668,7 @@ static void CL_SetClientTime(void)
     }
 
     SHOWCLAMP(2, "time %d %d, lerpfrac %.3f\n",
-              cl.time, cl.servertime, cl.lerpfrac);
+              cl.time, cl.serverTime, cl.lerpfrac);
 }
 
 static void CL_MeasureStats(void)

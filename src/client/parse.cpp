@@ -164,7 +164,7 @@ static void CL_ParsePacketEntities(server_frame_t *oldframe,
         if (oldnum > newnum) {
             // delta from baseline
             SHOWNET(2, "   baseline: %i ", newnum);
-            CL_ParseDeltaEntity(frame, newnum, &cl.baselines[newnum], bits);
+            CL_ParseDeltaEntity(frame, newnum, &cl.entityBaselines[newnum], bits);
             if (!bits) {
                 SHOWNET(2, "\n");
             }
@@ -409,7 +409,7 @@ static void CL_ParseBaseline(int index, int bits)
         Com_LPrintf(PRINT_DEVELOPER, "\n");
     }
 #endif
-    MSG_ParseDeltaEntity(NULL, &cl.baselines[index], index, bits, cl.esFlags);
+    MSG_ParseDeltaEntity(NULL, &cl.entityBaselines[index], index, bits, cl.esFlags);
 }
 
 // instead of wasting space for svc_configstring and svc_spawnbaseline

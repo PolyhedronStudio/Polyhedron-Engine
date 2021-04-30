@@ -68,7 +68,7 @@ sv_client and sv_player will be valid.
 ================
 SV_CreateBaselines
 
-Entity baselines are used to compress the update messages
+Entity entityBaselines are used to compress the update messages
 to the clients -- only the fields that differ from the
 baseline will be transmitted
 ================
@@ -79,9 +79,9 @@ static void create_baselines(void)
     entity_t    *ent;
     entity_packed_t *base, **chunk;
 
-    // clear baselines from previous level
+    // clear entityBaselines from previous level
     for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->baselines[i];
+        base = sv_client->entityBaselines[i];
         if (!base) {
             continue;
         }
@@ -101,7 +101,7 @@ static void create_baselines(void)
 
         ent->s.number = i;
 
-        chunk = &sv_client->baselines[i >> SV_BASELINES_SHIFT];
+        chunk = &sv_client->entityBaselines[i >> SV_BASELINES_SHIFT];
         if (*chunk == NULL) {
             *chunk = (entity_packed_t*)SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK); // CPP: Cast
         }
@@ -157,7 +157,7 @@ static void write_plain_baselines(void)
 
     // write a packet full of data
     for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->baselines[i];
+        base = sv_client->entityBaselines[i];
         if (!base) {
             continue;
         }
@@ -213,9 +213,9 @@ static void write_compressed_gamestate(void)
     }
     MSG_WriteShort(MAX_CONFIGSTRINGS);   // end of configstrings
 
-    // write baselines
+    // write entityBaselines
     for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->baselines[i];
+        base = sv_client->entityBaselines[i];
         if (!base) {
             continue;
         }
@@ -230,7 +230,7 @@ static void write_compressed_gamestate(void)
             base++;
         }
     }
-    MSG_WriteShort(0);   // end of baselines
+    MSG_WriteShort(0);   // end of entityBaselines
 
     SZ_WriteByte(buf, svc_zpacket);
     patch = (uint8_t*)SZ_GetSpace(buf, 2); // CPP: Cast
@@ -430,7 +430,7 @@ void SV_New_f(void)
     // to make sure the protocol is right, and to set the gamedir
     //
 
-    // create baselines for this client
+    // create entityBaselines for this client
     create_baselines();
 
     // send the serverdata
@@ -483,7 +483,7 @@ void SV_New_f(void)
         //if (sv_client->netchan->type == NETCHAN_NEW) {
             write_compressed_gamestate();
         //} else {
-        //    // FIXME: Z_SYNC_FLUSH is not efficient for baselines
+        //    // FIXME: Z_SYNC_FLUSH is not efficient for entityBaselines
         //    write_compressed_configstrings();
         //    write_plain_baselines();
         //}
@@ -914,7 +914,7 @@ static const ucmd_t ucmds[] = {
     // auto issued
     { "new", SV_New_f },
     { "begin", SV_Begin_f },
-    { "baselines", NULL },
+    { "entityBaselines", NULL },
     { "configstrings", NULL },
     { "nextserver", SV_NextServer_f },
     { "disconnect", SV_Disconnect_f },

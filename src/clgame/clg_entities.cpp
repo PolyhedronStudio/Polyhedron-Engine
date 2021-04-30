@@ -711,9 +711,9 @@ void CLG_CalcViewValues(void)
     }
 
 #if USE_SMOOTH_DELTA_ANGLES
-    cl->deltaAngles[0] = LerpShort(ops->pmove.deltaAngles[0], ps->pmove.deltaAngles[0], lerpFraction);
-    cl->deltaAngles[1] = LerpShort(ops->pmove.deltaAngles[1], ps->pmove.deltaAngles[1], lerpFraction);
-    cl->deltaAngles[2] = LerpShort(ops->pmove.deltaAngles[2], ps->pmove.deltaAngles[2], lerpFraction);
+    cl->deltaAngles[0] = LerpAngle(previousPlayerState->pmove.deltaAngles[0], currentPlayerState->pmove.deltaAngles[0], lerpFraction);
+    cl->deltaAngles[1] = LerpAngle(previousPlayerState->pmove.deltaAngles[1], currentPlayerState->pmove.deltaAngles[1], lerpFraction);
+    cl->deltaAngles[2] = LerpAngle(previousPlayerState->pmove.deltaAngles[2], currentPlayerState->pmove.deltaAngles[2], lerpFraction);
 #endif
 
     // don't interpolate blend color

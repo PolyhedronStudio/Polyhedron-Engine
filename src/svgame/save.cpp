@@ -883,7 +883,7 @@ ReadLevel
 SpawnEntities will allready have been called on the
 level the same way it was when the level was saved.
 
-That is necessary to get the baselines
+That is necessary to get the entityBaselines
 set up identically.
 
 The server will have cleared all of the world links before

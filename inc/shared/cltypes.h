@@ -289,42 +289,63 @@ struct cl_predicted_state_t {
 // * the client game module to provide access to media and other client state.
 //
 typedef struct client_state_s {
+    //
+    // Client User Command Related.
+    // 
     int         timeoutcount;
 
+    // The time we last transmitted a user command.
     unsigned    lastTransmitTime;
+    // The last transmitted command number. This may differ from the one below.
     unsigned    lastTransmitCmdNumber;
+    // The ACTUAL last transmitted number which wasn't stalled by not being ready to send yet.
     unsigned    lastTransmitCmdNumberReal;
+    // Determines whether to send the user command packet asap, and preferably, NOW.
     qboolean    sendPacketNow;
 
+    // Actual current client user command.
     cl_cmd_t    cmd;
+    // Actual current client user command list.
     cl_cmd_t    cmds[CMD_BACKUP];    // each mesage will send several old cmds
+    // Current command number.
     unsigned     commandNumber;
+
     vec3_t       predicted_origins[CMD_BACKUP];    // for debug comparing against server
     client_history_t    history[CMD_BACKUP];
     int         initialSeq;
 
-    //
-    // Predicated state.
-    //
+    // Predicted Client State. (Used for movement.)
     cl_predicted_state_t predictedState;
 
-    // rebuilt each valid frame
+
+    //
+    // Entity States.
+    // 
+    // Solid Entities, these are REBUILT during EACH FRAME.
     cl_entity_t       *solidEntities[MAX_PACKET_ENTITIES];
     int             numSolidEntities;
 
-    entity_state_t  baselines[MAX_EDICTS];
+    // Entity Baseline States. These are where to start working from.
+    entity_state_t  entityBaselines[MAX_EDICTS];
 
+    // The actual current Entity States.
     entity_state_t  entityStates[MAX_PARSE_ENTITIES];
     int             numEntityStates;
 
+    // The current client entity state messaging flags.
     msgEsFlags_t    esFlags;
 
+    //
+    // Server Frames.
+    // 
+    // A list of server frames received.
     server_frame_t  frames[UPDATE_BACKUP];
     unsigned        frameflags;
 
+    // The actual current server frame.
     server_frame_t  frame;                // received from server
     server_frame_t  oldframe;
-    int             servertime;
+    int             serverTime;
     int             serverdelta;
 
     byte            dcs[CS_BITMAP_BYTES];
@@ -345,7 +366,7 @@ typedef struct client_state_s {
     vec2_t      mousemove;
 
     int         time;           // this is the time value that the client
-                                // is rendering at.  always <= cl.servertime
+                                // is rendering at.  always <= cl.serverTime
     float       lerpfrac;       // between oldframe and frame
 
     //
@@ -403,7 +424,7 @@ typedef struct client_state_s {
     unsigned    reply_time;
     unsigned    reply_delta;
 #endif
-
+    vec3_t deltaAngles;
     //
     // locally derived information from server state
     //

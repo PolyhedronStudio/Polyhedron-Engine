@@ -132,11 +132,11 @@ void SV_CleanClient(client_t *client)
         client->version_string = NULL;
     }
 
-    // free baselines allocated for this client
+    // free entityBaselines allocated for this client
     for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        if (client->baselines[i]) {
-            Z_Free(client->baselines[i]);
-            client->baselines[i] = NULL;
+        if (client->entityBaselines[i]) {
+            Z_Free(client->entityBaselines[i]);
+            client->entityBaselines[i] = NULL;
         }
     }
 }
