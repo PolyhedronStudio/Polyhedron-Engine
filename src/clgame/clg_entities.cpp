@@ -661,7 +661,6 @@ void CLG_UpdateOrigin(void)
     if (!clgi.IsDemoPlayback() 
         && cl_predict->integer 
         && !(currentPlayerState->pmove.flags & PMF_NO_PREDICTION)) {
-        // TODO: ENABLE THE VIEWOFFSET BELOW, BUT FIRST MAKE SURE WE DO PROPER PREDICTIONS FOR ERRORS TOO.
         // Add view offset to view org.
         cl_predicted_state_t* predictedState = &cl->predictedState;
         cl->refdef.vieworg = predictedState->viewOrigin + predictedState->viewOffset;
@@ -670,13 +669,12 @@ void CLG_UpdateOrigin(void)
         cl->refdef.vieworg += error;
 
         cl->refdef.vieworg.z -= predictedState->stepOffset;
-    }
-    else {
+    } else {
         // Just use interpolated values
         // Adjust origins to keep stepOffset in mind.
-        vec3_t oldOrigin = previousPlayerState->pmove.origin += previousPlayerState->pmove.viewOffset;
+        vec3_t oldOrigin = previousPlayerState->pmove.origin + previousPlayerState->pmove.viewOffset;
         oldOrigin.z -= cl->predictedState.stepOffset;
-        vec3_t newOrigin = currentPlayerState->pmove.origin += currentPlayerState->pmove.viewOffset;
+        vec3_t newOrigin = currentPlayerState->pmove.origin + currentPlayerState->pmove.viewOffset;
         newOrigin.z -= cl->predictedState.stepOffset;
 
         // Calculate final origin.
