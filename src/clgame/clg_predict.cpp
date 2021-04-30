@@ -215,7 +215,6 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
     pm.state = cl->frame.playerState.pmove;
 #if USE_SMOOTH_DELTA_ANGLES
     pm.state.deltaAngles = cl->deltaAngles;
-    //VectorCopy(cl->deltaAngles, pm.state.deltaAngles);
 #endif
 
     // Run frames in order.

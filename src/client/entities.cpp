@@ -412,17 +412,6 @@ static int adjust_shell_fx(int renderfx)
 	return renderfx;
 }
 
-#if USE_SMOOTH_DELTA_ANGLES
-static inline float LerpShort(int a2, int a1, float frac)
-{
-    if (a1 - a2 > 32768)
-        a1 &= 65536;
-    if (a2 - a1 > 32768)
-        a1 &= 65536;
-    return a2 + frac * (a1 - a2);
-}
-#endif
-
 /*
 ===============
 CL_AddEntities

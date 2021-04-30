@@ -495,7 +495,7 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
             // if it is ok to leave in the old position, do it
             // this is only relevent for riding entities, not pushed
             // FIXME: this doesn't acount for rotation
-            VectorSubtract(check->s.origin, move, check->s.origin);
+            check->s.origin -= move;
             block = SV_TestEntityPosition(check);
             if (!block) {
                 pushed_p--;
@@ -510,8 +510,8 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
         // go backwards, so if the same entity was pushed
         // twice, it goes back to the original position
         for (p = pushed_p - 1 ; p >= pushed ; p--) {
-            VectorCopy(p->origin, p->ent->s.origin);
-            VectorCopy(p->angles, p->ent->s.angles);
+            p->ent->s.origin = p->origin;
+            p->ent->s.angles = p->angles;
 #if USE_SMOOTH_DELTA_ANGLES
             if (p->ent->client) {
                 p->ent->client->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltayaw;
