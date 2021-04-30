@@ -691,7 +691,7 @@ float CL_GM_CalcFOV(float fov_x, float width, float height) {
 //
 void CL_GM_CalcViewValues(void) {
     if (cge)
-        cge->CalcViewValues();
+        cge->UpdateOrigin();
 }
 
 //

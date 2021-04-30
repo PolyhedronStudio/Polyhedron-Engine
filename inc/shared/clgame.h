@@ -74,7 +74,7 @@ extern "C" {
         // Called when the client (and/is) disconnected for whichever reasons.
         void        (*ClearState) (void);
         // Can be called by the engine too for updating audio positioning.
-        void        (*CalcViewValues) (void);
+        void        (*UpdateOrigin) (void);
         // Called by the engine when a demo is being seeked.
         void        (*DemoSeek) (void);
         
