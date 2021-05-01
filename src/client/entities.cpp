@@ -40,7 +40,7 @@ static inline qboolean entity_optimized(const EntityState *state)
     if (cls.serverProtocol != PROTOCOL_VERSION_NAC)
         return false;
 
-    if (state->number != cl.frame.clientNum + 1)
+    if (state->number != cl.frame.clientNumber + 1)
         return false;
 
     if (cl.frame.playerState.pmove.type >= PM_DEAD)
@@ -130,7 +130,7 @@ static void entity_update(const EntityState *state)
     vec3_t origin_v;
 
     // if entity is solid, decode mins/maxs and add to the list
-    if (state->solid && state->number != cl.frame.clientNum + 1
+    if (state->solid && state->number != cl.frame.clientNumber + 1
         && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
         cl.solidEntities[cl.numSolidEntities++] = ent;
         if (state->solid != PACKED_BSP) {
@@ -173,7 +173,7 @@ static void set_active_state(void)
 {
     cls.state = ca_active;
 
-    cl.serverdelta = Q_align(cl.frame.number, CL_FRAMEDIV);
+    cl.serverDelta = Q_align(cl.frame.number, CL_FRAMEDIV);
     cl.time = cl.serverTime = 0; // set time, needed for demos
 
     // initialize oldframe so lerping doesn't hurt anything
@@ -216,9 +216,9 @@ static void set_active_state(void)
 }
 
 static void
-player_update(server_frame_t *oldframe, server_frame_t *frame, int framediv)
+player_update(ServerFrame *oldframe, ServerFrame *frame, int framediv)
 {
-    player_state_t *ps, *ops;
+    PlayerState *ps, *ops;
     cl_entity_t *ent;
     int oldnum;
 
@@ -243,7 +243,7 @@ player_update(server_frame_t *oldframe, server_frame_t *frame, int framediv)
         goto dup;
     }
     // no lerping if player entity was teleported (event check)
-    ent = &cs.entities[frame->clientNum + 1];
+    ent = &cs.entities[frame->clientNumber + 1];
     if (ent->serverframe > oldnum &&
         ent->serverframe <= frame->number &&
         (ent->current.event == EV_PLAYER_TELEPORT
@@ -255,7 +255,7 @@ player_update(server_frame_t *oldframe, server_frame_t *frame, int framediv)
     if ((ops->pmove.flags ^ ps->pmove.flags) & PMF_TIME_TELEPORT)
         goto dup;
     // no lerping if POV number changed
-    if (oldframe->clientNum != frame->clientNum)
+    if (oldframe->clientNumber != frame->clientNumber)
         goto dup;
     // developer option
     if (cl_nolerp->integer == 1)
@@ -288,7 +288,7 @@ void CL_DeltaFrame(void)
         set_active_state();
 
     // set server time
-    framenum = cl.frame.number - cl.serverdelta;
+    framenum = cl.frame.number - cl.serverDelta;
     cl.serverTime = framenum * CL_FRAMETIME;
 
     // rebuild the list of solid entities for this frame
@@ -297,7 +297,7 @@ void CL_DeltaFrame(void)
     // initialize position of the player's own entity from playerstate.
     // this is needed in situations when player entity is invisible, but
     // server sends an effect referencing it's origin (such as MuzzleFlashType::Login, etc)
-    ent = &cs.entities[cl.frame.clientNum + 1];
+    ent = &cs.entities[cl.frame.clientNumber + 1];
     Com_PlayerToEntityState(&cl.frame.playerState, &ent->current);
 
     for (i = 0; i < cl.frame.numEntities; i++) {
@@ -339,7 +339,7 @@ void CL_CheckEntityPresent(int entnum, const char *what)
 {
     cl_entity_t *e;
 
-    if (entnum == cl.frame.clientNum + 1) {
+    if (entnum == cl.frame.clientNumber + 1) {
         return; // player entity = current
     }
 
@@ -462,11 +462,11 @@ vec3_t CL_GetEntitySoundOrigin(int entnum) {
     // interpolate origin
     // FIXME: what should be the sound origin point for RenderEffects::Beam entities?
     ent = &cs.entities[entnum];
-    LerpVector(ent->prev.origin, ent->current.origin, cl.lerpfrac, org);
+    LerpVector(ent->prev.origin, ent->current.origin, cl.lerpFraction, org);
 
     // offset the origin for BSP models
     if (ent->current.solid == PACKED_BSP) {
-        cm = cl.model_clip[ent->current.modelindex];
+        cm = cl.clipModels[ent->current.modelindex];
         if (cm) {
             VectorAverage(cm->mins, cm->maxs, mid);
             VectorAdd(org, mid, org);

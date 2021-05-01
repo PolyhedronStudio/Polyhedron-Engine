@@ -64,18 +64,18 @@ typedef struct {
 } explosion_t;
 
 // Maximum amount of explosions.
-#define MAX_EXPLOSIONS  32
+constexpr uint32_t MAX_EXPLOSIONS = 32;
 
 // No Particle Settings.
-#define NOPART_GRENADE_EXPLOSION    1
-#define NOPART_GRENADE_TRAIL        2
-#define NOPART_ROCKET_EXPLOSION     4
-#define NOPART_ROCKET_TRAIL         8
-#define NOPART_BLOOD                16
+constexpr uint32_t NOPART_GRENADE_EXPLOSION = 1;
+constexpr uint32_t NOPART_GRENADE_TRAIL = 2;
+constexpr uint32_t NOPART_ROCKET_EXPLOSION = 4;
+constexpr uint32_t NOPART_ROCKET_TRAIL = 8;
+constexpr uint32_t NOPART_BLOOD = 16;
 
 // No Explosion settings.
-#define NOEXP_GRENADE   1
-#define NOEXP_ROCKET    2
+constexpr uint32_t NOEXP_GRENADE = 1;
+constexpr uint32_t NOEXP_ROCKET = 2;
 
 //
 // Local client entity structure, temporary entities.
@@ -182,7 +182,7 @@ typedef struct cparticle_s {
 //
 #if USE_DLIGHTS
 typedef struct cdlight_s {
-    int     key;        // so entities can reuse same entry
+    int32_t     key;        // so entities can reuse same entry
     vec3_t  color;
     vec3_t  origin;
     float   radius;
@@ -211,15 +211,15 @@ typedef struct clientinfo_s {
     qhandle_t model;                // Model handle.
 
     qhandle_t weaponmodel[MAX_CLIENTWEAPONMODELS];  // The weapon model handles.
-} clientinfo_t;
+} ClientInfo;
 
 //
 // Used for storing client input commands.
 //
 typedef struct {
-    unsigned    timeSent;           // time sent, for calculating pings
-    unsigned    timeReceived;           // time rcvd, for calculating pings
-    unsigned    commandNumber;      // current commandNumber for this frame
+    uint32_t timeSent;           // time sent, for calculating pings
+    uint32_t timeReceived;           // time rcvd, for calculating pings
+    uint32_t commandNumber;      // current commandNumber for this frame
 } ClientUserCommandHistory;
 
 //
@@ -227,20 +227,20 @@ typedef struct {
 // being sent from the server.
 //
 typedef struct {
-    qboolean        valid;      // False if delta parsing failed.
+    qboolean valid; // False if delta parsing failed.
 
-    int             number;     // Sequential identifier, used for delta.
-    int             delta;      // Delta between frames.
+    int32_t number; // Sequential identifier, used for delta.
+    int32_t delta;  // Delta between frames.
 
-    byte            areabits[MAX_MAP_AREA_BYTES];   // Area bits of this frame.
-    int             areabytes;                      // Area bytes.
+    byte areaBits[MAX_MAP_AREA_BYTES]; // Area bits of this frame.
+    int32_t areaBytes;                 // Area bytes.
 
-    player_state_t  playerState;         // The player state.
-    int             clientNum;  // The client number.
+    PlayerState  playerState;   // The player state.
+    int32_t clientNumber;       // The client number.
 
-    int             numEntities;    // The number of entities in the frame.
-    int             firstEntity;    // The first entity in the frame.
-} server_frame_t;
+    int32_t numEntities;    // The number of entities in the frame.
+    int32_t firstEntity;    // The first entity in the frame.
+} ServerFrame;
 
 //
 // Contains the client load states, clg_local.h can expand upon it with custom
@@ -253,16 +253,16 @@ typedef enum {
     LOAD_IMAGES,
     LOAD_CLIENTS,
     LOAD_SOUNDS
-} load_state_t;
+} LoadState;
 
 //
 // This structure contains all (persistent)shared data with the client.
 //
-typedef struct client_shared_s {
+struct ClientShared {
     // Stores the entities.
     cl_entity_t entities[MAX_ENTITIES];
     int num_entities;
-} client_shared_t;
+};
 
 //
 // Contains the predicted state (view origin, offset, angles, etc) of the client.
@@ -288,18 +288,18 @@ struct ClientPredictedState {
 // The client structure is cleared at each level load, and is exposed to
 // * the client game module to provide access to media and other client state.
 //
-typedef struct client_state_s {
+struct ClientState {
     //
     // Client User Command Related.
     // 
-    int         timeoutCount;
+    int32_t         timeoutCount;
 
     // The time we last transmitted a user command.
-    unsigned    lastTransmitTime;
+    uint32_t    lastTransmitTime;
     // The last transmitted command number. This may differ from the one below.
-    unsigned    lastTransmitCmdNumber;
+    uint32_t    lastTransmitCmdNumber;
     // The ACTUAL last transmitted number which wasn't stalled by not being ready to send yet.
-    unsigned    lastTransmitCmdNumberReal;
+    uint32_t    lastTransmitCmdNumberReal;
     // Determines whether to send the user command packet asap, and preferably, NOW.
     qboolean    sendPacketNow;
 
@@ -308,44 +308,44 @@ typedef struct client_state_s {
     // Actual current client user command list.
     ClientUserCommand    clientUserCommands[CMD_BACKUP];    // each mesage will send several old clientUserCommands
     // Current command number.
-    unsigned     currentClientCommandNumber;
+    uint32_t     currentClientCommandNumber;
     // History book of time sent, received, and command number.
     ClientUserCommandHistory clientCommandHistory[CMD_BACKUP];
     // Initial outgoing sequence number.
-    int initialSequence;
+    int32_t initialSequence;
 
     // Predicted Client State. (Used for movement.)
     ClientPredictedState predictedState;
 
-        //
+    //
     // Entity States.
     // 
     // Solid Entities, these are REBUILT during EACH FRAME.
-    cl_entity_t       *solidEntities[MAX_PACKET_ENTITIES];
-    int             numSolidEntities;
+    cl_entity_t *solidEntities[MAX_PACKET_ENTITIES];
+    int32_t numSolidEntities;
 
     // Entity Baseline States. These are where to start working from.
-    EntityState  entityBaselines[MAX_EDICTS];
+    EntityState entityBaselines[MAX_EDICTS];
 
     // The actual current Entity States.
-    EntityState  entityStates[MAX_PARSE_ENTITIES];
-    int             numEntityStates;
+    EntityState entityStates[MAX_PARSE_ENTITIES];
+    int32_t numEntityStates;
 
     // The current client entity state messaging flags.
-    msgEsFlags_t    esFlags;
+    EntityStateMessageFlags    esFlags;
 
     //
     // Server Frames.
     // 
     // A list of server frames received.
-    server_frame_t  frames[UPDATE_BACKUP];
-    unsigned        frameflags;
+    ServerFrame  frames[UPDATE_BACKUP];
+    uint32_t     frameflags;
 
     // The actual current server frame.
-    server_frame_t  frame;                // received from server
-    server_frame_t  oldframe;
-    int             serverTime;
-    int             serverdelta;
+    ServerFrame  frame;                // received from server
+    ServerFrame  oldframe;
+    int32_t             serverTime;
+    int32_t             serverDelta;
 
     byte            dcs[CS_BITMAP_BYTES];
 
@@ -364,9 +364,9 @@ typedef struct client_state_s {
     // localmove and pending cmd, cleared each time cmd is finalized
     vec2_t      mousemove;
 
-    int         time;           // this is the time value that the client
+    int32_t         time;           // this is the time value that the client
                                 // is rendering at.  always <= cl.serverTime
-    float       lerpfrac;       // between oldframe and frame
+    float       lerpFraction;       // between oldframe and frame
 
     //
     // Client Sound Variables.
@@ -387,41 +387,45 @@ typedef struct client_state_s {
     //
     // Client Rendering Variables.
     //
-    refdef_t    refdef;
-    float       fov_x;      // interpolated
-    float       fov_y;      // derived from fov_x assuming 4/3 aspect ratio
-    int         lightlevel;
+    refdef_t refdef;
+    float    fov_x;      // Interpolated
+    float    fov_y;      // Derived from fov_x assuming 4/3 aspect ratio
+    int32_t  lightlevel;
 
-    vec3_t      v_forward, v_right, v_up;    // set when refdef.angles is set
+    // Updated in CLG_UpdateOrigin.
+    vec3_t v_forward, v_right, v_up;    
 
     qboolean    thirdPersonView;
 
-    // predicted values, used for smooth player entity movement in thirdperson view
+    // Predicted values, used for smooth player entity movement in thirdperson view
     vec3_t      playerEntityOrigin;
     vec3_t      playerEntityAngles;
-
+    
     //
     // transient data from server
     //
-    char        layout[MAX_NET_STRING];     // general 2D overlay
-    int         inventory[MAX_ITEMS];
+    char    layout[MAX_NET_STRING];     // general 2D overlay
+    int32_t inventory[MAX_ITEMS];
 
     //
     // server state information
     //
-    int         serverstate;    // ss_* constants
-    int         servercount;    // server identification for prespawns
-    char        gamedir[MAX_QPATH];
-    int         clientNum;            // never changed during gameplay, set by serverdata packet
-    int         maxclients;
+    int32_t serverState;    // ss_* constants
+    int32_t serverCount;    // server identification for prespawns
+    
+    int32_t clientNumber;            // never changed during gameplay, set by serverdata packet
+    int32_t maxClients;
 
-    char        baseconfigstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
-    char        configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
+    char    gamedir[MAX_QPATH];
     char        mapname[MAX_QPATH]; // short format - q2dm1, etc
 
+    char        baseConfigStrings[MAX_CONFIGSTRINGS][MAX_QPATH];
+    char        configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
+
+
 #if USE_AUTOREPLY
-    unsigned    reply_time;
-    unsigned    reply_delta;
+    uint32_t replyTime;
+    uint32_t replyDelta;
 #endif
     vec3_t deltaAngles;
     //
@@ -429,17 +433,18 @@ typedef struct client_state_s {
     //
     bsp_t        *bsp;                  // Pointer to the actual BSP.
 
-    qhandle_t model_draw[MAX_MODELS];   // Handles for loaded draw models (MD2, MD3, ...).
-    mmodel_t *model_clip[MAX_MODELS];   // mmodel_t ptr handles for loaded clip models (Brush models).
+    qhandle_t drawModels[MAX_MODELS];   // Handles for loaded draw models (MD2, MD3, ...).
+    mmodel_t *clipModels[MAX_MODELS];   // mmodel_t ptr handles for loaded clip models (Brush models).
 
-    qhandle_t sound_precache[MAX_SOUNDS];   // Handles to the loaded sounds.
-    qhandle_t image_precache[MAX_IMAGES];   // Handles to the loaded images.
-
-    clientinfo_t    clientinfo[MAX_CLIENTS];    // Client info for all clients.
-    clientinfo_t    baseclientinfo;             // Local, Player, Client Info.
+    struct {
+        qhandle_t sounds[MAX_SOUNDS];   // Handles to the loaded sounds.
+        qhandle_t images[MAX_IMAGES];   // Handles to the loaded images.
+    } precaches;
+    ClientInfo    clientInfo[MAX_CLIENTS];    // Client info for all clients.
+    ClientInfo    baseClientInfo;             // Local, Player, Client Info.
 
     char    weaponModels[MAX_CLIENTWEAPONMODELS][MAX_QPATH]; // Weapon Models string paths.
-    int     numWeaponModels;    // Number of weapon models.
-} client_state_t;
+    int32_t numWeaponModels;    // Number of weapon models.
+};
 
 #endif // __SHARED_CL_TYPES_H__

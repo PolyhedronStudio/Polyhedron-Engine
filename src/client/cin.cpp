@@ -70,10 +70,10 @@ void SCR_StopCinematic(void)
 
     S_UnqueueRawSamples();
 
-    if (cl.image_precache[0])
+    if (cl.precaches.images[0])
     {
-        R_UnregisterImage(cl.image_precache[0]);
-        cl.image_precache[0] = 0;
+        R_UnregisterImage(cl.precaches.images[0]);
+        cl.precaches.images[0] = 0;
     }
 
     if (cin.file)
@@ -112,7 +112,7 @@ void SCR_FinishCinematic(void)
 		AL_UnqueueRawSamples();
 
     // tell the server to advance to the next map / cinematic
-    CL_ClientCommand(va("nextserver %i\n", cl.servercount));
+    CL_ClientCommand(va("nextserver %i\n", cl.serverCount));
 }
 
 //==========================================================================
@@ -462,10 +462,10 @@ void SCR_RunCinematic(void)
         cin.start_time = cls.realtime - cin.frame_index * 1000 / 14;
     }
 
-    R_UnregisterImage(cl.image_precache[0]);
-    cl.image_precache[0] = SCR_ReadNextFrame();
+    R_UnregisterImage(cl.precaches.images[0]);
+    cl.precaches.images[0] = SCR_ReadNextFrame();
 
-    if (!cl.image_precache[0])
+    if (!cl.precaches.images[0])
     {
         SCR_FinishCinematic();
         cin.start_time = 1;	// hack to get the black screen behind loading
@@ -496,8 +496,8 @@ void SCR_PlayCinematic(const char *name)
 
     if (!COM_CompareExtension(name, ".pcx"))
     {
-        cl.image_precache[0] = R_RegisterPic2(name);
-        if (!cl.image_precache[0]) {
+        cl.precaches.images[0] = R_RegisterPic2(name);
+        if (!cl.precaches.images[0]) {
             SCR_FinishCinematic();
             return;
         }
@@ -545,7 +545,7 @@ void SCR_PlayCinematic(const char *name)
         }
 
         cin.frame_index = 0;
-        cl.image_precache[0] = SCR_ReadNextFrame();
+        cl.precaches.images[0] = SCR_ReadNextFrame();
         cin.start_time = cls.realtime;
     }
     else

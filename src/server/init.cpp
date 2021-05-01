@@ -215,7 +215,7 @@ void SV_SpawnServer(mapcmd_t *cmd)
     ge->RunFrame(); sv.framenum++;
     ge->RunFrame(); sv.framenum++;
 
-    // make sure maxclients string is correct
+    // make sure maxClients string is correct
     sprintf(sv.configstrings[CS_MAXCLIENTS], "%d", sv_maxclients->integer);
 
     // check for a savegame
@@ -347,7 +347,7 @@ void SV_InitGame()
 
     }
 
-    // get any latched variable changes (maxclients, etc)
+    // get any latched variable changes (maxClients, etc)
     Cvar_GetLatchedVars();
 
 #if !USE_CLIENT
@@ -376,9 +376,9 @@ void SV_InitGame()
         }
     } else if (Cvar_VariableInteger("coop")) {
         if (sv_maxclients->integer <= 1 || sv_maxclients->integer > 4)
-            Cvar_Set("maxclients", "4");
+            Cvar_Set("maxClients", "4");
     } else {    // non-deathmatch, non-coop is one player
-        Cvar_FullSet("maxclients", "1", CVAR_SERVERINFO | CVAR_LATCH, FROM_CODE);
+        Cvar_FullSet("maxClients", "1", CVAR_SERVERINFO | CVAR_LATCH, FROM_CODE);
     }
 
     // enable networking

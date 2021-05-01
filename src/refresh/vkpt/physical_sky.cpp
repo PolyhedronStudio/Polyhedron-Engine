@@ -95,7 +95,7 @@ typedef enum
 
 static int active_sun_preset()
 {
-	qboolean multiplayer = cl.maxclients > 1;
+	qboolean multiplayer = cl.maxClients > 1;
 
 	if (multiplayer)
 	{

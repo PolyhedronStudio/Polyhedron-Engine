@@ -52,7 +52,7 @@ int _wrp_GetProtocolVersion(void) {
     return cls.protocolVersion;
 }
 int _wrp_GetServerState(void) {
-    return cl.serverstate;
+    return cl.serverState;
 }
 
 unsigned _wrp_GetRealTime(void) {
@@ -933,7 +933,7 @@ void CL_GM_InitMedia(void)
 // Call into the CG Module for notifying about "Media Load State Name"
 //===============
 //
-const char *CL_GM_GetMediaLoadStateName(load_state_t state)
+const char *CL_GM_GetMediaLoadStateName(LoadState state)
 {
     if (cge)
         return cge->GetMediaLoadStateName(state);

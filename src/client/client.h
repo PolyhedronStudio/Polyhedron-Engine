@@ -74,8 +74,8 @@ extern cl_entity_t    cl_entities[MAX_EDICTS];
 
 
 
-extern    client_state_t    cl;
-extern    client_shared_t   cs;
+extern    ClientState    cl;
+extern    ClientShared   cs;
 
 /*
 ==================================================================
@@ -373,7 +373,7 @@ typedef struct console_s {
     netadr_t remoteAddress;
     char *remotePassword;
 
-    load_state_t loadstate;
+    LoadState loadstate;
 } console_t;
 extern console_t con;
 //=============================================================================
@@ -399,7 +399,7 @@ qboolean CL_CheckForIgnore(const char *s);
 void CL_WriteConfig(void);
 connstate_t CL_GetState (void);                     // WATISDEZE Added for CG Module.
 void        CL_SetState (connstate_t state);        // WATISDEZE Added for CG Module.
-void        CL_SetLoadState (load_state_t state);   // WATISDEZE Added for CG Module.
+void        CL_SetLoadState (LoadState state);   // WATISDEZE Added for CG Module.
 
 //
 // precache.c
@@ -413,10 +413,10 @@ void        CL_SetLoadState (load_state_t state);   // WATISDEZE Added for CG Mo
 //     LOAD_IMAGES,
 //     LOAD_CLIENTS,
 //     LOAD_SOUNDS
-// } load_state_t;
+// } LoadState;
 
 void CL_ParsePlayerSkin(char *name, char *model, char *skin, const char *s);
-void CL_LoadState(load_state_t state);
+void CL_LoadState(LoadState state);
 void CL_RegisterSounds(void);
 void CL_RegisterBspModels(void);
 void CL_RegisterVWepModels(void);

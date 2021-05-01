@@ -32,7 +32,7 @@ extern clgame_export_t* cge;
 =====================================================================
 */
 
-static inline void CL_ParseDeltaEntity(server_frame_t  *frame,
+static inline void CL_ParseDeltaEntity(ServerFrame  *frame,
                                        int             newnum,
                                        EntityState  *old,
                                        int             bits)
@@ -62,8 +62,8 @@ static inline void CL_ParseDeltaEntity(server_frame_t  *frame,
         VectorCopy(old->origin, state->old_origin);
 }
 
-static void CL_ParsePacketEntities(server_frame_t *oldframe,
-                                   server_frame_t *frame)
+static void CL_ParsePacketEntities(ServerFrame *oldframe,
+                                   ServerFrame *frame)
 {
     int            newnum;
     int            bits;
@@ -196,8 +196,8 @@ static void CL_ParseFrame(int extrabits)
     uint32_t bits, extraflags;
     int     currentframe, deltaframe,
             delta, suppressed;
-    server_frame_t  frame, *oldframe;
-    player_state_t  *from;
+    ServerFrame  frame, *oldframe;
+    PlayerState  *from;
     int     length;
 
     memset(&frame, 0, sizeof(frame));
@@ -274,20 +274,20 @@ static void CL_ParseFrame(int extrabits)
         cl.frameflags |= FF_NODELTA;
     }
 
-    // read areabits
+    // read areaBits
     length = MSG_ReadByte();
     if (length) {
         if (length < 0 || msg_read.readcount + length > msg_read.cursize) {
             Com_Error(ERR_DROP, "%s: read past end of message", __func__);
         }
-        if (length > sizeof(frame.areabits)) {
-            Com_Error(ERR_DROP, "%s: invalid areabits length", __func__);
+        if (length > sizeof(frame.areaBits)) {
+            Com_Error(ERR_DROP, "%s: invalid areaBits length", __func__);
         }
-        memcpy(frame.areabits, msg_read.data + msg_read.readcount, length);
+        memcpy(frame.areaBits, msg_read.data + msg_read.readcount, length);
         msg_read.readcount += length;
-        frame.areabytes = length;
+        frame.areaBytes = length;
     } else {
-        frame.areabytes = 0;
+        frame.areaBytes = 0;
     }
 
     // MSG: !! TODO: Look at demo code and see if we can remove NETCHAN_OLD.
@@ -308,11 +308,11 @@ static void CL_ParseFrame(int extrabits)
         Com_LPrintf(PRINT_DEVELOPER, "\n");
     }
 #endif
-    // parse clientNum
+    // parse clientNumber
     if (extraflags & EPS_CLIENTNUM) {
-        frame.clientNum = MSG_ReadByte();
+        frame.clientNumber = MSG_ReadByte();
     } else if (oldframe) {
-        frame.clientNum = oldframe->clientNum;
+        frame.clientNumber = oldframe->clientNumber;
     }
 
     SHOWNET(2, "%3" PRIz ":packetentities\n", msg_read.readcount - 1);
@@ -443,17 +443,17 @@ static void CL_ParseServerData(void)
 
     Cbuf_Execute(&cl_cmdbuf);          // make sure any stuffed commands are done
 
-    // wipe the client_state_t struct
+    // wipe the ClientState struct
     CL_ClearState();
 
     // parse protocol version number
     protocol = MSG_ReadLong();
-    cl.servercount = MSG_ReadLong();
+    cl.serverCount = MSG_ReadLong();
     attractloop = MSG_ReadByte();
 
     Com_DPrintf("Serverdata packet received "
-                "(protocol=%d, servercount=%d, attractloop=%d)\n",
-                protocol, cl.servercount, attractloop);
+                "(protocol=%d, serverCount=%d, attractloop=%d)\n",
+                protocol, cl.serverCount, attractloop);
 
     // check protocol
     if (cls.serverProtocol != protocol) {
@@ -487,7 +487,7 @@ static void CL_ParseServerData(void)
     }
 
     // parse player entity number
-    cl.clientNum = MSG_ReadShort();
+    cl.clientNumber = MSG_ReadShort();
 
     // get the full level name
     MSG_ReadString(levelname, sizeof(levelname));
@@ -497,7 +497,7 @@ static void CL_ParseServerData(void)
     CL_GM_PMoveInit(cge->pmoveParams);
 
     // setup default server state
-    cl.serverstate = ss_game;
+    cl.serverState = ss_game;
 
     // MSG: !! Removed: PROTOCOL_VERSION_NAC
     //if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
@@ -513,7 +513,7 @@ static void CL_ParseServerData(void)
     // Parse N&C server state.
     i = MSG_ReadByte();
     Com_DPrintf("NaC server state %d\n", i);
-    cl.serverstate = i;
+    cl.serverState = i;
 
     i = MSG_ReadByte();
     if (i) {
@@ -527,8 +527,8 @@ static void CL_ParseServerData(void)
         CL_GM_PMoveEnableQW(cge->pmoveParams);
         //PMoveEnableQW(&cl.pmp);
     }
-    //cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_UMASK); // CPP: IMPROVE: cl.esFlags |= MSG_ES_UMASK;
-    cl.esFlags = (msgEsFlags_t)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
+    //cl.esFlags = (EntityStateMessageFlags)(cl.esFlags | MSG_ES_UMASK); // CPP: IMPROVE: cl.esFlags |= MSG_ES_UMASK;
+    cl.esFlags = (EntityStateMessageFlags)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
     i = MSG_ReadByte();
     if (i) {
         Com_DPrintf("NaC waterjump hack enabled\n");
@@ -539,7 +539,7 @@ static void CL_ParseServerData(void)
     cge->pmoveParams->flyhack = true; // fly hack is unconditionally enabled
     cge->pmoveParams->flyfriction = 4;
 
-    if (cl.clientNum == -1) {
+    if (cl.clientNumber == -1) {
         SCR_PlayCinematic(levelname);
     } else {
         // seperate the printfs so the server message can have a color
@@ -554,9 +554,9 @@ static void CL_ParseServerData(void)
         Com_Printf("%s\n", levelname);
         Com_SetColor(COLOR_NONE);
 
-        // make sure clientNum is in range
-        if (cl.clientNum < 0 || cl.clientNum >= MAX_CLIENTS) {
-            cl.clientNum = CLIENTNUM_NONE;
+        // make sure clientNumber is in range
+        if (cl.clientNumber < 0 || cl.clientNumber >= MAX_CLIENTS) {
+            cl.clientNumber = CLIENTNUM_NONE;
         }
     }
 }
@@ -657,12 +657,12 @@ static void CL_CheckForVersion(const char *s)
         return;
     }
 
-    if (cl.reply_time && cls.realtime - cl.reply_time < 120000) {
+    if (cl.replyTime && cls.realtime - cl.replyTime < 120000) {
         return;
     }
 
-    cl.reply_time = cls.realtime;
-    cl.reply_delta = 1024 + (rand() & 1023);
+    cl.replyTime = cls.realtime;
+    cl.replyDelta = 1024 + (rand() & 1023);
 }
 #endif
 

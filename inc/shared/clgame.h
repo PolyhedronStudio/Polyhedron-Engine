@@ -111,7 +111,7 @@ extern "C" {
         // Media.
         //---------------------------------------------------------------------
         // Called when the client wants to know the name of a custom load stat.
-        char        *(*GetMediaLoadStateName) (load_state_t state);
+        char        *(*GetMediaLoadStateName) (LoadState state);
         // Called when the renderer initializes.
         void        (*InitMedia) (void);
         // Called whenever the screen media has te reinitialize.
@@ -243,7 +243,7 @@ extern "C" {
         //
         // Client state.
         // Sets the client load state.
-        void            (*SetClientLoadState) (load_state_t state);
+        void            (*SetClientLoadState) (LoadState state);
         // Returns the current state of the client.
         connstate_t     (*GetClienState) (void);
 
@@ -648,9 +648,9 @@ extern "C" {
         // Pointers to actual client data.
         //
         // Client State.
-        client_state_t *cl;
+        ClientState *cl;
         // Client Shared.
-        client_shared_t* cs;
+        ClientShared* cs;
     } clgame_import_t;
 
     // Function pointer type for handling the actual import function.

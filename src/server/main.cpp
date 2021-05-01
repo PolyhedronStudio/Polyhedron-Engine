@@ -932,8 +932,8 @@ static void init_pmove_and_es_flags(client_t *newcl)
     }
     newcl->pmp.flyhack = true;
     newcl->pmp.flyfriction = 4;
-    //newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_UMASK); // CPP: Cast bitflag
-    newcl->esFlags = (msgEsFlags_t)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
+    //newcl->esFlags = (EntityStateMessageFlags)(newcl->esFlags | MSG_ES_UMASK); // CPP: Cast bitflag
+    newcl->esFlags = (EntityStateMessageFlags)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
 
     newcl->pmp.waterhack = (sv_waterjump_hack->integer != 0 ? true : false);
 }
@@ -1020,7 +1020,7 @@ static void SVC_DirectConnect(void)
     newcl->pool = (entity_pool_t*)&ge->edicts; // N&C: Edict_pool_t change
     newcl->cm = &sv.cm;
     newcl->spawncount = sv.spawncount;
-    newcl->maxclients = sv_maxclients->integer;
+    newcl->maxClients = sv_maxclients->integer;
 	newcl->last_valid_cluster = -1;
     strcpy(newcl->reconnect_var, params.reconnect_var);
     strcpy(newcl->reconnect_val, params.reconnect_val);
@@ -1952,7 +1952,7 @@ void SV_Init(void)
     Cvar_Get("fraglimit", "0", CVAR_SERVERINFO);
     Cvar_Get("timelimit", "0", CVAR_SERVERINFO);
 
-    sv_maxclients = Cvar_Get("maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH);
+    sv_maxclients = Cvar_Get("maxClients", "8", CVAR_SERVERINFO | CVAR_LATCH);
     sv_reserved_slots = Cvar_Get("sv_reserved_slots", "0", CVAR_LATCH);
     sv_hostname = Cvar_Get("hostname", "noname", CVAR_SERVERINFO | CVAR_ARCHIVE);
 #if USE_SYSCON

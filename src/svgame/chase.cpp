@@ -115,7 +115,7 @@ void ChaseNext(entity_t *ent)
     i = ent->client->chase_target - g_edicts;
     do {
         i++;
-        if (i > maxclients->value)
+        if (i > maxClients->value)
             i = 1;
         e = g_edicts + i;
         if (!e->inUse)
@@ -140,7 +140,7 @@ void ChasePrev(entity_t *ent)
     do {
         i--;
         if (i < 1)
-            i = maxclients->value;
+            i = maxClients->value;
         e = g_edicts + i;
         if (!e->inUse)
             continue;
@@ -157,7 +157,7 @@ void GetChaseTarget(entity_t *ent)
     int i;
     entity_t *other;
 
-    for (i = 1; i <= maxclients->value; i++) {
+    for (i = 1; i <= maxClients->value; i++) {
         other = g_edicts + i;
         if (other->inUse && !other->client->resp.spectator) {
             ent->client->chase_target = other;

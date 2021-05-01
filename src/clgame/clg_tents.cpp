@@ -570,7 +570,7 @@ static void CLG_AddBeams(void)
 			continue;
 
 		// if coming from the player, update the start position
-		if (b->entity == cl->frame.clientNum + 1)
+		if (b->entity == cl->frame.clientNumber + 1)
 			VectorAdd(cl->playerEntityOrigin, b->offset, org);
 		else
 			VectorAdd(b->start, b->offset, org);
@@ -648,7 +648,7 @@ static void CLG_AddPlayerBeams(void)
 	int         framenum;
 	float       model_length;
 	float       hand_multiplier;
-	player_state_t* ps, * ops;
+	PlayerState* ps, * ops;
 
 	if (info_hand->integer == 2)
 		hand_multiplier = 0;
@@ -663,7 +663,7 @@ static void CLG_AddPlayerBeams(void)
 			continue;
 
 		// if coming from the player, update the start position
-		if (b->entity == cl->frame.clientNum + 1) {
+		if (b->entity == cl->frame.clientNumber + 1) {
 			// set up gun position
 			ps = CL_KEYPS;
 			ops = CL_OLDKEYPS;

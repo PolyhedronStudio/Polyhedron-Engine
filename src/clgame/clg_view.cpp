@@ -239,7 +239,7 @@ static void V_SetLightLevel(void)
 //
 static void CLG_SetupFirstPersonView(void)
 {
-    player_state_t* ps, * ops;
+    PlayerState* ps, * ops;
     vec3_t kickangles;
     float lerp;
 
@@ -324,10 +324,10 @@ static void CLG_FinishViewValues(void)
     if (cl_player_model->integer != CL_PLAYER_MODEL_THIRD_PERSON)
         goto first;
 
-    if (cl->frame.clientNum == CLIENTNUM_NONE)
+    if (cl->frame.clientNumber == CLIENTNUM_NONE)
         goto first;
     
-    ent = &cs->entities[cl->frame.clientNum + 1];
+    ent = &cs->entities[cl->frame.clientNumber + 1];
     if (ent->serverframe != cl->frame.number)
         goto first;
 

@@ -1023,7 +1023,7 @@ int CM_WritePortalBits(cm_t *cm, byte *buffer)
 
     numportals = cm->cache->lastareaportal + 1;
     if (numportals > MAX_MAP_AREAS) {
-        /* HACK: use the same array size as areabytes!
+        /* HACK: use the same array size as areaBytes!
          * It is nonsense for a map to have > 256 areaportals anyway. */
         Com_WPrintf("%s: too many areaportals\n", __func__);
         numportals = MAX_MAP_AREAS;

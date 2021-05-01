@@ -101,10 +101,10 @@ extern cvar_t *cl_renderdemo;
 extern cvar_t *cl_renderdemo_fps;
 
 client_static_t cls;
-client_state_t  cl;
+ClientState  cl;
 
 // N&C: Client shared structure. used to access entities etc in CG Module.
-client_shared_t cs;
+ClientShared cs;
 
 // used for executing stringcmds
 cmdbuf_t    cl_cmdbuf;
@@ -594,7 +594,7 @@ void CL_SetState (connstate_t state) {
 // Sets the current load state of the client.
 //===============
 //
-void CL_SetLoadState (load_state_t state) {
+void CL_SetLoadState (LoadState state) {
     CL_LoadState(state);
 }
 
@@ -1139,7 +1139,7 @@ static void CL_PingServers_f(void)
 static void CL_Name_g(genctx_t *ctx)
 {
     int i;
-    clientinfo_t *ci;
+    ClientInfo *ci;
     char buffer[MAX_CLIENT_NAME];
 
     if (cls.state < ca_loading) {
@@ -1147,7 +1147,7 @@ static void CL_Name_g(genctx_t *ctx)
     }
 
     for (i = 0; i < MAX_CLIENTS; i++) {
-        ci = &cl.clientinfo[i];
+        ci = &cl.clientInfo[i];
         if (!ci->name[0]) {
             continue;
         }
@@ -1898,11 +1898,11 @@ static void CL_DumpClients_f(void)
     }
 
     for (i = 0; i < MAX_CLIENTS; i++) {
-        if (!cl.clientinfo[i].name[0]) {
+        if (!cl.clientInfo[i].name[0]) {
             continue;
         }
 
-        Com_Printf("%3i: %s\n", i, cl.clientinfo[i].name);
+        Com_Printf("%3i: %s\n", i, cl.clientInfo[i].name);
     }
 }
 
@@ -2048,14 +2048,14 @@ static size_t CL_Ups_m(char *buffer, size_t size)
 {
     vec3_t vel;
 
-    if (cl.frame.clientNum == CLIENTNUM_NONE) {
+    if (cl.frame.clientNumber == CLIENTNUM_NONE) {
         if (size) {
             *buffer = 0;
         }
         return 0;
     }
 
-    if (!cls.demo.playback && cl.frame.clientNum == cl.clientNum &&
+    if (!cls.demo.playback && cl.frame.clientNumber == cl.clientNumber &&
         cl_predict->integer) {
         vel = cl.predictedState.velocity;
     } else {
@@ -2273,7 +2273,7 @@ void CL_RestartFilesystem(qboolean total)
         // CL_RegisterSounds();
         CL_LoadState(LOAD_NONE);
     } else if (cls_state == ca_cinematic) {
-        cl.image_precache[0] = R_RegisterPic2(cl.mapname);
+        cl.precaches.images[0] = R_RegisterPic2(cl.mapname);
     }
 
     CL_LoadDownloadIgnores();
@@ -2332,7 +2332,7 @@ void CL_RestartRefresh(qboolean total)
         CL_PrepareMedia();
         CL_LoadState(LOAD_NONE);
     } else if (cls_state == ca_cinematic) {
-        cl.image_precache[0] = R_RegisterPic2(cl.mapname);
+        cl.precaches.images[0] = R_RegisterPic2(cl.mapname);
     }
 
     // switch back to original state
@@ -2618,7 +2618,7 @@ qboolean CL_CheatsOK(void)
         return true;
 
     // single player can cheat
-    if (cls.state > ca_connected && cl.maxclients == 1)
+    if (cls.state > ca_connected && cl.maxClients == 1)
         return true;
 
     return false;
@@ -2650,7 +2650,7 @@ static void CL_SetClientTime(void)
 
     if (com_timedemo->integer) {
         cl.time = cl.serverTime;
-        cl.lerpfrac = 1.0f;
+        cl.lerpFraction = 1.0f;
         return;
     }
 
@@ -2658,17 +2658,17 @@ static void CL_SetClientTime(void)
     if (cl.time > cl.serverTime) {
         SHOWCLAMP(1, "high clamp %i\n", cl.time - cl.serverTime);
         cl.time = cl.serverTime;
-        cl.lerpfrac = 1.0f;
+        cl.lerpFraction = 1.0f;
     } else if (cl.time < prevtime) {
         SHOWCLAMP(1, "low clamp %i\n", prevtime - cl.time);
         cl.time = prevtime;
-        cl.lerpfrac = 0;
+        cl.lerpFraction = 0;
     } else {
-        cl.lerpfrac = (cl.time - prevtime) * CL_1_FRAMETIME;
+        cl.lerpFraction = (cl.time - prevtime) * CL_1_FRAMETIME;
     }
 
-    SHOWCLAMP(2, "time %d %d, lerpfrac %.3f\n",
-              cl.time, cl.serverTime, cl.lerpfrac);
+    SHOWCLAMP(2, "time %d %d, lerpFraction %.3f\n",
+              cl.time, cl.serverTime, cl.lerpFraction);
 }
 
 static void CL_MeasureStats(void)
@@ -2712,17 +2712,17 @@ static void CL_MeasureStats(void)
 #if USE_AUTOREPLY
 static void CL_CheckForReply(void)
 {
-    if (!cl.reply_delta) {
+    if (!cl.replyDelta) {
         return;
     }
 
-    if (cls.realtime - cl.reply_time < cl.reply_delta) {
+    if (cls.realtime - cl.replyTime < cl.replyDelta) {
         return;
     }
 
     CL_ClientCommand(va("say \"%s\"", com_version->string));
 
-    cl.reply_delta = 0;
+    cl.replyDelta = 0;
 }
 #endif
 

@@ -193,7 +193,7 @@ typedef struct refdef_s {
     float       time;               // time is uesed to auto animate
     int         rdflags;            // RDF_UNDERWATER, etc
 
-    byte        *areabits;          // if not NULL, only areas with set bits will be drawn
+    byte        *areaBits;          // if not NULL, only areas with set bits will be drawn
 
     lightstyle_t    *lightstyles;   // [MAX_LIGHTSTYLES]
 

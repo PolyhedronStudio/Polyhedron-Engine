@@ -83,7 +83,7 @@ typedef enum msgEsFlags_s {
     MSG_ES_UMASK = (1 << 4),
     MSG_ES_BEAMORIGIN = (1 << 5),
     MSG_ES_REMOVE = (1 << 7)
-} msgEsFlags_t;
+} EntityStateMessageFlags;
 
 // CPP: Commented out, this was C code. 
 //typedef enum {
@@ -95,7 +95,7 @@ typedef enum msgEsFlags_s {
 //    MSG_ES_BEAMORIGIN   = (1 << 5),
 //    MSG_ES_SHORTANGLES  = (1 << 6),
 //    MSG_ES_REMOVE       = (1 << 7)
-//} msgEsFlags_t;
+//} EntityStateMessageFlags;
 
 extern sizebuf_t    msg_write;
 extern byte         msg_write_buffer[MAX_MSGLEN];
@@ -104,7 +104,7 @@ extern sizebuf_t    msg_read;
 extern byte         msg_read_buffer[MAX_MSGLEN];
 
 extern const entity_packed_t    nullEntityState;
-extern const player_state_t     nullPlayerState;
+extern const PlayerState     nullPlayerState;
 extern const ClientUserCommand          nullUserCmd;
 
 void    MSG_Init(void);
@@ -123,8 +123,8 @@ int     MSG_WriteDeltaUsercmd(const ClientUserCommand* from, const ClientUserCom
 #endif
 void    MSG_WriteDirection(const vec3_t& dir);
 void    MSG_PackEntity(entity_packed_t* out, const EntityState* in, qboolean short_angles);
-void    MSG_WriteDeltaEntity(const entity_packed_t* from, const entity_packed_t* to, msgEsFlags_t flags);
-int     MSG_WriteDeltaPlayerstate(const player_state_t* from, player_state_t* to, msgPsFlags_t flags);
+void    MSG_WriteDeltaEntity(const entity_packed_t* from, const entity_packed_t* to, EntityStateMessageFlags flags);
+int     MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, msgPsFlags_t flags);
 
 static inline void* MSG_WriteData(const void* data, size_t len)
 {
@@ -153,9 +153,9 @@ vec3_t  MSG_ReadDirection(void);
 #endif
 void    MSG_ReadDeltaUsercmd(const ClientUserCommand* from, ClientUserCommand* cmd);
 int     MSG_ParseEntityBits(int* bits);
-void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, int bits, msgEsFlags_t flags);
+void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, int bits, EntityStateMessageFlags flags);
 #if USE_CLIENT
-void    MSG_ParseDeltaPlayerstate(const player_state_t* from, player_state_t* to, int flags, int extraflags);
+void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int flags, int extraflags);
 #endif
 
 #ifdef _DEBUG

@@ -42,7 +42,7 @@ qboolean Com_WildCmpEx(const char *filter, const char *string, int term, qboolea
 qboolean Com_ParseTimespec(const char *s, int *frames);
 #endif
 
-void Com_PlayerToEntityState(const player_state_t *ps, EntityState *es);
+void Com_PlayerToEntityState(const PlayerState *ps, EntityState *es);
 
 unsigned Com_HashString(const char *s, unsigned size);
 unsigned Com_HashStringLen(const char *s, size_t len, unsigned size);

@@ -140,7 +140,7 @@ default_skin:
 // here.
 //===============
 //
-void CLG_LoadClientInfo(clientinfo_t* ci, const char* str)
+void CLG_LoadClientInfo(ClientInfo* ci, const char* str)
 {
     int         i;
     char        model_name[MAX_QPATH];
@@ -220,7 +220,7 @@ void CLG_LoadClientInfo(clientinfo_t* ci, const char* str)
     strcpy(ci->skin_name, skin_name);
 
     // base info should be at least partially valid
-    if (ci == &cl->baseclientinfo)
+    if (ci == &cl->baseClientInfo)
         return;
 
     // must have loaded all data types to be valid
@@ -313,7 +313,7 @@ void CLG_SetSky(void)
 // Return NULL if unknown.
 //===============
 //
-char *CLG_GetMediaLoadStateName(load_state_t state) {
+char *CLG_GetMediaLoadStateName(LoadState state) {
     // CPP: Compiler hates a switch with just a default.
     return NULL;
     //switch (state)
@@ -396,7 +396,7 @@ void CLG_LoadWorldMedia(void)
             continue;
         } 
         // Register the model.
-        cl->model_draw[i] = clgi.R_RegisterModel(filename);
+        cl->drawModels[i] = clgi.R_RegisterModel(filename);
     }
 
     //
@@ -414,7 +414,7 @@ void CLG_LoadWorldMedia(void)
             break;
         }
         // Regtister the image.
-        cl->image_precache[i] = clgi.R_RegisterPic2(filename);
+        cl->precaches.images[i] = clgi.R_RegisterPic2(filename);
     }
 
     //
@@ -431,7 +431,7 @@ void CLG_LoadWorldMedia(void)
         if (!filename[0])
             break;
         // Register the sound.
-        cl->sound_precache[i] = clgi.S_RegisterSound(filename);
+        cl->precaches.sounds[i] = clgi.S_RegisterSound(filename);
     }
 
     // Load in all client infos.
@@ -441,11 +441,11 @@ void CLG_LoadWorldMedia(void)
         if (!filename[0]) {
             continue;
         }
-        CLG_LoadClientInfo(&cl->clientinfo[i], filename);
+        CLG_LoadClientInfo(&cl->clientInfo[i], filename);
     }
 
     // Load in our base client (the actual player)
-    CLG_LoadClientInfo(&cl->baseclientinfo, "unnamed\\male/grunt");
+    CLG_LoadClientInfo(&cl->baseClientInfo, "unnamed\\male/grunt");
 
     // Last but not least, set the sky.
     CLG_SetSky();

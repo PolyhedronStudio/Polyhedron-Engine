@@ -76,7 +76,7 @@ fail:
 }
 
 // writes a delta update of an EntityState list to the message.
-static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
+static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
 {
     entity_packed_t oldpack, newpack;
     EntityState *oldent, *newent;
@@ -118,7 +118,7 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
             MSG_PackEntity(&oldpack, oldent, false);
             MSG_PackEntity(&newpack, newent, false);
             MSG_WriteDeltaEntity(&oldpack, &newpack,
-                                 (msgEsFlags_t)(newent->number <= cl.maxclients ? MSG_ES_NEWENTITY : 0));   // CPP: WARNING: msgEsFlags_t cast.
+                                 (EntityStateMessageFlags)(newent->number <= cl.maxClients ? MSG_ES_NEWENTITY : 0));   // CPP: WARNING: EntityStateMessageFlags cast.
             oldindex++;
             newindex++;
             continue;
@@ -128,7 +128,7 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
             // this is a new entity, send it from the baseline
             MSG_PackEntity(&oldpack, &cl.entityBaselines[newnum], false);
             MSG_PackEntity(&newpack, newent, false);
-            MSG_WriteDeltaEntity(&oldpack, &newpack, (msgEsFlags_t)(MSG_ES_FORCE | MSG_ES_NEWENTITY));  // CPP: WARNING: msgEsFlags_t cast.
+            MSG_WriteDeltaEntity(&oldpack, &newpack, (EntityStateMessageFlags)(MSG_ES_FORCE | MSG_ES_NEWENTITY));  // CPP: WARNING: EntityStateMessageFlags cast.
             newindex++;
             continue;
         }
@@ -145,19 +145,19 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
     MSG_WriteShort(0);      // end of packetentities
 }
 
-static void emit_delta_frame(server_frame_t *from, server_frame_t *to,
+static void emit_delta_frame(ServerFrame *from, ServerFrame *to,
                              int fromnum, int tonum)
 {
-    player_state_t oldPlayerState, newPlayerState;
+    PlayerState oldPlayerState, newPlayerState;
 
     MSG_WriteByte(svc_frame);
     MSG_WriteLong(tonum);
     MSG_WriteLong(fromnum);   // what we are delta'ing from
     MSG_WriteByte(0);   // rate dropped packets
 
-    // send over the areabits
-    MSG_WriteByte(to->areabytes);
-    MSG_WriteData(to->areabits, to->areabytes);
+    // send over the areaBits
+    MSG_WriteByte(to->areaBytes);
+    MSG_WriteData(to->areaBits, to->areaBytes);
 
     // delta encode the playerstate
     MSG_WriteByte(svc_playerinfo);
@@ -190,7 +190,7 @@ Writes delta from the last frame we got to the current frame.
 */
 void CL_EmitDemoFrame(void)
 {
-    server_frame_t  *oldframe;
+    ServerFrame  *oldframe;
     int             lastframe;
 
     if (!cl.frame.valid)
@@ -396,10 +396,10 @@ static void CL_Record_f(void)
     // send the serverdata
     MSG_WriteByte(svc_serverdata);
     MSG_WriteLong(PROTOCOL_VERSION_DEFAULT);
-    MSG_WriteLong(0x10000 + cl.servercount);
+    MSG_WriteLong(0x10000 + cl.serverCount);
     MSG_WriteByte(1);      // demos are always attract loops
     MSG_WriteString(cl.gamedir);
-    MSG_WriteShort(cl.clientNum);
+    MSG_WriteShort(cl.clientNumber);
     MSG_WriteString(cl.configstrings[CS_NAME]);
 
     // configstrings
@@ -525,7 +525,6 @@ static void CL_Suspend_f(void)
 static int read_first_message(qhandle_t f)
 {
     uint32_t    ul;
-    uint16_t    us;
     size_t      msglen;
     ssize_t     read;
     qerror_t    ret;
@@ -772,7 +771,7 @@ void CL_EmitDemoSnapshot(void)
     off_t pos;
     char *from, *to;
     size_t len;
-    server_frame_t *lastframe, *frame;
+    ServerFrame *lastframe, *frame;
     int i, j, lastnum;
 
     if (cl_demosnaps->integer <= 0)
@@ -810,7 +809,7 @@ void CL_EmitDemoSnapshot(void)
 
     // write configstrings
     for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
-        from = cl.baseconfigstrings[i];
+        from = cl.baseConfigStrings[i];
         to = cl.configstrings[i];
 
         if (!strcmp(from, to))
@@ -877,7 +876,7 @@ void CL_FirstDemoFrame(void)
     Com_DPrintf("[%d] first frame\n", cl.frame.number);
 
     // save base configstrings
-    memcpy(cl.baseconfigstrings, cl.configstrings, sizeof(cl.baseconfigstrings));
+    memcpy(cl.baseConfigStrings, cl.configstrings, sizeof(cl.baseConfigStrings));
 
     // obtain file length and offset of the second frame
     len = FS_Length(cls.demo.playback);
@@ -972,7 +971,7 @@ static void CL_Seek_f(void)
 
             // reset configstrings
             for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
-                from = cl.baseconfigstrings[i];
+                from = cl.baseConfigStrings[i];
                 to = cl.configstrings[i];
 
                 if (!strcmp(from, to))
@@ -1033,7 +1032,7 @@ static void CL_Seek_f(void)
     CL_GM_DemoSeek();
 
     // fix time delta
-    cl.serverdelta += cl.frame.number - prev;
+    cl.serverDelta += cl.frame.number - prev;
 
     // fire up destination frame
     CL_DeltaFrame();
@@ -1049,13 +1048,13 @@ done:
     cls.demo.seeking = false;
 }
 
-static void parse_info_string(demoInfo_t *info, int clientNum, int index, const char *string)
+static void parse_info_string(demoInfo_t *info, int clientNumber, int index, const char *string)
 {
     size_t len;
     char *p;
 
     if (index >= CS_PLAYERSKINS && index < CS_PLAYERSKINS + MAX_CLIENTS) {
-        if (index - CS_PLAYERSKINS == clientNum) {
+        if (index - CS_PLAYERSKINS == clientNumber) {
             Q_strlcpy(info->pov, string, sizeof(info->pov));
             p = strchr(info->pov, '\\');
             if (p) {
@@ -1081,7 +1080,7 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
     qhandle_t f;
     int c, index;
     char string[MAX_QPATH];
-    int clientNum, type;
+    int clientNumber, type;
 
     FS_FOpenFile(path, &f, FS_MODE_READ);
     if (!f) {
@@ -1103,7 +1102,7 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
         MSG_ReadLong();
         MSG_ReadByte();
         MSG_ReadString(NULL, 0);
-        clientNum = MSG_ReadShort();
+        clientNumber = MSG_ReadShort();
         MSG_ReadString(NULL, 0);
 
         while (1) {
@@ -1122,7 +1121,7 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
                 goto fail;
             }
             MSG_ReadString(string, sizeof(string));
-            parse_info_string(info, clientNum, index, string);
+            parse_info_string(info, clientNumber, index, string);
         }
 
         info->mvd = false;

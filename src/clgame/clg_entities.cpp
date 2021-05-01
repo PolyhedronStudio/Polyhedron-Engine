@@ -92,7 +92,7 @@ void CLG_AddPacketEntities(void)
     int                 pnum;
     cl_entity_t* cent;
     int                 autoanim;
-    clientinfo_t* ci;
+    ClientInfo* ci;
     unsigned int        effects, renderfx;
 
     // bonus items rotate at a fixed rate
@@ -135,7 +135,7 @@ void CLG_AddPacketEntities(void)
             renderfx &= ~RenderEffects::Glow;
 
         ent.oldframe = cent->prev.frame;
-        ent.backlerp = 1.0 - cl->lerpfrac;
+        ent.backlerp = 1.0 - cl->lerpFraction;
 
         if (renderfx & RenderEffects::FrameLerp) {
             // step origin discretely, because the frames
@@ -146,12 +146,12 @@ void CLG_AddPacketEntities(void)
         else if (renderfx & RenderEffects::Beam) {
             // interpolate start and end points for beams
             LerpVector(cent->prev.origin, cent->current.origin,
-                cl->lerpfrac, ent.origin);
+                cl->lerpFraction, ent.origin);
             LerpVector(cent->prev.old_origin, cent->current.old_origin,
-                cl->lerpfrac, ent.oldorigin);
+                cl->lerpFraction, ent.oldorigin);
         }
         else {
-            if (s1->number == cl->frame.clientNum + 1) {
+            if (s1->number == cl->frame.clientNumber + 1) {
                 // use predicted origin
                 VectorCopy(cl->playerEntityOrigin, ent.origin);
                 VectorCopy(cl->playerEntityOrigin, ent.oldorigin);
@@ -159,7 +159,7 @@ void CLG_AddPacketEntities(void)
             else {
                 // interpolate origin
                 LerpVector(cent->prev.origin, cent->current.origin,
-                    cl->lerpfrac, ent.origin);
+                    cl->lerpFraction, ent.origin);
                 VectorCopy(ent.origin, ent.oldorigin);
             }
         }
@@ -177,13 +177,13 @@ void CLG_AddPacketEntities(void)
             if (s1->modelindex == 255) {
                 // use custom player skin
                 ent.skinnum = 0;
-                ci = &cl->clientinfo[s1->skinnum & 0xff];
+                ci = &cl->clientInfo[s1->skinnum & 0xff];
                 ent.skin = ci->skin;
                 ent.model = ci->model;
                 if (!ent.skin || !ent.model) {
-                    ent.skin = cl->baseclientinfo.skin;
-                    ent.model = cl->baseclientinfo.model;
-                    ci = &cl->baseclientinfo;
+                    ent.skin = cl->baseClientInfo.skin;
+                    ent.model = cl->baseClientInfo.model;
+                    ci = &cl->baseClientInfo;
                 }
                 if (renderfx & RenderEffects::UseDisguise) {
                     char buffer[MAX_QPATH];
@@ -195,7 +195,7 @@ void CLG_AddPacketEntities(void)
             else {
                 ent.skinnum = s1->skinnum;
                 ent.skin = 0;
-                ent.model = cl->model_draw[s1->modelindex];
+                ent.model = cl->drawModels[s1->modelindex];
                 if (ent.model == cl_mod_laser || ent.model == cl_mod_dmspot)
                     renderfx |= RF_NOSHADOW;
             }
@@ -216,11 +216,11 @@ void CLG_AddPacketEntities(void)
             ent.angles[0] = 0;
             ent.angles[1] = autorotate;
             ent.angles[2] = 0;
-        } else if (s1->number == cl->frame.clientNum + 1) {
+        } else if (s1->number == cl->frame.clientNumber + 1) {
             VectorCopy(cl->playerEntityAngles, ent.angles);      // use predicted angles
         } else { // interpolate angles
             LerpAngles(cent->prev.angles, cent->current.angles,
-                cl->lerpfrac, ent.angles);
+                cl->lerpFraction, ent.angles);
 
             // mimic original ref_gl "leaning" bug (uuugly!)
             if (s1->modelindex == 255 && cl_rollhack->integer) {
@@ -229,7 +229,7 @@ void CLG_AddPacketEntities(void)
         }
 
         // Entity Effects for in case the entity is the actual client.
-        if (s1->number == cl->frame.clientNum + 1) {
+        if (s1->number == cl->frame.clientNumber + 1) {
             if (!cl->thirdPersonView)
             {
                 if (vid_rtx->integer)
@@ -306,7 +306,7 @@ void CLG_AddPacketEntities(void)
         if (s1->modelindex2) {
             if (s1->modelindex2 == 255) {
                 // custom weapon
-                ci = &cl->clientinfo[s1->skinnum & 0xff];
+                ci = &cl->clientInfo[s1->skinnum & 0xff];
                 i = (s1->skinnum >> 8); // 0 is default weapon model
                 if (i < 0 || i > cl->numWeaponModels - 1)
                     i = 0;
@@ -315,11 +315,11 @@ void CLG_AddPacketEntities(void)
                     if (i != 0)
                         ent.model = ci->weaponmodel[0];
                     if (!ent.model)
-                        ent.model = cl->baseclientinfo.weaponmodel[0];
+                        ent.model = cl->baseClientInfo.weaponmodel[0];
                 }
             }
             else
-                ent.model = cl->model_draw[s1->modelindex2];
+                ent.model = cl->drawModels[s1->modelindex2];
 
             // PMM - check for the defender sphere shell .. make it translucent
             if (!Q_strcasecmp(cl->configstrings[CS_MODELS + (s1->modelindex2)], "models/items/shell/tris.md2")) {
@@ -340,13 +340,13 @@ void CLG_AddPacketEntities(void)
 
         // Add an entity to the current rendering frame that has model index 3 attached to it.
         if (s1->modelindex3) {
-            ent.model = cl->model_draw[s1->modelindex3];
+            ent.model = cl->drawModels[s1->modelindex3];
             V_AddEntity(&ent);
         }
 
         // Add an entity to the current rendering frame that has model index 4 attached to it.
         if (s1->modelindex4) {
-            ent.model = cl->model_draw[s1->modelindex4];
+            ent.model = cl->drawModels[s1->modelindex4];
             V_AddEntity(&ent);
         }
 
@@ -376,7 +376,7 @@ CLG_AddViewWeapon
 */
 void CLG_AddViewWeapon(void)
 {
-    player_state_t* ps, * ops;
+    PlayerState* ps, * ops;
     r_entity_t    gun;        // view model
     int         i, shell_flags = 0;
 
@@ -399,7 +399,7 @@ void CLG_AddViewWeapon(void)
         gun.model = gun_model;  // development tool
     }
     else {
-        gun.model = cl->model_draw[ps->gunindex];
+        gun.model = cl->drawModels[ps->gunindex];
     }
     if (!gun.model) {
         return;
@@ -515,7 +515,7 @@ void CLG_AddEntities(void)
 //
 cl_entity_t* CLG_GetClientViewEntity(void) {
 
-    int32_t index = cl->clientNum;
+    int32_t index = cl->clientNumber;
 
     if (cl->frame.playerState.stats[STAT_CHASE]) {
         index = cl->frame.playerState.stats[STAT_CHASE] - CS_PLAYERSKINS;
@@ -533,7 +533,7 @@ cl_entity_t* CLG_GetClientViewEntity(void) {
 //
 qboolean CLG_IsClientViewEntity(const cl_entity_t* ent) {
 
-    if (ent->current.number == cl->clientNum + 1) {
+    if (ent->current.number == cl->clientNumber + 1) {
         return true;
     }
 
@@ -541,7 +541,7 @@ qboolean CLG_IsClientViewEntity(const cl_entity_t* ent) {
 
         if (ent->current.modelindex == 255) {
 
-            if (ent->current.number == cl->clientNum) {
+            if (ent->current.number == cl->clientNumber) {
                 return true;
             } 
 
@@ -639,12 +639,12 @@ static inline float lerp_client_fov(float ofov, float nfov, float lerp)
 //
 void CLG_UpdateOrigin(void)
 {
-    player_state_t *currentPlayerState = NULL;
-    player_state_t *previousPlayerState = NULL;
+    PlayerState *currentPlayerState = NULL;
+    PlayerState *previousPlayerState = NULL;
 
     vec3_t viewOffset = vec3_zero();
 
-    float lerpFraction = cl->lerpfrac;
+    float lerpFraction = cl->lerpFraction;
 
     // Only do this if we had a valid frame.
     if (!cl->frame.valid) {

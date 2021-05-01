@@ -2711,7 +2711,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	int num_instanced_vert = 0; /* need to track this here to find lights */
 	int instance_idx = 0;
 
-	const qboolean first_person_model = (cl_player_model->integer == CL_PLAYER_MODEL_FIRST_PERSON) && cl.baseclientinfo.model;
+	const qboolean first_person_model = (cl_player_model->integer == CL_PLAYER_MODEL_FIRST_PERSON) && cl.baseClientInfo.model;
 
 	for (int i = 0; i < vkpt_refdef.fd->num_entities; i++)
 	{

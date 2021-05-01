@@ -134,9 +134,9 @@ void CL_RegisterBspModels(void)
             break;
         }
         if (name[0] == '*')
-            cl.model_clip[i] = BSP_InlineModel(cl.bsp, name);
+            cl.clipModels[i] = BSP_InlineModel(cl.bsp, name);
         else
-            cl.model_clip[i] = NULL;
+            cl.clipModels[i] = NULL;
     }
 }
 
@@ -200,7 +200,7 @@ void CL_UpdateConfigstring(int index)
     }
 
     if (index == CS_MAXCLIENTS) {
-        cl.maxclients = atoi(s);
+        cl.maxClients = atoi(s);
         return;
     }
 
@@ -226,8 +226,8 @@ void CL_UpdateConfigstring(int index)
     //if (index >= CS_MODELS + 2 && index < CS_MODELS + MAX_MODELS) {
     //    if (*s == '*') {
     //        int i = index - CS_MODELS;
-    //        cl.model_draw[i] = R_RegisterModel(s);
-    //        cl.model_clip[i] = BSP_InlineModel(cl.bsp, s);
+    //        cl.drawModels[i] = R_RegisterModel(s);
+    //        cl.clipModels[i] = BSP_InlineModel(cl.bsp, s);
     //    }
     //    return;
     //}
@@ -235,19 +235,19 @@ void CL_UpdateConfigstring(int index)
     if (index >= CS_MODELS + 2 && index < CS_MODELS + MAX_MODELS) {
         int i = index - CS_MODELS;
 
-        cl.model_draw[i] = R_RegisterModel(s);
+        cl.drawModels[i] = R_RegisterModel(s);
         if (*s == '*')
-            cl.model_clip[i] = BSP_InlineModel(cl.bsp, s);
+            cl.clipModels[i] = BSP_InlineModel(cl.bsp, s);
         else
-            cl.model_clip[i] = NULL;
+            cl.clipModels[i] = NULL;
         return;
     }
     if (index >= CS_SOUNDS && index < CS_SOUNDS + MAX_SOUNDS) {
-        cl.sound_precache[index - CS_SOUNDS] = S_RegisterSound(s);
+        cl.precaches.sounds[index - CS_SOUNDS] = S_RegisterSound(s);
         return;
     }
     if (index >= CS_IMAGES && index < CS_IMAGES + MAX_IMAGES) {
-        cl.image_precache[index - CS_IMAGES] = R_RegisterPic2(s);
+        cl.precaches.images[index - CS_IMAGES] = R_RegisterPic2(s);
         return;
     }
 }

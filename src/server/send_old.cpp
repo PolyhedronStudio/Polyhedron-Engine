@@ -305,7 +305,7 @@ void SV_Multicast(const vec3_t *origin, multicast_t to)
         if (leaf1) {
             // find the client's PVS
 #if 0
-            player_state_t *ps = &client->edict->client->playerState;
+            PlayerState *ps = &client->edict->client->playerState;
             // N&C: FF Precision.
             VectorAdd(ps->viewOffset, ps->pmove.origin, orig);
             //VectorMA(ps->viewOffset, 0.125f, ps->pmove.origin, org);
@@ -708,7 +708,7 @@ static void write_datagram_old(client_t *client)
     }
 
     // send over all the relevant EntityState
-    // and the player_state_t
+    // and the PlayerState
     client->WriteFrame(client);
     if (msg_write.cursize > maxsize) {
         SV_DPrintf(0, "Frame %d overflowed for %s: %" PRIz " > %" PRIz"\n",
@@ -768,7 +768,7 @@ static void write_datagram_new(client_t *client)
     size_t cursize;
 
     // send over all the relevant EntityState
-    // and the player_state_t
+    // and the PlayerState
     client->WriteFrame(client);
 
     if (msg_write.overflowed) {

@@ -478,7 +478,7 @@ static inline void GL_DrawLeaf(mleaf_t *leaf)
     if (leaf->contents == CONTENTS_SOLID) {
         return; // solid leaf
     }
-    if (glr.fd.areabits && !Q_IsBitSet(glr.fd.areabits, leaf->area)) {
+    if (glr.fd.areaBits && !Q_IsBitSet(glr.fd.areaBits, leaf->area)) {
         return; // door blocks sight
     }
 

@@ -46,7 +46,7 @@ cvar_t  *timelimit;
 cvar_t  *password;
 cvar_t  *spectator_password;
 cvar_t  *needpass;
-cvar_t  *maxclients;
+cvar_t  *maxClients;
 cvar_t  *maxspectators;
 cvar_t  *maxentities;
 cvar_t  *g_select_empty;
@@ -145,7 +145,7 @@ void InitGame(void)
     gi.cvar("gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_LATCH);
     gi.cvar("gamedate", __DATE__ , CVAR_SERVERINFO | CVAR_LATCH);
 
-    maxclients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
+    maxClients = gi.cvar("maxClients", "4", CVAR_SERVERINFO | CVAR_LATCH);
     maxspectators = gi.cvar("maxspectators", "4", CVAR_SERVERINFO);
     deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
     coop = gi.cvar("coop", "0", CVAR_LATCH);
@@ -189,15 +189,15 @@ void InitGame(void)
 
     // initialize all entities for this game
     game.maxentities = maxentities->value;
-    clamp(game.maxentities, (int)maxclients->value + 1, MAX_EDICTS);
+    clamp(game.maxentities, (int)maxClients->value + 1, MAX_EDICTS);
     g_edicts = (entity_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
     globals.edicts = g_edicts;
     globals.max_edicts = game.maxentities;
 
     // initialize all clients for this game
-    game.maxclients = maxclients->value;
-    game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
-    globals.num_edicts = game.maxclients + 1;
+    game.maxClients = maxClients->value;
+    game.clients = (gclient_t*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    globals.num_edicts = game.maxClients + 1;
 }
 
 
@@ -294,7 +294,7 @@ void ClientEndServerFrames(void)
 
     // calc the player views now that all pushing
     // and damage has been added
-    for (i = 0 ; i < maxclients->value ; i++) {
+    for (i = 0 ; i < maxClients->value ; i++) {
         ent = g_edicts + 1 + i;
         if (!ent->inUse || !ent->client)
             continue;
@@ -431,7 +431,7 @@ void CheckDMRules(void)
     }
 
     if (fraglimit->value) {
-        for (i = 0 ; i < maxclients->value ; i++) {
+        for (i = 0 ; i < maxClients->value ; i++) {
             cl = game.clients + i;
             if (!g_edicts[i + 1].inUse)
                 continue;
@@ -465,7 +465,7 @@ void ExitLevel(void)
     ClientEndServerFrames();
 
     // clear some things before going to next level
-    for (i = 0 ; i < maxclients->value ; i++) {
+    for (i = 0 ; i < maxClients->value ; i++) {
         ent = g_edicts + 1 + i;
         if (!ent->inUse)
             continue;
@@ -521,7 +521,7 @@ void G_RunFrame(void)
             }
         }
 
-        if (i > 0 && i <= maxclients->value) {
+        if (i > 0 && i <= maxClients->value) {
             ClientBeginServerFrame(ent);
             continue;
         }
@@ -675,8 +675,8 @@ entity_t* G_Spawn(void)
     int         i;
     entity_t* e;
 
-    e = &g_edicts[game.maxclients + 1];
-    for (i = game.maxclients + 1; i < globals.num_edicts; i++, e++) {
+    e = &g_edicts[game.maxClients + 1];
+    for (i = game.maxClients + 1; i < globals.num_edicts; i++, e++) {
         // the first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!e->inUse && (e->freeTime < 2 || level.time - e->freeTime > 0.5)) {
@@ -704,7 +704,7 @@ void G_FreeEntity(entity_t* ed)
 {
     gi.UnlinkEntity(ed);        // unlink from world
 
-    if ((ed - g_edicts) <= (maxclients->value + BODY_QUEUE_SIZE)) {
+    if ((ed - g_edicts) <= (maxClients->value + BODY_QUEUE_SIZE)) {
         //      gi.DPrintf("tried to free special edict\n");
         return;
     }

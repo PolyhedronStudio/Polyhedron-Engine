@@ -97,7 +97,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
     char    *token;
     size_t  len;
     int     width, index;
-    clientinfo_t    *ci;
+    ClientInfo    *ci;
 
     if (!s[0])
         return;
@@ -169,7 +169,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             if (value < 0 || value >= MAX_CLIENTS) {
                 Com_Error(ERR_DROP, "%s: invalid client index", __func__);
             }
-            ci = &cl.clientinfo[value];
+            ci = &cl.clientInfo[value];
 
             token = COM_Parse(&s);
             score = atoi(token);
@@ -205,7 +205,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             if (value < 0 || value >= MAX_CLIENTS) {
                 Com_Error(ERR_DROP, "%s: invalid client index", __func__);
             }
-            ci = &cl.clientinfo[value];
+            ci = &cl.clientInfo[value];
 
             token = COM_Parse(&s);
             score = atoi(token);

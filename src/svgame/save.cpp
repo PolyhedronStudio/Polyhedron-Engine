@@ -398,7 +398,7 @@ static const save_field_t clientfields[] = {
 
 static const save_field_t gamefields[] = {
 #define _OFS GLOFS
-    I(maxclients),
+    I(maxClients),
     I(maxentities),
 
     I(serverflags),
@@ -538,7 +538,7 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         write_index(f, *(void **)p, sizeof(entity_t), g_edicts, MAX_EDICTS - 1);
         break;
     case F_CLIENT:
-        write_index(f, *(void **)p, sizeof(gclient_t), game.clients, game.maxclients - 1);
+        write_index(f, *(void **)p, sizeof(gclient_t), game.clients, game.maxClients - 1);
         break;
     case F_ITEM:
         write_index(f, *(void **)p, sizeof(gitem_t), itemlist, game.num_items - 1);
@@ -720,7 +720,7 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         *(entity_t **)p = (entity_t*)read_index(f, sizeof(entity_t), g_edicts, game.maxentities - 1); // CPP: Cast
         break;
     case F_CLIENT:
-        *(gclient_t **)p = (gclient_t*)read_index(f, sizeof(gclient_t), game.clients, game.maxclients - 1); // CPP: Cast
+        *(gclient_t **)p = (gclient_t*)read_index(f, sizeof(gclient_t), game.clients, game.maxClients - 1); // CPP: Cast
         break;
     case F_ITEM:
         *(gitem_t **)p = (gitem_t*)read_index(f, sizeof(gitem_t), itemlist, game.num_items - 1); // CPP: Cast
@@ -783,7 +783,7 @@ void WriteGame(const char *filename, qboolean autosave)
     write_fields(f, gamefields, &game);
     game.autosaved = false;
 
-    for (i = 0; i < game.maxclients; i++) {
+    for (i = 0; i < game.maxClients; i++) {
         write_fields(f, clientfields, &game.clients[i]);
     }
 
@@ -816,11 +816,11 @@ void ReadGame(const char *filename)
     read_fields(f, gamefields, &game);
 
     // should agree with server's version
-    if (game.maxclients != (int)maxclients->value) {
+    if (game.maxClients != (int)maxClients->value) {
         fclose(f);
-        gi.Error("Savegame has bad maxclients");
+        gi.Error("Savegame has bad maxClients");
     }
-    if (game.maxentities <= game.maxclients || game.maxentities > MAX_EDICTS) {
+    if (game.maxentities <= game.maxClients || game.maxentities > MAX_EDICTS) {
         fclose(f);
         gi.Error("Savegame has bad maxentities");
     }
@@ -829,8 +829,8 @@ void ReadGame(const char *filename)
     globals.edicts = g_edicts;
     globals.max_edicts = game.maxentities;
 
-    game.clients = (gclient_t*)gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
-    for (i = 0; i < game.maxclients; i++) {
+    game.clients = (gclient_t*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    for (i = 0; i < game.maxClients; i++) {
         read_fields(f, clientfields, &game.clients[i]);
     }
 
@@ -910,8 +910,8 @@ void ReadLevel(const char *filename)
     // Ensure all entities have a clean slate in memory.
     memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
 
-    // Set the number of edicts to be maxclients + 1. (They are soon to be in-use after all)
-    globals.num_edicts = maxclients->value + 1;
+    // Set the number of edicts to be maxClients + 1. (They are soon to be in-use after all)
+    globals.num_edicts = maxClients->value + 1;
 
     i = read_int(f);
     if (i != SAVE_MAGIC2) {
@@ -952,7 +952,7 @@ void ReadLevel(const char *filename)
     fclose(f);
 
     // mark all clients as unconnected
-    for (i = 0 ; i < maxclients->value ; i++) {
+    for (i = 0 ; i < maxClients->value ; i++) {
         ent = &g_edicts[i + 1];
         ent->client = game.clients + i;
         ent->client->pers.connected = false;

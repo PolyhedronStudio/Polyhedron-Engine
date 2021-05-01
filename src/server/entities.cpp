@@ -43,7 +43,7 @@ static void SV_EmitPacketEntities(client_t         *client,
     const entity_packed_t *oldent;
     unsigned i, oldindex, newindex, from_num_entities;
     int oldnum, newnum;
-    msgEsFlags_t flags;
+    EntityStateMessageFlags flags;
 
     if (!from)
         from_num_entities = 0;
@@ -77,11 +77,11 @@ static void SV_EmitPacketEntities(client_t         *client,
             // this updates their old_origin always and prevents warping in case
             // of packet loss.
             flags = client->esFlags;
-            if (newnum <= client->maxclients) {
-                flags = (msgEsFlags_t)(flags | MSG_ES_NEWENTITY);
+            if (newnum <= client->maxClients) {
+                flags = (EntityStateMessageFlags)(flags | MSG_ES_NEWENTITY);
             }
             if (newnum == clientEntityNum) {
-                flags = (msgEsFlags_t)(flags | MSG_ES_FIRSTPERSON);
+                flags = (EntityStateMessageFlags)(flags | MSG_ES_FIRSTPERSON);
                 VectorCopy(oldent->origin, newent->origin);
                 VectorCopy(oldent->angles, newent->angles);
             }
@@ -94,7 +94,7 @@ static void SV_EmitPacketEntities(client_t         *client,
 
         if (newnum < oldnum) {
             // this is a new entity, send it from the baseline
-            flags = (msgEsFlags_t)(client->esFlags | MSG_ES_FORCE | MSG_ES_NEWENTITY); // CPP: Cast
+            flags = (EntityStateMessageFlags)(client->esFlags | MSG_ES_FORCE | MSG_ES_NEWENTITY); // CPP: Cast
             oldent = client->entityBaselines[newnum >> SV_BASELINES_SHIFT];
             if (oldent) {
                 oldent += (newnum & SV_BASELINES_MASK);
@@ -102,7 +102,7 @@ static void SV_EmitPacketEntities(client_t         *client,
                 oldent = &nullEntityState;
             }
             if (newnum == clientEntityNum) {
-                flags = (msgEsFlags_t)(flags | MSG_ES_FIRSTPERSON); // CPP: Cast flags |= MSG_ES_FIRSTPERSON;
+                flags = (EntityStateMessageFlags)(flags | MSG_ES_FIRSTPERSON); // CPP: Cast flags |= MSG_ES_FIRSTPERSON;
                 VectorCopy(oldent->origin, newent->origin);
                 VectorCopy(oldent->angles, newent->angles);
             }
@@ -166,7 +166,7 @@ SV_WriteFrameToClient_Enhanced
 void SV_WriteFrameToClient(client_t *client)
 {
     client_frame_t  *frame, *oldframe;
-    player_state_t *oldPlayerState;
+    PlayerState *oldPlayerState;
     uint32_t        extraflags;
     int             delta, suppressed;
     byte            *b1, *b2;
@@ -194,9 +194,9 @@ void SV_WriteFrameToClient(client_t *client)
     // second byte to be patched
     b2 = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
 
-    // send over the areabits
-    MSG_WriteByte(frame->areabytes);
-    MSG_WriteData(frame->areabits, frame->areabytes);
+    // send over the areaBits
+    MSG_WriteByte(frame->areaBytes);
+    MSG_WriteData(frame->areaBits, frame->areaBytes);
 
     // ignore some parts of playerstate if not recording demo
     psFlags = (msgPsFlags_t)0; // CPP: Cast
@@ -212,7 +212,7 @@ void SV_WriteFrameToClient(client_t *client)
     // Fetch client entity number.
     clientEntityNum = 0;
     if (frame->playerState.pmove.type < PM_DEAD) {
-        clientEntityNum = frame->clientNum + 1;
+        clientEntityNum = frame->clientNumber + 1;
     }
     suppressed = client->frameflags;
 
@@ -220,10 +220,10 @@ void SV_WriteFrameToClient(client_t *client)
     // delta encode the playerstate
     extraflags = MSG_WriteDeltaPlayerstate(oldPlayerState, &frame->playerState, psFlags);
 
-    int clientNum = oldframe ? oldframe->clientNum : 0;
-    if (clientNum != frame->clientNum) {
+    int clientNumber = oldframe ? oldframe->clientNumber : 0;
+    if (clientNumber != frame->clientNumber) {
         extraflags |= EPS_CLIENTNUM;
-        MSG_WriteByte(frame->clientNum);
+        MSG_WriteByte(frame->clientNumber);
     }
 
     // save 3 high bits of extraflags
@@ -253,7 +253,7 @@ Build a client frame structure
 SV_BuildClientFrame
 
 Decides which entities are going to be visible to the client, and
-copies off the playerstat and areabits.
+copies off the playerstat and areaBits.
 =============
 */
 void SV_BuildClientFrame(client_t *client)
@@ -264,7 +264,7 @@ void SV_BuildClientFrame(client_t *client)
     entity_t     *clent;
     client_frame_t  *frame;
     entity_packed_t *state;
-    player_state_t  *ps;
+    PlayerState  *ps;
 	EntityState  es;
 	int         l;
     int         clientarea, clientcluster;
@@ -295,20 +295,20 @@ void SV_BuildClientFrame(client_t *client)
     clientcluster = CM_LeafCluster(leaf);
 
     // calculate the visible areas
-    frame->areabytes = CM_WriteAreaBits(client->cm, frame->areabits, clientarea);
+    frame->areaBytes = CM_WriteAreaBits(client->cm, frame->areaBits, clientarea);
 
-    // grab the current player_state_t
+    // grab the current PlayerState
     frame->playerState = *ps;
     //MSG_PackPlayer(&frame->playerState, ps);
 
-    // Grab the current clientNum
+    // Grab the current clientNumber
     // MSG: NOTE: !! In case of seeing a client model where one should not
     // it may be worth investigating this piece of code. 
-    frame->clientNum = client->number;
+    frame->clientNumber = client->number;
     //if (g_features->integer & GMF_CLIENTNUM) {
-    //    frame->clientNum = clent->client->clientNum;
+    //    frame->clientNumber = clent->client->clientNumber;
     //} else {
-    //    frame->clientNum = client->number;
+    //    frame->clientNumber = client->number;
     //}
 
 	if (clientcluster >= 0)
@@ -407,7 +407,7 @@ void SV_BuildClientFrame(client_t *client)
         MSG_PackEntity(state, &es, true); // MSG: !! Removed Q2PRO_SHORTANGLES - Modify packentity to always use short angles??
 
         // hide POV entity from renderer, unless this is player's own entity
-        if (e == frame->clientNum + 1 && ent != clent) {
+        if (e == frame->clientNumber + 1 && ent != clent) {
             state->modelindex = 0;
         }
 

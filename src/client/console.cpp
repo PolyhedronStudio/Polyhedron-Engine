@@ -73,7 +73,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //     netadr_t remoteAddress;
 //     char *remotePassword;
 
-//     load_state_t loadstate;
+//     LoadState loadstate;
 // } console_t;
 
 console_t    con;
@@ -544,7 +544,7 @@ void Con_SetColor(color_index_t color)
 CL_LoadState
 =================
 */
-void CL_LoadState(load_state_t state)
+void CL_LoadState(LoadState state)
 {
     con.loadstate = state;
     SCR_UpdateScreen();

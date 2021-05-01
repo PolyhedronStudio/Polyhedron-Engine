@@ -145,7 +145,7 @@ static void write_plain_configstrings(void)
 
 static void write_baseline(entity_packed_t *base)
 {
-    msgEsFlags_t flags = (msgEsFlags_t)(sv_client->esFlags | MSG_ES_FORCE); // CPP: Cast
+    EntityStateMessageFlags flags = (EntityStateMessageFlags)(sv_client->esFlags | MSG_ES_FORCE); // CPP: Cast
 
     MSG_WriteDeltaEntity(NULL, base, flags);
 }

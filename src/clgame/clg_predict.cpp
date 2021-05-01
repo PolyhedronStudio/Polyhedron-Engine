@@ -91,7 +91,7 @@ static void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, cons
 
         if (ent->current.solid == PACKED_BSP) {
             // special value for bmodel
-            cmodel = cl->model_clip[ent->current.modelindex];
+            cmodel = cl->clipModels[ent->current.modelindex];
             if (!cmodel)
                 continue;
             headNode = cmodel->headNode;
@@ -146,7 +146,7 @@ static int CLG_PointContents(const vec3_t &point)
         if (ent->current.solid != PACKED_BSP) // special value for bmodel
             continue;
 
-        cmodel = cl->model_clip[ent->current.modelindex];
+        cmodel = cl->clipModels[ent->current.modelindex];
         if (!cmodel)
             continue;
 

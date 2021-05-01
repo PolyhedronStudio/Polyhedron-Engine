@@ -57,12 +57,12 @@ typedef struct gclient_s gclient_t;
 #ifndef GAME_INCLUDE
 
 struct gclient_s {
-    player_state_t  playerState;     // communicated by server to clients
+    PlayerState  playerState;     // communicated by server to clients
     int             ping;
 
     // the game dll can add anything it wants after
     // this point in the structure
-    int             clientNum;
+    int             clientNumber;
 };
 
 

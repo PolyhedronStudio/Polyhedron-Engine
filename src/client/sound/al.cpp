@@ -1011,7 +1011,7 @@ static void AL_AddLoopSounds(void)
 		if (!sounds[i])
 			continue;
 
-		sfx = S_SfxForHandle(cl.sound_precache[sounds[i]]);
+		sfx = S_SfxForHandle(cl.precaches.sounds[sounds[i]]);
 		if (!sfx)
 			continue;       // bad sound effect
 		sc = sfx->cache;

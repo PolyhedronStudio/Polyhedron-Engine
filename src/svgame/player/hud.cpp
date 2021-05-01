@@ -102,7 +102,7 @@ void HUD_BeginIntermission(entity_t *targ)
     game.autosaved = false;
 
     // respawn any dead clients
-    for (i = 0 ; i < maxclients->value ; i++) {
+    for (i = 0 ; i < maxClients->value ; i++) {
         client = g_edicts + 1 + i;
         if (!client->inUse) {
             continue;
@@ -117,7 +117,7 @@ void HUD_BeginIntermission(entity_t *targ)
 
     if (strstr(level.changemap, "*")) {
         if (coop->value) {
-            for (i = 0 ; i < maxclients->value ; i++) {
+            for (i = 0 ; i < maxClients->value ; i++) {
                 client = g_edicts + 1 + i;
                 if (!client->inUse) {
                     continue;
@@ -163,7 +163,7 @@ void HUD_BeginIntermission(entity_t *targ)
 
     // Initiate the client intermission mode for all clients.
     // (MoveType = PM_FREEZE, positioned at intermission entity view values.)
-    for (i = 0 ; i < maxclients->value ; i++) {
+    for (i = 0 ; i < maxClients->value ; i++) {
         // Fetch client.
         client = g_edicts + 1 + i;
 
@@ -199,7 +199,7 @@ void HUD_GenerateDMScoreboardLayout(entity_t *ent, entity_t *killer)
 
     // sort the clients by score
     total = 0;
-    for (i = 0 ; i < game.maxclients ; i++) {
+    for (i = 0 ; i < game.maxClients ; i++) {
         cl_ent = g_edicts + 1 + i;
         if (!cl_ent->inUse || game.clients[i].resp.spectator)
             continue;
@@ -471,7 +471,7 @@ void HUD_CheckChaseStats(entity_t *ent)
         return;
     }
 
-    for (i = 1; i <= maxclients->value; i++) {
+    for (i = 1; i <= maxClients->value; i++) {
         gclient_t* cl;
 
         cl = g_edicts[i].client;

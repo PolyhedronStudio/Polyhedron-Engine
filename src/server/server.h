@@ -106,10 +106,10 @@ typedef struct {
     int         number;
     unsigned    num_entities;
     unsigned    first_entity;
-    player_state_t playerState;
-    int         clientNum;
-    int         areabytes;
-    byte        areabits[MAX_MAP_AREA_BYTES];  // portalarea visibility bits
+    PlayerState playerState;
+    int         clientNumber;
+    int         areaBytes;
+    byte        areaBits[MAX_MAP_AREA_BYTES];  // portalarea visibility bits
     unsigned    sentTime;                   // for ping calculations
     int         latency;
 } client_frame_t;
@@ -275,7 +275,7 @@ typedef struct client_s {
     int             version;    // minor version
 
     pmoveParams_t   pmp;        // spectator speed, etc
-    msgEsFlags_t    esFlags;    // entity protocol flags
+    EntityStateMessageFlags    esFlags;    // entity protocol flags
 
     // packetized messages
     list_t              msg_free_list;
@@ -295,7 +295,7 @@ typedef struct client_s {
     cm_t            *cm;
     int             slot;
     int             spawncount;
-    int             maxclients;
+    int             maxClients;
 
     // netchan type dependent methods
     void            (*AddMessage)(struct client_s *, byte *, size_t, qboolean);
@@ -388,9 +388,9 @@ typedef struct server_static_s {
     qboolean    initialized;        // sv_init has completed
     unsigned    realtime;           // always increasing, no clamping, etc
 
-    client_t    *client_pool;   // [maxclients]
+    client_t    *client_pool;   // [maxClients]
 
-    unsigned        num_entities;   // maxclients*UPDATE_BACKUP*MAX_PACKET_ENTITIES
+    unsigned        num_entities;   // maxClients*UPDATE_BACKUP*MAX_PACKET_ENTITIES
     unsigned        next_entity;    // next state to use
     entity_packed_t *entities;      // [num_entities]
 

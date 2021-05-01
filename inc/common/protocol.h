@@ -147,7 +147,7 @@ typedef enum {
 
 //==============================================
 
-// player_state_t communication
+// PlayerState communication
 #define PS_PM_TYPE				(1 << 0)
 #define PS_PM_ORIGIN			(1 << 1)
 #define PS_PM_VELOCITY			(1 << 2)

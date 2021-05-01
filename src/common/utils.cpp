@@ -266,7 +266,7 @@ Com_PlayerToEntityState
 Restores entity origin and angles from player state
 ================
 */
-void Com_PlayerToEntityState(const player_state_t *ps, EntityState *es)
+void Com_PlayerToEntityState(const PlayerState *ps, EntityState *es)
 {
     vec_t pitch;
 

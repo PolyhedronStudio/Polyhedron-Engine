@@ -47,7 +47,7 @@ void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
             for (cube = 0; cube < 8; cube++)
                 if (activator->client->pers.power_cubes & (1 << cube))
                     break;
-            for (player = 1; player <= game.maxclients; player++) {
+            for (player = 1; player <= game.maxClients; player++) {
                 ent = &g_edicts[player];
                 if (!ent->inUse)
                     continue;
@@ -60,7 +60,7 @@ void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
             }
         }
         else {
-            for (player = 1; player <= game.maxclients; player++) {
+            for (player = 1; player <= game.maxClients; player++) {
                 ent = &g_edicts[player];
                 if (!ent->inUse)
                     continue;

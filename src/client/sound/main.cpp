@@ -79,7 +79,7 @@ static cvar_t   *s_enable;
 static cvar_t   *s_auto_focus;
 static cvar_t   *s_swapstereo;
 
-// N&C: Moved to client_state_t
+// N&C: Moved to ClientState
 //extern qboolean snd_is_underwater;
 //qboolean snd_is_underwater_enabled;
 
@@ -554,9 +554,9 @@ static sfx_t *S_RegisterSexedSound(int entnum, const char *base)
 
     // determine what model the client is using
     if (entnum > 0 && entnum <= MAX_CLIENTS)
-        model = cl.clientinfo[entnum - 1].model_name;
+        model = cl.clientInfo[entnum - 1].model_name;
     else
-        model = cl.baseclientinfo.model_name;
+        model = cl.baseClientInfo.model_name;
 
     // if we can't figure it out, they're male
     if (model) // C++20: !*model
@@ -606,9 +606,9 @@ static void S_RegisterSexedSounds(void)
         sounds[total++] = i;
     }
 
-    // register sounds for baseclientinfo and other valid clientinfos
+    // register sounds for baseClientInfo and other valid clientinfos
     for (i = 0; i <= MAX_CLIENTS; i++) {
-        if (i > 0 && !cl.clientinfo[i - 1].model_name[0])
+        if (i > 0 && !cl.clientInfo[i - 1].model_name[0])
             continue;
         for (j = 0; j < total; j++) {
             sfx = &known_sfx[sounds[j]];
@@ -995,7 +995,7 @@ void S_StartSound(const vec3_t *origin, int entnum, int entchannel, qhandle_t hS
 
 void S_ParseStartSound(void)
 {
-    qhandle_t handle = cl.sound_precache[snd.index];
+    qhandle_t handle = cl.precaches.sounds[snd.index];
 
     if (!handle)
         return;
@@ -1125,7 +1125,7 @@ static void S_AddLoopSounds(void)
         if (!sounds[i])
             continue;
 
-        sfx = S_SfxForHandle(cl.sound_precache[sounds[i]]);
+        sfx = S_SfxForHandle(cl.precaches.sounds[sounds[i]]);
         if (!sfx)
             continue;       // bad sound effect
         sc = sfx->cache;
@@ -1210,10 +1210,10 @@ void S_Update(void)
 
     // set listener entity number
     // other parameters should be already set up by CL_UpdateOrigin
-    if (cl.clientNum == -1 || cl.frame.clientNum == CLIENTNUM_NONE) {
+    if (cl.clientNumber == -1 || cl.frame.clientNumber == CLIENTNUM_NONE) {
         listener_entnum = -1;
     } else {
-        listener_entnum = cl.frame.clientNum + 1;
+        listener_entnum = cl.frame.clientNumber + 1;
     }
 
 #if USE_OPENAL

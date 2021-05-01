@@ -260,14 +260,14 @@ typedef struct gitem_s {
 // the server.ssv file for savegames
 //
 typedef struct {
-    gclient_t   *clients;       // [maxclients]
+    gclient_t   *clients;       // [maxClients]
 
     // can't store spawnpoint in level, because
     // it would get overwritten by the savegame restore
     char        spawnpoint[512];    // needed for coop respawns
 
     // store latched cvars here that we want to get at often
-    int         maxclients;
+    int         maxClients;
     int         maxentities;
 
     // cross level triggers
@@ -520,7 +520,7 @@ extern  cvar_t  *bob_pitch;
 extern  cvar_t  *bob_roll;
 
 extern  cvar_t  *sv_cheats;
-extern  cvar_t  *maxclients;
+extern  cvar_t  *maxClients;
 extern  cvar_t  *maxspectators;
 
 extern  cvar_t  *flood_msgs;
@@ -793,7 +793,7 @@ typedef struct {
 // except for 'client->pers'
 struct gclient_s {
     // known to server
-    player_state_t  playerState;             // communicated by server to clients
+    PlayerState  playerState;             // communicated by server to clients
     int             ping;
 
     // private to game
@@ -871,7 +871,7 @@ struct entity_s {
     EntityState  s;
     struct gclient_s    *client;    // NULL if not a player
                                     // the server expects the first part
-                                    // of gclient_s to be a player_state_t
+                                    // of gclient_s to be a PlayerState
                                     // but the rest of it is opaque
 
     qboolean    inUse;
@@ -952,7 +952,7 @@ struct entity_s {
     float       debounceTouchTime;        // are all these legit?  do we need more/less of them?
     float       debouncePainTime;
     float       debounceDamageTime;
-    float       debounceSoundTime;    // move to clientinfo
+    float       debounceSoundTime;    // move to clientInfo
     float       lastMoveTime;
 
     int         health;
@@ -1005,7 +1005,7 @@ struct entity_s {
     vec3_t      moveOrigin;
     vec3_t      moveAngles;
 
-    // move this to clientinfo?
+    // move this to clientInfo?
     int         lightLevel;
 
     int         style;          // also used as areaportal number

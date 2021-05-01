@@ -182,12 +182,12 @@ static void CLG_CheckForVersion(const char* s)
         return;
     }
 
-    if (cl->reply_time && clgi.GetRealTime() - cl->reply_time < 120000) {
+    if (cl->replyTime && clgi.GetRealTime() - cl->replyTime < 120000) {
         return;
     }
 
-    cl->reply_time = clgi.GetRealTime();
-    cl->reply_delta = 1024 + (rand() & 1023);
+    cl->replyTime = clgi.GetRealTime();
+    cl->replyDelta = 1024 + (rand() & 1023);
 }
 #endif
 static void CLG_ParsePrint(void)
@@ -244,7 +244,7 @@ static void CLG_ParsePrint(void)
 
     // N&C: We don't need this stuff anymore..
     //// silence MVD spectator chat
-    //if (cl.serverstate == ss_broadcast && !strncmp(s, "[MVD] ", 6))
+    //if (cl.serverState == ss_broadcast && !strncmp(s, "[MVD] ", 6))
     //    return;
 
     // play sound
@@ -315,7 +315,7 @@ qboolean CLG_UpdateConfigString(int index, const char *str) {
     }
     
     if (index >= CS_PLAYERSKINS && index < CS_PLAYERSKINS + MAX_CLIENTS) {
-        CLG_LoadClientInfo(&cl->clientinfo[index - CS_PLAYERSKINS], str);
+        CLG_LoadClientInfo(&cl->clientInfo[index - CS_PLAYERSKINS], str);
         return true;
     }
 

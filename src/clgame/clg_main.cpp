@@ -28,9 +28,9 @@ clgame_import_t clgi;
 clgame_export_t clge;
 
 // Pointer to the actual client frame state.
-client_state_t* cl = NULL;
+ClientState* cl = NULL;
 // Pointer to the actual client shared data.
-client_shared_t* cs = NULL;
+ClientShared* cs = NULL;
 
 // Actual client game state (Contains the view for example).
 clientgame_t clg;
@@ -205,7 +205,7 @@ static void CL_Skins_f(void)
 {
     int i;
     char* s;
-    clientinfo_t* ci;
+    ClientInfo* ci;
 
     if (clgi.GetClienState() < ca_loading) {
         Com_Print("Must be in a level to load skins.\n");
@@ -218,10 +218,10 @@ static void CL_Skins_f(void)
         s = cl->configstrings[CS_PLAYERSKINS + i];
         if (!s[0])
             continue;
-        ci = &cl->clientinfo[i];
+        ci = &cl->clientInfo[i];
         CLG_LoadClientInfo(ci, s);
         if (!ci->model_name[0] || !ci->skin_name[0])
-            ci = &cl->baseclientinfo;
+            ci = &cl->baseClientInfo;
         Com_Print("client %d: %s --> %s/%s\n", i, s,
             ci->model_name, ci->skin_name);
         clgi.SCR_UpdateScreen();
@@ -321,7 +321,7 @@ static void cl_noskins_changed(cvar_t* self)
 {
     int i;
     char* s;
-    clientinfo_t* ci;
+    ClientInfo* ci;
 
     if (clgi.GetClienState() < ca_loading) {
         return;
@@ -331,7 +331,7 @@ static void cl_noskins_changed(cvar_t* self)
         s = cl->configstrings[CS_PLAYERSKINS + i];
         if (!s[0])
             continue;
-        ci = &cl->clientinfo[i];
+        ci = &cl->clientInfo[i];
         CLG_LoadClientInfo(ci, s);
     }
 }

@@ -81,21 +81,21 @@ Archived in MVD stream.
 static void PF_Unicast(entity_t *ent, qboolean reliable)
 {
     client_t    *client;
-    int         cmd, flags, clientNum;
+    int         cmd, flags, clientNumber;
 
     if (!ent) {
         goto clear;
     }
 
-    clientNum = NUM_FOR_EDICT(ent) - 1;
-    if (clientNum < 0 || clientNum >= sv_maxclients->integer) {
-        Com_WPrintf("%s to a non-client %d\n", __func__, clientNum);
+    clientNumber = NUM_FOR_EDICT(ent) - 1;
+    if (clientNumber < 0 || clientNumber >= sv_maxclients->integer) {
+        Com_WPrintf("%s to a non-client %d\n", __func__, clientNumber);
         goto clear;
     }
 
-    client = svs.client_pool + clientNum;
+    client = svs.client_pool + clientNumber;
     if (client->state <= cs_zombie) {
-        Com_WPrintf("%s to a free/zombie client %d\n", __func__, clientNum);
+        Com_WPrintf("%s to a free/zombie client %d\n", __func__, clientNumber);
         goto clear;
     }
 
@@ -208,7 +208,7 @@ static void PF_cprintf(entity_t *ent, int level, const char *fmt, ...)
 {
     char        msg[MAX_STRING_CHARS];
     va_list     argptr;
-    int         clientNum;
+    int         clientNumber;
     size_t      len;
     client_t    *client;
 
@@ -226,14 +226,14 @@ static void PF_cprintf(entity_t *ent, int level, const char *fmt, ...)
         return;
     }
 
-    clientNum = NUM_FOR_EDICT(ent) - 1;
-    if (clientNum < 0 || clientNum >= sv_maxclients->integer) {
-        Com_Error(ERR_DROP, "%s to a non-client %d", __func__, clientNum);
+    clientNumber = NUM_FOR_EDICT(ent) - 1;
+    if (clientNumber < 0 || clientNumber >= sv_maxclients->integer) {
+        Com_Error(ERR_DROP, "%s to a non-client %d", __func__, clientNumber);
     }
 
-    client = svs.client_pool + clientNum;
+    client = svs.client_pool + clientNumber;
     if (client->state <= cs_zombie) {
-        Com_WPrintf("%s to a free/zombie client %d\n", __func__, clientNum);
+        Com_WPrintf("%s to a free/zombie client %d\n", __func__, clientNumber);
         return;
     }
 
@@ -508,7 +508,7 @@ static void PF_StartSound(entity_t *edict, int channel,
     byte        mask[VIS_MAX_BYTES];
     mleaf_t     *leaf;
     int         area;
-    player_state_t      *ps;
+    PlayerState      *ps;
     message_packet_t    *msg;
 
     if (!edict)

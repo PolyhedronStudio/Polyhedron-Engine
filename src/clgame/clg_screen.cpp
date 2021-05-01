@@ -1076,7 +1076,7 @@ static void SCR_ExecuteLayoutString(const char* s)
     char* token;
     int     width;
     int     index;
-    clientinfo_t* ci;
+    ClientInfo* ci;
 
     if (!s[0])
         return;
@@ -1140,8 +1140,8 @@ static void SCR_ExecuteLayoutString(const char* s)
                 Com_Error(ERR_DROP, "%s: invalid pic index", __func__);
             }
             token = cl->configstrings[CS_IMAGES + index];
-            if (token[0] && cl->image_precache[index]) {
-                clgi.R_DrawPic(x, y, cl->image_precache[index]);
+            if (token[0] && cl->precaches.images[index]) {
+                clgi.R_DrawPic(x, y, cl->precaches.images[index]);
             }
 
             if (value == STAT_SELECTED_ICON && scr_showitemname->integer)
@@ -1165,7 +1165,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             if (value < 0 || value >= MAX_CLIENTS) {
                 Com_Error(ERR_DROP, "%s: invalid client index", __func__);
             }
-            ci = &cl->clientinfo[value];
+            ci = &cl->clientInfo[value];
 
             token = COM_Parse(&s);
             score = atoi(token);
@@ -1186,7 +1186,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             HUD_DrawString(x + 32, y + 3 * CHAR_HEIGHT, buffer);
 
             if (!ci->icon) {
-                ci = &cl->baseclientinfo;
+                ci = &cl->baseClientInfo;
             }
             clgi.R_DrawPic(x, y, ci->icon);
             continue;
@@ -1206,7 +1206,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             if (value < 0 || value >= MAX_CLIENTS) {
                 Com_Error(ERR_DROP, "%s: invalid client index", __func__);
             }
-            ci = &cl->clientinfo[value];
+            ci = &cl->clientInfo[value];
 
             token = COM_Parse(&s);
             score = atoi(token);
@@ -1218,7 +1218,7 @@ static void SCR_ExecuteLayoutString(const char* s)
 
             Q_snprintf(buffer, sizeof(buffer), "%3d %3d %-12.12s",
                 score, ping, ci->name);
-            if (value == cl->frame.clientNum) {
+            if (value == cl->frame.clientNumber) {
                 HUD_DrawAltString(x, y, buffer);
             }
             else {

@@ -422,7 +422,7 @@ void SaveClientData(void)
     int     i;
     entity_t *ent;
 
-    for (i = 0 ; i < game.maxclients ; i++) {
+    for (i = 0 ; i < game.maxClients ; i++) {
         ent = &g_edicts[1 + i];
         if (!ent->inUse)
             continue;
@@ -471,7 +471,7 @@ float   PlayersRangeFromSpot(entity_t *spot)
 
     bestplayerdistance = 9999999;
 
-    for (n = 1; n <= maxclients->value; n++) {
+    for (n = 1; n <= maxClients->value; n++) {
         player = &g_edicts[n];
 
         if (!player->inUse)
@@ -691,7 +691,7 @@ void CopyToBodyQue(entity_t *ent)
     gi.UnlinkEntity(ent);
 
     // grab a body que and cycle to the next one
-    body = &g_edicts[game.maxclients + level.body_que + 1];
+    body = &g_edicts[game.maxClients + level.body_que + 1];
     level.body_que = (level.body_que + 1) % BODY_QUEUE_SIZE;
 
     // send an effect on the removed body
@@ -782,7 +782,7 @@ void spectator_respawn(entity_t *ent)
         }
 
         // Count actual active spectators
-        for (i = 1, numspec = 0; i <= maxclients->value; i++)
+        for (i = 1, numspec = 0; i <= maxClients->value; i++)
             if (g_edicts[i].inUse && g_edicts[i].client->pers.spectator)
                 numspec++;
 
@@ -1081,7 +1081,7 @@ void ClientBegin(entity_t *ent)
         HUD_MoveClientToIntermission(ent);
     } else {
         // send effect if in a multiplayer game
-        if (game.maxclients > 1) {
+        if (game.maxClients > 1) {
             gi.WriteByte(svg_muzzleflash);
             gi.WriteShort(ent - g_edicts);
             gi.WriteByte(MuzzleFlashType::Login);
@@ -1193,7 +1193,7 @@ qboolean ClientConnect(entity_t *ent, char *userinfo)
         }
 
         // count spectators
-        for (i = numspec = 0; i < maxclients->value; i++)
+        for (i = numspec = 0; i < maxClients->value; i++)
             if (g_edicts[i + 1].inUse && g_edicts[i + 1].client->pers.spectator)
                 numspec++;
 
@@ -1226,7 +1226,7 @@ qboolean ClientConnect(entity_t *ent, char *userinfo)
 
     ClientUserinfoChanged(ent, userinfo);
 
-    if (game.maxclients > 1)
+    if (game.maxClients > 1)
         gi.DPrintf("%s connected\n", ent->client->pers.netname);
 
     ent->svFlags = 0; // make sure we start with known default
@@ -1488,7 +1488,7 @@ void ClientThink(entity_t *ent, ClientUserCommand *ucmd)
     }
 
     // update chase cam if being followed
-    for (int i = 1; i <= maxclients->value; i++) {
+    for (int i = 1; i <= maxClients->value; i++) {
         other = g_edicts + i;
         if (other->inUse && other->client->chase_target == ent)
             UpdateChaseCam(other);

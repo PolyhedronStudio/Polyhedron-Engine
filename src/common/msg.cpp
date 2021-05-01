@@ -38,7 +38,7 @@ sizebuf_t   msg_read;
 byte        msg_read_buffer[MAX_MSGLEN];
 
 const entity_packed_t   nullEntityState;
-const player_state_t    nullPlayerState;
+const PlayerState    nullPlayerState;
 const ClientUserCommand         nullUserCmd;
 
 /*
@@ -327,7 +327,7 @@ void MSG_PackEntity(entity_packed_t* out, const EntityState* in, qboolean short_
 
 void MSG_WriteDeltaEntity(const entity_packed_t* from,
     const entity_packed_t* to,
-    msgEsFlags_t          flags)
+    EntityStateMessageFlags          flags)
 {
     uint32_t    bits, mask;
 
@@ -572,7 +572,7 @@ void MSG_WriteDeltaEntity(const entity_packed_t* from,
     }
 }
 
-int MSG_WriteDeltaPlayerstate(const player_state_t* from, player_state_t* to, msgPsFlags_t flags)
+int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, msgPsFlags_t flags)
 {
     int     i;
     int     pflags, eflags;
@@ -738,7 +738,7 @@ int MSG_WriteDeltaPlayerstate(const player_state_t* from, player_state_t* to, ms
     }
 
     //
-    // write the rest of the player_state_t
+    // write the rest of the PlayerState
     //
     if (pflags & PS_PM_VIEW_OFFSET) {
         MSG_WriteFloat(to->pmove.viewOffset[0]);
@@ -1076,7 +1076,7 @@ void MSG_ParseDeltaEntity(const EntityState* from,
     EntityState* to,
     int            number,
     int            bits,
-    msgEsFlags_t   flags)
+    EntityStateMessageFlags   flags)
 {
     if (!to) {
         Com_Error(ERR_DROP, "%s: NULL", __func__);
@@ -1191,8 +1191,8 @@ void MSG_ParseDeltaEntity(const EntityState* from,
 MSG_ParseDeltaPlayerstate_Default
 ===================
 */
-void MSG_ParseDeltaPlayerstate(const player_state_t* from,
-    player_state_t* to,
+void MSG_ParseDeltaPlayerstate(const PlayerState* from,
+    PlayerState* to,
     int               flags,
     int               extraflags)
 {
@@ -1260,7 +1260,7 @@ void MSG_ParseDeltaPlayerstate(const player_state_t* from,
     }
 
     //
-    // parse the rest of the player_state_t
+    // parse the rest of the PlayerState
     //
     // View Offset.
     if (flags & PS_PM_VIEW_OFFSET) {

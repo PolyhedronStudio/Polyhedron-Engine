@@ -216,11 +216,11 @@ static constexpr uint32_t MAX_FRAMEDIV = 6;
 #if CGAME_INCLUDE
 #define CL_KEYPS        &cl->frame.playerState
 #define CL_OLDKEYPS     &cl->oldframe.playerState
-#define CL_KEYLERPFRAC  cl->lerpfrac
+#define CL_KEYLERPFRAC  cl->lerpFraction
 #else
 #define CL_KEYPS        &cl.frame.playerState
 #define CL_OLDKEYPS     &cl.oldframe.playerState
-#define CL_KEYLERPFRAC  cl.lerpfrac
+#define CL_KEYLERPFRAC  cl.lerpFraction
 #endif
 
 
@@ -643,8 +643,8 @@ typedef struct entity_state_s {
 } EntityState;
 
 //-----------------
-// player_state_t is the information needed in addition to pm_state_t
-// to rendered a view.  There will only be 10 player_state_t sent each second,
+// PlayerState is the information needed in addition to pm_state_t
+// to rendered a view.  There will only be 10 PlayerState sent each second,
 // but the number of pm_state_t changes will be reletive to client
 // frame rates
 //-----------------
@@ -670,7 +670,7 @@ typedef struct {
     int         rdflags;        // Refdef flags
 
     short       stats[MAX_STATS]; // Fast status bar updates
-} player_state_t;
+} PlayerState;
 
 
 //
@@ -986,7 +986,7 @@ typedef enum {
     FrameLerp       = (1 << 6),     // Linear Interpolation between animation frames.
     Beam            = (1 << 7),     // Special rendering hand: origin = to, old_origin = from.
 
-    CustomSkin      = (1 << 8),     // If CustomSkin is set, ent->skin is an index in image_precache.
+    CustomSkin      = (1 << 8),     // If CustomSkin is set, ent->skin is an index in precaches.images.
     Glow            = (1 << 9),     // Pulse lighting. Used for items.
     RedShell        = (1 << 10),    // Red shell color effect.
     GreenShell      = (1 << 11),    // Green shell color effect.
@@ -998,7 +998,7 @@ typedef enum {
     UseDisguise     = (1 << 16),    // Use disguise.
 } RenderEffects;
 
-// player_state_t->refdef flags
+// PlayerState->refdef flags
 #define RDF_UNDERWATER      1       // warp the screen as apropriate
 #define RDF_NOWORLDMODEL    2       // used for player configuration screen
 

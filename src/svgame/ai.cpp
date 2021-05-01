@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "utils.h"           // Include Utilities funcs.
 
 qboolean FindTarget(entity_t *self);
-extern cvar_t   *maxclients;
+extern cvar_t   *maxClients;
 
 qboolean ai_checkattack(entity_t *self, float dist);
 
@@ -58,7 +58,7 @@ void AI_SetSightClient(void)
     check = start;
     while (1) {
         check++;
-        if (check > game.maxclients)
+        if (check > game.maxClients)
             check = 1;
         ent = &g_edicts[check];
         if (ent->inUse

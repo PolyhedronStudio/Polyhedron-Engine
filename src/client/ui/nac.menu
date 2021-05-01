@@ -316,7 +316,7 @@ begin startserver
     strings "initial map" _ui_nextserver $com_maplist
     field --integer --status "0 - no time limit" --width 3 "time limit" timelimit
     field --integer --status "0 - no frag limit" --width 3 "frag limit" fraglimit
-    field --integer --width 3 "max players" maxclients
+    field --integer --width 3 "max players" maxClients
     field --width 16 "host name" hostname
     blank
     action --align "deathmatch flags..." pushmenu gameflags
@@ -350,10 +350,10 @@ begin development
     background #212F3CD0
     style --compact
     banner m_banner_game
-    action testmap_0 "skill 0; deathmatch 0; coop 0; maxclients 1; newgame; gamemap dev_testmap_0"
-    action medium "skill 0; deathmatch 0; coop 0; maxclients 1; newgame; gamemap dev_testmap_1"
-    action hard "skill 0; deathmatch 0; coop 0; maxclients 1; newgame; gamemap dev_testmap_2"
-    action nightmare "skill 0; deathmatch 0; coop 0; maxclients 1; newgame; gamemap dev_testmap_3"
+    action testmap_0 "skill 0; deathmatch 0; coop 0; maxClients 1; newgame; gamemap dev_testmap_0"
+    action medium "skill 0; deathmatch 0; coop 0; maxClients 1; newgame; gamemap dev_testmap_1"
+    action hard "skill 0; deathmatch 0; coop 0; maxClients 1; newgame; gamemap dev_testmap_2"
+    action nightmare "skill 0; deathmatch 0; coop 0; maxClients 1; newgame; gamemap dev_testmap_3"
     blank
     action "load game..." pushmenu loadgame
     action "save game..." pushmenu savegame
@@ -363,10 +363,10 @@ begin singleplayer
     background #212F3CD0
     style --compact
     banner m_banner_game
-    action easy "skill 0; deathmatch 0; coop 0; maxclients 1; newgame"
-    action medium "skill 1; deathmatch 0; coop 0; maxclients 1; newgame"
-    action hard "skill 2; deathmatch 0; coop 0; maxclients 1; newgame"
-    action nightmare "skill 3; deathmatch 0; coop 0; maxclients 1; newgame"
+    action easy "skill 0; deathmatch 0; coop 0; maxClients 1; newgame"
+    action medium "skill 1; deathmatch 0; coop 0; maxClients 1; newgame"
+    action hard "skill 2; deathmatch 0; coop 0; maxClients 1; newgame"
+    action nightmare "skill 3; deathmatch 0; coop 0; maxClients 1; newgame"
     blank
     action "load game..." pushmenu loadgame
     action "save game..." pushmenu savegame

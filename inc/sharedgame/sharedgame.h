@@ -65,7 +65,7 @@ struct EntityEffectType {
     static constexpr uint32_t Max = (1 << 31);
 };
 
-// player_state_t->refdef flags
+// PlayerState->refdef flags
 #define RDF_UNDERWATER      1       // warp the screen as apropriate
 #define RDF_NOWORLDMODEL    2       // used for player configuration screen
 

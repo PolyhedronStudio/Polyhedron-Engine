@@ -235,8 +235,8 @@ static void V_TestEntities(void)
             ent->origin[j] = cl.refdef.vieworg[j] + cl.v_forward[j] * f +
                              cl.v_right[j] * r;
 
-        ent->model = cl.baseclientinfo.model;
-        ent->skin = cl.baseclientinfo.skin;
+        ent->model = cl.baseClientInfo.model;
+        ent->skin = cl.baseClientInfo.skin;
     }
 }
 
@@ -420,10 +420,10 @@ void V_RenderView(void)
 
         cl.refdef.time = cl.time * 0.001;
 
-        if (cl.frame.areabytes) {
-            cl.refdef.areabits = cl.frame.areabits;
+        if (cl.frame.areaBytes) {
+            cl.refdef.areaBits = cl.frame.areaBits;
         } else {
-            cl.refdef.areabits = NULL;
+            cl.refdef.areaBits = NULL;
         }
 
         if (!cl_add_entities->integer)

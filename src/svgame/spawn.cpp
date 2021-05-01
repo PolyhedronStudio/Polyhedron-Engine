@@ -501,7 +501,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
     strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
 
     // set client fields on player ents
-    for (i = 0 ; i < game.maxclients ; i++)
+    for (i = 0 ; i < game.maxClients ; i++)
         g_edicts[i + 1].client = game.clients + i;
 
     ent = NULL;
@@ -790,7 +790,7 @@ void SP_worldspawn(entity_t *ent)
 
     gi.configstring(CS_CDTRACK, va("%i", ent->sounds));
 
-    gi.configstring(CS_MAXCLIENTS, va("%i", (int)(maxclients->value)));
+    gi.configstring(CS_MAXCLIENTS, va("%i", (int)(maxClients->value)));
 
     // status bar program
     if (deathmatch->value)

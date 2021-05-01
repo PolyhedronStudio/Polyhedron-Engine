@@ -213,7 +213,7 @@ void UI_StatusEvent(const serverStatus_t *status)
 {
     serverslot_t *slot;
     char *hostname, *host;
-    const char* map, *mod, *maxclients; // C++20: STRING: Added const to char*
+    const char* map, *mod, *maxClients; // C++20: STRING: Added const to char*
     unsigned timestamp, ping;
     const char *info = status->infostring;
     char key[MAX_INFO_STRING];
@@ -257,9 +257,9 @@ void UI_StatusEvent(const serverStatus_t *status)
         map = "???";
     }
 
-    maxclients = Info_ValueForKey(info, "maxclients");
-    if (!COM_IsUint(maxclients)) {
-        maxclients = "?";
+    maxClients = Info_ValueForKey(info, "maxClients");
+    if (!COM_IsUint(maxClients)) {
+        maxClients = "?";
     }
 
     if (timestamp > com_eventTime)
@@ -271,7 +271,7 @@ void UI_StatusEvent(const serverStatus_t *status)
 
     // CPP: WARNING: Casting a void* to... serverslot_t*
     slot = (serverslot_t*)UI_FormatColumns(SLOT_EXTRASIZE, host, mod, map,
-                            va("%d/%s", status->numPlayers, maxclients),
+                            va("%d/%s", status->numPlayers, maxClients),
                             va("%u", ping),
                             NULL);
     slot->status = serverslot_t::SLOT_VALID;
