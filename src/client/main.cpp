@@ -2083,18 +2083,18 @@ static size_t CL_Timer_m(char *buffer, size_t size)
 
 static size_t CL_DemoPos_m(char *buffer, size_t size)
 {
-    int sec, min, framenum;
+    int sec, min, frameNumber;
 
     if (cls.demo.playback)
-        framenum = cls.demo.frames_read;
+        frameNumber = cls.demo.frames_read;
     else
-        framenum = 0;  
+        frameNumber = 0;  
 
-    sec = framenum / 10; framenum %= 10;
+    sec = frameNumber / 10; frameNumber %= 10;
     min = sec / 60; sec %= 60;
 
     return Q_scnprintf(buffer, size,
-                       "%d:%02d.%d", min, sec, framenum);
+                       "%d:%02d.%d", min, sec, frameNumber);
 }
 
 static size_t CL_Fps_m(char *buffer, size_t size)

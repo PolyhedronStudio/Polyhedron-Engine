@@ -167,7 +167,7 @@ static void PF_bprintf(int level, const char *fmt, ...)
     FOR_EACH_CLIENT(client) {
         if (client->state != cs_spawned)
             continue;
-        if (level >= client->messagelevel) {
+        if (level >= client->messageLevel) {
             SV_ClientAddMessage(client, MSG_RELIABLE);
         }
     }
@@ -241,7 +241,7 @@ static void PF_cprintf(entity_t *ent, int level, const char *fmt, ...)
     MSG_WriteByte(level);
     MSG_WriteData(msg, len + 1);
 
-    if (level >= client->messagelevel) {
+    if (level >= client->messageLevel) {
         SV_ClientAddMessage(client, MSG_RELIABLE);
     }
 
@@ -542,7 +542,7 @@ static void PF_StartSound(entity_t *edict, int channel,
 
     FOR_EACH_CLIENT(client) {
         // do not send sounds to connecting clients
-        if (client->state != cs_spawned || client->download || client->nodata) {
+        if (client->state != cs_spawned || client->download.bytes || client->nodata) {
             continue;
         }
 

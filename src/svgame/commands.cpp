@@ -801,8 +801,8 @@ void Cmd_PlayerList_f(entity_t *ent)
             continue;
 
         Q_snprintf(st, sizeof(st), "%02d:%02d %4d %3d %s%s\n",
-                   (level.framenum - e2->client->resp.enterframe) / 600,
-                   ((level.framenum - e2->client->resp.enterframe) % 600) / 10,
+                   (level.frameNumber - e2->client->resp.enterframe) / 600,
+                   ((level.frameNumber - e2->client->resp.enterframe) % 600) / 10,
                    e2->client->ping,
                    e2->client->resp.score,
                    e2->client->pers.netname,

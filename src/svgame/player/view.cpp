@@ -901,7 +901,7 @@ void ClientEndServerFrame(entity_t *ent)
     ent->client->kickAngles = vec3_zero();
 
     // if the scoreboard is up, update it
-    if (ent->client->showscores && !(level.framenum & 31)) {
+    if (ent->client->showscores && !(level.frameNumber & 31)) {
         HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
         gi.Unicast(ent, false);
     }

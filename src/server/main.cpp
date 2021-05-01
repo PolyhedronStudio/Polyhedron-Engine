@@ -127,9 +127,9 @@ void SV_CleanClient(client_t *client)
     // close any existing donwload
     SV_CloseDownload(client);
 
-    if (client->version_string) {
-        Z_Free(client->version_string);
-        client->version_string = NULL;
+    if (client->versionString) {
+        Z_Free(client->versionString);
+        client->versionString = NULL;
     }
 
     // free entityBaselines allocated for this client
@@ -214,7 +214,7 @@ void SV_DropClient(client_t *client, const char *reason)
 
     oldstate = client->state;
     client->state = cs_zombie;        // become free in a few seconds
-    client->lastmessage = svs.realtime;
+    client->lastMessage = svs.realtime;
 
     // print the reason
     if (reason)
@@ -614,8 +614,8 @@ typedef struct {
     qboolean    has_zlib;
 
     int         reserved;   // hidden client slots
-    char        reconnect_var[16];
-    char        reconnect_val[16];
+    char        reconnectKey[16];
+    char        reconnectValue[16];
 } conn_params_t;
 
 #define __reject(...) \
@@ -875,8 +875,8 @@ static client_t *find_client_slot(conn_params_t *params)
     FOR_EACH_CLIENT(cl) {
         if (NET_IsEqualAdr(&net_from, &cl->netchan->remoteAddress)) {
             if (cl->state == cs_zombie) {
-                strcpy(params->reconnect_var, cl->reconnect_var);
-                strcpy(params->reconnect_val, cl->reconnect_val);
+                strcpy(params->reconnectKey, cl->reconnectKey);
+                strcpy(params->reconnectValue, cl->reconnectValue);
             } else {
                 SV_DropClient(cl, "reconnected");
             }
@@ -1022,8 +1022,8 @@ static void SVC_DirectConnect(void)
     newcl->spawncount = sv.spawncount;
     newcl->maxClients = sv_maxclients->integer;
 	newcl->last_valid_cluster = -1;
-    strcpy(newcl->reconnect_var, params.reconnect_var);
-    strcpy(newcl->reconnect_val, params.reconnect_val);
+    strcpy(newcl->reconnectKey, params.reconnectKey);
+    strcpy(newcl->reconnectValue, params.reconnectValue);
 
     init_pmove_and_es_flags(newcl);
 
@@ -1056,7 +1056,7 @@ static void SVC_DirectConnect(void)
     // send the connect packet to the client
     send_connect_packet(newcl, params.nctype);
 
-    SV_RateInit(&newcl->ratelimit_namechange, sv_namechange_limit->string);
+    SV_RateInit(&newcl->ratelimitNameChange, sv_namechange_limit->string);
 
     SV_InitClientSend(newcl);
 
@@ -1077,11 +1077,11 @@ static void SVC_DirectConnect(void)
 
     Com_DPrintf("Going from cs_free to cs_assigned for %s\n", newcl->name);
     newcl->state = cs_assigned;
-    newcl->framenum = 1; // frame 0 can't be used
-    newcl->lastframe = -1;
-    newcl->lastmessage = svs.realtime;    // don't timeout
-    newcl->lastactivity = svs.realtime;
-    newcl->min_ping = 9999;
+    newcl->frameNumber = 1; // frame 0 can't be used
+    newcl->lastFrame = -1;
+    newcl->lastMessage = svs.realtime;    // don't timeout
+    newcl->lastActivity = svs.realtime;
+    newcl->pingMinimum = 9999;
 }
 
 static qboolean rcon_valid(void)
@@ -1229,7 +1229,7 @@ static int ping_min(client_t *cl)
     int i, j, count = INT_MAX;
 
     for (i = 0; i < UPDATE_BACKUP; i++) {
-        j = cl->framenum - i - 1;
+        j = cl->frameNumber - i - 1;
         frame = &cl->frames[j & UPDATE_MASK];
         if (frame->number != j)
             continue;
@@ -1248,7 +1248,7 @@ static int ping_avg(client_t *cl)
     int i, j, total = 0, count = 0;
 
     for (i = 0; i < UPDATE_BACKUP; i++) {
-        j = cl->framenum - i - 1;
+        j = cl->frameNumber - i - 1;
         frame = &cl->frames[j & UPDATE_MASK];
         if (frame->number != j)
             continue;
@@ -1281,30 +1281,30 @@ static void SV_CalcPings(void)
     }
 
     // update avg ping and fps every 10 seconds
-    res = sv.framenum % (10 * SV_FRAMERATE);
+    res = sv.frameNumber % (10 * SV_FRAMERATE);
 
     FOR_EACH_CLIENT(cl) {
         if (cl->state == cs_spawned) {
             cl->ping = calc(cl);
             if (cl->ping) {
-                if (cl->ping < cl->min_ping) {
-                    cl->min_ping = cl->ping;
-                } else if (cl->ping > cl->max_ping) {
-                    cl->max_ping = cl->ping;
+                if (cl->ping < cl->pingMinimum) {
+                    cl->pingMinimum = cl->ping;
+                } else if (cl->ping > cl->pingMaximum) {
+                    cl->pingMaximum = cl->ping;
                 }
                 if (!res) {
-                    cl->avg_ping_time += cl->ping;
-                    cl->avg_ping_count++;
+                    cl->averagePingTime += cl->ping;
+                    cl->averagePingCount++;
                 }
             }
             if (!res) {
-                cl->moves_per_sec = cl->num_moves / 10;
-                cl->num_moves = 0;
+                cl->movesPerSecond = cl->numberOfMoves / 10;
+                cl->numberOfMoves = 0;
             }
         } else {
             cl->ping = 0;
-            cl->moves_per_sec = 0;
-            cl->num_moves = 0;
+            cl->movesPerSecond = 0;
+            cl->numberOfMoves = 0;
         }
 
         // let the game dll know about the ping
@@ -1325,11 +1325,11 @@ static void SV_GiveMsec(void)
 {
     client_t    *cl;
 
-    if (sv.framenum % (16 * SV_FRAMEDIV))
+    if (sv.frameNumber % (16 * SV_FRAMEDIV))
         return;
 
     FOR_EACH_CLIENT(cl) {
-        cl->command_msec = 1800; // 1600 + some slop
+        cl->clientUserCommandMiliseconds = 1800; // 1600 + some slop
     }
 }
 
@@ -1396,12 +1396,12 @@ static void SV_PacketEvent(void)
             break;
 
         // this is a valid, sequenced packet, so process it
-        client->lastmessage = svs.realtime;    // don't timeout
+        client->lastMessage = svs.realtime;    // don't timeout
 #if USE_ICMP
         client->unreachable = false; // don't drop
 #endif
         if (netchan->dropped > 0)
-            client->frameflags |= FF_CLIENTDROP;
+            client->frameFlags |= FF_CLIENTDROP;
 
         SV_ExecuteClientMessage(client);
         break;
@@ -1508,7 +1508,7 @@ static void SV_CheckTimeouts(void)
             continue;
         }
         // NOTE: delta calculated this way is not sensitive to overflow
-        delta = svs.realtime - client->lastmessage;
+        delta = svs.realtime - client->lastMessage;
         if (client->state == cs_zombie) {
             if (delta > zombie_time) {
                 SV_RemoveClient(client);
@@ -1534,12 +1534,12 @@ static void SV_CheckTimeouts(void)
             continue;
         }
 
-        if (client->frames_nodelta > 64 && !sv_allow_nodelta->integer) {
+        if (client->framesNoDelta > 64 && !sv_allow_nodelta->integer) {
             SV_DropClient(client, "too many nodelta frames");
             continue;
         }
 
-        delta = svs.realtime - client->lastactivity;
+        delta = svs.realtime - client->lastActivity;
         if (idle_time && delta > idle_time) {
             SV_DropClient(client, "idling");
             continue;
@@ -1768,7 +1768,7 @@ unsigned SV_Frame(unsigned msec)
         SV_PrepWorldFrame();
 
         // advance for next frame
-        sv.framenum++;
+        sv.frameNumber++;
     }
 
     if (COM_DEDICATED) {
@@ -1858,8 +1858,8 @@ void SV_UserinfoChanged(client_t *cl)
     // msg command
     val = Info_ValueForKey(cl->userinfo, "msg");
     if (*val) {
-        cl->messagelevel = atoi(val);
-        clamp(cl->messagelevel, PRINT_LOW, PRINT_CHAT + 1);
+        cl->messageLevel = atoi(val);
+        clamp(cl->messageLevel, PRINT_LOW, PRINT_CHAT + 1);
     }
 }
 
@@ -1906,7 +1906,7 @@ static void sv_namechange_limit_changed(cvar_t *self)
     client_t *client;
 
     FOR_EACH_CLIENT(client) {
-        SV_RateInit(&client->ratelimit_namechange, self->string);
+        SV_RateInit(&client->ratelimitNameChange, self->string);
     }
 }
 

@@ -129,7 +129,7 @@ typedef struct {
     ServerState  state;      // precache commands are only valid during load
     int             spawncount; // random number generated each server spawn
 
-    int         framenum;
+    int         frameNumber;
     unsigned    frameResidual;
 
     char        mapcmd[MAX_QPATH];          // ie: *intro.cin+base
@@ -191,12 +191,12 @@ static constexpr uint32_t SERVER_MESSAGES_TICKRATE = 20;
 #define FOR_EACH_CLIENT(client) \
     LIST_FOR_EACH(client_t, client, &sv_clientlist, entry)
 
-#define PL_S2C(cl) (cl->frames_sent ? \
-    (1.0f - (float)cl->frames_acked / cl->frames_sent) * 100.0f : 0.0f)
+#define PL_S2C(cl) (cl->framesSent ? \
+    (1.0f - (float)cl->framesAcknowledged / cl->framesSent) * 100.0f : 0.0f)
 #define PL_C2S(cl) (cl->netchan->totalReceived ? \
     ((float)cl->netchan->totalDropped / cl->netchan->totalReceived) * 100.0f : 0.0f)
-#define AVG_PING(cl) (cl->avg_ping_count ? \
-    cl->avg_ping_time / cl->avg_ping_count : cl->ping)
+#define AVG_PING(cl) (cl->averagePingCount ? \
+    cl->averagePingTime / cl->averagePingCount : cl->ping)
 
 typedef struct {
     unsigned    time;
@@ -209,65 +209,70 @@ typedef struct client_s {
     list_t          entry;
 
     // core info
-    ConnectionState       state;
-    entity_t         *edict;     // EDICT_NUM(clientnum+1)
+    ConnectionState state;
+    entity_t        *edict;     // EDICT_NUM(clientnum+1)
     int             number;     // client slot number
 
     // client flags
-    qboolean        reconnected: 1;
-    qboolean        nodata: 1;
-    qboolean        has_zlib: 1;
-    qboolean        drop_hack: 1;
+    qboolean    reconnected: 1;
+    qboolean    nodata: 1;
+    qboolean    has_zlib: 1;
+    qboolean    drop_hack: 1;
 #if USE_ICMP
-    qboolean        unreachable: 1;
+    qboolean    unreachable: 1;
 #endif
-    qboolean        http_download: 1;
+    qboolean    http_download: 1;
 
     // userinfo
-    char            userinfo[MAX_INFO_STRING];  // name, etc
-    char            name[MAX_CLIENT_NAME];      // extracted from userinfo, high bits masked
-    int             messagelevel;               // for filtering printed messages
-    size_t          rate;
-    RateLimit     ratelimit_namechange;       // for suppressing "foo changed name" flood
+    char        userinfo[MAX_INFO_STRING];  // name, etc
+    char        name[MAX_CLIENT_NAME];      // extracted from userinfo, high bits masked
+    int         messageLevel;               // for filtering printed messages
+    size_t      rate;
+    RateLimit   ratelimitNameChange;       // for suppressing "foo changed name" flood
 
     // console var probes
-    char            *version_string;
-    char            reconnect_var[16];
-    char            reconnect_val[16];
-    int             console_queries;
+    char            *versionString;
+    char            reconnectKey[16];
+    char            reconnectValue[16];
+    int             consoleQueries;
 
     // usercmd stuff
-    unsigned        lastmessage;    // svs.realtime when packet was last received
-    unsigned        lastactivity;   // svs.realtime when user activity was last seen
-    int             lastframe;      // for delta compression
-    ClientUserCommand       lastcmd;        // for filling in big drops
-    int             command_msec;   // every seconds this is reset, if user
+    unsigned        lastMessage;    // svs.realtime when packet was last received
+    unsigned        lastActivity;   // svs.realtime when user activity was last seen
+    int             lastFrame;      // for delta compression
+    ClientUserCommand       lastClientUserCommand;        // for filling in big drops
+    int             clientUserCommandMiliseconds;   // every seconds this is reset, if user
                                     // commands exhaust it, assume time cheating
-    int             num_moves;      // reset every 10 seconds
-    int             moves_per_sec;  // average movement FPS
+    int             numberOfMoves;      // reset every 10 seconds
+    int             movesPerSecond;  // average movement FPS
 
-    int             ping, min_ping, max_ping;
-    int             avg_ping_time, avg_ping_count;
+    int             ping, pingMinimum, pingMaximum;
+    int             averagePingTime, averagePingCount;
 
     // frame encoding
     ClientFrame  frames[UPDATE_BACKUP];    // updates can be delta'd from here
-    unsigned        frames_sent, frames_acked, frames_nodelta;
-    int             framenum;
+    unsigned        framesSent, framesAcknowledged, framesNoDelta;
+    int             frameNumber;
 
-    unsigned        frameflags;
+    unsigned        frameFlags;
 
     // rate dropping
-    size_t          message_size[SERVER_MESSAGES_TICKRATE];    // used to rate drop normal packets
-    int             suppress_count;                 // number of messages rate suppressed
-    unsigned        send_time, send_delta;          // used to rate drop async packets
+    size_t          messageSizes[SERVER_MESSAGES_TICKRATE];    // used to rate drop normal packets
+    int             suppressCount;                 // number of messages rate suppressed
+    unsigned        sendTime, sendDelta;          // used to rate drop async packets
 
     // current download
-    byte            *download;      // file being downloaded
-    int             downloadsize;   // total bytes (can't use EOF because of paks)
-    int             downloadcount;  // bytes sent
-    char            *downloadname;  // name of the file
-    int             downloadcmd;    // svc_(z)download
-    qboolean        downloadpending;
+    struct {
+        int32_t fileSize;   // total bytes (can't use EOF because of paks)
+        char    *fileName;  // name of the file
+
+        byte    *bytes;     // file being downloaded
+        int32_t bytesSent;  // bytes sent
+
+        int32_t command;    // svc_(z)download
+
+        qboolean isPending;
+    } download;
 
     // protocol stuff
     int             challenge;  // challenge of this user, randomly generated
@@ -421,10 +426,10 @@ extern list_t      sv_cmdlist_begin;
 extern list_t      sv_filterlist;
 extern list_t      sv_clientlist; // linked list of non-free clients
 
-extern ServerStatic     svs;        // persistant server info
-extern server_t            sv;         // local server
+extern ServerStatic  svs;        // persistant server info
+extern server_t      sv;         // local server
 
-extern pmoveParams_t    sv_pmp;
+extern pmoveParams_t sv_pmp;
 
 extern cvar_t       *sv_hostname;
 extern cvar_t       *sv_maxclients;

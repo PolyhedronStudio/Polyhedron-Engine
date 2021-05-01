@@ -127,23 +127,23 @@ static ClientFrame *get_last_frame(client_t *client)
 {
     ClientFrame *frame;
 
-    if (client->lastframe <= 0) {
+    if (client->lastFrame <= 0) {
         // client is asking for a retransmit
-        client->frames_nodelta++;
+        client->framesNoDelta++;
         return NULL;
     }
 
-    client->frames_nodelta = 0;
+    client->framesNoDelta = 0;
 
-    if (client->framenum - client->lastframe >= UPDATE_BACKUP) {
+    if (client->frameNumber - client->lastFrame >= UPDATE_BACKUP) {
         // client hasn't gotten a good message through in a long time
         Com_DPrintf("%s: delta request from out-of-date packet.\n", client->name);
         return NULL;
     }
 
     // we have a valid message to delta from
-    frame = &client->frames[client->lastframe & UPDATE_MASK];
-    if (frame->number != client->lastframe) {
+    frame = &client->frames[client->lastFrame & UPDATE_MASK];
+    if (frame->number != client->lastFrame) {
         // but it got never sent
         Com_DPrintf("%s: delta request from dropped frame.\n", client->name);
         return NULL;
@@ -174,13 +174,13 @@ void SV_WriteFrameToClient(client_t *client)
     int             clientEntityNum;
 
     // this is the frame we are creating
-    frame = &client->frames[client->framenum & UPDATE_MASK];
+    frame = &client->frames[client->frameNumber & UPDATE_MASK];
 
     // this is the frame we are delta'ing from
     oldframe = get_last_frame(client);
     if (oldframe) {
         oldPlayerState = &oldframe->playerState;
-        delta = client->framenum - client->lastframe;
+        delta = client->frameNumber - client->lastFrame;
     } else {
         oldPlayerState = NULL;
         delta = 31;
@@ -189,7 +189,7 @@ void SV_WriteFrameToClient(client_t *client)
     // first byte to be patched
     b1 = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
 
-    MSG_WriteLong((client->framenum & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));
+    MSG_WriteLong((client->frameNumber & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));
 
     // second byte to be patched
     b2 = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
@@ -214,7 +214,7 @@ void SV_WriteFrameToClient(client_t *client)
     if (frame->playerState.pmove.type < PM_DEAD) {
         clientEntityNum = frame->clientNumber + 1;
     }
-    suppressed = client->frameflags;
+    suppressed = client->frameFlags;
 
 
     // delta encode the playerstate
@@ -233,8 +233,8 @@ void SV_WriteFrameToClient(client_t *client)
     *b2 = (suppressed & SUPPRESSCOUNT_MASK) |
           ((extraflags & 0x0F) << SUPPRESSCOUNT_BITS);
 
-    client->suppress_count = 0;
-    client->frameflags = 0;
+    client->suppressCount = 0;
+    client->frameFlags = 0;
 
     // delta encode the entities
     SV_EmitPacketEntities(client, oldframe, frame, clientEntityNum);
@@ -279,12 +279,12 @@ void SV_BuildClientFrame(client_t *client)
         return;        // not in game yet
 
     // this is the frame we are creating
-    frame = &client->frames[client->framenum & UPDATE_MASK];
-    frame->number = client->framenum;
+    frame = &client->frames[client->frameNumber & UPDATE_MASK];
+    frame->number = client->frameNumber;
     frame->sentTime = com_eventTime; // save it for ping calc later
     frame->latency = -1; // not yet acked
 
-    client->frames_sent++;
+    client->framesSent++;
 
     // find the client's PVS
     ps = &clent->client->playerState;

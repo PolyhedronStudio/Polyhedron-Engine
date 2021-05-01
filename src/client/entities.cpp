@@ -179,7 +179,7 @@ static void set_active_state(void)
     // initialize oldframe so lerping doesn't hurt anything
     cl.oldframe.valid = false;
     cl.oldframe.playerState = cl.frame.playerState;
-    cl.frameflags = 0;
+    cl.frameFlags = 0;
     if (cls.netchan) {
         cl.initialSequence = cls.netchan->outgoingSequence;
     }
@@ -280,7 +280,7 @@ void CL_DeltaFrame(void)
     cl_entity_t           *ent;
     EntityState      *state;
     int                 i, j;
-    int                 framenum;
+    int                 frameNumber;
     int                 prevstate = cls.state;
 
     // getting a valid frame message ends the connection process
@@ -288,8 +288,8 @@ void CL_DeltaFrame(void)
         set_active_state();
 
     // set server time
-    framenum = cl.frame.number - cl.serverDelta;
-    cl.serverTime = framenum * CL_FRAMETIME;
+    frameNumber = cl.frame.number - cl.serverDelta;
+    cl.serverTime = frameNumber * CL_FRAMETIME;
 
     // rebuild the list of solid entities for this frame
     cl.numSolidEntities = 0;

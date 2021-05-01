@@ -248,7 +248,7 @@ static const save_field_t entityfields[] = {
 
 static const save_field_t levelfields[] = {
 #define _OFS LLOFS
-    I(framenum),
+    I(frameNumber),
     F(time),
 
     SZ(level_name, MAX_QPATH),

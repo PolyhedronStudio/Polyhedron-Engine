@@ -202,7 +202,7 @@ static void CL_ParseFrame(int extrabits)
 
     memset(&frame, 0, sizeof(frame));
 
-    cl.frameflags = 0;
+    cl.frameFlags = 0;
 
     extraflags = 0;
     bits = MSG_ReadLong();
@@ -223,7 +223,7 @@ static void CL_ParseFrame(int extrabits)
         // CLIENTDROP is implied, don't draw both
         suppressed &= ~FF_CLIENTDROP;
     }
-    cl.frameflags |= suppressed;
+    cl.frameFlags |= suppressed;
 
     extraflags = (extrabits << 4) | (bits >> SUPPRESSCOUNT_BITS);
 
@@ -232,7 +232,7 @@ static void CL_ParseFrame(int extrabits)
     frame.delta = deltaframe;
 
     if (cls.netchan && cls.netchan->dropped) {
-        cl.frameflags |= FF_SERVERDROP;
+        cl.frameFlags |= FF_SERVERDROP;
     }
 
     // if the frame is delta compressed from data that we no longer have
@@ -244,20 +244,20 @@ static void CL_ParseFrame(int extrabits)
         if (deltaframe == currentframe) {
             // old servers may cause this on map change
             Com_DPrintf("%s: delta from current frame\n", __func__);
-            cl.frameflags |= FF_BADFRAME;
+            cl.frameFlags |= FF_BADFRAME;
         } else if (oldframe->number != deltaframe) {
             // the frame that the server did the delta from
             // is too old, so we can't reconstruct it properly.
             Com_DPrintf("%s: delta frame was never received or too old\n", __func__);
-            cl.frameflags |= FF_OLDFRAME;
+            cl.frameFlags |= FF_OLDFRAME;
         } else if (!oldframe->valid) {
             // should never happen
             Com_DPrintf("%s: delta from invalid frame\n", __func__);
-            cl.frameflags |= FF_BADFRAME;
+            cl.frameFlags |= FF_BADFRAME;
         } else if (cl.numEntityStates - oldframe->firstEntity >
                    MAX_PARSE_ENTITIES - MAX_PACKET_ENTITIES) {
             Com_DPrintf("%s: delta entities too old\n", __func__);
-            cl.frameflags |= FF_OLDENT;
+            cl.frameFlags |= FF_OLDENT;
         } else {
             frame.valid = true; // valid delta parse
         }
@@ -271,7 +271,7 @@ static void CL_ParseFrame(int extrabits)
         oldframe = NULL;
         from = NULL;
         frame.valid = true; // uncompressed frame
-        cl.frameflags |= FF_NODELTA;
+        cl.frameFlags |= FF_NODELTA;
     }
 
     // read areaBits

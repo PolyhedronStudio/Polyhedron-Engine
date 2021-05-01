@@ -487,8 +487,8 @@ void G_RunFrame(void)
     int     i;
     entity_t *ent;
 
-    level.framenum++;
-    level.time = level.framenum * FRAMETIME;
+    level.frameNumber++;
+    level.time = level.frameNumber * FRAMETIME;
 
     // choose a client for monsters to target this frame
     AI_SetSightClient();

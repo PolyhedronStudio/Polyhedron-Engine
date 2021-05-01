@@ -53,7 +53,7 @@ void hurt_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* su
         self->timestamp = level.time + FRAMETIME;
 
     if (!(self->spawnFlags & 4)) {
-        if ((level.framenum % 10) == 0)
+        if ((level.frameNumber % 10) == 0)
             gi.Sound(other, CHAN_AUTO, self->noiseIndex, 1, ATTN_NORM, 0);
     }
 

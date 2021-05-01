@@ -369,8 +369,8 @@ static void stuff_junk(void)
         junk[i][15] = 0;
     }
 
-    strcpy(sv_client->reconnect_var, junk[2]);
-    strcpy(sv_client->reconnect_val, junk[3]);
+    strcpy(sv_client->reconnectKey, junk[2]);
+    strcpy(sv_client->reconnectValue, junk[3]);
 
     SV_ClientCommand(sv_client, "set %s set\n", junk[0]);
     SV_ClientCommand(sv_client, "$%s %s connect\n", junk[0], junk[1]);
@@ -408,7 +408,7 @@ void SV_New_f(void)
         Com_DPrintf("Going from cs_assigned to cs_connected for %s\n",
                     sv_client->name);
         sv_client->state = cs_connected;
-        sv_client->lastmessage = svs.realtime; // don't timeout
+        sv_client->lastMessage = svs.realtime; // don't timeout
         time(&sv_client->connect_time);
     } else if (sv_client->state > cs_connected) {
         Com_DPrintf("New not valid -- already primed\n");
@@ -416,7 +416,7 @@ void SV_New_f(void)
     }
 
     // stuff some junk, drop them and expect them to be back soon
-    if (sv_force_reconnect->string[0] && !sv_client->reconnect_var[0] &&
+    if (sv_force_reconnect->string[0] && !sv_client->reconnectKey[0] &&
         !NET_IsLocalAddress(&sv_client->netchan->remoteAddress)) {
         stuff_junk();
         SV_DropClient(sv_client, NULL);
@@ -466,14 +466,14 @@ void SV_New_f(void)
     // send reconnect var request
     if (sv_force_reconnect->string[0] && !sv_client->reconnected) {
         SV_ClientCommand(sv_client, "cmd \177c connect $%s\n",
-                         sv_client->reconnect_var);
+                         sv_client->reconnectKey);
     }
 
     Com_DPrintf("Going from cs_connected to cs_primed for %s\n",
                 sv_client->name);
     sv_client->state = cs_primed;
 
-    memset(&sv_client->lastcmd, 0, sizeof(sv_client->lastcmd));
+    memset(&sv_client->lastClientUserCommand, 0, sizeof(sv_client->lastClientUserCommand));
 
     if (sv.state == ss_pic || sv.state == ss_cinematic)
         return;
@@ -518,7 +518,7 @@ void SV_Begin_f(void)
         return;
     }
 
-    if (!sv_client->version_string) {
+    if (!sv_client->versionString) {
         SV_DropClient(sv_client, "!failed version probe");
         return;
     }
@@ -531,9 +531,9 @@ void SV_Begin_f(void)
     Com_DPrintf("Going from cs_primed to cs_spawned for %s\n",
                 sv_client->name);
     sv_client->state = cs_spawned;
-    sv_client->send_delta = 0;
-    sv_client->command_msec = 1800;
-    sv_client->suppress_count = 0;
+    sv_client->sendDelta = 0;
+    sv_client->clientUserCommandMiliseconds = 1800;
+    sv_client->suppressCount = 0;
     sv_client->http_download = false;
 
     stuff_cmds(&sv_cmdlist_begin);
@@ -556,18 +556,18 @@ void SV_Begin_f(void)
 
 void SV_CloseDownload(client_t *client)
 {
-    if (client->download) {
-        Z_Free(client->download);
-        client->download = NULL;
+    if (client->download.bytes) {
+        Z_Free(client->download.bytes);
+        client->download.bytes = NULL;
     }
-    if (client->downloadname) {
-        Z_Free(client->downloadname);
-        client->downloadname = NULL;
+    if (client->download.fileName) {
+        Z_Free(client->download.fileName);
+        client->download.fileName = NULL;
     }
-    client->downloadsize = 0;
-    client->downloadcount = 0;
-    client->downloadcmd = 0;
-    client->downloadpending = false;
+    client->download.fileSize = 0;
+    client->download.bytesSent = 0;
+    client->download.command = 0;
+    client->download.isPending = false;
 }
 
 /*
@@ -577,10 +577,10 @@ SV_NextDownload_f
 */
 static void SV_NextDownload_f(void)
 {
-    if (!sv_client->download)
+    if (!sv_client->download.bytes)
         return;
 
-    sv_client->downloadpending = true;
+    sv_client->download.isPending = true;
 }
 
 /*
@@ -657,7 +657,7 @@ static void SV_BeginDownload_f(void)
         goto fail1;
     }
 
-    if (sv_client->download) {
+    if (sv_client->download.bytes) {
         Com_DPrintf("Closing existing download for %s (should not happen)\n", sv_client->name);
         SV_CloseDownload(sv_client);
     }
@@ -730,12 +730,12 @@ static void SV_BeginDownload_f(void)
 
     FS_FCloseFile(f);
 
-    sv_client->download = download;
-    sv_client->downloadsize = downloadsize;
-    sv_client->downloadcount = offset;
-    sv_client->downloadname = SV_CopyString(name);
-    sv_client->downloadcmd = downloadcmd;
-    sv_client->downloadpending = true;
+    sv_client->download.bytes = download;
+    sv_client->download.fileSize = downloadsize;
+    sv_client->download.bytesSent = offset;
+    sv_client->download.fileName = SV_CopyString(name);
+    sv_client->download.command = downloadcmd;
+    sv_client->download.isPending = true;
 
     Com_DPrintf("Downloading %s to %s\n", name, sv_client->name);
     return;
@@ -755,10 +755,10 @@ static void SV_StopDownload_f(void)
 {
     int percent;
 
-    if (!sv_client->download)
+    if (!sv_client->download.bytes)
         return;
 
-    percent = sv_client->downloadcount * 100 / sv_client->downloadsize;
+    percent = sv_client->download.bytesSent * 100 / sv_client->download.fileSize;
 
     MSG_WriteByte(svc_download);
     MSG_WriteShort(-1);
@@ -766,7 +766,7 @@ static void SV_StopDownload_f(void)
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
 
     Com_DPrintf("Download of %s to %s stopped by user request\n",
-                sv_client->downloadname, sv_client->name);
+                sv_client->download.fileName, sv_client->name);
     SV_CloseDownload(sv_client);
 }
 
@@ -854,7 +854,7 @@ static void SV_Lag_f(void)
                     "RTT (min/avg/max):   %d/%d/%d ms\n"
                     "Server to client PL: %.2f%% (approx)\n"
                     "Client to server PL: %.2f%%\n",
-                    cl->name, cl->min_ping, AVG_PING(cl), cl->max_ping,
+                    cl->name, cl->pingMinimum, AVG_PING(cl), cl->pingMaximum,
                     PL_S2C(cl), PL_C2S(cl));
 }
 
@@ -886,26 +886,26 @@ static void SV_CvarResult_f(void)
 
     c = Cmd_Argv(1); // C++20: Added a cast.
     if (!strcmp(c, "version")) {
-        if (!sv_client->version_string) {
+        if (!sv_client->versionString) {
             v = (char*)Cmd_RawArgsFrom(2); // C++20: Added a cast.
             if (COM_DEDICATED) {
                 Com_Printf("%s[%s]: %s\n", sv_client->name,
                            NET_AdrToString(&sv_client->netchan->remoteAddress), v);
             }
-            sv_client->version_string = SV_CopyString(v);
+            sv_client->versionString = SV_CopyString(v);
         }
     } else if (!strcmp(c, "connect")) {
-        if (sv_client->reconnect_var[0]) {
-            if (!strcmp(Cmd_Argv(2), sv_client->reconnect_val)) {
+        if (sv_client->reconnectKey[0]) {
+            if (!strcmp(Cmd_Argv(2), sv_client->reconnectValue)) {
                 sv_client->reconnected = true;
             }
         }
     } else if (!strcmp(c, "console")) {
-        if (sv_client->console_queries > 0) {
+        if (sv_client->consoleQueries > 0) {
             Com_Printf("%s[%s]: \"%s\" is \"%s\"\n", sv_client->name,
                        NET_AdrToString(&sv_client->netchan->remoteAddress),
                        Cmd_Argv(2), Cmd_RawArgsFrom(3));
-            sv_client->console_queries--;
+            sv_client->consoleQueries--;
         }
     }
 }
@@ -1008,7 +1008,7 @@ static void SV_ExecuteUserCommand(const char *s)
 
     if (!strcmp(c, "say") || !strcmp(c, "say_team")) {
         // don't timeout. only chat commands count as activity.
-        sv_client->lastactivity = svs.realtime;
+        sv_client->lastActivity = svs.realtime;
     }
 
     ge->ClientCommand(sv_player);
@@ -1033,14 +1033,14 @@ SV_ClientThink
 */
 static inline void SV_ClientThink(ClientUserCommand *cmd)
 {
-    ClientUserCommand *old = &sv_client->lastcmd;
+    ClientUserCommand *old = &sv_client->lastClientUserCommand;
 
-    sv_client->command_msec -= cmd->cmd.msec;
-    sv_client->num_moves++;
+    sv_client->clientUserCommandMiliseconds -= cmd->cmd.msec;
+    sv_client->numberOfMoves++;
 
-    if (sv_client->command_msec < 0 && sv_enforcetime->integer) {
+    if (sv_client->clientUserCommandMiliseconds < 0 && sv_enforcetime->integer) {
         Com_DPrintf("commandMsec underflow from %s: %d\n",
-                    sv_client->name, sv_client->command_msec);
+                    sv_client->name, sv_client->clientUserCommandMiliseconds);
         return;
     }
 
@@ -1049,27 +1049,27 @@ static inline void SV_ClientThink(ClientUserCommand *cmd)
         || cmd->cmd.rightmove != old->cmd.rightmove
         || cmd->cmd.upmove != old->cmd.upmove) {
         // don't timeout
-        sv_client->lastactivity = svs.realtime;
+        sv_client->lastActivity = svs.realtime;
     }
 
     ge->ClientThink(sv_player, cmd);
 }
 
-static void SV_SetLastFrame(int lastframe)
+static void SV_SetLastFrame(int lastFrame)
 {
     ClientFrame *frame;
 
-    if (lastframe > 0) {
-        if (lastframe >= sv_client->framenum)
+    if (lastFrame > 0) {
+        if (lastFrame >= sv_client->frameNumber)
             return; // ignore invalid acks
 
-        if (lastframe <= sv_client->lastframe)
+        if (lastFrame <= sv_client->lastFrame)
             return; // ignore duplicate acks
 
-        if (sv_client->framenum - lastframe <= UPDATE_BACKUP) {
-            frame = &sv_client->frames[lastframe & UPDATE_MASK];
+        if (sv_client->frameNumber - lastFrame <= UPDATE_BACKUP) {
+            frame = &sv_client->frames[lastFrame & UPDATE_MASK];
 
-            if (frame->number == lastframe) {
+            if (frame->number == lastFrame) {
                 // save time for ping calc
                 if (frame->sentTime <= com_eventTime)
                     frame->latency = com_eventTime - frame->sentTime;
@@ -1077,10 +1077,10 @@ static void SV_SetLastFrame(int lastframe)
         }
 
         // count valid ack
-        sv_client->frames_acked++;
+        sv_client->framesAcknowledged++;
     }
 
-    sv_client->lastframe = lastframe;
+    sv_client->lastFrame = lastFrame;
 }
 
 /*
@@ -1091,7 +1091,7 @@ SV_ExecuteMove
 static void SV_ExecuteMove(void)
 {
     ClientUserCommand   oldest, oldcmd, newcmd;
-    int         lastframe;
+    int         lastFrame;
     int         net_drop;
 
     if (moveIssued) {
@@ -1101,7 +1101,7 @@ static void SV_ExecuteMove(void)
 
     moveIssued = true;
 
-    lastframe = MSG_ReadLong();
+    lastFrame = MSG_ReadLong();
 
     MSG_ReadDeltaUsercmd(NULL, &oldest);
     MSG_ReadDeltaUsercmd(&oldest, &oldcmd);
@@ -1112,18 +1112,18 @@ static void SV_ExecuteMove(void)
         return;
     }
 
-    SV_SetLastFrame(lastframe);
+    SV_SetLastFrame(lastFrame);
     
     // Determine drop rate, on whether we should be predicting or not.
     net_drop = sv_client->netchan->dropped;
     if (net_drop > 2) {
-        sv_client->frameflags |= FF_CLIENTPRED;
+        sv_client->frameFlags |= FF_CLIENTPRED;
     }
 
     if (net_drop < 20) {
         // Run last client user command multiple times if no backups are available
         while (net_drop > 2) {
-            SV_ClientThink(&sv_client->lastcmd);
+            SV_ClientThink(&sv_client->lastClientUserCommand);
             net_drop--;
         }
 
@@ -1138,7 +1138,7 @@ static void SV_ExecuteMove(void)
     SV_ClientThink(&newcmd);
 
     // Store it.
-    sv_client->lastcmd = newcmd;
+    sv_client->lastClientUserCommand = newcmd;
 }
 
 /*
@@ -1166,7 +1166,7 @@ static void SV_UpdateUserinfo(void)
     s = Info_ValueForKey(sv_client->userinfo, "name");
     s[MAX_CLIENT_NAME - 1] = 0;
     if (COM_IsWhite(s) || (sv_client->name[0] && strcmp(sv_client->name, s) &&
-                           SV_RateLimited(&sv_client->ratelimit_namechange))) {
+                           SV_RateLimited(&sv_client->ratelimitNameChange))) {
         if (!sv_client->name[0]) {
             SV_DropClient(sv_client, "malformed name");
             return;

@@ -1796,7 +1796,6 @@ void PMove(pm_move_t * pmove, pmoveParams_t * params)
     // Check for view step changes, if so, interpolate.
     PM_CheckViewStep();
 
-
     //PM_Debug("pm->step = %f pm->state.origin = %s", pm->step, Vec3ToString(pm->state.origin));
 }
 

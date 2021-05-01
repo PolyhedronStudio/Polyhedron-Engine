@@ -237,11 +237,11 @@ void M_MoveFrame(entity_t *self)
     move = self->monsterInfo.currentmove;
     self->nextThink = level.time + FRAMETIME;
 
-    if ((self->monsterInfo.nextframe) && (self->monsterInfo.nextframe >= move->firstframe) && (self->monsterInfo.nextframe <= move->lastframe)) {
+    if ((self->monsterInfo.nextframe) && (self->monsterInfo.nextframe >= move->firstframe) && (self->monsterInfo.nextframe <= move->lastFrame)) {
         self->s.frame = self->monsterInfo.nextframe;
         self->monsterInfo.nextframe = 0;
     } else {
-        if (self->s.frame == move->lastframe) {
+        if (self->s.frame == move->lastFrame) {
             if (move->endfunc) {
                 move->endfunc(self);
 
@@ -254,13 +254,13 @@ void M_MoveFrame(entity_t *self)
             }
         }
 
-        if (self->s.frame < move->firstframe || self->s.frame > move->lastframe) {
+        if (self->s.frame < move->firstframe || self->s.frame > move->lastFrame) {
             self->monsterInfo.aiflags &= ~AI_HOLD_FRAME;
             self->s.frame = move->firstframe;
         } else {
             if (!(self->monsterInfo.aiflags & AI_HOLD_FRAME)) {
                 self->s.frame++;
-                if (self->s.frame > move->lastframe)
+                if (self->s.frame > move->lastFrame)
                     self->s.frame = move->firstframe;
             }
         }
@@ -430,7 +430,7 @@ qboolean monster_start(entity_t *self)
 
     // randomize what frame they start on
     if (self->monsterInfo.currentmove)
-        self->s.frame = self->monsterInfo.currentmove->firstframe + (rand() % (self->monsterInfo.currentmove->lastframe - self->monsterInfo.currentmove->firstframe + 1));
+        self->s.frame = self->monsterInfo.currentmove->firstframe + (rand() % (self->monsterInfo.currentmove->lastFrame - self->monsterInfo.currentmove->firstframe + 1));
 
     return true;
 }

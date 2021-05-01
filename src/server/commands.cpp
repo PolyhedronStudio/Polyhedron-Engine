@@ -485,7 +485,7 @@ static void SV_Kick_f(void)
         return;
 
     SV_DropClient(sv_client, "?was kicked");
-    sv_client->lastmessage = svs.realtime;    // min case there is a funny zombie
+    sv_client->lastMessage = svs.realtime;    // min case there is a funny zombie
 
     // optionally ban their IP address
     if (!strcmp(Cmd_Argv(0), "kickban")) {
@@ -525,7 +525,7 @@ static void dump_clients(void)
             break;
         case cs_connected:
         case cs_primed:
-            if (client->download) {
+            if (client->download.bytes) {
                 Com_Printf("DNLD ");
             } else if (client->http_download) {
                 Com_Printf("HTTP ");
@@ -541,12 +541,12 @@ static void dump_clients(void)
         }
 
         Com_Printf("%-15.15s ", client->name);
-        Com_Printf("%7u ", svs.realtime - client->lastmessage);
+        Com_Printf("%7u ", svs.realtime - client->lastMessage);
         Com_Printf("%-21s ", NET_AdrToString(
                        &client->netchan->remoteAddress));
         Com_Printf("%5" PRIz " ", client->rate);
         Com_Printf("%2i ", client->protocol);
-        Com_Printf("%3i ", client->moves_per_sec);
+        Com_Printf("%3i ", client->movesPerSecond);
         Com_Printf("\n");
     }
 }
@@ -562,7 +562,7 @@ static void dump_versions(void)
     FOR_EACH_CLIENT(client) {
         Com_Printf("%3i %-15.15s %-40.40s\n",
                    client->number, client->name,
-                   client->version_string ? client->version_string : "-");
+                   client->versionString ? client->versionString : "-");
     }
 }
 
@@ -577,12 +577,12 @@ static void dump_downloads(void)
         "--- --------------- ---------------------------------------- ------- ----\n");
 
     FOR_EACH_CLIENT(client) {
-        if (client->download) {
-            name = client->downloadname;
-            size = client->downloadsize;
+        if (client->download.bytes) {
+            name = client->download.fileName;
+            size = client->download.fileSize;
             if (!size)
                 size = 1;
-            percent = client->downloadcount * 100 / size;
+            percent = client->download.bytesSent * 100 / size;
         } else if (client->http_download) {
             name = "<HTTP download>"; // C++20: Added cast.
             size = percent = 0;
@@ -606,7 +606,7 @@ static void dump_time(void)
         "--- --------------- ---- --------\n");
 
     FOR_EACH_CLIENT(client) {
-        idle = (svs.realtime - client->lastactivity) / 1000;
+        idle = (svs.realtime - client->lastActivity) / 1000;
         if (idle > 9999)
             idle = 9999;
         Com_TimeDiff(buffer, sizeof(buffer),
@@ -627,7 +627,7 @@ static void dump_lag(void)
     FOR_EACH_CLIENT(cl) {
         Com_Printf("%3i %-15.15s %5.2f %5.2f %4d %4d %4d %3d\n",
                    cl->number, cl->name, PL_S2C(cl), PL_C2S(cl),
-                   cl->min_ping, AVG_PING(cl), cl->max_ping,
+                   cl->pingMinimum, AVG_PING(cl), cl->pingMaximum,
                    cl->numpackets - 1);
     }
 }
@@ -750,16 +750,16 @@ void SV_PrintMiscInfo(void)
     char buffer[MAX_QPATH];
 
     Com_Printf("version              %s\n",
-               sv_client->version_string ? sv_client->version_string : "-");
+               sv_client->versionString ? sv_client->versionString : "-");
     Com_Printf("protocol (maj/min)   %d/%d\n",
                sv_client->protocol, sv_client->version);
     Com_Printf("maxmsglen            %" PRIz "\n", sv_client->netchan->maxpacketlen);
     Com_Printf("zlib support         %s\n", sv_client->has_zlib ? "yes" : "no");
     Com_Printf("netchan type         %s\n", "1");
     Com_Printf("ping                 %d\n", sv_client->ping);
-    Com_Printf("movement fps         %d\n", sv_client->moves_per_sec);
+    Com_Printf("movement fps         %d\n", sv_client->movesPerSecond);
     Com_Printf("RTT (min/avg/max)    %d/%d/%d ms\n",
-               sv_client->min_ping, AVG_PING(sv_client), sv_client->max_ping);
+               sv_client->pingMinimum, AVG_PING(sv_client), sv_client->pingMaximum);
     Com_Printf("PL server to client  %.2f%% (approx)\n", PL_S2C(sv_client));
     Com_Printf("PL client to server  %.2f%%\n", PL_C2S(sv_client));
 #ifdef USE_PACKETDUP
@@ -894,7 +894,7 @@ static void SV_StuffCvar_f(void)
     for (i = 2; i < argc; i++) {
         c = Cmd_Argv(i); // C++20: Added cast.
         SV_ClientCommand(sv_client, "cmd \177c console %s $%s\n", c, c);
-        sv_client->console_queries++;
+        sv_client->consoleQueries++;
     }
 
     sv_client = NULL;

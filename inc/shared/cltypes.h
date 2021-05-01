@@ -339,7 +339,7 @@ struct ClientState {
     // 
     // A list of server frames received.
     ServerFrame  frames[UPDATE_BACKUP];
-    uint32_t     frameflags;
+    uint32_t     frameFlags;
 
     // The actual current server frame.
     ServerFrame frame; // The current(last received frame from the server)

@@ -331,7 +331,7 @@ void FoundTarget(entity_t *self)
     // let other monsters see this monster for a while
     if (self->enemy->client) {
         level.sight_entity = self;
-        level.sight_entity_framenum = level.framenum;
+        level.sight_entity_framenum = level.frameNumber;
         level.sight_entity->lightLevel = 128;
     }
 
@@ -411,15 +411,15 @@ qboolean FindTarget(entity_t *self)
 // but not weapon impact/explosion noises
 
     heardit = false;
-    if ((level.sight_entity_framenum >= (level.framenum - 1)) && !(self->spawnFlags & 1)) {
+    if ((level.sight_entity_framenum >= (level.frameNumber - 1)) && !(self->spawnFlags & 1)) {
         client = level.sight_entity;
         if (client->enemy == self->enemy) {
             return false;
         }
-    } else if (level.sound_entity_framenum >= (level.framenum - 1)) {
+    } else if (level.sound_entity_framenum >= (level.frameNumber - 1)) {
         client = level.sound_entity;
         heardit = true;
-    } else if (!(self->enemy) && (level.sound2_entity_framenum >= (level.framenum - 1)) && !(self->spawnFlags & 1)) {
+    } else if (!(self->enemy) && (level.sound2_entity_framenum >= (level.frameNumber - 1)) && !(self->spawnFlags & 1)) {
         client = level.sound2_entity;
         heardit = true;
     } else {

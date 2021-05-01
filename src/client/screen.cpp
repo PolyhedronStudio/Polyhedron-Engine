@@ -343,7 +343,7 @@ static void SCR_DrawDebugGraph(void)
 }
 #endif
 
-static void draw_percent_bar(int percent, qboolean paused, int framenum)
+static void draw_percent_bar(int percent, qboolean paused, int frameNumber)
 {
     char buffer[16];
     int x, w;
@@ -361,10 +361,10 @@ static void draw_percent_bar(int percent, qboolean paused, int framenum)
     R_DrawString(x, scr.hud_height, 0, MAX_STRING_CHARS, buffer, scr.font_pic);
 
     if (scr_demobar->integer > 1) {
-        int sec = framenum / 10;
+        int sec = frameNumber / 10;
         int min = sec / 60; sec %= 60;
 
-        Q_scnprintf(buffer, sizeof(buffer), "%d:%02d.%d", min, sec, framenum % 10);
+        Q_scnprintf(buffer, sizeof(buffer), "%d:%02d.%d", min, sec, frameNumber % 10);
         R_DrawString(0, scr.hud_height, 0, MAX_STRING_CHARS, buffer, scr.font_pic);
     }
 
@@ -437,7 +437,7 @@ void SCR_LagSample(void)
         lag.head++;
     }
 
-    if (cl.frameflags & FF_SUPPRESSED) {
+    if (cl.frameFlags & FF_SUPPRESSED) {
         ping |= LAG_WARN_BIT;
     }
     lag.samples[lag.head % LAG_WIDTH] = ping;
@@ -522,14 +522,14 @@ static void SCR_DrawTurtle(void)
     if (scr_showturtle->integer <= 0)
         return;
 
-    if (!cl.frameflags)
+    if (!cl.frameFlags)
         return;
 
     x = CHAR_WIDTH;
     y = scr.hud_height - 11 * CHAR_HEIGHT;
 
 #define DF(f) \
-    if (cl.frameflags & FF_##f) { \
+    if (cl.frameFlags & FF_##f) { \
         SCR_DrawString(x, y, UI_ALTCOLOR, #f); \
         y += CHAR_HEIGHT; \
     }

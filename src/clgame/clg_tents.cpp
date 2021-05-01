@@ -645,7 +645,7 @@ static void CLG_AddPlayerBeams(void)
 	r_entity_t    ent;
 	vec3_t      angles;
 	float       len, steps;
-	int         framenum;
+	int         frameNumber;
 	float       model_length;
 	float       hand_multiplier;
 	PlayerState* ps, * ops;
@@ -696,7 +696,7 @@ static void CLG_AddPlayerBeams(void)
 			// if it's the heatbeam, draw the particle effect
 			CLG_Heatbeam(org, dist);
 
-			framenum = 1;
+			frameNumber = 1;
 		}
 		else {
 			VectorCopy(b->start, org);
@@ -723,7 +723,7 @@ static void CLG_AddPlayerBeams(void)
 				CLG_MonsterPlasma_Shell(b->start);
 			}
 
-			framenum = 2;
+			frameNumber = 2;
 		}
 
 		// add new entities for the beams
@@ -734,7 +734,7 @@ static void CLG_AddPlayerBeams(void)
 
 		memset(&ent, 0, sizeof(ent));
 		ent.model = b->model;
-		ent.frame = framenum;
+		ent.frame = frameNumber;
 		ent.flags = RenderEffects::FullBright;
 		ent.angles[0] = -angles[0];
 		ent.angles[1] = angles[1] + 180.0;

@@ -66,15 +66,15 @@ static qboolean SV_RateDrop(client_t *client)
 
     total = 0;
     for (i = 0; i < SERVER_MESSAGES_TICKRATE; i++) {
-        total += client->message_size[i];
+        total += client->messageSizes[i];
     }
 
     if (total > client->rate) {
         SV_DPrintf(0, "Frame %d suppressed for %s (total = %" PRIz ")\n",
-                   client->framenum, client->name, total);
-        client->frameflags |= FF_SUPPRESSED;
-        client->suppress_count++;
-        client->message_size[client->framenum % SERVER_MESSAGES_TICKRATE] = 0;
+                   client->frameNumber, client->name, total);
+        client->frameFlags |= FF_SUPPRESSED;
+        client->suppressCount++;
+        client->messageSizes[client->frameNumber % SERVER_MESSAGES_TICKRATE] = 0;
         return true;
     }
 
@@ -85,16 +85,16 @@ static void SV_CalcSendTime(client_t *client, size_t size)
 {
     // never drop over the loopback
     if (!client->rate) {
-        client->send_time = svs.realtime;
-        client->send_delta = 0;
+        client->sendTime = svs.realtime;
+        client->sendDelta = 0;
         return;
     }
 
     if (client->state == cs_spawned)
-        client->message_size[client->framenum % SERVER_MESSAGES_TICKRATE] = size;
+        client->messageSizes[client->frameNumber % SERVER_MESSAGES_TICKRATE] = size;
 
-    client->send_time = svs.realtime;
-    client->send_delta = size * 1000 / client->rate;
+    client->sendTime = svs.realtime;
+    client->sendDelta = size * 1000 / client->rate;
 }
 
 /*
@@ -120,7 +120,7 @@ void SV_ClientPrintf(client_t *client, int level, const char *fmt, ...)
     char        string[MAX_STRING_CHARS];
     size_t      len;
 
-    if (level < client->messagelevel)
+    if (level < client->messageLevel)
         return;
 
     va_start(argptr, fmt);
@@ -170,7 +170,7 @@ void SV_BroadcastPrintf(int level, const char *fmt, ...)
     FOR_EACH_CLIENT(client) {
         if (client->state != cs_spawned)
             continue;
-        if (level < client->messagelevel)
+        if (level < client->messageLevel)
             continue;
         SV_ClientAddMessage(client, MSG_RELIABLE);
     }
@@ -298,7 +298,7 @@ void SV_Multicast(const vec3_t *origin, multicast_t to)
         }
         // do not send unreliables to connecting clients
         if (!(flags & MSG_RELIABLE) && (client->state != cs_spawned ||
-                                        client->download || client->nodata)) {
+                                        client->download.bytes || client->nodata)) {
             continue;
         }
 
@@ -504,7 +504,7 @@ static qboolean check_entity(client_t *client, int entnum)
     ClientFrame *frame;
     unsigned i, j;
 
-    frame = &client->frames[client->framenum & UPDATE_MASK];
+    frame = &client->frames[client->frameNumber & UPDATE_MASK];
 
     for (i = 0; i < frame->num_entities; i++) {
         j = (frame->first_entity + i) % svs.num_entities;
@@ -685,7 +685,7 @@ void SV_SendClientMessages(void)
 
     // send a message to each connected client
     FOR_EACH_CLIENT(client) {
-        if (client->state != cs_spawned || client->download || client->nodata)
+        if (client->state != cs_spawned || client->download.bytes || client->nodata)
             goto finish;
 
         if (!SV_CLIENTSYNC(client))
@@ -705,7 +705,7 @@ void SV_SendClientMessages(void)
 
         // don't write any frame data until all fragments are sent
         if (client->netchan->fragmentPending) {
-            client->frameflags |= FF_SUPPRESSED;
+            client->frameFlags |= FF_SUPPRESSED;
             cursize = Netchan_TransmitNextFragment(client->netchan);
             SV_CalcSendTime(client, cursize);
             goto advance;
@@ -717,7 +717,7 @@ void SV_SendClientMessages(void)
 
 advance:
         // advance for next frame
-        client->framenum++;
+        client->frameNumber++;
 
 finish:
         // clear all unreliable messages still left
@@ -731,10 +731,10 @@ static void write_pending_download(client_t *client)
     size_t      remaining;
     int         chunk, percent;
 
-    if (!client->download)
+    if (!client->download.bytes)
         return;
 
-    if (!client->downloadpending)
+    if (!client->download.isPending)
         return;
 
     if (client->netchan->reliableLength)
@@ -748,21 +748,21 @@ static void write_pending_download(client_t *client)
     if (remaining <= 4)
         return;
 
-    chunk = client->downloadsize - client->downloadcount;
+    chunk = client->download.fileSize - client->download.bytesSent;
     if (chunk > remaining - 4)
         chunk = remaining - 4;
 
-    client->downloadpending = false;
-    client->downloadcount += chunk;
+    client->download.isPending = false;
+    client->download.bytesSent += chunk;
 
-    percent = client->downloadcount * 100 / client->downloadsize;
+    percent = client->download.bytesSent * 100 / client->download.fileSize;
 
-    SZ_WriteByte(buf, client->downloadcmd);
+    SZ_WriteByte(buf, client->download.command);
     SZ_WriteShort(buf, chunk);
     SZ_WriteByte(buf, percent);
-    SZ_Write(buf, client->download + client->downloadcount - chunk, chunk);
+    SZ_Write(buf, client->download.bytes + client->download.bytesSent - chunk, chunk);
 
-    if (client->downloadcount == client->downloadsize) {
+    if (client->download.bytesSent == client->download.fileSize) {
         SV_CloseDownload(client);
     }
 }
@@ -788,7 +788,7 @@ void SV_SendAsyncPackets(void)
 
     FOR_EACH_CLIENT(client) {
         // don't overrun bandwidth
-        if (svs.realtime - client->send_time < client->send_delta) {
+        if (svs.realtime - client->sendTime < client->sendDelta) {
             continue;
         }
 
@@ -802,7 +802,7 @@ void SV_SendAsyncPackets(void)
         }
 
         // spawned clients are handled elsewhere
-        if (client->state == cs_spawned && !client->download && !client->nodata && !SV_PAUSED) {
+        if (client->state == cs_spawned && !client->download.bytes && !client->nodata && !SV_PAUSED) {
             continue;
         }
 

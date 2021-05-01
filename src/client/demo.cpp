@@ -191,7 +191,7 @@ Writes delta from the last frame we got to the current frame.
 void CL_EmitDemoFrame(void)
 {
     ServerFrame  *oldframe;
-    int             lastframe;
+    int             lastFrame;
 
     if (!cl.frame.valid)
         return;
@@ -199,19 +199,19 @@ void CL_EmitDemoFrame(void)
     // the first frame is delta uncompressed
     if (cls.demo.last_server_frame == -1) {
         oldframe = NULL;
-        lastframe = -1;
+        lastFrame = -1;
     } else {
         oldframe = &cl.frames[cls.demo.last_server_frame & UPDATE_MASK];
-        lastframe = FRAME_PRE;
+        lastFrame = FRAME_PRE;
         if (oldframe->number != cls.demo.last_server_frame || !oldframe->valid ||
             cl.numEntityStates - oldframe->firstEntity > MAX_PARSE_ENTITIES) {
             oldframe = NULL;
-            lastframe = -1;
+            lastFrame = -1;
         }
     }
 
     // emit and flush frame
-    emit_delta_frame(oldframe, &cl.frame, lastframe, FRAME_CUR);
+    emit_delta_frame(oldframe, &cl.frame, lastFrame, FRAME_CUR);
 
     if (cls.demo.buffer.cursize + msg_write.cursize > cls.demo.buffer.maxsize) {
         Com_DPrintf("Demo frame overflowed (% " PRIz " + %" PRIz " > %" PRIz ")\n",
@@ -751,7 +751,7 @@ static void CL_Demo_c(genctx_t *ctx, int argnum)
 
 typedef struct {
     list_t entry;
-    int framenum;
+    int frameNumber;
     off_t filepos;
     size_t msglen;
     byte data[1];
@@ -771,7 +771,7 @@ void CL_EmitDemoSnapshot(void)
     off_t pos;
     char *from, *to;
     size_t len;
-    ServerFrame *lastframe, *frame;
+    ServerFrame *lastFrame, *frame;
     int i, j, lastnum;
 
     if (cl_demosnaps->integer <= 0)
@@ -792,7 +792,7 @@ void CL_EmitDemoSnapshot(void)
 
     // write all the backups, since we can't predict what frame the next
     // delta will come from
-    lastframe = NULL;
+    lastFrame = NULL;
     lastnum = -1;
     for (i = 0; i < UPDATE_BACKUP; i++) {
         j = cl.frame.number - (UPDATE_BACKUP - 1) + i;
@@ -802,8 +802,8 @@ void CL_EmitDemoSnapshot(void)
             continue;
         }
 
-        emit_delta_frame(lastframe, frame, lastnum, j);
-        lastframe = frame;
+        emit_delta_frame(lastFrame, frame, lastnum, j);
+        lastFrame = frame;
         lastnum = frame->number;
     }
 
@@ -831,7 +831,7 @@ void CL_EmitDemoSnapshot(void)
 
     // CPP: Cast void* to demosnap_t *
     snap = (demosnap_t*)Z_Malloc(sizeof(*snap) + msg_write.cursize - 1);
-    snap->framenum = cls.demo.frames_read;
+    snap->frameNumber = cls.demo.frames_read;
     snap->filepos = pos;
     snap->msglen = msg_write.cursize;
     memcpy(snap->data, msg_write.data, msg_write.cursize);
@@ -844,7 +844,7 @@ void CL_EmitDemoSnapshot(void)
     cls.demo.last_snapshot = cls.demo.frames_read;
 }
 
-static demosnap_t *find_snapshot(int framenum)
+static demosnap_t *find_snapshot(int frameNumber)
 {
     demosnap_t *snap, *prev;
 
@@ -854,7 +854,7 @@ static demosnap_t *find_snapshot(int framenum)
     prev = LIST_FIRST(demosnap_t, &cls.demo.snapshots, entry);
 
     LIST_FOR_EACH(demosnap_t, snap, &cls.demo.snapshots, entry) {
-        if (snap->framenum > framenum)
+        if (snap->frameNumber > frameNumber)
             break;
         prev = snap;
     }
@@ -959,7 +959,7 @@ static void CL_Seek_f(void)
         snap = find_snapshot(dest);
 
         if (snap) {
-            Com_DPrintf("found snap at %d\n", snap->framenum);
+            Com_DPrintf("found snap at %d\n", snap->frameNumber);
             ret = FS_Seek(cls.demo.playback, snap->filepos);
             if (ret < 0) {
                 Com_EPrintf("Couldn't seek demo: %s\n", Q_ErrorString(ret));
@@ -986,7 +986,7 @@ static void CL_Seek_f(void)
             msg_read.cursize = snap->msglen;
 
             CL_SeekDemoMessage();
-            cls.demo.frames_read = snap->framenum;
+            cls.demo.frames_read = snap->frameNumber;
             Com_DPrintf("[%d] after snap parse %d\n", cls.demo.frames_read, cl.frame.number);
         } else if (frames < 0) {
             Com_Printf("Couldn't seek backwards without snapshots!\n");
@@ -1042,7 +1042,7 @@ static void CL_Seek_f(void)
 
     update_status();
 
-    cl.frameflags = 0;
+    cl.frameFlags = 0;
 
 done:
     cls.demo.seeking = false;

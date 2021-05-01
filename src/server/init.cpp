@@ -29,12 +29,12 @@ void SV_ClientReset(client_t *client)
 
     // any partially connected client will be restarted
     client->state = cs_connected;
-    client->framenum = 1; // frame 0 can't be used
-    client->lastframe = -1;
-    client->frames_nodelta = 0;
-    client->send_delta = 0;
-    client->suppress_count = 0;
-    memset(&client->lastcmd, 0, sizeof(client->lastcmd));
+    client->frameNumber = 1; // frame 0 can't be used
+    client->lastFrame = -1;
+    client->framesNoDelta = 0;
+    client->sendDelta = 0;
+    client->suppressCount = 0;
+    memset(&client->lastClientUserCommand, 0, sizeof(client->lastClientUserCommand));
 }
 
 static void resolve_masters(void)
@@ -212,8 +212,8 @@ void SV_SpawnServer(MapCommand *cmd)
     ge->SpawnEntities(sv.name, entityString, cmd->spawnpoint);
 
     // run two frames to allow everything to settle
-    ge->RunFrame(); sv.framenum++;
-    ge->RunFrame(); sv.framenum++;
+    ge->RunFrame(); sv.frameNumber++;
+    ge->RunFrame(); sv.frameNumber++;
 
     // make sure maxClients string is correct
     sprintf(sv.configstrings[CS_MAXCLIENTS], "%d", sv_maxclients->integer);

@@ -188,7 +188,7 @@ typedef struct
 typedef struct
 {
 	int			firstframe;
-	int			lastframe;
+	int			lastFrame;
 	mframe_t	*frame;
 	void(*endfunc)(entity_t *self);
 } mmove_t;
