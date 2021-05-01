@@ -55,7 +55,7 @@ qboolean static inline NAC_PROTOCOL_SUPPORTED(uint32_t x) {
 //
 // Protocol Configuration.
 //
-// Number of copies of entity_state_t to keep buffered.
+// Number of copies of EntityState to keep buffered.
 constexpr int32_t UPDATE_BACKUP = 32;  // Must be Power Of Two. 
 constexpr int32_t UPDATE_MASK = (UPDATE_BACKUP - 1);
 
@@ -137,7 +137,7 @@ typedef enum {
 typedef enum {
     clc_bad,
     clc_nop,
-    clc_move,               // [cl_cmd_t]
+    clc_move,               // [ClientUserCommand]
     clc_userinfo,           // [userinfo string]
     clc_stringcmd,          // [string] message
 
@@ -219,7 +219,7 @@ typedef enum {
 
 //==============================================
 
-// entity_state_t communication
+// EntityState communication
 
 // Try to pack the common update flags into the first byte
 #define U_ORIGIN_X   (1<<0)        // was named: U_ORIGIN_X

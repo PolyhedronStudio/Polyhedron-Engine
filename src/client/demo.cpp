@@ -75,11 +75,11 @@ fail:
     return false;
 }
 
-// writes a delta update of an entity_state_t list to the message.
+// writes a delta update of an EntityState list to the message.
 static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
 {
     entity_packed_t oldpack, newpack;
-    entity_state_t *oldent, *newent;
+    EntityState *oldent, *newent;
     int     oldindex, newindex;
     int     oldnum, newnum;
     int     i, from_num_entities;
@@ -320,7 +320,7 @@ static void CL_Record_f(void)
     char    buffer[MAX_OSPATH];
     int     i, c;
     size_t  len;
-    entity_state_t  *ent;
+    EntityState  *ent;
     entity_packed_t pack;
     char            *s;
     qhandle_t       f;

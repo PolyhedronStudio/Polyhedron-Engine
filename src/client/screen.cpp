@@ -423,7 +423,7 @@ void SCR_LagClear(void)
 void SCR_LagSample(void)
 {
     int i = cls.netchan->incomingAcknowledged & CMD_MASK;
-    client_command_history_t *h = &cl.clientCommandHistory[i];
+    ClientUserCommandHistory *h = &cl.clientCommandHistory[i];
     unsigned ping;
 
     h->timeReceived = cls.realtime;

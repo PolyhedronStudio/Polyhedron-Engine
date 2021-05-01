@@ -35,7 +35,7 @@ constexpr uint8_t BUTTON_ANY			= (1 << 7);
 //=============================================================================
 //
 //-----------------
-// entity_state_t->effects
+// EntityState->effects
 // Effects are things handled on the client side (lights, particles, 
 // frame animations) that happen constantly on the given entity.
 // 

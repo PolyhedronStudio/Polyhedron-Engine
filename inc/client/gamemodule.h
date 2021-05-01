@@ -64,7 +64,7 @@ void		CL_GM_PMoveEnableQW(pmoveParams_t* pmp);
 //
 // Predict
 //
-void		CL_GM_CheckPredictionError(cl_cmd_t* clientUserCommand);
+void		CL_GM_CheckPredictionError(ClientUserCommand* clientUserCommand);
 void		CL_GM_PredictAngles(void);
 void		CL_GM_PredictMovement(unsigned int ack, unsigned int current);
 

@@ -1031,9 +1031,9 @@ static int         userinfoUpdateCount;
 SV_ClientThink
 ==================
 */
-static inline void SV_ClientThink(cl_cmd_t *cmd)
+static inline void SV_ClientThink(ClientUserCommand *cmd)
 {
-    cl_cmd_t *old = &sv_client->lastcmd;
+    ClientUserCommand *old = &sv_client->lastcmd;
 
     sv_client->command_msec -= cmd->cmd.msec;
     sv_client->num_moves++;
@@ -1090,7 +1090,7 @@ SV_ExecuteMove
 */
 static void SV_ExecuteMove(void)
 {
-    cl_cmd_t   oldest, oldcmd, newcmd;
+    ClientUserCommand   oldest, oldcmd, newcmd;
     int         lastframe;
     int         net_drop;
 
@@ -1100,11 +1100,6 @@ static void SV_ExecuteMove(void)
     }
 
     moveIssued = true;
-
-    // MSG: !!
-    //if (sv_client->protocol == PROTOCOL_VERSION_DEFAULT) {
-    //    MSG_ReadByte();    // skip over checksum
-    //}
 
     lastframe = MSG_ReadLong();
 
@@ -1118,29 +1113,31 @@ static void SV_ExecuteMove(void)
     }
 
     SV_SetLastFrame(lastframe);
-
+    
+    // Determine drop rate, on whether we should be predicting or not.
     net_drop = sv_client->netchan->dropped;
     if (net_drop > 2) {
         sv_client->frameflags |= FF_CLIENTPRED;
     }
 
     if (net_drop < 20) {
-        // run lastcmd multiple times if no backups available
+        // Run last client user command multiple times if no backups are available
         while (net_drop > 2) {
             SV_ClientThink(&sv_client->lastcmd);
             net_drop--;
         }
 
-        // run backup cmds
+        // Run backup client user commands.
         if (net_drop > 1)
             SV_ClientThink(&oldest);
         if (net_drop > 0)
             SV_ClientThink(&oldcmd);
     }
 
-    // run new cmd
+    // Run new cmd
     SV_ClientThink(&newcmd);
 
+    // Store it.
     sv_client->lastcmd = newcmd;
 }
 

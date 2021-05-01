@@ -299,8 +299,7 @@ static inline float LerpAngle(float a2, float a1, float frac)
 //
 static inline float anglemod(float a)
 {
-    a = (360.0f / 65536) * ((int)(a * (65536 / 360.0f)) & 65535);
-    return a;
+    return (360.0f / 65536) * ((int)(a * (65536 / 360.0f)) & 65535);
 }
 
 //

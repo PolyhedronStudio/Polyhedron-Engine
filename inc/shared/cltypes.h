@@ -81,8 +81,8 @@ typedef struct {
 // Local client entity structure, temporary entities.
 //
 typedef struct cl_entity_s {
-    entity_state_t    current;
-    entity_state_t    prev;            // will always be valid, but might just be a copy of current
+    EntityState    current;
+    EntityState    prev;            // will always be valid, but might just be a copy of current
 
     vec3_t          mins, maxs;
 
@@ -220,7 +220,7 @@ typedef struct {
     unsigned    timeSent;           // time sent, for calculating pings
     unsigned    timeReceived;           // time rcvd, for calculating pings
     unsigned    commandNumber;      // current commandNumber for this frame
-} client_command_history_t;
+} ClientUserCommandHistory;
 
 //
 // The server frame structure contains information about the frame
@@ -267,7 +267,7 @@ typedef struct client_shared_s {
 //
 // Contains the predicted state (view origin, offset, angles, etc) of the client.
 //
-struct cl_predicted_state_t {
+struct ClientPredictedState {
     // These are the actual predicted results that should align with the server's.
     vec3_t viewOrigin;  // Predicted view origin.
     vec3_t viewOffset;  // Predicted view offset.
@@ -304,18 +304,18 @@ typedef struct client_state_s {
     qboolean    sendPacketNow;
 
     // Actual current client user command.
-    cl_cmd_t    cmd;
+    ClientUserCommand    cmd;
     // Actual current client user command list.
-    cl_cmd_t    cmds[CMD_BACKUP];    // each mesage will send several old cmds
+    ClientUserCommand    clientUserCommands[CMD_BACKUP];    // each mesage will send several old clientUserCommands
     // Current command number.
     unsigned     currentClientCommandNumber;
     // History book of time sent, received, and command number.
-    client_command_history_t clientCommandHistory[CMD_BACKUP];
+    ClientUserCommandHistory clientCommandHistory[CMD_BACKUP];
     // Initial outgoing sequence number.
     int initialSequence;
 
     // Predicted Client State. (Used for movement.)
-    cl_predicted_state_t predictedState;
+    ClientPredictedState predictedState;
 
         //
     // Entity States.
@@ -325,10 +325,10 @@ typedef struct client_state_s {
     int             numSolidEntities;
 
     // Entity Baseline States. These are where to start working from.
-    entity_state_t  entityBaselines[MAX_EDICTS];
+    EntityState  entityBaselines[MAX_EDICTS];
 
     // The actual current Entity States.
-    entity_state_t  entityStates[MAX_PARSE_ENTITIES];
+    EntityState  entityStates[MAX_PARSE_ENTITIES];
     int             numEntityStates;
 
     // The current client entity state messaging flags.

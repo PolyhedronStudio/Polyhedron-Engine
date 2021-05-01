@@ -105,7 +105,7 @@ extern byte         msg_read_buffer[MAX_MSGLEN];
 
 extern const entity_packed_t    nullEntityState;
 extern const player_state_t     nullPlayerState;
-extern const cl_cmd_t          nullUserCmd;
+extern const ClientUserCommand          nullUserCmd;
 
 void    MSG_Init(void);
 
@@ -119,10 +119,10 @@ void    MSG_WriteString(const char* s);
 void    MSG_WritePosition(const vec3_t& pos);
 #if USE_CLIENT
 void    MSG_WriteBits(int value, int bits);
-int     MSG_WriteDeltaUsercmd(const cl_cmd_t* from, const cl_cmd_t* cmd);
+int     MSG_WriteDeltaUsercmd(const ClientUserCommand* from, const ClientUserCommand* cmd);
 #endif
 void    MSG_WriteDirection(const vec3_t& dir);
-void    MSG_PackEntity(entity_packed_t* out, const entity_state_t* in, qboolean short_angles);
+void    MSG_PackEntity(entity_packed_t* out, const EntityState* in, qboolean short_angles);
 void    MSG_WriteDeltaEntity(const entity_packed_t* from, const entity_packed_t* to, msgEsFlags_t flags);
 int     MSG_WriteDeltaPlayerstate(const player_state_t* from, player_state_t* to, msgPsFlags_t flags);
 
@@ -151,9 +151,9 @@ size_t  MSG_ReadStringLine(char* dest, size_t size);
 vec3_t  MSG_ReadPosition(void);
 vec3_t  MSG_ReadDirection(void);
 #endif
-void    MSG_ReadDeltaUsercmd(const cl_cmd_t* from, cl_cmd_t* cmd);
+void    MSG_ReadDeltaUsercmd(const ClientUserCommand* from, ClientUserCommand* cmd);
 int     MSG_ParseEntityBits(int* bits);
-void    MSG_ParseDeltaEntity(const entity_state_t* from, entity_state_t* to, int number, int bits, msgEsFlags_t flags);
+void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, int bits, msgEsFlags_t flags);
 #if USE_CLIENT
 void    MSG_ParseDeltaPlayerstate(const player_state_t* from, player_state_t* to, int flags, int extraflags);
 #endif

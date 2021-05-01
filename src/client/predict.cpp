@@ -41,8 +41,8 @@ void CL_CheckPredictionError(void)
     if (!cl_predict->integer || (cl.frame.playerState.pmove.flags & PMF_NO_PREDICTION))
         return;
 
-    // Calculate the last cl_cmd_t we sent that the server has processed
-    cl_cmd_t* cmd = &cl.cmds[cls.netchan->incomingAcknowledged & CMD_MASK];
+    // Calculate the last ClientUserCommand we sent that the server has processed
+    ClientUserCommand* cmd = &cl.clientUserCommands[cls.netchan->incomingAcknowledged & CMD_MASK];
 
     // Call into the CG Module to let it handle this.
     CL_GM_CheckPredictionError(cmd);

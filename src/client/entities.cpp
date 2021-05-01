@@ -35,7 +35,7 @@ FRAME PARSING
 =========================================================================
 */
 
-static inline qboolean entity_optimized(const entity_state_t *state)
+static inline qboolean entity_optimized(const EntityState *state)
 {
     if (cls.serverProtocol != PROTOCOL_VERSION_NAC)
         return false;
@@ -50,7 +50,7 @@ static inline qboolean entity_optimized(const entity_state_t *state)
 }
 
 static inline void
-entity_update_new(cl_entity_t *ent, const entity_state_t *state, const vec_t *origin)
+entity_update_new(cl_entity_t *ent, const EntityState *state, const vec_t *origin)
 {
     static int entity_ctr;
     ent->id = ++entity_ctr;
@@ -74,7 +74,7 @@ entity_update_new(cl_entity_t *ent, const entity_state_t *state, const vec_t *or
 }
 
 static inline void
-entity_update_old(cl_entity_t *ent, const entity_state_t *state, const vec_t *origin)
+entity_update_old(cl_entity_t *ent, const EntityState *state, const vec_t *origin)
 {
     int event = state->event;
 
@@ -123,7 +123,7 @@ static inline qboolean entity_new(const cl_entity_t *ent)
     return false;
 }
 
-static void entity_update(const entity_state_t *state)
+static void entity_update(const EntityState *state)
 {
     cl_entity_t *ent = &cs.entities[state->number];
     const vec_t *origin;
@@ -278,7 +278,7 @@ A valid frame has been parsed.
 void CL_DeltaFrame(void)
 {
     cl_entity_t           *ent;
-    entity_state_t      *state;
+    EntityState      *state;
     int                 i, j;
     int                 framenum;
     int                 prevstate = cls.state;

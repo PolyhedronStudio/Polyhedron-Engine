@@ -42,7 +42,7 @@ SET(SRC_SVGAME
 	svgame/ai.cpp
 	svgame/brushfuncs.cpp
 	svgame/chase.cpp
-	svgame/cmds.cpp
+	svgame/commands.cpp
 	svgame/combat.cpp
 	svgame/effects.cpp
 	svgame/functionpointers.cpp

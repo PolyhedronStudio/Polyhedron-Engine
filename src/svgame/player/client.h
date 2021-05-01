@@ -32,6 +32,6 @@ void ClientCommand(entity_t* ent);
 void ClientUserinfoChanged(entity_t* ent, char* userinfo);
 
 void ClientBeginServerFrame(entity_t* ent);
-void ClientThink(entity_t* ent, cl_cmd_t* cmd);
+void ClientThink(entity_t* ent, ClientUserCommand* cmd);
 
 #endif // __SVGAME_PLAYER_CLIENT_H__

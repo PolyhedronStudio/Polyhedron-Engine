@@ -265,7 +265,7 @@ void SV_BuildClientFrame(client_t *client)
     client_frame_t  *frame;
     entity_packed_t *state;
     player_state_t  *ps;
-	entity_state_t  es;
+	EntityState  es;
 	int         l;
     int         clientarea, clientcluster;
     mleaf_t     *leaf;
@@ -395,7 +395,7 @@ void SV_BuildClientFrame(client_t *client)
 			ent->s.number = e;
 		}
 
-		memcpy(&es, &ent->s, sizeof(entity_state_t));
+		memcpy(&es, &ent->s, sizeof(EntityState));
 
 		if (!ent_visible) {
 			// if the entity is invisible, kill its sound

@@ -605,7 +605,7 @@ static void SV_WriteDatagram(client_t *client)
 {
     size_t cursize;
 
-    // send over all the relevant entity_state_t
+    // send over all the relevant EntityState
     // and the player_state_t
     client->WriteFrame(client);
 

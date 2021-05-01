@@ -2690,7 +2690,7 @@ static void CL_MeasureStats(void)
             i = cl.initialSequence;
         }
         for (j = i; j <= ack; j++) {
-            client_command_history_t *h = &cl.clientCommandHistory[j & CMD_MASK];
+            ClientUserCommandHistory *h = &cl.clientCommandHistory[j & CMD_MASK];
             if (h->timeReceived > h->timeSent) {
                 ping += h->timeReceived - h->timeSent;
                 k++;
@@ -3044,7 +3044,7 @@ unsigned CL_Frame(unsigned msec)
 		CL_CheckForPause();
 	}
 
-    // Send pending cmds
+    // Send pending clientUserCommands
     CL_SendCmd();
 
     // Predict all unacknowledged movements

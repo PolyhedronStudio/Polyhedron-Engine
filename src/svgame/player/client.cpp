@@ -1314,7 +1314,7 @@ This will be called once for each client frame, which will
 usually be a couple times for each server frame.
 ==============
 */
-void ClientThink(entity_t *ent, cl_cmd_t *ucmd)
+void ClientThink(entity_t *ent, ClientUserCommand *ucmd)
 {
     gclient_t* client = nullptr;
     entity_t* other = nullptr;

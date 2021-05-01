@@ -86,7 +86,7 @@ static int adjust_shell_fx(int renderfx)
 void CLG_AddPacketEntities(void)
 {
     r_entity_t            ent;
-    entity_state_t* s1;
+    EntityState* s1;
     float               autorotate;
     int                 i;
     int                 pnum;
@@ -662,7 +662,7 @@ void CLG_UpdateOrigin(void)
         && cl_predict->integer 
         && !(currentPlayerState->pmove.flags & PMF_NO_PREDICTION)) {
         // Add view offset to view org.
-        cl_predicted_state_t* predictedState = &cl->predictedState;
+        ClientPredictedState* predictedState = &cl->predictedState;
         cl->refdef.vieworg = predictedState->viewOrigin + predictedState->viewOffset;
 
         const vec3_t error = vec3_scale(predictedState->error, 1.f - lerpFraction);

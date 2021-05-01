@@ -20,9 +20,9 @@
 // Checks for prediction errors.
 //================
 //
-void CLG_CheckPredictionError(cl_cmd_t *clientUserCommand) {
+void CLG_CheckPredictionError(ClientUserCommand *clientUserCommand) {
     const pm_state_t* in = &cl->frame.playerState.pmove;
-    cl_predicted_state_t* out = &cl->predictedState;
+    ClientPredictedState* out = &cl->predictedState;
 
     // if prediction was not run (just spawned), don't sweat it
     if (clientUserCommand->prediction.time == 0) {
@@ -223,7 +223,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
     // Run frames in order.
     while (++ack <= currentFrame) {
         // Fetch the command.
-        cl_cmd_t* cmd = &cl->cmds[ack & CMD_MASK];
+        ClientUserCommand* cmd = &cl->clientUserCommands[ack & CMD_MASK];
 
         // Execute a pmove with it.
         pm.cmd = *cmd;

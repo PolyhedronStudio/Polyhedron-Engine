@@ -537,7 +537,7 @@ typedef struct {
 } pm_cmd_t;
 
 //-----------------
-// cl_cmd_t is sent to the server each client frame
+// ClientUserCommand is sent to the server each client frame
 //-----------------
 typedef struct {
     pm_cmd_t cmd;       // the movement command
@@ -548,7 +548,7 @@ typedef struct {
         vec3_t origin;  // The predicted origin for this command
         vec3_t error;   // The prediction error for this command
     } prediction;
-} cl_cmd_t;
+} ClientUserCommand;
 
 
 //
@@ -598,7 +598,7 @@ typedef enum {
 } server_state_t;
 
 //-----------------
-// entity_state_t->event values
+// EntityState->event values
 // 
 // Entity events are for effects that take place relative to an existing 
 // entities origin. Very network efficient.
@@ -617,7 +617,7 @@ typedef enum {
 } entity_event_t;
 
 //-----------------
-// entity_state_t is the information conveyed from the server
+// EntityState is the information conveyed from the server
 // in an update message about entities that the client will
 // need to render in some way
 //-----------------
@@ -640,7 +640,7 @@ typedef struct entity_state_s {
     int32_t event;          // Impulse events -- muzzle flashes, footsteps, etc
                             // events only go out for a single frame, they
                             // are automatically cleared each frame
-} entity_state_t;
+} EntityState;
 
 //-----------------
 // player_state_t is the information needed in addition to pm_state_t
@@ -966,7 +966,7 @@ typedef struct {
 
 
 //-----------------
-// entity_state_t->renderfx
+// EntityState->renderfx
 //
 // The render effects are useful for tweaking the way how an entity is displayed.
 // It may be favored for it to only be visible in mirrors, or fullbright, name it.

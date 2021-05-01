@@ -34,10 +34,10 @@ extern clgame_export_t* cge;
 
 static inline void CL_ParseDeltaEntity(server_frame_t  *frame,
                                        int             newnum,
-                                       entity_state_t  *old,
+                                       EntityState  *old,
                                        int             bits)
 {
-    entity_state_t    *state;
+    EntityState    *state;
 
     // suck up to MAX_EDICTS for servers that don't cap at MAX_PACKET_ENTITIES
     if (frame->numEntities >= MAX_EDICTS) {
@@ -67,7 +67,7 @@ static void CL_ParsePacketEntities(server_frame_t *oldframe,
 {
     int            newnum;
     int            bits;
-    entity_state_t    *oldstate;
+    EntityState    *oldstate;
     int            oldindex, oldnum;
     int i;
 

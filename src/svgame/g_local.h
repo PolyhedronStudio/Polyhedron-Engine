@@ -868,7 +868,7 @@ struct gclient_s {
 
 
 struct entity_s {
-    entity_state_t  s;
+    EntityState  s;
     struct gclient_s    *client;    // NULL if not a player
                                     // the server expects the first part
                                     // of gclient_s to be a player_state_t

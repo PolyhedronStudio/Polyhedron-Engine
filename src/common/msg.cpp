@@ -39,7 +39,7 @@ byte        msg_read_buffer[MAX_MSGLEN];
 
 const entity_packed_t   nullEntityState;
 const player_state_t    nullPlayerState;
-const cl_cmd_t         nullUserCmd;
+const ClientUserCommand         nullUserCmd;
 
 /*
 =============
@@ -231,7 +231,7 @@ void MSG_WriteAngle(float f)
 // 
 //===============
 //
-int MSG_WriteDeltaUsercmd(const cl_cmd_t* from, const cl_cmd_t* cmd)
+int MSG_WriteDeltaUsercmd(const ClientUserCommand* from, const ClientUserCommand* cmd)
 {
     // Send a null message in case we had none.
     if (!from) {
@@ -301,7 +301,7 @@ void MSG_WriteDirection(const vec3_t& dir)
     MSG_WriteByte(best);
 }
 
-void MSG_PackEntity(entity_packed_t* out, const entity_state_t* in, qboolean short_angles)
+void MSG_PackEntity(entity_packed_t* out, const EntityState* in, qboolean short_angles)
 {
     // allow 0 to accomodate empty entityBaselines
     if (in->number < 0 || in->number >= MAX_EDICTS)
@@ -984,7 +984,7 @@ vec3_t MSG_ReadDirection(void)
     return bytedirs[b];
 }
 
-void MSG_ReadDeltaUsercmd(const cl_cmd_t* from, cl_cmd_t* to)
+void MSG_ReadDeltaUsercmd(const ClientUserCommand* from, ClientUserCommand* to)
 {
     int bits;
 
@@ -1072,8 +1072,8 @@ MSG_ParseDeltaEntity
 Can go from either a baseline or a previous packet_entity
 ==================
 */
-void MSG_ParseDeltaEntity(const entity_state_t* from,
-    entity_state_t* to,
+void MSG_ParseDeltaEntity(const EntityState* from,
+    EntityState* to,
     int            number,
     int            bits,
     msgEsFlags_t   flags)

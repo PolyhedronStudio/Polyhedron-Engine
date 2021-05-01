@@ -1077,7 +1077,7 @@ void S_BuildSoundList(int *sounds)
 {
     int         i;
     int         num;
-    entity_state_t  *ent;
+    EntityState  *ent;
 
     for (i = 0; i < cl.frame.numEntities; i++) {
         num = (cl.frame.firstEntity + i) & PARSE_ENTITIES_MASK;
@@ -1112,7 +1112,7 @@ static void S_AddLoopSounds(void)
     sfx_t       *sfx;
     sfxcache_t  *sc;
     int         num;
-    entity_state_t  *ent;
+    EntityState  *ent;
     vec3_t      origin;
 
     if (cls.state != ca_active || !s_active || sv_paused->integer || !s_ambient->integer) {

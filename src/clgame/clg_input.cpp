@@ -705,7 +705,7 @@ void CLG_FinalizeFrameMoveCommand(void)
 
     // Save this command off for prediction
     cl->currentClientCommandNumber++;
-    cl->cmds[cl->currentClientCommandNumber & CMD_MASK] = cl->cmd;
+    cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->cmd;
 
     // Clear pending cmd
     memset(&cl->cmd, 0, sizeof(cl->cmd));

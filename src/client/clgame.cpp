@@ -858,7 +858,7 @@ void CL_GM_EndServerMessage () {
 // Called by the client to check for prediction errors.
 //===============
 //
-void CL_GM_CheckPredictionError(cl_cmd_t *clientUserCommand) {
+void CL_GM_CheckPredictionError(ClientUserCommand *clientUserCommand) {
     if (cge)
         cge->CheckPredictionError(clientUserCommand);
 }

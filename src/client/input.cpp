@@ -402,7 +402,7 @@ static inline qboolean ready_to_send_hacked(void)
     }
 
     if (cl.currentClientCommandNumber - cl.lastTransmitCmdNumberReal > 2) {
-        return true; // can't drop more than 2 cmds
+        return true; // can't drop more than 2 clientUserCommands
     }
 
     return ready_to_send();
@@ -416,8 +416,8 @@ CL_SendUserCommand
 static void CL_SendUserCommand(void)
 {
     size_t cursize q_unused, checksumIndex;
-    cl_cmd_t *cmd, *oldcmd;
-    client_command_history_t*history;
+    ClientUserCommand *cmd, *oldcmd;
+    ClientUserCommandHistory*history;
 
     // archive this packet
     history = &cl.clientCommandHistory[cls.netchan->outgoingSequence & CMD_MASK];
@@ -455,17 +455,17 @@ static void CL_SendUserCommand(void)
         MSG_WriteLong(cl.frame.number);
     }
 
-    // send this and the previous cmds in the message, so
+    // send this and the previous clientUserCommands in the message, so
     // if the last packet was dropped, it can be recovered
-    cmd = &cl.cmds[(cl.currentClientCommandNumber - 2) & CMD_MASK];
+    cmd = &cl.clientUserCommands[(cl.currentClientCommandNumber - 2) & CMD_MASK];
     MSG_WriteDeltaUsercmd(NULL, cmd);
     oldcmd = cmd;
 
-    cmd = &cl.cmds[(cl.currentClientCommandNumber - 1) & CMD_MASK];
+    cmd = &cl.clientUserCommands[(cl.currentClientCommandNumber - 1) & CMD_MASK];
     MSG_WriteDeltaUsercmd(oldcmd, cmd);
     oldcmd = cmd;
 
-    cmd = &cl.cmds[cl.currentClientCommandNumber & CMD_MASK];
+    cmd = &cl.clientUserCommands[cl.currentClientCommandNumber & CMD_MASK];
     MSG_WriteDeltaUsercmd(oldcmd, cmd);
 
     // MSG: !! PROTOCOL - This one seemed to be needed for old protocol, and thus demo recording.
@@ -494,7 +494,7 @@ static void CL_SendUserCommand(void)
 
 static void CL_SendKeepAlive(void)
 {
-    client_command_history_t *history;
+    ClientUserCommandHistory *history;
     size_t cursize q_unused;
 
     // archive this packet

@@ -67,7 +67,7 @@ struct gclient_s {
 
 
 struct entity_s {
-    entity_state_t  s;
+    EntityState  s;
     struct gclient_s    *client;
     qboolean    inUse;
     int         linkCount;
@@ -275,7 +275,7 @@ typedef struct {
     void (*ClientUserinfoChanged)(entity_t *ent, char *userinfo);
     void (*ClientDisconnect)(entity_t *ent);
     void (*ClientCommand)(entity_t *ent);
-    void (*ClientThink)(entity_t *ent, cl_cmd_t *cmd);
+    void (*ClientThink)(entity_t *ent, ClientUserCommand *cmd);
 
     void (*RunFrame)(void);
 
