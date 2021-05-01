@@ -314,11 +314,11 @@ void SV_BuildClientFrame(client_t *client)
 	if (clientcluster >= 0)
 	{
 		CM_FatPVS(client->cm, clientpvs, org, DVIS_PVS2);
-		client->last_valid_cluster = clientcluster;
+		client->lastValidCluster = clientcluster;
 	}
 	else
 	{
-		BSP_ClusterVis(client->cm->cache, clientpvs, client->last_valid_cluster, DVIS_PVS2);
+		BSP_ClusterVis(client->cm->cache, clientpvs, client->lastValidCluster, DVIS_PVS2);
 	}
 
     BSP_ClusterVis(client->cm->cache, clientphs, clientcluster, DVIS_PHS);

@@ -206,67 +206,78 @@ typedef struct {
 } RateLimit;
 
 typedef struct client_s {
-    list_t          entry;
+    list_t entry;
 
     // core info
     ConnectionState state;
-    entity_t        *edict;     // EDICT_NUM(clientnum+1)
-    int             number;     // client slot number
+    entity_t *edict;     // EDICT_NUM(clientnum+1)
+    int number;     // client slot number
 
     // client flags
-    qboolean    reconnected: 1;
-    qboolean    nodata: 1;
-    qboolean    has_zlib: 1;
-    qboolean    drop_hack: 1;
+    qboolean reconnected: 1;
+    qboolean nodata: 1;
+    qboolean has_zlib: 1;
+    qboolean drop_hack: 1;
 #if USE_ICMP
-    qboolean    unreachable: 1;
+    qboolean unreachable: 1;
 #endif
-    qboolean    http_download: 1;
+    qboolean http_download: 1;
 
     // userinfo
-    char        userinfo[MAX_INFO_STRING];  // name, etc
-    char        name[MAX_CLIENT_NAME];      // extracted from userinfo, high bits masked
-    int         messageLevel;               // for filtering printed messages
-    size_t      rate;
-    RateLimit   ratelimitNameChange;       // for suppressing "foo changed name" flood
+    char userinfo[MAX_INFO_STRING];  // name, etc
+    char name[MAX_CLIENT_NAME];      // extracted from userinfo, high bits masked
+    int32_t messageLevel;               // for filtering printed messages
+    size_t rate;
+    RateLimit ratelimitNameChange;       // for suppressing "foo changed name" flood
 
     // console var probes
-    char            *versionString;
-    char            reconnectKey[16];
-    char            reconnectValue[16];
-    int             consoleQueries;
+    char *versionString;
+    char reconnectKey[16];
+    char reconnectValue[16];
+    int32_t consoleQueries;
 
     // usercmd stuff
-    unsigned        lastMessage;    // svs.realtime when packet was last received
-    unsigned        lastActivity;   // svs.realtime when user activity was last seen
-    int             lastFrame;      // for delta compression
-    ClientUserCommand       lastClientUserCommand;        // for filling in big drops
-    int             clientUserCommandMiliseconds;   // every seconds this is reset, if user
+    uint32_t lastMessage;    // svs.realTime when packet was last received
+    uint32_t lastActivity;   // svs.realTime when user activity was last seen
+    int32_t lastFrame;      // for delta compression
+    ClientUserCommand lastClientUserCommand;        // for filling in big drops
+    int32_t clientUserCommandMiliseconds;   // every seconds this is reset, if user
                                     // commands exhaust it, assume time cheating
-    int             numberOfMoves;      // reset every 10 seconds
-    int             movesPerSecond;  // average movement FPS
+    int32_t numberOfMoves;      // reset every 10 seconds
+    int32_t movesPerSecond;  // average movement FPS
 
-    int             ping, pingMinimum, pingMaximum;
-    int             averagePingTime, averagePingCount;
+    // Networking PING.
+    int32_t ping;
+    int32_t pingMinimum;
+    int32_t pingMaximum;
+
+    // Networking averages.
+    int32_t averagePingTime;
+    int32_t averagePingCount;
 
     // frame encoding
-    ClientFrame  frames[UPDATE_BACKUP];    // updates can be delta'd from here
-    unsigned        framesSent, framesAcknowledged, framesNoDelta;
-    int             frameNumber;
+    ClientFrame frames[UPDATE_BACKUP];    // Updates can be delta'd from here
+    uint32_t framesSent;
+    uint32_t framesAcknowledged;
+    uint32_t framesNoDelta;
+    int32_t frameNumber;
 
-    unsigned        frameFlags;
+    uint32_t frameFlags;
 
     // rate dropping
-    size_t          messageSizes[SERVER_MESSAGES_TICKRATE];    // used to rate drop normal packets
-    int             suppressCount;                 // number of messages rate suppressed
-    unsigned        sendTime, sendDelta;          // used to rate drop async packets
+    size_t messageSizes[SERVER_MESSAGES_TICKRATE]; // Used to rate drop normal packets
+    int32_t suppressCount; // Number of messages rate suppressed
+    
+    // Used to rate drop async packets
+    uint32_t sendTime;
+    uint32_t sendDelta;
 
     // current download
     struct {
         int32_t fileSize;   // total bytes (can't use EOF because of paks)
-        char    *fileName;  // name of the file
+        char *fileName;  // name of the file
 
-        byte    *bytes;     // file being downloaded
+        byte *bytes;     // file being downloaded
         int32_t bytesSent;  // bytes sent
 
         int32_t command;    // svc_(z)download
@@ -275,45 +286,45 @@ typedef struct client_s {
     } download;
 
     // protocol stuff
-    int             challenge;  // challenge of this user, randomly generated
-    int             protocol;   // major version
-    int             version;    // minor version
+    int32_t challenge;  // Challenge of this user, randomly generated
+    int32_t protocol;   // Major version
+    int32_t version;    // Minor version
 
-    pmoveParams_t   pmp;        // spectator speed, etc
-    EntityStateMessageFlags    esFlags;    // entity protocol flags
+    pmoveParams_t pmp; // Spectator speed, etc
+    EntityStateMessageFlags esFlags; // Entity protocol flags
 
     // packetized messages
-    list_t              msg_free_list;
-    list_t              msg_unreliable_list;
-    list_t              msg_reliable_list;
-    MessagePacket    *msg_pool;
-    size_t              msg_unreliable_bytes;   // total size of unreliable datagram
-    size_t              msg_dynamic_bytes;      // total size of dynamic memory allocated
+    list_t msg_free_list;
+    list_t msg_unreliable_list;
+    list_t msg_reliable_list;
+    MessagePacket *msg_pool;
+    size_t msg_unreliable_bytes;   // total size of unreliable datagram
+    size_t msg_dynamic_bytes;      // total size of dynamic memory allocated
 
     // per-client baseline chunks
     PackedEntity *entityBaselines[SV_BASELINES_CHUNKS];
 
     // server state pointers (hack for MVD channels implementation)
-    char            *configstrings;
-    char            *gamedir, *mapname;
-    EntityPool    *pool;
-    cm_t            *cm;
-    int             slot;
-    int             spawncount;
-    int             maxClients;
+    char *configstrings;
+    char *gamedir, *mapname;
+    EntityPool *pool;
+    cm_t *cm;
+    int32_t slot;
+    int32_t spawncount;
+    int32_t maxClients;
 
     // netchan type dependent methods
-    void            (*AddMessage)(struct client_s *, byte *, size_t, qboolean);
-    void            (*WriteFrame)(struct client_s *);
-    void            (*WriteDatagram)(struct client_s *);
+    void (*AddMessage)(struct client_s *, byte *, size_t, qboolean);
+    void (*WriteFrame)(struct client_s *);
+    void (*WriteDatagram)(struct client_s *);
 
     // netchan
-    netchan_t       *netchan;
-    int             numpackets; // for that nasty packetdup hack
+    netchan_t *netchan;
+    int32_t numpackets; // for that nasty packetdup hack
 
     // misc
-    time_t          connect_time; // time of initial connect
-	int             last_valid_cluster;
+    time_t timeOfInitialConnect; // time of initial connect
+	int32_t lastValidCluster;
 } client_t;
 
 // a client can leave the server in one of four ways:

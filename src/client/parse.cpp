@@ -636,7 +636,7 @@ static void CL_ParseReconnect(void)
     CL_Disconnect(ERR_RECONNECT);
 
     cls.state = ca_challenging;
-    cls.connect_time -= CONNECT_FAST;
+    cls.timeOfInitialConnect -= CONNECT_FAST;
     cls.connect_count = 0;
 
     CL_CheckForResend();

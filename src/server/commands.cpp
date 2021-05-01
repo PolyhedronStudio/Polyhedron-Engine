@@ -610,7 +610,7 @@ static void dump_time(void)
         if (idle > 9999)
             idle = 9999;
         Com_TimeDiff(buffer, sizeof(buffer),
-                     &client->connect_time, clock);
+                     &client->timeOfInitialConnect, clock);
         Com_Printf("%3i %-15.15s %4u %s\n",
                    client->number, client->name, idle, buffer);
     }
@@ -766,7 +766,7 @@ void SV_PrintMiscInfo(void)
     Com_Printf("packetdup            %d\n", sv_client->numpackets - 1);
 #endif
     Com_TimeDiff(buffer, sizeof(buffer),
-                 &sv_client->connect_time, time(NULL));
+                 &sv_client->timeOfInitialConnect, time(NULL));
     Com_Printf("connection time      %s\n", buffer);
 }
 

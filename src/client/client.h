@@ -172,7 +172,7 @@ typedef struct client_static_s {
 // connection information
     netadr_t    serverAddress;
     char        servername[MAX_OSPATH]; // name of server from original connect
-    unsigned    connect_time;           // for connection retransmits
+    unsigned    timeOfInitialConnect;           // for connection retransmits
     int         connect_count;
     qboolean    passive;
 

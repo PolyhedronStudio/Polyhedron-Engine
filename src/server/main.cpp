@@ -1021,7 +1021,7 @@ static void SVC_DirectConnect(void)
     newcl->cm = &sv.cm;
     newcl->spawncount = sv.spawncount;
     newcl->maxClients = sv_maxclients->integer;
-	newcl->last_valid_cluster = -1;
+	newcl->lastValidCluster = -1;
     strcpy(newcl->reconnectKey, params.reconnectKey);
     strcpy(newcl->reconnectValue, params.reconnectValue);
 
