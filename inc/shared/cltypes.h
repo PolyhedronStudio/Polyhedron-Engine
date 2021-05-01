@@ -342,10 +342,10 @@ struct ClientState {
     uint32_t     frameflags;
 
     // The actual current server frame.
-    ServerFrame  frame;                // received from server
-    ServerFrame  oldframe;
-    int32_t             serverTime;
-    int32_t             serverDelta;
+    ServerFrame frame; // The current(last received frame from the server)
+    ServerFrame oldframe; // The previous frame received, right before the current frame.
+    int32_t serverTime;
+    int32_t serverDelta;
 
     byte            dcs[CS_BITMAP_BYTES];
 

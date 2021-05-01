@@ -87,7 +87,7 @@ size_t      Netchan_TransmitNextFragment(struct netchan_s*);
 qboolean    Netchan_Process(struct netchan_s*);
 qboolean    Netchan_ShouldUpdate(struct netchan_s*);
 
-void Netchan_Close(netchan_t *netchan);
+void Netchan_Close(netchan_t*netchan);
 
 #define OOB_PRINT(sock, addr, data) \
     NET_SendPacket(sock, CONST_STR_LEN("\xff\xff\xff\xff" data), addr)

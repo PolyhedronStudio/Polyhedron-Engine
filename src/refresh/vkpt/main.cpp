@@ -1781,7 +1781,7 @@ bsp_add_entlights(const bsp_t* bsp)
 	if (entity_scale == 0.00f) {
 		entity_scale = 0.05f;
 	}
-	entString = bsp->entitystring;
+	entString = bsp->entityString;
 
 	//replicate SpawnEntities logic of game DLL, with regards to entity parsing
 

@@ -509,7 +509,7 @@ static void PF_StartSound(entity_t *edict, int channel,
     mleaf_t     *leaf;
     int         area;
     PlayerState      *ps;
-    message_packet_t    *msg;
+    MessagePacket    *msg;
 
     if (!edict)
         return;
@@ -614,7 +614,7 @@ static void PF_StartSound(entity_t *edict, int channel,
         //    flags |= SND_POS;
         //}
 
-        msg = LIST_FIRST(message_packet_t, &client->msg_free_list, entry);
+        msg = LIST_FIRST(MessagePacket, &client->msg_free_list, entry);
 
         msg->cursize = 0;
         msg->flags = flags;

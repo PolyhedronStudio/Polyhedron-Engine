@@ -254,7 +254,7 @@ typedef struct bsp_s {
     dvis_t          *vis;
 
     int             numentitychars;
-    char            *entitystring;
+    char            *entityString;
 
     int             numareas;
     marea_t         *areas;

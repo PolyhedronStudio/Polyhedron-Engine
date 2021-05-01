@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "server.h"
 
-server_static_t svs;                // persistant server info
+ServerStatic svs;                // persistant server info
 server_t        sv;                 // local server
 
 void SV_ClientReset(client_t *client)
@@ -97,7 +97,7 @@ static void override_entity_string(const char *server)
     }
 
     Com_Printf("Loaded entity string from %s\n", buffer);
-    sv.entitystring = str;
+    sv.entityString = str;
     return;
 
 fail2:
@@ -116,11 +116,11 @@ Change the server to a new map, taking all connected
 clients along with it.
 ================
 */
-void SV_SpawnServer(mapcmd_t *cmd)
+void SV_SpawnServer(MapCommand *cmd)
 {
     int         i;
     client_t    *client;
-    const char        *entitystring;
+    const char        *entityString;
 
     SCR_BeginLoadingPlaque();           // for local system
 
@@ -148,7 +148,7 @@ void SV_SpawnServer(mapcmd_t *cmd)
 
     // free current level
     CM_FreeMap(&sv.cm);
-    SV_FreeFile(sv.entitystring);
+    SV_FreeFile(sv.entityString);
 
     // wipe the entire per-level structure
     memset(&sv, 0, sizeof(sv));
@@ -188,11 +188,11 @@ void SV_SpawnServer(mapcmd_t *cmd)
             sprintf(sv.configstrings[CS_MODELS + 1 + i], "*%d", i);
         }
 
-        entitystring = sv.entitystring ? sv.entitystring : sv.cm.cache->entitystring;
+        entityString = sv.entityString ? sv.entityString : sv.cm.cache->entityString;
     } else {
         // no real map
         strcpy(sv.configstrings[CS_MAPCHECKSUM], "0");
-        entitystring = ""; // C++20: Added cast.
+        entityString = ""; // C++20: Added cast.
     }
 
     //
@@ -209,7 +209,7 @@ void SV_SpawnServer(mapcmd_t *cmd)
     sv.state = ss_loading;
 
     // load and spawn all other entities
-    ge->SpawnEntities(sv.name, entitystring, cmd->spawnpoint);
+    ge->SpawnEntities(sv.name, entityString, cmd->spawnpoint);
 
     // run two frames to allow everything to settle
     ge->RunFrame(); sv.framenum++;
@@ -251,7 +251,7 @@ Parses mapcmd into more C friendly form.
 Loads and fully validates the map to make sure server doesn't get killed.
 ==============
 */
-qboolean SV_ParseMapCmd(mapcmd_t *cmd)
+qboolean SV_ParseMapCmd(MapCommand *cmd)
 {
     char        expanded[MAX_QPATH];
     char        *s, *ch;
@@ -342,7 +342,7 @@ void SV_InitGame()
         SCR_BeginLoadingPlaque();
 
         CM_FreeMap(&sv.cm);
-        SV_FreeFile(sv.entitystring);
+        SV_FreeFile(sv.entityString);
         memset(&sv, 0, sizeof(sv));
 
     }
@@ -389,7 +389,7 @@ void SV_InitGame()
     svs.client_pool = (client_t*)SV_Mallocz(sizeof(client_t) * sv_maxclients->integer); // CPP: Cast
 
     svs.num_entities = sv_maxclients->integer * UPDATE_BACKUP * MAX_PACKET_ENTITIES;
-    svs.entities = (entity_packed_t*)SV_Mallocz(sizeof(entity_packed_t) * svs.num_entities); // CPP: Cast
+    svs.entities = (PackedEntity*)SV_Mallocz(sizeof(PackedEntity) * svs.num_entities); // CPP: Cast
 
 
     Cvar_ClampInteger(sv_reserved_slots, 0, sv_maxclients->integer - 1);

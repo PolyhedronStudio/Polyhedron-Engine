@@ -266,7 +266,7 @@ static void abort_func(void *arg)
 
 static void SV_Map(qboolean restart)
 {
-    mapcmd_t    cmd;
+    MapCommand    cmd;
     size_t      len;
 
     memset(&cmd, 0, sizeof(cmd));
@@ -442,7 +442,7 @@ static void SV_DumpEnts_f(void)
     bsp_t *c = sv.cm.cache;
     char buffer[MAX_OSPATH];
 
-    if (!c || !c->entitystring) {
+    if (!c || !c->entityString) {
         Com_Printf("No map loaded.\n");
         return;
     }
@@ -453,7 +453,7 @@ static void SV_DumpEnts_f(void)
     }
 
     if (FS_EasyWriteFile(buffer, sizeof(buffer), FS_MODE_WRITE,
-                         "maps/", Cmd_Argv(1), ".ent", c->entitystring, c->numentitychars)) {
+                         "maps/", Cmd_Argv(1), ".ent", c->entityString, c->numentitychars)) {
         Com_Printf("Dumped entity string to %s\n", buffer);
     }
 }
@@ -491,7 +491,7 @@ static void SV_Kick_f(void)
     if (!strcmp(Cmd_Argv(0), "kickban")) {
         netadr_t *addr = &sv_client->netchan->remoteAddress;
         if (addr->type == NA_IP || addr->type == NA_IP6) {
-            addrmatch_t *match = (addrmatch_t*)Z_Malloc(sizeof(*match)); // CPP: Cast
+            AddressMatch *match = (AddressMatch*)Z_Malloc(sizeof(*match)); // CPP: Cast
             match->addr = *addr;
             make_mask(&match->mask, addr->type, addr->type == NA_IP6 ? 128 : 32);
             match->hits = 0;
@@ -1015,7 +1015,7 @@ static qboolean parse_mask(char *s, netadr_t *addr, netadr_t *mask)
     return true;
 }
 
-static size_t format_mask(addrmatch_t *match, char *buf, size_t buf_size)
+static size_t format_mask(AddressMatch *match, char *buf, size_t buf_size)
 {
     int i, j, bits, size;
 
@@ -1051,7 +1051,7 @@ void SV_AddMatch_f(list_t *list)
 {
     const char* s;
     char buf[MAX_QPATH];
-    addrmatch_t *match;
+    AddressMatch *match;
     netadr_t addr, mask;
     size_t len;
 
@@ -1065,7 +1065,7 @@ void SV_AddMatch_f(list_t *list)
         return;
     }
 
-    LIST_FOR_EACH(addrmatch_t, match, list, entry) {
+    LIST_FOR_EACH(AddressMatch, match, list, entry) {
         if (NET_IsEqualBaseAdr(&match->addr, &addr) &&
             NET_IsEqualBaseAdr(&match->mask, &mask)) {
             format_mask(match, buf, sizeof(buf));
@@ -1076,7 +1076,7 @@ void SV_AddMatch_f(list_t *list)
 
     s = (char*)Cmd_ArgsFrom(2); // C++20: Added cast.
     len = strlen(s);
-    match = (addrmatch_t*)Z_Malloc(sizeof(*match) + len); // CPP: Cast
+    match = (AddressMatch*)Z_Malloc(sizeof(*match) + len); // CPP: Cast
     match->addr = addr;
     match->mask = mask;
     match->hits = 0;
@@ -1088,7 +1088,7 @@ void SV_AddMatch_f(list_t *list)
 void SV_DelMatch_f(list_t *list)
 {
     const char *s;
-    addrmatch_t *match, *next;
+    AddressMatch *match, *next;
     netadr_t addr, mask;
     int i;
 
@@ -1104,7 +1104,7 @@ void SV_DelMatch_f(list_t *list)
 
     s = Cmd_Argv(1); // C++20: Added cast.
     if (!strcmp(s, "all")) {
-        LIST_FOR_EACH_SAFE(addrmatch_t, match, next, list, entry) {
+        LIST_FOR_EACH_SAFE(AddressMatch, match, next, list, entry) {
             Z_Free(match);
         }
         List_Init(list);
@@ -1118,7 +1118,7 @@ void SV_DelMatch_f(list_t *list)
             Com_Printf("Bad index: %d\n", i);
             return;
         }
-        match = LIST_INDEX(addrmatch_t, i - 1, list, entry);
+        match = LIST_INDEX(AddressMatch, i - 1, list, entry);
         if (match) {
             goto remove;
         }
@@ -1130,7 +1130,7 @@ void SV_DelMatch_f(list_t *list)
         return;
     }
 
-    LIST_FOR_EACH(addrmatch_t, match, list, entry) {
+    LIST_FOR_EACH(AddressMatch, match, list, entry) {
         if (NET_IsEqualBaseAdr(&match->addr, &addr) &&
             NET_IsEqualBaseAdr(&match->mask, &mask)) {
 remove:
@@ -1144,7 +1144,7 @@ remove:
 
 void SV_ListMatches_f(list_t *list)
 {
-    addrmatch_t *match;
+    AddressMatch *match;
     char last[MAX_QPATH];
     char addr[MAX_QPATH];
     int count;
@@ -1157,7 +1157,7 @@ void SV_ListMatches_f(list_t *list)
     Com_Printf("id address/mask       hits last hit     comment\n"
                "-- ------------------ ---- ------------ -------\n");
     count = 1;
-    LIST_FOR_EACH(addrmatch_t, match, list, entry) {
+    LIST_FOR_EACH(AddressMatch, match, list, entry) {
         format_mask(match, addr, sizeof(addr));
         if (!match->time) {
             strcpy(last, "never");
@@ -1216,7 +1216,7 @@ static void SV_AddStuffCmd_f(void)
 {
     const char *s;
     list_t *list;
-    stuffcmd_t *stuff;
+    StuffTextCommand *stuff;
     int len;
 
     if (Cmd_Argc() < 3) {
@@ -1230,7 +1230,7 @@ static void SV_AddStuffCmd_f(void)
 
     s = Cmd_ArgsFrom(2); // C++20: Added cast.
     len = strlen(s);
-    stuff = (stuffcmd_t*)Z_Malloc(sizeof(*stuff) + len); // CPP: Cast
+    stuff = (StuffTextCommand*)Z_Malloc(sizeof(*stuff) + len); // CPP: Cast
     stuff->len = len;
     memcpy(stuff->string, s, len + 1);
     List_Append(list, &stuff->entry);
@@ -1239,7 +1239,7 @@ static void SV_AddStuffCmd_f(void)
 static void SV_DelStuffCmd_f(void)
 {
     list_t *list;
-    stuffcmd_t *stuff, *next;
+    StuffTextCommand *stuff, *next;
     const char *s;
     int i;
 
@@ -1259,7 +1259,7 @@ static void SV_DelStuffCmd_f(void)
 
     s = Cmd_Argv(2); // C++20: Added cast.
     if (!strcmp(s, "all")) {
-        LIST_FOR_EACH_SAFE(stuffcmd_t, stuff, next, list, entry) {
+        LIST_FOR_EACH_SAFE(StuffTextCommand, stuff, next, list, entry) {
             Z_Free(stuff);
         }
         List_Init(list);
@@ -1270,7 +1270,7 @@ static void SV_DelStuffCmd_f(void)
         Com_Printf("Bad StuffCmd index: %d\n", i);
         return;
     }
-    stuff = LIST_INDEX(stuffcmd_t, i - 1, list, entry);
+    stuff = LIST_INDEX(StuffTextCommand, i - 1, list, entry);
     if (!stuff) {
         Com_Printf("No such StuffCmd index: %d\n", i);
         return;
@@ -1283,7 +1283,7 @@ static void SV_DelStuffCmd_f(void)
 static void SV_ListStuffCmds_f(void)
 {
     list_t *list;
-    stuffcmd_t *stuff;
+    StuffTextCommand *stuff;
     int count;
 
     if (Cmd_Argc() != 2) {
@@ -1303,7 +1303,7 @@ static void SV_ListStuffCmds_f(void)
     Com_Printf("id command\n"
                "-- -------\n");
     count = 1;
-    LIST_FOR_EACH(stuffcmd_t, stuff, list, entry) {
+    LIST_FOR_EACH(StuffTextCommand, stuff, list, entry) {
         Com_Printf("%-2d %s\n", count, stuff->string);
         count++;
     }
@@ -1324,8 +1324,8 @@ static const char filteractions[FA_MAX][8] = {
 static void SV_AddFilterCmd_f(void)
 {
     const char *s, *comment;
-    filtercmd_t *filter;
-    filteraction_t action;
+    FilterCommand *filter;
+    FilterAction action;
     size_t len;
 
     if (Cmd_Argc() < 2) {
@@ -1336,7 +1336,7 @@ usage:
 
     if (Cmd_Argc() > 2) {
         s = Cmd_Argv(2); // C++20: Added cast.
-        for (action = (filteraction_t)0; action < FA_MAX; action = (filteraction_t)(action + 1)) { // CPP: Cast for loop
+        for (action = (FilterAction)0; action < FA_MAX; action = (FilterAction)(action + 1)) { // CPP: Cast for loop
             if (!strcmp(s, filteractions[action])) {
                 break;
             }
@@ -1352,14 +1352,14 @@ usage:
 
 
     s = Cmd_Argv(1); // C++20: Added cast.
-    LIST_FOR_EACH(filtercmd_t, filter, &sv_filterlist, entry) {
+    LIST_FOR_EACH(FilterCommand, filter, &sv_filterlist, entry) {
         if (!Q_stricmp(filter->string, s)) {
             Com_Printf("Filtercmd already exists: %s\n", s);
             return;
         }
     }
     len = strlen(s);
-    filter = (filtercmd_t*)Z_Malloc(sizeof(*filter) + len); // CPP: Cast
+    filter = (FilterCommand*)Z_Malloc(sizeof(*filter) + len); // CPP: Cast
     memcpy(filter->string, s, len + 1);
     filter->action = action;
     filter->comment = Z_CopyString(comment);
@@ -1368,10 +1368,10 @@ usage:
 
 static void SV_AddFilterCmd_c(genctx_t *ctx, int argnum)
 {
-    filteraction_t action;
+    FilterAction action;
 
     if (argnum == 2) {
-        for (action = (filteraction_t)0; action < FA_MAX; action = (filteraction_t )(action + 1)) { // CPP: Cast for loop
+        for (action = (FilterAction)0; action < FA_MAX; action = (FilterAction )(action + 1)) { // CPP: Cast for loop
             Prompt_AddMatch(ctx, filteractions[action]);
         }
     }
@@ -1379,7 +1379,7 @@ static void SV_AddFilterCmd_c(genctx_t *ctx, int argnum)
 
 static void SV_DelFilterCmd_f(void)
 {
-    filtercmd_t *filter, *next;
+    FilterCommand *filter, *next;
     const char *s;
     int i;
 
@@ -1395,7 +1395,7 @@ static void SV_DelFilterCmd_f(void)
 
     s = Cmd_Argv(1); // C++20: Added cast.
     if (!strcmp(s, "all")) {
-        LIST_FOR_EACH_SAFE(filtercmd_t, filter, next, &sv_filterlist, entry) {
+        LIST_FOR_EACH_SAFE(FilterCommand, filter, next, &sv_filterlist, entry) {
             Z_Free(filter->comment);
             Z_Free(filter);
         }
@@ -1408,13 +1408,13 @@ static void SV_DelFilterCmd_f(void)
             Com_Printf("Bad filtercmd index: %d\n", i);
             return;
         }
-        filter = LIST_INDEX(filtercmd_t, i - 1, &sv_filterlist, entry);
+        filter = LIST_INDEX(FilterCommand, i - 1, &sv_filterlist, entry);
         if (!filter) {
             Com_Printf("No such filtercmd index: %d\n", i);
             return;
         }
     } else {
-        LIST_FOR_EACH(filtercmd_t, filter, &sv_filterlist, entry) {
+        LIST_FOR_EACH(FilterCommand, filter, &sv_filterlist, entry) {
             if (!Q_stricmp(filter->string, s)) {
                 goto remove;
             }
@@ -1431,7 +1431,7 @@ remove:
 
 static void SV_DelFilterCmd_c(genctx_t *ctx, int argnum)
 {
-    filtercmd_t *filter;
+    FilterCommand *filter;
 
     if (argnum == 1) {
         if (LIST_EMPTY(&sv_filterlist)) {
@@ -1439,7 +1439,7 @@ static void SV_DelFilterCmd_c(genctx_t *ctx, int argnum)
         }
         ctx->ignorecase = true;
         Prompt_AddMatch(ctx, "all");
-        LIST_FOR_EACH(filtercmd_t, filter, &sv_filterlist, entry) {
+        LIST_FOR_EACH(FilterCommand, filter, &sv_filterlist, entry) {
             if (!Prompt_AddMatch(ctx, filter->string)) {
                 break;
             }
@@ -1449,7 +1449,7 @@ static void SV_DelFilterCmd_c(genctx_t *ctx, int argnum)
 
 static void SV_ListFilterCmds_f(void)
 {
-    filtercmd_t *filter;
+    FilterCommand *filter;
     int count;
 
     if (LIST_EMPTY(&sv_filterlist)) {
@@ -1460,7 +1460,7 @@ static void SV_ListFilterCmds_f(void)
     Com_Printf("id command          action comment\n"
                "-- ---------------- ------ -------\n");
     count = 1;
-    LIST_FOR_EACH(filtercmd_t, filter, &sv_filterlist, entry) {
+    LIST_FOR_EACH(FilterCommand, filter, &sv_filterlist, entry) {
         Com_Printf("%-2d %-16s %-6s %s\n", count,
                    filter->string, filteractions[filter->action],
                    filter->comment ? filter->comment : "");

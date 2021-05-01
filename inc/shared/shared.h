@@ -595,7 +595,7 @@ typedef enum {
     ss_pic,             // showing static picture
     ss_broadcast,       // running MVD client
     ss_cinematic,
-} server_state_t;
+} ServerState;
 
 //-----------------
 // EntityState->event values

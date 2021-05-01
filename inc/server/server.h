@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //     ss_pic,             // showing static picture
 //     ss_broadcast,       // running MVD client
 //     ss_cinematic,
-// } server_state_t;
+// } ServerState;
 
 #if USE_ICMP
 void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info);
@@ -41,8 +41,8 @@ unsigned SV_Frame(unsigned msec);
 void SV_SetConsoleTitle(void);
 #endif
 //void SV_ConsoleOutput(const char *msg);
-server_state_t	SV_GetState (void);                 // WATISDEZE: Added for client game dll
-void            SV_SetState (server_state_t state); // WATISDEZE: Added for client game dll
+ServerState	SV_GetState (void);                 // WATISDEZE: Added for client game dll
+void            SV_SetState (ServerState state); // WATISDEZE: Added for client game dll
 
 #if USE_CLIENT
 char *SV_GetSaveInfo(const char *dir);

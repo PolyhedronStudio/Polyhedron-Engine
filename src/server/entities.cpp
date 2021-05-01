@@ -31,16 +31,16 @@ Encode a client frame onto the network channel
 =============
 SV_EmitPacketEntities
 
-Writes a delta update of an entity_packed_t list to the message.
+Writes a delta update of an PackedEntity list to the message.
 =============
 */
 static void SV_EmitPacketEntities(client_t         *client,
-                                  client_frame_t   *from,
-                                  client_frame_t   *to,
+                                  ClientFrame   *from,
+                                  ClientFrame   *to,
                                   int              clientEntityNum)
 {
-    entity_packed_t *newent;
-    const entity_packed_t *oldent;
+    PackedEntity *newent;
+    const PackedEntity *oldent;
     unsigned i, oldindex, newindex, from_num_entities;
     int oldnum, newnum;
     EntityStateMessageFlags flags;
@@ -123,9 +123,9 @@ static void SV_EmitPacketEntities(client_t         *client,
     MSG_WriteShort(0);      // end of packetentities
 }
 
-static client_frame_t *get_last_frame(client_t *client)
+static ClientFrame *get_last_frame(client_t *client)
 {
-    client_frame_t *frame;
+    ClientFrame *frame;
 
     if (client->lastframe <= 0) {
         // client is asking for a retransmit
@@ -165,7 +165,7 @@ SV_WriteFrameToClient_Enhanced
 */
 void SV_WriteFrameToClient(client_t *client)
 {
-    client_frame_t  *frame, *oldframe;
+    ClientFrame  *frame, *oldframe;
     PlayerState *oldPlayerState;
     uint32_t        extraflags;
     int             delta, suppressed;
@@ -262,8 +262,8 @@ void SV_BuildClientFrame(client_t *client)
     vec3_t      org;
     entity_t     *ent;
     entity_t     *clent;
-    client_frame_t  *frame;
-    entity_packed_t *state;
+    ClientFrame  *frame;
+    PackedEntity *state;
     PlayerState  *ps;
 	EntityState  es;
 	int         l;

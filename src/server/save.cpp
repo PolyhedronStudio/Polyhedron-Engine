@@ -316,7 +316,7 @@ static void abort_func(void *arg)
 static int read_server_file(void)
 {
     char        name[MAX_OSPATH], string[MAX_STRING_CHARS];
-    mapcmd_t    cmd;
+    MapCommand    cmd;
     size_t      len;
 
     // errors like missing file, bad version, etc are
@@ -464,7 +464,7 @@ int SV_NoSaveGames(void)
     return 0;
 }
 
-void SV_AutoSaveBegin(mapcmd_t *cmd)
+void SV_AutoSaveBegin(MapCommand *cmd)
 {
     byte        bitmap[MAX_CLIENTS / CHAR_BIT];
     entity_t     *ent;
@@ -540,7 +540,7 @@ void SV_AutoSaveEnd(void)
     }
 }
 
-void SV_CheckForSavegame(mapcmd_t *cmd)
+void SV_CheckForSavegame(MapCommand *cmd)
 {
     if (SV_NoSaveGames())
         return;

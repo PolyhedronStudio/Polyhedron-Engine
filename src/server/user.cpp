@@ -77,7 +77,7 @@ static void create_baselines(void)
 {
     int        i;
     entity_t    *ent;
-    entity_packed_t *base, **chunk;
+    PackedEntity *base, **chunk;
 
     // clear entityBaselines from previous level
     for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
@@ -103,7 +103,7 @@ static void create_baselines(void)
 
         chunk = &sv_client->entityBaselines[i >> SV_BASELINES_SHIFT];
         if (*chunk == NULL) {
-            *chunk = (entity_packed_t*)SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK); // CPP: Cast
+            *chunk = (PackedEntity*)SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK); // CPP: Cast
         }
 
         base = *chunk + (i & SV_BASELINES_MASK);
@@ -143,7 +143,7 @@ static void write_plain_configstrings(void)
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
 }
 
-static void write_baseline(entity_packed_t *base)
+static void write_baseline(PackedEntity *base)
 {
     EntityStateMessageFlags flags = (EntityStateMessageFlags)(sv_client->esFlags | MSG_ES_FORCE); // CPP: Cast
 
@@ -153,7 +153,7 @@ static void write_baseline(entity_packed_t *base)
 static void write_plain_baselines(void)
 {
     int i, j;
-    entity_packed_t *base;
+    PackedEntity *base;
 
     // write a packet full of data
     for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
@@ -183,7 +183,7 @@ static void write_plain_baselines(void)
 static void write_compressed_gamestate(void)
 {
     sizebuf_t   *buf = &sv_client->netchan->message;
-    entity_packed_t  *base;
+    PackedEntity  *base;
     int         i, j;
     size_t      length;
     uint8_t     *patch;
@@ -342,9 +342,9 @@ fail:
 
 static void stuff_cmds(list_t *list)
 {
-    stuffcmd_t *stuff;
+    StuffTextCommand *stuff;
 
-    LIST_FOR_EACH(stuffcmd_t, stuff, list, entry) {
+    LIST_FOR_EACH(StuffTextCommand, stuff, list, entry) {
         MSG_WriteByte(svc_stufftext);
         MSG_WriteData(stuff->string, stuff->len);
         MSG_WriteByte('\n');
@@ -399,7 +399,7 @@ This will be sent on the initial connection and upon each server load.
 */
 void SV_New_f(void)
 {
-    clstate_t oldstate;
+    ConnectionState oldstate;
 
     Com_DPrintf("New() from %s\n", sv_client->name);
 
@@ -937,7 +937,7 @@ static const ucmd_t ucmds[] = {
     { NULL, NULL }
 };
 
-static void handle_filtercmd(filtercmd_t *filter)
+static void handle_filtercmd(FilterCommand *filter)
 {
     size_t len;
 
@@ -973,7 +973,7 @@ SV_ExecuteUserCommand
 static void SV_ExecuteUserCommand(const char *s)
 {
     const ucmd_t *u;
-    filtercmd_t *filter;
+    FilterCommand *filter;
     const char *c;
 
     Cmd_TokenizeString(s, false);
@@ -999,7 +999,7 @@ static void SV_ExecuteUserCommand(const char *s)
         return;
     }
 
-    LIST_FOR_EACH(filtercmd_t, filter, &sv_filterlist, entry) {
+    LIST_FOR_EACH(FilterCommand, filter, &sv_filterlist, entry) {
         if (!Q_stricmp(filter->string, c)) {
             handle_filtercmd(filter);
             return;
@@ -1057,7 +1057,7 @@ static inline void SV_ClientThink(ClientUserCommand *cmd)
 
 static void SV_SetLastFrame(int lastframe)
 {
-    client_frame_t *frame;
+    ClientFrame *frame;
 
     if (lastframe > 0) {
         if (lastframe >= sv_client->framenum)

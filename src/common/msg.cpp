@@ -37,7 +37,7 @@ byte        msg_write_buffer[MAX_MSGLEN];
 sizebuf_t   msg_read;
 byte        msg_read_buffer[MAX_MSGLEN];
 
-const entity_packed_t   nullEntityState;
+const PackedEntity   nullEntityState;
 const PlayerState    nullPlayerState;
 const ClientUserCommand         nullUserCmd;
 
@@ -301,7 +301,7 @@ void MSG_WriteDirection(const vec3_t& dir)
     MSG_WriteByte(best);
 }
 
-void MSG_PackEntity(entity_packed_t* out, const EntityState* in, qboolean short_angles)
+void MSG_PackEntity(PackedEntity* out, const EntityState* in, qboolean short_angles)
 {
     // allow 0 to accomodate empty entityBaselines
     if (in->number < 0 || in->number >= MAX_EDICTS)
@@ -325,8 +325,8 @@ void MSG_PackEntity(entity_packed_t* out, const EntityState* in, qboolean short_
     out->event = in->event;
 }
 
-void MSG_WriteDeltaEntity(const entity_packed_t* from,
-    const entity_packed_t* to,
+void MSG_WriteDeltaEntity(const PackedEntity* from,
+    const PackedEntity* to,
     EntityStateMessageFlags          flags)
 {
     uint32_t    bits, mask;

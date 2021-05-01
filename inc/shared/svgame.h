@@ -221,7 +221,7 @@ typedef struct {
     int         entity_size;
     int         num_edicts;     // current number, <= max_edicts
     int         max_edicts;
-} entity_pool_t;
+} EntityPool;
 
 typedef struct {
     //---------------------------------------------------------------------
@@ -300,7 +300,7 @@ typedef struct {
     // can vary in size from one game to another.
     //
     // The size will be fixed when ge->Init() is called
-//    entity_pool_t pool;
+//    EntityPool pool;
 
     struct entity_s  *edicts;
     int         entity_size;

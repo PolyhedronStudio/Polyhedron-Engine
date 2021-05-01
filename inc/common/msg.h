@@ -60,7 +60,7 @@ typedef struct {
     // Sound ID, and Event ID.
     uint8_t     sound;
     uint8_t     event;
-} entity_packed_t;
+} PackedEntity;
 
 //---------------
 // Player state messaging flags.
@@ -103,7 +103,7 @@ extern byte         msg_write_buffer[MAX_MSGLEN];
 extern sizebuf_t    msg_read;
 extern byte         msg_read_buffer[MAX_MSGLEN];
 
-extern const entity_packed_t    nullEntityState;
+extern const PackedEntity    nullEntityState;
 extern const PlayerState     nullPlayerState;
 extern const ClientUserCommand          nullUserCmd;
 
@@ -122,8 +122,8 @@ void    MSG_WriteBits(int value, int bits);
 int     MSG_WriteDeltaUsercmd(const ClientUserCommand* from, const ClientUserCommand* cmd);
 #endif
 void    MSG_WriteDirection(const vec3_t& dir);
-void    MSG_PackEntity(entity_packed_t* out, const EntityState* in, qboolean short_angles);
-void    MSG_WriteDeltaEntity(const entity_packed_t* from, const entity_packed_t* to, EntityStateMessageFlags flags);
+void    MSG_PackEntity(PackedEntity* out, const EntityState* in, qboolean short_angles);
+void    MSG_WriteDeltaEntity(const PackedEntity* from, const PackedEntity* to, EntityStateMessageFlags flags);
 int     MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, msgPsFlags_t flags);
 
 static inline void* MSG_WriteData(const void* data, size_t len)

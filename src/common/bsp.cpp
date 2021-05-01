@@ -737,9 +737,9 @@ LOAD(Areas)
 LOAD(EntString)
 {
     bsp->numentitychars = count;
-    bsp->entitystring = (char*)ALLOC(count + 1); // CPP: Cast
-    memcpy(bsp->entitystring, base, count);
-    bsp->entitystring[count] = 0;
+    bsp->entityString = (char*)ALLOC(count + 1); // CPP: Cast
+    memcpy(bsp->entityString, base, count);
+    bsp->entityString[count] = 0;
 
     return Q_ERR_SUCCESS;
 }

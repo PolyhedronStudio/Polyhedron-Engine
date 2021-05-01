@@ -413,7 +413,7 @@ FRAME UPDATES - COMMON
 ===============================================================================
 */
 
-static inline void free_msg_packet(client_t *client, message_packet_t *msg)
+static inline void free_msg_packet(client_t *client, MessagePacket *msg)
 {
     List_Remove(&msg->entry);
 
@@ -429,13 +429,13 @@ static inline void free_msg_packet(client_t *client, message_packet_t *msg)
 }
 
 #define FOR_EACH_MSG_SAFE(list) \
-    LIST_FOR_EACH_SAFE(message_packet_t, msg, next, list, entry)
+    LIST_FOR_EACH_SAFE(MessagePacket, msg, next, list, entry)
 #define MSG_FIRST(list) \
-    LIST_FIRST(message_packet_t, list, entry)
+    LIST_FIRST(MessagePacket, list, entry)
 
 static void free_all_messages(client_t *client)
 {
-    message_packet_t *msg, *next;
+    MessagePacket *msg, *next;
 
     FOR_EACH_MSG_SAFE(&client->msg_unreliable_list) {
         free_msg_packet(client, msg);
@@ -452,7 +452,7 @@ static void add_msg_packet(client_t    *client,
                            size_t      len,
                            qboolean    reliable)
 {
-    message_packet_t    *msg;
+    MessagePacket    *msg;
 
     if (!client->msg_pool) {
         return; // already dropped
@@ -467,7 +467,7 @@ static void add_msg_packet(client_t    *client,
                         __func__, client->name);
             goto overflowed;
         }
-        msg = (message_packet_t*)SV_Malloc(sizeof(*msg) + len - MSG_TRESHOLD); // CPP: Cast
+        msg = (MessagePacket*)SV_Malloc(sizeof(*msg) + len - MSG_TRESHOLD); // CPP: Cast
         client->msg_dynamic_bytes += len;
     } else {
         if (LIST_EMPTY(&client->msg_free_list)) {
@@ -501,7 +501,7 @@ overflowed:
 // check if this entity is present in current client frame
 static qboolean check_entity(client_t *client, int entnum)
 {
-    client_frame_t *frame;
+    ClientFrame *frame;
     unsigned i, j;
 
     frame = &client->frames[client->framenum & UPDATE_MASK];
@@ -517,7 +517,7 @@ static qboolean check_entity(client_t *client, int entnum)
 }
 
 // sounds reliative to entities are handled specially
-static void emit_snd(client_t *client, message_packet_t *msg)
+static void emit_snd(client_t *client, MessagePacket *msg)
 {
     int flags, entnum;
 
@@ -549,7 +549,7 @@ static void emit_snd(client_t *client, message_packet_t *msg)
     }
 }
 
-static inline void write_snd(client_t *client, message_packet_t *msg, size_t maxsize)
+static inline void write_snd(client_t *client, MessagePacket *msg, size_t maxsize)
 {
     // if this msg fits, write it
     if (msg_write.cursize + MAX_SOUND_PACKET <= maxsize) {
@@ -559,7 +559,7 @@ static inline void write_snd(client_t *client, message_packet_t *msg, size_t max
     List_Insert(&client->msg_free_list, &msg->entry);
 }
 
-static inline void write_msg(client_t *client, message_packet_t *msg, size_t maxsize)
+static inline void write_msg(client_t *client, MessagePacket *msg, size_t maxsize)
 {
     // if this msg fits, write it
     if (msg_write.cursize + msg->cursize <= maxsize) {
@@ -570,7 +570,7 @@ static inline void write_msg(client_t *client, message_packet_t *msg, size_t max
 
 static inline void write_unreliables(client_t *client, size_t maxsize)
 {
-    message_packet_t    *msg, *next;
+    MessagePacket    *msg, *next;
 
     FOR_EACH_MSG_SAFE(&client->msg_unreliable_list) {
         if (msg->cursize) {
@@ -662,7 +662,7 @@ COMMON STUFF
 
 static void finish_frame(client_t *client)
 {
-    message_packet_t *msg, *next;
+    MessagePacket *msg, *next;
 
     FOR_EACH_MSG_SAFE(&client->msg_unreliable_list) {
         free_msg_packet(client, msg);
@@ -840,7 +840,7 @@ void SV_InitClientSend(client_t *newcl)
     List_Init(&newcl->msg_unreliable_list);
     List_Init(&newcl->msg_reliable_list);
 
-    newcl->msg_pool = (message_packet_t*)SV_Malloc(sizeof(message_packet_t) * MSG_POOLSIZE); // CPP: Cast
+    newcl->msg_pool = (MessagePacket*)SV_Malloc(sizeof(MessagePacket) * MSG_POOLSIZE); // CPP: Cast
     for (i = 0; i < MSG_POOLSIZE; i++) {
         List_Append(&newcl->msg_free_list, &newcl->msg_pool[i].entry);
     }

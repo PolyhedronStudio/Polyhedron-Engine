@@ -112,7 +112,7 @@ typedef struct {
     byte        areaBits[MAX_MAP_AREA_BYTES];  // portalarea visibility bits
     unsigned    sentTime;                   // for ping calculations
     int         latency;
-} client_frame_t;
+} ClientFrame;
 
 //-----------------
 // Server side Entity.
@@ -126,17 +126,17 @@ typedef struct {
 // Main server structure.
 //-----------------
 typedef struct {
-    server_state_t  state;      // precache commands are only valid during load
+    ServerState  state;      // precache commands are only valid during load
     int             spawncount; // random number generated each server spawn
 
     int         framenum;
-    unsigned    frameresidual;
+    unsigned    frameResidual;
 
     char        mapcmd[MAX_QPATH];          // ie: *intro.cin+base
 
     char        name[MAX_QPATH];            // map name, or cinematic name
     cm_t        cm;
-    char        *entitystring;
+    char        *entityString;
 
     char        configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
 
@@ -154,7 +154,7 @@ typedef enum {
     cs_connected,   // netchan fully established, but not in game yet
     cs_primed,      // sent serverdata, client is precaching
     cs_spawned      // client is fully in game
-} clstate_t;
+} ConnectionState;
 
 constexpr uint32_t MSG_POOLSIZE = 1024;
 constexpr uint32_t MSG_TRESHOLD = (64 - 10);   // keep pmsg_s 64 bytes aligned
@@ -183,7 +183,7 @@ typedef struct {
             vec3_t      pos;     // Saved in case entity is freed
         };
     };
-} message_packet_t;
+} MessagePacket;
 
 // This is best to match the actual server game frame rate.
 static constexpr uint32_t SERVER_MESSAGES_TICKRATE = 20;
@@ -203,13 +203,13 @@ typedef struct {
     unsigned    credit;
     unsigned    credit_cap;
     unsigned    cost;
-} ratelimit_t;
+} RateLimit;
 
 typedef struct client_s {
     list_t          entry;
 
     // core info
-    clstate_t       state;
+    ConnectionState       state;
     entity_t         *edict;     // EDICT_NUM(clientnum+1)
     int             number;     // client slot number
 
@@ -228,7 +228,7 @@ typedef struct client_s {
     char            name[MAX_CLIENT_NAME];      // extracted from userinfo, high bits masked
     int             messagelevel;               // for filtering printed messages
     size_t          rate;
-    ratelimit_t     ratelimit_namechange;       // for suppressing "foo changed name" flood
+    RateLimit     ratelimit_namechange;       // for suppressing "foo changed name" flood
 
     // console var probes
     char            *version_string;
@@ -250,7 +250,7 @@ typedef struct client_s {
     int             avg_ping_time, avg_ping_count;
 
     // frame encoding
-    client_frame_t  frames[UPDATE_BACKUP];    // updates can be delta'd from here
+    ClientFrame  frames[UPDATE_BACKUP];    // updates can be delta'd from here
     unsigned        frames_sent, frames_acked, frames_nodelta;
     int             framenum;
 
@@ -281,17 +281,17 @@ typedef struct client_s {
     list_t              msg_free_list;
     list_t              msg_unreliable_list;
     list_t              msg_reliable_list;
-    message_packet_t    *msg_pool;
+    MessagePacket    *msg_pool;
     size_t              msg_unreliable_bytes;   // total size of unreliable datagram
     size_t              msg_dynamic_bytes;      // total size of dynamic memory allocated
 
     // per-client baseline chunks
-    entity_packed_t *entityBaselines[SV_BASELINES_CHUNKS];
+    PackedEntity *entityBaselines[SV_BASELINES_CHUNKS];
 
     // server state pointers (hack for MVD channels implementation)
     char            *configstrings;
     char            *gamedir, *mapname;
-    entity_pool_t    *pool;
+    EntityPool    *pool;
     cm_t            *cm;
     int             slot;
     int             spawncount;
@@ -325,25 +325,25 @@ typedef struct client_s {
 static constexpr uint32_t    MAX_CHALLENGES = 1024;
 
 typedef struct {
-    netadr_t    adr;
-    unsigned    challenge;
-    unsigned    time;
-} challenge_t;
+    netadr_t adr;
+    uint32_t challenge;
+    uint32_t time;
+} Challenge;
 
 typedef struct {
     list_t      entry;
     netadr_t    addr;
     netadr_t    mask;
-    unsigned    hits;
+    uint32_t    hits;
     time_t      time;   // time of the last hit
     char        comment[1];
-} addrmatch_t;
+} AddressMatch;
 
 typedef struct {
     list_t  entry;
-    int     len;
+    int32_t len;
     char    string[1];
-} stuffcmd_t;
+} StuffTextCommand;
 
 typedef enum {
     FA_IGNORE,
@@ -352,20 +352,24 @@ typedef enum {
     FA_KICK,
 
     FA_MAX
-} filteraction_t;
+} FilterAction;
 
 typedef struct {
-    list_t          entry;
-    filteraction_t  action;
-    char            *comment;
-    char            string[1];
-} filtercmd_t;
+    list_t entry;
+    
+    FilterAction action;
+
+    char *comment;
+    char  string[1];
+} FilterCommand;
 
 typedef struct {
     list_t entry;
     netadr_t adr;
-    unsigned last_ack;
+
+    uint32_t last_ack;
     time_t last_resolved;
+
     char name[1];
 } master_t;
 
@@ -373,11 +377,11 @@ typedef struct {
     char            buffer[MAX_QPATH];
     char            *server;
     char            *spawnpoint;
-    server_state_t  state;
-    int             loadgame;
+    ServerState     state;
+    int32_t         loadgame;
     qboolean        endofunit;
     cm_t            cm;
-} mapcmd_t;
+} MapCommand;
 
 #define FOR_EACH_MASTER(m) \
     LIST_FOR_EACH(master_t, m, &sv_masterlist, entry)
@@ -392,7 +396,7 @@ typedef struct server_static_s {
 
     unsigned        num_entities;   // maxClients*UPDATE_BACKUP*MAX_PACKET_ENTITIES
     unsigned        next_entity;    // next state to use
-    entity_packed_t *entities;      // [num_entities]
+    PackedEntity *entities;      // [num_entities]
 
 #if USE_ZLIB
     z_stream        z;  // for compressing messages at once
@@ -400,12 +404,12 @@ typedef struct server_static_s {
 
     unsigned        last_heartbeat;
 
-    ratelimit_t     ratelimit_status;
-    ratelimit_t     ratelimit_auth;
-    ratelimit_t     ratelimit_rcon;
+    RateLimit     ratelimit_status;
+    RateLimit     ratelimit_auth;
+    RateLimit     ratelimit_rcon;
 
-    challenge_t     challenges[MAX_CHALLENGES]; // to prevent invalid IPs from connecting
-} server_static_t;
+    Challenge     challenges[MAX_CHALLENGES]; // to prevent invalid IPs from connecting
+} ServerStatic;
 
 //=============================================================================
 
@@ -417,7 +421,7 @@ extern list_t      sv_cmdlist_begin;
 extern list_t      sv_filterlist;
 extern list_t      sv_clientlist; // linked list of non-free clients
 
-extern server_static_t     svs;        // persistant server info
+extern ServerStatic     svs;        // persistant server info
 extern server_t            sv;         // local server
 
 extern pmoveParams_t    sv_pmp;
@@ -485,11 +489,11 @@ void SV_InitOperatorCommands(void);
 
 void SV_UserinfoChanged(client_t *cl);
 
-qboolean SV_RateLimited(ratelimit_t *r);
-void SV_RateRecharge(ratelimit_t *r);
-void SV_RateInit(ratelimit_t *r, const char *s);
+qboolean SV_RateLimited(RateLimit *r);
+void SV_RateRecharge(RateLimit *r);
+void SV_RateInit(RateLimit *r, const char *s);
 
-addrmatch_t *SV_MatchAddress(list_t *list, netadr_t *address);
+AddressMatch *SV_MatchAddress(list_t *list, netadr_t *address);
 
 int SV_CountClients(void);
 
@@ -502,8 +506,8 @@ void SV_zfree(voidpf opaque, voidpf address);
 // sv_init.c
 //
 void SV_ClientReset(client_t *client);
-void SV_SpawnServer(mapcmd_t *cmd);
-qboolean SV_ParseMapCmd(mapcmd_t *cmd);
+void SV_SpawnServer(MapCommand *cmd);
+qboolean SV_ParseMapCmd(MapCommand *cmd);
 void SV_InitGame();
 
 //
@@ -577,9 +581,9 @@ void SV_InitEntity(entity_t *e);
 //
 // sv_save.c
 //
-void SV_AutoSaveBegin(mapcmd_t *cmd);
+void SV_AutoSaveBegin(MapCommand *cmd);
 void SV_AutoSaveEnd(void);
-void SV_CheckForSavegame(mapcmd_t *cmd);
+void SV_CheckForSavegame(MapCommand *cmd);
 void SV_RegisterSavegames(void);
 int SV_NoSaveGames(void);
 

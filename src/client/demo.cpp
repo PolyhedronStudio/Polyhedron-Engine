@@ -78,7 +78,7 @@ fail:
 // writes a delta update of an EntityState list to the message.
 static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
 {
-    entity_packed_t oldpack, newpack;
+    PackedEntity oldpack, newpack;
     EntityState *oldent, *newent;
     int     oldindex, newindex;
     int     oldnum, newnum;
@@ -321,7 +321,7 @@ static void CL_Record_f(void)
     int     i, c;
     size_t  len;
     EntityState  *ent;
-    entity_packed_t pack;
+    PackedEntity pack;
     char            *s;
     qhandle_t       f;
     unsigned        mode = FS_MODE_WRITE;

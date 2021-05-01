@@ -148,7 +148,7 @@ void SV_CleanClient(client_t *client)
 // Returns the current state of the server.
 //===============
 //
-server_state_t SV_GetState (void) {
+ServerState SV_GetState (void) {
     return sv.state;
 }
 
@@ -159,11 +159,11 @@ server_state_t SV_GetState (void) {
 // Sets the current state of the server.
 //===============
 //
-void SV_SetState (server_state_t state) {
+void SV_SetState (ServerState state) {
     sv.state = state;
 }
 
-static void print_drop_reason(client_t *client, const char *reason, clstate_t oldstate)
+static void print_drop_reason(client_t *client, const char *reason, ConnectionState oldstate)
 {
     int announce = oldstate == cs_spawned ? 2 : 1;
     const char *prefix = " was dropped: ";
@@ -207,7 +207,7 @@ or crashing.
 */
 void SV_DropClient(client_t *client, const char *reason)
 {
-    clstate_t oldstate;
+    ConnectionState oldstate;
 
     if (client->state <= cs_zombie)
         return; // called recursively?
@@ -253,7 +253,7 @@ Implements simple token bucket filter. Inspired by xt_limit.c from the Linux
 kernel. Returns true if limit is exceeded.
 ===============
 */
-qboolean SV_RateLimited(ratelimit_t *r)
+qboolean SV_RateLimited(RateLimit *r)
 {
     r->credit += (svs.realtime - r->time) * CREDITS_PER_MSEC;
     r->time = svs.realtime;
@@ -275,7 +275,7 @@ SV_RateRecharge
 Reverts the effect of SV_RateLimited.
 ===============
 */
-void SV_RateRecharge(ratelimit_t *r)
+void SV_RateRecharge(RateLimit *r)
 {
     r->credit += r->cost;
     if (r->credit > r->credit_cap)
@@ -297,7 +297,7 @@ SV_RateInit
 Full syntax is: <limit>[/<period>[sec|min|hour]][*<burst>]
 ===============
 */
-void SV_RateInit(ratelimit_t *r, const char *s)
+void SV_RateInit(RateLimit *r, const char *s)
 {
     unsigned limit, period, mult, burst, rate;
     char *p;
@@ -358,11 +358,11 @@ void SV_RateInit(ratelimit_t *r, const char *s)
     r->cost = rate2credits(rate);
 }
 
-addrmatch_t *SV_MatchAddress(list_t *list, netadr_t *addr)
+AddressMatch *SV_MatchAddress(list_t *list, netadr_t *addr)
 {
-    addrmatch_t *match;
+    AddressMatch *match;
 
-    LIST_FOR_EACH(addrmatch_t, match, list, entry) {
+    LIST_FOR_EACH(AddressMatch, match, list, entry) {
         if (NET_IsEqualBaseAdrMask(addr, &match->addr, &match->mask)) {
             match->hits++;
             match->time = time(NULL);
@@ -644,7 +644,7 @@ static qboolean parse_basic_params(conn_params_t *p)
 
 static qboolean permit_connection(conn_params_t *p)
 {
-    addrmatch_t *match;
+    AddressMatch *match;
     int i, count;
     client_t *cl;
     const char *s;
@@ -1017,7 +1017,7 @@ static void SVC_DirectConnect(void)
     newcl->gamedir = fs_game->string;
     newcl->mapname = sv.name;
     newcl->configstrings = (char *)sv.configstrings;
-    newcl->pool = (entity_pool_t*)&ge->edicts; // N&C: Edict_pool_t change
+    newcl->pool = (EntityPool*)&ge->edicts; // N&C: Edict_pool_t change
     newcl->cm = &sv.cm;
     newcl->spawncount = sv.spawncount;
     newcl->maxClients = sv_maxclients->integer;
@@ -1225,7 +1225,7 @@ static int ping_nop(client_t *cl)
 
 static int ping_min(client_t *cl)
 {
-    client_frame_t *frame;
+    ClientFrame *frame;
     int i, j, count = INT_MAX;
 
     for (i = 0; i < UPDATE_BACKUP; i++) {
@@ -1244,7 +1244,7 @@ static int ping_min(client_t *cl)
 
 static int ping_avg(client_t *cl)
 {
-    client_frame_t *frame;
+    ClientFrame *frame;
     int i, j, total = 0, count = 0;
 
     for (i = 0; i < UPDATE_BACKUP; i++) {
@@ -1740,9 +1740,9 @@ unsigned SV_Frame(unsigned msec)
     }
 
     // move autonomous things around if enough time has passed
-    sv.frameresidual += msec;
-    if (sv.frameresidual < SV_FRAMETIME) {
-        return SV_FRAMETIME - sv.frameresidual;
+    sv.frameResidual += msec;
+    if (sv.frameResidual < SV_FRAMETIME) {
+        return SV_FRAMETIME - sv.frameResidual;
     }
 
     if (svs.initialized && !check_paused()) {
@@ -1779,15 +1779,15 @@ unsigned SV_Frame(unsigned msec)
     }
 
     // decide how long to sleep next frame
-    sv.frameresidual -= SV_FRAMETIME;
-    if (sv.frameresidual < SV_FRAMETIME) {
-        return SV_FRAMETIME - sv.frameresidual;
+    sv.frameResidual -= SV_FRAMETIME;
+    if (sv.frameResidual < SV_FRAMETIME) {
+        return SV_FRAMETIME - sv.frameResidual;
     }
 
     // don't accumulate bogus residual
-    if (sv.frameresidual > 250) {
-        Com_DDDPrintf("Reset residual %u\n", sv.frameresidual);
-        sv.frameresidual = 100;
+    if (sv.frameResidual > 250) {
+        Com_DDDPrintf("Reset residual %u\n", sv.frameResidual);
+        sv.frameResidual = 100;
     }
 
     return 0;
@@ -2114,7 +2114,7 @@ void SV_Shutdown(const char *finalmsg, ErrorType type)
 
     // free current level
     CM_FreeMap(&sv.cm);
-    SV_FreeFile(sv.entitystring);
+    SV_FreeFile(sv.entityString);
     memset(&sv, 0, sizeof(sv));
 
     // free server static data
