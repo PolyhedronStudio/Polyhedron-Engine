@@ -1072,12 +1072,8 @@ MSG_ParseDeltaEntity
 Can go from either a baseline or a previous packet_entity
 ==================
 */
-void MSG_ParseDeltaEntity(const EntityState* from,
-    EntityState* to,
-    int            number,
-    int            bits,
-    EntityStateMessageFlags   flags)
-{
+void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, int bits, EntityStateMessageFlags flags) {
+    // Sanity checks.
     if (!to) {
         Com_Error(ERR_DROP, "%s: NULL", __func__);
     }
@@ -1086,11 +1082,10 @@ void MSG_ParseDeltaEntity(const EntityState* from,
         Com_Error(ERR_DROP, "%s: bad entity number: %d", __func__, number);
     }
 
-    // set everything to the state we are delta'ing from
+    // Set everything to the state we are delta'ing from
     if (!from) {
         memset(to, 0, sizeof(*to));
-    }
-    else if (to != from) {
+    } else if (to != from) {
         memcpy(to, from, sizeof(*to));
     }
 
@@ -1191,11 +1186,7 @@ void MSG_ParseDeltaEntity(const EntityState* from,
 MSG_ParseDeltaPlayerstate_Default
 ===================
 */
-void MSG_ParseDeltaPlayerstate(const PlayerState* from,
-    PlayerState* to,
-    int               flags,
-    int               extraflags)
-{
+void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int flags, int extraflags) {
     int         i;
     int         statbits;
 

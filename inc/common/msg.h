@@ -176,7 +176,7 @@ const char* MSG_ServerCommandString(int cmd);
 
 //============================================================================
 
-static inline int MSG_PackSolid16(const vec3_t mins, const vec3_t maxs)
+static inline int MSG_PackSolid16(const vec3_t &mins, const vec3_t &maxs)
 {
     int x, zd, zu;
 
@@ -195,7 +195,7 @@ static inline int MSG_PackSolid16(const vec3_t mins, const vec3_t maxs)
     return (zu << 10) | (zd << 5) | x;
 }
 
-static inline int MSG_PackSolid32(const vec3_t mins, const vec3_t maxs)
+static inline int MSG_PackSolid32(const vec3_t &mins, const vec3_t &maxs)
 {
     int x, zd, zu;
 
@@ -214,7 +214,7 @@ static inline int MSG_PackSolid32(const vec3_t mins, const vec3_t maxs)
     return (zu << 16) | (zd << 8) | x;
 }
 
-static inline void MSG_UnpackSolid16(int solid, vec3_t mins, vec3_t maxs)
+static inline void MSG_UnpackSolid16(int solid, vec3_t &mins, vec3_t &maxs)
 {
     int x, zd, zu;
 
@@ -228,7 +228,7 @@ static inline void MSG_UnpackSolid16(int solid, vec3_t mins, vec3_t maxs)
     maxs[2] = zu;
 }
 
-static inline void MSG_UnpackSolid32(int solid, vec3_t mins, vec3_t maxs)
+static inline void MSG_UnpackSolid32(int solid, vec3_t& mins, vec3_t& maxs)
 {
     int x, zd, zu;
 
