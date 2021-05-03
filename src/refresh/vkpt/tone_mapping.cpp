@@ -144,22 +144,21 @@ vkpt_tone_mapping_request_reset()
 VkResult
 vkpt_tone_mapping_create_pipelines()
 {
-	VkComputePipelineCreateInfo pipeline_info[TM_NUM_PIPELINES] = {
-		[TONE_MAPPING_HISTOGRAM] = {
-			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE(QVK_MOD_TONE_MAPPING_HISTOGRAM_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_tone_mapping_histogram,
-		},
-		[TONE_MAPPING_CURVE] = {
-			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE(QVK_MOD_TONE_MAPPING_CURVE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_tone_mapping_curve,
-		},
-		[TONE_MAPPING_APPLY] = {
-			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE(QVK_MOD_TONE_MAPPING_APPLY_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_tone_mapping_apply,
-		},
+	VkComputePipelineCreateInfo pipeline_info[TM_NUM_PIPELINES];
+	pipeline_info[TONE_MAPPING_HISTOGRAM] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_TONE_MAPPING_HISTOGRAM_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_tone_mapping_histogram,
+	};
+	pipeline_info[TONE_MAPPING_CURVE] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_TONE_MAPPING_CURVE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_tone_mapping_curve,
+	};
+	pipeline_info[TONE_MAPPING_APPLY] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_TONE_MAPPING_APPLY_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_tone_mapping_apply,
 	};
 
 	_VK(vkCreateComputePipelines(qvk.device, 0, LENGTH(pipeline_info), pipeline_info, 0, pipelines));
@@ -178,24 +177,24 @@ vkpt_tone_mapping_reset(VkCommandBuffer cmd_buf)
 		.uint32 = { 0, 0, 0, 0 }
 	};
 
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
+		.srcAccessMask = 0,
+		.dstAccessMask = 0,
 		.buffer = qvk.buf_tonemap.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = 0,
-		.dstAccessMask = 0
-	);
+		});
 
 	vkCmdFillBuffer(cmd_buf, qvk.buf_tonemap.buffer,
 		0, VK_WHOLE_SIZE, 0);
 
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
+		.srcAccessMask = 0,
+		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.buffer = qvk.buf_tonemap.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = 0,
-		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT
-	);
+	});
 
 	return VK_SUCCESS;
 }
@@ -214,24 +213,41 @@ vkpt_tone_mapping_destroy_pipelines()
 // Shorthand to record a resource barrier on a single image, to prevent threads
 // from trying to read from this image before it has been written to by the
 // previous stage.
-#define BARRIER_COMPUTE(cmd_buf, img) \
-	do { \
-		VkImageSubresourceRange subresource_range = { \
-			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
-			.baseMipLevel   = 0, \
-			.levelCount     = 1, \
-			.baseArrayLayer = 0, \
-			.layerCount     = 1 \
-		}; \
-		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
-				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
-				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-		); \
-	} while(0)
+//#define BARRIER_COMPUTE(cmd_buf, img) \
+//	do { \
+//		VkImageSubresourceRange subresource_range = { \
+//			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
+//			.baseMipLevel   = 0, \
+//			.levelCount     = 1, \
+//			.baseArrayLayer = 0, \
+//			.layerCount     = 1 \
+//		}; \
+//		IMAGE_BARRIER(cmd_buf, \
+//				.image            = img, \
+//				.subresourceRange = subresource_range, \
+//				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
+//				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
+//				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+//				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+//		); \
+//	} while(0)
+static inline void BARRIER_COMPUTE(VkCommandBuffer& commandBuffer, VkImage& image) {
+	VkImageSubresourceRange subresource_range = { \
+		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, \
+		.baseMipLevel = 0,
+		.levelCount = 1,
+		.baseArrayLayer = 0,
+		.layerCount = 1
+	};
+	IMAGE_BARRIER(commandBuffer, {
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.image = image,
+		.subresourceRange = subresource_range,
+	});
+}
 
 
 // Records the commands to apply tone mapping to the VKPT_IMG_TAA_OUTPUT image
@@ -263,13 +279,13 @@ vkpt_tone_mapping_record_cmd_buffer(VkCommandBuffer cmd_buf, float frame_time)
 		(qvk.extent_taa_output.height + 15) / 16,
 		1);
 
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.buffer = qvk.buf_tonemap.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT
-	);
+	});
 
 
 	// Record instructions to run the compute shader that computes the tone
@@ -322,13 +338,13 @@ vkpt_tone_mapping_record_cmd_buffer(VkCommandBuffer cmd_buf, float frame_time)
 
 	vkCmdDispatch(cmd_buf, 1, 1, 1);
 
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.buffer = qvk.buf_tonemap.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT
-	);
+	});
 
 
 	// Record instructions to apply our tone curve to the final image, apply

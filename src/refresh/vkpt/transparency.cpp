@@ -75,7 +75,7 @@ struct VkPtTransperancy
 static void create_buffers();
 static qboolean allocate_and_bind_memory_to_buffers();
 static void create_buffer_views(VkPtTransperancy &trans);
-static void fill_index_buffer();
+static void fill_index_buffer(VkPtTransperancy& trans);
 
 // update
 static void write_particle_geometry(const float* view_matrix, const rparticle_t* particles, int particle_num);

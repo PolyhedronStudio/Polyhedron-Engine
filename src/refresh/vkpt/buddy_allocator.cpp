@@ -77,7 +77,7 @@ BuddyAllocator* create_buddy_allocator(uint64_t capacity, uint64_t block_size)
 	const size_t free_list_array_size = _align(level_num * sizeof(AllocatorFreeListItem*), alignment);
 	const size_t free_item_buffer_size = _align(block_num * sizeof(AllocatorFreeListItem), alignment);
 	const size_t block_state_size = _align(block_num * sizeof(uint8_t), alignment);
-	char* memory = Z_Mallocz(allocator_size + free_list_array_size + free_item_buffer_size + block_state_size);
+	char* memory = (char*)Z_Mallocz(allocator_size + free_list_array_size + free_item_buffer_size + block_state_size);
 
 	BuddyAllocator* allocator = (BuddyAllocator*)memory;
 	allocator->block_size = block_size;
