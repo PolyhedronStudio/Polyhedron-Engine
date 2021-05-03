@@ -2629,7 +2629,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	float frame_time = min(1.f, max(0.f, fd->time - previous_time));
 	previous_time = fd->time;
 
-	vkpt_freecam_update(cls.frametime);
+	vkpt_freecam_update(cls.frameTime);
 
 	static unsigned previous_wallclock_time = 0;
 	unsigned current_wallclock_time = Sys_Milliseconds();
@@ -2694,9 +2694,9 @@ R_RenderFrame_RTX(refdef_t *fd)
 	ubo->prev_adapted_luminance = prev_adapted_luminance;
 
 	if (cvar_tm_blend_enable->integer)
-		Vector4Copy(fd->blend, ubo->fs_blend_color);
+		Vec4_Copy(fd->blend, ubo->fs_blend_color);
 	else
-		Vector4Set(ubo->fs_blend_color, 0.f, 0.f, 0.f, 0.f);
+		Vec4_Set(ubo->fs_blend_color, 0.f, 0.f, 0.f, 0.f);
 
 	vkpt_physical_sky_update_ubo(ubo, &sun_light, render_world);
 	vkpt_bloom_update(ubo, frame_time, ubo->medium != MEDIUM_NONE, menu_mode);
@@ -3109,7 +3109,7 @@ retry:;
 		.timeout = (~((uint64_t) 0)),
 		.semaphore = qvk.semaphores[qvk.current_frame_index][0].image_available,
 		.fence = VK_NULL_HANDLE,
-		.deviceMask = (1 << qvk.device_count) - 1,
+		.deviceMask = (uint32_t)(1 << qvk.device_count) - 1,
 	};
 
 	VkResult res_swapchain = vkAcquireNextImage2KHR(qvk.device, &acquire_info, &qvk.current_swap_chain_image_index);
@@ -3240,7 +3240,7 @@ R_EndFrame_RTX(void)
 
 	VkPresentInfoKHR present_info = {
 		.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-		.waitSemaphoreCount = qvk.device_count,
+		.waitSemaphoreCount = (uint32_t)qvk.device_count,
 		.pWaitSemaphores    = signal_semaphores,
 		.swapchainCount     = 1,
 		.pSwapchains        = &qvk.swap_chain,
@@ -3276,7 +3276,7 @@ R_ModeChanged_RTX(int width, int height, int flags, int rowbytes, void *pixels)
 
 	r_config.width  = width;
 	r_config.height = height;
-	r_config.flags  = flags;
+	r_config.flags  = (vidFlags_t)flags;
 
 	qvk.wait_for_idle_frames = MAX_FRAMES_IN_FLIGHT * 2;
 }
@@ -3294,7 +3294,7 @@ vkpt_show_pvs(void)
 		return;
 	}
 
-	BSP_ClusterVis(bsp_world_model, cluster_debug_mask, vkpt_refdef.fd->feedback.lookatcluster, DVIS_PVS);
+	BSP_ClusterVis(bsp_world_model, (byte*)cluster_debug_mask, vkpt_refdef.fd->feedback.lookatcluster, DVIS_PVS);
 	cluster_debug_index = vkpt_refdef.fd->feedback.lookatcluster;
 }
 
@@ -3527,23 +3527,23 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 		.layerCount = 1
 	};
 		
-	IMAGE_BARRIER(cmd_buf,
-		.image = swap_chain_image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-	);
-
-	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.screenshot_image,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		.image = swap_chain_image,
 		.subresourceRange = subresource_range,
+	});
+
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-	);
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.image = qvk.screenshot_image,
+		.subresourceRange = subresource_range,
+	});
 
 	VkImageCopy img_copy_region = {
 		.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
@@ -3556,31 +3556,31 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 		qvk.screenshot_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1, &img_copy_region);
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = swap_chain_image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.dstAccessMask = 0,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-	);
-
-	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.screenshot_image,
+		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.image = swap_chain_image,
 		.subresourceRange = subresource_range,
+	});
+
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL
-	);
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.image = qvk.screenshot_image,
+		.subresourceRange = subresource_range,
+	});
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, false);
 	vkpt_wait_idle(qvk.queue_graphics, &qvk.cmd_buffers_graphics);
 
 	VkImageSubresource subresource = {
 		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+		.mipLevel = 0,
 		.arrayLayer = 0,
-		.mipLevel = 0
 	};
 
 	VkSubresourceLayout subresource_layout;
@@ -3590,7 +3590,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 	_VK(vkMapMemory(qvk.device, qvk.screenshot_image_memory, 0, qvk.screenshot_image_memory_size, 0, &device_data));
 	
 	int pitch = qvk.extent_unscaled.width * 3;
-	byte *pixels = FS_AllocTempMem(pitch * qvk.extent_unscaled.height);
+	byte *pixels = (byte*)FS_AllocTempMem(pitch * qvk.extent_unscaled.height);
 
 	for (int row = 0; row < qvk.extent_unscaled.height; row++)
 	{
@@ -3632,7 +3632,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 }
 
 void
-R_SetSky_RTX(const char *name, float rotate, vec3_t axis)
+R_SetSky_RTX(const char* name, float rotate, vec3_t& axis)
 {
 	int     i;
 	char    pathname[MAX_QPATH];
@@ -3655,7 +3655,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t axis)
 			if(data) {
 				Z_Free(data);
 			}
-			data = Z_Malloc(6 * sizeof(uint32_t));
+			data = (byte*)Z_Malloc(6 * sizeof(uint32_t));
 			for(int j = 0; j < 6; j++)
 				((uint32_t *)data)[j] = 0xff00ffffu;
 			w_prev = h_prev = 1;
@@ -3664,7 +3664,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t axis)
 
 		size_t s = img->upload_width * img->upload_height * 4;
 		if(!data) {
-			data = Z_Malloc(s * 6);
+			data = (byte*)Z_Malloc(s * 6);
 			w_prev = img->upload_width;
 			h_prev = img->upload_height;
 		}
@@ -3766,7 +3766,7 @@ R_BeginRegistration_RTX(const char *name)
 }
 
 void
-R_EndRegistration_RTX(void)
+R_EndRegistration_RTX(const char *name)
 {
 	LOG_FUNC();
 	
@@ -3782,7 +3782,7 @@ VkCommandBuffer vkpt_begin_command_buffer(cmd_buf_group_t* group)
 	if (group->used_this_frame == group->count_per_frame)
 	{
 		uint32_t new_count = max(4, group->count_per_frame * 2);
-		VkCommandBuffer* new_buffers = Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(VkCommandBuffer));
+		VkCommandBuffer* new_buffers = (VkCommandBuffer*)Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(VkCommandBuffer));
 
 		for (int frame = 0; frame < MAX_FRAMES_IN_FLIGHT; frame++)
 		{
@@ -3802,7 +3802,7 @@ VkCommandBuffer vkpt_begin_command_buffer(cmd_buf_group_t* group)
 		}
 
 #ifdef _DEBUG
-		void** new_addrs = Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(void*));
+		void** new_addrs = (void**)Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(void*));
 
 		if (group->count_per_frame > 0)
 		{
@@ -3905,24 +3905,24 @@ void vkpt_submit_command_buffer(
 
 	VkSubmitInfo submit_info = {
 		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		.waitSemaphoreCount = wait_semaphore_count,
+		.waitSemaphoreCount = (uint32_t)wait_semaphore_count,
 		.pWaitSemaphores = wait_semaphores,
 		.pWaitDstStageMask = wait_stages,
-		.signalSemaphoreCount = signal_semaphore_count,
-		.pSignalSemaphores = signal_semaphores,
 		.commandBufferCount = 1,
 		.pCommandBuffers = &cmd_buf,
+		.signalSemaphoreCount = (uint32_t)signal_semaphore_count,
+		.pSignalSemaphores = signal_semaphores,
 	};
 
 #ifdef VKPT_DEVICE_GROUPS
 	VkDeviceGroupSubmitInfo device_group_submit_info = {
 		.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_SUBMIT_INFO,
 		.pNext = NULL,
-		.waitSemaphoreCount = wait_semaphore_count,
+		.waitSemaphoreCount = (uint32_t)wait_semaphore_count,
 		.pWaitSemaphoreDeviceIndices = wait_device_indices,
 		.commandBufferCount = 1,
 		.pCommandBufferDeviceMasks = &execute_device_mask,
-		.signalSemaphoreCount = signal_semaphore_count,
+		.signalSemaphoreCount = (uint32_t)signal_semaphore_count,
 		.pSignalSemaphoreDeviceIndices = signal_device_indices,
 	};
 

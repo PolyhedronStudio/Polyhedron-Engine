@@ -98,8 +98,8 @@ static void vkpt_freecam_mousemove()
 		my *= speed;
 
 		if (m_autosens->integer) {
-			mx *= cl.fov_x * autosens_x;
-			my *= cl.fov_y * autosens_y;
+			mx *= cl.fov_x * cl.autosens_x;
+			my *= cl.fov_y * cl.autosens_y;
 		}
 
 		mx /= freecam_zoom;
