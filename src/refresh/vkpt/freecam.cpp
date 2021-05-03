@@ -31,8 +31,8 @@ player model is switched to third person.
 */
 
 
-static vec3_t freecam_vieworg = { 0.f };
-static vec3_t freecam_viewangles = { 0.f };
+static vec3_t freecam_vieworg = vec3_zero();
+static vec3_t freecam_viewangles = vec3_zero();
 static float freecam_zoom = 1.f;
 static qboolean freecam_keystate[6] = { 0 };
 static qboolean freecam_active = false;
@@ -85,7 +85,7 @@ static void vkpt_freecam_mousemove()
 	if (Key_IsDown(K_MOUSE1) && Key_IsDown(K_MOUSE2))
 	{
 		mx *= sensitivity->value;
-		freecam_viewangles[ROLL] += m_yaw->value * mx;
+		freecam_viewangles[vec3_t::PYR::Roll] += m_yaw->value * mx;
 	}
 	else if (Key_IsDown(K_MOUSE1))
 	{
@@ -105,10 +105,10 @@ static void vkpt_freecam_mousemove()
 		mx /= freecam_zoom;
 		my /= freecam_zoom;
 
-		freecam_viewangles[YAW] -= m_yaw->value * mx;
-		freecam_viewangles[PITCH] += m_pitch->value * my * (m_invert->integer ? -1.f : 1.f);
+		freecam_viewangles[vec3_t::PYR::Yaw] -= m_yaw->value * mx;
+		freecam_viewangles[vec3_t::PYR::Pitch] += m_pitch->value * my * (m_invert->integer ? -1.f : 1.f);
 
-		freecam_viewangles[PITCH] = max(-90.f, min(90.f, freecam_viewangles[PITCH]));
+		freecam_viewangles[vec3_t::PYR::Pitch] = max(-90.f, min(90.f, freecam_viewangles[vec3_t::PYR::Pitch]));
 	}
 	else if (Key_IsDown(K_MOUSE2))
 	{
@@ -127,8 +127,8 @@ void vkpt_freecam_update(float frame_time)
 
 	if (!freecam_active)
 	{
-		VectorCopy(vkpt_refdef.fd->vieworg, freecam_vieworg);
-		VectorCopy(vkpt_refdef.fd->viewangles, freecam_viewangles);
+		freecam_vieworg = vkpt_refdef.fd->vieworg;
+		freecam_viewangles = vkpt_refdef.fd->viewAngles;
 		freecam_zoom = 1.f;
 		freecam_player_model = cl_player_model->integer;
 		freecam_active = true;
@@ -154,7 +154,7 @@ void vkpt_freecam_update(float frame_time)
 		VectorScale(velocity, 0.1f, velocity);
 
 	vec3_t forward, right, up;
-	AngleVectors(freecam_viewangles, forward, right, up);
+	AngleVectors(freecam_viewangles, &forward, &right, &up);
 	float speed = 100.f;
 	VectorMA(freecam_vieworg, velocity[0] * frame_time * speed, forward, freecam_vieworg);
 	VectorMA(freecam_vieworg, velocity[1] * frame_time * speed, right, freecam_vieworg);
@@ -162,10 +162,10 @@ void vkpt_freecam_update(float frame_time)
 
 	vkpt_freecam_mousemove();
 
-	VectorCopy(freecam_vieworg, vkpt_refdef.fd->vieworg);
-	VectorCopy(freecam_viewangles, vkpt_refdef.fd->viewangles);
-	vkpt_refdef.fd->fov_x = RAD2DEG(atanf(tanf(DEG2RAD(vkpt_refdef.fd->fov_x) * 0.5f) / freecam_zoom)) * 2.f;
-	vkpt_refdef.fd->fov_y = RAD2DEG(atanf(tanf(DEG2RAD(vkpt_refdef.fd->fov_y) * 0.5f) / freecam_zoom)) * 2.f;
+	vkpt_refdef.fd->vieworg = freecam_vieworg;
+	vkpt_refdef.fd->viewAngles = freecam_viewangles;
+	vkpt_refdef.fd->fov_x = Degrees(atanf(tanf(Radians(vkpt_refdef.fd->fov_x) * 0.5f) / freecam_zoom)) * 2.f;
+	vkpt_refdef.fd->fov_y = Degrees(atanf(tanf(Radians(vkpt_refdef.fd->fov_y) * 0.5f) / freecam_zoom)) * 2.f;
 
 	if (!VectorCompare(freecam_vieworg, prev_vieworg) || !VectorCompare(freecam_viewangles, prev_viewangles))
 	{
