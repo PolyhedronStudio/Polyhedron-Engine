@@ -86,8 +86,9 @@ static void upload_geometry(VkCommandBuffer command_buffer);
 cvar_t* cvar_pt_particle_size = NULL;
 cvar_t* cvar_pt_beam_width = NULL;
 cvar_t* cvar_pt_beam_lights = NULL;
+cvar_t* cvar_pt_particle_emissive = NULL;
 extern cvar_t* cvar_pt_enable_particles;
-extern cvar_t* cvar_pt_particle_emissive;
+
 extern cvar_t* cvar_pt_projection;
 
 void cast_u32_to_f32_color(int color_index, const color_t* pcolor, float* color_f32, float hdr_factor)
@@ -107,6 +108,7 @@ qboolean initialize_transparency()
 	cvar_pt_particle_size = Cvar_Get("pt_particle_size", "0.35", 0);
 	cvar_pt_beam_width = Cvar_Get("pt_beam_width", "1.0", 0);
 	cvar_pt_beam_lights = Cvar_Get("pt_beam_lights", "1.0", 0);
+	cvar_pt_particle_emissive = Cvar_Get("pt_particle_emissive", "1", 0);
 
 	memset(&transparency, 0, sizeof(transparency));
 
@@ -163,7 +165,7 @@ void destroy_transparency()
 }
 
 void update_transparency(VkCommandBuffer command_buffer, const float* view_matrix,
-	const particle_t* particles, int particle_num, const entity_t* entities, int entity_num)
+	const rparticle_t* particles, int particle_num, const r_entity_t* entities, int entity_num)
 {
 	transparency.host_frame_index = (transparency.host_frame_index + 1) % transparency.host_buffered_frame_num;
 	particle_num = min(particle_num, TR_PARTICLE_MAX_NUM);
@@ -172,7 +174,7 @@ void update_transparency(VkCommandBuffer command_buffer, const float* view_matri
 	uint32_t sprite_num = 0;
 	for (int i = 0; i < entity_num; i++)
 	{
-		if (entities[i].flags & RF_BEAM)
+		if (entities[i].flags & RenderEffects::Beam)
 		{
 			// write_beam_geometry skips zero-width beams as well
 			if(entities[i].frame > 0)
@@ -181,7 +183,7 @@ void update_transparency(VkCommandBuffer command_buffer, const float* view_matri
 		else if ((entities[i].model & 0x80000000) == 0)
 		{
 			const model_t* model = MOD_ForHandle(entities[i].model);
-			if (model && model->type == MOD_SPRITE)
+			if (model && model->type == model_t::MOD_SPRITE)
 				++sprite_num;
 		}
 	}
@@ -284,7 +286,7 @@ void get_transparency_counts(int* particle_num, int* beam_num, int* sprite_num)
 	*sprite_num = transparency.sprite_num;
 }
 
-static void write_particle_geometry(const float* view_matrix, const particle_t* particles, int particle_num)
+static void write_particle_geometry(const float* view_matrix, const rparticle_t* particles, int particle_num)
 {
 	const float particle_size = cvar_pt_particle_size->value;
 
@@ -299,7 +301,7 @@ static void write_particle_geometry(const float* view_matrix, const particle_t* 
 
 	for (int i = 0; i < particle_num; i++)
 	{
-		const particle_t* particle = particles + i;
+		const rparticle_t* particle = particles + i;
 
 		cast_u32_to_f32_color(particle->color, &particle->rgba, particle_colors, particle->brightness);
 		particle_colors[3] = particle->alpha;
@@ -346,7 +348,7 @@ static void write_particle_geometry(const float* view_matrix, const particle_t* 
 	}
 }
 
-static void write_beam_geometry(const entity_t* entities, int entity_num)
+static void write_beam_geometry(const r_entity_t* entities, int entity_num)
 {
 	const float hdr_factor = cvar_pt_particle_emissive->value;
 
@@ -362,10 +364,10 @@ static void write_beam_geometry(const entity_t* entities, int entity_num)
 
 	for (int i = 0; i < entity_num; i++)
 	{
-		if ((entities[i].flags & RF_BEAM) == 0)
+		if ((entities[i].flags & RenderEffects::beam) == 0)
 			continue;
 
-		const entity_t* beam = entities + i;
+		const r_entity_t* beam = entities + i;
 
 		// Adjust beam width. Default "narrow" beams have a width of 4, "fat" beams have 16.
 		if (beam->frame == 0)
@@ -435,7 +437,7 @@ static void write_beam_geometry(const entity_t* entities, int entity_num)
 		world_to_beam[14] = -DotProduct(begin, norm_dir);
 		world_to_beam[15] = 1;
 
-		Vector4Copy((world_to_beam + 12), (float *)(beam_infos));
+		Vec4_Copy((world_to_beam + 12), (float *)(beam_infos));
 		// First three columns are normals, so it's fine to pack them to half floats
 		packHalf4x16(beam_infos + 4, world_to_beam);
 		packHalf4x16(beam_infos + 6, world_to_beam + 4);
@@ -450,8 +452,8 @@ static void write_beam_geometry(const entity_t* entities, int entity_num)
 
 static int compare_beams(const void* _a, const void* _b)
 {
-	const entity_t* a = *(void**)_a;
-	const entity_t* b = *(void**)_b;
+	const r_entity_t* a = *(void**)_a;
+	const r_entity_t* b = *(void**)_b;
 
 	if (a->origin[0] < b->origin[0]) return -1;
 	if (a->origin[0] > b->origin[0]) return 1;
@@ -561,28 +563,28 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 
 	int num_beams = 0;
 
-	static entity_t* beams[MAX_BEAMS];
+	static r_entity_t* beams[MAX_BEAMS];
 
 	for (int i = 0; i < num_entites; i++)
 	{
 		if(num_beams == MAX_BEAMS)
 			break;
 
-		if ((entities[i].flags & RF_BEAM) != 0)
+		if ((entities[i].flags & RenderEffects::Beam) != 0)
 			beams[num_beams++] = entities + i;
 	}
 
 	if (num_beams == 0)
 		return;
 
-	qsort(beams, num_beams, sizeof(entity_t*), compare_beams);
+	qsort(beams, num_beams, sizeof(r_entity_t*), compare_beams);
 
 	for (int i = 0; i < num_beams; i++)
 	{
 		if (*num_lights >= max_lights)
 			return;
 		
-		const entity_t* beam = beams[i];
+		const r_entity_t* beam = beams[i];
 
 		// Adjust beam width. Default "narrow" beams have a width of 4, "fat" beams have 16.
 		if (beam->frame == 0)
@@ -610,7 +612,7 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 	}
 }
 
-static void write_sprite_geometry(const float* view_matrix, const entity_t* entities, int entity_num)
+static void write_sprite_geometry(const float* view_matrix, const r_entity_t* entities, int entity_num)
 {
 	if (transparency.sprite_num == 0)
 		return;
@@ -627,18 +629,18 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 
 	// TODO: use better alignment?
 	vec3_t* vertex_positions = (vec3_t*)(transparency.host_buffer_shadow + sprite_vertex_offset);
-	uint32_t* sprite_info = (int*)(transparency.host_buffer_shadow + transparency.sprite_info_host_offset);
+	uint32_t* sprite_info = (uint32_t*)(transparency.host_buffer_shadow + transparency.sprite_info_host_offset);
 
 	int sprite_count = 0;
 	for (int i = 0; i < entity_num; i++)
 	{
-		const entity_t *e = entities + i;
+		const r_entity_t*e = entities + i;
 
 		if (e->model & 0x80000000)
 			continue;
 
 		const model_t* model = MOD_ForHandle(e->model);
-		if (!model || model->type != MOD_SPRITE)
+		if (!model || model->type != model_t::MOD_SPRITE)
 			continue;
 
 		mspriteframe_t *frame = &model->spriteframes[e->frame % model->numframes];
@@ -876,7 +878,7 @@ static qboolean allocate_and_bind_memory_to_buffers()
 	const size_t host_buffer_size = transparency.host_buffered_frame_num * transparency.host_frame_size;
 
 	_VK(vkMapMemory(qvk.device, transparency.host_buffer_memory, 0, host_buffer_size, 0,
-		(void*)&transparency.mapped_host_buffer));
+		(void**)&transparency.mapped_host_buffer));
 
 	transparency.host_buffer_shadow = (char*)Z_Mallocz(transparency.host_frame_size);
 	

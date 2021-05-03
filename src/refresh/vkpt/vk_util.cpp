@@ -81,6 +81,9 @@ buffer_create(
 	buf->size = size;
 	buf->is_mapped = 0;
 
+	// VKPT: Put here for C++
+	VkMemoryAllocateInfo mem_alloc_info;
+	VkMemoryAllocateFlagsInfo mem_alloc_flags;
 	result = vkCreateBuffer(qvk.device, &buf_create_info, NULL, &buf->buffer);
 	if(result != VK_SUCCESS) {
 		goto fail_buffer;
@@ -90,15 +93,15 @@ buffer_create(
 	VkMemoryRequirements mem_reqs;
 	vkGetBufferMemoryRequirements(qvk.device, buf->buffer, &mem_reqs);
 
-	VkMemoryAllocateInfo mem_alloc_info = {
+	mem_alloc_info = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
 		.allocationSize = mem_reqs.size,
 		.memoryTypeIndex = get_memory_type(mem_reqs.memoryTypeBits, mem_properties)
 	};
 
-	VkMemoryAllocateFlagsInfo mem_alloc_flags = {
+	mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
-		.flags = (usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT : 0,
+		.flags = (VkMemoryAllocateFlags)((usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT : 0),
 		.deviceMask = 0
 	};
 
@@ -441,7 +444,7 @@ VkResult allocate_gpu_memory(VkMemoryRequirements mem_req, VkDeviceMemory* pMemo
 	VkMemoryAllocateFlagsInfo mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
 		.flags = VK_MEMORY_ALLOCATE_DEVICE_MASK_BIT,
-		.deviceMask = (1 << qvk.device_count) - 1
+		.deviceMask = (uint32_t)(1 << qvk.device_count) - 1
 	};
 
 	if (qvk.device_count > 1) {
