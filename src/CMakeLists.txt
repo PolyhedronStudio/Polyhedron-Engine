@@ -426,6 +426,7 @@ set(SRC_SHADERS
 	refresh/vkpt/shader/god_rays.comp
 	refresh/vkpt/shader/bloom_composite.comp
 	refresh/vkpt/shader/bloom_blur.comp
+	refresh/vkpt/shader/bloom_downscale.comp
 	refresh/vkpt/shader/compositing.comp
 	refresh/vkpt/shader/checkerboard_interleave.comp
 	refresh/vkpt/shader/asvgf_atrous.comp
@@ -448,6 +449,7 @@ set(SRC_SHADERS
 	refresh/vkpt/shader/final_blit_lanczos.frag
 	refresh/vkpt/shader/final_blit.vert
 )
+
 set(SRC_RT_SHADERS
 	refresh/vkpt/shader/primary_rays.rgen
 	refresh/vkpt/shader/direct_lighting.rgen
@@ -457,6 +459,7 @@ set(SRC_RT_SHADERS
 	refresh/vkpt/shader/path_tracer_particle.rahit
 	refresh/vkpt/shader/path_tracer_sprite.rahit
 	refresh/vkpt/shader/path_tracer_beam.rahit
+	refresh/vkpt/shader/path_tracer_beam.rint
 	refresh/vkpt/shader/path_tracer_explosion.rahit
 	refresh/vkpt/shader/path_tracer_shadow.rmiss
 	refresh/vkpt/shader/reflect_refract.rgen
