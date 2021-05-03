@@ -116,7 +116,7 @@ vkpt_shadow_map_initialize()
 		.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
 			   | VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics,
 		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
