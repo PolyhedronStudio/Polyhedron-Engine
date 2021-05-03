@@ -358,7 +358,7 @@ VkDescriptorSetLayout* SkyGetDescriptorLayout()
 	return &uniform_precomputed_descriptor_layout;
 }
 
-VkDescriptorSet SkyGetDescriptorSet()
+VkDescriptorSet SkyGetDescriptorSet(uint32_t framenumber)
 {
 	return desc_set_precomputed_ubo;
 }

@@ -65,12 +65,12 @@ static DeviceMemory     tex_invalid_texture_image_memory = { 0 };
 
 static VkDeviceMemory mem_images[NUM_VKPT_IMAGES];
 
-static DeviceMemory            tex_image_memory[MAX_RIMAGES] = { 0 };
-static VkBindImageMemoryInfo   tex_bind_image_info[MAX_RIMAGES] = { 0 };
+static DeviceMemory            tex_image_memory[MAX_RIMAGES] = { };
+static VkBindImageMemoryInfo   tex_bind_image_info[MAX_RIMAGES] = { };
 static DeviceMemoryAllocator*  tex_device_memory_allocator = NULL;
 
 static int image_loading_dirty_flag = 0;
-static uint8_t descriptor_set_dirty_flags[MAX_FRAMES_IN_FLIGHT] = { 0 }; // initialized in vkpt_textures_initialize
+static uint8_t descriptor_set_dirty_flags[MAX_FRAMES_IN_FLIGHT] = { }; // initialized in vkpt_textures_initialize
 
 static const float megabyte = 1048576.0f;
 
@@ -86,7 +86,7 @@ void vkpt_textures_prefetch()
         return;
     }
 
-    char const * ptr = buffer;
+    char const * ptr = (const char*)buffer;
 	char linebuf[MAX_QPATH];
 	while (sgets(linebuf, sizeof(linebuf), &ptr))
 	{
@@ -94,7 +94,7 @@ void vkpt_textures_prefetch()
 		if (!line)
 			continue;
 
-		image_t const * img1 = IMG_Find(line, IT_SKIN, IF_PERMANENT | IF_SRGB);
+		image_t const * img1 = IMG_Find(line, IT_SKIN, (imageflags_t)(IF_PERMANENT | IF_SRGB));
 
 		char other_name[MAX_QPATH];
 
@@ -112,7 +112,7 @@ void vkpt_textures_prefetch()
 			continue;
 		Q_concat(other_name, sizeof(other_name), other_name, "_light.tga", NULL);
 		FS_NormalizePath(other_name, other_name);
-		image_t const * img3 = IMG_Find(other_name, IT_SKIN, IF_PERMANENT | IF_SRGB);
+		image_t const * img3 = IMG_Find(other_name, IT_SKIN, (imageflags_t)(IF_PERMANENT | IF_SRGB));
 	}
     // Com_Printf("Loaded '%s'\n", filename);
     FS_FreeFile(buffer);
@@ -208,21 +208,21 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 
 	VkImageViewCreateInfo img_view_info = {
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = img_envmap,
 		.viewType   = VK_IMAGE_VIEW_TYPE_CUBE,
 		.format     = VK_FORMAT_R8G8B8A8_UNORM,
-		.image      = img_envmap,
+		.components = {
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_G,
+			VK_COMPONENT_SWIZZLE_B,
+			VK_COMPONENT_SWIZZLE_A,
+		},
 		.subresourceRange = {
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
 			.baseArrayLayer = 0,
 			.layerCount     = num_images,
-		},
-		.components     = {
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_G,
-			VK_COMPONENT_SWIZZLE_B,
-			VK_COMPONENT_SWIZZLE_A,
 		},
 	};
 	_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_envmap));

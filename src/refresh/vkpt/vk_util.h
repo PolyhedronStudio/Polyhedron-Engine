@@ -88,7 +88,7 @@ static inline void IMAGE_BARRIER(VkCommandBuffer &commandBuffer, VkImageMemoryBa
 //				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 1, &buf_mem_barrier, \
 //				0, NULL); \
 //	} while(0)
-static inline void BUFFER_BARRIER(VkCommandBuffer& commandBuffer, VkBufferMemoryBarrier &buf_mem_barrier) {
+static inline void BUFFER_BARRIER(VkCommandBuffer& commandBuffer, VkBufferMemoryBarrier buf_mem_barrier) {
 	buf_mem_barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 	buf_mem_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	buf_mem_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;

@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TR_BEAM_INTERSECT_SIZE (12 * sizeof(float))
 #define TR_SPRITE_INFO_SIZE    (2 * sizeof(float))
 
-struct
+struct VkPtTransperancy
 {
 	size_t vertex_position_host_offset;
 	size_t beam_aabb_host_offset;
@@ -74,7 +74,7 @@ struct
 // initialization
 static void create_buffers();
 static qboolean allocate_and_bind_memory_to_buffers();
-static void create_buffer_views();
+static void create_buffer_views(VkPtTransperancy &trans);
 static void fill_index_buffer();
 
 // update
@@ -876,59 +876,59 @@ static qboolean allocate_and_bind_memory_to_buffers()
 	const size_t host_buffer_size = transparency.host_buffered_frame_num * transparency.host_frame_size;
 
 	_VK(vkMapMemory(qvk.device, transparency.host_buffer_memory, 0, host_buffer_size, 0,
-		&transparency.mapped_host_buffer));
+		(void*)&transparency.mapped_host_buffer));
 
-	transparency.host_buffer_shadow = Z_Mallocz(transparency.host_frame_size);
+	transparency.host_buffer_shadow = (char*)Z_Mallocz(transparency.host_frame_size);
 	
 	return true;
 }
 
-static void create_buffer_views()
+static void create_buffer_views(VkPtTransperancy& trans)
 {
 	const VkBufferViewCreateInfo particle_color_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = transparency.particle_color_buffer.buffer,
+		.buffer = trans.particle_color_buffer.buffer,
 		.format = VK_FORMAT_R32G32B32A32_SFLOAT,
 		.range = TR_PARTICLE_MAX_NUM * TR_COLOR_SIZE
 	};
 
 	const VkBufferViewCreateInfo beam_color_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = transparency.beam_color_buffer.buffer,
+		.buffer = trans.beam_color_buffer.buffer,
 		.format = VK_FORMAT_R32G32B32A32_SFLOAT,
 		.range = TR_BEAM_MAX_NUM * TR_COLOR_SIZE
 	};
 
 	const VkBufferViewCreateInfo sprite_info_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = transparency.sprite_info_buffer.buffer,
+		.buffer = trans.sprite_info_buffer.buffer,
 		.format = VK_FORMAT_R32G32_UINT,
 		.range = TR_SPRITE_MAX_NUM * TR_SPRITE_INFO_SIZE
 	};
 
 	const VkBufferViewCreateInfo beam_intersect_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = transparency.beam_intersect_buffer.buffer,
+		.buffer = trans.beam_intersect_buffer.buffer,
 		.format = VK_FORMAT_R32G32B32A32_UINT,
 		.range = TR_BEAM_MAX_NUM * TR_BEAM_INTERSECT_SIZE
 	};
 
 	_VK(vkCreateBufferView(qvk.device, &particle_color_view_info, NULL,
-		&transparency.particle_color_buffer_view));
+		&trans.particle_color_buffer_view));
 
 	_VK(vkCreateBufferView(qvk.device, &beam_color_view_info, NULL,
-		&transparency.beam_color_buffer_view));
+		&trans.beam_color_buffer_view));
 
 	_VK(vkCreateBufferView(qvk.device, &sprite_info_view_info, NULL,
-		&transparency.sprite_info_buffer_view));
+		&trans.sprite_info_buffer_view));
 
 	_VK(vkCreateBufferView(qvk.device, &beam_intersect_view_info, NULL,
-		&transparency.beam_intersect_buffer_view));
+		&trans.beam_intersect_buffer_view));
 }
 
-static void fill_index_buffer()
+static void fill_index_buffer(VkPtTransperancy& trans)
 {
-	uint16_t* indices = (uint16_t*)transparency.host_buffer_shadow;
+	uint16_t* indices = (uint16_t*)trans.host_buffer_shadow;
 
 	for (size_t i = 0; i < TR_INDEX_MAX_NUM / 6; i++)
 	{
@@ -943,7 +943,7 @@ static void fill_index_buffer()
 		quad[5] = base_vertex + 0;
 	}
 
-	memcpy(transparency.mapped_host_buffer, transparency.host_buffer_shadow, sizeof(uint16_t) * TR_INDEX_MAX_NUM);
+	memcpy(trans.mapped_host_buffer, trans.host_buffer_shadow, sizeof(uint16_t) * TR_INDEX_MAX_NUM);
 
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_transfer);
 
@@ -953,7 +953,7 @@ static void fill_index_buffer()
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.buffer = transparency.index_buffer.buffer,
+		.buffer = trans.index_buffer.buffer,
 		.size = VK_WHOLE_SIZE
 	};
 
@@ -964,7 +964,7 @@ static void fill_index_buffer()
 		.size = TR_INDEX_MAX_NUM * sizeof(uint16_t)
 	};
 
-	vkCmdCopyBuffer(cmd_buf, transparency.host_buffer, transparency.index_buffer.buffer, 1, &region);
+	vkCmdCopyBuffer(cmd_buf, trans.host_buffer, trans.index_buffer.buffer, 1, &region);
 
 	const VkBufferMemoryBarrier post_barrier = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
@@ -972,7 +972,7 @@ static void fill_index_buffer()
 		.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.buffer = transparency.index_buffer.buffer,
+		.buffer = trans.index_buffer.buffer,
 		.size = VK_WHOLE_SIZE
 	};
 

@@ -93,7 +93,7 @@ typedef enum
 
 static int active_sun_preset()
 {
-	qboolean multiplayer = cl.maxclients > 1;
+	qboolean multiplayer = cl.maxClients > 1;
 
 	if (multiplayer)
 	{
@@ -137,13 +137,14 @@ initializeEnvTexture(int width, int height)
 
     VkImageCreateInfo img_info = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-        .extent = {
+		.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_R16G16B16A16_SFLOAT,
+		.extent = {
             .width = width,
             .height = height,
             .depth = 1,
         },
-        .imageType = VK_IMAGE_TYPE_2D,
-        .format = VK_FORMAT_R16G16B16A16_SFLOAT,
         .mipLevels = 1,
         .arrayLayers = num_images,
         .samples = VK_SAMPLE_COUNT_1_BIT,
@@ -151,7 +152,6 @@ initializeEnvTexture(int width, int height)
         .usage = VK_IMAGE_USAGE_STORAGE_BIT
                                | VK_IMAGE_USAGE_TRANSFER_DST_BIT
                                | VK_IMAGE_USAGE_SAMPLED_BIT,
-        .flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
         .queueFamilyIndexCount = qvk.queue_idx_graphics,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -182,16 +182,16 @@ initializeEnvTexture(int width, int height)
 
     VkImageViewCreateInfo img_view_info = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-        .viewType = VK_IMAGE_VIEW_TYPE_CUBE,
+		.image = img_envmap,
+		.viewType = VK_IMAGE_VIEW_TYPE_CUBE,
         .format = VK_FORMAT_R16G16B16A16_SFLOAT,
-        .image = img_envmap,
-        .subresourceRange = subresource_range,
         .components = {
             VK_COMPONENT_SWIZZLE_R,
             VK_COMPONENT_SWIZZLE_G,
             VK_COMPONENT_SWIZZLE_B,
             VK_COMPONENT_SWIZZLE_A,
         },
+		.subresourceRange = subresource_range,
     };
     _VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_envmap));
     ATTACH_LABEL_VARIABLE(imv_envmap, IMAGE_VIEW);
@@ -199,18 +199,18 @@ initializeEnvTexture(int width, int height)
     // cube descriptor layout
     {
         VkDescriptorImageInfo desc_img_info = {
-            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .imageView = imv_envmap,
-            .sampler = qvk.tex_sampler,
-        };
+			.sampler = qvk.tex_sampler,
+			.imageView = imv_envmap,
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		};
 
         VkWriteDescriptorSet s = {
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
             .dstSet = qvk.desc_set_textures_even,
             .dstBinding = BINDING_OFFSET_PHYSICAL_SKY,
             .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
             .pImageInfo = &desc_img_info,
         };
 
@@ -223,8 +223,8 @@ initializeEnvTexture(int width, int height)
     // image descriptor
     {
         VkDescriptorImageInfo desc_img_info = {
-            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .imageView = imv_envmap,
+			.imageView = imv_envmap,
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
         };
 
         VkWriteDescriptorSet s = {
@@ -232,8 +232,8 @@ initializeEnvTexture(int width, int height)
             .dstSet = qvk.desc_set_textures_even,
             .dstBinding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
             .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .descriptorCount = 1,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
             .pImageInfo = &desc_img_info,
         };
 
@@ -436,24 +436,24 @@ vkpt_physical_sky_destroy_pipelines()
 static void
 reset_sun_color_buffer(VkCommandBuffer cmd_buf)
 {
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_UNIFORM_READ_BIT,
+		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_UNIFORM_READ_BIT,
-		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT
-	);
+		});
 
 	vkCmdFillBuffer(cmd_buf, qvk.buf_sun_color.buffer,
 		0, VK_WHOLE_SIZE, 0);
 
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT
-	);
+	});
 }
 
 qboolean vkpt_physical_sky_needs_update()
