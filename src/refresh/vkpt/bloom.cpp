@@ -386,8 +386,8 @@ vkpt_bloom_record_cmd_buffer(VkCommandBuffer cmd_buf)
 		};
 
 		VkOffset3D offset_LR_input = {
-			.x = IMG_WIDTH,
-			.y = IMG_HEIGHT,
+			.x = (int32_t)IMG_WIDTH,
+			.y = (int32_t)IMG_HEIGHT,
 			.z = 1
 		};
 
@@ -406,14 +406,14 @@ vkpt_bloom_record_cmd_buffer(VkCommandBuffer cmd_buf)
 		{
 			case 1:
 				vis_img = VKPT_IMG_BLOOM_DOWNSCALE_MIP_1;
-				blit_region.srcOffsets[1].x = IMG_WIDTH / 2;
-				blit_region.srcOffsets[1].y = IMG_HEIGHT / 2;
+				blit_region.srcOffsets[1].x = (int32_t)IMG_WIDTH / 2;
+				blit_region.srcOffsets[1].y = (int32_t)IMG_HEIGHT / 2;
 				break;
 
 			case 2:
 				vis_img = VKPT_IMG_BLOOM_HBLUR;
-				blit_region.srcOffsets[1].x = IMG_WIDTH / 4;
-				blit_region.srcOffsets[1].y = IMG_HEIGHT / 4;
+				blit_region.srcOffsets[1].x = (int32_t)IMG_WIDTH / 4;
+				blit_region.srcOffsets[1].y = (int32_t)IMG_HEIGHT / 4;
 				break;
 
 			default:

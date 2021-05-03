@@ -437,7 +437,7 @@ static void build_pvs2(bsp_t* bsp)
 {
 	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
 
-	bsp->pvs2_matrix = Z_Mallocz(matrix_size);
+	bsp->pvs2_matrix = (char*)Z_Mallocz(matrix_size);
 
 	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++)
 	{
@@ -714,7 +714,7 @@ append_light_poly(int* num_lights, int* allocated, light_poly_t** lights)
 	if (*num_lights == *allocated)
 	{
 		*allocated = max(*allocated * 2, 128);
-		*lights = Z_Realloc(*lights, *allocated * sizeof(light_poly_t));
+		*lights = (light_poly_t*)Z_Realloc(*lights, *allocated * sizeof(light_poly_t));
 	}
 	return *lights + (*num_lights)++;
 }
@@ -1131,8 +1131,8 @@ compute_world_tangents(bsp_mesh_t* wm)
 
 	// tangent space is co-planar to triangle : only need to compute
 	// 1 vertex because all 3 verts share the same tangent space
-	wm->tangents = Z_Malloc(MAX_VERT_BSP * sizeof(uint32_t) / 3);
-	wm->texel_density = Z_Malloc(MAX_VERT_BSP * sizeof(float) / 3);
+	wm->tangents = (uint32_t*)Z_Malloc(MAX_VERT_BSP * sizeof(uint32_t) / 3);
+	wm->texel_density = (float*)Z_Malloc(MAX_VERT_BSP * sizeof(float) / 3);
 
 	for (int idx_tri = 0; idx_tri < ntriangles; ++idx_tri)
 	{
@@ -1153,8 +1153,8 @@ compute_world_tangents(bsp_mesh_t* wm)
 		VectorSubtract(pC, pA, dP1);
 
 		vec2_t dt0, dt1;
-		Vector2Subtract(tB, tA, dt0);
-		Vector2Subtract(tC, tA, dt1);
+		Vec2_Subtract(tB, tA, dt0);
+		Vec2_Subtract(tC, tA, dt1);
 
 		float r = 1.f / (dt0[0] * dt1[1] - dt1[0] * dt0[1]);
 
@@ -1227,7 +1227,7 @@ load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name)
     qboolean found_map = false;
 
     char* filebuf = NULL;
-    FS_LoadFile(filename, &filebuf);
+    FS_LoadFile(filename, (void**)&filebuf);
     
     if (filebuf)
     {
@@ -1237,7 +1237,7 @@ load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name)
     else
     {
         // try to load the global file
-        FS_LoadFile("sky_clusters.txt", &filebuf);
+        FS_LoadFile("sky_clusters.txt", (void**)&filebuf);
         if (!filebuf)
         {
             Com_WPrintf("Couldn't read sky_clusters.txt\n");
@@ -1298,7 +1298,7 @@ load_cameras(bsp_mesh_t* wm, const char* map_name)
 	wm->num_cameras = 0;
 
 	char* filebuf = NULL;
-	FS_LoadFile("cameras.txt", &filebuf);
+	FS_LoadFile("cameras.txt", (void**)&filebuf);
 	if (!filebuf)
 	{
 		Com_WPrintf("Couldn't read cameras.txt\n");
@@ -1383,7 +1383,7 @@ compute_sky_visibility(bsp_mesh_t *wm, bsp_t *bsp)
 static void
 compute_cluster_aabbs(bsp_mesh_t* wm)
 {
-	wm->cluster_aabbs = Z_Malloc(wm->num_clusters * sizeof(aabb_t));
+	wm->cluster_aabbs = (aabb_t*)Z_Malloc(wm->num_clusters * sizeof(aabb_t));
 	for (int c = 0; c < wm->num_clusters; c++)
 	{
 		VectorSet(wm->cluster_aabbs[c].mins, FLT_MAX, FLT_MAX, FLT_MAX);
@@ -1467,8 +1467,8 @@ static void
 collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 {
 #define MAX_LIGHTS_PER_CLUSTER 1024
-	int* cluster_lights = Z_Malloc(MAX_LIGHTS_PER_CLUSTER * wm->num_clusters * sizeof(int));
-	int* cluster_light_counts = Z_Mallocz(wm->num_clusters * sizeof(int));
+	int* cluster_lights = (int*)Z_Malloc(MAX_LIGHTS_PER_CLUSTER * wm->num_clusters * sizeof(int));
+	int* cluster_light_counts = (int*)Z_Mallocz(wm->num_clusters * sizeof(int));
 
 	// Construct an array of visible lights for each cluster.
 	// The array is in `cluster_lights`, with MAX_LIGHTS_PER_CLUSTER stride.
@@ -1480,7 +1480,7 @@ collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 		if(light->cluster < 0)
 			continue;
 
-		const byte* pvs = BSP_GetPvs(bsp, light->cluster);
+		const byte* pvs = (byte*)BSP_GetPvs(bsp, light->cluster);
 
 		FOREACH_BIT_BEGIN(pvs, bsp->visrowsize, other_cluster)
 			aabb_t* cluster_aabb = wm->cluster_aabbs + other_cluster;
@@ -1504,8 +1504,8 @@ collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 		wm->num_cluster_lights += cluster_light_counts[cluster];
 	}
 
-	wm->cluster_lights = Z_Mallocz(wm->num_cluster_lights * sizeof(int));
-	wm->cluster_light_offsets = Z_Mallocz((wm->num_clusters + 1) * sizeof(int));
+	wm->cluster_lights = (int*)Z_Mallocz(wm->num_cluster_lights * sizeof(int));
+	wm->cluster_light_offsets = (int*)Z_Mallocz((wm->num_clusters + 1) * sizeof(int));
 
 	// Com_Printf("Total interactions: %d, culled bbox: %d, culled proj: %d\n", wm->num_cluster_lights, lights_culled_bbox, lights_culled_proj);
 
@@ -1629,7 +1629,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 	load_sky_and_lava_clusters(wm, full_game_map_name);
 	load_cameras(wm, full_game_map_name);
 
-	wm->models = Z_Malloc(bsp->nummodels * sizeof(bsp_model_t));
+	wm->models = (bsp_model_t*)Z_Malloc(bsp->nummodels * sizeof(bsp_model_t));
 	memset(wm->models, 0, bsp->nummodels * sizeof(bsp_model_t));
 
     wm->num_models = bsp->nummodels;
@@ -1642,10 +1642,10 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 
     wm->num_vertices = 0;
     wm->num_indices = 0;
-    wm->positions = Z_Malloc(MAX_VERT_BSP * 3 * sizeof(*wm->positions));
-    wm->tex_coords = Z_Malloc(MAX_VERT_BSP * 2 * sizeof(*wm->tex_coords));
-    wm->materials = Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->materials));
-    wm->clusters = Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->clusters));
+    wm->positions = (float*)Z_Malloc(MAX_VERT_BSP * 3 * sizeof(*wm->positions));
+    wm->tex_coords = (float*)Z_Malloc(MAX_VERT_BSP * 2 * sizeof(*wm->tex_coords));
+    wm->materials = (uint32_t*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->materials));
+    wm->clusters = (int*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->clusters));
 
 	// clear these here because `bsp_mesh_load_custom_sky` creates lights before `collect_ligth_polys`
 	wm->num_light_polys = 0;
@@ -1703,7 +1703,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
     wm->num_indices = idx_ctr;
     wm->num_vertices = idx_ctr;
 
-    wm->indices = Z_Malloc(idx_ctr * sizeof(int));
+    wm->indices = (int*)Z_Malloc(idx_ctr * sizeof(int));
     for (int i = 0; i < wm->num_vertices; i++)
         wm->indices[i] = i;
 
@@ -1792,7 +1792,7 @@ bsp_mesh_register_textures(bsp_t *bsp)
 		if (!mat)
 			Com_EPrintf("error finding material '%s'\n", buffer);
 
-		image_t* image_diffuse = IMG_Find(buffer, IT_WALL, flags | IF_SRGB);
+		image_t* image_diffuse = IMG_Find(buffer, IT_WALL, (imageflags_t)(flags | IF_SRGB));
 		image_t* image_normals = NULL;
 		image_t* image_emissive = NULL;
 
@@ -1812,7 +1812,7 @@ bsp_mesh_register_textures(bsp_t *bsp)
 			// attempt loading the emissive texture
 			Q_concat(buffer, sizeof(buffer), "textures/", info->name, "_light.tga", NULL);
 			FS_NormalizePath(buffer, buffer);
-			image_emissive = IMG_Find(buffer, IT_WALL, flags | IF_SRGB);
+			image_emissive = IMG_Find(buffer, IT_WALL, (imageflags_t)(flags | IF_SRGB));
 			if (image_emissive == R_NOTEXTURE) image_emissive = NULL;
 
 			if (image_emissive && !image_emissive->processing_complete && (mat->emissive_scale > 0.f) && ((mat->flags & MATERIAL_FLAG_LIGHT) != 0 || MAT_IsKind(mat->flags, MATERIAL_KIND_LAVA)))

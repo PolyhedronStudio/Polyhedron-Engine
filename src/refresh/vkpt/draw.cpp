@@ -563,12 +563,14 @@ vkpt_final_blit_simple(VkCommandBuffer cmd_buf)
 	});
 
 	VkOffset3D blit_size = {
-		.x = qvk.extent_taa_output.width,
-		.y = qvk.extent_taa_output.height,
+		.x = (int32_t)qvk.extent_taa_output.width,
+		.y = (int32_t)qvk.extent_taa_output.height,
 		.z = 1
 	};
 	VkOffset3D blit_size_unscaled = {
-		.x = qvk.extent_unscaled.width,.y = qvk.extent_unscaled.height,.z = 1
+		.x = (int32_t)qvk.extent_unscaled.width,
+		.y = (int32_t)qvk.extent_unscaled.height,
+		.z = 1
 	};
 	VkImageBlit img_blit = {
 		.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },

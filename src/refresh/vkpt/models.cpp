@@ -136,7 +136,7 @@ qerror_t MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length)
 	if (ret) {
 		if (ret == Q_ERR_TOO_FEW) {
 			// empty models draw nothing
-			model->type = MOD_EMPTY;
+			model->type = model_t::MOD_EMPTY;
 			return Q_ERR_SUCCESS;
 		}
 		return ret;
@@ -220,21 +220,21 @@ qerror_t MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length)
 	}
 
 	Hunk_Begin(&model->hunk, 50u<<20);
-	model->type = MOD_ALIAS;
+	model->type = model_t::MOD_ALIAS;
 	model->nummeshes = 1;
 	model->numframes = header.num_frames;
-	model->meshes = MOD_Malloc(sizeof(maliasmesh_t));
-	model->frames = MOD_Malloc(header.num_frames * sizeof(maliasframe_t));
+	model->meshes = (maliasmesh_s*)MOD_Malloc(sizeof(maliasmesh_t));
+	model->frames = (maliasframe_s*)MOD_Malloc(header.num_frames * sizeof(maliasframe_t));
 
 	dst_mesh = model->meshes;
 	dst_mesh->numtris    = numindices / 3;
 	dst_mesh->numindices = numindices;
 	dst_mesh->numverts   = numverts;
 	dst_mesh->numskins   = header.num_skins;
-	dst_mesh->positions  = MOD_Malloc(numverts   * header.num_frames * sizeof(vec3_t));
-	dst_mesh->normals    = MOD_Malloc(numverts   * header.num_frames * sizeof(vec3_t));
-	dst_mesh->tex_coords = MOD_Malloc(numverts   * header.num_frames * sizeof(vec2_t));
-    dst_mesh->indices    = MOD_Malloc(numindices * sizeof(int));
+	dst_mesh->positions  = (vec3_t*)MOD_Malloc(numverts   * header.num_frames * sizeof(vec3_t));
+	dst_mesh->normals    = (vec3_t*)MOD_Malloc(numverts   * header.num_frames * sizeof(vec3_t));
+	dst_mesh->tex_coords = (vec2_t*)MOD_Malloc(numverts   * header.num_frames * sizeof(vec2_t));
+    dst_mesh->indices    = (int*)MOD_Malloc(numindices * sizeof(int));
 
 	if (dst_mesh->numtris != header.num_tris) {
 		Com_DPrintf("%s has %d bad triangles\n", model->name, header.num_tris - dst_mesh->numtris);
@@ -452,10 +452,10 @@ static qerror_t MOD_LoadMD3Mesh(model_t *model, maliasmesh_t *mesh,
 	mesh->numindices = header.num_tris * 3;
 	mesh->numverts = header.num_verts;
 	mesh->numskins = header.num_skins;
-	mesh->positions = MOD_Malloc(header.num_verts * model->numframes * sizeof(vec3_t));
-	mesh->normals = MOD_Malloc(header.num_verts * model->numframes * sizeof(vec3_t));
-	mesh->tex_coords = MOD_Malloc(header.num_verts * model->numframes * sizeof(vec2_t));
-    mesh->indices = MOD_Malloc(sizeof(int) * header.num_tris * 3);
+	mesh->positions = (vec3_t*)MOD_Malloc(header.num_verts * model->numframes * sizeof(vec3_t));
+	mesh->normals = (vec3_t*)MOD_Malloc(header.num_verts * model->numframes * sizeof(vec3_t));
+	mesh->tex_coords = (vec2_t*)MOD_Malloc(header.num_verts * model->numframes * sizeof(vec2_t));
+    mesh->indices = (int*)MOD_Malloc(sizeof(int) * header.num_tris * 3);
 
 	// load all skins
 	src_skin = (dmd3skin_t *)(rawdata + header.ofs_skins);
@@ -589,11 +589,11 @@ qerror_t MOD_LoadMD3_RTX(model_t *model, const void *rawdata, size_t length)
 		return Q_ERR_BAD_EXTENT;
 
 	Hunk_Begin(&model->hunk, 0x4000000);
-	model->type = MOD_ALIAS;
+	model->type = model_t::MOD_ALIAS;
 	model->numframes = header.num_frames;
 	model->nummeshes = header.num_meshes;
-	model->meshes = MOD_Malloc(sizeof(maliasmesh_t) * header.num_meshes);
-	model->frames = MOD_Malloc(sizeof(maliasframe_t) * header.num_frames);
+	model->meshes = (maliasmesh_s*)MOD_Malloc(sizeof(maliasmesh_t) * header.num_meshes);
+	model->frames = (maliasframe_s*)MOD_Malloc(sizeof(maliasframe_t) * header.num_frames);
 
 	// load all frames
 	src_frame = (dmd3frame_t *)((byte *)rawdata + header.ofs_frames);
@@ -638,7 +638,7 @@ void MOD_Reference_RTX(model_t *model)
 
 	// register any images used by the models
 	switch (model->type) {
-	case MOD_ALIAS:
+	case model_t::MOD_ALIAS:
 		for (mesh_idx = 0; mesh_idx < model->nummeshes; mesh_idx++) {
 			maliasmesh_t *mesh = &model->meshes[mesh_idx];
 			for (skin_idx = 0; skin_idx < mesh->numskins; skin_idx++) {
@@ -646,12 +646,12 @@ void MOD_Reference_RTX(model_t *model)
 			}
 		}
 		break;
-	case MOD_SPRITE:
+	case model_t::MOD_SPRITE:
 		for (frame_idx = 0; frame_idx < model->numframes; frame_idx++) {
 			model->spriteframes[frame_idx].image->registration_sequence = registration_sequence;
 		}
 		break;
-	case MOD_EMPTY:
+	case model_t::MOD_EMPTY:
 		break;
 	default:
 		Com_Error(ERR_FATAL, "%s: bad model type", __func__);
