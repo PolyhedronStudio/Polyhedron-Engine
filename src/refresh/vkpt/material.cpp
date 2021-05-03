@@ -134,7 +134,11 @@ typedef struct pbr_materials_table_s {
 	int num_custom_materials;
 } pbr_materials_table_t;
 
-static pbr_materials_table_t pbr_materials_table = { .num_materials = 0, .num_custom_materials = 0, .alpha_sorted = true };
+static pbr_materials_table_t pbr_materials_table = { 
+	.num_materials = 0,
+	.alpha_sorted = true,
+	.num_custom_materials = 0, 
+};
 
 pbr_material_t const * MAT_GetPBRMaterialsTable()
 {
