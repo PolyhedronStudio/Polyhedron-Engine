@@ -385,6 +385,7 @@ SET(SRC_VKPT
 	refresh/vkpt/asvgf.cpp
 	refresh/vkpt/bloom.cpp
 	refresh/vkpt/bsp_mesh.cpp
+	refresh/vkpt/conversion.cpp
 	refresh/vkpt/draw.cpp
 	refresh/vkpt/freecam.cpp
 	refresh/vkpt/main.cpp
@@ -411,6 +412,7 @@ SET(HEADERS_VKPT
 	refresh/vkpt/vkpt.h
 	refresh/vkpt/vk_util.h
 	refresh/vkpt/buddy_allocator.h
+	refresh/vkpt/conversion.h
 	refresh/vkpt/device_memory_allocator.h
 	refresh/vkpt/material.h
 	refresh/vkpt/physical_sky.h

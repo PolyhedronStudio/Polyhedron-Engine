@@ -55,18 +55,26 @@ VkDeviceAddress get_buffer_device_address(VkBuffer buffer);
 uint32_t get_memory_type(uint32_t mem_req_type_bits, VkMemoryPropertyFlags mem_prop);
 
 
-#define IMAGE_BARRIER(cmd_buf, ...) \
-	do { \
-		VkImageMemoryBarrier img_mem_barrier = { \
-			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
-			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-			__VA_ARGS__ \
-		}; \
-		vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
-				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, \
-				1, &img_mem_barrier); \
-	} while(0)
+//#define IMAGE_BARRIER(cmd_buf, ...) \
+//	do { \
+//		VkImageMemoryBarrier img_mem_barrier = { \
+//			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+//			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+//			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+//			__VA_ARGS__ \
+//		}; \
+//		vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
+//				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, \
+//				1, &img_mem_barrier); \
+//	} while(0)
+static inline void IMAGE_BARRIER(VkCommandBuffer &commandBuffer, VkImageMemoryBarrier img_mem_barrier) {
+	img_mem_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	img_mem_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	img_mem_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
+		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, \
+		1, &img_mem_barrier);
+}
 
 #define BUFFER_BARRIER(cmd_buf, ...) \
 	do { \
