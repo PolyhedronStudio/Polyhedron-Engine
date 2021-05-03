@@ -374,7 +374,7 @@ load_blue_noise()
 		                       | VK_IMAGE_USAGE_TRANSFER_DST_BIT
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics,
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
@@ -419,7 +419,7 @@ load_blue_noise()
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
-			.baseArrayLayer = layer,
+			.baseArrayLayer = (uint32_t)layer,
 			.layerCount     = 1,
 		};
 
@@ -437,7 +437,7 @@ load_blue_noise()
 			.imageSubresource = { 
 				.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 				.mipLevel       = 0,
-				.baseArrayLayer = layer,
+				.baseArrayLayer = (uint32_t)layer,
 				.layerCount     = 1,
 			},
 			.imageOffset    = { 0, 0, 0 },
@@ -840,10 +840,10 @@ vkpt_textures_initialize()
 		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.anisotropyEnable        = VK_TRUE,
 		.maxAnisotropy           = 16,
+		.minLod = 0.0f,
+		.maxLod = 128.0f,
 		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
 		.unnormalizedCoordinates = VK_FALSE,
-		.minLod                  = 0.0f,
-		.maxLod                  = 128.0f,
 	};
 	_VK(vkCreateSampler(qvk.device, &sampler_info, NULL, &qvk.tex_sampler));
 	ATTACH_LABEL_VARIABLE(qvk.tex_sampler, SAMPLER);
@@ -898,9 +898,9 @@ vkpt_textures_initialize()
 #undef IMG_DO
 #define IMG_DO(_name, _binding, ...) \
 		{ \
+			.binding         = BINDING_OFFSET_TEXTURES + _binding, \
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, \
 			.descriptorCount = 1, \
-			.binding         = BINDING_OFFSET_TEXTURES + _binding, \
 			.stageFlags      = VK_SHADER_STAGE_ALL, \
 		},
 	LIST_IMAGES
@@ -1110,7 +1110,7 @@ vkpt_textures_end_registration()
 		                       | VK_IMAGE_USAGE_TRANSFER_SRC_BIT
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics,
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
@@ -1218,7 +1218,7 @@ vkpt_textures_end_registration()
 		VkImageSubresourceRange subresource_range = {
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
-			.levelCount     = num_mip_levels,
+			.levelCount     = (uint32_t)num_mip_levels,
 			.baseArrayLayer = 0,
 			.layerCount     = 1
 		};
@@ -1272,17 +1272,22 @@ vkpt_textures_end_registration()
 			VkImageBlit region = {
 				.srcSubresource = {
 					.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-					.mipLevel = mip - 1,
+					.mipLevel = (uint32_t)mip - 1,
 					.baseArrayLayer = 0,
 					.layerCount = 1
 				},
 				.srcOffsets = { 
 					{ 0, 0, 0 }, 
-					{ wd, ht, 1 } },
+					{ 
+						(int32_t)wd, 
+						(int32_t)ht, 
+						1 
+					}
+				},
 
 				.dstSubresource = {
 					.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-					.mipLevel = mip,
+					.mipLevel = (uint32_t)mip,
 					.baseArrayLayer = 0,
 					.layerCount = 1
 				},
@@ -1391,7 +1396,7 @@ void vkpt_textures_update_descriptor_set()
 			.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet          = qvk_get_current_desc_set_textures(),
 			.dstBinding      = GLOBAL_TEXTURES_TEX_ARR_BINDING_IDX,
-			.dstArrayElement = i,
+			.dstArrayElement = (uint32_t)i,
 			.descriptorCount = 1,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.pImageInfo      = &img_info,
@@ -1483,7 +1488,7 @@ vkpt_create_images()
 LIST_IMAGES
 LIST_IMAGES_A_B
 #undef IMG_DO
-//	};
+	};
 
 #ifdef VKPT_DEVICE_GROUPS
 #define IMG_DO(_name, _binding, _vkformat, _glslformat, _w, _h) \

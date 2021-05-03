@@ -671,7 +671,7 @@ out:;
 
 		if(vkCreateImageView(qvk.device, &img_create_info, NULL, qvk.swap_chain_image_views + i) != VK_SUCCESS) {
 			Com_EPrintf("error creating image view!");
-			return 1;
+			return (VkResult)1;
 		}
 	}
 
@@ -707,7 +707,7 @@ create_command_pool_and_fences()
 	VkCommandPoolCreateInfo cmd_pool_create_info = {
 		.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
 		.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-		.queueFamilyIndex = qvk.queue_idx_graphics,
+		.queueFamilyIndex = (uint32_t)qvk.queue_idx_graphics,
 	};
 
 	/* command pool and buffers */
@@ -785,7 +785,7 @@ init_vulkan()
 		return false;
 	}
 
-	qvk.sdl2_extensions = malloc(sizeof(char*) * qvk.num_sdl2_extensions);
+	qvk.sdl2_extensions = (const char**)malloc(sizeof(char*) * qvk.num_sdl2_extensions);
 	if (!SDL_Vulkan_GetInstanceExtensions(qvk.window, &qvk.num_sdl2_extensions, qvk.sdl2_extensions)) {
 		Com_EPrintf("Couldn't get SDL2 Vulkan extensions\n");
 		return false;
@@ -797,7 +797,7 @@ init_vulkan()
 	}
 
 	int num_inst_ext_combined = qvk.num_sdl2_extensions + LENGTH(vk_requested_instance_extensions);
-	char **ext = alloca(sizeof(char *) * num_inst_ext_combined);
+	char **ext = (char**)alloca(sizeof(char *) * num_inst_ext_combined);
 	memcpy(ext, qvk.sdl2_extensions, qvk.num_sdl2_extensions * sizeof(*qvk.sdl2_extensions));
 	memcpy(ext + qvk.num_sdl2_extensions, vk_requested_instance_extensions, sizeof(vk_requested_instance_extensions));
 
@@ -818,7 +818,7 @@ init_vulkan()
 	VkInstanceCreateInfo inst_create_info = {
 		.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
 		.pApplicationInfo        = &vk_app_info,
-		.enabledExtensionCount   = num_inst_ext_combined,
+		.enabledExtensionCount   = (uint32_t)num_inst_ext_combined,
 		.ppEnabledExtensionNames = (const char * const*)ext,
 	};
 
@@ -886,7 +886,7 @@ init_vulkan()
 	_VK(vkEnumeratePhysicalDevices(qvk.instance, &num_devices, NULL));
 	if(num_devices == 0)
 		return false;
-	VkPhysicalDevice *devices = alloca(sizeof(VkPhysicalDevice) *num_devices);
+	VkPhysicalDevice *devices = (VkPhysicalDevice*)alloca(sizeof(VkPhysicalDevice) *num_devices);
 	_VK(vkEnumeratePhysicalDevices(qvk.instance, &num_devices, devices));
 
 #ifdef VKPT_DEVICE_GROUPS
@@ -962,7 +962,7 @@ init_vulkan()
 		uint32_t num_ext;
 		vkEnumerateDeviceExtensionProperties(devices[i], NULL, &num_ext, NULL);
 
-		VkExtensionProperties *ext_properties = alloca(sizeof(VkExtensionProperties) * num_ext);
+		VkExtensionProperties *ext_properties = (VkExtensionProperties*)alloca(sizeof(VkExtensionProperties) * num_ext);
 		vkEnumerateDeviceExtensionProperties(devices[i], NULL, &num_ext, ext_properties);
 
 		Com_Printf("Supported Vulkan device extensions:\n");
@@ -1147,7 +1147,7 @@ init_vulkan()
 	/* queue family and create physical device */
 	uint32_t num_queue_families = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(qvk.physical_device, &num_queue_families, NULL);
-	VkQueueFamilyProperties *queue_families = alloca(sizeof(VkQueueFamilyProperties) * num_queue_families);
+	VkQueueFamilyProperties *queue_families = (VkQueueFamilyProperties*)alloca(sizeof(VkQueueFamilyProperties) * num_queue_families);
 	vkGetPhysicalDeviceQueueFamilyProperties(qvk.physical_device, &num_queue_families, queue_families);
 
 	// Com_Printf("num queue families: %d\n", num_queue_families);
@@ -1191,9 +1191,9 @@ init_vulkan()
 	{
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+			.queueFamilyIndex = (uint32_t)qvk.queue_idx_graphics,
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
-			.queueFamilyIndex = qvk.queue_idx_graphics,
 		};
 
 		queue_create_info[num_create_queues++] = q;
@@ -1201,27 +1201,27 @@ init_vulkan()
 	if(qvk.queue_idx_compute != qvk.queue_idx_graphics) {
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+			.queueFamilyIndex = (uint32_t)qvk.queue_idx_compute,
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
-			.queueFamilyIndex = qvk.queue_idx_compute,
 		};
 		queue_create_info[num_create_queues++] = q;
 	};
 	if(qvk.queue_idx_transfer != qvk.queue_idx_graphics && qvk.queue_idx_transfer != qvk.queue_idx_compute) {
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+			.queueFamilyIndex = (uint32_t)qvk.queue_idx_transfer,
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
-			.queueFamilyIndex = qvk.queue_idx_transfer,
 		};
 		queue_create_info[num_create_queues++] = q;
 	};
 
 	VkPhysicalDeviceDescriptorIndexingFeatures idx_features = {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES,
-		.runtimeDescriptorArray = 1,
 		.shaderSampledImageArrayNonUniformIndexing = 1,
-		.shaderStorageBufferArrayNonUniformIndexing = 1
+		.shaderStorageBufferArrayNonUniformIndexing = 1,
+		.runtimeDescriptorArray = 1,
 	};
 
 #ifdef VKPT_DEVICE_GROUPS
@@ -1322,15 +1322,15 @@ init_vulkan()
 	VkDeviceCreateInfo dev_create_info = {
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		.pNext                   = &device_features,
+		.queueCreateInfoCount = (uint32_t)num_create_queues,
 		.pQueueCreateInfos       = queue_create_info,
-		.queueCreateInfoCount    = num_create_queues
 	};
 
 	uint32_t max_extension_count = LENGTH(vk_requested_device_extensions_common);
 	max_extension_count += max(max(LENGTH(vk_requested_device_extensions_khr), LENGTH(vk_requested_device_extensions_nv)), LENGTH(vk_requested_device_extensions_ray_query));
 	max_extension_count += LENGTH(vk_requested_device_extensions_debug);
 
-	const char** device_extensions = alloca(sizeof(char*) * max_extension_count);
+	const char** device_extensions = (const char**)alloca(sizeof(char*) * max_extension_count);
 	uint32_t device_extension_count = 0;
 
 	append_string_list(device_extensions, &device_extension_count, max_extension_count, 
@@ -1444,7 +1444,7 @@ create_shader_module_from_file(const char *name, const char *enum_name, qboolean
 	char *data;
 	size_t size;
 
-	size = FS_LoadFile(path, &data);
+	size = FS_LoadFile(path, (void**)&data);
 	if(!data) {
 		Com_EPrintf("Couldn't find shader module %s!\n", path);
 		return VK_NULL_HANDLE;
@@ -1592,7 +1592,7 @@ static int world_entity_id_count[2];
 static int num_model_lights = 0;
 static light_poly_t model_lights[MAX_MODEL_LIGHTS];
 
-static pbr_material_t const * get_mesh_material(const entity_t* entity, const maliasmesh_t* mesh)
+static pbr_material_t const * get_mesh_material(const r_entity_t* entity, const maliasmesh_t* mesh)
 {
 	if (entity->skin)
 	{
@@ -1606,7 +1606,7 @@ static pbr_material_t const * get_mesh_material(const entity_t* entity, const ma
 	return mesh->materials[skinnum];
 }
 
-static inline uint32_t fill_model_instance(const entity_t* entity, const model_t* model, const maliasmesh_t* mesh,
+static inline uint32_t fill_model_instance(const r_entity_t* entity, const model_t* model, const maliasmesh_t* mesh,
 	const float* transform, int model_instance_index, qboolean is_viewer_weapon, qboolean is_double_sided)
 {
 	pbr_material_t const * material = get_mesh_material(entity, mesh);
@@ -1639,11 +1639,11 @@ static inline uint32_t fill_model_instance(const entity_t* entity, const model_t
 
 	if (!MAT_IsKind(material_id, MATERIAL_KIND_GLASS))  
 	{
-		if (entity->flags & RF_SHELL_RED)
+		if (entity->flags & RenderEffects::RedShell)
 			material_id |= MATERIAL_FLAG_SHELL_RED;
-		if (entity->flags & RF_SHELL_GREEN)
+		if (entity->flags & RenderEffects::GreenShell)
 			material_id |= MATERIAL_FLAG_SHELL_GREEN;
-		if (entity->flags & RF_SHELL_BLUE)
+		if (entity->flags & RenderEffects::BlueShell)
 			material_id |= MATERIAL_FLAG_SHELL_BLUE;
 	}
 
@@ -1661,19 +1661,19 @@ static inline uint32_t fill_model_instance(const entity_t* entity, const model_t
 	instance->offset_prev = mesh->vertex_offset + oldframe * mesh->numverts * (sizeof(model_vertex_t) / sizeof(uint32_t));
 	instance->backlerp = entity->backlerp;
 	instance->material = material_id;
-	instance->alpha = (entity->flags & RF_TRANSLUCENT) ? entity->alpha : 1.0f;
+	instance->alpha = (entity->flags & RenderEffects::Translucent) ? entity->alpha : 1.0f;
 
 	return material_id;
 }
 
 static void
-add_dlights(const dlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
+add_dlights(const rdlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
 {
 	ubo->num_sphere_lights = 0;
 
 	for (int i = 0; i < num_lights; i++)
 	{
-		const dlight_t* light = lights + i;
+		const rdlight_t* light = lights + i;
 
 		float* dynlight_data = (float*)(ubo->sphere_light_data + ubo->num_sphere_lights * 2);
 		float* center = dynlight_data;
@@ -1697,7 +1697,7 @@ static inline void transform_point(const float* p, const float* matrix, float* r
 	VectorCopy(transformed, result); // vec4 -> vec3
 }
 
-static void process_bsp_entity(const entity_t* entity, int* bsp_mesh_idx, int* instance_idx, int* num_instanced_vert)
+static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int* instance_idx, int* num_instanced_vert)
 {
 	QVKInstanceBuffer_t* uniform_instance_buffer = &vkpt_refdef.uniform_instance_buffer;
 	uint32_t* ubo_bsp_cluster_id = (uint32_t*)uniform_instance_buffer->bsp_cluster_id;
@@ -1721,7 +1721,7 @@ static void process_bsp_entity(const entity_t* entity, int* bsp_mesh_idx, int* i
 	world_entity_ids[entity_frame_num][current_bsp_mesh_index] = entity->id;
 
 	float transform[16];
-	create_entity_matrix(transform, (entity_t*)entity, false);
+	create_entity_matrix(transform, (r_entity_t*)entity, false);
 	BspMeshInstance* ubo_instance_info = uniform_instance_buffer->bsp_mesh_instances + current_bsp_mesh_index;
 	memcpy(&ubo_instance_info->M, transform, sizeof(transform));
 	ubo_instance_info->frame = entity->frame;
@@ -1817,7 +1817,7 @@ static inline qboolean is_transparent_material(uint32_t material)
 #define MESH_FILTER_ALL 3
 
 static void process_regular_entity(
-	const entity_t* entity, 
+	const r_entity_t* entity, 
 	const model_t* model, 
 	qboolean is_viewer_weapon, 
 	qboolean is_double_sided, 
@@ -1834,7 +1834,7 @@ static void process_regular_entity(
 	uint32_t* ubo_model_cluster_id = (uint32_t*)uniform_instance_buffer->model_cluster_id;
 
 	float transform[16];
-	create_entity_matrix(transform, (entity_t*)entity, is_viewer_weapon);
+	create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
 	
 	int current_model_instance_index = *model_instance_idx;
 	int current_instance_index = *instance_idx;
@@ -1892,7 +1892,7 @@ static void process_regular_entity(
 
 		uint32_t cluster_id = ~0u;
 		if(bsp_world_model) 
-			cluster_id = BSP_PointLeaf(bsp_world_model->nodes, ((entity_t*)entity)->origin)->cluster;
+			cluster_id = BSP_PointLeaf(bsp_world_model->nodes, ((r_entity_t*)entity)->origin)->cluster;
 		ubo_model_cluster_id[current_model_instance_index] = cluster_id;
 
 		ubo_model_idx_offset[current_model_instance_index] = mesh->idx_offset;
@@ -1966,11 +1966,11 @@ prepare_entities(EntityUploadInfo* upload_info)
 	int num_instanced_vert = 0; /* need to track this here to find lights */
 	int instance_idx = 0;
 
-	const qboolean first_person_model = (cl_player_model->integer == CL_PLAYER_MODEL_FIRST_PERSON) && cl.baseclientinfo.model;
+	const qboolean first_person_model = (cl_player_model->integer == CL_PLAYER_MODEL_FIRST_PERSON) && cl.baseClientInfo.model;
 
 	for (int i = 0; i < vkpt_refdef.fd->num_entities; i++)
 	{
-		const entity_t* entity = vkpt_refdef.fd->entities + i;
+		const r_entity_t* entity = vkpt_refdef.fd->entities + i;
 
 		if (entity->model & 0x80000000)
 		{
@@ -1986,9 +1986,9 @@ prepare_entities(EntityUploadInfo* upload_info)
 			if (model == NULL || model->meshes == NULL)
 				continue;
 
-			if (entity->flags & RF_VIEWERMODEL)
+			if (entity->flags & RenderEffects::ViewerModel)
 				viewer_model_indices[viewer_model_num++] = i;
-			else if (entity->flags & RF_WEAPONMODEL)
+			else if (entity->flags & RenderEffects::ViewerModel)
 				viewer_weapon_indices[viewer_weapon_num++] = i;
 			else if (model->model_class == MCLASS_EXPLOSION || model->model_class == MCLASS_SMOKE)
 				explosion_indices[explosion_num++] = i;
@@ -2008,7 +2008,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	const uint32_t transparent_model_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < transparent_model_num; i++)
 	{
-		const entity_t* entity = vkpt_refdef.fd->entities + transparent_model_indices[i];
+		const r_entity_t* entity = vkpt_refdef.fd->entities + transparent_model_indices[i];
 
 		if (entity->model & 0x80000000)
 		{
@@ -2029,7 +2029,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	{
 		for (int i = 0; i < viewer_model_num; i++)
 		{
-			const entity_t* entity = vkpt_refdef.fd->entities + viewer_model_indices[i];
+			const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_model_indices[i];
 			const model_t* model = MOD_ForHandle(entity->model);
 			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 		}
@@ -2043,7 +2043,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	const uint32_t viewer_weapon_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < viewer_weapon_num; i++)
 	{
-		const entity_t* entity = vkpt_refdef.fd->entities + viewer_weapon_indices[i];
+		const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_weapon_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
 		process_regular_entity(entity, model, true, false, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 
@@ -2057,7 +2057,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	const uint32_t explosion_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < explosion_num; i++)
 	{
-		const entity_t* entity = vkpt_refdef.fd->entities + explosion_indices[i];
+		const r_entity_t* entity = vkpt_refdef.fd->entities + explosion_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
 		process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 	}
@@ -2425,13 +2425,17 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 		// Simulate that with a projection matrix adjustment to avoid modifying the rendering code.
 
 		float viewport_proj[16] = {
-			[0] = (float)fd->width / (float)qvk.extent_unscaled.width,
-			[12] = (float)(fd->x * 2 + fd->width - (int)qvk.extent_unscaled.width) / (float)qvk.extent_unscaled.width,
-			[5] = (float)fd->height / (float)qvk.extent_unscaled.height,
-			[13] = -(float)(fd->y * 2 + fd->height - (int)qvk.extent_unscaled.height) / (float)qvk.extent_unscaled.height,
-			[10] = 1.f,
-			[15] = 1.f
+			0.f, 0.f, 0.f, 0.f,
+			0.f, 0.f, 0.f, 0.f,
+			0.f, 0.f, 0.f, 0.f,
+			0.f, 0.f, 0.f, 0.f,
 		};
+		viewport_proj[0] = (float)fd->width / (float)qvk.extent_unscaled.width;
+		viewport_proj[12] = (float)(fd->x * 2 + fd->width - (int)qvk.extent_unscaled.width) / (float)qvk.extent_unscaled.width;
+		viewport_proj[5] = (float)fd->height / (float)qvk.extent_unscaled.height;
+		viewport_proj[13] = -(float)(fd->y * 2 + fd->height - (int)qvk.extent_unscaled.height) / (float)qvk.extent_unscaled.height;
+		viewport_proj[10] = 1.f;
+		viewport_proj[15] = 1.f;
 
 		mult_matrix_matrix(P, viewport_proj, raw_proj);
 	}

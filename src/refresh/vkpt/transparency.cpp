@@ -470,7 +470,7 @@ static int compare_beams(const void* _a, const void* _b)
 	return 0;
 }
 
-qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, vec3_t begin, vec3_t end, vec3_t color, float radius)
+qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, const vec4_t &begin, const vec4_t &end, const vec4_t &color, float radius)
 {
 	vec3_t dir, norm_dir;
 	VectorSubtract(end, begin, dir);
