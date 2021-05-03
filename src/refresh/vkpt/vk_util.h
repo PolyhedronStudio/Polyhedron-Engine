@@ -54,12 +54,13 @@ VkDeviceAddress get_buffer_device_address(VkBuffer buffer);
 
 uint32_t get_memory_type(uint32_t mem_req_type_bits, VkMemoryPropertyFlags mem_prop);
 
-// C++20 VKPT: Moved the initializers for:
-// sType srcQueueFamilyIndex dstQueueFamilyIndex
-// over to each respective call to IMAGE_BARRIER
+
 #define IMAGE_BARRIER(cmd_buf, ...) \
 	do { \
 		VkImageMemoryBarrier img_mem_barrier = { \
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
 			__VA_ARGS__ \
 		}; \
 		vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
@@ -67,11 +68,12 @@ uint32_t get_memory_type(uint32_t mem_req_type_bits, VkMemoryPropertyFlags mem_p
 				1, &img_mem_barrier); \
 	} while(0)
 
-// C++20 VKPT: Moved .sType, .srcQueueFamilyIndex, .dstQueueFamilyIndex out.
-// Initialized in the calls to BUFFER_BARRIER now due to init + dec orders having to match.
 #define BUFFER_BARRIER(cmd_buf, ...) \
 	do { \
 		VkBufferMemoryBarrier buf_mem_barrier = { \
+			.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER, \
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
 			__VA_ARGS__ \
 		}; \
 		vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
@@ -92,9 +94,6 @@ uint32_t get_memory_type(uint32_t mem_req_type_bits, VkMemoryPropertyFlags mem_p
 const char *qvk_format_to_string(VkFormat format);
 const char *qvk_result_to_string(VkResult result);
 
-// C++20: VKPT: Added .pNext = NULL, because all members need to be initialized.
-// Moved members in order.
-// Changed (uint64_t)a cast to (VkDebugReportObjectTypeEXT)a
 #define ATTACH_LABEL_VARIABLE(a, type) \
 	if(qvkDebugMarkerSetObjectNameEXT) { \
 		/*Com_Printf("attaching object label 0x%08lx %s\n", (uint64_t) a, #a);*/ \
@@ -102,12 +101,11 @@ const char *qvk_result_to_string(VkResult result);
 			.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT, \
 			.objectType = VK_DEBUG_REPORT_OBJECT_TYPE_##type##_EXT, \
 			.object = (uint64_t) a, \
-			.pObjectName = #a, \
+			.pObjectName = #a \
 		}; \
 		qvkDebugMarkerSetObjectNameEXT(qvk.device, &name_info); \
 	}
 
-// C++20 VKPT: Order fix of ATTACH_LABEL_VARIABLE_NAME
 #define ATTACH_LABEL_VARIABLE_NAME(a, type, name) \
 	if(qvkDebugMarkerSetObjectNameEXT) { \
 		/*Com_Printf("attaching object label 0x%08lx %s\n", (uint64_t) a, name);*/ \

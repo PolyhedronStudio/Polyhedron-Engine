@@ -49,9 +49,7 @@ vkpt_uniform_buffer_create()
 
 	_VK(vkCreateDescriptorSetLayout(qvk.device, &layout_info, NULL, &qvk.desc_set_layout_ubo));
 
-	const VkMemoryPropertyFlags host_memory_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT |
-		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
+	const VkMemoryPropertyFlags host_memory_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 	const VkMemoryPropertyFlags device_memory_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
 	VkPhysicalDeviceProperties properties;
@@ -70,12 +68,11 @@ vkpt_uniform_buffer_create()
 		.descriptorCount = MAX_FRAMES_IN_FLIGHT,
 	};
 
-	// C++20 VKPT: Order fix.
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-		.maxSets = MAX_FRAMES_IN_FLIGHT,
 		.poolSizeCount = 1,
 		.pPoolSizes    = &pool_size,
+		.maxSets       = MAX_FRAMES_IN_FLIGHT,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_ubo));
@@ -101,8 +98,7 @@ vkpt_uniform_buffer_create()
 		.range  = sizeof(QVKInstanceBuffer_t),
 	};
 
-	// C++20 VKPT: Array constructor fix.
-	VkWriteDescriptorSet writes[2] = { {}, {} };
+	VkWriteDescriptorSet writes[2] = { 0 };
 
 	writes[0].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 	writes[0].dstSet          = qvk.desc_set_ubo,
@@ -149,7 +145,7 @@ vkpt_uniform_buffer_update(VkCommandBuffer command_buffer)
 	assert(ubo->buffer != VK_NULL_HANDLE);
 	assert(qvk.current_frame_index < MAX_FRAMES_IN_FLIGHT);
 
-	QVKUniformBuffer_t *mapped_ubo = (QVKUniformBuffer_t*)buffer_map(ubo);// C++20 VKPT: Added cast.
+	QVKUniformBuffer_t *mapped_ubo = buffer_map(ubo);
 	assert(mapped_ubo);
 	memcpy(mapped_ubo, &vkpt_refdef.uniform_buffer, sizeof(QVKUniformBuffer_t));
 

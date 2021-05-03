@@ -48,7 +48,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	UBO_CVAR_DO(flt_atrous_normal_spec, 1) \
 	UBO_CVAR_DO(flt_enable, 1) /* switch for the entire SVGF reconstruction, 0 or 1 */ \
 	UBO_CVAR_DO(flt_fixed_albedo, 0) /* if nonzero, replaces surface albedo with that value after filtering */ \
-	UBO_CVAR_DO(flt_grad_transparent, 1.0) /* gradient scale for reflections and refractions, [0..1] */ \
+	UBO_CVAR_DO(flt_grad_weapon, 0.25) /* gradient scale for the first person weapon, [0..1] */ \
 	UBO_CVAR_DO(flt_min_alpha_color_hf, 0.02) /* minimum weight for the new frame data, color channel, (0..1] */ \
 	UBO_CVAR_DO(flt_min_alpha_color_lf, 0.01) \
 	UBO_CVAR_DO(flt_min_alpha_color_spec, 0.01) \
@@ -86,7 +86,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	UBO_CVAR_DO(pt_min_log_sky_luminance, -10) /* minimum sky luminance, log2 scale, used for polygon light selection, (-inf..inf) */ \
 	UBO_CVAR_DO(pt_metallic_override, -1) /* overrides metallic parameter of all materials if non-negative, [0..1] */ \
 	UBO_CVAR_DO(pt_ndf_trim, 0.9) /* trim factor for GGX NDF sampling (0..1] */ \
-	UBO_CVAR_DO(pt_num_bounce_rays, 1) /* number of bounce rays, [1..inf) */ \
+	UBO_CVAR_DO(pt_num_bounce_rays, 1) /* number of bounce rays, valid values are 0 (disabled), 0.5 (half-res diffuse), 1 (full-res diffuse + specular), 2 (two bounces) */ \
 	UBO_CVAR_DO(pt_particle_softness, 1.0) /* particle softness */ \
 	UBO_CVAR_DO(pt_reflect_refract, 2) /* number of reflection or refraction bounces: 0, 1 or 2 */ \
 	UBO_CVAR_DO(pt_roughness_override, -1) /* overrides roughness of all materials if non-negative, [0..1] */ \
@@ -104,6 +104,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	UBO_CVAR_DO(tm_exposure_bias, -1.0) /* exposure bias, log-2 scale */ \
 	UBO_CVAR_DO(tm_exposure_speed_down, 1) /* speed of exponential eye adaptation when scene gets darker, 0 means instant */ \
 	UBO_CVAR_DO(tm_exposure_speed_up, 2) /* speed of exponential eye adaptation when scene gets brighter, 0 means instant */ \
+	UBO_CVAR_DO(tm_blend_scale_border, 1) /* scale factor for full screen blend intensity, at screen border */ \
+	UBO_CVAR_DO(tm_blend_scale_center, 0.4) /* scale factor for full screen blend intensity, at screen center */ \
+	UBO_CVAR_DO(tm_blend_scale_fade_exp, 4) /* exponent used to interpolate between "border" and "center" factors */ \
 	UBO_CVAR_DO(tm_high_percentile, 90) /* high percentile for computing histogram average, (0..100] */ \
 	UBO_CVAR_DO(tm_knee_start, 0.6) /* where to switch from a linear to a rational function ramp in the post-tonemapping process, (0..1)  */ \
 	UBO_CVAR_DO(tm_low_percentile, 70) /* low percentile for computing histogram average, [0..100) */ \
@@ -141,16 +144,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	GLOBAL_UBO_VAR_LIST_DO(float,           sky_transmittance) \
 	GLOBAL_UBO_VAR_LIST_DO(float,           sky_phase_g) \
 	GLOBAL_UBO_VAR_LIST_DO(float,           sky_amb_phase_g) \
-    GLOBAL_UBO_VAR_LIST_DO(float,           sun_solid_angle) \
-    \
-    GLOBAL_UBO_VAR_LIST_DO(vec3,            physical_sky_ground_radiance) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           sun_solid_angle) \
+	\
+	GLOBAL_UBO_VAR_LIST_DO(vec3,            physical_sky_ground_radiance) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             physical_sky_flags) \
-    \
+	\
 	GLOBAL_UBO_VAR_LIST_DO(float,           sky_scattering) \
 	GLOBAL_UBO_VAR_LIST_DO(float,           temporal_blend_factor) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             planet_albedo_map) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             planet_normal_map) \
-    \
+	\
 	GLOBAL_UBO_VAR_LIST_DO(int,             num_sphere_lights) \
 	GLOBAL_UBO_VAR_LIST_DO(int ,            num_static_lights) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             num_static_primitives) \
@@ -166,32 +169,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_intensity) \
 	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_eccentricity) \
 	\
-	GLOBAL_UBO_VAR_LIST_DO(int,				god_rays_fogEnable) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogTintColorRed) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogTintColorGreen) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogTintColorBlue) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogTintPower) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogDensityRoot) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           god_rays_fogPushBackDist) \
-    GLOBAL_UBO_VAR_LIST_DO(int,             god_rays_fogMode) \
-    GLOBAL_UBO_VAR_LIST_DO(int,             skyPlanet) \
-    GLOBAL_UBO_VAR_LIST_DO(int,             sdfstep) \
-    GLOBAL_UBO_VAR_LIST_DO(int,             sdfclouds) \
-	GLOBAL_UBO_VAR_LIST_DO(int,             rgb_noise256_map) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           sdfcoverage) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           sdfthickness) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           sdfabsorption) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           sdffmbfreq) \
-	GLOBAL_UBO_VAR_LIST_DO(vec4,            sdfwindvec) \
-    GLOBAL_UBO_VAR_LIST_DO(vec3,            sdfcloudcolor) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           sdfcloudcolorize) \
-    GLOBAL_UBO_VAR_LIST_DO(vec3,            sdfskycolor) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           sdfskycolorize) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           sdfcloudinner) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           sdfcloudouter) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           sdfsunfluxmin) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           sdfsunfluxmax) \
-    \
 	GLOBAL_UBO_VAR_LIST_DO(int,             num_cameras) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             screen_image_width) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             screen_image_height) \
@@ -199,8 +176,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	\
 	GLOBAL_UBO_VAR_LIST_DO(int,             prev_width) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             prev_height)\
-	GLOBAL_UBO_VAR_LIST_DO(float,           inv_width)\
-	GLOBAL_UBO_VAR_LIST_DO(float,           inv_height)\
+	GLOBAL_UBO_VAR_LIST_DO(float,           inv_width) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           inv_height) \
 	\
 	GLOBAL_UBO_VAR_LIST_DO(int,             unscaled_width) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             unscaled_height) \
@@ -212,15 +189,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	GLOBAL_UBO_VAR_LIST_DO(int,             prev_taa_output_width) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             prev_taa_output_height) \
 	\
-    GLOBAL_UBO_VAR_LIST_DO(vec2,            sub_pixel_jitter) \
-    GLOBAL_UBO_VAR_LIST_DO(float,           prev_adapted_luminance) \
+	GLOBAL_UBO_VAR_LIST_DO(vec2,            sub_pixel_jitter) \
+	GLOBAL_UBO_VAR_LIST_DO(float,           prev_adapted_luminance) \
 	GLOBAL_UBO_VAR_LIST_DO(float,           padding1) \
+	GLOBAL_UBO_VAR_LIST_DO(vec4,            fs_blend_color) \
 	\
 	GLOBAL_UBO_VAR_LIST_DO(vec4,            world_center) \
 	GLOBAL_UBO_VAR_LIST_DO(vec4,            world_size) \
 	GLOBAL_UBO_VAR_LIST_DO(vec4,            world_half_size_inv) \
 	\
-	GLOBAL_UBO_VAR_LIST_DO(vec4,            sphere_light_data[MAX_LIGHT_SOURCES * 4]) \
+	GLOBAL_UBO_VAR_LIST_DO(vec4,            sphere_light_data[MAX_LIGHT_SOURCES * 2]) \
 	GLOBAL_UBO_VAR_LIST_DO(vec4,            cam_pos) \
 	GLOBAL_UBO_VAR_LIST_DO(mat4,            V) \
 	GLOBAL_UBO_VAR_LIST_DO(mat4,            invV) \
@@ -264,7 +242,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 typedef uint32_t uvec4_t[4];
-//typedef int ivec4_t[4]; // MATHLIB: !! COMMENTED OUT, IS ALREADY DEFINED IN vector4.h
+//typedef int ivec4_t[4];
 typedef uint32_t uint;
 
 typedef struct {

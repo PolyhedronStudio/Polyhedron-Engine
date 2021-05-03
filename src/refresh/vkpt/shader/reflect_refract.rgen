@@ -31,6 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ENABLE_SHADOW_CAUSTICS
 #define ENABLE_SUN_SHAPE
 #include "path_tracer_rgen.h"
+#include "path_tracer_transparency.glsl"
 #include "projection.glsl"
 
 layout(constant_id = 0) const uint spec_bounce_index = 0;
@@ -95,6 +96,9 @@ main()
 	vec4 view_direction = imageLoad(IMG_PT_VIEW_DIRECTION, ipos);
 	vec3 direction = view_direction.xyz;
 	int checkerboard_flags = int(view_direction.w);
+	// Different from primary_is_weapon - this carries over through reflections and refractions
+	int checkerboard_weapon_flag = checkerboard_flags & CHECKERBOARD_FLAG_WEAPON;
+	checkerboard_flags &= CHECKERBOARD_FLAG_FIELD_MASK;
 
 	vec4 throughput_distance = imageLoad(IMG_PT_THROUGHPUT, ipos);
 	vec3 throughput = throughput_distance.rgb;
@@ -477,10 +481,11 @@ main()
 	else
 		reflection_ray.origin -= normal.xyz * 0.001;
 
-	trace_ray(reflection_ray, backface_culling, reflection_cull_mask);
+	trace_ray(reflection_ray, backface_culling, reflection_cull_mask, false);
 
 	// Add the transparency encountered along the reflection ray
-	transparent = alpha_blend(transparent, unpackHalf4x16(ray_payload_brdf.transparency) * vec4(throughput, 1));
+	vec4 payload_transparency = get_payload_transparency_simple(ray_payload_brdf);
+	transparent = alpha_blend(transparent, payload_transparency * vec4(throughput, 1));
 
 	if(is_sky(ray_payload_brdf))
 	{
@@ -492,12 +497,6 @@ main()
 			vec3 env = env_map(direction, false);
 			env *= global_ubo.pt_env_scale;
 			
-			// Sample SDF Clouds
-			if(global_ubo.sdfclouds == 1)
-				SampleCloudsSDF(env, reflection_ray);
-
-			// End Sample SDF Clouds
-
 			transparent = alpha_blend(transparent, vec4(env * throughput, 1));
 		}
 
@@ -509,7 +508,7 @@ main()
 		imageStore(IMG_PT_METALLIC_A, ipos, vec4(0));
 		imageStore(IMG_PT_TRANSPARENT, ipos, transparent);
 		imageStore(IMG_PT_SHADING_POSITION, ipos, vec4(position + direction * PRIMARY_RAY_T_MAX, uintBitsToFloat(material_id)));
-		imageStore(IMG_PT_VIEW_DIRECTION, ipos, vec4(direction, float(checkerboard_flags)));
+		imageStore(IMG_PT_VIEW_DIRECTION, ipos, vec4(direction, float(checkerboard_flags | checkerboard_weapon_flag)));
 		imageStore(IMG_PT_VIEW_DEPTH_A, ipos, vec4(-PRIMARY_RAY_T_MAX));
 		imageStore(IMG_PT_GODRAYS_THROUGHPUT_DIST, ipos, vec4(throughput, PRIMARY_RAY_T_MAX));
 		
@@ -701,14 +700,14 @@ main()
 
 	bool is_dynamic_primitive = is_dynamic_instance(ray_payload_brdf);
 	uint primitive_id = get_primitive(ray_payload_brdf);
-	uint visbuf_instance_info = is_dynamic_primitive ? get_instance_id_instanced(primitive_id) : VISBUF_STATIC_GEOMETRY;
 
-	vec4 vis_buf;
-	vis_buf.xy = bary.yz;
-	vis_buf.z = uintBitsToFloat(visbuf_instance_info);
-	vis_buf.w = uintBitsToFloat(primitive_id);
+	uvec2 vis_buf;
+	vis_buf.x = is_dynamic_primitive
+		? get_instance_id_instanced(primitive_id)
+		: visbuf_pack_static_prim(primitive_id);
+	vis_buf.y = visbuf_pack_barycentrics(bary);
 	
-	imageStore(IMG_PT_VISBUF_A, ipos, vis_buf);
+	imageStore(IMG_PT_VISBUF_A, ipos, uvec4(vis_buf, 0, 0));
 
 	// Store the surface parameters into the G-buffer for the indirect lighting shader
 	if(is_camera(material_id))
@@ -727,7 +726,7 @@ main()
 
 	imageStore(IMG_PT_GEO_NORMAL_A, ipos, uvec4(encode_normal(geo_normal)));
 	imageStore(IMG_PT_SHADING_POSITION, ipos, vec4(position.xyz, uintBitsToFloat(material_id)));
-	imageStore(IMG_PT_VIEW_DIRECTION, ipos, vec4(direction, float(checkerboard_flags)));
+	imageStore(IMG_PT_VIEW_DIRECTION, ipos, vec4(direction, float(checkerboard_flags | checkerboard_weapon_flag)));
 	imageStore(IMG_PT_THROUGHPUT, ipos, vec4(throughput, optical_path_length));
 	imageStore(IMG_PT_TRANSPARENT, ipos, transparent);
 	imageStore(IMG_PT_CLUSTER_A, ipos, uvec4(cluster_idx));

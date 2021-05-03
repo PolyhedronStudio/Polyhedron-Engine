@@ -134,12 +134,7 @@ typedef struct pbr_materials_table_s {
 	int num_custom_materials;
 } pbr_materials_table_t;
 
-// C++20 VKPT: Initialize in order.
-static pbr_materials_table_t pbr_materials_table = { 
-	.num_materials = 0, 
-	.alpha_sorted = true,
-	.num_custom_materials = 0, 
-};
+static pbr_materials_table_t pbr_materials_table = { .num_materials = 0, .num_custom_materials = 0, .alpha_sorted = true };
 
 pbr_material_t const * MAT_GetPBRMaterialsTable()
 {
@@ -332,7 +327,7 @@ static qerror_t parseMaterialsTable(char const * filename, pbr_materials_table_t
 
 	qerror_t status = validateMaterialsTable(table);
 
-	Com_Printf("Loaded '%s' (fast search = %s)\n", filename, table->alpha_sorted == (qboolean)true ? "true" : "false"); // E0.2: Added cast.
+	Com_Printf("Loaded '%s' (fast search = %s)\n", filename, table->alpha_sorted == true ? "true" : "false");
 
 	FS_FreeFile(buffer);
 
@@ -594,15 +589,14 @@ qerror_t MAT_SetPBRMaterialAttribute(pbr_material_t * mat, char const * token, c
 		{6, "correct_albedo_flag", TOKEN_BOOL} };
 
 	static int ntokens = sizeof(tokens) / sizeof(struct Token);
-	
-	struct Token const* t = NULL;
-	float fvalue = 0.f; qboolean bvalue = false; char const* svalue = NULL;
 
+	// Declared here to avoid Label declaration C++ issues.
+	float fvalue = 0.f; qboolean bvalue = false; char const* svalue = NULL;
+	struct Token const* t = NULL;
+	
 	if (token == NULL || value == NULL)
 		goto usage;
 
-	// C++20 VKPT: moved to top.
-	//struct Token const * t = NULL;
 	for (int i = 0; i < ntokens; ++i)
 	{
 		if (strcmp(token, tokens[i].name) == 0)
@@ -614,8 +608,6 @@ qerror_t MAT_SetPBRMaterialAttribute(pbr_material_t * mat, char const * token, c
 		goto usage;
 	}
 
-	// C++20 VKPT: Moved to top.
-	//float fvalue = 0.f; qboolean bvalue = false; char const * svalue = NULL;
 	switch (t->type)
 	{
 		case TOKEN_BOOL:   bvalue = atoi(value) == 0 ? false : true; break;
@@ -643,8 +635,8 @@ qerror_t MAT_SetPBRMaterialAttribute(pbr_material_t * mat, char const * token, c
 				return Q_ERR_FAILURE;
 			}
 		} break;
-		case 5: mat->flags = bvalue == (qboolean)true ? mat->flags | MATERIAL_FLAG_LIGHT : mat->flags & ~(MATERIAL_FLAG_LIGHT); break; // E0.2: Added cast.
-		case 6: mat->flags = bvalue == (qboolean)true ? mat->flags | MATERIAL_FLAG_CORRECT_ALBEDO : mat->flags & ~(MATERIAL_FLAG_CORRECT_ALBEDO); break; // E0.2: Added cast.
+		case 5: mat->flags = bvalue == true ? mat->flags | MATERIAL_FLAG_LIGHT : mat->flags & ~(MATERIAL_FLAG_LIGHT); break;
+		case 6: mat->flags = bvalue == true ? mat->flags | MATERIAL_FLAG_CORRECT_ALBEDO : mat->flags & ~(MATERIAL_FLAG_CORRECT_ALBEDO); break;
 	}
 
 	return Q_ERR_SUCCESS;
@@ -653,8 +645,7 @@ usage:
 	Com_Printf("Usage : set_material <token> <value>\n");
 	for (int i = 0; i < ntokens; ++i)
 	{
-		// C++20 VKPT: struct Token const * t = &tokens[i];
-		t = &tokens[i];
+		struct Token const * t = &tokens[i];
 
 		char const * typeName = "(undefined)";
 		switch (t->type)

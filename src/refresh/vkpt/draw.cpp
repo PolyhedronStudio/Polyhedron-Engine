@@ -52,7 +52,7 @@ static VkPipelineLayout        pipeline_layout_final_blit;
 static VkRenderPass            render_pass_stretch_pic;
 static VkPipeline              pipeline_stretch_pic;
 static VkPipeline              pipeline_final_blit;
-static VkFramebuffer           framebuffer_stretch_pic[MAX_FRAMES_IN_FLIGHT];
+static VkFramebuffer           framebuffer_stretch_pic[MAX_SWAPCHAIN_IMAGES];
 static BufferResource_t        buf_stretch_pic_queue[MAX_FRAMES_IN_FLIGHT];
 static VkDescriptorSetLayout   desc_set_layout_sbo;
 static VkDescriptorPool        desc_pool_sbo;
@@ -187,19 +187,17 @@ create_render_pass()
 		.pColorAttachments    = &color_attachment_ref,
 	};
 
-	// C++20 VKPT: Order fix.
-	// C++20 VKPT: LENGTH() array macro fix.
-	VkSubpassDependency dependencies[1];// = {
-	dependencies[0] = {
-		.srcSubpass = VK_SUBPASS_EXTERNAL,
-		.dstSubpass = 0, /* index for own subpass */
-		.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.srcAccessMask = 0, /* XXX verify */
-		.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
-					   | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+	VkSubpassDependency dependencies[] = {
+		{
+			.srcSubpass    = VK_SUBPASS_EXTERNAL,
+			.dstSubpass    = 0, /* index for own subpass */
+			.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			.srcAccessMask = 0, /* XXX verify */
+			.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+			               | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		},
 	};
-	//};
 
 	VkRenderPassCreateInfo render_pass_info = {
 		.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
@@ -227,14 +225,13 @@ vkpt_draw_initialize()
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
 	}
 
-	// C++20 VKPT: Order fix.
-	// C++20 VKPT: LENGTH() array macro fix.
-	VkDescriptorSetLayoutBinding layout_bindings[1];// = {
-	layout_bindings[0] = {
-			.binding = 0,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+	VkDescriptorSetLayoutBinding layout_bindings[] = {
+		{
+			.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+			.binding         = 0,
+			.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT,
+		},
 	};
 
 	VkDescriptorSetLayoutCreateInfo layout_info = {
@@ -251,12 +248,11 @@ vkpt_draw_initialize()
 		.descriptorCount = MAX_FRAMES_IN_FLIGHT,
 	};
 
-	// C++20 VKPT: Order fix.
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-		.maxSets = MAX_FRAMES_IN_FLIGHT,
 		.poolSizeCount = 1,
 		.pPoolSizes    = &pool_size,
+		.maxSets       = MAX_FRAMES_IN_FLIGHT,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_sbo));
@@ -280,14 +276,13 @@ vkpt_draw_initialize()
 			.range  = sizeof(stretch_pic_queue),
 		};
 
-		// C++20 VKPT: Order fix.
 		VkWriteDescriptorSet output_buf_write = {
 			.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet          = desc_set_sbo[i],
 			.dstBinding      = 0,
 			.dstArrayElement = 0,
-			.descriptorCount = 1,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
 			.pBufferInfo     = &buf_info,
 		};
 
@@ -386,45 +381,42 @@ vkpt_draw_create_pipelines()
 		.pScissors     = &scissor,
 	};
 
-	// C++20 VKPT: Order fix.
 	VkPipelineRasterizationStateCreateInfo rasterizer_state = {
 		.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
 		.depthClampEnable        = VK_FALSE,
 		.rasterizerDiscardEnable = VK_FALSE, /* skip rasterizer */
 		.polygonMode             = VK_POLYGON_MODE_FILL,
+		.lineWidth               = 1.0f,
 		.cullMode                = VK_CULL_MODE_BACK_BIT,
 		.frontFace               = VK_FRONT_FACE_CLOCKWISE,
 		.depthBiasEnable         = VK_FALSE,
 		.depthBiasConstantFactor = 0.0f,
 		.depthBiasClamp          = 0.0f,
 		.depthBiasSlopeFactor    = 0.0f,
-		.lineWidth = 1.0f,
 	};
 
-	// C++20 VKPT: Order fix.
 	VkPipelineMultisampleStateCreateInfo multisample_state = {
 		.sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-		.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
 		.sampleShadingEnable   = VK_FALSE,
+		.rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT,
 		.minSampleShading      = 1.0f,
 		.pSampleMask           = NULL,
 		.alphaToCoverageEnable = VK_FALSE,
 		.alphaToOneEnable      = VK_FALSE,
 	};
 
-	// C++20 VKPT: Order fix.
 	VkPipelineColorBlendAttachmentState color_blend_attachment = {
-		.blendEnable = VK_TRUE,
+		.colorWriteMask      = VK_COLOR_COMPONENT_R_BIT
+			                 | VK_COLOR_COMPONENT_G_BIT
+			                 | VK_COLOR_COMPONENT_B_BIT
+			                 | VK_COLOR_COMPONENT_A_BIT,
+		.blendEnable         = VK_TRUE,
 		.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA,
 		.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
 		.colorBlendOp        = VK_BLEND_OP_ADD,
 		.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
 		.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
 		.alphaBlendOp        = VK_BLEND_OP_ADD,
-		.colorWriteMask = VK_COLOR_COMPONENT_R_BIT
-							 | VK_COLOR_COMPONENT_G_BIT
-							 | VK_COLOR_COMPONENT_B_BIT
-							 | VK_COLOR_COMPONENT_A_BIT,
 	};
 
 	VkPipelineColorBlendStateCreateInfo color_blend_state = {
@@ -515,15 +507,12 @@ vkpt_draw_submit_stretch_pics(VkCommandBuffer cmd_buf)
 	buffer_unmap(buf_spq);
 	spq_dev = NULL;
 
-	// C++20 VKPT: Construct fix.
 	VkRenderPassBeginInfo render_pass_info = {
 		.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.renderPass        = render_pass_stretch_pic,
 		.framebuffer       = framebuffer_stretch_pic[qvk.current_swap_chain_image_index],
-		.renderArea = {
-			.offset = { 0, 0 },
-			.extent = vkpt_draw_get_extent()
-		}
+		.renderArea.offset = { 0, 0 },
+		.renderArea.extent = vkpt_draw_get_extent()
 	};
 
 	VkDescriptorSet desc_sets[] = {
@@ -553,86 +542,61 @@ vkpt_final_blit_simple(VkCommandBuffer cmd_buf)
 		.layerCount = 1
 	};
 
-	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
+		.subresourceRange = subresource_range,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
-		.subresourceRange = subresource_range,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 	);
 
 	int output_img = VKPT_IMG_TAA_OUTPUT;
 
-	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = qvk.images[output_img],
+		.subresourceRange = subresource_range,
 		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = qvk.images[output_img],
-		.subresourceRange = subresource_range,
-
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
 	);
 
 	VkOffset3D blit_size = {
-		.x = (int32_t)qvk.extent_taa_output.width,	// C++20 VKPT: Added cast.
-		.y = (int32_t)qvk.extent_taa_output.height,	// C++20 VKPT: Added cast.
-		.z = (int32_t)1								// C++20 VKPT: Added cast.
+		.x = qvk.extent_taa_output.width,
+		.y = qvk.extent_taa_output.height,
+		.z = 1
 	};
 	VkOffset3D blit_size_unscaled = {
-		.x = (int32_t)qvk.extent_unscaled.width,.y = (int32_t)qvk.extent_unscaled.height,.z = 1 // C++20 VKPT: Added cast.
+		.x = qvk.extent_unscaled.width,.y = qvk.extent_unscaled.height,.z = 1
 	};
-
-	// C++20 VKPT: COnstruct fix.
 	VkImageBlit img_blit = {
 		.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
 		.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
-		//.srcOffsets = { [1] = blit_size },
-		//.dstOffsets = { [1] = blit_size_unscaled },
+		.srcOffsets = { [1] = blit_size },
+		.dstOffsets = { [1] = blit_size_unscaled },
 	};
-	img_blit.srcOffsets[1] = blit_size;
-	img_blit.dstOffsets[1] = blit_size_unscaled;
 	vkCmdBlitImage(cmd_buf,
 		qvk.images[output_img], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 		qvk.swap_chain_images[qvk.current_swap_chain_image_index], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1, &img_blit, VK_FILTER_NEAREST);
 
-	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
+		.subresourceRange = subresource_range,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = 0,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
-		.subresourceRange = subresource_range,
+		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 	);
 
-	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = qvk.images[output_img],
+		.subresourceRange = subresource_range,
 		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = qvk.images[output_img],
-		.subresourceRange = subresource_range,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL
 	);
 
 	return VK_SUCCESS;
@@ -641,15 +605,12 @@ vkpt_final_blit_simple(VkCommandBuffer cmd_buf)
 VkResult
 vkpt_final_blit_filtered(VkCommandBuffer cmd_buf)
 {
-	// C++20 VKPT: Construct fix.
 	VkRenderPassBeginInfo render_pass_info = {
 		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.renderPass = render_pass_stretch_pic,
 		.framebuffer = framebuffer_stretch_pic[qvk.current_swap_chain_image_index],
-		.renderArea = {
-			.offset = { 0, 0 },
-			.extent = vkpt_draw_get_extent()
-		}
+		.renderArea.offset = { 0, 0 },
+		.renderArea.extent = vkpt_draw_get_extent()
 	};
 
 	VkDescriptorSet desc_sets[] = {
@@ -708,7 +669,7 @@ R_SetColor_RTX(uint32_t color)
 }
 
 void
-R_LightPoint_RTX(const vec3_t &origin, vec3_t &light)
+R_LightPoint_RTX(vec3_t origin, vec3_t light)
 {
 	VectorSet(light, 1, 1, 1);
 }

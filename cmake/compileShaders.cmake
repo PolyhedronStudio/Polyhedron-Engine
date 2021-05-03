@@ -19,17 +19,24 @@ set(SHADER_SOURCE_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/vertex_buffer.h
     ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/water.glsl)
 
-find_program(GLSLANG_COMPILER
-        glslangValidator
-    PATHS
-        $ENV{VULKAN_SDK}/bin/
-)
 
-message(STATUS "Glslang compiler : ${GLSLANG_COMPILER}")
+if(TARGET glslangValidator)
+    set(GLSLANG_COMPILER "$<TARGET_FILE:glslangValidator>")
+    message(STATUS "Using glslangValidator built from source")
+else()
+    find_program(GLSLANG_COMPILER glslangValidator PATHS "$ENV{VULKAN_SDK}/bin/")
+
+    if(NOT GLSLANG_COMPILER)
+        message(FATAL_ERROR "Couldn't find glslangValidator! "
+            "Please provide a valid path to it using the GLSLANG_COMPILER variable.")
+    endif()
+    
+    message(STATUS "Using this glslangValidator: ${GLSLANG_COMPILER}")
+endif()
 
 function(compile_shader)
     set(options "")
-    set(oneValueArgs SOURCE_FILE OUTPUT_FILE_NAME OUTPUT_FILE_LIST)
+    set(oneValueArgs SOURCE_FILE OUTPUT_FILE_NAME OUTPUT_FILE_LIST STAGE)
     set(multiValueArgs DEFINES)
     cmake_parse_arguments(params "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -48,13 +55,20 @@ function(compile_shader)
     else()
         get_filename_component(output_file_name ${src_file} NAME)
     endif()
+
+    if (params_STAGE)
+        set(stage -S comp)
+    else()
+        set(stage)
+    endif()
     
     set_source_files_properties(${src_file} PROPERTIES VS_TOOL_OVERRIDE "None")
 
-    set (out_dir "${CMAKE_SOURCE_DIR}/baseq2/shader_vkpt")
+    set (out_dir "${CMAKE_SOURCE_DIR}/basenac/shader_vkpt")
     set (out_file "${out_dir}/${output_file_name}.spv")
     
     set(glslang_command_line
+            ${stage}
             --target-env vulkan1.2
             -DVKPT_SHADER
             -V
@@ -71,3 +85,4 @@ function(compile_shader)
     
     set(${params_OUTPUT_FILE_LIST} ${${params_OUTPUT_FILE_LIST}} ${out_file} PARENT_SCOPE)
 endfunction()
+

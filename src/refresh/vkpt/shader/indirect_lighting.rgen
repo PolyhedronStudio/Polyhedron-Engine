@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma optionNV(unroll all)
 
 #include "path_tracer_rgen.h"
+#include "path_tracer_transparency.glsl"
 
 layout(constant_id = 0) const uint spec_bounce_index = 0;
 
@@ -214,7 +215,7 @@ indirect_lighting(
 		shadow_cull_mask |= AS_FLAG_VIEWER_WEAPON;
 	}
 
-	trace_ray(bounce_ray, true, bounce_cull_mask);
+	trace_ray(bounce_ray, true, bounce_cull_mask, true);
 
 	Triangle triangle;
 
@@ -222,7 +223,7 @@ indirect_lighting(
 
 	if(is_specular_ray)
 	{
-		vec4 transparency = unpackHalf4x16(ray_payload_brdf.transparency);
+		vec4 transparency = get_payload_transparency_simple(ray_payload_brdf);
 		bounce_contrib += transparency.rgb * transparency.a * bounce_throughput * (1.0 - direct_specular_weight);
 	}
 
@@ -266,14 +267,9 @@ indirect_lighting(
 		if(!is_analytic_light || is_specular_ray)
 		{
 			vec3 env = env_map(bounce_direction, true);
+
 			env *= global_ubo.pt_env_scale;
 			
-			// Sample SDF Clouds
-			if(global_ubo.sdfclouds == 1)
-				SampleCloudsSDF(env, bounce_ray);
-
-			// End Sample SDF Clouds
-
 			if(!is_analytic_light)
 				bounce_contrib = bounce_throughput * env * indirect_specular_weight;
 			else if(is_specular_ray)
@@ -392,20 +388,7 @@ indirect_lighting(
 		if(sun_attenuation > 0)
 		{
 			vec3 bounce_sun_diffuse, bounce_sun_specular;
-			get_sunlight(
-			bounce_cluster_idx,
-			bounce_material_id,
-			bounce_position,
-			bounce_normal,
-			bounce_geo_normal,
-			bounce_direction,
-			0 /* roughness - don't care */,
-			MEDIUM_NONE,
-			false,
-			bounce_sun_diffuse,
-			bounce_sun_specular,
-			shadow_cull_mask);
-			
+			get_sunlight(bounce_cluster_idx, bounce_material_id, bounce_position, bounce_normal, bounce_geo_normal, bounce_direction, 0 /* roughness - don't care */, MEDIUM_NONE, false, bounce_sun_diffuse, bounce_sun_specular, shadow_cull_mask);
 			bounce_contrib += bounce_throughput * bounce_sun_diffuse * global_ubo.sun_bounce_scale * sun_attenuation;
 		}
 

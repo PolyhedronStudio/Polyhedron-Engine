@@ -22,9 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define GRAD_DWN (3)
 
 #define SHADOWMAP_SIZE 4096
-#define TERRAIN_SHADOWMAP_SIZE 2048
-
-#define USE_NEAREST_TEXTURE_FILTER 0
 
 #define HISTOGRAM_BINS 128
 
@@ -43,7 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define NUM_LIGHT_STATS_BUFFERS 3
 
-#define PRIMARY_RAY_T_MAX 100000
+#define PRIMARY_RAY_T_MAX 10000
 
 #define MAX_CAMERAS 8
 
@@ -93,6 +90,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define CHECKERBOARD_FLAG_REFLECTION 2
 #define CHECKERBOARD_FLAG_REFRACTION 4
 
+// Combines the PRIMARY, REFLECTION, REFRACTION fields
+#define CHECKERBOARD_FLAG_FIELD_MASK 7 
+// Not really a checkerboard flag, but it's stored in the same channel.
+// Signals that the surface is a first-person weapon.
+#define CHECKERBOARD_FLAG_WEAPON     8
+
 #define MEDIUM_NONE  0
 #define MEDIUM_WATER 1
 #define MEDIUM_SLIME 2
@@ -105,10 +108,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define SHADER_MAX_ENTITIES                  1024
 #define SHADER_MAX_BSP_ENTITIES              128
-#define MAX_LIGHT_SOURCES                    256
-//MAX_DLIGHTS + MAX_ENTLIGHTS
-#define MAX_ENTLIGHTS                        256
-#define MAX_LIGHT_STYLES                     256
+#define MAX_LIGHT_SOURCES                    32
+#define MAX_LIGHT_STYLES                     64
 
 #define AS_FLAG_OPAQUE          (1 << 0)
 #define AS_FLAG_TRANSPARENT     (1 << 1)
@@ -128,11 +129,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SBT_RMISS_PATH_TRACER 1
 #define SBT_RMISS_SHADOW 2
 #define SBT_RCHIT_OPAQUE 3
-#define SBT_RAHIT_PARTICLE 4
-#define SBT_RAHIT_BEAM 5
+#define SBT_RCHIT_EMPTY 4
+#define SBT_RAHIT_PARTICLE 5
 #define SBT_RAHIT_EXPLOSION 6
 #define SBT_RAHIT_SPRITE 7
-#define SBT_RCHIT_EMPTY 8
+#define SBT_RINT_BEAM 8
 #define SBT_ENTRIES_PER_PIPELINE 9
+// vkpt_pt_create_pipelines() relies on all 'transparency' SBT entries coming after SBT_FIRST_TRANSPARENCY
+#define SBT_FIRST_TRANSPARENCY SBT_RAHIT_PARTICLE
+
+// SBT indices, for primary rays
+#define SBTO_OPAQUE     (SBT_RCHIT_OPAQUE - SBT_RCHIT_OPAQUE)
+#define SBTO_PARTICLE   (SBT_RAHIT_PARTICLE - SBT_RCHIT_OPAQUE)
+#define SBTO_EXPLOSION  (SBT_RAHIT_EXPLOSION - SBT_RCHIT_OPAQUE)
+#define SBTO_SPRITE     (SBT_RAHIT_SPRITE - SBT_RCHIT_OPAQUE)
+#define SBTO_BEAM       (SBT_RINT_BEAM - SBT_RCHIT_OPAQUE)
 
 #endif /*_CONSTANTS_H_*/

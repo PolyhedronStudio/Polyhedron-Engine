@@ -65,8 +65,6 @@ cvar_t *sky_amb_phase_g;
 static uint32_t physical_sky_planet_albedo_map = 0;
 static uint32_t physical_sky_planet_normal_map = 0;
 
-static uint32_t rgb_noise256_map = 0;
-
 static time_t latched_local_time;
 
 static int current_preset = 0;
@@ -95,7 +93,7 @@ typedef enum
 
 static int active_sun_preset()
 {
-	qboolean multiplayer = cl.maxClients > 1;
+	qboolean multiplayer = cl.maxclients > 1;
 
 	if (multiplayer)
 	{
@@ -137,17 +135,15 @@ initializeEnvTexture(int width, int height)
 
     // cube image
 
-	// C++20 VKPT: Added member initialisation in order of.
-	VkImageCreateInfo img_info = {
-		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-		.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
-		.imageType = VK_IMAGE_TYPE_2D,
+    VkImageCreateInfo img_info = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .extent = {
+            .width = width,
+            .height = height,
+            .depth = 1,
+        },
+        .imageType = VK_IMAGE_TYPE_2D,
         .format = VK_FORMAT_R16G16B16A16_SFLOAT,
-		.extent = { // C++20 VKPT: Added here in order.
-			.width = (uint32_t)width,	// C++20 VKPT: Added required narrowing conversion.
-			.height = (uint32_t)height,	// C++20 VKPT: Added required narrowing conversion.
-			.depth = 1,
-		},
         .mipLevels = 1,
         .arrayLayers = num_images,
         .samples = VK_SAMPLE_COUNT_1_BIT,
@@ -155,8 +151,9 @@ initializeEnvTexture(int width, int height)
         .usage = VK_IMAGE_USAGE_STORAGE_BIT
                                | VK_IMAGE_USAGE_TRANSFER_DST_BIT
                                | VK_IMAGE_USAGE_SAMPLED_BIT,
+        .flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added required narrowing conversion.
+        .queueFamilyIndexCount = qvk.queue_idx_graphics,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
     };
 
@@ -182,38 +179,38 @@ initializeEnvTexture(int width, int height)
     change_image_layouts(img_envmap, &subresource_range);
 
     // image view
-	// C++20 VKPT: Order related VkImageViewCreateInfo again.
+
     VkImageViewCreateInfo img_view_info = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		.image = img_envmap,
-		.viewType = VK_IMAGE_VIEW_TYPE_CUBE,
+        .viewType = VK_IMAGE_VIEW_TYPE_CUBE,
         .format = VK_FORMAT_R16G16B16A16_SFLOAT,
-		.components = {
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_G,
-			VK_COMPONENT_SWIZZLE_B,
-			VK_COMPONENT_SWIZZLE_A,
-		},
-		.subresourceRange = subresource_range
+        .image = img_envmap,
+        .subresourceRange = subresource_range,
+        .components = {
+            VK_COMPONENT_SWIZZLE_R,
+            VK_COMPONENT_SWIZZLE_G,
+            VK_COMPONENT_SWIZZLE_B,
+            VK_COMPONENT_SWIZZLE_A,
+        },
     };
     _VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_envmap));
     ATTACH_LABEL_VARIABLE(imv_envmap, IMAGE_VIEW);
 
     // cube descriptor layout
     {
-        VkDescriptorImageInfo desc_img_info = { // C++20 VKPT: Order fix.
-			.sampler = qvk.tex_sampler,
-			.imageView = imv_envmap,
-			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+        VkDescriptorImageInfo desc_img_info = {
+            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+            .imageView = imv_envmap,
+            .sampler = qvk.tex_sampler,
         };
 
-        VkWriteDescriptorSet s = { // C++20 VKPT: Order fix.
+        VkWriteDescriptorSet s = {
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
             .dstSet = qvk.desc_set_textures_even,
             .dstBinding = BINDING_OFFSET_PHYSICAL_SKY,
             .dstArrayElement = 0,
-			.descriptorCount = 1,
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
             .pImageInfo = &desc_img_info,
         };
 
@@ -225,19 +222,18 @@ initializeEnvTexture(int width, int height)
 
     // image descriptor
     {
-        VkDescriptorImageInfo desc_img_info = { // C++20 VKPT: Order fix -
-			.imageView = imv_envmap,
-			.imageLayout = VK_IMAGE_LAYOUT_GENERAL
+        VkDescriptorImageInfo desc_img_info = {
+            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+            .imageView = imv_envmap,
         };
 
-		// C++20 VKPT: Order Fix.
         VkWriteDescriptorSet s = {
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
             .dstSet = qvk.desc_set_textures_even,
             .dstBinding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
             .dstArrayElement = 0,
-			.descriptorCount = 1,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            .descriptorCount = 1,
             .pImageInfo = &desc_img_info,
         };
 
@@ -341,52 +337,27 @@ vkpt_physical_sky_destroy()
 VkResult 
 vkpt_physical_sky_beginRegistration() 
 {
-	rgb_noise256_map = 0;
     physical_sky_planet_albedo_map = 0;
     physical_sky_planet_normal_map = 0;
     return VK_SUCCESS;
 }
 
-VkResult
-vkpt_physical_sky_endRegistration(const char *name)
+VkResult 
+vkpt_physical_sky_endRegistration()
 {
-	char    pathname[MAX_QPATH];
+    if (physical_sky_space->integer > 0)
+    {
+        image_t const * albedo_map = IMG_Find("env/planet_albedo.tga", IT_SKIN, IF_SRGB);
+        if (albedo_map != R_NOTEXTURE) {
+            physical_sky_planet_albedo_map = albedo_map - r_images;
+        }
 
-	if (physical_sky_space->integer > 0)
-	{
-		Q_concat(pathname, sizeof(pathname), "env/", name, "/planet_albedo", ".tga", NULL);
-		image_t const * albedo_map = IMG_Find(pathname, IT_SKIN, IF_SRGB);
-		if(albedo_map->pix_data == NULL)
-			albedo_map = IMG_Find("env/planet_albedo.tga", IT_SKIN, IF_SRGB);
-		
-		if (albedo_map != R_NOTEXTURE) {
-			physical_sky_planet_albedo_map = albedo_map - r_images;
-		}
-
-		Q_concat(pathname, sizeof(pathname), "env/", name, "/planet_normal", ".tga", NULL);
-		image_t const * normal_map = IMG_Find(pathname, IT_SKIN, IF_SRGB);
-		if(normal_map->pix_data == NULL)
-			normal_map = IMG_Find("env/planet_normal.tga", IT_SKIN, IF_SRGB);
-
-		if (normal_map != R_NOTEXTURE) {
-			physical_sky_planet_normal_map = normal_map - r_images;
-		}
-	}
-
-
-
-
-
-	Q_concat(pathname, sizeof(pathname), "env/", name, "/rgb_noise256", ".tga", NULL);
-	image_t const* noise_map = IMG_Find(pathname, IT_SKIN, IF_SRGB);
-	if (noise_map->pix_data == NULL)
-		noise_map = IMG_Find("env/rgb_noise256.tga", IT_SKIN, IF_SRGB);
-
-	if (noise_map != R_NOTEXTURE) {
-		rgb_noise256_map = noise_map - r_images;
-	}
-
-	return VK_SUCCESS;
+        image_t const * normal_map = IMG_Find("env/planet_normal.tga", IT_SKIN, IF_SRGB);
+        if (normal_map != R_NOTEXTURE) {
+            physical_sky_planet_normal_map = normal_map - r_images;
+        }
+    }
+    return VK_SUCCESS;
 }
 
 VkResult
@@ -442,7 +413,6 @@ vkpt_physical_sky_destroy_pipelines()
 	return VK_SUCCESS;
 }
 
-// C++20 VKPT: BARRIER_COMPUTE
 #define BARRIER_COMPUTE(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -453,15 +423,12 @@ vkpt_physical_sky_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
 				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
 				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 
@@ -469,33 +436,23 @@ vkpt_physical_sky_destroy_pipelines()
 static void
 reset_sun_color_buffer(VkCommandBuffer cmd_buf)
 {
-	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-		//.pNext = NULL,
-		.srcAccessMask = VK_ACCESS_UNIFORM_READ_BIT,
-		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
+		.srcAccessMask = VK_ACCESS_UNIFORM_READ_BIT,
+		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT
 	);
 
 	vkCmdFillBuffer(cmd_buf, qvk.buf_sun_color.buffer,
 		0, VK_WHOLE_SIZE, 0);
 
-	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-		//.pNext = NULL,
-		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
+		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT
 	);
 }
 
@@ -540,17 +497,12 @@ vkpt_physical_sky_record_cmd_buffer(VkCommandBuffer cmd_buf)
 
 	BARRIER_COMPUTE(cmd_buf, img_envmap);
 
-	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-		//.pNext = NULL,
-		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT
 	);
 
 	{
@@ -566,17 +518,12 @@ vkpt_physical_sky_record_cmd_buffer(VkCommandBuffer cmd_buf)
 		vkCmdDispatch(cmd_buf, 1, 1, 1);
 	}
 
-	// C++20 VKPT: BUFFER BARRIER
 	BUFFER_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-		//.pNext = NULL,
-		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_UNIFORM_READ_BIT,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_UNIFORM_READ_BIT
 	);
 
     skyNeedsUpdate = VK_FALSE;
@@ -588,18 +535,13 @@ static void change_image_layouts(VkImage image, const VkImageSubresourceRange* s
 {
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
-	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = img_envmap,
+		.subresourceRange = *subresource_range,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = img_envmap,
-		.subresourceRange = *subresource_range,
 	);
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
@@ -696,7 +638,7 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 	if (skyIndex != current_preset)
 	{
 		vkQueueWaitIdle(qvk.queue_graphics);
-		SkyLoadScatterParameters((SkyPreset)skyDesc->preset); // C++20 VKPT: Added cast.
+		SkyLoadScatterParameters(skyDesc->preset);
 		current_preset = skyIndex;
 	}
 
@@ -821,7 +763,7 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 	else
 		light->visible = (light->direction_envmap[2] >= -sinf(light->angular_size_rad * 0.5f));
 
-	vec3_t sun_direction_world = vec3_zero();
+	vec3_t sun_direction_world = { 0.f };
 	sun_direction_world[0] = light->direction_envmap[0] * sky_matrix[0][0] + light->direction_envmap[1] * sky_matrix[0][1] + light->direction_envmap[2] * sky_matrix[0][2];
 	sun_direction_world[1] = light->direction_envmap[0] * sky_matrix[1][0] + light->direction_envmap[1] * sky_matrix[1][1] + light->direction_envmap[2] * sky_matrix[1][2];
 	sun_direction_world[2] = light->direction_envmap[0] * sky_matrix[2][0] + light->direction_envmap[1] * sky_matrix[2][1] + light->direction_envmap[2] * sky_matrix[2][2];
@@ -849,7 +791,7 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
     ubo->sun_bounce_scale = sun_bounce->value;
 	ubo->sun_tan_half_angle = tanf(light->angular_size_rad * 0.5f);
 	ubo->sun_cos_half_angle = cosf(light->angular_size_rad * 0.5f);
-	ubo->sun_solid_angle = 2 * M_PI * (float)(1.0 - std::cosf(light->angular_size_rad * 0.5)); // use double for precision
+	ubo->sun_solid_angle = 2 * M_PI * (float)(1.0 - cos(light->angular_size_rad * 0.5)); // use double for precision
 	//ubo->sun_solid_angle = max(ubo->sun_solid_angle, 1e-3f);
 
 	VectorCopy(light->color, ubo->sun_color);
@@ -911,14 +853,8 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
 
     // planet
 
-	ubo->planet_albedo_map = physical_sky_planet_albedo_map;
+    ubo->planet_albedo_map = physical_sky_planet_albedo_map;
     ubo->planet_normal_map = physical_sky_planet_normal_map;
-
-
-
-
-
-	ubo->rgb_noise256_map = rgb_noise256_map;
 
 	ubo->sun_visible = light->visible;
 
@@ -1049,7 +985,7 @@ static PhysicalSkyDesc_t skyPresets[3] = {
 
 PhysicalSkyDesc_t const * GetSkyPreset(uint16_t index)
 {
-    if (index >= 0 && index < Q_COUNTOF(skyPresets))
+    if (index >= 0 && index < q_countof(skyPresets))
         return &skyPresets[index];
 
     return &skyPresets[0];

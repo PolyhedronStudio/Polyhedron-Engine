@@ -437,7 +437,7 @@ static void build_pvs2(bsp_t* bsp)
 {
 	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
 
-	bsp->pvs2_matrix = (char*)Z_Mallocz(matrix_size); // C++20 VKPT: Added cast.
+	bsp->pvs2_matrix = Z_Mallocz(matrix_size);
 
 	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++)
 	{
@@ -714,7 +714,7 @@ append_light_poly(int* num_lights, int* allocated, light_poly_t** lights)
 	if (*num_lights == *allocated)
 	{
 		*allocated = max(*allocated * 2, 128);
-		*lights = (light_poly_t*)Z_Realloc(*lights, *allocated * sizeof(light_poly_t)); // C++20 VKPT: Added cast.
+		*lights = Z_Realloc(*lights, *allocated * sizeof(light_poly_t));
 	}
 	return *lights + (*num_lights)++;
 }
@@ -1076,35 +1076,31 @@ is_model_transparent(bsp_mesh_t *wm, bsp_model_t *model)
 	return true;
 }
 
-
-uint32_t floatBitsToUint(float f) { return *((uint32_t*)&f); }
-
+// direct port of the encode_normal function from utils.glsl
 uint32_t
 encode_normal(vec3_t normal)
 {
-	uint32_t projected0, projected1;
-	float invL1Norm = 1.0f / (fabs(normal[0]) + fabs(normal[1]) + fabs(normal[2]));
+	float invL1Norm = 1.0f / (fabsf(normal[0]) + fabsf(normal[1]) + fabsf(normal[2]));
 
-	// first find floating point values of octahedral map in [-1,1]:
-	float enc0, enc1;
-	if (normal[2] < 0.0f) {
-		enc0 = (1.0f - abs(normal[1] * invL1Norm)) * ((normal[0] < 0.0f) ? -1.0f : 1.0f);
-		enc1 = (1.0f - abs(normal[0] * invL1Norm)) * ((normal[1] < 0.0f) ? -1.0f : 1.0f);
-	}
-	else {
-		enc0 = normal[0] * invL1Norm;
-		enc1 = normal[1] * invL1Norm;
-	}
-	// then encode:
-	uint32_t enci0 = floatBitsToUint((abs(enc0) + 2.0f) / 2.0f);
-	uint32_t enci1 = floatBitsToUint((abs(enc1) + 2.0f) / 2.0f);
-	// copy over sign bit and truncated mantissa. could use rounding for increased precision here.
-	projected0 = ((floatBitsToUint(enc0) & 0x80000000u) >> 16) | ((enci0 & 0x7fffffu) >> 8);
-	projected1 = ((floatBitsToUint(enc1) & 0x80000000u) >> 16) | ((enci1 & 0x7fffffu) >> 8);
-	// avoid -0 cases:
-	if ((projected0 & 0x7fffu) == 0) projected0 = 0;
-	if ((projected1 & 0x7fffu) == 0) projected1 = 0;
-	return (projected1 << 16) | projected0;
+    vec2_t p = { normal[0] * invL1Norm, normal[1] * invL1Norm };
+	vec2_t pp = { p[0], p[1] };
+
+    if(normal[2] < 0.f)
+    {
+    	pp[0] = (1.f - fabsf(p[1])) * ((p[0] >= 0.f) ? 1.f : -1.f);
+    	pp[1] = (1.f - fabsf(p[0])) * ((p[1] >= 0.f) ? 1.f : -1.f);
+    }
+
+    pp[0] = pp[0] * 0.5f + 0.5f;
+    pp[1] = pp[1] * 0.5f + 0.5f;
+
+    pp[0] = clamp(pp[0], 0.f, 1.f);
+    pp[1] = clamp(pp[1], 0.f, 1.f);
+
+    uint32_t ux = (uint32_t)(pp[0] * 0xffffu);
+    uint32_t uy = (uint32_t)(pp[1] * 0xffffu);
+
+    return ux | (uy << 16);
 }
 
 void
@@ -1135,8 +1131,8 @@ compute_world_tangents(bsp_mesh_t* wm)
 
 	// tangent space is co-planar to triangle : only need to compute
 	// 1 vertex because all 3 verts share the same tangent space
-	wm->tangents = (float*)Z_Malloc(MAX_VERT_BSP * sizeof(*wm->tangents));	// C++20 VKPT: Added a cast.
-	wm->texel_density = (float*)Z_Malloc(MAX_VERT_BSP * sizeof(float) / 3);	// C++20 VKPT: Added a cast.
+	wm->tangents = Z_Malloc(MAX_VERT_BSP * sizeof(uint32_t) / 3);
+	wm->texel_density = Z_Malloc(MAX_VERT_BSP * sizeof(float) / 3);
 
 	for (int idx_tri = 0; idx_tri < ntriangles; ++idx_tri)
 	{
@@ -1157,8 +1153,8 @@ compute_world_tangents(bsp_mesh_t* wm)
 		VectorSubtract(pC, pA, dP1);
 
 		vec2_t dt0, dt1;
-		Vec2_Subtract(tB, tA, dt0);
-		Vec2_Subtract(tC, tA, dt1);
+		Vector2Subtract(tB, tA, dt0);
+		Vector2Subtract(tC, tA, dt1);
 
 		float r = 1.f / (dt0[0] * dt1[1] - dt1[0] * dt0[1]);
 
@@ -1183,7 +1179,7 @@ compute_world_tangents(bsp_mesh_t* wm)
 		VectorSubtract(sdir, t, t);
 		VectorNormalize2(t, tangent); // Graham-Schmidt : t = normalize(t - n * (n.t))
 
-		VectorSet(&wm->tangents[idx_tri * 3], tangent[0], tangent[1], tangent[2]);
+		wm->tangents[idx_tri] = encode_normal(tangent);
 
 		vec3_t cross;
 		CrossProduct(normal, t, cross);
@@ -1206,8 +1202,8 @@ compute_world_tangents(bsp_mesh_t* wm)
 
 			float WL0 = VectorLength(dP0);
 			float WL1 = VectorLength(dP1);
-			float TL0 = std::sqrtf(dt0[0] * dt0[0] + dt0[1] * dt0[1]);
-			float TL1 = std::sqrtf(dt1[0] * dt1[0] + dt1[1] * dt1[1]);
+			float TL0 = sqrt(dt0[0] * dt0[0] + dt0[1] * dt0[1]);
+			float TL1 = sqrt(dt1[0] * dt1[0] + dt1[1] * dt1[1]);
 			float L0 = (WL0 > 0) ? (TL0 / WL0) : 0.f;
 			float L1 = (WL1 > 0) ? (TL1 / WL1) : 0.f;
 
@@ -1231,7 +1227,7 @@ load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name)
     qboolean found_map = false;
 
     char* filebuf = NULL;
-    FS_LoadFile(filename, (void**)&filebuf); // C++20: Added a cast.
+    FS_LoadFile(filename, &filebuf);
     
     if (filebuf)
     {
@@ -1241,7 +1237,7 @@ load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name)
     else
     {
         // try to load the global file
-        FS_LoadFile("sky_clusters.txt", (void**)&filebuf); // C++20: Added a cast.
+        FS_LoadFile("sky_clusters.txt", &filebuf);
         if (!filebuf)
         {
             Com_WPrintf("Couldn't read sky_clusters.txt\n");
@@ -1300,9 +1296,9 @@ static void
 load_cameras(bsp_mesh_t* wm, const char* map_name)
 {
 	wm->num_cameras = 0;
-	
+
 	char* filebuf = NULL;
-	FS_LoadFile("cameras.txt", (void**)&filebuf); // C++20: Added a cast.
+	FS_LoadFile("cameras.txt", &filebuf);
 	if (!filebuf)
 	{
 		Com_WPrintf("Couldn't read cameras.txt\n");
@@ -1387,8 +1383,8 @@ compute_sky_visibility(bsp_mesh_t *wm, bsp_t *bsp)
 static void
 compute_cluster_aabbs(bsp_mesh_t* wm)
 {
-	wm->cluster_aabbs = (aabb_t*)Z_Malloc(wm->numClusters * sizeof(aabb_t)); // C++20 VKPT: Added a cast.
-	for (int c = 0; c < wm->numClusters; c++)
+	wm->cluster_aabbs = Z_Malloc(wm->num_clusters * sizeof(aabb_t));
+	for (int c = 0; c < wm->num_clusters; c++)
 	{
 		VectorSet(wm->cluster_aabbs[c].mins, FLT_MAX, FLT_MAX, FLT_MAX);
 		VectorSet(wm->cluster_aabbs[c].maxs, -FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -1398,7 +1394,7 @@ compute_cluster_aabbs(bsp_mesh_t* wm)
 	{
 		int c = wm->clusters[tri];
 
-		if(c < 0 || c >= wm->numClusters)
+		if(c < 0 || c >= wm->num_clusters)
 			continue;
 
 		aabb_t* aabb = wm->cluster_aabbs + c;
@@ -1471,8 +1467,8 @@ static void
 collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 {
 #define MAX_LIGHTS_PER_CLUSTER 1024
-	int* cluster_lights = (int*)Z_Malloc(MAX_LIGHTS_PER_CLUSTER * wm->numClusters * sizeof(int)); // C++20 VKPT: Added a cast.
-	int* cluster_light_counts = (int*)Z_Mallocz(wm->numClusters * sizeof(int)); // C++20 VKPT: Added a cast.
+	int* cluster_lights = Z_Malloc(MAX_LIGHTS_PER_CLUSTER * wm->num_clusters * sizeof(int));
+	int* cluster_light_counts = Z_Mallocz(wm->num_clusters * sizeof(int));
 
 	// Construct an array of visible lights for each cluster.
 	// The array is in `cluster_lights`, with MAX_LIGHTS_PER_CLUSTER stride.
@@ -1484,7 +1480,7 @@ collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 		if(light->cluster < 0)
 			continue;
 
-		const byte* pvs = (const byte*)BSP_GetPvs(bsp, light->cluster); // C++20 VKPT: Added a cast.
+		const byte* pvs = BSP_GetPvs(bsp, light->cluster);
 
 		FOREACH_BIT_BEGIN(pvs, bsp->visrowsize, other_cluster)
 			aabb_t* cluster_aabb = wm->cluster_aabbs + other_cluster;
@@ -1503,20 +1499,20 @@ collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 	// Count the total number of cluster <-> light relations to allocate memory
 
 	wm->num_cluster_lights = 0;
-	for (int cluster = 0; cluster < wm->numClusters; cluster++)
+	for (int cluster = 0; cluster < wm->num_clusters; cluster++)
 	{
 		wm->num_cluster_lights += cluster_light_counts[cluster];
 	}
 
-	wm->cluster_lights = (int*)Z_Mallocz(wm->num_cluster_lights * sizeof(int)); // C++20 VKPT: Added a cast.
-	wm->cluster_light_offsets = (int*)Z_Mallocz((wm->numClusters + 1) * sizeof(int)); // C++20 VKPT: Added a cast.
+	wm->cluster_lights = Z_Mallocz(wm->num_cluster_lights * sizeof(int));
+	wm->cluster_light_offsets = Z_Mallocz((wm->num_clusters + 1) * sizeof(int));
 
 	// Com_Printf("Total interactions: %d, culled bbox: %d, culled proj: %d\n", wm->num_cluster_lights, lights_culled_bbox, lights_culled_proj);
 
 	// Compact the previously constructed array into wm->cluster_lights
 
 	int list_offset = 0;
-	for (int cluster = 0; cluster < wm->numClusters; cluster++)
+	for (int cluster = 0; cluster < wm->num_clusters; cluster++)
 	{
 		assert(list_offset >= 0);
 		wm->cluster_light_offsets[cluster] = list_offset;
@@ -1527,7 +1523,7 @@ collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 			count * sizeof(int));
 		list_offset += count;
 	}
-	wm->cluster_light_offsets[wm->numClusters] = list_offset;
+	wm->cluster_light_offsets[wm->num_clusters] = list_offset;
 
 	Z_Free(cluster_lights);
 	Z_Free(cluster_light_counts);
@@ -1551,10 +1547,9 @@ bsp_mesh_load_custom_sky(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, const char* m
 	tinyobj_material_t* materials = NULL;
 	size_t num_materials;
 
-	// N&C: Updated the tinyobj-c lib, now is multi-thread compatible. We use none, so we pass NULL to the context pointer.
 	unsigned int flags = TINYOBJ_FLAG_TRIANGULATE;
 	int ret = tinyobj_parse_obj(&attrib, &shapes, &num_shapes, &materials,
-		&num_materials, (const char*)file_buffer, NULL, flags);
+		&num_materials, (const char*)file_buffer, file_size, flags);
 
 	FS_FreeFile(file_buffer);
 
@@ -1634,23 +1629,23 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 	load_sky_and_lava_clusters(wm, full_game_map_name);
 	load_cameras(wm, full_game_map_name);
 
-	wm->models = (bsp_model_t*)Z_Malloc(bsp->nummodels * sizeof(bsp_model_t)); // C++20 VKPT: Added a cast.
+	wm->models = Z_Malloc(bsp->nummodels * sizeof(bsp_model_t));
 	memset(wm->models, 0, bsp->nummodels * sizeof(bsp_model_t));
 
     wm->num_models = bsp->nummodels;
-	wm->numClusters = bsp->vis->numclusters;
+	wm->num_clusters = bsp->vis->numclusters;
 
-	if (wm->numClusters + 1 >= MAX_LIGHT_LISTS)
+	if (wm->num_clusters + 1 >= MAX_LIGHT_LISTS)
 	{
-		Com_Error(ERR_FATAL, "The BSP model has too many clusters (%d)", wm->numClusters);
+		Com_Error(ERR_FATAL, "The BSP model has too many clusters (%d)", wm->num_clusters);
 	}
 
     wm->num_vertices = 0;
     wm->num_indices = 0;
-    wm->positions = (float*)Z_Malloc(MAX_VERT_BSP * 3 * sizeof(*wm->positions));	// C++20 VKPT: Added a cast.// C++20 VKPT: Added a cast.
-    wm->tex_coords = (float*)Z_Malloc(MAX_VERT_BSP * 2 * sizeof(*wm->tex_coords));	// C++20 VKPT: Added a cast.
-    wm->materials = (uint32_t*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->materials));	// C++20 VKPT: Added a cast.
-    wm->clusters = (int*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->clusters));		// C++20 VKPT: Added a cast.
+    wm->positions = Z_Malloc(MAX_VERT_BSP * 3 * sizeof(*wm->positions));
+    wm->tex_coords = Z_Malloc(MAX_VERT_BSP * 2 * sizeof(*wm->tex_coords));
+    wm->materials = Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->materials));
+    wm->clusters = Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->clusters));
 
 	// clear these here because `bsp_mesh_load_custom_sky` creates lights before `collect_ligth_polys`
 	wm->num_light_polys = 0;
@@ -1708,7 +1703,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
     wm->num_indices = idx_ctr;
     wm->num_vertices = idx_ctr;
 
-    wm->indices = (int*)Z_Malloc(idx_ctr * sizeof(int)); // C++20 VKPT: Added a cast.
+    wm->indices = Z_Malloc(idx_ctr * sizeof(int));
     for (int i = 0; i < wm->num_vertices; i++)
         wm->indices[i] = i;
 
@@ -1797,7 +1792,7 @@ bsp_mesh_register_textures(bsp_t *bsp)
 		if (!mat)
 			Com_EPrintf("error finding material '%s'\n", buffer);
 
-		image_t* image_diffuse = IMG_Find(buffer, IT_WALL, (imageflags_t)(flags | IF_SRGB)); // C++20 VKPT: Added a cast.
+		image_t* image_diffuse = IMG_Find(buffer, IT_WALL, flags | IF_SRGB);
 		image_t* image_normals = NULL;
 		image_t* image_emissive = NULL;
 
@@ -1817,7 +1812,7 @@ bsp_mesh_register_textures(bsp_t *bsp)
 			// attempt loading the emissive texture
 			Q_concat(buffer, sizeof(buffer), "textures/", info->name, "_light.tga", NULL);
 			FS_NormalizePath(buffer, buffer);
-			image_emissive = IMG_Find(buffer, IT_WALL, (imageflags_t)(flags | IF_SRGB)); // C++20 VKPT: Added a cast.
+			image_emissive = IMG_Find(buffer, IT_WALL, flags | IF_SRGB);
 			if (image_emissive == R_NOTEXTURE) image_emissive = NULL;
 
 			if (image_emissive && !image_emissive->processing_complete && (mat->emissive_scale > 0.f) && ((mat->flags & MATERIAL_FLAG_LIGHT) != 0 || MAT_IsKind(mat->flags, MATERIAL_KIND_LAVA)))

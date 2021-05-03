@@ -46,10 +46,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 #include <assert.h>
 
-#include "../stb/stb_image.h"
-#include "../stb/stb_image_resize.h"
-#include "../stb/stb_image_write.h"
-
 cvar_t *cvar_profiler = NULL;
 cvar_t *cvar_vsync = NULL;
 cvar_t *cvar_pt_caustics = NULL;
@@ -66,21 +62,17 @@ cvar_t *cvar_drs_maxscale = NULL;
 cvar_t *cvar_drs_adjust_up = NULL;
 cvar_t *cvar_drs_adjust_down = NULL;
 cvar_t *cvar_drs_gain = NULL;
-cvar_t *cvar_show_entlights = NULL;
-cvar_t *cvar_entlights_enabled = NULL;
-cvar_t *cvar_entlights_scale = NULL;
+cvar_t *cvar_tm_blend_enable = NULL;
 extern cvar_t *scr_viewsize;
 extern cvar_t *cvar_bloom_enable;
-extern cvar_t *cl_renderdemo;
-
-
 extern cvar_t* cvar_flt_taa;
 static int drs_current_scale = 0;
 static int drs_effective_scale = 0;
 
 cvar_t* cvar_min_driver_version = NULL;
 cvar_t* cvar_min_driver_version_khr = NULL;
-cvar_t *cvar_nv_ray_tracing = NULL;
+cvar_t* cvar_min_driver_version_amd = NULL;
+cvar_t *cvar_ray_tracing_api = NULL;
 cvar_t *cvar_vk_validation = NULL;
 
 extern uiStatic_t uis;
@@ -106,7 +98,7 @@ static qboolean temporal_frame_valid = false;
 
 static int world_anim_frame = 0;
 
-static vec3_t avg_envmap_color = vec3_zero();
+static vec3_t avg_envmap_color = { 0.f };
 
 static image_t *water_normal_texture = NULL;
 
@@ -115,22 +107,10 @@ int num_accumulated_frames = 0;
 static qboolean frame_ready = false;
 
 static float sky_rotation = 0.f;
-static vec3_t sky_axis = vec3_zero();
+static vec3_t sky_axis = { 0.f };
 
-static rdlight_t entlights[MAX_ENTLIGHTS];
-static dlightLS_t entlightstyles[MAX_ENTLIGHTS];
-int num_entlights = 0;
 #define NUM_TAA_SAMPLES 128
 static vec2_t taa_samples[NUM_TAA_SAMPLES];
-
-typedef struct EntityKVPair_s {
-	//	char* key;
-	//	char* value;
-	char key[256];
-	char value[256];
-} EntityKVPair_t;
-
-
 
 typedef enum {
 	VKPT_INIT_DEFAULT            = (0),
@@ -155,10 +135,9 @@ VkptInit_t vkpt_initialization[] = {
 	{ "images",   vkpt_create_images,                  vkpt_destroy_images,                  VKPT_INIT_SWAPCHAIN_RECREATE, 0 },
 	{ "draw",     vkpt_draw_initialize,                vkpt_draw_destroy,                    VKPT_INIT_DEFAULT,            0 },
 	{ "pt",       vkpt_pt_init,                        vkpt_pt_destroy,                      VKPT_INIT_DEFAULT,            0 },
-	{ "pt|",      vkpt_pt_create_pipelines,            vkpt_pt_destroy_pipelines,            (VkptInitFlags_t)(VKPT_INIT_SWAPCHAIN_RECREATE
-	                                                                                       | VKPT_INIT_RELOAD_SHADER),      0 }, // C++20 VKPT: Added cast.
-	{ "draw|",    vkpt_draw_create_pipelines,          vkpt_draw_destroy_pipelines,          (VkptInitFlags_t)(VKPT_INIT_SWAPCHAIN_RECREATE
-	                                                                                       | VKPT_INIT_RELOAD_SHADER),      0 }, // C++20 VKPT: Added cast.
+	{ "pt|",      vkpt_pt_create_pipelines,            vkpt_pt_destroy_pipelines,            VKPT_INIT_RELOAD_SHADER,      0 },
+	{ "draw|",    vkpt_draw_create_pipelines,          vkpt_draw_destroy_pipelines,          VKPT_INIT_SWAPCHAIN_RECREATE
+	                                                                                       | VKPT_INIT_RELOAD_SHADER,      0 },
 	{ "vbo|",     vkpt_vertex_buffer_create_pipelines, vkpt_vertex_buffer_destroy_pipelines, VKPT_INIT_RELOAD_SHADER,      0 },
 	{ "asvgf",    vkpt_asvgf_initialize,               vkpt_asvgf_destroy,                   VKPT_INIT_DEFAULT,            0 },
 	{ "asvgf|",   vkpt_asvgf_create_pipelines,         vkpt_asvgf_destroy_pipelines,         VKPT_INIT_RELOAD_SHADER,      0 },
@@ -414,6 +393,7 @@ QVK_t qvk = {
 
 #define VK_EXTENSION_DO(a) PFN_##a q##a = 0;
 LIST_EXTENSIONS_KHR
+LIST_EXTENSIONS_KHR_PIPELINE
 LIST_EXTENSIONS_NV
 LIST_EXTENSIONS_DEBUG
 LIST_EXTENSIONS_INSTANCE
@@ -452,6 +432,12 @@ const char *vk_requested_device_extensions_khr[] = {
 	VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME
 };
 
+const char* vk_requested_device_extensions_ray_query[] = {
+	VK_KHR_RAY_QUERY_EXTENSION_NAME,
+	VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+	VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME
+};
+
 const char *vk_requested_device_extensions_debug[] = {
 	VK_EXT_DEBUG_MARKER_EXTENSION_NAME,
 };
@@ -468,8 +454,6 @@ static const VkApplicationInfo vk_app_info = {
 /* use this to override file names */
 static const char *shader_module_file_names[NUM_QVK_SHADER_MODULES];
 
-int register_model_dirty;
-
 void
 get_vk_extension_list(
 		const char *layer,
@@ -477,7 +461,7 @@ get_vk_extension_list(
 		VkExtensionProperties **ext)
 {
 	_VK(vkEnumerateInstanceExtensionProperties(layer, num_extensions, NULL));
-	*ext = (VkExtensionProperties*)malloc(sizeof(**ext) * *num_extensions); // C++20 VKPT: malloc typecast
+	*ext = malloc(sizeof(**ext) * *num_extensions);
 	_VK(vkEnumerateInstanceExtensionProperties(layer, num_extensions, *ext));
 }
 
@@ -487,7 +471,7 @@ get_vk_layer_list(
 		VkLayerProperties **ext)
 {
 	_VK(vkEnumerateInstanceLayerProperties(num_layers, NULL));
-	*ext = (VkLayerProperties*)malloc(sizeof(**ext) * *num_layers); // C++20 VKPT: malloc typecast
+	*ext = malloc(sizeof(**ext) * *num_layers);
 	_VK(vkEnumerateInstanceLayerProperties(num_layers, *ext));
 }
 
@@ -557,13 +541,18 @@ qvkDestroyDebugUtilsMessengerEXT(
 VkResult
 create_swapchain()
 {
+    num_accumulated_frames = 0;
+
 	/* create swapchain (query details and ignore them afterwards :-) )*/
 	VkSurfaceCapabilitiesKHR surf_capabilities;
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(qvk.physical_device, qvk.surface, &surf_capabilities);
 
+	if (surf_capabilities.currentExtent.width == 0 || surf_capabilities.currentExtent.height == 0)
+		return VK_SUCCESS;
+
 	uint32_t num_formats = 0;
 	vkGetPhysicalDeviceSurfaceFormatsKHR(qvk.physical_device, qvk.surface, &num_formats, NULL);
-	VkSurfaceFormatKHR *avail_surface_formats = (VkSurfaceFormatKHR*)alloca(sizeof(VkSurfaceFormatKHR) * num_formats); // C++20 VKPT: alloca typecast
+	VkSurfaceFormatKHR *avail_surface_formats = alloca(sizeof(VkSurfaceFormatKHR) * num_formats);
 	vkGetPhysicalDeviceSurfaceFormatsKHR(qvk.physical_device, qvk.surface, &num_formats, avail_surface_formats);
 	/* Com_Printf("num surface formats: %d\n", num_formats);
 
@@ -589,7 +578,7 @@ out:;
 
 	uint32_t num_present_modes = 0;
 	vkGetPhysicalDeviceSurfacePresentModesKHR(qvk.physical_device, qvk.surface, &num_present_modes, NULL);
-	VkPresentModeKHR *avail_present_modes = (VkPresentModeKHR*)alloca(sizeof(VkPresentModeKHR) * num_present_modes); // C++20 VKPT: alloca typecast
+	VkPresentModeKHR *avail_present_modes = alloca(sizeof(VkPresentModeKHR) * num_present_modes);
 	vkGetPhysicalDeviceSurfacePresentModesKHR(qvk.physical_device, qvk.surface, &num_present_modes, avail_present_modes);
 	qboolean immediate_mode_available = false;
 
@@ -648,7 +637,7 @@ out:;
 
 	if(vkCreateSwapchainKHR(qvk.device, &swpch_create_info, NULL, &qvk.swap_chain) != VK_SUCCESS) {
 		Com_EPrintf("error creating swapchain\n");
-		return (VkResult)1;	// C++20 VKPT: Added cast.
+		return 1;
 	}
 
 	vkGetSwapchainImagesKHR(qvk.device, qvk.swap_chain, &qvk.num_swap_chain_images, NULL);
@@ -682,7 +671,7 @@ out:;
 
 		if(vkCreateImageView(qvk.device, &img_create_info, NULL, qvk.swap_chain_image_views + i) != VK_SUCCESS) {
 			Com_EPrintf("error creating image view!");
-			return (VkResult)1; // C++20 VKPT: Added cast.
+			return 1;
 		}
 	}
 
@@ -690,16 +679,7 @@ out:;
 
 	for (int image_index = 0; image_index < qvk.num_swap_chain_images; image_index++)
 	{
-		// IMAGE_BARRIER
 		IMAGE_BARRIER(cmd_buf,
-			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 
-			//.pNext = NULL, 
-			.srcAccessMask = 0,
-			.dstAccessMask = 0,
-			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-			.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, 
-			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, 
 			.image = qvk.swap_chain_images[image_index],
 			.subresourceRange = {
 				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -708,13 +688,15 @@ out:;
 				.baseArrayLayer = 0,
 				.layerCount = 1
 			},
+			.srcAccessMask = 0,
+			.dstAccessMask = 0,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 		);
 	}
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 	vkpt_wait_idle(qvk.queue_graphics, &qvk.cmd_buffers_graphics);
-
-	num_accumulated_frames = 0;
 
 	return VK_SUCCESS;
 }
@@ -722,11 +704,10 @@ out:;
 VkResult
 create_command_pool_and_fences()
 {
-	// C++20 VKPT: Order fix.
 	VkCommandPoolCreateInfo cmd_pool_create_info = {
 		.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-		.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-		.queueFamilyIndex = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added a cast.
+		.queueFamilyIndex = qvk.queue_idx_graphics,
+		.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
 	};
 
 	/* command pool and buffers */
@@ -804,7 +785,7 @@ init_vulkan()
 		return false;
 	}
 
-	qvk.sdl2_extensions = (const char**)malloc(sizeof(char*) * qvk.num_sdl2_extensions); // C++20 VKPT: Added a malloc cast.
+	qvk.sdl2_extensions = malloc(sizeof(char*) * qvk.num_sdl2_extensions);
 	if (!SDL_Vulkan_GetInstanceExtensions(qvk.window, &qvk.num_sdl2_extensions, qvk.sdl2_extensions)) {
 		Com_EPrintf("Couldn't get SDL2 Vulkan extensions\n");
 		return false;
@@ -816,7 +797,7 @@ init_vulkan()
 	}
 
 	int num_inst_ext_combined = qvk.num_sdl2_extensions + LENGTH(vk_requested_instance_extensions);
-	char **ext = (char**)alloca(sizeof(char *) * num_inst_ext_combined); // C++20 VKPT: Added an alloca cast.
+	char **ext = alloca(sizeof(char *) * num_inst_ext_combined);
 	memcpy(ext, qvk.sdl2_extensions, qvk.num_sdl2_extensions * sizeof(*qvk.sdl2_extensions));
 	memcpy(ext + qvk.num_sdl2_extensions, vk_requested_instance_extensions, sizeof(vk_requested_instance_extensions));
 
@@ -837,7 +818,7 @@ init_vulkan()
 	VkInstanceCreateInfo inst_create_info = {
 		.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
 		.pApplicationInfo        = &vk_app_info,
-		.enabledExtensionCount   = (uint32_t)num_inst_ext_combined, // C++20 VKPT: Added a cast.
+		.enabledExtensionCount   = num_inst_ext_combined,
 		.ppEnabledExtensionNames = (const char * const*)ext,
 	};
 
@@ -905,7 +886,7 @@ init_vulkan()
 	_VK(vkEnumeratePhysicalDevices(qvk.instance, &num_devices, NULL));
 	if(num_devices == 0)
 		return false;
-	VkPhysicalDevice *devices = (VkPhysicalDevice*)alloca(sizeof(VkPhysicalDevice) *num_devices); // C++20 VKPT: Added an alloca cast.
+	VkPhysicalDevice *devices = alloca(sizeof(VkPhysicalDevice) *num_devices);
 	_VK(vkEnumeratePhysicalDevices(qvk.instance, &num_devices, devices));
 
 #ifdef VKPT_DEVICE_GROUPS
@@ -922,7 +903,10 @@ init_vulkan()
 		num_device_groups = 1;
 		_VK(vkEnumeratePhysicalDeviceGroups(qvk.instance, &num_device_groups, &device_group_info));
 
-		if (device_group_info.physicalDeviceCount > VKPT_MAX_GPUS) {
+		if (device_group_info.physicalDeviceCount > VKPT_MAX_GPUS)
+		{
+			Com_EPrintf("SLI: device group 0 has %d devices, which is more than maximum supported count (%d).\n",
+				device_group_info.physicalDeviceCount, VKPT_MAX_GPUS);
 			return false;
 		}
 
@@ -935,27 +919,50 @@ init_vulkan()
 		for(int i = 0; i < qvk.device_count; i++) {
 			qvk.device_group_physical_devices[i] = device_group_create_info.pPhysicalDevices[i];
 		}
-	} else
-#endif
+		Com_Printf("SLI: using device group 0 with %d device(s).\n", qvk.device_count);
+	}
+	else
+	{
 		qvk.device_count = 1;
+		if (!cvar_sli->integer)
+			Com_Printf("SLI: multi-GPU support disabled through the 'sli' console variable.\n");
+		else
+			Com_Printf("SLI: no device groups found, using a single device.\n");
+	}
+#else
+	qvk.device_count = 1;
+#endif
 
 	int picked_device_with_khr = -1;
 	int picked_device_with_nv = -1;
+	int picked_device_with_ray_query = -1;
+	VkDriverId picked_driver_khr = VK_DRIVER_ID_MAX_ENUM;
+	VkDriverId picked_driver_ray_query = VK_DRIVER_ID_MAX_ENUM;
 	qvk.use_khr_ray_tracing = false;
+	qvk.use_ray_query = false;
 
 	for(int i = 0; i < num_devices; i++) 
 	{
-		VkPhysicalDeviceProperties dev_properties;
-		VkPhysicalDeviceFeatures   dev_features;
-		vkGetPhysicalDeviceProperties(devices[i], &dev_properties);
-		vkGetPhysicalDeviceFeatures  (devices[i], &dev_features);
+		VkPhysicalDeviceDriverProperties driver_properties = {
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES,
+			.pNext = NULL
+		};
 
-		Com_Printf("Physical device %d: %s\n", i, dev_properties.deviceName);
-		Com_Printf("Max number of allocations: %d\n", dev_properties.limits.maxMemoryAllocationCount);
+		VkPhysicalDeviceProperties2 dev_properties2 = {
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
+			.pNext = &driver_properties
+		};
+		vkGetPhysicalDeviceProperties2(devices[i], &dev_properties2);
+
+		VkPhysicalDeviceFeatures dev_features;
+		vkGetPhysicalDeviceFeatures(devices[i], &dev_features);
+
+		Com_Printf("Physical device %d: %s\n", i, dev_properties2.properties.deviceName);
+
 		uint32_t num_ext;
 		vkEnumerateDeviceExtensionProperties(devices[i], NULL, &num_ext, NULL);
 
-		VkExtensionProperties *ext_properties = (VkExtensionProperties*)alloca(sizeof(VkExtensionProperties) * num_ext); // C++20 VKPT: Added an alloca cast.
+		VkExtensionProperties *ext_properties = alloca(sizeof(VkExtensionProperties) * num_ext);
 		vkEnumerateDeviceExtensionProperties(devices[i], NULL, &num_ext, ext_properties);
 
 		Com_Printf("Supported Vulkan device extensions:\n");
@@ -976,27 +983,70 @@ init_vulkan()
 				if (picked_device_with_khr < 0)
 				{
 					picked_device_with_khr = i;
+					picked_driver_khr = driver_properties.driverID;
+				}
+			}
+
+			if (!strcmp(ext_properties[j].extensionName, VK_KHR_RAY_QUERY_EXTENSION_NAME))
+			{
+				if (picked_device_with_ray_query < 0)
+				{
+					picked_device_with_ray_query = i;
+					picked_driver_ray_query = driver_properties.driverID;
 				}
 			}
 		}
 	}
 
 	int picked_device = -1;
-	if ((!cvar_nv_ray_tracing->integer || picked_device_with_nv < 0) && picked_device_with_khr >= 0)
-	{
-		picked_device = picked_device_with_khr;
-		qvk.use_khr_ray_tracing = true;
 
-		if (cvar_nv_ray_tracing->integer)
-		{
-			Com_WPrintf("Use of %s is requested through cvar %s, but there is no GPU that supports it. Switching to KHR.\n",
-				VK_NV_RAY_TRACING_EXTENSION_NAME, cvar_nv_ray_tracing->name);
-		}
-	}
-	else if(picked_device_with_nv >= 0)
+	if (!Q_strcasecmp(cvar_ray_tracing_api->string, "query") && picked_device_with_ray_query >= 0)
 	{
-		picked_device = picked_device_with_nv;
+		qvk.use_khr_ray_tracing = true;
+		qvk.use_ray_query = true;
+		picked_device = picked_device_with_ray_query;
+	}
+	else if (!Q_strcasecmp(cvar_ray_tracing_api->string, "pipeline") && picked_device_with_khr >= 0)
+	{
+		qvk.use_khr_ray_tracing = true;
+		qvk.use_ray_query = false;
+		picked_device = picked_device_with_khr;
+	}
+	else if (!Q_strcasecmp(cvar_ray_tracing_api->string, "nv") && picked_device_with_nv >= 0)
+	{
 		qvk.use_khr_ray_tracing = false;
+		qvk.use_ray_query = false;
+		picked_device = picked_device_with_nv;
+	}
+
+	if (picked_device < 0)
+	{
+		if (Q_strcasecmp(cvar_ray_tracing_api->string, "auto"))
+		{
+			Com_WPrintf("Requested Ray Tracing API (%s) is not available, switching to automatic selection.\n", cvar_ray_tracing_api->string);
+		}
+
+		if (picked_driver_ray_query == VK_DRIVER_ID_NVIDIA_PROPRIETARY)
+		{
+			// Pick KHR_ray_query on NVIDIA drivers, if available.
+			// Currently, ray queries are very slow on AMD.
+			qvk.use_khr_ray_tracing = true;
+			qvk.use_ray_query = true;
+			picked_device = picked_device_with_ray_query;
+		}
+		else if (picked_device_with_khr >= 0)
+		{
+			// If KHR_ray_tracing_pipeline is available, pick that over NV_ray_tracing
+			qvk.use_khr_ray_tracing = true;
+			qvk.use_ray_query = false;
+			picked_device = picked_device_with_khr;
+		}
+		else if (picked_device_with_nv >= 0)
+		{
+			qvk.use_khr_ray_tracing = false;
+			qvk.use_ray_query = false;
+			picked_device = picked_device_with_nv;
+		}
 	}
 
 	if (picked_device < 0)
@@ -1007,20 +1057,31 @@ init_vulkan()
 	qvk.physical_device = devices[picked_device];
 
 	{
-		VkPhysicalDeviceProperties dev_properties;
-		vkGetPhysicalDeviceProperties(devices[picked_device], &dev_properties);
+		VkPhysicalDeviceDriverProperties driver_properties = {
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES,
+			.pNext = NULL
+		};
+
+		VkPhysicalDeviceProperties2 dev_properties2 = {
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
+			.pNext = &driver_properties
+		};
+
+		vkGetPhysicalDeviceProperties2(devices[picked_device], &dev_properties2);
 
 		// Store the timestamp period to get correct profiler results
-		qvk.timestampPeriod = dev_properties.limits.timestampPeriod;
+		qvk.timestampPeriod = dev_properties2.properties.limits.timestampPeriod;
 
-		Com_Printf("Picked physical device %d: %s\n", picked_device, dev_properties.deviceName);
-		Com_Printf("Using %s\n", qvk.use_khr_ray_tracing ? VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME : VK_NV_RAY_TRACING_EXTENSION_NAME);
+		Com_Printf("Picked physical device %d: %s\n", picked_device, dev_properties2.properties.deviceName);
+		Com_Printf("Using %s\n", qvk.use_khr_ray_tracing 
+			? (qvk.use_ray_query ? VK_KHR_RAY_QUERY_EXTENSION_NAME : VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME)
+			: VK_NV_RAY_TRACING_EXTENSION_NAME);
 
 #ifdef _WIN32
-		if (dev_properties.vendorID == 0x10de) // NVIDIA vendor ID
+		if (dev_properties2.properties.vendorID == 0x10de) // NVIDIA vendor ID
 		{
-			uint32_t driver_major = (dev_properties.driverVersion >> 22) & 0x3ff;
-			uint32_t driver_minor = (dev_properties.driverVersion >> 14) & 0xff;
+			uint32_t driver_major = (dev_properties2.properties.driverVersion >> 22) & 0x3ff;
+			uint32_t driver_minor = (dev_properties2.properties.driverVersion >> 14) & 0xff;
 
 			Com_Printf("NVIDIA GPU detected. Driver version: %u.%02u\n", driver_major, driver_minor);
 
@@ -1055,6 +1116,29 @@ init_vulkan()
 				}
 			}
 		}
+		else if (driver_properties.driverID == VK_DRIVER_ID_AMD_PROPRIETARY)
+		{
+			Com_Printf("AMD GPU detected. Driver version: %s\n", driver_properties.driverInfo);
+
+			uint32_t present_major = 0;
+			uint32_t present_minor = 0;
+			uint32_t present_patch = 0;
+			int nfields_present = sscanf(driver_properties.driverInfo, "%u.%u.%u", &present_major, &present_minor, &present_patch);
+
+			uint32_t required_major = 0;
+			uint32_t required_minor = 0;
+			uint32_t required_patch = 0;
+			int nfields_required = sscanf(cvar_min_driver_version_amd->string, "%u.%u.%u", &required_major, &required_minor, &required_patch);
+
+			if (nfields_present == 3 && nfields_required == 3)
+			{
+				if (present_major < required_major || present_major == required_major && present_minor < required_minor || present_major == required_major && present_minor == required_minor && present_patch < required_patch)
+				{
+					Com_Error(ERR_FATAL, "This game requires AMD Radeon Software version to be at least %s, while the installed version is %s.\nPlease update the AMD Radeon Software.",
+						cvar_min_driver_version_amd->string, driver_properties.driverInfo);
+				}
+			}
+		}
 #endif
 	}
 
@@ -1063,7 +1147,7 @@ init_vulkan()
 	/* queue family and create physical device */
 	uint32_t num_queue_families = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(qvk.physical_device, &num_queue_families, NULL);
-	VkQueueFamilyProperties *queue_families = (VkQueueFamilyProperties*)alloca(sizeof(VkQueueFamilyProperties) * num_queue_families); // C++20 VKPT: Added an alloca cast.
+	VkQueueFamilyProperties *queue_families = alloca(sizeof(VkQueueFamilyProperties) * num_queue_families);
 	vkGetPhysicalDeviceQueueFamilyProperties(qvk.physical_device, &num_queue_families, queue_families);
 
 	// Com_Printf("num queue families: %d\n", num_queue_families);
@@ -1105,60 +1189,49 @@ init_vulkan()
 	VkDeviceQueueCreateInfo queue_create_info[3];
 
 	{
-		// C++20 VKPT: Order fix.
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-			.queueFamilyIndex = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added a cast.
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
+			.queueFamilyIndex = qvk.queue_idx_graphics,
 		};
 
 		queue_create_info[num_create_queues++] = q;
 	};
 	if(qvk.queue_idx_compute != qvk.queue_idx_graphics) {
-		// C++20 VKPT: Order fix.
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-			.queueFamilyIndex = (uint32_t)qvk.queue_idx_compute, // C++20 VKPT: Added a cast.
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
+			.queueFamilyIndex = qvk.queue_idx_compute,
 		};
 		queue_create_info[num_create_queues++] = q;
 	};
 	if(qvk.queue_idx_transfer != qvk.queue_idx_graphics && qvk.queue_idx_transfer != qvk.queue_idx_compute) {
-		// C++20 VKPT: Order fix.
 		VkDeviceQueueCreateInfo q = {
 			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-			.queueFamilyIndex = (uint32_t)qvk.queue_idx_transfer, // C++20 VKPT: Added a cast.
 			.queueCount       = 1,
 			.pQueuePriorities = &queue_priorities,
+			.queueFamilyIndex = qvk.queue_idx_transfer,
 		};
 		queue_create_info[num_create_queues++] = q;
 	};
 
-	// C++20 VKPT: Order fix.
 	VkPhysicalDeviceDescriptorIndexingFeatures idx_features = {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES,
-		.shaderSampledImageArrayNonUniformIndexing = 1,
-		.shaderStorageBufferArrayNonUniformIndexing = 1,
 		.runtimeDescriptorArray = 1,
+		.shaderSampledImageArrayNonUniformIndexing = 1,
+		.shaderStorageBufferArrayNonUniformIndexing = 1
 	};
 
 #ifdef VKPT_DEVICE_GROUPS
 	if (qvk.device_count > 1) {
-		Com_Printf("Enabling multi-GPU support\n");
 		idx_features.pNext = &device_group_create_info;
 	}
 #endif
-	VkPhysicalDeviceRayTracingPipelineFeaturesKHR physical_device_rt_features = {
-		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR,
-		.pNext = &idx_features,
-		.rayTracingPipeline = VK_TRUE
-	};
-
 	VkPhysicalDeviceAccelerationStructureFeaturesKHR physical_device_as_features = {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR,
-		.pNext = &physical_device_rt_features,
+		.pNext = &idx_features,
 		.accelerationStructure = VK_TRUE,
 	};
 
@@ -1166,6 +1239,24 @@ init_vulkan()
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES,
 		.pNext = &physical_device_as_features,
 		.bufferDeviceAddress = VK_TRUE
+	};
+
+#ifdef VKPT_DEVICE_GROUPS
+	if (qvk.device_count > 1) {
+		physical_device_address_features.bufferDeviceAddressMultiDevice = VK_TRUE;
+	}
+#endif
+
+	VkPhysicalDeviceRayTracingPipelineFeaturesKHR physical_device_rt_pipeline_features = {
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR,
+		.pNext = &physical_device_address_features,
+		.rayTracingPipeline = VK_TRUE
+	};
+
+	VkPhysicalDeviceRayQueryFeaturesKHR physical_device_ray_query_features = {
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR,
+		.pNext = &physical_device_address_features,
+		.rayQuery = VK_TRUE
 	};
 
 	VkPhysicalDeviceFeatures2 device_features = {
@@ -1228,19 +1319,18 @@ init_vulkan()
 			.inheritedQueries = 0,
 		}
 	};
-	// C++20 VKPT: Order fix
 	VkDeviceCreateInfo dev_create_info = {
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		.pNext                   = &device_features,
-		.queueCreateInfoCount	 = (uint32_t)num_create_queues, // C++20 VKPT: Added a cast.
 		.pQueueCreateInfos       = queue_create_info,
+		.queueCreateInfoCount    = num_create_queues
 	};
 
 	uint32_t max_extension_count = LENGTH(vk_requested_device_extensions_common);
-	max_extension_count += max(LENGTH(vk_requested_device_extensions_khr), LENGTH(vk_requested_device_extensions_nv));
+	max_extension_count += max(max(LENGTH(vk_requested_device_extensions_khr), LENGTH(vk_requested_device_extensions_nv)), LENGTH(vk_requested_device_extensions_ray_query));
 	max_extension_count += LENGTH(vk_requested_device_extensions_debug);
 
-	const char** device_extensions = (const char **)alloca(sizeof(char*) * max_extension_count); // C++20 VKPT: Added an alloca cast.
+	const char** device_extensions = alloca(sizeof(char*) * max_extension_count);
 	uint32_t device_extension_count = 0;
 
 	append_string_list(device_extensions, &device_extension_count, max_extension_count, 
@@ -1248,9 +1338,20 @@ init_vulkan()
 
 	if(qvk.use_khr_ray_tracing)
 	{
-		append_string_list(device_extensions, &device_extension_count, max_extension_count, 
-			vk_requested_device_extensions_khr, LENGTH(vk_requested_device_extensions_khr));
-		device_features.pNext = &physical_device_address_features;
+		if (qvk.use_ray_query)
+		{
+			append_string_list(device_extensions, &device_extension_count, max_extension_count,
+				vk_requested_device_extensions_ray_query, LENGTH(vk_requested_device_extensions_ray_query));
+
+			device_features.pNext = &physical_device_ray_query_features;
+		}
+		else
+		{
+			append_string_list(device_extensions, &device_extension_count, max_extension_count,
+				vk_requested_device_extensions_khr, LENGTH(vk_requested_device_extensions_khr));
+
+			device_features.pNext = &physical_device_rt_pipeline_features;
+		}
 	}
 	else
 	{
@@ -1287,6 +1388,10 @@ init_vulkan()
 	if (qvk.use_khr_ray_tracing)
 	{
 		LIST_EXTENSIONS_KHR
+		if (!qvk.use_ray_query)
+		{
+			LIST_EXTENSIONS_KHR_PIPELINE
+		}
 	}
 	else
 	{
@@ -1312,7 +1417,12 @@ create_shader_module_from_file(const char *name, const char *enum_name, qboolean
 	if (is_rt_shader)
 	{
 		if (qvk.use_khr_ray_tracing)
-			suffix = ".khr";
+		{
+			if (qvk.use_ray_query)
+				suffix = ".rq";
+			else
+				suffix = ".khr";
+		}
 		else
 			suffix = ".nv";
 	}
@@ -1334,7 +1444,7 @@ create_shader_module_from_file(const char *name, const char *enum_name, qboolean
 	char *data;
 	size_t size;
 
-	size = FS_LoadFile(path, (void**)&data); // C++20 VKPT: ADded a FS_Loadfile cast.
+	size = FS_LoadFile(path, &data);
 	if(!data) {
 		Com_EPrintf("Couldn't find shader module %s!\n", path);
 		return VK_NULL_HANDLE;
@@ -1368,9 +1478,13 @@ vkpt_load_shader_modules()
 	} while(0);
 
 #define IS_RT_SHADER false
-	LIST_SHADER_MODULES
+	LIST_SHADER_MODULES;
 #define IS_RT_SHADER true
-	LIST_RT_SHADER_MODULES
+	LIST_RT_RGEN_SHADER_MODULES
+	if(!qvk.use_ray_query)
+	{
+		LIST_RT_PIPELINE_SHADER_MODULES
+	}
 #undef IS_RT_SHADER
 
 #undef SHADER_MODULE_DO
@@ -1394,9 +1508,13 @@ destroy_swapchain()
 {
 	for(int i = 0; i < qvk.num_swap_chain_images; i++) {
 		vkDestroyImageView  (qvk.device, qvk.swap_chain_image_views[i], NULL);
+		qvk.swap_chain_image_views[i] = VK_NULL_HANDLE;
 	}
+	qvk.num_swap_chain_images = 0;
 
-	vkDestroySwapchainKHR(qvk.device,   qvk.swap_chain, NULL);
+	vkDestroySwapchainKHR(qvk.device, qvk.swap_chain, NULL);
+	qvk.swap_chain = VK_NULL_HANDLE;
+
 	return VK_SUCCESS;
 }
 
@@ -1449,6 +1567,7 @@ destroy_vulkan()
 	// Clear the extension function pointers to make sure they don't refer non-requested extensions after vid_restart
 #define VK_EXTENSION_DO(a) q##a = NULL;
 	LIST_EXTENSIONS_KHR
+	LIST_EXTENSIONS_KHR_PIPELINE
 	LIST_EXTENSIONS_NV
 	LIST_EXTENSIONS_DEBUG
 	LIST_EXTENSIONS_INSTANCE
@@ -1473,7 +1592,7 @@ static int world_entity_id_count[2];
 static int num_model_lights = 0;
 static light_poly_t model_lights[MAX_MODEL_LIGHTS];
 
-static pbr_material_t const * get_mesh_material(const r_entity_t* entity, const maliasmesh_t* mesh)
+static pbr_material_t const * get_mesh_material(const entity_t* entity, const maliasmesh_t* mesh)
 {
 	if (entity->skin)
 	{
@@ -1487,7 +1606,7 @@ static pbr_material_t const * get_mesh_material(const r_entity_t* entity, const 
 	return mesh->materials[skinnum];
 }
 
-static inline uint32_t fill_model_instance(const r_entity_t* entity, const model_t* model, const maliasmesh_t* mesh,
+static inline uint32_t fill_model_instance(const entity_t* entity, const model_t* model, const maliasmesh_t* mesh,
 	const float* transform, int model_instance_index, qboolean is_viewer_weapon, qboolean is_double_sided)
 {
 	pbr_material_t const * material = get_mesh_material(entity, mesh);
@@ -1518,22 +1637,14 @@ static inline uint32_t fill_model_instance(const r_entity_t* entity, const model
 	if (is_double_sided)
 		material_id |= MATERIAL_FLAG_DOUBLE_SIDED;
 
-	if (!MAT_IsKind(material_id, MATERIAL_KIND_GLASS))
+	if (!MAT_IsKind(material_id, MATERIAL_KIND_GLASS))  
 	{
-		//add in RF_IRVISIBLE support
-		if ((entity->flags & RenderEffects::InfraRedVisible) && (vkpt_refdef.fd->rdflags & RDF_IRGOGGLES))
-		{
+		if (entity->flags & RF_SHELL_RED)
 			material_id |= MATERIAL_FLAG_SHELL_RED;
-		}
-		else
-		{
-			if (entity->flags & RenderEffects::RedShell)
-				material_id |= MATERIAL_FLAG_SHELL_RED;
-			if (entity->flags & RenderEffects::GreenShell)
-				material_id |= MATERIAL_FLAG_SHELL_GREEN;
-			if (entity->flags & RenderEffects::BlueShell)
-				material_id |= MATERIAL_FLAG_SHELL_BLUE;
-		}
+		if (entity->flags & RF_SHELL_GREEN)
+			material_id |= MATERIAL_FLAG_SHELL_GREEN;
+		if (entity->flags & RF_SHELL_BLUE)
+			material_id |= MATERIAL_FLAG_SHELL_BLUE;
 	}
 
 	ModelInstance* instance = &vkpt_refdef.uniform_instance_buffer.model_instances[model_instance_index];
@@ -1550,33 +1661,25 @@ static inline uint32_t fill_model_instance(const r_entity_t* entity, const model
 	instance->offset_prev = mesh->vertex_offset + oldframe * mesh->numverts * (sizeof(model_vertex_t) / sizeof(uint32_t));
 	instance->backlerp = entity->backlerp;
 	instance->material = material_id;
-	instance->alpha = (entity->flags & RenderEffects::Translucent) ? entity->alpha : 1.0f;
+	instance->alpha = (entity->flags & RF_TRANSLUCENT) ? entity->alpha : 1.0f;
 
 	return material_id;
 }
 
 static void
-add_dlights(const rdlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
+add_dlights(const dlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
 {
 	ubo->num_sphere_lights = 0;
 
-	for (int i = 0; i < num_lights && ubo->num_sphere_lights < MAX_LIGHT_SOURCES; i++)
+	for (int i = 0; i < num_lights; i++)
 	{
-		const rdlight_t* light = lights + i;
+		const dlight_t* light = lights + i;
 
-		float* dynlight_data = (float*)(ubo->sphere_light_data + ubo->num_sphere_lights * 4);
+		float* dynlight_data = (float*)(ubo->sphere_light_data + ubo->num_sphere_lights * 2);
 		float* center = dynlight_data;
 		float* radius = dynlight_data + 3;
 		float* color = dynlight_data + 4;
 		dynlight_data[7] = 0.f;
-		dynlight_data[8] = 0.f;
-		dynlight_data[9] = 0.f;
-		dynlight_data[10] = 0.f;
-		dynlight_data[11] = 1.0f;
-		dynlight_data[12] = 0.f;
-		dynlight_data[13] = 0.f;
-		dynlight_data[14] = light->radius;
-		dynlight_data[15] = 0.f;
 
 		VectorCopy(light->origin, center);
 		VectorScale(light->color, light->intensity / 25.f, color);
@@ -1586,861 +1689,6 @@ add_dlights(const rdlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
 	}
 }
 
-#define COM_PARSE_OLD_MAX_TOKEN_CHARS 128
-char	com_token_internal[COM_PARSE_OLD_MAX_TOKEN_CHARS];
-
-const char* COM_Parse_old(char** data_p)
-{
-	int		c;
-	int		len;
-	char* data;
-
-	data = *data_p;
-	len = 0;
-	com_token_internal[0] = 0;
-
-	if (!data)
-	{
-		*data_p = NULL;
-		return (char*)""; // C++20 VKPT: Added a (char*) cast to return "" 
-	}
-
-	// skip whitespace
-skipwhite:
-	while ((c = *data) <= ' ')
-	{
-		if (c == 0)
-		{
-			*data_p = NULL;
-			return (char*)""; // C++20 VKPT: Added a (char*) cast to return "" 
-		}
-		data++;
-	}
-
-	// skip // comments
-	if (c == '/' && data[1] == '/')
-	{
-		while (*data && *data != '\n')
-			data++;
-		goto skipwhite;
-	}
-
-
-	// handle quoted strings specially
-	if (c == '\"')
-	{
-		data++;
-		while (1)
-		{
-			c = *data++;
-			if (c == '\"' || !c)
-			{
-				com_token_internal[len] = 0;
-				*data_p = data;
-				return com_token_internal;
-			}
-			if (len < COM_PARSE_OLD_MAX_TOKEN_CHARS)
-			{
-				com_token_internal[len] = c;
-				len++;
-			}
-		}
-	}
-
-	// parse a regular word
-	do
-	{
-		if (len < COM_PARSE_OLD_MAX_TOKEN_CHARS)
-		{
-			com_token_internal[len] = c;
-			len++;
-		}
-		data++;
-		c = *data;
-	} while (c > 32);
-
-	if (len == COM_PARSE_OLD_MAX_TOKEN_CHARS)
-	{
-		//		Com_Printf ("Token exceeded %i chars, discarded.\n", MAX_TOKEN_CHARS);
-		len = 0;
-	}
-	com_token_internal[len] = 0;
-
-	*data_p = data;
-	return com_token_internal;
-}
-
-cvar_t		*initlight;
-cvar_t		*initlightbind;
-cvar_t		*inittargetlightLSbind;
-cvar_t		*inittargetlightbind;
-
-void inittargetlightLSbind_changed(cvar_t *self)
-{
-	char buffer[MAX_QPATH];
-	void *ptr = NULL;
-	sscanf(self->string, "%s %p",
-		&buffer,
-		&ptr);
-
-	// Find mathing light
-	for (int i = 0; i < num_entlights; i++)
-	{
-		rdlight_t *elight = &entlights[i];
-
-		// Assign tracker pointer
-		if (!Q_stricmp(buffer, elight->nacTargetName))
-		{
-			elight->nacTargetLightLSBind = ptr;
-			break;
-		}
-	}
-}
-
-void inittargetlightbind_changed(cvar_t *self)
-{
-	char buffer[MAX_QPATH];
-	void *ptr = NULL;
-	sscanf(self->string, "%s %p",
-		&buffer,
-		&ptr);
-
-	// Find mathing light
-	for (int i = 0; i < num_entlights; i++)
-	{
-		rdlight_t *elight = &entlights[i];
-
-		// Assign tracker pointer
-		if (!Q_stricmp(buffer, elight->nacTargetName))
-		{
-			elight->nacTargetLightBind = ptr;
-			break;
-		}
-	}
-}
-
-void initlight_changed(cvar_t *self)
-{
-	char buffer[MAX_QPATH];
-	void *ptr = NULL;
-	sscanf(self->string, "%s %p",
-		&buffer,
-		&ptr);
-
-	// Find mathing light
-	for (int i = 0; i < num_entlights; i++)
-	{
-		rdlight_t *elight = &entlights[i];
-
-		// Assign tracker pointer
-		if (!Q_stricmp(buffer, elight->nacTarget))
-		{
-			elight->nacTargetBind = ptr;
-			break;
-		}
-	}
-}
-
-void initlightbind_changed(cvar_t *self)
-{
-	char buffer[MAX_QPATH];
-	void *ptr = NULL;
-	sscanf(self->string, "%s %p",
-		&buffer,
-		&ptr);
-
-	// Find mathing light
-	for (int i = 0; i < num_entlights; i++)
-	{
-		rdlight_t *elight = &entlights[i];
-
-		// Assign Light pointer
-		if (!Q_stricmp(buffer, elight->nacTargetName))
-		{
-			elight->nacLightBind = ptr;
-			break;
-		}
-	}
-}
-
-#define BSP_MAX_ENTITY_PROPERTIES 50
-void
-bsp_add_entlights(const bsp_t* bsp)
-{
-	char* entString;
-	const char* com_token;
-	int el;
-	float entity_scale;
-
-	if (bsp == NULL || cvar_entlights_scale == NULL)
-		return;
-
-	//replicate algorithm from qrad3; would be best to be able to set entity_scale dynamically depending upon map
-	//so that original qrad parameters could be replicated here
-	entity_scale = atof(cvar_entlights_scale->string);
-	if (entity_scale == 0.00f) {
-		entity_scale = 0.05f;
-	}
-	entString = bsp->entityString;
-
-	//replicate SpawnEntities logic of game DLL, with regards to entity parsing
-
-	/*Example:
-	{
-	"style" "1"
-	"_color" "0.97 0.54 0.01"
-	"light" "300"
-	"origin" "-1632 320 256"
-	"classname" "light"
-	}
-	*/
-
-	//initialize all light values, even if not used
-	num_entlights = 0;
-	for (el = 0; el < MAX_ENTLIGHTS; el++)
-	{
-		rdlight_t* elight;
-		//elight = (rdlight_t*)(entlights + el);
-		elight = &entlights[el]; // (rdlight_t*)(entlights + (el * sizeof(rdlight_t)));
-		//elight = (rdlight_t*)(entlights + (el * sizeof(rdlight_t)));
-		elight->origin[0] = 0.00f;
-		elight->origin[1] = 0.00f;
-		elight->origin[2] = 0.00f;
-		elight->transformed[0] = 0.00f;
-		elight->transformed[1] = 0.00f;
-		elight->transformed[2] = 0.00f;
-		elight->intensity = 300.0f; //original qrad3 default
-		elight->radius = elight->intensity * entity_scale;
-		elight->color[0] = 1.00f;
-		elight->color[1] = 1.00f;
-		elight->color[2] = 1.00f;
-	}
-
-	for (;;) //loop over entities
-	{
-		EntityKVPair_t keypairs[BSP_MAX_ENTITY_PROPERTIES];
-		int num_keypairs, i;
-		qboolean islight;
-		const char* com_token_inner;
-		//char* inner;
-
-		num_keypairs = 0;
-		islight = false;
-
-		com_token = COM_Parse_old(&entString);
-
-		if (!entString)
-		{
-			break;
-		}
-		if (com_token[0] != '{')
-		{
-			Com_LPrintf(PRINT_WARNING, "bsp_add_entlights: found %s when expecting {", com_token);
-		}
-
-		//inner = entString;
-		num_keypairs = 0;
-
-		//replicate ED_ParseEntity() logic of game DLL
-		for (;; ) //loop over properties
-		{
-			EntityKVPair_t keypair;
-
-			keypair.key[0] = '\0';
-			keypair.value[0] = '\0';
-			keypair.key[sizeof(keypair.key - 1)] = '\0';
-			keypair.value[sizeof(keypair.value - 1)] = '\0';
-
-			if (num_keypairs >= BSP_MAX_ENTITY_PROPERTIES)
-			{
-				break;
-			}
-
-			//get key
-
-			com_token_inner = COM_Parse_old(&entString);
-
-			if (com_token_inner[0] == '}')
-			{
-				break;
-			}
-			if (!entString)
-			{
-				Com_LPrintf(PRINT_WARNING, "bsp_add_entlights: EOF without closing brace");
-			}
-
-			strncpy(keypair.key, com_token_inner, sizeof(keypair.key) - 1);
-
-			//get value
-
-			com_token_inner = COM_Parse_old(&entString);
-
-			if (!entString)
-			{
-				Com_LPrintf(PRINT_WARNING, "bsp_add_entlights: EOF without closing brace");
-			}
-
-			if (com_token_inner[0] == '}')
-			{
-				Com_LPrintf(PRINT_WARNING, "bsp_add_entlights: closing brace without data (2)");
-			}
-
-			strncpy(keypair.value, com_token_inner, sizeof(keypair.value) - 1);
-
-			keypairs[num_keypairs++] = keypair;
-		}
-
-		for (i = 0; i < num_keypairs; i++)
-			if (!Q_stricmp(keypairs[i].key, "classname") && !Q_stricmp(keypairs[i].value, "light"))
-			{
-				islight = true;
-			}
-
-		//only process light entities
-		if (islight && num_entlights < MAX_ENTLIGHTS)
-		{
-			rdlight_t* elight;
-			dlightLS_t* elightLS;
-			qboolean parse_error;
-
-			parse_error = false;
-
-			//examples:
-			//"_color" "0.97 0.54 0.01"
-			//"light" "300" - F_INT
-			//"origin" "-1632 320 256" - F_VECTOR
-
-			//elight = (rdlight_t*)(entlights + i);
-			elight = &entlights[num_entlights];
-			elightLS = &entlightstyles[num_entlights];
-			// (rdlight_t*)(entlights + (el * sizeof(rdlight_t)));
-			//elight = (rdlight_t*)(entlights + (num_entlights * sizeof(rdlight_t)));
-			elight->intensity = 300.0f; //original qrad3 default
-			elight->radius = elight->intensity * entity_scale;
-			elight->color[0] = 1.00f;
-			elight->color[1] = 1.00f;
-			elight->color[2] = 1.00f;
-
-			elight->nacTargetBind = NULL;
-			elight->nacLightBind = NULL;
-			elight->nacLsDirection = 1;
-			elightLS->frame = 0;
-			elightLS->maxdist = 0.0f;
-			elightLS->power = 0.0;
-			elightLS->lastCtime = 0;
-			elightLS->length = 0;
-			elightLS->done = 0;
-
-			for (i = 0; i < num_keypairs; i++)
-			{
-				if (!Q_stricmp(keypairs[i].key, "origin") || !Q_stricmp(keypairs[i].key, "_color"))
-				{
-					vec3_t vec;
-					//vec3_t* v;
-
-					//v = NULL;
-					vec[0] = 0.0f;
-					vec[1] = 0.0f;
-					vec[2] = 0.0f;
-
-					if (sscanf(keypairs[i].value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
-						//could not parse
-						parse_error = true;
-						break;
-					}
-					if (!Q_stricmp(keypairs[i].key, "origin"))
-					{
-						VectorCopy(vec, elight->origin);
-						//v = &elight->origin;
-					}
-					else if (!Q_stricmp(keypairs[i].key, "_color"))
-					{
-						VectorCopy(vec, elight->color);
-						//v = &elight->color;
-					}
-					else
-					{
-						//should be unreachable
-						parse_error = true;
-						break;
-					}
-					//*v[0] = vec[0];
-					//*v[1] = vec[1];
-					//*v[2] = vec[2];
-				}
-				else if (!Q_stricmp(keypairs[i].key, "_nacdirection"))
-				{
-					vec3_t vec;
-					//vec3_t* v;
-
-					//v = NULL;
-					vec[0] = 0.0f;
-					vec[1] = 0.0f;
-					vec[2] = 0.0f;
-
-					if (sscanf(keypairs[i].value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
-						//could not parse
-						parse_error = true;
-						break;
-					}
-					VectorCopy(vec, elight->nacDirection);
-					//v = &elight->color;
-
-					//*v[0] = vec[0];
-					//*v[1] = vec[1];
-					//*v[2] = vec[2];
-				}
-				else if (!Q_stricmp(keypairs[i].key, "_naclighttype"))
-				{
-					float f;
-					f = atof(keypairs[i].value);
-
-					elight->nacLightType = f;
-
-				}
-				else if (!Q_stricmp(keypairs[i].key, "_nacCustom"))
-				{
-					strcpy(elight->nacCustom, keypairs[i].value);
-					elight->nacusecustom = 0;
-					elightLS->length = strlen(elight->nacCustom)+1;
-					if (elightLS->length > 0)
-						elight->nacusecustom = 1;
-
-				}
-				else if (!Q_stricmp(keypairs[i].key, "_nacCustomEnabled"))
-				{
-					int f;
-					f = atoi(keypairs[i].value);
-
-					elight->nacCustomEnabled = f;
-
-				}
-				else if (!Q_stricmp(keypairs[i].key, "_nacCustomLoopEnabled"))
-				{
-					int f;
-					f = atoi(keypairs[i].value);
-
-					elight->nacCustomLoopEnabled = f;
-
-				}
-				else if (!Q_stricmp(keypairs[i].key, "_nacCustomToggleEnabled"))
-				{
-					int f;
-					f = atoi(keypairs[i].value);
-
-					elight->nacCustomToggleEnabled = f;
-
-				}
-				else if (!Q_stricmp(keypairs[i].key, "_nacHz"))
-				{
-					float f;
-					f = atof(keypairs[i].value);
-
-					elightLS->hzOver1k = 1000.0f / f;
-
-				}
-				else if (!Q_stricmp(keypairs[i].key, "nacname"))
-				{
-					// Assign to the elight					
-					strcpy(elight->nacTargetName, keypairs[i].value);
-
-				}
-				else if (!Q_stricmp(keypairs[i].key, "style"))
-				{
-					int f;
-					f = atoi(keypairs[i].value);
-
-					elight->naclightStyle = f;
-
-					switch (f)
-					{
-					case 0:
-						// 0 normal
-						strcpy(elightLS->lightstyle, "m");
-						elightLS->length = strlen(elightLS->lightstyle);
-						break;
-					case 1:
-						// 1 FLICKER (first variety)
-						// QLEG - Large Flicker, rescaled for RTX tone mapping (a-m only)
-						strcpy(elightLS->lightstyle, "degfdgedjgdglgfdfghkedg");
-						elightLS->length = strlen(elightLS->lightstyle)+1;
-						break;
-					case 2:
-						// 2 SLOW STRONG PULSE
-						strcpy(elightLS->lightstyle, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
-						elightLS->length = strlen(elightLS->lightstyle) + 1;
-						break;
-					case 3:
-						// 3 CANDLE (first variety)
-						strcpy(elightLS->lightstyle, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
-						elightLS->length = strlen(elightLS->lightstyle);
-						break;
-					case 4:
-						// 4 FAST STROBE
-						strcpy(elightLS->lightstyle, "mamamamamama");
-						elightLS->length = strlen(elightLS->lightstyle) + 1;
-						break;
-					case 5:
-						// 5 GENTLE PULSE 1
-						strcpy(elightLS->lightstyle, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
-						elightLS->length = strlen(elightLS->lightstyle);
-						break;
-					case 6:
-						// 6 FLICKER (second variety)
-						// QLEG - Small Flicker, rescaled for RTX tone mapping (a-m only)
-						strcpy(elightLS->lightstyle, "igkimigkgigkgkgik");
-						elightLS->length = strlen(elightLS->lightstyle) + 1;
-						break;
-					case 7:
-						// 7 CANDLE (second variety)
-						strcpy(elightLS->lightstyle, "mmmaaaabcdefgmmmmaaaammmaamm");
-						elightLS->length = strlen(elightLS->lightstyle) + 1;
-						break;
-					case 8:
-						// 8 CANDLE (third variety)
-						strcpy(elightLS->lightstyle, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
-						elightLS->length = strlen(elightLS->lightstyle) + 1;
-						break;
-					case 9:
-						// 9 SLOW STROBE (fourth variety)
-						strcpy(elightLS->lightstyle, "aaaaaaaazzzzzzzz");
-						elightLS->length = strlen(elightLS->lightstyle) + 1;
-						break;
-					case 10:
-						// 10 FLUORESCENT FLICKER
-						strcpy(elightLS->lightstyle, "mmmmaammaammmmmmmmaammmmaammaammaaaaaammaammmmmmaa"); //  mmamammmmammamamaaamammma
-						elightLS->length = strlen(elightLS->lightstyle) + 1;
-						break;
-					case 11:
-						// 11 SLOW PULSE NOT FADE TO BLACK
-						strcpy(elightLS->lightstyle, "abcdefghijklmnopqrrqponmlkjihgfedcba");
-						elightLS->length = strlen(elightLS->lightstyle) + 1;
-						break;
-					default:
-						break;
-					}
-				}
-				else if (!Q_stricmp(keypairs[i].key, "_nacumbraangle"))
-				{
-					float f;
-					f = atof(keypairs[i].value);
-					if (f == 0.0f)
-					{
-						parse_error = true;
-						break;
-					}
-
-					elight->nacUmbra = f;
-
-				}
-				else if (!Q_stricmp(keypairs[i].key, "_nacpenumbraangle"))
-				{
-					float f;
-					f = atof(keypairs[i].value);
-					if (f == 0.0f)
-					{
-						parse_error = true;
-						break;
-					}
-
-					elight->nacPenumbra = f;
-
-				}
-				else if (!Q_stricmp(keypairs[i].key, "_naclightpow"))
-				{
-					float f;
-					f = atof(keypairs[i].value);
-					if (f == 0.0f)
-					{
-						parse_error = true;
-						break;
-					}
-
-					elightLS->power = f;
-					elight->nacLightPower = f;
-
-				}
-				else if (!Q_stricmp(keypairs[i].key, "_naclightmax"))
-				{
-					float f;
-					f = atof(keypairs[i].value);
-					if (f == 0.0f)
-					{
-						parse_error = true;
-						break;
-					}
-
-					elightLS->maxdist = f;
-					elight->nacLightMaxDist = f;
-
-				}
-				else if (!Q_stricmp(keypairs[i].key, "light") || !Q_stricmp(keypairs[i].key, "_light"))
-				{
-					float f;
-					f = atof(keypairs[i].value);
-					if (f == 0.0f)
-					{
-						parse_error = true;
-						break;
-					}
-
-					elight->intensity = f;
-					elight->radius = elight->intensity * entity_scale;
-				}
-				else if (!Q_stricmp(keypairs[i].key, "light_spot"))
-				{
-					//TODO: add in support for spot lights
-					//ignore spot lights for now
-					//additional spot light properties are "_cone" and "angle"; these should be interpretted like qrad3
-					parse_error = true;
-				}
-				else if (!Q_stricmp(keypairs[i].key, "target"))
-				{
-
-					// Assign to the elight					
-					strcpy(elight->nacTarget, keypairs[i].value);
-					
-				}
-
-			}
-
-			if (parse_error == false && elight->radius != 0.00f)
-			{
-				//if not correct, redo this light definition with the next we find
-				//e.g. effectively ignore bad lights
-				num_entlights++;
-			}
-		}
-	}
-
-
-	/*initlight = Cvar_Get("initlight", "0", CVAR_ARCHIVE);
-	initlight->changed = initlight_changed;
-
-	initlightbind = Cvar_Get("initlightbind", "0", CVAR_ARCHIVE);
-	initlightbind->changed = initlightbind_changed;*/
-
-}
-
-// C++20 VKPT: Added void return type to bsp_reset_entlights which had none...
-void bsp_reset_entlights(const bsp_t* bsp)
-{
-	int el;
-	for (el = 0; el < MAX_ENTLIGHTS; el++)
-	{
-		dlightLS_t* elightLS;
-		elightLS = &entlightstyles[el]; 
-		
-		elightLS->frame = 0;
-		elightLS->done = 0;
-		elightLS->lastCtime = 0;
-	}
-
-}
-
-//#define NUM_ACTOR_SOUNDS   13
-//#define	MAX_ENT_CLUSTERS	16
-//
-//#include "game_copy.h"
-//
-//static void ProcessLightLookAtTarget(rdlight_t *elight, dlightLS_t *elightls)
-//{
-//	// Get target pos
-//	entity_t *lightTarget = (entity_t*)elight->nacTargetBind;
-//	if (!lightTarget) return;
-//
-//	// Calc vector normalized
-//	vec3_t dir;
-//
-//	VectorSubtract(elight->origin, lightTarget->s.origin, dir);
-//	VectorNormalize(dir);
-//	VectorCopy(dir, elight->nacDirection);
-//}
-//
-//static void ProcessLightMovewith(rdlight_t *elight, dlightLS_t *elightls)
-//{
-//	// Get target pos
-//	entity_t *light = (entity_t*)elight->nacLightBind;
-//	if (!light) return;
-//
-//	VectorCopy(light->s.origin, elight->origin);
-//
-//}
-//
-//static void ProcessLightStlye(rdlight_t *elight, dlightLS_t *elightls)
-//{
-//	const float conversion = 1.0f / 26.0f;
-//
-//	char c = 0;
-//
-//	if (elight->nacusecustom == 1)
-//	{
-//		if (elight->nacCustomEnabled == 1)
-//			c = elight->nacCustom[elightls->frame] - 'a';
-//		else
-//			c = 'z' - 'a';
-//	}
-//	else
-//	{
-//		c = elightls->lightstyle[elightls->frame] - 'a';
-//	}
-//
-//	float cc = conversion * c;
-//	if(elightls->done == 0) elight->nacLightPower = elightls->power * cc;
-//	
-//	if (cl.time - elightls->lastCtime >= elightls->hzOver1k)
-//	{
-//		if (elightls->frame + 1 == elightls->length && elight->nacLsDirection == 1)
-//		{
-//			// Done playing the anim forward
-//			if (elight->nacCustomLoopEnabled == 1 && 
-//				elight->nacCustomToggleEnabled == 0)
-//				elightls->frame = 0;
-//			
-//			if (elight->nacCustomToggleEnabled == 1)
-//			{
-//				elight->nacLsDirection = -1;
-//				//elightls->frame--;
-//			}
-//			
-//		}
-//		else if (elightls->frame - 1 == -1 && elight->nacLsDirection == -1)
-//		{
-//			// Done playing the anim backward
-//			if (elight->nacCustomLoopEnabled == 1)
-//				elight->nacLsDirection = 1;
-//			else
-//			{   
-//				elight->nacCustomToggleEnabled = 0;
-//				elight->nacLsDirection = 1;
-//				elightls->frame = elightls->length - 1;
-//				elightls->done = 1;
-//			}
-//		}
-//		else
-//		{
-//			elightls->frame += elight->nacLsDirection;
-//		}
-//
-//		elightls->lastCtime = cl.time;
-//	}
-//}
-//
-//static void ProcessTargetLightStlye(rdlight_t *elight, dlightLS_t *elightls)
-//{
-//	entity_t *targetLS = (entity_t*)elight->nacTargetLightLSBind;
-//	if (targetLS)
-//	{
-//		if (targetLS->changeLightLS == 1)
-//		{
-//			strcpy(elight->nacCustom, targetLS->nacCustom);
-//			elight->nacCustomEnabled = targetLS->nacCustomEnabled;
-//			elight->nacCustomLoopEnabled = targetLS->nacCustomLoopEnabled;
-//			elight->nacCustomToggleEnabled = targetLS->nacCustomToggleEnabled;
-//			elightls->hzOver1k = 1000.0f / targetLS->nacHz;
-//			elightls->length = strlen(elight->nacCustom) + 1;
-//			if (targetLS->nacCustomEnabled)
-//				elight->nacusecustom = 1;
-//
-//			targetLS->changeLightLS = 0;
-//		}
-//	}
-//}
-//
-//static void ProcessTargetLight(rdlight_t *elight, dlightLS_t *elightls)
-//{
-//	entity_t *targetL = (entity_t*)elight->nacTargetLightBind;
-//	if (targetL)
-//	{
-//		if (targetL->changeLight == 1)
-//		{
-//			elight->color[0] = targetL->color[0];
-//			elight->color[1] = targetL->color[1];
-//			elight->color[2] = targetL->color[2];
-//
-//			elight->nacDirection[0] = targetL->nacdirectionX;
-//			elight->nacDirection[1] = targetL->nacdirectionY;
-//			elight->nacDirection[2] = targetL->nacdirectionZ;
-//			elight->nacUmbra = targetL->nacumbraangle;
-//			elight->nacPenumbra = targetL->nacpenumbraangle;
-//
-//			elight->nacLightPower = targetL->naclightpow;
-//			elight->nacLightMaxDist = targetL->naclightmax;
-//			elight->naclightStyle = targetL->naclighttype;
-//
-//			targetL->changeLight = 0;
-//		}
-//	}
-//}
-
-//static void add_elights(refdef_t * fd, QVKUniformBuffer_t * ubo)
-//{
-//	
-//
-//	for (int i = 0; i < num_entlights && ubo->num_sphere_lights < MAX_LIGHT_SOURCES; i++)
-//	{
-//		rdlight_t *elight = &entlights[i];
-//		dlightLS_t *elightls = &entlightstyles[i];
-//
-//		// Process Target_LightStyle 
-//		ProcessTargetLightStlye(elight, elightls);
-//		
-//		// Process Target_Light
-//		ProcessTargetLight(elight, elightls);
-//
-//		// Process LightStyle
-//		ProcessLightStlye(elight, elightls);
-//
-//		// Process Light movewith
-//		if (elight->nacLightBind)
-//			ProcessLightMovewith(elight, elightls);
-//
-//		// Process Light LookAt Target
-//		if (elight->nacLightType != 0 && elight->nacTargetBind)
-//			ProcessLightLookAtTarget(elight, elightls);
-//
-//		float* dynlight_data = (float*)(ubo->sphere_light_data + ubo->num_sphere_lights * 4);
-//		float* center = dynlight_data;
-//		float* radius = dynlight_data + 3;
-//		float* color = dynlight_data + 4;
-//		dynlight_data[7] = 0.f;
-//
-//		dynlight_data[8] = elight->nacDirection[0];
-//		dynlight_data[9] = elight->nacDirection[1];
-//		dynlight_data[10] = elight->nacDirection[2];
-//		dynlight_data[11] = elight->nacLightPower;
-//
-//		dynlight_data[12] = elight->nacUmbra;
-//		dynlight_data[13] = elight->nacPenumbra;
-//		dynlight_data[14] = elight->nacLightMaxDist;
-//		dynlight_data[15] = elight->nacLightType;
-//
-//		VectorCopy(elight->origin, center);
-//		VectorScale(elight->color, elight->intensity / 25.f, color);
-//
-//		*radius = elight->radius;
-//
-//		ubo->num_sphere_lights++;
-//
-//		if (cvar_show_entlights->integer && fd->num_particles < MAX_PARTICLES)
-//		{
-//			rparticle_t * part = &fd->particles[fd->num_particles]; //fd->particles + (fd->num_particles * sizeof(rparticle_t));
-//
-//			VectorCopy(elight->origin, part->origin);
-//			part->radius = elight->radius;
-//			part->brightness = max(elight->color[0], max(elight->color[1], elight->color[2]));
-//			part->color = -1;
-//			part->rgba.u8[0] = (uint8_t)max(0.00f, min(255.00f, elight->color[0] / part->brightness * 255.00f));
-//			part->rgba.u8[1] = (uint8_t)max(0.00f, min(255.00f, elight->color[1] / part->brightness * 255.00f));
-//			part->rgba.u8[2] = (uint8_t)max(0.00f, min(255.00f, elight->color[2] / part->brightness * 255.00f));
-//			part->rgba.u8[3] = 255;
-//			part->alpha = 1.00f;
-//
-//			fd->num_particles++;
-//		}
-//	}
-//}
-
 static inline void transform_point(const float* p, const float* matrix, float* result)
 {
 	vec4_t point = { p[0], p[1], p[2], 1.f };
@@ -2449,7 +1697,7 @@ static inline void transform_point(const float* p, const float* matrix, float* r
 	VectorCopy(transformed, result); // vec4 -> vec3
 }
 
-static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int* instance_idx, int* num_instanced_vert)
+static void process_bsp_entity(const entity_t* entity, int* bsp_mesh_idx, int* instance_idx, int* num_instanced_vert)
 {
 	QVKInstanceBuffer_t* uniform_instance_buffer = &vkpt_refdef.uniform_instance_buffer;
 	uint32_t* ubo_bsp_cluster_id = (uint32_t*)uniform_instance_buffer->bsp_cluster_id;
@@ -2473,7 +1721,7 @@ static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int*
 	world_entity_ids[entity_frame_num][current_bsp_mesh_index] = entity->id;
 
 	float transform[16];
-	create_entity_matrix(transform, (r_entity_t*)entity, false);
+	create_entity_matrix(transform, (entity_t*)entity, false);
 	BspMeshInstance* ubo_instance_info = uniform_instance_buffer->bsp_mesh_instances + current_bsp_mesh_index;
 	memcpy(&ubo_instance_info->M, transform, sizeof(transform));
 	ubo_instance_info->frame = entity->frame;
@@ -2569,7 +1817,7 @@ static inline qboolean is_transparent_material(uint32_t material)
 #define MESH_FILTER_ALL 3
 
 static void process_regular_entity(
-	const r_entity_t* entity,
+	const entity_t* entity, 
 	const model_t* model, 
 	qboolean is_viewer_weapon, 
 	qboolean is_double_sided, 
@@ -2586,7 +1834,7 @@ static void process_regular_entity(
 	uint32_t* ubo_model_cluster_id = (uint32_t*)uniform_instance_buffer->model_cluster_id;
 
 	float transform[16];
-	create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
+	create_entity_matrix(transform, (entity_t*)entity, is_viewer_weapon);
 	
 	int current_model_instance_index = *model_instance_idx;
 	int current_instance_index = *instance_idx;
@@ -2644,7 +1892,7 @@ static void process_regular_entity(
 
 		uint32_t cluster_id = ~0u;
 		if(bsp_world_model) 
-			cluster_id = BSP_PointLeaf(bsp_world_model->nodes, ((r_entity_t*)entity)->origin)->cluster;
+			cluster_id = BSP_PointLeaf(bsp_world_model->nodes, ((entity_t*)entity)->origin)->cluster;
 		ubo_model_cluster_id[current_model_instance_index] = cluster_id;
 
 		ubo_model_idx_offset[current_model_instance_index] = mesh->idx_offset;
@@ -2670,17 +1918,24 @@ static void process_regular_entity(
 		mult_matrix_vector(end, transform, offset2);
 		VectorSet(color, 0.25f, 0.5f, 0.07f);
 
-		// MATHLIB: !! This one speaks for itself right?
-		vec3_t v3begin = { begin.x, begin.y, begin.z };
-		vec3_t v3end = { end.x, end.y, end.z };
-		vec3_t v3color = { color.x, color.y, color.z };
-		vkpt_build_cylinder_light(model_lights, &num_model_lights, MAX_MODEL_LIGHTS, bsp_world_model, v3begin, v3end, v3color, 1.5f);
+		vkpt_build_cylinder_light(model_lights, &num_model_lights, MAX_MODEL_LIGHTS, bsp_world_model, begin, end, color, 1.5f);
 	}
 
 	*model_instance_idx = current_model_instance_index;
 	*instance_idx = current_instance_index;
 	*num_instanced_vert = current_num_instanced_vert;
 }
+
+#if CL_RTX_SHADERBALLS
+extern vec3_t cl_dev_shaderballs_pos;
+
+void
+vkpt_drop_shaderballs()
+{
+	VectorCopy(vkpt_refdef.fd->vieworg, cl_dev_shaderballs_pos);
+	cl_dev_shaderballs_pos[2] -= 46.12f; // player eye-level
+}
+#endif
 
 static void
 prepare_entities(EntityUploadInfo* upload_info)
@@ -2711,11 +1966,11 @@ prepare_entities(EntityUploadInfo* upload_info)
 	int num_instanced_vert = 0; /* need to track this here to find lights */
 	int instance_idx = 0;
 
-	const qboolean first_person_model = (cl_player_model->integer == CL_PLAYER_MODEL_FIRST_PERSON) && cl.baseClientInfo.model;
+	const qboolean first_person_model = (cl_player_model->integer == CL_PLAYER_MODEL_FIRST_PERSON) && cl.baseclientinfo.model;
 
 	for (int i = 0; i < vkpt_refdef.fd->num_entities; i++)
 	{
-		const r_entity_t* entity = vkpt_refdef.fd->entities + i;
+		const entity_t* entity = vkpt_refdef.fd->entities + i;
 
 		if (entity->model & 0x80000000)
 		{
@@ -2731,9 +1986,9 @@ prepare_entities(EntityUploadInfo* upload_info)
 			if (model == NULL || model->meshes == NULL)
 				continue;
 
-			if (entity->flags & RenderEffects::ViewerModel)
+			if (entity->flags & RF_VIEWERMODEL)
 				viewer_model_indices[viewer_model_num++] = i;
-			else if (first_person_model && entity->flags & RenderEffects::WeaponModel)
+			else if (entity->flags & RF_WEAPONMODEL)
 				viewer_weapon_indices[viewer_weapon_num++] = i;
 			else if (model->model_class == MCLASS_EXPLOSION || model->model_class == MCLASS_SMOKE)
 				explosion_indices[explosion_num++] = i;
@@ -2753,7 +2008,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	const uint32_t transparent_model_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < transparent_model_num; i++)
 	{
-		const r_entity_t* entity = vkpt_refdef.fd->entities + transparent_model_indices[i];
+		const entity_t* entity = vkpt_refdef.fd->entities + transparent_model_indices[i];
 
 		if (entity->model & 0x80000000)
 		{
@@ -2774,7 +2029,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	{
 		for (int i = 0; i < viewer_model_num; i++)
 		{
-			const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_model_indices[i];
+			const entity_t* entity = vkpt_refdef.fd->entities + viewer_model_indices[i];
 			const model_t* model = MOD_ForHandle(entity->model);
 			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 		}
@@ -2788,7 +2043,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	const uint32_t viewer_weapon_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < viewer_weapon_num; i++)
 	{
-		const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_weapon_indices[i];
+		const entity_t* entity = vkpt_refdef.fd->entities + viewer_weapon_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
 		process_regular_entity(entity, model, true, false, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 
@@ -2802,7 +2057,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	const uint32_t explosion_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < explosion_num; i++)
 	{
-		const r_entity_t* entity = vkpt_refdef.fd->entities + explosion_indices[i];
+		const entity_t* entity = vkpt_refdef.fd->entities + explosion_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
 		process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert, MESH_FILTER_ALL, NULL);
 	}
@@ -2881,27 +2136,21 @@ copy_to_dump_texture(VkCommandBuffer cmd_buf, int src_image_index)
 	};
 
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.image = src_image,
+		.subresourceRange = subresource_range,
 		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = src_image,
-		.subresourceRange = subresource_range,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
 	);
 
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.image = dst_image,
+		.subresourceRange = subresource_range,
 		.srcAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = dst_image,
-		.subresourceRange = subresource_range,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 	);
 
 	vkCmdCopyImage(cmd_buf,
@@ -2910,27 +2159,21 @@ copy_to_dump_texture(VkCommandBuffer cmd_buf, int src_image_index)
 		1, &image_copy_region);
 
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.image = src_image,
+		.subresourceRange = subresource_range,
 		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = src_image,
-		.subresourceRange = subresource_range,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL
 	);
 
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.image = dst_image,
+		.subresourceRange = subresource_range,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = dst_image,
-		.subresourceRange = subresource_range,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL
 	);
 }
 #endif
@@ -2974,7 +2217,7 @@ process_render_feedback(ref_feedback_t *feedback, mleaf_t* viewleaf, qboolean* s
 		feedback->lookatcluster = readback.cluster;
 		feedback->num_light_polys = 0;
 
-		if (vkpt_refdef.bsp_mesh_world_loaded && feedback->lookatcluster >= 0 && feedback->lookatcluster < vkpt_refdef.bsp_mesh_world.numClusters)
+		if (vkpt_refdef.bsp_mesh_world_loaded && feedback->lookatcluster >= 0 && feedback->lookatcluster < vkpt_refdef.bsp_mesh_world.num_clusters)
 		{
 			int* light_offsets = vkpt_refdef.bsp_mesh_world.cluster_light_offsets + feedback->lookatcluster;
 			feedback->num_light_polys = light_offsets[1] - light_offsets[0];
@@ -2995,88 +2238,6 @@ typedef struct reference_mode_s
 	float temporal_blend_factor;
 	int reflect_refract;
 } reference_mode_t;
-
-void stbi_writex(void *context, void *data, int size)
-{
-	FS_Write(data, size, (qhandle_t)(size_t)context);
-}
-
-#define IMG_SAVE(x) \
-    static qerror_t IMG_Save##x(qhandle_t f, const char *filename, \
-        byte *pic, int width, int height, int row_stride, int param)
-
-IMG_SAVE(PNG)
-{
-	stbi_flip_vertically_on_write(1);
-	int ret = stbi_write_png_to_func(stbi_writex, (void*)(size_t)f, width, height, 3, pic, row_stride);
-
-	if (ret)
-		return Q_ERR_SUCCESS;
-
-	return Q_ERR_LIBRARY_ERROR;
-}
-
-static qhandle_t create_framedump(char *buffer, size_t size,
-	const char *name, const char *ext)
-{
-	qhandle_t f;
-	qerror_t ret;
-	int i;
-
-	if (name && *name) {
-		// save to user supplied name
-		return FS_EasyOpenFile(buffer, size, FS_MODE_WRITE,
-			"screenshots/", name, ext);
-	}
-
-	// find a file name to save it to
-	for (i = 0; i < 1000000; i++) {
-		Q_snprintf(buffer, size, "screenshots/%s_%03d%s", cls.demo.file_name, i, ext);
-		ret = FS_FOpenFile(buffer, &f, FS_MODE_WRITE | FS_FLAG_EXCL);
-		if (f) {
-			return f;
-		}
-		if (ret != Q_ERR_EXIST) {
-			Com_EPrintf("Couldn't exclusively open %s for writing: %s\n",
-				buffer, Q_ErrorString(ret));
-			return 0;
-		}
-	}
-
-	Com_EPrintf("Ran out of frame indexes!.\n");
-	return 0;
-}
-
-static qboolean make_framedump(const char *name, const char *ext,
-	qerror_t(*save)(qhandle_t, const char *, byte *, int, int, int, int),
-	int param)
-{
-	char        buffer[MAX_OSPATH];
-	byte        *pixels;
-	qerror_t    ret;
-	qhandle_t   f;
-	int         w, h, rowbytes;
-
-	f = create_framedump(buffer, sizeof(buffer), name, ext);
-	if (!f) {
-		return false; // C++20 VKPT: ADDED RETURN false to make_framedump
-	}
-
-	pixels = IMG_ReadPixels(&w, &h, &rowbytes);
-	ret = save(f, buffer, pixels, w, h, rowbytes, param);
-	FS_FreeTempMem(pixels);
-
-	FS_FCloseFile(f);
-
-	if (ret < 0) {
-		Com_EPrintf("Couldn't write %s: %s\n", buffer, Q_ErrorString(ret));
-		return false;
-	}
-	else {
-		return true;
-	}
-}
-
 
 static int
 get_accumulation_rendering_framenum()
@@ -3118,76 +2279,36 @@ evaluate_reference_mode(reference_mode_t* ref_mode)
 		case 1: {
 			char text[MAX_QPATH];
 			float percentage = powf(max(0.f, (num_accumulated_frames - num_warmup_frames) / (float)num_frames_to_accumulate), 0.5f);
+			Q_snprintf(text, sizeof(text), "Photo mode: accumulating samples... %d%%", (int)(min(1.f, percentage) * 100.f));
 
-			if (percentage < 1.0f)
+			int frames_after_accumulation_finished = num_accumulated_frames - num_warmup_frames - num_frames_to_accumulate;
+			float hud_alpha = max(0.f, min(1.f, (50 - frames_after_accumulation_finished) * 0.02f)); // fade out for 50 frames after accumulation finishes
+
+			int x = r_config.width / 4;
+			int y = 30;
+			R_SetScale(0.5f);
+			R_SetAlphaScale(hud_alpha);
+			draw_shadowed_string(x, y, UI_CENTER, MAX_QPATH, text);
+
+			if (cvar_pt_dof->integer)
 			{
-				if (!cls.demo.playback)
-				{
-					Q_snprintf(text, sizeof(text), "Photo mode: accumulating samples... %d%%", (int)(min(1.f, percentage) * 100.f));
+				x = 5;
+				y = r_config.height / 2 - 55;
+				Q_snprintf(text, sizeof(text), "Focal Distance: %.1f", cvar_pt_focus->value);
+				draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, text);
 
-					int frames_after_accumulation_finished = num_accumulated_frames - num_warmup_frames - num_frames_to_accumulate;
-					float hud_alpha = max(0.f, min(1.f, (50 - frames_after_accumulation_finished) * 0.02f)); // fade out for 50 frames after accumulation finishes
+				y += 10;
+				Q_snprintf(text, sizeof(text), "Aperture: %.2f", cvar_pt_aperture->value);
+				draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, text);
 
-					int x = r_config.width / 4;
-					int y = 30;
-					R_SetScale(0.5f);
-					R_SetAlphaScale(hud_alpha);
-
-					draw_shadowed_string(x, y, UI_CENTER, MAX_QPATH, text);
-
-					if (cvar_pt_dof->integer)
-					{
-						x = 5;
-						y = r_config.height / 2 - 55;
-
-						Q_snprintf(text, sizeof(text), "Focal Distance: %.1f", cvar_pt_focus->value);
-						draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, text);
-
-						y += 10;
-
-						Q_snprintf(text, sizeof(text), "Aperture: %.2f", cvar_pt_aperture->value);
-						draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, text);
-
-						y += 10;
-
-						draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, "Use Mouse Wheel, Shift, Ctrl to adjust");
-					}
-
-					R_SetAlphaScale(1.f);
-
-					SCR_SetHudAlpha(hud_alpha);
-				}
-			}
-			else
-			{
-				SCR_SetHudAlpha(0.f);
-
-				if (cl_renderdemo->integer)
-				{
-					qboolean result = make_framedump("", ".png", IMG_SavePNG, 0);
-
-					if (result)
-					{
-						Cvar_Set("cl_paused", "0");
-						CL_CheckForPause();
-
-						num_accumulated_frames = 0;
-
-						ref_mode->enable_accumulation = false;
-						ref_mode->enable_denoiser = !!cvar_flt_enable->integer;
-						if (cvar_pt_num_bounce_rays->value == 0.5f)
-							ref_mode->num_bounce_rays = 0.5f;
-						else
-							ref_mode->num_bounce_rays = max(0, min(2, round(cvar_pt_num_bounce_rays->value)));
-						ref_mode->temporal_blend_factor = 0.f;
-					}
-					else
-						CL_Disconnect(ERR_DISCONNECT);
-				}
-
-				break;
+				y += 10;
+				draw_shadowed_string(x, y, UI_LEFT, MAX_QPATH, "Use Mouse Wheel, Shift, Ctrl to adjust");
 			}
 
+			R_SetAlphaScale(1.f);
+
+			SCR_SetHudAlpha(hud_alpha);
+			break;
 		}
 		case 2:
 			SCR_SetHudAlpha(0.f);
@@ -3303,27 +2424,14 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 		// In some cases (ex.: player setup), 'fd' will describe a viewport that is not full screen.
 		// Simulate that with a projection matrix adjustment to avoid modifying the rendering code.
 
-		// C++20 VKPT: Changed viewport array construction.
-		//float viewport_proj[16] = {
-		//	[0] = (float)fd->width / (float)qvk.extent_unscaled.width,
-		//	[12] = (float)(fd->x * 2 + fd->width - (int)qvk.extent_unscaled.width) / (float)qvk.extent_unscaled.width,
-		//	[5] = (float)fd->height / (float)qvk.extent_unscaled.height,
-		//	[13] = -(float)(fd->y * 2 + fd->height - (int)qvk.extent_unscaled.height) / (float)qvk.extent_unscaled.height,
-		//	[10] = 1.f,
-		//	[15] = 1.f
-		//};
 		float viewport_proj[16] = {
-			0.f, 0.f, 0.f, 0.f,
-			0.f, 0.f, 0.f, 0.f,
-			0.f, 0.f, 0.f, 0.f,
-			0.f, 0.f, 0.f, 0.f,
+			[0] = (float)fd->width / (float)qvk.extent_unscaled.width,
+			[12] = (float)(fd->x * 2 + fd->width - (int)qvk.extent_unscaled.width) / (float)qvk.extent_unscaled.width,
+			[5] = (float)fd->height / (float)qvk.extent_unscaled.height,
+			[13] = -(float)(fd->y * 2 + fd->height - (int)qvk.extent_unscaled.height) / (float)qvk.extent_unscaled.height,
+			[10] = 1.f,
+			[15] = 1.f
 		};
-		viewport_proj[0] = (float)fd->width / (float)qvk.extent_unscaled.width;
-		viewport_proj[12] = (float)(fd->x * 2 + fd->width - (int)qvk.extent_unscaled.width) / (float)qvk.extent_unscaled.width;
-		viewport_proj[5] = (float)fd->height / (float)qvk.extent_unscaled.height;
-		viewport_proj[13] = -(float)(fd->y * 2 + fd->height - (int)qvk.extent_unscaled.height) / (float)qvk.extent_unscaled.height;
-		viewport_proj[10] = 1.f;
-		viewport_proj[15] = 1.f;
 
 		mult_matrix_matrix(P, viewport_proj, raw_proj);
 	}
@@ -3396,7 +2504,7 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 
 		if (ref_mode->enable_accumulation)
 		{
-			ubo->pt_texture_lod_bias = -log2(std::sqrtf(get_accumulation_rendering_framenum()));
+			ubo->pt_texture_lod_bias = -log2(sqrt(get_accumulation_rendering_framenum()));
 
 			// disable the other stabilization hacks
 			ubo->pt_specular_anti_flicker = 0.f;
@@ -3483,9 +2591,8 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	VectorCopy(sky_matrix[0], ubo->environment_rotation_matrix + 0);
 	VectorCopy(sky_matrix[1], ubo->environment_rotation_matrix + 4);
 	VectorCopy(sky_matrix[2], ubo->environment_rotation_matrix + 8);
-		
+	
 	add_dlights(vkpt_refdef.fd->dlights, vkpt_refdef.fd->num_dlights, ubo);
-	//add_elights(vkpt_refdef.fd, ubo);
 
 	const bsp_mesh_t* wm = &vkpt_refdef.bsp_mesh_world;
 	if (wm->num_cameras > 0)
@@ -3508,6 +2615,9 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 void
 R_RenderFrame_RTX(refdef_t *fd)
 {
+	if (!qvk.swap_chain)
+		return;
+
 	vkpt_refdef.fd = fd;
 	qboolean render_world = (fd->rdflags & RDF_NOWORLDMODEL) == 0;
 
@@ -3515,7 +2625,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	float frame_time = min(1.f, max(0.f, fd->time - previous_time));
 	previous_time = fd->time;
 
-	vkpt_freecam_update(cls.frameTime);
+	vkpt_freecam_update(cls.frametime);
 
 	static unsigned previous_wallclock_time = 0;
 	unsigned current_wallclock_time = Sys_Milliseconds();
@@ -3552,7 +2662,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	vec3_t sky_matrix[3];
 	prepare_sky_matrix(fd->time, sky_matrix);
 
-	sun_light_t sun_light = { }; //Somehow..
+	sun_light_t sun_light = { 0 };
 	if (render_world)
 	{
 		vkpt_evaluate_sun_light(&sun_light, sky_matrix, fd->time);
@@ -3578,6 +2688,11 @@ R_RenderFrame_RTX(refdef_t *fd)
 	QVKUniformBuffer_t *ubo = &vkpt_refdef.uniform_buffer;
 	prepare_ubo(fd, viewleaf, &ref_mode, sky_matrix, render_world);
 	ubo->prev_adapted_luminance = prev_adapted_luminance;
+
+	if (cvar_tm_blend_enable->integer)
+		Vector4Copy(fd->blend, ubo->fs_blend_color);
+	else
+		Vector4Set(ubo->fs_blend_color, 0.f, 0.f, 0.f, 0.f);
 
 	vkpt_physical_sky_update_ubo(ubo, &sun_light, render_world);
 	vkpt_bloom_update(ubo, frame_time, ubo->medium != MEDIUM_NONE, menu_mode);
@@ -3696,12 +2811,6 @@ R_RenderFrame_RTX(refdef_t *fd)
 			qvk.device_count, transfer_semaphores, wait_stages, device_indices,
 			0, 0, 0,
 			VK_NULL_HANDLE);
-
-		if (god_rays_enabled && qvk.device_count > 1)
-		{
-			// Ugly workaround for a Device Removed error in SLI mode
-			vkQueueWaitIdle(qvk.queue_graphics);
-		}
 	}
 
 	{
@@ -3955,6 +3064,18 @@ R_BeginFrame_RTX(void)
 		exit(1);
 	}
 
+	if (!qvk.swap_chain)
+	{
+		VkSurfaceCapabilitiesKHR surf_capabilities;
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(qvk.physical_device, qvk.surface, &surf_capabilities);
+
+		// see if we're un-minimized again
+		if (surf_capabilities.currentExtent.width != 0 && surf_capabilities.currentExtent.height != 0)
+		{
+			recreate_swapchain();
+		}
+	}
+
 	drs_process();
 	if (vkpt_refdef.fd)
 	{
@@ -3972,9 +3093,11 @@ R_BeginFrame_RTX(void)
 		recreate_swapchain();
 	}
 
-
-
 retry:;
+
+	if (!qvk.swap_chain) // we're minimized, don't render
+		return;
+
 #ifdef VKPT_DEVICE_GROUPS
 	VkAcquireNextImageInfoKHR acquire_info = {
 		.sType = VK_STRUCTURE_TYPE_ACQUIRE_NEXT_IMAGE_INFO_KHR,
@@ -3982,7 +3105,7 @@ retry:;
 		.timeout = (~((uint64_t) 0)),
 		.semaphore = qvk.semaphores[qvk.current_frame_index][0].image_available,
 		.fence = VK_NULL_HANDLE,
-		.deviceMask = (uint32_t)(1 << qvk.device_count) - 1, // C++20 VKPT: Added a cast.
+		.deviceMask = (1 << qvk.device_count) - 1,
 	};
 
 	VkResult res_swapchain = vkAcquireNextImage2KHR(qvk.device, &acquire_info, &qvk.current_swap_chain_image_index);
@@ -4032,6 +3155,12 @@ void
 R_EndFrame_RTX(void)
 {
 	LOG_FUNC();
+
+	if (!qvk.swap_chain)
+	{
+		vkpt_draw_clear_stretch_pics();
+		return;
+	}
 
 	if(cvar_profiler->integer)
 		draw_profiler(cvar_flt_enable->integer != 0);
@@ -4107,7 +3236,7 @@ R_EndFrame_RTX(void)
 
 	VkPresentInfoKHR present_info = {
 		.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-		.waitSemaphoreCount = (uint32_t)qvk.device_count, // C++20 VKPT: Added a cast.
+		.waitSemaphoreCount = qvk.device_count,
 		.pWaitSemaphores    = signal_semaphores,
 		.swapchainCount     = 1,
 		.pSwapchains        = &qvk.swap_chain,
@@ -4139,11 +3268,11 @@ R_EndFrame_RTX(void)
 void
 R_ModeChanged_RTX(int width, int height, int flags, int rowbytes, void *pixels)
 {
-	Com_Printf("mode changed %d %d\n", width, height);
+	Com_DPrintf("mode changed %d %d\n", width, height);
 
 	r_config.width  = width;
 	r_config.height = height;
-	r_config.flags  = (vidFlags_t)flags; // C++20 VKPT: Added a cast.
+	r_config.flags  = flags;
 
 	qvk.wait_for_idle_frames = MAX_FRAMES_IN_FLIGHT * 2;
 }
@@ -4161,7 +3290,7 @@ vkpt_show_pvs(void)
 		return;
 	}
 
-	BSP_ClusterVis(bsp_world_model, (byte*)cluster_debug_mask, vkpt_refdef.fd->feedback.lookatcluster, DVIS_PVS); // C++20 VKPT: Added cast (byte*)
+	BSP_ClusterVis(bsp_world_model, cluster_debug_mask, vkpt_refdef.fd->feedback.lookatcluster, DVIS_PVS);
 	cluster_debug_index = vkpt_refdef.fd->feedback.lookatcluster;
 }
 
@@ -4178,6 +3307,15 @@ static float halton(int base, int index) {
 	}
 	return r;
 };
+
+// Autocompletion support for ray_tracing_api cvar
+static void ray_tracing_api_g(genctx_t *ctx)
+{
+	Prompt_AddMatch(ctx, "auto");
+	Prompt_AddMatch(ctx, "query");
+	Prompt_AddMatch(ctx, "pipeline");
+	Prompt_AddMatch(ctx, "nv");
+}
 
 /* called when the library is loaded */
 qboolean
@@ -4197,7 +3335,7 @@ R_Init_RTX(qboolean total)
 	cvar_vsync = Cvar_Get("vid_vsync", "0", CVAR_REFRESH | CVAR_ARCHIVE);
 	cvar_vsync->changed = NULL; // in case the GL renderer has set it
 	cvar_pt_caustics = Cvar_Get("pt_caustics", "1", CVAR_ARCHIVE);
-	cvar_pt_enable_nodraw = Cvar_Get("pt_enable_nodraw", "1", 0);
+	cvar_pt_enable_nodraw = Cvar_Get("pt_enable_nodraw", "0", 0);
 
 	// 0 -> disabled, regular pause; 1 -> enabled; 2 -> enabled, hide GUI
 	cvar_pt_accumulation_rendering = Cvar_Get("pt_accumulation_rendering", "1", CVAR_ARCHIVE);
@@ -4229,9 +3367,8 @@ R_Init_RTX(qboolean total)
 	scr_viewsize = Cvar_Get("viewsize", "100", CVAR_ARCHIVE);
 	scr_viewsize->changed = viewsize_changed;
 
-	cvar_show_entlights = Cvar_Get("cl_show_entlights", "0", 0);
-	cvar_entlights_scale = Cvar_Get("cl_entlights_scale", "0.05", 0);
-	cvar_entlights_enabled = Cvar_Get("cl_entlights_enabled", "1", 0);
+	// enables or disables full screen blending effects
+	cvar_tm_blend_enable = Cvar_Get("tm_blend_enable", "1", CVAR_ARCHIVE);
 
 	drs_init();
 
@@ -4242,9 +3379,17 @@ R_Init_RTX(qboolean total)
 	// Separate min driver version for the KHR ray tracing mode
 	cvar_min_driver_version_khr = Cvar_Get("min_driver_version_khr", "460.82", 0);
 
-	// When nonzero, the game will pick NV_ray_tracing if both NV and KHR extensions are available
-	cvar_nv_ray_tracing = Cvar_Get("nv_ray_tracing", "0", CVAR_REFRESH | CVAR_ARCHIVE);
-	
+	// Minimum AMD driver version
+	cvar_min_driver_version_amd = Cvar_Get("min_driver_version_amd", "21.1.1", 0);
+
+	// Selects which RT API to use:
+	//  auto     - automatic selection based on the GPU
+	//  query    - prefer KHR_ray_query
+	//  pipeline - prefer KHR_ray_tracing_pipeline
+	//  nv       - prefer NV_ray_tracing
+	cvar_ray_tracing_api = Cvar_Get("ray_tracing_api", "auto", CVAR_REFRESH | CVAR_ARCHIVE);
+	cvar_ray_tracing_api->generator = &ray_tracing_api_g;
+
 	// When nonzero, the Vulkan validation layer is requested
 	cvar_vk_validation = Cvar_Get("vk_validation", "0", CVAR_REFRESH | CVAR_ARCHIVE);
 
@@ -4303,6 +3448,9 @@ R_Init_RTX(qboolean total)
 	Cmd_AddCommand("print_material", (xcommand_t)&vkpt_print_material);
 	Cmd_AddCommand("show_pvs", (xcommand_t)&vkpt_show_pvs);
 	Cmd_AddCommand("next_sun", (xcommand_t)&vkpt_next_sun_preset);
+#if CL_RTX_SHADERBALLS
+	Cmd_AddCommand("drop_balls", (xcommand_t)&vkpt_drop_shaderballs);
+#endif
 
 	for (int i = 0; i < 256; i++) {
 		qvk.sintab[i] = sinf(i * (2 * M_PI / 255));
@@ -4333,6 +3481,9 @@ R_Shutdown_RTX(qboolean total)
 	Cmd_RemoveCommand("print_material");
 	Cmd_RemoveCommand("show_pvs");
 	Cmd_RemoveCommand("next_sun");
+#if CL_RTX_SHADERBALLS
+	Cmd_RemoveCommand("drop_balls");
+#endif
 	
 	IMG_FreeAll();
 	vkpt_textures_destroy_unused();
@@ -4372,33 +3523,22 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 		.layerCount = 1
 	};
 		
-	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = swap_chain_image,
+		.subresourceRange = subresource_range,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = swap_chain_image,
-		.subresourceRange = subresource_range,
-
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
 	);
 
-	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = qvk.screenshot_image,
+		.subresourceRange = subresource_range,
 		.srcAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = qvk.screenshot_image,
-		.subresourceRange = subresource_range,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 	);
 
 	VkImageCopy img_copy_region = {
@@ -4412,43 +3552,31 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 		qvk.screenshot_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1, &img_copy_region);
 
-	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = swap_chain_image,
+		.subresourceRange = subresource_range,
 		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.dstAccessMask = 0,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = swap_chain_image,
-		.subresourceRange = subresource_range,
-
+		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 	);
 
-	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = qvk.screenshot_image,
+		.subresourceRange = subresource_range,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = qvk.screenshot_image,
-		.subresourceRange = subresource_range,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL
 	);
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, false);
 	vkpt_wait_idle(qvk.queue_graphics, &qvk.cmd_buffers_graphics);
 
-	// C++20 VKPT: Order fix.
 	VkImageSubresource subresource = {
 		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-		.mipLevel = 0,
 		.arrayLayer = 0,
+		.mipLevel = 0
 	};
 
 	VkSubresourceLayout subresource_layout;
@@ -4458,7 +3586,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 	_VK(vkMapMemory(qvk.device, qvk.screenshot_image_memory, 0, qvk.screenshot_image_memory_size, 0, &device_data));
 	
 	int pitch = qvk.extent_unscaled.width * 3;
-	byte *pixels = (byte*)FS_AllocTempMem(pitch * qvk.extent_unscaled.height); // C++20 VKPT: Added a cast.
+	byte *pixels = FS_AllocTempMem(pitch * qvk.extent_unscaled.height);
 
 	for (int row = 0; row < qvk.extent_unscaled.height; row++)
 	{
@@ -4500,7 +3628,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 }
 
 void
-R_SetSky_RTX(const char *name, float rotate, vec3_t &axis)
+R_SetSky_RTX(const char *name, float rotate, vec3_t axis)
 {
 	int     i;
 	char    pathname[MAX_QPATH];
@@ -4523,7 +3651,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t &axis)
 			if(data) {
 				Z_Free(data);
 			}
-			data = (byte*)Z_Malloc(6 * sizeof(uint32_t)); // C++20 VKPT: Added a Z_Malloc cast.
+			data = Z_Malloc(6 * sizeof(uint32_t));
 			for(int j = 0; j < 6; j++)
 				((uint32_t *)data)[j] = 0xff00ffffu;
 			w_prev = h_prev = 1;
@@ -4532,7 +3660,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t &axis)
 
 		size_t s = img->upload_width * img->upload_height * 4;
 		if(!data) {
-			data = (byte*)Z_Malloc(s * 6); // C++20 VKPT: Added a Z_Malloc cast.
+			data = Z_Malloc(s * 6);
 			w_prev = img->upload_width;
 			h_prev = img->upload_height;
 		}
@@ -4571,7 +3699,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t &axis)
 
 void R_AddDecal_RTX(decal_t *d)
 { }
-extern void SetFogByMap(const char* name);
+
 void
 R_BeginRegistration_RTX(const char *name)
 {
@@ -4600,13 +3728,6 @@ R_BeginRegistration_RTX(const char *name)
 	if(!bsp) {
 		Com_Error(ERR_DROP, "%s: couldn't load %s: %s", __func__, bsp_path, Q_ErrorString(ret));
 	}
-
-	// Load Map FogList
-	SetFogByMap(bsp_path);
-
-	//num_entlights = 0;
-	bsp_reset_entlights(bsp);
-
 	bsp_world_model = bsp;
 	bsp_mesh_register_textures(bsp);
 	bsp_mesh_create_from_bsp(&vkpt_refdef.bsp_mesh_world, bsp, name);
@@ -4641,11 +3762,11 @@ R_BeginRegistration_RTX(const char *name)
 }
 
 void
-R_EndRegistration_RTX(const char *name)
+R_EndRegistration_RTX(void)
 {
 	LOG_FUNC();
-
-	vkpt_physical_sky_endRegistration(name);
+	
+	vkpt_physical_sky_endRegistration();
 
 	IMG_FreeUnused();
 	MOD_FreeUnused();
@@ -4657,7 +3778,7 @@ VkCommandBuffer vkpt_begin_command_buffer(cmd_buf_group_t* group)
 	if (group->used_this_frame == group->count_per_frame)
 	{
 		uint32_t new_count = max(4, group->count_per_frame * 2);
-		VkCommandBuffer* new_buffers = (VkCommandBuffer*)Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(VkCommandBuffer)); // C++20 VKPT: Added a Z_Mallocz cast.
+		VkCommandBuffer* new_buffers = Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(VkCommandBuffer));
 
 		for (int frame = 0; frame < MAX_FRAMES_IN_FLIGHT; frame++)
 		{
@@ -4677,7 +3798,7 @@ VkCommandBuffer vkpt_begin_command_buffer(cmd_buf_group_t* group)
 		}
 
 #ifdef _DEBUG
-		void** new_addrs = (void**)Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(void*)); // C++20 VKPT: Added a Z_Mallocz cast.
+		void** new_addrs = Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(void*));
 
 		if (group->count_per_frame > 0)
 		{
@@ -4778,27 +3899,26 @@ void vkpt_submit_command_buffer(
 {
 	_VK(vkEndCommandBuffer(cmd_buf));
 
-	// C++20 VKPT: Order fix.
 	VkSubmitInfo submit_info = {
 		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		.waitSemaphoreCount = (uint32_t)wait_semaphore_count, // C++20 VKPT: Added cast.
+		.waitSemaphoreCount = wait_semaphore_count,
 		.pWaitSemaphores = wait_semaphores,
 		.pWaitDstStageMask = wait_stages,
+		.signalSemaphoreCount = signal_semaphore_count,
+		.pSignalSemaphores = signal_semaphores,
 		.commandBufferCount = 1,
 		.pCommandBuffers = &cmd_buf,
-		.signalSemaphoreCount = (uint32_t)signal_semaphore_count,
-		.pSignalSemaphores = signal_semaphores,
 	};
 
 #ifdef VKPT_DEVICE_GROUPS
 	VkDeviceGroupSubmitInfo device_group_submit_info = {
 		.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_SUBMIT_INFO,
 		.pNext = NULL,
-		.waitSemaphoreCount = (uint32_t)wait_semaphore_count, // C++20 VKPT: Added cast.
+		.waitSemaphoreCount = wait_semaphore_count,
 		.pWaitSemaphoreDeviceIndices = wait_device_indices,
 		.commandBufferCount = 1,
 		.pCommandBufferDeviceMasks = &execute_device_mask,
-		.signalSemaphoreCount = (uint32_t)signal_semaphore_count, // C++20 VKPT: Added cast.
+		.signalSemaphoreCount = signal_semaphore_count,
 		.pSignalSemaphoreDeviceIndices = signal_device_indices,
 	};
 

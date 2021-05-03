@@ -1,0 +1,129 @@
+/*
+Copyright (C) 2019, NVIDIA CORPORATION. All rights reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+#version 460
+#extension GL_GOOGLE_include_directive    : enable
+#extension GL_EXT_nonuniform_qualifier    : enable
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout (push_constant) uniform push_constant_block {
+    float pixstep_x;
+    float pixstep_y;
+    float argument_scale;
+    float normalization_scale;
+    int num_samples;
+    int pass;
+} push;
+
+#define GLOBAL_UBO_DESC_SET_IDX 0
+#include "global_ubo.h"
+
+#define GLOBAL_TEXTURES_DESC_SET_IDX 1
+#include "global_textures.h"
+
+vec2 img_to_uv(vec2 ipos)
+{
+    vec2 uv = ipos / vec2(global_ubo.taa_image_width / 4, global_ubo.taa_image_height / 4);
+ 
+    return uv;
+}
+
+vec4 load_input(ivec2 ipos)
+{
+    if (push.pass == 0)
+        return texelFetch(TEX_BLOOM_VBLUR, ipos, 0);
+    else
+        return texelFetch(TEX_BLOOM_HBLUR, ipos, 0);
+}
+
+vec4 fetch_input(vec2 uv)
+{
+    if (push.pass == 0)
+        return textureLod(TEX_BLOOM_VBLUR, uv, 0);
+    else
+        return textureLod(TEX_BLOOM_HBLUR, uv, 0);
+}
+
+void write_output(ivec2 ipos, vec4 o)
+{
+    if (push.pass == 0)
+        imageStore(IMG_BLOOM_HBLUR, ipos, o);
+    else
+        imageStore(IMG_BLOOM_VBLUR, ipos, o);
+}
+
+void
+main()
+{
+    ivec2 ipos = ivec2(gl_GlobalInvocationID);
+    ivec2 bloom_extent = ivec2(global_ubo.taa_output_width / 4, global_ubo.taa_output_height / 4);
+
+    if(any(greaterThanEqual(ipos, bloom_extent)))
+    {
+        write_output(ipos, vec4(0));
+        return;
+    }
+
+    vec2 bloom_sample_extent = vec2(bloom_extent) - vec2(0.5);
+
+    const vec2 pixstep = vec2(push.pixstep_x, push.pixstep_y);
+
+    vec4 bloom_input = load_input(ipos);
+
+    if (any(isnan(bloom_input)) || any(isinf(bloom_input))) {
+        write_output(ipos, vec4(0, 0, 0, 1));
+        return;
+    }
+
+    vec3 result = bloom_input.rgb;
+
+    float x;
+    for(x = 1; x < push.num_samples; x += 2) {
+        float w1 = exp(pow(x, 2) * push.argument_scale);
+        float w2 = exp(pow(x + 1.0, 2) * push.argument_scale);
+
+        float w12 = w1 + w2;
+        float p = w2 / w12;
+        vec2 offset = pixstep * (x + p);
+
+        vec2 pos1 = clamp(vec2(ipos) + vec2(0.5) + offset, vec2(0.0), bloom_sample_extent);
+        vec2 pos2 = clamp(vec2(ipos) + vec2(0.5) - offset, vec2(0.0), bloom_sample_extent);
+        
+        vec2 uv1 = img_to_uv(pos1);
+        vec2 uv2 = img_to_uv(pos2);
+
+        vec3 pix;
+
+        pix = fetch_input(uv1).rgb;
+        if (any(isnan(pix))) {
+            pix = vec3(0);
+        }
+        result += pix * w12;
+
+        pix = fetch_input(uv2).rgb;
+        if (any(isnan(pix))) {
+            pix = vec3(0);
+        }
+        result += pix * w12;
+    }
+
+    result *= push.normalization_scale;
+
+    write_output(ipos, vec4(result.r, result.g, result.b, bloom_input.a));
+}

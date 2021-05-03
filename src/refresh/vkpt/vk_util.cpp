@@ -50,6 +50,8 @@ get_memory_type(uint32_t mem_req_type_bits, VkMemoryPropertyFlags mem_prop)
 				return i;
 		}
 	}
+
+	Com_WPrintf("get_memory_type: cannot find a memory type with propertyFlags = 0x%x\n", mem_prop);
 	return 0;
 }
 
@@ -76,11 +78,6 @@ buffer_create(
 		.pQueueFamilyIndices = NULL
 	};
 
-	// C++20 VKPT: Label fix.
-	VkMemoryRequirements mem_reqs;
-	VkMemoryAllocateInfo mem_alloc_info;
-	VkMemoryAllocateFlagsInfo mem_alloc_flags;
-
 	buf->size = size;
 	buf->is_mapped = 0;
 
@@ -90,18 +87,18 @@ buffer_create(
 	}
 	assert(buf->buffer != VK_NULL_HANDLE);
 
-
+	VkMemoryRequirements mem_reqs;
 	vkGetBufferMemoryRequirements(qvk.device, buf->buffer, &mem_reqs);
 
-	mem_alloc_info = {
+	VkMemoryAllocateInfo mem_alloc_info = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
 		.allocationSize = mem_reqs.size,
 		.memoryTypeIndex = get_memory_type(mem_reqs.memoryTypeBits, mem_properties)
 	};
 
-	mem_alloc_flags = {
+	VkMemoryAllocateFlagsInfo mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
-		.flags = (VkMemoryAllocateFlags)((usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT : 0), // C++20 VKPT: Added cast.
+		.flags = (usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT : 0,
 		.deviceMask = 0
 	};
 
@@ -193,7 +190,7 @@ get_buffer_device_address(VkBuffer buffer)
 	  .buffer = buffer
 	};
 
-	return vkGetBufferDeviceAddress(qvk.device, &address_info);
+	return qvkGetBufferDeviceAddress(qvk.device, &address_info);
 }
 
 const char *
@@ -444,7 +441,7 @@ VkResult allocate_gpu_memory(VkMemoryRequirements mem_req, VkDeviceMemory* pMemo
 	VkMemoryAllocateFlagsInfo mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
 		.flags = VK_MEMORY_ALLOCATE_DEVICE_MASK_BIT,
-		.deviceMask = (uint32_t)(1 << qvk.device_count) - 1 // C++20 VKPT: Added cast.
+		.deviceMask = (1 << qvk.device_count) - 1
 	};
 
 	if (qvk.device_count > 1) {

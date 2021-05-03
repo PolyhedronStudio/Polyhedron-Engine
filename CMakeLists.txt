@@ -38,8 +38,9 @@ OPTION(CONFIG_BUILD_SV_GAME "Build Server Game module" ON)
 OPTION(CONFIG_ENABLE_RMLUI "Enable libRmlUI implementation" ON)
 OPTION(CONFIG_GL_RENDERER "Enable GL renderer" ON)
 OPTION(CONFIG_VKPT_RENDERER "Enable VKPT renderer" ON)
-OPTION(CONFIG_VKPT_ENABLE_DEVICE_GROUPS "Enable device groups (multi-gpu) support" ON)
-OPTION(CONFIG_VKPT_ENABLE_IMAGE_DUMPS "Enable image dumping functionality" OFF)
+OPTION(CONFIG_VKPT_ENABLE_DEVICE_GROUPS "Enable device groups (multi-gpu) support" ON) 
+OPTION(CONFIG_VKPT_ENABLE_IMAGE_DUMPS "Enable image dumping functionality" OFF) 
+OPTION(CONFIG_BUILD_GLSLANG "Build glslangValidator from source instead of using the SDK" ON)
 OPTION(CONFIG_USE_CURL "Use CURL for HTTP support" ON)
 
 # WATISDEZE: Do we still need these?

@@ -57,14 +57,13 @@ create_render_pass()
 		.pDepthStencilAttachment = &depth_attachment_ref,
 	};
 
-	// C++20 VKPT: Order fix.
 	VkSubpassDependency dependencies[] = {
 		{
 			.srcSubpass    = VK_SUBPASS_EXTERNAL,
 			.dstSubpass    = 0, /* index for own subpass */
 			.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			.srcAccessMask = 0, /* XXX verify */
+			.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
 			               | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 		},
@@ -101,16 +100,15 @@ vkpt_shadow_map_initialize()
 	);
 
 
-	// C++20 VKPT: Order fix.
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-		.imageType = VK_IMAGE_TYPE_2D,
-		.format = VK_FORMAT_D32_SFLOAT,
 		.extent = {
 			.width = SHADOWMAP_SIZE,
 			.height = SHADOWMAP_SIZE,
 			.depth = 1,
 		},
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_D32_SFLOAT,
 		.mipLevels = 1,
 		.arrayLayers = 2,
 		.samples = VK_SAMPLE_COUNT_1_BIT,
@@ -118,7 +116,7 @@ vkpt_shadow_map_initialize()
 		.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
 		       | VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added cast.
+		.queueFamilyIndexCount = qvk.queue_idx_graphics,
 		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
@@ -132,24 +130,23 @@ vkpt_shadow_map_initialize()
 
 	_VK(vkBindImageMemory(qvk.device, img_smap, mem_smap, 0));
 
-	// C++20 VKPT: Order fix.
 	VkImageViewCreateInfo img_view_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		.image = img_smap,
 		.viewType = VK_IMAGE_VIEW_TYPE_2D,
 		.format = VK_FORMAT_D32_SFLOAT,
-		.components = {
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_G,
-			VK_COMPONENT_SWIZZLE_B,
-			VK_COMPONENT_SWIZZLE_A,
-		},
+		.image = img_smap,
 		.subresourceRange = {
 			.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
 			.baseMipLevel = 0,
 			.levelCount = 1,
 			.baseArrayLayer = 0,
 			.layerCount = 1,
+		},
+		.components = {
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_G,
+			VK_COMPONENT_SWIZZLE_B,
+			VK_COMPONENT_SWIZZLE_A,
 		},
 	};
 	_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_smap_depth));
@@ -167,22 +164,13 @@ vkpt_shadow_map_initialize()
 
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
-	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = img_smap,
+		.subresourceRange = { .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,.levelCount = 1,.layerCount = 2 },
 		.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = img_smap,
-		.subresourceRange = { 
-			.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
-			.levelCount = 1,
-			.layerCount = 2 
-		},
 	);
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
@@ -274,20 +262,18 @@ vkpt_shadow_map_create_pipelines()
 		.pScissors     = &scissor,
 	};
 
-	// C++20 VKPT: Order fix.
 	VkPipelineRasterizationStateCreateInfo rasterizer_state = {
 		.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
 		.polygonMode             = VK_POLYGON_MODE_FILL,
-		.cullMode = VK_CULL_MODE_FRONT_BIT,
-		.frontFace = VK_FRONT_FACE_CLOCKWISE,
 		.lineWidth               = 1.0f,
+		.cullMode                = VK_CULL_MODE_FRONT_BIT,
+		.frontFace               = VK_FRONT_FACE_CLOCKWISE,
 	};
 
-	// C++20 VKPT: Order fix.
 	VkPipelineMultisampleStateCreateInfo multisample_state = {
 		.sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-		.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
 		.sampleShadingEnable   = VK_FALSE,
+		.rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT,
 		.minSampleShading      = 1.0f,
 		.pSampleMask           = NULL,
 		.alphaToCoverageEnable = VK_FALSE,
@@ -377,35 +363,23 @@ vkpt_shadow_map_destroy_pipelines()
 VkResult
 vkpt_shadow_map_render(VkCommandBuffer cmd_buf, float* view_projection_matrix, int num_static_verts, int num_dynamic_verts, int transparent_offset, int num_transparent_verts)
 {
-	// C++20 VKPT: IMAGE_BARRIER
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = img_smap,
+		.subresourceRange = { .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT, .levelCount = 1, .layerCount = 2 },
 		.srcAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 		.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = img_smap,
-		.subresourceRange = { 
-			.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT, 
-			.levelCount = 1, 
-			.layerCount = 2 
-		},
 	);
 
 	VkClearValue clear_depth = { .depthStencil = { .depth = 1.f } };
 	
-	// C++20 VKPT: Construct fix.
 	VkRenderPassBeginInfo render_pass_info = {
 		.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.renderPass        = render_pass_smap,
 		.framebuffer       = framebuffer_smap,
-		.renderArea = {
-			.offset = { 0, 0 },
-			.extent = { SHADOWMAP_SIZE, SHADOWMAP_SIZE },
-		},
+		.renderArea.offset = { 0, 0 },
+		.renderArea.extent = { SHADOWMAP_SIZE, SHADOWMAP_SIZE },
 		.clearValueCount   = 1,
 		.pClearValues      = &clear_depth
 	};
@@ -423,17 +397,12 @@ vkpt_shadow_map_render(VkCommandBuffer cmd_buf, float* view_projection_matrix, i
 
 	vkCmdSetViewport(cmd_buf, 0, 1, &viewport);
 
-	// C++20 VKPT: Order and construct fix.
 	VkRect2D scissor =
 	{
-		.offset = {
-			.x = 0,
-			.y = 0,
-		},
-		.extent = {
-			.width = SHADOWMAP_SIZE,
-			.height = SHADOWMAP_SIZE,
-		},
+		.extent.width = SHADOWMAP_SIZE,
+		.extent.height = SHADOWMAP_SIZE,
+		.offset.x = 0,
+		.offset.y = 0,
 	};
 
 	vkCmdSetScissor(cmd_buf, 0, 1, &scissor);
@@ -463,19 +432,15 @@ vkpt_shadow_map_render(VkCommandBuffer cmd_buf, float* view_projection_matrix, i
 
 	vkCmdEndRenderPass(cmd_buf);
 
-	// C++20 VKPT: IMAGE_BARRIER
+
 	IMAGE_BARRIER(cmd_buf,
-		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		//.pNext = NULL,
+		.image = img_smap,
+		.subresourceRange = { .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,.levelCount = 1,.layerCount = 2 },
 		.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 		.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = img_smap,
-		.subresourceRange = { .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,.levelCount = 1,.layerCount = 2 },
-	);
+		);
 
 	return VK_SUCCESS;
 }
@@ -486,10 +451,10 @@ static void sample_disk(float* u, float* v)
 	float b = frand();
 
 	float theta = 2.0 * M_PI * a;
-	float r = std::sqrtf(b);
+	float r = sqrt(b);
 
-	*u = r * std::cosf(theta);
-	*v = r * std::sinf(theta);
+	*u = r * cos(theta);
+	*v = r * sin(theta);
 }
 
 void vkpt_shadow_map_setup(const sun_light_t* light, const float* bbox_min, const float* bbox_max, float* VP, float* depth_scale, qboolean random_sampling)

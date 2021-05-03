@@ -82,6 +82,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	SHADER_MODULE_DO(QVK_MOD_ASVGF_TAAU_COMP)                        \
 	SHADER_MODULE_DO(QVK_MOD_BLOOM_BLUR_COMP)                        \
 	SHADER_MODULE_DO(QVK_MOD_BLOOM_COMPOSITE_COMP)                   \
+	SHADER_MODULE_DO(QVK_MOD_BLOOM_DOWNSCALE_COMP)                   \
 	SHADER_MODULE_DO(QVK_MOD_TONE_MAPPING_HISTOGRAM_COMP)            \
 	SHADER_MODULE_DO(QVK_MOD_TONE_MAPPING_CURVE_COMP)                \
 	SHADER_MODULE_DO(QVK_MOD_TONE_MAPPING_APPLY_COMP)                \
@@ -94,18 +95,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	SHADER_MODULE_DO(QVK_MOD_SHADOW_MAP_VERT)                        \
 	SHADER_MODULE_DO(QVK_MOD_COMPOSITING_COMP)                       \
 
-#define LIST_RT_SHADER_MODULES \
+#define LIST_RT_RGEN_SHADER_MODULES \
 	SHADER_MODULE_DO(QVK_MOD_PRIMARY_RAYS_RGEN)                      \
 	SHADER_MODULE_DO(QVK_MOD_REFLECT_REFRACT_RGEN)                   \
 	SHADER_MODULE_DO(QVK_MOD_DIRECT_LIGHTING_RGEN)                   \
 	SHADER_MODULE_DO(QVK_MOD_INDIRECT_LIGHTING_RGEN)                 \
+
+#define LIST_RT_PIPELINE_SHADER_MODULES \
 	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_RCHIT)                      \
 	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_PARTICLE_RAHIT)             \
 	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_BEAM_RAHIT)                 \
+	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_BEAM_RINT)                  \
 	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_RMISS)                      \
 	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_SHADOW_RMISS)               \
 	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_EXPLOSION_RAHIT)            \
 	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_SPRITE_RAHIT)               \
+
 
 #define SHADER_STAGE(_module, _stage) \
 	{ \
@@ -127,7 +132,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 enum QVK_SHADER_MODULES {
 #define SHADER_MODULE_DO(a) a,
 	LIST_SHADER_MODULES
-	LIST_RT_SHADER_MODULES
+	LIST_RT_RGEN_SHADER_MODULES
+	LIST_RT_PIPELINE_SHADER_MODULES
 #undef SHADER_MODULE_DO
 	NUM_QVK_SHADER_MODULES
 };
@@ -188,6 +194,7 @@ typedef struct QVK_s {
 	VkImageView                 swap_chain_image_views[MAX_SWAPCHAIN_IMAGES];
 
 	qboolean                    use_khr_ray_tracing;
+	qboolean                    use_ray_query;
 	qboolean                    enable_validation;
 
 	cmd_buf_group_t             cmd_buffers_graphics;
@@ -285,12 +292,15 @@ extern QVK_t qvk;
 	VK_EXTENSION_DO(vkDestroyAccelerationStructureKHR) \
 	VK_EXTENSION_DO(vkCmdBuildAccelerationStructuresKHR) \
 	VK_EXTENSION_DO(vkCmdCopyAccelerationStructureKHR) \
-	VK_EXTENSION_DO(vkCmdTraceRaysKHR) \
-	VK_EXTENSION_DO(vkCreateRayTracingPipelinesKHR) \
-	VK_EXTENSION_DO(vkGetRayTracingShaderGroupHandlesKHR) \
 	VK_EXTENSION_DO(vkGetAccelerationStructureDeviceAddressKHR) \
 	VK_EXTENSION_DO(vkCmdWriteAccelerationStructuresPropertiesKHR) \
-    VK_EXTENSION_DO(vkGetAccelerationStructureBuildSizesKHR) \
+	VK_EXTENSION_DO(vkGetAccelerationStructureBuildSizesKHR) \
+	VK_EXTENSION_DO(vkGetBufferDeviceAddress) \
+
+#define LIST_EXTENSIONS_KHR_PIPELINE \
+	VK_EXTENSION_DO(vkCreateRayTracingPipelinesKHR) \
+	VK_EXTENSION_DO(vkCmdTraceRaysKHR) \
+	VK_EXTENSION_DO(vkGetRayTracingShaderGroupHandlesKHR) \
 
 #define LIST_EXTENSIONS_NV \
 	VK_EXTENSION_DO(vkCreateAccelerationStructureNV) \
@@ -314,6 +324,7 @@ extern QVK_t qvk;
 
 #define VK_EXTENSION_DO(a) extern PFN_##a q##a;
 LIST_EXTENSIONS_KHR
+LIST_EXTENSIONS_KHR_PIPELINE
 LIST_EXTENSIONS_NV
 LIST_EXTENSIONS_DEBUG
 LIST_EXTENSIONS_INSTANCE
@@ -365,14 +376,15 @@ typedef struct bsp_mesh_s {
 	uint32_t world_custom_sky_offset;
 	uint32_t world_custom_sky_count;
 
-	float *positions, *tex_coords, *tangents;
+	float *positions, *tex_coords;
+	uint32_t* tangents;
 	int *indices;
 	uint32_t *materials;
 	float *texel_density;
 	int num_indices;
 	int num_vertices;
 
-	int numClusters;
+	int num_clusters;
 	int *clusters;
 
 	int num_cluster_lights;
@@ -429,13 +441,13 @@ typedef struct sun_light_s {
 	qboolean visible;
 } sun_light_t;
 
-void mult_matrix_matrix(float *p, const float *a, const float *b);
-void mult_matrix_vector(float *p, const float *a, const float *b);
-void create_entity_matrix(float matrix[16], r_entity_t *e, qboolean enable_left_hand);
-void create_projection_matrix(float matrix[16], float znear, float zfar, float fov_x, float fov_y);
-void create_view_matrix(float matrix[16], refdef_t *fd);
-void inverse(const float *m, float *inv);
-void create_orthographic_matrix(float matrix[16], float xmin, float xmax,
+void mult_matrix_matrix(mat4_t p, const mat4_t a, const mat4_t b);
+void mult_matrix_vector(mat4_t p, const mat4_t a, const vec4_t b);
+void create_entity_matrix(mat4_t matrix, r_entity_t *e, qboolean enable_left_hand);
+void create_projection_matrix(mat4_t matrix, float znear, float zfar, float fov_x, float fov_y);
+void create_view_matrix(mat4_t matrix, refdef_t *fd);
+void inverse(const mat4_t m, mat4_t inv);
+void create_orthographic_matrix(mat4_t matrix, float xmin, float xmax,
 		float ymin, float ymax, float znear, float zfar);
 
 #define PROFILER_LIST \
@@ -658,7 +670,6 @@ void update_transparency(VkCommandBuffer command_buffer, const float* view_matri
 
 typedef enum {
 	VKPT_TRANSPARENCY_PARTICLES,
-	VKPT_TRANSPARENCY_BEAMS,
 	VKPT_TRANSPARENCY_SPRITES,
 
 	VKPT_TRANSPARENCY_COUNT
@@ -672,10 +683,15 @@ void vkpt_get_transparency_buffers(
 	uint64_t* index_offset,
 	uint32_t* num_vertices,
 	uint32_t* num_indices);
+void vkpt_get_beam_aabb_buffer(
+	BufferResource_t** aabb_buffer,
+	uint64_t* aabb_offset,
+	uint32_t* num_aabbs);
 
 VkBufferView get_transparency_particle_color_buffer_view();
 VkBufferView get_transparency_beam_color_buffer_view();
 VkBufferView get_transparency_sprite_info_buffer_view();
+VkBufferView get_transparency_beam_intersect_buffer_view();
 void get_transparency_counts(int* particle_num, int* beam_num, int* sprite_num);
 void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, r_entity_t* entities, int num_entites, float adapted_luminance);
 qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, vec3_t begin, vec3_t end, vec3_t color, float radius);
@@ -719,7 +735,6 @@ typedef struct maliasmesh_s {
     vec3_t          *positions;
     vec3_t          *normals;
     vec2_t          *tex_coords;
-    vec4_t          *tangents;
 	struct pbr_material_s *materials[MAX_ALIAS_SKINS];
     int             numskins;
 } maliasmesh_t;
@@ -765,7 +780,7 @@ void R_ClearColor_RTX(void);
 void R_SetAlpha_RTX(float alpha);
 void R_SetAlphaScale_RTX(float alpha);
 void R_SetColor_RTX(uint32_t color);
-void R_LightPoint_RTX(const vec3_t &origin, vec3_t &light);
+void R_LightPoint_RTX(vec3_t origin, vec3_t light);
 void R_SetScale_RTX(float scale);
 void R_DrawStretchPic_RTX(int x, int y, int w, int h, qhandle_t pic);
 void R_DrawPic_RTX(int x, int y, qhandle_t pic);

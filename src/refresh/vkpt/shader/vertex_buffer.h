@@ -26,9 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_IDX_MODEL           (1 << 22)
 #define MAX_PRIM_MODEL          (MAX_IDX_MODEL / 3)
 
-#define MAX_VERT_INSTANCED      (1 << 21)
-#define MAX_IDX_INSTANCED       (MAX_VERT_INSTANCED / 3)
-
 #define MAX_LIGHT_LISTS         (1 << 14)
 #define MAX_LIGHT_LIST_NODES    (1 << 19)
 
@@ -61,7 +58,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define BSP_VERTEX_BUFFER_LIST \
 	VERTEX_BUFFER_LIST_DO(float,    3, positions_bsp,         (MAX_VERT_BSP        )) \
 	VERTEX_BUFFER_LIST_DO(float,    2, tex_coords_bsp,        (MAX_VERT_BSP        )) \
-	VERTEX_BUFFER_LIST_DO(float,    3, tangents_bsp,          (MAX_VERT_BSP / 3    )) \
+	VERTEX_BUFFER_LIST_DO(uint32_t, 1, tangents_bsp,          (MAX_VERT_BSP / 3    )) \
 	VERTEX_BUFFER_LIST_DO(uint32_t, 1, materials_bsp,         (MAX_VERT_BSP / 3    )) \
 	VERTEX_BUFFER_LIST_DO(uint32_t, 1, clusters_bsp,          (MAX_VERT_BSP / 3    )) \
 	VERTEX_BUFFER_LIST_DO(float,    1, texel_density_bsp,     (MAX_VERT_BSP / 3    )) \
@@ -70,8 +67,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MODEL_DYNAMIC_VERTEX_BUFFER_LIST \
 	VERTEX_BUFFER_LIST_DO(float,    3, positions_instanced,   (MAX_VERT_MODEL      )) \
 	VERTEX_BUFFER_LIST_DO(float,    3, pos_prev_instanced,    (MAX_VERT_MODEL      )) \
-	VERTEX_BUFFER_LIST_DO(float,    3, normals_instanced,     (MAX_VERT_MODEL      )) \
-	VERTEX_BUFFER_LIST_DO(float,    3, tangents_instanced,    (MAX_PRIM_MODEL      )) \
+	VERTEX_BUFFER_LIST_DO(uint32_t, 1, normals_instanced,     (MAX_VERT_MODEL      )) \
+	VERTEX_BUFFER_LIST_DO(uint32_t, 1, tangents_instanced,    (MAX_PRIM_MODEL      )) \
 	VERTEX_BUFFER_LIST_DO(float,    2, tex_coords_instanced,  (MAX_VERT_MODEL      )) \
 	VERTEX_BUFFER_LIST_DO(float,    1, alpha_instanced,       (MAX_PRIM_MODEL      )) \
 	VERTEX_BUFFER_LIST_DO(uint32_t, 1, clusters_instanced,    (MAX_PRIM_MODEL      )) \
@@ -118,8 +115,8 @@ struct ToneMappingBuffer
 };
 
 #ifndef VKPT_SHADER
-//typedef int ivec3_t[3];	// MATHLIB: !! Removed typedef int ivec3_t[3]; from vertex_buffer.h
-//typedef int ivec4_t[4]; // MATHLIB: !! COMMENTED OUT, IS ALREADY DEFINED IN vector4.h
+//typedef int ivec3_t[3];
+//typedef int ivec4_t[4];
 #else
 #define ivec3_t ivec3
 #define ivec4_t ivec4
@@ -162,14 +159,12 @@ typedef struct {
 	vec3_t position;
 	vec3_t normal;
 	vec2_t texcoord;
-	vec4_t tangents;
 } model_vertex_t;
 #else
-#define MODEL_VERTEX_SIZE 12
+#define MODEL_VERTEX_SIZE 8
 #define MODEL_VERTEX_POSITION 0
 #define MODEL_VERTEX_NORMAL 3
 #define MODEL_VERTEX_TEXCOORD 6
-#define MODEL_VERTEX_TANGENTS 8
 #endif
 
 #ifdef VKPT_SHADER
@@ -408,7 +403,7 @@ get_bsp_triangle(uint prim_id)
 	t.tex_coords[1] = get_tex_coords_bsp(prim_id * 3 + 1);
 	t.tex_coords[2] = get_tex_coords_bsp(prim_id * 3 + 2);
 
-    t.tangent = get_tangents_bsp(prim_id);
+    t.tangent = decode_normal(get_tangents_bsp(prim_id));
 
 	t.material_id = get_materials_bsp(prim_id);
 
@@ -420,38 +415,6 @@ get_bsp_triangle(uint prim_id)
 
 	return t;
 }
-
-//Triangle
-//get_model_triangle(uint prim_id, uint idx_offset, uint vert_offset)
-//{
-//	uvec3 idx = get_idx_model(prim_id + idx_offset / 3);
-//	idx += vert_offset;
-//
-//	Triangle t;
-//	t.positions[0] = get_positions_model(idx[0]);
-//	t.positions[1] = get_positions_model(idx[1]);
-//	t.positions[2] = get_positions_model(idx[2]);
-//
-//	t.normals[0] = get_normals_model(idx[0]);
-//	t.normals[1] = get_normals_model(idx[1]);
-//	t.normals[2] = get_normals_model(idx[2]);
-//
-//	t.tex_coords[0] = get_tex_coords_model(idx[0]);
-//	t.tex_coords[1] = get_tex_coords_model(idx[1]);
-//	t.tex_coords[2] = get_tex_coords_model(idx[2]);
-//
-//	vec4 tangent = get_tangents_model(idx[0]);
-//    t.tangent = tangent.xyz;
-//
-//	t.material_id = 0; // needs to come from uniform buffer
-//	if(tangent.w < 0)
-//		t.material_id |= MATERIAL_FLAG_HANDEDNESS;
-//
-//	t.alpha = 1.0;
-//	t.texel_density = 0;
-//
-//	return t;
-//}
 
 Triangle
 get_instanced_triangle(uint prim_id)
@@ -465,11 +428,11 @@ get_instanced_triangle(uint prim_id)
 	t.positions_prev[1] = get_pos_prev_instanced(prim_id * 3 + 1);
 	t.positions_prev[2] = get_pos_prev_instanced(prim_id * 3 + 2);
 
-	t.normals[0] = get_normals_instanced(prim_id * 3 + 0);
-	t.normals[1] = get_normals_instanced(prim_id * 3 + 1);
-	t.normals[2] = get_normals_instanced(prim_id * 3 + 2);
+	t.normals[0] = decode_normal(get_normals_instanced(prim_id * 3 + 0));
+	t.normals[1] = decode_normal(get_normals_instanced(prim_id * 3 + 1));
+	t.normals[2] = decode_normal(get_normals_instanced(prim_id * 3 + 2));
 
-	t.tangent = get_tangents_instanced(prim_id);
+	t.tangent = decode_normal(get_tangents_instanced(prim_id));
 
 	t.tex_coords[0] = get_tex_coords_instanced(prim_id * 3 + 0);
 	t.tex_coords[1] = get_tex_coords_instanced(prim_id * 3 + 1);
@@ -498,11 +461,11 @@ store_instanced_triangle(Triangle t, uint instance_id, uint prim_id)
 	set_pos_prev_instanced(prim_id * 3 + 1, t.positions_prev[1]);
 	set_pos_prev_instanced(prim_id * 3 + 2, t.positions_prev[2]);
 
-	set_normals_instanced(prim_id * 3 + 0, t.normals[0]);
-	set_normals_instanced(prim_id * 3 + 1, t.normals[1]);
-	set_normals_instanced(prim_id * 3 + 2, t.normals[2]);
+	set_normals_instanced(prim_id * 3 + 0, encode_normal(t.normals[0]));
+	set_normals_instanced(prim_id * 3 + 1, encode_normal(t.normals[1]));
+	set_normals_instanced(prim_id * 3 + 2, encode_normal(t.normals[2]));
 
-	set_tangents_instanced(prim_id, t.tangent);
+	set_tangents_instanced(prim_id, encode_normal(t.tangent));
 
 	set_tex_coords_instanced(prim_id * 3 + 0, t.tex_coords[0]);
 	set_tex_coords_instanced(prim_id * 3 + 1, t.tex_coords[1]);

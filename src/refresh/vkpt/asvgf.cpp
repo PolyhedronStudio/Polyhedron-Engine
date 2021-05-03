@@ -107,97 +107,67 @@ vkpt_asvgf_create_pipelines()
 		{ .mapEntryCount = 1, .pMapEntries = specEntries, .dataSize = sizeof(uint32_t), .pData = &spec_data[3] },
 	};
 
-	//GRADIENT_IMAGE,
-	//	GRADIENT_ATROUS,
-	//	GRADIENT_REPROJECT,
-	//	TEMPORAL,
-	//	ATROUS_LF,
-	//	ATROUS_ITER_0,
-	//	ATROUS_ITER_1,
-	//	ATROUS_ITER_2,
-	//	ATROUS_ITER_3,
-	//	TAAU,
-	//	CHECKERBOARD_INTERLEAVE,
-	//	COMPOSITING,
-	//	ASVGF_NUM_PIPELINES
-	// C++20 VKPT: Modified this so it doesn't do:
-	// 	VkComputePipelineCreateInfo pipeline_info[ASVGF_NUM_PIPELINES] = {
-	//		[GRADIENT_IMAGE] = { .. },
-	//		[...] = { .. },
-	//	};
-	// Since that is incompatible in C++20.
-	VkComputePipelineCreateInfo pipeline_info[ASVGF_NUM_PIPELINES];// = {
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[GRADIENT_IMAGE] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_IMG_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_general,
-	};
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[GRADIENT_ATROUS] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_atrous,
-	};
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[GRADIENT_REPROJECT] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_REPROJECT_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_general,
-	};
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[TEMPORAL] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_ASVGF_TEMPORAL_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_general,
-	};
-		// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[ATROUS_LF] = {
+	VkComputePipelineCreateInfo pipeline_info[ASVGF_NUM_PIPELINES] = {
+		[GRADIENT_IMAGE] = {
+			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage  = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_IMG_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_general,
+		},
+		[GRADIENT_ATROUS] = {
 			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE(QVK_MOD_ASVGF_LF_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.stage = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
 			.layout = pipeline_layout_atrous,
-	};
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[ATROUS_ITER_0] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[0]),
-		.layout = pipeline_layout_general,
-	};
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[ATROUS_ITER_1] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[1]),
-		.layout = pipeline_layout_general,
-	};
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[ATROUS_ITER_2] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[2]),
-		.layout = pipeline_layout_general,
-	};
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[ATROUS_ITER_3] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[3]),
-		.layout = pipeline_layout_general,
-	};
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[CHECKERBOARD_INTERLEAVE] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_CHECKERBOARD_INTERLEAVE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_general,
-	};
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[TAAU] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_ASVGF_TAAU_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_general,
-	};
-	// C++20 VKPT: Removed [GRADIENT_IMAGE] = {
-	pipeline_info[COMPOSITING] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_COMPOSITING_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_general,
+		},
+		[GRADIENT_REPROJECT] = {
+			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage  = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_REPROJECT_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_general,
+		},
+		[TEMPORAL] = {
+			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage  = SHADER_STAGE(QVK_MOD_ASVGF_TEMPORAL_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_general,
+		},
+		[ATROUS_LF] = {
+			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage  = SHADER_STAGE(QVK_MOD_ASVGF_LF_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_atrous,
+		},
+		[ATROUS_ITER_0] = {
+			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[0]),
+			.layout = pipeline_layout_general,
+		},
+		[ATROUS_ITER_1] = {
+			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[1]),
+			.layout = pipeline_layout_general,
+		},
+		[ATROUS_ITER_2] = {
+			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[2]),
+			.layout = pipeline_layout_general,
+		},
+		[ATROUS_ITER_3] = {
+			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[3]),
+			.layout = pipeline_layout_general,
+		},
+		[CHECKERBOARD_INTERLEAVE] = {
+			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage  = SHADER_STAGE(QVK_MOD_CHECKERBOARD_INTERLEAVE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_general,
+		},
+		[TAAU] = {
+			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage  = SHADER_STAGE(QVK_MOD_ASVGF_TAAU_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_general,
+		},
+		[COMPOSITING] = {
+			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage  = SHADER_STAGE(QVK_MOD_COMPOSITING_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_general,
+		},
 	};
 
 	_VK(vkCreateComputePipelines(qvk.device, 0, LENGTH(pipeline_info), pipeline_info, 0, pipeline_asvgf));
@@ -213,11 +183,6 @@ vkpt_asvgf_destroy_pipelines()
 	return VK_SUCCESS;
 }
 
-// C++20 VKPT: Modified to initialize members in order.
-// It also takes away the initialization of:
-// .sType, .srcQueueFamilyIndex and .dstQueueFamilyIndex
-//
-// This is because they need to be initialized in order.
 #define BARRIER_COMPUTE(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -228,15 +193,12 @@ vkpt_asvgf_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
-			.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT, \
-			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT, \
-			.oldLayout = VK_IMAGE_LAYOUT_GENERAL, \
-			.newLayout = VK_IMAGE_LAYOUT_GENERAL, \
-			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-			.image            = img, \
-			.subresourceRange = subresource_range, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
+				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
+				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
+				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 		); \
 	} while(0)
 
@@ -303,7 +265,7 @@ vkpt_asvgf_filter(VkCommandBuffer cmd_buf, qboolean enable_lf)
 	const int num_atrous_iterations_gradient = 7;
 	for(int i = 0; i < num_atrous_iterations_gradient; i++) {
 		uint32_t push_constants[1] = {
-			(uint32_t)i	// C++20 VKPT: Added a cast.
+			i
 		};
 
 		vkCmdPushConstants(cmd_buf, pipeline_layout_atrous,
@@ -349,7 +311,7 @@ vkpt_asvgf_filter(VkCommandBuffer cmd_buf, qboolean enable_lf)
 		if (enable_lf)
 		{
 			uint32_t push_constants[1] = {
-				(uint32_t)i // C++20 VKPT: Added a cast.
+				i
 			};
 
 			vkCmdBindPipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_asvgf[ATROUS_LF]);
@@ -450,7 +412,7 @@ vkpt_interleave(VkCommandBuffer cmd_buf)
 
 		// create full interleaved motion and color buffers on GPU 0
 		VkOffset2D offset_left = { 0, 0 };
-		VkOffset2D offset_right = { (int32_t)qvk.extent_render.width / 2, 0 }; // C++20 VKPT: Added a cast.
+		VkOffset2D offset_right = { qvk.extent_render.width / 2, 0 };
 		VkExtent2D extent = { qvk.extent_render.width / 2, qvk.extent_render.height };
 
 		vkpt_mgpu_image_copy(cmd_buf,

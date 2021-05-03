@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <assert.h>
 #include <stdio.h>
+#include "conversion.h"
 #include "precomputed_sky.h"
 
 
@@ -54,12 +55,9 @@ vkpt_vertex_buffer_bsp_upload_staging()
 	};
 	vkCmdCopyBuffer(cmd_buf, qvk.buf_vertex_bsp_staging.buffer, qvk.buf_vertex_bsp.buffer, 1, &copyRegion);
 
-	// C++20 VKPT: BUFFER_BARRIER
 	BUFFER_BARRIER(cmd_buf,
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR,
-		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.buffer = qvk.buf_vertex_bsp.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
@@ -114,19 +112,19 @@ vkpt_vertex_buffer_upload_bsp_mesh_to_staging(bsp_mesh_t *bsp_mesh)
 
 	memcpy(vbo->positions_bsp,  bsp_mesh->positions, num_vertices * sizeof(float) * 3   );
 	memcpy(vbo->tex_coords_bsp, bsp_mesh->tex_coords,num_vertices * sizeof(float) * 2   );
-    memcpy(vbo->tangents_bsp,   bsp_mesh->tangents,  num_vertices * sizeof(float));
+    memcpy(vbo->tangents_bsp,   bsp_mesh->tangents,  num_vertices * sizeof(uint32_t) / 3);
 	memcpy(vbo->materials_bsp,  bsp_mesh->materials, num_vertices * sizeof(uint32_t) / 3);
 	memcpy(vbo->clusters_bsp, bsp_mesh->clusters, num_vertices * sizeof(uint32_t) / 3);
 	memcpy(vbo->texel_density_bsp, bsp_mesh->texel_density, num_vertices * sizeof(float) / 3);
 
-	int numClusters = bsp_mesh->numClusters;
-	if (numClusters > MAX_LIGHT_LISTS)
+	int num_clusters = bsp_mesh->num_clusters;
+	if (num_clusters > MAX_LIGHT_LISTS)
 	{
 		assert(!"Visibility buffer overflow");
-		numClusters = MAX_LIGHT_LISTS;
+		num_clusters = MAX_LIGHT_LISTS;
 	}
 
-	memcpy(vbo->sky_visibility, bsp_mesh->sky_visibility, (numClusters + 7) / 8);
+	memcpy(vbo->sky_visibility, bsp_mesh->sky_visibility, (num_clusters + 7) / 8);
 
 	buffer_unmap(&qvk.buf_vertex_bsp_staging);
 	vbo = NULL;
@@ -149,8 +147,8 @@ void vkpt_light_buffer_reset_counts()
 void
 inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, light_poly_t* transformed_model_lights, int model_light_offset, uint32_t* dst_list_offsets, uint32_t* dst_lists)
 {
-	memset(local_light_counts, 0, bsp_mesh->numClusters * sizeof(int));
-	memset(cluster_light_counts, 0, bsp_mesh->numClusters * sizeof(int));
+	memset(local_light_counts, 0, bsp_mesh->num_clusters * sizeof(int));
+	memset(cluster_light_counts, 0, bsp_mesh->num_clusters * sizeof(int));
 
 	// Count the number of model lights per cluster
 
@@ -161,7 +159,7 @@ inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, ligh
 
 	// Count the number of model lights visible from each cluster, using the PVS
 
-	for (int c = 0; c < bsp_mesh->numClusters; c++)
+	for (int c = 0; c < bsp_mesh->num_clusters; c++)
 	{
 		if (local_light_counts[c])
 		{
@@ -180,7 +178,7 @@ inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, ligh
 
 	// Update the max light counts per cluster
 
-	for (int c = 0; c < bsp_mesh->numClusters; c++)
+	for (int c = 0; c < bsp_mesh->num_clusters; c++)
 	{
 		max_cluster_model_lights[c] = max(max_cluster_model_lights[c], cluster_light_counts[c]);
 	}
@@ -188,7 +186,7 @@ inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, ligh
 	// Copy the static light lists, and make room in these lists to inject the model lights
 
 	int tail = 0;
-	for (int c = 0; c < bsp_mesh->numClusters; c++)
+	for (int c = 0; c < bsp_mesh->num_clusters; c++)
 	{
 		int original_size = bsp_mesh->cluster_light_offsets[c + 1] - bsp_mesh->cluster_light_offsets[c];
 
@@ -201,7 +199,7 @@ inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, ligh
 		light_list_tails[c] = tail;
 		tail += max_cluster_model_lights[c];
 	}
-	dst_list_offsets[bsp_mesh->numClusters] = tail;
+	dst_list_offsets[bsp_mesh->num_clusters] = tail;
 
 	// Write the model light indices into the light lists
 
@@ -262,59 +260,6 @@ copy_light(const light_poly_t* light, float* vblight, const float* sky_radiance)
 	vblight[15] = 0.f;
 }
 
-/* 
-  Float -> Half converter function, adapted from
-  https://stackoverflow.com/questions/1659440/32-bit-to-16-bit-floating-point-conversion
-*/
-
-typedef union 
-{
-	float f;
-	int32_t si;
-	uint32_t ui;
-} Bits;
-
-static uint16_t floatToHalf(float value)
-{
-	static int const shift = 13;
-	static int const shiftSign = 16;
-
-	static int32_t const infN = 0x7F800000; // flt32 infinity
-	static int32_t const maxN = 0x477FE000; // max flt16 normal as a flt32
-	static int32_t const minN = 0x38800000; // min flt16 normal as a flt32
-	static int32_t const signN = 0x80000000; // flt32 sign bit
-
-	static int32_t const infC = 0x3FC00;
-	static int32_t const nanN = 0x7F802000; // minimum flt16 nan as a flt32
-	static int32_t const maxC = 0x23BFF;
-	static int32_t const minC = 0x1C400;
-	static int32_t const signC = 0x8000; // flt16 sign bit
-
-	static int32_t const mulN = 0x52000000; // (1 << 23) / minN
-	static int32_t const mulC = 0x33800000; // minN / (1 << (23 - shift))
-
-	static int32_t const subC = 0x003FF; // max flt32 subnormal down shifted
-	static int32_t const norC = 0x00400; // min flt32 normal down shifted
-
-	static int32_t const maxD = 0x1C000;
-	static int32_t const minD = 0x1C000;
-
-	Bits v, s;
-	v.f = value;
-	uint32_t sign = v.si & signN;
-	v.si ^= sign;
-	sign >>= shiftSign; // logical shift
-	s.si = mulN;
-	s.si = s.f * v.f; // correct subnormals
-	v.si ^= (s.si ^ v.si) & -(minN > v.si);
-	v.si ^= (infN ^ v.si) & -((infN > v.si) & (v.si > maxN));
-	v.si ^= (nanN ^ v.si) & -((nanN > v.si) & (v.si > infN));
-	v.ui >>= shift; // logical shift
-	v.si ^= ((v.si - maxD) ^ v.si) & -(v.si > maxC);
-	v.si ^= ((v.si - minD) ^ v.si) & -(v.si > subC);
-	return v.ui | sign;
-}
-
 extern vkpt_refdef_t vkpt_refdef;
 extern char cluster_debug_mask[VIS_MAX_BYTES];
 
@@ -330,7 +275,7 @@ vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t *bsp_mesh,
 
 	if (render_world)
 	{
-		assert(bsp_mesh->numClusters + 1 < MAX_LIGHT_LISTS);
+		assert(bsp_mesh->num_clusters + 1 < MAX_LIGHT_LISTS);
 		assert(bsp_mesh->num_cluster_lights < MAX_LIGHT_LIST_NODES);
 		assert(MAT_GetNumPBRMaterials() < MAX_PBR_MATERIALS);
 		assert(bsp_mesh->num_light_polys + num_model_lights < MAX_LIGHT_POLYS);
@@ -347,7 +292,7 @@ vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t *bsp_mesh,
 		}
 		else
 		{
-			memcpy(lbo->light_list_offsets, bsp_mesh->cluster_light_offsets, (bsp_mesh->numClusters + 1) * sizeof(uint32_t));
+			memcpy(lbo->light_list_offsets, bsp_mesh->cluster_light_offsets, (bsp_mesh->num_clusters + 1) * sizeof(uint32_t));
 			memcpy(lbo->light_list_lights, bsp_mesh->cluster_lights, bsp_mesh->num_cluster_lights * sizeof(uint32_t));
 		}
 
@@ -428,14 +373,13 @@ static void write_model_vbo_descriptor(int index, VkBuffer buffer, VkDeviceSize 
 		.range = size,
 	};
 
-	// C++20 VKPT: Order fix.
 	VkWriteDescriptorSet write_descriptor_set = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 		.dstSet = qvk.desc_set_model_vbos,
 		.dstBinding = 0,
-		.dstArrayElement = (uint32_t)index, // C++20 VKPT: Added cast.
-		.descriptorCount = 1,
+		.dstArrayElement = index,
 		.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+		.descriptorCount = 1,
 		.pBufferInfo = &descriptor_buffer_info,
 	};
 
@@ -514,7 +458,6 @@ vkpt_vertex_buffer_upload_models()
 				memcpy(vtx->position, m->positions + nvert, sizeof(vec3_t));
 				memcpy(vtx->normal, m->normals + nvert, sizeof(vec3_t));
 				memcpy(vtx->texcoord, m->tex_coords + nvert, sizeof(vec2_t));
-				memcpy(vtx->tangents, m->tangents + nvert, sizeof(vec4_t));
 			}
 
 			write_ptr += num_verts * (sizeof(model_vertex_t) / sizeof(uint32_t));
@@ -608,54 +551,53 @@ vkpt_vertex_buffer_upload_models()
 VkResult
 vkpt_vertex_buffer_create()
 {
-	// C++20 VKPT: Order fix.
 	VkDescriptorSetLayoutBinding vbo_layout_bindings[] = {
 		{
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
 			.binding = BSP_VERTEX_BUFFER_BINDING_IDX,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
 			.binding = MODEL_DYNAMIC_VERTEX_BUFFER_BINDING_IDX,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
 			.binding = LIGHT_BUFFER_BINDING_IDX,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
 			.binding = READBACK_BUFFER_BINDING_IDX,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
 			.binding = TONE_MAPPING_BUFFER_BINDING_IDX,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
 			.binding = SUN_COLOR_BUFFER_BINDING_IDX,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.binding = SUN_COLOR_UBO_BINDING_IDX,
 			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			.descriptorCount = 1,
+			.binding = SUN_COLOR_UBO_BINDING_IDX,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.binding = LIGHT_STATS_BUFFER_BINDING_IDX,
 			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.descriptorCount = 3,
+			.binding = LIGHT_STATS_BUFFER_BINDING_IDX,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		}
 	};
@@ -715,12 +657,11 @@ vkpt_vertex_buffer_create()
 		.descriptorCount = LENGTH(vbo_layout_bindings) + MAX_MODELS + 128,
 	};
 
-	// C++20 VKPT: Order fix.
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-		.maxSets = 2,
 		.poolSizeCount = 1,
 		.pPoolSizes    = &pool_size,
+		.maxSets       = 2,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_vertex_buffer));
@@ -740,14 +681,13 @@ vkpt_vertex_buffer_create()
 		.range  = sizeof(BspVertexBuffer),
 	};
 
-	// C++20 VKPT: Order fix.
 	VkWriteDescriptorSet output_buf_write = {
 		.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 		.dstSet          = qvk.desc_set_vertex_buffer,
 		.dstBinding      = BSP_VERTEX_BUFFER_BINDING_IDX,
 		.dstArrayElement = 0,
-		.descriptorCount = 1,
 		.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+		.descriptorCount = 1,
 		.pBufferInfo     = &buf_info,
 	};
 
@@ -784,11 +724,11 @@ vkpt_vertex_buffer_create()
 	buf_info.range = sizeof(SunColorBuffer);
 	vkUpdateDescriptorSets(qvk.device, 1, &output_buf_write, 0, NULL);
 
-	// C++20 VKPT: Order fix.
+
 	VkDescriptorSetLayoutBinding model_vbo_layout_binding = {
-		.binding = 0,
 		.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		.descriptorCount = MAX_MODELS,
+		.binding = 0,
 		.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT
 	};
 
@@ -878,7 +818,7 @@ VkResult vkpt_light_stats_create(bsp_mesh_t *bsp_mesh)
 	vkpt_light_stats_destroy();
 
 	// Light statistics: 2 uints (shadowed, unshadowed) per light per surface orientation (6) per cluster.
-	uint32_t num_stats = bsp_mesh->numClusters * bsp_mesh->num_light_polys * 6 * 2;
+	uint32_t num_stats = bsp_mesh->num_clusters * bsp_mesh->num_light_polys * 6 * 2;
 
     // Handle rare cases when the map has zero lights
     if (num_stats == 0)
@@ -907,14 +847,13 @@ VkResult vkpt_light_stats_create(bsp_mesh_t *bsp_mesh)
 			.range = qvk.buf_light_stats[2].size,
 		} };
 
-	// C++20 VKPT: Order fix.
 	VkWriteDescriptorSet output_buf_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 		.dstSet = qvk.desc_set_vertex_buffer,
 		.dstBinding = LIGHT_STATS_BUFFER_BINDING_IDX,
 		.dstArrayElement = 0,
-		.descriptorCount = LENGTH(light_stats_buf_info),
 		.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+		.descriptorCount = LENGTH(light_stats_buf_info),
 		.pBufferInfo = light_stats_buf_info,
 	};
 
@@ -1016,15 +955,14 @@ vkpt_instance_geometry(VkCommandBuffer cmd_buf, uint32_t num_instances, qboolean
 		vkCmdDispatch(cmd_buf, num_groups, 1, 1);
 	}
 
-	// C++20 VKPT: Order fix.
 	VkBufferMemoryBarrier barrier = {
 		.sType               = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
 		.srcAccessMask       = VK_ACCESS_SHADER_WRITE_BIT,
 		.dstAccessMask       = VK_ACCESS_SHADER_READ_BIT,
-		.srcQueueFamilyIndex = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added cast.
-		.dstQueueFamilyIndex = (uint32_t)qvk.queue_idx_graphics, // C++20 VKPT: Added cast.
 		.buffer              = qvk.buf_vertex_model_dynamic.buffer,
 		.size                = qvk.buf_vertex_model_dynamic.size,
+		.srcQueueFamilyIndex = qvk.queue_idx_graphics,
+		.dstQueueFamilyIndex = qvk.queue_idx_graphics
 	};
 
 	vkCmdPipelineBarrier(

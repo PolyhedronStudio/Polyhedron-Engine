@@ -1,0 +1,488 @@
+/*
+Copyright (C) 2018 Christoph Schied
+Copyright (C) 2019, NVIDIA CORPORATION. All rights reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+// ========================================================================== //
+// This rgen shader shoots primary rays from the camera and stores various 
+// parameters of the primary surface into the visibility buffer and G-buffer 
+// textures.
+//
+// See `path_tracer.h` for an overview of the path tracer.
+// ========================================================================== //
+
+#version 460
+#extension GL_GOOGLE_include_directive    : enable
+#pragma optionNV(unroll all)
+
+#include "path_tracer.h"
+#include "path_tracer_rgen.h"
+#include "projection.glsl"
+
+Ray
+get_primary_ray(vec2 screen_pos)
+{
+	vec3 view_dir = projection_screen_to_view(screen_pos, 1, false);
+	view_dir = normalize((global_ubo.invV * vec4(view_dir, 0)).xyz);
+
+	Ray ray;
+	ray.origin = vec3(0);
+	ray.direction = view_dir;
+	ray.t_min = 0;
+	ray.t_max = PRIMARY_RAY_T_MAX;
+
+	if(global_ubo.pt_aperture > 0)
+	{
+		// Camera basis
+
+		vec3 right = global_ubo.invV[0].xyz;
+		vec3 up = global_ubo.invV[1].xyz;
+		vec3 forward = global_ubo.invV[2].xyz;
+
+		// Find the intersection of the focal plane with the ray.
+
+		float distance = global_ubo.pt_focus / dot(view_dir, forward);
+		vec3 focal_point = view_dir * distance;
+
+		// Offset the ray origin in the focal plane to simulate aperture.
+
+		vec2 uv = vec2(get_rng(RNG_PRIMARY_APERTURE_X), get_rng(RNG_PRIMARY_APERTURE_Y));
+		vec2 planar_offset;
+
+		if(global_ubo.pt_aperture_type < 3)
+		{
+			planar_offset = sample_disk(uv);
+		}
+		else
+		{
+			float triangle = uv.x * global_ubo.pt_aperture_type;
+			uv.x = fract(triangle);
+			triangle = floor(triangle);
+
+			vec3 bary = sample_triangle(uv);
+			float section_angle = 2 * M_PI / global_ubo.pt_aperture_type;
+			float a1 = section_angle * (triangle + global_ubo.pt_aperture_angle    );
+			float a2 = section_angle * (triangle + global_ubo.pt_aperture_angle + 1);
+
+			vec2 v1 = vec2(cos(a1), sin(a1));
+			vec2 v2 = vec2(cos(a2), sin(a2));
+			planar_offset = bary.x * v1 + bary.y * v2; // + bary.z * v0, where v0 is (0, 0)
+		}
+
+		planar_offset *= global_ubo.pt_aperture;
+		vec3 offset = planar_offset.x * right + planar_offset.y * up;
+
+		ray.origin = offset;
+		ray.direction = normalize(focal_point - ray.origin);
+	}
+
+	ray.origin += global_ubo.cam_pos.xyz;
+
+	return ray;
+}
+
+void generate_rng_seed(ivec2 ipos, bool is_odd_checkerboard)
+{
+	int frame_num = global_ubo.current_frame_idx;
+
+	uint frame_offset = frame_num / NUM_BLUE_NOISE_TEX;
+
+	rng_seed = 0;
+	rng_seed |= (uint(ipos.x + frame_offset) % BLUE_NOISE_RES) <<  0u;
+	rng_seed |= (uint(ipos.y + (frame_offset << 4)) % BLUE_NOISE_RES) << 10u;
+	rng_seed |= uint(frame_num + uint(is_odd_checkerboard)) << 20;
+
+	imageStore(IMG_ASVGF_RNG_SEED_A, ipos, uvec4(rng_seed));
+}
+
+
+void main()
+{
+	ivec2 ipos = ivec2(rt_LaunchID.xy);
+	if(rt_LaunchID.z != 0)
+		ipos.x += global_ubo.width / 2;
+
+	bool is_odd_checkerboard = (rt_LaunchID.z != 0) || (push_constants.gpu_index == 1);
+
+	generate_rng_seed(ipos, is_odd_checkerboard);
+
+	vec3 position;
+	vec3 direction;
+	
+	vec2 pixel_offset;
+	if(global_ubo.flt_taa == AA_MODE_TAA || global_ubo.temporal_blend_factor > 0)
+	{   
+		// Photo mode or legacy TAA - use higher quality sampling
+		pixel_offset = vec2(get_rng(RNG_PRIMARY_OFF_X), get_rng(RNG_PRIMARY_OFF_Y));
+		pixel_offset -= vec2(0.5);
+	}
+	else 
+	{
+		// Real-time mode - use predictable sampling for TAAU
+		pixel_offset = global_ubo.sub_pixel_jitter;
+	}
+	
+	const ivec2 image_position = get_image_position();
+	const vec2 pixel_center = vec2(image_position) + vec2(0.5);
+	const vec2 inUV = (pixel_center + pixel_offset) / vec2(get_image_size());
+
+	Ray ray = get_primary_ray(inUV);
+
+	bool is_readback_pixel = all(equal(ipos, ivec2(global_ubo.width / 4, global_ubo.height / 2)));
+	if(is_readback_pixel)
+	{
+		// this needs to happen somewhere...
+		readback.sun_luminance = sun_color_ubo.sun_luminance;
+		readback.sky_luminance = sun_color_ubo.sky_luminance;
+	}
+
+	{
+		int cull_mask = PRIMARY_RAY_CULL_MASK;
+		
+		if(global_ubo.pt_show_sky != 0)
+			cull_mask |= AS_FLAG_CUSTOM_SKY;
+
+		trace_ray(ray, true, cull_mask);
+	}
+
+	direction = ray.direction;
+
+	// If the primary ray didn't hit anything, or it hit a sky polygon and pt_show_sky is disabled, 
+	// store the sky color and motion vectors. Doesn't apply to gradient samples because their rays intentionally miss.
+	if((!found_intersection(ray_payload_brdf) || (is_sky(ray_payload_brdf) && (global_ubo.pt_show_sky == 0))))
+	{
+	    // Override no hit with SDF 
+
+		vec3 env = env_map(ray.direction, false);	
+		env *= global_ubo.pt_env_scale;
+		
+		if(global_ubo.sdfclouds == 1)
+			SampleCloudsSDF(env, ray);
+		
+		// End Override SDF
+
+		vec4 transparent = alpha_blend(unpackHalf4x16(ray_payload_brdf.transparency), vec4(env, 1));
+
+		if(is_readback_pixel)
+		{
+			readback.material = ~0u;
+			readback.cluster = ~0u;
+		}
+
+		// Compute a motion vector for the sky, because we don't want TAA to blur it
+		vec3 prev_view_dir = (global_ubo.V_prev * vec4(direction, 0)).xyz;
+		vec2 prev_screen_pos;
+		float prev_distance;
+		projection_view_to_screen(prev_view_dir, prev_screen_pos, prev_distance, true);
+		vec2 motion = prev_screen_pos - inUV;
+		
+		// Store an empty surface into the G-buffer
+		imageStore(IMG_PT_NORMAL_A, ipos, uvec4(0));
+		imageStore(IMG_PT_GEO_NORMAL_A, ipos, uvec4(0));
+		imageStore(IMG_PT_VIEW_DEPTH_A, ipos, vec4(PRIMARY_RAY_T_MAX));
+		imageStore(IMG_PT_GODRAYS_THROUGHPUT_DIST, ipos, vec4(1, 1, 1, PRIMARY_RAY_T_MAX));
+		imageStore(IMG_PT_VIEW_DIRECTION, ipos, vec4(direction, 0));
+		imageStore(IMG_PT_SHADING_POSITION, ipos, vec4(global_ubo.cam_pos.xyz + direction * PRIMARY_RAY_T_MAX, 0));
+		imageStore(IMG_PT_MOTION, ipos, vec4(motion, 0, 0));
+		imageStore(IMG_PT_VISBUF_A, ipos, vec4(-1, -1, uintBitsToFloat(uvec2(~0u))));
+		imageStore(IMG_PT_ALBEDO, ipos, vec4(1,0,0,1));
+		imageStore(IMG_PT_TRANSPARENT, ipos, transparent);
+		return;
+	}
+	
+	Triangle triangle;
+	vec3 bary;
+
+	{
+		bool is_dynamic_primitive = is_dynamic_instance(ray_payload_brdf);
+		uint primitive_id = get_primitive(ray_payload_brdf);
+		bary = get_hit_barycentric(ray_payload_brdf);
+		
+		uint visbuf_instance_info = is_dynamic_primitive ? get_instance_id_instanced(primitive_id) : VISBUF_STATIC_GEOMETRY;
+
+		vec4 vis_buf;
+		vis_buf.xy = bary.yz;
+		vis_buf.z = uintBitsToFloat(visbuf_instance_info);
+		vis_buf.w = uintBitsToFloat(primitive_id);
+		
+		imageStore(IMG_PT_VISBUF_A, ipos, vis_buf);
+		
+		if(is_dynamic_primitive)
+			triangle = get_instanced_triangle(primitive_id);
+		else
+			triangle = get_bsp_triangle(primitive_id);
+	}
+
+	if(is_readback_pixel)
+	{
+		readback.material = triangle.material_id;
+		readback.cluster = triangle.cluster;
+	}
+
+	position       = triangle.positions * bary;
+	vec2 tex_coord = triangle.tex_coords * bary;
+	vec3 geo_normal = normalize(triangle.normals * bary);
+	
+	/* compute view-space derivatives of depth and motion vectors */
+	Ray ray_0 = get_primary_ray(inUV);
+	Ray ray_x = get_primary_ray(inUV + vec2(1.0 / float(global_ubo.width), 0));
+	Ray ray_y = get_primary_ray(inUV + vec2(0, 1.0 / float(global_ubo.height)));
+
+	vec3 bary_0 = compute_barycentric(triangle.positions, ray_0.origin, ray_0.direction);
+	vec3 bary_x = compute_barycentric(triangle.positions, ray_x.origin, ray_x.direction);
+	vec3 bary_y = compute_barycentric(triangle.positions, ray_y.origin, ray_y.direction);
+
+	vec3 pos_ws_x = triangle.positions * bary_x;
+	vec3 pos_ws_y = triangle.positions * bary_y;
+
+	vec2 tex_coord_0 = triangle.tex_coords * bary_0;
+	vec2 tex_coord_x = triangle.tex_coords * bary_x;
+	vec2 tex_coord_y = triangle.tex_coords * bary_y;
+	tex_coord_x -= tex_coord_0;
+	tex_coord_y -= tex_coord_0;
+	if(global_ubo.pt_texture_lod_bias != 0)
+	{
+		tex_coord_x *= pow(2.0, global_ubo.pt_texture_lod_bias);
+		tex_coord_y *= pow(2.0, global_ubo.pt_texture_lod_bias);
+	}
+
+	vec3 pos_ws_curr = position;
+	vec3 pos_ws_prev = triangle.positions_prev * bary;
+	
+	vec2 screen_pos_curr, screen_pos_prev;
+	float distance_curr, distance_prev;
+	projection_view_to_screen((global_ubo.V * vec4(pos_ws_curr, 1)).xyz, screen_pos_curr, distance_curr, false);
+	projection_view_to_screen((global_ubo.V_prev * vec4(pos_ws_prev, 1)).xyz, screen_pos_prev, distance_prev, true);
+	
+	float depth_vs_x = length(pos_ws_x - global_ubo.cam_pos.xyz);
+	float depth_vs_y = length(pos_ws_y - global_ubo.cam_pos.xyz);
+	float fwidth_depth = 1.0 / max(0.1, (abs(depth_vs_x - distance_curr) * 2 + abs(depth_vs_y - distance_curr))); // *2 on X because we're rendering in half resolution in X dimension
+
+	vec3 motion;
+	motion.xy = screen_pos_prev - screen_pos_curr;
+	motion.z = distance_prev - distance_curr;
+
+	imageStore(IMG_PT_VIEW_DEPTH_A, ipos, vec4(distance_curr));
+	imageStore(IMG_PT_MOTION, ipos, vec4(motion, fwidth_depth));
+
+	// Compute angle between adjacent rays using approximate acos(dot(...)), assume horizontal angle == vertical angle
+	float footprint_size_over_distance = sqrt(max(0, 2.0 - 2.0 * dot(ray_x.direction, ray_0.direction)));
+
+	vec3 primary_albedo = vec3(1);
+	float primary_metallic = 0;
+	float primary_specular = 0;
+	float primary_roughness = 1;
+	vec3 primary_emissive = vec3(0);
+	vec3 throughput = vec3(1);
+	vec3 normal;
+
+	// Get the primary surface material parameters
+    get_material(
+    	triangle,
+    	tex_coord,
+    	tex_coord_x,
+    	tex_coord_y,
+    	-1,
+    	geo_normal,
+    	primary_albedo,
+    	normal,
+    	primary_metallic,
+    	primary_specular,
+    	primary_roughness,
+    	primary_emissive);
+
+    // Extinction in the primary ray
+	if(global_ubo.medium != MEDIUM_NONE)
+	{
+		throughput *= extinction(global_ubo.medium, length(position - global_ubo.cam_pos.xyz));
+	}
+
+    float NdotV = clamp(-dot(normal, direction), 0, 1);
+	primary_specular = schlick_ross_fresnel(primary_specular, primary_roughness, NdotV);
+	primary_specular *= (1 - primary_roughness * (1 - primary_metallic) * 0.9);
+
+	uint material_id = triangle.material_id;
+
+	if((is_chrome(material_id) || is_screen(material_id) || is_camera(material_id)) && primary_roughness >= MAX_MIRROR_ROUGHNESS)
+	{
+		material_id = (material_id & ~MATERIAL_KIND_MASK) | MATERIAL_KIND_REGULAR;
+	}
+
+	if(is_camera(material_id) && ((global_ubo.pt_cameras == 0) || (global_ubo.pt_reflect_refract == 0)))
+	{
+		material_id = (material_id & ~MATERIAL_KIND_MASK) | MATERIAL_KIND_SCREEN;
+	}
+
+	int checkerboard_flags = CHECKERBOARD_FLAG_PRIMARY;
+
+	vec2 cameraUV = vec2(0);
+	if(is_camera(material_id))
+	{
+		if(get_camera_uv(tex_coord, cameraUV))
+		{
+			throughput *= 2;
+			checkerboard_flags = CHECKERBOARD_FLAG_REFRACTION | CHECKERBOARD_FLAG_REFLECTION;
+			primary_emissive = vec3(0);
+
+			if(is_odd_checkerboard)
+			{	
+				material_id = (material_id & ~MATERIAL_KIND_MASK) | MATERIAL_KIND_SCREEN;
+			}
+			else
+			{
+				uint packed = uint(cameraUV.x * 65535) & 0xffff | ((uint(cameraUV.y * 65535) & 0xffff) << 16);
+				imageStore(IMG_PT_NORMAL_A, ipos, uvec4(packed));
+			}
+		}
+		else
+		{
+			material_id = (material_id & ~MATERIAL_KIND_MASK) | MATERIAL_KIND_REGULAR;
+		}
+	}
+
+	bool primary_is_transparent = is_transparent(material_id);
+	bool primary_is_screen = is_screen(material_id);
+
+	if(is_screen(material_id) && luminance(primary_emissive) > 0) 
+	{
+		// Split the emissive parts of the screens into two checkerboard fields.
+		// Odd checkerboard: reflective part, even checkerboard: surface emissive part
+		// This has to be done here because the reflection shader doesn't know the primary surface emissive component.
+		
+		throughput *= 2;
+		checkerboard_flags = CHECKERBOARD_FLAG_PRIMARY | CHECKERBOARD_FLAG_REFLECTION;
+
+		if(!is_odd_checkerboard)
+		{			
+			// Black out the surface material for the emissive parts of reflective screens, keep only MVs and emissive channel
+			primary_specular = 0;
+			primary_roughness = 1;
+			primary_metallic = 1;
+			primary_albedo = vec3(0);
+			material_id = (material_id & ~MATERIAL_KIND_MASK) | MATERIAL_KIND_REGULAR;
+		}
+		else
+		{
+			primary_emissive = vec3(0);
+		}
+	}
+
+	if(is_transparent(material_id) && !is_odd_checkerboard)
+	{
+		checkerboard_flags = CHECKERBOARD_FLAG_PRIMARY | CHECKERBOARD_FLAG_REFRACTION;
+		material_id = (material_id & ~MATERIAL_KIND_MASK) | MATERIAL_KIND_REGULAR;
+	}
+
+	if(is_water(material_id) || is_slime(material_id))
+	{
+		normal = get_water_normal(material_id, geo_normal, triangle.tangent, position, false);
+
+		if(abs(geo_normal.z) < 0.1)  // hack to detect actual water vs. vertical force fields
+			material_id = (material_id & ~MATERIAL_KIND_MASK) | MATERIAL_KIND_GLASS;
+	}
+		
+	// Store the surface parameters into the G-buffer for the lighting shaders
+	if(is_camera(material_id))
+	{
+		uint camera_id = (material_id & MATERIAL_LIGHT_STYLE_MASK) >> (MATERIAL_LIGHT_STYLE_SHIFT + 2);
+		uint packed = uint(cameraUV.x * 0x3fff) & 0x3fff | ((uint(cameraUV.y * 0x3fff) & 0x3fff) << 14) | (camera_id << 28);
+		imageStore(IMG_PT_NORMAL_A, ipos, uvec4(packed));
+	}
+	else
+	{
+		imageStore(IMG_PT_NORMAL_A, ipos, uvec4(encode_normal(normal)));
+	}
+
+	// Replace the material light style with medium
+	material_id = (material_id & ~MATERIAL_LIGHT_STYLE_MASK) | (global_ubo.medium << MATERIAL_LIGHT_STYLE_SHIFT) & MATERIAL_LIGHT_STYLE_MASK;
+
+	imageStore(IMG_PT_GEO_NORMAL_A, ipos, uvec4(encode_normal(geo_normal)));
+	imageStore(IMG_PT_SHADING_POSITION, ipos, vec4(position.xyz, uintBitsToFloat(material_id)));
+	imageStore(IMG_PT_VIEW_DIRECTION, ipos, vec4(direction, float(checkerboard_flags)));
+	imageStore(IMG_PT_THROUGHPUT, ipos, vec4(throughput, distance_curr));
+	imageStore(IMG_PT_BOUNCE_THROUGHPUT, ipos, vec4(1, 1, 1, footprint_size_over_distance));
+	imageStore(IMG_PT_CLUSTER_A, ipos, ivec4(triangle.cluster));
+	imageStore(IMG_PT_ALBEDO, ipos, vec4(primary_albedo, primary_specular));
+	imageStore(IMG_PT_METALLIC_A, ipos, vec4(primary_metallic, primary_roughness, primary_specular, 0));
+	imageStore(IMG_PT_GODRAYS_THROUGHPUT_DIST, ipos, vec4(1, 1, 1, distance_curr));
+
+	// Debug visualization of the PVS (Potentially Visible Set)
+	if(triangle.cluster >= 0 && global_ubo.cluster_debug_index >= 0)
+	{
+		uint mask = get_cluster_debug_mask(triangle.cluster >> 5);
+		bool is_pvs = (mask & (1 << (triangle.cluster & 31))) != 0;
+		bool is_current = triangle.cluster == global_ubo.cluster_debug_index;
+
+		if(is_pvs || is_current)
+		{
+			int checkerboard = (int(position.x) >> 3) + (int(position.y) >> 3) + (int(position.z) >> 3);
+			if((checkerboard & 1) != 0)
+			{
+				vec3 color = is_current ? vec3(1, 0, 0) : vec3(1, 0.5, 0);
+				imageStore(IMG_PT_TRANSPARENT, ipos, vec4(color, 0.05));
+				return;
+			}
+		}
+	}
+
+	if(global_ubo.pt_show_sky != 0 && is_sky(ray_payload_brdf))
+	{
+		// show additional information about sky boxes: triangle edges...
+		if(any(lessThan(bary, vec3(0.02))))
+		{
+			imageStore(IMG_PT_TRANSPARENT, ipos, vec4(1,0,0,0.1));
+			return;
+		}
+
+		// ... and light flags
+		if((triangle.material_id & MATERIAL_FLAG_LIGHT) != 0)
+		{
+			imageStore(IMG_PT_TRANSPARENT, ipos, vec4(0,0,1,0.1));
+			return;
+		}
+	}
+
+	float hit_distance = ray_payload_brdf.hit_distance;
+
+	if(ray_payload_brdf.max_transparent_distance <= hit_distance)
+	{
+		vec4 transparent = unpackHalf4x16(ray_payload_brdf.transparency);
+
+		// Blend in the emissive component from the primary surface, with zero alpha
+		transparent = alpha_blend_premultiplied(transparent, vec4(primary_emissive * throughput, 0));
+
+		imageStore(IMG_PT_TRANSPARENT, ipos, transparent);
+		return;
+	}
+
+	// Difficult case: we found some transparency and it was behind the primary surface.
+	// Trace again.
+
+	ray.t_max = hit_distance;
+
+	{
+		int cull_mask = AS_FLAG_PARTICLES | AS_FLAG_EXPLOSIONS;
+		trace_ray(ray, true, cull_mask);
+	}
+
+	vec4 transparent = unpackHalf4x16(ray_payload_brdf.transparency);
+
+	// Blend in the emissive component from the primary surface, with zero alpha
+	transparent = alpha_blend_premultiplied(transparent, vec4(primary_emissive * throughput, 0));
+
+	imageStore(IMG_PT_TRANSPARENT, ipos, transparent);
+}

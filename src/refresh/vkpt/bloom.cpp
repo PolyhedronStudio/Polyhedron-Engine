@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 enum {
 	BLUR,
 	COMPOSITE,
+	DOWNSCALE,
 
 	BLOOM_NUM_PIPELINES
 };
@@ -175,17 +176,22 @@ vkpt_bloom_destroy()
 VkResult
 vkpt_bloom_create_pipelines()
 {
-	// C++20 VKPT: Removed the [INDEX] enum things.
-	VkComputePipelineCreateInfo pipeline_info[BLOOM_NUM_PIPELINES];
-	pipeline_info[BLUR] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_BLOOM_BLUR_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_blur
-	};
-	pipeline_info[COMPOSITE] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_BLOOM_COMPOSITE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_composite
+	VkComputePipelineCreateInfo pipeline_info[BLOOM_NUM_PIPELINES] = {
+		[BLUR] = {
+			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage = SHADER_STAGE(QVK_MOD_BLOOM_BLUR_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_blur,
+		},
+		[COMPOSITE] = {
+			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage = SHADER_STAGE(QVK_MOD_BLOOM_COMPOSITE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_composite,
+		},
+		[DOWNSCALE] = {
+			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage = SHADER_STAGE(QVK_MOD_BLOOM_DOWNSCALE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_composite,
+		}
 	};
 
 	_VK(vkCreateComputePipelines(qvk.device, 0, LENGTH(pipeline_info), pipeline_info, 0, pipelines));
@@ -201,7 +207,7 @@ vkpt_bloom_destroy_pipelines()
 	return VK_SUCCESS;
 }
 
-// C++20 VKPT: BARRIER_COMPUTE
+
 #define BARRIER_COMPUTE(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -212,19 +218,15 @@ vkpt_bloom_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
-			.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT, \
-			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT, \
-			.oldLayout = VK_IMAGE_LAYOUT_GENERAL, \
-			.newLayout = VK_IMAGE_LAYOUT_GENERAL, \
-			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-			.image            = img, \
-			.subresourceRange = subresource_range, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
+				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
+				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
+				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 		); \
 	} while(0)
 
-// C++20 VKPT: BARRIER_TO_COPY_DEST
 #define BARRIER_TO_COPY_DEST(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -235,19 +237,15 @@ vkpt_bloom_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
 				.srcAccessMask    = 0, \
 				.dstAccessMask    = 0, \
 				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, \
-				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 
-// C++20 VKPT: BARRIER_FROM_COPY_DEST
 #define BARRIER_FROM_COPY_DEST(cmd_buf, img) \
 	do { \
 		VkImageSubresourceRange subresource_range = { \
@@ -258,61 +256,12 @@ vkpt_bloom_destroy_pipelines()
 			.layerCount     = 1 \
 		}; \
 		IMAGE_BARRIER(cmd_buf, \
-				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
 				.srcAccessMask    = 0, \
 				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
 				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, \
 				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
-		); \
-	} while(0)
-
-// C++20 VKPT: IMAGE_BARRIER
-#define BARRIER_TO_COPY_SRC(cmd_buf, img) \
-	do { \
-		VkImageSubresourceRange subresource_range = { \
-			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
-			.baseMipLevel   = 0, \
-			.levelCount     = 1, \
-			.baseArrayLayer = 0, \
-			.layerCount     = 1 \
-		}; \
-		IMAGE_BARRIER(cmd_buf, \
-				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
-				.srcAccessMask    = 0, \
-				.dstAccessMask    = 0, \
-				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, \
-				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
-		); \
-	} while(0)
-
-// C++20 VKPT: IMAGE_BARRIER
-#define BARRIER_FROM_COPY_SRC(cmd_buf, img) \
-	do { \
-		VkImageSubresourceRange subresource_range = { \
-			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
-			.baseMipLevel   = 0, \
-			.levelCount     = 1, \
-			.baseArrayLayer = 0, \
-			.layerCount     = 1 \
-		}; \
-		IMAGE_BARRIER(cmd_buf, \
-				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
-				.srcAccessMask    = 0, \
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
-				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, \
-				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
 		); \
 	} while(0)
 
@@ -323,102 +272,22 @@ vkpt_bloom_record_cmd_buffer(VkCommandBuffer cmd_buf)
 
 	compute_push_constants();
 
-	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT]);
-
-	// downscale TAA_OUTPUT -> BLOOM_DOWNSCALE_MIP_1 -> BLOOM_VBLUR
-	{
-		VkImageSubresourceLayers subresource = {
-			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-			.mipLevel = 0,
-			.baseArrayLayer = 0,
-			.layerCount = 1
-		};
-
-		VkOffset3D offset_UL = {
-			.x = 0,
-			.y = 0,
-			.z = 0
-		};
-
-		// C++20 VKPT: Added casts.
-		VkOffset3D offset_LR_mip_0 = {
-			.x = (int32_t)extent.width,
-			.y = (int32_t)extent.height,
-			.z = 1
-		};
-
-		// C++20 VKPT: Added casts.
-		VkOffset3D offset_LR_mip_1 = {
-			.x = (int32_t)(extent.width / 2),
-			.y = (int32_t)(extent.height / 2),
-			.z = 1
-		};
-
-		// C++20 VKPT: Added casts.
-		VkOffset3D offset_LR_mip_2 = {
-			.x = (int32_t)(extent.width / 4),
-			.y = (int32_t)(extent.height / 4),
-			.z = 1
-		};
-
-		// C++20 VKPT: Initialize array instead of duplicated (.srcOffsets[0], .srcOffsets[1]) which are invalid.
-		// C++20 VKPT: Initialize array instead of duplicated (.dstOffsets[0], .dstOffsets[1]) which are invalid.
-		VkImageBlit blit_mip_0_to_1 = {
-			.srcSubresource = subresource,
-			.srcOffsets {
-				offset_UL,
-				offset_LR_mip_0,
-			},
-			.dstSubresource = subresource,
-			.dstOffsets = {
-				offset_UL,
-				offset_LR_mip_1,
-			}
-		};
-
-		// C++20 VKPT: Initialize array instead of duplicated (.srcOffsets[0], .srcOffsets[1]) which are invalid.
-		// C++20 VKPT: Initialize array instead of duplicated (.dstOffsets[0], .dstOffsets[1]) which are invalid.
-		VkImageBlit blit_mip_1_to_2 = {
-			.srcSubresource = subresource,
-			.srcOffsets {
-				offset_UL,
-				offset_LR_mip_1,
-			},
-			.dstSubresource = subresource,
-			.dstOffsets = {
-				offset_UL,
-				offset_LR_mip_2,
-			}
-		};
-
-		BARRIER_TO_COPY_SRC(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT]);
-		BARRIER_TO_COPY_DEST(cmd_buf, qvk.images[VKPT_IMG_BLOOM_DOWNSCALE_MIP_1]);
-
-		vkCmdBlitImage(cmd_buf,
-			qvk.images[VKPT_IMG_TAA_OUTPUT], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			qvk.images[VKPT_IMG_BLOOM_DOWNSCALE_MIP_1], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			1, &blit_mip_0_to_1, VK_FILTER_LINEAR);
-		
-		BARRIER_FROM_COPY_SRC(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT]);
-		BARRIER_FROM_COPY_DEST(cmd_buf, qvk.images[VKPT_IMG_BLOOM_DOWNSCALE_MIP_1]);
-
-		BARRIER_TO_COPY_SRC(cmd_buf, qvk.images[VKPT_IMG_BLOOM_DOWNSCALE_MIP_1]);
-		BARRIER_TO_COPY_DEST(cmd_buf, qvk.images[VKPT_IMG_BLOOM_VBLUR]);
-
-		vkCmdBlitImage(cmd_buf,
-			qvk.images[VKPT_IMG_BLOOM_DOWNSCALE_MIP_1], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			qvk.images[VKPT_IMG_BLOOM_VBLUR], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			1, &blit_mip_1_to_2, VK_FILTER_LINEAR);
-
-		BARRIER_FROM_COPY_SRC(cmd_buf, qvk.images[VKPT_IMG_BLOOM_DOWNSCALE_MIP_1]);
-		BARRIER_FROM_COPY_DEST(cmd_buf, qvk.images[VKPT_IMG_BLOOM_VBLUR]);
-	}
-
 	VkDescriptorSet desc_sets[] = {
 		qvk.desc_set_ubo,
 		qvk_get_current_desc_set_textures(),
 		qvk.desc_set_vertex_buffer
 	};
+
+	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT]);
+
+	vkCmdBindPipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, pipelines[DOWNSCALE]);
+	vkCmdBindDescriptorSets(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE,
+		pipeline_layout_composite, 0, LENGTH(desc_sets), desc_sets, 0, 0);
+
+	vkCmdDispatch(cmd_buf,
+		(extent.width / 4 + 15) / 16,
+		(extent.height / 4 + 15) / 16,
+		1);
 
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_BLOOM_VBLUR]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_BLOOM_HBLUR]);
@@ -462,25 +331,18 @@ vkpt_bloom_record_cmd_buffer(VkCommandBuffer cmd_buf)
 			.z = 0
 		};
 
-		// C++20 VKPT: Cast
 		VkOffset3D offset_LR_input = {
-			.x = (int32_t)IMG_WIDTH,
-			.y = (int32_t)IMG_HEIGHT,
+			.x = IMG_WIDTH,
+			.y = IMG_HEIGHT,
 			.z = 1
 		};
 
-		// C++20 VKPT: One of those "can't do srcOffsets[0] = offset_UL, things again.
 		VkImageBlit blit_region = {
 			.srcSubresource = subresource,
-			.srcOffsets {
-				offset_UL,
-				0				// Member value is set in code below.
-			},
+			.srcOffsets[0] = offset_UL,
 			.dstSubresource = subresource,
-			.dstOffsets = {
-				offset_UL,
-				offset_LR_input,
-			}
+			.dstOffsets[0] = offset_UL,
+			.dstOffsets[1] = offset_LR_input,
 		};
 
 		BARRIER_TO_COPY_DEST(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT]);

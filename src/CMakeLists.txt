@@ -463,20 +463,24 @@ set(SRC_RT_SHADERS
 # Check for a shader compiler.
 include(../cmake/compileShaders.cmake)
 
-if (GLSLANG_COMPILER)
-	foreach(s ${SRC_RT_SHADERS})
-        get_filename_component(shader_name ${s} NAME)
-		compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.nv" DEFINES "-DNV_RAY_TRACING")
-		compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.khr" DEFINES "-DKHR_RAY_TRACING")
-	endforeach()
+foreach(s ${SRC_RT_SHADERS})
+	get_filename_component(shader_name ${s} NAME)
+	get_filename_component(shader_ext ${s} EXT)
+	compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.nv" DEFINES "-DNV_RAY_TRACING")
+	compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.khr" DEFINES "-DKHR_RAY_TRACING")
+	if (shader_ext STREQUAL ".rgen")
+		compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.rq" DEFINES "-DKHR_RAY_QUERY -DCOMPSTAGE" STAGE "comp")
+	endif()
+endforeach()
 
-	foreach(s ${SRC_SHADERS})
-		compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode)
-	endforeach()
+foreach(s ${SRC_SHADERS})
+	compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode)
+endforeach()
 
-	add_custom_target(shaders DEPENDS ${shader_bytecode})
-else()
-    message(WARNING "Could not find shader compiler: you're on your own to build the shaders")
+add_custom_target(shaders DEPENDS ${shader_bytecode})
+
+if(TARGET glslangValidator)
+	add_dependencies(shaders glslangValidator)
 endif()
 
 # Embed version number
