@@ -200,7 +200,7 @@ vkpt_asvgf_destroy_pipelines()
 //				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 //		); \
 //	} while(0)
-static inline void BARRIER_COMPUTE(VkCommandBuffer commandBuffer, VkImage& image) {
+static inline void BARRIER_COMPUTE(VkCommandBuffer &commandBuffer, VkImage& image) {
 	VkImageSubresourceRange subresource_range = {
 		.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 		.baseMipLevel   = 0,

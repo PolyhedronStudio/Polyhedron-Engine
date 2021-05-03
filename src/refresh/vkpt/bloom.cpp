@@ -225,7 +225,7 @@ vkpt_bloom_destroy_pipelines()
 //				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
 //		); \
 //	} while(0)
-static inline void BARRIER_COMPUTE(VkCommandBuffer commandBuffer, VkImage &image) {
+static inline void BARRIER_COMPUTE(VkCommandBuffer &commandBuffer, VkImage &image) {
 	VkImageSubresourceRange subresource_range = {
 		.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 		.baseMipLevel   = 0,
@@ -262,7 +262,7 @@ static inline void BARRIER_COMPUTE(VkCommandBuffer commandBuffer, VkImage &image
 //				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, \
 //		); \
 //	} while(0)
-static inline void BARRIER_TO_COPY_DEST(VkCommandBuffer commandBuffer, VkImage& image) {
+static inline void BARRIER_TO_COPY_DEST(VkCommandBuffer &commandBuffer, VkImage& image) {
 	VkImageSubresourceRange subresource_range = {
 		.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 		.baseMipLevel   = 0,
@@ -300,7 +300,7 @@ static inline void BARRIER_TO_COPY_DEST(VkCommandBuffer commandBuffer, VkImage& 
 //		); \
 //	} while(0)
 
-static inline void BARRIER_FROM_COPY_DEST(VkCommandBuffer commandBuffer, VkImage& image) {
+static inline void BARRIER_FROM_COPY_DEST(VkCommandBuffer &commandBuffer, VkImage& image) {
 	VkImageSubresourceRange subresource_range = {
 		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
 		.baseMipLevel = 0,
