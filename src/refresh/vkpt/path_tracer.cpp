@@ -373,11 +373,11 @@ get_scratch_buffer_size_nv(VkAccelerationStructureNV ac)
 {
 	VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
 		.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
+		.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_BUILD_SCRATCH_NV,
 		.accelerationStructure = ac,
-		.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_BUILD_SCRATCH_NV
 	};
 
-	VkMemoryRequirements2 mem_req = { 0 };
+	VkMemoryRequirements2 mem_req = { };
 	mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
 	qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
 
@@ -479,8 +479,8 @@ vkpt_pt_create_accel_bottom(
 			.vertexData = {.deviceAddress = buffer_vertex->address + offset_vertex },
 			.vertexStride = sizeof(float) * 3,
 			.maxVertex = num_vertices - 1,
-			.indexData = {.deviceAddress = buffer_index ? (buffer_index->address + offset_index) : 0 },
 			.indexType = buffer_index ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_NONE_KHR,
+			.indexData = {.deviceAddress = buffer_index ? (buffer_index->address + offset_index) : 0 },
 		};
 
 		const VkAccelerationStructureGeometryDataKHR geometry_data = { 
@@ -546,8 +546,8 @@ vkpt_pt_create_accel_bottom(
 			// Create acceleration structure
 			VkAccelerationStructureCreateInfoKHR createInfo = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
+				.size = sizeInfo.accelerationStructureSize,
 				.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
-				.size = sizeInfo.accelerationStructureSize
 			};
 
 			// Create the buffer for the acceleration structure
@@ -594,8 +594,8 @@ vkpt_pt_create_accel_bottom(
 					.vertexStride = sizeof(float) * 3,
 					.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT,
 					.indexData = buffer_index ? buffer_index->buffer : VK_NULL_HANDLE,
-					.indexType = buffer_index ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_NONE_NV,
 					.indexCount = num_indices,
+					.indexType = buffer_index ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_NONE_NV,
 				},
 				.aabbs = { .sType = VK_STRUCTURE_TYPE_GEOMETRY_AABB_NV }
 			}
@@ -630,11 +630,11 @@ vkpt_pt_create_accel_bottom(
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_NV,
 				.info = {
 					.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
+					.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
+					.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV,
 					.instanceCount = 0,
 					.geometryCount = 1,
 					.pGeometries = &allocGeometry,
-					.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
-					.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV
 				}
 			};
 
@@ -642,11 +642,11 @@ vkpt_pt_create_accel_bottom(
 
 			VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
+				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV,
 				.accelerationStructure = blas->accel_nv,
-				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV
 			};
 
-			VkMemoryRequirements2 mem_req = { 0 };
+			VkMemoryRequirements2 mem_req = { };
 			mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
 			qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
 
@@ -672,9 +672,9 @@ vkpt_pt_create_accel_bottom(
 		VkAccelerationStructureInfoNV as_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
 			.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
+			.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV,
 			.geometryCount = 1,
 			.pGeometries = &geometry,
-			.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV
 		};
 
 		qvkCmdBuildAccelerationStructureNV(cmd_buf, &as_info,
@@ -783,8 +783,8 @@ vkpt_pt_create_accel_bottom_aabb(
 			// Create acceleration structure
 			VkAccelerationStructureCreateInfoKHR createInfo = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
+				.size = sizeInfo.accelerationStructureSize,
 				.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
-				.size = sizeInfo.accelerationStructureSize
 			};
 
 			// Create the buffer for the acceleration structure
@@ -830,9 +830,9 @@ vkpt_pt_create_accel_bottom_aabb(
 				.aabbs = {
 					.sType = VK_STRUCTURE_TYPE_GEOMETRY_AABB_NV,
 					.aabbData = buffer_aabb->buffer,
-					.offset = offset_aabb,
 					.numAABBs = num_aabbs,
-					.stride = sizeof(VkAabbPositionsKHR)
+					.stride = sizeof(VkAabbPositionsKHR),
+					.offset = offset_aabb,
 				}
 			}
 		};
@@ -865,11 +865,11 @@ vkpt_pt_create_accel_bottom_aabb(
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_NV,
 				.info = {
 					.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
+					.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
+					.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV,
 					.instanceCount = 0,
 					.geometryCount = 1,
 					.pGeometries = &allocGeometry,
-					.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
-					.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV
 				}
 			};
 
@@ -877,11 +877,11 @@ vkpt_pt_create_accel_bottom_aabb(
 
 			VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
+				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV,
 				.accelerationStructure = blas->accel_nv,
-				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV
 			};
 
-			VkMemoryRequirements2 mem_req = { 0 };
+			VkMemoryRequirements2 mem_req = { };
 			mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
 			qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
 
@@ -907,9 +907,9 @@ vkpt_pt_create_accel_bottom_aabb(
 		VkAccelerationStructureInfoNV as_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
 			.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
+			.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV,
 			.geometryCount = 1,
 			.pGeometries = &geometry,
-			.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV
 		};
 
 		qvkCmdBuildAccelerationStructureNV(cmd_buf, &as_info,
@@ -1147,16 +1147,16 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 		// Find size to build on the device
 		VkAccelerationStructureBuildGeometryInfoKHR buildInfo = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR,
+			.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
 			.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR,
+			.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR,
+			.srcAccelerationStructure = VK_NULL_HANDLE,
 			.geometryCount = 1,
 			.pGeometries = &topASGeometry,
-			.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR,
-			.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
-			.srcAccelerationStructure = VK_NULL_HANDLE
 		};
 
 		VkAccelerationStructureBuildSizesInfoKHR sizeInfo = { .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
-		qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &num_instances, &sizeInfo);
+		qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, (const uint32_t*)&num_instances, &sizeInfo);
 		assert(sizeInfo.accelerationStructureSize < SIZE_SCRATCH_BUFFER);
 
 		if (accel_top_match[idx].instanceCount < num_instances) {
@@ -1169,9 +1169,9 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 			// Create acceleration structure
 			VkAccelerationStructureCreateInfoKHR createInfo = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
-				.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
+				.buffer = mem_accel_top[idx].buffer,
 				.size = sizeInfo.accelerationStructureSize,
-				.buffer = mem_accel_top[idx].buffer
+				.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
 			};
 
 			// Create the acceleration structure
@@ -1200,12 +1200,12 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 		VkAccelerationStructureCreateInfoNV accel_create_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_NV,
 			.info = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
-			.instanceCount = num_instances,
-			.geometryCount = 0,
-			.pGeometries = NULL,
-			.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_NV
-		}
+				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
+				.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_NV,
+				.instanceCount = num_instances,
+				.geometryCount = 0,
+				.pGeometries = NULL,
+			}
 		};
 
 		if (accel_top_match[idx].instanceCount < accel_create_info.info.instanceCount) 
@@ -1217,10 +1217,10 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 			/* XXX: do allocation only once with safety margin */
 			VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
+				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV,
 				.accelerationStructure = accel_top_nv[idx],
-				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV
 			};
-			VkMemoryRequirements2 mem_req = { 0 };
+			VkMemoryRequirements2 mem_req = { };
 			mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
 			qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
 
@@ -1242,9 +1242,9 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 		VkAccelerationStructureInfoNV as_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
 			.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_NV,
+			.instanceCount = num_instances,
 			.geometryCount = 0,
 			.pGeometries = NULL,
-			.instanceCount = num_instances,
 		};
 
 		// Request the amount of scratch memory, just to make the validation layer happy.
@@ -1252,8 +1252,8 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 
 		VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
+			.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_BUILD_SCRATCH_NV,
 			.accelerationStructure = accel_top_nv[idx],
-			.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_BUILD_SCRATCH_NV
 		};
 
 		VkMemoryRequirements2 mem_req = { .sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2 };
@@ -1282,24 +1282,41 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 	return VK_SUCCESS;
 }
 
-#define BARRIER_COMPUTE(cmd_buf, img) \
-	do { \
-		VkImageSubresourceRange subresource_range = { \
-			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
-			.baseMipLevel   = 0, \
-			.levelCount     = 1, \
-			.baseArrayLayer = 0, \
-			.layerCount     = 1 \
-		}; \
-		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
-				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
-				.dstAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
-				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-		); \
-	} while(0)
+//#define BARRIER_COMPUTE(cmd_buf, img) \
+//	do { \
+//		VkImageSubresourceRange subresource_range = { \
+//			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
+//			.baseMipLevel   = 0, \
+//			.levelCount     = 1, \
+//			.baseArrayLayer = 0, \
+//			.layerCount     = 1 \
+//		}; \
+//		IMAGE_BARRIER(cmd_buf, \
+//				.image            = img, \
+//				.subresourceRange = subresource_range, \
+//				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
+//				.dstAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
+//				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+//				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+//		); \
+//	} while(0)
+static inline void BARRIER_COMPUTE(VkCommandBuffer& commandBuffer, VkImage& image) {
+	VkImageSubresourceRange subresource_range = {
+		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+		.baseMipLevel = 0,
+		.levelCount = 1,
+		.baseArrayLayer = 0,
+		.layerCount = 1
+	};
+	IMAGE_BARRIER(commandBuffer, {
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.image = image,
+		.subresourceRange = subresource_range,
+	});
+}
 
 static void setup_rt_pipeline(VkCommandBuffer cmd_buf, VkPipelineBindPoint bind_point, pipeline_index_t index)
 {
@@ -1384,13 +1401,13 @@ vkpt_pt_trace_primary_rays(VkCommandBuffer cmd_buf)
 {
 	int frame_idx = qvk.frame_counter & 1;
 	
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
 			.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 			.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 			.buffer = qvk.buf_readback.buffer,
 			.offset = 0,
 			.size = VK_WHOLE_SIZE,
-	);
+	});
 
 	BEGIN_PERF_MARKER(cmd_buf, PROFILER_PRIMARY_RAYS);
 
@@ -1491,13 +1508,13 @@ vkpt_pt_trace_lighting(VkCommandBuffer cmd_buf, float num_bounce_rays)
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_COLOR_HF]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_COLOR_SPEC]);
 
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.buffer = qvk.buf_readback.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-	);
+	});
 
 	BEGIN_PERF_MARKER(cmd_buf, PROFILER_INDIRECT_LIGHTING);
 
@@ -1585,7 +1602,7 @@ vkpt_pt_create_pipelines()
 	};
 
 	uint32_t num_shader_groups = SBT_ENTRIES_PER_PIPELINE * PIPELINE_COUNT;
-	char* shader_handles = alloca(num_shader_groups * shaderGroupHandleSize);
+	char* shader_handles = (char*)alloca(num_shader_groups * shaderGroupHandleSize);
 	memset(shader_handles, 0, num_shader_groups * shaderGroupHandleSize);
 
 	VkPipelineShaderStageCreateInfo shader_stages[] = {

@@ -364,7 +364,7 @@ static void write_beam_geometry(const r_entity_t* entities, int entity_num)
 
 	for (int i = 0; i < entity_num; i++)
 	{
-		if ((entities[i].flags & RenderEffects::beam) == 0)
+		if ((entities[i].flags & RenderEffects::Beam) == 0)
 			continue;
 
 		const r_entity_t* beam = entities + i;
@@ -452,8 +452,8 @@ static void write_beam_geometry(const r_entity_t* entities, int entity_num)
 
 static int compare_beams(const void* _a, const void* _b)
 {
-	const r_entity_t* a = *(void**)_a;
-	const r_entity_t* b = *(void**)_b;
+	const r_entity_t* a = (const r_entity_t*)*(void**)_a;
+	const r_entity_t* b = (const r_entity_t*)*(void**)_b;
 
 	if (a->origin[0] < b->origin[0]) return -1;
 	if (a->origin[0] > b->origin[0]) return 1;
@@ -554,7 +554,7 @@ qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, in
 	return true;
 }
 
-void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, entity_t* entities, int num_entites, float adapted_luminance)
+void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, r_entity_t* entities, int num_entites, float adapted_luminance)
 {
 	const float hdr_factor = cvar_pt_beam_lights->value * adapted_luminance * 20.f;
 
@@ -866,7 +866,7 @@ static qboolean allocate_and_bind_memory_to_buffers()
 
 	_VK(vkAllocateMemory(qvk.device, &host_memory_allocate_info, NULL, &transparency.host_buffer_memory));
 
-	VkBindBufferMemoryInfo bindings[1] = { 0 };
+	VkBindBufferMemoryInfo bindings[1] = { };
 
 	bindings[0].sType = VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_INFO;
 	bindings[0].buffer = transparency.host_buffer;
