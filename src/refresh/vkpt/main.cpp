@@ -98,7 +98,7 @@ static qboolean temporal_frame_valid = false;
 
 static int world_anim_frame = 0;
 
-static vec3_t avg_envmap_color = { 0.f };
+static vec3_t avg_envmap_color = vec3_zero();
 
 static image_t *water_normal_texture = NULL;
 
@@ -107,7 +107,7 @@ int num_accumulated_frames = 0;
 static qboolean frame_ready = false;
 
 static float sky_rotation = 0.f;
-static vec3_t sky_axis = { 0.f };
+static vec3_t sky_axis = vec3_zero();
 
 #define NUM_TAA_SAMPLES 128
 static vec2_t taa_samples[NUM_TAA_SAMPLES];
@@ -461,7 +461,7 @@ get_vk_extension_list(
 		VkExtensionProperties **ext)
 {
 	_VK(vkEnumerateInstanceExtensionProperties(layer, num_extensions, NULL));
-	*ext = malloc(sizeof(**ext) * *num_extensions);
+	*ext = (VkExtensionProperties*)malloc(sizeof(**ext) * *num_extensions);
 	_VK(vkEnumerateInstanceExtensionProperties(layer, num_extensions, *ext));
 }
 
@@ -471,7 +471,7 @@ get_vk_layer_list(
 		VkLayerProperties **ext)
 {
 	_VK(vkEnumerateInstanceLayerProperties(num_layers, NULL));
-	*ext = malloc(sizeof(**ext) * *num_layers);
+	*ext = (VkLayerProperties*)malloc(sizeof(**ext) * *num_layers);
 	_VK(vkEnumerateInstanceLayerProperties(num_layers, *ext));
 }
 
@@ -552,7 +552,7 @@ create_swapchain()
 
 	uint32_t num_formats = 0;
 	vkGetPhysicalDeviceSurfaceFormatsKHR(qvk.physical_device, qvk.surface, &num_formats, NULL);
-	VkSurfaceFormatKHR *avail_surface_formats = alloca(sizeof(VkSurfaceFormatKHR) * num_formats);
+	VkSurfaceFormatKHR *avail_surface_formats = (VkSurfaceFormatKHR*)alloca(sizeof(VkSurfaceFormatKHR) * num_formats);
 	vkGetPhysicalDeviceSurfaceFormatsKHR(qvk.physical_device, qvk.surface, &num_formats, avail_surface_formats);
 	/* Com_Printf("num surface formats: %d\n", num_formats);
 
@@ -578,7 +578,7 @@ out:;
 
 	uint32_t num_present_modes = 0;
 	vkGetPhysicalDeviceSurfacePresentModesKHR(qvk.physical_device, qvk.surface, &num_present_modes, NULL);
-	VkPresentModeKHR *avail_present_modes = alloca(sizeof(VkPresentModeKHR) * num_present_modes);
+	VkPresentModeKHR *avail_present_modes = (VkPresentModeKHR*)alloca(sizeof(VkPresentModeKHR) * num_present_modes);
 	vkGetPhysicalDeviceSurfacePresentModesKHR(qvk.physical_device, qvk.surface, &num_present_modes, avail_present_modes);
 	qboolean immediate_mode_available = false;
 
@@ -637,7 +637,7 @@ out:;
 
 	if(vkCreateSwapchainKHR(qvk.device, &swpch_create_info, NULL, &qvk.swap_chain) != VK_SUCCESS) {
 		Com_EPrintf("error creating swapchain\n");
-		return 1;
+		return (VkResult)1;
 	}
 
 	vkGetSwapchainImagesKHR(qvk.device, qvk.swap_chain, &qvk.num_swap_chain_images, NULL);
@@ -679,7 +679,11 @@ out:;
 
 	for (int image_index = 0; image_index < qvk.num_swap_chain_images; image_index++)
 	{
-		IMAGE_BARRIER(cmd_buf,
+		IMAGE_BARRIER(cmd_buf, {
+			.srcAccessMask = 0,
+			.dstAccessMask = 0,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 			.image = qvk.swap_chain_images[image_index],
 			.subresourceRange = {
 				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -688,11 +692,7 @@ out:;
 				.baseArrayLayer = 0,
 				.layerCount = 1
 			},
-			.srcAccessMask = 0,
-			.dstAccessMask = 0,
-			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-			.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		);
+		});
 	}
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
@@ -706,8 +706,8 @@ create_command_pool_and_fences()
 {
 	VkCommandPoolCreateInfo cmd_pool_create_info = {
 		.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+		.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
 		.queueFamilyIndex = qvk.queue_idx_graphics,
-		.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
 	};
 
 	/* command pool and buffers */

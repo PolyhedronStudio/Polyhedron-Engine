@@ -78,9 +78,9 @@ static void create_buffer_views();
 static void fill_index_buffer();
 
 // update
-static void write_particle_geometry(const float* view_matrix, const particle_t* particles, int particle_num);
-static void write_beam_geometry(const entity_t* entities, int entity_num);
-static void write_sprite_geometry(const float* view_matrix, const entity_t* entities, int entity_num);
+static void write_particle_geometry(const float* view_matrix, const rparticle_t* particles, int particle_num);
+static void write_beam_geometry(const r_entity_t* entities, int entity_num);
+static void write_sprite_geometry(const float* view_matrix, const r_entity_t* entities, int entity_num);
 static void upload_geometry(VkCommandBuffer command_buffer);
 
 cvar_t* cvar_pt_particle_size = NULL;
