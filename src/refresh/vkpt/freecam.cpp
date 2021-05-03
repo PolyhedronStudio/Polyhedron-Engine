@@ -34,7 +34,7 @@ player model is switched to third person.
 static vec3_t freecam_vieworg = vec3_zero();
 static vec3_t freecam_viewangles = vec3_zero();
 static float freecam_zoom = 1.f;
-static qboolean freecam_keystate[6] = { 0 };
+static qboolean freecam_keystate[6] = { 0, 0, 0, 0, 0, 0};
 static qboolean freecam_active = false;
 static int freecam_player_model = 0;
 

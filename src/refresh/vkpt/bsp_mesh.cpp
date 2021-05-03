@@ -114,7 +114,7 @@ create_poly(
 		sc[1] = 1.0f / image_diffuse->height;
 	}
 
-	float pos_center[3] = { 0 };
+	float pos_center[3] = { 0.f, 0.f, 0.f };
 	float tc_center[2];
 
 	for (int i = 0; i < surf->numsurfedges; i++) {

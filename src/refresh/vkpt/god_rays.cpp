@@ -267,7 +267,7 @@ static void create_image_views()
 
 static void create_pipeline_layout()
 {
-	VkDescriptorSetLayoutBinding bindings[1] = { 0 };
+	VkDescriptorSetLayoutBinding bindings[1] = { };
 	bindings[0].binding = 0;
 	bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	bindings[0].descriptorCount = 1;

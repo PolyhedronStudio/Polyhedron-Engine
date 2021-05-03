@@ -53,7 +53,7 @@ int create_sub_allocator(DeviceMemoryAllocator* allocator, uint32_t memory_type,
 
 DeviceMemoryAllocator* create_device_memory_allocator(VkDevice device)
 {
-	char* memory = Z_Mallocz(sizeof(DeviceMemoryAllocator));
+	char* memory = (char*)Z_Mallocz(sizeof(DeviceMemoryAllocator));
 
 	DeviceMemoryAllocator* allocator = (DeviceMemoryAllocator*)memory;
 	allocator->device = device;
@@ -168,7 +168,7 @@ int create_sub_allocator(DeviceMemoryAllocator* allocator, uint32_t memory_type,
 	VkMemoryAllocateFlagsInfo mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
 		.flags = VK_MEMORY_ALLOCATE_DEVICE_MASK_BIT,
-		.deviceMask = (1 << qvk.device_count) - 1
+		.deviceMask = (uint32_t)(1 << qvk.device_count) - 1
 	};
 
 	if (qvk.device_count > 1) {

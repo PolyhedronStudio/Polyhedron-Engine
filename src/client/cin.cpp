@@ -57,7 +57,7 @@ typedef struct
     int     frame_index;
 } cinematics_t;
 
-static cinematics_t cin = { 0 };
+static cinematics_t cin = { };
 
 /*
 ==================

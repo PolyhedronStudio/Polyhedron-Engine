@@ -2662,7 +2662,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	vec3_t sky_matrix[3];
 	prepare_sky_matrix(fd->time, sky_matrix);
 
-	sun_light_t sun_light = { 0 };
+	sun_light_t sun_light = { };
 	if (render_world)
 	{
 		vkpt_evaluate_sun_light(&sun_light, sky_matrix, fd->time);
@@ -2678,7 +2678,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	qboolean menu_mode = cl_paused->integer == 1 && uis.menuDepth > 0 && render_world;
 
 	num_model_lights = 0;
-	EntityUploadInfo upload_info = { 0 };
+	EntityUploadInfo upload_info = { };
 	prepare_entities(&upload_info);
 	if (bsp_world_model)
 	{
@@ -3640,7 +3640,7 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t axis)
 	sky_rotation = rotate;
 	VectorNormalize2(axis, sky_axis);
 
-	int avg_color[3] = { 0 };
+	int avg_color[3] = { 0.f, 0.f, 0.f };
 	int w_prev, h_prev;
 	for (i = 0; i < 6; i++) {
 		Q_concat(pathname, sizeof(pathname), "env/", name, suf[i], ".tga", NULL);

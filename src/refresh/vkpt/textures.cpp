@@ -175,13 +175,14 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_R8G8B8A8_UNORM,
 		.extent = {
-			.width  = w,
-			.height = h,
+			.width  = (uint32_t)w,
+			.height = (uint32_t)h,
 			.depth  = 1,
 		},
-		.imageType             = VK_IMAGE_TYPE_2D,
-		.format                = VK_FORMAT_R8G8B8A8_UNORM,
 		.mipLevels             = 1,
 		.arrayLayers           = num_images,
 		.samples               = VK_SAMPLE_COUNT_1_BIT,
@@ -189,9 +190,8 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 		.usage                 = VK_IMAGE_USAGE_STORAGE_BIT
 		                       | VK_IMAGE_USAGE_TRANSFER_DST_BIT
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT,
-		.flags                 = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics,
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
@@ -236,51 +236,55 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
-			.baseArrayLayer = layer,
+			.baseArrayLayer = (uint32_t)layer,
 			.layerCount     = 1,
 		};
 
-		IMAGE_BARRIER(cmd_buf,
-				.image            = img_envmap,
+		IMAGE_BARRIER(cmd_buf, {
+				.srcAccessMask = 0,
+				.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+				.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+				.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				.image = img_envmap,
 				.subresourceRange = subresource_range,
-				.srcAccessMask    = 0,
-				.dstAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
-				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-		);
+		});
 
 		VkBufferImageCopy cpy_info = {
 			.bufferOffset = img_size * layer,
 			.imageSubresource = { 
 				.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 				.mipLevel       = 0,
-				.baseArrayLayer = layer,
+				.baseArrayLayer = (uint32_t)layer,
 				.layerCount     = 1,
 			},
 			.imageOffset    = { 0, 0, 0 },
-			.imageExtent    = { w, h, 1 }
+			.imageExtent    = { 
+				(uint32_t)w, 
+				(uint32_t)h,
+				1 
+			}
 		};
 		vkCmdCopyBufferToImage(cmd_buf, buf_img_upload.buffer, img_envmap,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &cpy_info);
 
 
-		IMAGE_BARRIER(cmd_buf,
-				.image            = img_envmap,
+		IMAGE_BARRIER(cmd_buf, {
+				.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				.image = img_envmap,
 				.subresourceRange = subresource_range,
-				.srcAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				.newLayout        = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		);
+		});
 	}
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 
 	{
 	VkDescriptorImageInfo desc_img_info = {
+		.sampler = qvk.tex_sampler,
+		.imageView = imv_envmap,
 		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		.imageView   = imv_envmap,
-		.sampler     = qvk.tex_sampler,
 	};
 
 	VkWriteDescriptorSet s = {
@@ -288,8 +292,8 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 		.dstSet          = qvk.desc_set_textures_even,
 		.dstBinding      = BINDING_OFFSET_ENVMAP,
 		.dstArrayElement = 0,
-		.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.descriptorCount = 1,
+		.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.pImageInfo      = &desc_img_info,
 	};
 
@@ -328,7 +332,7 @@ load_blue_noise()
 
 		byte* filedata = 0;
 		uint16_t *data = 0;
-		ssize_t filelen = FS_LoadFile(buf, &filedata);
+		ssize_t filelen = FS_LoadFile(buf, (void**)&filedata);
 
 		if (filedata) {
 			data = stbi_load_16_from_memory(filedata, filelen, &w, &h, &n, 4);
@@ -355,13 +359,13 @@ load_blue_noise()
 
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_R16_UNORM,
 		.extent = {
 			.width  = BLUE_NOISE_RES,
 			.height = BLUE_NOISE_RES,
 			.depth  = 1,
 		},
-		.imageType             = VK_IMAGE_TYPE_2D,
-		.format                = VK_FORMAT_R16_UNORM,
 		.mipLevels             = 1,
 		.arrayLayers           = NUM_BLUE_NOISE_TEX,
 		.samples               = VK_SAMPLE_COUNT_1_BIT,
@@ -387,21 +391,21 @@ load_blue_noise()
 
 	VkImageViewCreateInfo img_view_info = {
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = img_blue_noise,
 		.viewType   = VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 		.format     = VK_FORMAT_R16_UNORM,
-		.image      = img_blue_noise,
-		.subresourceRange = {
-			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-			.baseMipLevel   = 0,
-			.levelCount     = 1,
-			.baseArrayLayer = 0,
-			.layerCount     = NUM_BLUE_NOISE_TEX,
-		},
 		.components     = {
 			VK_COMPONENT_SWIZZLE_R,
 			VK_COMPONENT_SWIZZLE_R,
 			VK_COMPONENT_SWIZZLE_R,
 			VK_COMPONENT_SWIZZLE_R,
+		},
+		.subresourceRange = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = NUM_BLUE_NOISE_TEX,
 		},
 	};
 	_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_blue_noise));
@@ -419,14 +423,14 @@ load_blue_noise()
 			.layerCount     = 1,
 		};
 
-		IMAGE_BARRIER(cmd_buf,
-				.image            = img_blue_noise,
+		IMAGE_BARRIER(cmd_buf, {
+				.srcAccessMask = 0,
+				.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+				.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+				.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				.image = img_blue_noise,
 				.subresourceRange = subresource_range,
-				.srcAccessMask    = 0,
-				.dstAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
-				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-		);
+		});
 
 		VkBufferImageCopy cpy_info = {
 			.bufferOffset = total_size * layer,
@@ -443,22 +447,22 @@ load_blue_noise()
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &cpy_info);
 
 
-		IMAGE_BARRIER(cmd_buf,
-				.image            = img_blue_noise,
-				.subresourceRange = subresource_range,
-				.srcAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				.newLayout        = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		);
+		IMAGE_BARRIER(cmd_buf, {
+			.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			.image = img_blue_noise,
+			.subresourceRange = subresource_range,
+		});
 	}
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 	
 	VkDescriptorImageInfo desc_img_info = {
+		.sampler = qvk.tex_sampler,
+		.imageView = imv_blue_noise,
 		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		.imageView   = imv_blue_noise,
-		.sampler     = qvk.tex_sampler,
 	};
 
 	VkWriteDescriptorSet s = {
@@ -466,8 +470,8 @@ load_blue_noise()
 		.dstSet          = qvk.desc_set_textures_even,
 		.dstBinding      = BINDING_OFFSET_BLUE_NOISE,
 		.dstArrayElement = 0,
-		.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.descriptorCount = 1,
+		.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.pImageInfo      = &desc_img_info,
 	};
 
@@ -780,32 +784,29 @@ void create_invalid_texture()
 
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = tex_invalid_texture_image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-	);
+		.image = tex_invalid_texture_image,
+		.subresourceRange = subresource_range,
+	});
 
 	const VkClearColorValue color = {
-		.float32[0] = 1.0f,
-		.float32[1] = 0.0f,
-		.float32[2] = 1.0f,
-		.float32[3] = 1.0f
+		.float32 = { 1.0f, 0.0f, 1.0f, 1.0f }
 	};
 	const VkImageSubresourceRange range = subresource_range;
 	vkCmdClearColorImage(cmd_buf, tex_invalid_texture_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &color, 1, &range);
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = tex_invalid_texture_image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-	);
+		.image = tex_invalid_texture_image,
+		.subresourceRange = subresource_range,
+	});
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 
@@ -833,6 +834,7 @@ vkpt_textures_initialize()
 		.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
 		.magFilter               = VK_FILTER_LINEAR,
 		.minFilter               = VK_FILTER_LINEAR,
+		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		.addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
@@ -840,7 +842,6 @@ vkpt_textures_initialize()
 		.maxAnisotropy           = 16,
 		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
 		.unnormalizedCoordinates = VK_FALSE,
-		.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		.minLod                  = 0.0f,
 		.maxLod                  = 128.0f,
 	};
@@ -850,6 +851,7 @@ vkpt_textures_initialize()
 		.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
 		.magFilter               = VK_FILTER_NEAREST,
 		.minFilter               = VK_FILTER_NEAREST,
+		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST,
 		.addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
@@ -857,7 +859,6 @@ vkpt_textures_initialize()
 		.maxAnisotropy           = 16,
 		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
 		.unnormalizedCoordinates = VK_FALSE,
-		.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_NEAREST,
 	};
 	_VK(vkCreateSampler(qvk.device, &sampler_nearest_info, NULL, &qvk.tex_sampler_nearest));
 	ATTACH_LABEL_VARIABLE(qvk.tex_sampler_nearest, SAMPLER);
@@ -866,6 +867,7 @@ vkpt_textures_initialize()
 		.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
 		.magFilter               = VK_FILTER_LINEAR,
 		.minFilter               = VK_FILTER_LINEAR,
+		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		.addressModeU            = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 		.addressModeV            = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
@@ -873,23 +875,22 @@ vkpt_textures_initialize()
 		.maxAnisotropy           = 16,
 		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
 		.unnormalizedCoordinates = VK_FALSE,
-		.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 	};
 	_VK(vkCreateSampler(qvk.device, &sampler_linear_clamp_info, NULL, &qvk.tex_sampler_linear_clamp));
 	ATTACH_LABEL_VARIABLE(qvk.tex_sampler_linear_clamp, SAMPLER);
 
 	VkDescriptorSetLayoutBinding layout_bindings[] = {
 		{
+			.binding = 0,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = MAX_RIMAGES,
-			.binding         = 0,
 			.stageFlags      = VK_SHADER_STAGE_ALL,
 		},
 #define IMG_DO(_name, _binding, ...) \
 		{ \
+			.binding         = BINDING_OFFSET_IMAGES + _binding, \
 			.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, \
 			.descriptorCount = 1, \
-			.binding         = BINDING_OFFSET_IMAGES + _binding, \
 			.stageFlags      = VK_SHADER_STAGE_ALL, \
 		},
 	LIST_IMAGES
@@ -906,75 +907,75 @@ vkpt_textures_initialize()
 	LIST_IMAGES_A_B
 #undef IMG_DO
 		{
+			.binding = BINDING_OFFSET_BLUE_NOISE,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
-			.binding         = BINDING_OFFSET_BLUE_NOISE,
 			.stageFlags      = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.binding = BINDING_OFFSET_ENVMAP,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
-			.binding         = BINDING_OFFSET_ENVMAP,
 			.stageFlags      = VK_SHADER_STAGE_ALL,
 		},
         {
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .binding = BINDING_OFFSET_PHYSICAL_SKY,
-            .stageFlags = VK_SHADER_STAGE_ALL,
-        },
-        {
-            .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .descriptorCount = 1,
-            .binding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
-            .stageFlags = VK_SHADER_STAGE_ALL,
-        },
-		{
+			.binding = BINDING_OFFSET_PHYSICAL_SKY,
 			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_ALL,
+        },
+        {
+			.binding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_ALL,
+        },
+		{
 			.binding = BINDING_OFFSET_SKY_TRANSMITTANCE,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_SKY_SCATTERING,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_SKY_IRRADIANCE,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_SKY_CLOUDS,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_TERRAIN_ALBEDO,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_TERRAIN_NORMALS,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_TERRAIN_DEPTH,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.binding = BINDING_OFFSET_TERRAIN_SHADOWMAP,
 			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
-			.binding = BINDING_OFFSET_TERRAIN_SHADOWMAP,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		}
 	};
@@ -994,9 +995,9 @@ vkpt_textures_initialize()
 
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		.maxSets = 2,
 		.poolSizeCount = 1,
 		.pPoolSizes    = &pool_size,
-		.maxSets       = 2,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_textures));
@@ -1094,13 +1095,13 @@ vkpt_textures_end_registration()
 
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_UNDEFINED,
 		.extent = {
 			.width  = 1337,
 			.height = 1337,
 			.depth  = 1
 		},
-		.imageType             = VK_IMAGE_TYPE_2D,
-		.format                = VK_FORMAT_UNDEFINED,
 		.mipLevels             = 1,
 		.arrayLayers           = 1,
 		.samples               = VK_SAMPLE_COUNT_1_BIT,
@@ -1117,18 +1118,18 @@ vkpt_textures_end_registration()
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 		.viewType   = VK_IMAGE_VIEW_TYPE_2D,
 		.format     = VK_FORMAT_UNDEFINED,
+		.components = {
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_G,
+			VK_COMPONENT_SWIZZLE_B,
+			VK_COMPONENT_SWIZZLE_A
+		},
 		.subresourceRange = {
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
 			.baseArrayLayer = 0,
 			.layerCount     = 1
-		},
-		.components     = {
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_G,
-			VK_COMPONENT_SWIZZLE_B,
-			VK_COMPONENT_SWIZZLE_A
 		},
 	};
 
@@ -1193,7 +1194,7 @@ vkpt_textures_end_registration()
 	
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
-	char *staging_buffer = buffer_map(&buf_img_upload);
+	char *staging_buffer = (char*)buffer_map(&buf_img_upload);
 
 	size_t offset = 0;
 	for(int i = 0; i < MAX_RIMAGES; i++) {
@@ -1222,14 +1223,14 @@ vkpt_textures_end_registration()
 			.layerCount     = 1
 		};
 
-		IMAGE_BARRIER(cmd_buf,
-				.image            = tex_images[i],
-				.subresourceRange = subresource_range,
-				.srcAccessMask    = 0,
-				.dstAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
-				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-		);
+		IMAGE_BARRIER(cmd_buf, {
+			.srcAccessMask = 0,
+			.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			.image = tex_images[i],
+			.subresourceRange = subresource_range,
+		});
 
 		{
 			memcpy(staging_buffer + offset, q_img->pix_data, wd * ht * 4);
@@ -1256,14 +1257,14 @@ vkpt_textures_end_registration()
 		{
 			subresource_range.baseMipLevel = mip - 1;
 
-			IMAGE_BARRIER(cmd_buf,
-				.image = tex_images[i],
-				.subresourceRange = subresource_range,
+			IMAGE_BARRIER(cmd_buf, {
 				.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 				.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-				);
+				.image = tex_images[i],
+				.subresourceRange = subresource_range,
+			});
 
 			int nwd = (wd > 1) ? (wd >> 1) : wd;
 			int nht = (ht > 1) ? (ht >> 1) : ht;
@@ -1299,14 +1300,14 @@ vkpt_textures_end_registration()
 
 			subresource_range.baseMipLevel = mip - 1;
 
-			IMAGE_BARRIER(cmd_buf,
-				.image = tex_images[i],
-				.subresourceRange = subresource_range,
+			IMAGE_BARRIER(cmd_buf, {
 				.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				);
+				.image = tex_images[i],
+				.subresourceRange = subresource_range,
+			});
 
 			wd = nwd;
 			ht = nht;
@@ -1314,14 +1315,14 @@ vkpt_textures_end_registration()
 
 		subresource_range.baseMipLevel = num_mip_levels - 1;
 
-		IMAGE_BARRIER(cmd_buf,
-			.image = tex_images[i],
-			.subresourceRange = subresource_range,
+		IMAGE_BARRIER(cmd_buf, {
 			.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 			.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			);
+			.image = tex_images[i],
+			.subresourceRange = subresource_range,
+		});
 
 		img_view_info.image = tex_images[i];
 		img_view_info.subresourceRange.levelCount = num_mip_levels;
@@ -1376,9 +1377,9 @@ void vkpt_textures_update_descriptor_set()
 			sampler = qvk.tex_sampler_linear_clamp;
 
 		VkDescriptorImageInfo img_info = {
+			.sampler = sampler,
+			.imageView = image_view,
 			.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			.imageView   = image_view,
-			.sampler     = sampler,
 		};
 
 		if (i >= VKPT_IMG_BLOOM_HBLUR &&
@@ -1391,8 +1392,8 @@ void vkpt_textures_update_descriptor_set()
 			.dstSet          = qvk_get_current_desc_set_textures(),
 			.dstBinding      = GLOBAL_TEXTURES_TEX_ARR_BINDING_IDX,
 			.dstArrayElement = i,
-			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
+			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.pImageInfo      = &img_info,
 		};
 
@@ -1407,9 +1408,11 @@ create_readback_image(VkImage *image, VkDeviceMemory *memory, VkDeviceSize *memo
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 		.imageType = VK_IMAGE_TYPE_2D,
 		.format = format,
-		.extent.width = width,
-		.extent.height = height,
-		.extent.depth = 1,
+		.extent = {
+			.width = width,
+			.height = height,
+			.depth = 1,
+		},
 		.mipLevels = 1,
 		.arrayLayers = 1,
 		.samples = VK_SAMPLE_COUNT_1_BIT,
@@ -1455,32 +1458,32 @@ vkpt_create_images()
 {
 	VkImageCreateInfo images_create_info[NUM_VKPT_IMAGES] = {
 #define IMG_DO(_name, _binding, _vkformat, _glslformat, _w, _h) \
-	[VKPT_IMG_##_name] = { \
+	images_create_info[VKPT_IMG_##_name] = { \
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, \
 		.imageType = VK_IMAGE_TYPE_2D, \
 		.format = VK_FORMAT_##_vkformat, \
 		.extent = { \
-			.width  = _w, \
-			.height = _h, \
+			.width  = (uint32_t)_w, \
+			.height = (uint32_t)_h, \
 			.depth  = 1 \
 		}, \
 		.mipLevels             = 1, \
 		.arrayLayers           = 1, \
 		.samples               = VK_SAMPLE_COUNT_1_BIT, \
 		.tiling                = VK_IMAGE_TILING_OPTIMAL, \
-		.usage                 = VK_IMAGE_USAGE_STORAGE_BIT \
+		.usage                 = (VkImageUsageFlags)(VK_IMAGE_USAGE_STORAGE_BIT \
 		                       | VK_IMAGE_USAGE_TRANSFER_SRC_BIT \
 		                       | VK_IMAGE_USAGE_TRANSFER_DST_BIT \
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT \
-		                       | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, \
+		                       | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT), \
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE, \
-		.queueFamilyIndexCount = qvk.queue_idx_graphics, \
-		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED, \
-	},
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, \
+		.initialLayout         = (VkImageLayout)VK_IMAGE_LAYOUT_UNDEFINED \
+	};
 LIST_IMAGES
 LIST_IMAGES_A_B
 #undef IMG_DO
-	};
+//	};
 
 #ifdef VKPT_DEVICE_GROUPS
 #define IMG_DO(_name, _binding, _vkformat, _glslformat, _w, _h) \
