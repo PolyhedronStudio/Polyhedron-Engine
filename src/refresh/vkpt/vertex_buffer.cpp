@@ -55,13 +55,13 @@ vkpt_vertex_buffer_bsp_upload_staging()
 	};
 	vkCmdCopyBuffer(cmd_buf, qvk.buf_vertex_bsp_staging.buffer, qvk.buf_vertex_bsp.buffer, 1, &copyRegion);
 
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR,
 		.buffer = qvk.buf_vertex_bsp.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-	);
+	});
 
 	if (qvk.buf_light_stats[0].buffer)
 	{
@@ -378,8 +378,8 @@ static void write_model_vbo_descriptor(int index, VkBuffer buffer, VkDeviceSize 
 		.dstSet = qvk.desc_set_model_vbos,
 		.dstBinding = 0,
 		.dstArrayElement = index,
-		.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		.descriptorCount = 1,
+		.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		.pBufferInfo = &descriptor_buffer_info,
 	};
 
@@ -553,51 +553,51 @@ vkpt_vertex_buffer_create()
 {
 	VkDescriptorSetLayoutBinding vbo_layout_bindings[] = {
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
 			.binding = BSP_VERTEX_BUFFER_BINDING_IDX,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
 			.binding = MODEL_DYNAMIC_VERTEX_BUFFER_BINDING_IDX,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
 			.binding = LIGHT_BUFFER_BINDING_IDX,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
 			.binding = READBACK_BUFFER_BINDING_IDX,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
 			.binding = TONE_MAPPING_BUFFER_BINDING_IDX,
-			.stageFlags = VK_SHADER_STAGE_ALL,
-		},
-		{
 			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.descriptorCount = 1,
-			.binding = SUN_COLOR_BUFFER_BINDING_IDX,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.binding = SUN_COLOR_BUFFER_BINDING_IDX,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_ALL,
+		},
+		{
+			.binding = SUN_COLOR_UBO_BINDING_IDX,
 			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			.descriptorCount = 1,
-			.binding = SUN_COLOR_UBO_BINDING_IDX,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.binding = LIGHT_STATS_BUFFER_BINDING_IDX,
 			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.descriptorCount = 3,
-			.binding = LIGHT_STATS_BUFFER_BINDING_IDX,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		}
 	};
@@ -659,9 +659,9 @@ vkpt_vertex_buffer_create()
 
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		.maxSets = 2,
 		.poolSizeCount = 1,
 		.pPoolSizes    = &pool_size,
-		.maxSets       = 2,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_vertex_buffer));
@@ -686,8 +686,8 @@ vkpt_vertex_buffer_create()
 		.dstSet          = qvk.desc_set_vertex_buffer,
 		.dstBinding      = BSP_VERTEX_BUFFER_BINDING_IDX,
 		.dstArrayElement = 0,
-		.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		.descriptorCount = 1,
+		.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		.pBufferInfo     = &buf_info,
 	};
 
@@ -726,9 +726,9 @@ vkpt_vertex_buffer_create()
 
 
 	VkDescriptorSetLayoutBinding model_vbo_layout_binding = {
+		.binding = 0,
 		.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		.descriptorCount = MAX_MODELS,
-		.binding = 0,
 		.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT
 	};
 
@@ -852,8 +852,8 @@ VkResult vkpt_light_stats_create(bsp_mesh_t *bsp_mesh)
 		.dstSet = qvk.desc_set_vertex_buffer,
 		.dstBinding = LIGHT_STATS_BUFFER_BINDING_IDX,
 		.dstArrayElement = 0,
-		.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		.descriptorCount = LENGTH(light_stats_buf_info),
+		.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		.pBufferInfo = light_stats_buf_info,
 	};
 
@@ -957,12 +957,12 @@ vkpt_instance_geometry(VkCommandBuffer cmd_buf, uint32_t num_instances, qboolean
 
 	VkBufferMemoryBarrier barrier = {
 		.sType               = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-		.srcAccessMask       = VK_ACCESS_SHADER_WRITE_BIT,
-		.dstAccessMask       = VK_ACCESS_SHADER_READ_BIT,
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+		.srcQueueFamilyIndex = qvk.queue_idx_graphics,
+		.dstQueueFamilyIndex = qvk.queue_idx_graphics,
 		.buffer              = qvk.buf_vertex_model_dynamic.buffer,
 		.size                = qvk.buf_vertex_model_dynamic.size,
-		.srcQueueFamilyIndex = qvk.queue_idx_graphics,
-		.dstQueueFamilyIndex = qvk.queue_idx_graphics
 	};
 
 	vkCmdPipelineBarrier(
