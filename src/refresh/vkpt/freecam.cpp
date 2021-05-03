@@ -140,7 +140,7 @@ void vkpt_freecam_update(float frame_time)
 	VectorCopy(freecam_viewangles, prev_viewangles);
 	float prev_zoom = freecam_zoom;
 
-	vec3_t velocity = { 0.f };
+	vec3_t velocity = vec3_zero();
 	if (freecam_keystate[0]) velocity[0] += 1.f;
 	if (freecam_keystate[1]) velocity[0] -= 1.f;
 	if (freecam_keystate[2]) velocity[1] += 1.f;

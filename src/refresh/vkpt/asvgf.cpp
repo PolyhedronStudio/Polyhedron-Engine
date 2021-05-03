@@ -107,67 +107,66 @@ vkpt_asvgf_create_pipelines()
 		{ .mapEntryCount = 1, .pMapEntries = specEntries, .dataSize = sizeof(uint32_t), .pData = &spec_data[3] },
 	};
 
-	VkComputePipelineCreateInfo pipeline_info[ASVGF_NUM_PIPELINES] = {
-		[GRADIENT_IMAGE] = {
-			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage  = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_IMG_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_general,
-		},
-		[GRADIENT_ATROUS] = {
+	VkComputePipelineCreateInfo pipeline_info[ASVGF_NUM_PIPELINES];
+	pipeline_info[GRADIENT_IMAGE] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_IMG_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_general,
+	};
+	pipeline_info[GRADIENT_ATROUS] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_atrous,
+	};
+	pipeline_info[GRADIENT_REPROJECT] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_REPROJECT_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_general,
+	};
+	pipeline_info[TEMPORAL] = {
 			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_atrous,
-		},
-		[GRADIENT_REPROJECT] = {
-			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage  = SHADER_STAGE(QVK_MOD_ASVGF_GRADIENT_REPROJECT_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.stage = SHADER_STAGE(QVK_MOD_ASVGF_TEMPORAL_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
 			.layout = pipeline_layout_general,
-		},
-		[TEMPORAL] = {
-			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage  = SHADER_STAGE(QVK_MOD_ASVGF_TEMPORAL_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_general,
-		},
-		[ATROUS_LF] = {
-			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage  = SHADER_STAGE(QVK_MOD_ASVGF_LF_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_atrous,
-		},
-		[ATROUS_ITER_0] = {
-			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[0]),
-			.layout = pipeline_layout_general,
-		},
-		[ATROUS_ITER_1] = {
-			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[1]),
-			.layout = pipeline_layout_general,
-		},
-		[ATROUS_ITER_2] = {
-			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[2]),
-			.layout = pipeline_layout_general,
-		},
-		[ATROUS_ITER_3] = {
-			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[3]),
-			.layout = pipeline_layout_general,
-		},
-		[CHECKERBOARD_INTERLEAVE] = {
-			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage  = SHADER_STAGE(QVK_MOD_CHECKERBOARD_INTERLEAVE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_general,
-		},
-		[TAAU] = {
-			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage  = SHADER_STAGE(QVK_MOD_ASVGF_TAAU_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_general,
-		},
-		[COMPOSITING] = {
-			.sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-			.stage  = SHADER_STAGE(QVK_MOD_COMPOSITING_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-			.layout = pipeline_layout_general,
-		},
+	};
+	pipeline_info[ATROUS_LF] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_ASVGF_LF_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_atrous,
+	};
+	pipeline_info[ATROUS_ITER_0] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[0]),
+		.layout = pipeline_layout_general,
+	};
+	pipeline_info[ATROUS_ITER_1] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[1]),
+		.layout = pipeline_layout_general,
+	};
+	pipeline_info[ATROUS_ITER_2] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[2]),
+		.layout = pipeline_layout_general,
+	};
+	pipeline_info[ATROUS_ITER_3] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE_SPEC(QVK_MOD_ASVGF_ATROUS_COMP, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[3]),
+		.layout = pipeline_layout_general,
+	};
+	pipeline_info[CHECKERBOARD_INTERLEAVE] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_CHECKERBOARD_INTERLEAVE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_general,
+	};
+	pipeline_info[TAAU] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_ASVGF_TAAU_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_general,
+	};
+	pipeline_info[COMPOSITING] = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.stage = SHADER_STAGE(QVK_MOD_COMPOSITING_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = pipeline_layout_general,
 	};
 
 	_VK(vkCreateComputePipelines(qvk.device, 0, LENGTH(pipeline_info), pipeline_info, 0, pipeline_asvgf));
@@ -183,24 +182,41 @@ vkpt_asvgf_destroy_pipelines()
 	return VK_SUCCESS;
 }
 
-#define BARRIER_COMPUTE(cmd_buf, img) \
-	do { \
-		VkImageSubresourceRange subresource_range = { \
-			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
-			.baseMipLevel   = 0, \
-			.levelCount     = 1, \
-			.baseArrayLayer = 0, \
-			.layerCount     = 1 \
-		}; \
-		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
-				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
-				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-		); \
-	} while(0)
+//#define BARRIER_COMPUTE(cmd_buf, img) \
+//	do { \
+//		VkImageSubresourceRange subresource_range = { \
+//			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
+//			.baseMipLevel   = 0, \
+//			.levelCount     = 1, \
+//			.baseArrayLayer = 0, \
+//			.layerCount     = 1 \
+//		}; \
+//		IMAGE_BARRIER(cmd_buf, \
+//				.image            = img, \
+//				.subresourceRange = subresource_range, \
+//				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
+//				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
+//				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+//				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+//		); \
+//	} while(0)
+static inline void BARRIER_COMPUTE(VkCommandBuffer commandBuffer, VkImage& image) {
+	VkImageSubresourceRange subresource_range = {
+		.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+		.baseMipLevel   = 0,
+		.levelCount     = 1,
+		.baseArrayLayer = 0,
+		.layerCount     = 1
+	};
+	IMAGE_BARRIER(commandBuffer, {
+			.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.image = image,
+			.subresourceRange = subresource_range,
+	});
+}
 
 VkResult
 vkpt_asvgf_gradient_reproject(VkCommandBuffer cmd_buf)
