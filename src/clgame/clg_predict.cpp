@@ -225,6 +225,8 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
         // Fetch the command.
         ClientUserCommand* cmd = &cl->clientUserCommands[ack & CMD_MASK];
 
+        cmd->prediction.time = clgi.GetRealTime();
+
         // Execute a pmove with it.
         pm.cmd = *cmd;
         PMove(&pm, &clg.pmoveParams);
@@ -239,7 +241,7 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
     // Run pending cmd
     if (cl->cmd.cmd.msec) {
         // save for debug checking
-        cl->cmd.time = cl->time;
+        cl->cmd.time = clgi.GetRealTime();
 
         pm.cmd = cl->cmd;
         pm.cmd.cmd.forwardmove = cl->localmove[0];
