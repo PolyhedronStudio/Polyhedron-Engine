@@ -449,6 +449,7 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
             // see if the ent's bbox is inside the pusher's final position
             if (!SV_TestEntityPosition(check))
                 continue;
+            
         }
 
         if ((pusher->moveType == MOVETYPE_PUSH) || (check->groundEntityPtr == pusher)) {

@@ -43,7 +43,7 @@ void CLG_CheckPredictionError(ClientUserCommand *clientUserCommand) {
     const float len = vec3_length(out->error);
     if (len > .1f) {
         if (len > MAX_DELTA_ORIGIN) {
-            Com_DPrint("MAX_DELTA_ORIGIN: %s", Vec3ToString(out->error));
+            Com_DPrint("CLG_PredictionError: if (len > MAX_DELTA_ORIGIN): %s\n", Vec3ToString(out->error));
 
             out->viewOrigin = in->origin;
             out->viewOffset = in->viewOffset;
@@ -53,7 +53,7 @@ void CLG_CheckPredictionError(ClientUserCommand *clientUserCommand) {
             out->error = vec3_zero();
         }
         else {
-            Com_DPrint("%s\n", Vec3ToString(out->error));
+            Com_DPrint("CLG_PredictionError: %s\n", Vec3ToString(out->error));
         }
     }
 }
@@ -227,7 +227,8 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
 
         // Execute a pmove with it.
         if (cmd->cmd.msec) {
-            cmd->prediction.simulationTime = clgi.GetFrameTime();
+            // Saved for prediction error checking.
+            cmd->prediction.simulationTime = clgi.GetRealTime();
 
             pm.cmd = *cmd;
             PMove(&pm, &clg.pmoveParams);
@@ -237,13 +238,13 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
         }
 
         // Save for error detection
-        cl->cmd.prediction.origin = pm.state.origin;
+        cmd->prediction.origin = pm.state.origin;
     }
 
     // Run pending cmd
     if (cl->cmd.cmd.msec) {
-        // save for debug checking
-        cl->cmd.time = clgi.GetFrameTime();
+        // Saved for prediction error checking.
+        cl->cmd.prediction.simulationTime = clgi.GetRealTime();
 
         pm.cmd = cl->cmd;
         pm.cmd.cmd.forwardmove = cl->localmove[0];
@@ -253,15 +254,15 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
         // Update player move client side audio effects.
         CLG_UpdateClientSoundSpecialEffects(&pm);
     }
+
     // Save for error detection
     cl->cmd.prediction.origin = pm.state.origin;
 
     // Copy results out for rendering
     cl->predictedState.viewOrigin  = pm.state.origin;
-    cl->predictedState.velocity    = pm.state.velocity;
-
-    cl->predictedState.stepOffset  = pm.state.stepOffset;
+    //cl->predictedState.velocity    = pm.state.velocity;
     cl->predictedState.viewOffset  = pm.state.viewOffset;
+    cl->predictedState.stepOffset = pm.state.stepOffset;
     cl->predictedState.viewAngles  = pm.viewAngles;
 
     cl->predictedState.groundEntityPtr = pm.groundEntityPtr;

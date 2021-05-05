@@ -696,6 +696,11 @@ void CLG_FinalizeFrameMoveCommand(void)
     cl->cmd.time = clgi.GetFrameTime();
     cl->cmd.timeStamp = clgi.GetRealTime();
 
+
+    // Save this command off for prediction
+    cl->currentClientCommandNumber++;
+    cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->cmd;
+
     CLG_KeyClear(&in_right);
     CLG_KeyClear(&in_left);
 
@@ -711,9 +716,6 @@ void CLG_FinalizeFrameMoveCommand(void)
     CLG_KeyClear(&in_lookup);
     CLG_KeyClear(&in_lookdown);
 
-    // Save this command off for prediction
-    cl->currentClientCommandNumber++;
-    cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->cmd;
 
     // Clear pending cmd
     memset(&cl->cmd, 0, sizeof(cl->cmd));

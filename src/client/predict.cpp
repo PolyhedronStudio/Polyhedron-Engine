@@ -42,7 +42,7 @@ void CL_CheckPredictionError(void)
         return;
 
     // Calculate the last ClientUserCommand we sent that the server has processed
-    ClientUserCommand* cmd = &cl.clientUserCommands[cls.netchan->incomingAcknowledged & CMD_MASK];
+    ClientUserCommand* cmd = &cl.clientUserCommands[cl.currentClientCommandNumber & CMD_MASK];
 
     // Call into the CG Module to let it handle this.
     CL_GM_CheckPredictionError(cmd);

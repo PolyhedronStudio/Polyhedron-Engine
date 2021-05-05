@@ -164,6 +164,9 @@ void CL_PrepareMedia(void)
     // N&C: Pass over loading to the CG Module so it can actively
     // manage the load state. This is useful for load screen information.
     CL_GM_LoadWorldMedia();
+
+    // Ensure to register these too, for client side prediction.
+    CL_RegisterBspModels();
     
     // The sound engine can now free unneeded stuff
     S_EndRegistration();
