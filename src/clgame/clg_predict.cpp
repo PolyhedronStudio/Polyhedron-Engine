@@ -26,7 +26,6 @@ void CLG_CheckPredictionError(ClientUserCommand *clientUserCommand) {
 
     // if prediction was not run (just spawned), don't sweat it
     if (clientUserCommand->prediction.simulationTime == 0) {
-
         out->viewOrigin = in->origin;
         out->viewOffset = in->viewOffset;
         out->viewAngles = in->viewAngles;
