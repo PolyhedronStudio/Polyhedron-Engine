@@ -665,8 +665,8 @@ void CLG_UpdateOrigin(void)
         ClientPredictedState* predictedState = &cl->predictedState;
         cl->refdef.vieworg = predictedState->viewOrigin + predictedState->viewOffset;
 
-        const vec3_t error = vec3_scale(predictedState->error, 1.f - lerpFraction);
-        cl->refdef.vieworg += error;
+        //const vec3_t error = vec3_scale(predictedState->error, 1.f - lerpFraction);
+        //cl->refdef.vieworg += error;
 
         cl->refdef.vieworg.z -= predictedState->stepOffset;
     } else {

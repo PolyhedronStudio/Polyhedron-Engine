@@ -544,7 +544,7 @@ typedef struct {
     uint32_t time;      // simulation time when the command was sent
     uint32_t timeStamp; // system time when the command was sent
     struct {
-        uint32_t time;  // The simulation time when prediction was run
+        uint32_t simulationTime;  // The simulation time when prediction was run
         vec3_t origin;  // The predicted origin for this command
         vec3_t error;   // The prediction error for this command
     } prediction;

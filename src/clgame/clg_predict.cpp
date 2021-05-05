@@ -25,7 +25,7 @@ void CLG_CheckPredictionError(ClientUserCommand *clientUserCommand) {
     ClientPredictedState* out = &cl->predictedState;
 
     // if prediction was not run (just spawned), don't sweat it
-    if (clientUserCommand->prediction.time == 0) {
+    if (clientUserCommand->prediction.simulationTime == 0) {
 
         out->viewOrigin = in->origin;
         out->viewOffset = in->viewOffset;
@@ -225,39 +225,44 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
         // Fetch the command.
         ClientUserCommand* cmd = &cl->clientUserCommands[ack & CMD_MASK];
 
-        cmd->prediction.time = clgi.GetRealTime();
-
         // Execute a pmove with it.
-        pm.cmd = *cmd;
-        PMove(&pm, &clg.pmoveParams);
+        if (cmd->cmd.msec) {
+            cmd->prediction.simulationTime = clgi.GetFrameTime();
 
-        // Update player move client side audio effects.
-        CLG_UpdateClientSoundSpecialEffects(&pm);
+            pm.cmd = *cmd;
+            PMove(&pm, &clg.pmoveParams);
+
+            // Update player move client side audio effects.
+            CLG_UpdateClientSoundSpecialEffects(&pm);
+        }
 
         // Save for error detection
-        cl->cmd.prediction.error = pm.state.origin;
+        cl->cmd.prediction.origin = pm.state.origin;
     }
 
     // Run pending cmd
     if (cl->cmd.cmd.msec) {
         // save for debug checking
-        cl->cmd.time = clgi.GetRealTime();
+        cl->cmd.time = clgi.GetFrameTime();
 
         pm.cmd = cl->cmd;
         pm.cmd.cmd.forwardmove = cl->localmove[0];
         pm.cmd.cmd.rightmove = cl->localmove[1];
         pm.cmd.cmd.upmove = cl->localmove[2];
         PMove(&pm, &clg.pmoveParams);
+        // Update player move client side audio effects.
+        CLG_UpdateClientSoundSpecialEffects(&pm);
     }
-
     // Save for error detection
-    cl->cmd.prediction.error = pm.state.origin;
+    cl->cmd.prediction.origin = pm.state.origin;
 
     // Copy results out for rendering
     cl->predictedState.viewOrigin  = pm.state.origin;
     cl->predictedState.velocity    = pm.state.velocity;
+
     cl->predictedState.stepOffset  = pm.state.stepOffset;
     cl->predictedState.viewOffset  = pm.state.viewOffset;
     cl->predictedState.viewAngles  = pm.viewAngles;
+
     cl->predictedState.groundEntityPtr = pm.groundEntityPtr;
 }
