@@ -1386,7 +1386,6 @@ void ClientThink(entity_t *ent, ClientUserCommand *ucmd)
         pm.PointContents = gi.PointContents;
 
         // perform a pmove
-        //gi.PMove(&pm);
         PMove(&pm, gi.GetPMoveParams());
 
         // Save results of pmove

@@ -282,7 +282,7 @@ static vec3_t PM_ClipVelocity(vec3_t & in, vec3_t & normal, float overbounce)
 static void PM_TouchEntity(struct entity_s* ent) {
     // Ensure it is valid.
     if (ent == NULL) {
-        PM_Debug("ent = NULL");
+        //PM_Debug("ent = NULL");
         return;
     }
 
@@ -336,19 +336,6 @@ static void PM_StepDown(const trace_t * trace) {
     // Calculate step height.
     pm->state.origin = trace->endPosition;
     pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
-
-    //// If we are above minimal step height, remove the PMF_ON_STAIRS flag.
-    //if (pm->step >= PM_STEP_HEIGHT_MIN) {
-    //    pm->state.flags |= PMF_ON_STAIRS;
-    //}
-    //// If we are stepping down more rapidly than PM_STEP_HEIGHT_MIN then remove the stairs flag.
-    //else if (pm->step <= -PM_STEP_HEIGHT_MIN && (pm->state.flags & PMF_ON_GROUND)) {
-    //    pm->state.flags |= PMF_ON_STAIRS;
-    //}
-    //// Nothing to deal with, set it to 0.
-    //else {
-    //    pm->step = 0.0;
-    //}
 }
 
 //
@@ -368,8 +355,9 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins,
     // M_CheckGround function instead. (Seems related to a -0.25f).
     // 
     // And otherwise, we got this solution below, which... is seemingly slow in certain cases...
-    //return pm->Trace(start, mins, maxs, end);
-#if 1
+#if 0
+    return pm->Trace(start, mins, maxs, end);
+#else
     const vec3_t offsets = { 0.f, 1.f, -1.f };
 
     // Jitter around
@@ -1571,10 +1559,12 @@ static void PM_NoclipMove() {
 //
 static void PM_FreezeMove(void) {
     //PM_Debug("%s", Vec3ToString(pm->state.origin));
-    // Other than that call.... It's empty.
-    // Or, what else did you expect to find here?
+         
+    // Wait wut? An empty functions?
     //
-    // The miracles of the universe? Try the vkpt folder for that.
+    // What else did you expect to find here?
+    //
+    // The miracles of the universe? Try the vkpt folder for that. :D <3
 }
 
 //
