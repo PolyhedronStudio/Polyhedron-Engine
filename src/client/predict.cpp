@@ -41,8 +41,20 @@ void CL_CheckPredictionError(void)
     if (!cl_predict->integer || (cl.frame.playerState.pmove.flags & PMF_NO_PREDICTION))
         return;
 
+    // If we are too far out of date, just freeze in place
+    const uint32_t last = cls.netchan->outgoingSequence;
+    uint32_t ack = cls.netchan->incomingAcknowledged;
+
+    if (last - ack >= CMD_BACKUP) {
+        Com_DPrintf("Exceeded CMD_BACKUP\n");
+        return;
+    }
+
     // Calculate the last ClientUserCommand we sent that the server has processed
-    ClientUserCommand* cmd = &cl.clientUserCommands[cl.currentClientCommandNumber & CMD_MASK];
+    uint32_t frame = cls.netchan->incomingAcknowledged & CMD_MASK;
+    uint32_t commandNumber = cl.clientCommandHistory[frame].commandNumber;
+
+    ClientUserCommand* cmd = &cl.clientUserCommands[commandNumber & CMD_MASK];
 
     // Call into the CG Module to let it handle this.
     CL_GM_CheckPredictionError(cmd);

@@ -642,8 +642,6 @@ void CLG_UpdateOrigin(void)
     PlayerState *currentPlayerState = NULL;
     PlayerState *previousPlayerState = NULL;
 
-    vec3_t viewOffset = vec3_zero();
-
     float lerpFraction = cl->lerpFraction;
 
     // Only do this if we had a valid frame.

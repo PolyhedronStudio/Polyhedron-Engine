@@ -206,6 +206,9 @@ static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
 void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
     pm_move_t   pm = {};
 
+    if (!ack || !currentFrame)
+        return;
+
     // Setup base trace calls.
     pm.Trace = CLG_Trace;
     pm.PointContents = CLG_PointContents;
@@ -252,10 +255,10 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
         PMove(&pm, &clg.pmoveParams);
         // Update player move client side audio effects.
         CLG_UpdateClientSoundSpecialEffects(&pm);
-    }
 
-    // Save for error detection
-    cl->cmd.prediction.origin = pm.state.origin;
+        // Save for error detection
+        cl->cmd.prediction.origin = pm.state.origin;
+    }
 
     // Copy results out for rendering
     cl->predictedState.viewOrigin  = pm.state.origin;

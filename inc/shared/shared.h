@@ -202,6 +202,14 @@ static constexpr float BASE_FRAMETIME = 50.0f; //100
 static constexpr float BASE_1_FRAMETIME = 0.02f; //0.01f   // 1/BASE_FRAMETIME
 static constexpr float BASE_FRAMETIME_1000 = 0.05f; //0.1f    // BASE_FRAMETIME/1000
 
+//-----------------
+//N&C 40hz tick
+//-----------------
+//static constexpr uint32_t BASE_FRAMERATE = 40; //10
+//static constexpr float BASE_FRAMETIME = 25.0f; //100
+//static constexpr float BASE_1_FRAMETIME = 0.04f; //0.01f   // 1/BASE_FRAMETIME
+//static constexpr float BASE_FRAMETIME_1000 = 0.025f; //0.1f    // BASE_FRAMETIME/1000
+
 // maximum variable FPS factor
 static constexpr uint32_t MAX_FRAMEDIV = 6;
 
