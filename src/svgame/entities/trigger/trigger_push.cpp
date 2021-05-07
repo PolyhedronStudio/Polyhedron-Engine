@@ -26,6 +26,9 @@ void trigger_push_touch(entity_t* self, entity_t* other, cplane_t* plane, csurfa
         VectorScale(self->moveDirection, self->speed * 10, other->velocity);
 
         if (other->client) {
+            other->client->playerState.pmove.flags |= PMF_TIME_PUSHED;
+            other->client->playerState.pmove.time = 240;
+
             // don't take falling damage immediately from this
             VectorCopy(other->velocity, other->client->oldVelocity);
             if (other->debounceSoundTime < level.time) {
