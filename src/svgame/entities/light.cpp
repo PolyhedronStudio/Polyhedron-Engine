@@ -24,7 +24,7 @@ Default _cone value is 10 (used to set size of light for spotlights)
 void light_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     if (self->spawnFlags & START_OFF) {
-        gi.configstring(CS_LIGHTS + self->style, "m");
+        gi.configstring(CS_LIGHTS + self->style, self->customLightStyle);
         self->spawnFlags &= ~START_OFF;
     }
     else {
@@ -46,6 +46,6 @@ void SP_light(entity_t* self)
         if (self->spawnFlags & START_OFF)
             gi.configstring(CS_LIGHTS + self->style, "a");
         else
-            gi.configstring(CS_LIGHTS + self->style, "m");
+            gi.configstring(CS_LIGHTS + self->style, self->customLightStyle);
     }
 }

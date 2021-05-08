@@ -1010,6 +1010,9 @@ struct entity_s {
 
     int         style;          // also used as areaportal number
 
+    // Custom lightstyle.
+    char        *customLightStyle;
+
     gitem_t     *item;          // for bonus items
 
     // common data blocks
