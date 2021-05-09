@@ -587,10 +587,6 @@ void CLG_BuildFrameMoveCommand(int msec)
     // Add to milliseconds of time to apply the move
     cl->clientUserCommand.moveCommand.msec += msec;
 
-    // Store time.
-    cl->clientUserCommand.time = clgi.GetFrameTime();
-    cl->clientUserCommand.timeStamp = clgi.GetRealTime();
-
     // Adjust viewAngles
     CLG_AdjustAngles(msec);
 
@@ -691,11 +687,6 @@ void CLG_FinalizeFrameMoveCommand(void)
     
     cl->clientUserCommand.moveCommand.impulse = in_impulse;
     in_impulse = 0;
-
-    // Store time.
-    cl->clientUserCommand.time = clgi.GetFrameTime();
-    cl->clientUserCommand.timeStamp = clgi.GetRealTime();
-
 
     // Save this command off for prediction
     cl->currentClientCommandNumber++;

@@ -11,6 +11,6 @@
 
 void CLG_CheckPredictionError(ClientUserCommand* clientUserCommand);
 void CLG_PredictAngles(void);
-void CLG_PredictMovement(unsigned int ack, unsigned int current);
+void CLG_PredictMovement(unsigned int acknowledgedCommandIndex, unsigned int currentCommandIndex);
 
 #endif // __CLGAME_PREDICT_H__

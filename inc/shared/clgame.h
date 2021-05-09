@@ -134,7 +134,7 @@ extern "C" {
         //---------------------------------------------------------------------
         void		(*CheckPredictionError) (ClientUserCommand* clientUserCommand);
         void		(*PredictAngles) (void);
-        void        (*PredictMovement) (unsigned int ack, unsigned int current);
+        void        (*PredictMovement) (unsigned int acknowledgedCommandIndex, unsigned int currentCommandIndex);
 
         //---------------------------------------------------------------------
         // ServerMessage Parsing.

@@ -203,10 +203,10 @@ static void CLG_UpdateClientSoundSpecialEffects(PlayerMove* pm)
 // Predicts the actual client side movement.
 //================
 //
-void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
+void CLG_PredictMovement(unsigned int acknowledgedCommandIndex, unsigned int currentCommandIndex) {
     PlayerMove   pm = {};
 
-    if (!ack || !currentFrame)
+    if (!acknowledgedCommandIndex || !currentCommandIndex)
         return;
 
     // Setup base trace calls.
@@ -223,9 +223,9 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
 #endif
 
     // Run frames in order.
-    while (++ack <= currentFrame) {
+    while (++acknowledgedCommandIndex <= currentCommandIndex) {
         // Fetch the command.
-        ClientUserCommand* cmd = &cl->clientUserCommands[ack & CMD_MASK];
+        ClientUserCommand* cmd = &cl->clientUserCommands[acknowledgedCommandIndex & CMD_MASK];
 
         // Execute a pmove with it.
         if (cmd->moveCommand.msec) {

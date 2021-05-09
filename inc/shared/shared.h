@@ -538,8 +538,11 @@ typedef struct {
 //-----------------
 typedef struct {
     PlayerMoveCommand moveCommand;       // the movement command
-    uint32_t time;      // simulation time when the command was sent
-    uint32_t timeStamp; // system time when the command was sent
+
+    uint32_t timeSent;      // Time sent, for calculating pings
+    uint32_t timeReceived;  // Time rcvd, for calculating pings
+    uint32_t commandNumber; // Current commandNumber for this move command frame
+
     struct {
         uint32_t simulationTime;  // The simulation time when prediction was run
         vec3_t origin;  // The predicted origin for this command
