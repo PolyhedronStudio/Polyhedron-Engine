@@ -295,10 +295,6 @@ static void CLG_ParseCenterPrint(void)
 //
 qboolean CLG_UpdateConfigString(int index, const char *str) {
     if (index == ConfigStrings::AirAcceleration) {
-        if (clg.pmoveParams.qwmode)
-            clg.pmoveParams.airaccelerate = true;
-        else
-            clg.pmoveParams.airaccelerate = atoi(str) ? true : false;
         return true;
     }
 

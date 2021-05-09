@@ -354,16 +354,16 @@ void CLG_AddPacketEntities(void)
         // Add automatic particle trail effects where desired.
         if (effects & ~EntityEffectType::Rotate) {
             if (effects & EntityEffectType::Blaster) {
-                CLG_BlasterTrail(cent->lerp_origin, ent.origin);
+                CLG_BlasterTrail(cent->lerpOrigin, ent.origin);
                 V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
             } else if (effects & EntityEffectType::Gib) {
-                CLG_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
+                CLG_DiminishingTrail(cent->lerpOrigin, ent.origin, cent, effects);
             }
         }
 
         //Com_DPrint("[NORMAL] entity ID =%i - origin = [%f, %f, %f]\n", ent.id, ent.origin[0], ent.origin[1], ent.origin[1]);
     skip:
-        VectorCopy(ent.origin, cent->lerp_origin);
+        VectorCopy(ent.origin, cent->lerpOrigin);
 
         //Com_DPrint("[SKIP] entity ID =%i - origin = [%f, %f, %f]\n", ent.id, ent.origin[0], ent.origin[1], ent.origin[1]);
     }

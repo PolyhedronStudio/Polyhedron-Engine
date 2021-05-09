@@ -475,7 +475,7 @@ typedef struct {
 	int         entity;
 	int         dest_entity;
 	qhandle_t   model;
-	int         endtime;
+	int         endTime;
 	vec3_t      offset;
 	vec3_t      start, end;
 } beam_t;
@@ -501,12 +501,12 @@ static void CLG_ParseBeam(qhandle_t model)
 
 	// find a free beam
 	for (i = 0, b = clg_beams; i < MAX_BEAMS; i++, b++) {
-		if (!b->model || b->endtime < cl->time) {
+		if (!b->model || b->endTime < cl->time) {
 			override :
 				b->entity = teParameters.entity1;
 			b->dest_entity = teParameters.entity2;
 			b->model = model;
-			b->endtime = cl->time + 200;
+			b->endTime = cl->time + 200;
 			VectorCopy(teParameters.pos1, b->start);
 			VectorCopy(teParameters.pos2, b->end);
 			VectorCopy(teParameters.offset, b->offset);
@@ -525,7 +525,7 @@ static void CLG_ParsePlayerBeam(qhandle_t model)
 		if (b->entity == teParameters.entity1) {
 			b->entity = teParameters.entity1;
 			b->model = model;
-			b->endtime = cl->time + 200;
+			b->endTime = cl->time + 200;
 			VectorCopy(teParameters.pos1, b->start);
 			VectorCopy(teParameters.pos2, b->end);
 			VectorCopy(teParameters.offset, b->offset);
@@ -535,10 +535,10 @@ static void CLG_ParsePlayerBeam(qhandle_t model)
 
 	// find a free beam
 	for (i = 0, b = clg_playerbeams; i < MAX_BEAMS; i++, b++) {
-		if (!b->model || b->endtime < cl->time) {
+		if (!b->model || b->endTime < cl->time) {
 			b->entity = teParameters.entity1;
 			b->model = model;
-			b->endtime = cl->time + 100;     // PMM - this needs to be 100 to prevent multiple heatbeams
+			b->endTime = cl->time + 100;     // PMM - this needs to be 100 to prevent multiple heatbeams
 			VectorCopy(teParameters.pos1, b->start);
 			VectorCopy(teParameters.pos2, b->end);
 			VectorCopy(teParameters.offset, b->offset);
@@ -566,7 +566,7 @@ static void CLG_AddBeams(void)
 
 	// update beams
 	for (i = 0, b = clg_beams; i < MAX_BEAMS; i++, b++) {
-		if (!b->model || b->endtime < cl->time)
+		if (!b->model || b->endTime < cl->time)
 			continue;
 
 		// if coming from the player, update the start position
@@ -659,7 +659,7 @@ static void CLG_AddPlayerBeams(void)
 
 	// update beams
 	for (i = 0, b = clg_playerbeams; i < MAX_BEAMS; i++, b++) {
-		if (!b->model || b->endtime < cl->time)
+		if (!b->model || b->endTime < cl->time)
 			continue;
 
 		// if coming from the player, update the start position
@@ -789,9 +789,9 @@ static void CLG_ProcessSustain(void)
 
 	for (i = 0, s = clg_sustains; i < MAX_SUSTAINS; i++, s++) {
 		if (s->id) {
-			if ((s->endtime >= cl->time) && (cl->time >= s->nextThink))
+			if ((s->endTime >= cl->time) && (cl->time >= s->nextThink))
 				s->Think(s);
-			else if (s->endtime < cl->time)
+			else if (s->endTime < cl->time)
 				s->id = 0;
 		}
 	}
@@ -816,7 +816,7 @@ static void CLG_ParseSteam(void)
 	VectorCopy(teParameters.dir, s->dir);
 	s->color = teParameters.color & 0xff;
 	s->magnitude = teParameters.entity2;
-	s->endtime = cl->time + teParameters.time;
+	s->endTime = cl->time + teParameters.time;
 	s->Think = CLG_ParticleSteamEffect2;
 	s->thinkinterval = 100;
 	s->nextThink = cl->time;

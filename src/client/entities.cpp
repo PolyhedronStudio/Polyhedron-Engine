@@ -63,14 +63,14 @@ entity_update_new(cl_entity_t *ent, const EntityState *state, const vec_t *origi
         state->event == EV_OTHER_TELEPORT ||
         (state->renderfx & (RenderEffects::FrameLerp | RenderEffects::Beam))) {
         // no lerping if teleported
-        ent->lerp_origin = origin;
+        ent->lerpOrigin = origin;
         return;
     }
 
     // old_origin is valid for new entities,
     // so use it as starting point for interpolating between
     ent->prev.origin = state->old_origin;
-    ent->lerp_origin = state->old_origin;
+    ent->lerpOrigin = state->old_origin;
 }
 
 static inline void
@@ -95,7 +95,7 @@ entity_update_old(cl_entity_t *ent, const EntityState *state, const vec_t *origi
         ent->prev = *state;
 
         // no lerping if teleported or morphed
-        ent->lerp_origin = origin;
+        ent->lerpOrigin = origin;
         return;
     }
 
@@ -108,7 +108,7 @@ static inline qboolean entity_new(const cl_entity_t *ent)
     if (!cl.oldframe.valid)
         return true;   // last received frame was invalid
 
-    if (ent->serverframe != cl.oldframe.number)
+    if (ent->serverFrame != cl.oldframe.number)
         return true;   // wasn't in last received frame
 
     if (cl_nolerp->integer == 2)
@@ -153,7 +153,7 @@ static void entity_update(const EntityState *state)
         entity_update_old(ent, state, origin);
     }
 
-    ent->serverframe = cl.frame.number;
+    ent->serverFrame = cl.frame.number;
     ent->current = *state;
 
     // work around Q2PRO server bandwidth optimization
@@ -244,8 +244,8 @@ player_update(ServerFrame *oldframe, ServerFrame *frame, int framediv)
     }
     // no lerping if player entity was teleported (event check)
     ent = &cs.entities[frame->clientNumber + 1];
-    if (ent->serverframe > oldnum &&
-        ent->serverframe <= frame->number &&
+    if (ent->serverFrame > oldnum &&
+        ent->serverFrame <= frame->number &&
         (ent->current.event == EV_PLAYER_TELEPORT
          || ent->current.event == EV_OTHER_TELEPORT)) {
         goto dup;
@@ -344,14 +344,14 @@ void CL_CheckEntityPresent(int entnum, const char *what)
     }
 
     e = &cs.entities[entnum];
-    if (e->serverframe == cl.frame.number) {
+    if (e->serverFrame == cl.frame.number) {
         return; // current
     }
 
-    if (e->serverframe) {
+    if (e->serverFrame) {
         Com_LPrintf(PRINT_DEVELOPER,
                     "SERVER BUG: %s on entity %d last seen %d frames ago\n",
-                    what, entnum, cl.frame.number - e->serverframe);
+                    what, entnum, cl.frame.number - e->serverFrame);
     } else {
         Com_LPrintf(PRINT_DEVELOPER,
                     "SERVER BUG: %s on entity %d never seen before\n",

@@ -982,30 +982,6 @@ void CL_GM_ShutdownMedia (void) {
 
 //
 //===============
-// CL_GM_PMoveInit
-// 
-// Call into the CG Module for initializing certain PMove parameters.
-//===============
-//
-void CL_GM_PMoveInit(pmoveParams_t* pmp) {
-    if (cge)
-        cge->PMoveInit(pmp);
-}
-
-//
-//===============
-// CL_GM_PMoveEnableQW
-// 
-// Call into the CG Module for enabling certain PMove parameters.
-//===============
-//
-void CL_GM_PMoveEnableQW(pmoveParams_t* pmp) {
-    if (cge)
-        cge->PMoveEnableQW(pmp);
-}
-
-//
-//===============
 // CL_GM_RenderScreen
 // 
 // Call into the CG Module for rendering the screen's 2D elements.

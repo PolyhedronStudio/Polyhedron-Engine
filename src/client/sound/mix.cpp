@@ -40,22 +40,22 @@ static void WriteLinearBlast(int16_t *out, samplepair_t *samp, int count)
     }
 }
 
-static void TransferStereo16(samplepair_t *samp, int endtime)
+static void TransferStereo16(samplepair_t *samp, int endTime)
 {
     int lpos;
     int ltime;
     int16_t *out;
     int count;
 
-    for (ltime = paintedtime; ltime < endtime;) {
+    for (ltime = paintedtime; ltime < endTime;) {
         // handle recirculating buffer issues
         lpos = ltime & ((dma.samples >> 1) - 1);
 
         out = (int16_t *)dma.buffer + (lpos << 1);
 
         count = (dma.samples >> 1) - lpos;
-        if (ltime + count > endtime)
-            count = endtime - ltime;
+        if (ltime + count > endTime)
+            count = endTime - ltime;
 
         // write a linear blast of samples
         WriteLinearBlast(out, samp, count);
@@ -65,7 +65,7 @@ static void TransferStereo16(samplepair_t *samp, int endtime)
     }
 }
 
-static void TransferStereo(samplepair_t *samp, int endtime)
+static void TransferStereo(samplepair_t *samp, int endTime)
 {
     int out_idx, out_mask;
     int count;
@@ -73,7 +73,7 @@ static void TransferStereo(samplepair_t *samp, int endtime)
     int step;
 
     p = (int *)samp;
-    count = (endtime - paintedtime) * dma.channels;
+    count = (endTime - paintedtime) * dma.channels;
     out_mask = dma.samples - 1;
     out_idx = paintedtime * dma.channels & out_mask;
     step = 3 - dma.channels;
@@ -99,23 +99,23 @@ static void TransferStereo(samplepair_t *samp, int endtime)
     }
 }
 
-static void TransferPaintBuffer(samplepair_t *samp, int endtime)
+static void TransferPaintBuffer(samplepair_t *samp, int endTime)
 {
     if (s_testsound->integer) {
         int i;
 
         // write a fixed sine wave
-        for (i = paintedtime; i < endtime; i++) {
+        for (i = paintedtime; i < endTime; i++) {
             samp[i].left = samp[i].right = std::sinf(i * 0.1) * 20000 * 256;
         }
     }
 
     if (dma.samplebits == 16 && dma.channels == 2) {
         // optimized case
-        TransferStereo16(samp, endtime);
+        TransferStereo16(samp, endTime);
     } else {
         // general case
-        TransferStereo(samp, endtime);
+        TransferStereo(samp, endTime);
     }
 }
 
@@ -176,7 +176,7 @@ static void Paint16(channel_t *ch, sfxcache_t *sc, int count, samplepair_t *samp
     ch->pos += count;
 }
 
-void S_PaintChannels(int endtime)
+void S_PaintChannels(int endTime)
 {
     samplepair_t paintbuffer[PAINTBUFFER_SIZE];
     int i;
@@ -186,9 +186,9 @@ void S_PaintChannels(int endtime)
     int ltime, count;
     playsound_t *ps;
 
-    while (paintedtime < endtime) {
+    while (paintedtime < endTime) {
         // if paintbuffer is smaller than DMA buffer
-        end = endtime;
+        end = endTime;
         if (end - paintedtime > PAINTBUFFER_SIZE)
             end = paintedtime + PAINTBUFFER_SIZE;
 

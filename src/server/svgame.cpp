@@ -693,12 +693,6 @@ static void PF_PositionedSound(vec3_t origin, entity_t *entity, int channel,
     }
 }
 
-// N&C: This returns the current PMoveParams to execute a PMove with in the
-// svgame dll code.
-pmoveParams_t* PF_GetPMoveParams(void) {
-    return (sv_client ? &sv_client->pmp : &sv_pmp);
-}
-
 static cvar_t *PF_cvar(const char *name, const char *value, int flags)
 {
     if (flags & CVAR_EXTENDED_MASK) {
@@ -891,8 +885,6 @@ void SV_InitGameProgs(void)
     importAPI.SetModel = PF_setmodel;
     importAPI.InPVS = PF_InPVS;
     importAPI.InPHS = PF_InPHS;
-    //import.PMove = PF_PMove;
-    importAPI.GetPMoveParams = PF_GetPMoveParams;
 
     importAPI.ModelIndex = PF_ModelIndex;
     importAPI.SoundIndex = PF_SoundIndex;

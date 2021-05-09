@@ -403,10 +403,7 @@ void SV_InitGame()
     }
 #endif
 
-        SV_InitGameProgs();
-
-    // N&C: PMove init here.
-    ge->PMoveInit(&sv_pmp);
+    SV_InitGameProgs();
 
     // send heartbeat very soon
     svs.last_heartbeat = -(HEARTBEAT_SECONDS - 5) * 1000;

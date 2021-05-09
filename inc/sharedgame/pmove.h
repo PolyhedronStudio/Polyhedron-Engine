@@ -127,37 +127,10 @@ typedef struct {
     int     (*PointContents)(const vec3_t &point);
 } PlayerMove;
 
-
-
-
-//-------------------
-// This is a shared structure between the client and server.
-// Each client has their own individual pmove parameters.
-// To add your own, add them below the comment.
-//-------------------
-typedef struct {
-    qboolean    qwmode;
-    qboolean    airaccelerate;
-    qboolean    strafehack;
-    qboolean    flyhack;
-    qboolean    waterhack;
-    float       speedmult;
-    float       watermult;
-    float       maxspeed;
-    float       friction;
-    float       waterfriction;
-    float       flyfriction;
-} pmoveParams_t;
-
-
 //
 // PMove functions.
 //
-void PMove(PlayerMove* pmove, pmoveParams_t* params);
-
-// TODO: 
-void PMoveInit(pmoveParams_t* pmp);
-void PMoveEnableQW(pmoveParams_t* pmp);
+void PMove(PlayerMove* pmove);
 
 #endif // PMOVE_H
 

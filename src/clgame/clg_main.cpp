@@ -109,9 +109,6 @@ q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
         CGAME_API_VERSION_POINT,
     };
 
-    // Export the player move parameters.
-    clge.pmoveParams                = &clg.pmoveParams;
-
     // Test if it is compatible, if not, return clge with only the apiversion set.
     // The client will handle the issue from there on.
     if (clgimp->apiversion.major != CGAME_API_VERSION_MAJOR ||
@@ -150,10 +147,6 @@ q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
     clge.LoadScreenMedia            = CLG_LoadScreenMedia;
     clge.LoadWorldMedia             = CLG_LoadWorldMedia;
     clge.ShutdownMedia              = CLG_ShutdownMedia;
-
-    // Player Movement. (Client Side)
-    clge.PMoveInit                  = PMoveInit;
-    clge.PMoveEnableQW              = PMoveEnableQW;
 
     // Predict Movement (Client Side)
     clge.CheckPredictionError       = CLG_CheckPredictionError;

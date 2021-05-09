@@ -52,16 +52,6 @@ extern "C" {
         } apiversion;
 
         //---------------------------------------------------------------------
-        // Pointers to CG Module.
-        //---------------------------------------------------------------------
-        // Shared player move parameters.
-        // N&C: This has moved over to the client game exports.
-        // It has been changed in to a pointer. By doing so we can prevent
-        // this structure from turning inconsistent if the game decides to
-        // add extra parameters to this structure.
-        pmoveParams_t* pmoveParams; // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
-
-        //---------------------------------------------------------------------
         // Core.
         //---------------------------------------------------------------------
         // Initializes the client game dll.
@@ -123,11 +113,6 @@ extern "C" {
         void        (*LoadWorldMedia) (void);
         // Called when the renderer shutsdown. Should unload all media.
         void        (*ShutdownMedia) (void);
-
-        // Called by the client to initialize PMove.
-        void        (*PMoveInit) (pmoveParams_t* pmp);
-        // Called by the client when the enable QW movement is toggled.
-        void        (*PMoveEnableQW) (pmoveParams_t* pmp);
 
         //---------------------------------------------------------------------
         // Predict Movement (Client Side)

@@ -492,10 +492,6 @@ static void CL_ParseServerData(void)
     // get the full level name
     MSG_ReadString(levelname, sizeof(levelname));
 
-    // setup default pmove parameters
-    // N&C: Let the client game module handle this.
-    CL_GM_PMoveInit(cge->pmoveParams);
-
     // setup default server state
     cl.serverState = ServerState::Game;
 
@@ -515,29 +511,10 @@ static void CL_ParseServerData(void)
     Com_DPrintf("NaC server state %d\n", i);
     cl.serverState = i;
 
-    i = MSG_ReadByte();
-    if (i) {
-        Com_DPrintf("NaC strafejump hack enabled\n");
-        cge->pmoveParams->strafehack = true;
-    }
-    i = MSG_ReadByte(); //atu QWMod
-    if (i) {
-        Com_DPrintf("NaC QW mode enabled\n");
-        // N&C: Let the client game module handle this.
-        CL_GM_PMoveEnableQW(cge->pmoveParams);
-        //PMoveEnableQW(&cl.pmp);
-    }
+
     //cl.esFlags = (EntityStateMessageFlags)(cl.esFlags | MSG_ES_UMASK); // CPP: IMPROVE: cl.esFlags |= MSG_ES_UMASK;
     cl.esFlags = (EntityStateMessageFlags)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
-    i = MSG_ReadByte();
-    if (i) {
-        Com_DPrintf("NaC waterjump hack enabled\n");
-        cge->pmoveParams->waterhack = true;
-    }
 
-    cge->pmoveParams->speedmult = 2;
-    cge->pmoveParams->flyhack = true; // fly hack is unconditionally enabled
-    cge->pmoveParams->flyfriction = 4;
 
     if (cl.clientNumber == -1) {
         SCR_PlayCinematic(levelname);

@@ -19,8 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server.h"
 #include "client/input.h"
 
-pmoveParams_t   sv_pmp;
-
 LIST_DECL(sv_masterlist);   // address of group servers
 LIST_DECL(sv_banlist);
 LIST_DECL(sv_blacklist);
@@ -916,26 +914,8 @@ static client_t *find_client_slot(conn_params_t *params)
 
 static void init_pmove_and_es_flags(client_t *newcl)
 {
-    int force;
-
-    // copy default pmove parameters
-    newcl->pmp = sv_pmp;
-    newcl->pmp.airaccelerate = sv_airaccelerate->integer ? true : false;
-
-    // common extensions
-    newcl->pmp.speedmult = 2;
-    force = 1;
-    newcl->pmp.strafehack = sv_strafejump_hack->integer >= force ? true : false;
-
-    if (sv_qwmod->integer) {
-        ge->PMoveEnableQW(&newcl->pmp);
-    }
-    newcl->pmp.flyhack = true;
-    newcl->pmp.flyfriction = 4;
     //newcl->esFlags = (EntityStateMessageFlags)(newcl->esFlags | MSG_ES_UMASK); // CPP: Cast bitflag
     newcl->esFlags = (EntityStateMessageFlags)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
-
-    newcl->pmp.waterhack = (sv_waterjump_hack->integer != 0 ? true : false);
 }
 
 static void send_connect_packet(client_t *newcl, int nctype)

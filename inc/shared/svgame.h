@@ -163,17 +163,6 @@ typedef struct {
     void (*LinkEntity)(entity_t *ent);
     void (*UnlinkEntity)(entity_t *ent);     // call before removing an interactive edict
     int (*BoxEntities)(const vec3_t &mins, const vec3_t &maxs, entity_t **list, int maxcount, int areatype);
-    
-    //
-    // N&C: We've moved the PMove functionality into sharedgame/pmove.c
-    // by doing so, we now call into the server for finding the proper
-    // pmoveparams_t to work in.
-    //
-    // Doing it this reversed method, allows for games to customize the pmove
-    // code.
-    //
-    //void (*PMove)(PlayerMove *pmove);          // player movement code common with client prediction
-    pmoveParams_t* (*GetPMoveParams) ();    // Used to call the shared PMove code with.
 
     // network messaging
     void (*Multicast)(const vec3_t *origin, MultiCast to);
@@ -278,13 +267,6 @@ typedef struct {
     void (*ClientThink)(entity_t *ent, ClientUserCommand *cmd);
 
     void (*RunFrame)(void);
-
-    //
-    // N&C: Our custom PMove requires that the server calls into the SVGame
-    // module for initializing pmove parameters.
-    //
-    void (*PMoveInit) (pmoveParams_t* pmp);
-    void (*PMoveEnableQW) (pmoveParams_t* pmp);
 
     // ServerCommand will be called when an "sv <command>" command is issued on the
     // server console.

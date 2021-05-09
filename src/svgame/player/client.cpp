@@ -1364,7 +1364,7 @@ void ClientThink(entity_t *ent, ClientUserCommand *clientUserCommand)
         pm.PointContents = gi.PointContents;
 
         // perform a pmove
-        PMove(&pm, gi.GetPMoveParams());
+        PMove(&pm);
 
         // Save client pmove results.
         client->playerState.pmove = pm.state;

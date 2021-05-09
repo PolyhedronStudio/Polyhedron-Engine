@@ -86,10 +86,8 @@ extern clg_view_t view;
 typedef struct clientgame_s {
     // This is required for C to compile. It doesn't like to compile an empty
     // struct.
-    //int nothingHereYet;
+    int nothingHereYet;
 
-    // The player move parameters.
-    pmoveParams_t pmoveParams;
 } clientgame_t;
 
 extern clientgame_t clg;

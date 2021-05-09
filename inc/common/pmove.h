@@ -29,23 +29,6 @@ Common between server and client so prediction matches
 ==============================================================
 */
 
-typedef struct {
-    qboolean    qwmode;
-    qboolean    airaccelerate;
-    qboolean    strafehack;
-    qboolean    flyhack;
-    qboolean    waterhack;
-    float       speedmult;
-    float       watermult;
-    float       maxspeed;
-    float       friction;
-    float       waterfriction;
-    float       flyfriction;
-} pmoveParams_t;
-
-void PMove(PlayerMove *pmove, pmoveParams_t *params);
-
-void PMoveInit(pmoveParams_t *pmp);
-void PMoveEnableQW(pmoveParams_t *pmp);
+void PMove(PlayerMove *pmove);
 
 #endif // PMOVE_H

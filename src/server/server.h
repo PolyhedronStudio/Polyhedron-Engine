@@ -290,7 +290,6 @@ typedef struct client_s {
     int32_t protocol;   // Major version
     int32_t version;    // Minor version
 
-    pmoveParams_t pmp; // Spectator speed, etc
     EntityStateMessageFlags esFlags; // Entity protocol flags
 
     // packetized messages
@@ -439,8 +438,6 @@ extern list_t      sv_clientlist; // linked list of non-free clients
 
 extern ServerStatic  svs;        // persistant server info
 extern server_t      sv;         // local server
-
-extern pmoveParams_t sv_pmp;
 
 extern cvar_t       *sv_hostname;
 extern cvar_t       *sv_maxclients;

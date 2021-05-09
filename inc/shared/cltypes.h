@@ -86,12 +86,10 @@ typedef struct cl_entity_s {
 
     vec3_t          mins, maxs;
 
-    int             serverframe;        // if not current, this ent isn't in the frame
+    int             serverFrame;        // if not current, this ent isn't in the frame
 
     int             trailcount;         // for diminishing grenade trails
-    vec3_t          lerp_origin;        // for trails (variable hz)
-
-    int             fly_stoptime;
+    vec3_t          lerpOrigin;        // for trails (variable hz)
 
     int             id;
 } cl_entity_t;
@@ -144,7 +142,7 @@ typedef struct {
 typedef struct cl_sustain_s {
     int     id;
     int     type;
-    int     endtime;
+    int     endTime;
     int     nextThink;
     int     thinkinterval;
     vec3_t  org;
@@ -311,6 +309,7 @@ struct ClientState {
     uint32_t     currentClientCommandNumber;
     // History book of time sent, received, and command number.
     ClientUserCommandHistory clientCommandHistory[CMD_BACKUP];
+
     // Initial outgoing sequence number.
     int32_t initialSequence;
 
@@ -416,11 +415,11 @@ struct ClientState {
     int32_t clientNumber;            // never changed during gameplay, set by serverdata packet
     int32_t maxClients;
 
-    char    gamedir[MAX_QPATH];
-    char        mapname[MAX_QPATH]; // short format - q2dm1, etc
+    char gamedir[MAX_QPATH];
+    char mapname[MAX_QPATH]; // short format - q2dm1, etc
 
-    char        baseConfigStrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
-    char        configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
+    char baseConfigStrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
+    char configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
 
 
 #if USE_AUTOREPLY

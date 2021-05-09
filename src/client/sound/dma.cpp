@@ -151,7 +151,7 @@ static int DMA_GetTime(void)
 
 void DMA_Update(void)
 {
-    int soundtime, endtime;
+    int soundtime, endTime;
     int samps;
 
     snddma.BeginPainting();
@@ -169,17 +169,17 @@ void DMA_Update(void)
     }
 
 // mix ahead of current position
-    endtime = soundtime + s_mixahead->value * dma.speed;
-//endtime = (soundtime + 4096) & ~4095;
+    endTime = soundtime + s_mixahead->value * dma.speed;
+//endTime = (soundtime + 4096) & ~4095;
 
     // mix to an even submission block size
-    endtime = (endtime + dma.submission_chunk - 1)
+    endTime = (endTime + dma.submission_chunk - 1)
               & ~(dma.submission_chunk - 1);
     samps = dma.samples >> (dma.channels - 1);
-    if (endtime - soundtime > samps)
-        endtime = soundtime + samps;
+    if (endTime - soundtime > samps)
+        endTime = soundtime + samps;
 
-    S_PaintChannels(endtime);
+    S_PaintChannels(endTime);
 
     snddma.Submit();
 }

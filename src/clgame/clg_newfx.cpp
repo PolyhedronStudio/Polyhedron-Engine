@@ -521,7 +521,7 @@ void CLG_Widowbeamout(cl_sustain_t* self)
     cparticle_t* p;
     float           ratio;
 
-    ratio = 1.0 - (((float)self->endtime - (float)cl->time) / 2100.0);
+    ratio = 1.0 - (((float)self->endTime - (float)cl->time) / 2100.0);
 
     for (i = 0; i < 300; i++) {
         p = CLG_AllocParticle();
@@ -552,7 +552,7 @@ void CLG_Nukeblast(cl_sustain_t* self)
     cparticle_t* p;
     float           ratio;
 
-    ratio = 1.0 - (((float)self->endtime - (float)cl->time) / 1000.0);
+    ratio = 1.0 - (((float)self->endTime - (float)cl->time) / 1000.0);
 
     for (i = 0; i < 700; i++) {
         p = CLG_AllocParticle();

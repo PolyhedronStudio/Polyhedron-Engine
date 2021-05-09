@@ -231,9 +231,6 @@ svgame_export_t* GetServerGameAPI(svgame_import_t* import)
     globals.ClientBegin = ClientBegin;
     globals.ClientCommand = ClientCommand;
 
-    globals.PMoveInit = PMoveInit;
-    globals.PMoveEnableQW = PMoveEnableQW;
-
     globals.RunFrame = G_RunFrame;
 
     globals.ServerCommand = ServerCommand;

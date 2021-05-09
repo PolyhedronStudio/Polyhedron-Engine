@@ -56,12 +56,6 @@ void CL_GM_BuildFrameMoveCommand(int msec);
 void CL_GM_FinalizeFrameMoveCommand(void);
 
 //
-// PMove.
-//
-void		CL_GM_PMoveInit(pmoveParams_t* pmp);
-void		CL_GM_PMoveEnableQW(pmoveParams_t* pmp);
-
-//
 // Predict
 //
 void		CL_GM_CheckPredictionError(ClientUserCommand* clientUserCommand);

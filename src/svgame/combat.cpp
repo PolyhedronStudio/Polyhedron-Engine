@@ -169,8 +169,8 @@ static int CheckPowerArmor(entity_t *ent, vec3_t point, vec3_t normal, int damag
     int         save;
     int         power_armor_type;
     int         index;
-    int         damagePerCell;
-    int         pa_te_type;
+    int         damagePerCell = 0;
+    int         pa_te_type = 0;
     int         power;
     int         power_used;
 

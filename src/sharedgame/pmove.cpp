@@ -142,10 +142,6 @@ static struct {
     trace_t groundTrace;
 } playerMoveLocals;
 
-
-// Static locals.
-static pmoveParams_t* pmp;      // Pointer to the player movement parameter settings.
-
 //
 // PM_MINS and PM_MAXS are the default bounding box, scaled by PM_SCALE
 // in Pm_Init. They are referenced in a few other places e.g. to create effects
@@ -1703,11 +1699,8 @@ static void PM_InitLocal() {
 // Can be called by either the server or the client
 //===============
 //
-void PMove(PlayerMove * pmove, pmoveParams_t * params)
+void PMove(PlayerMove * pmove)
 {
-    // TODO: When PMOVE is finished, remove this useless pmoveParams thing.
-    pmp = params;
-
     // Initialize the PMove.
     PM_Init(pmove);
 
@@ -1782,65 +1775,4 @@ void PMove(PlayerMove * pmove, pmoveParams_t * params)
     PM_CheckViewStep();
 
     //PM_Debug("pm->step = %f pm->state.origin = %s", pm->step, Vec3ToString(pm->state.origin));
-}
-
-
-//
-//=============================================================================
-//
-//	PMOVE PARAMETER
-//
-//=============================================================================
-//
-//
-//===============
-// PMoveInit
-// 
-// Initializes the pmp structure.
-//===============
-//
-void PMoveInit(pmoveParams_t * pmp)
-{
-    // Set up default pmove parameters
-    memset(pmp, 0, sizeof(*pmp));
-
-    pmp->qwmode = true;
-    pmp->watermult = PM_GRAVITY_WATER;
-    pmp->maxspeed = PM_SPEED_RUN;
-    //pmp->upspeed = (sv_qwmod->integer > 1) ? 310 : 350;
-    pmp->friction = PM_FRICT_GROUND;
-    pmp->waterfriction = PM_FRICT_WATER;
-    pmp->airaccelerate = true;
-    pmp->flyfriction = 9;
-    //pmp->speedmult = 1;
-    //pmp->watermult = 0.5f;
-    //pmp->maxspeed = 300;
-    //pmp->friction = 6;
-    //pmp->waterfriction = 1;
-    //pmp->flyfriction = 9;
-}
-
-//
-//===============
-// PMoveEnableQW
-// 
-// Enables QuakeWorld movement on the pmp.
-//===============
-//
-void PMoveEnableQW(pmoveParams_t * pmp)
-{
-    pmp->qwmode = true;
-    pmp->watermult = PM_GRAVITY_WATER;
-    pmp->maxspeed = PM_SPEED_RUN;
-    //pmp->upspeed = (sv_qwmod->integer > 1) ? 310 : 350;
-    pmp->friction = PM_FRICT_GROUND;
-    pmp->waterfriction = PM_FRICT_WATER;
-    pmp->airaccelerate = true;
-    //pmp->qwmode = true;
-    //pmp->watermult = 0.7f;
-    //pmp->maxspeed = 320;
-    ////pmp->upspeed = (sv_qwmod->integer > 1) ? 310 : 350;
-    //pmp->friction = 4;
-    //pmp->waterfriction = 4;
-    //pmp->airaccelerate = true;
 }
