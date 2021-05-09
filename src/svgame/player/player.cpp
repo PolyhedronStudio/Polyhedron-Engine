@@ -65,7 +65,7 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
     self->avelocity = vec3_zero();
 
     self->takedamage = DAMAGE_YES;
-    self->moveType = MOVETYPE_TOSS;
+    self->moveType = MoveType::Toss;
 
     self->s.modelindex2 = 0;    // remove linked weapon model
     
@@ -85,7 +85,7 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
     if (!self->deadFlag) {
         self->client->respawn_time = level.time + 1.0;
         LookAtKiller(self, inflictor, attacker);
-        self->client->playerState.pmove.type = PM_DEAD;
+        self->client->playerState.pmove.type = EnginePlayerMoveType::Dead;
         ClientUpdateObituary(self, inflictor, attacker);
         TossClientWeapon(self);
         if (deathmatch->value)
@@ -95,8 +95,8 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
         // this is kind of ugly, but it's how we want to handle keys in coop
         for (n = 0; n < game.num_items; n++) {
             if (coop->value && itemlist[n].flags & IT_KEY)
-                self->client->resp.coop_respawn.inventory[n] = self->client->pers.inventory[n];
-            self->client->pers.inventory[n] = 0;
+                self->client->respawn.coop_respawn.inventory[n] = self->client->persistent.inventory[n];
+            self->client->persistent.inventory[n] = 0;
         }
     }
 

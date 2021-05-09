@@ -43,7 +43,7 @@ static inline qboolean entity_optimized(const EntityState *state)
     if (state->number != cl.frame.clientNumber + 1)
         return false;
 
-    if (cl.frame.playerState.pmove.type >= PM_DEAD)
+    if (cl.frame.playerState.pmove.type >= EnginePlayerMoveType::Dead)
         return false;
 
     return true;
@@ -171,7 +171,7 @@ static void entity_event(int number)
 
 static void set_active_state(void)
 {
-    cls.state = ca_active;
+    cls.state = CCS_ACTIVE;
 
     cl.serverDelta = Q_align(cl.frame.number, CL_FRAMEDIV);
     cl.time = cl.serverTime = 0; // set time, needed for demos
@@ -191,7 +191,7 @@ static void set_active_state(void)
         cl.predictedState.viewOrigin = cl.frame.playerState.pmove.origin;
         cl.predictedState.velocity = cl.frame.playerState.pmove.velocity;
 
-        if (cl.frame.playerState.pmove.type < PM_DEAD) {
+        if (cl.frame.playerState.pmove.type < EnginePlayerMoveType::Dead) {
             // enhanced servers don't send viewAngles
             // N&C: Let the client game module predict angles.
             CL_GM_PredictAngles();
@@ -284,7 +284,7 @@ void CL_DeltaFrame(void)
     int                 prevstate = cls.state;
 
     // getting a valid frame message ends the connection process
-    if (cls.state == ca_precached)
+    if (cls.state == CCS_PRECACHED)
         set_active_state();
 
     // set server time

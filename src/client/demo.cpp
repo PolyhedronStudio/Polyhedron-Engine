@@ -362,7 +362,7 @@ static void CL_Record_f(void)
         return;
     }
 
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         Com_Printf("You must be in a level to record.\n");
         return;
     }
@@ -400,10 +400,10 @@ static void CL_Record_f(void)
     MSG_WriteByte(1);      // demos are always attract loops
     MSG_WriteString(cl.gamedir);
     MSG_WriteShort(cl.clientNumber);
-    MSG_WriteString(cl.configstrings[CS_NAME]);
+    MSG_WriteString(cl.configstrings[ConfigStrings::Name]);
 
     // configstrings
-    for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
+    for (i = 0; i < ConfigStrings::MaxConfigStrings; i++) {
         s = cl.configstrings[i];
         if (!*s)
             continue;
@@ -725,7 +725,7 @@ static void CL_PlayDemo_f(void)
 
 	Q_strlcpy(cls.demo.file_name, Cmd_Argv(1), sizeof(cls.demo.file_name));
 
-    cls.state = ca_connected;
+    cls.state = CCS_CONNECTED;
     Q_strlcpy(cls.servername, COM_SkipPath(name), sizeof(cls.servername));
     cls.serverAddress.type = NA_LOOPBACK;
 
@@ -736,7 +736,7 @@ static void CL_PlayDemo_f(void)
     CL_ParseServerMessage();
 
     // read and parse messages util `precache' command
-    while (cls.state == ca_connected) {
+    while (cls.state == CCS_CONNECTED) {
         Cbuf_Execute(&cl_cmdbuf);
         parse_next_message(0);
     }
@@ -808,7 +808,7 @@ void CL_EmitDemoSnapshot(void)
     }
 
     // write configstrings
-    for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
+    for (i = 0; i < ConfigStrings::MaxConfigStrings; i++) {
         from = cl.baseConfigStrings[i];
         to = cl.configstrings[i];
 
@@ -970,7 +970,7 @@ static void CL_Seek_f(void)
             cls.demo.eof = false;
 
             // reset configstrings
-            for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
+            for (i = 0; i < ConfigStrings::MaxConfigStrings; i++) {
                 from = cl.baseConfigStrings[i];
                 to = cl.configstrings[i];
 
@@ -1053,15 +1053,15 @@ static void parse_info_string(demoInfo_t *info, int clientNumber, int index, con
     size_t len;
     char *p;
 
-    if (index >= CS_PLAYERSKINS && index < CS_PLAYERSKINS + MAX_CLIENTS) {
-        if (index - CS_PLAYERSKINS == clientNumber) {
+    if (index >= ConfigStrings::PlayerSkins && index < ConfigStrings::PlayerSkins + MAX_CLIENTS) {
+        if (index - ConfigStrings::PlayerSkins == clientNumber) {
             Q_strlcpy(info->pov, string, sizeof(info->pov));
             p = strchr(info->pov, '\\');
             if (p) {
                 *p = 0;
             }
         }
-    } else if (index == CS_MODELS + 1) {
+    } else if (index == ConfigStrings::Models+ 1) {
         len = strlen(string);
         if (len > 9) {
             memcpy(info->map, string + 5, len - 9);   // skip "maps/"
@@ -1117,7 +1117,7 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
                 break;
             }
             index = MSG_ReadShort();
-            if (index < 0 || index >= MAX_CONFIGSTRINGS) {
+            if (index < 0 || index >= ConfigStrings::MaxConfigStrings) {
                 goto fail;
             }
             MSG_ReadString(string, sizeof(string));
@@ -1183,11 +1183,11 @@ CL_DemoFrame
 */
 void CL_DemoFrame(int msec)
 {
-    if (cls.state < ca_connected) {
+    if (cls.state < CCS_CONNECTED) {
         return;
     }
 
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         parse_next_message(0);
         return;
     }
@@ -1211,7 +1211,7 @@ void CL_DemoFrame(int msec)
     while (cl.serverTime < cl.time) {
         if (parse_next_message(cl_demowait->integer))
             break;
-        if (cls.state != ca_active)
+        if (cls.state != CCS_ACTIVE)
             break;
     }
 }

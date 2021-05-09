@@ -34,7 +34,7 @@ void use_target_changelevel(entity_t* self, entity_t* other, entity_t* activator
     // if multiplayer, let everyone know who hit the exit
     if (deathmatch->value) {
         if (activator && activator->client)
-            gi.BPrintf(PRINT_HIGH, "%s exited the level.\n", activator->client->pers.netname);
+            gi.BPrintf(PRINT_HIGH, "%s exited the level.\n", activator->client->persistent.netname);
     }
 
     // if going to a new unit, clear cross triggers

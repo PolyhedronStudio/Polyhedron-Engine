@@ -117,7 +117,7 @@ qboolean IsFemale(entity_t *ent)
     if (!ent->client)
         return false;
 
-    info = Info_ValueForKey(ent->client->pers.userinfo, "gender");
+    info = Info_ValueForKey(ent->client->persistent.userinfo, "gender");
     if (info[0] == 'f' || info[0] == 'F')
         return true;
     return false;
@@ -130,7 +130,7 @@ qboolean IsNeutral(entity_t *ent)
     if (!ent->client)
         return false;
 
-    info = Info_ValueForKey(ent->client->pers.userinfo, "gender");
+    info = Info_ValueForKey(ent->client->persistent.userinfo, "gender");
     if (info[0] != 'f' && info[0] != 'F' && info[0] != 'm' && info[0] != 'M')
         return true;
     return false;
@@ -223,9 +223,9 @@ void ClientUpdateObituary(entity_t *self, entity_t *inflictor, entity_t *attacke
             }
         }
         if (message) {
-            gi.BPrintf(PRINT_MEDIUM, "%s %s.\n", self->client->pers.netname, message);
+            gi.BPrintf(PRINT_MEDIUM, "%s %s.\n", self->client->persistent.netname, message);
             if (deathmatch->value)
-                self->client->resp.score--;
+                self->client->respawn.score--;
             self->enemy = NULL;
             return;
         }
@@ -303,21 +303,21 @@ void ClientUpdateObituary(entity_t *self, entity_t *inflictor, entity_t *attacke
                 break;
             }
             if (message) {
-                gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->client->pers.netname, message, attacker->client->pers.netname, message2);
+                gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->client->persistent.netname, message, attacker->client->persistent.netname, message2);
                 if (deathmatch->value) {
                     if (ff)
-                        attacker->client->resp.score--;
+                        attacker->client->respawn.score--;
                     else
-                        attacker->client->resp.score++;
+                        attacker->client->respawn.score++;
                 }
                 return;
             }
         }
     }
 
-    gi.BPrintf(PRINT_MEDIUM, "%s died.\n", self->client->pers.netname);
+    gi.BPrintf(PRINT_MEDIUM, "%s died.\n", self->client->persistent.netname);
     if (deathmatch->value)
-        self->client->resp.score--;
+        self->client->respawn.score--;
 }
 
 
@@ -333,8 +333,8 @@ void TossClientWeapon(entity_t *self)
     if (!deathmatch->value)
         return;
 
-    item = self->client->pers.weapon;
-    if (! self->client->pers.inventory[self->client->ammo_index])
+    item = self->client->persistent.weapon;
+    if (! self->client->persistent.inventory[self->client->ammo_index])
         item = NULL;
     if (item && (strcmp(item->pickupName, "Blaster") == 0))
         item = NULL;
@@ -361,33 +361,33 @@ void InitClientPersistant(gclient_t *client)
 {
 	gitem_t     *item;
 
-	memset(&client->pers, 0, sizeof(client->pers));
+	memset(&client->persistent, 0, sizeof(client->persistent));
 
 	item = FindItem("Blaster");
-	client->pers.selected_item = ITEM_INDEX(item);
-	client->pers.inventory[client->pers.selected_item] = 1;
+	client->persistent.selected_item = ITEM_INDEX(item);
+	client->persistent.inventory[client->persistent.selected_item] = 1;
 
-	client->pers.weapon = item;
+	client->persistent.weapon = item;
 
-    client->pers.health         = 100;
-    client->pers.maxHealth     = 100;
+    client->persistent.health         = 100;
+    client->persistent.maxHealth     = 100;
 
-    client->pers.max_bullets    = 200;
-    client->pers.max_shells     = 100;
-    client->pers.max_rockets    = 50;
-    client->pers.max_grenades   = 50;
-    client->pers.max_cells      = 200;
-    client->pers.max_slugs      = 50;
+    client->persistent.max_bullets    = 200;
+    client->persistent.max_shells     = 100;
+    client->persistent.max_rockets    = 50;
+    client->persistent.max_grenades   = 50;
+    client->persistent.max_cells      = 200;
+    client->persistent.max_slugs      = 50;
 
-    client->pers.connected = true;
+    client->persistent.connected = true;
 }
 
 
 void InitClientResp(gclient_t *client)
 {
-    memset(&client->resp, 0, sizeof(client->resp));
-    client->resp.enterframe = level.frameNumber;
-    client->resp.coop_respawn = client->pers;
+    memset(&client->respawn, 0, sizeof(client->respawn));
+    client->respawn.enterframe = level.frameNumber;
+    client->respawn.coop_respawn = client->persistent;
 }
 
 /*
@@ -409,21 +409,21 @@ void SaveClientData(void)
         ent = &g_edicts[1 + i];
         if (!ent->inUse)
             continue;
-        game.clients[i].pers.health = ent->health;
-        game.clients[i].pers.maxHealth = ent->maxHealth;
-        game.clients[i].pers.savedFlags = (ent->flags & (FL_GODMODE | FL_NOTARGET | FL_POWER_ARMOR));
+        game.clients[i].persistent.health = ent->health;
+        game.clients[i].persistent.maxHealth = ent->maxHealth;
+        game.clients[i].persistent.savedFlags = (ent->flags & (FL_GODMODE | FL_NOTARGET | FL_POWER_ARMOR));
         if (coop->value && ent->client)
-            game.clients[i].pers.score = ent->client->resp.score;
+            game.clients[i].persistent.score = ent->client->respawn.score;
     }
 }
 
 void FetchClientEntData(entity_t *ent)
 {
-    ent->health = ent->client->pers.health;
-    ent->maxHealth = ent->client->pers.maxHealth;
-    ent->flags |= ent->client->pers.savedFlags;
+    ent->health = ent->client->persistent.health;
+    ent->maxHealth = ent->client->persistent.maxHealth;
+    ent->flags |= ent->client->persistent.savedFlags;
     if (coop->value && ent->client)
-        ent->client->resp.score = ent->client->pers.score;
+        ent->client->respawn.score = ent->client->persistent.score;
 }
 
 
@@ -716,7 +716,7 @@ void RespawnClient(entity_t *self)
 {
     if (deathmatch->value || coop->value) {
         // spectator's don't leave bodies
-        if (self->moveType != MOVETYPE_NOCLIP && self->moveType != MOVETYPE_SPECTATOR)
+        if (self->moveType != MoveType::NoClip && self->moveType != MoveType::Spectator)
             CopyToBodyQue(self);
         self->svFlags &= ~SVF_NOCLIENT;
         PutClientInServer(self);
@@ -738,8 +738,8 @@ void RespawnClient(entity_t *self)
 }
 
 /*
- * only called when pers.spectator changes
- * note that resp.spectator should be the opposite of pers.spectator here
+ * only called when persistent.spectator changes
+ * note that resp.spectator should be the opposite of persistent.spectator here
  */
 void spectator_respawn(entity_t *ent)
 {
@@ -747,9 +747,9 @@ void spectator_respawn(entity_t *ent)
 
     // If the user wants to become a spectator, make sure he doesn't
     // exceed max_spectators
-    if (ent->client->pers.spectator) {
+    if (ent->client->persistent.spectator) {
         // Test if the spectator password was correct, if not, error and return.
-        char *value = Info_ValueForKey(ent->client->pers.userinfo, "spectator");
+        char *value = Info_ValueForKey(ent->client->persistent.userinfo, "spectator");
         if (*spectator_password->string &&
             strcmp(spectator_password->string, "none") &&
             strcmp(spectator_password->string, value)) {
@@ -757,7 +757,7 @@ void spectator_respawn(entity_t *ent)
             gi.CPrintf(ent, PRINT_HIGH, "Spectator password incorrect.\n");
 
             // Enable spectator state.
-            ent->client->pers.spectator = false;
+            ent->client->persistent.spectator = false;
 
             // Let the client go out of its spectator mode by using a StuffCmd.
             gi.StuffCmd(ent, "spectator 0\n");
@@ -766,7 +766,7 @@ void spectator_respawn(entity_t *ent)
 
         // Count actual active spectators
         for (i = 1, numspec = 0; i <= maxClients->value; i++)
-            if (g_edicts[i].inUse && g_edicts[i].client->pers.spectator)
+            if (g_edicts[i].inUse && g_edicts[i].client->persistent.spectator)
                 numspec++;
 
         if (numspec >= maxspectators->value) {
@@ -774,7 +774,7 @@ void spectator_respawn(entity_t *ent)
             gi.CPrintf(ent, PRINT_HIGH, "Server spectator limit is full.\n");
 
             // Enable spectator state.
-            ent->client->pers.spectator = false;
+            ent->client->persistent.spectator = false;
 
             // Let the client go out of its spectator mode by using a StuffCmd.
             gi.StuffCmd(ent, "spectator 0\n");
@@ -784,14 +784,14 @@ void spectator_respawn(entity_t *ent)
         // He was a spectator and wants to join the game 
         // He must have the right password
         // Test if the spectator password was correct, if not, error and return.
-        char *value = Info_ValueForKey(ent->client->pers.userinfo, "password");
+        char *value = Info_ValueForKey(ent->client->persistent.userinfo, "password");
         if (*password->string && strcmp(password->string, "none") &&
             strcmp(password->string, value)) {
             // Report error message by centerprinting it to client.
             gi.CPrintf(ent, PRINT_HIGH, "Password incorrect.\n");
 
             // Enable spectator state.
-            ent->client->pers.spectator = true;
+            ent->client->persistent.spectator = true;
 
             // Let the client go in its spectator mode by using a StuffCmd.
             gi.StuffCmd(ent, "spectator 1\n");
@@ -800,13 +800,13 @@ void spectator_respawn(entity_t *ent)
     }
 
     // clear client on respawn
-    ent->client->resp.score = ent->client->pers.score = 0;
+    ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->svFlags &= ~SVF_NOCLIENT;
     PutClientInServer(ent);
 
     // add a teleportation effect
-    if (!ent->client->pers.spectator)  {
+    if (!ent->client->persistent.spectator)  {
         // send effect
         gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
@@ -820,10 +820,10 @@ void spectator_respawn(entity_t *ent)
 
     ent->client->respawn_time = level.time;
 
-    if (ent->client->pers.spectator)
-        gi.BPrintf(PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->pers.netname);
+    if (ent->client->persistent.spectator)
+        gi.BPrintf(PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->persistent.netname);
     else
-        gi.BPrintf(PRINT_HIGH, "%s joined the game\n", ent->client->pers.netname);
+        gi.BPrintf(PRINT_HIGH, "%s joined the game\n", ent->client->persistent.netname);
 }
 
 //==============================================================
@@ -858,37 +858,37 @@ void PutClientInServer(entity_t *ent)
     if (deathmatch->value) {
         char        userinfo[MAX_INFO_STRING];
 
-        resp = client->resp;
-        memcpy(userinfo, client->pers.userinfo, sizeof(userinfo));
+        resp = client->respawn;
+        memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
         InitClientPersistant(client);
         ClientUserinfoChanged(ent, userinfo);
     } else if (coop->value) {
 //      int         n;
         char        userinfo[MAX_INFO_STRING];
 
-        resp = client->resp;
-        memcpy(userinfo, client->pers.userinfo, sizeof(userinfo));
+        resp = client->respawn;
+        memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
         // this is kind of ugly, but it's how we want to handle keys in coop
 //      for (n = 0; n < game.num_items; n++)
 //      {
 //          if (itemlist[n].flags & IT_KEY)
-//              resp.coop_respawn.inventory[n] = client->pers.inventory[n];
+//              resp.coop_respawn.inventory[n] = client->persistent.inventory[n];
 //      }
-        client->pers = resp.coop_respawn;
+        client->persistent = resp.coop_respawn;
         ClientUserinfoChanged(ent, userinfo);
-        if (resp.score > client->pers.score)
-            client->pers.score = resp.score;
+        if (resp.score > client->persistent.score)
+            client->persistent.score = resp.score;
     } else {
         resp = {};
     }
 
     // clear everything but the persistant data
-    saved = client->pers;
+    saved = client->persistent;
     memset(client, 0, sizeof(*client));
-    client->pers = saved;
-    if (client->pers.health <= 0)
+    client->persistent = saved;
+    if (client->persistent.health <= 0)
         InitClientPersistant(client);
-    client->resp = resp;
+    client->respawn = resp;
 
     // copy some data from the client to the entity
     FetchClientEntData(ent);
@@ -897,7 +897,7 @@ void PutClientInServer(entity_t *ent)
     ent->groundEntityPtr = NULL;
     ent->client = &game.clients[index];
     ent->takedamage = DAMAGE_AIM;
-    ent->moveType = MOVETYPE_WALK;
+    ent->moveType = MoveType::Walk;
     ent->viewHeight = 22;
     ent->inUse = true;
     ent->classname = "player";
@@ -932,14 +932,14 @@ void PutClientInServer(entity_t *ent)
     if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::FixedFOV)) {
         client->playerState.fov = 90;
     } else {
-        client->playerState.fov = atoi(Info_ValueForKey(client->pers.userinfo, "fov"));
+        client->playerState.fov = atoi(Info_ValueForKey(client->persistent.userinfo, "fov"));
         if (client->playerState.fov < 1)
             client->playerState.fov = 90;
         else if (client->playerState.fov > 160)
             client->playerState.fov = 160;
     }
 
-    client->playerState.gunindex = gi.ModelIndex(client->pers.weapon->viewModel);
+    client->playerState.gunindex = gi.ModelIndex(client->persistent.weapon->viewModel);
 
     // Clear certain entity state values
     ent->s.effects = 0;
@@ -953,7 +953,7 @@ void PutClientInServer(entity_t *ent)
 
     // set the delta angle
     for (i = 0 ; i < 3 ; i++) {
-        client->playerState.pmove.deltaAngles[i] = spawn_angles[i] - client->resp.cmd_angles[i];
+        client->playerState.pmove.deltaAngles[i] = spawn_angles[i] - client->respawn.commandViewAngles[i];
     }
 
     ent->s.angles[vec3_t::Pitch] = 0;
@@ -963,19 +963,19 @@ void PutClientInServer(entity_t *ent)
     VectorCopy(ent->s.angles, client->v_angle);
 
     // spawn a spectator
-    if (client->pers.spectator) {
+    if (client->persistent.spectator) {
         client->chase_target = NULL;
 
-        client->resp.spectator = true;
+        client->respawn.spectator = true;
 
-        ent->moveType = MOVETYPE_SPECTATOR;
+        ent->moveType = MoveType::Spectator;
         ent->solid = Solid::Not;
         ent->svFlags |= SVF_NOCLIENT;
         ent->client->playerState.gunindex = 0;
         gi.LinkEntity(ent);
         return;
     } else
-        client->resp.spectator = false;
+        client->respawn.spectator = false;
 
     if (!KillBox(ent)) {
         // could't spawn in?
@@ -984,7 +984,7 @@ void PutClientInServer(entity_t *ent)
     gi.LinkEntity(ent);
 
     // force the current weapon up
-    client->newweapon = client->pers.weapon;
+    client->newweapon = client->persistent.weapon;
     ChangeWeapon(ent);
 }
 
@@ -1015,7 +1015,7 @@ void ClientBeginDeathmatch(entity_t *ent)
         gi.Multicast(&ent->s.origin, MULTICAST_PVS);
     }
 
-    gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
+    gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
 
     // make sure all view stuff is valid
     ClientEndServerFrame(ent);
@@ -1070,7 +1070,7 @@ void ClientBegin(entity_t *ent)
             gi.WriteByte(MuzzleFlashType::Login);
             gi.Multicast(&ent->s.origin, MULTICAST_PVS);
 
-            gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
+            gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
         }
     }
 
@@ -1100,15 +1100,15 @@ void ClientUserinfoChanged(entity_t *ent, char *userinfo)
 
     // set name
     s = Info_ValueForKey(userinfo, "name");
-    strncpy(ent->client->pers.netname, s, sizeof(ent->client->pers.netname) - 1);
+    strncpy(ent->client->persistent.netname, s, sizeof(ent->client->persistent.netname) - 1);
 
     // set spectator
     s = Info_ValueForKey(userinfo, "spectator");
     // spectators are only supported in deathmatch
     if (deathmatch->value && *s && strcmp(s, "0"))
-        ent->client->pers.spectator = true;
+        ent->client->persistent.spectator = true;
     else
-        ent->client->pers.spectator = false;
+        ent->client->persistent.spectator = false;
 
     // set skin
     s = Info_ValueForKey(userinfo, "skin");
@@ -1116,7 +1116,7 @@ void ClientUserinfoChanged(entity_t *ent, char *userinfo)
     playernum = ent - g_edicts - 1;
 
     // combine name and skin into a configstring
-    gi.configstring(CS_PLAYERSKINS + playernum, va("%s\\%s", ent->client->pers.netname, s));
+    gi.configstring(ConfigStrings::PlayerSkins + playernum, va("%s\\%s", ent->client->persistent.netname, s));
 
     // fov
     if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::FixedFOV)) {
@@ -1132,11 +1132,11 @@ void ClientUserinfoChanged(entity_t *ent, char *userinfo)
     // handedness
     s = Info_ValueForKey(userinfo, "hand");
     if (strlen(s)) {
-        ent->client->pers.hand = atoi(s);
+        ent->client->persistent.hand = atoi(s);
     }
 
     // save off the userinfo in case we want to check something later
-    strncpy(ent->client->pers.userinfo, userinfo, sizeof(ent->client->pers.userinfo) - 1);
+    strncpy(ent->client->persistent.userinfo, userinfo, sizeof(ent->client->persistent.userinfo) - 1);
 }
 
 
@@ -1177,7 +1177,7 @@ qboolean ClientConnect(entity_t *ent, char *userinfo)
 
         // count spectators
         for (i = numspec = 0; i < maxClients->value; i++)
-            if (g_edicts[i + 1].inUse && g_edicts[i + 1].client->pers.spectator)
+            if (g_edicts[i + 1].inUse && g_edicts[i + 1].client->persistent.spectator)
                 numspec++;
 
         if (numspec >= maxspectators->value) {
@@ -1203,17 +1203,17 @@ qboolean ClientConnect(entity_t *ent, char *userinfo)
     if (ent->inUse == false) {
         // clear the respawning variables
         InitClientResp(ent->client);
-        if (!game.autosaved || !ent->client->pers.weapon)
+        if (!game.autosaved || !ent->client->persistent.weapon)
             InitClientPersistant(ent->client);
     }
 
     ClientUserinfoChanged(ent, userinfo);
 
     if (game.maxClients > 1)
-        gi.DPrintf("%s connected\n", ent->client->pers.netname);
+        gi.DPrintf("%s connected\n", ent->client->persistent.netname);
 
     ent->svFlags = 0; // make sure we start with known default
-    ent->client->pers.connected = true;
+    ent->client->persistent.connected = true;
     return true;
 }
 
@@ -1232,7 +1232,7 @@ void ClientDisconnect(entity_t *ent)
     if (!ent->client)
         return;
 
-    gi.BPrintf(PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
+    gi.BPrintf(PRINT_HIGH, "%s disconnected\n", ent->client->persistent.netname);
 
     // send effect
     if (ent->inUse) {
@@ -1250,11 +1250,11 @@ void ClientDisconnect(entity_t *ent)
     ent->solid = Solid::Not;
     ent->inUse = false;
     ent->classname = "disconnected";
-    ent->client->pers.connected = false;
+    ent->client->persistent.connected = false;
 
     // FIXME: don't break skins on corpses, etc
     //playernum = ent-g_edicts-1;
-    //gi.configstring (CS_PLAYERSKINS+playernum, "");
+    //gi.configstring (ConfigStrings::PlayerSkins+playernum, "");
 }
 
 
@@ -1280,13 +1280,13 @@ unsigned CheckBlock(void *b, int c)
         v += ((byte *)b)[i];
     return v;
 }
-void PrintPMove(pm_move_t *pm)
+void PrintPMove(PlayerMove *pm)
 {
     unsigned    c1, c2;
 
     c1 = CheckBlock(&pm->state, sizeof(pm->state));
-    c2 = CheckBlock(&pm->cmd, sizeof(pm->cmd));
-    Com_Printf("sv %3i:%i %i\n", pm->cmd.cmd.impulse, c1, c2);
+    c2 = CheckBlock(&pm->clientUserCommand, sizeof(pm->clientUserCommand));
+    Com_Printf("sv %3i:%i %i\n", pm->clientUserCommand.moveCommand.impulse, c1, c2);
 }
 
 /*
@@ -1297,12 +1297,12 @@ This will be called once for each client frame, which will
 usually be a couple times for each server frame.
 ==============
 */
-void ClientThink(entity_t *ent, ClientUserCommand *ucmd)
+void ClientThink(entity_t *ent, ClientUserCommand *clientUserCommand)
 {
     gclient_t* client = nullptr;
     entity_t* other = nullptr;
 
-    pm_move_t pm = {};
+    PlayerMove pm = {};
     
     // Sanity checks.
     if (!ent) {
@@ -1319,10 +1319,10 @@ void ClientThink(entity_t *ent, ClientUserCommand *ucmd)
 
 
     if (level.intermissiontime) {
-        client->playerState.pmove.type = PM_FREEZE;
+        client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
         // can exit intermission after five seconds
         if (level.time > level.intermissiontime + 5.0
-            && (ucmd->cmd.buttons & BUTTON_ANY))
+            && (clientUserCommand->moveCommand.buttons & BUTTON_ANY))
             level.exitintermission = true;
         return;
     }
@@ -1331,24 +1331,24 @@ void ClientThink(entity_t *ent, ClientUserCommand *ucmd)
 
     if (ent->client->chase_target) {
         // Angles are fetched from the client we are chasing.
-        client->resp.cmd_angles[0] = ucmd->cmd.angles[0];
-        client->resp.cmd_angles[1] = ucmd->cmd.angles[1];
-        client->resp.cmd_angles[2] = ucmd->cmd.angles[2];
+        client->respawn.commandViewAngles[0] = clientUserCommand->moveCommand.viewAngles[0];
+        client->respawn.commandViewAngles[1] = clientUserCommand->moveCommand.viewAngles[1];
+        client->respawn.commandViewAngles[2] = clientUserCommand->moveCommand.viewAngles[2];
     } else {
 
         // set up for pmove
         memset(&pm, 0, sizeof(pm));
 
-        if ( ent->moveType == MOVETYPE_NOCLIP )
-            client->playerState.pmove.type = PM_NOCLIP;
-        else if ( ent->moveType == MOVETYPE_SPECTATOR )
-            client->playerState.pmove.type = PM_SPECTATOR;
+        if ( ent->moveType == MoveType::NoClip )
+            client->playerState.pmove.type = PlayerMoveType::Noclip;
+        else if ( ent->moveType == MoveType::Spectator )
+            client->playerState.pmove.type = PlayerMoveType::Spectator;
         else if ( ent->s.modelindex != 255 )
-            client->playerState.pmove.type = PM_GIB;
+            client->playerState.pmove.type = EnginePlayerMoveType::Gib;
         else if ( ent->deadFlag )
-            client->playerState.pmove.type = PM_DEAD;
+            client->playerState.pmove.type = EnginePlayerMoveType::Dead;
         else
-            client->playerState.pmove.type = PM_NORMAL;
+            client->playerState.pmove.type = PlayerMoveType::Normal;
 
         client->playerState.pmove.gravity = sv_gravity->value;
         
@@ -1358,59 +1358,60 @@ void ClientThink(entity_t *ent, ClientUserCommand *ucmd)
         // Move over entity state values into the player move state so it is up to date.
         pm.state.origin = ent->s.origin;
         pm.state.velocity = ent->velocity;
-
-        if (memcmp(&client->old_pmove, &pm.state, sizeof(pm.state))) {
-            pm.testInitial = true;
-        }
-
-        pm.cmd = *ucmd;
+        pm.clientUserCommand = *clientUserCommand;
         pm.groundEntityPtr = ent->groundEntityPtr;
-        pm.Trace = PM_Trace;    // adds default parms
+        pm.Trace = PM_Trace;
         pm.PointContents = gi.PointContents;
 
         // perform a pmove
         PMove(&pm, gi.GetPMoveParams());
 
-        // Save results of pmove
+        // Save client pmove results.
         client->playerState.pmove = pm.state;
-        client->old_pmove = pm.state;
 
-        // Move over results to entity.
+        // Move over needed results to the entity and its state.
         ent->s.origin = pm.state.origin;
         ent->velocity = pm.state.velocity;
         ent->mins = pm.mins;
         ent->maxs = pm.maxs;
+        ent->viewHeight = pm.state.viewOffset[2];
+        ent->waterLevel = pm.waterLevel;
+        ent->waterType = pm.waterType;
 
-        // Copy over the user command angles so they are stored for respawns.
-        // (Used when going into a new map etc.)
-        client->resp.cmd_angles[0] = ucmd->cmd.angles[0];
-        client->resp.cmd_angles[1] = ucmd->cmd.angles[1];
-        client->resp.cmd_angles[2] = ucmd->cmd.angles[2];
-
-        if (ent->groundEntityPtr && !pm.groundEntityPtr && (pm.cmd.cmd.upmove >= 10) && (pm.waterLevel == 0)) {
+        // Check for jumping sound.
+        if (ent->groundEntityPtr && !pm.groundEntityPtr && (pm.clientUserCommand.moveCommand.upMove >= 10) && (pm.waterLevel == 0)) {
             gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("*jump1.wav"), 1, ATTN_NORM, 0);
             PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
         }
 
-        ent->viewHeight = pm.state.viewOffset[2];
-        ent->waterLevel = pm.waterLevel;
-        ent->waterType = pm.waterType;
         ent->groundEntityPtr = pm.groundEntityPtr;
+
+        // Copy over the user command angles so they are stored for respawns.
+        // (Used when going into a new map etc.)
+        client->respawn.commandViewAngles[0] = clientUserCommand->moveCommand.viewAngles[0];
+        client->respawn.commandViewAngles[1] = clientUserCommand->moveCommand.viewAngles[1];
+        client->respawn.commandViewAngles[2] = clientUserCommand->moveCommand.viewAngles[2];
+
+
+        // Store entity link count in case we have a ground entity pointer.
         if (pm.groundEntityPtr)
             ent->groundEntityLinkCount = pm.groundEntityPtr->linkCount;
 
+        // Special treatment for angles in case we are dead. Target the killer entity yaw angle.
         if (ent->deadFlag) {
             client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
             client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
             client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killer_yaw;
         } else {
-            VectorCopy(pm.viewAngles, client->v_angle);
-            VectorCopy(pm.viewAngles, client->playerState.pmove.viewAngles);
+            // Otherwise, store the resulting view angles accordingly.
+            client->v_angle = pm.viewAngles;
+            client->playerState.pmove.viewAngles = pm.viewAngles;
         }
 
         gi.LinkEntity(ent);
 
-        if (ent->moveType != MOVETYPE_NOCLIP && ent->moveType != MOVETYPE_SPECTATOR)
+        // Only check for trigger and object touches if not one of these movetypes.
+        if (ent->moveType != MoveType::NoClip && ent->moveType != MoveType::Spectator)
             UTIL_TouchTriggers(ent);
 
         // touch other objects
@@ -1431,16 +1432,16 @@ void ClientThink(entity_t *ent, ClientUserCommand *ucmd)
     }
 
     client->oldbuttons = client->buttons;
-    client->buttons = ucmd->cmd.buttons;
+    client->buttons = clientUserCommand->moveCommand.buttons;
     client->latched_buttons |= client->buttons & ~client->oldbuttons;
 
     // save light level the player is standing on for
     // monster sighting AI
-    ent->lightLevel = ucmd->cmd.lightlevel;
+    ent->lightLevel = clientUserCommand->moveCommand.lightLevel;
 
     // fire weapon from final position if needed
     if (client->latched_buttons & BUTTON_ATTACK) {
-        if (client->resp.spectator) {
+        if (client->respawn.spectator) {
 
             client->latched_buttons = 0;
 
@@ -1456,8 +1457,8 @@ void ClientThink(entity_t *ent, ClientUserCommand *ucmd)
         }
     }
 
-    if (client->resp.spectator) {
-        if (ucmd->cmd.upmove >= 10) {
+    if (client->respawn.spectator) {
+        if (clientUserCommand->moveCommand.upMove >= 10) {
             if (!(client->playerState.pmove.flags & PMF_JUMP_HELD)) {
                 client->playerState.pmove.flags |= PMF_JUMP_HELD;
                 if (client->chase_target)
@@ -1497,14 +1498,14 @@ void ClientBeginServerFrame(entity_t *ent)
     client = ent->client;
 
     if (deathmatch->value &&
-        client->pers.spectator != client->resp.spectator &&
+        client->persistent.spectator != client->respawn.spectator &&
         (level.time - client->respawn_time) >= 5) {
         spectator_respawn(ent);
         return;
     }
 
     // run weapon animations if it hasn't been done by a ucmd_t
-    if (!client->weapon_thunk && !client->resp.spectator)
+    if (!client->weapon_thunk && !client->respawn.spectator)
         Think_Weapon(ent);
     else
         client->weapon_thunk = false;

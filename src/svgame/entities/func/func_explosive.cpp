@@ -109,7 +109,7 @@ void SP_func_explosive(entity_t* self)
         return;
     }
 
-    self->moveType = MOVETYPE_PUSH;
+    self->moveType = MoveType::Push;
 
     gi.ModelIndex("models/objects/debris1/tris.md2");
     gi.ModelIndex("models/objects/debris2/tris.md2");

@@ -1015,11 +1015,11 @@ static void SCR_DrawInventory(void)
         item = index[i];
         // search for a binding
         Q_concat(string, sizeof(string),
-            "use ", cl->configstrings[CS_ITEMS + item], NULL);
+            "use ", cl->configstrings[ConfigStrings::Items+ item], NULL);
         bind = clgi.Key_GetBinding(string);
 
         Q_snprintf(string, sizeof(string), "%6s %3i %s",
-            bind, cl->inventory[item], cl->configstrings[CS_ITEMS + item]);
+            bind, cl->inventory[item], cl->configstrings[ConfigStrings::Items+ item]);
 
         if (item != selected) {
             HUD_DrawAltString(x, y, string);
@@ -1061,7 +1061,7 @@ static void SCR_DrawSelectedItemName(int x, int y, int item)
     {
         clgi.R_SetAlpha(alpha * scr_alpha->value);
 
-        int index = CS_ITEMS + item;
+        int index = ConfigStrings::Items+ item;
         HUD_DrawString(x, y, cl->configstrings[index]);
 
         clgi.R_SetAlpha(scr_alpha->value);
@@ -1139,7 +1139,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             if (index < 0 || index >= MAX_IMAGES) {
                 Com_Error(ERR_DROP, "%s: invalid pic index", __func__);
             }
-            token = cl->configstrings[CS_IMAGES + index];
+            token = cl->configstrings[ConfigStrings::Images+ index];
             if (token[0] && cl->precaches.images[index]) {
                 clgi.R_DrawPic(x, y, cl->precaches.images[index]);
             }
@@ -1313,7 +1313,7 @@ static void SCR_ExecuteLayoutString(const char* s)
                 Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
             }
             index = cl->frame.playerState.stats[index];
-            if (index < 0 || index >= MAX_CONFIGSTRINGS) {
+            if (index < 0 || index >= ConfigStrings::MaxConfigStrings) {
                 Com_Error(ERR_DROP, "%s: invalid string index", __func__);
             }
             HUD_DrawString(x, y, cl->configstrings[index]);
@@ -1407,7 +1407,7 @@ static void SCR_DrawStats(void)
     if (scr_draw2d->integer <= 1)
         return;
 
-    SCR_ExecuteLayoutString(cl->configstrings[CS_STATUSBAR]);
+    SCR_ExecuteLayoutString(cl->configstrings[ConfigStrings::StatusBar]);
 }
 
 static void SCR_DrawLayout(void)
@@ -1452,7 +1452,7 @@ static void SCR_Sky_f(void)
         return;
     }
 
-    if (clgi.GetClienState() != ca_active) {
+    if (clgi.GetClienState() != CCS_ACTIVE) {
         Com_Print("No map loaded.\n");
         return;
     }

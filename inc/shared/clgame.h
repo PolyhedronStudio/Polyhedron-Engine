@@ -245,7 +245,7 @@ extern "C" {
         // Sets the client load state.
         void            (*SetClientLoadState) (LoadState state);
         // Returns the current state of the client.
-        connstate_t     (*GetClienState) (void);
+        ClientConnectionState     (*GetClienState) (void);
 
         // Checks if the name of the player is on the client's ignore list.
         qboolean        (*CheckForIgnore) (const char *s);

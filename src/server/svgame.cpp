@@ -57,17 +57,17 @@ static int PF_FindIndex(const char *name, int start, int max)
 
 static int PF_ModelIndex(const char *name)
 {
-    return PF_FindIndex(name, CS_MODELS, MAX_MODELS);
+    return PF_FindIndex(name, ConfigStrings::Models, MAX_MODELS);
 }
 
 static int PF_SoundIndex(const char *name)
 {
-    return PF_FindIndex(name, CS_SOUNDS, MAX_SOUNDS);
+    return PF_FindIndex(name, ConfigStrings::Sounds, MAX_SOUNDS);
 }
 
 static int PF_ImageIndex(const char *name)
 {
-    return PF_FindIndex(name, CS_IMAGES, MAX_IMAGES);
+    return PF_FindIndex(name, ConfigStrings::Images, MAX_IMAGES);
 }
 
 /*
@@ -354,10 +354,10 @@ static void PF_configstring(int index, const char *val)
     client_t *client;
     char *dst;
 
-    if (index < 0 || index >= MAX_CONFIGSTRINGS)
+    if (index < 0 || index >= ConfigStrings::MaxConfigStrings)
         Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
 
-    if (sv.state == ss_dead) {
+    if (sv.state == SS_DEAD) {
         Com_WPrintf("%s: not yet initialized\n", __func__);
         return;
     }
@@ -367,7 +367,7 @@ static void PF_configstring(int index, const char *val)
 
     // error out entirely if it exceedes array bounds
     len = strlen(val);
-    maxlen = (MAX_CONFIGSTRINGS - index) * MAX_QPATH;
+    maxlen = (ConfigStrings::MaxConfigStrings- index) * MAX_QPATH;
     if (len >= maxlen) {
         Com_Error(ERR_DROP,
                   "%s: index %d overflowed: %" PRIz " > %" PRIz, // CPP: String fix.
@@ -392,7 +392,7 @@ static void PF_configstring(int index, const char *val)
     memcpy(dst, val, len);
     dst[len] = 0;
 
-    if (sv.state == ss_loading) {
+    if (sv.state == SS_LOADING) {
         return;
     }
 

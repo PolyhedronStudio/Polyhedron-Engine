@@ -45,7 +45,7 @@ void Machinegun_Fire(entity_t* ent)
     else
         ent->client->playerState.gunframe = 5;
 
-    if (ent->client->pers.inventory[ent->client->ammo_index] < 1) {
+    if (ent->client->persistent.inventory[ent->client->ammo_index] < 1) {
         ent->client->playerState.gunframe = 6;
         if (level.time >= ent->debouncePainTime) {
             gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
@@ -89,7 +89,7 @@ void Machinegun_Fire(entity_t* ent)
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
-        ent->client->pers.inventory[ent->client->ammo_index]--;
+        ent->client->persistent.inventory[ent->client->ammo_index]--;
 
     ent->client->anim_priority = ANIM_ATTACK;
     if (ent->client->playerState.pmove.flags & PMF_DUCKED) {

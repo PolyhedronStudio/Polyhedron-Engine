@@ -54,9 +54,9 @@ void SP_func_rotating(entity_t* ent)
 {
     ent->solid = Solid::BSP;
     if (ent->spawnFlags & 32)
-        ent->moveType = MOVETYPE_STOP;
+        ent->moveType = MoveType::Stop;
     else
-        ent->moveType = MOVETYPE_PUSH;
+        ent->moveType = MoveType::Push;
 
     // set the axis of rotation
     VectorClear(ent->moveDirection);

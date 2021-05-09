@@ -315,33 +315,33 @@ static const save_field_t clientfields[] = {
 
     SA(playerState.stats, MAX_STATS),
 
-    SZ(pers.userinfo, MAX_INFO_STRING),
-    SZ(pers.netname, 16),
-    I(pers.hand),
+    SZ(persistent.userinfo, MAX_INFO_STRING),
+    SZ(persistent.netname, 16),
+    I(persistent.hand),
 
-    I(pers.connected),
+    I(persistent.connected),
 
-    I(pers.health),
-    I(pers.maxHealth),
-    I(pers.savedFlags),
+    I(persistent.health),
+    I(persistent.maxHealth),
+    I(persistent.savedFlags),
 
-    I(pers.selected_item),
-    IA(pers.inventory, MAX_ITEMS),
+    I(persistent.selected_item),
+    IA(persistent.inventory, MAX_ITEMS),
 
-    I(pers.max_bullets),
-    I(pers.max_shells),
-    I(pers.max_rockets),
-    I(pers.max_grenades),
-    I(pers.max_cells),
-    I(pers.max_slugs),
+    I(persistent.max_bullets),
+    I(persistent.max_shells),
+    I(persistent.max_rockets),
+    I(persistent.max_grenades),
+    I(persistent.max_cells),
+    I(persistent.max_slugs),
 
-    T(pers.weapon),
-    T(pers.lastweapon),
+    T(persistent.weapon),
+    T(persistent.lastweapon),
 
-    I(pers.power_cubes),
-    I(pers.score),
+    I(persistent.power_cubes),
+    I(persistent.score),
 
-    I(pers.spectator),
+    I(persistent.spectator),
 
     I(showscores),
     I(showinventory),
@@ -956,7 +956,7 @@ void ReadLevel(const char *filename)
     for (i = 0 ; i < maxClients->value ; i++) {
         ent = &g_edicts[i + 1];
         ent->client = game.clients + i;
-        ent->client->pers.connected = false;
+        ent->client->persistent.connected = false;
     }
 
     // do any load time things at this point

@@ -37,7 +37,7 @@ void CLG_RegisterVWepModels()
      }
     
     for (i = 2; i < MAX_MODELS; i++) {
-        name = cl->configstrings[CS_MODELS + i];
+        name = cl->configstrings[ConfigStrings::Models+ i];
         if (!name[0]) {
             break;
         }
@@ -287,14 +287,14 @@ void CLG_SetSky(void)
     float       rotate;
     vec3_t      axis;
 
-    rotate = atof(cl->configstrings[CS_SKYROTATE]);
-    if (sscanf(cl->configstrings[CS_SKYAXIS], "%f %f %f",
+    rotate = atof(cl->configstrings[ConfigStrings::SkyRotate]);
+    if (sscanf(cl->configstrings[ConfigStrings::SkyAxis], "%f %f %f",
         &axis[0], &axis[1], &axis[2]) != 3) {
-        Com_DPrint("Couldn't parse CS_SKYAXIS\n");
+        Com_DPrint("Couldn't parse ConfigStrings::SkyAxis\n");
         VectorClear(axis);
     }
 
-    clgi.R_SetSky(cl->configstrings[CS_SKY], rotate, axis);
+    clgi.R_SetSky(cl->configstrings[ConfigStrings::Sky], rotate, axis);
 }
 
 //
@@ -386,7 +386,7 @@ void CLG_LoadWorldMedia(void)
     // Load World Models passed from server.
     for (i = 2; i < MAX_MODELS; i++) {
         // Fetch string (filename).
-        filename = cl->configstrings[CS_MODELS + i];
+        filename = cl->configstrings[ConfigStrings::Models+ i];
         // Ensure it has a name.
         if (!filename[0]) {
             break;
@@ -408,7 +408,7 @@ void CLG_LoadWorldMedia(void)
     CLG_LoadClientImages();
     for (i = 1; i < MAX_IMAGES; i++) {
         // Fetch string (filename).
-        filename = cl->configstrings[CS_IMAGES + i];
+        filename = cl->configstrings[ConfigStrings::Images+ i];
         // Ensure it has a name.
         if (!filename[0]) {
             break;
@@ -426,7 +426,7 @@ void CLG_LoadWorldMedia(void)
     // Load sounds passed from the server.
     for (i = 1; i < MAX_SOUNDS; i++) {
         // Fetch string (filename).
-        filename = cl->configstrings[CS_SOUNDS + i];
+        filename = cl->configstrings[ConfigStrings::Sounds+ i];
         // Ensure it has a name.
         if (!filename[0])
             break;
@@ -437,7 +437,7 @@ void CLG_LoadWorldMedia(void)
     // Load in all client infos.
     clgi.SetClientLoadState(LOAD_CLIENTS);
     for (i = 0; i < MAX_CLIENTS; i++) {
-        filename = cl->configstrings[CS_PLAYERSKINS + i];
+        filename = cl->configstrings[ConfigStrings::PlayerSkins + i];
         if (!filename[0]) {
             continue;
         }

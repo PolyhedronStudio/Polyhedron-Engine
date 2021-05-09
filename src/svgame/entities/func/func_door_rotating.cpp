@@ -69,7 +69,7 @@ void SP_func_door_rotating(entity_t* ent)
     VectorMA(ent->s.angles, st.distance, ent->moveDirection, ent->pos2);
     ent->moveInfo.distance = st.distance;
 
-    ent->moveType = MOVETYPE_PUSH;
+    ent->moveType = MoveType::Push;
     ent->solid = Solid::BSP;
     gi.SetModel(ent, ent->model);
 

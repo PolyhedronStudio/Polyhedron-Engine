@@ -344,7 +344,7 @@ static void CL_ParseFrame(int extrabits)
         Com_Error(ERR_DROP, "%s: bad fov", __func__);
     }
 
-    if (cls.state < ca_precached)
+    if (cls.state < CCS_PRECACHED)
         return;
 
     cl.oldframe = cl.frame;
@@ -369,7 +369,7 @@ static void CL_ParseConfigstring(int index)
     size_t  len, maxlen;
     char    *s;
 
-    if (index < 0 || index >= MAX_CONFIGSTRINGS) {
+    if (index < 0 || index >= ConfigStrings::MaxConfigStrings) {
         Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
     }
 
@@ -420,7 +420,7 @@ static void CL_ParseGamestate(void)
 
     while (msg_read.readcount < msg_read.cursize) {
         index = MSG_ReadShort();
-        if (index == MAX_CONFIGSTRINGS) {
+        if (index == ConfigStrings::MaxConfigStrings) {
             break;
         }
         CL_ParseConfigstring(index);
@@ -497,7 +497,7 @@ static void CL_ParseServerData(void)
     CL_GM_PMoveInit(cge->pmoveParams);
 
     // setup default server state
-    cl.serverState = ss_game;
+    cl.serverState = SS_GAME;
 
     // MSG: !! Removed: PROTOCOL_VERSION_NAC
     //if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
@@ -615,7 +615,7 @@ static void CL_ParseStartSoundPacket(void)
 
     snd.flags = flags;
 
-    SHOWNET(2, "    %s\n", cl.configstrings[CS_SOUNDS + snd.index]);
+    SHOWNET(2, "    %s\n", cl.configstrings[ConfigStrings::Sounds+ snd.index]);
 }
 
 static void CL_ParseReconnect(void)
@@ -635,7 +635,7 @@ static void CL_ParseReconnect(void)
 
     CL_Disconnect(ERR_RECONNECT);
 
-    cls.state = ca_challenging;
+    cls.state = CCS_CHALLENGING;
     cls.timeOfInitialConnect -= CONNECT_FAST;
     cls.connect_count = 0;
 

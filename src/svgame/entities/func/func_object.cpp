@@ -29,7 +29,7 @@ void func_object_touch(entity_t* self, entity_t* other, cplane_t* plane, csurfac
 
 void func_object_release(entity_t* self)
 {
-    self->moveType = MOVETYPE_TOSS;
+    self->moveType = MoveType::Toss;
     self->Touch = func_object_touch;
 }
 
@@ -58,13 +58,13 @@ void SP_func_object(entity_t* self)
 
     if (self->spawnFlags == 0) {
         self->solid = Solid::BSP;
-        self->moveType = MOVETYPE_PUSH;
+        self->moveType = MoveType::Push;
         self->Think = func_object_release;
         self->nextThink = level.time + 2 * FRAMETIME;
     }
     else {
         self->solid = Solid::Not;
-        self->moveType = MOVETYPE_PUSH;
+        self->moveType = MoveType::Push;
         self->Use = func_object_use;
         self->svFlags |= SVF_NOCLIENT;
     }

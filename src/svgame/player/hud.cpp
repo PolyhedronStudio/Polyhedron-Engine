@@ -32,7 +32,7 @@ INTERMISSION
 //===============
 // HUD_MoveClientToIntermission
 // 
-// Changes the client's movement type to PM_FREEZE while setting its
+// Changes the client's movement type to PlayerMoveType::Freezewhile setting its
 // origin and viewAngles to the previously fetched intermission entity 
 // values.
 //================
@@ -56,7 +56,7 @@ void HUD_MoveClientToIntermission(entity_t *ent)
     ent->client->playerState.pmove.origin = level.intermission_origin;
     ent->client->playerState.pmove.viewAngles = level.intermission_angle;
     // Setup the rest of the client player state.
-    ent->client->playerState.pmove.type = PM_FREEZE;
+    ent->client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
     ent->client->playerState.gunindex = 0;
     ent->client->playerState.blend[3] = 0;
     ent->client->playerState.rdflags &= ~RDF_UNDERWATER;
@@ -125,7 +125,7 @@ void HUD_BeginIntermission(entity_t *targ)
                 // strip players of all keys between units
                 for (n = 0; n < MAX_ITEMS; n++) {
                     if (itemlist[n].flags & IT_KEY) {
-                        client->client->pers.inventory[n] = 0;
+                        client->client->persistent.inventory[n] = 0;
                     }
                 }
             }
@@ -201,9 +201,9 @@ void HUD_GenerateDMScoreboardLayout(entity_t *ent, entity_t *killer)
     total = 0;
     for (i = 0 ; i < game.maxClients ; i++) {
         cl_ent = g_edicts + 1 + i;
-        if (!cl_ent->inUse || game.clients[i].resp.spectator)
+        if (!cl_ent->inUse || game.clients[i].respawn.spectator)
             continue;
-        score = game.clients[i].resp.score;
+        score = game.clients[i].respawn.score;
         for (j = 0 ; j < total ; j++) {
             if (score > sortedscores[j])
                 break;
@@ -253,7 +253,7 @@ void HUD_GenerateDMScoreboardLayout(entity_t *ent, entity_t *killer)
         // send the layout
         Q_snprintf(entry, sizeof(entry),
                    "client %i %i %i %i %i %i ",
-                   x, y, sorted[i], cl->resp.score, cl->ping, (level.frameNumber - cl->resp.enterframe) / 600);
+                   x, y, sorted[i], cl->respawn.score, cl->ping, (level.frameNumber - cl->respawn.enterframe) / 600);
         j = strlen(entry);
         if (stringlength + j > 1024)
             break;
@@ -362,8 +362,6 @@ void HelpComputer(entity_t *ent)
 void HUD_SetClientStats(entity_t* ent)
 {
     gitem_t* item;
-    int         index, cells;
-    int         power_armor_type;
 
     // Ensure ent is valid.
     if (!ent) {
@@ -379,14 +377,14 @@ void HUD_SetClientStats(entity_t* ent)
     //
     // ammo
     //
-    if (!ent->client->ammo_index /* || !ent->client->pers.inventory[ent->client->ammo_index] */) {
+    if (!ent->client->ammo_index /* || !ent->client->persistent.inventory[ent->client->ammo_index] */) {
         ent->client->playerState.stats[STAT_AMMO_ICON] = 0;
         ent->client->playerState.stats[STAT_AMMO] = 0;
     }
     else {
         item = &itemlist[ent->client->ammo_index];
         ent->client->playerState.stats[STAT_AMMO_ICON] = gi.ImageIndex(item->icon);
-        ent->client->playerState.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
+        ent->client->playerState.stats[STAT_AMMO] = ent->client->persistent.inventory[ent->client->ammo_index];
     }
 
     //
@@ -412,12 +410,12 @@ void HUD_SetClientStats(entity_t* ent)
     //
     // selected item
     //
-    if (ent->client->pers.selected_item == -1)
+    if (ent->client->persistent.selected_item == -1)
         ent->client->playerState.stats[STAT_SELECTED_ICON] = 0;
     else
-        ent->client->playerState.stats[STAT_SELECTED_ICON] = gi.ImageIndex(itemlist[ent->client->pers.selected_item].icon);
+        ent->client->playerState.stats[STAT_SELECTED_ICON] = gi.ImageIndex(itemlist[ent->client->persistent.selected_item].icon);
 
-    ent->client->playerState.stats[STAT_SELECTED_ITEM] = ent->client->pers.selected_item;
+    ent->client->playerState.stats[STAT_SELECTED_ITEM] = ent->client->persistent.selected_item;
 
     //
     // layouts
@@ -425,32 +423,32 @@ void HUD_SetClientStats(entity_t* ent)
     ent->client->playerState.stats[STAT_LAYOUTS] = 0;
 
     if (deathmatch->value) {
-        if (ent->client->pers.health <= 0 || level.intermissiontime
+        if (ent->client->persistent.health <= 0 || level.intermissiontime
             || ent->client->showscores)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 1;
-        if (ent->client->showinventory && ent->client->pers.health > 0)
+        if (ent->client->showinventory && ent->client->persistent.health > 0)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 2;
     }
     else {
         if (ent->client->showscores || ent->client->showhelp)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 1;
-        if (ent->client->showinventory && ent->client->pers.health > 0)
+        if (ent->client->showinventory && ent->client->persistent.health > 0)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 2;
     }
 
     //
     // frags
     //
-    ent->client->playerState.stats[STAT_FRAGS] = ent->client->resp.score;
+    ent->client->playerState.stats[STAT_FRAGS] = ent->client->respawn.score;
 
     //
     // help icon / current weapon if not shown
     //
-    if ((ent->client->pers.hand == CENTER_HANDED
+    if ((ent->client->persistent.hand == CENTER_HANDED
                 || ent->client->playerState.fov > 91)
-                && ent->client->pers.weapon) {
+                && ent->client->persistent.weapon) {
 
-        ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->pers.weapon->icon);
+        ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->persistent.weapon->icon);
     } else {
         ent->client->playerState.stats[STAT_HELPICON] = 0;
     }
@@ -507,19 +505,19 @@ void HUD_SetSpectatorStats(entity_t *ent)
     /* layouts are independant in spectator */
     cl->playerState.stats[STAT_LAYOUTS] = 0;
 
-    if ((cl->pers.health <= 0) || level.intermissiontime || cl->showscores)
+    if ((cl->persistent.health <= 0) || level.intermissiontime || cl->showscores)
     {
         cl->playerState.stats[STAT_LAYOUTS] |= 1;
     }
 
-    if (cl->showinventory && (cl->pers.health > 0))
+    if (cl->showinventory && (cl->persistent.health > 0))
     {
         cl->playerState.stats[STAT_LAYOUTS] |= 2;
     }
 
     if (cl->chase_target && cl->chase_target->inUse)
     {
-        cl->playerState.stats[STAT_CHASE] = CS_PLAYERSKINS +
+        cl->playerState.stats[STAT_CHASE] = ConfigStrings::PlayerSkins +
             (cl->chase_target - g_edicts) - 1;
     }
     else

@@ -67,7 +67,7 @@ void weapon_shotgun_fire(entity_t* ent)
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
-        ent->client->pers.inventory[ent->client->ammo_index]--;
+        ent->client->persistent.inventory[ent->client->ammo_index]--;
 }
 
 void Weapon_Shotgun(entity_t* ent)

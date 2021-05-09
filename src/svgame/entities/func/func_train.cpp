@@ -209,7 +209,7 @@ void train_use(entity_t* self, entity_t* other, entity_t* activator)
 
 void SP_func_train(entity_t* self)
 {
-    self->moveType = MOVETYPE_PUSH;
+    self->moveType = MoveType::Push;
 
     VectorClear(self->s.angles);
     self->Blocked = train_blocked;

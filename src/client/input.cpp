@@ -84,14 +84,14 @@ static qboolean IN_GetCurrentGrab(void)
     if (cls.key_dest & (KEY_MENU | KEY_CONSOLE))
         return false;  // menu or console is up
 
-    if (cls.state != ca_active && cls.state != ca_cinematic)
+    if (cls.state != CCS_ACTIVE && cls.state != CCS_CINEMATIC)
         return false;  // not connected
 
     if (in_grab->integer >= 2) {
         if (cls.demo.playback && !Key_IsDown(K_SHIFT))
             return false;  // playing a demo (and not using freelook)
 
-        if (cl.frame.playerState.pmove.type == PM_FREEZE)
+        if (cl.frame.playerState.pmove.type == EnginePlayerMoveType::Freeze)
             return false;  // spectator mode
     }
 
@@ -288,7 +288,7 @@ qboolean CL_GetMouseMotion(int *deltaX, int *deltaY) {
 CL_UpdateCmd
 
 Updates msec, angles and builds interpolated movement vector for local prediction.
-Doesn't touch command forward/side/upmove, these are filled by CL_FinalizeCmd.
+Doesn't touch command forward/side/upMove, these are filled by CL_FinalizeCmd.
 =================
 */
 void CL_UpdateCmd(int msec)
@@ -556,7 +556,7 @@ static void CL_SendUserinfo(void)
 
 void CL_SendCmd(void)
 {
-    if (cls.state < ca_connected) {
+    if (cls.state < CCS_CONNECTED) {
         return; // not talking to a server
     }
 
@@ -566,7 +566,7 @@ void CL_SendCmd(void)
         return;
     }
 
-    if (cls.state != ca_active || sv_paused->integer) {
+    if (cls.state != CCS_ACTIVE || sv_paused->integer) {
         // send a userinfo update if needed
         CL_SendUserinfo();
 

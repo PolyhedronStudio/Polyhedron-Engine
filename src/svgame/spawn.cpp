@@ -751,7 +751,7 @@ Only used for the world.
 */
 void SP_worldspawn(entity_t *ent)
 {
-    ent->moveType = MOVETYPE_PUSH;
+    ent->moveType = MoveType::Push;
     ent->solid = Solid::BSP;
     ent->inUse = true;          // since the world doesn't use G_Spawn()
     ent->s.modelindex = 1;      // world model is always index 1
@@ -774,30 +774,30 @@ void SP_worldspawn(entity_t *ent)
     // make some data visible to the server
 
     if (ent->message && ent->message[0]) {
-        gi.configstring(CS_NAME, ent->message);
+        gi.configstring(ConfigStrings::Name, ent->message);
         strncpy(level.level_name, ent->message, sizeof(level.level_name));
     } else
         strncpy(level.level_name, level.mapname, sizeof(level.level_name));
 
     if (st.sky && st.sky[0])
-        gi.configstring(CS_SKY, st.sky);
+        gi.configstring(ConfigStrings::Sky, st.sky);
     else
-        gi.configstring(CS_SKY, "unit1_");
+        gi.configstring(ConfigStrings::Sky, "unit1_");
 
-    gi.configstring(CS_SKYROTATE, va("%f", st.skyrotate));
+    gi.configstring(ConfigStrings::SkyRotate, va("%f", st.skyrotate));
 
-    gi.configstring(CS_SKYAXIS, va("%f %f %f",
+    gi.configstring(ConfigStrings::SkyAxis, va("%f %f %f",
                                    st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]));
 
-    gi.configstring(CS_CDTRACK, va("%i", ent->sounds));
+    gi.configstring(ConfigStrings::CdTrack, va("%i", ent->sounds));
 
-    gi.configstring(CS_MAXCLIENTS, va("%i", (int)(maxClients->value)));
+    gi.configstring(ConfigStrings::MaxClients, va("%i", (int)(maxClients->value)));
 
     // status bar program
     if (deathmatch->value)
-        gi.configstring(CS_STATUSBAR, dm_statusbar);
+        gi.configstring(ConfigStrings::StatusBar, dm_statusbar);
     else
-        gi.configstring(CS_STATUSBAR, single_statusbar);
+        gi.configstring(ConfigStrings::StatusBar, single_statusbar);
 
     //---------------
 
@@ -899,44 +899,44 @@ void SP_worldspawn(entity_t *ent)
 //
 
     // 0 normal
-    gi.configstring(CS_LIGHTS + 0, "m");
+    gi.configstring(ConfigStrings::Lights+ 0, "m");
 
     // 1 FLICKER (first variety)
-    gi.configstring(CS_LIGHTS + 1, "mmnmmommommnonmmonqnmmo");
+    gi.configstring(ConfigStrings::Lights+ 1, "mmnmmommommnonmmonqnmmo");
 
     // 2 SLOW STRONG PULSE
-    gi.configstring(CS_LIGHTS + 2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
+    gi.configstring(ConfigStrings::Lights+ 2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
 
     // 3 CANDLE (first variety)
-    gi.configstring(CS_LIGHTS + 3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
+    gi.configstring(ConfigStrings::Lights+ 3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
 
     // 4 FAST STROBE
-    gi.configstring(CS_LIGHTS + 4, "mamamamamama");
+    gi.configstring(ConfigStrings::Lights+ 4, "mamamamamama");
 
     // 5 GENTLE PULSE 1
-    gi.configstring(CS_LIGHTS + 5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
+    gi.configstring(ConfigStrings::Lights+ 5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
 
     // 6 FLICKER (second variety)
-    gi.configstring(CS_LIGHTS + 6, "nmonqnmomnmomomno");
+    gi.configstring(ConfigStrings::Lights+ 6, "nmonqnmomnmomomno");
 
     // 7 CANDLE (second variety)
-    gi.configstring(CS_LIGHTS + 7, "mmmaaaabcdefgmmmmaaaammmaamm");
+    gi.configstring(ConfigStrings::Lights+ 7, "mmmaaaabcdefgmmmmaaaammmaamm");
 
     // 8 CANDLE (third variety)
-    gi.configstring(CS_LIGHTS + 8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
+    gi.configstring(ConfigStrings::Lights+ 8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
 
     // 9 SLOW STROBE (fourth variety)
-    gi.configstring(CS_LIGHTS + 9, "aaaaaaaazzzzzzzz");
+    gi.configstring(ConfigStrings::Lights+ 9, "aaaaaaaazzzzzzzz");
 
     // 10 FLUORESCENT FLICKER
-    gi.configstring(CS_LIGHTS + 10, "mmamammmmammamamaaamammma");
+    gi.configstring(ConfigStrings::Lights+ 10, "mmamammmmammamamaaamammma");
 
     // 11 SLOW PULSE NOT FADE TO BLACK
-    gi.configstring(CS_LIGHTS + 11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
+    gi.configstring(ConfigStrings::Lights+ 11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
 
     // styles 32-62 are assigned by the light program for switchable lights
 
     // 63 testing
-    gi.configstring(CS_LIGHTS + 63, "a");
+    gi.configstring(ConfigStrings::Lights+ 63, "a");
 }
 

@@ -14,7 +14,7 @@
 //=====================================================
 /*QUAKED target_lightramp (0 .5 .8) (-8 -8 -8) (8 8 8) TOGGLE
 speed       How many seconds the ramping will take
-message     two letters; starting lightlevel and ending lightlevel
+message     two letters; starting lightLevel and ending lightLevel
 */
 
 void target_lightramp_think(entity_t* self)
@@ -23,7 +23,7 @@ void target_lightramp_think(entity_t* self)
 
     style[0] = 'a' + self->moveDirection[0] + (level.time - self->timestamp) / FRAMETIME * self->moveDirection[2];
     style[1] = 0;
-    gi.configstring(CS_LIGHTS + self->enemy->style, style);
+    gi.configstring(ConfigStrings::Lights+ self->enemy->style, style);
 
     if ((level.time - self->timestamp) < self->speed) {
         self->nextThink = level.time + FRAMETIME;

@@ -435,7 +435,7 @@ static void P_CheckFallingDamage(entity_t *ent)
     if (ent->s.modelindex != 255)
         return;     // not in the player model
 
-    if (ent->moveType == MOVETYPE_NOCLIP || ent->moveType == MOVETYPE_SPECTATOR)
+    if (ent->moveType == MoveType::NoClip || ent->moveType == MoveType::Spectator)
         return;
 
     if ((ent->client->oldVelocity[2] < 0) && (ent->velocity[2] > ent->client->oldVelocity[2]) && (!ent->groundEntityPtr)) {
@@ -499,7 +499,7 @@ static void P_CheckWorldEffects(void)
 {
     int         waterlevel, old_waterlevel;
 
-    if (current_player->moveType == MOVETYPE_NOCLIP || current_player->moveType == MOVETYPE_SPECTATOR) {
+    if (current_player->moveType == MoveType::NoClip || current_player->moveType == MoveType::Spectator) {
         current_player->air_finished = level.time + 12; // don't need air
         return;
     }
@@ -659,8 +659,8 @@ static void G_SetClientSound(entity_t *ent)
 {
     const char    *weap; // C++20: STRING: Added const to char*
 
-    if (ent->client->pers.weapon)
-        weap = ent->client->pers.weapon->classname;
+    if (ent->client->persistent.weapon)
+        weap = ent->client->persistent.weapon->classname;
     else
         weap = "";
 
@@ -877,7 +877,7 @@ void ClientEndServerFrame(entity_t *ent)
     SV_CalculateBlend(ent);
 
     // Set the stats to display for this client (one of the chase spectator stats or...)
-    if (ent->client->resp.spectator)
+    if (ent->client->respawn.spectator)
         HUD_SetSpectatorStats(ent);
     else
         HUD_SetClientStats(ent);

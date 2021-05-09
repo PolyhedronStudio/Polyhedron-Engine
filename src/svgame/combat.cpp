@@ -34,7 +34,7 @@ qboolean CanDamage(entity_t *targ, entity_t *inflictor)
     trace_t trace;
 
 // bmodels need special checking because their origin is 0,0,0
-    if (targ->moveType == MOVETYPE_PUSH) {
+    if (targ->moveType == MoveType::Push) {
         VectorAdd(targ->absMin, targ->absMax, dest);
         VectorScale(dest, 0.5, dest);
         trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
@@ -99,14 +99,14 @@ void Killed(entity_t *targ, entity_t *inflictor, entity_t *attacker, int damage,
         if (!(targ->monsterInfo.aiflags & AI_GOOD_GUY)) {
             level.killed_monsters++;
             if (coop->value && attacker->client)
-                attacker->client->resp.score++;
+                attacker->client->respawn.score++;
             // medics won't heal monsters that they kill themselves
             if (strcmp(attacker->classname, "monster_medic") == 0)
                 targ->owner = attacker;
         }
     }
 
-    if (targ->moveType == MOVETYPE_PUSH || targ->moveType == MOVETYPE_STOP || targ->moveType == MOVETYPE_NONE) {
+    if (targ->moveType == MoveType::Push || targ->moveType == MoveType::Stop || targ->moveType == MoveType::None) {
         // doors, triggers, etc
         targ->Die(targ, inflictor, attacker, damage, point);
         return;
@@ -207,7 +207,7 @@ static int CheckPowerArmor(entity_t *ent, vec3_t point, vec3_t normal, int damag
     power_used = save / damagePerCell;
 
     if (client)
-        client->pers.inventory[index] -= power_used;
+        client->persistent.inventory[index] -= power_used;
     else
         ent->monsterInfo.power_armor_power -= power_used;
     return save;
@@ -241,13 +241,13 @@ static int CheckArmor(entity_t *ent, vec3_t point, vec3_t normal, int damage, in
         save = ceil(((gitem_armor_t *)armor->info)->energy_protection * damage);
     else
         save = ceil(((gitem_armor_t *)armor->info)->normal_protection * damage);
-    if (save >= client->pers.inventory[index])
-        save = client->pers.inventory[index];
+    if (save >= client->persistent.inventory[index])
+        save = client->persistent.inventory[index];
 
     if (!save)
         return 0;
 
-    client->pers.inventory[index] -= save;
+    client->persistent.inventory[index] -= save;
     SpawnDamage(te_sparks, point, normal, save);
 
     return save;
@@ -391,7 +391,7 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
 
 // figure momentum add
     if (!(dflags & DAMAGE_NO_KNOCKBACK)) {
-        if ((knockback) && (targ->moveType != MOVETYPE_NONE) && (targ->moveType != MOVETYPE_BOUNCE) && (targ->moveType != MOVETYPE_PUSH) && (targ->moveType != MOVETYPE_STOP)) {
+        if ((knockback) && (targ->moveType != MoveType::None) && (targ->moveType != MoveType::Bounce) && (targ->moveType != MoveType::Push) && (targ->moveType != MoveType::Stop)) {
             vec3_t  kvel;
             float   mass;
 

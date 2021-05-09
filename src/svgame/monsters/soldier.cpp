@@ -874,7 +874,7 @@ void soldier_dead(entity_t *self)
 {
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, -8);
-    self->moveType = MOVETYPE_TOSS;
+    self->moveType = MoveType::Toss;
     self->svFlags |= SVF_DEADMONSTER;
     self->nextThink = 0;
     gi.LinkEntity(self);
@@ -1185,7 +1185,7 @@ void SP_monster_soldier_x(entity_t *self)
     self->monsterInfo.scale = MODEL_SCALE;
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 32);
-    self->moveType = MOVETYPE_STEP;
+    self->moveType = MoveType::Step;
     self->solid = Solid::BoundingBox;
 
     sound_idle =    gi.SoundIndex("soldier/solidle1.wav");

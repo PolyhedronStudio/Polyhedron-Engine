@@ -99,11 +99,11 @@ void ThrowGib(entity_t *self, const char *gibname, int damage, int type)
     gib->Die = gib_die;
 
     if (type == GIB_ORGANIC) {
-        gib->moveType = MOVETYPE_TOSS;
+        gib->moveType = MoveType::Toss;
         gib->Touch = gib_touch;
         vscale = 0.5;
     } else {
-        gib->moveType = MOVETYPE_BOUNCE;
+        gib->moveType = MoveType::Bounce;
         vscale = 1.0;
     }
 
@@ -142,11 +142,11 @@ void ThrowHead(entity_t *self, const char *gibname, int damage, int type)
     self->Die = gib_die;
 
     if (type == GIB_ORGANIC) {
-        self->moveType = MOVETYPE_TOSS;
+        self->moveType = MoveType::Toss;
         self->Touch = gib_touch;
         vscale = 0.5;
     } else {
-        self->moveType = MOVETYPE_BOUNCE;
+        self->moveType = MoveType::Bounce;
         vscale = 1.0;
     }
 
@@ -189,7 +189,7 @@ void ThrowClientHead(entity_t *self, int damage)
     self->s.sound = 0;
     self->flags |= FL_NO_KNOCKBACK;
 
-    self->moveType = MOVETYPE_BOUNCE;
+    self->moveType = MoveType::Bounce;
     // Calculate velocity for given damage.
     vd = VelocityForDamage(damage);
     VectorAdd(self->velocity, vd, self->velocity);
@@ -228,7 +228,7 @@ void ThrowDebris(entity_t *self, const char *modelname, float speed, const vec3_
     v[1] = 100 * crandom();
     v[2] = 100 + 100 * crandom();
     VectorMA(self->velocity, speed, v, chunk->velocity);
-    chunk->moveType = MOVETYPE_BOUNCE;
+    chunk->moveType = MoveType::Bounce;
     chunk->solid = Solid::Not;
     chunk->avelocity[0] = random() * 600;
     chunk->avelocity[1] = random() * 600;

@@ -702,7 +702,7 @@ static void check_player(const char *name)
     // sexed sounds
     for (i = 0; i < precache_sexed_total; i++) {
         j = precache_sexed_sounds[i];
-        p = cl.configstrings[CS_SOUNDS + j];
+        p = cl.configstrings[ConfigStrings::Sounds+ j];
 
         if (*p == '*') {
             len = Q_concat(fn, sizeof(fn), "players/", model, "/", p + 1, NULL);
@@ -744,7 +744,7 @@ void CL_RequestNextDownload(void)
     size_t len;
     int i;
 
-    if (cls.state != ca_connected && cls.state != ca_loading)
+    if (cls.state != CCS_CONNECTED && cls.state != CCS_LOADING)
         return;
 
     if (allow_download->integer <= 0 || NET_IsLocalAddress(&cls.serverAddress)) {
@@ -760,12 +760,12 @@ void CL_RequestNextDownload(void)
     case PRECACHE_MODELS:
         // confirm map
         if (allow_download_maps->integer)
-            check_file(cl.configstrings[CS_MODELS + 1], DL_MAP);
+            check_file(cl.configstrings[ConfigStrings::Models+ 1], DL_MAP);
 
         // checking for models
         if (allow_download_models->integer) {
             for (i = 2; i < MAX_MODELS; i++) {
-                name = cl.configstrings[CS_MODELS + i];
+                name = cl.configstrings[ConfigStrings::Models+ i];
                 if (!name[0]) {
                     break;
                 }
@@ -788,7 +788,7 @@ void CL_RequestNextDownload(void)
             }
 
             for (i = 2; i < MAX_MODELS; i++) {
-                name = cl.configstrings[CS_MODELS + i];
+                name = cl.configstrings[ConfigStrings::Models+ i];
                 if (!name[0]) {
                     break;
                 }
@@ -801,7 +801,7 @@ void CL_RequestNextDownload(void)
 
         if (allow_download_sounds->integer) {
             for (i = 1; i < MAX_SOUNDS; i++) {
-                name = cl.configstrings[CS_SOUNDS + i];
+                name = cl.configstrings[ConfigStrings::Sounds+ i];
                 if (!name[0]) {
                     break;
                 }
@@ -819,7 +819,7 @@ void CL_RequestNextDownload(void)
 
         if (allow_download_pics->integer) {
             for (i = 1; i < MAX_IMAGES; i++) {
-                name = cl.configstrings[CS_IMAGES + i];
+                name = cl.configstrings[ConfigStrings::Images+ i];
                 if (!name[0]) {
                     break;
                 }
@@ -836,13 +836,13 @@ void CL_RequestNextDownload(void)
             // find sexed sounds
             precache_sexed_total = 0;
             for (i = 1; i < MAX_SOUNDS; i++) {
-                if (cl.configstrings[CS_SOUNDS + i][0] == '*') {
+                if (cl.configstrings[ConfigStrings::Sounds+ i][0] == '*') {
                     precache_sexed_sounds[precache_sexed_total++] = i;
                 }
             }
 
             for (i = 0; i < MAX_CLIENTS; i++) {
-                name = cl.configstrings[CS_PLAYERSKINS + i];
+                name = cl.configstrings[ConfigStrings::PlayerSkins + i];
                 if (!name[0]) {
                     continue;
                 }
@@ -856,7 +856,7 @@ void CL_RequestNextDownload(void)
             };
 
             for (i = 0; i < 6; i++) {
-                len = Q_concat(fn, sizeof(fn), "env/", cl.configstrings[CS_SKY], env_suf[i], ".tga", NULL);
+                len = Q_concat(fn, sizeof(fn), "env/", cl.configstrings[ConfigStrings::Sky], env_suf[i], ".tga", NULL);
                 check_file_len(fn, len, DL_OTHER);
             }
         }
@@ -917,7 +917,7 @@ static void CL_Download_f(void)
     const char *path; // C++20: STRING: Added const to char*
     qerror_t ret;
 
-    if (cls.state < ca_connected) {
+    if (cls.state < CCS_CONNECTED) {
         Com_Printf("Must be connected to a server.\n");
         return;
     }

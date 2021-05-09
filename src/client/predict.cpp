@@ -70,7 +70,7 @@ Sets cl.predicted_origin and cl.predicted_angles
 */
 void CL_PredictMovement(void)
 {
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         return;
     }
 
@@ -100,7 +100,7 @@ void CL_PredictMovement(void)
     }
 
     // Ensure we had moved.
-    if (!cl.cmd.cmd.msec && currentFrameIndex == ack) {
+    if (!cl.clientUserCommand.moveCommand.msec && currentFrameIndex == ack) {
         SHOWMISS("%i: not moved\n", cl.frame.number);
         return;
     }

@@ -106,7 +106,7 @@ void SP_func_button(entity_t* ent)
     float   dist;
 
     UTIL_SetMoveDir(ent->s.angles, ent->moveDirection);
-    ent->moveType = MOVETYPE_STOP;
+    ent->moveType = MoveType::Stop;
     ent->solid = Solid::BSP;
     gi.SetModel(ent, ent->model);
 

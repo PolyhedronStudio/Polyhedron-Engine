@@ -43,7 +43,7 @@ typedef struct {
     float       flyfriction;
 } pmoveParams_t;
 
-void PMove(pm_move_t *pmove, pmoveParams_t *params);
+void PMove(PlayerMove *pmove, pmoveParams_t *params);
 
 void PMoveInit(pmoveParams_t *pmp);
 void PMoveEnableQW(pmoveParams_t *pmp);

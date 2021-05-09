@@ -121,7 +121,7 @@ static void write_plain_configstrings(void)
 
     // write a packet full of data
     string = sv_client->configstrings;
-    for (i = 0; i < MAX_CONFIGSTRINGS; i++, string += MAX_QPATH) {
+    for (i = 0; i < ConfigStrings::MaxConfigStrings; i++, string += MAX_QPATH) {
         if (!string[0]) {
             continue;
         }
@@ -193,7 +193,7 @@ static void write_compressed_gamestate(void)
 
     // write configstrings
     string = sv_client->configstrings;
-    for (i = 0; i < MAX_CONFIGSTRINGS; i++, string += MAX_QPATH) {
+    for (i = 0; i < ConfigStrings::MaxConfigStrings; i++, string += MAX_QPATH) {
         if (!string[0]) {
             continue;
         }
@@ -211,7 +211,7 @@ static void write_compressed_gamestate(void)
         MSG_WriteData(string, length);
         MSG_WriteByte(0);
     }
-    MSG_WriteShort(MAX_CONFIGSTRINGS);   // end of configstrings
+    MSG_WriteShort(ConfigStrings::MaxConfigStrings);   // end of configstrings
 
     // write entityBaselines
     for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
@@ -299,7 +299,7 @@ static void write_compressed_configstrings(void)
 
     // write a packet full of data
     string = sv_client->configstrings;
-    for (i = 0; i < MAX_CONFIGSTRINGS; i++, string += MAX_QPATH) {
+    for (i = 0; i < ConfigStrings::MaxConfigStrings; i++, string += MAX_QPATH) {
         if (!string[0]) {
             continue;
         }
@@ -441,11 +441,11 @@ void SV_New_f(void)
     MSG_WriteLong(sv_client->spawncount);
     MSG_WriteByte(0);   // no attract loop
     MSG_WriteString(sv_client->gamedir);
-    if (sv.state == ss_pic || sv.state == ss_cinematic)
+    if (sv.state == SS_PIC || sv.state == ss_cinematic)
         MSG_WriteShort(-1);
     else
         MSG_WriteShort(sv_client->slot);
-    MSG_WriteString(&sv_client->configstrings[CS_NAME * MAX_QPATH]);
+    MSG_WriteString(&sv_client->configstrings[ConfigStrings::Name * MAX_QPATH]);
 
     MSG_WriteShort(sv_client->version);
     MSG_WriteByte(sv.state);
@@ -475,7 +475,7 @@ void SV_New_f(void)
 
     memset(&sv_client->lastClientUserCommand, 0, sizeof(sv_client->lastClientUserCommand));
 
-    if (sv.state == ss_pic || sv.state == ss_cinematic)
+    if (sv.state == SS_PIC || sv.state == ss_cinematic)
         return;
 
 #if USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
@@ -780,7 +780,7 @@ static void SV_NextServer_f(void)
     Q_strlcpy(nextserver, v, sizeof(nextserver));
     Cvar_Set("nextserver", "");
     
-    if (sv.state != ss_pic && sv.state != ss_cinematic)
+    if (sv.state != SS_PIC && sv.state != ss_cinematic)
         return;     // can't nextserver while playing a normal game
 
     if (Cvar_VariableInteger("deathmatch"))
@@ -991,7 +991,7 @@ static void SV_ExecuteUserCommand(const char *s)
         return;
     }
 
-    if (sv.state == ss_pic || sv.state == ss_cinematic) {
+    if (sv.state == SS_PIC || sv.state == ss_cinematic) {
         return;
     }
 
@@ -1035,7 +1035,7 @@ static inline void SV_ClientThink(ClientUserCommand *cmd)
 {
     ClientUserCommand *old = &sv_client->lastClientUserCommand;
 
-    sv_client->clientUserCommandMiliseconds -= cmd->cmd.msec;
+    sv_client->clientUserCommandMiliseconds -= cmd->moveCommand.msec;
     sv_client->numberOfMoves++;
 
     if (sv_client->clientUserCommandMiliseconds < 0 && sv_enforcetime->integer) {
@@ -1044,10 +1044,10 @@ static inline void SV_ClientThink(ClientUserCommand *cmd)
         return;
     }
 
-    if (cmd->cmd.buttons != old->cmd.buttons
-        || cmd->cmd.forwardmove != old->cmd.forwardmove
-        || cmd->cmd.rightmove != old->cmd.rightmove
-        || cmd->cmd.upmove != old->cmd.upmove) {
+    if (cmd->moveCommand.buttons != old->moveCommand.buttons
+        || cmd->moveCommand.forwardMove != old->moveCommand.forwardMove
+        || cmd->moveCommand.rightMove != old->moveCommand.rightMove
+        || cmd->moveCommand.upMove != old->moveCommand.upMove) {
         // don't timeout
         sv_client->lastActivity = svs.realtime;
     }

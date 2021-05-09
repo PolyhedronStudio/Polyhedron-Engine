@@ -322,7 +322,7 @@ void CLG_AddPacketEntities(void)
                 ent.model = cl->drawModels[s1->modelindex2];
 
             // PMM - check for the defender sphere shell .. make it translucent
-            if (!Q_strcasecmp(cl->configstrings[CS_MODELS + (s1->modelindex2)], "models/items/shell/tris.md2")) {
+            if (!Q_strcasecmp(cl->configstrings[ConfigStrings::Models+ (s1->modelindex2)], "models/items/shell/tris.md2")) {
                 ent.alpha = 0.32;
                 ent.flags = RenderEffects::Translucent;
             }
@@ -518,7 +518,7 @@ cl_entity_t* CLG_GetClientViewEntity(void) {
     int32_t index = cl->clientNumber;
 
     if (cl->frame.playerState.stats[STAT_CHASE]) {
-        index = cl->frame.playerState.stats[STAT_CHASE] - CS_PLAYERSKINS;
+        index = cl->frame.playerState.stats[STAT_CHASE] - ConfigStrings::PlayerSkins;
     }
 
     return &cs->entities[index + 1];
@@ -545,7 +545,7 @@ qboolean CLG_IsClientViewEntity(const cl_entity_t* ent) {
                 return true;
             } 
 
-            const int16_t chase = cl->frame.playerState.stats[STAT_CHASE] - CS_PLAYERSKINS;
+            const int16_t chase = cl->frame.playerState.stats[STAT_CHASE] - ConfigStrings::PlayerSkins;
 
             if (ent->current.number == chase) {
                 return true;
@@ -686,7 +686,7 @@ void CLG_UpdateOrigin(void)
     if (clgi.IsDemoPlayback()) {
         LerpAngles(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction, cl->refdef.viewAngles);
     }
-    else if (currentPlayerState->pmove.type < PM_DEAD) {
+    else if (currentPlayerState->pmove.type < EnginePlayerMoveType::Dead) {
         // use predicted values
         cl->refdef.viewAngles = cl->predictedState.viewAngles;
     }

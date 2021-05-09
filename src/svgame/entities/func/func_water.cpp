@@ -35,7 +35,7 @@ void SP_func_water(entity_t* self)
     vec3_t  abs_movedir;
 
     UTIL_SetMoveDir(self->s.angles, self->moveDirection);
-    self->moveType = MOVETYPE_PUSH;
+    self->moveType = MoveType::Push;
     self->solid = Solid::BSP;
     gi.SetModel(self, self->model);
 

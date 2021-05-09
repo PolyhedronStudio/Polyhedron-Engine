@@ -290,7 +290,7 @@ static void SV_Map(qboolean restart)
     SV_AutoSaveBegin(&cmd);
 
     // any error will drop from this point
-    if ((sv.state != ss_game && sv.state != ss_pic && sv.state != ss_cinematic) || restart)
+    if ((sv.state != SS_GAME && sv.state != SS_PIC && sv.state != ss_cinematic) || restart)
         SV_InitGame();    // the game is just starting
 
     // clear pending CM
@@ -371,7 +371,7 @@ static int should_really_restart(void)
 {
     static qboolean warned;
 
-    if (sv.state != ss_game && sv.state != ss_pic && sv.state != ss_cinematic)
+    if (sv.state != SS_GAME && sv.state != SS_PIC && sv.state != ss_cinematic)
         return 1;   // the game is just starting
 
 #if !USE_CLIENT

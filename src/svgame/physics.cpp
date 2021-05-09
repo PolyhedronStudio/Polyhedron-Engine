@@ -27,12 +27,12 @@ pushmove objects do not obey gravity, and do not interact with each other or tri
 
 onground is set for toss objects when they come to a complete rest.  it is set for steping or walking objects
 
-doors, plats, etc are Solid::BSP, and MOVETYPE_PUSH
-bonus items are Solid::Trigger touch, and MOVETYPE_TOSS
-corpses are Solid::Not and MOVETYPE_TOSS
-crates are Solid::BoundingBox and MOVETYPE_TOSS
-walking monsters are SOLID_SLIDEBOX and MOVETYPE_STEP
-flying/floating monsters are SOLID_SLIDEBOX and MOVETYPE_FLY
+doors, plats, etc are Solid::BSP, and MoveType::Push
+bonus items are Solid::Trigger touch, and MoveType::Toss
+corpses are Solid::Not and MoveType::Toss
+crates are Solid::BoundingBox and MoveType::Toss
+walking monsters are SOLID_SLIDEBOX and MoveType::Step
+flying/floating monsters are SOLID_SLIDEBOX and MoveType::Fly
 
 solid_edge items only clip against bsp models.
 
@@ -425,11 +425,11 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
     for (e = 1; e < globals.num_edicts; e++, check++) {
         if (!check->inUse)
             continue;
-        if (check->moveType == MOVETYPE_PUSH
-            || check->moveType == MOVETYPE_STOP
-            || check->moveType == MOVETYPE_NONE
-            || check->moveType == MOVETYPE_NOCLIP
-            || check->moveType == MOVETYPE_SPECTATOR)
+        if (check->moveType == MoveType::Push
+            || check->moveType == MoveType::Stop
+            || check->moveType == MoveType::None
+            || check->moveType == MoveType::NoClip
+            || check->moveType == MoveType::Spectator)
             continue;
 
         if (!check->area.prev)
@@ -452,7 +452,7 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
             
         }
 
-        if ((pusher->moveType == MOVETYPE_PUSH) || (check->groundEntityPtr == pusher)) {
+        if ((pusher->moveType == MoveType::Push) || (check->groundEntityPtr == pusher)) {
             // move this entity
             pushed_p->ent = check;
             VectorCopy(check->s.origin, pushed_p->origin);
@@ -680,8 +680,8 @@ void SV_Physics_Toss(entity_t *ent)
     SV_CheckVelocity(ent);
 
     // Add gravity
-    if (ent->moveType != MOVETYPE_FLY
-        && ent->moveType != MOVETYPE_FLYMISSILE)
+    if (ent->moveType != MoveType::Fly
+        && ent->moveType != MoveType::FlyMissile)
         SV_AddGravity(ent);
 
     // Move angles
@@ -694,7 +694,7 @@ void SV_Physics_Toss(entity_t *ent)
         return;
 
     if (trace.fraction < 1) {
-        if (ent->moveType == MOVETYPE_BOUNCE)
+        if (ent->moveType == MoveType::Bounce)
             backoff = 1.5;
         else
             backoff = 1;
@@ -703,7 +703,7 @@ void SV_Physics_Toss(entity_t *ent)
 
         // stop if on ground
         if (trace.plane.normal[2] > 0.7) {
-            if (ent->velocity[2] < 60 || ent->moveType != MOVETYPE_BOUNCE) {
+            if (ent->velocity[2] < 60 || ent->moveType != MoveType::Bounce) {
                 ent->groundEntityPtr = trace.ent;
                 ent->groundEntityLinkCount = trace.ent->linkCount;
                 VectorCopy(vec3_origin, ent->velocity);
@@ -901,24 +901,24 @@ void G_RunEntity(entity_t *ent)
         ent->PreThink(ent);
 
     switch ((int)ent->moveType) {
-    case MOVETYPE_PUSH:
-    case MOVETYPE_STOP:
+    case MoveType::Push:
+    case MoveType::Stop:
         SV_Physics_Pusher(ent);
         break;
-    case MOVETYPE_NONE:
+    case MoveType::None:
         SV_Physics_None(ent);
         break;
-    case MOVETYPE_NOCLIP:
-    case MOVETYPE_SPECTATOR:
+    case MoveType::NoClip:
+    case MoveType::Spectator:
         SV_Physics_Noclip(ent);
         break;
-    case MOVETYPE_STEP:
+    case MoveType::Step:
         SV_Physics_Step(ent);
         break;
-    case MOVETYPE_TOSS:
-    case MOVETYPE_BOUNCE:
-    case MOVETYPE_FLY:
-    case MOVETYPE_FLYMISSILE:
+    case MoveType::Toss:
+    case MoveType::Bounce:
+    case MoveType::Fly:
+    case MoveType::FlyMissile:
         SV_Physics_Toss(ent);
         break;
     default:

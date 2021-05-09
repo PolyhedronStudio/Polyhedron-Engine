@@ -129,7 +129,7 @@ void Con_Close(qboolean force)
     }
 
     // if not connected, console or menu should be up
-    if (cls.state < ca_active && !(cls.key_dest & KEY_MENU)) {
+    if (cls.state < CCS_ACTIVE && !(cls.key_dest & KEY_MENU)) {
         return;
     }
 
@@ -184,7 +184,7 @@ static void toggle_console(consoleMode_t mode, chatMode_t chat)
         return;
     }
 
-    if (mode == CON_CHAT && (cls.state != ca_active || cls.demo.playback)) {
+    if (mode == CON_CHAT && (cls.state != CCS_ACTIVE || cls.demo.playback)) {
         Com_Printf("You must be in a level to chat.\n");
         return;
     }
@@ -293,7 +293,7 @@ Con_MessageMode_f
 */
 static void start_message_mode(chatMode_t mode)
 {
-    if (cls.state != ca_active || cls.demo.playback) {
+    if (cls.state != CCS_ACTIVE || cls.demo.playback) {
         Com_Printf("You must be in a level to chat.\n");
         return;
     }
@@ -717,7 +717,7 @@ static void Con_DrawNotify(void)
     float   alpha;
 
     // only draw notify in game
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         return;
     }
     if (cls.key_dest & (KEY_MENU | KEY_CONSOLE)) {
@@ -797,13 +797,13 @@ static void Con_DrawSolidConsole(void)
         vislines = con.vidHeight;
 
 // setup transparency
-    if (cls.state >= ca_active && !(cls.key_dest & KEY_MENU) && con_alpha->value) {
+    if (cls.state >= CCS_ACTIVE && !(cls.key_dest & KEY_MENU) && con_alpha->value) {
         alpha = 0.5f + 0.5f * (con.currentHeight / con_height->value);
         R_SetAlpha(alpha * Cvar_ClampValue(con_alpha, 0, 1));
     }
 
 // draw the background
-    if (cls.state < ca_active || (cls.key_dest & KEY_MENU) || con_alpha->value) {
+    if (cls.state < CCS_ACTIVE || (cls.key_dest & KEY_MENU) || con_alpha->value) {
         R_DrawStretchPic(0, vislines - con.vidHeight,
                          con.vidWidth, con.vidHeight, con.backImage);
     }
@@ -886,11 +886,11 @@ static void Con_DrawSolidConsole(void)
         // draw it
         y = vislines - CON_PRESTEP + CHAR_HEIGHT * 2;
         R_DrawString(CHAR_WIDTH, y, 0, CON_LINEWIDTH, buffer, con.charsetImage);
-    } else if (cls.state == ca_loading) {
+    } else if (cls.state == CCS_LOADING) {
         // draw loading state
         switch (con.loadstate) {
         case LOAD_MAP:
-            text = cl.configstrings[CS_MODELS + 1];
+            text = cl.configstrings[ConfigStrings::Models+ 1];
             break;
         case LOAD_MODELS:
             text = "models";
@@ -994,12 +994,12 @@ void Con_RunConsole(void)
     }
 
     if (!(cls.key_dest & KEY_MENU)) {
-        if (cls.state == ca_disconnected) {
+        if (cls.state == CCS_DISCONNECTED) {
             // draw fullscreen console
             con.destHeight = con.currentHeight = 1;
             return;
         }
-        if (cls.state > ca_disconnected && cls.state < ca_active) {
+        if (cls.state > CCS_DISCONNECTED && cls.state < CCS_ACTIVE) {
             // draw half-screen console
             con.destHeight = con.currentHeight = 0.5f;
             return;
@@ -1084,7 +1084,7 @@ static void Con_Action(void)
     } else {
         if (con.mode == CON_REMOTE) {
             CL_SendRcon(&con.remoteAddress, con.remotePassword, cmd);
-        } else if (cls.state == ca_active && con.mode == CON_CHAT) {
+        } else if (cls.state == CCS_ACTIVE && con.mode == CON_CHAT) {
             Con_Say(cmd);
         } else {
             Cbuf_AddText(&cmd_buffer, cmd);
@@ -1094,7 +1094,7 @@ static void Con_Action(void)
 
     Con_Printf("]%s\n", cmd);
 
-    if (cls.state == ca_disconnected) {
+    if (cls.state == CCS_DISCONNECTED) {
         // force an update, because the command may take some time
         SCR_UpdateScreen();
     }

@@ -598,8 +598,8 @@ static void SCR_DrawDebugPMove(void)
     y = (scr.hud_height - 2 * CHAR_HEIGHT) / 2;
 
     i = cl.frame.playerState.pmove.type;
-    if (i > PM_FREEZE)
-        i = PM_FREEZE;
+    if (i > EnginePlayerMoveType::Freeze)
+        i = EnginePlayerMoveType::Freeze;
 
     R_DrawString(x, y, 0, MAX_STRING_CHARS, types[i], scr.font_pic);
     y += CHAR_HEIGHT;
@@ -663,7 +663,7 @@ static void SCR_TimeRefresh_f(void)
     unsigned    start, stop;
     float       time;
 
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         Com_Printf("No map loaded.\n");
         return;
     }
@@ -909,12 +909,12 @@ static void SCR_DrawActive(void)
         return;
 
     // draw black background if not active
-    if (cls.state < ca_active) {
+    if (cls.state < CCS_ACTIVE) {
         R_DrawFill8(0, 0, r_config.width, r_config.height, 0);
         return;
     }
 
-    if (cls.state == ca_cinematic) {
+    if (cls.state == CCS_CINEMATIC) {
         if (cl.precaches.images[0]) 
         {
             // scale the image to touch the screen from inside, keeping the aspect ratio

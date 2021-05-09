@@ -34,9 +34,9 @@ vec3_t P_ProjectSource(gclient_t* client, const vec3_t& point, const vec3_t& dis
 {
     vec3_t  _distance = distance;;
 
-    if (client->pers.hand == LEFT_HANDED)
+    if (client->persistent.hand == LEFT_HANDED)
         _distance[1] *= -1;
-    else if (client->pers.hand == CENTER_HANDED)
+    else if (client->persistent.hand == CENTER_HANDED)
         _distance[1] = 0;
 
     return G_ProjectSource(point, _distance, forward, right);

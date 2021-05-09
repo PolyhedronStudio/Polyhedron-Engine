@@ -83,7 +83,7 @@ constexpr int32_t MAX_PACKET_FRAMES = 4;
 constexpr int32_t MAX_PACKET_STRINGCMDS = 8;
 constexpr int32_t MAX_PACKET_USERINFOS = 8;
 
-constexpr int32_t CS_BITMAP_BYTES = (MAX_CONFIGSTRINGS / 8); // 260
+constexpr int32_t CS_BITMAP_BYTES = (ConfigStrings::MaxConfigStrings/ 8); // 260
 constexpr int32_t CS_BITMAP_LONGS = (CS_BITMAP_BYTES / 4);
 
 //==============================================

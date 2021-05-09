@@ -28,7 +28,7 @@ void UpdateChaseCam(entity_t *ent)
 
     // is our chase target gone?
     if (!ent->client->chase_target->inUse
-        || ent->client->chase_target->client->resp.spectator) {
+        || ent->client->chase_target->client->respawn.spectator) {
         entity_t *old = ent->client->chase_target;
         ChaseNext(ent);
         if (ent->client->chase_target == old) {
@@ -82,13 +82,13 @@ void UpdateChaseCam(entity_t *ent)
     }
 
     if (targ->deadFlag)
-        ent->client->playerState.pmove.type = PM_DEAD;
+        ent->client->playerState.pmove.type = EnginePlayerMoveType::Dead;
     else
-        ent->client->playerState.pmove.type = PM_FREEZE;
+        ent->client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
 
     VectorCopy(goal, ent->s.origin);
     for (i = 0 ; i < 3 ; i++)
-        ent->client->playerState.pmove.deltaAngles[i] = targ->client->v_angle[i] - ent->client->resp.cmd_angles[i];
+        ent->client->playerState.pmove.deltaAngles[i] = targ->client->v_angle[i] - ent->client->respawn.commandViewAngles[i];
 
     if (targ->deadFlag) {
         ent->client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
@@ -120,7 +120,7 @@ void ChaseNext(entity_t *ent)
         e = g_edicts + i;
         if (!e->inUse)
             continue;
-        if (!e->client->resp.spectator)
+        if (!e->client->respawn.spectator)
             break;
     } while (e != ent->client->chase_target);
 
@@ -144,7 +144,7 @@ void ChasePrev(entity_t *ent)
         e = g_edicts + i;
         if (!e->inUse)
             continue;
-        if (!e->client->resp.spectator)
+        if (!e->client->respawn.spectator)
             break;
     } while (e != ent->client->chase_target);
 
@@ -159,7 +159,7 @@ void GetChaseTarget(entity_t *ent)
 
     for (i = 1; i <= maxClients->value; i++) {
         other = g_edicts + i;
-        if (other->inUse && !other->client->resp.spectator) {
+        if (other->inUse && !other->client->respawn.spectator) {
             ent->client->chase_target = other;
             ent->client->update_chase = true;
             UpdateChaseCam(ent);

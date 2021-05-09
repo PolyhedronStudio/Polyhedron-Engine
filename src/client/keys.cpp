@@ -180,7 +180,7 @@ void Key_SetDest(keydest_t dest)
     int diff;
 
 // if not connected, console or menu should be up
-    if (cls.state < ca_active && !(dest & (KEY_MENU | KEY_CONSOLE))) {
+    if (cls.state < CCS_ACTIVE && !(dest & (KEY_MENU | KEY_CONSOLE))) {
         
         dest = (keydest_t)(dest | KEY_CONSOLE); // CPP: dest |= KEY_CONSOLE;
     }
@@ -691,7 +691,7 @@ void Key_Event(unsigned key, qboolean down, unsigned time)
         }
 
         if (cls.key_dest & KEY_CONSOLE) {
-            if (cls.state < ca_active && !(cls.key_dest & KEY_MENU)) {
+            if (cls.state < CCS_ACTIVE && !(cls.key_dest & KEY_MENU)) {
                 UI_OpenMenu(UIMENU_MAIN);
             } else {
                 Con_Close(true);
@@ -700,7 +700,7 @@ void Key_Event(unsigned key, qboolean down, unsigned time)
             UI_KeyEvent(key, down);
         } else if (cls.key_dest & KEY_MESSAGE) {
             Key_Message(key);
-        } else if (cls.state >= ca_active) {
+        } else if (cls.state >= CCS_ACTIVE) {
             UI_OpenMenu(UIMENU_GAME);
         } else {
             UI_OpenMenu(UIMENU_MAIN);
@@ -724,7 +724,7 @@ void Key_Event(unsigned key, qboolean down, unsigned time)
     }
 
     // skip the rest of the cinematic
-    if (cls.key_dest == KEY_GAME && cls.state == ca_cinematic && down) {
+    if (cls.key_dest == KEY_GAME && cls.state == CCS_CINEMATIC && down) {
         SCR_FinishCinematic();
     }
 

@@ -110,26 +110,26 @@ void CL_RegisterBspModels(void)
     char *name;
     int i;
 
-    ret = BSP_Load(cl.configstrings[CS_MODELS + 1], &cl.bsp);
+    ret = BSP_Load(cl.configstrings[ConfigStrings::Models+ 1], &cl.bsp);
     if (cl.bsp == NULL) {
         Com_Error(ERR_DROP, "Couldn't load %s: %s",
-                  cl.configstrings[CS_MODELS + 1], Q_ErrorString(ret));
+                  cl.configstrings[ConfigStrings::Models+ 1], Q_ErrorString(ret));
     }
 
 #if USE_MAPCHECKSUM
-    if (cl.bsp->checksum != atoi(cl.configstrings[CS_MAPCHECKSUM])) {
+    if (cl.bsp->checksum != atoi(cl.configstrings[ConfigStrings::MapCheckSum])) {
         if (cls.demo.playback) {
             Com_WPrintf("Local map version differs from demo: %i != %s\n",
-                        cl.bsp->checksum, cl.configstrings[CS_MAPCHECKSUM]);
+                        cl.bsp->checksum, cl.configstrings[ConfigStrings::MapCheckSum]);
         } else {
             Com_Error(ERR_DROP, "Local map version differs from server: %i != %s",
-                      cl.bsp->checksum, cl.configstrings[CS_MAPCHECKSUM]);
+                      cl.bsp->checksum, cl.configstrings[ConfigStrings::MapCheckSum]);
         }
     }
 #endif
 
     for (i = 1; i < MAX_MODELS; i++) {
-        name = cl.configstrings[CS_MODELS + i];
+        name = cl.configstrings[ConfigStrings::Models+ i];
         if (!name[0]) {
             break;
         }
@@ -179,7 +179,7 @@ void CL_PrepareMedia(void)
 
     SCR_UpdateScreen();
 
-	int cdtrack = atoi(cl.configstrings[CS_CDTRACK]);
+	int cdtrack = atoi(cl.configstrings[ConfigStrings::CdTrack]);
     OGG_PlayTrack(cdtrack);
 }
 
@@ -202,12 +202,12 @@ void CL_UpdateConfigstring(int index)
         return;
     }
 
-    if (index == CS_MAXCLIENTS) {
+    if (index == ConfigStrings::MaxClients) {
         cl.maxClients = atoi(s);
         return;
     }
 
-    if (index == CS_MODELS + 1) {
+    if (index == ConfigStrings::Models+ 1) {
         size_t len = strlen(s);
 
         if (len <= 9) {
@@ -220,23 +220,23 @@ void CL_UpdateConfigstring(int index)
 
     // Anything processed after this if statement is done so only when we're
     // not fully precached yet. 
-    if (cls.state < ca_precached) {
+    if (cls.state < CCS_PRECACHED) {
         return;
     }
 
     // TODO: Move all over to CG Module and ONLY
     // handle the BSP Model loading. EXAMPLE:
-    //if (index >= CS_MODELS + 2 && index < CS_MODELS + MAX_MODELS) {
+    //if (index >= ConfigStrings::Models+ 2 && index < ConfigStrings::Models+ MAX_MODELS) {
     //    if (*s == '*') {
-    //        int i = index - CS_MODELS;
+    //        int i = index - ConfigStrings::Models;
     //        cl.drawModels[i] = R_RegisterModel(s);
     //        cl.clipModels[i] = BSP_InlineModel(cl.bsp, s);
     //    }
     //    return;
     //}
     
-    if (index >= CS_MODELS + 2 && index < CS_MODELS + MAX_MODELS) {
-        int i = index - CS_MODELS;
+    if (index >= ConfigStrings::Models+ 2 && index < ConfigStrings::Models+ MAX_MODELS) {
+        int i = index - ConfigStrings::Models;
 
         cl.drawModels[i] = R_RegisterModel(s);
         if (*s == '*')
@@ -245,12 +245,12 @@ void CL_UpdateConfigstring(int index)
             cl.clipModels[i] = NULL;
         return;
     }
-    if (index >= CS_SOUNDS && index < CS_SOUNDS + MAX_SOUNDS) {
-        cl.precaches.sounds[index - CS_SOUNDS] = S_RegisterSound(s);
+    if (index >= ConfigStrings::Sounds&& index < ConfigStrings::Sounds+ MAX_SOUNDS) {
+        cl.precaches.sounds[index - ConfigStrings::Sounds] = S_RegisterSound(s);
         return;
     }
-    if (index >= CS_IMAGES && index < CS_IMAGES + MAX_IMAGES) {
-        cl.precaches.images[index - CS_IMAGES] = R_RegisterPic2(s);
+    if (index >= ConfigStrings::Images&& index < ConfigStrings::Images+ MAX_IMAGES) {
+        cl.precaches.images[index - ConfigStrings::Images] = R_RegisterPic2(s);
         return;
     }
 }

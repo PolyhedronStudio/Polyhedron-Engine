@@ -304,7 +304,7 @@ struct ClientState {
     qboolean    sendPacketNow;
 
     // Actual current client user command.
-    ClientUserCommand    cmd;
+    ClientUserCommand    clientUserCommand;
     // Actual current client user command list.
     ClientUserCommand    clientUserCommands[CMD_BACKUP];    // each mesage will send several old clientUserCommands
     // Current command number.
@@ -390,7 +390,7 @@ struct ClientState {
     refdef_t refdef;
     float    fov_x;      // Interpolated
     float    fov_y;      // Derived from fov_x assuming 4/3 aspect ratio
-    int32_t  lightlevel;
+    int32_t  lightLevel;
 
     // Updated in CLG_UpdateOrigin.
     vec3_t v_forward, v_right, v_up;    
@@ -419,8 +419,8 @@ struct ClientState {
     char    gamedir[MAX_QPATH];
     char        mapname[MAX_QPATH]; // short format - q2dm1, etc
 
-    char        baseConfigStrings[MAX_CONFIGSTRINGS][MAX_QPATH];
-    char        configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
+    char        baseConfigStrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
+    char        configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
 
 
 #if USE_AUTOREPLY

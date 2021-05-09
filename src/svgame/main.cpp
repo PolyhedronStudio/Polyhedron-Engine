@@ -431,7 +431,7 @@ void CheckDMRules(void)
             if (!g_edicts[i + 1].inUse)
                 continue;
 
-            if (cl->resp.score >= fraglimit->value) {
+            if (cl->respawn.score >= fraglimit->value) {
                 gi.BPrintf(PRINT_HIGH, "Fraglimit hit.\n");
                 EndDMLevel();
                 return;
@@ -464,8 +464,8 @@ void ExitLevel(void)
         ent = g_edicts + 1 + i;
         if (!ent->inUse)
             continue;
-        if (ent->health > ent->client->pers.maxHealth)
-            ent->health = ent->client->pers.maxHealth;
+        if (ent->health > ent->client->persistent.maxHealth)
+            ent->health = ent->client->persistent.maxHealth;
     }
 
 }

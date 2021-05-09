@@ -29,7 +29,7 @@ char *ClientTeam(entity_t *ent)
     if (!ent->client)
         return value;
 
-    strcpy(value, Info_ValueForKey(ent->client->pers.userinfo, "skin"));
+    strcpy(value, Info_ValueForKey(ent->client->persistent.userinfo, "skin"));
     p = strchr(value, '/');
     if (!p)
         return value;
@@ -75,8 +75,8 @@ void SelectNextItem(entity_t *ent, int itflags)
 
     // scan  for the next valid one
     for (i = 1 ; i <= MAX_ITEMS ; i++) {
-        index = (cl->pers.selected_item + i) % MAX_ITEMS;
-        if (!cl->pers.inventory[index])
+        index = (cl->persistent.selected_item + i) % MAX_ITEMS;
+        if (!cl->persistent.inventory[index])
             continue;
         it = &itemlist[index];
         if (!it->Use)
@@ -84,11 +84,11 @@ void SelectNextItem(entity_t *ent, int itflags)
         if (!(it->flags & itflags))
             continue;
 
-        cl->pers.selected_item = index;
+        cl->persistent.selected_item = index;
         return;
     }
 
-    cl->pers.selected_item = -1;
+    cl->persistent.selected_item = -1;
 }
 
 void SelectPrevItem(entity_t *ent, int itflags)
@@ -106,8 +106,8 @@ void SelectPrevItem(entity_t *ent, int itflags)
 
     // scan  for the next valid one
     for (i = 1 ; i <= MAX_ITEMS ; i++) {
-        index = (cl->pers.selected_item + MAX_ITEMS - i) % MAX_ITEMS;
-        if (!cl->pers.inventory[index])
+        index = (cl->persistent.selected_item + MAX_ITEMS - i) % MAX_ITEMS;
+        if (!cl->persistent.inventory[index])
             continue;
         it = &itemlist[index];
         if (!it->Use)
@@ -115,11 +115,11 @@ void SelectPrevItem(entity_t *ent, int itflags)
         if (!(it->flags & itflags))
             continue;
 
-        cl->pers.selected_item = index;
+        cl->persistent.selected_item = index;
         return;
     }
 
-    cl->pers.selected_item = -1;
+    cl->persistent.selected_item = -1;
 }
 
 void HUD_ValidateSelectedItem(entity_t *ent)
@@ -133,7 +133,7 @@ void HUD_ValidateSelectedItem(entity_t *ent)
 
     cl = ent->client;
 
-    if (cl->pers.inventory[cl->pers.selected_item])
+    if (cl->persistent.inventory[cl->persistent.selected_item])
         return;     // valid
 
     SelectNextItem(ent, -1);
@@ -191,7 +191,7 @@ void Cmd_Give_f(entity_t *ent)
                 continue;
             if (!(it->flags & IT_WEAPON))
                 continue;
-            ent->client->pers.inventory[i] += 1;
+            ent->client->persistent.inventory[i] += 1;
         }
         if (!give_all)
             return;
@@ -217,7 +217,7 @@ void Cmd_Give_f(entity_t *ent)
                 continue;
             if (it->flags & (IT_WEAPON | IT_AMMO))
                 continue;
-            ent->client->pers.inventory[i] = 1;
+            ent->client->persistent.inventory[i] = 1;
         }
         return;
     }
@@ -241,9 +241,9 @@ void Cmd_Give_f(entity_t *ent)
 
     if (it->flags & IT_AMMO) {
         if (gi.argc() == 3)
-            ent->client->pers.inventory[index] = atoi(gi.argv(2));
+            ent->client->persistent.inventory[index] = atoi(gi.argv(2));
         else
-            ent->client->pers.inventory[index] += it->quantity;
+            ent->client->persistent.inventory[index] += it->quantity;
     } else {
         it_ent = G_Spawn();
         it_ent->classname = it->classname;
@@ -317,11 +317,11 @@ void Cmd_Noclip_f(entity_t *ent)
         return;
     }
 
-    if (ent->moveType == MOVETYPE_NOCLIP) {
-        ent->moveType = MOVETYPE_WALK;
+    if (ent->moveType == MoveType::NoClip) {
+        ent->moveType = MoveType::Walk;
         gi.CPrintf(ent, PRINT_HIGH, "noclip OFF\n");
     } else {
-        ent->moveType = MOVETYPE_NOCLIP;
+        ent->moveType = MoveType::NoClip;
         gi.CPrintf(ent, PRINT_HIGH, "noclip ON\n");
     }
 }
@@ -351,7 +351,7 @@ void Cmd_Use_f(entity_t *ent)
         return;
     }
     index = ITEM_INDEX(it);
-    if (!ent->client->pers.inventory[index]) {
+    if (!ent->client->persistent.inventory[index]) {
         gi.CPrintf(ent, PRINT_HIGH, "Out of item: %s\n", s);
         return;
     }
@@ -384,7 +384,7 @@ void Cmd_Drop_f(entity_t *ent)
         return;
     }
     index = ITEM_INDEX(it);
-    if (!ent->client->pers.inventory[index]) {
+    if (!ent->client->persistent.inventory[index]) {
         gi.CPrintf(ent, PRINT_HIGH, "Out of item: %s\n", s);
         return;
     }
@@ -417,7 +417,7 @@ void Cmd_Inven_f(entity_t *ent)
 
     gi.WriteByte(svg_inventory);
     for (i = 0 ; i < MAX_ITEMS ; i++) {
-        gi.WriteShort(cl->pers.inventory[i]);
+        gi.WriteShort(cl->persistent.inventory[i]);
     }
     gi.Unicast(ent, true);
 }
@@ -433,12 +433,12 @@ void Cmd_InvUse_f(entity_t *ent)
 
     HUD_ValidateSelectedItem(ent);
 
-    if (ent->client->pers.selected_item == -1) {
+    if (ent->client->persistent.selected_item == -1) {
         gi.CPrintf(ent, PRINT_HIGH, "No item to use.\n");
         return;
     }
 
-    it = &itemlist[ent->client->pers.selected_item];
+    it = &itemlist[ent->client->persistent.selected_item];
     if (!it->Use) {
         gi.CPrintf(ent, PRINT_HIGH, "Item is not usable.\n");
         return;
@@ -460,15 +460,15 @@ void Cmd_WeapPrev_f(entity_t *ent)
 
     cl = ent->client;
 
-    if (!cl->pers.weapon)
+    if (!cl->persistent.weapon)
         return;
 
-    selected_weapon = ITEM_INDEX(cl->pers.weapon);
+    selected_weapon = ITEM_INDEX(cl->persistent.weapon);
 
     // scan  for the next valid one
     for (i = 1 ; i <= MAX_ITEMS ; i++) {
         index = (selected_weapon + i) % MAX_ITEMS;
-        if (!cl->pers.inventory[index])
+        if (!cl->persistent.inventory[index])
             continue;
         it = &itemlist[index];
         if (!it->Use)
@@ -476,7 +476,7 @@ void Cmd_WeapPrev_f(entity_t *ent)
         if (!(it->flags & IT_WEAPON))
             continue;
         it->Use(ent, it);
-        if (cl->pers.weapon == it)
+        if (cl->persistent.weapon == it)
             return; // successful
     }
 }
@@ -495,15 +495,15 @@ void Cmd_WeapNext_f(entity_t *ent)
 
     cl = ent->client;
 
-    if (!cl->pers.weapon)
+    if (!cl->persistent.weapon)
         return;
 
-    selected_weapon = ITEM_INDEX(cl->pers.weapon);
+    selected_weapon = ITEM_INDEX(cl->persistent.weapon);
 
     // scan  for the next valid one
     for (i = 1 ; i <= MAX_ITEMS ; i++) {
         index = (selected_weapon + MAX_ITEMS - i) % MAX_ITEMS;
-        if (!cl->pers.inventory[index])
+        if (!cl->persistent.inventory[index])
             continue;
         it = &itemlist[index];
         if (!it->Use)
@@ -511,7 +511,7 @@ void Cmd_WeapNext_f(entity_t *ent)
         if (!(it->flags & IT_WEAPON))
             continue;
         it->Use(ent, it);
-        if (cl->pers.weapon == it)
+        if (cl->persistent.weapon == it)
             return; // successful
     }
 }
@@ -529,11 +529,11 @@ void Cmd_WeapLast_f(entity_t *ent)
 
     cl = ent->client;
 
-    if (!cl->pers.weapon || !cl->pers.lastweapon)
+    if (!cl->persistent.weapon || !cl->persistent.lastweapon)
         return;
 
-    index = ITEM_INDEX(cl->pers.lastweapon);
-    if (!cl->pers.inventory[index])
+    index = ITEM_INDEX(cl->persistent.lastweapon);
+    if (!cl->persistent.inventory[index])
         return;
     it = &itemlist[index];
     if (!it->Use)
@@ -554,12 +554,12 @@ void Cmd_InvDrop_f(entity_t *ent)
 
     HUD_ValidateSelectedItem(ent);
 
-    if (ent->client->pers.selected_item == -1) {
+    if (ent->client->persistent.selected_item == -1) {
         gi.CPrintf(ent, PRINT_HIGH, "No item to drop.\n");
         return;
     }
 
-    it = &itemlist[ent->client->pers.selected_item];
+    it = &itemlist[ent->client->persistent.selected_item];
     if (!it->Drop) {
         gi.CPrintf(ent, PRINT_HIGH, "Item is not dropable.\n");
         return;
@@ -627,7 +627,7 @@ void Cmd_Players_f(entity_t *ent)
 
     count = 0;
     for (i = 0 ; i < maxClients->value ; i++)
-        if (game.clients[i].pers.connected) {
+        if (game.clients[i].persistent.connected) {
             index[count] = i;
             count++;
         }
@@ -641,7 +641,7 @@ void Cmd_Players_f(entity_t *ent)
     for (i = 0 ; i < count ; i++) {
         Q_snprintf(small, sizeof(small), "%3i %s\n",
                    game.clients[index[i]].playerState.stats[STAT_FRAGS],
-                   game.clients[index[i]].pers.netname);
+                   game.clients[index[i]].persistent.netname);
         if (strlen(small) + strlen(large) > sizeof(large) - 100) {
             // can't print all of them in one packet
             strcat(large, "...\n");
@@ -723,9 +723,9 @@ void Cmd_Say_f(entity_t *ent, qboolean team, qboolean arg0)
         team = false;
 
     if (team)
-        Q_snprintf(text, sizeof(text), "(%s): ", ent->client->pers.netname);
+        Q_snprintf(text, sizeof(text), "(%s): ", ent->client->persistent.netname);
     else
-        Q_snprintf(text, sizeof(text), "%s: ", ent->client->pers.netname);
+        Q_snprintf(text, sizeof(text), "%s: ", ent->client->persistent.netname);
 
     if (arg0) {
         strcat(text, gi.argv(0));
@@ -801,12 +801,12 @@ void Cmd_PlayerList_f(entity_t *ent)
             continue;
 
         Q_snprintf(st, sizeof(st), "%02d:%02d %4d %3d %s%s\n",
-                   (level.frameNumber - e2->client->resp.enterframe) / 600,
-                   ((level.frameNumber - e2->client->resp.enterframe) % 600) / 10,
+                   (level.frameNumber - e2->client->respawn.enterframe) / 600,
+                   ((level.frameNumber - e2->client->respawn.enterframe) % 600) / 10,
                    e2->client->ping,
-                   e2->client->resp.score,
-                   e2->client->pers.netname,
-                   e2->client->resp.spectator ? " (spectator)" : "");
+                   e2->client->respawn.score,
+                   e2->client->persistent.netname,
+                   e2->client->respawn.spectator ? " (spectator)" : "");
         if (strlen(text) + strlen(st) > sizeof(text) - 50) {
             sprintf(text + strlen(text), "And more...\n");
             gi.CPrintf(ent, PRINT_HIGH, "%s", text);

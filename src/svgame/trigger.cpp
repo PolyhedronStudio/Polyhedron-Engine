@@ -25,7 +25,7 @@ void InitTrigger(entity_t *self)
         UTIL_SetMoveDir(self->s.angles, self->moveDirection);
 
     self->solid = Solid::Trigger;
-    self->moveType = MOVETYPE_NONE;
+    self->moveType = MoveType::None;
     gi.SetModel(self, self->model);
     self->svFlags = SVF_NOCLIENT;
 }

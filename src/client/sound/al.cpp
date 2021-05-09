@@ -1001,7 +1001,7 @@ static void AL_AddLoopSounds(void)
 	vec3_t      origin;
 	float       dist;
 
-	if (cls.state != ca_active || sv_paused->integer || !s_ambient->integer) {
+	if (cls.state != CCS_ACTIVE || sv_paused->integer || !s_ambient->integer) {
 		return;
 	}
 

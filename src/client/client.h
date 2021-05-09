@@ -94,16 +94,16 @@ of server connections
 
 // Moved to shared/shared.h
 // typedef enum {
-//     ca_uninitialized,
-//     ca_disconnected,    // not talking to a server
-//     ca_challenging,     // sending getchallenge packets to the server
-//     ca_connecting,      // sending connect packets to the server
-//     ca_connected,       // netchan_t established, waiting for svc_serverdata
-//     ca_loading,         // loading level data
-//     ca_precached,       // loaded level data, waiting for svc_frame
-//     ca_active,          // game views should be displayed
-//     ca_cinematic        // running a cinematic
-// } connstate_t;
+//     CCS_UNINITIALIZED,
+//     CCS_DISCONNECTED,    // not talking to a server
+//     CCS_CHALLENGING,     // sending getchallenge packets to the server
+//     CCS_CONNECTING,      // sending connect packets to the server
+//     CCS_CONNECTED,       // netchan_t established, waiting for svc_serverdata
+//     CCS_LOADING,         // loading level data
+//     CCS_PRECACHED,       // loaded level data, waiting for svc_frame
+//     CCS_ACTIVE,          // game views should be displayed
+//     CCS_CINEMATIC        // running a cinematic
+// } ClientConnectionState;
 
 #define FOR_EACH_DLQ(q) \
     LIST_FOR_EACH(dlqueue_t, q, &cls.download.queue, entry)
@@ -136,7 +136,7 @@ typedef struct {
 } dlqueue_t;
 
 typedef struct client_static_s {
-    connstate_t state;
+    ClientConnectionState state;
     keydest_t   key_dest;
 
     active_t    active;
@@ -397,8 +397,8 @@ void CL_CheckForPause(void);
 void CL_UpdateFrameTimes(void);
 qboolean CL_CheckForIgnore(const char *s);
 void CL_WriteConfig(void);
-connstate_t CL_GetState (void);                     // WATISDEZE Added for CG Module.
-void        CL_SetState (connstate_t state);        // WATISDEZE Added for CG Module.
+ClientConnectionState CL_GetState (void);                     // WATISDEZE Added for CG Module.
+void        CL_SetState (ClientConnectionState state);        // WATISDEZE Added for CG Module.
 void        CL_SetLoadState (LoadState state);   // WATISDEZE Added for CG Module.
 
 //

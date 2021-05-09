@@ -554,7 +554,7 @@ void SCR_PlayCinematic(const char *name)
         return;
     }
 
-    cls.state = ca_cinematic;
+    cls.state = CCS_CINEMATIC;
 
     SCR_EndLoadingPlaque();     // get rid of loading plaque
     Con_Close(false);          // get rid of connection screen

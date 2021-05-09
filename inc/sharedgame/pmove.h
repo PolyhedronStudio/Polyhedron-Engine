@@ -54,7 +54,7 @@ extern const vec3_t PM_MAXS;
 //#define BUTTON_SCORE		(1 << 3)
 
 //
-// Game-specific flags for pm_state_t.flags.
+// Game-specific flags for PlayerMoveState.flags.
 //
 // Player Move Flags.
 constexpr int32_t PMF_DUCKED            = (PMF_GAME << 0);  // Player is ducked
@@ -71,7 +71,7 @@ constexpr int32_t PMF_GIBLET            = (PMF_GAME << 10); // Player is a gible
 constexpr int32_t PMF_TIME_TRICK_START  = (PMF_GAME << 11); // Time until we can initiate a trick jump
 
 //
-// The mask of pm_state_t.flags affecting pm_state_t.time.
+// The mask of PlayerMoveState.flags affecting PlayerMoveState.time.
 //
 constexpr int32_t PMF_TIME_MASK = (
     PMF_TIME_PUSHED |
@@ -95,14 +95,10 @@ constexpr int32_t PM_MAX_TOUCH_ENTS = 32;
 //-------------------
 typedef struct {
     // Movement command (in)
-    ClientUserCommand cmd;  
+    ClientUserCommand clientUserCommand;  
 
     // Movement state (in/out)
-    pm_state_t state;
-
-    // TODO: Do we need this still?
-    // If .s has changed outside of pmove, testInitial is true (in)
-    qboolean        testInitial;
+    PlayerMoveState state;
 
     // Hook pull speed (in)
     float hookPullSpeed;
@@ -122,14 +118,14 @@ typedef struct {
     
     float       step; // Traversed step height. (out)
 
-    // Water type and level (Ranges 0 - 3, 0 = no water..)
-    int         waterType;  
-    int         waterLevel; // Water Level (1 - 3)
+    // Water Type (lava, slime, water), and waterLevel.
+    int32_t waterType;  
+    int32_t waterLevel; // Water Level (1 - 3)
 
     // Callback functions for collision with the world and solid entities
     trace_t (*q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end);
     int     (*PointContents)(const vec3_t &point);
-} pm_move_t;
+} PlayerMove;
 
 
 
@@ -157,7 +153,7 @@ typedef struct {
 //
 // PMove functions.
 //
-void PMove(pm_move_t* pmove, pmoveParams_t* params);
+void PMove(PlayerMove* pmove, pmoveParams_t* params);
 
 // TODO: 
 void PMoveInit(pmoveParams_t* pmp);

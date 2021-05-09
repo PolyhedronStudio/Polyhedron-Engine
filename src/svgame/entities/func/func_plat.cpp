@@ -113,7 +113,7 @@ void plat_spawn_inside_trigger(entity_t* ent)
     //
     trigger = G_Spawn();
     trigger->Touch = Touch_Plat_Center;
-    trigger->moveType = MOVETYPE_NONE;
+    trigger->moveType = MoveType::None;
     trigger->solid = Solid::Trigger;
     trigger->enemy = ent;
 
@@ -167,7 +167,7 @@ void SP_func_plat(entity_t* ent)
 {
     VectorClear(ent->s.angles);
     ent->solid = Solid::BSP;
-    ent->moveType = MOVETYPE_PUSH;
+    ent->moveType = MoveType::Push;
 
     gi.SetModel(ent, ent->model);
 

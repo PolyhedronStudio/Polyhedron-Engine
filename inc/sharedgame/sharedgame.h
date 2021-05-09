@@ -35,6 +35,27 @@ constexpr uint8_t BUTTON_ANY			= (1 << 7);
 //=============================================================================
 //
 //-----------------
+// Brief Water Level.
+//-----------------
+struct WaterLevel {
+    static constexpr int32_t Unknown = -1;
+    static constexpr int32_t None = 0;
+    static constexpr int32_t Feet = 1;
+    static constexpr int32_t Waist = 2;
+    static constexpr int32_t Under = 3;
+};
+
+//-----------------
+// General player movement and capabilities classification.
+//-----------------
+struct PlayerMoveType {
+    static constexpr uint8_t Normal = 0;    // Walking, jumping, falling, swimming, etc.
+    static constexpr uint8_t Spectator= 1;  // Free-flying movement with acceleration and friction
+    static constexpr uint8_t Noclip = 2;    // Like PM_SPECTATOR, but noclips through walls
+    // All slots up till 32 are free for custom game PM_ defines.
+};
+
+//-----------------
 // EntityState->effects
 // Effects are things handled on the client side (lights, particles, 
 // frame animations) that happen constantly on the given entity.
@@ -68,7 +89,6 @@ struct EntityEffectType {
 // PlayerState->refdef flags
 #define RDF_UNDERWATER      1       // warp the screen as apropriate
 #define RDF_NOWORLDMODEL    2       // used for player configuration screen
-
 //ROGUE
 #define RDF_IRGOGGLES       4
 #define RDF_UVGOGGLES       8
@@ -78,8 +98,6 @@ struct EntityEffectType {
 // muzzle flashes / player effects
 //-----------------
 struct MuzzleFlashType {
-
-
     // These aren't weapons, but are effects displayed in the player's view.
     // Hence, as such, they are actually treated as muzzleflashes.
     static constexpr uint8_t Respawn = 0;

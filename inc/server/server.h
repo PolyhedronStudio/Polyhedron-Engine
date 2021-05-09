@@ -23,10 +23,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // WatIsDeze: Has been moved to shared/shared.h for the clgame dll.
 // typedef enum {
-//     ss_dead,            // no map loaded
-//     ss_loading,         // spawning level edicts
-//     ss_game,            // actively running
-//     ss_pic,             // showing static picture
+//     SS_DEAD,            // no map loaded
+//     SS_LOADING,         // spawning level edicts
+//     SS_GAME,            // actively running
+//     SS_PIC,             // showing static picture
 //     ss_broadcast,       // running MVD client
 //     ss_cinematic,
 // } ServerState;

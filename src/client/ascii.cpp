@@ -248,7 +248,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
                 Com_Error(ERR_DROP, "%s: invalid string index", __func__);
             }
             index = cl.frame.playerState.stats[index];
-            if (index < 0 || index >= MAX_CONFIGSTRINGS) {
+            if (index < 0 || index >= ConfigStrings::MaxConfigStrings) {
                 Com_Error(ERR_DROP, "%s: invalid string index", __func__);
             }
             len = strlen(cl.configstrings[index]);
@@ -298,7 +298,7 @@ static void SCR_ScoreShot_f(void)
     int i;
     qerror_t ret;
 
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         Com_Printf("Must be in a level.\n");
         return;
     }
@@ -335,7 +335,7 @@ static void SCR_ScoreShot_f(void)
         buffer[i * (TH_WIDTH + 1) + TH_WIDTH] = '\n';
     }
 
-    TH_DrawLayoutString(buffer, cl.configstrings[CS_STATUSBAR]);
+    TH_DrawLayoutString(buffer, cl.configstrings[ConfigStrings::StatusBar]);
     TH_DrawLayoutString(buffer, cl.layout);
 
     FS_Write(buffer, sizeof(buffer), f);
@@ -350,7 +350,7 @@ static void SCR_ScoreDump_f(void)
     char buffer[(TH_WIDTH + 1) * TH_HEIGHT];
     int i;
 
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         Com_Printf("Must be in a level.\n");
         return;
     }
@@ -361,7 +361,7 @@ static void SCR_ScoreDump_f(void)
     }
     buffer[i * (TH_WIDTH + 1) + TH_WIDTH] = 0;
 
-    TH_DrawLayoutString(buffer, cl.configstrings[CS_STATUSBAR]);
+    TH_DrawLayoutString(buffer, cl.configstrings[ConfigStrings::StatusBar]);
     TH_DrawLayoutString(buffer, cl.layout);
 
     Com_Printf("%s\n", buffer);

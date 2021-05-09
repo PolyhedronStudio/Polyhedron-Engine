@@ -131,7 +131,7 @@ void SP_misc_explobox(entity_t* self)
     gi.ModelIndex("models/objects/debris3/tris.md2");
 
     self->solid = Solid::BoundingBox;
-    self->moveType = MOVETYPE_STEP;
+    self->moveType = MoveType::Step;
 
     self->model = "models/objects/barrels/tris.md2";
     self->s.modelindex = gi.ModelIndex(self->model);

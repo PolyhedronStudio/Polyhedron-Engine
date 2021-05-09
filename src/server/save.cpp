@@ -46,7 +46,7 @@ static int write_server_file(qboolean autosave)
     MSG_WriteLong(timestamp & 0xffffffff);
     MSG_WriteLong(timestamp >> 32);
     MSG_WriteByte(autosave);
-    MSG_WriteString(sv.configstrings[CS_NAME]);
+    MSG_WriteString(sv.configstrings[ConfigStrings::Name]);
 
     // write the mapcmd
     MSG_WriteString(sv.mapcmd);
@@ -96,7 +96,7 @@ static int write_level_file(void)
     MSG_WriteLong(SAVE_VERSION);
 
     // write configstrings
-    for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
+    for (i = 0; i < ConfigStrings::MaxConfigStrings; i++) {
         s = sv.configstrings[i];
         if (!s[0])
             continue;
@@ -109,7 +109,7 @@ static int write_level_file(void)
         MSG_WriteData(s, len);
         MSG_WriteByte(0);
     }
-    MSG_WriteShort(MAX_CONFIGSTRINGS);
+    MSG_WriteShort(ConfigStrings::MaxConfigStrings);
 
     len = CM_WritePortalBits(&sv.cm, portalbits);
     MSG_WriteByte(len);
@@ -423,10 +423,10 @@ static int read_level_file(void)
     // read all configstrings
     while (1) {
         index = MSG_ReadShort();
-        if (index == MAX_CONFIGSTRINGS)
+        if (index == ConfigStrings::MaxConfigStrings)
             break;
 
-        if (index < 0 || index > MAX_CONFIGSTRINGS)
+        if (index < 0 || index > ConfigStrings::MaxConfigStrings)
             Com_Error(ERR_DROP, "Bad savegame configstring index");
 
         maxlen = CS_SIZE(index);
@@ -476,7 +476,7 @@ void SV_AutoSaveBegin(MapCommand *cmd)
         return;
     }
 
-    if (sv.state != ss_game)
+    if (sv.state != SS_GAME)
         return;
 
     if (SV_NoSaveGames())
@@ -508,7 +508,7 @@ void SV_AutoSaveBegin(MapCommand *cmd)
 
 void SV_AutoSaveEnd(void)
 {
-    if (sv.state != ss_game)
+    if (sv.state != SS_GAME)
         return;
 
     if (SV_NoSaveGames())
@@ -624,7 +624,7 @@ static void SV_Savegame_f(void)
 {
     const char *dir;
 
-    if (sv.state != ss_game) {
+    if (sv.state != SS_GAME) {
         Com_Printf("You must be in a game to save.\n");
         return;
     }

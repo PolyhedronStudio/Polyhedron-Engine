@@ -43,7 +43,7 @@ void SP_trigger_multiple(entity_t* ent)
     if (!ent->wait)
         ent->wait = 0.2;
     ent->Touch = Touch_Multi;
-    ent->moveType = MOVETYPE_NONE;
+    ent->moveType = MoveType::None;
     ent->svFlags |= SVF_NOCLIENT;
 
 

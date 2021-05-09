@@ -325,7 +325,7 @@ void monster_triggered_spawn(entity_t *self)
     KillBox(self);
 
     self->solid = Solid::BoundingBox;
-    self->moveType = MOVETYPE_STEP;
+    self->moveType = MoveType::Step;
     self->svFlags &= ~SVF_NOCLIENT;
     self->air_finished = level.time + 12;
     gi.LinkEntity(self);
@@ -352,7 +352,7 @@ void monster_triggered_spawn_use(entity_t *self, entity_t *other, entity_t *acti
 void monster_triggered_start(entity_t *self)
 {
     self->solid = Solid::Not;
-    self->moveType = MOVETYPE_NONE;
+    self->moveType = MoveType::None;
     self->svFlags |= SVF_NOCLIENT;
     self->nextThink = 0;
     self->Use = monster_triggered_spawn_use;

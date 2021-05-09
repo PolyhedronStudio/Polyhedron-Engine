@@ -158,7 +158,7 @@ void UI_PopMenu(void)
         UI_ForceMenuOff();
 
 		// Save the config file if the user closes the menu while in-game
-		if (cls.state >= ca_active) {
+		if (cls.state >= CCS_ACTIVE) {
 			CL_WriteConfig();
 		}
 

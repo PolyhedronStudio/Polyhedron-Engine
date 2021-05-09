@@ -164,34 +164,34 @@ void SV_SpawnServer(MapCommand *cmd)
     svs.next_entity = 0;
 
     // save name for levels that don't set message
-    Q_strlcpy(sv.configstrings[CS_NAME], cmd->server, MAX_QPATH);
+    Q_strlcpy(sv.configstrings[ConfigStrings::Name], cmd->server, MAX_QPATH);
     Q_strlcpy(sv.name, cmd->server, sizeof(sv.name));
     Q_strlcpy(sv.mapcmd, cmd->buffer, sizeof(sv.mapcmd));
 
     if (Cvar_VariableInteger("deathmatch")) {
-        sprintf(sv.configstrings[CS_AIRACCEL], "%d", sv_airaccelerate->integer);
+        sprintf(sv.configstrings[ConfigStrings::AirAcceleration], "%d", sv_airaccelerate->integer);
     } else {
-        strcpy(sv.configstrings[CS_AIRACCEL], "0");
+        strcpy(sv.configstrings[ConfigStrings::AirAcceleration], "0");
     }
 
     resolve_masters();
 
-    if (cmd->state == ss_game) {
+    if (cmd->state == SS_GAME) {
         override_entity_string(cmd->server);
 
         sv.cm = cmd->cm;
-        sprintf(sv.configstrings[CS_MAPCHECKSUM], "%d", (int)sv.cm.cache->checksum);
+        sprintf(sv.configstrings[ConfigStrings::MapCheckSum], "%d", (int)sv.cm.cache->checksum);
 
         // set inline model names
-        Q_concat(sv.configstrings[CS_MODELS + 1], MAX_QPATH, "maps/", cmd->server, ".bsp", NULL);
+        Q_concat(sv.configstrings[ConfigStrings::Models+ 1], MAX_QPATH, "maps/", cmd->server, ".bsp", NULL);
         for (i = 1; i < sv.cm.cache->nummodels; i++) {
-            sprintf(sv.configstrings[CS_MODELS + 1 + i], "*%d", i);
+            sprintf(sv.configstrings[ConfigStrings::Models+ 1 + i], "*%d", i);
         }
 
         entityString = sv.entityString ? sv.entityString : sv.cm.cache->entityString;
     } else {
         // no real map
-        strcpy(sv.configstrings[CS_MAPCHECKSUM], "0");
+        strcpy(sv.configstrings[ConfigStrings::MapCheckSum], "0");
         entityString = ""; // C++20: Added cast.
     }
 
@@ -206,7 +206,7 @@ void SV_SpawnServer(MapCommand *cmd)
 
     // precache and static commands can be issued during
     // map initialization
-    sv.state = ss_loading;
+    sv.state = SS_LOADING;
 
     // load and spawn all other entities
     ge->SpawnEntities(sv.name, entityString, cmd->spawnpoint);
@@ -216,7 +216,7 @@ void SV_SpawnServer(MapCommand *cmd)
     ge->RunFrame(); sv.frameNumber++;
 
     // make sure maxClients string is correct
-    sprintf(sv.configstrings[CS_MAXCLIENTS], "%d", sv_maxclients->integer);
+    sprintf(sv.configstrings[ConfigStrings::MaxClients], "%d", sv_maxclients->integer);
 
     // check for a savegame
     SV_CheckForSavegame(cmd);
@@ -295,7 +295,7 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
         } else {
             ret = FS_LoadFile(expanded, NULL);
         }
-        cmd->state = ss_pic;
+        cmd->state = SS_PIC;
     } 
     else if (!COM_CompareExtension(s, ".cin")) {
         ret = Q_ERR_SUCCESS;
@@ -308,7 +308,7 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
         } else {
             ret = CM_LoadMap(&cmd->cm, expanded);
         }
-        cmd->state = ss_game;
+        cmd->state = SS_GAME;
     }
 
     if (ret < 0) {

@@ -215,7 +215,7 @@ qboolean CL_ForwardToServer(void)
     const char    *cmd; // C++20: STRING: Added const to char*
 
     cmd = Cmd_Argv(0);
-    if (cls.state != ca_active || *cmd == '-' || *cmd == '+') {
+    if (cls.state != CCS_ACTIVE || *cmd == '-' || *cmd == '+') {
         return false;
     }
 
@@ -230,7 +230,7 @@ CL_ForwardToServer_f
 */
 static void CL_ForwardToServer_f(void)
 {
-    if (cls.state < ca_connected) {
+    if (cls.state < CCS_CONNECTED) {
         Com_Printf("Can't \"%s\", not connected\n", Cmd_Argv(0));
         return;
     }
@@ -283,7 +283,7 @@ void CL_CheckForResend(void)
 
     // if the local server is running and we aren't
     // then connect
-    if (cls.state < ca_connecting && sv_running->integer > ss_loading) {
+    if (cls.state < CCS_CONNECTING && sv_running->integer > SS_LOADING) {
         strcpy(cls.servername, "localhost");
         cls.serverAddress.type = NA_LOOPBACK;
         cls.serverProtocol = cl_protocol->integer;
@@ -293,7 +293,7 @@ void CL_CheckForResend(void)
         }
 
         // we don't need a challenge on the localhost
-        cls.state = ca_connecting;
+        cls.state = CCS_CONNECTING;
         cls.timeOfInitialConnect -= CONNECT_FAST;
         cls.connect_count = 0;
 
@@ -304,7 +304,7 @@ void CL_CheckForResend(void)
     }
 
     // resend if we haven't gotten a reply yet
-    if (cls.state != ca_connecting && cls.state != ca_challenging) {
+    if (cls.state != CCS_CONNECTING && cls.state != CCS_CHALLENGING) {
         return;
     }
 
@@ -315,7 +315,7 @@ void CL_CheckForResend(void)
     cls.timeOfInitialConnect = cls.realtime;    // for retransmit requests
     cls.connect_count++;
 
-    if (cls.state == ca_challenging) {
+    if (cls.state == CCS_CHALLENGING) {
         Com_Printf("Requesting challenge... %i\n", cls.connect_count);
         OOB_PRINT(NS_CLIENT, &cls.serverAddress, "getchallenge\n");
         return;
@@ -445,7 +445,7 @@ usage:
     cls.serverProtocol = protocol;
     cls.protocolVersion = 0;
     cls.passive = false;
-    cls.state = ca_challenging;
+    cls.state = CCS_CHALLENGING;
     cls.timeOfInitialConnect -= CONNECT_FAST;
     cls.connect_count = 0;
 
@@ -572,7 +572,7 @@ static void CL_Rcon_c(genctx_t *ctx, int argnum)
 // Returns the current state of the client.
 //===============
 //
-connstate_t     CL_GetState (void) {
+ClientConnectionState     CL_GetState (void) {
     return cls.state;
 }
 
@@ -583,7 +583,7 @@ connstate_t     CL_GetState (void) {
 // Sets the current state of the client.
 //===============
 //
-void CL_SetState (connstate_t state) {
+void CL_SetState (ClientConnectionState state) {
     cls.state = state;
 }
 
@@ -622,8 +622,8 @@ void CL_ClearState(void)
     memset(&cl, 0, sizeof(cl));
     memset(&cs.entities, 0, sizeof(cs.entities));
 
-    if (cls.state > ca_connected) {
-        cls.state = ca_connected;
+    if (cls.state > CCS_CONNECTED) {
+        cls.state = CCS_CONNECTED;
         CL_CheckForPause();
         CL_UpdateFrameTimes();
     }
@@ -663,7 +663,7 @@ void CL_Disconnect(ErrorType type)
     CL_GM_ClientDisconnect();
     //SCR_ClearChatHUD_f();   // clear chat HUD on server change
 
-    if (cls.state > ca_disconnected && !cls.demo.playback) {
+    if (cls.state > CCS_DISCONNECTED && !cls.demo.playback) {
         EXEC_TRIGGER(cl_disconnectcmd);
     }
 
@@ -701,7 +701,7 @@ void CL_Disconnect(ErrorType type)
 
     CL_ClearState();
 
-    cls.state = ca_disconnected;
+    cls.state = CCS_DISCONNECTED;
 
     cl.snd_is_underwater = false; // OAL: Moved to client.
 
@@ -725,7 +725,7 @@ CL_Disconnect_f
 */
 static void CL_Disconnect_f(void)
 {
-    if (cls.state > ca_disconnected) {
+    if (cls.state > CCS_DISCONNECTED) {
         Com_Error(ERR_DISCONNECT, "Disconnected from server");
     }
 }
@@ -889,10 +889,10 @@ static void CL_ParsePrintMessage(void)
 
     // Finally, check is this is response from the server we are connecting to
     // and if so, start channenge cycle again
-    if ((cls.state == ca_challenging || cls.state == ca_connecting) &&
+    if ((cls.state == CCS_CHALLENGING || cls.state == CCS_CONNECTING) &&
         NET_IsEqualBaseAdr(&net_from, &cls.serverAddress)) {
         Com_Printf("%s", string);
-        cls.state = ca_challenging;
+        cls.state = CCS_CHALLENGING;
         //cls.connect_count = 0;
         return;
     }
@@ -989,7 +989,7 @@ static void CL_Changing_f(void)
     int i, j;
     const char *s; // C++20: STRING: Added const to char*
 
-    if (cls.state < ca_connected) {
+    if (cls.state < CCS_CONNECTED) {
         return;
     }
 
@@ -1007,9 +1007,9 @@ static void CL_Changing_f(void)
 
     SCR_BeginLoadingPlaque();
 
-    cls.state = ca_connected;   // not active anymore, but not disconnected
+    cls.state = CCS_CONNECTED;   // not active anymore, but not disconnected
     cl.mapname[0] = 0;
-    cl.configstrings[CS_NAME][0] = 0;
+    cl.configstrings[ConfigStrings::Name][0] = 0;
 
     CL_CheckForPause();
 
@@ -1037,12 +1037,12 @@ The server is changing levels
 */
 static void CL_Reconnect_f(void)
 {
-    if (cls.state >= ca_precached) {
+    if (cls.state >= CCS_PRECACHED) {
         CL_Disconnect(ERR_RECONNECT);
     }
 
-    if (cls.state >= ca_connected) {
-        cls.state = ca_connected;
+    if (cls.state >= CCS_CONNECTED) {
+        cls.state = CCS_CONNECTED;
 
         if (cls.demo.playback) {
             return;
@@ -1069,7 +1069,7 @@ static void CL_Reconnect_f(void)
 
     Com_Printf("Reconnecting...\n");
 
-    cls.state = ca_challenging;
+    cls.state = CCS_CHALLENGING;
     cls.timeOfInitialConnect -= CONNECT_FAST;
     cls.connect_count = 0;
 
@@ -1142,7 +1142,7 @@ static void CL_Name_g(genctx_t *ctx)
     ClientInfo *ci;
     char buffer[MAX_CLIENT_NAME];
 
-    if (cls.state < ca_loading) {
+    if (cls.state < CCS_LOADING) {
         return;
     }
 
@@ -1193,7 +1193,7 @@ static void CL_ConnectionlessPacket(void)
     if (!strcmp(c, "challenge")) {
         int mask = 0;
 
-        if (cls.state < ca_challenging) {
+        if (cls.state < CCS_CHALLENGING) {
             Com_DPrintf("Challenge received while not connecting.  Ignored.\n");
             return;
         }
@@ -1201,13 +1201,13 @@ static void CL_ConnectionlessPacket(void)
             Com_DPrintf("Challenge from different address.  Ignored.\n");
             return;
         }
-        if (cls.state > ca_challenging) {
+        if (cls.state > CCS_CHALLENGING) {
             Com_DPrintf("Dup challenge received.  Ignored.\n");
             return;
         }
 
         cls.challenge = atoi(Cmd_Argv(1));
-        cls.state = ca_connecting;
+        cls.state = CCS_CONNECTING;
         cls.timeOfInitialConnect -= CONNECT_INSTANT; // fire immediately
         //cls.connect_count = 0;
 
@@ -1261,7 +1261,7 @@ static void CL_ConnectionlessPacket(void)
         char mapname[MAX_QPATH];
         qboolean got_server = false;
 
-        if (cls.state < ca_connecting) {
+        if (cls.state < CCS_CONNECTING) {
             Com_DPrintf("Connect received while not connecting.  Ignored.\n");
             return;
         }
@@ -1269,7 +1269,7 @@ static void CL_ConnectionlessPacket(void)
             Com_DPrintf("Connect from different address.  Ignored.\n");
             return;
         }
-        if (cls.state > ca_connecting) {
+        if (cls.state > CCS_CONNECTING) {
             Com_DPrintf("Dup connect received.  Ignored.\n");
             return;
         }
@@ -1319,7 +1319,7 @@ static void CL_ConnectionlessPacket(void)
                                     cls.quakePort, 1024, cls.serverProtocol);
 
         CL_ClientCommand("new");
-        cls.state = ca_connected;
+        cls.state = CCS_CONNECTED;
         cls.connect_count = 0;
         strcpy(cl.mapname, mapname);   // for levelshot screen
         return;
@@ -1338,7 +1338,7 @@ static void CL_ConnectionlessPacket(void)
         Q_strlcpy(cls.servername, s, sizeof(cls.servername));
         cls.passive = false;
 
-        cls.state = ca_challenging;
+        cls.state = CCS_CHALLENGING;
         cls.timeOfInitialConnect -= CONNECT_FAST;
         cls.connect_count = 0;
 
@@ -1376,7 +1376,7 @@ static void CL_PacketEvent(void)
         return;
     }
 
-    if (cls.state < ca_connected) {
+    if (cls.state < CCS_CONNECTED) {
         return;
     }
 
@@ -1430,7 +1430,7 @@ void CL_ErrorEvent(netadr_t *from)
     //
     // error packet from server
     //
-    if (cls.state < ca_connected) {
+    if (cls.state < CCS_CONNECTED) {
         return;
     }
     if (!cls.netchan) {
@@ -1610,7 +1610,7 @@ void CL_Begin(void)
 
     // Set state to precached and send over a begin command.
     CL_LoadState(LOAD_NONE);
-    cls.state = ca_precached;
+    cls.state = CCS_PRECACHED;
     CL_ClientCommand(va("begin %i\n", precache_spawncount));
 
     // Inform CG Module.
@@ -1627,11 +1627,11 @@ before allowing the client into the server
 */
 static void CL_Precache_f(void)
 {
-    if (cls.state < ca_connected) {
+    if (cls.state < CCS_CONNECTED) {
         return;
     }
 
-    cls.state = ca_loading;
+    cls.state = CCS_LOADING;
     CL_LoadState(LOAD_MAP);
 
     S_StopAllSounds();
@@ -1641,7 +1641,7 @@ static void CL_Precache_f(void)
         CL_RegisterBspModels();
         CL_PrepareMedia();
         CL_LoadState(LOAD_NONE);
-        cls.state = ca_precached;
+        cls.state = CCS_PRECACHED;
         return;
     }
 
@@ -1650,8 +1650,8 @@ static void CL_Precache_f(void)
     CL_ResetPrecacheCheck();
     CL_RequestNextDownload();
 
-    if (cls.state != ca_precached) {
-        cls.state = ca_connected;
+    if (cls.state != CCS_PRECACHED) {
+        cls.state = CCS_CONNECTED;
     }
 }
 
@@ -1892,7 +1892,7 @@ static void CL_DumpClients_f(void)
 {
     int i;
 
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         Com_Printf("Must be in a level to dump.\n");
         return;
     }
@@ -1910,7 +1910,7 @@ static void dump_program(const char *text, const char *name)
 {
     char buffer[MAX_OSPATH];
 
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         Com_Printf("Must be in a level to dump.\n");
         return;
     }
@@ -1933,7 +1933,7 @@ static void dump_program(const char *text, const char *name)
 
 static void CL_DumpStatusbar_f(void)
 {
-    dump_program(cl.configstrings[CS_STATUSBAR], "status bar");
+    dump_program(cl.configstrings[ConfigStrings::StatusBar], "status bar");
 }
 
 static void CL_DumpLayout_f(void)
@@ -2232,8 +2232,8 @@ void CL_RestartFilesystem(qboolean total)
 
     // temporary switch to loading state
     cls_state = cls.state;
-    if (cls.state >= ca_precached) {
-        cls.state = ca_loading;
+    if (cls.state >= CCS_PRECACHED) {
+        cls.state = CCS_LOADING;
     }
 
     Con_Popup(false);
@@ -2263,23 +2263,23 @@ void CL_RestartFilesystem(qboolean total)
         FS_Restart(total);
     }
 
-    if (cls_state == ca_disconnected) {
+    if (cls_state == CCS_DISCONNECTED) {
         UI_OpenMenu(UIMENU_DEFAULT);
-    } else if (cls_state >= ca_loading && cls_state <= ca_active) {
+    } else if (cls_state >= CCS_LOADING && cls_state <= CCS_ACTIVE) {
         CL_LoadState(LOAD_MAP);
         CL_PrepareMedia();
         // Moved tl CL_PrepareMedia
         // CL_LoadState(LOAD_SOUNDS);
         // CL_RegisterSounds();
         CL_LoadState(LOAD_NONE);
-    } else if (cls_state == ca_cinematic) {
+    } else if (cls_state == CCS_CINEMATIC) {
         cl.precaches.images[0] = R_RegisterPic2(cl.mapname);
     }
 
     CL_LoadDownloadIgnores();
 
     // switch back to original state
-    cls.state = (connstate_t)cls_state; // CPP:
+    cls.state = (ClientConnectionState)cls_state; // CPP:
 
     Con_Close(false);
 
@@ -2298,8 +2298,8 @@ void CL_RestartRefresh(qboolean total)
 
     // temporary switch to loading state
     cls_state = cls.state;
-    if (cls.state >= ca_precached) {
-        cls.state = ca_loading;
+    if (cls.state >= CCS_PRECACHED) {
+        cls.state = CCS_LOADING;
     }
 
     Con_Popup(false);
@@ -2325,18 +2325,18 @@ void CL_RestartRefresh(qboolean total)
 
     }
 
-    if (cls_state == ca_disconnected) {
+    if (cls_state == CCS_DISCONNECTED) {
         UI_OpenMenu(UIMENU_DEFAULT);
-    } else if (cls_state >= ca_loading && cls_state <= ca_active) {
+    } else if (cls_state >= CCS_LOADING && cls_state <= CCS_ACTIVE) {
         CL_LoadState(LOAD_MAP);
         CL_PrepareMedia();
         CL_LoadState(LOAD_NONE);
-    } else if (cls_state == ca_cinematic) {
+    } else if (cls_state == CCS_CINEMATIC) {
         cl.precaches.images[0] = R_RegisterPic2(cl.mapname);
     }
 
     // switch back to original state
-    cls.state = (connstate_t)cls_state; // CPP:
+    cls.state = (ClientConnectionState)cls_state; // CPP:
 
     Con_Close(false);
 
@@ -2491,7 +2491,7 @@ static void CL_InitLocal(void)
     cvar_t *var;
     int i;
 
-    cls.state = ca_disconnected;
+    cls.state = CCS_DISCONNECTED;
     cls.timeOfInitialConnect -= CONNECT_INSTANT;
 
     // Initialize the rest of the client.
@@ -2606,7 +2606,7 @@ CL_CheatsOK
 qboolean CL_CheatsOK(void)
 {
     // can cheat when disconnected or playing a demo
-    if (cls.state < ca_connected || cls.demo.playback)
+    if (cls.state < CCS_CONNECTED || cls.demo.playback)
         return true;
 
     // can't cheat on remote servers
@@ -2618,7 +2618,7 @@ qboolean CL_CheatsOK(void)
         return true;
 
     // single player can cheat
-    if (cls.state > ca_connected && cl.maxClients == 1)
+    if (cls.state > CCS_CONNECTED && cl.maxClients == 1)
         return true;
 
     return false;
@@ -2762,7 +2762,7 @@ CL_CheckForPause
 */
 void CL_CheckForPause(void)
 {
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         // only pause when active
         Cvar_Set("cl_paused", "0");
         Cvar_Set("sv_paused", "0");
@@ -2863,7 +2863,7 @@ void CL_UpdateFrameTimes(void)
         ref_msec = phys_msec = 0;
         main_msec = fps_to_msec(20);
         sync_mode = SYNC_SLEEP_20;
-    } else if (cls.active == ACT_RESTORED || cls.state != ca_active) {
+    } else if (cls.active == ACT_RESTORED || cls.state != CCS_ACTIVE) {
         // run at 60 fps if not active
         ref_msec = phys_msec = 0;
         if (cl_async->integer > 1) {
@@ -3010,7 +3010,7 @@ unsigned CL_Frame(unsigned msec)
         CL_DemoFrame(main_extra);
 
     // Calculate local time
-	if (cls.state == ca_active && !sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2))
+	if (cls.state == CCS_ACTIVE && !sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2))
         CL_SetClientTime();
 
 #if USE_AUTOREPLY

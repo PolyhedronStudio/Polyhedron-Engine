@@ -366,7 +366,7 @@ void fire_blaster(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int
         bolt->spawnFlags = 1;
     bolt->svFlags = SVF_DEADMONSTER;    // Set Dead Monster flag so the projectiles 
                                         // won't clip against players.
-    bolt->moveType = MOVETYPE_FLYMISSILE;   // Movetype FLYMISSILE
+    bolt->moveType = MoveType::FlyMissile;   // Movetype FLYMISSILE
     bolt->clipMask = CONTENTS_MASK_SHOT;    // CONTENTS_MASK_SHOT
     bolt->solid = Solid::BoundingBox;               // Solid::BoundingBox
     bolt->s.effects |= effect;              // Apply effect argument to entity.

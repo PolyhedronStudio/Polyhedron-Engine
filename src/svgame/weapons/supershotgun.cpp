@@ -65,7 +65,7 @@ void weapon_supershotgun_fire(entity_t* ent)
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
-        ent->client->pers.inventory[ent->client->ammo_index] -= 2;
+        ent->client->persistent.inventory[ent->client->ammo_index] -= 2;
 }
 
 void Weapon_SuperShotgun(entity_t* ent)

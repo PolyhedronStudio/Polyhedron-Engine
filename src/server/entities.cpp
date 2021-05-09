@@ -200,7 +200,7 @@ void SV_WriteFrameToClient(client_t *client)
 
     // ignore some parts of playerstate if not recording demo
     psFlags = (msgPsFlags_t)0; // CPP: Cast
-    if (frame->playerState.pmove.type < PM_DEAD) {
+    if (frame->playerState.pmove.type < EnginePlayerMoveType::Dead) {
         if (!(frame->playerState.pmove.flags & PMF_NO_PREDICTION)) {
             psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_VIEWANGLES);  // CPP: Cast
         }
@@ -211,7 +211,7 @@ void SV_WriteFrameToClient(client_t *client)
 
     // Fetch client entity number.
     clientEntityNum = 0;
-    if (frame->playerState.pmove.type < PM_DEAD) {
+    if (frame->playerState.pmove.type < EnginePlayerMoveType::Dead) {
         clientEntityNum = frame->clientNumber + 1;
     }
     suppressed = client->frameFlags;

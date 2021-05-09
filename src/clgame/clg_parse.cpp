@@ -294,7 +294,7 @@ static void CLG_ParseCenterPrint(void)
 //===============
 //
 qboolean CLG_UpdateConfigString(int index, const char *str) {
-    if (index == CS_AIRACCEL) {
+    if (index == ConfigStrings::AirAcceleration) {
         if (clg.pmoveParams.qwmode)
             clg.pmoveParams.airaccelerate = true;
         else
@@ -303,19 +303,19 @@ qboolean CLG_UpdateConfigString(int index, const char *str) {
     }
 
 #if USE_LIGHTSTYLES
-    if (index >= CS_LIGHTS && index < CS_LIGHTS + MAX_LIGHTSTYLES) {
-        CLG_SetLightStyle(index - CS_LIGHTS, str);
+    if (index >= ConfigStrings::Lights&& index < ConfigStrings::Lights+ MAX_LIGHTSTYLES) {
+        CLG_SetLightStyle(index - ConfigStrings::Lights, str);
         return true;
     }
 #endif
     // In case we aren't precaching, but got updated configstrings by the
     // server, we reload them.
-    if (clgi.GetClienState() < ca_precached) {
+    if (clgi.GetClienState() < CCS_PRECACHED) {
         return false;
     }
     
-    if (index >= CS_PLAYERSKINS && index < CS_PLAYERSKINS + MAX_CLIENTS) {
-        CLG_LoadClientInfo(&cl->clientInfo[index - CS_PLAYERSKINS], str);
+    if (index >= ConfigStrings::PlayerSkins && index < ConfigStrings::PlayerSkins + MAX_CLIENTS) {
+        CLG_LoadClientInfo(&cl->clientInfo[index - ConfigStrings::PlayerSkins], str);
         return true;
     }
 

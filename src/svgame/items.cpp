@@ -145,14 +145,14 @@ qboolean Pickup_Powerup(entity_t *ent, entity_t *other)
 {
     int     quantity;
 
-    quantity = other->client->pers.inventory[ITEM_INDEX(ent->item)];
+    quantity = other->client->persistent.inventory[ITEM_INDEX(ent->item)];
     if ((skill->value == 1 && quantity >= 2) || (skill->value >= 2 && quantity >= 1))
         return false;
 
     if ((coop->value) && (ent->item->flags & IT_STAY_COOP) && (quantity > 0))
         return false;
 
-    other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+    other->client->persistent.inventory[ITEM_INDEX(ent->item)]++;
 
     if (deathmatch->value) {
         if (!(ent->spawnFlags & DROPPED_ITEM))
@@ -165,7 +165,7 @@ qboolean Pickup_Powerup(entity_t *ent, entity_t *other)
 void Drop_General(entity_t *ent, gitem_t *item)
 {
     Drop_Item(ent, item);
-    ent->client->pers.inventory[ITEM_INDEX(item)]--;
+    ent->client->persistent.inventory[ITEM_INDEX(item)]--;
     HUD_ValidateSelectedItem(ent);
 }
 
@@ -183,29 +183,29 @@ qboolean Add_Ammo(entity_t *ent, gitem_t *item, int count)
         return false;
 
     if (item->tag == AMMO_BULLETS)
-        max = ent->client->pers.max_bullets;
+        max = ent->client->persistent.max_bullets;
     else if (item->tag == AMMO_SHELLS)
-        max = ent->client->pers.max_shells;
+        max = ent->client->persistent.max_shells;
     else if (item->tag == AMMO_ROCKETS)
-        max = ent->client->pers.max_rockets;
+        max = ent->client->persistent.max_rockets;
     else if (item->tag == AMMO_GRENADES)
-        max = ent->client->pers.max_grenades;
+        max = ent->client->persistent.max_grenades;
     else if (item->tag == AMMO_CELLS)
-        max = ent->client->pers.max_cells;
+        max = ent->client->persistent.max_cells;
     else if (item->tag == AMMO_SLUGS)
-        max = ent->client->pers.max_slugs;
+        max = ent->client->persistent.max_slugs;
     else
         return false;
 
     index = ITEM_INDEX(item);
 
-    if (ent->client->pers.inventory[index] == max)
+    if (ent->client->persistent.inventory[index] == max)
         return false;
 
-    ent->client->pers.inventory[index] += count;
+    ent->client->persistent.inventory[index] += count;
 
-    if (ent->client->pers.inventory[index] > max)
-        ent->client->pers.inventory[index] = max;
+    if (ent->client->persistent.inventory[index] > max)
+        ent->client->persistent.inventory[index] = max;
 
     return true;
 }
@@ -224,13 +224,13 @@ qboolean Pickup_Ammo(entity_t *ent, entity_t *other)
     else
         count = ent->item->quantity;
 
-    oldcount = other->client->pers.inventory[ITEM_INDEX(ent->item)];
+    oldcount = other->client->persistent.inventory[ITEM_INDEX(ent->item)];
 
     if (!Add_Ammo(other, ent->item, count))
         return false;
 
     if (weapon && !oldcount) {
-        if (other->client->pers.weapon != ent->item && (!deathmatch->value || other->client->pers.weapon == FindItem("blaster")))
+        if (other->client->persistent.weapon != ent->item && (!deathmatch->value || other->client->persistent.weapon == FindItem("blaster")))
             other->client->newweapon = ent->item;
     }
 
@@ -246,21 +246,21 @@ void Drop_Ammo(entity_t *ent, gitem_t *item)
 
     index = ITEM_INDEX(item);
     dropped = Drop_Item(ent, item);
-    if (ent->client->pers.inventory[index] >= item->quantity)
+    if (ent->client->persistent.inventory[index] >= item->quantity)
         dropped->count = item->quantity;
     else
-        dropped->count = ent->client->pers.inventory[index];
+        dropped->count = ent->client->persistent.inventory[index];
 
-    if (ent->client->pers.weapon &&
-        ent->client->pers.weapon->tag == AMMO_GRENADES &&
+    if (ent->client->persistent.weapon &&
+        ent->client->persistent.weapon->tag == AMMO_GRENADES &&
         item->tag == AMMO_GRENADES &&
-        ent->client->pers.inventory[index] - dropped->count <= 0) {
+        ent->client->persistent.inventory[index] - dropped->count <= 0) {
         gi.CPrintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
         G_FreeEntity(dropped);
         return;
     }
 
-    ent->client->pers.inventory[index] -= dropped->count;
+    ent->client->persistent.inventory[index] -= dropped->count;
     HUD_ValidateSelectedItem(ent);
 }
 
@@ -316,7 +316,7 @@ int ArmorIndex(entity_t *ent)
     if (!ent->client)
         return 0;
 
-    if (ent->client->pers.inventory[body_armor_index] > 0)
+    if (ent->client->persistent.inventory[body_armor_index] > 0)
         return body_armor_index;
 
     return 0;
@@ -339,7 +339,7 @@ qboolean Pickup_Armor(entity_t *ent, entity_t *other)
 
     // if player has no armor, just use it
     if (!old_armor_index) {
-        other->client->pers.inventory[ITEM_INDEX(ent->item)] = newinfo->base_count;
+        other->client->persistent.inventory[ITEM_INDEX(ent->item)] = newinfo->base_count;
     }
 
     // use the better armor
@@ -349,30 +349,30 @@ qboolean Pickup_Armor(entity_t *ent, entity_t *other)
         if (newinfo->normal_protection > oldinfo->normal_protection) {
             // calc new armor values
             salvage = oldinfo->normal_protection / newinfo->normal_protection;
-            salvagecount = salvage * other->client->pers.inventory[old_armor_index];
+            salvagecount = salvage * other->client->persistent.inventory[old_armor_index];
             newcount = newinfo->base_count + salvagecount;
             if (newcount > newinfo->max_count)
                 newcount = newinfo->max_count;
 
             // zero count of old armor so it goes away
-            other->client->pers.inventory[old_armor_index] = 0;
+            other->client->persistent.inventory[old_armor_index] = 0;
 
             // change armor to new item with computed value
-            other->client->pers.inventory[ITEM_INDEX(ent->item)] = newcount;
+            other->client->persistent.inventory[ITEM_INDEX(ent->item)] = newcount;
         } else {
             // calc new armor values
             salvage = newinfo->normal_protection / oldinfo->normal_protection;
             salvagecount = salvage * newinfo->base_count;
-            newcount = other->client->pers.inventory[old_armor_index] + salvagecount;
+            newcount = other->client->persistent.inventory[old_armor_index] + salvagecount;
             if (newcount > oldinfo->max_count)
                 newcount = oldinfo->max_count;
 
             // if we're already maxed out then we don't need the new armor
-            if (other->client->pers.inventory[old_armor_index] >= newcount)
+            if (other->client->persistent.inventory[old_armor_index] >= newcount)
                 return false;
 
             // update current armor value
-            other->client->pers.inventory[old_armor_index] = newcount;
+            other->client->persistent.inventory[old_armor_index] = newcount;
         }
     }
 
@@ -408,12 +408,12 @@ void Touch_Item(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t *sur
 
         // show icon and name on status bar
         other->client->playerState.stats[STAT_PICKUP_ICON] = gi.ImageIndex(ent->item->icon);
-        other->client->playerState.stats[STAT_PICKUP_STRING] = CS_ITEMS + ITEM_INDEX(ent->item);
+        other->client->playerState.stats[STAT_PICKUP_STRING] = ConfigStrings::Items+ ITEM_INDEX(ent->item);
         other->client->pickup_msg_time = level.time + 3.0;
 
         // change selected item
         if (ent->item->Use)
-            other->client->pers.selected_item = other->client->playerState.stats[STAT_SELECTED_ITEM] = ITEM_INDEX(ent->item);
+            other->client->persistent.selected_item = other->client->playerState.stats[STAT_SELECTED_ITEM] = ITEM_INDEX(ent->item);
 
         if (ent->item->Pickup == Pickup_Health) {
             if (ent->count == 2)
@@ -481,7 +481,7 @@ entity_t *Drop_Item(entity_t *ent, gitem_t *item)
     VectorSet(dropped->maxs, 15, 15, 15);
     gi.SetModel(dropped, dropped->item->worldModel);
     dropped->solid = Solid::Trigger;
-    dropped->moveType = MOVETYPE_TOSS;
+    dropped->moveType = MoveType::Toss;
     dropped->Touch = drop_temp_touch;
     dropped->owner = ent;
 
@@ -546,7 +546,7 @@ void droptofloor(entity_t *ent)
     else
         gi.SetModel(ent, ent->item->worldModel);
     ent->solid = Solid::Trigger;
-    ent->moveType = MOVETYPE_TOSS;
+    ent->moveType = MoveType::Toss;
     ent->Touch = Touch_Item;
 
     // Calculate trace destination
@@ -1015,7 +1015,7 @@ void SetItemNames(void)
 
     for (i = 0 ; i < game.num_items ; i++) {
         it = &itemlist[i];
-        gi.configstring(CS_ITEMS + i, it->pickupName);
+        gi.configstring(ConfigStrings::Items+ i, it->pickupName);
     }
 
     body_armor_index   = ITEM_INDEX(FindItem("Body Armor"));

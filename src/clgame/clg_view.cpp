@@ -203,7 +203,7 @@ void V_Shutdown(void)
 //===============
 // V_SetLightLevel
 // 
-// Set the lightlevel of the client.
+// Set the lightLevel of the client.
 //===============
 //
 static void V_SetLightLevel(void)
@@ -217,15 +217,15 @@ static void V_SetLightLevel(void)
     // as the mono value returned by software
     if (shadelight[0] > shadelight[1]) {
         if (shadelight[0] > shadelight[2]) {
-            cl->lightlevel = 150.0f * shadelight[0];
+            cl->lightLevel = 150.0f * shadelight[0];
         } else {
-            cl->lightlevel = 150.0f * shadelight[2];
+            cl->lightLevel = 150.0f * shadelight[2];
         }
     } else {
         if (shadelight[1] > shadelight[2]) {
-            cl->lightlevel = 150.0f * shadelight[1];
+            cl->lightLevel = 150.0f * shadelight[1];
         } else {
-            cl->lightlevel = 150.0f * shadelight[2];
+            cl->lightLevel = 150.0f * shadelight[2];
         }
     }
 }

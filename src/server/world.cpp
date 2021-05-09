@@ -217,7 +217,7 @@ void SV_LinkEntity(cm_t *cm, entity_t *ent)
             // doors may legally straggle two areas,
             // but nothing should evern need more than that
             if (ent->areaNumber && ent->areaNumber != area) {
-                if (ent->areaNumber2 && ent->areaNumber2 != area && sv.state == ss_loading) {
+                if (ent->areaNumber2 && ent->areaNumber2 != area && sv.state == SS_LOADING) {
                     Com_DPrintf("Object touching 3 areas at %f %f %f\n",
                                 ent->absMin[0], ent->absMin[1], ent->absMin[2]);
                 }

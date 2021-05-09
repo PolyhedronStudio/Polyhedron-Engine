@@ -44,7 +44,7 @@ void func_wall_use(entity_t* self, entity_t* other, entity_t* activator)
 
 void SP_func_wall(entity_t* self)
 {
-    self->moveType = MOVETYPE_PUSH;
+    self->moveType = MoveType::Push;
     gi.SetModel(self, self->model);
 
     if (self->spawnFlags & 8)

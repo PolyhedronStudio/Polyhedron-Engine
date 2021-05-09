@@ -229,7 +229,7 @@ static size_t LOC_Here_m(char *buffer, size_t size)
     size_t ret;
 
     ret = Q_strlcpy(buffer, "unknown", size);
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         return ret;
     }
 
@@ -254,7 +254,7 @@ static size_t LOC_There_m(char *buffer, size_t size)
     int ret;
 
     ret = Q_strlcpy(buffer, "unknown", size);
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         return ret;
     }
 
@@ -279,7 +279,7 @@ static void LOC_Add_f(void)
         return;
     }
 
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         Com_Printf("Must be in a level.\n");
         return;
     }
@@ -293,7 +293,7 @@ static void LOC_Delete_f(void)
 {
     location_t *loc;
 
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         Com_Printf("Must be in a level.\n");
         return;
     }
@@ -317,7 +317,7 @@ static void LOC_Update_f(void)
         return;
     }
 
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         Com_Printf("Must be in a level.\n");
         return;
     }
@@ -341,7 +341,7 @@ static void LOC_Write_f(void)
     qhandle_t f;
     int count;
 
-    if (cls.state != ca_active) {
+    if (cls.state != CCS_ACTIVE) {
         Com_Printf("Must be in a level.\n");
         return;
     }

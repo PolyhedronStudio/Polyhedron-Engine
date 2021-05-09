@@ -27,7 +27,7 @@ void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
         return;
 
     index = ITEM_INDEX(self->item);
-    if (!activator->client->pers.inventory[index]) {
+    if (!activator->client->persistent.inventory[index]) {
         if (level.time < self->debounceTouchTime)
             return;
         self->debounceTouchTime = level.time + 5.0;
@@ -45,7 +45,7 @@ void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
             int cube;
 
             for (cube = 0; cube < 8; cube++)
-                if (activator->client->pers.power_cubes & (1 << cube))
+                if (activator->client->persistent.power_cubes & (1 << cube))
                     break;
             for (player = 1; player <= game.maxClients; player++) {
                 ent = &g_edicts[player];
@@ -53,9 +53,9 @@ void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
                     continue;
                 if (!ent->client)
                     continue;
-                if (ent->client->pers.power_cubes & (1 << cube)) {
-                    ent->client->pers.inventory[index]--;
-                    ent->client->pers.power_cubes &= ~(1 << cube);
+                if (ent->client->persistent.power_cubes & (1 << cube)) {
+                    ent->client->persistent.inventory[index]--;
+                    ent->client->persistent.power_cubes &= ~(1 << cube);
                 }
             }
         }
@@ -66,12 +66,12 @@ void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
                     continue;
                 if (!ent->client)
                     continue;
-                ent->client->pers.inventory[index] = 0;
+                ent->client->persistent.inventory[index] = 0;
             }
         }
     }
     else {
-        activator->client->pers.inventory[index]--;
+        activator->client->persistent.inventory[index]--;
     }
 
     UTIL_UseTargets(self, activator);

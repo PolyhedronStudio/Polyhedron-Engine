@@ -207,7 +207,7 @@ static void CL_Skins_f(void)
     char* s;
     ClientInfo* ci;
 
-    if (clgi.GetClienState() < ca_loading) {
+    if (clgi.GetClienState() < CCS_LOADING) {
         Com_Print("Must be in a level to load skins.\n");
         return;
     }
@@ -215,7 +215,7 @@ static void CL_Skins_f(void)
     CLG_RegisterVWepModels();
 
     for (i = 0; i < MAX_CLIENTS; i++) {
-        s = cl->configstrings[CS_PLAYERSKINS + i];
+        s = cl->configstrings[ConfigStrings::PlayerSkins + i];
         if (!s[0])
             continue;
         ci = &cl->clientInfo[i];
@@ -258,7 +258,7 @@ static size_t CL_Armor_m(char* buffer, size_t size)
 static size_t CL_WeaponModel_m(char* buffer, size_t size)
 {
     return Q_scnprintf(buffer, size, "%s",
-        cl->configstrings[cl->frame.playerState.gunindex + CS_MODELS]);
+        cl->configstrings[cl->frame.playerState.gunindex + ConfigStrings::Models]);
 }
 
 //---------------
@@ -323,12 +323,12 @@ static void cl_noskins_changed(cvar_t* self)
     char* s;
     ClientInfo* ci;
 
-    if (clgi.GetClienState() < ca_loading) {
+    if (clgi.GetClienState() < CCS_LOADING) {
         return;
     }
 
     for (i = 0; i < MAX_CLIENTS; i++) {
-        s = cl->configstrings[CS_PLAYERSKINS + i];
+        s = cl->configstrings[ConfigStrings::PlayerSkins + i];
         if (!s[0])
             continue;
         ci = &cl->clientInfo[i];
@@ -343,7 +343,7 @@ static void cl_player_model_changed(cvar_t* self)
 
 static void cl_vwep_changed(cvar_t* self)
 {
-    if (clgi.GetClienState() < ca_loading) {
+    if (clgi.GetClienState() < CCS_LOADING) {
         return;
     }
     // Register view weapon models again.

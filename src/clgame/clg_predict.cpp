@@ -21,7 +21,7 @@
 //================
 //
 void CLG_CheckPredictionError(ClientUserCommand *clientUserCommand) {
-    const pm_state_t* in = &cl->frame.playerState.pmove;
+    const PlayerMoveState* in = &cl->frame.playerState.pmove;
     ClientPredictedState* out = &cl->predictedState;
 
     // if prediction was not run (just spawned), don't sweat it
@@ -165,7 +165,7 @@ static int CLG_PointContents(const vec3_t &point)
 // Can be called by either the server or the client
 //================
 //
-static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
+static void CLG_UpdateClientSoundSpecialEffects(PlayerMove* pm)
 {
     static int underwater;
 
@@ -204,7 +204,7 @@ static void CLG_UpdateClientSoundSpecialEffects(pm_move_t* pm)
 //================
 //
 void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
-    pm_move_t   pm = {};
+    PlayerMove   pm = {};
 
     if (!ack || !currentFrame)
         return;
@@ -228,11 +228,11 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
         ClientUserCommand* cmd = &cl->clientUserCommands[ack & CMD_MASK];
 
         // Execute a pmove with it.
-        if (cmd->cmd.msec) {
+        if (cmd->moveCommand.msec) {
             // Saved for prediction error checking.
             cmd->prediction.simulationTime = clgi.GetRealTime();
 
-            pm.cmd = *cmd;
+            pm.clientUserCommand = *cmd;
             PMove(&pm, &clg.pmoveParams);
 
             // Update player move client side audio effects.
@@ -244,20 +244,20 @@ void CLG_PredictMovement(unsigned int ack, unsigned int currentFrame) {
     }
 
     // Run pending cmd
-    if (cl->cmd.cmd.msec) {
+    if (cl->clientUserCommand.moveCommand.msec) {
         // Saved for prediction error checking.
-        cl->cmd.prediction.simulationTime = clgi.GetRealTime();
+        cl->clientUserCommand.prediction.simulationTime = clgi.GetRealTime();
 
-        pm.cmd = cl->cmd;
-        pm.cmd.cmd.forwardmove = cl->localmove[0];
-        pm.cmd.cmd.rightmove = cl->localmove[1];
-        pm.cmd.cmd.upmove = cl->localmove[2];
+        pm.clientUserCommand = cl->clientUserCommand;
+        pm.clientUserCommand.moveCommand.forwardMove = cl->localmove[0];
+        pm.clientUserCommand.moveCommand.rightMove = cl->localmove[1];
+        pm.clientUserCommand.moveCommand.upMove = cl->localmove[2];
         PMove(&pm, &clg.pmoveParams);
         // Update player move client side audio effects.
         CLG_UpdateClientSoundSpecialEffects(&pm);
 
         // Save for error detection
-        cl->cmd.prediction.origin = pm.state.origin;
+        cl->clientUserCommand.prediction.origin = pm.state.origin;
     }
 
     // Copy results out for rendering

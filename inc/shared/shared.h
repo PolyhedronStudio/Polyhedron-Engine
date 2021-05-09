@@ -373,32 +373,36 @@ typedef enum {
 //
 //=============================================================================
 //
-#define CVAR_CHEAT          (1 << 5)  // can't be changed when connected
-#define CVAR_PRIVATE        (1 << 6)  // never macro expanded or saved to config
-#define CVAR_ROM            (1 << 7)  // can't be changed even from cmdline
-#define CVAR_MODIFIED       (1 << 8)  // modified by user
-#define CVAR_CUSTOM         (1 << 9)  // created by user
-#define CVAR_WEAK           (1 << 10) // doesn't have value
-#define CVAR_GAME           (1 << 11) // created by game library
-#define CVAR_FILES          (1 << 13) // r_reload when changed
-#define CVAR_REFRESH        (1 << 14) // vid_restart when changed
-#define CVAR_SOUND          (1 << 15) // snd_restart when changed
 
-#define CVAR_INFOMASK       (CVAR_USERINFO | CVAR_SERVERINFO)
-#define CVAR_MODIFYMASK     (CVAR_INFOMASK | CVAR_FILES | CVAR_REFRESH | CVAR_SOUND)
-#define CVAR_NOARCHIVEMASK  (CVAR_NOSET | CVAR_CHEAT | CVAR_PRIVATE | CVAR_ROM)
-#define CVAR_EXTENDED_MASK  (~31)
+
+constexpr uint32_t CVAR_CHEAT       = (1 << 5);  // can't be changed when connected
+constexpr uint32_t CVAR_PRIVATE     = (1 << 6);  // never macro expanded or saved to config
+constexpr uint32_t CVAR_ROM         = (1 << 7);  // can't be changed even from cmdline
+constexpr uint32_t CVAR_MODIFIED    = (1 << 8);  // modified by user
+constexpr uint32_t CVAR_CUSTOM      = (1 << 9);  // created by user
+constexpr uint32_t CVAR_WEAK        = (1 << 10); // doesn't have value
+constexpr uint32_t CVAR_GAME        = (1 << 11); // created by game library
+constexpr uint32_t CVAR_FILES       = (1 << 13); // r_reload when changed
+constexpr uint32_t CVAR_REFRESH     = (1 << 14); // vid_restart when changed
+constexpr uint32_t CVAR_SOUND       = (1 << 15); // snd_restart when changed
+
+constexpr uint32_t CVAR_ARCHIVE     = 1; // set to cause it to be saved to vars.rc
+constexpr uint32_t CVAR_USERINFO    = 2; // added to userinfo  when changed
+constexpr uint32_t CVAR_SERVERINFO  = 4; // added to serverinfo when changed
+constexpr uint32_t CVAR_NOSET       = 8; // don't allow change from console at all,
+// but can be set from the command line
+constexpr uint32_t CVAR_LATCH       = 16;// save changes until server restart
+
+constexpr uint32_t CVAR_INFOMASK        = (CVAR_USERINFO | CVAR_SERVERINFO);
+constexpr uint32_t CVAR_MODIFYMASK      = (CVAR_INFOMASK | CVAR_FILES | CVAR_REFRESH | CVAR_SOUND);
+constexpr uint32_t CVAR_NOARCHIVEMASK   = (CVAR_NOSET | CVAR_CHEAT | CVAR_PRIVATE | CVAR_ROM);
+constexpr uint32_t CVAR_EXTENDED_MASK   = (~31);
 
 // Only include here, in case CVar has not been defined yet? TODO: Investigate, this is CLG related.
 #ifndef CVAR
 #define CVAR
 
-#define CVAR_ARCHIVE    1   // set to cause it to be saved to vars.rc
-#define CVAR_USERINFO   2   // added to userinfo  when changed
-#define CVAR_SERVERINFO 4   // added to serverinfo when changed
-#define CVAR_NOSET      8   // don't allow change from console at all,
-// but can be set from the command line
-#define CVAR_LATCH      16  // save changes until server restart
+
 
 struct cvar_s;
 struct genctx_s;
@@ -437,30 +441,33 @@ typedef struct cvar_s {
 // Config Strings(CS) are a general means of communication from the server to
 // all connected clients. A config string can be at most MAX_QPATH characters.
 //-----------------
-#define CS_NAME             0
-#define CS_CDTRACK          1
-#define CS_SKY              2
-#define CS_SKYAXIS          3       // %f %f %f format
-#define CS_SKYROTATE        4
-#define CS_STATUSBAR        5       // display program string
+struct ConfigStrings {
+    static constexpr uint32_t Name              = 0;
+    static constexpr uint32_t CdTrack           = 1;
+    static constexpr uint32_t Sky               = 2;
+    static constexpr uint32_t SkyAxis           = 3;       // %f %f %f format
+    static constexpr uint32_t SkyRotate         = 4;
+    static constexpr uint32_t StatusBar         = 5;       // display program string
 
-#define CS_AIRACCEL         29      // air acceleration control
-#define CS_MAXCLIENTS       30
-#define CS_MAPCHECKSUM      31      // for catching cheater maps
+    static constexpr uint32_t AirAcceleration   = 29;      // air acceleration control
+    static constexpr uint32_t MaxClients        = 30;
+    static constexpr uint32_t MapCheckSum       = 31;      // for catching cheater maps
 
-#define CS_MODELS           32
-#define CS_SOUNDS           (CS_MODELS+MAX_MODELS)
-#define CS_IMAGES           (CS_SOUNDS+MAX_SOUNDS)
-#define CS_LIGHTS           (CS_IMAGES+MAX_IMAGES)
-#define CS_ITEMS            (CS_LIGHTS+MAX_LIGHTSTYLES)
-#define CS_PLAYERSKINS      (CS_ITEMS+MAX_ITEMS)
-#define CS_GENERAL          (CS_PLAYERSKINS+MAX_CLIENTS)
-#define MAX_CONFIGSTRINGS   (CS_GENERAL+MAX_GENERAL)
+    static constexpr uint32_t Models            = 32;
+    static constexpr uint32_t Sounds            = (ConfigStrings::Models + MAX_MODELS);
+    static constexpr uint32_t Images            = (ConfigStrings::Sounds + MAX_SOUNDS);
+    static constexpr uint32_t Lights            = (ConfigStrings::Images+ MAX_IMAGES);
+    static constexpr uint32_t Items             = (ConfigStrings::Lights+ MAX_LIGHTSTYLES);
+    static constexpr uint32_t PlayerSkins       = (ConfigStrings::Items+ MAX_ITEMS);
+    static constexpr uint32_t General           = (ConfigStrings::PlayerSkins + MAX_CLIENTS);
+    static constexpr uint32_t MaxConfigStrings  = (ConfigStrings::General+ MAX_GENERAL);
+};
 
-// Some mods actually exploit CS_STATUSBAR to take space up to CS_AIRACCEL
-#define CS_SIZE(cs) \
-    ((cs) >= CS_STATUSBAR && (cs) < CS_AIRACCEL ? \
-      MAX_QPATH * (CS_AIRACCEL - (cs)) : MAX_QPATH)
+// Some mods actually exploit ConfigStrings::StatusBar to take space up to ConfigStrings::AirAcceleration
+inline static uint32_t CS_SIZE(uint32_t cs) {
+    return ((cs) >= ConfigStrings::StatusBar && (cs) < ConfigStrings::AirAcceleration? \
+        MAX_QPATH * (ConfigStrings::AirAcceleration- (cs)) : MAX_QPATH);
+}
 
 
 //
@@ -470,31 +477,12 @@ typedef struct cvar_s {
 //
 //=============================================================================
 //
-//-----------------
-// Brief Water Level.
-//-----------------
-typedef enum {
-    WATER_UNKNOWN = -1,
-    WATER_NONE,
-    WATER_FEET,
-    WATER_WAIST,
-    WATER_UNDER
-} pm_water_level_t;
 
-//-----------------
-// General player movement and capabilities classification.
-//-----------------
-typedef enum {
-    PM_NORMAL, // Walking, jumping, falling, swimming, etc.
-    PM_HOOK_PULL,   // Pull hook
-    PM_HOOK_SWING,  // Swing hook
-    PM_SPECTATOR,   // Free-flying movement with acceleration and friction
-    PM_NOCLIP,      // Like PM_SPECTATOR, but noclips through walls
-    // All slots up till 32 are free for custom game PM_ defines.
-    PM_DEAD = 32, // No movement, but the ability to rotate in place
-    PM_FREEZE,    // No movement at all
-    PM_GIB,       // No movement, different bounding box
-} pm_type_t;
+struct EnginePlayerMoveType {
+    static constexpr int32_t Dead = 32;     // No movement, but the ability to rotate in place
+    static constexpr int32_t Freeze = 33;    // No movement at all
+    static constexpr int32_t Gib = 34;      // No movement, different bounding box
+};
 
 //-----------------
 // Player movement flags.The game is free to define up to 16 bits.
@@ -512,7 +500,7 @@ constexpr int32_t PMF_GAME          = (PMF_ENGINE << 3);// Game flags start from
 // prediction error of some degree.
 //-----------------
 typedef struct {
-    pm_type_t    type;
+    uint32_t    type;
 
     vec3_t      origin;
     vec3_t      velocity;
@@ -520,8 +508,9 @@ typedef struct {
     uint16_t    flags;       // Ducked, jump_held, etc
     uint16_t    time;        // Each unit = 8 ms
     uint16_t    gravity;
-    vec3_t      deltaAngles;    // Add to command angles to get view direction
+
     // Changed by spawns, rotating objects, and teleporters
+    vec3_t      deltaAngles;    // Add to command angles to get view direction
 
     // View offsets. (Only Z is used atm, beware.)
     vec3_t viewOffset;
@@ -530,25 +519,25 @@ typedef struct {
     // Step offset, used for stair interpolations.
     float stepOffset;
 
-} pm_state_t;
+} PlayerMoveState;
 
 //-----------------
-// pm_cmd_t is part of each client user cmd.
+// PlayerMoveCommand is part of each client user cmd.
 //-----------------
 typedef struct {
     uint8_t msec;   // Duration of the command, in milliseconds
-    vec3_t angles;  // The final view angles for this command
-    int16_t forwardmove, rightmove, upmove; // Directional intentions
+    vec3_t viewAngles;  // The final view angles for this command
+    int16_t forwardMove, rightMove, upMove; // Directional intentions
     uint8_t buttons;    // Bit mask of buttons down
     uint8_t impulse;    // Impulse cmd.
-    uint8_t lightlevel; // Lightlevel.
-} pm_cmd_t;
+    uint8_t lightLevel; // Lightlevel.
+} PlayerMoveCommand;
 
 //-----------------
 // ClientUserCommand is sent to the server each client frame
 //-----------------
 typedef struct {
-    pm_cmd_t cmd;       // the movement command
+    PlayerMoveCommand moveCommand;       // the movement command
     uint32_t time;      // simulation time when the command was sent
     uint32_t timeStamp; // system time when the command was sent
     struct {
@@ -576,31 +565,31 @@ typedef enum {
     MULTICAST_ALL_R,
     MULTICAST_PHS_R,
     MULTICAST_PVS_R
-} multicast_t;
+} MultiCast;
 
 //-----------------
 // Connection State of the client.
 //-----------------
 typedef enum {
-    ca_uninitialized,
-    ca_disconnected,    // not talking to a server
-    ca_challenging,     // sending getchallenge packets to the server
-    ca_connecting,      // sending connect packets to the server
-    ca_connected,       // netchan_t established, waiting for svc_serverdata
-    ca_loading,         // loading level data
-    ca_precached,       // loaded level data, waiting for svc_frame
-    ca_active,          // game views should be displayed
-    ca_cinematic        // running a cinematic
-} connstate_t;
+    CCS_UNINITIALIZED,
+    CCS_DISCONNECTED,    // not talking to a server
+    CCS_CHALLENGING,     // sending getchallenge packets to the server
+    CCS_CONNECTING,      // sending connect packets to the server
+    CCS_CONNECTED,       // netchan_t established, waiting for svc_serverdata
+    CCS_LOADING,         // loading level data
+    CCS_PRECACHED,       // loaded level data, waiting for svc_frame
+    CCS_ACTIVE,          // game views should be displayed
+    CCS_CINEMATIC        // running a cinematic
+} ClientConnectionState;
 
 //-----------------
 // Run State of the server.
 //-----------------
 typedef enum {
-    ss_dead,            // no map loaded
-    ss_loading,         // spawning level edicts
-    ss_game,            // actively running
-    ss_pic,             // showing static picture
+    SS_DEAD,            // no map loaded
+    SS_LOADING,         // spawning level edicts
+    SS_GAME,            // actively running
+    SS_PIC,             // showing static picture
     ss_broadcast,       // running MVD client
     ss_cinematic,
 } ServerState;
@@ -622,7 +611,7 @@ typedef enum {
     EV_FALLFAR,
     EV_PLAYER_TELEPORT,
     EV_OTHER_TELEPORT
-} entity_event_t;
+} EntityEvent;
 
 //-----------------
 // EntityState is the information conveyed from the server
@@ -651,16 +640,16 @@ typedef struct entity_state_s {
 } EntityState;
 
 //-----------------
-// PlayerState is the information needed in addition to pm_state_t
+// PlayerState is the information needed in addition to PlayerMoveState
 // to rendered a view.  There will only be 10 PlayerState sent each second,
-// but the number of pm_state_t changes will be reletive to client
+// but the number of PlayerMoveState changes will be reletive to client
 // frame rates
 //-----------------
 // Maximum amount of stats available to the player state.
 #define MAX_STATS               32
 
 typedef struct {
-    pm_state_t   pmove;         // For prediction
+    PlayerMoveState   pmove;         // For prediction
 
     // These fields do not need to be communicated bit-precise
     vec3_t      kickAngles;     // Add to view direction to get render angles

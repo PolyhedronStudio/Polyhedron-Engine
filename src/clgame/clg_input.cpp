@@ -205,11 +205,11 @@ static float CLG_KeyState(KeyBinding* key)
     }
 
     // special case for instant packet
-    if (!cl->cmd.cmd.msec) {
+    if (!cl->clientUserCommand.moveCommand.msec) {
         return (float)(key->state & BUTTON_STATE_HELD);
     }
 
-    val = (float)msec / cl->cmd.cmd.msec;
+    val = (float)msec / cl->clientUserCommand.moveCommand.msec;
 
     return Clampf(val, 0, 1);
 }
@@ -252,7 +252,7 @@ static void IN_AttackDown(void)
 {
     CLG_KeyDown(&in_attack);
 
-    if (cl_instantpacket->integer && clgi.GetClienState() == ca_active) {// && cls->netchan) {
+    if (cl_instantpacket->integer && clgi.GetClienState() == CCS_ACTIVE) {// && cls->netchan) {
         cl->sendPacketNow = true;
     }
 }
@@ -264,7 +264,7 @@ static void IN_UseDown(void)
 {
     CLG_KeyDown(&in_use);
 
-    if (cl_instantpacket->integer && clgi.GetClienState() == ca_active) {// && cls.netchan) {
+    if (cl_instantpacket->integer && clgi.GetClienState() == CCS_ACTIVE) {// && cls.netchan) {
         cl->sendPacketNow = true;
     }
 }
@@ -572,7 +572,7 @@ void CLG_RegisterInput(void)
 // CLG_BuildFrameMoveCommand
 // 
 // Updates msec, anglesand builds interpolated movement vector for local 
-// prediction. Doesn't touch command forward/side/upmove, these are filled
+// prediction. Doesn't touch command forward/side/upMove, these are filled
 // by CLG_BuildMovementCommand.
 //================
 //
@@ -585,11 +585,11 @@ void CLG_BuildFrameMoveCommand(int msec)
     }
 
     // Add to milliseconds of time to apply the move
-    cl->cmd.cmd.msec += msec;
+    cl->clientUserCommand.moveCommand.msec += msec;
 
     // Store time.
-    cl->cmd.time = clgi.GetFrameTime();
-    cl->cmd.timeStamp = clgi.GetRealTime();
+    cl->clientUserCommand.time = clgi.GetFrameTime();
+    cl->clientUserCommand.timeStamp = clgi.GetRealTime();
 
     // Adjust viewAngles
     CLG_AdjustAngles(msec);
@@ -609,9 +609,9 @@ void CLG_BuildFrameMoveCommand(int msec)
 
     CLG_ClampPitch();
 
-    cl->cmd.cmd.angles[0] = cl->viewAngles[0];
-    cl->cmd.cmd.angles[1] = cl->viewAngles[1];
-    cl->cmd.cmd.angles[2] = cl->viewAngles[2];
+    cl->clientUserCommand.moveCommand.viewAngles[0] = cl->viewAngles[0];
+    cl->clientUserCommand.moveCommand.viewAngles[1] = cl->viewAngles[1];
+    cl->clientUserCommand.moveCommand.viewAngles[2] = cl->viewAngles[2];
 }
 
 //
@@ -624,7 +624,7 @@ void CLG_BuildFrameMoveCommand(int msec)
 //
 void CLG_FinalizeFrameMoveCommand(void)
 {
-    if (clgi.GetClienState() != ca_active) {
+    if (clgi.GetClienState() != CCS_ACTIVE) {
         return; // not talking to a server
     }
 
@@ -636,10 +636,10 @@ void CLG_FinalizeFrameMoveCommand(void)
     // figure button bits
     //
     if (in_attack.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->cmd.cmd.buttons |= BUTTON_ATTACK;
+        cl->clientUserCommand.moveCommand.buttons |= BUTTON_ATTACK;
 
     if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->cmd.cmd.buttons |= BUTTON_USE;
+        cl->clientUserCommand.moveCommand.buttons |= BUTTON_USE;
 
     // Undo the button_state_down for the next frame, it needs a repress for
     // that to be re-enabled.
@@ -649,22 +649,22 @@ void CLG_FinalizeFrameMoveCommand(void)
     // Whether to run or not, depends on whether auto-run is on or off.
     if (cl_run->value) {
         if (in_speed.state & BUTTON_STATE_HELD) {
-            cl->cmd.cmd.buttons |= BUTTON_WALK;
+            cl->clientUserCommand.moveCommand.buttons |= BUTTON_WALK;
         }
     }
     else {
         if (!(in_speed.state & BUTTON_STATE_HELD)) {
-            cl->cmd.cmd.buttons |= BUTTON_WALK;
+            cl->clientUserCommand.moveCommand.buttons |= BUTTON_WALK;
         }
     }
 
     // Always send in case any button was down at all in-game.
     if (clgi.Key_GetDest() == KEY_GAME && clgi.Key_AnyKeyDown()) {
-        cl->cmd.cmd.buttons |= BUTTON_ANY;
+        cl->clientUserCommand.moveCommand.buttons |= BUTTON_ANY;
     }
 
-    if (cl->cmd.cmd.msec > 250) {
-        cl->cmd.cmd.msec = 100;        // time was unreasonable
+    if (cl->clientUserCommand.moveCommand.msec > 250) {
+        cl->clientUserCommand.moveCommand.msec = 100;        // time was unreasonable
     }
 
     // Rebuild the movement vector
@@ -681,25 +681,25 @@ void CLG_FinalizeFrameMoveCommand(void)
     move = CLG_ClampSpeed(move);
 
     // Store the movement vector
-    cl->cmd.cmd.forwardmove = move[0];
-    cl->cmd.cmd.rightmove = move[1];
-    cl->cmd.cmd.upmove = move[2];
+    cl->clientUserCommand.moveCommand.forwardMove = move[0];
+    cl->clientUserCommand.moveCommand.rightMove = move[1];
+    cl->clientUserCommand.moveCommand.upMove = move[2];
 
     // Clear all states
     cl->mousemove[0] = 0;
     cl->mousemove[1] = 0;
     
-    cl->cmd.cmd.impulse = in_impulse;
+    cl->clientUserCommand.moveCommand.impulse = in_impulse;
     in_impulse = 0;
 
     // Store time.
-    cl->cmd.time = clgi.GetFrameTime();
-    cl->cmd.timeStamp = clgi.GetRealTime();
+    cl->clientUserCommand.time = clgi.GetFrameTime();
+    cl->clientUserCommand.timeStamp = clgi.GetRealTime();
 
 
     // Save this command off for prediction
     cl->currentClientCommandNumber++;
-    cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->cmd;
+    cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->clientUserCommand;
 
     CLG_KeyClear(&in_right);
     CLG_KeyClear(&in_left);
@@ -718,5 +718,5 @@ void CLG_FinalizeFrameMoveCommand(void)
 
 
     // Clear pending cmd
-    memset(&cl->cmd, 0, sizeof(cl->cmd));
+    cl->clientUserCommand = {};
 }

@@ -134,68 +134,68 @@ constexpr int32_t AI_PURSUE_NEXT = 0x00000020;
 constexpr int32_t AI_PURSUE_TEMP = 0x00000040;
 constexpr int32_t AI_HOLD_FRAME = 0x00000080;
 constexpr int32_t AI_GOOD_GUY = 0x00000100;
-constexpr int32_t  AI_BRUTAL = 0x00000200;
-constexpr int32_t  AI_NOSTEP = 0x00000400;
-constexpr int32_t  AI_DUCKED = 0x00000800;
-constexpr int32_t  AI_COMBAT_POINT = 0x00001000;
-constexpr int32_t  AI_MEDIC = 0x00002000;
-constexpr int32_t  AI_RESURRECTING = 0x00004000;
+constexpr int32_t AI_BRUTAL = 0x00000200;
+constexpr int32_t AI_NOSTEP = 0x00000400;
+constexpr int32_t AI_DUCKED = 0x00000800;
+constexpr int32_t AI_COMBAT_POINT = 0x00001000;
+constexpr int32_t AI_MEDIC = 0x00002000;
+constexpr int32_t AI_RESURRECTING = 0x00004000;
 
 //monster attack state
-constexpr int32_t  AS_STRAIGHT = 1;
-constexpr int32_t  AS_SLIDING = 2;
-constexpr int32_t  AS_MELEE = 3;
-constexpr int32_t  AS_MISSILE = 4;
+constexpr int32_t AS_STRAIGHT = 1;
+constexpr int32_t AS_SLIDING = 2;
+constexpr int32_t AS_MELEE = 3;
+constexpr int32_t AS_MISSILE = 4;
 
 // armor types
-constexpr int32_t  ARMOR_NONE = 0;
-constexpr int32_t  ARMOR_JACKET = 1;
-constexpr int32_t  ARMOR_COMBAT = 2;
-constexpr int32_t  ARMOR_BODY = 3;
-constexpr int32_t  ARMOR_SHARD = 4;
+constexpr int32_t ARMOR_NONE = 0;
+constexpr int32_t ARMOR_JACKET = 1;
+constexpr int32_t ARMOR_COMBAT = 2;
+constexpr int32_t ARMOR_BODY = 3;
+constexpr int32_t ARMOR_SHARD = 4;
 
 // power armor types
-constexpr int32_t  POWER_ARMOR_NONE = 0;
+constexpr int32_t POWER_ARMOR_NONE = 0;
 
 // handedness values
-constexpr int32_t  RIGHT_HANDED = 0;
-constexpr int32_t  LEFT_HANDED = 1;
-constexpr int32_t  CENTER_HANDED = 2;
+constexpr int32_t RIGHT_HANDED = 0;
+constexpr int32_t LEFT_HANDED = 1;
+constexpr int32_t CENTER_HANDED = 2;
 
 
 // game.serverflags values
-constexpr int32_t  SFL_CROSS_TRIGGER_1 = 0x00000001;
-constexpr int32_t  SFL_CROSS_TRIGGER_2 = 0x00000002;
-constexpr int32_t  SFL_CROSS_TRIGGER_3 = 0x00000004;
-constexpr int32_t  SFL_CROSS_TRIGGER_4 = 0x00000008;
-constexpr int32_t  SFL_CROSS_TRIGGER_5 = 0x00000010;
-constexpr int32_t  SFL_CROSS_TRIGGER_6 = 0x00000020;
-constexpr int32_t  SFL_CROSS_TRIGGER_7 = 0x00000040;
-constexpr int32_t  SFL_CROSS_TRIGGER_8 = 0x00000080;
-constexpr int32_t  SFL_CROSS_TRIGGER_MASK = 0x000000ff;
+constexpr int32_t SFL_CROSS_TRIGGER_1 = 0x00000001;
+constexpr int32_t SFL_CROSS_TRIGGER_2 = 0x00000002;
+constexpr int32_t SFL_CROSS_TRIGGER_3 = 0x00000004;
+constexpr int32_t SFL_CROSS_TRIGGER_4 = 0x00000008;
+constexpr int32_t SFL_CROSS_TRIGGER_5 = 0x00000010;
+constexpr int32_t SFL_CROSS_TRIGGER_6 = 0x00000020;
+constexpr int32_t SFL_CROSS_TRIGGER_7 = 0x00000040;
+constexpr int32_t SFL_CROSS_TRIGGER_8 = 0x00000080;
+constexpr int32_t SFL_CROSS_TRIGGER_MASK = 0x000000ff;
 
 
 // noise types for PlayerNoise
-constexpr int32_t  PNOISE_SELF = 0;
-constexpr int32_t  PNOISE_WEAPON = 1;
-constexpr int32_t  PNOISE_IMPACT = 2;
+constexpr int32_t PNOISE_SELF = 0;
+constexpr int32_t PNOISE_WEAPON = 1;
+constexpr int32_t PNOISE_IMPACT = 2;
 
 
 // edict->moveType values
-typedef enum {
-    MOVETYPE_NONE,          // never moves
-    MOVETYPE_SPECTATOR,     // special movetype for spectators to not go through walls
-    MOVETYPE_NOCLIP,        // origin and angles change with no interaction
-    MOVETYPE_PUSH,          // no clip to world, push on box contact
-    MOVETYPE_STOP,          // no clip to world, stops on box contact
+struct MoveType {
+    static constexpr int32_t None = 0;      // Never moves
+    static constexpr int32_t Spectator = 1; // Special movetype for spectators to not go through walls
+    static constexpr int32_t NoClip = 2;    // Origin and angles change with no interaction
+    static constexpr int32_t Push = 3;      // No clip to world, push on box contact
+    static constexpr int32_t Stop = 4;      // No clip to world, stops on box contact
 
-    MOVETYPE_WALK,          // gravity
-    MOVETYPE_STEP,          // gravity, special edge handling
-    MOVETYPE_FLY,
-    MOVETYPE_TOSS,          // gravity
-    MOVETYPE_FLYMISSILE,    // extra size to monsters
-    MOVETYPE_BOUNCE
-} movetype_t;
+    static constexpr int32_t Walk          = 10;    // Gravity
+    static constexpr int32_t Step          = 11;    // Gravity, special edge handling
+    static constexpr int32_t Fly           = 12;
+    static constexpr int32_t Toss          = 13;    // Gravity
+    static constexpr int32_t FlyMissile    = 14;    // Extra size to monsters
+    static constexpr int32_t Bounce        = 15;
+};
 
 
 
@@ -781,25 +781,24 @@ typedef struct {
 
 // client data that stays across deathmatch respawns
 typedef struct {
-    client_persistant_t coop_respawn;   // what to set client->pers to on a respawn
+    client_persistant_t coop_respawn;   // what to set client->persistent to on a respawn
     int         enterframe;         // level.frameNumber the client entered the game
     int         score;              // frags, etc
-    vec3_t      cmd_angles;         // angles sent over in the last command
+    vec3_t      commandViewAngles;         // angles sent over in the last command
 
     qboolean    spectator;          // client is a spectator
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),
-// except for 'client->pers'
+// except for 'client->persistent'
 struct gclient_s {
     // known to server
     PlayerState  playerState;             // communicated by server to clients
     int             ping;
 
     // private to game
-    client_persistant_t pers;
-    client_respawn_t    resp;
-    pm_state_t       old_pmove;  // for detecting out-of-pmove changes
+    client_persistant_t persistent;
+    client_respawn_t    respawn;
 
     qboolean    showscores;         // set layout stat
     qboolean    showinventory;      // set layout stat
