@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "player/hud.h"      // Include HUD funcs.
 
 #include "weapons/blaster.h"
-#include "weapons/flaregun.h"
 #include "weapons/machinegun.h"
 #include "weapons/shotgun.h"
 #include "weapons/supershotgun.h"

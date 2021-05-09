@@ -159,9 +159,6 @@ extern void door_hit_bottom(entity_t* self);
 extern void door_hit_top(entity_t* self);
 extern void train_wait(entity_t* self);
 
-extern void flare_think(entity_t* self); // Q2RTX
-extern void flare_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf); // Q2RTX
-
 extern void barrel_explode(entity_t* self);
 extern void barrel_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
 extern void barrel_delay(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
@@ -269,8 +266,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, train_next },
 { P_think, trigger_elevator_init },
 { P_think, walkmonster_start_go },
-{ P_think, flare_think }, // Q2RTX
-{ P_touch, flare_touch }, // Q2RTX
 { P_touch, blaster_touch },
 { P_touch, button_touch },
 { P_touch, door_touch },

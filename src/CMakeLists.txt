@@ -122,7 +122,6 @@ SET(SRC_SVGAME
 	svgame/entities/trigger/trigger_relay.cpp
 	
 	svgame/entities/light.cpp
-	
 
 	svgame/monsters/movement.cpp
 	svgame/monsters/soldier.cpp
@@ -135,7 +134,6 @@ SET(SRC_SVGAME
 	svgame/player/weapons.cpp
 	
 	svgame/weapons/blaster.cpp
-	svgame/weapons/flaregun.cpp
 	svgame/weapons/machinegun.cpp
 	svgame/weapons/shotgun.cpp
 	svgame/weapons/supershotgun.cpp
@@ -161,7 +159,6 @@ SET(HEADERS_SVGAME
 	svgame/player/weapons.h
 	
 	svgame/weapons/blaster.h
-	svgame/weapons/flaregun.h
 	svgame/weapons/machinegun.h
 	svgame/weapons/shotgun.h
 	svgame/weapons/supershotgun.h

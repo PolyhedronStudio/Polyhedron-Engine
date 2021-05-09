@@ -92,7 +92,6 @@ struct MuzzleFlashType {
     static constexpr uint8_t MachineGun = 17;
     static constexpr uint8_t Shotgun = 18;
     static constexpr uint8_t SuperShotgun = 19;
-    static constexpr uint8_t Flare = 20;
 };
 
 //-----------------

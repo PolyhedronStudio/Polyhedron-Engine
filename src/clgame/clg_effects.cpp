@@ -402,10 +402,6 @@ void CLG_MuzzleFlash() {
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
         CLG_LogoutEffect(pl->current.origin, mzParameters.weapon);
         break;
-    case MuzzleFlashType::Flare:
-        DL_RADIUS(0);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/flaregun.wav"), volume, ATTN_NORM, 0);
-        break;
     }
 
     if (vid_rtx->integer)

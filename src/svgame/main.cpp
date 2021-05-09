@@ -78,7 +78,6 @@ cvar_t  *flood_waitdelay;
 
 cvar_t  *sv_maplist;
 
-cvar_t  *sv_flaregun;
 cvar_t  *cl_monsterfootsteps;
 
 void SpawnEntities(const char *mapname, const char *entities, const char *spawnpoint);
@@ -177,11 +176,7 @@ void InitGame(void)
     // dm map list
     sv_maplist = gi.cvar("sv_maplist", "", 0);
 
-	// flare gun switch: 
-	//   0 = no flare gun
-	//   1 = spawn with the flare gun
-	//   2 = spawn with the flare gun and some grenades
-	sv_flaregun = gi.cvar("sv_flaregun", "1", 0);
+    // Monster footsteps.
 	cl_monsterfootsteps = gi.cvar("cl_monsterfootsteps", "1", 0);
 
     // items
