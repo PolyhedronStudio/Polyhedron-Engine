@@ -186,7 +186,8 @@ void IN_Shutdown(void)
         input.api.Shutdown();
     }
 
-    memset(&input, 0, sizeof(input));
+    // Reset input.
+    input = {};
 }
 
 static void in_changed_hard(cvar_t *self)

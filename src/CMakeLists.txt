@@ -214,8 +214,8 @@ if (CONFIG_ENABLE_RMLUI)
 SET(SRC_CLIENT_RMLUI
 	client/rmlui/interfaces/FileInterface.cpp
 	client/rmlui/interfaces/FileInterface.h
-	client/rmlui/interfaces/RenderInterfaceOpenGL.cpp
-	client/rmlui/interfaces/RenderInterfaceOpenGL.h
+	client/rmlui/interfaces/RenderInterface.cpp
+	client/rmlui/interfaces/RenderInterface.h
 	client/rmlui/interfaces/SystemInterface.cpp
 	client/rmlui/interfaces/SystemInterface.h
 	client/rmlui/rmlui.cpp
