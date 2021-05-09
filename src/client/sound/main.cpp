@@ -744,7 +744,7 @@ void S_SpatializeOrigin(const vec3_t &origin, float master_vol, float dist_mult,
     vec_t       lscale, rscale, scale;
     vec3_t      source_vec;
 
-    if (cls.state != CCS_ACTIVE) {
+    if (cls.connectionState != ClientConnectionState::Active) {
         *left_vol = *right_vol = 255;
         return;
     }
@@ -1115,7 +1115,7 @@ static void S_AddLoopSounds(void)
     EntityState  *ent;
     vec3_t      origin;
 
-    if (cls.state != CCS_ACTIVE || !s_active || sv_paused->integer || !s_ambient->integer) {
+    if (cls.connectionState != ClientConnectionState::Active || !s_active || sv_paused->integer || !s_ambient->integer) {
         return;
     }
 
@@ -1203,7 +1203,7 @@ void S_Update(void)
     // if the laoding plaque is up, clear everything
     // out to make sure we aren't looping a dirty
     // dma buffer while loading
-    if (cls.state == CCS_LOADING) {
+    if (cls.connectionState == ClientConnectionState::Loading) {
         // S_ClearBuffer should be already done in S_StopAllSounds
         return;
     }

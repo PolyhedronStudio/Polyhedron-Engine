@@ -203,7 +203,7 @@ static void CLG_ParsePrint(void)
 
     if (level != PRINT_CHAT) {
         Com_Print("%s", s);
-        if (!clgi.IsDemoPlayback() && clgi.GetServerState() != ss_broadcast) {
+        if (!clgi.IsDemoPlayback()) {
             COM_strclr(s);
             clgi.Cmd_ExecTrigger(s);
         }
@@ -215,7 +215,7 @@ static void CLG_ParsePrint(void)
     }
 
 #if USE_AUTOREPLY
-    if (!clgi.IsDemoPlayback() && clgi.GetServerState() != ss_broadcast) {
+    if (!clgi.IsDemoPlayback()) {
         CLG_CheckForVersion(s);
     }
 #endif
@@ -244,7 +244,7 @@ static void CLG_ParsePrint(void)
 
     // N&C: We don't need this stuff anymore..
     //// silence MVD spectator chat
-    //if (cl.serverState == ss_broadcast && !strncmp(s, "[MVD] ", 6))
+    //if (cl.serverState == SERVERSTATE_BROADCAST && !strncmp(s, "[MVD] ", 6))
     //    return;
 
     // play sound
@@ -269,7 +269,7 @@ static void CLG_ParseCenterPrint(void)
     //SHOWNET(2, "    \"%s\"\n", s);
     SCR_CenterPrint(s);
 
-    if (!clgi.IsDemoPlayback() && clgi.GetServerState() != ss_broadcast) {
+    if (!clgi.IsDemoPlayback()) {
         COM_strclr(s);
         clgi.Cmd_ExecTrigger(s);
     }
@@ -310,7 +310,7 @@ qboolean CLG_UpdateConfigString(int index, const char *str) {
 #endif
     // In case we aren't precaching, but got updated configstrings by the
     // server, we reload them.
-    if (clgi.GetClienState() < CCS_PRECACHED) {
+    if (clgi.GetClienState() < ClientConnectionState::Precached) {
         return false;
     }
     

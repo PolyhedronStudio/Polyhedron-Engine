@@ -1452,7 +1452,7 @@ static void SCR_Sky_f(void)
         return;
     }
 
-    if (clgi.GetClienState() != CCS_ACTIVE) {
+    if (clgi.GetClienState() != ClientConnectionState::Active) {
         Com_Print("No map loaded.\n");
         return;
     }

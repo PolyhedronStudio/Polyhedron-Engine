@@ -570,29 +570,28 @@ typedef enum {
 //-----------------
 // Connection State of the client.
 //-----------------
-typedef enum {
-    CCS_UNINITIALIZED,
-    CCS_DISCONNECTED,    // not talking to a server
-    CCS_CHALLENGING,     // sending getchallenge packets to the server
-    CCS_CONNECTING,      // sending connect packets to the server
-    CCS_CONNECTED,       // netchan_t established, waiting for svc_serverdata
-    CCS_LOADING,         // loading level data
-    CCS_PRECACHED,       // loaded level data, waiting for svc_frame
-    CCS_ACTIVE,          // game views should be displayed
-    CCS_CINEMATIC        // running a cinematic
-} ClientConnectionState;
+struct ClientConnectionState {
+    static constexpr int32_t Uninitialized = 0;
+    static constexpr int32_t Disconnected = 1;  // Not talking to a server
+    static constexpr int32_t Challenging = 2;   // Sending getchallenge packets to the server
+    static constexpr int32_t Connecting = 3;    // Sending connect packets to the server
+    static constexpr int32_t Connected = 4;     // Netchan_t established, waiting for svc_serverdata
+    static constexpr int32_t Loading = 5;       // Loading level data
+    static constexpr int32_t Precached = 6;     // Loaded level data, waiting for svc_frame
+    static constexpr int32_t Active = 7;        // Game views should be displayed
+    static constexpr int32_t Cinematic = 8;     // Running a cinematic
+};
 
 //-----------------
 // Run State of the server.
 //-----------------
-typedef enum {
-    SS_DEAD,            // no map loaded
-    SS_LOADING,         // spawning level edicts
-    SS_GAME,            // actively running
-    SS_PIC,             // showing static picture
-    ss_broadcast,       // running MVD client
-    ss_cinematic,
-} ServerState;
+struct ServerState {
+    static constexpr int32_t Dead = 0;            // No map loaded
+    static constexpr int32_t Loading = 1;         // Spawning level edicts
+    static constexpr int32_t Game = 2;            // Actively running
+    static constexpr int32_t Pic = 3;             // Showing static picture
+    static constexpr int32_t Cinematic = 4;
+};
 
 //-----------------
 // EntityState->event values

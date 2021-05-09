@@ -21,16 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "common/net/net.h"
 
-// WatIsDeze: Has been moved to shared/shared.h for the clgame dll.
-// typedef enum {
-//     SS_DEAD,            // no map loaded
-//     SS_LOADING,         // spawning level edicts
-//     SS_GAME,            // actively running
-//     SS_PIC,             // showing static picture
-//     ss_broadcast,       // running MVD client
-//     ss_cinematic,
-// } ServerState;
-
 #if USE_ICMP
 void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info);
 #endif
@@ -41,8 +31,8 @@ unsigned SV_Frame(unsigned msec);
 void SV_SetConsoleTitle(void);
 #endif
 //void SV_ConsoleOutput(const char *msg);
-ServerState	SV_GetState (void);                 // WATISDEZE: Added for client game dll
-void            SV_SetState (ServerState state); // WATISDEZE: Added for client game dll
+uint32_t		SV_GetServerState (void);                 // WATISDEZE: Added for client game dll
+void            SV_SetServerState (uint32_t serverSate); // WATISDEZE: Added for client game dll
 
 #if USE_CLIENT
 char *SV_GetSaveInfo(const char *dir);

@@ -207,7 +207,7 @@ static void CL_Skins_f(void)
     char* s;
     ClientInfo* ci;
 
-    if (clgi.GetClienState() < CCS_LOADING) {
+    if (clgi.GetClienState() < ClientConnectionState::Loading) {
         Com_Print("Must be in a level to load skins.\n");
         return;
     }
@@ -323,7 +323,7 @@ static void cl_noskins_changed(cvar_t* self)
     char* s;
     ClientInfo* ci;
 
-    if (clgi.GetClienState() < CCS_LOADING) {
+    if (clgi.GetClienState() < ClientConnectionState::Loading) {
         return;
     }
 
@@ -343,7 +343,7 @@ static void cl_player_model_changed(cvar_t* self)
 
 static void cl_vwep_changed(cvar_t* self)
 {
-    if (clgi.GetClienState() < CCS_LOADING) {
+    if (clgi.GetClienState() < ClientConnectionState::Loading) {
         return;
     }
     // Register view weapon models again.

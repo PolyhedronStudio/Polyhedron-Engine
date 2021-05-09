@@ -70,7 +70,7 @@ Sets cl.predicted_origin and cl.predicted_angles
 */
 void CL_PredictMovement(void)
 {
-    if (cls.state != CCS_ACTIVE) {
+    if (cls.connectionState != ClientConnectionState::Active) {
         return;
     }
 

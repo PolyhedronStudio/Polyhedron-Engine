@@ -362,7 +362,7 @@ static void CL_Record_f(void)
         return;
     }
 
-    if (cls.state != CCS_ACTIVE) {
+    if (cls.connectionState != ClientConnectionState::Active) {
         Com_Printf("You must be in a level to record.\n");
         return;
     }
@@ -725,7 +725,7 @@ static void CL_PlayDemo_f(void)
 
 	Q_strlcpy(cls.demo.file_name, Cmd_Argv(1), sizeof(cls.demo.file_name));
 
-    cls.state = CCS_CONNECTED;
+    cls.connectionState = ClientConnectionState::Connected;
     Q_strlcpy(cls.servername, COM_SkipPath(name), sizeof(cls.servername));
     cls.serverAddress.type = NA_LOOPBACK;
 
@@ -736,7 +736,7 @@ static void CL_PlayDemo_f(void)
     CL_ParseServerMessage();
 
     // read and parse messages util `precache' command
-    while (cls.state == CCS_CONNECTED) {
+    while (cls.connectionState == ClientConnectionState::Connected) {
         Cbuf_Execute(&cl_cmdbuf);
         parse_next_message(0);
     }
@@ -1168,8 +1168,9 @@ void CL_CleanupDemos(void)
         Z_Free(snap);
     }
 
-    if (total)
+    if (total) {
         Com_DPrintf("Freed %" PRIz " bytes of snaps\n", total);
+    }
 
     memset(&cls.demo, 0, sizeof(cls.demo));
 
@@ -1183,11 +1184,11 @@ CL_DemoFrame
 */
 void CL_DemoFrame(int msec)
 {
-    if (cls.state < CCS_CONNECTED) {
+    if (cls.connectionState < ClientConnectionState::Connected) {
         return;
     }
 
-    if (cls.state != CCS_ACTIVE) {
+    if (cls.connectionState != ClientConnectionState::Active) {
         parse_next_message(0);
         return;
     }
@@ -1211,7 +1212,7 @@ void CL_DemoFrame(int msec)
     while (cl.serverTime < cl.time) {
         if (parse_next_message(cl_demowait->integer))
             break;
-        if (cls.state != CCS_ACTIVE)
+        if (cls.connectionState != ClientConnectionState::Active)
             break;
     }
 }

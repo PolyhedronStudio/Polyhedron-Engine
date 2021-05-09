@@ -23,12 +23,12 @@ server_t        sv;                 // local server
 
 void SV_ClientReset(client_t *client)
 {
-    if (client->state < cs_connected) {
+    if (client->connectionState < ConnectionState::Connected) {
         return;
     }
 
     // any partially connected client will be restarted
-    client->state = cs_connected;
+    client->connectionState = ConnectionState::Connected;
     client->frameNumber = 1; // frame 0 can't be used
     client->lastFrame = -1;
     client->framesNoDelta = 0;
@@ -176,7 +176,7 @@ void SV_SpawnServer(MapCommand *cmd)
 
     resolve_masters();
 
-    if (cmd->state == SS_GAME) {
+    if (cmd->serverState == ServerState::Game) {
         override_entity_string(cmd->server);
 
         sv.cm = cmd->cm;
@@ -206,7 +206,7 @@ void SV_SpawnServer(MapCommand *cmd)
 
     // precache and static commands can be issued during
     // map initialization
-    sv.state = SS_LOADING;
+    sv.serverState = ServerState::Loading;
 
     // load and spawn all other entities
     ge->SpawnEntities(sv.name, entityString, cmd->spawnpoint);
@@ -222,13 +222,13 @@ void SV_SpawnServer(MapCommand *cmd)
     SV_CheckForSavegame(cmd);
 
     // all precaches are complete
-    sv.state = cmd->state;
+    sv.serverState = cmd->serverState;
 
     // set serverinfo variable
     SV_InfoSet("mapname", sv.name);
     SV_InfoSet("port", net_port->string);
 
-    Cvar_SetInteger(sv_running, sv.state, FROM_CODE);
+    Cvar_SetInteger(sv_running, sv.serverState, FROM_CODE);
     Cvar_Set("sv_paused", "0");
     Cvar_Set("timedemo", "0");
 
@@ -295,11 +295,11 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
         } else {
             ret = FS_LoadFile(expanded, NULL);
         }
-        cmd->state = SS_PIC;
+        cmd->serverState = ServerState::Pic;
     } 
     else if (!COM_CompareExtension(s, ".cin")) {
         ret = Q_ERR_SUCCESS;
-        cmd->state = ss_cinematic;
+        cmd->serverState = ServerState::Cinematic;
     }
     else {
         len = Q_concat(expanded, sizeof(expanded), "maps/", s, ".bsp", NULL);
@@ -308,7 +308,7 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
         } else {
             ret = CM_LoadMap(&cmd->cm, expanded);
         }
-        cmd->state = SS_GAME;
+        cmd->serverState = ServerState::Game;
     }
 
     if (ret < 0) {

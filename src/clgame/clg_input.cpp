@@ -252,7 +252,7 @@ static void IN_AttackDown(void)
 {
     CLG_KeyDown(&in_attack);
 
-    if (cl_instantpacket->integer && clgi.GetClienState() == CCS_ACTIVE) {// && cls->netchan) {
+    if (cl_instantpacket->integer && clgi.GetClienState() == ClientConnectionState::Active) {// && cls->netchan) {
         cl->sendPacketNow = true;
     }
 }
@@ -264,7 +264,7 @@ static void IN_UseDown(void)
 {
     CLG_KeyDown(&in_use);
 
-    if (cl_instantpacket->integer && clgi.GetClienState() == CCS_ACTIVE) {// && cls.netchan) {
+    if (cl_instantpacket->integer && clgi.GetClienState() == ClientConnectionState::Active) {// && cls.netchan) {
         cl->sendPacketNow = true;
     }
 }
@@ -624,7 +624,7 @@ void CLG_BuildFrameMoveCommand(int msec)
 //
 void CLG_FinalizeFrameMoveCommand(void)
 {
-    if (clgi.GetClienState() != CCS_ACTIVE) {
+    if (clgi.GetClienState() != ClientConnectionState::Active) {
         return; // not talking to a server
     }
 

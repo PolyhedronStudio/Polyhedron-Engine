@@ -126,11 +126,11 @@ typedef struct {
 // Main server structure.
 //-----------------
 typedef struct {
-    ServerState  state;      // precache commands are only valid during load
-    int             spawncount; // random number generated each server spawn
+    int32_t serverState;      // precache commands are only valid during load
+    int32_t spawncount; // random number generated each server spawn
 
-    int         frameNumber;
-    unsigned    frameResidual;
+    int32_t  frameNumber;
+    uint32_t frameResidual;
 
     char        mapcmd[MAX_QPATH];          // ie: *intro.cin+base
 
@@ -146,15 +146,15 @@ typedef struct {
 } server_t;
 
 
-typedef enum {
-    cs_free,        // can be reused for a new connection
-    cs_zombie,      // client has been disconnected, but don't reuse
-                    // connection for a couple seconds
-    cs_assigned,    // client_t assigned, but no data received from client yet
-    cs_connected,   // netchan fully established, but not in game yet
-    cs_primed,      // sent serverdata, client is precaching
-    cs_spawned      // client is fully in game
-} ConnectionState;
+struct ConnectionState {
+    static constexpr int32_t Free = 0;      // Can be reused for a new connection
+    static constexpr int32_t Zombie = 1;    // Client has been disconnected, but don't reuse
+                                            // Connection for a couple seconds
+    static constexpr int32_t Assigned = 2;  // Client_t assigned, but no data received from client yet
+    static constexpr int32_t Connected = 3; // Netchan fully established, but not in game yet
+    static constexpr int32_t Primed = 4;    // Sent serverdata, client is precaching
+    static constexpr int32_t Spawned = 5;   // Client is fully in game
+};
 
 constexpr uint32_t MSG_POOLSIZE = 1024;
 constexpr uint32_t MSG_TRESHOLD = (64 - 10);   // keep pmsg_s 64 bytes aligned
@@ -209,7 +209,7 @@ typedef struct client_s {
     list_t entry;
 
     // core info
-    ConnectionState state;
+    int32_t connectionState;
     entity_t *edict;     // EDICT_NUM(clientnum+1)
     int number;     // client slot number
 
@@ -393,7 +393,7 @@ typedef struct {
     char            buffer[MAX_QPATH];
     char            *server;
     char            *spawnpoint;
-    ServerState     state;
+    int32_t         serverState;
     int32_t         loadgame;
     qboolean        endofunit;
     cm_t            cm;

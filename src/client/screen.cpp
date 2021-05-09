@@ -663,7 +663,7 @@ static void SCR_TimeRefresh_f(void)
     unsigned    start, stop;
     float       time;
 
-    if (cls.state != CCS_ACTIVE) {
+    if (cls.connectionState != ClientConnectionState::Active) {
         Com_Printf("No map loaded.\n");
         return;
     }
@@ -800,7 +800,7 @@ SCR_BeginLoadingPlaque
 */
 void SCR_BeginLoadingPlaque(void)
 {
-    if (!cls.state) {
+    if (!cls.connectionState) {
         return;
     }
 
@@ -832,7 +832,7 @@ SCR_EndLoadingPlaque
 */
 void SCR_EndLoadingPlaque(void)
 {
-    if (!cls.state) {
+    if (!cls.connectionState) {
         return;
     }
     cls.disable_screen = 0;
@@ -909,12 +909,12 @@ static void SCR_DrawActive(void)
         return;
 
     // draw black background if not active
-    if (cls.state < CCS_ACTIVE) {
+    if (cls.connectionState < ClientConnectionState::Active) {
         R_DrawFill8(0, 0, r_config.width, r_config.height, 0);
         return;
     }
 
-    if (cls.state == CCS_CINEMATIC) {
+    if (cls.connectionState == ClientConnectionState::Cinematic) {
         if (cl.precaches.images[0]) 
         {
             // scale the image to touch the screen from inside, keeping the aspect ratio

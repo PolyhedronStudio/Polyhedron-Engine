@@ -298,7 +298,7 @@ static void SCR_ScoreShot_f(void)
     int i;
     qerror_t ret;
 
-    if (cls.state != CCS_ACTIVE) {
+    if (cls.connectionState != ClientConnectionState::Active) {
         Com_Printf("Must be in a level.\n");
         return;
     }
@@ -350,7 +350,7 @@ static void SCR_ScoreDump_f(void)
     char buffer[(TH_WIDTH + 1) * TH_HEIGHT];
     int i;
 
-    if (cls.state != CCS_ACTIVE) {
+    if (cls.connectionState != ClientConnectionState::Active) {
         Com_Printf("Must be in a level.\n");
         return;
     }

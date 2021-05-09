@@ -744,7 +744,7 @@ void CL_RequestNextDownload(void)
     size_t len;
     int i;
 
-    if (cls.state != CCS_CONNECTED && cls.state != CCS_LOADING)
+    if (cls.connectionState != ClientConnectionState::Connected && cls.connectionState != ClientConnectionState::Loading)
         return;
 
     if (allow_download->integer <= 0 || NET_IsLocalAddress(&cls.serverAddress)) {
@@ -917,7 +917,7 @@ static void CL_Download_f(void)
     const char *path; // C++20: STRING: Added const to char*
     qerror_t ret;
 
-    if (cls.state < CCS_CONNECTED) {
+    if (cls.connectionState < ClientConnectionState::Connected) {
         Com_Printf("Must be connected to a server.\n");
         return;
     }

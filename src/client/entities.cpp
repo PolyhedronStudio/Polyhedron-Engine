@@ -171,7 +171,7 @@ static void entity_event(int number)
 
 static void set_active_state(void)
 {
-    cls.state = CCS_ACTIVE;
+    cls.connectionState = ClientConnectionState::Active;
 
     cl.serverDelta = Q_align(cl.frame.number, CL_FRAMEDIV);
     cl.time = cl.serverTime = 0; // set time, needed for demos
@@ -281,10 +281,10 @@ void CL_DeltaFrame(void)
     EntityState      *state;
     int                 i, j;
     int                 frameNumber;
-    int                 prevstate = cls.state;
+    int                 prevstate = cls.connectionState;
 
     // getting a valid frame message ends the connection process
-    if (cls.state == CCS_PRECACHED)
+    if (cls.connectionState == ClientConnectionState::Precached)
         set_active_state();
 
     // set server time

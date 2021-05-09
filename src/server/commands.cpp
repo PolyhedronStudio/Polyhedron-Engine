@@ -143,7 +143,7 @@ client_t *SV_GetPlayer(const char *s, qboolean partial)
         }
 
         other = &svs.client_pool[i];
-        if (other->state <= cs_zombie) {
+        if (other->connectionState <= ConnectionState::Zombie) {
             Com_Printf("Client slot %d is not active.\n", i);
             return NULL;
         }
@@ -152,7 +152,7 @@ client_t *SV_GetPlayer(const char *s, qboolean partial)
 
     // check for exact name match
     FOR_EACH_CLIENT(other) {
-        if (other->state <= cs_zombie) {
+        if (other->connectionState <= ConnectionState::Zombie) {
             continue;
         }
         if (!strcmp(other->name, s)) {
@@ -169,7 +169,7 @@ client_t *SV_GetPlayer(const char *s, qboolean partial)
     match = NULL;
     count = 0;
     FOR_EACH_CLIENT(other) {
-        if (other->state <= cs_zombie) {
+        if (other->connectionState <= ConnectionState::Zombie) {
             continue;
         }
         if (!Q_stricmp(other->name, s)) {
@@ -203,7 +203,7 @@ static void SV_Player_g(genctx_t *ctx)
     }
 
     FOR_EACH_CLIENT(cl) {
-        if (cl->state <= cs_zombie) {
+        if (cl->connectionState <= ConnectionState::Zombie) {
             continue;
         }
         if (!Prompt_AddMatch(ctx, cl->name)) {
@@ -290,7 +290,7 @@ static void SV_Map(qboolean restart)
     SV_AutoSaveBegin(&cmd);
 
     // any error will drop from this point
-    if ((sv.state != SS_GAME && sv.state != SS_PIC && sv.state != ss_cinematic) || restart)
+    if ((sv.serverState != ServerState::Game && sv.serverState != ServerState::Pic && sv.serverState != ServerState::Cinematic) || restart)
         SV_InitGame();    // the game is just starting
 
     // clear pending CM
@@ -371,7 +371,7 @@ static int should_really_restart(void)
 {
     static qboolean warned;
 
-    if (sv.state != SS_GAME && sv.state != SS_PIC && sv.state != ss_cinematic)
+    if (sv.serverState != ServerState::Game && sv.serverState != ServerState::Pic && sv.serverState != ServerState::Cinematic)
         return 1;   // the game is just starting
 
 #if !USE_CLIENT
@@ -516,20 +516,20 @@ static void dump_clients(void)
         Com_Printf("%3i %5i ", client->number,
                    client->edict->client->playerState.stats[STAT_FRAGS]);
 
-        switch (client->state) {
-        case cs_zombie:
+        switch (client->connectionState) {
+        case ConnectionState::Zombie:
             Com_Printf("ZMBI ");
             break;
-        case cs_assigned:
+        case ConnectionState::Assigned:
             Com_Printf("ASGN ");
             break;
-        case cs_connected:
-        case cs_primed:
+        case ConnectionState::Connected:
+        case ConnectionState::Primed:
             if (client->download.bytes) {
                 Com_Printf("DNLD ");
             } else if (client->http_download) {
                 Com_Printf("HTTP ");
-            } else if (client->state == cs_connected) {
+            } else if (client->connectionState == ConnectionState::Connected) {
                 Com_Printf("CNCT ");
             } else {
                 Com_Printf("PRIM ");
@@ -706,7 +706,7 @@ static void SV_ConSay_f(void)
 
     s = Cmd_RawArgs(); // C++20: Added cast.
     FOR_EACH_CLIENT(client) {
-        if (client->state != cs_spawned)
+        if (client->connectionState != ConnectionState::Spawned)
             continue;
         SV_ClientPrintf(client, PRINT_CHAT, "console: %s\n", s);
     }

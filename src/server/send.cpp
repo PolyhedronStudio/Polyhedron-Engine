@@ -90,7 +90,7 @@ static void SV_CalcSendTime(client_t *client, size_t size)
         return;
     }
 
-    if (client->state == cs_spawned)
+    if (client->connectionState == ConnectionState::Spawned)
         client->messageSizes[client->frameNumber % SERVER_MESSAGES_TICKRATE] = size;
 
     client->sendTime = svs.realtime;
@@ -168,7 +168,7 @@ void SV_BroadcastPrintf(int level, const char *fmt, ...)
     MSG_WriteData(string, len + 1);
 
     FOR_EACH_CLIENT(client) {
-        if (client->state != cs_spawned)
+        if (client->connectionState != ConnectionState::Spawned)
             continue;
         if (level < client->messageLevel)
             continue;
@@ -293,11 +293,11 @@ void SV_Multicast(const vec3_t *origin, MultiCast to)
 
     // send the data to all relevent clients
     FOR_EACH_CLIENT(client) {
-        if (client->state < cs_primed) {
+        if (client->connectionState < ConnectionState::Primed) {
             continue;
         }
         // do not send unreliables to connecting clients
-        if (!(flags & MSG_RELIABLE) && (client->state != cs_spawned ||
+        if (!(flags & MSG_RELIABLE) && (client->connectionState != ConnectionState::Spawned ||
                                         client->download.bytes || client->nodata)) {
             continue;
         }
@@ -685,7 +685,7 @@ void SV_SendClientMessages(void)
 
     // send a message to each connected client
     FOR_EACH_CLIENT(client) {
-        if (client->state != cs_spawned || client->download.bytes || client->nodata)
+        if (client->connectionState != ConnectionState::Spawned || client->download.bytes || client->nodata)
             goto finish;
 
         if (!SV_CLIENTSYNC(client))
@@ -802,7 +802,7 @@ void SV_SendAsyncPackets(void)
         }
 
         // spawned clients are handled elsewhere
-        if (client->state == cs_spawned && !client->download.bytes && !client->nodata && !SV_PAUSED) {
+        if (client->connectionState == ConnectionState::Spawned && !client->download.bytes && !client->nodata && !SV_PAUSED) {
             continue;
         }
 
@@ -810,7 +810,7 @@ void SV_SendAsyncPackets(void)
         retransmit = (com_localTime - netchan->lastSent > 1000);
 
         // don't write new reliables if not yet acknowledged
-        if (netchan->reliableLength && !retransmit && client->state != cs_zombie) {
+        if (netchan->reliableLength && !retransmit && client->connectionState != ConnectionState::Zombie) {
             continue;
         }
 

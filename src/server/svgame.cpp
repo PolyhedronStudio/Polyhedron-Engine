@@ -94,7 +94,7 @@ static void PF_Unicast(entity_t *ent, qboolean reliable)
     }
 
     client = svs.client_pool + clientNumber;
-    if (client->state <= cs_zombie) {
+    if (client->connectionState <= ConnectionState::Zombie) {
         Com_WPrintf("%s to a free/zombie client %d\n", __func__, clientNumber);
         goto clear;
     }
@@ -165,7 +165,7 @@ static void PF_bprintf(int level, const char *fmt, ...)
     }
 
     FOR_EACH_CLIENT(client) {
-        if (client->state != cs_spawned)
+        if (client->connectionState != ConnectionState::Spawned)
             continue;
         if (level >= client->messageLevel) {
             SV_ClientAddMessage(client, MSG_RELIABLE);
@@ -232,7 +232,7 @@ static void PF_cprintf(entity_t *ent, int level, const char *fmt, ...)
     }
 
     client = svs.client_pool + clientNumber;
-    if (client->state <= cs_zombie) {
+    if (client->connectionState <= ConnectionState::Zombie) {
         Com_WPrintf("%s to a free/zombie client %d\n", __func__, clientNumber);
         return;
     }
@@ -357,7 +357,7 @@ static void PF_configstring(int index, const char *val)
     if (index < 0 || index >= ConfigStrings::MaxConfigStrings)
         Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
 
-    if (sv.state == SS_DEAD) {
+    if (sv.serverState == ServerState::Dead) {
         Com_WPrintf("%s: not yet initialized\n", __func__);
         return;
     }
@@ -392,7 +392,7 @@ static void PF_configstring(int index, const char *val)
     memcpy(dst, val, len);
     dst[len] = 0;
 
-    if (sv.state == SS_LOADING) {
+    if (sv.serverState == ServerState::Loading) {
         return;
     }
 
@@ -403,7 +403,7 @@ static void PF_configstring(int index, const char *val)
     MSG_WriteByte(0);
 
     FOR_EACH_CLIENT(client) {
-        if (client->state < cs_primed) {
+        if (client->connectionState < ConnectionState::Primed) {
             continue;
         }
         SV_ClientAddMessage(client, MSG_RELIABLE);
@@ -542,7 +542,7 @@ static void PF_StartSound(entity_t *edict, int channel,
 
     FOR_EACH_CLIENT(client) {
         // do not send sounds to connecting clients
-        if (client->state != cs_spawned || client->download.bytes || client->nodata) {
+        if (client->connectionState != ConnectionState::Spawned || client->download.bytes || client->nodata) {
             continue;
         }
 

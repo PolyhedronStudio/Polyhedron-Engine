@@ -476,7 +476,7 @@ void SV_AutoSaveBegin(MapCommand *cmd)
         return;
     }
 
-    if (sv.state != SS_GAME)
+    if (sv.serverState != ServerState::Game)
         return;
 
     if (SV_NoSaveGames())
@@ -508,7 +508,7 @@ void SV_AutoSaveBegin(MapCommand *cmd)
 
 void SV_AutoSaveEnd(void)
 {
-    if (sv.state != SS_GAME)
+    if (sv.serverState != ServerState::Game)
         return;
 
     if (SV_NoSaveGames())
@@ -624,7 +624,7 @@ static void SV_Savegame_f(void)
 {
     const char *dir;
 
-    if (sv.state != SS_GAME) {
+    if (sv.serverState != ServerState::Game) {
         Com_Printf("You must be in a game to save.\n");
         return;
     }

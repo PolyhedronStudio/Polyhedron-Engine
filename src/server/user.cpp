@@ -399,18 +399,18 @@ This will be sent on the initial connection and upon each server load.
 */
 void SV_New_f(void)
 {
-    ConnectionState oldstate;
+    int32_t oldConnectionState;
 
     Com_DPrintf("New() from %s\n", sv_client->name);
 
-    oldstate = sv_client->state;
-    if (sv_client->state < cs_connected) {
-        Com_DPrintf("Going from cs_assigned to cs_connected for %s\n",
+    oldConnectionState = sv_client->connectionState;
+    if (sv_client->connectionState < ConnectionState::Connected) {
+        Com_DPrintf("Going from ConnectionState::Assigned to ConnectionState::Connected for %s\n",
                     sv_client->name);
-        sv_client->state = cs_connected;
+        sv_client->connectionState = ConnectionState::Connected;
         sv_client->lastMessage = svs.realtime; // don't timeout
         time(&sv_client->timeOfInitialConnect);
-    } else if (sv_client->state > cs_connected) {
+    } else if (sv_client->connectionState > ConnectionState::Connected) {
         Com_DPrintf("New not valid -- already primed\n");
         return;
     }
@@ -441,14 +441,14 @@ void SV_New_f(void)
     MSG_WriteLong(sv_client->spawncount);
     MSG_WriteByte(0);   // no attract loop
     MSG_WriteString(sv_client->gamedir);
-    if (sv.state == SS_PIC || sv.state == ss_cinematic)
+    if (sv.serverState == ServerState::Pic || sv.serverState == ServerState::Cinematic)
         MSG_WriteShort(-1);
     else
         MSG_WriteShort(sv_client->slot);
     MSG_WriteString(&sv_client->configstrings[ConfigStrings::Name * MAX_QPATH]);
 
     MSG_WriteShort(sv_client->version);
-    MSG_WriteByte(sv.state);
+    MSG_WriteByte(sv.serverState);
     MSG_WriteByte(sv_client->pmp.strafehack);
     MSG_WriteByte(sv_client->pmp.qwmode);
     MSG_WriteByte(sv_client->pmp.waterhack);
@@ -458,7 +458,7 @@ void SV_New_f(void)
     SV_ClientCommand(sv_client, "\n");
 
     // send version string request
-    if (oldstate == cs_assigned) {
+    if (oldConnectionState == ConnectionState::Assigned) {
         SV_ClientCommand(sv_client, "cmd \177c version $version\n");
         stuff_cmds(&sv_cmdlist_connect);
     }
@@ -469,13 +469,13 @@ void SV_New_f(void)
                          sv_client->reconnectKey);
     }
 
-    Com_DPrintf("Going from cs_connected to cs_primed for %s\n",
+    Com_DPrintf("Going from ConnectionState::Connected to ConnectionState::Primed for %s\n",
                 sv_client->name);
-    sv_client->state = cs_primed;
+    sv_client->connectionState = ConnectionState::Primed;
 
     memset(&sv_client->lastClientUserCommand, 0, sizeof(sv_client->lastClientUserCommand));
 
-    if (sv.state == SS_PIC || sv.state == ss_cinematic)
+    if (sv.serverState == ServerState::Pic || sv.serverState == ServerState::Cinematic)
         return;
 
 #if USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
@@ -508,12 +508,12 @@ void SV_Begin_f(void)
     Com_DPrintf("Begin() from %s\n", sv_client->name);
 
     // handle the case of a level changing while a client was connecting
-    if (sv_client->state < cs_primed) {
+    if (sv_client->connectionState < ConnectionState::Primed) {
         Com_DPrintf("Begin not valid -- not yet primed\n");
         SV_New_f();
         return;
     }
-    if (sv_client->state > cs_primed) {
+    if (sv_client->connectionState > ConnectionState::Primed) {
         Com_DPrintf("Begin not valid -- already spawned\n");
         return;
     }
@@ -528,9 +528,9 @@ void SV_Begin_f(void)
         return;
     }
 
-    Com_DPrintf("Going from cs_primed to cs_spawned for %s\n",
+    Com_DPrintf("Going from ConnectionState::Primed to ConnectionState::Spawned for %s\n",
                 sv_client->name);
-    sv_client->state = cs_spawned;
+    sv_client->connectionState = ConnectionState::Spawned;
     sv_client->sendDelta = 0;
     sv_client->clientUserCommandMiliseconds = 1800;
     sv_client->suppressCount = 0;
@@ -780,7 +780,7 @@ static void SV_NextServer_f(void)
     Q_strlcpy(nextserver, v, sizeof(nextserver));
     Cvar_Set("nextserver", "");
     
-    if (sv.state != SS_PIC && sv.state != ss_cinematic)
+    if (sv.serverState != ServerState::Pic && sv.serverState != ServerState::Cinematic)
         return;     // can't nextserver while playing a normal game
 
     if (Cvar_VariableInteger("deathmatch"))
@@ -791,7 +791,7 @@ static void SV_NextServer_f(void)
     if (!nextserver[0])
     {
         if (Cvar_VariableInteger("coop"))
-            Cbuf_AddText(&cmd_buffer, "gamemap \"*base1\"\n");
+            Cbuf_AddText(&cmd_buffer, "gamemap \"*nacstart\"\n");
         else
             Cbuf_AddText(&cmd_buffer, "killserver\n");
     }
@@ -991,11 +991,11 @@ static void SV_ExecuteUserCommand(const char *s)
         return;
     }
 
-    if (sv.state == SS_PIC || sv.state == ss_cinematic) {
+    if (sv.serverState == ServerState::Pic || sv.serverState == ServerState::Cinematic) {
         return;
     }
 
-    if (sv_client->state != cs_spawned && !sv_allow_unconnected_cmds->integer) {
+    if (sv_client->connectionState != ConnectionState::Spawned && !sv_allow_unconnected_cmds->integer) {
         return;
     }
 
@@ -1107,7 +1107,7 @@ static void SV_ExecuteMove(void)
     MSG_ReadDeltaUsercmd(&oldest, &oldcmd);
     MSG_ReadDeltaUsercmd(&oldcmd, &newcmd);
 
-    if (sv_client->state != cs_spawned) {
+    if (sv_client->connectionState != ConnectionState::Spawned) {
         SV_SetLastFrame(-1);
         return;
     }
@@ -1336,7 +1336,7 @@ void SV_ExecuteClientMessage(client_t *client)
             break;
         }
 
-        if (client->state <= cs_zombie)
+        if (client->connectionState <= ConnectionState::Zombie)
             break;    // disconnect command
     }
 

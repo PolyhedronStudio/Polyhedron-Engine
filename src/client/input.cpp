@@ -84,7 +84,7 @@ static qboolean IN_GetCurrentGrab(void)
     if (cls.key_dest & (KEY_MENU | KEY_CONSOLE))
         return false;  // menu or console is up
 
-    if (cls.state != CCS_ACTIVE && cls.state != CCS_CINEMATIC)
+    if (cls.connectionState != ClientConnectionState::Active && cls.connectionState != ClientConnectionState::Cinematic)
         return false;  // not connected
 
     if (in_grab->integer >= 2) {
@@ -556,7 +556,7 @@ static void CL_SendUserinfo(void)
 
 void CL_SendCmd(void)
 {
-    if (cls.state < CCS_CONNECTED) {
+    if (cls.connectionState < ClientConnectionState::Connected) {
         return; // not talking to a server
     }
 
@@ -566,7 +566,7 @@ void CL_SendCmd(void)
         return;
     }
 
-    if (cls.state != CCS_ACTIVE || sv_paused->integer) {
+    if (cls.connectionState != ClientConnectionState::Active || sv_paused->integer) {
         // send a userinfo update if needed
         CL_SendUserinfo();
 

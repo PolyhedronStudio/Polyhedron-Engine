@@ -114,9 +114,9 @@ void SV_RemoveClient(client_t *client)
     // itself to make code that traverses client list in a loop happy!
     List_Remove(&client->entry);
 
-    Com_DPrintf("Going from cs_zombie to cs_free for %s\n", client->name);
+    Com_DPrintf("Going from ConnectionState::Zombie to ConnectionState::Free for %s\n", client->name);
 
-    client->state = cs_free;    // can now be reused
+    client->connectionState = ConnectionState::Free;    // can now be reused
     client->name[0] = 0;
 }
 
@@ -143,29 +143,29 @@ void SV_CleanClient(client_t *client)
 
 //
 //===============
-// SV_GetState
+// SV_GetServerState
 // 
 // Returns the current state of the server.
 //===============
 //
-ServerState SV_GetState (void) {
-    return sv.state;
+uint32_t SV_GetServerState (void) {
+    return sv.serverState;
 }
 
 //
 //===============
-// SV_SetState
+// SV_SetServerState
 // 
 // Sets the current state of the server.
 //===============
 //
-void SV_SetState (ServerState state) {
-    sv.state = state;
+void SV_SetServerState (uint32_t serverState) {
+    sv.serverState = serverState;
 }
 
-static void print_drop_reason(client_t *client, const char *reason, ConnectionState oldstate)
+static void print_drop_reason(client_t *client, const char *reason, int32_t oldConnectionState)
 {
-    int announce = oldstate == cs_spawned ? 2 : 1;
+    int announce = oldConnectionState == ConnectionState::Spawned ? 2 : 1;
     const char *prefix = " was dropped: ";
 
     // parse flags
@@ -207,24 +207,24 @@ or crashing.
 */
 void SV_DropClient(client_t *client, const char *reason)
 {
-    ConnectionState oldstate;
+    int32_t oldConnectionState;
 
-    if (client->state <= cs_zombie)
+    if (client->connectionState <= ConnectionState::Zombie)
         return; // called recursively?
 
-    oldstate = client->state;
-    client->state = cs_zombie;        // become free in a few seconds
+    oldConnectionState = client->connectionState;
+    client->connectionState = ConnectionState::Zombie;        // become free in a few seconds
     client->lastMessage = svs.realtime;
 
     // print the reason
     if (reason)
-        print_drop_reason(client, reason, oldstate);
+        print_drop_reason(client, reason, oldConnectionState);
 
     // add the disconnect
     MSG_WriteByte(svc_disconnect);
     SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
 
-    if (oldstate == cs_spawned) {
+    if (oldConnectionState == ConnectionState::Spawned) {
         // call the prog function for removing a client
         // this will remove the body, among other things
         ge->ClientDisconnect(client->edict);
@@ -232,7 +232,7 @@ void SV_DropClient(client_t *client, const char *reason)
 
     SV_CleanClient(client);
 
-    Com_DPrintf("Going to cs_zombie for %s\n", client->name);
+    Com_DPrintf("Going to ConnectionState::Zombie for %s\n", client->name);
 }
 
 
@@ -427,7 +427,7 @@ static size_t SV_StatusString(char *status)
     // add player list
     if (sv_status_show->integer > 1) {
         FOR_EACH_CLIENT(cl) {
-            if (cl->state == cs_zombie) {
+            if (cl->connectionState == ConnectionState::Zombie) {
                 continue;
             }
             len = Q_snprintf(entry, sizeof(entry),
@@ -701,7 +701,7 @@ static qboolean permit_connection(conn_params_t *p)
             if (net_from.type == NA_IP6 && memcmp(net_from.ip.u8, adr->ip.u8, 48 / CHAR_BIT))
                 continue;
 
-            if (cl->state == cs_zombie)
+            if (cl->connectionState == ConnectionState::Zombie)
                 count += 1;
             else
                 count += 2;
@@ -874,7 +874,7 @@ static client_t *find_client_slot(conn_params_t *params)
     // if there is already a slot for this ip, reuse it
     FOR_EACH_CLIENT(cl) {
         if (NET_IsEqualAdr(&net_from, &cl->netchan->remoteAddress)) {
-            if (cl->state == cs_zombie) {
+            if (cl->connectionState == ConnectionState::Zombie) {
                 strcpy(params->reconnectKey, cl->reconnectKey);
                 strcpy(params->reconnectValue, cl->reconnectValue);
             } else {
@@ -895,7 +895,7 @@ static client_t *find_client_slot(conn_params_t *params)
     // find a free client slot
     for (i = 0; i < sv_maxclients->integer - params->reserved; i++) {
         cl = &svs.client_pool[i];
-        if (cl->state == cs_free)
+        if (cl->connectionState == ConnectionState::Free)
             return cl;
     }
 
@@ -1075,8 +1075,8 @@ static void SVC_DirectConnect(void)
     // add them to the linked list of connected clients
     List_SeqAdd(&sv_clientlist, &newcl->entry);
 
-    Com_DPrintf("Going from cs_free to cs_assigned for %s\n", newcl->name);
-    newcl->state = cs_assigned;
+    Com_DPrintf("Going from ConnectionState::Free to ConnectionState::Assigned for %s\n", newcl->name);
+    newcl->connectionState = ConnectionState::Assigned;
     newcl->frameNumber = 1; // frame 0 can't be used
     newcl->lastFrame = -1;
     newcl->lastMessage = svs.realtime;    // don't timeout
@@ -1210,7 +1210,7 @@ int SV_CountClients(void)
     int count = 0;
 
     FOR_EACH_CLIENT(cl) {
-        if (cl->state > cs_zombie) {
+        if (cl->connectionState > ConnectionState::Zombie) {
             count++;
         }
     }
@@ -1284,7 +1284,7 @@ static void SV_CalcPings(void)
     res = sv.frameNumber % (10 * SV_FRAMERATE);
 
     FOR_EACH_CLIENT(cl) {
-        if (cl->state == cs_spawned) {
+        if (cl->connectionState == ConnectionState::Spawned) {
             cl->ping = calc(cl);
             if (cl->ping) {
                 if (cl->ping < cl->pingMinimum) {
@@ -1392,7 +1392,7 @@ static void SV_PacketEvent(void)
         if (!Netchan_Process(netchan))
             break;
 
-        if (client->state == cs_zombie)
+        if (client->connectionState == ConnectionState::Zombie)
             break;
 
         // this is a valid, sequenced packet, so process it
@@ -1421,7 +1421,7 @@ static void update_client_mtu(client_t *client, int ee_info)
     if (ee_info < 576 || ee_info > 4096)
         return;
 
-    if (client->state != cs_primed)
+    if (client->state != ConnectionState::Primed)
         return;
 
     // TODO: old clients require entire queue flush :(
@@ -1458,7 +1458,7 @@ void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info)
 
     // check for errors from connected clients
     FOR_EACH_CLIENT(client) {
-        if (client->state == cs_zombie) {
+        if (client->connectionState == ConnectionState::Zombie) {
             continue; // already a zombie
         }
         netchan = client->netchan;
@@ -1509,7 +1509,7 @@ static void SV_CheckTimeouts(void)
         }
         // NOTE: delta calculated this way is not sensitive to overflow
         delta = svs.realtime - client->lastMessage;
-        if (client->state == cs_zombie) {
+        if (client->connectionState == ConnectionState::Zombie) {
             if (delta > zombie_time) {
                 SV_RemoveClient(client);
             }
@@ -1528,7 +1528,7 @@ static void SV_CheckTimeouts(void)
             }
         }
 #endif
-        if (delta > drop_time || (client->state == cs_assigned && delta > ghost_time)) {
+        if (delta > drop_time || (client->connectionState == ConnectionState::Assigned && delta > ghost_time)) {
             SV_DropClient(client, "?timed out");
             SV_RemoveClient(client);      // don't bother with zombie state
             continue;
@@ -2071,7 +2071,7 @@ static void SV_FinalMessage(const char *message, ErrorType type)
     // stagger the packets to crutch operating system limited buffers
     for (i = 0; i < 2; i++) {
         FOR_EACH_CLIENT(client) {
-            if (client->state == cs_zombie) {
+            if (client->connectionState == ConnectionState::Zombie) {
                 continue;
             }
             netchan = client->netchan;
@@ -2086,7 +2086,7 @@ static void SV_FinalMessage(const char *message, ErrorType type)
 
     // free any data dynamically allocated
     FOR_EACH_CLIENT(client) {
-        if (client->state != cs_zombie) {
+        if (client->connectionState != ConnectionState::Zombie) {
             SV_CleanClient(client);
         }
         SV_RemoveClient(client);

@@ -94,15 +94,15 @@ of server connections
 
 // Moved to shared/shared.h
 // typedef enum {
-//     CCS_UNINITIALIZED,
-//     CCS_DISCONNECTED,    // not talking to a server
-//     CCS_CHALLENGING,     // sending getchallenge packets to the server
-//     CCS_CONNECTING,      // sending connect packets to the server
-//     CCS_CONNECTED,       // netchan_t established, waiting for svc_serverdata
-//     CCS_LOADING,         // loading level data
-//     CCS_PRECACHED,       // loaded level data, waiting for svc_frame
-//     CCS_ACTIVE,          // game views should be displayed
-//     CCS_CINEMATIC        // running a cinematic
+//     ClientConnectionState::Uninitialized,
+//     ClientConnectionState::Disconnected,    // not talking to a server
+//     ClientConnectionState::Challenging,     // sending getchallenge packets to the server
+//     ClientConnectionState::Connecting,      // sending connect packets to the server
+//     ClientConnectionState::Connected,       // netchan_t established, waiting for svc_serverdata
+//     ClientConnectionState::Loading,         // loading level data
+//     ClientConnectionState::Precached,       // loaded level data, waiting for svc_frame
+//     ClientConnectionState::Active,          // game views should be displayed
+//     ClientConnectionState::Cinematic        // running a cinematic
 // } ClientConnectionState;
 
 #define FOR_EACH_DLQ(q) \
@@ -136,7 +136,7 @@ typedef struct {
 } dlqueue_t;
 
 typedef struct client_static_s {
-    ClientConnectionState state;
+    int32_t    connectionState;
     keydest_t   key_dest;
 
     active_t    active;
@@ -397,23 +397,13 @@ void CL_CheckForPause(void);
 void CL_UpdateFrameTimes(void);
 qboolean CL_CheckForIgnore(const char *s);
 void CL_WriteConfig(void);
-ClientConnectionState CL_GetState (void);                     // WATISDEZE Added for CG Module.
-void        CL_SetState (ClientConnectionState state);        // WATISDEZE Added for CG Module.
+uint32_t    CL_GetConnectionState (void);                     // WATISDEZE Added for CG Module.
+void        CL_SetConnectionState (uint32_t state);        // WATISDEZE Added for CG Module.
 void        CL_SetLoadState (LoadState state);   // WATISDEZE Added for CG Module.
 
 //
 // precache.c
 //
-
-// WatIsDeze: Moved to shared/cltypes.h
-// typedef enum {
-//     LOAD_NONE,
-//     LOAD_MAP,
-//     LOAD_MODELS,
-//     LOAD_IMAGES,
-//     LOAD_CLIENTS,
-//     LOAD_SOUNDS
-// } LoadState;
 
 void CL_ParsePlayerSkin(char *name, char *model, char *skin, const char *s);
 void CL_LoadState(LoadState state);

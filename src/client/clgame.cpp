@@ -413,7 +413,7 @@ void CL_InitGameProgs(void)
     importAPI.UpdateListenerOrigin = CL_UpdateListenerOrigin;
 
     importAPI.SetClientLoadState = CL_SetLoadState;
-    importAPI.GetClienState = CL_GetState;
+    importAPI.GetClienState = CL_GetConnectionState;
 
     importAPI.CheckForIgnore = CL_CheckForIgnore;
     importAPI.CheckForIP = CL_CheckForIP;

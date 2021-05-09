@@ -344,7 +344,7 @@ static void CL_ParseFrame(int extrabits)
         Com_Error(ERR_DROP, "%s: bad fov", __func__);
     }
 
-    if (cls.state < CCS_PRECACHED)
+    if (cls.connectionState < ClientConnectionState::Precached)
         return;
 
     cl.oldframe = cl.frame;
@@ -497,7 +497,7 @@ static void CL_ParseServerData(void)
     CL_GM_PMoveInit(cge->pmoveParams);
 
     // setup default server state
-    cl.serverState = SS_GAME;
+    cl.serverState = ServerState::Game;
 
     // MSG: !! Removed: PROTOCOL_VERSION_NAC
     //if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
@@ -635,7 +635,7 @@ static void CL_ParseReconnect(void)
 
     CL_Disconnect(ERR_RECONNECT);
 
-    cls.state = CCS_CHALLENGING;
+    cls.connectionState = ClientConnectionState::Challenging;
     cls.timeOfInitialConnect -= CONNECT_FAST;
     cls.connect_count = 0;
 

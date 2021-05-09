@@ -220,7 +220,7 @@ void CL_UpdateConfigstring(int index)
 
     // Anything processed after this if statement is done so only when we're
     // not fully precached yet. 
-    if (cls.state < CCS_PRECACHED) {
+    if (cls.connectionState < ClientConnectionState::Precached) {
         return;
     }
 
