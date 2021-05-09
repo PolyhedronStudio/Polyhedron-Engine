@@ -213,16 +213,24 @@ if (NOT CONFIG_VKPT_RENDERER AND CONFIG_GL_RENDERER)
 	)
 endif()
 
+if (CONFIG_ENABLE_RMLUI)
 SET(SRC_CLIENT_RMLUI
 	client/rmlui/interfaces/FileInterface.cpp
 	client/rmlui/interfaces/FileInterface.h
-	client/rmlui/interfaces/RenderInterface.cpp
-	client/rmlui/interfaces/RenderInterface.h
+	client/rmlui/interfaces/RenderInterfaceOpenGL.cpp
+	client/rmlui/interfaces/RenderInterfaceOpenGL.h
 	client/rmlui/interfaces/SystemInterface.cpp
 	client/rmlui/interfaces/SystemInterface.h
 	client/rmlui/rmlui.cpp
 	client/rmlui/rmlui.h
 )
+else()
+SET(SRC_CLIENT_RMLUI
+	client/rmlui/rmlui_null.cpp
+	client/rmlui/rmlui.h
+)
+endif()
+
 SET(SRC_CLIENT_HTTP
 	client/http.cpp
 )
@@ -570,6 +578,9 @@ IF(CONFIG_ENABLE_RMLUI)
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ${CMAKE_SOURCE_DIR}/extern/Nac-RmlUi/Include/)
 	TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_RMLUI=1 RMLUI_STATIC_LIB)
 	TARGET_LINK_LIBRARIES(client RmlCore RmlDebugger RmlLua)
+ELSE()
+	# These are set to supply the rmlui_null.cpp file.
+	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
 ENDIF()
 
 if (GLSLANG_COMPILER)

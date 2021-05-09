@@ -559,9 +559,11 @@ qboolean VID_Init(graphics_api_t api)
     VID_SetMode();
     return true;
 
+#if REF_GL
 fail:
 	VID_Shutdown();
 	return false;
+#endif
 }
 
 void VID_Shutdown(void)

@@ -42,7 +42,7 @@ cvar_t      *vid_displaylist;
 snd_params_t    snd;
 
 // used in gl and vkpt renderers
-extern int registration_sequence; // CPP: Extern
+int registration_sequence; // CPP: Extern
 
 #define MODE_GEOMETRY   1
 #define MODE_FULLSCREEN 2

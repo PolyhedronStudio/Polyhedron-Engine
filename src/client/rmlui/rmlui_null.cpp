@@ -7,9 +7,6 @@
 // RmlUI Wrapper API that is client game friendly if needed.
 //
 
-#include "librmlui.h"
-
-
 // Client includes.
 #include "../client.h"
 #include "client/sound/vorbis.h"
@@ -17,15 +14,6 @@
 
 // RmlUI includes.
 #include "rmlui.h"
-
-//////////////////////
-Rml::Context* context = NULL;
-Rml::ElementDocument* document = NULL;
-
-RmlUiRenderInterface rmlRenderInterface;
-RmlUISystemInterface rmlSystemInterface;
-RmlUIFileInterface rmlFileInterface;
-
 
 //
 //=============================================================================
@@ -35,55 +23,7 @@ RmlUIFileInterface rmlFileInterface;
 //=============================================================================
 //
 void RMLUI_Init(void) {
-	// Begin by installing the custom interfaces.
-	Rml::SetRenderInterface(&rmlRenderInterface);
-	Rml::SetSystemInterface(&rmlSystemInterface);
-	Rml::SetFileInterface(&rmlFileInterface);
 
-	// Initialize the render interface.
-	rmlRenderInterface.Initialize();
-
-	// Now we can initialize RmlUi.
-	Rml::Initialise();
-
-	// Load FontFaces.
-	struct FontFace {
-		Rml::String filename;
-		bool fallback_face;
-	};
-	FontFace font_faces[] = {
-		{ "LatoLatin-Regular.ttf",    false },
-		{ "LatoLatin-Italic.ttf",     false },
-		{ "LatoLatin-Bold.ttf",       false },
-		{ "LatoLatin-BoldItalic.ttf", false },
-		{ "NotoEmoji-Regular.ttf",    true  },
-	};
-
-	for (const FontFace& face : font_faces)
-	{
-		Rml::LoadFontFace("fonts/" + face.filename, face.fallback_face);
-	}
-
-	// Create a context next.
-	context = Rml::CreateContext("main", Rml::Vector2i(1280, 720));
-	if (!context)
-	{
-		Rml::Shutdown();
-		return;
-	}
-
-	// If you want to use the debugger, initialize it now.
-	Rml::Debugger::Initialise(context);
-
-	// Now we are ready to load our document.
-	document = context->LoadDocument("fonts/demo.rml");
-	if (!document)
-	{
-		Rml::Shutdown();
-		return;
-	}
-	//document->Show();
-	//document->Hide();
 }
 
 //
@@ -94,17 +34,7 @@ void RMLUI_Init(void) {
 //=============================================================================
 //
 bool RMLUI_ProcessKeyDown(SDL_Keycode key) {
-	if (!context)
-		return true;
-
-	// Enable/Disable RMLUI Debugger.
-	if (key == SDLK_F8)
-	{
-		Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
-		return false; // Consumed.
-	}
-
-	return context->ProcessKeyDown(rmlSystemInterface.TranslateKey(key), RmlUISystemInterface::GetKeyModifiers());
+	return true;
 }
 
 //
@@ -115,17 +45,7 @@ bool RMLUI_ProcessKeyDown(SDL_Keycode key) {
 //=============================================================================
 //
 bool RMLUI_ProcessKeyUp(SDL_Keycode key) {
-	if (!context)
-		return true;
-
-	// Enable/Disable RMLUI Debugger.
-	//if (key == SDLK_F8)
-	//{
-	//	Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
-	//	return false; // Consumed.
-	//}
-
-	return context->ProcessKeyUp(rmlSystemInterface.TranslateKey(key), RmlUISystemInterface::GetKeyModifiers());
+	return true;
 }
 
 //
@@ -136,10 +56,7 @@ bool RMLUI_ProcessKeyUp(SDL_Keycode key) {
 //=============================================================================
 //
 bool RMLUI_ProcessTextInput(const char* text) {
-	if (!context)
-		return true;
-
-	return context->ProcessTextInput(Rml::String(text));
+	return true;
 }
 
 //
@@ -151,10 +68,7 @@ bool RMLUI_ProcessTextInput(const char* text) {
 //=============================================================================
 //
 bool RMLUI_ProcessMouseMove(int x, int y) {
-	if (!context)
-		return true;
-
-	return context->ProcessMouseMove(x, y, RmlUISystemInterface::GetKeyModifiers());
+	return true;
 }
 
 //
@@ -165,10 +79,7 @@ bool RMLUI_ProcessMouseMove(int x, int y) {
 //=============================================================================
 //
 bool RMLUI_ProcessMouseWheel(float delta) {
-	if (!context)
-		return true;
-
-	return context->ProcessMouseWheel(delta, RmlUISystemInterface::GetKeyModifiers());
+	return true;
 }
 
 //
@@ -180,10 +91,7 @@ bool RMLUI_ProcessMouseWheel(float delta) {
 //=============================================================================
 //
 bool RMLUI_ProcessMouseButtonUp(int button) {
-	if (!context)
-		return true;
-
-	return context->ProcessMouseButtonUp(rmlSystemInterface.TranslateMouseButton(button), RmlUISystemInterface::GetKeyModifiers());
+	return true;
 }
 
 //
@@ -195,34 +103,20 @@ bool RMLUI_ProcessMouseButtonUp(int button) {
 //=============================================================================
 //
 bool RMLUI_ProcessMouseButtonDown(int button) {
-	if (!context)
-		return true;
-
-	return context->ProcessMouseButtonDown(rmlSystemInterface.TranslateMouseButton(button), RmlUISystemInterface::GetKeyModifiers());
+	return true;
 }
 
 // Render RMLUI
 void RMLUI_UpdateFrame(void) {
-	if (!context)
-		return;
-	if (!(Key_GetDest() & KEY_MENU)) {
-		return;
-	}
-	context->Update();
+
 }
 
 // Render RMLUI
 void RMLUI_RenderFrame(void) {
-	if (!context)
-		return;
-	if (!(Key_GetDest() & KEY_MENU)) {
-		return;
-	}
-	context->Render();
+
 }
 
 // Shutdowns RMLUI.
 void RMLUI_Shutdown(void) {
-	// Shutting down RmlUi releases all its resources, including elements, documents, and contexts.
-	Rml::Shutdown();
+
 }
