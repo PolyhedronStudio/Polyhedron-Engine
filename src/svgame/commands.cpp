@@ -68,7 +68,7 @@ void SelectNextItem(entity_t *ent, int itflags)
 
     cl = ent->client;
 
-    if (cl->chase_target) {
+    if (cl->chaseTarget) {
         ChaseNext(ent);
         return;
     }
@@ -99,7 +99,7 @@ void SelectPrevItem(entity_t *ent, int itflags)
 
     cl = ent->client;
 
-    if (cl->chase_target) {
+    if (cl->chaseTarget) {
         ChasePrev(ent);
         return;
     }
@@ -405,15 +405,14 @@ void Cmd_Inven_f(entity_t *ent)
 
     cl = ent->client;
 
-    cl->showscores = false;
-    cl->showhelp = false;
+    cl->showScores = false;
 
-    if (cl->showinventory) {
-        cl->showinventory = false;
+    if (cl->showInventory) {
+        cl->showInventory = false;
         return;
     }
 
-    cl->showinventory = true;
+    cl->showInventory = true;
 
     gi.WriteByte(svg_inventory);
     for (i = 0 ; i < MAX_ITEMS ; i++) {
@@ -574,7 +573,7 @@ Cmd_Kill_f
 */
 void Cmd_Kill_f(entity_t *ent)
 {
-    if ((level.time - ent->client->respawn_time) < 5)
+    if ((level.time - ent->client->respawnTime) < 5)
         return;
     ent->flags &= ~FL_GODMODE;
     ent->health = 0;
@@ -589,9 +588,8 @@ Cmd_PutAway_f
 */
 void Cmd_PutAway_f(entity_t *ent)
 {
-    ent->client->showscores = false;
-    ent->client->showhelp = false;
-    ent->client->showinventory = false;
+    ent->client->showScores = false;
+    ent->client->showInventory = false;
 }
 
 
@@ -750,24 +748,24 @@ void Cmd_Say_f(entity_t *ent, qboolean team, qboolean arg0)
     if (flood_msgs->value) {
         cl = ent->client;
 
-        if (level.time < cl->flood_locktill) {
+        if (level.time < cl->flood.lockTill) {
             gi.CPrintf(ent, PRINT_HIGH, "You can't talk for %d more seconds\n",
-                       (int)(cl->flood_locktill - level.time));
+                       (int)(cl->flood.lockTill - level.time));
             return;
         }
-        i = cl->flood_whenhead - flood_msgs->value + 1;
+        i = cl->flood.whenHead - flood_msgs->value + 1;
         if (i < 0)
-            i = (sizeof(cl->flood_when) / sizeof(cl->flood_when[0])) + i;
-        if (cl->flood_when[i] &&
-            level.time - cl->flood_when[i] < flood_persecond->value) {
-            cl->flood_locktill = level.time + flood_waitdelay->value;
+            i = (sizeof(cl->flood.when) / sizeof(cl->flood.when[0])) + i;
+        if (cl->flood.when[i] &&
+            level.time - cl->flood.when[i] < flood_persecond->value) {
+            cl->flood.lockTill = level.time + flood_waitdelay->value;
             gi.CPrintf(ent, PRINT_CHAT, "Flood protection:  You can't talk for %d seconds.\n",
                        (int)flood_waitdelay->value);
             return;
         }
-        cl->flood_whenhead = (cl->flood_whenhead + 1) %
-                             (sizeof(cl->flood_when) / sizeof(cl->flood_when[0]));
-        cl->flood_when[cl->flood_whenhead] = level.time;
+        cl->flood.whenHead = (cl->flood.whenHead + 1) %
+                             (sizeof(cl->flood.when) / sizeof(cl->flood.when[0]));
+        cl->flood.when[cl->flood.whenHead] = level.time;
     }
 
     if (dedicated->value)

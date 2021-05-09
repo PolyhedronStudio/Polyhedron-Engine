@@ -48,7 +48,7 @@ void HUD_MoveClientToIntermission(entity_t *ent)
     }
 
     if (deathmatch->value || coop->value)
-        ent->client->showscores = true;
+        ent->client->showScores = true;
 
     // Copy over the previously fetched map intermission entity origin into
     // the client player states positions.
@@ -289,18 +289,17 @@ Display the scoreboard
 */
 void Cmd_Score_f(entity_t *ent)
 {
-    ent->client->showinventory = false;
-    ent->client->showhelp = false;
+    ent->client->showInventory = false;
 
     if (!deathmatch->value && !coop->value)
         return;
 
-    if (ent->client->showscores) {
-        ent->client->showscores = false;
+    if (ent->client->showScores) {
+        ent->client->showScores = false;
         return;
     }
 
-    ent->client->showscores = true;
+    ent->client->showScores = true;
     HUD_SendDMScoreboardMessage(ent);
 }
 
@@ -377,14 +376,14 @@ void HUD_SetClientStats(entity_t* ent)
     //
     // ammo
     //
-    if (!ent->client->ammo_index /* || !ent->client->persistent.inventory[ent->client->ammo_index] */) {
+    if (!ent->client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
         ent->client->playerState.stats[STAT_AMMO_ICON] = 0;
         ent->client->playerState.stats[STAT_AMMO] = 0;
     }
     else {
-        item = &itemlist[ent->client->ammo_index];
+        item = &itemlist[ent->client->ammoIndex];
         ent->client->playerState.stats[STAT_AMMO_ICON] = gi.ImageIndex(item->icon);
-        ent->client->playerState.stats[STAT_AMMO] = ent->client->persistent.inventory[ent->client->ammo_index];
+        ent->client->playerState.stats[STAT_AMMO] = ent->client->persistent.inventory[ent->client->ammoIndex];
     }
 
     //
@@ -396,7 +395,7 @@ void HUD_SetClientStats(entity_t* ent)
     //
     // pickup message
     //
-    if (level.time > ent->client->pickup_msg_time) {
+    if (level.time > ent->client->pickupMessageTime) {
         ent->client->playerState.stats[STAT_PICKUP_ICON] = 0;
         ent->client->playerState.stats[STAT_PICKUP_STRING] = 0;
     }
@@ -424,15 +423,15 @@ void HUD_SetClientStats(entity_t* ent)
 
     if (deathmatch->value) {
         if (ent->client->persistent.health <= 0 || level.intermissiontime
-            || ent->client->showscores)
+            || ent->client->showScores)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 1;
-        if (ent->client->showinventory && ent->client->persistent.health > 0)
+        if (ent->client->showInventory && ent->client->persistent.health > 0)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 2;
     }
     else {
-        if (ent->client->showscores || ent->client->showhelp)
+        if (ent->client->showScores)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 1;
-        if (ent->client->showinventory && ent->client->persistent.health > 0)
+        if (ent->client->showInventory && ent->client->persistent.health > 0)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 2;
     }
 
@@ -474,7 +473,7 @@ void HUD_CheckChaseStats(entity_t *ent)
 
         cl = g_edicts[i].client;
 
-        if (!g_edicts[i].inUse || (cl->chase_target != ent)) {
+        if (!g_edicts[i].inUse || (cl->chaseTarget != ent)) {
             continue;
         }
 
@@ -496,7 +495,7 @@ void HUD_SetSpectatorStats(entity_t *ent)
 
     gclient_t* cl = ent->client;
 
-    if (!cl->chase_target) {
+    if (!cl->chaseTarget) {
         HUD_SetClientStats(ent);
     }
 
@@ -505,20 +504,20 @@ void HUD_SetSpectatorStats(entity_t *ent)
     /* layouts are independant in spectator */
     cl->playerState.stats[STAT_LAYOUTS] = 0;
 
-    if ((cl->persistent.health <= 0) || level.intermissiontime || cl->showscores)
+    if ((cl->persistent.health <= 0) || level.intermissiontime || cl->showScores)
     {
         cl->playerState.stats[STAT_LAYOUTS] |= 1;
     }
 
-    if (cl->showinventory && (cl->persistent.health > 0))
+    if (cl->showInventory && (cl->persistent.health > 0))
     {
         cl->playerState.stats[STAT_LAYOUTS] |= 2;
     }
 
-    if (cl->chase_target && cl->chase_target->inUse)
+    if (cl->chaseTarget && cl->chaseTarget->inUse)
     {
         cl->playerState.stats[STAT_CHASE] = ConfigStrings::PlayerSkins +
-            (cl->chase_target - g_edicts) - 1;
+            (cl->chaseTarget - g_edicts) - 1;
     }
     else
     {

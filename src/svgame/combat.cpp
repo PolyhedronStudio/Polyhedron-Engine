@@ -473,11 +473,11 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
     // the total will be turned into screen blends and view angle kicks
     // at the end of the frame
     if (client) {
-        client->damage_parmor += psave;
-        client->damage_armor += asave;
-        client->damage_blood += take;
-        client->damage_knockback += knockback;
-        VectorCopy(point, client->damage_from);
+        client->damages.powerArmor += psave;
+        client->damages.armor += asave;
+        client->damages.blood += take;
+        client->damages.knockBack += knockback;
+        VectorCopy(point, client->damages.from);
     }
 }
 

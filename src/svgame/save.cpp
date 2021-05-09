@@ -343,45 +343,43 @@ static const save_field_t clientfields[] = {
 
     I(persistent.spectator),
 
-    I(showscores),
-    I(showinventory),
-    I(showhelp),
-    I(showhelpicon),
+    I(showScores),
+    I(showInventory),
+    I(showHelpIcon),
 
-    I(ammo_index),
+    I(ammoIndex),
 
     T(newweapon),
 
-    I(damage_armor),
-    I(damage_parmor),
-    I(damage_blood),
-    I(damage_knockback),
-    V(damage_from),
+    I(damages.armor),
+    I(damages.powerArmor),
+    I(damages.blood),
+    I(damages.knockBack),
+    V(damages.from),
 
-    F(killer_yaw),
+    F(killerYaw),
 
-    I(weaponstate),
+    I(weaponState),
 
     V(kickAngles),
     V(kickOrigin),
-    F(v_dmg_roll),
-    F(v_dmg_pitch),
-    F(v_dmg_time),
-    F(fall_time),
-    F(fall_value),
-    F(damage_alpha),
-    F(bonus_alpha),
-    V(damage_blend),
-    V(v_angle),
+    F(viewDamage.roll),
+    F(viewDamage.pitch),
+    F(viewDamage.time),
+    F(fallTime),
+    F(fallValue),
+    F(damageAlpha),
+    F(bonusAlpha),
+    V(damageBlend),
+    V(aimAngles),
     F(bobtime),
     V(oldViewAngles),
     V(oldVelocity),
 
-    F(next_drown_time),
-    I(old_waterlevel),
-    I(breather_sound),
+    F(nextDrownTime),
+    I(oldWaterLevel),
 
-    I(machinegun_shots),
+    I(machinegunShots),
 
     I(anim_end),
     I(anim_priority),
@@ -389,9 +387,9 @@ static const save_field_t clientfields[] = {
     I(anim_run),
 
     // powerup timers
-    I(weapon_sound),
+    I(weaponSound),
 
-    F(pickup_msg_time),
+    F(pickupMessageTime),
 
     {(fieldtype_t)0}
 #undef _OFS

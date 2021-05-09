@@ -48,7 +48,7 @@ void teleporter_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface
 
     VectorClear(other->s.angles);
     VectorClear(other->client->playerState.pmove.viewAngles);
-    VectorClear(other->client->v_angle);
+    VectorClear(other->client->aimAngles);
 
     // kill anything at the destination
     KillBox(other);

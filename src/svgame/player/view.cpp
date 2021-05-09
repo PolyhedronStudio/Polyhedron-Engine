@@ -82,13 +82,13 @@ static void P_ApplyDamageFeedback(entity_t *player)
 
     // flash the backgrounds behind the status numbers
     client->playerState.stats[STAT_FLASHES] = 0;
-    if (client->damage_blood)
+    if (client->damages.blood)
         client->playerState.stats[STAT_FLASHES] |= 1;
-    if (client->damage_armor && !(player->flags & FL_GODMODE))
+    if (client->damages.armor && !(player->flags & FL_GODMODE))
         client->playerState.stats[STAT_FLASHES] |= 2;
 
     // total points of damage shot at the player this frame
-    count = (client->damage_blood + client->damage_armor + client->damage_parmor);
+    count = (client->damages.blood + client->damages.armor + client->damages.powerArmor);
     if (count == 0)
         return;     // didn't take any damage
 
@@ -139,30 +139,30 @@ static void P_ApplyDamageFeedback(entity_t *player)
     }
 
     // The total alpha of the blend is always proportional to count.
-    if (client->damage_alpha < 0.f)
-        client->damage_alpha = 0.f;
-    client->damage_alpha += count * 0.01f;
-    if (client->damage_alpha < 0.2f)
-        client->damage_alpha = 0.2f;
-    if (client->damage_alpha > 0.6f)
-        client->damage_alpha = 0.6f;     // don't go too saturated
+    if (client->damageAlpha < 0.f)
+        client->damageAlpha = 0.f;
+    client->damageAlpha += count * 0.01f;
+    if (client->damageAlpha < 0.2f)
+        client->damageAlpha = 0.2f;
+    if (client->damageAlpha > 0.6f)
+        client->damageAlpha = 0.6f;     // don't go too saturated
 
     // The color of the blend will vary based on how much was absorbed
     // by different armors.
     vec3_t blendColor = vec3_zero();
-    if (client->damage_parmor)
-        blendColor = vec3_fmaf(blendColor, (float)client->damage_parmor / realcount, power_color);
-    if (client->damage_armor)
-        blendColor = vec3_fmaf(blendColor, (float)client->damage_armor / realcount, acolor);
-    if (client->damage_blood)
-        blendColor = vec3_fmaf(blendColor, (float)client->damage_blood / realcount, bcolor);
-    client->damage_blend = blendColor;
+    if (client->damages.powerArmor)
+        blendColor = vec3_fmaf(blendColor, (float)client->damages.powerArmor / realcount, power_color);
+    if (client->damages.armor)
+        blendColor = vec3_fmaf(blendColor, (float)client->damages.armor / realcount, acolor);
+    if (client->damages.blood)
+        blendColor = vec3_fmaf(blendColor, (float)client->damages.blood / realcount, bcolor);
+    client->damageBlend = blendColor;
 
 
     //
     // Calculate view angle kicks
     //
-    kick = abs(client->damage_knockback);
+    kick = abs(client->damages.knockBack);
     if (kick && player->health > 0) { // kick of 0 means no view adjust at all
         kick = kick * 100 / player->health;
 
@@ -171,25 +171,25 @@ static void P_ApplyDamageFeedback(entity_t *player)
         if (kick > 50)
             kick = 50;
 
-        vec3_t kickVec = client->damage_from - player->s.origin;
+        vec3_t kickVec = client->damages.from - player->s.origin;
         kickVec = vec3_normalize(kickVec);
 
         side = DotProduct(kickVec, right);
-        client->v_dmg_roll = kick * side * 0.3f;
+        client->viewDamage.roll = kick * side * 0.3f;
 
         side = -DotProduct(kickVec, forward);
-        client->v_dmg_pitch = kick * side * 0.3f;
+        client->viewDamage.pitch = kick * side * 0.3f;
 
-        client->v_dmg_time = level.time + DAMAGE_TIME;
+        client->viewDamage.time = level.time + DAMAGE_TIME;
     }
 
     //
     // clear totals
     //
-    client->damage_blood = 0;
-    client->damage_armor = 0;
-    client->damage_parmor = 0;
-    client->damage_knockback = 0;
+    client->damages.blood = 0;
+    client->damages.armor = 0;
+    client->damages.powerArmor = 0;
+    client->damages.knockBack = 0;
 }
 
 //
@@ -223,24 +223,24 @@ static void SV_CalculateViewOffset(entity_t *ent)
 
         ent->client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
         ent->client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
-        ent->client->playerState.pmove.viewAngles[vec3_t::Yaw] = ent->client->killer_yaw;
+        ent->client->playerState.pmove.viewAngles[vec3_t::Yaw] = ent->client->killerYaw;
     } else {
         // Fetch client kick angles.
         vec3_t newKickAngles = ent->client->playerState.kickAngles = ent->client->kickAngles; //ent->client->playerState.kickAngles;
 
         // Add pitch(X) and roll(Z) angles based on damage kick
-        ratio = (ent->client->v_dmg_time - level.time) / DAMAGE_TIME;
+        ratio = (ent->client->viewDamage.time - level.time) / DAMAGE_TIME;
         if (ratio < 0) {
-            ratio = ent->client->v_dmg_pitch = ent->client->v_dmg_roll = 0;
+            ratio = ent->client->viewDamage.pitch = ent->client->viewDamage.roll = 0;
         }
-        newKickAngles[vec3_t::Pitch] += ratio * ent->client->v_dmg_pitch;
-        newKickAngles[vec3_t::Roll] += ratio * ent->client->v_dmg_roll;
+        newKickAngles[vec3_t::Pitch] += ratio * ent->client->viewDamage.pitch;
+        newKickAngles[vec3_t::Roll] += ratio * ent->client->viewDamage.roll;
 
         // Add pitch based on fall kick
-        ratio = (ent->client->fall_time - level.time) / FALL_TIME;
+        ratio = (ent->client->fallTime - level.time) / FALL_TIME;
         if (ratio < 0)
             ratio = 0;
-        newKickAngles[vec3_t::Pitch] += ratio * ent->client->fall_value;
+        newKickAngles[vec3_t::Pitch] += ratio * ent->client->fallValue;
 
         // Add angles based on velocity
         delta = vec3_dot(ent->velocity, forward);
@@ -276,10 +276,10 @@ static void SV_CalculateViewOffset(entity_t *ent)
     };
         
     // Add fall impact view punch height.
-    ratio = (ent->client->fall_time - level.time) / FALL_TIME;
+    ratio = (ent->client->fallTime - level.time) / FALL_TIME;
     if (ratio < 0)
         ratio = 0;
-    newViewOffset.z -= ratio * ent->client->fall_value * 0.4f;
+    newViewOffset.z -= ratio * ent->client->fallValue * 0.4f;
 
     // Add bob height.
     bob = bobfracsin * xyspeed * bob_up->value;
@@ -402,22 +402,22 @@ static void SV_CalculateBlend(entity_t *ent)
         SV_AddBlend(0.5, 0.3, 0.2, 0.4, ent->client->playerState.blend);
 
     // add for damage
-    if (ent->client->damage_alpha > 0)
-        SV_AddBlend(ent->client->damage_blend[0], ent->client->damage_blend[1]
-                    , ent->client->damage_blend[2], ent->client->damage_alpha, ent->client->playerState.blend);
+    if (ent->client->damageAlpha > 0)
+        SV_AddBlend(ent->client->damageBlend[0], ent->client->damageBlend[1]
+                    , ent->client->damageBlend[2], ent->client->damageAlpha, ent->client->playerState.blend);
 
-    if (ent->client->bonus_alpha > 0)
-        SV_AddBlend(0.85, 0.7, 0.3, ent->client->bonus_alpha, ent->client->playerState.blend);
+    if (ent->client->bonusAlpha > 0)
+        SV_AddBlend(0.85, 0.7, 0.3, ent->client->bonusAlpha, ent->client->playerState.blend);
 
     // drop the damage value
-    ent->client->damage_alpha -= 0.06;
-    if (ent->client->damage_alpha < 0)
-        ent->client->damage_alpha = 0;
+    ent->client->damageAlpha -= 0.06;
+    if (ent->client->damageAlpha < 0)
+        ent->client->damageAlpha = 0;
 
     // drop the bonus value
-    ent->client->bonus_alpha -= 0.1;
-    if (ent->client->bonus_alpha < 0)
-        ent->client->bonus_alpha = 0;
+    ent->client->bonusAlpha -= 0.1;
+    if (ent->client->bonusAlpha < 0)
+        ent->client->bonusAlpha = 0;
 }
 
 //
@@ -463,10 +463,10 @@ static void P_CheckFallingDamage(entity_t *ent)
         return;
     }
 
-    ent->client->fall_value = delta * 0.5;
-    if (ent->client->fall_value > 40)
-        ent->client->fall_value = 40;
-    ent->client->fall_time = level.time + FALL_TIME;
+    ent->client->fallValue = delta * 0.5;
+    if (ent->client->fallValue > 40)
+        ent->client->fallValue = 40;
+    ent->client->fallTime = level.time + FALL_TIME;
 
     if (delta > 30) {
         if (ent->health > 0) {
@@ -497,7 +497,7 @@ static void P_CheckFallingDamage(entity_t *ent)
 //
 static void P_CheckWorldEffects(void)
 {
-    int         waterlevel, old_waterlevel;
+    int         waterlevel, oldWaterLevel;
 
     if (current_player->moveType == MoveType::NoClip || current_player->moveType == MoveType::Spectator) {
         current_player->air_finished = level.time + 12; // don't need air
@@ -505,13 +505,13 @@ static void P_CheckWorldEffects(void)
     }
 
     waterlevel = current_player->waterLevel;
-    old_waterlevel = current_client->old_waterlevel;
-    current_client->old_waterlevel = waterlevel;
+    oldWaterLevel = current_client->oldWaterLevel;
+    current_client->oldWaterLevel = waterlevel;
 
     //
     // if just entered a water volume, play a sound
     //
-    if (!old_waterlevel && waterlevel) {
+    if (!oldWaterLevel && waterlevel) {
         PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
         if (current_player->waterType & CONTENTS_LAVA)
             gi.Sound(current_player, CHAN_BODY, gi.SoundIndex("player/lava_in.wav"), 1, ATTN_NORM, 0);
@@ -528,7 +528,7 @@ static void P_CheckWorldEffects(void)
     //
     // if just completely exited a water volume, play a sound
     //
-    if (old_waterlevel && ! waterlevel) {
+    if (oldWaterLevel && ! waterlevel) {
         PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
         gi.Sound(current_player, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
         current_player->flags &= ~FL_INWATER;
@@ -537,14 +537,14 @@ static void P_CheckWorldEffects(void)
     //
     // check for head just going under water
     //
-    if (old_waterlevel != 3 && waterlevel == 3) {
+    if (oldWaterLevel != 3 && waterlevel == 3) {
         gi.Sound(current_player, CHAN_BODY, gi.SoundIndex("player/watr_un.wav"), 1, ATTN_NORM, 0);
     }
 
     //
     // check for head just coming out of water
     //
-    if (old_waterlevel == 3 && waterlevel != 3) {
+    if (oldWaterLevel == 3 && waterlevel != 3) {
         if (current_player->air_finished < level.time) {
             // gasp for air
             gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
@@ -562,9 +562,9 @@ static void P_CheckWorldEffects(void)
         // if out of air, start drowning
         if (current_player->air_finished < level.time) {
             // drown!
-            if (current_player->client->next_drown_time < level.time
+            if (current_player->client->nextDrownTime < level.time
                 && current_player->health > 0) {
-                current_player->client->next_drown_time = level.time + 1;
+                current_player->client->nextDrownTime = level.time + 1;
 
                 // take more damage the longer underwater
                 current_player->dmg += 2;
@@ -670,8 +670,8 @@ static void G_SetClientSound(entity_t *ent)
         ent->s.sound = gi.SoundIndex("weapons/rg_hum.wav");
     else if (strcmp(weap, "weapon_bfg") == 0)
         ent->s.sound = gi.SoundIndex("weapons/bfg_hum.wav");
-    else if (ent->client->weapon_sound)
-        ent->s.sound = ent->client->weapon_sound;
+    else if (ent->client->weaponSound)
+        ent->s.sound = ent->client->weaponSound;
     else
         ent->s.sound = 0;
 }
@@ -805,7 +805,7 @@ void ClientEndServerFrame(entity_t *ent)
         return;
     }
 
-    vec3_vectors(ent->client->v_angle, &forward, &right, &up);
+    vec3_vectors(ent->client->aimAngles, &forward, &right, &up);
 
     // burn from lava, etc
     P_CheckWorldEffects();
@@ -814,11 +814,11 @@ void ClientEndServerFrame(entity_t *ent)
     // set model angles from view angles so other things in
     // the world can tell which direction you are looking
     //
-    if (ent->client->v_angle[vec3_t::Pitch] > 180)
-        ent->s.angles[vec3_t::Pitch] = (-360 + ent->client->v_angle[vec3_t::Pitch]) / 3;
+    if (ent->client->aimAngles[vec3_t::Pitch] > 180)
+        ent->s.angles[vec3_t::Pitch] = (-360 + ent->client->aimAngles[vec3_t::Pitch]) / 3;
     else
-        ent->s.angles[vec3_t::Pitch] = ent->client->v_angle[vec3_t::Pitch] / 3;
-    ent->s.angles[vec3_t::Yaw] = ent->client->v_angle[vec3_t::Yaw];
+        ent->s.angles[vec3_t::Pitch] = ent->client->aimAngles[vec3_t::Pitch] / 3;
+    ent->s.angles[vec3_t::Yaw] = ent->client->aimAngles[vec3_t::Yaw];
     ent->s.angles[vec3_t::Roll] = 0;
     ent->s.angles[vec3_t::Roll] = SV_CalcRoll(ent->s.angles, ent->velocity) * 4;
 
@@ -828,10 +828,11 @@ void ClientEndServerFrame(entity_t *ent)
     //
     xyspeed = std::sqrtf(ent->velocity[0] * ent->velocity[0] + ent->velocity[1] * ent->velocity[1]);
 
-    if (xyspeed < 5) {
+    if (xyspeed < 5 || !(current_client->playerState.pmove.flags & PMF_ON_GROUND)) {
         bobmove = 0;
         current_client->bobtime = 0;    // start at beginning of cycle again
     }
+
     // N&C: Footstep tweaks.
     else if (ent->groundEntityPtr || ent->waterLevel == 2)
     {	// so bobbing only cycles when on ground
@@ -901,7 +902,7 @@ void ClientEndServerFrame(entity_t *ent)
     ent->client->kickAngles = vec3_zero();
 
     // if the scoreboard is up, update it
-    if (ent->client->showscores && !(level.frameNumber & 31)) {
+    if (ent->client->showScores && !(level.frameNumber & 31)) {
         HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
         gi.Unicast(ent, false);
     }

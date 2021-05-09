@@ -33,21 +33,21 @@ void LookAtKiller(entity_t* self, entity_t* inflictor, entity_t* attacker)
         VectorSubtract(inflictor->s.origin, self->s.origin, dir);
     }
     else {
-        self->client->killer_yaw = self->s.angles[vec3_t::Yaw];
+        self->client->killerYaw = self->s.angles[vec3_t::Yaw];
         return;
     }
 
     if (dir[0])
-        self->client->killer_yaw = 180 / M_PI * atan2(dir[1], dir[0]);
+        self->client->killerYaw = 180 / M_PI * atan2(dir[1], dir[0]);
     else {
-        self->client->killer_yaw = 0;
+        self->client->killerYaw = 0;
         if (dir[1] > 0)
-            self->client->killer_yaw = 90;
+            self->client->killerYaw = 90;
         else if (dir[1] < 0)
-            self->client->killer_yaw = -90;
+            self->client->killerYaw = -90;
     }
-    if (self->client->killer_yaw < 0)
-        self->client->killer_yaw += 360;
+    if (self->client->killerYaw < 0)
+        self->client->killerYaw += 360;
 
 
 }
@@ -75,7 +75,7 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
     self->s.angles[2] = 0;
 
     self->s.sound = 0;
-    self->client->weapon_sound = 0;
+    self->client->weaponSound = 0;
 
     self->maxs[2] = -8;
 
@@ -83,7 +83,7 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
     self->svFlags |= SVF_DEADMONSTER;
 
     if (!self->deadFlag) {
-        self->client->respawn_time = level.time + 1.0;
+        self->client->respawnTime = level.time + 1.0;
         LookAtKiller(self, inflictor, attacker);
         self->client->playerState.pmove.type = EnginePlayerMoveType::Dead;
         ClientUpdateObituary(self, inflictor, attacker);

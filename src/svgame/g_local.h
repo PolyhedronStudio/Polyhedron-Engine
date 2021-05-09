@@ -800,49 +800,58 @@ struct gclient_s {
     client_persistant_t persistent;
     client_respawn_t    respawn;
 
-    qboolean    showscores;         // set layout stat
-    qboolean    showinventory;      // set layout stat
-    qboolean    showhelp;
-    qboolean    showhelpicon;
+    qboolean    showScores;         // set layout stat
+    qboolean    showInventory;      // set layout stat
+    qboolean    showHelpIcon;
 
-    int         ammo_index;
+    int         ammoIndex;
 
     int         buttons;
-    int         oldbuttons;
-    int         latched_buttons;
+    int         oldButtons;
+    int         latchedButtons;     // These are used for one time push events.
 
-    qboolean    weapon_thunk;
+    qboolean    weaponThunk;
 
     gitem_t     *newweapon;
 
     // sum up damage over an entire frame, so
     // shotgun blasts give a single big kick
-    int         damage_armor;       // damage absorbed by armor
-    int         damage_parmor;      // damage absorbed by power armor
-    int         damage_blood;       // damage taken out of health
-    int         damage_knockback;   // impact damage
-    vec3_t      damage_from;        // origin for vector calculation
+    struct {
+        int         armor;       // damage absorbed by armor
+        int         powerArmor;      // damage absorbed by power armor
+        int         blood;       // damage taken out of health
+        int         knockBack;   // impact damage
+        vec3_t      from;        // origin for vector calculation
+    } damages;
 
-    float       killer_yaw;         // when dead, look at killer
+    float       killerYaw;         // when dead, look at killer
 
-    weaponstate_t   weaponstate;
+    weaponstate_t   weaponState;
     vec3_t      kickAngles;    // weapon kicks
     vec3_t      kickOrigin;
-    float       v_dmg_roll, v_dmg_pitch, v_dmg_time;    // damage kicks
-    float       fall_time, fall_value;      // for view drop on fall
-    float       damage_alpha;
-    float       bonus_alpha;
-    vec3_t      damage_blend;
-    vec3_t      v_angle;            // aiming direction
+    // View damage kicks.
+    struct {
+        float roll;
+        float pitch;
+        float time;
+    } viewDamage;
+
+    float       fallTime, fallValue;      // for view drop on fall
+    float       damageAlpha;
+    float       bonusAlpha;
+    vec3_t      damageBlend;
+    vec3_t      aimAngles;            // aiming direction
     float       bobtime;            // so off-ground doesn't change it
+
+    // Old view angles and velocity.
     vec3_t      oldViewAngles;
     vec3_t      oldVelocity;
 
-    float       next_drown_time;
-    int         old_waterlevel;
-    int         breather_sound;
+    float       nextDrownTime;
+    int         oldWaterLevel;
 
-    int         machinegun_shots;   // for weapon raising
+    // For weapon raising
+    int         machinegunShots;
 
     // animation vars
     int         anim_end;
@@ -850,19 +859,27 @@ struct gclient_s {
     qboolean    anim_duck;
     qboolean    anim_run;
 
-    // powerup timers
-    int         weapon_sound;
+    // Weapon Sound.
+    int         weaponSound;
 
-    float       pickup_msg_time;
+    // Pick up message time.
+    float       pickupMessageTime;
 
-    float       flood_locktill;     // locked from talking
-    float       flood_when[10];     // when messages were said
-    int         flood_whenhead;     // head pointer for when said
+    // Flood protection struct.
+    struct {
+        float   lockTill;     // locked from talking
+        float   when[10];     // when messages were said
+        int     whenHead;     // head pointer for when said
+    } flood;
 
-    float       respawn_time;       // can respawn when time > this
+    // Client can respawn when time > this
+    float       respawnTime;
 
-    entity_t     *chase_target;      // player we are chasing
-    qboolean    update_chase;       // need to update chase info?
+    // The (client)player we are chasing
+    entity_t     *chaseTarget;
+
+    // Do we need to update chase info?
+    qboolean    updateChase;
 };
 
 

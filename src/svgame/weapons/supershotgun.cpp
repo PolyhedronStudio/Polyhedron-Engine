@@ -33,7 +33,7 @@ void weapon_supershotgun_fire(entity_t* ent)
     int         damage = 6;
     int         kick = 12;
 
-    vec3_vectors(ent->client->v_angle, &forward, &right, NULL);
+    vec3_vectors(ent->client->aimAngles, &forward, &right, NULL);
 
     ent->client->kickOrigin = vec3_scale(forward, -2);
     ent->client->kickAngles[0] = -2;
@@ -46,12 +46,12 @@ void weapon_supershotgun_fire(entity_t* ent)
         kick *= 4;
     }
 
-    v[vec3_t::PYR::Pitch] = ent->client->v_angle[vec3_t::PYR::Pitch];
-    v[vec3_t::PYR::Yaw] = ent->client->v_angle[vec3_t::PYR::Yaw] - 5;
-    v[vec3_t::PYR::Roll] = ent->client->v_angle[vec3_t::PYR::Roll];
+    v[vec3_t::PYR::Pitch] = ent->client->aimAngles[vec3_t::PYR::Pitch];
+    v[vec3_t::PYR::Yaw] = ent->client->aimAngles[vec3_t::PYR::Yaw] - 5;
+    v[vec3_t::PYR::Roll] = ent->client->aimAngles[vec3_t::PYR::Roll];
     vec3_vectors(v, &forward, NULL, NULL);
     fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
-    v[vec3_t::PYR::Yaw] = ent->client->v_angle[vec3_t::PYR::Yaw] + 5;
+    v[vec3_t::PYR::Yaw] = ent->client->aimAngles[vec3_t::PYR::Yaw] + 5;
     vec3_vectors(v, &forward, NULL, NULL);
     fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
 
@@ -65,7 +65,7 @@ void weapon_supershotgun_fire(entity_t* ent)
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
-        ent->client->persistent.inventory[ent->client->ammo_index] -= 2;
+        ent->client->persistent.inventory[ent->client->ammoIndex] -= 2;
 }
 
 void Weapon_SuperShotgun(entity_t* ent)

@@ -334,15 +334,15 @@ void TossClientWeapon(entity_t *self)
         return;
 
     item = self->client->persistent.weapon;
-    if (! self->client->persistent.inventory[self->client->ammo_index])
+    if (! self->client->persistent.inventory[self->client->ammoIndex])
         item = NULL;
     if (item && (strcmp(item->pickupName, "Blaster") == 0))
         item = NULL;
 
     if (item) {
-        self->client->v_angle[vec3_t::Yaw] -= spread;
+        self->client->aimAngles[vec3_t::Yaw] -= spread;
         drop = Drop_Item(self, item);
-        self->client->v_angle[vec3_t::Yaw] += spread;
+        self->client->aimAngles[vec3_t::Yaw] += spread;
         drop->spawnFlags = DROPPED_PLAYER_ITEM;
     }
 }
@@ -728,7 +728,7 @@ void RespawnClient(entity_t *self)
         self->client->playerState.pmove.flags = PMF_TIME_TELEPORT;
         self->client->playerState.pmove.time = 14;
 
-        self->client->respawn_time = level.time;
+        self->client->respawnTime = level.time;
 
         return;
     }
@@ -818,7 +818,7 @@ void spectator_respawn(entity_t *ent)
         ent->client->playerState.pmove.time = 14;
     }
 
-    ent->client->respawn_time = level.time;
+    ent->client->respawnTime = level.time;
 
     if (ent->client->persistent.spectator)
         gi.BPrintf(PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->persistent.netname);
@@ -960,11 +960,11 @@ void PutClientInServer(entity_t *ent)
     ent->s.angles[vec3_t::Yaw] = spawn_angles[vec3_t::Yaw];
     ent->s.angles[vec3_t::Roll] = 0;
     VectorCopy(ent->s.angles, client->playerState.pmove.viewAngles);
-    VectorCopy(ent->s.angles, client->v_angle);
+    VectorCopy(ent->s.angles, client->aimAngles);
 
     // spawn a spectator
     if (client->persistent.spectator) {
-        client->chase_target = NULL;
+        client->chaseTarget = NULL;
 
         client->respawn.spectator = true;
 
@@ -1329,7 +1329,7 @@ void ClientThink(entity_t *ent, ClientUserCommand *clientUserCommand)
 
     pm_passent = ent;
 
-    if (ent->client->chase_target) {
+    if (ent->client->chaseTarget) {
         // Angles are fetched from the client we are chasing.
         client->respawn.commandViewAngles[0] = clientUserCommand->moveCommand.viewAngles[0];
         client->respawn.commandViewAngles[1] = clientUserCommand->moveCommand.viewAngles[1];
@@ -1401,10 +1401,10 @@ void ClientThink(entity_t *ent, ClientUserCommand *clientUserCommand)
         if (ent->deadFlag) {
             client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
             client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
-            client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killer_yaw;
+            client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
         } else {
             // Otherwise, store the resulting view angles accordingly.
-            client->v_angle = pm.viewAngles;
+            client->aimAngles = pm.viewAngles;
             client->playerState.pmove.viewAngles = pm.viewAngles;
         }
 
@@ -1431,28 +1431,28 @@ void ClientThink(entity_t *ent, ClientUserCommand *clientUserCommand)
 
     }
 
-    client->oldbuttons = client->buttons;
+    client->oldButtons = client->buttons;
     client->buttons = clientUserCommand->moveCommand.buttons;
-    client->latched_buttons |= client->buttons & ~client->oldbuttons;
+    client->latchedButtons |= client->buttons & ~client->oldButtons;
 
     // save light level the player is standing on for
     // monster sighting AI
     ent->lightLevel = clientUserCommand->moveCommand.lightLevel;
 
     // fire weapon from final position if needed
-    if (client->latched_buttons & BUTTON_ATTACK) {
+    if (client->latchedButtons & BUTTON_ATTACK) {
         if (client->respawn.spectator) {
 
-            client->latched_buttons = 0;
+            client->latchedButtons = 0;
 
-            if (client->chase_target) {
-                client->chase_target = NULL;
+            if (client->chaseTarget) {
+                client->chaseTarget = NULL;
                 client->playerState.pmove.flags &= ~PMF_NO_PREDICTION;
             } else
                 GetChaseTarget(ent);
 
-        } else if (!client->weapon_thunk) {
-            client->weapon_thunk = true;
+        } else if (!client->weaponThunk) {
+            client->weaponThunk = true;
             Think_Weapon(ent);
         }
     }
@@ -1461,7 +1461,7 @@ void ClientThink(entity_t *ent, ClientUserCommand *clientUserCommand)
         if (clientUserCommand->moveCommand.upMove >= 10) {
             if (!(client->playerState.pmove.flags & PMF_JUMP_HELD)) {
                 client->playerState.pmove.flags |= PMF_JUMP_HELD;
-                if (client->chase_target)
+                if (client->chaseTarget)
                     ChaseNext(ent);
                 else
                     GetChaseTarget(ent);
@@ -1473,7 +1473,7 @@ void ClientThink(entity_t *ent, ClientUserCommand *clientUserCommand)
     // update chase cam if being followed
     for (int i = 1; i <= maxClients->value; i++) {
         other = g_edicts + i;
-        if (other->inUse && other->client->chase_target == ent)
+        if (other->inUse && other->client->chaseTarget == ent)
             UpdateChaseCam(other);
     }
 }
@@ -1499,30 +1499,30 @@ void ClientBeginServerFrame(entity_t *ent)
 
     if (deathmatch->value &&
         client->persistent.spectator != client->respawn.spectator &&
-        (level.time - client->respawn_time) >= 5) {
+        (level.time - client->respawnTime) >= 5) {
         spectator_respawn(ent);
         return;
     }
 
     // run weapon animations if it hasn't been done by a ucmd_t
-    if (!client->weapon_thunk && !client->respawn.spectator)
+    if (!client->weaponThunk && !client->respawn.spectator)
         Think_Weapon(ent);
     else
-        client->weapon_thunk = false;
+        client->weaponThunk = false;
 
     if (ent->deadFlag) {
         // wait for any button just going down
-        if (level.time > client->respawn_time) {
+        if (level.time > client->respawnTime) {
             // in deathmatch, only wait for attack button
             if (deathmatch->value)
                 buttonMask = BUTTON_ATTACK;
             else
                 buttonMask = -1;
 
-            if ((client->latched_buttons & buttonMask) ||
+            if ((client->latchedButtons & buttonMask) ||
                 (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::ForceRespawn))) {
                 RespawnClient(ent);
-                client->latched_buttons = 0;
+                client->latchedButtons = 0;
             }
         }
         return;
@@ -1533,5 +1533,5 @@ void ClientBeginServerFrame(entity_t *ent)
         if (!visible(ent, PlayerTrail_LastSpot()))
             PlayerTrail_Add(ent->s.old_origin);
 
-    client->latched_buttons = 0;
+    client->latchedButtons = 0;
 }

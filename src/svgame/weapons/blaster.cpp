@@ -33,7 +33,7 @@ void Blaster_Fire(entity_t* ent, const vec3_t &g_offset, int damage, qboolean hy
 
     if (is_quad)
         damage *= 4;
-    AngleVectors(ent->client->v_angle, &forward, &right, NULL);
+    AngleVectors(ent->client->aimAngles, &forward, &right, NULL);
     VectorSet(offset, 24, 8, ent->viewHeight - 8);
     VectorAdd(offset, g_offset, offset);
     start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);

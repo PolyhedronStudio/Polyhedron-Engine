@@ -39,7 +39,7 @@ void weapon_shotgun_fire(entity_t* ent)
         return;
     }
 
-    vec3_vectors(ent->client->v_angle, &forward, &right, NULL);
+    vec3_vectors(ent->client->aimAngles, &forward, &right, NULL);
 
     ent->client->kickOrigin = vec3_scale(forward, -2);
     ent->client->kickAngles[0] = -2;
@@ -67,7 +67,7 @@ void weapon_shotgun_fire(entity_t* ent)
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
-        ent->client->persistent.inventory[ent->client->ammo_index]--;
+        ent->client->persistent.inventory[ent->client->ammoIndex]--;
 }
 
 void Weapon_Shotgun(entity_t* ent)

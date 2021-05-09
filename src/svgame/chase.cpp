@@ -27,24 +27,24 @@ void UpdateChaseCam(entity_t *ent)
     vec3_t angles;
 
     // is our chase target gone?
-    if (!ent->client->chase_target->inUse
-        || ent->client->chase_target->client->respawn.spectator) {
-        entity_t *old = ent->client->chase_target;
+    if (!ent->client->chaseTarget->inUse
+        || ent->client->chaseTarget->client->respawn.spectator) {
+        entity_t *old = ent->client->chaseTarget;
         ChaseNext(ent);
-        if (ent->client->chase_target == old) {
-            ent->client->chase_target = NULL;
+        if (ent->client->chaseTarget == old) {
+            ent->client->chaseTarget = NULL;
             ent->client->playerState.pmove.flags &= ~PMF_NO_PREDICTION;
             return;
         }
     }
 
-    targ = ent->client->chase_target;
+    targ = ent->client->chaseTarget;
 
     VectorCopy(targ->s.origin, ownerv);
 
     ownerv[2] += targ->viewHeight;
 
-    VectorCopy(targ->client->v_angle, angles);
+    VectorCopy(targ->client->aimAngles, angles);
     if (angles[vec3_t::Pitch] > 56)
         angles[vec3_t::Pitch] = 56;
     AngleVectors(angles, &forward, &right, NULL);
@@ -88,15 +88,15 @@ void UpdateChaseCam(entity_t *ent)
 
     VectorCopy(goal, ent->s.origin);
     for (i = 0 ; i < 3 ; i++)
-        ent->client->playerState.pmove.deltaAngles[i] = targ->client->v_angle[i] - ent->client->respawn.commandViewAngles[i];
+        ent->client->playerState.pmove.deltaAngles[i] = targ->client->aimAngles[i] - ent->client->respawn.commandViewAngles[i];
 
     if (targ->deadFlag) {
         ent->client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
         ent->client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
-        ent->client->playerState.pmove.viewAngles[vec3_t::Yaw] = targ->client->killer_yaw;
+        ent->client->playerState.pmove.viewAngles[vec3_t::Yaw] = targ->client->killerYaw;
     } else {
-        VectorCopy(targ->client->v_angle, ent->client->playerState.pmove.viewAngles);
-        VectorCopy(targ->client->v_angle, ent->client->v_angle);
+        VectorCopy(targ->client->aimAngles, ent->client->playerState.pmove.viewAngles);
+        VectorCopy(targ->client->aimAngles, ent->client->aimAngles);
     }
 
     ent->viewHeight = 0;
@@ -109,10 +109,10 @@ void ChaseNext(entity_t *ent)
     int i;
     entity_t *e;
 
-    if (!ent->client->chase_target)
+    if (!ent->client->chaseTarget)
         return;
 
-    i = ent->client->chase_target - g_edicts;
+    i = ent->client->chaseTarget - g_edicts;
     do {
         i++;
         if (i > maxClients->value)
@@ -122,10 +122,10 @@ void ChaseNext(entity_t *ent)
             continue;
         if (!e->client->respawn.spectator)
             break;
-    } while (e != ent->client->chase_target);
+    } while (e != ent->client->chaseTarget);
 
-    ent->client->chase_target = e;
-    ent->client->update_chase = true;
+    ent->client->chaseTarget = e;
+    ent->client->updateChase = true;
 }
 
 void ChasePrev(entity_t *ent)
@@ -133,10 +133,10 @@ void ChasePrev(entity_t *ent)
     int i;
     entity_t *e;
 
-    if (!ent->client->chase_target)
+    if (!ent->client->chaseTarget)
         return;
 
-    i = ent->client->chase_target - g_edicts;
+    i = ent->client->chaseTarget - g_edicts;
     do {
         i--;
         if (i < 1)
@@ -146,10 +146,10 @@ void ChasePrev(entity_t *ent)
             continue;
         if (!e->client->respawn.spectator)
             break;
-    } while (e != ent->client->chase_target);
+    } while (e != ent->client->chaseTarget);
 
-    ent->client->chase_target = e;
-    ent->client->update_chase = true;
+    ent->client->chaseTarget = e;
+    ent->client->updateChase = true;
 }
 
 void GetChaseTarget(entity_t *ent)
@@ -160,8 +160,8 @@ void GetChaseTarget(entity_t *ent)
     for (i = 1; i <= maxClients->value; i++) {
         other = g_edicts + i;
         if (other->inUse && !other->client->respawn.spectator) {
-            ent->client->chase_target = other;
-            ent->client->update_chase = true;
+            ent->client->chaseTarget = other;
+            ent->client->updateChase = true;
             UpdateChaseCam(ent);
             return;
         }

@@ -143,7 +143,7 @@ void ChangeWeapon(entity_t *ent)
     ent->client->persistent.lastweapon = ent->client->persistent.weapon;
     ent->client->persistent.weapon = ent->client->newweapon;
     ent->client->newweapon = NULL;
-    ent->client->machinegun_shots = 0;
+    ent->client->machinegunShots = 0;
 
     // set visible model
     if (ent->s.modelindex == 255) {
@@ -155,9 +155,9 @@ void ChangeWeapon(entity_t *ent)
     }
 
     if (ent->client->persistent.weapon && ent->client->persistent.weapon->ammo)
-        ent->client->ammo_index = ITEM_INDEX(FindItem(ent->client->persistent.weapon->ammo));
+        ent->client->ammoIndex = ITEM_INDEX(FindItem(ent->client->persistent.weapon->ammo));
     else
-        ent->client->ammo_index = 0;
+        ent->client->ammoIndex = 0;
 
     if (!ent->client->persistent.weapon) {
         // dead
@@ -165,7 +165,7 @@ void ChangeWeapon(entity_t *ent)
         return;
     }
 
-    ent->client->weaponstate = WEAPON_ACTIVATING;
+    ent->client->weaponState = WEAPON_ACTIVATING;
     ent->client->playerState.gunframe = 0;
     ent->client->playerState.gunindex = gi.ModelIndex(ent->client->persistent.weapon->viewModel);
 
@@ -226,7 +226,7 @@ Make the weapon ready if there is ammo
 */
 void Use_Weapon(entity_t *ent, gitem_t *item)
 {
-    int         ammo_index;
+    int         ammoIndex;
     gitem_t     *ammo_item;
 
     // see if we're already using it
@@ -235,14 +235,14 @@ void Use_Weapon(entity_t *ent, gitem_t *item)
 
     if (item->ammo && !g_select_empty->value && !(item->flags & IT_AMMO)) {
         ammo_item = FindItem(item->ammo);
-        ammo_index = ITEM_INDEX(ammo_item);
+        ammoIndex = ITEM_INDEX(ammo_item);
 
-        if (!ent->client->persistent.inventory[ammo_index]) {
+        if (!ent->client->persistent.inventory[ammoIndex]) {
             gi.CPrintf(ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickupName, item->pickupName);
             return;
         }
 
-        if (ent->client->persistent.inventory[ammo_index] < item->quantity) {
+        if (ent->client->persistent.inventory[ammoIndex] < item->quantity) {
             gi.CPrintf(ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickupName, item->pickupName);
             return;
         }
@@ -297,7 +297,7 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
         return;
     }
 
-    if (ent->client->weaponstate == WEAPON_DROPPING) {
+    if (ent->client->weaponState == WEAPON_DROPPING) {
         if (ent->client->playerState.gunframe == FRAME_DEACTIVATE_LAST) {
             ChangeWeapon(ent);
             return;
@@ -317,9 +317,9 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
         return;
     }
 
-    if (ent->client->weaponstate == WEAPON_ACTIVATING) {
+    if (ent->client->weaponState == WEAPON_ACTIVATING) {
         if (ent->client->playerState.gunframe == FRAME_ACTIVATE_LAST) {
-            ent->client->weaponstate = WEAPON_READY;
+            ent->client->weaponState = WEAPON_READY;
             ent->client->playerState.gunframe = FRAME_IDLE_FIRST;
             return;
         }
@@ -328,8 +328,8 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
         return;
     }
 
-    if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING)) {
-        ent->client->weaponstate = WEAPON_DROPPING;
+    if ((ent->client->newweapon) && (ent->client->weaponState != WEAPON_FIRING)) {
+        ent->client->weaponState = WEAPON_DROPPING;
         ent->client->playerState.gunframe = FRAME_DEACTIVATE_FIRST;
 
         if ((FRAME_DEACTIVATE_LAST - FRAME_DEACTIVATE_FIRST) < 4) {
@@ -346,13 +346,13 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
         return;
     }
 
-    if (ent->client->weaponstate == WEAPON_READY) {
-        if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
-            ent->client->latched_buttons &= ~BUTTON_ATTACK;
-            if ((!ent->client->ammo_index) ||
-                (ent->client->persistent.inventory[ent->client->ammo_index] >= ent->client->persistent.weapon->quantity)) {
+    if (ent->client->weaponState == WEAPON_READY) {
+        if (((ent->client->latchedButtons | ent->client->buttons) & BUTTON_ATTACK)) {
+            ent->client->latchedButtons &= ~BUTTON_ATTACK;
+            if ((!ent->client->ammoIndex) ||
+                (ent->client->persistent.inventory[ent->client->ammoIndex] >= ent->client->persistent.weapon->quantity)) {
                 ent->client->playerState.gunframe = FRAME_FIRE_FIRST;
-                ent->client->weaponstate = WEAPON_FIRING;
+                ent->client->weaponState = WEAPON_FIRING;
 
                 // start the animation
                 ent->client->anim_priority = ANIM_ATTACK;
@@ -390,7 +390,7 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
         }
     }
 
-    if (ent->client->weaponstate == WEAPON_FIRING) {
+    if (ent->client->weaponState == WEAPON_FIRING) {
         for (n = 0; fire_frames[n]; n++) {
             if (ent->client->playerState.gunframe == fire_frames[n]) {
                 fire(ent);
@@ -402,6 +402,6 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
             ent->client->playerState.gunframe++;
 
         if (ent->client->playerState.gunframe == FRAME_IDLE_FIRST + 1)
-            ent->client->weaponstate = WEAPON_READY;
+            ent->client->weaponState = WEAPON_READY;
     }
 }

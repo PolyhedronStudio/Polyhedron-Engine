@@ -404,12 +404,12 @@ void Touch_Item(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t *sur
 
     if (taken) {
         // flash the screen
-        other->client->bonus_alpha = 0.25;
+        other->client->bonusAlpha = 0.25;
 
         // show icon and name on status bar
         other->client->playerState.stats[STAT_PICKUP_ICON] = gi.ImageIndex(ent->item->icon);
         other->client->playerState.stats[STAT_PICKUP_STRING] = ConfigStrings::Items+ ITEM_INDEX(ent->item);
-        other->client->pickup_msg_time = level.time + 3.0;
+        other->client->pickupMessageTime = level.time + 3.0;
 
         // change selected item
         if (ent->item->Use)
@@ -488,7 +488,7 @@ entity_t *Drop_Item(entity_t *ent, gitem_t *item)
     if (ent->client) {
         trace_t trace;
 
-        AngleVectors(ent->client->v_angle, &forward, &right, NULL);
+        AngleVectors(ent->client->aimAngles, &forward, &right, NULL);
         VectorSet(offset, 24, 0, -16);
         dropped->s.origin = G_ProjectSource(ent->s.origin, offset, forward, right);
         trace = gi.Trace(ent->s.origin, dropped->mins, dropped->maxs,
