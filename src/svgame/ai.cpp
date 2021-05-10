@@ -63,7 +63,7 @@ void AI_SetSightClient(void)
         ent = &g_edicts[check];
         if (ent->inUse
             && ent->health > 0
-            && !(ent->flags & FL_NOTARGET)) {
+            && !(ent->flags & EntityFlags::NoTarget)) {
             level.sight_client = ent;
             return;     // got one
         }
@@ -436,15 +436,15 @@ qboolean FindTarget(entity_t *self)
         return true;    // JDC false;
 
     if (client->client) {
-        if (client->flags & FL_NOTARGET)
+        if (client->flags & EntityFlags::NoTarget)
             return false;
     } else if (client->svFlags & SVF_MONSTER) {
         if (!client->enemy)
             return false;
-        if (client->enemy->flags & FL_NOTARGET)
+        if (client->enemy->flags & EntityFlags::NoTarget)
             return false;
     } else if (heardit) {
-        if (client->owner->flags & FL_NOTARGET)
+        if (client->owner->flags & EntityFlags::NoTarget)
             return false;
     } else
         return false;
@@ -616,7 +616,7 @@ qboolean M_CheckAttack(entity_t *self)
         return true;
     }
 
-    if (self->flags & FL_FLY) {
+    if (self->flags & EntityFlags::Fly) {
         if (random() < 0.3)
             self->monsterInfo.attack_state = AS_SLIDING;
         else

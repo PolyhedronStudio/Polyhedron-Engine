@@ -84,7 +84,7 @@ static void P_ApplyDamageFeedback(entity_t *player)
     client->playerState.stats[STAT_FLASHES] = 0;
     if (client->damages.blood)
         client->playerState.stats[STAT_FLASHES] |= 1;
-    if (client->damages.armor && !(player->flags & FL_GODMODE))
+    if (client->damages.armor && !(player->flags & EntityFlags::GodMode))
         client->playerState.stats[STAT_FLASHES] |= 2;
 
     // total points of damage shot at the player this frame
@@ -93,7 +93,7 @@ static void P_ApplyDamageFeedback(entity_t *player)
         return;     // didn't take any damage
 
     // start a pain animation if still in the player model
-    if (client->animation.priorityAnimation < ANIM_PAIN && player->state.modelindex == 255) {
+    if (client->animation.priorityAnimation < ANIM_PAIN && player->state.modelIndex == 255) {
         static int      i;
 
         client->animation.priorityAnimation = ANIM_PAIN;
@@ -124,7 +124,7 @@ static void P_ApplyDamageFeedback(entity_t *player)
         count = 10; // always make a visible effect
 
     // Play an apropriate pain sound
-    if ((level.time > player->debouncePainTime) && !(player->flags & FL_GODMODE)) {
+    if ((level.time > player->debouncePainTime) && !(player->flags & EntityFlags::GodMode)) {
         r = 1 + (rand() & 1);
         player->debouncePainTime = level.time + 0.7f;
         if (player->health < 25)
@@ -313,14 +313,14 @@ static void SV_CalculateGunOffset(entity_t *ent)
     float   delta;
 
     // gun angles from bobbing
-    ent->client->playerState.gunangles[vec3_t::Roll] = xyspeed * bobfracsin * 0.005;
-    ent->client->playerState.gunangles[vec3_t::Yaw]  = xyspeed * bobfracsin * 0.01;
+    ent->client->playerState.gunAngles[vec3_t::Roll] = xyspeed * bobfracsin * 0.005;
+    ent->client->playerState.gunAngles[vec3_t::Yaw]  = xyspeed * bobfracsin * 0.01;
     if (bobcycle & 1) {
-        ent->client->playerState.gunangles[vec3_t::Roll] = -ent->client->playerState.gunangles[vec3_t::Roll];
-        ent->client->playerState.gunangles[vec3_t::Yaw]  = -ent->client->playerState.gunangles[vec3_t::Yaw];
+        ent->client->playerState.gunAngles[vec3_t::Roll] = -ent->client->playerState.gunAngles[vec3_t::Roll];
+        ent->client->playerState.gunAngles[vec3_t::Yaw]  = -ent->client->playerState.gunAngles[vec3_t::Yaw];
     }
 
-    ent->client->playerState.gunangles[vec3_t::Pitch] = xyspeed * bobfracsin * 0.005;
+    ent->client->playerState.gunAngles[vec3_t::Pitch] = xyspeed * bobfracsin * 0.005;
 
     // gun angles from delta movement
     for (i = 0 ; i < 3 ; i++) {
@@ -334,19 +334,19 @@ static void SV_CalculateGunOffset(entity_t *ent)
         if (delta < -45)
             delta = -45;
         if (i == vec3_t::Yaw)
-            ent->client->playerState.gunangles[vec3_t::Roll] += 0.1 * delta;
-        ent->client->playerState.gunangles[i] += 0.2 * delta;
+            ent->client->playerState.gunAngles[vec3_t::Roll] += 0.1 * delta;
+        ent->client->playerState.gunAngles[i] += 0.2 * delta;
     }
 
     // gun height
-    VectorClear(ent->client->playerState.gunoffset);
+    VectorClear(ent->client->playerState.gunOffset);
 //  ent->playerState->gunorigin[2] += bob;
 
     // gun_x / gun_y / gun_z are development tools
     for (i = 0 ; i < 3 ; i++) {
-        ent->client->playerState.gunoffset[i] += forward[i] * (gun_y->value);
-        ent->client->playerState.gunoffset[i] += right[i] * gun_x->value;
-        ent->client->playerState.gunoffset[i] += up[i] * (-gun_z->value);
+        ent->client->playerState.gunOffset[i] += forward[i] * (gun_y->value);
+        ent->client->playerState.gunOffset[i] += right[i] * gun_x->value;
+        ent->client->playerState.gunOffset[i] += up[i] * (-gun_z->value);
     }
 }
 
@@ -432,7 +432,7 @@ static void P_CheckFallingDamage(entity_t *ent)
     int     damage;
     vec3_t  dir;
 
-    if (ent->state.modelindex != 255)
+    if (ent->state.modelIndex != 255)
         return;     // not in the player model
 
     if (ent->moveType == MoveType::NoClip || ent->moveType == MoveType::Spectator)
@@ -459,7 +459,7 @@ static void P_CheckFallingDamage(entity_t *ent)
         return;
 
     if (delta < 15) {
-        ent->state.event = EV_FOOTSTEP;
+        ent->state.event = EntityEvent::Footstep;
         return;
     }
 
@@ -471,9 +471,9 @@ static void P_CheckFallingDamage(entity_t *ent)
     if (delta > 30) {
         if (ent->health > 0) {
             if (delta >= 55)
-                ent->state.event = EV_FALLFAR;
+                ent->state.event = EntityEvent::FallFar;
             else
-                ent->state.event = EV_FALL;
+                ent->state.event = EntityEvent::Fall;
         }
         ent->debouncePainTime = level.time;   // no normal pain sound
         damage = (delta - 30) / 2;
@@ -484,7 +484,7 @@ static void P_CheckFallingDamage(entity_t *ent)
         if (!deathmatch->value || !((int)dmflags->value & DeathMatchFlags::NoFalling))
             T_Damage(ent, world, world, dir, ent->state.origin, vec3_origin, damage, 0, 0, MOD_FALLING);
     } else {
-        ent->state.event = EV_FALLSHORT;
+        ent->state.event = EntityEvent::FallShort;
         return;
     }
 }
@@ -519,7 +519,7 @@ static void P_CheckWorldEffects(void)
             gi.Sound(current_player, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
         else if (current_player->waterType & CONTENTS_WATER)
             gi.Sound(current_player, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
-        current_player->flags |= FL_INWATER;
+        current_player->flags |= EntityFlags::InWater;
 
         // clear damage_debounce, so the pain sound will play immediately
         current_player->debounceDamageTime = level.time - 1;
@@ -531,7 +531,7 @@ static void P_CheckWorldEffects(void)
     if (oldWaterLevel && ! waterlevel) {
         PlayerNoise(current_player, current_player->state.origin, PNOISE_SELF);
         gi.Sound(current_player, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
-        current_player->flags &= ~FL_INWATER;
+        current_player->flags &= ~EntityFlags::InWater;
     }
 
     //
@@ -627,7 +627,7 @@ static void G_SetClientEffects(entity_t *ent)
         return;
 
     // show cheaters!!!
-    if (ent->flags & FL_GODMODE) {
+    if (ent->flags & EntityFlags::GodMode) {
         ent->state.renderfx |= (RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell);
     }
 }
@@ -645,7 +645,7 @@ static void G_SetClientEvent(entity_t *ent)
 
     if (ent->groundEntityPtr && xyspeed > 225) {
         if ((int)(current_client->bobtime + bobmove) != bobcycle)
-            ent->state.event = EV_FOOTSTEP;
+            ent->state.event = EntityEvent::Footstep;
     }
 }
 
@@ -691,7 +691,7 @@ static void G_SetClientFrame(entity_t *ent)
     if (!ent)
         return;
 
-    if (ent->state.modelindex != 255)
+    if (ent->state.modelIndex != 255)
         return;     // not in the player model
 
     client = ent->client;
@@ -780,6 +780,11 @@ void ClientEndServerFrame(entity_t *ent)
     float   bobtime;
     int     i;
 
+    if (!ent || !ent->client) {
+        return;
+    }
+
+    // Setup the current player and entity being processed.
     current_player = ent;
     current_client = ent->client;
 
@@ -791,11 +796,8 @@ void ClientEndServerFrame(entity_t *ent)
     // If it wasn't updated here, the view position would lag a frame
     // behind the body position when pushed -- "sinking into plats"
     //
-    for (i = 0 ; i < 3 ; i++) {
-        // N&C: FF Precision.
-        VectorCopy(ent->state.origin, current_client->playerState.pmove.origin);
-        VectorCopy(ent->velocity, current_client->playerState.pmove.velocity);
-    }
+    current_client->playerState.pmove.origin = ent->state.origin;
+    current_client->playerState.pmove.velocity = ent->velocity;
 
     //
     // If the end of unit layout is displayed, don't give
@@ -847,14 +849,16 @@ void ClientEndServerFrame(entity_t *ent)
         else if (!ent->groundEntityPtr && ent->waterLevel == 2 && xyspeed > 100)
             bobmove = 0.225;
         else if (xyspeed > 100)
-            bobmove = 0.0625;
+            bobmove = 0.0825;
         else if (!ent->groundEntityPtr && ent->waterLevel == 2)
             bobmove = 0.1625;
         else
             bobmove = 0.03125;
     }
 
-    bobtime = (current_client->bobtime += bobmove);
+    // Generate bob time.
+    current_client->bobtime += bobmove;
+    bobtime = current_client->bobtime;
 
     if (current_client->playerState.pmove.flags & PMF_DUCKED)
         bobtime *= 2;   // N&C: Footstep tweak.

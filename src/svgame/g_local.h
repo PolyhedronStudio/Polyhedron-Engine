@@ -49,63 +49,81 @@ constexpr float DAMAGE_TIME = 0.5f;
 constexpr float FALL_TIME = 0.3f;
 
 
-// edict->spawnFlags
+// entity->spawnFlags
 // these are set with checkboxes on each entity in the map editor
-constexpr int32_t  SPAWNFLAG_NOT_EASY = 0x00000100;
-constexpr int32_t  SPAWNFLAG_NOT_MEDIUM = 0x00000200;
-constexpr int32_t  SPAWNFLAG_NOT_HARD = 0x00000400;
-constexpr int32_t  SPAWNFLAG_NOT_DEATHMATCH = 0x00000800;
-constexpr int32_t  SPAWNFLAG_NOT_COOP = 0x00001000;
+struct EntitySpawnFlags {
+    static constexpr int32_t NotEasy = 0x00000100;
+    static constexpr int32_t NotMedium = 0x00000200;
+    static constexpr int32_t NotHard = 0x00000400;
+    static constexpr int32_t NotDeathMatch= 0x00000800;
+    static constexpr int32_t NotCoop = 0x00001000;
+};
 
-// edict->flags
-constexpr int32_t  FL_FLY = 0x00000001;
-constexpr int32_t  FL_SWIM = 0x00000002;  // implied immunity to drowining
-constexpr int32_t  FL_IMMUNE_LASER = 0x00000004;
-constexpr int32_t  FL_INWATER = 0x00000008;
-constexpr int32_t  FL_GODMODE = 0x00000010;
-constexpr int32_t  FL_NOTARGET = 0x00000020;
-constexpr int32_t  FL_IMMUNE_SLIME = 0x00000040;
-constexpr int32_t  FL_IMMUNE_LAVA = 0x00000080;
-constexpr int32_t  FL_PARTIALGROUND = 0x00000100;  // not all corners are valid
-constexpr int32_t  FL_WATERJUMP = 0x00000200;  // player jumping out of water
-constexpr int32_t  FL_TEAMSLAVE = 0x00000400;  // not the first on the team
-constexpr int32_t  FL_NO_KNOCKBACK = 0x00000800;
-constexpr int32_t  FL_POWER_ARMOR = 0x00001000;  // power armor (if any) is active
-constexpr int32_t  FL_RESPAWN = 0x80000000;  // used for item respawning
-
+// entity->flags
+struct EntityFlags {
+    static constexpr int32_t Fly = 0x00000001;
+    static constexpr int32_t Swim = 0x00000002; // Implied immunity to drowining
+    static constexpr int32_t ImmuneLaser = 0x00000004;
+    static constexpr int32_t InWater = 0x00000008;
+    static constexpr int32_t GodMode = 0x00000010;
+    static constexpr int32_t NoTarget = 0x00000020;
+    static constexpr int32_t ImmuneToSlime = 0x00000040;
+    static constexpr int32_t ImmuneToLava = 0x00000080;
+    static constexpr int32_t PartiallyOnGround = 0x00000100;  // Not all corners are valid
+    static constexpr int32_t WaterJump = 0x00000200; // Player jumping out of water
+    static constexpr int32_t TeamSlave = 0x00000400;  // Not the first on the team
+    static constexpr int32_t NoKnockBack = 0x00000800;
+    static constexpr int32_t PowerArmor = 0x00001000;  // Power armor (if any) is active
+    static constexpr int32_t Respawn = 0x80000000;  // Used for item respawning
+};
 
 constexpr float FRAMETIME = 0.1f;
 
 // memory tags to allow dynamic memory to be cleaned up
-constexpr int32_t  TAG_GAME = 765;     // clear when unloading the dll
-constexpr int32_t  TAG_LEVEL = 766;     // clear when loading a new level
+constexpr int32_t TAG_GAME = 765;     // clear when unloading the dll
+constexpr int32_t TAG_LEVEL = 766;     // clear when loading a new level
 
 
-constexpr int32_t  MELEE_DISTANCE = 80;
+constexpr int32_t MELEE_DISTANCE = 80;
 
-constexpr int32_t  BODY_QUEUE_SIZE = 8;
+constexpr int32_t BODY_QUEUE_SIZE = 8;
 
-typedef enum {
-    DAMAGE_NO,
-    DAMAGE_YES,         // will take damage if hit
-    DAMAGE_AIM          // auto targeting recognizes this
-} damage_t;
+//-------------------
+// TakeDamage
+//
+// Add custom take damage conditions here.
+//-------------------
+struct TakeDamage {
+    static constexpr int32_t No = 0;  // Will NOT take damage if hit
+    static constexpr int32_t Yes = 1; // WILL take damage if hit
+    static constexpr int32_t Aim = 2; // When auto targeting is enabled, it'll recognizes this
+};
 
-typedef enum {
-    WEAPON_READY,
-    WEAPON_ACTIVATING,
-    WEAPON_DROPPING,
-    WEAPON_FIRING
-} weaponstate_t;
+//-------------------
+// WeaponState
+//
+// Add custom weapon states here.
+//-------------------
+struct WeaponState {
+    static constexpr int32_t Ready = 0;
+    static constexpr int32_t Activating = 1;
+    static constexpr int32_t Dropping = 2;
+    static constexpr int32_t Firing = 3;
+};
 
-typedef enum {
-    AMMO_BULLETS,
-    AMMO_SHELLS,
-    AMMO_ROCKETS,
-    AMMO_GRENADES,
-    AMMO_CELLS,
-    AMMO_SLUGS
-} ammo_t;
+//-------------------
+// AmmoType
+//
+// Add ammo types here.
+//-------------------
+struct AmmoType {
+    static constexpr int32_t Bullets = 0;
+    static constexpr int32_t Shells = 1;
+    static constexpr int32_t Rockets = 2;
+    static constexpr int32_t Grenade = 3;
+    static constexpr int32_t Cells = 4;
+    static constexpr int32_t Slugs = 5;
+};
 
 
 //deadFlag
@@ -826,7 +844,8 @@ struct gclient_s {
 
     float       killerYaw;         // when dead, look at killer
 
-    weaponstate_t   weaponState;
+    int32_t     weaponState;
+
     vec3_t      kickAngles;    // weapon kicks
     vec3_t      kickOrigin;
     // View damage kicks.
@@ -988,7 +1007,7 @@ struct entity_s {
     const char        *map;           // target_changelevel // C++20: STRING: Added const to char *
 
     int         viewHeight;     // height above origin where eyesight is determined
-    int         takedamage;
+    int         takeDamage;
     int         dmg;
     int         radius_dmg;
     float       dmg_radius;

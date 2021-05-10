@@ -41,7 +41,7 @@ void hurt_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* su
 {
     int     dflags;
 
-    if (!other->takedamage)
+    if (!other->takeDamage)
         return;
 
     if (self->timestamp > level.time)

@@ -20,7 +20,7 @@ Walking monsters that touch this will jump in the direction of the trigger's ang
 
 void trigger_monsterjump_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
 {
-    if (other->flags & (FL_FLY | FL_SWIM))
+    if (other->flags & (EntityFlags::Fly | EntityFlags::Swim))
         return;
     if (other->svFlags & SVF_DEADMONSTER)
         return;

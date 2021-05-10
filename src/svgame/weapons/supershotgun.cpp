@@ -59,9 +59,9 @@ void weapon_supershotgun_fire(entity_t* ent)
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MuzzleFlashType::SuperShotgun | is_silenced);
-    gi.Multicast(&ent->state.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->state.origin, MultiCast::PVS);
 
-    ent->client->playerState.gunframe++;
+    ent->client->playerState.gunFrame++;
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))

@@ -59,18 +59,18 @@ entity_update_new(cl_entity_t *ent, const EntityState *state, const vec_t *origi
     // duplicate the current state so lerping doesn't hurt anything
     ent->prev = *state;
 
-    if (state->event == EV_PLAYER_TELEPORT ||
-        state->event == EV_OTHER_TELEPORT ||
+    if (state->event == EntityEvent::PlayerTeleport ||
+        state->event == EntityEvent::OtherTeleport ||
         (state->renderfx & (RenderEffects::FrameLerp | RenderEffects::Beam))) {
         // no lerping if teleported
         ent->lerpOrigin = origin;
         return;
     }
 
-    // old_origin is valid for new entities,
+    // oldOrigin is valid for new entities,
     // so use it as starting point for interpolating between
-    ent->prev.origin = state->old_origin;
-    ent->lerpOrigin = state->old_origin;
+    ent->prev.origin = state->oldOrigin;
+    ent->lerpOrigin = state->oldOrigin;
 }
 
 static inline void
@@ -78,12 +78,12 @@ entity_update_old(cl_entity_t *ent, const EntityState *state, const vec_t *origi
 {
     int event = state->event;
 
-    if (state->modelindex != ent->current.modelindex
-        || state->modelindex2 != ent->current.modelindex2
-        || state->modelindex3 != ent->current.modelindex3
-        || state->modelindex4 != ent->current.modelindex4
-        || event == EV_PLAYER_TELEPORT
-        || event == EV_OTHER_TELEPORT
+    if (state->modelIndex != ent->current.modelIndex
+        || state->modelIndex2 != ent->current.modelIndex2
+        || state->modelIndex3 != ent->current.modelIndex3
+        || state->modelIndex4 != ent->current.modelIndex4
+        || event == EntityEvent::PlayerTeleport
+        || event == EntityEvent::OtherTeleport
         || fabsf(origin[0] - ent->current.origin[0]) > 512
         || fabsf(origin[1] - ent->current.origin[1]) > 512
         || fabsf(origin[2] - ent->current.origin[2]) > 512
@@ -246,8 +246,8 @@ player_update(ServerFrame *oldframe, ServerFrame *frame, int framediv)
     ent = &cs.entities[frame->clientNumber + 1];
     if (ent->serverFrame > oldnum &&
         ent->serverFrame <= frame->number &&
-        (ent->current.event == EV_PLAYER_TELEPORT
-         || ent->current.event == EV_OTHER_TELEPORT)) {
+        (ent->current.event == EntityEvent::PlayerTeleport
+         || ent->current.event == EntityEvent::OtherTeleport)) {
         goto dup;
     }
 
@@ -466,7 +466,7 @@ vec3_t CL_GetEntitySoundOrigin(int entnum) {
 
     // offset the origin for BSP models
     if (ent->current.solid == PACKED_BSP) {
-        cm = cl.clipModels[ent->current.modelindex];
+        cm = cl.clipModels[ent->current.modelIndex];
         if (cm) {
             VectorAverage(cm->mins, cm->maxs, mid);
             VectorAdd(org, mid, org);

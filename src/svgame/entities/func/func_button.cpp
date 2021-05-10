@@ -46,7 +46,7 @@ void button_return(entity_t* self)
     self->state.frame = 0;
 
     if (self->health)
-        self->takedamage = DAMAGE_YES;
+        self->takeDamage = TakeDamage::Yes;
 }
 
 void button_wait(entity_t* self)
@@ -69,7 +69,7 @@ void button_fire(entity_t* self)
         return;
 
     self->moveInfo.state = STATE_UP;
-    if (self->moveInfo.sound_start && !(self->flags & FL_TEAMSLAVE))
+    if (self->moveInfo.sound_start && !(self->flags & EntityFlags::TeamSlave))
         gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_start, 1, ATTN_STATIC, 0);
     Brush_Move_Calc(self, self->moveInfo.end_origin, button_wait);
 }
@@ -96,7 +96,7 @@ void button_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int 
 {
     self->activator = attacker;
     self->health = self->maxHealth;
-    self->takedamage = DAMAGE_NO;
+    self->takeDamage = TakeDamage::No;
     button_fire(self);
 }
 
@@ -138,7 +138,7 @@ void SP_func_button(entity_t* ent)
     if (ent->health) {
         ent->maxHealth = ent->health;
         ent->Die = button_killed;
-        ent->takedamage = DAMAGE_YES;
+        ent->takeDamage = TakeDamage::Yes;
     }
     else if (!ent->targetName)
         ent->Touch = button_touch;

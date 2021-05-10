@@ -47,7 +47,7 @@ void Blaster_Fire(entity_t* ent, const vec3_t &g_offset, int damage, qboolean hy
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
-    gi.Multicast(&ent->state.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->state.origin, MultiCast::PVS);
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 }
@@ -62,7 +62,7 @@ void Weapon_Blaster_Fire(entity_t* ent)
     else
         damage = 10;
     Blaster_Fire(ent, vec3_origin, damage, false, EntityEffectType::Blaster);
-    ent->client->playerState.gunframe++;
+    ent->client->playerState.gunFrame++;
 }
 
 void Weapon_Blaster(entity_t* ent)

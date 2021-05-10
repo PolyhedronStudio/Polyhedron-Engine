@@ -59,7 +59,7 @@ static inline void CL_ParseDeltaEntity(ServerFrame  *frame,
 
     // shuffle previous origin to old
     if (!(bits & U_OLDORIGIN) && !(state->renderfx & RenderEffects::Beam))
-        VectorCopy(old->origin, state->old_origin);
+        VectorCopy(old->origin, state->oldOrigin);
 }
 
 static void CL_ParsePacketEntities(ServerFrame *oldframe,

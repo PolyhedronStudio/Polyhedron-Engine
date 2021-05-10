@@ -42,13 +42,13 @@ typedef struct {
     // N&C: Full float precision for entities.
     vec3_t      origin;
     vec3_t      angles;
-    vec3_t      old_origin;
+    vec3_t      oldOrigin;
 
     // Model indexes.
-    uint8_t     modelindex;
-    uint8_t     modelindex2;
-    uint8_t     modelindex3;
-    uint8_t     modelindex4;
+    uint8_t     modelIndex;
+    uint8_t     modelIndex2;
+    uint8_t     modelIndex3;
+    uint8_t     modelIndex4;
 
     // Rendering effects.
     uint32_t    skinnum;

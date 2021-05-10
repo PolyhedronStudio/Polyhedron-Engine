@@ -135,7 +135,7 @@ void SpawnDamage(int type, const vec3_t &origin, const vec3_t &normal, int damag
 //  gi.WriteByte (damage);
     gi.WritePosition(origin);
     gi.WriteDirection(normal);
-    gi.Multicast(&origin, MULTICAST_PVS);
+    gi.Multicast(&origin, MultiCast::PVS);
 }
 
 
@@ -296,7 +296,7 @@ void M_ReactToDamage(entity_t *targ, entity_t *attacker)
 
     // it's the same base (walk/swim/fly) type and a different classname and it's not a tank
     // (they spray too much), get mad at them
-    if (((targ->flags & (FL_FLY | FL_SWIM)) == (attacker->flags & (FL_FLY | FL_SWIM))) &&
+    if (((targ->flags & (EntityFlags::Fly | EntityFlags::Swim)) == (attacker->flags & (EntityFlags::Fly | EntityFlags::Swim))) &&
         (strcmp(targ->classname, attacker->classname) != 0) &&
         (strcmp(attacker->classname, "monster_tank") != 0) &&
         (strcmp(attacker->classname, "monster_supertank") != 0) &&
@@ -347,7 +347,7 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
         return;
     }
 
-    if (!targ->takedamage)
+    if (!targ->takeDamage)
         return;
 
     // friendly fire avoidance
@@ -386,7 +386,7 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
     if (!(dflags & DAMAGE_RADIUS) && (targ->svFlags & SVF_MONSTER) && (attacker->client) && (!targ->enemy) && (targ->health > 0))
         damage *= 2;
 
-    if (targ->flags & FL_NO_KNOCKBACK)
+    if (targ->flags & EntityFlags::NoKnockBack)
         knockback = 0;
 
 // figure momentum add
@@ -413,7 +413,7 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
     save = 0;
 
     // check for godmode
-    if ((targ->flags & FL_GODMODE) && !(dflags & DAMAGE_NO_PROTECTION)) {
+    if ((targ->flags & EntityFlags::GodMode) && !(dflags & DAMAGE_NO_PROTECTION)) {
         take = 0;
         save = damage;
         SpawnDamage(te_sparks, point, normal, save);
@@ -447,7 +447,7 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
 
         if (targ->health <= 0) {
             if ((targ->svFlags & SVF_MONSTER) || (client))
-                targ->flags |= FL_NO_KNOCKBACK;
+                targ->flags |= EntityFlags::NoKnockBack;
             Killed(targ, inflictor, attacker, take, point);
             return;
         }
@@ -462,7 +462,7 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
                 targ->debouncePainTime = level.time + 5;
         }
     } else if (client) {
-        if (!(targ->flags & FL_GODMODE) && (take))
+        if (!(targ->flags & EntityFlags::GodMode) && (take))
             targ->Pain(targ, attacker, knockback, take);
     } else if (take) {
         if (targ->Pain)
@@ -506,7 +506,7 @@ void T_RadiusDamage(entity_t *inflictor, entity_t *attacker, float damage, entit
         if (ent == ignore)
             continue;
         // Continue in case this entity CAN'T take any damage.
-        if (!ent->takedamage)
+        if (!ent->takeDamage)
             continue;
 
         // Calculate damage points.

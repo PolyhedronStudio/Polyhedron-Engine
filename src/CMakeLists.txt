@@ -335,6 +335,7 @@ SET(HEADERS_SHARED
 
 	../inc/shared/clgame.h
 	../inc/shared/cltypes.h
+	../inc/shared/collision.h
 	../inc/shared/config.h
 	../inc/shared/endian.h 
 	../inc/shared/svgame.h 

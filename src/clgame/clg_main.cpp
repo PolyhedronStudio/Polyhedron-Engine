@@ -251,7 +251,7 @@ static size_t CL_Armor_m(char* buffer, size_t size)
 static size_t CL_WeaponModel_m(char* buffer, size_t size)
 {
     return Q_scnprintf(buffer, size, "%s",
-        cl->configstrings[cl->frame.playerState.gunindex + ConfigStrings::Models]);
+        cl->configstrings[cl->frame.playerState.gunIndex + ConfigStrings::Models]);
 }
 
 //---------------

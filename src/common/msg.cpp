@@ -311,11 +311,11 @@ void MSG_PackEntity(PackedEntity* out, const EntityState* in, qboolean short_ang
     out->number = in->number;
     out->origin = in->origin;
     out->angles = in->angles;
-    out->old_origin = in->old_origin;
-    out->modelindex = in->modelindex;
-    out->modelindex2 = in->modelindex2;
-    out->modelindex3 = in->modelindex3;
-    out->modelindex4 = in->modelindex4;
+    out->oldOrigin = in->oldOrigin;
+    out->modelIndex = in->modelIndex;
+    out->modelIndex2 = in->modelIndex2;
+    out->modelIndex3 = in->modelIndex3;
+    out->modelIndex4 = in->modelIndex4;
     out->skinnum = in->skinnum;
     out->effects = in->effects;
     out->renderfx = in->renderfx;
@@ -380,9 +380,9 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
             bits |= U_ANGLE_Z | U_ANGLE16;
 
         if (flags & MSG_ES_NEWENTITY) {
-            if (!EqualEpsilonf(to->old_origin[0], from->origin[0]) ||
-                !EqualEpsilonf(to->old_origin[1], from->origin[1]) ||
-                !EqualEpsilonf(to->old_origin[2], from->origin[2]))
+            if (!EqualEpsilonf(to->oldOrigin[0], from->origin[0]) ||
+                !EqualEpsilonf(to->oldOrigin[1], from->origin[1]) ||
+                !EqualEpsilonf(to->oldOrigin[2], from->origin[2]))
                 bits |= U_OLDORIGIN;
         }
     }
@@ -433,13 +433,13 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
     if (to->event)
         bits |= U_EVENT;
 
-    if (to->modelindex != from->modelindex)
+    if (to->modelIndex != from->modelIndex)
         bits |= U_MODEL;
-    if (to->modelindex2 != from->modelindex2)
+    if (to->modelIndex2 != from->modelIndex2)
         bits |= U_MODEL2;
-    if (to->modelindex3 != from->modelindex3)
+    if (to->modelIndex3 != from->modelIndex3)
         bits |= U_MODEL3;
-    if (to->modelindex4 != from->modelindex4)
+    if (to->modelIndex4 != from->modelIndex4)
         bits |= U_MODEL4;
 
     if (to->sound != from->sound)
@@ -450,9 +450,9 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
     }
     else if (to->renderfx & RenderEffects::Beam) {
         if (flags & MSG_ES_BEAMORIGIN) {
-            if (!EqualEpsilonf(to->old_origin[0], from->old_origin[0]) ||
-                !EqualEpsilonf(to->old_origin[1], from->old_origin[1]) ||
-                !EqualEpsilonf(to->old_origin[2], from->old_origin[2]))
+            if (!EqualEpsilonf(to->oldOrigin[0], from->oldOrigin[0]) ||
+                !EqualEpsilonf(to->oldOrigin[1], from->oldOrigin[1]) ||
+                !EqualEpsilonf(to->oldOrigin[2], from->oldOrigin[2]))
                 bits |= U_OLDORIGIN;
         }
         else {
@@ -504,13 +504,13 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
         MSG_WriteByte(to->number);
 
     if (bits & U_MODEL)
-        MSG_WriteByte(to->modelindex);
+        MSG_WriteByte(to->modelIndex);
     if (bits & U_MODEL2)
-        MSG_WriteByte(to->modelindex2);
+        MSG_WriteByte(to->modelIndex2);
     if (bits & U_MODEL3)
-        MSG_WriteByte(to->modelindex3);
+        MSG_WriteByte(to->modelIndex3);
     if (bits & U_MODEL4)
-        MSG_WriteByte(to->modelindex4);
+        MSG_WriteByte(to->modelIndex4);
 
     if (bits & U_FRAME8)
         MSG_WriteByte(to->frame);
@@ -558,9 +558,9 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
 
     // N&C: Full float precision.
     if (bits & U_OLDORIGIN) {
-        MSG_WriteFloat(to->old_origin[0]);
-        MSG_WriteFloat(to->old_origin[1]);
-        MSG_WriteFloat(to->old_origin[2]);
+        MSG_WriteFloat(to->oldOrigin[0]);
+        MSG_WriteFloat(to->oldOrigin[1]);
+        MSG_WriteFloat(to->oldOrigin[2]);
     }
 
     if (bits & U_SOUND)
@@ -671,20 +671,20 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, msgPsFla
     if (to->rdflags != from->rdflags)
         pflags |= PS_RDFLAGS;
 
-    if (to->gunindex != from->gunindex)
+    if (to->gunIndex != from->gunIndex)
         pflags |= PS_WEAPONINDEX;
 
-    if (to->gunframe != from->gunframe)
+    if (to->gunFrame != from->gunFrame)
         pflags |= PS_WEAPONFRAME;
 
-    if (from->gunoffset[0] != to->gunoffset[0] ||
-        from->gunoffset[1] != to->gunoffset[1] ||
-        from->gunoffset[2] != to->gunoffset[2])
+    if (from->gunOffset[0] != to->gunOffset[0] ||
+        from->gunOffset[1] != to->gunOffset[1] ||
+        from->gunOffset[2] != to->gunOffset[2])
         eflags |= EPS_GUNOFFSET;
 
-    if (from->gunangles[0] != to->gunangles[0] ||
-        from->gunangles[1] != to->gunangles[1] ||
-        from->gunangles[2] != to->gunangles[2])
+    if (from->gunAngles[0] != to->gunAngles[0] ||
+        from->gunAngles[1] != to->gunAngles[1] ||
+        from->gunAngles[2] != to->gunAngles[2])
         eflags |= EPS_GUNANGLES;
 
     statbits = 0;
@@ -759,21 +759,21 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, msgPsFla
     }
 
     if (pflags & PS_WEAPONINDEX)
-        MSG_WriteByte(to->gunindex);
+        MSG_WriteByte(to->gunIndex);
 
     if (pflags & PS_WEAPONFRAME)
-        MSG_WriteLong(to->gunframe);
+        MSG_WriteLong(to->gunFrame);
 
     if (eflags & EPS_GUNOFFSET) {
-        MSG_WriteFloat(to->gunoffset[0]);
-        MSG_WriteFloat(to->gunoffset[1]);
-        MSG_WriteFloat(to->gunoffset[2]);
+        MSG_WriteFloat(to->gunOffset[0]);
+        MSG_WriteFloat(to->gunOffset[1]);
+        MSG_WriteFloat(to->gunOffset[2]);
     }
 
     if (eflags & EPS_GUNANGLES) {
-        MSG_WriteFloat(to->gunangles[0]);
-        MSG_WriteFloat(to->gunangles[1]);
-        MSG_WriteFloat(to->gunangles[2]);
+        MSG_WriteFloat(to->gunAngles[0]);
+        MSG_WriteFloat(to->gunAngles[1]);
+        MSG_WriteFloat(to->gunAngles[2]);
     }
 
     if (pflags & PS_BLEND) {
@@ -1098,16 +1098,16 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
 
     // Model Indexes.
     if (bits & U_MODEL) {
-        to->modelindex = MSG_ReadByte();
+        to->modelIndex = MSG_ReadByte();
     }
     if (bits & U_MODEL2) {
-        to->modelindex2 = MSG_ReadByte();
+        to->modelIndex2 = MSG_ReadByte();
     }
     if (bits & U_MODEL3) {
-        to->modelindex3 = MSG_ReadByte();
+        to->modelIndex3 = MSG_ReadByte();
     }
     if (bits & U_MODEL4) {
-        to->modelindex4 = MSG_ReadByte();
+        to->modelIndex4 = MSG_ReadByte();
     }
 
     // Frame.
@@ -1162,7 +1162,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
 
     // Old Origin.
     if (bits & U_OLDORIGIN) {
-        to->old_origin = MSG_ReadPosition(); // MSG: !! ReadPos
+        to->oldOrigin = MSG_ReadPosition(); // MSG: !! ReadPos
     }
 
     // Sound.
@@ -1276,26 +1276,26 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int fla
 
     // Weapon Index.
     if (flags & PS_WEAPONINDEX) {
-        to->gunindex = MSG_ReadByte();
+        to->gunIndex = MSG_ReadByte();
     }
 
     // Weapon Frame.
     if (flags & PS_WEAPONFRAME) {
-        to->gunframe = MSG_ReadLong();
+        to->gunFrame = MSG_ReadLong();
     }
 
     // Gun Offset.
     if (extraflags & EPS_GUNOFFSET) {
-        to->gunoffset[0] = MSG_ReadFloat();
-        to->gunoffset[1] = MSG_ReadFloat();
-        to->gunoffset[2] = MSG_ReadFloat();
+        to->gunOffset[0] = MSG_ReadFloat();
+        to->gunOffset[1] = MSG_ReadFloat();
+        to->gunOffset[2] = MSG_ReadFloat();
     }
 
     // Gun Angles.
     if (extraflags & EPS_GUNANGLES) {
-        to->gunangles[0] = MSG_ReadFloat();
-        to->gunangles[1] = MSG_ReadFloat();
-        to->gunangles[2] = MSG_ReadFloat();
+        to->gunAngles[0] = MSG_ReadFloat();
+        to->gunAngles[1] = MSG_ReadFloat();
+        to->gunAngles[2] = MSG_ReadFloat();
     }
 
     // Blend.
@@ -1359,10 +1359,10 @@ void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
     SP(PM_VIEW_OFFSET, "pmove.viewOffset");
     SP(PM_VIEW_ANGLES, "pmove.viewAngles");
     SP(KICKANGLES, "kickAngles");
-    SP(WEAPONINDEX, "gunindex");
-    SP(WEAPONFRAME, "gunframe");
-    SE(GUNOFFSET, "gunoffset");
-    SE(GUNANGLES, "gunangles");
+    SP(WEAPONINDEX, "gunIndex");
+    SP(WEAPONFRAME, "gunFrame");
+    SE(GUNOFFSET, "gunOffset");
+    SE(GUNANGLES, "gunAngles");
     SP(BLEND, "blend");
     SP(FOV, "fov");
     SP(RDFLAGS, "rdflags");
@@ -1397,10 +1397,10 @@ void MSG_ShowDeltaUsercmdBits(int bits)
 void MSG_ShowDeltaEntityBits(int bits)
 {
 #define S(b,s) if(bits&U_##b) SHOWBITS(s)
-    S(MODEL, "modelindex");
-    S(MODEL2, "modelindex2");
-    S(MODEL3, "modelindex3");
-    S(MODEL4, "modelindex4");
+    S(MODEL, "modelIndex");
+    S(MODEL2, "modelIndex2");
+    S(MODEL3, "modelIndex3");
+    S(MODEL4, "modelIndex4");
 
     if (bits & U_FRAME8)
         SHOWBITS("frame8");
@@ -1434,7 +1434,7 @@ void MSG_ShowDeltaEntityBits(int bits)
     S(ANGLE_X, "angles[0]");
     S(ANGLE_Y, "angles[1]");
     S(ANGLE_Z, "angles[2]");
-    S(OLDORIGIN, "old_origin");
+    S(OLDORIGIN, "oldOrigin");
     S(SOUND, "sound");
     S(EVENT, "event");
     S(SOLID, "solid");
@@ -1451,10 +1451,10 @@ void MSG_ShowDeltaPlayerstateBits_Packet(int flags)
 //    S(VIEWANGLES, "viewAngles[0,1]");
 //    S(VIEWANGLE2, "viewAngles[2]");
 //    S(KICKANGLES, "kickAngles");
-//    S(WEAPONINDEX, "gunindex");
-//    S(WEAPONFRAME, "gunframe");
-//    S(GUNOFFSET, "gunoffset");
-//    S(GUNANGLES, "gunangles");
+//    S(WEAPONINDEX, "gunIndex");
+//    S(WEAPONFRAME, "gunFrame");
+//    S(GUNOFFSET, "gunOffset");
+//    S(GUNANGLES, "gunAngles");
 //    S(BLEND, "blend");
 //    S(FOV, "fov");
 //    S(RDFLAGS, "rdflags");

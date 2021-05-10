@@ -165,7 +165,7 @@ typedef struct {
     int (*BoxEntities)(const vec3_t &mins, const vec3_t &maxs, entity_t **list, int maxcount, int areatype);
 
     // network messaging
-    void (*Multicast)(const vec3_t *origin, MultiCast to);
+    void (*Multicast)(const vec3_t *origin, int32_t to);
     void (*Unicast)(entity_t *ent, qboolean reliable);
     void (*WriteChar)(int c);
     void (*WriteByte)(int c);

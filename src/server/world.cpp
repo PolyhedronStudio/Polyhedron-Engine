@@ -308,9 +308,9 @@ void PF_LinkEntity(entity_t *ent)
 
     SV_LinkEntity(&sv.cm, ent);
 
-    // if first time, make sure old_origin is valid
+    // if first time, make sure oldOrigin is valid
     if (!ent->linkCount) {
-        VectorCopy(ent->state.origin, ent->state.old_origin);
+        VectorCopy(ent->state.origin, ent->state.oldOrigin);
     }
     ent->linkCount++;
 
@@ -419,7 +419,7 @@ object of mins/maxs size.
 static mnode_t *SV_HullForEntity(entity_t *ent)
 {
     if (ent->solid == Solid::BSP) {
-        int i = ent->state.modelindex - 1;
+        int i = ent->state.modelIndex - 1;
 
         // explicit hulls in the BSP model
         if (i <= 0 || i >= sv.cm.cache->nummodels)

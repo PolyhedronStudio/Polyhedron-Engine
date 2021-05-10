@@ -104,7 +104,7 @@ void Brush_Move_Calc(entity_t* ent, const vec3_t &dest, void(*func)(entity_t*))
     ent->moveInfo.endfunc = func;
 
     if (ent->moveInfo.speed == ent->moveInfo.accel && ent->moveInfo.speed == ent->moveInfo.decel) {
-        if (level.current_entity == ((ent->flags & FL_TEAMSLAVE) ? ent->teamMasterPtr : ent)) {
+        if (level.current_entity == ((ent->flags & EntityFlags::TeamSlave) ? ent->teamMasterPtr : ent)) {
             Brush_Move_Begin(ent);
         }
         else {
@@ -189,7 +189,7 @@ void Brush_AngleMove_Calc(entity_t* ent, void(*func)(entity_t*))
 {
     VectorClear(ent->avelocity);
     ent->moveInfo.endfunc = func;
-    if (level.current_entity == ((ent->flags & FL_TEAMSLAVE) ? ent->teamMasterPtr : ent)) {
+    if (level.current_entity == ((ent->flags & EntityFlags::TeamSlave) ? ent->teamMasterPtr : ent)) {
         Brush_AngleMove_Begin(ent);
     }
     else {

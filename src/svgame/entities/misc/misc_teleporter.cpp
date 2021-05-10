@@ -29,7 +29,7 @@ void teleporter_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface
     gi.UnlinkEntity(other);
 
     VectorCopy(dest->state.origin, other->state.origin);
-    VectorCopy(dest->state.origin, other->state.old_origin);
+    VectorCopy(dest->state.origin, other->state.oldOrigin);
     other->state.origin[2] += 10;
 
     // clear the velocity and hold them in place briefly
@@ -38,8 +38,8 @@ void teleporter_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface
     other->client->playerState.pmove.flags |= PMF_TIME_TELEPORT;
 
     // draw the teleport splash at source and on the player
-    self->owner->state.event = EV_PLAYER_TELEPORT;
-    other->state.event = EV_PLAYER_TELEPORT;
+    self->owner->state.event = EntityEvent::PlayerTeleport;
+    other->state.event = EntityEvent::PlayerTeleport;
 
     // set angles
     for (i = 0; i < 3; i++) {

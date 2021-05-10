@@ -22,7 +22,7 @@ void SP_misc_gib_leg(entity_t* ent)
     gi.SetModel(ent, "models/objects/gibs/leg/tris.md2");
     ent->solid = Solid::Not;
     ent->state.effects |= EntityEffectType::Gib;
-    ent->takedamage = DAMAGE_YES;
+    ent->takeDamage = TakeDamage::Yes;
     ent->Die = gib_die;
     ent->moveType = MoveType::Toss;
     ent->svFlags |= SVF_MONSTER;

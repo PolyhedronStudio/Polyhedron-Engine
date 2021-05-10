@@ -18,7 +18,7 @@
 //=====================================================
 /*QUAKED func_door (0 .5 .8) ? START_OPEN x CRUSHER NOMONSTER ANIMATED TOGGLE ANIMATED_FAST
 TOGGLE      wait in both the start and end states for a trigger event.
-START_OPEN  the door to moves to its destination when spawned, and operate in reverse.  It is used to temporarily or permanently close off an area when triggered (not useful for touch or takedamage doors).
+START_OPEN  the door to moves to its destination when spawned, and operate in reverse.  It is used to temporarily or permanently close off an area when triggered (not useful for touch or takeDamage doors).
 NOMONSTER   monsters will not trigger this door
 
 "message"   is printed when the door is touched if it is a trigger door and it hasn't been fired yet
@@ -54,7 +54,7 @@ void door_go_down(entity_t* self);
 
 void door_hit_top(entity_t* self)
 {
-    if (!(self->flags & FL_TEAMSLAVE)) {
+    if (!(self->flags & EntityFlags::TeamSlave)) {
         if (self->moveInfo.sound_end)
             gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_end, 1, ATTN_STATIC, 0);
         self->state.sound = 0;
@@ -70,7 +70,7 @@ void door_hit_top(entity_t* self)
 
 void door_hit_bottom(entity_t* self)
 {
-    if (!(self->flags & FL_TEAMSLAVE)) {
+    if (!(self->flags & EntityFlags::TeamSlave)) {
         if (self->moveInfo.sound_end)
             gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_end, 1, ATTN_STATIC, 0);
         self->state.sound = 0;
@@ -81,13 +81,13 @@ void door_hit_bottom(entity_t* self)
 
 void door_go_down(entity_t* self)
 {
-    if (!(self->flags & FL_TEAMSLAVE)) {
+    if (!(self->flags & EntityFlags::TeamSlave)) {
         if (self->moveInfo.sound_start)
             gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_start, 1, ATTN_STATIC, 0);
         self->state.sound = self->moveInfo.sound_middle;
     }
     if (self->maxHealth) {
-        self->takedamage = DAMAGE_YES;
+        self->takeDamage = TakeDamage::Yes;
         self->health = self->maxHealth;
     }
 
@@ -110,7 +110,7 @@ void door_go_up(entity_t* self, entity_t* activator)
         return;
     }
 
-    if (!(self->flags & FL_TEAMSLAVE)) {
+    if (!(self->flags & EntityFlags::TeamSlave)) {
         if (self->moveInfo.sound_start)
             gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_start, 1, ATTN_STATIC, 0);
         self->state.sound = self->moveInfo.sound_middle;
@@ -129,7 +129,7 @@ void door_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     entity_t* ent;
 
-    if (self->flags & FL_TEAMSLAVE)
+    if (self->flags & EntityFlags::TeamSlave)
         return;
 
     if (self->spawnFlags & DOOR_TOGGLE) {
@@ -179,7 +179,7 @@ void Think_CalcMoveSpeed(entity_t* self)
     float   ratio;
     float   dist;
 
-    if (self->flags & FL_TEAMSLAVE)
+    if (self->flags & EntityFlags::TeamSlave)
         return;     // only the team master does this
 
     // find the smallest distance any member of the team will be moving
@@ -213,7 +213,7 @@ void Think_SpawnDoorTrigger(entity_t* ent)
     entity_t* other;
     vec3_t      mins, maxs;
 
-    if (ent->flags & FL_TEAMSLAVE)
+    if (ent->flags & EntityFlags::TeamSlave)
         return;     // only the team leader spawns a trigger
 
     VectorCopy(ent->absMin, mins);
@@ -284,7 +284,7 @@ void door_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int da
 
     for (ent = self->teamMasterPtr; ent; ent = ent->teamChainPtr) {
         ent->health = ent->maxHealth;
-        ent->takedamage = DAMAGE_NO;
+        ent->takeDamage = TakeDamage::No;
     }
     door_use(self->teamMasterPtr, attacker, attacker);
 }
@@ -355,7 +355,7 @@ void SP_func_door(entity_t* ent)
     ent->moveInfo.state = STATE_BOTTOM;
 
     if (ent->health) {
-        ent->takedamage = DAMAGE_YES;
+        ent->takeDamage = TakeDamage::Yes;
         ent->Die = door_killed;
         ent->maxHealth = ent->health;
     }

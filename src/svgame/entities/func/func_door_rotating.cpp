@@ -17,7 +17,7 @@
 /*QUAKED func_door_rotating (0 .5 .8) ? START_OPEN REVERSE CRUSHER NOMONSTER ANIMATED TOGGLE X_AXIS Y_AXIS
 TOGGLE causes the door to wait in both the start and end states for a trigger event.
 
-START_OPEN  the door to moves to its destination when spawned, and operate in reverse.  It is used to temporarily or permanently close off an area when triggered (not useful for touch or takedamage doors).
+START_OPEN  the door to moves to its destination when spawned, and operate in reverse.  It is used to temporarily or permanently close off an area when triggered (not useful for touch or takeDamage doors).
 NOMONSTER   monsters will not trigger this door
 
 You need to have an origin brush as part of this entity.  The center of that brush will be
@@ -103,7 +103,7 @@ void SP_func_door_rotating(entity_t* ent)
     }
 
     if (ent->health) {
-        ent->takedamage = DAMAGE_YES;
+        ent->takeDamage = TakeDamage::Yes;
         ent->Die = door_killed;
         ent->maxHealth = ent->health;
     }

@@ -80,7 +80,7 @@ void train_wait(entity_t* self)
             self->nextThink = 0;
         }
 
-        if (!(self->flags & FL_TEAMSLAVE)) {
+        if (!(self->flags & EntityFlags::TeamSlave)) {
             if (self->moveInfo.sound_end)
                 gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_end, 1, ATTN_STATIC, 0);
             self->state.sound = 0;
@@ -121,8 +121,8 @@ again:
         }
         first = false;
         VectorSubtract(ent->state.origin, self->mins, self->state.origin);
-        VectorCopy(self->state.origin, self->state.old_origin);
-        self->state.event = EV_OTHER_TELEPORT;
+        VectorCopy(self->state.origin, self->state.oldOrigin);
+        self->state.event = EntityEvent::OtherTeleport;
         gi.LinkEntity(self);
         goto again;
     }
@@ -130,7 +130,7 @@ again:
     self->moveInfo.wait = ent->wait;
     self->targetEntityPtr = ent;
 
-    if (!(self->flags & FL_TEAMSLAVE)) {
+    if (!(self->flags & EntityFlags::TeamSlave)) {
         if (self->moveInfo.sound_start)
             gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_start, 1, ATTN_STATIC, 0);
         self->state.sound = self->moveInfo.sound_middle;

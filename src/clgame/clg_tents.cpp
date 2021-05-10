@@ -669,8 +669,8 @@ static void CLG_AddPlayerBeams(void)
 			ops = CL_OLDKEYPS;
 
 			for (j = 0; j < 3; j++)
-				b->start[j] = cl->refdef.vieworg[j] + ops->gunoffset[j] +
-				CL_KEYLERPFRAC * (ps->gunoffset[j] - ops->gunoffset[j]);
+				b->start[j] = cl->refdef.vieworg[j] + ops->gunOffset[j] +
+				CL_KEYLERPFRAC * (ps->gunOffset[j] - ops->gunOffset[j]);
 
 			VectorMA(b->start, (hand_multiplier * b->offset[0]), cl->v_right, org);
 			VectorMA(org, b->offset[1], cl->v_forward, org);

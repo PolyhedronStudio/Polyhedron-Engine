@@ -39,7 +39,7 @@ void func_explosive_explode(entity_t* self, entity_t* inflictor, entity_t* attac
     VectorAdd(self->absMin, size, origin);
     VectorCopy(origin, self->state.origin);
 
-    self->takedamage = DAMAGE_NO;
+    self->takeDamage = TakeDamage::No;
 
     if (self->dmg)
         T_RadiusDamage(self, attacker, self->dmg, NULL, self->dmg + 40, MOD_EXPLOSIVE);
@@ -136,7 +136,7 @@ void SP_func_explosive(entity_t* self)
         if (!self->health)
             self->health = 100;
         self->Die = func_explosive_explode;
-        self->takedamage = DAMAGE_YES;
+        self->takeDamage = TakeDamage::Yes;
     }
 
     gi.LinkEntity(self);

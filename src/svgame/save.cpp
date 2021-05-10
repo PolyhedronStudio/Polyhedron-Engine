@@ -54,11 +54,11 @@ static const save_field_t entityfields[] = {
 #define _OFS FOFS
     V(state.origin),
     V(state.angles),
-    V(state.old_origin),
-    I(state.modelindex),
-    I(state.modelindex2),
-    I(state.modelindex3),
-    I(state.modelindex4),
+    V(state.oldOrigin),
+    I(state.modelIndex),
+    I(state.modelIndex2),
+    I(state.modelIndex3),
+    I(state.modelIndex4),
     I(state.frame),
     I(state.skinnum),
     I(state.effects),
@@ -144,7 +144,7 @@ static const save_field_t entityfields[] = {
     L(map),
 
     I(viewHeight),
-    I(takedamage),
+    I(takeDamage),
     I(dmg),
     I(radius_dmg),
     F(dmg_radius),
@@ -302,10 +302,10 @@ static const save_field_t clientfields[] = {
     V(playerState.pmove.viewOffset),
     V(playerState.kickAngles),
 
-    V(playerState.gunangles),
-    V(playerState.gunoffset),
-    I(playerState.gunindex),
-    I(playerState.gunframe),
+    V(playerState.gunAngles),
+    V(playerState.gunOffset),
+    I(playerState.gunIndex),
+    I(playerState.gunFrame),
 
     FA(playerState.blend, 4),
 

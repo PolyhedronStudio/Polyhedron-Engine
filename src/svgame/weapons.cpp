@@ -90,7 +90,7 @@ qboolean fire_hit(entity_t *self, vec3_t &aim, int damage, int kick)
 
     tr = gi.Trace(self->state.origin, vec3_origin, vec3_origin, point, self, CONTENTS_MASK_SHOT);
     if (tr.fraction < 1) {
-        if (!tr.ent->takedamage)
+        if (!tr.ent->takeDamage)
             return false;
         // if it will hit any client/monster then hit the one we wanted to hit
         if ((tr.ent->svFlags & SVF_MONSTER) || (tr.ent->client))
@@ -185,7 +185,7 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
                     gi.WritePosition(tr.endPosition);
                     gi.WriteDirection(tr.plane.normal);
                     gi.WriteByte(color);
-                    gi.Multicast(&tr.endPosition, MULTICAST_PVS);
+                    gi.Multicast(&tr.endPosition, MultiCast::PVS);
                 }
 
                 // change bullet's course when it enters water
@@ -207,7 +207,7 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
     // send gun puff / flash
     if (!((tr.surface) && (tr.surface->flags & SURF_SKY))) {
         if (tr.fraction < 1.0) {
-            if (tr.ent->takedamage) {
+            if (tr.ent->takeDamage) {
                 T_Damage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DAMAGE_BULLET, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
@@ -215,7 +215,7 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
                     gi.WriteByte(te_impact);
                     gi.WritePosition(tr.endPosition);
                     gi.WriteDirection(tr.plane.normal);
-                    gi.Multicast(&tr.endPosition, MULTICAST_PVS);
+                    gi.Multicast(&tr.endPosition, MultiCast::PVS);
 
                     if (self->client)
                         PlayerNoise(self, tr.endPosition, PNOISE_IMPACT);
@@ -243,7 +243,7 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
         gi.WriteByte(TempEntityEvent::BubbleTrail);
         gi.WritePosition(water_start);
         gi.WritePosition(tr.endPosition);
-        gi.Multicast(&pos, MULTICAST_PVS);
+        gi.Multicast(&pos, MultiCast::PVS);
     }
 }
 
@@ -305,7 +305,7 @@ void blaster_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t 
     if (self->owner->client)
         PlayerNoise(self->owner, self->state.origin, PNOISE_IMPACT);
 
-    if (other->takedamage) {
+    if (other->takeDamage) {
         if (self->spawnFlags & 1)
             mod = MOD_HYPERBLASTER;
         else
@@ -331,7 +331,7 @@ void blaster_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t 
             gi.WriteDirection(vec3_zero());
         else
             gi.WriteDirection(plane->normal);
-        gi.Multicast(&self->state.origin, MULTICAST_PVS);
+        gi.Multicast(&self->state.origin, MultiCast::PVS);
     }
 
     G_FreeEntity(self);
@@ -373,14 +373,14 @@ void fire_blaster(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int
     
     // Setup entity physics attribute values.
     bolt->state.origin = start;     // Initial origin.
-    bolt->state.old_origin = start; // Initial origin, same to origin, since this entity had no frame life yet.
+    bolt->state.oldOrigin = start; // Initial origin, same to origin, since this entity had no frame life yet.
     bolt->state.angles = vec3_euler(dir);       // Calculate euler radian entity satate angles.
     bolt->velocity = vec3_scale(dir, speed);// Calculate entity state velocity.
     bolt->mins = vec3_zero();   // Clear bounding mins.
     bolt->maxs = vec3_zero();   // Clear bounding maxs.
 
     // Setup (and precache) sound, and model.
-    bolt->state.modelindex = gi.ModelIndex("models/objects/laser/tris.md2");
+    bolt->state.modelIndex = gi.ModelIndex("models/objects/laser/tris.md2");
     bolt->state.sound = gi.SoundIndex("misc/lasfly.wav");
        
     // Setup touch and Think function pointers.

@@ -17,7 +17,7 @@ void plat_go_down(entity_t* ent);
 
 void plat_hit_top(entity_t* ent)
 {
-    if (!(ent->flags & FL_TEAMSLAVE)) {
+    if (!(ent->flags & EntityFlags::TeamSlave)) {
         if (ent->moveInfo.sound_end)
             gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_end, 1, ATTN_STATIC, 0);
         ent->state.sound = 0;
@@ -30,7 +30,7 @@ void plat_hit_top(entity_t* ent)
 
 void plat_hit_bottom(entity_t* ent)
 {
-    if (!(ent->flags & FL_TEAMSLAVE)) {
+    if (!(ent->flags & EntityFlags::TeamSlave)) {
         if (ent->moveInfo.sound_end)
             gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_end, 1, ATTN_STATIC, 0);
         ent->state.sound = 0;
@@ -40,7 +40,7 @@ void plat_hit_bottom(entity_t* ent)
 
 void plat_go_down(entity_t* ent)
 {
-    if (!(ent->flags & FL_TEAMSLAVE)) {
+    if (!(ent->flags & EntityFlags::TeamSlave)) {
         if (ent->moveInfo.sound_start)
             gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_start, 1, ATTN_STATIC, 0);
         ent->state.sound = ent->moveInfo.sound_middle;
@@ -51,7 +51,7 @@ void plat_go_down(entity_t* ent)
 
 void plat_go_up(entity_t* ent)
 {
-    if (!(ent->flags & FL_TEAMSLAVE)) {
+    if (!(ent->flags & EntityFlags::TeamSlave)) {
         if (ent->moveInfo.sound_start)
             gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_start, 1, ATTN_STATIC, 0);
         ent->state.sound = ent->moveInfo.sound_middle;

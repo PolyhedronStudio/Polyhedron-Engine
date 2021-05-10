@@ -24,7 +24,7 @@ void target_explosion_explode(entity_t* self)
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TempEntityEvent::Explosion1);
     gi.WritePosition(self->state.origin);
-    gi.Multicast(&self->state.origin, MULTICAST_PHS);
+    gi.Multicast(&self->state.origin, MultiCast::PHS);
 
     T_RadiusDamage(self, self->activator, self->dmg, NULL, self->dmg + 40, MOD_EXPLOSIVE);
 

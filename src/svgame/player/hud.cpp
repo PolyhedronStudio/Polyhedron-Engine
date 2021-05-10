@@ -57,15 +57,15 @@ void HUD_MoveClientToIntermission(entity_t *ent)
     ent->client->playerState.pmove.viewAngles = level.intermission_angle;
     // Setup the rest of the client player state.
     ent->client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
-    ent->client->playerState.gunindex = 0;
+    ent->client->playerState.gunIndex = 0;
     ent->client->playerState.blend[3] = 0;
     ent->client->playerState.rdflags &= ~RDF_UNDERWATER;
 
     ent->viewHeight = 0;
-    ent->state.modelindex = 0;
-    ent->state.modelindex2 = 0;
-    ent->state.modelindex3 = 0;
-    ent->state.modelindex = 0;
+    ent->state.modelIndex = 0;
+    ent->state.modelIndex2 = 0;
+    ent->state.modelIndex3 = 0;
+    ent->state.modelIndex = 0;
     ent->state.effects = 0;
     ent->state.sound = 0;
     ent->solid = Solid::Not;

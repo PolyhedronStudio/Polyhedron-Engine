@@ -420,7 +420,7 @@ G_FindTeams
 
 Chain together all entities with a matching team field.
 
-All but the first will have the FL_TEAMSLAVE flag set.
+All but the first will have the EntityFlags::TeamSlave flag set.
 All but the last will have the teamchain field set to the next one
 ================
 */
@@ -437,7 +437,7 @@ void G_FindTeams(void)
             continue;
         if (!e->team)
             continue;
-        if (e->flags & FL_TEAMSLAVE)
+        if (e->flags & EntityFlags::TeamSlave)
             continue;
         chain = e;
         e->teamMasterPtr = e;
@@ -448,14 +448,14 @@ void G_FindTeams(void)
                 continue;
             if (!e2->team)
                 continue;
-            if (e2->flags & FL_TEAMSLAVE)
+            if (e2->flags & EntityFlags::TeamSlave)
                 continue;
             if (!strcmp(e->team, e2->team)) {
                 c2++;
                 chain->teamChainPtr = e2;
                 e2->teamMasterPtr = e;
                 chain = e2;
-                e2->flags |= FL_TEAMSLAVE;
+                e2->flags |= EntityFlags::TeamSlave;
             }
         }
     }
@@ -525,7 +525,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
 
         // yet another map hack
         if (!Q_stricmp(level.mapname, "command") && !Q_stricmp(ent->classname, "trigger_once") && !Q_stricmp(ent->model, "*27"))
-            ent->spawnFlags &= ~SPAWNFLAG_NOT_HARD;
+            ent->spawnFlags &= ~EntitySpawnFlags::NotHard;
 
         // remove things (except the world) from different skill levels or deathmatch
         if (ent != g_edicts) {
@@ -535,16 +535,16 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
 				continue;
 			}
             if (deathmatch->value) {
-                if (ent->spawnFlags & SPAWNFLAG_NOT_DEATHMATCH) {
+                if (ent->spawnFlags & EntitySpawnFlags::NotDeathMatch) {
                     G_FreeEntity(ent);
                     inhibit++;
                     continue;
                 }
             } else {
-                if ( /* ((coop->value) && (ent->spawnFlags & SPAWNFLAG_NOT_COOP)) || */
-                    ((skill->value == 0) && (ent->spawnFlags & SPAWNFLAG_NOT_EASY)) ||
-                    ((skill->value == 1) && (ent->spawnFlags & SPAWNFLAG_NOT_MEDIUM)) ||
-                    (((skill->value == 2) || (skill->value == 3)) && (ent->spawnFlags & SPAWNFLAG_NOT_HARD))
+                if ( /* ((coop->value) && (ent->spawnFlags & EntitySpawnFlags::NotCoop)) || */
+                    ((skill->value == 0) && (ent->spawnFlags & EntitySpawnFlags::NotEasy)) ||
+                    ((skill->value == 1) && (ent->spawnFlags & EntitySpawnFlags::NotMedium)) ||
+                    (((skill->value == 2) || (skill->value == 3)) && (ent->spawnFlags & EntitySpawnFlags::NotHard))
                 ) {
                     G_FreeEntity(ent);
                     inhibit++;
@@ -552,7 +552,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
                 }
             }
 
-            ent->spawnFlags &= ~(SPAWNFLAG_NOT_EASY | SPAWNFLAG_NOT_MEDIUM | SPAWNFLAG_NOT_HARD | SPAWNFLAG_NOT_COOP | SPAWNFLAG_NOT_DEATHMATCH);
+            ent->spawnFlags &= ~(EntitySpawnFlags::NotEasy | EntitySpawnFlags::NotMedium | EntitySpawnFlags::NotHard | EntitySpawnFlags::NotCoop | EntitySpawnFlags::NotDeathMatch);
         }
 
         ED_CallSpawn(ent);
@@ -754,7 +754,7 @@ void SP_worldspawn(entity_t *ent)
     ent->moveType = MoveType::Push;
     ent->solid = Solid::BSP;
     ent->inUse = true;          // since the world doesn't use G_Spawn()
-    ent->state.modelindex = 1;      // world model is always index 1
+    ent->state.modelIndex = 1;      // world model is always index 1
 
     //---------------
 

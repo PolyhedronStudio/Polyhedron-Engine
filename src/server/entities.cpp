@@ -74,7 +74,7 @@ static void SV_EmitPacketEntities(client_t         *client,
             // Delta update from old position. Because the force parm is false,
             // this will not result in any bytes being emitted if the entity has
             // not changed at all. Note that players are always 'newentities',
-            // this updates their old_origin always and prevents warping in case
+            // this updates their oldOrigin always and prevents warping in case
             // of packet loss.
             flags = client->esFlags;
             if (newnum <= client->maxClients) {
@@ -340,7 +340,7 @@ void SV_BuildClientFrame(client_t *client)
             continue;
 
         // ignore ents without visible models unless they have an effect
-        if (!ent->state.modelindex && !ent->state.effects && !ent->state.sound) {
+        if (!ent->state.modelIndex && !ent->state.effects && !ent->state.sound) {
             if (!ent->state.event) {
                 continue;
             }
@@ -372,7 +372,7 @@ void SV_BuildClientFrame(client_t *client)
                         ent_visible = false;
                     }
 
-                    if (!ent->state.modelindex) {
+                    if (!ent->state.modelIndex) {
                         // don't send sounds if they will be attenuated away
                         vec3_t    delta;
                         float    len;
@@ -386,7 +386,7 @@ void SV_BuildClientFrame(client_t *client)
             }
         }
 
-        if(!ent_visible && (!sv_novis->integer || !ent->state.modelindex))
+        if(!ent_visible && (!sv_novis->integer || !ent->state.modelIndex))
             continue;
         
 		if (ent->state.number != e) {
@@ -408,7 +408,7 @@ void SV_BuildClientFrame(client_t *client)
 
         // hide POV entity from renderer, unless this is player's own entity
         if (e == frame->clientNumber + 1 && ent != clent) {
-            state->modelindex = 0;
+            state->modelIndex = 0;
         }
 
         //if (ent->owner == clent) {

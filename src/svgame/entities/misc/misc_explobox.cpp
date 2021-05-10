@@ -112,7 +112,7 @@ void barrel_explode(entity_t* self)
 
 void barrel_delay(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point)
 {
-    self->takedamage = DAMAGE_NO;
+    self->takeDamage = TakeDamage::No;
     self->nextThink = level.time + 2 * FRAMETIME;
     self->Think = barrel_explode;
     self->activator = attacker;
@@ -134,7 +134,7 @@ void SP_misc_explobox(entity_t* self)
     self->moveType = MoveType::Step;
 
     self->model = "models/objects/barrels/tris.md2";
-    self->state.modelindex = gi.ModelIndex(self->model);
+    self->state.modelIndex = gi.ModelIndex(self->model);
     VectorSet(self->mins, -16, -16, 0);
     VectorSet(self->maxs, 16, 16, 40);
 
@@ -146,7 +146,7 @@ void SP_misc_explobox(entity_t* self)
         self->dmg = 150;
 
     self->Die = barrel_delay;
-    self->takedamage = DAMAGE_YES;
+    self->takeDamage = TakeDamage::Yes;
     self->monsterInfo.aiflags = AI_NOSTEP;
 
     self->Touch = barrel_touch;

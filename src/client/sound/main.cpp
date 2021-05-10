@@ -1082,7 +1082,7 @@ void S_BuildSoundList(int *sounds)
     for (i = 0; i < cl.frame.numEntities; i++) {
         num = (cl.frame.firstEntity + i) & PARSE_ENTITIES_MASK;
         ent = &cl.entityStates[num];
-        if (s_ambient->integer == 2 && !ent->modelindex) {
+        if (s_ambient->integer == 2 && !ent->modelIndex) {
             sounds[i] = 0;
         } else if (s_ambient->integer == 3 && ent->number != listener_entnum) {
             sounds[i] = 0;

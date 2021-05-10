@@ -561,14 +561,14 @@ typedef struct {
 //-----------------
 // Destination class for gi.Multicast()
 //-----------------
-typedef enum {
-    MULTICAST_ALL,
-    MULTICAST_PHS,
-    MULTICAST_PVS,
-    MULTICAST_ALL_R,
-    MULTICAST_PHS_R,
-    MULTICAST_PVS_R
-} MultiCast;
+struct MultiCast {
+    static constexpr int32_t All = 0;
+    static constexpr int32_t PHS = 1;
+    static constexpr int32_t PVS = 2;
+    static constexpr int32_t All_R = 3;
+    static constexpr int32_t PHS_R = 4;
+    static constexpr int32_t PVS_R = 5;
+};
 
 //-----------------
 // Connection State of the client.
@@ -604,16 +604,16 @@ struct ServerState {
 // 
 // All muzzle flashes really should be converted to events...
 //-----------------
-typedef enum {
-    EV_NONE,
-    EV_ITEM_RESPAWN,
-    EV_FOOTSTEP,
-    EV_FALLSHORT,
-    EV_FALL,
-    EV_FALLFAR,
-    EV_PLAYER_TELEPORT,
-    EV_OTHER_TELEPORT
-} EntityEvent;
+struct EntityEvent {
+    static constexpr int32_t None = 0;
+    static constexpr int32_t ItemRespawn = 1;
+    static constexpr int32_t Footstep = 2;
+    static constexpr int32_t FallShort = 3;
+    static constexpr int32_t Fall = 4;
+    static constexpr int32_t FallFar = 5;
+    static constexpr int32_t PlayerTeleport = 6;
+    static constexpr int32_t OtherTeleport = 7;
+};
 
 //-----------------
 // EntityState is the information conveyed from the server
@@ -625,9 +625,9 @@ typedef struct entity_state_s {
 
     vec3_t  origin;
     vec3_t  angles;
-    vec3_t  old_origin;     // For lerping
-    int32_t modelindex;
-    int32_t modelindex2, modelindex3, modelindex4;  // Weapons, CTF flags, etc
+    vec3_t  oldOrigin;     // For lerping
+    int32_t modelIndex;
+    int32_t modelIndex2, modelIndex3, modelIndex4;  // Weapons, CTF flags, etc
     int32_t frame;
     int32_t skinnum;
     uint32_t effects;        // PGM - we're filling it, so it needs to be unsigned
@@ -657,10 +657,10 @@ typedef struct {
     vec3_t      kickAngles;     // Add to view direction to get render angles
                                 // Set by weapon kicks, pain effects, etc
 
-    vec3_t      gunangles;
-    vec3_t      gunoffset;
-    int         gunindex;
-    int         gunframe;
+    vec3_t      gunAngles;
+    vec3_t      gunOffset;
+    int         gunIndex;
+    int         gunFrame;
 
     float       blend[4];       // RGBA full screen effect
 
@@ -882,7 +882,7 @@ typedef enum {
     Translucent     = (1 << 5),     // Translucent.
 
     FrameLerp       = (1 << 6),     // Linear Interpolation between animation frames.
-    Beam            = (1 << 7),     // Special rendering hand: origin = to, old_origin = from.
+    Beam            = (1 << 7),     // Special rendering hand: origin = to, oldOrigin = from.
 
     CustomSkin      = (1 << 8),     // If CustomSkin is set, ent->skin is an index in precaches.images.
     Glow            = (1 << 9),     // Pulse lighting. Used for items.

@@ -113,7 +113,7 @@ static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
             // Delta update from old position. Because the force parm is false,
             // this will not result in any bytes being emitted if the entity has
             // not changed at all. Note that players are always 'newentities',
-            // this updates their old_origin always and prevents warping in case
+            // this updates their oldOrigin always and prevents warping in case
             // of packet loss.
             MSG_PackEntity(&oldpack, oldent, false);
             MSG_PackEntity(&newpack, newent, false);

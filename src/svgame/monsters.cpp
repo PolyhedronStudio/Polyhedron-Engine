@@ -34,7 +34,7 @@ void monster_fire_bullet(entity_t *self, const vec3_t &start, const vec3_t &dir,
     gi.WriteByte(svg_muzzleflash2);
     gi.WriteShort(self - g_edicts);
     gi.WriteByte(flashtype);
-    gi.Multicast(&start, MULTICAST_PVS);
+    gi.Multicast(&start, MultiCast::PVS);
 }
 
 
@@ -59,7 +59,7 @@ void M_CheckGround(entity_t *ent)
     vec3_t      point;
     trace_t     trace;
 
-    if (ent->flags & (FL_SWIM | FL_FLY))
+    if (ent->flags & (EntityFlags::Swim | EntityFlags::Fly))
         return;
 
     if (ent->velocity[2] > 100) {
@@ -132,7 +132,7 @@ void M_WorldEffects(entity_t *ent)
     int     dmg;
 
     if (ent->health > 0) {
-        if (!(ent->flags & FL_SWIM)) {
+        if (!(ent->flags & EntityFlags::Swim)) {
             if (ent->waterLevel < 3) {
                 ent->air_finished = level.time + 12;
             } else if (ent->air_finished < level.time) {
@@ -162,27 +162,27 @@ void M_WorldEffects(entity_t *ent)
     }
 
     if (ent->waterLevel == 0) {
-        if (ent->flags & FL_INWATER) {
+        if (ent->flags & EntityFlags::InWater) {
             gi.Sound(ent, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
-            ent->flags &= ~FL_INWATER;
+            ent->flags &= ~EntityFlags::InWater;
         }
         return;
     }
 
-    if ((ent->waterType & CONTENTS_LAVA) && !(ent->flags & FL_IMMUNE_LAVA)) {
+    if ((ent->waterType & CONTENTS_LAVA) && !(ent->flags & EntityFlags::ImmuneToLava)) {
         if (ent->debounceDamageTime < level.time) {
             ent->debounceDamageTime = level.time + 0.2;
             T_Damage(ent, world, world, vec3_origin, ent->state.origin, vec3_origin, 10 * ent->waterLevel, 0, 0, MOD_LAVA);
         }
     }
-    if ((ent->waterType & CONTENTS_SLIME) && !(ent->flags & FL_IMMUNE_SLIME)) {
+    if ((ent->waterType & CONTENTS_SLIME) && !(ent->flags & EntityFlags::ImmuneToSlime)) {
         if (ent->debounceDamageTime < level.time) {
             ent->debounceDamageTime = level.time + 1;
             T_Damage(ent, world, world, vec3_origin, ent->state.origin, vec3_origin, 4 * ent->waterLevel, 0, 0, MOD_SLIME);
         }
     }
 
-    if (!(ent->flags & FL_INWATER)) {
+    if (!(ent->flags & EntityFlags::InWater)) {
         if (!(ent->svFlags & SVF_DEADMONSTER)) {
             if (ent->waterType & CONTENTS_LAVA)
                 if (random() <= 0.5)
@@ -195,7 +195,7 @@ void M_WorldEffects(entity_t *ent)
                 gi.Sound(ent, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
         }
 
-        ent->flags |= FL_INWATER;
+        ent->flags |= EntityFlags::InWater;
         ent->debounceDamageTime = 0;
     }
 }
@@ -305,7 +305,7 @@ void monster_use(entity_t *self, entity_t *other, entity_t *activator)
         return;
     if (self->health <= 0)
         return;
-    if (activator->flags & FL_NOTARGET)
+    if (activator->flags & EntityFlags::NoTarget)
         return;
     if (!(activator->client) && !(activator->monsterInfo.aiflags & AI_GOOD_GUY))
         return;
@@ -332,7 +332,7 @@ void monster_triggered_spawn(entity_t *self)
 
     monster_start_go(self);
 
-    if (self->enemy && !(self->spawnFlags & 1) && !(self->enemy->flags & FL_NOTARGET)) {
+    if (self->enemy && !(self->spawnFlags & 1) && !(self->enemy->flags & EntityFlags::NoTarget)) {
         FoundTarget(self);
     } else {
         self->enemy = NULL;
@@ -369,7 +369,7 @@ enemy as activator.
 */
 void monster_death_use(entity_t *self)
 {
-    self->flags &= ~(FL_FLY | FL_SWIM);
+    self->flags &= ~(EntityFlags::Fly | EntityFlags::Swim);
     self->monsterInfo.aiflags &= AI_GOOD_GUY;
 
     if (self->item) {
@@ -408,7 +408,7 @@ qboolean monster_start(entity_t *self)
     self->nextThink = level.time + FRAMETIME;
     self->svFlags |= SVF_MONSTER;
     self->state.renderfx |= RenderEffects::FrameLerp;
-    self->takedamage = DAMAGE_AIM;
+    self->takeDamage = TakeDamage::Aim;
     self->air_finished = level.time + 12;
     self->Use = monster_use;
     self->maxHealth = self->health;
@@ -420,7 +420,7 @@ qboolean monster_start(entity_t *self)
 
     if (!self->monsterInfo.checkattack)
         self->monsterInfo.checkattack = M_CheckAttack;
-    VectorCopy(self->state.origin, self->state.old_origin);
+    VectorCopy(self->state.origin, self->state.oldOrigin);
 
     if (st.item) {
         self->item = FindItemByClassname(st.item);
@@ -552,7 +552,7 @@ void flymonster_start_go(entity_t *self)
 
 void flymonster_start(entity_t *self)
 {
-    self->flags |= FL_FLY;
+    self->flags |= EntityFlags::Fly;
     self->Think = flymonster_start_go;
     monster_start(self);
 }
@@ -572,7 +572,7 @@ void swimmonster_start_go(entity_t *self)
 
 void swimmonster_start(entity_t *self)
 {
-    self->flags |= FL_SWIM;
+    self->flags |= EntityFlags::Swim;
     self->Think = swimmonster_start_go;
     monster_start(self);
 }

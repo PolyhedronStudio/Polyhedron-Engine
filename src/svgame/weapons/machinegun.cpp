@@ -36,17 +36,17 @@ void Machinegun_Fire(entity_t* ent)
 
     if (!(ent->client->buttons & BUTTON_ATTACK)) {
         ent->client->machinegunShots = 0;
-        ent->client->playerState.gunframe++;
+        ent->client->playerState.gunFrame++;
         return;
     }
 
-    if (ent->client->playerState.gunframe == 5)
-        ent->client->playerState.gunframe = 4;
+    if (ent->client->playerState.gunFrame == 5)
+        ent->client->playerState.gunFrame = 4;
     else
-        ent->client->playerState.gunframe = 5;
+        ent->client->playerState.gunFrame = 5;
 
     if (ent->client->persistent.inventory[ent->client->ammoIndex] < 1) {
-        ent->client->playerState.gunframe = 6;
+        ent->client->playerState.gunFrame = 6;
         if (level.time >= ent->debouncePainTime) {
             gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
             ent->debouncePainTime = level.time + 1;
@@ -84,7 +84,7 @@ void Machinegun_Fire(entity_t* ent)
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MuzzleFlashType::MachineGun | is_silenced);
-    gi.Multicast(&ent->state.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->state.origin, MultiCast::PVS);
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 

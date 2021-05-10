@@ -411,7 +411,7 @@ void SaveClientData(void)
             continue;
         game.clients[i].persistent.health = ent->health;
         game.clients[i].persistent.maxHealth = ent->maxHealth;
-        game.clients[i].persistent.savedFlags = (ent->flags & (FL_GODMODE | FL_NOTARGET | FL_POWER_ARMOR));
+        game.clients[i].persistent.savedFlags = (ent->flags & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
         if (coop->value && ent->client)
             game.clients[i].persistent.score = ent->client->respawn.score;
     }
@@ -663,7 +663,7 @@ void body_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int damag
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         self->state.origin[2] -= 48;
         ThrowClientHead(self, damage);
-        self->takedamage = DAMAGE_NO;
+        self->takeDamage = TakeDamage::No;
     }
 }
 
@@ -678,18 +678,18 @@ void CopyToBodyQue(entity_t *ent)
     level.body_que = (level.body_que + 1) % BODY_QUEUE_SIZE;
 
     // send an effect on the removed body
-    if (body->state.modelindex) {
+    if (body->state.modelIndex) {
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TempEntityEvent::Blood);
         gi.WritePosition(body->state.origin);
         gi.WriteDirection(vec3_origin);
-        gi.Multicast(&body->state.origin, MULTICAST_PVS);
+        gi.Multicast(&body->state.origin, MultiCast::PVS);
     }
 
     gi.UnlinkEntity(body);
     body->state = ent->state;
     body->state.number = body - g_edicts;
-    body->state.event = EV_OTHER_TELEPORT;
+    body->state.event = EntityEvent::OtherTeleport;
 
     body->svFlags = ent->svFlags;
     VectorCopy(ent->mins, body->mins);
@@ -707,7 +707,7 @@ void CopyToBodyQue(entity_t *ent)
     body->groundEntityPtr = ent->groundEntityPtr;
 
     body->Die = body_die;
-    body->takedamage = DAMAGE_YES;
+    body->takeDamage = TakeDamage::Yes;
 
     gi.LinkEntity(body);
 }
@@ -722,7 +722,7 @@ void RespawnClient(entity_t *self)
         PutClientInServer(self);
 
         // add a teleportation effect
-        self->state.event = EV_PLAYER_TELEPORT;
+        self->state.event = EntityEvent::PlayerTeleport;
 
         // hold in place briefly
         self->client->playerState.pmove.flags = PMF_TIME_TELEPORT;
@@ -811,7 +811,7 @@ void spectator_respawn(entity_t *ent)
         gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
         gi.WriteByte(MuzzleFlashType::Login);
-        gi.Multicast(&ent->state.origin, MULTICAST_PVS);
+        gi.Multicast(&ent->state.origin, MultiCast::PVS);
 
         // hold in place briefly
         ent->client->playerState.pmove.flags = PMF_TIME_TELEPORT;
@@ -896,7 +896,7 @@ void PutClientInServer(entity_t *ent)
     // clear entity values
     ent->groundEntityPtr = NULL;
     ent->client = &game.clients[index];
-    ent->takedamage = DAMAGE_AIM;
+    ent->takeDamage = TakeDamage::Aim;
     ent->moveType = MoveType::Walk;
     ent->viewHeight = 22;
     ent->inUse = true;
@@ -911,7 +911,7 @@ void PutClientInServer(entity_t *ent)
     ent->Die = Player_Die;
     ent->waterLevel = 0;
     ent->waterType = 0;
-    ent->flags &= ~FL_NO_KNOCKBACK;
+    ent->flags &= ~EntityFlags::NoKnockBack;
     ent->svFlags &= ~SVF_DEADMONSTER;
 
     ent->mins = vec3_scale(PM_MINS, PM_SCALE);
@@ -926,7 +926,7 @@ void PutClientInServer(entity_t *ent)
     client->playerState.pmove.origin = spawn_origin;
     
     // Assign spawn origin to the entity state origin, ensure that it is off-ground.
-    ent->state.origin = ent->state.old_origin = spawn_origin + vec3_t{ 0.f, 0.f, 1.f };
+    ent->state.origin = ent->state.oldOrigin = spawn_origin + vec3_t{ 0.f, 0.f, 1.f };
 
     // Set FOV, fixed, or custom.
     if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::FixedFOV)) {
@@ -939,12 +939,12 @@ void PutClientInServer(entity_t *ent)
             client->playerState.fov = 160;
     }
 
-    client->playerState.gunindex = gi.ModelIndex(client->persistent.weapon->viewModel);
+    client->playerState.gunIndex = gi.ModelIndex(client->persistent.weapon->viewModel);
 
     // Clear certain entity state values
     ent->state.effects = 0;
-    ent->state.modelindex = 255;        // Will use the skin specified model
-    ent->state.modelindex2 = 255;       // Custom gun model
+    ent->state.modelIndex = 255;        // Will use the skin specified model
+    ent->state.modelIndex2 = 255;       // Custom gun model
     // sknum is player num and weapon number
     // weapon number will be added in changeweapon
     ent->state.skinnum = ent - g_edicts - 1;
@@ -971,7 +971,7 @@ void PutClientInServer(entity_t *ent)
         ent->moveType = MoveType::Spectator;
         ent->solid = Solid::Not;
         ent->svFlags |= SVF_NOCLIENT;
-        ent->client->playerState.gunindex = 0;
+        ent->client->playerState.gunIndex = 0;
         gi.LinkEntity(ent);
         return;
     } else
@@ -1012,7 +1012,7 @@ void ClientBeginDeathmatch(entity_t *ent)
         gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
         gi.WriteByte(MuzzleFlashType::Login);
-        gi.Multicast(&ent->state.origin, MULTICAST_PVS);
+        gi.Multicast(&ent->state.origin, MultiCast::PVS);
     }
 
     gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
@@ -1068,7 +1068,7 @@ void ClientBegin(entity_t *ent)
             gi.WriteByte(svg_muzzleflash);
             gi.WriteShort(ent - g_edicts);
             gi.WriteByte(MuzzleFlashType::Login);
-            gi.Multicast(&ent->state.origin, MULTICAST_PVS);
+            gi.Multicast(&ent->state.origin, MultiCast::PVS);
 
             gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
         }
@@ -1239,11 +1239,11 @@ void ClientDisconnect(entity_t *ent)
         gi.WriteByte(svg_muzzleflash);
         gi.WriteShort(ent - g_edicts);
         gi.WriteByte(MuzzleFlashType::Logout);
-        gi.Multicast(&ent->state.origin, MULTICAST_PVS);
+        gi.Multicast(&ent->state.origin, MultiCast::PVS);
     }
 
     gi.UnlinkEntity(ent);
-    ent->state.modelindex = 0;
+    ent->state.modelIndex = 0;
     ent->state.sound = 0;
     ent->state.event = 0;
     ent->state.effects = 0;
@@ -1343,7 +1343,7 @@ void ClientThink(entity_t *ent, ClientUserCommand *clientUserCommand)
             client->playerState.pmove.type = PlayerMoveType::Noclip;
         else if ( ent->moveType == MoveType::Spectator )
             client->playerState.pmove.type = PlayerMoveType::Spectator;
-        else if ( ent->state.modelindex != 255 )
+        else if ( ent->state.modelIndex != 255 )
             client->playerState.pmove.type = EnginePlayerMoveType::Gib;
         else if ( ent->deadFlag )
             client->playerState.pmove.type = EnginePlayerMoveType::Dead;
@@ -1530,7 +1530,7 @@ void ClientBeginServerFrame(entity_t *ent)
     // add player trail so monsters can follow
     if (!deathmatch->value)
         if (!visible(ent, PlayerTrail_LastSpot()))
-            PlayerTrail_Add(ent->state.old_origin);
+            PlayerTrail_Add(ent->state.oldOrigin);
 
     client->latchedButtons = 0;
 }

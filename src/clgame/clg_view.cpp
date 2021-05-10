@@ -331,7 +331,7 @@ static void CLG_FinishViewValues(void)
     if (ent->serverFrame != cl->frame.number)
         goto first;
 
-    if (!ent->current.modelindex)
+    if (!ent->current.modelIndex)
         goto first;
 
     CLG_SetupThirdPersionView();

@@ -638,7 +638,7 @@ void soldier_duck_down(entity_t *self)
         return;
     self->monsterInfo.aiflags |= AI_DUCKED;
     self->maxs[2] -= 32;
-    self->takedamage = DAMAGE_YES;
+    self->takeDamage = TakeDamage::Yes;
     self->monsterInfo.pausetime = level.time + 1;
     gi.LinkEntity(self);
 }
@@ -647,7 +647,7 @@ void soldier_duck_up(entity_t *self)
 {
     self->monsterInfo.aiflags &= ~AI_DUCKED;
     self->maxs[2] += 32;
-    self->takedamage = DAMAGE_AIM;
+    self->takeDamage = TakeDamage::Aim;
     gi.LinkEntity(self);
 }
 
@@ -1144,7 +1144,7 @@ void soldier_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int da
 
 // regular death
     self->deadFlag = DEAD_DEAD;
-    self->takedamage = DAMAGE_YES;
+    self->takeDamage = TakeDamage::Yes;
     self->state.skinnum |= 1;
 
     if (self->state.skinnum == 1)
@@ -1181,7 +1181,7 @@ void soldier_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int da
 void SP_monster_soldier_x(entity_t *self)
 {
 
-    self->state.modelindex = gi.ModelIndex("models/monsters/soldier/tris.md2");
+    self->state.modelIndex = gi.ModelIndex("models/monsters/soldier/tris.md2");
     self->monsterInfo.scale = MODEL_SCALE;
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 32);

@@ -545,7 +545,7 @@ void SV_Physics_Pusher(entity_t *ent)
     entity_t     *part, *mv;
 
     // if not a team captain, so movement will be handled elsewhere
-    if (ent->flags & FL_TEAMSLAVE)
+    if (ent->flags & EntityFlags::TeamSlave)
         return;
 
     // make sure all team slaves can move before commiting
@@ -651,7 +651,7 @@ void SV_Physics_Toss(entity_t *ent)
     entity_t     *slave;
     qboolean    wasInWater;
     qboolean    isInWater;
-    vec3_t      old_origin;
+    vec3_t      oldOrigin;
 
     // Regular thinking
     SV_RunThink(ent);
@@ -659,7 +659,7 @@ void SV_Physics_Toss(entity_t *ent)
         return;
 
     // If not a team captain, so movement will be handled elsewhere
-    if (ent->flags & FL_TEAMSLAVE)
+    if (ent->flags & EntityFlags::TeamSlave)
         return;
 
     if (ent->velocity[2] > 0)
@@ -675,7 +675,7 @@ void SV_Physics_Toss(entity_t *ent)
         return;
 
     // Store ent->state.origin as the old origin
-    old_origin = ent->state.origin;
+    oldOrigin = ent->state.origin;
 
     SV_CheckVelocity(ent);
 
@@ -726,7 +726,7 @@ void SV_Physics_Toss(entity_t *ent)
         ent->waterLevel = 0;
 
     if (!wasInWater && isInWater)
-        gi.PositionedSound(old_origin, g_edicts, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(oldOrigin, g_edicts, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
     else if (wasInWater && !isInWater)
         gi.PositionedSound(ent->state.origin, g_edicts, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 
@@ -814,8 +814,8 @@ void SV_Physics_Step(entity_t *ent)
     //   flying monsters
     //   swimming monsters who are in the water
     if (! wasonground)
-        if (!(ent->flags & FL_FLY))
-            if (!((ent->flags & FL_SWIM) && (ent->waterLevel > 2))) {
+        if (!(ent->flags & EntityFlags::Fly))
+            if (!((ent->flags & EntityFlags::Swim) && (ent->waterLevel > 2))) {
                 if (ent->velocity[2] < sv_gravity->value * -0.1)
                     hitsound = true;
                 if (ent->waterLevel == 0)
@@ -823,7 +823,7 @@ void SV_Physics_Step(entity_t *ent)
             }
 
     // friction for flying monsters that have been given vertical velocity
-    if ((ent->flags & FL_FLY) && (ent->velocity[2] != 0)) {
+    if ((ent->flags & EntityFlags::Fly) && (ent->velocity[2] != 0)) {
         speed = std::fabsf(ent->velocity[2]);
         control = speed < sv_stopspeed ? sv_stopspeed : speed;
         friction = sv_friction / 3;
@@ -835,7 +835,7 @@ void SV_Physics_Step(entity_t *ent)
     }
 
     // friction for flying monsters that have been given vertical velocity
-    if ((ent->flags & FL_SWIM) && (ent->velocity[2] != 0)) {
+    if ((ent->flags & EntityFlags::Swim) && (ent->velocity[2] != 0)) {
         speed = std::fabsf(ent->velocity[2]);
         control = speed < sv_stopspeed ? sv_stopspeed : speed;
         newspeed = speed - (FRAMETIME * control * sv_waterfriction * ent->waterLevel);
@@ -848,7 +848,7 @@ void SV_Physics_Step(entity_t *ent)
     if (ent->velocity[2] || ent->velocity[1] || ent->velocity[0]) {
         // apply friction
         // let dead monsters who aren't completely onground slide
-        if ((wasonground) || (ent->flags & (FL_SWIM | FL_FLY)))
+        if ((wasonground) || (ent->flags & (EntityFlags::Swim | EntityFlags::Fly)))
             if (!(ent->health <= 0.0 && !M_CheckBottom(ent))) {
                 vel = ent->velocity;
                 speed = std::sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);

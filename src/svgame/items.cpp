@@ -122,7 +122,7 @@ void DoRespawn(entity_t *ent)
     gi.LinkEntity(ent);
 
     // send an effect
-    ent->state.event = EV_ITEM_RESPAWN;
+    ent->state.event = EntityEvent::ItemRespawn;
 }
 
 void SetRespawn(entity_t *ent, float delay)
@@ -130,7 +130,7 @@ void SetRespawn(entity_t *ent, float delay)
     if (!ent)
         return;
 
-    ent->flags |= FL_RESPAWN;
+    ent->flags |= EntityFlags::Respawn;
     ent->svFlags |= SVF_NOCLIENT;
     ent->solid = Solid::Not;
     ent->nextThink = level.time + delay;
@@ -182,17 +182,17 @@ qboolean Add_Ammo(entity_t *ent, gitem_t *item, int count)
     if (!ent->client)
         return false;
 
-    if (item->tag == AMMO_BULLETS)
+    if (item->tag == AmmoType::Bullets)
         max = ent->client->persistent.max_bullets;
-    else if (item->tag == AMMO_SHELLS)
+    else if (item->tag == AmmoType::Shells)
         max = ent->client->persistent.max_shells;
-    else if (item->tag == AMMO_ROCKETS)
+    else if (item->tag == AmmoType::Rockets)
         max = ent->client->persistent.max_rockets;
-    else if (item->tag == AMMO_GRENADES)
+    else if (item->tag == AmmoType::Grenade)
         max = ent->client->persistent.max_grenades;
-    else if (item->tag == AMMO_CELLS)
+    else if (item->tag == AmmoType::Cells)
         max = ent->client->persistent.max_cells;
-    else if (item->tag == AMMO_SLUGS)
+    else if (item->tag == AmmoType::Slugs)
         max = ent->client->persistent.max_slugs;
     else
         return false;
@@ -252,8 +252,8 @@ void Drop_Ammo(entity_t *ent, gitem_t *item)
         dropped->count = ent->client->persistent.inventory[index];
 
     if (ent->client->persistent.weapon &&
-        ent->client->persistent.weapon->tag == AMMO_GRENADES &&
-        item->tag == AMMO_GRENADES &&
+        ent->client->persistent.weapon->tag == AmmoType::Grenade &&
+        item->tag == AmmoType::Grenade &&
         ent->client->persistent.inventory[index] - dropped->count <= 0) {
         gi.CPrintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
         G_FreeEntity(dropped);
@@ -298,7 +298,7 @@ qboolean Pickup_Health(entity_t *ent, entity_t *other)
         ent->Think = MegaHealth_think;
         ent->nextThink = level.time + 5;
         ent->owner = other;
-        ent->flags |= FL_RESPAWN;
+        ent->flags |= EntityFlags::Respawn;
         ent->svFlags |= SVF_NOCLIENT;
         ent->solid = Solid::Not;
     } else {
@@ -438,8 +438,8 @@ void Touch_Item(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t *sur
         return;
 
     if (!((coop->value) && (ent->item->flags & IT_STAY_COOP)) || (ent->spawnFlags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM))) {
-        if (ent->flags & FL_RESPAWN)
-            ent->flags &= ~FL_RESPAWN;
+        if (ent->flags & EntityFlags::Respawn)
+            ent->flags &= ~EntityFlags::Respawn;
         else
             G_FreeEntity(ent);
     }
@@ -562,7 +562,7 @@ void droptofloor(entity_t *ent)
     VectorCopy(tr.endPosition, ent->state.origin);
 
     if (ent->team) {
-        ent->flags &= ~FL_TEAMSLAVE;
+        ent->flags &= ~EntityFlags::TeamSlave;
         ent->chain = ent->teamChainPtr;
         ent->teamChainPtr = NULL;
 
@@ -878,7 +878,7 @@ gitem_t itemlist[] = {
         IT_AMMO,
         0,
         NULL,
-        AMMO_SHELLS,
+        AmmoType::Shells,
         /* precache */ ""
     },
 
@@ -901,7 +901,7 @@ gitem_t itemlist[] = {
         IT_AMMO,
         0,
         NULL,
-        AMMO_BULLETS,
+        AmmoType::Bullets,
         /* precache */ ""
     },
 

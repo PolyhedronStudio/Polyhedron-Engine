@@ -271,8 +271,8 @@ void Cmd_God_f(entity_t *ent)
         return;
     }
 
-    ent->flags ^= FL_GODMODE;
-    if (!(ent->flags & FL_GODMODE))
+    ent->flags ^= EntityFlags::GodMode;
+    if (!(ent->flags & EntityFlags::GodMode))
         gi.CPrintf(ent, PRINT_HIGH, "godmode OFF\n");
     else
         gi.CPrintf(ent, PRINT_HIGH, "godmode ON\n");
@@ -295,8 +295,8 @@ void Cmd_Notarget_f(entity_t *ent)
         return;
     }
 
-    ent->flags ^= FL_NOTARGET;
-    if (!(ent->flags & FL_NOTARGET))
+    ent->flags ^= EntityFlags::NoTarget;
+    if (!(ent->flags & EntityFlags::NoTarget))
         gi.CPrintf(ent, PRINT_HIGH, "notarget OFF\n");
     else
         gi.CPrintf(ent, PRINT_HIGH, "notarget ON\n");
@@ -575,7 +575,7 @@ void Cmd_Kill_f(entity_t *ent)
 {
     if ((level.time - ent->client->respawnTime) < 5)
         return;
-    ent->flags &= ~FL_GODMODE;
+    ent->flags &= ~EntityFlags::GodMode;
     ent->health = 0;
     meansOfDeath = MOD_SUICIDE;
     Player_Die(ent, ent, ent, 100000, vec3_origin);

@@ -64,10 +64,10 @@ void Player_Die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
     // Clear out angular velocity.
     self->avelocity = vec3_zero();
 
-    self->takedamage = DAMAGE_YES;
+    self->takeDamage = TakeDamage::Yes;
     self->moveType = MoveType::Toss;
 
-    self->state.modelindex2 = 0;    // remove linked weapon model
+    self->state.modelIndex2 = 0;    // remove linked weapon model
     
     self->state.effects = EntityEffectType::Corpse;
 
@@ -101,7 +101,7 @@ void Player_Die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
     }
 
     // remove powerups
-    self->flags &= ~FL_POWER_ARMOR;
+    self->flags &= ~EntityFlags::PowerArmor;
 
     if (self->health < -40) {
         // gib
@@ -110,7 +110,7 @@ void Player_Die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         ThrowClientHead(self, damage);
 
-        self->takedamage = DAMAGE_NO;
+        self->takeDamage = TakeDamage::No;
     }
     else {
         // normal death

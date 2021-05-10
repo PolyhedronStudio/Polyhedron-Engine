@@ -62,7 +62,7 @@ void gib_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t *sur
         AngleVectors(normal_angles, NULL, &right, NULL);
         vectoangles(right, self->state.angles);
 
-        if (self->state.modelindex == sm_meat_index) {
+        if (self->state.modelIndex == sm_meat_index) {
             self->state.frame++;
             self->Think = gib_think;
             self->nextThink = level.time + FRAMETIME;
@@ -94,8 +94,8 @@ void ThrowGib(entity_t *self, const char *gibname, int damage, int type)
     gi.SetModel(gib, gibname);
     gib->solid = Solid::Not;
     gib->state.effects |= EntityEffectType::Gib;
-    gib->flags |= FL_NO_KNOCKBACK;
-    gib->takedamage = DAMAGE_YES;
+    gib->flags |= EntityFlags::NoKnockBack;
+    gib->takeDamage = TakeDamage::Yes;
     gib->Die = gib_die;
 
     if (type == GIB_ORGANIC) {
@@ -131,14 +131,14 @@ void ThrowHead(entity_t *self, const char *gibname, int damage, int type)
     VectorClear(self->mins);
     VectorClear(self->maxs);
 
-    self->state.modelindex2 = 0;
+    self->state.modelIndex2 = 0;
     gi.SetModel(self, gibname);
     self->solid = Solid::Not;
     self->state.effects |= EntityEffectType::Gib;
     self->state.sound = 0;
-    self->flags |= FL_NO_KNOCKBACK;
+    self->flags |= EntityFlags::NoKnockBack;
     self->svFlags &= ~SVF_MONSTER;
-    self->takedamage = DAMAGE_YES;
+    self->takeDamage = TakeDamage::Yes;
     self->Die = gib_die;
 
     if (type == GIB_ORGANIC) {
@@ -183,11 +183,11 @@ void ThrowClientHead(entity_t *self, int damage)
     VectorSet(self->mins, -16, -16, 0);
     VectorSet(self->maxs, 16, 16, 16);
 
-    self->takedamage = DAMAGE_NO;
+    self->takeDamage = TakeDamage::No;
     self->solid = Solid::Not;
     self->state.effects = EntityEffectType::Gib;
     self->state.sound = 0;
-    self->flags |= FL_NO_KNOCKBACK;
+    self->flags |= EntityFlags::NoKnockBack;
 
     self->moveType = MoveType::Bounce;
     // Calculate velocity for given damage.
@@ -238,7 +238,7 @@ void ThrowDebris(entity_t *self, const char *modelname, float speed, const vec3_
     chunk->state.frame = 0;
     chunk->flags = 0;
     chunk->classname = "debris";
-    chunk->takedamage = DAMAGE_YES;
+    chunk->takeDamage = TakeDamage::Yes;
     chunk->Die = debris_die;
     gi.LinkEntity(chunk);
 }
@@ -249,7 +249,7 @@ void BecomeExplosion1(entity_t *self)
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TempEntityEvent::Explosion1);
     gi.WritePosition(self->state.origin);
-    gi.Multicast(&self->state.origin, MULTICAST_PVS);
+    gi.Multicast(&self->state.origin, MultiCast::PVS);
 
     G_FreeEntity(self);
 }
@@ -260,7 +260,7 @@ void BecomeExplosion2(entity_t *self)
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TempEntityEvent::Explosion2);
     gi.WritePosition(self->state.origin);
-    gi.Multicast(&self->state.origin, MULTICAST_PVS);
+    gi.Multicast(&self->state.origin, MultiCast::PVS);
 
     G_FreeEntity(self);
 }
