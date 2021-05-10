@@ -18,15 +18,15 @@
 // The enum starts at 22, and has room up to 32 for custom commands.
 //-------------------
 typedef enum {
-    // these ops are known to the game dll
-    svg_muzzleflash = 22,
-    svg_muzzleflash2,
-    svg_temp_entity,
-    svg_layout,
-    svg_inventory,
 
-    svg_num_types
-} svg_ops_t;
+    SVG_CMD_MUZZLEFLASH = 22,
+    SVG_CMD_MUZZLEFLASH2,
+    SVG_CMD_TEMP_ENTITY,
+    SVG_CMD_LAYOUT,
+    SVG_CMD_INVENTORY,
+
+    SVG_CMD_NUM_TYPES
+} ServerGameCommands;
 
 //-------------------
 // These are client game commands that get send to the server game module.
@@ -35,7 +35,7 @@ typedef enum {
 // The enum starts at 13, and has room up to 32 for custom commands.
 //-------------------
 typedef enum {
-    clg_custom_command = 32,
-} clg_ops_t;
+    CLG_CMD_NUM_TYPES = 13,
+} ClientGameCommands;
 
 #endif

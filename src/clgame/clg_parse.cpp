@@ -243,7 +243,7 @@ static void CLG_ParsePrint(void)
     SCR_AddToChatHUD(s);
 
     // N&C: We don't need this stuff anymore..
-    //// silence MVD spectator chat
+    //// silence MVD isSpectator chat
     //if (cl.serverState == SERVERSTATE_BROADCAST && !strncmp(s, "[MVD] ", 6))
     //    return;
 
@@ -356,33 +356,33 @@ qboolean CLG_ParseServerMessage (int serverCommand) {
             break;
 
         // Client temporary entities. (Particles, etc.)
-        case svg_temp_entity:
+        case SVG_CMD_TEMP_ENTITY:
             CLG_ParseTempEntitiesPacket();
             CLG_ParseTempEntity();
             return true;
         break;
 
         // Client Muzzle Flash.
-        case svg_muzzleflash:
+        case SVG_CMD_MUZZLEFLASH:
             CLG_ParseMuzzleFlashPacket(0);
             CLG_MuzzleFlash();
             return true;
         break;
         // Entity Muzzle Flash.
-        case svg_muzzleflash2:
+        case SVG_CMD_MUZZLEFLASH2:
             CLG_ParseMuzzleFlashPacket(0);
             CLG_MuzzleFlash2();
             return true;
         break;
 
         // Client inventory updates.
-        case svg_inventory:
+        case SVG_CMD_INVENTORY:
             CLG_ParseInventory();
             return true;
         break;
 
         // Client layout (Cruel, limited, ugly UI...) updates
-        case svg_layout:
+        case SVG_CMD_LAYOUT:
             CLG_ParseLayout();
             return true;
         break;
@@ -407,11 +407,11 @@ qboolean CLG_ParseServerMessage (int serverCommand) {
 qboolean CLG_SeekDemoMessage(int demoCommand) {
     // Switch cmd.
     switch (demoCommand) {
-    case svg_inventory:
+    case SVG_CMD_INVENTORY:
         CLG_ParseInventory();
         return true;
         break;
-    case svg_layout:
+    case SVG_CMD_LAYOUT:
         CLG_ParseLayout();
         return true;
         break;

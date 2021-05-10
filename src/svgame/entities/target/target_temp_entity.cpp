@@ -17,7 +17,7 @@ Fire an origin based temp entity event to the clients.
 */
 void Use_Target_Tent(entity_t* ent, entity_t* other, entity_t* activator)
 {
-    gi.WriteByte(svg_temp_entity);
+    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(ent->style);
     gi.WritePosition(ent->state.origin);
     gi.Multicast(&ent->state.origin, MultiCast::PVS);

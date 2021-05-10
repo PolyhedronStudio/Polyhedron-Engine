@@ -432,7 +432,7 @@ void G_FindTeams(void)
 
     c = 0;
     c2 = 0;
-    for (i = 1, e = g_edicts + i ; i < globals.num_edicts ; i++, e++) {
+    for (i = 1, e = g_entities + i ; i < globals.num_edicts ; i++, e++) {
         if (!e->inUse)
             continue;
         if (!e->team)
@@ -494,16 +494,16 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
     memset(&level, 0, sizeof(level));
     // WatIs: C++-ify: Note that this may be a problem maker.
     //for (int i = 0; i < game.maxentities; i++) {
-    //    g_edicts[i] = entity_t();
+    //    g_entities[i] = entity_t();
     //}
-    memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0])); // WatIs: C++-ify: Note that this may be a problem maker.
+    memset(g_entities, 0, game.maxentities * sizeof(g_entities[0])); // WatIs: C++-ify: Note that this may be a problem maker.
 
     strncpy(level.mapname, mapname, sizeof(level.mapname) - 1);
     strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
 
     // set client fields on player ents
     for (i = 0 ; i < game.maxClients ; i++)
-        g_edicts[i + 1].client = game.clients + i;
+        g_entities[i + 1].client = game.clients + i;
 
     ent = NULL;
     inhibit = 0;
@@ -518,7 +518,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
             gi.Error("ED_LoadFromFile: found %s when expecting {", com_token);
 
         if (!ent)
-            ent = g_edicts;
+            ent = g_entities;
         else
             ent = G_Spawn();
         ED_ParseEntity(&entities, ent);
@@ -528,7 +528,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
             ent->spawnFlags &= ~EntitySpawnFlags::NotHard;
 
         // remove things (except the world) from different skill levels or deathmatch
-        if (ent != g_edicts) {
+        if (ent != g_entities) {
 			if (nomonsters->value && (strstr(ent->classname, "monster") || strstr(ent->classname, "misc_deadsoldier") || strstr(ent->classname, "misc_insane"))) {
 				G_FreeEntity(ent);
 				inhibit++;
@@ -721,7 +721,7 @@ static const char dm_statusbar[] =
 "yt 2 "
 "num 3 14 "
 
-// spectator
+// isSpectator
 "if 17 "
 "xv 0 "
 "yb -58 "
@@ -759,7 +759,7 @@ void SP_worldspawn(entity_t *ent)
     //---------------
 
     // reserve some spots for dead player bodies for coop / deathmatch
-    level.body_que = 0;
+    level.bodyQue = 0;
     for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
         entity_t* ent = G_Spawn();
         ent->classname = "bodyque";

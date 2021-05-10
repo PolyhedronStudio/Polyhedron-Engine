@@ -44,8 +44,8 @@ void Blaster_Fire(entity_t* ent, const vec3_t &g_offset, int damage, qboolean hy
     fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
 
     // send muzzle flash
-    gi.WriteByte(svg_muzzleflash);
-    gi.WriteShort(ent - g_edicts);
+    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+    gi.WriteShort(ent - g_entities);
     gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
     gi.Multicast(&ent->state.origin, MultiCast::PVS);
 

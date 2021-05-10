@@ -28,7 +28,7 @@ void target_earthquake_think(entity_t* self)
         self->lastMoveTime = level.time + 0.5;
     }
 
-    for (i = 1, e = g_edicts + i; i < globals.num_edicts; i++, e++) {
+    for (i = 1, e = g_entities + i; i < globals.num_edicts; i++, e++) {
         if (!e->inUse)
             continue;
         if (!e->client)

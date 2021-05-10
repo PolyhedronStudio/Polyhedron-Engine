@@ -119,10 +119,10 @@ qboolean Pickup_Weapon(entity_t *ent, entity_t *other)
         }
     }
 
-    if (other->client->persistent.weapon != ent->item &&
+    if (other->client->persistent.activeWeapon != ent->item &&
         (other->client->persistent.inventory[index] == 1) &&
-        (!deathmatch->value || other->client->persistent.weapon == FindItem("blaster")))
-        other->client->newweapon = ent->item;
+        (!deathmatch->value || other->client->persistent.activeWeapon == FindItem("blaster")))
+        other->client->newWeapon = ent->item;
 
     return true;
 }
@@ -140,26 +140,26 @@ void ChangeWeapon(entity_t *ent)
 {
     int i;
 
-    ent->client->persistent.lastweapon = ent->client->persistent.weapon;
-    ent->client->persistent.weapon = ent->client->newweapon;
-    ent->client->newweapon = NULL;
+    ent->client->persistent.lastWeapon = ent->client->persistent.activeWeapon;
+    ent->client->persistent.activeWeapon = ent->client->newWeapon;
+    ent->client->newWeapon = NULL;
     ent->client->machinegunShots = 0;
 
     // set visible model
     if (ent->state.modelIndex == 255) {
-        if (ent->client->persistent.weapon)
-            i = ((ent->client->persistent.weapon->weaponModel & 0xff) << 8);
+        if (ent->client->persistent.activeWeapon)
+            i = ((ent->client->persistent.activeWeapon->weaponModel & 0xff) << 8);
         else
             i = 0;
-        ent->state.skinNumber = (ent - g_edicts - 1) | i;
+        ent->state.skinNumber = (ent - g_entities - 1) | i;
     }
 
-    if (ent->client->persistent.weapon && ent->client->persistent.weapon->ammo)
-        ent->client->ammoIndex = ITEM_INDEX(FindItem(ent->client->persistent.weapon->ammo));
+    if (ent->client->persistent.activeWeapon && ent->client->persistent.activeWeapon->ammo)
+        ent->client->ammoIndex = ITEM_INDEX(FindItem(ent->client->persistent.activeWeapon->ammo));
     else
         ent->client->ammoIndex = 0;
 
-    if (!ent->client->persistent.weapon) {
+    if (!ent->client->persistent.activeWeapon) {
         // dead
         ent->client->playerState.gunIndex = 0;
         return;
@@ -167,7 +167,7 @@ void ChangeWeapon(entity_t *ent)
 
     ent->client->weaponState = WeaponState::Activating;
     ent->client->playerState.gunFrame = 0;
-    ent->client->playerState.gunIndex = gi.ModelIndex(ent->client->persistent.weapon->viewModel);
+    ent->client->playerState.gunIndex = gi.ModelIndex(ent->client->persistent.activeWeapon->viewModel);
 
     ent->client->animation.priorityAnimation = ANIM_PAIN;
     if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
@@ -189,10 +189,10 @@ void NoAmmoWeaponChange(entity_t *ent)
 {
     if (ent->client->persistent.inventory[ITEM_INDEX(FindItem("bullets"))]
         &&  ent->client->persistent.inventory[ITEM_INDEX(FindItem("machinegun"))]) {
-        ent->client->newweapon = FindItem("machinegun");
+        ent->client->newWeapon = FindItem("machinegun");
         return;
     }
-    ent->client->newweapon = FindItem("blaster");
+    ent->client->newWeapon = FindItem("blaster");
 }
 
 /*
@@ -206,13 +206,13 @@ void Think_Weapon(entity_t *ent)
 {
     // if just died, put the weapon away
     if (ent->health < 1) {
-        ent->client->newweapon = NULL;
+        ent->client->newWeapon = NULL;
         ChangeWeapon(ent);
     }
 
     // call active weapon Think routine
-    if (ent->client->persistent.weapon && ent->client->persistent.weapon->WeaponThink) {
-        ent->client->persistent.weapon->WeaponThink(ent);
+    if (ent->client->persistent.activeWeapon && ent->client->persistent.activeWeapon->WeaponThink) {
+        ent->client->persistent.activeWeapon->WeaponThink(ent);
     }
 }
 
@@ -230,7 +230,7 @@ void Use_Weapon(entity_t *ent, gitem_t *item)
     gitem_t     *ammo_item;
 
     // see if we're already using it
-    if (item == ent->client->persistent.weapon)
+    if (item == ent->client->persistent.activeWeapon)
         return;
 
     if (item->ammo && !g_select_empty->value && !(item->flags & IT_AMMO)) {
@@ -249,7 +249,7 @@ void Use_Weapon(entity_t *ent, gitem_t *item)
     }
 
     // change to this weapon when down
-    ent->client->newweapon = item;
+    ent->client->newWeapon = item;
 }
 
 
@@ -268,7 +268,7 @@ void Drop_Weapon(entity_t *ent, gitem_t *item)
 
     index = ITEM_INDEX(item);
     // see if we're already using it
-    if (((item == ent->client->persistent.weapon) || (item == ent->client->newweapon)) && (ent->client->persistent.inventory[index] == 1)) {
+    if (((item == ent->client->persistent.activeWeapon) || (item == ent->client->newWeapon)) && (ent->client->persistent.inventory[index] == 1)) {
         gi.CPrintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
         return;
     }
@@ -328,7 +328,7 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
         return;
     }
 
-    if ((ent->client->newweapon) && (ent->client->weaponState != WeaponState::Firing)) {
+    if ((ent->client->newWeapon) && (ent->client->weaponState != WeaponState::Firing)) {
         ent->client->weaponState = WeaponState::Dropping;
         ent->client->playerState.gunFrame = FRAME_DEACTIVATE_FIRST;
 
@@ -350,7 +350,7 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
         if (((ent->client->latchedButtons | ent->client->buttons) & BUTTON_ATTACK)) {
             ent->client->latchedButtons &= ~BUTTON_ATTACK;
             if ((!ent->client->ammoIndex) ||
-                (ent->client->persistent.inventory[ent->client->ammoIndex] >= ent->client->persistent.weapon->quantity)) {
+                (ent->client->persistent.inventory[ent->client->ammoIndex] >= ent->client->persistent.activeWeapon->quantity)) {
                 ent->client->playerState.gunFrame = FRAME_FIRE_FIRST;
                 ent->client->weaponState = WeaponState::Firing;
 

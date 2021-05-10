@@ -95,7 +95,7 @@ void Player_Die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
         // this is kind of ugly, but it's how we want to handle keys in coop
         for (n = 0; n < game.num_items; n++) {
             if (coop->value && itemlist[n].flags & IT_KEY)
-                self->client->respawn.coop_respawn.inventory[n] = self->client->persistent.inventory[n];
+                self->client->respawn.persistentCoopRespawn.inventory[n] = self->client->persistent.inventory[n];
             self->client->persistent.inventory[n] = 0;
         }
     }

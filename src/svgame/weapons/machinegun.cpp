@@ -81,8 +81,8 @@ void Machinegun_Fire(entity_t* ent)
     start = P_ProjectSource(ent->client, ent->state.origin, offset, forward, right);
     fire_bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
 
-    gi.WriteByte(svg_muzzleflash);
-    gi.WriteShort(ent - g_edicts);
+    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+    gi.WriteShort(ent - g_entities);
     gi.WriteByte(MuzzleFlashType::MachineGun | is_silenced);
     gi.Multicast(&ent->state.origin, MultiCast::PVS);
 

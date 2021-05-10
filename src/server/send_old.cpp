@@ -648,7 +648,7 @@ static void repack_unreliables(client_t *client, size_t maxsize)
 
     // temp entities first
     FOR_EACH_MSG_SAFE(&client->msg_unreliable_list) {
-        if (!msg->cursize || msg->data[0] != svg_temp_entity) {
+        if (!msg->cursize || msg->data[0] != SVG_CMD_TEMP_ENTITY) {
             continue;
         }
         write_msg(client, msg, maxsize);

@@ -1011,12 +1011,12 @@ void CL_SeekDemoMessage(void)
             break;
 
         // WatIsDeze: Movd to CGModule.
-        //case svg_temp_entity:
+        //case SVG_CMD_TEMP_ENTITY:
         //    CL_ParseTEntPacket();
         //    break;
 
-        //case svg_muzzleflash:
-        //case svg_muzzleflash2:
+        //case SVG_CMD_MUZZLEFLASH:
+        //case SVG_CMD_MUZZLEFLASH2:
         //    CL_ParseMuzzleFlashPacket(0);
         //    break;
 
@@ -1025,11 +1025,11 @@ void CL_SeekDemoMessage(void)
             continue;
 
         // N&C: Moved to CGModule.
-        //case svg_inventory:
+        //case SVG_CMD_INVENTORY:
         //    CL_ParseInventory();
         //    break;
 
-        //case svg_layout:
+        //case SVG_CMD_LAYOUT:
         //    CL_ParseLayout();
         //    break;
 

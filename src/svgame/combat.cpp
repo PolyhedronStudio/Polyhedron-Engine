@@ -130,7 +130,7 @@ void SpawnDamage(int type, const vec3_t &origin, const vec3_t &normal, int damag
 {
     if (damage > 255)
         damage = 255;
-    gi.WriteByte(svg_temp_entity);
+    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(type);
 //  gi.WriteByte (damage);
     gi.WritePosition(origin);

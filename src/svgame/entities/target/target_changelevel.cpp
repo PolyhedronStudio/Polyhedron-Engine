@@ -21,7 +21,7 @@ void use_target_changelevel(entity_t* self, entity_t* other, entity_t* activator
         return;     // already activated
 
     if (!deathmatch->value && !coop->value) {
-        if (g_edicts[1].health <= 0)
+        if (g_entities[1].health <= 0)
             return;
     }
 

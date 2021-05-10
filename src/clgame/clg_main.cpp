@@ -407,7 +407,7 @@ void CLG_Init() {
     // TODO: not sure what this is for, don't see it used anywhere.
     info_msg                = clgi.Cvar_Get("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
     info_password           = clgi.Cvar_Get("password", "", CVAR_USERINFO);
-    info_spectator          = clgi.Cvar_Get("spectator", "0", CVAR_USERINFO);
+    info_spectator          = clgi.Cvar_Get("isSpectator", "0", CVAR_USERINFO);
 
     // Video.
     vid_rtx                 = clgi.Cvar_Get("vid_rtx", NULL, 0);

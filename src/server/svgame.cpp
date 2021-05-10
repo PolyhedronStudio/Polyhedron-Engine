@@ -111,7 +111,7 @@ static void PF_Unicast(entity_t *ent, qboolean reliable)
         flags |= MSG_RELIABLE;
     }
 
-    if (cmd == svg_layout) {
+    if (cmd == SVG_CMD_LAYOUT) {
         flags |= MSG_COMPRESS;
     }
 

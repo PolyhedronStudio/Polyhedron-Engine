@@ -183,17 +183,17 @@ qboolean Add_Ammo(entity_t *ent, gitem_t *item, int count)
         return false;
 
     if (item->tag == AmmoType::Bullets)
-        max = ent->client->persistent.max_bullets;
+        max = ent->client->persistent.maxBullets;
     else if (item->tag == AmmoType::Shells)
-        max = ent->client->persistent.max_shells;
+        max = ent->client->persistent.maxShells;
     else if (item->tag == AmmoType::Rockets)
-        max = ent->client->persistent.max_rockets;
+        max = ent->client->persistent.maxRockets;
     else if (item->tag == AmmoType::Grenade)
-        max = ent->client->persistent.max_grenades;
+        max = ent->client->persistent.maxGrenades;
     else if (item->tag == AmmoType::Cells)
-        max = ent->client->persistent.max_cells;
+        max = ent->client->persistent.maxCells;
     else if (item->tag == AmmoType::Slugs)
-        max = ent->client->persistent.max_slugs;
+        max = ent->client->persistent.maxSlugs;
     else
         return false;
 
@@ -230,8 +230,8 @@ qboolean Pickup_Ammo(entity_t *ent, entity_t *other)
         return false;
 
     if (weapon && !oldcount) {
-        if (other->client->persistent.weapon != ent->item && (!deathmatch->value || other->client->persistent.weapon == FindItem("blaster")))
-            other->client->newweapon = ent->item;
+        if (other->client->persistent.activeWeapon != ent->item && (!deathmatch->value || other->client->persistent.activeWeapon == FindItem("blaster")))
+            other->client->newWeapon = ent->item;
     }
 
     if (!(ent->spawnFlags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && (deathmatch->value))
@@ -251,8 +251,8 @@ void Drop_Ammo(entity_t *ent, gitem_t *item)
     else
         dropped->count = ent->client->persistent.inventory[index];
 
-    if (ent->client->persistent.weapon &&
-        ent->client->persistent.weapon->tag == AmmoType::Grenade &&
+    if (ent->client->persistent.activeWeapon &&
+        ent->client->persistent.activeWeapon->tag == AmmoType::Grenade &&
         item->tag == AmmoType::Grenade &&
         ent->client->persistent.inventory[index] - dropped->count <= 0) {
         gi.CPrintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
@@ -413,7 +413,7 @@ void Touch_Item(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t *sur
 
         // change selected item
         if (ent->item->Use)
-            other->client->persistent.selected_item = other->client->playerState.stats[STAT_SELECTED_ITEM] = ITEM_INDEX(ent->item);
+            other->client->persistent.selectedItem = other->client->playerState.stats[STAT_SELECTED_ITEM] = ITEM_INDEX(ent->item);
 
         if (ent->item->Pickup == Pickup_Health) {
             if (ent->count == 2)
@@ -706,8 +706,8 @@ void SpawnItem(entity_t *ent, gitem_t *item)
     }
 
     if (coop->value && (strcmp(ent->classname, "key_power_cube") == 0)) {
-        ent->spawnFlags |= (1 << (8 + level.power_cubes));
-        level.power_cubes++;
+        ent->spawnFlags |= (1 << (8 + level.powerCubes));
+        level.powerCubes++;
     }
 
     // don't let them drop items that stay in a coop game

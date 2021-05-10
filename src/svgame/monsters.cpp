@@ -31,8 +31,8 @@ void monster_fire_bullet(entity_t *self, const vec3_t &start, const vec3_t &dir,
 {
     fire_bullet(self, start, dir, damage, kick, hspread, vspread, MOD_UNKNOWN);
 
-    gi.WriteByte(svg_muzzleflash2);
-    gi.WriteShort(self - g_edicts);
+    gi.WriteByte(SVG_CMD_MUZZLEFLASH2);
+    gi.WriteShort(self - g_entities);
     gi.WriteByte(flashtype);
     gi.Multicast(&start, MultiCast::PVS);
 }

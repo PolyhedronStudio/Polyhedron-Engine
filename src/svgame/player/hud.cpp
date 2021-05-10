@@ -103,7 +103,7 @@ void HUD_BeginIntermission(entity_t *targ)
 
     // respawn any dead clients
     for (i = 0 ; i < maxClients->value ; i++) {
-        client = g_edicts + 1 + i;
+        client = g_entities + 1 + i;
         if (!client->inUse) {
             continue;
         }
@@ -118,7 +118,7 @@ void HUD_BeginIntermission(entity_t *targ)
     if (strstr(level.changemap, "*")) {
         if (coop->value) {
             for (i = 0 ; i < maxClients->value ; i++) {
-                client = g_edicts + 1 + i;
+                client = g_entities + 1 + i;
                 if (!client->inUse) {
                     continue;
                 }
@@ -165,7 +165,7 @@ void HUD_BeginIntermission(entity_t *targ)
     // (MoveType = PM_FREEZE, positioned at intermission entity view values.)
     for (i = 0 ; i < maxClients->value ; i++) {
         // Fetch client.
-        client = g_edicts + 1 + i;
+        client = g_entities + 1 + i;
 
         // Ensure a client is in use, otherwise skip it.
         if (!client->inUse)
@@ -200,8 +200,8 @@ void HUD_GenerateDMScoreboardLayout(entity_t *ent, entity_t *killer)
     // sort the clients by score
     total = 0;
     for (i = 0 ; i < game.maxClients ; i++) {
-        cl_ent = g_edicts + 1 + i;
-        if (!cl_ent->inUse || game.clients[i].respawn.spectator)
+        cl_ent = g_entities + 1 + i;
+        if (!cl_ent->inUse || game.clients[i].respawn.isSpectator)
             continue;
         score = game.clients[i].respawn.score;
         for (j = 0 ; j < total ; j++) {
@@ -228,7 +228,7 @@ void HUD_GenerateDMScoreboardLayout(entity_t *ent, entity_t *killer)
 
     for (i = 0 ; i < total ; i++) {
         cl = &game.clients[sorted[i]];
-        cl_ent = g_edicts + 1 + sorted[i];
+        cl_ent = g_entities + 1 + sorted[i];
 
         x = (i >= 6) ? 160 : 0;
         y = 32 + 32 * (i % 6);
@@ -253,7 +253,7 @@ void HUD_GenerateDMScoreboardLayout(entity_t *ent, entity_t *killer)
         // send the layout
         Q_snprintf(entry, sizeof(entry),
                    "client %i %i %i %i %i %i ",
-                   x, y, sorted[i], cl->respawn.score, cl->ping, (level.frameNumber - cl->respawn.enterframe) / 600);
+                   x, y, sorted[i], cl->respawn.score, cl->ping, (level.frameNumber - cl->respawn.enterFrame) / 600);
         j = strlen(entry);
         if (stringlength + j > 1024)
             break;
@@ -261,7 +261,7 @@ void HUD_GenerateDMScoreboardLayout(entity_t *ent, entity_t *killer)
         stringlength += j;
     }
 
-    gi.WriteByte(svg_layout);
+    gi.WriteByte(SVG_CMD_LAYOUT);
     gi.WriteString(string);
 }
 
@@ -342,7 +342,7 @@ void HelpComputer(entity_t *ent)
                level.found_goals, level.total_goals,
                0, 0);
 
-    gi.WriteByte(svg_layout);
+    gi.WriteByte(SVG_CMD_LAYOUT);
     gi.WriteString(string);
     gi.Unicast(ent, true);
 }
@@ -409,12 +409,12 @@ void HUD_SetClientStats(entity_t* ent)
     //
     // selected item
     //
-    if (ent->client->persistent.selected_item == -1)
+    if (ent->client->persistent.selectedItem == -1)
         ent->client->playerState.stats[STAT_SELECTED_ICON] = 0;
     else
-        ent->client->playerState.stats[STAT_SELECTED_ICON] = gi.ImageIndex(itemlist[ent->client->persistent.selected_item].icon);
+        ent->client->playerState.stats[STAT_SELECTED_ICON] = gi.ImageIndex(itemlist[ent->client->persistent.selectedItem].icon);
 
-    ent->client->playerState.stats[STAT_SELECTED_ITEM] = ent->client->persistent.selected_item;
+    ent->client->playerState.stats[STAT_SELECTED_ITEM] = ent->client->persistent.selectedItem;
 
     //
     // layouts
@@ -445,9 +445,9 @@ void HUD_SetClientStats(entity_t* ent)
     //
     if ((ent->client->persistent.hand == CENTER_HANDED
                 || ent->client->playerState.fov > 91)
-                && ent->client->persistent.weapon) {
+                && ent->client->persistent.activeWeapon) {
 
-        ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->persistent.weapon->icon);
+        ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->persistent.activeWeapon->icon);
     } else {
         ent->client->playerState.stats[STAT_HELPICON] = 0;
     }
@@ -471,14 +471,14 @@ void HUD_CheckChaseStats(entity_t *ent)
     for (i = 1; i <= maxClients->value; i++) {
         gclient_t* cl;
 
-        cl = g_edicts[i].client;
+        cl = g_entities[i].client;
 
-        if (!g_edicts[i].inUse || (cl->chaseTarget != ent)) {
+        if (!g_entities[i].inUse || (cl->chaseTarget != ent)) {
             continue;
         }
 
         memcpy(cl->playerState.stats, ent->client->playerState.stats, sizeof(cl->playerState.stats));
-        HUD_SetSpectatorStats(g_edicts + i);
+        HUD_SetSpectatorStats(g_entities + i);
     }
 }
 
@@ -501,7 +501,7 @@ void HUD_SetSpectatorStats(entity_t *ent)
 
     cl->playerState.stats[STAT_SPECTATOR] = 1;
 
-    /* layouts are independant in spectator */
+    /* layouts are independant in isSpectator */
     cl->playerState.stats[STAT_LAYOUTS] = 0;
 
     if ((cl->persistent.health <= 0) || level.intermissiontime || cl->showScores)
@@ -517,7 +517,7 @@ void HUD_SetSpectatorStats(entity_t *ent)
     if (cl->chaseTarget && cl->chaseTarget->inUse)
     {
         cl->playerState.stats[STAT_CHASE] = ConfigStrings::PlayerSkins +
-            (cl->chaseTarget - g_edicts) - 1;
+            (cl->chaseTarget - g_entities) - 1;
     }
     else
     {

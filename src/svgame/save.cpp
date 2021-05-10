@@ -279,9 +279,9 @@ static const save_field_t levelfields[] = {
     I(total_monsters),
     I(killed_monsters),
 
-    I(body_que),
+    I(bodyQue),
 
-    I(power_cubes),
+    I(powerCubes),
 
     {(fieldtype_t)0}
 #undef _OFS
@@ -325,23 +325,23 @@ static const save_field_t clientfields[] = {
     I(persistent.maxHealth),
     I(persistent.savedFlags),
 
-    I(persistent.selected_item),
+    I(persistent.selectedItem),
     IA(persistent.inventory, MAX_ITEMS),
 
-    I(persistent.max_bullets),
-    I(persistent.max_shells),
-    I(persistent.max_rockets),
-    I(persistent.max_grenades),
-    I(persistent.max_cells),
-    I(persistent.max_slugs),
+    I(persistent.maxBullets),
+    I(persistent.maxShells),
+    I(persistent.maxRockets),
+    I(persistent.maxGrenades),
+    I(persistent.maxCells),
+    I(persistent.maxSlugs),
 
-    T(persistent.weapon),
-    T(persistent.lastweapon),
+    T(persistent.activeWeapon),
+    T(persistent.lastWeapon),
 
-    I(persistent.power_cubes),
+    I(persistent.powerCubes),
     I(persistent.score),
 
-    I(persistent.spectator),
+    I(persistent.isSpectator),
 
     I(showScores),
     I(showInventory),
@@ -349,7 +349,7 @@ static const save_field_t clientfields[] = {
 
     I(ammoIndex),
 
-    T(newweapon),
+    T(newWeapon),
 
     I(damages.armor),
     I(damages.powerArmor),
@@ -534,7 +534,7 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     case F_EDICT:
-        write_index(f, *(void **)p, sizeof(entity_t), g_edicts, MAX_EDICTS - 1);
+        write_index(f, *(void **)p, sizeof(entity_t), g_entities, MAX_EDICTS - 1);
         break;
     case F_CLIENT:
         write_index(f, *(void **)p, sizeof(gclient_t), game.clients, game.maxClients - 1);
@@ -716,7 +716,7 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     case F_EDICT:
-        *(entity_t **)p = (entity_t*)read_index(f, sizeof(entity_t), g_edicts, game.maxentities - 1); // CPP: Cast
+        *(entity_t **)p = (entity_t*)read_index(f, sizeof(entity_t), g_entities, game.maxentities - 1); // CPP: Cast
         break;
     case F_CLIENT:
         *(gclient_t **)p = (gclient_t*)read_index(f, sizeof(gclient_t), game.clients, game.maxClients - 1); // CPP: Cast
@@ -824,8 +824,8 @@ void ReadGame(const char *filename)
         gi.Error("Savegame has bad maxentities");
     }
 
-    g_edicts = (entity_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
-    globals.edicts = g_edicts;
+    g_entities = (entity_t*)gi.TagMalloc(game.maxentities * sizeof(g_entities[0]), TAG_GAME); // CPP: Cast
+    globals.edicts = g_entities;
     globals.max_edicts = game.maxentities;
 
     game.clients = (gclient_t*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
@@ -863,7 +863,7 @@ void WriteLevel(const char *filename)
 
     // write out all the entities
     for (i = 0; i < globals.num_edicts; i++) {
-        ent = &g_edicts[i];
+        ent = &g_entities[i];
         if (!ent->inUse)
             continue;
         write_int(f, i);
@@ -907,7 +907,7 @@ void ReadLevel(const char *filename)
         gi.Error("Couldn't open %s", filename);
 
     // Ensure all entities have a clean slate in memory.
-    memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
+    memset(g_entities, 0, game.maxentities * sizeof(g_entities[0]));
 
     // Set the number of edicts to be maxClients + 1. (They are soon to be in-use after all)
     globals.num_edicts = maxClients->value + 1;
@@ -938,7 +938,7 @@ void ReadLevel(const char *filename)
         if (entnum >= globals.num_edicts)
             globals.num_edicts = entnum + 1;
 
-        ent = &g_edicts[entnum];
+        ent = &g_entities[entnum];
         read_fields(f, entityfields, ent);
         ent->inUse = true;
         ent->state.number = entnum;
@@ -952,14 +952,14 @@ void ReadLevel(const char *filename)
 
     // mark all clients as unconnected
     for (i = 0 ; i < maxClients->value ; i++) {
-        ent = &g_edicts[i + 1];
+        ent = &g_entities[i + 1];
         ent->client = game.clients + i;
         ent->client->persistent.connected = false;
     }
 
     // do any load time things at this point
     for (i = 0 ; i < globals.num_edicts ; i++) {
-        ent = &g_edicts[i];
+        ent = &g_entities[i];
 
         if (!ent->inUse)
             continue;

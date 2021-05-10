@@ -21,7 +21,7 @@ void target_explosion_explode(entity_t* self)
 {
     float       save;
 
-    gi.WriteByte(svg_temp_entity);
+    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(TempEntityEvent::Explosion1);
     gi.WritePosition(self->state.origin);
     gi.Multicast(&self->state.origin, MultiCast::PHS);

@@ -57,7 +57,7 @@ entity_t *SV_TestEntityPosition(entity_t *ent)
     trace = gi.Trace(ent->state.origin, ent->mins, ent->maxs, ent->state.origin, ent, mask);
 
     if (trace.startSolid)
-        return g_edicts;
+        return g_entities;
 
     return NULL;
 }
@@ -421,7 +421,7 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
     gi.LinkEntity(pusher);
 
 // see if any solid entities are inside the final position
-    check = g_edicts + 1;
+    check = g_entities + 1;
     for (e = 1; e < globals.num_edicts; e++, check++) {
         if (!check->inUse)
             continue;
@@ -726,9 +726,9 @@ void SV_Physics_Toss(entity_t *ent)
         ent->waterLevel = 0;
 
     if (!wasInWater && isInWater)
-        gi.PositionedSound(oldOrigin, g_edicts, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(oldOrigin, g_entities, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
     else if (wasInWater && !isInWater)
-        gi.PositionedSound(ent->state.origin, g_edicts, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(ent->state.origin, g_entities, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 
     // Move teamslaves
     for (slave = ent->teamChainPtr; slave; slave = slave->teamChainPtr) {

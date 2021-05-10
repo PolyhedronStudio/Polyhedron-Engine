@@ -45,23 +45,23 @@ void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
             int cube;
 
             for (cube = 0; cube < 8; cube++)
-                if (activator->client->persistent.power_cubes & (1 << cube))
+                if (activator->client->persistent.powerCubes & (1 << cube))
                     break;
             for (player = 1; player <= game.maxClients; player++) {
-                ent = &g_edicts[player];
+                ent = &g_entities[player];
                 if (!ent->inUse)
                     continue;
                 if (!ent->client)
                     continue;
-                if (ent->client->persistent.power_cubes & (1 << cube)) {
+                if (ent->client->persistent.powerCubes & (1 << cube)) {
                     ent->client->persistent.inventory[index]--;
-                    ent->client->persistent.power_cubes &= ~(1 << cube);
+                    ent->client->persistent.powerCubes &= ~(1 << cube);
                 }
             }
         }
         else {
             for (player = 1; player <= game.maxClients; player++) {
-                ent = &g_edicts[player];
+                ent = &g_entities[player];
                 if (!ent->inUse)
                     continue;
                 if (!ent->client)

@@ -92,7 +92,7 @@ static qboolean IN_GetCurrentGrab(void)
             return false;  // playing a demo (and not using freelook)
 
         if (cl.frame.playerState.pmove.type == EnginePlayerMoveType::Freeze)
-            return false;  // spectator mode
+            return false;  // isSpectator mode
     }
 
     if (in_grab->integer >= 1)

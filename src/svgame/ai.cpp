@@ -53,14 +53,14 @@ void AI_SetSightClient(void)
     if (level.sight_client == NULL)
         start = 1;
     else
-        start = level.sight_client - g_edicts;
+        start = level.sight_client - g_entities;
 
     check = start;
     while (1) {
         check++;
         if (check > game.maxClients)
             check = 1;
-        ent = &g_edicts[check];
+        ent = &g_entities[check];
         if (ent->inUse
             && ent->health > 0
             && !(ent->flags & EntityFlags::NoTarget)) {

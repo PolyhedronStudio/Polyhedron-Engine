@@ -35,11 +35,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define GAMEVERSION "basenac"
 
 // protocol bytes that can be directly added to messages
-//#define	svg_muzzleflash		1
-//#define	svg_muzzleflash2	2
-//#define	svg_temp_entity		3
-//#define	svg_layout			4
-//#define	svg_inventory		5
+//#define	SVG_CMD_MUZZLEFLASH		1
+//#define	SVG_CMD_MUZZLEFLASH2	2
+//#define	SVG_CMD_TEMP_ENTITY		3
+//#define	SVG_CMD_LAYOUT			4
+//#define	SVG_CMD_INVENTORY		5
 //#define	svc_stufftext		11
 
 //==================================================================
@@ -335,9 +335,9 @@ typedef struct {
     int         killed_monsters;
 
     entity_t     *current_entity;    // entity running from G_RunFrame
-    int         body_que;           // dead bodies
+    int         bodyQue;           // dead bodies
 
-    int         power_cubes;        // ugly necessity for coop
+    int         powerCubes;        // ugly necessity for coop
 } level_locals_t;
 
 
@@ -497,7 +497,7 @@ extern  int snd_fry;
 extern  int meansOfDeath;
 
 
-extern  entity_t         *g_edicts;
+extern  entity_t         *g_entities;
 
 #define FOFS(x) q_offsetof(entity_t, x)
 #define STOFS(x) q_offsetof(spawn_temp_t, x)
@@ -551,7 +551,7 @@ extern  cvar_t  *sv_flaregun;
 
 extern  cvar_t  *cl_monsterfootsteps;
 
-#define world   (&g_edicts[0])
+#define world   (&g_entities[0])
 
 // item spawnFlags
 #define ITEM_TRIGGER_SPAWN      0x00000001
@@ -763,49 +763,49 @@ void GetChaseTarget(entity_t *ent);
 #define ANIM_REVERSE    6
 
 
-// client data that stays across multiple level loads
+// Client data that stays across multiple level loads
 typedef struct {
     char        userinfo[MAX_INFO_STRING];
     char        netname[16];
     int         hand;
 
-    qboolean    connected;  // a loadgame will leave valid entities that
+    qboolean    connected;  // A loadgame will leave valid entities that
                             // just don't have a connection yet
 
-    // values saved and restored from edicts when changing levels
+    // Values saved and restored from entities when changing levels
     int         health;
     int         maxHealth;
     int         savedFlags;
 
-    int         selected_item;
+    int         selectedItem;
     int         inventory[MAX_ITEMS];
 
-    // ammo capacities
-    int         max_bullets;
-    int         max_shells;
-    int         max_rockets;
-    int         max_grenades;
-    int         max_cells;
-    int         max_slugs;
+    // Ammo capacities
+    int         maxBullets;
+    int         maxShells;
+    int         maxRockets;
+    int         maxGrenades;
+    int         maxCells;
+    int         maxSlugs;
 
-    gitem_t     *weapon;
-    gitem_t     *lastweapon;
+    gitem_t     *activeWeapon;
+    gitem_t     *lastWeapon;
 
-    int         power_cubes;    // used for tracking the cubes in coop games
-    int         score;          // for calculating total unit score in coop games
+    int         powerCubes;    // Used for tracking the cubes in coop games
+    int         score;         // For calculating total unit score in coop games
 
-    qboolean    spectator;          // client is a spectator
-} client_persistant_t;
+    qboolean    isSpectator;          // client is a isSpectator
+} ClientPersistantData;
 
 // client data that stays across deathmatch respawns
 typedef struct {
-    client_persistant_t coop_respawn;   // what to set client->persistent to on a respawn
-    int         enterframe;         // level.frameNumber the client entered the game
+    ClientPersistantData persistentCoopRespawn;   // what to set client->persistent to on a respawn
+    int         enterFrame;         // level.frameNumber the client entered the game
     int         score;              // frags, etc
     vec3_t      commandViewAngles;         // angles sent over in the last command
 
-    qboolean    spectator;          // client is a spectator
-} client_respawn_t;
+    qboolean    isSpectator;          // client is a isSpectator
+} ClientRespawnData;
 
 // this structure is cleared on each PutClientInServer(),
 // except for 'client->persistent'
@@ -815,8 +815,8 @@ struct gclient_s {
     int             ping;
 
     // private to game
-    client_persistant_t persistent;
-    client_respawn_t    respawn;
+    ClientPersistantData persistent;
+    ClientRespawnData    respawn;
 
     qboolean    showScores;         // set layout stat
     qboolean    showInventory;      // set layout stat
@@ -830,7 +830,7 @@ struct gclient_s {
 
     qboolean    weaponThunk;
 
-    gitem_t     *newweapon;
+    gitem_t     *newWeapon;
 
     // sum up damage over an entire frame, so
     // shotgun blasts give a single big kick
@@ -1034,25 +1034,25 @@ struct entity_s {
     float       attenuation;
 
     // timing variables
-    float       wait;
-    float       delay;          // before firing targets
-    float       random;
+    float wait;
+    float delay;          // before firing targets
+    float random;
 
-    float       teleportTime;
+    float teleportTime;
 
-    int         waterType;
-    int         waterLevel;
+    int waterType;
+    int waterLevel;
 
-    vec3_t      moveOrigin;
-    vec3_t      moveAngles;
+    vec3_t moveOrigin;
+    vec3_t moveAngles;
 
     // move this to clientInfo?
-    int         lightLevel;
+    int lightLevel;
 
-    int         style;          // also used as areaportal number
+    int style;          // also used as areaportal number
 
     // Custom lightstyle.
-    char        *customLightStyle;
+    char *customLightStyle;
 
     gitem_t     *item;          // for bonus items
 

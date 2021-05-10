@@ -28,7 +28,7 @@ void UpdateChaseCam(entity_t *ent)
 
     // is our chase target gone?
     if (!ent->client->chaseTarget->inUse
-        || ent->client->chaseTarget->client->respawn.spectator) {
+        || ent->client->chaseTarget->client->respawn.isSpectator) {
         entity_t *old = ent->client->chaseTarget;
         ChaseNext(ent);
         if (ent->client->chaseTarget == old) {
@@ -112,15 +112,15 @@ void ChaseNext(entity_t *ent)
     if (!ent->client->chaseTarget)
         return;
 
-    i = ent->client->chaseTarget - g_edicts;
+    i = ent->client->chaseTarget - g_entities;
     do {
         i++;
         if (i > maxClients->value)
             i = 1;
-        e = g_edicts + i;
+        e = g_entities + i;
         if (!e->inUse)
             continue;
-        if (!e->client->respawn.spectator)
+        if (!e->client->respawn.isSpectator)
             break;
     } while (e != ent->client->chaseTarget);
 
@@ -136,15 +136,15 @@ void ChasePrev(entity_t *ent)
     if (!ent->client->chaseTarget)
         return;
 
-    i = ent->client->chaseTarget - g_edicts;
+    i = ent->client->chaseTarget - g_entities;
     do {
         i--;
         if (i < 1)
             i = maxClients->value;
-        e = g_edicts + i;
+        e = g_entities + i;
         if (!e->inUse)
             continue;
-        if (!e->client->respawn.spectator)
+        if (!e->client->respawn.isSpectator)
             break;
     } while (e != ent->client->chaseTarget);
 
@@ -158,8 +158,8 @@ void GetChaseTarget(entity_t *ent)
     entity_t *other;
 
     for (i = 1; i <= maxClients->value; i++) {
-        other = g_edicts + i;
-        if (other->inUse && !other->client->respawn.spectator) {
+        other = g_entities + i;
+        if (other->inUse && !other->client->respawn.isSpectator) {
             ent->client->chaseTarget = other;
             ent->client->updateChase = true;
             UpdateChaseCam(ent);

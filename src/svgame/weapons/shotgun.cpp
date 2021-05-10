@@ -58,8 +58,8 @@ void weapon_shotgun_fire(entity_t* ent)
         fire_shotgun(ent, start, forward, damage, kick, 500, 500, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
 
     // send muzzle flash
-    gi.WriteByte(svg_muzzleflash);
-    gi.WriteShort(ent - g_edicts);
+    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+    gi.WriteShort(ent - g_entities);
     gi.WriteByte(MuzzleFlashType::Shotgun | is_silenced);
     gi.Multicast(&ent->state.origin, MultiCast::PVS);
 

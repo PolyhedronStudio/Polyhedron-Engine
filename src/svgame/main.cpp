@@ -35,7 +35,7 @@ int sm_meat_index;
 int snd_fry;
 int meansOfDeath;
 
-entity_t     *g_edicts;
+entity_t     *g_entities;
 
 cvar_t  *deathmatch;
 cvar_t  *coop;
@@ -99,8 +99,8 @@ void ShutdownGame(void)
     gi.DPrintf("==== ShutdownGame ====\n");
 
     // WatIs: C++-ify: Delete the edicts and clients arrays, they are allocated using new [], so need a delete[]
-    //if (g_edicts)
-    //    delete[] g_edicts;
+    //if (g_entities)
+    //    delete[] g_entities;
 
     //if (game.clients)
     //    delete[] game.clients;
@@ -185,8 +185,8 @@ void InitGame(void)
     // initialize all entities for this game
     game.maxentities = maxentities->value;
     clamp(game.maxentities, (int)maxClients->value + 1, MAX_EDICTS);
-    g_edicts = (entity_t*)gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME); // CPP: Cast
-    globals.edicts = g_edicts;
+    g_entities = (entity_t*)gi.TagMalloc(game.maxentities * sizeof(g_entities[0]), TAG_GAME); // CPP: Cast
+    globals.edicts = g_entities;
     globals.max_edicts = game.maxentities;
 
     // initialize all clients for this game
@@ -287,7 +287,7 @@ void ClientEndServerFrames(void)
     // calc the player views now that all pushing
     // and damage has been added
     for (i = 0 ; i < maxClients->value ; i++) {
-        ent = g_edicts + 1 + i;
+        ent = g_entities + 1 + i;
         if (!ent->inUse || !ent->client)
             continue;
         ClientEndServerFrame(ent);
@@ -425,7 +425,7 @@ void CheckDMRules(void)
     if (fraglimit->value) {
         for (i = 0 ; i < maxClients->value ; i++) {
             cl = game.clients + i;
-            if (!g_edicts[i + 1].inUse)
+            if (!g_entities[i + 1].inUse)
                 continue;
 
             if (cl->respawn.score >= fraglimit->value) {
@@ -458,7 +458,7 @@ void ExitLevel(void)
 
     // clear some things before going to next level
     for (i = 0 ; i < maxClients->value ; i++) {
-        ent = g_edicts + 1 + i;
+        ent = g_entities + 1 + i;
         if (!ent->inUse)
             continue;
         if (ent->health > ent->client->persistent.maxHealth)
@@ -496,7 +496,7 @@ void G_RunFrame(void)
     // treat each object in turn
     // even the world gets a chance to Think
     //
-    ent = &g_edicts[0];
+    ent = &g_entities[0];
     for (i = 0 ; i < globals.num_edicts ; i++, ent++) {
         if (!ent->inUse)
             continue;
@@ -548,11 +548,11 @@ entity_t* G_Find(entity_t* from, int fieldofs, const char* match)
     char* s;
 
     if (!from)
-        from = g_edicts;
+        from = g_entities;
     else
         from++;
 
-    for (; from < &g_edicts[globals.num_edicts]; from++) {
+    for (; from < &g_entities[globals.num_edicts]; from++) {
         if (!from->inUse)
             continue;
         s = *(char**)((byte*)from + fieldofs);
@@ -581,10 +581,10 @@ entity_t* G_FindEntitiesWithinRadius(entity_t* from, vec3_t org, float rad)
     int     j;
 
     if (!from)
-        from = g_edicts;
+        from = g_entities;
     else
         from++;
-    for (; from < &g_edicts[globals.num_edicts]; from++) {
+    for (; from < &g_entities[globals.num_edicts]; from++) {
         if (!from->inUse)
             continue;
         if (from->solid == Solid::Not)
@@ -648,7 +648,7 @@ void G_InitEntity(entity_t* e)
     e->inUse = true;
     e->classname = "noclass";
     e->gravity = 1.0;
-    e->state.number = e - g_edicts;
+    e->state.number = e - g_entities;
 }
 
 /*
@@ -667,7 +667,7 @@ entity_t* G_Spawn(void)
     int         i;
     entity_t* e;
 
-    e = &g_edicts[game.maxClients + 1];
+    e = &g_entities[game.maxClients + 1];
     for (i = game.maxClients + 1; i < globals.num_edicts; i++, e++) {
         // the first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
@@ -696,7 +696,7 @@ void G_FreeEntity(entity_t* ed)
 {
     gi.UnlinkEntity(ed);        // unlink from world
 
-    if ((ed - g_edicts) <= (maxClients->value + BODY_QUEUE_SIZE)) {
+    if ((ed - g_entities) <= (maxClients->value + BODY_QUEUE_SIZE)) {
         //      gi.DPrintf("tried to free special edict\n");
         return;
     }

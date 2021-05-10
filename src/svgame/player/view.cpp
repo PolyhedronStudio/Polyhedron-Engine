@@ -659,8 +659,8 @@ static void G_SetClientSound(entity_t *ent)
 {
     const char    *weap; // C++20: STRING: Added const to char*
 
-    if (ent->client->persistent.weapon)
-        weap = ent->client->persistent.weapon->classname;
+    if (ent->client->persistent.activeWeapon)
+        weap = ent->client->persistent.activeWeapon->classname;
     else
         weap = "";
 
@@ -885,8 +885,8 @@ void ClientEndServerFrame(entity_t *ent)
     // should be determined by the client
     SV_CalculateBlend(ent);
 
-    // Set the stats to display for this client (one of the chase spectator stats or...)
-    if (ent->client->respawn.spectator)
+    // Set the stats to display for this client (one of the chase isSpectator stats or...)
+    if (ent->client->respawn.isSpectator)
         HUD_SetSpectatorStats(ent);
     else
         HUD_SetClientStats(ent);

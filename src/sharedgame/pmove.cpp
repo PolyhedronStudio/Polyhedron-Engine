@@ -1477,7 +1477,7 @@ static void PM_WalkMove(void) {
 //===============
 // PM_SpectatorMove
 // 
-// Handles special spectator movement.
+// Handles special isSpectator movement.
 //===============
 //
 static void PM_SpectatorMove(void) {
