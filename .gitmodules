@@ -1,0 +1,3 @@
+[submodule "nac-extern"]
+	path = extern
+	url = https://github.com/WatIsDeze/nac-extern
