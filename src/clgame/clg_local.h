@@ -24,6 +24,8 @@
 #include "shared/refresh.h"
 
 // Common.
+#include "common/cmodel.h"
+#include "common/cmd.h"
 #include "common/msg.h"
 #include "common/protocol.h"
 

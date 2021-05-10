@@ -856,6 +856,13 @@ void    Info_Print(const char* infostring);
 #include "shared/collision.h"
 
 
+//
+//=============================================================================
+//
+//	Entities & Related.
+//
+//=============================================================================
+//
 //-----------------
 // EntityState->renderfx
 //
@@ -928,11 +935,5 @@ typedef enum {
 #define UF_MUTE_OBSERVERS   16
 #define UF_MUTE_MISC        32
 #define UF_PLAYERFOV        64
-
-// WatIsDeze: Ifdef, for cgame dll.
-#ifdef CGAME_INCLUDE
-#include "common/cmodel.h"
-#include "common/cmd.h"
-#endif // CGAME_INCLUDE
 
 #endif // SHARED_H
