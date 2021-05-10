@@ -16,6 +16,6 @@ Used as a positional target for lightning.
 */
 void SP_info_notnull(entity_t* self)
 {
-    VectorCopy(self->s.origin, self->absMin);
-    VectorCopy(self->s.origin, self->absMax);
+    VectorCopy(self->state.origin, self->absMin);
+    VectorCopy(self->state.origin, self->absMax);
 }

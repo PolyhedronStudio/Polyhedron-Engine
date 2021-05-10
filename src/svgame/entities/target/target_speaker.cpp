@@ -31,10 +31,10 @@ void Use_Target_Speaker(entity_t* ent, entity_t* other, entity_t* activator)
 
     if (ent->spawnFlags & 3) {
         // looping sound toggles
-        if (ent->s.sound)
-            ent->s.sound = 0;   // turn it off
+        if (ent->state.sound)
+            ent->state.sound = 0;   // turn it off
         else
-            ent->s.sound = ent->noiseIndex;    // start it
+            ent->state.sound = ent->noiseIndex;    // start it
     }
     else {
         // normal sound
@@ -44,7 +44,7 @@ void Use_Target_Speaker(entity_t* ent, entity_t* other, entity_t* activator)
             chan = CHAN_VOICE;
         // use a positioned_sound, because this entity won't normally be
         // sent to any clients because it is invisible
-        gi.PositionedSound(ent->s.origin, ent, chan, ent->noiseIndex, ent->volume, ent->attenuation, 0);
+        gi.PositionedSound(ent->state.origin, ent, chan, ent->noiseIndex, ent->volume, ent->attenuation, 0);
     }
 }
 
@@ -53,7 +53,7 @@ void SP_target_speaker(entity_t* ent)
     char    buffer[MAX_QPATH];
 
     if (!st.noise) {
-        gi.DPrintf("target_speaker with no noise set at %s\n", Vec3ToString(ent->s.origin));
+        gi.DPrintf("target_speaker with no noise set at %s\n", Vec3ToString(ent->state.origin));
         return;
     }
     if (!strstr(st.noise, ".wav"))
@@ -72,7 +72,7 @@ void SP_target_speaker(entity_t* ent)
 
     // check for prestarted looping sound
     if (ent->spawnFlags & 1)
-        ent->s.sound = ent->noiseIndex;
+        ent->state.sound = ent->noiseIndex;
 
     ent->Use = Use_Target_Speaker;
 

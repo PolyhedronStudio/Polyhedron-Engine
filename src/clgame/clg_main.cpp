@@ -23,9 +23,9 @@
 // Core.
 //
 // Contains the function pointers being passed in from the engine.
-clgame_import_t clgi;
+ClientGameImport clgi;
 // Static export variable, lives as long as the client game dll lives.
-clgame_export_t clge;
+ClientGameExport clge;
 
 // Pointer to the actual client frame state.
 ClientState* cl = NULL;
@@ -93,7 +93,7 @@ cvar_t* vid_rtx = NULL;
 //extern "C" {
 //#endif
 
-q_exported clgame_export_t *GetClientGameAPI (clgame_import_t *clgimp)
+q_exported ClientGameExport *GetClientGameAPI (ClientGameImport *clgimp)
 {
     // Store a copy of the engine imported function pointer struct.
     clgi = *clgimp;

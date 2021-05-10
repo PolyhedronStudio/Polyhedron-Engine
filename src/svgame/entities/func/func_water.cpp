@@ -34,7 +34,7 @@ void SP_func_water(entity_t* self)
 {
     vec3_t  abs_movedir;
 
-    UTIL_SetMoveDir(self->s.angles, self->moveDirection);
+    UTIL_SetMoveDir(self->state.angles, self->moveDirection);
     self->moveType = MoveType::Push;
     self->solid = Solid::BSP;
     gi.SetModel(self, self->model);
@@ -55,7 +55,7 @@ void SP_func_water(entity_t* self)
     }
 
     // calculate second position
-    VectorCopy(self->s.origin, self->pos1);
+    VectorCopy(self->state.origin, self->pos1);
     abs_movedir[0] = fabs(self->moveDirection[0]);
     abs_movedir[1] = fabs(self->moveDirection[1]);
     abs_movedir[2] = fabs(self->moveDirection[2]);
@@ -64,15 +64,15 @@ void SP_func_water(entity_t* self)
 
     // if it starts open, switch the positions
     if (self->spawnFlags & DOOR_START_OPEN) {
-        VectorCopy(self->pos2, self->s.origin);
+        VectorCopy(self->pos2, self->state.origin);
         VectorCopy(self->pos1, self->pos2);
-        VectorCopy(self->s.origin, self->pos1);
+        VectorCopy(self->state.origin, self->pos1);
     }
 
     VectorCopy(self->pos1, self->moveInfo.start_origin);
-    VectorCopy(self->s.angles, self->moveInfo.start_angles);
+    VectorCopy(self->state.angles, self->moveInfo.start_angles);
     VectorCopy(self->pos2, self->moveInfo.end_origin);
-    VectorCopy(self->s.angles, self->moveInfo.end_angles);
+    VectorCopy(self->state.angles, self->moveInfo.end_angles);
 
     self->moveInfo.state = STATE_BOTTOM;
 

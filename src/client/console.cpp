@@ -461,7 +461,7 @@ void Con_Init(void)
     con_background = Cvar_Get("con_background", "conback", 0);
     con_background->changed = con_param_changed;
     con_scroll = Cvar_Get("con_scroll", "0", 0);
-    con_history = Cvar_Get("con_history", "0", 0);
+    con_history = Cvar_Get("con_history", "64", 0);
 
     IF_Init(&con.prompt.inputLine, 0, MAX_FIELD_TEXT - 1);
     IF_Init(&con.chatPrompt.inputLine, 0, MAX_FIELD_TEXT - 1);

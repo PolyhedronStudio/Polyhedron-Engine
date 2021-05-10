@@ -82,18 +82,18 @@ void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
 void SP_trigger_key(entity_t* self)
 {
     if (!st.item) {
-        gi.DPrintf("no key item for trigger_key at %s\n", Vec3ToString(self->s.origin));
+        gi.DPrintf("no key item for trigger_key at %s\n", Vec3ToString(self->state.origin));
         return;
     }
     self->item = FindItemByClassname(st.item);
 
     if (!self->item) {
-        gi.DPrintf("item %s not found for trigger_key at %s\n", st.item, Vec3ToString(self->s.origin));
+        gi.DPrintf("item %s not found for trigger_key at %s\n", st.item, Vec3ToString(self->state.origin));
         return;
     }
 
     if (!self->target) {
-        gi.DPrintf("%s at %s has no target\n", self->classname, Vec3ToString(self->s.origin));
+        gi.DPrintf("%s at %s has no target\n", self->classname, Vec3ToString(self->state.origin));
         return;
     }
 

@@ -167,7 +167,7 @@ void SV_LinkEntity(cm_t *cm, entity_t *ent)
 
     // set the abs box
     if (ent->solid == Solid::BSP &&
-        (ent->s.angles[0] || ent->s.angles[1] || ent->s.angles[2])) {
+        (ent->state.angles[0] || ent->state.angles[1] || ent->state.angles[2])) {
         // expand for rotation
         float   max, v;
         int     i;
@@ -182,13 +182,13 @@ void SV_LinkEntity(cm_t *cm, entity_t *ent)
                 max = v;
         }
         for (i = 0; i < 3; i++) {
-            ent->absMin[i] = ent->s.origin[i] - max;
-            ent->absMax[i] = ent->s.origin[i] + max;
+            ent->absMin[i] = ent->state.origin[i] - max;
+            ent->absMax[i] = ent->state.origin[i] + max;
         }
     } else {
         // normal
-        VectorAdd(ent->s.origin, ent->mins, ent->absMin);
-        VectorAdd(ent->s.origin, ent->maxs, ent->absMax);
+        VectorAdd(ent->state.origin, ent->mins, ent->absMin);
+        VectorAdd(ent->state.origin, ent->maxs, ent->absMax);
     }
 
     // because movement is clipped an epsilon away from an actual edge,
@@ -289,19 +289,19 @@ void PF_LinkEntity(entity_t *ent)
     switch (ent->solid) {
     case Solid::BoundingBox:
         if ((ent->svFlags & SVF_DEADMONSTER) || VectorCompare(ent->mins, ent->maxs)) {
-            ent->s.solid = 0;
+            ent->state.solid = 0;
             sent->solid32 = 0;
         } else {
-            ent->s.solid = MSG_PackSolid32(ent->mins, ent->maxs);
+            ent->state.solid = MSG_PackSolid32(ent->mins, ent->maxs);
             sent->solid32 = MSG_PackSolid32(ent->mins, ent->maxs);
         }
         break;
     case Solid::BSP:
-        ent->s.solid = PACKED_BSP;      // a Solid::BoundingBox will never create this value
+        ent->state.solid = PACKED_BSP;      // a Solid::BoundingBox will never create this value
         sent->solid32 = PACKED_BSP;     // FIXME: use 255?
         break;
     default:
-        ent->s.solid = 0;
+        ent->state.solid = 0;
         sent->solid32 = 0;
         break;
     }
@@ -310,7 +310,7 @@ void PF_LinkEntity(entity_t *ent)
 
     // if first time, make sure old_origin is valid
     if (!ent->linkCount) {
-        VectorCopy(ent->s.origin, ent->s.old_origin);
+        VectorCopy(ent->state.origin, ent->state.old_origin);
     }
     ent->linkCount++;
 
@@ -419,7 +419,7 @@ object of mins/maxs size.
 static mnode_t *SV_HullForEntity(entity_t *ent)
 {
     if (ent->solid == Solid::BSP) {
-        int i = ent->s.modelindex - 1;
+        int i = ent->state.modelindex - 1;
 
         // explicit hulls in the BSP model
         if (i <= 0 || i >= sv.cm.cache->nummodels)
@@ -458,7 +458,7 @@ int SV_PointContents(const vec3_t &p)
 
         // might intersect, so do an exact clip
         contents |= CM_TransformedPointContents(p, SV_HullForEntity(hit),
-                                                hit->s.origin, hit->s.angles);
+                                                hit->state.origin, hit->state.angles);
     }
 
     return contents;
@@ -515,7 +515,7 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
         // might intersect, so do an exact clip
         CM_TransformedBoxTrace(&trace, start, end, mins, maxs,
                                SV_HullForEntity(touch), contentmask,
-                               touch->s.origin, touch->s.angles);
+                               touch->state.origin, touch->state.angles);
 
         CM_ClipEntity(tr, &trace, touch);
     }

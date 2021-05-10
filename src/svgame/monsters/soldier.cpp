@@ -79,7 +79,7 @@ void soldier_idle(entity_t *self)
 
 void soldier_cock(entity_t *self)
 {
-    if (self->s.frame == FRAME_stand322)
+    if (self->state.frame == FRAME_stand322)
         gi.Sound(self, CHAN_WEAPON, sound_cock, 1, ATTN_IDLE, 0);
     else
         gi.Sound(self, CHAN_WEAPON, sound_cock, 1, ATTN_NORM, 0);
@@ -427,7 +427,7 @@ void soldier_pain(entity_t *self, entity_t *other, float kick, int damage)
     int     n;
 
     if (self->health < (self->maxHealth / 2))
-        self->s.skinnum |= 1;
+        self->state.skinnum |= 1;
 
     if (level.time < self->debouncePainTime) {
         if ((self->velocity[2] > 100) && ((self->monsterInfo.currentmove == &soldier_move_pain1) || (self->monsterInfo.currentmove == &soldier_move_pain2) || (self->monsterInfo.currentmove == &soldier_move_pain3)))
@@ -437,7 +437,7 @@ void soldier_pain(entity_t *self, entity_t *other, float kick, int damage)
 
     self->debouncePainTime = level.time + 3;
 
-    n = self->s.skinnum | 1;
+    n = self->state.skinnum | 1;
     if (n == 1)
         gi.Sound(self, CHAN_VOICE, sound_pain_light, 1, ATTN_NORM, 0);
     else if (n == 3)
@@ -482,20 +482,20 @@ void soldier_fire(entity_t *self, int flash_number)
     float   r, u;
     int     flash_index;
 
-    if (self->s.skinnum < 2)
+    if (self->state.skinnum < 2)
         flash_index = blaster_flash[flash_number];
-    else if (self->s.skinnum < 4)
+    else if (self->state.skinnum < 4)
         flash_index = shotgun_flash[flash_number];
     else
         flash_index = machinegun_flash[flash_number];
 
-    AngleVectors(self->s.angles, &forward, &right, NULL);
-    start = G_ProjectSource(self->s.origin, { 10.6 * 1.2, 7.7 * 1.2, 7.8 * 1.2 }, forward, right);
+    AngleVectors(self->state.angles, &forward, &right, NULL);
+    start = G_ProjectSource(self->state.origin, { 10.6 * 1.2, 7.7 * 1.2, 7.8 * 1.2 }, forward, right);
 
     if (flash_number == 5 || flash_number == 6) {
         VectorCopy(forward, aim);
     } else {
-        VectorCopy(self->enemy->s.origin, end);
+        VectorCopy(self->enemy->state.origin, end);
         end[2] += self->enemy->viewHeight;
         VectorSubtract(end, start, aim);
         vectoangles(aim, dir);
@@ -511,7 +511,7 @@ void soldier_fire(entity_t *self, int flash_number)
         VectorNormalize(aim);
     }
 
-    if (self->s.skinnum <= 1) {
+    if (self->state.skinnum <= 1) {
         //monster_fire_blaster(self, start, aim, 5, 600, flash_index, EF_BLASTER);
     } else {
         if (!(self->monsterInfo.aiflags & AI_HOLD_FRAME))
@@ -535,7 +535,7 @@ void soldier_fire1(entity_t *self)
 
 void soldier_attack1_refire1(entity_t *self)
 {
-    if (self->s.skinnum > 1)
+    if (self->state.skinnum > 1)
         return;
 
     if (self->enemy->health <= 0)
@@ -549,7 +549,7 @@ void soldier_attack1_refire1(entity_t *self)
 
 void soldier_attack1_refire2(entity_t *self)
 {
-    if (self->s.skinnum < 2)
+    if (self->state.skinnum < 2)
         return;
 
     if (self->enemy->health <= 0)
@@ -584,7 +584,7 @@ void soldier_fire2(entity_t *self)
 
 void soldier_attack2_refire1(entity_t *self)
 {
-    if (self->s.skinnum > 1)
+    if (self->state.skinnum > 1)
         return;
 
     if (self->enemy->health <= 0)
@@ -598,7 +598,7 @@ void soldier_attack2_refire1(entity_t *self)
 
 void soldier_attack2_refire2(entity_t *self)
 {
-    if (self->s.skinnum < 2)
+    if (self->state.skinnum < 2)
         return;
 
     if (self->enemy->health <= 0)
@@ -768,7 +768,7 @@ mmove_t soldier_move_attack6 = {FRAME_runs01, FRAME_runs14, soldier_frames_attac
 
 void soldier_attack(entity_t *self)
 {
-    if (self->s.skinnum < 4) {
+    if (self->state.skinnum < 4) {
         if (random() < 0.5)
             self->monsterInfo.currentmove = &soldier_move_attack1;
         else
@@ -1145,16 +1145,16 @@ void soldier_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int da
 // regular death
     self->deadFlag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
-    self->s.skinnum |= 1;
+    self->state.skinnum |= 1;
 
-    if (self->s.skinnum == 1)
+    if (self->state.skinnum == 1)
         gi.Sound(self, CHAN_VOICE, sound_death_light, 1, ATTN_NORM, 0);
-    else if (self->s.skinnum == 3)
+    else if (self->state.skinnum == 3)
         gi.Sound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
-    else // (self->s.skinnum == 5)
+    else // (self->state.skinnum == 5)
         gi.Sound(self, CHAN_VOICE, sound_death_ss, 1, ATTN_NORM, 0);
 
-    if (fabs((self->s.origin[2] + self->viewHeight) - point[2]) <= 4) {
+    if (fabs((self->state.origin[2] + self->viewHeight) - point[2]) <= 4) {
         // head shot
         self->monsterInfo.currentmove = &soldier_move_death3;
         return;
@@ -1181,7 +1181,7 @@ void soldier_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int da
 void SP_monster_soldier_x(entity_t *self)
 {
 
-    self->s.modelindex = gi.ModelIndex("models/monsters/soldier/tris.md2");
+    self->state.modelindex = gi.ModelIndex("models/monsters/soldier/tris.md2");
     self->monsterInfo.scale = MODEL_SCALE;
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 32);
@@ -1239,7 +1239,7 @@ void SP_monster_soldier_light(entity_t *self)
     gi.SoundIndex("misc/lasfly.wav");
     gi.SoundIndex("soldier/solatck2.wav");
 
-    self->s.skinnum = 0;
+    self->state.skinnum = 0;
     self->health = 20;
     self->gibHealth = -30;
 }
@@ -1263,7 +1263,7 @@ void SP_monster_soldier(entity_t *self)
 	sound_step4 = gi.SoundIndex("player/step4.wav");
     gi.SoundIndex("soldier/solatck1.wav");
 
-    self->s.skinnum = 2;
+    self->state.skinnum = 2;
     self->health = 30;
     self->gibHealth = -30;
 }
@@ -1287,7 +1287,7 @@ void SP_monster_soldier_ss(entity_t *self)
 	sound_step4 = gi.SoundIndex("player/step4.wav");
     gi.SoundIndex("soldier/solatck3.wav");
 
-    self->s.skinnum = 4;
+    self->state.skinnum = 4;
     self->health = 40;
     self->gibHealth = -30;
 }

@@ -52,7 +52,7 @@ void HUD_MoveClientToIntermission(entity_t *ent)
 
     // Copy over the previously fetched map intermission entity origin into
     // the client player states positions.
-    ent->s.origin = level.intermission_origin;
+    ent->state.origin = level.intermission_origin;
     ent->client->playerState.pmove.origin = level.intermission_origin;
     ent->client->playerState.pmove.viewAngles = level.intermission_angle;
     // Setup the rest of the client player state.
@@ -62,12 +62,12 @@ void HUD_MoveClientToIntermission(entity_t *ent)
     ent->client->playerState.rdflags &= ~RDF_UNDERWATER;
 
     ent->viewHeight = 0;
-    ent->s.modelindex = 0;
-    ent->s.modelindex2 = 0;
-    ent->s.modelindex3 = 0;
-    ent->s.modelindex = 0;
-    ent->s.effects = 0;
-    ent->s.sound = 0;
+    ent->state.modelindex = 0;
+    ent->state.modelindex2 = 0;
+    ent->state.modelindex3 = 0;
+    ent->state.modelindex = 0;
+    ent->state.effects = 0;
+    ent->state.sound = 0;
     ent->solid = Solid::Not;
 
     // Add the layout in case of a deathmatch or co-op gamemode.
@@ -158,8 +158,8 @@ void HUD_BeginIntermission(entity_t *targ)
         }
     }
 
-    level.intermission_origin = intermissionEntity->s.origin, level.intermission_origin;
-    level.intermission_angle = intermissionEntity->s.angles;
+    level.intermission_origin = intermissionEntity->state.origin, level.intermission_origin;
+    level.intermission_angle = intermissionEntity->state.angles;
 
     // Initiate the client intermission mode for all clients.
     // (MoveType = PM_FREEZE, positioned at intermission entity view values.)

@@ -36,7 +36,7 @@ void Blaster_Fire(entity_t* ent, const vec3_t &g_offset, int damage, qboolean hy
     AngleVectors(ent->client->aimAngles, &forward, &right, NULL);
     VectorSet(offset, 24, 8, ent->viewHeight - 8);
     VectorAdd(offset, g_offset, offset);
-    start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
+    start = P_ProjectSource(ent->client, ent->state.origin, offset, forward, right);
 
     VectorScale(forward, -2, ent->client->kickOrigin);
     ent->client->kickAngles[0] = -1;
@@ -47,7 +47,7 @@ void Blaster_Fire(entity_t* ent, const vec3_t &g_offset, int damage, qboolean hy
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
-    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->state.origin, MULTICAST_PVS);
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 }

@@ -674,8 +674,8 @@ entity_t *PlayerTrail_LastSpot(void);
 //
 // g_player.c
 //
-void player_pain(entity_t *self, entity_t *other, float kick, int damage);
-void player_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int damage, const vec3_t& point);
+void Player_Pain(entity_t *self, entity_t *other, float kick, int damage);
+void Player_Die(entity_t *self, entity_t *inflictor, entity_t *attacker, int damage, const vec3_t& point);
 
 //
 // g_svcmds.c
@@ -735,7 +735,7 @@ void GetChaseTarget(entity_t *ent);
 
 //============================================================================
 
-// client_t->anim_priority
+// client_t->animation.priorityAnimation
 #define ANIM_BASIC      0       // stand / run
 #define ANIM_WAVE       1
 #define ANIM_JUMP       2
@@ -854,10 +854,16 @@ struct gclient_s {
     int         machinegunShots;
 
     // animation vars
-    int         anim_end;
-    int         anim_priority;
-    qboolean    anim_duck;
-    qboolean    anim_run;
+    struct {
+        //int         animation.endFrame;
+        //int         animation.priorityAnimation;
+        //qboolean    anim_duck;
+        //qboolean    anim_run;
+        int         endFrame;
+        int         priorityAnimation;
+        qboolean    isDucking;
+        qboolean    isRunning;
+    } animation;
 
     // Weapon Sound.
     int         weaponSound;
@@ -884,7 +890,7 @@ struct gclient_s {
 
 
 struct entity_s {
-    EntityState  s;
+    EntityState  state;
     struct gclient_s    *client;    // NULL if not a player
                                     // the server expects the first part
                                     // of gclient_s to be a PlayerState

@@ -28,9 +28,9 @@ void teleporter_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface
     // unlink to make sure it can't possibly interfere with KillBox
     gi.UnlinkEntity(other);
 
-    VectorCopy(dest->s.origin, other->s.origin);
-    VectorCopy(dest->s.origin, other->s.old_origin);
-    other->s.origin[2] += 10;
+    VectorCopy(dest->state.origin, other->state.origin);
+    VectorCopy(dest->state.origin, other->state.old_origin);
+    other->state.origin[2] += 10;
 
     // clear the velocity and hold them in place briefly
     VectorClear(other->velocity);
@@ -38,15 +38,15 @@ void teleporter_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface
     other->client->playerState.pmove.flags |= PMF_TIME_TELEPORT;
 
     // draw the teleport splash at source and on the player
-    self->owner->s.event = EV_PLAYER_TELEPORT;
-    other->s.event = EV_PLAYER_TELEPORT;
+    self->owner->state.event = EV_PLAYER_TELEPORT;
+    other->state.event = EV_PLAYER_TELEPORT;
 
     // set angles
     for (i = 0; i < 3; i++) {
-        other->client->playerState.pmove.deltaAngles[i] = dest->s.angles[i] - other->client->respawn.commandViewAngles[i];
+        other->client->playerState.pmove.deltaAngles[i] = dest->state.angles[i] - other->client->respawn.commandViewAngles[i];
     }
 
-    VectorClear(other->s.angles);
+    VectorClear(other->state.angles);
     VectorClear(other->client->playerState.pmove.viewAngles);
     VectorClear(other->client->aimAngles);
 
@@ -70,9 +70,9 @@ void SP_misc_teleporter(entity_t* ent)
     }
 
     gi.SetModel(ent, "models/objects/dmspot/tris.md2");
-    ent->s.skinnum = 1;
-    ent->s.effects = EntityEffectType::Teleporter;
-    ent->s.sound = gi.SoundIndex("world/amb10.wav");
+    ent->state.skinnum = 1;
+    ent->state.effects = EntityEffectType::Teleporter;
+    ent->state.sound = gi.SoundIndex("world/amb10.wav");
     ent->solid = Solid::BoundingBox;
 
     VectorSet(ent->mins, -32, -32, -24);
@@ -84,7 +84,7 @@ void SP_misc_teleporter(entity_t* ent)
     trig->solid = Solid::Trigger;
     trig->target = ent->target;
     trig->owner = ent;
-    VectorCopy(ent->s.origin, trig->s.origin);
+    VectorCopy(ent->state.origin, trig->state.origin);
     VectorSet(trig->mins, -8, -8, 8);
     VectorSet(trig->maxs, 8, 8, 24);
     gi.LinkEntity(trig);

@@ -54,7 +54,7 @@ entity_t *SV_TestEntityPosition(entity_t *ent)
         mask = ent->clipMask;
     else
         mask = CONTENTS_MASK_SOLID;
-    trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, mask);
+    trace = gi.Trace(ent->state.origin, ent->mins, ent->maxs, ent->state.origin, ent, mask);
 
     if (trace.startSolid)
         return g_edicts;
@@ -204,9 +204,9 @@ int SV_FlyMove(entity_t *ent, float time, int mask)
     ent->groundEntityPtr = NULL;
     for (bumpcount = 0 ; bumpcount < numbumps ; bumpcount++) {
         for (i = 0 ; i < 3 ; i++)
-            end[i] = ent->s.origin[i] + time_left * ent->velocity[i];
+            end[i] = ent->state.origin[i] + time_left * ent->velocity[i];
 
-        trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, end, ent, mask);
+        trace = gi.Trace(ent->state.origin, ent->mins, ent->maxs, end, ent, mask);
 
         if (trace.allSolid) {
             // entity is trapped in another solid
@@ -216,7 +216,7 @@ int SV_FlyMove(entity_t *ent, float time, int mask)
 
         if (trace.fraction > 0) {
             // actually covered some distance
-            VectorCopy(trace.endPosition, ent->s.origin);
+            VectorCopy(trace.endPosition, ent->state.origin);
             VectorCopy(ent->velocity, original_velocity);
             numplanes = 0;
         }
@@ -334,7 +334,7 @@ trace_t SV_PushEntity(entity_t *ent, vec3_t push)
     vec3_t  end;
     int     mask;
 
-    VectorCopy(ent->s.origin, start);
+    VectorCopy(ent->state.origin, start);
     VectorAdd(start, push, end);
 
 retry:
@@ -345,7 +345,7 @@ retry:
 
     trace = gi.Trace(start, ent->mins, ent->maxs, end, ent, mask);
 
-    VectorCopy(trace.endPosition, ent->s.origin);
+    VectorCopy(trace.endPosition, ent->state.origin);
     gi.LinkEntity(ent);
 
     if (trace.fraction != 1.0) {
@@ -354,7 +354,7 @@ retry:
         // if the pushed entity went away and the pusher is still there
         if (!trace.ent->inUse && ent->inUse) {
             // move the pusher back and try again
-            VectorCopy(start, ent->s.origin);
+            VectorCopy(start, ent->state.origin);
             gi.LinkEntity(ent);
             goto retry;
         }
@@ -407,8 +407,8 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
 
 // save the pusher's original position
     pushed_p->ent = pusher;
-    VectorCopy(pusher->s.origin, pushed_p->origin);
-    VectorCopy(pusher->s.angles, pushed_p->angles);
+    VectorCopy(pusher->state.origin, pushed_p->origin);
+    VectorCopy(pusher->state.angles, pushed_p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
     if (pusher->client)
         pushed_p->deltayaw = pusher->client->playerState.pmove.deltaAngles[vec3_t::Yaw];
@@ -416,8 +416,8 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
     pushed_p++;
 
 // move the pusher to it's final position
-    VectorAdd(pusher->s.origin, move, pusher->s.origin);
-    VectorAdd(pusher->s.angles, amove, pusher->s.angles);
+    VectorAdd(pusher->state.origin, move, pusher->state.origin);
+    VectorAdd(pusher->state.angles, amove, pusher->state.angles);
     gi.LinkEntity(pusher);
 
 // see if any solid entities are inside the final position
@@ -455,8 +455,8 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
         if ((pusher->moveType == MoveType::Push) || (check->groundEntityPtr == pusher)) {
             // move this entity
             pushed_p->ent = check;
-            VectorCopy(check->s.origin, pushed_p->origin);
-            VectorCopy(check->s.angles, pushed_p->angles);
+            VectorCopy(check->state.origin, pushed_p->origin);
+            VectorCopy(check->state.angles, pushed_p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
             if (check->client)
                 pushed_p->deltayaw = check->client->playerState.pmove.deltaAngles[vec3_t::Yaw];
@@ -464,7 +464,7 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
             pushed_p++;
 
             // try moving the contacted entity
-            VectorAdd(check->s.origin, move, check->s.origin);
+            VectorAdd(check->state.origin, move, check->state.origin);
 #if USE_SMOOTH_DELTA_ANGLES
             if (check->client) {
                 // FIXME: doesn't rotate monsters?
@@ -474,12 +474,12 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
 #endif
 
             // figure movement due to the pusher's amove
-            VectorSubtract(check->s.origin, pusher->s.origin, org);
+            VectorSubtract(check->state.origin, pusher->state.origin, org);
             org2[0] = DotProduct(org, forward);
             org2[1] = -DotProduct(org, right);
             org2[2] = DotProduct(org, up);
             VectorSubtract(org2, org, move2);
-            VectorAdd(check->s.origin, move2, check->s.origin);
+            VectorAdd(check->state.origin, move2, check->state.origin);
 
             // may have pushed them off an edge
             if (check->groundEntityPtr != pusher)
@@ -496,7 +496,7 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
             // if it is ok to leave in the old position, do it
             // this is only relevent for riding entities, not pushed
             // FIXME: this doesn't acount for rotation
-            check->s.origin -= move;
+            check->state.origin -= move;
             block = SV_TestEntityPosition(check);
             if (!block) {
                 pushed_p--;
@@ -511,8 +511,8 @@ qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
         // go backwards, so if the same entity was pushed
         // twice, it goes back to the original position
         for (p = pushed_p - 1 ; p >= pushed ; p--) {
-            p->ent->s.origin = p->origin;
-            p->ent->s.angles = p->angles;
+            p->ent->state.origin = p->origin;
+            p->ent->state.angles = p->angles;
 #if USE_SMOOTH_DELTA_ANGLES
             if (p->ent->client) {
                 p->ent->client->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltayaw;
@@ -622,8 +622,8 @@ void SV_Physics_Noclip(entity_t *ent)
     if (!ent->inUse)
         return;
 
-    ent->s.angles = vec3_fmaf(ent->s.angles, FRAMETIME, ent->avelocity);
-    ent->s.origin = vec3_fmaf(ent->s.origin, FRAMETIME, ent->velocity);
+    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->avelocity);
+    ent->state.origin = vec3_fmaf(ent->state.origin, FRAMETIME, ent->velocity);
 
     gi.LinkEntity(ent);
 }
@@ -674,8 +674,8 @@ void SV_Physics_Toss(entity_t *ent)
     if (ent->groundEntityPtr)
         return;
 
-    // Store ent->s.origin as the old origin
-    old_origin = ent->s.origin;
+    // Store ent->state.origin as the old origin
+    old_origin = ent->state.origin;
 
     SV_CheckVelocity(ent);
 
@@ -685,7 +685,7 @@ void SV_Physics_Toss(entity_t *ent)
         SV_AddGravity(ent);
 
     // Move angles
-    ent->s.angles = vec3_fmaf(ent->s.angles, FRAMETIME, ent->avelocity);
+    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->avelocity);
 
     // Move origin
     move = vec3_scale(ent->velocity, FRAMETIME);
@@ -717,7 +717,7 @@ void SV_Physics_Toss(entity_t *ent)
 
     // Check for water transition
     wasInWater = (ent->waterType & CONTENTS_MASK_LIQUID);
-    ent->waterType = gi.PointContents(ent->s.origin);
+    ent->waterType = gi.PointContents(ent->state.origin);
     isInWater = ent->waterType & CONTENTS_MASK_LIQUID;
 
     if (isInWater)
@@ -728,12 +728,12 @@ void SV_Physics_Toss(entity_t *ent)
     if (!wasInWater && isInWater)
         gi.PositionedSound(old_origin, g_edicts, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
     else if (wasInWater && !isInWater)
-        gi.PositionedSound(ent->s.origin, g_edicts, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(ent->state.origin, g_edicts, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 
     // Move teamslaves
     for (slave = ent->teamChainPtr; slave; slave = slave->teamChainPtr) {
         // Set origin and link them in.
-        slave->s.origin = ent->s.origin;
+        slave->state.origin = ent->state.origin;
         gi.LinkEntity(slave);
     }
 }
@@ -769,7 +769,7 @@ void SV_AddRotationalFriction(entity_t *ent)
     int     n;
     float   adjustment;
 
-    ent->s.angles = vec3_fmaf(ent->s.angles, FRAMETIME, ent->avelocity);
+    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->avelocity);
     adjustment = FRAMETIME * sv_stopspeed * sv_friction;
     for (n = 0; n < 3; n++) {
         if (ent->avelocity[n] > 0) {

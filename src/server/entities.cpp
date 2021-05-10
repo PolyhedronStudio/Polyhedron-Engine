@@ -340,8 +340,8 @@ void SV_BuildClientFrame(client_t *client)
             continue;
 
         // ignore ents without visible models unless they have an effect
-        if (!ent->s.modelindex && !ent->s.effects && !ent->s.sound) {
-            if (!ent->s.event) {
+        if (!ent->state.modelindex && !ent->state.effects && !ent->state.sound) {
+            if (!ent->state.event) {
                 continue;
             }
         }
@@ -362,7 +362,7 @@ void SV_BuildClientFrame(client_t *client)
             if (ent_visible)
             {
                 // beams just check one point for PHS
-                if (ent->s.renderfx & RenderEffects::Beam) {
+                if (ent->state.renderfx & RenderEffects::Beam) {
                     l = ent->clusterNumbers[0];
                     if (!Q_IsBitSet(clientphs, l))
                         ent_visible = false;
@@ -372,12 +372,12 @@ void SV_BuildClientFrame(client_t *client)
                         ent_visible = false;
                     }
 
-                    if (!ent->s.modelindex) {
+                    if (!ent->state.modelindex) {
                         // don't send sounds if they will be attenuated away
                         vec3_t    delta;
                         float    len;
 
-                        delta = org - ent->s.origin;
+                        delta = org - ent->state.origin;
                         len = vec3_length(delta);
                         if (len > 400)
                             ent_visible = false;
@@ -386,16 +386,16 @@ void SV_BuildClientFrame(client_t *client)
             }
         }
 
-        if(!ent_visible && (!sv_novis->integer || !ent->s.modelindex))
+        if(!ent_visible && (!sv_novis->integer || !ent->state.modelindex))
             continue;
         
-		if (ent->s.number != e) {
-			Com_WPrintf("%s: fixing ent->s.number: %d to %d\n",
-				__func__, ent->s.number, e);
-			ent->s.number = e;
+		if (ent->state.number != e) {
+			Com_WPrintf("%s: fixing ent->state.number: %d to %d\n",
+				__func__, ent->state.number, e);
+			ent->state.number = e;
 		}
 
-		memcpy(&es, &ent->s, sizeof(EntityState));
+		memcpy(&es, &ent->state, sizeof(EntityState));
 
 		if (!ent_visible) {
 			// if the entity is invisible, kill its sound

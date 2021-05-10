@@ -165,7 +165,7 @@ extern "C" {
         // finish up its current frame loop iteration.
         void        (*PostRenderView) (void);
 
-    } clgame_export_t;
+    } ClientGameExport;
 
     // Structure containing all the engine function pointers for the client dll to work with.
     typedef struct clg_import_s {
@@ -636,10 +636,10 @@ extern "C" {
         ClientState *cl;
         // Client Shared.
         ClientShared* cs;
-    } clgame_import_t;
+    } ClientGameImport;
 
     // Function pointer type for handling the actual import function.
-    typedef clgame_export_t (*GetClientGameAPI_t) (clgame_import_t);
+    typedef ClientGameExport (*GetClientGameAPI_t) (ClientGameImport);
 #ifdef __cplusplus
 };  // Extern C.
 #endif

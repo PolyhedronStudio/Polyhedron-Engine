@@ -503,7 +503,7 @@ void G_RunFrame(void)
 
         level.current_entity = ent;
 
-        VectorCopy(ent->s.origin, ent->s.old_origin);
+        VectorCopy(ent->state.origin, ent->state.old_origin);
 
         // if the ground entity moved, make sure we are still on it
         if ((ent->groundEntityPtr) && (ent->groundEntityPtr->linkCount != ent->groundEntityLinkCount)) {
@@ -590,7 +590,7 @@ entity_t* G_FindEntitiesWithinRadius(entity_t* from, vec3_t org, float rad)
         if (from->solid == Solid::Not)
             continue;
         for (j = 0; j < 3; j++)
-            eorg[j] = org[j] - (from->s.origin[j] + (from->mins[j] + from->maxs[j]) * 0.5);
+            eorg[j] = org[j] - (from->state.origin[j] + (from->mins[j] + from->maxs[j]) * 0.5);
         if (VectorLength(eorg) > rad)
             continue;
         return from;
@@ -648,7 +648,7 @@ void G_InitEntity(entity_t* e)
     e->inUse = true;
     e->classname = "noclass";
     e->gravity = 1.0;
-    e->s.number = e - g_edicts;
+    e->state.number = e - g_edicts;
 }
 
 /*

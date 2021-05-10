@@ -26,24 +26,24 @@ STOP mean it will stop moving instead of pushing entities
 
 void rotating_blocked(entity_t* self, entity_t* other)
 {
-    T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
 void rotating_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
 {
     if (self->avelocity[0] || self->avelocity[1] || self->avelocity[2])
-        T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
 void rotating_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     if (!VectorCompare(self->avelocity, vec3_origin)) {
-        self->s.sound = 0;
+        self->state.sound = 0;
         VectorClear(self->avelocity);
         self->Touch = NULL;
     }
     else {
-        self->s.sound = self->moveInfo.sound_middle;
+        self->state.sound = self->moveInfo.sound_middle;
         VectorScale(self->moveDirection, self->speed, self->avelocity);
         if (self->spawnFlags & 16)
             self->Touch = rotating_touch;
@@ -86,9 +86,9 @@ void SP_func_rotating(entity_t* ent)
         ent->Use(ent, NULL, NULL);
 
     if (ent->spawnFlags & 64)
-        ent->s.effects |= EntityEffectType::AnimCycleAll2hz;
+        ent->state.effects |= EntityEffectType::AnimCycleAll2hz;
     if (ent->spawnFlags & 128)
-        ent->s.effects |= EntityEffectType::AnimCycleAll30hz;
+        ent->state.effects |= EntityEffectType::AnimCycleAll30hz;
 
     gi.SetModel(ent, ent->model);
     gi.LinkEntity(ent);

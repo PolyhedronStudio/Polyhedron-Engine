@@ -78,27 +78,27 @@ void Machinegun_Fire(entity_t* ent)
     VectorAdd(ent->client->aimAngles, ent->client->kickAngles, angles);
     AngleVectors(angles, &forward, &right, NULL);
     VectorSet(offset, 0, 8, ent->viewHeight - 8);
-    start = P_ProjectSource(ent->client, ent->s.origin, offset, forward, right);
+    start = P_ProjectSource(ent->client, ent->state.origin, offset, forward, right);
     fire_bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
 
     gi.WriteByte(svg_muzzleflash);
     gi.WriteShort(ent - g_edicts);
     gi.WriteByte(MuzzleFlashType::MachineGun | is_silenced);
-    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
+    gi.Multicast(&ent->state.origin, MULTICAST_PVS);
 
     PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
         ent->client->persistent.inventory[ent->client->ammoIndex]--;
 
-    ent->client->anim_priority = ANIM_ATTACK;
+    ent->client->animation.priorityAnimation = ANIM_ATTACK;
     if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
-        ent->s.frame = FRAME_crattak1 - (int)(random() + 0.25);
-        ent->client->anim_end = FRAME_crattak9;
+        ent->state.frame = FRAME_crattak1 - (int)(random() + 0.25);
+        ent->client->animation.endFrame = FRAME_crattak9;
     }
     else {
-        ent->s.frame = FRAME_attack1 - (int)(random() + 0.25);
-        ent->client->anim_end = FRAME_attack8;
+        ent->state.frame = FRAME_attack1 - (int)(random() + 0.25);
+        ent->client->animation.endFrame = FRAME_attack8;
     }
 }
 

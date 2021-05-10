@@ -24,7 +24,7 @@ void target_earthquake_think(entity_t* self)
     entity_t* e;
 
     if (self->lastMoveTime < level.time) {
-        gi.PositionedSound(self->s.origin, self, CHAN_AUTO, self->noiseIndex, 1.0, ATTN_NONE, 0);
+        gi.PositionedSound(self->state.origin, self, CHAN_AUTO, self->noiseIndex, 1.0, ATTN_NONE, 0);
         self->lastMoveTime = level.time + 0.5;
     }
 
@@ -57,7 +57,7 @@ void target_earthquake_use(entity_t* self, entity_t* other, entity_t* activator)
 void SP_target_earthquake(entity_t* self)
 {
     if (!self->targetName)
-        gi.DPrintf("untargeted %s at %s\n", self->classname, Vec3ToString(self->s.origin));
+        gi.DPrintf("untargeted %s at %s\n", self->classname, Vec3ToString(self->state.origin));
 
     if (!self->count)
         self->count = 5;

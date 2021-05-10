@@ -37,7 +37,7 @@ qboolean CanDamage(entity_t *targ, entity_t *inflictor)
     if (targ->moveType == MoveType::Push) {
         VectorAdd(targ->absMin, targ->absMax, dest);
         VectorScale(dest, 0.5, dest);
-        trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+        trace = gi.Trace(inflictor->state.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
         if (trace.fraction == 1.0)
             return true;
         if (trace.ent == targ)
@@ -45,35 +45,35 @@ qboolean CanDamage(entity_t *targ, entity_t *inflictor)
         return false;
     }
 
-    trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, targ->s.origin, inflictor, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(inflictor->state.origin, vec3_origin, vec3_origin, targ->state.origin, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
-    VectorCopy(targ->s.origin, dest);
+    VectorCopy(targ->state.origin, dest);
     dest[0] += 15.0;
     dest[1] += 15.0;
-    trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(inflictor->state.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
-    VectorCopy(targ->s.origin, dest);
+    VectorCopy(targ->state.origin, dest);
     dest[0] += 15.0;
     dest[1] -= 15.0;
-    trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(inflictor->state.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
-    VectorCopy(targ->s.origin, dest);
+    VectorCopy(targ->state.origin, dest);
     dest[0] -= 15.0;
     dest[1] += 15.0;
-    trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(inflictor->state.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
-    VectorCopy(targ->s.origin, dest);
+    VectorCopy(targ->state.origin, dest);
     dest[0] -= 15.0;
     dest[1] -= 15.0;
-    trace = gi.Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = gi.Trace(inflictor->state.origin, vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
@@ -501,7 +501,7 @@ void T_RadiusDamage(entity_t *inflictor, entity_t *attacker, float damage, entit
     }
 
     // Find entities within radius.
-    while ((ent = G_FindEntitiesWithinRadius(ent, inflictor->s.origin, radius)) != NULL) {
+    while ((ent = G_FindEntitiesWithinRadius(ent, inflictor->state.origin, radius)) != NULL) {
         // Continue in case this entity has to be ignored from applying damage.
         if (ent == ignore)
             continue;
@@ -511,8 +511,8 @@ void T_RadiusDamage(entity_t *inflictor, entity_t *attacker, float damage, entit
 
         // Calculate damage points.
         v = ent->mins + ent->maxs, v;
-        v = vec3_fmaf(ent->s.origin, 0.5, v);
-        v -= inflictor->s.origin;
+        v = vec3_fmaf(ent->state.origin, 0.5, v);
+        v -= inflictor->state.origin;
         points = damage - 0.5 * vec3_length(v);
 
         // In case the attacker is the own entity, half damage.
@@ -524,10 +524,10 @@ void T_RadiusDamage(entity_t *inflictor, entity_t *attacker, float damage, entit
             // Ensure whether we CAN actually apply damage.
             if (CanDamage(ent, inflictor)) {
                 // Calculate direcion.
-                dir = ent->s.origin - inflictor->s.origin;
+                dir = ent->state.origin - inflictor->state.origin;
 
                 // Apply damages.
-                T_Damage(ent, inflictor, attacker, dir, inflictor->s.origin, vec3_zero(), (int)points, (int)points, DAMAGE_RADIUS, mod);
+                T_Damage(ent, inflictor, attacker, dir, inflictor->state.origin, vec3_zero(), (int)points, (int)points, DAMAGE_RADIUS, mod);
             }
         }
     }

@@ -68,11 +68,11 @@ void M_CheckGround(entity_t *ent)
     }
 
 // if the hull point one-quarter unit down is solid the entity is on ground
-    point[0] = ent->s.origin[0];
-    point[1] = ent->s.origin[1];
-    point[2] = ent->s.origin[2] - 0.25;
+    point[0] = ent->state.origin[0];
+    point[1] = ent->state.origin[1];
+    point[2] = ent->state.origin[2] - 0.25;
 
-    trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, point, ent, CONTENTS_MASK_MONSTERSOLID);
+    trace = gi.Trace(ent->state.origin, ent->mins, ent->maxs, point, ent, CONTENTS_MASK_MONSTERSOLID);
 
     // check steepness
     if (trace.plane.normal[2] < 0.7 && !trace.startSolid) {
@@ -83,9 +83,9 @@ void M_CheckGround(entity_t *ent)
 //  ent->groundEntityPtr = trace.ent;
 //  ent->groundEntityLinkCount = trace.ent->linkCount;
 //  if (!trace.startSolid && !trace.allSolid)
-//      VectorCopy (trace.endPosition, ent->s.origin);
+//      VectorCopy (trace.endPosition, ent->state.origin);
     if (!trace.startSolid && !trace.allSolid) {
-        VectorCopy(trace.endPosition, ent->s.origin);
+        VectorCopy(trace.endPosition, ent->state.origin);
         ent->groundEntityPtr = trace.ent;
         ent->groundEntityLinkCount = trace.ent->linkCount;
         ent->velocity[2] = 0;
@@ -101,9 +101,9 @@ void M_CatagorizePosition(entity_t *ent)
 //
 // get waterlevel
 //
-    point[0] = ent->s.origin[0];
-    point[1] = ent->s.origin[1];
-    point[2] = ent->s.origin[2] + ent->mins[2] + 1;
+    point[0] = ent->state.origin[0];
+    point[1] = ent->state.origin[1];
+    point[2] = ent->state.origin[2] + ent->mins[2] + 1;
     cont = gi.PointContents(point);
 
     if (!(cont & CONTENTS_MASK_LIQUID)) {
@@ -141,7 +141,7 @@ void M_WorldEffects(entity_t *ent)
                     dmg = 2 + 2 * floor(level.time - ent->air_finished);
                     if (dmg > 15)
                         dmg = 15;
-                    T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
+                    T_Damage(ent, world, world, vec3_origin, ent->state.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
                     ent->debouncePainTime = level.time + 1;
                 }
             }
@@ -154,7 +154,7 @@ void M_WorldEffects(entity_t *ent)
                     dmg = 2 + 2 * floor(level.time - ent->air_finished);
                     if (dmg > 15)
                         dmg = 15;
-                    T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
+                    T_Damage(ent, world, world, vec3_origin, ent->state.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
                     ent->debouncePainTime = level.time + 1;
                 }
             }
@@ -172,13 +172,13 @@ void M_WorldEffects(entity_t *ent)
     if ((ent->waterType & CONTENTS_LAVA) && !(ent->flags & FL_IMMUNE_LAVA)) {
         if (ent->debounceDamageTime < level.time) {
             ent->debounceDamageTime = level.time + 0.2;
-            T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 10 * ent->waterLevel, 0, 0, MOD_LAVA);
+            T_Damage(ent, world, world, vec3_origin, ent->state.origin, vec3_origin, 10 * ent->waterLevel, 0, 0, MOD_LAVA);
         }
     }
     if ((ent->waterType & CONTENTS_SLIME) && !(ent->flags & FL_IMMUNE_SLIME)) {
         if (ent->debounceDamageTime < level.time) {
             ent->debounceDamageTime = level.time + 1;
-            T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 4 * ent->waterLevel, 0, 0, MOD_SLIME);
+            T_Damage(ent, world, world, vec3_origin, ent->state.origin, vec3_origin, 4 * ent->waterLevel, 0, 0, MOD_SLIME);
         }
     }
 
@@ -206,16 +206,16 @@ void M_droptofloor(entity_t *ent)
     vec3_t      end;
     trace_t     trace;
 
-    ent->s.origin[2] += 1;
-    VectorCopy(ent->s.origin, end);
+    ent->state.origin[2] += 1;
+    VectorCopy(ent->state.origin, end);
     end[2] -= 256;
 
-    trace = gi.Trace(ent->s.origin, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
+    trace = gi.Trace(ent->state.origin, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
 
     if (trace.fraction == 1 || trace.allSolid)
         return;
 
-    VectorCopy(trace.endPosition, ent->s.origin);
+    VectorCopy(trace.endPosition, ent->state.origin);
 
     gi.LinkEntity(ent);
     M_CheckGround(ent);
@@ -225,7 +225,7 @@ void M_droptofloor(entity_t *ent)
 
 void M_SetEffects(entity_t *ent)
 {
-    ent->s.renderfx &= ~(RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell);
+    ent->state.renderfx &= ~(RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell);
 }
 
 
@@ -238,10 +238,10 @@ void M_MoveFrame(entity_t *self)
     self->nextThink = level.time + FRAMETIME;
 
     if ((self->monsterInfo.nextframe) && (self->monsterInfo.nextframe >= move->firstframe) && (self->monsterInfo.nextframe <= move->lastFrame)) {
-        self->s.frame = self->monsterInfo.nextframe;
+        self->state.frame = self->monsterInfo.nextframe;
         self->monsterInfo.nextframe = 0;
     } else {
-        if (self->s.frame == move->lastFrame) {
+        if (self->state.frame == move->lastFrame) {
             if (move->endfunc) {
                 move->endfunc(self);
 
@@ -254,19 +254,19 @@ void M_MoveFrame(entity_t *self)
             }
         }
 
-        if (self->s.frame < move->firstframe || self->s.frame > move->lastFrame) {
+        if (self->state.frame < move->firstframe || self->state.frame > move->lastFrame) {
             self->monsterInfo.aiflags &= ~AI_HOLD_FRAME;
-            self->s.frame = move->firstframe;
+            self->state.frame = move->firstframe;
         } else {
             if (!(self->monsterInfo.aiflags & AI_HOLD_FRAME)) {
-                self->s.frame++;
-                if (self->s.frame > move->lastFrame)
-                    self->s.frame = move->firstframe;
+                self->state.frame++;
+                if (self->state.frame > move->lastFrame)
+                    self->state.frame = move->firstframe;
             }
         }
     }
 
-    index = self->s.frame - move->firstframe;
+    index = self->state.frame - move->firstframe;
     if (move->frame[index].aifunc) {
         if (!(self->monsterInfo.aiflags & AI_HOLD_FRAME))
             move->frame[index].aifunc(self, move->frame[index].dist * self->monsterInfo.scale);
@@ -321,7 +321,7 @@ void monster_start_go(entity_t *self);
 
 void monster_triggered_spawn(entity_t *self)
 {
-    self->s.origin[2] += 1;
+    self->state.origin[2] += 1;
     KillBox(self);
 
     self->solid = Solid::BoundingBox;
@@ -399,7 +399,7 @@ qboolean monster_start(entity_t *self)
     if ((self->spawnFlags & 4) && !(self->monsterInfo.aiflags & AI_GOOD_GUY)) {
         self->spawnFlags &= ~4;
         self->spawnFlags |= 1;
-//      gi.DPrintf("fixed spawnFlags on %s at %s\n", self->classname, Vec3ToString(self->s.origin));
+//      gi.DPrintf("fixed spawnFlags on %s at %s\n", self->classname, Vec3ToString(self->state.origin));
     }
 
     if (!(self->monsterInfo.aiflags & AI_GOOD_GUY))
@@ -407,30 +407,30 @@ qboolean monster_start(entity_t *self)
 
     self->nextThink = level.time + FRAMETIME;
     self->svFlags |= SVF_MONSTER;
-    self->s.renderfx |= RenderEffects::FrameLerp;
+    self->state.renderfx |= RenderEffects::FrameLerp;
     self->takedamage = DAMAGE_AIM;
     self->air_finished = level.time + 12;
     self->Use = monster_use;
     self->maxHealth = self->health;
     self->clipMask = CONTENTS_MASK_MONSTERSOLID;
 
-    self->s.skinnum = 0;
+    self->state.skinnum = 0;
     self->deadFlag = DEAD_NO;
     self->svFlags &= ~SVF_DEADMONSTER;
 
     if (!self->monsterInfo.checkattack)
         self->monsterInfo.checkattack = M_CheckAttack;
-    VectorCopy(self->s.origin, self->s.old_origin);
+    VectorCopy(self->state.origin, self->state.old_origin);
 
     if (st.item) {
         self->item = FindItemByClassname(st.item);
         if (!self->item)
-            gi.DPrintf("%s at %s has bad item: %s\n", self->classname, Vec3ToString(self->s.origin), st.item);
+            gi.DPrintf("%s at %s has bad item: %s\n", self->classname, Vec3ToString(self->state.origin), st.item);
     }
 
     // randomize what frame they start on
     if (self->monsterInfo.currentmove)
-        self->s.frame = self->monsterInfo.currentmove->firstframe + (rand() % (self->monsterInfo.currentmove->lastFrame - self->monsterInfo.currentmove->firstframe + 1));
+        self->state.frame = self->monsterInfo.currentmove->firstframe + (rand() % (self->monsterInfo.currentmove->lastFrame - self->monsterInfo.currentmove->firstframe + 1));
 
     return true;
 }
@@ -460,7 +460,7 @@ void monster_start_go(entity_t *self)
             }
         }
         if (notcombat && self->combatTarget)
-            gi.DPrintf("%s at %s has target with mixed types\n", self->classname, Vec3ToString(self->s.origin));
+            gi.DPrintf("%s at %s has target with mixed types\n", self->classname, Vec3ToString(self->state.origin));
         if (fixup)
             self->target = NULL;
     }
@@ -473,9 +473,9 @@ void monster_start_go(entity_t *self)
         while ((target = G_Find(target, FOFS(targetName), self->combatTarget)) != NULL) {
             if (strcmp(target->classname, "point_combat") != 0) {
                 gi.DPrintf("%s at (%i %i %i) has a bad combatTarget %s : %s at (%i %i %i)\n",
-                           self->classname, (int)self->s.origin[0], (int)self->s.origin[1], (int)self->s.origin[2],
-                           self->combatTarget, target->classname, (int)target->s.origin[0], (int)target->s.origin[1],
-                           (int)target->s.origin[2]);
+                           self->classname, (int)self->state.origin[0], (int)self->state.origin[1], (int)self->state.origin[2],
+                           self->combatTarget, target->classname, (int)target->state.origin[0], (int)target->state.origin[1],
+                           (int)target->state.origin[2]);
             }
         }
     }
@@ -483,13 +483,13 @@ void monster_start_go(entity_t *self)
     if (self->target) {
         self->goalEntityPtr = self->moveTargetPtr = G_PickTarget(self->target);
         if (!self->moveTargetPtr) {
-            gi.DPrintf("%s can't find target %s at %s\n", self->classname, self->target, Vec3ToString(self->s.origin));
+            gi.DPrintf("%s can't find target %s at %s\n", self->classname, self->target, Vec3ToString(self->state.origin));
             self->target = NULL;
             self->monsterInfo.pausetime = 100000000;
             self->monsterInfo.stand(self);
         } else if (strcmp(self->moveTargetPtr->classname, "path_corner") == 0) {
-            VectorSubtract(self->goalEntityPtr->s.origin, self->s.origin, v);
-            self->idealYaw = self->s.angles[vec3_t::Yaw] = vectoyaw(v);
+            VectorSubtract(self->goalEntityPtr->state.origin, self->state.origin, v);
+            self->idealYaw = self->state.angles[vec3_t::Yaw] = vectoyaw(v);
             self->monsterInfo.walk(self);
             self->target = NULL;
         } else {
@@ -514,7 +514,7 @@ void walkmonster_start_go(entity_t *self)
 
         if (self->groundEntityPtr)
             if (!M_walkmove(self, 0, 0))
-                gi.DPrintf("%s in solid at %s\n", self->classname, Vec3ToString(self->s.origin));
+                gi.DPrintf("%s in solid at %s\n", self->classname, Vec3ToString(self->state.origin));
     }
 
     if (!self->yawSpeed)
@@ -537,7 +537,7 @@ void walkmonster_start(entity_t *self)
 void flymonster_start_go(entity_t *self)
 {
     if (!M_walkmove(self, 0, 0))
-        gi.DPrintf("%s in solid at %s\n", self->classname, Vec3ToString(self->s.origin));
+        gi.DPrintf("%s in solid at %s\n", self->classname, Vec3ToString(self->state.origin));
 
     if (!self->yawSpeed)
         self->yawSpeed = 10;

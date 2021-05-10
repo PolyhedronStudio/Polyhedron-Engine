@@ -86,7 +86,7 @@ This replaces the QC functions: ai_forward, ai_back, ai_pain, and ai_painforward
 */
 void ai_move(entity_t *self, float dist)
 {
-    M_walkmove(self, self->s.angles[vec3_t::Yaw], dist);
+    M_walkmove(self, self->state.angles[vec3_t::Yaw], dist);
 }
 
 
@@ -103,13 +103,13 @@ void ai_stand(entity_t *self, float dist)
     vec3_t  v;
 
     if (dist)
-        M_walkmove(self, self->s.angles[vec3_t::Yaw], dist);
+        M_walkmove(self, self->state.angles[vec3_t::Yaw], dist);
 
     if (self->monsterInfo.aiflags & AI_STAND_GROUND) {
         if (self->enemy) {
-            VectorSubtract(self->enemy->s.origin, self->s.origin, v);
+            VectorSubtract(self->enemy->state.origin, self->state.origin, v);
             self->idealYaw = vectoyaw(v);
-            if (self->s.angles[vec3_t::Yaw] != self->idealYaw && self->monsterInfo.aiflags & AI_TEMP_STAND_GROUND) {
+            if (self->state.angles[vec3_t::Yaw] != self->idealYaw && self->monsterInfo.aiflags & AI_TEMP_STAND_GROUND) {
                 self->monsterInfo.aiflags &= ~(AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
                 self->monsterInfo.run(self);
             }
@@ -177,12 +177,12 @@ void ai_charge(entity_t *self, float dist)
 {
     vec3_t  v;
 
-    VectorSubtract(self->enemy->s.origin, self->s.origin, v);
+    VectorSubtract(self->enemy->state.origin, self->state.origin, v);
     self->idealYaw = vectoyaw(v);
     M_ChangeYaw(self);
 
     if (dist)
-        M_walkmove(self, self->s.angles[vec3_t::Yaw], dist);
+        M_walkmove(self, self->state.angles[vec3_t::Yaw], dist);
 }
 
 
@@ -197,7 +197,7 @@ Distance is for slight position adjustments needed by the animations
 void ai_turn(entity_t *self, float dist)
 {
     if (dist)
-        M_walkmove(self, self->s.angles[vec3_t::Yaw], dist);
+        M_walkmove(self, self->state.angles[vec3_t::Yaw], dist);
 
     if (FindTarget(self))
         return;
@@ -248,7 +248,7 @@ int range(entity_t *self, entity_t *other)
     vec3_t  v;
     float   len;
 
-    VectorSubtract(self->s.origin, other->s.origin, v);
+    VectorSubtract(self->state.origin, other->state.origin, v);
     len = VectorLength(v);
     if (len < MELEE_DISTANCE)
         return RANGE_MELEE;
@@ -272,9 +272,9 @@ qboolean visible(entity_t *self, entity_t *other)
     vec3_t  spot2;
     trace_t trace;
 
-    VectorCopy(self->s.origin, spot1);
+    VectorCopy(self->state.origin, spot1);
     spot1[2] += self->viewHeight;
-    VectorCopy(other->s.origin, spot2);
+    VectorCopy(other->state.origin, spot2);
     spot2[2] += other->viewHeight;
     trace = gi.Trace(spot1, vec3_origin, vec3_origin, spot2, self, CONTENTS_MASK_OPAQUE);
 
@@ -297,8 +297,8 @@ qboolean infront(entity_t *self, entity_t *other)
     float   dot;
     vec3_t  forward;
 
-    AngleVectors(self->s.angles, &forward, NULL, NULL);
-    VectorSubtract(other->s.origin, self->s.origin, vec);
+    AngleVectors(self->state.angles, &forward, NULL, NULL);
+    VectorSubtract(other->state.origin, self->state.origin, vec);
     VectorNormalize(vec);
     dot = DotProduct(vec, forward);
 
@@ -319,7 +319,7 @@ void HuntTarget(entity_t *self)
         self->monsterInfo.stand(self);
     else
         self->monsterInfo.run(self);
-    VectorSubtract(self->enemy->s.origin, self->s.origin, vec);
+    VectorSubtract(self->enemy->state.origin, self->state.origin, vec);
     self->idealYaw = vectoyaw(vec);
     // wait a while before first attack
     if (!(self->monsterInfo.aiflags & AI_STAND_GROUND))
@@ -337,7 +337,7 @@ void FoundTarget(entity_t *self)
 
     self->showHostile = level.time + 1;        // wake up other monsters
 
-    VectorCopy(self->enemy->s.origin, self->monsterInfo.last_sighting);
+    VectorCopy(self->enemy->state.origin, self->monsterInfo.last_sighting);
     self->monsterInfo.trail_time = level.time;
 
     if (!self->combatTarget) {
@@ -349,7 +349,7 @@ void FoundTarget(entity_t *self)
     if (!self->moveTargetPtr) {
         self->goalEntityPtr = self->moveTargetPtr = self->enemy;
         HuntTarget(self);
-        gi.DPrintf("%s at %s, combatTarget %s not found\n", self->classname, vec3_to_str(self->s.origin), self->combatTarget);
+        gi.DPrintf("%s at %s, combatTarget %s not found\n", self->classname, vec3_to_str(self->state.origin), self->combatTarget);
         return;
     }
 
@@ -495,11 +495,11 @@ qboolean FindTarget(entity_t *self)
             if (!visible(self, client))
                 return false;
         } else {
-            if (!gi.InPHS(self->s.origin, client->s.origin))
+            if (!gi.InPHS(self->state.origin, client->state.origin))
                 return false;
         }
 
-        VectorSubtract(client->s.origin, self->s.origin, temp);
+        VectorSubtract(client->state.origin, self->state.origin, temp);
 
         if (VectorLength(temp) > 1000) { // too far to hear
             return false;
@@ -542,7 +542,7 @@ qboolean FacingIdeal(entity_t *self)
 {
     float   delta;
 
-    delta = anglemod(self->s.angles[vec3_t::Yaw] - self->idealYaw);
+    delta = anglemod(self->state.angles[vec3_t::Yaw] - self->idealYaw);
     if (delta > 45 && delta < 315)
         return false;
     return true;
@@ -559,9 +559,9 @@ qboolean M_CheckAttack(entity_t *self)
 
     if (self->enemy->health > 0) {
         // see if any entities are in the way of the shot
-        VectorCopy(self->s.origin, spot1);
+        VectorCopy(self->state.origin, spot1);
         spot1[2] += self->viewHeight;
-        VectorCopy(self->enemy->s.origin, spot2);
+        VectorCopy(self->enemy->state.origin, spot2);
         spot2[2] += self->enemy->viewHeight;
 
         tr = gi.Trace(spot1, vec3_origin, vec3_origin, spot2, self, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_SLIME | CONTENTS_LAVA | CONTENTS_WINDOW);
@@ -778,7 +778,7 @@ qboolean ai_checkattack(entity_t *self, float dist)
     enemy_vis = visible(self, self->enemy);
     if (enemy_vis) {
         self->monsterInfo.search_time = level.time + 5;
-        VectorCopy(self->enemy->s.origin, self->monsterInfo.last_sighting);
+        VectorCopy(self->enemy->state.origin, self->monsterInfo.last_sighting);
     }
 
 // look for other coop players here
@@ -789,7 +789,7 @@ qboolean ai_checkattack(entity_t *self, float dist)
 //  }
 
     enemy_range = range(self, self->enemy);
-    VectorSubtract(self->enemy->s.origin, self->s.origin, temp);
+    VectorSubtract(self->enemy->state.origin, self->state.origin, temp);
     enemy_yaw = vectoyaw(temp);
 
 
@@ -839,7 +839,7 @@ void ai_run(entity_t *self, float dist)
     }
 
     if (self->monsterInfo.aiflags & AI_SOUND_TARGET) {
-        VectorSubtract(self->s.origin, self->enemy->s.origin, v);
+        VectorSubtract(self->state.origin, self->enemy->state.origin, v);
         if (VectorLength(v) < 64) {
             self->monsterInfo.aiflags |= (AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
             self->monsterInfo.stand(self);
@@ -865,7 +865,7 @@ void ai_run(entity_t *self, float dist)
 //          dprint("regained sight\n");
         M_MoveToGoal(self, dist);
         self->monsterInfo.aiflags &= ~AI_LOST_SIGHT;
-        VectorCopy(self->enemy->s.origin, self->monsterInfo.last_sighting);
+        VectorCopy(self->enemy->state.origin, self->monsterInfo.last_sighting);
         self->monsterInfo.trail_time = level.time;
         return;
     }
@@ -919,9 +919,9 @@ void ai_run(entity_t *self, float dist)
         }
 
         if (marker) {
-            VectorCopy(marker->s.origin, self->monsterInfo.last_sighting);
+            VectorCopy(marker->state.origin, self->monsterInfo.last_sighting);
             self->monsterInfo.trail_time = marker->timestamp;
-            self->s.angles[vec3_t::Yaw] = self->idealYaw = marker->s.angles[vec3_t::Yaw];
+            self->state.angles[vec3_t::Yaw] = self->idealYaw = marker->state.angles[vec3_t::Yaw];
 //          dprint("heading is "); dprint(ftos(self.ideal_yaw)); dprint("\n");
 
 //          debug_drawline(self.origin, self.last_sighting, 52);
@@ -929,64 +929,64 @@ void ai_run(entity_t *self, float dist)
         }
     }
 
-    VectorSubtract(self->s.origin, self->monsterInfo.last_sighting, v);
+    VectorSubtract(self->state.origin, self->monsterInfo.last_sighting, v);
     d1 = VectorLength(v);
     if (d1 <= dist) {
         self->monsterInfo.aiflags |= AI_PURSUE_NEXT;
         dist = d1;
     }
 
-    VectorCopy(self->monsterInfo.last_sighting, self->goalEntityPtr->s.origin);
+    VectorCopy(self->monsterInfo.last_sighting, self->goalEntityPtr->state.origin);
 
     if (isNew) {
 //      gi.DPrintf("checking for course correction\n");
 
-        tr = gi.Trace(self->s.origin, self->mins, self->maxs, self->monsterInfo.last_sighting, self, CONTENTS_MASK_PLAYERSOLID);
+        tr = gi.Trace(self->state.origin, self->mins, self->maxs, self->monsterInfo.last_sighting, self, CONTENTS_MASK_PLAYERSOLID);
         if (tr.fraction < 1) {
-            VectorSubtract(self->goalEntityPtr->s.origin, self->s.origin, v);
+            VectorSubtract(self->goalEntityPtr->state.origin, self->state.origin, v);
             d1 = VectorLength(v);
             center = tr.fraction;
             d2 = d1 * ((center + 1) / 2);
-            self->s.angles[vec3_t::Yaw] = self->idealYaw = vectoyaw(v);
-            AngleVectors(self->s.angles, &v_forward, &v_right, NULL);
+            self->state.angles[vec3_t::Yaw] = self->idealYaw = vectoyaw(v);
+            AngleVectors(self->state.angles, &v_forward, &v_right, NULL);
 
             VectorSet(v, d2, -16, 0);
-            left_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);
-            tr = gi.Trace(self->s.origin, self->mins, self->maxs, left_target, self, CONTENTS_MASK_PLAYERSOLID);
+            left_target = G_ProjectSource(self->state.origin, v, v_forward, v_right);
+            tr = gi.Trace(self->state.origin, self->mins, self->maxs, left_target, self, CONTENTS_MASK_PLAYERSOLID);
             left = tr.fraction;
 
             VectorSet(v, d2, 16, 0);
-            right_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);
-            tr = gi.Trace(self->s.origin, self->mins, self->maxs, right_target, self, CONTENTS_MASK_PLAYERSOLID);
+            right_target = G_ProjectSource(self->state.origin, v, v_forward, v_right);
+            tr = gi.Trace(self->state.origin, self->mins, self->maxs, right_target, self, CONTENTS_MASK_PLAYERSOLID);
             right = tr.fraction;
 
             center = (d1 * center) / d2;
             if (left >= center && left > right) {
                 if (left < 1) {
                     VectorSet(v, d2 * left * 0.5, -16, 0);
-                    left_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);
+                    left_target = G_ProjectSource(self->state.origin, v, v_forward, v_right);
 //                  gi.DPrintf("incomplete path, go part way and adjust again\n");
                 }
                 VectorCopy(self->monsterInfo.last_sighting, self->monsterInfo.saved_goal);
                 self->monsterInfo.aiflags |= AI_PURSUE_TEMP;
-                VectorCopy(left_target, self->goalEntityPtr->s.origin);
+                VectorCopy(left_target, self->goalEntityPtr->state.origin);
                 VectorCopy(left_target, self->monsterInfo.last_sighting);
-                VectorSubtract(self->goalEntityPtr->s.origin, self->s.origin, v);
-                self->s.angles[vec3_t::Yaw] = self->idealYaw = vectoyaw(v);
+                VectorSubtract(self->goalEntityPtr->state.origin, self->state.origin, v);
+                self->state.angles[vec3_t::Yaw] = self->idealYaw = vectoyaw(v);
 //              gi.DPrintf("adjusted left\n");
 //              debug_drawline(self.origin, self.last_sighting, 152);
             } else if (right >= center && right > left) {
                 if (right < 1) {
                     VectorSet(v, d2 * right * 0.5, 16, 0);
-                    right_target = G_ProjectSource(self->s.origin, v, v_forward, v_right);
+                    right_target = G_ProjectSource(self->state.origin, v, v_forward, v_right);
 //                  gi.DPrintf("incomplete path, go part way and adjust again\n");
                 }
                 VectorCopy(self->monsterInfo.last_sighting, self->monsterInfo.saved_goal);
                 self->monsterInfo.aiflags |= AI_PURSUE_TEMP;
-                VectorCopy(right_target, self->goalEntityPtr->s.origin);
+                VectorCopy(right_target, self->goalEntityPtr->state.origin);
                 VectorCopy(right_target, self->monsterInfo.last_sighting);
-                VectorSubtract(self->goalEntityPtr->s.origin, self->s.origin, v);
-                self->s.angles[vec3_t::Yaw] = self->idealYaw = vectoyaw(v);
+                VectorSubtract(self->goalEntityPtr->state.origin, self->state.origin, v);
+                self->state.angles[vec3_t::Yaw] = self->idealYaw = vectoyaw(v);
 //              gi.DPrintf("adjusted right\n");
 //              debug_drawline(self.origin, self.last_sighting, 152);
             }

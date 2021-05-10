@@ -24,7 +24,7 @@ void func_object_touch(entity_t* self, entity_t* other, cplane_t* plane, csurfac
         return;
     if (other->takedamage == DAMAGE_NO)
         return;
-    T_Damage(other, self, self, vec3_origin, self->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, self->state.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
 void func_object_release(entity_t* self)
@@ -70,9 +70,9 @@ void SP_func_object(entity_t* self)
     }
 
     if (self->spawnFlags & 2)
-        self->s.effects |= EntityEffectType::AnimCycleAll2hz;
+        self->state.effects |= EntityEffectType::AnimCycleAll2hz;
     if (self->spawnFlags & 4)
-        self->s.effects |= EntityEffectType::AnimCycleAll30hz;
+        self->state.effects |= EntityEffectType::AnimCycleAll30hz;
 
     self->clipMask = CONTENTS_MASK_MONSTERSOLID;
 

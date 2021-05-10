@@ -95,11 +95,11 @@ static void create_baselines(void)
             continue;
         }
 
-        if (!ES_INUSE(&ent->s)) {
+        if (!ES_INUSE(&ent->state)) {
             continue;
         }
 
-        ent->s.number = i;
+        ent->state.number = i;
 
         chunk = &sv_client->entityBaselines[i >> SV_BASELINES_SHIFT];
         if (*chunk == NULL) {
@@ -107,7 +107,7 @@ static void create_baselines(void)
         }
 
         base = *chunk + (i & SV_BASELINES_MASK);
-        MSG_PackEntity(base, &ent->s, true); // MSG: !! Removed: Q2PRO_SHORTANGLES - Modify MSG_PackEntity to always use shortangles.
+        MSG_PackEntity(base, &ent->state, true); // MSG: !! Removed: Q2PRO_SHORTANGLES - Modify MSG_PackEntity to always use shortangles.
 
         base->solid = sv.entities[i].solid32;
     }

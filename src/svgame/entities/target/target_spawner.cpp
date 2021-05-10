@@ -32,8 +32,8 @@ void use_target_spawner(entity_t* self, entity_t* other, entity_t* activator)
 
     ent = G_Spawn();
     ent->classname = self->target;
-    VectorCopy(self->s.origin, ent->s.origin);
-    VectorCopy(self->s.angles, ent->s.angles);
+    VectorCopy(self->state.origin, ent->state.origin);
+    VectorCopy(self->state.angles, ent->state.angles);
     ED_CallSpawn(ent);
     gi.UnlinkEntity(ent);
     KillBox(ent);
@@ -47,7 +47,7 @@ void SP_target_spawner(entity_t* self)
     self->Use = use_target_spawner;
     self->svFlags = SVF_NOCLIENT;
     if (self->speed) {
-        UTIL_SetMoveDir(self->s.angles, self->moveDirection);
+        UTIL_SetMoveDir(self->state.angles, self->moveDirection);
         VectorScale(self->moveDirection, self->speed, self->moveDirection);
     }
 }

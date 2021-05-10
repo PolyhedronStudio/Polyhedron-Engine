@@ -206,9 +206,9 @@ static const spawn_field_t spawn_fields[] = {
     {"volume", FOFS(volume), F_FLOAT},
     {"attenuation", FOFS(attenuation), F_FLOAT},
     {"map", FOFS(map), F_LSTRING},
-    {"origin", FOFS(s.origin), F_VECTOR},
-    {"angles", FOFS(s.angles), F_VECTOR},
-    {"angle", FOFS(s.angles), F_ANGLEHACK},
+    {"origin", FOFS(state.origin), F_VECTOR},
+    {"angles", FOFS(state.angles), F_VECTOR},
+    {"angle", FOFS(state.angles), F_ANGLEHACK},
 
     {NULL}
 };
@@ -754,7 +754,7 @@ void SP_worldspawn(entity_t *ent)
     ent->moveType = MoveType::Push;
     ent->solid = Solid::BSP;
     ent->inUse = true;          // since the world doesn't use G_Spawn()
-    ent->s.modelindex = 1;      // world model is always index 1
+    ent->state.modelindex = 1;      // world model is always index 1
 
     //---------------
 

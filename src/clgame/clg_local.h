@@ -116,7 +116,7 @@ typedef enum {
 //-------------------
 // Core - Used to access the client's internals.
 //-------------------
-extern clgame_import_t  clgi;
+extern ClientGameImport  clgi;
 extern ClientState   *cl;
 extern ClientShared  *cs;
 

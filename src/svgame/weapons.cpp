@@ -70,7 +70,7 @@ qboolean fire_hit(entity_t *self, vec3_t &aim, int damage, int kick)
         return false;
 
     //see if enemy is in range
-    VectorSubtract(self->enemy->s.origin, self->s.origin, dir);
+    VectorSubtract(self->enemy->state.origin, self->state.origin, dir);
     range = VectorLength(dir);
     if (range > aim[0])
         return false;
@@ -86,9 +86,9 @@ qboolean fire_hit(entity_t *self, vec3_t &aim, int damage, int kick)
             aim[1] = self->enemy->maxs[0];
     }
 
-    VectorMA(self->s.origin, range, dir, point);
+    VectorMA(self->state.origin, range, dir, point);
 
-    tr = gi.Trace(self->s.origin, vec3_origin, vec3_origin, point, self, CONTENTS_MASK_SHOT);
+    tr = gi.Trace(self->state.origin, vec3_origin, vec3_origin, point, self, CONTENTS_MASK_SHOT);
     if (tr.fraction < 1) {
         if (!tr.ent->takedamage)
             return false;
@@ -97,11 +97,11 @@ qboolean fire_hit(entity_t *self, vec3_t &aim, int damage, int kick)
             tr.ent = self->enemy;
     }
 
-    AngleVectors(self->s.angles, &forward, &right, &up);
-    VectorMA(self->s.origin, range, forward, point);
+    AngleVectors(self->state.angles, &forward, &right, &up);
+    VectorMA(self->state.origin, range, forward, point);
     VectorMA(point, aim[1], right, point);
     VectorMA(point, aim[2], up, point);
-    VectorSubtract(point, self->enemy->s.origin, dir);
+    VectorSubtract(point, self->enemy->state.origin, dir);
 
     // do the damage
     T_Damage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DAMAGE_NO_KNOCKBACK, MOD_HIT);
@@ -139,7 +139,7 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
     qboolean    water = false;
     int         content_mask = CONTENTS_MASK_SHOT | CONTENTS_MASK_LIQUID;
 
-    tr = gi.Trace(self->s.origin, vec3_origin, vec3_origin, start, self, CONTENTS_MASK_SHOT);
+    tr = gi.Trace(self->state.origin, vec3_origin, vec3_origin, start, self, CONTENTS_MASK_SHOT);
     if (!(tr.fraction < 1.0)) {
         vectoangles(aimdir, dir);
         AngleVectors(dir, &forward, &right, &up);
@@ -303,7 +303,7 @@ void blaster_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t 
     }
 
     if (self->owner->client)
-        PlayerNoise(self->owner, self->s.origin, PNOISE_IMPACT);
+        PlayerNoise(self->owner, self->state.origin, PNOISE_IMPACT);
 
     if (other->takedamage) {
         if (self->spawnFlags & 1)
@@ -314,24 +314,24 @@ void blaster_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t 
         // N&C: Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
         if (plane)
         {
-            T_Damage(other, self, self->owner, self->velocity, self->s.origin,
+            T_Damage(other, self, self->owner, self->velocity, self->state.origin,
                 plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
         }
         else
         {
-            T_Damage(other, self, self->owner, self->velocity, self->s.origin,
+            T_Damage(other, self, self->owner, self->velocity, self->state.origin,
                 vec3_zero(), self->dmg, 1, DAMAGE_ENERGY, mod);
         }
 
     } else {
         gi.WriteByte(svg_temp_entity);
         gi.WriteByte(TempEntityEvent::Blaster);
-        gi.WritePosition(self->s.origin);
+        gi.WritePosition(self->state.origin);
         if (!plane)
             gi.WriteDirection(vec3_zero());
         else
             gi.WriteDirection(plane->normal);
-        gi.Multicast(&self->s.origin, MULTICAST_PVS);
+        gi.Multicast(&self->state.origin, MULTICAST_PVS);
     }
 
     G_FreeEntity(self);
@@ -369,19 +369,19 @@ void fire_blaster(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int
     bolt->moveType = MoveType::FlyMissile;   // Movetype FLYMISSILE
     bolt->clipMask = CONTENTS_MASK_SHOT;    // CONTENTS_MASK_SHOT
     bolt->solid = Solid::BoundingBox;               // Solid::BoundingBox
-    bolt->s.effects |= effect;              // Apply effect argument to entity.
+    bolt->state.effects |= effect;              // Apply effect argument to entity.
     
     // Setup entity physics attribute values.
-    bolt->s.origin = start;     // Initial origin.
-    bolt->s.old_origin = start; // Initial origin, same to origin, since this entity had no frame life yet.
-    bolt->s.angles = vec3_euler(dir);       // Calculate euler radian entity satate angles.
+    bolt->state.origin = start;     // Initial origin.
+    bolt->state.old_origin = start; // Initial origin, same to origin, since this entity had no frame life yet.
+    bolt->state.angles = vec3_euler(dir);       // Calculate euler radian entity satate angles.
     bolt->velocity = vec3_scale(dir, speed);// Calculate entity state velocity.
     bolt->mins = vec3_zero();   // Clear bounding mins.
     bolt->maxs = vec3_zero();   // Clear bounding maxs.
 
     // Setup (and precache) sound, and model.
-    bolt->s.modelindex = gi.ModelIndex("models/objects/laser/tris.md2");
-    bolt->s.sound = gi.SoundIndex("misc/lasfly.wav");
+    bolt->state.modelindex = gi.ModelIndex("models/objects/laser/tris.md2");
+    bolt->state.sound = gi.SoundIndex("misc/lasfly.wav");
        
     // Setup touch and Think function pointers.
     bolt->Touch = blaster_touch;
@@ -393,14 +393,14 @@ void fire_blaster(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int
 
     // If a client is firing this bolt, let AI check for dodges.
     if (self->client)
-        check_dodge(self, bolt->s.origin, dir, speed);
+        check_dodge(self, bolt->state.origin, dir, speed);
 
     // Trace bolt.
-    tr = gi.Trace(self->s.origin, vec3_zero(), vec3_zero(), bolt->s.origin, bolt, CONTENTS_MASK_SHOT);
+    tr = gi.Trace(self->state.origin, vec3_zero(), vec3_zero(), bolt->state.origin, bolt, CONTENTS_MASK_SHOT);
 
     // Did we hit anything?
     if (tr.fraction < 1.0) {
-        bolt->s.origin = vec3_fmaf(bolt->s.origin, -10, dir);
+        bolt->state.origin = vec3_fmaf(bolt->state.origin, -10, dir);
         bolt->Touch(bolt, tr.ent, NULL, NULL);
     }
 }

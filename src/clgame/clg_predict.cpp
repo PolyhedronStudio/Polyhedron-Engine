@@ -253,6 +253,7 @@ void CLG_PredictMovement(unsigned int acknowledgedCommandIndex, unsigned int cur
         pm.clientUserCommand.moveCommand.rightMove = cl->localmove[1];
         pm.clientUserCommand.moveCommand.upMove = cl->localmove[2];
         PMove(&pm);
+
         // Update player move client side audio effects.
         CLG_UpdateClientSoundSpecialEffects(&pm);
 

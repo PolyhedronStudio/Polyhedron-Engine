@@ -578,7 +578,7 @@ void Cmd_Kill_f(entity_t *ent)
     ent->flags &= ~FL_GODMODE;
     ent->health = 0;
     meansOfDeath = MOD_SUICIDE;
-    player_die(ent, ent, ent, 100000, vec3_origin);
+    Player_Die(ent, ent, ent, 100000, vec3_origin);
 }
 
 /*
@@ -666,37 +666,37 @@ void Cmd_Wave_f(entity_t *ent)
     if (ent->client->playerState.pmove.flags & PMF_DUCKED)
         return;
 
-    if (ent->client->anim_priority > ANIM_WAVE)
+    if (ent->client->animation.priorityAnimation > ANIM_WAVE)
         return;
 
-    ent->client->anim_priority = ANIM_WAVE;
+    ent->client->animation.priorityAnimation = ANIM_WAVE;
 
     switch (i) {
     case 0:
         gi.CPrintf(ent, PRINT_HIGH, "flipoff\n");
-        ent->s.frame = FRAME_flip01 - 1;
-        ent->client->anim_end = FRAME_flip12;
+        ent->state.frame = FRAME_flip01 - 1;
+        ent->client->animation.endFrame = FRAME_flip12;
         break;
     case 1:
         gi.CPrintf(ent, PRINT_HIGH, "salute\n");
-        ent->s.frame = FRAME_salute01 - 1;
-        ent->client->anim_end = FRAME_salute11;
+        ent->state.frame = FRAME_salute01 - 1;
+        ent->client->animation.endFrame = FRAME_salute11;
         break;
     case 2:
         gi.CPrintf(ent, PRINT_HIGH, "taunt\n");
-        ent->s.frame = FRAME_taunt01 - 1;
-        ent->client->anim_end = FRAME_taunt17;
+        ent->state.frame = FRAME_taunt01 - 1;
+        ent->client->animation.endFrame = FRAME_taunt17;
         break;
     case 3:
         gi.CPrintf(ent, PRINT_HIGH, "wave\n");
-        ent->s.frame = FRAME_wave01 - 1;
-        ent->client->anim_end = FRAME_wave11;
+        ent->state.frame = FRAME_wave01 - 1;
+        ent->client->animation.endFrame = FRAME_wave11;
         break;
     case 4:
     default:
         gi.CPrintf(ent, PRINT_HIGH, "point\n");
-        ent->s.frame = FRAME_point01 - 1;
-        ent->client->anim_end = FRAME_point12;
+        ent->state.frame = FRAME_point01 - 1;
+        ent->client->animation.endFrame = FRAME_point12;
         break;
     }
 }

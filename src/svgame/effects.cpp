@@ -37,10 +37,10 @@ void ClipGibVelocity(entity_t *ent)
 //
 void gib_think(entity_t *self)
 {
-    self->s.frame++;
+    self->state.frame++;
     self->nextThink = level.time + FRAMETIME;
 
-    if (self->s.frame == 10) {
+    if (self->state.frame == 10) {
         self->Think = G_FreeEntity;
         self->nextThink = level.time + 8 + random() * 10;
     }
@@ -60,10 +60,10 @@ void gib_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t *sur
 
         vectoangles(plane->normal, normal_angles);
         AngleVectors(normal_angles, NULL, &right, NULL);
-        vectoangles(right, self->s.angles);
+        vectoangles(right, self->state.angles);
 
-        if (self->s.modelindex == sm_meat_index) {
-            self->s.frame++;
+        if (self->state.modelindex == sm_meat_index) {
+            self->state.frame++;
             self->Think = gib_think;
             self->nextThink = level.time + FRAMETIME;
         }
@@ -87,13 +87,13 @@ void ThrowGib(entity_t *self, const char *gibname, int damage, int type)
 
     VectorScale(self->size, 0.5, size);
     VectorAdd(self->absMin, size, origin);
-    gib->s.origin[0] = origin[0] + crandom() * size[0];
-    gib->s.origin[1] = origin[1] + crandom() * size[1];
-    gib->s.origin[2] = origin[2] + crandom() * size[2];
+    gib->state.origin[0] = origin[0] + crandom() * size[0];
+    gib->state.origin[1] = origin[1] + crandom() * size[1];
+    gib->state.origin[2] = origin[2] + crandom() * size[2];
 
     gi.SetModel(gib, gibname);
     gib->solid = Solid::Not;
-    gib->s.effects |= EntityEffectType::Gib;
+    gib->state.effects |= EntityEffectType::Gib;
     gib->flags |= FL_NO_KNOCKBACK;
     gib->takedamage = DAMAGE_YES;
     gib->Die = gib_die;
@@ -126,16 +126,16 @@ void ThrowHead(entity_t *self, const char *gibname, int damage, int type)
     vec3_t  vd;
     float   vscale;
 
-    self->s.skinnum = 0;
-    self->s.frame = 0;
+    self->state.skinnum = 0;
+    self->state.frame = 0;
     VectorClear(self->mins);
     VectorClear(self->maxs);
 
-    self->s.modelindex2 = 0;
+    self->state.modelindex2 = 0;
     gi.SetModel(self, gibname);
     self->solid = Solid::Not;
-    self->s.effects |= EntityEffectType::Gib;
-    self->s.sound = 0;
+    self->state.effects |= EntityEffectType::Gib;
+    self->state.sound = 0;
     self->flags |= FL_NO_KNOCKBACK;
     self->svFlags &= ~SVF_MONSTER;
     self->takedamage = DAMAGE_YES;
@@ -171,22 +171,22 @@ void ThrowClientHead(entity_t *self, int damage)
 
     if (rand() & 1) {
         gibname = "models/objects/gibs/head2/tris.md2";
-        self->s.skinnum = 1;        // second skin is player
+        self->state.skinnum = 1;        // second skin is player
     } else {
         gibname = "models/objects/gibs/skull/tris.md2";
-        self->s.skinnum = 0;
+        self->state.skinnum = 0;
     }
 
-    self->s.origin[2] += 32;
-    self->s.frame = 0;
+    self->state.origin[2] += 32;
+    self->state.frame = 0;
     gi.SetModel(self, gibname);
     VectorSet(self->mins, -16, -16, 0);
     VectorSet(self->maxs, 16, 16, 16);
 
     self->takedamage = DAMAGE_NO;
     self->solid = Solid::Not;
-    self->s.effects = EntityEffectType::Gib;
-    self->s.sound = 0;
+    self->state.effects = EntityEffectType::Gib;
+    self->state.sound = 0;
     self->flags |= FL_NO_KNOCKBACK;
 
     self->moveType = MoveType::Bounce;
@@ -195,8 +195,8 @@ void ThrowClientHead(entity_t *self, int damage)
     VectorAdd(self->velocity, vd, self->velocity);
 
     if (self->client) { // bodies in the queue don't have a client anymore
-        self->client->anim_priority = ANIM_DEATH;
-        self->client->anim_end = self->s.frame;
+        self->client->animation.priorityAnimation = ANIM_DEATH;
+        self->client->animation.endFrame = self->state.frame;
     } else {
         self->Think = NULL;
         self->nextThink = 0;
@@ -222,7 +222,7 @@ void ThrowDebris(entity_t *self, const char *modelname, float speed, const vec3_
     vec3_t  v;
 
     chunk = G_Spawn();
-    VectorCopy(origin, chunk->s.origin);
+    VectorCopy(origin, chunk->state.origin);
     gi.SetModel(chunk, modelname);
     v[0] = 100 * crandom();
     v[1] = 100 * crandom();
@@ -235,7 +235,7 @@ void ThrowDebris(entity_t *self, const char *modelname, float speed, const vec3_
     chunk->avelocity[2] = random() * 600;
     chunk->Think = G_FreeEntity;
     chunk->nextThink = level.time + 5 + random() * 5;
-    chunk->s.frame = 0;
+    chunk->state.frame = 0;
     chunk->flags = 0;
     chunk->classname = "debris";
     chunk->takedamage = DAMAGE_YES;
@@ -248,8 +248,8 @@ void BecomeExplosion1(entity_t *self)
 {
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TempEntityEvent::Explosion1);
-    gi.WritePosition(self->s.origin);
-    gi.Multicast(&self->s.origin, MULTICAST_PVS);
+    gi.WritePosition(self->state.origin);
+    gi.Multicast(&self->state.origin, MULTICAST_PVS);
 
     G_FreeEntity(self);
 }
@@ -259,8 +259,8 @@ void BecomeExplosion2(entity_t *self)
 {
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TempEntityEvent::Explosion2);
-    gi.WritePosition(self->s.origin);
-    gi.Multicast(&self->s.origin, MULTICAST_PVS);
+    gi.WritePosition(self->state.origin);
+    gi.Multicast(&self->state.origin, MULTICAST_PVS);
 
     G_FreeEntity(self);
 }

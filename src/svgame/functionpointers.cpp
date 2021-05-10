@@ -178,7 +178,7 @@ const save_ptr_t save_ptrs[] = {
 { P_die, func_explosive_explode },
 
 { P_die, gib_die },
-{ P_die, player_die },
+{ P_die, Player_Die },
 { P_die, soldier_die },
 
 { P_monsterinfo_attack, soldier_attack },
@@ -219,7 +219,7 @@ const save_ptr_t save_ptrs[] = {
 
 { P_monsterinfo_walk, soldier_walk },
 
-{ P_pain, player_pain },
+{ P_pain, Player_Pain },
 { P_pain, soldier_pain },
 
 { P_think, Brush_AngleMove_Begin },

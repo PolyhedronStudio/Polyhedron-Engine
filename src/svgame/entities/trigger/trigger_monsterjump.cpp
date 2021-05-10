@@ -44,8 +44,8 @@ void SP_trigger_monsterjump(entity_t* self)
         self->speed = 200;
     if (!st.height)
         st.height = 200;
-    if (self->s.angles[vec3_t::Yaw] == 0)
-        self->s.angles[vec3_t::Yaw] = 360;
+    if (self->state.angles[vec3_t::Yaw] == 0)
+        self->state.angles[vec3_t::Yaw] = 360;
     InitTrigger(self);
     self->Touch = trigger_monsterjump_touch;
     self->moveDirection[2] = st.height;

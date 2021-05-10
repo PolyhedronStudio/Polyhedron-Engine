@@ -40,7 +40,7 @@ void UpdateChaseCam(entity_t *ent)
 
     targ = ent->client->chaseTarget;
 
-    VectorCopy(targ->s.origin, ownerv);
+    VectorCopy(targ->state.origin, ownerv);
 
     ownerv[2] += targ->viewHeight;
 
@@ -51,8 +51,8 @@ void UpdateChaseCam(entity_t *ent)
     VectorNormalize(forward);
     VectorMA(ownerv, -30, forward, o);
 
-    if (o[2] < targ->s.origin[2] + 20)
-        o[2] = targ->s.origin[2] + 20;
+    if (o[2] < targ->state.origin[2] + 20)
+        o[2] = targ->state.origin[2] + 20;
 
     // jump animation lifts
     if (!targ->groundEntityPtr)
@@ -86,7 +86,7 @@ void UpdateChaseCam(entity_t *ent)
     else
         ent->client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
 
-    VectorCopy(goal, ent->s.origin);
+    VectorCopy(goal, ent->state.origin);
     for (i = 0 ; i < 3 ; i++)
         ent->client->playerState.pmove.deltaAngles[i] = targ->client->aimAngles[i] - ent->client->respawn.commandViewAngles[i];
 

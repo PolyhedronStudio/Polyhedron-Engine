@@ -67,7 +67,7 @@ struct gclient_s {
 
 
 struct entity_s {
-    EntityState  s;
+    EntityState  state;
     struct gclient_s    *client;
     qboolean    inUse;
     int         linkCount;

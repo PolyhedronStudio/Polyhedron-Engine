@@ -27,7 +27,7 @@ void barrel_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* 
         return;
 
     ratio = (float)other->mass / (float)self->mass;
-    VectorSubtract(self->s.origin, other->s.origin, v);
+    VectorSubtract(self->state.origin, other->state.origin, v);
     M_walkmove(self, vectoyaw(v), 20 * ratio * FRAMETIME);
 }
 
@@ -39,18 +39,18 @@ void barrel_explode(entity_t* self)
 
     T_RadiusDamage(self, self->activator, self->dmg, NULL, self->dmg + 40, MOD_BARREL);
 
-    VectorCopy(self->s.origin, save);
-    VectorMA(self->absMin, 0.5, self->size, self->s.origin);
+    VectorCopy(self->state.origin, save);
+    VectorMA(self->absMin, 0.5, self->size, self->state.origin);
 
     // a few big chunks
     spd = 1.5 * (float)self->dmg / 200.0;
-    org[0] = self->s.origin[0] + crandom() * self->size[0];
-    org[1] = self->s.origin[1] + crandom() * self->size[1];
-    org[2] = self->s.origin[2] + crandom() * self->size[2];
+    org[0] = self->state.origin[0] + crandom() * self->size[0];
+    org[1] = self->state.origin[1] + crandom() * self->size[1];
+    org[2] = self->state.origin[2] + crandom() * self->size[2];
     ThrowDebris(self, "models/objects/debris1/tris.md2", spd, org);
-    org[0] = self->s.origin[0] + crandom() * self->size[0];
-    org[1] = self->s.origin[1] + crandom() * self->size[1];
-    org[2] = self->s.origin[2] + crandom() * self->size[2];
+    org[0] = self->state.origin[0] + crandom() * self->size[0];
+    org[1] = self->state.origin[1] + crandom() * self->size[1];
+    org[2] = self->state.origin[2] + crandom() * self->size[2];
     ThrowDebris(self, "models/objects/debris1/tris.md2", spd, org);
 
     // bottom corners
@@ -70,40 +70,40 @@ void barrel_explode(entity_t* self)
 
     // a bunch of little chunks
     spd = 2 * self->dmg / 200;
-    org[0] = self->s.origin[0] + crandom() * self->size[0];
-    org[1] = self->s.origin[1] + crandom() * self->size[1];
-    org[2] = self->s.origin[2] + crandom() * self->size[2];
+    org[0] = self->state.origin[0] + crandom() * self->size[0];
+    org[1] = self->state.origin[1] + crandom() * self->size[1];
+    org[2] = self->state.origin[2] + crandom() * self->size[2];
     ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
-    org[0] = self->s.origin[0] + crandom() * self->size[0];
-    org[1] = self->s.origin[1] + crandom() * self->size[1];
-    org[2] = self->s.origin[2] + crandom() * self->size[2];
+    org[0] = self->state.origin[0] + crandom() * self->size[0];
+    org[1] = self->state.origin[1] + crandom() * self->size[1];
+    org[2] = self->state.origin[2] + crandom() * self->size[2];
     ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
-    org[0] = self->s.origin[0] + crandom() * self->size[0];
-    org[1] = self->s.origin[1] + crandom() * self->size[1];
-    org[2] = self->s.origin[2] + crandom() * self->size[2];
+    org[0] = self->state.origin[0] + crandom() * self->size[0];
+    org[1] = self->state.origin[1] + crandom() * self->size[1];
+    org[2] = self->state.origin[2] + crandom() * self->size[2];
     ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
-    org[0] = self->s.origin[0] + crandom() * self->size[0];
-    org[1] = self->s.origin[1] + crandom() * self->size[1];
-    org[2] = self->s.origin[2] + crandom() * self->size[2];
+    org[0] = self->state.origin[0] + crandom() * self->size[0];
+    org[1] = self->state.origin[1] + crandom() * self->size[1];
+    org[2] = self->state.origin[2] + crandom() * self->size[2];
     ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
-    org[0] = self->s.origin[0] + crandom() * self->size[0];
-    org[1] = self->s.origin[1] + crandom() * self->size[1];
-    org[2] = self->s.origin[2] + crandom() * self->size[2];
+    org[0] = self->state.origin[0] + crandom() * self->size[0];
+    org[1] = self->state.origin[1] + crandom() * self->size[1];
+    org[2] = self->state.origin[2] + crandom() * self->size[2];
     ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
-    org[0] = self->s.origin[0] + crandom() * self->size[0];
-    org[1] = self->s.origin[1] + crandom() * self->size[1];
-    org[2] = self->s.origin[2] + crandom() * self->size[2];
+    org[0] = self->state.origin[0] + crandom() * self->size[0];
+    org[1] = self->state.origin[1] + crandom() * self->size[1];
+    org[2] = self->state.origin[2] + crandom() * self->size[2];
     ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
-    org[0] = self->s.origin[0] + crandom() * self->size[0];
-    org[1] = self->s.origin[1] + crandom() * self->size[1];
-    org[2] = self->s.origin[2] + crandom() * self->size[2];
+    org[0] = self->state.origin[0] + crandom() * self->size[0];
+    org[1] = self->state.origin[1] + crandom() * self->size[1];
+    org[2] = self->state.origin[2] + crandom() * self->size[2];
     ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
-    org[0] = self->s.origin[0] + crandom() * self->size[0];
-    org[1] = self->s.origin[1] + crandom() * self->size[1];
-    org[2] = self->s.origin[2] + crandom() * self->size[2];
+    org[0] = self->state.origin[0] + crandom() * self->size[0];
+    org[1] = self->state.origin[1] + crandom() * self->size[1];
+    org[2] = self->state.origin[2] + crandom() * self->size[2];
     ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
 
-    VectorCopy(save, self->s.origin);
+    VectorCopy(save, self->state.origin);
     if (self->groundEntityPtr)
         BecomeExplosion2(self);
     else
@@ -134,7 +134,7 @@ void SP_misc_explobox(entity_t* self)
     self->moveType = MoveType::Step;
 
     self->model = "models/objects/barrels/tris.md2";
-    self->s.modelindex = gi.ModelIndex(self->model);
+    self->state.modelindex = gi.ModelIndex(self->model);
     VectorSet(self->mins, -16, -16, 0);
     VectorSet(self->maxs, 16, 16, 40);
 

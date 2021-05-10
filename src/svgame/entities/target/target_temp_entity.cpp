@@ -19,8 +19,8 @@ void Use_Target_Tent(entity_t* ent, entity_t* other, entity_t* activator)
 {
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(ent->style);
-    gi.WritePosition(ent->s.origin);
-    gi.Multicast(&ent->s.origin, MULTICAST_PVS);
+    gi.WritePosition(ent->state.origin);
+    gi.Multicast(&ent->state.origin, MULTICAST_PVS);
 }
 
 void SP_target_temp_entity(entity_t* ent)

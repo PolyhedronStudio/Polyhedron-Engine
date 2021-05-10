@@ -76,7 +76,7 @@ void PlayerNoise(entity_t *who, vec3_t where, int type)
         level.sound2_entity_framenum = level.frameNumber;
     }
 
-    VectorCopy(where, noise->s.origin);
+    VectorCopy(where, noise->state.origin);
     VectorSubtract(where, noise->maxs, noise->absMin);
     VectorAdd(where, noise->maxs, noise->absMax);
     noise->teleportTime = level.time;
@@ -146,12 +146,12 @@ void ChangeWeapon(entity_t *ent)
     ent->client->machinegunShots = 0;
 
     // set visible model
-    if (ent->s.modelindex == 255) {
+    if (ent->state.modelindex == 255) {
         if (ent->client->persistent.weapon)
             i = ((ent->client->persistent.weapon->weaponModel & 0xff) << 8);
         else
             i = 0;
-        ent->s.skinnum = (ent - g_edicts - 1) | i;
+        ent->state.skinnum = (ent - g_edicts - 1) | i;
     }
 
     if (ent->client->persistent.weapon && ent->client->persistent.weapon->ammo)
@@ -169,13 +169,13 @@ void ChangeWeapon(entity_t *ent)
     ent->client->playerState.gunframe = 0;
     ent->client->playerState.gunindex = gi.ModelIndex(ent->client->persistent.weapon->viewModel);
 
-    ent->client->anim_priority = ANIM_PAIN;
+    ent->client->animation.priorityAnimation = ANIM_PAIN;
     if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
-        ent->s.frame = FRAME_crpain1;
-        ent->client->anim_end = FRAME_crpain4;
+        ent->state.frame = FRAME_crpain1;
+        ent->client->animation.endFrame = FRAME_crpain4;
     } else {
-        ent->s.frame = FRAME_pain301;
-        ent->client->anim_end = FRAME_pain304;
+        ent->state.frame = FRAME_pain301;
+        ent->client->animation.endFrame = FRAME_pain304;
 
     }
 }
@@ -293,7 +293,7 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 {
     int     n;
 
-    if (ent->deadFlag || ent->s.modelindex != 255) { // VWep animations screw up corpses
+    if (ent->deadFlag || ent->state.modelindex != 255) { // VWep animations screw up corpses
         return;
     }
 
@@ -302,13 +302,13 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
             ChangeWeapon(ent);
             return;
         } else if ((FRAME_DEACTIVATE_LAST - ent->client->playerState.gunframe) == 4) {
-            ent->client->anim_priority = ANIM_REVERSE;
+            ent->client->animation.priorityAnimation = ANIM_REVERSE;
             if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
-                ent->s.frame = FRAME_crpain4 + 1;
-                ent->client->anim_end = FRAME_crpain1;
+                ent->state.frame = FRAME_crpain4 + 1;
+                ent->client->animation.endFrame = FRAME_crpain1;
             } else {
-                ent->s.frame = FRAME_pain304 + 1;
-                ent->client->anim_end = FRAME_pain301;
+                ent->state.frame = FRAME_pain304 + 1;
+                ent->client->animation.endFrame = FRAME_pain301;
 
             }
         }
@@ -333,13 +333,13 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
         ent->client->playerState.gunframe = FRAME_DEACTIVATE_FIRST;
 
         if ((FRAME_DEACTIVATE_LAST - FRAME_DEACTIVATE_FIRST) < 4) {
-            ent->client->anim_priority = ANIM_REVERSE;
+            ent->client->animation.priorityAnimation = ANIM_REVERSE;
             if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
-                ent->s.frame = FRAME_crpain4 + 1;
-                ent->client->anim_end = FRAME_crpain1;
+                ent->state.frame = FRAME_crpain4 + 1;
+                ent->client->animation.endFrame = FRAME_crpain1;
             } else {
-                ent->s.frame = FRAME_pain304 + 1;
-                ent->client->anim_end = FRAME_pain301;
+                ent->state.frame = FRAME_pain304 + 1;
+                ent->client->animation.endFrame = FRAME_pain301;
 
             }
         }
@@ -355,13 +355,13 @@ void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
                 ent->client->weaponState = WEAPON_FIRING;
 
                 // start the animation
-                ent->client->anim_priority = ANIM_ATTACK;
+                ent->client->animation.priorityAnimation = ANIM_ATTACK;
                 if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
-                    ent->s.frame = FRAME_crattak1 - 1;
-                    ent->client->anim_end = FRAME_crattak9;
+                    ent->state.frame = FRAME_crattak1 - 1;
+                    ent->client->animation.endFrame = FRAME_crattak9;
                 } else {
-                    ent->s.frame = FRAME_attack1 - 1;
-                    ent->client->anim_end = FRAME_attack8;
+                    ent->state.frame = FRAME_attack1 - 1;
+                    ent->client->animation.endFrame = FRAME_attack8;
                 }
             } else {
                 if (level.time >= ent->debouncePainTime) {

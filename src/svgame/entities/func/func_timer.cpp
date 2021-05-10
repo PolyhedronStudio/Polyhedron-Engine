@@ -58,7 +58,7 @@ void SP_func_timer(entity_t* self)
 
     if (self->random >= self->wait) {
         self->random = self->wait - FRAMETIME;
-        gi.DPrintf("func_timer at %s has random >= wait\n", Vec3ToString(self->s.origin));
+        gi.DPrintf("func_timer at %s has random >= wait\n", Vec3ToString(self->state.origin));
     }
 
     if (self->spawnFlags & 1) {

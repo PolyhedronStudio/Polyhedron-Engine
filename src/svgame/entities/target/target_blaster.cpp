@@ -30,14 +30,14 @@ void use_target_blaster(entity_t* self, entity_t* other, entity_t* activator)
         effect = EF_BLASTER;
 #endif
 
-    fire_blaster(self, self->s.origin, self->moveDirection, self->dmg, self->speed, EntityEffectType::Blaster, MOD_TARGET_BLASTER);
+    fire_blaster(self, self->state.origin, self->moveDirection, self->dmg, self->speed, EntityEffectType::Blaster, MOD_TARGET_BLASTER);
     gi.Sound(self, CHAN_VOICE, self->noiseIndex, 1, ATTN_NORM, 0);
 }
 
 void SP_target_blaster(entity_t* self)
 {
     self->Use = use_target_blaster;
-    UTIL_SetMoveDir(self->s.angles, self->moveDirection);
+    UTIL_SetMoveDir(self->state.angles, self->moveDirection);
     self->noiseIndex = gi.SoundIndex("weapons/laser2.wav");
 
     if (!self->dmg)

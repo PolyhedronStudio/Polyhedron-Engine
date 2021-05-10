@@ -20,7 +20,7 @@ void plat_hit_top(entity_t* ent)
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveInfo.sound_end)
             gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_end, 1, ATTN_STATIC, 0);
-        ent->s.sound = 0;
+        ent->state.sound = 0;
     }
     ent->moveInfo.state = STATE_TOP;
 
@@ -33,7 +33,7 @@ void plat_hit_bottom(entity_t* ent)
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveInfo.sound_end)
             gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_end, 1, ATTN_STATIC, 0);
-        ent->s.sound = 0;
+        ent->state.sound = 0;
     }
     ent->moveInfo.state = STATE_BOTTOM;
 }
@@ -43,7 +43,7 @@ void plat_go_down(entity_t* ent)
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveInfo.sound_start)
             gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_start, 1, ATTN_STATIC, 0);
-        ent->s.sound = ent->moveInfo.sound_middle;
+        ent->state.sound = ent->moveInfo.sound_middle;
     }
     ent->moveInfo.state = STATE_DOWN;
     Brush_Move_Calc(ent, ent->moveInfo.end_origin, plat_hit_bottom);
@@ -54,7 +54,7 @@ void plat_go_up(entity_t* ent)
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveInfo.sound_start)
             gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_start, 1, ATTN_STATIC, 0);
-        ent->s.sound = ent->moveInfo.sound_middle;
+        ent->state.sound = ent->moveInfo.sound_middle;
     }
     ent->moveInfo.state = STATE_UP;
     Brush_Move_Calc(ent, ent->moveInfo.start_origin, plat_hit_top);
@@ -64,14 +64,14 @@ void plat_blocked(entity_t* self, entity_t* other)
 {
     if (!(other->svFlags & SVF_MONSTER) && (!other->client)) {
         // give it a chance to go away on it's own terms (like gibs)
-        T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
         // if it's still there, nuke it
         if (other)
             BecomeExplosion1(other);
         return;
     }
 
-    T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 
     if (self->moveInfo.state == STATE_UP)
         plat_go_down(self);
@@ -165,7 +165,7 @@ Set "sounds" to one of the following:
 */
 void SP_func_plat(entity_t* ent)
 {
-    VectorClear(ent->s.angles);
+    VectorClear(ent->state.angles);
     ent->solid = Solid::BSP;
     ent->moveType = MoveType::Push;
 
@@ -195,8 +195,8 @@ void SP_func_plat(entity_t* ent)
         st.lip = 8;
 
     // pos1 is the top position, pos2 is the bottom
-    VectorCopy(ent->s.origin, ent->pos1);
-    VectorCopy(ent->s.origin, ent->pos2);
+    VectorCopy(ent->state.origin, ent->pos1);
+    VectorCopy(ent->state.origin, ent->pos2);
     if (st.height)
         ent->pos2[2] -= st.height;
     else
@@ -210,7 +210,7 @@ void SP_func_plat(entity_t* ent)
         ent->moveInfo.state = STATE_UP;
     }
     else {
-        VectorCopy(ent->pos2, ent->s.origin);
+        VectorCopy(ent->pos2, ent->state.origin);
         gi.LinkEntity(ent);
         ent->moveInfo.state = STATE_BOTTOM;
     }
@@ -220,9 +220,9 @@ void SP_func_plat(entity_t* ent)
     ent->moveInfo.decel = ent->decel;
     ent->moveInfo.wait = ent->wait;
     VectorCopy(ent->pos1, ent->moveInfo.start_origin);
-    VectorCopy(ent->s.angles, ent->moveInfo.start_angles);
+    VectorCopy(ent->state.angles, ent->moveInfo.start_angles);
     VectorCopy(ent->pos2, ent->moveInfo.end_origin);
-    VectorCopy(ent->s.angles, ent->moveInfo.end_angles);
+    VectorCopy(ent->state.angles, ent->moveInfo.end_angles);
 
     ent->moveInfo.sound_start = gi.SoundIndex("plats/pt1_strt.wav");
     ent->moveInfo.sound_middle = gi.SoundIndex("plats/pt1_mid.wav");

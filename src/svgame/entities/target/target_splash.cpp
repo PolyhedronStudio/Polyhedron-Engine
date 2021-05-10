@@ -32,10 +32,10 @@ void use_target_splash(entity_t* self, entity_t* other, entity_t* activator)
     gi.WriteByte(svg_temp_entity);
     gi.WriteByte(TempEntityEvent::Splash);
     gi.WriteByte(self->count);
-    gi.WritePosition(self->s.origin);
+    gi.WritePosition(self->state.origin);
     gi.WriteDirection(self->moveDirection);
     gi.WriteByte(self->sounds);
-    gi.Multicast(&self->s.origin, MULTICAST_PVS);
+    gi.Multicast(&self->state.origin, MULTICAST_PVS);
 
     if (self->dmg)
         T_RadiusDamage(self, activator, self->dmg, NULL, self->dmg + 40, MOD_SPLASH);
@@ -44,7 +44,7 @@ void use_target_splash(entity_t* self, entity_t* other, entity_t* activator)
 void SP_target_splash(entity_t* self)
 {
     self->Use = use_target_splash;
-    UTIL_SetMoveDir(self->s.angles, self->moveDirection);
+    UTIL_SetMoveDir(self->state.angles, self->moveDirection);
 
     if (!self->count)
         self->count = 32;

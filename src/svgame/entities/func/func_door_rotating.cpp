@@ -45,7 +45,7 @@ REVERSE will cause the door to rotate in the opposite direction.
 
 void SP_func_door_rotating(entity_t* ent)
 {
-    VectorClear(ent->s.angles);
+    VectorClear(ent->state.angles);
 
     // set the axis of rotation
     VectorClear(ent->moveDirection);
@@ -61,12 +61,12 @@ void SP_func_door_rotating(entity_t* ent)
         VectorNegate(ent->moveDirection, ent->moveDirection);
 
     if (!st.distance) {
-        gi.DPrintf("%s at %s with no distance set\n", ent->classname, Vec3ToString(ent->s.origin));
+        gi.DPrintf("%s at %s with no distance set\n", ent->classname, Vec3ToString(ent->state.origin));
         st.distance = 90;
     }
 
-    VectorCopy(ent->s.angles, ent->pos1);
-    VectorMA(ent->s.angles, st.distance, ent->moveDirection, ent->pos2);
+    VectorCopy(ent->state.angles, ent->pos1);
+    VectorMA(ent->state.angles, st.distance, ent->moveDirection, ent->pos2);
     ent->moveInfo.distance = st.distance;
 
     ent->moveType = MoveType::Push;
@@ -96,9 +96,9 @@ void SP_func_door_rotating(entity_t* ent)
 
     // if it starts open, switch the positions
     if (ent->spawnFlags & DOOR_START_OPEN) {
-        VectorCopy(ent->pos2, ent->s.angles);
+        VectorCopy(ent->pos2, ent->state.angles);
         VectorCopy(ent->pos1, ent->pos2);
-        VectorCopy(ent->s.angles, ent->pos1);
+        VectorCopy(ent->state.angles, ent->pos1);
         VectorNegate(ent->moveDirection, ent->moveDirection);
     }
 
@@ -118,13 +118,13 @@ void SP_func_door_rotating(entity_t* ent)
     ent->moveInfo.accel = ent->accel;
     ent->moveInfo.decel = ent->decel;
     ent->moveInfo.wait = ent->wait;
-    VectorCopy(ent->s.origin, ent->moveInfo.start_origin);
+    VectorCopy(ent->state.origin, ent->moveInfo.start_origin);
     VectorCopy(ent->pos1, ent->moveInfo.start_angles);
-    VectorCopy(ent->s.origin, ent->moveInfo.end_origin);
+    VectorCopy(ent->state.origin, ent->moveInfo.end_origin);
     VectorCopy(ent->pos2, ent->moveInfo.end_angles);
 
     if (ent->spawnFlags & 16)
-        ent->s.effects |= EntityEffectType::AnimCycleAll2hz;
+        ent->state.effects |= EntityEffectType::AnimCycleAll2hz;
 
     // to simplify logic elsewhere, make non-teamed doors into a team of one
     if (!ent->team)

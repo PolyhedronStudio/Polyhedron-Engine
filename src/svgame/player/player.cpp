@@ -12,7 +12,7 @@
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
 
-void player_pain(entity_t* self, entity_t* other, float kick, int damage)
+void Player_Pain(entity_t* self, entity_t* other, float kick, int damage)
 {
     // player pain is handled at the end of the frame in P_ApplyDamageFeedback
 }
@@ -27,13 +27,13 @@ void LookAtKiller(entity_t* self, entity_t* inflictor, entity_t* attacker)
     vec3_t      dir;
 
     if (attacker && attacker != world && attacker != self) {
-        VectorSubtract(attacker->s.origin, self->s.origin, dir);
+        VectorSubtract(attacker->state.origin, self->state.origin, dir);
     }
     else if (inflictor && inflictor != world && inflictor != self) {
-        VectorSubtract(inflictor->s.origin, self->s.origin, dir);
+        VectorSubtract(inflictor->state.origin, self->state.origin, dir);
     }
     else {
-        self->client->killerYaw = self->s.angles[vec3_t::Yaw];
+        self->client->killerYaw = self->state.angles[vec3_t::Yaw];
         return;
     }
 
@@ -54,10 +54,10 @@ void LookAtKiller(entity_t* self, entity_t* inflictor, entity_t* attacker)
 
 /*
 ==================
-player_die
+Player_Die
 ==================
 */
-void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point)
+void Player_Die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point)
 {
     int     n;
 
@@ -67,14 +67,14 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
     self->takedamage = DAMAGE_YES;
     self->moveType = MoveType::Toss;
 
-    self->s.modelindex2 = 0;    // remove linked weapon model
+    self->state.modelindex2 = 0;    // remove linked weapon model
     
-    self->s.effects = EntityEffectType::Corpse;
+    self->state.effects = EntityEffectType::Corpse;
 
-    self->s.angles[0] = 0;
-    self->s.angles[2] = 0;
+    self->state.angles[0] = 0;
+    self->state.angles[2] = 0;
 
-    self->s.sound = 0;
+    self->state.sound = 0;
     self->client->weaponSound = 0;
 
     self->maxs[2] = -8;
@@ -119,23 +119,23 @@ void player_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
 
             i = (i + 1) % 3;
             // start a death animation
-            self->client->anim_priority = ANIM_DEATH;
+            self->client->animation.priorityAnimation = ANIM_DEATH;
             if (self->client->playerState.pmove.flags & PMF_DUCKED) {
-                self->s.frame = FRAME_crdeath1 - 1;
-                self->client->anim_end = FRAME_crdeath5;
+                self->state.frame = FRAME_crdeath1 - 1;
+                self->client->animation.endFrame = FRAME_crdeath5;
             }
             else switch (i) {
             case 0:
-                self->s.frame = FRAME_death101 - 1;
-                self->client->anim_end = FRAME_death106;
+                self->state.frame = FRAME_death101 - 1;
+                self->client->animation.endFrame = FRAME_death106;
                 break;
             case 1:
-                self->s.frame = FRAME_death201 - 1;
-                self->client->anim_end = FRAME_death206;
+                self->state.frame = FRAME_death201 - 1;
+                self->client->animation.endFrame = FRAME_death206;
                 break;
             case 2:
-                self->s.frame = FRAME_death301 - 1;
-                self->client->anim_end = FRAME_death308;
+                self->state.frame = FRAME_death301 - 1;
+                self->client->animation.endFrame = FRAME_death308;
                 break;
             }
             gi.Sound(self, CHAN_VOICE, gi.SoundIndex(va("*death%i.wav", (rand() % 4) + 1)), 1, ATTN_NORM, 0);

@@ -57,7 +57,7 @@ void door_hit_top(entity_t* self)
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveInfo.sound_end)
             gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_end, 1, ATTN_STATIC, 0);
-        self->s.sound = 0;
+        self->state.sound = 0;
     }
     self->moveInfo.state = STATE_TOP;
     if (self->spawnFlags & DOOR_TOGGLE)
@@ -73,7 +73,7 @@ void door_hit_bottom(entity_t* self)
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveInfo.sound_end)
             gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_end, 1, ATTN_STATIC, 0);
-        self->s.sound = 0;
+        self->state.sound = 0;
     }
     self->moveInfo.state = STATE_BOTTOM;
     door_use_areaportals(self, false);
@@ -84,7 +84,7 @@ void door_go_down(entity_t* self)
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveInfo.sound_start)
             gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_start, 1, ATTN_STATIC, 0);
-        self->s.sound = self->moveInfo.sound_middle;
+        self->state.sound = self->moveInfo.sound_middle;
     }
     if (self->maxHealth) {
         self->takedamage = DAMAGE_YES;
@@ -113,7 +113,7 @@ void door_go_up(entity_t* self, entity_t* activator)
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveInfo.sound_start)
             gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_start, 1, ATTN_STATIC, 0);
-        self->s.sound = self->moveInfo.sound_middle;
+        self->state.sound = self->moveInfo.sound_middle;
     }
     self->moveInfo.state = STATE_UP;
     if (strcmp(self->classname, "func_door") == 0)
@@ -251,14 +251,14 @@ void door_blocked(entity_t* self, entity_t* other)
 
     if (!(other->svFlags & SVF_MONSTER) && (!other->client)) {
         // give it a chance to go away on it's own terms (like gibs)
-        T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
         // if it's still there, nuke it
         if (other)
             BecomeExplosion1(other);
         return;
     }
 
-    T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 
     if (self->spawnFlags & DOOR_CRUSHER)
         return;
@@ -312,7 +312,7 @@ void SP_func_door(entity_t* ent)
         ent->moveInfo.sound_end = gi.SoundIndex("doors/dr1_end.wav");
     }
 
-    UTIL_SetMoveDir(ent->s.angles, ent->moveDirection);
+    UTIL_SetMoveDir(ent->state.angles, ent->moveDirection);
     ent->moveType = MoveType::Push;
     ent->solid = Solid::BSP;
     gi.SetModel(ent, ent->model);
@@ -338,7 +338,7 @@ void SP_func_door(entity_t* ent)
         ent->dmg = 2;
 
     // calculate second position
-    VectorCopy(ent->s.origin, ent->pos1);
+    VectorCopy(ent->state.origin, ent->pos1);
     abs_movedir[0] = fabs(ent->moveDirection[0]);
     abs_movedir[1] = fabs(ent->moveDirection[1]);
     abs_movedir[2] = fabs(ent->moveDirection[2]);
@@ -347,9 +347,9 @@ void SP_func_door(entity_t* ent)
 
     // if it starts open, switch the positions
     if (ent->spawnFlags & DOOR_START_OPEN) {
-        VectorCopy(ent->pos2, ent->s.origin);
+        VectorCopy(ent->pos2, ent->state.origin);
         VectorCopy(ent->pos1, ent->pos2);
-        VectorCopy(ent->s.origin, ent->pos1);
+        VectorCopy(ent->state.origin, ent->pos1);
     }
 
     ent->moveInfo.state = STATE_BOTTOM;
@@ -369,14 +369,14 @@ void SP_func_door(entity_t* ent)
     ent->moveInfo.decel = ent->decel;
     ent->moveInfo.wait = ent->wait;
     VectorCopy(ent->pos1, ent->moveInfo.start_origin);
-    VectorCopy(ent->s.angles, ent->moveInfo.start_angles);
+    VectorCopy(ent->state.angles, ent->moveInfo.start_angles);
     VectorCopy(ent->pos2, ent->moveInfo.end_origin);
-    VectorCopy(ent->s.angles, ent->moveInfo.end_angles);
+    VectorCopy(ent->state.angles, ent->moveInfo.end_angles);
 
     if (ent->spawnFlags & 16)
-        ent->s.effects |= EntityEffectType::AnimCycleAll2hz;
+        ent->state.effects |= EntityEffectType::AnimCycleAll2hz;
     if (ent->spawnFlags & 64)
-        ent->s.effects |= EntityEffectType::AnimCycleAll30hz;
+        ent->state.effects |= EntityEffectType::AnimCycleAll30hz;
 
     // to simplify logic elsewhere, make non-teamed doors into a team of one
     if (!ent->team)

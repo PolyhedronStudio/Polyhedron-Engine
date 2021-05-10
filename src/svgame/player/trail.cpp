@@ -69,12 +69,12 @@ void PlayerTrail_Add(vec3_t spot)
     if (!trail_active)
         return;
 
-    VectorCopy(spot, trail[trail_head]->s.origin);
+    VectorCopy(spot, trail[trail_head]->state.origin);
 
     trail[trail_head]->timestamp = level.time;
 
-    VectorSubtract(spot, trail[PREV(trail_head)]->s.origin, temp);
-    trail[trail_head]->s.angles[1] = vectoyaw(temp);
+    VectorSubtract(spot, trail[PREV(trail_head)]->state.origin, temp);
+    trail[trail_head]->state.angles[1] = vectoyaw(temp);
 
     trail_head = NEXT(trail_head);
 }

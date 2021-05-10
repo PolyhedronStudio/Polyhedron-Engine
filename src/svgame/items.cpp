@@ -122,7 +122,7 @@ void DoRespawn(entity_t *ent)
     gi.LinkEntity(ent);
 
     // send an effect
-    ent->s.event = EV_ITEM_RESPAWN;
+    ent->state.event = EV_ITEM_RESPAWN;
 }
 
 void SetRespawn(entity_t *ent, float delay)
@@ -475,8 +475,8 @@ entity_t *Drop_Item(entity_t *ent, gitem_t *item)
     dropped->classname = item->classname;
     dropped->item = item;
     dropped->spawnFlags = DROPPED_ITEM;
-    dropped->s.effects = item->worldModelFlags;
-    dropped->s.renderfx = RenderEffects::Glow;
+    dropped->state.effects = item->worldModelFlags;
+    dropped->state.renderfx = RenderEffects::Glow;
     VectorSet(dropped->mins, -15, -15, -15);
     VectorSet(dropped->maxs, 15, 15, 15);
     gi.SetModel(dropped, dropped->item->worldModel);
@@ -490,13 +490,13 @@ entity_t *Drop_Item(entity_t *ent, gitem_t *item)
 
         AngleVectors(ent->client->aimAngles, &forward, &right, NULL);
         VectorSet(offset, 24, 0, -16);
-        dropped->s.origin = G_ProjectSource(ent->s.origin, offset, forward, right);
-        trace = gi.Trace(ent->s.origin, dropped->mins, dropped->maxs,
-                         dropped->s.origin, ent, CONTENTS_SOLID);
-        VectorCopy(trace.endPosition, dropped->s.origin);
+        dropped->state.origin = G_ProjectSource(ent->state.origin, offset, forward, right);
+        trace = gi.Trace(ent->state.origin, dropped->mins, dropped->maxs,
+                         dropped->state.origin, ent, CONTENTS_SOLID);
+        VectorCopy(trace.endPosition, dropped->state.origin);
     } else {
-        AngleVectors(ent->s.angles, &forward, &right, NULL);
-        VectorCopy(ent->s.origin, dropped->s.origin);
+        AngleVectors(ent->state.angles, &forward, &right, NULL);
+        VectorCopy(ent->state.origin, dropped->state.origin);
     }
 
     VectorScale(forward, 100, dropped->velocity);
@@ -550,16 +550,16 @@ void droptofloor(entity_t *ent)
     ent->Touch = Touch_Item;
 
     // Calculate trace destination
-    dest = ent->s.origin + vec3_t(0.f, 0.f, 128.f);
+    dest = ent->state.origin + vec3_t(0.f, 0.f, 128.f);
 
-    tr = gi.Trace(ent->s.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
+    tr = gi.Trace(ent->state.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
     if (tr.startSolid) {
-        gi.DPrintf("droptofloor: %s startsolid at %s\n", ent->classname, Vec3ToString(ent->s.origin));
+        gi.DPrintf("droptofloor: %s startsolid at %s\n", ent->classname, Vec3ToString(ent->state.origin));
         G_FreeEntity(ent);
         return;
     }
 
-    VectorCopy(tr.endPosition, ent->s.origin);
+    VectorCopy(tr.endPosition, ent->state.origin);
 
     if (ent->team) {
         ent->flags &= ~FL_TEAMSLAVE;
@@ -577,8 +577,8 @@ void droptofloor(entity_t *ent)
     if (ent->spawnFlags & ITEM_NO_TOUCH) {
         ent->solid = Solid::BoundingBox;
         ent->Touch = NULL;
-        ent->s.effects &= ~EntityEffectType::Rotate;
-        ent->s.renderfx &= ~RenderEffects::Glow;
+        ent->state.effects &= ~EntityEffectType::Rotate;
+        ent->state.renderfx &= ~RenderEffects::Glow;
     }
 
     if (ent->spawnFlags & ITEM_TRIGGER_SPAWN) {
@@ -673,7 +673,7 @@ void SpawnItem(entity_t *ent, gitem_t *item)
     if (ent->spawnFlags) {
         if (strcmp(ent->classname, "key_power_cube") != 0) {
             ent->spawnFlags = 0;
-            gi.DPrintf("%s at %s has invalid spawnFlags set\n", ent->classname, Vec3ToString(ent->s.origin));
+            gi.DPrintf("%s at %s has invalid spawnFlags set\n", ent->classname, Vec3ToString(ent->state.origin));
         }
     }
 
@@ -718,8 +718,8 @@ void SpawnItem(entity_t *ent, gitem_t *item)
     ent->item = item;
     ent->nextThink = level.time + 2 * FRAMETIME;    // items start after other solids
     ent->Think = droptofloor;
-    ent->s.effects = item->worldModelFlags;
-    ent->s.renderfx = RenderEffects::Glow;
+    ent->state.effects = item->worldModelFlags;
+    ent->state.renderfx = RenderEffects::Glow;
     if (ent->model)
         gi.ModelIndex(ent->model);
 }

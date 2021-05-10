@@ -35,7 +35,7 @@ void train_blocked(entity_t* self, entity_t* other)
 {
     if (!(other->svFlags & SVF_MONSTER) && (!other->client)) {
         // give it a chance to go away on it's own terms (like gibs)
-        T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
         // if it's still there, nuke it
         if (other)
             BecomeExplosion1(other);
@@ -48,7 +48,7 @@ void train_blocked(entity_t* self, entity_t* other)
     if (!self->dmg)
         return;
     self->debounceTouchTime = level.time + 0.5;
-    T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
 void train_wait(entity_t* self)
@@ -83,7 +83,7 @@ void train_wait(entity_t* self)
         if (!(self->flags & FL_TEAMSLAVE)) {
             if (self->moveInfo.sound_end)
                 gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_end, 1, ATTN_STATIC, 0);
-            self->s.sound = 0;
+            self->state.sound = 0;
         }
     }
     else {
@@ -116,13 +116,13 @@ again:
     // check for a teleport path_corner
     if (ent->spawnFlags & 1) {
         if (!first) {
-            gi.DPrintf("connected teleport path_corners, see %s at %s\n", ent->classname, vec3_to_str(ent->s.origin));
+            gi.DPrintf("connected teleport path_corners, see %s at %s\n", ent->classname, vec3_to_str(ent->state.origin));
             return;
         }
         first = false;
-        VectorSubtract(ent->s.origin, self->mins, self->s.origin);
-        VectorCopy(self->s.origin, self->s.old_origin);
-        self->s.event = EV_OTHER_TELEPORT;
+        VectorSubtract(ent->state.origin, self->mins, self->state.origin);
+        VectorCopy(self->state.origin, self->state.old_origin);
+        self->state.event = EV_OTHER_TELEPORT;
         gi.LinkEntity(self);
         goto again;
     }
@@ -133,12 +133,12 @@ again:
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveInfo.sound_start)
             gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_start, 1, ATTN_STATIC, 0);
-        self->s.sound = self->moveInfo.sound_middle;
+        self->state.sound = self->moveInfo.sound_middle;
     }
 
-    VectorSubtract(ent->s.origin, self->mins, dest);
+    VectorSubtract(ent->state.origin, self->mins, dest);
     self->moveInfo.state = STATE_TOP;
-    VectorCopy(self->s.origin, self->moveInfo.start_origin);
+    VectorCopy(self->state.origin, self->moveInfo.start_origin);
     VectorCopy(dest, self->moveInfo.end_origin);
     Brush_Move_Calc(self, dest, train_wait);
     self->spawnFlags |= TRAIN_START_ON;
@@ -151,9 +151,9 @@ void train_resume(entity_t* self)
 
     ent = self->targetEntityPtr;
 
-    VectorSubtract(ent->s.origin, self->mins, dest);
+    VectorSubtract(ent->state.origin, self->mins, dest);
     self->moveInfo.state = STATE_TOP;
-    VectorCopy(self->s.origin, self->moveInfo.start_origin);
+    VectorCopy(self->state.origin, self->moveInfo.start_origin);
     VectorCopy(dest, self->moveInfo.end_origin);
     Brush_Move_Calc(self, dest, train_wait);
     self->spawnFlags |= TRAIN_START_ON;
@@ -174,7 +174,7 @@ void func_train_find(entity_t* self)
     }
     self->target = ent->target;
 
-    VectorSubtract(ent->s.origin, self->mins, self->s.origin);
+    VectorSubtract(ent->state.origin, self->mins, self->state.origin);
     gi.LinkEntity(self);
 
     // if not triggered, start immediately
@@ -211,7 +211,7 @@ void SP_func_train(entity_t* self)
 {
     self->moveType = MoveType::Push;
 
-    VectorClear(self->s.angles);
+    VectorClear(self->state.angles);
     self->Blocked = train_blocked;
     if (self->spawnFlags & TRAIN_BLOCK_STOPS)
         self->dmg = 0;

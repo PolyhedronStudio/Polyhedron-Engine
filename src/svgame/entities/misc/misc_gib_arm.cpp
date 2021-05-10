@@ -21,7 +21,7 @@ void SP_misc_gib_arm(entity_t* ent)
 {
     gi.SetModel(ent, "models/objects/gibs/arm/tris.md2");
     ent->solid = Solid::Not;
-    ent->s.effects |= EntityEffectType::Gib;
+    ent->state.effects |= EntityEffectType::Gib;
     ent->takedamage = DAMAGE_YES;
     ent->Die = gib_die;
     ent->moveType = MoveType::Toss;

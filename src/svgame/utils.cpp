@@ -312,12 +312,12 @@ qboolean KillBox(entity_t *ent)
     trace_t     tr;
 
     while (1) {
-        tr = gi.Trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, CONTENTS_MASK_PLAYERSOLID);
+        tr = gi.Trace(ent->state.origin, ent->mins, ent->maxs, ent->state.origin, NULL, CONTENTS_MASK_PLAYERSOLID);
         if (!tr.ent)
             break;
 
         // nail it
-        T_Damage(tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+        T_Damage(tr.ent, ent, ent, vec3_origin, ent->state.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
 
         // if we didn't kill it, fail
         if (tr.ent->solid)

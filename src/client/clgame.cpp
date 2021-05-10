@@ -29,7 +29,7 @@
 #include "shared/clgame.h"
 
 // Contains the functions being exported to client game dll.
-clgame_export_t *cge;
+ClientGameExport *cge;
 
 // Operating System handle to the cgame library.
 static void *cgame_library;
@@ -360,24 +360,24 @@ void CL_ShutdownGameProgs(void)
 //
 void CL_InitGameProgs(void)
 {
-    clgame_import_t   importAPI;
-    clgame_export_t* (*entry)(clgame_import_t*) = NULL;
+    ClientGameImport   importAPI;
+    ClientGameExport* (*entry)(ClientGameImport*) = NULL;
 
     // unload anything we have now
     CL_ShutdownGameProgs();
 
     // for debugging or `proxy' mods
     if (sys_forcecgamelib->string[0])
-        entry = (clgame_export_t * (*)(clgame_import_t*))_CL_LoadGameLibrary(sys_forcecgamelib->string); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
+        entry = (ClientGameExport * (*)(ClientGameImport*))_CL_LoadGameLibrary(sys_forcecgamelib->string); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
 
     // try game first
     if (!entry && fs_game->string[0]) {
-        entry = (clgame_export_t * (*)(clgame_import_t*))CL_LoadGameLibrary(fs_game->string, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
+        entry = (ClientGameExport * (*)(ClientGameImport*))CL_LoadGameLibrary(fs_game->string, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
     }
 
     // then try basenac
     if (!entry) {
-        entry = (clgame_export_t * (*)(clgame_import_t*))CL_LoadGameLibrary(BASEGAME, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
+        entry = (ClientGameExport * (*)(ClientGameImport*))CL_LoadGameLibrary(BASEGAME, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
     }
 
     // all paths failed

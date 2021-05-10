@@ -2252,7 +2252,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //	// Calc vector normalized
 //	vec3_t dir;
 //
-//	VectorSubtract(elight->origin, lightTarget->s.origin, dir);
+//	VectorSubtract(elight->origin, lightTarget->state.origin, dir);
 //	VectorNormalize(dir);
 //	VectorCopy(dir, elight->nacDirection);
 //}
@@ -2263,7 +2263,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //	entity_t *light = (entity_t*)elight->nacLightBind;
 //	if (!light) return;
 //
-//	VectorCopy(light->s.origin, elight->origin);
+//	VectorCopy(light->state.origin, elight->origin);
 //
 //}
 //

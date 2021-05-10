@@ -50,8 +50,8 @@ void target_lightramp_use(entity_t* self, entity_t* other, entity_t* activator)
             if (!e)
                 break;
             if (strcmp(e->classname, "light") != 0) {
-                gi.DPrintf("%s at %s ", self->classname, Vec3ToString(self->s.origin));
-                gi.DPrintf("target %s (%s at %s) is not a light\n", self->target, e->classname, Vec3ToString(e->s.origin));
+                gi.DPrintf("%s at %s ", self->classname, Vec3ToString(self->state.origin));
+                gi.DPrintf("target %s (%s at %s) is not a light\n", self->target, e->classname, Vec3ToString(e->state.origin));
             }
             else {
                 self->enemy = e;
@@ -59,7 +59,7 @@ void target_lightramp_use(entity_t* self, entity_t* other, entity_t* activator)
         }
 
         if (!self->enemy) {
-            gi.DPrintf("%s target %s not found at %s\n", self->classname, self->target, Vec3ToString(self->s.origin));
+            gi.DPrintf("%s target %s not found at %s\n", self->classname, self->target, Vec3ToString(self->state.origin));
             G_FreeEntity(self);
             return;
         }
@@ -72,7 +72,7 @@ void target_lightramp_use(entity_t* self, entity_t* other, entity_t* activator)
 void SP_target_lightramp(entity_t* self)
 {
     if (!self->message || strlen(self->message) != 2 || self->message[0] < 'a' || self->message[0] > 'z' || self->message[1] < 'a' || self->message[1] > 'z' || self->message[0] == self->message[1]) {
-        gi.DPrintf("target_lightramp has bad ramp (%s) at %s\n", self->message, Vec3ToString(self->s.origin));
+        gi.DPrintf("target_lightramp has bad ramp (%s) at %s\n", self->message, Vec3ToString(self->state.origin));
         G_FreeEntity(self);
         return;
     }
@@ -83,7 +83,7 @@ void SP_target_lightramp(entity_t* self)
     }
 
     if (!self->target) {
-        gi.DPrintf("%s with no target at %s\n", self->classname, Vec3ToString(self->s.origin));
+        gi.DPrintf("%s with no target at %s\n", self->classname, Vec3ToString(self->state.origin));
         G_FreeEntity(self);
         return;
     }

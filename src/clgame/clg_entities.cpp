@@ -514,9 +514,10 @@ void CLG_AddEntities(void)
 //===============
 //
 cl_entity_t* CLG_GetClientViewEntity(void) {
-
+    // Fetch clientnumber by default.
     int32_t index = cl->clientNumber;
 
+    // Fetch the chasing entity index if we are chasing.
     if (cl->frame.playerState.stats[STAT_CHASE]) {
         index = cl->frame.playerState.stats[STAT_CHASE] - ConfigStrings::PlayerSkins;
     }
@@ -532,19 +533,20 @@ cl_entity_t* CLG_GetClientViewEntity(void) {
 //===============
 //
 qboolean CLG_IsClientViewEntity(const cl_entity_t* ent) {
-
+    // If the entity number matches, then we're good.
     if (ent->current.number == cl->clientNumber + 1) {
         return true;
     }
 
+    // If not, then we are viewing an other client entity, check whether it is in corpse mode.
     if ((ent->current.effects & EntityEffectType::Corpse) == 0) {
-
+        // In case of no model index, we still want to validate some other cases.
         if (ent->current.modelindex == 255) {
-
             if (ent->current.number == cl->clientNumber) {
                 return true;
             } 
 
+            // If we came to this point, fetch the chasing client.
             const int16_t chase = cl->frame.playerState.stats[STAT_CHASE] - ConfigStrings::PlayerSkins;
 
             if (ent->current.number == chase) {
@@ -553,6 +555,7 @@ qboolean CLG_IsClientViewEntity(const cl_entity_t* ent) {
         }
     }
 
+    // And if we came to this point, all bets are off, this is no client entity which we are viewing.
     return false;
 }
 
