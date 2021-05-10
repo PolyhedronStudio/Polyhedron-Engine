@@ -374,7 +374,7 @@ static void write_beam_geometry(const r_entity_t* entities, int entity_num)
 			continue;
 		const float beam_radius = cvar_pt_beam_width->value * beam->frame * 0.5;
 
-		cast_u32_to_f32_color(beam->skinnum, &beam->rgba, beam_colors, hdr_factor);
+		cast_u32_to_f32_color(beam->skinNumber, &beam->rgba, beam_colors, hdr_factor);
 		beam_colors[3] = beam->alpha;
 		beam_colors += 4;
 
@@ -606,7 +606,7 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 		VectorMA(end, 5.f, norm_dir, end);
 
 		vec4_t color = { 0.f, 0.f, 0.f, 0.f };
-		cast_u32_to_f32_color(beam->skinnum, &beam->rgba, color, hdr_factor);
+		cast_u32_to_f32_color(beam->skinNumber, &beam->rgba, color, hdr_factor);
 
 		vkpt_build_cylinder_light(light_list, num_lights, max_lights, bsp, begin, end, color, beam_radius);
 	}

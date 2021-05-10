@@ -80,7 +80,7 @@ void Player_Die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
     self->maxs[2] = -8;
 
     //  self->solid = Solid::Not;
-    self->svFlags |= SVF_DEADMONSTER;
+    self->serverFlags |= EntityServerFlags::DeadMonster;
 
     if (!self->deadFlag) {
         self->client->respawnTime = level.time + 1.0;

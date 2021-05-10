@@ -155,7 +155,7 @@ static void CLG_AddLasers(void)
 			ent.alpha = 0.30f;
 		}
 
-		ent.skinnum = l->color;
+		ent.skinNumber = l->color;
 		ent.flags = RenderEffects::Translucent | RenderEffects::Beam;
 		VectorCopy(l->start, ent.origin);
 		VectorCopy(l->end, ent.oldorigin);
@@ -409,16 +409,16 @@ static void CLG_AddExplosions(void)
 			ent->alpha = ent->alpha * ent->alpha * (3.f - 2.f * ent->alpha); // smoothstep
 
 			if (f < 10) {
-				ent->skinnum = (f >> 1);
-				if (ent->skinnum < 0)
-					ent->skinnum = 0;
+				ent->skinNumber = (f >> 1);
+				if (ent->skinNumber < 0)
+					ent->skinNumber = 0;
 			}
 			else {
 				ent->flags |= RenderEffects::Translucent;
 				if (f < 13)
-					ent->skinnum = 5;
+					ent->skinNumber = 5;
 				else
-					ent->skinnum = 6;
+					ent->skinNumber = 6;
 			}
 			break;
 		case explosion_t::ex_poly2:
@@ -428,7 +428,7 @@ static void CLG_AddExplosions(void)
 			}
 
 			ent->alpha = (5.0 - (float)f) / 5.0;
-			ent->skinnum = 0;
+			ent->skinNumber = 0;
 			ent->flags |= RenderEffects::Translucent;
 			break;
 		default:

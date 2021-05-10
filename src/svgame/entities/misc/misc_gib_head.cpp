@@ -25,7 +25,7 @@ void SP_misc_gib_head(entity_t* ent)
     ent->takeDamage = TakeDamage::Yes;
     ent->Die = gib_die;
     ent->moveType = MoveType::Toss;
-    ent->svFlags |= SVF_MONSTER;
+    ent->serverFlags |= EntityServerFlags::Monster;
     ent->deadFlag = DEAD_DEAD;
     ent->avelocity[0] = random() * 200;
     ent->avelocity[1] = random() * 200;

@@ -49,5 +49,5 @@ void SP_target_splash(entity_t* self)
     if (!self->count)
         self->count = 32;
 
-    self->svFlags = SVF_NOCLIENT;
+    self->serverFlags = EntityServerFlags::NoClient;
 }

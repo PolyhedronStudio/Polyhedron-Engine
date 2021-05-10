@@ -604,7 +604,7 @@ static void PF_StartSound(entity_t *edict, int channel,
         }
 
         // send origin for invisible entities
-        if (edict->svFlags & SVF_NOCLIENT) {
+        if (edict->serverFlags & EntityServerFlags::NoClient) {
             flags |= SND_POS;
         }
 

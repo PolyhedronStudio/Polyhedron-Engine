@@ -41,7 +41,7 @@ static void check_dodge(entity_t *self, const vec3_t &start, const vec3_t &dir, 
     }
     VectorMA(start, WORLD_SIZE, dir, end);
     tr = gi.Trace(start, vec3_origin, vec3_origin, end, self, CONTENTS_MASK_SHOT);
-    if ((tr.ent) && (tr.ent->svFlags & SVF_MONSTER) && (tr.ent->health > 0) && (tr.ent->monsterInfo.dodge) && infront(tr.ent, self)) {
+    if ((tr.ent) && (tr.ent->serverFlags & EntityServerFlags::Monster) && (tr.ent->health > 0) && (tr.ent->monsterInfo.dodge) && infront(tr.ent, self)) {
         VectorSubtract(tr.endPosition, start, v);
         eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
         tr.ent->monsterInfo.dodge(tr.ent, self, eta);
@@ -93,7 +93,7 @@ qboolean fire_hit(entity_t *self, vec3_t &aim, int damage, int kick)
         if (!tr.ent->takeDamage)
             return false;
         // if it will hit any client/monster then hit the one we wanted to hit
-        if ((tr.ent->svFlags & SVF_MONSTER) || (tr.ent->client))
+        if ((tr.ent->serverFlags & EntityServerFlags::Monster) || (tr.ent->client))
             tr.ent = self->enemy;
     }
 
@@ -106,7 +106,7 @@ qboolean fire_hit(entity_t *self, vec3_t &aim, int damage, int kick)
     // do the damage
     T_Damage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DAMAGE_NO_KNOCKBACK, MOD_HIT);
 
-    if (!(tr.ent->svFlags & SVF_MONSTER) && (!tr.ent->client))
+    if (!(tr.ent->serverFlags & EntityServerFlags::Monster) && (!tr.ent->client))
         return false;
 
     // do our special form of knockback here
@@ -364,7 +364,7 @@ void fire_blaster(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int
     bolt->dmg = damage;         // Setup damage.
     if (hyper)                  // Hyperblaster?
         bolt->spawnFlags = 1;
-    bolt->svFlags = SVF_DEADMONSTER;    // Set Dead Monster flag so the projectiles 
+    bolt->serverFlags = EntityServerFlags::DeadMonster;    // Set Dead Monster flag so the projectiles 
                                         // won't clip against players.
     bolt->moveType = MoveType::FlyMissile;   // Movetype FLYMISSILE
     bolt->clipMask = CONTENTS_MASK_SHOT;    // CONTENTS_MASK_SHOT

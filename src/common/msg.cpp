@@ -316,7 +316,7 @@ void MSG_PackEntity(PackedEntity* out, const EntityState* in, qboolean short_ang
     out->modelIndex2 = in->modelIndex2;
     out->modelIndex3 = in->modelIndex3;
     out->modelIndex4 = in->modelIndex4;
-    out->skinnum = in->skinnum;
+    out->skinNumber = in->skinNumber;
     out->effects = in->effects;
     out->renderfx = in->renderfx;
     out->solid = in->solid;
@@ -392,10 +392,10 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
     else
         mask = 0xffff8000;  // don't confuse old clients
 
-    if (to->skinnum != from->skinnum) {
-        if (to->skinnum & mask)
+    if (to->skinNumber != from->skinNumber) {
+        if (to->skinNumber & mask)
             bits |= U_SKIN8 | U_SKIN16;
-        else if (to->skinnum & 0x0000ff00)
+        else if (to->skinNumber & 0x0000ff00)
             bits |= U_SKIN16;
         else
             bits |= U_SKIN8;
@@ -518,11 +518,11 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
         MSG_WriteShort(to->frame);
 
     if ((bits & (U_SKIN8 | U_SKIN16)) == (U_SKIN8 | U_SKIN16))  //used for laser colors
-        MSG_WriteLong(to->skinnum);
+        MSG_WriteLong(to->skinNumber);
     else if (bits & U_SKIN8)
-        MSG_WriteByte(to->skinnum);
+        MSG_WriteByte(to->skinNumber);
     else if (bits & U_SKIN16)
-        MSG_WriteShort(to->skinnum);
+        MSG_WriteShort(to->skinNumber);
 
     if ((bits & (U_EFFECTS8 | U_EFFECTS16)) == (U_EFFECTS8 | U_EFFECTS16))
         MSG_WriteLong(to->effects);
@@ -1118,11 +1118,11 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
 
     // Skinnum.
     if ((bits & (U_SKIN8 | U_SKIN16)) == (U_SKIN8 | U_SKIN16))  //used for laser colors
-        to->skinnum = MSG_ReadLong();
+        to->skinNumber = MSG_ReadLong();
     else if (bits & U_SKIN8)
-        to->skinnum = MSG_ReadByte();
+        to->skinNumber = MSG_ReadByte();
     else if (bits & U_SKIN16)
-        to->skinnum = MSG_ReadWord();
+        to->skinNumber = MSG_ReadWord();
 
     // Effects.
     if ((bits & (U_EFFECTS8 | U_EFFECTS16)) == (U_EFFECTS8 | U_EFFECTS16))

@@ -157,10 +157,10 @@ void Touch_DoorTrigger(entity_t* self, entity_t* other, cplane_t* plane, csurfac
     if (other->health <= 0)
         return;
 
-    if (!(other->svFlags & SVF_MONSTER) && (!other->client))
+    if (!(other->serverFlags & EntityServerFlags::Monster) && (!other->client))
         return;
 
-    if ((self->owner->spawnFlags & DOOR_NOMONSTER) && (other->svFlags & SVF_MONSTER))
+    if ((self->owner->spawnFlags & DOOR_NOMONSTER) && (other->serverFlags & EntityServerFlags::Monster))
         return;
 
     if (level.time < self->debounceTouchTime)
@@ -249,7 +249,7 @@ void door_blocked(entity_t* self, entity_t* other)
 {
     entity_t* ent;
 
-    if (!(other->svFlags & SVF_MONSTER) && (!other->client)) {
+    if (!(other->serverFlags & EntityServerFlags::Monster) && (!other->client)) {
         // give it a chance to go away on it's own terms (like gibs)
         T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
         // if it's still there, nuke it

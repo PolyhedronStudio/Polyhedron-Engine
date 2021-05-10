@@ -1599,11 +1599,11 @@ static pbr_material_t const * get_mesh_material(const r_entity_t* entity, const 
 		return MAT_UpdatePBRMaterialSkin(IMG_ForHandle(entity->skin));
 	}
 
-	int skinnum = 0;
-	if (mesh->materials[entity->skinnum])
-		skinnum = entity->skinnum;
+	int skinNumber = 0;
+	if (mesh->materials[entity->skinNumber])
+		skinNumber = entity->skinNumber;
 
-	return mesh->materials[skinnum];
+	return mesh->materials[skinNumber];
 }
 
 static inline uint32_t fill_model_instance(const r_entity_t* entity, const model_t* model, const maliasmesh_t* mesh,

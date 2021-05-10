@@ -168,16 +168,16 @@ void CLG_AddPacketEntities(void)
 
         // tweak the color of beams
         if (renderfx & RenderEffects::Beam) {
-            // the four beam colors are encoded in 32 bits of skinnum (hack)
+            // the four beam colors are encoded in 32 bits of skinNumber (hack)
             ent.alpha = 0.30;
-            ent.skinnum = (s1->skinnum >> ((rand() % 4) * 8)) & 0xff;
+            ent.skinNumber = (s1->skinNumber >> ((rand() % 4) * 8)) & 0xff;
             ent.model = 0;
         } else {
             // set skin
             if (s1->modelIndex == 255) {
                 // use custom player skin
-                ent.skinnum = 0;
-                ci = &cl->clientInfo[s1->skinnum & 0xff];
+                ent.skinNumber = 0;
+                ci = &cl->clientInfo[s1->skinNumber & 0xff];
                 ent.skin = ci->skin;
                 ent.model = ci->model;
                 if (!ent.skin || !ent.model) {
@@ -193,7 +193,7 @@ void CLG_AddPacketEntities(void)
                 }
             }
             else {
-                ent.skinnum = s1->skinnum;
+                ent.skinNumber = s1->skinNumber;
                 ent.skin = 0;
                 ent.model = cl->drawModels[s1->modelIndex];
                 if (ent.model == cl_mod_laser || ent.model == cl_mod_dmspot)
@@ -297,7 +297,7 @@ void CLG_AddPacketEntities(void)
         }
 
         ent.skin = 0;       // never use a custom skin on others
-        ent.skinnum = 0;
+        ent.skinNumber = 0;
         ent.flags = base_entity_flags;
         ent.alpha = 0;
 
@@ -306,8 +306,8 @@ void CLG_AddPacketEntities(void)
         if (s1->modelIndex2) {
             if (s1->modelIndex2 == 255) {
                 // custom weapon
-                ci = &cl->clientInfo[s1->skinnum & 0xff];
-                i = (s1->skinnum >> 8); // 0 is default weapon model
+                ci = &cl->clientInfo[s1->skinNumber & 0xff];
+                i = (s1->skinNumber >> 8); // 0 is default weapon model
                 if (i < 0 || i > cl->numWeaponModels - 1)
                     i = 0;
                 ent.model = ci->weaponmodel[i];
@@ -617,10 +617,10 @@ static inline float lerp_client_fov(float ofov, float nfov, float lerp)
         else if (fov > 160)
             fov = 160;
 
-        if (info_uf->integer & UF_LOCALFOV)
+        if (info_uf->integer & UserFields::LocalFieldOfView)
             return fov;
 
-        if (!(info_uf->integer & UF_PLAYERFOV)) {
+        if (!(info_uf->integer & UserFields::PlayerFieldOfView)) {
             if (ofov >= 90)
                 ofov = fov;
             if (nfov >= 90)

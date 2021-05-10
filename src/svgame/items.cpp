@@ -117,7 +117,7 @@ void DoRespawn(entity_t *ent)
             ;
     }
 
-    ent->svFlags &= ~SVF_NOCLIENT;
+    ent->serverFlags &= ~EntityServerFlags::NoClient;
     ent->solid = Solid::Trigger;
     gi.LinkEntity(ent);
 
@@ -131,7 +131,7 @@ void SetRespawn(entity_t *ent, float delay)
         return;
 
     ent->flags |= EntityFlags::Respawn;
-    ent->svFlags |= SVF_NOCLIENT;
+    ent->serverFlags |= EntityServerFlags::NoClient;
     ent->solid = Solid::Not;
     ent->nextThink = level.time + delay;
     ent->Think = DoRespawn;
@@ -299,7 +299,7 @@ qboolean Pickup_Health(entity_t *ent, entity_t *other)
         ent->nextThink = level.time + 5;
         ent->owner = other;
         ent->flags |= EntityFlags::Respawn;
-        ent->svFlags |= SVF_NOCLIENT;
+        ent->serverFlags |= EntityServerFlags::NoClient;
         ent->solid = Solid::Not;
     } else {
         if (!(ent->spawnFlags & DROPPED_ITEM) && (deathmatch->value))
@@ -512,7 +512,7 @@ entity_t *Drop_Item(entity_t *ent, gitem_t *item)
 
 void Use_Item(entity_t *ent, entity_t *other, entity_t *activator)
 {
-    ent->svFlags &= ~SVF_NOCLIENT;
+    ent->serverFlags &= ~EntityServerFlags::NoClient;
     ent->Use = NULL;
 
     if (ent->spawnFlags & ITEM_NO_TOUCH) {
@@ -566,7 +566,7 @@ void droptofloor(entity_t *ent)
         ent->chain = ent->teamChainPtr;
         ent->teamChainPtr = NULL;
 
-        ent->svFlags |= SVF_NOCLIENT;
+        ent->serverFlags |= EntityServerFlags::NoClient;
         ent->solid = Solid::Not;
         if (ent == ent->teamMasterPtr) {
             ent->nextThink = level.time + FRAMETIME;
@@ -582,7 +582,7 @@ void droptofloor(entity_t *ent)
     }
 
     if (ent->spawnFlags & ITEM_TRIGGER_SPAWN) {
-        ent->svFlags |= SVF_NOCLIENT;
+        ent->serverFlags |= EntityServerFlags::NoClient;
         ent->solid = Solid::Not;
         ent->Use = Use_Item;
     }

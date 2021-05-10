@@ -45,5 +45,5 @@ void SP_target_blaster(entity_t* self)
     if (!self->speed)
         self->speed = 1000;
 
-    self->svFlags = SVF_NOCLIENT;
+    self->serverFlags = EntityServerFlags::NoClient;
 }

@@ -45,7 +45,7 @@ void use_target_spawner(entity_t* self, entity_t* other, entity_t* activator)
 void SP_target_spawner(entity_t* self)
 {
     self->Use = use_target_spawner;
-    self->svFlags = SVF_NOCLIENT;
+    self->serverFlags = EntityServerFlags::NoClient;
     if (self->speed) {
         UTIL_SetMoveDir(self->state.angles, self->moveDirection);
         VectorScale(self->moveDirection, self->speed, self->moveDirection);

@@ -562,15 +562,15 @@ static int texnum_for_mesh(maliasmesh_t *mesh)
     if (!mesh->numskins)
         return TEXNUM_DEFAULT;
 
-    if (ent->skinnum < 0 || ent->skinnum >= mesh->numskins) {
-        Com_DPrintf("%s: no such skin: %d\n", "GL_DrawAliasModel", ent->skinnum);
+    if (ent->skinNumber < 0 || ent->skinNumber >= mesh->numskins) {
+        Com_DPrintf("%s: no such skin: %d\n", "GL_DrawAliasModel", ent->skinNumber);
         return mesh->skins[0]->texnum;
     }
 
-    if (mesh->skins[ent->skinnum]->texnum == TEXNUM_DEFAULT)
+    if (mesh->skins[ent->skinNumber]->texnum == TEXNUM_DEFAULT)
         return mesh->skins[0]->texnum;
 
-    return mesh->skins[ent->skinnum]->texnum;
+    return mesh->skins[ent->skinNumber]->texnum;
 }
 
 static void draw_alias_mesh(maliasmesh_t *mesh)

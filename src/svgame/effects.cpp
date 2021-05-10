@@ -126,7 +126,7 @@ void ThrowHead(entity_t *self, const char *gibname, int damage, int type)
     vec3_t  vd;
     float   vscale;
 
-    self->state.skinnum = 0;
+    self->state.skinNumber = 0;
     self->state.frame = 0;
     VectorClear(self->mins);
     VectorClear(self->maxs);
@@ -137,7 +137,7 @@ void ThrowHead(entity_t *self, const char *gibname, int damage, int type)
     self->state.effects |= EntityEffectType::Gib;
     self->state.sound = 0;
     self->flags |= EntityFlags::NoKnockBack;
-    self->svFlags &= ~SVF_MONSTER;
+    self->serverFlags &= ~EntityServerFlags::Monster;
     self->takeDamage = TakeDamage::Yes;
     self->Die = gib_die;
 
@@ -171,10 +171,10 @@ void ThrowClientHead(entity_t *self, int damage)
 
     if (rand() & 1) {
         gibname = "models/objects/gibs/head2/tris.md2";
-        self->state.skinnum = 1;        // second skin is player
+        self->state.skinNumber = 1;        // second skin is player
     } else {
         gibname = "models/objects/gibs/skull/tris.md2";
-        self->state.skinnum = 0;
+        self->state.skinNumber = 0;
     }
 
     self->state.origin[2] += 32;

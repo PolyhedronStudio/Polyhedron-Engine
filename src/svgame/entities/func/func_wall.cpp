@@ -29,12 +29,12 @@ void func_wall_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     if (self->solid == Solid::Not) {
         self->solid = Solid::BSP;
-        self->svFlags &= ~SVF_NOCLIENT;
+        self->serverFlags &= ~EntityServerFlags::NoClient;
         KillBox(self);
     }
     else {
         self->solid = Solid::Not;
-        self->svFlags |= SVF_NOCLIENT;
+        self->serverFlags |= EntityServerFlags::NoClient;
     }
     gi.LinkEntity(self);
 
@@ -79,7 +79,7 @@ void SP_func_wall(entity_t* self)
     }
     else {
         self->solid = Solid::Not;
-        self->svFlags |= SVF_NOCLIENT;
+        self->serverFlags |= EntityServerFlags::NoClient;
     }
     gi.LinkEntity(self);
 }

@@ -70,7 +70,7 @@ void SP_misc_teleporter(entity_t* ent)
     }
 
     gi.SetModel(ent, "models/objects/dmspot/tris.md2");
-    ent->state.skinnum = 1;
+    ent->state.skinNumber = 1;
     ent->state.effects = EntityEffectType::Teleporter;
     ent->state.sound = gi.SoundIndex("world/amb10.wav");
     ent->solid = Solid::BoundingBox;

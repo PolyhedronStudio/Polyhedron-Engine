@@ -22,9 +22,9 @@ void trigger_monsterjump_touch(entity_t* self, entity_t* other, cplane_t* plane,
 {
     if (other->flags & (EntityFlags::Fly | EntityFlags::Swim))
         return;
-    if (other->svFlags & SVF_DEADMONSTER)
+    if (other->serverFlags & EntityServerFlags::DeadMonster)
         return;
-    if (!(other->svFlags & SVF_MONSTER))
+    if (!(other->serverFlags & EntityServerFlags::Monster))
         return;
 
     // set XY even if not on ground, so the jump will clear lips

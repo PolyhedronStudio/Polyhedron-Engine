@@ -44,7 +44,7 @@ void SP_trigger_multiple(entity_t* ent)
         ent->wait = 0.2;
     ent->Touch = Touch_Multi;
     ent->moveType = MoveType::None;
-    ent->svFlags |= SVF_NOCLIENT;
+    ent->serverFlags |= EntityServerFlags::NoClient;
 
 
     if (ent->spawnFlags & 4) {

@@ -58,7 +58,7 @@ void trigger_elevator_init(entity_t* self)
     }
 
     self->Use = trigger_elevator_use;
-    self->svFlags = SVF_NOCLIENT;
+    self->serverFlags = EntityServerFlags::NoClient;
 
 }
 

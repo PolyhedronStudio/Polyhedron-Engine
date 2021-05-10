@@ -51,7 +51,7 @@ typedef struct {
     uint8_t     modelIndex4;
 
     // Rendering effects.
-    uint32_t    skinnum;
+    uint32_t    skinNumber;
     uint32_t    effects;
     uint32_t    renderfx;
     uint32_t    solid;

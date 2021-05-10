@@ -928,7 +928,7 @@ struct entity_s {
 
     //================================
 
-    int         svFlags;
+    int         serverFlags;
     vec3_t      mins, maxs;
     vec3_t      absMin, absMax, size;
     uint32_t    solid;

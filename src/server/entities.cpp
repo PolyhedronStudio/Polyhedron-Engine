@@ -336,7 +336,7 @@ void SV_BuildClientFrame(client_t *client)
         }
 
         // ignore ents without visible models
-        if (ent->svFlags & SVF_NOCLIENT)
+        if (ent->serverFlags & EntityServerFlags::NoClient)
             continue;
 
         // ignore ents without visible models unless they have an effect

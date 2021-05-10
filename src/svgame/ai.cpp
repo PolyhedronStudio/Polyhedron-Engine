@@ -438,7 +438,7 @@ qboolean FindTarget(entity_t *self)
     if (client->client) {
         if (client->flags & EntityFlags::NoTarget)
             return false;
-    } else if (client->svFlags & SVF_MONSTER) {
+    } else if (client->serverFlags & EntityServerFlags::Monster) {
         if (!client->enemy)
             return false;
         if (client->enemy->flags & EntityFlags::NoTarget)

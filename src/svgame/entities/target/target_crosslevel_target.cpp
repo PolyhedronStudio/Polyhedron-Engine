@@ -29,7 +29,7 @@ void SP_target_crosslevel_target(entity_t* self)
 {
     if (!self->delay)
         self->delay = 1;
-    self->svFlags = SVF_NOCLIENT;
+    self->serverFlags = EntityServerFlags::NoClient;
 
     self->Think = target_crosslevel_target_think;
     self->nextThink = level.time + self->delay;

@@ -26,5 +26,5 @@ void SP_func_killbox(entity_t* ent)
 {
     gi.SetModel(ent, ent->model);
     ent->Use = use_killbox;
-    ent->svFlags = SVF_NOCLIENT;
+    ent->serverFlags = EntityServerFlags::NoClient;
 }

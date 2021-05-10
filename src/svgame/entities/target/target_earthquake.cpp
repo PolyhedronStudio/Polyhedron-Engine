@@ -65,7 +65,7 @@ void SP_target_earthquake(entity_t* self)
     if (!self->speed)
         self->speed = 200;
 
-    self->svFlags |= SVF_NOCLIENT;
+    self->serverFlags |= EntityServerFlags::NoClient;
     self->Think = target_earthquake_think;
     self->Use = target_earthquake_use;
 

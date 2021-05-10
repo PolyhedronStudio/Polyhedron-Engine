@@ -205,10 +205,10 @@ void GL_DrawBeams(void)
 
         length = VectorLength(d1);
 
-        if (ent->skinnum == -1) {
+        if (ent->skinNumber == -1) {
             color.u32 = ent->rgba.u32;
         } else {
-            color.u32 = d_8to24table[ent->skinnum & 0xff];
+            color.u32 = d_8to24table[ent->skinNumber & 0xff];
             color.u8[3] = 255 * ent->alpha;
         }
 

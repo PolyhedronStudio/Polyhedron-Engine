@@ -342,8 +342,10 @@ SET(HEADERS_SHARED
 	../inc/shared/keys.h 
 	../inc/shared/list.h 
 	../inc/shared/math.h 
+	../inc/shared/messaging.h 
 	../inc/shared/platform.h
 	../inc/shared/refresh.h 
+	../inc/shared/qstring.h 
 	../inc/shared/shared.h 
 	../inc/shared/ui.h 
 )

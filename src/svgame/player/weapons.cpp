@@ -54,7 +54,7 @@ void PlayerNoise(entity_t *who, vec3_t where, int type)
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
         noise->owner = who;
-        noise->svFlags = SVF_NOCLIENT;
+        noise->serverFlags = EntityServerFlags::NoClient;
         who->myNoise = noise;
 
         noise = G_Spawn();
@@ -62,7 +62,7 @@ void PlayerNoise(entity_t *who, vec3_t where, int type)
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
         noise->owner = who;
-        noise->svFlags = SVF_NOCLIENT;
+        noise->serverFlags = EntityServerFlags::NoClient;
         who->myNoise2 = noise;
     }
 
@@ -151,7 +151,7 @@ void ChangeWeapon(entity_t *ent)
             i = ((ent->client->persistent.weapon->weaponModel & 0xff) << 8);
         else
             i = 0;
-        ent->state.skinnum = (ent - g_edicts - 1) | i;
+        ent->state.skinNumber = (ent - g_edicts - 1) | i;
     }
 
     if (ent->client->persistent.weapon && ent->client->persistent.weapon->ammo)

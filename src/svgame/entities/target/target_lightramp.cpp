@@ -88,7 +88,7 @@ void SP_target_lightramp(entity_t* self)
         return;
     }
 
-    self->svFlags |= SVF_NOCLIENT;
+    self->serverFlags |= EntityServerFlags::NoClient;
     self->Use = target_lightramp_use;
     self->Think = target_lightramp_think;
 

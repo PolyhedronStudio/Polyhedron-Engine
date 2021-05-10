@@ -50,5 +50,5 @@ void use_target_explosion(entity_t* self, entity_t* other, entity_t* activator)
 void SP_target_explosion(entity_t* ent)
 {
     ent->Use = use_target_explosion;
-    ent->svFlags = SVF_NOCLIENT;
+    ent->serverFlags = EntityServerFlags::NoClient;
 }

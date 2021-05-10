@@ -22,6 +22,6 @@ void trigger_crosslevel_trigger_use(entity_t* self, entity_t* other, entity_t* a
 
 void SP_target_crosslevel_trigger(entity_t* self)
 {
-    self->svFlags = SVF_NOCLIENT;
+    self->serverFlags = EntityServerFlags::NoClient;
     self->Use = trigger_crosslevel_trigger_use;
 }

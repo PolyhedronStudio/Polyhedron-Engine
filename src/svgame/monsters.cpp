@@ -183,7 +183,7 @@ void M_WorldEffects(entity_t *ent)
     }
 
     if (!(ent->flags & EntityFlags::InWater)) {
-        if (!(ent->svFlags & SVF_DEADMONSTER)) {
+        if (!(ent->serverFlags & EntityServerFlags::DeadMonster)) {
             if (ent->waterType & CONTENTS_LAVA)
                 if (random() <= 0.5)
                     gi.Sound(ent, CHAN_BODY, gi.SoundIndex("player/lava1.wav"), 1, ATTN_NORM, 0);
@@ -249,7 +249,7 @@ void M_MoveFrame(entity_t *self)
                 move = self->monsterInfo.currentmove;
 
                 // check for death
-                if (self->svFlags & SVF_DEADMONSTER)
+                if (self->serverFlags & EntityServerFlags::DeadMonster)
                     return;
             }
         }
@@ -326,7 +326,7 @@ void monster_triggered_spawn(entity_t *self)
 
     self->solid = Solid::BoundingBox;
     self->moveType = MoveType::Step;
-    self->svFlags &= ~SVF_NOCLIENT;
+    self->serverFlags &= ~EntityServerFlags::NoClient;
     self->air_finished = level.time + 12;
     gi.LinkEntity(self);
 
@@ -353,7 +353,7 @@ void monster_triggered_start(entity_t *self)
 {
     self->solid = Solid::Not;
     self->moveType = MoveType::None;
-    self->svFlags |= SVF_NOCLIENT;
+    self->serverFlags |= EntityServerFlags::NoClient;
     self->nextThink = 0;
     self->Use = monster_triggered_spawn_use;
 }
@@ -406,7 +406,7 @@ qboolean monster_start(entity_t *self)
         level.total_monsters++;
 
     self->nextThink = level.time + FRAMETIME;
-    self->svFlags |= SVF_MONSTER;
+    self->serverFlags |= EntityServerFlags::Monster;
     self->state.renderfx |= RenderEffects::FrameLerp;
     self->takeDamage = TakeDamage::Aim;
     self->air_finished = level.time + 12;
@@ -414,9 +414,9 @@ qboolean monster_start(entity_t *self)
     self->maxHealth = self->health;
     self->clipMask = CONTENTS_MASK_MONSTERSOLID;
 
-    self->state.skinnum = 0;
+    self->state.skinNumber = 0;
     self->deadFlag = DEAD_NO;
-    self->svFlags &= ~SVF_DEADMONSTER;
+    self->serverFlags &= ~EntityServerFlags::DeadMonster;
 
     if (!self->monsterInfo.checkattack)
         self->monsterInfo.checkattack = M_CheckAttack;

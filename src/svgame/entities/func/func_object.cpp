@@ -36,7 +36,7 @@ void func_object_release(entity_t* self)
 void func_object_use(entity_t* self, entity_t* other, entity_t* activator)
 {
     self->solid = Solid::BSP;
-    self->svFlags &= ~SVF_NOCLIENT;
+    self->serverFlags &= ~EntityServerFlags::NoClient;
     self->Use = NULL;
     KillBox(self);
     func_object_release(self);
@@ -66,7 +66,7 @@ void SP_func_object(entity_t* self)
         self->solid = Solid::Not;
         self->moveType = MoveType::Push;
         self->Use = func_object_use;
-        self->svFlags |= SVF_NOCLIENT;
+        self->serverFlags |= EntityServerFlags::NoClient;
     }
 
     if (self->spawnFlags & 2)

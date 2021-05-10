@@ -288,7 +288,7 @@ void PF_LinkEntity(entity_t *ent)
     // encode the size into the entity_state for client prediction
     switch (ent->solid) {
     case Solid::BoundingBox:
-        if ((ent->svFlags & SVF_DEADMONSTER) || VectorCompare(ent->mins, ent->maxs)) {
+        if ((ent->serverFlags & EntityServerFlags::DeadMonster) || VectorCompare(ent->mins, ent->maxs)) {
             ent->state.solid = 0;
             sent->solid32 = 0;
         } else {
@@ -509,7 +509,7 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
         }
 
         if (!(contentmask & CONTENTS_DEADMONSTER)
-            && (touch->svFlags & SVF_DEADMONSTER))
+            && (touch->serverFlags & EntityServerFlags::DeadMonster))
             continue;
 
         // might intersect, so do an exact clip

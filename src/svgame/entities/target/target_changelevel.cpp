@@ -57,5 +57,5 @@ void SP_target_changelevel(entity_t* ent)
         ent->map = "fact3$secret1";
 
     ent->Use = use_target_changelevel;
-    ent->svFlags = SVF_NOCLIENT;
+    ent->serverFlags = EntityServerFlags::NoClient;
 }

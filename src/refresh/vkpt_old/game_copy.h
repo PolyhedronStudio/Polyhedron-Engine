@@ -144,7 +144,7 @@ typedef struct gitem_s
 	void(*weaponthink)(struct entity_s *ent);
 	char		*pickup_sound;
 	char		*world_model;
-	int			world_model_skinnum; //Knightmare- added skinnum here so items can share models
+	int			world_model_skinnum; //Knightmare- added skinNumber here so items can share models
 	int			world_model_flags;
 	char		*view_model;
 

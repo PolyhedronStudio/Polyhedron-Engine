@@ -95,7 +95,7 @@ void func_explosive_use(entity_t* self, entity_t* other, entity_t* activator)
 void func_explosive_spawn(entity_t* self, entity_t* other, entity_t* activator)
 {
     self->solid = Solid::BSP;
-    self->svFlags &= ~SVF_NOCLIENT;
+    self->serverFlags &= ~EntityServerFlags::NoClient;
     self->Use = NULL;
     KillBox(self);
     gi.LinkEntity(self);
@@ -117,7 +117,7 @@ void SP_func_explosive(entity_t* self)
     gi.SetModel(self, self->model);
 
     if (self->spawnFlags & 1) {
-        self->svFlags |= SVF_NOCLIENT;
+        self->serverFlags |= EntityServerFlags::NoClient;
         self->solid = Solid::Not;
         self->Use = func_explosive_spawn;
     }

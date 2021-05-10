@@ -94,8 +94,8 @@ void Killed(entity_t *targ, entity_t *inflictor, entity_t *attacker, int damage,
 
     targ->enemy = attacker;
 
-    if ((targ->svFlags & SVF_MONSTER) && (targ->deadFlag != DEAD_DEAD)) {
-//      targ->svFlags |= SVF_DEADMONSTER;   // now treat as a different content type
+    if ((targ->serverFlags & EntityServerFlags::Monster) && (targ->deadFlag != DEAD_DEAD)) {
+//      targ->serverFlags |= EntityServerFlags::DeadMonster;   // now treat as a different content type
         if (!(targ->monsterInfo.aiflags & AI_GOOD_GUY)) {
             level.killed_monsters++;
             if (coop->value && attacker->client)
@@ -112,7 +112,7 @@ void Killed(entity_t *targ, entity_t *inflictor, entity_t *attacker, int damage,
         return;
     }
 
-    if ((targ->svFlags & SVF_MONSTER) && (targ->deadFlag != DEAD_DEAD)) {
+    if ((targ->serverFlags & EntityServerFlags::Monster) && (targ->deadFlag != DEAD_DEAD)) {
         targ->Touch = NULL;
         monster_death_use(targ);
     }
@@ -184,7 +184,7 @@ static int CheckPowerArmor(entity_t *ent, vec3_t point, vec3_t normal, int damag
 
     index = 0;  // shut up gcc
 
-    if (ent->svFlags & SVF_MONSTER) {
+    if (ent->serverFlags & EntityServerFlags::Monster) {
         power_armor_type = ent->monsterInfo.power_armor_type;
         power = ent->monsterInfo.power_armor_power;
     } else
@@ -255,7 +255,7 @@ static int CheckArmor(entity_t *ent, vec3_t point, vec3_t normal, int damage, in
 
 void M_ReactToDamage(entity_t *targ, entity_t *attacker)
 {
-    if (!(attacker->client) && !(attacker->svFlags & SVF_MONSTER))
+    if (!(attacker->client) && !(attacker->serverFlags & EntityServerFlags::Monster))
         return;
 
     if (attacker == targ || attacker == targ->enemy)
@@ -263,7 +263,7 @@ void M_ReactToDamage(entity_t *targ, entity_t *attacker)
 
     // dead monsters, like misc_deadsoldier, don't have AI functions, but 
     // M_ReactToDamage might still be called on them
-    if (targ->svFlags & SVF_DEADMONSTER)
+    if (targ->serverFlags & EntityServerFlags::DeadMonster)
         return;
 
     // if we are a good guy monster and our attacker is a player
@@ -383,7 +383,7 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
 
 
 // bonus damage for suprising a monster
-    if (!(dflags & DAMAGE_RADIUS) && (targ->svFlags & SVF_MONSTER) && (attacker->client) && (!targ->enemy) && (targ->health > 0))
+    if (!(dflags & DAMAGE_RADIUS) && (targ->serverFlags & EntityServerFlags::Monster) && (attacker->client) && (!targ->enemy) && (targ->health > 0))
         damage *= 2;
 
     if (targ->flags & EntityFlags::NoKnockBack)
@@ -434,7 +434,7 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
 
 // do the damage
     if (take) {
-        if ((targ->svFlags & SVF_MONSTER) || (client))
+        if ((targ->serverFlags & EntityServerFlags::Monster) || (client))
         {
             // SpawnDamage(TempEntityEvent::Blood, point, normal, take);
             SpawnDamage(TempEntityEvent::Blood, point, dir, take);
@@ -446,14 +446,14 @@ void T_Damage(entity_t *targ, entity_t *inflictor, entity_t *attacker, const vec
         targ->health = targ->health - take;
 
         if (targ->health <= 0) {
-            if ((targ->svFlags & SVF_MONSTER) || (client))
+            if ((targ->serverFlags & EntityServerFlags::Monster) || (client))
                 targ->flags |= EntityFlags::NoKnockBack;
             Killed(targ, inflictor, attacker, take, point);
             return;
         }
     }
 
-    if (targ->svFlags & SVF_MONSTER) {
+    if (targ->serverFlags & EntityServerFlags::Monster) {
         M_ReactToDamage(targ, attacker);
         if (!(targ->monsterInfo.aiflags & AI_DUCKED) && (take)) {
             targ->Pain(targ, attacker, knockback, take);

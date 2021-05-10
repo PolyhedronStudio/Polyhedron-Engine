@@ -508,7 +508,7 @@ void G_RunFrame(void)
         // if the ground entity moved, make sure we are still on it
         if ((ent->groundEntityPtr) && (ent->groundEntityPtr->linkCount != ent->groundEntityLinkCount)) {
             ent->groundEntityPtr = NULL;
-            if (!(ent->flags & (EntityFlags::Swim | EntityFlags::Fly)) && (ent->svFlags & SVF_MONSTER)) {
+            if (!(ent->flags & (EntityFlags::Swim | EntityFlags::Fly)) && (ent->serverFlags & EntityServerFlags::Monster)) {
                 M_CheckGround(ent);
             }
         }

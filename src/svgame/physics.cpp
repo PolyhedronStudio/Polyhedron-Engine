@@ -867,7 +867,7 @@ void SV_Physics_Step(entity_t *ent)
                 }
             }
 
-        if (ent->svFlags & SVF_MONSTER)
+        if (ent->serverFlags & EntityServerFlags::Monster)
             mask = CONTENTS_MASK_MONSTERSOLID;
         else
             mask = CONTENTS_MASK_SOLID;

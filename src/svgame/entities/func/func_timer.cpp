@@ -66,5 +66,5 @@ void SP_func_timer(entity_t* self)
         self->activator = self;
     }
 
-    self->svFlags = SVF_NOCLIENT;
+    self->serverFlags = EntityServerFlags::NoClient;
 }

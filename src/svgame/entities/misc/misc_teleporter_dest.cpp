@@ -17,7 +17,7 @@ Point teleporters at these.
 void SP_misc_teleporter_dest(entity_t* ent)
 {
     gi.SetModel(ent, "models/objects/dmspot/tris.md2");
-    ent->state.skinnum = 0;
+    ent->state.skinNumber = 0;
     ent->solid = Solid::BoundingBox;
     //  ent->state.effects |= EF_FLIES;
     VectorSet(ent->mins, -32, -32, -24);

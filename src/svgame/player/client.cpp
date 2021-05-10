@@ -691,7 +691,7 @@ void CopyToBodyQue(entity_t *ent)
     body->state.number = body - g_edicts;
     body->state.event = EntityEvent::OtherTeleport;
 
-    body->svFlags = ent->svFlags;
+    body->serverFlags = ent->serverFlags;
     VectorCopy(ent->mins, body->mins);
     VectorCopy(ent->maxs, body->maxs);
     VectorCopy(ent->absMin, body->absMin);
@@ -718,7 +718,7 @@ void RespawnClient(entity_t *self)
         // spectator's don't leave bodies
         if (self->moveType != MoveType::NoClip && self->moveType != MoveType::Spectator)
             CopyToBodyQue(self);
-        self->svFlags &= ~SVF_NOCLIENT;
+        self->serverFlags &= ~EntityServerFlags::NoClient;
         PutClientInServer(self);
 
         // add a teleportation effect
@@ -802,7 +802,7 @@ void spectator_respawn(entity_t *ent)
     // clear client on respawn
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
-    ent->svFlags &= ~SVF_NOCLIENT;
+    ent->serverFlags &= ~EntityServerFlags::NoClient;
     PutClientInServer(ent);
 
     // add a teleportation effect
@@ -912,7 +912,7 @@ void PutClientInServer(entity_t *ent)
     ent->waterLevel = 0;
     ent->waterType = 0;
     ent->flags &= ~EntityFlags::NoKnockBack;
-    ent->svFlags &= ~SVF_DEADMONSTER;
+    ent->serverFlags &= ~EntityServerFlags::DeadMonster;
 
     ent->mins = vec3_scale(PM_MINS, PM_SCALE);
     ent->maxs = vec3_scale(PM_MAXS, PM_SCALE);
@@ -947,7 +947,7 @@ void PutClientInServer(entity_t *ent)
     ent->state.modelIndex2 = 255;       // Custom gun model
     // sknum is player num and weapon number
     // weapon number will be added in changeweapon
-    ent->state.skinnum = ent - g_edicts - 1;
+    ent->state.skinNumber = ent - g_edicts - 1;
 
     ent->state.frame = 0;
 
@@ -970,7 +970,7 @@ void PutClientInServer(entity_t *ent)
 
         ent->moveType = MoveType::Spectator;
         ent->solid = Solid::Not;
-        ent->svFlags |= SVF_NOCLIENT;
+        ent->serverFlags |= EntityServerFlags::NoClient;
         ent->client->playerState.gunIndex = 0;
         gi.LinkEntity(ent);
         return;
@@ -1212,7 +1212,7 @@ qboolean ClientConnect(entity_t *ent, char *userinfo)
     if (game.maxClients > 1)
         gi.DPrintf("%s connected\n", ent->client->persistent.netname);
 
-    ent->svFlags = 0; // make sure we start with known default
+    ent->serverFlags = 0; // make sure we start with known default
     ent->client->persistent.connected = true;
     return true;
 }

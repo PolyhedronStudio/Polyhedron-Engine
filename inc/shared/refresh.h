@@ -87,7 +87,7 @@ typedef struct r_entity_s {
     // Misc.
     //
     float               backlerp;   // 0.0 = current, 1.0 = old
-    int                 skinnum;    // also used as RenderEffects::Beam's palette index,
+    int                 skinNumber;    // also used as RenderEffects::Beam's palette index,
                                     // -1 => use rgba
 
     float               alpha;      // ignore if RenderEffects::Translucent isn't set

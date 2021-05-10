@@ -60,7 +60,7 @@ static const save_field_t entityfields[] = {
     I(state.modelIndex3),
     I(state.modelIndex4),
     I(state.frame),
-    I(state.skinnum),
+    I(state.skinNumber),
     I(state.effects),
     I(state.renderfx),
     I(state.solid),
@@ -69,7 +69,7 @@ static const save_field_t entityfields[] = {
 
     // [...]
 
-    I(svFlags),
+    I(serverFlags),
     V(mins),
     V(maxs),
     V(absMin),
