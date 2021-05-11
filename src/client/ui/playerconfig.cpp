@@ -112,10 +112,10 @@ static void ReloadMedia(void)
     Q_concat(scratch, sizeof(scratch), "players/", model, "/", skin, ".pcx", NULL);
     m_player.entities[0].skin = R_RegisterSkin(scratch);
 
-    if (!uis.weaponModel[0])
+    if (!uis.weaponModelIndex[0])
         return;
 
-    Q_concat(scratch, sizeof(scratch), "players/", model, "/", uis.weaponModel, NULL);
+    Q_concat(scratch, sizeof(scratch), "players/", model, "/", uis.weaponModelIndex, NULL);
     m_player.entities[1].model = R_RegisterModel(scratch);
     if (!m_player.entities[1].model)
         return;

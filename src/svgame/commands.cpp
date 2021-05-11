@@ -189,7 +189,7 @@ void Cmd_Give_f(Entity *ent)
             it = itemlist + i;
             if (!it->Pickup)
                 continue;
-            if (!(it->flags & IT_WEAPON))
+            if (!(it->flags & ItemFlags::IsWeapon))
                 continue;
             ent->client->persistent.inventory[i] += 1;
         }
@@ -202,7 +202,7 @@ void Cmd_Give_f(Entity *ent)
             it = itemlist + i;
             if (!it->Pickup)
                 continue;
-            if (!(it->flags & IT_AMMO))
+            if (!(it->flags & ItemFlags::IsAmmo))
                 continue;
             Add_Ammo(ent, it, 1000);
         }
@@ -215,7 +215,7 @@ void Cmd_Give_f(Entity *ent)
             it = itemlist + i;
             if (!it->Pickup)
                 continue;
-            if (it->flags & (IT_WEAPON | IT_AMMO))
+            if (it->flags & (ItemFlags::IsWeapon | ItemFlags::IsAmmo))
                 continue;
             ent->client->persistent.inventory[i] = 1;
         }
@@ -239,7 +239,7 @@ void Cmd_Give_f(Entity *ent)
 
     index = ITEM_INDEX(it);
 
-    if (it->flags & IT_AMMO) {
+    if (it->flags & ItemFlags::IsAmmo) {
         if (gi.argc() == 3)
             ent->client->persistent.inventory[index] = atoi(gi.argv(2));
         else
@@ -472,7 +472,7 @@ void Cmd_WeapPrev_f(Entity *ent)
         it = &itemlist[index];
         if (!it->Use)
             continue;
-        if (!(it->flags & IT_WEAPON))
+        if (!(it->flags & ItemFlags::IsWeapon))
             continue;
         it->Use(ent, it);
         if (cl->persistent.activeWeapon == it)
@@ -507,7 +507,7 @@ void Cmd_WeapNext_f(Entity *ent)
         it = &itemlist[index];
         if (!it->Use)
             continue;
-        if (!(it->flags & IT_WEAPON))
+        if (!(it->flags & ItemFlags::IsWeapon))
             continue;
         it->Use(ent, it);
         if (cl->persistent.activeWeapon == it)
@@ -537,7 +537,7 @@ void Cmd_WeapLast_f(Entity *ent)
     it = &itemlist[index];
     if (!it->Use)
         return;
-    if (!(it->flags & IT_WEAPON))
+    if (!(it->flags & ItemFlags::IsWeapon))
         return;
     it->Use(ent, it);
 }
@@ -625,7 +625,7 @@ void Cmd_Players_f(Entity *ent)
 
     count = 0;
     for (i = 0 ; i < maxClients->value ; i++)
-        if (game.clients[i].persistent.connected) {
+        if (game.clients[i].persistent.isConnected) {
             index[count] = i;
             count++;
         }
@@ -869,13 +869,13 @@ void ClientCommand(Entity *ent)
     else if (Q_stricmp(cmd, "invprev") == 0)
         SelectPrevItem(ent, -1);
     else if (Q_stricmp(cmd, "invnextw") == 0)
-        SelectNextItem(ent, IT_WEAPON);
+        SelectNextItem(ent, ItemFlags::IsWeapon);
     else if (Q_stricmp(cmd, "invprevw") == 0)
-        SelectPrevItem(ent, IT_WEAPON);
+        SelectPrevItem(ent, ItemFlags::IsWeapon);
     else if (Q_stricmp(cmd, "invnextp") == 0)
-        SelectNextItem(ent, IT_POWERUP);
+        SelectNextItem(ent, ItemFlags::IsPowerUp);
     else if (Q_stricmp(cmd, "invprevp") == 0)
-        SelectPrevItem(ent, IT_POWERUP);
+        SelectPrevItem(ent, ItemFlags::IsPowerUp);
     else if (Q_stricmp(cmd, "invuse") == 0)
         Cmd_InvUse_f(ent);
     else if (Q_stricmp(cmd, "invdrop") == 0)

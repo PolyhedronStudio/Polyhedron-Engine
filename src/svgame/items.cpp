@@ -28,7 +28,7 @@ qboolean    Pickup_Weapon(Entity *ent, Entity *other);
 void        Use_Weapon(Entity *ent, gitem_t *inv);
 void        Drop_Weapon(Entity *ent, gitem_t *inv);
 
-gitem_armor_t bodyarmor_info    = {100, 200, .80f, .60f, ARMOR_BODY};
+gitem_armor_t bodyarmor_info    = {100, 200, .80f, .60f, ArmorType::Body};
 
 static int  body_armor_index;
 #define HEALTH_IGNORE_MAX   1
@@ -149,7 +149,7 @@ qboolean Pickup_Powerup(Entity *ent, Entity *other)
     if ((skill->value == 1 && quantity >= 2) || (skill->value >= 2 && quantity >= 1))
         return false;
 
-    if ((coop->value) && (ent->item->flags & IT_STAY_COOP) && (quantity > 0))
+    if ((coop->value) && (ent->item->flags & ItemFlags::StayInCoop) && (quantity > 0))
         return false;
 
     other->client->persistent.inventory[ITEM_INDEX(ent->item)]++;
@@ -216,7 +216,7 @@ qboolean Pickup_Ammo(Entity *ent, Entity *other)
     int         count;
     qboolean    weapon;
 
-    weapon = (ent->item->flags & IT_WEAPON);
+    weapon = (ent->item->flags & ItemFlags::IsWeapon);
     if ((weapon) && ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
         count = 1000;
     else if (ent->count)
@@ -437,7 +437,7 @@ void Touch_Item(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf)
     if (!taken)
         return;
 
-    if (!((coop->value) && (ent->item->flags & IT_STAY_COOP)) || (ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem))) {
+    if (!((coop->value) && (ent->item->flags & ItemFlags::StayInCoop)) || (ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem))) {
         if (ent->flags & EntityFlags::Respawn)
             ent->flags &= ~EntityFlags::Respawn;
         else
@@ -698,7 +698,7 @@ void SpawnItem(Entity *ent, gitem_t *item)
             }
         }
         if ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo) {
-            if ((item->flags == IT_AMMO)) {
+            if ((item->flags == ItemFlags::IsAmmo)) {
                 G_FreeEntity(ent);
                 return;
             }
@@ -711,7 +711,7 @@ void SpawnItem(Entity *ent, gitem_t *item)
     }
 
     // don't let them drop items that stay in a coop game
-    if ((coop->value) && (item->flags & IT_STAY_COOP)) {
+    if ((coop->value) && (item->flags & ItemFlags::StayInCoop)) {
         item->Drop = NULL;
     }
 
@@ -751,10 +751,10 @@ gitem_t itemlist[] = {
         /* width */     3,
         0,
         NULL,
-        IT_ARMOR,
+        ItemFlags::IsArmor,
         0,
         &bodyarmor_info,
-        ARMOR_BODY,
+        ArmorType::Body,
         /* precache */ ""
     },
 
@@ -779,7 +779,7 @@ gitem_t itemlist[] = {
         0,
         0,
         NULL,
-        IT_WEAPON | IT_STAY_COOP,
+        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
         WEAP_BLASTER,
         NULL,
         0,
@@ -802,7 +802,7 @@ gitem_t itemlist[] = {
         0,
         1,
         "Bullets",
-        IT_WEAPON | IT_STAY_COOP,
+        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
         WEAP_MACHINEGUN,
         NULL,
         0,
@@ -825,7 +825,7 @@ gitem_t itemlist[] = {
         0,
         1,
         "Shells",
-        IT_WEAPON | IT_STAY_COOP,
+        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
         WEAP_SHOTGUN,
         NULL,
         0,
@@ -848,7 +848,7 @@ gitem_t itemlist[] = {
         0,
         2,
         "Shells",
-        IT_WEAPON | IT_STAY_COOP,
+        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
         WEAP_SUPERSHOTGUN,
         NULL,
         0,
@@ -875,7 +875,7 @@ gitem_t itemlist[] = {
         /* width */     3,
         10,
         NULL,
-        IT_AMMO,
+        ItemFlags::IsAmmo,
         0,
         NULL,
         AmmoType::Shells,
@@ -898,7 +898,7 @@ gitem_t itemlist[] = {
         /* width */     3,
         50,
         NULL,
-        IT_AMMO,
+        ItemFlags::IsAmmo,
         0,
         NULL,
         AmmoType::Bullets,

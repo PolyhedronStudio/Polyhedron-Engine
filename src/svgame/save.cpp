@@ -316,7 +316,7 @@ static const save_field_t clientfields[] = {
     SZ(persistent.netname, 16),
     I(persistent.hand),
 
-    I(persistent.connected),
+    I(persistent.isConnected),
 
     I(persistent.health),
     I(persistent.maxHealth),
@@ -951,7 +951,7 @@ void ReadLevel(const char *filename)
     for (i = 0 ; i < maxClients->value ; i++) {
         ent = &g_entities[i + 1];
         ent->client = game.clients + i;
-        ent->client->persistent.connected = false;
+        ent->client->persistent.isConnected = false;
     }
 
     // do any load time things at this point

@@ -116,20 +116,25 @@ struct AmmoType {
     static constexpr int32_t Slugs = 5;
 };
 
-
-//deadFlag
+//-------------------
+// deadFlag
+//-------------------
 constexpr int32_t  DEAD_NO = 0;
 constexpr int32_t  DEAD_DYING = 1;
 constexpr int32_t  DEAD_DEAD = 2;
 constexpr int32_t  DEAD_RESPAWNABLE = 3;
 
-//range
+//-------------------
+// Ranges
+//-------------------
 constexpr int32_t  RANGE_MELEE = 0;
 constexpr int32_t  RANGE_NEAR = 1;
 constexpr int32_t  RANGE_MID = 2;
 constexpr int32_t  RANGE_FAR = 3;
 
+//-------------------
 //gib types
+//-------------------
 constexpr int32_t GIB_ORGANIC = 0;
 constexpr int32_t GIB_METALLIC = 1;
 
@@ -156,23 +161,33 @@ constexpr int32_t AS_SLIDING = 2;
 constexpr int32_t AS_MELEE = 3;
 constexpr int32_t AS_MISSILE = 4;
 
-// armor types
-constexpr int32_t ARMOR_NONE = 0;
-constexpr int32_t ARMOR_JACKET = 1;
-constexpr int32_t ARMOR_COMBAT = 2;
-constexpr int32_t ARMOR_BODY = 3;
-constexpr int32_t ARMOR_SHARD = 4;
+//-------------------
+// Armor types
+//-------------------
+struct ArmorType {
+    static constexpr int32_t None = 0;
+    static constexpr int32_t Jacket = 1;
+    static constexpr int32_t Combat = 2;
+    static constexpr int32_t Body = 3;
+    static constexpr int32_t Shard = 4;
+};
 
-// power armor types
+//-------------------
+// Power armor types
+//-------------------
 constexpr int32_t POWER_ARMOR_NONE = 0;
 
-// handedness values
+//-------------------
+// Player handedness values
+//-------------------
 constexpr int32_t RIGHT_HANDED = 0;
 constexpr int32_t LEFT_HANDED = 1;
 constexpr int32_t CENTER_HANDED = 2;
 
 
+//-------------------
 // game.serverflags values
+//-------------------
 constexpr int32_t SFL_CROSS_TRIGGER_1 = 0x00000001;
 constexpr int32_t SFL_CROSS_TRIGGER_2 = 0x00000002;
 constexpr int32_t SFL_CROSS_TRIGGER_3 = 0x00000004;
@@ -183,13 +198,17 @@ constexpr int32_t SFL_CROSS_TRIGGER_7 = 0x00000040;
 constexpr int32_t SFL_CROSS_TRIGGER_8 = 0x00000080;
 constexpr int32_t SFL_CROSS_TRIGGER_MASK = 0x000000ff;
 
-
-// noise types for PlayerNoise
+//-------------------
+// Noise types for PlayerNoise
+//-------------------
 constexpr int32_t PNOISE_SELF = 0;
 constexpr int32_t PNOISE_WEAPON = 1;
 constexpr int32_t PNOISE_IMPACT = 2;
 
 
+//-------------------
+// Actual entity movetypes that can be employed. 
+//-------------------
 // edict->moveType values
 struct MoveType {
     static constexpr int32_t None = 0;      // Never moves
@@ -207,7 +226,9 @@ struct MoveType {
 };
 
 
-
+//-------------------
+// Armor item description.
+//-------------------
 typedef struct {
     int     baseCount;
     int     maxCount;
@@ -217,56 +238,85 @@ typedef struct {
 } gitem_armor_t;
 
 
-// gitem_t->flags
-constexpr int32_t IT_WEAPON = 1;       // use makes active weapon
-constexpr int32_t IT_AMMO = 2;
-constexpr int32_t IT_ARMOR = 4;
-constexpr int32_t IT_STAY_COOP = 8;
-constexpr int32_t IT_KEY = 16;
-constexpr int32_t IT_POWERUP = 32;
+//-------------------
+// Item flags.
+//-------------------
+struct ItemFlags {
+    static constexpr int32_t IsWeapon = 1;       // use makes active weapon
+    static constexpr int32_t IsAmmo = 2;
+    static constexpr int32_t IsArmor = 4;
+    static constexpr int32_t StayInCoop = 8;
+    static constexpr int32_t IsKey = 16;
+    static constexpr int32_t IsPowerUp = 32;
+};
 
-// gitem_t->weaponModel for weapons indicates model index
+//-------------------
+// Weapon model indexes for: gitem_t->weaponModelIndex
+//-------------------
 constexpr int32_t WEAP_BLASTER = 1;
 constexpr int32_t WEAP_MACHINEGUN = 2;
 constexpr int32_t WEAP_SHOTGUN = 3;
 constexpr int32_t WEAP_SUPERSHOTGUN = 4;
 
-// C++20: STRING: Added const to the chars.
+//-------------------
+// Special item entity structure. This is a hybrid of ammo, health,
+// and actual weapons. 
+//-------------------
 typedef struct gitem_s {
-    const char *className; // spawning name
+    // Spawning classname.
+    const char *className;
+
+    // Function callbacks.
     qboolean (*Pickup)(struct entity_s *ent, struct entity_s *other);
     void (*Use)(struct entity_s *ent, struct gitem_s *item);
     void (*Drop)(struct entity_s *ent, struct gitem_s *item);
     void (*WeaponThink)(struct entity_s *ent);
+
+    // Sound used when being picked up.
     const char *pickupSound;
+
+    // Actual world model used to display.
     const char *worldModel;
+    
+    // Specific worldmodel flags.
     int worldModelFlags;
+
+    // Item view model. (Used for weapons, weapons are items.)
     const char        *viewModel;
 
-    // client side info
+    // Client side infe.
     const char  *icon;
-    const char  *pickupName;   // for printing on pickup
-    int countWidth;    // number of digits to display by icon
+    const char  *pickupName;    // for printing on pickup
+    int countWidth;             // number of digits to display by icon
 
-    int quantity;       // for ammo how much, for weapons how much is used per shot
-    const char  *ammo;          // for weapons
-    int flags;          // IT_* flags
+    // For ammo items this value dictates how much ammo to gain.
+    // For weapon items, this value dictates how much ammo is used on a per shot basis.
+    int quantity;
 
-    int weaponModel;      // weapon model index (for weapons)
+    // Ammo string for weapons.
+    const char  *ammo;
 
+    // IT_* flags
+    int flags;          
+
+    // Weaponmodel index.
+    int weaponModelIndex;      // weapon model index (for weapons)
+
+    // Info string & Tag.
     void *info;
     int tag;
 
-    const char  *precaches;     // string of all models, sounds, and images this item will use
+    // An actual string of all models, sounds, and images this item will use
+    const char  *precaches;     
 } gitem_t;
 
 
 
-//
+//-------------------
 // This structure is left intact through an entire game
 // it should be initialized at dll load time, and read/written to
 // the server.ssv file for savegames
-//
+//-------------------
 typedef struct {
     GameClient *clients;       // [maxClients]
 
@@ -288,10 +338,12 @@ typedef struct {
 } GameLocals;
 
 
-//
-// this structure is cleared as each map is entered
-// it is read/written to the level.sav file for savegames
-//
+//-------------------
+// Stores level locals, from current time, to which entities are sighted.
+// 
+// This structure is cleared as each map is entered it is read/written 
+// to the 'level.sav' file for savegames
+//-------------------
 typedef struct {
     int frameNumber;
     float time;
@@ -333,10 +385,10 @@ typedef struct {
     int powerCubes; // Ugly necessity for coop
 } LevelLocals;
 
-
-// TemporarySpawnFields is only used to hold entity field values that
-// can be set from the editor, but aren't actualy present
+//-------------------
+// Holds entity field values that can be set from the editor, but aren't actualy present
 // in Entity during gameplay
+//-------------------
 typedef struct {
     // world vars
     char *sky;
@@ -358,7 +410,10 @@ typedef struct {
     float maxpitch;
 } TemporarySpawnFields;
 
-
+//-------------------
+// Contains data for keeping track of velocity based moving entities.
+// (In other words, entities that aren't a: Client or AI Player.
+//-------------------
 typedef struct {
     // fixed data
     vec3_t startOrigin;
@@ -449,12 +504,13 @@ extern  TemporarySpawnFields    st;
 extern  int sm_meat_index;
 extern  int snd_fry;
 
+//-------------------
 //
 // Means of death
 //
 // Used for registring means of death types so they can be displayed 
 // accordingly in the obituaries.
-//
+//-------------------
 struct MeansOfDeath {
     static constexpr int32_t Unknown = 0;
     static constexpr int32_t Blaster = 1;
@@ -504,9 +560,9 @@ extern  Entity         *g_entities;
 #define random()    ((rand () & RAND_MAX) / ((float)RAND_MAX))
 #define crandom()   (2.0 * (random() - 0.5))
 
-//
-// Extern cvars, we want to access these all over ofc.
-//
+//-------------------
+// Server game related cvars.
+//-------------------
 extern  cvar_t  *maxEntities;
 extern  cvar_t  *deathmatch;
 extern  cvar_t  *coop;
@@ -558,9 +614,9 @@ extern  cvar_t  *cl_monsterfootsteps;
 //
 Entity* G_GetWorldEntity();
 
-//
-// Spawn flags set by editors for items.
-//
+//-------------------
+// Spawnflags for items, set by editor(s).
+//-------------------
 struct ItemSpawnFlags {
     static constexpr int32_t TriggerSpawn = 0x00000001;
     static constexpr int32_t NoTouch = 0x00000002;
@@ -757,7 +813,9 @@ void GetChaseTarget(Entity *ent);
 
 //============================================================================
 
-// client_t->animation.priorityAnimation
+//-------------------
+// Player Animations.
+//-------------------
 struct PlayerAnimation {
     static constexpr int32_t Basic = 0;       // Stand / Run
     static constexpr int32_t Wave = 1;
@@ -768,14 +826,17 @@ struct PlayerAnimation {
     static constexpr int32_t Reverse = 6;
 };
 
-// Client data that stays across multiple level loads
+//-------------------
+// The ClientPersistantData struct manages data that has to stay persistent
+// across level changes.
+//-------------------
 typedef struct {
     char userinfo[MAX_INFO_STRING];
     char netname[16];
     int hand;
 
-    qboolean connected;  // A loadgame will leave valid entities that
-                            // just don't have a connection yet
+    qboolean isConnected;  // A loadgame will leave valid entities that
+                           // just don't have a connection yet
 
     // Values saved and restored from entities when changing levels
     int health;
@@ -802,7 +863,11 @@ typedef struct {
     qboolean isSpectator;          // client is a isSpectator
 } ClientPersistantData;
 
-// client data that stays across deathmatch respawns
+//-------------------
+// The ClientRespawnData struct is used to store specific information about
+// respawning. Also maintains a member variable for data that has to stay
+// persistent during mapchanges/respawns in a coop game.
+//-------------------
 typedef struct {
     ClientPersistantData persistentCoopRespawn;   // what to set client->persistent to on a respawn
     int enterFrame;         // level.frameNumber the client entered the game
@@ -812,8 +877,15 @@ typedef struct {
     qboolean isSpectator;          // client is a isSpectator
 } ClientRespawnData;
 
-// this structure is cleared on each PutClientInServer(),
-// except for 'client->persistent'
+
+//-------------------
+// The gclient_s, Game Client structure.
+// 
+// Whenever PutClientInServer is called, this structure is cleared.
+// The only thing that maintains its data is the persistent member.
+// 
+// This is to maintain several specific client data across maps.
+//-------------------
 struct gclient_s {
     // known to server
     PlayerState  playerState;             // communicated by server to clients
@@ -909,28 +981,34 @@ struct gclient_s {
     qboolean updateChase;
 };
 
-
+//-------------------
+// entity_s, the server side entity structure. If you know what an entity is,
+// then you know what this is.
+//-------------------
 struct entity_s {
+    // Actual entity state member. Contains all data that is actually networked.
     EntityState  state;
-    struct gclient_s *client;    // NULL if not a player
-                                    // the server expects the first part
-                                    // of gclient_s to be a PlayerState
-                                    // but the rest of it is opaque
 
+    // NULL if not a player the server expects the first part of gclient_s to
+    // be a PlayerState but the rest of it is opaque
+    struct gclient_s *client;       
+
+    // An entity is in no use, in case it complies to the INUSE macro.
     qboolean inUse;
     int linkCount;
 
     // FIXME: move these fields to a server private sv_entity_t
-    list_t area;               // linked to a division node or leaf
+    list_t area; // Linked to a division node or leaf
 
+    // If numClusters is -1, use headNodew instead.
     int numClusters;       // if -1, use headNode instead
     int clusterNumbers[MAX_ENT_CLUSTERS];
-    int headNode;           // unused if numClusters != -1
+    // Only use this instead of numClusters if numClusters == -1
+    int headNode;           
     int areaNumber;
     int areaNumber2;
 
     //================================
-
     int serverFlags;
     vec3_t mins, maxs;
     vec3_t absMin, absMax, size;

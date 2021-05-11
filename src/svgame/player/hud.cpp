@@ -124,7 +124,7 @@ void HUD_BeginIntermission(Entity *targ)
                 }
                 // strip players of all keys between units
                 for (n = 0; n < MAX_ITEMS; n++) {
-                    if (itemlist[n].flags & IT_KEY) {
+                    if (itemlist[n].flags & ItemFlags::IsKey) {
                         client->client->persistent.inventory[n] = 0;
                     }
                 }

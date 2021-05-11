@@ -772,7 +772,7 @@ static qboolean Parse_File(const char *path, int depth)
                     R_GetPicSize(&uis.cursorWidth,
                                  &uis.cursorHeight, uis.cursorHandle);
                 } else if (!strcmp(cmd, "weapon")) {
-                    Cmd_ArgvBuffer(1, uis.weaponModel, sizeof(uis.weaponModel));
+                    Cmd_ArgvBuffer(1, uis.weaponModelIndex, sizeof(uis.weaponModelIndex));
                 } else {
                     Com_WPrintf("Unknown keyword '%s'\n", cmd);
                     break;

@@ -337,7 +337,7 @@ void InitClientPersistant(GameClient *client)
     client->persistent.maxCells      = 200;
     client->persistent.maxSlugs      = 50;
 
-    client->persistent.connected = true;
+    client->persistent.isConnected = true;
 }
 
 
@@ -828,7 +828,7 @@ void PutClientInServer(Entity *ent)
         // this is kind of ugly, but it's how we want to handle keys in coop
 //      for (n = 0; n < game.numberOfItems; n++)
 //      {
-//          if (itemlist[n].flags & IT_KEY)
+//          if (itemlist[n].flags & ItemFlags::IsKey)
 //              resp.persistentCoopRespawn.inventory[n] = client->persistent.inventory[n];
 //      }
         client->persistent = resp.persistentCoopRespawn;
@@ -1170,7 +1170,7 @@ qboolean ClientConnect(Entity *ent, char *userinfo)
         gi.DPrintf("%s connected\n", ent->client->persistent.netname);
 
     ent->serverFlags = 0; // make sure we start with known default
-    ent->client->persistent.connected = true;
+    ent->client->persistent.isConnected = true;
     return true;
 }
 
@@ -1207,7 +1207,7 @@ void ClientDisconnect(Entity *ent)
     ent->solid = Solid::Not;
     ent->inUse = false;
     ent->className = "disconnected";
-    ent->client->persistent.connected = false;
+    ent->client->persistent.isConnected = false;
 
     // FIXME: don't break skins on corpses, etc
     //playernum = ent-g_entities-1;

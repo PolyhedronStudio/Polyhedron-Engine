@@ -148,7 +148,7 @@ void ChangeWeapon(Entity *ent)
     // set visible model
     if (ent->state.modelIndex == 255) {
         if (ent->client->persistent.activeWeapon)
-            i = ((ent->client->persistent.activeWeapon->weaponModel & 0xff) << 8);
+            i = ((ent->client->persistent.activeWeapon->weaponModelIndex & 0xff) << 8);
         else
             i = 0;
         ent->state.skinNumber = (ent - g_entities - 1) | i;
@@ -233,7 +233,7 @@ void Use_Weapon(Entity *ent, gitem_t *item)
     if (item == ent->client->persistent.activeWeapon)
         return;
 
-    if (item->ammo && !g_select_empty->value && !(item->flags & IT_AMMO)) {
+    if (item->ammo && !g_select_empty->value && !(item->flags & ItemFlags::IsAmmo)) {
         ammo_item = FindItem(item->ammo);
         ammoIndex = ITEM_INDEX(ammo_item);
 
