@@ -225,7 +225,7 @@ void SV_SpawnServer(MapCommand *cmd)
     sv.serverState = cmd->serverState;
 
     // set serverinfo variable
-    SV_InfoSet("mapname", sv.name);
+    SV_InfoSet("mapName", sv.name);
     SV_InfoSet("port", net_port->string);
 
     Cvar_SetInteger(sv_running, sv.serverState, FROM_CODE);

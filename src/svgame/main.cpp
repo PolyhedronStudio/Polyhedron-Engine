@@ -80,7 +80,7 @@ cvar_t  *sv_maplist;
 
 cvar_t  *cl_monsterfootsteps;
 
-void SpawnEntities(const char *mapname, const char *entities, const char *spawnpoint);
+void SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
 
 void RunEntity(Entity *ent);
 void WriteGame(const char *filename, qboolean autosave);
@@ -308,8 +308,8 @@ Entity *CreateTargetChangeLevel(char *map)
 
     ent = G_Spawn();
     ent->className = (char*)"target_changelevel"; // C++20: Added a cast.
-    Q_snprintf(level.nextmap, sizeof(level.nextmap), "%s", map);
-    ent->map = level.nextmap;
+    Q_snprintf(level.nextMap, sizeof(level.nextMap), "%s", map);
+    ent->map = level.nextMap;
     return ent;
 }
 
@@ -328,7 +328,7 @@ void EndDMLevel(void)
 
     // stay on same level flag
     if ((int)dmflags->value & DeathMatchFlags::SameLevel) {
-        HUD_BeginIntermission(CreateTargetChangeLevel(level.mapname));
+        HUD_BeginIntermission(CreateTargetChangeLevel(level.mapName));
         return;
     }
 
@@ -338,12 +338,12 @@ void EndDMLevel(void)
         f = NULL;
         t = strtok(s, seps);
         while (t != NULL) {
-            if (Q_stricmp(t, level.mapname) == 0) {
+            if (Q_stricmp(t, level.mapName) == 0) {
                 // it's in the list, go to the next one
                 t = strtok(NULL, seps);
                 if (t == NULL) { // end of list, go to first one
                     if (f == NULL) // there isn't a first one, same level
-                        HUD_BeginIntermission(CreateTargetChangeLevel(level.mapname));
+                        HUD_BeginIntermission(CreateTargetChangeLevel(level.mapName));
                     else
                         HUD_BeginIntermission(CreateTargetChangeLevel(f));
                 } else
@@ -358,14 +358,14 @@ void EndDMLevel(void)
         free(s);
     }
 
-    if (level.nextmap[0]) // go to a specific map
-        HUD_BeginIntermission(CreateTargetChangeLevel(level.nextmap));
+    if (level.nextMap[0]) // go to a specific map
+        HUD_BeginIntermission(CreateTargetChangeLevel(level.nextMap));
     else {  // search for a changelevel
         ent = G_Find(NULL, FOFS(className), "target_changelevel");
         if (!ent) {
             // the map designer didn't include a changelevel,
             // so create a fake ent that goes back to the same level
-            HUD_BeginIntermission(CreateTargetChangeLevel(level.mapname));
+            HUD_BeginIntermission(CreateTargetChangeLevel(level.mapName));
             return;
         }
         HUD_BeginIntermission(ent);
@@ -408,7 +408,7 @@ void CheckDMRules(void)
     int         i;
     GameClient   *cl;
 
-    if (level.intermissiontime)
+    if (level.intermission.time)
         return;
 
     if (!deathmatch->value)
@@ -449,11 +449,11 @@ void ExitLevel(void)
     Entity *ent;
     char    command [256];
 
-    Q_snprintf(command, sizeof(command), "gamemap \"%s\"\n", level.changemap);
+    Q_snprintf(command, sizeof(command), "gamemap \"%s\"\n", level.intermission.changeMap);
     gi.AddCommandString(command);
-    level.changemap = NULL;
-    level.exitintermission = 0;
-    level.intermissiontime = 0;
+    level.intermission.changeMap = NULL;
+    level.intermission.exitIntermission = 0;
+    level.intermission.time = 0;
     ClientEndServerFrames();
 
     // clear some things before going to next level
@@ -487,7 +487,7 @@ void G_RunFrame(void)
 
     // exit intermissions
 
-    if (level.exitintermission) {
+    if (level.intermission.exitIntermission) {
         ExitLevel();
         return;
     }

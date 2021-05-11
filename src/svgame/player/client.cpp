@@ -74,7 +74,7 @@ void SP_CreateCoopSpots(Entity *self)
 {
     Entity *spot;
 
-    if (Q_stricmp(level.mapname, "security") == 0) {
+    if (Q_stricmp(level.mapName, "security") == 0) {
         spot = G_Spawn();
         spot->className = "info_player_coop";
         spot->state.origin[0] = 188 - 64;
@@ -962,7 +962,7 @@ void ClientBeginDeathmatch(Entity *ent)
     // locate ent at a spawn point
     PutClientInServer(ent);
 
-    if (level.intermissiontime) {
+    if (level.intermission.time) {
         HUD_MoveClientToIntermission(ent);
     } else {
         // send effect
@@ -1017,7 +1017,7 @@ void ClientBegin(Entity *ent)
         PutClientInServer(ent);
     }
 
-    if (level.intermissiontime) {
+    if (level.intermission.time) {
         HUD_MoveClientToIntermission(ent);
     } else {
         // send effect if in a multiplayer game
@@ -1160,7 +1160,7 @@ qboolean ClientConnect(Entity *ent, char *userinfo)
     if (ent->inUse == false) {
         // clear the respawning variables
         InitClientResp(ent->client);
-        if (!game.autosaved || !ent->client->persistent.activeWeapon)
+        if (!game.autoSaved || !ent->client->persistent.activeWeapon)
             InitClientPersistant(ent->client);
     }
 
@@ -1275,12 +1275,12 @@ void ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
     client = ent->client;
 
 
-    if (level.intermissiontime) {
+    if (level.intermission.time) {
         client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
         // can exit intermission after five seconds
-        if (level.time > level.intermissiontime + 5.0
+        if (level.time > level.intermission.time + 5.0
             && (clientUserCommand->moveCommand.buttons & BUTTON_ANY))
-            level.exitintermission = true;
+            level.intermission.exitIntermission = true;
         return;
     }
 
@@ -1448,7 +1448,7 @@ void ClientBeginServerFrame(Entity *ent)
     GameClient   *client;
     int         buttonMask;
 
-    if (level.intermissiontime)
+    if (level.intermission.time)
         return;
 
     client = ent->client;

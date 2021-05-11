@@ -1008,7 +1008,7 @@ static void CL_Changing_f(void)
     SCR_BeginLoadingPlaque();
 
     cls.connectionState = ClientConnectionState::Connected;   // not active anymore, but not disconnected
-    cl.mapname[0] = 0;
+    cl.mapName[0] = 0;
     cl.configstrings[ConfigStrings::Name][0] = 0;
 
     CL_CheckForPause();
@@ -1020,7 +1020,7 @@ static void CL_Changing_f(void)
     for (i = 1; i < j; i++) {
         s = Cmd_Argv(i);
         if (!strncmp(s, "map=", 4)) {
-            Q_strlcpy(cl.mapname, s + 4, sizeof(cl.mapname));
+            Q_strlcpy(cl.mapName, s + 4, sizeof(cl.mapName));
         }
     }
 
@@ -1258,7 +1258,7 @@ static void CL_ConnectionlessPacket(void)
     // server connection
     if (!strcmp(c, "client_connect")) {
         int anticheat = 0;
-        char mapname[MAX_QPATH];
+        char mapName[MAX_QPATH];
         qboolean got_server = false;
 
         if (cls.connectionState < ClientConnectionState::Connecting) {
@@ -1275,7 +1275,7 @@ static void CL_ConnectionlessPacket(void)
         }
 
         // MSG: !! TODO: Look at demo code and see if we can remove NETCHAN_OLD.
-        mapname[0] = 0;
+        mapName[0] = 0;
 
         // parse additional parameters
         j = Cmd_Argc();
@@ -1296,7 +1296,7 @@ static void CL_ConnectionlessPacket(void)
                     }
                 }
             } else if (!strncmp(s, "map=", 4)) {
-                Q_strlcpy(mapname, s + 4, sizeof(mapname));
+                Q_strlcpy(mapName, s + 4, sizeof(mapName));
             } else if (!strncmp(s, "dlserver=", 9)) {
                 if (!got_server) {
                     HTTP_SetServer(s + 9);
@@ -1321,7 +1321,7 @@ static void CL_ConnectionlessPacket(void)
         CL_ClientCommand("new");
         cls.connectionState = ClientConnectionState::Connected;
         cls.connect_count = 0;
-        strcpy(cl.mapname, mapname);   // for levelshot screen
+        strcpy(cl.mapName, mapName);   // for levelshot screen
         return;
     }
 
@@ -2036,7 +2036,7 @@ static void CL_Say_c(genctx_t *ctx, int argnum)
 
 static size_t CL_Mapname_m(char *buffer, size_t size)
 {
-    return Q_strlcpy(buffer, cl.mapname, size);
+    return Q_strlcpy(buffer, cl.mapName, size);
 }
 
 static size_t CL_Server_m(char *buffer, size_t size)
@@ -2273,7 +2273,7 @@ void CL_RestartFilesystem(qboolean total)
         // CL_RegisterSounds();
         CL_LoadState(LOAD_NONE);
     } else if (clientConnectionState == ClientConnectionState::Cinematic) {
-        cl.precaches.images[0] = R_RegisterPic2(cl.mapname);
+        cl.precaches.images[0] = R_RegisterPic2(cl.mapName);
     }
 
     CL_LoadDownloadIgnores();
@@ -2332,7 +2332,7 @@ void CL_RestartRefresh(qboolean total)
         CL_PrepareMedia();
         CL_LoadState(LOAD_NONE);
     } else if (clientConnectionState == ClientConnectionState::Cinematic) {
-        cl.precaches.images[0] = R_RegisterPic2(cl.mapname);
+        cl.precaches.images[0] = R_RegisterPic2(cl.mapName);
     }
 
     // switch back to original state

@@ -17,7 +17,7 @@ Changes level to "map" when fired
 */
 void use_target_changelevel(Entity* self, Entity* other, Entity* activator)
 {
-    if (level.intermissiontime)
+    if (level.intermission.time)
         return;     // already activated
 
     if (!deathmatch->value && !coop->value) {
@@ -53,7 +53,7 @@ void SP_target_changelevel(Entity* ent)
     }
 
     // ugly hack because *SOMEBODY* screwed up their map
-    if ((Q_stricmp(level.mapname, "fact1") == 0) && (Q_stricmp(ent->map, "fact3") == 0))
+    if ((Q_stricmp(level.mapName, "fact1") == 0) && (Q_stricmp(ent->map, "fact3") == 0))
         ent->map = "fact3$secret1";
 
     ent->Use = use_target_changelevel;

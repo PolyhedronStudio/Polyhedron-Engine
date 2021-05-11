@@ -623,7 +623,7 @@ static void G_SetClientEffects(Entity *ent)
     ent->state.effects = 0;
     ent->state.renderfx = 0;
 
-    if (ent->health <= 0 || level.intermissiontime)
+    if (ent->health <= 0 || level.intermission.time)
         return;
 
     // show cheaters!!!
@@ -803,7 +803,7 @@ void ClientEndServerFrame(Entity *ent)
     // If the end of unit layout is displayed, don't give
     // the player any normal movement attributes
     //
-    if (level.intermissiontime) {
+    if (level.intermission.time) {
         // FIXME: add view drifting here?
         current_client->playerState.blend[3] = 0;
         current_client->playerState.fov = 90;

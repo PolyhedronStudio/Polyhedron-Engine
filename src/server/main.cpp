@@ -937,7 +937,7 @@ static void send_connect_packet(client_t *newcl, int nctype)
     }
 
     Netchan_OutOfBand(NS_SERVER, &net_from, "client_connect%s%s%s%s map=%s",
-                      ncstring, acstring, dlstring1, dlstring2, newcl->mapname);
+                      ncstring, acstring, dlstring1, dlstring2, newcl->mapName);
 }
 
 // converts all the extra positional parameters to `connect' command into an
@@ -995,7 +995,7 @@ static void SVC_DirectConnect(void)
     newcl->has_zlib = params.has_zlib;
     newcl->edict = EDICT_NUM(number + 1);
     newcl->gamedir = fs_game->string;
-    newcl->mapname = sv.name;
+    newcl->mapName = sv.name;
     newcl->configstrings = (char *)sv.configstrings;
     newcl->pool = (EntityPool*)&ge->edicts; // N&C: Edict_pool_t change
     newcl->cm = &sv.cm;

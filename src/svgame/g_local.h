@@ -334,7 +334,8 @@ typedef struct {
     // Items
     int numberOfItems;
 
-    qboolean autosaved;
+    // Did we autosave?
+    qboolean autoSaved;
 } GameLocals;
 
 
@@ -345,19 +346,29 @@ typedef struct {
 // to the 'level.sav' file for savegames
 //-------------------
 typedef struct {
+    // Current local level frame number.
     int frameNumber;
+
+    // Current local level time.
     float time;
 
-    char level_name[MAX_QPATH];  // the descriptive name (Outer Base, etc)
-    char mapname[MAX_QPATH];     // the server name (base1, etc)
-    char nextmap[MAX_QPATH];     // go here when fraglimit is hit
+    char levelName[MAX_QPATH];  // The descriptive name (Outer Base, etc)
+    char mapName[MAX_QPATH];    // The server name (base1, etc)
+    char nextMap[MAX_QPATH];    // Go here when fraglimit is hit
 
-    // intermission state
-    float intermissiontime;       // time the intermission was started
-    const char *changemap; // C++20: STRING: Added const to char*
-    int exitintermission;
-    vec3_t intermissionOrigin;
-    vec3_t intermissionAngle;
+    //
+    // Stores the state for a games 'Intermission state'. This is where the
+    // camera hangs somewhere, at the end of a map, players get to say
+    // 'hey ggg u n00bz' after seeing each other's scores. When all is said and
+    // done the game moves on to the next map. This is when exitIntermission != 0
+    //
+    struct {
+        float time; // Time the intermission was started
+        const char* changeMap; // Map to switch to after intermission has exited.
+        int exitIntermission; // Set to true(1) when exiting the intermission should take place.
+        vec3_t origin; // Origin for intermission to take place at.
+        vec3_t viewAngle; // View angle to apply for intermission.
+    } intermission;
 
     Entity *sightClient;  // changed once each frame for coop games
 
@@ -394,7 +405,7 @@ typedef struct {
     char *sky;
     float skyrotate;
     vec3_t skyaxis;
-    char *nextmap;
+    char *nextMap;
 
     int lip;
     int distance;

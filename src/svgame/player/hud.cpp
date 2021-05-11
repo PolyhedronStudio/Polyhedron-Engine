@@ -52,9 +52,9 @@ void HUD_MoveClientToIntermission(Entity *ent)
 
     // Copy over the previously fetched map intermission entity origin into
     // the client player states positions.
-    ent->state.origin = level.intermissionOrigin;
-    ent->client->playerState.pmove.origin = level.intermissionOrigin;
-    ent->client->playerState.pmove.viewAngles = level.intermissionAngle;
+    ent->state.origin = level.intermission.origin;
+    ent->client->playerState.pmove.origin = level.intermission.origin;
+    ent->client->playerState.pmove.viewAngles = level.intermission.viewAngle;
     // Setup the rest of the client player state.
     ent->client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
     ent->client->playerState.gunIndex = 0;
@@ -95,11 +95,11 @@ void HUD_BeginIntermission(Entity *targ)
         return;
     }
 
-    if (level.intermissiontime) {
+    if (level.intermission.time) {
         return;     // already activated
     }
 
-    game.autosaved = false;
+    game.autoSaved = false;
 
     // respawn any dead clients
     for (i = 0 ; i < maxClients->value ; i++) {
@@ -112,10 +112,10 @@ void HUD_BeginIntermission(Entity *targ)
         }
     }
 
-    level.intermissiontime = level.time;
-    level.changemap = targ->map;
+    level.intermission.time = level.time;
+    level.intermission.changeMap = targ->map;
 
-    if (strstr(level.changemap, "*")) {
+    if (strstr(level.intermission.changeMap, "*")) {
         if (coop->value) {
             for (i = 0 ; i < maxClients->value ; i++) {
                 client = g_entities + 1 + i;
@@ -132,12 +132,12 @@ void HUD_BeginIntermission(Entity *targ)
         }
     } else {
         if (!deathmatch->value) {
-            level.exitintermission = 1;     // go immediately to the next level
+            level.intermission.exitIntermission = 1;     // go immediately to the next level
             return;
         }
     }
 
-    level.exitintermission = 0;
+    level.intermission.exitIntermission = 0;
 
     // Fetch an intermission entity.
     Entity *intermissionEntity = G_Find(NULL, FOFS(className), "info_player_intermission");
@@ -158,8 +158,8 @@ void HUD_BeginIntermission(Entity *targ)
         }
     }
 
-    level.intermissionOrigin = intermissionEntity->state.origin, level.intermissionOrigin;
-    level.intermissionAngle = intermissionEntity->state.angles;
+    level.intermission.origin = intermissionEntity->state.origin, level.intermission.origin;
+    level.intermission.viewAngle = intermissionEntity->state.angles;
 
     // Initiate the client intermission mode for all clients.
     // (MoveType = PM_FREEZE, positioned at intermission entity view values.)
@@ -379,7 +379,7 @@ void HUD_SetClientStats(Entity* ent)
     ent->client->playerState.stats[STAT_LAYOUTS] = 0;
 
     if (deathmatch->value) {
-        if (ent->client->persistent.health <= 0 || level.intermissiontime
+        if (ent->client->persistent.health <= 0 || level.intermission.time
             || ent->client->showScores)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 1;
         if (ent->client->showInventory && ent->client->persistent.health > 0)
@@ -461,7 +461,7 @@ void HUD_SetSpectatorStats(Entity *ent)
     /* layouts are independant in isSpectator */
     cl->playerState.stats[STAT_LAYOUTS] = 0;
 
-    if ((cl->persistent.health <= 0) || level.intermissiontime || cl->showScores)
+    if ((cl->persistent.health <= 0) || level.intermission.time || cl->showScores)
     {
         cl->playerState.stats[STAT_LAYOUTS] |= 1;
     }

@@ -847,7 +847,7 @@ void ClientCommand(Entity *ent)
         return;
     }
 
-    if (level.intermissiontime)
+    if (level.intermission.time)
         return;
 
     if (Q_stricmp(cmd, "use") == 0)

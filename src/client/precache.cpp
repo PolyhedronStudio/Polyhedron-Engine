@@ -152,12 +152,12 @@ void CL_PrepareMedia(void)
 {
     if (!cls.ref_initialized)
         return;
-    if (!cl.mapname[0])
+    if (!cl.mapName[0])
         return;     // no map loaded
 
 
     // register models, pics, and skins
-    R_BeginRegistration(cl.mapname);
+    R_BeginRegistration(cl.mapName);
     // register sounds.
     S_BeginRegistration();
 
@@ -172,7 +172,7 @@ void CL_PrepareMedia(void)
     S_EndRegistration();
 
     // the renderer can now free unneeded stuff
-    R_EndRegistration(cl.mapname);
+    R_EndRegistration(cl.mapName);
 
     // clear any lines of console text
     Con_ClearNotify_f();
@@ -213,8 +213,8 @@ void CL_UpdateConfigstring(int index)
         if (len <= 9) {
             Com_Error(ERR_DROP, "%s: bad world model: %s", __func__, s);
         }
-        memcpy(cl.mapname, s + 5, len - 9);   // skip "maps/"
-        cl.mapname[len - 9] = 0; // cut off ".bsp"
+        memcpy(cl.mapName, s + 5, len - 9);   // skip "maps/"
+        cl.mapName[len - 9] = 0; // cut off ".bsp"
         return;
     }
 

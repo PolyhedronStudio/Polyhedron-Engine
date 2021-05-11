@@ -67,7 +67,7 @@ void LOC_LoadLocations(void)
     qerror_t ret;
 
     // load from main directory
-    Q_concat(path, sizeof(path), "locs/", cl.mapname, ".loc", NULL);
+    Q_concat(path, sizeof(path), "locs/", cl.mapName, ".loc", NULL);
 
     ret = FS_LoadFile(path, (void **)&buffer);
     if (!buffer) {
@@ -352,7 +352,7 @@ static void LOC_Write_f(void)
     }
 
     f = FS_EasyOpenFile(buffer, sizeof(buffer), FS_MODE_WRITE | FS_FLAG_TEXT,
-                        "locs/", cl.mapname, ".loc");
+                        "locs/", cl.mapName, ".loc");
     if (!f) {
         return;
     }

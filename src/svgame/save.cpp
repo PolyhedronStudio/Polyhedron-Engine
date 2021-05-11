@@ -252,15 +252,15 @@ static const save_field_t levelfields[] = {
     I(frameNumber),
     F(time),
 
-    SZ(level_name, MAX_QPATH),
-    SZ(mapname, MAX_QPATH),
-    SZ(nextmap, MAX_QPATH),
+    SZ(levelName, MAX_QPATH),
+    SZ(mapName, MAX_QPATH),
+    SZ(nextMap, MAX_QPATH),
 
-    F(intermissiontime),
-    L(changemap),
-    I(exitintermission),
-    V(intermissionOrigin),
-    V(intermissionAngle),
+    F(intermission.time),
+    L(intermission.changeMap),
+    I(intermission.exitIntermission),
+    V(intermission.origin),
+    V(intermission.viewAngle),
 
     E(sightClient),
 
@@ -401,7 +401,7 @@ static const save_field_t gamefields[] = {
 
     I(numberOfItems),
 
-    I(autosaved),
+    I(autoSaved),
 
     {(fieldtype_t)0}
 #undef _OFS
@@ -775,9 +775,9 @@ void WriteGame(const char *filename, qboolean autosave)
     write_int(f, SAVE_MAGIC1);
     write_int(f, SAVE_VERSION);
 
-    game.autosaved = autosave;
+    game.autoSaved = autosave;
     write_fields(f, gamefields, &game);
-    game.autosaved = false;
+    game.autoSaved = false;
 
     for (i = 0; i < game.maxClients; i++) {
         write_fields(f, clientfields, &game.clients[i]);

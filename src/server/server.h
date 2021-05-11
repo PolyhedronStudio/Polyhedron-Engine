@@ -305,7 +305,7 @@ typedef struct client_s {
 
     // server state pointers (hack for MVD channels implementation)
     char *configstrings;
-    char *gamedir, *mapname;
+    char *gamedir, *mapName;
     EntityPool *pool;
     cm_t *cm;
     int32_t slot;

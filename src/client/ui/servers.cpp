@@ -252,7 +252,7 @@ void UI_StatusEvent(const serverStatus_t *status)
         mod = "basenac";
     }
 
-    map = Info_ValueForKey(info, "mapname");
+    map = Info_ValueForKey(info, "mapName");
     if (COM_IsWhite(map)) {
         map = "???";
     }

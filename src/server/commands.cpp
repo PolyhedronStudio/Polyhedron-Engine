@@ -349,7 +349,7 @@ goes to map jail.bsp.
 static void SV_GameMap_f(void)
 {
     if (Cmd_Argc() != 2) {
-        Com_Printf("Usage: %s <mapname>\n", Cmd_Argv(0));
+        Com_Printf("Usage: %s <mapName>\n", Cmd_Argv(0));
         return;
     }
 
@@ -399,7 +399,7 @@ static int should_really_restart(void)
         Com_Printf(
             "(You can set 'sv_allow_map' to 1 if you wish to permanently "
             "disable this warning. To force restart for a single invocation "
-            "of this command, use 'map <mapname> force')\n");
+            "of this command, use 'map <mapName> force')\n");
         warned = true;
     }
 
@@ -419,7 +419,7 @@ static void SV_Map_f(void)
     int res;
 
     if (Cmd_Argc() < 2) {
-        Com_Printf("Usage: %s <mapname>\n", Cmd_Argv(0));
+        Com_Printf("Usage: %s <mapName>\n", Cmd_Argv(0));
         return;
     }
 

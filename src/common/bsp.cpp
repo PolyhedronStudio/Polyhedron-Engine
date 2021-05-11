@@ -1014,7 +1014,7 @@ static qboolean BSP_GetPatchedPVSFileName(const char* map_path, char pvs_path[MA
 	return true;
 }
 
-// Loads the first- and second-order PVS matrices from a file called `maps/pvs/<mapname>.bin`
+// Loads the first- and second-order PVS matrices from a file called `maps/pvs/<mapName>.bin`
 static qboolean BSP_LoadPatchedPVS(bsp_t *bsp)
 {
 	char pvs_path[MAX_QPATH];
@@ -1046,7 +1046,7 @@ static qboolean BSP_LoadPatchedPVS(bsp_t *bsp)
 	return true;
 }
 
-// Saves the first- and second-order PVS matrices to a file called `maps/pvs/<mapname>.bin`
+// Saves the first- and second-order PVS matrices to a file called `maps/pvs/<mapName>.bin`
 qboolean BSP_SavePatchedPVS(bsp_t *bsp)
 {
 	char pvs_path[MAX_QPATH];

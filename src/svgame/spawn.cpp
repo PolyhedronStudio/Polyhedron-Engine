@@ -230,7 +230,7 @@ static const spawn_field_t temp_fields[] = {
     {"maxyaw", STOFS(maxyaw), F_FLOAT},
     {"minpitch", STOFS(minpitch), F_FLOAT},
     {"maxpitch", STOFS(maxpitch), F_FLOAT},
-    {"nextmap", STOFS(nextmap), F_LSTRING},
+    {"nextMap", STOFS(nextMap), F_LSTRING},
 
     {NULL}
 };
@@ -471,7 +471,7 @@ Creates a server's entity / program execution context by
 parsing textual entity definitions out of an ent file.
 ==============
 */
-void SpawnEntities(const char *mapname, const char *entities, const char *spawnpoint)
+void SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint)
 {
     Entity     *ent;
     int         inhibit;
@@ -498,7 +498,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
     //}
     memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0])); // WatIs: C++-ify: Note that this may be a problem maker.
 
-    strncpy(level.mapname, mapname, sizeof(level.mapname) - 1);
+    strncpy(level.mapName, mapName, sizeof(level.mapName) - 1);
     strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
 
     // set client fields on player ents
@@ -524,7 +524,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
         ED_ParseEntity(&entities, ent);
 
         // yet another map hack
-        if (!Q_stricmp(level.mapname, "command") && !Q_stricmp(ent->className, "trigger_once") && !Q_stricmp(ent->model, "*27"))
+        if (!Q_stricmp(level.mapName, "command") && !Q_stricmp(ent->className, "trigger_once") && !Q_stricmp(ent->model, "*27"))
             ent->spawnFlags &= ~EntitySpawnFlags::NotHard;
 
         // remove things (except the world) from different skill levels or deathmatch
@@ -768,16 +768,16 @@ void SP_worldspawn(Entity *ent)
     // set configstrings for items
     SetItemNames();
 
-    if (st.nextmap)
-        strcpy(level.nextmap, st.nextmap);
+    if (st.nextMap)
+        strcpy(level.nextMap, st.nextMap);
 
     // make some data visible to the server
 
     if (ent->message && ent->message[0]) {
         gi.configstring(ConfigStrings::Name, ent->message);
-        strncpy(level.level_name, ent->message, sizeof(level.level_name));
+        strncpy(level.levelName, ent->message, sizeof(level.levelName));
     } else
-        strncpy(level.level_name, level.mapname, sizeof(level.level_name));
+        strncpy(level.levelName, level.mapName, sizeof(level.levelName));
 
     if (st.sky && st.sky[0])
         gi.configstring(ConfigStrings::Sky, st.sky);

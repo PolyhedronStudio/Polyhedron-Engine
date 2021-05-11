@@ -416,7 +416,7 @@ struct ClientState {
     int32_t maxClients;
 
     char gamedir[MAX_QPATH];
-    char mapname[MAX_QPATH]; // short format - q2dm1, etc
+    char mapName[MAX_QPATH]; // short format - q2dm1, etc
 
     char baseConfigStrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
     char configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
