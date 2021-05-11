@@ -370,13 +370,17 @@ typedef struct {
         vec3_t viewAngle; // View angle to apply for intermission.
     } intermission;
 
-    Entity *sightClient;  // changed once each frame for coop games
+    // The actual client the AI has sight on for this current frame.
+    Entity *sightClient;  // Changed once each frame for coop games
 
+    // Entity which the AI has sight on.
     Entity *sightEntity;
     int sightEntityFrameNumber;
-    Entity *soundEntity;
+
+    // Sound entities are set to the entity that caused the AI to be triggered.
+    Entity *soundEntity;            // In case of a footstep, jumping sound, etc.
     int soundEntityFrameNumber;
-    Entity *sound2Entity;
+    Entity *sound2Entity;           // In case of a weapon action.
     int sound2EntityFrameNumber;
 
     // Not renaming this one, it has to go in the future.
