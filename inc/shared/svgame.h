@@ -51,8 +51,8 @@ struct Solid {
 #define MAX_ENT_CLUSTERS    16
 
 
-typedef struct entity_s entity_t;
-typedef struct gclient_s gclient_t;
+typedef struct entity_s Entity;
+typedef struct gclient_s GameClient;
 
 
 #ifndef GAME_INCLUDE
@@ -88,7 +88,7 @@ struct entity_s {
     vec3_t      absMin, absMax, size;
     uint32_t    solid;
     int         clipMask;
-    entity_t     *owner;
+    Entity     *owner;
 
     // the game dll can add anything it wants after
     // this point in the structure
@@ -130,10 +130,10 @@ typedef struct {
     // special messages
     void (* q_printf(2, 3) BPrintf)(int printlevel, const char *fmt, ...);
     void (* q_printf(1, 2) DPrintf)(const char *fmt, ...);
-    void (* q_printf(3, 4) CPrintf)(entity_t *ent, int printlevel, const char *fmt, ...);
-    void (* q_printf(2, 3) CenterPrintf)(entity_t *ent, const char *fmt, ...);
-    void (*Sound)(entity_t *ent, int channel, int soundindex, float volume, float attenuation, float timeofs);
-    void (*PositionedSound)(vec3_t origin, entity_t *ent, int channel, int soundinedex, float volume, float attenuation, float timeofs);
+    void (* q_printf(3, 4) CPrintf)(Entity *ent, int printlevel, const char *fmt, ...);
+    void (* q_printf(2, 3) CenterPrintf)(Entity *ent, const char *fmt, ...);
+    void (*Sound)(Entity *ent, int channel, int soundindex, float volume, float attenuation, float timeofs);
+    void (*PositionedSound)(vec3_t origin, Entity *ent, int channel, int soundinedex, float volume, float attenuation, float timeofs);
 
     // config strings hold all the index strings, the lightstyles,
     // and misc data like the sky definition and cdtrack.
@@ -148,10 +148,10 @@ typedef struct {
     int (*SoundIndex)(const char *name);
     int (*ImageIndex)(const char *name);
 
-    void (*SetModel)(entity_t *ent, const char *name);
+    void (*SetModel)(Entity *ent, const char *name);
 
     // collision detection
-    trace_t (* q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, entity_t *passent, int contentmask);
+    trace_t (* q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passent, int contentmask);
     int (*PointContents)(const vec3_t &point);
     qboolean (*InPVS)(const vec3_t &p1, const vec3_t &p2);
     qboolean (*InPHS)(const vec3_t &p1, const vec3_t &p2);
@@ -161,13 +161,13 @@ typedef struct {
     // an entity will never be sent to a client or used for collision
     // if it is not passed to LinkEntity.  If the size, position, or
     // solidity changes, it must be relinked.
-    void (*LinkEntity)(entity_t *ent);
-    void (*UnlinkEntity)(entity_t *ent);     // call before removing an interactive edict
-    int (*BoxEntities)(const vec3_t &mins, const vec3_t &maxs, entity_t **list, int maxcount, int areatype);
+    void (*LinkEntity)(Entity *ent);
+    void (*UnlinkEntity)(Entity *ent);     // call before removing an interactive edict
+    int (*BoxEntities)(const vec3_t &mins, const vec3_t &maxs, Entity **list, int maxcount, int areatype);
 
     // network messaging
     void (*Multicast)(const vec3_t *origin, int32_t to);
-    void (*Unicast)(entity_t *ent, qboolean reliable);
+    void (*Unicast)(Entity *ent, qboolean reliable);
     void (*WriteChar)(int c);
     void (*WriteByte)(int c);
     void (*WriteShort)(int c);
@@ -193,14 +193,14 @@ typedef struct {
     const char *(*args)(void);      // concatenation of all argv >= 1 // C++20: char*
 
     // N&C: Stuff Cmd.
-    void (*StuffCmd) (entity_t* pent, const char* pszCommand); // C++20: STRING: Added const to char*
+    void (*StuffCmd) (Entity* pent, const char* pszCommand); // C++20: STRING: Added const to char*
     
     // add commands to the server console as if they were typed in
     // for map changing, etc
     void (*AddCommandString)(const char *text);
 
     void (*DebugGraph)(float value, int color);
-} svgame_import_t;
+} ServerGameImports;
 
 //
 // functions exported by the game subsystem
@@ -260,12 +260,12 @@ typedef struct {
     void (*WriteLevel)(const char *filename);
     void (*ReadLevel)(const char *filename);
 
-    qboolean (*ClientConnect)(entity_t *ent, char *userinfo);
-    void (*ClientBegin)(entity_t *ent);
-    void (*ClientUserinfoChanged)(entity_t *ent, char *userinfo);
-    void (*ClientDisconnect)(entity_t *ent);
-    void (*ClientCommand)(entity_t *ent);
-    void (*ClientThink)(entity_t *ent, ClientUserCommand *cmd);
+    qboolean (*ClientConnect)(Entity *ent, char *userinfo);
+    void (*ClientBegin)(Entity *ent);
+    void (*ClientUserinfoChanged)(Entity *ent, char *userinfo);
+    void (*ClientDisconnect)(Entity *ent);
+    void (*ClientCommand)(Entity *ent);
+    void (*ClientThink)(Entity *ent, ClientUserCommand *cmd);
 
     void (*RunFrame)(void);
 
@@ -289,6 +289,6 @@ typedef struct {
     int         entity_size;
     int         num_edicts;     // current number, <= max_edicts
     int         max_edicts;
-} svgame_export_t;
+} ServerGameExports;
 
 #endif // __INC_SHARED__SVGAME_H__

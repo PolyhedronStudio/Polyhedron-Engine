@@ -25,13 +25,13 @@ so, the basic time between firing is a random time between
 
 These can used but not touched.
 */
-void func_timer_think(entity_t* self)
+void func_timer_think(Entity* self)
 {
     UTIL_UseTargets(self, self->activator);
     self->nextThink = level.time + self->wait + crandom() * self->random;
 }
 
-void func_timer_use(entity_t* self, entity_t* other, entity_t* activator)
+void func_timer_use(Entity* self, Entity* other, Entity* activator)
 {
     self->activator = activator;
 
@@ -48,7 +48,7 @@ void func_timer_use(entity_t* self, entity_t* other, entity_t* activator)
         func_timer_think(self);
 }
 
-void SP_func_timer(entity_t* self)
+void SP_func_timer(Entity* self)
 {
     if (!self->wait)
         self->wait = 1.0;

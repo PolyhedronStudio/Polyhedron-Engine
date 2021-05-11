@@ -24,14 +24,14 @@ sounds
 4)
 set "message" to text string
 */
-void trigger_enable(entity_t* self, entity_t* other, entity_t* activator)
+void trigger_enable(Entity* self, Entity* other, Entity* activator)
 {
     self->solid = Solid::Trigger;
     self->Use = Use_Multi;
     gi.LinkEntity(self);
 }
 
-void SP_trigger_multiple(entity_t* ent)
+void SP_trigger_multiple(Entity* ent)
 {
     if (ent->sounds == 1)
         ent->noiseIndex = gi.SoundIndex("misc/secret.wav");

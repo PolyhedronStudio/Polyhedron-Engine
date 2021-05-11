@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "server.h"
 
-svgame_export_t    *ge;
+ServerGameExports    *ge;
 
 static void PF_configstring(int index, const char *val);
 
@@ -78,7 +78,7 @@ Sends the contents of the mutlicast buffer to a single client.
 Archived in MVD stream.
 ===============
 */
-static void PF_Unicast(entity_t *ent, qboolean reliable)
+static void PF_Unicast(Entity *ent, qboolean reliable)
 {
     client_t    *client;
     int         cmd, flags, clientNumber;
@@ -204,7 +204,7 @@ Print to a single client if the level passes.
 Archived in MVD stream.
 ===============
 */
-static void PF_cprintf(entity_t *ent, int level, const char *fmt, ...)
+static void PF_cprintf(Entity *ent, int level, const char *fmt, ...)
 {
     char        msg[MAX_STRING_CHARS];
     va_list     argptr;
@@ -258,7 +258,7 @@ Centerprint to a single client.
 Archived in MVD stream.
 ===============
 */
-static void PF_centerprintf(entity_t *ent, const char *fmt, ...)
+static void PF_centerprintf(Entity *ent, const char *fmt, ...)
 {
     char        msg[MAX_STRING_CHARS];
     va_list     argptr;
@@ -318,7 +318,7 @@ PF_setmodel
 Also sets mins and maxs for inline bmodels
 =================
 */
-static void PF_setmodel(entity_t *ent, const char *name)
+static void PF_setmodel(Entity *ent, const char *name)
 {
     int         i;
     mmodel_t    *mod;
@@ -496,7 +496,7 @@ or the midpoint of the entity box for bmodels.
     if (soundindex < 0 || soundindex >= MAX_SOUNDS) \
         Com_Error(ERR_DROP, "%s: soundindex = %d", __func__, soundindex);
 
-static void PF_StartSound(entity_t *edict, int channel,
+static void PF_StartSound(Entity *edict, int channel,
                           int soundindex, float volume,
                           float attenuation, float timeofs)
 {
@@ -637,7 +637,7 @@ static void PF_StartSound(entity_t *edict, int channel,
     }
 }
 
-static void PF_PositionedSound(vec3_t origin, entity_t *entity, int channel,
+static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
                                int soundindex, float volume,
                                float attenuation, float timeofs)
 {
@@ -710,7 +710,7 @@ static cvar_t *PF_cvar(const char *name, const char *value, int flags)
 // Stuff Cmd implementation like other Quake engines have for the server module.
 //===============
 //
-static void PF_stuffcmd(entity_t* pent, const char* pszCommand) {
+static void PF_stuffcmd(Entity* pent, const char* pszCommand) {
     MSG_WriteByte(svc_stufftext);
     MSG_WriteString(pszCommand);
 
@@ -839,24 +839,24 @@ Init the game subsystem for a new map
 */
 void SV_InitGameProgs(void)
 {
-    svgame_import_t   importAPI;
-    svgame_export_t   *(*entry)(svgame_import_t *) = NULL;
+    ServerGameImports   importAPI;
+    ServerGameExports   *(*entry)(ServerGameImports *) = NULL;
 
     // unload anything we have now
     SV_ShutdownGameProgs();
 
     // for debugging or `proxy' mods
     if (sys_forcegamelib->string[0])
-        entry = (svgame_export_t * (*)(svgame_import_t*))_SV_LoadGameLibrary(sys_forcegamelib->string); // CPP: DANGER: WARNING: Is this cast ok?
+        entry = (ServerGameExports * (*)(ServerGameImports*))_SV_LoadGameLibrary(sys_forcegamelib->string); // CPP: DANGER: WARNING: Is this cast ok?
 
     // try game first
     if (!entry && fs_game->string[0]) {
-        entry = (svgame_export_t * (*)(svgame_import_t*))SV_LoadGameLibrary(fs_game->string, ""); // CPP: DANGER: WARNING: Is this cast ok?
+        entry = (ServerGameExports * (*)(ServerGameImports*))SV_LoadGameLibrary(fs_game->string, ""); // CPP: DANGER: WARNING: Is this cast ok?
     }
 
     // then try basenac
     if (!entry) {
-        entry = (svgame_export_t * (*)(svgame_import_t*))SV_LoadGameLibrary(BASEGAME, ""); // CPP: DANGER: WARNING: Is this cast ok?
+        entry = (ServerGameExports * (*)(ServerGameImports*))SV_LoadGameLibrary(BASEGAME, ""); // CPP: DANGER: WARNING: Is this cast ok?
     }
 
     // all paths failed
@@ -939,13 +939,13 @@ void SV_InitGameProgs(void)
     ge->Init();
 
     // sanitize entity_size
-    if (ge->entity_size < sizeof(entity_t) || ge->entity_size > SIZE_MAX / MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Server Game DLL returned bad size of entity_t");
+    if (ge->entity_size < sizeof(Entity) || ge->entity_size > SIZE_MAX / MAX_EDICTS) {
+        Com_Error(ERR_DROP, "Server Game DLL returned bad size of Entity");
     }
 
     // sanitize max_edicts
     if (ge->entity_size <= sv_maxclients->integer || ge->entity_size > MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Server Game DLL returned bad number of max_edicts %i   %i", ge->entity_size, sizeof(entity_t));
+        Com_Error(ERR_DROP, "Server Game DLL returned bad number of max_edicts %i   %i", ge->entity_size, sizeof(Entity));
     }
 }
 

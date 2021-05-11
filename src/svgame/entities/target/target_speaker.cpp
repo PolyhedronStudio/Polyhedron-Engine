@@ -25,7 +25,7 @@ Normal sounds play each time the target is used.  The reliable flag can be set f
 Looped sounds are always atten 3 / vol 1, and the use function toggles it on/off.
 Multiple identical looping sounds will just increase volume without any speed cost.
 */
-void Use_Target_Speaker(entity_t* ent, entity_t* other, entity_t* activator)
+void Use_Target_Speaker(Entity* ent, Entity* other, Entity* activator)
 {
     int     chan;
 
@@ -48,7 +48,7 @@ void Use_Target_Speaker(entity_t* ent, entity_t* other, entity_t* activator)
     }
 }
 
-void SP_target_speaker(entity_t* ent)
+void SP_target_speaker(Entity* ent)
 {
     char    buffer[MAX_QPATH];
 

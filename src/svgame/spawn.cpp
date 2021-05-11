@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 typedef struct {
     const char    *name; // C++20: STRING: Added const
-    void (*spawn)(entity_t *ent);
+    void (*spawn)(Entity *ent);
 } spawn_func_t;
 
 typedef struct {
@@ -31,75 +31,75 @@ typedef struct {
     fieldtype_t type;
 } spawn_field_t;
 
-void SP_item_health(entity_t *self);
-void SP_item_health_small(entity_t *self);
-void SP_item_health_large(entity_t *self);
-void SP_item_health_mega(entity_t *self);
+void SP_item_health(Entity *self);
+void SP_item_health_small(Entity *self);
+void SP_item_health_large(Entity *self);
+void SP_item_health_mega(Entity *self);
 
-void SP_info_player_start(entity_t *ent);
-void SP_info_player_deathmatch(entity_t *ent);
-void SP_info_player_coop(entity_t *ent);
-void SP_info_player_intermission(entity_t *ent);
+void SP_info_player_start(Entity *ent);
+void SP_info_player_deathmatch(Entity *ent);
+void SP_info_player_coop(Entity *ent);
+void SP_info_player_intermission(Entity *ent);
 
-void SP_func_plat(entity_t *ent);
-void SP_func_rotating(entity_t *ent);
-void SP_func_button(entity_t *ent);
-void SP_func_door(entity_t *ent);
+void SP_func_plat(Entity *ent);
+void SP_func_rotating(Entity *ent);
+void SP_func_button(Entity *ent);
+void SP_func_door(Entity *ent);
 
-void SP_func_door_rotating(entity_t *ent);
-void SP_func_water(entity_t *ent);
-void SP_func_train(entity_t *ent);
-void SP_func_conveyor(entity_t *self);
-void SP_func_wall(entity_t *self);
-void SP_func_object(entity_t *self);
-void SP_func_explosive(entity_t *self);
-void SP_func_timer(entity_t *self);
-void SP_func_areaportal(entity_t *ent);
-void SP_func_killbox(entity_t *ent);
+void SP_func_door_rotating(Entity *ent);
+void SP_func_water(Entity *ent);
+void SP_func_train(Entity *ent);
+void SP_func_conveyor(Entity *self);
+void SP_func_wall(Entity *self);
+void SP_func_object(Entity *self);
+void SP_func_explosive(Entity *self);
+void SP_func_timer(Entity *self);
+void SP_func_areaportal(Entity *ent);
+void SP_func_killbox(Entity *ent);
 
-void SP_trigger_always(entity_t *ent);
-void SP_trigger_once(entity_t *ent);
-void SP_trigger_multiple(entity_t *ent);
-void SP_trigger_relay(entity_t *ent);
-void SP_trigger_push(entity_t *ent);
-void SP_trigger_hurt(entity_t *ent);
-void SP_trigger_key(entity_t *ent);
-void SP_trigger_counter(entity_t *ent);
-void SP_trigger_elevator(entity_t *ent);
-void SP_trigger_gravity(entity_t *ent);
-void SP_trigger_monsterjump(entity_t *ent);
+void SP_trigger_always(Entity *ent);
+void SP_trigger_once(Entity *ent);
+void SP_trigger_multiple(Entity *ent);
+void SP_trigger_relay(Entity *ent);
+void SP_trigger_push(Entity *ent);
+void SP_trigger_hurt(Entity *ent);
+void SP_trigger_key(Entity *ent);
+void SP_trigger_counter(Entity *ent);
+void SP_trigger_elevator(Entity *ent);
+void SP_trigger_gravity(Entity *ent);
+void SP_trigger_monsterjump(Entity *ent);
 
-void SP_target_temp_entity(entity_t *ent);
-void SP_target_speaker(entity_t *ent);
-void SP_target_explosion(entity_t *ent);
-void SP_target_changelevel(entity_t *ent);
-void SP_target_splash(entity_t *ent);
-void SP_target_spawner(entity_t *ent);
-void SP_target_blaster(entity_t *ent);
-void SP_target_crosslevel_trigger(entity_t *ent);
-void SP_target_crosslevel_target(entity_t *ent);
+void SP_target_temp_entity(Entity *ent);
+void SP_target_speaker(Entity *ent);
+void SP_target_explosion(Entity *ent);
+void SP_target_changelevel(Entity *ent);
+void SP_target_splash(Entity *ent);
+void SP_target_spawner(Entity *ent);
+void SP_target_blaster(Entity *ent);
+void SP_target_crosslevel_trigger(Entity *ent);
+void SP_target_crosslevel_target(Entity *ent);
 
-void SP_target_lightramp(entity_t *self);
-void SP_target_earthquake(entity_t *ent);
+void SP_target_lightramp(Entity *self);
+void SP_target_earthquake(Entity *ent);
 
-void SP_worldspawn(entity_t *ent);
+void SP_worldspawn(Entity *ent);
 
-void SP_light(entity_t *self);
-void SP_info_null(entity_t *self);
-void SP_info_notnull(entity_t *self);
+void SP_light(Entity *self);
+void SP_info_null(Entity *self);
+void SP_info_notnull(Entity *self);
 
-void SP_misc_gib_arm(entity_t *self);
-void SP_misc_gib_leg(entity_t *self);
-void SP_misc_gib_head(entity_t *self);
+void SP_misc_gib_arm(Entity *self);
+void SP_misc_gib_leg(Entity *self);
+void SP_misc_gib_head(Entity *self);
 
-void SP_misc_teleporter(entity_t *self);
-void SP_misc_teleporter_dest(entity_t *self);
+void SP_misc_teleporter(Entity *self);
+void SP_misc_teleporter_dest(Entity *self);
 
-void SP_monster_soldier_light(entity_t *self);
-void SP_monster_soldier(entity_t *self);
-void SP_monster_soldier_ss(entity_t *self);
+void SP_monster_soldier_light(Entity *self);
+void SP_monster_soldier(Entity *self);
+void SP_monster_soldier_ss(Entity *self);
 
-void SP_misc_explobox(entity_t* self);
+void SP_misc_explobox(Entity* self);
 
 static const spawn_func_t spawn_funcs[] = {
     {"item_health", SP_item_health},
@@ -176,12 +176,12 @@ static const spawn_func_t spawn_funcs[] = {
 };
 
 static const spawn_field_t spawn_fields[] = {
-    {"classname", FOFS(classname), F_LSTRING},
+    {"className", FOFS(className), F_LSTRING},
     {"model", FOFS(model), F_LSTRING},
     {"spawnFlags", FOFS(spawnFlags), F_INT},
     {"speed", FOFS(speed), F_FLOAT},
-    {"accel", FOFS(accel), F_FLOAT},
-    {"decel", FOFS(decel), F_FLOAT},
+    {"acceleration", FOFS(acceleration), F_FLOAT},
+    {"deceleration", FOFS(deceleration), F_FLOAT},
     {"target", FOFS(target), F_LSTRING},
     {"targetName", FOFS(targetName), F_LSTRING},
     {"pathTarget", FOFS(pathTarget), F_LSTRING},
@@ -201,7 +201,7 @@ static const spawn_field_t spawn_fields[] = {
     {"health", FOFS(health), F_INT},
     {"sounds", FOFS(sounds), F_INT},
     {"light", 0, F_IGNORE},
-    {"dmg", FOFS(dmg), F_INT},
+    {"damage", FOFS(damage), F_INT},
     {"mass", FOFS(mass), F_INT},
     {"volume", FOFS(volume), F_FLOAT},
     {"attenuation", FOFS(attenuation), F_FLOAT},
@@ -243,22 +243,22 @@ ED_CallSpawn
 Finds the spawn function for the entity and calls it
 ===============
 */
-void ED_CallSpawn(entity_t *ent)
+void ED_CallSpawn(Entity *ent)
 {
     const spawn_func_t *s;
     gitem_t *item;
     int     i;
 
-    if (!ent->classname) {
-        gi.DPrintf("ED_CallSpawn: NULL classname\n");
+    if (!ent->className) {
+        gi.DPrintf("ED_CallSpawn: NULL className\n");
         return;
     }
 
     // check item spawn functions
-    for (i = 0, item = itemlist ; i < game.num_items ; i++, item++) {
-        if (!item->classname)
+    for (i = 0, item = itemlist ; i < game.numberOfItems ; i++, item++) {
+        if (!item->className)
             continue;
-        if (!strcmp(item->classname, ent->classname)) {
+        if (!strcmp(item->className, ent->className)) {
             // found it
             SpawnItem(ent, item);
             return;
@@ -267,13 +267,13 @@ void ED_CallSpawn(entity_t *ent)
 
     // check normal spawn functions
     for (s = spawn_funcs ; s->name ; s++) {
-        if (!strcmp(s->name, ent->classname)) {
+        if (!strcmp(s->name, ent->className)) {
             // found it
             s->spawn(ent);
             return;
         }
     }
-    gi.DPrintf("%s doesn't have a spawn function\n", ent->classname);
+    gi.DPrintf("%s doesn't have a spawn function\n", ent->className);
 }
 
 /*
@@ -370,7 +370,7 @@ Parses an edict out of the given string, returning the new position
 ed should be a properly initialized empty edict.
 ====================
 */
-void ED_ParseEntity(const char **data, entity_t *ent)
+void ED_ParseEntity(const char **data, Entity *ent)
 {
     qboolean    init;
     char        *key, *value;
@@ -426,7 +426,7 @@ All but the last will have the teamchain field set to the next one
 */
 void G_FindTeams(void)
 {
-    entity_t *e, *e2, *chain;
+    Entity *e, *e2, *chain;
     int     i, j;
     int     c, c2;
 
@@ -473,7 +473,7 @@ parsing textual entity definitions out of an ent file.
 */
 void SpawnEntities(const char *mapname, const char *entities, const char *spawnpoint)
 {
-    entity_t     *ent;
+    Entity     *ent;
     int         inhibit;
     char        *com_token;
     int         i;
@@ -493,10 +493,10 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
 
     memset(&level, 0, sizeof(level));
     // WatIs: C++-ify: Note that this may be a problem maker.
-    //for (int i = 0; i < game.maxentities; i++) {
-    //    g_entities[i] = entity_t();
+    //for (int i = 0; i < game.maxEntities; i++) {
+    //    g_entities[i] = Entity();
     //}
-    memset(g_entities, 0, game.maxentities * sizeof(g_entities[0])); // WatIs: C++-ify: Note that this may be a problem maker.
+    memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0])); // WatIs: C++-ify: Note that this may be a problem maker.
 
     strncpy(level.mapname, mapname, sizeof(level.mapname) - 1);
     strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
@@ -524,12 +524,12 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
         ED_ParseEntity(&entities, ent);
 
         // yet another map hack
-        if (!Q_stricmp(level.mapname, "command") && !Q_stricmp(ent->classname, "trigger_once") && !Q_stricmp(ent->model, "*27"))
+        if (!Q_stricmp(level.mapname, "command") && !Q_stricmp(ent->className, "trigger_once") && !Q_stricmp(ent->model, "*27"))
             ent->spawnFlags &= ~EntitySpawnFlags::NotHard;
 
         // remove things (except the world) from different skill levels or deathmatch
         if (ent != g_entities) {
-			if (nomonsters->value && (strstr(ent->classname, "monster") || strstr(ent->classname, "misc_deadsoldier") || strstr(ent->classname, "misc_insane"))) {
+			if (nomonsters->value && (strstr(ent->className, "monster") || strstr(ent->className, "misc_deadsoldier") || strstr(ent->className, "misc_insane"))) {
 				G_FreeEntity(ent);
 				inhibit++;
 				continue;
@@ -749,7 +749,7 @@ Only used for the world.
 "gravity"   800 is default gravity
 "message"   text to print at user logon
 */
-void SP_worldspawn(entity_t *ent)
+void SP_worldspawn(Entity *ent)
 {
     ent->moveType = MoveType::Push;
     ent->solid = Solid::BSP;
@@ -761,8 +761,8 @@ void SP_worldspawn(entity_t *ent)
     // reserve some spots for dead player bodies for coop / deathmatch
     level.bodyQue = 0;
     for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
-        entity_t* ent = G_Spawn();
-        ent->classname = "bodyque";
+        Entity* ent = G_Spawn();
+        ent->className = "bodyque";
     }
 
     // set configstrings for items

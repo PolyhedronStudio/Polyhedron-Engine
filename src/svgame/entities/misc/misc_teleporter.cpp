@@ -12,9 +12,9 @@
 
 //=====================================================
 
-void teleporter_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
+void teleporter_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
 {
-    entity_t* dest;
+    Entity* dest;
     int         i;
 
     if (!other->client)
@@ -59,9 +59,9 @@ void teleporter_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface
 /*QUAKED misc_teleporter (1 0 0) (-32 -32 -24) (32 32 -16)
 Stepping onto this disc will teleport players to the targeted misc_teleporter_dest object.
 */
-void SP_misc_teleporter(entity_t* ent)
+void SP_misc_teleporter(Entity* ent)
 {
-    entity_t* trig;
+    Entity* trig;
 
     if (!ent->target) {
         gi.DPrintf("teleporter without a target.\n");

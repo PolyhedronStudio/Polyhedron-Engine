@@ -34,17 +34,17 @@ static int write_server_file(qboolean autosave)
     cvar_t      *var;
     size_t      len;
     qerror_t    ret;
-    uint64_t    timestamp;
+    uint64_t    timeStamp;
 
     // write magic
     MSG_WriteLong(SAVE_MAGIC1);
     MSG_WriteLong(SAVE_VERSION);
 
-    timestamp = (uint64_t)time(NULL);
+    timeStamp = (uint64_t)time(NULL);
 
     // write the comment field
-    MSG_WriteLong(timestamp & 0xffffffff);
-    MSG_WriteLong(timestamp >> 32);
+    MSG_WriteLong(timeStamp & 0xffffffff);
+    MSG_WriteLong(timeStamp >> 32);
     MSG_WriteByte(autosave);
     MSG_WriteString(sv.configstrings[ConfigStrings::Name]);
 
@@ -261,7 +261,7 @@ char *SV_GetSaveInfo(const char *dir)
 {
     char        name[MAX_QPATH], date[MAX_QPATH];
     size_t      len;
-    uint64_t    timestamp;
+    uint64_t    timeStamp;
     int         autosave, year;
     time_t      t;
     struct tm   *tm;
@@ -280,8 +280,8 @@ char *SV_GetSaveInfo(const char *dir)
         return NULL;
 
     // read the comment field
-    timestamp = (uint64_t)MSG_ReadLong();
-    timestamp |= (uint64_t)MSG_ReadLong() << 32;
+    timeStamp = (uint64_t)MSG_ReadLong();
+    timeStamp |= (uint64_t)MSG_ReadLong() << 32;
     autosave = MSG_ReadByte();
     MSG_ReadString(name, sizeof(name));
 
@@ -294,7 +294,7 @@ char *SV_GetSaveInfo(const char *dir)
     year = tm ? tm->tm_year : -1;
 
     // format savegame date
-    t = (time_t)timestamp;
+    t = (time_t)timeStamp;
     len = 0;
     if ((tm = localtime(&t)) != NULL) {
         if (tm->tm_year == year)
@@ -467,7 +467,7 @@ int SV_NoSaveGames(void)
 void SV_AutoSaveBegin(MapCommand *cmd)
 {
     byte        bitmap[MAX_CLIENTS / CHAR_BIT];
-    entity_t     *ent;
+    Entity     *ent;
     int         i;
 
     // check for clearing the current savegame

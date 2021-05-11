@@ -585,8 +585,8 @@ void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         VectorNormalize(velocity);
         VectorScale(velocity, dirt_base_velocity + frand() * dirt_rand_velocity, p->vel);
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);
@@ -614,8 +614,8 @@ void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         VectorNormalize(velocity);
         VectorScale(velocity, spark_base_velocity + powf(frand(), 2.0f) * spark_rand_velocity, p->vel);
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -2.0 / (0.5 + frand() * 0.3);
@@ -661,8 +661,8 @@ void CLG_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count)
         VectorNormalize(velocity);
         VectorScale(velocity, water_base_velocity + frand() * water_rand_velocity, p->vel);
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);
@@ -716,8 +716,8 @@ void CLG_BloodParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         // fake gravity
         p->org[2] -= d * d * .001f;
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 0.5;
 
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);
@@ -754,8 +754,8 @@ void CLG_ParticleEffect2(vec3_t org, vec3_t dir, int color, int count)
             p->vel[j] = crand() * 20;
         }
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);
@@ -793,8 +793,8 @@ void CLG_TeleporterParticles(vec3_t org)
         p->org[2] = org[2] - 8 + (rand() & 7);
         p->vel[2] = 80 + (rand() & 7);
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -0.5;
@@ -838,8 +838,8 @@ static void CLG_LogoutEffect(vec3_t org, int type)
         for (j = 0; j < 3; j++)
             p->vel[j] = crand() * 20;
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (1.0 + frand() * 0.3);
@@ -877,8 +877,8 @@ void CLG_ItemRespawnParticles(vec3_t org)
         for (j = 0; j < 3; j++)
             p->vel[j] = crand() * 8;
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY * 0.2;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY * 0.2;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (1.0 + frand() * 0.3);
@@ -913,8 +913,8 @@ void CLG_ExplosionParticles(vec3_t org)
             p->vel[j] = (rand() % 384) - 192;
         }
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -0.8 / (0.5 + frand() * 0.3);
@@ -947,15 +947,15 @@ void CLG_BigTeleportParticles(vec3_t org)
         dist = rand() & 31;
         p->org[0] = org[0] + std::cosf(angle) * dist;
         p->vel[0] = std::cosf(angle) * (70 + (rand() & 63));
-        p->accel[0] = -std::cosf(angle) * 100;
+        p->acceleration[0] = -std::cosf(angle) * 100;
 
         p->org[1] = org[1] + std::sinf(angle) * dist;
         p->vel[1] = std::sinf(angle) * (70 + (rand() & 63));
-        p->accel[1] = -std::sinf(angle) * 100;
+        p->acceleration[1] = -std::sinf(angle) * 100;
 
         p->org[2] = org[2] + 8 + (rand() % 90);
         p->vel[2] = -100 + (rand() & 31);
-        p->accel[2] = PARTICLE_GRAVITY * 4;
+        p->acceleration[2] = PARTICLE_GRAVITY * 4;
         p->alpha = 1.0;
 
         p->alphavel = -0.3 / (0.5 + frand() * 0.3);
@@ -994,8 +994,8 @@ void CLG_BlasterParticles(vec3_t org, vec3_t dir)
             p->vel[j] = dir[j] * 30 + crand() * 40;
         }
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);
@@ -1031,7 +1031,7 @@ void CLG_BlasterTrail(vec3_t start, vec3_t end)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
 
@@ -1044,7 +1044,7 @@ void CLG_BlasterTrail(vec3_t start, vec3_t end)
         for (j = 0; j < 3; j++) {
             p->org[j] = move[j] + crand();
             p->vel[j] = crand() * 5;
-            p->accel[j] = 0;
+            p->acceleration[j] = 0;
         }
 
         VectorAdd(move, vec, move);
@@ -1096,7 +1096,7 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags)
             p = CLG_AllocParticle();
             if (!p)
                 return;
-            VectorClear(p->accel);
+            VectorClear(p->acceleration);
 
             p->time = cl->time;
 
@@ -1110,7 +1110,7 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags)
                 for (j = 0; j < 3; j++) {
                     p->org[j] = move[j] + crand() * orgscale;
                     p->vel[j] = crand() * velscale;
-                    p->accel[j] = 0;
+                    p->acceleration[j] = 0;
                 }
                 p->vel[2] -= PARTICLE_GRAVITY;
             } else {
@@ -1124,7 +1124,7 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags)
                     p->org[j] = move[j] + crand() * orgscale;
                     p->vel[j] = crand() * velscale;
                 }
-                p->accel[2] = 20;
+                p->acceleration[2] = 20;
             }
         }
 
@@ -1162,7 +1162,7 @@ void CLG_BubbleTrail(vec3_t start, vec3_t end)
         if (!p)
             return;
 
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
         p->time = cl->time;
 
         p->alpha = 1.0;
@@ -1222,8 +1222,8 @@ void CLG_TeleportParticles(vec3_t org)
                 vel = 50 + (rand() & 63);
                 VectorScale(dir, vel, p->vel);
 
-                p->accel[0] = p->accel[1] = 0;
-                p->accel[2] = -PARTICLE_GRAVITY;
+                p->acceleration[0] = p->acceleration[1] = 0;
+                p->acceleration[2] = -PARTICLE_GRAVITY;
             }
 }
 
@@ -1279,9 +1279,9 @@ void CLG_AddParticles(void)
 
         time2 = time * time;
 
-        part->origin[0] = p->org[0] + p->vel[0] * time + p->accel[0] * time2;
-        part->origin[1] = p->org[1] + p->vel[1] * time + p->accel[1] * time2;
-        part->origin[2] = p->org[2] + p->vel[2] * time + p->accel[2] * time2;
+        part->origin[0] = p->org[0] + p->vel[0] * time + p->acceleration[0] * time2;
+        part->origin[1] = p->org[1] + p->vel[1] * time + p->acceleration[1] * time2;
+        part->origin[2] = p->org[2] + p->vel[2] * time + p->acceleration[2] * time2;
 
         if (color == -1) {
             part->rgba.u8[0] = p->rgba.u8[0];

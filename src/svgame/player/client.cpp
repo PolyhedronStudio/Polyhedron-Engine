@@ -26,9 +26,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
 
-void ClientUserinfoChanged(entity_t *ent, char *userinfo);
+void ClientUserinfoChanged(Entity *ent, char *userinfo);
 
-void SP_misc_teleporter_dest(entity_t *ent);
+void SP_misc_teleporter_dest(Entity *ent);
 
 //
 // Gross, ugly, disgustuing hack section
@@ -42,15 +42,15 @@ void SP_misc_teleporter_dest(entity_t *ent);
 // we use carnal knowledge of the maps to fix the coop spot targetnames to match
 // that of the nearest named single player spot
 
-void SP_FixCoopSpots(entity_t *self)
+void SP_FixCoopSpots(Entity *self)
 {
-    entity_t *spot;
+    Entity *spot;
     vec3_t  d;
 
     spot = NULL;
 
     while (1) {
-        spot = G_Find(spot, FOFS(classname), "info_player_start");
+        spot = G_Find(spot, FOFS(className), "info_player_start");
         if (!spot)
             return;
         if (!spot->targetName)
@@ -58,7 +58,7 @@ void SP_FixCoopSpots(entity_t *self)
         VectorSubtract(self->state.origin, spot->state.origin, d);
         if (VectorLength(d) < 384) {
             if ((!self->targetName) || Q_stricmp(self->targetName, spot->targetName) != 0) {
-//              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->classname, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
+//              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->className, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
                 self->targetName = spot->targetName;
             }
             return;
@@ -70,13 +70,13 @@ void SP_FixCoopSpots(entity_t *self)
 // some maps don't have any coop spots at all, so we need to create them
 // where they should have been
 
-void SP_CreateCoopSpots(entity_t *self)
+void SP_CreateCoopSpots(Entity *self)
 {
-    entity_t *spot;
+    Entity *spot;
 
     if (Q_stricmp(level.mapname, "security") == 0) {
         spot = G_Spawn();
-        spot->classname = "info_player_coop";
+        spot->className = "info_player_coop";
         spot->state.origin[0] = 188 - 64;
         spot->state.origin[1] = -164;
         spot->state.origin[2] = 80;
@@ -84,7 +84,7 @@ void SP_CreateCoopSpots(entity_t *self)
         spot->state.angles[1] = 90;
 
         spot = G_Spawn();
-        spot->classname = "info_player_coop";
+        spot->className = "info_player_coop";
         spot->state.origin[0] = 188 + 64;
         spot->state.origin[1] = -164;
         spot->state.origin[2] = 80;
@@ -92,7 +92,7 @@ void SP_CreateCoopSpots(entity_t *self)
         spot->state.angles[1] = 90;
 
         spot = G_Spawn();
-        spot->classname = "info_player_coop";
+        spot->className = "info_player_coop";
         spot->state.origin[0] = 188 + 128;
         spot->state.origin[1] = -164;
         spot->state.origin[2] = 80;
@@ -110,7 +110,7 @@ void SP_CreateCoopSpots(entity_t *self)
 
 
 
-qboolean IsFemale(entity_t *ent)
+qboolean IsFemale(Entity *ent)
 {
     char        *info;
 
@@ -123,7 +123,7 @@ qboolean IsFemale(entity_t *ent)
     return false;
 }
 
-qboolean IsNeutral(entity_t *ent)
+qboolean IsNeutral(Entity *ent)
 {
     char        *info;
 
@@ -136,7 +136,7 @@ qboolean IsNeutral(entity_t *ent)
     return false;
 }
 
-void ClientUpdateObituary(entity_t *self, entity_t *inflictor, entity_t *attacker)
+void ClientUpdateObituary(Entity *self, Entity *inflictor, Entity *attacker)
 {
     int         mod;
     const char        *message; // C++20: STRING: Added const to char*
@@ -144,56 +144,48 @@ void ClientUpdateObituary(entity_t *self, entity_t *inflictor, entity_t *attacke
     qboolean    ff;
 
     if (coop->value && attacker->client)
-        meansOfDeath |= MOD_FRIENDLY_FIRE;
+        meansOfDeath |= MeansOfDeath::FriendlyFire;
 
     if (deathmatch->value || coop->value) {
-        ff = meansOfDeath & MOD_FRIENDLY_FIRE;
-        mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
+        ff = meansOfDeath & MeansOfDeath::FriendlyFire;
+        mod = meansOfDeath & ~MeansOfDeath::FriendlyFire;
         message = NULL;
         message2 = "";
 
         switch (mod) {
-        case MOD_SUICIDE:
+        case MeansOfDeath::Suicide:
             message = "suicides";
             break;
-        case MOD_FALLING:
+        case MeansOfDeath::Falling:
             message = "cratered";
             break;
-        case MOD_CRUSH:
+        case MeansOfDeath::Crush:
             message = "was squished";
             break;
-        case MOD_WATER:
+        case MeansOfDeath::Water:
             message = "sank like a rock";
             break;
-        case MOD_SLIME:
+        case MeansOfDeath::Slime:
             message = "melted";
             break;
-        case MOD_LAVA:
+        case MeansOfDeath::Lava:
             message = "does a back flip into the lava";
             break;
-        case MOD_EXPLOSIVE:
-        case MOD_BARREL:
+        case MeansOfDeath::Explosive:
+        case MeansOfDeath::Barrel:
             message = "blew up";
             break;
-        case MOD_EXIT:
+        case MeansOfDeath::Exit:
             message = "found a way out";
             break;
-        case MOD_TARGET_BLASTER:
-            message = "got blasted";
-            break;
-        case MOD_BOMB:
-        case MOD_SPLASH:
-        case MOD_TRIGGER_HURT:
+        case MeansOfDeath::Splash:
+        case MeansOfDeath::TriggerHurt:
             message = "was in the wrong place";
             break;
         }
         if (attacker == self) {
             switch (mod) {
-            case MOD_HELD_GRENADE:
-                message = "tried to put the pin back in";
-                break;
-            case MOD_HG_SPLASH:
-            case MOD_G_SPLASH:
+            case MeansOfDeath::GrenadeSplash:
                 if (IsNeutral(self))
                     message = "tripped on its own grenade";
                 else if (IsFemale(self))
@@ -201,16 +193,13 @@ void ClientUpdateObituary(entity_t *self, entity_t *inflictor, entity_t *attacke
                 else
                     message = "tripped on his own grenade";
                 break;
-            case MOD_R_SPLASH:
+            case MeansOfDeath::RocketSplash:
                 if (IsNeutral(self))
                     message = "blew itself up";
                 else if (IsFemale(self))
                     message = "blew herself up";
                 else
                     message = "blew himself up";
-                break;
-            case MOD_BFG_BLAST:
-                message = "should have used a smaller gun";
                 break;
             default:
                 if (IsNeutral(self))
@@ -233,71 +222,36 @@ void ClientUpdateObituary(entity_t *self, entity_t *inflictor, entity_t *attacke
         self->enemy = attacker;
         if (attacker && attacker->client) {
             switch (mod) {
-            case MOD_BLASTER:
+            case MeansOfDeath::Blaster:
                 message = "was blasted by";
                 break;
-            case MOD_SHOTGUN:
+            case MeansOfDeath::Shotgun:
                 message = "was gunned down by";
                 break;
-            case MOD_SSHOTGUN:
+            case MeansOfDeath::SuperShotgun:
                 message = "was blown away by";
                 message2 = "'s super shotgun";
                 break;
-            case MOD_MACHINEGUN:
+            case MeansOfDeath::Machinegun:
                 message = "was machinegunned by";
                 break;
-            case MOD_CHAINGUN:
-                message = "was cut in half by";
-                message2 = "'s chaingun";
-                break;
-            case MOD_GRENADE:
+            case MeansOfDeath::Grenade:
                 message = "was popped by";
                 message2 = "'s grenade";
                 break;
-            case MOD_G_SPLASH:
+            case MeansOfDeath::GrenadeSplash:
                 message = "was shredded by";
                 message2 = "'s shrapnel";
                 break;
-            case MOD_ROCKET:
+            case MeansOfDeath::Rocket:
                 message = "ate";
                 message2 = "'s rocket";
                 break;
-            case MOD_R_SPLASH:
+            case MeansOfDeath::RocketSplash:
                 message = "almost dodged";
                 message2 = "'s rocket";
                 break;
-            case MOD_HYPERBLASTER:
-                message = "was melted by";
-                message2 = "'s hyperblaster";
-                break;
-            case MOD_RAILGUN:
-                message = "was railed by";
-                break;
-            case MOD_BFG_LASER:
-                message = "saw the pretty lights from";
-                message2 = "'s BFG";
-                break;
-            case MOD_BFG_BLAST:
-                message = "was disintegrated by";
-                message2 = "'s BFG blast";
-                break;
-            case MOD_BFG_EFFECT:
-                message = "couldn't hide from";
-                message2 = "'s BFG";
-                break;
-            case MOD_HANDGRENADE:
-                message = "caught";
-                message2 = "'s handgrenade";
-                break;
-            case MOD_HG_SPLASH:
-                message = "didn't see";
-                message2 = "'s handgrenade";
-                break;
-            case MOD_HELD_GRENADE:
-                message = "feels";
-                message2 = "'s pain";
-                break;
-            case MOD_TELEFRAG:
+            case MeansOfDeath::TeleFrag:
                 message = "tried to invade";
                 message2 = "'s personal space";
                 break;
@@ -321,12 +275,12 @@ void ClientUpdateObituary(entity_t *self, entity_t *inflictor, entity_t *attacke
 }
 
 
-void Touch_Item(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t *surf);
+void Touch_Item(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf);
 
-void TossClientWeapon(entity_t *self)
+void TossClientWeapon(Entity *self)
 {
     gitem_t     *item;
-    entity_t     *drop;
+    Entity     *drop;
     qboolean    quad;
     float       spread = 1.5f;
 
@@ -343,7 +297,7 @@ void TossClientWeapon(entity_t *self)
         self->client->aimAngles[vec3_t::Yaw] -= spread;
         drop = Drop_Item(self, item);
         self->client->aimAngles[vec3_t::Yaw] += spread;
-        drop->spawnFlags = DROPPED_PLAYER_ITEM;
+        drop->spawnFlags = ItemSpawnFlags::DroppedPlayerItem;
     }
 }
 
@@ -357,7 +311,7 @@ This is only called when the game first initializes in single player,
 but is called after each death and level change in deathmatch
 ==============
 */
-void InitClientPersistant(gclient_t *client)
+void InitClientPersistant(GameClient *client)
 {
 	gitem_t     *item = NULL;
 
@@ -387,7 +341,7 @@ void InitClientPersistant(gclient_t *client)
 }
 
 
-void InitClientResp(gclient_t *client)
+void InitClientResp(GameClient *client)
 {
     if (!client)
         return;
@@ -410,7 +364,7 @@ edicts are wiped.
 void SaveClientData(void)
 {
     int     i;
-    entity_t *ent;
+    Entity *ent;
 
     for (i = 0 ; i < game.maxClients ; i++) {
         ent = &g_entities[1 + i];
@@ -424,7 +378,7 @@ void SaveClientData(void)
     }
 }
 
-void FetchClientEntData(entity_t *ent)
+void FetchClientEntData(Entity *ent)
 {
     ent->health = ent->client->persistent.health;
     ent->maxHealth = ent->client->persistent.maxHealth;
@@ -450,9 +404,9 @@ PlayersRangeFromSpot
 Returns the distance to the nearest player from the given spot
 ================
 */
-float   PlayersRangeFromSpot(entity_t *spot)
+float   PlayersRangeFromSpot(Entity *spot)
 {
-    entity_t *player;
+    Entity *player;
     float   bestplayerdistance;
     vec3_t  v;
     int     n;
@@ -488,9 +442,9 @@ go to a random point, but NOT the two points closest
 to other players
 ================
 */
-entity_t *SelectRandomDeathmatchSpawnPoint(void)
+Entity *SelectRandomDeathmatchSpawnPoint(void)
 {
-    entity_t *spot, *spot1, *spot2;
+    Entity *spot, *spot1, *spot2;
     int     count = 0;
     int     selection;
     float   range, range1, range2;
@@ -499,7 +453,7 @@ entity_t *SelectRandomDeathmatchSpawnPoint(void)
     range1 = range2 = 99999;
     spot1 = spot2 = NULL;
 
-    while ((spot = G_Find(spot, FOFS(classname), "info_player_deathmatch")) != NULL) {
+    while ((spot = G_Find(spot, FOFS(className), "info_player_deathmatch")) != NULL) {
         count++;
         range = PlayersRangeFromSpot(spot);
         if (range < range1) {
@@ -523,7 +477,7 @@ entity_t *SelectRandomDeathmatchSpawnPoint(void)
 
     spot = NULL;
     do {
-        spot = G_Find(spot, FOFS(classname), "info_player_deathmatch");
+        spot = G_Find(spot, FOFS(className), "info_player_deathmatch");
         if (spot == spot1 || spot == spot2)
             selection++;
     } while (selection--);
@@ -537,14 +491,14 @@ SelectFarthestDeathmatchSpawnPoint
 
 ================
 */
-entity_t *SelectFarthestDeathmatchSpawnPoint(void)
+Entity *SelectFarthestDeathmatchSpawnPoint(void)
 {
-    entity_t *bestSpawnLocationEntity = NULL;
+    Entity *bestSpawnLocationEntity = NULL;
     float   bestdistance = 0;
     float  bestplayerdistance = 0;
-    entity_t *spawnLocationEntity = NULL;
+    Entity *spawnLocationEntity = NULL;
 
-    while ((spawnLocationEntity = G_Find(spawnLocationEntity, FOFS(classname), "info_player_deathmatch")) != NULL) {
+    while ((spawnLocationEntity = G_Find(spawnLocationEntity, FOFS(className), "info_player_deathmatch")) != NULL) {
         bestplayerdistance = PlayersRangeFromSpot(spawnLocationEntity);
 
         if (bestplayerdistance > bestdistance) {
@@ -559,12 +513,12 @@ entity_t *SelectFarthestDeathmatchSpawnPoint(void)
 
     // if there is a player just spawned on each and every start spot
     // we have no choice to turn one into a telefrag meltdown
-    spawnLocationEntity = G_Find(NULL, FOFS(classname), "info_player_deathmatch");
+    spawnLocationEntity = G_Find(NULL, FOFS(className), "info_player_deathmatch");
 
     return spawnLocationEntity;
 }
 
-entity_t *SelectDeathmatchSpawnPoint(void)
+Entity *SelectDeathmatchSpawnPoint(void)
 {
     if ((int)(dmflags->value) & DeathMatchFlags::SpawnFarthest)
         return SelectFarthestDeathmatchSpawnPoint();
@@ -573,10 +527,10 @@ entity_t *SelectDeathmatchSpawnPoint(void)
 }
 
 
-entity_t *SelectCoopSpawnPoint(entity_t *ent)
+Entity *SelectCoopSpawnPoint(Entity *ent)
 {
     int clientIndex = 0;
-    entity_t *spawnPointEntity = NULL;
+    Entity *spawnPointEntity = NULL;
     const char *target; // C++20: STRING: Added const to char*
 
     clientIndex = ent->client - game.clients;
@@ -589,7 +543,7 @@ entity_t *SelectCoopSpawnPoint(entity_t *ent)
 
     // Assume there are four coop spots at each spawnpoint
     while (1) {
-        spawnPointEntity = G_Find(spawnPointEntity, FOFS(classname), "info_player_coop");
+        spawnPointEntity = G_Find(spawnPointEntity, FOFS(className), "info_player_coop");
         if (!spawnPointEntity)
             return NULL;    // we didn't have enough...
 
@@ -615,9 +569,9 @@ SelectSpawnPoint
 Chooses a player start, deathmatch start, coop start, etc
 ============
 */
-void    SelectSpawnPoint(entity_t *ent, vec3_t &origin, vec3_t &angles)
+void    SelectSpawnPoint(Entity *ent, vec3_t &origin, vec3_t &angles)
 {
-    entity_t *spot = NULL;
+    Entity *spot = NULL;
 
     if (deathmatch->value)
         spot = SelectDeathmatchSpawnPoint();
@@ -626,7 +580,7 @@ void    SelectSpawnPoint(entity_t *ent, vec3_t &origin, vec3_t &angles)
 
     // find a single player start spot
     if (!spot) {
-        while ((spot = G_Find(spot, FOFS(classname), "info_player_start")) != NULL) {
+        while ((spot = G_Find(spot, FOFS(className), "info_player_start")) != NULL) {
             if (!game.spawnpoint[0] && !spot->targetName)
                 break;
 
@@ -640,7 +594,7 @@ void    SelectSpawnPoint(entity_t *ent, vec3_t &origin, vec3_t &angles)
         if (!spot) {
             if (!game.spawnpoint[0]) {
                 // there wasn't a spawnpoint without a target, so use any
-                spot = G_Find(spot, FOFS(classname), "info_player_start");
+                spot = G_Find(spot, FOFS(className), "info_player_start");
             }
             if (!spot)
                 gi.Error("Couldn't find spawn point %s", game.spawnpoint);
@@ -656,7 +610,7 @@ void    SelectSpawnPoint(entity_t *ent, vec3_t &origin, vec3_t &angles)
 
 //======================================================================
 
-void body_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int damage, const vec3_t& point)
+void body_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point)
 {
     int n;
 
@@ -670,9 +624,9 @@ void body_die(entity_t *self, entity_t *inflictor, entity_t *attacker, int damag
     }
 }
 
-void CopyToBodyQue(entity_t *ent)
+void CopyToBodyQue(Entity *ent)
 {
-    entity_t     *body;
+    Entity     *body;
 
     gi.UnlinkEntity(ent);
 
@@ -702,7 +656,7 @@ void CopyToBodyQue(entity_t *ent)
 
     body->size = ent->size; // VectorCopy(ent->size, body->size);
     body->velocity = ent->velocity; // VectorCopy(ent->velocity, body->velocity);
-    body->avelocity = ent->avelocity; //  VectorCopy(ent->avelocity, body->avelocity);
+    body->angularVelocity = ent->angularVelocity; //  VectorCopy(ent->angularVelocity, body->angularVelocity);
     body->solid = ent->solid;
     body->clipMask = ent->clipMask;
     body->owner = ent->owner;
@@ -715,7 +669,7 @@ void CopyToBodyQue(entity_t *ent)
     gi.LinkEntity(body);
 }
 
-void RespawnClient(entity_t *self)
+void RespawnClient(Entity *self)
 {
     if (deathmatch->value || coop->value) {
         // isSpectator's don't leave bodies
@@ -744,7 +698,7 @@ void RespawnClient(entity_t *self)
  * only called when persistent.isSpectator changes
  * note that resp.isSpectator should be the opposite of persistent.isSpectator here
  */
-void spectator_respawn(entity_t *ent)
+void spectator_respawn(Entity *ent)
 {
     int i, numspec;
 
@@ -840,11 +794,11 @@ Called when a player connects to a server or respawns in
 a deathmatch.
 ============
 */
-void PutClientInServer(entity_t *ent)
+void PutClientInServer(Entity *ent)
 {
     int     index;
     vec3_t  spawn_origin, spawn_angles;
-    gclient_t   *client;
+    GameClient   *client;
     int     i;
     ClientPersistantData saved;
     ClientRespawnData    resp;
@@ -872,7 +826,7 @@ void PutClientInServer(entity_t *ent)
         resp = client->respawn;
         memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
         // this is kind of ugly, but it's how we want to handle keys in coop
-//      for (n = 0; n < game.num_items; n++)
+//      for (n = 0; n < game.numberOfItems; n++)
 //      {
 //          if (itemlist[n].flags & IT_KEY)
 //              resp.persistentCoopRespawn.inventory[n] = client->persistent.inventory[n];
@@ -903,11 +857,11 @@ void PutClientInServer(entity_t *ent)
     ent->moveType = MoveType::Walk;
     ent->viewHeight = 22;
     ent->inUse = true;
-    ent->classname = "player";
+    ent->className = "player";
     ent->mass = 200;
     ent->solid = Solid::BoundingBox;
     ent->deadFlag = DEAD_NO;
-    ent->air_finished = level.time + 12;
+    ent->airFinished = level.time + 12;
     ent->clipMask = CONTENTS_MASK_PLAYERSOLID;
     ent->model = "players/male/tris.md2";
     ent->Pain = Player_Pain;
@@ -999,7 +953,7 @@ A client has just connected to the server in
 deathmatch mode, so clear everything out before starting them.
 =====================
 */
-void ClientBeginDeathmatch(entity_t *ent)
+void ClientBeginDeathmatch(Entity *ent)
 {
     G_InitEntity(ent);
 
@@ -1033,7 +987,7 @@ called when a client has finished connecting, and is ready
 to be placed into the game.  This will happen every level load.
 ============
 */
-void ClientBegin(entity_t *ent)
+void ClientBegin(Entity *ent)
 {
     int     i;
 
@@ -1058,7 +1012,7 @@ void ClientBegin(entity_t *ent)
         // except for the persistant data that was initialized at
         // ClientConnect() time
         G_InitEntity(ent);
-        ent->classname = "player";
+        ent->className = "player";
         InitClientResp(ent->client);
         PutClientInServer(ent);
     }
@@ -1091,7 +1045,7 @@ The game can override any of the settings in place
 (forcing skins or names, etc) before copying it off.
 ============
 */
-void ClientUserinfoChanged(entity_t *ent, char *userinfo)
+void ClientUserinfoChanged(Entity *ent, char *userinfo)
 {
     char    *s;
     int     playernum;
@@ -1155,7 +1109,7 @@ Changing levels will NOT cause this to be called again, but
 loadgames will.
 ============
 */
-qboolean ClientConnect(entity_t *ent, char *userinfo)
+qboolean ClientConnect(Entity *ent, char *userinfo)
 {
     char    *value;
 
@@ -1228,7 +1182,7 @@ Called when a player drops from the server.
 Will not be called between levels.
 ============
 */
-void ClientDisconnect(entity_t *ent)
+void ClientDisconnect(Entity *ent)
 {
     //int     playernum;
 
@@ -1252,7 +1206,7 @@ void ClientDisconnect(entity_t *ent)
     ent->state.effects = 0;
     ent->solid = Solid::Not;
     ent->inUse = false;
-    ent->classname = "disconnected";
+    ent->className = "disconnected";
     ent->client->persistent.connected = false;
 
     // FIXME: don't break skins on corpses, etc
@@ -1264,7 +1218,7 @@ void ClientDisconnect(entity_t *ent)
 //==============================================================
 
 
-entity_t *pm_passent;
+Entity *pm_passent;
 
 // pmove doesn't need to know about passent and contentmask
 trace_t q_gameabi PM_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end)
@@ -1300,10 +1254,10 @@ This will be called once for each client frame, which will
 usually be a couple times for each server frame.
 ==============
 */
-void ClientThink(entity_t *ent, ClientUserCommand *clientUserCommand)
+void ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
 {
-    gclient_t* client = nullptr;
-    entity_t* other = nullptr;
+    GameClient* client = nullptr;
+    Entity* other = nullptr;
 
     PlayerMove pm = {};
     
@@ -1315,7 +1269,7 @@ void ClientThink(entity_t *ent, ClientUserCommand *clientUserCommand)
         Com_Error(ErrorType::ERR_DROP, "%s: *ent has no client to think with!\n", __FUNCTION__);
 
     // Store the current entity to be run from G_RunFrame.
-    level.current_entity = ent;
+    level.currentEntity = ent;
 
     // Fetch the entity client.
     client = ent->client;
@@ -1489,9 +1443,9 @@ This will be called once for each server frame, before running
 any other entities in the world.
 ==============
 */
-void ClientBeginServerFrame(entity_t *ent)
+void ClientBeginServerFrame(Entity *ent)
 {
-    gclient_t   *client;
+    GameClient   *client;
     int         buttonMask;
 
     if (level.intermissiontime)

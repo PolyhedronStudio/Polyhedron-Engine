@@ -45,7 +45,7 @@ SV_TestEntityPosition
 
 ============
 */
-entity_t *SV_TestEntityPosition(entity_t *ent)
+Entity *SV_TestEntityPosition(Entity *ent)
 {
     trace_t trace;
     int     mask;
@@ -68,7 +68,7 @@ entity_t *SV_TestEntityPosition(entity_t *ent)
 SV_CheckVelocity
 ================
 */
-void SV_CheckVelocity(entity_t *ent)
+void SV_CheckVelocity(Entity *ent)
 {
     int     i;
 
@@ -90,7 +90,7 @@ SV_RunThink
 Runs thinking code for this frame if necessary
 =============
 */
-qboolean SV_RunThink(entity_t *ent)
+qboolean SV_RunThink(Entity *ent)
 {
     float   thinktime;
 
@@ -115,9 +115,9 @@ SV_Impact
 Two entities have touched, so run their touch functions
 ==================
 */
-void SV_Impact(entity_t *e1, trace_t *trace)
+void SV_Impact(Entity *e1, trace_t *trace)
 {
-    entity_t     *e2;
+    Entity     *e2;
 //  cplane_t    backplane;
 
     e2 = trace->ent;
@@ -177,9 +177,9 @@ Returns the clipflags if the velocity was modified (hit something solid)
 ============
 */
 #define MAX_CLIP_PLANES 5
-int SV_FlyMove(entity_t *ent, float time, int mask)
+int SV_FlyMove(Entity *ent, float time, int mask)
 {
-    entity_t     *hit;
+    Entity     *hit;
     int         bumpcount, numbumps;
     vec3_t      dir;
     float       d;
@@ -307,7 +307,7 @@ SV_AddGravity
 
 ============
 */
-void SV_AddGravity(entity_t *ent)
+void SV_AddGravity(Entity *ent)
 {
     ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME;
 }
@@ -327,7 +327,7 @@ SV_PushEntity
 Does not change the entities velocity at all
 ============
 */
-trace_t SV_PushEntity(entity_t *ent, vec3_t push)
+trace_t SV_PushEntity(Entity *ent, vec3_t push)
 {
     trace_t trace;
     vec3_t  start;
@@ -368,7 +368,7 @@ retry:
 
 
 typedef struct {
-    entity_t *ent;
+    Entity *ent;
     vec3_t  origin;
     vec3_t  angles;
 #if USE_SMOOTH_DELTA_ANGLES
@@ -377,7 +377,7 @@ typedef struct {
 } pushed_t;
 pushed_t    pushed[MAX_EDICTS], *pushed_p;
 
-entity_t *obstacle;
+Entity *obstacle;
 
 /*
 ============
@@ -387,10 +387,10 @@ Objects need to be moved back on a failed push,
 otherwise riders would continue to slide.
 ============
 */
-qboolean SV_Push(entity_t *pusher, vec3_t move, vec3_t amove)
+qboolean SV_Push(Entity *pusher, vec3_t move, vec3_t amove)
 {
     int         i, e;
-    entity_t     *check, *block;
+    Entity     *check, *block;
     vec3_t      mins, maxs;
     pushed_t    *p;
     vec3_t      org, org2, move2, forward, right, up;
@@ -539,10 +539,10 @@ Bmodel objects don't interact with each other, but
 push all box objects
 ================
 */
-void SV_Physics_Pusher(entity_t *ent)
+void SV_Physics_Pusher(Entity *ent)
 {
     vec3_t      move, amove;
-    entity_t     *part, *mv;
+    Entity     *part, *mv;
 
     // if not a team captain, so movement will be handled elsewhere
     if (ent->flags & EntityFlags::TeamSlave)
@@ -555,11 +555,11 @@ void SV_Physics_Pusher(entity_t *ent)
     pushed_p = pushed;
     for (part = ent ; part ; part = part->teamChainPtr) {
         if (part->velocity[0] || part->velocity[1] || part->velocity[2] ||
-            part->avelocity[0] || part->avelocity[1] || part->avelocity[2]
+            part->angularVelocity[0] || part->angularVelocity[1] || part->angularVelocity[2]
            ) {
             // object is moving
             VectorScale(part->velocity, FRAMETIME, move);
-            VectorScale(part->avelocity, FRAMETIME, amove);
+            VectorScale(part->angularVelocity, FRAMETIME, amove);
 
             if (!SV_Push(part, move, amove))
                 break;  // move was Blocked
@@ -601,7 +601,7 @@ SV_Physics_None
 Non moving objects can only Think
 =============
 */
-void SV_Physics_None(entity_t *ent)
+void SV_Physics_None(Entity *ent)
 {
 // regular thinking
     SV_RunThink(ent);
@@ -614,7 +614,7 @@ SV_Physics_Noclip
 A moving object that doesn't obey physics
 =============
 */
-void SV_Physics_Noclip(entity_t *ent)
+void SV_Physics_Noclip(Entity *ent)
 {
 // regular thinking
     if (!SV_RunThink(ent))
@@ -622,7 +622,7 @@ void SV_Physics_Noclip(entity_t *ent)
     if (!ent->inUse)
         return;
 
-    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->avelocity);
+    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->angularVelocity);
     ent->state.origin = vec3_fmaf(ent->state.origin, FRAMETIME, ent->velocity);
 
     gi.LinkEntity(ent);
@@ -643,12 +643,12 @@ SV_Physics_Toss
 Toss, bounce, and fly movement.  When onground, do nothing.
 =============
 */
-void SV_Physics_Toss(entity_t *ent)
+void SV_Physics_Toss(Entity *ent)
 {
     trace_t     trace;
     vec3_t      move;
     float       backoff;
-    entity_t     *slave;
+    Entity     *slave;
     qboolean    wasInWater;
     qboolean    isInWater;
     vec3_t      oldOrigin;
@@ -685,7 +685,7 @@ void SV_Physics_Toss(entity_t *ent)
         SV_AddGravity(ent);
 
     // Move angles
-    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->avelocity);
+    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->angularVelocity);
 
     // Move origin
     move = vec3_scale(ent->velocity, FRAMETIME);
@@ -707,7 +707,7 @@ void SV_Physics_Toss(entity_t *ent)
                 ent->groundEntityPtr = trace.ent;
                 ent->groundEntityLinkCount = trace.ent->linkCount;
                 VectorCopy(vec3_origin, ent->velocity);
-                VectorCopy(vec3_origin, ent->avelocity);
+                VectorCopy(vec3_origin, ent->angularVelocity);
             }
         }
 
@@ -764,34 +764,34 @@ constexpr int32_t sv_stopspeed = 100;
 constexpr int32_t sv_friction = 6;
 constexpr int32_t sv_waterfriction = 1;
 
-void SV_AddRotationalFriction(entity_t *ent)
+void SV_AddRotationalFriction(Entity *ent)
 {
     int     n;
     float   adjustment;
 
-    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->avelocity);
+    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->angularVelocity);
     adjustment = FRAMETIME * sv_stopspeed * sv_friction;
     for (n = 0; n < 3; n++) {
-        if (ent->avelocity[n] > 0) {
-            ent->avelocity[n] -= adjustment;
-            if (ent->avelocity[n] < 0)
-                ent->avelocity[n] = 0;
+        if (ent->angularVelocity[n] > 0) {
+            ent->angularVelocity[n] -= adjustment;
+            if (ent->angularVelocity[n] < 0)
+                ent->angularVelocity[n] = 0;
         } else {
-            ent->avelocity[n] += adjustment;
-            if (ent->avelocity[n] > 0)
-                ent->avelocity[n] = 0;
+            ent->angularVelocity[n] += adjustment;
+            if (ent->angularVelocity[n] > 0)
+                ent->angularVelocity[n] = 0;
         }
     }
 }
 
-void SV_Physics_Step(entity_t *ent)
+void SV_Physics_Step(Entity *ent)
 {
     qboolean    wasonground;
     qboolean    hitsound = false;
     float       *vel;
     float       speed, newspeed, control;
     float       friction;
-    entity_t     *groundentity;
+    Entity     *groundentity;
     int         mask;
 
     // airborn monsters should always check for ground
@@ -807,7 +807,7 @@ void SV_Physics_Step(entity_t *ent)
     else
         wasonground = false;
 
-    if (ent->avelocity[0] || ent->avelocity[1] || ent->avelocity[2])
+    if (ent->angularVelocity[0] || ent->angularVelocity[1] || ent->angularVelocity[2])
         SV_AddRotationalFriction(ent);
 
     // add gravity except:
@@ -895,7 +895,7 @@ G_RunEntity
 
 ================
 */
-void G_RunEntity(entity_t *ent)
+void G_RunEntity(Entity *ent)
 {
     if (ent->PreThink)
         ent->PreThink(ent);

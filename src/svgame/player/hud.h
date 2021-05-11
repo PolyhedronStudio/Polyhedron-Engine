@@ -9,11 +9,11 @@
 #ifndef __SVGAME_PLAYER_HUD_H__
 #define __SVGAME_PLAYER_HUD_H__
 
-void HUD_MoveClientToIntermission(entity_t* client);
-void HUD_SetClientStats(entity_t* ent);
-void HUD_SetSpectatorStats(entity_t* ent);
-void HUD_CheckChaseStats(entity_t* ent);
-void HUD_ValidateSelectedItem(entity_t* ent);
-void HUD_GenerateDMScoreboardLayout(entity_t* client, entity_t* killer);
+void HUD_MoveClientToIntermission(Entity* client);
+void HUD_SetClientStats(Entity* ent);
+void HUD_SetSpectatorStats(Entity* ent);
+void HUD_CheckChaseStats(Entity* ent);
+void HUD_ValidateSelectedItem(Entity* ent);
+void HUD_GenerateDMScoreboardLayout(Entity* client, Entity* killer);
 
 #endif // __SVGAME_PLAYER_HUD_H__

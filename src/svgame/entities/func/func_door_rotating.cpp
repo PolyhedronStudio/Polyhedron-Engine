@@ -35,7 +35,7 @@ REVERSE will cause the door to rotate in the opposite direction.
 "health"    if set, door must be shot open
 "speed"     movement speed (100 default)
 "wait"      wait before returning (3 default, -1 = never return)
-"dmg"       damage to inflict when Blocked (2 default)
+"damage"       damage to inflict when Blocked (2 default)
 "sounds"
 1)  silent
 2)  light
@@ -43,7 +43,7 @@ REVERSE will cause the door to rotate in the opposite direction.
 4)  heavy
 */
 
-void SP_func_door_rotating(entity_t* ent)
+void SP_func_door_rotating(Entity* ent)
 {
     VectorClear(ent->state.angles);
 
@@ -61,12 +61,12 @@ void SP_func_door_rotating(entity_t* ent)
         VectorNegate(ent->moveDirection, ent->moveDirection);
 
     if (!st.distance) {
-        gi.DPrintf("%s at %s with no distance set\n", ent->classname, Vec3ToString(ent->state.origin));
+        gi.DPrintf("%s at %s with no distance set\n", ent->className, Vec3ToString(ent->state.origin));
         st.distance = 90;
     }
 
-    VectorCopy(ent->state.angles, ent->pos1);
-    VectorMA(ent->state.angles, st.distance, ent->moveDirection, ent->pos2);
+    VectorCopy(ent->state.angles, ent->position1);
+    VectorMA(ent->state.angles, st.distance, ent->moveDirection, ent->position2);
     ent->moveInfo.distance = st.distance;
 
     ent->moveType = MoveType::Push;
@@ -78,27 +78,27 @@ void SP_func_door_rotating(entity_t* ent)
 
     if (!ent->speed)
         ent->speed = 100;
-    if (!ent->accel)
-        ent->accel = ent->speed;
-    if (!ent->decel)
-        ent->decel = ent->speed;
+    if (!ent->acceleration)
+        ent->acceleration = ent->speed;
+    if (!ent->deceleration)
+        ent->deceleration = ent->speed;
 
     if (!ent->wait)
         ent->wait = 3;
-    if (!ent->dmg)
-        ent->dmg = 2;
+    if (!ent->damage)
+        ent->damage = 2;
 
     if (ent->sounds != 1) {
-        ent->moveInfo.sound_start = gi.SoundIndex("doors/dr1_strt.wav");
-        ent->moveInfo.sound_middle = gi.SoundIndex("doors/dr1_mid.wav");
-        ent->moveInfo.sound_end = gi.SoundIndex("doors/dr1_end.wav");
+        ent->moveInfo.startSoundIndex = gi.SoundIndex("doors/dr1_strt.wav");
+        ent->moveInfo.middleSoundIndex = gi.SoundIndex("doors/dr1_mid.wav");
+        ent->moveInfo.endSoundIndex = gi.SoundIndex("doors/dr1_end.wav");
     }
 
     // if it starts open, switch the positions
     if (ent->spawnFlags & DOOR_START_OPEN) {
-        VectorCopy(ent->pos2, ent->state.angles);
-        VectorCopy(ent->pos1, ent->pos2);
-        VectorCopy(ent->state.angles, ent->pos1);
+        VectorCopy(ent->position2, ent->state.angles);
+        VectorCopy(ent->position1, ent->position2);
+        VectorCopy(ent->state.angles, ent->position1);
         VectorNegate(ent->moveDirection, ent->moveDirection);
     }
 
@@ -115,13 +115,13 @@ void SP_func_door_rotating(entity_t* ent)
 
     ent->moveInfo.state = STATE_BOTTOM;
     ent->moveInfo.speed = ent->speed;
-    ent->moveInfo.accel = ent->accel;
-    ent->moveInfo.decel = ent->decel;
+    ent->moveInfo.acceleration = ent->acceleration;
+    ent->moveInfo.deceleration = ent->deceleration;
     ent->moveInfo.wait = ent->wait;
-    VectorCopy(ent->state.origin, ent->moveInfo.start_origin);
-    VectorCopy(ent->pos1, ent->moveInfo.start_angles);
-    VectorCopy(ent->state.origin, ent->moveInfo.end_origin);
-    VectorCopy(ent->pos2, ent->moveInfo.end_angles);
+    VectorCopy(ent->state.origin, ent->moveInfo.startOrigin);
+    VectorCopy(ent->position1, ent->moveInfo.startAngles);
+    VectorCopy(ent->state.origin, ent->moveInfo.endOrigin);
+    VectorCopy(ent->position2, ent->moveInfo.endAngles);
 
     if (ent->spawnFlags & 16)
         ent->state.effects |= EntityEffectType::AnimCycleAll2hz;

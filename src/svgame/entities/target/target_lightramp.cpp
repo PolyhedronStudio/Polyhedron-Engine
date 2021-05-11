@@ -17,15 +17,15 @@ speed       How many seconds the ramping will take
 message     two letters; starting lightLevel and ending lightLevel
 */
 
-void target_lightramp_think(entity_t* self)
+void target_lightramp_think(Entity* self)
 {
     char    style[2];
 
-    style[0] = 'a' + self->moveDirection[0] + (level.time - self->timestamp) / FRAMETIME * self->moveDirection[2];
+    style[0] = 'a' + self->moveDirection[0] + (level.time - self->timeStamp) / FRAMETIME * self->moveDirection[2];
     style[1] = 0;
     gi.configstring(ConfigStrings::Lights+ self->enemy->style, style);
 
-    if ((level.time - self->timestamp) < self->speed) {
+    if ((level.time - self->timeStamp) < self->speed) {
         self->nextThink = level.time + FRAMETIME;
     }
     else if (self->spawnFlags & 1) {
@@ -38,10 +38,10 @@ void target_lightramp_think(entity_t* self)
     }
 }
 
-void target_lightramp_use(entity_t* self, entity_t* other, entity_t* activator)
+void target_lightramp_use(Entity* self, Entity* other, Entity* activator)
 {
     if (!self->enemy) {
-        entity_t* e;
+        Entity* e;
 
         // check all the targets
         e = NULL;
@@ -49,9 +49,9 @@ void target_lightramp_use(entity_t* self, entity_t* other, entity_t* activator)
             e = G_Find(e, FOFS(targetName), self->target);
             if (!e)
                 break;
-            if (strcmp(e->classname, "light") != 0) {
-                gi.DPrintf("%s at %s ", self->classname, Vec3ToString(self->state.origin));
-                gi.DPrintf("target %s (%s at %s) is not a light\n", self->target, e->classname, Vec3ToString(e->state.origin));
+            if (strcmp(e->className, "light") != 0) {
+                gi.DPrintf("%s at %s ", self->className, Vec3ToString(self->state.origin));
+                gi.DPrintf("target %s (%s at %s) is not a light\n", self->target, e->className, Vec3ToString(e->state.origin));
             }
             else {
                 self->enemy = e;
@@ -59,17 +59,17 @@ void target_lightramp_use(entity_t* self, entity_t* other, entity_t* activator)
         }
 
         if (!self->enemy) {
-            gi.DPrintf("%s target %s not found at %s\n", self->classname, self->target, Vec3ToString(self->state.origin));
+            gi.DPrintf("%s target %s not found at %s\n", self->className, self->target, Vec3ToString(self->state.origin));
             G_FreeEntity(self);
             return;
         }
     }
 
-    self->timestamp = level.time;
+    self->timeStamp = level.time;
     target_lightramp_think(self);
 }
 
-void SP_target_lightramp(entity_t* self)
+void SP_target_lightramp(Entity* self)
 {
     if (!self->message || strlen(self->message) != 2 || self->message[0] < 'a' || self->message[0] > 'z' || self->message[1] < 'a' || self->message[1] > 'z' || self->message[0] == self->message[1]) {
         gi.DPrintf("target_lightramp has bad ramp (%s) at %s\n", self->message, Vec3ToString(self->state.origin));
@@ -83,7 +83,7 @@ void SP_target_lightramp(entity_t* self)
     }
 
     if (!self->target) {
-        gi.DPrintf("%s with no target at %s\n", self->classname, Vec3ToString(self->state.origin));
+        gi.DPrintf("%s with no target at %s\n", self->className, Vec3ToString(self->state.origin));
         G_FreeEntity(self);
         return;
     }

@@ -22,8 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 
-static  entity_t     *current_player;
-static  gclient_t   *current_client;
+static  Entity     *current_player;
+static  GameClient   *current_client;
 
 static  vec3_t  forward, right, up;
 static float   xyspeed;
@@ -67,9 +67,9 @@ static float SV_CalcRoll(vec3_t angles, vec3_t velocity)
 // Handles color blends and view kicks
 //===============
 //
-static void P_ApplyDamageFeedback(entity_t *player)
+static void P_ApplyDamageFeedback(Entity *player)
 {
-    gclient_t   *client;
+    GameClient   *client;
     float   side;
     float   realcount, count, kick;
     vec3_t  v;
@@ -208,7 +208,7 @@ static void P_ApplyDamageFeedback(entity_t *player)
 // 
 //===============
 //
-static void SV_CalculateViewOffset(entity_t *ent)
+static void SV_CalculateViewOffset(Entity *ent)
 {
     float       bob;
     float       ratio;
@@ -307,7 +307,7 @@ static void SV_CalculateViewOffset(entity_t *ent)
 // 
 //===============
 //
-static void SV_CalculateGunOffset(entity_t *ent)
+static void SV_CalculateGunOffset(Entity *ent)
 {
     int     i;
     float   delta;
@@ -377,7 +377,7 @@ static void SV_AddBlend(float r, float g, float b, float a, float *v_blend)
 // 
 //===============
 //
-static void SV_CalculateBlend(entity_t *ent)
+static void SV_CalculateBlend(Entity *ent)
 {
     int     contents;
     vec3_t  vieworg;
@@ -426,7 +426,7 @@ static void SV_CalculateBlend(entity_t *ent)
 // 
 //===============
 //
-static void P_CheckFallingDamage(entity_t *ent)
+static void P_CheckFallingDamage(Entity *ent)
 {
     float   delta;
     int     damage;
@@ -482,7 +482,7 @@ static void P_CheckFallingDamage(entity_t *ent)
         VectorSet(dir, 0, 0, 1);
 
         if (!deathmatch->value || !((int)dmflags->value & DeathMatchFlags::NoFalling))
-            T_Damage(ent, world, world, dir, ent->state.origin, vec3_origin, damage, 0, 0, MOD_FALLING);
+            T_Damage(ent, G_GetWorldEntity(), G_GetWorldEntity(), dir, ent->state.origin, vec3_origin, damage, 0, 0, MeansOfDeath::Falling);
     } else {
         ent->state.event = EntityEvent::FallShort;
         return;
@@ -500,7 +500,7 @@ static void P_CheckWorldEffects(void)
     int         waterlevel, oldWaterLevel;
 
     if (current_player->moveType == MoveType::NoClip || current_player->moveType == MoveType::Spectator) {
-        current_player->air_finished = level.time + 12; // don't need air
+        current_player->airFinished = level.time + 12; // don't need air
         return;
     }
 
@@ -545,11 +545,11 @@ static void P_CheckWorldEffects(void)
     // check for head just coming out of water
     //
     if (oldWaterLevel == 3 && waterlevel != 3) {
-        if (current_player->air_finished < level.time) {
+        if (current_player->airFinished < level.time) {
             // gasp for air
             gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
             PlayerNoise(current_player, current_player->state.origin, PNOISE_SELF);
-        } else  if (current_player->air_finished < level.time + 11) {
+        } else  if (current_player->airFinished < level.time + 11) {
             // just break surface
             gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
         }
@@ -560,19 +560,19 @@ static void P_CheckWorldEffects(void)
     //
     if (waterlevel == 3) {
         // if out of air, start drowning
-        if (current_player->air_finished < level.time) {
+        if (current_player->airFinished < level.time) {
             // drown!
             if (current_player->client->nextDrownTime < level.time
                 && current_player->health > 0) {
                 current_player->client->nextDrownTime = level.time + 1;
 
                 // take more damage the longer underwater
-                current_player->dmg += 2;
-                if (current_player->dmg > 15)
-                    current_player->dmg = 15;
+                current_player->damage += 2;
+                if (current_player->damage > 15)
+                    current_player->damage = 15;
 
                 // play a gurp sound instead of a normal pain sound
-                if (current_player->health <= current_player->dmg)
+                if (current_player->health <= current_player->damage)
                     gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/drown1.wav"), 1, ATTN_NORM, 0);
                 else if (rand() & 1)
                     gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("*gurp1.wav"), 1, ATTN_NORM, 0);
@@ -581,12 +581,12 @@ static void P_CheckWorldEffects(void)
 
                 current_player->debouncePainTime = level.time;
 
-                T_Damage(current_player, world, world, vec3_origin, current_player->state.origin, vec3_origin, current_player->dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
+                T_Damage(current_player, G_GetWorldEntity(), G_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, current_player->damage, 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
             }
         }
     } else {
-        current_player->air_finished = level.time + 12;
-        current_player->dmg = 2;
+        current_player->airFinished = level.time + 12;
+        current_player->damage = 2;
     }
 
     //
@@ -603,11 +603,11 @@ static void P_CheckWorldEffects(void)
                 current_player->debouncePainTime = level.time + 1;
             }
 
-            T_Damage(current_player, world, world, vec3_origin, current_player->state.origin, vec3_origin, 3 * waterlevel, 0, 0, MOD_LAVA);
+            T_Damage(current_player, G_GetWorldEntity(), G_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
         }
 
         if (current_player->waterType & CONTENTS_SLIME) {
-            T_Damage(current_player, world, world, vec3_origin, current_player->state.origin, vec3_origin, 1 * waterlevel, 0, 0, MOD_SLIME);
+            T_Damage(current_player, G_GetWorldEntity(), G_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 }
@@ -618,7 +618,7 @@ static void P_CheckWorldEffects(void)
 // 
 //===============
 //
-static void G_SetClientEffects(entity_t *ent)
+static void G_SetClientEffects(Entity *ent)
 {
     ent->state.effects = 0;
     ent->state.renderfx = 0;
@@ -638,13 +638,13 @@ static void G_SetClientEffects(entity_t *ent)
 // 
 //===============
 //
-static void G_SetClientEvent(entity_t *ent)
+static void G_SetClientEvent(Entity *ent)
 {
     if (ent->state.event)
         return;
 
     if (ent->groundEntityPtr && xyspeed > 225) {
-        if ((int)(current_client->bobtime + bobmove) != bobcycle)
+        if ((int)(current_client->bobTime + bobmove) != bobcycle)
             ent->state.event = EntityEvent::Footstep;
     }
 }
@@ -655,12 +655,12 @@ static void G_SetClientEvent(entity_t *ent)
 // 
 //===============
 //
-static void G_SetClientSound(entity_t *ent)
+static void G_SetClientSound(Entity *ent)
 {
     const char    *weap; // C++20: STRING: Added const to char*
 
     if (ent->client->persistent.activeWeapon)
-        weap = ent->client->persistent.activeWeapon->classname;
+        weap = ent->client->persistent.activeWeapon->className;
     else
         weap = "";
 
@@ -682,9 +682,9 @@ static void G_SetClientSound(entity_t *ent)
 // 
 //===============
 //
-static void G_SetClientFrame(entity_t *ent)
+static void G_SetClientFrame(Entity *ent)
 {
-    gclient_t *client = NULL;
+    GameClient *client = NULL;
     qboolean isDucking = false;
     qboolean isRunning = false;
 
@@ -775,9 +775,9 @@ newanim:
 // after spawning.
 //===============
 //
-void ClientEndServerFrame(entity_t *ent)
+void ClientEndServerFrame(Entity *ent)
 {
-    float   bobtime;
+    float   bobTime;
     int     i;
 
     if (!ent || !ent->client) {
@@ -836,7 +836,7 @@ void ClientEndServerFrame(entity_t *ent)
 
     if (xyspeed < 5 || !(current_client->playerState.pmove.flags & PMF_ON_GROUND)) {
         bobmove = 0;
-        current_client->bobtime = 0;    // start at beginning of cycle again
+        current_client->bobTime = 0;    // start at beginning of cycle again
     }
 
     // N&C: Footstep tweaks.
@@ -857,14 +857,14 @@ void ClientEndServerFrame(entity_t *ent)
     }
 
     // Generate bob time.
-    current_client->bobtime += bobmove;
-    bobtime = current_client->bobtime;
+    current_client->bobTime += bobmove;
+    bobTime = current_client->bobTime;
 
     if (current_client->playerState.pmove.flags & PMF_DUCKED)
-        bobtime *= 2;   // N&C: Footstep tweak.
+        bobTime *= 2;   // N&C: Footstep tweak.
 
-    bobcycle = (int)bobtime;
-    bobfracsin = std::fabsf(std::sinf(bobtime * M_PI));
+    bobcycle = (int)bobTime;
+    bobfracsin = std::fabsf(std::sinf(bobTime * M_PI));
 
     // Detect hitting the floor, and apply damage appropriately.
     P_CheckFallingDamage(ent);

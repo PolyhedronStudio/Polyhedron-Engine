@@ -15,7 +15,7 @@
 This is solid bmodel that will fall if it's support it removed.
 */
 
-void func_object_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
+void func_object_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
 {
     // only squash thing we fall on top of
     if (!plane)
@@ -24,16 +24,16 @@ void func_object_touch(entity_t* self, entity_t* other, cplane_t* plane, csurfac
         return;
     if (other->takeDamage == TakeDamage::No)
         return;
-    T_Damage(other, self, self, vec3_origin, self->state.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, self->state.origin, vec3_origin, self->damage, 1, 0, MeansOfDeath::Crush);
 }
 
-void func_object_release(entity_t* self)
+void func_object_release(Entity* self)
 {
     self->moveType = MoveType::Toss;
     self->Touch = func_object_touch;
 }
 
-void func_object_use(entity_t* self, entity_t* other, entity_t* activator)
+void func_object_use(Entity* self, Entity* other, Entity* activator)
 {
     self->solid = Solid::BSP;
     self->serverFlags &= ~EntityServerFlags::NoClient;
@@ -42,7 +42,7 @@ void func_object_use(entity_t* self, entity_t* other, entity_t* activator)
     func_object_release(self);
 }
 
-void SP_func_object(entity_t* self)
+void SP_func_object(Entity* self)
 {
     gi.SetModel(self, self->model);
 
@@ -53,8 +53,8 @@ void SP_func_object(entity_t* self)
     self->maxs[1] -= 1;
     self->maxs[2] -= 1;
 
-    if (!self->dmg)
-        self->dmg = 100;
+    if (!self->damage)
+        self->damage = 100;
 
     if (self->spawnFlags == 0) {
         self->solid = Solid::BSP;

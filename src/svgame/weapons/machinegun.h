@@ -9,7 +9,7 @@
 #ifndef __SVGAME_WEAPONS_MACHINEGUN_H__
 #define __SVGAME_WEAPONS_MACHINEGUN_H__
 
-void Machinegun_Fire(entity_t* ent);
-void Weapon_Machinegun(entity_t* ent);
+void Machinegun_Fire(Entity* ent);
+void Weapon_Machinegun(Entity* ent);
 
 #endif // __SVGAME_WEAPONS_MACHINEGUN_H__

@@ -37,9 +37,9 @@ Monsters that don't directly see the player can move
 to a noise in hopes of seeing the player from there.
 ===============
 */
-void PlayerNoise(entity_t *who, vec3_t where, int type)
+void PlayerNoise(Entity *who, vec3_t where, int type)
 {
-    entity_t     *noise;
+    Entity     *noise;
 
     if (deathmatch->value)
         return;
@@ -48,32 +48,32 @@ void PlayerNoise(entity_t *who, vec3_t where, int type)
         return;
 
 
-    if (!who->myNoise) {
+    if (!who->myNoisePtr) {
         noise = G_Spawn();
-        noise->classname = "player_noise";
+        noise->className = "player_noise";
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
         noise->owner = who;
         noise->serverFlags = EntityServerFlags::NoClient;
-        who->myNoise = noise;
+        who->myNoisePtr = noise;
 
         noise = G_Spawn();
-        noise->classname = "player_noise";
+        noise->className = "player_noise";
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
         noise->owner = who;
         noise->serverFlags = EntityServerFlags::NoClient;
-        who->myNoise2 = noise;
+        who->myNoise2Ptr = noise;
     }
 
     if (type == PNOISE_SELF || type == PNOISE_WEAPON) {
-        noise = who->myNoise;
-        level.sound_entity = noise;
-        level.sound_entity_framenum = level.frameNumber;
+        noise = who->myNoisePtr;
+        level.soundEntity = noise;
+        level.soundEntityFrameNumber = level.frameNumber;
     } else { // type == PNOISE_IMPACT
-        noise = who->myNoise2;
-        level.sound2_entity = noise;
-        level.sound2_entity_framenum = level.frameNumber;
+        noise = who->myNoise2Ptr;
+        level.sound2Entity = noise;
+        level.sound2EntityFrameNumber = level.frameNumber;
     }
 
     VectorCopy(where, noise->state.origin);
@@ -84,7 +84,7 @@ void PlayerNoise(entity_t *who, vec3_t where, int type)
 }
 
 
-qboolean Pickup_Weapon(entity_t *ent, entity_t *other)
+qboolean Pickup_Weapon(Entity *ent, Entity *other)
 {
     int         index;
     gitem_t     *ammo;
@@ -93,13 +93,13 @@ qboolean Pickup_Weapon(entity_t *ent, entity_t *other)
 
     if ((((int)(dmflags->value) & DeathMatchFlags::WeaponsStay) || coop->value)
         && other->client->persistent.inventory[index]) {
-        if (!(ent->spawnFlags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)))
+        if (!(ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem)))
             return false;   // leave the weapon for others to pickup
     }
 
     other->client->persistent.inventory[index]++;
 
-    if (!(ent->spawnFlags & DROPPED_ITEM)) {
+    if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem)) {
         // give them some ammo with it
         ammo = FindItem(ent->item->ammo);
         if ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo)
@@ -107,7 +107,7 @@ qboolean Pickup_Weapon(entity_t *ent, entity_t *other)
         else
             Add_Ammo(other, ammo, ammo->quantity);
 
-        if (!(ent->spawnFlags & DROPPED_PLAYER_ITEM)) {
+        if (!(ent->spawnFlags & ItemSpawnFlags::DroppedPlayerItem)) {
             if (deathmatch->value) {
                 if ((int)(dmflags->value) & DeathMatchFlags::WeaponsStay)
                     ent->flags |= EntityFlags::Respawn;
@@ -136,7 +136,7 @@ The old weapon has been dropped all the way, so make the new one
 current
 ===============
 */
-void ChangeWeapon(entity_t *ent)
+void ChangeWeapon(Entity *ent)
 {
     int i;
 
@@ -185,7 +185,7 @@ void ChangeWeapon(entity_t *ent)
 NoAmmoWeaponChange
 =================
 */
-void NoAmmoWeaponChange(entity_t *ent)
+void NoAmmoWeaponChange(Entity *ent)
 {
     if (ent->client->persistent.inventory[ITEM_INDEX(FindItem("bullets"))]
         &&  ent->client->persistent.inventory[ITEM_INDEX(FindItem("machinegun"))]) {
@@ -202,7 +202,7 @@ Think_Weapon
 Called by ClientBeginServerFrame and ClientThink
 =================
 */
-void Think_Weapon(entity_t *ent)
+void Think_Weapon(Entity *ent)
 {
     // if just died, put the weapon away
     if (ent->health < 1) {
@@ -224,7 +224,7 @@ Use_Weapon
 Make the weapon ready if there is ammo
 ================
 */
-void Use_Weapon(entity_t *ent, gitem_t *item)
+void Use_Weapon(Entity *ent, gitem_t *item)
 {
     int         ammoIndex;
     gitem_t     *ammo_item;
@@ -259,7 +259,7 @@ void Use_Weapon(entity_t *ent, gitem_t *item)
 Drop_Weapon
 ================
 */
-void Drop_Weapon(entity_t *ent, gitem_t *item)
+void Drop_Weapon(Entity *ent, gitem_t *item)
 {
     int     index;
 
@@ -289,7 +289,7 @@ A generic function to handle the basics of weapon thinking
 #define FRAME_IDLE_FIRST        (FRAME_FIRE_LAST + 1)
 #define FRAME_DEACTIVATE_FIRST  (FRAME_IDLE_LAST + 1)
 
-void Weapon_Generic(entity_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(entity_t *ent))
+void Weapon_Generic(Entity *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(Entity *ent))
 {
     int     n;
 

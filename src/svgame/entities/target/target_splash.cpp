@@ -23,11 +23,11 @@ Set "sounds" to one of the following:
   6) blood
 
 "count" how many pixels in the splash
-"dmg"   if set, does a radius damage at this location when it splashes
+"damage"   if set, does a radius damage at this location when it splashes
         useful for lava/sparks
 */
 
-void use_target_splash(entity_t* self, entity_t* other, entity_t* activator)
+void use_target_splash(Entity* self, Entity* other, Entity* activator)
 {
     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(TempEntityEvent::Splash);
@@ -37,11 +37,11 @@ void use_target_splash(entity_t* self, entity_t* other, entity_t* activator)
     gi.WriteByte(self->sounds);
     gi.Multicast(&self->state.origin, MultiCast::PVS);
 
-    if (self->dmg)
-        T_RadiusDamage(self, activator, self->dmg, NULL, self->dmg + 40, MOD_SPLASH);
+    if (self->damage)
+        T_RadiusDamage(self, activator, self->damage, NULL, self->damage + 40, MeansOfDeath::Splash);
 }
 
-void SP_target_splash(entity_t* self)
+void SP_target_splash(Entity* self)
 {
     self->Use = use_target_splash;
     UTIL_SetMoveDir(self->state.angles, self->moveDirection);

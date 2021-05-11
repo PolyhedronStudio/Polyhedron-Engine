@@ -14,10 +14,10 @@
 //=====================================================
 /*QUAKED misc_explobox (0 .5 .8) (-16 -16 0) (16 16 40)
 Large exploding box.  You can override its mass (100),
-health (80), and dmg (150).
+health (80), and damage (150).
 */
 
-void barrel_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
+void barrel_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
 
 {
     float   ratio;
@@ -31,19 +31,19 @@ void barrel_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* 
     M_walkmove(self, vectoyaw(v), 20 * ratio * FRAMETIME);
 }
 
-void barrel_explode(entity_t* self)
+void barrel_explode(Entity* self)
 {
     vec3_t  org;
     float   spd;
     vec3_t  save;
 
-    T_RadiusDamage(self, self->activator, self->dmg, NULL, self->dmg + 40, MOD_BARREL);
+    T_RadiusDamage(self, self->activator, self->damage, NULL, self->damage + 40, MeansOfDeath::Barrel);
 
     VectorCopy(self->state.origin, save);
     VectorMA(self->absMin, 0.5, self->size, self->state.origin);
 
     // a few big chunks
-    spd = 1.5 * (float)self->dmg / 200.0;
+    spd = 1.5 * (float)self->damage / 200.0;
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
@@ -54,7 +54,7 @@ void barrel_explode(entity_t* self)
     ThrowDebris(self, "models/objects/debris1/tris.md2", spd, org);
 
     // bottom corners
-    spd = 1.75 * (float)self->dmg / 200.0;
+    spd = 1.75 * (float)self->damage / 200.0;
     VectorCopy(self->absMin, org);
     ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
     VectorCopy(self->absMin, org);
@@ -69,7 +69,7 @@ void barrel_explode(entity_t* self)
     ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
 
     // a bunch of little chunks
-    spd = 2 * self->dmg / 200;
+    spd = 2 * self->damage / 200;
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
@@ -110,7 +110,7 @@ void barrel_explode(entity_t* self)
         BecomeExplosion1(self);
 }
 
-void barrel_delay(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point)
+void barrel_delay(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point)
 {
     self->takeDamage = TakeDamage::No;
     self->nextThink = level.time + 2 * FRAMETIME;
@@ -118,7 +118,7 @@ void barrel_delay(entity_t* self, entity_t* inflictor, entity_t* attacker, int d
     self->activator = attacker;
 }
 
-void SP_misc_explobox(entity_t* self)
+void SP_misc_explobox(Entity* self)
 {
     if (deathmatch->value) {
         // auto-remove for deathmatch
@@ -142,8 +142,8 @@ void SP_misc_explobox(entity_t* self)
         self->mass = 400;
     if (!self->health)
         self->health = 10;
-    if (!self->dmg)
-        self->dmg = 150;
+    if (!self->damage)
+        self->damage = 150;
 
     self->Die = barrel_delay;
     self->takeDamage = TakeDamage::Yes;

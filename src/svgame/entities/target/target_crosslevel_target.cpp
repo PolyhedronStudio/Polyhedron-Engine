@@ -17,7 +17,7 @@ killTarget also work.
 
 "delay"     delay before using targets if the trigger has been activated (default 1)
 */
-void target_crosslevel_target_think(entity_t* self)
+void target_crosslevel_target_think(Entity* self)
 {
     if (self->spawnFlags == (game.serverflags & SFL_CROSS_TRIGGER_MASK & self->spawnFlags)) {
         UTIL_UseTargets(self, self);
@@ -25,7 +25,7 @@ void target_crosslevel_target_think(entity_t* self)
     }
 }
 
-void SP_target_crosslevel_target(entity_t* self)
+void SP_target_crosslevel_target(Entity* self)
 {
     if (!self->delay)
         self->delay = 1;

@@ -20,7 +20,7 @@ If nomessage is not set, t will print "1 more.. " etc when triggered and "sequen
 After the counter has been triggered "count" times (default 2), it will fire all of it's targets and remove itself.
 */
 
-void trigger_counter_use(entity_t* self, entity_t* other, entity_t* activator)
+void trigger_counter_use(Entity* self, Entity* other, Entity* activator)
 {
     if (self->count == 0)
         return;
@@ -43,7 +43,7 @@ void trigger_counter_use(entity_t* self, entity_t* other, entity_t* activator)
     multi_trigger(self);
 }
 
-void SP_trigger_counter(entity_t* self)
+void SP_trigger_counter(Entity* self)
 {
     self->wait = -1;
     if (!self->count)

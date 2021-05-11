@@ -24,9 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "weapons/shotgun.h"
 #include "weapons/supershotgun.h"
 
-qboolean    Pickup_Weapon(entity_t *ent, entity_t *other);
-void        Use_Weapon(entity_t *ent, gitem_t *inv);
-void        Drop_Weapon(entity_t *ent, gitem_t *inv);
+qboolean    Pickup_Weapon(Entity *ent, Entity *other);
+void        Use_Weapon(Entity *ent, gitem_t *inv);
+void        Drop_Weapon(Entity *ent, gitem_t *inv);
 
 gitem_armor_t bodyarmor_info    = {100, 200, .80f, .60f, ARMOR_BODY};
 
@@ -43,7 +43,7 @@ GetItemByIndex
 */
 gitem_t *GetItemByIndex(int index)
 {
-    if (index == 0 || index >= game.num_items)
+    if (index == 0 || index >= game.numberOfItems)
         return NULL;
 
     return &itemlist[index];
@@ -56,16 +56,16 @@ FindItemByClassname
 
 ===============
 */
-gitem_t *FindItemByClassname(const char *classname)
+gitem_t *FindItemByClassname(const char *className)
 {
     int     i;
     gitem_t *it;
 
     it = itemlist;
-    for (i = 0 ; i < game.num_items ; i++, it++) {
-        if (!it->classname)
+    for (i = 0 ; i < game.numberOfItems ; i++, it++) {
+        if (!it->className)
             continue;
-        if (!Q_stricmp(it->classname, classname))
+        if (!Q_stricmp(it->className, className))
             return it;
     }
 
@@ -84,7 +84,7 @@ gitem_t *FindItem(const char *pickup_name) // C++20: STRING: Added const to char
     gitem_t *it;
 
     it = itemlist;
-    for (i = 0 ; i < game.num_items ; i++, it++) {
+    for (i = 0 ; i < game.numberOfItems ; i++, it++) {
         if (!it->pickupName)
             continue;
         if (!Q_stricmp(it->pickupName, pickup_name))
@@ -96,13 +96,13 @@ gitem_t *FindItem(const char *pickup_name) // C++20: STRING: Added const to char
 
 //======================================================================
 
-void DoRespawn(entity_t *ent)
+void DoRespawn(Entity *ent)
 {
     if (!ent)
         return;
 
     if (ent->team) {
-        entity_t *master;
+        Entity *master;
         int count;
         int choice;
 
@@ -125,7 +125,7 @@ void DoRespawn(entity_t *ent)
     ent->state.event = EntityEvent::ItemRespawn;
 }
 
-void SetRespawn(entity_t *ent, float delay)
+void SetRespawn(Entity *ent, float delay)
 {
     if (!ent)
         return;
@@ -141,7 +141,7 @@ void SetRespawn(entity_t *ent, float delay)
 
 //======================================================================
 
-qboolean Pickup_Powerup(entity_t *ent, entity_t *other)
+qboolean Pickup_Powerup(Entity *ent, Entity *other)
 {
     int     quantity;
 
@@ -155,14 +155,14 @@ qboolean Pickup_Powerup(entity_t *ent, entity_t *other)
     other->client->persistent.inventory[ITEM_INDEX(ent->item)]++;
 
     if (deathmatch->value) {
-        if (!(ent->spawnFlags & DROPPED_ITEM))
+        if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem))
             SetRespawn(ent, ent->item->quantity);
     }
 
     return true;
 }
 
-void Drop_General(entity_t *ent, gitem_t *item)
+void Drop_General(Entity *ent, gitem_t *item)
 {
     Drop_Item(ent, item);
     ent->client->persistent.inventory[ITEM_INDEX(item)]--;
@@ -171,7 +171,7 @@ void Drop_General(entity_t *ent, gitem_t *item)
 
 //======================================================================
 
-qboolean Add_Ammo(entity_t *ent, gitem_t *item, int count)
+qboolean Add_Ammo(Entity *ent, gitem_t *item, int count)
 {
     int         index;
     int         max;
@@ -210,7 +210,7 @@ qboolean Add_Ammo(entity_t *ent, gitem_t *item, int count)
     return true;
 }
 
-qboolean Pickup_Ammo(entity_t *ent, entity_t *other)
+qboolean Pickup_Ammo(Entity *ent, Entity *other)
 {
     int         oldcount;
     int         count;
@@ -234,14 +234,14 @@ qboolean Pickup_Ammo(entity_t *ent, entity_t *other)
             other->client->newWeapon = ent->item;
     }
 
-    if (!(ent->spawnFlags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && (deathmatch->value))
+    if (!(ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem)) && (deathmatch->value))
         SetRespawn(ent, 30);
     return true;
 }
 
-void Drop_Ammo(entity_t *ent, gitem_t *item)
+void Drop_Ammo(Entity *ent, gitem_t *item)
 {
-    entity_t *dropped;
+    Entity *dropped;
     int     index;
 
     index = ITEM_INDEX(item);
@@ -267,7 +267,7 @@ void Drop_Ammo(entity_t *ent, gitem_t *item)
 
 //======================================================================
 
-void MegaHealth_think(entity_t *self)
+void MegaHealth_think(Entity *self)
 {
     if (self->owner->health > self->owner->maxHealth) {
         self->nextThink = level.time + 1;
@@ -275,13 +275,13 @@ void MegaHealth_think(entity_t *self)
         return;
     }
 
-    if (!(self->spawnFlags & DROPPED_ITEM) && (deathmatch->value))
+    if (!(self->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
         SetRespawn(self, 20);
     else
         G_FreeEntity(self);
 }
 
-qboolean Pickup_Health(entity_t *ent, entity_t *other)
+qboolean Pickup_Health(Entity *ent, Entity *other)
 {
     if (!(ent->style & HEALTH_IGNORE_MAX))
         if (other->health >= other->maxHealth)
@@ -302,7 +302,7 @@ qboolean Pickup_Health(entity_t *ent, entity_t *other)
         ent->serverFlags |= EntityServerFlags::NoClient;
         ent->solid = Solid::Not;
     } else {
-        if (!(ent->spawnFlags & DROPPED_ITEM) && (deathmatch->value))
+        if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
             SetRespawn(ent, 30);
     }
 
@@ -311,7 +311,7 @@ qboolean Pickup_Health(entity_t *ent, entity_t *other)
 
 //======================================================================
 
-int ArmorIndex(entity_t *ent)
+int ArmorIndex(Entity *ent)
 {
     if (!ent->client)
         return 0;
@@ -322,7 +322,7 @@ int ArmorIndex(entity_t *ent)
     return 0;
 }
 
-qboolean Pickup_Armor(entity_t *ent, entity_t *other)
+qboolean Pickup_Armor(Entity *ent, Entity *other)
 {
     int             old_armor_index;
     gitem_armor_t   *oldinfo;
@@ -339,20 +339,20 @@ qboolean Pickup_Armor(entity_t *ent, entity_t *other)
 
     // if player has no armor, just use it
     if (!old_armor_index) {
-        other->client->persistent.inventory[ITEM_INDEX(ent->item)] = newinfo->base_count;
+        other->client->persistent.inventory[ITEM_INDEX(ent->item)] = newinfo->baseCount;
     }
 
     // use the better armor
     else {
         oldinfo = &bodyarmor_info;
 
-        if (newinfo->normal_protection > oldinfo->normal_protection) {
+        if (newinfo->normalProtection > oldinfo->normalProtection) {
             // calc new armor values
-            salvage = oldinfo->normal_protection / newinfo->normal_protection;
+            salvage = oldinfo->normalProtection / newinfo->normalProtection;
             salvagecount = salvage * other->client->persistent.inventory[old_armor_index];
-            newcount = newinfo->base_count + salvagecount;
-            if (newcount > newinfo->max_count)
-                newcount = newinfo->max_count;
+            newcount = newinfo->baseCount + salvagecount;
+            if (newcount > newinfo->maxCount)
+                newcount = newinfo->maxCount;
 
             // zero count of old armor so it goes away
             other->client->persistent.inventory[old_armor_index] = 0;
@@ -361,11 +361,11 @@ qboolean Pickup_Armor(entity_t *ent, entity_t *other)
             other->client->persistent.inventory[ITEM_INDEX(ent->item)] = newcount;
         } else {
             // calc new armor values
-            salvage = newinfo->normal_protection / oldinfo->normal_protection;
-            salvagecount = salvage * newinfo->base_count;
+            salvage = newinfo->normalProtection / oldinfo->normalProtection;
+            salvagecount = salvage * newinfo->baseCount;
             newcount = other->client->persistent.inventory[old_armor_index] + salvagecount;
-            if (newcount > oldinfo->max_count)
-                newcount = oldinfo->max_count;
+            if (newcount > oldinfo->maxCount)
+                newcount = oldinfo->maxCount;
 
             // if we're already maxed out then we don't need the new armor
             if (other->client->persistent.inventory[old_armor_index] >= newcount)
@@ -376,7 +376,7 @@ qboolean Pickup_Armor(entity_t *ent, entity_t *other)
         }
     }
 
-    if (!(ent->spawnFlags & DROPPED_ITEM) && (deathmatch->value))
+    if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
         SetRespawn(ent, 20);
 
     return true;
@@ -389,7 +389,7 @@ qboolean Pickup_Armor(entity_t *ent, entity_t *other)
 Touch_Item
 ===============
 */
-void Touch_Item(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t *surf)
+void Touch_Item(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf)
 {
     qboolean    taken;
 
@@ -429,15 +429,15 @@ void Touch_Item(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t *sur
         }
     }
 
-    if (!(ent->spawnFlags & ITEM_TARGETS_USED)) {
+    if (!(ent->spawnFlags & ItemSpawnFlags::TargetsUsed)) {
         UTIL_UseTargets(ent, other);
-        ent->spawnFlags |= ITEM_TARGETS_USED;
+        ent->spawnFlags |= ItemSpawnFlags::TargetsUsed;
     }
 
     if (!taken)
         return;
 
-    if (!((coop->value) && (ent->item->flags & IT_STAY_COOP)) || (ent->spawnFlags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM))) {
+    if (!((coop->value) && (ent->item->flags & IT_STAY_COOP)) || (ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem))) {
         if (ent->flags & EntityFlags::Respawn)
             ent->flags &= ~EntityFlags::Respawn;
         else
@@ -447,7 +447,7 @@ void Touch_Item(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t *sur
 
 //======================================================================
 
-void drop_temp_touch(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t *surf)
+void drop_temp_touch(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf)
 {
     if (other == ent->owner)
         return;
@@ -455,7 +455,7 @@ void drop_temp_touch(entity_t *ent, entity_t *other, cplane_t *plane, csurface_t
     Touch_Item(ent, other, plane, surf);
 }
 
-void drop_make_touchable(entity_t *ent)
+void drop_make_touchable(Entity *ent)
 {
     ent->Touch = Touch_Item;
     if (deathmatch->value) {
@@ -464,17 +464,17 @@ void drop_make_touchable(entity_t *ent)
     }
 }
 
-entity_t *Drop_Item(entity_t *ent, gitem_t *item)
+Entity *Drop_Item(Entity *ent, gitem_t *item)
 {
-    entity_t *dropped;
+    Entity *dropped;
     vec3_t  forward, right;
     vec3_t  offset;
 
     dropped = G_Spawn();
 
-    dropped->classname = item->classname;
+    dropped->className = item->className;
     dropped->item = item;
-    dropped->spawnFlags = DROPPED_ITEM;
+    dropped->spawnFlags = ItemSpawnFlags::DroppedItem;
     dropped->state.effects = item->worldModelFlags;
     dropped->state.renderfx = RenderEffects::Glow;
     VectorSet(dropped->mins, -15, -15, -15);
@@ -510,12 +510,12 @@ entity_t *Drop_Item(entity_t *ent, gitem_t *item)
     return dropped;
 }
 
-void Use_Item(entity_t *ent, entity_t *other, entity_t *activator)
+void Use_Item(Entity *ent, Entity *other, Entity *activator)
 {
     ent->serverFlags &= ~EntityServerFlags::NoClient;
     ent->Use = NULL;
 
-    if (ent->spawnFlags & ITEM_NO_TOUCH) {
+    if (ent->spawnFlags & ItemSpawnFlags::NoTouch) {
         ent->solid = Solid::BoundingBox;
         ent->Touch = NULL;
     } else {
@@ -533,7 +533,7 @@ void Use_Item(entity_t *ent, entity_t *other, entity_t *activator)
 droptofloor
 ================
 */
-void droptofloor(entity_t *ent)
+void droptofloor(Entity *ent)
 {
     trace_t     tr;
     vec3_t      dest;
@@ -554,7 +554,7 @@ void droptofloor(entity_t *ent)
 
     tr = gi.Trace(ent->state.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
     if (tr.startSolid) {
-        gi.DPrintf("droptofloor: %s startsolid at %s\n", ent->classname, Vec3ToString(ent->state.origin));
+        gi.DPrintf("droptofloor: %s startsolid at %s\n", ent->className, Vec3ToString(ent->state.origin));
         G_FreeEntity(ent);
         return;
     }
@@ -574,14 +574,14 @@ void droptofloor(entity_t *ent)
         }
     }
 
-    if (ent->spawnFlags & ITEM_NO_TOUCH) {
+    if (ent->spawnFlags & ItemSpawnFlags::NoTouch) {
         ent->solid = Solid::BoundingBox;
         ent->Touch = NULL;
         ent->state.effects &= ~EntityEffectType::Rotate;
         ent->state.renderfx &= ~RenderEffects::Glow;
     }
 
-    if (ent->spawnFlags & ITEM_TRIGGER_SPAWN) {
+    if (ent->spawnFlags & ItemSpawnFlags::TriggerSpawn) {
         ent->serverFlags |= EntityServerFlags::NoClient;
         ent->solid = Solid::Not;
         ent->Use = Use_Item;
@@ -638,7 +638,7 @@ void PrecacheItem(gitem_t *it)
 
         len = s - start;
         if (len >= MAX_QPATH || len < 5)
-            gi.Error("PrecacheItem: %s has bad precache string", it->classname);
+            gi.Error("PrecacheItem: %s has bad precache string", it->className);
         memcpy(data, start, len);
         data[len] = 0;
         if (*s)
@@ -666,14 +666,14 @@ Items can't be immediately dropped to floor, because they might
 be on an entity that hasn't spawned yet.
 ============
 */
-void SpawnItem(entity_t *ent, gitem_t *item)
+void SpawnItem(Entity *ent, gitem_t *item)
 {
     PrecacheItem(item);
 
     if (ent->spawnFlags) {
-        if (strcmp(ent->classname, "key_power_cube") != 0) {
+        if (strcmp(ent->className, "key_power_cube") != 0) {
             ent->spawnFlags = 0;
-            gi.DPrintf("%s at %s has invalid spawnFlags set\n", ent->classname, Vec3ToString(ent->state.origin));
+            gi.DPrintf("%s at %s has invalid spawnFlags set\n", ent->className, Vec3ToString(ent->state.origin));
         }
     }
 
@@ -705,7 +705,7 @@ void SpawnItem(entity_t *ent, gitem_t *item)
         }
     }
 
-    if (coop->value && (strcmp(ent->classname, "key_power_cube") == 0)) {
+    if (coop->value && (strcmp(ent->className, "key_power_cube") == 0)) {
         ent->spawnFlags |= (1 << (8 + level.powerCubes));
         level.powerCubes++;
     }
@@ -933,7 +933,7 @@ gitem_t itemlist[] = {
 
 /*QUAKED item_health (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
-void SP_item_health(entity_t *self)
+void SP_item_health(Entity *self)
 {
     if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
         G_FreeEntity(self);
@@ -948,7 +948,7 @@ void SP_item_health(entity_t *self)
 
 /*QUAKED item_health_small (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
-void SP_item_health_small(entity_t *self)
+void SP_item_health_small(Entity *self)
 {
     if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
         G_FreeEntity(self);
@@ -964,7 +964,7 @@ void SP_item_health_small(entity_t *self)
 
 /*QUAKED item_health_large (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
-void SP_item_health_large(entity_t *self)
+void SP_item_health_large(Entity *self)
 {
     if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
         G_FreeEntity(self);
@@ -979,7 +979,7 @@ void SP_item_health_large(entity_t *self)
 
 /*QUAKED item_health_mega (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
-void SP_item_health_mega(entity_t *self)
+void SP_item_health_mega(Entity *self)
 {
     if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
         G_FreeEntity(self);
@@ -996,7 +996,7 @@ void SP_item_health_mega(entity_t *self)
 
 void InitItems(void)
 {
-    game.num_items = sizeof(itemlist) / sizeof(itemlist[0]) - 1;
+    game.numberOfItems = sizeof(itemlist) / sizeof(itemlist[0]) - 1;
 }
 
 
@@ -1013,7 +1013,7 @@ void SetItemNames(void)
     int     i;
     gitem_t *it;
 
-    for (i = 0 ; i < game.num_items ; i++) {
+    for (i = 0 ; i < game.numberOfItems ; i++) {
         it = &itemlist[i];
         gi.configstring(ConfigStrings::Items+ i, it->pickupName);
     }

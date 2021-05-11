@@ -109,7 +109,7 @@ static void CLG_KeyDown(KeyBinding* b)
     if (b->state & BUTTON_STATE_HELD)
         return;        // still down
 
-    // save timestamp
+    // save timeStamp
     c = clgi.Cmd_Argv(2);
     b->downtime = atoi(c);
     if (!b->downtime) {
@@ -154,7 +154,7 @@ static void CLG_KeyUp(KeyBinding* b)
     if (!(b->state & BUTTON_STATE_HELD))
         return;        // still up (this should not happen)
 
-    // save timestamp
+    // save timeStamp
     c = clgi.Cmd_Argv(2);
     uptime = atoi(c);
     if (!uptime) {

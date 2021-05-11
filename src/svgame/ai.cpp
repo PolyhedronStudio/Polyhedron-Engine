@@ -20,10 +20,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "g_local.h"         // Include SVGame funcs.
 #include "utils.h"           // Include Utilities funcs.
 
-qboolean FindTarget(entity_t *self);
+qboolean FindTarget(Entity *self);
 extern cvar_t   *maxClients;
 
-qboolean ai_checkattack(entity_t *self, float dist);
+qboolean ai_checkattack(Entity *self, float dist);
 
 qboolean    enemy_vis;
 int         enemy_range;
@@ -36,24 +36,24 @@ float       enemy_yaw;
 =================
 AI_SetSightClient
 
-Called once each frame to set level.sight_client to the
+Called once each frame to set level.sightClient to the
 player to be checked for in findtarget.
 
-If all clients are either dead or in notarget, sight_client
+If all clients are either dead or in notarget, sightClient
 will be null.
 
-In coop games, sight_client will cycle between the clients.
+In coop games, sightClient will cycle between the clients.
 =================
 */
 void AI_SetSightClient(void)
 {
-    entity_t *ent;
+    Entity *ent;
     int     start, check;
 
-    if (level.sight_client == NULL)
+    if (level.sightClient == NULL)
         start = 1;
     else
-        start = level.sight_client - g_entities;
+        start = level.sightClient - g_entities;
 
     check = start;
     while (1) {
@@ -64,11 +64,11 @@ void AI_SetSightClient(void)
         if (ent->inUse
             && ent->health > 0
             && !(ent->flags & EntityFlags::NoTarget)) {
-            level.sight_client = ent;
+            level.sightClient = ent;
             return;     // got one
         }
         if (check == start) {
-            level.sight_client = NULL;
+            level.sightClient = NULL;
             return;     // nobody to see
         }
     }
@@ -84,7 +84,7 @@ Move the specified distance at current facing.
 This replaces the QC functions: ai_forward, ai_back, ai_pain, and ai_painforward
 ==============
 */
-void ai_move(entity_t *self, float dist)
+void ai_move(Entity *self, float dist)
 {
     M_walkmove(self, self->state.angles[vec3_t::Yaw], dist);
 }
@@ -98,7 +98,7 @@ Used for standing around and looking for players
 Distance is for slight position adjustments needed by the animations
 ==============
 */
-void ai_stand(entity_t *self, float dist)
+void ai_stand(Entity *self, float dist)
 {
     vec3_t  v;
 
@@ -146,7 +146,7 @@ ai_walk
 The monster is walking it's beat
 =============
 */
-void ai_walk(entity_t *self, float dist)
+void ai_walk(Entity *self, float dist)
 {
     M_MoveToGoal(self, dist);
 
@@ -173,7 +173,7 @@ Turns towards target and advances
 Use this call with a distnace of 0 to replace ai_face
 ==============
 */
-void ai_charge(entity_t *self, float dist)
+void ai_charge(Entity *self, float dist)
 {
     vec3_t  v;
 
@@ -194,7 +194,7 @@ don't move, but turn towards ideal_yaw
 Distance is for slight position adjustments needed by the animations
 =============
 */
-void ai_turn(entity_t *self, float dist)
+void ai_turn(Entity *self, float dist)
 {
     if (dist)
         M_walkmove(self, self->state.angles[vec3_t::Yaw], dist);
@@ -243,7 +243,7 @@ returns the range catagorization of an entity reletive to self
 3   only triggered by damage
 =============
 */
-int range(entity_t *self, entity_t *other)
+int range(Entity *self, Entity *other)
 {
     vec3_t  v;
     float   len;
@@ -266,7 +266,7 @@ visible
 returns 1 if the entity is visible to self, even if not infront ()
 =============
 */
-qboolean visible(entity_t *self, entity_t *other)
+qboolean visible(Entity *self, Entity *other)
 {
     vec3_t  spot1;
     vec3_t  spot2;
@@ -291,7 +291,7 @@ infront
 returns 1 if the entity is in front (in sight) of self
 =============
 */
-qboolean infront(entity_t *self, entity_t *other)
+qboolean infront(Entity *self, Entity *other)
 {
     vec3_t  vec;
     float   dot;
@@ -310,7 +310,7 @@ qboolean infront(entity_t *self, entity_t *other)
 
 //============================================================================
 
-void HuntTarget(entity_t *self)
+void HuntTarget(Entity *self)
 {
     vec3_t  vec;
 
@@ -326,13 +326,13 @@ void HuntTarget(entity_t *self)
         AttackFinished(self, 1);
 }
 
-void FoundTarget(entity_t *self)
+void FoundTarget(Entity *self)
 {
     // let other monsters see this monster for a while
     if (self->enemy->client) {
-        level.sight_entity = self;
-        level.sight_entity_framenum = level.frameNumber;
-        level.sight_entity->lightLevel = 128;
+        level.sightEntity = self;
+        level.sightEntityFrameNumber = level.frameNumber;
+        level.sightEntity->lightLevel = 128;
     }
 
     self->showHostile = level.time + 1;        // wake up other monsters
@@ -349,7 +349,7 @@ void FoundTarget(entity_t *self)
     if (!self->moveTargetPtr) {
         self->goalEntityPtr = self->moveTargetPtr = self->enemy;
         HuntTarget(self);
-        gi.DPrintf("%s at %s, combatTarget %s not found\n", self->classname, vec3_to_str(self->state.origin), self->combatTarget);
+        gi.DPrintf("%s at %s, combatTarget %s not found\n", self->className, vec3_to_str(self->state.origin), self->combatTarget);
         return;
     }
 
@@ -383,15 +383,15 @@ checked each frame.  This means multi player games will have slightly
 slower noticing monsters.
 ============
 */
-qboolean FindTarget(entity_t *self)
+qboolean FindTarget(Entity *self)
 {
-    entity_t     *client;
+    Entity     *client;
     qboolean    heardit;
     int         r;
 
     if (self->monsterInfo.aiflags & AI_GOOD_GUY) {
-        if (self->goalEntityPtr && self->goalEntityPtr->inUse && self->goalEntityPtr->classname) {
-            if (strcmp(self->goalEntityPtr->classname, "target_actor") == 0)
+        if (self->goalEntityPtr && self->goalEntityPtr->inUse && self->goalEntityPtr->className) {
+            if (strcmp(self->goalEntityPtr->className, "target_actor") == 0)
                 return false;
         }
 
@@ -411,19 +411,19 @@ qboolean FindTarget(entity_t *self)
 // but not weapon impact/explosion noises
 
     heardit = false;
-    if ((level.sight_entity_framenum >= (level.frameNumber - 1)) && !(self->spawnFlags & 1)) {
-        client = level.sight_entity;
+    if ((level.sightEntityFrameNumber >= (level.frameNumber - 1)) && !(self->spawnFlags & 1)) {
+        client = level.sightEntity;
         if (client->enemy == self->enemy) {
             return false;
         }
-    } else if (level.sound_entity_framenum >= (level.frameNumber - 1)) {
-        client = level.sound_entity;
+    } else if (level.soundEntityFrameNumber >= (level.frameNumber - 1)) {
+        client = level.soundEntity;
         heardit = true;
-    } else if (!(self->enemy) && (level.sound2_entity_framenum >= (level.frameNumber - 1)) && !(self->spawnFlags & 1)) {
-        client = level.sound2_entity;
+    } else if (!(self->enemy) && (level.sound2EntityFrameNumber >= (level.frameNumber - 1)) && !(self->spawnFlags & 1)) {
+        client = level.sound2Entity;
         heardit = true;
     } else {
-        client = level.sight_client;
+        client = level.sightClient;
         if (!client)
             return false;   // no clients to get mad at
     }
@@ -477,7 +477,7 @@ qboolean FindTarget(entity_t *self)
 
         self->enemy = client;
 
-        if (strcmp(self->enemy->classname, "player_noise") != 0) {
+        if (strcmp(self->enemy->className, "player_noise") != 0) {
             self->monsterInfo.aiflags &= ~AI_SOUND_TARGET;
 
             if (!self->enemy->client) {
@@ -538,7 +538,7 @@ FacingIdeal
 
 ============
 */
-qboolean FacingIdeal(entity_t *self)
+qboolean FacingIdeal(Entity *self)
 {
     float   delta;
 
@@ -551,7 +551,7 @@ qboolean FacingIdeal(entity_t *self)
 
 //=============================================================================
 
-qboolean M_CheckAttack(entity_t *self)
+qboolean M_CheckAttack(Entity *self)
 {
     vec3_t  spot1, spot2;
     float   chance;
@@ -634,7 +634,7 @@ ai_run_melee
 Turn and close until within an angle to launch a melee attack
 =============
 */
-void ai_run_melee(entity_t *self)
+void ai_run_melee(Entity *self)
 {
     self->idealYaw = enemy_yaw;
     M_ChangeYaw(self);
@@ -653,7 +653,7 @@ ai_run_missile
 Turn in place until within an angle to launch a missile attack
 =============
 */
-void ai_run_missile(entity_t *self)
+void ai_run_missile(Entity *self)
 {
     self->idealYaw = enemy_yaw;
     M_ChangeYaw(self);
@@ -672,7 +672,7 @@ ai_run_slide
 Strafe sideways, but stay at aproximately the same range
 =============
 */
-void ai_run_slide(entity_t *self, float distance)
+void ai_run_slide(Entity *self, float distance)
 {
     float   ofs;
 
@@ -700,7 +700,7 @@ Decides if we're going to attack or do something else
 used by ai_run and ai_stand
 =============
 */
-qboolean ai_checkattack(entity_t *self, float dist)
+qboolean ai_checkattack(Entity *self, float dist)
 {
     vec3_t      temp;
     qboolean    hesDeadJim;
@@ -819,13 +819,13 @@ ai_run
 The monster has an enemy it is trying to kill
 =============
 */
-void ai_run(entity_t *self, float dist)
+void ai_run(Entity *self, float dist)
 {
     vec3_t      v;
-    entity_t     *tempgoal;
-    entity_t     *save;
+    Entity     *tempgoal;
+    Entity     *save;
     qboolean    isNew; // CPP: Renamed, because new is a keyword in C++
-    entity_t     *marker;
+    Entity     *marker;
     float       d1, d2;
     trace_t     tr;
     vec3_t      v_forward, v_right;
@@ -920,7 +920,7 @@ void ai_run(entity_t *self, float dist)
 
         if (marker) {
             VectorCopy(marker->state.origin, self->monsterInfo.last_sighting);
-            self->monsterInfo.trail_time = marker->timestamp;
+            self->monsterInfo.trail_time = marker->timeStamp;
             self->state.angles[vec3_t::Yaw] = self->idealYaw = marker->state.angles[vec3_t::Yaw];
 //          dprint("heading is "); dprint(ftos(self.ideal_yaw)); dprint("\n");
 

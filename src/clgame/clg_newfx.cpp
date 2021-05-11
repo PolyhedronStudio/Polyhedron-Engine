@@ -82,7 +82,7 @@ void CLG_DebugTrail(vec3_t start, vec3_t end)
             return;
 
         p->time = cl->time;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
         VectorClear(p->vel);
         p->alpha = 1.0;
         p->alphavel = -0.1;
@@ -118,7 +118,7 @@ void CLG_SmokeTrail(vec3_t start, vec3_t end, int colorStart, int colorRun, int 
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
 
@@ -127,7 +127,7 @@ void CLG_SmokeTrail(vec3_t start, vec3_t end, int colorStart, int colorRun, int 
         p->color = colorStart + (rand() % colorRun);
         for (j = 0; j < 3; j++) {
             p->org[j] = move[j] + crand() * 3;
-            p->accel[j] = 0;
+            p->acceleration[j] = 0;
         }
         p->vel[2] = 20 + crand() * 5;
 
@@ -157,7 +157,7 @@ void CLG_ForceWall(vec3_t start, vec3_t end, int color)
             p = CLG_AllocParticle();
             if (!p)
                 return;
-            VectorClear(p->accel);
+            VectorClear(p->acceleration);
 
             p->time = cl->time;
 
@@ -166,7 +166,7 @@ void CLG_ForceWall(vec3_t start, vec3_t end, int color)
             p->color = color;
             for (j = 0; j < 3; j++) {
                 p->org[j] = move[j] + crand() * 3;
-                p->accel[j] = 0;
+                p->acceleration[j] = 0;
             }
             p->vel[0] = 0;
             p->vel[1] = 0;
@@ -206,8 +206,8 @@ void CLG_GenericParticleEffect(vec3_t org, vec3_t dir, int color, int count, int
             p->vel[j] = crand() * 20;
         }
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (0.5 + frand() * alphavel);
@@ -241,7 +241,7 @@ void CLG_BubbleTrail2(vec3_t start, vec3_t end, int dist)
         if (!p)
             return;
 
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
         p->time = cl->time;
 
         p->alpha = 1.0;
@@ -298,7 +298,7 @@ void CLG_Heatbeam(vec3_t start, vec3_t forward)
                 return;
 
             p->time = cl->time;
-            VectorClear(p->accel);
+            VectorClear(p->acceleration);
             variance = 0.5;
             c = std::cosf(rot) * variance;
             s = std::sinf(rot) * variance;
@@ -360,8 +360,8 @@ void CLG_ParticleSteamEffect(vec3_t org, vec3_t dir, int color, int count, int m
         d = crand() * magnitude / 3;
         VectorMA(p->vel, d, u, p->vel);
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY / 2;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY / 2;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);
@@ -396,8 +396,8 @@ void CLG_ParticleSteamEffect2(cl_sustain_t* self)
         d = crand() * self->magnitude / 3;
         VectorMA(p->vel, d, u, p->vel);
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY / 2;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY / 2;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);
@@ -440,7 +440,7 @@ void CLG_TrackerTrail(vec3_t start, vec3_t end, int particleColor)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
 
@@ -451,7 +451,7 @@ void CLG_TrackerTrail(vec3_t start, vec3_t end, int particleColor)
         VectorMA(move, 8 * cos(dist), up, p->org);
         for (j = 0; j < 3; j++) {
             p->vel[j] = 0;
-            p->accel[j] = 0;
+            p->acceleration[j] = 0;
         }
         p->vel[2] = 5;
 
@@ -469,7 +469,7 @@ void CLG_Tracker_Shell(vec3_t origin)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
 
@@ -496,7 +496,7 @@ void CLG_MonsterPlasma_Shell(vec3_t origin)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
 
@@ -527,7 +527,7 @@ void CLG_Widowbeamout(cl_sustain_t* self)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
 
@@ -558,7 +558,7 @@ void CLG_Nukeblast(cl_sustain_t* self)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
 
@@ -585,7 +585,7 @@ void CLG_Tracker_Explode(vec3_t  origin)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
 
@@ -632,7 +632,7 @@ void CLG_TagTrail(vec3_t start, vec3_t end, int color)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
 
@@ -642,7 +642,7 @@ void CLG_TagTrail(vec3_t start, vec3_t end, int color)
         for (j = 0; j < 3; j++) {
             p->org[j] = move[j] + crand() * 16;
             p->vel[j] = crand() * 5;
-            p->accel[j] = 0;
+            p->acceleration[j] = 0;
         }
 
         VectorAdd(move, vec, move);
@@ -672,8 +672,8 @@ void CLG_ColorExplosionParticles(vec3_t org, int color, int run)
             p->vel[j] = (rand() % 256) - 128;
         }
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -0.4 / (0.6 + frand() * 0.2);
@@ -711,7 +711,7 @@ void CLG_ParticleSmokeEffect(vec3_t org, vec3_t dir, int color, int count, int m
         d = crand() * magnitude / 3;
         VectorMA(p->vel, d, u, p->vel);
 
-        p->accel[0] = p->accel[1] = p->accel[2] = 0;
+        p->acceleration[0] = p->acceleration[1] = p->acceleration[2] = 0;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);
@@ -747,8 +747,8 @@ void CLG_BlasterParticles2(vec3_t org, vec3_t dir, unsigned int color)
             p->vel[j] = dir[j] * 30 + crand() * 40;
         }
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = -PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);
@@ -785,7 +785,7 @@ void CLG_BlasterTrail2(vec3_t start, vec3_t end)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
 
@@ -795,7 +795,7 @@ void CLG_BlasterTrail2(vec3_t start, vec3_t end)
         for (j = 0; j < 3; j++) {
             p->org[j] = move[j] + crand();
             p->vel[j] = crand() * 5;
-            p->accel[j] = 0;
+            p->acceleration[j] = 0;
         }
 
         VectorAdd(move, vec, move);
@@ -830,7 +830,7 @@ void CLG_IonripperTrail(vec3_t start, vec3_t ent)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
         p->alpha = 0.5;
@@ -839,7 +839,7 @@ void CLG_IonripperTrail(vec3_t start, vec3_t ent)
 
         for (j = 0; j < 3; j++) {
             p->org[j] = move[j];
-            p->accel[j] = 0;
+            p->acceleration[j] = 0;
         }
         if (left) {
             left = 0;
@@ -891,7 +891,7 @@ void CLG_TrapParticles(r_entity_t* ent)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->accel);
+        VectorClear(p->acceleration);
 
         p->time = cl->time;
 
@@ -901,9 +901,9 @@ void CLG_TrapParticles(r_entity_t* ent)
         for (j = 0; j < 3; j++) {
             p->org[j] = move[j] + crand();
             p->vel[j] = crand() * 15;
-            p->accel[j] = 0;
+            p->acceleration[j] = 0;
         }
-        p->accel[2] = PARTICLE_GRAVITY;
+        p->acceleration[2] = PARTICLE_GRAVITY;
 
         VectorAdd(move, vec, move);
     }
@@ -943,8 +943,8 @@ void CLG_TrapParticles(r_entity_t* ent)
                     vel = 50 + (rand() & 63);
                     VectorScale(dir, vel, p->vel);
 
-                    p->accel[0] = p->accel[1] = 0;
-                    p->accel[2] = -PARTICLE_GRAVITY;
+                    p->acceleration[0] = p->acceleration[1] = 0;
+                    p->acceleration[2] = -PARTICLE_GRAVITY;
                 }
     }
 }
@@ -974,8 +974,8 @@ void CLG_ParticleEffect3(vec3_t org, vec3_t dir, int color, int count)
             p->vel[j] = crand() * 20;
         }
 
-        p->accel[0] = p->accel[1] = 0;
-        p->accel[2] = PARTICLE_GRAVITY;
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = PARTICLE_GRAVITY;
         p->alpha = 1.0;
 
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);

@@ -24,7 +24,12 @@
 //
 //======================================================================
 //
-void weapon_supershotgun_fire(entity_t* ent)
+static constexpr int32_t DEFAULT_SUPERSHOTGUN_HSPREAD = 1000;
+static constexpr int32_t DEFAULT_SUPERSHOTGUN_VSPREAD = 500;
+
+static constexpr int32_t DEFAULT_SUPERSHOTGUN_COUNT = 20;
+
+void weapon_supershotgun_fire(Entity* ent)
 {
     vec3_t      start;
     vec3_t      forward, right;
@@ -50,10 +55,10 @@ void weapon_supershotgun_fire(entity_t* ent)
     v[vec3_t::PYR::Yaw] = ent->client->aimAngles[vec3_t::PYR::Yaw] - 5;
     v[vec3_t::PYR::Roll] = ent->client->aimAngles[vec3_t::PYR::Roll];
     vec3_vectors(v, &forward, NULL, NULL);
-    fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
+    fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
     v[vec3_t::PYR::Yaw] = ent->client->aimAngles[vec3_t::PYR::Yaw] + 5;
     vec3_vectors(v, &forward, NULL, NULL);
-    fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
+    fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
 
     // send muzzle flash
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
@@ -68,7 +73,7 @@ void weapon_supershotgun_fire(entity_t* ent)
         ent->client->persistent.inventory[ent->client->ammoIndex] -= 2;
 }
 
-void Weapon_SuperShotgun(entity_t* ent)
+void Weapon_SuperShotgun(Entity* ent)
 {
     static int  pause_frames[] = { 29, 42, 57, 0 };
     static int  fire_frames[] = { 7, 0 };

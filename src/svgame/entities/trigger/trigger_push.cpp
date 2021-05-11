@@ -17,9 +17,9 @@
 
 static int windsound;
 
-void trigger_push_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
+void trigger_push_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
 {
-    if (strcmp(other->classname, "grenade") == 0) {
+    if (strcmp(other->className, "grenade") == 0) {
         VectorScale(self->moveDirection, self->speed * 10, other->velocity);
     }
     else if (other->health > 0) {
@@ -46,7 +46,7 @@ void trigger_push_touch(entity_t* self, entity_t* other, cplane_t* plane, csurfa
 Pushes the player
 "speed"     defaults to 1000
 */
-void SP_trigger_push(entity_t* self)
+void SP_trigger_push(Entity* self)
 {
     InitTrigger(self);
     windsound = gi.SoundIndex("misc/windfly.wav");

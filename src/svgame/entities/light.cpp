@@ -21,7 +21,7 @@ Default _cone value is 10 (used to set size of light for spotlights)
 
 #define START_OFF   1
 
-void light_use(entity_t* self, entity_t* other, entity_t* activator)
+void light_use(Entity* self, Entity* other, Entity* activator)
 {
     if (self->spawnFlags & START_OFF) {
         gi.configstring(ConfigStrings::Lights + self->style, self->customLightStyle);
@@ -33,7 +33,7 @@ void light_use(entity_t* self, entity_t* other, entity_t* activator)
     }
 }
 
-void SP_light(entity_t* self)
+void SP_light(Entity* self)
 {
     // no targeted lights in deathmatch, because they cause global messages
     if (!self->targetName || deathmatch->value) {

@@ -60,51 +60,51 @@
 // Support routines for movement (changes in origin using velocity)
 //
 
-void Brush_Move_Done(entity_t* ent)
+void Brush_Move_Done(Entity* ent)
 {
     VectorClear(ent->velocity);
-    ent->moveInfo.endfunc(ent);
+    ent->moveInfo.OnEndFunction(ent);
 }
 
-void Brush_Move_Final(entity_t* ent)
+void Brush_Move_Final(Entity* ent)
 {
-    if (ent->moveInfo.remaining_distance == 0) {
+    if (ent->moveInfo.remainingDistance == 0) {
         Brush_Move_Done(ent);
         return;
     }
 
-    VectorScale(ent->moveInfo.dir, ent->moveInfo.remaining_distance / FRAMETIME, ent->velocity);
+    VectorScale(ent->moveInfo.dir, ent->moveInfo.remainingDistance / FRAMETIME, ent->velocity);
 
     ent->Think = Brush_Move_Done;
     ent->nextThink = level.time + FRAMETIME;
 }
 
-void Brush_Move_Begin(entity_t* ent)
+void Brush_Move_Begin(Entity* ent)
 {
     float   frames;
 
-    if ((ent->moveInfo.speed * FRAMETIME) >= ent->moveInfo.remaining_distance) {
+    if ((ent->moveInfo.speed * FRAMETIME) >= ent->moveInfo.remainingDistance) {
         Brush_Move_Final(ent);
         return;
     }
     VectorScale(ent->moveInfo.dir, ent->moveInfo.speed, ent->velocity);
-    frames = floor((ent->moveInfo.remaining_distance / ent->moveInfo.speed) / FRAMETIME);
-    ent->moveInfo.remaining_distance -= frames * ent->moveInfo.speed * FRAMETIME;
+    frames = floor((ent->moveInfo.remainingDistance / ent->moveInfo.speed) / FRAMETIME);
+    ent->moveInfo.remainingDistance -= frames * ent->moveInfo.speed * FRAMETIME;
     ent->nextThink = level.time + (frames * FRAMETIME);
     ent->Think = Brush_Move_Final;
 }
 
-void Think_AccelMove(entity_t* ent);
+void Think_AccelMove(Entity* ent);
 
-void Brush_Move_Calc(entity_t* ent, const vec3_t &dest, void(*func)(entity_t*))
+void Brush_Move_Calc(Entity* ent, const vec3_t &dest, void(*func)(Entity*))
 {
     VectorClear(ent->velocity);
     VectorSubtract(dest, ent->state.origin, ent->moveInfo.dir);
-    ent->moveInfo.remaining_distance = VectorNormalize(ent->moveInfo.dir);
-    ent->moveInfo.endfunc = func;
+    ent->moveInfo.remainingDistance = VectorNormalize(ent->moveInfo.dir);
+    ent->moveInfo.OnEndFunction = func;
 
-    if (ent->moveInfo.speed == ent->moveInfo.accel && ent->moveInfo.speed == ent->moveInfo.decel) {
-        if (level.current_entity == ((ent->flags & EntityFlags::TeamSlave) ? ent->teamMasterPtr : ent)) {
+    if (ent->moveInfo.speed == ent->moveInfo.acceleration && ent->moveInfo.speed == ent->moveInfo.deceleration) {
+        if (level.currentEntity == ((ent->flags & EntityFlags::TeamSlave) ? ent->teamMasterPtr : ent)) {
             Brush_Move_Begin(ent);
         }
         else {
@@ -114,7 +114,7 @@ void Brush_Move_Calc(entity_t* ent, const vec3_t &dest, void(*func)(entity_t*))
     }
     else {
         // accelerative
-        ent->moveInfo.current_speed = 0;
+        ent->moveInfo.currentSpeed = 0;
         ent->Think = Think_AccelMove;
         ent->nextThink = level.time + FRAMETIME;
     }
@@ -122,36 +122,36 @@ void Brush_Move_Calc(entity_t* ent, const vec3_t &dest, void(*func)(entity_t*))
 
 
 //
-// Support routines for angular movement (changes in angle using avelocity)
+// Support routines for angular movement (changes in angle using angularVelocity)
 //
 
-void Brush_AngleMove_Done(entity_t* ent)
+void Brush_AngleMove_Done(Entity* ent)
 {
-    VectorClear(ent->avelocity);
-    ent->moveInfo.endfunc(ent);
+    VectorClear(ent->angularVelocity);
+    ent->moveInfo.OnEndFunction(ent);
 }
 
-void Brush_AngleMove_Final(entity_t* ent)
+void Brush_AngleMove_Final(Entity* ent)
 {
     vec3_t  move;
 
     if (ent->moveInfo.state == STATE_UP)
-        VectorSubtract(ent->moveInfo.end_angles, ent->state.angles, move);
+        VectorSubtract(ent->moveInfo.endAngles, ent->state.angles, move);
     else
-        VectorSubtract(ent->moveInfo.start_angles, ent->state.angles, move);
+        VectorSubtract(ent->moveInfo.startAngles, ent->state.angles, move);
 
     if (VectorCompare(move, vec3_origin)) {
         Brush_AngleMove_Done(ent);
         return;
     }
 
-    VectorScale(move, 1.0 / FRAMETIME, ent->avelocity);
+    VectorScale(move, 1.0 / FRAMETIME, ent->angularVelocity);
 
     ent->Think = Brush_AngleMove_Done;
     ent->nextThink = level.time + FRAMETIME;
 }
 
-void Brush_AngleMove_Begin(entity_t* ent)
+void Brush_AngleMove_Begin(Entity* ent)
 {
     vec3_t  destdelta;
     float   len;
@@ -160,9 +160,9 @@ void Brush_AngleMove_Begin(entity_t* ent)
 
     // set destdelta to the vector needed to move
     if (ent->moveInfo.state == STATE_UP)
-        VectorSubtract(ent->moveInfo.end_angles, ent->state.angles, destdelta);
+        VectorSubtract(ent->moveInfo.endAngles, ent->state.angles, destdelta);
     else
-        VectorSubtract(ent->moveInfo.start_angles, ent->state.angles, destdelta);
+        VectorSubtract(ent->moveInfo.startAngles, ent->state.angles, destdelta);
 
     // calculate length of vector
     len = VectorLength(destdelta);
@@ -178,18 +178,18 @@ void Brush_AngleMove_Begin(entity_t* ent)
     frames = floor(traveltime / FRAMETIME);
 
     // scale the destdelta vector by the time spent traveling to get velocity
-    VectorScale(destdelta, 1.0 / traveltime, ent->avelocity);
+    VectorScale(destdelta, 1.0 / traveltime, ent->angularVelocity);
 
     // set nextThink to trigger a Think when dest is reached
     ent->nextThink = level.time + frames * FRAMETIME;
     ent->Think = Brush_AngleMove_Final;
 }
 
-void Brush_AngleMove_Calc(entity_t* ent, void(*func)(entity_t*))
+void Brush_AngleMove_Calc(Entity* ent, void(*func)(Entity*))
 {
-    VectorClear(ent->avelocity);
-    ent->moveInfo.endfunc = func;
-    if (level.current_entity == ((ent->flags & EntityFlags::TeamSlave) ? ent->teamMasterPtr : ent)) {
+    VectorClear(ent->angularVelocity);
+    ent->moveInfo.OnEndFunction = func;
+    if (level.currentEntity == ((ent->flags & EntityFlags::TeamSlave) ? ent->teamMasterPtr : ent)) {
         Brush_AngleMove_Begin(ent);
     }
     else {
@@ -214,109 +214,109 @@ void plat_CalcAcceleratedMove(moveinfo_t* moveinfo)
     float   accel_dist;
     float   decel_dist;
 
-    moveinfo->move_speed = moveinfo->speed;
+    moveinfo->moveSpeed = moveinfo->speed;
 
-    if (moveinfo->remaining_distance < moveinfo->accel) {
-        moveinfo->current_speed = moveinfo->remaining_distance;
+    if (moveinfo->remainingDistance < moveinfo->acceleration) {
+        moveinfo->currentSpeed = moveinfo->remainingDistance;
         return;
     }
 
-    accel_dist = AccelerationDistance(moveinfo->speed, moveinfo->accel);
-    decel_dist = AccelerationDistance(moveinfo->speed, moveinfo->decel);
+    accel_dist = AccelerationDistance(moveinfo->speed, moveinfo->acceleration);
+    decel_dist = AccelerationDistance(moveinfo->speed, moveinfo->deceleration);
 
-    if ((moveinfo->remaining_distance - accel_dist - decel_dist) < 0) {
+    if ((moveinfo->remainingDistance - accel_dist - decel_dist) < 0) {
         float   f;
 
-        f = (moveinfo->accel + moveinfo->decel) / (moveinfo->accel * moveinfo->decel);
-        moveinfo->move_speed = (-2 + std::sqrtf(4 - 4 * f * (-2 * moveinfo->remaining_distance))) / (2 * f);
-        decel_dist = AccelerationDistance(moveinfo->move_speed, moveinfo->decel);
+        f = (moveinfo->acceleration + moveinfo->deceleration) / (moveinfo->acceleration * moveinfo->deceleration);
+        moveinfo->moveSpeed = (-2 + std::sqrtf(4 - 4 * f * (-2 * moveinfo->remainingDistance))) / (2 * f);
+        decel_dist = AccelerationDistance(moveinfo->moveSpeed, moveinfo->deceleration);
     }
 
-    moveinfo->decel_distance = decel_dist;
+    moveinfo->deceleratedDistance = decel_dist;
 }
 
 void plat_Accelerate(moveinfo_t* moveinfo)
 {
     // are we decelerating?
-    if (moveinfo->remaining_distance <= moveinfo->decel_distance) {
-        if (moveinfo->remaining_distance < moveinfo->decel_distance) {
-            if (moveinfo->next_speed) {
-                moveinfo->current_speed = moveinfo->next_speed;
-                moveinfo->next_speed = 0;
+    if (moveinfo->remainingDistance <= moveinfo->deceleratedDistance) {
+        if (moveinfo->remainingDistance < moveinfo->deceleratedDistance) {
+            if (moveinfo->nextSpeed) {
+                moveinfo->currentSpeed = moveinfo->nextSpeed;
+                moveinfo->nextSpeed = 0;
                 return;
             }
-            if (moveinfo->current_speed > moveinfo->decel)
-                moveinfo->current_speed -= moveinfo->decel;
+            if (moveinfo->currentSpeed > moveinfo->deceleration)
+                moveinfo->currentSpeed -= moveinfo->deceleration;
         }
         return;
     }
 
     // are we at full speed and need to start decelerating during this move?
-    if (moveinfo->current_speed == moveinfo->move_speed)
-        if ((moveinfo->remaining_distance - moveinfo->current_speed) < moveinfo->decel_distance) {
+    if (moveinfo->currentSpeed == moveinfo->moveSpeed)
+        if ((moveinfo->remainingDistance - moveinfo->currentSpeed) < moveinfo->deceleratedDistance) {
             float   p1_distance;
             float   p2_distance;
             float   distance;
 
-            p1_distance = moveinfo->remaining_distance - moveinfo->decel_distance;
-            p2_distance = moveinfo->move_speed * (1.0 - (p1_distance / moveinfo->move_speed));
+            p1_distance = moveinfo->remainingDistance - moveinfo->deceleratedDistance;
+            p2_distance = moveinfo->moveSpeed * (1.0 - (p1_distance / moveinfo->moveSpeed));
             distance = p1_distance + p2_distance;
-            moveinfo->current_speed = moveinfo->move_speed;
-            moveinfo->next_speed = moveinfo->move_speed - moveinfo->decel * (p2_distance / distance);
+            moveinfo->currentSpeed = moveinfo->moveSpeed;
+            moveinfo->nextSpeed = moveinfo->moveSpeed - moveinfo->deceleration * (p2_distance / distance);
             return;
         }
 
     // are we accelerating?
-    if (moveinfo->current_speed < moveinfo->speed) {
+    if (moveinfo->currentSpeed < moveinfo->speed) {
         float   old_speed;
         float   p1_distance;
         float   p1_speed;
         float   p2_distance;
         float   distance;
 
-        old_speed = moveinfo->current_speed;
+        old_speed = moveinfo->currentSpeed;
 
-        // figure simple acceleration up to move_speed
-        moveinfo->current_speed += moveinfo->accel;
-        if (moveinfo->current_speed > moveinfo->speed)
-            moveinfo->current_speed = moveinfo->speed;
+        // figure simple acceleration up to moveSpeed
+        moveinfo->currentSpeed += moveinfo->acceleration;
+        if (moveinfo->currentSpeed > moveinfo->speed)
+            moveinfo->currentSpeed = moveinfo->speed;
 
         // are we accelerating throughout this entire move?
-        if ((moveinfo->remaining_distance - moveinfo->current_speed) >= moveinfo->decel_distance)
+        if ((moveinfo->remainingDistance - moveinfo->currentSpeed) >= moveinfo->deceleratedDistance)
             return;
 
-        // during this move we will accelrate from current_speed to move_speed
-        // and cross over the decel_distance; figure the average speed for the
+        // during this move we will accelrate from currentSpeed to moveSpeed
+        // and cross over the deceleratedDistance; figure the average speed for the
         // entire move
-        p1_distance = moveinfo->remaining_distance - moveinfo->decel_distance;
-        p1_speed = (old_speed + moveinfo->move_speed) / 2.0;
-        p2_distance = moveinfo->move_speed * (1.0 - (p1_distance / p1_speed));
+        p1_distance = moveinfo->remainingDistance - moveinfo->deceleratedDistance;
+        p1_speed = (old_speed + moveinfo->moveSpeed) / 2.0;
+        p2_distance = moveinfo->moveSpeed * (1.0 - (p1_distance / p1_speed));
         distance = p1_distance + p2_distance;
-        moveinfo->current_speed = (p1_speed * (p1_distance / distance)) + (moveinfo->move_speed * (p2_distance / distance));
-        moveinfo->next_speed = moveinfo->move_speed - moveinfo->decel * (p2_distance / distance);
+        moveinfo->currentSpeed = (p1_speed * (p1_distance / distance)) + (moveinfo->moveSpeed * (p2_distance / distance));
+        moveinfo->nextSpeed = moveinfo->moveSpeed - moveinfo->deceleration * (p2_distance / distance);
         return;
     }
 
-    // we are at constant velocity (move_speed)
+    // we are at constant velocity (moveSpeed)
     return;
 }
 
-void Think_AccelMove(entity_t* ent)
+void Think_AccelMove(Entity* ent)
 {
-    ent->moveInfo.remaining_distance -= ent->moveInfo.current_speed;
+    ent->moveInfo.remainingDistance -= ent->moveInfo.currentSpeed;
 
-    if (ent->moveInfo.current_speed == 0)       // starting or Blocked
+    if (ent->moveInfo.currentSpeed == 0)       // starting or Blocked
         plat_CalcAcceleratedMove(&ent->moveInfo);
 
     plat_Accelerate(&ent->moveInfo);
 
     // will the entire move complete on next frame?
-    if (ent->moveInfo.remaining_distance <= ent->moveInfo.current_speed) {
+    if (ent->moveInfo.remainingDistance <= ent->moveInfo.currentSpeed) {
         Brush_Move_Final(ent);
         return;
     }
 
-    VectorScale(ent->moveInfo.dir, ent->moveInfo.current_speed * 10, ent->velocity);
+    VectorScale(ent->moveInfo.dir, ent->moveInfo.currentSpeed * 10, ent->velocity);
     ent->nextThink = level.time + FRAMETIME;
     ent->Think = Think_AccelMove;
 }

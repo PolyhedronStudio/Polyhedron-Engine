@@ -18,39 +18,39 @@ the point around which it is rotated. It will rotate around the Z axis by defaul
 check either the X_AXIS or Y_AXIS box to change that.
 
 "speed" determines how fast it moves; default value is 100.
-"dmg"   damage to inflict when Blocked (2 default)
+"damage"   damage to inflict when Blocked (2 default)
 
 REVERSE will cause the it to rotate in the opposite direction.
 STOP mean it will stop moving instead of pushing entities
 */
 
-void rotating_blocked(entity_t* self, entity_t* other)
+void rotating_blocked(Entity* self, Entity* other)
 {
-    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->damage, 1, 0, MeansOfDeath::Crush);
 }
 
-void rotating_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
+void rotating_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
 {
-    if (self->avelocity[0] || self->avelocity[1] || self->avelocity[2])
-        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+    if (self->angularVelocity[0] || self->angularVelocity[1] || self->angularVelocity[2])
+        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->damage, 1, 0, MeansOfDeath::Crush);
 }
 
-void rotating_use(entity_t* self, entity_t* other, entity_t* activator)
+void rotating_use(Entity* self, Entity* other, Entity* activator)
 {
-    if (!VectorCompare(self->avelocity, vec3_origin)) {
+    if (!VectorCompare(self->angularVelocity, vec3_origin)) {
         self->state.sound = 0;
-        VectorClear(self->avelocity);
+        VectorClear(self->angularVelocity);
         self->Touch = NULL;
     }
     else {
-        self->state.sound = self->moveInfo.sound_middle;
-        VectorScale(self->moveDirection, self->speed, self->avelocity);
+        self->state.sound = self->moveInfo.middleSoundIndex;
+        VectorScale(self->moveDirection, self->speed, self->angularVelocity);
         if (self->spawnFlags & 16)
             self->Touch = rotating_touch;
     }
 }
 
-void SP_func_rotating(entity_t* ent)
+void SP_func_rotating(Entity* ent)
 {
     ent->solid = Solid::BSP;
     if (ent->spawnFlags & 32)
@@ -73,13 +73,13 @@ void SP_func_rotating(entity_t* ent)
 
     if (!ent->speed)
         ent->speed = 100;
-    if (!ent->dmg)
-        ent->dmg = 2;
+    if (!ent->damage)
+        ent->damage = 2;
 
-    //  ent->moveInfo.sound_middle = "doors/hydro1.wav";
+    //  ent->moveInfo.middleSoundIndex = "doors/hydro1.wav";
 
     ent->Use = rotating_use;
-    if (ent->dmg)
+    if (ent->damage)
         ent->Blocked = rotating_blocked;
 
     if (ent->spawnFlags & 1)

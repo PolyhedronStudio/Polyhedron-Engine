@@ -17,10 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 #include "g_local.h"
 
-void UpdateChaseCam(entity_t *ent)
+void UpdateChaseCam(Entity *ent)
 {
     vec3_t o, ownerv, goal;
-    entity_t *targ;
+    Entity *targ;
     vec3_t forward, right;
     trace_t trace;
     int i;
@@ -29,7 +29,7 @@ void UpdateChaseCam(entity_t *ent)
     // is our chase target gone?
     if (!ent->client->chaseTarget->inUse
         || ent->client->chaseTarget->client->respawn.isSpectator) {
-        entity_t *old = ent->client->chaseTarget;
+        Entity *old = ent->client->chaseTarget;
         ChaseNext(ent);
         if (ent->client->chaseTarget == old) {
             ent->client->chaseTarget = NULL;
@@ -104,10 +104,10 @@ void UpdateChaseCam(entity_t *ent)
     gi.LinkEntity(ent);
 }
 
-void ChaseNext(entity_t *ent)
+void ChaseNext(Entity *ent)
 {
     int i;
-    entity_t *e;
+    Entity *e;
 
     if (!ent->client->chaseTarget)
         return;
@@ -128,10 +128,10 @@ void ChaseNext(entity_t *ent)
     ent->client->updateChase = true;
 }
 
-void ChasePrev(entity_t *ent)
+void ChasePrev(Entity *ent)
 {
     int i;
-    entity_t *e;
+    Entity *e;
 
     if (!ent->client->chaseTarget)
         return;
@@ -152,10 +152,10 @@ void ChasePrev(entity_t *ent)
     ent->client->updateChase = true;
 }
 
-void GetChaseTarget(entity_t *ent)
+void GetChaseTarget(Entity *ent)
 {
     int i;
-    entity_t *other;
+    Entity *other;
 
     for (i = 1; i <= maxClients->value; i++) {
         other = g_entities + i;

@@ -11,13 +11,13 @@
 #include "../../g_local.h"
 
 // Declared in misc.c
-extern void gib_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
+extern void gib_die(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point);
 
 //=====================================================
 /*QUAKED misc_gib_leg (1 0 0) (-8 -8 -8) (8 8 8)
 Intended for use with the target_spawner
 */
-void SP_misc_gib_leg(entity_t* ent)
+void SP_misc_gib_leg(Entity* ent)
 {
     gi.SetModel(ent, "models/objects/gibs/leg/tris.md2");
     ent->solid = Solid::Not;
@@ -27,9 +27,9 @@ void SP_misc_gib_leg(entity_t* ent)
     ent->moveType = MoveType::Toss;
     ent->serverFlags |= EntityServerFlags::Monster;
     ent->deadFlag = DEAD_DEAD;
-    ent->avelocity[0] = random() * 200;
-    ent->avelocity[1] = random() * 200;
-    ent->avelocity[2] = random() * 200;
+    ent->angularVelocity[0] = random() * 200;
+    ent->angularVelocity[1] = random() * 200;
+    ent->angularVelocity[2] = random() * 200;
     ent->Think = G_FreeEntity;
     ent->nextThink = level.time + 30;
     gi.LinkEntity(ent);

@@ -33,7 +33,7 @@ is not a staircase.
 */
 int c_yes, c_no;
 
-qboolean M_CheckBottom(entity_t *ent)
+qboolean M_CheckBottom(Entity *ent)
 {
     vec3_t  mins, maxs, start, stop;
     trace_t trace;
@@ -106,7 +106,7 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 */
 //FIXME since we need to test end position contents here, can we avoid doing
 //it again later in catagorize position?
-qboolean SV_movestep(entity_t *ent, vec3_t move, qboolean relink)
+qboolean SV_movestep(Entity *ent, vec3_t move, qboolean relink)
 {
     float       dz;
     vec3_t      oldorg, neworg, end;
@@ -277,7 +277,7 @@ M_ChangeYaw
 
 ===============
 */
-void M_ChangeYaw(entity_t *ent)
+void M_ChangeYaw(Entity *ent)
 {
     float   ideal;
     float   current;
@@ -320,7 +320,7 @@ facing it.
 
 ======================
 */
-qboolean SV_StepDirection(entity_t *ent, float yaw, float dist)
+qboolean SV_StepDirection(Entity *ent, float yaw, float dist)
 {
     vec3_t      move, oldorigin;
     float       delta;
@@ -355,7 +355,7 @@ SV_FixCheckBottom
 
 ======================
 */
-void SV_FixCheckBottom(entity_t *ent)
+void SV_FixCheckBottom(Entity *ent)
 {
     ent->flags |= EntityFlags::PartiallyOnGround;
 }
@@ -369,7 +369,7 @@ SV_NewChaseDir
 ================
 */
 #define DI_NODIR    -1
-void SV_NewChaseDir(entity_t *actor, entity_t *enemy, float dist)
+void SV_NewChaseDir(Entity *actor, Entity *enemy, float dist)
 {
     float   deltax, deltay;
     float   d[3];
@@ -456,7 +456,7 @@ SV_CloseEnough
 
 ======================
 */
-qboolean SV_CloseEnough(entity_t *ent, entity_t *goal, float dist)
+qboolean SV_CloseEnough(Entity *ent, Entity *goal, float dist)
 {
     int     i;
 
@@ -475,9 +475,9 @@ qboolean SV_CloseEnough(entity_t *ent, entity_t *goal, float dist)
 M_MoveToGoal
 ======================
 */
-void M_MoveToGoal(entity_t *ent, float dist)
+void M_MoveToGoal(Entity *ent, float dist)
 {
-    entity_t     *goal;
+    Entity     *goal;
 
     goal = ent->goalEntityPtr;
 
@@ -501,7 +501,7 @@ void M_MoveToGoal(entity_t *ent, float dist)
 M_walkmove
 ===============
 */
-qboolean M_walkmove(entity_t *ent, float yaw, float dist)
+qboolean M_walkmove(Entity *ent, float yaw, float dist)
 {
     vec3_t  move;
 

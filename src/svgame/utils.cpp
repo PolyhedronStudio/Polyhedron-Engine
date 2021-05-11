@@ -30,7 +30,7 @@ vec3_t G_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t
     };
 }
 
-vec3_t P_ProjectSource(gclient_t* client, const vec3_t& point, const vec3_t& distance, const vec3_t& forward, const vec3_t& right)
+vec3_t P_ProjectSource(GameClient* client, const vec3_t& point, const vec3_t& distance, const vec3_t& forward, const vec3_t& right)
 {
     vec3_t  _distance = distance;;
 
@@ -62,7 +62,7 @@ vec3_t VelocityForDamage(int damage)
     return v;
 }
 
-void Think_Delay(entity_t *ent)
+void Think_Delay(Entity *ent)
 {
     UTIL_UseTargets(ent, ent->activator);
     G_FreeEntity(ent);
@@ -84,9 +84,9 @@ match (string)self.target and call their .use function
 
 ==============================
 */
-void UTIL_UseTargets(entity_t *ent, entity_t *activator)
+void UTIL_UseTargets(Entity *ent, Entity *activator)
 {
-    entity_t     *t;
+    Entity     *t;
 
 //
 // check for a delay
@@ -94,7 +94,7 @@ void UTIL_UseTargets(entity_t *ent, entity_t *activator)
     if (ent->delay) {
         // create a temp object to fire at a later time
         t = G_Spawn();
-        t->classname = "DelayedUse";
+        t->className = "DelayedUse";
         t->nextThink = level.time + ent->delay;
         t->Think = Think_Delay;
         t->activator = activator;
@@ -139,8 +139,8 @@ void UTIL_UseTargets(entity_t *ent, entity_t *activator)
         t = NULL;
         while ((t = G_Find(t, FOFS(targetName), ent->target))) {
             // doors fire area portals in a specific way
-            if (!Q_stricmp(t->classname, "func_areaportal") &&
-                (!Q_stricmp(ent->classname, "func_door") || !Q_stricmp(ent->classname, "func_door_rotating")))
+            if (!Q_stricmp(t->className, "func_areaportal") &&
+                (!Q_stricmp(ent->className, "func_door") || !Q_stricmp(ent->className, "func_door_rotating")))
                 continue;
 
             if (t == ent) {
@@ -235,10 +235,10 @@ G_TouchTriggers
 
 ============
 */
-void    UTIL_TouchTriggers(entity_t *ent)
+void    UTIL_TouchTriggers(Entity *ent)
 {
     int         i, num;
-    entity_t     *touch[MAX_EDICTS], *hit;
+    Entity     *touch[MAX_EDICTS], *hit;
 
     // dead things don't activate triggers!
     if ((ent->client || (ent->serverFlags & EntityServerFlags::Monster)) && (ent->health <= 0))
@@ -267,10 +267,10 @@ Call after linking a new trigger in during gameplay
 to force all entities it covers to immediately touch it
 ============
 */
-void    G_TouchSolids(entity_t *ent)
+void    G_TouchSolids(Entity *ent)
 {
     int         i, num;
-    entity_t     *touch[MAX_EDICTS], *hit;
+    Entity     *touch[MAX_EDICTS], *hit;
 
     num = gi.BoxEntities(ent->absMin, ent->absMax, touch
                        , MAX_EDICTS, AREA_SOLID);
@@ -307,7 +307,7 @@ Kills all entities that would touch the proposed new positioning
 of ent.  Ent should be unlinked before calling this!
 =================
 */
-qboolean KillBox(entity_t *ent)
+qboolean KillBox(Entity *ent)
 {
     trace_t     tr;
 
@@ -317,7 +317,7 @@ qboolean KillBox(entity_t *ent)
             break;
 
         // nail it
-        T_Damage(tr.ent, ent, ent, vec3_origin, ent->state.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+        T_Damage(tr.ent, ent, ent, vec3_origin, ent->state.origin, vec3_origin, 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
 
         // if we didn't kill it, fail
         if (tr.ent->solid)

@@ -30,7 +30,7 @@ START_OPEN causes the water to move to its destination when spawned and operate 
 2)  lava
 */
 
-void SP_func_water(entity_t* self)
+void SP_func_water(Entity* self)
 {
     vec3_t  abs_movedir;
 
@@ -44,41 +44,41 @@ void SP_func_water(entity_t* self)
         break;
 
     case 1: // water
-        self->moveInfo.sound_start = gi.SoundIndex("world/mov_watr.wav");
-        self->moveInfo.sound_end = gi.SoundIndex("world/stp_watr.wav");
+        self->moveInfo.startSoundIndex = gi.SoundIndex("world/mov_watr.wav");
+        self->moveInfo.endSoundIndex = gi.SoundIndex("world/stp_watr.wav");
         break;
 
     case 2: // lava
-        self->moveInfo.sound_start = gi.SoundIndex("world/mov_watr.wav");
-        self->moveInfo.sound_end = gi.SoundIndex("world/stp_watr.wav");
+        self->moveInfo.startSoundIndex = gi.SoundIndex("world/mov_watr.wav");
+        self->moveInfo.endSoundIndex = gi.SoundIndex("world/stp_watr.wav");
         break;
     }
 
     // calculate second position
-    VectorCopy(self->state.origin, self->pos1);
+    VectorCopy(self->state.origin, self->position1);
     abs_movedir[0] = fabs(self->moveDirection[0]);
     abs_movedir[1] = fabs(self->moveDirection[1]);
     abs_movedir[2] = fabs(self->moveDirection[2]);
     self->moveInfo.distance = abs_movedir[0] * self->size[0] + abs_movedir[1] * self->size[1] + abs_movedir[2] * self->size[2] - st.lip;
-    VectorMA(self->pos1, self->moveInfo.distance, self->moveDirection, self->pos2);
+    VectorMA(self->position1, self->moveInfo.distance, self->moveDirection, self->position2);
 
     // if it starts open, switch the positions
     if (self->spawnFlags & DOOR_START_OPEN) {
-        VectorCopy(self->pos2, self->state.origin);
-        VectorCopy(self->pos1, self->pos2);
-        VectorCopy(self->state.origin, self->pos1);
+        VectorCopy(self->position2, self->state.origin);
+        VectorCopy(self->position1, self->position2);
+        VectorCopy(self->state.origin, self->position1);
     }
 
-    VectorCopy(self->pos1, self->moveInfo.start_origin);
-    VectorCopy(self->state.angles, self->moveInfo.start_angles);
-    VectorCopy(self->pos2, self->moveInfo.end_origin);
-    VectorCopy(self->state.angles, self->moveInfo.end_angles);
+    VectorCopy(self->position1, self->moveInfo.startOrigin);
+    VectorCopy(self->state.angles, self->moveInfo.startAngles);
+    VectorCopy(self->position2, self->moveInfo.endOrigin);
+    VectorCopy(self->state.angles, self->moveInfo.endAngles);
 
     self->moveInfo.state = STATE_BOTTOM;
 
     if (!self->speed)
         self->speed = 25;
-    self->moveInfo.accel = self->moveInfo.decel = self->moveInfo.speed = self->speed;
+    self->moveInfo.acceleration = self->moveInfo.deceleration = self->moveInfo.speed = self->speed;
 
     if (!self->wait)
         self->wait = -1;
@@ -89,7 +89,7 @@ void SP_func_water(entity_t* self)
     if (self->wait == -1)
         self->spawnFlags |= DOOR_TOGGLE;
 
-    self->classname = "func_door";
+    self->className = "func_door";
 
     gi.LinkEntity(self);
 }

@@ -79,13 +79,13 @@ static void CLG_ParseTempEntitiesPacket(void)
     case TempEntityEvent::Sparks:
     case TempEntityEvent::BulletSparks:
     case TempEntityEvent::ElectricSparks:
-        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.position1 = clgi.MSG_ReadPosition();
         teParameters.dir = clgi.MSG_ReadDirection();
         break;
 
     case TempEntityEvent::Splash:
         teParameters.count = clgi.MSG_ReadByte();
-        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.position1 = clgi.MSG_ReadPosition();
         teParameters.dir = clgi.MSG_ReadDirection();
         teParameters.color = clgi.MSG_ReadByte();
         break;
@@ -93,8 +93,8 @@ static void CLG_ParseTempEntitiesPacket(void)
     case TempEntityEvent::DebugTrail:
     case TempEntityEvent::BubbleTrail:
     case TempEntityEvent::BubbleTrail2:
-        teParameters.pos1 = clgi.MSG_ReadPosition();
-        teParameters.pos2 = clgi.MSG_ReadPosition();
+        teParameters.position1 = clgi.MSG_ReadPosition();
+        teParameters.position2 = clgi.MSG_ReadPosition();
         break;
 
     case TempEntityEvent::Explosion2:
@@ -103,19 +103,19 @@ static void CLG_ParseTempEntitiesPacket(void)
     case TempEntityEvent::BigExplosion1:
     case TempEntityEvent::PlainExplosion:
     case TempEntityEvent::TeleportEffect:
-        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.position1 = clgi.MSG_ReadPosition();
         break;
 
     case TempEntityEvent::ForceWall:
-        teParameters.pos1 = clgi.MSG_ReadPosition();
-        teParameters.pos2 = clgi.MSG_ReadPosition();
+        teParameters.position1 = clgi.MSG_ReadPosition();
+        teParameters.position2 = clgi.MSG_ReadPosition();
         teParameters.color = clgi.MSG_ReadByte();
         break;
 
     case TempEntityEvent::Steam:
         teParameters.entity1 = clgi.MSG_ReadShort();
         teParameters.count = clgi.MSG_ReadByte();
-        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.position1 = clgi.MSG_ReadPosition();
         teParameters.dir = clgi.MSG_ReadDirection();
         teParameters.color = clgi.MSG_ReadByte();
         teParameters.entity2 = clgi.MSG_ReadShort();
@@ -127,7 +127,7 @@ static void CLG_ParseTempEntitiesPacket(void)
     case TempEntityEvent::Flare:
         teParameters.entity1 = clgi.MSG_ReadShort();
         teParameters.count = clgi.MSG_ReadByte();
-        teParameters.pos1 = clgi.MSG_ReadPosition();
+        teParameters.position1 = clgi.MSG_ReadPosition();
         teParameters.dir = clgi.MSG_ReadDirection();
         break;
 

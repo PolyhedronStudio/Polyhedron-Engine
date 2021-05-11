@@ -15,7 +15,7 @@
 //=====================================================
 /*QUAKED func_explosive (0 .5 .8) ? Trigger_Spawn ANIMATED ANIMATED_FAST
 Any brush that you want to explode or break apart.  If you want an
-ex0plosion, set dmg and it will do a radius explosion of that amount
+ex0plosion, set damage and it will do a radius explosion of that amount
 at the center of the bursh.
 
 If targeted it will not be shootable.
@@ -26,7 +26,7 @@ mass defaults to 75.  This determines how much debris is emitted when
 it explodes.  You get one large chunk per 100 of mass (up to 8) and
 one small chunk per 25 of mass (up to 16).  So 800 gives the most.
 */
-void func_explosive_explode(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t &point)
+void func_explosive_explode(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t &point)
 {
     vec3_t  origin;
     vec3_t  chunkorigin;
@@ -41,8 +41,8 @@ void func_explosive_explode(entity_t* self, entity_t* inflictor, entity_t* attac
 
     self->takeDamage = TakeDamage::No;
 
-    if (self->dmg)
-        T_RadiusDamage(self, attacker, self->dmg, NULL, self->dmg + 40, MOD_EXPLOSIVE);
+    if (self->damage)
+        T_RadiusDamage(self, attacker, self->damage, NULL, self->damage + 40, MeansOfDeath::Explosive);
 
     VectorSubtract(self->state.origin, inflictor->state.origin, self->velocity);
     VectorNormalize(self->velocity);
@@ -81,18 +81,18 @@ void func_explosive_explode(entity_t* self, entity_t* inflictor, entity_t* attac
 
     UTIL_UseTargets(self, attacker);
 
-    if (self->dmg)
+    if (self->damage)
         BecomeExplosion1(self);
     else
         G_FreeEntity(self);
 }
 
-void func_explosive_use(entity_t* self, entity_t* other, entity_t* activator)
+void func_explosive_use(Entity* self, Entity* other, Entity* activator)
 {
     func_explosive_explode(self, other, activator, self->health, vec3_origin);
 }
 
-void func_explosive_spawn(entity_t* self, entity_t* other, entity_t* activator)
+void func_explosive_spawn(Entity* self, Entity* other, Entity* activator)
 {
     self->solid = Solid::BSP;
     self->serverFlags &= ~EntityServerFlags::NoClient;
@@ -101,7 +101,7 @@ void func_explosive_spawn(entity_t* self, entity_t* other, entity_t* activator)
     gi.LinkEntity(self);
 }
 
-void SP_func_explosive(entity_t* self)
+void SP_func_explosive(Entity* self)
 {
     if (deathmatch->value) {
         // auto-remove for deathmatch

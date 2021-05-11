@@ -12,7 +12,7 @@
 
 //=====================================================
 
-void Use_Areaportal(entity_t * ent, entity_t * other, entity_t * activator)
+void Use_Areaportal(Entity * ent, Entity * other, Entity * activator)
 {
     ent->count ^= 1;        // toggle state
 //  gi.DPrintf ("portalstate: %i = %i\n", ent->style, ent->count);
@@ -25,7 +25,7 @@ This is a non-visible object that divides the world into
 areas that are seperated when this portal is not activated.
 Usually enclosed in the middle of a door.
 */
-void SP_func_areaportal(entity_t * ent)
+void SP_func_areaportal(Entity * ent)
 {
     ent->Use = Use_Areaportal;
     ent->count = 0;     // always start closed;

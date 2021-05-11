@@ -28,7 +28,7 @@ LIST_DECL(sv_filterlist);
 LIST_DECL(sv_clientlist);   // linked list of non-free clients
 
 client_t    *sv_client;         // current client
-entity_t     *sv_player;         // current client edict
+Entity     *sv_player;         // current client edict
 
 qboolean     sv_pending_autosave = 0;
 
@@ -1537,7 +1537,7 @@ player processing happens outside RunWorldFrame
 */
 static void SV_PrepWorldFrame(void)
 {
-    entity_t    *ent;
+    Entity    *ent;
     int        i;
 
     sv.tracecount = 0;

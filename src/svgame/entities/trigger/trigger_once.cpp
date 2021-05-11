@@ -13,7 +13,7 @@
 #include "../../trigger.h"
 
 // Extern in trigger_multiple.c
-extern void SP_trigger_multiple(entity_t* ent);
+extern void SP_trigger_multiple(Entity* ent);
 
 //=====================================================
 /*QUAKED trigger_once (.5 .5 .5) ? x x TRIGGERED
@@ -31,7 +31,7 @@ sounds
 "message"   string to be displayed when triggered
 */
 
-void SP_trigger_once(entity_t* ent)
+void SP_trigger_once(Entity* ent)
 {
     // make old maps work because I messed up on flag assignments here
     // triggered was on bit 1 when it should have been on bit 4
@@ -41,7 +41,7 @@ void SP_trigger_once(entity_t* ent)
         VectorMA(ent->mins, 0.5, ent->size, v);
         ent->spawnFlags &= ~1;
         ent->spawnFlags |= 4;
-        gi.DPrintf("fixed TRIGGERED flag on %s at %s\n", ent->classname, Vec3ToString(v));
+        gi.DPrintf("fixed TRIGGERED flag on %s at %s\n", ent->className, Vec3ToString(v));
     }
 
     ent->wait = -1;

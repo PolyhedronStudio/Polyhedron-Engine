@@ -16,12 +16,12 @@
 /*QUAKED trigger_relay (.5 .5 .5) (-8 -8 -8) (8 8 8)
 This fixed size trigger cannot be touched, it can only be fired by other events.
 */
-void trigger_relay_use(entity_t* self, entity_t* other, entity_t* activator)
+void trigger_relay_use(Entity* self, Entity* other, Entity* activator)
 {
     UTIL_UseTargets(self, activator);
 }
 
-void SP_trigger_relay(entity_t* self)
+void SP_trigger_relay(Entity* self)
 {
     self->Use = trigger_relay_use;
 }

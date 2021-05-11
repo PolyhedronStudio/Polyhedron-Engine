@@ -27,7 +27,7 @@ a non-instant attack weapon.  It checks to see if a
 monster's dodge function should be called.
 =================
 */
-static void check_dodge(entity_t *self, const vec3_t &start, const vec3_t &dir, int speed)
+static void check_dodge(Entity *self, const vec3_t &start, const vec3_t &dir, int speed)
 {
     vec3_t  end;
     vec3_t  v;
@@ -56,7 +56,7 @@ fire_hit
 Used for all impact (hit/punch/slash) attacks
 =================
 */
-qboolean fire_hit(entity_t *self, vec3_t &aim, int damage, int kick)
+qboolean fire_hit(Entity *self, vec3_t &aim, int damage, int kick)
 {
     trace_t     tr;
     vec3_t      forward, right, up;
@@ -104,7 +104,7 @@ qboolean fire_hit(entity_t *self, vec3_t &aim, int damage, int kick)
     VectorSubtract(point, self->enemy->state.origin, dir);
 
     // do the damage
-    T_Damage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DAMAGE_NO_KNOCKBACK, MOD_HIT);
+    T_Damage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
 
     if (!(tr.ent->serverFlags & EntityServerFlags::Monster) && (!tr.ent->client))
         return false;
@@ -127,7 +127,7 @@ fire_lead
 This is an internal support routine used for bullet/pellet based weapons.
 =================
 */
-static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int te_impact, int hspread, int vspread, int mod)
+static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int te_impact, int hspread, int vspread, int mod)
 {
     trace_t     tr;
     vec3_t      dir;
@@ -208,7 +208,7 @@ static void fire_lead(entity_t *self, const vec3_t& start, const vec3_t& aimdir,
     if (!((tr.surface) && (tr.surface->flags & SURF_SKY))) {
         if (tr.fraction < 1.0) {
             if (tr.ent->takeDamage) {
-                T_Damage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DAMAGE_BULLET, mod);
+                T_Damage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
                     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
@@ -256,7 +256,7 @@ Fires a single round.  Used for machinegun and chaingun.  Would be fine for
 pistols, rifles, etc....
 =================
 */
-void fire_bullet(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod)
+void fire_bullet(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod)
 {
     fire_lead(self, start, aimdir, damage, kick, TempEntityEvent::Gunshot, hspread, vspread, mod);
 }
@@ -268,7 +268,7 @@ void fire_bullet(entity_t *self, const vec3_t& start, const vec3_t& aimdir, int 
 // Shoots shotgun pellets.  Used by shotgun and super shotgun.
 //===============
 //
-void fire_shotgun(entity_t* self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int mod)
+void fire_shotgun(Entity* self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int mod)
 {
     int		i;
 
@@ -283,7 +283,7 @@ void fire_shotgun(entity_t* self, const vec3_t &start, const vec3_t &aimdir, int
 // Fires a single blaster bolt.  Used by the blaster and hyper blaster.
 //===============
 //
-void blaster_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t *surf)
+void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
 {
     int mod;
 
@@ -306,21 +306,18 @@ void blaster_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t 
         PlayerNoise(self->owner, self->state.origin, PNOISE_IMPACT);
 
     if (other->takeDamage) {
-        if (self->spawnFlags & 1)
-            mod = MOD_HYPERBLASTER;
-        else
-            mod = MOD_BLASTER;
+        mod = MeansOfDeath::Blaster;
 
         // N&C: Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
         if (plane)
         {
             T_Damage(other, self, self->owner, self->velocity, self->state.origin,
-                plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
+                plane->normal, self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
         }
         else
         {
             T_Damage(other, self, self->owner, self->velocity, self->state.origin,
-                vec3_zero(), self->dmg, 1, DAMAGE_ENERGY, mod);
+                vec3_zero(), self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
         }
 
     } else {
@@ -347,9 +344,9 @@ void blaster_touch(entity_t *self, entity_t *other, cplane_t *plane, csurface_t 
 // predicted against the shots.
 //===============
 //
-void fire_blaster(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int effect, qboolean hyper)
+void fire_blaster(Entity *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int effect, qboolean hyper)
 {
-    entity_t *bolt;
+    Entity *bolt;
     trace_t tr;
     
     // Calculate direction vector.
@@ -359,9 +356,9 @@ void fire_blaster(entity_t *self, const vec3_t& start, const vec3_t &aimdir, int
     bolt = G_Spawn();
 
     // Setup basic entity attributes.
-    bolt->classname = "bolt";   // Classname.
+    bolt->className = "bolt";   // Classname.
     bolt->owner = self;         // Setup owner.
-    bolt->dmg = damage;         // Setup damage.
+    bolt->damage = damage;         // Setup damage.
     if (hyper)                  // Hyperblaster?
         bolt->spawnFlags = 1;
     bolt->serverFlags = EntityServerFlags::DeadMonster;    // Set Dead Monster flag so the projectiles 

@@ -13,23 +13,23 @@
 // Misc.
 //
 
-void ClipGibVelocity(entity_t* ent);
+void ClipGibVelocity(Entity* ent);
 
 //
 // Gibs.
 //
-void gib_think(entity_t* self);
-void gib_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf);
-void gib_die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point);
+void gib_think(Entity* self);
+void gib_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf);
+void gib_die(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point);
 
-void ThrowHead(entity_t* self, const char* gibname, int damage, int type);
-void ThrowClientHead(entity_t* self, int damage);
-void ThrowGib(entity_t* self, const char* gibname, int damage, int type);
+void ThrowHead(Entity* self, const char* gibname, int damage, int type);
+void ThrowClientHead(Entity* self, int damage);
+void ThrowGib(Entity* self, const char* gibname, int damage, int type);
 
 //
 // Explosions.
 //
-void BecomeExplosion1(entity_t* self);
-void BecomeExplosion2(entity_t* self);
+void BecomeExplosion1(Entity* self);
+void BecomeExplosion2(Entity* self);
 
 #endif // __SVGAME_PLAYER_WEAPONS_H__

@@ -23,7 +23,7 @@ The brush should be have a surface with at least one current content enabled.
 speed   default 100
 */
 
-void func_conveyor_use(entity_t* self, entity_t* other, entity_t* activator)
+void func_conveyor_use(Entity* self, Entity* other, Entity* activator)
 {
     if (self->spawnFlags & 1) {
         self->speed = 0;
@@ -38,7 +38,7 @@ void func_conveyor_use(entity_t* self, entity_t* other, entity_t* activator)
         self->count = 0;
 }
 
-void SP_func_conveyor(entity_t* self)
+void SP_func_conveyor(Entity* self)
 {
     if (!self->speed)
         self->speed = 100;

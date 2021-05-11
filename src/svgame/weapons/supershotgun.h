@@ -9,7 +9,7 @@
 #ifndef __SVGAME_WEAPONS_SUPERSHOTGUN_H__
 #define __SVGAME_WEAPONS_SUPERSHOTGUN_H__
 
-void weapon_supershotgun_fire(entity_t* ent);
-void Weapon_SuperShotgun(entity_t* ent);
+void weapon_supershotgun_fire(Entity* ent);
+void Weapon_SuperShotgun(Entity* ent);
 
 #endif // __SVGAME_WEAPONS_SUPERSHOTGUN_H__

@@ -43,7 +43,7 @@ static areanode_t   sv_areanodes[AREA_NODES];
 static int          sv_numareanodes;
 
 static vec3_t    area_mins, area_maxs; // MATHLIB: No more float* pointers to local func arrays.
-static entity_t  **area_list;
+static Entity  **area_list;
 static int      area_count, area_maxcount;
 static int      area_type;
 
@@ -101,7 +101,7 @@ SV_ClearWorld
 void SV_ClearWorld(void)
 {
     mmodel_t *cm;
-    entity_t *ent;
+    Entity *ent;
     int i;
 
     memset(sv_areanodes, 0, sizeof(sv_areanodes));
@@ -126,7 +126,7 @@ SV_EntityIsVisible
 Checks if edict is potentially visible from the given PVS row.
 ===============
 */
-qboolean SV_EntityIsVisible(cm_t *cm, entity_t *ent, byte *mask)
+qboolean SV_EntityIsVisible(cm_t *cm, Entity *ent, byte *mask)
 {
     int i;
 
@@ -153,7 +153,7 @@ General purpose routine shared between game DLL and MVD code.
 Links entity to PVS leafs.
 ===============
 */
-void SV_LinkEntity(cm_t *cm, entity_t *ent)
+void SV_LinkEntity(cm_t *cm, Entity *ent)
 {
     mleaf_t     *leafs[MAX_TOTAL_ENT_LEAFS];
     int         clusters[MAX_TOTAL_ENT_LEAFS];
@@ -253,7 +253,7 @@ void SV_LinkEntity(cm_t *cm, entity_t *ent)
     }
 }
 
-void PF_UnlinkEntity(entity_t *ent)
+void PF_UnlinkEntity(Entity *ent)
 {
     if (!ent->area.prev)
         return;        // not linked in anywhere
@@ -261,7 +261,7 @@ void PF_UnlinkEntity(entity_t *ent)
     ent->area.prev = ent->area.next = NULL;
 }
 
-void PF_LinkEntity(entity_t *ent)
+void PF_LinkEntity(Entity *ent)
 {
     areanode_t *node;
     server_entity_t *sent;
@@ -347,7 +347,7 @@ SV_AreaEntities_r
 static void SV_AreaEntities_r(areanode_t *node)
 {
     list_t      *start;
-    entity_t     *check;
+    Entity     *check;
 
     // touch linked edicts
     if (area_type == AREA_SOLID)
@@ -355,7 +355,7 @@ static void SV_AreaEntities_r(areanode_t *node)
     else
         start = &node->trigger_edicts;
 
-    LIST_FOR_EACH(entity_t, check, start, area) {
+    LIST_FOR_EACH(Entity, check, start, area) {
         if (check->solid == Solid::Not)
             continue;        // deactivated
         if (check->absMin[0] > area_maxs[0]
@@ -390,7 +390,7 @@ static void SV_AreaEntities_r(areanode_t *node)
 SV_AreaEntities
 ================
 */
-int SV_AreaEntities(const vec3_t &mins, const vec3_t &maxs, entity_t **list,
+int SV_AreaEntities(const vec3_t &mins, const vec3_t &maxs, Entity **list,
                   int maxcount, int areatype)
 {
     area_mins = mins;
@@ -416,7 +416,7 @@ Returns a headNode that can be used for testing or clipping an
 object of mins/maxs size.
 ================
 */
-static mnode_t *SV_HullForEntity(entity_t *ent)
+static mnode_t *SV_HullForEntity(Entity *ent)
 {
     if (ent->solid == Solid::BSP) {
         int i = ent->state.modelIndex - 1;
@@ -439,7 +439,7 @@ SV_PointContents
 */
 int SV_PointContents(const vec3_t &p)
 {
-    entity_t     *touch[MAX_EDICTS], *hit;
+    Entity     *touch[MAX_EDICTS], *hit;
     int         i, num;
     int         contents;
 
@@ -471,11 +471,11 @@ SV_ClipMoveToEntities
 ====================
 */
 static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
-                                  entity_t *passedict, int contentmask, trace_t *tr)
+                                  Entity *passedict, int contentmask, trace_t *tr)
 {
     vec3_t      boxmins, boxmaxs;
     int         i, num;
-    entity_t     *touchlist[MAX_EDICTS], *touch;
+    Entity     *touchlist[MAX_EDICTS], *touch;
     trace_t     trace;
 
     // create the bounding box of the entire move
@@ -530,7 +530,7 @@ Passedict and edicts owned by passedict are explicitly not checked.
 ==================
 */
 trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
-                           entity_t *passedict, int contentmask)
+                           Entity *passedict, int contentmask)
 {
     trace_t     trace;
 

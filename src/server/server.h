@@ -71,9 +71,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 //=============================================================================
-#define EDICT_POOL(c, n) ((entity_t *)((byte *)(c)->pool->edicts + (c)->pool->entity_size*(n)))
+#define EDICT_POOL(c, n) ((Entity *)((byte *)(c)->pool->edicts + (c)->pool->entity_size*(n)))
 
-#define EDICT_NUM(n) ((entity_t *)((byte *)ge->edicts + ge->entity_size*(n)))
+#define EDICT_NUM(n) ((Entity *)((byte *)ge->edicts + ge->entity_size*(n)))
 #define NUM_FOR_EDICT(e) ((int)(((byte *)(e) - (byte *)ge->edicts) / ge->entity_size))
 
 
@@ -210,7 +210,7 @@ typedef struct client_s {
 
     // core info
     int32_t connectionState;
-    entity_t *edict;     // EDICT_NUM(clientnum+1)
+    Entity *edict;     // EDICT_NUM(clientnum+1)
     int number;     // client slot number
 
     // client flags
@@ -484,7 +484,7 @@ extern cvar_t       *sv_zombietime;
 extern cvar_t       *sv_ghostime;
 
 extern client_t     *sv_client;
-extern entity_t      *sv_player;
+extern Entity      *sv_player;
 
 extern qboolean     sv_pending_autosave;
 
@@ -583,11 +583,11 @@ void SV_WriteFrameToClient(client_t *client);
 //
 // sv_game.c
 //
-extern    svgame_export_t    *ge;
+extern    ServerGameExports    *ge;
 
 void SV_InitGameProgs(void);
 void SV_ShutdownGameProgs(void);
-void SV_InitEntity(entity_t *e);
+void SV_InitEntity(Entity *e);
 
 //void PF_PMove(PlayerMove *pm);
 
@@ -609,19 +609,19 @@ int SV_NoSaveGames(void);
 void SV_ClearWorld(void);
 // called after the world model has been loaded, before linking any entities
 
-void PF_UnlinkEntity(entity_t *ent);
+void PF_UnlinkEntity(Entity *ent);
 // call before removing an entity, and before trying to move one,
 // so it doesn't clip against itself
 
-void SV_LinkEntity(cm_t *cm, entity_t *ent);
-void PF_LinkEntity(entity_t *ent);
+void SV_LinkEntity(cm_t *cm, Entity *ent);
+void PF_LinkEntity(Entity *ent);
 // Needs to be called any time an entity changes origin, mins, maxs,
 // or solid.  Automatically unlinks if needed.
 // sets ent->v.absMin and ent->v.absMax
 // sets ent->leafnums[] for pvs determination even if the entity
 // is not solid
 
-int SV_AreaEntities(const vec3_t &mins, const vec3_t &maxs, entity_t **list, int maxcount, int areatype);
+int SV_AreaEntities(const vec3_t &mins, const vec3_t &maxs, Entity **list, int maxcount, int areatype);
 // fills in a table of edict pointers with edicts that have bounding boxes
 // that intersect the given area.  It is possible for a non-axial bmodel
 // to be returned that doesn't actually intersect the area on an exact
@@ -629,7 +629,7 @@ int SV_AreaEntities(const vec3_t &mins, const vec3_t &maxs, entity_t **list, int
 // returns the number of pointers filled in
 // ??? does this always return the world?
 
-qboolean SV_EntityIsVisible(cm_t *cm, entity_t *ent, byte *mask);
+qboolean SV_EntityIsVisible(cm_t *cm, Entity *ent, byte *mask);
 
 //===================================================================
 
@@ -641,7 +641,7 @@ int SV_PointContents(const vec3_t &p);
 // Quake 2 extends this to also check entities, to allow moving liquids
 
 trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
-                           entity_t *passedict, int contentmask);
+                           Entity *passedict, int contentmask);
 // mins and maxs are relative
 
 // if the entire move stays in a solid volume, trace.allSolid will be set,

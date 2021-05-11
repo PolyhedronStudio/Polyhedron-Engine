@@ -32,7 +32,7 @@ constexpr uint32_t BUTTON_STATE_UP   = (1 << 2);
 //
 typedef struct {
     uint32_t keys[2]; // keys holding it down
-    uint32_t downtime; // msec timestamp
+    uint32_t downtime; // msec timeStamp
     uint32_t msec; // msec down this frame
     uint8_t state; // button state.
 } KeyBinding;
@@ -100,8 +100,8 @@ typedef struct cl_entity_s {
 //
 typedef struct {
     int type;
-    vec3_t pos1;
-    vec3_t pos2;
+    vec3_t position1;
+    vec3_t position2;
     vec3_t offset;
     vec3_t dir;
     int count;
@@ -167,7 +167,7 @@ typedef struct cparticle_s {
 
     vec3_t  org;
     vec3_t  vel;
-    vec3_t  accel;
+    vec3_t  acceleration;
     int     color;      // -1 => use rgba
     float   alpha;
     float   alphavel;

@@ -13,11 +13,11 @@
 /*QUAKED target_blaster (1 0 0) (-8 -8 -8) (8 8 8) NOTRAIL NOEFFECTS
 Fires a blaster bolt in the set direction when triggered.
 
-dmg     default is 15
+damage     default is 15
 speed   default is 1000
 */
 
-void use_target_blaster(entity_t* self, entity_t* other, entity_t* activator)
+void use_target_blaster(Entity* self, Entity* other, Entity* activator)
 {
 #if 0
     int effect;
@@ -30,18 +30,18 @@ void use_target_blaster(entity_t* self, entity_t* other, entity_t* activator)
         effect = EF_BLASTER;
 #endif
 
-    fire_blaster(self, self->state.origin, self->moveDirection, self->dmg, self->speed, EntityEffectType::Blaster, MOD_TARGET_BLASTER);
+    //fire_blaster(self, self->state.origin, self->moveDirection, self->damage, self->speed, EntityEffectType::Blaster, MeansOfDeath::Tar);
     gi.Sound(self, CHAN_VOICE, self->noiseIndex, 1, ATTN_NORM, 0);
 }
 
-void SP_target_blaster(entity_t* self)
+void SP_target_blaster(Entity* self)
 {
     self->Use = use_target_blaster;
     UTIL_SetMoveDir(self->state.angles, self->moveDirection);
     self->noiseIndex = gi.SoundIndex("weapons/laser2.wav");
 
-    if (!self->dmg)
-        self->dmg = 15;
+    if (!self->damage)
+        self->damage = 15;
     if (!self->speed)
         self->speed = 1000;
 

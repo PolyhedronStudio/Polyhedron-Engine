@@ -384,8 +384,8 @@ static void write_beam_geometry(const float* view_matrix, const r_entity_t* enti
 
 static int compare_beams(const void* _a, const void* _b)
 {
-	const r_entity_t* a = (const r_entity_t*)*(void**)_a; // C++20 VKPT: Added const entity_t* cast.
-	const r_entity_t* b = (const r_entity_t*)*(void**)_b; // C++20 VKPT: Added const entity_t* cast.
+	const r_entity_t* a = (const r_entity_t*)*(void**)_a; // C++20 VKPT: Added const Entity* cast.
+	const r_entity_t* b = (const r_entity_t*)*(void**)_b; // C++20 VKPT: Added const Entity* cast.
 
 	if (a->origin[0] < b->origin[0]) return -1;
 	if (a->origin[0] > b->origin[0]) return 1;

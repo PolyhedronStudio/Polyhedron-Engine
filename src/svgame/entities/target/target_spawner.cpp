@@ -24,14 +24,14 @@ For gibs:
     speed how fast it should be moving otherwise it
     will just be dropped
 */
-void ED_CallSpawn(entity_t* ent);
+void ED_CallSpawn(Entity* ent);
 
-void use_target_spawner(entity_t* self, entity_t* other, entity_t* activator)
+void use_target_spawner(Entity* self, Entity* other, Entity* activator)
 {
-    entity_t* ent;
+    Entity* ent;
 
     ent = G_Spawn();
-    ent->classname = self->target;
+    ent->className = self->target;
     VectorCopy(self->state.origin, ent->state.origin);
     VectorCopy(self->state.angles, ent->state.angles);
     ED_CallSpawn(ent);
@@ -42,7 +42,7 @@ void use_target_spawner(entity_t* self, entity_t* other, entity_t* activator)
         VectorCopy(self->moveDirection, ent->velocity);
 }
 
-void SP_target_spawner(entity_t* self)
+void SP_target_spawner(Entity* self)
 {
     self->Use = use_target_spawner;
     self->serverFlags = EntityServerFlags::NoClient;

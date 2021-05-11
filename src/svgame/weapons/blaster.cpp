@@ -25,7 +25,7 @@
 //======================================================================
 //
 
-void Blaster_Fire(entity_t* ent, const vec3_t &g_offset, int damage, qboolean hyper, int effect)
+void Blaster_Fire(Entity* ent, const vec3_t &g_offset, int damage, qboolean hyper, int effect)
 {
     vec3_t  forward, right;
     vec3_t  start;
@@ -53,7 +53,7 @@ void Blaster_Fire(entity_t* ent, const vec3_t &g_offset, int damage, qboolean hy
 }
 
 
-void Weapon_Blaster_Fire(entity_t* ent)
+void Weapon_Blaster_Fire(Entity* ent)
 {
     int     damage;
 
@@ -65,7 +65,7 @@ void Weapon_Blaster_Fire(entity_t* ent)
     ent->client->playerState.gunFrame++;
 }
 
-void Weapon_Blaster(entity_t* ent)
+void Weapon_Blaster(Entity* ent)
 {
     static int  pause_frames[] = { 19, 32, 0 };
     static int  fire_frames[] = { 5, 0 };

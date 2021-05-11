@@ -15,16 +15,16 @@
 /*QUAKED trigger_hurt (.5 .5 .5) ? START_OFF TOGGLE SILENT NO_PROTECTION SLOW
 Any entity that touches this will be hurt.
 
-It does dmg points of damage each server frame
+It does damage points of damage each server frame
 
 SILENT          supresses playing the sound
 SLOW            changes the damage rate to once per second
 NO_PROTECTION   *nothing* stops the damage
 
-"dmg"           default 5 (whole numbers only)
+"damage"           default 5 (whole numbers only)
 
 */
-void hurt_use(entity_t* self, entity_t* other, entity_t* activator)
+void hurt_use(Entity* self, Entity* other, Entity* activator)
 {
     if (self->solid == Solid::Not)
         self->solid = Solid::Trigger;
@@ -37,20 +37,20 @@ void hurt_use(entity_t* self, entity_t* other, entity_t* activator)
 }
 
 
-void hurt_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
+void hurt_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
 {
     int     dflags;
 
     if (!other->takeDamage)
         return;
 
-    if (self->timestamp > level.time)
+    if (self->timeStamp > level.time)
         return;
 
     if (self->spawnFlags & 16)
-        self->timestamp = level.time + 1;
+        self->timeStamp = level.time + 1;
     else
-        self->timestamp = level.time + FRAMETIME;
+        self->timeStamp = level.time + FRAMETIME;
 
     if (!(self->spawnFlags & 4)) {
         if ((level.frameNumber % 10) == 0)
@@ -58,21 +58,21 @@ void hurt_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* su
     }
 
     if (self->spawnFlags & 8)
-        dflags = DAMAGE_NO_PROTECTION;
+        dflags = DamageFlags::IgnoreProtection;
     else
         dflags = 0;
-    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->dmg, self->dmg, dflags, MOD_TRIGGER_HURT);
+    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->damage, self->damage, dflags, MeansOfDeath::TriggerHurt);
 }
 
-void SP_trigger_hurt(entity_t* self)
+void SP_trigger_hurt(Entity* self)
 {
     InitTrigger(self);
 
     self->noiseIndex = gi.SoundIndex("world/electro.wav");
     self->Touch = hurt_touch;
 
-    if (!self->dmg)
-        self->dmg = 5;
+    if (!self->damage)
+        self->damage = 5;
 
     if (self->spawnFlags & 1)
         self->solid = Solid::Not;

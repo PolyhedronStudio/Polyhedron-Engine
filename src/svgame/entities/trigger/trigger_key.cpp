@@ -17,7 +17,7 @@
 A relay trigger that only fires it's targets if player has the proper key.
 Use "item" to specify the required key, for example "key_data_cd"
 */
-void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
+void trigger_key_use(Entity* self, Entity* other, Entity* activator)
 {
     int         index;
 
@@ -39,9 +39,9 @@ void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
     gi.Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/keyuse.wav"), 1, ATTN_NORM, 0);
     if (coop->value) {
         int     player;
-        entity_t* ent;
+        Entity* ent;
 
-        if (strcmp(self->item->classname, "key_power_cube") == 0) {
+        if (strcmp(self->item->className, "key_power_cube") == 0) {
             int cube;
 
             for (cube = 0; cube < 8; cube++)
@@ -79,7 +79,7 @@ void trigger_key_use(entity_t* self, entity_t* other, entity_t* activator)
     self->Use = NULL;
 }
 
-void SP_trigger_key(entity_t* self)
+void SP_trigger_key(Entity* self)
 {
     if (!st.item) {
         gi.DPrintf("no key item for trigger_key at %s\n", Vec3ToString(self->state.origin));
@@ -93,7 +93,7 @@ void SP_trigger_key(entity_t* self)
     }
 
     if (!self->target) {
-        gi.DPrintf("%s at %s has no target\n", self->classname, Vec3ToString(self->state.origin));
+        gi.DPrintf("%s at %s has no target\n", self->className, Vec3ToString(self->state.origin));
         return;
     }
 

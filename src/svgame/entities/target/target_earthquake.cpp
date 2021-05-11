@@ -18,10 +18,10 @@ All players and monsters are affected.
 "count"     duration of the quake (default:5)
 */
 
-void target_earthquake_think(entity_t* self)
+void target_earthquake_think(Entity* self)
 {
     int     i;
-    entity_t* e;
+    Entity* e;
 
     if (self->lastMoveTime < level.time) {
         gi.PositionedSound(self->state.origin, self, CHAN_AUTO, self->noiseIndex, 1.0, ATTN_NONE, 0);
@@ -42,22 +42,22 @@ void target_earthquake_think(entity_t* self)
         e->velocity[2] = self->speed * (100.0 / e->mass);
     }
 
-    if (level.time < self->timestamp)
+    if (level.time < self->timeStamp)
         self->nextThink = level.time + FRAMETIME;
 }
 
-void target_earthquake_use(entity_t* self, entity_t* other, entity_t* activator)
+void target_earthquake_use(Entity* self, Entity* other, Entity* activator)
 {
-    self->timestamp = level.time + self->count;
+    self->timeStamp = level.time + self->count;
     self->nextThink = level.time + FRAMETIME;
     self->activator = activator;
     self->lastMoveTime = 0;
 }
 
-void SP_target_earthquake(entity_t* self)
+void SP_target_earthquake(Entity* self)
 {
     if (!self->targetName)
-        gi.DPrintf("untargeted %s at %s\n", self->classname, Vec3ToString(self->state.origin));
+        gi.DPrintf("untargeted %s at %s\n", self->className, Vec3ToString(self->state.origin));
 
     if (!self->count)
         self->count = 5;

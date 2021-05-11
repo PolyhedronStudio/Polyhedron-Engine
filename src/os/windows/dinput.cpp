@@ -122,9 +122,9 @@ static void DI_GetMouseEvents(void)
             case DIMOFS_BUTTON7:
                 button = p->dwOfs - DIMOFS_BUTTON0;
                 if (p->dwData & 0x80) {
-                    Key_Event(K_MOUSE1 + button, true, p->dwTimeStamp);
+                    Key_Event(K_MOUSE1 + button, true, p->dwtimeStamp);
                 } else {
-                    Key_Event(K_MOUSE1 + button, false, p->dwTimeStamp);
+                    Key_Event(K_MOUSE1 + button, false, p->dwtimeStamp);
                 }
                 break;
             case DIMOFS_Z:
@@ -133,11 +133,11 @@ static void DI_GetMouseEvents(void)
                     break;
                 }
                 if (value > 0) {
-                    Key_Event(K_MWHEELUP, true, p->dwTimeStamp);
-                    Key_Event(K_MWHEELUP, false, p->dwTimeStamp);
+                    Key_Event(K_MWHEELUP, true, p->dwtimeStamp);
+                    Key_Event(K_MWHEELUP, false, p->dwtimeStamp);
                 } else {
-                    Key_Event(K_MWHEELDOWN, true, p->dwTimeStamp);
-                    Key_Event(K_MWHEELDOWN, false, p->dwTimeStamp);
+                    Key_Event(K_MWHEELDOWN, true, p->dwtimeStamp);
+                    Key_Event(K_MWHEELDOWN, false, p->dwtimeStamp);
                 }
                 break;
             default:

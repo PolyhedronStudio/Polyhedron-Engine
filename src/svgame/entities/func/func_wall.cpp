@@ -25,7 +25,7 @@ START_ON        only valid for TRIGGER_SPAWN walls
                 the wall will initially be present
 */
 
-void func_wall_use(entity_t* self, entity_t* other, entity_t* activator)
+void func_wall_use(Entity* self, Entity* other, Entity* activator)
 {
     if (self->solid == Solid::Not) {
         self->solid = Solid::BSP;
@@ -42,7 +42,7 @@ void func_wall_use(entity_t* self, entity_t* other, entity_t* activator)
         self->Use = NULL;
 }
 
-void SP_func_wall(entity_t* self)
+void SP_func_wall(Entity* self)
 {
     self->moveType = MoveType::Push;
     gi.SetModel(self, self->model);

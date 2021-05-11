@@ -86,10 +86,10 @@ static const save_field_t entityfields[] = {
     F(freeTime),
 
     L(message),
-    L(classname),
+    L(className),
     I(spawnFlags),
 
-    F(timestamp),
+    F(timeStamp),
 
     L(target),
     L(targetName),
@@ -101,16 +101,16 @@ static const save_field_t entityfields[] = {
     E(targetEntityPtr),
 
     F(speed),
-    F(accel),
-    F(decel),
+    F(acceleration),
+    F(deceleration),
     V(moveDirection),
-    V(pos1),
-    V(pos2),
+    V(position1),
+    V(position2),
 
     V(velocity),
-    V(avelocity),
+    V(angularVelocity),
     I(mass),
-    F(air_finished),
+    F(airFinished),
     F(gravity),
 
     E(goalEntityPtr),
@@ -139,15 +139,15 @@ static const save_field_t entityfields[] = {
     I(deadFlag),
     I(showHostile),
 
-    F(powerarmor_time),
+    F(powerArmorTime),
 
     L(map),
 
     I(viewHeight),
     I(takeDamage),
-    I(dmg),
-    I(radius_dmg),
-    F(dmg_radius),
+    I(damage),
+    I(radiusDamage),
+    F(damageRadius),
     I(sounds),
     I(count),
 
@@ -160,8 +160,8 @@ static const save_field_t entityfields[] = {
     E(teamChainPtr),
     E(teamMasterPtr),
 
-    E(myNoise),
-    E(myNoise2),
+    E(myNoisePtr),
+    E(myNoise2Ptr),
 
     I(noiseIndex),
     I(noiseIndex2),
@@ -187,30 +187,30 @@ static const save_field_t entityfields[] = {
 
     T(item),
 
-    V(moveInfo.start_origin),
-    V(moveInfo.start_angles),
-    V(moveInfo.end_origin),
-    V(moveInfo.end_angles),
+    V(moveInfo.startOrigin),
+    V(moveInfo.startAngles),
+    V(moveInfo.endOrigin),
+    V(moveInfo.endAngles),
 
-    I(moveInfo.sound_start),
-    I(moveInfo.sound_middle),
-    I(moveInfo.sound_end),
+    I(moveInfo.startSoundIndex),
+    I(moveInfo.middleSoundIndex),
+    I(moveInfo.endSoundIndex),
 
-    F(moveInfo.accel),
+    F(moveInfo.acceleration),
     F(moveInfo.speed),
-    F(moveInfo.decel),
+    F(moveInfo.deceleration),
     F(moveInfo.distance),
 
     F(moveInfo.wait),
 
     I(moveInfo.state),
     V(moveInfo.dir),
-    F(moveInfo.current_speed),
-    F(moveInfo.move_speed),
-    F(moveInfo.next_speed),
-    F(moveInfo.remaining_distance),
-    F(moveInfo.decel_distance),
-    P(moveInfo.endfunc, P_moveinfo_endfunc),
+    F(moveInfo.currentSpeed),
+    F(moveInfo.moveSpeed),
+    F(moveInfo.nextSpeed),
+    F(moveInfo.remainingDistance),
+    F(moveInfo.deceleratedDistance),
+    P(moveInfo.OnEndFunction, P_moveinfo_endfunc),
 
     P(monsterInfo.currentmove, P_monsterinfo_currentmove),
     I(monsterInfo.aiflags),
@@ -259,25 +259,22 @@ static const save_field_t levelfields[] = {
     F(intermissiontime),
     L(changemap),
     I(exitintermission),
-    V(intermission_origin),
-    V(intermission_angle),
+    V(intermissionOrigin),
+    V(intermissionAngle),
 
-    E(sight_client),
+    E(sightClient),
 
-    E(sight_entity),
-    I(sight_entity_framenum),
-    E(sound_entity),
-    I(sound_entity_framenum),
-    E(sound2_entity),
-    I(sound2_entity_framenum),
+    E(sightEntity),
+    I(sightEntityFrameNumber),
+    E(soundEntity),
+    I(soundEntityFrameNumber),
+    E(sound2Entity),
+    I(sound2EntityFrameNumber),
 
     I(pic_health),
-    
-    I(total_goals),
-    I(found_goals),
 
-    I(total_monsters),
-    I(killed_monsters),
+    I(totalMonsters),
+    I(killedMonsters),
 
     I(bodyQue),
 
@@ -372,7 +369,7 @@ static const save_field_t clientfields[] = {
     F(bonusAlpha),
     V(damageBlend),
     V(aimAngles),
-    F(bobtime),
+    F(bobTime),
     V(oldViewAngles),
     V(oldVelocity),
 
@@ -398,11 +395,11 @@ static const save_field_t clientfields[] = {
 static const save_field_t gamefields[] = {
 #define _OFS GLOFS
     I(maxClients),
-    I(maxentities),
+    I(maxEntities),
 
     I(serverflags),
 
-    I(num_items),
+    I(numberOfItems),
 
     I(autosaved),
 
@@ -534,13 +531,13 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     case F_EDICT:
-        write_index(f, *(void **)p, sizeof(entity_t), g_entities, MAX_EDICTS - 1);
+        write_index(f, *(void **)p, sizeof(Entity), g_entities, MAX_EDICTS - 1);
         break;
     case F_CLIENT:
-        write_index(f, *(void **)p, sizeof(gclient_t), game.clients, game.maxClients - 1);
+        write_index(f, *(void **)p, sizeof(GameClient), game.clients, game.maxClients - 1);
         break;
     case F_ITEM:
-        write_index(f, *(void **)p, sizeof(gitem_t), itemlist, game.num_items - 1);
+        write_index(f, *(void **)p, sizeof(gitem_t), itemlist, game.numberOfItems - 1);
         break;
 
     case F_POINTER:
@@ -716,13 +713,13 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     case F_EDICT:
-        *(entity_t **)p = (entity_t*)read_index(f, sizeof(entity_t), g_entities, game.maxentities - 1); // CPP: Cast
+        *(Entity **)p = (Entity*)read_index(f, sizeof(Entity), g_entities, game.maxEntities - 1); // CPP: Cast
         break;
     case F_CLIENT:
-        *(gclient_t **)p = (gclient_t*)read_index(f, sizeof(gclient_t), game.clients, game.maxClients - 1); // CPP: Cast
+        *(GameClient **)p = (GameClient*)read_index(f, sizeof(GameClient), game.clients, game.maxClients - 1); // CPP: Cast
         break;
     case F_ITEM:
-        *(gitem_t **)p = (gitem_t*)read_index(f, sizeof(gitem_t), itemlist, game.num_items - 1); // CPP: Cast
+        *(gitem_t **)p = (gitem_t*)read_index(f, sizeof(gitem_t), itemlist, game.numberOfItems - 1); // CPP: Cast
         break;
 
     case F_POINTER:
@@ -819,16 +816,16 @@ void ReadGame(const char *filename)
         fclose(f);
         gi.Error("Savegame has bad maxClients");
     }
-    if (game.maxentities <= game.maxClients || game.maxentities > MAX_EDICTS) {
+    if (game.maxEntities <= game.maxClients || game.maxEntities > MAX_EDICTS) {
         fclose(f);
-        gi.Error("Savegame has bad maxentities");
+        gi.Error("Savegame has bad maxEntities");
     }
 
-    g_entities = (entity_t*)gi.TagMalloc(game.maxentities * sizeof(g_entities[0]), TAG_GAME); // CPP: Cast
+    g_entities = (Entity*)gi.TagMalloc(game.maxEntities * sizeof(g_entities[0]), TAG_GAME); // CPP: Cast
     globals.edicts = g_entities;
-    globals.max_edicts = game.maxentities;
+    globals.max_edicts = game.maxEntities;
 
-    game.clients = (gclient_t*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     for (i = 0; i < game.maxClients; i++) {
         read_fields(f, clientfields, &game.clients[i]);
     }
@@ -848,7 +845,7 @@ WriteLevel
 void WriteLevel(const char *filename)
 {
     int     i;
-    entity_t *ent;
+    Entity *ent;
     FILE    *f;
 
     f = fopen(filename, "wb");
@@ -858,7 +855,7 @@ void WriteLevel(const char *filename)
     write_int(f, SAVE_MAGIC2);
     write_int(f, SAVE_VERSION);
 
-    // write out level_locals_t
+    // write out LevelLocals
     write_fields(f, levelfields, &level);
 
     // write out all the entities
@@ -896,7 +893,7 @@ void ReadLevel(const char *filename)
     int     entnum;
     FILE    *f;
     int     i;
-    entity_t *ent;
+    Entity *ent;
 
     // Free any dynamic memory allocated by loading the level
     // base state
@@ -907,7 +904,7 @@ void ReadLevel(const char *filename)
         gi.Error("Couldn't open %s", filename);
 
     // Ensure all entities have a clean slate in memory.
-    memset(g_entities, 0, game.maxentities * sizeof(g_entities[0]));
+    memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0]));
 
     // Set the number of edicts to be maxClients + 1. (They are soon to be in-use after all)
     globals.num_edicts = maxClients->value + 1;
@@ -932,7 +929,7 @@ void ReadLevel(const char *filename)
         entnum = read_int(f);
         if (entnum == -1)
             break;
-        if (entnum < 0 || entnum >= game.maxentities) {
+        if (entnum < 0 || entnum >= game.maxEntities) {
             gi.Error("%s: bad entity number", __func__);
         }
         if (entnum >= globals.num_edicts)
@@ -965,8 +962,8 @@ void ReadLevel(const char *filename)
             continue;
 
         // fire any cross-level triggers
-        if (ent->classname)
-            if (strcmp(ent->classname, "target_crosslevel_target") == 0)
+        if (ent->className)
+            if (strcmp(ent->className, "target_crosslevel_target") == 0)
                 ent->nextThink = level.time + ent->delay;
 
         //if (ent->Think == func_clock_think || ent->Use == func_clock_use) {

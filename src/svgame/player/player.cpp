@@ -12,7 +12,7 @@
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
 
-void Player_Pain(entity_t* self, entity_t* other, float kick, int damage)
+void Player_Pain(Entity* self, Entity* other, float kick, int damage)
 {
     // player pain is handled at the end of the frame in P_ApplyDamageFeedback
 }
@@ -22,14 +22,14 @@ void Player_Pain(entity_t* self, entity_t* other, float kick, int damage)
 LookAtKiller
 ==================
 */
-void LookAtKiller(entity_t* self, entity_t* inflictor, entity_t* attacker)
+void LookAtKiller(Entity* self, Entity* inflictor, Entity* attacker)
 {
     vec3_t      dir;
 
-    if (attacker && attacker != world && attacker != self) {
+    if (attacker && attacker != G_GetWorldEntity() && attacker != self) {
         VectorSubtract(attacker->state.origin, self->state.origin, dir);
     }
-    else if (inflictor && inflictor != world && inflictor != self) {
+    else if (inflictor && inflictor != G_GetWorldEntity() && inflictor != self) {
         VectorSubtract(inflictor->state.origin, self->state.origin, dir);
     }
     else {
@@ -57,12 +57,12 @@ void LookAtKiller(entity_t* self, entity_t* inflictor, entity_t* attacker)
 Player_Die
 ==================
 */
-void Player_Die(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t& point)
+void Player_Die(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point)
 {
     int     n;
 
     // Clear out angular velocity.
-    self->avelocity = vec3_zero();
+    self->angularVelocity = vec3_zero();
 
     self->takeDamage = TakeDamage::Yes;
     self->moveType = MoveType::Toss;
@@ -93,7 +93,7 @@ void Player_Die(entity_t* self, entity_t* inflictor, entity_t* attacker, int dam
 
         // clear inventory
         // this is kind of ugly, but it's how we want to handle keys in coop
-        for (n = 0; n < game.num_items; n++) {
+        for (n = 0; n < game.numberOfItems; n++) {
             if (coop->value && itemlist[n].flags & IT_KEY)
                 self->client->respawn.persistentCoopRespawn.inventory[n] = self->client->persistent.inventory[n];
             self->client->persistent.inventory[n] = 0;

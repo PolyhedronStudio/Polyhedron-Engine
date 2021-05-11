@@ -102,11 +102,11 @@ main()
         float p = w2 / w12;
         vec2 offset = pixstep * (x + p);
 
-        vec2 pos1 = clamp(vec2(ipos) + vec2(0.5) + offset, vec2(0.0), bloom_sample_extent);
-        vec2 pos2 = clamp(vec2(ipos) + vec2(0.5) - offset, vec2(0.0), bloom_sample_extent);
+        vec2 position1 = clamp(vec2(ipos) + vec2(0.5) + offset, vec2(0.0), bloom_sample_extent);
+        vec2 position2 = clamp(vec2(ipos) + vec2(0.5) - offset, vec2(0.0), bloom_sample_extent);
         
-        vec2 uv1 = img_to_uv(pos1);
-        vec2 uv2 = img_to_uv(pos2);
+        vec2 uv1 = img_to_uv(position1);
+        vec2 uv2 = img_to_uv(position2);
 
         vec3 pix;
 

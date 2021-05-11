@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "utils.h"
 #include "trigger.h"
 
-void InitTrigger(entity_t *self)
+void InitTrigger(Entity *self)
 {
     if (!VectorCompare(self->state.angles, vec3_origin))
         UTIL_SetMoveDir(self->state.angles, self->moveDirection);
@@ -32,7 +32,7 @@ void InitTrigger(entity_t *self)
 
 
 // the wait time has passed, so set back up for another activation
-void multi_wait(entity_t *ent)
+void multi_wait(Entity *ent)
 {
     ent->nextThink = 0;
 }
@@ -41,7 +41,7 @@ void multi_wait(entity_t *ent)
 // the trigger was just activated
 // ent->activator should be set to the activator so it can be held through a delay
 // so wait for the delay time before firing
-void multi_trigger(entity_t *ent)
+void multi_trigger(Entity *ent)
 {
     if (ent->nextThink)
         return;     // already been triggered
@@ -60,13 +60,13 @@ void multi_trigger(entity_t *ent)
     }
 }
 
-void Use_Multi(entity_t *ent, entity_t *other, entity_t *activator)
+void Use_Multi(Entity *ent, Entity *other, Entity *activator)
 {
     ent->activator = activator;
     multi_trigger(ent);
 }
 
-void Touch_Multi(entity_t *self, entity_t *other, cplane_t *plane, csurface_t *surf)
+void Touch_Multi(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
 {
     if (other->client) {
         if (self->spawnFlags & 2)

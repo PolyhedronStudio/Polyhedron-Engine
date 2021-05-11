@@ -24,7 +24,10 @@
 //
 //======================================================================
 //
-void Machinegun_Fire(entity_t* ent)
+static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_HSPREAD = 300;
+static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_VSPREAD = 500;
+
+void Machinegun_Fire(Entity* ent)
 {
     int i;
     vec3_t      start;
@@ -79,7 +82,7 @@ void Machinegun_Fire(entity_t* ent)
     AngleVectors(angles, &forward, &right, NULL);
     VectorSet(offset, 0, 8, ent->viewHeight - 8);
     start = P_ProjectSource(ent->client, ent->state.origin, offset, forward, right);
-    fire_bullet(ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+    fire_bullet(ent, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
 
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
     gi.WriteShort(ent - g_entities);
@@ -102,7 +105,7 @@ void Machinegun_Fire(entity_t* ent)
     }
 }
 
-void Weapon_Machinegun(entity_t* ent)
+void Weapon_Machinegun(Entity* ent)
 {
     static int  pause_frames[] = { 23, 45, 0 };
     static int  fire_frames[] = { 4, 5, 0 };

@@ -28,7 +28,7 @@ NOMONSTER   monsters will not trigger this door
 "speed"     movement speed (100 default)
 "wait"      wait before returning (3 default, -1 = never return)
 "lip"       lip remaining at end of move (8 default)
-"dmg"       damage to inflict when Blocked (2 default)
+"damage"       damage to inflict when Blocked (2 default)
 "sounds"
 1)  silent
 2)  light
@@ -36,27 +36,27 @@ NOMONSTER   monsters will not trigger this door
 4)  heavy
 */
 
-void door_use_areaportals(entity_t* self, qboolean open)
+void door_use_areaportals(Entity* self, qboolean open)
 {
-    entity_t* t = NULL;
+    Entity* t = NULL;
 
     if (!self->target)
         return;
 
     while ((t = G_Find(t, FOFS(targetName), self->target))) {
-        if (Q_stricmp(t->classname, "func_areaportal") == 0) {
+        if (Q_stricmp(t->className, "func_areaportal") == 0) {
             gi.SetAreaPortalState(t->style, open);
         }
     }
 }
 
-void door_go_down(entity_t* self);
+void door_go_down(Entity* self);
 
-void door_hit_top(entity_t* self)
+void door_hit_top(Entity* self)
 {
     if (!(self->flags & EntityFlags::TeamSlave)) {
-        if (self->moveInfo.sound_end)
-            gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_end, 1, ATTN_STATIC, 0);
+        if (self->moveInfo.endSoundIndex)
+            gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.endSoundIndex, 1, ATTN_STATIC, 0);
         self->state.sound = 0;
     }
     self->moveInfo.state = STATE_TOP;
@@ -68,23 +68,23 @@ void door_hit_top(entity_t* self)
     }
 }
 
-void door_hit_bottom(entity_t* self)
+void door_hit_bottom(Entity* self)
 {
     if (!(self->flags & EntityFlags::TeamSlave)) {
-        if (self->moveInfo.sound_end)
-            gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_end, 1, ATTN_STATIC, 0);
+        if (self->moveInfo.endSoundIndex)
+            gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.endSoundIndex, 1, ATTN_STATIC, 0);
         self->state.sound = 0;
     }
     self->moveInfo.state = STATE_BOTTOM;
     door_use_areaportals(self, false);
 }
 
-void door_go_down(entity_t* self)
+void door_go_down(Entity* self)
 {
     if (!(self->flags & EntityFlags::TeamSlave)) {
-        if (self->moveInfo.sound_start)
-            gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_start, 1, ATTN_STATIC, 0);
-        self->state.sound = self->moveInfo.sound_middle;
+        if (self->moveInfo.startSoundIndex)
+            gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.startSoundIndex, 1, ATTN_STATIC, 0);
+        self->state.sound = self->moveInfo.middleSoundIndex;
     }
     if (self->maxHealth) {
         self->takeDamage = TakeDamage::Yes;
@@ -92,13 +92,13 @@ void door_go_down(entity_t* self)
     }
 
     self->moveInfo.state = STATE_DOWN;
-    if (strcmp(self->classname, "func_door") == 0)
-        Brush_Move_Calc(self, self->moveInfo.start_origin, door_hit_bottom);
-    else if (strcmp(self->classname, "func_door_rotating") == 0)
+    if (strcmp(self->className, "func_door") == 0)
+        Brush_Move_Calc(self, self->moveInfo.startOrigin, door_hit_bottom);
+    else if (strcmp(self->className, "func_door_rotating") == 0)
         Brush_AngleMove_Calc(self, door_hit_bottom);
 }
 
-void door_go_up(entity_t* self, entity_t* activator)
+void door_go_up(Entity* self, Entity* activator)
 {
     if (self->moveInfo.state == STATE_UP)
         return;     // already going up
@@ -111,23 +111,23 @@ void door_go_up(entity_t* self, entity_t* activator)
     }
 
     if (!(self->flags & EntityFlags::TeamSlave)) {
-        if (self->moveInfo.sound_start)
-            gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_start, 1, ATTN_STATIC, 0);
-        self->state.sound = self->moveInfo.sound_middle;
+        if (self->moveInfo.startSoundIndex)
+            gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.startSoundIndex, 1, ATTN_STATIC, 0);
+        self->state.sound = self->moveInfo.middleSoundIndex;
     }
     self->moveInfo.state = STATE_UP;
-    if (strcmp(self->classname, "func_door") == 0)
-        Brush_Move_Calc(self, self->moveInfo.end_origin, door_hit_top);
-    else if (strcmp(self->classname, "func_door_rotating") == 0)
+    if (strcmp(self->className, "func_door") == 0)
+        Brush_Move_Calc(self, self->moveInfo.endOrigin, door_hit_top);
+    else if (strcmp(self->className, "func_door_rotating") == 0)
         Brush_AngleMove_Calc(self, door_hit_top);
 
     UTIL_UseTargets(self, activator);
     door_use_areaportals(self, true);
 }
 
-void door_use(entity_t* self, entity_t* other, entity_t* activator)
+void door_use(Entity* self, Entity* other, Entity* activator)
 {
-    entity_t* ent;
+    Entity* ent;
 
     if (self->flags & EntityFlags::TeamSlave)
         return;
@@ -152,7 +152,7 @@ void door_use(entity_t* self, entity_t* other, entity_t* activator)
     }
 }
 
-void Touch_DoorTrigger(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
+void Touch_DoorTrigger(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
 {
     if (other->health <= 0)
         return;
@@ -170,9 +170,9 @@ void Touch_DoorTrigger(entity_t* self, entity_t* other, cplane_t* plane, csurfac
     door_use(self->owner, other, other);
 }
 
-void Think_CalcMoveSpeed(entity_t* self)
+void Think_CalcMoveSpeed(Entity* self)
 {
-    entity_t* ent;
+    Entity* ent;
     float   min;
     float   time;
     float   newspeed;
@@ -196,21 +196,21 @@ void Think_CalcMoveSpeed(entity_t* self)
     for (ent = self; ent; ent = ent->teamChainPtr) {
         newspeed = fabs(ent->moveInfo.distance) / time;
         ratio = newspeed / ent->moveInfo.speed;
-        if (ent->moveInfo.accel == ent->moveInfo.speed)
-            ent->moveInfo.accel = newspeed;
+        if (ent->moveInfo.acceleration == ent->moveInfo.speed)
+            ent->moveInfo.acceleration = newspeed;
         else
-            ent->moveInfo.accel *= ratio;
-        if (ent->moveInfo.decel == ent->moveInfo.speed)
-            ent->moveInfo.decel = newspeed;
+            ent->moveInfo.acceleration *= ratio;
+        if (ent->moveInfo.deceleration == ent->moveInfo.speed)
+            ent->moveInfo.deceleration = newspeed;
         else
-            ent->moveInfo.decel *= ratio;
+            ent->moveInfo.deceleration *= ratio;
         ent->moveInfo.speed = newspeed;
     }
 }
 
-void Think_SpawnDoorTrigger(entity_t* ent)
+void Think_SpawnDoorTrigger(Entity* ent)
 {
-    entity_t* other;
+    Entity* other;
     vec3_t      mins, maxs;
 
     if (ent->flags & EntityFlags::TeamSlave)
@@ -245,20 +245,20 @@ void Think_SpawnDoorTrigger(entity_t* ent)
     Think_CalcMoveSpeed(ent);
 }
 
-void door_blocked(entity_t* self, entity_t* other)
+void door_blocked(Entity* self, Entity* other)
 {
-    entity_t* ent;
+    Entity* ent;
 
     if (!(other->serverFlags & EntityServerFlags::Monster) && (!other->client)) {
         // give it a chance to go away on it's own terms (like gibs)
-        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 100000, 1, 0, MeansOfDeath::Crush);
         // if it's still there, nuke it
         if (other)
             BecomeExplosion1(other);
         return;
     }
 
-    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->damage, 1, 0, MeansOfDeath::Crush);
 
     if (self->spawnFlags & DOOR_CRUSHER)
         return;
@@ -278,9 +278,9 @@ void door_blocked(entity_t* self, entity_t* other)
     }
 }
 
-void door_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t &point)
+void door_killed(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t &point)
 {
-    entity_t* ent;
+    Entity* ent;
 
     for (ent = self->teamMasterPtr; ent; ent = ent->teamChainPtr) {
         ent->health = ent->maxHealth;
@@ -289,7 +289,7 @@ void door_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int da
     door_use(self->teamMasterPtr, attacker, attacker);
 }
 
-void door_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
+void door_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
 {
     if (!other->client)
         return;
@@ -302,14 +302,14 @@ void door_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* su
     gi.Sound(other, CHAN_AUTO, gi.SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
 }
 
-void SP_func_door(entity_t* ent)
+void SP_func_door(Entity* ent)
 {
     vec3_t  abs_movedir;
 
     if (ent->sounds != 1) {
-        ent->moveInfo.sound_start = gi.SoundIndex("doors/dr1_strt.wav");
-        ent->moveInfo.sound_middle = gi.SoundIndex("doors/dr1_mid.wav");
-        ent->moveInfo.sound_end = gi.SoundIndex("doors/dr1_end.wav");
+        ent->moveInfo.startSoundIndex = gi.SoundIndex("doors/dr1_strt.wav");
+        ent->moveInfo.middleSoundIndex = gi.SoundIndex("doors/dr1_mid.wav");
+        ent->moveInfo.endSoundIndex = gi.SoundIndex("doors/dr1_end.wav");
     }
 
     UTIL_SetMoveDir(ent->state.angles, ent->moveDirection);
@@ -325,31 +325,31 @@ void SP_func_door(entity_t* ent)
     if (deathmatch->value)
         ent->speed *= 2;
 
-    if (!ent->accel)
-        ent->accel = ent->speed;
-    if (!ent->decel)
-        ent->decel = ent->speed;
+    if (!ent->acceleration)
+        ent->acceleration = ent->speed;
+    if (!ent->deceleration)
+        ent->deceleration = ent->speed;
 
     if (!ent->wait)
         ent->wait = 3;
     if (!st.lip)
         st.lip = 8;
-    if (!ent->dmg)
-        ent->dmg = 2;
+    if (!ent->damage)
+        ent->damage = 2;
 
     // calculate second position
-    VectorCopy(ent->state.origin, ent->pos1);
+    VectorCopy(ent->state.origin, ent->position1);
     abs_movedir[0] = fabs(ent->moveDirection[0]);
     abs_movedir[1] = fabs(ent->moveDirection[1]);
     abs_movedir[2] = fabs(ent->moveDirection[2]);
     ent->moveInfo.distance = abs_movedir[0] * ent->size[0] + abs_movedir[1] * ent->size[1] + abs_movedir[2] * ent->size[2] - st.lip;
-    VectorMA(ent->pos1, ent->moveInfo.distance, ent->moveDirection, ent->pos2);
+    VectorMA(ent->position1, ent->moveInfo.distance, ent->moveDirection, ent->position2);
 
     // if it starts open, switch the positions
     if (ent->spawnFlags & DOOR_START_OPEN) {
-        VectorCopy(ent->pos2, ent->state.origin);
-        VectorCopy(ent->pos1, ent->pos2);
-        VectorCopy(ent->state.origin, ent->pos1);
+        VectorCopy(ent->position2, ent->state.origin);
+        VectorCopy(ent->position1, ent->position2);
+        VectorCopy(ent->state.origin, ent->position1);
     }
 
     ent->moveInfo.state = STATE_BOTTOM;
@@ -365,13 +365,13 @@ void SP_func_door(entity_t* ent)
     }
 
     ent->moveInfo.speed = ent->speed;
-    ent->moveInfo.accel = ent->accel;
-    ent->moveInfo.decel = ent->decel;
+    ent->moveInfo.acceleration = ent->acceleration;
+    ent->moveInfo.deceleration = ent->deceleration;
     ent->moveInfo.wait = ent->wait;
-    VectorCopy(ent->pos1, ent->moveInfo.start_origin);
-    VectorCopy(ent->state.angles, ent->moveInfo.start_angles);
-    VectorCopy(ent->pos2, ent->moveInfo.end_origin);
-    VectorCopy(ent->state.angles, ent->moveInfo.end_angles);
+    VectorCopy(ent->position1, ent->moveInfo.startOrigin);
+    VectorCopy(ent->state.angles, ent->moveInfo.startAngles);
+    VectorCopy(ent->position2, ent->moveInfo.endOrigin);
+    VectorCopy(ent->state.angles, ent->moveInfo.endAngles);
 
     if (ent->spawnFlags & 16)
         ent->state.effects |= EntityEffectType::AnimCycleAll2hz;

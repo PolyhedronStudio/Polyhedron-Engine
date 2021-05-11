@@ -59,7 +59,7 @@ typedef struct {
     char        *rules[MAX_STATUS_RULES];
     int         numPlayers;
     char        *players[MAX_STATUS_PLAYERS];
-    unsigned    timestamp;
+    unsigned    timeStamp;
     uint32_t    color;
     char        name[1];
 } serverslot_t;
@@ -71,7 +71,7 @@ typedef struct {
     menuList_t      players;
     void            *names[MAX_STATUS_SERVERS];
     const char            *args;  // C++20: STRING: Added const to char*
-    unsigned        timestamp;
+    unsigned        timeStamp;
     int             pingstage;
     int             pingindex;
     int             pingtime;
@@ -214,7 +214,7 @@ void UI_StatusEvent(const serverStatus_t *status)
     serverslot_t *slot;
     char *hostname, *host;
     const char* map, *mod, *maxClients; // C++20: STRING: Added const to char*
-    unsigned timestamp, ping;
+    unsigned timeStamp, ping;
     const char *info = status->infostring;
     char key[MAX_INFO_STRING];
     char value[MAX_INFO_STRING];
@@ -234,11 +234,11 @@ void UI_StatusEvent(const serverStatus_t *status)
         }
         m_servers.list.numItems++;
         hostname = UI_CopyString(NET_AdrToString(&net_from));
-        timestamp = m_servers.timestamp;
+        timeStamp = m_servers.timeStamp;
     } else {
         // free previous data
         hostname = slot->hostname;
-        timestamp = slot->timestamp;
+        timeStamp = slot->timeStamp;
         FreeSlot(slot);
     }
 
@@ -262,10 +262,10 @@ void UI_StatusEvent(const serverStatus_t *status)
         maxClients = "?";
     }
 
-    if (timestamp > com_eventTime)
-        timestamp = com_eventTime;
+    if (timeStamp > com_eventTime)
+        timeStamp = com_eventTime;
 
-    ping = com_eventTime - timestamp;
+    ping = com_eventTime - timeStamp;
     if (ping > 999)
         ping = 999;
 
@@ -309,7 +309,7 @@ void UI_StatusEvent(const serverStatus_t *status)
                              NULL);
     }
 
-    slot->timestamp = timestamp;
+    slot->timeStamp = timeStamp;
 
     // don't sort when manually refreshing
     if (m_servers.pingstage)
@@ -331,7 +331,7 @@ void UI_ErrorEvent(netadr_t *from)
     serverslot_t *slot;
     netadr_t address;
     char *hostname;
-    unsigned timestamp, ping;
+    unsigned timeStamp, ping;
     int i;
 
     // ignore unless menu is up
@@ -348,13 +348,13 @@ void UI_ErrorEvent(netadr_t *from)
 
     address = slot->address;
     hostname = slot->hostname;
-    timestamp = slot->timestamp;
+    timeStamp = slot->timeStamp;
     FreeSlot(slot);
 
-    if (timestamp > com_eventTime)
-        timestamp = com_eventTime;
+    if (timeStamp > com_eventTime)
+        timeStamp = com_eventTime;
 
-    ping = com_eventTime - timestamp;
+    ping = com_eventTime - timeStamp;
     if (ping > 999)
         ping = 999;
 
@@ -367,7 +367,7 @@ void UI_ErrorEvent(netadr_t *from)
     slot->color = U32_WHITE;
     slot->numRules = 0;
     slot->numPlayers = 0;
-    slot->timestamp = timestamp;
+    slot->timeStamp = timeStamp;
 
     m_servers.list.items[i] = slot;
 }
@@ -432,7 +432,7 @@ static menuSound_t PingSelected(void)
     slot->color = U32_WHITE;
     slot->numRules = 0;
     slot->numPlayers = 0;
-    slot->timestamp = com_eventTime;
+    slot->timeStamp = com_eventTime;
 
     m_servers.list.items[m_servers.list.curvalue] = slot;
 
@@ -486,7 +486,7 @@ static void AddServer(const netadr_t *address, const char *hostname)
     slot->color = U32_WHITE;
     slot->numRules = 0;
     slot->numPlayers = 0;
-    slot->timestamp = com_eventTime;
+    slot->timeStamp = com_eventTime;
 
     m_servers.list.items[m_servers.list.numItems++] = slot;
 }
@@ -718,7 +718,7 @@ void UI_Frame(int msec)
         if (slot->status > serverslot_t::SLOT_PENDING) // CPP:
             continue;
         slot->status = serverslot_t::SLOT_PENDING;
-        slot->timestamp = com_eventTime;
+        slot->timeStamp = com_eventTime;
         CL_SendStatusRequest(&slot->address);
         break;
     }
@@ -750,7 +750,7 @@ static void PingServers(void)
     memset(&broadcast, 0, sizeof(broadcast));
     ParseMasterArgs(&broadcast);
 
-    m_servers.timestamp = Sys_Milliseconds();
+    m_servers.timeStamp = Sys_Milliseconds();
 
     // optionally ping broadcast
     if (broadcast.type)

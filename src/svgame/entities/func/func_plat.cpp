@@ -13,13 +13,13 @@
 #include "../../effects.h"
 
 //=====================================================
-void plat_go_down(entity_t* ent);
+void plat_go_down(Entity* ent);
 
-void plat_hit_top(entity_t* ent)
+void plat_hit_top(Entity* ent)
 {
     if (!(ent->flags & EntityFlags::TeamSlave)) {
-        if (ent->moveInfo.sound_end)
-            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_end, 1, ATTN_STATIC, 0);
+        if (ent->moveInfo.endSoundIndex)
+            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.endSoundIndex, 1, ATTN_STATIC, 0);
         ent->state.sound = 0;
     }
     ent->moveInfo.state = STATE_TOP;
@@ -28,50 +28,50 @@ void plat_hit_top(entity_t* ent)
     ent->nextThink = level.time + 3;
 }
 
-void plat_hit_bottom(entity_t* ent)
+void plat_hit_bottom(Entity* ent)
 {
     if (!(ent->flags & EntityFlags::TeamSlave)) {
-        if (ent->moveInfo.sound_end)
-            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_end, 1, ATTN_STATIC, 0);
+        if (ent->moveInfo.endSoundIndex)
+            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.endSoundIndex, 1, ATTN_STATIC, 0);
         ent->state.sound = 0;
     }
     ent->moveInfo.state = STATE_BOTTOM;
 }
 
-void plat_go_down(entity_t* ent)
+void plat_go_down(Entity* ent)
 {
     if (!(ent->flags & EntityFlags::TeamSlave)) {
-        if (ent->moveInfo.sound_start)
-            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_start, 1, ATTN_STATIC, 0);
-        ent->state.sound = ent->moveInfo.sound_middle;
+        if (ent->moveInfo.startSoundIndex)
+            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.startSoundIndex, 1, ATTN_STATIC, 0);
+        ent->state.sound = ent->moveInfo.middleSoundIndex;
     }
     ent->moveInfo.state = STATE_DOWN;
-    Brush_Move_Calc(ent, ent->moveInfo.end_origin, plat_hit_bottom);
+    Brush_Move_Calc(ent, ent->moveInfo.endOrigin, plat_hit_bottom);
 }
 
-void plat_go_up(entity_t* ent)
+void plat_go_up(Entity* ent)
 {
     if (!(ent->flags & EntityFlags::TeamSlave)) {
-        if (ent->moveInfo.sound_start)
-            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.sound_start, 1, ATTN_STATIC, 0);
-        ent->state.sound = ent->moveInfo.sound_middle;
+        if (ent->moveInfo.startSoundIndex)
+            gi.Sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveInfo.startSoundIndex, 1, ATTN_STATIC, 0);
+        ent->state.sound = ent->moveInfo.middleSoundIndex;
     }
     ent->moveInfo.state = STATE_UP;
-    Brush_Move_Calc(ent, ent->moveInfo.start_origin, plat_hit_top);
+    Brush_Move_Calc(ent, ent->moveInfo.startOrigin, plat_hit_top);
 }
 
-void plat_blocked(entity_t* self, entity_t* other)
+void plat_blocked(Entity* self, Entity* other)
 {
     if (!(other->serverFlags & EntityServerFlags::Monster) && (!other->client)) {
         // give it a chance to go away on it's own terms (like gibs)
-        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 100000, 1, 0, MeansOfDeath::Crush);
         // if it's still there, nuke it
         if (other)
             BecomeExplosion1(other);
         return;
     }
 
-    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+    T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->damage, 1, 0, MeansOfDeath::Crush);
 
     if (self->moveInfo.state == STATE_UP)
         plat_go_down(self);
@@ -80,7 +80,7 @@ void plat_blocked(entity_t* self, entity_t* other)
 }
 
 
-void Use_Plat(entity_t* ent, entity_t* other, entity_t* activator)
+void Use_Plat(Entity* ent, Entity* other, Entity* activator)
 {
     if (ent->Think)
         return;     // already down
@@ -88,7 +88,7 @@ void Use_Plat(entity_t* ent, entity_t* other, entity_t* activator)
 }
 
 
-void Touch_Plat_Center(entity_t* ent, entity_t* other, cplane_t* plane, csurface_t* surf)
+void Touch_Plat_Center(Entity* ent, Entity* other, cplane_t* plane, csurface_t* surf)
 {
     if (!other->client)
         return;
@@ -103,9 +103,9 @@ void Touch_Plat_Center(entity_t* ent, entity_t* other, cplane_t* plane, csurface
         ent->nextThink = level.time + 1;    // the player is still on the plat, so delay going down
 }
 
-void plat_spawn_inside_trigger(entity_t* ent)
+void plat_spawn_inside_trigger(Entity* ent)
 {
-    entity_t* trigger;
+    Entity* trigger;
     vec3_t  tmin, tmax;
 
     //
@@ -125,7 +125,7 @@ void plat_spawn_inside_trigger(entity_t* ent)
     tmax[1] = ent->maxs[1] - 25;
     tmax[2] = ent->maxs[2] + 8;
 
-    tmin[2] = tmax[2] - (ent->pos1[2] - ent->pos2[2] + st.lip);
+    tmin[2] = tmax[2] - (ent->position1[2] - ent->position2[2] + st.lip);
 
     if (ent->spawnFlags & PLAT_LOW_TRIGGER)
         tmax[2] = tmin[2] + 8;
@@ -154,7 +154,7 @@ Plats are always drawn in the extended position, so they will light correctly.
 If the plat is the target of another trigger or button, it will start out disabled in the extended position until it is trigger, when it will lower and become a normal plat.
 
 "speed" overrides default 200.
-"accel" overrides default 500
+"acceleration" overrides default 500
 "lip"   overrides default 8 pixel lip
 
 If the "height" key is set, that will determine the amount the plat moves, instead of being implicitly determoveinfoned by the model's height.
@@ -163,7 +163,7 @@ Set "sounds" to one of the following:
 1) base fast
 2) chain slow
 */
-void SP_func_plat(entity_t* ent)
+void SP_func_plat(Entity* ent)
 {
     VectorClear(ent->state.angles);
     ent->solid = Solid::BSP;
@@ -178,29 +178,29 @@ void SP_func_plat(entity_t* ent)
     else
         ent->speed *= 0.1;
 
-    if (!ent->accel)
-        ent->accel = 5;
+    if (!ent->acceleration)
+        ent->acceleration = 5;
     else
-        ent->accel *= 0.1;
+        ent->acceleration *= 0.1;
 
-    if (!ent->decel)
-        ent->decel = 5;
+    if (!ent->deceleration)
+        ent->deceleration = 5;
     else
-        ent->decel *= 0.1;
+        ent->deceleration *= 0.1;
 
-    if (!ent->dmg)
-        ent->dmg = 2;
+    if (!ent->damage)
+        ent->damage = 2;
 
     if (!st.lip)
         st.lip = 8;
 
-    // pos1 is the top position, pos2 is the bottom
-    VectorCopy(ent->state.origin, ent->pos1);
-    VectorCopy(ent->state.origin, ent->pos2);
+    // position1 is the top position, position2 is the bottom
+    VectorCopy(ent->state.origin, ent->position1);
+    VectorCopy(ent->state.origin, ent->position2);
     if (st.height)
-        ent->pos2[2] -= st.height;
+        ent->position2[2] -= st.height;
     else
-        ent->pos2[2] -= (ent->maxs[2] - ent->mins[2]) - st.lip;
+        ent->position2[2] -= (ent->maxs[2] - ent->mins[2]) - st.lip;
 
     ent->Use = Use_Plat;
 
@@ -210,21 +210,21 @@ void SP_func_plat(entity_t* ent)
         ent->moveInfo.state = STATE_UP;
     }
     else {
-        VectorCopy(ent->pos2, ent->state.origin);
+        VectorCopy(ent->position2, ent->state.origin);
         gi.LinkEntity(ent);
         ent->moveInfo.state = STATE_BOTTOM;
     }
 
     ent->moveInfo.speed = ent->speed;
-    ent->moveInfo.accel = ent->accel;
-    ent->moveInfo.decel = ent->decel;
+    ent->moveInfo.acceleration = ent->acceleration;
+    ent->moveInfo.deceleration = ent->deceleration;
     ent->moveInfo.wait = ent->wait;
-    VectorCopy(ent->pos1, ent->moveInfo.start_origin);
-    VectorCopy(ent->state.angles, ent->moveInfo.start_angles);
-    VectorCopy(ent->pos2, ent->moveInfo.end_origin);
-    VectorCopy(ent->state.angles, ent->moveInfo.end_angles);
+    VectorCopy(ent->position1, ent->moveInfo.startOrigin);
+    VectorCopy(ent->state.angles, ent->moveInfo.startAngles);
+    VectorCopy(ent->position2, ent->moveInfo.endOrigin);
+    VectorCopy(ent->state.angles, ent->moveInfo.endAngles);
 
-    ent->moveInfo.sound_start = gi.SoundIndex("plats/pt1_strt.wav");
-    ent->moveInfo.sound_middle = gi.SoundIndex("plats/pt1_mid.wav");
-    ent->moveInfo.sound_end = gi.SoundIndex("plats/pt1_end.wav");
+    ent->moveInfo.startSoundIndex = gi.SoundIndex("plats/pt1_strt.wav");
+    ent->moveInfo.middleSoundIndex = gi.SoundIndex("plats/pt1_mid.wav");
+    ent->moveInfo.endSoundIndex = gi.SoundIndex("plats/pt1_end.wav");
 }

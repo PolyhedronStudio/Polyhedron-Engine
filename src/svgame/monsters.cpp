@@ -27,9 +27,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // and we can mess it up based on skill.  Spread should be for normal
 // and we can tighten or loosen based on skill.  We could muck with
 // the damages too, but I'm not sure that's such a good idea.
-void monster_fire_bullet(entity_t *self, const vec3_t &start, const vec3_t &dir, int damage, int kick, int hspread, int vspread, int flashtype)
+void monster_fire_bullet(Entity *self, const vec3_t &start, const vec3_t &dir, int damage, int kick, int hspread, int vspread, int flashtype)
 {
-    fire_bullet(self, start, dir, damage, kick, hspread, vspread, MOD_UNKNOWN);
+    fire_bullet(self, start, dir, damage, kick, hspread, vspread, MeansOfDeath::Unknown);
 
     gi.WriteByte(SVG_CMD_MUZZLEFLASH2);
     gi.WriteShort(self - g_entities);
@@ -43,18 +43,18 @@ void monster_fire_bullet(entity_t *self, const vec3_t &start, const vec3_t &dir,
 //
 
 
-void M_FlyCheck(entity_t *self)
+void M_FlyCheck(Entity *self)
 {
 
 }
 
-void AttackFinished(entity_t *self, float time)
+void AttackFinished(Entity *self, float time)
 {
     self->monsterInfo.attack_finished = level.time + time;
 }
 
 
-void M_CheckGround(entity_t *ent)
+void M_CheckGround(Entity *ent)
 {
     vec3_t      point;
     trace_t     trace;
@@ -93,7 +93,7 @@ void M_CheckGround(entity_t *ent)
 }
 
 
-void M_CatagorizePosition(entity_t *ent)
+void M_CatagorizePosition(Entity *ent)
 {
     vec3_t      point;
     int         cont;
@@ -127,34 +127,34 @@ void M_CatagorizePosition(entity_t *ent)
 }
 
 
-void M_WorldEffects(entity_t *ent)
+void M_WorldEffects(Entity *ent)
 {
-    int     dmg;
+    int     damage;
 
     if (ent->health > 0) {
         if (!(ent->flags & EntityFlags::Swim)) {
             if (ent->waterLevel < 3) {
-                ent->air_finished = level.time + 12;
-            } else if (ent->air_finished < level.time) {
+                ent->airFinished = level.time + 12;
+            } else if (ent->airFinished < level.time) {
                 // drown!
                 if (ent->debouncePainTime < level.time) {
-                    dmg = 2 + 2 * floor(level.time - ent->air_finished);
-                    if (dmg > 15)
-                        dmg = 15;
-                    T_Damage(ent, world, world, vec3_origin, ent->state.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
+                    damage = 2 + 2 * floor(level.time - ent->airFinished);
+                    if (damage > 15)
+                        damage = 15;
+                    T_Damage(ent, G_GetWorldEntity(), G_GetWorldEntity(), vec3_origin, ent->state.origin, vec3_origin, damage, 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
                     ent->debouncePainTime = level.time + 1;
                 }
             }
         } else {
             if (ent->waterLevel > 0) {
-                ent->air_finished = level.time + 9;
-            } else if (ent->air_finished < level.time) {
+                ent->airFinished = level.time + 9;
+            } else if (ent->airFinished < level.time) {
                 // suffocate!
                 if (ent->debouncePainTime < level.time) {
-                    dmg = 2 + 2 * floor(level.time - ent->air_finished);
-                    if (dmg > 15)
-                        dmg = 15;
-                    T_Damage(ent, world, world, vec3_origin, ent->state.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
+                    damage = 2 + 2 * floor(level.time - ent->airFinished);
+                    if (damage > 15)
+                        damage = 15;
+                    T_Damage(ent, G_GetWorldEntity(), G_GetWorldEntity(), vec3_origin, ent->state.origin, vec3_origin, damage, 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
                     ent->debouncePainTime = level.time + 1;
                 }
             }
@@ -172,13 +172,13 @@ void M_WorldEffects(entity_t *ent)
     if ((ent->waterType & CONTENTS_LAVA) && !(ent->flags & EntityFlags::ImmuneToLava)) {
         if (ent->debounceDamageTime < level.time) {
             ent->debounceDamageTime = level.time + 0.2;
-            T_Damage(ent, world, world, vec3_origin, ent->state.origin, vec3_origin, 10 * ent->waterLevel, 0, 0, MOD_LAVA);
+            T_Damage(ent, G_GetWorldEntity(), G_GetWorldEntity(), vec3_origin, ent->state.origin, vec3_origin, 10 * ent->waterLevel, 0, 0, MeansOfDeath::Lava);
         }
     }
     if ((ent->waterType & CONTENTS_SLIME) && !(ent->flags & EntityFlags::ImmuneToSlime)) {
         if (ent->debounceDamageTime < level.time) {
             ent->debounceDamageTime = level.time + 1;
-            T_Damage(ent, world, world, vec3_origin, ent->state.origin, vec3_origin, 4 * ent->waterLevel, 0, 0, MOD_SLIME);
+            T_Damage(ent, G_GetWorldEntity(), G_GetWorldEntity(), vec3_origin, ent->state.origin, vec3_origin, 4 * ent->waterLevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 
@@ -201,7 +201,7 @@ void M_WorldEffects(entity_t *ent)
 }
 
 
-void M_droptofloor(entity_t *ent)
+void M_droptofloor(Entity *ent)
 {
     vec3_t      end;
     trace_t     trace;
@@ -223,13 +223,13 @@ void M_droptofloor(entity_t *ent)
 }
 
 
-void M_SetEffects(entity_t *ent)
+void M_SetEffects(Entity *ent)
 {
     ent->state.renderfx &= ~(RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell);
 }
 
 
-void M_MoveFrame(entity_t *self)
+void M_MoveFrame(Entity *self)
 {
     mmove_t *move;
     int     index;
@@ -242,10 +242,10 @@ void M_MoveFrame(entity_t *self)
         self->monsterInfo.nextframe = 0;
     } else {
         if (self->state.frame == move->lastFrame) {
-            if (move->endfunc) {
-                move->endfunc(self);
+            if (move->OnEndFunction) {
+                move->OnEndFunction(self);
 
-                // regrab move, endfunc is very likely to change it
+                // regrab move, OnEndFunction is very likely to change it
                 move = self->monsterInfo.currentmove;
 
                 // check for death
@@ -279,7 +279,7 @@ void M_MoveFrame(entity_t *self)
 }
 
 
-void monster_think(entity_t *self)
+void monster_think(Entity *self)
 {
     M_MoveFrame(self);
     if (self->linkCount != self->monsterInfo.linkCount) {
@@ -299,7 +299,7 @@ monster_use
 Using a monster makes it angry at the current activator
 ================
 */
-void monster_use(entity_t *self, entity_t *other, entity_t *activator)
+void monster_use(Entity *self, Entity *other, Entity *activator)
 {
     if (self->enemy)
         return;
@@ -316,10 +316,10 @@ void monster_use(entity_t *self, entity_t *other, entity_t *activator)
 }
 
 
-void monster_start_go(entity_t *self);
+void monster_start_go(Entity *self);
 
 
-void monster_triggered_spawn(entity_t *self)
+void monster_triggered_spawn(Entity *self)
 {
     self->state.origin[2] += 1;
     KillBox(self);
@@ -327,7 +327,7 @@ void monster_triggered_spawn(entity_t *self)
     self->solid = Solid::BoundingBox;
     self->moveType = MoveType::Step;
     self->serverFlags &= ~EntityServerFlags::NoClient;
-    self->air_finished = level.time + 12;
+    self->airFinished = level.time + 12;
     gi.LinkEntity(self);
 
     monster_start_go(self);
@@ -339,7 +339,7 @@ void monster_triggered_spawn(entity_t *self)
     }
 }
 
-void monster_triggered_spawn_use(entity_t *self, entity_t *other, entity_t *activator)
+void monster_triggered_spawn_use(Entity *self, Entity *other, Entity *activator)
 {
     // we have a one frame delay here so we don't telefrag the guy who activated us
     self->Think = monster_triggered_spawn;
@@ -349,7 +349,7 @@ void monster_triggered_spawn_use(entity_t *self, entity_t *other, entity_t *acti
     self->Use = monster_use;
 }
 
-void monster_triggered_start(entity_t *self)
+void monster_triggered_start(Entity *self)
 {
     self->solid = Solid::Not;
     self->moveType = MoveType::None;
@@ -367,7 +367,7 @@ When a monster dies, it fires all of its targets with the current
 enemy as activator.
 ================
 */
-void monster_death_use(entity_t *self)
+void monster_death_use(Entity *self)
 {
     self->flags &= ~(EntityFlags::Fly | EntityFlags::Swim);
     self->monsterInfo.aiflags &= AI_GOOD_GUY;
@@ -389,7 +389,7 @@ void monster_death_use(entity_t *self)
 
 //============================================================================
 
-qboolean monster_start(entity_t *self)
+qboolean monster_start(Entity *self)
 {
     if (deathmatch->value) {
         G_FreeEntity(self);
@@ -399,17 +399,17 @@ qboolean monster_start(entity_t *self)
     if ((self->spawnFlags & 4) && !(self->monsterInfo.aiflags & AI_GOOD_GUY)) {
         self->spawnFlags &= ~4;
         self->spawnFlags |= 1;
-//      gi.DPrintf("fixed spawnFlags on %s at %s\n", self->classname, Vec3ToString(self->state.origin));
+//      gi.DPrintf("fixed spawnFlags on %s at %s\n", self->className, Vec3ToString(self->state.origin));
     }
 
     if (!(self->monsterInfo.aiflags & AI_GOOD_GUY))
-        level.total_monsters++;
+        level.totalMonsters++;
 
     self->nextThink = level.time + FRAMETIME;
     self->serverFlags |= EntityServerFlags::Monster;
     self->state.renderfx |= RenderEffects::FrameLerp;
     self->takeDamage = TakeDamage::Aim;
-    self->air_finished = level.time + 12;
+    self->airFinished = level.time + 12;
     self->Use = monster_use;
     self->maxHealth = self->health;
     self->clipMask = CONTENTS_MASK_MONSTERSOLID;
@@ -425,7 +425,7 @@ qboolean monster_start(entity_t *self)
     if (st.item) {
         self->item = FindItemByClassname(st.item);
         if (!self->item)
-            gi.DPrintf("%s at %s has bad item: %s\n", self->classname, Vec3ToString(self->state.origin), st.item);
+            gi.DPrintf("%s at %s has bad item: %s\n", self->className, Vec3ToString(self->state.origin), st.item);
     }
 
     // randomize what frame they start on
@@ -435,7 +435,7 @@ qboolean monster_start(entity_t *self)
     return true;
 }
 
-void monster_start_go(entity_t *self)
+void monster_start_go(Entity *self)
 {
     vec3_t  v;
 
@@ -446,13 +446,13 @@ void monster_start_go(entity_t *self)
     if (self->target) {
         qboolean    notcombat;
         qboolean    fixup;
-        entity_t     *target;
+        Entity     *target;
 
         target = NULL;
         notcombat = false;
         fixup = false;
         while ((target = G_Find(target, FOFS(targetName), self->target)) != NULL) {
-            if (strcmp(target->classname, "point_combat") == 0) {
+            if (strcmp(target->className, "point_combat") == 0) {
                 self->combatTarget = self->target;
                 fixup = true;
             } else {
@@ -460,21 +460,21 @@ void monster_start_go(entity_t *self)
             }
         }
         if (notcombat && self->combatTarget)
-            gi.DPrintf("%s at %s has target with mixed types\n", self->classname, Vec3ToString(self->state.origin));
+            gi.DPrintf("%s at %s has target with mixed types\n", self->className, Vec3ToString(self->state.origin));
         if (fixup)
             self->target = NULL;
     }
 
     // validate combatTarget
     if (self->combatTarget) {
-        entity_t     *target;
+        Entity     *target;
 
         target = NULL;
         while ((target = G_Find(target, FOFS(targetName), self->combatTarget)) != NULL) {
-            if (strcmp(target->classname, "point_combat") != 0) {
+            if (strcmp(target->className, "point_combat") != 0) {
                 gi.DPrintf("%s at (%i %i %i) has a bad combatTarget %s : %s at (%i %i %i)\n",
-                           self->classname, (int)self->state.origin[0], (int)self->state.origin[1], (int)self->state.origin[2],
-                           self->combatTarget, target->classname, (int)target->state.origin[0], (int)target->state.origin[1],
+                           self->className, (int)self->state.origin[0], (int)self->state.origin[1], (int)self->state.origin[2],
+                           self->combatTarget, target->className, (int)target->state.origin[0], (int)target->state.origin[1],
                            (int)target->state.origin[2]);
             }
         }
@@ -483,11 +483,11 @@ void monster_start_go(entity_t *self)
     if (self->target) {
         self->goalEntityPtr = self->moveTargetPtr = G_PickTarget(self->target);
         if (!self->moveTargetPtr) {
-            gi.DPrintf("%s can't find target %s at %s\n", self->classname, self->target, Vec3ToString(self->state.origin));
+            gi.DPrintf("%s can't find target %s at %s\n", self->className, self->target, Vec3ToString(self->state.origin));
             self->target = NULL;
             self->monsterInfo.pausetime = 100000000;
             self->monsterInfo.stand(self);
-        } else if (strcmp(self->moveTargetPtr->classname, "path_corner") == 0) {
+        } else if (strcmp(self->moveTargetPtr->className, "path_corner") == 0) {
             VectorSubtract(self->goalEntityPtr->state.origin, self->state.origin, v);
             self->idealYaw = self->state.angles[vec3_t::Yaw] = vectoyaw(v);
             self->monsterInfo.walk(self);
@@ -507,14 +507,14 @@ void monster_start_go(entity_t *self)
 }
 
 
-void walkmonster_start_go(entity_t *self)
+void walkmonster_start_go(Entity *self)
 {
     if (!(self->spawnFlags & 2) && level.time < 1) {
         M_droptofloor(self);
 
         if (self->groundEntityPtr)
             if (!M_walkmove(self, 0, 0))
-                gi.DPrintf("%s in solid at %s\n", self->classname, Vec3ToString(self->state.origin));
+                gi.DPrintf("%s in solid at %s\n", self->className, Vec3ToString(self->state.origin));
     }
 
     if (!self->yawSpeed)
@@ -527,17 +527,17 @@ void walkmonster_start_go(entity_t *self)
         monster_triggered_start(self);
 }
 
-void walkmonster_start(entity_t *self)
+void walkmonster_start(Entity *self)
 {
     self->Think = walkmonster_start_go;
     monster_start(self);
 }
 
 
-void flymonster_start_go(entity_t *self)
+void flymonster_start_go(Entity *self)
 {
     if (!M_walkmove(self, 0, 0))
-        gi.DPrintf("%s in solid at %s\n", self->classname, Vec3ToString(self->state.origin));
+        gi.DPrintf("%s in solid at %s\n", self->className, Vec3ToString(self->state.origin));
 
     if (!self->yawSpeed)
         self->yawSpeed = 10;
@@ -550,7 +550,7 @@ void flymonster_start_go(entity_t *self)
 }
 
 
-void flymonster_start(entity_t *self)
+void flymonster_start(Entity *self)
 {
     self->flags |= EntityFlags::Fly;
     self->Think = flymonster_start_go;
@@ -558,7 +558,7 @@ void flymonster_start(entity_t *self)
 }
 
 
-void swimmonster_start_go(entity_t *self)
+void swimmonster_start_go(Entity *self)
 {
     if (!self->yawSpeed)
         self->yawSpeed = 10;
@@ -570,7 +570,7 @@ void swimmonster_start_go(entity_t *self)
         monster_triggered_start(self);
 }
 
-void swimmonster_start(entity_t *self)
+void swimmonster_start(Entity *self)
 {
     self->flags |= EntityFlags::Swim;
     self->Think = swimmonster_start_go;

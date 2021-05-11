@@ -36,7 +36,7 @@ vkpt_profiler_initialize()
 {
 	VkQueryPoolCreateInfo query_pool_info = {
 		.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO,
-		.queryType = VK_QUERY_TYPE_TIMESTAMP,
+		.queryType = VK_QUERY_TYPE_timeStamp,
 		.queryCount = MAX_FRAMES_IN_FLIGHT * NUM_PROFILER_QUERIES_PER_FRAME,
 	};
 	vkCreateQueryPool(qvk.device, &query_pool_info, NULL, &query_pool);
@@ -61,7 +61,7 @@ vkpt_profiler_query(VkCommandBuffer cmd_buf, int idx, VKPTProfilerAction action)
 		? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT 
 		: VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
-	vkCmdWriteTimestamp(cmd_buf, stage, query_pool, idx);
+	vkCmdWritetimeStamp(cmd_buf, stage, query_pool, idx);
 
 	set_current_gpu(cmd_buf, ALL_GPUS);
 
@@ -203,6 +203,6 @@ double vkpt_get_profiler_result(int idx)
 	if (begin == 0 || end == 0)
 		return 0.0; // one of these queries was unavailable at the time vkGetQueryPoolResults was called
 
-	double ms = (double)(end - begin) * 1e-6 * qvk.timestampPeriod;
+	double ms = (double)(end - begin) * 1e-6 * qvk.timeStampPeriod;
 	return ms;
 }

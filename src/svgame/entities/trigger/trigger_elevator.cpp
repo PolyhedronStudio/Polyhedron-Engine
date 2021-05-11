@@ -12,14 +12,14 @@
 #include "../../trigger.h"
 
 // extern, is in func_train.c
-extern void train_resume(entity_t* self);
+extern void train_resume(Entity* self);
 
 //=====================================================
 /*QUAKED trigger_elevator (0.3 0.1 0.6) (-8 -8 -8) (8 8 8)
 */
-void trigger_elevator_use(entity_t* self, entity_t* other, entity_t* activator)
+void trigger_elevator_use(Entity* self, Entity* other, Entity* activator)
 {
-    entity_t* target;
+    Entity* target;
 
     if (self->moveTargetPtr->nextThink) {
         //      gi.DPrintf("elevator busy\n");
@@ -41,7 +41,7 @@ void trigger_elevator_use(entity_t* self, entity_t* other, entity_t* activator)
     train_resume(self->moveTargetPtr);
 }
 
-void trigger_elevator_init(entity_t* self)
+void trigger_elevator_init(Entity* self)
 {
     if (!self->target) {
         gi.DPrintf("trigger_elevator has no target\n");
@@ -52,7 +52,7 @@ void trigger_elevator_init(entity_t* self)
         gi.DPrintf("trigger_elevator unable to find target %s\n", self->target);
         return;
     }
-    if (strcmp(self->moveTargetPtr->classname, "func_train") != 0) {
+    if (strcmp(self->moveTargetPtr->className, "func_train") != 0) {
         gi.DPrintf("trigger_elevator target %s is not a train\n", self->target);
         return;
     }
@@ -62,7 +62,7 @@ void trigger_elevator_init(entity_t* self)
 
 }
 
-void SP_trigger_elevator(entity_t* self)
+void SP_trigger_elevator(Entity* self)
 {
     self->Think = trigger_elevator_init;
     self->nextThink = level.time + FRAMETIME;

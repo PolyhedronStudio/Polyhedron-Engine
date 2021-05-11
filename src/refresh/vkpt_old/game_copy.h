@@ -1,4 +1,4 @@
-typedef struct entity_s entity_t;
+typedef struct entity_s Entity;
 
 typedef struct link_s
 {
@@ -137,7 +137,7 @@ typedef enum
 
 typedef struct gitem_s
 {
-	const char		*classname;	// spawning name
+	const char		*className;	// spawning name
 	qboolean(*pickup)(struct entity_s *ent, struct entity_s *other);
 	void(*use)(struct entity_s *ent, struct gitem_s *item);
 	void(*drop)(struct entity_s *ent, struct gitem_s *item);
@@ -167,9 +167,9 @@ typedef struct gitem_s
 
 typedef struct
 {
-	void(*aifunc)(entity_t *self, float dist);
+	void(*aifunc)(Entity *self, float dist);
 	float	dist;
-	void(*thinkfunc)(entity_t *self);
+	void(*thinkfunc)(Entity *self);
 } mframe_t;
 
 typedef struct
@@ -177,7 +177,7 @@ typedef struct
 	int			firstframe;
 	int			lastFrame;
 	mframe_t	*frame;
-	void(*endfunc)(entity_t *self);
+	void(*OnEndFunction)(Entity *self);
 } mmove_t;
 
 typedef struct
@@ -188,17 +188,17 @@ typedef struct
 	int			nextframe;
 	float		scale;
 
-	void(*stand)(entity_t *self);
-	void(*idle)(entity_t *self);
-	void(*search)(entity_t *self);
-	void(*walk)(entity_t *self);
-	void(*run)(entity_t *self);
-	void(*dodge)(entity_t *self, entity_t *other, float eta);
-	void(*attack)(entity_t *self);
-	void(*melee)(entity_t *self);
-	void(*sight)(entity_t *self, entity_t *other);
-	qboolean(*checkattack)(entity_t *self);
-	void(*jump)(entity_t *self);
+	void(*stand)(Entity *self);
+	void(*idle)(Entity *self);
+	void(*search)(Entity *self);
+	void(*walk)(Entity *self);
+	void(*run)(Entity *self);
+	void(*dodge)(Entity *self, Entity *other, float eta);
+	void(*attack)(Entity *self);
+	void(*melee)(Entity *self);
+	void(*sight)(Entity *self, Entity *other);
+	qboolean(*checkattack)(Entity *self);
+	void(*jump)(Entity *self);
 
 	float		pausetime;
 	float		attack_finished;
@@ -215,22 +215,22 @@ typedef struct
 	int			power_armor_type;
 	int			power_armor_power;
 
-	qboolean(*Blocked)(entity_t *self, float dist);
+	qboolean(*Blocked)(Entity *self, float dist);
 	float		last_hint_time;		// last time the monster checked for hintpaths.
-	entity_t		*goal_hint;			// which hint_path we're trying to get to
+	Entity		*goal_hint;			// which hint_path we're trying to get to
 	int			medicTries;
-	entity_t		*badMedic1, *badMedic2;	// these medics have declared this monster "unhealable"
-	entity_t		*healer;	// this is who is healing this monster
-	void(*duck)(entity_t *self, float eta);
-	void(*unduck)(entity_t *self);
-	void(*sidestep)(entity_t *self);
+	Entity		*badMedic1, *badMedic2;	// these medics have declared this monster "unhealable"
+	Entity		*healer;	// this is who is healing this monster
+	void(*duck)(Entity *self, float eta);
+	void(*unduck)(Entity *self);
+	void(*sidestep)(Entity *self);
 	//  while abort_duck would be nice, only monsters which duck but don't sidestep would use it .. only the brain
 	//  not really worth it.  sidestep is an implied abort_duck
-//	void		(*abort_duck)(entity_t *self);
+//	void		(*abort_duck)(Entity *self);
 	float		base_height;
 	float		next_duck_time;
 	float		duck_wait_time;
-	entity_t		*last_player_enemy;
+	Entity		*last_player_enemy;
 	// blindfire stuff .. the boolean says whether the monster will do it, and blind_fire_time is the timing
 	// (set in the monster) of the next shot
 	qboolean	blindfire;		// will the monster blindfire?
@@ -239,13 +239,13 @@ typedef struct
 	// used by the spawners to not spawn too much and keep track of #s of monsters spawned
 	int			monster_slots;
 	int			monster_used;
-	entity_t		*commander;
+	Entity		*commander;
 	// powerup timers, used by widow, our friend
 	float		quad_framenum;
 	float		invincible_framenum;
 	float		double_framenum;
-	entity_t		*leader;
-	entity_t		*old_leader;
+	Entity		*leader;
+	Entity		*old_leader;
 	//Lazarus
 	float		min_range;		// Monsters stop chasing enemy at this distance
 	float		max_range;		// Monsters won't notice or attack targets farther than this
@@ -266,18 +266,18 @@ typedef struct
 typedef struct
 {
 	// fixed data
-	vec3_t		start_origin;
-	vec3_t		start_angles;
-	vec3_t		end_origin;
-	vec3_t		end_angles;
+	vec3_t		startOrigin;
+	vec3_t		startAngles;
+	vec3_t		endOrigin;
+	vec3_t		endAngles;
 
-	int			sound_start;
-	int			sound_middle;
-	int			sound_end;
+	int			startSoundIndex;
+	int			middleSoundIndex;
+	int			endSoundIndex;
 
-	float		accel;
+	float		acceleration;
 	float		speed;
-	float		decel;
+	float		deceleration;
 	float		distance;
 
 	float		wait;
@@ -286,13 +286,13 @@ typedef struct
 	int			state;
 	int			prevstate;
 	vec3_t		dir;
-	float		current_speed;
-	float		move_speed;
-	float		next_speed;
-	float		remaining_distance;
-	float		decel_distance;
+	float		currentSpeed;
+	float		moveSpeed;
+	float		nextSpeed;
+	float		remainingDistance;
+	float		deceleratedDistance;
 	float		ratio;
-	void(*endfunc)(entity_t *);
+	void(*OnEndFunction)(Entity *);
 	qboolean	is_blocked;
 } moveinfo_t;
 

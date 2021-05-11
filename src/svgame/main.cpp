@@ -25,17 +25,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // These are used all throughout the code. To store game state related
 // information, and callbacks to the engine server game API.
 //-----------------
-game_locals_t   game;
-level_locals_t  level;
-svgame_import_t   gi;       // CLEANUP: These were game_import_t and game_export_t
-svgame_export_t   globals;  // CLEANUP: These were game_import_t and game_export_t
-spawn_temp_t    st;
+GameLocals   game;
+LevelLocals  level;
+ServerGameImports   gi;       // CLEANUP: These were game_import_t and game_export_t
+ServerGameExports   globals;  // CLEANUP: These were game_import_t and game_export_t
+TemporarySpawnFields    st;
 
 int sm_meat_index;
 int snd_fry;
 int meansOfDeath;
 
-entity_t     *g_entities;
+Entity     *g_entities;
 
 cvar_t  *deathmatch;
 cvar_t  *coop;
@@ -48,7 +48,7 @@ cvar_t  *spectator_password;
 cvar_t  *needpass;
 cvar_t  *maxClients;
 cvar_t  *maxspectators;
-cvar_t  *maxentities;
+cvar_t  *maxEntities;
 cvar_t  *g_select_empty;
 cvar_t  *dedicated;
 cvar_t  *nomonsters;
@@ -82,7 +82,7 @@ cvar_t  *cl_monsterfootsteps;
 
 void SpawnEntities(const char *mapname, const char *entities, const char *spawnpoint);
 
-void RunEntity(entity_t *ent);
+void RunEntity(Entity *ent);
 void WriteGame(const char *filename, qboolean autosave);
 void ReadGame(const char *filename);
 void WriteLevel(const char *filename);
@@ -149,7 +149,7 @@ void InitGame(void)
     deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
     coop = gi.cvar("coop", "0", CVAR_LATCH);
     skill = gi.cvar("skill", "1", CVAR_LATCH);
-    maxentities = gi.cvar("maxentities", "2048", CVAR_LATCH); // N&C: Pool
+    maxEntities = gi.cvar("maxEntities", "2048", CVAR_LATCH); // N&C: Pool
 
     // change anytime vars
     dmflags = gi.cvar("dmflags", "0", CVAR_SERVERINFO);
@@ -183,15 +183,15 @@ void InitGame(void)
     InitItems();
 
     // initialize all entities for this game
-    game.maxentities = maxentities->value;
-    clamp(game.maxentities, (int)maxClients->value + 1, MAX_EDICTS);
-    g_entities = (entity_t*)gi.TagMalloc(game.maxentities * sizeof(g_entities[0]), TAG_GAME); // CPP: Cast
+    game.maxEntities = maxEntities->value;
+    clamp(game.maxEntities, (int)maxClients->value + 1, MAX_EDICTS);
+    g_entities = (Entity*)gi.TagMalloc(game.maxEntities * sizeof(g_entities[0]), TAG_GAME); // CPP: Cast
     globals.edicts = g_entities;
-    globals.max_edicts = game.maxentities;
+    globals.max_edicts = game.maxEntities;
 
     // initialize all clients for this game
     game.maxClients = maxClients->value;
-    game.clients = (gclient_t*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     globals.num_edicts = game.maxClients + 1;
 }
 
@@ -204,7 +204,7 @@ Returns a pointer to the structure with all entry points
 and global variables
 =================
 */
-svgame_export_t* GetServerGameAPI(svgame_import_t* import)
+ServerGameExports* GetServerGameAPI(ServerGameImports* import)
 {
     gi = *import;
 
@@ -235,7 +235,7 @@ svgame_export_t* GetServerGameAPI(svgame_import_t* import)
 
     globals.ServerCommand = ServerCommand;
 
-    globals.entity_size = sizeof(entity_t);
+    globals.entity_size = sizeof(Entity);
 
     return &globals;
 }
@@ -282,7 +282,7 @@ ClientEndServerFrames
 void ClientEndServerFrames(void)
 {
     int     i;
-    entity_t *ent;
+    Entity *ent;
 
     // calc the player views now that all pushing
     // and damage has been added
@@ -302,12 +302,12 @@ CreateTargetChangeLevel
 Returns the created target changelevel
 =================
 */
-entity_t *CreateTargetChangeLevel(char *map)
+Entity *CreateTargetChangeLevel(char *map)
 {
-    entity_t *ent;
+    Entity *ent;
 
     ent = G_Spawn();
-    ent->classname = (char*)"target_changelevel"; // C++20: Added a cast.
+    ent->className = (char*)"target_changelevel"; // C++20: Added a cast.
     Q_snprintf(level.nextmap, sizeof(level.nextmap), "%s", map);
     ent->map = level.nextmap;
     return ent;
@@ -322,7 +322,7 @@ The timelimit or fraglimit has been exceeded
 */
 void EndDMLevel(void)
 {
-    entity_t     *ent;
+    Entity     *ent;
     char *s, *t, *f;
     static const char *seps = " ,\n\r";
 
@@ -361,7 +361,7 @@ void EndDMLevel(void)
     if (level.nextmap[0]) // go to a specific map
         HUD_BeginIntermission(CreateTargetChangeLevel(level.nextmap));
     else {  // search for a changelevel
-        ent = G_Find(NULL, FOFS(classname), "target_changelevel");
+        ent = G_Find(NULL, FOFS(className), "target_changelevel");
         if (!ent) {
             // the map designer didn't include a changelevel,
             // so create a fake ent that goes back to the same level
@@ -406,7 +406,7 @@ CheckDMRules
 void CheckDMRules(void)
 {
     int         i;
-    gclient_t   *cl;
+    GameClient   *cl;
 
     if (level.intermissiontime)
         return;
@@ -446,7 +446,7 @@ ExitLevel
 void ExitLevel(void)
 {
     int     i;
-    entity_t *ent;
+    Entity *ent;
     char    command [256];
 
     Q_snprintf(command, sizeof(command), "gamemap \"%s\"\n", level.changemap);
@@ -477,7 +477,7 @@ Advances the world by 0.1 seconds
 void G_RunFrame(void)
 {
     int     i;
-    entity_t *ent;
+    Entity *ent;
 
     level.frameNumber++;
     level.time = level.frameNumber * FRAMETIME;
@@ -501,7 +501,7 @@ void G_RunFrame(void)
         if (!ent->inUse)
             continue;
 
-        level.current_entity = ent;
+        level.currentEntity = ent;
 
         VectorCopy(ent->state.origin, ent->state.oldOrigin);
 
@@ -543,7 +543,7 @@ NULL will be returned if the end of the list is reached.
 
 =============
 */
-entity_t* G_Find(entity_t* from, int fieldofs, const char* match)
+Entity* G_Find(Entity* from, int fieldofs, const char* match)
 {
     char* s;
 
@@ -575,7 +575,7 @@ Returns entities that have origins within a spherical area
 G_FindEntitiesWithinRadius (origin, radius)
 =================
 */
-entity_t* G_FindEntitiesWithinRadius(entity_t* from, vec3_t org, float rad)
+Entity* G_FindEntitiesWithinRadius(Entity* from, vec3_t org, float rad)
 {
     vec3_t  eorg;
     int     j;
@@ -614,11 +614,11 @@ NULL will be returned if the end of the list is reached.
 */
 #define MAXCHOICES  8
 
-entity_t* G_PickTarget(char* targetName)
+Entity* G_PickTarget(char* targetName)
 {
-    entity_t* ent = NULL;
+    Entity* ent = NULL;
     int     num_choices = 0;
-    entity_t* choice[MAXCHOICES];
+    Entity* choice[MAXCHOICES];
 
     if (!targetName) {
         gi.DPrintf("G_PickTarget called with NULL targetName\n");
@@ -643,10 +643,10 @@ entity_t* G_PickTarget(char* targetName)
 }
 
 
-void G_InitEntity(entity_t* e)
+void G_InitEntity(Entity* e)
 {
     e->inUse = true;
-    e->classname = "noclass";
+    e->className = "noclass";
     e->gravity = 1.0;
     e->state.number = e - g_entities;
 }
@@ -662,10 +662,10 @@ instead of being removed and recreated, which can cause interpolated
 angles and bad trails.
 =================
 */
-entity_t* G_Spawn(void)
+Entity* G_Spawn(void)
 {
     int         i;
-    entity_t* e;
+    Entity* e;
 
     e = &g_entities[game.maxClients + 1];
     for (i = game.maxClients + 1; i < globals.num_edicts; i++, e++) {
@@ -677,7 +677,7 @@ entity_t* G_Spawn(void)
         }
     }
 
-    if (i == game.maxentities)
+    if (i == game.maxEntities)
         gi.Error("ED_Alloc: no free edicts");
 
     globals.num_edicts++;
@@ -692,7 +692,7 @@ G_FreeEntity
 Marks the edict as free
 =================
 */
-void G_FreeEntity(entity_t* ed)
+void G_FreeEntity(Entity* ed)
 {
     gi.UnlinkEntity(ed);        // unlink from world
 
@@ -703,8 +703,13 @@ void G_FreeEntity(entity_t* ed)
 
     // C++-ify, reset the struct itself.
     memset(ed, 0, sizeof(*ed));
-    //*ed = entity_t();
-    ed->classname = "freed";
+    //*ed = Entity();
+    ed->className = "freed";
     ed->freeTime = level.time;
     ed->inUse = false;
 }
+
+// Returns a pointer to the world entity aka Worldspawn.
+Entity* G_GetWorldEntity() {
+    return &g_entities[0];
+};

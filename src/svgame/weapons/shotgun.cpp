@@ -25,8 +25,13 @@
 //
 //======================================================================
 //
+static constexpr int32_t SHOTGUN_BULLET_COUNT_DEATHMATCH = 12;
+static constexpr int32_t SHOTGUN_BULLET_COUNT_DEFAULT = 12;
 
-void weapon_shotgun_fire(entity_t* ent)
+static constexpr int32_t SHOTGUN_HSPREAD = 500;
+static constexpr int32_t SHOTGUN_VSPREAD = 500;
+
+void weapon_shotgun_fire(Entity* ent)
 {
     vec3_t      start;
     vec3_t      forward, right;
@@ -53,9 +58,9 @@ void weapon_shotgun_fire(entity_t* ent)
     }
 
     if (deathmatch->value)
-        fire_shotgun(ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
+        fire_shotgun(ent, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEATHMATCH, MeansOfDeath::Shotgun);
     else
-        fire_shotgun(ent, start, forward, damage, kick, 500, 500, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
+        fire_shotgun(ent, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEFAULT, MeansOfDeath::Shotgun);
 
     // send muzzle flash
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
@@ -70,7 +75,7 @@ void weapon_shotgun_fire(entity_t* ent)
         ent->client->persistent.inventory[ent->client->ammoIndex]--;
 }
 
-void Weapon_Shotgun(entity_t* ent)
+void Weapon_Shotgun(Entity* ent)
 {
     static int  pause_frames[] = { 22, 28, 34, 0 };
     static int  fire_frames[] = { 8, 9, 0 };

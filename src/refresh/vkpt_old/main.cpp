@@ -1010,8 +1010,8 @@ init_vulkan()
 		VkPhysicalDeviceProperties dev_properties;
 		vkGetPhysicalDeviceProperties(devices[picked_device], &dev_properties);
 
-		// Store the timestamp period to get correct profiler results
-		qvk.timestampPeriod = dev_properties.limits.timestampPeriod;
+		// Store the timeStamp period to get correct profiler results
+		qvk.timeStampPeriod = dev_properties.limits.timeStampPeriod;
 
 		Com_Printf("Picked physical device %d: %s\n", picked_device, dev_properties.deviceName);
 		Com_Printf("Using %s\n", qvk.use_khr_ray_tracing ? VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME : VK_NV_RAY_TRACING_EXTENSION_NAME);
@@ -1791,7 +1791,7 @@ bsp_add_entlights(const bsp_t* bsp)
 	"_color" "0.97 0.54 0.01"
 	"light" "300"
 	"origin" "-1632 320 256"
-	"classname" "light"
+	"className" "light"
 	}
 	*/
 
@@ -1891,7 +1891,7 @@ bsp_add_entlights(const bsp_t* bsp)
 		}
 
 		for (i = 0; i < num_keypairs; i++)
-			if (!Q_stricmp(keypairs[i].key, "classname") && !Q_stricmp(keypairs[i].value, "light"))
+			if (!Q_stricmp(keypairs[i].key, "className") && !Q_stricmp(keypairs[i].value, "light"))
 			{
 				islight = true;
 			}
@@ -2246,7 +2246,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //static void ProcessLightLookAtTarget(rdlight_t *elight, dlightLS_t *elightls)
 //{
 //	// Get target pos
-//	entity_t *lightTarget = (entity_t*)elight->nacTargetBind;
+//	Entity *lightTarget = (Entity*)elight->nacTargetBind;
 //	if (!lightTarget) return;
 //
 //	// Calc vector normalized
@@ -2260,7 +2260,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //static void ProcessLightMovewith(rdlight_t *elight, dlightLS_t *elightls)
 //{
 //	// Get target pos
-//	entity_t *light = (entity_t*)elight->nacLightBind;
+//	Entity *light = (Entity*)elight->nacLightBind;
 //	if (!light) return;
 //
 //	VectorCopy(light->state.origin, elight->origin);
@@ -2328,7 +2328,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //
 //static void ProcessTargetLightStlye(rdlight_t *elight, dlightLS_t *elightls)
 //{
-//	entity_t *targetLS = (entity_t*)elight->nacTargetLightLSBind;
+//	Entity *targetLS = (Entity*)elight->nacTargetLightLSBind;
 //	if (targetLS)
 //	{
 //		if (targetLS->changeLightLS == 1)
@@ -2349,7 +2349,7 @@ void bsp_reset_entlights(const bsp_t* bsp)
 //
 //static void ProcessTargetLight(rdlight_t *elight, dlightLS_t *elightls)
 //{
-//	entity_t *targetL = (entity_t*)elight->nacTargetLightBind;
+//	Entity *targetL = (Entity*)elight->nacTargetLightBind;
 //	if (targetL)
 //	{
 //		if (targetL->changeLight == 1)

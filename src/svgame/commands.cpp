@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "player/animations.h"
 
 
-char *ClientTeam(entity_t *ent)
+char *ClientTeam(Entity *ent)
 {
     char        *p;
     static char value[512];
@@ -43,7 +43,7 @@ char *ClientTeam(entity_t *ent)
     return ++p;
 }
 
-qboolean OnSameTeam(entity_t *ent1, entity_t *ent2)
+qboolean OnSameTeam(Entity *ent1, Entity *ent2)
 {
     char    ent1Team [512];
     char    ent2Team [512];
@@ -60,9 +60,9 @@ qboolean OnSameTeam(entity_t *ent1, entity_t *ent2)
 }
 
 
-void SelectNextItem(entity_t *ent, int itflags)
+void SelectNextItem(Entity *ent, int itflags)
 {
-    gclient_t   *cl;
+    GameClient   *cl;
     int         i, index;
     gitem_t     *it;
 
@@ -91,9 +91,9 @@ void SelectNextItem(entity_t *ent, int itflags)
     cl->persistent.selectedItem = -1;
 }
 
-void SelectPrevItem(entity_t *ent, int itflags)
+void SelectPrevItem(Entity *ent, int itflags)
 {
-    gclient_t   *cl;
+    GameClient   *cl;
     int         i, index;
     gitem_t     *it;
 
@@ -122,14 +122,14 @@ void SelectPrevItem(entity_t *ent, int itflags)
     cl->persistent.selectedItem = -1;
 }
 
-void HUD_ValidateSelectedItem(entity_t *ent)
+void HUD_ValidateSelectedItem(Entity *ent)
 {
     // Ensure these are valid.
     if (!ent || !ent->client) {
         return;
     }
 
-    gclient_t   *cl;
+    GameClient   *cl;
 
     cl = ent->client;
 
@@ -149,14 +149,14 @@ Cmd_Give_f
 Give items to a client
 ==================
 */
-void Cmd_Give_f(entity_t *ent)
+void Cmd_Give_f(Entity *ent)
 {
     const char        *name;
     gitem_t     *it;
     int         index;
     int         i;
     qboolean    give_all;
-    entity_t     *it_ent;
+    Entity     *it_ent;
 
     // Ensure these are valid.
     if (!ent) {
@@ -185,7 +185,7 @@ void Cmd_Give_f(entity_t *ent)
     }
 
     if (give_all || Q_stricmp(name, "weapons") == 0) {
-        for (i = 0 ; i < game.num_items ; i++) {
+        for (i = 0 ; i < game.numberOfItems ; i++) {
             it = itemlist + i;
             if (!it->Pickup)
                 continue;
@@ -198,7 +198,7 @@ void Cmd_Give_f(entity_t *ent)
     }
 
     if (give_all || Q_stricmp(name, "ammo") == 0) {
-        for (i = 0 ; i < game.num_items ; i++) {
+        for (i = 0 ; i < game.numberOfItems ; i++) {
             it = itemlist + i;
             if (!it->Pickup)
                 continue;
@@ -211,7 +211,7 @@ void Cmd_Give_f(entity_t *ent)
     }
 
     if (give_all) {
-        for (i = 0 ; i < game.num_items ; i++) {
+        for (i = 0 ; i < game.numberOfItems ; i++) {
             it = itemlist + i;
             if (!it->Pickup)
                 continue;
@@ -246,7 +246,7 @@ void Cmd_Give_f(entity_t *ent)
             ent->client->persistent.inventory[index] += it->quantity;
     } else {
         it_ent = G_Spawn();
-        it_ent->classname = it->classname;
+        it_ent->className = it->className;
         SpawnItem(it_ent, it);
         Touch_Item(it_ent, ent, NULL, NULL);
         if (it_ent->inUse)
@@ -264,7 +264,7 @@ Sets client to godmode
 argv(0) god
 ==================
 */
-void Cmd_God_f(entity_t *ent)
+void Cmd_God_f(Entity *ent)
 {
     if (deathmatch->value && !sv_cheats->value) {
         gi.CPrintf(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
@@ -288,7 +288,7 @@ Sets client to notarget
 argv(0) notarget
 ==================
 */
-void Cmd_Notarget_f(entity_t *ent)
+void Cmd_Notarget_f(Entity *ent)
 {
     if (deathmatch->value && !sv_cheats->value) {
         gi.CPrintf(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
@@ -310,7 +310,7 @@ Cmd_Noclip_f
 argv(0) noclip
 ==================
 */
-void Cmd_Noclip_f(entity_t *ent)
+void Cmd_Noclip_f(Entity *ent)
 {
     if (deathmatch->value && !sv_cheats->value) {
         gi.CPrintf(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
@@ -334,7 +334,7 @@ Cmd_Use_f
 Use an inventory item
 ==================
 */
-void Cmd_Use_f(entity_t *ent)
+void Cmd_Use_f(Entity *ent)
 {
     int         index;
     gitem_t     *it;
@@ -367,7 +367,7 @@ Cmd_Drop_f
 Drop an inventory item
 ==================
 */
-void Cmd_Drop_f(entity_t *ent)
+void Cmd_Drop_f(Entity *ent)
 {
     int         index;
     gitem_t     *it;
@@ -398,10 +398,10 @@ void Cmd_Drop_f(entity_t *ent)
 Cmd_Inven_f
 =================
 */
-void Cmd_Inven_f(entity_t *ent)
+void Cmd_Inven_f(Entity *ent)
 {
     int         i;
-    gclient_t   *cl;
+    GameClient   *cl;
 
     cl = ent->client;
 
@@ -426,7 +426,7 @@ void Cmd_Inven_f(entity_t *ent)
 Cmd_InvUse_f
 =================
 */
-void Cmd_InvUse_f(entity_t *ent)
+void Cmd_InvUse_f(Entity *ent)
 {
     gitem_t     *it;
 
@@ -450,9 +450,9 @@ void Cmd_InvUse_f(entity_t *ent)
 Cmd_WeapPrev_f
 =================
 */
-void Cmd_WeapPrev_f(entity_t *ent)
+void Cmd_WeapPrev_f(Entity *ent)
 {
-    gclient_t   *cl;
+    GameClient   *cl;
     int         i, index;
     gitem_t     *it;
     int         selected_weapon;
@@ -485,9 +485,9 @@ void Cmd_WeapPrev_f(entity_t *ent)
 Cmd_WeapNext_f
 =================
 */
-void Cmd_WeapNext_f(entity_t *ent)
+void Cmd_WeapNext_f(Entity *ent)
 {
-    gclient_t   *cl;
+    GameClient   *cl;
     int         i, index;
     gitem_t     *it;
     int         selected_weapon;
@@ -520,9 +520,9 @@ void Cmd_WeapNext_f(entity_t *ent)
 Cmd_WeapLast_f
 =================
 */
-void Cmd_WeapLast_f(entity_t *ent)
+void Cmd_WeapLast_f(Entity *ent)
 {
-    gclient_t   *cl;
+    GameClient   *cl;
     int         index;
     gitem_t     *it;
 
@@ -547,7 +547,7 @@ void Cmd_WeapLast_f(entity_t *ent)
 Cmd_InvDrop_f
 =================
 */
-void Cmd_InvDrop_f(entity_t *ent)
+void Cmd_InvDrop_f(Entity *ent)
 {
     gitem_t     *it;
 
@@ -571,13 +571,13 @@ void Cmd_InvDrop_f(entity_t *ent)
 Cmd_Kill_f
 =================
 */
-void Cmd_Kill_f(entity_t *ent)
+void Cmd_Kill_f(Entity *ent)
 {
     if ((level.time - ent->client->respawnTime) < 5)
         return;
     ent->flags &= ~EntityFlags::GodMode;
     ent->health = 0;
-    meansOfDeath = MOD_SUICIDE;
+    meansOfDeath = MeansOfDeath::Suicide;
     Player_Die(ent, ent, ent, 100000, vec3_origin);
 }
 
@@ -586,7 +586,7 @@ void Cmd_Kill_f(entity_t *ent)
 Cmd_PutAway_f
 =================
 */
-void Cmd_PutAway_f(entity_t *ent)
+void Cmd_PutAway_f(Entity *ent)
 {
     ent->client->showScores = false;
     ent->client->showInventory = false;
@@ -615,7 +615,7 @@ int PlayerSort(void const *a, void const *b)
 Cmd_Players_f
 =================
 */
-void Cmd_Players_f(entity_t *ent)
+void Cmd_Players_f(Entity *ent)
 {
     int     i;
     int     count;
@@ -656,7 +656,7 @@ void Cmd_Players_f(entity_t *ent)
 Cmd_Wave_f
 =================
 */
-void Cmd_Wave_f(entity_t *ent)
+void Cmd_Wave_f(Entity *ent)
 {
     int     i;
 
@@ -706,13 +706,13 @@ void Cmd_Wave_f(entity_t *ent)
 Cmd_Say_f
 ==================
 */
-void Cmd_Say_f(entity_t *ent, qboolean team, qboolean arg0)
+void Cmd_Say_f(Entity *ent, qboolean team, qboolean arg0)
 {
     int     i, j;
-    entity_t *other;
+    Entity *other;
     char    *p; // C++20: Removed const.
     char    text[2048];
-    gclient_t *cl;
+    GameClient *cl;
 
     if (gi.argc() < 2 && !arg0)
         return;
@@ -785,12 +785,12 @@ void Cmd_Say_f(entity_t *ent, qboolean team, qboolean arg0)
     }
 }
 
-void Cmd_PlayerList_f(entity_t *ent)
+void Cmd_PlayerList_f(Entity *ent)
 {
     int i;
     char st[80];
     char text[1400];
-    entity_t *e2;
+    Entity *e2;
 
     // connect time, ping, score, name
     *text = 0;
@@ -821,7 +821,7 @@ void Cmd_PlayerList_f(entity_t *ent)
 ClientCommand
 =================
 */
-void ClientCommand(entity_t *ent)
+void ClientCommand(Entity *ent)
 {
     const char    *cmd;
 

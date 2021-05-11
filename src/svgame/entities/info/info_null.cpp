@@ -14,7 +14,7 @@
 /*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)
 Used as a positional target for spotlights, etc.
 */
-void SP_info_null(entity_t* self)
+void SP_info_null(Entity* self)
 {
     G_FreeEntity(self);
 }

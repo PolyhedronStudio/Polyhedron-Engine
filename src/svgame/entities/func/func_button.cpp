@@ -30,18 +30,18 @@ When a button is touched, it moves some distance in the direction of it's angle,
 5) in-out
 */
 
-void button_done(entity_t* self)
+void button_done(Entity* self)
 {
     self->moveInfo.state = STATE_BOTTOM;
     self->state.effects &= ~EntityEffectType::AnimCycleFrames23hz2;
     self->state.effects |= EntityEffectType::AnimCycleFrames01hz2;
 }
 
-void button_return(entity_t* self)
+void button_return(Entity* self)
 {
     self->moveInfo.state = STATE_DOWN;
 
-    Brush_Move_Calc(self, self->moveInfo.start_origin, button_done);
+    Brush_Move_Calc(self, self->moveInfo.startOrigin, button_done);
 
     self->state.frame = 0;
 
@@ -49,7 +49,7 @@ void button_return(entity_t* self)
         self->takeDamage = TakeDamage::Yes;
 }
 
-void button_wait(entity_t* self)
+void button_wait(Entity* self)
 {
     self->moveInfo.state = STATE_TOP;
     self->state.effects &= ~EntityEffectType::AnimCycleFrames01hz2;
@@ -63,24 +63,24 @@ void button_wait(entity_t* self)
     }
 }
 
-void button_fire(entity_t* self)
+void button_fire(Entity* self)
 {
     if (self->moveInfo.state == STATE_UP || self->moveInfo.state == STATE_TOP)
         return;
 
     self->moveInfo.state = STATE_UP;
-    if (self->moveInfo.sound_start && !(self->flags & EntityFlags::TeamSlave))
-        gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.sound_start, 1, ATTN_STATIC, 0);
-    Brush_Move_Calc(self, self->moveInfo.end_origin, button_wait);
+    if (self->moveInfo.startSoundIndex && !(self->flags & EntityFlags::TeamSlave))
+        gi.Sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveInfo.startSoundIndex, 1, ATTN_STATIC, 0);
+    Brush_Move_Calc(self, self->moveInfo.endOrigin, button_wait);
 }
 
-void button_use(entity_t* self, entity_t* other, entity_t* activator)
+void button_use(Entity* self, Entity* other, Entity* activator)
 {
     self->activator = activator;
     button_fire(self);
 }
 
-void button_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
+void button_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
 {
     if (!other->client)
         return;
@@ -92,7 +92,7 @@ void button_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* 
     button_fire(self);
 }
 
-void button_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int damage, const vec3_t &point)
+void button_killed(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t &point)
 {
     self->activator = attacker;
     self->health = self->maxHealth;
@@ -100,7 +100,7 @@ void button_killed(entity_t* self, entity_t* inflictor, entity_t* attacker, int 
     button_fire(self);
 }
 
-void SP_func_button(entity_t* ent)
+void SP_func_button(Entity* ent)
 {
     vec3_t  abs_movedir;
     float   dist;
@@ -111,26 +111,26 @@ void SP_func_button(entity_t* ent)
     gi.SetModel(ent, ent->model);
 
     if (ent->sounds != 1)
-        ent->moveInfo.sound_start = gi.SoundIndex("switches/butn2.wav");
+        ent->moveInfo.startSoundIndex = gi.SoundIndex("switches/butn2.wav");
 
     if (!ent->speed)
         ent->speed = 40;
-    if (!ent->accel)
-        ent->accel = ent->speed;
-    if (!ent->decel)
-        ent->decel = ent->speed;
+    if (!ent->acceleration)
+        ent->acceleration = ent->speed;
+    if (!ent->deceleration)
+        ent->deceleration = ent->speed;
 
     if (!ent->wait)
         ent->wait = 3;
     if (!st.lip)
         st.lip = 4;
 
-    VectorCopy(ent->state.origin, ent->pos1);
+    VectorCopy(ent->state.origin, ent->position1);
     abs_movedir[0] = fabs(ent->moveDirection[0]);
     abs_movedir[1] = fabs(ent->moveDirection[1]);
     abs_movedir[2] = fabs(ent->moveDirection[2]);
     dist = abs_movedir[0] * ent->size[0] + abs_movedir[1] * ent->size[1] + abs_movedir[2] * ent->size[2] - st.lip;
-    VectorMA(ent->pos1, dist, ent->moveDirection, ent->pos2);
+    VectorMA(ent->position1, dist, ent->moveDirection, ent->position2);
 
     ent->Use = button_use;
     ent->state.effects |= EntityEffectType::AnimCycleFrames01hz2;
@@ -146,13 +146,13 @@ void SP_func_button(entity_t* ent)
     ent->moveInfo.state = STATE_BOTTOM;
 
     ent->moveInfo.speed = ent->speed;
-    ent->moveInfo.accel = ent->accel;
-    ent->moveInfo.decel = ent->decel;
+    ent->moveInfo.acceleration = ent->acceleration;
+    ent->moveInfo.deceleration = ent->deceleration;
     ent->moveInfo.wait = ent->wait;
-    VectorCopy(ent->pos1, ent->moveInfo.start_origin);
-    VectorCopy(ent->state.angles, ent->moveInfo.start_angles);
-    VectorCopy(ent->pos2, ent->moveInfo.end_origin);
-    VectorCopy(ent->state.angles, ent->moveInfo.end_angles);
+    VectorCopy(ent->position1, ent->moveInfo.startOrigin);
+    VectorCopy(ent->state.angles, ent->moveInfo.startAngles);
+    VectorCopy(ent->position2, ent->moveInfo.endOrigin);
+    VectorCopy(ent->state.angles, ent->moveInfo.endAngles);
 
     gi.LinkEntity(ent);
 }

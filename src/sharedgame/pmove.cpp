@@ -854,13 +854,13 @@ static qboolean PM_CheckWaterJump(void) {
             return false;
         }
 
-        vec3_t pos2 = {
+        vec3_t position2 = {
             pos.x,
             pos.y,
             pm->state.origin.z
         };
 
-        trace = PM_TraceCorrectAllSolid(pos, pm->mins, pm->maxs, pos2);
+        trace = PM_TraceCorrectAllSolid(pos, pm->mins, pm->maxs, position2);
 
         if (!(trace.ent && trace.plane.normal.z >= PM_STEP_NORMAL)) {
             PM_Debug("Can't exit water: not a step\n");
@@ -1081,15 +1081,15 @@ static void PM_Friction(void) {
 // Returns the newly user intended velocity
 //===============
 //
-static void PM_Accelerate(const vec3_t & dir, float speed, float accel) {
-    const float current_speed = vec3_dot(pm->state.velocity, dir);
-    const float add_speed = speed - current_speed;
+static void PM_Accelerate(const vec3_t & dir, float speed, float acceleration) {
+    const float currentSpeed = vec3_dot(pm->state.velocity, dir);
+    const float add_speed = speed - currentSpeed;
 
     if (add_speed <= 0.0f) {
         return;
     }
 
-    float accel_speed = accel * playerMoveLocals.frameTime * speed;
+    float accel_speed = acceleration * playerMoveLocals.frameTime * speed;
 
     if (accel_speed > add_speed) {
         accel_speed = add_speed;
@@ -1385,13 +1385,13 @@ static void PM_AirMove(void) {
         speed = 0.f;
     }
 
-    float accel = PM_ACCEL_AIR;
+    float acceleration = PM_ACCEL_AIR;
 
     if (pm->state.flags & PMF_DUCKED) {
-        accel *= PM_ACCEL_AIR_MOD_DUCKED;
+        acceleration *= PM_ACCEL_AIR_MOD_DUCKED;
     }
 
-    PM_Accelerate(dir, speed, accel);
+    PM_Accelerate(dir, speed, acceleration);
 
     PM_StepSlideMove();
 }
@@ -1453,9 +1453,9 @@ static void PM_WalkMove(void) {
     }
 
     // Accelerate based on slickness of ground surface
-    const float accel = (playerMoveLocals.groundTrace.surface->flags & SURF_SLICK) ? PM_ACCEL_GROUND_SLICK : PM_ACCEL_GROUND;
+    const float acceleration = (playerMoveLocals.groundTrace.surface->flags & SURF_SLICK) ? PM_ACCEL_GROUND_SLICK : PM_ACCEL_GROUND;
 
-    PM_Accelerate(dir, speed, accel);
+    PM_Accelerate(dir, speed, acceleration);
 
     // Determine the speed after acceleration
     speed = vec3_length(pm->state.velocity);

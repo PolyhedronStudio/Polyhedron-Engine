@@ -37,7 +37,7 @@ INTERMISSION
 // values.
 //================
 //
-void HUD_MoveClientToIntermission(entity_t *ent)
+void HUD_MoveClientToIntermission(Entity *ent)
 {
     // Ensure it is a valid client entity.
     if (!ent) {
@@ -52,9 +52,9 @@ void HUD_MoveClientToIntermission(entity_t *ent)
 
     // Copy over the previously fetched map intermission entity origin into
     // the client player states positions.
-    ent->state.origin = level.intermission_origin;
-    ent->client->playerState.pmove.origin = level.intermission_origin;
-    ent->client->playerState.pmove.viewAngles = level.intermission_angle;
+    ent->state.origin = level.intermissionOrigin;
+    ent->client->playerState.pmove.origin = level.intermissionOrigin;
+    ent->client->playerState.pmove.viewAngles = level.intermissionAngle;
     // Setup the rest of the client player state.
     ent->client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
     ent->client->playerState.gunIndex = 0;
@@ -85,10 +85,10 @@ void HUD_MoveClientToIntermission(entity_t *ent)
 // Begins an intermission process for the given target entity.
 //================
 //
-void HUD_BeginIntermission(entity_t *targ)
+void HUD_BeginIntermission(Entity *targ)
 {
     int     i, n;
-    entity_t *client = nullptr;
+    Entity *client = nullptr;
 
     // Ensure targ is valid.
     if (!targ) {
@@ -140,26 +140,26 @@ void HUD_BeginIntermission(entity_t *targ)
     level.exitintermission = 0;
 
     // Fetch an intermission entity.
-    entity_t *intermissionEntity = G_Find(NULL, FOFS(classname), "info_player_intermission");
+    Entity *intermissionEntity = G_Find(NULL, FOFS(className), "info_player_intermission");
     if (!intermissionEntity) {
         // the map creator forgot to put in an intermission point...
-        intermissionEntity = G_Find(NULL, FOFS(classname), "info_player_start");
+        intermissionEntity = G_Find(NULL, FOFS(className), "info_player_start");
         if (!intermissionEntity) {
-            intermissionEntity = G_Find(NULL, FOFS(classname), "info_player_deathmatch");
+            intermissionEntity = G_Find(NULL, FOFS(className), "info_player_deathmatch");
         }
     } else {
         // chose one of four spots
         i = rand() & 3;
         while (i--) {
-            intermissionEntity = G_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
+            intermissionEntity = G_Find(intermissionEntity, FOFS(className), "info_player_intermission");
             if (!intermissionEntity) {  // wrap around the list 
-                intermissionEntity = G_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
+                intermissionEntity = G_Find(intermissionEntity, FOFS(className), "info_player_intermission");
             }
         }
     }
 
-    level.intermission_origin = intermissionEntity->state.origin, level.intermission_origin;
-    level.intermission_angle = intermissionEntity->state.angles;
+    level.intermissionOrigin = intermissionEntity->state.origin, level.intermissionOrigin;
+    level.intermissionAngle = intermissionEntity->state.angles;
 
     // Initiate the client intermission mode for all clients.
     // (MoveType = PM_FREEZE, positioned at intermission entity view values.)
@@ -183,7 +183,7 @@ HUD_GenerateDMScoreboardLayout
 
 ==================
 */
-void HUD_GenerateDMScoreboardLayout(entity_t *ent, entity_t *killer)
+void HUD_GenerateDMScoreboardLayout(Entity *ent, Entity *killer)
 {
     char    entry[1024];
     char    string[1400];
@@ -193,8 +193,8 @@ void HUD_GenerateDMScoreboardLayout(entity_t *ent, entity_t *killer)
     int     sortedscores[MAX_CLIENTS];
     int     score, total;
     int     x, y;
-    gclient_t   *cl;
-    entity_t     *cl_ent;
+    GameClient   *cl;
+    Entity     *cl_ent;
     const char    *tag; // C++20: STRING: Added const to char*
 
     // sort the clients by score
@@ -273,7 +273,7 @@ HUD_SendDMScoreboardMessage
 Sends the deatchmatch scoreboard svc_layout message.
 ==================
 */
-void HUD_SendDMScoreboardMessage(entity_t *ent)
+void HUD_SendDMScoreboardMessage(Entity *ent)
 {
     HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
     gi.Unicast(ent, true);
@@ -287,7 +287,7 @@ Cmd_Score_f
 Display the scoreboard
 ==================
 */
-void Cmd_Score_f(entity_t *ent)
+void Cmd_Score_f(Entity *ent)
 {
     ent->client->showInventory = false;
 
@@ -304,49 +304,6 @@ void Cmd_Score_f(entity_t *ent)
 }
 
 
-/*
-==================
-HelpComputer
-
-Draw help computer.
-==================
-*/
-void HelpComputer(entity_t *ent)
-{
-    char    string[1024];
-    const char    *sk; // C++20: STRING: Added const to char*
-
-    if (skill->value == 0)
-        sk = "easy";
-    else if (skill->value == 1)
-        sk = "medium";
-    else if (skill->value == 2)
-        sk = "hard";
-    else
-        sk = "hard+";
-
-    // send the layout
-    Q_snprintf(string, sizeof(string),
-               "xv 32 yv 8 picn help "         // background
-               "xv 202 yv 12 string2 \"%s\" "      // skill
-               "xv 0 yv 24 cstring2 \"%s\" "       // level name
-               "xv 0 yv 54 cstring2 \"%s\" "       // help 1
-               "xv 0 yv 110 cstring2 \"%s\" "      // help 2
-               "xv 50 yv 164 string2 \" kills     goals    secrets\" "
-               "xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" ",
-               sk,
-               level.level_name,
-               "game.helpmessage1",
-               "game.helpmessage2",
-               level.killed_monsters, level.total_monsters,
-               level.found_goals, level.total_goals,
-               0, 0);
-
-    gi.WriteByte(SVG_CMD_LAYOUT);
-    gi.WriteString(string);
-    gi.Unicast(ent, true);
-}
-
 //=======================================================================
 
 //
@@ -358,7 +315,7 @@ void HelpComputer(entity_t *ent)
 // and audio if required.
 //================
 //
-void HUD_SetClientStats(entity_t* ent)
+void HUD_SetClientStats(Entity* ent)
 {
     gitem_t* item;
 
@@ -460,7 +417,7 @@ void HUD_SetClientStats(entity_t* ent)
 HUD_CheckChaseStats
 ===============
 */
-void HUD_CheckChaseStats(entity_t *ent)
+void HUD_CheckChaseStats(Entity *ent)
 {
     int i;
 
@@ -469,7 +426,7 @@ void HUD_CheckChaseStats(entity_t *ent)
     }
 
     for (i = 1; i <= maxClients->value; i++) {
-        gclient_t* cl;
+        GameClient* cl;
 
         cl = g_entities[i].client;
 
@@ -487,13 +444,13 @@ void HUD_CheckChaseStats(entity_t *ent)
 HUD_SetSpectatorStats
 ===============
 */
-void HUD_SetSpectatorStats(entity_t *ent)
+void HUD_SetSpectatorStats(Entity *ent)
 {
     if (!ent) {
         return;
     }
 
-    gclient_t* cl = ent->client;
+    GameClient* cl = ent->client;
 
     if (!cl->chaseTarget) {
         HUD_SetClientStats(ent);

@@ -337,7 +337,7 @@ static int VID_SDL_InitSubSystem(void)
 static int VID_SDL_EventFilter(void *userdata, SDL_Event *event)
 {
     // SDL uses relative time, we need absolute
-    event->common.timestamp = Sys_Milliseconds();
+    event->common.timeStamp = Sys_Milliseconds();
     return 1;
 }
 
@@ -655,13 +655,13 @@ static void key_event(SDL_KeyboardEvent *event)
     }
 
     if (result == K_LALT || result == K_RALT)
-        Key_Event(K_ALT, event->state, event->timestamp);
+        Key_Event(K_ALT, event->state, event->timeStamp);
     else if (result == K_LCTRL || result == K_RCTRL)
-        Key_Event(K_CTRL, event->state, event->timestamp);
+        Key_Event(K_CTRL, event->state, event->timeStamp);
     else if (result == K_LSHIFT || result == K_RSHIFT)
-        Key_Event(K_SHIFT, event->state, event->timestamp);
+        Key_Event(K_SHIFT, event->state, event->timeStamp);
 
-    Key_Event(result, event->state, event->timestamp);
+    Key_Event(result, event->state, event->timeStamp);
 }
 
 static void mouse_button_event(SDL_MouseButtonEvent *event)
@@ -689,25 +689,25 @@ static void mouse_button_event(SDL_MouseButtonEvent *event)
         return;
     }
 
-    Key_Event(key, event->state, event->timestamp);
+    Key_Event(key, event->state, event->timeStamp);
 }
 
 static void mouse_wheel_event(SDL_MouseWheelEvent *event)
 {
     if (event->x > 0) {
-        Key_Event(K_MWHEELRIGHT, true, event->timestamp);
-        Key_Event(K_MWHEELRIGHT, false, event->timestamp);
+        Key_Event(K_MWHEELRIGHT, true, event->timeStamp);
+        Key_Event(K_MWHEELRIGHT, false, event->timeStamp);
     } else if (event->x < 0) {
-        Key_Event(K_MWHEELLEFT, true, event->timestamp);
-        Key_Event(K_MWHEELLEFT, false, event->timestamp);
+        Key_Event(K_MWHEELLEFT, true, event->timeStamp);
+        Key_Event(K_MWHEELLEFT, false, event->timeStamp);
     }
 
     if (event->y > 0) {
-        Key_Event(K_MWHEELUP, true, event->timestamp);
-        Key_Event(K_MWHEELUP, false, event->timestamp);
+        Key_Event(K_MWHEELUP, true, event->timeStamp);
+        Key_Event(K_MWHEELUP, false, event->timeStamp);
     } else if (event->y < 0) {
-        Key_Event(K_MWHEELDOWN, true, event->timestamp);
-        Key_Event(K_MWHEELDOWN, false, event->timestamp);
+        Key_Event(K_MWHEELDOWN, true, event->timeStamp);
+        Key_Event(K_MWHEELDOWN, false, event->timeStamp);
     }
 }
 

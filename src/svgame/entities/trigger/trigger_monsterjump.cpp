@@ -18,7 +18,7 @@ Walking monsters that touch this will jump in the direction of the trigger's ang
 "height" default to 200, the speed thrown upwards
 */
 
-void trigger_monsterjump_touch(entity_t* self, entity_t* other, cplane_t* plane, csurface_t* surf)
+void trigger_monsterjump_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
 {
     if (other->flags & (EntityFlags::Fly | EntityFlags::Swim))
         return;
@@ -38,7 +38,7 @@ void trigger_monsterjump_touch(entity_t* self, entity_t* other, cplane_t* plane,
     other->velocity[2] = self->moveDirection[2];
 }
 
-void SP_trigger_monsterjump(entity_t* self)
+void SP_trigger_monsterjump(Entity* self)
 {
     if (!self->speed)
         self->speed = 200;

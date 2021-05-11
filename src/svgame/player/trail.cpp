@@ -37,7 +37,7 @@ the player has been recently.  It is used by monsters for pursuit.
 
 #define TRAIL_LENGTH    8
 
-entity_t     *trail[TRAIL_LENGTH];
+Entity     *trail[TRAIL_LENGTH];
 int         trail_head;
 qboolean    trail_active = false;
 
@@ -54,7 +54,7 @@ void PlayerTrail_Init(void)
 
     for (n = 0; n < TRAIL_LENGTH; n++) {
         trail[n] = G_Spawn();
-        trail[n]->classname = "player_trail";
+        trail[n]->className = "player_trail";
     }
 
     trail_head = 0;
@@ -71,7 +71,7 @@ void PlayerTrail_Add(vec3_t spot)
 
     VectorCopy(spot, trail[trail_head]->state.origin);
 
-    trail[trail_head]->timestamp = level.time;
+    trail[trail_head]->timeStamp = level.time;
 
     VectorSubtract(spot, trail[PREV(trail_head)]->state.origin, temp);
     trail[trail_head]->state.angles[1] = vectoyaw(temp);
@@ -90,7 +90,7 @@ void PlayerTrail_New(vec3_t spot)
 }
 
 
-entity_t *PlayerTrail_PickFirst(entity_t *self)
+Entity *PlayerTrail_PickFirst(Entity *self)
 {
     int     marker;
     int     n;
@@ -99,7 +99,7 @@ entity_t *PlayerTrail_PickFirst(entity_t *self)
         return NULL;
 
     for (marker = trail_head, n = TRAIL_LENGTH; n; n--) {
-        if (trail[marker]->timestamp <= self->monsterInfo.trail_time)
+        if (trail[marker]->timeStamp <= self->monsterInfo.trail_time)
             marker = NEXT(marker);
         else
             break;
@@ -116,7 +116,7 @@ entity_t *PlayerTrail_PickFirst(entity_t *self)
     return trail[marker];
 }
 
-entity_t *PlayerTrail_PickNext(entity_t *self)
+Entity *PlayerTrail_PickNext(Entity *self)
 {
     int     marker;
     int     n;
@@ -125,7 +125,7 @@ entity_t *PlayerTrail_PickNext(entity_t *self)
         return NULL;
 
     for (marker = trail_head, n = TRAIL_LENGTH; n; n--) {
-        if (trail[marker]->timestamp <= self->monsterInfo.trail_time)
+        if (trail[marker]->timeStamp <= self->monsterInfo.trail_time)
             marker = NEXT(marker);
         else
             break;
@@ -134,7 +134,7 @@ entity_t *PlayerTrail_PickNext(entity_t *self)
     return trail[marker];
 }
 
-entity_t *PlayerTrail_LastSpot(void)
+Entity *PlayerTrail_LastSpot(void)
 {
     return trail[PREV(trail_head)];
 }

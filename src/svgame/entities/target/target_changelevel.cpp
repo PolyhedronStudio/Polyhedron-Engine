@@ -15,7 +15,7 @@
 /*QUAKED target_changelevel (1 0 0) (-8 -8 -8) (8 8 8)
 Changes level to "map" when fired
 */
-void use_target_changelevel(entity_t* self, entity_t* other, entity_t* activator)
+void use_target_changelevel(Entity* self, Entity* other, Entity* activator)
 {
     if (level.intermissiontime)
         return;     // already activated
@@ -26,8 +26,8 @@ void use_target_changelevel(entity_t* self, entity_t* other, entity_t* activator
     }
 
     // if noexit, do a ton of damage to other
-    if (deathmatch->value && !((int)dmflags->value & DeathMatchFlags::AllowExit) && other != world) {
-        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 10 * other->maxHealth, 1000, 0, MOD_EXIT);
+    if (deathmatch->value && !((int)dmflags->value & DeathMatchFlags::AllowExit) && other != G_GetWorldEntity()) {
+        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 10 * other->maxHealth, 1000, 0, MeansOfDeath::Exit);
         return;
     }
 
@@ -44,7 +44,7 @@ void use_target_changelevel(entity_t* self, entity_t* other, entity_t* activator
     HUD_BeginIntermission(self);
 }
 
-void SP_target_changelevel(entity_t* ent)
+void SP_target_changelevel(Entity* ent)
 {
     if (!ent->map) {
         gi.DPrintf("target_changelevel with no map at %s\n", Vec3ToString(ent->state.origin));
