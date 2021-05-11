@@ -93,10 +93,10 @@ static void P_ApplyDamageFeedback(Entity *player)
         return;     // didn't take any damage
 
     // start a pain animation if still in the player model
-    if (client->animation.priorityAnimation < ANIM_PAIN && player->state.modelIndex == 255) {
+    if (client->animation.priorityAnimation < PlayerAnimation::Pain && player->state.modelIndex == 255) {
         static int      i;
 
-        client->animation.priorityAnimation = ANIM_PAIN;
+        client->animation.priorityAnimation = PlayerAnimation::Pain;
         if (client->playerState.pmove.flags & PMF_DUCKED) {
             player->state.frame = FRAME_crpain1 - 1;
             client->animation.endFrame = FRAME_crpain4;
@@ -706,14 +706,14 @@ static void G_SetClientFrame(Entity *ent)
         isRunning = false;
 
     // check for stand/duck and stop/go transitions
-    if (isDucking != client->animation.isDucking && client->animation.priorityAnimation < ANIM_DEATH)
+    if (isDucking != client->animation.isDucking && client->animation.priorityAnimation < PlayerAnimation::Death)
         goto newanim;
-    if (isRunning != client->animation.isRunning && client->animation.priorityAnimation == ANIM_BASIC)
+    if (isRunning != client->animation.isRunning && client->animation.priorityAnimation == PlayerAnimation::Basic)
         goto newanim;
-    if (!ent->groundEntityPtr && client->animation.priorityAnimation <= ANIM_WAVE)
+    if (!ent->groundEntityPtr && client->animation.priorityAnimation <= PlayerAnimation::Wave)
         goto newanim;
 
-    if (client->animation.priorityAnimation == ANIM_REVERSE) {
+    if (client->animation.priorityAnimation == PlayerAnimation::Reverse) {
         if (ent->state.frame > client->animation.endFrame) {
             ent->state.frame--;
             return;
@@ -724,12 +724,12 @@ static void G_SetClientFrame(Entity *ent)
         return;
     }
 
-    if (client->animation.priorityAnimation == ANIM_DEATH)
+    if (client->animation.priorityAnimation == PlayerAnimation::Death)
         return;     // stay there
-    if (client->animation.priorityAnimation == ANIM_JUMP) {
+    if (client->animation.priorityAnimation == PlayerAnimation::Jump) {
         if (!ent->groundEntityPtr)
             return;     // stay there
-        ent->client->animation.priorityAnimation = ANIM_WAVE;
+        ent->client->animation.priorityAnimation = PlayerAnimation::Wave;
         ent->state.frame = FRAME_jump3;
         ent->client->animation.endFrame = FRAME_jump6;
         return;
@@ -737,12 +737,12 @@ static void G_SetClientFrame(Entity *ent)
 
 newanim:
     // return to either a running or standing frame
-    client->animation.priorityAnimation = ANIM_BASIC;
+    client->animation.priorityAnimation = PlayerAnimation::Basic;
     client->animation.isDucking = isDucking;
     client->animation.isRunning = isRunning;
 
     if (!ent->groundEntityPtr) {
-        client->animation.priorityAnimation = ANIM_JUMP;
+        client->animation.priorityAnimation = PlayerAnimation::Jump;
         if (ent->state.frame != FRAME_jump2)
             ent->state.frame = FRAME_jump1;
         client->animation.endFrame = FRAME_jump2;

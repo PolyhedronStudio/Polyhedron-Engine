@@ -119,7 +119,7 @@ void Player_Die(Entity* self, Entity* inflictor, Entity* attacker, int damage, c
 
             i = (i + 1) % 3;
             // start a death animation
-            self->client->animation.priorityAnimation = ANIM_DEATH;
+            self->client->animation.priorityAnimation = PlayerAnimation::Death;
             if (self->client->playerState.pmove.flags & PMF_DUCKED) {
                 self->state.frame = FRAME_crdeath1 - 1;
                 self->client->animation.endFrame = FRAME_crdeath5;

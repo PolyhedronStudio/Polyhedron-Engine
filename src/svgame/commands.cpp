@@ -666,10 +666,10 @@ void Cmd_Wave_f(Entity *ent)
     if (ent->client->playerState.pmove.flags & PMF_DUCKED)
         return;
 
-    if (ent->client->animation.priorityAnimation > ANIM_WAVE)
+    if (ent->client->animation.priorityAnimation > PlayerAnimation::Wave)
         return;
 
-    ent->client->animation.priorityAnimation = ANIM_WAVE;
+    ent->client->animation.priorityAnimation = PlayerAnimation::Wave;
 
     switch (i) {
     case 0:

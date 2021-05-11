@@ -94,7 +94,7 @@ void Machinegun_Fire(Entity* ent)
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
         ent->client->persistent.inventory[ent->client->ammoIndex]--;
 
-    ent->client->animation.priorityAnimation = ANIM_ATTACK;
+    ent->client->animation.priorityAnimation = PlayerAnimation::Attack;
     if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
         ent->state.frame = FRAME_crattak1 - (int)(random() + 0.25);
         ent->client->animation.endFrame = FRAME_crattak9;

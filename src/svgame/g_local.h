@@ -758,14 +758,15 @@ void GetChaseTarget(Entity *ent);
 //============================================================================
 
 // client_t->animation.priorityAnimation
-#define ANIM_BASIC      0       // stand / run
-#define ANIM_WAVE       1
-#define ANIM_JUMP       2
-#define ANIM_PAIN       3
-#define ANIM_ATTACK     4
-#define ANIM_DEATH      5
-#define ANIM_REVERSE    6
-
+struct PlayerAnimation {
+    static constexpr int32_t Basic = 0;       // Stand / Run
+    static constexpr int32_t Wave = 1;
+    static constexpr int32_t Jump = 2;
+    static constexpr int32_t Pain = 3;
+    static constexpr int32_t Attack = 4;
+    static constexpr int32_t Death = 5;
+    static constexpr int32_t Reverse = 6;
+};
 
 // Client data that stays across multiple level loads
 typedef struct {

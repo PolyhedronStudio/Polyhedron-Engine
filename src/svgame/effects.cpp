@@ -195,7 +195,7 @@ void ThrowClientHead(Entity *self, int damage)
     VectorAdd(self->velocity, vd, self->velocity);
 
     if (self->client) { // bodies in the queue don't have a client anymore
-        self->client->animation.priorityAnimation = ANIM_DEATH;
+        self->client->animation.priorityAnimation = PlayerAnimation::Death;
         self->client->animation.endFrame = self->state.frame;
     } else {
         self->Think = NULL;

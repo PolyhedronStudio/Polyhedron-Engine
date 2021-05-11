@@ -169,7 +169,7 @@ void ChangeWeapon(Entity *ent)
     ent->client->playerState.gunFrame = 0;
     ent->client->playerState.gunIndex = gi.ModelIndex(ent->client->persistent.activeWeapon->viewModel);
 
-    ent->client->animation.priorityAnimation = ANIM_PAIN;
+    ent->client->animation.priorityAnimation = PlayerAnimation::Pain;
     if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
         ent->state.frame = FRAME_crpain1;
         ent->client->animation.endFrame = FRAME_crpain4;
@@ -302,7 +302,7 @@ void Weapon_Generic(Entity *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, i
             ChangeWeapon(ent);
             return;
         } else if ((FRAME_DEACTIVATE_LAST - ent->client->playerState.gunFrame) == 4) {
-            ent->client->animation.priorityAnimation = ANIM_REVERSE;
+            ent->client->animation.priorityAnimation = PlayerAnimation::Reverse;
             if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
                 ent->state.frame = FRAME_crpain4 + 1;
                 ent->client->animation.endFrame = FRAME_crpain1;
@@ -333,7 +333,7 @@ void Weapon_Generic(Entity *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, i
         ent->client->playerState.gunFrame = FRAME_DEACTIVATE_FIRST;
 
         if ((FRAME_DEACTIVATE_LAST - FRAME_DEACTIVATE_FIRST) < 4) {
-            ent->client->animation.priorityAnimation = ANIM_REVERSE;
+            ent->client->animation.priorityAnimation = PlayerAnimation::Reverse;
             if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
                 ent->state.frame = FRAME_crpain4 + 1;
                 ent->client->animation.endFrame = FRAME_crpain1;
@@ -355,7 +355,7 @@ void Weapon_Generic(Entity *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, i
                 ent->client->weaponState = WeaponState::Firing;
 
                 // start the animation
-                ent->client->animation.priorityAnimation = ANIM_ATTACK;
+                ent->client->animation.priorityAnimation = PlayerAnimation::Attack;
                 if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
                     ent->state.frame = FRAME_crattak1 - 1;
                     ent->client->animation.endFrame = FRAME_crattak9;
