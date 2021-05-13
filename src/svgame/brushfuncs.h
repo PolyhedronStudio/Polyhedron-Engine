@@ -81,8 +81,8 @@ void Brush_AngleMove_Final(Entity* ent);
 void Brush_AngleMove_Begin(Entity* ent);
 void Brush_AngleMove_Calc(Entity* ent, void(*func)(Entity*));
 
-void plat_CalcAcceleratedMove(moveinfo_t* moveinfo);
-void plat_Accelerate(moveinfo_t* moveinfo);
+void plat_CalcAcceleratedMove(PushMoveInfo* moveinfo);
+void plat_Accelerate(PushMoveInfo* moveinfo);
 void Think_AccelMove(Entity* ent);
 
 #endif // __SVGAME_PLAYER_WEAPONS_H__

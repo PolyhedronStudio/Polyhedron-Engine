@@ -456,7 +456,7 @@ typedef struct {
     float remainingDistance;
     float deceleratedDistance;
     void (*OnEndFunction)(Entity *);
-} moveinfo_t;
+} PushMoveInfo;
 
 
 typedef struct {
@@ -1159,7 +1159,7 @@ struct entity_s {
     gitem_t *item;          // for bonus items
 
     // common data blocks
-    moveinfo_t moveInfo;
+    PushMoveInfo moveInfo;
     monsterinfo_t monsterInfo;
 };
 

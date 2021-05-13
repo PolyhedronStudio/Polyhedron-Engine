@@ -294,5 +294,5 @@ typedef struct
 	float		ratio;
 	void(*OnEndFunction)(Entity *);
 	qboolean	is_blocked;
-} moveinfo_t;
+} PushMoveInfo;
 

@@ -209,7 +209,7 @@ change the speed for the next frame
 */
 #define AccelerationDistance(target, rate)  (target * ((target / rate) + 1) / 2)
 
-void plat_CalcAcceleratedMove(moveinfo_t* moveinfo)
+void plat_CalcAcceleratedMove(PushMoveInfo* moveinfo)
 {
     float   accel_dist;
     float   decel_dist;
@@ -235,7 +235,7 @@ void plat_CalcAcceleratedMove(moveinfo_t* moveinfo)
     moveinfo->deceleratedDistance = decel_dist;
 }
 
-void plat_Accelerate(moveinfo_t* moveinfo)
+void plat_Accelerate(PushMoveInfo* moveinfo)
 {
     // are we decelerating?
     if (moveinfo->remainingDistance <= moveinfo->deceleratedDistance) {
