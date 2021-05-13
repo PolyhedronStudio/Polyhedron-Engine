@@ -49,7 +49,7 @@ SET(SRC_SVGAME
 	svgame/items.cpp
 	svgame/main.cpp
 	svgame/effects.cpp
-	svgame/monsters.cpp
+	svgame/oldmonsters.cpp
 	svgame/physics.cpp
 	svgame/save.cpp
 	svgame/spawn.cpp
@@ -123,8 +123,8 @@ SET(SRC_SVGAME
 	
 	svgame/entities/light.cpp
 
-	svgame/monsters/movement.cpp
-	svgame/monsters/soldier.cpp
+	svgame/oldmonsters/movement.cpp
+	svgame/oldmonsters/soldier.cpp
 
 	svgame/player/client.cpp
 	svgame/player/hud.cpp
@@ -151,7 +151,7 @@ SET(HEADERS_SVGAME
 
 	svgame/entities/func/func_door.h
 
-	svgame/monsters/soldier.h
+	svgame/oldmonsters/soldier.h
 
 	svgame/player/animations.h
 	svgame/player/client.h
