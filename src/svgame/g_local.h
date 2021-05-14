@@ -458,53 +458,6 @@ typedef struct {
     void (*OnEndFunction)(Entity *);
 } PushMoveInfo;
 
-
-typedef struct {
-    void    (*aifunc)(Entity *self, float dist);
-    float   dist;
-    void    (*thinkfunc)(Entity *self);
-} mframe_t;
-
-typedef struct {
-    int         firstframe;
-    int         lastFrame;
-    mframe_t    *frame;
-    void        (*OnEndFunction)(Entity *self);
-} mmove_t;
-
-typedef struct {
-    mmove_t     *currentmove;
-    int         aiflags;
-    int         nextframe;
-    float       scale;
-
-    void        (*stand)(Entity *self);
-    void        (*idle)(Entity *self);
-    void        (*search)(Entity *self);
-    void        (*walk)(Entity *self);
-    void        (*run)(Entity *self);
-    void        (*dodge)(Entity *self, Entity *other, float eta);
-    void        (*attack)(Entity *self);
-    void        (*melee)(Entity *self);
-    void        (*sight)(Entity *self, Entity *other);
-    qboolean    (*checkattack)(Entity *self);
-
-    float       pausetime;
-    float       attack_finished;
-
-    vec3_t      saved_goal;
-    float       search_time;
-    float       trail_time;
-    vec3_t      last_sighting;
-    int         attack_state;
-    int         lefty;
-    float       idle_time;
-    int         linkCount;
-
-    int         power_armor_type;
-    int         power_armor_power;
-} monsterinfo_t;
-
 // Wrap these in functions such as?:
 // SVG_GetGameLocals
 // SVG_GetLevelLocals
@@ -711,41 +664,6 @@ struct DamageFlags {
 };
 
 //
-// g_monster.c
-//
-void monster_fire_bullet(Entity *self, const vec3_t &start, const vec3_t &dir, int damage, int kick, int hspread, int vspread, int flashtype);
-void monster_fire_blaster(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int flashtype, int effect);
-void M_droptofloor(Entity *ent);
-void monster_think(Entity *self);
-void walkmonster_start(Entity *self);
-void swimmonster_start(Entity *self);
-void flymonster_start(Entity *self);
-void AttackFinished(Entity *self, float time);
-void monster_death_use(Entity *self);
-void M_CatagorizePosition(Entity *ent);
-qboolean M_CheckAttack(Entity *self);
-void M_FlyCheck(Entity *self);
-void M_CheckGround(Entity *ent);
-
-//
-// g_ai.c
-//
-void AI_SetSightClient(void);
-
-void ai_stand(Entity *self, float dist);
-void ai_move(Entity *self, float dist);
-void ai_walk(Entity *self, float dist);
-void ai_turn(Entity *self, float dist);
-void ai_run(Entity *self, float dist);
-void ai_charge(Entity *self, float dist);
-int range(Entity *self, Entity *other);
-
-void FoundTarget(Entity *self);
-qboolean infront(Entity *self, Entity *other);
-qboolean visible(Entity *self, Entity *other);
-qboolean FacingIdeal(Entity *self);
-
-//
 // g_weapon.c
 //
 void ThrowDebris(Entity *self, const char *modelname, float speed, const vec3_t& origin);
@@ -790,14 +708,6 @@ void ClientEndServerFrame(Entity *ent);
 // g_pweapon.c
 //
 void PlayerNoise(Entity *who, vec3_t where, int type);
-
-//
-// m_move.c
-//
-qboolean M_CheckBottom(Entity *ent);
-qboolean M_walkmove(Entity *ent, float yaw, float dist);
-void M_MoveToGoal(Entity *ent, float dist);
-void M_ChangeYaw(Entity *ent);
 
 //
 // g_phys.c
@@ -996,6 +906,14 @@ struct gclient_s {
     qboolean updateChase;
 };
 
+
+//-------------------
+// MonsterAI predecleration. 
+// 
+// TODO: Really need to start moving each of these classes and all into their own files...
+//-------------------
+#include "ai/MonsterAI.h"
+
 //-------------------
 // entity_s, the server side entity structure. If you know what an entity is,
 // then you know what this is.
@@ -1160,7 +1078,7 @@ struct entity_s {
 
     // common data blocks
     PushMoveInfo moveInfo;
-    monsterinfo_t monsterInfo;
+    MonsterAI monsterAI;
 };
 
 #endif

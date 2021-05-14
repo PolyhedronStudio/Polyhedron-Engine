@@ -212,37 +212,6 @@ static const save_field_t entityfields[] = {
     F(moveInfo.deceleratedDistance),
     P(moveInfo.OnEndFunction, P_moveinfo_endfunc),
 
-    P(monsterInfo.currentmove, P_monsterinfo_currentmove),
-    I(monsterInfo.aiflags),
-    I(monsterInfo.nextframe),
-    F(monsterInfo.scale),
-
-    P(monsterInfo.stand, P_monsterinfo_stand),
-    P(monsterInfo.idle, P_monsterinfo_idle),
-    P(monsterInfo.search, P_monsterinfo_search),
-    P(monsterInfo.walk, P_monsterinfo_walk),
-    P(monsterInfo.run, P_monsterinfo_run),
-    P(monsterInfo.dodge, P_monsterinfo_dodge),
-    P(monsterInfo.attack, P_monsterinfo_attack),
-    P(monsterInfo.melee, P_monsterinfo_melee),
-    P(monsterInfo.sight, P_monsterinfo_sight),
-    P(monsterInfo.checkattack, P_monsterinfo_checkattack),
-
-    F(monsterInfo.pausetime),
-    F(monsterInfo.attack_finished),
-
-    V(monsterInfo.saved_goal),
-    F(monsterInfo.search_time),
-    F(monsterInfo.trail_time),
-    V(monsterInfo.last_sighting),
-    I(monsterInfo.attack_state),
-    I(monsterInfo.lefty),
-    F(monsterInfo.idle_time),
-    I(monsterInfo.linkCount),
-
-    I(monsterInfo.power_armor_type),
-    I(monsterInfo.power_armor_power),
-
     {(fieldtype_t)0}
 #undef _OFS
 };

@@ -94,17 +94,17 @@ void Killed(Entity *targ, Entity *inflictor, Entity *attacker, int damage, vec3_
 
     targ->enemy = attacker;
 
-    if ((targ->serverFlags & EntityServerFlags::Monster) && (targ->deadFlag != DEAD_DEAD)) {
-//      targ->serverFlags |= EntityServerFlags::DeadMonster;   // now treat as a different content type
-        if (!(targ->monsterInfo.aiflags & AI_GOOD_GUY)) {
-            level.killedMonsters++;
-            if (coop->value && attacker->client)
-                attacker->client->respawn.score++;
-            // medics won't heal monsters that they kill themselves
-            if (strcmp(attacker->className, "monster_medic") == 0)
-                targ->owner = attacker;
-        }
-    }
+//    if ((targ->serverFlags & EntityServerFlags::Monster) && (targ->deadFlag != DEAD_DEAD)) {
+////      targ->serverFlags |= EntityServerFlags::DeadMonster;   // now treat as a different content type
+//        if (!(targ->monsterInfo.aiflags & AI_GOOD_GUY)) {
+//            level.killedMonsters++;
+//            if (coop->value && attacker->client)
+//                attacker->client->respawn.score++;
+//            // medics won't heal monsters that they kill themselves
+//            if (strcmp(attacker->className, "monster_medic") == 0)
+//                targ->owner = attacker;
+//        }
+//    }
 
     if (targ->moveType == MoveType::Push || targ->moveType == MoveType::Stop || targ->moveType == MoveType::None) {
         // doors, triggers, etc
@@ -112,10 +112,10 @@ void Killed(Entity *targ, Entity *inflictor, Entity *attacker, int damage, vec3_
         return;
     }
 
-    if ((targ->serverFlags & EntityServerFlags::Monster) && (targ->deadFlag != DEAD_DEAD)) {
-        targ->Touch = NULL;
-        monster_death_use(targ);
-    }
+    //if ((targ->serverFlags & EntityServerFlags::Monster) && (targ->deadFlag != DEAD_DEAD)) {
+    //    targ->Touch = NULL;
+    //    monster_death_use(targ);
+    //}
 
     targ->Die(targ, inflictor, attacker, damage, point);
 }
@@ -185,8 +185,8 @@ static int CheckPowerArmor(Entity *ent, vec3_t point, vec3_t normal, int damage,
     index = 0;  // shut up gcc
 
     if (ent->serverFlags & EntityServerFlags::Monster) {
-        power_armor_type = ent->monsterInfo.power_armor_type;
-        power = ent->monsterInfo.power_armor_power;
+        //power_armor_type = ent->monsterInfo.power_armor_type;
+        //power = ent->monsterInfo.power_armor_power;
     } else
         return 0;
 
@@ -208,8 +208,8 @@ static int CheckPowerArmor(Entity *ent, vec3_t point, vec3_t normal, int damage,
 
     if (client)
         client->persistent.inventory[index] -= power_used;
-    else
-        ent->monsterInfo.power_armor_power -= power_used;
+    //else
+    //    ent->monsterInfo.power_armor_power -= power_used;
     return save;
 }
 
@@ -251,79 +251,6 @@ static int CheckArmor(Entity *ent, vec3_t point, vec3_t normal, int damage, int 
     SpawnDamage(te_sparks, point, normal, save);
 
     return save;
-}
-
-void M_ReactToDamage(Entity *targ, Entity *attacker)
-{
-    if (!(attacker->client) && !(attacker->serverFlags & EntityServerFlags::Monster))
-        return;
-
-    if (attacker == targ || attacker == targ->enemy)
-        return;
-
-    // dead monsters, like misc_deadsoldier, don't have AI functions, but 
-    // M_ReactToDamage might still be called on them
-    if (targ->serverFlags & EntityServerFlags::DeadMonster)
-        return;
-
-    // if we are a good guy monster and our attacker is a player
-    // or another good guy, do not get mad at them
-    if (targ->monsterInfo.aiflags & AI_GOOD_GUY) {
-        if (attacker->client || (attacker->monsterInfo.aiflags & AI_GOOD_GUY))
-            return;
-    }
-
-    // we now know that we are not both good guys
-
-    // if attacker is a client, get mad at them because he's good and we're not
-    if (attacker->client) {
-        targ->monsterInfo.aiflags &= ~AI_SOUND_TARGET;
-
-        // this can only happen in coop (both new and old enemies are clients)
-        // only switch if can't see the current enemy
-        if (targ->enemy && targ->enemy->client) {
-            if (visible(targ, targ->enemy)) {
-                targ->oldEnemyPtr = attacker;
-                return;
-            }
-            targ->oldEnemyPtr = targ->enemy;
-        }
-        targ->enemy = attacker;
-        if (!(targ->monsterInfo.aiflags & AI_DUCKED))
-            FoundTarget(targ);
-        return;
-    }
-
-    // it's the same base (walk/swim/fly) type and a different className and it's not a tank
-    // (they spray too much), get mad at them
-    if (((targ->flags & (EntityFlags::Fly | EntityFlags::Swim)) == (attacker->flags & (EntityFlags::Fly | EntityFlags::Swim))) &&
-        (strcmp(targ->className, attacker->className) != 0) &&
-        (strcmp(attacker->className, "monster_tank") != 0) &&
-        (strcmp(attacker->className, "monster_supertank") != 0) &&
-        (strcmp(attacker->className, "monster_makron") != 0) &&
-        (strcmp(attacker->className, "monster_jorg") != 0)) {
-        if (targ->enemy && targ->enemy->client)
-            targ->oldEnemyPtr = targ->enemy;
-        targ->enemy = attacker;
-        if (!(targ->monsterInfo.aiflags & AI_DUCKED))
-            FoundTarget(targ);
-    }
-    // if they *meant* to shoot us, then shoot back
-    else if (attacker->enemy == targ) {
-        if (targ->enemy && targ->enemy->client)
-            targ->oldEnemyPtr = targ->enemy;
-        targ->enemy = attacker;
-        if (!(targ->monsterInfo.aiflags & AI_DUCKED))
-            FoundTarget(targ);
-    }
-    // otherwise get mad at whoever they are mad at (help our buddy) unless it is us!
-    else if (attacker->enemy && attacker->enemy != targ) {
-        if (targ->enemy && targ->enemy->client)
-            targ->oldEnemyPtr = targ->enemy;
-        targ->enemy = attacker->enemy;
-        if (!(targ->monsterInfo.aiflags & AI_DUCKED))
-            FoundTarget(targ);
-    }
 }
 
 qboolean CheckTeamDamage(Entity *targ, Entity *attacker)
@@ -453,15 +380,16 @@ void T_Damage(Entity *targ, Entity *inflictor, Entity *attacker, const vec3_t &d
         }
     }
 
-    if (targ->serverFlags & EntityServerFlags::Monster) {
-        M_ReactToDamage(targ, attacker);
-        if (!(targ->monsterInfo.aiflags & AI_DUCKED) && (take)) {
-            targ->Pain(targ, attacker, knockback, take);
-            // nightmare mode monsters don't go into pain frames often
-            if (skill->value == 3)
-                targ->debouncePainTime = level.time + 5;
-        }
-    } else if (client) {
+    //if (targ->serverFlags & EntityServerFlags::Monster) {
+    //    M_ReactToDamage(targ, attacker);
+    //    if (!(targ->monsterInfo.aiflags & AI_DUCKED) && (take)) {
+    //        targ->Pain(targ, attacker, knockback, take);
+    //        // nightmare mode monsters don't go into pain frames often
+    //        if (skill->value == 3)
+    //            targ->debouncePainTime = level.time + 5;
+    //    }
+    //} else 
+    if (client) {
         if (!(targ->flags & EntityFlags::GodMode) && (take))
             targ->Pain(targ, attacker, knockback, take);
     } else if (take) {

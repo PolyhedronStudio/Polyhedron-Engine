@@ -28,7 +28,7 @@ void barrel_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf
 
     ratio = (float)other->mass / (float)self->mass;
     VectorSubtract(self->state.origin, other->state.origin, v);
-    M_walkmove(self, vectoyaw(v), 20 * ratio * FRAMETIME);
+//    M_walkmove(self, vectoyaw(v), 20 * ratio * FRAMETIME);
 }
 
 void barrel_explode(Entity* self)
@@ -118,6 +118,10 @@ void barrel_delay(Entity* self, Entity* inflictor, Entity* attacker, int damage,
     self->activator = attacker;
 }
 
+void barrel_think(Entity* self) {
+
+}
+
 void SP_misc_explobox(Entity* self)
 {
     if (deathmatch->value) {
@@ -147,12 +151,11 @@ void SP_misc_explobox(Entity* self)
 
     self->Die = barrel_delay;
     self->takeDamage = TakeDamage::Yes;
-    self->monsterInfo.aiflags = AI_NOSTEP;
 
     self->Touch = barrel_touch;
 
-    self->Think = M_droptofloor;
-    self->nextThink = level.time + 2 * FRAMETIME;
+    //self->Think = barrel_think;
+    //self->nextThink = level.time + 2 * FRAMETIME;
 
     gi.LinkEntity(self);
 }

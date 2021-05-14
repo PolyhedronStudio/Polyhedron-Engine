@@ -95,9 +95,6 @@ void SP_misc_gib_head(Entity *self);
 void SP_misc_teleporter(Entity *self);
 void SP_misc_teleporter_dest(Entity *self);
 
-void SP_monster_soldier_light(Entity *self);
-void SP_monster_soldier(Entity *self);
-void SP_monster_soldier_ss(Entity *self);
 
 void SP_misc_explobox(Entity* self);
 
@@ -168,33 +165,29 @@ static const spawn_func_t spawn_funcs[] = {
     {"misc_teleporter_dest", SP_misc_teleporter_dest},
     {"misc_explobox", SP_misc_explobox},
 
-    {"monster_soldier_light", SP_monster_soldier_light},
-    {"monster_soldier", SP_monster_soldier},
-    {"monster_soldier_ss", SP_monster_soldier_ss},
-
     {NULL, NULL}
 };
 
 static const spawn_field_t spawn_fields[] = {
-    {"className", FOFS(className), F_LSTRING},
+    {"classname", FOFS(className), F_LSTRING},
     {"model", FOFS(model), F_LSTRING},
-    {"spawnFlags", FOFS(spawnFlags), F_INT},
+    {"spawnflags", FOFS(spawnFlags), F_INT},
     {"speed", FOFS(speed), F_FLOAT},
     {"acceleration", FOFS(acceleration), F_FLOAT},
     {"deceleration", FOFS(deceleration), F_FLOAT},
     {"target", FOFS(target), F_LSTRING},
     {"targetName", FOFS(targetName), F_LSTRING},
-    {"pathTarget", FOFS(pathTarget), F_LSTRING},
-    {"deathTarget", FOFS(deathTarget), F_LSTRING},
-    {"killTarget", FOFS(killTarget), F_LSTRING},
-    {"combatTarget", FOFS(combatTarget), F_LSTRING},
+    {"pathtarget", FOFS(pathTarget), F_LSTRING},
+    {"deathtarget", FOFS(deathTarget), F_LSTRING},
+    {"killtarget", FOFS(killTarget), F_LSTRING},
+    {"combattarget", FOFS(combatTarget), F_LSTRING},
     {"message", FOFS(message), F_LSTRING},
     {"team", FOFS(team), F_LSTRING},
     {"wait", FOFS(wait), F_FLOAT},
     {"delay", FOFS(delay), F_FLOAT},
     {"random", FOFS(random), F_FLOAT},
-    {"moveOrigin", FOFS(moveOrigin), F_VECTOR},
-    {"moveAngles", FOFS(moveAngles), F_VECTOR},
+    {"moveorigin", FOFS(moveOrigin), F_VECTOR},
+    {"moveangles", FOFS(moveAngles), F_VECTOR},
     {"style", FOFS(style), F_INT},
     {"customLightStyle", FOFS(customLightStyle), F_LSTRING},
     {"count", FOFS(count), F_INT},
@@ -230,7 +223,7 @@ static const spawn_field_t temp_fields[] = {
     {"maxyaw", STOFS(maxyaw), F_FLOAT},
     {"minpitch", STOFS(minpitch), F_FLOAT},
     {"maxpitch", STOFS(maxpitch), F_FLOAT},
-    {"nextMap", STOFS(nextMap), F_LSTRING},
+    {"nextmap", STOFS(nextMap), F_LSTRING},
 
     {NULL}
 };

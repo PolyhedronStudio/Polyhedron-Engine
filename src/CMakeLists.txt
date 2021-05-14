@@ -39,7 +39,6 @@ SET(HEADERS_CLGAME
 
 ###################### SERVER GAME
 SET(SRC_SVGAME
-	svgame/ai.cpp
 	svgame/brushfuncs.cpp
 	svgame/chase.cpp
 	svgame/commands.cpp
@@ -49,7 +48,7 @@ SET(SRC_SVGAME
 	svgame/items.cpp
 	svgame/main.cpp
 	svgame/effects.cpp
-	svgame/oldmonsters.cpp
+	#svgame/oldmonsters.cpp
 	svgame/physics.cpp
 	svgame/save.cpp
 	svgame/spawn.cpp
@@ -58,6 +57,8 @@ SET(SRC_SVGAME
 	
 	svgame/utils.cpp
 	svgame/weapons.cpp
+
+	svgame/ai/MonsterAI.cpp
 
 	svgame/entities/func/func_areaportal.cpp
 	svgame/entities/func/func_button.cpp
@@ -123,8 +124,8 @@ SET(SRC_SVGAME
 	
 	svgame/entities/light.cpp
 
-	svgame/oldmonsters/movement.cpp
-	svgame/oldmonsters/soldier.cpp
+	#svgame/oldmonsters/movement.cpp
+	#svgame/oldmonsters/soldier.cpp
 
 	svgame/player/client.cpp
 	svgame/player/hud.cpp
@@ -149,9 +150,11 @@ SET(HEADERS_SVGAME
 	svgame/trigger.h
 	svgame/utils.h
 
+	svgame/ai/MonsterAI.h
+
 	svgame/entities/func/func_door.h
 
-	svgame/oldmonsters/soldier.h
+	#svgame/oldmonsters/soldier.h
 
 	svgame/player/animations.h
 	svgame/player/client.h

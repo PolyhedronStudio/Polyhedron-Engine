@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /*
 =================
+TODO: Maybe... replace, rename, etc.
 check_dodge
 
 This is a support routine used when a client is firing
@@ -29,23 +30,24 @@ monster's dodge function should be called.
 */
 static void check_dodge(Entity *self, const vec3_t &start, const vec3_t &dir, int speed)
 {
-    vec3_t  end;
-    vec3_t  v;
-    trace_t tr;
-    float   eta;
+    //vec3_t  end;
+    //vec3_t  v;
+    //trace_t tr;
+    //float   eta;
 
-    // easy mode only ducks one quarter the time
-    if (skill->value == 0) {
-        if (random() > 0.25)
-            return;
-    }
-    VectorMA(start, WORLD_SIZE, dir, end);
-    tr = gi.Trace(start, vec3_origin, vec3_origin, end, self, CONTENTS_MASK_SHOT);
-    if ((tr.ent) && (tr.ent->serverFlags & EntityServerFlags::Monster) && (tr.ent->health > 0) && (tr.ent->monsterInfo.dodge) && infront(tr.ent, self)) {
-        VectorSubtract(tr.endPosition, start, v);
-        eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
-        tr.ent->monsterInfo.dodge(tr.ent, self, eta);
-    }
+    //// easy mode only ducks one quarter the time
+    //if (skill->value == 0) {
+    //    if (random() > 0.25)
+    //        return;
+    //}
+    //VectorMA(start, WORLD_SIZE, dir, end);
+    //tr = gi.Trace(start, vec3_origin, vec3_origin, end, self, CONTENTS_MASK_SHOT);
+    //if ((tr.ent) && (tr.ent->serverFlags & EntityServerFlags::Monster) && (tr.ent->health > 0) && (tr.ent->monsterInfo.dodge) && infront(tr.ent, self)) {
+    //    VectorSubtract(tr.endPosition, start, v);
+    //    eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
+    //    
+    //    //tr.ent->monsterInfo.dodge(tr.ent, self, eta);
+    //}
 }
 
 

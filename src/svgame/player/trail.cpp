@@ -99,19 +99,19 @@ Entity *PlayerTrail_PickFirst(Entity *self)
         return NULL;
 
     for (marker = trail_head, n = TRAIL_LENGTH; n; n--) {
-        if (trail[marker]->timeStamp <= self->monsterInfo.trail_time)
+//        if (trail[marker]->timeStamp <= self->monsterInfo.trail_time)
             marker = NEXT(marker);
-        else
-            break;
+        //else
+        //    break;
     }
 
-    if (visible(self, trail[marker])) {
-        return trail[marker];
-    }
+    //if (visible(self, trail[marker])) {
+    //    return trail[marker];
+    //}
 
-    if (visible(self, trail[PREV(marker)])) {
-        return trail[PREV(marker)];
-    }
+    //if (visible(self, trail[PREV(marker)])) {
+    //    return trail[PREV(marker)];
+    //}
 
     return trail[marker];
 }
@@ -125,10 +125,10 @@ Entity *PlayerTrail_PickNext(Entity *self)
         return NULL;
 
     for (marker = trail_head, n = TRAIL_LENGTH; n; n--) {
-        if (trail[marker]->timeStamp <= self->monsterInfo.trail_time)
+//        if (trail[marker]->timeStamp <= self->monsterInfo.trail_time)
             marker = NEXT(marker);
-        else
-            break;
+        //else
+        //    break;
     }
 
     return trail[marker];

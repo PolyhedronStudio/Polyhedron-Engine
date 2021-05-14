@@ -13,29 +13,6 @@
 //
 #include "functionpointers.h"
 
-extern mmove_t soldier_move_attack1;
-extern mmove_t soldier_move_attack2;
-extern mmove_t soldier_move_attack3;
-extern mmove_t soldier_move_attack4;
-extern mmove_t soldier_move_attack6;
-extern mmove_t soldier_move_death1;
-extern mmove_t soldier_move_death2;
-extern mmove_t soldier_move_death3;
-extern mmove_t soldier_move_death4;
-extern mmove_t soldier_move_death5;
-extern mmove_t soldier_move_death6;
-extern mmove_t soldier_move_duck;
-extern mmove_t soldier_move_pain1;
-extern mmove_t soldier_move_pain2;
-extern mmove_t soldier_move_pain3;
-extern mmove_t soldier_move_pain4;
-extern mmove_t soldier_move_run;
-extern mmove_t soldier_move_stand1;
-extern mmove_t soldier_move_stand3;
-extern mmove_t soldier_move_start_run;
-extern mmove_t soldier_move_walk1;
-extern mmove_t soldier_move_walk2;
-
 extern void door_blocked(Entity* self, Entity* other);
 extern void plat_blocked(Entity* self, Entity* other);
 extern void rotating_blocked(Entity* self, Entity* other);
@@ -46,16 +23,7 @@ extern void debris_die(Entity* self, Entity* inflictor, Entity* attacker, int da
 extern void door_killed(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point);
 extern void func_explosive_explode(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point);
 extern void gib_die(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point);
-extern void soldier_die(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point);
 
-extern void soldier_attack(Entity *self);
-extern void soldier_dodge(Entity* self, Entity* attacker, float eta);
-extern void soldier_run(Entity *self);
-extern void soldier_sight(Entity* self, Entity* other);
-extern void soldier_stand(Entity *self);
-extern void soldier_walk(Entity *self);
-extern void soldier_pain(Entity* self, Entity* other, float kick, int damage);
-;
 extern void Brush_AngleMove_Begin(Entity* self);
 extern void Brush_AngleMove_Done(Entity* self);
 extern void Brush_AngleMove_Final(Entity* self);
@@ -67,7 +35,6 @@ extern void door_go_down(Entity* self);
 extern void DoRespawn(Entity* self);
 extern void drop_make_touchable(Entity* self);
 extern void droptofloor(Entity* self);
-extern void flymonster_start_go(Entity* self);
 
 extern void func_object_release(Entity* self);
 extern void func_timer_think(Entity* self);
@@ -77,7 +44,6 @@ extern void gib_think(Entity* self);
 
 extern void MegaHealth_think(Entity* self);
 
-extern void monster_triggered_spawn(Entity* self);
 extern void Brush_Move_Begin(Entity* self);
 extern void Brush_Move_Done(Entity* self);
 extern void Brush_Move_Final(Entity* self);
@@ -85,7 +51,6 @@ extern void multi_wait(Entity* self);
 extern void plat_go_down(Entity* self);
 extern void SP_CreateCoopSpots(Entity* self);
 extern void SP_FixCoopSpots(Entity* self);
-extern void swimmonster_start_go(Entity* self);
 extern void target_crosslevel_target_think(Entity* self);
 extern void target_earthquake_think(Entity* self);
 extern void target_explosion_explode(Entity* self);
@@ -97,7 +62,6 @@ extern void Think_Delay(Entity* self);
 extern void Think_SpawnDoorTrigger(Entity* self);
 extern void train_next(Entity* self);
 extern void trigger_elevator_init(Entity* self);
-extern void walkmonster_start_go(Entity* self);
 extern void blaster_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf);
 extern void button_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf);
 extern void door_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf);
@@ -126,8 +90,6 @@ extern void func_timer_use(Entity* self, Entity* other, Entity* activator);
 extern void func_wall_use(Entity* self, Entity* other, Entity* activator);
 extern void hurt_use(Entity* self, Entity* other, Entity* activator);
 extern void light_use(Entity* self, Entity* other, Entity* activator);
-extern void monster_triggered_spawn_use(Entity* self, Entity* other, Entity* activator);
-extern void monster_use(Entity* self, Entity* other, Entity* activator);
 extern void rotating_use(Entity* self, Entity* other, Entity* activator);
 extern void target_earthquake_use(Entity* self, Entity* other, Entity* activator);
 extern void target_lightramp_use(Entity* self, Entity* other, Entity* activator);
@@ -179,48 +141,8 @@ const save_ptr_t save_ptrs[] = {
 
 { P_die, gib_die },
 { P_die, Player_Die },
-{ P_die, soldier_die },
-
-{ P_monsterinfo_attack, soldier_attack },
-
-{ P_monsterinfo_checkattack, M_CheckAttack },
-
-{ P_monsterinfo_currentmove, &soldier_move_attack1 },
-{ P_monsterinfo_currentmove, &soldier_move_attack2 },
-{ P_monsterinfo_currentmove, &soldier_move_attack3 },
-{ P_monsterinfo_currentmove, &soldier_move_attack4 },
-{ P_monsterinfo_currentmove, &soldier_move_attack6 },
-{ P_monsterinfo_currentmove, &soldier_move_death1 },
-{ P_monsterinfo_currentmove, &soldier_move_death2 },
-{ P_monsterinfo_currentmove, &soldier_move_death3 },
-{ P_monsterinfo_currentmove, &soldier_move_death4 },
-{ P_monsterinfo_currentmove, &soldier_move_death5 },
-{ P_monsterinfo_currentmove, &soldier_move_death6 },
-{ P_monsterinfo_currentmove, &soldier_move_duck },
-{ P_monsterinfo_currentmove, &soldier_move_pain1 },
-{ P_monsterinfo_currentmove, &soldier_move_pain2 },
-{ P_monsterinfo_currentmove, &soldier_move_pain3 },
-{ P_monsterinfo_currentmove, &soldier_move_pain4 },
-{ P_monsterinfo_currentmove, &soldier_move_run },
-{ P_monsterinfo_currentmove, &soldier_move_stand1 },
-{ P_monsterinfo_currentmove, &soldier_move_stand3 },
-{ P_monsterinfo_currentmove, &soldier_move_start_run },
-{ P_monsterinfo_currentmove, &soldier_move_walk1 },
-{ P_monsterinfo_currentmove, &soldier_move_walk2 },
-
-
-{ P_monsterinfo_dodge, soldier_dodge },
-
-{ P_monsterinfo_run, soldier_run },
-
-{ P_monsterinfo_sight, soldier_sight },
-
-{ P_monsterinfo_stand, soldier_stand },
-
-{ P_monsterinfo_walk, soldier_walk },
 
 { P_pain, Player_Pain },
-{ P_pain, soldier_pain },
 
 { P_think, Brush_AngleMove_Begin },
 { P_think, Brush_AngleMove_Done },
@@ -233,17 +155,13 @@ const save_ptr_t save_ptrs[] = {
 { P_think, DoRespawn },
 { P_think, drop_make_touchable },
 { P_think, droptofloor },
-{ P_think, flymonster_start_go },
 { P_think, func_object_release },
 { P_think, func_timer_think },
 { P_think, func_train_find },
 { P_think, G_FreeEntity },
 { P_think, gib_think },
 
-{ P_think, M_droptofloor },
 { P_think, MegaHealth_think },
-{ P_think, monster_think },
-{ P_think, monster_triggered_spawn },
 { P_think, Brush_Move_Begin },
 { P_think, Brush_Move_Done },
 { P_think, Brush_Move_Final },
@@ -251,7 +169,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, plat_go_down },
 { P_think, SP_CreateCoopSpots },
 { P_think, SP_FixCoopSpots },
-{ P_think, swimmonster_start_go },
 { P_think, target_crosslevel_target_think },
 { P_think, target_earthquake_think },
 { P_think, target_explosion_explode },
@@ -265,7 +182,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, Think_SpawnDoorTrigger },
 { P_think, train_next },
 { P_think, trigger_elevator_init },
-{ P_think, walkmonster_start_go },
 { P_touch, blaster_touch },
 { P_touch, button_touch },
 { P_touch, door_touch },
@@ -301,9 +217,6 @@ const save_ptr_t save_ptrs[] = {
 
 { P_use, hurt_use },
 { P_use, light_use },
-
-{ P_use, monster_triggered_spawn_use },
-{ P_use, monster_use },
 
 { P_use, rotating_use },
 

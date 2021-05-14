@@ -482,9 +482,6 @@ void G_RunFrame(void)
     level.frameNumber++;
     level.time = level.frameNumber * FRAMETIME;
 
-    // choose a client for monsters to target this frame
-    AI_SetSightClient();
-
     // exit intermissions
 
     if (level.intermission.exitIntermission) {
@@ -508,9 +505,9 @@ void G_RunFrame(void)
         // if the ground entity moved, make sure we are still on it
         if ((ent->groundEntityPtr) && (ent->groundEntityPtr->linkCount != ent->groundEntityLinkCount)) {
             ent->groundEntityPtr = NULL;
-            if (!(ent->flags & (EntityFlags::Swim | EntityFlags::Fly)) && (ent->serverFlags & EntityServerFlags::Monster)) {
-                M_CheckGround(ent);
-            }
+            //if (!(ent->flags & (EntityFlags::Swim | EntityFlags::Fly)) && (ent->serverFlags & EntityServerFlags::Monster)) {
+            //    M_CheckGround(ent);
+            //}
         }
 
         if (i > 0 && i <= maxClients->value) {

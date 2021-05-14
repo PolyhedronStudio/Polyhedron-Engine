@@ -1484,10 +1484,10 @@ void ClientBeginServerFrame(Entity *ent)
         return;
     }
 
-    // add player trail so monsters can follow
-    if (!deathmatch->value)
-        if (!visible(ent, PlayerTrail_LastSpot()))
-            PlayerTrail_Add(ent->state.oldOrigin);
+    //// add player trail so monsters can follow
+    //if (!deathmatch->value)
+    //    if (!visible(ent, PlayerTrail_LastSpot()))
+    //        PlayerTrail_Add(ent->state.oldOrigin);
 
     client->latchedButtons = 0;
 }
