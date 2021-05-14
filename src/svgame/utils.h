@@ -23,6 +23,5 @@ void    UTIL_TouchTriggers(Entity* ent);
 void    UTIL_TouchSolids(Entity* ent);
 
 float vectoyaw(const vec3_t& vec);
-void vectoangles(const vec3_t& vec, vec3_t& angles);
 
 #endif // __SVGAME_UTILS_H__

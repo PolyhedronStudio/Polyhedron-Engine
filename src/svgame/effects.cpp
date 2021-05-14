@@ -58,9 +58,9 @@ void gib_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
     if (plane) {
         gi.Sound(self, CHAN_VOICE, gi.SoundIndex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
 
-        vectoangles(plane->normal, normal_angles);
+        normal_angles = vec3_euler(plane->normal);
         AngleVectors(normal_angles, NULL, &right, NULL);
-        vectoangles(right, self->state.angles);
+        self->state.angles = vec3_euler(right);
 
         if (self->state.modelIndex == sm_meat_index) {
             self->state.frame++;

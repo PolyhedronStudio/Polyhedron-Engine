@@ -143,7 +143,7 @@ static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, i
 
     tr = gi.Trace(self->state.origin, vec3_origin, vec3_origin, start, self, CONTENTS_MASK_SHOT);
     if (!(tr.fraction < 1.0)) {
-        vectoangles(aimdir, dir);
+        dir = vec3_euler(aimdir);
         AngleVectors(dir, &forward, &right, &up);
 
         r = crandom() * hspread;
@@ -191,8 +191,7 @@ static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, i
                 }
 
                 // change bullet's course when it enters water
-                VectorSubtract(end, start, dir);
-                vectoangles(dir, dir);
+                vec3_t dir = vec3_euler(end - start);
                 AngleVectors(dir, &forward, &right, &up);
                 r = crandom() * hspread * 2;
                 u = crandom() * vspread * 2;

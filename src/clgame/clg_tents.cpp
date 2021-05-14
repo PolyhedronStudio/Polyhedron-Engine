@@ -577,7 +577,7 @@ static void CLG_AddBeams(void)
 
 		// calculate pitch and yaw
 		VectorSubtract(b->end, org, dist);
-		vectoangles2(dist, angles);
+		angles = vec3_euler(dist);
 
 		// add new entities for the beams
 		d = VectorNormalize(dist);
@@ -691,7 +691,7 @@ static void CLG_AddPlayerBeams(void)
 				VectorMA(org, -1, cl->v_up, org);
 
 			// FIXME: use cl.refdef.viewAngles?
-			vectoangles2(dist, angles);
+			angles = vec3_euler(dist);
 
 			// if it's the heatbeam, draw the particle effect
 			CLG_Heatbeam(org, dist);
@@ -703,7 +703,7 @@ static void CLG_AddPlayerBeams(void)
 
 			// calculate pitch and yaw
 			VectorSubtract(b->end, org, dist);
-			vectoangles2(dist, angles);
+			angles = vec3_euler(dist);
 
 			// if it's a non-origin offset, it's a player, so use the hardcoded player offset
 			if (!VectorCompare(b->offset, vec3_origin)) {

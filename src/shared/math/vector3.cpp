@@ -6,45 +6,6 @@
 #include "shared/shared.h"
 
 /*
-======
-vectoangles2 - this is duplicated in the game DLL, but I need it here.
-======
-*/
-void vectoangles2(const vec3_t& value1, vec3_t& angles)
-{
-    float   forward;
-    float   yaw, pitch;
-
-    if (value1.xyz[1] == 0 && value1.xyz[0] == 0) {
-        yaw = 0;
-        if (value1.xyz[2] > 0)
-            pitch = 90;
-        else
-            pitch = 270;
-    }
-    else {
-        if (value1.xyz[0])
-            yaw = std::atan2f(value1.xyz[1], value1.xyz[0]) * 180.f / M_PI;
-        else if (value1.xyz[1] > 0)
-            yaw = 90;
-        else
-            yaw = 270;
-
-        if (yaw < 0)
-            yaw += 360;
-
-        forward = std::sqrtf(value1.xyz[0] * value1.xyz[0] + value1.xyz[1] * value1.xyz[1]);
-        pitch = std::atan2f(value1.xyz[2], forward) * 180.f / M_PI;
-        if (pitch < 0)
-            pitch += 360;
-    }
-
-    angles.xyz[vec3_t::Pitch] = -pitch;
-    angles.xyz[vec3_t::Yaw] = yaw;
-    angles.xyz[vec3_t::Roll] = 0;
-}
-
-/*
 ==================
 SetupRotationMatrix
 
