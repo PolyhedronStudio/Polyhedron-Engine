@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "g_local.h"
 #include "utils.h"
 
+#include "entities/base/SVGBaseEntity.h"
+
 /*
 
 
@@ -101,9 +103,13 @@ qboolean SV_RunThink(Entity *ent)
         return true;
 
     ent->nextThink = 0;
-    if (!ent->Think)
-        gi.Error("NULL ent->Think");
-    ent->Think(ent);
+ 
+
+    if (ent->Think)
+        ent->Think(ent);
+    
+    if (ent->classEntity)
+        ent->classEntity->Think();
 
     return false;
 }
@@ -122,11 +128,18 @@ void SV_Impact(Entity *e1, trace_t *trace)
 
     e2 = trace->ent;
 
-    if (e1->Touch && e1->solid != Solid::Not)
-        e1->Touch(e1, e2, &trace->plane, trace->surface);
+    if (e1->solid != Solid::Not) {
+        //e1->Touch(e1, e2, &trace->plane, trace->surface);
+        
+        if (e1->classEntity)
+            e1->classEntity->Touch(e1->classEntity, e2->classEntity, &trace->plane, trace->surface);
+    }
 
-    if (e2->Touch && e2->solid != Solid::Not)
-        e2->Touch(e2, e1, NULL, NULL);
+    if (e2->solid != Solid::Not) {
+        //e2->Touch(e2, e1, NULL, NULL);
+        if (e2->classEntity)
+            e2->classEntity->Touch(e2->classEntity, e1->classEntity, &trace->plane, trace->surface);
+    }
 }
 
 

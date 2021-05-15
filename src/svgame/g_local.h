@@ -542,7 +542,6 @@ extern  cvar_t  *spectator_password;
 extern  cvar_t  *needpass;
 extern  cvar_t  *g_select_empty;
 extern  cvar_t  *dedicated;
-extern  cvar_t  *nomonsters;
 
 extern  cvar_t  *filterban;
 
@@ -908,7 +907,7 @@ struct gclient_s {
 //-------------------
 // Predeclarations.
 //-------------------
-class CBaseEntity;
+class SVGBaseEntity;
 
 //-------------------
 // entity_s, the server side entity structure. If you know what an entity is,
@@ -954,7 +953,7 @@ struct entity_s {
     // EXPECTS THE FIELDS IN THAT ORDER!
 
     //================================
-    CBaseEntity* classEntity;
+    SVGBaseEntity* classEntity;
 
     int moveType;
     int flags;

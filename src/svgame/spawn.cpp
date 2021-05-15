@@ -228,12 +228,25 @@ static const spawn_field_t temp_fields[] = {
     {NULL}
 };
 
+//
+// SVG_SpawnServerGameClassEntity
+//
+//
+#include "entities/base/SVGBaseEntity.h"
+#include "entities/misc/MiscExplosionBox.h"
+
+SVGBaseEntity* SVG_SpawnServerGameClassEntity(Entity* ent, const std::string& className) {
+    if (className == "misc_explobox")
+        return new MiscExplosionBox(ent);
+    else
+        return new SVGBaseEntity(ent);
+}
 
 /*
 ===============
 ED_CallSpawn
 
-Finds the spawn function for the entity and calls it
+Allocates the proper server game entity class. Then spawns the entity.
 ===============
 */
 void ED_CallSpawn(Entity *ent)
@@ -242,6 +255,11 @@ void ED_CallSpawn(Entity *ent)
     gitem_t *item;
     int     i;
 
+    // Ensure ent is valid.
+    if (!ent)
+        return;
+
+    // Ensure we have a classname.
     if (!ent->className) {
         gi.DPrintf("ED_CallSpawn: NULL className\n");
         return;
@@ -263,9 +281,14 @@ void ED_CallSpawn(Entity *ent)
         if (!strcmp(s->name, ent->className)) {
             // found it
             s->spawn(ent);
+
+            // Spawn the according server game entity class.
+            ent->classEntity = SVG_SpawnServerGameClassEntity(ent, ent->className);
+            ent->classEntity->Spawn();
             return;
         }
     }
+
     gi.DPrintf("%s doesn't have a spawn function\n", ent->className);
 }
 
@@ -369,7 +392,7 @@ void ED_ParseEntity(const char **data, Entity *ent)
     char        *key, *value;
 
     init = false;
-    memset(&st, 0, sizeof(st));
+    st = {};
 
 // go through all the dictionary pairs
     while (1) {
@@ -403,7 +426,7 @@ void ED_ParseEntity(const char **data, Entity *ent)
     }
 
     if (!init)
-        memset(ent, 0, sizeof(*ent));
+        ent = {};
 }
 
 
@@ -456,6 +479,7 @@ void G_FindTeams(void)
     gi.DPrintf("%i teams with %i entities\n", c, c2);
 }
 
+
 /*
 ==============
 SVG_SpawnEntities
@@ -472,6 +496,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     int         i;
     float       skill_level;
 
+    // Do a skill check.
     skill_level = floor(skill->value);
     if (skill_level < 0)
         skill_level = 0;
@@ -480,24 +505,24 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     if (skill->value != skill_level)
         gi.cvar_forceset("skill", va("%f", skill_level));
 
+    // Save client data.
     SVG_SaveClientData();
 
+    // Free level tag allocated data.
     gi.FreeTags(TAG_LEVEL);
 
-    memset(&level, 0, sizeof(level));
-    // WatIs: C++-ify: Note that this may be a problem maker.
-    //for (int i = 0; i < game.maxEntities; i++) {
-    //    g_entities[i] = Entity();
-    //}
+    // Clear level state.
+    level = {};
+
+    // Clear out entities.
     for (int32_t i = 0; i < game.maxEntities; i++) {
         g_entities[i] = {};
     }
-    //memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0])); // WatIs: C++-ify: Note that this may be a problem maker.
 
     strncpy(level.mapName, mapName, sizeof(level.mapName) - 1);
     strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
 
-    // set client fields on player ents
+    // Set client fields on player ents
     for (i = 0 ; i < game.maxClients ; i++)
         g_entities[i + 1].client = game.clients + i;
 
@@ -525,11 +550,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
 
         // remove things (except the world) from different skill levels or deathmatch
         if (ent != g_entities) {
-			if (nomonsters->value && (strstr(ent->className, "monster") || strstr(ent->className, "misc_deadsoldier") || strstr(ent->className, "misc_insane"))) {
-				SVG_FreeEntity(ent);
-				inhibit++;
-				continue;
-			}
+            // Do a check for deathmatch, in case the entity isn't allowed there.
             if (deathmatch->value) {
                 if (ent->spawnFlags & EntitySpawnFlags::NotDeathMatch) {
                     SVG_FreeEntity(ent);
@@ -551,7 +572,14 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
             ent->spawnFlags &= ~(EntitySpawnFlags::NotEasy | EntitySpawnFlags::NotMedium | EntitySpawnFlags::NotHard | EntitySpawnFlags::NotCoop | EntitySpawnFlags::NotDeathMatch);
         }
 
+        // Allocate the class entity, and call its spawn.
         ED_CallSpawn(ent);
+    }
+
+    // Post spawn entities.
+    for (int32_t i = 0; i < MAX_EDICTS; i++) {
+        if (g_entities[i].classEntity)
+            g_entities[i].classEntity->PostSpawn();
     }
 
     gi.DPrintf("%i entities inhibited\n", inhibit);

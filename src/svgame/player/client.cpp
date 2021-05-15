@@ -22,6 +22,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client.h"         // Include Player Client header.
 #include "hud.h"            // Include HUD header.
 
+#include "../entities/base/SVGBaseEntity.h"
+#include "../entities/base/PlayerClient.h"
+
 #include "sharedgame/sharedgame.h" // Include SG Base.
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
@@ -992,6 +995,15 @@ void SVG_ClientBegin(Entity *ent)
 
     ent->client = game.clients + (ent - g_entities - 1);
 
+    // Spawn client class entity.
+    ent->className = "PlayerClient";
+    
+    // If the client already has an entity class, ditch it.
+    if (ent->classEntity)
+        delete ent->classEntity;
+
+    ent->classEntity = new PlayerClient(ent);
+
     if (deathmatch->value) {
         SVG_ClientBeginDeathmatch(ent);
         return;
@@ -1379,9 +1391,12 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
                     break;
             if (j != i)
                 continue;   // duplicated
-            if (!other->Touch)
+            //if (!other->Touch)
+            //    continue;
+            //other->Touch(other, ent, NULL, NULL);
+            if (!other->classEntity)
                 continue;
-            other->Touch(other, ent, NULL, NULL);
+            other->classEntity->Touch(other->classEntity, ent->classEntity, NULL, NULL);
         }
 
     }

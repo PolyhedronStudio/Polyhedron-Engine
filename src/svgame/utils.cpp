@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "g_local.h"
 #include "utils.h"
-
+#include "entities/base/SVGBaseEntity.h"
 
 vec3_t SVG_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right)
 {
@@ -200,9 +200,9 @@ void UTIL_TouchTriggers(Entity *ent)
         hit = touch[i];
         if (!hit->inUse)
             continue;
-        if (!hit->Touch)
+        if (!hit->classEntity)
             continue;
-        hit->Touch(hit, ent, NULL, NULL);
+        hit->classEntity->Touch((hit->classEntity ? hit->classEntity : nullptr), (ent->classEntity ? ent->classEntity : nullptr), NULL, NULL);
     }
 }
 
@@ -228,8 +228,8 @@ void    G_TouchSolids(Entity *ent)
         hit = touch[i];
         if (!hit->inUse)
             continue;
-        if (ent->Touch)
-            ent->Touch(hit, ent, NULL, NULL);
+        if (ent->classEntity)
+            ent->classEntity->Touch((hit->classEntity ? hit->classEntity : nullptr), (ent->classEntity ? ent->classEntity : nullptr), NULL, NULL);
         if (!ent->inUse)
             break;
     }

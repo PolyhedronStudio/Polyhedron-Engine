@@ -24,6 +24,11 @@ public:
     void Think();       // General entity thinking routine.
 
     // Functions.
+    void MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+    void MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+
+    // Set when exploding, after a minor delay.
+    void MiscExplosionBoxExplode(void);
 
 private:
 

@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "g_local.h"         // Include SVGame funcs.
 #include "utils.h"           // Include Utilities funcs.
+#include "entities/base/SVGBaseEntity.h"
 
 /*
 ============
@@ -108,7 +109,13 @@ void Killed(Entity *targ, Entity *inflictor, Entity *attacker, int damage, vec3_
 
     if (targ->moveType == MoveType::Push || targ->moveType == MoveType::Stop || targ->moveType == MoveType::None) {
         // doors, triggers, etc
-        targ->Die(targ, inflictor, attacker, damage, point);
+        if (targ->classEntity) {
+            SVGBaseEntity* svgInflictor = (inflictor ? inflictor->classEntity : NULL);
+            SVGBaseEntity* svgAttacker = (attacker ? attacker->classEntity : NULL);
+
+            targ->classEntity->Die(svgInflictor, svgAttacker, damage, point);
+        }
+        //targ->Die(targ, inflictor, attacker, damage, point);
         return;
     }
 
@@ -116,8 +123,14 @@ void Killed(Entity *targ, Entity *inflictor, Entity *attacker, int damage, vec3_
     //    targ->Touch = NULL;
     //    monster_death_use(targ);
     //}
+    if (targ->classEntity) {
+        SVGBaseEntity* svgInflictor = (inflictor ? inflictor->classEntity : NULL);
+        SVGBaseEntity* svgAttacker = (attacker ? attacker->classEntity : NULL);
 
-    targ->Die(targ, inflictor, attacker, damage, point);
+        targ->classEntity->Die(svgInflictor, svgAttacker, damage, point);
+    }
+
+    //targ->Die(targ, inflictor, attacker, damage, point);
 }
 
 

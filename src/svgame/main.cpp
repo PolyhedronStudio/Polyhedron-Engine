@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "g_local.h"          // Include SVGame header.
+#include "entities/base/SVGBaseEntity.h"
 #include "player/client.h"    // Include Player Client header.
 
 //-----------------
@@ -51,7 +52,6 @@ cvar_t  *maxspectators;
 cvar_t  *maxEntities;
 cvar_t  *g_select_empty;
 cvar_t  *dedicated;
-cvar_t  *nomonsters;
 
 cvar_t  *filterban;
 
@@ -136,8 +136,6 @@ void SVG_InitGame(void)
 
     // noset vars
     dedicated = gi.cvar("dedicated", "0", CVAR_NOSET);
-
-	nomonsters = gi.cvar("nomonsters", "0", 0);
 
     // latched vars
     sv_cheats = gi.cvar("cheats", "0", CVAR_SERVERINFO | CVAR_LATCH);
@@ -695,6 +693,10 @@ void SVG_FreeEntity(Entity* ed)
         //      gi.DPrintf("tried to free special edict\n");
         return;
     }
+
+    // Delete the actual entity pointer.
+    if (ed->classEntity)
+        delete ed->classEntity;
 
     // C++-ify, reset the struct itself.
     memset(ed, 0, sizeof(*ed));
