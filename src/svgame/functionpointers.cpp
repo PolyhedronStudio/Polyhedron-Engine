@@ -140,9 +140,9 @@ const save_ptr_t save_ptrs[] = {
 { P_die, func_explosive_explode },
 
 { P_die, gib_die },
-{ P_die, Player_Die },
+{ P_die, SVG_Player_Die },
 
-{ P_pain, Player_Pain },
+{ P_pain, SVG_Player_Pain },
 
 { P_think, Brush_AngleMove_Begin },
 { P_think, Brush_AngleMove_Done },
@@ -158,7 +158,7 @@ const save_ptr_t save_ptrs[] = {
 { P_think, func_object_release },
 { P_think, func_timer_think },
 { P_think, func_train_find },
-{ P_think, G_FreeEntity },
+{ P_think, SVG_FreeEntity },
 { P_think, gib_think },
 
 { P_think, MegaHealth_think },
@@ -196,7 +196,7 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, teleporter_touch },
 
 { P_touch, Touch_DoorTrigger },
-{ P_touch, Touch_Item },
+{ P_touch, SVG_TouchItem },
 { P_touch, Touch_Multi },
 { P_touch, Touch_Plat_Center },
 

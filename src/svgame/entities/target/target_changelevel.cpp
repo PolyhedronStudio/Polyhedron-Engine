@@ -26,8 +26,8 @@ void use_target_changelevel(Entity* self, Entity* other, Entity* activator)
     }
 
     // if noexit, do a ton of damage to other
-    if (deathmatch->value && !((int)dmflags->value & DeathMatchFlags::AllowExit) && other != G_GetWorldEntity()) {
-        T_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 10 * other->maxHealth, 1000, 0, MeansOfDeath::Exit);
+    if (deathmatch->value && !((int)dmflags->value & DeathMatchFlags::AllowExit) && other != SVG_GetWorldEntity()) {
+        SVG_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 10 * other->maxHealth, 1000, 0, MeansOfDeath::Exit);
         return;
     }
 
@@ -41,14 +41,14 @@ void use_target_changelevel(Entity* self, Entity* other, Entity* activator)
     if (strstr(self->map, "*"))
         game.serverflags &= ~(SFL_CROSS_TRIGGER_MASK);
 
-    HUD_BeginIntermission(self);
+    SVG_HUD_BeginIntermission(self);
 }
 
 void SP_target_changelevel(Entity* ent)
 {
     if (!ent->map) {
         gi.DPrintf("target_changelevel with no map at %s\n", Vec3ToString(ent->state.origin));
-        G_FreeEntity(ent);
+        SVG_FreeEntity(ent);
         return;
     }
 

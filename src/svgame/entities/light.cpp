@@ -37,7 +37,7 @@ void SP_light(Entity* self)
 {
     // no targeted lights in deathmatch, because they cause global messages
     if (!self->targetName || deathmatch->value) {
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 

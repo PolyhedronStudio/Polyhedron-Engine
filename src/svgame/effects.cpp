@@ -41,7 +41,7 @@ void gib_think(Entity *self)
     self->nextThink = level.time + FRAMETIME;
 
     if (self->state.frame == 10) {
-        self->Think = G_FreeEntity;
+        self->Think = SVG_FreeEntity;
         self->nextThink = level.time + 8 + random() * 10;
     }
 }
@@ -72,7 +72,7 @@ void gib_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
 
 void gib_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point)
 {
-    G_FreeEntity(self);
+    SVG_FreeEntity(self);
 }
 
 void ThrowGib(Entity *self, const char *gibname, int damage, int type)
@@ -83,7 +83,7 @@ void ThrowGib(Entity *self, const char *gibname, int damage, int type)
     vec3_t  size;
     float   vscale;
 
-    gib = G_Spawn();
+    gib = SVG_Spawn();
 
     VectorScale(self->size, 0.5, size);
     VectorAdd(self->absMin, size, origin);
@@ -108,14 +108,14 @@ void ThrowGib(Entity *self, const char *gibname, int damage, int type)
     }
 
     // Calculate velocity for given damage.
-    vd = VelocityForDamage(damage);
+    vd = SVG_VelocityForDamage(damage);
     VectorMA(self->velocity, vscale, vd, gib->velocity);
     ClipGibVelocity(gib);
     gib->angularVelocity[0] = random() * 600;
     gib->angularVelocity[1] = random() * 600;
     gib->angularVelocity[2] = random() * 600;
 
-    gib->Think = G_FreeEntity;
+    gib->Think = SVG_FreeEntity;
     gib->nextThink = level.time + 10 + random() * 10;
 
     gi.LinkEntity(gib);
@@ -151,13 +151,13 @@ void ThrowHead(Entity *self, const char *gibname, int damage, int type)
     }
 
     // Calculate velocity for given damage.
-    vd = VelocityForDamage(damage);
+    vd = SVG_VelocityForDamage(damage);
     VectorMA(self->velocity, vscale, vd, self->velocity);
     ClipGibVelocity(self);
 
     self->angularVelocity[vec3_t::Yaw] = crandom() * 600;
 
-    self->Think = G_FreeEntity;
+    self->Think = SVG_FreeEntity;
     self->nextThink = level.time + 10 + random() * 10;
 
     gi.LinkEntity(self);
@@ -191,7 +191,7 @@ void ThrowClientHead(Entity *self, int damage)
 
     self->moveType = MoveType::Bounce;
     // Calculate velocity for given damage.
-    vd = VelocityForDamage(damage);
+    vd = SVG_VelocityForDamage(damage);
     VectorAdd(self->velocity, vd, self->velocity);
 
     if (self->client) { // bodies in the queue don't have a client anymore
@@ -213,15 +213,15 @@ void ThrowClientHead(Entity *self, int damage)
 //
 void debris_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point)
 {
-    G_FreeEntity(self);
+    SVG_FreeEntity(self);
 }
 
-void ThrowDebris(Entity *self, const char *modelname, float speed, const vec3_t &origin) // C++20: STRING: Added const to char*
+void SVG_ThrowDebris(Entity *self, const char *modelname, float speed, const vec3_t &origin) // C++20: STRING: Added const to char*
 {
     Entity *chunk;
     vec3_t  v;
 
-    chunk = G_Spawn();
+    chunk = SVG_Spawn();
     VectorCopy(origin, chunk->state.origin);
     gi.SetModel(chunk, modelname);
     v[0] = 100 * crandom();
@@ -233,7 +233,7 @@ void ThrowDebris(Entity *self, const char *modelname, float speed, const vec3_t 
     chunk->angularVelocity[0] = random() * 600;
     chunk->angularVelocity[1] = random() * 600;
     chunk->angularVelocity[2] = random() * 600;
-    chunk->Think = G_FreeEntity;
+    chunk->Think = SVG_FreeEntity;
     chunk->nextThink = level.time + 5 + random() * 5;
     chunk->state.frame = 0;
     chunk->flags = 0;
@@ -251,7 +251,7 @@ void BecomeExplosion1(Entity *self)
     gi.WritePosition(self->state.origin);
     gi.Multicast(&self->state.origin, MultiCast::PVS);
 
-    G_FreeEntity(self);
+    SVG_FreeEntity(self);
 }
 
 
@@ -262,5 +262,5 @@ void BecomeExplosion2(Entity *self)
     gi.WritePosition(self->state.origin);
     gi.Multicast(&self->state.origin, MultiCast::PVS);
 
-    G_FreeEntity(self);
+    SVG_FreeEntity(self);
 }

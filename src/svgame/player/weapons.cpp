@@ -27,7 +27,7 @@ byte     is_silenced;
 
 /*
 ===============
-PlayerNoise
+SVG_PlayerNoise
 
 Each player can have two noise objects associated with it:
 a personal noise (jumping, pain, weapon firing), and a weapon
@@ -37,7 +37,7 @@ Monsters that don't directly see the player can move
 to a noise in hopes of seeing the player from there.
 ===============
 */
-void PlayerNoise(Entity *who, vec3_t where, int type)
+void SVG_PlayerNoise(Entity *who, vec3_t where, int type)
 {
     Entity     *noise;
 
@@ -49,7 +49,7 @@ void PlayerNoise(Entity *who, vec3_t where, int type)
 
 
     if (!who->myNoisePtr) {
-        noise = G_Spawn();
+        noise = SVG_Spawn();
         noise->className = "player_noise";
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
@@ -57,7 +57,7 @@ void PlayerNoise(Entity *who, vec3_t where, int type)
         noise->serverFlags = EntityServerFlags::NoClient;
         who->myNoisePtr = noise;
 
-        noise = G_Spawn();
+        noise = SVG_Spawn();
         noise->className = "player_noise";
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
@@ -101,18 +101,18 @@ qboolean Pickup_Weapon(Entity *ent, Entity *other)
 
     if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem)) {
         // give them some ammo with it
-        ammo = FindItem(ent->item->ammo);
+        ammo = SVG_FindItemByPickupName(ent->item->ammo);
         if ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo)
-            Add_Ammo(other, ammo, 1000);
+            SVG_AddAmmo(other, ammo, 1000);
         else
-            Add_Ammo(other, ammo, ammo->quantity);
+            SVG_AddAmmo(other, ammo, ammo->quantity);
 
         if (!(ent->spawnFlags & ItemSpawnFlags::DroppedPlayerItem)) {
             if (deathmatch->value) {
                 if ((int)(dmflags->value) & DeathMatchFlags::WeaponsStay)
                     ent->flags |= EntityFlags::Respawn;
                 else
-                    SetRespawn(ent, 30);
+                    SVG_SetRespawn(ent, 30);
             }
             if (coop->value)
                 ent->flags |= EntityFlags::Respawn;
@@ -121,7 +121,7 @@ qboolean Pickup_Weapon(Entity *ent, Entity *other)
 
     if (other->client->persistent.activeWeapon != ent->item &&
         (other->client->persistent.inventory[index] == 1) &&
-        (!deathmatch->value || other->client->persistent.activeWeapon == FindItem("blaster")))
+        (!deathmatch->value || other->client->persistent.activeWeapon == SVG_FindItemByPickupName("blaster")))
         other->client->newWeapon = ent->item;
 
     return true;
@@ -130,13 +130,13 @@ qboolean Pickup_Weapon(Entity *ent, Entity *other)
 
 /*
 ===============
-ChangeWeapon
+SVG_ChangeWeapon
 
 The old weapon has been dropped all the way, so make the new one
 current
 ===============
 */
-void ChangeWeapon(Entity *ent)
+void SVG_ChangeWeapon(Entity *ent)
 {
     int i;
 
@@ -155,7 +155,7 @@ void ChangeWeapon(Entity *ent)
     }
 
     if (ent->client->persistent.activeWeapon && ent->client->persistent.activeWeapon->ammo)
-        ent->client->ammoIndex = ITEM_INDEX(FindItem(ent->client->persistent.activeWeapon->ammo));
+        ent->client->ammoIndex = ITEM_INDEX(SVG_FindItemByPickupName(ent->client->persistent.activeWeapon->ammo));
     else
         ent->client->ammoIndex = 0;
 
@@ -187,27 +187,27 @@ NoAmmoWeaponChange
 */
 void NoAmmoWeaponChange(Entity *ent)
 {
-    if (ent->client->persistent.inventory[ITEM_INDEX(FindItem("bullets"))]
-        &&  ent->client->persistent.inventory[ITEM_INDEX(FindItem("machinegun"))]) {
-        ent->client->newWeapon = FindItem("machinegun");
+    if (ent->client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("bullets"))]
+        &&  ent->client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("machinegun"))]) {
+        ent->client->newWeapon = SVG_FindItemByPickupName("machinegun");
         return;
     }
-    ent->client->newWeapon = FindItem("blaster");
+    ent->client->newWeapon = SVG_FindItemByPickupName("blaster");
 }
 
 /*
 =================
-Think_Weapon
+SVG_ThinkWeapon
 
 Called by ClientBeginServerFrame and ClientThink
 =================
 */
-void Think_Weapon(Entity *ent)
+void SVG_ThinkWeapon(Entity *ent)
 {
     // if just died, put the weapon away
     if (ent->health < 1) {
         ent->client->newWeapon = NULL;
-        ChangeWeapon(ent);
+        SVG_ChangeWeapon(ent);
     }
 
     // call active weapon Think routine
@@ -234,7 +234,7 @@ void Use_Weapon(Entity *ent, gitem_t *item)
         return;
 
     if (item->ammo && !g_select_empty->value && !(item->flags & ItemFlags::IsAmmo)) {
-        ammo_item = FindItem(item->ammo);
+        ammo_item = SVG_FindItemByPickupName(item->ammo);
         ammoIndex = ITEM_INDEX(ammo_item);
 
         if (!ent->client->persistent.inventory[ammoIndex]) {
@@ -273,7 +273,7 @@ void Drop_Weapon(Entity *ent, gitem_t *item)
         return;
     }
 
-    Drop_Item(ent, item);
+    SVG_DropItem(ent, item);
     ent->client->persistent.inventory[index]--;
 }
 
@@ -299,7 +299,7 @@ void Weapon_Generic(Entity *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, i
 
     if (ent->client->weaponState == WeaponState::Dropping) {
         if (ent->client->playerState.gunFrame == FRAME_DEACTIVATE_LAST) {
-            ChangeWeapon(ent);
+            SVG_ChangeWeapon(ent);
             return;
         } else if ((FRAME_DEACTIVATE_LAST - ent->client->playerState.gunFrame) == 4) {
             ent->client->animation.priorityAnimation = PlayerAnimation::Reverse;

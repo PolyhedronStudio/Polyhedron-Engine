@@ -19,13 +19,13 @@ void teleporter_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* 
 
     if (!other->client)
         return;
-    dest = G_Find(NULL, FOFS(targetName), self->target);
+    dest = SVG_Find(NULL, FOFS(targetName), self->target);
     if (!dest) {
         gi.DPrintf("Couldn't find destination\n");
         return;
     }
 
-    // unlink to make sure it can't possibly interfere with KillBox
+    // unlink to make sure it can't possibly interfere with SVG_KillBox
     gi.UnlinkEntity(other);
 
     VectorCopy(dest->state.origin, other->state.origin);
@@ -51,7 +51,7 @@ void teleporter_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* 
     VectorClear(other->client->aimAngles);
 
     // kill anything at the destination
-    KillBox(other);
+    SVG_KillBox(other);
 
     gi.LinkEntity(other);
 }
@@ -65,7 +65,7 @@ void SP_misc_teleporter(Entity* ent)
 
     if (!ent->target) {
         gi.DPrintf("teleporter without a target.\n");
-        G_FreeEntity(ent);
+        SVG_FreeEntity(ent);
         return;
     }
 
@@ -79,7 +79,7 @@ void SP_misc_teleporter(Entity* ent)
     VectorSet(ent->maxs, 32, 32, -16);
     gi.LinkEntity(ent);
 
-    trig = G_Spawn();
+    trig = SVG_Spawn();
     trig->Touch = teleporter_touch;
     trig->solid = Solid::Trigger;
     trig->target = ent->target;

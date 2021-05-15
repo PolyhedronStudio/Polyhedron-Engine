@@ -16,5 +16,5 @@ Used as a positional target for spotlights, etc.
 */
 void SP_info_null(Entity* self)
 {
-    G_FreeEntity(self);
+    SVG_FreeEntity(self);
 }

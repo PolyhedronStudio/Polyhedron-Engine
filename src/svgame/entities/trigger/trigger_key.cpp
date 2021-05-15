@@ -85,7 +85,7 @@ void SP_trigger_key(Entity* self)
         gi.DPrintf("no key item for trigger_key at %s\n", Vec3ToString(self->state.origin));
         return;
     }
-    self->item = FindItemByClassname(st.item);
+    self->item = SVG_FindItemByClassname(st.item);
 
     if (!self->item) {
         gi.DPrintf("item %s not found for trigger_key at %s\n", st.item, Vec3ToString(self->state.origin));

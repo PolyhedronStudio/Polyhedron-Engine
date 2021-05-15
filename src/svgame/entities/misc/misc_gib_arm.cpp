@@ -30,7 +30,7 @@ void SP_misc_gib_arm(Entity* ent)
     ent->angularVelocity[0] = random() * 200;
     ent->angularVelocity[1] = random() * 200;
     ent->angularVelocity[2] = random() * 200;
-    ent->Think = G_FreeEntity;
+    ent->Think = SVG_FreeEntity;
     ent->nextThink = level.time + 30;
     gi.LinkEntity(ent);
 }

@@ -28,7 +28,7 @@ void SP_trigger_gravity(Entity* self)
 {
     if (st.gravity == 0) {
         gi.DPrintf("trigger_gravity without gravity set at %s\n", Vec3ToString(self->state.origin));
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 

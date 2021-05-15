@@ -253,7 +253,7 @@ void ED_CallSpawn(Entity *ent)
             continue;
         if (!strcmp(item->className, ent->className)) {
             // found it
-            SpawnItem(ent, item);
+            SVG_SpawnItem(ent, item);
             return;
         }
     }
@@ -458,13 +458,13 @@ void G_FindTeams(void)
 
 /*
 ==============
-SpawnEntities
+SVG_SpawnEntities
 
 Creates a server's entity / program execution context by
 parsing textual entity definitions out of an ent file.
 ==============
 */
-void SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint)
+void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint)
 {
     Entity     *ent;
     int         inhibit;
@@ -480,7 +480,7 @@ void SpawnEntities(const char *mapName, const char *entities, const char *spawnp
     if (skill->value != skill_level)
         gi.cvar_forceset("skill", va("%f", skill_level));
 
-    SaveClientData();
+    SVG_SaveClientData();
 
     gi.FreeTags(TAG_LEVEL);
 
@@ -513,7 +513,7 @@ void SpawnEntities(const char *mapName, const char *entities, const char *spawnp
         if (!ent)
             ent = g_entities;
         else
-            ent = G_Spawn();
+            ent = SVG_Spawn();
         ED_ParseEntity(&entities, ent);
 
         // yet another map hack
@@ -523,13 +523,13 @@ void SpawnEntities(const char *mapName, const char *entities, const char *spawnp
         // remove things (except the world) from different skill levels or deathmatch
         if (ent != g_entities) {
 			if (nomonsters->value && (strstr(ent->className, "monster") || strstr(ent->className, "misc_deadsoldier") || strstr(ent->className, "misc_insane"))) {
-				G_FreeEntity(ent);
+				SVG_FreeEntity(ent);
 				inhibit++;
 				continue;
 			}
             if (deathmatch->value) {
                 if (ent->spawnFlags & EntitySpawnFlags::NotDeathMatch) {
-                    G_FreeEntity(ent);
+                    SVG_FreeEntity(ent);
                     inhibit++;
                     continue;
                 }
@@ -539,7 +539,7 @@ void SpawnEntities(const char *mapName, const char *entities, const char *spawnp
                     ((skill->value == 1) && (ent->spawnFlags & EntitySpawnFlags::NotMedium)) ||
                     (((skill->value == 2) || (skill->value == 3)) && (ent->spawnFlags & EntitySpawnFlags::NotHard))
                 ) {
-                    G_FreeEntity(ent);
+                    SVG_FreeEntity(ent);
                     inhibit++;
                     continue;
                 }
@@ -565,7 +565,7 @@ void SpawnEntities(const char *mapName, const char *entities, const char *spawnp
 
     G_FindTeams();
 
-    PlayerTrail_Init();
+    SVG_PlayerTrail_Init();
 }
 
 
@@ -746,7 +746,7 @@ void SP_worldspawn(Entity *ent)
 {
     ent->moveType = MoveType::Push;
     ent->solid = Solid::BSP;
-    ent->inUse = true;          // since the world doesn't use G_Spawn()
+    ent->inUse = true;          // since the world doesn't use SVG_Spawn()
     ent->state.modelIndex = 1;      // world model is always index 1
 
     //---------------
@@ -754,12 +754,12 @@ void SP_worldspawn(Entity *ent)
     // reserve some spots for dead player bodies for coop / deathmatch
     level.bodyQue = 0;
     for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
-        Entity* ent = G_Spawn();
+        Entity* ent = SVG_Spawn();
         ent->className = "bodyque";
     }
 
     // set configstrings for items
-    SetItemNames();
+    SVG_SetItemNames();
 
     if (st.nextMap)
         strcpy(level.nextMap, st.nextMap);
@@ -808,7 +808,7 @@ void SP_worldspawn(Entity *ent)
 
     snd_fry = gi.SoundIndex("player/fry.wav");  // standing in lava / slime
 
-    PrecacheItem(FindItem("Blaster"));
+    SVG_PrecacheItem(SVG_FindItemByPickupName("Blaster"));
 
     gi.SoundIndex("player/lava1.wav");
     gi.SoundIndex("player/lava2.wav");

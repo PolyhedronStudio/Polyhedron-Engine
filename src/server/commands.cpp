@@ -953,12 +953,12 @@ static void SV_KillServer_f(void)
 
 /*
 ===============
-SV_ServerCommand_f
+SV_SVG_ServerCommand_f
 
 Let the game dll handle a command
 ===============
 */
-static void SV_ServerCommand_f(void)
+static void SV_SVG_ServerCommand_f(void)
 {
     if (!ge) {
         Com_Printf("No game loaded.\n");
@@ -1487,7 +1487,7 @@ static const cmdreg_t c_server[] = {
     { "setmaster", SV_SetMaster_f },
     { "listmasters", SV_ListMasters_f },
     { "killserver", SV_KillServer_f },
-    { "sv", SV_ServerCommand_f },
+    { "sv", SV_SVG_ServerCommand_f },
     { "pickclient", SV_PickClient_f },
     { "addban", SV_AddBan_f },
     { "delban", SV_DelBan_f },

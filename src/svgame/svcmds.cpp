@@ -110,10 +110,10 @@ static qboolean StringToFilter(const char *s, ipfilter_t *f) // C++20: STRING: A
 
 /*
 =================
-SV_FilterPacket
+SVG_FilterPacket
 =================
 */
-qboolean SV_FilterPacket(char *from)
+qboolean SVG_FilterPacket(char *from)
 {
     int     i;
     unsigned    in;
@@ -265,14 +265,14 @@ void SVCmd_WriteIP_f(void)
 
 /*
 =================
-ServerCommand
+SVG_ServerCommand
 
-ServerCommand will be called when an "sv" command is issued.
+SVG_ServerCommand will be called when an "sv" command is issued.
 The game can issue gi.argc() / gi.argv() commands to get the rest
 of the parameters
 =================
 */
-void    ServerCommand(void)
+void    SVG_ServerCommand(void)
 {
     const char    *cmd; // C++20: Added const to char*
 

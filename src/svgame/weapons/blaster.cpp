@@ -36,12 +36,12 @@ void Blaster_Fire(Entity* ent, const vec3_t &g_offset, int damage, qboolean hype
     AngleVectors(ent->client->aimAngles, &forward, &right, NULL);
     VectorSet(offset, 24, 8, ent->viewHeight - 8);
     VectorAdd(offset, g_offset, offset);
-    start = P_ProjectSource(ent->client, ent->state.origin, offset, forward, right);
+    start = SVG_PlayerProjectSource(ent->client, ent->state.origin, offset, forward, right);
 
     VectorScale(forward, -2, ent->client->kickOrigin);
     ent->client->kickAngles[0] = -1;
 
-    fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
+    SVG_FireBlaster(ent, start, forward, damage, 1000, effect, hyper);
 
     // send muzzle flash
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
@@ -49,7 +49,7 @@ void Blaster_Fire(Entity* ent, const vec3_t &g_offset, int damage, qboolean hype
     gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
     gi.Multicast(&ent->state.origin, MultiCast::PVS);
 
-    PlayerNoise(ent, start, PNOISE_WEAPON);
+    SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 }
 
 

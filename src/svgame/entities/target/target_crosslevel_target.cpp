@@ -21,7 +21,7 @@ void target_crosslevel_target_think(Entity* self)
 {
     if (self->spawnFlags == (game.serverflags & SFL_CROSS_TRIGGER_MASK & self->spawnFlags)) {
         UTIL_UseTargets(self, self);
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
     }
 }
 

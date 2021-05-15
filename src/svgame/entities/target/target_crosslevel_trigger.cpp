@@ -17,7 +17,7 @@ Once this trigger is touched/used, any trigger_crosslevel_target with the same t
 void trigger_crosslevel_trigger_use(Entity* self, Entity* other, Entity* activator)
 {
     game.serverflags |= self->spawnFlags;
-    G_FreeEntity(self);
+    SVG_FreeEntity(self);
 }
 
 void SP_target_crosslevel_trigger(Entity* self)

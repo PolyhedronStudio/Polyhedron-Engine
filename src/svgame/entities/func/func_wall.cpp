@@ -30,7 +30,7 @@ void func_wall_use(Entity* self, Entity* other, Entity* activator)
     if (self->solid == Solid::Not) {
         self->solid = Solid::BSP;
         self->serverFlags &= ~EntityServerFlags::NoClient;
-        KillBox(self);
+        SVG_KillBox(self);
     }
     else {
         self->solid = Solid::Not;

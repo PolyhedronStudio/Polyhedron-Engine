@@ -887,11 +887,11 @@ void SV_Physics_Step(Entity *ent)
 //============================================================================
 /*
 ================
-G_RunEntity
+SVG_RunEntity
 
 ================
 */
-void G_RunEntity(Entity *ent)
+void SVG_RunEntity(Entity *ent)
 {
     if (ent->PreThink)
         ent->PreThink(ent);

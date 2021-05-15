@@ -30,13 +30,13 @@ void use_target_spawner(Entity* self, Entity* other, Entity* activator)
 {
     Entity* ent;
 
-    ent = G_Spawn();
+    ent = SVG_Spawn();
     ent->className = self->target;
     VectorCopy(self->state.origin, ent->state.origin);
     VectorCopy(self->state.angles, ent->state.angles);
     ED_CallSpawn(ent);
     gi.UnlinkEntity(ent);
-    KillBox(ent);
+    SVG_KillBox(ent);
     gi.LinkEntity(ent);
     if (self->speed)
         VectorCopy(self->moveDirection, ent->velocity);

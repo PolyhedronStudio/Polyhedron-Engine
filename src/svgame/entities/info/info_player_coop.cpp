@@ -20,7 +20,7 @@ potential spawning position for coop games
 void SP_info_player_coop(Entity* self)
 {
     if (!coop->value) {
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 

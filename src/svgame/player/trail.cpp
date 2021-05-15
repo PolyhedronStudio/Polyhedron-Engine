@@ -45,7 +45,7 @@ qboolean    trail_active = false;
 #define PREV(n)     (((n) - 1) & (TRAIL_LENGTH - 1))
 
 
-void PlayerTrail_Init(void)
+void SVG_PlayerTrail_Init(void)
 {
     int     n;
 
@@ -53,7 +53,7 @@ void PlayerTrail_Init(void)
         return;
 
     for (n = 0; n < TRAIL_LENGTH; n++) {
-        trail[n] = G_Spawn();
+        trail[n] = SVG_Spawn();
         trail[n]->className = "player_trail";
     }
 
@@ -62,7 +62,7 @@ void PlayerTrail_Init(void)
 }
 
 
-void PlayerTrail_Add(vec3_t spot)
+void SVG_PlayerTrail_Add(vec3_t spot)
 {
     vec3_t  temp;
 
@@ -74,23 +74,23 @@ void PlayerTrail_Add(vec3_t spot)
     trail[trail_head]->timeStamp = level.time;
 
     VectorSubtract(spot, trail[PREV(trail_head)]->state.origin, temp);
-    trail[trail_head]->state.angles[1] = vectoyaw(temp);
+    trail[trail_head]->state.angles[1] = 0.f;// TODO: Fix? vectoyaw(temp);
 
     trail_head = NEXT(trail_head);
 }
 
 
-void PlayerTrail_New(vec3_t spot)
+void SVG_PlayerTrail_New(vec3_t spot)
 {
     if (!trail_active)
         return;
 
-    PlayerTrail_Init();
-    PlayerTrail_Add(spot);
+    SVG_PlayerTrail_Init();
+    SVG_PlayerTrail_Add(spot);
 }
 
 
-Entity *PlayerTrail_PickFirst(Entity *self)
+Entity *SVG_PlayerTrail_PickFirst(Entity *self)
 {
     int     marker;
     int     n;
@@ -116,7 +116,7 @@ Entity *PlayerTrail_PickFirst(Entity *self)
     return trail[marker];
 }
 
-Entity *PlayerTrail_PickNext(Entity *self)
+Entity *SVG_PlayerTrail_PickNext(Entity *self)
 {
     int     marker;
     int     n;
@@ -134,7 +134,7 @@ Entity *PlayerTrail_PickNext(Entity *self)
     return trail[marker];
 }
 
-Entity *PlayerTrail_LastSpot(void)
+Entity *SVG_PlayerTrail_LastSpot(void)
 {
     return trail[PREV(trail_head)];
 }

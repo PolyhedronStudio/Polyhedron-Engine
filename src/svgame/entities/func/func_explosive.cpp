@@ -42,7 +42,7 @@ void func_explosive_explode(Entity* self, Entity* inflictor, Entity* attacker, i
     self->takeDamage = TakeDamage::No;
 
     if (self->damage)
-        T_RadiusDamage(self, attacker, self->damage, NULL, self->damage + 40, MeansOfDeath::Explosive);
+        SVG_RadiusDamage(self, attacker, self->damage, NULL, self->damage + 40, MeansOfDeath::Explosive);
 
     VectorSubtract(self->state.origin, inflictor->state.origin, self->velocity);
     VectorNormalize(self->velocity);
@@ -64,7 +64,7 @@ void func_explosive_explode(Entity* self, Entity* inflictor, Entity* attacker, i
             chunkorigin[0] = origin[0] + crandom() * size[0];
             chunkorigin[1] = origin[1] + crandom() * size[1];
             chunkorigin[2] = origin[2] + crandom() * size[2];
-            ThrowDebris(self, "models/objects/debris1/tris.md2", 1, chunkorigin);
+            SVG_ThrowDebris(self, "models/objects/debris1/tris.md2", 1, chunkorigin);
         }
     }
 
@@ -76,7 +76,7 @@ void func_explosive_explode(Entity* self, Entity* inflictor, Entity* attacker, i
         chunkorigin[0] = origin[0] + crandom() * size[0];
         chunkorigin[1] = origin[1] + crandom() * size[1];
         chunkorigin[2] = origin[2] + crandom() * size[2];
-        ThrowDebris(self, "models/objects/debris2/tris.md2", 2, chunkorigin);
+        SVG_ThrowDebris(self, "models/objects/debris2/tris.md2", 2, chunkorigin);
     }
 
     UTIL_UseTargets(self, attacker);
@@ -84,7 +84,7 @@ void func_explosive_explode(Entity* self, Entity* inflictor, Entity* attacker, i
     if (self->damage)
         BecomeExplosion1(self);
     else
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
 }
 
 void func_explosive_use(Entity* self, Entity* other, Entity* activator)
@@ -97,7 +97,7 @@ void func_explosive_spawn(Entity* self, Entity* other, Entity* activator)
     self->solid = Solid::BSP;
     self->serverFlags &= ~EntityServerFlags::NoClient;
     self->Use = NULL;
-    KillBox(self);
+    SVG_KillBox(self);
     gi.LinkEntity(self);
 }
 
@@ -105,7 +105,7 @@ void SP_func_explosive(Entity* self)
 {
     if (deathmatch->value) {
         // auto-remove for deathmatch
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 

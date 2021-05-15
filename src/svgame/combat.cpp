@@ -22,13 +22,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /*
 ============
-CanDamage
+SVG_CanDamage
 
 Returns true if the inflictor can directly damage the target.  Used for
 explosions and melee attacks.
 ============
 */
-qboolean CanDamage(Entity *targ, Entity *inflictor)
+qboolean SVG_CanDamage(Entity *targ, Entity *inflictor)
 {
     vec3_t  dest;
     trace_t trace;
@@ -141,7 +141,7 @@ void SpawnDamage(int type, const vec3_t &origin, const vec3_t &normal, int damag
 
 /*
 ============
-T_Damage
+SVG_Damage
 
 targ        entity that is being damaged
 inflictor   entity that is causing the damage
@@ -154,7 +154,7 @@ normal      normal vector from that point
 damage      amount of damage being inflicted
 knockback   force to be applied against targ as a result of the damage
 
-dflags      these flags are used to control how T_Damage works
+dflags      these flags are used to control how SVG_Damage works
     DamageFlags::IndirectFromRadius           damage was indirect (from a nearby explosion)
     DamageFlags::NoArmorProtection         armor does not protect from this damage
     DamageFlags::EnergyBasedWeapon           damage is from an energy based weapon
@@ -231,11 +231,11 @@ static int CheckArmor(Entity *ent, vec3_t point, vec3_t normal, int damage, int 
     if (dflags & DamageFlags::NoArmorProtection)
         return 0;
 
-    index = ArmorIndex(ent);
+    index = SVG_ArmorIndex(ent);
     if (!index)
         return 0;
 
-    armor = GetItemByIndex(index);
+    armor = SVG_GetItemByIndex(index);
 
     if (dflags & DamageFlags::EnergyBasedWeapon)
         save = ceil(((gitem_armor_t *)armor->info)->energyProtection * damage);
@@ -260,7 +260,7 @@ qboolean CheckTeamDamage(Entity *targ, Entity *attacker)
     return false;
 }
 
-void T_Damage(Entity *targ, Entity *inflictor, Entity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockback, int dflags, int mod)
+void SVG_Damage(Entity *targ, Entity *inflictor, Entity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockback, int dflags, int mod)
 {
     GameClient   *client;
     int         take;
@@ -281,7 +281,7 @@ void T_Damage(Entity *targ, Entity *inflictor, Entity *attacker, const vec3_t &d
     // if enabled you can't hurt teammates (but you can hurt yourself)
     // knockback still occurs
     if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (DeathMatchFlags::ModelTeams | DeathMatchFlags::SkinTeams))) || coop->value)) {
-        if (OnSameTeam(targ, attacker)) {
+        if (SVG_OnSameTeam(targ, attacker)) {
             if ((int)(dmflags->value) & DeathMatchFlags::NoFriendlyFire)
                 damage = 0;
             else
@@ -412,10 +412,10 @@ void T_Damage(Entity *targ, Entity *inflictor, Entity *attacker, const vec3_t &d
 
 /*
 ============
-T_RadiusDamage
+SVG_RadiusDamage
 ============
 */
-void T_RadiusDamage(Entity *inflictor, Entity *attacker, float damage, Entity *ignore, float radius, int mod)
+void SVG_RadiusDamage(Entity *inflictor, Entity *attacker, float damage, Entity *ignore, float radius, int mod)
 {
     float   points;
     Entity *ent = NULL;
@@ -429,7 +429,7 @@ void T_RadiusDamage(Entity *inflictor, Entity *attacker, float damage, Entity *i
     }
 
     // Find entities within radius.
-    while ((ent = G_FindEntitiesWithinRadius(ent, inflictor->state.origin, radius)) != NULL) {
+    while ((ent = SVG_FindEntitiesWithinRadius(ent, inflictor->state.origin, radius)) != NULL) {
         // Continue in case this entity has to be ignored from applying damage.
         if (ent == ignore)
             continue;
@@ -450,12 +450,12 @@ void T_RadiusDamage(Entity *inflictor, Entity *attacker, float damage, Entity *i
         // Apply damage points.
         if (points > 0) {
             // Ensure whether we CAN actually apply damage.
-            if (CanDamage(ent, inflictor)) {
+            if (SVG_CanDamage(ent, inflictor)) {
                 // Calculate direcion.
                 dir = ent->state.origin - inflictor->state.origin;
 
                 // Apply damages.
-                T_Damage(ent, inflictor, attacker, dir, inflictor->state.origin, vec3_zero(), (int)points, (int)points, DamageFlags::IndirectFromRadius, mod);
+                SVG_Damage(ent, inflictor, attacker, dir, inflictor->state.origin, vec3_zero(), (int)points, (int)points, DamageFlags::IndirectFromRadius, mod);
             }
         }
     }

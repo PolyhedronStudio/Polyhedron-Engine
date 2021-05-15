@@ -53,12 +53,12 @@ static void check_dodge(Entity *self, const vec3_t &start, const vec3_t &dir, in
 
 /*
 =================
-fire_hit
+SVG_FireHit
 
 Used for all impact (hit/punch/slash) attacks
 =================
 */
-qboolean fire_hit(Entity *self, vec3_t &aim, int damage, int kick)
+qboolean SVG_FireHit(Entity *self, vec3_t &aim, int damage, int kick)
 {
     trace_t     tr;
     vec3_t      forward, right, up;
@@ -106,7 +106,7 @@ qboolean fire_hit(Entity *self, vec3_t &aim, int damage, int kick)
     VectorSubtract(point, self->enemy->state.origin, dir);
 
     // do the damage
-    T_Damage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
+    SVG_Damage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
 
     if (!(tr.ent->serverFlags & EntityServerFlags::Monster) && (!tr.ent->client))
         return false;
@@ -209,7 +209,7 @@ static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, i
     if (!((tr.surface) && (tr.surface->flags & SURF_SKY))) {
         if (tr.fraction < 1.0) {
             if (tr.ent->takeDamage) {
-                T_Damage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
+                SVG_Damage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
                     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
@@ -219,7 +219,7 @@ static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, i
                     gi.Multicast(&tr.endPosition, MultiCast::PVS);
 
                     if (self->client)
-                        PlayerNoise(self, tr.endPosition, PNOISE_IMPACT);
+                        SVG_PlayerNoise(self, tr.endPosition, PNOISE_IMPACT);
                 }
             }
         }
@@ -251,25 +251,25 @@ static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, i
 
 /*
 =================
-fire_bullet
+SVG_FireBullet
 
 Fires a single round.  Used for machinegun and chaingun.  Would be fine for
 pistols, rifles, etc....
 =================
 */
-void fire_bullet(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod)
+void SVG_FireBullet(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod)
 {
     fire_lead(self, start, aimdir, damage, kick, TempEntityEvent::Gunshot, hspread, vspread, mod);
 }
 
 //
 //===============
-// fire_shotgun
+// SVG_FireShotgun
 // 
 // Shoots shotgun pellets.  Used by shotgun and super shotgun.
 //===============
 //
-void fire_shotgun(Entity* self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int mod)
+void SVG_FireShotgun(Entity* self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int mod)
 {
     int		i;
 
@@ -279,7 +279,7 @@ void fire_shotgun(Entity* self, const vec3_t &start, const vec3_t &aimdir, int d
 
 //
 //===============
-// fire_blaster
+// SVG_FireBlaster
 // 
 // Fires a single blaster bolt.  Used by the blaster and hyper blaster.
 //===============
@@ -291,7 +291,7 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
     // N&C: From Yamagi Q2, this seems to resolve our random crashes at times.
     if (!self || !other) // Plane and Surf can be NULL
     {
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 
@@ -299,12 +299,12 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
         return;
 
     if (surf && (surf->flags & SURF_SKY)) {
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 
     if (self->owner->client)
-        PlayerNoise(self->owner, self->state.origin, PNOISE_IMPACT);
+        SVG_PlayerNoise(self->owner, self->state.origin, PNOISE_IMPACT);
 
     if (other->takeDamage) {
         mod = MeansOfDeath::Blaster;
@@ -312,12 +312,12 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
         // N&C: Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
         if (plane)
         {
-            T_Damage(other, self, self->owner, self->velocity, self->state.origin,
+            SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
                 plane->normal, self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
         }
         else
         {
-            T_Damage(other, self, self->owner, self->velocity, self->state.origin,
+            SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
                 vec3_zero(), self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
         }
 
@@ -332,12 +332,12 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
         gi.Multicast(&self->state.origin, MultiCast::PVS);
     }
 
-    G_FreeEntity(self);
+    SVG_FreeEntity(self);
 }
 
 //
 //===============
-// fire_blaster
+// SVG_FireBlaster
 //
 // Fire projectiles as deadmonsters, so that if prediction is used against 
 // the objects the player isn't solid clipped against it. 
@@ -345,7 +345,7 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
 // predicted against the shots.
 //===============
 //
-void fire_blaster(Entity *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int effect, qboolean hyper)
+void SVG_FireBlaster(Entity *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int effect, qboolean hyper)
 {
     Entity *bolt;
     trace_t tr;
@@ -353,8 +353,8 @@ void fire_blaster(Entity *self, const vec3_t& start, const vec3_t &aimdir, int d
     // Calculate direction vector.
     vec3_t dir = vec3_normalize(aimdir);
 
-    // Fetch first free entity slot to use, by calling G_Spawn.
-    bolt = G_Spawn();
+    // Fetch first free entity slot to use, by calling SVG_Spawn.
+    bolt = SVG_Spawn();
 
     // Setup basic entity attributes.
     bolt->className = "bolt";   // Classname.
@@ -384,7 +384,7 @@ void fire_blaster(Entity *self, const vec3_t& start, const vec3_t &aimdir, int d
     // Setup touch and Think function pointers.
     bolt->Touch = blaster_touch;
     bolt->nextThink = level.time + 2;
-    bolt->Think = G_FreeEntity;
+    bolt->Think = SVG_FreeEntity;
     
     // Link entity in for collision.
     gi.LinkEntity(bolt);

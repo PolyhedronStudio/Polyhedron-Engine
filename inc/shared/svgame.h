@@ -187,7 +187,7 @@ typedef struct {
     cvar_t *(*cvar_set)(const char *var_name, const char *value);
     cvar_t *(*cvar_forceset)(const char *var_name, const char *value);
 
-    // ClientCommand and ServerCommand parameter access
+    // ClientCommand and SVG_ServerCommand parameter access
     int (*argc)(void);
     const char *(*argv)(int n);     // C++20: char*
     const char *(*args)(void);      // concatenation of all argv >= 1 // C++20: char*
@@ -269,11 +269,11 @@ typedef struct {
 
     void (*RunFrame)(void);
 
-    // ServerCommand will be called when an "sv <command>" command is issued on the
+    // SVG_ServerCommand will be called when an "sv <command>" command is issued on the
     // server console.
     // The game can issue gi.argc() / gi.argv() commands to get the rest
     // of the parameters
-    void (*ServerCommand)(void);
+    void (*ServerCommand) (void);
 
     //
     // global variables shared between game and server

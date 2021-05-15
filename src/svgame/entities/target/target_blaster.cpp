@@ -30,7 +30,7 @@ void use_target_blaster(Entity* self, Entity* other, Entity* activator)
         effect = EF_BLASTER;
 #endif
 
-    //fire_blaster(self, self->state.origin, self->moveDirection, self->damage, self->speed, EntityEffectType::Blaster, MeansOfDeath::Tar);
+    //SVG_FireBlaster(self, self->state.origin, self->moveDirection, self->damage, self->speed, EntityEffectType::Blaster, MeansOfDeath::Tar);
     gi.Sound(self, CHAN_VOICE, self->noiseIndex, 1, ATTN_NORM, 0);
 }
 

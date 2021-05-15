@@ -43,7 +43,7 @@ char *ClientTeam(Entity *ent)
     return ++p;
 }
 
-qboolean OnSameTeam(Entity *ent1, Entity *ent2)
+qboolean SVG_OnSameTeam(Entity *ent1, Entity *ent2)
 {
     char    ent1Team [512];
     char    ent2Team [512];
@@ -69,7 +69,7 @@ void SelectNextItem(Entity *ent, int itflags)
     cl = ent->client;
 
     if (cl->chaseTarget) {
-        ChaseNext(ent);
+        SVG_ChaseNext(ent);
         return;
     }
 
@@ -100,7 +100,7 @@ void SelectPrevItem(Entity *ent, int itflags)
     cl = ent->client;
 
     if (cl->chaseTarget) {
-        ChasePrev(ent);
+        SVG_ChasePrev(ent);
         return;
     }
 
@@ -204,7 +204,7 @@ void Cmd_Give_f(Entity *ent)
                 continue;
             if (!(it->flags & ItemFlags::IsAmmo))
                 continue;
-            Add_Ammo(ent, it, 1000);
+            SVG_AddAmmo(ent, it, 1000);
         }
         if (!give_all)
             return;
@@ -222,10 +222,10 @@ void Cmd_Give_f(Entity *ent)
         return;
     }
 
-    it = FindItem(name);
+    it = SVG_FindItemByPickupName(name);
     if (!it) {
         name = gi.argv(1); // C++20: Added cast.
-        it = FindItem(name);
+        it = SVG_FindItemByPickupName(name);
         if (!it) {
             gi.CPrintf(ent, PRINT_HIGH, "unknown item\n");
             return;
@@ -245,12 +245,12 @@ void Cmd_Give_f(Entity *ent)
         else
             ent->client->persistent.inventory[index] += it->quantity;
     } else {
-        it_ent = G_Spawn();
+        it_ent = SVG_Spawn();
         it_ent->className = it->className;
-        SpawnItem(it_ent, it);
-        Touch_Item(it_ent, ent, NULL, NULL);
+        SVG_SpawnItem(it_ent, it);
+        SVG_TouchItem(it_ent, ent, NULL, NULL);
         if (it_ent->inUse)
-            G_FreeEntity(it_ent);
+            SVG_FreeEntity(it_ent);
     }
 }
 
@@ -341,7 +341,7 @@ void Cmd_Use_f(Entity *ent)
     const char        *s;
 
     s = gi.args(); // C++20: Added casts.
-    it = FindItem(s);
+    it = SVG_FindItemByPickupName(s);
     if (!it) {
         gi.CPrintf(ent, PRINT_HIGH, "unknown item: %s\n", s);
         return;
@@ -374,7 +374,7 @@ void Cmd_Drop_f(Entity *ent)
     const char        *s;
 
     s = (const char*)gi.args(); // C++20: Added casts.
-    it = FindItem(s);
+    it = SVG_FindItemByPickupName(s);
     if (!it) {
         gi.CPrintf(ent, PRINT_HIGH, "unknown item: %s\n", s);
         return;
@@ -578,7 +578,7 @@ void Cmd_Kill_f(Entity *ent)
     ent->flags &= ~EntityFlags::GodMode;
     ent->health = 0;
     meansOfDeath = MeansOfDeath::Suicide;
-    Player_Die(ent, ent, ent, 100000, vec3_origin);
+    SVG_Player_Die(ent, ent, ent, 100000, vec3_origin);
 }
 
 /*
@@ -778,7 +778,7 @@ void Cmd_Say_f(Entity *ent, qboolean team, qboolean arg0)
         if (!other->client)
             continue;
         if (team) {
-            if (!OnSameTeam(ent, other))
+            if (!SVG_OnSameTeam(ent, other))
                 continue;
         }
         gi.CPrintf(other, PRINT_CHAT, "%s", text);
@@ -821,7 +821,7 @@ void Cmd_PlayerList_f(Entity *ent)
 ClientCommand
 =================
 */
-void ClientCommand(Entity *ent)
+void SVG_ClientCommand(Entity *ent)
 {
     const char    *cmd;
 
@@ -843,7 +843,7 @@ void ClientCommand(Entity *ent)
         return;
     }
     if (Q_stricmp(cmd, "score") == 0) {
-        Cmd_Score_f(ent);
+        SVG_Command_Score_f(ent);
         return;
     }
 

@@ -85,7 +85,7 @@ void HUD_MoveClientToIntermission(Entity *ent)
 // Begins an intermission process for the given target entity.
 //================
 //
-void HUD_BeginIntermission(Entity *targ)
+void SVG_HUD_BeginIntermission(Entity *targ)
 {
     int     i, n;
     Entity *client = nullptr;
@@ -108,7 +108,7 @@ void HUD_BeginIntermission(Entity *targ)
             continue;
         }
         if (client->health <= 0) {
-            RespawnClient(client);
+            SVG_RespawnClient(client);
         }
     }
 
@@ -140,20 +140,20 @@ void HUD_BeginIntermission(Entity *targ)
     level.intermission.exitIntermission = 0;
 
     // Fetch an intermission entity.
-    Entity *intermissionEntity = G_Find(NULL, FOFS(className), "info_player_intermission");
+    Entity *intermissionEntity = SVG_Find(NULL, FOFS(className), "info_player_intermission");
     if (!intermissionEntity) {
         // the map creator forgot to put in an intermission point...
-        intermissionEntity = G_Find(NULL, FOFS(className), "info_player_start");
+        intermissionEntity = SVG_Find(NULL, FOFS(className), "info_player_start");
         if (!intermissionEntity) {
-            intermissionEntity = G_Find(NULL, FOFS(className), "info_player_deathmatch");
+            intermissionEntity = SVG_Find(NULL, FOFS(className), "info_player_deathmatch");
         }
     } else {
         // chose one of four spots
         i = rand() & 3;
         while (i--) {
-            intermissionEntity = G_Find(intermissionEntity, FOFS(className), "info_player_intermission");
+            intermissionEntity = SVG_Find(intermissionEntity, FOFS(className), "info_player_intermission");
             if (!intermissionEntity) {  // wrap around the list 
-                intermissionEntity = G_Find(intermissionEntity, FOFS(className), "info_player_intermission");
+                intermissionEntity = SVG_Find(intermissionEntity, FOFS(className), "info_player_intermission");
             }
         }
     }
@@ -282,12 +282,12 @@ void HUD_SendDMScoreboardMessage(Entity *ent)
 
 /*
 ==================
-Cmd_Score_f
+SVG_Command_Score_f
 
 Display the scoreboard
 ==================
 */
-void Cmd_Score_f(Entity *ent)
+void SVG_Command_Score_f(Entity *ent)
 {
     ent->client->showInventory = false;
 

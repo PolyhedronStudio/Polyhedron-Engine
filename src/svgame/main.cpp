@@ -80,23 +80,23 @@ cvar_t  *sv_maplist;
 
 cvar_t  *cl_monsterfootsteps;
 
-void SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
+void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
 
-void RunEntity(Entity *ent);
-void WriteGame(const char *filename, qboolean autosave);
-void ReadGame(const char *filename);
-void WriteLevel(const char *filename);
-void ReadLevel(const char *filename);
-void InitGame(void);
-void G_RunFrame(void);
+void SVG_RunEntity(Entity *ent);
+void SVG_WriteGame(const char *filename, qboolean autosave);
+void SVG_ReadGame(const char *filename);
+void SVG_WriteLevel(const char *filename);
+void SVG_ReadLevel(const char *filename);
+void SVG_InitGame(void);
+void SVG_RunFrame(void);
 
 
 //===================================================================
 
 
-void ShutdownGame(void)
+void SVG_ShutdownGame(void)
 {
-    gi.DPrintf("==== ShutdownGame ====\n");
+    gi.DPrintf("==== SVG_ShutdownGame ====\n");
 
     // WatIs: C++-ify: Delete the edicts and clients arrays, they are allocated using new [], so need a delete[]
     //if (g_entities)
@@ -112,14 +112,14 @@ void ShutdownGame(void)
 
 /*
 ============
-InitGame
+SVG_InitGame
 
 This will be called when the dll is first loaded, which
 only happens when a new game is started or a save game
 is loaded.
 ============
 */
-void InitGame(void)
+void SVG_InitGame(void)
 {
 
     gi.DPrintf("==== InitServerGame ====\n");
@@ -180,7 +180,7 @@ void InitGame(void)
 	cl_monsterfootsteps = gi.cvar("cl_monsterfootsteps", "1", 0);
 
     // items
-    InitItems();
+    SVG_InitItems();
 
     // initialize all entities for this game
     game.maxEntities = maxEntities->value;
@@ -215,25 +215,25 @@ ServerGameExports* GetServerGameAPI(ServerGameImports* import)
         SVGAME_API_VERSION_POINT,
     };
 
-    globals.Init = InitGame;
-    globals.Shutdown = ShutdownGame;
-    globals.SpawnEntities = SpawnEntities;
+    globals.Init = SVG_InitGame;
+    globals.Shutdown = SVG_ShutdownGame;
+    globals.SpawnEntities = SVG_SpawnEntities;
 
-    globals.WriteGame = WriteGame;
-    globals.ReadGame = ReadGame;
-    globals.WriteLevel = WriteLevel;
-    globals.ReadLevel = ReadLevel;
+    globals.WriteGame = SVG_WriteGame;
+    globals.ReadGame = SVG_ReadGame;
+    globals.WriteLevel = SVG_WriteLevel;
+    globals.ReadLevel = SVG_ReadLevel;
 
-    globals.ClientThink = ClientThink;
-    globals.ClientConnect = ClientConnect;
-    globals.ClientUserinfoChanged = ClientUserinfoChanged;
-    globals.ClientDisconnect = ClientDisconnect;
-    globals.ClientBegin = ClientBegin;
-    globals.ClientCommand = ClientCommand;
+    globals.ClientThink = SVG_ClientThink;
+    globals.ClientConnect = SVG_ClientConnect;
+    globals.ClientUserinfoChanged = SVG_ClientUserinfoChanged;
+    globals.ClientDisconnect = SVG_ClientDisconnect;
+    globals.ClientBegin = SVG_ClientBegin;
+    globals.ClientCommand = SVG_ClientCommand;
 
-    globals.RunFrame = G_RunFrame;
+    globals.RunFrame = SVG_RunFrame;
 
-    globals.ServerCommand = ServerCommand;
+    globals.ServerCommand = SVG_ServerCommand;
 
     globals.entity_size = sizeof(Entity);
 
@@ -276,10 +276,10 @@ void Com_Error(ErrorType type, const char *fmt, ...)
 
 /*
 =================
-ClientEndServerFrames
+SVG_ClientEndServerFrames
 =================
 */
-void ClientEndServerFrames(void)
+void SVG_ClientEndServerFrames(void)
 {
     int     i;
     Entity *ent;
@@ -290,23 +290,23 @@ void ClientEndServerFrames(void)
         ent = g_entities + 1 + i;
         if (!ent->inUse || !ent->client)
             continue;
-        ClientEndServerFrame(ent);
+        SVG_ClientEndServerFrame(ent);
     }
 
 }
 
 /*
 =================
-CreateTargetChangeLevel
+SVG_CreateTargetChangeLevel
 
 Returns the created target changelevel
 =================
 */
-Entity *CreateTargetChangeLevel(char *map)
+Entity *SVG_CreateTargetChangeLevel(char *map)
 {
     Entity *ent;
 
-    ent = G_Spawn();
+    ent = SVG_Spawn();
     ent->className = (char*)"target_changelevel"; // C++20: Added a cast.
     Q_snprintf(level.nextMap, sizeof(level.nextMap), "%s", map);
     ent->map = level.nextMap;
@@ -328,7 +328,7 @@ void EndDMLevel(void)
 
     // stay on same level flag
     if ((int)dmflags->value & DeathMatchFlags::SameLevel) {
-        HUD_BeginIntermission(CreateTargetChangeLevel(level.mapName));
+        SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
         return;
     }
 
@@ -343,11 +343,11 @@ void EndDMLevel(void)
                 t = strtok(NULL, seps);
                 if (t == NULL) { // end of list, go to first one
                     if (f == NULL) // there isn't a first one, same level
-                        HUD_BeginIntermission(CreateTargetChangeLevel(level.mapName));
+                        SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
                     else
-                        HUD_BeginIntermission(CreateTargetChangeLevel(f));
+                        SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(f));
                 } else
-                    HUD_BeginIntermission(CreateTargetChangeLevel(t));
+                    SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(t));
                 free(s);
                 return;
             }
@@ -359,16 +359,16 @@ void EndDMLevel(void)
     }
 
     if (level.nextMap[0]) // go to a specific map
-        HUD_BeginIntermission(CreateTargetChangeLevel(level.nextMap));
+        SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.nextMap));
     else {  // search for a changelevel
-        ent = G_Find(NULL, FOFS(className), "target_changelevel");
+        ent = SVG_Find(NULL, FOFS(className), "target_changelevel");
         if (!ent) {
             // the map designer didn't include a changelevel,
             // so create a fake ent that goes back to the same level
-            HUD_BeginIntermission(CreateTargetChangeLevel(level.mapName));
+            SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
             return;
         }
-        HUD_BeginIntermission(ent);
+        SVG_HUD_BeginIntermission(ent);
     }
 }
 
@@ -454,7 +454,7 @@ void ExitLevel(void)
     level.intermission.changeMap = NULL;
     level.intermission.exitIntermission = 0;
     level.intermission.time = 0;
-    ClientEndServerFrames();
+    SVG_ClientEndServerFrames();
 
     // clear some things before going to next level
     for (i = 0 ; i < maxClients->value ; i++) {
@@ -469,12 +469,12 @@ void ExitLevel(void)
 
 /*
 ================
-G_RunFrame
+SVG_RunFrame
 
 Advances the world by 0.1 seconds
 ================
 */
-void G_RunFrame(void)
+void SVG_RunFrame(void)
 {
     int     i;
     Entity *ent;
@@ -511,11 +511,11 @@ void G_RunFrame(void)
         }
 
         if (i > 0 && i <= maxClients->value) {
-            ClientBeginServerFrame(ent);
+            SVG_ClientBeginServerFrame(ent);
             continue;
         }
 
-        G_RunEntity(ent);
+        SVG_RunEntity(ent);
     }
 
     // see if it is time to end a deathmatch
@@ -525,12 +525,12 @@ void G_RunFrame(void)
     CheckNeedPass();
 
     // build the playerstate_t structures for all players
-    ClientEndServerFrames();
+    SVG_ClientEndServerFrames();
 }
 
 /*
 =============
-G_Find
+SVG_Find
 
 Searches all active entities for the next one that holds
 the matching string at fieldofs (use the FOFS() macro) in the structure.
@@ -540,7 +540,7 @@ NULL will be returned if the end of the list is reached.
 
 =============
 */
-Entity* G_Find(Entity* from, int fieldofs, const char* match)
+Entity* SVG_Find(Entity* from, int fieldofs, const char* match)
 {
     char* s;
 
@@ -565,14 +565,14 @@ Entity* G_Find(Entity* from, int fieldofs, const char* match)
 
 /*
 =================
-G_FindEntitiesWithinRadius
+SVG_FindEntitiesWithinRadius
 
 Returns entities that have origins within a spherical area
 
-G_FindEntitiesWithinRadius (origin, radius)
+SVG_FindEntitiesWithinRadius (origin, radius)
 =================
 */
-Entity* G_FindEntitiesWithinRadius(Entity* from, vec3_t org, float rad)
+Entity* SVG_FindEntitiesWithinRadius(Entity* from, vec3_t org, float rad)
 {
     vec3_t  eorg;
     int     j;
@@ -599,7 +599,7 @@ Entity* G_FindEntitiesWithinRadius(Entity* from, vec3_t org, float rad)
 
 /*
 =============
-G_PickTarget
+SVG_PickTarget
 
 Searches all active entities for the next one that holds
 the matching string at fieldofs (use the FOFS() macro) in the structure.
@@ -611,19 +611,19 @@ NULL will be returned if the end of the list is reached.
 */
 #define MAXCHOICES  8
 
-Entity* G_PickTarget(char* targetName)
+Entity* SVG_PickTarget(char* targetName)
 {
     Entity* ent = NULL;
     int     num_choices = 0;
     Entity* choice[MAXCHOICES];
 
     if (!targetName) {
-        gi.DPrintf("G_PickTarget called with NULL targetName\n");
+        gi.DPrintf("SVG_PickTarget called with NULL targetName\n");
         return NULL;
     }
 
     while (1) {
-        ent = G_Find(ent, FOFS(targetName), targetName);
+        ent = SVG_Find(ent, FOFS(targetName), targetName);
         if (!ent)
             break;
         choice[num_choices++] = ent;
@@ -632,7 +632,7 @@ Entity* G_PickTarget(char* targetName)
     }
 
     if (!num_choices) {
-        gi.DPrintf("G_PickTarget: target %s not found\n", targetName);
+        gi.DPrintf("SVG_PickTarget: target %s not found\n", targetName);
         return NULL;
     }
 
@@ -640,7 +640,7 @@ Entity* G_PickTarget(char* targetName)
 }
 
 
-void G_InitEntity(Entity* e)
+void SVG_InitEntity(Entity* e)
 {
     e->inUse = true;
     e->className = "noclass";
@@ -650,7 +650,7 @@ void G_InitEntity(Entity* e)
 
 /*
 =================
-G_Spawn
+SVG_Spawn
 
 Either finds a free edict, or allocates a new one.
 Try to avoid reusing an entity that was recently freed, because it
@@ -659,7 +659,7 @@ instead of being removed and recreated, which can cause interpolated
 angles and bad trails.
 =================
 */
-Entity* G_Spawn(void)
+Entity* SVG_Spawn(void)
 {
     int         i;
     Entity* e;
@@ -669,7 +669,7 @@ Entity* G_Spawn(void)
         // the first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!e->inUse && (e->freeTime < 2 || level.time - e->freeTime > 0.5)) {
-            G_InitEntity(e);
+            SVG_InitEntity(e);
             return e;
         }
     }
@@ -678,18 +678,18 @@ Entity* G_Spawn(void)
         gi.Error("ED_Alloc: no free edicts");
 
     globals.num_edicts++;
-    G_InitEntity(e);
+    SVG_InitEntity(e);
     return e;
 }
 
 /*
 =================
-G_FreeEntity
+SVG_FreeEntity
 
 Marks the edict as free
 =================
 */
-void G_FreeEntity(Entity* ed)
+void SVG_FreeEntity(Entity* ed)
 {
     gi.UnlinkEntity(ed);        // unlink from world
 
@@ -707,6 +707,6 @@ void G_FreeEntity(Entity* ed)
 }
 
 // Returns a pointer to the world entity aka Worldspawn.
-Entity* G_GetWorldEntity() {
+Entity* SVG_GetWorldEntity() {
     return &g_entities[0];
 };

@@ -482,7 +482,7 @@ static void P_CheckFallingDamage(Entity *ent)
         VectorSet(dir, 0, 0, 1);
 
         if (!deathmatch->value || !((int)dmflags->value & DeathMatchFlags::NoFalling))
-            T_Damage(ent, G_GetWorldEntity(), G_GetWorldEntity(), dir, ent->state.origin, vec3_origin, damage, 0, 0, MeansOfDeath::Falling);
+            SVG_Damage(ent, SVG_GetWorldEntity(), SVG_GetWorldEntity(), dir, ent->state.origin, vec3_origin, damage, 0, 0, MeansOfDeath::Falling);
     } else {
         ent->state.event = EntityEvent::FallShort;
         return;
@@ -512,7 +512,7 @@ static void P_CheckWorldEffects(void)
     // if just entered a water volume, play a sound
     //
     if (!oldWaterLevel && waterlevel) {
-        PlayerNoise(current_player, current_player->state.origin, PNOISE_SELF);
+        SVG_PlayerNoise(current_player, current_player->state.origin, PNOISE_SELF);
         if (current_player->waterType & CONTENTS_LAVA)
             gi.Sound(current_player, CHAN_BODY, gi.SoundIndex("player/lava_in.wav"), 1, ATTN_NORM, 0);
         else if (current_player->waterType & CONTENTS_SLIME)
@@ -529,7 +529,7 @@ static void P_CheckWorldEffects(void)
     // if just completely exited a water volume, play a sound
     //
     if (oldWaterLevel && ! waterlevel) {
-        PlayerNoise(current_player, current_player->state.origin, PNOISE_SELF);
+        SVG_PlayerNoise(current_player, current_player->state.origin, PNOISE_SELF);
         gi.Sound(current_player, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
         current_player->flags &= ~EntityFlags::InWater;
     }
@@ -548,7 +548,7 @@ static void P_CheckWorldEffects(void)
         if (current_player->airFinished < level.time) {
             // gasp for air
             gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
-            PlayerNoise(current_player, current_player->state.origin, PNOISE_SELF);
+            SVG_PlayerNoise(current_player, current_player->state.origin, PNOISE_SELF);
         } else  if (current_player->airFinished < level.time + 11) {
             // just break surface
             gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
@@ -581,7 +581,7 @@ static void P_CheckWorldEffects(void)
 
                 current_player->debouncePainTime = level.time;
 
-                T_Damage(current_player, G_GetWorldEntity(), G_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, current_player->damage, 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+                SVG_Damage(current_player, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, current_player->damage, 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
             }
         }
     } else {
@@ -603,11 +603,11 @@ static void P_CheckWorldEffects(void)
                 current_player->debouncePainTime = level.time + 1;
             }
 
-            T_Damage(current_player, G_GetWorldEntity(), G_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
+            SVG_Damage(current_player, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
         }
 
         if (current_player->waterType & CONTENTS_SLIME) {
-            T_Damage(current_player, G_GetWorldEntity(), G_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
+            SVG_Damage(current_player, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 }
@@ -769,13 +769,13 @@ newanim:
 
 //
 //===============
-// ClientEndServerFrame
+// SVG_ClientEndServerFrame
 //
 // Called for each player at the end of the server frame and right 
 // after spawning.
 //===============
 //
-void ClientEndServerFrame(Entity *ent)
+void SVG_ClientEndServerFrame(Entity *ent)
 {
     float   bobTime;
     int     i;

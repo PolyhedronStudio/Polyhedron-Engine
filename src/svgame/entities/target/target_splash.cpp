@@ -38,7 +38,7 @@ void use_target_splash(Entity* self, Entity* other, Entity* activator)
     gi.Multicast(&self->state.origin, MultiCast::PVS);
 
     if (self->damage)
-        T_RadiusDamage(self, activator, self->damage, NULL, self->damage + 40, MeansOfDeath::Splash);
+        SVG_RadiusDamage(self, activator, self->damage, NULL, self->damage + 40, MeansOfDeath::Splash);
 }
 
 void SP_target_splash(Entity* self)

@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 #include "g_local.h"
 
-void UpdateChaseCam(Entity *ent)
+void SVG_UpdateChaseCam(Entity *ent)
 {
     vec3_t o, ownerv, goal;
     Entity *targ;
@@ -30,7 +30,7 @@ void UpdateChaseCam(Entity *ent)
     if (!ent->client->chaseTarget->inUse
         || ent->client->chaseTarget->client->respawn.isSpectator) {
         Entity *old = ent->client->chaseTarget;
-        ChaseNext(ent);
+        SVG_ChaseNext(ent);
         if (ent->client->chaseTarget == old) {
             ent->client->chaseTarget = NULL;
             ent->client->playerState.pmove.flags &= ~PMF_NO_PREDICTION;
@@ -104,7 +104,7 @@ void UpdateChaseCam(Entity *ent)
     gi.LinkEntity(ent);
 }
 
-void ChaseNext(Entity *ent)
+void SVG_ChaseNext(Entity *ent)
 {
     int i;
     Entity *e;
@@ -128,7 +128,7 @@ void ChaseNext(Entity *ent)
     ent->client->updateChase = true;
 }
 
-void ChasePrev(Entity *ent)
+void SVG_ChasePrev(Entity *ent)
 {
     int i;
     Entity *e;
@@ -152,7 +152,7 @@ void ChasePrev(Entity *ent)
     ent->client->updateChase = true;
 }
 
-void GetChaseTarget(Entity *ent)
+void SVG_GetChaseTarget(Entity *ent)
 {
     int i;
     Entity *other;
@@ -162,7 +162,7 @@ void GetChaseTarget(Entity *ent)
         if (other->inUse && !other->client->respawn.isSpectator) {
             ent->client->chaseTarget = other;
             ent->client->updateChase = true;
-            UpdateChaseCam(ent);
+            SVG_UpdateChaseCam(ent);
             return;
         }
     }

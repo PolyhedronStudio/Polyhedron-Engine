@@ -38,7 +38,7 @@ void trigger_push_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t
         }
     }
     if (self->spawnFlags & PUSH_ONCE)
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
 }
 
 

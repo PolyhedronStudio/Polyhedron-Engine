@@ -44,7 +44,7 @@ void weapon_supershotgun_fire(Entity* ent)
     ent->client->kickAngles[0] = -2;
 
     VectorSet(offset, 0, 8, ent->viewHeight - 8);
-    start = P_ProjectSource(ent->client, ent->state.origin, offset, forward, right);
+    start = SVG_PlayerProjectSource(ent->client, ent->state.origin, offset, forward, right);
 
     if (is_quad) {
         damage *= 4;
@@ -55,10 +55,10 @@ void weapon_supershotgun_fire(Entity* ent)
     v[vec3_t::PYR::Yaw] = ent->client->aimAngles[vec3_t::PYR::Yaw] - 5;
     v[vec3_t::PYR::Roll] = ent->client->aimAngles[vec3_t::PYR::Roll];
     vec3_vectors(v, &forward, NULL, NULL);
-    fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
+    SVG_FireShotgun(ent, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
     v[vec3_t::PYR::Yaw] = ent->client->aimAngles[vec3_t::PYR::Yaw] + 5;
     vec3_vectors(v, &forward, NULL, NULL);
-    fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
+    SVG_FireShotgun(ent, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
 
     // send muzzle flash
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
@@ -67,7 +67,7 @@ void weapon_supershotgun_fire(Entity* ent)
     gi.Multicast(&ent->state.origin, MultiCast::PVS);
 
     ent->client->playerState.gunFrame++;
-    PlayerNoise(ent, start, PNOISE_WEAPON);
+    SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
         ent->client->persistent.inventory[ent->client->ammoIndex] -= 2;

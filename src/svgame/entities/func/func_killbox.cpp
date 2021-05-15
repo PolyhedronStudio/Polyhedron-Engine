@@ -19,7 +19,7 @@ Kills everything inside when fired, irrespective of protection.
 */
 void use_killbox(Entity* self, Entity* other, Entity* activator)
 {
-    KillBox(self);
+    SVG_KillBox(self);
 }
 
 void SP_func_killbox(Entity* ent)

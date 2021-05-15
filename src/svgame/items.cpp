@@ -38,10 +38,10 @@ static int  body_armor_index;
 
 /*
 ===============
-GetItemByIndex
+SVG_GetItemByIndex
 ===============
 */
-gitem_t *GetItemByIndex(int index)
+gitem_t *SVG_GetItemByIndex(int index)
 {
     if (index == 0 || index >= game.numberOfItems)
         return NULL;
@@ -52,11 +52,11 @@ gitem_t *GetItemByIndex(int index)
 
 /*
 ===============
-FindItemByClassname
+SVG_FindItemByClassname
 
 ===============
 */
-gitem_t *FindItemByClassname(const char *className)
+gitem_t *SVG_FindItemByClassname(const char *className)
 {
     int     i;
     gitem_t *it;
@@ -74,11 +74,11 @@ gitem_t *FindItemByClassname(const char *className)
 
 /*
 ===============
-FindItem
+SVG_FindItemByPickupName
 
 ===============
 */
-gitem_t *FindItem(const char *pickup_name) // C++20: STRING: Added const to char*
+gitem_t *SVG_FindItemByPickupName(const char *pickup_name) // C++20: STRING: Added const to char*
 {
     int     i;
     gitem_t *it;
@@ -125,7 +125,7 @@ void DoRespawn(Entity *ent)
     ent->state.event = EntityEvent::ItemRespawn;
 }
 
-void SetRespawn(Entity *ent, float delay)
+void SVG_SetRespawn(Entity *ent, float delay)
 {
     if (!ent)
         return;
@@ -156,7 +156,7 @@ qboolean Pickup_Powerup(Entity *ent, Entity *other)
 
     if (deathmatch->value) {
         if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem))
-            SetRespawn(ent, ent->item->quantity);
+            SVG_SetRespawn(ent, ent->item->quantity);
     }
 
     return true;
@@ -164,14 +164,14 @@ qboolean Pickup_Powerup(Entity *ent, Entity *other)
 
 void Drop_General(Entity *ent, gitem_t *item)
 {
-    Drop_Item(ent, item);
+    SVG_DropItem(ent, item);
     ent->client->persistent.inventory[ITEM_INDEX(item)]--;
     HUD_ValidateSelectedItem(ent);
 }
 
 //======================================================================
 
-qboolean Add_Ammo(Entity *ent, gitem_t *item, int count)
+qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int count)
 {
     int         index;
     int         max;
@@ -226,16 +226,16 @@ qboolean Pickup_Ammo(Entity *ent, Entity *other)
 
     oldcount = other->client->persistent.inventory[ITEM_INDEX(ent->item)];
 
-    if (!Add_Ammo(other, ent->item, count))
+    if (!SVG_AddAmmo(other, ent->item, count))
         return false;
 
     if (weapon && !oldcount) {
-        if (other->client->persistent.activeWeapon != ent->item && (!deathmatch->value || other->client->persistent.activeWeapon == FindItem("blaster")))
+        if (other->client->persistent.activeWeapon != ent->item && (!deathmatch->value || other->client->persistent.activeWeapon == SVG_FindItemByPickupName("blaster")))
             other->client->newWeapon = ent->item;
     }
 
     if (!(ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem)) && (deathmatch->value))
-        SetRespawn(ent, 30);
+        SVG_SetRespawn(ent, 30);
     return true;
 }
 
@@ -245,7 +245,7 @@ void Drop_Ammo(Entity *ent, gitem_t *item)
     int     index;
 
     index = ITEM_INDEX(item);
-    dropped = Drop_Item(ent, item);
+    dropped = SVG_DropItem(ent, item);
     if (ent->client->persistent.inventory[index] >= item->quantity)
         dropped->count = item->quantity;
     else
@@ -256,7 +256,7 @@ void Drop_Ammo(Entity *ent, gitem_t *item)
         item->tag == AmmoType::Grenade &&
         ent->client->persistent.inventory[index] - dropped->count <= 0) {
         gi.CPrintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
-        G_FreeEntity(dropped);
+        SVG_FreeEntity(dropped);
         return;
     }
 
@@ -276,9 +276,9 @@ void MegaHealth_think(Entity *self)
     }
 
     if (!(self->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
-        SetRespawn(self, 20);
+        SVG_SetRespawn(self, 20);
     else
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
 }
 
 qboolean Pickup_Health(Entity *ent, Entity *other)
@@ -303,7 +303,7 @@ qboolean Pickup_Health(Entity *ent, Entity *other)
         ent->solid = Solid::Not;
     } else {
         if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
-            SetRespawn(ent, 30);
+            SVG_SetRespawn(ent, 30);
     }
 
     return true;
@@ -311,7 +311,7 @@ qboolean Pickup_Health(Entity *ent, Entity *other)
 
 //======================================================================
 
-int ArmorIndex(Entity *ent)
+int SVG_ArmorIndex(Entity *ent)
 {
     if (!ent->client)
         return 0;
@@ -334,7 +334,7 @@ qboolean Pickup_Armor(Entity *ent, Entity *other)
     // get info on new armor
     newinfo = (gitem_armor_t *)ent->item->info;
 
-    old_armor_index = ArmorIndex(other);
+    old_armor_index = SVG_ArmorIndex(other);
 
 
     // if player has no armor, just use it
@@ -377,7 +377,7 @@ qboolean Pickup_Armor(Entity *ent, Entity *other)
     }
 
     if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
-        SetRespawn(ent, 20);
+        SVG_SetRespawn(ent, 20);
 
     return true;
 }
@@ -386,10 +386,10 @@ qboolean Pickup_Armor(Entity *ent, Entity *other)
 
 /*
 ===============
-Touch_Item
+SVG_TouchItem
 ===============
 */
-void Touch_Item(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf)
+void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf)
 {
     qboolean    taken;
 
@@ -441,7 +441,7 @@ void Touch_Item(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf)
         if (ent->flags & EntityFlags::Respawn)
             ent->flags &= ~EntityFlags::Respawn;
         else
-            G_FreeEntity(ent);
+            SVG_FreeEntity(ent);
     }
 }
 
@@ -452,25 +452,25 @@ void drop_temp_touch(Entity *ent, Entity *other, cplane_t *plane, csurface_t *su
     if (other == ent->owner)
         return;
 
-    Touch_Item(ent, other, plane, surf);
+    SVG_TouchItem(ent, other, plane, surf);
 }
 
 void drop_make_touchable(Entity *ent)
 {
-    ent->Touch = Touch_Item;
+    ent->Touch = SVG_TouchItem;
     if (deathmatch->value) {
         ent->nextThink = level.time + 29;
-        ent->Think = G_FreeEntity;
+        ent->Think = SVG_FreeEntity;
     }
 }
 
-Entity *Drop_Item(Entity *ent, gitem_t *item)
+Entity *SVG_DropItem(Entity *ent, gitem_t *item)
 {
     Entity *dropped;
     vec3_t  forward, right;
     vec3_t  offset;
 
-    dropped = G_Spawn();
+    dropped = SVG_Spawn();
 
     dropped->className = item->className;
     dropped->item = item;
@@ -490,7 +490,7 @@ Entity *Drop_Item(Entity *ent, gitem_t *item)
 
         AngleVectors(ent->client->aimAngles, &forward, &right, NULL);
         VectorSet(offset, 24, 0, -16);
-        dropped->state.origin = G_ProjectSource(ent->state.origin, offset, forward, right);
+        dropped->state.origin = SVG_ProjectSource(ent->state.origin, offset, forward, right);
         trace = gi.Trace(ent->state.origin, dropped->mins, dropped->maxs,
                          dropped->state.origin, ent, CONTENTS_SOLID);
         VectorCopy(trace.endPosition, dropped->state.origin);
@@ -520,7 +520,7 @@ void Use_Item(Entity *ent, Entity *other, Entity *activator)
         ent->Touch = NULL;
     } else {
         ent->solid = Solid::Trigger;
-        ent->Touch = Touch_Item;
+        ent->Touch = SVG_TouchItem;
     }
 
     gi.LinkEntity(ent);
@@ -547,7 +547,7 @@ void droptofloor(Entity *ent)
         gi.SetModel(ent, ent->item->worldModel);
     ent->solid = Solid::Trigger;
     ent->moveType = MoveType::Toss;
-    ent->Touch = Touch_Item;
+    ent->Touch = SVG_TouchItem;
 
     // Calculate trace destination
     dest = ent->state.origin + vec3_t(0.f, 0.f, 128.f);
@@ -555,7 +555,7 @@ void droptofloor(Entity *ent)
     tr = gi.Trace(ent->state.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
     if (tr.startSolid) {
         gi.DPrintf("droptofloor: %s startsolid at %s\n", ent->className, Vec3ToString(ent->state.origin));
-        G_FreeEntity(ent);
+        SVG_FreeEntity(ent);
         return;
     }
 
@@ -593,14 +593,14 @@ void droptofloor(Entity *ent)
 
 /*
 ===============
-PrecacheItem
+SVG_PrecacheItem
 
 Precaches all data needed for a given item.
 This will be called for each item spawned in a level,
 and for each item in each client's inventory.
 ===============
 */
-void PrecacheItem(gitem_t *it)
+void SVG_PrecacheItem(gitem_t *it)
 {
     const char    *s, *start; // C++20: STRING: Added const
     char    data[MAX_QPATH];
@@ -621,9 +621,9 @@ void PrecacheItem(gitem_t *it)
 
     // parse everything for its ammo
     if (it->ammo && it->ammo[0]) {
-        ammo = FindItem(it->ammo);
+        ammo = SVG_FindItemByPickupName(it->ammo);
         if (ammo != it)
-            PrecacheItem(ammo);
+            SVG_PrecacheItem(ammo);
     }
 
     // parse the space seperated precache string for other items
@@ -638,7 +638,7 @@ void PrecacheItem(gitem_t *it)
 
         len = s - start;
         if (len >= MAX_QPATH || len < 5)
-            gi.Error("PrecacheItem: %s has bad precache string", it->className);
+            gi.Error("SVG_PrecacheItem: %s has bad precache string", it->className);
         memcpy(data, start, len);
         data[len] = 0;
         if (*s)
@@ -658,7 +658,7 @@ void PrecacheItem(gitem_t *it)
 
 /*
 ============
-SpawnItem
+SVG_SpawnItem
 
 Sets the clipping size and plants the object on the floor.
 
@@ -666,9 +666,9 @@ Items can't be immediately dropped to floor, because they might
 be on an entity that hasn't spawned yet.
 ============
 */
-void SpawnItem(Entity *ent, gitem_t *item)
+void SVG_SpawnItem(Entity *ent, gitem_t *item)
 {
-    PrecacheItem(item);
+    SVG_PrecacheItem(item);
 
     if (ent->spawnFlags) {
         if (strcmp(ent->className, "key_power_cube") != 0) {
@@ -681,25 +681,25 @@ void SpawnItem(Entity *ent, gitem_t *item)
     if (deathmatch->value) {
         if ((int)dmflags->value & DeathMatchFlags::NoArmor) {
             if (item->Pickup == Pickup_Armor) {
-                G_FreeEntity(ent);
+                SVG_FreeEntity(ent);
                 return;
             }
         }
         if ((int)dmflags->value & DeathMatchFlags::NoItems) {
             if (item->Pickup == Pickup_Powerup) {
-                G_FreeEntity(ent);
+                SVG_FreeEntity(ent);
                 return;
             }
         }
         if ((int)dmflags->value & DeathMatchFlags::NoHealth) {
             if (item->Pickup == Pickup_Health) {
-                G_FreeEntity(ent);
+                SVG_FreeEntity(ent);
                 return;
             }
         }
         if ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo) {
             if ((item->flags == ItemFlags::IsAmmo)) {
-                G_FreeEntity(ent);
+                SVG_FreeEntity(ent);
                 return;
             }
         }
@@ -936,13 +936,13 @@ gitem_t itemlist[] = {
 void SP_item_health(Entity *self)
 {
     if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 
     self->model = "models/items/healing/medium/tris.md2";
     self->count = 10;
-    SpawnItem(self, FindItem("Health"));
+    SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     gi.SoundIndex("items/n_health.wav");
 }
 
@@ -951,13 +951,13 @@ void SP_item_health(Entity *self)
 void SP_item_health_small(Entity *self)
 {
     if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 
     self->model = "models/items/healing/stimpack/tris.md2";
     self->count = 2;
-    SpawnItem(self, FindItem("Health"));
+    SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     self->style = HEALTH_IGNORE_MAX;
     gi.SoundIndex("items/s_health.wav");
 }
@@ -967,13 +967,13 @@ void SP_item_health_small(Entity *self)
 void SP_item_health_large(Entity *self)
 {
     if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 
     self->model = "models/items/healing/large/tris.md2";
     self->count = 25;
-    SpawnItem(self, FindItem("Health"));
+    SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     gi.SoundIndex("items/l_health.wav");
 }
 
@@ -982,19 +982,19 @@ void SP_item_health_large(Entity *self)
 void SP_item_health_mega(Entity *self)
 {
     if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 
     self->model = "models/items/mega_h/tris.md2";
     self->count = 100;
-    SpawnItem(self, FindItem("Health"));
+    SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     gi.SoundIndex("items/m_health.wav");
     self->style = HEALTH_IGNORE_MAX | HEALTH_TIMED;
 }
 
 
-void InitItems(void)
+void SVG_InitItems(void)
 {
     game.numberOfItems = sizeof(itemlist) / sizeof(itemlist[0]) - 1;
 }
@@ -1003,12 +1003,12 @@ void InitItems(void)
 
 /*
 ===============
-SetItemNames
+SVG_SetItemNames
 
 Called by worldspawn
 ===============
 */
-void SetItemNames(void)
+void SVG_SetItemNames(void)
 {
     int     i;
     gitem_t *it;
@@ -1018,5 +1018,5 @@ void SetItemNames(void)
         gi.configstring(ConfigStrings::Items+ i, it->pickupName);
     }
 
-    body_armor_index   = ITEM_INDEX(FindItem("Body Armor"));
+    body_armor_index   = ITEM_INDEX(SVG_FindItemByPickupName("Body Armor"));
 }

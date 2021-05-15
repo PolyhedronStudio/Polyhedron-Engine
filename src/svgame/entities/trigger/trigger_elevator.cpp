@@ -31,7 +31,7 @@ void trigger_elevator_use(Entity* self, Entity* other, Entity* activator)
         return;
     }
 
-    target = G_PickTarget(other->pathTarget);
+    target = SVG_PickTarget(other->pathTarget);
     if (!target) {
         gi.DPrintf("elevator used with bad pathTarget: %s\n", other->pathTarget);
         return;
@@ -47,7 +47,7 @@ void trigger_elevator_init(Entity* self)
         gi.DPrintf("trigger_elevator has no target\n");
         return;
     }
-    self->moveTargetPtr = G_PickTarget(self->target);
+    self->moveTargetPtr = SVG_PickTarget(self->target);
     if (!self->moveTargetPtr) {
         gi.DPrintf("trigger_elevator unable to find target %s\n", self->target);
         return;

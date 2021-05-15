@@ -199,7 +199,7 @@ constexpr int32_t SFL_CROSS_TRIGGER_8 = 0x00000080;
 constexpr int32_t SFL_CROSS_TRIGGER_MASK = 0x000000ff;
 
 //-------------------
-// Noise types for PlayerNoise
+// Noise types for SVG_PlayerNoise
 //-------------------
 constexpr int32_t PNOISE_SELF = 0;
 constexpr int32_t PNOISE_WEAPON = 1;
@@ -390,7 +390,7 @@ typedef struct {
     int totalMonsters;
     int killedMonsters;
 
-    // The current entity that is actively being ran from G_RunFrame.
+    // The current entity that is actively being ran from SVG_RunFrame.
     Entity *currentEntity;
 
     // Index for the que pile of dead bodies.
@@ -580,7 +580,7 @@ extern  cvar_t  *cl_monsterfootsteps;
 // 
 // Since that is rather unclear, I now present to you:
 //
-Entity* G_GetWorldEntity();
+Entity* SVG_GetWorldEntity();
 
 //-------------------
 // Spawnflags for items, set by editor(s).
@@ -624,34 +624,34 @@ extern  gitem_t itemlist[];
 //
 // g_cmds.c
 //
-void Cmd_Score_f(Entity *ent);
+void SVG_Command_Score_f(Entity *ent);
 
 //
 // g_items.c
 //
-void PrecacheItem(gitem_t *it);
-void InitItems(void);
-void SetItemNames(void);
-gitem_t *FindItem(const char *pickup_name);
-gitem_t *FindItemByClassname(const char *className);
+void SVG_PrecacheItem(gitem_t *it);
+void SVG_InitItems(void);
+void SVG_SetItemNames(void);
+gitem_t *SVG_FindItemByPickupName(const char *pickup_name);
+gitem_t *SVG_FindItemByClassname(const char *className);
 #define ITEM_INDEX(x) ((x)-itemlist)
-Entity *Drop_Item(Entity *ent, gitem_t *item);
-void SetRespawn(Entity *ent, float delay);
-void ChangeWeapon(Entity *ent);
-void SpawnItem(Entity *ent, gitem_t *item);
-void Think_Weapon(Entity *ent);
-int ArmorIndex(Entity *ent);
-gitem_t *GetItemByIndex(int index);
-qboolean Add_Ammo(Entity *ent, gitem_t *item, int count);
-void Touch_Item(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf);
+Entity *SVG_DropItem(Entity *ent, gitem_t *item);
+void SVG_SetRespawn(Entity *ent, float delay);
+void SVG_ChangeWeapon(Entity *ent);
+void SVG_SpawnItem(Entity *ent, gitem_t *item);
+void SVG_ThinkWeapon(Entity *ent);
+int SVG_ArmorIndex(Entity *ent);
+gitem_t *SVG_GetItemByIndex(int index);
+qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int count);
+void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf);
 
 //
 // g_combat.c
 //
-qboolean OnSameTeam(Entity *ent1, Entity *ent2);
-qboolean CanDamage(Entity *targ, Entity *inflictor);
-void T_Damage(Entity *targ, Entity *inflictor, Entity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockback, int dflags, int mod);
-void T_RadiusDamage(Entity *inflictor, Entity *attacker, float damage, Entity *ignore, float radius, int mod);
+qboolean SVG_OnSameTeam(Entity *ent1, Entity *ent2);
+qboolean SVG_CanDamage(Entity *targ, Entity *inflictor);
+void SVG_Damage(Entity *targ, Entity *inflictor, Entity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockback, int dflags, int mod);
+void SVG_RadiusDamage(Entity *inflictor, Entity *attacker, float damage, Entity *ignore, float radius, int mod);
 
 // damage flags
 struct DamageFlags {
@@ -666,38 +666,38 @@ struct DamageFlags {
 //
 // g_weapon.c
 //
-void ThrowDebris(Entity *self, const char *modelname, float speed, const vec3_t& origin);
-qboolean fire_hit(Entity *self, vec3_t &aim, int damage, int kick);
-void fire_bullet(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod);
-void fire_shotgun(Entity* self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
-void fire_blaster(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int effect, qboolean hyper);
+void SVG_ThrowDebris(Entity *self, const char *modelname, float speed, const vec3_t& origin);
+qboolean SVG_FireHit(Entity *self, vec3_t &aim, int damage, int kick);
+void SVG_FireBullet(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod);
+void SVG_FireShotgun(Entity* self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
+void SVG_FireBlaster(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int effect, qboolean hyper);
 
 //
 // g_ptrail.c
 //
-void PlayerTrail_Init(void);
-void PlayerTrail_Add(vec3_t spot);
-void PlayerTrail_New(vec3_t spot);
-Entity *PlayerTrail_PickFirst(Entity *self);
-Entity *PlayerTrail_PickNext(Entity *self);
-Entity *PlayerTrail_LastSpot(void);
+void SVG_PlayerTrail_Init(void);
+void SVG_PlayerTrail_Add(vec3_t spot);
+void SVG_PlayerTrail_New(vec3_t spot);
+Entity *SVG_PlayerTrail_PickFirst(Entity *self);
+Entity *SVG_PlayerTrail_PickNext(Entity *self);
+Entity *SVG_PlayerTrail_LastSpot(void);
 
 //
 // g_player.c
 //
-void Player_Pain(Entity *self, Entity *other, float kick, int damage);
-void Player_Die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point);
+void SVG_Player_Pain(Entity *self, Entity *other, float kick, int damage);
+void SVG_Player_Die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point);
 
 //
 // g_svcmds.c
 //
-void    ServerCommand(void);
-qboolean SV_FilterPacket(char *from);
+void    SVG_ServerCommand(void);
+qboolean SVG_FilterPacket(char *from);
 
 //
 // p_view.c
 //
-void ClientEndServerFrame(Entity *ent);
+void SVG_ClientEndServerFrame(Entity *ent);
 
 //
 // p_hud.c
@@ -707,34 +707,34 @@ void ClientEndServerFrame(Entity *ent);
 //
 // g_pweapon.c
 //
-void PlayerNoise(Entity *who, vec3_t where, int type);
+void SVG_PlayerNoise(Entity *who, vec3_t where, int type);
 
 //
 // g_phys.c
 //
-void G_RunEntity(Entity *ent);
+void SVG_RunEntity(Entity *ent);
 
 //
 // g_main.c
 //
-void SaveClientData(void);
-void FetchClientEntData(Entity *ent);
+void SVG_SaveClientData(void);
+void SVG_FetchClientData(Entity *ent);
 
-Entity* G_PickTarget(char* targetName);
-Entity* G_Find(Entity* from, int fieldofs, const char* match); // C++20: Added const to char*
-Entity* G_FindEntitiesWithinRadius(Entity* from, vec3_t org, float rad);
+Entity* SVG_PickTarget(char* targetName);
+Entity* SVG_Find(Entity* from, int fieldofs, const char* match); // C++20: Added const to char*
+Entity* SVG_FindEntitiesWithinRadius(Entity* from, vec3_t org, float rad);
 
-void    G_InitEntity(Entity* e);
-Entity* G_Spawn(void);
-void    G_FreeEntity(Entity* e);
+void    SVG_InitEntity(Entity* e);
+Entity* SVG_Spawn(void);
+void    SVG_FreeEntity(Entity* e);
 
 //
 // g_chase.c
 //
-void UpdateChaseCam(Entity *ent);
-void ChaseNext(Entity *ent);
-void ChasePrev(Entity *ent);
-void GetChaseTarget(Entity *ent);
+void SVG_UpdateChaseCam(Entity *ent);
+void SVG_ChaseNext(Entity *ent);
+void SVG_ChasePrev(Entity *ent);
+void SVG_GetChaseTarget(Entity *ent);
 
 //============================================================================
 

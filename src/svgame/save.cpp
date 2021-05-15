@@ -729,13 +729,13 @@ A single player death will automatically restore from the
 last save position.
 ============
 */
-void WriteGame(const char *filename, qboolean autosave)
+void SVG_WriteGame(const char *filename, qboolean autosave)
 {
     FILE    *f;
     int     i;
 
     if (!autosave)
-        SaveClientData();
+        SVG_SaveClientData();
 
     f = fopen(filename, "wb");
     if (!f)
@@ -755,7 +755,7 @@ void WriteGame(const char *filename, qboolean autosave)
     fclose(f);
 }
 
-void ReadGame(const char *filename)
+void SVG_ReadGame(const char *filename)
 {
     FILE    *f;
     int     i;
@@ -811,7 +811,7 @@ WriteLevel
 
 =================
 */
-void WriteLevel(const char *filename)
+void SVG_WriteLevel(const char *filename)
 {
     int     i;
     Entity *ent;
@@ -857,7 +857,7 @@ calling ReadLevel.
 No clients are connected yet.
 =================
 */
-void ReadLevel(const char *filename)
+void SVG_ReadLevel(const char *filename)
 {
     int     entnum;
     FILE    *f;

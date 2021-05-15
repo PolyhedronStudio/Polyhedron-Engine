@@ -37,7 +37,7 @@ void barrel_explode(Entity* self)
     float   spd;
     vec3_t  save;
 
-    T_RadiusDamage(self, self->activator, self->damage, NULL, self->damage + 40, MeansOfDeath::Barrel);
+    SVG_RadiusDamage(self, self->activator, self->damage, NULL, self->damage + 40, MeansOfDeath::Barrel);
 
     VectorCopy(self->state.origin, save);
     VectorMA(self->absMin, 0.5, self->size, self->state.origin);
@@ -47,61 +47,61 @@ void barrel_explode(Entity* self)
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris1/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris1/tris.md2", spd, org);
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris1/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris1/tris.md2", spd, org);
 
     // bottom corners
     spd = 1.75 * (float)self->damage / 200.0;
     VectorCopy(self->absMin, org);
-    ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
     VectorCopy(self->absMin, org);
     org[0] += self->size[0];
-    ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
     VectorCopy(self->absMin, org);
     org[1] += self->size[1];
-    ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
     VectorCopy(self->absMin, org);
     org[0] += self->size[0];
     org[1] += self->size[1];
-    ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
 
     // a bunch of little chunks
     spd = 2 * self->damage / 200;
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
     org[0] = self->state.origin[0] + crandom() * self->size[0];
     org[1] = self->state.origin[1] + crandom() * self->size[1];
     org[2] = self->state.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    SVG_ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
 
     VectorCopy(save, self->state.origin);
     if (self->groundEntityPtr)
@@ -126,7 +126,7 @@ void SP_misc_explobox(Entity* self)
 {
     if (deathmatch->value) {
         // auto-remove for deathmatch
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 

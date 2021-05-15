@@ -12,7 +12,7 @@
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
 
-void Player_Pain(Entity* self, Entity* other, float kick, int damage)
+void SVG_Player_Pain(Entity* self, Entity* other, float kick, int damage)
 {
     // player pain is handled at the end of the frame in P_ApplyDamageFeedback
 }
@@ -26,10 +26,10 @@ void LookAtKiller(Entity* self, Entity* inflictor, Entity* attacker)
 {
     vec3_t      dir;
 
-    if (attacker && attacker != G_GetWorldEntity() && attacker != self) {
+    if (attacker && attacker != SVG_GetWorldEntity() && attacker != self) {
         VectorSubtract(attacker->state.origin, self->state.origin, dir);
     }
-    else if (inflictor && inflictor != G_GetWorldEntity() && inflictor != self) {
+    else if (inflictor && inflictor != SVG_GetWorldEntity() && inflictor != self) {
         VectorSubtract(inflictor->state.origin, self->state.origin, dir);
     }
     else {
@@ -54,10 +54,10 @@ void LookAtKiller(Entity* self, Entity* inflictor, Entity* attacker)
 
 /*
 ==================
-Player_Die
+SVG_Player_Die
 ==================
 */
-void Player_Die(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point)
+void SVG_Player_Die(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point)
 {
     int     n;
 
@@ -86,10 +86,10 @@ void Player_Die(Entity* self, Entity* inflictor, Entity* attacker, int damage, c
         self->client->respawnTime = level.time + 1.0;
         LookAtKiller(self, inflictor, attacker);
         self->client->playerState.pmove.type = EnginePlayerMoveType::Dead;
-        ClientUpdateObituary(self, inflictor, attacker);
-        TossClientWeapon(self);
+        SVG_ClientUpdateObituary(self, inflictor, attacker);
+        SVG_TossClientWeapon(self);
         if (deathmatch->value)
-            Cmd_Score_f(self);       // show scores
+            SVG_Command_Score_f(self);       // show scores
 
         // clear inventory
         // this is kind of ugly, but it's how we want to handle keys in coop

@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "utils.h"
 
 
-vec3_t G_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right)
+vec3_t SVG_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right)
 {
     return vec3_t{
         point[0] + forward[0] * distance[0] + right[0] * distance[1],
@@ -30,7 +30,7 @@ vec3_t G_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t
     };
 }
 
-vec3_t P_ProjectSource(GameClient* client, const vec3_t& point, const vec3_t& distance, const vec3_t& forward, const vec3_t& right)
+vec3_t SVG_PlayerProjectSource(GameClient* client, const vec3_t& point, const vec3_t& distance, const vec3_t& forward, const vec3_t& right)
 {
     vec3_t  _distance = distance;;
 
@@ -39,11 +39,11 @@ vec3_t P_ProjectSource(GameClient* client, const vec3_t& point, const vec3_t& di
     else if (client->persistent.hand == CENTER_HANDED)
         _distance[1] = 0;
 
-    return G_ProjectSource(point, _distance, forward, right);
+    return SVG_ProjectSource(point, _distance, forward, right);
 }
 
 
-vec3_t VelocityForDamage(int damage)
+vec3_t SVG_VelocityForDamage(int damage)
 {
     // Pick random velocities.
     vec3_t v = {
@@ -65,7 +65,7 @@ vec3_t VelocityForDamage(int damage)
 void Think_Delay(Entity *ent)
 {
     UTIL_UseTargets(ent, ent->activator);
-    G_FreeEntity(ent);
+    SVG_FreeEntity(ent);
 }
 
 /*
@@ -93,7 +93,7 @@ void UTIL_UseTargets(Entity *ent, Entity *activator)
 //
     if (ent->delay) {
         // create a temp object to fire at a later time
-        t = G_Spawn();
+        t = SVG_Spawn();
         t->className = "DelayedUse";
         t->nextThink = level.time + ent->delay;
         t->Think = Think_Delay;
@@ -123,8 +123,8 @@ void UTIL_UseTargets(Entity *ent, Entity *activator)
 //
     if (ent->killTarget) {
         t = NULL;
-        while ((t = G_Find(t, FOFS(targetName), ent->killTarget))) {
-            G_FreeEntity(t);
+        while ((t = SVG_Find(t, FOFS(targetName), ent->killTarget))) {
+            SVG_FreeEntity(t);
             if (!ent->inUse) {
                 gi.DPrintf("entity was removed while using killtargets\n");
                 return;
@@ -137,7 +137,7 @@ void UTIL_UseTargets(Entity *ent, Entity *activator)
 //
     if (ent->target) {
         t = NULL;
-        while ((t = G_Find(t, FOFS(targetName), ent->target))) {
+        while ((t = SVG_Find(t, FOFS(targetName), ent->target))) {
             // doors fire area portals in a specific way
             if (!Q_stricmp(t->className, "func_areaportal") &&
                 (!Q_stricmp(ent->className, "func_door") || !Q_stricmp(ent->className, "func_door_rotating")))
@@ -176,34 +176,13 @@ void UTIL_SetMoveDir(vec3_t &angles, vec3_t &moveDirection)
     VectorClear(angles);
 }
 
-
-float vectoyaw(const vec3_t &vec)
-{
-    float   yaw;
-
-    if (/*vec[vec3_t::Yaw] == 0 &&*/ vec[vec3_t::Pitch] == 0) {
-        yaw = 0;
-        if (vec[vec3_t::Yaw] > 0)
-            yaw = 90;
-        else if (vec[vec3_t::Yaw] < 0)
-            yaw = -90;
-    } else {
-        yaw = (int)(std::atan2f(vec[vec3_t::Yaw], vec[vec3_t::Pitch]) * 180.f / M_PI);
-        if (yaw < 0)
-            yaw += 360;
-    }
-
-    return yaw;
-}
-
-
 /*
 ============
 G_TouchTriggers
 
 ============
 */
-void    UTIL_TouchTriggers(Entity *ent)
+void UTIL_TouchTriggers(Entity *ent)
 {
     int         i, num;
     Entity     *touch[MAX_EDICTS], *hit;
@@ -269,13 +248,13 @@ Kill box
 
 /*
 =================
-KillBox
+SVG_KillBox
 
 Kills all entities that would touch the proposed new positioning
 of ent.  Ent should be unlinked before calling this!
 =================
 */
-qboolean KillBox(Entity *ent)
+qboolean SVG_KillBox(Entity *ent)
 {
     trace_t     tr;
 
@@ -285,7 +264,7 @@ qboolean KillBox(Entity *ent)
             break;
 
         // nail it
-        T_Damage(tr.ent, ent, ent, vec3_origin, ent->state.origin, vec3_origin, 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
+        SVG_Damage(tr.ent, ent, ent, vec3_origin, ent->state.origin, vec3_origin, 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
 
         // if we didn't kill it, fail
         if (tr.ent->solid)

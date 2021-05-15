@@ -56,7 +56,7 @@ void multi_trigger(Entity *ent)
         // called while looping through area links...
         ent->Touch = NULL;
         ent->nextThink = level.time + FRAMETIME;
-        ent->Think = G_FreeEntity;
+        ent->Think = SVG_FreeEntity;
     }
 }
 

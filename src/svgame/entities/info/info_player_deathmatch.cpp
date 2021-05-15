@@ -19,7 +19,7 @@ potential spawning position for deathmatch games
 void SP_info_player_deathmatch(Entity* self)
 {
     if (!deathmatch->value) {
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
     SP_misc_teleporter_dest(self);

@@ -24,7 +24,7 @@ void func_object_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t*
         return;
     if (other->takeDamage == TakeDamage::No)
         return;
-    T_Damage(other, self, self, vec3_origin, self->state.origin, vec3_origin, self->damage, 1, 0, MeansOfDeath::Crush);
+    SVG_Damage(other, self, self, vec3_origin, self->state.origin, vec3_origin, self->damage, 1, 0, MeansOfDeath::Crush);
 }
 
 void func_object_release(Entity* self)
@@ -38,7 +38,7 @@ void func_object_use(Entity* self, Entity* other, Entity* activator)
     self->solid = Solid::BSP;
     self->serverFlags &= ~EntityServerFlags::NoClient;
     self->Use = NULL;
-    KillBox(self);
+    SVG_KillBox(self);
     func_object_release(self);
 }
 

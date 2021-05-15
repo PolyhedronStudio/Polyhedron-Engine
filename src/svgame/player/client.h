@@ -9,29 +9,29 @@
 #ifndef __SVGAME_PLAYER_CLIENT_H__
 #define __SVGAME_PLAYER_CLIENT_H__
 
-qboolean ClientConnect(Entity* ent, char* userinfo);
-void ClientDisconnect(Entity* ent);
+qboolean SVG_ClientConnect(Entity* ent, char* userinfo);
+void SVG_ClientDisconnect(Entity* ent);
 
-void PutClientInServer(Entity* ent);
-void InitClientPersistant(GameClient* client);
-void InitClientResp(GameClient* client);
-void HUD_BeginIntermission(Entity* targ);
+void SVG_PutClientInServer(Entity* ent);
+void SVG_InitClientPersistant(GameClient* client);
+void SVG_InitClientResp(GameClient* client);
+void SVG_HUD_BeginIntermission(Entity* targ);
 
 // Respawns the actual client.
-void RespawnClient(Entity* ent);
+void SVG_RespawnClient(Entity* ent);
 
 // Tosses the client weapon.
-void TossClientWeapon(Entity* self);
+void SVG_TossClientWeapon(Entity* self);
 
 // Updates the client obituary.
-void ClientUpdateObituary(Entity* self, Entity* inflictor, Entity* attacker);
-void TossClientWeapon(Entity* self);
+void SVG_ClientUpdateObituary(Entity* self, Entity* inflictor, Entity* attacker);
+void SVG_TossClientWeapon(Entity* self);
 
-void ClientBegin(Entity* ent);
-void ClientCommand(Entity* ent);
-void ClientUserinfoChanged(Entity* ent, char* userinfo);
+void SVG_ClientBegin(Entity* ent);
+void SVG_ClientCommand(Entity* ent);
+void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo);
 
-void ClientBeginServerFrame(Entity* ent);
-void ClientThink(Entity* ent, ClientUserCommand* cmd);
+void SVG_ClientBeginServerFrame(Entity* ent);
+void SVG_ClientThink(Entity* ent, ClientUserCommand* cmd);
 
 #endif // __SVGAME_PLAYER_CLIENT_H__

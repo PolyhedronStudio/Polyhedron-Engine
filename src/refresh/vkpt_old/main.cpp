@@ -1783,7 +1783,7 @@ bsp_add_entlights(const bsp_t* bsp)
 	}
 	entString = bsp->entityString;
 
-	//replicate SpawnEntities logic of game DLL, with regards to entity parsing
+	//replicate SVG_SpawnEntities logic of game DLL, with regards to entity parsing
 
 	/*Example:
 	{

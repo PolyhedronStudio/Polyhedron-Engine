@@ -46,7 +46,7 @@ void target_lightramp_use(Entity* self, Entity* other, Entity* activator)
         // check all the targets
         e = NULL;
         while (1) {
-            e = G_Find(e, FOFS(targetName), self->target);
+            e = SVG_Find(e, FOFS(targetName), self->target);
             if (!e)
                 break;
             if (strcmp(e->className, "light") != 0) {
@@ -60,7 +60,7 @@ void target_lightramp_use(Entity* self, Entity* other, Entity* activator)
 
         if (!self->enemy) {
             gi.DPrintf("%s target %s not found at %s\n", self->className, self->target, Vec3ToString(self->state.origin));
-            G_FreeEntity(self);
+            SVG_FreeEntity(self);
             return;
         }
     }
@@ -73,18 +73,18 @@ void SP_target_lightramp(Entity* self)
 {
     if (!self->message || strlen(self->message) != 2 || self->message[0] < 'a' || self->message[0] > 'z' || self->message[1] < 'a' || self->message[1] > 'z' || self->message[0] == self->message[1]) {
         gi.DPrintf("target_lightramp has bad ramp (%s) at %s\n", self->message, Vec3ToString(self->state.origin));
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 
     if (deathmatch->value) {
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 
     if (!self->target) {
         gi.DPrintf("%s with no target at %s\n", self->className, Vec3ToString(self->state.origin));
-        G_FreeEntity(self);
+        SVG_FreeEntity(self);
         return;
     }
 
