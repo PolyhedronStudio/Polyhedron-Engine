@@ -60,6 +60,8 @@ SET(SRC_SVGAME
 
 	svgame/ai/MonsterAI.cpp
 
+	svgame/entities/base/SVGBaseEntity.cpp
+
 	svgame/entities/func/func_areaportal.cpp
 	svgame/entities/func/func_button.cpp
 	
@@ -151,6 +153,8 @@ SET(HEADERS_SVGAME
 	svgame/utils.h
 
 	svgame/ai/MonsterAI.h
+
+	svgame/entities/base/SVGBaseEntity.h
 
 	svgame/entities/func/func_door.h
 

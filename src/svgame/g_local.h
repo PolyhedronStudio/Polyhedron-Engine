@@ -906,8 +906,17 @@ struct gclient_s {
 };
 
 //-------------------
+// Predeclarations.
+//-------------------
+class CBaseEntity;
+
+//-------------------
 // entity_s, the server side entity structure. If you know what an entity is,
 // then you know what this is.
+// 
+// The actual SVGBaseEntity class is a member. It is where the magic happens.
+// Entities can be linked to their "classname", this will in turn make sure that
+// the proper inheritance entity is allocated.
 //-------------------
 struct entity_s {
     // Actual entity state member. Contains all data that is actually networked.
@@ -945,6 +954,8 @@ struct entity_s {
     // EXPECTS THE FIELDS IN THAT ORDER!
 
     //================================
+    CBaseEntity* classEntity;
+
     int moveType;
     int flags;
 
