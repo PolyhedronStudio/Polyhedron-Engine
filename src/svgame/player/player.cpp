@@ -14,7 +14,7 @@
 
 void SVG_Player_Pain(Entity* self, Entity* other, float kick, int damage)
 {
-    // player pain is handled at the end of the frame in P_ApplyDamageFeedback
+    // player pain is handled at the end of the frame in SVG_Player_ApplyDamageFeedback
 }
 
 /*

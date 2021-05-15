@@ -34,12 +34,12 @@ static float   bobfracsin;     // sin(bobfrac*M_PI)
 
 //
 //===============
-// SV_CalcRoll
+// SVG_CalcRoll
 // 
 //
 //===============
 //
-static float SV_CalcRoll(vec3_t angles, vec3_t velocity)
+static float SVG_CalcRoll(vec3_t angles, vec3_t velocity)
 {
     float   sign;
     float   side;
@@ -62,12 +62,12 @@ static float SV_CalcRoll(vec3_t angles, vec3_t velocity)
 
 //
 //===============
-// P_ApplyDamageFeedback
+// SVG_Player_ApplyDamageFeedback
 // 
 // Handles color blends and view kicks
 //===============
 //
-static void P_ApplyDamageFeedback(Entity *player)
+static void SVG_Player_ApplyDamageFeedback(Entity *player)
 {
     GameClient   *client;
     float   side;
@@ -194,7 +194,7 @@ static void P_ApplyDamageFeedback(Entity *player)
 
 //
 //===============
-// SV_CalculateViewOffset
+// SVG_CalculateViewOffset
 // 
 // Calculates t
 //
@@ -208,7 +208,7 @@ static void P_ApplyDamageFeedback(Entity *player)
 // 
 //===============
 //
-static void SV_CalculateViewOffset(Entity *ent)
+static void SVG_CalculateViewOffset(Entity *ent)
 {
     float       bob;
     float       ratio;
@@ -303,11 +303,11 @@ static void SV_CalculateViewOffset(Entity *ent)
 
 //
 //===============
-// SV_CalculateGunOffset
+// SVG_CalculateGunOffset
 // 
 //===============
 //
-static void SV_CalculateGunOffset(Entity *ent)
+static void SVG_CalculateGunOffset(Entity *ent)
 {
     int     i;
     float   delta;
@@ -373,11 +373,11 @@ static void SV_AddBlend(float r, float g, float b, float a, float *v_blend)
 
 //
 //===============
-// SV_CalculateBlend
+// SVG_CalculateBlend
 // 
 //===============
 //
-static void SV_CalculateBlend(Entity *ent)
+static void SVG_CalculateBlend(Entity *ent)
 {
     int     contents;
     vec3_t  vieworg;
@@ -422,11 +422,11 @@ static void SV_CalculateBlend(Entity *ent)
 
 //
 //===============
-// P_CheckFallingDamage
+// SVG_Player_CheckFallingDamage
 // 
 //===============
 //
-static void P_CheckFallingDamage(Entity *ent)
+static void SVG_Player_CheckFallingDamage(Entity *ent)
 {
     float   delta;
     int     damage;
@@ -491,11 +491,11 @@ static void P_CheckFallingDamage(Entity *ent)
 
 //
 //===============
-// P_CheckWorldEffects
+// SVG_Player_CheckWorldEffects
 // 
 //===============
 //
-static void P_CheckWorldEffects(void)
+static void SVG_Player_CheckWorldEffects(void)
 {
     int         waterlevel, oldWaterLevel;
 
@@ -614,11 +614,11 @@ static void P_CheckWorldEffects(void)
 
 //
 //===============
-// G_SetClientEffects
+// SVG_SetClientEffects
 // 
 //===============
 //
-static void G_SetClientEffects(Entity *ent)
+static void SVG_SetClientEffects(Entity *ent)
 {
     ent->state.effects = 0;
     ent->state.renderfx = 0;
@@ -634,11 +634,11 @@ static void G_SetClientEffects(Entity *ent)
 
 //
 //===============
-// G_SetClientEvent
+// SVG_SetClientEvent
 // 
 //===============
 //
-static void G_SetClientEvent(Entity *ent)
+static void SVG_SetClientEvent(Entity *ent)
 {
     if (ent->state.event)
         return;
@@ -651,11 +651,11 @@ static void G_SetClientEvent(Entity *ent)
 
 //
 //===============
-// G_SetClientSound
+// SVG_SetClientSound
 // 
 //===============
 //
-static void G_SetClientSound(Entity *ent)
+static void SVG_SetClientSound(Entity *ent)
 {
     const char    *weap; // C++20: STRING: Added const to char*
 
@@ -678,11 +678,11 @@ static void G_SetClientSound(Entity *ent)
 
 //
 //===============
-// G_SetClientFrame
+// SVG_SetClientFrame
 // 
 //===============
 //
-static void G_SetClientFrame(Entity *ent)
+static void SVG_SetClientFrame(Entity *ent)
 {
     GameClient *client = NULL;
     qboolean isDucking = false;
@@ -806,14 +806,14 @@ void SVG_ClientEndServerFrame(Entity *ent)
         // FIXME: add view drifting here?
         current_client->playerState.blend[3] = 0;
         current_client->playerState.fov = 90;
-        HUD_SetClientStats(ent);
+        SVG_HUD_SetClientStats(ent);
         return;
     }
 
     vec3_vectors(ent->client->aimAngles, &forward, &right, &up);
 
     // burn from lava, etc
-    P_CheckWorldEffects();
+    SVG_Player_CheckWorldEffects();
 
     //
     // set model angles from view angles so other things in
@@ -825,7 +825,7 @@ void SVG_ClientEndServerFrame(Entity *ent)
         ent->state.angles[vec3_t::Pitch] = ent->client->aimAngles[vec3_t::Pitch] / 3;
     ent->state.angles[vec3_t::Yaw] = ent->client->aimAngles[vec3_t::Yaw];
     ent->state.angles[vec3_t::Roll] = 0;
-    ent->state.angles[vec3_t::Roll] = SV_CalcRoll(ent->state.angles, ent->velocity) * 4;
+    ent->state.angles[vec3_t::Roll] = SVG_CalcRoll(ent->state.angles, ent->velocity) * 4;
 
     //
     // calculate speed and cycle to be used for
@@ -866,39 +866,39 @@ void SVG_ClientEndServerFrame(Entity *ent)
     bobfracsin = std::fabsf(std::sinf(bobTime * M_PI));
 
     // Detect hitting the floor, and apply damage appropriately.
-    P_CheckFallingDamage(ent);
+    SVG_Player_CheckFallingDamage(ent);
 
     // Apply all other the damage taken this frame
-    P_ApplyDamageFeedback(ent);
+    SVG_Player_ApplyDamageFeedback(ent);
 
     // Determine the new frame's view offsets
-    SV_CalculateViewOffset(ent);
+    SVG_CalculateViewOffset(ent);
 
     // Determine the gun offsets
-    SV_CalculateGunOffset(ent);
+    SVG_CalculateGunOffset(ent);
 
     // Determine the full screen color blend
     // must be after viewOffset, so eye contents can be
     // accurately determined
     // FIXME: with client prediction, the contents
     // should be determined by the client
-    SV_CalculateBlend(ent);
+    SVG_CalculateBlend(ent);
 
     // Set the stats to display for this client (one of the chase isSpectator stats or...)
     if (ent->client->respawn.isSpectator)
-        HUD_SetSpectatorStats(ent);
+        SVG_HUD_SetSpectatorStats(ent);
     else
-        HUD_SetClientStats(ent);
+        SVG_HUD_SetClientStats(ent);
 
-    HUD_CheckChaseStats(ent);
+    SVG_HUD_CheckChaseStats(ent);
 
-    G_SetClientEvent(ent);
+    SVG_SetClientEvent(ent);
 
-    G_SetClientEffects(ent);
+    SVG_SetClientEffects(ent);
 
-    G_SetClientSound(ent);
+    SVG_SetClientSound(ent);
 
-    G_SetClientFrame(ent);
+    SVG_SetClientFrame(ent);
 
     // Store velocity and view angles.
     ent->client->oldVelocity = ent->velocity;
@@ -910,7 +910,7 @@ void SVG_ClientEndServerFrame(Entity *ent)
 
     // if the scoreboard is up, update it
     if (ent->client->showScores && !(level.frameNumber & 31)) {
-        HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
+        SVG_HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
         gi.Unicast(ent, false);
     }
 }

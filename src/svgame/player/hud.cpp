@@ -72,7 +72,7 @@ void HUD_MoveClientToIntermission(Entity *ent)
 
     // Add the layout in case of a deathmatch or co-op gamemode.
     if (deathmatch->value || coop->value) {
-        HUD_GenerateDMScoreboardLayout(ent, NULL);
+        SVG_HUD_GenerateDMScoreboardLayout(ent, NULL);
         gi.Unicast(ent, true);
     }
 
@@ -179,11 +179,11 @@ void SVG_HUD_BeginIntermission(Entity *targ)
 
 /*
 ==================
-HUD_GenerateDMScoreboardLayout
+SVG_HUD_GenerateDMScoreboardLayout
 
 ==================
 */
-void HUD_GenerateDMScoreboardLayout(Entity *ent, Entity *killer)
+void SVG_HUD_GenerateDMScoreboardLayout(Entity *ent, Entity *killer)
 {
     char    entry[1024];
     char    string[1400];
@@ -275,7 +275,7 @@ Sends the deatchmatch scoreboard svc_layout message.
 */
 void HUD_SendDMScoreboardMessage(Entity *ent)
 {
-    HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
+    SVG_HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
     gi.Unicast(ent, true);
 }
 
@@ -308,14 +308,14 @@ void SVG_Command_Score_f(Entity *ent)
 
 //
 //===============
-// HUD_SetClientStats
+// SVG_HUD_SetClientStats
 // 
 // Sets the entities client, player state, status array with the current
 // frame game state data. Such as ammo, etc, it also index/precaches images
 // and audio if required.
 //================
 //
-void HUD_SetClientStats(Entity* ent)
+void SVG_HUD_SetClientStats(Entity* ent)
 {
     gitem_t* item;
 
@@ -414,10 +414,10 @@ void HUD_SetClientStats(Entity* ent)
 
 /*
 ===============
-HUD_CheckChaseStats
+SVG_HUD_CheckChaseStats
 ===============
 */
-void HUD_CheckChaseStats(Entity *ent)
+void SVG_HUD_CheckChaseStats(Entity *ent)
 {
     int i;
 
@@ -435,16 +435,16 @@ void HUD_CheckChaseStats(Entity *ent)
         }
 
         memcpy(cl->playerState.stats, ent->client->playerState.stats, sizeof(cl->playerState.stats));
-        HUD_SetSpectatorStats(g_entities + i);
+        SVG_HUD_SetSpectatorStats(g_entities + i);
     }
 }
 
 /*
 ===============
-HUD_SetSpectatorStats
+SVG_HUD_SetSpectatorStats
 ===============
 */
-void HUD_SetSpectatorStats(Entity *ent)
+void SVG_HUD_SetSpectatorStats(Entity *ent)
 {
     if (!ent) {
         return;
@@ -453,7 +453,7 @@ void HUD_SetSpectatorStats(Entity *ent)
     GameClient* cl = ent->client;
 
     if (!cl->chaseTarget) {
-        HUD_SetClientStats(ent);
+        SVG_HUD_SetClientStats(ent);
     }
 
     cl->playerState.stats[STAT_SPECTATOR] = 1;
