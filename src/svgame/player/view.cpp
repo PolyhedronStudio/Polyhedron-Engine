@@ -778,7 +778,6 @@ newanim:
 void SVG_ClientEndServerFrame(Entity *ent)
 {
     float   bobTime;
-    int     i;
 
     if (!ent || !ent->client) {
         return;

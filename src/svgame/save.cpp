@@ -790,7 +790,6 @@ void SVG_ReadGame(const char *filename)
         gi.Error("Savegame has bad maxEntities");
     }
 
-    g_entities = (Entity*)gi.TagMalloc(game.maxEntities * sizeof(g_entities[0]), TAG_GAME); // CPP: Cast
     globals.edicts = g_entities;
     globals.max_edicts = game.maxEntities;
 
@@ -873,7 +872,10 @@ void SVG_ReadLevel(const char *filename)
         gi.Error("Couldn't open %s", filename);
 
     // Ensure all entities have a clean slate in memory.
-    memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0]));
+    for (int32_t i = 0; i < game.maxEntities; i++) {
+        g_entities[i] = {};
+    }
+    //memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0]));
 
     // Set the number of edicts to be maxClients + 1. (They are soon to be in-use after all)
     globals.num_edicts = maxClients->value + 1;

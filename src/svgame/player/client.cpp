@@ -281,7 +281,6 @@ void SVG_TossClientWeapon(Entity *self)
 {
     gitem_t     *item;
     Entity     *drop;
-    qboolean    quad;
     float       spread = 1.5f;
 
     if (!deathmatch->value)

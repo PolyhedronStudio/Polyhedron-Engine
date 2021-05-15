@@ -215,6 +215,18 @@ static inline float Clampf(float f, float min = 0.f, float max = 1.f) {
 
 //
 //===============
+// Clampi
+// 
+// Returns the value 'i', clamped to the specified 'min' and 'max'.
+//===============
+//
+static inline int Clampi(int i, int min, int max) {
+    return Mini(Maxi(i, min), max);
+}
+
+
+//
+//===============
 // ClampEuler
 // 
 // The angle `theta` circularly clamped.

@@ -35,7 +35,7 @@ int sm_meat_index;
 int snd_fry;
 int meansOfDeath;
 
-Entity     *g_entities;
+Entity g_entities[MAX_EDICTS];
 
 cvar_t  *deathmatch;
 cvar_t  *coop;
@@ -149,7 +149,6 @@ void SVG_InitGame(void)
     deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
     coop = gi.cvar("coop", "0", CVAR_LATCH);
     skill = gi.cvar("skill", "1", CVAR_LATCH);
-    maxEntities = gi.cvar("maxEntities", "2048", CVAR_LATCH); // N&C: Pool
 
     // change anytime vars
     dmflags = gi.cvar("dmflags", "0", CVAR_SERVERINFO);
@@ -183,9 +182,8 @@ void SVG_InitGame(void)
     SVG_InitItems();
 
     // initialize all entities for this game
-    game.maxEntities = maxEntities->value;
-    clamp(game.maxEntities, (int)maxClients->value + 1, MAX_EDICTS);
-    g_entities = (Entity*)gi.TagMalloc(game.maxEntities * sizeof(g_entities[0]), TAG_GAME); // CPP: Cast
+    game.maxEntities = MAX_EDICTS;
+    game.maxEntities = Clampi(game.maxEntities, (int)maxClients->value + 1, MAX_EDICTS);
     globals.edicts = g_entities;
     globals.max_edicts = game.maxEntities;
 

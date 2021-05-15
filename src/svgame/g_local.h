@@ -511,7 +511,7 @@ struct MeansOfDeath {
 extern  int meansOfDeath;
 
 // Once again, ugly.
-extern  Entity         *g_entities;
+extern  Entity g_entities[MAX_EDICTS];
 
 //
 // Small macros that are used to generate a field offset with. These are used
@@ -531,7 +531,6 @@ extern  Entity         *g_entities;
 //-------------------
 // Server game related cvars.
 //-------------------
-extern  cvar_t  *maxEntities;
 extern  cvar_t  *deathmatch;
 extern  cvar_t  *coop;
 extern  cvar_t  *dmflags;
@@ -906,14 +905,6 @@ struct gclient_s {
     qboolean updateChase;
 };
 
-
-//-------------------
-// MonsterAI predecleration. 
-// 
-// TODO: Really need to start moving each of these classes and all into their own files...
-//-------------------
-#include "ai/MonsterAI.h"
-
 //-------------------
 // entity_s, the server side entity structure. If you know what an entity is,
 // then you know what this is.
@@ -1078,7 +1069,6 @@ struct entity_s {
 
     // common data blocks
     PushMoveInfo moveInfo;
-    MonsterAI monsterAI;
 };
 
 #endif

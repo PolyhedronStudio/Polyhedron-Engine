@@ -489,7 +489,10 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     //for (int i = 0; i < game.maxEntities; i++) {
     //    g_entities[i] = Entity();
     //}
-    memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0])); // WatIs: C++-ify: Note that this may be a problem maker.
+    for (int32_t i = 0; i < game.maxEntities; i++) {
+        g_entities[i] = {};
+    }
+    //memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0])); // WatIs: C++-ify: Note that this may be a problem maker.
 
     strncpy(level.mapName, mapName, sizeof(level.mapName) - 1);
     strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
