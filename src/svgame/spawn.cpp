@@ -425,7 +425,7 @@ void G_FindTeams(void)
 
     c = 0;
     c2 = 0;
-    for (i = 1, e = g_entities + i ; i < globals.num_edicts ; i++, e++) {
+    for (i = 1, e = g_entities + i ; i < globals.numberOfEntities ; i++, e++) {
         if (!e->inUse)
             continue;
         if (!e->team)
@@ -436,7 +436,7 @@ void G_FindTeams(void)
         e->teamMasterPtr = e;
         c++;
         c2++;
-        for (j = i + 1, e2 = e + 1 ; j < globals.num_edicts ; j++, e2++) {
+        for (j = i + 1, e2 = e + 1 ; j < globals.numberOfEntities ; j++, e2++) {
             if (!e2->inUse)
                 continue;
             if (!e2->team)
@@ -559,7 +559,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
 #ifdef DEBUG
     i = 1;
     ent = EDICT_NUM(i);
-    while (i < globals.pool.num_edicts) {
+    while (i < globals.pool.numberOfEntities) {
         if (ent->inUse != 0 || ent->inUse != 1)
             Com_DPrintf("Invalid entity %d\n", i);
         i++, ent++;

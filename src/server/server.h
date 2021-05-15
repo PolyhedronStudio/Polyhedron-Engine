@@ -71,10 +71,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 //=============================================================================
-#define EDICT_POOL(c, n) ((Entity *)((byte *)(c)->pool->edicts + (c)->pool->entity_size*(n)))
+#define EDICT_POOL(c, n) ((Entity *)((byte *)(c)->pool->entities + (c)->pool->entitySize*(n)))
 
-#define EDICT_NUM(n) ((Entity *)((byte *)ge->edicts + ge->entity_size*(n)))
-#define NUM_FOR_EDICT(e) ((int)(((byte *)(e) - (byte *)ge->edicts) / ge->entity_size))
+#define EDICT_NUM(n) ((Entity *)((byte *)ge->entities + ge->entitySize*(n)))
+#define NUM_FOR_EDICT(e) ((int)(((byte *)(e) - (byte *)ge->entities) / ge->entitySize))
 
 
 //=============================================================================

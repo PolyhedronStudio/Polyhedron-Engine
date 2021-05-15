@@ -39,7 +39,7 @@ size_t playertouchmax;
 
 void SV_PreRunCmd(void)
 {
-    size_t max = (ge->num_edicts + 512 + 7) & ~7;
+    size_t max = (ge->numberOfEntities + 512 + 7) & ~7;
     if (max > playertouchmax)
     {
         playertouchmax = max;
@@ -88,7 +88,7 @@ static void create_baselines(void)
         memset(base, 0, sizeof(*base) * SV_BASELINES_PER_CHUNK);
     }
 
-    for (i = 1; i < sv_client->pool->num_edicts; i++) {
+    for (i = 1; i < sv_client->pool->numberOfEntities; i++) {
         ent = EDICT_POOL(sv_client, i);
 
         if (!ent->inUse) {

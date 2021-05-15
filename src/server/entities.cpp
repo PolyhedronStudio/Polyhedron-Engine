@@ -327,7 +327,7 @@ void SV_BuildClientFrame(client_t *client)
     frame->num_entities = 0;
     frame->first_entity = svs.next_entity;
 
-    for (e = 1; e < client->pool->num_edicts; e++) {
+    for (e = 1; e < client->pool->numberOfEntities; e++) {
         ent = EDICT_POOL(client, e);
 
         // ignore entities not in use

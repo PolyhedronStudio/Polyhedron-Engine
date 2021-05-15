@@ -790,8 +790,8 @@ void SVG_ReadGame(const char *filename)
         gi.Error("Savegame has bad maxEntities");
     }
 
-    globals.edicts = g_entities;
-    globals.max_edicts = game.maxEntities;
+    globals.entities = g_entities;
+    globals.maxEntities = game.maxEntities;
 
     game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     for (i = 0; i < game.maxClients; i++) {
@@ -827,7 +827,7 @@ void SVG_WriteLevel(const char *filename)
     write_fields(f, levelfields, &level);
 
     // write out all the entities
-    for (i = 0; i < globals.num_edicts; i++) {
+    for (i = 0; i < globals.numberOfEntities; i++) {
         ent = &g_entities[i];
         if (!ent->inUse)
             continue;
@@ -878,7 +878,7 @@ void SVG_ReadLevel(const char *filename)
     //memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0]));
 
     // Set the number of edicts to be maxClients + 1. (They are soon to be in-use after all)
-    globals.num_edicts = maxClients->value + 1;
+    globals.numberOfEntities = maxClients->value + 1;
 
     i = read_int(f);
     if (i != SAVE_MAGIC2) {
@@ -903,8 +903,8 @@ void SVG_ReadLevel(const char *filename)
         if (entnum < 0 || entnum >= game.maxEntities) {
             gi.Error("%s: bad entity number", __func__);
         }
-        if (entnum >= globals.num_edicts)
-            globals.num_edicts = entnum + 1;
+        if (entnum >= globals.numberOfEntities)
+            globals.numberOfEntities = entnum + 1;
 
         ent = &g_entities[entnum];
         read_fields(f, entityfields, ent);
@@ -926,7 +926,7 @@ void SVG_ReadLevel(const char *filename)
     }
 
     // do any load time things at this point
-    for (i = 0 ; i < globals.num_edicts ; i++) {
+    for (i = 0 ; i < globals.numberOfEntities ; i++) {
         ent = &g_entities[i];
 
         if (!ent->inUse)

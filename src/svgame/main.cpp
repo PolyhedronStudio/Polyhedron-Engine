@@ -184,13 +184,13 @@ void SVG_InitGame(void)
     // initialize all entities for this game
     game.maxEntities = MAX_EDICTS;
     game.maxEntities = Clampi(game.maxEntities, (int)maxClients->value + 1, MAX_EDICTS);
-    globals.edicts = g_entities;
-    globals.max_edicts = game.maxEntities;
+    globals.entities = g_entities;
+    globals.maxEntities = game.maxEntities;
 
     // initialize all clients for this game
     game.maxClients = maxClients->value;
     game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
-    globals.num_edicts = game.maxClients + 1;
+    globals.numberOfEntities = game.maxClients + 1;
 }
 
 
@@ -233,7 +233,7 @@ ServerGameExports* GetServerGameAPI(ServerGameImports* import)
 
     globals.ServerCommand = SVG_ServerCommand;
 
-    globals.entity_size = sizeof(Entity);
+    globals.entitySize = sizeof(Entity);
 
     return &globals;
 }
@@ -492,7 +492,7 @@ void SVG_RunFrame(void)
     // even the world gets a chance to Think
     //
     ent = &g_entities[0];
-    for (i = 0 ; i < globals.num_edicts ; i++, ent++) {
+    for (i = 0 ; i < globals.numberOfEntities ; i++, ent++) {
         if (!ent->inUse)
             continue;
 
@@ -547,7 +547,7 @@ Entity* SVG_Find(Entity* from, int fieldofs, const char* match)
     else
         from++;
 
-    for (; from < &g_entities[globals.num_edicts]; from++) {
+    for (; from < &g_entities[globals.numberOfEntities]; from++) {
         if (!from->inUse)
             continue;
         s = *(char**)((byte*)from + fieldofs);
@@ -579,7 +579,7 @@ Entity* SVG_FindEntitiesWithinRadius(Entity* from, vec3_t org, float rad)
         from = g_entities;
     else
         from++;
-    for (; from < &g_entities[globals.num_edicts]; from++) {
+    for (; from < &g_entities[globals.numberOfEntities]; from++) {
         if (!from->inUse)
             continue;
         if (from->solid == Solid::Not)
@@ -663,7 +663,7 @@ Entity* SVG_Spawn(void)
     Entity* e;
 
     e = &g_entities[game.maxClients + 1];
-    for (i = game.maxClients + 1; i < globals.num_edicts; i++, e++) {
+    for (i = game.maxClients + 1; i < globals.numberOfEntities; i++, e++) {
         // the first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!e->inUse && (e->freeTime < 2 || level.time - e->freeTime > 0.5)) {
@@ -675,7 +675,7 @@ Entity* SVG_Spawn(void)
     if (i == game.maxEntities)
         gi.Error("ED_Alloc: no free edicts");
 
-    globals.num_edicts++;
+    globals.numberOfEntities++;
     SVG_InitEntity(e);
     return e;
 }

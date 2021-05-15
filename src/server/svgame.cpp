@@ -938,14 +938,14 @@ void SV_InitGameProgs(void)
     // initialize
     ge->Init();
 
-    // sanitize entity_size
-    if (ge->entity_size < sizeof(Entity) || ge->entity_size > SIZE_MAX / MAX_EDICTS) {
+    // sanitize entitySize
+    if (ge->entitySize < sizeof(Entity) || ge->entitySize > SIZE_MAX / MAX_EDICTS) {
         Com_Error(ERR_DROP, "Server Game DLL returned bad size of Entity");
     }
 
-    // sanitize max_edicts
-    if (ge->entity_size <= sv_maxclients->integer || ge->entity_size > MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Server Game DLL returned bad number of max_edicts %i   %i", ge->entity_size, sizeof(Entity));
+    // sanitize maxEntities
+    if (ge->entitySize <= sv_maxclients->integer || ge->entitySize > MAX_EDICTS) {
+        Com_Error(ERR_DROP, "Server Game DLL returned bad number of maxEntities %i   %i", ge->entitySize, sizeof(Entity));
     }
 }
 

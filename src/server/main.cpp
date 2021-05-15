@@ -997,7 +997,7 @@ static void SVC_DirectConnect(void)
     newcl->gamedir = fs_game->string;
     newcl->mapName = sv.name;
     newcl->configstrings = (char *)sv.configstrings;
-    newcl->pool = (EntityPool*)&ge->edicts; // N&C: Edict_pool_t change
+    newcl->pool = (EntityPool*)&ge->entities; // N&C: Edict_pool_t change
     newcl->cm = &sv.cm;
     newcl->spawncount = sv.spawncount;
     newcl->maxClients = sv_maxclients->integer;
@@ -1545,7 +1545,7 @@ static void SV_PrepWorldFrame(void)
     if (!SV_FRAMESYNC)
         return;
 
-    for (i = 1; i < ge->num_edicts; i++) {
+    for (i = 1; i < ge->numberOfEntities; i++) {
         ent = EDICT_NUM(i);
 
         // events only last for a single keyframe

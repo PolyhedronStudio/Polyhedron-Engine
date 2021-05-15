@@ -207,10 +207,10 @@ typedef struct {
 //
 
 typedef struct {
-    struct entity_s  *edicts;
-    int         entity_size;
-    int         num_edicts;     // current number, <= max_edicts
-    int         max_edicts;
+    struct entity_s  *entities;
+    int         entitySize;
+    int         numberOfEntities;     // current number, <= maxEntities
+    int         maxEntities;
 } EntityPool;
 
 typedef struct {
@@ -285,10 +285,10 @@ typedef struct {
     // The size will be fixed when ge->Init() is called
 //    EntityPool pool;
 
-    struct entity_s  *edicts;
-    int         entity_size;
-    int         num_edicts;     // current number, <= max_edicts
-    int         max_edicts;
+    struct entity_s  *entities;
+    int         entitySize;
+    int         numberOfEntities;     // current number, <= maxEntities
+    int         maxEntities;
 } ServerGameExports;
 
 #endif // __INC_SHARED__SVGAME_H__
