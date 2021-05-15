@@ -90,6 +90,7 @@ SET(SRC_SVGAME
 	svgame/entities/misc/misc_gib_arm.cpp 
 	svgame/entities/misc/misc_gib_leg.cpp 
 	svgame/entities/misc/misc_gib_head.cpp 
+	svgame/entities/misc/MiscExplosionBox.cpp
 	 
 	svgame/entities/misc/misc_teleporter.cpp
 	svgame/entities/misc/misc_teleporter_dest.cpp
@@ -157,6 +158,8 @@ SET(HEADERS_SVGAME
 	svgame/entities/base/SVGBaseEntity.h
 
 	svgame/entities/func/func_door.h
+
+	svgame/entities/misc/MiscExplosionBox.h
 
 	#svgame/oldmonsters/soldier.h
 

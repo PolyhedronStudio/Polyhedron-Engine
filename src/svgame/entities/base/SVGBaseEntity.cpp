@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// CBaseEntity.cpp
+// SVGBaseEntity.cpp
 //
 //
 */

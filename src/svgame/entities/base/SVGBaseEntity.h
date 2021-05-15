@@ -2,14 +2,14 @@
 // LICENSE HERE.
 
 //
-// CBaseEntity.h
+// SVGBaseEntity.h
 //
 // Base entity class, where the fun begins. All entities are inherited from this,
 // one way or the other :)
 //
 */
-#ifndef __SVGAME_ENTITIES_BASE_CBASEENTITY_H__
-#define __SVGAME_ENTITIES_BASE_CBASEENTITY_H__
+#ifndef __SVGAME_ENTITIES_BASE_SVGBASEENTITY_H__
+#define __SVGAME_ENTITIES_BASE_SVGBASEENTITY_H__
 
 class SVGBaseEntity {
 public:
