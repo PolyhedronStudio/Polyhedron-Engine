@@ -662,6 +662,12 @@ struct DamageFlags {
 };
 
 //
+// stepmove.cpp
+//
+qboolean SVG_StepMove_CheckBottom(Entity* ent);
+qboolean SVG_StepMove_Walk(Entity* ent, float yaw, float dist);
+
+//
 // g_weapon.c
 //
 void SVG_ThrowDebris(Entity *self, const char *modelname, float speed, const vec3_t& origin);

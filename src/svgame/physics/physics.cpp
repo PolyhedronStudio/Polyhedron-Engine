@@ -17,10 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // g_phys.c
 
-#include "g_local.h"
-#include "utils.h"
+#include "../g_local.h"
+#include "../utils.h"
 
-#include "entities/base/SVGBaseEntity.h"
+#include "../entities/base/SVGBaseEntity.h"
 
 /*
 

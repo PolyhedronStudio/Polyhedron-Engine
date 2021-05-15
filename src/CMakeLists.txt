@@ -49,7 +49,6 @@ SET(SRC_SVGAME
 	svgame/main.cpp
 	svgame/effects.cpp
 	#svgame/oldmonsters.cpp
-	svgame/physics.cpp
 	svgame/save.cpp
 	svgame/spawn.cpp
 	svgame/svcmds.cpp
@@ -130,6 +129,8 @@ SET(SRC_SVGAME
 
 	#svgame/oldmonsters/movement.cpp
 	#svgame/oldmonsters/soldier.cpp
+	svgame/physics/physics.cpp
+	svgame/physics/stepmove.cpp
 
 	svgame/player/client.cpp
 	svgame/player/hud.cpp
