@@ -304,19 +304,28 @@ static inline float LerpAngle(float a2, float a1, float frac)
 
 //
 //===============
-// anglemod
+// AngleMod
 // 
 // Short angle modular.
 //===============
 //
-static inline float anglemod(float a)
-{
-    return (360.0f / 65536) * ((int)(a * (65536 / 360.0f)) & 65535);
+static inline float AngleMod(float a) {
+    a = fmodf(a, 360.f);// (360.0 / 65536) * ((int32_t) (a * (65536 / 360.0)) & 65535);
+
+    if (a < 0) {
+        return a + (((int32_t)(a / 360.f) + 1) * 360.f);
+    }
+
+    return a;
 }
+//static inline float AngleMod(float a)
+//{
+//    return (360.f * a) & 360; //(360.0f / 65536) * ((int)(a * (65536 / 360.0f)) & 65535);
+//}
 
 //
 //===============
-// anglemod
+// AngleMod
 // 
 // Short angle modular.
 //===============

@@ -116,7 +116,7 @@ static const save_field_t entityfields[] = {
     E(goalEntityPtr),
     E(moveTargetPtr),
     F(yawSpeed),
-    F(idealYaw),
+    F(idealYawAngle),
 
     F(nextThink),
     P(PreThink, P_prethink),

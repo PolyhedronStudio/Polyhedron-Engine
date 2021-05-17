@@ -93,7 +93,6 @@ realcheck:
     return true;
 }
 
-
 void SVG_StepMove_CheckGround(Entity* ent)
 {
     vec3_t      point;
@@ -227,11 +226,11 @@ qboolean SVG_MoveStep(Entity* ent, vec3_t move, qboolean relink)
         return false;
     }
 
-    // push down from a step height above the wished position
+    // Push down from a step height above the wished position
 //    if (!(ent->monsterInfo.aiflags & AI_NOSTEP))
-        stepsize = STEPSIZE;
+    //    stepsize = STEPSIZE;
     //else
-    //    stepsize = 1;
+        stepsize = 1;
 
     neworg[2] += stepsize;
     VectorCopy(neworg, end);
@@ -316,15 +315,15 @@ M_ChangeYaw
 
 ===============
 */
-void M_ChangeYaw(Entity* ent)
+static void SVG_CalculateYawAngle (Entity* ent)
 {
     float   ideal;
     float   current;
     float   move;
     float   speed;
 
-    current = anglemod(ent->state.angles[vec3_t::Yaw]);
-    ideal = ent->idealYaw;
+    current = AngleMod(ent->state.angles[vec3_t::Yaw]);
+    ideal = ent->idealYawAngle;
 
     if (current == ideal)
         return;
@@ -348,7 +347,7 @@ void M_ChangeYaw(Entity* ent)
             move = -speed;
     }
 
-    ent->state.angles[vec3_t::Yaw] = anglemod(current + move);
+    ent->state.angles[vec3_t::Yaw] = AngleMod(current + move);
 }
 
 
@@ -366,8 +365,8 @@ qboolean SV_StepDirection(Entity* ent, float yaw, float dist)
     vec3_t      move, oldorigin;
     float       delta;
 
-    ent->idealYaw = yaw;
-    M_ChangeYaw(ent);
+    ent->idealYawAngle = yaw;
+    SVG_CalculateYawAngle(ent);
 
     yaw = yaw * M_PI * 2 / 360;
     move[0] = std::cosf(yaw) * dist;
@@ -376,7 +375,7 @@ qboolean SV_StepDirection(Entity* ent, float yaw, float dist)
 
     VectorCopy(ent->state.origin, oldorigin);
     if (SVG_MoveStep(ent, move, false)) {
-        delta = ent->state.angles[vec3_t::Yaw] - ent->idealYaw;
+        delta = ent->state.angles[vec3_t::Yaw] - ent->idealYawAngle;
         if (delta > 45 && delta < 315) {
             // not turned far enough, so don't take the step
             VectorCopy(oldorigin, ent->state.origin);
@@ -389,154 +388,6 @@ qboolean SV_StepDirection(Entity* ent, float yaw, float dist)
     UTIL_TouchTriggers(ent);
     return false;
 }
-
-/*
-======================
-SV_FixCheckBottom
-
-======================
-*/
-void SV_FixCheckBottom(Entity* ent)
-{
-    ent->flags |= EntityFlags::PartiallyOnGround;
-}
-
-
-
-/*
-================
-SV_NewChaseDir
-
-================
-*/
-#define DI_NODIR    -1
-void SV_NewChaseDir(Entity* actor, Entity* enemy, float dist)
-{
-    float   deltax, deltay;
-    float   d[3];
-    float   tdir, olddir, turnaround;
-
-    //FIXME: how did we get here with no enemy
-    if (!enemy)
-        return;
-
-    olddir = anglemod((int)(actor->idealYaw / 45) * 45);
-    turnaround = anglemod(olddir - 180);
-
-    deltax = enemy->state.origin[0] - actor->state.origin[0];
-    deltay = enemy->state.origin[1] - actor->state.origin[1];
-    if (deltax > 10)
-        d[1] = 0;
-    else if (deltax < -10)
-        d[1] = 180;
-    else
-        d[1] = DI_NODIR;
-    if (deltay < -10)
-        d[2] = 270;
-    else if (deltay > 10)
-        d[2] = 90;
-    else
-        d[2] = DI_NODIR;
-
-    // try direct route
-    if (d[1] != DI_NODIR && d[2] != DI_NODIR) {
-        if (d[1] == 0)
-            tdir = d[2] == 90 ? 45 : 315;
-        else
-            tdir = d[2] == 90 ? 135 : 215;
-
-        if (tdir != turnaround && SV_StepDirection(actor, tdir, dist))
-            return;
-    }
-
-    // try other directions
-    if (((rand() & 3) & 1) || fabsf(deltay) > fabsf(deltax)) {
-        tdir = d[1];
-        d[1] = d[2];
-        d[2] = tdir;
-    }
-
-    if (d[1] != DI_NODIR && d[1] != turnaround
-        && SV_StepDirection(actor, d[1], dist))
-        return;
-
-    if (d[2] != DI_NODIR && d[2] != turnaround
-        && SV_StepDirection(actor, d[2], dist))
-        return;
-
-    /* there is no direct path to the player, so pick another direction */
-
-    if (olddir != DI_NODIR && SV_StepDirection(actor, olddir, dist))
-        return;
-
-    if (rand() & 1) { /*randomly determine direction of search*/
-        for (tdir = 0; tdir <= 315; tdir += 45)
-            if (tdir != turnaround && SV_StepDirection(actor, tdir, dist))
-                return;
-    }
-    else {
-        for (tdir = 315; tdir >= 0; tdir -= 45)
-            if (tdir != turnaround && SV_StepDirection(actor, tdir, dist))
-                return;
-    }
-
-    if (turnaround != DI_NODIR && SV_StepDirection(actor, turnaround, dist))
-        return;
-
-    actor->idealYaw = olddir;      // can't move
-
-// if a bridge was pulled out from underneath a monster, it may not have
-// a valid standing position at all
-
-    if (!SVG_StepMove_CheckBottom(actor))
-        SV_FixCheckBottom(actor);
-}
-
-/*
-======================
-SV_CloseEnough
-
-======================
-*/
-qboolean SV_CloseEnough(Entity* ent, Entity* goal, float dist)
-{
-    int     i;
-
-    for (i = 0; i < 3; i++) {
-        if (goal->absMin[i] > ent->absMax[i] + dist)
-            return false;
-        if (goal->absMax[i] < ent->absMin[i] - dist)
-            return false;
-    }
-    return true;
-}
-
-
-///*
-//======================
-//M_MoveToGoal
-//======================
-//*/
-//void M_MoveToGoal(Entity* ent, float dist)
-//{
-//    Entity* goal;
-//
-//    goal = ent->goalEntityPtr;
-//
-//    if (!ent->groundEntityPtr && !(ent->flags & (EntityFlags::Fly | EntityFlags::Swim)))
-//        return;
-//
-//    // if the next step hits the enemy, return immediately
-//    if (ent->enemy && SV_CloseEnough(ent, ent->enemy, dist))
-//        return;
-//
-//    // bump around...
-//    if ((rand() & 3) == 1 || !SV_StepDirection(ent, ent->idealYaw, dist)) {
-//        if (ent->inUse)
-//            SV_NewChaseDir(ent, goal, dist);
-//    }
-//}
-
 
 /*
 ===============

@@ -1004,7 +1004,7 @@ struct entity_s {
     Entity *goalEntityPtr;
     Entity *moveTargetPtr;
     float yawSpeed;
-    float idealYaw;
+    float idealYawAngle;
 
     float nextThink;
     void (*PreThink)(Entity *ent);
