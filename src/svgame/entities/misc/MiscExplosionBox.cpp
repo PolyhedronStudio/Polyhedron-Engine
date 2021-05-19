@@ -6,38 +6,22 @@
 //
 //
 */
-#include "../../g_local.h"     // SVGame.
-#include "../../effects.h"     // Effects.
-#include "../../utils.h"       // Util funcs.
+#include "../../g_local.h"          // SVGame.
+#include "../../effects.h"          // Effects.
+#include "../../utils.h"            // Util funcs.
+#include "../../physics/stepmove.h" // Stepmove funcs.
 
+// Server Game Base Entity.
 #include "../base/SVGBaseEntity.h"
 
+// Misc Explosion Box Entity.
 #include "MiscExplosionBox.h"
 
 
-void barrel_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
 
-{
-    //float   ratio;
-    //vec3_t  v;
-
-    //if ((!other->groundEntityPtr) || (other->groundEntityPtr == self))
-    //    return;
-
-    //ratio = (float)other->mass / (float)GetServerEntity()->mass;
-    //VectorSubtract(GetServerEntity()->state.origin, other->state.origin, v);
-    ////    M_walkmove(self, vectoyaw(v), 20 * ratio * FRAMETIME);
-}
-
-
-void barrel_explode(Entity* self) {
-
-}
-void barrel_delay(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point)
-{
-}
-
+//
 // Constructor/Deconstructor.
+//
 MiscExplosionBox::MiscExplosionBox(Entity* svEntity) : SVGBaseEntity(svEntity) {
 
 }
@@ -45,10 +29,27 @@ MiscExplosionBox::~MiscExplosionBox() {
 
 }
 
+
+
+//
 // Interface functions. 
+//
+//
+//===============
+// MiscExplosionBox::PreCache
+//
+//===============
+//
 void MiscExplosionBox::PreCache() {
 	gi.DPrintf("MiscExplosionBox::PreCache();");
 }
+
+//
+//===============
+// MiscExplosionBox::Spawn
+//
+//===============
+//
 void MiscExplosionBox::Spawn() {
     // Ensure we call the base spawn function.
     SVGBaseEntity::Spawn();
@@ -63,10 +64,8 @@ void MiscExplosionBox::Spawn() {
     // Set move type.
     SetMoveType(MoveType::Step);
 
-    //GetServerEntity()->model = "models/objects/barrels/tris.md2";
     // Set the barrel model, and model index.
     SetModel("models/objects/barrels/tris.md2");
-    GetServerEntity()->state.modelIndex = gi.ModelIndex(GetServerEntity()->model);
 
     // Set the bounding box.
     SetBoundingBox(
@@ -104,38 +103,84 @@ void MiscExplosionBox::Spawn() {
     // Link the entity to world, for collision testing.
     LinkEntity();
 }
+
+//
+//===============
+// MiscExplosionBox::PostSpawn
+//
+//===============
+//
 void MiscExplosionBox::PostSpawn() {
-	gi.DPrintf("MiscExplosionBox::PostSpawn();");
+	//gi.DPrintf("MiscExplosionBox::PostSpawn();");
 }
+
+//
+//===============
+// MiscExplosionBox::Think
+//
+//===============
+//
 void MiscExplosionBox::Think() {
     SVGBaseEntity::Think();
-	gi.DPrintf("MiscExplosionBox::Think();");
+	//gi.DPrintf("MiscExplosionBox::Think();");
 }
 
-// Functions.
-extern void SVG_StepMove_CheckGround(Entity* ent);
+
+//
+// Callback Functions.
+//
+//
+//===============
+// MiscExplosionBox::MiscExplosionBoxThink
+//
+// Think callback, to execute the needed physics for this pusher object.
+//===============
+//
 void MiscExplosionBox::MiscExplosionBoxThink(void) {
-    vec3_t      end;
+    // Get the origin.
+    vec3_t origin = GetOrigin();
+
+    // Calculate trace end position.
+    vec3_t end = origin + vec3_t { 0.f, 0.f, 1.f };
     trace_t     trace;
 
-    GetServerEntity()->state.origin[2] += 1;
-    VectorCopy(GetServerEntity()->state.origin, end);
-    end[2] -= 256;
+    // Set origin + 1 on the Z axis.
+    SetOrigin(GetOrigin() + vec3_t{ 0.f, 0.f, 1.f });
+    
+    // Calculate the end point for tracing.
+    end = GetOrigin() + vec3_t{ 0.f, 0.f, 256.f };
 
-    trace = gi.Trace(GetServerEntity()->state.origin, GetServerEntity()->mins, GetServerEntity()->maxs, end, GetServerEntity(), CONTENTS_MASK_MONSTERSOLID);
+    // Execute the trace.
+    trace = gi.Trace(GetOrigin(), GetServerEntity()->mins, GetServerEntity()->maxs, end, GetServerEntity(), CONTENTS_MASK_MONSTERSOLID);
 
-    if (trace.fraction == 1 || trace.allSolid)
-    return;
+    // Return in case of fraction 1 or allSolid.
+    if (trace.fraction == 1 || trace.allSolid) {
+        return;
+    }
 
-    VectorCopy(trace.endPosition, GetServerEntity()->state.origin);
+    // Set origin to the trace end position.
+    SetOrigin(trace.endPosition);
 
     if (GetServerEntity()->state.number == 12) {
         gi.DPrintf("I think, therefor, as a misc_explobox I AM!\n");
     }
-    gi.LinkEntity(GetServerEntity());
+    
+    // Link entity for testing.
+    LinkEntity();
+
+    // Do a check ground for the step move of this pusher.
     SVG_StepMove_CheckGround(GetServerEntity());
     //M_CatagorizePosition(ent);
 }
+
+//
+//===============
+// MiscExplosionBox::MiscExplosionBoxExplode
+//
+// 'Think' callback that is set when the explosion box is exploding.
+// (Has died due to taking damage.)
+//===============
+//
 void MiscExplosionBox::MiscExplosionBoxExplode(void)
 {
     vec3_t  org;
@@ -217,6 +262,13 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
     SetThink(nullptr);
 }
 
+//
+//===============
+// MiscExplosionBox::MiscExplosionBoxDie
+//
+// 'Die' callback, the explosion box has been damaged too much.
+//===============
+//
 void MiscExplosionBox::MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     GetServerEntity()->takeDamage = TakeDamage::No;
     GetServerEntity()->nextThinkTime = level.time + 2 * FRAMETIME;
@@ -226,6 +278,13 @@ void MiscExplosionBox::MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEnti
     SetThink(&MiscExplosionBox::MiscExplosionBoxExplode);
 }
 
+//
+//===============
+// MiscExplosionBox::MiscExplosionBoxTouch
+//
+// 'Touch' callback, to calculate the direction to move into.
+//===============
+//
 void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
     float   ratio;
     vec3_t  v;

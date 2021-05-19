@@ -121,10 +121,6 @@ extern void door_hit_bottom(Entity* self);
 extern void door_hit_top(Entity* self);
 extern void train_wait(Entity* self);
 
-extern void barrel_explode(Entity* self);
-extern void barrel_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf);
-extern void barrel_delay(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point);
-
 const save_ptr_t save_ptrs[] = {
 { P_blocked, door_blocked },
 { P_blocked, plat_blocked },
@@ -135,7 +131,6 @@ const save_ptr_t save_ptrs[] = {
 { P_die, button_killed },
 { P_die, debris_die },
 { P_die, door_killed },
-	{ P_die, barrel_delay },
 
 { P_die, func_explosive_explode },
 
@@ -175,8 +170,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, target_lightramp_think },
 { P_think, Think_AccelMove },
 
-	{ P_think, barrel_explode},
-
 { P_think, Think_CalcMoveSpeed },
 { P_think, Think_Delay },
 { P_think, Think_SpawnDoorTrigger },
@@ -189,7 +182,7 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, func_object_touch },
 { P_touch, gib_touch },
 { P_touch, hurt_touch },
-	{ P_touch, barrel_touch },
+
 { P_touch, rotating_touch },
 
 

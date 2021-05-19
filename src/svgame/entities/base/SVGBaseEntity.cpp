@@ -78,7 +78,6 @@ void SVGBaseEntity::Think() {
 	(this->*thinkFunction)();
 }
 
-
 //
 //===============
 // SVGBaseEntity::Die

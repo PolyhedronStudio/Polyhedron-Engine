@@ -75,6 +75,11 @@ public:
         return serverEntity->nextThinkTime;
     }
 
+    // Return the 'origin' value.
+    inline const vec3_t &GetOrigin() {
+        return serverEntity->state.origin;
+    }
+
     // Return the 'solid' value.
     inline const uint32_t GetSolid() {
         return serverEntity->solid;
@@ -111,7 +116,11 @@ public:
 
     // Set the 'model' value.
     inline void SetModel(const char* model) {
+        // Set model.
         serverEntity->model = model;
+
+        // Set model index.
+        serverEntity->state.modelIndex = gi.ModelIndex(GetModel());
     }
 
     // Set the 'nextThinkTime' value.
@@ -122,6 +131,11 @@ public:
     // Set the 'nextThinkTime' value.
     inline void SetNextThinkTime(const float& nextThinkTime) {
         serverEntity->nextThinkTime = nextThinkTime;
+    }
+
+    // Set the 'origin' value.
+    inline void SetOrigin(const vec3_t& origin) {
+        serverEntity->state.origin = origin;
     }
 
     // Set the 'solid' value.
