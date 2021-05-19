@@ -169,6 +169,7 @@ SET(HEADERS_SVGAME
 	svgame/player/animations.h
 	svgame/player/client.h
 	svgame/player/player.h
+	svgame/player/view.h
 	svgame/player/weapons.h
 	
 	svgame/weapons/blaster.h

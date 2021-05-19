@@ -231,5 +231,5 @@ void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity*
     float yaw = vec3_to_yaw(v);
 
     SVG_StepMove_Walk(GetServerEntity(), yaw, 20 * ratio * FRAMETIME);
-    gi.DPrintf("self entity id: '%i' - is touching entity id: '%i'\n", GetServerEntity()->state.number);
+    gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
 }

@@ -19,10 +19,10 @@ void SVG_Player_Pain(Entity* self, Entity* other, float kick, int damage)
 
 /*
 ==================
-LookAtKiller
+SVG_LookAtKiller
 ==================
 */
-//void LookAtKiller(Entity* self, Entity* inflictor, Entity* attacker)
+//void SVG_LookAtKiller(Entity* self, Entity* inflictor, Entity* attacker)
 //{
 //    vec3_t      dir;
 //
@@ -82,7 +82,7 @@ void SVG_Player_Die(Entity* self, Entity* inflictor, Entity* attacker, int damag
 
     //if (!self->deadFlag) {
     //    self->client->respawnTime = level.time + 1.0;
-    //    LookAtKiller(self, inflictor, attacker);
+    //    SVG_LookAtKiller(self, inflictor, attacker);
     //    self->client->playerState.pmove.type = EnginePlayerMoveType::Dead;
     //    SVG_ClientUpdateObituary(self, inflictor, attacker);
     //    SVG_TossClientWeapon(self);

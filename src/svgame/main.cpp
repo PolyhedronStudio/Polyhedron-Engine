@@ -18,7 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "g_local.h"          // Include SVGame header.
 #include "entities/base/SVGBaseEntity.h"
-#include "player/client.h"    // Include Player Client header.
+#include "player/client.h"      // Include Player Client header.
+#include "player/view.h"        // Include Player View header.
 
 //-----------------
 // Global Game Variables.

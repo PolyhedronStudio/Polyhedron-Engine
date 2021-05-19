@@ -699,16 +699,6 @@ void    SVG_ServerCommand(void);
 qboolean SVG_FilterPacket(char *from);
 
 //
-// p_view.c
-//
-void SVG_ClientEndServerFrame(Entity *ent);
-
-//
-// p_hud.c
-//
-
-
-//
 // g_pweapon.c
 //
 void SVG_PlayerNoise(Entity *who, vec3_t where, int type);

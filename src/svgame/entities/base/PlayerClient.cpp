@@ -6,11 +6,12 @@
 //
 //
 */
-#include "../../g_local.h"     // SVGame.
-#include "../../effects.h"     // Effects.
-#include "../../player/client.h" // Player Client functions.
-#include "../../player/animations.h"         // Include Player Client Animations.
-#include "../../utils.h"       // Util funcs.
+#include "../../g_local.h"              // SVGame.
+#include "../../effects.h"              // Effects.
+#include "../../player/client.h"        // Player Client functions.
+#include "../../player/animations.h"    // Include Player Client Animations.
+#include "../../player/view.h"          // Include Player View functions..
+#include "../../utils.h"                // Util funcs.
 
 #include "../base/SVGBaseEntity.h"
 
@@ -41,40 +42,6 @@ void PlayerClient::Think() {
     gi.DPrintf("MiscExplosionBox::Think();");
 }
 
-/*
-==================
-LookAtKiller
-==================
-*/
-void LookAtKiller(Entity* self, Entity* inflictor, Entity* attacker)
-{
-    vec3_t      dir;
-
-    if (attacker && attacker != SVG_GetWorldEntity() && attacker != self) {
-        VectorSubtract(attacker->state.origin, self->state.origin, dir);
-    }
-    else if (inflictor && inflictor != SVG_GetWorldEntity() && inflictor != self) {
-        VectorSubtract(inflictor->state.origin, self->state.origin, dir);
-    }
-    else {
-        self->client->killerYaw = self->state.angles[vec3_t::Yaw];
-        return;
-    }
-
-    if (dir[0])
-        self->client->killerYaw = 180 / M_PI * atan2(dir[1], dir[0]);
-    else {
-        self->client->killerYaw = 0;
-        if (dir[1] > 0)
-            self->client->killerYaw = 90;
-        else if (dir[1] < 0)
-            self->client->killerYaw = -90;
-    }
-    if (self->client->killerYaw < 0)
-        self->client->killerYaw += 360;
-}
-
-
 void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     int     n;
 
@@ -103,7 +70,7 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
 
     if (!self->deadFlag) {
         self->client->respawnTime = level.time + 1.0;
-        LookAtKiller(self, inflictor->GetServerEntity(), attacker->GetServerEntity());
+        SVG_LookAtKiller(self, inflictor->GetServerEntity(), attacker->GetServerEntity());
         self->client->playerState.pmove.type = EnginePlayerMoveType::Dead;
         SVG_ClientUpdateObituary(self, inflictor->GetServerEntity(), attacker->GetServerEntity());
         SVG_TossClientWeapon(self);

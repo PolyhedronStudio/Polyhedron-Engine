@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../utils.h"       // Util funcs.
 #include "client.h"         // Include Player Client header.
 #include "hud.h"            // Include HUD header.
+#include "view.h"           // View header.
 
 #include "../entities/base/SVGBaseEntity.h"
 #include "../entities/base/PlayerClient.h"
