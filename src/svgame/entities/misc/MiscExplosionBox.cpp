@@ -141,12 +141,8 @@ void MiscExplosionBox::Think() {
 //===============
 //
 void MiscExplosionBox::MiscExplosionBoxThink(void) {
-    // Get the origin.
-    vec3_t origin = GetOrigin();
-
     // Calculate trace end position.
-    vec3_t end = origin + vec3_t { 0.f, 0.f, 1.f };
-    trace_t     trace;
+    vec3_t end = GetOrigin() + vec3_t { 0.f, 0.f, 1.f };
 
     // Set origin + 1 on the Z axis.
     SetOrigin(GetOrigin() + vec3_t{ 0.f, 0.f, 1.f });
@@ -155,7 +151,7 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
     end = GetOrigin() + vec3_t{ 0.f, 0.f, 256.f };
 
     // Execute the trace.
-    trace = gi.Trace(GetOrigin(), GetMins(), GetMaxs(), end, GetServerEntity(), CONTENTS_MASK_MONSTERSOLID);
+    trace_t trace = gi.Trace(GetOrigin(), GetMins(), GetMaxs(), end, GetServerEntity(), CONTENTS_MASK_MONSTERSOLID);
 
     // Return in case of fraction 1 or allSolid.
     if (trace.fraction == 1 || trace.allSolid) {
@@ -187,25 +183,21 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
 //
 void MiscExplosionBox::MiscExplosionBoxExplode(void)
 {
-    vec3_t  origin;
-    float   speed;
-    vec3_t  save;
-
     // Execute radius damage.
     SVG_RadiusDamage(GetServerEntity(), GetServerEntity()->activator, GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
 
     // Retrieve origin.
-    save = GetOrigin();
+    vec3_t save = GetOrigin();
 
     // Set the new origin.
     SetOrigin(vec3_fmaf(GetAbsoluteMin(), 0.5f, GetSize()));
 
     // Calculate speed.
-    speed = 1.5 * (float)GetDamage() / 200.0f;
+    float speed = 1.5 * (float)GetDamage() / 200.0f;
 
     // Throw several debris chunks.
     vec3_t randomVec = { crandom(), crandom(), crandom() };
-    origin = GetOrigin() + randomVec * GetSize();
+    vec3_t origin = GetOrigin() + randomVec * GetSize();
     SVG_ThrowDebris(GetServerEntity(), "models/objects/debris1/tris.md2", speed, origin);
 
     randomVec = { crandom(), crandom(), crandom() };
