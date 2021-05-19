@@ -36,12 +36,20 @@ MiscExplosionBox::~MiscExplosionBox() {
 //
 //
 //===============
-// MiscExplosionBox::PreCache
+// MiscExplosionBox::Precache
 //
 //===============
 //
-void MiscExplosionBox::PreCache() {
-	gi.DPrintf("MiscExplosionBox::PreCache();");
+void MiscExplosionBox::Precache() {
+    // Precache actual barrel model.
+    SVG_PrecacheModel("models/objects/barrels/tris.md2");
+
+    // Precache the debris.
+    SVG_PrecacheModel("models/objects/debris1/tris.md2");
+    SVG_PrecacheModel("models/objects/debris2/tris.md2");
+    SVG_PrecacheModel("models/objects/debris3/tris.md2");
+
+    //gi.DPrintf("MiscExplosionBox::Precache();");
 }
 
 //
@@ -53,10 +61,6 @@ void MiscExplosionBox::PreCache() {
 void MiscExplosionBox::Spawn() {
     // Ensure we call the base spawn function.
     SVGBaseEntity::Spawn();
-
-    gi.ModelIndex("models/objects/debris1/tris.md2");
-    gi.ModelIndex("models/objects/debris2/tris.md2");
-    gi.ModelIndex("models/objects/debris3/tris.md2");
 
     // Set solid.
     SetSolid(Solid::BoundingBox);
@@ -151,7 +155,7 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
     end = GetOrigin() + vec3_t{ 0.f, 0.f, 256.f };
 
     // Execute the trace.
-    trace = gi.Trace(GetOrigin(), GetServerEntity()->mins, GetServerEntity()->maxs, end, GetServerEntity(), CONTENTS_MASK_MONSTERSOLID);
+    trace = gi.Trace(GetOrigin(), GetMins(), GetMaxs(), end, GetServerEntity(), CONTENTS_MASK_MONSTERSOLID);
 
     // Return in case of fraction 1 or allSolid.
     if (trace.fraction == 1 || trace.allSolid) {
@@ -183,82 +187,83 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
 //
 void MiscExplosionBox::MiscExplosionBoxExplode(void)
 {
-    vec3_t  org;
-    float   spd;
+    vec3_t  origin;
+    float   speed;
     vec3_t  save;
 
-    SVG_RadiusDamage(GetServerEntity(), GetServerEntity()->activator, GetServerEntity()->damage, NULL, GetServerEntity()->damage + 40, MeansOfDeath::Barrel);
+    // Execute radius damage.
+    SVG_RadiusDamage(GetServerEntity(), GetServerEntity()->activator, GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
 
-    VectorCopy(GetServerEntity()->state.origin, save);
-    VectorMA(GetServerEntity()->absMin, 0.5, GetServerEntity()->size, GetServerEntity()->state.origin);
+    // Retrieve origin.
+    save = GetOrigin();
 
-    // a few big chunks
-    spd = 1.5 * (float)GetServerEntity()->damage / 200.0;
-    org[0] = GetServerEntity()->state.origin[0] + crandom() * GetServerEntity()->size[0];
-    org[1] = GetServerEntity()->state.origin[1] + crandom() * GetServerEntity()->size[1];
-    org[2] = GetServerEntity()->state.origin[2] + crandom() * GetServerEntity()->size[2];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris1/tris.md2", spd, org);
-    org[0] = GetServerEntity()->state.origin[0] + crandom() * GetServerEntity()->size[0];
-    org[1] = GetServerEntity()->state.origin[1] + crandom() * GetServerEntity()->size[1];
-    org[2] = GetServerEntity()->state.origin[2] + crandom() * GetServerEntity()->size[2];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris1/tris.md2", spd, org);
+    // Set the new origin.
+    SetOrigin(vec3_fmaf(GetAbsoluteMin(), 0.5f, GetSize()));
+
+    // Calculate speed.
+    speed = 1.5 * (float)GetDamage() / 200.0f;
+
+    // Throw several debris chunks.
+    vec3_t randomVec = { crandom(), crandom(), crandom() };
+    origin = GetOrigin() + randomVec * GetSize();
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris1/tris.md2", speed, origin);
+
+    randomVec = { crandom(), crandom(), crandom() };
+    origin = GetOrigin() + randomVec * GetSize();
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris1/tris.md2", speed, origin);
 
     // bottom corners
-    spd = 1.75 * (float)GetServerEntity()->damage / 200.0;
-    VectorCopy(GetServerEntity()->absMin, org);
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", spd, org);
-    VectorCopy(GetServerEntity()->absMin, org);
-    org[0] += GetServerEntity()->size[0];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", spd, org);
-    VectorCopy(GetServerEntity()->absMin, org);
-    org[1] += GetServerEntity()->size[1];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", spd, org);
-    VectorCopy(GetServerEntity()->absMin, org);
-    org[0] += GetServerEntity()->size[0];
-    org[1] += GetServerEntity()->size[1];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", spd, org);
+    speed = 1.75 * (float)GetDamage() / 200.0f;
+    origin = GetAbsoluteMin();
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", speed, origin);
+    origin = GetAbsoluteMin();
+    origin.x += GetSize().x;
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", speed, origin);
+    origin = GetAbsoluteMin();
+    origin.y += GetSize().y;
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", speed, origin);
+    origin = GetAbsoluteMin();
+    origin.x += GetSize().x;
+    origin.y += GetSize().y;
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", speed, origin);
 
-    // a bunch of little chunks
-    spd = 2 * GetServerEntity()->damage / 200;
-    org[0] = GetServerEntity()->state.origin[0] + crandom() * GetServerEntity()->size[0];
-    org[1] = GetServerEntity()->state.origin[1] + crandom() * GetServerEntity()->size[1];
-    org[2] = GetServerEntity()->state.origin[2] + crandom() * GetServerEntity()->size[2];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", spd, org);
-    org[0] = GetServerEntity()->state.origin[0] + crandom() * GetServerEntity()->size[0];
-    org[1] = GetServerEntity()->state.origin[1] + crandom() * GetServerEntity()->size[1];
-    org[2] = GetServerEntity()->state.origin[2] + crandom() * GetServerEntity()->size[2];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", spd, org);
-    org[0] = GetServerEntity()->state.origin[0] + crandom() * GetServerEntity()->size[0];
-    org[1] = GetServerEntity()->state.origin[1] + crandom() * GetServerEntity()->size[1];
-    org[2] = GetServerEntity()->state.origin[2] + crandom() * GetServerEntity()->size[2];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", spd, org);
-    org[0] = GetServerEntity()->state.origin[0] + crandom() * GetServerEntity()->size[0];
-    org[1] = GetServerEntity()->state.origin[1] + crandom() * GetServerEntity()->size[1];
-    org[2] = GetServerEntity()->state.origin[2] + crandom() * GetServerEntity()->size[2];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", spd, org);
-    org[0] = GetServerEntity()->state.origin[0] + crandom() * GetServerEntity()->size[0];
-    org[1] = GetServerEntity()->state.origin[1] + crandom() * GetServerEntity()->size[1];
-    org[2] = GetServerEntity()->state.origin[2] + crandom() * GetServerEntity()->size[2];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", spd, org);
-    org[0] = GetServerEntity()->state.origin[0] + crandom() * GetServerEntity()->size[0];
-    org[1] = GetServerEntity()->state.origin[1] + crandom() * GetServerEntity()->size[1];
-    org[2] = GetServerEntity()->state.origin[2] + crandom() * GetServerEntity()->size[2];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", spd, org);
-    org[0] = GetServerEntity()->state.origin[0] + crandom() * GetServerEntity()->size[0];
-    org[1] = GetServerEntity()->state.origin[1] + crandom() * GetServerEntity()->size[1];
-    org[2] = GetServerEntity()->state.origin[2] + crandom() * GetServerEntity()->size[2];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", spd, org);
-    org[0] = GetServerEntity()->state.origin[0] + crandom() * GetServerEntity()->size[0];
-    org[1] = GetServerEntity()->state.origin[1] + crandom() * GetServerEntity()->size[1];
-    org[2] = GetServerEntity()->state.origin[2] + crandom() * GetServerEntity()->size[2];
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", spd, org);
+    // A bunch of little chunks
+    speed = 2.f * GetDamage() / 200.f;
+    randomVec = { crandom(), crandom(), crandom() };
+    origin = GetOrigin() + randomVec * GetSize();
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
+    randomVec = { crandom(), crandom(), crandom() };
+    origin = GetOrigin() + randomVec * GetSize();
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
+    randomVec = { crandom(), crandom(), crandom() };
+    origin = GetOrigin() + randomVec * GetSize();
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
+    randomVec = { crandom(), crandom(), crandom() };
+    origin = GetOrigin() + randomVec * GetSize();
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
+    randomVec = { crandom(), crandom(), crandom() };
+    origin = GetOrigin() + randomVec * GetSize();
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
+    randomVec = { crandom(), crandom(), crandom() };
+    origin = GetOrigin() + randomVec * GetSize();
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
+    randomVec = { crandom(), crandom(), crandom() };
+    origin = GetOrigin() + randomVec * GetSize();
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
+    randomVec = { crandom(), crandom(), crandom() };
+    origin = GetOrigin() + randomVec * GetSize();
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
+    
+    // Reset origin to saved origin.
+    SetOrigin(save);
 
-    VectorCopy(save, GetServerEntity()->state.origin);
+    // Depending on whether we have a ground entity or not, we determine which explosion to use.
     if (GetServerEntity()->groundEntityPtr)
         BecomeExplosion2(GetServerEntity());
     else
         BecomeExplosion1(GetServerEntity());
 
+    // Ensure we have no more think callback pointer set when this entity has "died"
     SetThink(nullptr);
 }
 
@@ -270,11 +275,17 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
 //===============
 //
 void MiscExplosionBox::MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
-    GetServerEntity()->takeDamage = TakeDamage::No;
-    GetServerEntity()->nextThinkTime = level.time + 2 * FRAMETIME;
+    // Entity is dying, it can't take any more damage.
+    SetTakeDamage(TakeDamage::No);
+    
+    // Attacker becomes this entity its "activator".
     if (attacker)
         GetServerEntity()->activator = attacker->GetServerEntity();
 
+    // Setup the next think and think time.
+    SetNextThinkTime(level.time + 2 * FRAMETIME);
+
+    // Set think function.
     SetThink(&MiscExplosionBox::MiscExplosionBoxExplode);
 }
 
@@ -286,21 +297,26 @@ void MiscExplosionBox::MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEnti
 //===============
 //
 void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
-    float   ratio;
-    vec3_t  v;
-
+    // Safety checks.
     if (!self)
         return;
     if (!other)
         return;
 
+    // Ground entity checks.
     if ((!other->GetServerEntity()->groundEntityPtr) || (other->GetServerEntity()->groundEntityPtr == GetServerEntity()))
         return;
 
-    ratio = (float)other->GetServerEntity()->mass / (float)GetServerEntity()->mass;
-    VectorSubtract(GetServerEntity()->state.origin, other->GetServerEntity()->state.origin, v);
-    float yaw = vec3_to_yaw(v);
+    // Calculate ratio to use.
+    float ratio = (float)other->GetServerEntity()->mass / (float)GetServerEntity()->mass;
+    
+    // Calculate direction.
+    vec3_t dir = GetOrigin() - other->GetOrigin();
 
+    // Calculate yaw to use based on direction.
+    float yaw = vec3_to_yaw(dir);
+
+    // Last but not least, move a step ahead.
     SVG_StepMove_Walk(GetServerEntity(), yaw, 20 * ratio * FRAMETIME);
     gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
 }

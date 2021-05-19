@@ -285,6 +285,11 @@ void ED_CallSpawn(Entity *ent)
 
             // Spawn the according server game entity class.
             ent->classEntity = SVG_SpawnClassEntity(ent, ent->className);
+            
+            // Precache.
+            ent->classEntity->Precache();
+
+            // Spawn.
             ent->classEntity->Spawn();
             return;
         }

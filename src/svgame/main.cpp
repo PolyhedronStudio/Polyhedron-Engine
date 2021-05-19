@@ -718,3 +718,14 @@ void SVG_FreeEntity(Entity* ed)
 Entity* SVG_GetWorldEntity() {
     return &g_entities[0];
 };
+
+//
+//===============
+// SVG_PrecacheModel
+//
+// Precaches the model and returns the model index.
+//===============
+//
+qhandle_t SVG_PrecacheModel(const std::string &filename) {
+    return gi.ModelIndex(filename.c_str());
+}

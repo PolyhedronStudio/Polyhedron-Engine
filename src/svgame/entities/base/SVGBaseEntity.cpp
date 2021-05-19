@@ -27,13 +27,13 @@ SVGBaseEntity::~SVGBaseEntity() {
 // Interface functions. 
 //
 //===============
-// SVGBaseEntity::PreCache
+// SVGBaseEntity::Precache
 //
 // This function is used to load all entity data with.
 //===============
 //
-void SVGBaseEntity::PreCache() {
-	gi.DPrintf("SVGBaseEntity::PreCache();");
+void SVGBaseEntity::Precache() {
+	gi.DPrintf("SVGBaseEntity::Precache();");
 }
 
 //

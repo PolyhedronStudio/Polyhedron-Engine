@@ -526,7 +526,7 @@ extern  Entity g_entities[MAX_EDICTS];
 // Very ugly macros, need to rid ourselves and inline func them at the least.
 // Also, there should be alternatives in our utils for math lib as is.
 #define random()    ((rand () & RAND_MAX) / ((float)RAND_MAX))
-#define crandom()   (2.0 * (random() - 0.5))
+#define crandom()   (2.0f * (random() - 0.5f))
 
 //-------------------
 // Server game related cvars.
@@ -715,6 +715,8 @@ Entity* SVG_FindEntitiesWithinRadius(Entity* from, vec3_t org, float rad);
 void    SVG_InitEntity(Entity* e);
 Entity* SVG_Spawn(void);
 void    SVG_FreeEntity(Entity* e);
+
+qhandle_t SVG_PrecacheModel(const std::string& filename);
 
 //
 // g_chase.c

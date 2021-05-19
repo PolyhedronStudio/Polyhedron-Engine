@@ -18,7 +18,7 @@ public:
     virtual ~PlayerClient();
 
     // Interface functions. 
-    void PreCache();    // Precaches data.
+    void Precache();    // Precaches data.
     void Spawn();       // Spawns the entity.
     void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     void Think();       // General entity thinking routine.

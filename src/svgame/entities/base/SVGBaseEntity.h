@@ -32,7 +32,7 @@ public:
     //
     // Interface functions. 
     //
-    virtual void PreCache();    // Precaches data.
+    virtual void Precache();    // Precaches data.
     virtual void Spawn();       // Spawns the entity.
     virtual void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     virtual void Think();       // General entity thinking routine.
@@ -46,6 +46,17 @@ public:
     //
     // Entity Get Functions.
     //
+    
+    // Return the bounding box absolute 'min' value.
+    inline const vec3_t& GetAbsoluteMin() {
+        return serverEntity->absMin;
+    }
+
+    // Return the bounding box absolute 'max' value.
+    inline const vec3_t& GetAbsoluteMax() {
+        return serverEntity->absMax;
+    }
+
     // Return the 'damage' value.
     inline const int32_t GetDamage() {
         return serverEntity->damage;
@@ -58,6 +69,16 @@ public:
     // Return the 'mass' value.
     inline const int32_t GetMass() {
         return serverEntity->mass;
+    }
+
+    // Return the bounding box 'mins' value.
+    inline const vec3_t& GetMins() {
+        return serverEntity->mins;
+    }
+
+    // Return the bounding box 'maxs' value.
+    inline const vec3_t& GetMaxs() {
+        return serverEntity->maxs;
     }
     
     // Return the 'model' value.
@@ -78,6 +99,11 @@ public:
     // Return the 'origin' value.
     inline const vec3_t &GetOrigin() {
         return serverEntity->state.origin;
+    }
+
+    // Return the 'size' value.
+    inline const vec3_t& GetSize() {
+        return serverEntity->size;
     }
 
     // Return the 'solid' value.

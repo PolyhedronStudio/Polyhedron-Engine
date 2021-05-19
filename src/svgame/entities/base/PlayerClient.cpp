@@ -26,8 +26,8 @@ PlayerClient::~PlayerClient() {
 }
 
 // Interface functions. 
-void PlayerClient::PreCache() {
-    gi.DPrintf("MiscExplosionBox::PreCache();");
+void PlayerClient::Precache() {
+    gi.DPrintf("MiscExplosionBox::Precache();");
 }
 void PlayerClient::Spawn() {
     // Set the die function.
