@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sharedgame/sharedgame.h" // Include SG Base.
 #include "sharedgame/protocol.h"
 
-// the "gameversion" client command will print this plus compile date
+// the "gameversion" client command will print32_t this plus compile date
 #define GAMEVERSION "basenac"
 
 //==================================================================
@@ -151,7 +151,7 @@ constexpr int32_t AI_GOOD_GUY = 0x00000100;
 constexpr int32_t AI_BRUTAL = 0x00000200;
 constexpr int32_t AI_NOSTEP = 0x00000400;
 constexpr int32_t AI_DUCKED = 0x00000800;
-constexpr int32_t AI_COMBAT_POINT = 0x00001000;
+constexpr int32_t AI_COMBAT_POint32_t = 0x00001000;
 constexpr int32_t AI_MEDIC = 0x00002000;
 constexpr int32_t AI_RESURRECTING = 0x00004000;
 
@@ -230,11 +230,11 @@ struct MoveType {
 // Armor item description.
 //-------------------
 typedef struct {
-    int     baseCount;
-    int     maxCount;
+    int32_t     baseCount;
+    int32_t     maxCount;
     float   normalProtection;
     float   energyProtection;
-    int     armor;
+    int32_t     armor;
 } gitem_armor_t;
 
 
@@ -279,7 +279,7 @@ typedef struct gitem_s {
     const char *worldModel;
     
     // Specific worldmodel flags.
-    int worldModelFlags;
+    int32_t worldModelFlags;
 
     // Item view model. (Used for weapons, weapons are items.)
     const char        *viewModel;
@@ -287,24 +287,24 @@ typedef struct gitem_s {
     // Client side infe.
     const char  *icon;
     const char  *pickupName;    // for printing on pickup
-    int countWidth;             // number of digits to display by icon
+    int32_t countWidth;             // number of digits to display by icon
 
     // For ammo items this value dictates how much ammo to gain.
     // For weapon items, this value dictates how much ammo is used on a per shot basis.
-    int quantity;
+    int32_t quantity;
 
     // Ammo string for weapons.
     const char  *ammo;
 
     // IT_* flags
-    int flags;          
+    int32_t flags;          
 
     // Weaponmodel index.
-    int weaponModelIndex;      // weapon model index (for weapons)
+    int32_t weaponModelIndex;      // weapon model index (for weapons)
 
     // Info string & Tag.
     void *info;
-    int tag;
+    int32_t tag;
 
     // An actual string of all models, sounds, and images this item will use
     const char  *precaches;     
@@ -320,19 +320,19 @@ typedef struct gitem_s {
 typedef struct {
     GameClient *clients;       // [maxClients]
 
-    // Can't store spawnpoint in level, because
+    // Can't store spawnpoint32_t in level, because
     // it would get overwritten by the savegame restore
     char spawnpoint[512];    // needed for coop respawns
 
     // Store latched cvars here that we want to get at often
-    int maxClients;
-    int maxEntities;
+    int32_t maxClients;
+    int32_t maxEntities;
 
     // Cross level triggers
-    int serverflags;
+    int32_t serverflags;
 
     // Items
-    int numberOfItems;
+    int32_t numberOfItems;
 
     // Did we autosave?
     qboolean autoSaved;
@@ -347,7 +347,7 @@ typedef struct {
 //-------------------
 typedef struct {
     // Current local level frame number.
-    int frameNumber;
+    int32_t frameNumber;
 
     // Current local level time.
     float time;
@@ -365,7 +365,7 @@ typedef struct {
     struct {
         float time; // Time the intermission was started
         const char* changeMap; // Map to switch to after intermission has exited.
-        int exitIntermission; // Set to true(1) when exiting the intermission should take place.
+        int32_t exitIntermission; // Set to true(1) when exiting the intermission should take place.
         vec3_t origin; // Origin for intermission to take place at.
         vec3_t viewAngle; // View angle to apply for intermission.
     } intermission;
@@ -375,29 +375,29 @@ typedef struct {
 
     // Entity which the AI has sight on.
     Entity *sightEntity;
-    int sightEntityFrameNumber;
+    int32_t sightEntityFrameNumber;
 
     // Sound entities are set to the entity that caused the AI to be triggered.
     Entity *soundEntity;            // In case of a footstep, jumping sound, etc.
-    int soundEntityFrameNumber;
+    int32_t soundEntityFrameNumber;
     Entity *sound2Entity;           // In case of a weapon action.
-    int sound2EntityFrameNumber;
+    int32_t sound2EntityFrameNumber;
 
     // Not renaming this one, it has to go in the future.
-    int pic_health;
+    int32_t pic_health;
 
     // Total level Monster stats.
-    int totalMonsters;
-    int killedMonsters;
+    int32_t totalMonsters;
+    int32_t killedMonsters;
 
     // The current entity that is actively being ran from SVG_RunFrame.
     Entity *currentEntity;
 
     // Index for the que pile of dead bodies.
-    int bodyQue;
+    int32_t bodyQue;
 
     // Ugly place for storing coop variables.
-    int powerCubes; // Ugly necessity for coop
+    int32_t powerCubes; // Ugly necessity for coop
 } LevelLocals;
 
 //-------------------
@@ -411,9 +411,9 @@ typedef struct {
     vec3_t skyaxis;
     char *nextMap;
 
-    int lip;
-    int distance;
-    int height;
+    int32_t lip;
+    int32_t distance;
+    int32_t height;
     const char *noise; // C++20: STRING: Added const to char *
     float pausetime;
     const char *item; // C++20: STRING: Added const to char *
@@ -436,9 +436,9 @@ typedef struct {
     vec3_t endOrigin;
     vec3_t endAngles;
 
-    int startSoundIndex;
-    int middleSoundIndex;
-    int endSoundIndex;
+    int32_t startSoundIndex;
+    int32_t middleSoundIndex;
+    int32_t endSoundIndex;
 
     float acceleration;
     float speed;
@@ -448,7 +448,7 @@ typedef struct {
     float wait;
 
     // state data
-    int state;
+    int32_t state;
     vec3_t dir;
     float currentSpeed;
     float moveSpeed;
@@ -469,8 +469,8 @@ extern  ServerGameExports globals;    // CLEANUP: These were game_import_t and g
 extern  TemporarySpawnFields    st;
 
 // These too need to be taken care of.
-extern  int sm_meat_index;
-extern  int snd_fry;
+extern  int32_t sm_meat_index;
+extern  int32_t snd_fry;
 
 //-------------------
 //
@@ -508,7 +508,7 @@ struct MeansOfDeath {
 };
 
 // Extern variable, really ugly.
-extern  int meansOfDeath;
+extern  int32_t meansOfDeath;
 
 // Once again, ugly.
 extern  Entity g_entities[MAX_EDICTS];
@@ -638,9 +638,9 @@ void SVG_SetRespawn(Entity *ent, float delay);
 void SVG_ChangeWeapon(Entity *ent);
 void SVG_SpawnItem(Entity *ent, gitem_t *item);
 void SVG_ThinkWeapon(Entity *ent);
-int SVG_ArmorIndex(Entity *ent);
-gitem_t *SVG_GetItemByIndex(int index);
-qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int count);
+int32_t SVG_ArmorIndex(Entity *ent);
+gitem_t *SVG_GetItemByIndex(int32_t index);
+qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int32_t count);
 void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf);
 
 //
@@ -648,8 +648,8 @@ void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf
 //
 qboolean SVG_OnSameTeam(Entity *ent1, Entity *ent2);
 qboolean SVG_CanDamage(Entity *targ, Entity *inflictor);
-void SVG_Damage(Entity *targ, Entity *inflictor, Entity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockback, int dflags, int mod);
-void SVG_RadiusDamage(Entity *inflictor, Entity *attacker, float damage, Entity *ignore, float radius, int mod);
+void SVG_Damage(Entity *targ, Entity *inflictor, Entity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int32_t damage, int32_t knockback, int32_t dflags, int32_t mod);
+void SVG_RadiusDamage(Entity *inflictor, Entity *attacker, float damage, Entity *ignore, float radius, int32_t mod);
 
 // damage flags
 struct DamageFlags {
@@ -671,10 +671,10 @@ qboolean SVG_StepMove_Walk(Entity* ent, float yaw, float dist);
 // g_weapon.c
 //
 void SVG_ThrowDebris(Entity *self, const char *modelname, float speed, const vec3_t& origin);
-qboolean SVG_FireHit(Entity *self, vec3_t &aim, int damage, int kick);
-void SVG_FireBullet(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod);
-void SVG_FireShotgun(Entity* self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
-void SVG_FireBlaster(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int effect, qboolean hyper);
+qboolean SVG_FireHit(Entity *self, vec3_t &aim, int32_t damage, int32_t kick);
+void SVG_FireBullet(Entity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t mod);
+void SVG_FireShotgun(Entity* self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t count, int32_t mod);
+void SVG_FireBlaster(Entity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t speed, int32_t effect, qboolean hyper);
 
 //
 // g_ptrail.c
@@ -689,8 +689,8 @@ Entity *SVG_PlayerTrail_LastSpot(void);
 //
 // g_player.c
 //
-void SVG_Player_Pain(Entity *self, Entity *other, float kick, int damage);
-void SVG_Player_Die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point);
+void SVG_Player_Pain(Entity *self, Entity *other, float kick, int32_t damage);
+void SVG_Player_Die(Entity *self, Entity *inflictor, Entity *attacker, int32_t damage, const vec3_t& point);
 
 //
 // g_svcmds.c
@@ -701,7 +701,7 @@ qboolean SVG_FilterPacket(char *from);
 //
 // g_pweapon.c
 //
-void SVG_PlayerNoise(Entity *who, vec3_t where, int type);
+void SVG_PlayerNoise(Entity *who, vec3_t where, int32_t type);
 
 //
 // g_phys.c
@@ -715,7 +715,7 @@ void SVG_SaveClientData(void);
 void SVG_FetchClientData(Entity *ent);
 
 Entity* SVG_PickTarget(char* targetName);
-Entity* SVG_Find(Entity* from, int fieldofs, const char* match); // C++20: Added const to char*
+Entity* SVG_Find(Entity* from, int32_t fieldofs, const char* match); // C++20: Added const to char*
 Entity* SVG_FindEntitiesWithinRadius(Entity* from, vec3_t org, float rad);
 
 void    SVG_InitEntity(Entity* e);
@@ -752,32 +752,32 @@ struct PlayerAnimation {
 typedef struct {
     char userinfo[MAX_INFO_STRING];
     char netname[16];
-    int hand;
+    int32_t hand;
 
     qboolean isConnected;  // A loadgame will leave valid entities that
                            // just don't have a connection yet
 
     // Values saved and restored from entities when changing levels
-    int health;
-    int maxHealth;
-    int savedFlags;
+    int32_t health;
+    int32_t maxHealth;
+    int32_t savedFlags;
 
-    int selectedItem;
-    int inventory[MAX_ITEMS];
+    int32_t selectedItem;
+    int32_t inventory[MAX_ITEMS];
 
     // Ammo capacities
-    int maxBullets;
-    int maxShells;
-    int maxRockets;
-    int maxGrenades;
-    int maxCells;
-    int maxSlugs;
+    int32_t maxBullets;
+    int32_t maxShells;
+    int32_t maxRockets;
+    int32_t maxGrenades;
+    int32_t maxCells;
+    int32_t maxSlugs;
 
     gitem_t *activeWeapon;
     gitem_t *lastWeapon;
 
-    int powerCubes;    // Used for tracking the cubes in coop games
-    int score;         // For calculating total unit score in coop games
+    int32_t powerCubes;    // Used for tracking the cubes in coop games
+    int32_t score;         // For calculating total unit score in coop games
 
     qboolean isSpectator;          // client is a isSpectator
 } ClientPersistantData;
@@ -789,8 +789,8 @@ typedef struct {
 //-------------------
 typedef struct {
     ClientPersistantData persistentCoopRespawn;   // what to set client->persistent to on a respawn
-    int enterFrame;         // level.frameNumber the client entered the game
-    int score;              // frags, etc
+    int32_t enterFrame;         // level.frameNumber the client entered the game
+    int32_t score;              // frags, etc
     vec3_t commandViewAngles;         // angles sent over in the last command
 
     qboolean isSpectator;          // client is a isSpectator
@@ -808,7 +808,7 @@ typedef struct {
 struct gclient_s {
     // known to server
     PlayerState  playerState;             // communicated by server to clients
-    int ping;
+    int32_t ping;
 
     // private to game
     ClientPersistantData persistent;
@@ -818,11 +818,11 @@ struct gclient_s {
     qboolean showInventory;      // set layout stat
     qboolean showHelpIcon;
 
-    int ammoIndex;
+    int32_t ammoIndex;
 
-    int buttons;
-    int oldButtons;
-    int latchedButtons;     // These are used for one time push events.
+    int32_t buttons;
+    int32_t oldButtons;
+    int32_t latchedButtons;     // These are used for one time push events.
 
     qboolean weaponThunk;
 
@@ -831,10 +831,10 @@ struct gclient_s {
     // sum up damage over an entire frame, so
     // shotgun blasts give a single big kick
     struct {
-        int armor;       // damage absorbed by armor
-        int powerArmor;      // damage absorbed by power armor
-        int blood;       // damage taken out of health
-        int knockBack;   // impact damage
+        int32_t armor;       // damage absorbed by armor
+        int32_t powerArmor;      // damage absorbed by power armor
+        int32_t blood;       // damage taken out of health
+        int32_t knockBack;   // impact damage
         vec3_t from;        // origin for vector calculation
     } damages;
 
@@ -864,21 +864,21 @@ struct gclient_s {
     vec3_t oldVelocity;
 
     float nextDrownTime;
-    int oldWaterLevel;
+    int32_t oldWaterLevel;
 
     // For weapon raising
-    int machinegunShots;
+    int32_t machinegunShots;
 
     // animation vars
     struct {
-        int         endFrame;
-        int         priorityAnimation;
+        int32_t         endFrame;
+        int32_t         priorityAnimation;
         qboolean    isDucking;
         qboolean    isRunning;
     } animation;
 
     // Weapon Sound.
-    int weaponSound;
+    int32_t weaponSound;
 
     // Pick up message time.
     float pickupMessageTime;
@@ -887,7 +887,7 @@ struct gclient_s {
     struct {
         float lockTill;     // locked from talking
         float when[10];     // when messages were said
-        int whenHead;     // head pointer for when said
+        int32_t whenHead;     // head pointer for when said
     } flood;
 
     // Client can respawn when time > this
@@ -923,25 +923,25 @@ struct entity_s {
 
     // An entity is in no use, in case it complies to the INUSE macro.
     qboolean inUse;
-    int linkCount;
+    int32_t linkCount;
 
     // FIXME: move these fields to a server private sv_entity_t
     list_t area; // Linked to a division node or leaf
 
     // If numClusters is -1, use headNodew instead.
-    int numClusters;       // if -1, use headNode instead
-    int clusterNumbers[MAX_ENT_CLUSTERS];
+    int32_t numClusters;       // if -1, use headNode instead
+    int32_t clusterNumbers[MAX_ENT_CLUSTERS];
     // Only use this instead of numClusters if numClusters == -1
-    int headNode;           
-    int areaNumber;
-    int areaNumber2;
+    int32_t headNode;           
+    int32_t areaNumber;
+    int32_t areaNumber2;
 
     //================================
-    int serverFlags;
+    int32_t serverFlags;
     vec3_t mins, maxs;
     vec3_t absMin, absMax, size;
     uint32_t solid;
-    int clipMask;
+    int32_t clipMask;
     Entity *owner;
 
 
@@ -951,8 +951,8 @@ struct entity_s {
     //================================
     SVGBaseEntity* classEntity;
 
-    int moveType;
-    int flags;
+    int32_t moveType;
+    int32_t flags;
 
     const char *model;       // C++20: STRING: Added const to char*
     float freeTime;     // sv.time when the object was freed
@@ -962,7 +962,7 @@ struct entity_s {
     //
     const char *message;     // C++20: STRING: Added const to char *
     const char *className;   // C++20: STRING: Made const.
-    int spawnFlags;
+    int32_t spawnFlags;
 
     float timeStamp;
 
@@ -986,7 +986,7 @@ struct entity_s {
     // Regular entity velocity, gravity, mass.
     vec3_t velocity;
     vec3_t angularVelocity;
-    int mass;
+    int32_t mass;
     float airFinished;
     float gravity;        // per entity gravity multiplier (1.0 is normal)
                                 // use for lowgrav artifact, flares
@@ -1002,8 +1002,8 @@ struct entity_s {
     void (*Blocked)(Entity *self, Entity *other);         // move to moveinfo?
     void (*Touch)(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf);
     void (*Use)(Entity *self, Entity *other, Entity *activator);
-    void (*Pain)(Entity *self, Entity *other, float kick, int damage);
-    void (*Die)(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t &point);
+    void (*Pain)(Entity *self, Entity *other, float kick, int32_t damage);
+    void (*Die)(Entity *self, Entity *inflictor, Entity *attacker, int32_t damage, const vec3_t &point);
 
     float debounceTouchTime;        // are all these legit?  do we need more/less of them?
     float debouncePainTime;
@@ -1011,23 +1011,23 @@ struct entity_s {
     float debounceSoundTime;    // move to clientInfo
     float lastMoveTime;
 
-    int health;
-    int maxHealth;
-    int gibHealth;      // Health level required in order for an edict to gib.
-    int deadFlag;
+    int32_t health;
+    int32_t maxHealth;
+    int32_t gibHealth;      // Health level required in order for an edict to gib.
+    int32_t deadFlag;
     qboolean showHostile;
 
     float powerArmorTime;
 
     const char *map;           // target_changelevel // C++20: STRING: Added const to char *
 
-    int viewHeight;     // height above origin where eyesight is determined
-    int takeDamage;
-    int damage;
-    int radiusDamage;
+    int32_t viewHeight;     // height above origin where eyesight is determined
+    int32_t takeDamage;
+    int32_t damage;
+    int32_t radiusDamage;
     float damageRadius;
-    int sounds;         // make this a spawntemp var?
-    int count;
+    int32_t sounds;         // make this a spawntemp var?
+    int32_t count;
 
     // Chain, enemy, old enemy, and activator entity pointers.
     Entity *chain;
@@ -1037,7 +1037,7 @@ struct entity_s {
     
     // Ground pointers.
     Entity *groundEntityPtr;
-    int groundEntityLinkCount;
+    int32_t groundEntityLinkCount;
     
     Entity *teamChainPtr;
     Entity *teamMasterPtr;
@@ -1045,8 +1045,8 @@ struct entity_s {
     Entity *myNoisePtr;       // can go in client only
     Entity *myNoise2Ptr;
 
-    int noiseIndex;
-    int noiseIndex2;
+    int32_t noiseIndex;
+    int32_t noiseIndex2;
     float volume;
     float attenuation;
 
@@ -1057,16 +1057,16 @@ struct entity_s {
 
     float teleportTime;
 
-    int waterType;
-    int waterLevel;
+    int32_t waterType;
+    int32_t waterLevel;
 
     vec3_t moveOrigin;
     vec3_t moveAngles;
 
     // move this to clientInfo?
-    int lightLevel;
+    int32_t lightLevel;
 
-    int style;          // also used as areaportal number
+    int32_t style;          // also used as areaportal number
 
     // Custom lightstyle.
     char *customLightStyle;

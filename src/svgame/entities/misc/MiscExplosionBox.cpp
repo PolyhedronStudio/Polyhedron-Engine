@@ -62,13 +62,28 @@ void MiscExplosionBox::Spawn() {
     gi.ModelIndex("models/objects/debris2/tris.md2");
     gi.ModelIndex("models/objects/debris3/tris.md2");
 
-    GetServerEntity()->solid = Solid::BoundingBox;
-    GetServerEntity()->moveType = MoveType::Step;
+    // Set solid.
+    SetSolid(Solid::BoundingBox);
 
-    GetServerEntity()->model = "models/objects/barrels/tris.md2";
+    // Set move type.
+    SetMoveType(MoveType::Step);
+
+    //GetServerEntity()->model = "models/objects/barrels/tris.md2";
+    // Set the barrel model, and model index.
+    SetModel("models/objects/barrels/tris.md2");
     GetServerEntity()->state.modelIndex = gi.ModelIndex(GetServerEntity()->model);
-    VectorSet(GetServerEntity()->mins, -16, -16, 0);
-    VectorSet(GetServerEntity()->maxs, 16, 16, 40);
+
+    // Set the bounding box.
+    SetBoundingBox(
+        // Mins.
+        {
+            -16, -16, 0
+        },
+        // Maxs.
+        {
+            16, 16, 40
+        }
+    );
 
     if (!GetServerEntity()->mass)
         GetServerEntity()->mass = 400;

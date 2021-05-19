@@ -44,9 +44,30 @@ public:
     void Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
 
     //
-    // Functions.
+    // Entity Get Functions.
     //
+
+
+    //
+    // Entity Set Functions.
+    //
+    inline void SetModel(const char* model) {
+        serverEntity->model = model;
+    }
+    inline void SetMoveType(const int32_t moveType) {
+        serverEntity->moveType = moveType;
+    }
+    inline void SetSolid(const uint32_t solid) {
+        serverEntity->solid = solid;
+    }
+    inline void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) {
+        serverEntity->mins = mins;
+        serverEntity->maxs = maxs;
+    }
+
+
     Entity* GetServerEntity();
+
 
 private:
     // The actual entity this class is a member of.
