@@ -229,13 +229,14 @@ static const spawn_field_t temp_fields[] = {
 };
 
 //
-// SVG_SpawnServerGameClassEntity
+// SVG_SpawnClassEntity
 //
 //
 #include "entities/base/SVGBaseEntity.h"
+#include "entities/base/PlayerClient.h"
 #include "entities/misc/MiscExplosionBox.h"
 
-SVGBaseEntity* SVG_SpawnServerGameClassEntity(Entity* ent, const std::string& className) {
+SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     if (className == "misc_explobox")
         return new MiscExplosionBox(ent);
     else
@@ -283,7 +284,7 @@ void ED_CallSpawn(Entity *ent)
             s->spawn(ent);
 
             // Spawn the according server game entity class.
-            ent->classEntity = SVG_SpawnServerGameClassEntity(ent, ent->className);
+            ent->classEntity = SVG_SpawnClassEntity(ent, ent->className);
             ent->classEntity->Spawn();
             return;
         }
@@ -432,7 +433,7 @@ void ED_ParseEntity(const char **data, Entity *ent)
 
 /*
 ================
-G_FindTeams
+SVG_FindTeams
 
 Chain together all entities with a matching team field.
 
@@ -440,7 +441,7 @@ All but the first will have the EntityFlags::TeamSlave flag set.
 All but the last will have the teamchain field set to the next one
 ================
 */
-void G_FindTeams(void)
+void SVG_FindTeams(void)
 {
     Entity *e, *e2, *chain;
     int     i, j;
@@ -516,6 +517,11 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
 
     // Clear out entities.
     for (int32_t i = 0; i < game.maxEntities; i++) {
+        // Delete class entities, if any.
+        if (g_entities[i].classEntity) {
+            delete g_entities[i].classEntity;
+        }
+
         g_entities[i] = {};
     }
 
@@ -594,7 +600,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     }
 #endif
 
-    G_FindTeams();
+    SVG_FindTeams();
 
     SVG_PlayerTrail_Init();
 }

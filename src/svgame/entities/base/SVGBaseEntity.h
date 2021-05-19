@@ -37,6 +37,9 @@ public:
     virtual void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     virtual void Think();       // General entity thinking routine.
 
+    //
+    // Callback functions.
+    //
     void Die(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
     void Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
 

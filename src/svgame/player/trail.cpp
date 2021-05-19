@@ -74,7 +74,7 @@ void SVG_PlayerTrail_Add(vec3_t spot)
     trail[trail_head]->timeStamp = level.time;
 
     VectorSubtract(spot, trail[PREV(trail_head)]->state.origin, temp);
-    trail[trail_head]->state.angles[1] = 0.f;// TODO: Fix? vectoyaw(temp);
+    trail[trail_head]->state.angles[1] = vec3_to_yaw(temp);
 
     trail_head = NEXT(trail_head);
 }

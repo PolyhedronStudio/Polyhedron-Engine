@@ -44,8 +44,8 @@ void SP_light(Entity* self)
     if (self->style >= 32) {
         self->Use = light_use;
         if (self->spawnFlags & START_OFF)
-            gi.configstring(ConfigStrings::Lights+ self->style, "a");
+            gi.configstring(ConfigStrings::Lights + self->style, "a");
         else
-            gi.configstring(ConfigStrings::Lights+ self->style, self->customLightStyle);
+            gi.configstring(ConfigStrings::Lights + self->style, self->customLightStyle);
     }
 }

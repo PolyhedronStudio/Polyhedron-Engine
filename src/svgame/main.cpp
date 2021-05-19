@@ -280,8 +280,9 @@ void SVG_ClientEndServerFrames(void)
     int     i;
     Entity *ent;
 
-    // calc the player views now that all pushing
-    // and damage has been added
+    // Go through each client and calculate their final view for the state.
+    // (This happens here, so we can take into consideration objects that have
+    // pushes the player. And of course, because damage has been added.)
     for (i = 0 ; i < maxClients->value ; i++) {
         ent = g_entities + 1 + i;
         if (!ent->inUse || !ent->client)
@@ -311,12 +312,12 @@ Entity *SVG_CreateTargetChangeLevel(char *map)
 
 /*
 =================
-EndDMLevel
+SVG_EndDMLevel
 
 The timelimit or fraglimit has been exceeded
 =================
 */
-void EndDMLevel(void)
+void SVG_EndDMLevel(void)
 {
     Entity     *ent;
     char *s, *t, *f;
@@ -371,10 +372,10 @@ void EndDMLevel(void)
 
 /*
 =================
-CheckNeedPass
+SVG_CheckNeedPass
 =================
 */
-void CheckNeedPass(void)
+void SVG_CheckNeedPass(void)
 {
     int need;
 
@@ -396,10 +397,10 @@ void CheckNeedPass(void)
 
 /*
 =================
-CheckDMRules
+SVG_CheckDMRules
 =================
 */
-void CheckDMRules(void)
+void SVG_CheckDMRules(void)
 {
     int         i;
     GameClient   *cl;
@@ -413,7 +414,7 @@ void CheckDMRules(void)
     if (timelimit->value) {
         if (level.time >= timelimit->value * 60) {
             gi.BPrintf(PRINT_HIGH, "Timelimit hit.\n");
-            EndDMLevel();
+            SVG_EndDMLevel();
             return;
         }
     }
@@ -426,7 +427,7 @@ void CheckDMRules(void)
 
             if (cl->respawn.score >= fraglimit->value) {
                 gi.BPrintf(PRINT_HIGH, "Fraglimit hit.\n");
-                EndDMLevel();
+                SVG_EndDMLevel();
                 return;
             }
         }
@@ -436,10 +437,10 @@ void CheckDMRules(void)
 
 /*
 =============
-ExitLevel
+SVG_ExitLevel
 =============
 */
-void ExitLevel(void)
+void SVG_ExitLevel(void)
 {
     int     i;
     Entity *ent;
@@ -452,7 +453,7 @@ void ExitLevel(void)
     level.intermission.time = 0;
     SVG_ClientEndServerFrames();
 
-    // clear some things before going to next level
+    // Clear some things before going to next level
     for (i = 0 ; i < maxClients->value ; i++) {
         ent = g_entities + 1 + i;
         if (!ent->inUse)
@@ -475,18 +476,20 @@ void SVG_RunFrame(void)
     int     i;
     Entity *ent;
 
+    // We're moving the game a frame forward.
     level.frameNumber++;
+
+    // Calculate the current frame time for this frame number.
     level.time = level.frameNumber * FRAMETIME;
 
-    // exit intermissions
-
+    // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {
-        ExitLevel();
+        SVG_ExitLevel();
         return;
     }
 
     //
-    // treat each object in turn
+    // Treat each object in turn
     // even the world gets a chance to Think
     //
     ent = &g_entities[0];
@@ -494,9 +497,10 @@ void SVG_RunFrame(void)
         if (!ent->inUse)
             continue;
 
+        // Let the level data know which entity we are processing right now.
         level.currentEntity = ent;
 
-        VectorCopy(ent->state.origin, ent->state.oldOrigin);
+        ent->state.oldOrigin = ent->state.origin;
 
         // if the ground entity moved, make sure we are still on it
         if ((ent->groundEntityPtr) && (ent->groundEntityPtr->linkCount != ent->groundEntityLinkCount)) {
@@ -506,21 +510,23 @@ void SVG_RunFrame(void)
             //}
         }
 
+        // Time to begin a server frame for all of our clients. (This has to ha
         if (i > 0 && i <= maxClients->value) {
             SVG_ClientBeginServerFrame(ent);
             continue;
         }
 
+        // Last but not least, "run" process the entity.
         SVG_RunEntity(ent);
     }
 
-    // see if it is time to end a deathmatch
-    CheckDMRules();
+    // See if it is time to end a deathmatch
+    SVG_CheckDMRules();
 
-    // see if needpass needs updated
-    CheckNeedPass();
+    // See if needpass needs updated
+    SVG_CheckNeedPass();
 
-    // build the playerstate_t structures for all players
+    // Build the playerstate_t structures for all players
     SVG_ClientEndServerFrames();
 }
 
@@ -699,7 +705,8 @@ void SVG_FreeEntity(Entity* ed)
         delete ed->classEntity;
 
     // C++-ify, reset the struct itself.
-    memset(ed, 0, sizeof(*ed));
+    //memset(ed, 0, sizeof(*ed));
+    *ed = {};
     //*ed = Entity();
     ed->className = "freed";
     ed->freeTime = level.time;

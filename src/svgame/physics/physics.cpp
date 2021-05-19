@@ -103,10 +103,9 @@ qboolean SV_RunThink(Entity *ent)
         return true;
 
     ent->nextThink = 0;
- 
 
-    if (ent->Think)
-        ent->Think(ent);
+    //if (ent->Think)
+    //    ent->Think(ent);
     
     if (ent->classEntity)
         ent->classEntity->Think();
@@ -130,7 +129,6 @@ void SV_Impact(Entity *e1, trace_t *trace)
 
     if (e1->solid != Solid::Not) {
         //e1->Touch(e1, e2, &trace->plane, trace->surface);
-        
         if (e1->classEntity)
             e1->classEntity->Touch(e1->classEntity, e2->classEntity, &trace->plane, trace->surface);
     }

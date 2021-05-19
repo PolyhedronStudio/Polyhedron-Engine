@@ -117,6 +117,9 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
 
     VectorCopy(trace.endPosition, GetServerEntity()->state.origin);
 
+    if (GetServerEntity()->state.number == 12) {
+        gi.DPrintf("I think, therefor, as a misc_explobox I AM!\n");
+    }
     gi.LinkEntity(GetServerEntity());
     SVG_StepMove_CheckGround(GetServerEntity());
     //M_CatagorizePosition(ent);
@@ -211,26 +214,6 @@ void MiscExplosionBox::MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEnti
     SetThink(&MiscExplosionBox::MiscExplosionBoxExplode);
 }
 
-float vectoyaw(const vec3_t &vec)
-{
-    float   yaw;
-
-    if (/*vec[YAW] == 0 &&*/ vec[vec3_t::PYR::Pitch] == 0) {
-        yaw = 0;
-        if (vec[vec3_t::PYR::Yaw] > 0)
-            yaw = 90;
-        else if (vec[vec3_t::PYR::Yaw] < 0)
-            yaw = -90;
-    }
-    else {
-        yaw = (int)(atan2(vec[vec3_t::PYR::Yaw], vec[vec3_t::PYR::Pitch]) * 180 / M_PI);
-        if (yaw < 0)
-            yaw += 360;
-    }
-
-    return yaw;
-}
-
 void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
     float   ratio;
     vec3_t  v;
@@ -245,7 +228,7 @@ void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity*
 
     ratio = (float)other->GetServerEntity()->mass / (float)GetServerEntity()->mass;
     VectorSubtract(GetServerEntity()->state.origin, other->GetServerEntity()->state.origin, v);
-    float yaw = vectoyaw(v);
+    float yaw = vec3_to_yaw(v);
 
     SVG_StepMove_Walk(GetServerEntity(), yaw, 20 * ratio * FRAMETIME);
     gi.DPrintf("self entity id: '%i' - is touching entity id: '%i'\n", GetServerEntity()->state.number);

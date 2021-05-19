@@ -852,7 +852,21 @@ void SVG_PutClientInServer(Entity *ent)
     // copy some data from the client to the entity
     SVG_FetchClientData(ent);
 
+    //
+    // Spawn client class entity.
+    //
+    ent->className = "PlayerClient";
+
+    // If the client already has an entity class, ditch it.
+    if (ent->classEntity)
+        delete ent->classEntity;
+
+    ent->classEntity = new PlayerClient(ent);
+    ent->classEntity->Spawn();
+
+    //
     // clear entity values
+    //
     ent->groundEntityPtr = NULL;
     ent->client = &game.clients[index];
     ent->takeDamage = TakeDamage::Aim;
@@ -867,7 +881,7 @@ void SVG_PutClientInServer(Entity *ent)
     ent->clipMask = CONTENTS_MASK_PLAYERSOLID;
     ent->model = "players/male/tris.md2";
     ent->Pain = SVG_Player_Pain;
-    ent->Die = SVG_Player_Die;
+    //ent->Die = SVG_Player_Die;
     ent->waterLevel = 0;
     ent->waterType = 0;
     ent->flags &= ~EntityFlags::NoKnockBack;
@@ -996,13 +1010,14 @@ void SVG_ClientBegin(Entity *ent)
     ent->client = game.clients + (ent - g_entities - 1);
 
     // Spawn client class entity.
-    ent->className = "PlayerClient";
-    
-    // If the client already has an entity class, ditch it.
-    if (ent->classEntity)
-        delete ent->classEntity;
+    //ent->className = "PlayerClient";
+    //
+    //// If the client already has an entity class, ditch it.
+    //if (ent->classEntity)
+    //    delete ent->classEntity;
 
-    ent->classEntity = new PlayerClient(ent);
+    //ent->classEntity = new PlayerClient(ent);
+    //ent->classEntity->Spawn();
 
     if (deathmatch->value) {
         SVG_ClientBeginDeathmatch(ent);
@@ -1018,6 +1033,16 @@ void SVG_ClientBegin(Entity *ent)
         // with deltaangles
         for (i = 0 ; i < 3 ; i++)
             ent->client->playerState.pmove.deltaAngles[i] = ent->client->playerState.pmove.viewAngles[i];
+
+        // 
+        ent->className = "PlayerClient";
+
+        // If the client already has an entity class, ditch it.
+        if (ent->classEntity)
+            delete ent->classEntity;
+
+        ent->classEntity = new PlayerClient(ent);
+        ent->classEntity->Spawn();
     } else {
         // a spawn point will completely reinitialize the entity
         // except for the persistant data that was initialized at

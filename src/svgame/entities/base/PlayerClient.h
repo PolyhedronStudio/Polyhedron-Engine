@@ -23,6 +23,11 @@ public:
     void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     void Think();       // General entity thinking routine.
 
+    //
+    // Callback functions.
+    //
+    void PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+
 private:
 
 };

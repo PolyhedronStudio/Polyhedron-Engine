@@ -122,7 +122,7 @@ void CLG_RunLightStyles(void)
     int     ofs;
     clightstyle_t* ls;
 
-    ofs = cl->time / 100;
+    ofs = cl->time / 50;
     if (ofs == cl_lastofs)
         return;
     cl_lastofs = ofs;
@@ -147,7 +147,7 @@ void CLG_SetLightStyle(int index, const char* s)
     }
 
     for (i = 0; i < ls->length; i++) {
-        ls->map[i] = (float)(s[i] - 'a') / (float)('m' - 'a');
+        ls->map[i] = (1.0f / 26.f) * (float)((float)s[i] - (float)'a'); //(float)(s[i] - 'a') / (float)('m' - 'a'); //0.2f;  //(1.0f / 26.f)* (float)((float)s[i] - (float)'a');//;(float)(s[i] - 'a') / (float)('z' - 'a');
     }
 
     if (ls->entry.prev) {
