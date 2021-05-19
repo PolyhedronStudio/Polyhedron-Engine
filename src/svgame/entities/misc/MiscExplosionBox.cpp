@@ -165,7 +165,7 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
         gi.DPrintf("I think, therefor, as a misc_explobox I AM!\n");
     }
     
-    // Link entity for testing.
+    // Link entity for collision testing.
     LinkEntity();
 
     // Do a check ground for the step move of this pusher.
@@ -192,59 +192,33 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
     // Set the new origin.
     SetOrigin(vec3_fmaf(GetAbsoluteMin(), 0.5f, GetSize()));
 
-    // Calculate speed.
-    float speed = 1.5 * (float)GetDamage() / 200.0f;
+    // Throw several "debris1/tris.md2" chunks.
+    SpawnDebris1Chunk();
+    SpawnDebris1Chunk();
 
-    // Throw several debris chunks.
-    vec3_t randomVec = { crandom(), crandom(), crandom() };
-    vec3_t origin = GetOrigin() + randomVec * GetSize();
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris1/tris.md2", speed, origin);
-
-    randomVec = { crandom(), crandom(), crandom() };
-    origin = GetOrigin() + randomVec * GetSize();
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris1/tris.md2", speed, origin);
-
-    // bottom corners
-    speed = 1.75 * (float)GetDamage() / 200.0f;
-    origin = GetAbsoluteMin();
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", speed, origin);
+    // Bottom corners
+    vec3_t origin = GetAbsoluteMin();
+    SpawnDebris3Chunk(origin);
     origin = GetAbsoluteMin();
     origin.x += GetSize().x;
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", speed, origin);
+    SpawnDebris3Chunk(origin);
     origin = GetAbsoluteMin();
     origin.y += GetSize().y;
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", speed, origin);
+    SpawnDebris3Chunk(origin);
     origin = GetAbsoluteMin();
     origin.x += GetSize().x;
     origin.y += GetSize().y;
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", speed, origin);
+    SpawnDebris3Chunk(origin);
 
-    // A bunch of little chunks
-    speed = 2.f * GetDamage() / 200.f;
-    randomVec = { crandom(), crandom(), crandom() };
-    origin = GetOrigin() + randomVec * GetSize();
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
-    randomVec = { crandom(), crandom(), crandom() };
-    origin = GetOrigin() + randomVec * GetSize();
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
-    randomVec = { crandom(), crandom(), crandom() };
-    origin = GetOrigin() + randomVec * GetSize();
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
-    randomVec = { crandom(), crandom(), crandom() };
-    origin = GetOrigin() + randomVec * GetSize();
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
-    randomVec = { crandom(), crandom(), crandom() };
-    origin = GetOrigin() + randomVec * GetSize();
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
-    randomVec = { crandom(), crandom(), crandom() };
-    origin = GetOrigin() + randomVec * GetSize();
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
-    randomVec = { crandom(), crandom(), crandom() };
-    origin = GetOrigin() + randomVec * GetSize();
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
-    randomVec = { crandom(), crandom(), crandom() };
-    origin = GetOrigin() + randomVec * GetSize();
-    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
+    // Spawn 8 "debris2/tris.md2" chunks.
+    SpawnDebris2Chunk();
+    SpawnDebris2Chunk();
+    SpawnDebris2Chunk();
+    SpawnDebris2Chunk();
+    SpawnDebris2Chunk();
+    SpawnDebris2Chunk();
+    SpawnDebris2Chunk();
+    SpawnDebris2Chunk();
     
     // Reset origin to saved origin.
     SetOrigin(save);
@@ -311,4 +285,71 @@ void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity*
     // Last but not least, move a step ahead.
     SVG_StepMove_Walk(GetServerEntity(), yaw, 20 * ratio * FRAMETIME);
     gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
+}
+
+
+//
+//===============
+// MiscExplosionBox::SpawnDebris1Chunk
+// 
+// Function to spawn "debris1/tris.md2" chunks.
+//===============
+//
+void MiscExplosionBox::SpawnDebris1Chunk() {
+    // Speed to throw debris at.
+    float speed = 1.5 * (float)GetDamage() / 200.0f;
+
+    // Calculate random direction vector.
+    vec3_t randomDirection = {
+        crandom(),
+        crandom(),
+        crandom()
+    };
+
+    // Calculate origin to spawn them at.
+    vec3_t origin = GetOrigin() + randomDirection * GetSize();
+
+    // Throw debris!
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris1/tris.md2", speed, origin);
+}
+
+
+//
+//===============
+// MiscExplosionBox::SpawnDebris2Chunk
+//
+// Function to spawn "debris2/tris.md2" chunks.
+//===============
+//
+void MiscExplosionBox::SpawnDebris2Chunk() {
+    // Speed to throw debris at.
+    float speed = 2.f * GetDamage() / 200.f;
+    
+    // Calculate random direction vector.
+    vec3_t randomDirection = { 
+        crandom(), 
+        crandom(), 
+        crandom() 
+    };
+
+    // Calculate origin to spawn them at.
+    vec3_t origin = GetOrigin() + randomDirection * GetSize();
+
+    // Last but not least, throw debris.
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris2/tris.md2", speed, origin);
+}
+
+//
+//===============
+// MiscExplosionBox::SpawnDebris3Chunk
+// 
+// Function to spawn "debris3/tris.md2" chunks.
+//===============
+//
+void MiscExplosionBox::SpawnDebris3Chunk(const vec3_t &origin) {
+    // Speed to throw debris at.
+    float speed = 1.75 * (float)GetDamage() / 200.0f;
+
+    // Throw debris!
+    SVG_ThrowDebris(GetServerEntity(), "models/objects/debris3/tris.md2", speed, origin);
 }

@@ -36,7 +36,14 @@ public:
     void MiscExplosionBoxExplode(void);
 
 private:
+    // Function to spawn "debris1/tris.md2" chunks.
+    void SpawnDebris1Chunk();
 
+    // Function to spawn "debris2/tris.md2" chunks.
+    void SpawnDebris2Chunk();
+
+    // Function to spawn "debris3/tris.md2" chunks.
+    void SpawnDebris3Chunk(const vec3_t& origin);
 };
 
 #endif // __SVGAME_ENTITIES_MISC_MISCEXPLOSIONBOX_H__
