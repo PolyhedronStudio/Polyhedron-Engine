@@ -96,13 +96,13 @@ qboolean SV_RunThink(Entity *ent)
 {
     float   thinktime;
 
-    thinktime = ent->nextThink;
+    thinktime = ent->nextThinkTime;
     if (thinktime <= 0)
         return true;
     if (thinktime > level.time + 0.001)
         return true;
 
-    ent->nextThink = 0;
+    ent->nextThinkTime = 0;
 
     //if (ent->Think)
     //    ent->Think(ent);
@@ -580,10 +580,10 @@ void SV_Physics_Pusher(Entity *ent)
         gi.Error("pushed_p > &pushed[MAX_EDICTS], memory corrupted");
 
     if (part) {
-        // the move failed, bump all nextThink times and back out moves
+        // the move failed, bump all nextThinkTime times and back out moves
         for (mv = ent ; mv ; mv = mv->teamChainPtr) {
-            if (mv->nextThink > 0)
-                mv->nextThink += FRAMETIME;
+            if (mv->nextThinkTime > 0)
+                mv->nextThinkTime += FRAMETIME;
         }
 
         // if the pusher has a "Blocked" function, call it

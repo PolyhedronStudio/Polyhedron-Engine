@@ -143,7 +143,7 @@ typedef struct cl_sustain_s {
     int     id;
     int     type;
     int     endTime;
-    int     nextThink;
+    int     nextThinkTime;
     int     thinkinterval;
     vec3_t  org;
     vec3_t  dir;

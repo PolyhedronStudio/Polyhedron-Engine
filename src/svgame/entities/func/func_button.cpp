@@ -58,7 +58,7 @@ void button_wait(Entity* self)
     UTIL_UseTargets(self, self->activator);
     self->state.frame = 1;
     if (self->moveInfo.wait >= 0) {
-        self->nextThink = level.time + self->moveInfo.wait;
+        self->nextThinkTime = level.time + self->moveInfo.wait;
         self->Think = button_return;
     }
 }

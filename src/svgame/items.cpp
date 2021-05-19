@@ -133,7 +133,7 @@ void SVG_SetRespawn(Entity *ent, float delay)
     ent->flags |= EntityFlags::Respawn;
     ent->serverFlags |= EntityServerFlags::NoClient;
     ent->solid = Solid::Not;
-    ent->nextThink = level.time + delay;
+    ent->nextThinkTime = level.time + delay;
     ent->Think = DoRespawn;
     gi.LinkEntity(ent);
 }
@@ -270,7 +270,7 @@ void Drop_Ammo(Entity *ent, gitem_t *item)
 void MegaHealth_think(Entity *self)
 {
     if (self->owner->health > self->owner->maxHealth) {
-        self->nextThink = level.time + 1;
+        self->nextThinkTime = level.time + 1;
         self->owner->health -= 1;
         return;
     }
@@ -296,7 +296,7 @@ qboolean Pickup_Health(Entity *ent, Entity *other)
 
     if (ent->style & HEALTH_TIMED) {
         ent->Think = MegaHealth_think;
-        ent->nextThink = level.time + 5;
+        ent->nextThinkTime = level.time + 5;
         ent->owner = other;
         ent->flags |= EntityFlags::Respawn;
         ent->serverFlags |= EntityServerFlags::NoClient;
@@ -459,7 +459,7 @@ void drop_make_touchable(Entity *ent)
 {
     ent->Touch = SVG_TouchItem;
     if (deathmatch->value) {
-        ent->nextThink = level.time + 29;
+        ent->nextThinkTime = level.time + 29;
         ent->Think = SVG_FreeEntity;
     }
 }
@@ -503,7 +503,7 @@ Entity *SVG_DropItem(Entity *ent, gitem_t *item)
     dropped->velocity[2] = 300;
 
     dropped->Think = drop_make_touchable;
-    dropped->nextThink = level.time + 1;
+    dropped->nextThinkTime = level.time + 1;
 
     gi.LinkEntity(dropped);
 
@@ -569,7 +569,7 @@ void droptofloor(Entity *ent)
         ent->serverFlags |= EntityServerFlags::NoClient;
         ent->solid = Solid::Not;
         if (ent == ent->teamMasterPtr) {
-            ent->nextThink = level.time + FRAMETIME;
+            ent->nextThinkTime = level.time + FRAMETIME;
             ent->Think = DoRespawn;
         }
     }
@@ -716,7 +716,7 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
     }
 
     ent->item = item;
-    ent->nextThink = level.time + 2 * FRAMETIME;    // items start after other solids
+    ent->nextThinkTime = level.time + 2 * FRAMETIME;    // items start after other solids
     ent->Think = droptofloor;
     ent->state.effects = item->worldModelFlags;
     ent->state.renderfx = RenderEffects::Glow;

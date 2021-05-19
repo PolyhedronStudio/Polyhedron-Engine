@@ -28,7 +28,7 @@ These can used but not touched.
 void func_timer_think(Entity* self)
 {
     UTIL_UseTargets(self, self->activator);
-    self->nextThink = level.time + self->wait + crandom() * self->random;
+    self->nextThinkTime = level.time + self->wait + crandom() * self->random;
 }
 
 void func_timer_use(Entity* self, Entity* other, Entity* activator)
@@ -36,14 +36,14 @@ void func_timer_use(Entity* self, Entity* other, Entity* activator)
     self->activator = activator;
 
     // if on, turn it off
-    if (self->nextThink) {
-        self->nextThink = 0;
+    if (self->nextThinkTime) {
+        self->nextThinkTime = 0;
         return;
     }
 
     // turn it on
     if (self->delay)
-        self->nextThink = level.time + self->delay;
+        self->nextThinkTime = level.time + self->delay;
     else
         func_timer_think(self);
 }
@@ -62,7 +62,7 @@ void SP_func_timer(Entity* self)
     }
 
     if (self->spawnFlags & 1) {
-        self->nextThink = level.time + 1.0 + st.pausetime + self->delay + self->wait + crandom() * self->random;
+        self->nextThinkTime = level.time + 1.0 + st.pausetime + self->delay + self->wait + crandom() * self->random;
         self->activator = self;
     }
 

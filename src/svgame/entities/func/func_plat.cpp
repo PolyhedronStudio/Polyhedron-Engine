@@ -25,7 +25,7 @@ void plat_hit_top(Entity* ent)
     ent->moveInfo.state = STATE_TOP;
 
     ent->Think = plat_go_down;
-    ent->nextThink = level.time + 3;
+    ent->nextThinkTime = level.time + 3;
 }
 
 void plat_hit_bottom(Entity* ent)
@@ -100,7 +100,7 @@ void Touch_Plat_Center(Entity* ent, Entity* other, cplane_t* plane, csurface_t* 
     if (ent->moveInfo.state == STATE_BOTTOM)
         plat_go_up(ent);
     else if (ent->moveInfo.state == STATE_TOP)
-        ent->nextThink = level.time + 1;    // the player is still on the plat, so delay going down
+        ent->nextThinkTime = level.time + 1;    // the player is still on the plat, so delay going down
 }
 
 void plat_spawn_inside_trigger(Entity* ent)

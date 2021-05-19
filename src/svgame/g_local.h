@@ -996,7 +996,7 @@ struct entity_s {
     float yawSpeed;
     float idealYawAngle;
 
-    float nextThink;
+    float nextThinkTime;
     void (*PreThink)(Entity *ent);
     void (*Think)(Entity *self);
     void (*Blocked)(Entity *self, Entity *other);         // move to moveinfo?

@@ -403,7 +403,7 @@ void CLG_ParticleSteamEffect2(cl_sustain_t* self)
         p->alphavel = -1.0 / (0.5 + frand() * 0.3);
     }
 
-    self->nextThink += self->thinkinterval;
+    self->nextThinkTime += self->thinkinterval;
 }
 
 /*

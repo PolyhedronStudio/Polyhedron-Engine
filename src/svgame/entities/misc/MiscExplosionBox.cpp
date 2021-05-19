@@ -50,13 +50,8 @@ void MiscExplosionBox::PreCache() {
 	gi.DPrintf("MiscExplosionBox::PreCache();");
 }
 void MiscExplosionBox::Spawn() {
+    // Ensure we call the base spawn function.
     SVGBaseEntity::Spawn();
-
-    if (deathmatch->value) {
-        // auto-remove for deathmatch
-        SVG_FreeEntity(GetServerEntity());
-        return;
-    }
 
     gi.ModelIndex("models/objects/debris1/tris.md2");
     gi.ModelIndex("models/objects/debris2/tris.md2");
@@ -85,27 +80,29 @@ void MiscExplosionBox::Spawn() {
         }
     );
 
-    if (!GetServerEntity()->mass)
-        GetServerEntity()->mass = 400;
-    if (!GetServerEntity()->health)
-        GetServerEntity()->health = 10;
-    if (!GetServerEntity()->damage)
-        GetServerEntity()->damage = 150;
+    // Set default values in case we have none.
+    if (!GetMass()) {
+        SetMass(400);
+    }
+    if (!GetHealth()) {
+        SetHealth(10);
+    }
+    if (!GetDamage())
+        SetDamage(150);
 
-    GetServerEntity()->takeDamage = TakeDamage::Yes;
+    // Set entity to allow taking damage (can't explode otherwise.)
+    SetTakeDamage(TakeDamage::Yes);
 
-    //GetServerEntity()->Touch = barrel_touch;
-
-    //serverEntity->Think = barrel_think;
-    
+    // Setup our MiscExplosionBox callbacks.
     SetThink(&MiscExplosionBox::MiscExplosionBoxThink);
-    GetServerEntity()->nextThink = level.time + 2 * FRAMETIME;
-
     SetDie(&MiscExplosionBox::MiscExplosionBoxDie);
     SetTouch(&MiscExplosionBox::MiscExplosionBoxTouch);
 
-    gi.LinkEntity(GetServerEntity());
+    // Setup the next think time.
+    SetNextThinkTime(level.time + 2 * FRAMETIME);
 
+    // Link the entity to world, for collision testing.
+    LinkEntity();
 }
 void MiscExplosionBox::PostSpawn() {
 	gi.DPrintf("MiscExplosionBox::PostSpawn();");
@@ -222,7 +219,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
 
 void MiscExplosionBox::MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     GetServerEntity()->takeDamage = TakeDamage::No;
-    GetServerEntity()->nextThink = level.time + 2 * FRAMETIME;
+    GetServerEntity()->nextThinkTime = level.time + 2 * FRAMETIME;
     if (attacker)
         GetServerEntity()->activator = attacker->GetServerEntity();
 

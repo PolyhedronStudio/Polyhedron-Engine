@@ -17,13 +17,17 @@ public:
     MiscExplosionBox(Entity* svEntity);
     virtual ~MiscExplosionBox();
 
+    //
     // Interface functions. 
+    //
     void PreCache();    // Precaches data.
     void Spawn();       // Spawns the entity.
     void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     void Think();       // General entity thinking routine.
 
-    // Functions.
+    //
+    // Callback Functions.
+    //
     void MiscExplosionBoxThink(void);
     void MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
     void MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);

@@ -60,7 +60,7 @@ void SP_func_object(Entity* self)
         self->solid = Solid::BSP;
         self->moveType = MoveType::Push;
         self->Think = func_object_release;
-        self->nextThink = level.time + 2 * FRAMETIME;
+        self->nextThinkTime = level.time + 2 * FRAMETIME;
     }
     else {
         self->solid = Solid::Not;

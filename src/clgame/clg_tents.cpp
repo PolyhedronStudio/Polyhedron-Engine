@@ -789,7 +789,7 @@ static void CLG_ProcessSustain(void)
 
 	for (i = 0, s = clg_sustains; i < MAX_SUSTAINS; i++, s++) {
 		if (s->id) {
-			if ((s->endTime >= cl->time) && (cl->time >= s->nextThink))
+			if ((s->endTime >= cl->time) && (cl->time >= s->nextThinkTime))
 				s->Think(s);
 			else if (s->endTime < cl->time)
 				s->id = 0;
@@ -819,7 +819,7 @@ static void CLG_ParseSteam(void)
 	s->endTime = cl->time + teParameters.time;
 	s->Think = CLG_ParticleSteamEffect2;
 	s->thinkinterval = 100;
-	s->nextThink = cl->time;
+	s->nextThinkTime = cl->time;
 }
 
 //

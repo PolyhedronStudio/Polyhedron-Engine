@@ -32,5 +32,5 @@ void SP_target_crosslevel_target(Entity* self)
     self->serverFlags = EntityServerFlags::NoClient;
 
     self->Think = target_crosslevel_target_think;
-    self->nextThink = level.time + self->delay;
+    self->nextThinkTime = level.time + self->delay;
 }

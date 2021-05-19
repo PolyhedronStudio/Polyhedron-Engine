@@ -23,6 +23,6 @@ void SP_info_player_start(Entity* self)
     if (Q_stricmp(level.mapName, "security") == 0) {
         // invoke one of our gross, ugly, disgusting hacks
         self->Think = SP_CreateCoopSpots;
-        self->nextThink = level.time + FRAMETIME;
+        self->nextThinkTime = level.time + FRAMETIME;
     }
 }

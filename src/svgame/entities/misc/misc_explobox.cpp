@@ -55,7 +55,7 @@ void SP_misc_explobox(Entity* self)
     //self->Touch = barrel_touch;
 
     ////self->Think = barrel_think;
-    ////self->nextThink = level.time + 2 * FRAMETIME;
+    ////self->nextThinkTime = level.time + 2 * FRAMETIME;
 
     //gi.LinkEntity(self);
 }

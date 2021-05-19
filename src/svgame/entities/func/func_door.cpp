@@ -64,7 +64,7 @@ void door_hit_top(Entity* self)
         return;
     if (self->moveInfo.wait >= 0) {
         self->Think = door_go_down;
-        self->nextThink = level.time + self->moveInfo.wait;
+        self->nextThinkTime = level.time + self->moveInfo.wait;
     }
 }
 
@@ -106,7 +106,7 @@ void door_go_up(Entity* self, Entity* activator)
     if (self->moveInfo.state == STATE_TOP) {
         // reset top wait time
         if (self->moveInfo.wait >= 0)
-            self->nextThink = level.time + self->moveInfo.wait;
+            self->nextThinkTime = level.time + self->moveInfo.wait;
         return;
     }
 
@@ -384,7 +384,7 @@ void SP_func_door(Entity* ent)
 
     gi.LinkEntity(ent);
 
-    ent->nextThink = level.time + FRAMETIME;
+    ent->nextThinkTime = level.time + FRAMETIME;
     if (ent->health || ent->targetName)
         ent->Think = Think_CalcMoveSpeed;
     else

@@ -46,27 +46,104 @@ public:
     //
     // Entity Get Functions.
     //
+    // Return the 'damage' value.
+    inline const int32_t GetDamage() {
+        return serverEntity->damage;
+    }
 
+    // Return the 'health' value.
+    inline const int32_t GetHealth() {
+        return serverEntity->health;
+    }
+    // Return the 'mass' value.
+    inline const int32_t GetMass() {
+        return serverEntity->mass;
+    }
+    
+    // Return the 'model' value.
+    inline const char* GetModel() {
+        return serverEntity->model;
+    }
+
+    // Return the 'movetype' value.
+    inline const int32_t GetMoveType() {
+        return serverEntity->moveType;
+    }
+
+    // Return the 'nextThinkTime' value.
+    inline const int32_t GetNextThinkTime() {
+        return serverEntity->nextThinkTime;
+    }
+
+    // Return the 'solid' value.
+    inline const uint32_t GetSolid() {
+        return serverEntity->solid;
+    }
+
+    // Return the 'takeDamage' value.
+    inline const int32_t GetTakeDamage() {
+        return serverEntity->takeDamage;
+    }
 
     //
     // Entity Set Functions.
     //
-    inline void SetModel(const char* model) {
-        serverEntity->model = model;
-    }
-    inline void SetMoveType(const int32_t moveType) {
-        serverEntity->moveType = moveType;
-    }
-    inline void SetSolid(const uint32_t solid) {
-        serverEntity->solid = solid;
-    }
+    // Set the 'mins', and 'maxs' values of the entity bounding box.
     inline void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) {
         serverEntity->mins = mins;
         serverEntity->maxs = maxs;
     }
 
+    // Set the 'damage' value.
+    inline void SetDamage(const int32_t &damage) {
+        serverEntity->damage = damage;
+    }
 
-    Entity* GetServerEntity();
+    // Set the 'health' value.
+    inline void SetHealth(const int32_t &health) {
+        serverEntity->health = health;
+    }
+
+    // Set the 'mass' value.
+    inline void SetMass(const int32_t &mass) {
+        serverEntity->mass = mass;
+    }
+
+    // Set the 'model' value.
+    inline void SetModel(const char* model) {
+        serverEntity->model = model;
+    }
+
+    // Set the 'nextThinkTime' value.
+    inline void SetMoveType(const int32_t &moveType) {
+        serverEntity->moveType = moveType;
+    }
+
+    // Set the 'nextThinkTime' value.
+    inline void SetNextThinkTime(const float& nextThinkTime) {
+        serverEntity->nextThinkTime = nextThinkTime;
+    }
+
+    // Set the 'solid' value.
+    inline void SetSolid(const uint32_t &solid) {
+        serverEntity->solid = solid;
+    }
+
+    // Set the 'takeDamage' value.
+    inline void SetTakeDamage(const int32_t& takeDamage) {
+        serverEntity->takeDamage = takeDamage;
+    }
+
+    //
+    // General Entity Functions.
+    //
+    // Link entity to world for collision testing using gi.LinkEntity.
+    void LinkEntity();
+
+    // Returns the server entity pointer.
+    inline Entity* GetServerEntity() {
+        return serverEntity;
+    }
 
 
 private:

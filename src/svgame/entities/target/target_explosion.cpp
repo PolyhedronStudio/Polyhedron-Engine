@@ -44,7 +44,7 @@ void use_target_explosion(Entity* self, Entity* other, Entity* activator)
     }
 
     self->Think = target_explosion_explode;
-    self->nextThink = level.time + self->delay;
+    self->nextThinkTime = level.time + self->delay;
 }
 
 void SP_target_explosion(Entity* ent)

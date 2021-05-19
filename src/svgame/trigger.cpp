@@ -34,7 +34,7 @@ void InitTrigger(Entity *self)
 // the wait time has passed, so set back up for another activation
 void multi_wait(Entity *ent)
 {
-    ent->nextThink = 0;
+    ent->nextThinkTime = 0;
 }
 
 
@@ -43,19 +43,19 @@ void multi_wait(Entity *ent)
 // so wait for the delay time before firing
 void multi_trigger(Entity *ent)
 {
-    if (ent->nextThink)
+    if (ent->nextThinkTime)
         return;     // already been triggered
 
     UTIL_UseTargets(ent, ent->activator);
 
     if (ent->wait > 0) {
         ent->Think = multi_wait;
-        ent->nextThink = level.time + ent->wait;
+        ent->nextThinkTime = level.time + ent->wait;
     } else {
         // we can't just remove (self) here, because this is a touch function
         // called while looping through area links...
         ent->Touch = NULL;
-        ent->nextThink = level.time + FRAMETIME;
+        ent->nextThinkTime = level.time + FRAMETIME;
         ent->Think = SVG_FreeEntity;
     }
 }

@@ -40,7 +40,7 @@ void SP_info_player_coop(Entity* self)
         (Q_stricmp(level.mapName, "strike") == 0)) {
         // invoke one of our gross, ugly, disgusting hacks
         self->Think = SP_FixCoopSpots;
-        self->nextThink = level.time + FRAMETIME;
+        self->nextThinkTime = level.time + FRAMETIME;
     }
 }
 

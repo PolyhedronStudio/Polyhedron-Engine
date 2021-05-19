@@ -26,7 +26,7 @@ void target_lightramp_think(Entity* self)
     gi.configstring(ConfigStrings::Lights+ self->enemy->style, style);
 
     if ((level.time - self->timeStamp) < self->speed) {
-        self->nextThink = level.time + FRAMETIME;
+        self->nextThinkTime = level.time + FRAMETIME;
     }
     else if (self->spawnFlags & 1) {
         char    temp;

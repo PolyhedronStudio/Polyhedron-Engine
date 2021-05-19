@@ -43,13 +43,13 @@ void target_earthquake_think(Entity* self)
     }
 
     if (level.time < self->timeStamp)
-        self->nextThink = level.time + FRAMETIME;
+        self->nextThinkTime = level.time + FRAMETIME;
 }
 
 void target_earthquake_use(Entity* self, Entity* other, Entity* activator)
 {
     self->timeStamp = level.time + self->count;
-    self->nextThink = level.time + FRAMETIME;
+    self->nextThinkTime = level.time + FRAMETIME;
     self->activator = activator;
     self->lastMoveTime = 0;
 }

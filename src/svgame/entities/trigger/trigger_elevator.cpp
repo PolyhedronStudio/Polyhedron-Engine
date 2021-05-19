@@ -21,7 +21,7 @@ void trigger_elevator_use(Entity* self, Entity* other, Entity* activator)
 {
     Entity* target;
 
-    if (self->moveTargetPtr->nextThink) {
+    if (self->moveTargetPtr->nextThinkTime) {
         //      gi.DPrintf("elevator busy\n");
         return;
     }
@@ -65,5 +65,5 @@ void trigger_elevator_init(Entity* self)
 void SP_trigger_elevator(Entity* self)
 {
     self->Think = trigger_elevator_init;
-    self->nextThink = level.time + FRAMETIME;
+    self->nextThinkTime = level.time + FRAMETIME;
 }

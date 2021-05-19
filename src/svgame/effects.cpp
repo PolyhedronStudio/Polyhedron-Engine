@@ -38,11 +38,11 @@ void ClipGibVelocity(Entity *ent)
 void gib_think(Entity *self)
 {
     self->state.frame++;
-    self->nextThink = level.time + FRAMETIME;
+    self->nextThinkTime = level.time + FRAMETIME;
 
     if (self->state.frame == 10) {
         self->Think = SVG_FreeEntity;
-        self->nextThink = level.time + 8 + random() * 10;
+        self->nextThinkTime = level.time + 8 + random() * 10;
     }
 }
 
@@ -65,7 +65,7 @@ void gib_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
         if (self->state.modelIndex == sm_meat_index) {
             self->state.frame++;
             self->Think = gib_think;
-            self->nextThink = level.time + FRAMETIME;
+            self->nextThinkTime = level.time + FRAMETIME;
         }
     }
 }
@@ -116,7 +116,7 @@ void ThrowGib(Entity *self, const char *gibname, int damage, int type)
     gib->angularVelocity[2] = random() * 600;
 
     gib->Think = SVG_FreeEntity;
-    gib->nextThink = level.time + 10 + random() * 10;
+    gib->nextThinkTime = level.time + 10 + random() * 10;
 
     gi.LinkEntity(gib);
 }
@@ -158,7 +158,7 @@ void ThrowHead(Entity *self, const char *gibname, int damage, int type)
     self->angularVelocity[vec3_t::Yaw] = crandom() * 600;
 
     self->Think = SVG_FreeEntity;
-    self->nextThink = level.time + 10 + random() * 10;
+    self->nextThinkTime = level.time + 10 + random() * 10;
 
     gi.LinkEntity(self);
 }
@@ -199,7 +199,7 @@ void ThrowClientHead(Entity *self, int damage)
         self->client->animation.endFrame = self->state.frame;
     } else {
         self->Think = NULL;
-        self->nextThink = 0;
+        self->nextThinkTime = 0;
     }
 
     gi.LinkEntity(self);
@@ -234,7 +234,7 @@ void SVG_ThrowDebris(Entity *self, const char *modelname, float speed, const vec
     chunk->angularVelocity[1] = random() * 600;
     chunk->angularVelocity[2] = random() * 600;
     chunk->Think = SVG_FreeEntity;
-    chunk->nextThink = level.time + 5 + random() * 5;
+    chunk->nextThinkTime = level.time + 5 + random() * 5;
     chunk->state.frame = 0;
     chunk->flags = 0;
     chunk->className = "debris";

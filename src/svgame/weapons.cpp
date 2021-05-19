@@ -383,7 +383,7 @@ void SVG_FireBlaster(Entity *self, const vec3_t& start, const vec3_t &aimdir, in
        
     // Setup touch and Think function pointers.
     bolt->Touch = blaster_touch;
-    bolt->nextThink = level.time + 2;
+    bolt->nextThinkTime = level.time + 2;
     bolt->Think = SVG_FreeEntity;
     
     // Link entity in for collision.

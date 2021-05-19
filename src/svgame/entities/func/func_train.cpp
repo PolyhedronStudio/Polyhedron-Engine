@@ -70,14 +70,14 @@ void train_wait(Entity* self)
 
     if (self->moveInfo.wait) {
         if (self->moveInfo.wait > 0) {
-            self->nextThink = level.time + self->moveInfo.wait;
+            self->nextThinkTime = level.time + self->moveInfo.wait;
             self->Think = train_next;
         }
         else if (self->spawnFlags & TRAIN_TOGGLE) { // && wait < 0
             train_next(self);
             self->spawnFlags &= ~TRAIN_START_ON;
             VectorClear(self->velocity);
-            self->nextThink = 0;
+            self->nextThinkTime = 0;
         }
 
         if (!(self->flags & EntityFlags::TeamSlave)) {
@@ -182,7 +182,7 @@ void func_train_find(Entity* self)
         self->spawnFlags |= TRAIN_START_ON;
 
     if (self->spawnFlags & TRAIN_START_ON) {
-        self->nextThink = level.time + FRAMETIME;
+        self->nextThinkTime = level.time + FRAMETIME;
         self->Think = train_next;
         self->activator = self;
     }
@@ -197,7 +197,7 @@ void train_use(Entity* self, Entity* other, Entity* activator)
             return;
         self->spawnFlags &= ~TRAIN_START_ON;
         VectorClear(self->velocity);
-        self->nextThink = 0;
+        self->nextThinkTime = 0;
     }
     else {
         if (self->targetEntityPtr)
@@ -238,7 +238,7 @@ void SP_func_train(Entity* self)
     if (self->target) {
         // start trains on the second frame, to make sure their targets have had
         // a chance to spawn
-        self->nextThink = level.time + FRAMETIME;
+        self->nextThinkTime = level.time + FRAMETIME;
         self->Think = func_train_find;
     }
     else {

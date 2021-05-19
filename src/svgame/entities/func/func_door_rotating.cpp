@@ -132,7 +132,7 @@ void SP_func_door_rotating(Entity* ent)
 
     gi.LinkEntity(ent);
 
-    ent->nextThink = level.time + FRAMETIME;
+    ent->nextThinkTime = level.time + FRAMETIME;
     if (ent->health || ent->targetName)
         ent->Think = Think_CalcMoveSpeed;
     else
