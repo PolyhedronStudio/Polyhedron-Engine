@@ -70,44 +70,6 @@ void SP_FixCoopSpots(Entity *self)
     }
 }
 
-// now if that one wasn't ugly enough for you then try this one on for size
-// some maps don't have any coop spots at all, so we need to create them
-// where they should have been
-
-void SP_CreateCoopSpots(Entity *self)
-{
-    Entity *spot;
-
-    if (Q_stricmp(level.mapName, "security") == 0) {
-        spot = SVG_Spawn();
-        spot->className = "info_player_coop";
-        spot->state.origin[0] = 188 - 64;
-        spot->state.origin[1] = -164;
-        spot->state.origin[2] = 80;
-        spot->targetName = "jail3";
-        spot->state.angles[1] = 90;
-
-        spot = SVG_Spawn();
-        spot->className = "info_player_coop";
-        spot->state.origin[0] = 188 + 64;
-        spot->state.origin[1] = -164;
-        spot->state.origin[2] = 80;
-        spot->targetName = "jail3";
-        spot->state.angles[1] = 90;
-
-        spot = SVG_Spawn();
-        spot->className = "info_player_coop";
-        spot->state.origin[0] = 188 + 128;
-        spot->state.origin[1] = -164;
-        spot->state.origin[2] = 80;
-        spot->targetName = "jail3";
-        spot->state.angles[1] = 90;
-
-        return;
-    }
-}
-
-
 //=======================================================================
 
 

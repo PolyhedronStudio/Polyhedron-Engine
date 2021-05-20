@@ -85,6 +85,7 @@ SET(SRC_SVGAME
 	svgame/entities/info/info_player_deathmatch.cpp
 	svgame/entities/info/info_player_intermission.cpp
 	svgame/entities/info/info_player_start.cpp
+	svgame/entities/info/InfoPlayerStart.cpp
 
 	svgame/entities/misc/misc_explobox.cpp
 	svgame/entities/misc/misc_gib_arm.cpp 
