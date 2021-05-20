@@ -148,7 +148,7 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
 {
     float       dz;
-    trace_t     trace;
+    SVGTrace    trace;
     int         i;
     float       stepsize;
     vec3_t      test;
@@ -298,8 +298,8 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
     if (ent->GetFlags() & EntityFlags::PartiallyOnGround) {
         ent->SetFlags(ent->GetFlags() & ~EntityFlags::PartiallyOnGround);
     }
-    ent->GetServerEntity()->groundEntityPtr = trace.ent;
-    ent->GetServerEntity()->groundEntityLinkCount = trace.ent->linkCount;
+    ent->GetServerEntity()->groundEntityPtr = trace.ent->GetServerEntity();
+    ent->GetServerEntity()->groundEntityLinkCount = trace.ent->GetServerEntity()->linkCount;
 
     // the move is ok
     if (relink) {

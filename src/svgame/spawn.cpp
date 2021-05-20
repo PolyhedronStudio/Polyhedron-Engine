@@ -241,9 +241,6 @@ static const spawn_field_t temp_fields[] = {
 #include "entities/Worldspawn.h"
 #include "entities/Light.h"
 
-// BaseEntity array, matches similarly index wise.
-extern SVGBaseEntity* g_baseEntities[MAX_EDICTS];
-
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     SVGBaseEntity* spawnEntity = NULL;
 

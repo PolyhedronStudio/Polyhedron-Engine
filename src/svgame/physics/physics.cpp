@@ -120,23 +120,21 @@ SV_Impact
 Two entities have touched, so run their touch functions
 ==================
 */
-void SV_Impact(Entity *e1, trace_t *trace)
+void SV_Impact(SVGBaseEntity *e1, SVGTrace *trace)
 {
-    Entity     *e2;
+    SVGBaseEntity     *e2;
 //  cplane_t    backplane;
 
     e2 = trace->ent;
 
-    if (e1->solid != Solid::Not) {
+    if (e1->GetSolid() != Solid::Not) {
         //e1->Touch(e1, e2, &trace->plane, trace->surface);
-        if (e1->classEntity)
-            e1->classEntity->Touch(e1->classEntity, e2->classEntity, &trace->plane, trace->surface);
+        e1->Touch(e1, e2, &trace->plane, trace->surface);
     }
 
-    if (e2->solid != Solid::Not) {
+    if (e2->GetSolid() != Solid::Not) {
         //e2->Touch(e2, e1, NULL, NULL);
-        if (e2->classEntity)
-            e2->classEntity->Touch(e2->classEntity, e1->classEntity, &trace->plane, trace->surface);
+        e2->Touch(e2, e1, &trace->plane, trace->surface);
     }
 }
 
@@ -188,9 +186,9 @@ Returns the clipflags if the velocity was modified (hit something solid)
 ============
 */
 #define MAX_CLIP_PLANES 5
-int SV_FlyMove(Entity *ent, float time, int mask)
+int SV_FlyMove(SVGBaseEntity *ent, float time, int mask)
 {
-    Entity     *hit;
+    SVGBaseEntity     *hit;
     int         bumpcount, numbumps;
     vec3_t      dir;
     float       d;
@@ -198,7 +196,7 @@ int SV_FlyMove(Entity *ent, float time, int mask)
     vec3_t      planes[MAX_CLIP_PLANES];
     vec3_t      primal_velocity, original_velocity, new_velocity;
     int         i, j;
-    trace_t     trace;
+    SVGTrace     trace;
     vec3_t      end;
     float       time_left;
     int         Blocked;
@@ -206,29 +204,31 @@ int SV_FlyMove(Entity *ent, float time, int mask)
     numbumps = 4;
 
     Blocked = 0;
-    VectorCopy(ent->velocity, original_velocity);
-    VectorCopy(ent->velocity, primal_velocity);
+    original_velocity = ent->GetVelocity();
+    primal_velocity = ent->GetVelocity();
+
     numplanes = 0;
 
     time_left = time;
 
-    ent->groundEntityPtr = NULL;
+    ent->GetServerEntity()->groundEntityPtr = NULL;
     for (bumpcount = 0 ; bumpcount < numbumps ; bumpcount++) {
-        for (i = 0 ; i < 3 ; i++)
-            end[i] = ent->state.origin[i] + time_left * ent->velocity[i];
+        //for (i = 0 ; i < 3 ; i++)
+        //    end[i] = ent->state.origin[i] + time_left * ent->velocity[i];
+        end = ent->GetOrigin() + (vec3_t{ time_left, time_left, time_left } *ent->GetVelocity());
 
-        trace = gi.Trace(ent->state.origin, ent->mins, ent->maxs, end, ent, mask);
+        trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), end, ent, mask);
 
         if (trace.allSolid) {
             // entity is trapped in another solid
-            VectorCopy(vec3_origin, ent->velocity);
+            ent->SetVelocity(vec3_origin);
             return 3;
         }
 
         if (trace.fraction > 0) {
             // actually covered some distance
-            VectorCopy(trace.endPosition, ent->state.origin);
-            VectorCopy(ent->velocity, original_velocity);
+            ent->SetOrigin(trace.endPosition);
+            original_velocity = ent->GetVelocity();
             numplanes = 0;
         }
 
@@ -239,9 +239,9 @@ int SV_FlyMove(Entity *ent, float time, int mask)
 
         if (trace.plane.normal[2] > 0.7) {
             Blocked |= 1;       // floor
-            if (hit->solid == Solid::BSP) {
-                ent->groundEntityPtr = hit;
-                ent->groundEntityLinkCount = hit->linkCount;
+            if (hit->GetSolid() == Solid::BSP) {
+                ent->GetServerEntity()->groundEntityPtr = hit->GetServerEntity();
+                ent->GetServerEntity()->groundEntityLinkCount = hit->GetServerEntity()->linkCount;
             }
         }
         if (!trace.plane.normal[2]) {
@@ -252,7 +252,7 @@ int SV_FlyMove(Entity *ent, float time, int mask)
 // run the impact function
 //
         SV_Impact(ent, &trace);
-        if (!ent->inUse)
+        if (!ent->GetInUse())
             break;      // removed by the impact function
 
 
@@ -261,7 +261,7 @@ int SV_FlyMove(Entity *ent, float time, int mask)
         // cliped to another plane
         if (numplanes >= MAX_CLIP_PLANES) {
             // this shouldn't really happen
-            VectorCopy(vec3_origin, ent->velocity);
+            ent->SetVelocity(vec3_origin);
             return 3;
         }
 
@@ -285,25 +285,25 @@ int SV_FlyMove(Entity *ent, float time, int mask)
 
         if (i != numplanes) {
             // go along this plane
-            VectorCopy(new_velocity, ent->velocity);
+            ent->SetVelocity(new_velocity);
         } else {
             // go along the crease
             if (numplanes != 2) {
 //              gi.DPrintf ("clip velocity, numplanes == %i\n",numplanes);
-                VectorCopy(vec3_origin, ent->velocity);
+                ent->SetVelocity(vec3_origin);
                 return 7;
             }
             CrossProduct(planes[0], planes[1], dir);
-            d = DotProduct(dir, ent->velocity);
-            VectorScale(dir, d, ent->velocity);
+            d = DotProduct(dir, ent->GetVelocity());
+            ent->SetVelocity(vec3_scale(dir, d));
         }
 
 //
 // if original velocity is against the original velocity, stop dead
 // to avoid tiny occilations in sloping corners
 //
-        if (DotProduct(ent->velocity, primal_velocity) <= 0) {
-            VectorCopy(vec3_origin, ent->velocity);
+        if (DotProduct(ent->GetVelocity(), primal_velocity) <= 0) {
+            ent->SetVelocity(vec3_origin);
             return Blocked;
         }
     }
@@ -318,9 +318,12 @@ SV_AddGravity
 
 ============
 */
-void SV_AddGravity(Entity *ent)
+void SV_AddGravity(SVGBaseEntity *ent)
 {
-    ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME;
+    vec3_t velocity = ent->GetVelocity();
+    velocity.z -= ent->GetServerEntity()->gravity * sv_gravity->value * FRAMETIME;
+    ent->SetVelocity(velocity);
+//    ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME;
 }
 
 /*
@@ -338,48 +341,51 @@ SV_PushEntity
 Does not change the entities velocity at all
 ============
 */
-trace_t SV_PushEntity(Entity *ent, vec3_t push)
+SVGTrace SV_PushEntity(SVGBaseEntity *ent, vec3_t push)
 {
-    trace_t trace;
+    SVGTrace trace;
     vec3_t  start;
     vec3_t  end;
     int     mask;
 
-    VectorCopy(ent->state.origin, start);
-    VectorAdd(start, push, end);
+    // Calculate start for push.
+    vec3_t start = ent->GetOrigin();
+
+    // Calculate end for push.
+    vec3_t end = start + push;
 
 retry:
-    if (ent->clipMask)
-        mask = ent->clipMask;
+    if (ent->GetClipMask())
+        mask = ent->GetClipMask();
     else
         mask = CONTENTS_MASK_SOLID;
 
-    trace = gi.Trace(start, ent->mins, ent->maxs, end, ent, mask);
+    trace = SVG_Trace(start, ent->GetMins(), ent->GetMaxs(), end, ent, mask);
 
-    VectorCopy(trace.endPosition, ent->state.origin);
-    gi.LinkEntity(ent);
+    ent->SetOrigin(trace.endPosition);
+    ent->LinkEntity();
 
     if (trace.fraction != 1.0) {
         SV_Impact(ent, &trace);
 
         // if the pushed entity went away and the pusher is still there
-        if (!trace.ent->inUse && ent->inUse) {
+        if (!trace.ent->GetInUse() && ent->GetInUse()) {
             // move the pusher back and try again
-            VectorCopy(start, ent->state.origin);
-            gi.LinkEntity(ent);
+            ent->SetOrigin(start);
+            ent->LinkEntity();
             goto retry;
         }
     }
 
-    if (ent->inUse)
-        UTIL_TouchTriggers(ent);
+    if (ent->GetInUse())
+        UTIL_TouchTriggers(ent->GetServerEntity());
 
     return trace;
 }
 
 
 typedef struct {
-    Entity *ent;
+    SVGBaseEntity *ent;
     vec3_t  origin;
     vec3_t  angles;
 #if USE_SMOOTH_DELTA_ANGLES
@@ -398,19 +404,20 @@ Objects need to be moved back on a failed push,
 otherwise riders would continue to slide.
 ============
 */
-qboolean SV_Push(Entity *pusher, vec3_t move, vec3_t amove)
+qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
 {
     int         i, e;
-    Entity     *check, *block;
-    vec3_t      mins, maxs;
+    SVGBaseEntity     *check, *block;
     pushed_t    *p;
     vec3_t      org, org2, move2, forward, right, up;
 
     // find the bounding box
-    for (i = 0 ; i < 3 ; i++) {
-        mins[i] = pusher->absMin[i] + move[i];
-        maxs[i] = pusher->absMax[i] + move[i];
-    }
+    //for (i = 0 ; i < 3 ; i++) {
+    //    mins[i] = pusher->absMin[i] + move[i];
+    //    maxs[i] = pusher->absMax[i] + move[i];
+    //}
+    vec3_t mins = pusher->GetAbsoluteMin() + move;
+    vec3_t maxs = pusher->GetAbsoluteMax() + move;
 
 // we need this for pushing things later
     VectorSubtract(vec3_origin, amove, org);
@@ -418,88 +425,96 @@ qboolean SV_Push(Entity *pusher, vec3_t move, vec3_t amove)
 
 // save the pusher's original position
     pushed_p->ent = pusher;
-    VectorCopy(pusher->state.origin, pushed_p->origin);
-    VectorCopy(pusher->state.angles, pushed_p->angles);
+    pushed_p->origin = pusher->GetOrigin(); // VectorCopy(pusher->state.origin, pushed_p->origin);
+    pushed_p->angles = pusher->GetAngles();
+
 #if USE_SMOOTH_DELTA_ANGLES
-    if (pusher->client)
-        pushed_p->deltayaw = pusher->client->playerState.pmove.deltaAngles[vec3_t::Yaw];
+    if (pusher->GetClient())
+        pushed_p->deltayaw = pusher->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
 #endif
     pushed_p++;
 
 // move the pusher to it's final position
-    VectorAdd(pusher->state.origin, move, pusher->state.origin);
-    VectorAdd(pusher->state.angles, amove, pusher->state.angles);
-    gi.LinkEntity(pusher);
+    pusher->SetOrigin(pusher->GetOrigin() + move);
+    pusher->SetAngles(pusher->GetAngles() + amove);
+    pusher->LinkEntity();
 
 // see if any solid entities are inside the final position
-    check = g_entities + 1;
+    check = g_baseEntities + 1;
     for (e = 1; e < globals.numberOfEntities; e++, check++) {
-        if (!check->inUse)
+        qboolean isInUse = check->GetInUse();
+        
+        int32_t moveType = check->GetMoveType();
+        
+        vec3_t absMin = check->GetAbsoluteMin();
+        vec3_t absMax = check->GetAbsoluteMax();
+
+        if (!check->GetInUse())
             continue;
-        if (check->moveType == MoveType::Push
-            || check->moveType == MoveType::Stop
-            || check->moveType == MoveType::None
-            || check->moveType == MoveType::NoClip
-            || check->moveType == MoveType::Spectator)
+        if (moveType == MoveType::Push
+            || moveType == MoveType::Stop
+            || moveType == MoveType::None
+            || moveType == MoveType::NoClip
+            || moveType == MoveType::Spectator)
             continue;
 
-        if (!check->area.prev)
+        if (!check->GetServerEntity()->area.prev)
             continue;       // not linked in anywhere
 
         // if the entity is standing on the pusher, it will definitely be moved
-        if (check->groundEntityPtr != pusher) {
+        if (check->GetServerEntity()->groundEntityPtr != pusher->GetServerEntity()) {
             // see if the ent needs to be tested
-            if (check->absMin[0] >= maxs[0]
-                || check->absMin[1] >= maxs[1]
-                || check->absMin[2] >= maxs[2]
-                || check->absMax[0] <= mins[0]
-                || check->absMax[1] <= mins[1]
-                || check->absMax[2] <= mins[2])
+            if (absMin[0] >= maxs[0]
+                || absMin[1] >= maxs[1]
+                || absMin[2] >= maxs[2]
+                || absMax[0] <= mins[0]
+                || absMax[1] <= mins[1]
+                || absMax[2] <= mins[2])
                 continue;
 
             // see if the ent's bbox is inside the pusher's final position
-            if (!SV_TestEntityPosition(check))
+            if (!SV_TestEntityPosition(check->GetServerEntity()))
                 continue;
             
         }
 
-        if ((pusher->moveType == MoveType::Push) || (check->groundEntityPtr == pusher)) {
+        if ((pusher->GetMoveType() == MoveType::Push) || (check->GetServerEntity()->groundEntityPtr == pusher->GetServerEntity())) {
             // move this entity
             pushed_p->ent = check;
-            VectorCopy(check->state.origin, pushed_p->origin);
-            VectorCopy(check->state.angles, pushed_p->angles);
+            pushed_p->origin = check->GetOrigin();  //VectorCopy(check->state.origin, pushed_p->origin);
+            pushed_p->angles = check->GetAngles(); //VectorCopy(check->state.angles, pushed_p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
-            if (check->client)
-                pushed_p->deltayaw = check->client->playerState.pmove.deltaAngles[vec3_t::Yaw];
+            if (check->GetClient())
+                pushed_p->deltayaw = check->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
 #endif
             pushed_p++;
 
             // try moving the contacted entity
-            VectorAdd(check->state.origin, move, check->state.origin);
+            check->SetOrigin(check->GetOrigin() + move);
 #if USE_SMOOTH_DELTA_ANGLES
-            if (check->client) {
+            if (check->GetClient()) {
                 // FIXME: doesn't rotate monsters?
                 // FIXME: skuller: needs client side interpolation
-                check->client->playerState.pmove.deltaAngles[vec3_t::Yaw] += amove[vec3_t::Yaw];
+                check->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] += amove[vec3_t::Yaw];
             }
 #endif
 
             // figure movement due to the pusher's amove
-            VectorSubtract(check->state.origin, pusher->state.origin, org);
+            org = check->GetOrigin() - pusher->GetOrigin(); //VectorSubtract(check->state.origin, pusher->state.origin, org);
             org2[0] = DotProduct(org, forward);
             org2[1] = -DotProduct(org, right);
             org2[2] = DotProduct(org, up);
             VectorSubtract(org2, org, move2);
-            VectorAdd(check->state.origin, move2, check->state.origin);
+            check->SetOrigin(check->GetOrigin() + move2);//VectorAdd(check->state.origin, move2, check->state.origin);
 
             // may have pushed them off an edge
-            if (check->groundEntityPtr != pusher)
-                check->groundEntityPtr = NULL;
+            if (check->GetServerEntity()->groundEntityPtr != pusher->GetServerEntity())
+                check->GetServerEntity()->groundEntityPtr = NULL;
 
-            block = SV_TestEntityPosition(check);
+            block = SV_TestEntityPosition(check->GetServerEntity());
             if (!block) {
                 // pushed ok
-                gi.LinkEntity(check);
+                check->LinkEntity();
                 // impact?
                 continue;
             }
@@ -507,8 +522,8 @@ qboolean SV_Push(Entity *pusher, vec3_t move, vec3_t amove)
             // if it is ok to leave in the old position, do it
             // this is only relevent for riding entities, not pushed
             // FIXME: this doesn't acount for rotation
-            check->state.origin -= move;
-            block = SV_TestEntityPosition(check);
+            check->SetOrigin(check->GetOrigin() - move);//check->state.origin -= move;
+            block = SV_TestEntityPosition(check->GetServerEntity());
             if (!block) {
                 pushed_p--;
                 continue;
@@ -522,11 +537,11 @@ qboolean SV_Push(Entity *pusher, vec3_t move, vec3_t amove)
         // go backwards, so if the same entity was pushed
         // twice, it goes back to the original position
         for (p = pushed_p - 1 ; p >= pushed ; p--) {
-            p->ent->state.origin = p->origin;
-            p->ent->state.angles = p->angles;
+            p->ent->SetOrigin(p->origin);
+            p->ent->SetAngles(p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
-            if (p->ent->client) {
-                p->ent->client->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltayaw;
+            if (p->ent->GetClient()) {
+                p->ent->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltayaw;
             }
 #endif
             gi.LinkEntity(p->ent);
@@ -537,7 +552,7 @@ qboolean SV_Push(Entity *pusher, vec3_t move, vec3_t amove)
 //FIXME: is there a better way to handle this?
     // see if anything we moved has touched a trigger
     for (p = pushed_p - 1 ; p >= pushed ; p--)
-        UTIL_TouchTriggers(p->ent);
+        UTIL_TouchTriggers(p->ent->GetServerEntity());
 
     return true;
 }
@@ -660,7 +675,7 @@ SV_Physics_Toss
 Toss, bounce, and fly movement.  When onground, do nothing.
 =============
 */
-void SV_Physics_Toss(Entity *ent)
+void SV_Physics_Toss(SVGBaseEntity *ent)
 {
     trace_t     trace;
     vec3_t      move;
@@ -781,7 +796,7 @@ constexpr int32_t sv_stopspeed = 100;
 constexpr int32_t sv_friction = 6;
 constexpr int32_t sv_waterfriction = 1;
 
-void SV_AddRotationalFriction(Entity *ent)
+void SV_AddRotationalFriction(SVGBaseEntity *ent)
 {
     int     n;
     float   adjustment;
@@ -801,7 +816,7 @@ void SV_AddRotationalFriction(Entity *ent)
     }
 }
 
-void SV_Physics_Step(Entity *ent)
+void SV_Physics_Step(SVGBaseEntity *ent)
 {
     qboolean    wasonground;
     qboolean    hitsound = false;
@@ -908,12 +923,12 @@ SVG_RunEntity
 
 ================
 */
-void SVG_RunEntity(Entity *ent)
+void SVG_RunEntity(SVGBaseEntity *ent)
 {
     //if (ent->PreThink)
     //    ent->PreThink(ent);
 
-    switch ((int)ent->moveType) {
+    switch (ent->GetMoveType()) {
     case MoveType::Push:
     case MoveType::Stop:
         SV_Physics_Pusher(ent);
@@ -935,6 +950,6 @@ void SVG_RunEntity(Entity *ent)
         SV_Physics_Toss(ent);
         break;
     default:
-        gi.Error("SV_Physics: bad moveType %i", (int)ent->moveType);
+        gi.Error("SV_Physics: bad moveType %i", ent->GetMoveType());
     }
 }

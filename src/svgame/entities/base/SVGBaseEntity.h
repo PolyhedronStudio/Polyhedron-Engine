@@ -51,11 +51,6 @@ public:
     //
     // Entity Get Functions.
     //
-    // Return the 'activatorPtr' entity pointer.
-    SVGBaseEntity* GetActivator() {
-        return activatorPtr;
-    }
-
     // Return the bounding box absolute 'min' value.
     inline const vec3_t& GetAbsoluteMin() {
         return serverEntity->absMin;
@@ -65,10 +60,25 @@ public:
     inline const vec3_t& GetAbsoluteMax() {
         return serverEntity->absMax;
     }
+    
+    // Return the 'activatorPtr' entity pointer.
+    SVGBaseEntity* GetActivator() {
+        return activatorPtr;
+    }
+
+    // Return the 'angles' value.
+    inline const vec3_t& GetAngles() {
+        return serverEntity->state.angles;
+    }
 
     // Return the 'client' pointer.
     gclient_s* GetClient() {
         return serverEntity->client;
+    }
+
+    // Return the 'clipmask' value.
+    inline const int32_t GetClipMask() {
+        return serverEntity->clipMask;
     }
 
     // Return the 'damage' value.
@@ -179,11 +189,21 @@ public:
     inline void SetActivator(SVGBaseEntity* activator) {
         this->activatorPtr = activator;
     }
+    
+    // Return the 'angles' value.
+    inline void SetAngles(const vec3_t& angles) {
+        serverEntity->state.angles = angles;
+    }
 
     // Set the 'mins', and 'maxs' values of the entity bounding box.
     inline void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) {
         serverEntity->mins = mins;
         serverEntity->maxs = maxs;
+    }
+
+    // Return the 'clipmask' value.
+    inline void SetClipMask(const int32_t &clipMask) {
+        serverEntity->clipMask = clipMask;
     }
 
     // Set the 'damage' value.

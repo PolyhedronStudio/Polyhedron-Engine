@@ -275,8 +275,8 @@ Sends the deatchmatch scoreboard svc_layout message.
 */
 void HUD_SendDMScoreboardMessage(Entity *ent)
 {
-    SVG_HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
-    gi.Unicast(ent, true);
+    //SVG_HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
+    //gi.Unicast(ent, true);
 }
 
 

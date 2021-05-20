@@ -510,8 +510,16 @@ struct MeansOfDeath {
 // Extern variable, really ugly.
 extern  int32_t meansOfDeath;
 
+
+//-------------------
+// Predeclarations.
+//-------------------
+class SVGBaseEntity;
+
 // Once again, ugly.
-extern  Entity g_entities[MAX_EDICTS];
+extern Entity g_entities[MAX_EDICTS];
+extern SVGBaseEntity* g_baseEntities[MAX_EDICTS];
+
 
 //
 // Small macros that are used to generate a field offset with. These are used
@@ -620,12 +628,6 @@ typedef enum {
 extern  gitem_t itemlist[];
 
 
-//-------------------
-// Predeclarations.
-//-------------------
-class SVGBaseEntity;
-
-
 //
 // g_cmds.c
 //
@@ -707,7 +709,7 @@ void SVG_PlayerNoise(Entity *who, vec3_t where, int32_t type);
 //
 // g_phys.c
 //
-void SVG_RunEntity(Entity *ent);
+void SVG_RunEntity(SVGBaseEntity *ent);
 
 //
 // g_main.c
