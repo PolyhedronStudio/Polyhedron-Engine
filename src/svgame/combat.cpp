@@ -403,11 +403,21 @@ void SVG_Damage(Entity *targ, Entity *inflictor, Entity *attacker, const vec3_t 
     //    }
     //} else 
     if (client) {
-        if (!(targ->flags & EntityFlags::GodMode) && (take))
-            targ->Pain(targ, attacker, knockback, take);
+        //if (!(targ->flags & EntityFlags::GodMode) && (take))
+        //    targ->Pain(targ, attacker, knockback, take);
+        if (!(targ->flags & EntityFlags::GodMode) && (take)) {
+            if (targ->classEntity) {
+                if (attacker->classEntity) {
+                    targ->classEntity->TakeDamage(attacker->classEntity, knockback, take);
+                }
+            }
+        }
     } else if (take) {
-        if (targ->Pain)
-            targ->Pain(targ, attacker, knockback, take);
+        if (targ->classEntity) {
+            if (attacker->classEntity) {
+                targ->classEntity->TakeDamage(attacker->classEntity, knockback, take);
+            }
+        }
     }
 
     // add to the damage inflicted on a player this frame

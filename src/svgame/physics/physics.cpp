@@ -588,8 +588,14 @@ void SV_Physics_Pusher(Entity *ent)
 
         // if the pusher has a "Blocked" function, call it
         // otherwise, just stay in place until the obstacle is gone
-        if (part->Blocked)
-            part->Blocked(part, obstacle);
+        if (part->classEntity) {
+            if (obstacle->classEntity) {
+                part->classEntity->Blocked(obstacle->classEntity);
+            }
+        }
+
+        //if (part->Blocked)
+        //    part->Blocked(part, obstacle);
 #if 0
         // if the pushed entity went away and the pusher is still there
         if (!obstacle->inUse && part->inUse)

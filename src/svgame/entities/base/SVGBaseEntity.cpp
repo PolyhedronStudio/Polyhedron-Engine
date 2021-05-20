@@ -96,6 +96,38 @@ void SVGBaseEntity::Use(SVGBaseEntity* other, SVGBaseEntity* activator) {
 
 //
 //===============
+// SVGBaseEntity::Blocked
+//
+// Execute the 'Blocked' callback in case we ran into any.
+//===============
+//
+void SVGBaseEntity::Blocked(SVGBaseEntity* other) {
+	// Safety check.
+	if (blockedFunction == nullptr)
+		return;
+
+	// Execute 'Die' callback function.
+	(this->*blockedFunction)(other);
+}
+
+//
+//===============
+// SVGBaseEntity::TakeDamage
+//
+// Execute the 'TakeDamage' callback in case we ran into any.
+//===============
+//
+void SVGBaseEntity::TakeDamage(SVGBaseEntity* other, float kick, int32_t damage) {
+	// Safety check.
+	if (takeDamageFunction == nullptr)
+		return;
+
+	// Execute 'Die' callback function.
+	(this->*takeDamageFunction)(other, kick, damage);
+}
+
+//
+//===============
 // SVGBaseEntity::Die
 //
 // Execute the 'Die' callback in case we ran into any.

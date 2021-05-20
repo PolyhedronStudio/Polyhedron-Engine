@@ -20,7 +20,7 @@ public:
     using UseCallbackPointer        = void(SVGBaseEntity::*)(SVGBaseEntity* other, SVGBaseEntity* activator);
     using TouchCallbackPointer      = void(SVGBaseEntity::*)(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
     using BlockedCallbackPointer    = void(SVGBaseEntity::*)(SVGBaseEntity* other);
-    using TakeDamageCallbackPointer = void(SVGBaseEntity::*)(SVGBaseEntity* attacker, SVGBaseEntity* inflictor, int damageFlags, float damage);
+    using TakeDamageCallbackPointer = void(SVGBaseEntity::*)(SVGBaseEntity* other, float kick, int32_t damage);
     using DieCallbackPointer        = void(SVGBaseEntity::*)(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
 
     //
@@ -44,7 +44,9 @@ public:
     //
     void Use(SVGBaseEntity* other, SVGBaseEntity* activator);
     void Die(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+    void Blocked(SVGBaseEntity* other);
     void Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+    void TakeDamage(SVGBaseEntity* other, float kick, int32_t damage);
 
     //
     // Entity Get Functions.
