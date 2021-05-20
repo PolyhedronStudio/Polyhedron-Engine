@@ -51,6 +51,11 @@ public:
     //
     // Entity Get Functions.
     //
+    // Return the 'activatorPtr' entity pointer.
+    SVGBaseEntity* GetActivator() {
+        return activatorPtr;
+    }
+
     // Return the bounding box absolute 'min' value.
     inline const vec3_t& GetAbsoluteMin() {
         return serverEntity->absMin;
@@ -61,9 +66,29 @@ public:
         return serverEntity->absMax;
     }
 
+    // Return the 'client' pointer.
+    gclient_s* GetClient() {
+        return serverEntity->client;
+    }
+
     // Return the 'damage' value.
     inline const int32_t GetDamage() {
         return serverEntity->damage;
+    }
+
+    // Return the 'enemyPtr' entity pointer.
+    SVGBaseEntity* GetEnemy() {
+        return enemyPtr;
+    }
+
+    // Return the 'oldEnemyPtr' entity pointer.
+    SVGBaseEntity* GetOldEnemy() {
+        return oldEnemyPtr;
+    }
+
+    // Return the 'flags' value.
+    inline const int32_t GetFlags() {
+        return serverEntity->flags;
     }
 
     // Return the 'health' value.
@@ -98,7 +123,7 @@ public:
 
     // Return the 'movetype' value.
     inline const int32_t GetMoveType() {
-        return serverEntity->moveType;
+        return moveType;
     }
 
     // Return the 'nextThinkTime' value.
@@ -109,6 +134,11 @@ public:
     // Return the 'origin' value.
     inline const vec3_t &GetOrigin() {
         return serverEntity->state.origin;
+    }
+
+    // Returns the 'serverFlags' value.
+    inline const int32_t GetServerFlags() {
+        return serverEntity->serverFlags;
     }
 
     // Return the 'size' value.
@@ -136,10 +166,20 @@ public:
         return serverEntity->takeDamage;
     }
 
+    // Return the 'velocity' value.
+    inline const vec3_t& GetVelocity() {
+        return serverEntity->velocity;
+    }
+
 
     //
     // Entity Set Functions.
     //
+    // Set the 'activatorPtr' pointer.
+    inline void SetActivator(SVGBaseEntity* activator) {
+        this->activatorPtr = activator;
+    }
+
     // Set the 'mins', and 'maxs' values of the entity bounding box.
     inline void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) {
         serverEntity->mins = mins;
@@ -149,6 +189,21 @@ public:
     // Set the 'damage' value.
     inline void SetDamage(const int32_t &damage) {
         serverEntity->damage = damage;
+    }
+
+    // Set the 'enemyPtr' pointer.
+    inline void SetEnemy(SVGBaseEntity* enemy) {
+        this->enemyPtr = enemy;
+    }
+
+    // Set the 'oldEnemyPtr' pointer.
+    inline void SetOldEnemy(SVGBaseEntity* oldEnemy) {
+        this->oldEnemyPtr = oldEnemy;
+    }
+
+    // Set the 'flags' value.
+    inline void SetFlags(const int32_t &flags) {
+        serverEntity->flags = flags;
     }
 
     // Set the 'health' value.
@@ -191,7 +246,7 @@ public:
 
     // Set the 'nextThinkTime' value.
     inline void SetMoveType(const int32_t &moveType) {
-        serverEntity->moveType = moveType;
+        this->moveType = moveType;
     }
 
     // Set the 'nextThinkTime' value.
@@ -202,6 +257,11 @@ public:
     // Set the 'origin' value.
     inline void SetOrigin(const vec3_t& origin) {
         serverEntity->state.origin = origin;
+    }
+
+    // Returns the 'serverFlags' value.
+    inline void SetServerFlags(const int32_t &serverFlags) {
+        serverEntity->serverFlags = serverFlags;
     }
 
     // Set the 'solid' value.
@@ -224,6 +284,11 @@ public:
         serverEntity->takeDamage = takeDamage;
     }
 
+    // Set the 'velocity' value.
+    inline void GetVelocity(const vec3_t &velocity) {
+        serverEntity->velocity = velocity;
+    }
+
 
     //
     // General Entity Functions.
@@ -240,6 +305,21 @@ public:
 private:
     // The actual entity this class is a member of.
     Entity *serverEntity;
+
+    //
+    // Other base entity members. (These were old fields in edict_T back in the day.)
+    //
+    // Move Type. (MoveType:: ... )
+    int32_t moveType;
+
+    // Current active enemy, NULL if not any.    
+    SVGBaseEntity *enemyPtr;
+
+    // Old enemy, NULL if not any.
+    SVGBaseEntity *oldEnemyPtr;
+
+    // Entity that activated this entity, NULL if none.
+    SVGBaseEntity *activatorPtr;
 
 public:
     //
@@ -278,6 +358,9 @@ public:
     inline void SetTakeDamageCallback(function f)
     {
         takeDamageFunction = static_cast<TakeDamageCallbackPointer>(f);
+    }
+    inline qboolean HasTakeDamageCallback() {
+        return (takeDamageFunction != nullptr ? true : false);
     }
 
     // Sets the 'Die' callback function.

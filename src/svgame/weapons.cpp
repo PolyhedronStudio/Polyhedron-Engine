@@ -382,9 +382,9 @@ void SVG_FireBlaster(Entity *self, const vec3_t& start, const vec3_t &aimdir, in
     bolt->state.sound = gi.SoundIndex("misc/lasfly.wav");
        
     // Setup touch and Think function pointers.
-    bolt->Touch = blaster_touch;
-    bolt->nextThinkTime = level.time + 2;
-    bolt->Think = SVG_FreeEntity;
+    //bolt->Touch = blaster_touch;
+    //bolt->nextThinkTime = level.time + 2;
+    //bolt->Think = SVG_FreeEntity;
     
     // Link entity in for collision.
     gi.LinkEntity(bolt);
@@ -399,6 +399,6 @@ void SVG_FireBlaster(Entity *self, const vec3_t& start, const vec3_t &aimdir, in
     // Did we hit anything?
     if (tr.fraction < 1.0) {
         bolt->state.origin = vec3_fmaf(bolt->state.origin, -10, dir);
-        bolt->Touch(bolt, tr.ent, NULL, NULL);
+        //bolt->Touch(bolt, tr.ent, NULL, NULL);
     }
 }

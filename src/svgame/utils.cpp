@@ -64,7 +64,7 @@ vec3_t SVG_VelocityForDamage(int damage)
 
 void Think_Delay(Entity *ent)
 {
-    UTIL_UseTargets(ent, ent->activator);
+//    UTIL_UseTargets(ent, ent->activator);
     SVG_FreeEntity(ent);
 }
 
@@ -96,8 +96,8 @@ void UTIL_UseTargets(Entity *ent, Entity *activator)
         t = SVG_Spawn();
         t->className = "DelayedUse";
         t->nextThinkTime = level.time + ent->delay;
-        t->Think = Think_Delay;
-        t->activator = activator;
+        //t->Think = Think_Delay;
+//        t->activator = activator;
         if (!activator)
             gi.DPrintf("Think_Delay with no activator\n");
         t->message = ent->message;
@@ -273,7 +273,7 @@ qboolean SVG_KillBox(Entity *ent)
             break;
 
         // nail it
-        SVG_Damage(tr.ent, ent, ent, vec3_origin, ent->state.origin, vec3_origin, 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
+//        SVG_Damage(tr.ent, ent, ent, vec3_origin, ent->state.origin, vec3_origin, 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
 
         // if we didn't kill it, fail
         if (tr.ent->solid)

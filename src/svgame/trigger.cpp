@@ -25,7 +25,7 @@ void InitTrigger(Entity *self)
         UTIL_SetMoveDir(self->state.angles, self->moveDirection);
 
     self->solid = Solid::Trigger;
-    self->moveType = MoveType::None;
+    //self->moveType = MoveType::None;
     gi.SetModel(self, self->model);
     self->serverFlags = EntityServerFlags::NoClient;
 }
@@ -46,23 +46,23 @@ void multi_trigger(Entity *ent)
     if (ent->nextThinkTime)
         return;     // already been triggered
 
-    UTIL_UseTargets(ent, ent->activator);
+    //UTIL_UseTargets(ent, ent->activator);
 
     if (ent->wait > 0) {
-        ent->Think = multi_wait;
+        //ent->Think = multi_wait;
         ent->nextThinkTime = level.time + ent->wait;
     } else {
         // we can't just remove (self) here, because this is a touch function
         // called while looping through area links...
-        ent->Touch = NULL;
+        //ent->Touch = NULL;
         ent->nextThinkTime = level.time + FRAMETIME;
-        ent->Think = SVG_FreeEntity;
+        //ent->Think = SVG_FreeEntity;
     }
 }
 
 void Use_Multi(Entity *ent, Entity *other, Entity *activator)
 {
-    ent->activator = activator;
+    //ent->activator = activator;
     multi_trigger(ent);
 }
 
@@ -85,6 +85,6 @@ void Touch_Multi(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
             return;
     }
 
-    self->activator = other;
+    //self->activator = other;
     multi_trigger(self);
 }

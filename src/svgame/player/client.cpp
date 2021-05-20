@@ -628,7 +628,7 @@ void CopyToBodyQue(Entity *ent)
     body->moveType = ent->moveType;
     body->groundEntityPtr = ent->groundEntityPtr;
 
-    body->Die = body_die;
+    //body->Die = body_die;
     body->takeDamage = TakeDamage::Yes;
 
     gi.LinkEntity(body);

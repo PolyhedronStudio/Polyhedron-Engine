@@ -196,7 +196,7 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
 void MiscExplosionBox::MiscExplosionBoxExplode(void)
 {
     // Execute radius damage.
-    SVG_RadiusDamage(GetServerEntity(), GetServerEntity()->activator, GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
+    SVG_RadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
 
     // Retrieve origin.
     vec3_t save = GetOrigin();
@@ -258,7 +258,7 @@ void MiscExplosionBox::MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEnti
     
     // Attacker becomes this entity its "activator".
     if (attacker)
-        GetServerEntity()->activator = attacker->GetServerEntity();
+        SetActivator(attacker);
 
     // Setup the next think and think time.
     SetNextThinkTime(level.time + 2 * FRAMETIME);

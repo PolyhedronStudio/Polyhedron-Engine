@@ -910,8 +910,8 @@ SVG_RunEntity
 */
 void SVG_RunEntity(Entity *ent)
 {
-    if (ent->PreThink)
-        ent->PreThink(ent);
+    //if (ent->PreThink)
+    //    ent->PreThink(ent);
 
     switch ((int)ent->moveType) {
     case MoveType::Push:

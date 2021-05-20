@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "utils.h"           // Include Utilities funcs.
 #include "player/hud.h"      // Include HUD funcs.
 
+#include "entities/base/SVGBaseEntity.h"
+
 #include "weapons/blaster.h"
 #include "weapons/machinegun.h"
 #include "weapons/shotgun.h"
@@ -134,7 +136,7 @@ void SVG_SetRespawn(Entity *ent, float delay)
     ent->serverFlags |= EntityServerFlags::NoClient;
     ent->solid = Solid::Not;
     ent->nextThinkTime = level.time + delay;
-    ent->Think = DoRespawn;
+//    ent->Think = DoRespawn;
     gi.LinkEntity(ent);
 }
 
@@ -295,7 +297,7 @@ qboolean Pickup_Health(Entity *ent, Entity *other)
     }
 
     if (ent->style & HEALTH_TIMED) {
-        ent->Think = MegaHealth_think;
+//        ent->Think = MegaHealth_think;
         ent->nextThinkTime = level.time + 5;
         ent->owner = other;
         ent->flags |= EntityFlags::Respawn;
@@ -311,12 +313,18 @@ qboolean Pickup_Health(Entity *ent, Entity *other)
 
 //======================================================================
 
-int SVG_ArmorIndex(Entity *ent)
+int SVG_ArmorIndex(SVGBaseEntity *ent)
 {
-    if (!ent->client)
+    if (!ent)
         return 0;
 
-    if (ent->client->persistent.inventory[body_armor_index] > 0)
+    // Fetch client.
+    gclient_s* client = ent->GetClient();
+    
+    if (!client)
+        return 0;
+
+    if (client->persistent.inventory[body_armor_index] > 0)
         return body_armor_index;
 
     return 0;
@@ -324,60 +332,60 @@ int SVG_ArmorIndex(Entity *ent)
 
 qboolean Pickup_Armor(Entity *ent, Entity *other)
 {
-    int             old_armor_index;
-    gitem_armor_t   *oldinfo;
-    gitem_armor_t   *newinfo;
-    int             newcount;
-    float           salvage;
-    int             salvagecount;
+    //int             old_armor_index;
+    //gitem_armor_t   *oldinfo;
+    //gitem_armor_t   *newinfo;
+    //int             newcount;
+    //float           salvage;
+    //int             salvagecount;
 
-    // get info on new armor
-    newinfo = (gitem_armor_t *)ent->item->info;
+    //// get info on new armor
+    //newinfo = (gitem_armor_t *)ent->item->info;
 
-    old_armor_index = SVG_ArmorIndex(other);
+    //old_armor_index = SVG_ArmorIndex(other);
 
 
-    // if player has no armor, just use it
-    if (!old_armor_index) {
-        other->client->persistent.inventory[ITEM_INDEX(ent->item)] = newinfo->baseCount;
-    }
+    //// if player has no armor, just use it
+    //if (!old_armor_index) {
+    //    other->client->persistent.inventory[ITEM_INDEX(ent->item)] = newinfo->baseCount;
+    //}
 
-    // use the better armor
-    else {
-        oldinfo = &bodyarmor_info;
+    //// use the better armor
+    //else {
+    //    oldinfo = &bodyarmor_info;
 
-        if (newinfo->normalProtection > oldinfo->normalProtection) {
-            // calc new armor values
-            salvage = oldinfo->normalProtection / newinfo->normalProtection;
-            salvagecount = salvage * other->client->persistent.inventory[old_armor_index];
-            newcount = newinfo->baseCount + salvagecount;
-            if (newcount > newinfo->maxCount)
-                newcount = newinfo->maxCount;
+    //    if (newinfo->normalProtection > oldinfo->normalProtection) {
+    //        // calc new armor values
+    //        salvage = oldinfo->normalProtection / newinfo->normalProtection;
+    //        salvagecount = salvage * other->client->persistent.inventory[old_armor_index];
+    //        newcount = newinfo->baseCount + salvagecount;
+    //        if (newcount > newinfo->maxCount)
+    //            newcount = newinfo->maxCount;
 
-            // zero count of old armor so it goes away
-            other->client->persistent.inventory[old_armor_index] = 0;
+    //        // zero count of old armor so it goes away
+    //        other->client->persistent.inventory[old_armor_index] = 0;
 
-            // change armor to new item with computed value
-            other->client->persistent.inventory[ITEM_INDEX(ent->item)] = newcount;
-        } else {
-            // calc new armor values
-            salvage = newinfo->normalProtection / oldinfo->normalProtection;
-            salvagecount = salvage * newinfo->baseCount;
-            newcount = other->client->persistent.inventory[old_armor_index] + salvagecount;
-            if (newcount > oldinfo->maxCount)
-                newcount = oldinfo->maxCount;
+    //        // change armor to new item with computed value
+    //        other->client->persistent.inventory[ITEM_INDEX(ent->item)] = newcount;
+    //    } else {
+    //        // calc new armor values
+    //        salvage = newinfo->normalProtection / oldinfo->normalProtection;
+    //        salvagecount = salvage * newinfo->baseCount;
+    //        newcount = other->client->persistent.inventory[old_armor_index] + salvagecount;
+    //        if (newcount > oldinfo->maxCount)
+    //            newcount = oldinfo->maxCount;
 
-            // if we're already maxed out then we don't need the new armor
-            if (other->client->persistent.inventory[old_armor_index] >= newcount)
-                return false;
+    //        // if we're already maxed out then we don't need the new armor
+    //        if (other->client->persistent.inventory[old_armor_index] >= newcount)
+    //            return false;
 
-            // update current armor value
-            other->client->persistent.inventory[old_armor_index] = newcount;
-        }
-    }
+    //        // update current armor value
+    //        other->client->persistent.inventory[old_armor_index] = newcount;
+    //    }
+    //}
 
-    if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
-        SVG_SetRespawn(ent, 20);
+    //if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
+    //    SVG_SetRespawn(ent, 20);
 
     return true;
 }
@@ -457,70 +465,71 @@ void drop_temp_touch(Entity *ent, Entity *other, cplane_t *plane, csurface_t *su
 
 void drop_make_touchable(Entity *ent)
 {
-    ent->Touch = SVG_TouchItem;
+//    ent->Touch = SVG_TouchItem;
     if (deathmatch->value) {
         ent->nextThinkTime = level.time + 29;
-        ent->Think = SVG_FreeEntity;
+//        ent->Think = SVG_FreeEntity;
     }
 }
 
 Entity *SVG_DropItem(Entity *ent, gitem_t *item)
 {
-    Entity *dropped;
-    vec3_t  forward, right;
-    vec3_t  offset;
-
-    dropped = SVG_Spawn();
-
-    dropped->className = item->className;
-    dropped->item = item;
-    dropped->spawnFlags = ItemSpawnFlags::DroppedItem;
-    dropped->state.effects = item->worldModelFlags;
-    dropped->state.renderfx = RenderEffects::Glow;
-    VectorSet(dropped->mins, -15, -15, -15);
-    VectorSet(dropped->maxs, 15, 15, 15);
-    gi.SetModel(dropped, dropped->item->worldModel);
-    dropped->solid = Solid::Trigger;
-    dropped->moveType = MoveType::Toss;
-    dropped->Touch = drop_temp_touch;
-    dropped->owner = ent;
-
-    if (ent->client) {
-        trace_t trace;
-
-        AngleVectors(ent->client->aimAngles, &forward, &right, NULL);
-        VectorSet(offset, 24, 0, -16);
-        dropped->state.origin = SVG_ProjectSource(ent->state.origin, offset, forward, right);
-        trace = gi.Trace(ent->state.origin, dropped->mins, dropped->maxs,
-                         dropped->state.origin, ent, CONTENTS_SOLID);
-        VectorCopy(trace.endPosition, dropped->state.origin);
-    } else {
-        AngleVectors(ent->state.angles, &forward, &right, NULL);
-        VectorCopy(ent->state.origin, dropped->state.origin);
-    }
-
-    VectorScale(forward, 100, dropped->velocity);
-    dropped->velocity[2] = 300;
-
-    dropped->Think = drop_make_touchable;
-    dropped->nextThinkTime = level.time + 1;
-
-    gi.LinkEntity(dropped);
-
-    return dropped;
+    return NULL;
+//    Entity *dropped;
+//    vec3_t  forward, right;
+//    vec3_t  offset;
+//
+//    dropped = SVG_Spawn();
+//
+//    dropped->className = item->className;
+//    dropped->item = item;
+//    dropped->spawnFlags = ItemSpawnFlags::DroppedItem;
+//    dropped->state.effects = item->worldModelFlags;
+//    dropped->state.renderfx = RenderEffects::Glow;
+//    VectorSet(dropped->mins, -15, -15, -15);
+//    VectorSet(dropped->maxs, 15, 15, 15);
+//    gi.SetModel(dropped, dropped->item->worldModel);
+//    dropped->solid = Solid::Trigger;
+//    dropped->moveType = MoveType::Toss;
+////    dropped->Touch = drop_temp_touch;
+//    dropped->owner = ent;
+//
+//    if (ent->client) {
+//        trace_t trace;
+//
+//        AngleVectors(ent->client->aimAngles, &forward, &right, NULL);
+//        VectorSet(offset, 24, 0, -16);
+//        dropped->state.origin = SVG_ProjectSource(ent->state.origin, offset, forward, right);
+//        trace = gi.Trace(ent->state.origin, dropped->mins, dropped->maxs,
+//                         dropped->state.origin, ent, CONTENTS_SOLID);
+//        VectorCopy(trace.endPosition, dropped->state.origin);
+//    } else {
+//        AngleVectors(ent->state.angles, &forward, &right, NULL);
+//        VectorCopy(ent->state.origin, dropped->state.origin);
+//    }
+//
+//    VectorScale(forward, 100, dropped->velocity);
+//    dropped->velocity[2] = 300;
+//
+////    dropped->Think = drop_make_touchable;
+//    dropped->nextThinkTime = level.time + 1;
+//
+//    gi.LinkEntity(dropped);
+//
+//    return dropped;
 }
 
 void Use_Item(Entity *ent, Entity *other, Entity *activator)
 {
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    ent->Use = NULL;
+//    ent->Use = NULL;
 
     if (ent->spawnFlags & ItemSpawnFlags::NoTouch) {
         ent->solid = Solid::BoundingBox;
-        ent->Touch = NULL;
+       // ent->Touch = NULL;
     } else {
         ent->solid = Solid::Trigger;
-        ent->Touch = SVG_TouchItem;
+//        ent->Touch = SVG_TouchItem;
     }
 
     gi.LinkEntity(ent);
@@ -535,59 +544,59 @@ droptofloor
 */
 void droptofloor(Entity *ent)
 {
-    trace_t     tr;
-    vec3_t      dest;
-
-    ent->mins = { -15.f, -15.f, -15.f };
-    ent->maxs = { 15.f, 15.f, 15.f };
-
-    if (ent->model)
-        gi.SetModel(ent, ent->model);
-    else
-        gi.SetModel(ent, ent->item->worldModel);
-    ent->solid = Solid::Trigger;
-    ent->moveType = MoveType::Toss;
-    ent->Touch = SVG_TouchItem;
-
-    // Calculate trace destination
-    dest = ent->state.origin + vec3_t(0.f, 0.f, 128.f);
-
-    tr = gi.Trace(ent->state.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
-    if (tr.startSolid) {
-        gi.DPrintf("droptofloor: %s startsolid at %s\n", ent->className, Vec3ToString(ent->state.origin));
-        SVG_FreeEntity(ent);
-        return;
-    }
-
-    VectorCopy(tr.endPosition, ent->state.origin);
-
-    if (ent->team) {
-        ent->flags &= ~EntityFlags::TeamSlave;
-        ent->chain = ent->teamChainPtr;
-        ent->teamChainPtr = NULL;
-
-        ent->serverFlags |= EntityServerFlags::NoClient;
-        ent->solid = Solid::Not;
-        if (ent == ent->teamMasterPtr) {
-            ent->nextThinkTime = level.time + FRAMETIME;
-            ent->Think = DoRespawn;
-        }
-    }
-
-    if (ent->spawnFlags & ItemSpawnFlags::NoTouch) {
-        ent->solid = Solid::BoundingBox;
-        ent->Touch = NULL;
-        ent->state.effects &= ~EntityEffectType::Rotate;
-        ent->state.renderfx &= ~RenderEffects::Glow;
-    }
-
-    if (ent->spawnFlags & ItemSpawnFlags::TriggerSpawn) {
-        ent->serverFlags |= EntityServerFlags::NoClient;
-        ent->solid = Solid::Not;
-        ent->Use = Use_Item;
-    }
-
-    gi.LinkEntity(ent);
+//    trace_t     tr;
+//    vec3_t      dest;
+//
+//    ent->mins = { -15.f, -15.f, -15.f };
+//    ent->maxs = { 15.f, 15.f, 15.f };
+//
+//    if (ent->model)
+//        gi.SetModel(ent, ent->model);
+//    else
+//        gi.SetModel(ent, ent->item->worldModel);
+//    ent->solid = Solid::Trigger;
+//    ent->moveType = MoveType::Toss;
+////    ent->Touch = SVG_TouchItem;
+//
+//    // Calculate trace destination
+//    dest = ent->state.origin + vec3_t(0.f, 0.f, 128.f);
+//
+//    tr = gi.Trace(ent->state.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
+//    if (tr.startSolid) {
+//        gi.DPrintf("droptofloor: %s startsolid at %s\n", ent->className, Vec3ToString(ent->state.origin));
+//        SVG_FreeEntity(ent);
+//        return;
+//    }
+//
+//    VectorCopy(tr.endPosition, ent->state.origin);
+//
+//    if (ent->team) {
+//        ent->flags &= ~EntityFlags::TeamSlave;
+//        ent->chain = ent->teamChainPtr;
+//        ent->teamChainPtr = NULL;
+//
+//        ent->serverFlags |= EntityServerFlags::NoClient;
+//        ent->solid = Solid::Not;
+//        if (ent == ent->teamMasterPtr) {
+//            ent->nextThinkTime = level.time + FRAMETIME;
+////            ent->Think = DoRespawn;
+//        }
+//    }
+//
+//    if (ent->spawnFlags & ItemSpawnFlags::NoTouch) {
+//        ent->solid = Solid::BoundingBox;
+////        ent->Touch = NULL;
+//        ent->state.effects &= ~EntityEffectType::Rotate;
+//        ent->state.renderfx &= ~RenderEffects::Glow;
+//    }
+//
+//    if (ent->spawnFlags & ItemSpawnFlags::TriggerSpawn) {
+//        ent->serverFlags |= EntityServerFlags::NoClient;
+//        ent->solid = Solid::Not;
+////        ent->Use = Use_Item;
+//    }
+//
+//    gi.LinkEntity(ent);
 }
 
 
@@ -717,7 +726,7 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
 
     ent->item = item;
     ent->nextThinkTime = level.time + 2 * FRAMETIME;    // items start after other solids
-    ent->Think = droptofloor;
+//    ent->Think = droptofloor;
     ent->state.effects = item->worldModelFlags;
     ent->state.renderfx = RenderEffects::Glow;
     if (ent->model)

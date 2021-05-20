@@ -281,31 +281,31 @@ void WorldSpawn::Spawn() {
 
     // make some data visible to the server
     if (GetServerEntity()->message && GetServerEntity()->message[0]) {
-        gi.configstring(ConfigStrings::Name, GetServerEntity()->message);
+        SVG_SetConfigString(ConfigStrings::Name, GetServerEntity()->message);
         strncpy(level.levelName, GetServerEntity()->message, sizeof(level.levelName));
     }
     else
         strncpy(level.levelName, level.mapName, sizeof(level.levelName));
 
     if (st.sky && st.sky[0])
-        gi.configstring(ConfigStrings::Sky, st.sky);
+        SVG_SetConfigString(ConfigStrings::Sky, st.sky);
     else
-        gi.configstring(ConfigStrings::Sky, "unit1_");
+        SVG_SetConfigString(ConfigStrings::Sky, "unit1_");
 
-    gi.configstring(ConfigStrings::SkyRotate, va("%f", st.skyrotate));
+    SVG_SetConfigString(ConfigStrings::SkyRotate, va("%f", st.skyrotate));
 
-    gi.configstring(ConfigStrings::SkyAxis, va("%f %f %f",
+    SVG_SetConfigString(ConfigStrings::SkyAxis, va("%f %f %f",
         st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]));
 
-    gi.configstring(ConfigStrings::CdTrack, va("%i", GetServerEntity()->sounds));
+    SVG_SetConfigString(ConfigStrings::CdTrack, va("%i", GetServerEntity()->sounds));
 
-    gi.configstring(ConfigStrings::MaxClients, va("%i", (int)(maxClients->value)));
+    SVG_SetConfigString(ConfigStrings::MaxClients, va("%i", (int)(maxClients->value)));
 
     // status bar program
     if (deathmatch->value)
-        gi.configstring(ConfigStrings::StatusBar, dm_statusbar);
+        SVG_SetConfigString(ConfigStrings::StatusBar, dm_statusbar);
     else
-        gi.configstring(ConfigStrings::StatusBar, single_statusbar);
+        SVG_SetConfigString(ConfigStrings::StatusBar, single_statusbar);
 
     //---------------
 
@@ -314,48 +314,50 @@ void WorldSpawn::Spawn() {
     //
 
         // 0 normal
-    gi.configstring(ConfigStrings::Lights + 0, "m");
+    SVG_SetConfigString(ConfigStrings::Lights + 0, "m");
 
     // 1 FLICKER (first variety)
-    gi.configstring(ConfigStrings::Lights + 1, "mmnmmommommnonmmonqnmmo");
+    SVG_SetConfigString(ConfigStrings::Lights + 1, "mmnmmommommnonmmonqnmmo");
 
     // 2 SLOW STRONG PULSE
-    gi.configstring(ConfigStrings::Lights + 2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
+    SVG_SetConfigString(ConfigStrings::Lights + 2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
 
     // 3 CANDLE (first variety)
-    gi.configstring(ConfigStrings::Lights + 3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
+    SVG_SetConfigString(ConfigStrings::Lights + 3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
 
     // 4 FAST STROBE
-    gi.configstring(ConfigStrings::Lights + 4, "mamamamamama");
+    SVG_SetConfigString(ConfigStrings::Lights + 4, "mamamamamama");
 
     // 5 GENTLE PULSE 1
-    gi.configstring(ConfigStrings::Lights + 5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
+    SVG_SetConfigString(ConfigStrings::Lights + 5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
 
     // 6 FLICKER (second variety)
-    gi.configstring(ConfigStrings::Lights + 6, "nmonqnmomnmomomno");
+    SVG_SetConfigString(ConfigStrings::Lights + 6, "nmonqnmomnmomomno");
 
     // 7 CANDLE (second variety)
-    gi.configstring(ConfigStrings::Lights + 7, "mmmaaaabcdefgmmmmaaaammmaamm");
+    SVG_SetConfigString(ConfigStrings::Lights + 7, "mmmaaaabcdefgmmmmaaaammmaamm");
 
     // 8 CANDLE (third variety)
-    gi.configstring(ConfigStrings::Lights + 8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
+    SVG_SetConfigString(ConfigStrings::Lights + 8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
 
     // 9 SLOW STROBE (fourth variety)
-    gi.configstring(ConfigStrings::Lights + 9, "aaaaaaaazzzzzzzz");
+    SVG_SetConfigString(ConfigStrings::Lights + 9, "aaaaaaaazzzzzzzz");
 
     // 10 FLUORESCENT FLICKER
-    gi.configstring(ConfigStrings::Lights + 10, "mmamammmmammamamaaamammma");
+    SVG_SetConfigString(ConfigStrings::Lights + 10, "mmamammmmammamamaaamammma");
 
     // 11 SLOW PULSE NOT FADE TO BLACK
-    gi.configstring(ConfigStrings::Lights + 11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
+    SVG_SetConfigString(ConfigStrings::Lights + 11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
 
     // styles 32-62 are assigned by the light program for switchable lights
 
     // 63 testing
-    gi.configstring(ConfigStrings::Lights + 63, "a");
+    SVG_SetConfigString(ConfigStrings::Lights + 63, "a");
 
     // Set think function.
     //SetThinkCallback()
+    SetThinkCallback(&WorldSpawn::WorldSpawnThink);
+    SetNextThinkTime(level.time + 0.1f);
 }
 void WorldSpawn::PostSpawn() {
     // Parent class PostSpawn.
@@ -367,5 +369,6 @@ void WorldSpawn::Think() {
 }
 
 void WorldSpawn::WorldSpawnThink(void) {
-    
+    SetThinkCallback(&WorldSpawn::WorldSpawnThink);
+    SetNextThinkTime(level.time + 0.1f);
 }

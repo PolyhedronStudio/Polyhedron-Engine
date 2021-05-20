@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../g_local.h"      // SVGame funcs.
 #include "../utils.h"        // Util funcs.
 
+#include "../entities/base/SVGBaseEntity.h"
+
 #define STEPSIZE    18
 
 /*
@@ -143,55 +145,54 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 */
 //FIXME since we need to test end position contents here, can we avoid doing
 //it again later in catagorize position?
-qboolean SVG_MoveStep(Entity* ent, vec3_t move, qboolean relink)
+qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
 {
     float       dz;
-    vec3_t      oldorg, neworg, end;
     trace_t     trace;
     int         i;
     float       stepsize;
     vec3_t      test;
     int         contents;
 
-    // try the move
-    VectorCopy(ent->state.origin, oldorg);
-    VectorAdd(ent->state.origin, move, neworg);
+    // Try the move
+    vec3_t oldOrigin = ent->GetOrigin(); // VectorCopy(ent->state.origin, oldorg);
+    vec3_t newOrigin = oldOrigin + move;
 
     // flying monsters don't step up
-    if (ent->flags & (EntityFlags::Swim | EntityFlags::Fly)) {
+    if (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) {
         // try one move with vertical motion, then one without
         for (i = 0; i < 2; i++) {
-            VectorAdd(ent->state.origin, move, neworg);
-            if (i == 0 && ent->enemy) {
-                if (!ent->goalEntityPtr)
-                    ent->goalEntityPtr = ent->enemy;
-                dz = ent->state.origin[2] - ent->goalEntityPtr->state.origin[2];
-                if (ent->goalEntityPtr->client) {
+            newOrigin = ent->GetOrigin() + move;
+            if (i == 0 && ent->GetEnemy()) {
+                if (!ent->GetServerEntity()->goalEntityPtr)
+                    ent->GetServerEntity()->goalEntityPtr = ent->GetEnemy()->GetServerEntity();
+                dz = ent->GetServerEntity()->state.origin[2] - ent->GetServerEntity()->goalEntityPtr->state.origin[2];
+                if (ent->GetServerEntity()->goalEntityPtr->client) {
                     if (dz > 40)
-                        neworg[2] -= 8;
-                    if (!((ent->flags & EntityFlags::Swim) && (ent->waterLevel < 2)))
+                        newOrigin.z -= 8;
+                    if (!((ent->GetFlags() & EntityFlags::Swim) && (ent->GetServerEntity()->waterLevel < 2)))
                         if (dz < 30)
-                            neworg[2] += 8;
+                            newOrigin.z += 8;
                 }
                 else {
                     if (dz > 8)
-                        neworg[2] -= 8;
+                        newOrigin.z -= 8;
                     else if (dz > 0)
-                        neworg[2] -= dz;
+                        newOrigin.z -= dz;
                     else if (dz < -8)
-                        neworg[2] += 8;
+                        newOrigin.z += 8;
                     else
-                        neworg[2] += dz;
+                        newOrigin.z += dz;
                 }
             }
-            trace = gi.Trace(ent->state.origin, ent->mins, ent->maxs, neworg, ent, CONTENTS_MASK_MONSTERSOLID);
+            trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), newOrigin, ent, CONTENTS_MASK_MONSTERSOLID);
 
             // fly monsters don't enter water voluntarily
-            if (ent->flags & EntityFlags::Fly) {
-                if (!ent->waterLevel) {
+            if (ent->GetFlags() & EntityFlags::Fly) {
+                if (!ent->GetServerEntity()->waterLevel) {
                     test[0] = trace.endPosition[0];
                     test[1] = trace.endPosition[1];
-                    test[2] = trace.endPosition[2] + ent->mins[2] + 1;
+                    test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
                     contents = gi.PointContents(test);
                     if (contents & CONTENTS_MASK_LIQUID)
                         return false;
@@ -199,11 +200,11 @@ qboolean SVG_MoveStep(Entity* ent, vec3_t move, qboolean relink)
             }
 
             // swim monsters don't exit water voluntarily
-            if (ent->flags & EntityFlags::Swim) {
-                if (ent->waterLevel < 2) {
+            if (ent->GetFlags() & EntityFlags::Swim) {
+                if (ent->GetServerEntity()->waterLevel < 2) {
                     test[0] = trace.endPosition[0];
                     test[1] = trace.endPosition[1];
-                    test[2] = trace.endPosition[2] + ent->mins[2] + 1;
+                    test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
                     contents = gi.PointContents(test);
                     if (!(contents & CONTENTS_MASK_LIQUID))
                         return false;
@@ -211,15 +212,16 @@ qboolean SVG_MoveStep(Entity* ent, vec3_t move, qboolean relink)
             }
 
             if (trace.fraction == 1) {
-                VectorCopy(trace.endPosition, ent->state.origin);
+                ent->SetOrigin(trace.endPosition);
+
                 if (relink) {
-                    gi.LinkEntity(ent);
-                    UTIL_TouchTriggers(ent);
+                    gi.LinkEntity(ent->GetServerEntity());
+                    UTIL_TouchTriggers(ent->GetServerEntity());
                 }
                 return true;
             }
 
-            if (!ent->enemy)
+            if (!ent->GetEnemy())
                 break;
         }
 
@@ -232,28 +234,28 @@ qboolean SVG_MoveStep(Entity* ent, vec3_t move, qboolean relink)
     //else
         stepsize = 1;
 
-    neworg[2] += stepsize;
-    VectorCopy(neworg, end);
+    newOrigin[2] += stepsize;
+    vec3_t end = newOrigin;
     end[2] -= stepsize * 2;
 
-    trace = gi.Trace(neworg, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
+    trace = SVG_Trace(newOrigin, ent->GetMins(), ent->GetMaxs(), end, ent, CONTENTS_MASK_MONSTERSOLID);
 
     if (trace.allSolid)
         return false;
 
     if (trace.startSolid) {
-        neworg[2] -= stepsize;
-        trace = gi.Trace(neworg, ent->mins, ent->maxs, end, ent, CONTENTS_MASK_MONSTERSOLID);
+        newOrigin[2] -= stepsize;
+        trace = SVG_Trace(newOrigin, ent->GetMins(), ent->GetMaxs(), end, ent, CONTENTS_MASK_MONSTERSOLID);
         if (trace.allSolid || trace.startSolid)
             return false;
     }
 
 
     // don't go in to water
-    if (ent->waterLevel == 0) {
+    if (ent->GetServerEntity()->waterLevel == 0) {
         test[0] = trace.endPosition[0];
         test[1] = trace.endPosition[1];
-        test[2] = trace.endPosition[2] + ent->mins[2] + 1;
+        test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
         contents = gi.PointContents(test);
 
         if (contents & CONTENTS_MASK_LIQUID)
@@ -262,13 +264,13 @@ qboolean SVG_MoveStep(Entity* ent, vec3_t move, qboolean relink)
 
     if (trace.fraction == 1) {
         // if monster had the ground pulled out, go ahead and fall
-        if (ent->flags & EntityFlags::PartiallyOnGround) {
-            VectorAdd(ent->state.origin, move, ent->state.origin);
+        if (ent->GetFlags() & EntityFlags::PartiallyOnGround) {
+            ent->SetOrigin(ent->GetOrigin() + move);
             if (relink) {
-                gi.LinkEntity(ent);
-                UTIL_TouchTriggers(ent);
+                gi.LinkEntity(ent->GetServerEntity());
+                UTIL_TouchTriggers(ent->GetServerEntity());
             }
-            ent->groundEntityPtr = NULL;
+            ent->GetServerEntity()->groundEntityPtr = NULL;
             return true;
         }
 
@@ -276,32 +278,33 @@ qboolean SVG_MoveStep(Entity* ent, vec3_t move, qboolean relink)
     }
 
     // check point traces down for dangling corners
-    VectorCopy(trace.endPosition, ent->state.origin);
+    ent->SetOrigin(trace.endPosition);
+//    VectorCopy(trace.endPosition, ent->state.origin);
 
-    if (!SVG_StepMove_CheckBottom(ent)) {
-        if (ent->flags & EntityFlags::PartiallyOnGround) {
+    if (!SVG_StepMove_CheckBottom(ent->GetServerEntity())) {
+        if (ent->GetFlags() & EntityFlags::PartiallyOnGround) {
             // entity had floor mostly pulled out from underneath it
             // and is trying to correct
             if (relink) {
-                gi.LinkEntity(ent);
-                UTIL_TouchTriggers(ent);
+                gi.LinkEntity(ent->GetServerEntity());
+                UTIL_TouchTriggers(ent->GetServerEntity());
             }
             return true;
         }
-        VectorCopy(oldorg, ent->state.origin);
+        ent->SetOrigin(oldOrigin);
         return false;
     }
 
-    if (ent->flags & EntityFlags::PartiallyOnGround) {
-        ent->flags &= ~EntityFlags::PartiallyOnGround;
+    if (ent->GetFlags() & EntityFlags::PartiallyOnGround) {
+        ent->SetFlags(ent->GetFlags() & ~EntityFlags::PartiallyOnGround);
     }
-    ent->groundEntityPtr = trace.ent;
-    ent->groundEntityLinkCount = trace.ent->linkCount;
+    ent->GetServerEntity()->groundEntityPtr = trace.ent;
+    ent->GetServerEntity()->groundEntityLinkCount = trace.ent->linkCount;
 
     // the move is ok
     if (relink) {
-        gi.LinkEntity(ent);
-        UTIL_TouchTriggers(ent);
+        gi.LinkEntity(ent->GetServerEntity());
+        UTIL_TouchTriggers(ent->GetServerEntity());
     }
     return true;
 }
@@ -360,32 +363,33 @@ facing it.
 
 ======================
 */
-qboolean SV_StepDirection(Entity* ent, float yaw, float dist)
+qboolean SV_StepDirection(SVGBaseEntity* ent, float yaw, float dist)
 {
     vec3_t      move, oldorigin;
     float       delta;
 
-    ent->idealYawAngle = yaw;
-    SVG_CalculateYawAngle(ent);
+    ent->GetServerEntity()->idealYawAngle = yaw;
+    SVG_CalculateYawAngle(ent->GetServerEntity());
 
     yaw = yaw * M_PI * 2 / 360;
     move[0] = std::cosf(yaw) * dist;
     move[1] = std::sinf(yaw) * dist;
     move[2] = 0;
 
-    VectorCopy(ent->state.origin, oldorigin);
+    ent->SetOrigin(oldorigin);
+//    VectorCopy(ent->state.origin, oldorigin);
     if (SVG_MoveStep(ent, move, false)) {
-        delta = ent->state.angles[vec3_t::Yaw] - ent->idealYawAngle;
+        delta = ent->GetServerEntity()->state.angles[vec3_t::Yaw] - ent->GetServerEntity()->idealYawAngle;
         if (delta > 45 && delta < 315) {
             // not turned far enough, so don't take the step
-            VectorCopy(oldorigin, ent->state.origin);
+            VectorCopy(oldorigin, ent->GetServerEntity()->state.origin);
         }
-        gi.LinkEntity(ent);
-        UTIL_TouchTriggers(ent);
+        gi.LinkEntity(ent->GetServerEntity());
+        UTIL_TouchTriggers(ent->GetServerEntity());
         return true;
     }
-    gi.LinkEntity(ent);
-    UTIL_TouchTriggers(ent);
+    gi.LinkEntity(ent->GetServerEntity());
+    UTIL_TouchTriggers(ent->GetServerEntity());
     return false;
 }
 
@@ -394,11 +398,11 @@ qboolean SV_StepDirection(Entity* ent, float yaw, float dist)
 SVG_WalkStepMove
 ===============
 */
-qboolean SVG_StepMove_Walk(Entity* ent, float yaw, float dist)
+qboolean SVG_StepMove_Walk(SVGBaseEntity* ent, float yaw, float dist)
 {
     vec3_t  move;
 
-    if (!ent->groundEntityPtr && !(ent->flags & (EntityFlags::Fly | EntityFlags::Swim)))
+    if (!ent->GetServerEntity()->groundEntityPtr && !(ent->GetFlags() & (EntityFlags::Fly | EntityFlags::Swim)))
         return false;
 
     yaw = yaw * M_PI * 2 / 360;

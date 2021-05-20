@@ -49,10 +49,10 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
     // Clear out angular velocity.
     self->angularVelocity = vec3_zero();
 
-    self->takeDamage = TakeDamage::Yes;
-    self->moveType = MoveType::Toss;
+    SetTakeDamage(TakeDamage::Yes);
+    SetMoveType(MoveType::Toss);
 
-    self->state.modelIndex2 = 0;    // remove linked weapon model
+    SetModelIndex2(0);    // remove linked weapon model
 
     self->state.effects = EntityEffectType::Corpse;
 

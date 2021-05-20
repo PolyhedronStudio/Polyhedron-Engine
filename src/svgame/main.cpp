@@ -575,25 +575,38 @@ Returns entities that have origins within a spherical area
 SVG_FindEntitiesWithinRadius (origin, radius)
 =================
 */
-Entity* SVG_FindEntitiesWithinRadius(Entity* from, vec3_t org, float rad)
+SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t org, float rad)
 {
     vec3_t  eorg;
     int     j;
 
+    Entity* serverEnt = (from ? from->GetServerEntity() : nullptr);
+
     if (!from)
-        from = g_entities;
+        serverEnt = g_entities;
     else
-        from++;
-    for (; from < &g_entities[globals.numberOfEntities]; from++) {
-        if (!from->inUse)
+        serverEnt++;
+
+    for (; serverEnt < &g_entities[globals.numberOfEntities]; serverEnt++) {
+        // Fetch serverEntity its ClassEntity.
+        SVGBaseEntity* classEntity = serverEnt->classEntity;
+
+        // Ensure it has a class entity.
+        if (!serverEnt->classEntity)
             continue;
-        if (from->solid == Solid::Not)
+
+        if (!classEntity->GetInUse())
             continue;
-        for (j = 0; j < 3; j++)
-            eorg[j] = org[j] - (from->state.origin[j] + (from->mins[j] + from->maxs[j]) * 0.5);
-        if (VectorLength(eorg) > rad)
+
+        if (classEntity->GetSolid() == Solid::Not)
             continue;
-        return from;
+        //for (j = 0; j < 3; j++)
+            //eorg[j] = org[j] - (from->state.origin[j] + (from->mins[j] + from->maxs[j]) * 0.5);
+        eorg = org - (classEntity->GetOrigin() + vec3_scale(classEntity->GetMins() + classEntity->GetMaxs(), 0.5f));
+        if (vec3_length(eorg) > rad)
+            continue;
+
+        return classEntity;
     }
 
     return NULL;
@@ -718,6 +731,31 @@ void SVG_FreeEntity(Entity* ed)
 Entity* SVG_GetWorldEntity() {
     return &g_entities[0];
 };
+
+//
+//===============
+// SVG_Trace
+//
+// The defacto trace function to use, for SVGBaseEntity and its derived family & friends.
+//===============
+//
+trace_t SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, SVGBaseEntity* passent, const int32_t &contentMask) {
+    // Fetch server entity in case one was passed to us.
+    Entity* serverEntity = (passent ? passent->GetServerEntity() : NULL);
+
+    return gi.Trace(start, mins, maxs, end, serverEntity, contentMask);
+}
+
+//
+//===============
+// SVG_SetConfigString
+//
+// Sets the config string at the given index number.
+//===============
+//
+void SVG_SetConfigString(const int32_t &configStringIndex, const std::string& configString) {
+    gi.configstring(configStringIndex, configString.c_str());
+}
 
 //
 //===============

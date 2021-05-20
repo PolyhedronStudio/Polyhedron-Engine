@@ -619,6 +619,13 @@ typedef enum {
 
 extern  gitem_t itemlist[];
 
+
+//-------------------
+// Predeclarations.
+//-------------------
+class SVGBaseEntity;
+
+
 //
 // g_cmds.c
 //
@@ -638,7 +645,7 @@ void SVG_SetRespawn(Entity *ent, float delay);
 void SVG_ChangeWeapon(Entity *ent);
 void SVG_SpawnItem(Entity *ent, gitem_t *item);
 void SVG_ThinkWeapon(Entity *ent);
-int32_t SVG_ArmorIndex(Entity *ent);
+int32_t SVG_ArmorIndex(SVGBaseEntity *ent);
 gitem_t *SVG_GetItemByIndex(int32_t index);
 qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int32_t count);
 void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf);
@@ -646,10 +653,10 @@ void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf
 //
 // g_combat.c
 //
-qboolean SVG_OnSameTeam(Entity *ent1, Entity *ent2);
-qboolean SVG_CanDamage(Entity *targ, Entity *inflictor);
-void SVG_Damage(Entity *targ, Entity *inflictor, Entity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int32_t damage, int32_t knockback, int32_t dflags, int32_t mod);
-void SVG_RadiusDamage(Entity *inflictor, Entity *attacker, float damage, Entity *ignore, float radius, int32_t mod);
+qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2);
+qboolean SVG_CanDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor);
+void SVG_Damage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int32_t damage, int32_t knockback, int32_t dflags, int32_t mod);
+void SVG_RadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int32_t mod);
 
 // damage flags
 struct DamageFlags {
@@ -710,13 +717,17 @@ void SVG_FetchClientData(Entity *ent);
 
 Entity* SVG_PickTarget(char* targetName);
 Entity* SVG_Find(Entity* from, int32_t fieldofs, const char* match); // C++20: Added const to char*
-Entity* SVG_FindEntitiesWithinRadius(Entity* from, vec3_t org, float rad);
+SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t org, float rad);
 
 void    SVG_InitEntity(Entity* e);
 Entity* SVG_Spawn(void);
 void    SVG_FreeEntity(Entity* e);
 
-// TODO: Move to precache.cpp and precache.h eh?
+// TODO: All these go elsewhere, sometime, as does most...
+void SVG_SetConfigString(const int32_t &configStringIndex, const std::string &configString);
+
+trace_t SVG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, SVGBaseEntity* passent, const int32_t& contentMask);
+
 qhandle_t SVG_PrecacheModel(const std::string& filename);
 qhandle_t SVG_PrecacheImage(const std::string& filename);
 qhandle_t SVG_PrecacheSound(const std::string& filename);
@@ -900,11 +911,6 @@ struct gclient_s {
 };
 
 //-------------------
-// Predeclarations.
-//-------------------
-class SVGBaseEntity;
-
-//-------------------
 // entity_s, the server side entity structure. If you know what an entity is,
 // then you know what this is.
 // 
@@ -950,7 +956,6 @@ struct entity_s {
     //================================
     SVGBaseEntity* classEntity;
 
-    int32_t moveType;
     int32_t flags;
 
     const char *model;       // C++20: STRING: Added const to char*
@@ -996,13 +1001,6 @@ struct entity_s {
     float idealYawAngle;
 
     float nextThinkTime;
-    void (*PreThink)(Entity *ent);
-    void (*Think)(Entity *self);
-    void (*Blocked)(Entity *self, Entity *other);         // move to moveinfo?
-    void (*Touch)(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf);
-    void (*Use)(Entity *self, Entity *other, Entity *activator);
-    void (*Pain)(Entity *self, Entity *other, float kick, int32_t damage);
-    void (*Die)(Entity *self, Entity *inflictor, Entity *attacker, int32_t damage, const vec3_t &point);
 
     float debounceTouchTime;        // are all these legit?  do we need more/less of them?
     float debouncePainTime;
@@ -1030,9 +1028,6 @@ struct entity_s {
 
     // Chain, enemy, old enemy, and activator entity pointers.
     Entity *chain;
-    Entity *enemy;
-    Entity *oldEnemyPtr;
-    Entity *activator;
     
     // Ground pointers.
     Entity *groundEntityPtr;

@@ -75,7 +75,7 @@ void Brush_Move_Final(Entity* ent)
 
     VectorScale(ent->moveInfo.dir, ent->moveInfo.remainingDistance / FRAMETIME, ent->velocity);
 
-    ent->Think = Brush_Move_Done;
+    //ent->Think = Brush_Move_Done;
     ent->nextThinkTime = level.time + FRAMETIME;
 }
 
@@ -91,7 +91,7 @@ void Brush_Move_Begin(Entity* ent)
     frames = floor((ent->moveInfo.remainingDistance / ent->moveInfo.speed) / FRAMETIME);
     ent->moveInfo.remainingDistance -= frames * ent->moveInfo.speed * FRAMETIME;
     ent->nextThinkTime = level.time + (frames * FRAMETIME);
-    ent->Think = Brush_Move_Final;
+    //ent->Think = Brush_Move_Final;
 }
 
 void Think_AccelMove(Entity* ent);
@@ -109,13 +109,13 @@ void Brush_Move_Calc(Entity* ent, const vec3_t &dest, void(*func)(Entity*))
         }
         else {
             ent->nextThinkTime = level.time + FRAMETIME;
-            ent->Think = Brush_Move_Begin;
+            //ent->Think = Brush_Move_Begin;
         }
     }
     else {
         // accelerative
         ent->moveInfo.currentSpeed = 0;
-        ent->Think = Think_AccelMove;
+        //ent->Think = Think_AccelMove;
         ent->nextThinkTime = level.time + FRAMETIME;
     }
 }
@@ -147,7 +147,7 @@ void Brush_AngleMove_Final(Entity* ent)
 
     VectorScale(move, 1.0 / FRAMETIME, ent->angularVelocity);
 
-    ent->Think = Brush_AngleMove_Done;
+    //ent->Think = Brush_AngleMove_Done;
     ent->nextThinkTime = level.time + FRAMETIME;
 }
 
@@ -182,7 +182,7 @@ void Brush_AngleMove_Begin(Entity* ent)
 
     // set nextThinkTime to trigger a Think when dest is reached
     ent->nextThinkTime = level.time + frames * FRAMETIME;
-    ent->Think = Brush_AngleMove_Final;
+    //ent->Think = Brush_AngleMove_Final;
 }
 
 void Brush_AngleMove_Calc(Entity* ent, void(*func)(Entity*))
@@ -194,7 +194,7 @@ void Brush_AngleMove_Calc(Entity* ent, void(*func)(Entity*))
     }
     else {
         ent->nextThinkTime = level.time + FRAMETIME;
-        ent->Think = Brush_AngleMove_Begin;
+        //ent->Think = Brush_AngleMove_Begin;
     }
 }
 
@@ -318,5 +318,5 @@ void Think_AccelMove(Entity* ent)
 
     VectorScale(ent->moveInfo.dir, ent->moveInfo.currentSpeed * 10, ent->velocity);
     ent->nextThinkTime = level.time + FRAMETIME;
-    ent->Think = Think_AccelMove;
+    //ent->Think = Think_AccelMove;
 }

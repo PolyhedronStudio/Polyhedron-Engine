@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "g_local.h"
 #include "player/animations.h"
 
+#include "entities/base/SVGBaseEntity.h"
 
 char *ClientTeam(Entity *ent)
 {
@@ -310,19 +311,19 @@ Cmd_Noclip_f
 argv(0) noclip
 ==================
 */
-void Cmd_Noclip_f(Entity *ent)
+void Cmd_Noclip_f(SVGBaseEntity *ent)
 {
     if (deathmatch->value && !sv_cheats->value) {
-        gi.CPrintf(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
         return;
     }
 
-    if (ent->moveType == MoveType::NoClip) {
-        ent->moveType = MoveType::Walk;
-        gi.CPrintf(ent, PRINT_HIGH, "noclip OFF\n");
+    if (ent->GetMoveType() == MoveType::NoClip) {
+        ent->SetMoveType(MoveType::Walk);
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "noclip OFF\n");
     } else {
-        ent->moveType = MoveType::NoClip;
-        gi.CPrintf(ent, PRINT_HIGH, "noclip ON\n");
+        ent->SetMoveType(MoveType::NoClip);
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "noclip ON\n");
     }
 }
 
@@ -861,7 +862,7 @@ void SVG_ClientCommand(Entity *ent)
     else if (Q_stricmp(cmd, "notarget") == 0)
         Cmd_Notarget_f(ent);
     else if (Q_stricmp(cmd, "noclip") == 0)
-        Cmd_Noclip_f(ent);
+        Cmd_Noclip_f(ent->classEntity);
     else if (Q_stricmp(cmd, "inven") == 0)
         Cmd_Inven_f(ent);
     else if (Q_stricmp(cmd, "invnext") == 0)

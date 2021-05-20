@@ -41,7 +41,7 @@ void gib_think(Entity *self)
     self->nextThinkTime = level.time + FRAMETIME;
 
     if (self->state.frame == 10) {
-        self->Think = SVG_FreeEntity;
+        //self->Think = SVG_FreeEntity;
         self->nextThinkTime = level.time + 8 + random() * 10;
     }
 }
@@ -53,7 +53,7 @@ void gib_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
     if (!self->groundEntityPtr)
         return;
 
-    self->Touch = NULL;
+    //self->Touch = NULL;
 
     if (plane) {
         gi.Sound(self, CHAN_VOICE, gi.SoundIndex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
@@ -64,7 +64,7 @@ void gib_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
 
         if (self->state.modelIndex == sm_meat_index) {
             self->state.frame++;
-            self->Think = gib_think;
+            //self->Think = gib_think;
             self->nextThinkTime = level.time + FRAMETIME;
         }
     }
@@ -77,132 +77,132 @@ void gib_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, cons
 
 void ThrowGib(Entity *self, const char *gibname, int damage, int type)
 {
-    Entity *gib;
-    vec3_t  vd;
-    vec3_t  origin;
-    vec3_t  size;
-    float   vscale;
+    //Entity *gib;
+    //vec3_t  vd;
+    //vec3_t  origin;
+    //vec3_t  size;
+    //float   vscale;
 
-    gib = SVG_Spawn();
+    //gib = SVG_Spawn();
 
-    VectorScale(self->size, 0.5, size);
-    VectorAdd(self->absMin, size, origin);
-    gib->state.origin[0] = origin[0] + crandom() * size[0];
-    gib->state.origin[1] = origin[1] + crandom() * size[1];
-    gib->state.origin[2] = origin[2] + crandom() * size[2];
+    //VectorScale(self->size, 0.5, size);
+    //VectorAdd(self->absMin, size, origin);
+    //gib->state.origin[0] = origin[0] + crandom() * size[0];
+    //gib->state.origin[1] = origin[1] + crandom() * size[1];
+    //gib->state.origin[2] = origin[2] + crandom() * size[2];
 
-    gi.SetModel(gib, gibname);
-    gib->solid = Solid::Not;
-    gib->state.effects |= EntityEffectType::Gib;
-    gib->flags |= EntityFlags::NoKnockBack;
-    gib->takeDamage = TakeDamage::Yes;
-    gib->Die = gib_die;
+    //gi.SetModel(gib, gibname);
+    //gib->solid = Solid::Not;
+    //gib->state.effects |= EntityEffectType::Gib;
+    //gib->flags |= EntityFlags::NoKnockBack;
+    //gib->takeDamage = TakeDamage::Yes;
+    ////gib->Die = gib_die;
 
-    if (type == GIB_ORGANIC) {
-        gib->moveType = MoveType::Toss;
-        gib->Touch = gib_touch;
-        vscale = 0.5;
-    } else {
-        gib->moveType = MoveType::Bounce;
-        vscale = 1.0;
-    }
+    //if (type == GIB_ORGANIC) {
+    //    gib->moveType = MoveType::Toss;
+    //    //gib->Touch = gib_touch;
+    //    vscale = 0.5;
+    //} else {
+    //    gib->moveType = MoveType::Bounce;
+    //    vscale = 1.0;
+    //}
 
-    // Calculate velocity for given damage.
-    vd = SVG_VelocityForDamage(damage);
-    VectorMA(self->velocity, vscale, vd, gib->velocity);
-    ClipGibVelocity(gib);
-    gib->angularVelocity[0] = random() * 600;
-    gib->angularVelocity[1] = random() * 600;
-    gib->angularVelocity[2] = random() * 600;
+    //// Calculate velocity for given damage.
+    //vd = SVG_VelocityForDamage(damage);
+    //VectorMA(self->velocity, vscale, vd, gib->velocity);
+    //ClipGibVelocity(gib);
+    //gib->angularVelocity[0] = random() * 600;
+    //gib->angularVelocity[1] = random() * 600;
+    //gib->angularVelocity[2] = random() * 600;
 
-    gib->Think = SVG_FreeEntity;
-    gib->nextThinkTime = level.time + 10 + random() * 10;
+    ////gib->Think = SVG_FreeEntity;
+    //gib->nextThinkTime = level.time + 10 + random() * 10;
 
-    gi.LinkEntity(gib);
+    //gi.LinkEntity(gib);
 }
 
 void ThrowHead(Entity *self, const char *gibname, int damage, int type)
 {
-    vec3_t  vd;
-    float   vscale;
+    //vec3_t  vd;
+    //float   vscale;
 
-    self->state.skinNumber = 0;
-    self->state.frame = 0;
-    VectorClear(self->mins);
-    VectorClear(self->maxs);
+    //self->state.skinNumber = 0;
+    //self->state.frame = 0;
+    //VectorClear(self->mins);
+    //VectorClear(self->maxs);
 
-    self->state.modelIndex2 = 0;
-    gi.SetModel(self, gibname);
-    self->solid = Solid::Not;
-    self->state.effects |= EntityEffectType::Gib;
-    self->state.sound = 0;
-    self->flags |= EntityFlags::NoKnockBack;
-    self->serverFlags &= ~EntityServerFlags::Monster;
-    self->takeDamage = TakeDamage::Yes;
-    self->Die = gib_die;
+    //self->state.modelIndex2 = 0;
+    //gi.SetModel(self, gibname);
+    //self->solid = Solid::Not;
+    //self->state.effects |= EntityEffectType::Gib;
+    //self->state.sound = 0;
+    //self->flags |= EntityFlags::NoKnockBack;
+    //self->serverFlags &= ~EntityServerFlags::Monster;
+    //self->takeDamage = TakeDamage::Yes;
+    ////self->Die = gib_die;
 
-    if (type == GIB_ORGANIC) {
-        self->moveType = MoveType::Toss;
-        self->Touch = gib_touch;
-        vscale = 0.5;
-    } else {
-        self->moveType = MoveType::Bounce;
-        vscale = 1.0;
-    }
+    //if (type == GIB_ORGANIC) {
+    //    self->moveType = MoveType::Toss;
+    //    //self->Touch = gib_touch;
+    //    vscale = 0.5;
+    //} else {
+    //    self->moveType = MoveType::Bounce;
+    //    vscale = 1.0;
+    //}
 
-    // Calculate velocity for given damage.
-    vd = SVG_VelocityForDamage(damage);
-    VectorMA(self->velocity, vscale, vd, self->velocity);
-    ClipGibVelocity(self);
+    //// Calculate velocity for given damage.
+    //vd = SVG_VelocityForDamage(damage);
+    //VectorMA(self->velocity, vscale, vd, self->velocity);
+    //ClipGibVelocity(self);
 
-    self->angularVelocity[vec3_t::Yaw] = crandom() * 600;
+    //self->angularVelocity[vec3_t::Yaw] = crandom() * 600;
 
-    self->Think = SVG_FreeEntity;
-    self->nextThinkTime = level.time + 10 + random() * 10;
+    ////self->Think = SVG_FreeEntity;
+    //self->nextThinkTime = level.time + 10 + random() * 10;
 
-    gi.LinkEntity(self);
+    //gi.LinkEntity(self);
 }
 
 
 void ThrowClientHead(Entity *self, int damage)
 {
-    vec3_t  vd;
-    const char    *gibname; // C++20 VKPT: added const.
+    //vec3_t  vd;
+    //const char    *gibname; // C++20 VKPT: added const.
 
-    if (rand() & 1) {
-        gibname = "models/objects/gibs/head2/tris.md2";
-        self->state.skinNumber = 1;        // second skin is player
-    } else {
-        gibname = "models/objects/gibs/skull/tris.md2";
-        self->state.skinNumber = 0;
-    }
+    //if (rand() & 1) {
+    //    gibname = "models/objects/gibs/head2/tris.md2";
+    //    self->state.skinNumber = 1;        // second skin is player
+    //} else {
+    //    gibname = "models/objects/gibs/skull/tris.md2";
+    //    self->state.skinNumber = 0;
+    //}
 
-    self->state.origin[2] += 32;
-    self->state.frame = 0;
-    gi.SetModel(self, gibname);
-    VectorSet(self->mins, -16, -16, 0);
-    VectorSet(self->maxs, 16, 16, 16);
+    //self->state.origin[2] += 32;
+    //self->state.frame = 0;
+    //gi.SetModel(self, gibname);
+    //VectorSet(self->mins, -16, -16, 0);
+    //VectorSet(self->maxs, 16, 16, 16);
 
-    self->takeDamage = TakeDamage::No;
-    self->solid = Solid::Not;
-    self->state.effects = EntityEffectType::Gib;
-    self->state.sound = 0;
-    self->flags |= EntityFlags::NoKnockBack;
+    //self->takeDamage = TakeDamage::No;
+    //self->solid = Solid::Not;
+    //self->state.effects = EntityEffectType::Gib;
+    //self->state.sound = 0;
+    //self->flags |= EntityFlags::NoKnockBack;
 
-    self->moveType = MoveType::Bounce;
-    // Calculate velocity for given damage.
-    vd = SVG_VelocityForDamage(damage);
-    VectorAdd(self->velocity, vd, self->velocity);
+    //self->moveType = MoveType::Bounce;
+    //// Calculate velocity for given damage.
+    //vd = SVG_VelocityForDamage(damage);
+    //VectorAdd(self->velocity, vd, self->velocity);
 
-    if (self->client) { // bodies in the queue don't have a client anymore
-        self->client->animation.priorityAnimation = PlayerAnimation::Death;
-        self->client->animation.endFrame = self->state.frame;
-    } else {
-        self->Think = NULL;
-        self->nextThinkTime = 0;
-    }
+    //if (self->client) { // bodies in the queue don't have a client anymore
+    //    self->client->animation.priorityAnimation = PlayerAnimation::Death;
+    //    self->client->animation.endFrame = self->state.frame;
+    //} else {
+    //    //self->Think = NULL;
+    //    self->nextThinkTime = 0;
+    //}
 
-    gi.LinkEntity(self);
+    //gi.LinkEntity(self);
 }
 
 
@@ -216,7 +216,7 @@ void debris_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, c
     SVG_FreeEntity(self);
 }
 
-void SVG_ThrowDebris(Entity *self, const char *modelname, float speed, const vec3_t &origin) // C++20: STRING: Added const to char*
+void SVG_ThrowDebris(SVGBaseEntity *self, const char *modelname, float speed, const vec3_t &origin) // C++20: STRING: Added const to char*
 {
     Entity *chunk;
     vec3_t  v;
@@ -227,19 +227,19 @@ void SVG_ThrowDebris(Entity *self, const char *modelname, float speed, const vec
     v[0] = 100 * crandom();
     v[1] = 100 * crandom();
     v[2] = 100 + 100 * crandom();
-    VectorMA(self->velocity, speed, v, chunk->velocity);
-    chunk->moveType = MoveType::Bounce;
+    //VectorMA(self->velocity, speed, v, chunk->velocity);
+    //chunk->moveType = MoveType::Bounce;
     chunk->solid = Solid::Not;
     chunk->angularVelocity[0] = random() * 600;
     chunk->angularVelocity[1] = random() * 600;
     chunk->angularVelocity[2] = random() * 600;
-    chunk->Think = SVG_FreeEntity;
+//    chunk->Think = SVG_FreeEntity;
     chunk->nextThinkTime = level.time + 5 + random() * 5;
     chunk->state.frame = 0;
     chunk->flags = 0;
     chunk->className = "debris";
     chunk->takeDamage = TakeDamage::Yes;
-    chunk->Die = debris_die;
+//    chunk->Die = debris_die;
     gi.LinkEntity(chunk);
 }
 
