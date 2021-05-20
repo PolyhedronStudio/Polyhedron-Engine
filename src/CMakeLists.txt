@@ -62,69 +62,69 @@ SET(SRC_SVGAME
 	svgame/entities/base/SVGBaseEntity.cpp
 	svgame/entities/base/PlayerClient.cpp
 
-	svgame/entities/func/func_areaportal.cpp
-	svgame/entities/func/func_button.cpp
+	#svgame/entities/func/func_areaportal.cpp
+	#svgame/entities/func/func_button.cpp
 	
-	svgame/entities/func/func_conveyor.cpp
-	svgame/entities/func/func_door.cpp 
-	svgame/entities/func/func_door_rotating.cpp
-	svgame/entities/func/func_explosive.cpp 
+	#svgame/entities/func/func_conveyor.cpp
+	#svgame/entities/func/func_door.cpp 
+	#svgame/entities/func/func_door_rotating.cpp
+	#svgame/entities/func/func_explosive.cpp 
 	
-	svgame/entities/func/func_killbox.cpp
-	svgame/entities/func/func_object.cpp
-	svgame/entities/func/func_plat.cpp
-	svgame/entities/func/func_rotating.cpp
-	svgame/entities/func/func_timer.cpp
-	svgame/entities/func/func_train.cpp 
-	svgame/entities/func/func_wall.cpp
-	svgame/entities/func/func_water.cpp
+	#svgame/entities/func/func_killbox.cpp
+	#svgame/entities/func/func_object.cpp
+	#svgame/entities/func/func_plat.cpp
+	#svgame/entities/func/func_rotating.cpp
+	#svgame/entities/func/func_timer.cpp
+	#svgame/entities/func/func_train.cpp 
+	#svgame/entities/func/func_wall.cpp
+	#svgame/entities/func/func_water.cpp
 	
-	svgame/entities/info/info_notnull.cpp
-	svgame/entities/info/info_null.cpp
-	svgame/entities/info/info_player_coop.cpp
-	svgame/entities/info/info_player_deathmatch.cpp
-	svgame/entities/info/info_player_intermission.cpp
-	svgame/entities/info/info_player_start.cpp
+	#svgame/entities/info/info_notnull.cpp
+	#svgame/entities/info/info_null.cpp
+	#svgame/entities/info/info_player_coop.cpp
+	#svgame/entities/info/info_player_deathmatch.cpp
+	#svgame/entities/info/info_player_intermission.cpp
+	#svgame/entities/info/info_player_start.cpp
 	svgame/entities/info/InfoPlayerStart.cpp
 
-	svgame/entities/misc/misc_explobox.cpp
-	svgame/entities/misc/misc_gib_arm.cpp 
-	svgame/entities/misc/misc_gib_leg.cpp 
-	svgame/entities/misc/misc_gib_head.cpp 
+	#svgame/entities/misc/misc_explobox.cpp
+	#svgame/entities/misc/misc_gib_arm.cpp 
+	#svgame/entities/misc/misc_gib_leg.cpp 
+	#svgame/entities/misc/misc_gib_head.cpp 
 	svgame/entities/misc/MiscExplosionBox.cpp
 	 
-	svgame/entities/misc/misc_teleporter.cpp
-	svgame/entities/misc/misc_teleporter_dest.cpp
+	#svgame/entities/misc/misc_teleporter.cpp
+	#svgame/entities/misc/misc_teleporter_dest.cpp
 
-	svgame/entities/target/target_blaster.cpp
-	svgame/entities/target/target_changelevel.cpp
+	#svgame/entities/target/target_blaster.cpp
+	#svgame/entities/target/target_changelevel.cpp
 	
-	svgame/entities/target/target_crosslevel_target.cpp
-	svgame/entities/target/target_crosslevel_trigger.cpp
-	svgame/entities/target/target_earthquake.cpp
-	svgame/entities/target/target_explosion.cpp
+	#svgame/entities/target/target_crosslevel_target.cpp
+	#svgame/entities/target/target_crosslevel_trigger.cpp
+	#svgame/entities/target/target_earthquake.cpp
+	#svgame/entities/target/target_explosion.cpp
 	
 	
 	
-	svgame/entities/target/target_lightramp.cpp
+	#svgame/entities/target/target_lightramp.cpp
 	
-	svgame/entities/target/target_spawner.cpp
-	svgame/entities/target/target_speaker.cpp
-	svgame/entities/target/target_splash.cpp
+	#svgame/entities/target/target_spawner.cpp
+	#svgame/entities/target/target_speaker.cpp
+	#svgame/entities/target/target_splash.cpp
 	
-	svgame/entities/target/target_temp_entity.cpp
+	#svgame/entities/target/target_temp_entity.cpp
 
-	svgame/entities/trigger/trigger_always.cpp
-	svgame/entities/trigger/trigger_counter.cpp
-	svgame/entities/trigger/trigger_elevator.cpp
-	svgame/entities/trigger/trigger_gravity.cpp
-	svgame/entities/trigger/trigger_hurt.cpp
-	svgame/entities/trigger/trigger_key.cpp
-	svgame/entities/trigger/trigger_monsterjump.cpp
-	svgame/entities/trigger/trigger_multiple.cpp
-	svgame/entities/trigger/trigger_once.cpp
-	svgame/entities/trigger/trigger_push.cpp
-	svgame/entities/trigger/trigger_relay.cpp
+	#svgame/entities/trigger/trigger_always.cpp
+	#svgame/entities/trigger/trigger_counter.cpp
+	#svgame/entities/trigger/trigger_elevator.cpp
+	#svgame/entities/trigger/trigger_gravity.cpp
+	#svgame/entities/trigger/trigger_hurt.cpp
+	#svgame/entities/trigger/trigger_key.cpp
+	#svgame/entities/trigger/trigger_monsterjump.cpp
+	#svgame/entities/trigger/trigger_multiple.cpp
+	#svgame/entities/trigger/trigger_once.cpp
+	#svgame/entities/trigger/trigger_push.cpp
+	#svgame/entities/trigger/trigger_relay.cpp
 	
 	svgame/entities/Light.cpp
 	svgame/entities/WorldSpawn.cpp

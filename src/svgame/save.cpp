@@ -454,12 +454,13 @@ static void write_pointer(FILE *f, void *p, ptr_type_t type)
         return;
     }
 
-    for (i = 0, ptr = save_ptrs; i < num_save_ptrs; i++, ptr++) {
-        if (ptr->type == type && ptr->ptr == p) {
-            write_int(f, i);
-            return;
-        }
-    }
+    return;
+    //for (i = 0, ptr = save_ptrs; i < num_save_ptrs; i++, ptr++) {
+    //    if (ptr->type == type && ptr->ptr == p) {
+    //        write_int(f, i);
+    //        return;
+    //    }
+    //}
 
     gi.Error("%s: unknown pointer: %p", __func__, p);
 }
@@ -510,8 +511,11 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     case F_POINTER:
-        write_pointer(f, *(void **)p, (ptr_type_t)field->size); // CPP: Cast
+        // TODO: We aren't using this anymore...
         break;
+    //case F_POINTER:
+    //    write_pointer(f, *(void **)p, (ptr_type_t)field->size); // CPP: Cast
+    //    break;
 
     default:
         gi.Error("%s: unknown field type", __func__);
@@ -634,14 +638,14 @@ static void *read_pointer(FILE *f, ptr_type_t type)
         return NULL;
     }
 
-    if (index < 0 || index >= num_save_ptrs) {
-        gi.Error("%s: bad index", __func__);
-    }
+    //if (index < 0 || index >= num_save_ptrs) {
+    //    gi.Error("%s: bad index", __func__);
+    //}
 
-    ptr = &save_ptrs[index];
-    if (ptr->type != type) {
-        gi.Error("%s: type mismatch", __func__);
-    }
+    //ptr = &save_ptrs[index];
+    //if (ptr->type != type) {
+    //    gi.Error("%s: type mismatch", __func__);
+    //}
 
     return ptr->ptr;
 }
@@ -691,9 +695,12 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         *(gitem_t **)p = (gitem_t*)read_index(f, sizeof(gitem_t), itemlist, game.numberOfItems - 1); // CPP: Cast
         break;
 
+    // TODO: We aren't using this anymore...
     case F_POINTER:
-        *(void **)p = read_pointer(f, (ptr_type_t)field->size); // CPP: Cast
         break;
+    //case F_POINTER:
+    //    *(void **)p = read_pointer(f, (ptr_type_t)field->size); // CPP: Cast
+    //    break;
 
     default:
         gi.Error("%s: unknown field type", __func__);

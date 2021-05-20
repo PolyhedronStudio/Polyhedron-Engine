@@ -17,5 +17,5 @@ typedef struct {
     void *ptr;
 } save_ptr_t;
 
-extern const save_ptr_t save_ptrs[];
-extern const int num_save_ptrs;
+//extern const save_ptr_t save_ptrs[];
+//extern const int num_save_ptrs;

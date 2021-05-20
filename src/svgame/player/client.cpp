@@ -843,7 +843,7 @@ void SVG_PutClientInServer(Entity *ent)
     ent->airFinished = level.time + 12;
     ent->clipMask = CONTENTS_MASK_PLAYERSOLID;
     ent->model = "players/male/tris.md2";
-    ent->Pain = SVG_Player_Pain;
+    //ent->Pain = SVG_Player_Pain;
     //ent->Die = SVG_Player_Die;
     ent->waterLevel = 0;
     ent->waterType = 0;

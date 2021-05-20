@@ -121,132 +121,131 @@ extern void door_hit_bottom(Entity* self);
 extern void door_hit_top(Entity* self);
 extern void train_wait(Entity* self);
 
-const save_ptr_t save_ptrs[] = {
-{ P_blocked, door_blocked },
-{ P_blocked, plat_blocked },
-{ P_blocked, rotating_blocked },
-{ P_blocked, train_blocked },
-
-{ P_die, body_die },
-{ P_die, button_killed },
-{ P_die, debris_die },
-{ P_die, door_killed },
-
-{ P_die, func_explosive_explode },
-
-{ P_die, gib_die },
-{ P_die, SVG_Player_Die },
-
-{ P_pain, SVG_Player_Pain },
-
-{ P_think, Brush_AngleMove_Begin },
-{ P_think, Brush_AngleMove_Done },
-{ P_think, Brush_AngleMove_Final },
-
-{ P_think, button_return },
-
-{ P_think, door_go_down },
-
-{ P_think, DoRespawn },
-{ P_think, drop_make_touchable },
-{ P_think, droptofloor },
-{ P_think, func_object_release },
-{ P_think, func_timer_think },
-{ P_think, func_train_find },
-{ P_think, SVG_FreeEntity },
-{ P_think, gib_think },
-
-{ P_think, MegaHealth_think },
-{ P_think, Brush_Move_Begin },
-{ P_think, Brush_Move_Done },
-{ P_think, Brush_Move_Final },
-{ P_think, multi_wait },
-{ P_think, plat_go_down },
-//{ P_think, SP_CreateCoopSpots },
-{ P_think, SP_FixCoopSpots },
-{ P_think, target_crosslevel_target_think },
-{ P_think, target_earthquake_think },
-{ P_think, target_explosion_explode },
-{ P_think, target_lightramp_think },
-{ P_think, Think_AccelMove },
-
-{ P_think, Think_CalcMoveSpeed },
-{ P_think, Think_Delay },
-{ P_think, Think_SpawnDoorTrigger },
-{ P_think, train_next },
-{ P_think, trigger_elevator_init },
-{ P_touch, blaster_touch },
-{ P_touch, button_touch },
-{ P_touch, door_touch },
-{ P_touch, drop_temp_touch },
-{ P_touch, func_object_touch },
-{ P_touch, gib_touch },
-{ P_touch, hurt_touch },
-
-{ P_touch, rotating_touch },
-
-
-{ P_touch, teleporter_touch },
-
-{ P_touch, Touch_DoorTrigger },
-{ P_touch, SVG_TouchItem },
-{ P_touch, Touch_Multi },
-{ P_touch, Touch_Plat_Center },
-
-{ P_touch, trigger_gravity_touch },
-{ P_touch, trigger_monsterjump_touch },
-{ P_touch, trigger_push_touch },
-
-{ P_use, button_use },
-
-{ P_use, door_use },
-
-{ P_use, func_conveyor_use },
-{ P_use, func_explosive_spawn },
-{ P_use, func_explosive_use },
-{ P_use, func_object_use },
-{ P_use, func_timer_use },
-{ P_use, func_wall_use },
-
-{ P_use, hurt_use },
-//{ P_use, light_use },
-
-{ P_use, rotating_use },
-
-{ P_use, target_earthquake_use },
-{ P_use, target_lightramp_use },
-{ P_use, train_use },
-
-{ P_use, trigger_counter_use },
-{ P_use, trigger_crosslevel_trigger_use },
-{ P_use, trigger_elevator_use },
-{ P_use, trigger_enable },
-{ P_use, trigger_key_use },
-{ P_use, trigger_relay_use },
-
-{ P_use, Use_Areaportal },
-{ P_use, Use_Item },
-{ P_use, use_killbox },
-{ P_use, Use_Multi },
-{ P_use, Use_Plat },
-{ P_use, use_target_blaster },
-{ P_use, use_target_changelevel },
-{ P_use, use_target_explosion },
-{ P_use, use_target_spawner },
-{ P_use, Use_Target_Speaker },
-{ P_use, use_target_splash },
-{ P_use, Use_Target_Tent },
-
-{ P_moveinfo_endfunc, plat_hit_bottom },
-{ P_moveinfo_endfunc, plat_hit_top },
-
-{ P_moveinfo_endfunc, button_done },
-{ P_moveinfo_endfunc, button_wait },
-
-{ P_moveinfo_endfunc, door_hit_bottom },
-{ P_moveinfo_endfunc, door_hit_top },
-
-{ P_moveinfo_endfunc, train_wait },
-
-};
-const int num_save_ptrs = sizeof(save_ptrs) / sizeof(save_ptrs[0]);
+//const save_ptr_t save_ptrs[] = {
+//{ P_blocked, door_blocked },
+//{ P_blocked, plat_blocked },
+//{ P_blocked, rotating_blocked },
+//{ P_blocked, train_blocked },
+//
+//{ P_die, body_die },
+//{ P_die, button_killed },
+//{ P_die, debris_die },
+//{ P_die, door_killed },
+//
+//{ P_die, func_explosive_explode },
+//
+//{ P_die, gib_die },
+//{ P_die, SVG_Player_Die },
+//
+//{ P_pain, SVG_Player_Pain },
+//
+//{ P_think, Brush_AngleMove_Begin },
+//{ P_think, Brush_AngleMove_Done },
+//{ P_think, Brush_AngleMove_Final },
+//
+//{ P_think, button_return },
+//
+//{ P_think, door_go_down },
+//
+//{ P_think, DoRespawn },
+//{ P_think, drop_make_touchable },
+//{ P_think, droptofloor },
+//{ P_think, func_object_release },
+//{ P_think, func_timer_think },
+//{ P_think, func_train_find },
+//{ P_think, SVG_FreeEntity },
+//{ P_think, gib_think },
+//
+//{ P_think, MegaHealth_think },
+//{ P_think, Brush_Move_Begin },
+//{ P_think, Brush_Move_Done },
+//{ P_think, Brush_Move_Final },
+//{ P_think, multi_wait },
+//{ P_think, plat_go_down },
+////{ P_think, SP_CreateCoopSpots },
+//{ P_think, SP_FixCoopSpots },
+//{ P_think, target_crosslevel_target_think },
+//{ P_think, target_earthquake_think },
+//{ P_think, target_explosion_explode },
+//{ P_think, target_lightramp_think },
+//{ P_think, Think_AccelMove },
+//
+//{ P_think, Think_CalcMoveSpeed },
+//{ P_think, Think_Delay },
+//{ P_think, Think_SpawnDoorTrigger },
+//{ P_think, train_next },
+//{ P_think, trigger_elevator_init },
+//{ P_touch, blaster_touch },
+//{ P_touch, button_touch },
+//{ P_touch, door_touch },
+//{ P_touch, drop_temp_touch },
+//{ P_touch, func_object_touch },
+//{ P_touch, gib_touch },
+//{ P_touch, hurt_touch },
+//
+//{ P_touch, rotating_touch },
+//
+//
+//{ P_touch, teleporter_touch },
+//
+//{ P_touch, Touch_DoorTrigger },
+//{ P_touch, SVG_TouchItem },
+//{ P_touch, Touch_Multi },
+//{ P_touch, Touch_Plat_Center },
+//
+//{ P_touch, trigger_gravity_touch },
+//{ P_touch, trigger_monsterjump_touch },
+//{ P_touch, trigger_push_touch },
+//
+//{ P_use, button_use },
+//
+//{ P_use, door_use },
+//
+//{ P_use, func_conveyor_use },
+//{ P_use, func_explosive_spawn },
+//{ P_use, func_explosive_use },
+//{ P_use, func_object_use },
+//{ P_use, func_timer_use },
+//{ P_use, func_wall_use },
+//
+//{ P_use, hurt_use },
+////{ P_use, light_use },
+//
+//{ P_use, rotating_use },
+//
+//{ P_use, target_earthquake_use },
+//{ P_use, target_lightramp_use },
+//{ P_use, train_use },
+//
+//{ P_use, trigger_counter_use },
+//{ P_use, trigger_crosslevel_trigger_use },
+//{ P_use, trigger_elevator_use },
+//{ P_use, trigger_enable },
+//{ P_use, trigger_key_use },
+//{ P_use, trigger_relay_use },
+//
+//{ P_use, Use_Areaportal },
+//{ P_use, Use_Item },
+//{ P_use, use_killbox },
+//{ P_use, Use_Multi },
+//{ P_use, Use_Plat },
+//{ P_use, use_target_blaster },
+//{ P_use, use_target_changelevel },
+//{ P_use, use_target_explosion },
+//{ P_use, use_target_spawner },
+//{ P_use, Use_Target_Speaker },
+//{ P_use, use_target_splash },
+//{ P_use, Use_Target_Tent },
+//
+//{ P_moveinfo_endfunc, plat_hit_bottom },
+//{ P_moveinfo_endfunc, plat_hit_top },
+//
+//{ P_moveinfo_endfunc, button_done },
+//{ P_moveinfo_endfunc, button_wait },
+//
+//{ P_moveinfo_endfunc, door_hit_bottom },
+//{ P_moveinfo_endfunc, door_hit_top },
+//
+//{ P_moveinfo_endfunc, train_wait },
+//};
+//const int num_save_ptrs = sizeof(save_ptrs) / sizeof(save_ptrs[0]);
