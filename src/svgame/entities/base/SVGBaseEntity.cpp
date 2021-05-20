@@ -80,6 +80,22 @@ void SVGBaseEntity::Think() {
 
 //
 //===============
+// SVGBaseEntity::Use
+//
+// Execute the 'Use' callback in case we ran into any.
+//===============
+//
+void SVGBaseEntity::Use(SVGBaseEntity* other, SVGBaseEntity* activator) {
+	// Safety check.
+	if (useFunction == nullptr)
+		return;
+
+	// Execute 'Die' callback function.
+	(this->*useFunction)(other, activator);
+}
+
+//
+//===============
 // SVGBaseEntity::Die
 //
 // Execute the 'Die' callback in case we ran into any.

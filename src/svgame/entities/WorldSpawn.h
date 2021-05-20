@@ -2,21 +2,21 @@
 // LICENSE HERE.
 
 //
-// Light.h
+// WorldSpawn.h
 //
-// Light entity definition.
+// WorldSpawn entity definition.
 //
 */
-#ifndef __SVGAME_ENTITIES_LIGHT_H__
-#define __SVGAME_ENTITIES_LIGHT_H__
+#ifndef __SVGAME_ENTITIES_WORLDSPAWN_H__
+#define __SVGAME_ENTITIES_WORLDSPAWN_H__
 
 class SVGBaseEntity;
 
-class Light : public SVGBaseEntity {
+class WorldSpawn : public SVGBaseEntity {
 public:
     // Constructor/Deconstructor.
-    Light(Entity* svEntity);
-    virtual ~Light();
+    WorldSpawn(Entity* svEntity);
+    virtual ~WorldSpawn();
 
     //
     // Interface functions. 
@@ -29,10 +29,10 @@ public:
     //
     // Callback functions.
     //
-    void LightUse(SVGBaseEntity* other, SVGBaseEntity* activator);
+    void WorldSpawnThink(void);
 
 private:
 
 };
 
-#endif // __SVGAME_ENTITIES_MISC_PLAYERCLIENT_H__
+#endif // __SVGAME_ENTITIES_WORLDSPAWN_H__

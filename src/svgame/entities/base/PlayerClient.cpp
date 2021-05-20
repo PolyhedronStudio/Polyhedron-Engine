@@ -27,19 +27,18 @@ PlayerClient::~PlayerClient() {
 
 // Interface functions. 
 void PlayerClient::Precache() {
-    gi.DPrintf("MiscExplosionBox::Precache();");
+
 }
 void PlayerClient::Spawn() {
     // Set the die function.
     SetDieCallback(&PlayerClient::PlayerClientDie);
-
-    gi.DPrintf("MiscExplosionBox::Spawn();");
+    gi.DPrintf("PlayerClient::Spawn();");
 }
 void PlayerClient::PostSpawn() {
-    gi.DPrintf("MiscExplosionBox::PostSpawn();");
+
 }
 void PlayerClient::Think() {
-    gi.DPrintf("MiscExplosionBox::Think();");
+
 }
 
 void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {

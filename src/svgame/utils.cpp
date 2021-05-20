@@ -146,8 +146,17 @@ void UTIL_UseTargets(Entity *ent, Entity *activator)
             if (t == ent) {
                 gi.DPrintf("WARNING: Entity used itself.\n");
             } else {
-                if (t->Use)
-                    t->Use(t, ent, activator);
+                SVGBaseEntity* classEntity = t->classEntity;
+
+                // Only continue if there is a classentity.
+                if (classEntity) {
+                    // Check for the other entities to have a classentity too.
+                    if (ent->classEntity && activator->classEntity) {
+                        ent->classEntity->Use(ent->classEntity, activator->classEntity);
+                    }
+                }
+                //if (t->Use)
+                //    t->Use(t, ent, activator);
             }
             if (!ent->inUse) {
                 gi.DPrintf("entity was removed while using targets\n");

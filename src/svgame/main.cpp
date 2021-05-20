@@ -723,9 +723,31 @@ Entity* SVG_GetWorldEntity() {
 //===============
 // SVG_PrecacheModel
 //
-// Precaches the model and returns the model index.
+// Precaches the model and returns the model index qhandle_t.
 //===============
 //
 qhandle_t SVG_PrecacheModel(const std::string &filename) {
     return gi.ModelIndex(filename.c_str());
+}
+
+//
+//===============
+// SVG_PrecacheImage
+//
+// Precaches the image and returns the image index qhandle_t.
+//===============
+//
+qhandle_t SVG_PrecacheImage(const std::string& filename) {
+    return gi.ImageIndex(filename.c_str());
+}
+
+//
+//===============
+// SVG_PrecacheSound
+//
+// Precaches the sound and returns the sound index qhandle_t.
+//===============
+//
+qhandle_t SVG_PrecacheSound(const std::string& filename) {
+    return gi.SoundIndex(filename.c_str());
 }

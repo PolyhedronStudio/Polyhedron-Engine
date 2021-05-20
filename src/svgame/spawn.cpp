@@ -106,7 +106,7 @@ static const spawn_func_t spawn_funcs[] = {
     //{"item_health_large", SP_item_health_large},
     //{"item_health_mega", SP_item_health_mega},
 
-    {"info_player_start", SP_info_player_start},
+    {"info_player_start", NULL},
     //{"info_player_deathmatch", SP_info_player_deathmatch},
     //{"info_player_coop", SP_info_player_coop},
     //{"info_player_intermission", SP_info_player_intermission},
@@ -152,9 +152,9 @@ static const spawn_func_t spawn_funcs[] = {
     //{"target_lightramp", SP_target_lightramp},
     //{"target_earthquake", SP_target_earthquake},
 
-    {"worldspawn", SP_worldspawn},
+    {"worldspawn", NULL},
 
-    {"light", SP_light},
+    {"light", NULL},
     //{"info_null", SP_info_null},
     //{"func_group", SP_info_null},
     //{"info_notnull", SP_info_notnull},
@@ -165,7 +165,7 @@ static const spawn_func_t spawn_funcs[] = {
 
     //{"misc_teleporter", SP_misc_teleporter},
     //{"misc_teleporter_dest", SP_misc_teleporter_dest},
-    {"misc_explobox", SP_misc_explobox},
+    {"misc_explobox", NULL},
 
     {NULL, NULL}
 };
@@ -238,17 +238,24 @@ static const spawn_field_t temp_fields[] = {
 #include "entities/base/PlayerClient.h"
 #include "entities/info/InfoPlayerStart.h"
 #include "entities/misc/MiscExplosionBox.h"
+#include "entities/Worldspawn.h"
 #include "entities/Light.h"
 
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
+    SVGBaseEntity* spawnEntity = NULL;
+
     if (className == "misc_explobox")
-        return new MiscExplosionBox(ent);
+        spawnEntity = new MiscExplosionBox(ent);
     else if (className == "info_player_start")
-        return new InfoPlayerStart(ent);
+        spawnEntity = new InfoPlayerStart(ent);
     else if (className == "light")
-        return new Light(ent);
+        spawnEntity = new Light(ent);
+    else if (className == "worldspawn")
+        spawnEntity = new WorldSpawn(ent);
     else
-        return new SVGBaseEntity(ent);
+        spawnEntity = new SVGBaseEntity(ent);
+
+    return spawnEntity;
 }
 
 /*
@@ -288,9 +295,6 @@ void ED_CallSpawn(Entity *ent)
     // check normal spawn functions
     for (s = spawn_funcs ; s->name ; s++) {
         if (!strcmp(s->name, ent->className)) {
-            // found it
-            s->spawn(ent);
-
             // Spawn the according server game entity class.
             ent->classEntity = SVG_SpawnClassEntity(ent, ent->className);
             
@@ -643,343 +647,3 @@ ifbit <stat> <value>
 endif
 
 #endif
-
-static const char single_statusbar[] =
-"yb -24 "
-
-// health
-"xv 0 "
-"hnum "
-"xv 50 "
-"pic 0 "
-
-// ammo
-"if 2 "
-"   xv  100 "
-"   anum "
-"   xv  150 "
-"   pic 2 "
-"endif "
-
-// armor
-"if 4 "
-"   xv  200 "
-"   rnum "
-"   xv  250 "
-"   pic 4 "
-"endif "
-
-// selected item
-"if 6 "
-"   xv  296 "
-"   pic 6 "
-"endif "
-
-"yb -50 "
-
-// picked up item
-"if 7 "
-"   xv  0 "
-"   pic 7 "
-"   xv  26 "
-"   yb  -42 "
-"   stat_string 8 "
-"   yb  -50 "
-"endif "
-
-// timer
-"if 9 "
-"   xv  262 "
-"   num 2   10 "
-"   xv  296 "
-"   pic 9 "
-"endif "
-
-//  help / weapon icon
-"if 11 "
-"   xv  148 "
-"   pic 11 "
-"endif "
-;
-
-static const char dm_statusbar[] =
-"yb -24 "
-
-// health
-"xv 0 "
-"hnum "
-"xv 50 "
-"pic 0 "
-
-// ammo
-"if 2 "
-"   xv  100 "
-"   anum "
-"   xv  150 "
-"   pic 2 "
-"endif "
-
-// armor
-"if 4 "
-"   xv  200 "
-"   rnum "
-"   xv  250 "
-"   pic 4 "
-"endif "
-
-// selected item
-"if 6 "
-"   xv  296 "
-"   pic 6 "
-"endif "
-
-"yb -50 "
-
-// picked up item
-"if 7 "
-"   xv  0 "
-"   pic 7 "
-"   xv  26 "
-"   yb  -42 "
-"   stat_string 8 "
-"   yb  -50 "
-"endif "
-
-// timer
-"if 9 "
-"   xv  246 "
-"   num 2   10 "
-"   xv  296 "
-"   pic 9 "
-"endif "
-
-//  help / weapon icon
-"if 11 "
-"   xv  148 "
-"   pic 11 "
-"endif "
-
-//  frags
-"xr -50 "
-"yt 2 "
-"num 3 14 "
-
-// isSpectator
-"if 17 "
-"xv 0 "
-"yb -58 "
-"string2 \"SPECTATOR MODE\" "
-"endif "
-
-// chase camera
-"if 16 "
-"xv 0 "
-"yb -68 "
-"string \"Chasing\" "
-"xv 64 "
-"stat_string 16 "
-"endif "
-;
-
-
-/*QUAKED worldspawn (0 0 0) ?
-
-Only used for the world.
-"sky"   environment map name
-"skyaxis"   vector axis for rotating sky
-"skyrotate" speed of rotation in degrees/second
-"sounds"    music cd track number
-"gravity"   800 is default gravity
-"message"   text to print at user logon
-*/
-void SP_worldspawn(Entity *ent)
-{
-    ent->moveType = MoveType::Push;
-    ent->solid = Solid::BSP;
-    ent->inUse = true;          // since the world doesn't use SVG_Spawn()
-    ent->state.modelIndex = 1;      // world model is always index 1
-
-    //---------------
-
-    // reserve some spots for dead player bodies for coop / deathmatch
-    level.bodyQue = 0;
-    for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
-        Entity* ent = SVG_Spawn();
-        ent->className = "bodyque";
-    }
-
-    // set configstrings for items
-    SVG_SetItemNames();
-
-    if (st.nextMap)
-        strcpy(level.nextMap, st.nextMap);
-
-    // make some data visible to the server
-
-    if (ent->message && ent->message[0]) {
-        gi.configstring(ConfigStrings::Name, ent->message);
-        strncpy(level.levelName, ent->message, sizeof(level.levelName));
-    } else
-        strncpy(level.levelName, level.mapName, sizeof(level.levelName));
-
-    if (st.sky && st.sky[0])
-        gi.configstring(ConfigStrings::Sky, st.sky);
-    else
-        gi.configstring(ConfigStrings::Sky, "unit1_");
-
-    gi.configstring(ConfigStrings::SkyRotate, va("%f", st.skyrotate));
-
-    gi.configstring(ConfigStrings::SkyAxis, va("%f %f %f",
-                                   st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]));
-
-    gi.configstring(ConfigStrings::CdTrack, va("%i", ent->sounds));
-
-    gi.configstring(ConfigStrings::MaxClients, va("%i", (int)(maxClients->value)));
-
-    // status bar program
-    if (deathmatch->value)
-        gi.configstring(ConfigStrings::StatusBar, dm_statusbar);
-    else
-        gi.configstring(ConfigStrings::StatusBar, single_statusbar);
-
-    //---------------
-
-
-    // help icon for statusbar
-    gi.ImageIndex("i_help");
-    level.pic_health = gi.ImageIndex("i_health");
-    gi.ImageIndex("help");
-    gi.ImageIndex("field_3");
-
-    if (!st.gravity)
-        gi.cvar_set("sv_gravity", "750");
-    else
-        gi.cvar_set("sv_gravity", st.gravity);
-
-    snd_fry = gi.SoundIndex("player/fry.wav");  // standing in lava / slime
-
-    SVG_PrecacheItem(SVG_FindItemByPickupName("Blaster"));
-
-    gi.SoundIndex("player/lava1.wav");
-    gi.SoundIndex("player/lava2.wav");
-
-    gi.SoundIndex("misc/pc_up.wav");
-    gi.SoundIndex("misc/talk1.wav");
-
-    gi.SoundIndex("misc/udeath.wav");
-
-    // gibs
-    gi.SoundIndex("items/respawn1.wav");
-
-    // sexed sounds
-    gi.SoundIndex("*death1.wav");
-    gi.SoundIndex("*death2.wav");
-    gi.SoundIndex("*death3.wav");
-    gi.SoundIndex("*death4.wav");
-    gi.SoundIndex("*fall1.wav");
-    gi.SoundIndex("*fall2.wav");
-    gi.SoundIndex("*gurp1.wav");        // drowning damage
-    gi.SoundIndex("*gurp2.wav");
-    gi.SoundIndex("*jump1.wav");        // player jump
-    gi.SoundIndex("*pain25_1.wav");
-    gi.SoundIndex("*pain25_2.wav");
-    gi.SoundIndex("*pain50_1.wav");
-    gi.SoundIndex("*pain50_2.wav");
-    gi.SoundIndex("*pain75_1.wav");
-    gi.SoundIndex("*pain75_2.wav");
-    gi.SoundIndex("*pain100_1.wav");
-    gi.SoundIndex("*pain100_2.wav");
-
-    // sexed models
-    // THIS ORDER MUST MATCH THE DEFINES IN g_local.h
-    // you can add more, max 15
-    gi.ModelIndex("#w_blaster.md2");
-    gi.ModelIndex("#w_shotgun.md2");
-    gi.ModelIndex("#w_sshotgun.md2");
-    gi.ModelIndex("#w_machinegun.md2");
-    gi.ModelIndex("#w_chaingun.md2");
-    gi.ModelIndex("#a_grenades.md2");
-    gi.ModelIndex("#w_glauncher.md2");
-    gi.ModelIndex("#w_rlauncher.md2");
-    gi.ModelIndex("#w_hyperblaster.md2");
-    gi.ModelIndex("#w_railgun.md2");
-    gi.ModelIndex("#w_bfg.md2");
-
-    //-------------------
-
-    gi.SoundIndex("player/gasp1.wav");      // gasping for air
-    gi.SoundIndex("player/gasp2.wav");      // head breaking surface, not gasping
-
-    gi.SoundIndex("player/watr_in.wav");    // feet hitting water
-    gi.SoundIndex("player/watr_out.wav");   // feet leaving water
-
-    gi.SoundIndex("player/watr_un.wav");    // head going underwater
-
-    gi.SoundIndex("player/u_breath1.wav");
-    gi.SoundIndex("player/u_breath2.wav");
-
-    gi.SoundIndex("items/pkup.wav");        // bonus item pickup
-    gi.SoundIndex("world/land.wav");        // landing thud
-    gi.SoundIndex("misc/h2ohit1.wav");      // landing splash
-
-    gi.SoundIndex("items/damage.wav");
-    gi.SoundIndex("items/protect.wav");
-    gi.SoundIndex("items/protect4.wav");
-    gi.SoundIndex("weapons/noammo.wav");
-
-    gi.SoundIndex("infantry/inflies1.wav");
-
-    sm_meat_index = gi.ModelIndex("models/objects/gibs/sm_meat/tris.md2");
-    gi.ModelIndex("models/objects/gibs/arm/tris.md2");
-    gi.ModelIndex("models/objects/gibs/bone/tris.md2");
-    gi.ModelIndex("models/objects/gibs/bone2/tris.md2");
-    gi.ModelIndex("models/objects/gibs/chest/tris.md2");
-    gi.ModelIndex("models/objects/gibs/skull/tris.md2");
-    gi.ModelIndex("models/objects/gibs/head2/tris.md2");
-
-//
-// Setup light animation tables. 'a' is total darkness, 'z' is doublebright.
-//
-
-    // 0 normal
-    gi.configstring(ConfigStrings::Lights+ 0, "m");
-
-    // 1 FLICKER (first variety)
-    gi.configstring(ConfigStrings::Lights+ 1, "mmnmmommommnonmmonqnmmo");
-
-    // 2 SLOW STRONG PULSE
-    gi.configstring(ConfigStrings::Lights+ 2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
-
-    // 3 CANDLE (first variety)
-    gi.configstring(ConfigStrings::Lights+ 3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
-
-    // 4 FAST STROBE
-    gi.configstring(ConfigStrings::Lights+ 4, "mamamamamama");
-
-    // 5 GENTLE PULSE 1
-    gi.configstring(ConfigStrings::Lights+ 5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
-
-    // 6 FLICKER (second variety)
-    gi.configstring(ConfigStrings::Lights+ 6, "nmonqnmomnmomomno");
-
-    // 7 CANDLE (second variety)
-    gi.configstring(ConfigStrings::Lights+ 7, "mmmaaaabcdefgmmmmaaaammmaamm");
-
-    // 8 CANDLE (third variety)
-    gi.configstring(ConfigStrings::Lights+ 8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
-
-    // 9 SLOW STROBE (fourth variety)
-    gi.configstring(ConfigStrings::Lights+ 9, "aaaaaaaazzzzzzzz");
-
-    // 10 FLUORESCENT FLICKER
-    gi.configstring(ConfigStrings::Lights+ 10, "mmamammmmammamamaaamammma");
-
-    // 11 SLOW PULSE NOT FADE TO BLACK
-    gi.configstring(ConfigStrings::Lights+ 11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
-
-    // styles 32-62 are assigned by the light program for switchable lights
-
-    // 63 testing
-    gi.configstring(ConfigStrings::Lights+ 63, "a");
-}
-

@@ -716,7 +716,10 @@ void    SVG_InitEntity(Entity* e);
 Entity* SVG_Spawn(void);
 void    SVG_FreeEntity(Entity* e);
 
+// TODO: Move to precache.cpp and precache.h eh?
 qhandle_t SVG_PrecacheModel(const std::string& filename);
+qhandle_t SVG_PrecacheImage(const std::string& filename);
+qhandle_t SVG_PrecacheSound(const std::string& filename);
 
 //
 // g_chase.c

@@ -127,6 +127,7 @@ SET(SRC_SVGAME
 	svgame/entities/trigger/trigger_relay.cpp
 	
 	svgame/entities/Light.cpp
+	svgame/entities/WorldSpawn.cpp
 
 	#svgame/oldmonsters/movement.cpp
 	#svgame/oldmonsters/soldier.cpp
@@ -166,6 +167,7 @@ SET(HEADERS_SVGAME
 	svgame/entities/misc/MiscExplosionBox.h
 
 	svgame/entities/Light.h
+	svgame/entities/WorldSpawn.h
 
 	#svgame/oldmonsters/soldier.h
 
