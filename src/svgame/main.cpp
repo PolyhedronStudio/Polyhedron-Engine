@@ -479,7 +479,7 @@ Advances the world by 0.1 seconds
 void SVG_RunFrame(void)
 {
     int     i;
-    Entity *ent;
+    SVGBaseEntity *ent;
 
     // We're moving the game a frame forward.
     level.frameNumber++;
@@ -497,19 +497,28 @@ void SVG_RunFrame(void)
     // Treat each object in turn
     // even the world gets a chance to Think
     //
-    ent = &g_entities[0];
-    for (i = 0 ; i < globals.numberOfEntities ; i++, ent++) {
-        if (!ent->inUse)
+    ent = g_baseEntities[0];
+    for (i = 0 ; i < globals.numberOfEntities ; i++, ent = g_baseEntities[i]) {
+        // Need to be working with a valid base entity.
+        if (!ent)
+            continue;
+
+        if (!ent->GetServerEntity())
+            continue;
+
+        // Is it in use? If not, continue.
+        if (!ent->GetInUse())
             continue;
 
         // Let the level data know which entity we are processing right now.
-        level.currentEntity = ent;
+        level.currentEntity = ent->GetServerEntity();
 
-        ent->state.oldOrigin = ent->state.origin;
+        // Backup origin as its Old Origin.
+        ent->SetOldOrigin(ent->GetOrigin());
 
         // if the ground entity moved, make sure we are still on it
-        if ((ent->groundEntityPtr) && (ent->groundEntityPtr->linkCount != ent->groundEntityLinkCount)) {
-            ent->groundEntityPtr = NULL;
+        if ((ent->GetServerEntity()->groundEntityPtr) && (ent->GetServerEntity()->groundEntityPtr->linkCount != ent->GetServerEntity()->groundEntityLinkCount)) {
+            ent->GetServerEntity()->groundEntityPtr = NULL;
             //if (!(ent->flags & (EntityFlags::Swim | EntityFlags::Fly)) && (ent->serverFlags & EntityServerFlags::Monster)) {
             //    M_CheckGround(ent);
             //}
@@ -517,12 +526,12 @@ void SVG_RunFrame(void)
 
         // Time to begin a server frame for all of our clients. (This has to ha
         if (i > 0 && i <= maxClients->value) {
-            SVG_ClientBeginServerFrame(ent);
+            SVG_ClientBeginServerFrame(ent->GetServerEntity());
             continue;
         }
 
         // Last but not least, "run" process the entity.
-        SVG_RunEntity(ent->classEntity);
+        SVG_RunEntity(ent);
     }
 
     // See if it is time to end a deathmatch
@@ -711,6 +720,7 @@ Marks the edict as free
 */
 void SVG_FreeEntity(Entity* ed)
 {
+    // First of all, unlink the entity from this world.
     gi.UnlinkEntity(ed);        // unlink from world
 
     if ((ed - g_entities) <= (maxClients->value + BODY_QUEUE_SIZE)) {
@@ -722,7 +732,7 @@ void SVG_FreeEntity(Entity* ed)
     if (ed->state.number) {
         if (g_baseEntities[ed->state.number]) {
             delete g_baseEntities[ed->state.number];
-            ed->classEntity = NULL;
+            ed->classEntity = g_baseEntities[ed->state.number] = NULL;
         }
     }
 

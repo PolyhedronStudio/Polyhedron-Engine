@@ -61,9 +61,9 @@ public:
         return serverEntity->absMax;
     }
     
-    // Return the 'activatorPtr' entity pointer.
+    // Return the 'activatorEntity' entity pointer.
     SVGBaseEntity* GetActivator() {
-        return activatorPtr;
+        return activatorEntity;
     }
 
     // Return the 'angles' value.
@@ -93,12 +93,12 @@ public:
 
     // Return the 'enemyPtr' entity pointer.
     SVGBaseEntity* GetEnemy() {
-        return enemyPtr;
+        return enemyEntity;
     }
 
     // Return the 'oldEnemyPtr' entity pointer.
     SVGBaseEntity* GetOldEnemy() {
-        return oldEnemyPtr;
+        return oldEnemyEntity;
     }
 
     // Return the 'flags' value.
@@ -113,6 +113,9 @@ public:
 
     // Get the 'inuse' value.
     inline qboolean GetInUse() {
+        if (!serverEntity)
+            return false;
+
         return serverEntity->inUse;
     }
 
@@ -144,6 +147,11 @@ public:
     // Return the 'nextThinkTime' value.
     inline const int32_t GetNextThinkTime() {
         return serverEntity->nextThinkTime;
+    }
+
+    // Return the 'oldOrigin' value.
+    inline const vec3_t& GetOldOrigin() {
+        return serverEntity->state.oldOrigin;
     }
 
     // Return the 'origin' value.
@@ -181,6 +189,21 @@ public:
         return serverEntity->takeDamage;
     }
 
+    // Set the 'team' entity value.
+    inline char* GetTeam() {
+        return serverEntity->team;
+    }
+
+    // Set the 'teamChain' entity value.
+    inline SVGBaseEntity* GetTeamChainEntity() {
+        return teamChainEntity;
+    }
+
+    // Set the 'teamMaster' entity value.
+    inline SVGBaseEntity *GetTeamMasterEntity() {
+        return teamMasterEntity;
+    }
+
     // Return the 'velocity' value.
     inline const vec3_t& GetVelocity() {
         return serverEntity->velocity;
@@ -190,9 +213,9 @@ public:
     //
     // Entity Set Functions.
     //
-    // Set the 'activatorPtr' pointer.
+    // Set the 'activatorEntity' pointer.
     inline void SetActivator(SVGBaseEntity* activator) {
-        this->activatorPtr = activator;
+        this->activatorEntity = activator;
     }
     
     // Return the 'angles' value.
@@ -202,7 +225,7 @@ public:
 
     // Set the 'angularVelocity' value.
     inline void SetAngularVelocity(const vec3_t& angularVelocity) {
-        serverEntity->angularVelocity = angularVelocity;
+        this->angularVelocity = angularVelocity;
     }
 
     // Set the 'mins', and 'maxs' values of the entity bounding box.
@@ -223,12 +246,12 @@ public:
 
     // Set the 'enemyPtr' pointer.
     inline void SetEnemy(SVGBaseEntity* enemy) {
-        this->enemyPtr = enemy;
+        this->enemyEntity = enemy;
     }
 
     // Set the 'oldEnemyPtr' pointer.
     inline void SetOldEnemy(SVGBaseEntity* oldEnemy) {
-        this->oldEnemyPtr = oldEnemy;
+        this->oldEnemyEntity = oldEnemy;
     }
 
     // Set the 'flags' value.
@@ -285,6 +308,11 @@ public:
     }
 
     // Set the 'origin' value.
+    inline void SetOldOrigin(const vec3_t& oldOrigin) {
+        serverEntity->state.oldOrigin = oldOrigin;
+    }
+
+    // Set the 'origin' value.
     inline void SetOrigin(const vec3_t& origin) {
         serverEntity->state.origin = origin;
     }
@@ -314,6 +342,16 @@ public:
         serverEntity->takeDamage = takeDamage;
     }
 
+    // Set the 'teamChain' entity value.
+    inline void SetTeamChainEntity(SVGBaseEntity* entity) {
+        teamChainEntity = entity;
+    }
+
+    // Set the 'teamMaster' entity value.
+    inline void SetTeamMasterEntity(SVGBaseEntity* entity) {
+        teamMasterEntity = entity;
+    }
+
     // Set the 'velocity' value.
     inline void SetVelocity(const vec3_t &velocity) {
         serverEntity->velocity = velocity;
@@ -333,7 +371,9 @@ public:
 
 
 private:
+    //
     // The actual entity this class is a member of.
+    //
     Entity *serverEntity;
 
     //
@@ -342,14 +382,23 @@ private:
     // Move Type. (MoveType:: ... )
     int32_t moveType;
 
-    // Current active enemy, NULL if not any.    
-    SVGBaseEntity *enemyPtr;
+    // Velocity.
+    vec3_t velocity;
 
+    // Angular Velocity.
+    vec3_t angularVelocity;
+
+    // Current active enemy, NULL if not any.    
+    SVGBaseEntity *enemyEntity;
     // Old enemy, NULL if not any.
-    SVGBaseEntity *oldEnemyPtr;
+    SVGBaseEntity *oldEnemyEntity;
 
     // Entity that activated this entity, NULL if none.
-    SVGBaseEntity *activatorPtr;
+    SVGBaseEntity *activatorEntity;
+
+    // Team Chain Pointer, and Master Pointer.
+    SVGBaseEntity* teamChainEntity;
+    SVGBaseEntity* teamMasterEntity;
 
 public:
     //

@@ -571,6 +571,9 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
     vec3_t      move, amove;
     SVGBaseEntity     *part, *mv;
 
+    if (ent->GetServerEntity()->state.number == 0)
+        return;
+
     // if not a team captain, so movement will be handled elsewhere
     if (ent->GetFlags() & EntityFlags::TeamSlave)
         return;
@@ -580,13 +583,22 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
     // if the move is Blocked, all moved objects will be backed out
 //retry:
     pushed_p = pushed;
-    for (part = ent ; part ; part = part->GetServerEntity()->teamChainPtr->classEntity) {
-        if (part->GetServerEntity()->velocity[0] || part->GetServerEntity()->velocity[1] || part->GetServerEntity()->velocity[2] ||
-            part->GetServerEntity()->angularVelocity[0] || part->GetServerEntity()->angularVelocity[1] || part->GetServerEntity()->angularVelocity[2]
+    for (part = ent ; part ; part = part->GetTeamChainEntity()) {
+        if (!part)
+            break;
+
+        // Fetch pusher part, its Velocity.
+        vec3_t partVelocity = part->GetVelocity();
+
+        // Fetch pusher part, its Angular Velocity.
+        vec3_t partAngularVelocity = part->GetAngularVelocity();
+
+        if (partVelocity.x || partVelocity.y || partVelocity.z ||
+            partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z
            ) {
             // object is moving
             VectorScale(part->GetVelocity(), FRAMETIME, move);
-            VectorScale(part->GetServerEntity()->angularVelocity, FRAMETIME, amove);
+            VectorScale(part->GetAngularVelocity(), FRAMETIME, amove);
 
             if (!SV_Push(part, move, amove))
                 break;  // move was Blocked
@@ -597,7 +609,7 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
 
     if (part) {
         // the move failed, bump all nextThinkTime times and back out moves
-        for (mv = ent ; mv ; mv = mv->GetServerEntity()->teamChainPtr->classEntity) {
+        for (mv = ent ; mv ; mv = mv->GetTeamChainEntity()) {
             if (mv->GetNextThinkTime() > 0)
                 mv->SetNextThinkTime(mv->GetNextThinkTime() + FRAMETIME);
         }
@@ -617,7 +629,7 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
 #endif
     } else {
         // the move succeeded, so call all Think functions
-        for (part = ent ; part ; part = part->GetServerEntity()->teamChainPtr->classEntity) {
+        for (part = ent ; part ; part = part->GetTeamChainEntity()) {
             SV_RunThink(part);
         }
     }
@@ -679,7 +691,7 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
     SVGTrace     trace;
     vec3_t      move;
     float       backoff;
-    Entity     *slave;
+    SVGBaseEntity     *slave;
     qboolean    wasInWater;
     qboolean    isInWater;
     vec3_t      oldOrigin;
@@ -764,10 +776,10 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
         gi.PositionedSound(ent->GetOrigin(), g_entities, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 
     // Move teamslaves
-    for (slave = ent->GetServerEntity()->teamChainPtr; slave; slave = slave->teamChainPtr) {
+    for (slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {
         // Set origin and link them in.
-        slave->state.origin = ent->GetOrigin();
-        gi.LinkEntity(slave);
+        slave->SetOrigin(ent->GetOrigin());
+        slave->LinkEntity();
     }
 }
 

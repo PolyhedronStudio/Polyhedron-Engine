@@ -460,36 +460,48 @@ All but the last will have the teamchain field set to the next one
 */
 void SVG_FindTeams(void)
 {
-    Entity *e, *e2, *chain;
+    Entity* e, * e2;
+    SVGBaseEntity *chain;
     int     i, j;
     int     c, c2;
 
     c = 0;
     c2 = 0;
-    for (i = 1, e = g_entities + i ; i < globals.numberOfEntities ; i++, e++) {
-        if (!e->inUse)
+    for (i = 1, e = g_entities + i; i < globals.numberOfEntities; i++, e++) {
+        // Fetch class entity.
+        SVGBaseEntity *classEntity = g_baseEntities[e->state.number];
+
+        if (classEntity == NULL)
             continue;
-        if (!e->team)
+        if (!classEntity->GetInUse())
             continue;
-        if (e->flags & EntityFlags::TeamSlave)
+        if (!classEntity->GetTeam())
             continue;
-        chain = e;
-        e->teamMasterPtr = e;
+        if (classEntity->GetFlags() & EntityFlags::TeamSlave)
+            continue;
+        chain = classEntity;
+        classEntity->SetTeamMasterEntity(classEntity);
         c++;
         c2++;
         for (j = i + 1, e2 = e + 1 ; j < globals.numberOfEntities ; j++, e2++) {
-            if (!e2->inUse)
+            // Fetch class entity.
+            SVGBaseEntity* classEntity2 = g_baseEntities[e->state.number];
+
+            if (classEntity2 == NULL)
                 continue;
-            if (!e2->team)
+
+            if (!classEntity2->GetInUse())
                 continue;
-            if (e2->flags & EntityFlags::TeamSlave)
+            if (!classEntity2->GetTeam())
                 continue;
-            if (!strcmp(e->team, e2->team)) {
+            if (classEntity2->GetFlags() & EntityFlags::TeamSlave)
+                continue;
+            if (!strcmp(classEntity->GetTeam(), classEntity2->GetTeam())) {
                 c2++;
-                chain->teamChainPtr = e2;
-                e2->teamMasterPtr = e;
-                chain = e2;
-                e2->flags |= EntityFlags::TeamSlave;
+                chain->SetTeamChainEntity(classEntity2);
+                classEntity2->SetTeamMasterEntity(classEntity);
+                chain = classEntity2;
+                classEntity2->SetFlags(classEntity2->GetFlags() | EntityFlags::TeamSlave);
             }
         }
     }
@@ -535,8 +547,9 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     // Clear out entities.
     for (int32_t i = 0; i < game.maxEntities; i++) {
         // Delete class entities, if any.
-        if (g_entities[i].classEntity) {
-            delete g_entities[i].classEntity;
+        if (g_baseEntities[i]) {
+            delete g_baseEntities[i];
+            g_baseEntities[i] = NULL;
         }
 
         g_entities[i] = {};

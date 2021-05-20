@@ -27,18 +27,21 @@ PlayerClient::~PlayerClient() {
 
 // Interface functions. 
 void PlayerClient::Precache() {
-
+    SVGBaseEntity::Precache();
 }
 void PlayerClient::Spawn() {
+    // Spawn.
+    SVGBaseEntity::Spawn();
+
     // Set the die function.
     SetDieCallback(&PlayerClient::PlayerClientDie);
     gi.DPrintf("PlayerClient::Spawn();");
 }
 void PlayerClient::PostSpawn() {
-
+    SVGBaseEntity::PostSpawn();
 }
 void PlayerClient::Think() {
-
+    SVGBaseEntity::Think();
 }
 
 void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {

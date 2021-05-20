@@ -22,13 +22,15 @@ InfoPlayerStart::~InfoPlayerStart() {
 
 // Interface functions. 
 void InfoPlayerStart::Precache() {
+    SVGBaseEntity::Precache();
 }
 
 void InfoPlayerStart::Spawn() {
-
+    SVGBaseEntity::Spawn();
 }
 
 void InfoPlayerStart::PostSpawn() {
+    SVGBaseEntity::PostSpawn();
 }
 
 void InfoPlayerStart::Think() {

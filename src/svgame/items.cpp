@@ -100,31 +100,31 @@ gitem_t *SVG_FindItemByPickupName(const char *pickup_name) // C++20: STRING: Add
 
 void DoRespawn(Entity *ent)
 {
-    if (!ent)
-        return;
+    //if (!ent)
+    //    return;
 
-    if (ent->team) {
-        Entity *master;
-        int count;
-        int choice;
+    //if (ent->team) {
+    //    Entity *master;
+    //    int count;
+    //    int choice;
 
-        master = ent->teamMasterPtr;
+    //    master = ent->teamMasterPtr;
 
-        for (count = 0, ent = master; ent; ent = ent->chain, count++)
-            ;
+    //    for (count = 0, ent = master; ent; ent = ent->chain, count++)
+    //        ;
 
-        choice = rand() % count;
+    //    choice = rand() % count;
 
-        for (count = 0, ent = master; count < choice; ent = ent->chain, count++)
-            ;
-    }
+    //    for (count = 0, ent = master; count < choice; ent = ent->chain, count++)
+    //        ;
+    //}
 
-    ent->serverFlags &= ~EntityServerFlags::NoClient;
-    ent->solid = Solid::Trigger;
-    gi.LinkEntity(ent);
+    //ent->serverFlags &= ~EntityServerFlags::NoClient;
+    //ent->solid = Solid::Trigger;
+    //gi.LinkEntity(ent);
 
-    // send an effect
-    ent->state.event = EntityEvent::ItemRespawn;
+    //// send an effect
+    //ent->state.event = EntityEvent::ItemRespawn;
 }
 
 void SVG_SetRespawn(Entity *ent, float delay)

@@ -157,8 +157,8 @@ static const save_field_t entityfields[] = {
     //E(activator),
     E(groundEntityPtr),
     I(groundEntityLinkCount),
-    E(teamChainPtr),
-    E(teamMasterPtr),
+    //E(teamChainPtr),
+    //E(teamMasterPtr),
 
     E(myNoisePtr),
     E(myNoise2Ptr),

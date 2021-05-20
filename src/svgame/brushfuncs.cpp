@@ -98,26 +98,26 @@ void Think_AccelMove(Entity* ent);
 
 void Brush_Move_Calc(Entity* ent, const vec3_t &dest, void(*func)(Entity*))
 {
-    VectorClear(ent->velocity);
-    VectorSubtract(dest, ent->state.origin, ent->moveInfo.dir);
-    ent->moveInfo.remainingDistance = VectorNormalize(ent->moveInfo.dir);
-    ent->moveInfo.OnEndFunction = func;
+    //VectorClear(ent->velocity);
+    //VectorSubtract(dest, ent->state.origin, ent->moveInfo.dir);
+    //ent->moveInfo.remainingDistance = VectorNormalize(ent->moveInfo.dir);
+    //ent->moveInfo.OnEndFunction = func;
 
-    if (ent->moveInfo.speed == ent->moveInfo.acceleration && ent->moveInfo.speed == ent->moveInfo.deceleration) {
-        if (level.currentEntity == ((ent->flags & EntityFlags::TeamSlave) ? ent->teamMasterPtr : ent)) {
-            Brush_Move_Begin(ent);
-        }
-        else {
-            ent->nextThinkTime = level.time + FRAMETIME;
-            //ent->Think = Brush_Move_Begin;
-        }
-    }
-    else {
-        // accelerative
-        ent->moveInfo.currentSpeed = 0;
-        //ent->Think = Think_AccelMove;
-        ent->nextThinkTime = level.time + FRAMETIME;
-    }
+    //if (ent->moveInfo.speed == ent->moveInfo.acceleration && ent->moveInfo.speed == ent->moveInfo.deceleration) {
+    //    if (level.currentEntity == ((ent->flags & EntityFlags::TeamSlave) ? ent->teamMasterPtr : ent)) {
+    //        Brush_Move_Begin(ent);
+    //    }
+    //    else {
+    //        ent->nextThinkTime = level.time + FRAMETIME;
+    //        //ent->Think = Brush_Move_Begin;
+    //    }
+    //}
+    //else {
+    //    // accelerative
+    //    ent->moveInfo.currentSpeed = 0;
+    //    //ent->Think = Think_AccelMove;
+    //    ent->nextThinkTime = level.time + FRAMETIME;
+    //}
 }
 
 
@@ -187,15 +187,15 @@ void Brush_AngleMove_Begin(Entity* ent)
 
 void Brush_AngleMove_Calc(Entity* ent, void(*func)(Entity*))
 {
-    VectorClear(ent->angularVelocity);
-    ent->moveInfo.OnEndFunction = func;
-    if (level.currentEntity == ((ent->flags & EntityFlags::TeamSlave) ? ent->teamMasterPtr : ent)) {
-        Brush_AngleMove_Begin(ent);
-    }
-    else {
-        ent->nextThinkTime = level.time + FRAMETIME;
-        //ent->Think = Brush_AngleMove_Begin;
-    }
+    //VectorClear(ent->angularVelocity);
+    //ent->moveInfo.OnEndFunction = func;
+    //if (level.currentEntity == ((ent->flags & EntityFlags::TeamSlave) ? ent->teamMasterPtr : ent)) {
+    //    Brush_AngleMove_Begin(ent);
+    //}
+    //else {
+    //    ent->nextThinkTime = level.time + FRAMETIME;
+    //    ent->Think = Brush_AngleMove_Begin;
+    //}
 }
 
 

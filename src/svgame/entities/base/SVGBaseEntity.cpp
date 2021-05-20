@@ -46,6 +46,9 @@ void SVGBaseEntity::Precache() {
 //
 void SVGBaseEntity::Spawn() {
 	gi.DPrintf("SVGBaseEntity::Spawn();");
+
+	// Set default movetype to none.
+	SetMoveType(MoveType::None);
 }
 
 //
