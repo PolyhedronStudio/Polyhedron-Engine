@@ -97,9 +97,9 @@ void MiscExplosionBox::Spawn() {
     SetTakeDamage(TakeDamage::Yes);
 
     // Setup our MiscExplosionBox callbacks.
-    SetThink(&MiscExplosionBox::MiscExplosionBoxThink);
-    SetDie(&MiscExplosionBox::MiscExplosionBoxDie);
-    SetTouch(&MiscExplosionBox::MiscExplosionBoxTouch);
+    SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxThink);
+    SetDieCallback(&MiscExplosionBox::MiscExplosionBoxDie);
+    SetTouchCallback(&MiscExplosionBox::MiscExplosionBoxTouch);
 
     // Setup the next think time.
     SetNextThinkTime(level.time + 2 * FRAMETIME);
@@ -142,13 +142,25 @@ void MiscExplosionBox::Think() {
 //
 void MiscExplosionBox::MiscExplosionBoxThink(void) {
     // Calculate trace end position.
-    vec3_t end = GetOrigin() + vec3_t { 0.f, 0.f, 1.f };
+    vec3_t end = GetOrigin() + vec3_t { 
+        0.f, 
+        0.f, 
+        1.f 
+    };
 
     // Set origin + 1 on the Z axis.
-    SetOrigin(GetOrigin() + vec3_t{ 0.f, 0.f, 1.f });
+    SetOrigin(GetOrigin() + vec3_t{ 
+        0.f, 
+        0.f, 
+        1.f }
+    );
     
     // Calculate the end point for tracing.
-    end = GetOrigin() + vec3_t{ 0.f, 0.f, 256.f };
+    end = GetOrigin() + vec3_t { 
+        0.f, 
+        0.f, 
+        256.f 
+    };
 
     // Execute the trace.
     trace_t trace = gi.Trace(GetOrigin(), GetMins(), GetMaxs(), end, GetServerEntity(), CONTENTS_MASK_MONSTERSOLID);
@@ -230,7 +242,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
         BecomeExplosion1(GetServerEntity());
 
     // Ensure we have no more think callback pointer set when this entity has "died"
-    SetThink(nullptr);
+    SetThinkCallback(nullptr);
 }
 
 //
@@ -252,7 +264,7 @@ void MiscExplosionBox::MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEnti
     SetNextThinkTime(level.time + 2 * FRAMETIME);
 
     // Set think function.
-    SetThink(&MiscExplosionBox::MiscExplosionBoxExplode);
+    SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxExplode);
 }
 
 //

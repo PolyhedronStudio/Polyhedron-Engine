@@ -16,18 +16,19 @@ public:
     //
     // Function pointers for actual callbacks.
     //
-    typedef void (SVGBaseEntity::* ThinkCallBackPointer)(void);
-    typedef void (SVGBaseEntity::* UseCallBackPointer)(SVGBaseEntity* activator, SVGBaseEntity* caller, float value);
-    typedef void (SVGBaseEntity::* TouchCallBackPointer)(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
-    typedef void (SVGBaseEntity::* BlockedCallBackPointer)(SVGBaseEntity* other);
-    typedef void (SVGBaseEntity::* TakeDamageCallBackPointer)(SVGBaseEntity* attacker, SVGBaseEntity* inflictor, int damageFlags, float damage);
-    typedef void (SVGBaseEntity::* DieCallBackPointer)(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+    using ThinkCallbackPointer      = void(SVGBaseEntity::*)(void);
+    using UseCallbackPointer        = void(SVGBaseEntity::*)(SVGBaseEntity* activator, SVGBaseEntity* caller, float value);
+    using TouchCallbackPointer      = void(SVGBaseEntity::*)(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+    using BlockedCallbackPointer    = void(SVGBaseEntity::*)(SVGBaseEntity* other);
+    using TakeDamageCallbackPointer = void(SVGBaseEntity::*)(SVGBaseEntity* attacker, SVGBaseEntity* inflictor, int damageFlags, float damage);
+    using DieCallbackPointer        = void(SVGBaseEntity::*)(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
 
     //
     // Constructor/Deconstructor.
     //
     SVGBaseEntity(Entity* svEntity);
     virtual ~SVGBaseEntity();
+
 
     //
     // Interface functions. 
@@ -37,16 +38,17 @@ public:
     virtual void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     virtual void Think();       // General entity thinking routine.
 
+
     //
     // Callback functions.
     //
     void Die(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
     void Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
 
+
     //
     // Entity Get Functions.
     //
-    
     // Return the bounding box absolute 'min' value.
     inline const vec3_t& GetAbsoluteMin() {
         return serverEntity->absMin;
@@ -116,6 +118,7 @@ public:
         return serverEntity->takeDamage;
     }
 
+
     //
     // Entity Set Functions.
     //
@@ -174,6 +177,7 @@ public:
         serverEntity->takeDamage = takeDamage;
     }
 
+
     //
     // General Entity Functions.
     //
@@ -196,25 +200,49 @@ public:
     //
     // Sets the 'Think' callback function.
     template<typename function>
-    inline void SetThink(function f)
+    inline void SetThinkCallback(function f)
     {
-        thinkFunction = static_cast<ThinkCallBackPointer>(f);
+        thinkFunction = static_cast<ThinkCallbackPointer>(f);
+    }
+
+    // Sets the 'Use' callback function.
+    template<typename function>
+    inline void SetUseCallback(function f)
+    {
+
+        useFunction = static_cast<UseCallbackPointer>(f);
     }
 
     // Sets the 'Touch' callback function.
     template<typename function>
-    inline void SetTouch(function f)
+    inline void SetTouchCallback(function f)
     {
 
-        touchFunction = static_cast<TouchCallBackPointer>(f);
+        touchFunction = static_cast<TouchCallbackPointer>(f);
+    }
+
+    // Sets the 'Blocked' callback function.
+    template<typename function>
+    inline void SetBlockedCallback(function f)
+    {
+
+        blockedFunction = static_cast<BlockedCallbackPointer>(f);
+    }
+
+    // Sets the 'SetTakeDamage' callback function.
+    template<typename function>
+    inline void SetTakeDamageCallback(function f)
+    {
+
+        takeDamageFunction = static_cast<TakeDamageCallbackPointer>(f);
     }
 
     // Sets the 'Die' callback function.
     template<typename function>
-    inline void SetDie(function f)
+    inline void SetDieCallback(function f)
     {
 
-        dieFunction = static_cast<DieCallBackPointer>(f);
+        dieFunction = static_cast<DieCallbackPointer>(f);
     }
 
 
@@ -222,12 +250,12 @@ protected:
     //
     // Callback function pointers.
     //
-    void						(SVGBaseEntity::* thinkFunction)(void);
-    void						(SVGBaseEntity::* useFunction)(SVGBaseEntity* activator, SVGBaseEntity* caller, float value);
-    void						(SVGBaseEntity::* touchFunction)(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
-    void						(SVGBaseEntity::* blockedFunction)(SVGBaseEntity* other);
-    void						(SVGBaseEntity::* takeDamageFunction)(SVGBaseEntity* attacker, SVGBaseEntity* inflictor, int damageFlags, float damage);
-    void						(SVGBaseEntity::* dieFunction)(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+    ThinkCallbackPointer        thinkFunction;
+    UseCallbackPointer          useFunction;
+    TouchCallbackPointer        touchFunction;
+    BlockedCallbackPointer      blockedFunction;
+    TakeDamageCallbackPointer   takeDamageFunction;
+    DieCallbackPointer          dieFunction;
 };
 
 #endif // __SVGAME_ENTITIES_BASE_CBASEENTITY_H__
