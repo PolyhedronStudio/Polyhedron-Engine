@@ -126,7 +126,7 @@ SET(SRC_SVGAME
 	svgame/entities/trigger/trigger_push.cpp
 	svgame/entities/trigger/trigger_relay.cpp
 	
-	svgame/entities/light.cpp
+	svgame/entities/Light.cpp
 
 	#svgame/oldmonsters/movement.cpp
 	#svgame/oldmonsters/soldier.cpp
@@ -164,6 +164,8 @@ SET(HEADERS_SVGAME
 	svgame/entities/func/func_door.h
 
 	svgame/entities/misc/MiscExplosionBox.h
+
+	svgame/entities/Light.h
 
 	#svgame/oldmonsters/soldier.h
 

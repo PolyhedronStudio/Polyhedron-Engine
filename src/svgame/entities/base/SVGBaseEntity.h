@@ -113,6 +113,16 @@ public:
         return serverEntity->solid;
     }
 
+    // Set the 'spawnFlags' value.
+    inline const int32_t GetSpawnFlags() {
+        return serverEntity->spawnFlags;
+    }
+
+    // Return the 'style' value.
+    inline const int32_t GetStyle() {
+        return serverEntity->style;
+    }
+
     // Return the 'takeDamage' value.
     inline const int32_t GetTakeDamage() {
         return serverEntity->takeDamage;
@@ -170,6 +180,16 @@ public:
     // Set the 'solid' value.
     inline void SetSolid(const uint32_t &solid) {
         serverEntity->solid = solid;
+    }
+
+    // Set the 'spawnFlags' value.
+    inline void SetSpawnFlags(const int32_t& spawnFlags) {
+        serverEntity->spawnFlags = spawnFlags;
+    }
+
+    // Set the 'style' value.
+    inline const uint32_t SetStyle(const int32_t &style) {
+        serverEntity->style = style;
     }
 
     // Set the 'takeDamage' value.

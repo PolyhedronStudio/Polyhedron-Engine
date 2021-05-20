@@ -84,7 +84,9 @@ void SP_target_earthquake(Entity *ent);
 
 void SP_worldspawn(Entity *ent);
 
-void SP_light(Entity *self);
+void SP_light(Entity* self) {
+
+}
 void SP_info_null(Entity *self);
 void SP_info_notnull(Entity *self);
 
@@ -236,12 +238,15 @@ static const spawn_field_t temp_fields[] = {
 #include "entities/base/PlayerClient.h"
 #include "entities/info/InfoPlayerStart.h"
 #include "entities/misc/MiscExplosionBox.h"
+#include "entities/Light.h"
 
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     if (className == "misc_explobox")
         return new MiscExplosionBox(ent);
-    if (className == "info_player_start")
+    else if (className == "info_player_start")
         return new InfoPlayerStart(ent);
+    else if (className == "light")
+        return new Light(ent);
     else
         return new SVGBaseEntity(ent);
 }

@@ -89,7 +89,7 @@ extern void func_object_use(Entity* self, Entity* other, Entity* activator);
 extern void func_timer_use(Entity* self, Entity* other, Entity* activator);
 extern void func_wall_use(Entity* self, Entity* other, Entity* activator);
 extern void hurt_use(Entity* self, Entity* other, Entity* activator);
-extern void light_use(Entity* self, Entity* other, Entity* activator);
+//extern void light_use(Entity* self, Entity* other, Entity* activator);
 extern void rotating_use(Entity* self, Entity* other, Entity* activator);
 extern void target_earthquake_use(Entity* self, Entity* other, Entity* activator);
 extern void target_lightramp_use(Entity* self, Entity* other, Entity* activator);
@@ -209,7 +209,7 @@ const save_ptr_t save_ptrs[] = {
 { P_use, func_wall_use },
 
 { P_use, hurt_use },
-{ P_use, light_use },
+//{ P_use, light_use },
 
 { P_use, rotating_use },
 
