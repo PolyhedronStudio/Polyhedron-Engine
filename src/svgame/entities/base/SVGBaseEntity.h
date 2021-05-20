@@ -16,12 +16,12 @@ public:
     //
     // Function pointers for actual callbacks.
     //
-    using ThinkCallbackPointer      = void(SVGBaseEntity::*)(void);
-    using UseCallbackPointer        = void(SVGBaseEntity::*)(SVGBaseEntity* activator, SVGBaseEntity* caller, float value);
-    using TouchCallbackPointer      = void(SVGBaseEntity::*)(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
-    using BlockedCallbackPointer    = void(SVGBaseEntity::*)(SVGBaseEntity* other);
-    using TakeDamageCallbackPointer = void(SVGBaseEntity::*)(SVGBaseEntity* attacker, SVGBaseEntity* inflictor, int damageFlags, float damage);
-    using DieCallbackPointer        = void(SVGBaseEntity::*)(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+    using ThinkCallBackPointer      = void(SVGBaseEntity::*)(void);
+    using UseCallBackPointer        = void(SVGBaseEntity::*)(SVGBaseEntity* activator, SVGBaseEntity* caller, float value);
+    using TouchCallBackPointer      = void(SVGBaseEntity::*)(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+    using BlockedCallBackPointer    = void(SVGBaseEntity::*)(SVGBaseEntity* other);
+    using TakeDamageCallBackPointer = void(SVGBaseEntity::*)(SVGBaseEntity* attacker, SVGBaseEntity* inflictor, int damageFlags, float damage);
+    using DieCallBackPointer        = void(SVGBaseEntity::*)(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
 
     //
     // Constructor/Deconstructor.
@@ -202,47 +202,42 @@ public:
     template<typename function>
     inline void SetThinkCallback(function f)
     {
-        thinkFunction = static_cast<ThinkCallbackPointer>(f);
+        thinkFunction = static_cast<ThinkCallBackPointer>(f);
     }
 
     // Sets the 'Use' callback function.
     template<typename function>
     inline void SetUseCallback(function f)
     {
-
-        useFunction = static_cast<UseCallbackPointer>(f);
+        useFunction = static_cast<UseCallBackPointer>(f);
     }
 
     // Sets the 'Touch' callback function.
     template<typename function>
     inline void SetTouchCallback(function f)
     {
-
-        touchFunction = static_cast<TouchCallbackPointer>(f);
+        touchFunction = static_cast<TouchCallBackPointer>(f);
     }
 
     // Sets the 'Blocked' callback function.
     template<typename function>
     inline void SetBlockedCallback(function f)
     {
-
-        blockedFunction = static_cast<BlockedCallbackPointer>(f);
+        blockedFunction = static_cast<BlockedCallBackPointer>(f);
     }
 
     // Sets the 'SetTakeDamage' callback function.
     template<typename function>
     inline void SetTakeDamageCallback(function f)
     {
-
-        takeDamageFunction = static_cast<TakeDamageCallbackPointer>(f);
+        takeDamageFunction = static_cast<TakeDamageCallBackPointer>(f);
     }
 
     // Sets the 'Die' callback function.
     template<typename function>
     inline void SetDieCallback(function f)
     {
-
-        dieFunction = static_cast<DieCallbackPointer>(f);
+        dieFunction = static_cast<DieCallBackPointer>(f);
     }
 
 
@@ -250,12 +245,12 @@ protected:
     //
     // Callback function pointers.
     //
-    ThinkCallbackPointer        thinkFunction;
-    UseCallbackPointer          useFunction;
-    TouchCallbackPointer        touchFunction;
-    BlockedCallbackPointer      blockedFunction;
-    TakeDamageCallbackPointer   takeDamageFunction;
-    DieCallbackPointer          dieFunction;
+    ThinkCallBackPointer        thinkFunction;
+    UseCallBackPointer          useFunction;
+    TouchCallBackPointer        touchFunction;
+    BlockedCallBackPointer      blockedFunction;
+    TakeDamageCallBackPointer   takeDamageFunction;
+    DieCallBackPointer          dieFunction;
 };
 
 #endif // __SVGAME_ENTITIES_BASE_CBASEENTITY_H__

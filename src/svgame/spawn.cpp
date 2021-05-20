@@ -99,70 +99,70 @@ void SP_misc_teleporter_dest(Entity *self);
 void SP_misc_explobox(Entity* self);
 
 static const spawn_func_t spawn_funcs[] = {
-    {"item_health", SP_item_health},
-    {"item_health_small", SP_item_health_small},
-    {"item_health_large", SP_item_health_large},
-    {"item_health_mega", SP_item_health_mega},
+    //{"item_health", SP_item_health},
+    //{"item_health_small", SP_item_health_small},
+    //{"item_health_large", SP_item_health_large},
+    //{"item_health_mega", SP_item_health_mega},
 
     {"info_player_start", SP_info_player_start},
-    {"info_player_deathmatch", SP_info_player_deathmatch},
-    {"info_player_coop", SP_info_player_coop},
-    {"info_player_intermission", SP_info_player_intermission},
+    //{"info_player_deathmatch", SP_info_player_deathmatch},
+    //{"info_player_coop", SP_info_player_coop},
+    //{"info_player_intermission", SP_info_player_intermission},
 
-    {"func_plat", SP_func_plat},
-    {"func_button", SP_func_button},
-    {"func_door", SP_func_door},
+    //{"func_plat", SP_func_plat},
+    //{"func_button", SP_func_button},
+    //{"func_door", SP_func_door},
 
-    {"func_door_rotating", SP_func_door_rotating},
-    {"func_rotating", SP_func_rotating},
-    {"func_train", SP_func_train},
-    {"func_water", SP_func_water},
-    {"func_conveyor", SP_func_conveyor},
-    {"func_areaportal", SP_func_areaportal},
-    {"func_wall", SP_func_wall},
-    {"func_object", SP_func_object},
-    {"func_timer", SP_func_timer},
-    {"func_explosive", SP_func_explosive},
-    {"func_killbox", SP_func_killbox},
+    //{"func_door_rotating", SP_func_door_rotating},
+    //{"func_rotating", SP_func_rotating},
+    //{"func_train", SP_func_train},
+    //{"func_water", SP_func_water},
+    //{"func_conveyor", SP_func_conveyor},
+    //{"func_areaportal", SP_func_areaportal},
+    //{"func_wall", SP_func_wall},
+    //{"func_object", SP_func_object},
+    //{"func_timer", SP_func_timer},
+    //{"func_explosive", SP_func_explosive},
+    //{"func_killbox", SP_func_killbox},
 
-    {"trigger_always", SP_trigger_always},
-    {"trigger_once", SP_trigger_once},
-    {"trigger_multiple", SP_trigger_multiple},
-    {"trigger_relay", SP_trigger_relay},
-    {"trigger_push", SP_trigger_push},
-    {"trigger_hurt", SP_trigger_hurt},
-    {"trigger_key", SP_trigger_key},
-    {"trigger_counter", SP_trigger_counter},
-    {"trigger_elevator", SP_trigger_elevator},
-    {"trigger_gravity", SP_trigger_gravity},
-    {"trigger_monsterjump", SP_trigger_monsterjump},
+    //{"trigger_always", SP_trigger_always},
+    //{"trigger_once", SP_trigger_once},
+    //{"trigger_multiple", SP_trigger_multiple},
+    //{"trigger_relay", SP_trigger_relay},
+    //{"trigger_push", SP_trigger_push},
+    //{"trigger_hurt", SP_trigger_hurt},
+    //{"trigger_key", SP_trigger_key},
+    //{"trigger_counter", SP_trigger_counter},
+    //{"trigger_elevator", SP_trigger_elevator},
+    //{"trigger_gravity", SP_trigger_gravity},
+    //{"trigger_monsterjump", SP_trigger_monsterjump},
 
-    {"target_temp_entity", SP_target_temp_entity},
-    {"target_speaker", SP_target_speaker},
-    {"target_explosion", SP_target_explosion},
-    {"target_changelevel", SP_target_changelevel},
-    {"target_splash", SP_target_splash},
-    {"target_spawner", SP_target_spawner},
-    {"target_blaster", SP_target_blaster},
-    {"target_crosslevel_trigger", SP_target_crosslevel_trigger},
-    {"target_crosslevel_target", SP_target_crosslevel_target},
+    //{"target_temp_entity", SP_target_temp_entity},
+    //{"target_speaker", SP_target_speaker},
+    //{"target_explosion", SP_target_explosion},
+    //{"target_changelevel", SP_target_changelevel},
+    //{"target_splash", SP_target_splash},
+    //{"target_spawner", SP_target_spawner},
+    //{"target_blaster", SP_target_blaster},
+    //{"target_crosslevel_trigger", SP_target_crosslevel_trigger},
+    //{"target_crosslevel_target", SP_target_crosslevel_target},
 
-    {"target_lightramp", SP_target_lightramp},
-    {"target_earthquake", SP_target_earthquake},
+    //{"target_lightramp", SP_target_lightramp},
+    //{"target_earthquake", SP_target_earthquake},
 
     {"worldspawn", SP_worldspawn},
 
     {"light", SP_light},
-    {"info_null", SP_info_null},
-    {"func_group", SP_info_null},
-    {"info_notnull", SP_info_notnull},
+    //{"info_null", SP_info_null},
+    //{"func_group", SP_info_null},
+    //{"info_notnull", SP_info_notnull},
 
-    {"misc_gib_arm", SP_misc_gib_arm},
-    {"misc_gib_leg", SP_misc_gib_leg},
-    {"misc_gib_head", SP_misc_gib_head},
+    //{"misc_gib_arm", SP_misc_gib_arm},
+    //{"misc_gib_leg", SP_misc_gib_leg},
+    //{"misc_gib_head", SP_misc_gib_head},
 
-    {"misc_teleporter", SP_misc_teleporter},
-    {"misc_teleporter_dest", SP_misc_teleporter_dest},
+    //{"misc_teleporter", SP_misc_teleporter},
+    //{"misc_teleporter_dest", SP_misc_teleporter_dest},
     {"misc_explobox", SP_misc_explobox},
 
     {NULL, NULL}
@@ -234,11 +234,14 @@ static const spawn_field_t temp_fields[] = {
 //
 #include "entities/base/SVGBaseEntity.h"
 #include "entities/base/PlayerClient.h"
+#include "entities/info/InfoPlayerStart.h"
 #include "entities/misc/MiscExplosionBox.h"
 
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     if (className == "misc_explobox")
         return new MiscExplosionBox(ent);
+    if (className == "info_player_start")
+        return new InfoPlayerStart(ent);
     else
         return new SVGBaseEntity(ent);
 }

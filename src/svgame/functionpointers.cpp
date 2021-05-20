@@ -49,7 +49,7 @@ extern void Brush_Move_Done(Entity* self);
 extern void Brush_Move_Final(Entity* self);
 extern void multi_wait(Entity* self);
 extern void plat_go_down(Entity* self);
-extern void SP_CreateCoopSpots(Entity* self);
+//extern void SP_CreateCoopSpots(Entity* self);
 extern void SP_FixCoopSpots(Entity* self);
 extern void target_crosslevel_target_think(Entity* self);
 extern void target_earthquake_think(Entity* self);
@@ -162,7 +162,7 @@ const save_ptr_t save_ptrs[] = {
 { P_think, Brush_Move_Final },
 { P_think, multi_wait },
 { P_think, plat_go_down },
-{ P_think, SP_CreateCoopSpots },
+//{ P_think, SP_CreateCoopSpots },
 { P_think, SP_FixCoopSpots },
 { P_think, target_crosslevel_target_think },
 { P_think, target_earthquake_think },
