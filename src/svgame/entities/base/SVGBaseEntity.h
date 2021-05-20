@@ -285,7 +285,7 @@ public:
     }
 
     // Set the 'velocity' value.
-    inline void GetVelocity(const vec3_t &velocity) {
+    inline void SetVelocity(const vec3_t &velocity) {
         serverEntity->velocity = velocity;
     }
 

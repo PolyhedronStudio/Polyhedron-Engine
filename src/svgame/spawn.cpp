@@ -241,20 +241,23 @@ static const spawn_field_t temp_fields[] = {
 #include "entities/Worldspawn.h"
 #include "entities/Light.h"
 
+// BaseEntity array, matches similarly index wise.
+extern SVGBaseEntity* g_baseEntities[MAX_EDICTS];
+
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     SVGBaseEntity* spawnEntity = NULL;
 
     if (className == "misc_explobox")
-        spawnEntity = new MiscExplosionBox(ent);
+        spawnEntity = g_baseEntities[ent->state.number] = new MiscExplosionBox(ent);
     else if (className == "info_player_start")
-        spawnEntity = new InfoPlayerStart(ent);
+        spawnEntity = g_baseEntities[ent->state.number] = new InfoPlayerStart(ent);
     else if (className == "light")
-        spawnEntity = new Light(ent);
+        spawnEntity = g_baseEntities[ent->state.number] = new Light(ent);
     else if (className == "worldspawn")
-        spawnEntity = new WorldSpawn(ent);
+        spawnEntity = g_baseEntities[ent->state.number] = new WorldSpawn(ent);
     else
-        spawnEntity = new SVGBaseEntity(ent);
-
+        spawnEntity = g_baseEntities[ent->state.number] = new SVGBaseEntity(ent);
+        
     return spawnEntity;
 }
 

@@ -726,7 +726,39 @@ void    SVG_FreeEntity(Entity* e);
 // TODO: All these go elsewhere, sometime, as does most...
 void SVG_SetConfigString(const int32_t &configStringIndex, const std::string &configString);
 
-trace_t SVG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, SVGBaseEntity* passent, const int32_t& contentMask);
+//
+// Custom server game trace struct, stores SVGBaseEntity* instead.
+//
+struct SVGTrace {
+    // If true, the trace startedand ended within the same solid.
+    qboolean    allSolid;
+    // If true, the trace started within a solid, but exited it.
+    qboolean    startSolid;
+    // The fraction of the desired distance traveled(0.0 - 1.0).If
+    // 1.0, no plane was impacted.
+    float       fraction;
+
+    // The destination position.
+    vec3_t      endPosition;
+
+    // The impacted plane, or empty.Note that a copy of the plane is
+    // returned, rather than a pointer.This is because the plane may belong to
+    // an inline BSP model or the box hull of a solid entity, in which case it must
+    // be transformed by the entity's current position.
+    cplane_t    plane;
+    // The impacted surface, or `NULL`.
+    csurface_t* surface;
+    // The contents mask of the impacted brush, or 0.
+    int         contents;
+
+    // The impacted entity, or `NULL`.
+    SVGBaseEntity *ent;   // Not set by CM_*() functions
+
+    // N&C: Custom added.
+    vec3_t		offsets[8];	// [signbits][x] = either size[0][x] or size[1][x]
+};
+
+SVGTrace SVG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, SVGBaseEntity* passent, const int32_t& contentMask);
 
 qhandle_t SVG_PrecacheModel(const std::string& filename);
 qhandle_t SVG_PrecacheImage(const std::string& filename);

@@ -37,7 +37,11 @@ int sm_meat_index;
 int snd_fry;
 int meansOfDeath;
 
+// Actual Server Entity array.
 Entity g_entities[MAX_EDICTS];
+
+// BaseEntity array, matches similarly index wise.
+SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 
 cvar_t  *deathmatch;
 cvar_t  *coop;
@@ -715,8 +719,12 @@ void SVG_FreeEntity(Entity* ed)
     }
 
     // Delete the actual entity pointer.
-    if (ed->classEntity)
-        delete ed->classEntity;
+    if (ed->state.number) {
+        if (g_baseEntities[ed->state.number]) {
+            delete g_baseEntities[ed->state.number];
+            ed->classEntity = NULL;
+        }
+    }
 
     // C++-ify, reset the struct itself.
     //memset(ed, 0, sizeof(*ed));
@@ -739,11 +747,38 @@ Entity* SVG_GetWorldEntity() {
 // The defacto trace function to use, for SVGBaseEntity and its derived family & friends.
 //===============
 //
-trace_t SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, SVGBaseEntity* passent, const int32_t &contentMask) {
+SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, SVGBaseEntity* passent, const int32_t &contentMask) {
     // Fetch server entity in case one was passed to us.
     Entity* serverEntity = (passent ? passent->GetServerEntity() : NULL);
 
-    return gi.Trace(start, mins, maxs, end, serverEntity, contentMask);
+    // Execute server trace.
+    trace_t trace = gi.Trace(start, mins, maxs, end, serverEntity, contentMask);
+
+    // Convert results to Server Game Trace.
+    SVGTrace svgTrace;
+    svgTrace.allSolid = trace.allSolid;
+    svgTrace.contents = trace.contents;
+    svgTrace.endPosition = trace.endPosition;
+    svgTrace.fraction = trace.fraction;
+    svgTrace.offsets[0] = trace.offsets[0];
+    svgTrace.offsets[1] = trace.offsets[1];
+    svgTrace.offsets[2] = trace.offsets[2];
+    svgTrace.offsets[3] = trace.offsets[3];
+    svgTrace.offsets[4] = trace.offsets[4];
+    svgTrace.offsets[5] = trace.offsets[5];
+    svgTrace.offsets[6] = trace.offsets[6];
+    svgTrace.offsets[7] = trace.offsets[7];
+    svgTrace.plane = trace.plane;
+    svgTrace.startSolid = trace.startSolid;
+    svgTrace.surface = trace.surface;
+
+    // Special.
+    if (trace.ent) {
+        uint32_t index = trace.ent->state.number;
+        svgTrace.ent = g_baseEntities[index];
+    }
+
+    return svgTrace;
 }
 
 //

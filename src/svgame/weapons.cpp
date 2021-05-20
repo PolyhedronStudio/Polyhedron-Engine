@@ -18,6 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "g_local.h"
 #include "utils.h"
 
+#include "entities/base/SVGBaseEntity.h"
+
 /*
 =================
 TODO: Maybe... replace, rename, etc.
@@ -58,52 +60,51 @@ SVG_FireHit
 Used for all impact (hit/punch/slash) attacks
 =================
 */
-qboolean SVG_FireHit(Entity *self, vec3_t &aim, int damage, int kick)
+qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int damage, int kick)
 {
     trace_t     tr;
     vec3_t      forward, right, up;
     vec3_t      v;
     vec3_t      point;
     float       range;
-    vec3_t      dir;
 
     // Make sure we have an enemy..
-    if (!self->enemy)
+    if (!self->GetEnemy())
         return false;
 
     //see if enemy is in range
-    VectorSubtract(self->enemy->state.origin, self->state.origin, dir);
+    vec3_t dir = self->GetEnemy()->GetOrigin() - self->GetOrigin();
     range = VectorLength(dir);
     if (range > aim[0])
         return false;
 
-    if (aim[1] > self->mins[0] && aim[1] < self->maxs[0]) {
+    if (aim[1] > self->GetMins().x && aim[1] < self->GetMaxs().x) {
         // the hit is straight on so back the range up to the edge of their bbox
-        range -= self->enemy->maxs[0];
+        range -= self->GetEnemy()->GetMaxs().x;
     } else {
         // this is a side hit so adjust the "right" value out to the edge of their bbox
         if (aim[1] < 0)
-            aim[1] = self->enemy->mins[0];
+            aim[1] = self->GetEnemy()->GetMaxs().x;
         else
-            aim[1] = self->enemy->maxs[0];
+            aim[1] = self->GetEnemy()->GetMaxs().x;
     }
 
-    VectorMA(self->state.origin, range, dir, point);
+    point = vec3_fmaf(self->GetOrigin(), range, dir);
 
-    tr = gi.Trace(self->state.origin, vec3_origin, vec3_origin, point, self, CONTENTS_MASK_SHOT);
+    tr = SVG_Trace(self->GetOrigin(), vec3_origin, vec3_origin, point, self, CONTENTS_MASK_SHOT);
     if (tr.fraction < 1) {
         if (!tr.ent->takeDamage)
             return false;
         // if it will hit any client/monster then hit the one we wanted to hit
         if ((tr.ent->serverFlags & EntityServerFlags::Monster) || (tr.ent->client))
-            tr.ent = self->enemy;
+            tr.ent = self->GetEnemy()->GetServerEntity();
     }
 
-    AngleVectors(self->state.angles, &forward, &right, &up);
-    VectorMA(self->state.origin, range, forward, point);
-    VectorMA(point, aim[1], right, point);
-    VectorMA(point, aim[2], up, point);
-    VectorSubtract(point, self->enemy->state.origin, dir);
+    AngleVectors(self->GetServerEntity()->state.angles, &forward, &right, &up);
+    point = vec3_fmaf(self->GetOrigin(), range, forward);
+    point = vec3_fmaf(point, aim[1], right);
+    point = vec3_fmaf(point, aim[2], up);
+    dir = point - self->GetEnemy()->GetOrigin();
 
     // do the damage
     SVG_Damage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
@@ -112,12 +113,12 @@ qboolean SVG_FireHit(Entity *self, vec3_t &aim, int damage, int kick)
         return false;
 
     // do our special form of knockback here
-    VectorMA(self->enemy->absMin, 0.5, self->enemy->size, v);
-    VectorSubtract(v, point, v);
-    VectorNormalize(v);
-    VectorMA(self->enemy->velocity, kick, v, self->enemy->velocity);
-    if (self->enemy->velocity[2] > 0)
-        self->enemy->groundEntityPtr = NULL;
+    v = vec3_fmaf(self->GetEnemy()->GetAbsoluteMin(), 0.5, self->GetEnemy()->GetSize());
+    v = v - point;
+    v = vec3_normalize(v);
+    self->GetEnemy()->SetVelocity(vec3_fmaf(self->GetEnemy()->GetVelocity(), kick, v));
+    if (self->GetEnemy()->GetVelocity().z > 0)
+        self->GetEnemy()->GetServerEntity()->groundEntityPtr = NULL;
     return true;
 }
 

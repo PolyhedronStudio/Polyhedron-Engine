@@ -181,7 +181,7 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
     LinkEntity();
 
     // Do a check ground for the step move of this pusher.
-    SVG_StepMove_CheckGround(GetServerEntity());
+    SVG_StepMove_CheckGround(this);
     //M_CatagorizePosition(ent);
 }
 
@@ -286,7 +286,7 @@ void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity*
         return;
 
     // Calculate ratio to use.
-    float ratio = (float)other->GetServerEntity()->mass / (float)GetServerEntity()->mass;
+    float ratio = (float)other->GetMass() / (float)GetMass();
     
     // Calculate direction.
     vec3_t dir = GetOrigin() - other->GetOrigin();
@@ -295,7 +295,7 @@ void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity*
     float yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
-    SVG_StepMove_Walk(GetServerEntity(), yaw, 20 * ratio * FRAMETIME);
+    SVG_StepMove_Walk(this, yaw, 20 * ratio * FRAMETIME);
     gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
 }
 

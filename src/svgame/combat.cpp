@@ -32,7 +32,7 @@ explosions and melee attacks.
 qboolean SVG_CanDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor)
 {
     vec3_t  dest;
-    trace_t trace;
+    SVGTrace trace;
 
 // bmodels need special checking because their origin is 0,0,0
     if (targ->GetMoveType() == MoveType::Push) {
@@ -41,7 +41,7 @@ qboolean SVG_CanDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor)
         trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
         if (trace.fraction == 1.0)
             return true;
-        if (trace.ent == targ->GetServerEntity())
+        if (trace.ent == targ)
             return true;
         return false;
     }
@@ -341,7 +341,7 @@ void SVG_Damage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *at
             else
                 VectorScale(dir, 500.0 * (float)knockback / mass, kvel);
 
-            targ->GetVelocity(targ->GetVelocity() + kvel);
+            targ->SetVelocity(targ->GetVelocity() + kvel);
         }
     }
 
