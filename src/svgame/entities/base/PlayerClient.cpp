@@ -31,7 +31,7 @@ void PlayerClient::Precache() {
 }
 void PlayerClient::Spawn() {
     // Set the die function.
-    SetDie(&PlayerClient::PlayerClientDie);
+    SetDieCallback(&PlayerClient::PlayerClientDie);
 
     gi.DPrintf("MiscExplosionBox::Spawn();");
 }
