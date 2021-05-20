@@ -71,7 +71,7 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
         self->client->respawnTime = level.time + 1.0;
         SVG_LookAtKiller(self, inflictor->GetServerEntity(), attacker->GetServerEntity());
         self->client->playerState.pmove.type = EnginePlayerMoveType::Dead;
-        SVG_ClientUpdateObituary(self, inflictor->GetServerEntity(), attacker->GetServerEntity());
+        SVG_ClientUpdateObituary(this, inflictor, attacker);
         SVG_TossClientWeapon(self);
         if (deathmatch->value)
             SVG_Command_Score_f(self);       // show scores

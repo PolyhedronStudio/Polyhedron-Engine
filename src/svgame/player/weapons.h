@@ -16,7 +16,7 @@ extern byte     is_silenced;
 // Player project source.
 vec3_t SVG_PlayerProjectSource(GameClient* client, const vec3_t &point, const vec3_t& distance, const vec3_t& forward, const vec3_t& right);
 
-void SVG_PlayerNoise(Entity* who, vec3_t where, int type);
+void SVG_PlayerNoise(SVGBaseEntity* who, vec3_t where, int type);
 
 qboolean    Pickup_Weapon(Entity* ent, Entity* other);
 void        SVG_ChangeWeapon(Entity* ent);

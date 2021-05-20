@@ -95,29 +95,27 @@ realcheck:
     return true;
 }
 
-void SVG_StepMove_CheckGround(Entity* ent)
+void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
 {
     vec3_t      point;
-    trace_t     trace;
+    SVGTrace     trace;
 
-    if (ent->flags & (EntityFlags::Swim | EntityFlags::Fly))
+    if (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly))
         return;
 
-    if (ent->velocity[2] > 100) {
-        ent->groundEntityPtr = NULL;
+    if (ent->GetVelocity().z > 100) {
+        ent->GetServerEntity()->groundEntityPtr = NULL;
         return;
     }
 
     // if the hull point one-quarter unit down is solid the entity is on ground
-    point[0] = ent->state.origin[0];
-    point[1] = ent->state.origin[1];
-    point[2] = ent->state.origin[2] - 0.25;
+    point = ent->GetOrigin() + vec3_t{ 0.f, 0.f, 0.25f };
 
-    trace = gi.Trace(ent->state.origin, ent->mins, ent->maxs, point, ent, CONTENTS_MASK_MONSTERSOLID);
+    trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), point, ent, CONTENTS_MASK_MONSTERSOLID);
 
     // check steepness
     if (trace.plane.normal[2] < 0.7 && !trace.startSolid) {
-        ent->groundEntityPtr = NULL;
+        ent->GetServerEntity()->groundEntityPtr = NULL;
         return;
     }
 
@@ -126,10 +124,10 @@ void SVG_StepMove_CheckGround(Entity* ent)
     //  if (!trace.startsolid && !trace.allsolid)
     //      VectorCopy (trace.endpos, ent->s.origin);
     if (!trace.startSolid && !trace.allSolid) {
-        VectorCopy(trace.endPosition, ent->state.origin);
-        ent->groundEntityPtr = trace.ent;
-        ent->groundEntityLinkCount = trace.ent->linkCount;
-        ent->velocity[2] = 0;
+        ent->SetOrigin(trace.endPosition);
+        ent->GetServerEntity()->groundEntityPtr = trace.ent->GetServerEntity();
+        ent->GetServerEntity()->groundEntityLinkCount = trace.ent->GetServerEntity()->linkCount;
+        ent->GetServerEntity()->velocity[2] = 0;
     }
 }
 

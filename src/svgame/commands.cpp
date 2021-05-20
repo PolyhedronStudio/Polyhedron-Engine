@@ -20,17 +20,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "entities/base/SVGBaseEntity.h"
 
-char *ClientTeam(Entity *ent)
+char *ClientTeam(SVGBaseEntity *ent)
 {
     char        *p;
     static char value[512];
 
     value[0] = 0;
 
-    if (!ent->client)
+    if (!ent->GetClient())
         return value;
 
-    strcpy(value, Info_ValueForKey(ent->client->persistent.userinfo, "skin"));
+    strcpy(value, Info_ValueForKey(ent->GetClient()->persistent.userinfo, "skin"));
     p = strchr(value, '/');
     if (!p)
         return value;
@@ -44,7 +44,7 @@ char *ClientTeam(Entity *ent)
     return ++p;
 }
 
-qboolean SVG_OnSameTeam(Entity *ent1, Entity *ent2)
+qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2)
 {
     char    ent1Team [512];
     char    ent2Team [512];
@@ -779,7 +779,7 @@ void Cmd_Say_f(Entity *ent, qboolean team, qboolean arg0)
         if (!other->client)
             continue;
         if (team) {
-            if (!SVG_OnSameTeam(ent, other))
+            if (!SVG_OnSameTeam(ent->classEntity, other->classEntity))
                 continue;
         }
         gi.CPrintf(other, PRINT_CHAT, "%s", text);

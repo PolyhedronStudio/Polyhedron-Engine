@@ -76,40 +76,40 @@ void SP_FixCoopSpots(Entity *self)
 
 
 
-qboolean IsFemale(Entity *ent)
+qboolean IsFemale(SVGBaseEntity *ent)
 {
     char        *info;
 
-    if (!ent->client)
+    if (!ent->GetClient())
         return false;
 
-    info = Info_ValueForKey(ent->client->persistent.userinfo, "gender");
+    info = Info_ValueForKey(ent->GetClient()->persistent.userinfo, "gender");
     if (info[0] == 'f' || info[0] == 'F')
         return true;
     return false;
 }
 
-qboolean IsNeutral(Entity *ent)
+qboolean IsNeutral(SVGBaseEntity *ent)
 {
     char        *info;
 
-    if (!ent->client)
+    if (!ent->GetClient())
         return false;
 
-    info = Info_ValueForKey(ent->client->persistent.userinfo, "gender");
+    info = Info_ValueForKey(ent->GetClient()->persistent.userinfo, "gender");
     if (info[0] != 'f' && info[0] != 'F' && info[0] != 'm' && info[0] != 'M')
         return true;
     return false;
 }
 
-void SVG_ClientUpdateObituary(Entity *self, Entity *inflictor, Entity *attacker)
+void SVG_ClientUpdateObituary(SVGBaseEntity *self, SVGBaseEntity *inflictor, SVGBaseEntity *attacker)
 {
     int         mod;
     const char        *message; // C++20: STRING: Added const to char*
     const char        *message2; // C++20: STRING: Added const to char*
     qboolean    ff;
 
-    if (coop->value && attacker->client)
+    if (coop->value && attacker->GetClient())
         meansOfDeath |= MeansOfDeath::FriendlyFire;
 
     if (deathmatch->value || coop->value) {
@@ -178,15 +178,15 @@ void SVG_ClientUpdateObituary(Entity *self, Entity *inflictor, Entity *attacker)
             }
         }
         if (message) {
-            gi.BPrintf(PRINT_MEDIUM, "%s %s.\n", self->client->persistent.netname, message);
+            gi.BPrintf(PRINT_MEDIUM, "%s %s.\n", self->GetClient()->persistent.netname, message);
             if (deathmatch->value)
-                self->client->respawn.score--;
-            self->enemy = NULL;
+                self->GetClient()->respawn.score--;
+            self->SetEnemy(NULL);
             return;
         }
 
-        self->enemy = attacker;
-        if (attacker && attacker->client) {
+        self->SetEnemy(attacker);
+        if (attacker && attacker->GetClient()) {
             switch (mod) {
             case MeansOfDeath::Blaster:
                 message = "was blasted by";
@@ -223,21 +223,21 @@ void SVG_ClientUpdateObituary(Entity *self, Entity *inflictor, Entity *attacker)
                 break;
             }
             if (message) {
-                gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->client->persistent.netname, message, attacker->client->persistent.netname, message2);
+                gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message, attacker->GetClient()->persistent.netname, message2);
                 if (deathmatch->value) {
                     if (ff)
-                        attacker->client->respawn.score--;
+                        attacker->GetClient()->respawn.score--;
                     else
-                        attacker->client->respawn.score++;
+                        attacker->GetClient()->respawn.score++;
                 }
                 return;
             }
         }
     }
 
-    gi.BPrintf(PRINT_MEDIUM, "%s died.\n", self->client->persistent.netname);
+    gi.BPrintf(PRINT_MEDIUM, "%s died.\n", self->GetClient()->persistent.netname);
     if (deathmatch->value)
-        self->client->respawn.score--;
+        self->GetClient()->respawn.score--;
 }
 
 
@@ -625,7 +625,7 @@ void CopyToBodyQue(Entity *ent)
     body->solid = ent->solid;
     body->clipMask = ent->clipMask;
     body->owner = ent->owner;
-    body->moveType = ent->moveType;
+    body->classEntity->SetMoveType(ent->classEntity->GetMoveType());
     body->groundEntityPtr = ent->groundEntityPtr;
 
     //body->Die = body_die;
@@ -638,7 +638,7 @@ void SVG_RespawnClient(Entity *self)
 {
     if (deathmatch->value || coop->value) {
         // isSpectator's don't leave bodies
-        if (self->moveType != MoveType::NoClip && self->moveType != MoveType::Spectator)
+        if (self->classEntity->GetMoveType() != MoveType::NoClip && self->classEntity->GetMoveType() != MoveType::Spectator)
             CopyToBodyQue(self);
         self->serverFlags &= ~EntityServerFlags::NoClient;
         SVG_PutClientInServer(self);
@@ -833,7 +833,7 @@ void SVG_PutClientInServer(Entity *ent)
     ent->groundEntityPtr = NULL;
     ent->client = &game.clients[index];
     ent->takeDamage = TakeDamage::Aim;
-    ent->moveType = MoveType::Walk;
+    ent->classEntity->SetMoveType(MoveType::Walk);
     ent->viewHeight = 22;
     ent->inUse = true;
     ent->className = "player";
@@ -904,7 +904,7 @@ void SVG_PutClientInServer(Entity *ent)
 
         client->respawn.isSpectator = true;
 
-        ent->moveType = MoveType::Spectator;
+        ent->classEntity->SetMoveType(MoveType::Spectator);
         ent->solid = Solid::Not;
         ent->serverFlags |= EntityServerFlags::NoClient;
         ent->client->playerState.gunIndex = 0;
@@ -1295,9 +1295,9 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
         // set up for pmove
         memset(&pm, 0, sizeof(pm));
 
-        if ( ent->moveType == MoveType::NoClip )
+        if ( ent->classEntity->GetMoveType() == MoveType::NoClip )
             client->playerState.pmove.type = PlayerMoveType::Noclip;
-        else if ( ent->moveType == MoveType::Spectator )
+        else if ( ent->classEntity->GetMoveType() == MoveType::Spectator )
             client->playerState.pmove.type = PlayerMoveType::Spectator;
         else if ( ent->state.modelIndex != 255 )
             client->playerState.pmove.type = EnginePlayerMoveType::Gib;
@@ -1337,7 +1337,7 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
         // Check for jumping sound.
         if (ent->groundEntityPtr && !pm.groundEntityPtr && (pm.clientUserCommand.moveCommand.upMove >= 10) && (pm.waterLevel == 0)) {
             gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("*jump1.wav"), 1, ATTN_NORM, 0);
-            SVG_PlayerNoise(ent, ent->state.origin, PNOISE_SELF);
+            SVG_PlayerNoise(ent->classEntity, ent->state.origin, PNOISE_SELF);
         }
 
         ent->groundEntityPtr = pm.groundEntityPtr;
@@ -1366,7 +1366,7 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
         gi.LinkEntity(ent);
 
         // Only check for trigger and object touches if not one of these movetypes.
-        if (ent->moveType != MoveType::NoClip && ent->moveType != MoveType::Spectator)
+        if (ent->classEntity->GetMoveType() != MoveType::NoClip && ent->classEntity->GetMoveType() != MoveType::Spectator)
             UTIL_TouchTriggers(ent);
 
         // touch other objects

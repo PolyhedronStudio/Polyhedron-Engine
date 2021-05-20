@@ -586,7 +586,8 @@ extern  cvar_t  *cl_monsterfootsteps;
 // 
 // Since that is rather unclear, I now present to you:
 //
-Entity* SVG_GetWorldEntity();
+Entity* SVG_GetWorldServerEntity();
+SVGBaseEntity* SVG_GetWorldEntity();
 
 //-------------------
 // Spawnflags for items, set by editor(s).
@@ -673,11 +674,11 @@ struct DamageFlags {
 //
 // g_weapon.c
 //
-void SVG_ThrowDebris(Entity *self, const char *modelname, float speed, const vec3_t& origin);
-qboolean SVG_FireHit(Entity *self, vec3_t &aim, int32_t damage, int32_t kick);
-void SVG_FireBullet(Entity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t mod);
-void SVG_FireShotgun(Entity* self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t count, int32_t mod);
-void SVG_FireBlaster(Entity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t speed, int32_t effect, qboolean hyper);
+void SVG_ThrowDebris(SVGBaseEntity *self, const char *modelname, float speed, const vec3_t& origin);
+qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t kick);
+void SVG_FireBullet(SVGBaseEntity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t mod);
+void SVG_FireShotgun(SVGBaseEntity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t count, int32_t mod);
+void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t speed, int32_t effect, qboolean hyper);
 
 //
 // g_ptrail.c
@@ -704,7 +705,7 @@ qboolean SVG_FilterPacket(char *from);
 //
 // g_pweapon.c
 //
-void SVG_PlayerNoise(Entity *who, vec3_t where, int32_t type);
+void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int32_t type);
 
 //
 // g_phys.c

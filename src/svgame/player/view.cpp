@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "../g_local.h"
+#include "../entities/base/SVGBaseEntity.h"
 #include "hud.h"
 #include "animations.h"
 
@@ -435,7 +436,7 @@ static void SVG_Player_CheckFallingDamage(Entity *ent)
     if (ent->state.modelIndex != 255)
         return;     // not in the player model
 
-    if (ent->moveType == MoveType::NoClip || ent->moveType == MoveType::Spectator)
+    if (ent->classEntity->GetMoveType() == MoveType::NoClip || ent->classEntity->GetMoveType() == MoveType::Spectator)
         return;
 
     if ((ent->client->oldVelocity[2] < 0) && (ent->velocity[2] > ent->client->oldVelocity[2]) && (!ent->groundEntityPtr)) {
@@ -482,7 +483,7 @@ static void SVG_Player_CheckFallingDamage(Entity *ent)
         VectorSet(dir, 0, 0, 1);
 
         if (!deathmatch->value || !((int)dmflags->value & DeathMatchFlags::NoFalling))
-            SVG_Damage(ent, SVG_GetWorldEntity(), SVG_GetWorldEntity(), dir, ent->state.origin, vec3_origin, damage, 0, 0, MeansOfDeath::Falling);
+            SVG_Damage(ent->classEntity, SVG_GetWorldEntity(), SVG_GetWorldEntity(), dir, ent->state.origin, vec3_origin, damage, 0, 0, MeansOfDeath::Falling);
     } else {
         ent->state.event = EntityEvent::FallShort;
         return;
@@ -499,7 +500,7 @@ static void SVG_Player_CheckWorldEffects(void)
 {
     int         waterlevel, oldWaterLevel;
 
-    if (current_player->moveType == MoveType::NoClip || current_player->moveType == MoveType::Spectator) {
+    if (current_player->classEntity->GetMoveType() == MoveType::NoClip || current_player->classEntity->GetMoveType() == MoveType::Spectator) {
         current_player->airFinished = level.time + 12; // don't need air
         return;
     }
@@ -512,7 +513,7 @@ static void SVG_Player_CheckWorldEffects(void)
     // if just entered a water volume, play a sound
     //
     if (!oldWaterLevel && waterlevel) {
-        SVG_PlayerNoise(current_player, current_player->state.origin, PNOISE_SELF);
+        SVG_PlayerNoise(current_player->classEntity, current_player->state.origin, PNOISE_SELF);
         if (current_player->waterType & CONTENTS_LAVA)
             gi.Sound(current_player, CHAN_BODY, gi.SoundIndex("player/lava_in.wav"), 1, ATTN_NORM, 0);
         else if (current_player->waterType & CONTENTS_SLIME)
@@ -529,7 +530,7 @@ static void SVG_Player_CheckWorldEffects(void)
     // if just completely exited a water volume, play a sound
     //
     if (oldWaterLevel && ! waterlevel) {
-        SVG_PlayerNoise(current_player, current_player->state.origin, PNOISE_SELF);
+        SVG_PlayerNoise(current_player->classEntity, current_player->state.origin, PNOISE_SELF);
         gi.Sound(current_player, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
         current_player->flags &= ~EntityFlags::InWater;
     }
@@ -548,7 +549,7 @@ static void SVG_Player_CheckWorldEffects(void)
         if (current_player->airFinished < level.time) {
             // gasp for air
             gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
-            SVG_PlayerNoise(current_player, current_player->state.origin, PNOISE_SELF);
+            SVG_PlayerNoise(current_player->classEntity, current_player->state.origin, PNOISE_SELF);
         } else  if (current_player->airFinished < level.time + 11) {
             // just break surface
             gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
@@ -581,7 +582,7 @@ static void SVG_Player_CheckWorldEffects(void)
 
                 current_player->debouncePainTime = level.time;
 
-                SVG_Damage(current_player, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, current_player->damage, 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+                SVG_Damage(current_player->classEntity, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, current_player->damage, 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
             }
         }
     } else {
@@ -603,11 +604,11 @@ static void SVG_Player_CheckWorldEffects(void)
                 current_player->debouncePainTime = level.time + 1;
             }
 
-            SVG_Damage(current_player, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
+            SVG_Damage(current_player->classEntity, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
         }
 
         if (current_player->waterType & CONTENTS_SLIME) {
-            SVG_Damage(current_player, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
+            SVG_Damage(current_player->classEntity, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 }
@@ -778,10 +779,10 @@ void SVG_LookAtKiller(Entity* self, Entity* inflictor, Entity* attacker)
 {
     vec3_t dir;
 
-    if (attacker && attacker != SVG_GetWorldEntity() && attacker != self) {
+    if (attacker && attacker != SVG_GetWorldServerEntity() && attacker != self) {
         dir = attacker->state.origin - self->state.origin;
     }
-    else if (inflictor && inflictor != SVG_GetWorldEntity() && inflictor != self) {
+    else if (inflictor && inflictor != SVG_GetWorldServerEntity() && inflictor != self) {
         dir = inflictor->state.origin - self->state.origin;
     }
     else {
@@ -935,7 +936,7 @@ void SVG_ClientEndServerFrame(Entity *ent)
 
     // if the scoreboard is up, update it
     if (ent->client->showScores && !(level.frameNumber & 31)) {
-        SVG_HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
+        SVG_HUD_GenerateDMScoreboardLayout(ent, ent->classEntity->GetEnemy()->GetServerEntity());
         gi.Unicast(ent, false);
     }
 }

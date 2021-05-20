@@ -55,10 +55,10 @@ void weapon_supershotgun_fire(Entity* ent)
     v[vec3_t::PYR::Yaw] = ent->client->aimAngles[vec3_t::PYR::Yaw] - 5;
     v[vec3_t::PYR::Roll] = ent->client->aimAngles[vec3_t::PYR::Roll];
     vec3_vectors(v, &forward, NULL, NULL);
-    SVG_FireShotgun(ent, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
+    SVG_FireShotgun(ent->classEntity, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
     v[vec3_t::PYR::Yaw] = ent->client->aimAngles[vec3_t::PYR::Yaw] + 5;
     vec3_vectors(v, &forward, NULL, NULL);
-    SVG_FireShotgun(ent, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
+    SVG_FireShotgun(ent->classEntity, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
 
     // send muzzle flash
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
@@ -67,7 +67,7 @@ void weapon_supershotgun_fire(Entity* ent)
     gi.Multicast(&ent->state.origin, MultiCast::PVS);
 
     ent->client->playerState.gunFrame++;
-    SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
+    SVG_PlayerNoise(ent->classEntity, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
         ent->client->persistent.inventory[ent->client->ammoIndex] -= 2;

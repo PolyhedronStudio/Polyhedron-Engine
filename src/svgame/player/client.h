@@ -24,7 +24,7 @@ void SVG_RespawnClient(Entity* ent);
 void SVG_TossClientWeapon(Entity* self);
 
 // Updates the client obituary.
-void SVG_ClientUpdateObituary(Entity* self, Entity* inflictor, Entity* attacker);
+void SVG_ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker);
 void SVG_TossClientWeapon(Entity* self);
 
 void SVG_ClientBegin(Entity* ent);

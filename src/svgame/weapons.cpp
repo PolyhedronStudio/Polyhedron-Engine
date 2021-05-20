@@ -62,7 +62,7 @@ Used for all impact (hit/punch/slash) attacks
 */
 qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int damage, int kick)
 {
-    trace_t     tr;
+    SVGTrace     tr;
     vec3_t      forward, right, up;
     vec3_t      v;
     vec3_t      point;
@@ -93,11 +93,11 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int damage, int kick)
 
     tr = SVG_Trace(self->GetOrigin(), vec3_origin, vec3_origin, point, self, CONTENTS_MASK_SHOT);
     if (tr.fraction < 1) {
-        if (!tr.ent->takeDamage)
+        if (!tr.ent->GetTakeDamage())
             return false;
         // if it will hit any client/monster then hit the one we wanted to hit
-        if ((tr.ent->serverFlags & EntityServerFlags::Monster) || (tr.ent->client))
-            tr.ent = self->GetEnemy()->GetServerEntity();
+        if ((tr.ent->GetServerFlags() & EntityServerFlags::Monster) || (tr.ent->GetClient()))
+            tr.ent = self->GetEnemy();
     }
 
     AngleVectors(self->GetServerEntity()->state.angles, &forward, &right, &up);
@@ -109,7 +109,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int damage, int kick)
     // do the damage
     SVG_Damage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
 
-    if (!(tr.ent->serverFlags & EntityServerFlags::Monster) && (!tr.ent->client))
+    if (!(tr.ent->GetServerFlags() & EntityServerFlags::Monster) && (!tr.ent->GetClient()))
         return false;
 
     // do our special form of knockback here
@@ -130,9 +130,9 @@ fire_lead
 This is an internal support routine used for bullet/pellet based weapons.
 =================
 */
-static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int te_impact, int hspread, int vspread, int mod)
+static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int te_impact, int hspread, int vspread, int mod)
 {
-    trace_t     tr;
+    SVGTrace     tr;
     vec3_t      dir;
     vec3_t      forward, right, up;
     vec3_t      end;
@@ -142,7 +142,7 @@ static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, i
     qboolean    water = false;
     int         content_mask = CONTENTS_MASK_SHOT | CONTENTS_MASK_LIQUID;
 
-    tr = gi.Trace(self->state.origin, vec3_origin, vec3_origin, start, self, CONTENTS_MASK_SHOT);
+    tr = SVG_Trace(self->GetOrigin(), vec3_origin, vec3_origin, start, self, CONTENTS_MASK_SHOT);
     if (!(tr.fraction < 1.0)) {
         dir = vec3_euler(aimdir);
         AngleVectors(dir, &forward, &right, &up);
@@ -159,7 +159,7 @@ static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, i
             content_mask &= ~CONTENTS_MASK_LIQUID;
         }
 
-        tr = gi.Trace(start, vec3_origin, vec3_origin, end, self, content_mask);
+        tr = SVG_Trace(start, vec3_origin, vec3_origin, end, self, content_mask);
 
         // see if we hit water
         if (tr.contents & CONTENTS_MASK_LIQUID) {
@@ -202,14 +202,14 @@ static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, i
             }
 
             // re-trace ignoring water this time
-            tr = gi.Trace(water_start, vec3_origin, vec3_origin, end, self, CONTENTS_MASK_SHOT);
+            tr = SVG_Trace(water_start, vec3_origin, vec3_origin, end, self, CONTENTS_MASK_SHOT);
         }
     }
 
     // send gun puff / flash
     if (!((tr.surface) && (tr.surface->flags & SURF_SKY))) {
         if (tr.fraction < 1.0) {
-            if (tr.ent->takeDamage) {
+            if (tr.ent->GetTakeDamage()) {
                 SVG_Damage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
@@ -219,7 +219,7 @@ static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, i
                     gi.WriteDirection(tr.plane.normal);
                     gi.Multicast(&tr.endPosition, MultiCast::PVS);
 
-                    if (self->client)
+                    if (self->GetClient())
                         SVG_PlayerNoise(self, tr.endPosition, PNOISE_IMPACT);
                 }
             }
@@ -236,7 +236,7 @@ static void fire_lead(Entity *self, const vec3_t& start, const vec3_t& aimdir, i
         if (gi.PointContents(pos) & CONTENTS_MASK_LIQUID)
             VectorCopy(pos, tr.endPosition);
         else
-            tr = gi.Trace(pos, vec3_origin, vec3_origin, water_start, tr.ent, CONTENTS_MASK_LIQUID);
+            tr = SVG_Trace(pos, vec3_origin, vec3_origin, water_start, tr.ent, CONTENTS_MASK_LIQUID);
 
         VectorAdd(water_start, tr.endPosition, pos);
         VectorScale(pos, 0.5, pos);
@@ -258,7 +258,7 @@ Fires a single round.  Used for machinegun and chaingun.  Would be fine for
 pistols, rifles, etc....
 =================
 */
-void SVG_FireBullet(Entity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod)
+void SVG_FireBullet(SVGBaseEntity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread, int vspread, int mod)
 {
     fire_lead(self, start, aimdir, damage, kick, TempEntityEvent::Gunshot, hspread, vspread, mod);
 }
@@ -270,7 +270,7 @@ void SVG_FireBullet(Entity *self, const vec3_t& start, const vec3_t& aimdir, int
 // Shoots shotgun pellets.  Used by shotgun and super shotgun.
 //===============
 //
-void SVG_FireShotgun(Entity* self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int mod)
+void SVG_FireShotgun(SVGBaseEntity* self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread, int vspread, int count, int mod)
 {
     int		i;
 
@@ -304,8 +304,8 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
         return;
     }
 
-    if (self->owner->client)
-        SVG_PlayerNoise(self->owner, self->state.origin, PNOISE_IMPACT);
+//    if (self->owner->client)
+//        SVG_PlayerNoise(self->owner, self->state.origin, PNOISE_IMPACT);
 
     if (other->takeDamage) {
         mod = MeansOfDeath::Blaster;
@@ -313,13 +313,13 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
         // N&C: Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
         if (plane)
         {
-            SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
-                plane->normal, self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
+            //SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
+            //    plane->normal, self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
         }
         else
         {
-            SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
-                vec3_zero(), self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
+            //SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
+            //    vec3_zero(), self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
         }
 
     } else {
@@ -346,60 +346,60 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
 // predicted against the shots.
 //===============
 //
-void SVG_FireBlaster(Entity *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int effect, qboolean hyper)
+void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int effect, qboolean hyper)
 {
-    Entity *bolt;
-    trace_t tr;
-    
-    // Calculate direction vector.
-    vec3_t dir = vec3_normalize(aimdir);
+    //Entity *bolt;
+    //trace_t tr;
+    //
+    //// Calculate direction vector.
+    //vec3_t dir = vec3_normalize(aimdir);
 
-    // Fetch first free entity slot to use, by calling SVG_Spawn.
-    bolt = SVG_Spawn();
+    //// Fetch first free entity slot to use, by calling SVG_Spawn.
+    //bolt = SVG_Spawn();
 
-    // Setup basic entity attributes.
-    bolt->className = "bolt";   // Classname.
-    bolt->owner = self;         // Setup owner.
-    bolt->damage = damage;         // Setup damage.
-    if (hyper)                  // Hyperblaster?
-        bolt->spawnFlags = 1;
-    bolt->serverFlags = EntityServerFlags::DeadMonster;    // Set Dead Monster flag so the projectiles 
-                                        // won't clip against players.
-    bolt->moveType = MoveType::FlyMissile;   // Movetype FLYMISSILE
-    bolt->clipMask = CONTENTS_MASK_SHOT;    // CONTENTS_MASK_SHOT
-    bolt->solid = Solid::BoundingBox;               // Solid::BoundingBox
-    bolt->state.effects |= effect;              // Apply effect argument to entity.
-    
-    // Setup entity physics attribute values.
-    bolt->state.origin = start;     // Initial origin.
-    bolt->state.oldOrigin = start; // Initial origin, same to origin, since this entity had no frame life yet.
-    bolt->state.angles = vec3_euler(dir);       // Calculate euler radian entity satate angles.
-    bolt->velocity = vec3_scale(dir, speed);// Calculate entity state velocity.
-    bolt->mins = vec3_zero();   // Clear bounding mins.
-    bolt->maxs = vec3_zero();   // Clear bounding maxs.
+    //// Setup basic entity attributes.
+    //bolt->className = "bolt";   // Classname.
+    //bolt->owner = self;         // Setup owner.
+    //bolt->damage = damage;         // Setup damage.
+    //if (hyper)                  // Hyperblaster?
+    //    bolt->spawnFlags = 1;
+    //bolt->serverFlags = EntityServerFlags::DeadMonster;    // Set Dead Monster flag so the projectiles 
+    //                                    // won't clip against players.
+    //bolt->moveType = MoveType::FlyMissile;   // Movetype FLYMISSILE
+    //bolt->clipMask = CONTENTS_MASK_SHOT;    // CONTENTS_MASK_SHOT
+    //bolt->solid = Solid::BoundingBox;               // Solid::BoundingBox
+    //bolt->state.effects |= effect;              // Apply effect argument to entity.
+    //
+    //// Setup entity physics attribute values.
+    //bolt->state.origin = start;     // Initial origin.
+    //bolt->state.oldOrigin = start; // Initial origin, same to origin, since this entity had no frame life yet.
+    //bolt->state.angles = vec3_euler(dir);       // Calculate euler radian entity satate angles.
+    //bolt->velocity = vec3_scale(dir, speed);// Calculate entity state velocity.
+    //bolt->mins = vec3_zero();   // Clear bounding mins.
+    //bolt->maxs = vec3_zero();   // Clear bounding maxs.
 
-    // Setup (and precache) sound, and model.
-    bolt->state.modelIndex = gi.ModelIndex("models/objects/laser/tris.md2");
-    bolt->state.sound = gi.SoundIndex("misc/lasfly.wav");
-       
-    // Setup touch and Think function pointers.
-    //bolt->Touch = blaster_touch;
-    //bolt->nextThinkTime = level.time + 2;
-    //bolt->Think = SVG_FreeEntity;
-    
-    // Link entity in for collision.
-    gi.LinkEntity(bolt);
+    //// Setup (and precache) sound, and model.
+    //bolt->state.modelIndex = gi.ModelIndex("models/objects/laser/tris.md2");
+    //bolt->state.sound = gi.SoundIndex("misc/lasfly.wav");
+    //   
+    //// Setup touch and Think function pointers.
+    ////bolt->Touch = blaster_touch;
+    ////bolt->nextThinkTime = level.time + 2;
+    ////bolt->Think = SVG_FreeEntity;
+    //
+    //// Link entity in for collision.
+    //gi.LinkEntity(bolt);
 
-    // If a client is firing this bolt, let AI check for dodges.
-    if (self->client)
-        check_dodge(self, bolt->state.origin, dir, speed);
+    //// If a client is firing this bolt, let AI check for dodges.
+    //if (self->client)
+    //    check_dodge(self, bolt->state.origin, dir, speed);
 
-    // Trace bolt.
-    tr = gi.Trace(self->state.origin, vec3_zero(), vec3_zero(), bolt->state.origin, bolt, CONTENTS_MASK_SHOT);
+    //// Trace bolt.
+    //tr = gi.Trace(self->state.origin, vec3_zero(), vec3_zero(), bolt->state.origin, bolt, CONTENTS_MASK_SHOT);
 
-    // Did we hit anything?
-    if (tr.fraction < 1.0) {
-        bolt->state.origin = vec3_fmaf(bolt->state.origin, -10, dir);
-        //bolt->Touch(bolt, tr.ent, NULL, NULL);
-    }
+    //// Did we hit anything?
+    //if (tr.fraction < 1.0) {
+    //    bolt->state.origin = vec3_fmaf(bolt->state.origin, -10, dir);
+    //    //bolt->Touch(bolt, tr.ent, NULL, NULL);
+    //}
 }

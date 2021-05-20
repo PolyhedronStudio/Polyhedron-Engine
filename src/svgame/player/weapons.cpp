@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../g_local.h"
 #include "animations.h"
 
+#include "../entities/base/SVGBaseEntity.h"
+
 #include "sharedgame/sharedgame.h" // Include SG Base.
 
 qboolean is_quad;
@@ -37,41 +39,41 @@ Monsters that don't directly see the player can move
 to a noise in hopes of seeing the player from there.
 ===============
 */
-void SVG_PlayerNoise(Entity *who, vec3_t where, int type)
+void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int type)
 {
     Entity     *noise;
 
     if (deathmatch->value)
         return;
 
-    if (who->flags & EntityFlags::NoTarget)
+    if (who->GetFlags() & EntityFlags::NoTarget)
         return;
 
 
-    if (!who->myNoisePtr) {
+    if (!who->GetServerEntity()->myNoisePtr) {
         noise = SVG_Spawn();
         noise->className = "player_noise";
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
-        noise->owner = who;
+        noise->owner = who->GetServerEntity();
         noise->serverFlags = EntityServerFlags::NoClient;
-        who->myNoisePtr = noise;
+        who->GetServerEntity()->myNoisePtr = noise;
 
         noise = SVG_Spawn();
         noise->className = "player_noise";
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
-        noise->owner = who;
+        noise->owner = who->GetServerEntity();
         noise->serverFlags = EntityServerFlags::NoClient;
-        who->myNoise2Ptr = noise;
+        who->GetServerEntity()->myNoise2Ptr = noise;
     }
 
     if (type == PNOISE_SELF || type == PNOISE_WEAPON) {
-        noise = who->myNoisePtr;
+        noise = who->GetServerEntity()->myNoisePtr;
         level.soundEntity = noise;
         level.soundEntityFrameNumber = level.frameNumber;
     } else { // type == PNOISE_IMPACT
-        noise = who->myNoise2Ptr;
+        noise = who->GetServerEntity()->myNoise2Ptr;
         level.sound2Entity = noise;
         level.sound2EntityFrameNumber = level.frameNumber;
     }

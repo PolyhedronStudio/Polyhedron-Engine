@@ -70,19 +70,23 @@ Entity *SV_TestEntityPosition(Entity *ent)
 SV_CheckVelocity
 ================
 */
-void SV_CheckVelocity(Entity *ent)
+void SV_CheckVelocity(SVGBaseEntity *ent)
 {
     int     i;
 
 //
 // bound velocity
 //
+    vec3_t velocity = ent->GetVelocity();
+
     for (i = 0 ; i < 3 ; i++) {
-        if (ent->velocity[i] > sv_maxvelocity->value)
-            ent->velocity[i] = sv_maxvelocity->value;
-        else if (ent->velocity[i] < -sv_maxvelocity->value)
-            ent->velocity[i] = -sv_maxvelocity->value;
+        if (velocity[i] > sv_maxvelocity->value)
+            velocity[i] = sv_maxvelocity->value;
+        else if (velocity[i] < -sv_maxvelocity->value)
+            velocity[i] = -sv_maxvelocity->value;
     }
+
+    ent->SetVelocity(velocity);
 }
 
 /*
@@ -92,23 +96,21 @@ SV_RunThink
 Runs thinking code for this frame if necessary
 =============
 */
-qboolean SV_RunThink(Entity *ent)
+qboolean SV_RunThink(SVGBaseEntity *ent)
 {
     float   thinktime;
 
-    thinktime = ent->nextThinkTime;
+    thinktime = ent->GetNextThinkTime();
     if (thinktime <= 0)
         return true;
     if (thinktime > level.time + 0.001)
         return true;
 
-    ent->nextThinkTime = 0;
+    ent->SetNextThinkTime(0);
 
     //if (ent->Think)
     //    ent->Think(ent);
-    
-    if (ent->classEntity)
-        ent->classEntity->Think();
+    ent->Think();
 
     return false;
 }
@@ -344,8 +346,6 @@ Does not change the entities velocity at all
 SVGTrace SV_PushEntity(SVGBaseEntity *ent, vec3_t push)
 {
     SVGTrace trace;
-    vec3_t  start;
-    vec3_t  end;
     int     mask;
 
     // Calculate start for push.
@@ -394,7 +394,7 @@ typedef struct {
 } pushed_t;
 pushed_t    pushed[MAX_EDICTS], *pushed_p;
 
-Entity *obstacle;
+SVGBaseEntity *obstacle;
 
 /*
 ============
@@ -407,8 +407,9 @@ otherwise riders would continue to slide.
 qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
 {
     int         i, e;
-    SVGBaseEntity     *check, *block;
-    pushed_t    *p;
+    SVGBaseEntity* check = NULL;
+    SVGBaseEntity* block = NULL;
+    pushed_t    *p = NULL;
     vec3_t      org, org2, move2, forward, right, up;
 
     // find the bounding box
@@ -440,7 +441,7 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
     pusher->LinkEntity();
 
 // see if any solid entities are inside the final position
-    check = g_baseEntities + 1;
+    check = (g_baseEntities + 1)[0];
     for (e = 1; e < globals.numberOfEntities; e++, check++) {
         qboolean isInUse = check->GetInUse();
         
@@ -511,7 +512,7 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
             if (check->GetServerEntity()->groundEntityPtr != pusher->GetServerEntity())
                 check->GetServerEntity()->groundEntityPtr = NULL;
 
-            block = SV_TestEntityPosition(check->GetServerEntity());
+            block = SV_TestEntityPosition(check->GetServerEntity())->classEntity;
             if (!block) {
                 // pushed ok
                 check->LinkEntity();
@@ -523,7 +524,7 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
             // this is only relevent for riding entities, not pushed
             // FIXME: this doesn't acount for rotation
             check->SetOrigin(check->GetOrigin() - move);//check->state.origin -= move;
-            block = SV_TestEntityPosition(check->GetServerEntity());
+            block = SV_TestEntityPosition(check->GetServerEntity())->classEntity;
             if (!block) {
                 pushed_p--;
                 continue;
@@ -544,7 +545,7 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
                 p->ent->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltayaw;
             }
 #endif
-            gi.LinkEntity(p->ent);
+            p->ent->LinkEntity();
         }
         return false;
     }
@@ -565,13 +566,13 @@ Bmodel objects don't interact with each other, but
 push all box objects
 ================
 */
-void SV_Physics_Pusher(Entity *ent)
+void SV_Physics_Pusher(SVGBaseEntity *ent)
 {
     vec3_t      move, amove;
-    Entity     *part, *mv;
+    SVGBaseEntity     *part, *mv;
 
     // if not a team captain, so movement will be handled elsewhere
-    if (ent->flags & EntityFlags::TeamSlave)
+    if (ent->GetFlags() & EntityFlags::TeamSlave)
         return;
 
     // make sure all team slaves can move before commiting
@@ -579,13 +580,13 @@ void SV_Physics_Pusher(Entity *ent)
     // if the move is Blocked, all moved objects will be backed out
 //retry:
     pushed_p = pushed;
-    for (part = ent ; part ; part = part->teamChainPtr) {
-        if (part->velocity[0] || part->velocity[1] || part->velocity[2] ||
-            part->angularVelocity[0] || part->angularVelocity[1] || part->angularVelocity[2]
+    for (part = ent ; part ; part = part->GetServerEntity()->teamChainPtr->classEntity) {
+        if (part->GetServerEntity()->velocity[0] || part->GetServerEntity()->velocity[1] || part->GetServerEntity()->velocity[2] ||
+            part->GetServerEntity()->angularVelocity[0] || part->GetServerEntity()->angularVelocity[1] || part->GetServerEntity()->angularVelocity[2]
            ) {
             // object is moving
-            VectorScale(part->velocity, FRAMETIME, move);
-            VectorScale(part->angularVelocity, FRAMETIME, amove);
+            VectorScale(part->GetVelocity(), FRAMETIME, move);
+            VectorScale(part->GetServerEntity()->angularVelocity, FRAMETIME, amove);
 
             if (!SV_Push(part, move, amove))
                 break;  // move was Blocked
@@ -596,17 +597,15 @@ void SV_Physics_Pusher(Entity *ent)
 
     if (part) {
         // the move failed, bump all nextThinkTime times and back out moves
-        for (mv = ent ; mv ; mv = mv->teamChainPtr) {
-            if (mv->nextThinkTime > 0)
-                mv->nextThinkTime += FRAMETIME;
+        for (mv = ent ; mv ; mv = mv->GetServerEntity()->teamChainPtr->classEntity) {
+            if (mv->GetNextThinkTime() > 0)
+                mv->SetNextThinkTime(mv->GetNextThinkTime() + FRAMETIME);
         }
 
         // if the pusher has a "Blocked" function, call it
         // otherwise, just stay in place until the obstacle is gone
-        if (part->classEntity) {
-            if (obstacle->classEntity) {
-                part->classEntity->Blocked(obstacle->classEntity);
-            }
+        if (obstacle) {
+            part->Blocked(obstacle);
         }
 
         //if (part->Blocked)
@@ -618,7 +617,7 @@ void SV_Physics_Pusher(Entity *ent)
 #endif
     } else {
         // the move succeeded, so call all Think functions
-        for (part = ent ; part ; part = part->teamChainPtr) {
+        for (part = ent ; part ; part = part->GetServerEntity()->teamChainPtr->classEntity) {
             SV_RunThink(part);
         }
     }
@@ -633,7 +632,7 @@ SV_Physics_None
 Non moving objects can only Think
 =============
 */
-void SV_Physics_None(Entity *ent)
+void SV_Physics_None(SVGBaseEntity *ent)
 {
 // regular thinking
     SV_RunThink(ent);
@@ -646,18 +645,18 @@ SV_Physics_Noclip
 A moving object that doesn't obey physics
 =============
 */
-void SV_Physics_Noclip(Entity *ent)
+void SV_Physics_Noclip(SVGBaseEntity *ent)
 {
 // regular thinking
     if (!SV_RunThink(ent))
         return;
-    if (!ent->inUse)
+    if (!ent->GetInUse())
         return;
 
-    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->angularVelocity);
-    ent->state.origin = vec3_fmaf(ent->state.origin, FRAMETIME, ent->velocity);
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME, ent->GetAngularVelocity()));
+    ent->SetOrigin(vec3_fmaf(ent->GetOrigin(), FRAMETIME, ent->GetVelocity()));
 
-    gi.LinkEntity(ent);
+    ent->LinkEntity();
 }
 
 /*
@@ -677,7 +676,7 @@ Toss, bounce, and fly movement.  When onground, do nothing.
 */
 void SV_Physics_Toss(SVGBaseEntity *ent)
 {
-    trace_t     trace;
+    SVGTrace     trace;
     vec3_t      move;
     float       backoff;
     Entity     *slave;
@@ -687,85 +686,87 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
 
     // Regular thinking
     SV_RunThink(ent);
-    if (!ent->inUse)
+    if (!ent->GetInUse())
         return;
 
     // If not a team captain, so movement will be handled elsewhere
-    if (ent->flags & EntityFlags::TeamSlave)
+    if (ent->GetFlags() & EntityFlags::TeamSlave)
         return;
 
-    if (ent->velocity[2] > 0)
-        ent->groundEntityPtr = NULL;
+    if (ent->GetVelocity().z > 0)
+        ent->GetServerEntity()->groundEntityPtr = NULL;
 
     // Check for the groundentity going away
-    if (ent->groundEntityPtr)
-        if (!ent->groundEntityPtr->inUse)
-            ent->groundEntityPtr = NULL;
+    if (ent->GetServerEntity()->groundEntityPtr)
+        if (!ent->GetServerEntity()->groundEntityPtr->inUse)
+            ent->GetServerEntity()->groundEntityPtr = NULL;
 
     // If onground, return without moving
-    if (ent->groundEntityPtr)
+    if (ent->GetServerEntity()->groundEntityPtr)
         return;
 
     // Store ent->state.origin as the old origin
-    oldOrigin = ent->state.origin;
+    oldOrigin = ent->GetOrigin();
 
     SV_CheckVelocity(ent);
 
     // Add gravity
-    if (ent->moveType != MoveType::Fly
-        && ent->moveType != MoveType::FlyMissile)
+    if (ent->GetMoveType() != MoveType::Fly
+        && ent->GetMoveType() != MoveType::FlyMissile)
         SV_AddGravity(ent);
 
     // Move angles
-    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->angularVelocity);
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME, ent->GetAngularVelocity()));
 
     // Move origin
-    move = vec3_scale(ent->velocity, FRAMETIME);
+    move = vec3_scale(ent->GetVelocity(), FRAMETIME);
     trace = SV_PushEntity(ent, move);
-    if (!ent->inUse)
+    if (!ent->GetInUse())
         return;
 
     if (trace.fraction < 1) {
-        if (ent->moveType == MoveType::Bounce)
+        if (ent->GetMoveType() == MoveType::Bounce)
             backoff = 1.5;
         else
             backoff = 1;
 
-        ClipVelocity(ent->velocity, trace.plane.normal, ent->velocity, backoff);
+        vec3_t outVelocity;
+        ClipVelocity(ent->GetVelocity(), trace.plane.normal, outVelocity, backoff);
+        ent->SetVelocity(outVelocity);
 
         // stop if on ground
         if (trace.plane.normal[2] > 0.7) {
-            if (ent->velocity[2] < 60 || ent->moveType != MoveType::Bounce) {
-                ent->groundEntityPtr = trace.ent;
-                ent->groundEntityLinkCount = trace.ent->linkCount;
-                VectorCopy(vec3_origin, ent->velocity);
-                VectorCopy(vec3_origin, ent->angularVelocity);
+            if (ent->GetVelocity().z < 60 || ent->GetMoveType() != MoveType::Bounce) {
+                ent->GetServerEntity()->groundEntityPtr = trace.ent->GetServerEntity();
+                ent->GetServerEntity()->groundEntityLinkCount = trace.ent->GetServerEntity()->linkCount;
+                ent->SetVelocity(vec3_origin);
+                ent->SetAngularVelocity(vec3_origin);
             }
         }
 
-//      if (ent->Touch)
-//          ent->Touch (ent, trace.ent, &trace.plane, trace.surface);
+      if (ent->HasTouchCallback())
+          ent->Touch(ent, trace.ent, &trace.plane, trace.surface);
     }
 
     // Check for water transition
-    wasInWater = (ent->waterType & CONTENTS_MASK_LIQUID);
-    ent->waterType = gi.PointContents(ent->state.origin);
-    isInWater = ent->waterType & CONTENTS_MASK_LIQUID;
+    wasInWater = (ent->GetServerEntity()->waterType & CONTENTS_MASK_LIQUID);
+    ent->GetServerEntity()->waterType = gi.PointContents(ent->GetOrigin());
+    isInWater = ent->GetServerEntity()->waterType & CONTENTS_MASK_LIQUID;
 
     if (isInWater)
-        ent->waterLevel = 1;
+        ent->GetServerEntity()->waterLevel = 1;
     else
-        ent->waterLevel = 0;
+        ent->GetServerEntity()->waterLevel = 0;
 
     if (!wasInWater && isInWater)
         gi.PositionedSound(oldOrigin, g_entities, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
     else if (wasInWater && !isInWater)
-        gi.PositionedSound(ent->state.origin, g_entities, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(ent->GetOrigin(), g_entities, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 
     // Move teamslaves
-    for (slave = ent->teamChainPtr; slave; slave = slave->teamChainPtr) {
+    for (slave = ent->GetServerEntity()->teamChainPtr; slave; slave = slave->teamChainPtr) {
         // Set origin and link them in.
-        slave->state.origin = ent->state.origin;
+        slave->state.origin = ent->GetOrigin();
         gi.LinkEntity(slave);
     }
 }
@@ -800,20 +801,23 @@ void SV_AddRotationalFriction(SVGBaseEntity *ent)
 {
     int     n;
     float   adjustment;
+    
+    vec3_t angularVelocity = ent->GetAngularVelocity();
 
-    ent->state.angles = vec3_fmaf(ent->state.angles, FRAMETIME, ent->angularVelocity);
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME, angularVelocity));
     adjustment = FRAMETIME * sv_stopspeed * sv_friction;
     for (n = 0; n < 3; n++) {
-        if (ent->angularVelocity[n] > 0) {
-            ent->angularVelocity[n] -= adjustment;
-            if (ent->angularVelocity[n] < 0)
-                ent->angularVelocity[n] = 0;
+        if (angularVelocity[n] > 0) {
+            angularVelocity[n] -= adjustment;
+            if (angularVelocity[n] < 0)
+                angularVelocity[n] = 0;
         } else {
-            ent->angularVelocity[n] += adjustment;
-            if (ent->angularVelocity[n] > 0)
-                ent->angularVelocity[n] = 0;
+            angularVelocity[n] += adjustment;
+            if (angularVelocity[n] > 0)
+                angularVelocity[n] = 0;
         }
     }
+    ent->SetAngularVelocity(angularVelocity);
 }
 
 void SV_Physics_Step(SVGBaseEntity *ent)
@@ -826,7 +830,7 @@ void SV_Physics_Step(SVGBaseEntity *ent)
     Entity     *groundentity;
     int         mask;
 
-    groundentity = ent->groundEntityPtr;
+    groundentity = ent->GetServerEntity()->groundEntityPtr;
 
     SV_CheckVelocity(ent);
 
@@ -835,50 +839,52 @@ void SV_Physics_Step(SVGBaseEntity *ent)
     else
         wasonground = false;
 
-    if (ent->angularVelocity[0] || ent->angularVelocity[1] || ent->angularVelocity[2])
+    vec3_t angularVelocity = ent->GetAngularVelocity();
+
+    if (angularVelocity[0] || angularVelocity[1] || angularVelocity[2])
         SV_AddRotationalFriction(ent);
 
     // add gravity except:
     //   flying monsters
     //   swimming monsters who are in the water
     if (! wasonground)
-        if (!(ent->flags & EntityFlags::Fly))
-            if (!((ent->flags & EntityFlags::Swim) && (ent->waterLevel > 2))) {
-                if (ent->velocity[2] < sv_gravity->value * -0.1)
+        if (!(ent->GetFlags() & EntityFlags::Fly))
+            if (!((ent->GetFlags() & EntityFlags::Swim) && (ent->GetServerEntity()->waterLevel > 2))) {
+                if (ent->GetVelocity().z < sv_gravity->value * -0.1)
                     hitsound = true;
-                if (ent->waterLevel == 0)
+                if (ent->GetServerEntity()->waterLevel == 0)
                     SV_AddGravity(ent);
             }
 
     // friction for flying monsters that have been given vertical velocity
-    if ((ent->flags & EntityFlags::Fly) && (ent->velocity[2] != 0)) {
-        speed = std::fabsf(ent->velocity[2]);
+    if ((ent->GetFlags() & EntityFlags::Fly) && (ent->GetVelocity().z != 0)) {
+        speed = std::fabsf(ent->GetServerEntity()->velocity[2]);
         control = speed < sv_stopspeed ? sv_stopspeed : speed;
         friction = sv_friction / 3;
         newspeed = speed - (FRAMETIME * control * friction);
         if (newspeed < 0)
             newspeed = 0;
         newspeed /= speed;
-        ent->velocity[2] *= newspeed;
+        ent->GetServerEntity()->velocity[2] *= newspeed;
     }
 
     // friction for flying monsters that have been given vertical velocity
-    if ((ent->flags & EntityFlags::Swim) && (ent->velocity[2] != 0)) {
-        speed = std::fabsf(ent->velocity[2]);
+    if ((ent->GetServerEntity()->flags & EntityFlags::Swim) && (ent->GetServerEntity()->velocity[2] != 0)) {
+        speed = std::fabsf(ent->GetServerEntity()->velocity[2]);
         control = speed < sv_stopspeed ? sv_stopspeed : speed;
-        newspeed = speed - (FRAMETIME * control * sv_waterfriction * ent->waterLevel);
+        newspeed = speed - (FRAMETIME * control * sv_waterfriction * ent->GetServerEntity()->waterLevel);
         if (newspeed < 0)
             newspeed = 0;
         newspeed /= speed;
-        ent->velocity[2] *= newspeed;
+        ent->GetServerEntity()->velocity[2] *= newspeed;
     }
 
-    if (ent->velocity[2] || ent->velocity[1] || ent->velocity[0]) {
+    if (ent->GetServerEntity()->velocity[2] || ent->GetServerEntity()->velocity[1] || ent->GetServerEntity()->velocity[0]) {
         // apply friction
         // let dead monsters who aren't completely onground slide
-        if ((wasonground) || (ent->flags & (EntityFlags::Swim | EntityFlags::Fly)))
-            if (!(ent->health <= 0.0)) {
-                vel = ent->velocity;
+        if ((wasonground) || (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)))
+            if (!(ent->GetServerEntity()->health <= 0.0)) {
+                vel = ent->GetServerEntity()->velocity;
                 speed = std::sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
                 if (speed) {
                     friction = sv_friction;
@@ -895,21 +901,21 @@ void SV_Physics_Step(SVGBaseEntity *ent)
                 }
             }
 
-        if (ent->serverFlags & EntityServerFlags::Monster)
+        if (ent->GetServerEntity()->serverFlags & EntityServerFlags::Monster)
             mask = CONTENTS_MASK_MONSTERSOLID;
         else
             mask = CONTENTS_MASK_SOLID;
         SV_FlyMove(ent, FRAMETIME, mask);
 
-        gi.LinkEntity(ent);
-        UTIL_TouchTriggers(ent);
-        if (!ent->inUse)
+        ent->LinkEntity();
+        UTIL_TouchTriggers(ent->GetServerEntity());
+        if (!ent->GetInUse())
             return;
 
-        if (ent->groundEntityPtr)
+        if (ent->GetServerEntity()->groundEntityPtr)
             if (!wasonground)
                 if (hitsound)
-                    gi.Sound(ent, 0, gi.SoundIndex("world/land.wav"), 1, 1, 0);
+                    gi.Sound(ent->GetServerEntity(), 0, gi.SoundIndex("world/land.wav"), 1, 1, 0);
     }
 
 // regular thinking

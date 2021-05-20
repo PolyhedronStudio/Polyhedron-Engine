@@ -71,6 +71,11 @@ public:
         return serverEntity->state.angles;
     }
 
+    // Return the 'angularVelocity' value.
+    inline const vec3_t& GetAngularVelocity() {
+        return serverEntity->angularVelocity;
+    }
+
     // Return the 'client' pointer.
     gclient_s* GetClient() {
         return serverEntity->client;
@@ -193,6 +198,11 @@ public:
     // Return the 'angles' value.
     inline void SetAngles(const vec3_t& angles) {
         serverEntity->state.angles = angles;
+    }
+
+    // Set the 'angularVelocity' value.
+    inline void SetAngularVelocity(const vec3_t& angularVelocity) {
+        serverEntity->angularVelocity = angularVelocity;
     }
 
     // Set the 'mins', and 'maxs' values of the entity bounding box.
@@ -364,6 +374,9 @@ public:
     inline void SetTouchCallback(function f)
     {
         touchFunction = static_cast<TouchCallbackPointer>(f);
+    }
+    inline qboolean HasTouchCallback() {
+        return (touchFunction != nullptr ? true : false);
     }
 
     // Sets the 'Blocked' callback function.

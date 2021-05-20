@@ -82,14 +82,14 @@ void Machinegun_Fire(Entity* ent)
     AngleVectors(angles, &forward, &right, NULL);
     VectorSet(offset, 0, 8, ent->viewHeight - 8);
     start = SVG_PlayerProjectSource(ent->client, ent->state.origin, offset, forward, right);
-    SVG_FireBullet(ent, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
+    SVG_FireBullet(ent->classEntity, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
 
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
     gi.WriteShort(ent - g_entities);
     gi.WriteByte(MuzzleFlashType::MachineGun | is_silenced);
     gi.Multicast(&ent->state.origin, MultiCast::PVS);
 
-    SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
+    SVG_PlayerNoise(ent->classEntity, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
         ent->client->persistent.inventory[ent->client->ammoIndex]--;

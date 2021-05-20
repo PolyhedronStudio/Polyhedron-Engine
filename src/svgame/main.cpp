@@ -87,7 +87,7 @@ cvar_t  *cl_monsterfootsteps;
 
 void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
 
-void SVG_RunEntity(Entity *ent);
+void SVG_RunEntity(SVGBaseEntity *ent);
 void SVG_WriteGame(const char *filename, qboolean autosave);
 void SVG_ReadGame(const char *filename);
 void SVG_WriteLevel(const char *filename);
@@ -522,7 +522,7 @@ void SVG_RunFrame(void)
         }
 
         // Last but not least, "run" process the entity.
-        SVG_RunEntity(ent);
+        SVG_RunEntity(ent->classEntity);
     }
 
     // See if it is time to end a deathmatch
@@ -736,8 +736,12 @@ void SVG_FreeEntity(Entity* ed)
 }
 
 // Returns a pointer to the world entity aka Worldspawn.
-Entity* SVG_GetWorldEntity() {
+Entity* SVG_GetWorldServerEntity() {
     return &g_entities[0];
+};
+
+SVGBaseEntity* SVG_GetWorldEntity() {
+    return g_baseEntities[0];
 };
 
 //
