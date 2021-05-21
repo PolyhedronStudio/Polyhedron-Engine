@@ -21,12 +21,13 @@ SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
 	takeDamageFunction = nullptr;
 	dieFunction = nullptr;
 
-	// All Entity pointers best be nullptr.
-	enemyEntity = nullptr;
-	oldEnemyEntity = nullptr;
-
+	//
+	// Set all entity pointer references to nullptr.
+	//
 	activatorEntity = nullptr;
-
+	enemyEntity = nullptr;
+	groundEntity = nullptr;
+	oldEnemyEntity = nullptr;
 	teamChainEntity = nullptr;
 	teamMasterEntity = nullptr;
 }

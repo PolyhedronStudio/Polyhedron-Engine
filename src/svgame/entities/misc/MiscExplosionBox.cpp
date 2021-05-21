@@ -242,7 +242,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
     SetOrigin(save);
 
     // Depending on whether we have a ground entity or not, we determine which explosion to use.
-    if (GetServerEntity()->groundEntityPtr)
+    if (GetGroundEntity())
         BecomeExplosion2(GetServerEntity());
     else
         BecomeExplosion1(GetServerEntity());
@@ -288,7 +288,7 @@ void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity*
     //    return;
 
     // Ground entity checks.
-    if ((!other->GetServerEntity()->groundEntityPtr) || (other->GetServerEntity()->groundEntityPtr == GetServerEntity()))
+    if ((!other->GetGroundEntity()) || (other->GetGroundEntity() == this))
         return;
 
     // Calculate ratio to use.

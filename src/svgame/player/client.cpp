@@ -626,7 +626,7 @@ void CopyToBodyQue(Entity *ent)
     body->clipMask = ent->clipMask;
     body->owner = ent->owner;
     body->classEntity->SetMoveType(ent->classEntity->GetMoveType());
-    body->groundEntityPtr = ent->groundEntityPtr;
+    body->classEntity->SetGroundEntity(ent->classEntity->GetGroundEntity());
 
     //body->Die = body_die;
     body->takeDamage = TakeDamage::Yes;

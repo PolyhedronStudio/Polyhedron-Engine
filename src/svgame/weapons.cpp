@@ -118,7 +118,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int damage, int kick)
     v = vec3_normalize(v);
     self->GetEnemy()->SetVelocity(vec3_fmaf(self->GetEnemy()->GetVelocity(), kick, v));
     if (self->GetEnemy()->GetVelocity().z > 0)
-        self->GetEnemy()->GetServerEntity()->groundEntityPtr = NULL;
+        self->GetEnemy()->SetGroundEntity(nullptr);
     return true;
 }
 

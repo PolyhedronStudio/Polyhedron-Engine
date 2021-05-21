@@ -104,7 +104,7 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
         return;
 
     if (ent->GetVelocity().z > 100) {
-        ent->GetServerEntity()->groundEntityPtr = NULL;
+        ent->SetGroundEntity(nullptr);
         return;
     }
 
@@ -115,7 +115,7 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
 
     // check steepness
     if (trace.plane.normal[2] < 0.7 && !trace.startSolid) {
-        ent->GetServerEntity()->groundEntityPtr = NULL;
+        ent->SetGroundEntity(nullptr);
         return;
     }
 
@@ -125,8 +125,8 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
     //      VectorCopy (trace.endpos, ent->s.origin);
     if (!trace.startSolid && !trace.allSolid) {
         ent->SetOrigin(trace.endPosition);
-        ent->GetServerEntity()->groundEntityPtr = trace.ent->GetServerEntity();
-        ent->GetServerEntity()->groundEntityLinkCount = trace.ent->GetServerEntity()->linkCount;
+        ent->SetGroundEntity(trace.ent);
+        ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
         ent->GetServerEntity()->velocity[2] = 0;
     }
 }
@@ -269,7 +269,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
                 ent->LinkEntity();
                 UTIL_TouchTriggers(ent);
             }
-            ent->GetServerEntity()->groundEntityPtr = NULL;
+            ent->SetGroundEntity(nullptr);
             return true;
         }
 
@@ -297,8 +297,8 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
     if (ent->GetFlags() & EntityFlags::PartiallyOnGround) {
         ent->SetFlags(ent->GetFlags() & ~EntityFlags::PartiallyOnGround);
     }
-    ent->GetServerEntity()->groundEntityPtr = trace.ent->GetServerEntity();
-    ent->GetServerEntity()->groundEntityLinkCount = trace.ent->GetServerEntity()->linkCount;
+    ent->SetGroundEntity(trace.ent);
+    ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
 
     // the move is ok
     if (relink) {
@@ -402,7 +402,7 @@ qboolean SVG_StepMove_Walk(SVGBaseEntity* ent, float yaw, float dist)
 {
     vec3_t  move;
 
-    if (!ent->GetServerEntity()->groundEntityPtr && !(ent->GetFlags() & (EntityFlags::Fly | EntityFlags::Swim)))
+    if (!ent->GetGroundEntity() && !(ent->GetFlags() & (EntityFlags::Fly | EntityFlags::Swim)))
         return false;
 
     yaw = yaw * M_PI * 2 / 360;

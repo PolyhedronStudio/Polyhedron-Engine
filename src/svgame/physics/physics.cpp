@@ -47,19 +47,19 @@ SV_TestEntityPosition
 
 ============
 */
-Entity *SV_TestEntityPosition(Entity *ent)
+SVGBaseEntity *SV_TestEntityPosition(SVGBaseEntity *ent)
 {
-    trace_t trace;
+    SVGTrace trace;
     int     mask;
 
-    if (ent->clipMask)
-        mask = ent->clipMask;
+    if (ent->GetClipMask())
+        mask = ent->GetClipMask();
     else
         mask = CONTENTS_MASK_SOLID;
-    trace = gi.Trace(ent->state.origin, ent->mins, ent->maxs, ent->state.origin, ent, mask);
+    trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, mask);
 
     if (trace.startSolid)
-        return g_entities;
+        return g_baseEntities[0];
 
     return NULL;
 }
@@ -213,7 +213,7 @@ int SV_FlyMove(SVGBaseEntity *ent, float time, int mask)
 
     time_left = time;
 
-    ent->GetServerEntity()->groundEntityPtr = NULL;
+    ent->SetGroundEntity(nullptr);
     for (bumpcount = 0 ; bumpcount < numbumps ; bumpcount++) {
         //for (i = 0 ; i < 3 ; i++)
         //    end[i] = ent->state.origin[i] + time_left * ent->velocity[i];
@@ -242,8 +242,8 @@ int SV_FlyMove(SVGBaseEntity *ent, float time, int mask)
         if (trace.plane.normal[2] > 0.7) {
             Blocked |= 1;       // floor
             if (hit->GetSolid() == Solid::BSP) {
-                ent->GetServerEntity()->groundEntityPtr = hit->GetServerEntity();
-                ent->GetServerEntity()->groundEntityLinkCount = hit->GetServerEntity()->linkCount;
+                ent->SetGroundEntity(hit);
+                ent->SetGroundEntityLinkCount(hit->GetLinkCount());
             }
         }
         if (!trace.plane.normal[2]) {
@@ -468,7 +468,7 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
             continue;       // not linked in anywhere
 
         // if the entity is standing on the pusher, it will definitely be moved
-        if (check->GetServerEntity()->groundEntityPtr != pusher->GetServerEntity()) {
+        if (check->GetGroundEntity() != pusher) {
             // see if the ent needs to be tested
             if (absMin[0] >= maxs[0]
                 || absMin[1] >= maxs[1]
@@ -479,12 +479,12 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
                 continue;
 
             // see if the ent's bbox is inside the pusher's final position
-            if (!SV_TestEntityPosition(check->GetServerEntity()))
+            if (!SV_TestEntityPosition(check))
                 continue;
             
         }
 
-        if ((pusher->GetMoveType() == MoveType::Push) || (check->GetServerEntity()->groundEntityPtr == pusher->GetServerEntity())) {
+        if ((pusher->GetMoveType() == MoveType::Push) || (check->GetGroundEntity() == pusher)) {
             // move this entity
             pushed_p->ent = check;
             pushed_p->origin = check->GetOrigin();  //VectorCopy(check->state.origin, pushed_p->origin);
@@ -514,10 +514,10 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
             check->SetOrigin(check->GetOrigin() + move2);//VectorAdd(check->state.origin, move2, check->state.origin);
 
             // may have pushed them off an edge
-            if (check->GetServerEntity()->groundEntityPtr != pusher->GetServerEntity())
-                check->GetServerEntity()->groundEntityPtr = NULL;
+            if (check->GetGroundEntity() != pusher)
+                check->SetGroundEntity(nullptr);
 
-            block = SV_TestEntityPosition(check->GetServerEntity())->classEntity;
+            block = SV_TestEntityPosition(check);
             if (!block) {
                 // pushed ok
                 check->LinkEntity();
@@ -529,7 +529,7 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
             // this is only relevent for riding entities, not pushed
             // FIXME: this doesn't acount for rotation
             check->SetOrigin(check->GetOrigin() - move);//check->state.origin -= move;
-            block = SV_TestEntityPosition(check->GetServerEntity())->classEntity;
+            block = SV_TestEntityPosition(check);
             if (!block) {
                 pushed_p--;
                 continue;
@@ -705,15 +705,15 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
         return;
 
     if (ent->GetVelocity().z > 0)
-        ent->GetServerEntity()->groundEntityPtr = NULL;
+        ent->SetGroundEntity(nullptr);
 
     // Check for the groundentity going away
-    if (ent->GetServerEntity()->groundEntityPtr)
-        if (!ent->GetServerEntity()->groundEntityPtr->inUse)
-            ent->GetServerEntity()->groundEntityPtr = NULL;
+    if (ent->GetGroundEntity())
+        if (!ent->GetGroundEntity()->IsInUse())
+            ent->SetGroundEntity(nullptr);
 
     // If onground, return without moving
-    if (ent->GetServerEntity()->groundEntityPtr)
+    if (ent->GetGroundEntity())
         return;
 
     // Store ent->state.origin as the old origin
@@ -748,8 +748,8 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
         // stop if on ground
         if (trace.plane.normal[2] > 0.7) {
             if (ent->GetVelocity().z < 60 || ent->GetMoveType() != MoveType::Bounce) {
-                ent->GetServerEntity()->groundEntityPtr = trace.ent->GetServerEntity();
-                ent->GetServerEntity()->groundEntityLinkCount = trace.ent->GetServerEntity()->linkCount;
+                ent->SetGroundEntity(trace.ent);
+                ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
                 ent->SetVelocity(vec3_origin);
                 ent->SetAngularVelocity(vec3_origin);
             }
@@ -846,10 +846,10 @@ void SV_Physics_Step(SVGBaseEntity *ent)
     float       *vel;
     float       speed, newspeed, control;
     float       friction;
-    Entity     *groundentity;
+    SVGBaseEntity     *groundentity;
     int         mask;
 
-    groundentity = ent->GetServerEntity()->groundEntityPtr;
+    groundentity = ent->GetGroundEntity();
 
     SV_CheckVelocity(ent);
 
@@ -937,10 +937,10 @@ void SV_Physics_Step(SVGBaseEntity *ent)
         if (!ent->IsInUse())
             return;
 
-        if (ent->GetServerEntity()->groundEntityPtr)
+        if (ent->GetGroundEntity())
             if (!wasonground)
                 if (hitsound)
-                    gi.Sound(ent->GetServerEntity(), 0, gi.SoundIndex("world/land.wav"), 1, 1, 0);
+                    SVG_Sound(ent, 0, gi.SoundIndex("world/land.wav"), 1, 1, 0);
     }
 
 // regular thinking

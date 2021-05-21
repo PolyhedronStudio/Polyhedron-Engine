@@ -111,6 +111,16 @@ public:
         return serverEntity->flags;
     }
 
+    // Return the 'groundEntitPtr' entity.
+    inline SVGBaseEntity* GetGroundEntity() {
+        return groundEntity;
+    }
+
+    // Return the 'groundEntityLinkCount' value.
+    inline int32_t GetGroundEntityLinkCount() {
+        return groundEntityLinkCount;
+    }
+
     // Return the 'health' value.
     inline const int32_t GetHealth() {
         return serverEntity->health;
@@ -121,9 +131,14 @@ public:
         return serverEntity->inUse;
     }
 
-    // Set the 'killTarget' entity value.
+    // Get the 'killTarget' entity value.
     inline char* GetKillTarget() {
         return serverEntity->killTarget;
+    }
+
+    // Get the 'linkCount' value.
+    inline const int32_t GetLinkCount() {
+        return serverEntity->linkCount;
     }
 
     // Return the 'mass' value.
@@ -300,6 +315,32 @@ public:
         serverEntity->flags = flags;
     }
 
+    // Set the 'groundEntitPtr' entity.
+    inline void SetGroundEntity(SVGBaseEntity* groundEntity) {
+        // Ensure to set the serverEntity its ground entity too.
+        //
+        // This is so sharedgame code can utilize it as well.
+        //
+        // TODO: Needs a lookup function for these entities in the
+        // shared game code.
+        if (groundEntity) {
+            // Set the server entity side ground pointer.
+            serverEntity->groundEntityPtr = groundEntity->GetServerEntity();
+
+            // Set SVGBaseEntity variant ground entity.
+            this->groundEntity = groundEntity;
+        }
+    }
+
+    // Set the 'groundEntityLinkCount' value.
+    inline void SetGroundEntityLinkCount(int32_t groundEntityLinkCount) {
+        // Set it for THIS class entity.
+        this->groundEntityLinkCount = groundEntityLinkCount;
+
+        // Ensure it is also set on our server entity.
+        serverEntity->groundEntityLinkCount = groundEntityLinkCount;
+    }
+
     // Set the 'health' value.
     inline void SetHealth(const int32_t &health) {
         serverEntity->health = health;
@@ -308,6 +349,11 @@ public:
     // Set the 'inuse' value.
     inline void SetInUse(const qboolean& inUse) {
         serverEntity->inUse = inUse;
+    }
+
+    // Set the 'linkCount' value.
+    inline void SetLinkCount(const int32_t &linkCount) {
+        serverEntity->linkCount = linkCount;
     }
 
     // Set the 'mass' value.
@@ -434,18 +480,25 @@ private:
     // Angular Velocity.
     vec3_t _angularVelocity;
 
+    // Ground Entity link count. (To keep track if it is linked or not.)
+    int32_t groundEntityLinkCount;
+
+    //
+    // Entity pointers.
+    // 
+    // Entity that activated this entity, NULL if none.
+    SVGBaseEntity* activatorEntity;
     // Current active enemy, NULL if not any.    
     SVGBaseEntity *enemyEntity;
+    // Ground entity we're standing on.
+    SVGBaseEntity *groundEntity;
     // Old enemy, NULL if not any.
     SVGBaseEntity *oldEnemyEntity;
-
-    // Entity that activated this entity, NULL if none.
-    SVGBaseEntity *activatorEntity;
-
-    // Team Chain Pointer, and Master Pointer.
+    // Team Chain Pointer.
     SVGBaseEntity* teamChainEntity;
+    // Master Pointer.
     SVGBaseEntity* teamMasterEntity;
-
+    
 public:
     //
     // Ugly, but effective callback SET methods.
