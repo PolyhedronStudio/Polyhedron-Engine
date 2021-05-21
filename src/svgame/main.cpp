@@ -745,6 +745,11 @@ void SVG_FreeEntity(Entity* ed)
     ed->inUse = false;
 }
 
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// 
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 // Returns a pointer to the world entity aka Worldspawn.
 Entity* SVG_GetWorldServerEntity() {
     return &g_entities[0];
@@ -753,6 +758,63 @@ Entity* SVG_GetWorldServerEntity() {
 SVGBaseEntity* SVG_GetWorldEntity() {
     return g_baseEntities[0];
 };
+
+//
+//===============
+// SVG_CenterPrint
+//
+// Wraps up gi.CenterPrintf for SVGBaseEntity, and nice std::string hurray.
+//===============
+//
+void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str) {
+    if (!ent)
+        return;
+
+    gi.CenterPrintf(ent->GetServerEntity(), "%s", str.c_str());
+}
+
+//
+//===============
+// SVG_CenterPrint
+//
+// Wraps up gi.Sound for SVGBaseEntity.
+//===============
+//
+void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset) {
+    if (!ent)
+        return;
+
+    gi.Sound(ent->GetServerEntity(), channel, soundIndex, volume, attenuation, timeOffset);
+}
+
+
+//
+//===============
+// SVG_BoxEntities
+//
+// Returns an std::vector containing the found boxed entities. Will not exceed listCount.
+//===============
+//
+std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount, int32_t areaType) {
+    Entity* boxedServerEntities[MAX_EDICTS];
+    std::vector<SVGBaseEntity*> boxedBaseEntities;
+
+    // Ensure the listCount can't exceed the max edicts.
+    if (listCount > MAX_EDICTS) {
+        listCount = MAX_EDICTS;
+    }
+
+    // Box the entities.
+    int32_t numEntities = gi.BoxEntities(mins, maxs, boxedServerEntities, MAX_EDICTS, AREA_SOLID);
+
+    // Go through the boxed entities list, and store there classEntities (SVGBaseEntity aka baseEntities).
+    for (int32_t i = 0; i < numEntities; i++) {
+        boxedBaseEntities.push_back(boxedServerEntities[i]->classEntity);
+    }
+
+    // Return our boxed base entities vector.
+    return boxedBaseEntities;
+}
 
 //
 //===============

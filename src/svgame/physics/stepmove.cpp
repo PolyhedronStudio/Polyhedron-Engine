@@ -213,8 +213,8 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
                 ent->SetOrigin(trace.endPosition);
 
                 if (relink) {
-                    gi.LinkEntity(ent->GetServerEntity());
-                    UTIL_TouchTriggers(ent->GetServerEntity());
+                    ent->LinkEntity();
+                    UTIL_TouchTriggers(ent);
                 }
                 return true;
             }
@@ -265,8 +265,8 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
         if (ent->GetFlags() & EntityFlags::PartiallyOnGround) {
             ent->SetOrigin(ent->GetOrigin() + move);
             if (relink) {
-                gi.LinkEntity(ent->GetServerEntity());
-                UTIL_TouchTriggers(ent->GetServerEntity());
+                ent->LinkEntity();
+                UTIL_TouchTriggers(ent);
             }
             ent->GetServerEntity()->groundEntityPtr = NULL;
             return true;
@@ -284,8 +284,8 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
             // entity had floor mostly pulled out from underneath it
             // and is trying to correct
             if (relink) {
-                gi.LinkEntity(ent->GetServerEntity());
-                UTIL_TouchTriggers(ent->GetServerEntity());
+                ent->LinkEntity();
+                UTIL_TouchTriggers(ent);
             }
             return true;
         }
@@ -301,8 +301,8 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
 
     // the move is ok
     if (relink) {
-        gi.LinkEntity(ent->GetServerEntity());
-        UTIL_TouchTriggers(ent->GetServerEntity());
+        ent->LinkEntity();
+        UTIL_TouchTriggers(ent);
     }
     return true;
 }
@@ -382,12 +382,12 @@ qboolean SV_StepDirection(SVGBaseEntity* ent, float yaw, float dist)
             // not turned far enough, so don't take the step
             VectorCopy(oldorigin, ent->GetServerEntity()->state.origin);
         }
-        gi.LinkEntity(ent->GetServerEntity());
-        UTIL_TouchTriggers(ent->GetServerEntity());
+        ent->LinkEntity();
+        UTIL_TouchTriggers(ent);
         return true;
     }
-    gi.LinkEntity(ent->GetServerEntity());
-    UTIL_TouchTriggers(ent->GetServerEntity());
+    ent->LinkEntity();
+    UTIL_TouchTriggers(ent);
     return false;
 }
 

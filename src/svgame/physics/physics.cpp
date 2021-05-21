@@ -378,7 +378,7 @@ retry:
     }
 
     if (ent->IsInUse())
-        UTIL_TouchTriggers(ent->GetServerEntity());
+        UTIL_TouchTriggers(ent);
 
     return trace;
 }
@@ -553,7 +553,7 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
 //FIXME: is there a better way to handle this?
     // see if anything we moved has touched a trigger
     for (p = pushed_p - 1 ; p >= pushed ; p--)
-        UTIL_TouchTriggers(p->ent->GetServerEntity());
+        UTIL_TouchTriggers(p->ent);
 
     return true;
 }
@@ -860,10 +860,14 @@ void SV_Physics_Step(SVGBaseEntity *ent)
     else
         wasonground = false;
 
+    // Check whether its angular velocity needs to be taken in consideration.
     vec3_t angularVelocity = ent->GetAngularVelocity();
 
     if (angularVelocity[0] || angularVelocity[1] || angularVelocity[2])
         SV_AddRotationalFriction(ent);
+
+    // Re-ensure we fetched its latest angular velocity.
+    angularVelocity = ent->GetAngularVelocity();
 
     // add gravity except:
     //   flying monsters
@@ -929,7 +933,8 @@ void SV_Physics_Step(SVGBaseEntity *ent)
         SV_FlyMove(ent, FRAMETIME, mask);
 
         ent->LinkEntity();
-        UTIL_TouchTriggers(ent->GetServerEntity());
+        UTIL_TouchTriggers(ent);
+
         if (!ent->IsInUse())
             return;
 

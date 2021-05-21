@@ -438,7 +438,7 @@ void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf
     }
 
     if (!(ent->spawnFlags & ItemSpawnFlags::TargetsUsed)) {
-        UTIL_UseTargets(ent, other);
+        UTIL_UseTargets(ent->classEntity, other->classEntity);
         ent->spawnFlags |= ItemSpawnFlags::TargetsUsed;
     }
 

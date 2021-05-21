@@ -76,6 +76,11 @@ public:
         return serverEntity->angularVelocity;
     }
 
+    // Return the 'className' value.
+    inline const char* GetClassName() {
+        return serverEntity->className;
+    }
+
     // Return the 'client' pointer.
     gclient_s* GetClient() {
         return serverEntity->client;
@@ -91,14 +96,14 @@ public:
         return serverEntity->damage;
     }
 
+    // Return the 'delay' value.
+    inline const int32_t GetDelay() {
+        return serverEntity->delay;
+    }
+
     // Return the 'enemyPtr' entity pointer.
     SVGBaseEntity* GetEnemy() {
         return enemyEntity;
-    }
-
-    // Return the 'oldEnemyPtr' entity pointer.
-    SVGBaseEntity* GetOldEnemy() {
-        return oldEnemyEntity;
     }
 
     // Return the 'flags' value.
@@ -119,21 +124,31 @@ public:
         return serverEntity->inUse;
     }
 
+    // Set the 'killTarget' entity value.
+    inline char* GetKillTarget() {
+        return serverEntity->killTarget;
+    }
+
     // Return the 'mass' value.
     inline const int32_t GetMass() {
         return serverEntity->mass;
+    }
+    
+    // Return the bounding box 'maxs' value.
+    inline const vec3_t& GetMaxs() {
+        return serverEntity->maxs;
+    }
+
+    // Return the 'message' value.
+    inline const char* GetMessage() {
+        return serverEntity->message;
     }
 
     // Return the bounding box 'mins' value.
     inline const vec3_t& GetMins() {
         return serverEntity->mins;
     }
-
-    // Return the bounding box 'maxs' value.
-    inline const vec3_t& GetMaxs() {
-        return serverEntity->maxs;
-    }
-    
+   
     // Return the 'model' value.
     inline const char* GetModel() {
         return serverEntity->model;
@@ -149,6 +164,21 @@ public:
         return serverEntity->nextThinkTime;
     }
 
+    // Return the 'noiseIndex' value.
+    inline const int32_t GetNoiseIndex() {
+        return serverEntity->noiseIndex;
+    }
+
+    // Return the 'noiseIndex2' value.
+    inline const int32_t GetNoiseIndex2() {
+        return serverEntity->noiseIndex2;
+    }
+
+    // Return the 'oldEnemyPtr' entity pointer.
+    SVGBaseEntity* GetOldEnemy() {
+        return oldEnemyEntity;
+    }
+
     // Return the 'oldOrigin' value.
     inline const vec3_t& GetOldOrigin() {
         return serverEntity->state.oldOrigin;
@@ -157,6 +187,11 @@ public:
     // Return the 'origin' value.
     inline const vec3_t &GetOrigin() {
         return serverEntity->state.origin;
+    }
+
+    // Set the 'pathTarget' entity value.
+    inline char* GetPathTarget() {
+        return serverEntity->pathTarget;
     }
 
     // Returns the 'serverFlags' value.
@@ -187,6 +222,15 @@ public:
     // Return the 'takeDamage' value.
     inline const int32_t GetTakeDamage() {
         return serverEntity->takeDamage;
+    }
+
+    // Set the 'target' entity value.
+    inline char* GetTarget() {
+        return serverEntity->target;
+    }
+    // Set the 'targetName' entity value.
+    inline const char* GetTargetName() {
+        return serverEntity->targetName;
     }
 
     // Set the 'team' entity value.
@@ -244,14 +288,14 @@ public:
         serverEntity->damage = damage;
     }
 
+    // Return the 'delay' value.
+    inline const int32_t SetDelay(const int32_t &delay) {
+        serverEntity->delay = delay;
+    }
+
     // Set the 'enemyPtr' pointer.
     inline void SetEnemy(SVGBaseEntity* enemy) {
         this->enemyEntity = enemy;
-    }
-
-    // Set the 'oldEnemyPtr' pointer.
-    inline void SetOldEnemy(SVGBaseEntity* oldEnemy) {
-        this->oldEnemyEntity = oldEnemy;
     }
 
     // Set the 'flags' value.
@@ -305,6 +349,11 @@ public:
     // Set the 'nextThinkTime' value.
     inline void SetNextThinkTime(const float& nextThinkTime) {
         serverEntity->nextThinkTime = nextThinkTime;
+    }
+    
+    // Set the 'oldEnemyPtr' pointer.
+    inline void SetOldEnemy(SVGBaseEntity* oldEnemy) {
+        this->oldEnemyEntity = oldEnemy;
     }
 
     // Set the 'origin' value.

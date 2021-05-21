@@ -715,6 +715,7 @@ void SVG_RunEntity(SVGBaseEntity *ent);
 //
 // g_main.c
 //
+//-----------------------------------------------------------------------------------------------------------
 void SVG_SaveClientData(void);
 void SVG_FetchClientData(Entity *ent);
 
@@ -763,9 +764,16 @@ struct SVGTrace {
 
 SVGTrace SVG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, SVGBaseEntity* passent, const int32_t& contentMask);
 
+std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount = MAX_EDICTS, int32_t areaType = AREA_SOLID);
+
 qhandle_t SVG_PrecacheModel(const std::string& filename);
 qhandle_t SVG_PrecacheImage(const std::string& filename);
 qhandle_t SVG_PrecacheSound(const std::string& filename);
+
+void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str);
+void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset);
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //
 // g_chase.c
@@ -1011,8 +1019,6 @@ struct entity_s {
     char *killTarget;
     char *team;
     char *pathTarget;
-    char *deathTarget;
-    char *combatTarget;
     Entity *targetEntityPtr;
 
     // For moving objects(plats, etc)

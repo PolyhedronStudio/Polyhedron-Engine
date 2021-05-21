@@ -913,7 +913,7 @@ void SVG_PutClientInServer(Entity *ent)
     } else
         client->respawn.isSpectator = false;
 
-    if (!SVG_KillBox(ent)) {
+    if (!SVG_KillBox(ent->classEntity)) {
         // could't spawn in?
     }
 
@@ -1367,7 +1367,7 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
 
         // Only check for trigger and object touches if not one of these movetypes.
         if (ent->classEntity->GetMoveType() != MoveType::NoClip && ent->classEntity->GetMoveType() != MoveType::Spectator)
-            UTIL_TouchTriggers(ent);
+            UTIL_TouchTriggers(ent->classEntity);
 
         // touch other objects
         int i = 0;

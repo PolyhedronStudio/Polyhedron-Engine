@@ -62,10 +62,10 @@ vec3_t SVG_VelocityForDamage(int damage)
     return v;
 }
 
-void Think_Delay(Entity *ent)
+void Think_Delay(SVGBaseEntity *ent)
 {
-//    UTIL_UseTargets(ent, ent->activator);
-    SVG_FreeEntity(ent);
+    UTIL_UseTargets(ent, ent->GetActivator());
+    SVG_FreeEntity(ent->GetServerEntity());
 }
 
 /*
@@ -84,25 +84,25 @@ match (string)self.target and call their .use function
 
 ==============================
 */
-void UTIL_UseTargets(Entity *ent, Entity *activator)
+void UTIL_UseTargets(SVGBaseEntity*ent, SVGBaseEntity*activator)
 {
     Entity     *t;
 
 //
 // check for a delay
 //
-    if (ent->delay) {
+    if (ent->GetDelay()) {
         // create a temp object to fire at a later time
         t = SVG_Spawn();
         t->className = "DelayedUse";
-        t->nextThinkTime = level.time + ent->delay;
+        t->nextThinkTime = level.time + ent->GetDelay();
         //t->Think = Think_Delay;
 //        t->activator = activator;
         if (!activator)
             gi.DPrintf("Think_Delay with no activator\n");
-        t->message = ent->message;
-        t->target = ent->target;
-        t->killTarget = ent->killTarget;
+        t->message = ent->GetMessage();
+        t->target = ent->GetTarget();
+        t->killTarget = ent->GetKillTarget();
         return;
     }
 
@@ -110,22 +110,22 @@ void UTIL_UseTargets(Entity *ent, Entity *activator)
 //
 // print the message
 //
-    if ((ent->message) && !(activator->serverFlags & EntityServerFlags::Monster)) {
-        gi.CenterPrintf(activator, "%s", ent->message);
-        if (ent->noiseIndex)
-            gi.Sound(activator, CHAN_AUTO, ent->noiseIndex, 1, ATTN_NORM, 0);
+    if ((ent->GetMessage()) && !(activator->GetServerFlags() & EntityServerFlags::Monster)) {
+        SVG_CenterPrint(activator, ent->GetMessage());
+        if (ent->GetNoiseIndex())
+            SVG_Sound(activator, CHAN_AUTO, ent->GetNoiseIndex(), 1, ATTN_NORM, 0);
         else
-            gi.Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+            SVG_Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
     }
 
 //
 // kill killtargets
 //
-    if (ent->killTarget) {
+    if (ent->GetKillTarget()) {
         t = NULL;
-        while ((t = SVG_Find(t, FOFS(targetName), ent->killTarget))) {
+        while ((t = SVG_Find(t, FOFS(targetName), ent->GetKillTarget()))) {
             SVG_FreeEntity(t);
-            if (!ent->inUse) {
+            if (!ent->IsInUse()) {
                 gi.DPrintf("entity was removed while using killtargets\n");
                 return;
             }
@@ -135,30 +135,25 @@ void UTIL_UseTargets(Entity *ent, Entity *activator)
 //
 // fire targets
 //
-    if (ent->target) {
+    if (ent->GetTarget()) {
         t = NULL;
-        while ((t = SVG_Find(t, FOFS(targetName), ent->target))) {
+        while ((t = SVG_Find(t, FOFS(targetName), ent->GetTarget()))) {
             // doors fire area portals in a specific way
             if (!Q_stricmp(t->className, "func_areaportal") &&
-                (!Q_stricmp(ent->className, "func_door") || !Q_stricmp(ent->className, "func_door_rotating")))
+                (!Q_stricmp(ent->GetClassName(), "func_door") || !Q_stricmp(ent->GetClassName(), "func_door_rotating")))
                 continue;
 
-            if (t == ent) {
+            if (t == ent->GetServerEntity()) {
                 gi.DPrintf("WARNING: Entity used itself.\n");
             } else {
-                SVGBaseEntity* classEntity = t->classEntity;
+                SVGBaseEntity* targetClassEntity = t->classEntity;
 
                 // Only continue if there is a classentity.
-                if (classEntity) {
-                    // Check for the other entities to have a classentity too.
-                    if (ent->classEntity && activator->classEntity) {
-                        ent->classEntity->Use(ent->classEntity, activator->classEntity);
-                    }
+                if (targetClassEntity) {
+                    targetClassEntity->Use(ent, activator);
                 }
-                //if (t->Use)
-                //    t->Use(t, ent, activator);
             }
-            if (!ent->inUse) {
+            if (!ent->IsInUse()) {
                 gi.DPrintf("entity was removed while using targets\n");
                 return;
             }
@@ -191,27 +186,24 @@ G_TouchTriggers
 
 ============
 */
-void UTIL_TouchTriggers(Entity *ent)
+void UTIL_TouchTriggers(SVGBaseEntity *ent)
 {
-    int         i, num;
-    Entity     *touch[MAX_EDICTS], *hit;
-
-    // dead things don't activate triggers!
-    if ((ent->client || (ent->serverFlags & EntityServerFlags::Monster)) && (ent->health <= 0))
+    // Dead things don't activate triggers!
+    if ((ent->GetClient() || (ent->GetServerFlags() & EntityServerFlags::Monster)) && (ent->GetHealth() <= 0))
         return;
 
-    num = gi.BoxEntities(ent->absMin, ent->absMax, touch
-                       , MAX_EDICTS, AREA_TRIGGERS);
+    // Fetch the boxed entities.
+    std::vector<SVGBaseEntity*> touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AREA_TRIGGERS);
 
     // be careful, it is possible to have an entity in this
     // list removed before we get to it (killtriggered)
-    for (i = 0 ; i < num ; i++) {
-        hit = touch[i];
-        if (!hit->inUse)
+    for (auto& touchedEntity : touched) {
+        if (!touchedEntity)
             continue;
-        if (!hit->classEntity)
+        if (!touchedEntity->IsInUse())
             continue;
-        hit->classEntity->Touch((hit->classEntity ? hit->classEntity : nullptr), (ent->classEntity ? ent->classEntity : nullptr), NULL, NULL);
+
+        touchedEntity->Touch(touchedEntity, ent, NULL, NULL);
     }
 }
 
@@ -223,25 +215,34 @@ Call after linking a new trigger in during gameplay
 to force all entities it covers to immediately touch it
 ============
 */
-void    G_TouchSolids(Entity *ent)
+void G_TouchSolids(SVGBaseEntity *ent)
 {
-    int         i, num;
-    Entity     *touch[MAX_EDICTS], *hit;
-
-    num = gi.BoxEntities(ent->absMin, ent->absMax, touch
-                       , MAX_EDICTS, AREA_SOLID);
+    // Fetch the boxed entities.
+    std::vector<SVGBaseEntity*> touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AREA_SOLID);
 
     // be careful, it is possible to have an entity in this
     // list removed before we get to it (killtriggered)
-    for (i = 0 ; i < num ; i++) {
-        hit = touch[i];
-        if (!hit->inUse)
+    for (auto& touchedEntity : touched) {
+        if (!touchedEntity)
             continue;
-        if (ent->classEntity)
-            ent->classEntity->Touch((hit->classEntity ? hit->classEntity : nullptr), (ent->classEntity ? ent->classEntity : nullptr), NULL, NULL);
-        if (!ent->inUse)
+        if (!touchedEntity->IsInUse())
+            continue;
+
+        ent->Touch(touchedEntity, ent, NULL, NULL);
+
+        if (!ent->IsInUse())
             break;
     }
+
+    //for (i = 0 ; i < num ; i++) {
+    //    hit = touch[i];
+    //    if (!hit->inUse)
+    //        continue;
+    //    if (ent->classEntity)
+    //        ent->classEntity->Touch((hit->classEntity ? hit->classEntity : nullptr), (ent->classEntity ? ent->classEntity : nullptr), NULL, NULL);
+    //    if (!ent->inUse)
+    //        break;
+    //}
 }
 
 
@@ -263,20 +264,20 @@ Kills all entities that would touch the proposed new positioning
 of ent.  Ent should be unlinked before calling this!
 =================
 */
-qboolean SVG_KillBox(Entity *ent)
+qboolean SVG_KillBox(SVGBaseEntity *ent)
 {
-    trace_t     tr;
+    SVGTrace tr;
 
     while (1) {
-        tr = gi.Trace(ent->state.origin, ent->mins, ent->maxs, ent->state.origin, NULL, CONTENTS_MASK_PLAYERSOLID);
+        tr = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), NULL, CONTENTS_MASK_PLAYERSOLID);
         if (!tr.ent)
             break;
 
         // nail it
-//        SVG_Damage(tr.ent, ent, ent, vec3_origin, ent->state.origin, vec3_origin, 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
+        SVG_Damage(tr.ent, ent, ent, vec3_origin, ent->GetOrigin(), vec3_origin, 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
 
         // if we didn't kill it, fail
-        if (tr.ent->solid)
+        if (tr.ent->GetSolid())
             return false;
     }
 

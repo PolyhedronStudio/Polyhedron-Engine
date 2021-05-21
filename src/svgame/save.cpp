@@ -96,8 +96,6 @@ static const save_field_t entityfields[] = {
     L(killTarget),
     L(team),
     L(pathTarget),
-    L(deathTarget),
-    L(combatTarget),
     E(targetEntityPtr),
 
     F(speed),
