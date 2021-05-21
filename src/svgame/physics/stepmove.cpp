@@ -109,7 +109,7 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
     }
 
     // if the hull point one-quarter unit down is solid the entity is on ground
-    point = ent->GetOrigin() + vec3_t{ 0.f, 0.f, 0.25f };
+    point = ent->GetOrigin() + vec3_t{ 0.f, 0.f, -0.25f };
 
     trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), point, ent, CONTENTS_MASK_MONSTERSOLID);
 
@@ -363,7 +363,7 @@ facing it.
 */
 qboolean SV_StepDirection(SVGBaseEntity* ent, float yaw, float dist)
 {
-    vec3_t      move, oldorigin;
+    vec3_t      move, oldOrigin;
     float       delta;
 
     ent->GetServerEntity()->idealYawAngle = yaw;
@@ -374,13 +374,14 @@ qboolean SV_StepDirection(SVGBaseEntity* ent, float yaw, float dist)
     move[1] = std::sinf(yaw) * dist;
     move[2] = 0;
 
-    ent->SetOrigin(oldorigin);
+    oldOrigin = ent->GetOrigin();
+
 //    VectorCopy(ent->state.origin, oldorigin);
     if (SVG_MoveStep(ent, move, false)) {
         delta = ent->GetServerEntity()->state.angles[vec3_t::Yaw] - ent->GetServerEntity()->idealYawAngle;
         if (delta > 45 && delta < 315) {
             // not turned far enough, so don't take the step
-            VectorCopy(oldorigin, ent->GetServerEntity()->state.origin);
+            ent->SetOrigin(oldOrigin);
         }
         ent->LinkEntity();
         UTIL_TouchTriggers(ent);

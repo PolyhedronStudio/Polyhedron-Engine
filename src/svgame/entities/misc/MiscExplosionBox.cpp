@@ -41,6 +41,9 @@ MiscExplosionBox::~MiscExplosionBox() {
 //===============
 //
 void MiscExplosionBox::Precache() {
+    // Always call parent class method.
+    SVGBaseEntity::Precache();
+
     // Precache actual barrel model.
     SVG_PrecacheModel("models/objects/barrels/tris.md2");
 
@@ -59,7 +62,7 @@ void MiscExplosionBox::Precache() {
 //===============
 //
 void MiscExplosionBox::Spawn() {
-    // Ensure we call the base spawn function.
+    // Always call parent class method.
     SVGBaseEntity::Spawn();
 
     // Set solid.
@@ -115,6 +118,8 @@ void MiscExplosionBox::Spawn() {
 //===============
 //
 void MiscExplosionBox::PostSpawn() {
+    // Always call parent class method.
+    SVGBaseEntity::PostSpawn();
 	//gi.DPrintf("MiscExplosionBox::PostSpawn();");
 }
 
@@ -125,6 +130,7 @@ void MiscExplosionBox::PostSpawn() {
 //===============
 //
 void MiscExplosionBox::Think() {
+    // Always call parent class method.
     SVGBaseEntity::Think();
 	//gi.DPrintf("MiscExplosionBox::Think();");
 }
@@ -163,7 +169,7 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
     };
 
     // Execute the trace.
-    trace_t trace = gi.Trace(GetOrigin(), GetMins(), GetMaxs(), end, GetServerEntity(), CONTENTS_MASK_MONSTERSOLID);
+    SVGTrace trace = SVG_Trace(GetOrigin(), GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
 
     // Return in case of fraction 1 or allSolid.
     if (trace.fraction == 1 || trace.allSolid) {

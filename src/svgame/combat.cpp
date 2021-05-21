@@ -283,7 +283,7 @@ void SVG_Damage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *at
         return;
     }
 
-    if (!targ->HasTakeDamageCallback())
+    if (!targ->GetTakeDamage())
         return;
 
     // friendly fire avoidance
