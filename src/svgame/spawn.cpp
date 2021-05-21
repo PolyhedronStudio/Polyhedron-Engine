@@ -31,75 +31,6 @@ typedef struct {
     fieldtype_t type;
 } spawn_field_t;
 
-void SP_item_health(Entity *self);
-void SP_item_health_small(Entity *self);
-void SP_item_health_large(Entity *self);
-void SP_item_health_mega(Entity *self);
-
-void SP_info_player_start(Entity *ent);
-void SP_info_player_deathmatch(Entity *ent);
-void SP_info_player_coop(Entity *ent);
-void SP_info_player_intermission(Entity *ent);
-
-void SP_func_plat(Entity *ent);
-void SP_func_rotating(Entity *ent);
-void SP_func_button(Entity *ent);
-void SP_func_door(Entity *ent);
-
-void SP_func_door_rotating(Entity *ent);
-void SP_func_water(Entity *ent);
-void SP_func_train(Entity *ent);
-void SP_func_conveyor(Entity *self);
-void SP_func_wall(Entity *self);
-void SP_func_object(Entity *self);
-void SP_func_explosive(Entity *self);
-void SP_func_timer(Entity *self);
-void SP_func_areaportal(Entity *ent);
-void SP_func_killbox(Entity *ent);
-
-void SP_trigger_always(Entity *ent);
-void SP_trigger_once(Entity *ent);
-void SP_trigger_multiple(Entity *ent);
-void SP_trigger_relay(Entity *ent);
-void SP_trigger_push(Entity *ent);
-void SP_trigger_hurt(Entity *ent);
-void SP_trigger_key(Entity *ent);
-void SP_trigger_counter(Entity *ent);
-void SP_trigger_elevator(Entity *ent);
-void SP_trigger_gravity(Entity *ent);
-void SP_trigger_monsterjump(Entity *ent);
-
-void SP_target_temp_entity(Entity *ent);
-void SP_target_speaker(Entity *ent);
-void SP_target_explosion(Entity *ent);
-void SP_target_changelevel(Entity *ent);
-void SP_target_splash(Entity *ent);
-void SP_target_spawner(Entity *ent);
-void SP_target_blaster(Entity *ent);
-void SP_target_crosslevel_trigger(Entity *ent);
-void SP_target_crosslevel_target(Entity *ent);
-
-void SP_target_lightramp(Entity *self);
-void SP_target_earthquake(Entity *ent);
-
-void SP_worldspawn(Entity *ent);
-
-void SP_light(Entity* self) {
-
-}
-void SP_info_null(Entity *self);
-void SP_info_notnull(Entity *self);
-
-void SP_misc_gib_arm(Entity *self);
-void SP_misc_gib_leg(Entity *self);
-void SP_misc_gib_head(Entity *self);
-
-void SP_misc_teleporter(Entity *self);
-void SP_misc_teleporter_dest(Entity *self);
-
-
-void SP_misc_explobox(Entity* self);
-
 static const spawn_func_t spawn_funcs[] = {
     //{"item_health", SP_item_health},
     //{"item_health_small", SP_item_health_small},
@@ -242,18 +173,34 @@ static const spawn_field_t temp_fields[] = {
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     SVGBaseEntity* spawnEntity = NULL;
 
+    int32_t entityNumber = ent->state.number;
+
     if (className == "misc_explobox")
-        spawnEntity = g_baseEntities[ent->state.number] = new MiscExplosionBox(ent);
+        spawnEntity = g_baseEntities[entityNumber] = new MiscExplosionBox(ent);
     else if (className == "info_player_start")
-        spawnEntity = g_baseEntities[ent->state.number] = new InfoPlayerStart(ent);
+        spawnEntity = g_baseEntities[entityNumber] = new InfoPlayerStart(ent);
     else if (className == "light")
-        spawnEntity = g_baseEntities[ent->state.number] = new Light(ent);
+        spawnEntity = g_baseEntities[entityNumber] = new Light(ent);
     else if (className == "worldspawn")
-        spawnEntity = g_baseEntities[ent->state.number] = new WorldSpawn(ent);
+        spawnEntity = g_baseEntities[entityNumber] = new WorldSpawn(ent);
+    else if (className == "PlayerClient")
+        spawnEntity = g_baseEntities[entityNumber] = new PlayerClient(ent);
     else
-        spawnEntity = g_baseEntities[ent->state.number] = new SVGBaseEntity(ent);
+        spawnEntity = g_baseEntities[entityNumber] = new SVGBaseEntity(ent);
         
     return spawnEntity;
+}
+
+void SVG_FreeClassEntity(Entity* ent) {
+    // Only proceed if it has a classEntity.
+    if (!ent->classEntity)
+        return;
+
+    // Delete the class entity.
+    delete g_baseEntities[ent->state.number];
+
+    // Set it to nullptr.
+    ent->classEntity = g_baseEntities[ent->state.number] = nullptr;
 }
 
 /*

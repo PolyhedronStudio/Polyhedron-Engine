@@ -34,6 +34,7 @@ void PlayerClient::Spawn() {
     SVGBaseEntity::Spawn();
 
     SetMoveType(MoveType::Walk);
+    SetGroundEntity(nullptr);
 
     // Set the die function.
     SetDieCallback(&PlayerClient::PlayerClientDie);

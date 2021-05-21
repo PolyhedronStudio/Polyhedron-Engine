@@ -773,6 +773,9 @@ qhandle_t SVG_PrecacheSound(const std::string& filename);
 void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str);
 void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset);
 
+SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className);
+void SVG_FreeClassEntity(Entity* ent);
+
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //

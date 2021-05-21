@@ -44,6 +44,7 @@ SET(SRC_SVGAME
 	svgame/commands.cpp
 	svgame/combat.cpp
 	svgame/effects.cpp
+	svgame/entities.cpp
 	svgame/functionpointers.cpp
 	svgame/items.cpp
 	svgame/main.cpp
@@ -153,6 +154,7 @@ SET(HEADERS_SVGAME
 	svgame/g_local.h
 	svgame/brushfuncs.h
 	svgame/effects.h
+	svgame/entities.h
 	svgame/functionpointers.h
 	svgame/trigger.h
 	svgame/utils.h

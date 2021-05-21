@@ -96,6 +96,11 @@ public:
         return serverEntity->damage;
     }
 
+    // Get the 'deadFlag' value.
+    inline const int32_t GetDeadFlag() {
+        return serverEntity->deadFlag;
+    }
+
     // Return the 'delay' value.
     inline const int32_t GetDelay() {
         return serverEntity->delay;
@@ -145,7 +150,7 @@ public:
     inline const int32_t GetMass() {
         return serverEntity->mass;
     }
-    
+
     // Return the bounding box 'maxs' value.
     inline const vec3_t& GetMaxs() {
         return serverEntity->maxs;
@@ -300,6 +305,11 @@ public:
         serverEntity->damage = damage;
     }
 
+    // Set the 'deadFlag' value.
+    inline void SetDeadFlag(const int32_t& deadFlag) {
+        serverEntity->deadFlag = deadFlag;
+    }
+
     // Return the 'delay' value.
     inline const int32_t SetDelay(const int32_t &delay) {
         serverEntity->delay = delay;
@@ -359,6 +369,16 @@ public:
     // Set the 'mass' value.
     inline void SetMass(const int32_t &mass) {
         serverEntity->mass = mass;
+    }
+
+    // Set the 'maxs' value.
+    inline void SetMaxs(const vec3_t& maxs) {
+        serverEntity->maxs = maxs;
+    }
+    
+    // Set the 'mins' value.
+    inline void SetMins(const vec3_t& mins) {
+        serverEntity->mins = mins;
     }
 
     // Set the 'modelIndex, modelIndex1, modelIndex2, modelIndex3' values.

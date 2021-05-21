@@ -500,6 +500,9 @@ static void SVG_Player_CheckWorldEffects(void)
 {
     int         waterlevel, oldWaterLevel;
 
+    if (!current_player->classEntity)
+        return;
+
     if (current_player->classEntity->GetMoveType() == MoveType::NoClip || current_player->classEntity->GetMoveType() == MoveType::Spectator) {
         current_player->airFinished = level.time + 12; // don't need air
         return;
@@ -805,7 +808,7 @@ void SVG_ClientEndServerFrame(Entity *ent)
 {
     float   bobTime;
 
-    if (!ent || !ent->client) {
+    if (!ent || !ent->client || !ent->classEntity) {
         return;
     }
 
