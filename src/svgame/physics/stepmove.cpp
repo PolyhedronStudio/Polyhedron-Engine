@@ -161,6 +161,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
         // try one move with vertical motion, then one without
         for (i = 0; i < 2; i++) {
             newOrigin = ent->GetOrigin() + move;
+
             if (i == 0 && ent->GetEnemy()) {
                 if (!ent->GetServerEntity()->goalEntityPtr)
                     ent->GetServerEntity()->goalEntityPtr = ent->GetEnemy()->GetServerEntity();

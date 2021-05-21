@@ -476,8 +476,18 @@ SVG_RunFrame
 Advances the world by 0.1 seconds
 ================
 */
+/*
+================
+SVG_RunFrame
+
+Advances the world by 0.1 seconds
+================
+*/
 void SVG_RunFrame(void)
 {
+    int     i;
+    Entity* ent;
+
     // We're moving the game a frame forward.
     level.frameNumber++;
 
@@ -494,31 +504,23 @@ void SVG_RunFrame(void)
     // Treat each object in turn
     // even the world gets a chance to Think
     //
-    SVGBaseEntity *ent = g_baseEntities[0];
-    for (int32_t i = 0 ; i < globals.numberOfEntities ; i++) {
-        // Fetch the entity.
-        ent = g_baseEntities[i];
+    ent = &g_entities[0];
+    for (i = 0; i < globals.numberOfEntities; i++) {//, ent++) {
+        ent = &g_entities[i];
 
-        // Need to be working with a valid base entity.
-        if (!ent)
+        if (!ent->inUse)
             continue;
-
-        if (!ent->GetServerEntity())
-            continue;
-
-        // Is it in use? If not, continue.
-        if (!ent->IsInUse())
+        if (!ent->classEntity)
             continue;
 
         // Let the level data know which entity we are processing right now.
-        level.currentEntity = ent;
+        level.currentEntity = ent->classEntity;
 
-        // Backup origin as its Old Origin.
-        ent->SetOldOrigin(ent->GetOrigin());
+        ent->state.oldOrigin = ent->state.origin;
 
         // if the ground entity moved, make sure we are still on it
-        if ((ent->GetServerEntity()->groundEntityPtr) && (ent->GetServerEntity()->groundEntityPtr->linkCount != ent->GetServerEntity()->groundEntityLinkCount)) {
-            ent->GetServerEntity()->groundEntityPtr = NULL;
+        if ((ent->groundEntityPtr) && (ent->groundEntityPtr->linkCount != ent->groundEntityLinkCount)) {
+            ent->groundEntityPtr = NULL;
             //if (!(ent->flags & (EntityFlags::Swim | EntityFlags::Fly)) && (ent->serverFlags & EntityServerFlags::Monster)) {
             //    M_CheckGround(ent);
             //}
@@ -526,12 +528,12 @@ void SVG_RunFrame(void)
 
         // Time to begin a server frame for all of our clients. (This has to ha
         if (i > 0 && i <= maxClients->value) {
-            SVG_ClientBeginServerFrame(ent->GetServerEntity());
+            SVG_ClientBeginServerFrame(ent);
             continue;
         }
 
         // Last but not least, "run" process the entity.
-        SVG_RunEntity(ent);
+        SVG_RunEntity(ent->classEntity);
     }
 
     // See if it is time to end a deathmatch
@@ -543,6 +545,77 @@ void SVG_RunFrame(void)
     // Build the playerstate_t structures for all players
     SVG_ClientEndServerFrames();
 }
+
+//
+// The new loop to be, but it won't run the item entities atm, for a lack of their base entity counterparts.
+//
+//void SVG_RunFrame(void)
+//{
+//    // We're moving the game a frame forward.
+//    level.frameNumber++;
+//
+//    // Calculate the current frame time for this frame number.
+//    level.time = level.frameNumber * FRAMETIME;
+//
+//    // Check for whether an intermission point wants to exit this level.
+//    if (level.intermission.exitIntermission) {
+//        SVG_ExitLevel();
+//        return;
+//    }
+//
+//    //
+//    // Treat each object in turn
+//    // even the world gets a chance to Think
+//    //
+//    SVGBaseEntity *ent = g_baseEntities[0];
+//    for (int32_t i = 0 ; i < globals.numberOfEntities ; i++) {
+//        // Fetch the entity.
+//        ent = g_baseEntities[i];
+//
+//        // Need to be working with a valid base entity.
+//        if (!ent)
+//            continue;
+//
+//        if (!ent->GetServerEntity())
+//            continue;
+//
+//        // Is it in use? If not, continue.
+//        if (!ent->IsInUse())
+//            continue;
+//
+//        // Let the level data know which entity we are processing right now.
+//        level.currentEntity = ent;
+//
+//        // Backup origin as its Old Origin.
+//        ent->SetOldOrigin(ent->GetOrigin());
+//
+//        // if the ground entity moved, make sure we are still on it
+//        if ((ent->GetServerEntity()->groundEntityPtr) && (ent->GetServerEntity()->groundEntityPtr->linkCount != ent->GetServerEntity()->groundEntityLinkCount)) {
+//            ent->GetServerEntity()->groundEntityPtr = NULL;
+//            //if (!(ent->flags & (EntityFlags::Swim | EntityFlags::Fly)) && (ent->serverFlags & EntityServerFlags::Monster)) {
+//            //    M_CheckGround(ent);
+//            //}
+//        }
+//
+//        // Time to begin a server frame for all of our clients. (This has to ha
+//        if (i > 0 && i <= maxClients->value) {
+//            SVG_ClientBeginServerFrame(ent->GetServerEntity());
+//            continue;
+//        }
+//
+//        // Last but not least, "run" process the entity.
+//        SVG_RunEntity(ent);
+//    }
+//
+//    // See if it is time to end a deathmatch
+//    SVG_CheckDMRules();
+//
+//    // See if needpass needs updated
+//    SVG_CheckNeedPass();
+//
+//    // Build the playerstate_t structures for all players
+//    SVG_ClientEndServerFrames();
+//}
 
 /*
 =============
@@ -851,7 +924,9 @@ SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, 
     // Special.
     if (trace.ent) {
         uint32_t index = trace.ent->state.number;
-        svgTrace.ent = g_baseEntities[index];
+
+        if (g_baseEntities[index] != NULL)
+            svgTrace.ent = g_baseEntities[index];
     }
 
     return svgTrace;

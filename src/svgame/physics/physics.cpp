@@ -295,8 +295,9 @@ int SV_FlyMove(SVGBaseEntity *ent, float time, int mask)
                 ent->SetVelocity(vec3_origin);
                 return 7;
             }
-            CrossProduct(planes[0], planes[1], dir);
-            d = DotProduct(dir, ent->GetVelocity());
+
+            dir = vec3_cross(planes[0], planes[1]);
+            d = vec3_dot(dir, ent->GetVelocity());
             ent->SetVelocity(vec3_scale(dir, d));
         }
 
@@ -304,7 +305,7 @@ int SV_FlyMove(SVGBaseEntity *ent, float time, int mask)
 // if original velocity is against the original velocity, stop dead
 // to avoid tiny occilations in sloping corners
 //
-        if (DotProduct(ent->GetVelocity(), primal_velocity) <= 0) {
+        if (vec3_dot(ent->GetVelocity(), primal_velocity) <= 0) {
             ent->SetVelocity(vec3_origin);
             return Blocked;
         }
@@ -595,8 +596,8 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
             partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z
             ) {
             // object is moving
-            VectorScale(part->GetVelocity(), FRAMETIME, move);
-            VectorScale(part->GetAngularVelocity(), FRAMETIME, amove);
+            move = vec3_scale(part->GetVelocity(), FRAMETIME);
+            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME);
 
             if (!SV_Push(part, move, amove))
                 break;  // move was Blocked
@@ -614,9 +615,9 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
 
         // if the pusher has a "Blocked" function, call it
         // otherwise, just stay in place until the obstacle is gone
-        if (obstacle) {
+        //if (obstacle) {
             part->Blocked(obstacle);
-        }
+        //}
 
         //if (part->Blocked)
         //    part->Blocked(part, obstacle);
@@ -754,8 +755,7 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
             }
         }
 
-      if (ent->HasTouchCallback())
-          ent->Touch(ent, trace.ent, &trace.plane, trace.surface);
+        ent->Touch(ent, trace.ent, &trace.plane, trace.surface);
     }
 
     // Check for water transition
@@ -958,12 +958,6 @@ void SVG_RunEntity(SVGBaseEntity *ent)
 {
     //if (ent->PreThink)
     //    ent->PreThink(ent);
-    if (!ent)
-        return;
-
-    if (!ent->GetServerEntity())
-        return;
-
     int32_t moveType = ent->GetMoveType();
 
     switch (moveType) {

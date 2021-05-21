@@ -936,7 +936,12 @@ void SVG_ClientEndServerFrame(Entity *ent)
 
     // if the scoreboard is up, update it
     if (ent->client->showScores && !(level.frameNumber & 31)) {
-        SVG_HUD_GenerateDMScoreboardLayout(ent, ent->classEntity->GetEnemy()->GetServerEntity());
+        Entity* enemyEntity = NULL;
+        if (ent->classEntity) {
+            if (ent->classEntity->GetEnemy())
+                enemyEntity = ent->classEntity->GetEnemy()->GetServerEntity();
+        }
+        SVG_HUD_GenerateDMScoreboardLayout(ent, enemyEntity);
         gi.Unicast(ent, false);
     }
 }
