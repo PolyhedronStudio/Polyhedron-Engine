@@ -118,9 +118,6 @@ public:
 
     // Get the 'inuse' value.
     inline qboolean IsInUse() {
-        if (!serverEntity)
-            return false;
-
         return serverEntity->inUse;
     }
 

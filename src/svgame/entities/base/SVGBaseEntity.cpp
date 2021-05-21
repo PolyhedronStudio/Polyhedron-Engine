@@ -13,12 +13,22 @@
 
 // Constructor/Deconstructor.
 SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
+	// All callback functions best be nullptr.
 	thinkFunction = nullptr;
 	useFunction = nullptr;
 	touchFunction = nullptr;
 	blockedFunction = nullptr;
 	takeDamageFunction = nullptr;
 	dieFunction = nullptr;
+
+	// All Entity pointers best be nullptr.
+	enemyEntity = nullptr;
+	oldEnemyEntity = nullptr;
+
+	activatorEntity = nullptr;
+
+	teamChainEntity = nullptr;
+	teamMasterEntity = nullptr;
 }
 SVGBaseEntity::~SVGBaseEntity() {
 

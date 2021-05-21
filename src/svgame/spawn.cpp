@@ -613,8 +613,8 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
 
     // Post spawn entities.
     for (int32_t i = 0; i < MAX_EDICTS; i++) {
-        if (g_entities[i].classEntity)
-            g_entities[i].classEntity->PostSpawn();
+        if (g_baseEntities[i])
+            g_baseEntities[i]->PostSpawn();
     }
 
     gi.DPrintf("%i entities inhibited\n", inhibit);

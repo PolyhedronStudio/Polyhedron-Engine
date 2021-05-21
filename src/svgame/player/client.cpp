@@ -1268,7 +1268,7 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
         Com_Error(ErrorType::ERR_DROP, "%s: *ent has no client to think with!\n", __FUNCTION__);
 
     // Store the current entity to be run from SVG_RunFrame.
-    level.currentEntity = ent;
+    level.currentEntity = ent->classEntity;
 
     // Fetch the entity client.
     client = ent->client;

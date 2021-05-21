@@ -34,6 +34,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // the "gameversion" client command will print32_t this plus compile date
 #define GAMEVERSION "basenac"
 
+//-------------------
+// Predeclarations.
+//-------------------
+class SVGBaseEntity;
+
+
 //==================================================================
 
 // view pitching times
@@ -391,7 +397,7 @@ typedef struct {
     int32_t killedMonsters;
 
     // The current entity that is actively being ran from SVG_RunFrame.
-    Entity *currentEntity;
+    SVGBaseEntity *currentEntity;
 
     // Index for the que pile of dead bodies.
     int32_t bodyQue;
@@ -509,12 +515,6 @@ struct MeansOfDeath {
 
 // Extern variable, really ugly.
 extern  int32_t meansOfDeath;
-
-
-//-------------------
-// Predeclarations.
-//-------------------
-class SVGBaseEntity;
 
 // Once again, ugly.
 extern Entity g_entities[MAX_EDICTS];

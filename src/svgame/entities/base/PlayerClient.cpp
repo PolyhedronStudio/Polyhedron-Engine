@@ -33,6 +33,8 @@ void PlayerClient::Spawn() {
     // Spawn.
     SVGBaseEntity::Spawn();
 
+    SetMoveType(MoveType::Walk);
+
     // Set the die function.
     SetDieCallback(&PlayerClient::PlayerClientDie);
     gi.DPrintf("PlayerClient::Spawn();");

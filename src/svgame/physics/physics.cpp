@@ -441,16 +441,20 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
     pusher->LinkEntity();
 
 // see if any solid entities are inside the final position
-    check = (g_baseEntities + 1)[0];
-    for (e = 1; e < globals.numberOfEntities; e++, check++) {
+    for (e = 1; e < globals.numberOfEntities; e++) {
+        // Fetch the base entity and ensure it is valid.
+        check = g_baseEntities[e];
+
+        if (!check)
+            continue;
+
+        // Fetch its properties to work with.
         qboolean isInUse = check->IsInUse();
-        
         int32_t moveType = check->GetMoveType();
-        
         vec3_t absMin = check->GetAbsoluteMin();
         vec3_t absMax = check->GetAbsoluteMax();
 
-        if (!check->IsInUse())
+        if (!isInUse)
             continue;
         if (moveType == MoveType::Push
             || moveType == MoveType::Stop
@@ -571,9 +575,6 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
     vec3_t      move, amove;
     SVGBaseEntity     *part, *mv;
 
-    if (ent->GetServerEntity()->state.number == 0)
-        return;
-
     // if not a team captain, so movement will be handled elsewhere
     if (ent->GetFlags() & EntityFlags::TeamSlave)
         return;
@@ -584,9 +585,6 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
 //retry:
     pushed_p = pushed;
     for (part = ent ; part ; part = part->GetTeamChainEntity()) {
-        if (!part)
-            break;
-
         // Fetch pusher part, its Velocity.
         vec3_t partVelocity = part->GetVelocity();
 
@@ -595,7 +593,7 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
 
         if (partVelocity.x || partVelocity.y || partVelocity.z ||
             partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z
-           ) {
+            ) {
             // object is moving
             VectorScale(part->GetVelocity(), FRAMETIME, move);
             VectorScale(part->GetAngularVelocity(), FRAMETIME, amove);
@@ -894,7 +892,7 @@ void SV_Physics_Step(SVGBaseEntity *ent)
     }
 
     // friction for flying monsters that have been given vertical velocity
-    if ((ent->GetServerEntity()->flags & EntityFlags::Swim) && (ent->GetServerEntity()->velocity[2] != 0)) {
+    if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetServerEntity()->velocity[2] != 0)) {
         speed = std::fabsf(ent->GetServerEntity()->velocity[2]);
         control = speed < sv_stopspeed ? sv_stopspeed : speed;
         newspeed = speed - (FRAMETIME * control * sv_waterfriction * ent->GetServerEntity()->waterLevel);
@@ -930,6 +928,7 @@ void SV_Physics_Step(SVGBaseEntity *ent)
             mask = CONTENTS_MASK_MONSTERSOLID;
         else
             mask = CONTENTS_MASK_SOLID;
+
         SV_FlyMove(ent, FRAMETIME, mask);
 
         ent->LinkEntity();
@@ -959,8 +958,15 @@ void SVG_RunEntity(SVGBaseEntity *ent)
 {
     //if (ent->PreThink)
     //    ent->PreThink(ent);
+    if (!ent)
+        return;
 
-    switch (ent->GetMoveType()) {
+    if (!ent->GetServerEntity())
+        return;
+
+    int32_t moveType = ent->GetMoveType();
+
+    switch (moveType) {
     case MoveType::Push:
     case MoveType::Stop:
         SV_Physics_Pusher(ent);

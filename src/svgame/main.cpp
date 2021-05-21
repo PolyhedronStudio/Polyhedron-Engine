@@ -478,9 +478,6 @@ Advances the world by 0.1 seconds
 */
 void SVG_RunFrame(void)
 {
-    int     i;
-    SVGBaseEntity *ent;
-
     // We're moving the game a frame forward.
     level.frameNumber++;
 
@@ -497,8 +494,11 @@ void SVG_RunFrame(void)
     // Treat each object in turn
     // even the world gets a chance to Think
     //
-    ent = g_baseEntities[0];
-    for (i = 0 ; i < globals.numberOfEntities ; i++, ent = g_baseEntities[i]) {
+    SVGBaseEntity *ent = g_baseEntities[0];
+    for (int32_t i = 0 ; i < globals.numberOfEntities ; i++) {
+        // Fetch the entity.
+        ent = g_baseEntities[i];
+
         // Need to be working with a valid base entity.
         if (!ent)
             continue;
@@ -511,7 +511,7 @@ void SVG_RunFrame(void)
             continue;
 
         // Let the level data know which entity we are processing right now.
-        level.currentEntity = ent->GetServerEntity();
+        level.currentEntity = ent;
 
         // Backup origin as its Old Origin.
         ent->SetOldOrigin(ent->GetOrigin());
