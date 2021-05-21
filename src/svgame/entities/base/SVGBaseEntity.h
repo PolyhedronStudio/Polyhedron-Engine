@@ -112,7 +112,7 @@ public:
     }
 
     // Get the 'inuse' value.
-    inline qboolean GetInUse() {
+    inline qboolean IsInUse() {
         if (!serverEntity)
             return false;
 
@@ -225,7 +225,7 @@ public:
 
     // Set the 'angularVelocity' value.
     inline void SetAngularVelocity(const vec3_t& angularVelocity) {
-        this->angularVelocity = angularVelocity;
+        serverEntity->angularVelocity = angularVelocity;
     }
 
     // Set the 'mins', and 'maxs' values of the entity bounding box.
@@ -383,10 +383,10 @@ private:
     int32_t moveType;
 
     // Velocity.
-    vec3_t velocity;
+    vec3_t _velocity;
 
     // Angular Velocity.
-    vec3_t angularVelocity;
+    vec3_t _angularVelocity;
 
     // Current active enemy, NULL if not any.    
     SVGBaseEntity *enemyEntity;

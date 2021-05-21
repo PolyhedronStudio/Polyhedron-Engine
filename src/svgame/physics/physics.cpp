@@ -254,7 +254,7 @@ int SV_FlyMove(SVGBaseEntity *ent, float time, int mask)
 // run the impact function
 //
         SV_Impact(ent, &trace);
-        if (!ent->GetInUse())
+        if (!ent->IsInUse())
             break;      // removed by the impact function
 
 
@@ -369,7 +369,7 @@ retry:
         SV_Impact(ent, &trace);
 
         // if the pushed entity went away and the pusher is still there
-        if (!trace.ent->GetInUse() && ent->GetInUse()) {
+        if (!trace.ent->IsInUse() && ent->IsInUse()) {
             // move the pusher back and try again
             ent->SetOrigin(start);
             ent->LinkEntity();
@@ -377,7 +377,7 @@ retry:
         }
     }
 
-    if (ent->GetInUse())
+    if (ent->IsInUse())
         UTIL_TouchTriggers(ent->GetServerEntity());
 
     return trace;
@@ -443,14 +443,14 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
 // see if any solid entities are inside the final position
     check = (g_baseEntities + 1)[0];
     for (e = 1; e < globals.numberOfEntities; e++, check++) {
-        qboolean isInUse = check->GetInUse();
+        qboolean isInUse = check->IsInUse();
         
         int32_t moveType = check->GetMoveType();
         
         vec3_t absMin = check->GetAbsoluteMin();
         vec3_t absMax = check->GetAbsoluteMax();
 
-        if (!check->GetInUse())
+        if (!check->IsInUse())
             continue;
         if (moveType == MoveType::Push
             || moveType == MoveType::Stop
@@ -662,7 +662,7 @@ void SV_Physics_Noclip(SVGBaseEntity *ent)
 // regular thinking
     if (!SV_RunThink(ent))
         return;
-    if (!ent->GetInUse())
+    if (!ent->IsInUse())
         return;
 
     ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME, ent->GetAngularVelocity()));
@@ -698,7 +698,7 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
 
     // Regular thinking
     SV_RunThink(ent);
-    if (!ent->GetInUse())
+    if (!ent->IsInUse())
         return;
 
     // If not a team captain, so movement will be handled elsewhere
@@ -733,7 +733,7 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
     // Move origin
     move = vec3_scale(ent->GetVelocity(), FRAMETIME);
     trace = SV_PushEntity(ent, move);
-    if (!ent->GetInUse())
+    if (!ent->IsInUse())
         return;
 
     if (trace.fraction < 1) {
@@ -742,8 +742,8 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
         else
             backoff = 1;
 
-        vec3_t outVelocity;
-        ClipVelocity(ent->GetVelocity(), trace.plane.normal, outVelocity, backoff);
+        vec3_t outVelocity = ent->GetVelocity();
+        ClipVelocity(outVelocity, trace.plane.normal, outVelocity, backoff);
         ent->SetVelocity(outVelocity);
 
         // stop if on ground
@@ -814,10 +814,17 @@ void SV_AddRotationalFriction(SVGBaseEntity *ent)
     int     n;
     float   adjustment;
     
+    // Acquire the rotational velocity first.
     vec3_t angularVelocity = ent->GetAngularVelocity();
 
+    // Set angles in proper direction.
     ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME, angularVelocity));
+
+    // Calculate adjustment to apply.
     adjustment = FRAMETIME * sv_stopspeed * sv_friction;
+
+    // Apply adjustments.
+    angularVelocity = ent->GetAngularVelocity();
     for (n = 0; n < 3; n++) {
         if (angularVelocity[n] > 0) {
             angularVelocity[n] -= adjustment;
@@ -829,6 +836,8 @@ void SV_AddRotationalFriction(SVGBaseEntity *ent)
                 angularVelocity[n] = 0;
         }
     }
+
+    // Last but not least, set the new angularVelocity.
     ent->SetAngularVelocity(angularVelocity);
 }
 
@@ -921,7 +930,7 @@ void SV_Physics_Step(SVGBaseEntity *ent)
 
         ent->LinkEntity();
         UTIL_TouchTriggers(ent->GetServerEntity());
-        if (!ent->GetInUse())
+        if (!ent->IsInUse())
             return;
 
         if (ent->GetServerEntity()->groundEntityPtr)

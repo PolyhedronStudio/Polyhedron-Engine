@@ -473,7 +473,8 @@ void SVG_FindTeams(void)
 
         if (classEntity == NULL)
             continue;
-        if (!classEntity->GetInUse())
+
+        if (!classEntity->IsInUse())
             continue;
         if (!classEntity->GetTeam())
             continue;
@@ -490,7 +491,7 @@ void SVG_FindTeams(void)
             if (classEntity2 == NULL)
                 continue;
 
-            if (!classEntity2->GetInUse())
+            if (!classEntity2->IsInUse())
                 continue;
             if (!classEntity2->GetTeam())
                 continue;

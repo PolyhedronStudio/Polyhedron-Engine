@@ -507,7 +507,7 @@ void SVG_RunFrame(void)
             continue;
 
         // Is it in use? If not, continue.
-        if (!ent->GetInUse())
+        if (!ent->IsInUse())
             continue;
 
         // Let the level data know which entity we are processing right now.
@@ -608,7 +608,7 @@ SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t org, flo
         if (!serverEnt->classEntity)
             continue;
 
-        if (!classEntity->GetInUse())
+        if (!classEntity->IsInUse())
             continue;
 
         if (classEntity->GetSolid() == Solid::Not)
