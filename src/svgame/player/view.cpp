@@ -505,7 +505,7 @@ static void SVG_Player_CheckWorldEffects(void)
         return;
 
     if (current_player->classEntity->GetMoveType() == MoveType::NoClip || current_player->classEntity->GetMoveType() == MoveType::Spectator) {
-        current_player->airFinished = level.time + 12; // don't need air
+        current_player->airFinishedTime = level.time + 12; // don't need air
         return;
     }
 
@@ -550,11 +550,11 @@ static void SVG_Player_CheckWorldEffects(void)
     // check for head just coming out of water
     //
     if (oldWaterLevel == 3 && waterlevel != 3) {
-        if (current_player->airFinished < level.time) {
+        if (current_player->airFinishedTime < level.time) {
             // gasp for air
             gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
             SVG_PlayerNoise(current_player->classEntity, current_player->state.origin, PNOISE_SELF);
-        } else  if (current_player->airFinished < level.time + 11) {
+        } else  if (current_player->airFinishedTime < level.time + 11) {
             // just break surface
             gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
         }
@@ -565,7 +565,7 @@ static void SVG_Player_CheckWorldEffects(void)
     //
     if (waterlevel == 3) {
         // if out of air, start drowning
-        if (current_player->airFinished < level.time) {
+        if (current_player->airFinishedTime < level.time) {
             // drown!
             if (current_player->client->nextDrownTime < level.time
                 && current_player->health > 0) {
@@ -590,7 +590,7 @@ static void SVG_Player_CheckWorldEffects(void)
             }
         }
     } else {
-        current_player->airFinished = level.time + 12;
+        current_player->airFinishedTime = level.time + 12;
         current_player->damage = 2;
     }
 

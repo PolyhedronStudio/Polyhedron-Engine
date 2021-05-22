@@ -856,7 +856,7 @@ void SVG_PutClientInServer(Entity *ent)
     //ent->mass = 200;
     //ent->solid = Solid::BoundingBox;
     //ent->deadFlag = DEAD_NO;
-    //ent->airFinished = level.time + 12;
+    //ent->airFinishedTime = level.time + 12;
     //ent->clipMask = CONTENTS_MASK_PLAYERSOLID;
     //ent->model = "players/male/tris.md2";
     ////ent->Pain = SVG_Player_Pain;

@@ -1018,7 +1018,7 @@ struct entity_s {
     vec3_t velocity;
     vec3_t angularVelocity;
     int32_t mass;
-    float airFinished;
+    float airFinishedTime;
     float gravity;        // per entity gravity multiplier (1.0 is normal)
                                 // use for lowgrav artifact, flares
 

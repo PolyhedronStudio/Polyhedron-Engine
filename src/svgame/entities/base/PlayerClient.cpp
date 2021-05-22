@@ -60,7 +60,7 @@ void PlayerClient::Spawn() {
     SetMass(200);
     SetSolid(Solid::BoundingBox);
     SetDeadFlag(DEAD_NO);
-    GetServerEntity()->airFinished = level.time + 12;
+    GetServerEntity()->airFinishedTime = level.time + 12;
     SetClipMask(CONTENTS_MASK_PLAYERSOLID);
     SetModel("players/male/tris.md2");
 
