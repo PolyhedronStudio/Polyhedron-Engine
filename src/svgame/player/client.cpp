@@ -244,7 +244,7 @@ void SVG_ClientUpdateObituary(SVGBaseEntity *self, SVGBaseEntity *inflictor, SVG
 
 void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf);
 
-void SVG_TossClientWeapon(Entity *self)
+void SVG_TossClientWeapon(PlayerClient *playerClient)
 {
     gitem_t     *item;
     Entity     *drop;
@@ -253,16 +253,16 @@ void SVG_TossClientWeapon(Entity *self)
     if (!deathmatch->value)
         return;
 
-    item = self->client->persistent.activeWeapon;
-    if (! self->client->persistent.inventory[self->client->ammoIndex])
+    item = playerClient->GetActiveWeapon();
+    if (!playerClient->GetClient()->persistent.inventory[playerClient->GetClient()->ammoIndex])
         item = NULL;
     if (item && (strcmp(item->pickupName, "Blaster") == 0))
         item = NULL;
 
     if (item) {
-        self->client->aimAngles[vec3_t::Yaw] -= spread;
-        drop = SVG_DropItem(self, item);
-        self->client->aimAngles[vec3_t::Yaw] += spread;
+        playerClient->GetClient()->aimAngles[vec3_t::Yaw] -= spread;
+        drop = SVG_DropItem(playerClient->GetServerEntity(), item);
+        playerClient->GetClient()->aimAngles[vec3_t::Yaw] += spread;
         drop->spawnFlags = ItemSpawnFlags::DroppedPlayerItem;
     }
 }

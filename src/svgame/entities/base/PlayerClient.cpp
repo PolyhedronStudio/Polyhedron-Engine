@@ -8,13 +8,14 @@
 */
 #include "../../g_local.h"              // SVGame.
 #include "../../effects.h"              // Effects.
+#include "../../entities.h"             // Entities.
 #include "../../player/client.h"        // Player Client functions.
 #include "../../player/animations.h"    // Include Player Client Animations.
 #include "../../player/view.h"          // Include Player View functions..
 #include "../../utils.h"                // Util funcs.
 
+// Class Entities.
 #include "../base/SVGBaseEntity.h"
-
 #include "PlayerClient.h"
 
 // Constructor/Deconstructor.
@@ -25,28 +26,65 @@ PlayerClient::~PlayerClient() {
 
 }
 
-// Interface functions. 
+//
+//===============
+// PlayerClient::Precache
+//
+//===============
+//
 void PlayerClient::Precache() {
     SVGBaseEntity::Precache();
 }
+
+//
+//===============
+// PlayerClient::Spawn
+//
+//===============
+//
 void PlayerClient::Spawn() {
     // Spawn.
     SVGBaseEntity::Spawn();
 
+    // Ensure movetype is walk.
     SetMoveType(MoveType::Walk);
+
+    // When spawned, we aren't on any ground, make sure of that.
     SetGroundEntity(nullptr);
 
     // Set the die function.
     SetDieCallback(&PlayerClient::PlayerClientDie);
     gi.DPrintf("PlayerClient::Spawn();");
 }
+
+//
+//===============
+// PlayerClient::PostSpawn
+//
+//===============
+//
 void PlayerClient::PostSpawn() {
     SVGBaseEntity::PostSpawn();
 }
+
+//
+//===============
+// PlayerClient::Think
+//
+//===============
+//
 void PlayerClient::Think() {
+    // Parent class Think.
     SVGBaseEntity::Think();
 }
 
+//
+//===============
+// PlayerClient::PlayerClientDie
+//
+// Callback that is fired any time the player dies. As such, it kindly takes care of doing this.
+//===============
+//
 void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
 
     // Fetch server entity.
@@ -86,13 +124,23 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
     // If we're not dead yet, we got some death initializing to do.
     if (!GetDeadFlag()) {
         // Set respawn time.
-        client->respawnTime = level.time + 1.0;
-        SVG_LookAtKiller(serverEntity, inflictor->GetServerEntity(), attacker->GetServerEntity());
-        client->playerState.pmove.type = EnginePlayerMoveType::Dead;
+        SetRespawnTime(level.time + 1.0);
+
+        // Ensure we are looking at our killer.
+        LookAtKiller(inflictor, attacker);
+
+        // Dead players don't move ;-)
+        SetPlayerMoveType(EnginePlayerMoveType::Dead);
+
+        // Update the obituary.
         SVG_ClientUpdateObituary(this, inflictor, attacker);
-        SVG_TossClientWeapon(serverEntity);
+
+        // Toss our weapon, assuming we had any.
+        SVG_TossClientWeapon(this);
+
+        // Show the scoreboard in case of a deathmatch mode.
         if (deathmatch->value)
-            SVG_Command_Score_f(serverEntity);       // show scores
+            SVG_Command_Score_f(serverEntity);
 
         // Clear inventory this is kind of ugly, but it's how we want to handle keys in coop
         for (int32_t i = 0; i < game.numberOfItems; i++) {
@@ -127,24 +175,26 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
             static int i;
 
             i = (i + 1) % 3;
+
             // start a death animation
-            client->animation.priorityAnimation = PlayerAnimation::Death;
+            SetPriorityAnimation(PlayerAnimation::Death);
+
             if (client->playerState.pmove.flags & PMF_DUCKED) {
                 SetFrame(FRAME_crdeath1 - 1);
-                client->animation.endFrame = FRAME_crdeath5;
+                SetAnimationEndFrame(FRAME_crdeath5);
             }
             else switch (i) {
             case 0:
                 SetFrame(FRAME_death101 - 1);
-                client->animation.endFrame = FRAME_death106;
+                SetAnimationEndFrame(FRAME_death106);
                 break;
             case 1:
                 SetFrame(FRAME_death201 - 1);
-                client->animation.endFrame = FRAME_death206;
+                SetAnimationEndFrame(FRAME_death206);
                 break;
             case 2:
                 SetFrame(FRAME_death301 - 1);
-                client->animation.endFrame = FRAME_death308;
+                SetAnimationEndFrame(FRAME_death308);
                 break;
             }
             SVG_Sound(this, CHAN_VOICE, gi.SoundIndex(va("*death%i.wav", (rand() % 4) + 1)), 1, ATTN_NORM, 0);
@@ -156,4 +206,31 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
 
     // Link our entity back in for collision purposes.
     LinkEntity();
+}
+
+//
+//===============
+// PlayerClient::LookAtKiller
+//
+// Sets the clients view to look at the killer.
+//===============
+//
+void PlayerClient::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacker)
+{
+    // Fetch client.
+    gclient_s* client = GetClient();
+
+    // Is the attack, not us, or the world?
+    if (attacker && attacker != SVG_GetWorldClassEntity() && attacker != this) {
+        float yaw = vec3_to_yaw(attacker->GetOrigin() - GetOrigin());
+        SetKillerYaw(yaw);
+    // Is the inflictor, and not an attack, NOT us or the WORLD?
+    } else if (inflictor && inflictor != SVG_GetWorldClassEntity() && inflictor != this) {
+        float yaw = vec3_to_yaw(inflictor->GetOrigin() - GetOrigin());
+        SetKillerYaw(yaw);
+    // If none of the above, set the yaw as is.
+    } else {
+        SetKillerYaw(GetAngles()[vec3_t::Yaw]);
+        return;
+    }
 }

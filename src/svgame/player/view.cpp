@@ -774,31 +774,6 @@ newanim:
 
 //
 //===============
-// SVG_LookAtKiller
-//
-// Sets the entity 'self' to rotate its view to the killer.
-//===============
-//
-void SVG_LookAtKiller(Entity* self, Entity* inflictor, Entity* attacker)
-{
-    vec3_t dir;
-
-    if (attacker && attacker != SVG_GetWorldServerEntity() && attacker != self) {
-        dir = attacker->state.origin - self->state.origin;
-    }
-    else if (inflictor && inflictor != SVG_GetWorldServerEntity() && inflictor != self) {
-        dir = inflictor->state.origin - self->state.origin;
-    }
-    else {
-        self->client->killerYaw = self->state.angles[vec3_t::Yaw];
-        return;
-    }
-
-    self->client->killerYaw = vec3_to_yaw(dir);
-}
-
-//
-//===============
 // SVG_ClientEndServerFrame
 //
 // Called for each player at the end of the server frame and right 
