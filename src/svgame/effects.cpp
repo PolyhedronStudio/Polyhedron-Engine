@@ -8,6 +8,7 @@
 //
 
 #include "g_local.h"         // Include SVGame funcs.
+#include "entities.h"
 #include "utils.h"           // Include Utilities funcs.
 #include "effects.h"
 

@@ -580,15 +580,6 @@ extern  cvar_t  *sv_flaregun;
 
 extern  cvar_t  *cl_monsterfootsteps;
 
-//
-// Returns a pointer to the first entity, this is always the "worldspawn" entity.
-// Used to be an old macro in the Q2 past: world
-// 
-// Since that is rather unclear, I now present to you:
-//
-Entity* SVG_GetWorldServerEntity();
-SVGBaseEntity* SVG_GetWorldEntity();
-
 //-------------------
 // Spawnflags for items, set by editor(s).
 //-------------------
@@ -719,13 +710,7 @@ void SVG_RunEntity(SVGBaseEntity *ent);
 void SVG_SaveClientData(void);
 void SVG_FetchClientData(Entity *ent);
 
-Entity* SVG_PickTarget(char* targetName);
-Entity* SVG_Find(Entity* from, int32_t fieldofs, const char* match); // C++20: Added const to char*
-SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t org, float rad);
-
-void    SVG_InitEntity(Entity* e);
 Entity* SVG_Spawn(void);
-void    SVG_FreeEntity(Entity* e);
 
 // TODO: All these go elsewhere, sometime, as does most...
 void SVG_SetConfigString(const int32_t &configStringIndex, const std::string &configString);
@@ -773,8 +758,6 @@ qhandle_t SVG_PrecacheSound(const std::string& filename);
 void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str);
 void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset);
 
-SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className);
-void SVG_FreeClassEntity(Entity* ent);
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 

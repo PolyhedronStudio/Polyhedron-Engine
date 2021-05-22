@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // g_utils.c -- misc utility functions for game module
 
 #include "g_local.h"
+#include "entities.h"
 #include "utils.h"
 #include "entities/base/SVGBaseEntity.h"
 

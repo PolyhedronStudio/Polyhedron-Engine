@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "g_local.h"          // Include SVGame header.
+#include "entities.h"         // Entities.
 #include "player/client.h"    // Include Player Client header.
 
 typedef struct {
@@ -164,44 +165,6 @@ static const spawn_field_t temp_fields[] = {
 //
 //
 #include "entities/base/SVGBaseEntity.h"
-#include "entities/base/PlayerClient.h"
-#include "entities/info/InfoPlayerStart.h"
-#include "entities/misc/MiscExplosionBox.h"
-#include "entities/Worldspawn.h"
-#include "entities/Light.h"
-
-SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
-    SVGBaseEntity* spawnEntity = NULL;
-
-    int32_t entityNumber = ent->state.number;
-
-    if (className == "misc_explobox")
-        spawnEntity = g_baseEntities[entityNumber] = new MiscExplosionBox(ent);
-    else if (className == "info_player_start")
-        spawnEntity = g_baseEntities[entityNumber] = new InfoPlayerStart(ent);
-    else if (className == "light")
-        spawnEntity = g_baseEntities[entityNumber] = new Light(ent);
-    else if (className == "worldspawn")
-        spawnEntity = g_baseEntities[entityNumber] = new WorldSpawn(ent);
-    else if (className == "PlayerClient")
-        spawnEntity = g_baseEntities[entityNumber] = new PlayerClient(ent);
-    else
-        spawnEntity = g_baseEntities[entityNumber] = new SVGBaseEntity(ent);
-        
-    return spawnEntity;
-}
-
-void SVG_FreeClassEntity(Entity* ent) {
-    // Only proceed if it has a classEntity.
-    if (!ent->classEntity)
-        return;
-
-    // Delete the class entity.
-    delete g_baseEntities[ent->state.number];
-
-    // Set it to nullptr.
-    ent->classEntity = g_baseEntities[ent->state.number] = nullptr;
-}
 
 /*
 ===============

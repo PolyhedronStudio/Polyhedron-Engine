@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // g_combat.c
 
 #include "g_local.h"         // Include SVGame funcs.
+#include "entities.h"
 #include "utils.h"           // Include Utilities funcs.
 #include "entities/base/SVGBaseEntity.h"
 

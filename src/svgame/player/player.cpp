@@ -26,10 +26,10 @@ SVG_LookAtKiller
 //{
 //    vec3_t      dir;
 //
-//    if (attacker && attacker != SVG_GetWorldEntity() && attacker != self) {
+//    if (attacker && attacker != SVG_GetWorldClassEntity() && attacker != self) {
 //        VectorSubtract(attacker->state.origin, self->state.origin, dir);
 //    }
-//    else if (inflictor && inflictor != SVG_GetWorldEntity() && inflictor != self) {
+//    else if (inflictor && inflictor != SVG_GetWorldClassEntity() && inflictor != self) {
 //        VectorSubtract(inflictor->state.origin, self->state.origin, dir);
 //    }
 //    else {

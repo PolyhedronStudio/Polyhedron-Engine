@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 #include "../g_local.h"     // SVGame.
 #include "../effects.h"     // Effects.
+#include "../entities.h"    
 #include "../utils.h"       // Util funcs.
 #include "client.h"         // Include Player Client header.
 #include "hud.h"            // Include HUD header.
@@ -818,14 +819,13 @@ void SVG_PutClientInServer(Entity *ent)
     //
     // Spawn client class entity.
     //
+    SVG_FreeClassEntity(ent);
+
     ent->className = "PlayerClient";
-
-    // If the client already has an entity class, ditch it.
-    if (ent->classEntity)
-        delete ent->classEntity;
-
-    ent->classEntity = new PlayerClient(ent);
+    ent->classEntity = SVG_SpawnClassEntity(ent, ent->className);
+    ent->classEntity->Precache();
     ent->classEntity->Spawn();
+    ent->classEntity->PostSpawn();
 
     //
     // clear entity values
@@ -998,20 +998,20 @@ void SVG_ClientBegin(Entity *ent)
             ent->client->playerState.pmove.deltaAngles[i] = ent->client->playerState.pmove.viewAngles[i];
 
         // 
-        ent->className = "PlayerClient";
-
         // If the client already has an entity class, ditch it.
-        if (ent->classEntity)
-            delete ent->classEntity;
+        SVG_FreeClassEntity(ent);
 
-        ent->classEntity = new PlayerClient(ent);
+        ent->className = "PlayerClient";
+        ent->classEntity = SVG_SpawnClassEntity(ent, ent->className);
+        ent->classEntity->Precache();
         ent->classEntity->Spawn();
+        ent->classEntity->PostSpawn();
     } else {
         // a spawn point will completely reinitialize the entity
         // except for the persistant data that was initialized at
         // ClientConnect() time
         SVG_InitEntity(ent);
-        ent->className = "player";
+        ent->className = "PlayerClient";
         InitClientResp(ent->client);
         SVG_PutClientInServer(ent);
     }

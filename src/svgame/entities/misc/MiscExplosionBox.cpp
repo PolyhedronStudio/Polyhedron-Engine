@@ -132,6 +132,7 @@ void MiscExplosionBox::PostSpawn() {
 void MiscExplosionBox::Think() {
     // Always call parent class method.
     SVGBaseEntity::Think();
+
 	//gi.DPrintf("MiscExplosionBox::Think();");
 }
 

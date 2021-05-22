@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "../g_local.h"
+#include "../entities.h"
 #include "../entities/base/SVGBaseEntity.h"
 #include "hud.h"
 #include "animations.h"
@@ -483,7 +484,7 @@ static void SVG_Player_CheckFallingDamage(Entity *ent)
         VectorSet(dir, 0, 0, 1);
 
         if (!deathmatch->value || !((int)dmflags->value & DeathMatchFlags::NoFalling))
-            SVG_Damage(ent->classEntity, SVG_GetWorldEntity(), SVG_GetWorldEntity(), dir, ent->state.origin, vec3_origin, damage, 0, 0, MeansOfDeath::Falling);
+            SVG_Damage(ent->classEntity, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, ent->state.origin, vec3_origin, damage, 0, 0, MeansOfDeath::Falling);
     } else {
         ent->state.event = EntityEvent::FallShort;
         return;
@@ -585,7 +586,7 @@ static void SVG_Player_CheckWorldEffects(void)
 
                 current_player->debouncePainTime = level.time;
 
-                SVG_Damage(current_player->classEntity, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, current_player->damage, 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+                SVG_Damage(current_player->classEntity, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_origin, current_player->state.origin, vec3_origin, current_player->damage, 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
             }
         }
     } else {
@@ -607,11 +608,11 @@ static void SVG_Player_CheckWorldEffects(void)
                 current_player->debouncePainTime = level.time + 1;
             }
 
-            SVG_Damage(current_player->classEntity, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
+            SVG_Damage(current_player->classEntity, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_origin, current_player->state.origin, vec3_origin, 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
         }
 
         if (current_player->waterType & CONTENTS_SLIME) {
-            SVG_Damage(current_player->classEntity, SVG_GetWorldEntity(), SVG_GetWorldEntity(), vec3_origin, current_player->state.origin, vec3_origin, 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
+            SVG_Damage(current_player->classEntity, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_origin, current_player->state.origin, vec3_origin, 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 }
