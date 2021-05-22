@@ -35,6 +35,7 @@ public:
     //
     virtual void Precache();    // Precaches data.
     virtual void Spawn();       // Spawns the entity.
+    virtual void Respawn();     // Respawns the entity.
     virtual void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     virtual void Think();       // General entity thinking routine.
 
@@ -236,7 +237,7 @@ public:
         return serverEntity->solid;
     }
 
-    // Set the 'spawnFlags' value.
+    // Return the 'spawnFlags' value.
     inline const int32_t GetSpawnFlags() {
         return serverEntity->spawnFlags;
     }
@@ -246,7 +247,7 @@ public:
         return serverEntity->style;
     }
 
-    // Sets the 'sound' value.
+    // Return the 'sound' value.
     inline const int32_t GetSound() {
         return serverEntity->state.sound;
     }
@@ -256,28 +257,33 @@ public:
         return serverEntity->takeDamage;
     }
 
-    // Set the 'target' entity value.
+    // Return the 'target' entity value.
     inline char* GetTarget() {
         return serverEntity->target;
     }
-    // Set the 'targetName' entity value.
+    // Return the 'targetName' entity value.
     inline const char* GetTargetName() {
         return serverEntity->targetName;
     }
 
-    // Set the 'team' entity value.
+    // Return the 'team' entity value.
     inline char* GetTeam() {
         return serverEntity->team;
     }
 
-    // Set the 'teamChain' entity value.
+    // Return the 'teamChain' entity value.
     inline SVGBaseEntity* GetTeamChainEntity() {
         return teamChainEntity;
     }
 
-    // Set the 'teamMaster' entity value.
+    // Return the 'teamMaster' entity value.
     inline SVGBaseEntity *GetTeamMasterEntity() {
         return teamMasterEntity;
+    }
+
+    // Return the 'viewHeight' entity value.
+    inline const int32_t GetViewHeight() {
+        return serverEntity->viewHeight;
     }
 
     // Return the 'velocity' value.
@@ -285,6 +291,15 @@ public:
         return serverEntity->velocity;
     }
 
+    // Return the 'waterLevel' value.
+    inline const int32_t GetWaterLevel() {
+        return serverEntity->waterLevel;
+    }
+
+    // Return the 'waterType' value.
+    inline const int32_t GetWaterType() {
+        return serverEntity->waterType;
+    }
 
     //
     // Entity Set Functions.
@@ -494,9 +509,24 @@ public:
         teamMasterEntity = entity;
     }
 
+    // Set the 'viewHeight' entity value.
+    inline void SetViewHeight(const int32_t& height) {
+        serverEntity->viewHeight = height;
+    }
+
     // Set the 'velocity' value.
     inline void SetVelocity(const vec3_t &velocity) {
         serverEntity->velocity = velocity;
+    }
+
+    // Return the 'waterLevel' value.
+    inline void SetWaterLevel(const int32_t &waterLevel) {
+        serverEntity->waterLevel = waterLevel;
+    }
+
+    // Return the 'waterType' value.
+    inline void SetWaterType(const int32_t &waterType) {
+        serverEntity->waterType = waterType;
     }
 
 
@@ -512,7 +542,7 @@ public:
     }
 
 
-private:
+protected:
     //
     // The actual entity this class is a member of.
     //

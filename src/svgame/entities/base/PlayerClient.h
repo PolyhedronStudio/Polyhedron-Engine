@@ -22,6 +22,7 @@ public:
     //
     void Precache();    // Precaches data.
     void Spawn();       // Spawns the entity.
+    void Respawn();     // Respawns the entity.
     void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     void Think();       // General entity thinking routine.
 
@@ -47,6 +48,12 @@ public:
     }
     inline void SetAnimationEndFrame(const int32_t& endFrame) {
         GetClient()->animation.endFrame = endFrame;
+    }
+
+    // Client.
+    // Sets the 'client' pointer.
+    void SetClient(gclient_s *client) {
+        serverEntity->client = client;
     }
 
     // Killer Yaw.

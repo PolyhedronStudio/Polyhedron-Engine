@@ -113,6 +113,16 @@ void MiscExplosionBox::Spawn() {
 
 //
 //===============
+// MiscExplosionBox::Respawn
+//
+//===============
+//
+void MiscExplosionBox::Respawn() {
+    gi.DPrintf("MiscExplosionBox::Respawn();");
+}
+
+//
+//===============
 // MiscExplosionBox::PostSpawn
 //
 //===============

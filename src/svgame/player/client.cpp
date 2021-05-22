@@ -766,7 +766,7 @@ void SVG_PutClientInServer(Entity *ent)
     vec3_t  spawn_origin, spawn_angles;
     GameClient   *client;
     int     i;
-    ClientPersistantData saved;
+
     ClientRespawnData    resp;
 
     // find a spawn point
@@ -781,36 +781,51 @@ void SVG_PutClientInServer(Entity *ent)
     if (deathmatch->value) {
         char        userinfo[MAX_INFO_STRING];
 
+        // Store the respawn values.
         resp = client->respawn;
-        memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
-        InitClientPersistant(client);
-        SVG_ClientUserinfoChanged(ent, userinfo);
-    } else if (coop->value) {
-//      int         n;
-        char        userinfo[MAX_INFO_STRING];
 
-        resp = client->respawn;
+        // Store user info.
         memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
-        // this is kind of ugly, but it's how we want to handle keys in coop
-//      for (n = 0; n < game.numberOfItems; n++)
-//      {
-//          if (itemlist[n].flags & ItemFlags::IsKey)
-//              resp.persistentCoopRespawn.inventory[n] = client->persistent.inventory[n];
-//      }
-        client->persistent = resp.persistentCoopRespawn;
+
+        // Initialize a fresh client persistent state.
+        InitClientPersistant(client);
+
+        // Check for changed user info.
         SVG_ClientUserinfoChanged(ent, userinfo);
-        if (resp.score > client->persistent.score)
-            client->persistent.score = resp.score;
+//    } else if (coop->value) {
+////      int         n;
+//        char        userinfo[MAX_INFO_STRING];
+//
+//        resp = client->respawn;
+//        memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
+//        // this is kind of ugly, but it's how we want to handle keys in coop
+////      for (n = 0; n < game.numberOfItems; n++)
+////      {
+////          if (itemlist[n].flags & ItemFlags::IsKey)
+////              resp.persistentCoopRespawn.inventory[n] = client->persistent.inventory[n];
+////      }
+//        client->persistent = resp.persistentCoopRespawn;
+//        SVG_ClientUserinfoChanged(ent, userinfo);
+//        if (resp.score > client->persistent.score)
+//            client->persistent.score = resp.score;
     } else {
         resp = {};
     }
 
-    // clear everything but the persistant data
-    saved = client->persistent;
-    memset(client, 0, sizeof(*client));
+    // Store persistent client data.
+    ClientPersistantData saved = client->persistent;
+
+    // Reset the client data.
+    *client = {};
+
+    // Restore persistent client data.
     client->persistent = saved;
+
+    // In case of death, initialize a fresh client persistent data.
     if (client->persistent.health <= 0)
         InitClientPersistant(client);
+
+    // Last but not least, respawn.
     client->respawn = resp;
 
     // copy some data from the client to the entity
@@ -822,37 +837,38 @@ void SVG_PutClientInServer(Entity *ent)
     SVG_FreeClassEntity(ent);
 
     ent->className = "PlayerClient";
-    ent->classEntity = SVG_SpawnClassEntity(ent, ent->className);
-    ent->classEntity->Precache();
-    ent->classEntity->Spawn();
-    ent->classEntity->PostSpawn();
+    PlayerClient *playerClientEntity = (PlayerClient*)(ent->classEntity = SVG_SpawnClassEntity(ent, ent->className));
+    playerClientEntity->SetClient(&game.clients[index]);
+    playerClientEntity->Precache();
+    playerClientEntity->Spawn();
+    playerClientEntity->PostSpawn();
 
     //
     // clear entity values
     //
-    ent->groundEntityPtr = NULL;
-    ent->client = &game.clients[index];
-    ent->takeDamage = TakeDamage::Aim;
-    ent->classEntity->SetMoveType(MoveType::Walk);
-    ent->viewHeight = 22;
-    ent->inUse = true;
-    ent->className = "PlayerClient";
-    ent->mass = 200;
-    ent->solid = Solid::BoundingBox;
-    ent->deadFlag = DEAD_NO;
-    ent->airFinished = level.time + 12;
-    ent->clipMask = CONTENTS_MASK_PLAYERSOLID;
-    ent->model = "players/male/tris.md2";
-    //ent->Pain = SVG_Player_Pain;
-    //ent->Die = SVG_Player_Die;
-    ent->waterLevel = 0;
-    ent->waterType = 0;
-    ent->flags &= ~EntityFlags::NoKnockBack;
-    ent->serverFlags &= ~EntityServerFlags::DeadMonster;
+    //ent->groundEntityPtr = NULL;
+    //ent->client = &game.clients[index];
+    //ent->takeDamage = TakeDamage::Aim;
+    //ent->classEntity->SetMoveType(MoveType::Walk);
+    //ent->viewHeight = 22;
+    //ent->inUse = true;
+    //ent->className = "PlayerClient";
+    //ent->mass = 200;
+    //ent->solid = Solid::BoundingBox;
+    //ent->deadFlag = DEAD_NO;
+    //ent->airFinished = level.time + 12;
+    //ent->clipMask = CONTENTS_MASK_PLAYERSOLID;
+    //ent->model = "players/male/tris.md2";
+    ////ent->Pain = SVG_Player_Pain;
+    ////ent->Die = SVG_Player_Die;
+    //ent->waterLevel = 0;
+    //ent->waterType = 0;
+    //ent->flags &= ~EntityFlags::NoKnockBack;
+    //ent->serverFlags &= ~EntityServerFlags::DeadMonster;
 
-    ent->mins = vec3_scale(PM_MINS, PM_SCALE);
-    ent->maxs = vec3_scale(PM_MAXS, PM_SCALE);
-    ent->velocity = vec3_zero();
+    //ent->mins = vec3_scale(PM_MINS, PM_SCALE);
+    //ent->maxs = vec3_scale(PM_MAXS, PM_SCALE);
+    //ent->velocity = vec3_zero();
 
     // Clear playerstate values
     //memset(&ent->client->playerState, 0, sizeof(client->playerState));

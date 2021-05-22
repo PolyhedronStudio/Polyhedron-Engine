@@ -52,9 +52,48 @@ void PlayerClient::Spawn() {
     // When spawned, we aren't on any ground, make sure of that.
     SetGroundEntity(nullptr);
 
+//    ent->client = &game.clients[index];
+    SetTakeDamage(TakeDamage::Aim);
+    SetMoveType(MoveType::Walk);
+    SetViewHeight(22);
+    SetInUse(true);
+    SetMass(200);
+    SetSolid(Solid::BoundingBox);
+    SetDeadFlag(DEAD_NO);
+    GetServerEntity()->airFinished = level.time + 12;
+    SetClipMask(CONTENTS_MASK_PLAYERSOLID);
+    SetModel("players/male/tris.md2");
+
+    // Setup WaterLevel and Type.
+    SetWaterLevel(WaterLevel::None);
+    SetWaterType(0);
+
+    // Setup Flags.
+    SetFlags(GetFlags() & ~EntityFlags::NoKnockBack);
+    SetServerFlags(GetServerFlags() & ~EntityServerFlags::DeadMonster);
+
+    // Default Player Move bounding box.
+    SetMins(vec3_scale(PM_MINS, PM_SCALE));
+    SetMaxs(vec3_scale(PM_MAXS, PM_SCALE));
+    
+    // Zero velocity.
+    SetVelocity(vec3_zero());
+
     // Set the die function.
     SetDieCallback(&PlayerClient::PlayerClientDie);
+
+    // Debug.
     gi.DPrintf("PlayerClient::Spawn();");
+}
+
+//
+//===============
+// PlayerClient::Respawn
+//
+//===============
+//
+void PlayerClient::Respawn() {
+    gi.DPrintf("PlayerClient::Respawn();");
 }
 
 //

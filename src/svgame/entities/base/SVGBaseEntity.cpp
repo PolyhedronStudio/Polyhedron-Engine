@@ -64,6 +64,18 @@ void SVGBaseEntity::Spawn() {
 
 //
 //===============
+// SVGBaseEntity::Respawn
+//
+// This function can be overrided, to allow for entity respawning.
+// Setup the basic entity properties here.
+//===============
+//
+void SVGBaseEntity::Respawn() {
+	gi.DPrintf("SVGBaseEntity::Respawn();");
+}
+
+//
+//===============
 // SVGBaseEntity::PostSpawn
 //
 // This function can be overrided, to allow for entity post spawning.
