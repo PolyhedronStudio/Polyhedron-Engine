@@ -836,7 +836,7 @@ void SVG_PutClientInServer(Entity *ent)
     ent->classEntity->SetMoveType(MoveType::Walk);
     ent->viewHeight = 22;
     ent->inUse = true;
-    ent->className = "player";
+    ent->className = "PlayerClient";
     ent->mass = 200;
     ent->solid = Solid::BoundingBox;
     ent->deadFlag = DEAD_NO;

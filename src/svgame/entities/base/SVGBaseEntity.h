@@ -106,6 +106,11 @@ public:
         return serverEntity->delay;
     }
 
+    // Return the 'effects' value.
+    inline const uint32_t GetEffects() {
+        return serverEntity->state.effects;
+    }
+
     // Return the 'enemyPtr' entity pointer.
     SVGBaseEntity* GetEnemy() {
         return enemyEntity;
@@ -114,6 +119,11 @@ public:
     // Return the 'flags' value.
     inline const int32_t GetFlags() {
         return serverEntity->flags;
+    }
+
+    // Return the 'frame' value.
+    inline const int32_t GetFrame() {
+        return serverEntity->state.frame;
     }
 
     // Return the 'groundEntitPtr' entity.
@@ -236,6 +246,11 @@ public:
         return serverEntity->style;
     }
 
+    // Sets the 'sound' value.
+    inline const int32_t GetSound() {
+        return serverEntity->state.sound;
+    }
+
     // Return the 'takeDamage' value.
     inline const int32_t GetTakeDamage() {
         return serverEntity->takeDamage;
@@ -310,6 +325,11 @@ public:
         serverEntity->deadFlag = deadFlag;
     }
 
+    // Set the 'effects' value.
+    inline void SetEffects(const uint32_t &effects) {
+        serverEntity->state.effects = effects;
+    }
+
     // Return the 'delay' value.
     inline const int32_t SetDelay(const int32_t &delay) {
         serverEntity->delay = delay;
@@ -323,6 +343,11 @@ public:
     // Set the 'flags' value.
     inline void SetFlags(const int32_t &flags) {
         serverEntity->flags = flags;
+    }
+
+    // Set the 'frame' value.
+    inline void SetFrame(const int32_t &frame) {
+        serverEntity->state.frame = frame;;
     }
 
     // Set the 'groundEntitPtr' entity.
@@ -437,6 +462,11 @@ public:
     // Set the 'solid' value.
     inline void SetSolid(const uint32_t &solid) {
         serverEntity->solid = solid;
+    }
+
+    // Sets the 'sound' value.
+    inline void SetSound(const int32_t& sound) {
+        serverEntity->state.sound = sound;
     }
 
     // Set the 'spawnFlags' value.
