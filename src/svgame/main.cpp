@@ -465,8 +465,10 @@ void SVG_ExitLevel(void)
         ent = g_entities + 1 + i;
         if (!ent->inUse)
             continue;
-        if (ent->health > ent->client->persistent.maxHealth)
-            ent->health = ent->client->persistent.maxHealth;
+        if (!ent->classEntity)
+            continue;
+        if (ent->classEntity->GetHealth() > ent->client->persistent.maxHealth)
+            ent->classEntity->SetHealth(ent->client->persistent.maxHealth);
     }
 
 }

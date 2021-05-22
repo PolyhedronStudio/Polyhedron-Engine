@@ -139,7 +139,7 @@ public:
 
     // Return the 'health' value.
     inline const int32_t GetHealth() {
-        return serverEntity->health;
+        return health;
     }
 
     // Get the 'inuse' value.
@@ -393,7 +393,7 @@ public:
 
     // Set the 'health' value.
     inline void SetHealth(const int32_t &health) {
-        serverEntity->health = health;
+        this->health = health;
     }
 
     // Set the 'inuse' value.
@@ -556,12 +556,14 @@ protected:
 
     // Velocity.
     vec3_t _velocity;
-
     // Angular Velocity.
     vec3_t _angularVelocity;
 
     // Ground Entity link count. (To keep track if it is linked or not.)
     int32_t groundEntityLinkCount;
+
+    // Entity health.
+    int32_t health;
 
     //
     // Entity pointers.

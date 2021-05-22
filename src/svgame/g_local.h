@@ -1035,7 +1035,6 @@ struct entity_s {
     float debounceSoundTime;    // move to clientInfo
     float lastMoveTime;
 
-    int32_t health;
     int32_t maxHealth;
     int32_t gibHealth;      // Health level required in order for an edict to gib.
     int32_t deadFlag;

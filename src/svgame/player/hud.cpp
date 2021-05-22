@@ -17,6 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 #include "../g_local.h" // Include SVGame header.
 #include "../entities.h"
+#include "../entities/base/SVGBaseEntity.h"
+#include "../entities/base/PlayerClient.h"
 
 #include "client.h"     // Include Player Client header.
 #include "hud.h"        // Include HUD header.
@@ -109,7 +111,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
         if (!client->inUse) {
             continue;
         }
-        if (client->health <= 0) {
+        if (client->classEntity->GetHealth() <= 0) {
             SVG_RespawnClient(client);
         }
     }
@@ -330,7 +332,7 @@ void SVG_HUD_SetClientStats(Entity* ent)
     // health
     //
     ent->client->playerState.stats[STAT_HEALTH_ICON] = level.pic_health;
-    ent->client->playerState.stats[STAT_HEALTH] = ent->health;
+    ent->client->playerState.stats[STAT_HEALTH] = ent->classEntity->GetHealth();
 
     //
     // ammo

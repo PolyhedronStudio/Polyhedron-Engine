@@ -336,7 +336,7 @@ void SVG_SaveClientData(void)
         ent = &g_entities[1 + i];
         if (!ent->inUse)
             continue;
-        game.clients[i].persistent.health = ent->health;
+        game.clients[i].persistent.health = ent->classEntity->GetHealth();
         game.clients[i].persistent.maxHealth = ent->maxHealth;
         game.clients[i].persistent.savedFlags = (ent->flags & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
         if (coop->value && ent->client)
@@ -346,7 +346,7 @@ void SVG_SaveClientData(void)
 
 void SVG_FetchClientData(Entity *ent)
 {
-    ent->health = ent->client->persistent.health;
+    ent->classEntity->SetHealth(ent->client->persistent.health);
     ent->maxHealth = ent->client->persistent.maxHealth;
     ent->flags |= ent->client->persistent.savedFlags;
     if (coop->value && ent->client)
@@ -387,7 +387,7 @@ float   PlayersRangeFromSpot(Entity *spot)
         if (!player->inUse)
             continue;
 
-        if (player->health <= 0)
+        if (player->classEntity && player->classEntity->GetHealth() <= 0)
             continue;
 
         VectorSubtract(spot->state.origin, player->state.origin, v);
@@ -580,7 +580,7 @@ void body_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, con
 {
     int n;
 
-    if (self->health < -40) {
+    if (self->classEntity && self->classEntity->GetHealth() < -40) {
         gi.Sound(self, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 4; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
@@ -828,9 +828,6 @@ void SVG_PutClientInServer(Entity *ent)
     // Last but not least, respawn.
     client->respawn = resp;
 
-    // copy some data from the client to the entity
-    SVG_FetchClientData(ent);
-
     //
     // Spawn client class entity.
     //
@@ -842,6 +839,9 @@ void SVG_PutClientInServer(Entity *ent)
     playerClientEntity->Precache();
     playerClientEntity->Spawn();
     playerClientEntity->PostSpawn();
+
+    // copy some data from the client to the entity
+    SVG_FetchClientData(ent);
 
     //
     // clear entity values
@@ -1238,7 +1238,7 @@ Entity *pm_passent;
 // pmove doesn't need to know about passent and contentmask
 trace_t q_gameabi PM_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end)
 {
-    if (pm_passent->health > 0)
+    if (pm_passent->classEntity && pm_passent->classEntity->GetHealth() > 0)
         return gi.Trace(start, mins, maxs, end, pm_passent, CONTENTS_MASK_PLAYERSOLID);
     else
         return gi.Trace(start, mins, maxs, end, pm_passent, CONTENTS_MASK_DEADSOLID);

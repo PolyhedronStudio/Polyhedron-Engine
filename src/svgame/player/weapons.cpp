@@ -207,7 +207,7 @@ Called by ClientBeginServerFrame and ClientThink
 void SVG_ThinkWeapon(Entity *ent)
 {
     // if just died, put the weapon away
-    if (ent->health < 1) {
+    if (ent->classEntity->GetHealth() < 1) {
         ent->client->newWeapon = NULL;
         SVG_ChangeWeapon(ent);
     }

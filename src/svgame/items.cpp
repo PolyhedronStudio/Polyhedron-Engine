@@ -272,42 +272,42 @@ void Drop_Ammo(Entity *ent, gitem_t *item)
 
 void MegaHealth_think(Entity *self)
 {
-    if (self->owner->health > self->owner->maxHealth) {
-        self->nextThinkTime = level.time + 1;
-        self->owner->health -= 1;
-        return;
-    }
+    //if (self->owner->health > self->owner->maxHealth) {
+    //    self->nextThinkTime = level.time + 1;
+    //    self->owner->health -= 1;
+    //    return;
+    //}
 
-    if (!(self->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
-        SVG_SetRespawn(self, 20);
-    else
-        SVG_FreeEntity(self);
+    //if (!(self->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
+    //    SVG_SetRespawn(self, 20);
+    //else
+    //    SVG_FreeEntity(self);
 }
 
 qboolean Pickup_Health(Entity *ent, Entity *other)
 {
-    if (!(ent->style & HEALTH_IGNORE_MAX))
-        if (other->health >= other->maxHealth)
-            return false;
-
-    other->health += ent->count;
-
-    if (!(ent->style & HEALTH_IGNORE_MAX)) {
-        if (other->health > other->maxHealth)
-            other->health = other->maxHealth;
-    }
-
-    if (ent->style & HEALTH_TIMED) {
-//        ent->Think = MegaHealth_think;
-        ent->nextThinkTime = level.time + 5;
-        ent->owner = other;
-        ent->flags |= EntityFlags::Respawn;
-        ent->serverFlags |= EntityServerFlags::NoClient;
-        ent->solid = Solid::Not;
-    } else {
-        if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
-            SVG_SetRespawn(ent, 30);
-    }
+//    if (!(ent->style & HEALTH_IGNORE_MAX))
+//        if (other->health >= other->maxHealth)
+//            return false;
+//
+//    other->health += ent->count;
+//
+//    if (!(ent->style & HEALTH_IGNORE_MAX)) {
+//        if (other->health > other->maxHealth)
+//            other->health = other->maxHealth;
+//    }
+//
+//    if (ent->style & HEALTH_TIMED) {
+////        ent->Think = MegaHealth_think;
+//        ent->nextThinkTime = level.time + 5;
+//        ent->owner = other;
+//        ent->flags |= EntityFlags::Respawn;
+//        ent->serverFlags |= EntityServerFlags::NoClient;
+//        ent->solid = Solid::Not;
+//    } else {
+//        if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem) && (deathmatch->value))
+//            SVG_SetRespawn(ent, 30);
+//    }
 
     return true;
 }
@@ -404,8 +404,8 @@ void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf
 
     if (!other->client)
         return;
-    if (other->health < 1)
-        return;     // dead people can't pickup
+    //if (other->health < 1)
+    //    return;     // dead people can't pickup
     if (!ent->item->Pickup)
         return;     // not a grabbable item?
 

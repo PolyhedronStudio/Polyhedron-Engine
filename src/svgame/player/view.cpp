@@ -129,11 +129,11 @@ static void SVG_Player_ApplyDamageFeedback(Entity *player)
     if ((level.time > player->debouncePainTime) && !(player->flags & EntityFlags::GodMode)) {
         r = 1 + (rand() & 1);
         player->debouncePainTime = level.time + 0.7f;
-        if (player->health < 25)
+        if (player->classEntity->GetHealth() < 25)
             l = 25;
-        else if (player->health < 50)
+        else if (player->classEntity->GetHealth() < 50)
             l = 50;
-        else if (player->health < 75)
+        else if (player->classEntity->GetHealth() < 75)
             l = 75;
         else
             l = 100;
@@ -165,8 +165,8 @@ static void SVG_Player_ApplyDamageFeedback(Entity *player)
     // Calculate view angle kicks
     //
     kick = abs(client->damages.knockBack);
-    if (kick && player->health > 0) { // kick of 0 means no view adjust at all
-        kick = kick * 100 / player->health;
+    if (kick && player->classEntity->GetHealth() > 0) { // kick of 0 means no view adjust at all
+        kick = kick * 100 / player->classEntity->GetHealth();
 
         if (kick < count * 0.5f)
             kick = count * 0.5f;
@@ -471,7 +471,7 @@ static void SVG_Player_CheckFallingDamage(Entity *ent)
     ent->client->fallTime = level.time + FALL_TIME;
 
     if (delta > 30) {
-        if (ent->health > 0) {
+        if (ent->classEntity->GetHealth() > 0) {
             if (delta >= 55)
                 ent->state.event = EntityEvent::FallFar;
             else
@@ -568,7 +568,7 @@ static void SVG_Player_CheckWorldEffects(void)
         if (current_player->airFinishedTime < level.time) {
             // drown!
             if (current_player->client->nextDrownTime < level.time
-                && current_player->health > 0) {
+                && current_player->classEntity->GetHealth() > 0) {
                 current_player->client->nextDrownTime = level.time + 1;
 
                 // take more damage the longer underwater
@@ -577,7 +577,7 @@ static void SVG_Player_CheckWorldEffects(void)
                     current_player->damage = 15;
 
                 // play a gurp sound instead of a normal pain sound
-                if (current_player->health <= current_player->damage)
+                if (current_player->classEntity->GetHealth() <= current_player->damage)
                     gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/drown1.wav"), 1, ATTN_NORM, 0);
                 else if (rand() & 1)
                     gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("*gurp1.wav"), 1, ATTN_NORM, 0);
@@ -599,7 +599,7 @@ static void SVG_Player_CheckWorldEffects(void)
     //
     if (waterlevel && (current_player->waterType & (CONTENTS_LAVA | CONTENTS_SLIME))) {
         if (current_player->waterType & CONTENTS_LAVA) {
-            if (current_player->health > 0
+            if (current_player->classEntity->GetHealth() > 0
                 && current_player->debouncePainTime <= level.time) {
                 if (rand() & 1)
                     gi.Sound(current_player, CHAN_VOICE, gi.SoundIndex("player/burn1.wav"), 1, ATTN_NORM, 0);
@@ -628,7 +628,7 @@ static void SVG_SetClientEffects(Entity *ent)
     ent->state.effects = 0;
     ent->state.renderfx = 0;
 
-    if (ent->health <= 0 || level.intermission.time)
+    if (ent->classEntity->GetHealth() <= 0 || level.intermission.time)
         return;
 
     // show cheaters!!!

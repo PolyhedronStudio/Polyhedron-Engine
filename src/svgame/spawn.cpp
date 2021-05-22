@@ -123,7 +123,7 @@ static const spawn_field_t spawn_fields[] = {
     {"style", FOFS(style), F_INT},
     {"customLightStyle", FOFS(customLightStyle), F_LSTRING},
     {"count", FOFS(count), F_INT},
-    {"health", FOFS(health), F_INT},
+//    {"health", FOFS(health), F_INT},
     {"sounds", FOFS(sounds), F_INT},
     {"light", 0, F_IGNORE},
     {"damage", FOFS(damage), F_INT},

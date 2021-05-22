@@ -131,7 +131,7 @@ static const save_field_t entityfields[] = {
     F(debounceSoundTime),
     F(lastMoveTime),
 
-    I(health),
+//    I(health),
     I(maxHealth),
     I(gibHealth),
     I(deadFlag),

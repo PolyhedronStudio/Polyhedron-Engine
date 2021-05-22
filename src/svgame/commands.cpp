@@ -179,9 +179,9 @@ void Cmd_Give_f(Entity *ent)
 
     if (give_all || Q_stricmp(gi.argv(1), "health") == 0) {
         if (gi.argc() == 3)
-            ent->health = atoi(gi.argv(2));
+            ent->classEntity->SetHealth(atoi(gi.argv(2)));
         else
-            ent->health = ent->maxHealth;
+            ent->classEntity->SetHealth(ent->maxHealth);
         if (!give_all)
             return;
     }
@@ -578,7 +578,7 @@ void Cmd_Kill_f(Entity *ent)
     if ((level.time - ent->client->respawnTime) < 5)
         return;
     ent->flags &= ~EntityFlags::GodMode;
-    ent->health = 0;
+    ent->classEntity->SetHealth(0);
     meansOfDeath = MeansOfDeath::Suicide;
     SVG_Player_Die(ent, ent, ent, 100000, vec3_origin);
 }

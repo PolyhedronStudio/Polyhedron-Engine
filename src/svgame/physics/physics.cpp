@@ -906,7 +906,7 @@ void SV_Physics_Step(SVGBaseEntity *ent)
         // apply friction
         // let dead monsters who aren't completely onground slide
         if ((wasonground) || (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)))
-            if (!(ent->GetServerEntity()->health <= 0.0)) {
+            if (!(ent->GetHealth() <= 0.0)) {
                 vel = ent->GetServerEntity()->velocity;
                 speed = std::sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
                 if (speed) {
