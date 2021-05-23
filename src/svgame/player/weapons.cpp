@@ -87,47 +87,48 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int type)
 }
 
 
-qboolean Pickup_Weapon(Entity *ent, Entity *other)
+qboolean Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other)
 {
-    int         index;
-    gitem_t     *ammo;
+    //int         index;
+    //gitem_t     *ammo;
 
-    index = ITEM_INDEX(ent->item);
+    //index = ITEM_INDEX(ent->item);
 
-    if ((((int)(dmflags->value) & DeathMatchFlags::WeaponsStay) || coop->value)
-        && other->client->persistent.inventory[index]) {
-        if (!(ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem)))
-            return false;   // leave the weapon for others to pickup
-    }
+    //if ((((int)(dmflags->value) & DeathMatchFlags::WeaponsStay) || coop->value)
+    //    && other->client->persistent.inventory[index]) {
+    //    if (!(ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem)))
+    //        return false;   // leave the weapon for others to pickup
+    //}
 
-    other->client->persistent.inventory[index]++;
+    //other->client->persistent.inventory[index]++;
 
-    if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem)) {
-        // give them some ammo with it
-        ammo = SVG_FindItemByPickupName(ent->item->ammo);
-        if ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo)
-            SVG_AddAmmo(other, ammo, 1000);
-        else
-            SVG_AddAmmo(other, ammo, ammo->quantity);
+    //if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem)) {
+    //    // give them some ammo with it
+    //    ammo = SVG_FindItemByPickupName(ent->item->ammo);
+    //    if ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo)
+    //        SVG_AddAmmo(other, ammo, 1000);
+    //    else
+    //        SVG_AddAmmo(other, ammo, ammo->quantity);
 
-        if (!(ent->spawnFlags & ItemSpawnFlags::DroppedPlayerItem)) {
-            if (deathmatch->value) {
-                if ((int)(dmflags->value) & DeathMatchFlags::WeaponsStay)
-                    ent->flags |= EntityFlags::Respawn;
-                else
-                    SVG_SetRespawn(ent, 30);
-            }
-            if (coop->value)
-                ent->flags |= EntityFlags::Respawn;
-        }
-    }
+    //    if (!(ent->spawnFlags & ItemSpawnFlags::DroppedPlayerItem)) {
+    //        if (deathmatch->value) {
+    //            if ((int)(dmflags->value) & DeathMatchFlags::WeaponsStay)
+    //                ent->flags |= EntityFlags::Respawn;
+    //            else
+    //                SVG_SetRespawn(ent, 30);
+    //        }
+    //        if (coop->value)
+    //            ent->flags |= EntityFlags::Respawn;
+    //    }
+    //}
 
-    if (other->client->persistent.activeWeapon != ent->item &&
-        (other->client->persistent.inventory[index] == 1) &&
-        (!deathmatch->value || other->client->persistent.activeWeapon == SVG_FindItemByPickupName("blaster")))
-        other->client->newWeapon = ent->item;
+    //if (other->client->persistent.activeWeapon != ent->item &&
+    //    (other->client->persistent.inventory[index] == 1) &&
+    //    (!deathmatch->value || other->client->persistent.activeWeapon == SVG_FindItemByPickupName("blaster")))
+    //    other->client->newWeapon = ent->item;
 
-    return true;
+    //return true;
+    return false;
 }
 
 
@@ -233,7 +234,7 @@ Use_Weapon
 Make the weapon ready if there is ammo
 ================
 */
-void Use_Weapon(SVGBaseEntity *ent, gitem_t *item)
+void Use_Weapon(PlayerClient *ent, gitem_t* item)
 {
     int         ammoIndex;
     gitem_t     *ammo_item;
@@ -269,22 +270,23 @@ void Use_Weapon(SVGBaseEntity *ent, gitem_t *item)
 Drop_Weapon
 ================
 */
-void Drop_Weapon(Entity *ent, gitem_t *item)
+void Drop_Weapon(PlayerClient *ent, gitem_t *item)
 {
     int     index;
 
     if ((int)(dmflags->value) & DeathMatchFlags::WeaponsStay)
         return;
 
+    GameClient* client = ent->GetClient();
     index = ITEM_INDEX(item);
     // see if we're already using it
-    if (((item == ent->client->persistent.activeWeapon) || (item == ent->client->newWeapon)) && (ent->client->persistent.inventory[index] == 1)) {
-        gi.CPrintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
+    if (((item == client->persistent.activeWeapon) || (item == client->newWeapon)) && (client->persistent.inventory[index] == 1)) {
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Can't drop current weapon\n");
         return;
     }
 
-    SVG_DropItem(ent, item);
-    ent->client->persistent.inventory[index]--;
+    SVG_DropItem(ent->GetServerEntity(), item);
+    client->persistent.inventory[index]--;
 }
 
 

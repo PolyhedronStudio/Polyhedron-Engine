@@ -28,9 +28,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "weapons/shotgun.h"
 #include "weapons/supershotgun.h"
 
-qboolean    Pickup_Weapon(SVGBaseEntity *ent, SVGBaseEntity *other);
-void        Use_Weapon(SVGBaseEntity *ent, gitem_t *inv);
-void        Drop_Weapon(SVGBaseEntity *ent, gitem_t *inv);
+qboolean    Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other);
+void        Use_Weapon(PlayerClient *ent, gitem_t *inv);
+void        Drop_Weapon(PlayerClient *ent, gitem_t *inv);
 
 gitem_armor_t bodyarmor_info    = {100, 200, .80f, .60f, ArmorType::Body};
 
@@ -214,58 +214,58 @@ qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int count)
     return true;
 }
 
-qboolean Pickup_Ammo(Entity *ent, Entity *other)
+qboolean Pickup_Ammo(SVGBaseEntity *ent, PlayerClient*other)
 {
-    int         oldcount;
-    int         count;
-    qboolean    weapon;
+    //int         oldcount;
+    //int         count;
+    //qboolean    weapon;
 
-    weapon = (ent->item->flags & ItemFlags::IsWeapon);
-    if ((weapon) && ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
-        count = 1000;
-    else if (ent->count)
-        count = ent->count;
-    else
-        count = ent->item->quantity;
+    //weapon = (ent->item->flags & ItemFlags::IsWeapon);
+    //if ((weapon) && ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
+    //    count = 1000;
+    //else if (ent->count)
+    //    count = ent->count;
+    //else
+    //    count = ent->item->quantity;
 
-    oldcount = other->client->persistent.inventory[ITEM_INDEX(ent->item)];
+    //oldcount = other->client->persistent.inventory[ITEM_INDEX(ent->item)];
 
-    if (!SVG_AddAmmo(other, ent->item, count))
-        return false;
+    //if (!SVG_AddAmmo(other, ent->item, count))
+    //    return false;
 
-    if (weapon && !oldcount) {
-        if (other->client->persistent.activeWeapon != ent->item && (!deathmatch->value || other->client->persistent.activeWeapon == SVG_FindItemByPickupName("blaster")))
-            other->client->newWeapon = ent->item;
-    }
+    //if (weapon && !oldcount) {
+    //    if (other->client->persistent.activeWeapon != ent->item && (!deathmatch->value || other->client->persistent.activeWeapon == SVG_FindItemByPickupName("blaster")))
+    //        other->client->newWeapon = ent->item;
+    //}
 
-    if (!(ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem)) && (deathmatch->value))
-        SVG_SetRespawn(ent, 30);
+    //if (!(ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem)) && (deathmatch->value))
+    //    SVG_SetRespawn(ent, 30);
     return true;
 }
 
-void Drop_Ammo(Entity *ent, gitem_t *item)
+void Drop_Ammo(PlayerClient *ent, gitem_t *item)
 {
-    Entity *dropped;
-    int     index;
+    //Entity *dropped;
+    //int     index;
 
-    index = ITEM_INDEX(item);
-    dropped = SVG_DropItem(ent, item);
-    if (ent->client->persistent.inventory[index] >= item->quantity)
-        dropped->count = item->quantity;
-    else
-        dropped->count = ent->client->persistent.inventory[index];
+    //index = ITEM_INDEX(item);
+    //dropped = SVG_DropItem(ent, item);
+    //if (ent->client->persistent.inventory[index] >= item->quantity)
+    //    dropped->count = item->quantity;
+    //else
+    //    dropped->count = ent->client->persistent.inventory[index];
 
-    if (ent->client->persistent.activeWeapon &&
-        ent->client->persistent.activeWeapon->tag == AmmoType::Grenade &&
-        item->tag == AmmoType::Grenade &&
-        ent->client->persistent.inventory[index] - dropped->count <= 0) {
-        gi.CPrintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
-        SVG_FreeEntity(dropped);
-        return;
-    }
+    //if (ent->client->persistent.activeWeapon &&
+    //    ent->client->persistent.activeWeapon->tag == AmmoType::Grenade &&
+    //    item->tag == AmmoType::Grenade &&
+    //    ent->client->persistent.inventory[index] - dropped->count <= 0) {
+    //    gi.CPrintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
+    //    SVG_FreeEntity(dropped);
+    //    return;
+    //}
 
-    ent->client->persistent.inventory[index] -= dropped->count;
-    HUD_ValidateSelectedItem(ent);
+    //ent->client->persistent.inventory[index] -= dropped->count;
+    //HUD_ValidateSelectedItem(ent);
 }
 
 
@@ -332,7 +332,7 @@ int SVG_ArmorIndex(SVGBaseEntity *ent)
     return 0;
 }
 
-qboolean Pickup_Armor(SVGBaseEntity *ent, SVGBaseEntity *other)
+qboolean Pickup_Armor(SVGBaseEntity *ent, PlayerClient *other)
 {
     //int             old_armor_index;
     //gitem_armor_t   *oldinfo;
@@ -916,26 +916,26 @@ gitem_t itemlist[] = {
         /* precache */ ""
     },
 
-    {
-        NULL,
-        Pickup_Health,
-        NULL,
-        NULL,
-        NULL,
-        "items/pkup.wav",
-        NULL, 0,
-        NULL,
-        /* icon */      "i_health",
-        /* pickup */    "Health",
-        /* width */     3,
-        0,
-        NULL,
-        0,
-        0,
-        NULL,
-        0,
-        /* precache */ "items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav"
-    },
+    //{
+    //    NULL,
+    //    Pickup_Health,
+    //    NULL,
+    //    NULL,
+    //    NULL,
+    //    "items/pkup.wav",
+    //    NULL, 0,
+    //    NULL,
+    //    /* icon */      "i_health",
+    //    /* pickup */    "Health",
+    //    /* width */     3,
+    //    0,
+    //    NULL,
+    //    0,
+    //    0,
+    //    NULL,
+    //    0,
+    //    /* precache */ "items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav"
+    //},
 
     // end of list marker
     {NULL}

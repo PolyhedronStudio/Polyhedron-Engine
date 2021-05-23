@@ -10,6 +10,10 @@
 // Include local game header.
 #include "../g_local.h"
 
+// Include class entities.
+#include "../entities/base/SVGBaseEntity.h"
+#include "../entities/base/PlayerClient.h"
+
 // Include player headers.
 #include "../player/animations.h"
 #include "../player/weapons.h"
@@ -33,24 +37,26 @@ static constexpr int32_t SHOTGUN_VSPREAD = 500;
 
 void weapon_shotgun_fire(PlayerClient * ent)
 {
-    vec3_t      start;
     vec3_t      forward, right;
-    vec3_t      offset;
     int         damage = 4;
     int         kick = 8;
 
-    if (ent->client->playerState.gunFrame == 9) {
-        ent->client->playerState.gunFrame++;
+    GameClient* client = ent->GetClient();
+
+    if (client->playerState.gunFrame == 9) {
+        client->playerState.gunFrame++;
         return;
     }
 
-    vec3_vectors(ent->client->aimAngles, &forward, &right, NULL);
+    vec3_vectors(client->aimAngles, &forward, &right, NULL);
 
-    ent->client->kickOrigin = vec3_scale(forward, -2);
-    ent->client->kickAngles[0] = -2;
+    client->kickOrigin = vec3_scale(forward, -2);
+    client->kickAngles[0] = -2;
 
-    VectorSet(offset, 0, 8, ent->viewHeight - 8);
-    start = SVG_PlayerProjectSource(ent->client, ent->state.origin, offset, forward, right);
+    vec3_t offset = {
+        0.f, 8.f, ent->GetViewHeight() - 8.f
+    };
+    vec3_t start = SVG_PlayerProjectSource(client, ent->GetOrigin(), offset, forward, right);
 
     if (is_quad) {
         damage *= 4;
@@ -58,24 +64,25 @@ void weapon_shotgun_fire(PlayerClient * ent)
     }
 
     if (deathmatch->value)
-        SVG_FireShotgun(ent->classEntity, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEATHMATCH, MeansOfDeath::Shotgun);
+        SVG_FireShotgun(ent, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEATHMATCH, MeansOfDeath::Shotgun);
     else
-        SVG_FireShotgun(ent->classEntity, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEFAULT, MeansOfDeath::Shotgun);
+        SVG_FireShotgun(ent, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEFAULT, MeansOfDeath::Shotgun);
 
     // send muzzle flash
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-    gi.WriteShort(ent - g_entities);
+    gi.WriteShort(ent->GetServerEntity() - g_entities);
     gi.WriteByte(MuzzleFlashType::Shotgun | is_silenced);
-    gi.Multicast(&ent->state.origin, MultiCast::PVS);
+    vec3_t origin = ent->GetOrigin();
+    gi.Multicast(&origin, MultiCast::PVS);
 
-    ent->client->playerState.gunFrame++;
-    SVG_PlayerNoise(ent->classEntity, start, PNOISE_WEAPON);
+    client->playerState.gunFrame++;
+    SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
-        ent->client->persistent.inventory[ent->client->ammoIndex]--;
+        client->persistent.inventory[client->ammoIndex]--;
 }
 
-void Weapon_Shotgun(Entity* ent)
+void Weapon_Shotgun(PlayerClient* ent)
 {
     static int  pause_frames[] = { 22, 28, 34, 0 };
     static int  fire_frames[] = { 8, 9, 0 };

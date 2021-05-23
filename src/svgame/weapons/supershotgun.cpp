@@ -10,6 +10,10 @@
 // Include local game header.
 #include "../g_local.h"
 
+// Include class entities.
+#include "../entities/base/SVGBaseEntity.h"
+#include "../entities/base/PlayerClient.h"
+
 // Include player headers.
 #include "../player/animations.h"
 #include "../player/weapons.h"
@@ -29,51 +33,55 @@ static constexpr int32_t DEFAULT_SUPERSHOTGUN_VSPREAD = 500;
 
 static constexpr int32_t DEFAULT_SUPERSHOTGUN_COUNT = 20;
 
-void weapon_supershotgun_fire(Entity* ent)
+void weapon_supershotgun_fire(PlayerClient * ent)
 {
     vec3_t      start;
     vec3_t      forward, right;
-    vec3_t      offset;
     vec3_t      v;
     int         damage = 6;
     int         kick = 12;
 
-    vec3_vectors(ent->client->aimAngles, &forward, &right, NULL);
+    GameClient* client = ent->GetClient();
 
-    ent->client->kickOrigin = vec3_scale(forward, -2);
-    ent->client->kickAngles[0] = -2;
+    vec3_vectors(client->aimAngles, &forward, &right, NULL);
 
-    VectorSet(offset, 0, 8, ent->viewHeight - 8);
-    start = SVG_PlayerProjectSource(ent->client, ent->state.origin, offset, forward, right);
+    client->kickOrigin = vec3_scale(forward, -2);
+    client->kickAngles[0] = -2;
+
+    vec3_t offset = {
+        0.f, 8.f, (float)ent->GetViewHeight() - 8.f
+    };
+    start = SVG_PlayerProjectSource(client, ent->GetOrigin(), offset, forward, right);
 
     if (is_quad) {
         damage *= 4;
         kick *= 4;
     }
 
-    v[vec3_t::PYR::Pitch] = ent->client->aimAngles[vec3_t::PYR::Pitch];
-    v[vec3_t::PYR::Yaw] = ent->client->aimAngles[vec3_t::PYR::Yaw] - 5;
-    v[vec3_t::PYR::Roll] = ent->client->aimAngles[vec3_t::PYR::Roll];
+    v[vec3_t::PYR::Pitch] = client->aimAngles[vec3_t::PYR::Pitch];
+    v[vec3_t::PYR::Yaw] = client->aimAngles[vec3_t::PYR::Yaw] - 5;
+    v[vec3_t::PYR::Roll] = client->aimAngles[vec3_t::PYR::Roll];
     vec3_vectors(v, &forward, NULL, NULL);
-    SVG_FireShotgun(ent->classEntity, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
-    v[vec3_t::PYR::Yaw] = ent->client->aimAngles[vec3_t::PYR::Yaw] + 5;
+    SVG_FireShotgun(ent, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
+    v[vec3_t::PYR::Yaw] = client->aimAngles[vec3_t::PYR::Yaw] + 5;
     vec3_vectors(v, &forward, NULL, NULL);
-    SVG_FireShotgun(ent->classEntity, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
+    SVG_FireShotgun(ent, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
 
     // send muzzle flash
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-    gi.WriteShort(ent - g_entities);
+    gi.WriteShort(ent->GetServerEntity() - g_entities);
     gi.WriteByte(MuzzleFlashType::SuperShotgun | is_silenced);
-    gi.Multicast(&ent->state.origin, MultiCast::PVS);
+    vec3_t origin = ent->GetOrigin();
+    gi.Multicast(&origin, MultiCast::PVS);
 
-    ent->client->playerState.gunFrame++;
-    SVG_PlayerNoise(ent->classEntity, start, PNOISE_WEAPON);
+    client->playerState.gunFrame++;
+    SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
-        ent->client->persistent.inventory[ent->client->ammoIndex] -= 2;
+        client->persistent.inventory[client->ammoIndex] -= 2;
 }
 
-void Weapon_SuperShotgun(Entity* ent)
+void Weapon_SuperShotgun(PlayerClient* ent)
 {
     static int  pause_frames[] = { 29, 42, 57, 0 };
     static int  fire_frames[] = { 7, 0 };

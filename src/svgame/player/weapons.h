@@ -21,7 +21,7 @@ vec3_t SVG_PlayerProjectSource(GameClient* client, const vec3_t &point, const ve
 
 void SVG_PlayerNoise(SVGBaseEntity* who, vec3_t where, int type);
 
-qboolean    Pickup_Weapon(Entity* ent, Entity* other);
+qboolean    Pickup_Weapon(SVGBaseEntity* ent, PlayerClient* other);
 void        SVG_ChangeWeapon(PlayerClient* ent);
 void        NoAmmoWeaponChange(PlayerClient* ent);
 void        SVG_ThinkWeapon(PlayerClient* ent);

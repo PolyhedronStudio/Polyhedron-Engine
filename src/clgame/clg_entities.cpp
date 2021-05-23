@@ -580,7 +580,7 @@ void CLG_EntityEvent(int number) {
         CLG_TeleporterParticles(cent->current.origin);
     }
         
-    switch (cent->current.event) {
+    switch (cent->current.eventID) {
     case EntityEvent::ItemRespawn:
         clgi.S_StartSound(NULL, number, CHAN_WEAPON, clgi.S_RegisterSound("items/respawn1.wav"), 1, ATTN_IDLE, 0);
         CLG_ItemRespawnParticles(cent->current.origin);

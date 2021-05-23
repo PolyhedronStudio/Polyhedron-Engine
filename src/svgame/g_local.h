@@ -35,9 +35,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define GAMEVERSION "basenac"
 
 //-------------------
-// Predeclarations.
+// Forward Declaration.
 //-------------------
 class SVGBaseEntity;
+class PlayerClient;
 
 
 //==================================================================
@@ -273,10 +274,10 @@ typedef struct gitem_s {
     const char *className;
 
     // Function callbacks.
-    qboolean (*Pickup)(SVGBaseEntity *ent, SVGBaseEntity *other);
-    void (*Use)(SVGBaseEntity *ent, struct gitem_s *item);
-    void (*Drop)(SVGBaseEntity *ent, struct gitem_s *item);
-    void (*WeaponThink)(SVGBaseEntity *ent);
+    qboolean (*Pickup)(SVGBaseEntity *ent, PlayerClient *other);
+    void (*Use)(PlayerClient *ent, struct gitem_s *item);
+    void (*Drop)(PlayerClient *ent, struct gitem_s *item);
+    void (*WeaponThink)(PlayerClient *ent);
 
     // Sound used when being picked up.
     const char *pickupSound;
@@ -642,7 +643,7 @@ void SVG_ThinkWeapon(Entity *ent);
 int32_t SVG_ArmorIndex(SVGBaseEntity *ent);
 gitem_t *SVG_GetItemByIndex(int32_t index);
 qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int32_t count);
-void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf);
+void SVG_TouchItem(SVGBaseEntity* ent, SVGBaseEntity* other, cplane_t *plane, csurface_t *surf);
 
 //
 // g_combat.c

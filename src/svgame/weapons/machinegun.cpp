@@ -10,7 +10,7 @@
 // Include local game header.
 #include "../g_local.h"
 
-// ClassEntities.
+// Include class entities.
 #include "../entities/base/SVGBaseEntity.h"
 #include "../entities/base/PlayerClient.h"
 
@@ -33,14 +33,15 @@ static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_VSPREAD = 500;
 
 void Machinegun_Fire(PlayerClient* ent)
 {
-    int i;
-    vec3_t      start;
-    vec3_t      forward, right;
-    vec3_t      angles;
-    int         damage = 8;
-    int         kick = 2;
-    vec3_t      offset;
+    int32_t i;
+    vec3_t start;
+    vec3_t forward, right;
 
+    int32_t damage = 8;
+    int32_t kick = 2;
+
+
+    // Get the client.
     GameClient* client = ent->GetClient();
 
     if (!(client->buttons & BUTTON_ATTACK)) {
@@ -84,34 +85,37 @@ void Machinegun_Fire(PlayerClient* ent)
     }
 
     // get start / end positions
-    VectorAdd(client->aimAngles, client->kickAngles, angles);
-    AngleVectors(angles, &forward, &right, NULL);
-    VectorSet(offset, 0, 8, ent->viewHeight - 8);
-    start = SVG_PlayerProjectSource(client, ent->state.origin, offset, forward, right);
-    SVG_FireBullet(ent->classEntity, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
+    vec3_t angles = client->aimAngles + client->kickAngles;
+    vec3_vectors(angles, &forward, &right, NULL);
+    vec3_t offset = {
+        0.f, 8, (float)ent->GetViewHeight() - 8.f
+    };
+    start = SVG_PlayerProjectSource(client, ent->GetOrigin(), offset, forward, right);
+    SVG_FireBullet(ent, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
 
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-    gi.WriteShort(ent - g_entities);
+    gi.WriteShort(ent->GetServerEntity() - g_entities);
     gi.WriteByte(MuzzleFlashType::MachineGun | is_silenced);
-    gi.Multicast(&ent->state.origin, MultiCast::PVS);
+    vec3_t origin = ent->GetOrigin();
+    gi.Multicast(&origin, MultiCast::PVS);
 
-    SVG_PlayerNoise(ent->classEntity, start, PNOISE_WEAPON);
+    SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
         client->persistent.inventory[client->ammoIndex]--;
 
     client->animation.priorityAnimation = PlayerAnimation::Attack;
     if (client->playerState.pmove.flags & PMF_DUCKED) {
-        ent->state.frame = FRAME_crattak1 - (int)(random() + 0.25);
+        ent->SetFrame(FRAME_crattak1 - (int)(random() + 0.25));
         client->animation.endFrame = FRAME_crattak9;
     }
     else {
-        ent->state.frame = FRAME_attack1 - (int)(random() + 0.25);
+        ent->SetFrame(FRAME_attack1 - (int)(random() + 0.25));
         client->animation.endFrame = FRAME_attack8;
     }
 }
 
-void Weapon_Machinegun(Entity* ent)
+void Weapon_Machinegun(PlayerClient* ent)
 {
     static int  pause_frames[] = { 23, 45, 0 };
     static int  fire_frames[] = { 4, 5, 0 };

@@ -244,9 +244,6 @@ void SVG_ClientUpdateObituary(SVGBaseEntity *self, SVGBaseEntity *inflictor, SVG
         self->GetClient()->respawn.score--;
 }
 
-
-void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf);
-
 void SVG_TossClientWeapon(PlayerClient *playerClient)
 {
     gitem_t     *item;
