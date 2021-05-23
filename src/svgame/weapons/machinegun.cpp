@@ -10,6 +10,10 @@
 // Include local game header.
 #include "../g_local.h"
 
+// ClassEntities.
+#include "../entities/base/SVGBaseEntity.h"
+#include "../entities/base/PlayerClient.h"
+
 // Include player headers.
 #include "../player/animations.h"
 #include "../player/weapons.h"
@@ -27,7 +31,7 @@
 static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_HSPREAD = 300;
 static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_VSPREAD = 500;
 
-void Machinegun_Fire(Entity* ent)
+void Machinegun_Fire(PlayerClient* ent)
 {
     int i;
     vec3_t      start;
@@ -37,22 +41,24 @@ void Machinegun_Fire(Entity* ent)
     int         kick = 2;
     vec3_t      offset;
 
-    if (!(ent->client->buttons & BUTTON_ATTACK)) {
-        ent->client->machinegunShots = 0;
-        ent->client->playerState.gunFrame++;
+    GameClient* client = ent->GetClient();
+
+    if (!(client->buttons & BUTTON_ATTACK)) {
+        client->machinegunShots = 0;
+        client->playerState.gunFrame++;
         return;
     }
 
-    if (ent->client->playerState.gunFrame == 5)
-        ent->client->playerState.gunFrame = 4;
+    if (client->playerState.gunFrame == 5)
+        client->playerState.gunFrame = 4;
     else
-        ent->client->playerState.gunFrame = 5;
+        client->playerState.gunFrame = 5;
 
-    if (ent->client->persistent.inventory[ent->client->ammoIndex] < 1) {
-        ent->client->playerState.gunFrame = 6;
-        if (level.time >= ent->debouncePainTime) {
-            gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-            ent->debouncePainTime = level.time + 1;
+    if (client->persistent.inventory[client->ammoIndex] < 1) {
+        client->playerState.gunFrame = 6;
+        if (level.time >= ent->GetDebouncePainTime()) {
+            gi.Sound(ent->GetServerEntity(), CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+            ent->SetDebouncePainTime(level.time + 1);
         }
         NoAmmoWeaponChange(ent);
         return;
@@ -64,24 +70,24 @@ void Machinegun_Fire(Entity* ent)
     }
 
     for (i = 1; i < 3; i++) {
-        ent->client->kickOrigin[i] = crandom() * 0.35;
-        ent->client->kickAngles[i] = crandom() * 0.7;
+        client->kickOrigin[i] = crandom() * 0.35;
+        client->kickAngles[i] = crandom() * 0.7;
     }
-    ent->client->kickOrigin[0] = crandom() * 0.35;
-    ent->client->kickAngles[0] = ent->client->machinegunShots * -1.5;
+    client->kickOrigin[0] = crandom() * 0.35;
+    client->kickAngles[0] = client->machinegunShots * -1.5;
 
     // raise the gun as it is firing
     if (!deathmatch->value) {
-        ent->client->machinegunShots++;
-        if (ent->client->machinegunShots > 9)
-            ent->client->machinegunShots = 9;
+        client->machinegunShots++;
+        if (client->machinegunShots > 9)
+            client->machinegunShots = 9;
     }
 
     // get start / end positions
-    VectorAdd(ent->client->aimAngles, ent->client->kickAngles, angles);
+    VectorAdd(client->aimAngles, client->kickAngles, angles);
     AngleVectors(angles, &forward, &right, NULL);
     VectorSet(offset, 0, 8, ent->viewHeight - 8);
-    start = SVG_PlayerProjectSource(ent->client, ent->state.origin, offset, forward, right);
+    start = SVG_PlayerProjectSource(client, ent->state.origin, offset, forward, right);
     SVG_FireBullet(ent->classEntity, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
 
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
@@ -92,16 +98,16 @@ void Machinegun_Fire(Entity* ent)
     SVG_PlayerNoise(ent->classEntity, start, PNOISE_WEAPON);
 
     if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
-        ent->client->persistent.inventory[ent->client->ammoIndex]--;
+        client->persistent.inventory[client->ammoIndex]--;
 
-    ent->client->animation.priorityAnimation = PlayerAnimation::Attack;
-    if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
+    client->animation.priorityAnimation = PlayerAnimation::Attack;
+    if (client->playerState.pmove.flags & PMF_DUCKED) {
         ent->state.frame = FRAME_crattak1 - (int)(random() + 0.25);
-        ent->client->animation.endFrame = FRAME_crattak9;
+        client->animation.endFrame = FRAME_crattak9;
     }
     else {
         ent->state.frame = FRAME_attack1 - (int)(random() + 0.25);
-        ent->client->animation.endFrame = FRAME_attack8;
+        client->animation.endFrame = FRAME_attack8;
     }
 }
 

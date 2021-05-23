@@ -53,13 +53,13 @@ typedef struct {
     // Rendering effects.
     uint32_t    skinNumber;
     uint32_t    effects;
-    uint32_t    renderfx;
+    uint32_t    renderEffects;
     uint32_t    solid;
     uint16_t    frame;
 
     // Sound ID, and Event ID.
     uint8_t     sound;
-    uint8_t     event;
+    uint8_t     eventID;
 } PackedEntity;
 
 //---------------

@@ -318,11 +318,11 @@ void MSG_PackEntity(PackedEntity* out, const EntityState* in, qboolean short_ang
     out->modelIndex4 = in->modelIndex4;
     out->skinNumber = in->skinNumber;
     out->effects = in->effects;
-    out->renderfx = in->renderfx;
+    out->renderEffects = in->renderEffects;
     out->solid = in->solid;
     out->frame = in->frame;
     out->sound = in->sound;
-    out->event = in->event;
+    out->eventID = in->eventID;
 }
 
 void MSG_WriteDeltaEntity(const PackedEntity* from,
@@ -417,10 +417,10 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
             bits |= U_EFFECTS8;
     }
 
-    if (to->renderfx != from->renderfx) {
-        if (to->renderfx & mask)
+    if (to->renderEffects != from->renderEffects) {
+        if (to->renderEffects & mask)
             bits |= U_RENDERFX8 | U_RENDERFX16;
-        else if (to->renderfx & 0x0000ff00)
+        else if (to->renderEffects & 0x0000ff00)
             bits |= U_RENDERFX16;
         else
             bits |= U_RENDERFX8;
@@ -430,7 +430,7 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
         bits |= U_SOLID;
 
     // event is not delta compressed, just 0 compressed
-    if (to->event)
+    if (to->eventID)
         bits |= U_EVENT;
 
     if (to->modelIndex != from->modelIndex)
@@ -445,10 +445,10 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
     if (to->sound != from->sound)
         bits |= U_SOUND;
 
-    if (to->renderfx & RenderEffects::FrameLerp) {
+    if (to->renderEffects & RenderEffects::FrameLerp) {
         bits |= U_OLDORIGIN;
     }
-    else if (to->renderfx & RenderEffects::Beam) {
+    else if (to->renderEffects & RenderEffects::Beam) {
         if (flags & MSG_ES_BEAMORIGIN) {
             if (!EqualEpsilonf(to->oldOrigin[0], from->oldOrigin[0]) ||
                 !EqualEpsilonf(to->oldOrigin[1], from->oldOrigin[1]) ||
@@ -532,11 +532,11 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
         MSG_WriteShort(to->effects);
 
     if ((bits & (U_RENDERFX8 | U_RENDERFX16)) == (U_RENDERFX8 | U_RENDERFX16))
-        MSG_WriteLong(to->renderfx);
+        MSG_WriteLong(to->renderEffects);
     else if (bits & U_RENDERFX8)
-        MSG_WriteByte(to->renderfx);
+        MSG_WriteByte(to->renderEffects);
     else if (bits & U_RENDERFX16)
-        MSG_WriteShort(to->renderfx);
+        MSG_WriteShort(to->renderEffects);
 
     // N&C: Full float precision.
     if (bits & U_ORIGIN_X)
@@ -566,7 +566,7 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
     if (bits & U_SOUND)
         MSG_WriteByte(to->sound);
     if (bits & U_EVENT)
-        MSG_WriteByte(to->event);
+        MSG_WriteByte(to->eventID);
     if (bits & U_SOLID) {
         MSG_WriteLong(to->solid);
     }
@@ -1090,7 +1090,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
     }
 
     to->number = number;
-    to->event = 0;
+    to->eventID = 0;
 
     if (!bits) {
         return;
@@ -1134,11 +1134,11 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
 
     // RenderFX.
     if ((bits & (U_RENDERFX8 | U_RENDERFX16)) == (U_RENDERFX8 | U_RENDERFX16))
-        to->renderfx = MSG_ReadLong();
+        to->renderEffects = MSG_ReadLong();
     else if (bits & U_RENDERFX8)
-        to->renderfx = MSG_ReadByte();
+        to->renderEffects = MSG_ReadByte();
     else if (bits & U_RENDERFX16)
-        to->renderfx = MSG_ReadWord();
+        to->renderEffects = MSG_ReadWord();
 
     // Origin.
     if (bits & U_ORIGIN_X)
@@ -1172,7 +1172,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
 
     // Event.
     if (bits & U_EVENT) {
-        to->event = MSG_ReadByte();
+        to->eventID = MSG_ReadByte();
     }
 
     // Solid.

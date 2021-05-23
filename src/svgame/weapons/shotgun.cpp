@@ -31,7 +31,7 @@ static constexpr int32_t SHOTGUN_BULLET_COUNT_DEFAULT = 12;
 static constexpr int32_t SHOTGUN_HSPREAD = 500;
 static constexpr int32_t SHOTGUN_VSPREAD = 500;
 
-void weapon_shotgun_fire(Entity* ent)
+void weapon_shotgun_fire(PlayerClient * ent)
 {
     vec3_t      start;
     vec3_t      forward, right;

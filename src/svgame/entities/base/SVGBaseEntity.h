@@ -117,6 +117,11 @@ public:
         return enemyEntity;
     }
 
+    // Return the 'eventID' value.
+    inline const uint8_t GetEventID() {
+        return serverEntity->state.eventID;
+    }
+
     // Return the 'flags' value.
     inline const int32_t GetFlags() {
         return serverEntity->flags;
@@ -187,6 +192,20 @@ public:
         return serverEntity->model;
     }
 
+    // Return the 'modelIndex, modelIndex1, modelIndex2, modelIndex3' values.
+    inline const int32_t GetModelIndex() {
+        return serverEntity->state.modelIndex;
+    }
+    inline const int32_t GetModelIndex2() {
+        return serverEntity->state.modelIndex2;
+    }
+    inline const int32_t GetModelIndex3() {
+        return serverEntity->state.modelIndex3;
+    }
+    inline const int32_t GetModelIndex4() {
+        return serverEntity->state.modelIndex4;
+    }
+
     // Return the 'movetype' value.
     inline const int32_t GetMoveType() {
         return moveType;
@@ -226,14 +245,24 @@ public:
         return serverEntity->state.origin;
     }
 
+    // Return the 'renderEffects' value.
+    inline const int32_t SetRenderEffects() {
+        return serverEntity->state.renderEffects;
+    }
+
     // Set the 'pathTarget' entity value.
     inline char* GetPathTarget() {
         return serverEntity->pathTarget;
     }
 
-    // Returns the 'serverFlags' value.
+    // Return the 'serverFlags' value.
     inline const int32_t GetServerFlags() {
         return serverEntity->serverFlags;
+    }
+
+    // Return the 'skinNumber' value.
+    inline const int32_t GetSkinNumber() {
+        return serverEntity->state.skinNumber;
     }
 
     // Return the 'size' value.
@@ -364,6 +393,11 @@ public:
         this->enemyEntity = enemy;
     }
 
+    // Return the 'eventID' value.
+    inline void SetEventID(const uint8_t &eventID) {
+        serverEntity->state.eventID = eventID;
+    }
+
     // Set the 'flags' value.
     inline void SetFlags(const int32_t &flags) {
         serverEntity->flags = flags;
@@ -483,9 +517,19 @@ public:
         serverEntity->state.origin = origin;
     }
 
-    // Returns the 'serverFlags' value.
+    // Set the 'renderEffects' value.
+    inline void SetRenderEffects(const int32_t& renderEffects) {
+        serverEntity->state.renderEffects = renderEffects;
+    }
+
+    // Set the 'serverFlags' value.
     inline void SetServerFlags(const int32_t &serverFlags) {
         serverEntity->serverFlags = serverFlags;
+    }
+
+    // Set the 'skinNumber' value.
+    inline void SetSkinNumber(const int32_t& skinNumber) {
+        serverEntity->state.skinNumber = skinNumber;
     }
 
     // Set the 'solid' value.

@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "animations.h"
 
 #include "../entities/base/SVGBaseEntity.h"
+#include "../entities/base/PlayerClient.h"
 
 #include "sharedgame/sharedgame.h" // Include SG Base.
 
@@ -138,46 +139,48 @@ The old weapon has been dropped all the way, so make the new one
 current
 ===============
 */
-void SVG_ChangeWeapon(Entity *ent)
+void SVG_ChangeWeapon(PlayerClient*ent)
 {
     int i;
 
-    ent->client->persistent.lastWeapon = ent->client->persistent.activeWeapon;
-    ent->client->persistent.activeWeapon = ent->client->newWeapon;
-    ent->client->newWeapon = NULL;
-    ent->client->machinegunShots = 0;
+    GameClient* client = ent->GetClient();
+
+    client->persistent.lastWeapon = client->persistent.activeWeapon;
+    client->persistent.activeWeapon = client->newWeapon;
+    client->newWeapon = NULL;
+    client->machinegunShots = 0;
 
     // set visible model
-    if (ent->state.modelIndex == 255) {
-        if (ent->client->persistent.activeWeapon)
-            i = ((ent->client->persistent.activeWeapon->weaponModelIndex & 0xff) << 8);
+    if (ent->GetModelIndex() == 255) {
+        if (client->persistent.activeWeapon)
+            i = ((client->persistent.activeWeapon->weaponModelIndex & 0xff) << 8);
         else
             i = 0;
-        ent->state.skinNumber = (ent - g_entities - 1) | i;
+        ent->SetSkinNumber((ent->GetServerEntity() - g_entities - 1) | i);
     }
 
-    if (ent->client->persistent.activeWeapon && ent->client->persistent.activeWeapon->ammo)
-        ent->client->ammoIndex = ITEM_INDEX(SVG_FindItemByPickupName(ent->client->persistent.activeWeapon->ammo));
+    if (client->persistent.activeWeapon && client->persistent.activeWeapon->ammo)
+        client->ammoIndex = ITEM_INDEX(SVG_FindItemByPickupName(client->persistent.activeWeapon->ammo));
     else
-        ent->client->ammoIndex = 0;
+        client->ammoIndex = 0;
 
-    if (!ent->client->persistent.activeWeapon) {
+    if (!client->persistent.activeWeapon) {
         // dead
-        ent->client->playerState.gunIndex = 0;
+        client->playerState.gunIndex = 0;
         return;
     }
 
-    ent->client->weaponState = WeaponState::Activating;
-    ent->client->playerState.gunFrame = 0;
-    ent->client->playerState.gunIndex = gi.ModelIndex(ent->client->persistent.activeWeapon->viewModel);
+    client->weaponState = WeaponState::Activating;
+    client->playerState.gunFrame = 0;
+    client->playerState.gunIndex = gi.ModelIndex(client->persistent.activeWeapon->viewModel);
 
-    ent->client->animation.priorityAnimation = PlayerAnimation::Pain;
-    if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
-        ent->state.frame = FRAME_crpain1;
-        ent->client->animation.endFrame = FRAME_crpain4;
+    client->animation.priorityAnimation = PlayerAnimation::Pain;
+    if (client->playerState.pmove.flags & PMF_DUCKED) {
+        ent->SetFrame(FRAME_crpain1);
+        client->animation.endFrame = FRAME_crpain4;
     } else {
-        ent->state.frame = FRAME_pain301;
-        ent->client->animation.endFrame = FRAME_pain304;
+        ent->SetFrame(FRAME_pain301);
+        client->animation.endFrame = FRAME_pain304;
 
     }
 }
@@ -187,14 +190,16 @@ void SVG_ChangeWeapon(Entity *ent)
 NoAmmoWeaponChange
 =================
 */
-void NoAmmoWeaponChange(Entity *ent)
+void NoAmmoWeaponChange(PlayerClient *ent)
 {
-    if (ent->client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("bullets"))]
-        &&  ent->client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("machinegun"))]) {
-        ent->client->newWeapon = SVG_FindItemByPickupName("machinegun");
+    GameClient* client = ent->GetClient();
+
+    if (client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("bullets"))]
+        &&  client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("machinegun"))]) {
+        client->newWeapon = SVG_FindItemByPickupName("machinegun");
         return;
     }
-    ent->client->newWeapon = SVG_FindItemByPickupName("blaster");
+    client->newWeapon = SVG_FindItemByPickupName("blaster");
 }
 
 /*
@@ -204,17 +209,19 @@ SVG_ThinkWeapon
 Called by ClientBeginServerFrame and ClientThink
 =================
 */
-void SVG_ThinkWeapon(Entity *ent)
+void SVG_ThinkWeapon(PlayerClient *ent)
 {
+    GameClient* client = ent->GetClient();
+
     // if just died, put the weapon away
-    if (ent->classEntity->GetHealth() < 1) {
-        ent->client->newWeapon = NULL;
+    if (ent->GetHealth() < 1) {
+        client->newWeapon = NULL;
         SVG_ChangeWeapon(ent);
     }
 
     // call active weapon Think routine
-    if (ent->client->persistent.activeWeapon && ent->client->persistent.activeWeapon->WeaponThink) {
-        ent->client->persistent.activeWeapon->WeaponThink(ent);
+    if (client->persistent.activeWeapon && client->persistent.activeWeapon->WeaponThink) {
+        client->persistent.activeWeapon->WeaponThink(ent);
     }
 }
 
@@ -226,32 +233,33 @@ Use_Weapon
 Make the weapon ready if there is ammo
 ================
 */
-void Use_Weapon(Entity *ent, gitem_t *item)
+void Use_Weapon(SVGBaseEntity *ent, gitem_t *item)
 {
     int         ammoIndex;
     gitem_t     *ammo_item;
+    GameClient* client = ent->GetClient();
 
     // see if we're already using it
-    if (item == ent->client->persistent.activeWeapon)
+    if (item == client->persistent.activeWeapon)
         return;
 
     if (item->ammo && !g_select_empty->value && !(item->flags & ItemFlags::IsAmmo)) {
         ammo_item = SVG_FindItemByPickupName(item->ammo);
         ammoIndex = ITEM_INDEX(ammo_item);
 
-        if (!ent->client->persistent.inventory[ammoIndex]) {
-            gi.CPrintf(ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickupName, item->pickupName);
+        if (!client->persistent.inventory[ammoIndex]) {
+            gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "No %s for %s.\n", ammo_item->pickupName, item->pickupName);
             return;
         }
 
-        if (ent->client->persistent.inventory[ammoIndex] < item->quantity) {
-            gi.CPrintf(ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickupName, item->pickupName);
+        if (client->persistent.inventory[ammoIndex] < item->quantity) {
+            gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickupName, item->pickupName);
             return;
         }
     }
 
     // change to this weapon when down
-    ent->client->newWeapon = item;
+    client->newWeapon = item;
 }
 
 
@@ -291,119 +299,121 @@ A generic function to handle the basics of weapon thinking
 #define FRAME_IDLE_FIRST        (FRAME_FIRE_LAST + 1)
 #define FRAME_DEACTIVATE_FIRST  (FRAME_IDLE_LAST + 1)
 
-void Weapon_Generic(Entity *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(Entity *ent))
+void Weapon_Generic(PlayerClient *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(PlayerClient *ent))
 {
     int     n;
 
-    if (ent->classEntity->GetDeadFlag() || ent->state.modelIndex != 255) { // VWep animations screw up corpses
+    if (ent->GetDeadFlag() || ent->GetModelIndex() != 255) { // VWep animations screw up corpses
         return;
     }
 
-    if (ent->client->weaponState == WeaponState::Dropping) {
-        if (ent->client->playerState.gunFrame == FRAME_DEACTIVATE_LAST) {
+    GameClient* client = ent->GetClient();
+
+    if (client->weaponState == WeaponState::Dropping) {
+        if (client->playerState.gunFrame == FRAME_DEACTIVATE_LAST) {
             SVG_ChangeWeapon(ent);
             return;
-        } else if ((FRAME_DEACTIVATE_LAST - ent->client->playerState.gunFrame) == 4) {
-            ent->client->animation.priorityAnimation = PlayerAnimation::Reverse;
-            if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
-                ent->state.frame = FRAME_crpain4 + 1;
-                ent->client->animation.endFrame = FRAME_crpain1;
+        } else if ((FRAME_DEACTIVATE_LAST - client->playerState.gunFrame) == 4) {
+            client->animation.priorityAnimation = PlayerAnimation::Reverse;
+            if (client->playerState.pmove.flags & PMF_DUCKED) {
+                ent->SetFrame(FRAME_crpain4 + 1);
+                client->animation.endFrame = FRAME_crpain1;
             } else {
-                ent->state.frame = FRAME_pain304 + 1;
-                ent->client->animation.endFrame = FRAME_pain301;
+                ent->SetFrame(FRAME_pain304 + 1);
+                client->animation.endFrame = FRAME_pain301;
 
             }
         }
 
-        ent->client->playerState.gunFrame++;
+        client->playerState.gunFrame++;
         return;
     }
 
-    if (ent->client->weaponState == WeaponState::Activating) {
-        if (ent->client->playerState.gunFrame == FRAME_ACTIVATE_LAST) {
-            ent->client->weaponState = WeaponState::Ready;
-            ent->client->playerState.gunFrame = FRAME_IDLE_FIRST;
+    if (client->weaponState == WeaponState::Activating) {
+        if (client->playerState.gunFrame == FRAME_ACTIVATE_LAST) {
+            client->weaponState = WeaponState::Ready;
+            client->playerState.gunFrame = FRAME_IDLE_FIRST;
             return;
         }
 
-        ent->client->playerState.gunFrame++;
+        client->playerState.gunFrame++;
         return;
     }
 
-    if ((ent->client->newWeapon) && (ent->client->weaponState != WeaponState::Firing)) {
-        ent->client->weaponState = WeaponState::Dropping;
-        ent->client->playerState.gunFrame = FRAME_DEACTIVATE_FIRST;
+    if ((client->newWeapon) && (client->weaponState != WeaponState::Firing)) {
+        client->weaponState = WeaponState::Dropping;
+        client->playerState.gunFrame = FRAME_DEACTIVATE_FIRST;
 
         if ((FRAME_DEACTIVATE_LAST - FRAME_DEACTIVATE_FIRST) < 4) {
-            ent->client->animation.priorityAnimation = PlayerAnimation::Reverse;
-            if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
-                ent->state.frame = FRAME_crpain4 + 1;
-                ent->client->animation.endFrame = FRAME_crpain1;
+            client->animation.priorityAnimation = PlayerAnimation::Reverse;
+            if (client->playerState.pmove.flags & PMF_DUCKED) {
+                ent->SetFrame(FRAME_crpain4 + 1);
+                client->animation.endFrame = FRAME_crpain1;
             } else {
-                ent->state.frame = FRAME_pain304 + 1;
-                ent->client->animation.endFrame = FRAME_pain301;
+                ent->SetFrame(FRAME_pain304 + 1);
+                client->animation.endFrame = FRAME_pain301;
 
             }
         }
         return;
     }
 
-    if (ent->client->weaponState == WeaponState::Ready) {
-        if (((ent->client->latchedButtons | ent->client->buttons) & BUTTON_ATTACK)) {
-            ent->client->latchedButtons &= ~BUTTON_ATTACK;
-            if ((!ent->client->ammoIndex) ||
-                (ent->client->persistent.inventory[ent->client->ammoIndex] >= ent->client->persistent.activeWeapon->quantity)) {
-                ent->client->playerState.gunFrame = FRAME_FIRE_FIRST;
-                ent->client->weaponState = WeaponState::Firing;
+    if (client->weaponState == WeaponState::Ready) {
+        if (((client->latchedButtons | client->buttons) & BUTTON_ATTACK)) {
+            client->latchedButtons &= ~BUTTON_ATTACK;
+            if ((!client->ammoIndex) ||
+                (client->persistent.inventory[client->ammoIndex] >= client->persistent.activeWeapon->quantity)) {
+                client->playerState.gunFrame = FRAME_FIRE_FIRST;
+                client->weaponState = WeaponState::Firing;
 
                 // start the animation
-                ent->client->animation.priorityAnimation = PlayerAnimation::Attack;
-                if (ent->client->playerState.pmove.flags & PMF_DUCKED) {
-                    ent->state.frame = FRAME_crattak1 - 1;
-                    ent->client->animation.endFrame = FRAME_crattak9;
+                client->animation.priorityAnimation = PlayerAnimation::Attack;
+                if (client->playerState.pmove.flags & PMF_DUCKED) {
+                    ent->SetFrame(FRAME_crattak1 - 1);
+                    client->animation.endFrame = FRAME_crattak9;
                 } else {
-                    ent->state.frame = FRAME_attack1 - 1;
-                    ent->client->animation.endFrame = FRAME_attack8;
+                    ent->SetFrame(FRAME_attack1 - 1);
+                    client->animation.endFrame = FRAME_attack8;
                 }
             } else {
-                if (level.time >= ent->debouncePainTime) {
-                    gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-                    ent->debouncePainTime = level.time + 1;
+                if (level.time >= ent->GetDebouncePainTime()) {
+                    gi.Sound(ent->GetServerEntity(), CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    ent->SetDebouncePainTime(level.time + 1);
                 }
                 NoAmmoWeaponChange(ent);
             }
         } else {
-            if (ent->client->playerState.gunFrame == FRAME_IDLE_LAST) {
-                ent->client->playerState.gunFrame = FRAME_IDLE_FIRST;
+            if (client->playerState.gunFrame == FRAME_IDLE_LAST) {
+                client->playerState.gunFrame = FRAME_IDLE_FIRST;
                 return;
             }
 
             if (pause_frames) {
                 for (n = 0; pause_frames[n]; n++) {
-                    if (ent->client->playerState.gunFrame == pause_frames[n]) {
+                    if (client->playerState.gunFrame == pause_frames[n]) {
                         if (rand() & 15)
                             return;
                     }
                 }
             }
 
-            ent->client->playerState.gunFrame++;
+            client->playerState.gunFrame++;
             return;
         }
     }
 
-    if (ent->client->weaponState == WeaponState::Firing) {
+    if (client->weaponState == WeaponState::Firing) {
         for (n = 0; fire_frames[n]; n++) {
-            if (ent->client->playerState.gunFrame == fire_frames[n]) {
+            if (client->playerState.gunFrame == fire_frames[n]) {
                 fire(ent);
                 break;
             }
         }
 
         if (!fire_frames[n])
-            ent->client->playerState.gunFrame++;
+            client->playerState.gunFrame++;
 
-        if (ent->client->playerState.gunFrame == FRAME_IDLE_FIRST + 1)
-            ent->client->weaponState = WeaponState::Ready;
+        if (client->playerState.gunFrame == FRAME_IDLE_FIRST + 1)
+            client->weaponState = WeaponState::Ready;
     }
 }

@@ -341,7 +341,7 @@ void SV_BuildClientFrame(client_t *client)
 
         // ignore ents without visible models unless they have an effect
         if (!ent->state.modelIndex && !ent->state.effects && !ent->state.sound) {
-            if (!ent->state.event) {
+            if (!ent->state.eventID) {
                 continue;
             }
         }
@@ -362,7 +362,7 @@ void SV_BuildClientFrame(client_t *client)
             if (ent_visible)
             {
                 // beams just check one point for PHS
-                if (ent->state.renderfx & RenderEffects::Beam) {
+                if (ent->state.renderEffects & RenderEffects::Beam) {
                     l = ent->clusterNumbers[0];
                     if (!Q_IsBitSet(clientphs, l))
                         ent_visible = false;

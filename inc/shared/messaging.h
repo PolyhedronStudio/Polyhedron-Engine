@@ -90,12 +90,12 @@ typedef struct entity_state_s {
     int32_t frame;
     int32_t skinNumber;
     uint32_t effects;        // PGM - we're filling it, so it needs to be unsigned
-    int32_t renderfx;
+    int32_t renderEffects;
     int32_t solid;          // For client side prediction, 8*(bits 0-4) is x/y radius
                             // 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
                             // gi.LinkEntity sets this properly
     int32_t sound;          // For looping sounds, to guarantee shutoff
-    int32_t event;          // Impulse events -- muzzle flashes, footsteps, etc
+    int32_t eventID;          // Impulse events -- muzzle flashes, footsteps, etc
                             // events only go out for a single frame, they
                             // are automatically cleared each frame
 } EntityState;

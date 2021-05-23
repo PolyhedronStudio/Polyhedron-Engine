@@ -562,7 +562,7 @@ typedef struct file_info_s {
 //=============================================================================
 //
 //-----------------
-// EntityState->renderfx
+// EntityState->renderEffects
 //
 // The render effects are useful for tweaking the way how an entity is displayed.
 // It may be favored for it to only be visible in mirrors, or fullbright, name it.

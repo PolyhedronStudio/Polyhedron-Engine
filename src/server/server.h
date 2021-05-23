@@ -574,7 +574,7 @@ void SV_PrintMiscInfo(void);
 //
 
 #define ES_INUSE(s) \
-    ((s)->modelIndex || (s)->effects || (s)->sound || (s)->event)
+    ((s)->modelIndex || (s)->effects || (s)->sound || (s)->eventID)
 
 void SV_BuildProxyClientFrame(client_t *client);
 void SV_BuildClientFrame(client_t *client);

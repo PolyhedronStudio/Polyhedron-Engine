@@ -59,9 +59,9 @@ entity_update_new(cl_entity_t *ent, const EntityState *state, const vec_t *origi
     // duplicate the current state so lerping doesn't hurt anything
     ent->prev = *state;
 
-    if (state->event == EntityEvent::PlayerTeleport ||
-        state->event == EntityEvent::OtherTeleport ||
-        (state->renderfx & (RenderEffects::FrameLerp | RenderEffects::Beam))) {
+    if (state->eventID == EntityEvent::PlayerTeleport ||
+        state->eventID == EntityEvent::OtherTeleport ||
+        (state->renderEffects & (RenderEffects::FrameLerp | RenderEffects::Beam))) {
         // no lerping if teleported
         ent->lerpOrigin = origin;
         return;
@@ -76,14 +76,14 @@ entity_update_new(cl_entity_t *ent, const EntityState *state, const vec_t *origi
 static inline void
 entity_update_old(cl_entity_t *ent, const EntityState *state, const vec_t *origin)
 {
-    int event = state->event;
+    int eventID = state->eventID;
 
     if (state->modelIndex != ent->current.modelIndex
         || state->modelIndex2 != ent->current.modelIndex2
         || state->modelIndex3 != ent->current.modelIndex3
         || state->modelIndex4 != ent->current.modelIndex4
-        || event == EntityEvent::PlayerTeleport
-        || event == EntityEvent::OtherTeleport
+        || eventID == EntityEvent::PlayerTeleport
+        || eventID == EntityEvent::OtherTeleport
         || fabsf(origin[0] - ent->current.origin[0]) > 512
         || fabsf(origin[1] - ent->current.origin[1]) > 512
         || fabsf(origin[2] - ent->current.origin[2]) > 512
@@ -246,8 +246,8 @@ player_update(ServerFrame *oldframe, ServerFrame *frame, int framediv)
     ent = &cs.entities[frame->clientNumber + 1];
     if (ent->serverFrame > oldnum &&
         ent->serverFrame <= frame->number &&
-        (ent->current.event == EntityEvent::PlayerTeleport
-         || ent->current.event == EntityEvent::OtherTeleport)) {
+        (ent->current.eventID == EntityEvent::PlayerTeleport
+         || ent->current.eventID == EntityEvent::OtherTeleport)) {
         goto dup;
     }
 
@@ -375,7 +375,7 @@ INTERPOLATE BETWEEN FRAMES TO GET RENDERING PARMS
 #define RESERVED_ENTITIY_SHADERBALLS 2
 #define RESERVED_ENTITIY_COUNT 3
 
-static int adjust_shell_fx(int renderfx)
+static int adjust_shell_fx(int renderEffects)
 {
 	// PMM - at this point, all of the shells have been handled
 	// if we're in the rogue pack, set up the custom mixing, otherwise just
@@ -383,31 +383,31 @@ static int adjust_shell_fx(int renderfx)
 	if (!strcmp(fs_game->string, "rogue")) {
 		// all of the solo colors are fine.  we need to catch any of the combinations that look bad
 		// (double & half) and turn them into the appropriate color, and make double/quad something special
-		if (renderfx & RenderEffects::HalfDamShell) {
+		if (renderEffects & RenderEffects::HalfDamShell) {
 			// ditch the half damage shell if any of red, blue, or double are on
-			if (renderfx & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::DoubleShell))
-				renderfx &= ~RenderEffects::HalfDamShell;
+			if (renderEffects & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::DoubleShell))
+				renderEffects &= ~RenderEffects::HalfDamShell;
 		}
 
-		if (renderfx & RenderEffects::DoubleShell) {
+		if (renderEffects & RenderEffects::DoubleShell) {
 			// lose the yellow shell if we have a red, blue, or green shell
-			if (renderfx & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::GreenShell))
-				renderfx &= ~RenderEffects::DoubleShell;
+			if (renderEffects & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::GreenShell))
+				renderEffects &= ~RenderEffects::DoubleShell;
 			// if we have a red shell, turn it to purple by adding blue
-			if (renderfx & RenderEffects::RedShell)
-				renderfx |= RenderEffects::BlueShell;
+			if (renderEffects & RenderEffects::RedShell)
+				renderEffects |= RenderEffects::BlueShell;
 			// if we have a blue shell (and not a red shell), turn it to cyan by adding green
-			else if (renderfx & RenderEffects::BlueShell) {
+			else if (renderEffects & RenderEffects::BlueShell) {
 				// go to green if it's on already, otherwise do cyan (flash green)
-				if (renderfx & RenderEffects::GreenShell)
-					renderfx &= ~RenderEffects::BlueShell;
+				if (renderEffects & RenderEffects::GreenShell)
+					renderEffects &= ~RenderEffects::BlueShell;
 				else
-					renderfx |= RenderEffects::GreenShell;
+					renderEffects |= RenderEffects::GreenShell;
 			}
 		}
 	}
 
-	return renderfx;
+	return renderEffects;
 }
 
 /*

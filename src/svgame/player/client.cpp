@@ -615,7 +615,7 @@ void CopyToBodyQue(Entity *ent)
     gi.UnlinkEntity(body);
     body->state = ent->state;
     body->state.number = body - g_entities;
-    body->state.event = EntityEvent::OtherTeleport;
+    body->state.eventID = EntityEvent::OtherTeleport;
 
     body->serverFlags = ent->serverFlags;
     VectorCopy(ent->mins, body->mins);
@@ -648,7 +648,7 @@ void SVG_RespawnClient(Entity *self)
         SVG_PutClientInServer(self);
 
         // add a teleportation effect
-        self->state.event = EntityEvent::PlayerTeleport;
+        self->state.eventID = EntityEvent::PlayerTeleport;
 
         // hold in place briefly
         self->client->playerState.pmove.flags = PMF_TIME_TELEPORT;
@@ -1220,7 +1220,7 @@ void SVG_ClientDisconnect(Entity *ent)
     gi.UnlinkEntity(ent);
     ent->state.modelIndex = 0;
     ent->state.sound = 0;
-    ent->state.event = 0;
+    ent->state.eventID = 0;
     ent->state.effects = 0;
     ent->solid = Solid::Not;
     ent->inUse = false;

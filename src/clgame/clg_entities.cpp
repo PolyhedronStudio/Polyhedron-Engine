@@ -40,7 +40,7 @@ extern qhandle_t cl_sfx_footsteps[4];
 #define RESERVED_ENTITIY_SHADERBALLS 2
 #define RESERVED_ENTITIY_COUNT 3
 
-static int adjust_shell_fx(int renderfx)
+static int adjust_shell_fx(int renderEffects)
 {
     //// PMM - at this point, all of the shells have been handled
     //// if we're in the rogue pack, set up the custom mixing, otherwise just
@@ -48,31 +48,31 @@ static int adjust_shell_fx(int renderfx)
     //if (!strcmp(fs_game->string, "rogue")) {
     //    // all of the solo colors are fine.  we need to catch any of the combinations that look bad
     //    // (double & half) and turn them into the appropriate color, and make double/quad something special
-    //    if (renderfx & RenderEffects::HalfDamShell) {
+    //    if (renderEffects & RenderEffects::HalfDamShell) {
     //        // ditch the half damage shell if any of red, blue, or double are on
-    //        if (renderfx & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::DoubleShell))
-    //            renderfx &= ~RenderEffects::HalfDamShell;
+    //        if (renderEffects & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::DoubleShell))
+    //            renderEffects &= ~RenderEffects::HalfDamShell;
     //    }
 
-    //    if (renderfx & RenderEffects::DoubleShell) {
+    //    if (renderEffects & RenderEffects::DoubleShell) {
     //        // lose the yellow shell if we have a red, blue, or green shell
-    //        if (renderfx & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::GreenShell))
-    //            renderfx &= ~RenderEffects::DoubleShell;
+    //        if (renderEffects & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::GreenShell))
+    //            renderEffects &= ~RenderEffects::DoubleShell;
     //        // if we have a red shell, turn it to purple by adding blue
-    //        if (renderfx & RenderEffects::RedShell)
-    //            renderfx |= RenderEffects::BlueShell;
+    //        if (renderEffects & RenderEffects::RedShell)
+    //            renderEffects |= RenderEffects::BlueShell;
     //        // if we have a blue shell (and not a red shell), turn it to cyan by adding green
-    //        else if (renderfx & RenderEffects::BlueShell) {
+    //        else if (renderEffects & RenderEffects::BlueShell) {
     //            // go to green if it's on already, otherwise do cyan (flash green)
-    //            if (renderfx & RenderEffects::GreenShell)
-    //                renderfx &= ~RenderEffects::BlueShell;
+    //            if (renderEffects & RenderEffects::GreenShell)
+    //                renderEffects &= ~RenderEffects::BlueShell;
     //            else
-    //                renderfx |= RenderEffects::GreenShell;
+    //                renderEffects |= RenderEffects::GreenShell;
     //        }
     //    }
     //}
 
-    return renderfx;
+    return renderEffects;
 }
 
 //
@@ -93,7 +93,7 @@ void CLG_AddPacketEntities(void)
     cl_entity_t* cent;
     int                 autoanim;
     ClientInfo* ci;
-    unsigned int        effects, renderfx;
+    unsigned int        effects, renderEffects;
 
     // bonus items rotate at a fixed rate
     autorotate = AngleMod(cl->time * 0.1f);
@@ -114,7 +114,7 @@ void CLG_AddPacketEntities(void)
         ent.id = cent->id + RESERVED_ENTITIY_COUNT;
 
         effects = s1->effects;
-        renderfx = s1->renderfx;
+        renderEffects = s1->renderEffects;
 
         //
         // Frame Animation Effects.
@@ -132,18 +132,18 @@ void CLG_AddPacketEntities(void)
 
         // optionally remove the glowing effect
         if (cl_noglow->integer)
-            renderfx &= ~RenderEffects::Glow;
+            renderEffects &= ~RenderEffects::Glow;
 
         ent.oldframe = cent->prev.frame;
         ent.backlerp = 1.0 - cl->lerpFraction;
 
-        if (renderfx & RenderEffects::FrameLerp) {
+        if (renderEffects & RenderEffects::FrameLerp) {
             // step origin discretely, because the frames
             // do the animation properly
             VectorCopy(cent->current.origin, ent.origin);
             VectorCopy(cent->current.oldOrigin, ent.oldorigin);  // FIXME
         }
-        else if (renderfx & RenderEffects::Beam) {
+        else if (renderEffects & RenderEffects::Beam) {
             // interpolate start and end points for beams
             LerpVector(cent->prev.origin, cent->current.origin,
                 cl->lerpFraction, ent.origin);
@@ -167,7 +167,7 @@ void CLG_AddPacketEntities(void)
         // create a new entity
 
         // tweak the color of beams
-        if (renderfx & RenderEffects::Beam) {
+        if (renderEffects & RenderEffects::Beam) {
             // the four beam colors are encoded in 32 bits of skinNumber (hack)
             ent.alpha = 0.30;
             ent.skinNumber = (s1->skinNumber >> ((rand() % 4) * 8)) & 0xff;
@@ -185,7 +185,7 @@ void CLG_AddPacketEntities(void)
                     ent.model = cl->baseClientInfo.model;
                     ci = &cl->baseClientInfo;
                 }
-                if (renderfx & RenderEffects::UseDisguise) {
+                if (renderEffects & RenderEffects::UseDisguise) {
                     char buffer[MAX_QPATH];
 
                     Q_concat(buffer, sizeof(buffer), "players/", ci->model_name, "/disguise.pcx", NULL);
@@ -197,19 +197,19 @@ void CLG_AddPacketEntities(void)
                 ent.skin = 0;
                 ent.model = cl->drawModels[s1->modelIndex];
                 if (ent.model == cl_mod_laser || ent.model == cl_mod_dmspot)
-                    renderfx |= RF_NOSHADOW;
+                    renderEffects |= RF_NOSHADOW;
             }
         }
 
         // only used for black hole model right now, FIXME: do better
-        if ((renderfx & RenderEffects::Translucent) && !(renderfx & RenderEffects::Beam))
+        if ((renderEffects & RenderEffects::Translucent) && !(renderEffects & RenderEffects::Beam))
             ent.alpha = 0.70;
 
         // render effects (fullbright, translucent, etc)
         if ((effects & EntityEffectType::ColorShell))
-            ent.flags = 0;  // renderfx go on color shell entity
+            ent.flags = 0;  // renderEffects go on color shell entity
         else
-            ent.flags = renderfx;
+            ent.flags = renderEffects;
 
         // calculate angles
         if (effects & EntityEffectType::Rotate) {  // some bonus items auto-rotate
@@ -258,10 +258,10 @@ void CLG_AddPacketEntities(void)
 
         ent.flags |= base_entity_flags;
 
-        // in rtx mode, the base entity has the renderfx for shells
+        // in rtx mode, the base entity has the renderEffects for shells
         if ((effects & EntityEffectType::ColorShell) && vid_rtx->integer) {
-            renderfx = adjust_shell_fx(renderfx);
-            ent.flags |= renderfx;
+            renderEffects = adjust_shell_fx(renderEffects);
+            ent.flags |= renderEffects;
         }
 
         // add to refresh list
@@ -290,8 +290,8 @@ void CLG_AddPacketEntities(void)
 
         // color shells generate a separate entity for the main model
         if ((effects & EntityEffectType::ColorShell) && !vid_rtx->integer) {
-            renderfx = adjust_shell_fx(renderfx);
-            ent.flags = renderfx | RenderEffects::Translucent | base_entity_flags;
+            renderEffects = adjust_shell_fx(renderEffects);
+            ent.flags = renderEffects | RenderEffects::Translucent | base_entity_flags;
             ent.alpha = 0.30;
             V_AddEntity(&ent);
         }
@@ -328,7 +328,7 @@ void CLG_AddPacketEntities(void)
             }
 
             if ((effects & EntityEffectType::ColorShell) && vid_rtx->integer) {
-                ent.flags |= renderfx;
+                ent.flags |= renderEffects;
             }
 
             V_AddEntity(&ent);

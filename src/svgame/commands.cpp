@@ -64,16 +64,16 @@ qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2)
 }
 
 
-void SelectNextItem(Entity *ent, int itflags)
+void SelectNextItem(PlayerClient *ent, int itflags)
 {
     GameClient   *cl;
     int         i, index;
     gitem_t     *it;
 
-    cl = ent->client;
+    cl = ent->GetClient();
 
     if (cl->chaseTarget) {
-        SVG_ChaseNext((PlayerClient*)ent->classEntity);
+        SVG_ChaseNext(ent);
         return;
     }
 
@@ -126,16 +126,14 @@ void SelectPrevItem(Entity *ent, int itflags)
     cl->persistent.selectedItem = -1;
 }
 
-void HUD_ValidateSelectedItem(Entity *ent)
+void HUD_ValidateSelectedItem(PlayerClient *ent)
 {
     // Ensure these are valid.
-    if (!ent || !ent->client) {
+    if (!ent || !ent->GetClient()) {
         return;
     }
 
-    GameClient   *cl;
-
-    cl = ent->client;
+    GameClient* cl = ent->GetClient();
 
     if (cl->persistent.inventory[cl->persistent.selectedItem])
         return;     // valid
@@ -338,7 +336,7 @@ Cmd_Use_f
 Use an inventory item
 ==================
 */
-void Cmd_Use_f(Entity *ent)
+void Cmd_Use_f(PlayerClient *ent)
 {
     int         index;
     gitem_t     *it;
@@ -347,16 +345,16 @@ void Cmd_Use_f(Entity *ent)
     s = gi.args(); // C++20: Added casts.
     it = SVG_FindItemByPickupName(s);
     if (!it) {
-        gi.CPrintf(ent, PRINT_HIGH, "unknown item: %s\n", s);
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "unknown item: %s\n", s);
         return;
     }
     if (!it->Use) {
-        gi.CPrintf(ent, PRINT_HIGH, "Item is not usable.\n");
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not usable.\n");
         return;
     }
     index = ITEM_INDEX(it);
-    if (!ent->client->persistent.inventory[index]) {
-        gi.CPrintf(ent, PRINT_HIGH, "Out of item: %s\n", s);
+    if (!ent->GetClient()->persistent.inventory[index]) {
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Out of item: %s\n", s);
         return;
     }
 
@@ -371,7 +369,7 @@ Cmd_Drop_f
 Drop an inventory item
 ==================
 */
-void Cmd_Drop_f(Entity *ent)
+void Cmd_Drop_f(PlayerClient*ent)
 {
     int         index;
     gitem_t     *it;
@@ -380,16 +378,16 @@ void Cmd_Drop_f(Entity *ent)
     s = (const char*)gi.args(); // C++20: Added casts.
     it = SVG_FindItemByPickupName(s);
     if (!it) {
-        gi.CPrintf(ent, PRINT_HIGH, "unknown item: %s\n", s);
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "unknown item: %s\n", s);
         return;
     }
     if (!it->Drop) {
-        gi.CPrintf(ent, PRINT_HIGH, "Item is not dropable.\n");
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not dropable.\n");
         return;
     }
     index = ITEM_INDEX(it);
-    if (!ent->client->persistent.inventory[index]) {
-        gi.CPrintf(ent, PRINT_HIGH, "Out of item: %s\n", s);
+    if (!ent->GetClient()->persistent.inventory[index]) {
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Out of item: %s\n", s);
         return;
     }
 
@@ -430,20 +428,20 @@ void Cmd_Inven_f(Entity *ent)
 Cmd_InvUse_f
 =================
 */
-void Cmd_InvUse_f(Entity *ent)
+void Cmd_InvUse_f(PlayerClient *ent)
 {
     gitem_t     *it;
 
     HUD_ValidateSelectedItem(ent);
 
-    if (ent->client->persistent.selectedItem == -1) {
-        gi.CPrintf(ent, PRINT_HIGH, "No item to use.\n");
+    if (ent->GetClient()->persistent.selectedItem == -1) {
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "No item to use.\n");
         return;
     }
 
-    it = &itemlist[ent->client->persistent.selectedItem];
+    it = &itemlist[ent->GetClient()->persistent.selectedItem];
     if (!it->Use) {
-        gi.CPrintf(ent, PRINT_HIGH, "Item is not usable.\n");
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not usable.\n");
         return;
     }
     it->Use(ent, it);
@@ -454,14 +452,14 @@ void Cmd_InvUse_f(Entity *ent)
 Cmd_WeapPrev_f
 =================
 */
-void Cmd_WeapPrev_f(Entity *ent)
+void Cmd_WeapPrev_f(PlayerClient *ent)
 {
     GameClient   *cl;
     int         i, index;
     gitem_t     *it;
     int         selected_weapon;
 
-    cl = ent->client;
+    cl = ent->GetClient();
 
     if (!cl->persistent.activeWeapon)
         return;
@@ -489,14 +487,14 @@ void Cmd_WeapPrev_f(Entity *ent)
 Cmd_WeapNext_f
 =================
 */
-void Cmd_WeapNext_f(Entity *ent)
+void Cmd_WeapNext_f(PlayerClient *ent)
 {
     GameClient   *cl;
     int         i, index;
     gitem_t     *it;
     int         selected_weapon;
 
-    cl = ent->client;
+    cl = ent->GetClient();
 
     if (!cl->persistent.activeWeapon)
         return;
@@ -524,13 +522,13 @@ void Cmd_WeapNext_f(Entity *ent)
 Cmd_WeapLast_f
 =================
 */
-void Cmd_WeapLast_f(Entity *ent)
+void Cmd_WeapLast_f(PlayerClient *ent)
 {
     GameClient   *cl;
     int         index;
     gitem_t     *it;
 
-    cl = ent->client;
+    cl = ent->GetClient();
 
     if (!cl->persistent.activeWeapon || !cl->persistent.lastWeapon)
         return;
@@ -551,20 +549,20 @@ void Cmd_WeapLast_f(Entity *ent)
 Cmd_InvDrop_f
 =================
 */
-void Cmd_InvDrop_f(Entity *ent)
+void Cmd_InvDrop_f(PlayerClient *ent)
 {
     gitem_t     *it;
 
     HUD_ValidateSelectedItem(ent);
 
-    if (ent->client->persistent.selectedItem == -1) {
-        gi.CPrintf(ent, PRINT_HIGH, "No item to drop.\n");
+    if (ent->GetClient()->persistent.selectedItem == -1) {
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "No item to drop.\n");
         return;
     }
 
-    it = &itemlist[ent->client->persistent.selectedItem];
+    it = &itemlist[ent->GetClient()->persistent.selectedItem];
     if (!it->Drop) {
-        gi.CPrintf(ent, PRINT_HIGH, "Item is not dropable.\n");
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not dropable.\n");
         return;
     }
     it->Drop(ent, it);
@@ -826,29 +824,34 @@ void Cmd_PlayerList_f(Entity *ent)
 ClientCommand
 =================
 */
-void SVG_ClientCommand(Entity *ent)
+void SVG_ClientCommand(Entity *serverEntity)
 {
     const char    *cmd;
 
-    if (!ent->client)
-        return;     // not fully in game yet
+    // Ensure it is an entity with active client.
+    if (!serverEntity->client)
+        return; // Not fully in game yet
 
+    // We can safely cast to PlayerClient now.
+    PlayerClient* ent = (PlayerClient*)serverEntity->classEntity;
+
+    // Fetch cmd.
     cmd = gi.argv(0);
 
     if (Q_stricmp(cmd, "players") == 0) {
-        Cmd_Players_f(ent);
+        Cmd_Players_f(serverEntity);
         return;
     }
     if (Q_stricmp(cmd, "say") == 0) {
-        Cmd_Say_f(ent, false, false);
+        Cmd_Say_f(serverEntity, false, false);
         return;
     }
     if (Q_stricmp(cmd, "say_team") == 0) {
-        Cmd_Say_f(ent, true, false);
+        Cmd_Say_f(serverEntity, true, false);
         return;
     }
     if (Q_stricmp(cmd, "score") == 0) {
-        SVG_Command_Score_f(ent);
+        SVG_Command_Score_f(serverEntity);
         return;
     }
 
@@ -860,27 +863,27 @@ void SVG_ClientCommand(Entity *ent)
     else if (Q_stricmp(cmd, "drop") == 0)
         Cmd_Drop_f(ent);
     else if (Q_stricmp(cmd, "give") == 0)
-        Cmd_Give_f(ent);
+        Cmd_Give_f(ent->GetServerEntity());
     else if (Q_stricmp(cmd, "god") == 0)
-        Cmd_God_f(ent);
+        Cmd_God_f(ent->GetServerEntity());
     else if (Q_stricmp(cmd, "notarget") == 0)
-        Cmd_Notarget_f(ent);
+        Cmd_Notarget_f(ent->GetServerEntity());
     else if (Q_stricmp(cmd, "noclip") == 0)
-        Cmd_Noclip_f(ent->classEntity);
+        Cmd_Noclip_f(ent);
     else if (Q_stricmp(cmd, "inven") == 0)
-        Cmd_Inven_f(ent);
+        Cmd_Inven_f(ent->GetServerEntity());
     else if (Q_stricmp(cmd, "invnext") == 0)
         SelectNextItem(ent, -1);
     else if (Q_stricmp(cmd, "invprev") == 0)
-        SelectPrevItem(ent, -1);
+        SelectPrevItem(serverEntity, -1);
     else if (Q_stricmp(cmd, "invnextw") == 0)
         SelectNextItem(ent, ItemFlags::IsWeapon);
     else if (Q_stricmp(cmd, "invprevw") == 0)
-        SelectPrevItem(ent, ItemFlags::IsWeapon);
+        SelectPrevItem(serverEntity, ItemFlags::IsWeapon);
     else if (Q_stricmp(cmd, "invnextp") == 0)
         SelectNextItem(ent, ItemFlags::IsPowerUp);
     else if (Q_stricmp(cmd, "invprevp") == 0)
-        SelectPrevItem(ent, ItemFlags::IsPowerUp);
+        SelectPrevItem(serverEntity, ItemFlags::IsPowerUp);
     else if (Q_stricmp(cmd, "invuse") == 0)
         Cmd_InvUse_f(ent);
     else if (Q_stricmp(cmd, "invdrop") == 0)
@@ -892,13 +895,13 @@ void SVG_ClientCommand(Entity *ent)
     else if (Q_stricmp(cmd, "weaplast") == 0)
         Cmd_WeapLast_f(ent);
     else if (Q_stricmp(cmd, "kill") == 0)
-        Cmd_Kill_f((PlayerClient*)ent->classEntity);
+        Cmd_Kill_f(ent);
     else if (Q_stricmp(cmd, "putaway") == 0)
-        Cmd_PutAway_f(ent);
+        Cmd_PutAway_f(serverEntity);
     else if (Q_stricmp(cmd, "wave") == 0)
-        Cmd_Wave_f(ent);
+        Cmd_Wave_f(serverEntity);
     else if (Q_stricmp(cmd, "playerlist") == 0)
-        Cmd_PlayerList_f(ent);
+        Cmd_PlayerList_f(serverEntity);
     else    // anything that doesn't match a command will be a chat
-        Cmd_Say_f(ent, false, true);
+        Cmd_Say_f(serverEntity, false, true);
 }

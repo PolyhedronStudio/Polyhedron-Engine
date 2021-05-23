@@ -62,10 +62,10 @@ static const save_field_t entityfields[] = {
     I(state.frame),
     I(state.skinNumber),
     I(state.effects),
-    I(state.renderfx),
+    I(state.renderEffects),
     I(state.solid),
     I(state.sound),
-    I(state.event),
+    I(state.eventID),
 
     // [...]
 
@@ -108,7 +108,7 @@ static const save_field_t entityfields[] = {
     V(velocity),
     V(angularVelocity),
 //    I(mass),
-    F(airFinishedTime),
+//    F(airFinishedTime),
     F(gravity),
 
     E(goalEntityPtr),
@@ -125,10 +125,10 @@ static const save_field_t entityfields[] = {
     //P(Pain, P_pain),
     //P(Die, P_die),
 
-    F(debounceTouchTime),
-    F(debouncePainTime),
-    F(debounceDamageTime),
-    F(debounceSoundTime),
+//    F(debounceTouchTime),
+//    F(debouncePainTime),
+//    F(debounceDamageTime),
+//    F(debounceSoundTime),
     F(lastMoveTime),
 
 //    I(health),

@@ -21,15 +21,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "player/hud.h"      // Include HUD funcs.
 
 #include "entities/base/SVGBaseEntity.h"
+#include "entities/base/PlayerClient.h"
 
 #include "weapons/blaster.h"
 #include "weapons/machinegun.h"
 #include "weapons/shotgun.h"
 #include "weapons/supershotgun.h"
 
-qboolean    Pickup_Weapon(Entity *ent, Entity *other);
-void        Use_Weapon(Entity *ent, gitem_t *inv);
-void        Drop_Weapon(Entity *ent, gitem_t *inv);
+qboolean    Pickup_Weapon(SVGBaseEntity *ent, SVGBaseEntity *other);
+void        Use_Weapon(SVGBaseEntity *ent, gitem_t *inv);
+void        Drop_Weapon(SVGBaseEntity *ent, gitem_t *inv);
 
 gitem_armor_t bodyarmor_info    = {100, 200, .80f, .60f, ArmorType::Body};
 
@@ -331,7 +332,7 @@ int SVG_ArmorIndex(SVGBaseEntity *ent)
     return 0;
 }
 
-qboolean Pickup_Armor(Entity *ent, Entity *other)
+qboolean Pickup_Armor(SVGBaseEntity *ent, SVGBaseEntity *other)
 {
     //int             old_armor_index;
     //gitem_armor_t   *oldinfo;
@@ -398,60 +399,60 @@ qboolean Pickup_Armor(Entity *ent, Entity *other)
 SVG_TouchItem
 ===============
 */
-void SVG_TouchItem(Entity *ent, Entity *other, cplane_t *plane, csurface_t *surf)
+void SVG_TouchItem(SVGBaseEntity *ent, SVGBaseEntity *other, cplane_t *plane, csurface_t *surf)
 {
     qboolean    taken;
 
-    if (!other->client)
+    if (!other->GetClient())
         return;
     //if (other->health < 1)
     //    return;     // dead people can't pickup
-    if (!ent->item->Pickup)
-        return;     // not a grabbable item?
+    //if (!ent->item->Pickup)
+    //    return;     // not a grabbable item?
 
-    taken = ent->item->Pickup(ent, other);
+    //taken = ent->item->Pickup(ent, other);
 
-    if (taken) {
-        // flash the screen
-        other->client->bonusAlpha = 0.25;
+    //if (taken) {
+    //    // flash the screen
+    //    other->client->bonusAlpha = 0.25;
 
-        // show icon and name on status bar
-        other->client->playerState.stats[STAT_PICKUP_ICON] = gi.ImageIndex(ent->item->icon);
-        other->client->playerState.stats[STAT_PICKUP_STRING] = ConfigStrings::Items+ ITEM_INDEX(ent->item);
-        other->client->pickupMessageTime = level.time + 3.0;
+    //    // show icon and name on status bar
+    //    other->client->playerState.stats[STAT_PICKUP_ICON] = gi.ImageIndex(ent->item->icon);
+    //    other->client->playerState.stats[STAT_PICKUP_STRING] = ConfigStrings::Items+ ITEM_INDEX(ent->item);
+    //    other->client->pickupMessageTime = level.time + 3.0;
 
-        // change selected item
-        if (ent->item->Use)
-            other->client->persistent.selectedItem = other->client->playerState.stats[STAT_SELECTED_ITEM] = ITEM_INDEX(ent->item);
+    //    // change selected item
+    //    if (ent->item->Use)
+    //        other->client->persistent.selectedItem = other->client->playerState.stats[STAT_SELECTED_ITEM] = ITEM_INDEX(ent->item);
 
-        if (ent->item->Pickup == Pickup_Health) {
-            if (ent->count == 2)
-                gi.Sound(other, CHAN_ITEM, gi.SoundIndex("items/s_health.wav"), 1, ATTN_NORM, 0);
-            else if (ent->count == 10)
-                gi.Sound(other, CHAN_ITEM, gi.SoundIndex("items/n_health.wav"), 1, ATTN_NORM, 0);
-            else if (ent->count == 25)
-                gi.Sound(other, CHAN_ITEM, gi.SoundIndex("items/l_health.wav"), 1, ATTN_NORM, 0);
-            else // (ent->count == 100)
-                gi.Sound(other, CHAN_ITEM, gi.SoundIndex("items/m_health.wav"), 1, ATTN_NORM, 0);
-        } else if (ent->item->pickupSound) {
-            gi.Sound(other, CHAN_ITEM, gi.SoundIndex(ent->item->pickupSound), 1, ATTN_NORM, 0);
-        }
-    }
+    //    if (ent->item->Pickup == Pickup_Health) {
+    //        if (ent->count == 2)
+    //            gi.Sound(other, CHAN_ITEM, gi.SoundIndex("items/s_health.wav"), 1, ATTN_NORM, 0);
+    //        else if (ent->count == 10)
+    //            gi.Sound(other, CHAN_ITEM, gi.SoundIndex("items/n_health.wav"), 1, ATTN_NORM, 0);
+    //        else if (ent->count == 25)
+    //            gi.Sound(other, CHAN_ITEM, gi.SoundIndex("items/l_health.wav"), 1, ATTN_NORM, 0);
+    //        else // (ent->count == 100)
+    //            gi.Sound(other, CHAN_ITEM, gi.SoundIndex("items/m_health.wav"), 1, ATTN_NORM, 0);
+    //    } else if (ent->item->pickupSound) {
+    //        gi.Sound(other, CHAN_ITEM, gi.SoundIndex(ent->item->pickupSound), 1, ATTN_NORM, 0);
+    //    }
+    //}
 
-    if (!(ent->spawnFlags & ItemSpawnFlags::TargetsUsed)) {
-        UTIL_UseTargets(ent->classEntity, other->classEntity);
-        ent->spawnFlags |= ItemSpawnFlags::TargetsUsed;
-    }
+    //if (!(ent->spawnFlags & ItemSpawnFlags::TargetsUsed)) {
+    //    UTIL_UseTargets(ent->classEntity, other->classEntity);
+    //    ent->spawnFlags |= ItemSpawnFlags::TargetsUsed;
+    //}
 
-    if (!taken)
-        return;
+    //if (!taken)
+    //    return;
 
-    if (!((coop->value) && (ent->item->flags & ItemFlags::StayInCoop)) || (ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem))) {
-        if (ent->flags & EntityFlags::Respawn)
-            ent->flags &= ~EntityFlags::Respawn;
-        else
-            SVG_FreeEntity(ent);
-    }
+    //if (!((coop->value) && (ent->item->flags & ItemFlags::StayInCoop)) || (ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem))) {
+    //    if (ent->flags & EntityFlags::Respawn)
+    //        ent->flags &= ~EntityFlags::Respawn;
+    //    else
+    //        SVG_FreeEntity(ent);
+    //}
 }
 
 //======================================================================
@@ -486,7 +487,7 @@ Entity *SVG_DropItem(Entity *ent, gitem_t *item)
 //    dropped->item = item;
 //    dropped->spawnFlags = ItemSpawnFlags::DroppedItem;
 //    dropped->state.effects = item->worldModelFlags;
-//    dropped->state.renderfx = RenderEffects::Glow;
+//    dropped->state.renderEffects = RenderEffects::Glow;
 //    VectorSet(dropped->mins, -15, -15, -15);
 //    VectorSet(dropped->maxs, 15, 15, 15);
 //    gi.SetModel(dropped, dropped->item->worldModel);
@@ -588,7 +589,7 @@ void droptofloor(Entity *ent)
 //        ent->solid = Solid::BoundingBox;
 ////        ent->Touch = NULL;
 //        ent->state.effects &= ~EntityEffectType::Rotate;
-//        ent->state.renderfx &= ~RenderEffects::Glow;
+//        ent->state.renderEffects &= ~RenderEffects::Glow;
 //    }
 //
 //    if (ent->spawnFlags & ItemSpawnFlags::TriggerSpawn) {
@@ -687,33 +688,33 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
         }
     }
 
-    // some items will be prevented in deathmatch
-    if (deathmatch->value) {
-        if ((int)dmflags->value & DeathMatchFlags::NoArmor) {
-            if (item->Pickup == Pickup_Armor) {
-                SVG_FreeEntity(ent);
-                return;
-            }
-        }
-        if ((int)dmflags->value & DeathMatchFlags::NoItems) {
-            if (item->Pickup == Pickup_Powerup) {
-                SVG_FreeEntity(ent);
-                return;
-            }
-        }
-        if ((int)dmflags->value & DeathMatchFlags::NoHealth) {
-            if (item->Pickup == Pickup_Health) {
-                SVG_FreeEntity(ent);
-                return;
-            }
-        }
-        if ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo) {
-            if ((item->flags == ItemFlags::IsAmmo)) {
-                SVG_FreeEntity(ent);
-                return;
-            }
-        }
-    }
+    //// some items will be prevented in deathmatch
+    //if (deathmatch->value) {
+    //    if ((int)dmflags->value & DeathMatchFlags::NoArmor) {
+    //        if (item->Pickup == Pickup_Armor) {
+    //            SVG_FreeEntity(ent);
+    //            return;
+    //        }
+    //    }
+    //    if ((int)dmflags->value & DeathMatchFlags::NoItems) {
+    //        if (item->Pickup == Pickup_Powerup) {
+    //            SVG_FreeEntity(ent);
+    //            return;
+    //        }
+    //    }
+    //    if ((int)dmflags->value & DeathMatchFlags::NoHealth) {
+    //        if (item->Pickup == Pickup_Health) {
+    //            SVG_FreeEntity(ent);
+    //            return;
+    //        }
+    //    }
+    //    if ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo) {
+    //        if ((item->flags == ItemFlags::IsAmmo)) {
+    //            SVG_FreeEntity(ent);
+    //            return;
+    //        }
+    //    }
+    //}
 
     if (coop->value && (strcmp(ent->className, "key_power_cube") == 0)) {
         ent->spawnFlags |= (1 << (8 + level.powerCubes));
@@ -729,7 +730,7 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
     ent->nextThinkTime = level.time + 2 * FRAMETIME;    // items start after other solids
 //    ent->Think = droptofloor;
     ent->state.effects = item->worldModelFlags;
-    ent->state.renderfx = RenderEffects::Glow;
+    ent->state.renderEffects = RenderEffects::Glow;
     if (ent->model)
         gi.ModelIndex(ent->model);
 }

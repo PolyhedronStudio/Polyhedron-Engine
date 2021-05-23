@@ -42,6 +42,14 @@ public:
         GetClient()->persistent.activeWeapon = weapon;
     }
 
+    // airFinishedTime
+    inline const float GetAirFinishedTime() {
+        return airFinishedTime;
+    }
+    inline void SetAirFinishedTime(const float& airFinishedTime) {
+        this->airFinishedTime = airFinishedTime;
+    }
+
     // Animation EndFrame.
     inline const int32_t GetAnimationEndFrame() {
         return GetClient()->animation.endFrame;
@@ -56,12 +64,52 @@ public:
         serverEntity->client = client;
     }
 
+    // Debounce Touch Time.
+    inline const float GetDebounceTouchTime() {
+        return debounceTouchTime;
+    }
+    void SetDebounceTouchTime(const float& debounceTouchTime) {
+        this->debounceTouchTime = debounceTouchTime;
+    }
+
+    // Debounce Pain Time.
+    inline const float GetDebouncePainTime() {
+        return debouncePainTime;
+    }
+    void SetDebouncePainTime(const float& debouncePainTime) {
+        this->debouncePainTime = debouncePainTime;
+    }
+
+    // Debounce Damage Time.
+    inline const float GetDebounceDamageTime() {
+        return debounceDamageTime;
+    }
+    void SetDebounceDamageTime(const float& debounceDamageTime) {
+        this->debounceDamageTime = debounceDamageTime;
+    }
+
+    // Debounce Sound Time.
+    inline const float GetDebounceSoundTime() {
+        return debounceSoundTime;
+    }
+    void SetDebounceSoundTime(const float& debounceSoundTime) {
+        this->debounceSoundTime = debounceSoundTime;
+    }
+
     // Killer Yaw.
     inline void SetKillerYaw(const float& killerYaw) {
         GetClient()->killerYaw = killerYaw;
     }
     inline const float GetKillerYaw() {
         return GetClient()->killerYaw;
+    }
+
+    // NextDrawnTime.
+    inline const float GetNextDrownTime() {
+        return GetClient()->nextDrownTime;
+    }
+    inline void SetNextDrownTime(const float& nextDrownTime) {
+        GetClient()->nextDrownTime = nextDrownTime;
     }
 
     // Player Move Type.
@@ -87,6 +135,16 @@ public:
     inline void SetRespawnTime(float time) {
         GetClient()->respawnTime = time;
     }
+
+protected:
+    // The level.time when the "air" state finished. 
+    float airFinishedTime;
+
+    // Debounce level.time values.
+    float debounceTouchTime;
+    float debouncePainTime;
+    float debounceDamageTime;
+    float debounceSoundTime;
 
 private:
     //

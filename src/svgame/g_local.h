@@ -273,10 +273,10 @@ typedef struct gitem_s {
     const char *className;
 
     // Function callbacks.
-    qboolean (*Pickup)(struct entity_s *ent, struct entity_s *other);
-    void (*Use)(struct entity_s *ent, struct gitem_s *item);
-    void (*Drop)(struct entity_s *ent, struct gitem_s *item);
-    void (*WeaponThink)(struct entity_s *ent);
+    qboolean (*Pickup)(SVGBaseEntity *ent, SVGBaseEntity *other);
+    void (*Use)(SVGBaseEntity *ent, struct gitem_s *item);
+    void (*Drop)(SVGBaseEntity *ent, struct gitem_s *item);
+    void (*WeaponThink)(SVGBaseEntity *ent);
 
     // Sound used when being picked up.
     const char *pickupSound;
@@ -1014,7 +1014,7 @@ struct entity_s {
     // Regular entity velocity, gravity, mass.
     vec3_t velocity;
     vec3_t angularVelocity;
-    float airFinishedTime;
+    
     float gravity;        // per entity gravity multiplier (1.0 is normal)
                                 // use for lowgrav artifact, flares
 
@@ -1024,11 +1024,6 @@ struct entity_s {
     float idealYawAngle;
 
     float nextThinkTime;
-
-    float debounceTouchTime;        // are all these legit?  do we need more/less of them?
-    float debouncePainTime;
-    float debounceDamageTime;
-    float debounceSoundTime;    // move to clientInfo
     float lastMoveTime;
 
     //int32_t health;
