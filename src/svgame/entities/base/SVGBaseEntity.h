@@ -99,7 +99,7 @@ public:
 
     // Get the 'deadFlag' value.
     inline const int32_t GetDeadFlag() {
-        return serverEntity->deadFlag;
+        return deadFlag;
     }
 
     // Return the 'delay' value.
@@ -160,6 +160,11 @@ public:
     // Return the 'mass' value.
     inline const int32_t GetMass() {
         return serverEntity->mass;
+    }
+
+    // Return the 'maxHealth' value.
+    inline const int32_t GetMaxHealth() {
+        return maxHealth;
     }
 
     // Return the bounding box 'maxs' value.
@@ -337,7 +342,7 @@ public:
 
     // Set the 'deadFlag' value.
     inline void SetDeadFlag(const int32_t& deadFlag) {
-        serverEntity->deadFlag = deadFlag;
+        this->deadFlag = deadFlag;
     }
 
     // Set the 'effects' value.
@@ -409,6 +414,11 @@ public:
     // Set the 'mass' value.
     inline void SetMass(const int32_t &mass) {
         serverEntity->mass = mass;
+    }
+
+    // Set the 'maxHealth' value.
+    inline void SetMaxHealth(const int32_t& maxHealth) {
+        this->maxHealth = maxHealth;
     }
 
     // Set the 'maxs' value.
@@ -562,8 +572,13 @@ protected:
     // Ground Entity link count. (To keep track if it is linked or not.)
     int32_t groundEntityLinkCount;
 
-    // Entity health.
+    // Current health.
     int32_t health;
+    // Maximum health.
+    int32_t maxHealth;
+
+    // Dead Flag. (Are we dead, dying or...?)
+    int32_t deadFlag;
 
     //
     // Entity pointers.

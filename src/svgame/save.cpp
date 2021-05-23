@@ -132,9 +132,9 @@ static const save_field_t entityfields[] = {
     F(lastMoveTime),
 
 //    I(health),
-    I(maxHealth),
-    I(gibHealth),
-    I(deadFlag),
+//    I(maxHealth),
+//    I(gibHealth),
+//    I(deadFlag),
     I(showHostile),
 
     F(powerArmorTime),

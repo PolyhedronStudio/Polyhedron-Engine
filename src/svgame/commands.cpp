@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "player/animations.h"
 
 #include "entities/base/SVGBaseEntity.h"
+#include "entities/base/PlayerClient.h"
 
 char *ClientTeam(SVGBaseEntity *ent)
 {
@@ -181,7 +182,7 @@ void Cmd_Give_f(Entity *ent)
         if (gi.argc() == 3)
             ent->classEntity->SetHealth(atoi(gi.argv(2)));
         else
-            ent->classEntity->SetHealth(ent->maxHealth);
+            ent->classEntity->SetHealth(ent->classEntity->GetMaxHealth());
         if (!give_all)
             return;
     }
@@ -573,14 +574,15 @@ void Cmd_InvDrop_f(Entity *ent)
 Cmd_Kill_f
 =================
 */
-void Cmd_Kill_f(Entity *ent)
+void Cmd_Kill_f(PlayerClient *ent)
 {
-    if ((level.time - ent->client->respawnTime) < 5)
+    if ((level.time - ent->GetClient()->respawnTime) < 5)
         return;
-    ent->flags &= ~EntityFlags::GodMode;
-    ent->classEntity->SetHealth(0);
+
+    ent->SetFlags(ent->GetFlags() & ~EntityFlags::GodMode);
+    ent->SetHealth(0);
     meansOfDeath = MeansOfDeath::Suicide;
-    SVG_Player_Die(ent, ent, ent, 100000, vec3_origin);
+    ent->Die(ent, ent, 100000, vec3_zero());
 }
 
 /*
@@ -889,7 +891,7 @@ void SVG_ClientCommand(Entity *ent)
     else if (Q_stricmp(cmd, "weaplast") == 0)
         Cmd_WeapLast_f(ent);
     else if (Q_stricmp(cmd, "kill") == 0)
-        Cmd_Kill_f(ent);
+        Cmd_Kill_f((PlayerClient*)ent->classEntity);
     else if (Q_stricmp(cmd, "putaway") == 0)
         Cmd_PutAway_f(ent);
     else if (Q_stricmp(cmd, "wave") == 0)

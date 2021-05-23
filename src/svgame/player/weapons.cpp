@@ -295,7 +295,7 @@ void Weapon_Generic(Entity *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, i
 {
     int     n;
 
-    if (ent->deadFlag || ent->state.modelIndex != 255) { // VWep animations screw up corpses
+    if (ent->classEntity->GetDeadFlag() || ent->state.modelIndex != 255) { // VWep animations screw up corpses
         return;
     }
 

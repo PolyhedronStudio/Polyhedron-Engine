@@ -220,7 +220,7 @@ static void SVG_CalculateViewOffset(Entity *ent)
     // Calculate new kick angle vales. (
     // 
     // If dead, set a fixed angle and don't add any kick
-    if (ent->deadFlag) {
+    if (ent->classEntity->GetDeadFlag()) {
         ent->client->playerState.kickAngles = vec3_zero();
 
         ent->client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;

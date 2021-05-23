@@ -337,7 +337,7 @@ void SVG_SaveClientData(void)
         if (!ent->inUse)
             continue;
         game.clients[i].persistent.health = ent->classEntity->GetHealth();
-        game.clients[i].persistent.maxHealth = ent->maxHealth;
+        game.clients[i].persistent.maxHealth = ent->classEntity->GetMaxHealth();
         game.clients[i].persistent.savedFlags = (ent->flags & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
         if (coop->value && ent->client)
             game.clients[i].persistent.score = ent->client->respawn.score;
@@ -347,8 +347,8 @@ void SVG_SaveClientData(void)
 void SVG_FetchClientData(Entity *ent)
 {
     ent->classEntity->SetHealth(ent->client->persistent.health);
-    ent->maxHealth = ent->client->persistent.maxHealth;
-    ent->flags |= ent->client->persistent.savedFlags;
+    ent->classEntity->SetMaxHealth(ent->client->persistent.maxHealth);
+    ent->classEntity->SetFlags(ent->classEntity->GetFlags() | ent->client->persistent.savedFlags);
     if (coop->value && ent->client)
         ent->client->respawn.score = ent->client->persistent.score;
 }
@@ -1317,7 +1317,7 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
             client->playerState.pmove.type = PlayerMoveType::Spectator;
         else if ( ent->state.modelIndex != 255 )
             client->playerState.pmove.type = EnginePlayerMoveType::Gib;
-        else if ( ent->deadFlag )
+        else if ( ent->classEntity->GetDeadFlag() )
             client->playerState.pmove.type = EnginePlayerMoveType::Dead;
         else
             client->playerState.pmove.type = PlayerMoveType::Normal;
@@ -1369,7 +1369,7 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
             ent->groundEntityLinkCount = pm.groundEntityPtr->linkCount;
 
         // Special treatment for angles in case we are dead. Target the killer entity yaw angle.
-        if (ent->deadFlag) {
+        if (ent->classEntity->GetDeadFlag()) {
             client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
             client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
             client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
@@ -1484,7 +1484,7 @@ void SVG_ClientBeginServerFrame(Entity *ent)
     else
         client->weaponThunk = false;
 
-    if (ent->deadFlag) {
+    if (ent->classEntity->GetDeadFlag()) {
         // wait for any button just going down
         if (level.time > client->respawnTime) {
             // in deathmatch, only wait for attack button

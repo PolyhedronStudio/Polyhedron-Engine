@@ -16,6 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 #include "g_local.h"
+#include "entities/base/SVGBaseEntity.h"
 
 void SVG_UpdateChaseCam(Entity *ent)
 {
@@ -81,7 +82,7 @@ void SVG_UpdateChaseCam(Entity *ent)
         goal[2] += 6;
     }
 
-    if (targ->deadFlag)
+    if (targ->classEntity->GetDeadFlag())
         ent->client->playerState.pmove.type = EnginePlayerMoveType::Dead;
     else
         ent->client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
@@ -90,7 +91,7 @@ void SVG_UpdateChaseCam(Entity *ent)
     for (i = 0 ; i < 3 ; i++)
         ent->client->playerState.pmove.deltaAngles[i] = targ->client->aimAngles[i] - ent->client->respawn.commandViewAngles[i];
 
-    if (targ->deadFlag) {
+    if (targ->classEntity->GetDeadFlag()) {
         ent->client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
         ent->client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
         ent->client->playerState.pmove.viewAngles[vec3_t::Yaw] = targ->client->killerYaw;
