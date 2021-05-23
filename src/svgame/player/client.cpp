@@ -622,8 +622,8 @@ void CopyToBodyQue(Entity *ent)
     VectorCopy(ent->absMax, body->absMax);
 
     body->size = ent->size; // VectorCopy(ent->size, body->size);
-    body->velocity = ent->velocity; // VectorCopy(ent->velocity, body->velocity);
-    body->angularVelocity = ent->angularVelocity; //  VectorCopy(ent->angularVelocity, body->angularVelocity);
+    //body->velocity = ent->classEntity->GetVelocity(); // VectorCopy(ent->velocity, body->velocity);
+    //body->angularVelocity = ent->classEntity->GetAngularVelocity(); //  VectorCopy(ent->angularVelocity, body->angularVelocity);
     body->solid = ent->solid;
     body->clipMask = ent->clipMask;
     body->owner = ent->owner;
@@ -1270,26 +1270,33 @@ This will be called once for each client frame, which will
 usually be a couple times for each server frame.
 ==============
 */
-void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
+void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
 {
     GameClient* client = nullptr;
+    PlayerClient *classEntity = nullptr;
     Entity* other = nullptr;
+
 
     PlayerMove pm = {};
     
     // Sanity checks.
-    if (!ent) {
+    if (!serverEntity) {
         Com_Error(ErrorType::ERR_DROP, "%s: has a NULL *ent!\n", __FUNCTION__);
     }
-    if (!ent->client)
+    if (!serverEntity->client)
         Com_Error(ErrorType::ERR_DROP, "%s: *ent has no client to think with!\n", __FUNCTION__);
 
+    if (!serverEntity->classEntity)
+        return;
+
     // Store the current entity to be run from SVG_RunFrame.
-    level.currentEntity = ent->classEntity;
+    level.currentEntity = serverEntity->classEntity;
 
     // Fetch the entity client.
-    client = ent->client;
+    client = serverEntity->client;
 
+    // Fetch the class entity.
+    classEntity = (PlayerClient*)serverEntity->classEntity;
 
     if (level.intermission.time) {
         client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
@@ -1300,9 +1307,9 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
         return;
     }
 
-    pm_passent = ent;
+    pm_passent = serverEntity;
 
-    if (ent->client->chaseTarget) {
+    if (client->chaseTarget) {
         // Angles are fetched from the client we are chasing.
         client->respawn.commandViewAngles[0] = clientUserCommand->moveCommand.viewAngles[0];
         client->respawn.commandViewAngles[1] = clientUserCommand->moveCommand.viewAngles[1];
@@ -1312,13 +1319,13 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
         // set up for pmove
         memset(&pm, 0, sizeof(pm));
 
-        if ( ent->classEntity->GetMoveType() == MoveType::NoClip )
+        if ( classEntity->GetMoveType() == MoveType::NoClip )
             client->playerState.pmove.type = PlayerMoveType::Noclip;
-        else if ( ent->classEntity->GetMoveType() == MoveType::Spectator )
+        else if ( classEntity->GetMoveType() == MoveType::Spectator )
             client->playerState.pmove.type = PlayerMoveType::Spectator;
-        else if ( ent->state.modelIndex != 255 )
+        else if (classEntity->GetModelIndex() != 255 )
             client->playerState.pmove.type = EnginePlayerMoveType::Gib;
-        else if ( ent->classEntity->GetDeadFlag() )
+        else if ( classEntity->GetDeadFlag() )
             client->playerState.pmove.type = EnginePlayerMoveType::Dead;
         else
             client->playerState.pmove.type = PlayerMoveType::Normal;
@@ -1329,10 +1336,13 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
         pm.state = client->playerState.pmove;
 
         // Move over entity state values into the player move state so it is up to date.
-        pm.state.origin = ent->state.origin;
-        pm.state.velocity = ent->velocity;
+        pm.state.origin = classEntity->GetOrigin();
+        pm.state.velocity = classEntity->GetVelocity();
         pm.clientUserCommand = *clientUserCommand;
-        pm.groundEntityPtr = ent->groundEntityPtr;
+        if (classEntity->GetGroundEntity())
+            pm.groundEntityPtr = classEntity->GetGroundEntity()->GetServerEntity();
+        else
+            pm.groundEntityPtr = NULL;
         pm.Trace = PM_Trace;
         pm.PointContents = gi.PointContents;
 
@@ -1343,21 +1353,24 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
         client->playerState.pmove = pm.state;
 
         // Move over needed results to the entity and its state.
-        ent->state.origin = pm.state.origin;
-        ent->velocity = pm.state.velocity;
-        ent->mins = pm.mins;
-        ent->maxs = pm.maxs;
-        ent->viewHeight = pm.state.viewOffset[2];
-        ent->waterLevel = pm.waterLevel;
-        ent->waterType = pm.waterType;
+        classEntity->SetOrigin(pm.state.origin);
+        classEntity->SetVelocity(pm.state.velocity);
+        classEntity->SetMins(pm.mins);
+        classEntity->SetMaxs(pm.maxs);
+        classEntity->SetViewHeight(pm.state.viewOffset[2]);
+        classEntity->SetWaterLevel(pm.waterLevel);
+        classEntity->SetWaterType(pm.waterType);
 
         // Check for jumping sound.
-        if (ent->groundEntityPtr && !pm.groundEntityPtr && (pm.clientUserCommand.moveCommand.upMove >= 10) && (pm.waterLevel == 0)) {
-            gi.Sound(ent, CHAN_VOICE, gi.SoundIndex("*jump1.wav"), 1, ATTN_NORM, 0);
-            SVG_PlayerNoise(ent->classEntity, ent->state.origin, PNOISE_SELF);
+        if (classEntity->GetGroundEntity() && !pm.groundEntityPtr && (pm.clientUserCommand.moveCommand.upMove >= 10) && (pm.waterLevel == 0)) {
+            gi.Sound(serverEntity, CHAN_VOICE, gi.SoundIndex("*jump1.wav"), 1, ATTN_NORM, 0);
+            SVG_PlayerNoise(classEntity, classEntity->GetOrigin(), PNOISE_SELF);
         }
 
-        ent->groundEntityPtr = pm.groundEntityPtr;
+        if (pm.groundEntityPtr != NULL)
+            classEntity->SetGroundEntity(pm.groundEntityPtr->classEntity);
+        else
+            classEntity->SetGroundEntity(NULL);
 
         // Copy over the user command angles so they are stored for respawns.
         // (Used when going into a new map etc.)
@@ -1367,10 +1380,10 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
 
         // Store entity link count in case we have a ground entity pointer.
         if (pm.groundEntityPtr)
-            ent->groundEntityLinkCount = pm.groundEntityPtr->linkCount;
+            classEntity->SetGroundEntityLinkCount(pm.groundEntityPtr->linkCount);
 
         // Special treatment for angles in case we are dead. Target the killer entity yaw angle.
-        if (ent->classEntity->GetDeadFlag()) {
+        if (classEntity->GetDeadFlag()) {
             client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
             client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
             client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
@@ -1380,11 +1393,12 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
             client->playerState.pmove.viewAngles = pm.viewAngles;
         }
 
-        gi.LinkEntity(ent);
+        // Link it back in for collision testing.
+        classEntity->LinkEntity();
 
         // Only check for trigger and object touches if not one of these movetypes.
-        if (ent->classEntity->GetMoveType() != MoveType::NoClip && ent->classEntity->GetMoveType() != MoveType::Spectator)
-            UTIL_TouchTriggers(ent->classEntity);
+        if (classEntity->GetMoveType() != MoveType::NoClip && classEntity->GetMoveType() != MoveType::Spectator)
+            UTIL_TouchTriggers(classEntity);
 
         // touch other objects
         int i = 0;
@@ -1401,7 +1415,7 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
             //other->Touch(other, ent, NULL, NULL);
             if (!other->classEntity)
                 continue;
-            other->classEntity->Touch(other->classEntity, ent->classEntity, NULL, NULL);
+            other->classEntity->Touch(other->classEntity, classEntity, NULL, NULL);
         }
 
     }
@@ -1412,7 +1426,7 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
 
     // save light level the player is standing on for
     // monster sighting AI
-    ent->lightLevel = clientUserCommand->moveCommand.lightLevel;
+    //ent->lightLevel = clientUserCommand->moveCommand.lightLevel;
 
     // fire weapon from final position if needed
     if (client->latchedButtons & BUTTON_ATTACK) {
@@ -1424,11 +1438,11 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
                 client->chaseTarget = NULL;
                 client->playerState.pmove.flags &= ~PMF_NO_PREDICTION;
             } else
-                SVG_GetChaseTarget((PlayerClient*)ent->classEntity);
+                SVG_GetChaseTarget(classEntity);
 
         } else if (!client->weaponThunk) {
             client->weaponThunk = true;
-            SVG_ThinkWeapon((PlayerClient*)ent->classEntity);
+            SVG_ThinkWeapon(classEntity);
         }
     }
 
@@ -1437,9 +1451,9 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
             if (!(client->playerState.pmove.flags & PMF_JUMP_HELD)) {
                 client->playerState.pmove.flags |= PMF_JUMP_HELD;
                 if (client->chaseTarget)
-                    SVG_ChaseNext((PlayerClient*)ent->classEntity);
+                    SVG_ChaseNext(classEntity);
                 else
-                    SVG_GetChaseTarget((PlayerClient*)ent->classEntity);
+                    SVG_GetChaseTarget(classEntity);
             }
         } else
             client->playerState.pmove.flags &= ~PMF_JUMP_HELD;
@@ -1448,8 +1462,8 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
     // update chase cam if being followed
     for (int i = 1; i <= maxClients->value; i++) {
         other = g_entities + i;
-        if (other->inUse && other->client->chaseTarget == ent)
-            SVG_UpdateChaseCam((PlayerClient*)other->classEntity);
+        if (other->inUse && other->client->chaseTarget == serverEntity)
+            SVG_UpdateChaseCam(classEntity);
     }
 }
 

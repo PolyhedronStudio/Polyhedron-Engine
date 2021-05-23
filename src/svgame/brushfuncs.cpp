@@ -62,36 +62,36 @@
 
 void Brush_Move_Done(Entity* ent)
 {
-    VectorClear(ent->velocity);
-    ent->moveInfo.OnEndFunction(ent);
+    //VectorClear(ent->velocity);
+    //ent->moveInfo.OnEndFunction(ent);
 }
 
 void Brush_Move_Final(Entity* ent)
 {
-    if (ent->moveInfo.remainingDistance == 0) {
-        Brush_Move_Done(ent);
-        return;
-    }
+    //if (ent->moveInfo.remainingDistance == 0) {
+    //    Brush_Move_Done(ent);
+    //    return;
+    //}
 
-    VectorScale(ent->moveInfo.dir, ent->moveInfo.remainingDistance / FRAMETIME, ent->velocity);
+    //VectorScale(ent->moveInfo.dir, ent->moveInfo.remainingDistance / FRAMETIME, ent->velocity);
 
-    //ent->Think = Brush_Move_Done;
-    ent->nextThinkTime = level.time + FRAMETIME;
+    ////ent->Think = Brush_Move_Done;
+    //ent->nextThinkTime = level.time + FRAMETIME;
 }
 
 void Brush_Move_Begin(Entity* ent)
 {
-    float   frames;
+    //float   frames;
 
-    if ((ent->moveInfo.speed * FRAMETIME) >= ent->moveInfo.remainingDistance) {
-        Brush_Move_Final(ent);
-        return;
-    }
-    VectorScale(ent->moveInfo.dir, ent->moveInfo.speed, ent->velocity);
-    frames = floor((ent->moveInfo.remainingDistance / ent->moveInfo.speed) / FRAMETIME);
-    ent->moveInfo.remainingDistance -= frames * ent->moveInfo.speed * FRAMETIME;
-    ent->nextThinkTime = level.time + (frames * FRAMETIME);
-    //ent->Think = Brush_Move_Final;
+    //if ((ent->moveInfo.speed * FRAMETIME) >= ent->moveInfo.remainingDistance) {
+    //    Brush_Move_Final(ent);
+    //    return;
+    //}
+    //VectorScale(ent->moveInfo.dir, ent->moveInfo.speed, ent->velocity);
+    //frames = floor((ent->moveInfo.remainingDistance / ent->moveInfo.speed) / FRAMETIME);
+    //ent->moveInfo.remainingDistance -= frames * ent->moveInfo.speed * FRAMETIME;
+    //ent->nextThinkTime = level.time + (frames * FRAMETIME);
+    ////ent->Think = Brush_Move_Final;
 }
 
 void Think_AccelMove(Entity* ent);
@@ -127,62 +127,62 @@ void Brush_Move_Calc(Entity* ent, const vec3_t &dest, void(*func)(Entity*))
 
 void Brush_AngleMove_Done(Entity* ent)
 {
-    VectorClear(ent->angularVelocity);
-    ent->moveInfo.OnEndFunction(ent);
+    //VectorClear(ent->angularVelocity);
+    //ent->moveInfo.OnEndFunction(ent);
 }
 
 void Brush_AngleMove_Final(Entity* ent)
 {
-    vec3_t  move;
+    //vec3_t  move;
 
-    if (ent->moveInfo.state == STATE_UP)
-        VectorSubtract(ent->moveInfo.endAngles, ent->state.angles, move);
-    else
-        VectorSubtract(ent->moveInfo.startAngles, ent->state.angles, move);
+    //if (ent->moveInfo.state == STATE_UP)
+    //    VectorSubtract(ent->moveInfo.endAngles, ent->state.angles, move);
+    //else
+    //    VectorSubtract(ent->moveInfo.startAngles, ent->state.angles, move);
 
-    if (VectorCompare(move, vec3_origin)) {
-        Brush_AngleMove_Done(ent);
-        return;
-    }
+    //if (VectorCompare(move, vec3_origin)) {
+    //    Brush_AngleMove_Done(ent);
+    //    return;
+    //}
 
-    VectorScale(move, 1.0 / FRAMETIME, ent->angularVelocity);
+    //VectorScale(move, 1.0 / FRAMETIME, ent->angularVelocity);
 
-    //ent->Think = Brush_AngleMove_Done;
-    ent->nextThinkTime = level.time + FRAMETIME;
+    ////ent->Think = Brush_AngleMove_Done;
+    //ent->nextThinkTime = level.time + FRAMETIME;
 }
 
 void Brush_AngleMove_Begin(Entity* ent)
 {
-    vec3_t  destdelta;
-    float   len;
-    float   traveltime;
-    float   frames;
+    //vec3_t  destdelta;
+    //float   len;
+    //float   traveltime;
+    //float   frames;
 
-    // set destdelta to the vector needed to move
-    if (ent->moveInfo.state == STATE_UP)
-        VectorSubtract(ent->moveInfo.endAngles, ent->state.angles, destdelta);
-    else
-        VectorSubtract(ent->moveInfo.startAngles, ent->state.angles, destdelta);
+    //// set destdelta to the vector needed to move
+    //if (ent->moveInfo.state == STATE_UP)
+    //    VectorSubtract(ent->moveInfo.endAngles, ent->state.angles, destdelta);
+    //else
+    //    VectorSubtract(ent->moveInfo.startAngles, ent->state.angles, destdelta);
 
-    // calculate length of vector
-    len = VectorLength(destdelta);
+    //// calculate length of vector
+    //len = VectorLength(destdelta);
 
-    // divide by speed to get time to reach dest
-    traveltime = len / ent->moveInfo.speed;
+    //// divide by speed to get time to reach dest
+    //traveltime = len / ent->moveInfo.speed;
 
-    if (traveltime < FRAMETIME) {
-        Brush_AngleMove_Final(ent);
-        return;
-    }
+    //if (traveltime < FRAMETIME) {
+    //    Brush_AngleMove_Final(ent);
+    //    return;
+    //}
 
-    frames = floor(traveltime / FRAMETIME);
+    //frames = floor(traveltime / FRAMETIME);
 
-    // scale the destdelta vector by the time spent traveling to get velocity
-    VectorScale(destdelta, 1.0 / traveltime, ent->angularVelocity);
+    //// scale the destdelta vector by the time spent traveling to get velocity
+    //VectorScale(destdelta, 1.0 / traveltime, ent->angularVelocity);
 
-    // set nextThinkTime to trigger a Think when dest is reached
-    ent->nextThinkTime = level.time + frames * FRAMETIME;
-    //ent->Think = Brush_AngleMove_Final;
+    //// set nextThinkTime to trigger a Think when dest is reached
+    //ent->nextThinkTime = level.time + frames * FRAMETIME;
+    ////ent->Think = Brush_AngleMove_Final;
 }
 
 void Brush_AngleMove_Calc(Entity* ent, void(*func)(Entity*))
@@ -303,20 +303,20 @@ void plat_Accelerate(PushMoveInfo* moveinfo)
 
 void Think_AccelMove(Entity* ent)
 {
-    ent->moveInfo.remainingDistance -= ent->moveInfo.currentSpeed;
+    //ent->moveInfo.remainingDistance -= ent->moveInfo.currentSpeed;
 
-    if (ent->moveInfo.currentSpeed == 0)       // starting or Blocked
-        plat_CalcAcceleratedMove(&ent->moveInfo);
+    //if (ent->moveInfo.currentSpeed == 0)       // starting or Blocked
+    //    plat_CalcAcceleratedMove(&ent->moveInfo);
 
-    plat_Accelerate(&ent->moveInfo);
+    //plat_Accelerate(&ent->moveInfo);
 
-    // will the entire move complete on next frame?
-    if (ent->moveInfo.remainingDistance <= ent->moveInfo.currentSpeed) {
-        Brush_Move_Final(ent);
-        return;
-    }
+    //// will the entire move complete on next frame?
+    //if (ent->moveInfo.remainingDistance <= ent->moveInfo.currentSpeed) {
+    //    Brush_Move_Final(ent);
+    //    return;
+    //}
 
-    VectorScale(ent->moveInfo.dir, ent->moveInfo.currentSpeed * 10, ent->velocity);
-    ent->nextThinkTime = level.time + FRAMETIME;
-    //ent->Think = Think_AccelMove;
+    //VectorScale(ent->moveInfo.dir, ent->moveInfo.currentSpeed * 10, ent->velocity);
+    //ent->nextThinkTime = level.time + FRAMETIME;
+    ////ent->Think = Think_AccelMove;
 }

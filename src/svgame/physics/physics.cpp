@@ -881,33 +881,35 @@ void SV_Physics_Step(SVGBaseEntity *ent)
 
     // friction for flying monsters that have been given vertical velocity
     if ((ent->GetFlags() & EntityFlags::Fly) && (ent->GetVelocity().z != 0)) {
-        speed = std::fabsf(ent->GetServerEntity()->velocity[2]);
+        speed = std::fabsf(ent->GetVelocity().z);
         control = speed < sv_stopspeed ? sv_stopspeed : speed;
         friction = sv_friction / 3;
         newspeed = speed - (FRAMETIME * control * friction);
         if (newspeed < 0)
             newspeed = 0;
         newspeed /= speed;
-        ent->GetServerEntity()->velocity[2] *= newspeed;
+        vec3_t velocity = ent->GetVelocity();
+        ent->SetVelocity({ velocity.x, velocity.y, velocity.z * newspeed }); //         ent->GetServerEntity()->velocity[2] *= newspeed;
     }
 
     // friction for flying monsters that have been given vertical velocity
-    if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetServerEntity()->velocity[2] != 0)) {
-        speed = std::fabsf(ent->GetServerEntity()->velocity[2]);
+    if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetVelocity().z != 0)) {
+        speed = std::fabsf(ent->GetVelocity().z);
         control = speed < sv_stopspeed ? sv_stopspeed : speed;
         newspeed = speed - (FRAMETIME * control * sv_waterfriction * ent->GetServerEntity()->waterLevel);
         if (newspeed < 0)
             newspeed = 0;
         newspeed /= speed;
-        ent->GetServerEntity()->velocity[2] *= newspeed;
+        vec3_t velocity = ent->GetVelocity();
+        ent->SetVelocity({ velocity.x, velocity.y, velocity.z * newspeed }); //         ent->GetServerEntity()->velocity[2] *= newspeed;
     }
 
-    if (ent->GetServerEntity()->velocity[2] || ent->GetServerEntity()->velocity[1] || ent->GetServerEntity()->velocity[0]) {
+    if (ent->GetVelocity().z || ent->GetVelocity().y || ent->GetVelocity().x) {
         // apply friction
         // let dead monsters who aren't completely onground slide
         if ((wasonground) || (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)))
             if (!(ent->GetHealth() <= 0.0)) {
-                vel = ent->GetServerEntity()->velocity;
+                vec3_t vel = ent->GetVelocity();
                 speed = std::sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
                 if (speed) {
                     friction = sv_friction;
@@ -921,6 +923,9 @@ void SV_Physics_Step(SVGBaseEntity *ent)
 
                     vel[0] *= newspeed;
                     vel[1] *= newspeed;
+
+                    // Set the velocity.
+                    ent->SetVelocity(vel);
                 }
             }
 

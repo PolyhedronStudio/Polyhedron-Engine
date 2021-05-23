@@ -127,7 +127,8 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
         ent->SetOrigin(trace.endPosition);
         ent->SetGroundEntity(trace.ent);
         ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
-        ent->GetServerEntity()->velocity[2] = 0;
+        vec3_t velocity = ent->GetVelocity();
+        ent->SetVelocity({ velocity.x, velocity.y, 0 });
     }
 }
 

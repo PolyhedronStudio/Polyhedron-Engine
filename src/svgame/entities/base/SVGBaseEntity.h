@@ -74,7 +74,7 @@ public:
 
     // Return the 'angularVelocity' value.
     inline const vec3_t& GetAngularVelocity() {
-        return serverEntity->angularVelocity;
+        return angularVelocity;
     }
 
     // Return the 'className' value.
@@ -326,7 +326,7 @@ public:
 
     // Return the 'velocity' value.
     inline const vec3_t& GetVelocity() {
-        return serverEntity->velocity;
+        return velocity;
     }
 
     // Return the 'waterLevel' value.
@@ -354,7 +354,7 @@ public:
 
     // Set the 'angularVelocity' value.
     inline void SetAngularVelocity(const vec3_t& angularVelocity) {
-        serverEntity->angularVelocity = angularVelocity;
+        this->angularVelocity = angularVelocity;
     }
 
     // Set the 'mins', and 'maxs' values of the entity bounding box.
@@ -574,7 +574,7 @@ public:
 
     // Set the 'velocity' value.
     inline void SetVelocity(const vec3_t &velocity) {
-        serverEntity->velocity = velocity;
+        this->velocity = velocity;
     }
 
     // Return the 'waterLevel' value.
@@ -613,9 +613,9 @@ protected:
     int32_t moveType;
 
     // Velocity.
-    vec3_t _velocity;
+    vec3_t velocity;
     // Angular Velocity.
-    vec3_t _angularVelocity;
+    vec3_t angularVelocity;
     // Mass
     int32_t mass;
 

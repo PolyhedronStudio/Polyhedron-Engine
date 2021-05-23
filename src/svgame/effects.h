@@ -10,9 +10,13 @@
 #define __SVGAME_EFFECTS_H__
 
 //
+// Forward declaration.
+//
+class SVGBaseEntity;
+
+//
 // Misc.
 //
-
 void ClipGibVelocity(Entity* ent);
 
 //
@@ -29,7 +33,7 @@ void ThrowGib(Entity* self, const char* gibname, int damage, int type);
 //
 // Explosions.
 //
-void BecomeExplosion1(Entity* self);
-void BecomeExplosion2(Entity* self);
+void BecomeExplosion1(SVGBaseEntity* self);
+void BecomeExplosion2(SVGBaseEntity* self);
 
 #endif // __SVGAME_PLAYER_WEAPONS_H__

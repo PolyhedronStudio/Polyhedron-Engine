@@ -44,9 +44,9 @@ extern void gib_think(Entity* self);
 
 extern void MegaHealth_think(Entity* self);
 
-extern void Brush_Move_Begin(Entity* self);
-extern void Brush_Move_Done(Entity* self);
-extern void Brush_Move_Final(Entity* self);
+//extern void Brush_Move_Begin(Entity* self);
+//extern void Brush_Move_Done(Entity* self);
+//extern void Brush_Move_Final(Entity* self);
 extern void multi_wait(Entity* self);
 extern void plat_go_down(Entity* self);
 //extern void SP_CreateCoopSpots(Entity* self);

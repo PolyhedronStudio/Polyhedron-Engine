@@ -1013,8 +1013,8 @@ struct entity_s {
     vec3_t position1, position2;
 
     // Regular entity velocity, gravity, mass.
-    vec3_t velocity;
-    vec3_t angularVelocity;
+    //vec3_t velocity;
+    //vec3_t angularVelocity;
     
     float gravity;        // per entity gravity multiplier (1.0 is normal)
                                 // use for lowgrav artifact, flares

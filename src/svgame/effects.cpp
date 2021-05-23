@@ -12,22 +12,25 @@
 #include "utils.h"           // Include Utilities funcs.
 #include "effects.h"
 
+#include "entities/base/SVGBaseEntity.h"
+#include "entities/base/PlayerClient.h"
+
 //=====================================================
 
 void ClipGibVelocity(Entity *ent)
 {
-    if (ent->velocity[0] < -300)
-        ent->velocity[0] = -300;
-    else if (ent->velocity[0] > 300)
-        ent->velocity[0] = 300;
-    if (ent->velocity[1] < -300)
-        ent->velocity[1] = -300;
-    else if (ent->velocity[1] > 300)
-        ent->velocity[1] = 300;
-    if (ent->velocity[2] < 200)
-        ent->velocity[2] = 200; // always some upwards
-    else if (ent->velocity[2] > 500)
-        ent->velocity[2] = 500;
+    //if (ent->velocity[0] < -300)
+    //    ent->velocity[0] = -300;
+    //else if (ent->velocity[0] > 300)
+    //    ent->velocity[0] = 300;
+    //if (ent->velocity[1] < -300)
+    //    ent->velocity[1] = -300;
+    //else if (ent->velocity[1] > 300)
+    //    ent->velocity[1] = 300;
+    //if (ent->velocity[2] < 200)
+    //    ent->velocity[2] = 200; // always some upwards
+    //else if (ent->velocity[2] > 500)
+    //    ent->velocity[2] = 500;
 }
 
 
@@ -219,49 +222,53 @@ void debris_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, c
 
 void SVG_ThrowDebris(SVGBaseEntity *self, const char *modelname, float speed, const vec3_t &origin) // C++20: STRING: Added const to char*
 {
-    Entity *chunk;
-    vec3_t  v;
-
-    chunk = SVG_Spawn();
-    VectorCopy(origin, chunk->state.origin);
-    gi.SetModel(chunk, modelname);
-    v[0] = 100 * crandom();
-    v[1] = 100 * crandom();
-    v[2] = 100 + 100 * crandom();
-    //VectorMA(self->velocity, speed, v, chunk->velocity);
-    //chunk->moveType = MoveType::Bounce;
-    chunk->solid = Solid::Not;
-    chunk->angularVelocity[0] = random() * 600;
-    chunk->angularVelocity[1] = random() * 600;
-    chunk->angularVelocity[2] = random() * 600;
-//    chunk->Think = SVG_FreeEntity;
-    chunk->nextThinkTime = level.time + 5 + random() * 5;
-    chunk->state.frame = 0;
-    chunk->flags = 0;
-    chunk->className = "debris";
-    chunk->takeDamage = TakeDamage::Yes;
-//    chunk->Die = debris_die;
-    gi.LinkEntity(chunk);
+//    Entity *chunk;
+//    vec3_t  v;
+//
+//    chunk = SVG_Spawn();
+//    VectorCopy(origin, chunk->state.origin);
+//    gi.SetModel(chunk, modelname);
+//    v[0] = 100 * crandom();
+//    v[1] = 100 * crandom();
+//    v[2] = 100 + 100 * crandom();
+//    //VectorMA(self->velocity, speed, v, chunk->velocity);
+//    //chunk->moveType = MoveType::Bounce;
+//    chunk->solid = Solid::Not;
+//    chunk->angularVelocity[0] = random() * 600;
+//    chunk->angularVelocity[1] = random() * 600;
+//    chunk->angularVelocity[2] = random() * 600;
+////    chunk->Think = SVG_FreeEntity;
+//    chunk->nextThinkTime = level.time + 5 + random() * 5;
+//    chunk->state.frame = 0;
+//    chunk->flags = 0;
+//    chunk->className = "debris";
+//    chunk->takeDamage = TakeDamage::Yes;
+////    chunk->Die = debris_die;
+//    gi.LinkEntity(chunk);
 }
 
 
-void BecomeExplosion1(Entity *self)
+void BecomeExplosion1(SVGBaseEntity *self)
 {
+    vec3_t origin = self->GetOrigin();
     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(TempEntityEvent::Explosion1);
-    gi.WritePosition(self->state.origin);
-    gi.Multicast(&self->state.origin, MultiCast::PVS);
+    gi.WritePosition(origin);
+    
+    gi.Multicast(&origin, MultiCast::PVS);
 
-    SVG_FreeEntity(self);
+    SVG_FreeEntity(self->GetServerEntity());
 }
 
 
-void BecomeExplosion2(Entity *self)
+void BecomeExplosion2(SVGBaseEntity*self)
 {
+    vec3_t origin = self->GetOrigin();
+
     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(TempEntityEvent::Explosion2);
-    gi.WritePosition(self->state.origin);
-    gi.Multicast(&self->state.origin, MultiCast::PVS);
+    gi.WritePosition(origin);
+    gi.Multicast(&origin, MultiCast::PVS);
 
-    SVG_FreeEntity(self);
+    SVG_FreeEntity(self->GetServerEntity());
 }
