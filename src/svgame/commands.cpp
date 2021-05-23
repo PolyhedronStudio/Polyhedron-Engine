@@ -16,6 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 #include "g_local.h"
+#include "chasecamera.h"
 #include "entities.h"
 #include "player/animations.h"
 
@@ -72,7 +73,7 @@ void SelectNextItem(Entity *ent, int itflags)
     cl = ent->client;
 
     if (cl->chaseTarget) {
-        SVG_ChaseNext(ent);
+        SVG_ChaseNext((PlayerClient*)ent->classEntity);
         return;
     }
 
@@ -103,7 +104,7 @@ void SelectPrevItem(Entity *ent, int itflags)
     cl = ent->client;
 
     if (cl->chaseTarget) {
-        SVG_ChasePrev(ent);
+        SVG_ChasePrev((PlayerClient*)ent->classEntity);
         return;
     }
 

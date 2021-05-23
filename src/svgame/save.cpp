@@ -107,7 +107,7 @@ static const save_field_t entityfields[] = {
 
     V(velocity),
     V(angularVelocity),
-    I(mass),
+//    I(mass),
     F(airFinishedTime),
     F(gravity),
 

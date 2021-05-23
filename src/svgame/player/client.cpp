@@ -16,24 +16,27 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
+// General.
 #include "../g_local.h"     // SVGame.
+#include "../chasecamera.h" // Chase Camera.
 #include "../effects.h"     // Effects.
-#include "../entities.h"    
+#include "../entities.h"    // Entities.
 #include "../utils.h"       // Util funcs.
 #include "client.h"         // Include Player Client header.
 #include "hud.h"            // Include HUD header.
 #include "view.h"           // View header.
 
+// ClassEntities.
 #include "../entities/base/SVGBaseEntity.h"
 #include "../entities/base/PlayerClient.h"
 
+// Shared Game.
 #include "sharedgame/sharedgame.h" // Include SG Base.
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
 
 void SVG_ClientUserinfoChanged(Entity *ent, char *userinfo);
 
-void SP_misc_teleporter_dest(Entity *ent);
 
 //
 // Gross, ugly, disgustuing hack section
@@ -1423,7 +1426,7 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
                 client->chaseTarget = NULL;
                 client->playerState.pmove.flags &= ~PMF_NO_PREDICTION;
             } else
-                SVG_GetChaseTarget(ent);
+                SVG_GetChaseTarget((PlayerClient*)ent->classEntity);
 
         } else if (!client->weaponThunk) {
             client->weaponThunk = true;
@@ -1436,9 +1439,9 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
             if (!(client->playerState.pmove.flags & PMF_JUMP_HELD)) {
                 client->playerState.pmove.flags |= PMF_JUMP_HELD;
                 if (client->chaseTarget)
-                    SVG_ChaseNext(ent);
+                    SVG_ChaseNext((PlayerClient*)ent->classEntity);
                 else
-                    SVG_GetChaseTarget(ent);
+                    SVG_GetChaseTarget((PlayerClient*)ent->classEntity);
             }
         } else
             client->playerState.pmove.flags &= ~PMF_JUMP_HELD;
@@ -1448,7 +1451,7 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
     for (int i = 1; i <= maxClients->value; i++) {
         other = g_entities + i;
         if (other->inUse && other->client->chaseTarget == ent)
-            SVG_UpdateChaseCam(other);
+            SVG_UpdateChaseCam((PlayerClient*)other->classEntity);
     }
 }
 

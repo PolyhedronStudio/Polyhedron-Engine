@@ -16,9 +16,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 #include "g_local.h"
-#include "entities/base/SVGBaseEntity.h"
+#include "chasecamera.h"
 
-void SVG_UpdateChaseCam(Entity *ent)
+#include "entities/base/SVGBaseEntity.h"
+#include "entities/base/PlayerClient.h"
+
+void SVG_UpdateChaseCam(PlayerClient *ent)
 {
     vec3_t o, ownerv, goal;
     Entity *targ;
@@ -28,22 +31,22 @@ void SVG_UpdateChaseCam(Entity *ent)
     vec3_t angles;
 
     // is our chase target gone?
-    if (!ent->client->chaseTarget->inUse
-        || ent->client->chaseTarget->client->respawn.isSpectator) {
-        Entity *old = ent->client->chaseTarget;
+    if (!ent->GetClient()->chaseTarget->inUse
+        || ent->GetClient()->chaseTarget->client->respawn.isSpectator) {
+        Entity *old = ent->GetClient()->chaseTarget;
         SVG_ChaseNext(ent);
-        if (ent->client->chaseTarget == old) {
-            ent->client->chaseTarget = NULL;
-            ent->client->playerState.pmove.flags &= ~PMF_NO_PREDICTION;
+        if (ent->GetClient()->chaseTarget == old) {
+            ent->GetClient()->chaseTarget = NULL;
+            ent->GetClient()->playerState.pmove.flags &= ~PMF_NO_PREDICTION;
             return;
         }
     }
 
-    targ = ent->client->chaseTarget;
+    targ = ent->GetClient()->chaseTarget;
 
     VectorCopy(targ->state.origin, ownerv);
 
-    ownerv[2] += targ->viewHeight;
+    ownerv[2] += targ->classEntity->GetViewHeight();
 
     VectorCopy(targ->client->aimAngles, angles);
     if (angles[vec3_t::Pitch] > 56)
@@ -83,37 +86,39 @@ void SVG_UpdateChaseCam(Entity *ent)
     }
 
     if (targ->classEntity->GetDeadFlag())
-        ent->client->playerState.pmove.type = EnginePlayerMoveType::Dead;
+        ent->GetClient()->playerState.pmove.type = EnginePlayerMoveType::Dead;
     else
-        ent->client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
+        ent->GetClient()->playerState.pmove.type = EnginePlayerMoveType::Freeze;
 
-    VectorCopy(goal, ent->state.origin);
-    for (i = 0 ; i < 3 ; i++)
-        ent->client->playerState.pmove.deltaAngles[i] = targ->client->aimAngles[i] - ent->client->respawn.commandViewAngles[i];
+    ent->SetOrigin(goal);
+
+    for (i = 0; i < 3; i++)
+        ent->GetClient()->playerState.pmove.deltaAngles[i] = targ->client->aimAngles[i] - ent->GetClient() ->respawn.commandViewAngles[i];
 
     if (targ->classEntity->GetDeadFlag()) {
-        ent->client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
-        ent->client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
-        ent->client->playerState.pmove.viewAngles[vec3_t::Yaw] = targ->client->killerYaw;
+        ent->GetClient()->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
+        ent->GetClient()->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
+        ent->GetClient()->playerState.pmove.viewAngles[vec3_t::Yaw] = targ->client->killerYaw;
     } else {
-        VectorCopy(targ->client->aimAngles, ent->client->playerState.pmove.viewAngles);
-        VectorCopy(targ->client->aimAngles, ent->client->aimAngles);
+        ent->GetClient()->playerState.pmove.viewAngles = targ->client->aimAngles;
+        ent->GetClient()->aimAngles = targ->client->aimAngles;
     }
 
-    ent->viewHeight = 0;
-    ent->client->playerState.pmove.flags |= PMF_NO_PREDICTION;
-    gi.LinkEntity(ent);
+    ent->SetViewHeight(0);
+    ent->GetClient()->playerState.pmove.flags |= PMF_NO_PREDICTION;
+    ent->LinkEntity();
 }
 
-void SVG_ChaseNext(Entity *ent)
+void SVG_ChaseNext(PlayerClient *ent)
 {
     int i;
     Entity *e;
+    GameClient* client = ent->GetClient();
 
-    if (!ent->client->chaseTarget)
+    if (!client->chaseTarget)
         return;
 
-    i = ent->client->chaseTarget - g_entities;
+    i = client->chaseTarget - g_entities;
     do {
         i++;
         if (i > maxClients->value)
@@ -123,21 +128,22 @@ void SVG_ChaseNext(Entity *ent)
             continue;
         if (!e->client->respawn.isSpectator)
             break;
-    } while (e != ent->client->chaseTarget);
+    } while (e != client->chaseTarget);
 
-    ent->client->chaseTarget = e;
-    ent->client->updateChase = true;
+    client->chaseTarget = e;
+    client->updateChase = true;
 }
 
-void SVG_ChasePrev(Entity *ent)
+void SVG_ChasePrev(PlayerClient*ent)
 {
     int i;
     Entity *e;
+    GameClient* client = ent->GetClient();
 
-    if (!ent->client->chaseTarget)
+    if (!client->chaseTarget)
         return;
 
-    i = ent->client->chaseTarget - g_entities;
+    i = client->chaseTarget - g_entities;
     do {
         i--;
         if (i < 1)
@@ -147,26 +153,27 @@ void SVG_ChasePrev(Entity *ent)
             continue;
         if (!e->client->respawn.isSpectator)
             break;
-    } while (e != ent->client->chaseTarget);
+    } while (e != client->chaseTarget);
 
-    ent->client->chaseTarget = e;
-    ent->client->updateChase = true;
+    client->chaseTarget = e;
+    client->updateChase = true;
 }
 
-void SVG_GetChaseTarget(Entity *ent)
+void SVG_GetChaseTarget(PlayerClient *ent)
 {
     int i;
     Entity *other;
+    GameClient* client = ent->GetClient();
 
     for (i = 1; i <= maxClients->value; i++) {
         other = g_entities + i;
         if (other->inUse && !other->client->respawn.isSpectator) {
-            ent->client->chaseTarget = other;
-            ent->client->updateChase = true;
+            client->chaseTarget = other;
+            client->updateChase = true;
             SVG_UpdateChaseCam(ent);
             return;
         }
     }
-    gi.CenterPrintf(ent, "No other players to chase.");
+    gi.CenterPrintf(ent->GetServerEntity(), "No other players to chase.");
 }
 

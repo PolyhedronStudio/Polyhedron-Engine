@@ -764,10 +764,7 @@ void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float vo
 //
 // g_chase.c
 //
-void SVG_UpdateChaseCam(Entity *ent);
-void SVG_ChaseNext(Entity *ent);
-void SVG_ChasePrev(Entity *ent);
-void SVG_GetChaseTarget(Entity *ent);
+
 
 //============================================================================
 
@@ -1017,7 +1014,6 @@ struct entity_s {
     // Regular entity velocity, gravity, mass.
     vec3_t velocity;
     vec3_t angularVelocity;
-    int32_t mass;
     float airFinishedTime;
     float gravity;        // per entity gravity multiplier (1.0 is normal)
                                 // use for lowgrav artifact, flares

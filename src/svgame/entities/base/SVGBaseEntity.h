@@ -159,7 +159,7 @@ public:
 
     // Return the 'mass' value.
     inline const int32_t GetMass() {
-        return serverEntity->mass;
+        return mass;
     }
 
     // Return the 'maxHealth' value.
@@ -205,6 +205,10 @@ public:
     // Return the 'noiseIndex2' value.
     inline const int32_t GetNoiseIndex2() {
         return serverEntity->noiseIndex2;
+    }
+
+    inline const int32_t GetNumber() {
+        return serverEntity->state.number;
     }
 
     // Return the 'oldEnemyPtr' entity pointer.
@@ -413,7 +417,7 @@ public:
 
     // Set the 'mass' value.
     inline void SetMass(const int32_t &mass) {
-        serverEntity->mass = mass;
+        this->mass = mass;
     }
 
     // Set the 'maxHealth' value.
@@ -568,6 +572,8 @@ protected:
     vec3_t _velocity;
     // Angular Velocity.
     vec3_t _angularVelocity;
+    // Mass
+    int32_t mass;
 
     // Ground Entity link count. (To keep track if it is linked or not.)
     int32_t groundEntityLinkCount;

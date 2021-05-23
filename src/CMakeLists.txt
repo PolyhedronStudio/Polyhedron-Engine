@@ -40,7 +40,7 @@ SET(HEADERS_CLGAME
 ###################### SERVER GAME
 SET(SRC_SVGAME
 	svgame/brushfuncs.cpp
-	svgame/chase.cpp
+	svgame/chasecamera.cpp
 	svgame/commands.cpp
 	svgame/combat.cpp
 	svgame/effects.cpp
@@ -153,6 +153,7 @@ SET(HEADERS_SVGAME
 
 	svgame/g_local.h
 	svgame/brushfuncs.h
+	svgame/chasecamera.h
 	svgame/effects.h
 	svgame/entities.h
 	svgame/functionpointers.h

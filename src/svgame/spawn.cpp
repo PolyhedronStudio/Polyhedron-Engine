@@ -127,7 +127,7 @@ static const spawn_field_t spawn_fields[] = {
     {"sounds", FOFS(sounds), F_INT},
     {"light", 0, F_IGNORE},
     {"damage", FOFS(damage), F_INT},
-    {"mass", FOFS(mass), F_INT},
+//    {"mass", FOFS(mass), F_INT},
     {"volume", FOFS(volume), F_FLOAT},
     {"attenuation", FOFS(attenuation), F_FLOAT},
     {"map", FOFS(map), F_LSTRING},
