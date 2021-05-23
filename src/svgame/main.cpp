@@ -294,7 +294,7 @@ void SVG_ClientEndServerFrames(void)
         ent = g_entities + 1 + i;
         if (!ent->inUse || !ent->client)
             continue;
-        SVG_ClientEndServerFrame(ent);
+        SVG_ClientEndServerFrame((PlayerClient*)ent->classEntity);
     }
 
 }

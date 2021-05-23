@@ -170,7 +170,7 @@ void Drop_General(Entity *ent, gitem_t *item)
 {
     SVG_DropItem(ent, item);
     ent->client->persistent.inventory[ITEM_INDEX(item)]--;
-    HUD_ValidateSelectedItem(ent);
+    HUD_ValidateSelectedItem((PlayerClient*)ent->classEntity);
 }
 
 //======================================================================
@@ -462,7 +462,7 @@ void drop_temp_touch(Entity *ent, Entity *other, cplane_t *plane, csurface_t *su
     if (other == ent->owner)
         return;
 
-    SVG_TouchItem(ent, other, plane, surf);
+    SVG_TouchItem(ent->classEntity, other->classEntity, plane, surf);
 }
 
 void drop_make_touchable(Entity *ent)

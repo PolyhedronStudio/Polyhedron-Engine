@@ -637,9 +637,9 @@ gitem_t *SVG_FindItemByClassname(const char *className);
 #define ITEM_INDEX(x) ((x)-itemlist)
 Entity *SVG_DropItem(Entity *ent, gitem_t *item);
 void SVG_SetRespawn(Entity *ent, float delay);
-void SVG_ChangeWeapon(Entity *ent);
+void SVG_ChangeWeapon(PlayerClient* ent);
 void SVG_SpawnItem(Entity *ent, gitem_t *item);
-void SVG_ThinkWeapon(Entity *ent);
+//void SVG_ThinkWeapon(Entity *ent);
 int32_t SVG_ArmorIndex(SVGBaseEntity *ent);
 gitem_t *SVG_GetItemByIndex(int32_t index);
 qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int32_t count);

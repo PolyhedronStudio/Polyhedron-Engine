@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client.h"         // Include Player Client header.
 #include "hud.h"            // Include HUD header.
 #include "view.h"           // View header.
+#include "weapons.h"
 
 // ClassEntities.
 #include "../entities/base/SVGBaseEntity.h"
@@ -937,7 +938,7 @@ void SVG_PutClientInServer(Entity *ent)
 
     // force the current weapon up
     client->newWeapon = client->persistent.activeWeapon;
-    SVG_ChangeWeapon(ent);
+    SVG_ChangeWeapon((PlayerClient*)ent->classEntity);
 }
 
 /*
@@ -970,7 +971,7 @@ void SVG_ClientBeginDeathmatch(Entity *ent)
     gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
 
     // make sure all view stuff is valid
-    SVG_ClientEndServerFrame(ent);
+    SVG_ClientEndServerFrame((PlayerClient*)ent->classEntity);
 }
 
 
@@ -1047,7 +1048,7 @@ void SVG_ClientBegin(Entity *ent)
     }
 
     // Called to make sure all view stuff is valid
-    SVG_ClientEndServerFrame(ent);
+    SVG_ClientEndServerFrame((PlayerClient*)ent->classEntity);
 }
 
 /*
@@ -1427,7 +1428,7 @@ void SVG_ClientThink(Entity *ent, ClientUserCommand *clientUserCommand)
 
         } else if (!client->weaponThunk) {
             client->weaponThunk = true;
-            SVG_ThinkWeapon(ent);
+            SVG_ThinkWeapon((PlayerClient*)ent->classEntity);
         }
     }
 
@@ -1480,7 +1481,7 @@ void SVG_ClientBeginServerFrame(Entity *ent)
 
     // run weapon animations if it hasn't been done by a ucmd_t
     if (!client->weaponThunk && !client->respawn.isSpectator)
-        SVG_ThinkWeapon(ent);
+        SVG_ThinkWeapon((PlayerClient*)ent->classEntity);
     else
         client->weaponThunk = false;
 

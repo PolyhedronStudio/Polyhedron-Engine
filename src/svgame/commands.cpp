@@ -250,7 +250,7 @@ void Cmd_Give_f(Entity *ent)
         it_ent = SVG_Spawn();
         it_ent->className = it->className;
         SVG_SpawnItem(it_ent, it);
-        SVG_TouchItem(it_ent, ent, NULL, NULL);
+//        SVG_TouchItem(it_ent, ent, NULL, NULL); Items..
         if (it_ent->inUse)
             SVG_FreeEntity(it_ent);
     }
