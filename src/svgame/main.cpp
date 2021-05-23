@@ -531,7 +531,7 @@ void SVG_RunFrame(void)
         serverEntity->state.oldOrigin = serverEntity->state.origin;
 
         // If the ground entity moved, make sure we are still on it
-        if ((baseEntity->GetGroundEntity()) && (baseEntity->GetGroundEntity()->GetLinkCount() != baseEntity->GetLinkCount())) {
+        if ((baseEntity->GetGroundEntity()) && (baseEntity->GetGroundEntity()->GetLinkCount() != baseEntity->GetGroundEntityLinkCount())) {
             baseEntity->SetGroundEntity(nullptr);
 
             if (!(baseEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (baseEntity->GetServerFlags() & EntityServerFlags::Monster)) {

@@ -419,10 +419,12 @@ public:
         if (groundEntity) {
             // Set the server entity side ground pointer.
             serverEntity->groundEntityPtr = groundEntity->GetServerEntity();
-
-            // Set SVGBaseEntity variant ground entity.
-            this->groundEntity = groundEntity;
+        } else {
+            serverEntity->groundEntityPtr = nullptr;
         }
+
+        // Set SVGBaseEntity variant ground entity.
+        this->groundEntity = groundEntity;
     }
 
     // Set the 'groundEntityLinkCount' value.
@@ -431,7 +433,7 @@ public:
         this->groundEntityLinkCount = groundEntityLinkCount;
 
         // Ensure it is also set on our server entity.
-        serverEntity->groundEntityLinkCount = groundEntityLinkCount;
+        //serverEntity->groundEntityLinkCount = groundEntityLinkCount;
     }
 
     // Set the 'health' value.

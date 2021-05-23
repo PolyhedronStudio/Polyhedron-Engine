@@ -158,47 +158,93 @@ void MiscExplosionBox::Think() {
 //===============
 //
 void MiscExplosionBox::MiscExplosionBoxThink(void) {
-    // Calculate trace end position.
-    vec3_t end = GetOrigin() + vec3_t { 
-        0.f, 
-        0.f, 
-        1.f 
+    // First, ensure our origin is +1 off the floor.
+    vec3_t newOrigin = GetOrigin() + vec3_t{
+        0.f, 0.f, 1.f
     };
-
-    // Set origin + 1 on the Z axis.
-    SetOrigin(GetOrigin() + vec3_t{ 
-        0.f, 
-        0.f, 
-        1.f }
-    );
     
-    // Calculate the end point for tracing.
-    end = GetOrigin() + vec3_t { 
-        0.f, 
-        0.f, 
-        256.f 
+    SetOrigin(newOrigin);
+
+    // Calculate the end origin to use for tracing.
+    vec3_t end = newOrigin + vec3_t{
+        0, 0, -256.f
     };
 
-    // Execute the trace.
+    // Exceute the trace.
     SVGTrace trace = SVG_Trace(GetOrigin(), GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
 
-    // Return in case of fraction 1 or allSolid.
-    if (trace.fraction == 1 || trace.allSolid) {
+    // Return in case we hit anything.
+    if (trace.fraction == 1 || trace.allSolid)
         return;
-    }
 
-    // Set origin to the trace end position.
+    // Set new entity origin.
     SetOrigin(trace.endPosition);
 
-    if (GetServerEntity()->state.number == 12) {
-        gi.DPrintf("I think, therefor, as a misc_explobox I AM!\n");
-    }
-    
-    // Link entity for collision testing.
+    // Link entity back in.
     LinkEntity();
 
-    // Do a check ground for the step move of this pusher.
+    // Check for ground.
     SVG_StepMove_CheckGround(this);
+    //vec3_t      end;
+//trace_t     trace;
+
+//ent->s.origin[2] += 1;
+//VectorCopy(ent->s.origin, end);
+//end[2] -= 256;
+
+//trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
+
+//if (trace.fraction == 1 || trace.allsolid)
+//    return;
+
+//VectorCopy(trace.endpos, ent->s.origin);
+
+//gi.linkentity(ent);
+//M_CheckGround(ent);
+//M_CatagorizePosition(ent);
+
+
+    // Calculate trace end position.
+    //vec3_t end = GetOrigin() + vec3_t { 
+    //    0.f, 
+    //    0.f, 
+    //    1.f 
+    //};
+
+    //// Set origin + 1 on the Z axis.
+    //SetOrigin(GetOrigin() + vec3_t{ 
+    //    0.f, 
+    //    0.f, 
+    //    1.f }
+    //);
+    //
+    //// Calculate the end point for tracing.
+    //end = GetOrigin() + vec3_t { 
+    //    0.f, 
+    //    0.f, 
+    //    256.f 
+    //};
+
+    //// Execute the trace.
+    //SVGTrace trace = SVG_Trace(GetOrigin(), GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
+
+    //// Return in case of fraction 1 or allSolid.
+    //if (trace.fraction == 1 || trace.allSolid) {
+    //    return;
+    //}
+
+    //// Set origin to the trace end position.
+    //SetOrigin(trace.endPosition);
+
+    //if (GetServerEntity()->state.number == 12) {
+    //    gi.DPrintf("I think, therefor, as a misc_explobox I AM!\n");
+    //}
+    //
+    //// Link entity for collision testing.
+    //LinkEntity();
+
+    //// Do a check ground for the step move of this pusher.
+    //SVG_StepMove_CheckGround(this);
     //M_CatagorizePosition(ent);
 }
 

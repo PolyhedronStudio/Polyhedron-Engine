@@ -1343,6 +1343,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
             pm.groundEntityPtr = classEntity->GetGroundEntity()->GetServerEntity();
         else
             pm.groundEntityPtr = NULL;
+
         pm.Trace = PM_Trace;
         pm.PointContents = gi.PointContents;
 
@@ -1401,8 +1402,8 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
             UTIL_TouchTriggers(classEntity);
 
         // touch other objects
-        int i = 0;
-        int j = 0;
+        int32_t i = 0;
+        int32_t j = 0;
         for (i = 0 ; i < pm.numTouchedEntities; i++) {
             other = pm.touchedEntities[i];
             for (j = 0 ; j < i ; j++)

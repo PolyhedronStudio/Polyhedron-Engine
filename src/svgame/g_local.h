@@ -1050,7 +1050,7 @@ struct entity_s {
     
     // Ground pointers.
     Entity *groundEntityPtr;
-    int32_t groundEntityLinkCount;
+    //int32_t groundEntityLinkCount;
 
     Entity *myNoisePtr;       // can go in client only
     Entity *myNoise2Ptr;

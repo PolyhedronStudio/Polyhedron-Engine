@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "../g_local.h"
 #include "../utils.h"
+#include "stepmove.h"
 
 #include "../entities/base/SVGBaseEntity.h"
 
@@ -848,6 +849,10 @@ void SV_Physics_Step(SVGBaseEntity *ent)
     float       friction;
     SVGBaseEntity     *groundentity;
     int         mask;
+
+    if (!ent->GetGroundEntity()) {
+        SVG_StepMove_CheckGround(ent);
+    }
 
     groundentity = ent->GetGroundEntity();
 
