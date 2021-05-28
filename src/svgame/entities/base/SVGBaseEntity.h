@@ -249,7 +249,7 @@ public:
     }
 
     // Return the 'renderEffects' value.
-    inline const int32_t SetRenderEffects() {
+    inline const int32_t GetRenderEffects() {
         return serverEntity->state.renderEffects;
     }
 
