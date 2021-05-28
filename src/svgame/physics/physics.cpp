@@ -109,8 +109,9 @@ qboolean SV_RunThink(SVGBaseEntity *ent)
 
     ent->SetNextThinkTime(0);
 
-    //if (ent->Think)
-    //    ent->Think(ent);
+    if (!ent->HasThinkCallback())
+        gi.Error("nullptr ent->Think callback");
+
     ent->Think();
 
     return false;
@@ -218,7 +219,7 @@ int SV_FlyMove(SVGBaseEntity *ent, float time, int mask)
     for (bumpcount = 0 ; bumpcount < numbumps ; bumpcount++) {
         //for (i = 0 ; i < 3 ; i++)
         //    end[i] = ent->state.origin[i] + time_left * ent->velocity[i];
-        end = ent->GetOrigin() + vec3_t{ time_left, time_left, time_left } *ent->GetVelocity();
+        end = ent->GetOrigin() + vec3_t{ time_left, time_left, time_left } * ent->GetVelocity();
 
         trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), end, ent, mask);
 
@@ -408,7 +409,7 @@ otherwise riders would continue to slide.
 */
 qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
 {
-    int         i, e;
+    int e;
     SVGBaseEntity* check = NULL;
     SVGBaseEntity* block = NULL;
     pushed_t    *p = NULL;
@@ -844,7 +845,6 @@ void SV_Physics_Step(SVGBaseEntity *ent)
 {
     qboolean    wasonground;
     qboolean    hitsound = false;
-    float       *vel;
     float       speed, newspeed, control;
     float       friction;
     SVGBaseEntity     *groundentity;

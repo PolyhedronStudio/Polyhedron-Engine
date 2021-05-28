@@ -356,8 +356,8 @@ void WorldSpawn::Spawn() {
 
     // Set think function.
     //SetThinkCallback()
-    SetThinkCallback(&WorldSpawn::WorldSpawnThink);
-    SetNextThinkTime(level.time + 0.1f);
+    //SetThinkCallback(&WorldSpawn::WorldSpawnThink);
+    //SetNextThinkTime(level.time + 0.1f);
 }
 void WorldSpawn::PostSpawn() {
     // Parent class PostSpawn.
@@ -369,6 +369,6 @@ void WorldSpawn::Think() {
 }
 
 void WorldSpawn::WorldSpawnThink(void) {
-    SetThinkCallback(&WorldSpawn::WorldSpawnThink);
-    SetNextThinkTime(level.time + 0.1f);
+    //SetThinkCallback(&WorldSpawn::WorldSpawnThink);
+    //SetNextThinkTime(level.time + 0.1f);
 }

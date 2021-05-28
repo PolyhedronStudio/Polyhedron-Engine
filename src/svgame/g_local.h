@@ -75,7 +75,7 @@ struct EntityFlags {
     static constexpr int32_t Respawn = 0x80000000;  // Used for item respawning
 };
 
-constexpr float FRAMETIME = 0.1f;
+constexpr float FRAMETIME = 0.05;
 
 // memory tags to allow dynamic memory to be cleaned up
 constexpr int32_t TAG_GAME = 765;     // clear when unloading the dll
@@ -720,6 +720,23 @@ void SVG_SetConfigString(const int32_t &configStringIndex, const std::string &co
 // Custom server game trace struct, stores SVGBaseEntity* instead.
 //
 struct SVGTrace {
+    SVGTrace() {
+        allSolid = false;
+        startSolid = false;
+        fraction = 0.f;
+        endPosition = vec3_t{ 0.f, 0.f, 0.f };
+        surface = nullptr;
+        contents = 0;
+        ent = nullptr;
+        offsets[0] = vec3_t{ 0.f, 0.f, 0.f };
+        offsets[1] = vec3_t{ 0.f, 0.f, 0.f };
+        offsets[2] = vec3_t{ 0.f, 0.f, 0.f };
+        offsets[3] = vec3_t{ 0.f, 0.f, 0.f };
+        offsets[4] = vec3_t{ 0.f, 0.f, 0.f };
+        offsets[5] = vec3_t{ 0.f, 0.f, 0.f };
+        offsets[6] = vec3_t{ 0.f, 0.f, 0.f };
+        offsets[7] = vec3_t{ 0.f, 0.f, 0.f };
+    }
     // If true, the trace startedand ended within the same solid.
     qboolean    allSolid;
     // If true, the trace started within a solid, but exited it.

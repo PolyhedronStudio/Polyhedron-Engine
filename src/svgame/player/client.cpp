@@ -1342,7 +1342,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
         if (classEntity->GetGroundEntity())
             pm.groundEntityPtr = classEntity->GetGroundEntity()->GetServerEntity();
         else
-            pm.groundEntityPtr = NULL;
+            pm.groundEntityPtr = nullptr;
 
         pm.Trace = PM_Trace;
         pm.PointContents = gi.PointContents;
@@ -1368,10 +1368,10 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
             SVG_PlayerNoise(classEntity, classEntity->GetOrigin(), PNOISE_SELF);
         }
 
-        if (pm.groundEntityPtr != NULL)
+        if (pm.groundEntityPtr)
             classEntity->SetGroundEntity(pm.groundEntityPtr->classEntity);
         else
-            classEntity->SetGroundEntity(NULL);
+            classEntity->SetGroundEntity(nullptr);
 
         // Copy over the user command angles so they are stored for respawns.
         // (Used when going into a new map etc.)

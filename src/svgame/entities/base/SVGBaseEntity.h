@@ -215,7 +215,7 @@ public:
     }
 
     // Return the 'nextThinkTime' value.
-    inline const int32_t GetNextThinkTime() {
+    inline const float GetNextThinkTime() {
         return serverEntity->nextThinkTime;
     }
 
@@ -497,7 +497,7 @@ public:
         SetModelIndex(gi.ModelIndex(GetModel()));
     }
 
-    // Set the 'nextThinkTime' value.
+    // Set the 'moveType' value.
     inline void SetMoveType(const int32_t &moveType) {
         this->moveType = moveType;
     }
@@ -660,6 +660,9 @@ public:
     inline void SetThinkCallback(function f)
     {
         thinkFunction = static_cast<ThinkCallbackPointer>(f);
+    }
+    inline qboolean HasThinkCallback() {
+        return (thinkFunction != nullptr ? true : false);
     }
 
     // Sets the 'Use' callback function.

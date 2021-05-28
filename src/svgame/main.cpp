@@ -477,14 +477,7 @@ void SVG_ExitLevel(void)
 ================
 SVG_RunFrame
 
-Advances the world by 0.1 seconds
-================
-*/
-/*
-================
-SVG_RunFrame
-
-Advances the world by 0.1 seconds
+Advances the world by 0.05(FRAMETIME) seconds
 ================
 */
 void SVG_RunFrame(void)
@@ -509,9 +502,9 @@ void SVG_RunFrame(void)
     // Treat each object in turn
     // even the world gets a chance to Think
     //
-    for (i = 0; i < globals.numberOfEntities; i++) {//, ent++) {
-        // Fetch server entity.
-        serverEntity = &g_entities[i];
+    serverEntity = &g_entities[0];
+    for (i = 0; i < globals.numberOfEntities; i++, serverEntity++) {
+
 
         // Don't go on if it isn't in use.
         if (!serverEntity->inUse)
@@ -603,11 +596,11 @@ void SVG_RunFrame(void)
 //        ent->SetOldOrigin(ent->GetOrigin());
 //
 //        // if the ground entity moved, make sure we are still on it
-//        if ((ent->GetServerEntity()->groundEntityPtr) && (ent->GetServerEntity()->groundEntityPtr->linkCount != ent->GetServerEntity()->groundEntityLinkCount)) {
-//            ent->GetServerEntity()->groundEntityPtr = NULL;
-//            //if (!(ent->flags & (EntityFlags::Swim | EntityFlags::Fly)) && (ent->serverFlags & EntityServerFlags::Monster)) {
-//            //    M_CheckGround(ent);
-//            //}
+//        if (ent->GetGroundEntity() && (ent->GetLinkCount() != ent->GetGroundEntityLinkCount())) {
+//            ent->SetGroundEntity(nullptr);
+//            if (!(ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (ent->GetServerFlags() & EntityServerFlags::Monster)) {
+//                SVG_StepMove_CheckGround(ent);
+//            }
 //        }
 //
 //        // Time to begin a server frame for all of our clients. (This has to ha

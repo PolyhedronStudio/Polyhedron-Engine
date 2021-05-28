@@ -232,9 +232,9 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
 
     // Push down from a step height above the wished position
 //    if (!(ent->monsterInfo.aiflags & AI_NOSTEP))
-    //    stepsize = STEPSIZE;
+        stepsize = STEPSIZE;
     //else
-        stepsize = 1;
+    //    stepsize = 1;
 
     newOrigin[2] += stepsize;
     vec3_t end = newOrigin;

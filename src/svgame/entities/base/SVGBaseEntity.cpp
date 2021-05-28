@@ -112,6 +112,7 @@ void SVGBaseEntity::PostSpawn() {
 //===============
 //
 void SVGBaseEntity::Think() {
+	gi.DPrintf("Class: %s, is thinking while nextThinkTime was: %f", typeid(*this).name(), GetNextThinkTime());
 	// Safety check.
 	if (thinkFunction == nullptr)
 		return;
@@ -195,6 +196,8 @@ void SVGBaseEntity::Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* p
 	// Safety check.
 	if (touchFunction == nullptr)
 		return;
+
+	uint32_t stateNumber = self->GetNumber();
 
 	// Execute 'Touch' callback function.
 	(this->*touchFunction)(self, other, plane, surf);

@@ -105,7 +105,7 @@ void MiscExplosionBox::Spawn() {
     SetTouchCallback(&MiscExplosionBox::MiscExplosionBoxTouch);
 
     // Setup the next think time.
-    SetNextThinkTime(level.time + 2 * FRAMETIME);
+    SetNextThinkTime(level.time + 2.f * FRAMETIME);
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -143,7 +143,7 @@ void MiscExplosionBox::Think() {
     // Always call parent class method.
     SVGBaseEntity::Think();
 
-	//gi.DPrintf("MiscExplosionBox::Think();");
+	gi.DPrintf("MiscExplosionBox::Think();");
 }
 
 
@@ -343,6 +343,10 @@ void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity*
         return;
     if (!other)
         return;
+    // TODO: Move elsewhere in baseentity, I guess?
+    // Prevent this entity from touching itself.
+    if (this == other)
+        return;
 
     // Ground entity checks.
     if ((!other->GetGroundEntity()) || (other->GetGroundEntity() == this))
@@ -358,7 +362,7 @@ void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity*
     float yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
-    SVG_StepMove_Walk(this, yaw, 20 * ratio * FRAMETIME);
+    SVG_StepMove_Walk(this, yaw, 40 * ratio * FRAMETIME);
     gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
 }
 
