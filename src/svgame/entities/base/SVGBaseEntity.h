@@ -134,7 +134,10 @@ public:
 
     // Return the 'groundEntitPtr' entity.
     inline SVGBaseEntity* GetGroundEntity() {
-        return groundEntity;
+        if (serverEntity->groundEntityPtr)
+            return serverEntity->groundEntityPtr->classEntity;
+        else
+            return groundEntity;
     }
 
     // Return the 'groundEntityLinkCount' value.

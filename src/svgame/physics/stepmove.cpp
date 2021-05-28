@@ -109,7 +109,9 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
     }
 
     // if the hull point one-quarter unit down is solid the entity is on ground
-    point = ent->GetOrigin() + vec3_t{ 0.f, 0.f, -0.25f };
+    point = ent->GetOrigin() - vec3_t {
+        0.f, 0.f, 0.25f 
+    };
 
     trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), point, ent, CONTENTS_MASK_MONSTERSOLID);
 
@@ -134,7 +136,7 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
 
 /*
 =============
-SV_movestep
+SVG_movestep
 
 Called by monster program code.
 The move will be adjusted for slopes and stairs, but if the move isn't

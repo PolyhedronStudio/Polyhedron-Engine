@@ -263,7 +263,7 @@ void WorldSpawn::Spawn() {
     SetSolid(Solid::BSP);
     SetInUse(true);          // since the world doesn't use SVG_Spawn()
     SetModelIndex(1);      // world model is always index 1
-
+    SetClipMask(0);
     //---------------
 
     // Reserve some spots for dead player bodies for coop / deathmatch

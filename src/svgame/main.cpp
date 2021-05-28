@@ -730,6 +730,9 @@ SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, 
         if (g_baseEntities[index] != NULL)
             svgTrace.ent = g_baseEntities[index];
     }
+    else {
+        svgTrace.ent = nullptr;
+    }
 
     return svgTrace;
 }

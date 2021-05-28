@@ -339,10 +339,10 @@ void MiscExplosionBox::MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEnti
 //
 void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
     // Safety checks.
-    //if (!self)
-    //    return;
-    //if (!other)
-    //    return;
+    if (!self)
+        return;
+    if (!other)
+        return;
 
     // Ground entity checks.
     if ((!other->GetGroundEntity()) || (other->GetGroundEntity() == this))

@@ -46,9 +46,6 @@ void PlayerClient::Spawn() {
     // Spawn.
     SVGBaseEntity::Spawn();
 
-    // Ensure movetype is walk.
-    SetMoveType(MoveType::Walk);
-
     // When spawned, we aren't on any ground, make sure of that.
     SetGroundEntity(nullptr);
 

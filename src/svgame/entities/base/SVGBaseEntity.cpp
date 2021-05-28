@@ -13,7 +13,9 @@
 
 // Constructor/Deconstructor.
 SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
+	//
 	// All callback functions best be nullptr.
+	//
 	thinkFunction = nullptr;
 	useFunction = nullptr;
 	touchFunction = nullptr;
@@ -30,6 +32,20 @@ SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
 	oldEnemyEntity = nullptr;
 	teamChainEntity = nullptr;
 	teamMasterEntity = nullptr;
+
+	//
+	// Default values for members.
+	//
+	moveType = MoveType::None;
+
+	// Velocity.
+	velocity = vec3_zero();
+	angularVelocity = vec3_zero();
+	mass = 0;
+	groundEntityLinkCount = 0;
+	health = 0;
+	maxHealth = 0;
+	deadFlag = DEAD_NO;
 }
 SVGBaseEntity::~SVGBaseEntity() {
 
