@@ -638,7 +638,7 @@ static void SVG_SetClientEffects(PlayerClient *ent)
 
     // show cheaters!!!
     if (ent->GetFlags() & EntityFlags::GodMode) {
-        ent->SetRenderEffects(ent->SetRenderEffects() | (RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell));
+        ent->SetRenderEffects(ent->GetRenderEffects() | (RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell));
     }
 }
 

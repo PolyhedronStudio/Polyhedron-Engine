@@ -134,9 +134,9 @@ public:
 
     // Return the 'groundEntitPtr' entity.
     inline SVGBaseEntity* GetGroundEntity() {
-        if (serverEntity->groundEntityPtr)
-            return serverEntity->groundEntityPtr->classEntity;
-        else
+        //if (serverEntity->groundEntityPtr)
+        //    return serverEntity->groundEntityPtr->classEntity;
+        //else
             return groundEntity;
     }
 
@@ -419,12 +419,12 @@ public:
         //
         // TODO: Needs a lookup function for these entities in the
         // shared game code.
-        if (groundEntity) {
-            // Set the server entity side ground pointer.
-            serverEntity->groundEntityPtr = groundEntity->GetServerEntity();
-        } else {
-            serverEntity->groundEntityPtr = nullptr;
-        }
+        //if (groundEntity) {
+        //    // Set the server entity side ground pointer.
+        //    serverEntity->groundEntityPtr = groundEntity->GetServerEntity();
+        //} else {
+        //    serverEntity->groundEntityPtr = nullptr;
+        //}
 
         // Set SVGBaseEntity variant ground entity.
         this->groundEntity = groundEntity;
