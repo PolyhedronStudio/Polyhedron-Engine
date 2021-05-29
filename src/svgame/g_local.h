@@ -216,7 +216,7 @@ constexpr int32_t PNOISE_IMPACT = 2;
 //-------------------
 // Actual entity movetypes that can be employed. 
 //-------------------
-// edict->moveType values
+// Entity moveType values
 struct MoveType {
     static constexpr int32_t None = 0;      // Never moves
     static constexpr int32_t Spectator = 1; // Special movetype for spectators to not go through walls
@@ -224,9 +224,9 @@ struct MoveType {
     static constexpr int32_t Push = 3;      // No clip to world, push on box contact
     static constexpr int32_t Stop = 4;      // No clip to world, stops on box contact
 
-    static constexpr int32_t Walk          = 10;    // Gravity
-    static constexpr int32_t Step          = 11;    // Gravity, special edge handling
-    static constexpr int32_t Fly           = 12;
+    static constexpr int32_t Walk          = 10;    // Gravity. (Player Movement entities use this.)
+    static constexpr int32_t Step          = 11;    // Gravity, fixed distance, and special edge handling if wished for.
+    static constexpr int32_t Fly           = 12;    // 
     static constexpr int32_t Toss          = 13;    // Gravity
     static constexpr int32_t FlyMissile    = 14;    // Extra size to monsters
     static constexpr int32_t Bounce        = 15;

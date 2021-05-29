@@ -331,22 +331,22 @@ void SV_AddGravity(SVGBaseEntity *ent)
 //    ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME;
 }
 
-/*
-===============================================================================
+//
+//=============================================================================
+//
+//	PUSHMOVE
+//
+//=============================================================================
+//
 
-PUSHMOVE
-
-===============================================================================
-*/
-
-/*
-============
-SV_PushEntity
-
-Does not change the entities velocity at all
-============
-*/
-SVGTrace SV_PushEntity(SVGBaseEntity *ent, vec3_t push)
+//
+//===============
+// SVG_PushEntity
+//
+// Does not change the entities velocity at all
+//===============
+//
+SVGTrace SVG_PushEntity(SVGBaseEntity *ent, vec3_t push)
 {
     SVGTrace trace;
     int     mask;
@@ -733,7 +733,7 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
 
     // Move origin
     move = vec3_scale(ent->GetVelocity(), FRAMETIME);
-    trace = SV_PushEntity(ent, move);
+    trace = SVG_PushEntity(ent, move);
     if (!ent->IsInUse())
         return;
 
