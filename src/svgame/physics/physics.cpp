@@ -321,10 +321,14 @@ int SVG_FlyMove(SVGBaseEntity *ent, float time, int mask)
 //
 void SVG_AddGravity(SVGBaseEntity *ent)
 {
+    // Fetch velocity.
     vec3_t velocity = ent->GetVelocity();
-    velocity.z -= ent->GetServerEntity()->gravity * sv_gravity->value * FRAMETIME;
+
+    // Apply gravity.
+    velocity.z -= ent->GetGravity() * sv_gravity->value * FRAMETIME;
+
+    // Apply new velocity to entity.
     ent->SetVelocity(velocity);
-//    ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME;
 }
 
 //
@@ -562,15 +566,16 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
     return true;
 }
 
-/*
-================
-SV_Physics_Pusher
 
-Bmodel objects don't interact with each other, but
-push all box objects
-================
-*/
-void SV_Physics_Pusher(SVGBaseEntity *ent)
+//
+//===============
+// SVG_Physics_Pusher
+//
+// Bmodel objects don't interact with each other, but
+// push all box objects
+//===============
+//
+void SVG_Physics_Pusher(SVGBaseEntity *ent)
 {
     vec3_t      move, amove;
     SVGBaseEntity     *part, *mv;
@@ -635,27 +640,26 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
 
 //==================================================================
 
-/*
-=============
-SV_Physics_None
-
-Non moving objects can only Think
-=============
-*/
-void SV_Physics_None(SVGBaseEntity *ent)
+//
+//===============
+// SVG_Physics_None
+//
+// Non moving objects can only Think
+//===============
+//
+void SVG_Physics_None(SVGBaseEntity *ent)
 {
-// regular thinking
     SVG_RunThink(ent);
 }
 
-/*
-=============
-SV_Physics_Noclip
-
-A moving object that doesn't obey physics
-=============
-*/
-void SV_Physics_Noclip(SVGBaseEntity *ent)
+//
+//===============
+// SVG_Physics_Noclip
+//
+// A moving object that doesn't obey physics
+//===============
+//
+void SVG_Physics_Noclip(SVGBaseEntity *ent)
 {
 // regular thinking
     if (!SVG_RunThink(ent))
@@ -669,33 +673,26 @@ void SV_Physics_Noclip(SVGBaseEntity *ent)
     ent->LinkEntity();
 }
 
-/*
-==============================================================================
+//
+//=============================================================================
+//
+//	TOSS / BOUNCE
+//
+//=============================================================================
+//
 
-TOSS / BOUNCE
-
-==============================================================================
-*/
-
-/*
-=============
-SV_Physics_Toss
-
-Toss, bounce, and fly movement.  When onground, do nothing.
-=============
-*/
-void SV_Physics_Toss(SVGBaseEntity *ent)
+//
+//===============
+// SVG_Physics_Toss
+//
+// Toss, bounce, and fly movement.  When onground, do nothing.
+//===============
+//
+void SVG_Physics_Toss(SVGBaseEntity *ent)
 {
-    SVGTrace     trace;
-    vec3_t      move;
-    float       backoff;
-    SVGBaseEntity     *slave;
-    qboolean    wasInWater;
-    qboolean    isInWater;
-    vec3_t      oldOrigin;
-
     // Regular thinking
     SVG_RunThink(ent);
+
     if (!ent->IsInUse())
         return;
 
@@ -703,21 +700,27 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
     if (ent->GetFlags() & EntityFlags::TeamSlave)
         return;
 
-    if (ent->GetVelocity().z > 0)
+    // IF we're moving up, we know we're not on-ground, that's for sure :)
+    if (ent->GetVelocity().z > 0) {
         ent->SetGroundEntity(nullptr);
+    }
 
-    // Check for the groundentity going away
-    if (ent->GetGroundEntity())
-        if (!ent->GetGroundEntity()->IsInUse())
+    // Check for the groundEntity going away
+    if (ent->GetGroundEntity()) {
+        if (!ent->GetGroundEntity()->IsInUse()) {
             ent->SetGroundEntity(nullptr);
+        }
+    }
 
     // If onground, return without moving
-    if (ent->GetGroundEntity())
+    if (ent->GetGroundEntity()) {
         return;
+    }
 
     // Store ent->state.origin as the old origin
-    oldOrigin = ent->GetOrigin();
+    vec3_t oldOrigin = ent->GetOrigin();
 
+    // Bound velocity within limits of sv_maxvelocity
     SVG_BoundVelocity(ent);
 
     // Add gravity
@@ -729,22 +732,25 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
     ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME, ent->GetAngularVelocity()));
 
     // Move origin
-    move = vec3_scale(ent->GetVelocity(), FRAMETIME);
-    trace = SVG_PushEntity(ent, move);
+    vec3_t move = vec3_scale(ent->GetVelocity(), FRAMETIME);
+    SVGTrace trace = SVG_PushEntity(ent, move);
     if (!ent->IsInUse())
         return;
 
     if (trace.fraction < 1) {
-        if (ent->GetMoveType() == MoveType::Bounce)
-            backoff = 1.5;
-        else
-            backoff = 1;
+        float backOff = 1;
 
-        vec3_t outVelocity = ent->GetVelocity();
-        ClipVelocity(outVelocity, trace.plane.normal, outVelocity, backoff);
-        ent->SetVelocity(outVelocity);
+        // More backOff if bouncing movetype.
+        if (ent->GetMoveType() == MoveType::Bounce) {
+            backOff = 1.5;
+        }
+        
+        // Clip new velocity.
+        vec3_t newVelocity = ent->GetVelocity();
+        ClipVelocity(newVelocity, trace.plane.normal, newVelocity, backOff);
+        ent->SetVelocity(newVelocity);
 
-        // stop if on ground
+        // Stop if on ground
         if (trace.plane.normal[2] > 0.7) {
             if (ent->GetVelocity().z < 60 || ent->GetMoveType() != MoveType::Bounce) {
                 ent->SetGroundEntity(trace.ent);
@@ -757,60 +763,54 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
         ent->Touch(ent, trace.ent, &trace.plane, trace.surface);
     }
 
-    // Check for water transition
-    wasInWater = (ent->GetServerEntity()->waterType & CONTENTS_MASK_LIQUID);
-    ent->GetServerEntity()->waterType = gi.PointContents(ent->GetOrigin());
-    isInWater = ent->GetServerEntity()->waterType & CONTENTS_MASK_LIQUID;
+    // Check for water transition, first fetch the OLD contents mask.
+    qboolean wasInWater = (ent->GetWaterType() & CONTENTS_MASK_LIQUID);
+    // Set new watertype based on gi.PointContents test result.
+    ent->SetWaterType(gi.PointContents(ent->GetOrigin()));
+    qboolean isInWater = ent->GetWaterType() & CONTENTS_MASK_LIQUID;
 
+    // Store waterlevel.
     if (isInWater)
-        ent->GetServerEntity()->waterLevel = 1;
+        ent->SetWaterLevel(1);
     else
-        ent->GetServerEntity()->waterLevel = 0;
+        ent->SetWaterLevel(0);
 
+    // Determine what sound to play.
     if (!wasInWater && isInWater)
         gi.PositionedSound(oldOrigin, g_entities, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
     else if (wasInWater && !isInWater)
         gi.PositionedSound(ent->GetOrigin(), g_entities, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 
     // Move teamslaves
-    for (slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {
+    for (SVGBaseEntity *slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {
         // Set origin and link them in.
         slave->SetOrigin(ent->GetOrigin());
         slave->LinkEntity();
     }
 }
 
-/*
-===============================================================================
-
-STEPPING MOVEMENT
-
-===============================================================================
-*/
-
-/*
-=============
-SV_Physics_Step
-
-Monsters freefall when they don't have a ground entity, otherwise
-all movement is done with discrete steps.
-
-This is also used for objects that have become still on the ground, but
-will fall if the floor is pulled out from under them.
-FIXME: is this true?
-=============
-*/
+//
+//=============================================================================
+//
+//	STEPPING MOVEMENT
+//
+//=============================================================================
+//
 
 //FIXME: hacked in for E3 demo
-constexpr int32_t sv_stopspeed = 100;
-constexpr int32_t sv_friction = 6;
-constexpr int32_t sv_waterfriction = 1;
+constexpr float STEPMOVE_STOPSPEED = 100.f;
+constexpr float STEPMOVE_FRICTION = 6.f;
+constexpr float STEPMOVE_WATERFRICTION = 1.f;
 
-void SV_AddRotationalFriction(SVGBaseEntity *ent)
-{
-    int     n;
-    float   adjustment;
-    
+//
+//===============
+// SVG_AddRotationalFriction
+//
+// Does what it says it does.
+//===============
+//
+void SVG_AddRotationalFriction(SVGBaseEntity *ent)
+{ 
     // Acquire the rotational velocity first.
     vec3_t angularVelocity = ent->GetAngularVelocity();
 
@@ -818,11 +818,11 @@ void SV_AddRotationalFriction(SVGBaseEntity *ent)
     ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME, angularVelocity));
 
     // Calculate adjustment to apply.
-    adjustment = FRAMETIME * sv_stopspeed * sv_friction;
+    float adjustment = FRAMETIME * STEPMOVE_STOPSPEED * STEPMOVE_FRICTION;
 
     // Apply adjustments.
     angularVelocity = ent->GetAngularVelocity();
-    for (n = 0; n < 3; n++) {
+    for (int32_t n = 0; n < 3; n++) {
         if (angularVelocity[n] > 0) {
             angularVelocity[n] -= adjustment;
             if (angularVelocity[n] < 0)
@@ -838,129 +838,160 @@ void SV_AddRotationalFriction(SVGBaseEntity *ent)
     ent->SetAngularVelocity(angularVelocity);
 }
 
-void SV_Physics_Step(SVGBaseEntity *ent)
+//
+//===============
+// SVG_Physics_Step
+//
+// Monsters freefall when they don't have a ground entity, otherwise
+// all movement is done with discrete steps.
+//
+// This is also used for objects that have become still on the ground, but
+// will fall if the floor is pulled out from under them.
+// FIXME: is this true ?
+//===============
+//
+void SVG_Physics_Step(SVGBaseEntity *ent)
 {
-    qboolean    wasonground;
-    qboolean    hitsound = false;
-    float       speed, newspeed, control;
-    float       friction;
-    SVGBaseEntity     *groundentity;
+    // Stores whether to play a "surface hit" sound.
+    qboolean    hitSound = false;
     int         mask;
 
+    // If we have no ground entity.
     if (!ent->GetGroundEntity()) {
+        // Ensure we check if we aren't on one in this frame already.
         SVG_StepMove_CheckGround(ent);
     }
 
-    groundentity = ent->GetGroundEntity();
+    // Fetch ground entity pointer. (This can be the newly found entity ofc.)
+    SVGBaseEntity* groundEntity = ent->GetGroundEntity();
 
+    // Store whether we had a ground entity at all.
+    qboolean wasOnGround = (groundEntity ? true : false);
+
+    // Bound our velocity within sv_maxvelocity limits.
     SVG_BoundVelocity(ent);
 
-    if (groundentity)
-        wasonground = true;
-    else
-        wasonground = false;
-
-    // Check whether its angular velocity needs to be taken in consideration.
+    // Check for angular velocities. If found, add rotational friction.
     vec3_t angularVelocity = ent->GetAngularVelocity();
 
-    if (angularVelocity[0] || angularVelocity[1] || angularVelocity[2])
-        SV_AddRotationalFriction(ent);
+    if (angularVelocity.x || angularVelocity.y || angularVelocity.z)
+        SVG_AddRotationalFriction(ent);
 
     // Re-ensure we fetched its latest angular velocity.
     angularVelocity = ent->GetAngularVelocity();
 
-    // add gravity except:
-    //   flying monsters
-    //   swimming monsters who are in the water
-    if (! wasonground)
-        if (!(ent->GetFlags() & EntityFlags::Fly))
-            if (!((ent->GetFlags() & EntityFlags::Swim) && (ent->GetServerEntity()->waterLevel > 2))) {
-                if (ent->GetVelocity().z < sv_gravity->value * -0.1)
-                    hitsound = true;
-                if (ent->GetServerEntity()->waterLevel == 0)
+    // Add gravity except for: 
+    // - Flying monsters
+    // - Swimming monsters who are in the water
+    if (!wasOnGround) {
+        // If it is not a flying monster, we are done.
+        if (!(ent->GetFlags() & EntityFlags::Fly)) {
+            // In case the swim mosnter is not in water...
+            if (!((ent->GetFlags() & EntityFlags::Swim) && (ent->GetWaterLevel() > 2))) {
+                // Determine whether to play a "hit sound".
+                if (ent->GetVelocity().z < sv_gravity->value * -0.1) {
+                    hitSound = true;
+                }
+
+                // Add gravity in case the monster is not in water, it can't fly, so it falls.
+                if (ent->GetWaterLevel() == 0) {
                     SVG_AddGravity(ent);
+                }
             }
+        }
+    }
 
-    // friction for flying monsters that have been given vertical velocity
+    // Friction for flying monsters that have been given vertical velocity
     if ((ent->GetFlags() & EntityFlags::Fly) && (ent->GetVelocity().z != 0)) {
-        speed = std::fabsf(ent->GetVelocity().z);
-        control = speed < sv_stopspeed ? sv_stopspeed : speed;
-        friction = sv_friction / 3;
-        newspeed = speed - (FRAMETIME * control * friction);
-        if (newspeed < 0)
-            newspeed = 0;
-        newspeed /= speed;
+        float speed = std::fabsf(ent->GetVelocity().z);
+        float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
+        float friction = STEPMOVE_FRICTION / 3;
+        float newSpeed = speed - (FRAMETIME * control * friction);
+        if (newSpeed < 0)
+            newSpeed = 0;
+        newSpeed /= speed;
         vec3_t velocity = ent->GetVelocity();
-        ent->SetVelocity({ velocity.x, velocity.y, velocity.z * newspeed }); //         ent->GetServerEntity()->velocity[2] *= newspeed;
+        ent->SetVelocity({ velocity.x, velocity.y, velocity.z * newSpeed });
     }
 
-    // friction for flying monsters that have been given vertical velocity
+    // Friction for flying monsters that have been given vertical velocity
     if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetVelocity().z != 0)) {
-        speed = std::fabsf(ent->GetVelocity().z);
-        control = speed < sv_stopspeed ? sv_stopspeed : speed;
-        newspeed = speed - (FRAMETIME * control * sv_waterfriction * ent->GetServerEntity()->waterLevel);
-        if (newspeed < 0)
-            newspeed = 0;
-        newspeed /= speed;
+        float speed = std::fabsf(ent->GetVelocity().z);
+        float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
+        float newSpeed = speed - (FRAMETIME * control * STEPMOVE_WATERFRICTION * ent->GetWaterLevel());
+        if (newSpeed < 0)
+            newSpeed = 0;
+        newSpeed /= speed;
         vec3_t velocity = ent->GetVelocity();
-        ent->SetVelocity({ velocity.x, velocity.y, velocity.z * newspeed }); //         ent->GetServerEntity()->velocity[2] *= newspeed;
+        ent->SetVelocity({ velocity.x, velocity.y, velocity.z * newSpeed });
     }
 
+    // In case we have velocity, execute movement logic.
     if (ent->GetVelocity().z || ent->GetVelocity().y || ent->GetVelocity().x) {
         // apply friction
         // let dead monsters who aren't completely onground slide
-        if ((wasonground) || (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)))
+        if ((wasOnGround) || (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)))
             if (!(ent->GetHealth() <= 0.0)) {
                 vec3_t vel = ent->GetVelocity();
-                speed = std::sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
+                float speed = std::sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
                 if (speed) {
-                    friction = sv_friction;
+                    float friction = STEPMOVE_FRICTION;
+                    float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
+                    float newSpeed = speed - FRAMETIME * control * friction;
 
-                    control = speed < sv_stopspeed ? sv_stopspeed : speed;
-                    newspeed = speed - FRAMETIME * control * friction;
+                    if (newSpeed < 0)
+                        newSpeed = 0;
+                    newSpeed /= speed;
 
-                    if (newspeed < 0)
-                        newspeed = 0;
-                    newspeed /= speed;
-
-                    vel[0] *= newspeed;
-                    vel[1] *= newspeed;
+                    vel[0] *= newSpeed;
+                    vel[1] *= newSpeed;
 
                     // Set the velocity.
                     ent->SetVelocity(vel);
                 }
             }
 
-        if (ent->GetServerEntity()->serverFlags & EntityServerFlags::Monster)
-            mask = CONTENTS_MASK_MONSTERSOLID;
-        else
-            mask = CONTENTS_MASK_SOLID;
+        // Default mask is solid.
+        int32_t mask = CONTENTS_MASK_SOLID;
 
+        // In case of a monster, monstersolid.
+        if (ent->GetServerFlags() & EntityServerFlags::Monster)
+            mask = CONTENTS_MASK_MONSTERSOLID;
+        
+        // Execute "FlyMove", essentially also our water move.
         SVG_FlyMove(ent, FRAMETIME, mask);
 
+        // Link entity back for collision, and execute a check for touching triggers.
         ent->LinkEntity();
         UTIL_TouchTriggers(ent);
 
+        // Can't continue if this entity wasn't in use.
         if (!ent->IsInUse())
             return;
 
-        if (ent->GetGroundEntity())
-            if (!wasonground)
-                if (hitsound)
+        // Check for whether to play a land sound.
+        if (ent->GetGroundEntity()) {
+            if (!wasOnGround) {
+                if (hitSound) {
                     SVG_Sound(ent, 0, gi.SoundIndex("world/land.wav"), 1, 1, 0);
+                }
+            }
+        }
     }
 
-// regular thinking
+    // Last but not least, give the entity a chance to think for this frame.
     SVG_RunThink(ent);
 }
 
 //============================================================================
-/*
-================
-SVG_RunEntity
 
-================
-*/
+//
+//===============
+// SVG_RunEntity
+//
+// Determines what kind of run/thinking method to execute.
+//===============
+//
 void SVG_RunEntity(SVGBaseEntity *ent)
 {
     //if (ent->PreThink)
@@ -970,23 +1001,23 @@ void SVG_RunEntity(SVGBaseEntity *ent)
     switch (moveType) {
     case MoveType::Push:
     case MoveType::Stop:
-        SV_Physics_Pusher(ent);
+        SVG_Physics_Pusher(ent);
         break;
     case MoveType::None:
-        SV_Physics_None(ent);
+        SVG_Physics_None(ent);
         break;
     case MoveType::NoClip:
     case MoveType::Spectator:
-        SV_Physics_Noclip(ent);
+        SVG_Physics_Noclip(ent);
         break;
     case MoveType::Step:
-        SV_Physics_Step(ent);
+        SVG_Physics_Step(ent);
         break;
     case MoveType::Toss:
     case MoveType::Bounce:
     case MoveType::Fly:
     case MoveType::FlyMissile:
-        SV_Physics_Toss(ent);
+        SVG_Physics_Toss(ent);
         break;
     default:
         gi.Error("SV_Physics: bad moveType %i", ent->GetMoveType());

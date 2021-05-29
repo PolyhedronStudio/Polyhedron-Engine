@@ -132,6 +132,11 @@ public:
         return serverEntity->state.frame;
     }
 
+    // Return the 'gravity' value.
+    inline const float GetGravity() {
+        return serverEntity->gravity;
+    }
+
     // Return the 'groundEntitPtr' entity.
     inline SVGBaseEntity* GetGroundEntity() {
         //if (serverEntity->groundEntityPtr)
@@ -409,6 +414,11 @@ public:
     // Set the 'frame' value.
     inline void SetFrame(const int32_t &frame) {
         serverEntity->state.frame = frame;;
+    }
+
+    // Set the 'gravity' value.
+    inline void SetGravity(const float &gravity) {
+        serverEntity->gravity = gravity;
     }
 
     // Set the 'groundEntitPtr' entity.
