@@ -42,13 +42,13 @@ solid_edge items only clip against bsp models.
 */
 
 
-/*
-============
-SV_TestEntityPosition
-
-============
-*/
-SVGBaseEntity *SV_TestEntityPosition(SVGBaseEntity *ent)
+//
+//===============
+// SVG_TestEntityPosition
+//
+//===============
+//
+SVGBaseEntity *SVG_TestEntityPosition(SVGBaseEntity *ent)
 {
     SVGTrace trace;
     int     mask;
@@ -66,38 +66,34 @@ SVGBaseEntity *SV_TestEntityPosition(SVGBaseEntity *ent)
 }
 
 
-/*
-================
-SV_CheckVelocity
-================
-*/
-void SV_CheckVelocity(SVGBaseEntity *ent)
-{
-    int     i;
 
 //
-// bound velocity
+//===============
+// SVG_BoundVelocity
 //
+// Keeps an entity its velocity within max boundaries. (-sv_maxvelocity, sv_maxvelocity)
+//===============
+//
+void SVG_BoundVelocity(SVGBaseEntity *ent)
+{
     vec3_t velocity = ent->GetVelocity();
 
-    for (i = 0 ; i < 3 ; i++) {
-        if (velocity[i] > sv_maxvelocity->value)
-            velocity[i] = sv_maxvelocity->value;
-        else if (velocity[i] < -sv_maxvelocity->value)
-            velocity[i] = -sv_maxvelocity->value;
-    }
-
-    ent->SetVelocity(velocity);
+    ent->SetVelocity(vec3_t {
+        Clampf(velocity.x, -sv_maxvelocity->value, sv_maxvelocity->value),
+        Clampf(velocity.y, -sv_maxvelocity->value, sv_maxvelocity->value),
+        Clampf(velocity.z, -sv_maxvelocity->value, sv_maxvelocity->value)
+    });
 }
 
-/*
-=============
-SV_RunThink
 
-Runs thinking code for this frame if necessary
-=============
-*/
-qboolean SV_RunThink(SVGBaseEntity *ent)
+//
+//===============
+// SVG_RunThink
+//
+// Runs entity thinking code for this frame if necessary
+//===============
+//
+qboolean SVG_RunThink(SVGBaseEntity *ent)
 {
     float   thinktime;
 
@@ -117,14 +113,14 @@ qboolean SV_RunThink(SVGBaseEntity *ent)
     return false;
 }
 
-/*
-==================
-SV_Impact
-
-Two entities have touched, so run their touch functions
-==================
-*/
-void SV_Impact(SVGBaseEntity *e1, SVGTrace *trace)
+//
+//===============
+// SVG_Impact
+//
+// Two entities have touched, so run their touch functions
+//===============
+//
+void SVG_Impact(SVGBaseEntity *e1, SVGTrace *trace)
 {
     SVGBaseEntity     *e2;
 //  cplane_t    backplane;
@@ -143,17 +139,17 @@ void SV_Impact(SVGBaseEntity *e1, SVGTrace *trace)
 }
 
 
-/*
-==================
-ClipVelocity
-
-Slide off of the impacting object
-returns the Blocked flags (1 = floor, 2 = step / wall)
-==================
-*/
+//
+//===============
+// ClipVelocity
+//
+// Slide off of the impacting object
+// returns the Blocked flags(1 = floor, 2 = step / wall)
+//===============
+//
 #define STOP_EPSILON    0.1
 
-int ClipVelocity(const vec3_t &in, const vec3_t &normal, vec3_t &out, float overbounce)
+static int ClipVelocity(const vec3_t &in, const vec3_t &normal, vec3_t &out, float overbounce)
 {
     float   backoff;
     float   change;
@@ -178,19 +174,19 @@ int ClipVelocity(const vec3_t &in, const vec3_t &normal, vec3_t &out, float over
 }
 
 
-/*
-============
-SV_FlyMove
-
-The basic solid body movement clip that slides along multiple planes
-Returns the clipflags if the velocity was modified (hit something solid)
-1 = floor
-2 = wall / step
-4 = dead stop
-============
-*/
+//
+//===============
+// SVG_FlyMove
+//
+// The basic solid body movement clip that slides along multiple planes
+// Returns the clipflags if the velocity was modified(hit something solid)
+// 1 = floor
+// 2 = wall / step
+// 4 = dead stop
+//===============
+//
 #define MAX_CLIP_PLANES 5
-int SV_FlyMove(SVGBaseEntity *ent, float time, int mask)
+int SVG_FlyMove(SVGBaseEntity *ent, float time, int mask)
 {
     SVGBaseEntity     *hit;
     int         bumpcount, numbumps;
@@ -255,7 +251,7 @@ int SV_FlyMove(SVGBaseEntity *ent, float time, int mask)
 //
 // run the impact function
 //
-        SV_Impact(ent, &trace);
+        SVG_Impact(ent, &trace);
         if (!ent->IsInUse())
             break;      // removed by the impact function
 
@@ -317,13 +313,13 @@ int SV_FlyMove(SVGBaseEntity *ent, float time, int mask)
 }
 
 
-/*
-============
-SV_AddGravity
-
-============
-*/
-void SV_AddGravity(SVGBaseEntity *ent)
+//
+//===============
+// SVG_AddGravity
+//
+//===============
+//
+void SVG_AddGravity(SVGBaseEntity *ent)
 {
     vec3_t velocity = ent->GetVelocity();
     velocity.z -= ent->GetServerEntity()->gravity * sv_gravity->value * FRAMETIME;
@@ -369,7 +365,7 @@ retry:
     ent->LinkEntity();
 
     if (trace.fraction != 1.0) {
-        SV_Impact(ent, &trace);
+        SVG_Impact(ent, &trace);
 
         // if the pushed entity went away and the pusher is still there
         if (!trace.ent->IsInUse() && ent->IsInUse()) {
@@ -399,15 +395,16 @@ pushed_t    pushed[MAX_EDICTS], *pushed_p;
 
 SVGBaseEntity *obstacle;
 
-/*
-============
-SV_Push
 
-Objects need to be moved back on a failed push,
-otherwise riders would continue to slide.
-============
-*/
-qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
+//
+//===============
+// SVG_Push
+//
+// Objects need to be moved back on a failed push,
+// otherwise riders would continue to slide.
+//===============
+//
+qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
 {
     int e;
     SVGBaseEntity* check = NULL;
@@ -481,7 +478,7 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
                 continue;
 
             // see if the ent's bbox is inside the pusher's final position
-            if (!SV_TestEntityPosition(check))
+            if (!SVG_TestEntityPosition(check))
                 continue;
             
         }
@@ -519,7 +516,7 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
             if (check->GetGroundEntity() != pusher)
                 check->SetGroundEntity(nullptr);
 
-            block = SV_TestEntityPosition(check);
+            block = SVG_TestEntityPosition(check);
             if (!block) {
                 // pushed ok
                 check->LinkEntity();
@@ -531,7 +528,7 @@ qboolean SV_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
             // this is only relevent for riding entities, not pushed
             // FIXME: this doesn't acount for rotation
             check->SetOrigin(check->GetOrigin() - move);//check->state.origin -= move;
-            block = SV_TestEntityPosition(check);
+            block = SVG_TestEntityPosition(check);
             if (!block) {
                 pushed_p--;
                 continue;
@@ -601,7 +598,7 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
             move = vec3_scale(part->GetVelocity(), FRAMETIME);
             amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME);
 
-            if (!SV_Push(part, move, amove))
+            if (!SVG_Push(part, move, amove))
                 break;  // move was Blocked
         }
     }
@@ -631,7 +628,7 @@ void SV_Physics_Pusher(SVGBaseEntity *ent)
     } else {
         // the move succeeded, so call all Think functions
         for (part = ent ; part ; part = part->GetTeamChainEntity()) {
-            SV_RunThink(part);
+            SVG_RunThink(part);
         }
     }
 }
@@ -648,7 +645,7 @@ Non moving objects can only Think
 void SV_Physics_None(SVGBaseEntity *ent)
 {
 // regular thinking
-    SV_RunThink(ent);
+    SVG_RunThink(ent);
 }
 
 /*
@@ -661,7 +658,7 @@ A moving object that doesn't obey physics
 void SV_Physics_Noclip(SVGBaseEntity *ent)
 {
 // regular thinking
-    if (!SV_RunThink(ent))
+    if (!SVG_RunThink(ent))
         return;
     if (!ent->IsInUse())
         return;
@@ -698,7 +695,7 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
     vec3_t      oldOrigin;
 
     // Regular thinking
-    SV_RunThink(ent);
+    SVG_RunThink(ent);
     if (!ent->IsInUse())
         return;
 
@@ -721,12 +718,12 @@ void SV_Physics_Toss(SVGBaseEntity *ent)
     // Store ent->state.origin as the old origin
     oldOrigin = ent->GetOrigin();
 
-    SV_CheckVelocity(ent);
+    SVG_BoundVelocity(ent);
 
     // Add gravity
     if (ent->GetMoveType() != MoveType::Fly
         && ent->GetMoveType() != MoveType::FlyMissile)
-        SV_AddGravity(ent);
+        SVG_AddGravity(ent);
 
     // Move angles
     ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME, ent->GetAngularVelocity()));
@@ -856,7 +853,7 @@ void SV_Physics_Step(SVGBaseEntity *ent)
 
     groundentity = ent->GetGroundEntity();
 
-    SV_CheckVelocity(ent);
+    SVG_BoundVelocity(ent);
 
     if (groundentity)
         wasonground = true;
@@ -881,7 +878,7 @@ void SV_Physics_Step(SVGBaseEntity *ent)
                 if (ent->GetVelocity().z < sv_gravity->value * -0.1)
                     hitsound = true;
                 if (ent->GetServerEntity()->waterLevel == 0)
-                    SV_AddGravity(ent);
+                    SVG_AddGravity(ent);
             }
 
     // friction for flying monsters that have been given vertical velocity
@@ -939,7 +936,7 @@ void SV_Physics_Step(SVGBaseEntity *ent)
         else
             mask = CONTENTS_MASK_SOLID;
 
-        SV_FlyMove(ent, FRAMETIME, mask);
+        SVG_FlyMove(ent, FRAMETIME, mask);
 
         ent->LinkEntity();
         UTIL_TouchTriggers(ent);
@@ -954,7 +951,7 @@ void SV_Physics_Step(SVGBaseEntity *ent)
     }
 
 // regular thinking
-    SV_RunThink(ent);
+    SVG_RunThink(ent);
 }
 
 //============================================================================
