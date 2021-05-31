@@ -363,172 +363,6 @@ void SVG_FetchClientData(Entity *ent)
 
 =======================================================================
 */
-
-/*
-================
-PlayersRangeFromSpot
-
-Returns the distance to the nearest player from the given spot
-================
-*/
-float   PlayersRangeFromSpot(Entity *spot)
-{
-    Entity *player;
-    float   bestplayerdistance;
-    vec3_t  v;
-    int     n;
-    float   playerdistance;
-
-
-    bestplayerdistance = 9999999;
-
-    for (n = 1; n <= maxClients->value; n++) {
-        player = &g_entities[n];
-
-        if (!player->inUse)
-            continue;
-
-        if (player->classEntity && player->classEntity->GetHealth() <= 0)
-            continue;
-
-        VectorSubtract(spot->state.origin, player->state.origin, v);
-        playerdistance = VectorLength(v);
-
-        if (playerdistance < bestplayerdistance)
-            bestplayerdistance = playerdistance;
-    }
-
-    return bestplayerdistance;
-}
-
-/*
-================
-SelectRandomDeathmatchSpawnPoint
-
-go to a random point, but NOT the two points closest
-to other players
-================
-*/
-Entity *SelectRandomDeathmatchSpawnPoint(void)
-{
-    Entity *spot, *spot1, *spot2;
-    int     count = 0;
-    int     selection;
-    float   range, range1, range2;
-
-    spot = NULL;
-    range1 = range2 = 99999;
-    spot1 = spot2 = NULL;
-
-    while ((spot = SVG_Find(spot, FOFS(className), "info_player_deathmatch")) != NULL) {
-        count++;
-        range = PlayersRangeFromSpot(spot);
-        if (range < range1) {
-            range1 = range;
-            spot1 = spot;
-        } else if (range < range2) {
-            range2 = range;
-            spot2 = spot;
-        }
-    }
-
-    if (!count)
-        return NULL;
-
-    if (count <= 2) {
-        spot1 = spot2 = NULL;
-    } else
-        count -= 2;
-
-    selection = rand() % count;
-
-    spot = NULL;
-    do {
-        spot = SVG_Find(spot, FOFS(className), "info_player_deathmatch");
-        if (spot == spot1 || spot == spot2)
-            selection++;
-    } while (selection--);
-
-    return spot;
-}
-
-/*
-================
-SelectFarthestDeathmatchSpawnPoint
-
-================
-*/
-Entity *SelectFarthestDeathmatchSpawnPoint(void)
-{
-    Entity *bestSpawnLocationEntity = NULL;
-    float   bestdistance = 0;
-    float  bestplayerdistance = 0;
-    Entity *spawnLocationEntity = NULL;
-
-    while ((spawnLocationEntity = SVG_Find(spawnLocationEntity, FOFS(className), "info_player_deathmatch")) != NULL) {
-        bestplayerdistance = PlayersRangeFromSpot(spawnLocationEntity);
-
-        if (bestplayerdistance > bestdistance) {
-            bestSpawnLocationEntity = spawnLocationEntity;
-            bestdistance = bestplayerdistance;
-        }
-    }
-
-    if (bestSpawnLocationEntity) {
-        return bestSpawnLocationEntity;
-    }
-
-    // if there is a player just spawned on each and every start spot
-    // we have no choice to turn one into a telefrag meltdown
-    spawnLocationEntity = SVG_Find(NULL, FOFS(className), "info_player_deathmatch");
-
-    return spawnLocationEntity;
-}
-
-Entity *SelectDeathmatchSpawnPoint(void)
-{
-    if ((int)(dmflags->value) & DeathMatchFlags::SpawnFarthest)
-        return SelectFarthestDeathmatchSpawnPoint();
-    else
-        return SelectRandomDeathmatchSpawnPoint();
-}
-
-
-Entity *SelectCoopSpawnPoint(Entity *ent)
-{
-    int clientIndex = 0;
-    Entity *spawnPointEntity = NULL;
-    const char *target; // C++20: STRING: Added const to char*
-
-    clientIndex = ent->client - game.clients;
-
-    // Player 0 starts in normal player spawn point
-    if (!clientIndex)
-        return NULL;
-
-    spawnPointEntity = NULL;
-
-    // Assume there are four coop spots at each spawnpoint
-    while (1) {
-        spawnPointEntity = SVG_Find(spawnPointEntity, FOFS(className), "info_player_coop");
-        if (!spawnPointEntity)
-            return NULL;    // we didn't have enough...
-
-        target = spawnPointEntity->targetName;
-        if (!target)
-            target = "";
-        if (Q_stricmp(game.spawnpoint, target) == 0) {
-            // this is a coop spawn point for one of the clients here
-            clientIndex--;
-            if (!clientIndex)
-                return spawnPointEntity;        // this is it
-        }
-    }
-
-    return spawnPointEntity;
-}
-
-
 /*
 ===========
 SelectSpawnPoint
@@ -536,32 +370,27 @@ SelectSpawnPoint
 Chooses a player start, deathmatch start, coop start, etc
 ============
 */
-void    SelectSpawnPoint(Entity *ent, vec3_t &origin, vec3_t &angles)
+void SelectSpawnPoint(Entity *ent, vec3_t &origin, vec3_t &angles)
 {
-    Entity *spot = NULL;
-
-    if (deathmatch->value)
-        spot = SelectDeathmatchSpawnPoint();
-    else if (coop->value)
-        spot = SelectCoopSpawnPoint(ent);
+    SVGBaseEntity *spot = nullptr;
 
     // find a single player start spot
     if (!spot) {
-        while ((spot = SVG_Find(spot, FOFS(className), "info_player_start")) != NULL) {
-            if (!game.spawnpoint[0] && !spot->targetName)
+        while ((spot = SVG_FindEntityByKeyValue("classname", "info_player_start", spot)) != nullptr) {
+            if (!game.spawnpoint[0] && !spot->GetTargetName())
                 break;
 
-            if (!game.spawnpoint[0] || !spot->targetName)
+            if (!game.spawnpoint[0] || !spot->GetTargetName())
                 continue;
 
-            if (Q_stricmp(game.spawnpoint, spot->targetName) == 0)
+            if (Q_stricmp(game.spawnpoint, spot->GetTargetName()) == 0)
                 break;
         }
 
         if (!spot) {
             if (!game.spawnpoint[0]) {
                 // there wasn't a spawnpoint without a target, so use any
-                spot = SVG_Find(spot, FOFS(className), "info_player_start");
+                spot = SVG_FindEntityByKeyValue("classname", "info_player_start", spot);
             }
             if (!spot)
                 gi.Error("Couldn't find spawn point %s", game.spawnpoint);
@@ -569,9 +398,9 @@ void    SelectSpawnPoint(Entity *ent, vec3_t &origin, vec3_t &angles)
     }
 
     if (spot) {
-        origin = spot->state.origin;
+        origin = spot->GetOrigin();
         origin.z += 9;
-        angles = spot->state.angles;
+        angles = spot->GetAngles();
     }
 }
 

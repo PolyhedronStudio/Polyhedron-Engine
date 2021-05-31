@@ -59,23 +59,23 @@ struct EntitySpawnFlags {
 
 // entity->flags
 struct EntityFlags {
-    static constexpr int32_t Fly = 0x00000001;
-    static constexpr int32_t Swim = 0x00000002; // Implied immunity to drowining
-    static constexpr int32_t ImmuneLaser = 0x00000004;
-    static constexpr int32_t InWater = 0x00000008;
-    static constexpr int32_t GodMode = 0x00000010;
-    static constexpr int32_t NoTarget = 0x00000020;
-    static constexpr int32_t ImmuneToSlime = 0x00000040;
-    static constexpr int32_t ImmuneToLava = 0x00000080;
-    static constexpr int32_t PartiallyOnGround = 0x00000100;  // Not all corners are valid
-    static constexpr int32_t WaterJump = 0x00000200; // Player jumping out of water
-    static constexpr int32_t TeamSlave = 0x00000400;  // Not the first on the team
-    static constexpr int32_t NoKnockBack = 0x00000800;
-    static constexpr int32_t PowerArmor = 0x00001000;  // Power armor (if any) is active
+    static constexpr int32_t Fly = 1;
+    static constexpr int32_t Swim = 2; // Implied immunity to drowining
+    static constexpr int32_t ImmuneLaser = 4;
+    static constexpr int32_t InWater = 8;
+    static constexpr int32_t GodMode = 16;
+    static constexpr int32_t NoTarget = 32;
+    static constexpr int32_t ImmuneToSlime = 64;
+    static constexpr int32_t ImmuneToLava = 128;
+    static constexpr int32_t PartiallyOnGround = 256;  // Not all corners are valid
+    static constexpr int32_t WaterJump = 512; // Player jumping out of water
+    static constexpr int32_t TeamSlave = 1024;  // Not the first on the team
+    static constexpr int32_t NoKnockBack = 2048;
+    static constexpr int32_t PowerArmor = 4096;  // Power armor (if any) is active
     static constexpr int32_t Respawn = 0x80000000;  // Used for item respawning
 };
 
-constexpr float FRAMETIME = 0.05;
+constexpr float FRAMETIME = BASE_FRAMETIME_1000; // With the game set to run at 20 ticks, this means FRAMETIME = 0.05f;
 
 // memory tags to allow dynamic memory to be cleaned up
 constexpr int32_t TAG_GAME = 765;     // clear when unloading the dll
@@ -998,7 +998,11 @@ struct entity_s {
     // EXPECTS THE FIELDS IN THAT ORDER!
 
     //================================
+    // Pointer to the actual game class entity belonging to this server entity.
     SVGBaseEntity* classEntity;
+
+    // Hashmap containing the key:value entity properties.
+    std::map<std::string, std::string> entityDictionary;
 
     int32_t flags;
 

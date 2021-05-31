@@ -71,6 +71,9 @@ void MiscExplosionBox::Spawn() {
     // Set move type.
     SetMoveType(MoveType::Step);
 
+    // Set clip mask.
+    SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
+
     // Set the barrel model, and model index.
     SetModel("models/objects/barrels/tris.md2");
 
@@ -85,7 +88,7 @@ void MiscExplosionBox::Spawn() {
             16, 16, 40
         }
     );
-
+    //SetFlags(EntityFlags::Swim);
     // Set default values in case we have none.
     if (!GetMass()) {
         SetMass(400);
@@ -93,8 +96,9 @@ void MiscExplosionBox::Spawn() {
     if (!GetHealth()) {
         SetHealth(10);
     }
-    if (!GetDamage())
+    if (!GetDamage()) {
         SetDamage(150);
+    }
 
     // Set entity to allow taking damage (can't explode otherwise.)
     SetTakeDamage(TakeDamage::Yes);
@@ -162,7 +166,7 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
     vec3_t newOrigin = GetOrigin() + vec3_t{
         0.f, 0.f, 1.f
     };
-    
+
     SetOrigin(newOrigin);
 
     // Calculate the end origin to use for tracing.
@@ -185,6 +189,18 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
 
     // Check for ground.
     SVG_StepMove_CheckGround(this);
+
+    // Calculate direction.
+    vec3_t dir = { -90.f, 0.f, 0.f };
+
+    // Calculate yaw to use based on direction.
+    float yaw = vec3_to_yaw(dir);
+    float ratio = 2;
+
+    // Last but not least, move a step ahead.
+    SVG_StepMove_Walk(this, yaw, 40 * ratio * FRAMETIME);
+
+    SetNextThinkTime(0.05f);
     //vec3_t      end;
 //trace_t     trace;
 
@@ -363,7 +379,7 @@ void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity*
 
     // Last but not least, move a step ahead.
     SVG_StepMove_Walk(this, yaw, 40 * ratio * FRAMETIME);
-    gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
+    //gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
 }
 
 

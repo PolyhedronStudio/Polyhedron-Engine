@@ -156,7 +156,13 @@ WorldSpawn::~WorldSpawn() {
 
 }
 
-// Interface functions. 
+//
+//===============
+// WorldSpawn::Precache
+//
+// You can precache all game related data here.
+//===============
+//
 void WorldSpawn::Precache() {
     // Parent class precache.
     SVGBaseEntity::Precache();
@@ -254,6 +260,14 @@ void WorldSpawn::Precache() {
     SVG_PrecacheModel("models/objects/gibs/skull/tris.md2");
     SVG_PrecacheModel("models/objects/gibs/head2/tris.md2");
 }
+
+//
+//===============
+// WorldSpawn::Spawn
+//
+// Sets Worldspawn related properties. Nice right?
+//===============
+//
 void WorldSpawn::Spawn() {
     // Parent class spawn.
     SVGBaseEntity::Spawn();
@@ -275,29 +289,6 @@ void WorldSpawn::Spawn() {
 
     // set configstrings for items
     SVG_SetItemNames();
-
-    if (st.nextMap)
-        strcpy(level.nextMap, st.nextMap);
-
-    // make some data visible to the server
-    if (GetServerEntity()->message && GetServerEntity()->message[0]) {
-        SVG_SetConfigString(ConfigStrings::Name, GetServerEntity()->message);
-        strncpy(level.levelName, GetServerEntity()->message, sizeof(level.levelName));
-    }
-    else
-        strncpy(level.levelName, level.mapName, sizeof(level.levelName));
-
-    if (st.sky && st.sky[0])
-        SVG_SetConfigString(ConfigStrings::Sky, st.sky);
-    else
-        SVG_SetConfigString(ConfigStrings::Sky, "unit1_");
-
-    SVG_SetConfigString(ConfigStrings::SkyRotate, va("%f", st.skyrotate));
-
-    SVG_SetConfigString(ConfigStrings::SkyAxis, va("%f %f %f",
-        st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]));
-
-    SVG_SetConfigString(ConfigStrings::CdTrack, va("%i", GetServerEntity()->sounds));
 
     SVG_SetConfigString(ConfigStrings::MaxClients, va("%i", (int)(maxClients->value)));
 
@@ -359,15 +350,116 @@ void WorldSpawn::Spawn() {
     //SetThinkCallback(&WorldSpawn::WorldSpawnThink);
     //SetNextThinkTime(level.time + 0.1f);
 }
+
+//
+//===============
+// WorldSpawn::PostSpawn
+//
+// Placeholder, can be used though.
+//===============
+//
 void WorldSpawn::PostSpawn() {
     // Parent class PostSpawn.
     SVGBaseEntity::PostSpawn();
 }
+
+//
+//===============
+// WorldSpawn::Think
+//
+// Placeholder, can be used though.
+//===============
+//
 void WorldSpawn::Think() {
     // Parent class think.
     SVGBaseEntity::Think();
 }
 
+//
+//===============
+// WorldSpawn::SpawnKey
+//
+// This function can be overrided, to allow for custom entity key:value parsing.
+//===============
+//
+void WorldSpawn::SpawnKey(const std::string& key, const std::string& value) {
+    // Pass it on.
+    SVGBaseEntity::SpawnKey(key, value);
+
+    if (key == "gravity") {
+        // Parse Gravity.
+        int32_t gravity = 0;
+        ParseIntegerKeyValue(key, value, gravity);
+        
+        // Set gravity to default if parsing failed.
+        if (!gravity)
+            gi.cvar_set("sv_gravity", "750");
+        else
+            gi.cvar_set("sv_gravity", std::to_string(gravity).c_str());
+    } else if (key == "message") {
+        // Parse message.
+        std::string message = "";
+        ParseStringKeyValue(key, value, message);
+
+        // Assign level name, in case there is one.
+        if (message != "") {
+            SVG_SetConfigString(ConfigStrings::Name, message.c_str());
+        } else {
+            strncpy(level.levelName, level.mapName, sizeof(level.levelName));
+        }
+    } else if (key == "nextmap") {
+        // Parse message.
+        std::string nextmap = "";
+        ParseStringKeyValue(key, value, nextmap);
+
+        // Assign.
+        if (nextmap != "") {
+            strcpy(level.nextMap, nextmap.c_str());
+        }
+    } else if (key == "sky") {
+        // Parse message.
+        std::string sky = "";
+        ParseStringKeyValue(key, value, sky);
+
+        // Assign.
+        if (sky != "")
+            SVG_SetConfigString(ConfigStrings::Sky, sky.c_str());
+        else
+            SVG_SetConfigString(ConfigStrings::Sky, "unit1_");
+    } else if (key == "skyrotate") {
+        // Parse skyrotate.
+        float skyrotate = 0.f;
+        ParseFloatKeyValue(key, value, skyrotate);
+
+        // Assign.
+        SVG_SetConfigString(ConfigStrings::SkyRotate, va("%f", skyrotate));
+
+    } else if (key == "skyaxis") {
+        // Parse skyaxis.
+        vec3_t skyaxis = vec3_zero();
+        ParseVector3KeyValue(key, value, skyaxis);
+
+        // Assign.
+        SVG_SetConfigString(ConfigStrings::SkyAxis, va("%f %f %f", skyaxis.x, skyaxis.y, skyaxis.z));
+    } else if (key == "sounds") {
+        // Parse sounds.
+        int32_t sounds = 0;
+        ParseIntegerKeyValue(key, value, sounds);
+
+        // Assign.
+        SVG_SetConfigString(ConfigStrings::CdTrack, va("%i", sounds));
+    } else {
+
+    }
+}
+
+//
+//===============
+// WorldSpawn::WorldSpawnThink
+//
+// 'Think' callback placeholder, can be used though.
+//===============
+//
 void WorldSpawn::WorldSpawnThink(void) {
     //SetThinkCallback(&WorldSpawn::WorldSpawnThink);
     //SetNextThinkTime(level.time + 0.1f);

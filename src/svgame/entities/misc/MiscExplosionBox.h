@@ -20,7 +20,7 @@ public:
     //
     // Interface functions. 
     //
-    void Precache();    // Precaches data.
+    void Precache() override;    // Precaches data.
     void Spawn();       // Spawns the entity.
     void Respawn();     // Respawns the entity.
     void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.

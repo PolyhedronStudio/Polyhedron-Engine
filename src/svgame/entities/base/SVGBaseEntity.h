@@ -39,6 +39,7 @@ public:
     virtual void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     virtual void Think();       // General entity thinking routine.
 
+    virtual void SpawnKey(const std::string& key, const std::string& value); // Called for each key:value when parsing the entity dictionary.
 
     //
     // Callback functions.
@@ -616,6 +617,16 @@ public:
 
 
 protected:
+    //
+    // Entity Dictionary Value Parsing functions.
+    // 
+    // When successful they return true, false otherwise.
+    // 
+    qboolean ParseFloatKeyValue(const std::string& key, const std::string& value, float& floatNumber);
+    qboolean ParseIntegerKeyValue(const std::string& key, const std::string& value, int32_t& integerNumber);
+    qboolean ParseStringKeyValue(const std::string& key, const std::string& value, std::string& stringValue);
+    qboolean ParseVector3KeyValue(const std::string& key, const std::string& value, vec3_t& vectorValue);
+
     //
     // The actual entity this class is a member of.
     //

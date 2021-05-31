@@ -41,6 +41,9 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     // Start with a nice nullptr.
     SVGBaseEntity* spawnEntity = nullptr;
 
+    if (!ent)
+        return nullptr;
+
     // Fetch entity number.
     int32_t entityNumber = ent->state.number;
 
@@ -208,6 +211,56 @@ Entity* SVG_Find(Entity* from, int fieldofs, const char* match)
     }
 
     return NULL;
+}
+
+//
+//===============
+// SVG_FindEntity
+//
+// Returns an entity that matches the given fieldKey and fieldValue in its 
+// entity dictionary.
+//===============
+//
+SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::string& fieldValue, SVGBaseEntity* lastEntity) {
+ 
+    //if (!from)
+    //    from = g_baseEntities;
+    //else
+    //    from++;
+
+    //for (int32_t i = 0; from < &g_entities[globals.numberOfEntities]; from++) {
+    //    s = *(char**)((byte*)from + fieldofs);
+    //    if (!s)
+    //        continue;
+    //    if (!Q_stricmp(s, mat ch))
+    //        return from;
+    //}
+
+    // In case we have a last entity, we now know where to start.
+    int32_t start = (lastEntity != nullptr ? lastEntity->GetNumber() : 0);
+
+    // Very ugly, but I suppose... it has to be like this for now.
+    for (int32_t i = start; i < MAX_EDICTS; i++) {
+        // Ensure this entity is in use. (Skip otherwise.)
+        if (!g_entities[i].inUse)
+            continue;
+
+        // Ensure this entity has a valid class entity. (Skip otherwise.)
+        if (!g_entities[i].classEntity)
+            continue;
+
+        // Start preparing for checking IF, its dictionary HAS fieldKey.
+        auto dictionary = g_entities[i].entityDictionary;
+
+        if (dictionary.find(fieldKey) != dictionary.end()) {
+            if (dictionary[fieldKey] == fieldValue) {
+                return g_entities[i].classEntity;
+            }
+        }
+    }
+
+    // We failed at finding any entity with the specific requirements, return nullptr.
+    return nullptr;
 }
 
 //

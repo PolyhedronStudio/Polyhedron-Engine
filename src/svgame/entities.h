@@ -24,8 +24,10 @@ class SVGBaseEntity;
 Entity* SVG_PickTarget(char* targetName);
 Entity* SVG_Find(Entity* from, int32_t fieldofs, const char* match); // C++20: Added const to char*
 
+// Find entities within a given radius.
 SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t org, float rad, uint32_t excludeSolidFlags = Solid::Not);
-
+// Find entities based on their field(key), and field(value).
+SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::string& fieldValue, SVGBaseEntity* lastEntity = nullptr);
 
 //
 // Server Entity handling.

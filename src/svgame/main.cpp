@@ -693,10 +693,10 @@ std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& ma
 //
 SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, SVGBaseEntity* passent, const int32_t &contentMask) {
     // Fetch server entity in case one was passed to us.
-    Entity* serverEntity = (passent ? passent->GetServerEntity() : NULL);
+    Entity* serverPassEntity = (passent ? passent->GetServerEntity() : NULL);
 
     // Execute server trace.
-    trace_t trace = gi.Trace(start, mins, maxs, end, serverEntity, contentMask);
+    trace_t trace = gi.Trace(start, mins, maxs, end, serverPassEntity, contentMask);
 
     // Convert results to Server Game Trace.
     SVGTrace svgTrace;
@@ -720,11 +720,13 @@ SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, 
     if (trace.ent) {
         uint32_t index = trace.ent->state.number;
 
-        if (g_baseEntities[index] != NULL)
+        if (g_baseEntities[index] != NULL) {
             svgTrace.ent = g_baseEntities[index];
-    }
-    else {
-        svgTrace.ent = nullptr;
+        } else {
+            svgTrace.ent = g_entities[0].classEntity;
+        }
+    } else {
+        svgTrace.ent = g_entities[0].classEntity;
     }
 
     return svgTrace;

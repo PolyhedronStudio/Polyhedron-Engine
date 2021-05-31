@@ -61,6 +61,7 @@ SET(SRC_SVGAME
 	svgame/ai/MonsterAI.cpp
 
 	svgame/entities/base/SVGBaseEntity.cpp
+	svgame/entities/base/SVGBaseTrigger.cpp
 	svgame/entities/base/PlayerClient.cpp
 
 	#svgame/entities/func/func_areaportal.cpp
@@ -163,6 +164,7 @@ SET(HEADERS_SVGAME
 	svgame/ai/MonsterAI.h
 
 	svgame/entities/base/SVGBaseEntity.h
+	svgame/entities/base/SVGBaseTrigger.h
 	svgame/entities/base/PlayerClient.h
 
 	svgame/entities/func/func_door.h
@@ -368,6 +370,7 @@ SET(HEADERS_SHARED
 	../inc/shared/platform.h
 	../inc/shared/refresh.h 
 	../inc/shared/qstring.h 
+	../inc/shared/strings.h
 	../inc/shared/shared.h 
 	../inc/shared/ui.h 
 )

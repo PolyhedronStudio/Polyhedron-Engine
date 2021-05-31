@@ -542,6 +542,7 @@ typedef struct file_info_s {
 //=============================================================================
 //
 #include "shared/qstring.h"
+#include "shared/strings.h"
 
 
 //

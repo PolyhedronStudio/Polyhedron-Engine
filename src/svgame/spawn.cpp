@@ -167,65 +167,12 @@ static const spawn_field_t temp_fields[] = {
 #include "entities/base/SVGBaseEntity.h"
 
 /*
-===============
-ED_CallSpawn
-
-Allocates the proper server game entity class. Then spawns the entity.
-===============
-*/
-void ED_CallSpawn(Entity *ent)
-{
-    const spawn_func_t *s;
-    gitem_t *item;
-    int     i;
-
-    // Ensure ent is valid.
-    if (!ent)
-        return;
-
-    // Ensure we have a classname.
-    if (!ent->className) {
-        gi.DPrintf("ED_CallSpawn: NULL className\n");
-        return;
-    }
-
-    // check item spawn functions
-    for (i = 0, item = itemlist ; i < game.numberOfItems ; i++, item++) {
-        if (!item->className)
-            continue;
-        if (!strcmp(item->className, ent->className)) {
-            // found it
-            SVG_SpawnItem(ent, item);
-            return;
-        }
-    }
-
-    // check normal spawn functions
-    for (s = spawn_funcs ; s->name ; s++) {
-        if (!strcmp(s->name, ent->className)) {
-            // Spawn the according server game entity class.
-            ent->classEntity = SVG_SpawnClassEntity(ent, ent->className);
-            
-            // Precache.
-            ent->classEntity->Precache();
-
-            // Spawn.
-            ent->classEntity->Spawn();
-            return;
-        }
-    }
-
-    gi.DPrintf("%s doesn't have a spawn function\n", ent->className);
-}
-
-/*
 =============
 ED_NewString
 =============
 */
-static char *ED_NewString(const char *string)
-{
-    char    *newb, *new_p;
+static char* ED_NewString(const char* string) {
+    char* newb, * new_p;
     int     i, l;
 
     l = strlen(string) + 1;
@@ -234,7 +181,7 @@ static char *ED_NewString(const char *string)
 
     new_p = newb;
 
-    for (i = 0 ; i < l ; i++) {
+    for (i = 0; i < l; i++) {
         if (string[i] == '\\' && i < l - 1) {
             i++;
             if (string[i] == 'n')
@@ -248,60 +195,71 @@ static char *ED_NewString(const char *string)
     return newb;
 }
 
-
-
-
 /*
 ===============
-ED_ParseField
+ED_CallSpawn
 
-Takes a key/value pair and sets the binary values
-in an edict
+Allocates the proper server game entity class. Then spawns the entity.
 ===============
 */
-static qboolean ED_ParseField(const spawn_field_t *fields, const char *key, const char *value, byte *b)
+void ED_CallSpawn(Entity *ent)
 {
-    const spawn_field_t *f;
-    float   v;
-    vec3_t  vec;
+    const spawn_func_t *s;
+    gitem_t *item;
+    int     i;
 
-    for (f = fields ; f->name ; f++) {
-        if (!Q_stricmp(f->name, key)) {
-            // found it
-            switch (f->type) {
-            case F_LSTRING:
-                *(char **)(b + f->ofs) = ED_NewString(value);
-                break;
-            case F_VECTOR:
-                if (sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
-                    gi.DPrintf("%s: couldn't parse '%s'\n", __func__, key);
-                    VectorClear(vec);
-                }
-                ((float *)(b + f->ofs))[0] = vec[0];
-                ((float *)(b + f->ofs))[1] = vec[1];
-                ((float *)(b + f->ofs))[2] = vec[2];
-                break;
-            case F_INT:
-                *(int *)(b + f->ofs) = atoi(value);
-                break;
-            case F_FLOAT:
-                *(float *)(b + f->ofs) = atof(value);
-                break;
-            case F_ANGLEHACK:
-                v = atof(value);
-                ((float *)(b + f->ofs))[0] = 0;
-                ((float *)(b + f->ofs))[1] = v;
-                ((float *)(b + f->ofs))[2] = 0;
-                break;
-            case F_IGNORE:
-                break;
-            default:
-                break;
+    // Ensure ent is valid.
+    //if (!ent)
+    //    return;
+
+    // Ensure we have a classname.
+    //if (!ent->className) {
+    //    gi.DPrintf("ED_CallSpawn: NULL className\n");
+    //    return;
+    //}
+
+    // check item spawn functions
+    //for (i = 0, item = itemlist ; i < game.numberOfItems ; i++, item++) {
+    //    if (!item->className)
+    //        continue;
+    //    if (!strcmp(item->className, ent->className)) {
+    //        // found it
+    //        SVG_SpawnItem(ent, item);
+    //        return;
+    //    }
+    //}
+
+    // check normal spawn functions
+    for (s = spawn_funcs ; s->name ; s++) {
+        // Fetch dictionary.
+        auto dictionary = ent->entityDictionary;
+
+        if (dictionary.find("classname") == dictionary.end()) {
+            // TODO: Free the entity?
+            SVG_FreeEntity(ent);
+            continue;
+        }
+
+        if (dictionary["classname"] == s->name) {
+            // Spawn the according server game entity class.
+            ent->className = ED_NewString(ent->entityDictionary["classname"].c_str());
+            ent->classEntity = SVG_SpawnClassEntity(ent, ent->className);
+            
+            // SpawnKey fetching engaged * sunglasses on, this is cool *
+            for (auto& keyValueEntry : ent->entityDictionary) {
+                ent->classEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
             }
-            return true;
+
+            // Precache.
+            ent->classEntity->Precache();
+
+            // Spawn.
+            ent->classEntity->Spawn();
+            return;
         }
     }
-    return false;
+
+    gi.DPrintf("%s doesn't have a spawn function\n", ent->className);
 }
 
 /*
@@ -312,15 +270,14 @@ Parses an edict out of the given string, returning the new position
 ed should be a properly initialized empty edict.
 ====================
 */
-void ED_ParseEntity(const char **data, Entity *ent)
-{
+void ED_ParseEntity(const char** data, Entity* ent) {
     qboolean    init;
-    char        *key, *value;
+    char* key, * value;
 
     init = false;
     st = {};
 
-// go through all the dictionary pairs
+    // go through all the dictionary pairs
     while (1) {
         // parse key
         key = COM_Parse(data);
@@ -344,17 +301,71 @@ void ED_ParseEntity(const char **data, Entity *ent)
         if (key[0] == '_')
             continue;
 
-        if (!ED_ParseField(spawn_fields, key, value, (byte *)ent)) {
-            if (!ED_ParseField(temp_fields, key, value, (byte *)&st)) {
-                gi.DPrintf("%s: %s is not a field\n", __func__, key);
-            }
-        }
+        ent->entityDictionary[key] = value;
+        //if (!ED_ParseField(spawn_fields, key, value, (byte *)ent)) {
+        //    if (!ED_ParseField(temp_fields, key, value, (byte *)&st)) {
+        //        gi.DPrintf("%s: %s is not a field\n", __func__, key);
+        //    }
+        //}
     }
 
     if (!init)
         ent = {};
 }
 
+
+/*
+===============
+ED_ParseField
+
+Takes a key/value pair and sets the binary values
+in an edict
+===============
+*/
+//static qboolean ED_ParseField(const spawn_field_t *fields, const char *key, const char *value, byte *b)
+//{
+//    const spawn_field_t *f;
+//    float   v;
+//    vec3_t  vec;
+//
+//    for (f = fields ; f->name ; f++) {
+//        if (!Q_stricmp(f->name, key)) {
+//            // found it
+//            switch (f->type) {
+//            case F_LSTRING:
+//                *(char **)(b + f->ofs) = ED_NewString(value);
+//                break;
+//            case F_VECTOR:
+//                if (sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
+//                    gi.DPrintf("%s: couldn't parse '%s'\n", __func__, key);
+//                    VectorClear(vec);
+//                }
+//                ((float *)(b + f->ofs))[0] = vec[0];
+//                ((float *)(b + f->ofs))[1] = vec[1];
+//                ((float *)(b + f->ofs))[2] = vec[2];
+//                break;
+//            case F_INT:
+//                *(int *)(b + f->ofs) = atoi(value);
+//                break;
+//            case F_FLOAT:
+//                *(float *)(b + f->ofs) = atof(value);
+//                break;
+//            case F_ANGLEHACK:
+//                v = atof(value);
+//                ((float *)(b + f->ofs))[0] = 0;
+//                ((float *)(b + f->ofs))[1] = v;
+//                ((float *)(b + f->ofs))[2] = 0;
+//                break;
+//            case F_IGNORE:
+//                break;
+//            default:
+//                break;
+//            }
+//            return true;
+//        }
+//    }
+//    return false;
+//}
 
 /*
 ================
@@ -489,33 +500,33 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
             ent = SVG_Spawn();
         ED_ParseEntity(&entities, ent);
 
-        // yet another map hack
-        if (!Q_stricmp(level.mapName, "command") && !Q_stricmp(ent->className, "trigger_once") && !Q_stricmp(ent->model, "*27"))
-            ent->spawnFlags &= ~EntitySpawnFlags::NotHard;
+        //// yet another map hack
+        //if (!Q_stricmp(level.mapName, "command") && !Q_stricmp(ent->className, "trigger_once") && !Q_stricmp(ent->model, "*27"))
+        //    ent->spawnFlags &= ~EntitySpawnFlags::NotHard;
 
-        // remove things (except the world) from different skill levels or deathmatch
-        if (ent != g_entities) {
-            // Do a check for deathmatch, in case the entity isn't allowed there.
-            if (deathmatch->value) {
-                if (ent->spawnFlags & EntitySpawnFlags::NotDeathMatch) {
-                    SVG_FreeEntity(ent);
-                    inhibit++;
-                    continue;
-                }
-            } else {
-                if ( /* ((coop->value) && (ent->spawnFlags & EntitySpawnFlags::NotCoop)) || */
-                    ((skill->value == 0) && (ent->spawnFlags & EntitySpawnFlags::NotEasy)) ||
-                    ((skill->value == 1) && (ent->spawnFlags & EntitySpawnFlags::NotMedium)) ||
-                    (((skill->value == 2) || (skill->value == 3)) && (ent->spawnFlags & EntitySpawnFlags::NotHard))
-                ) {
-                    SVG_FreeEntity(ent);
-                    inhibit++;
-                    continue;
-                }
-            }
+        //// remove things (except the world) from different skill levels or deathmatch
+        //if (ent != g_entities) {
+        //    // Do a check for deathmatch, in case the entity isn't allowed there.
+        //    if (deathmatch->value) {
+        //        if (ent->spawnFlags & EntitySpawnFlags::NotDeathMatch) {
+        //            SVG_FreeEntity(ent);
+        //            inhibit++;
+        //            continue;
+        //        }
+        //    } else {
+        //        if ( /* ((coop->value) && (ent->spawnFlags & EntitySpawnFlags::NotCoop)) || */
+        //            ((skill->value == 0) && (ent->spawnFlags & EntitySpawnFlags::NotEasy)) ||
+        //            ((skill->value == 1) && (ent->spawnFlags & EntitySpawnFlags::NotMedium)) ||
+        //            (((skill->value == 2) || (skill->value == 3)) && (ent->spawnFlags & EntitySpawnFlags::NotHard))
+        //        ) {
+        //            SVG_FreeEntity(ent);
+        //            inhibit++;
+        //            continue;
+        //        }
+        //    }
 
-            ent->spawnFlags &= ~(EntitySpawnFlags::NotEasy | EntitySpawnFlags::NotMedium | EntitySpawnFlags::NotHard | EntitySpawnFlags::NotCoop | EntitySpawnFlags::NotDeathMatch);
-        }
+        //    ent->spawnFlags &= ~(EntitySpawnFlags::NotEasy | EntitySpawnFlags::NotMedium | EntitySpawnFlags::NotHard | EntitySpawnFlags::NotCoop | EntitySpawnFlags::NotDeathMatch);
+        //}
 
         // Allocate the class entity, and call its spawn.
         ED_CallSpawn(ent);
