@@ -122,7 +122,7 @@ void MiscExplosionBox::Spawn() {
 //===============
 //
 void MiscExplosionBox::Respawn() {
-    gi.DPrintf("MiscExplosionBox::Respawn();");
+    //gi.DPrintf("MiscExplosionBox::Respawn();");
 }
 
 //
@@ -147,7 +147,7 @@ void MiscExplosionBox::Think() {
     // Always call parent class method.
     SVGBaseEntity::Think();
 
-	gi.DPrintf("MiscExplosionBox::Think();");
+	//gi.DPrintf("MiscExplosionBox::Think();");
 }
 
 

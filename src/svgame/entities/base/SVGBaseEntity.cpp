@@ -60,7 +60,7 @@ SVGBaseEntity::~SVGBaseEntity() {
 //===============
 //
 void SVGBaseEntity::Precache() {
-	gi.DPrintf("SVGBaseEntity::Precache();");
+	//gi.DPrintf("SVGBaseEntity::Precache();");
 }
 
 //
@@ -72,10 +72,10 @@ void SVGBaseEntity::Precache() {
 //===============
 //
 void SVGBaseEntity::Spawn() {
-	gi.DPrintf("SVGBaseEntity::Spawn();");
+	//gi.DPrintf("SVGBaseEntity::Spawn();");
 
 	// Set default movetype to none.
-	SetMoveType(MoveType::None);
+	//SetMoveType(MoveType::None);
 }
 
 //
@@ -87,7 +87,7 @@ void SVGBaseEntity::Spawn() {
 //===============
 //
 void SVGBaseEntity::Respawn() {
-	gi.DPrintf("SVGBaseEntity::Respawn();");
+	//gi.DPrintf("SVGBaseEntity::Respawn();");
 }
 
 //
@@ -100,7 +100,7 @@ void SVGBaseEntity::Respawn() {
 //===============
 //
 void SVGBaseEntity::PostSpawn() {
-	gi.DPrintf("SVGBaseEntity::PostSpawn();");
+	//gi.DPrintf("SVGBaseEntity::PostSpawn();");
 }
 
 //
@@ -112,7 +112,6 @@ void SVGBaseEntity::PostSpawn() {
 //===============
 //
 void SVGBaseEntity::Think() {
-	gi.DPrintf("Class: %s, is thinking while nextThinkTime was: %f", typeid(*this).name(), GetNextThinkTime());
 	// Safety check.
 	if (thinkFunction == nullptr)
 		return;
@@ -129,7 +128,6 @@ void SVGBaseEntity::Think() {
 //===============
 //
 qboolean SVGBaseEntity::ParseFloatKeyValue(const std::string& key, const std::string& value, float &floatNumber) {
-	
 	floatNumber = std::stof(value);
 
 	return true;
@@ -143,7 +141,6 @@ qboolean SVGBaseEntity::ParseFloatKeyValue(const std::string& key, const std::st
 //===============
 //
 qboolean SVGBaseEntity::ParseIntegerKeyValue(const std::string& key, const std::string& value, int32_t &integerNumber) {
-
 	integerNumber = std::stoi(value);
 
 	return true;
