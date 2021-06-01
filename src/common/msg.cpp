@@ -208,21 +208,6 @@ void MSG_WriteVector3(const vec3_t& pos)
     MSG_WriteFloat(pos[2]);
 }
 
-//
-//===============
-// MSG_WriteAngle
-// 
-//===============
-//
-
-#define ANGLE2BYTE(x)   ((int)((x)*256.0f/360)&255)
-#define BYTE2ANGLE(x)   ((x)*(360.0f/256))
-
-void MSG_WriteAngle(float f)
-{
-    MSG_WriteByte(ANGLE2BYTE(f));
-}
-
 #if USE_CLIENT
 
 //
