@@ -846,7 +846,7 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
     // bobbing based on that.
     //
     vec3_t playerVelocity = ent->GetVelocity();
-    XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
+    XYSpeed = sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
 
     if (XYSpeed < 5 || !(currentClient->playerState.pmove.flags & PMF_ON_GROUND)) {
         // Special handling for when not on ground.
@@ -878,7 +878,7 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
         bobTime *= 2;   // N&C: Footstep tweak.
 
     bobCycle = (int)bobTime;
-    bobFracsin = std::fabsf(std::sinf(bobTime * M_PI));
+    bobFracsin = fabsf(sinf(bobTime * M_PI));
 
     // Detect hitting the floor, and apply damage appropriately.
     SVG_Player_CheckFallingDamage(ent);

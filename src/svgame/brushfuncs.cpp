@@ -228,7 +228,7 @@ void plat_CalcAcceleratedMove(PushMoveInfo* moveinfo)
         float   f;
 
         f = (moveinfo->acceleration + moveinfo->deceleration) / (moveinfo->acceleration * moveinfo->deceleration);
-        moveinfo->moveSpeed = (-2 + std::sqrtf(4 - 4 * f * (-2 * moveinfo->remainingDistance))) / (2 * f);
+        moveinfo->moveSpeed = (-2 + sqrtf(4 - 4 * f * (-2 * moveinfo->remainingDistance))) / (2 * f);
         decel_dist = AccelerationDistance(moveinfo->moveSpeed, moveinfo->deceleration);
     }
 

@@ -1214,7 +1214,7 @@ static void PM_LadderMove(void) {
     vel.z = 0.f;
 
     // handle Z intentions differently
-    if (std::fabsf(pm->state.velocity.z) < PM_SPEED_LADDER) {
+    if (fabsf(pm->state.velocity.z) < PM_SPEED_LADDER) {
 
         if ((pm->viewAngles.x <= -15.0f) && (pm->clientUserCommand.moveCommand.forwardMove > 0)) {
             vel.z = PM_SPEED_LADDER;
@@ -1632,7 +1632,7 @@ static void PM_ClampAngles(void) {
         pm->viewAngles[i] = temp;
     }
 
-    // Clamp pitch to prevent the player from looking up or down more than 90º
+    // Clamp pitch to prevent the player from looking up or down more than 90ï¿½
     if (pm->viewAngles.x > 90.0f && pm->viewAngles.x < 270.0f) {
         pm->viewAngles.x = 90.0f;
     }

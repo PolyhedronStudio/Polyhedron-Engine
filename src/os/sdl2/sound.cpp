@@ -115,7 +115,7 @@ static sndinitstat_t Init(void)
     dma.samples = 0x8000 * obtained.channels;
     dma.submission_chunk = 1;
     dma.samplebits = 16;
-    dma.buffer = Z_Mallocz(dma.samples * 2);
+    dma.buffer = (byte*)Z_Mallocz(dma.samples * 2);
     dma.samplepos = 0;
 
     Com_Printf("Using SDL audio driver: %s\n", SDL_GetCurrentAudioDriver());

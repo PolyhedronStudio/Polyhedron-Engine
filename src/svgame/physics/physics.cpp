@@ -903,7 +903,7 @@ void SVG_Physics_Step(SVGBaseEntity *ent)
 
     // Friction for flying monsters that have been given vertical velocity
     if ((ent->GetFlags() & EntityFlags::Fly) && (ent->GetVelocity().z != 0)) {
-        float speed = std::fabsf(ent->GetVelocity().z);
+        float speed = fabsf(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
         float friction = STEPMOVE_FRICTION / 3;
         float newSpeed = speed - (FRAMETIME * control * friction);
@@ -916,7 +916,7 @@ void SVG_Physics_Step(SVGBaseEntity *ent)
 
     // Friction for flying monsters that have been given vertical velocity
     if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetVelocity().z != 0)) {
-        float speed = std::fabsf(ent->GetVelocity().z);
+        float speed = fabsf(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
         float newSpeed = speed - (FRAMETIME * control * STEPMOVE_WATERFRICTION * ent->GetWaterLevel());
         if (newSpeed < 0)
@@ -933,7 +933,7 @@ void SVG_Physics_Step(SVGBaseEntity *ent)
         if ((wasOnGround) || (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)))
             if (!(ent->GetHealth() <= 0.0)) {
                 vec3_t vel = ent->GetVelocity();
-                float speed = std::sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
+                float speed = sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
                 if (speed) {
                     float friction = STEPMOVE_FRICTION;
                     float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;

@@ -10,13 +10,6 @@
 #include "entities.h"			// Entities header.
 #include "player/client.h"		// Include Player Client header.
 
-#include "entities/base/SVGBaseEntity.h"
-#include "entities/base/PlayerClient.h"
-#include "entities/info/InfoPlayerStart.h"
-#include "entities/misc/MiscExplosionBox.h"
-#include "entities/Worldspawn.h"
-#include "entities/Light.h"
-
 //
 // SVG_SpawnClassEntity
 //
@@ -25,7 +18,7 @@
 #include "entities/base/PlayerClient.h"
 #include "entities/info/InfoPlayerStart.h"
 #include "entities/misc/MiscExplosionBox.h"
-#include "entities/Worldspawn.h"
+#include "entities/WorldSpawn.h"
 #include "entities/Light.h"
 
 //

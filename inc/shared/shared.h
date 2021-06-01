@@ -46,14 +46,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <cinttypes>
 #include <climits>
 #include <ctime>
+#include <cstring>
 #include <cfloat>
 
 //-----------------
 // C++ STL
 //-----------------
-#include <numbers>
 #include <string>
-#include <numbers>
 #include <iostream>
 #include <sstream>
 #include <map>

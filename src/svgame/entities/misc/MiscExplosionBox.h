@@ -21,10 +21,10 @@ public:
     // Interface functions. 
     //
     void Precache() override;    // Precaches data.
-    void Spawn();       // Spawns the entity.
-    void Respawn();     // Respawns the entity.
-    void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    void Think();       // General entity thinking routine.
+    void Spawn() override;       // Spawns the entity.
+    void Respawn() override;     // Respawns the entity.
+    void PostSpawn() override;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
+    void Think() override;       // General entity thinking routine.
 
     //
     // Callback Functions.
