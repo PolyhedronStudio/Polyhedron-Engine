@@ -197,11 +197,11 @@ void MSG_WriteString(const char* string)
 
 //
 //===============
-// MSG_WritePosition
+// MSG_WriteVector3
 // 
 //===============
 //
-void MSG_WritePosition(const vec3_t& pos)
+void MSG_WriteVector3(const vec3_t& pos)
 {
     MSG_WriteFloat(pos[0]);
     MSG_WriteFloat(pos[1]);
@@ -292,14 +292,6 @@ int MSG_WriteDeltaUsercmd(const ClientUserCommand* from, const ClientUserCommand
 }
 
 #endif // USE_CLIENT
-
-void MSG_WriteDirection(const vec3_t& dir)
-{
-    int     best;
-
-    best = DirToByte(dir);
-    MSG_WriteByte(best);
-}
 
 void MSG_PackEntity(PackedEntity* out, const EntityState* in)
 {
@@ -965,23 +957,12 @@ size_t MSG_ReadStringLine(char* dest, size_t size)
     return len;
 }
 
-vec3_t MSG_ReadPosition(void) {
+vec3_t MSG_ReadVector3(void) {
     return vec3_t{
         MSG_ReadFloat(),
         MSG_ReadFloat(),
         MSG_ReadFloat()
     };
-}
-
-vec3_t MSG_ReadDirection(void)
-{
-    int     b;
-
-    b = MSG_ReadByte();
-    if (b < 0 || b >= NUMVERTEXNORMALS)
-        Com_Error(ERR_DROP, "MSG_ReadDirection: out of range");
-
-    return bytedirs[b];
 }
 
 void MSG_ReadDeltaUsercmd(const ClientUserCommand* from, ClientUserCommand* to)
@@ -1162,7 +1143,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
 
     // Old Origin.
     if (bits & U_OLDORIGIN) {
-        to->oldOrigin = MSG_ReadPosition(); // MSG: !! ReadPos
+        to->oldOrigin = MSG_ReadVector3(); // MSG: !! ReadPos
     }
 
     // Sound.

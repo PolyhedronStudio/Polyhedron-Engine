@@ -116,12 +116,11 @@ void    MSG_WriteShort(int c);
 void    MSG_WriteLong(int c);
 void    MSG_WriteFloat(float c);
 void    MSG_WriteString(const char* s);
-void    MSG_WritePosition(const vec3_t& pos);
+void    MSG_WriteVector3(const vec3_t& pos);
 #if USE_CLIENT
 void    MSG_WriteBits(int value, int bits);
 int     MSG_WriteDeltaUsercmd(const ClientUserCommand* from, const ClientUserCommand* cmd);
 #endif
-void    MSG_WriteDirection(const vec3_t& dir);
 void    MSG_PackEntity(PackedEntity* out, const EntityState* in);
 void    MSG_WriteDeltaEntity(const PackedEntity* from, const PackedEntity* to, EntityStateMessageFlags flags);
 int     MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, msgPsFlags_t flags);
@@ -148,8 +147,8 @@ float   MSG_ReadFloat(void);
 size_t  MSG_ReadString(char* dest, size_t size);
 size_t  MSG_ReadStringLine(char* dest, size_t size);
 #if USE_CLIENT
-vec3_t  MSG_ReadPosition(void);
-vec3_t  MSG_ReadDirection(void);
+vec3_t  MSG_ReadVector3(void);
+vec3_t  MSG_ReadVector3(void);
 #endif
 void    MSG_ReadDeltaUsercmd(const ClientUserCommand* from, ClientUserCommand* cmd);
 int     MSG_ParseEntityBits(int* bits);

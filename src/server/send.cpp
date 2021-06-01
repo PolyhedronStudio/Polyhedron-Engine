@@ -545,7 +545,7 @@ static void emit_snd(client_t *client, MessagePacket *msg)
     MSG_WriteShort(msg->sendchan);
 
     if (flags & SND_POS) {
-        MSG_WritePosition(msg->pos);
+        MSG_WriteVector3(msg->pos);
     }
 }
 

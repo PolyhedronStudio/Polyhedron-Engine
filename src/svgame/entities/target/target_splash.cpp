@@ -33,7 +33,7 @@ void use_target_splash(Entity* self, Entity* other, Entity* activator)
     gi.WriteByte(TempEntityEvent::Splash);
     gi.WriteByte(self->count);
     gi.WritePosition(self->state.origin);
-    gi.WriteDirection(self->moveDirection);
+    gi.WriteVector3(self->moveDirection);
     gi.WriteByte(self->sounds);
     gi.Multicast(&self->state.origin, MultiCast::PVS);
 

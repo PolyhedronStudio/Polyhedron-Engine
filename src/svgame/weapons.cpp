@@ -187,7 +187,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                     gi.WriteByte(TempEntityEvent::Splash);
                     gi.WriteByte(8);
                     gi.WritePosition(tr.endPosition);
-                    gi.WriteDirection(tr.plane.normal);
+                    gi.WriteVector3(tr.plane.normal);
                     gi.WriteByte(color);
                     gi.Multicast(&tr.endPosition, MultiCast::PVS);
                 }
@@ -217,7 +217,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
                     gi.WriteByte(te_impact);
                     gi.WritePosition(tr.endPosition);
-                    gi.WriteDirection(tr.plane.normal);
+                    gi.WriteVector3(tr.plane.normal);
                     gi.Multicast(&tr.endPosition, MultiCast::PVS);
 
                     if (self->GetClient())
@@ -328,9 +328,9 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
         gi.WriteByte(TempEntityEvent::Blaster);
         gi.WritePosition(self->state.origin);
         if (!plane)
-            gi.WriteDirection(vec3_zero());
+            gi.WriteVector3(vec3_zero());
         else
-            gi.WriteDirection(plane->normal);
+            gi.WriteVector3(plane->normal);
         gi.Multicast(&self->state.origin, MultiCast::PVS);
     }
 
