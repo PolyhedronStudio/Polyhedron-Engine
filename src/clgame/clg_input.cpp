@@ -338,7 +338,7 @@ static void CLG_MouseMove() {
 
     clgi.Cvar_ClampValue(m_accel, 0, 1);
 
-    speed = sqrtf(motionX * motionX + motionY * motionY);
+    speed = std::sqrtf(motionX * motionX + motionY * motionY);
     speed = sensitivity->value + speed * m_accel->value;
 
     motionX *= speed;

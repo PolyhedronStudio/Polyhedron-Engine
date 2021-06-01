@@ -300,8 +300,8 @@ void CLG_Heatbeam(vec3_t start, vec3_t forward)
             p->time = cl->time;
             VectorClear(p->acceleration);
             variance = 0.5;
-            c = cosf(rot) * variance;
-            s = sinf(rot) * variance;
+            c = std::cosf(rot) * variance;
+            s = std::sinf(rot) * variance;
 
             // trim it so it looks like it's starting at the origin
             if (i < 10) {

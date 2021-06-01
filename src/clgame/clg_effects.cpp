@@ -945,13 +945,13 @@ void CLG_BigTeleportParticles(vec3_t org)
 
         angle = M_PI * 2 * (rand() & 1023) / 1023.0;
         dist = rand() & 31;
-        p->org[0] = org[0] + cosf(angle) * dist;
-        p->vel[0] = cosf(angle) * (70 + (rand() & 63));
-        p->acceleration[0] = -cosf(angle) * 100;
+        p->org[0] = org[0] + std::cosf(angle) * dist;
+        p->vel[0] = std::cosf(angle) * (70 + (rand() & 63));
+        p->acceleration[0] = -std::cosf(angle) * 100;
 
-        p->org[1] = org[1] + sinf(angle) * dist;
-        p->vel[1] = sinf(angle) * (70 + (rand() & 63));
-        p->acceleration[1] = -sinf(angle) * 100;
+        p->org[1] = org[1] + std::sinf(angle) * dist;
+        p->vel[1] = std::sinf(angle) * (70 + (rand() & 63));
+        p->acceleration[1] = -std::sinf(angle) * 100;
 
         p->org[2] = org[2] + 8 + (rand() % 90);
         p->vel[2] = -100 + (rand() & 31);

@@ -109,9 +109,7 @@ typedef struct entity_state_s {
 // Maximum amount of stats available to the player state.
 #define MAX_STATS               32
 
-struct PlayerState {
-    PlayerState() {};
-
+typedef struct {
     PlayerMoveState   pmove;         // For prediction
 
     // These fields do not need to be communicated bit-precise
@@ -130,6 +128,6 @@ struct PlayerState {
     int         rdflags;        // Refdef flags
 
     short       stats[MAX_STATS]; // Fast status bar updates
-}; 
+} PlayerState; 
 
 #endif // __SHARED__MESSAGING_H__

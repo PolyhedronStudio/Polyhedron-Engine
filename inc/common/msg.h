@@ -37,9 +37,7 @@ typedef union {
 // 
 // Be careful, and only touch this if you know what you are doing.
 //---------------
-struct PackedEntity {
-    PackedEntity() {};
-
+typedef struct {
     uint16_t    number;
     // N&C: Full float precision for entities.
     vec3_t      origin;
@@ -62,7 +60,7 @@ struct PackedEntity {
     // Sound ID, and Event ID.
     uint8_t     sound;
     uint8_t     eventID;
-};
+} PackedEntity;
 
 //---------------
 // Player state messaging flags.

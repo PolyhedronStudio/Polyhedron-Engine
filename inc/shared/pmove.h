@@ -68,9 +68,7 @@ typedef struct {
 //-----------------
 // ClientUserCommand is sent to the server each client frame
 //-----------------
-struct ClientUserCommand {
-    ClientUserCommand() {};
-
+typedef struct {
     PlayerMoveCommand moveCommand;       // the movement command
 
     uint32_t timeSent;      // Time sent, for calculating pings
@@ -82,6 +80,6 @@ struct ClientUserCommand {
         vec3_t origin;  // The predicted origin for this command
         vec3_t error;   // The prediction error for this command
     } prediction;
-};
+} ClientUserCommand;
 
 #endif // #ifndef __SHARED__PMOVE_H__

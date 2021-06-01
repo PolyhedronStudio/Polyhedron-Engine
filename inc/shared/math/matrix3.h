@@ -203,19 +203,19 @@ static inline vec3_t matrix3_to_angles(const mat3_t &m) {
 	float c;
 	float pitch;
 
-	pitch = -asinf(m[2]);
-	c = cosf(pitch);
+	pitch = -std::asinf(m[2]);
+	c = std::cosf(pitch);
 	if (fabs(c) > 5 * 10e-6) {     // Gimball lock?
 		// no
 		c = 1.0f / c;
 		angles[vec3_t::Pitch] = Degrees(pitch);
-		angles[vec3_t::Yaw] = Degrees(atan2f(m[1] * c, m[0] * c));
-		angles[vec3_t::Roll] = Degrees(atan2f(-m[5] * c, m[8] * c));
+		angles[vec3_t::Yaw] = Degrees(std::atan2f(m[1] * c, m[0] * c));
+		angles[vec3_t::Roll] = Degrees(std::atan2f(-m[5] * c, m[8] * c));
 	}
 	else {
 		// yes
 		angles[vec3_t::Pitch] = m[2] > 0 ? -90 : 90;
-		angles[vec3_t::Yaw] = Degrees(atan2f(m[3], -m[4]));
+		angles[vec3_t::Yaw] = Degrees(std::atan2f(m[3], -m[4]));
 		angles[vec3_t::Roll] = 180;
 	}
 

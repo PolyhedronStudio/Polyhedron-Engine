@@ -583,7 +583,7 @@ ADD_EXECUTABLE(server
 	${SRC_SHARED} ${HEADERS_SHARED}
 	${SRC_UNIX}
 	${SRC_SERVER} ${HEADERS_SERVER}
-	client/null.cpp
+	client/null.c
 )
 ENDIF()
 

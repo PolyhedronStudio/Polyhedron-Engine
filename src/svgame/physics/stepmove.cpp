@@ -374,8 +374,8 @@ qboolean SV_StepDirection(SVGBaseEntity* ent, float yaw, float dist)
     SVG_CalculateYawAngle(ent->GetServerEntity());
 
     yaw = yaw * M_PI * 2 / 360;
-    move[0] = cosf(yaw) * dist;
-    move[1] = sinf(yaw) * dist;
+    move[0] = std::cosf(yaw) * dist;
+    move[1] = std::sinf(yaw) * dist;
     move[2] = 0;
 
     oldOrigin = ent->GetOrigin();
@@ -410,8 +410,8 @@ qboolean SVG_StepMove_Walk(SVGBaseEntity* ent, float yaw, float dist)
 
     yaw = yaw * M_PI * 2 / 360;
 
-    move[0] = cosf(yaw) * dist;
-    move[1] = sinf(yaw) * dist;
+    move[0] = std::cosf(yaw) * dist;
+    move[1] = std::sinf(yaw) * dist;
     move[2] = 0;
 
     return SVG_MoveStep(ent, move, true);

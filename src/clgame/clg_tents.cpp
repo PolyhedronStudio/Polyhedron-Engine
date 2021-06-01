@@ -873,8 +873,8 @@ static void CLG_RailSpiral(void)
 		VectorClear(p->acceleration);
 
 		d = i * 0.1;
-		c = cosf(d);
-		s = sinf(d);
+		c = std::cosf(d);
+		s = std::sinf(d);
 
 		VectorScale(right, c, dir);
 		VectorMA(dir, s, up, dir);
@@ -956,9 +956,9 @@ static void CLG_RailTrail(void)
 
 static void dirtoangles(vec3_t angles)
 {
-	angles[0] = acosf(teParameters.dir[2]) / M_PI * 180.f;
+	angles[0] = std::acosf(teParameters.dir[2]) / M_PI * 180.f;
 	if (teParameters.dir[0])
-		angles[1] = atan2f(teParameters.dir[1], teParameters.dir[0]) / M_PI * 180.f;
+		angles[1] = std::atan2f(teParameters.dir[1], teParameters.dir[0]) / M_PI * 180.f;
 	else if (teParameters.dir[1] > 0)
 		angles[1] = 90;
 	else if (teParameters.dir[1] < 0)

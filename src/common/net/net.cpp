@@ -508,16 +508,16 @@ static void NET_Stats_f(void)
 
     Com_FormatTime(buffer, sizeof(buffer), diff);
     Com_Printf("Network uptime: %s\n", buffer);
-    Com_Printf("Bytes sent: %" PRIu64 " (%" PRIu64 " bytes/sec)\n",
+    Com_Printf("Bytes sent: %"PRIu64" (%"PRIu64" bytes/sec)\n",
                net_bytes_sent, net_bytes_sent / diff);
-    Com_Printf("Bytes rcvd: %" PRIu64 " (%" PRIu64 " bytes/sec)\n",
+    Com_Printf("Bytes rcvd: %"PRIu64" (%"PRIu64" bytes/sec)\n",
                net_bytes_rcvd, net_bytes_rcvd / diff);
-    Com_Printf("Packets sent: %" PRIu64 " (%" PRIu64 " packets/sec)\n",
+    Com_Printf("Packets sent: %"PRIu64" (%"PRIu64" packets/sec)\n",
                net_packets_sent, net_packets_sent / diff);
-    Com_Printf("Packets rcvd: %" PRIu64 " (%" PRIu64 " packets/sec)\n",
+    Com_Printf("Packets rcvd: %"PRIu64" (%"PRIu64" packets/sec)\n",
                net_packets_rcvd, net_packets_rcvd / diff);
 #if USE_ICMP
-    Com_Printf("Total errors: %" PRIu64 "/%" PRIu64 "/%" PRIu64 " (send/recv/icmp)\n",
+    Com_Printf("Total errors: %"PRIu64"/%"PRIu64"/%"PRIu64" (send/recv/icmp)\n",
                net_send_errors, net_recv_errors, net_icmp_errors);
 #else
     Com_Printf("Total errors: %"PRIu64"/%"PRIu64" (send/recv)\n",

@@ -3644,7 +3644,7 @@ R_SetSky_RTX(const char* name, float rotate, vec3_t& axis)
 	sky_rotation = rotate;
 	VectorNormalize2(axis, sky_axis);
 
-	int avg_color[3] = { 0, 0, 0 };
+	int avg_color[3] = { 0.f, 0.f, 0.f };
 	int w_prev, h_prev;
 	for (i = 0; i < 6; i++) {
 		Q_concat(pathname, sizeof(pathname), "env/", name, suf[i], ".tga", NULL);

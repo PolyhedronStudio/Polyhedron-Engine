@@ -210,7 +210,7 @@ void LOC_AddLocationsToScene(void)
         VectorCopy(loc->origin, ent.origin);
 
         if (loc == nearest) {
-            ent.origin[2] += 10.0f * sinf(cl.time * 0.01f);
+            ent.origin[2] += 10.0f * std::sinf(cl.time * 0.01f);
             V_AddLight(loc->origin, 200, 1, 1, 1);
         }
 

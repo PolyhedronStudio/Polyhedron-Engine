@@ -709,8 +709,8 @@ static void Cmd_OpenURL_f(void)
 #ifdef __linux__
     pid_t pid = fork();
     if (pid == 0) {
-	const char * args[] = { "xdg-open", url, NULL};
-	//execv("/usr/bin/xdg-open", args[0]);
+	char * args[] = { "xdg-open", url, NULL};
+	execv("/usr/bin/xdg-open", args);
 	exit(0);
     }
 #elif _WINDOWS

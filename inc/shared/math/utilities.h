@@ -11,11 +11,6 @@
 #ifndef __INC_SHARED_MATH_UTILITIES_H__
 #define __INC_SHARED_MATH_UTILITIES_H__
 
-// Really ugly fact is that C++ 20, on CLang, has no numbers header... so we resort...
-#ifndef PI
-    #define PI   3.14159265358979f
-#endif
-
 // NAN Macro - Use for checking NAN errors.
 #define nanmask (255<<23)
 #define IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
@@ -40,8 +35,8 @@
 #define Q_ClearBit(data, bit)   ((data)[(bit) >> 3] &= ~(1 << ((bit) & 7)))
 
 // Conversion (Degrees, Radians) scalar values.
-#define DegreesScalar ((float) (180.0f / PI))
-#define RadiansScalar ((float) (PI / 180.0f))
+#define DegreesScalar ((float) (180.0f / std::numbers::pi_v<float>))
+#define RadiansScalar ((float) (std::numbers::pi_v<float> / 180.0f))
 
 
 //
@@ -74,8 +69,8 @@ static inline float Radians(float degrees) {
 //===============
 //
 static inline void SinCosRadians(const float radians, float  &s, float &c) {
-    s = sinf(radians);
-    c = cosf(radians);
+    s = std::sinf(radians);
+    c = std::cosf(radians);
 }
 
 //
@@ -134,7 +129,7 @@ static inline float RandomRangef(float begin, float end) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
 
-    return begin + static_cast<float>(rand()) / (static_cast<float>(((float)RAND_MAX) / (begin - end)));
+    return begin + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (begin - end)));
 }
 
 //
@@ -266,7 +261,7 @@ static inline float Smoothf(float f, float min, float max) {
 //===============
 //
 static inline bool EqualEpsilonf(float a, float b, float epsilon = FLT_EPSILON) {
-    return fabsf(a - b) <= epsilon;
+    return std::fabsf(a - b) <= epsilon;
 }
 
 //

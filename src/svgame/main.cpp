@@ -199,9 +199,6 @@ void SVG_InitGame(void)
 }
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 /*
 =================
 GetServerGameAPI
@@ -245,9 +242,6 @@ ServerGameExports* GetServerGameAPI(ServerGameImports* import)
 
     return &globals;
 }
-#ifdef __cplusplus
-}; // Extern "C"
-#endif
 
 #ifndef GAME_HARD_LINKED
 // this is only here so the functions in q_shared.c can link
