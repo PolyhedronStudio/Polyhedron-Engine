@@ -442,11 +442,6 @@ static void CL_SendUserCommand(void)
 
     // save the position for a checksum byte
     checksumIndex = 0;
-    // MSG: !! PROTOCOL - This one seemed to be needed for old protocol, and thus demo recording.
-    //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
-    //    checksumIndex = msg_write.cursize;
-    //    SZ_GetSpace(&msg_write, 1);
-    //}
 
     // let the server know what the last frame we
     // got was, so the next message can be delta compressed
@@ -468,15 +463,6 @@ static void CL_SendUserCommand(void)
 
     cmd = &cl.clientUserCommands[cl.currentClientCommandNumber & CMD_MASK];
     MSG_WriteDeltaUsercmd(oldcmd, cmd);
-
-    // MSG: !! PROTOCOL - This one seemed to be needed for old protocol, and thus demo recording.
-    //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
-    //    // calculate a checksum over the move commands
-    //    msg_write.data[checksumIndex] = COM_BlockSequenceCRCByte(
-    //                                        msg_write.data + checksumIndex + 1,
-    //                                        msg_write.cursize - checksumIndex - 1,
-    //                                        cls.netchan->outgoingSequence);
-    //}
 
     P_FRAMES++;
 
