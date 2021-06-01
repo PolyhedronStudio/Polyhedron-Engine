@@ -404,7 +404,7 @@ void SV_BuildClientFrame(client_t *client)
 
         // add it to the circular client_entities array
         state = &svs.entities[svs.next_entity % svs.num_entities];
-        MSG_PackEntity(state, &es, true); // MSG: !! Removed Q2PRO_SHORTANGLES - Modify packentity to always use short angles??
+        MSG_PackEntity(state, &es);
 
         // hide POV entity from renderer, unless this is player's own entity
         if (e == frame->clientNumber + 1 && ent != clent) {

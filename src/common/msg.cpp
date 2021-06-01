@@ -301,7 +301,7 @@ void MSG_WriteDirection(const vec3_t& dir)
     MSG_WriteByte(best);
 }
 
-void MSG_PackEntity(PackedEntity* out, const EntityState* in, qboolean short_angles)
+void MSG_PackEntity(PackedEntity* out, const EntityState* in)
 {
     // allow 0 to accomodate empty entityBaselines
     if (in->number < 0 || in->number >= MAX_EDICTS)

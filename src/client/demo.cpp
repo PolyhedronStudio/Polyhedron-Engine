@@ -115,8 +115,8 @@ static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
             // not changed at all. Note that players are always 'newentities',
             // this updates their oldOrigin always and prevents warping in case
             // of packet loss.
-            MSG_PackEntity(&oldpack, oldent, false);
-            MSG_PackEntity(&newpack, newent, false);
+            MSG_PackEntity(&oldpack, oldent);
+            MSG_PackEntity(&newpack, newent);
             MSG_WriteDeltaEntity(&oldpack, &newpack,
                                  (EntityStateMessageFlags)(newent->number <= cl.maxClients ? MSG_ES_NEWENTITY : 0));   // CPP: WARNING: EntityStateMessageFlags cast.
             oldindex++;
@@ -126,8 +126,8 @@ static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
 
         if (newnum < oldnum) {
             // this is a new entity, send it from the baseline
-            MSG_PackEntity(&oldpack, &cl.entityBaselines[newnum], false);
-            MSG_PackEntity(&newpack, newent, false);
+            MSG_PackEntity(&oldpack, &cl.entityBaselines[newnum]);
+            MSG_PackEntity(&newpack, newent);
             MSG_WriteDeltaEntity(&oldpack, &newpack, (EntityStateMessageFlags)(MSG_ES_FORCE | MSG_ES_NEWENTITY));  // CPP: WARNING: EntityStateMessageFlags cast.
             newindex++;
             continue;
@@ -135,7 +135,7 @@ static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
 
         if (newnum > oldnum) {
             // the old entity isn't present in the new message
-            MSG_PackEntity(&oldpack, oldent, false);
+            MSG_PackEntity(&oldpack, oldent);
             MSG_WriteDeltaEntity(&oldpack, NULL, MSG_ES_FORCE);
             oldindex++;
             continue;
@@ -435,7 +435,7 @@ static void CL_Record_f(void)
         }
 
         MSG_WriteByte(svc_spawnbaseline);
-        MSG_PackEntity(&pack, ent, false);
+        MSG_PackEntity(&pack, ent);
         MSG_WriteDeltaEntity(NULL, &pack, MSG_ES_FORCE);
     }
 

@@ -122,7 +122,7 @@ void    MSG_WriteBits(int value, int bits);
 int     MSG_WriteDeltaUsercmd(const ClientUserCommand* from, const ClientUserCommand* cmd);
 #endif
 void    MSG_WriteDirection(const vec3_t& dir);
-void    MSG_PackEntity(PackedEntity* out, const EntityState* in, qboolean short_angles);
+void    MSG_PackEntity(PackedEntity* out, const EntityState* in);
 void    MSG_WriteDeltaEntity(const PackedEntity* from, const PackedEntity* to, EntityStateMessageFlags flags);
 int     MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, msgPsFlags_t flags);
 
