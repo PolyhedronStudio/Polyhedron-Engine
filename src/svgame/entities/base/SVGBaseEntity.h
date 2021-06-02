@@ -125,7 +125,7 @@ public:
 
     // Return the 'flags' value.
     inline const int32_t GetFlags() {
-        return serverEntity->flags;
+        return flags;
     }
 
     // Return the 'frame' value.
@@ -414,7 +414,7 @@ public:
 
     // Set the 'flags' value.
     inline void SetFlags(const int32_t &flags) {
-        serverEntity->flags = flags;
+        this->flags = flags;
     }
 
     // Set the 'frame' value.
@@ -634,7 +634,11 @@ protected:
     //
     // Other base entity members. (These were old fields in edict_T back in the day.)
     //
-    // Move Type. (MoveType:: ... )
+    // 
+    // Entity flags, general flags, flags... :) 
+    int32_t flags;
+
+    // Move Type. (MoveType::xxx)
     int32_t moveType;
 
     // Velocity.
