@@ -434,7 +434,7 @@ void CopyToBodyQue(Entity *ent)
     if (body->state.modelIndex) {
         gi.WriteByte(SVG_CMD_TEMP_ENTITY);
         gi.WriteByte(TempEntityEvent::Blood);
-        gi.WritePosition(body->state.origin);
+        gi.WriteVector3(body->state.origin);
         gi.WriteVector3(vec3_zero());
         gi.Multicast(&body->state.origin, MultiCast::PVS);
     }

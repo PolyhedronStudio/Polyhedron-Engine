@@ -237,7 +237,7 @@ typedef enum {
 #define U_ANGLE_X    (1<<10)         // was named: U_ANGLE_X
 #define U_MODEL     (1<<11)
 #define U_RENDERFX8 (1<<12)        // fullbright, etc
-#define U_ANGLE16   (1<<13)
+//#define U_ANGLE16   (1<<13)
 #define U_EFFECTS8  (1<<14)        // autorotate, trails, etc
 #define U_MOREBITS2 (1<<15)        // read one additional byte
 

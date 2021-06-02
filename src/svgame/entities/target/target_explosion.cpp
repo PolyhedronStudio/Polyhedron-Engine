@@ -23,7 +23,7 @@ void target_explosion_explode(Entity* self)
 
     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(TempEntityEvent::Explosion1);
-    gi.WritePosition(self->state.origin);
+    gi.WriteVector3(self->state.origin);
     gi.Multicast(&self->state.origin, MultiCast::PHS);
 
     SVG_RadiusDamage(self, self->activator, self->damage, NULL, self->damage + 40, MeansOfDeath::Explosive);

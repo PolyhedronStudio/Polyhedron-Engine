@@ -350,11 +350,11 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
 
         // N&C: Full float precision.
         if (!EqualEpsilonf(to->angles[0], from->angles[0]))
-            bits |= U_ANGLE_X | U_ANGLE16;
+            bits |= U_ANGLE_X;
         if (!EqualEpsilonf(to->angles[1], from->angles[1]))
-            bits |= U_ANGLE_Y | U_ANGLE16;
+            bits |= U_ANGLE_Y;
         if (!EqualEpsilonf(to->angles[2], from->angles[2]))
-            bits |= U_ANGLE_Z | U_ANGLE16;
+            bits |= U_ANGLE_Z;
 
         if (flags & MSG_ES_NEWENTITY) {
             if (!EqualEpsilonf(to->oldOrigin[0], from->origin[0]) ||
@@ -363,11 +363,8 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
                 bits |= U_OLDORIGIN;
         }
     }
-
-    if (flags & MSG_ES_UMASK)
-        mask = 0xffff0000;
-    else
-        mask = 0xffff8000;  // don't confuse old clients
+    
+    mask = 0xffff8000;  // don't confuse old clients
 
     if (to->skinNumber != from->skinNumber) {
         if (to->skinNumber & mask)
@@ -442,9 +439,6 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
     //
     if (!bits && !(flags & MSG_ES_FORCE))
         return;     // nothing to send!
-
-    if (flags & MSG_ES_REMOVE)
-        bits |= U_REMOVE; // used for MVD stream only
 
     //----------
 
@@ -524,14 +518,12 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
         MSG_WriteFloat(to->origin[2]);
 
     // N&C: Full float precision.
-    if (bits & U_ANGLE16) {
-        if (bits & U_ANGLE_X)
-            MSG_WriteFloat(to->angles[0]);
-        if (bits & U_ANGLE_Y)
-            MSG_WriteFloat(to->angles[1]);
-        if (bits & U_ANGLE_Z)
-            MSG_WriteFloat(to->angles[2]);
-    }
+    if (bits & U_ANGLE_X)
+        MSG_WriteFloat(to->angles[0]);
+    if (bits & U_ANGLE_Y)
+        MSG_WriteFloat(to->angles[1]);
+    if (bits & U_ANGLE_Z)
+        MSG_WriteFloat(to->angles[2]);
 
     // N&C: Full float precision.
     if (bits & U_OLDORIGIN) {
@@ -1117,14 +1109,12 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
     }
 
     // Angle.
-    if (bits & U_ANGLE16) {
-        if (bits & U_ANGLE_X)
-            to->angles[0] = MSG_ReadFloat();
-        if (bits & U_ANGLE_Y)
-            to->angles[1] = MSG_ReadFloat();
-        if (bits & U_ANGLE_Z)
-            to->angles[2] = MSG_ReadFloat();
-    }
+    if (bits & U_ANGLE_X)
+        to->angles[0] = MSG_ReadFloat();
+    if (bits & U_ANGLE_Y)
+        to->angles[1] = MSG_ReadFloat();
+    if (bits & U_ANGLE_Z)
+        to->angles[2] = MSG_ReadFloat();
 
     // Old Origin.
     if (bits & U_OLDORIGIN) {

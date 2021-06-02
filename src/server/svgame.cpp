@@ -900,7 +900,7 @@ void SV_InitGameProgs(void)
     importAPI.WriteLong = MSG_WriteLong;
     importAPI.WriteFloat = MSG_WriteFloat;
     importAPI.WriteString = MSG_WriteString;
-    importAPI.WritePosition = MSG_WriteVector3;
+    importAPI.WriteVector3 = MSG_WriteVector3;
 
     importAPI.TagMalloc = PF_TagMalloc;
     importAPI.TagFree = Z_Free;

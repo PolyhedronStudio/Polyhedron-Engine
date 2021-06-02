@@ -914,7 +914,6 @@ static client_t *find_client_slot(conn_params_t *params)
 
 static void init_pmove_and_es_flags(client_t *newcl)
 {
-    //newcl->esFlags = (EntityStateMessageFlags)(newcl->esFlags | MSG_ES_UMASK); // CPP: Cast bitflag
     newcl->esFlags = (EntityStateMessageFlags)(newcl->esFlags | MSG_ES_BEAMORIGIN); // CPP: Cast bitflag
 }
 

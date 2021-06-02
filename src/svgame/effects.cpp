@@ -253,7 +253,7 @@ void BecomeExplosion1(SVGBaseEntity *self)
     vec3_t origin = self->GetOrigin();
     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(TempEntityEvent::Explosion1);
-    gi.WritePosition(origin);
+    gi.WriteVector3(origin);
     
     gi.Multicast(&origin, MultiCast::PVS);
 
@@ -267,7 +267,7 @@ void BecomeExplosion2(SVGBaseEntity*self)
 
     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(TempEntityEvent::Explosion2);
-    gi.WritePosition(origin);
+    gi.WriteVector3(origin);
     gi.Multicast(&origin, MultiCast::PVS);
 
     SVG_FreeEntity(self->GetServerEntity());

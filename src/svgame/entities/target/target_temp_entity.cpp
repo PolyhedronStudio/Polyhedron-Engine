@@ -19,7 +19,7 @@ void Use_Target_Tent(Entity* ent, Entity* other, Entity* activator)
 {
     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(ent->style);
-    gi.WritePosition(ent->state.origin);
+    gi.WriteVector3(ent->state.origin);
     gi.Multicast(&ent->state.origin, MultiCast::PVS);
 }
 

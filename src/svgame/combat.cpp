@@ -142,7 +142,7 @@ void SpawnDamage(int type, const vec3_t &origin, const vec3_t &normal, int damag
     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(type);
 //  gi.WriteByte (damage);
-    gi.WritePosition(origin);
+    gi.WriteVector3(origin);
     gi.WriteVector3(normal);
     gi.Multicast(&origin, MultiCast::PVS);
 }
