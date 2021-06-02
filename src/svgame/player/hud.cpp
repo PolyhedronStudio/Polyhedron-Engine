@@ -257,7 +257,7 @@ void SVG_HUD_GenerateDMScoreboardLayout(Entity *ent, Entity *killer)
         // send the layout
         Q_snprintf(entry, sizeof(entry),
                    "client %i %i %i %i %i %i ",
-                   x, y, sorted[i], cl->respawn.score, cl->ping, (level.frameNumber - cl->respawn.enterFrame) / 600);
+                   x, y, sorted[i], cl->respawn.score, cl->ping, (level.frameNumber - cl->respawn.enterGameFrameNumber) / 600);
         j = strlen(entry);
         if (stringlength + j > 1024)
             break;

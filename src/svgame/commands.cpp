@@ -802,8 +802,8 @@ void Cmd_PlayerList_f(Entity *ent)
             continue;
 
         Q_snprintf(st, sizeof(st), "%02d:%02d %4d %3d %s%s\n",
-                   (level.frameNumber - e2->client->respawn.enterFrame) / 600,
-                   ((level.frameNumber - e2->client->respawn.enterFrame) % 600) / 10,
+                   (level.frameNumber - e2->client->respawn.enterGameFrameNumber) / 600,
+                   ((level.frameNumber - e2->client->respawn.enterGameFrameNumber) % 600) / 10,
                    e2->client->ping,
                    e2->client->respawn.score,
                    e2->client->persistent.netname,

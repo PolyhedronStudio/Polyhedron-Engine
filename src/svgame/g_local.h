@@ -841,14 +841,14 @@ typedef struct {
 // respawning. Also maintains a member variable for data that has to stay
 // persistent during mapchanges/respawns in a coop game.
 //-------------------
-typedef struct {
-    ClientPersistantData persistentCoopRespawn;   // what to set client->persistent to on a respawn
-    int32_t enterFrame;         // level.frameNumber the client entered the game
+struct ClientRespawnData {
+    ClientPersistantData persistentCoopRespawn;   // What to set client->persistent to on a respawn
+    int32_t enterGameFrameNumber;         // level.frameNumber the client entered the game
     int32_t score;              // frags, etc
     vec3_t commandViewAngles;         // angles sent over in the last command
 
     qboolean isSpectator;          // client is a isSpectator
-} ClientRespawnData;
+};
 
 
 //-------------------

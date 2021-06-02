@@ -314,7 +314,7 @@ void InitClientResp(GameClient *client)
         return;
 
     client->respawn = {};
-    client->respawn.enterFrame = level.frameNumber;
+    client->respawn.enterGameFrameNumber = level.frameNumber;
     client->respawn.persistentCoopRespawn = client->persistent;
 }
 
