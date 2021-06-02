@@ -242,30 +242,20 @@ static void SVGPM_Debug(const char* func, const char* fmt, ...) {
 //===============
 // PM_ClipVelocity
 //
-// Walking up a step should kill some velocity.
-//  
-// Slide off of the impacting object
-// returns the Blocked flags(1 = floor, 2 = step / wall)
+// Slide off of the impacted plane.
 //===============
 //
-#define STOP_EPSILON    0.1
-static vec3_t PM_ClipVelocity(vec3_t & in, vec3_t & normal, float overbounce)
-{
-    vec3_t  result;
-    float   backoff;
-    float   change;
-    int     i;
+static vec3_t PM_ClipVelocity(const vec3_t in, const vec3_t normal, float bounce) {
 
-    backoff = DotProduct(in, normal) * overbounce;
+    float backoff = vec3_dot(in, normal);
 
-    for (i = 0; i < 3; i++) {
-        change = normal[i] * backoff;
-        result[i] = in[i] - change;
-        if (result[i] > -STOP_EPSILON && result[i] < STOP_EPSILON)
-            result[i] = 0;
+    if (backoff < 0.0f) {
+        backoff *= bounce;
+    } else {
+        backoff /= bounce;
     }
 
-    return result;
+    return in - vec3_scale(normal, backoff);
 }
 
 //
@@ -1404,14 +1394,11 @@ static void PM_AirMove(void) {
 //===============
 //
 static void PM_WalkMove(void) {
-
     // Check for beginning of a jump
     if (PM_CheckJump()) {
         PM_AirMove();
         return;
     }
-
-    //PM_Debug("%s", Vec3ToString(pm->state.origin));
 
     PM_Friction();
 
@@ -1451,6 +1438,10 @@ static void PM_WalkMove(void) {
     if (speed < PM_STOP_EPSILON) {
         speed = 0.0f;
     }
+
+#if 1
+    PM_Debug("PM_WalkMove dir.x: %g   y: %g   z: %g", dir.x, dir.y, dir.z);
+#endif
 
     // Accelerate based on slickness of ground surface
     const float acceleration = (playerMoveLocals.groundTrace.surface->flags & SURF_SLICK) ? PM_ACCEL_GROUND_SLICK : PM_ACCEL_GROUND;
@@ -1773,6 +1764,4 @@ void PMove(PlayerMove * pmove)
 
     // Check for view step changes, if so, interpolate.
     PM_CheckViewStep();
-
-    //PM_Debug("pm->step = %f pm->state.origin = %s", pm->step, Vec3ToString(pm->state.origin));
 }
