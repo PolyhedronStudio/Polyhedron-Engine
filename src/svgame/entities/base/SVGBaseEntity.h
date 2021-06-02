@@ -140,10 +140,7 @@ public:
 
     // Return the 'groundEntitPtr' entity.
     inline SVGBaseEntity* GetGroundEntity() {
-        //if (serverEntity->groundEntityPtr)
-        //    return serverEntity->groundEntityPtr->classEntity;
-        //else
-            return groundEntity;
+        return groundEntity;
     }
 
     // Return the 'groundEntityLinkCount' value.
@@ -432,19 +429,6 @@ public:
 
     // Set the 'groundEntitPtr' entity.
     inline void SetGroundEntity(SVGBaseEntity* groundEntity) {
-        // Ensure to set the serverEntity its ground entity too.
-        //
-        // This is so sharedgame code can utilize it as well.
-        //
-        // TODO: Needs a lookup function for these entities in the
-        // shared game code.
-        //if (groundEntity) {
-        //    // Set the server entity side ground pointer.
-        //    serverEntity->groundEntityPtr = groundEntity->GetServerEntity();
-        //} else {
-        //    serverEntity->groundEntityPtr = nullptr;
-        //}
-
         // Set SVGBaseEntity variant ground entity.
         this->groundEntity = groundEntity;
     }
@@ -453,9 +437,6 @@ public:
     inline void SetGroundEntityLinkCount(int32_t groundEntityLinkCount) {
         // Set it for THIS class entity.
         this->groundEntityLinkCount = groundEntityLinkCount;
-
-        // Ensure it is also set on our server entity.
-        //serverEntity->groundEntityLinkCount = groundEntityLinkCount;
     }
 
     // Set the 'health' value.

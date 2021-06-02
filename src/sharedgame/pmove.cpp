@@ -1439,10 +1439,6 @@ static void PM_WalkMove(void) {
         speed = 0.0f;
     }
 
-#if 1
-    PM_Debug("PM_WalkMove dir.x: %g   y: %g   z: %g", dir.x, dir.y, dir.z);
-#endif
-
     // Accelerate based on slickness of ground surface
     const float acceleration = (playerMoveLocals.groundTrace.surface->flags & SURF_SLICK) ? PM_ACCEL_GROUND_SLICK : PM_ACCEL_GROUND;
 
