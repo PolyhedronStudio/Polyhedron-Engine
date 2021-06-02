@@ -95,7 +95,7 @@ public:
 
     // Return the 'damage' value.
     inline const int32_t GetDamage() {
-        return serverEntity->damage;
+        return damage;
     }
 
     // Get the 'deadFlag' value.
@@ -154,7 +154,7 @@ public:
     }
 
     inline const float GetIdealYawAngle() {
-        return this->idealYawAngle;
+        return idealYawAngle;
     }
 
     // Get the 'inuse' value.
@@ -302,7 +302,7 @@ public:
 
     // Return the 'takeDamage' value.
     inline const int32_t GetTakeDamage() {
-        return serverEntity->takeDamage;
+        return takeDamage;
     }
 
     // Return the 'target' entity value.
@@ -331,7 +331,7 @@ public:
 
     // Return the 'viewHeight' entity value.
     inline const int32_t GetViewHeight() {
-        return serverEntity->viewHeight;
+        return viewHeight;
     }
 
     // Return the 'velocity' value.
@@ -350,7 +350,7 @@ public:
     }
 
     inline const float GetYawSpeed() {
-        return this->yawSpeed;
+        return yawSpeed;
     }
 
     //
@@ -384,7 +384,7 @@ public:
 
     // Set the 'damage' value.
     inline void SetDamage(const int32_t &damage) {
-        serverEntity->damage = damage;
+        this->damage = damage;
     }
 
     // Set the 'deadFlag' value.
@@ -564,7 +564,7 @@ public:
 
     // Set the 'takeDamage' value.
     inline void SetTakeDamage(const int32_t& takeDamage) {
-        serverEntity->takeDamage = takeDamage;
+        this->takeDamage = takeDamage;
     }
 
     // Set the 'teamChain' entity value.
@@ -579,7 +579,7 @@ public:
 
     // Set the 'viewHeight' entity value.
     inline void SetViewHeight(const int32_t& height) {
-        serverEntity->viewHeight = height;
+        this->viewHeight = height;
     }
 
     // Set the 'velocity' value.
@@ -667,6 +667,18 @@ protected:
     // Maximum health.
     int32_t maxHealth;
 
+    // The height above the origin, this is where EYE SIGHT comes from. Ok?
+    int32_t viewHeight;
+
+    // Determines how to interpret, take damage like a man or like a ... ? Yeah, pick up soap.
+    int32_t takeDamage;
+    
+    // Actual damage it does if encountered or fucked around with.
+    int32_t damage;
+
+//int32_t radiusDamage;
+//float damageRadius;
+// 
     // Dead Flag. (Are we dead, dying or...?)
     int32_t deadFlag;
 

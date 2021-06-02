@@ -129,7 +129,7 @@ static const save_field_t entityfields[] = {
 //    F(debouncePainTime),
 //    F(debounceDamageTime),
 //    F(debounceSoundTime),
-    F(lastMoveTime),
+//    F(lastMoveTime),
 
 //    I(health),
 //    I(maxHealth),
@@ -141,12 +141,12 @@ static const save_field_t entityfields[] = {
 
     L(map),
 
-    I(viewHeight),
-    I(takeDamage),
-    I(damage),
-    I(radiusDamage),
-    F(damageRadius),
-    I(sounds),
+    //I(viewHeight),
+    //I(takeDamage),
+    //I(damage),
+    //I(radiusDamage),
+    //F(damageRadius),
+    //I(sounds),
     I(count),
 
     E(chain),

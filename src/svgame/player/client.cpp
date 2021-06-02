@@ -408,61 +408,61 @@ void SelectSpawnPoint(Entity *ent, vec3_t &origin, vec3_t &angles)
 
 void body_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point)
 {
-    int n;
+    //int n;
 
-    if (self->classEntity && self->classEntity->GetHealth() < -40) {
-        gi.Sound(self, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
-        for (n = 0; n < 4; n++)
-            ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        self->state.origin.z -= 48;
-        ThrowClientHead(self, damage);
-        self->takeDamage = TakeDamage::No;
-    }
+    //if (self->classEntity && self->classEntity->GetHealth() < -40) {
+    //    gi.Sound(self, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+    //    for (n = 0; n < 4; n++)
+    //        ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+    //    self->state.origin.z -= 48;
+    //    ThrowClientHead(self, damage);
+    //    self->takeDamage = TakeDamage::No;
+    //}
 }
 
 void CopyToBodyQue(Entity *ent)
 {
-    Entity     *body;
+    //Entity     *body;
 
-    gi.UnlinkEntity(ent);
+    //gi.UnlinkEntity(ent);
 
-    // grab a body que and cycle to the next one
-    body = &g_entities[game.maxClients + level.bodyQue + 1];
-    level.bodyQue = (level.bodyQue + 1) % BODY_QUEUE_SIZE;
+    //// grab a body que and cycle to the next one
+    //body = &g_entities[game.maxClients + level.bodyQue + 1];
+    //level.bodyQue = (level.bodyQue + 1) % BODY_QUEUE_SIZE;
 
-    // send an effect on the removed body
-    if (body->state.modelIndex) {
-        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
-        gi.WriteByte(TempEntityEvent::Blood);
-        gi.WriteVector3(body->state.origin);
-        gi.WriteVector3(vec3_zero());
-        gi.Multicast(&body->state.origin, MultiCast::PVS);
-    }
+    //// send an effect on the removed body
+    //if (body->state.modelIndex) {
+    //    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+    //    gi.WriteByte(TempEntityEvent::Blood);
+    //    gi.WriteVector3(body->state.origin);
+    //    gi.WriteVector3(vec3_zero());
+    //    gi.Multicast(&body->state.origin, MultiCast::PVS);
+    //}
 
-    gi.UnlinkEntity(body);
-    body->state = ent->state;
-    body->state.number = body - g_entities;
-    body->state.eventID = EntityEvent::OtherTeleport;
+    //gi.UnlinkEntity(body);
+    //body->state = ent->state;
+    //body->state.number = body - g_entities;
+    //body->state.eventID = EntityEvent::OtherTeleport;
 
-    body->serverFlags = ent->serverFlags;
-    VectorCopy(ent->mins, body->mins);
-    VectorCopy(ent->maxs, body->maxs);
-    VectorCopy(ent->absMin, body->absMin);
-    VectorCopy(ent->absMax, body->absMax);
+    //body->serverFlags = ent->serverFlags;
+    //VectorCopy(ent->mins, body->mins);
+    //VectorCopy(ent->maxs, body->maxs);
+    //VectorCopy(ent->absMin, body->absMin);
+    //VectorCopy(ent->absMax, body->absMax);
 
-    body->size = ent->size; // VectorCopy(ent->size, body->size);
-    //body->velocity = ent->classEntity->GetVelocity(); // VectorCopy(ent->velocity, body->velocity);
-    //body->angularVelocity = ent->classEntity->GetAngularVelocity(); //  VectorCopy(ent->angularVelocity, body->angularVelocity);
-    body->solid = ent->solid;
-    body->clipMask = ent->clipMask;
-    body->owner = ent->owner;
-    body->classEntity->SetMoveType(ent->classEntity->GetMoveType());
-    body->classEntity->SetGroundEntity(ent->classEntity->GetGroundEntity());
+    //body->size = ent->size; // VectorCopy(ent->size, body->size);
+    ////body->velocity = ent->classEntity->GetVelocity(); // VectorCopy(ent->velocity, body->velocity);
+    ////body->angularVelocity = ent->classEntity->GetAngularVelocity(); //  VectorCopy(ent->angularVelocity, body->angularVelocity);
+    //body->solid = ent->solid;
+    //body->clipMask = ent->clipMask;
+    //body->owner = ent->owner;
+    //body->classEntity->SetMoveType(ent->classEntity->GetMoveType());
+    //body->classEntity->SetGroundEntity(ent->classEntity->GetGroundEntity());
 
-    //body->Die = body_die;
-    body->takeDamage = TakeDamage::Yes;
+    ////body->Die = body_die;
+    //body->takeDamage = TakeDamage::Yes;
 
-    gi.LinkEntity(body);
+    //gi.LinkEntity(body);
 }
 
 void SVG_RespawnClient(Entity *self)

@@ -308,31 +308,31 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
 //    if (self->owner->client)
 //        SVG_PlayerNoise(self->owner, self->state.origin, PNOISE_IMPACT);
 
-    if (other->takeDamage) {
-        mod = MeansOfDeath::Blaster;
+    //if (other->takeDamage) {
+    //    mod = MeansOfDeath::Blaster;
 
-        // N&C: Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
-        if (plane)
-        {
-            //SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
-            //    plane->normal, self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
-        }
-        else
-        {
-            //SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
-            //    vec3_zero(), self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
-        }
+    //    // N&C: Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
+    //    if (plane)
+    //    {
+    //        //SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
+    //        //    plane->normal, self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
+    //    }
+    //    else
+    //    {
+    //        //SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
+    //        //    vec3_zero(), self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
+    //    }
 
-    } else {
-        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
-        gi.WriteByte(TempEntityEvent::Blaster);
-        gi.WriteVector3(self->state.origin);
-        if (!plane)
-            gi.WriteVector3(vec3_zero());
-        else
-            gi.WriteVector3(plane->normal);
-        gi.Multicast(&self->state.origin, MultiCast::PVS);
-    }
+    //} else {
+    //    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+    //    gi.WriteByte(TempEntityEvent::Blaster);
+    //    gi.WriteVector3(self->state.origin);
+    //    if (!plane)
+    //        gi.WriteVector3(vec3_zero());
+    //    else
+    //        gi.WriteVector3(plane->normal);
+    //    gi.Multicast(&self->state.origin, MultiCast::PVS);
+    //}
 
     SVG_FreeEntity(self);
 }

@@ -103,10 +103,7 @@ SET(SRC_SVGAME
 	
 	#svgame/entities/target/target_crosslevel_target.cpp
 	#svgame/entities/target/target_crosslevel_trigger.cpp
-	#svgame/entities/target/target_earthquake.cpp
 	#svgame/entities/target/target_explosion.cpp
-	
-	
 	
 	#svgame/entities/target/target_lightramp.cpp
 	

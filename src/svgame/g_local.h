@@ -1046,7 +1046,7 @@ struct entity_s {
     //float idealYawAngle;
 
     //float nextThinkTime;
-    float lastMoveTime;
+    //float lastMoveTime;
 
     //int32_t health;
     //int32_t maxHealth;
@@ -1058,12 +1058,10 @@ struct entity_s {
 
     const char *map;           // target_changelevel // C++20: STRING: Added const to char *
 
-    int32_t viewHeight;     // height above origin where eyesight is determined
-    int32_t takeDamage;
-    int32_t damage;
-    int32_t radiusDamage;
-    float damageRadius;
-    int32_t sounds;         // make this a spawntemp var?
+    //int32_t viewHeight;     // height above origin where eyesight is determined
+    //int32_t takeDamage;
+    //int32_t damage;
+    //int32_t sounds;         // make this a spawntemp var?
     int32_t count;
 
     // Chain, enemy, old enemy, and activator entity pointers.

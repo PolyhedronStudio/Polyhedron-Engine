@@ -36,49 +36,49 @@ INTERMISSION
 //===============
 // HUD_MoveClientToIntermission
 // 
-// Changes the client's movement type to PlayerMoveType::Freezewhile setting its
+// Changes the client's movement type to PlayerMoveType::Freeze while setting its
 // origin and viewAngles to the previously fetched intermission entity 
 // values.
 //================
 //
 void HUD_MoveClientToIntermission(Entity *ent)
 {
-    // Ensure it is a valid client entity.
-    if (!ent) {
-        return;
-    }
-    if (!ent->client) {
-        return;
-    }
+    //// Ensure it is a valid client entity.
+    //if (!ent) {
+    //    return;
+    //}
+    //if (!ent->client) {
+    //    return;
+    //}
 
-    if (deathmatch->value || coop->value)
-        ent->client->showScores = true;
+    //if (deathmatch->value || coop->value)
+    //    ent->client->showScores = true;
 
-    // Copy over the previously fetched map intermission entity origin into
-    // the client player states positions.
-    ent->state.origin = level.intermission.origin;
-    ent->client->playerState.pmove.origin = level.intermission.origin;
-    ent->client->playerState.pmove.viewAngles = level.intermission.viewAngle;
-    // Setup the rest of the client player state.
-    ent->client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
-    ent->client->playerState.gunIndex = 0;
-    ent->client->playerState.blend[3] = 0;
-    ent->client->playerState.rdflags &= ~RDF_UNDERWATER;
+    //// Copy over the previously fetched map intermission entity origin into
+    //// the client player states positions.
+    //ent->state.origin = level.intermission.origin;
+    //ent->client->playerState.pmove.origin = level.intermission.origin;
+    //ent->client->playerState.pmove.viewAngles = level.intermission.viewAngle;
+    //// Setup the rest of the client player state.
+    //ent->client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
+    //ent->client->playerState.gunIndex = 0;
+    //ent->client->playerState.blend[3] = 0;
+    //ent->client->playerState.rdflags &= ~RDF_UNDERWATER;
 
-    ent->viewHeight = 0;
-    ent->state.modelIndex = 0;
-    ent->state.modelIndex2 = 0;
-    ent->state.modelIndex3 = 0;
-    ent->state.modelIndex = 0;
-    ent->state.effects = 0;
-    ent->state.sound = 0;
-    ent->solid = Solid::Not;
+    //ent->viewHeight = 0;
+    //ent->state.modelIndex = 0;
+    //ent->state.modelIndex2 = 0;
+    //ent->state.modelIndex3 = 0;
+    //ent->state.modelIndex = 0;
+    //ent->state.effects = 0;
+    //ent->state.sound = 0;
+    //ent->solid = Solid::Not;
 
-    // Add the layout in case of a deathmatch or co-op gamemode.
-    if (deathmatch->value || coop->value) {
-        SVG_HUD_GenerateDMScoreboardLayout(ent, NULL);
-        gi.Unicast(ent, true);
-    }
+    //// Add the layout in case of a deathmatch or co-op gamemode.
+    //if (deathmatch->value || coop->value) {
+    //    SVG_HUD_GenerateDMScoreboardLayout(ent, NULL);
+    //    gi.Unicast(ent, true);
+    //}
 
 }
 
