@@ -42,6 +42,9 @@ SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
 	velocity = vec3_zero();
 	angularVelocity = vec3_zero();
 	mass = 0;
+	gravity = 1.f;
+	yawSpeed = 0.f;
+	idealYawAngle = 0.f;
 	groundEntityLinkCount = 0;
 	health = 0;
 	maxHealth = 0;

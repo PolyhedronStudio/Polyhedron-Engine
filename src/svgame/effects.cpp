@@ -41,42 +41,42 @@ void ClipGibVelocity(Entity *ent)
 //
 void gib_think(Entity *self)
 {
-    self->state.frame++;
-    self->nextThinkTime = level.time + FRAMETIME;
+    //self->state.frame++;
+    //self->nextThinkTime = level.time + FRAMETIME;
 
-    if (self->state.frame == 10) {
-        //self->Think = SVG_FreeEntity;
-        self->nextThinkTime = level.time + 8 + random() * 10;
-    }
+    //if (self->state.frame == 10) {
+    //    //self->Think = SVG_FreeEntity;
+    //    self->nextThinkTime = level.time + 8 + random() * 10;
+    //}
 }
 
 void gib_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
 {
-    vec3_t  normal_angles, right;
+    //vec3_t  normal_angles, right;
 
-    if (!self->groundEntityPtr)
-        return;
+    //if (!self->groundEntityPtr)
+    //    return;
 
-    //self->Touch = NULL;
+    ////self->Touch = NULL;
 
-    if (plane) {
-        gi.Sound(self, CHAN_VOICE, gi.SoundIndex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
+    //if (plane) {
+    //    gi.Sound(self, CHAN_VOICE, gi.SoundIndex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
 
-        normal_angles = vec3_euler(plane->normal);
-        AngleVectors(normal_angles, NULL, &right, NULL);
-        self->state.angles = vec3_euler(right);
+    //    normal_angles = vec3_euler(plane->normal);
+    //    AngleVectors(normal_angles, NULL, &right, NULL);
+    //    self->state.angles = vec3_euler(right);
 
-        if (self->state.modelIndex == sm_meat_index) {
-            self->state.frame++;
-            //self->Think = gib_think;
-            self->nextThinkTime = level.time + FRAMETIME;
-        }
-    }
+    //    if (self->state.modelIndex == sm_meat_index) {
+    //        self->state.frame++;
+    //        //self->Think = gib_think;
+    //        self->nextThinkTime = level.time + FRAMETIME;
+    //    }
+    //}
 }
 
 void gib_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point)
 {
-    SVG_FreeEntity(self);
+    //SVG_FreeEntity(self);
 }
 
 void ThrowGib(Entity *self, const char *gibname, int damage, int type)

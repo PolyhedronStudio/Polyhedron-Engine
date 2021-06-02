@@ -236,13 +236,13 @@ struct MoveType {
 //-------------------
 // Armor item description.
 //-------------------
-typedef struct {
+struct gitem_armor_t {
     int32_t     baseCount;
     int32_t     maxCount;
     float   normalProtection;
     float   energyProtection;
     int32_t     armor;
-} gitem_armor_t;
+};
 
 
 //-------------------
@@ -324,7 +324,7 @@ typedef struct gitem_s {
 // it should be initialized at dll load time, and read/written to
 // the server.ssv file for savegames
 //-------------------
-typedef struct {
+struct GameLocals {
     GameClient *clients;       // [maxClients]
 
     // Can't store spawnpoint32_t in level, because
@@ -343,7 +343,7 @@ typedef struct {
 
     // Did we autosave?
     qboolean autoSaved;
-} GameLocals;
+};
 
 
 //-------------------
@@ -352,7 +352,7 @@ typedef struct {
 // This structure is cleared as each map is entered it is read/written 
 // to the 'level.sav' file for savegames
 //-------------------
-typedef struct {
+struct LevelLocals  {
     // Current local level frame number.
     int32_t frameNumber;
 
@@ -405,13 +405,13 @@ typedef struct {
 
     // Ugly place for storing coop variables.
     int32_t powerCubes; // Ugly necessity for coop
-} LevelLocals;
+};
 
 //-------------------
 // Holds entity field values that can be set from the editor, but aren't actualy present
 // in Entity during gameplay
 //-------------------
-typedef struct {
+struct TemporarySpawnFields {
     // world vars
     char *sky;
     float skyrotate;
@@ -430,13 +430,13 @@ typedef struct {
     float maxyaw;
     float minpitch;
     float maxpitch;
-} TemporarySpawnFields;
+};
 
 //-------------------
 // Contains data for keeping track of velocity based moving entities.
 // (In other words, entities that aren't a: Client or AI Player.
 //-------------------
-typedef struct {
+struct PushMoveInfo {
     // fixed data
     vec3_t startOrigin;
     vec3_t startAngles;
@@ -463,7 +463,7 @@ typedef struct {
     float remainingDistance;
     float deceleratedDistance;
     void (*OnEndFunction)(Entity *);
-} PushMoveInfo;
+};
 
 // Wrap these in functions such as?:
 // SVG_GetGameLocals
@@ -803,7 +803,7 @@ struct PlayerAnimation {
 // The ClientPersistantData struct manages data that has to stay persistent
 // across level changes.
 //-------------------
-typedef struct {
+struct ClientPersistantData {
     char userinfo[MAX_INFO_STRING];
     char netname[16];
     int32_t hand;
@@ -834,7 +834,7 @@ typedef struct {
     int32_t score;         // For calculating total unit score in coop games
 
     qboolean isSpectator;          // client is a isSpectator
-} ClientPersistantData;
+};
 
 //-------------------
 // The ClientRespawnData struct is used to store specific information about
@@ -1037,15 +1037,15 @@ struct entity_s {
     //vec3_t velocity;
     //vec3_t angularVelocity;
     
-    float gravity;        // per entity gravity multiplier (1.0 is normal)
+    //float gravity;        // per entity gravity multiplier (1.0 is normal)
                                 // use for lowgrav artifact, flares
 
     Entity *goalEntityPtr;
     Entity *moveTargetPtr;
-    float yawSpeed;
-    float idealYawAngle;
+    //float yawSpeed;
+    //float idealYawAngle;
 
-    float nextThinkTime;
+    //float nextThinkTime;
     float lastMoveTime;
 
     //int32_t health;

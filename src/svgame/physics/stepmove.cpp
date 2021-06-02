@@ -328,13 +328,21 @@ static void SVG_CalculateYawAngle (Entity* ent)
     float   speed;
 
     current = AngleMod(ent->state.angles[vec3_t::Yaw]);
-    ideal = ent->idealYawAngle;
+    
+    if (ent->classEntity)
+        ideal = ent->classEntity->GetIdealYawAngle();
+    else
+        ideal = 0.f;
 
     if (current == ideal)
         return;
 
     move = ideal - current;
-    speed = ent->yawSpeed;
+    if (ent->classEntity)
+        speed = ent->classEntity->GetYawSpeed();
+    else
+        speed = 0.f;
+
     if (ideal > current) {
         if (move >= 180)
             move = move - 360;
@@ -370,7 +378,7 @@ qboolean SV_StepDirection(SVGBaseEntity* ent, float yaw, float dist)
     vec3_t      move, oldOrigin;
     float       delta;
 
-    ent->GetServerEntity()->idealYawAngle = yaw;
+    ent->SetIdealYawAngle(yaw);
     SVG_CalculateYawAngle(ent->GetServerEntity());
 
     yaw = yaw * M_PI * 2 / 360;
@@ -382,7 +390,7 @@ qboolean SV_StepDirection(SVGBaseEntity* ent, float yaw, float dist)
 
 //    VectorCopy(ent->state.origin, oldorigin);
     if (SVG_MoveStep(ent, move, false)) {
-        delta = ent->GetServerEntity()->state.angles[vec3_t::Yaw] - ent->GetServerEntity()->idealYawAngle;
+        delta = ent->GetServerEntity()->state.angles[vec3_t::Yaw] - ent->GetIdealYawAngle();
         if (delta > 45 && delta < 315) {
             // not turned far enough, so don't take the step
             ent->SetOrigin(oldOrigin);

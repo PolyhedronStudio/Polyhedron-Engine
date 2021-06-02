@@ -135,7 +135,7 @@ public:
 
     // Return the 'gravity' value.
     inline const float GetGravity() {
-        return serverEntity->gravity;
+        return gravity;
     }
 
     // Return the 'groundEntitPtr' entity.
@@ -154,6 +154,10 @@ public:
     // Return the 'health' value.
     inline const int32_t GetHealth() {
         return health;
+    }
+
+    inline const float GetIdealYawAngle() {
+        return this->idealYawAngle;
     }
 
     // Get the 'inuse' value.
@@ -222,7 +226,7 @@ public:
 
     // Return the 'nextThinkTime' value.
     inline const float GetNextThinkTime() {
-        return serverEntity->nextThinkTime;
+        return nextThinkTime;
     }
 
     // Return the 'noiseIndex' value.
@@ -348,6 +352,10 @@ public:
         return serverEntity->waterType;
     }
 
+    inline const float GetYawSpeed() {
+        return this->yawSpeed;
+    }
+
     //
     // Entity Set Functions.
     //
@@ -419,7 +427,7 @@ public:
 
     // Set the 'gravity' value.
     inline void SetGravity(const float &gravity) {
-        serverEntity->gravity = gravity;
+        this->gravity = gravity;
     }
 
     // Set the 'groundEntitPtr' entity.
@@ -453,6 +461,11 @@ public:
     // Set the 'health' value.
     inline void SetHealth(const int32_t &health) {
         this->health = health;
+    }
+
+    // Set the 'idealYawAngle' value.
+    inline void SetIdealYawAngle(const float& idealYawAngle) {
+        this->idealYawAngle = idealYawAngle;
     }
 
     // Set the 'inuse' value.
@@ -515,7 +528,7 @@ public:
 
     // Set the 'nextThinkTime' value.
     inline void SetNextThinkTime(const float& nextThinkTime) {
-        serverEntity->nextThinkTime = nextThinkTime;
+        this->nextThinkTime = nextThinkTime;
     }
     
     // Set the 'oldEnemyPtr' pointer.
@@ -603,6 +616,11 @@ public:
         serverEntity->waterType = waterType;
     }
 
+    // Yaw Speed. (Should be for monsters...)
+    inline void SetYawSpeed(const float& yawSpeed) {
+        this->yawSpeed = yawSpeed;
+    }
+
 
     //
     // General Entity Functions.
@@ -644,6 +662,21 @@ protected:
     vec3_t angularVelocity;
     // Mass
     int32_t mass;
+    // Per entity gravity multiplier (1.0 is normal). TIP: Use for lowgrav artifact, flares
+    float gravity;
+    
+    // Goal Entity.
+    Entity* goalEntityPtr;
+    // Move Target Entity.
+    Entity* moveTargetPtr;
+    
+    // Yaw Speed. (Should be for monsters...)
+    float yawSpeed;
+    // Ideal Yaw Angle. (Should be for monsters...)
+    float idealYawAngle;
+
+    // The next 'think' time, determines when to call the 'think' callback.
+    float nextThinkTime;
 
     // Ground Entity link count. (To keep track if it is linked or not.)
     int32_t groundEntityLinkCount;

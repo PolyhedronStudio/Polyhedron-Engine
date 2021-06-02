@@ -330,7 +330,7 @@ void SVG_InitEntity(Entity* e)
     e->className = "noclass";
 
     // Reset gravity.
-    e->gravity = 1.0;
+//    e->gravity = 1.0;
 
     // Last but not least, give it that ID number it so badly deserves for being initialized.
     e->state.number = e - g_entities;

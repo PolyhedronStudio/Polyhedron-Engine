@@ -96,7 +96,7 @@ void UTIL_UseTargets(SVGBaseEntity*ent, SVGBaseEntity*activator)
         // create a temp object to fire at a later time
         t = SVG_Spawn();
         t->className = "DelayedUse";
-        t->nextThinkTime = level.time + ent->GetDelay();
+//        t->nextThinkTime = level.time + ent->GetDelay();
         //t->Think = Think_Delay;
 //        t->activator = activator;
         if (!activator)

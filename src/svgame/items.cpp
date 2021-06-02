@@ -137,7 +137,7 @@ void SVG_SetRespawn(Entity *ent, float delay)
     ent->flags |= EntityFlags::Respawn;
     ent->serverFlags |= EntityServerFlags::NoClient;
     ent->solid = Solid::Not;
-    ent->nextThinkTime = level.time + delay;
+//    ent->nextThinkTime = level.time + delay;
 //    ent->Think = DoRespawn;
     gi.LinkEntity(ent);
 }
@@ -469,7 +469,7 @@ void drop_make_touchable(Entity *ent)
 {
 //    ent->Touch = SVG_TouchItem;
     if (deathmatch->value) {
-        ent->nextThinkTime = level.time + 29;
+//        ent->nextThinkTime = level.time + 29;
 //        ent->Think = SVG_FreeEntity;
     }
 }
@@ -727,7 +727,7 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
     }
 
     ent->item = item;
-    ent->nextThinkTime = level.time + 2 * FRAMETIME;    // items start after other solids
+//    ent->nextThinkTime = level.time + 2 * FRAMETIME;    // items start after other solids
 //    ent->Think = droptofloor;
     ent->state.effects = item->worldModelFlags;
     ent->state.renderEffects = RenderEffects::Glow;

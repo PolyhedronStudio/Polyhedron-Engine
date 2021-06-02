@@ -109,14 +109,14 @@ static const save_field_t entityfields[] = {
 //    V(angularVelocity),
 //    I(mass),
 //    F(airFinishedTime),
-    F(gravity),
+//    F(gravity),
 
     E(goalEntityPtr),
     E(moveTargetPtr),
-    F(yawSpeed),
-    F(idealYawAngle),
+//    F(yawSpeed),
+ //   F(idealYawAngle),
 
-    F(nextThinkTime),
+ //   F(nextThinkTime),
     //P(PreThink, P_prethink),
     //P(Think, P_think),
     //P(Blocked, P_blocked),
@@ -938,9 +938,9 @@ void SVG_ReadLevel(const char *filename)
             continue;
 
         // fire any cross-level triggers
-        if (ent->className)
-            if (strcmp(ent->className, "target_crosslevel_target") == 0)
-                ent->nextThinkTime = level.time + ent->delay;
+        //if (ent->className)
+        //    if (strcmp(ent->className, "target_crosslevel_target") == 0)
+        //        ent->nextThinkTime = level.time + ent->delay;
 
         //if (ent->Think == func_clock_think || ent->Use == func_clock_use) {
         //    const char *msg = ent->message;
