@@ -383,9 +383,6 @@ void WorldSpawn::Think() {
 //===============
 //
 void WorldSpawn::SpawnKey(const std::string& key, const std::string& value) {
-    // Pass it on.
-    SVGBaseEntity::SpawnKey(key, value);
-
     if (key == "gravity") {
         // Parse Gravity.
         int32_t gravity = 0;
@@ -449,7 +446,8 @@ void WorldSpawn::SpawnKey(const std::string& key, const std::string& value) {
         // Assign.
         SVG_SetConfigString(ConfigStrings::CdTrack, va("%i", sounds));
     } else {
-
+        // Pass it on.
+        SVGBaseEntity::SpawnKey(key, value);
     }
 }
 

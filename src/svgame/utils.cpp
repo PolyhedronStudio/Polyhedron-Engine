@@ -189,23 +189,50 @@ G_TouchTriggers
 */
 void UTIL_TouchTriggers(SVGBaseEntity *ent)
 {
-    // Dead things don't activate triggers!
+    int         i, num;
+    Entity* serverEntity = ent->GetServerEntity();
+    Entity* touch[MAX_EDICTS], * hit;
+
+    // dead things don't activate triggers!
     if ((ent->GetClient() || (ent->GetServerFlags() & EntityServerFlags::Monster)) && (ent->GetHealth() <= 0))
         return;
 
-    // Fetch the boxed entities.
-    std::vector<SVGBaseEntity*> touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AREA_TRIGGERS);
+    num = gi.BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), touch
+        , MAX_EDICTS, AREA_TRIGGERS);
 
     // be careful, it is possible to have an entity in this
     // list removed before we get to it (killtriggered)
-    for (auto& touchedEntity : touched) {
-        if (!touchedEntity)
-            continue;
-        if (!touchedEntity->IsInUse())
+    for (i = 0; i < num; i++) {
+        hit = touch[i];
+        if (!hit->inUse)
             continue;
 
-        touchedEntity->Touch(touchedEntity, ent, NULL, NULL);
+        if (!hit->classEntity)
+            continue;
+
+        hit->classEntity->Touch(hit->classEntity, ent, NULL, NULL);
+        //if (!hit->touch)
+        //    continue;
+        //hit->touch(hit, ent, NULL, NULL);
     }
+    //// Dead things don't activate triggers!
+    //if ((ent->GetClient() || (ent->GetServerFlags() & EntityServerFlags::Monster)) && (ent->GetHealth() <= 0))
+    //    return;
+
+    //// Fetch the boxed entities.
+    //std::vector<SVGBaseEntity*> touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AREA_TRIGGERS);
+    //int32_t size = touched.size();
+
+    //// be careful, it is possible to have an entity in this
+    //// list removed before we get to it (killtriggered)
+    //for (auto& touchedEntity : touched) {
+    //    if (!touchedEntity)
+    //        continue;
+    //    if (!touchedEntity->IsInUse())
+    //        continue;
+
+    //    touchedEntity->Touch(touchedEntity, ent, NULL, NULL);
+    //}
 }
 
 /*
@@ -229,7 +256,7 @@ void G_TouchSolids(SVGBaseEntity *ent)
         if (!touchedEntity->IsInUse())
             continue;
 
-        ent->Touch(touchedEntity, ent, NULL, NULL);
+        touchedEntity->Touch(touchedEntity, ent, NULL, NULL);
 
         if (!ent->IsInUse())
             break;

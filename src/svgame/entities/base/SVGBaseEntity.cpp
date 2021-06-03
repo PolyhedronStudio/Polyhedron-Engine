@@ -39,6 +39,8 @@ SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
 	moveType = MoveType::None;
 
 	// Velocity.
+	flags = 0;
+	spawnFlags = 0;
 	velocity = vec3_zero();
 	angularVelocity = vec3_zero();
 	mass = 0;
@@ -234,8 +236,8 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 		// Set angle.
 		SetAngles(vec3_t{ vec3_to_yaw({ parsedAngle , 0.f, 0.f }), 0.f, 0.f });
 	}
-
-	if (key == "angles") {
+	// Angles.
+	else if (key == "angles") {
 		// Parse angles.
 		vec3_t parsedAngles = vec3_zero();
 		ParseVector3KeyValue(key, value, parsedAngles);
@@ -243,15 +245,43 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 		// Set origin.
 		SetAngles(parsedAngles);
 	}
+	// Damage(dmg)
+	else if (key == "dmg") {
+		// Parse damage.
+		int32_t parsedDamage = 0;
+		ParseIntegerKeyValue(key, value, parsedDamage);
 
+		// Set Damage.
+		SetDamage(parsedDamage);
+	}
+	// Model.
+	else if (key == "model") {
+		// Parse model.
+		std::string parsedModel = "";
+		ParseStringKeyValue(key, value, parsedModel);
+
+		// Set model.
+		SetModel(parsedModel);
+	}
 	// Origin.
-	if (key == "origin") {
+	else if (key == "origin") {
 		// Parse origin.
 		vec3_t parsedOrigin = vec3_zero();
 		ParseVector3KeyValue(key, value, parsedOrigin);
 
 		// Set origin.
 		SetOrigin(parsedOrigin);
+	}	
+	// Spawnflags.
+	else if (key == "spawnflags") {
+		// Parse damage.
+		int32_t parsedSpawnFlags = 0;
+		ParseIntegerKeyValue(key, value, parsedSpawnFlags);
+
+		// Set SpawnFlags.
+		SetSpawnFlags(parsedSpawnFlags);
+	} else {
+		gi.DPrintf("Entity ID: %i - classname: %s has unknown Key/Value['%s','%s']\n", GetServerEntity()->state.number, GetServerEntity()->className, key.c_str(), value.c_str());
 	}
 }
 
@@ -330,8 +360,6 @@ void SVGBaseEntity::Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* p
 	// Safety check.
 	if (touchFunction == nullptr)
 		return;
-
-	uint32_t stateNumber = self->GetNumber();
 
 	// Execute 'Touch' callback function.
 	(this->*touchFunction)(self, other, plane, surf);

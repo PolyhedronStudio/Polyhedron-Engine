@@ -499,7 +499,7 @@ public:
         this->model = model;
 
         // Set model index.
-        SetModelIndex(gi.ModelIndex(GetModel().c_str()));
+        SetModelIndex(gi.ModelIndex(model.c_str()));
     }
 
     // Set the 'moveType' value.
@@ -540,6 +540,11 @@ public:
     // Set the 'skinNumber' value.
     inline void SetSkinNumber(const int32_t& skinNumber) {
         serverEntity->state.skinNumber = skinNumber;
+    }
+
+    // Sest the 'size' value.
+    inline void SetSize(const vec3_t& size) {
+        serverEntity->size = size;
     }
 
     // Set the 'solid' value.

@@ -122,19 +122,21 @@ qboolean SVG_RunThink(SVGBaseEntity *ent)
 //
 void SVG_Impact(SVGBaseEntity *e1, SVGTrace *trace)
 {
-    SVGBaseEntity     *e2;
+    SVGBaseEntity *e2 = nullptr;
 //  cplane_t    backplane;
 
-    e2 = trace->ent;
+    if (trace) {
+        e2 = trace->ent;
+    }
 
     if (e1->GetSolid() != Solid::Not) {
         //e1->Touch(e1, e2, &trace->plane, trace->surface);
         e1->Touch(e1, e2, &trace->plane, trace->surface);
     }
 
-    if (e2->GetSolid() != Solid::Not) {
+    if (e2 != nullptr && e2->GetSolid() != Solid::Not) {
         //e2->Touch(e2, e1, NULL, NULL);
-        e2->Touch(e2, e1, &trace->plane, trace->surface);
+        e2->Touch(e2, e1, NULL, NULL);
     }
 }
 
@@ -403,7 +405,7 @@ typedef struct {
     vec3_t  origin;
     vec3_t  angles;
 #if USE_SMOOTH_DELTA_ANGLES
-    int     deltayaw;
+    int     deltaYaw;
 #endif
 } pushed_t;
 pushed_t    pushed[MAX_EDICTS], *pushed_p;
@@ -427,26 +429,25 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
     pushed_t    *p = NULL;
     vec3_t      org, org2, move2, forward, right, up;
 
-    // find the bounding box
-    //for (i = 0 ; i < 3 ; i++) {
-    //    mins[i] = pusher->absMin[i] + move[i];
-    //    maxs[i] = pusher->absMax[i] + move[i];
-    //}
+    // Find the bounding box
     vec3_t mins = pusher->GetAbsoluteMin() + move;
     vec3_t maxs = pusher->GetAbsoluteMax() + move;
 
-// we need this for pushing things later
+    // We need this for pushing things later
     org = vec3_zero() - amove;
     AngleVectors(org, &forward, &right, &up);
 
-// save the pusher's original position
+    // Save the pusher's original position
     pushed_p->ent = pusher;
     pushed_p->origin = pusher->GetOrigin(); // VectorCopy(pusher->state.origin, pushed_p->origin);
     pushed_p->angles = pusher->GetAngles();
 
 #if USE_SMOOTH_DELTA_ANGLES
-    if (pusher->GetClient())
-        pushed_p->deltayaw = pusher->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
+    if (pusher->GetClient()) {
+        pushed_p->deltaYaw = pusher->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
+    } else {
+        pushed_p->deltaYaw = 0.f;
+    }
 #endif
     pushed_p++;
 
@@ -505,7 +506,7 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
             pushed_p->angles = check->GetAngles(); //VectorCopy(check->state.angles, pushed_p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
             if (check->GetClient())
-                pushed_p->deltayaw = check->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
+                pushed_p->deltaYaw = check->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
 #endif
             pushed_p++;
 
@@ -561,7 +562,7 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
             p->ent->SetAngles(p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
             if (p->ent->GetClient()) {
-                p->ent->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltayaw;
+                p->ent->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltaYaw;
             }
 #endif
             p->ent->LinkEntity();
@@ -757,8 +758,7 @@ void SVG_Physics_Toss(SVGBaseEntity *ent)
         }
         
         // Clip new velocity.
-        vec3_t newVelocity = ClipVelocity(ent->GetVelocity(), trace.plane.normal, backOff);
-        ent->SetVelocity(newVelocity);
+        ent->SetVelocity(ClipVelocity(ent->GetVelocity(), trace.plane.normal, backOff));
 
         // Stop if on ground
         if (trace.plane.normal[2] > 0.7) {

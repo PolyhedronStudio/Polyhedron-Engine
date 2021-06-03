@@ -28,9 +28,19 @@ public:
     virtual void PostSpawn() override;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     virtual void Think() override;       // General entity thinking routine.
 
+    virtual void SpawnKey(const std::string& key, const std::string& value)  override;
+
+    //
+    // Trigger functions.
+    //
+    void UseTargets(SVGBaseEntity* activator);
+
+    //
+    // Get/Set
+    // 
     // Return the 'delay' value.
     inline const int32_t GetDelay() {
-        return serverEntity->delay;
+        return delay;
     }
 
     //
@@ -38,12 +48,25 @@ public:
     //
 
     // Return the 'delay' value.
-    inline const int32_t SetDelay(const int32_t& delay) {
-       // this->delay = delay;
-        return 0;
+    inline void SetDelay(const int32_t& delay) {
+        this->delay = delay;
     }
 
 protected:
+    /* legacy trigger architecture */
+    //float m_flDelay;
+    //virtual void(entity, int) Trigger;
+    //virtual void(entity, int, float) UseTargets;
+
+    ///* master feature */
+    //virtual int(void) GetValue;
+    //virtual int(void) GetMaster;
+
+    ///* spawn setup helpers */
+    //virtual void(void) InitBrushTrigger;
+    //virtual void(void) InitPointTrigger;
+    virtual void InitBrushTrigger();
+    virtual void InitPointTrigger();
 
     //
     // Other base entity members. (These were old fields in edict_T back in the day.)
@@ -56,6 +79,19 @@ protected:
     //int32_t m_iTeam;
     //int32_t m_iValue;
 
+    // Kill target when triggered.
+    std::string killTargetStr;
+    
+    // Message when triggered.
+    std::string messageStr;
+
+    // Master trigger entity.
+    std::string masterStr;
+
+    // Delay before calling trigger execution.
+    float delay;
+
+    // Timestamp that the trigger has been called at.
     //
     // Entity pointers.
     // 
@@ -73,18 +109,7 @@ protected:
     //SVGBaseEntity* teamMasterEntity;
 
 public:
-    //
-    // Ugly, but effective callback SET methods.
-    //
-    // Sets the 'Think' callback function.
-    template<typename function>
-    inline void SetThinkCallback(function f)
-    {
-        thinkFunction = static_cast<ThinkCallbackPointer>(f);
-    }
-    inline qboolean HasThinkCallback() {
-        return (thinkFunction != nullptr ? true : false);
-    }
+
 
 protected:
     //

@@ -22,9 +22,11 @@
 //
 //
 #include "entities/base/SVGBaseEntity.h"
+#include "entities/base/SVGBaseTrigger.h"
 #include "entities/base/PlayerClient.h"
 #include "entities/info/InfoPlayerStart.h"
 #include "entities/misc/MiscExplosionBox.h"
+#include "entities/trigger/TriggerHurt.h"
 #include "entities/Worldspawn.h"
 #include "entities/Light.h"
 
@@ -55,6 +57,8 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
         spawnEntity = g_baseEntities[entityNumber] = new Light(ent);
     else if (className == "worldspawn")
         spawnEntity = g_baseEntities[entityNumber] = new WorldSpawn(ent);
+    else if (className == "trigger_hurt")
+        spawnEntity = g_baseEntities[entityNumber] = new TriggerHurt(ent);
     else if (className == "PlayerClient")
         spawnEntity = g_baseEntities[entityNumber] = new PlayerClient(ent);
     else

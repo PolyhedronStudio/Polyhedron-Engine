@@ -124,6 +124,7 @@ SET(SRC_SVGAME
 	#svgame/entities/trigger/trigger_once.cpp
 	#svgame/entities/trigger/trigger_push.cpp
 	#svgame/entities/trigger/trigger_relay.cpp
+	svgame/entities/trigger/TriggerHurt.cpp
 	
 	svgame/entities/Light.cpp
 	svgame/entities/WorldSpawn.cpp
@@ -167,6 +168,8 @@ SET(HEADERS_SVGAME
 	svgame/entities/func/func_door.h
 
 	svgame/entities/misc/MiscExplosionBox.h
+
+	svgame/entities/trigger/TriggerHurt.h
 
 	svgame/entities/Light.h
 	svgame/entities/WorldSpawn.h

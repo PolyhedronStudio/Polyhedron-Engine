@@ -56,7 +56,7 @@ SVGBaseTrigger::~SVGBaseTrigger() {
 //===============
 //
 void SVGBaseTrigger::Precache() {
-	gi.DPrintf("SVGBaseEntity::Precache();");
+	SVGBaseEntity::Precache();
 }
 
 //
@@ -67,6 +67,8 @@ void SVGBaseTrigger::Precache() {
 //
 void SVGBaseTrigger::Spawn() {
 	SVGBaseEntity::Spawn();
+
+
 }
 
 //
@@ -98,6 +100,77 @@ void SVGBaseTrigger::PostSpawn() {
 void SVGBaseTrigger::Think() {
 	SVGBaseEntity::Think();
 }
+
+//
+//===============
+// SVGBaseTrigger::InitBrushTrigger
+//
+//===============
+//
+void SVGBaseTrigger::InitBrushTrigger() {
+	SetModel(GetModel());
+	SetMoveType(MoveType::None);
+	SetSolid(Solid::Trigger);
+	SetInUse(true);
+
+	// Ensure we got the proper no client flags.
+	SetServerFlags(EntityServerFlags::NoClient);
+}
+
+//
+//===============
+// SVGBaseTrigger::InitPointTrigger
+//
+//===============
+//
+void SVGBaseTrigger::InitPointTrigger() {
+	const vec3_t HULL_MINS = { -16.f, -16.f, -36.f };
+	const vec3_t HULL_MAXS = { 16.f,  16.f,  36.f };
+
+	SetSize(HULL_MINS + HULL_MAXS);
+	SetMoveType(MoveType::None);
+	SetSolid(Solid::Trigger);
+
+	// Ensure we got the proper no client flags.
+	SetServerFlags(EntityServerFlags::NoClient);
+}
+
+//
+//===============
+// SVGBaseTrigger::InitPointTrigger
+//
+//===============
+//
+void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) {
+	// Parent class spawnkey.
+	SVGBaseEntity::SpawnKey(key, value);
+
+	if (key == "killtarget") {
+		// Parsed string.
+		std::string parsedString;
+
+		// Parse.
+		ParseStringKeyValue(key, value, parsedString);
+
+		// Assign.
+		killTargetStr = value;
+	}
+}
+	//case "killtarget":
+	//	m_strKillTarget = strValue;
+	//	break;
+	//case "message":
+	//	m_strMessage = strValue;
+	//	break;
+	//case "master":
+	//	m_strMaster = strValue;
+	//	break;
+	//case "team_no":
+	//	m_iTeam = stoi(strValue);
+	//	break;
+	//case "delay":
+	//	m_flDelay = stof(strValue);
+	//	break;
 
 //
 //===============
