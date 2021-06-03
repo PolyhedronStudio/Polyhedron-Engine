@@ -35,15 +35,16 @@ is not a staircase.
 */
 int c_yes, c_no;
 
-qboolean SVG_StepMove_CheckBottom(Entity* ent)
+qboolean SVG_StepMove_CheckBottom(SVGBaseEntity* ent)
 {
-    vec3_t  mins, maxs, start, stop;
-    trace_t trace;
-    int     x, y;
+    vec3_t  start, stop;
+    SVGTrace trace;
+    int32_t x, y;
     float   mid, bottom;
 
-    VectorAdd(ent->state.origin, ent->mins, mins);
-    VectorAdd(ent->state.origin, ent->maxs, maxs);
+    vec3_t mins = ent->GetOrigin() - ent->GetMins(); //VectorAdd(ent->state.origin, ent->mins, mins);
+    vec3_t maxs = ent->GetOrigin() - ent->GetMaxs(); //VectorAdd(ent->state.origin, ent->maxs, maxs);
+    
 
     // if all of the points under the corners are solid world, don't bother
     // with the tougher checks
@@ -71,7 +72,7 @@ realcheck:
     start[0] = stop[0] = (mins[0] + maxs[0]) * 0.5;
     start[1] = stop[1] = (mins[1] + maxs[1]) * 0.5;
     stop[2] = start[2] - 2 * STEPSIZE;
-    trace = gi.Trace(start, vec3_origin, vec3_origin, stop, ent, CONTENTS_MASK_MONSTERSOLID);
+    trace = SVG_Trace(start, vec3_zero(), vec3_zero(), stop, ent, CONTENTS_MASK_MONSTERSOLID);
 
     if (trace.fraction == 1.0)
         return false;
@@ -83,7 +84,7 @@ realcheck:
             start[0] = stop[0] = x ? maxs[0] : mins[0];
             start[1] = stop[1] = y ? maxs[1] : mins[1];
 
-            trace = gi.Trace(start, vec3_origin, vec3_origin, stop, ent, CONTENTS_MASK_MONSTERSOLID);
+            trace = SVG_Trace(start, vec3_zero(), vec3_zero(), stop, ent, CONTENTS_MASK_MONSTERSOLID);
 
             if (trace.fraction != 1.0 && trace.endPosition[2] > bottom)
                 bottom = trace.endPosition[2];
@@ -281,9 +282,8 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
 
     // check point traces down for dangling corners
     ent->SetOrigin(trace.endPosition);
-//    VectorCopy(trace.endPosition, ent->state.origin);
 
-    if (!SVG_StepMove_CheckBottom(ent->GetServerEntity())) {
+    if (!SVG_StepMove_CheckBottom(ent)) {
         if (ent->GetFlags() & EntityFlags::PartiallyOnGround) {
             // entity had floor mostly pulled out from underneath it
             // and is trying to correct
