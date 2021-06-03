@@ -143,12 +143,9 @@ void SVG_Impact(SVGBaseEntity *e1, SVGTrace *trace)
 //===============
 // ClipVelocity
 //
-// Slide off of the impacting object
-// returns the Blocked flags(1 = floor, 2 = step / wall)
+// Slide off of the impacting object returns new velocity.
 //===============
 //
-#define STOP_EPSILON    0.1
-
 static vec3_t ClipVelocity(const vec3_t in, const vec3_t normal, float bounce) {
 
     float backoff = vec3_dot(in, normal);
@@ -279,7 +276,7 @@ int SVG_FlyMove(SVGBaseEntity *ent, float time, int mask)
             return 3;
         }
 
-        VectorCopy(trace.plane.normal, planes[numplanes]);
+        planes[numplanes] = trace.plane.normal;
         numplanes++;
 
 //
@@ -289,8 +286,8 @@ int SVG_FlyMove(SVGBaseEntity *ent, float time, int mask)
             new_velocity = ClipVelocity(original_velocity, planes[i], 1);
 
             for (j = 0 ; j < numplanes ; j++)
-                if ((j != i) && !VectorCompare(planes[i], planes[j])) {
-                    if (DotProduct(new_velocity, planes[j]) < 0)
+                if ((j != i) && !vec3_equal(planes[i], planes[j])) {
+                    if (vec3_dot(new_velocity, planes[j]) < 0)
                         break;  // not ok
                 }
             if (j == numplanes)
@@ -524,10 +521,10 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
 
             // figure movement due to the pusher's amove
             org = check->GetOrigin() - pusher->GetOrigin(); //VectorSubtract(check->state.origin, pusher->state.origin, org);
-            org2[0] = DotProduct(org, forward);
-            org2[1] = -DotProduct(org, right);
-            org2[2] = DotProduct(org, up);
-            VectorSubtract(org2, org, move2);
+            org2[0] = vec3_dot(org, forward);
+            org2[1] = -vec3_dot(org, right);
+            org2[2] = vec3_dot(org, up);
+            move2 = org2 - org;
             check->SetOrigin(check->GetOrigin() + move2);//VectorAdd(check->state.origin, move2, check->state.origin);
 
             // may have pushed them off an edge
