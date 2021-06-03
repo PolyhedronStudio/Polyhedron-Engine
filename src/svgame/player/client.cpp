@@ -337,9 +337,11 @@ void SVG_SaveClientData(void)
         ent = &g_entities[1 + i];
         if (!ent->inUse)
             continue;
+        if (!ent->classEntity)
+            continue;
         game.clients[i].persistent.health = ent->classEntity->GetHealth();
         game.clients[i].persistent.maxHealth = ent->classEntity->GetMaxHealth();
-        game.clients[i].persistent.savedFlags = (ent->flags & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
+        game.clients[i].persistent.savedFlags = (ent->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
         if (coop->value && ent->client)
             game.clients[i].persistent.score = ent->client->respawn.score;
     }

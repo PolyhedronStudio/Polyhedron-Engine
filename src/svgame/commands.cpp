@@ -266,18 +266,18 @@ Sets client to godmode
 argv(0) god
 ==================
 */
-void Cmd_God_f(Entity *ent)
+void Cmd_God_f(SVGBaseEntity *ent)
 {
     if (deathmatch->value && !sv_cheats->value) {
-        gi.CPrintf(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
         return;
     }
 
-    ent->flags ^= EntityFlags::GodMode;
-    if (!(ent->flags & EntityFlags::GodMode))
-        gi.CPrintf(ent, PRINT_HIGH, "godmode OFF\n");
+    ent->SetFlags(ent->GetFlags() ^ EntityFlags::GodMode);
+    if (!(ent->GetFlags() & EntityFlags::GodMode))
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "godmode OFF\n");
     else
-        gi.CPrintf(ent, PRINT_HIGH, "godmode ON\n");
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "godmode ON\n");
 }
 
 
@@ -290,18 +290,18 @@ Sets client to notarget
 argv(0) notarget
 ==================
 */
-void Cmd_Notarget_f(Entity *ent)
+void Cmd_Notarget_f(SVGBaseEntity *ent)
 {
     if (deathmatch->value && !sv_cheats->value) {
-        gi.CPrintf(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
         return;
     }
 
-    ent->flags ^= EntityFlags::NoTarget;
-    if (!(ent->flags & EntityFlags::NoTarget))
-        gi.CPrintf(ent, PRINT_HIGH, "notarget OFF\n");
+    ent->SetFlags(ent->GetFlags() ^ EntityFlags::NoTarget);
+    if (!(ent->GetFlags() & EntityFlags::NoTarget))
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "notarget OFF\n");
     else
-        gi.CPrintf(ent, PRINT_HIGH, "notarget ON\n");
+        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "notarget ON\n");
 }
 
 
@@ -865,9 +865,9 @@ void SVG_ClientCommand(Entity *serverEntity)
     else if (Q_stricmp(cmd, "give") == 0)
         Cmd_Give_f(ent->GetServerEntity());
     else if (Q_stricmp(cmd, "god") == 0)
-        Cmd_God_f(ent->GetServerEntity());
+        Cmd_God_f(ent);
     else if (Q_stricmp(cmd, "notarget") == 0)
-        Cmd_Notarget_f(ent->GetServerEntity());
+        Cmd_Notarget_f(ent);
     else if (Q_stricmp(cmd, "noclip") == 0)
         Cmd_Noclip_f(ent);
     else if (Q_stricmp(cmd, "inven") == 0)

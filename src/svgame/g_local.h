@@ -1004,9 +1004,7 @@ struct entity_s {
     // Hashmap containing the key:value entity properties.
     std::map<std::string, std::string> entityDictionary;
 
-    int32_t flags;
-
-    const char *model;       // C++20: STRING: Added const to char*
+    //const char *model;       // C++20: STRING: Added const to char*
     float freeTime;     // sv.time when the object was freed
 
     //

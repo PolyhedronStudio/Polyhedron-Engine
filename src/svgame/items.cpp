@@ -134,7 +134,7 @@ void SVG_SetRespawn(Entity *ent, float delay)
     if (!ent)
         return;
 
-    ent->flags |= EntityFlags::Respawn;
+//    ent->flags |= EntityFlags::Respawn;
     ent->serverFlags |= EntityServerFlags::NoClient;
     ent->solid = Solid::Not;
 //    ent->nextThinkTime = level.time + delay;
@@ -731,8 +731,8 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
 //    ent->Think = droptofloor;
     ent->state.effects = item->worldModelFlags;
     ent->state.renderEffects = RenderEffects::Glow;
-    if (ent->model)
-        gi.ModelIndex(ent->model);
+    //if (ent->model)
+    //    gi.ModelIndex(ent->model);
 }
 
 //======================================================================
@@ -951,7 +951,7 @@ void SP_item_health(Entity *self)
         return;
     }
 
-    self->model = "models/items/healing/medium/tris.md2";
+//    self->model = "models/items/healing/medium/tris.md2";
     self->count = 10;
     SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     gi.SoundIndex("items/n_health.wav");
@@ -966,7 +966,7 @@ void SP_item_health_small(Entity *self)
         return;
     }
 
-    self->model = "models/items/healing/stimpack/tris.md2";
+//    self->model = "models/items/healing/stimpack/tris.md2";
     self->count = 2;
     SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     self->style = HEALTH_IGNORE_MAX;
@@ -982,7 +982,7 @@ void SP_item_health_large(Entity *self)
         return;
     }
 
-    self->model = "models/items/healing/large/tris.md2";
+//    self->model = "models/items/healing/large/tris.md2";
     self->count = 25;
     SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     gi.SoundIndex("items/l_health.wav");
@@ -997,7 +997,7 @@ void SP_item_health_mega(Entity *self)
         return;
     }
 
-    self->model = "models/items/mega_h/tris.md2";
+//    self->model = "models/items/mega_h/tris.md2";
     self->count = 100;
     SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     gi.SoundIndex("items/m_health.wav");

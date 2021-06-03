@@ -198,8 +198,8 @@ public:
     }
    
     // Return the 'model' value.
-    inline const char* GetModel() {
-        return serverEntity->model;
+    inline const std::string &GetModel() {
+        return model;
     }
 
     // Return the 'modelIndex, modelIndex1, modelIndex2, modelIndex3' values.
@@ -494,12 +494,12 @@ public:
     }
 
     // Set the 'model' value.
-    inline void SetModel(const char* model) {
+    inline void SetModel(const std::string &model) {
         // Set model.
-        serverEntity->model = model;
+        this->model = model;
 
         // Set model index.
-        SetModelIndex(gi.ModelIndex(GetModel()));
+        SetModelIndex(gi.ModelIndex(GetModel().c_str()));
     }
 
     // Set the 'moveType' value.
@@ -637,6 +637,9 @@ protected:
     // 
     // Entity flags, general flags, flags... :) 
     int32_t flags;
+
+    // Entity MODEL filename.
+    std::string model;
 
     // Move Type. (MoveType::xxx)
     int32_t moveType;

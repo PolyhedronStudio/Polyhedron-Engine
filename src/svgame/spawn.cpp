@@ -104,7 +104,7 @@ static const spawn_func_t spawn_funcs[] = {
 
 static const spawn_field_t spawn_fields[] = {
     {"classname", FOFS(className), F_LSTRING},
-    {"model", FOFS(model), F_LSTRING},
+//    {"model", FOFS(model), F_LSTRING},
     {"spawnflags", FOFS(spawnFlags), F_INT},
     {"speed", FOFS(speed), F_FLOAT},
     {"acceleration", FOFS(acceleration), F_FLOAT},

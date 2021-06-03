@@ -21,13 +21,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 void InitTrigger(Entity *self)
 {
-    if (!VectorCompare(self->state.angles, vec3_origin))
-        UTIL_SetMoveDir(self->state.angles, self->moveDirection);
+    //if (!VectorCompare(self->state.angles, vec3_origin))
+    //    UTIL_SetMoveDir(self->state.angles, self->moveDirection);
 
-    self->solid = Solid::Trigger;
-    //self->moveType = MoveType::None;
-    gi.SetModel(self, self->model);
-    self->serverFlags = EntityServerFlags::NoClient;
+    //self->solid = Solid::Trigger;
+    ////self->moveType = MoveType::None;
+    //gi.SetModel(self, self->model);
+    //self->serverFlags = EntityServerFlags::NoClient;
 }
 
 

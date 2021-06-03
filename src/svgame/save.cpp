@@ -80,9 +80,9 @@ static const save_field_t entityfields[] = {
     E(owner),
 
     //I(classEntity->GetMoveType()),
-    I(flags),
+//    I(flags),
 
-    L(model),
+//    L(model),
     F(freeTime),
 
     L(message),
