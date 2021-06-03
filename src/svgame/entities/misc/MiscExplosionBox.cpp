@@ -190,17 +190,20 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
     // Check for ground.
     SVG_StepMove_CheckGround(this);
 
-    // Calculate direction.
-    vec3_t dir = { -90.f, 0.f, 0.f };
+    //// Calculate direction.
+    //vec3_t dir = { -90.f, 0.f, 0.f };
 
-    // Calculate yaw to use based on direction.
-    float yaw = vec3_to_yaw(dir);
-    float ratio = 2;
+    //// Calculate yaw to use based on direction.
+    //float yaw = vec3_to_yaw(dir);
+    //float ratio = 2;
 
-    // Last but not least, move a step ahead.
-    SVG_StepMove_Walk(this, yaw, 40 * ratio * FRAMETIME);
+    //// Last but not least, move a step ahead.
+    //SVG_StepMove_Walk(this, yaw, 40 * ratio * FRAMETIME);
 
     SetNextThinkTime(0.05f);
+    // 
+    // 
+    // 
     //vec3_t      end;
 //trace_t     trace;
 

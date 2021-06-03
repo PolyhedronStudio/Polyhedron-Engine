@@ -149,29 +149,43 @@ void SVG_Impact(SVGBaseEntity *e1, SVGTrace *trace)
 //
 #define STOP_EPSILON    0.1
 
-static int ClipVelocity(const vec3_t &in, const vec3_t &normal, vec3_t &out, float overbounce)
-{
-    float   backoff;
-    float   change;
-    int     i, Blocked;
+static vec3_t ClipVelocity(const vec3_t in, const vec3_t normal, float bounce) {
 
-    Blocked = 0;
-    if (normal[2] > 0)
-        Blocked |= 1;       // floor
-    if (!normal[2])
-        Blocked |= 2;       // step
+    float backoff = vec3_dot(in, normal);
 
-    backoff = DotProduct(in, normal) * overbounce;
-
-    for (i = 0 ; i < 3 ; i++) {
-        change = normal[i] * backoff;
-        out[i] = in[i] - change;
-        if (out[i] > -STOP_EPSILON && out[i] < STOP_EPSILON)
-            out[i] = 0;
+    if (backoff < 0.0f) {
+        backoff *= bounce;
+    } else {
+        backoff /= bounce;
     }
 
-    return Blocked;
+    return in - vec3_scale(normal, backoff);
 }
+
+
+//static int ClipVelocity(const vec3_t &in, const vec3_t &normal, vec3_t &out, float overbounce)
+//{
+//    float   backoff;
+//    float   change;
+//    int     i, Blocked;
+//
+//    Blocked = 0;
+//    if (normal[2] > 0)
+//        Blocked |= 1;       // floor
+//    if (!normal[2])
+//        Blocked |= 2;       // step
+//
+//    backoff = DotProduct(in, normal) * overbounce;
+//
+//    for (i = 0 ; i < 3 ; i++) {
+//        change = normal[i] * backoff;
+//        out[i] = in[i] - change;
+//        if (out[i] > -STOP_EPSILON && out[i] < STOP_EPSILON)
+//            out[i] = 0;
+//    }
+//
+//    return Blocked;
+//}
 
 
 //
@@ -272,7 +286,7 @@ int SVG_FlyMove(SVGBaseEntity *ent, float time, int mask)
 // modify original_velocity so it parallels all of the clip planes
 //
         for (i = 0 ; i < numplanes ; i++) {
-            ClipVelocity(original_velocity, planes[i], new_velocity, 1);
+            new_velocity = ClipVelocity(original_velocity, planes[i], 1);
 
             for (j = 0 ; j < numplanes ; j++)
                 if ((j != i) && !VectorCompare(planes[i], planes[j])) {
@@ -746,8 +760,7 @@ void SVG_Physics_Toss(SVGBaseEntity *ent)
         }
         
         // Clip new velocity.
-        vec3_t newVelocity = ent->GetVelocity();
-        ClipVelocity(newVelocity, trace.plane.normal, newVelocity, backOff);
+        vec3_t newVelocity = ClipVelocity(ent->GetVelocity(), trace.plane.normal, backOff);
         ent->SetVelocity(newVelocity);
 
         // Stop if on ground
