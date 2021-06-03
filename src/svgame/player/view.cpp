@@ -485,7 +485,7 @@ static void SVG_Player_CheckFallingDamage(PlayerClient *ent)
         damage = (delta - 30) / 2;
         if (damage < 1)
             damage = 1;
-        VectorSet(dir, 0, 0, 1);
+        dir = { 0.f, 0.f, 1.f };
 
         if (!deathmatch->value || !((int)dmflags->value & DeathMatchFlags::NoFalling))
             SVG_Damage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, ent->GetOrigin(), vec3_origin, damage, 0, 0, MeansOfDeath::Falling);

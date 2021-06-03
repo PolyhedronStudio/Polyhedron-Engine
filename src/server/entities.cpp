@@ -82,8 +82,8 @@ static void SV_EmitPacketEntities(client_t         *client,
             }
             if (newnum == clientEntityNum) {
                 flags = (EntityStateMessageFlags)(flags | MSG_ES_FIRSTPERSON);
-                VectorCopy(oldent->origin, newent->origin);
-                VectorCopy(oldent->angles, newent->angles);
+                newent->origin = oldent->origin; // VectorCopy(oldent->origin, newent->origin);
+                newent->angles = oldent->angles; // VectorCopy(oldent->angles, newent->angles);
             }
 
             MSG_WriteDeltaEntity(oldent, newent, flags);
@@ -103,8 +103,8 @@ static void SV_EmitPacketEntities(client_t         *client,
             }
             if (newnum == clientEntityNum) {
                 flags = (EntityStateMessageFlags)(flags | MSG_ES_FIRSTPERSON); // CPP: Cast flags |= MSG_ES_FIRSTPERSON;
-                VectorCopy(oldent->origin, newent->origin);
-                VectorCopy(oldent->angles, newent->angles);
+                newent->origin = oldent->origin; // VectorCopy(oldent->origin, newent->origin);
+                newent->angles = oldent->angles; // VectorCopy(oldent->angles, newent->angles);
             }
 
             MSG_WriteDeltaEntity(oldent, newent, flags);

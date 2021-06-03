@@ -64,8 +64,8 @@ void SP_FixCoopSpots(Entity *self)
             return;
         if (!spot->targetName)
             continue;
-        VectorSubtract(self->state.origin, spot->state.origin, d);
-        if (VectorLength(d) < 384) {
+        d = self->state.origin - spot->state.origin;
+        if (vec3_length(d) < 384) {
             if ((!self->targetName) || Q_stricmp(self->targetName, spot->targetName) != 0) {
 //              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->className, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
                 self->targetName = spot->targetName;
@@ -743,8 +743,10 @@ void SVG_PutClientInServer(Entity *ent)
     ent->state.angles[vec3_t::Pitch] = 0;
     ent->state.angles[vec3_t::Yaw] = spawn_angles[vec3_t::Yaw];
     ent->state.angles[vec3_t::Roll] = 0;
-    VectorCopy(ent->state.angles, client->playerState.pmove.viewAngles);
-    VectorCopy(ent->state.angles, client->aimAngles);
+
+    // Setup angles for playerstate and client aim.
+    client->playerState.pmove.viewAngles = ent->state.angles; // VectorCopy(ent->state.angles, client->playerState.pmove.viewAngles);
+    client->aimAngles = ent->state.angles; //VectorCopy(ent->state.angles, client->aimAngles);
 
     // spawn a isSpectator
     if (client->persistent.isSpectator) {
