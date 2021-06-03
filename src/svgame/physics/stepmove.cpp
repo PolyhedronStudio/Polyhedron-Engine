@@ -172,7 +172,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
                 if (ent->GetServerEntity()->goalEntityPtr->client) {
                     if (dz > 40)
                         newOrigin.z -= 8;
-                    if (!((ent->GetFlags() & EntityFlags::Swim) && (ent->GetServerEntity()->waterLevel < 2)))
+                    if (!((ent->GetFlags() & EntityFlags::Swim) && (ent->GetWaterLevel() < 2)))
                         if (dz < 30)
                             newOrigin.z += 8;
                 }
@@ -191,7 +191,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
 
             // fly monsters don't enter water voluntarily
             if (ent->GetFlags() & EntityFlags::Fly) {
-                if (!ent->GetServerEntity()->waterLevel) {
+                if (!ent->GetWaterLevel()) {
                     test[0] = trace.endPosition[0];
                     test[1] = trace.endPosition[1];
                     test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
@@ -203,7 +203,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
 
             // swim monsters don't exit water voluntarily
             if (ent->GetFlags() & EntityFlags::Swim) {
-                if (ent->GetServerEntity()->waterLevel < 2) {
+                if (ent->GetWaterLevel() < 2) {
                     test[0] = trace.endPosition[0];
                     test[1] = trace.endPosition[1];
                     test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
@@ -254,7 +254,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
 
 
     // don't go in to water
-    if (ent->GetServerEntity()->waterLevel == 0) {
+    if (ent->GetWaterLevel() == 0) {
         test[0] = trace.endPosition[0];
         test[1] = trace.endPosition[1];
         test[2] = trace.endPosition[2] + ent->GetMins().z + 1;

@@ -47,94 +47,97 @@ qboolean    trail_active = false;
 
 void SVG_PlayerTrail_Init(void)
 {
-    int     n;
+    //int     n;
 
-    if (deathmatch->value /* FIXME || coop */)
-        return;
+    //if (deathmatch->value /* FIXME || coop */)
+    //    return;
 
-    for (n = 0; n < TRAIL_LENGTH; n++) {
-        trail[n] = SVG_Spawn();
-        trail[n]->className = "player_trail";
-    }
+    //for (n = 0; n < TRAIL_LENGTH; n++) {
+    //    trail[n] = SVG_Spawn();
+    //    trail[n]->className = "player_trail";
+    //}
 
-    trail_head = 0;
-    trail_active = true;
+    //trail_head = 0;
+    //trail_active = true;
 }
 
 
 void SVG_PlayerTrail_Add(vec3_t spot)
 {
-    vec3_t  temp;
+    //vec3_t  temp;
 
-    if (!trail_active)
-        return;
+    //if (!trail_active)
+    //    return;
 
-    VectorCopy(spot, trail[trail_head]->state.origin);
+    //VectorCopy(spot, trail[trail_head]->state.origin);
 
-    trail[trail_head]->timeStamp = level.time;
+    //trail[trail_head]->timeStamp = level.time;
 
-    VectorSubtract(spot, trail[PREV(trail_head)]->state.origin, temp);
-    trail[trail_head]->state.angles[1] = vec3_to_yaw(temp);
+    //VectorSubtract(spot, trail[PREV(trail_head)]->state.origin, temp);
+    //trail[trail_head]->state.angles[1] = vec3_to_yaw(temp);
 
-    trail_head = NEXT(trail_head);
+    //trail_head = NEXT(trail_head);
 }
 
 
 void SVG_PlayerTrail_New(vec3_t spot)
 {
-    if (!trail_active)
-        return;
+    //if (!trail_active)
+    //    return;
 
-    SVG_PlayerTrail_Init();
-    SVG_PlayerTrail_Add(spot);
+    //SVG_PlayerTrail_Init();
+    //SVG_PlayerTrail_Add(spot);
 }
 
 
 Entity *SVG_PlayerTrail_PickFirst(Entity *self)
 {
-    int     marker;
-    int     n;
-
-    if (!trail_active)
-        return NULL;
-
-    for (marker = trail_head, n = TRAIL_LENGTH; n; n--) {
-//        if (trail[marker]->timeStamp <= self->monsterInfo.trail_time)
-            marker = NEXT(marker);
-        //else
-        //    break;
-    }
-
-    //if (visible(self, trail[marker])) {
-    //    return trail[marker];
-    //}
-
-    //if (visible(self, trail[PREV(marker)])) {
-    //    return trail[PREV(marker)];
-    //}
-
-    return trail[marker];
+//    int     marker;
+//    int     n;
+//
+//    if (!trail_active)
+//        return NULL;
+//
+//    for (marker = trail_head, n = TRAIL_LENGTH; n; n--) {
+////        if (trail[marker]->timeStamp <= self->monsterInfo.trail_time)
+//            marker = NEXT(marker);
+//        //else
+//        //    break;
+//    }
+//
+//    //if (visible(self, trail[marker])) {
+//    //    return trail[marker];
+//    //}
+//
+//    //if (visible(self, trail[PREV(marker)])) {
+//    //    return trail[PREV(marker)];
+//    //}
+//
+//    return trail[marker];
+    return nullptr;
 }
 
 Entity *SVG_PlayerTrail_PickNext(Entity *self)
 {
-    int     marker;
-    int     n;
-
-    if (!trail_active)
-        return NULL;
-
-    for (marker = trail_head, n = TRAIL_LENGTH; n; n--) {
-//        if (trail[marker]->timeStamp <= self->monsterInfo.trail_time)
-            marker = NEXT(marker);
-        //else
-        //    break;
-    }
-
-    return trail[marker];
+//    int     marker;
+//    int     n;
+//
+//    if (!trail_active)
+//        return NULL;
+//
+//    for (marker = trail_head, n = TRAIL_LENGTH; n; n--) {
+////        if (trail[marker]->timeStamp <= self->monsterInfo.trail_time)
+//            marker = NEXT(marker);
+//        //else
+//        //    break;
+//    }
+//
+//    return trail[marker];
+    return nullptr;
 }
 
 Entity *SVG_PlayerTrail_LastSpot(void)
 {
-    return trail[PREV(trail_head)];
+    return nullptr;
+    //return trail[PREV(trail_head)];
 }

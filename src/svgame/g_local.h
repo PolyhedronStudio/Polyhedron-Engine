@@ -1016,7 +1016,6 @@ struct entity_s {
 
     float timeStamp;
 
-    float angle;          // set in qe3, -1 = up, -2 = down
     char *target;
     const char *targetName;
     char *killTarget;
@@ -1049,11 +1048,6 @@ struct entity_s {
     //int32_t health;
     //int32_t maxHealth;
 
-    
-    qboolean showHostile;
-
-    float powerArmorTime;
-
     const char *map;           // target_changelevel // C++20: STRING: Added const to char *
 
     //int32_t viewHeight;     // height above origin where eyesight is determined
@@ -1084,8 +1078,7 @@ struct entity_s {
 
     float teleportTime;
 
-    int32_t waterType;
-    int32_t waterLevel;
+
 
     vec3_t moveOrigin;
     vec3_t moveAngles;

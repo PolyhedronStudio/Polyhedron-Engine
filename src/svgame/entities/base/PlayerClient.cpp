@@ -116,6 +116,18 @@ void PlayerClient::Think() {
 
 //
 //===============
+// PlayerClient::SpawnKey
+//
+// PlayerClient spawn key handling.
+//===============
+//
+void PlayerClient::SpawnKey(const std::string& key, const std::string& value) {
+    // Parent class spawnkey.
+    SVGBaseEntity::SpawnKey(key, value);
+}
+
+//
+//===============
 // PlayerClient::PlayerClientDie
 //
 // Callback that is fired any time the player dies. As such, it kindly takes care of doing this.

@@ -135,9 +135,9 @@ static const save_field_t entityfields[] = {
 //    I(maxHealth),
 //    I(gibHealth),
 //    I(deadFlag),
-    I(showHostile),
+//    I(showHostile),
 
-    F(powerArmorTime),
+ //   F(powerArmorTime),
 
     L(map),
 
@@ -172,8 +172,8 @@ static const save_field_t entityfields[] = {
 
     F(teleportTime),
 
-    I(waterType),
-    I(waterLevel),
+//    I(waterType),
+//    I(waterLevel),
 
     V(moveOrigin),
     V(moveAngles),

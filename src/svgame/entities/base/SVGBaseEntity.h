@@ -341,12 +341,12 @@ public:
 
     // Return the 'waterLevel' value.
     inline const int32_t GetWaterLevel() {
-        return serverEntity->waterLevel;
+        return waterLevel;
     }
 
     // Return the 'waterType' value.
     inline const int32_t GetWaterType() {
-        return serverEntity->waterType;
+        return waterType;
     }
 
     inline const float GetYawSpeed() {
@@ -589,12 +589,12 @@ public:
 
     // Return the 'waterLevel' value.
     inline void SetWaterLevel(const int32_t &waterLevel) {
-        serverEntity->waterLevel = waterLevel;
+        this->waterLevel = waterLevel;
     }
 
     // Return the 'waterType' value.
     inline void SetWaterType(const int32_t &waterType) {
-        serverEntity->waterType = waterType;
+        this->waterType = waterType;
     }
 
     // Yaw Speed. (Should be for monsters...)
@@ -646,6 +646,14 @@ protected:
 
     // Move Type. (MoveType::xxx)
     int32_t moveType;
+
+    // WaterType::xxxx
+    int32_t waterType;
+    // WaterLevel::xxxx
+    int32_t waterLevel;
+
+    // Angle direction: Set in Trenchbroom -1 = up -2 = down.
+    //float angle;
 
     // Velocity.
     vec3_t velocity;
