@@ -68,14 +68,14 @@ void Use_Multi(Entity *ent, Entity *other, Entity *activator)
 
 void Touch_Multi(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
 {
-    if (other->client) {
-        if (self->spawnFlags & 2)
-            return;
-    } else if (other->serverFlags & EntityServerFlags::Monster) {
-        if (!(self->spawnFlags & 1))
-            return;
-    } else
-        return;
+    //if (other->client) {
+    //    if (self->spawnFlags & 2)
+    //        return;
+    //} else if (other->serverFlags & EntityServerFlags::Monster) {
+    //    if (!(self->spawnFlags & 1))
+    //        return;
+    //} else
+    //    return;
 
     if (!VectorCompare(self->moveDirection, vec3_origin)) {
         vec3_t  forward;

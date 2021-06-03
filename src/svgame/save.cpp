@@ -87,7 +87,7 @@ static const save_field_t entityfields[] = {
 
     L(message),
     L(className),
-    I(spawnFlags),
+//    I(spawnFlags),
 
     F(timeStamp),
 

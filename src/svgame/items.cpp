@@ -159,8 +159,8 @@ qboolean Pickup_Powerup(Entity *ent, Entity *other)
     other->client->persistent.inventory[ITEM_INDEX(ent->item)]++;
 
     if (deathmatch->value) {
-        if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem))
-            SVG_SetRespawn(ent, ent->item->quantity);
+        //if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem))
+        //    SVG_SetRespawn(ent, ent->item->quantity);
     }
 
     return true;
@@ -526,13 +526,13 @@ void Use_Item(Entity *ent, Entity *other, Entity *activator)
     ent->serverFlags &= ~EntityServerFlags::NoClient;
 //    ent->Use = NULL;
 
-    if (ent->spawnFlags & ItemSpawnFlags::NoTouch) {
-        ent->solid = Solid::BoundingBox;
-       // ent->Touch = NULL;
-    } else {
-        ent->solid = Solid::Trigger;
-//        ent->Touch = SVG_TouchItem;
-    }
+//    if (ent->spawnFlags & ItemSpawnFlags::NoTouch) {
+//        ent->solid = Solid::BoundingBox;
+//       // ent->Touch = NULL;
+//    } else {
+//        ent->solid = Solid::Trigger;
+////        ent->Touch = SVG_TouchItem;
+//    }
 
     gi.LinkEntity(ent);
 }
@@ -681,12 +681,12 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
 {
     SVG_PrecacheItem(item);
 
-    if (ent->spawnFlags) {
-        if (strcmp(ent->className, "key_power_cube") != 0) {
-            ent->spawnFlags = 0;
-            gi.DPrintf("%s at %s has invalid spawnFlags set\n", ent->className, Vec3ToString(ent->state.origin));
-        }
-    }
+    //if (ent->spawnFlags) {
+    //    if (strcmp(ent->className, "key_power_cube") != 0) {
+    //        ent->spawnFlags = 0;
+    //        gi.DPrintf("%s at %s has invalid spawnFlags set\n", ent->className, Vec3ToString(ent->state.origin));
+    //    }
+    //}
 
     //// some items will be prevented in deathmatch
     //if (deathmatch->value) {
@@ -717,7 +717,7 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
     //}
 
     if (coop->value && (strcmp(ent->className, "key_power_cube") == 0)) {
-        ent->spawnFlags |= (1 << (8 + level.powerCubes));
+//        ent->spawnFlags |= (1 << (8 + level.powerCubes));
         level.powerCubes++;
     }
 

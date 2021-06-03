@@ -105,7 +105,7 @@ static const spawn_func_t spawn_funcs[] = {
 static const spawn_field_t spawn_fields[] = {
     {"classname", FOFS(className), F_LSTRING},
 //    {"model", FOFS(model), F_LSTRING},
-    {"spawnflags", FOFS(spawnFlags), F_INT},
+//    {"spawnflags", FOFS(spawnFlags), F_INT},
     {"speed", FOFS(speed), F_FLOAT},
     {"acceleration", FOFS(acceleration), F_FLOAT},
     {"deceleration", FOFS(deceleration), F_FLOAT},
@@ -131,9 +131,9 @@ static const spawn_field_t spawn_fields[] = {
     {"volume", FOFS(volume), F_FLOAT},
     {"attenuation", FOFS(attenuation), F_FLOAT},
     {"map", FOFS(map), F_LSTRING},
-    {"origin", FOFS(state.origin), F_VECTOR},
-    {"angles", FOFS(state.angles), F_VECTOR},
-    {"angle", FOFS(state.angles), F_ANGLEHACK},
+    //{"origin", FOFS(state.origin), F_VECTOR},
+    //{"angles", FOFS(state.angles), F_VECTOR},
+    //{"angle", FOFS(state.angles), F_ANGLEHACK},
 
     {NULL}
 };

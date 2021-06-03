@@ -1012,7 +1012,7 @@ struct entity_s {
     //
     const char *message;     // C++20: STRING: Added const to char *
     const char *className;   // C++20: STRING: Made const.
-    int32_t spawnFlags;
+    
 
     float timeStamp;
 

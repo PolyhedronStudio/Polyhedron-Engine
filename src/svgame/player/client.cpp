@@ -261,10 +261,10 @@ void SVG_TossClientWeapon(PlayerClient *playerClient)
         item = NULL;
 
     if (item) {
-        playerClient->GetClient()->aimAngles[vec3_t::Yaw] -= spread;
-        drop = SVG_DropItem(playerClient->GetServerEntity(), item);
-        playerClient->GetClient()->aimAngles[vec3_t::Yaw] += spread;
-        drop->spawnFlags = ItemSpawnFlags::DroppedPlayerItem;
+        //playerClient->GetClient()->aimAngles[vec3_t::Yaw] -= spread;
+        //drop = SVG_DropItem(playerClient->GetServerEntity(), item);
+        //playerClient->GetClient()->aimAngles[vec3_t::Yaw] += spread;
+        //drop->spawnFlags = ItemSpawnFlags::DroppedPlayerItem;
     }
 }
 

@@ -287,7 +287,7 @@ public:
 
     // Return the 'spawnFlags' value.
     inline const int32_t GetSpawnFlags() {
-        return serverEntity->spawnFlags;
+        return spawnFlags;
     }
 
     // Return the 'style' value.
@@ -554,7 +554,7 @@ public:
 
     // Set the 'spawnFlags' value.
     inline void SetSpawnFlags(const int32_t& spawnFlags) {
-        serverEntity->spawnFlags = spawnFlags;
+        this->spawnFlags = spawnFlags;
     }
 
     // Set the 'style' value.
@@ -637,6 +637,9 @@ protected:
     // 
     // Entity flags, general flags, flags... :) 
     int32_t flags;
+
+    // Entity spawn flags (Such as, is this a dropped item?)
+    int32_t spawnFlags;
 
     // Entity MODEL filename.
     std::string model;
