@@ -770,7 +770,7 @@ void SVG_Physics_Toss(SVGBaseEntity *ent)
             }
         }
 
-        ent->Touch(ent, trace.ent, &trace.plane, trace.surface);
+        //ent->Touch(ent, trace.ent, &trace.plane, trace.surface);
     }
 
     // Check for water transition, first fetch the OLD contents mask.

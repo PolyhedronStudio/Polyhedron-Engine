@@ -677,7 +677,8 @@ std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& ma
 
     // Go through the boxed entities list, and store there classEntities (SVGBaseEntity aka baseEntities).
     for (int32_t i = 0; i < numEntities; i++) {
-        boxedBaseEntities.push_back(boxedServerEntities[i]->classEntity);
+        if (g_baseEntities[boxedServerEntities[i]->state.number] != nullptr)
+            boxedBaseEntities.push_back(g_baseEntities[boxedServerEntities[i]->state.number]);
     }
 
     // Return our boxed base entities vector.

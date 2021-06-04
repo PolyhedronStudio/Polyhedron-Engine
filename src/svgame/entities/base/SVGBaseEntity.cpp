@@ -189,13 +189,6 @@ qboolean SVGBaseEntity::ParseVector3KeyValue(const std::string& key, const std::
 		i++;
 	}
 
-	// If i never reached to be 2 precisely, we failed.
-	//if (i < 2) {
-	//	gi.DPrintf("%s: couldn't parse '%s'\n", __func__, key.c_str());
-	//	vec = vec3_zero();
-	//	return false;
-	//}
-
 	return true;
 }
 

@@ -39,7 +39,7 @@ public:
     // Get/Set
     // 
     // Return the 'delay' value.
-    inline const int32_t GetDelay() {
+    inline const float GetDelay() {
         return delay;
     }
 
@@ -48,7 +48,7 @@ public:
     //
 
     // Return the 'delay' value.
-    inline void SetDelay(const int32_t& delay) {
+    inline void SetDelay(const float& delay) {
         this->delay = delay;
     }
 

@@ -112,9 +112,9 @@ void SVGBaseTrigger::InitBrushTrigger() {
 	SetMoveType(MoveType::None);
 	SetSolid(Solid::Trigger);
 	SetInUse(true);
-
+	//SetOrigin(g_baseEntities[0]->GetOrigin());
 	// Ensure we got the proper no client flags.
-	SetServerFlags(EntityServerFlags::NoClient);
+	//SetServerFlags(EntityServerFlags::NoClient);
 }
 
 //
@@ -142,9 +142,6 @@ void SVGBaseTrigger::InitPointTrigger() {
 //===============
 //
 void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) {
-	// Parent class spawnkey.
-	SVGBaseEntity::SpawnKey(key, value);
-
 	if (key == "killtarget") {
 		// Parsed string.
 		std::string parsedString;
@@ -154,6 +151,9 @@ void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) 
 
 		// Assign.
 		killTargetStr = value;
+	} else {
+		// Parent class spawnkey.
+		SVGBaseEntity::SpawnKey(key, value);
 	}
 }
 	//case "killtarget":

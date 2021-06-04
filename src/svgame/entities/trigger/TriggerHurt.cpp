@@ -137,12 +137,13 @@ void TriggerHurt::Think() {
 
 void TriggerHurt::SpawnKey(const std::string& key, const std::string& value) {
 	// Parent class spawnkey.
-	// We don't want it to reposition this fucker.
-	//if (key == "origin") {
+	// We don't want it to reposition this fucker.?
+	
+	if (key == "origin") {
 
-//	} else {
+	} else {
 		SVGBaseTrigger::SpawnKey(key, value);
-	//}
+	}
 }
 
 //

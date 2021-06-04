@@ -498,6 +498,9 @@ public:
         // Set model.
         this->model = model;
 
+        // Set the model.
+        gi.SetModel(serverEntity, model.c_str());
+
         // Set model index.
         SetModelIndex(gi.ModelIndex(model.c_str()));
     }

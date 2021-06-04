@@ -383,7 +383,9 @@ void WorldSpawn::Think() {
 //===============
 //
 void WorldSpawn::SpawnKey(const std::string& key, const std::string& value) {
-    if (key == "gravity") {
+/*    if (key == "origin") {
+
+    }else */if (key == "gravity") {
         // Parse Gravity.
         int32_t gravity = 0;
         ParseIntegerKeyValue(key, value, gravity);
