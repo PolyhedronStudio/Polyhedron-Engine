@@ -13,6 +13,7 @@
 
 // Server Game Base Entity.
 #include "../base/SVGBaseEntity.h"
+#include "../base/SVGBaseTrigger.h"
 
 // Misc Explosion Box Entity.
 #include "MiscExplosionBox.h"
@@ -22,7 +23,7 @@
 //
 // Constructor/Deconstructor.
 //
-MiscExplosionBox::MiscExplosionBox(Entity* svEntity) : SVGBaseEntity(svEntity) {
+MiscExplosionBox::MiscExplosionBox(Entity* svEntity) : SVGBaseTrigger(svEntity) {
 
 }
 MiscExplosionBox::~MiscExplosionBox() {
@@ -42,7 +43,7 @@ MiscExplosionBox::~MiscExplosionBox() {
 //
 void MiscExplosionBox::Precache() {
     // Always call parent class method.
-    SVGBaseEntity::Precache();
+    SVGBaseTrigger::Precache();
 
     // Precache actual barrel model.
     SVG_PrecacheModel("models/objects/barrels/tris.md2");
@@ -63,7 +64,7 @@ void MiscExplosionBox::Precache() {
 //
 void MiscExplosionBox::Spawn() {
     // Always call parent class method.
-    SVGBaseEntity::Spawn();
+    SVGBaseTrigger::Spawn();
 
     // Set solid.
     SetSolid(Solid::BoundingBox);
@@ -133,7 +134,7 @@ void MiscExplosionBox::Respawn() {
 //
 void MiscExplosionBox::PostSpawn() {
     // Always call parent class method.
-    SVGBaseEntity::PostSpawn();
+    SVGBaseTrigger::PostSpawn();
 	//gi.DPrintf("MiscExplosionBox::PostSpawn();");
 }
 
@@ -145,7 +146,7 @@ void MiscExplosionBox::PostSpawn() {
 //
 void MiscExplosionBox::Think() {
     // Always call parent class method.
-    SVGBaseEntity::Think();
+    SVGBaseTrigger::Think();
 
 	//gi.DPrintf("MiscExplosionBox::Think();");
 }

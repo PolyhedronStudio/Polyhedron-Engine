@@ -10,13 +10,6 @@
 #include "entities.h"			// Entities header.
 #include "player/client.h"		// Include Player Client header.
 
-#include "entities/base/SVGBaseEntity.h"
-#include "entities/base/PlayerClient.h"
-#include "entities/info/InfoPlayerStart.h"
-#include "entities/misc/MiscExplosionBox.h"
-#include "entities/Worldspawn.h"
-#include "entities/Light.h"
-
 //
 // SVG_SpawnClassEntity
 //
@@ -25,18 +18,18 @@
 #include "entities/base/SVGBaseTrigger.h"
 #include "entities/base/PlayerClient.h"
 #include "entities/info/InfoPlayerStart.h"
-#include "entities/misc/MiscExplosionBox.h"
+#include "entities/trigger/TriggerAlways.h"
+#include "entities/trigger/TriggerMultiple.h"
 #include "entities/trigger/TriggerHurt.h"
 #include "entities/Worldspawn.h"
 #include "entities/Light.h"
+#include "entities/misc/MiscExplosionBox.h"
 
 //
 //===============
-// SVG_FreeClassEntity
+// SVG_SpawnClassEntity
 // 
-// Will remove the class entity, if it exists. For fully freeing an entity,
-// look for SVG_FreeEntity instead. It automatically takes care of 
-// classEntities too.
+// 
 //=================
 //
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
@@ -57,8 +50,12 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
         spawnEntity = g_baseEntities[entityNumber] = new Light(ent);
     else if (className == "worldspawn")
         spawnEntity = g_baseEntities[entityNumber] = new WorldSpawn(ent);
+    else if (className == "trigger_always")
+        spawnEntity = g_baseEntities[entityNumber] = new TriggerAlways(ent);
     else if (className == "trigger_hurt")
         spawnEntity = g_baseEntities[entityNumber] = new TriggerHurt(ent);
+    else if (className == "trigger_multiple")
+        spawnEntity = g_baseEntities[entityNumber] = new TriggerMultiple(ent);
     else if (className == "PlayerClient")
         spawnEntity = g_baseEntities[entityNumber] = new PlayerClient(ent);
     else

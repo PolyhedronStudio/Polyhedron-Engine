@@ -26,7 +26,6 @@ SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
 	//
 	// Set all entity pointer references to nullptr.
 	//
-	activatorEntity = nullptr;
 	enemyEntity = nullptr;
 	groundEntity = nullptr;
 	oldEnemyEntity = nullptr;
@@ -264,7 +263,25 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 
 		// Set origin.
 		SetOrigin(parsedOrigin);
-	}	
+	} else if (key == "target") {
+		// Parsed string.
+		std::string parsedString = "";
+
+		// Parse.
+		ParseStringKeyValue(key, value, parsedString);
+
+		// Assign.
+		targetStr = parsedString;
+	} else 	if (key == "targetname") {
+		// Parsed string.
+		std::string parsedString = "";
+
+		// Parse.
+		ParseStringKeyValue(key, value, parsedString);
+
+		// Assign.
+		targetNameStr = parsedString;
+	}
 	// Spawnflags.
 	else if (key == "spawnflags") {
 		// Parse damage.

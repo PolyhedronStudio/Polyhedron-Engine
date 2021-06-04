@@ -166,8 +166,8 @@ static const save_field_t entityfields[] = {
     F(volume),
     F(attenuation),
 
-    F(wait),
-    F(delay),
+//    F(wait),
+//    F(delay),
     F(random),
 
     F(teleportTime),

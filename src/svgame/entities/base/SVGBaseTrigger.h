@@ -38,6 +38,11 @@ public:
     //
     // Get/Set
     // 
+    // Return the 'activatorEntity' entity pointer.
+    SVGBaseEntity* GetActivator() {
+        return activatorEntity;
+    }
+
     // Return the 'delay' value.
     inline const float GetDelay() {
         return delay;
@@ -46,6 +51,10 @@ public:
     //
     // Entity Set Functions.
     //
+    // Set the 'activatorEntity' pointer.
+    inline void SetActivator(SVGBaseEntity* activator) {
+        this->activatorEntity = activator;
+    }
 
     // Return the 'delay' value.
     inline void SetDelay(const float& delay) {
@@ -71,13 +80,7 @@ protected:
     //
     // Other base entity members. (These were old fields in edict_T back in the day.)
     //
-    //int m_strGlobalState;
-    //string m_strKillTarget;
-    //string m_strMessage;
-    //string m_strMaster;
-    //int32_t m_iUseType;
-    //int32_t m_iTeam;
-    //int32_t m_iValue;
+
 
     // Kill target when triggered.
     std::string killTargetStr;
@@ -91,12 +94,15 @@ protected:
     // Delay before calling trigger execution.
     float delay;
 
+    // Wait time before triggering at all, in case it was set to auto.
+    float wait;
+
     // Timestamp that the trigger has been called at.
     //
     // Entity pointers.
     // 
     //// Entity that activated this entity, NULL if none.
-    //SVGBaseEntity* activatorEntity;
+    SVGBaseEntity* activatorEntity;
     //// Current active enemy, NULL if not any.    
     //SVGBaseEntity* enemyEntity;
     //// Ground entity we're standing on.

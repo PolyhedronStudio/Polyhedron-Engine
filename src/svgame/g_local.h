@@ -1072,8 +1072,8 @@ struct entity_s {
     float attenuation;
 
     // timing variables
-    float wait;
-    float delay;          // before firing targets
+    //float wait;
+    //float delay;          // before firing targets
     float random;
 
     float teleportTime;

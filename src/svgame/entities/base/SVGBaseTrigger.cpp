@@ -6,9 +6,12 @@
 //
 //
 */
-#include "../../g_local.h"     // SVGame.
-#include "../../effects.h"     // Effects.
-#include "../../utils.h"       // Util funcs.
+#include "../../g_local.h"		// SVGame.
+#include "../../effects.h"		// Effects.
+#include "../../entities.h"		// Entities.
+#include "../../utils.h"		// Util funcs.
+
+// Class Entities.
 #include "SVGBaseEntity.h"
 #include "SVGBaseTrigger.h"
 
@@ -23,6 +26,7 @@ SVGBaseTrigger::SVGBaseTrigger(Entity* svEntity) : SVGBaseEntity(svEntity) {
 	//
 	// Set all entity pointer references to nullptr.
 	//
+	activatorEntity = nullptr;
 	//activatorEntity = nullptr;
 	//enemyEntity = nullptr;
 	//groundEntity = nullptr;
@@ -112,8 +116,7 @@ void SVGBaseTrigger::InitBrushTrigger() {
 	SetMoveType(MoveType::None);
 	SetSolid(Solid::Trigger);
 	SetInUse(true);
-	//SetOrigin(g_baseEntities[0]->GetOrigin());
-	// Ensure we got the proper no client flags.
+
 	//SetServerFlags(EntityServerFlags::NoClient);
 }
 
@@ -132,7 +135,7 @@ void SVGBaseTrigger::InitPointTrigger() {
 	SetSolid(Solid::Trigger);
 
 	// Ensure we got the proper no client flags.
-	SetServerFlags(EntityServerFlags::NoClient);
+	//SetServerFlags(EntityServerFlags::NoClient);
 }
 
 //
@@ -144,7 +147,7 @@ void SVGBaseTrigger::InitPointTrigger() {
 void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) {
 	if (key == "killtarget") {
 		// Parsed string.
-		std::string parsedString;
+		std::string parsedString = "";
 
 		// Parse.
 		ParseStringKeyValue(key, value, parsedString);
@@ -156,34 +159,106 @@ void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) 
 		SVGBaseEntity::SpawnKey(key, value);
 	}
 }
-	//case "killtarget":
-	//	m_strKillTarget = strValue;
-	//	break;
-	//case "message":
-	//	m_strMessage = strValue;
-	//	break;
-	//case "master":
-	//	m_strMaster = strValue;
-	//	break;
-	//case "team_no":
-	//	m_iTeam = stoi(strValue);
-	//	break;
-	//case "delay":
-	//	m_flDelay = stof(strValue);
-	//	break;
 
 //
 //===============
-// SVGBaseTrigger::Use
+// SVGBaseTrigger::UseTargets
 //
-// Execute the 'Use' callback in case we ran into any.
+// The activator is the entity who is initiating the firing. If not set as
+// a function argument, it will use whichever is set in the entity itself.
+//
+// If self.delay is set, a DelayedUse entity will be created that will actually
+// do the SUB_UseTargets after that many seconds have passed.
+//
+// Centerprints any self.message to the activator.
+//
+// Search for (string)targetName in all entities that (string)target and
+// calls their Use function.
 //===============
 //
-//void SVGBaseTrigger::Use(SVGBaseEntity* other, SVGBaseEntity* activator) {
-//	// Safety check.
-//	if (useFunction == nullptr)
-//		return;
-//
-//	// Execute 'Die' callback function.
-//	(this->*useFunction)(other, activator);
-//}
+void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
+	//
+	// Check for a delay
+	//
+    if (GetDelay()) {
+		// Create a temporary DelayedTrigger entity, to fire at a latter time.
+	//        t = SVG_Spawn();
+	//        t->className = "DelayedUse";
+	////        t->nextThinkTime = level.time + ent->GetDelay();
+	//        //t->Think = Think_Delay;
+	////        t->activator = activator;
+	//        if (!activator)
+	//            gi.DPrintf("Think_Delay with no activator\n");
+	//        t->message = ent->GetMessage();
+	//        t->target = ent->GetTarget();
+	//        t->killTarget = ent->GetKillTarget();
+	//        return;
+	}
+	
+	//
+	// Print the "message"
+	//
+	if (GetMessage() && !(activator->GetServerFlags() & EntityServerFlags::Monster)) {
+		// Fetch noise index.
+		int32_t noiseIndex = GetNoiseIndex();
+
+		// Print the message.
+		SVG_CenterPrint(activator, GetMessage());
+
+		// Play specific noise sound, in case one is set. Default talk1.wav otherwise.
+		if (noiseIndex) {
+			SVG_Sound(activator, CHAN_AUTO, noiseIndex, 1, ATTN_NORM, 0);
+		} else {
+			SVG_Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+		}
+	}
+
+	//
+	// Kill killtargets
+	//
+	if (GetKillTarget()) {
+		SVGBaseEntity* triggerEntity = nullptr;
+
+		while (triggerEntity != SVG_FindEntityByKeyValue("targetname", GetKillTarget(), triggerEntity))
+			// It is going to die, free it.
+			SVG_FreeClassEntity(triggerEntity->GetServerEntity());
+
+			if (!IsInUse()) {
+                gi.DPrintf("entity was removed while using killtargets\n");
+                return;
+			}
+	}
+	
+	//
+	// Fire targets
+	//
+	if (GetTarget().length()) {
+		SVGBaseEntity* triggerEntity = nullptr;
+
+		while (triggerEntity != SVG_FindEntityByKeyValue("targetname", GetTarget(), triggerEntity)) {
+
+		}
+	//        t = NULL;
+	//        while ((t = SVG_Find(t, FOFS(targetName), ent->GetTarget()))) {
+	//            // doors fire area portals in a specific way
+	//            if (!Q_stricmp(t->className, "func_areaportal") &&
+	//                (!Q_stricmp(ent->GetClassName(), "func_door") || !Q_stricmp(ent->GetClassName(), "func_door_rotating")))
+	//                continue;
+	//
+	//            if (t == ent->GetServerEntity()) {
+	//                gi.DPrintf("WARNING: Entity used itself.\n");
+	//            } else {
+	//                SVGBaseEntity* targetClassEntity = t->classEntity;
+	//
+	//                // Only continue if there is a classentity.
+	//                if (targetClassEntity) {
+	//                    targetClassEntity->Use(ent, activator);
+	//                }
+	//            }
+	//            if (!ent->IsInUse()) {
+	//                gi.DPrintf("entity was removed while using targets\n");
+	//                return;
+	//            }
+	//	}
+	}
+}

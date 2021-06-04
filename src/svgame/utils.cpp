@@ -65,8 +65,8 @@ vec3_t SVG_VelocityForDamage(int damage)
 
 void Think_Delay(SVGBaseEntity *ent)
 {
-    UTIL_UseTargets(ent, ent->GetActivator());
-    SVG_FreeEntity(ent->GetServerEntity());
+    //UTIL_UseTargets(ent, ent->GetActivator());
+    //SVG_FreeEntity(ent->GetServerEntity());
 }
 
 /*
@@ -87,79 +87,79 @@ match (string)self.target and call their .use function
 */
 void UTIL_UseTargets(SVGBaseEntity*ent, SVGBaseEntity*activator)
 {
-    Entity     *t;
-
+//    Entity     *t;
 //
-// check for a delay
+////
+//// check for a delay
+////
+//    if (ent->GetDelay()) {
+//        // create a temp object to fire at a later time
+//        t = SVG_Spawn();
+//        t->className = "DelayedUse";
+////        t->nextThinkTime = level.time + ent->GetDelay();
+//        //t->Think = Think_Delay;
+////        t->activator = activator;
+//        if (!activator)
+//            gi.DPrintf("Think_Delay with no activator\n");
+//        t->message = ent->GetMessage();
+//        t->target = ent->GetTarget();
+//        t->killTarget = ent->GetKillTarget();
+//        return;
+//    }
 //
-    if (ent->GetDelay()) {
-        // create a temp object to fire at a later time
-        t = SVG_Spawn();
-        t->className = "DelayedUse";
-//        t->nextThinkTime = level.time + ent->GetDelay();
-        //t->Think = Think_Delay;
-//        t->activator = activator;
-        if (!activator)
-            gi.DPrintf("Think_Delay with no activator\n");
-        t->message = ent->GetMessage();
-        t->target = ent->GetTarget();
-        t->killTarget = ent->GetKillTarget();
-        return;
-    }
-
-
 //
-// print the message
+////
+//// print the message
+////
+//    if ((ent->GetMessage()) && !(activator->GetServerFlags() & EntityServerFlags::Monster)) {
+//        SVG_CenterPrint(activator, ent->GetMessage());
+//        if (ent->GetNoiseIndex())
+//            SVG_Sound(activator, CHAN_AUTO, ent->GetNoiseIndex(), 1, ATTN_NORM, 0);
+//        else
+//            SVG_Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+//    }
 //
-    if ((ent->GetMessage()) && !(activator->GetServerFlags() & EntityServerFlags::Monster)) {
-        SVG_CenterPrint(activator, ent->GetMessage());
-        if (ent->GetNoiseIndex())
-            SVG_Sound(activator, CHAN_AUTO, ent->GetNoiseIndex(), 1, ATTN_NORM, 0);
-        else
-            SVG_Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
-    }
-
+////
+//// kill killtargets
+////
+//    if (ent->GetKillTarget()) {
+//        t = NULL;
+//        while ((t = SVG_Find(t, FOFS(targetName), ent->GetKillTarget()))) {
+//            SVG_FreeEntity(t);
+//            if (!ent->IsInUse()) {
+//                gi.DPrintf("entity was removed while using killtargets\n");
+//                return;
+//            }
+//        }
+//    }
 //
-// kill killtargets
+////
+//// fire targets
+////
+//    if (ent->GetTarget()) {
+//        t = NULL;
+//        while ((t = SVG_Find(t, FOFS(targetName), ent->GetTarget()))) {
+//            // doors fire area portals in a specific way
+//            if (!Q_stricmp(t->className, "func_areaportal") &&
+//                (!Q_stricmp(ent->GetClassName(), "func_door") || !Q_stricmp(ent->GetClassName(), "func_door_rotating")))
+//                continue;
 //
-    if (ent->GetKillTarget()) {
-        t = NULL;
-        while ((t = SVG_Find(t, FOFS(targetName), ent->GetKillTarget()))) {
-            SVG_FreeEntity(t);
-            if (!ent->IsInUse()) {
-                gi.DPrintf("entity was removed while using killtargets\n");
-                return;
-            }
-        }
-    }
-
+//            if (t == ent->GetServerEntity()) {
+//                gi.DPrintf("WARNING: Entity used itself.\n");
+//            } else {
+//                SVGBaseEntity* targetClassEntity = t->classEntity;
 //
-// fire targets
-//
-    if (ent->GetTarget()) {
-        t = NULL;
-        while ((t = SVG_Find(t, FOFS(targetName), ent->GetTarget()))) {
-            // doors fire area portals in a specific way
-            if (!Q_stricmp(t->className, "func_areaportal") &&
-                (!Q_stricmp(ent->GetClassName(), "func_door") || !Q_stricmp(ent->GetClassName(), "func_door_rotating")))
-                continue;
-
-            if (t == ent->GetServerEntity()) {
-                gi.DPrintf("WARNING: Entity used itself.\n");
-            } else {
-                SVGBaseEntity* targetClassEntity = t->classEntity;
-
-                // Only continue if there is a classentity.
-                if (targetClassEntity) {
-                    targetClassEntity->Use(ent, activator);
-                }
-            }
-            if (!ent->IsInUse()) {
-                gi.DPrintf("entity was removed while using targets\n");
-                return;
-            }
-        }
-    }
+//                // Only continue if there is a classentity.
+//                if (targetClassEntity) {
+//                    targetClassEntity->Use(ent, activator);
+//                }
+//            }
+//            if (!ent->IsInUse()) {
+//                gi.DPrintf("entity was removed while using targets\n");
+//                return;
+//            }
+//        }
+//    }
 }
 
 

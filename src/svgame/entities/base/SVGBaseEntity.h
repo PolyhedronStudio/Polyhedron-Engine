@@ -62,11 +62,6 @@ public:
     inline const vec3_t& GetAbsoluteMax() {
         return serverEntity->absMax;
     }
-    
-    // Return the 'activatorEntity' entity pointer.
-    SVGBaseEntity* GetActivator() {
-        return activatorEntity;
-    }
 
     // Return the 'angles' value.
     inline const vec3_t& GetAngles() {
@@ -104,9 +99,9 @@ public:
     }
 
     // Return the 'delay' value.
-    inline const int32_t GetDelay() {
-        return serverEntity->delay;
-    }
+    //inline const float GetDelay() {
+    //    return delay;
+    //}
 
     // Return the 'effects' value.
     inline const uint32_t GetEffects() {
@@ -306,12 +301,12 @@ public:
     }
 
     // Return the 'target' entity value.
-    inline char* GetTarget() {
-        return serverEntity->target;
+    inline const std::string& GetTarget() {
+        return targetStr;
     }
     // Return the 'targetName' entity value.
-    inline const char* GetTargetName() {
-        return serverEntity->targetName;
+    inline const std::string& GetTargetName() {
+        return targetNameStr;
     }
 
     // Return the 'team' entity value.
@@ -355,12 +350,7 @@ public:
 
     //
     // Entity Set Functions.
-    //
-    // Set the 'activatorEntity' pointer.
-    inline void SetActivator(SVGBaseEntity* activator) {
-        this->activatorEntity = activator;
-    }
-    
+    //  
     // Return the 'angles' value.
     inline void SetAngles(const vec3_t& angles) {
         serverEntity->state.angles = angles;
@@ -398,9 +388,9 @@ public:
     }
 
     // Return the 'delay' value.
-    inline const int32_t SetDelay(const int32_t &delay) {
-        serverEntity->delay = delay;
-    }
+    //inline void SetDelay(const float &delay) {
+    //    this->delay = delay;
+    //}
 
     // Set the 'enemyPtr' pointer.
     inline void SetEnemy(SVGBaseEntity* enemy) {
@@ -575,6 +565,15 @@ public:
         this->takeDamage = takeDamage;
     }
 
+    // Set the 'target' entity value.
+    inline void SetTarget(const std::string& target) {
+        this->targetStr = target;
+    }
+    // Set the 'targetName' entity value.
+    inline void SetTargetName(const std::string& targetName) {
+        this->targetNameStr = targetName;
+    }
+
     // Set the 'teamChain' entity value.
     inline void SetTeamChainEntity(SVGBaseEntity* entity) {
         teamChainEntity = entity;
@@ -643,26 +642,33 @@ protected:
     // Other base entity members. (These were old fields in edict_T back in the day.)
     //
     // 
+    //---------------------------------
+    // -- Flags
     // Entity flags, general flags, flags... :) 
     int32_t flags;
-
     // Entity spawn flags (Such as, is this a dropped item?)
     int32_t spawnFlags;
 
+    //---------------------------------
+    // -- Strings.
     // Entity MODEL filename.
     std::string model;
+    std::string targetStr;
+    std::string targetNameStr;
 
+    //---------------------------------
+    // -- Types (Move, Water, what have ya? Add in here.)
     // Move Type. (MoveType::xxx)
     int32_t moveType;
-
     // WaterType::xxxx
     int32_t waterType;
     // WaterLevel::xxxx
     int32_t waterLevel;
 
+    //---------------------------------
+    // -- Physics
     // Angle direction: Set in Trenchbroom -1 = up -2 = down.
     //float angle;
-
     // Velocity.
     vec3_t velocity;
     // Angular Velocity.
@@ -709,16 +715,20 @@ protected:
     int32_t deadFlag;
 
     //
+    // This one resides here... for now.
+    //
+    //float delay;
+
+    //
     // Entity pointers.
     // 
-    // Entity that activated this entity, NULL if none.
-    SVGBaseEntity* activatorEntity;
     // Current active enemy, NULL if not any.    
     SVGBaseEntity *enemyEntity;
     // Ground entity we're standing on.
     SVGBaseEntity *groundEntity;
     // Old enemy, NULL if not any.
     SVGBaseEntity *oldEnemyEntity;
+
     // Team Chain Pointer.
     SVGBaseEntity* teamChainEntity;
     // Master Pointer.
