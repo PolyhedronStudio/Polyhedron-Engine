@@ -445,8 +445,6 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
 #if USE_SMOOTH_DELTA_ANGLES
     if (pusher->GetClient()) {
         pushed_p->deltaYaw = pusher->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
-    } else {
-        pushed_p->deltaYaw = 0.f;
     }
 #endif
     pushed_p++;
