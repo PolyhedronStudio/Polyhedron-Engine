@@ -27,33 +27,15 @@ TriggerHurt::TriggerHurt(Entity* svEntity) : SVGBaseTrigger(svEntity) {
 	//
 	// All callback functions best be nullptr.
 	//
-	//thinkFunction = nullptr;
-
 
 	//
 	// Set all entity pointer references to nullptr.
 	//
-	//activatorEntity = nullptr;
-	//enemyEntity = nullptr;
-	//groundEntity = nullptr;
-	//oldEnemyEntity = nullptr;
-	//teamChainEntity = nullptr;
-	//teamMasterEntity = nullptr;
 
 	//
 	// Default values for members.
 	//
 	lastHurtTime = 0.f;
-	//moveType = MoveType::None;
-
-	//// Velocity.
-	//velocity = vec3_zero();
-	//angularVelocity = vec3_zero();
-	//mass = 0;
-	//groundEntityLinkCount = 0;
-	//health = 0;
-	//maxHealth = 0;
-	//deadFlag = DEAD_NO;
 }
 TriggerHurt::~TriggerHurt() {
 
@@ -87,15 +69,16 @@ void TriggerHurt::Spawn() {
 	//self->Touch = hurt_touch;
 	SetTouchCallback(&TriggerHurt::TriggerHurtTouch);
 
+	// Check for default values (from TB, otherwise... set it ourselves to a default.)
 	if (!GetDamage()) {
 		SetDamage(5);
 	}
 
 	// Make it solid trigger, or start off.
 	if (GetSpawnFlags() & SPAWNFLAG_START_OFF)
-		SetSolid(Solid::Not);
+		SetSolid(Solid::Not);	// Make it solid::not, meaning it can't be triggered.
 	else
-		SetSolid(Solid::Trigger);
+		SetSolid(Solid::Trigger); // Make it triggerable :)
 
 	// In case the entity can be "used", set it to hurt those who use it as well.
 	if (GetSpawnFlags() & SPAWNFLAG_TOGGLE)
@@ -188,19 +171,22 @@ void TriggerHurt::TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
 //===============
 // TriggerHurt::TriggerHurtUse
 //
-// 'Touch' callback, to hurt the entities touching it.
+// 'Use' callback, to trigger it on/off.
 //===============
 //
 void TriggerHurt::TriggerHurtUse(SVGBaseEntity* other, SVGBaseEntity* activator) {
 	gi.DPrintf("TriggerHurtUse!\n");
 
+	// Switch states.
 	if (GetSolid() == Solid::Not)
 		SetSolid(Solid::Trigger);
 	else
 		SetSolid(Solid::Not);
 	
+	// Link entity back in for collision use.
 	LinkEntity();
 
+	// Ensure that it can only be used ONCE.
 	if (!(GetSpawnFlags() & 2))
 		SetTouchCallback(nullptr);
 }

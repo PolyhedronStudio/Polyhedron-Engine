@@ -312,7 +312,7 @@ void SV_Multicast(const vec3_t *origin, int32_t to)
 #else
             // FIXME: for some strange reason, game code assumes the server
             // uses entity origin for PVS/PHS culling, not the view origin
-            client->edict->state.origin = org; // VectorCopy(client->edict->state.origin, org);
+            org = client->edict->state.origin; // VectorCopy(client->edict->state.origin, org);
 #endif
             leaf2 = CM_PointLeaf(&sv.cm, org);
             if (!CM_AreasConnected(&sv.cm, leaf1->area, leaf2->area))

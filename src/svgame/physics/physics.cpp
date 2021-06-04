@@ -434,7 +434,7 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
     vec3_t maxs = pusher->GetAbsoluteMax() + move;
 
     // We need this for pushing things later
-    org = vec3_zero() - amove;
+    VectorSubtract(vec3_origin, amove, org);
     AngleVectors(org, &forward, &right, &up);
 
     // Save the pusher's original position
