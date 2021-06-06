@@ -6,9 +6,10 @@
 //
 //
 */
-#include "../../g_local.h"     // SVGame.
-#include "../../effects.h"     // Effects.
-#include "../../utils.h"       // Util funcs.
+#include "../../g_local.h"		// SVGame.
+#include "../../effects.h"		// Effects.
+#include "../../entities.h"		// Entities.
+#include "../../utils.h"		// Util funcs.
 #include "SVGBaseEntity.h"
 
 // Constructor/Deconstructor.
@@ -271,7 +272,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 		ParseStringKeyValue(key, value, parsedString);
 
 		// Assign.
-		targetStr = parsedString;
+		SetTarget(parsedString);
 	} else 	if (key == "targetname") {
 		// Parsed string.
 		std::string parsedString = "";
@@ -280,7 +281,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 		ParseStringKeyValue(key, value, parsedString);
 
 		// Assign.
-		targetNameStr = parsedString;
+		SetTargetName(parsedString);
 	}
 	// Spawnflags.
 	else if (key == "spawnflags") {
@@ -384,4 +385,11 @@ void SVGBaseEntity::Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* p
 //
 void SVGBaseEntity::LinkEntity() {
 	gi.LinkEntity(serverEntity);
+}
+
+//
+//
+//
+void SVGBaseEntity::SVGBaseEntityThinkFree(void) {
+	SVG_FreeClassEntity(serverEntity);
 }

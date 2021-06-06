@@ -223,7 +223,40 @@ Entity* SVG_Find(Entity* from, int fieldofs, const char* match)
 //===============
 //
 SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::string& fieldValue, SVGBaseEntity* lastEntity) {
- 
+    vec3_t  eorg;
+    int     j;
+
+    Entity* serverEnt = (lastEntity ? lastEntity->GetServerEntity() : nullptr);
+
+    if (!lastEntity)
+        serverEnt = g_entities;
+    else
+        serverEnt++;
+
+    for (; serverEnt < &g_entities[globals.numberOfEntities]; serverEnt++) {
+        // Fetch serverEntity its ClassEntity.
+        SVGBaseEntity* classEntity = serverEnt->classEntity;
+
+        // Ensure it has a class entity.
+        if (!serverEnt->classEntity)
+            continue;
+
+        // Ensure it is in use.
+        if (!classEntity->IsInUse())
+            continue;
+
+        // Start preparing for checking IF, its dictionary HAS fieldKey.
+        auto dictionary = serverEnt->entityDictionary;
+
+        if (dictionary.find(fieldKey) != dictionary.end()) {
+            if (dictionary[fieldKey] == fieldValue) {
+                return classEntity;
+            }
+        }
+    }
+
+    return nullptr;
+
     //if (!from)
     //    from = g_baseEntities;
     //else
@@ -237,31 +270,31 @@ SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::
     //        return from;
     //}
 
-    // In case we have a last entity, we now know where to start.
-    int32_t start = (lastEntity != nullptr ? lastEntity->GetNumber() : 0);
+    //// In case we have a last entity, we now know where to start.
+    //int32_t start = (lastEntity != nullptr ? lastEntity->GetNumber() : 0);
 
-    // Very ugly, but I suppose... it has to be like this for now.
-    for (int32_t i = start; i < MAX_EDICTS; i++) {
-        // Ensure this entity is in use. (Skip otherwise.)
-        if (!g_entities[i].inUse)
-            continue;
+    //// Very ugly, but I suppose... it has to be like this for now.
+    //for (int32_t i = start; i < MAX_EDICTS; i++) {
+    //    // Ensure this entity is in use. (Skip otherwise.)
+    //    if (!g_entities[i].inUse)
+    //        continue;
 
-        // Ensure this entity has a valid class entity. (Skip otherwise.)
-        if (!g_entities[i].classEntity)
-            continue;
+    //    // Ensure this entity has a valid class entity. (Skip otherwise.)
+    //    if (!g_entities[i].classEntity)
+    //        continue;
 
-        // Start preparing for checking IF, its dictionary HAS fieldKey.
-        auto dictionary = g_entities[i].entityDictionary;
+    //    // Start preparing for checking IF, its dictionary HAS fieldKey.
+    //    auto dictionary = g_entities[i].entityDictionary;
 
-        if (dictionary.find(fieldKey) != dictionary.end()) {
-            if (dictionary[fieldKey] == fieldValue) {
-                return g_entities[i].classEntity;
-            }
-        }
-    }
+    //    if (dictionary.find(fieldKey) != dictionary.end()) {
+    //        if (dictionary[fieldKey] == fieldValue) {
+    //            return g_entities[i].classEntity;
+    //        }
+    //    }
+    //}
 
-    // We failed at finding any entity with the specific requirements, return nullptr.
-    return nullptr;
+    //// We failed at finding any entity with the specific requirements, return nullptr.
+    //return nullptr;
 }
 
 //

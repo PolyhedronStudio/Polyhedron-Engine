@@ -158,8 +158,8 @@ public:
     }
 
     // Get the 'killTarget' entity value.
-    inline char* GetKillTarget() {
-        return serverEntity->killTarget;
+    inline const std::string &GetKillTarget() {
+        return killTargetStr;
     }
 
     // Get the 'linkCount' value.
@@ -183,8 +183,8 @@ public:
     }
 
     // Return the 'message' value.
-    inline const char* GetMessage() {
-        return serverEntity->message;
+    inline const std::string &GetMessage() {
+        return messageStr;
     }
 
     // Return the bounding box 'mins' value.
@@ -443,6 +443,11 @@ public:
     inline void SetInUse(const qboolean& inUse) {
         serverEntity->inUse = inUse;
     }
+    
+    // Set the 'killTargetSTr' value.
+    inline void SetKillTarget(const std::string& killTarget) {
+        this->killTargetStr = killTarget;
+    }
 
     // Set the 'linkCount' value.
     inline void SetLinkCount(const int32_t &linkCount) {
@@ -503,6 +508,11 @@ public:
     // Set the 'nextThinkTime' value.
     inline void SetNextThinkTime(const float& nextThinkTime) {
         this->nextThinkTime = nextThinkTime;
+    }
+
+    // Set the 'noiseIndex' value.
+    inline void SetNoiseIndex(const int32_t& noiseIndex) {
+        this->serverEntity->noiseIndex = noiseIndex;
     }
     
     // Set the 'oldEnemyPtr' pointer.
@@ -653,8 +663,14 @@ protected:
     // -- Strings.
     // Entity MODEL filename.
     std::string model;
+    // Trigger kill target string.
+    std::string killTargetStr;
+    // Trigger target string.
     std::string targetStr;
+    // Trigger its own targetname string.
     std::string targetNameStr;
+    // Trigger its message string.
+    std::string messageStr;
 
     //---------------------------------
     // -- Types (Move, Water, what have ya? Add in here.)
@@ -800,6 +816,11 @@ protected:
     BlockedCallbackPointer      blockedFunction;
     TakeDamageCallbackPointer   takeDamageFunction;
     DieCallbackPointer          dieFunction;
+
+    //
+    // Callback implementations that can be set by all child entities.
+    //
+    void SVGBaseEntityThinkFree(void);
 };
 
 #endif // __SVGAME_ENTITIES_BASE_CBASEENTITY_H__

@@ -145,7 +145,7 @@ void SVGBaseTrigger::InitPointTrigger() {
 //===============
 //
 void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) {
-	if (key == "killtarget") {
+	if (key == "message") {
 		// Parsed string.
 		std::string parsedString = "";
 
@@ -153,7 +153,16 @@ void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) 
 		ParseStringKeyValue(key, value, parsedString);
 
 		// Assign.
-		killTargetStr = value;
+		messageStr = parsedString;
+	} else if (key == "killtarget") {
+		// Parsed string.
+		std::string parsedString = "";
+
+		// Parse.
+		ParseStringKeyValue(key, value, parsedString);
+
+		// Assign.
+		killTargetStr = parsedString;
 	} else {
 		// Parent class spawnkey.
 		SVGBaseEntity::SpawnKey(key, value);
@@ -198,7 +207,7 @@ void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
 	//
 	// Print the "message"
 	//
-	if (GetMessage() && !(activator->GetServerFlags() & EntityServerFlags::Monster)) {
+	if (GetMessage().length() && !(activator->GetServerFlags() & EntityServerFlags::Monster)) {
 		// Fetch noise index.
 		int32_t noiseIndex = GetNoiseIndex();
 
@@ -216,10 +225,10 @@ void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
 	//
 	// Kill killtargets
 	//
-	if (GetKillTarget()) {
+	if (GetKillTarget().length()) {
 		SVGBaseEntity* triggerEntity = nullptr;
 
-		while (triggerEntity != SVG_FindEntityByKeyValue("targetname", GetKillTarget(), triggerEntity))
+		while (triggerEntity = SVG_FindEntityByKeyValue("targetname", GetKillTarget(), triggerEntity))
 			// It is going to die, free it.
 			SVG_FreeClassEntity(triggerEntity->GetServerEntity());
 
@@ -235,30 +244,24 @@ void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
 	if (GetTarget().length()) {
 		SVGBaseEntity* triggerEntity = nullptr;
 
-		while (triggerEntity != SVG_FindEntityByKeyValue("targetname", GetTarget(), triggerEntity)) {
+		while ((triggerEntity = SVG_FindEntityByKeyValue("targetname", GetTarget(), triggerEntity))) {
+			// Doors fire area portals in a special way. So we skip those.
+			if (triggerEntity->GetClassName() == "func_areaportal"
+				&& (GetClassName() == "func_door" || GetClassName() == "func_door_rotating")) {
+				continue;
+			}
 
+			if (triggerEntity == this) {
+				gi.DPrintf("WARNING: Entity #%i used itself.\n", GetServerEntity()->state.number);
+			} else {
+				triggerEntity->Use(this, activator);
+			}
+
+			// Make sure it is in use, if not, debug.
+			if (!triggerEntity->IsInUse()) {
+                gi.DPrintf("WARNING: Entity #%i was removed while using targets\n", GetServerEntity()->state.number);
+                return;
+			}
 		}
-	//        t = NULL;
-	//        while ((t = SVG_Find(t, FOFS(targetName), ent->GetTarget()))) {
-	//            // doors fire area portals in a specific way
-	//            if (!Q_stricmp(t->className, "func_areaportal") &&
-	//                (!Q_stricmp(ent->GetClassName(), "func_door") || !Q_stricmp(ent->GetClassName(), "func_door_rotating")))
-	//                continue;
-	//
-	//            if (t == ent->GetServerEntity()) {
-	//                gi.DPrintf("WARNING: Entity used itself.\n");
-	//            } else {
-	//                SVGBaseEntity* targetClassEntity = t->classEntity;
-	//
-	//                // Only continue if there is a classentity.
-	//                if (targetClassEntity) {
-	//                    targetClassEntity->Use(ent, activator);
-	//                }
-	//            }
-	//            if (!ent->IsInUse()) {
-	//                gi.DPrintf("entity was removed while using targets\n");
-	//                return;
-	//            }
-	//	}
 	}
 }

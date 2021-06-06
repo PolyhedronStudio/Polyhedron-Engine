@@ -48,6 +48,11 @@ public:
         return delay;
     }
 
+    // Return the 'wait' value.
+    inline const float GetWait() {
+        return wait;
+    }
+
     //
     // Entity Set Functions.
     //
@@ -59,6 +64,11 @@ public:
     // Return the 'delay' value.
     inline void SetDelay(const float& delay) {
         this->delay = delay;
+    }
+
+    // Return the 'wait' value.
+    inline void SetWait(const float& wait) {
+        this->wait = wait;
     }
 
 protected:
@@ -83,13 +93,13 @@ protected:
 
 
     // Kill target when triggered.
-    std::string killTargetStr;
+    //std::string killTargetStr;
     
     // Message when triggered.
-    std::string messageStr;
+    //std::string messageStr;
 
     // Master trigger entity.
-    std::string masterStr;
+    //std::string masterStr;
 
     // Delay before calling trigger execution.
     float delay;

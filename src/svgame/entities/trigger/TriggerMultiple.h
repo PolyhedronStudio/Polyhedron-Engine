@@ -35,7 +35,9 @@ public:
     //
 
     // Callback functions.
+    void TriggerMultipleThinkWait(void);
     void TriggerMultipleTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+    void TriggerMultipleEnable(SVGBaseEntity* other, SVGBaseEntity* activator);
     void TriggerMultipleUse(SVGBaseEntity* other, SVGBaseEntity* activator);
 
     //
@@ -43,6 +45,11 @@ public:
     // 
 
 protected:
+    //
+    // Trigger function.
+    //
+    void Trigger(SVGBaseEntity* activator);
+
     //
     // Other base entity members. (These were old fields in edict_T back in the day.)
     //
