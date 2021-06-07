@@ -177,16 +177,16 @@ void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
     if (GetDelayTime()) {
 		// Create a temporary DelayedTrigger entity, to fire at a latter time.
 	    Entity *serverTriggerDelay = SVG_Spawn();
-		serverTriggerDelay->className = "trigger_delayeduse";
-		SVGBaseTrigger *triggerDelay = (SVGBaseTrigger*)(serverTriggerDelay->classEntity = SVG_SpawnClassEntity(serverTriggerDelay, "trigger_delayeduse"));
-		triggerDelay->SetNextThinkTime(level.time + GetDelayTime());
-		triggerDelay->SetThinkCallback(&TriggerDelayedUse::TriggerDelayedUseThink);
+		serverTriggerDelay->className = "DelayedUse";
+		SVGBaseTrigger *triggerDelay = (SVGBaseTrigger*)(serverTriggerDelay->classEntity = SVG_SpawnClassEntity(serverTriggerDelay, "DelayedUse"));
 		if (!activator)
 			gi.DPrintf("TriggerDelayThink with no activator\n");
 		triggerDelay->SetActivator(activator);
 		triggerDelay->SetMessage(GetMessage());
 		triggerDelay->SetTarget(GetTarget());
 		triggerDelay->SetKillTarget(GetKillTarget());
+		triggerDelay->SetNextThinkTime(level.time + GetDelayTime());
+		triggerDelay->SetThinkCallback(&TriggerDelayedUse::TriggerDelayedUseThink);
 
 		// Return, the rest happens by delay.
 		return;

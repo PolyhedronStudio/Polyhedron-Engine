@@ -64,7 +64,9 @@ void TriggerDelayedUse::Spawn() {
 	SVGBaseTrigger::Spawn();
 
 	// Initialize Brush Trigger.
-	InitPointTrigger();
+	//InitPointTrigger();
+	SetMoveType(MoveType::None);
+	SetSolid(Solid::Not);
 
 	// Link entity for collision.
 	LinkEntity();

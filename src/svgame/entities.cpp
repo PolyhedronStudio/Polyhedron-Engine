@@ -53,7 +53,7 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
         spawnEntity = g_baseEntities[entityNumber] = new WorldSpawn(ent);
     else if (className == "trigger_always")
         spawnEntity = g_baseEntities[entityNumber] = new TriggerAlways(ent);
-    else if (className == "trigger_delayeduse")
+    else if (className == "DelayedUse")
         spawnEntity = g_baseEntities[entityNumber] = new TriggerDelayedUse(ent);
     else if (className == "trigger_hurt")
         spawnEntity = g_baseEntities[entityNumber] = new TriggerHurt(ent);
