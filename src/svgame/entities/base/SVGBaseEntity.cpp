@@ -39,6 +39,9 @@ SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
 	moveType = MoveType::None;
 
 	// Velocity.
+	delayTime = 0;
+	waitTime = 0;
+
 	flags = 0;
 	spawnFlags = 0;
 	velocity = vec3_zero();
@@ -247,6 +250,39 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 		// Set Damage.
 		SetDamage(parsedDamage);
 	}
+	// Delay.
+	else if (key == "delay") {
+		// Parsed float.
+		float parsedFloat = 0.f;
+
+		// Parse.
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Assign.
+		SetDelayTime(parsedFloat);
+	}
+	// KillTarget.
+	else if (key == "killtarget") {
+		// Parsed string.
+		std::string parsedString = "";
+
+		// Parse.
+		ParseStringKeyValue(key, value, parsedString);
+
+		// Assign.
+		SetKillTarget(parsedString);
+	}
+	// Message.
+	else if (key == "message") {
+		// Parsed string.
+		std::string parsedString = "";
+
+		// Parse.
+		ParseStringKeyValue(key, value, parsedString);
+
+		// Assign.
+		SetMessage(parsedString);
+	} 
 	// Model.
 	else if (key == "model") {
 		// Parse model.
@@ -264,6 +300,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 
 		// Set origin.
 		SetOrigin(parsedOrigin);
+	// Target.
 	} else if (key == "target") {
 		// Parsed string.
 		std::string parsedString = "";
@@ -273,6 +310,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 
 		// Assign.
 		SetTarget(parsedString);
+	// TargetName.
 	} else 	if (key == "targetname") {
 		// Parsed string.
 		std::string parsedString = "";

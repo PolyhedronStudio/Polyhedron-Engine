@@ -43,32 +43,12 @@ public:
         return activatorEntity;
     }
 
-    // Return the 'delay' value.
-    inline const float GetDelay() {
-        return delay;
-    }
-
-    // Return the 'wait' value.
-    inline const float GetWait() {
-        return wait;
-    }
-
     //
     // Entity Set Functions.
     //
     // Set the 'activatorEntity' pointer.
     inline void SetActivator(SVGBaseEntity* activator) {
         this->activatorEntity = activator;
-    }
-
-    // Return the 'delay' value.
-    inline void SetDelay(const float& delay) {
-        this->delay = delay;
-    }
-
-    // Return the 'wait' value.
-    inline void SetWait(const float& wait) {
-        this->wait = wait;
     }
 
 protected:
@@ -100,12 +80,6 @@ protected:
 
     // Master trigger entity.
     //std::string masterStr;
-
-    // Delay before calling trigger execution.
-    float delay;
-
-    // Wait time before triggering at all, in case it was set to auto.
-    float wait;
 
     // Timestamp that the trigger has been called at.
     //

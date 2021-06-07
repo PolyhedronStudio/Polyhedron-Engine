@@ -63,6 +63,7 @@ static const spawn_func_t spawn_funcs[] = {
     //{"trigger_once", SP_trigger_once},
     //{"trigger_relay", SP_trigger_relay},
     //{"trigger_push", SP_trigger_push},
+    {"trigger_delayeduse", NULL},
     {"trigger_hurt", NULL},
     {"trigger_multiple", NULL},
     //{"trigger_key", SP_trigger_key},

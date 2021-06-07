@@ -70,8 +70,8 @@ void TriggerMultiple::Spawn() {
 	else if (sound == 3)
 		SetNoiseIndex(SVG_PrecacheSound("misc/trigger1.wav")); // Similar to gi.SoundIndex.
 
-	if (!GetWait())
-		SetWait(0.2f);
+	if (!GetWaitTime())
+		SetWaitTime(0.2f);
 
 	//self->noiseIndex = gi.SoundIndex("world/electro.wav");
 	SetTouchCallback(&TriggerMultiple::TriggerMultipleTouch);
@@ -133,14 +133,15 @@ void TriggerMultiple::Trigger(SVGBaseEntity *activator) {
 		return;
 
 	// Execute UseTargets.
+	SetActivator(activator);
 	UseTargets(activator);
 
-	if (GetWait() > 0) {
+	if (GetWaitTime() > 0) {
 		// Set our think callback to be "waiting".
 		SetThinkCallback(&TriggerMultiple::TriggerMultipleThinkWait);
 
 		// Update the next think callback.
-		SetNextThinkTime(level.time + GetWait());
+		SetNextThinkTime(level.time + GetWaitTime());
 	} else {
 		// We can't just remove (self) here, because this is a touch function
 		// called while looping through area links...
@@ -193,8 +194,7 @@ void TriggerMultiple::TriggerMultipleTouch(SVGBaseEntity* self, SVGBaseEntity* o
 	//}
 
 	//self->activator = other;
-	//SetActivator(other);
-
+	SetActivator(other);
 	Trigger(other);
 }
 

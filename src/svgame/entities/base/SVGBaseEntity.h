@@ -98,10 +98,10 @@ public:
         return deadFlag;
     }
 
-    // Return the 'delay' value.
-    //inline const float GetDelay() {
-    //    return delay;
-    //}
+    // Set the 'delay' value.
+    inline const float &GetDelayTime() {
+        return delayTime;
+    }
 
     // Return the 'effects' value.
     inline const uint32_t GetEffects() {
@@ -334,6 +334,11 @@ public:
         return velocity;
     }
 
+    // Return the 'wait' value.
+    inline const float& GetWaitTime() {
+        return waitTime;
+    }
+
     // Return the 'waterLevel' value.
     inline const int32_t GetWaterLevel() {
         return waterLevel;
@@ -387,10 +392,10 @@ public:
         serverEntity->state.effects = effects;
     }
 
-    // Return the 'delay' value.
-    //inline void SetDelay(const float &delay) {
-    //    this->delay = delay;
-    //}
+    // Set the 'delayTime' value.
+    inline void SetDelayTime(const float& delayTime) {
+        this->delayTime = delayTime;
+    }
 
     // Set the 'enemyPtr' pointer.
     inline void SetEnemy(SVGBaseEntity* enemy) {
@@ -467,6 +472,11 @@ public:
     // Set the 'maxs' value.
     inline void SetMaxs(const vec3_t& maxs) {
         serverEntity->maxs = maxs;
+    }
+
+    // Set the 'messageStr' value.
+    inline void SetMessage(const std::string& message) {
+        this->messageStr = message;
     }
     
     // Set the 'mins' value.
@@ -604,6 +614,11 @@ public:
         this->velocity = velocity;
     }
 
+    // Return the 'wait' value.
+    inline void SetWaitTime(const float& waitTime) {
+        this->waitTime = waitTime;
+    }
+
     // Return the 'waterLevel' value.
     inline void SetWaterLevel(const int32_t &waterLevel) {
         this->waterLevel = waterLevel;
@@ -694,6 +709,8 @@ protected:
     // Per entity gravity multiplier (1.0 is normal). TIP: Use for lowgrav artifact, flares
     float gravity;
     
+    //-----------------------------------
+    // -- Pointers.
     // Goal Entity.
     Entity* goalEntityPtr;
     // Move Target Entity.
@@ -704,29 +721,33 @@ protected:
     // Ideal Yaw Angle. (Should be for monsters...)
     float idealYawAngle;
 
+    //------------------------------------
+    // Timing.
     // The next 'think' time, determines when to call the 'think' callback.
     float nextThinkTime;
+    // Delay before calling trigger execution.
+    float delayTime;
+    // Wait time before triggering at all, in case it was set to auto.
+    float waitTime;
 
     // Ground Entity link count. (To keep track if it is linked or not.)
     int32_t groundEntityLinkCount;
 
+    //------------------------------------
+    // Entity Status.
     // Current health.
     int32_t health;
     // Maximum health.
     int32_t maxHealth;
 
+    //------------------------------------
+    // Entity GAME settings.
     // The height above the origin, this is where EYE SIGHT comes from. Ok?
     int32_t viewHeight;
-
     // Determines how to interpret, take damage like a man or like a ... ? Yeah, pick up soap.
     int32_t takeDamage;
-    
     // Actual damage it does if encountered or fucked around with.
     int32_t damage;
-
-//int32_t radiusDamage;
-//float damageRadius;
-// 
     // Dead Flag. (Are we dead, dying or...?)
     int32_t deadFlag;
 

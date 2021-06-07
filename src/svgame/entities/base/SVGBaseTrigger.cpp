@@ -15,6 +15,9 @@
 #include "SVGBaseEntity.h"
 #include "SVGBaseTrigger.h"
 
+// Included for delayed use.
+#include "../trigger/TriggerDelayedUse.h"
+
 // Constructor/Deconstructor.
 SVGBaseTrigger::SVGBaseTrigger(Entity* svEntity) : SVGBaseEntity(svEntity) {
 	//
@@ -37,6 +40,8 @@ SVGBaseTrigger::SVGBaseTrigger(Entity* svEntity) : SVGBaseEntity(svEntity) {
 	//
 	// Default values for members.
 	//
+
+
 	//moveType = MoveType::None;
 
 	//// Velocity.
@@ -145,28 +150,8 @@ void SVGBaseTrigger::InitPointTrigger() {
 //===============
 //
 void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) {
-	if (key == "message") {
-		// Parsed string.
-		std::string parsedString = "";
-
-		// Parse.
-		ParseStringKeyValue(key, value, parsedString);
-
-		// Assign.
-		messageStr = parsedString;
-	} else if (key == "killtarget") {
-		// Parsed string.
-		std::string parsedString = "";
-
-		// Parse.
-		ParseStringKeyValue(key, value, parsedString);
-
-		// Assign.
-		killTargetStr = parsedString;
-	} else {
-		// Parent class spawnkey.
-		SVGBaseEntity::SpawnKey(key, value);
-	}
+	// Parent class spawnkey.
+	SVGBaseEntity::SpawnKey(key, value);
 }
 
 //
@@ -189,10 +174,23 @@ void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
 	//
 	// Check for a delay
 	//
-    if (GetDelay()) {
+    if (GetDelayTime()) {
 		// Create a temporary DelayedTrigger entity, to fire at a latter time.
-	//        t = SVG_Spawn();
-	//        t->className = "DelayedUse";
+	    Entity *serverTriggerDelay = SVG_Spawn();
+		serverTriggerDelay->className = "trigger_delayeduse";
+		SVGBaseTrigger *triggerDelay = (SVGBaseTrigger*)(serverTriggerDelay->classEntity = SVG_SpawnClassEntity(serverTriggerDelay, "trigger_delayeduse"));
+		triggerDelay->SetNextThinkTime(level.time + GetDelayTime());
+		triggerDelay->SetThinkCallback(&TriggerDelayedUse::TriggerDelayedUseThink);
+		if (!activator)
+			gi.DPrintf("TriggerDelayThink with no activator\n");
+		triggerDelay->SetActivator(activator);
+		triggerDelay->SetMessage(GetMessage());
+		triggerDelay->SetTarget(GetTarget());
+		triggerDelay->SetKillTarget(GetKillTarget());
+
+		// Return, the rest happens by delay.
+		return;
+
 	////        t->nextThinkTime = level.time + ent->GetDelay();
 	//        //t->Think = Think_Delay;
 	////        t->activator = activator;
@@ -230,7 +228,7 @@ void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
 
 		while (triggerEntity = SVG_FindEntityByKeyValue("targetname", GetKillTarget(), triggerEntity))
 			// It is going to die, free it.
-			SVG_FreeClassEntity(triggerEntity->GetServerEntity());
+			SVG_FreeEntity(triggerEntity->GetServerEntity());
 
 			if (!IsInUse()) {
                 gi.DPrintf("entity was removed while using killtargets\n");

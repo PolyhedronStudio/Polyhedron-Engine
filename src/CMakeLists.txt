@@ -125,6 +125,7 @@ SET(SRC_SVGAME
 	#svgame/entities/trigger/trigger_push.cpp
 	#svgame/entities/trigger/trigger_relay.cpp
 	svgame/entities/trigger/TriggerAlways.cpp
+	svgame/entities/trigger/TriggerDelayedUse.cpp
 	svgame/entities/trigger/TriggerMultiple.cpp
 	svgame/entities/trigger/TriggerHurt.cpp
 	
@@ -172,6 +173,7 @@ SET(HEADERS_SVGAME
 	svgame/entities/misc/MiscExplosionBox.h
 
 	svgame/entities/trigger/TriggerAlways.h
+	svgame/entities/trigger/TriggerDelayedUse.h
 	svgame/entities/trigger/TriggerMultiple.h
 	svgame/entities/trigger/TriggerHurt.h
 
