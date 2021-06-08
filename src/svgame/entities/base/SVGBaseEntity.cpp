@@ -429,5 +429,5 @@ void SVGBaseEntity::LinkEntity() {
 //
 //
 void SVGBaseEntity::SVGBaseEntityThinkFree(void) {
-	SVG_FreeClassEntity(serverEntity);
+	SVG_FreeEntity(serverEntity);
 }

@@ -120,9 +120,8 @@ void SVGBaseTrigger::InitBrushTrigger() {
 	SetModel(GetModel());
 	SetMoveType(MoveType::None);
 	SetSolid(Solid::Trigger);
-	SetInUse(true);
-
-	//SetServerFlags(EntityServerFlags::NoClient);
+	
+	SetServerFlags(EntityServerFlags::NoClient);
 }
 
 //
@@ -140,7 +139,7 @@ void SVGBaseTrigger::InitPointTrigger() {
 	SetSolid(Solid::Trigger);
 
 	// Ensure we got the proper no client flags.
-	//SetServerFlags(EntityServerFlags::NoClient);
+	SetServerFlags(EntityServerFlags::NoClient);
 }
 
 //
@@ -150,8 +149,21 @@ void SVGBaseTrigger::InitPointTrigger() {
 //===============
 //
 void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) {
+	// Wait.
+	if (key == "wait") {
+		// Parsed float.
+		float parsedFloat = 0.f;
+
+		// Parse.
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Assign.
+		SetWaitTime(parsedFloat);
+	}
 	// Parent class spawnkey.
-	SVGBaseEntity::SpawnKey(key, value);
+	else {
+		SVGBaseEntity::SpawnKey(key, value);
+	}
 }
 
 //

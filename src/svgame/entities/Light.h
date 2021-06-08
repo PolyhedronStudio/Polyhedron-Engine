@@ -10,9 +10,9 @@
 #ifndef __SVGAME_ENTITIES_LIGHT_H__
 #define __SVGAME_ENTITIES_LIGHT_H__
 
-class SVGBaseEntity;
+class SVGBaseTrigger;
 
-class Light : public SVGBaseEntity {
+class Light : public SVGBaseTrigger {
 public:
     // Constructor/Deconstructor.
     Light(Entity* svEntity);

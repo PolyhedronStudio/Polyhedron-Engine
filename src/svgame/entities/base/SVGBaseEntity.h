@@ -387,14 +387,14 @@ public:
         this->deadFlag = deadFlag;
     }
 
-    // Set the 'effects' value.
-    inline void SetEffects(const uint32_t &effects) {
-        serverEntity->state.effects = effects;
-    }
-
     // Set the 'delayTime' value.
     inline void SetDelayTime(const float& delayTime) {
         this->delayTime = delayTime;
+    }
+
+    // Set the 'effects' value.
+    inline void SetEffects(const uint32_t &effects) {
+        serverEntity->state.effects = effects;
     }
 
     // Set the 'enemyPtr' pointer.

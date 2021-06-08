@@ -20,8 +20,9 @@
 #include "entities/info/InfoPlayerStart.h"
 #include "entities/trigger/TriggerAlways.h"
 #include "entities/trigger/TriggerDelayedUse.h"
-#include "entities/trigger/TriggerMultiple.h"
 #include "entities/trigger/TriggerHurt.h"
+#include "entities/trigger/TriggerMultiple.h"
+#include "entities/trigger/TriggerOnce.h"
 #include "entities/Worldspawn.h"
 #include "entities/Light.h"
 #include "entities/misc/MiscExplosionBox.h"
@@ -59,6 +60,8 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
         spawnEntity = g_baseEntities[entityNumber] = new TriggerHurt(ent);
     else if (className == "trigger_multiple")
         spawnEntity = g_baseEntities[entityNumber] = new TriggerMultiple(ent);
+    else if (className == "trigger_once")
+        spawnEntity = g_baseEntities[entityNumber] = new TriggerOnce(ent);
     else if (className == "PlayerClient")
         spawnEntity = g_baseEntities[entityNumber] = new PlayerClient(ent);
     else

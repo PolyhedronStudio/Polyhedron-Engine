@@ -60,12 +60,12 @@ static const spawn_func_t spawn_funcs[] = {
     //{"func_killbox", SP_func_killbox},
 
     {"trigger_always", NULL},
-    //{"trigger_once", SP_trigger_once},
     //{"trigger_relay", SP_trigger_relay},
     //{"trigger_push", SP_trigger_push},
     {"DelayedUse", NULL},
     {"trigger_hurt", NULL},
     {"trigger_multiple", NULL},
+    {"trigger_once", NULL},
     //{"trigger_key", SP_trigger_key},
     //{"trigger_counter", SP_trigger_counter},
     //{"trigger_elevator", SP_trigger_elevator},

@@ -126,8 +126,9 @@ SET(SRC_SVGAME
 	#svgame/entities/trigger/trigger_relay.cpp
 	svgame/entities/trigger/TriggerAlways.cpp
 	svgame/entities/trigger/TriggerDelayedUse.cpp
-	svgame/entities/trigger/TriggerMultiple.cpp
 	svgame/entities/trigger/TriggerHurt.cpp
+	svgame/entities/trigger/TriggerMultiple.cpp
+	svgame/entities/trigger/TriggerOnce.cpp
 	
 	svgame/entities/Light.cpp
 	svgame/entities/WorldSpawn.cpp
@@ -174,9 +175,10 @@ SET(HEADERS_SVGAME
 
 	svgame/entities/trigger/TriggerAlways.h
 	svgame/entities/trigger/TriggerDelayedUse.h
-	svgame/entities/trigger/TriggerMultiple.h
 	svgame/entities/trigger/TriggerHurt.h
-
+	svgame/entities/trigger/TriggerMultiple.h
+	svgame/entities/trigger/TriggerOnce.h
+	
 	svgame/entities/Light.h
 	svgame/entities/WorldSpawn.h
 

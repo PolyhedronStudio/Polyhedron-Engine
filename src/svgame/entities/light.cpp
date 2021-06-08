@@ -9,13 +9,14 @@
 #include "../g_local.h"              // SVGame.
 
 #include "base/SVGBaseEntity.h"
+#include "base/SVGBaseTrigger.h"
 #include "Light.h"
 
 // Yeah, the spawnflag for start off.
 #define START_OFF   1
 
 // Constructor/Deconstructor.
-Light::Light(Entity* svEntity) : SVGBaseEntity(svEntity) {
+Light::Light(Entity* svEntity) : SVGBaseTrigger(svEntity) {
 
 }
 Light::~Light() {
@@ -25,11 +26,11 @@ Light::~Light() {
 // Interface functions. 
 void Light::Precache() {
     // Parent class precache.
-    SVGBaseEntity::Precache();
+    SVGBaseTrigger::Precache();
 }
 void Light::Spawn() {
     // Parent class spawn.
-    SVGBaseEntity::Spawn();
+    SVGBaseTrigger::Spawn();
 
     // WatIsDeze: I think we want lights. This is for the old 1997/1998
     // no targeted lights in deathmatch, because they cause global messages
@@ -53,11 +54,11 @@ void Light::Spawn() {
 }
 void Light::PostSpawn() {
     // Parent class PostSpawn.
-    SVGBaseEntity::PostSpawn();
+    SVGBaseTrigger::PostSpawn();
 }
 void Light::Think() {
     // Parent class think.
-    SVGBaseEntity::Think();
+    SVGBaseTrigger::Think();
 }
 
 void Light::LightUse(SVGBaseEntity* other, SVGBaseEntity* activator) {
