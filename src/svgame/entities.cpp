@@ -102,7 +102,7 @@ void SVG_FreeClassEntity(Entity* ent) {
 // SVG_FreeEntity
 // 
 // Will remove the class entity, if it exists. Continues to then mark the
-// entity as "free". (inUse = false)
+// entity as "freed". (inUse = false)
 //=================
 //
 void SVG_FreeEntity(Entity* ent)

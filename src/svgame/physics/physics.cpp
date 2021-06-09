@@ -748,23 +748,23 @@ void SVG_Physics_Toss(SVGBaseEntity *ent)
         return;
 
     if (trace.fraction < 1) {
-        float backOff = 1;
+        float backOff = 1.f;
 
         // More backOff if bouncing movetype.
         if (ent->GetMoveType() == MoveType::Bounce) {
-            backOff = 1.5;
+            backOff = 1.5f;
         }
         
         // Clip new velocity.
         ent->SetVelocity(ClipVelocity(ent->GetVelocity(), trace.plane.normal, backOff));
 
         // Stop if on ground
-        if (trace.plane.normal[2] > 0.7) {
-            if (ent->GetVelocity().z < 60 || ent->GetMoveType() != MoveType::Bounce) {
+        if (trace.plane.normal[2] > 0.7f) {
+            if (ent->GetVelocity().z < 60.f || ent->GetMoveType() != MoveType::Bounce) {
                 ent->SetGroundEntity(trace.ent);
                 ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
-                ent->SetVelocity(vec3_origin);
-                ent->SetAngularVelocity(vec3_origin);
+                ent->SetVelocity(vec3_zero());
+                ent->SetAngularVelocity(vec3_zero());
             }
         }
 

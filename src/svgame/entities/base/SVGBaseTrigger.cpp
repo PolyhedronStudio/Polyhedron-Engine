@@ -144,7 +144,7 @@ void SVGBaseTrigger::InitPointTrigger() {
 
 //
 //===============
-// SVGBaseTrigger::InitPointTrigger
+// SVGBaseTrigger::SpawnKey
 //
 //===============
 //

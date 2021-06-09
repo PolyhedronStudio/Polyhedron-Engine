@@ -361,6 +361,9 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     BlasterBolt *boltEntity = (BlasterBolt*)(serverEntity->classEntity = SVG_SpawnClassEntity(serverEntity, "BlasterBolt"));
     
     // Basic attributes.
+    boltEntity->Precache();
+    boltEntity->Spawn();
+
     boltEntity->SetOwner(self);
     boltEntity->SetDamage(damage);
     if (hyper)

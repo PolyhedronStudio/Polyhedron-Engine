@@ -589,7 +589,7 @@ public:
     }
 
     // Set the 'style' value.
-    inline const uint32_t SetStyle(const int32_t &style) {
+    inline void SetStyle(const int32_t &style) {
         serverEntity->style = style;
     }
 
