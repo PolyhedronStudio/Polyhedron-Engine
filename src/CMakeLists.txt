@@ -129,7 +129,9 @@ SET(SRC_SVGAME
 	svgame/entities/trigger/TriggerHurt.cpp
 	svgame/entities/trigger/TriggerMultiple.cpp
 	svgame/entities/trigger/TriggerOnce.cpp
-	
+
+	svgame/entities/weaponry/BlasterBolt.cpp
+		
 	svgame/entities/Light.cpp
 	svgame/entities/WorldSpawn.cpp
 
@@ -179,6 +181,8 @@ SET(HEADERS_SVGAME
 	svgame/entities/trigger/TriggerMultiple.h
 	svgame/entities/trigger/TriggerOnce.h
 	
+	svgame/entities/weaponry/BlasterBolt.h
+
 	svgame/entities/Light.h
 	svgame/entities/WorldSpawn.h
 

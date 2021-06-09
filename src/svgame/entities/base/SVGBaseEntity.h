@@ -154,6 +154,9 @@ public:
 
     // Get the 'inuse' value.
     inline qboolean IsInUse() {
+        if (!serverEntity)
+            return false;
+
         return serverEntity->inUse;
     }
 
@@ -248,6 +251,11 @@ public:
     // Return the 'origin' value.
     inline const vec3_t &GetOrigin() {
         return serverEntity->state.origin;
+    }
+
+    // Set the 'owner' value.
+    inline SVGBaseEntity* GetOwner() {
+        return this->ownerEntity;
     }
 
     // Return the 'renderEffects' value.
@@ -540,6 +548,11 @@ public:
         serverEntity->state.origin = origin;
     }
 
+    // Set the 'owner' value.
+    inline void SetOwner(SVGBaseEntity* owner) {
+        this->ownerEntity = owner;
+    }
+
     // Set the 'renderEffects' value.
     inline void SetRenderEffects(const int32_t& renderEffects) {
         serverEntity->state.renderEffects = renderEffects;
@@ -766,6 +779,9 @@ protected:
     // Old enemy, NULL if not any.
     SVGBaseEntity *oldEnemyEntity;
 
+    // Owner pointer. (Such as, did the player fire a blaster bolt? If so, the owner is...)
+    SVGBaseEntity* ownerEntity;
+
     // Team Chain Pointer.
     SVGBaseEntity* teamChainEntity;
     // Master Pointer.
@@ -838,6 +854,7 @@ protected:
     TakeDamageCallbackPointer   takeDamageFunction;
     DieCallbackPointer          dieFunction;
 
+public:
     //
     // Callback implementations that can be set by all child entities.
     //

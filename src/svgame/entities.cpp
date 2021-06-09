@@ -23,6 +23,7 @@
 #include "entities/trigger/TriggerHurt.h"
 #include "entities/trigger/TriggerMultiple.h"
 #include "entities/trigger/TriggerOnce.h"
+#include "entities/weaponry/BlasterBolt.h"
 #include "entities/Worldspawn.h"
 #include "entities/Light.h"
 #include "entities/misc/MiscExplosionBox.h"
@@ -64,6 +65,8 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
         spawnEntity = g_baseEntities[entityNumber] = new TriggerOnce(ent);
     else if (className == "PlayerClient")
         spawnEntity = g_baseEntities[entityNumber] = new PlayerClient(ent);
+    else if (className == "BlasterBolt")
+        spawnEntity = g_baseEntities[entityNumber] = new BlasterBolt(ent);
     else
         spawnEntity = g_baseEntities[entityNumber] = new SVGBaseEntity(ent);
 

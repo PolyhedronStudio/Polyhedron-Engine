@@ -100,6 +100,8 @@ static const spawn_func_t spawn_funcs[] = {
     //{"misc_teleporter_dest", SP_misc_teleporter_dest},
     {"misc_explobox", NULL},
 
+    {"BlasterBolt", NULL},
+
     {NULL, NULL}
 };
 

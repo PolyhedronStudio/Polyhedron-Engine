@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "utils.h"
 
 #include "entities/base/SVGBaseEntity.h"
+#include "entities/weaponry/BlasterBolt.h"
 
 /*
 =================
@@ -349,6 +350,104 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
 //
 void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aimdir, int damage, int speed, int effect, qboolean hyper)
 {
+    // Calculate direction vector.
+    vec3_t dir = vec3_normalize(aimdir);
+ 
+    // Spawn the blaster bolt server entity.
+    Entity *serverEntity = SVG_Spawn();
+    serverEntity->className = "BlasterBolt";
+
+    // Enjoy its class entity.
+    BlasterBolt *boltEntity = (BlasterBolt*)(serverEntity->classEntity = SVG_SpawnClassEntity(serverEntity, "BlasterBolt"));
+    
+    // Basic attributes.
+    boltEntity->SetOwner(self);
+    boltEntity->SetDamage(damage);
+    if (hyper)
+        boltEntity->SetSpawnFlags(1);
+    boltEntity->SetServerFlags(EntityServerFlags::DeadMonster);
+    boltEntity->SetMoveType(MoveType::FlyMissile);
+    boltEntity->SetSolid(Solid::BoundingBox);
+    boltEntity->SetEffects(boltEntity->GetEffects() | effect);
+
+    // Physics attributes.
+    boltEntity->SetOrigin(start);    // Initial origin.
+    boltEntity->SetOldOrigin(start); // Initial origin, same to origin, since this entity had no frame life yet.
+    boltEntity->SetAngles(vec3_euler(dir));
+    boltEntity->SetVelocity(vec3_scale(dir, speed));
+    boltEntity->SetMins(vec3_zero()); // Clear bounding mins.
+    boltEntity->SetMaxs(vec3_zero()); // clear bounding maxs.
+
+    // Model/Sound attributes.
+    boltEntity->SetModel("models/objects/laser/tris.md2");
+    boltEntity->SetSound(SVG_PrecacheSound("misc/lasfly.wav"));
+
+    // Set Touch and Think callbacks.
+    boltEntity->SetTouchCallback(&BlasterBolt::BlasterBoltTouch);
+
+    // Set think.
+    boltEntity->SetNextThinkTime(level.time + 2);
+    boltEntity->SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
+
+    // Link Bolt into world.
+    boltEntity->LinkEntity();
+
+    // If a client is firing this bolt, let AI check for dodges.
+    //if (self->client)
+    //    check_dodge(self, bolt->state.origin, dir, speed);
+
+    // Trace bolt.
+    SVGTrace trace = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), boltEntity->GetOrigin(), boltEntity, CONTENTS_MASK_SHOT);
+
+    // Did we hit anything?
+    if (trace.fraction < 1.0) {
+        boltEntity->SetOrigin(vec3_fmaf(boltEntity->GetOrigin(), -10, dir));
+        boltEntity->Touch(boltEntity, trace.ent, NULL, NULL);
+    }
+//}
+// 
+    ////bolt->Touch = blaster_touch;
+////bolt->nextThinkTime = level.time + 2;
+////bolt->Think = SVG_FreeEntity;
+
+        //// If a client is firing this bolt, let AI check for dodges.
+    //if (self->client)
+    //    check_dodge(self, bolt->state.origin, dir, speed);
+
+    //// Trace bolt.
+    //tr = gi.Trace(self->state.origin, vec3_zero(), vec3_zero(), bolt->state.origin, bolt, CONTENTS_MASK_SHOT);
+
+    //// Did we hit anything?
+    //if (tr.fraction < 1.0) {
+    //    bolt->state.origin = vec3_fmaf(bolt->state.origin, -10, dir);
+    //    //bolt->Touch(bolt, tr.ent, NULL, NULL);
+    //}
+    // 
+    //// Setup (and precache) sound, and model.
+    //bolt->state.modelIndex = gi.ModelIndex("models/objects/laser/tris.md2");
+    //bolt->state.sound = gi.SoundIndex("misc/lasfly.wav");
+    //   
+    //// Setup touch and Think function pointers.
+    ////bolt->Touch = blaster_touch;
+    ////bolt->nextThinkTime = level.time + 2;
+    ////bolt->Think = SVG_FreeEntity;
+    //
+    //// Link entity in for collision.
+    //gi.LinkEntity(bolt);
+
+    //// If a client is firing this bolt, let AI check for dodges.
+    //if (self->client)
+    //    check_dodge(self, bolt->state.origin, dir, speed);
+
+    //// Trace bolt.
+    //tr = gi.Trace(self->state.origin, vec3_zero(), vec3_zero(), bolt->state.origin, bolt, CONTENTS_MASK_SHOT);
+
+    //// Did we hit anything?
+    //if (tr.fraction < 1.0) {
+    //    bolt->state.origin = vec3_fmaf(bolt->state.origin, -10, dir);
+    //    //bolt->Touch(bolt, tr.ent, NULL, NULL);
+    //}
+
     //Entity *bolt;
     //trace_t tr;
     //
