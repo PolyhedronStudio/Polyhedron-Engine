@@ -9,6 +9,7 @@
 
 // Include local game header.
 #include "g_local.h"
+#include "entities/base/SVGBaseEntity.h"
 #include "brushfuncs.h"
 
 //=====================================================
@@ -55,69 +56,84 @@
 //#define DOOR_X_AXIS         64
 //#define DOOR_Y_AXIS         128
 
-
 //
 // Support routines for movement (changes in origin using velocity)
 //
 
 void Brush_Move_Done(Entity* ent)
 {
-    //VectorClear(ent->velocity);
-    //ent->moveInfo.OnEndFunction(ent);
+    ent->classEntity->SetVelocity( vec3_zero() );
+    ent->moveInfo.OnEndFunction( ent );
 }
 
 void Brush_Move_Final(Entity* ent)
 {
-    //if (ent->moveInfo.remainingDistance == 0) {
-    //    Brush_Move_Done(ent);
-    //    return;
-    //}
+    if ( ent->moveInfo.remainingDistance == 0 ) 
+    {
+        Brush_Move_Done( ent );
+        return;
+    }
 
-    //VectorScale(ent->moveInfo.dir, ent->moveInfo.remainingDistance / FRAMETIME, ent->velocity);
+    // Move only as far as to clear the remaining distance
+    ent->classEntity->SetVelocity( vec3_scale( ent->moveInfo.dir, ent->moveInfo.remainingDistance / FRAMETIME ) );
 
-    ////ent->Think = Brush_Move_Done;
-    //ent->nextThinkTime = level.time + FRAMETIME;
+    // FIXME This is a problem.
+    //ent->Think = Brush_Move_Done;
+    ent->classEntity->SetNextThinkTime( level.time + FRAMETIME );
 }
 
 void Brush_Move_Begin(Entity* ent)
 {
-    //float   frames;
+    float frames;
 
-    //if ((ent->moveInfo.speed * FRAMETIME) >= ent->moveInfo.remainingDistance) {
-    //    Brush_Move_Final(ent);
-    //    return;
-    //}
+    // It's time to stop
+    if ( (ent->moveInfo.speed * FRAMETIME) >= ent->moveInfo.remainingDistance )
+    {
+        Brush_Move_Final(ent);
+        return;
+    }
+    
     //VectorScale(ent->moveInfo.dir, ent->moveInfo.speed, ent->velocity);
-    //frames = floor((ent->moveInfo.remainingDistance / ent->moveInfo.speed) / FRAMETIME);
-    //ent->moveInfo.remainingDistance -= frames * ent->moveInfo.speed * FRAMETIME;
-    //ent->nextThinkTime = level.time + (frames * FRAMETIME);
-    ////ent->Think = Brush_Move_Final;
+    ent->classEntity->SetVelocity( vec3_scale( ent->moveInfo.dir, ent->moveInfo.speed ) );
+
+    frames = floor( (ent->moveInfo.remainingDistance / ent->moveInfo.speed) / FRAMETIME );
+    ent->moveInfo.remainingDistance -= frames * ent->moveInfo.speed * FRAMETIME;
+    ent->classEntity->SetNextThinkTime( level.time + (frames * FRAMETIME) );
+    
+    // FIXME: Mayhaps Brush_Move_Begin et al should be moved to SVGBaseEntity
+    //ent->Think = Brush_Move_Final;
 }
 
 void Think_AccelMove(Entity* ent);
 
 void Brush_Move_Calc(Entity* ent, const vec3_t &dest, void(*func)(Entity*))
 {
-    //VectorClear(ent->velocity);
-    //VectorSubtract(dest, ent->state.origin, ent->moveInfo.dir);
-    //ent->moveInfo.remainingDistance = VectorNormalize(ent->moveInfo.dir);
-    //ent->moveInfo.OnEndFunction = func;
+    ent->classEntity->SetVelocity( vec3_zero() );
+    ent->moveInfo.dir = dest - ent->classEntity->GetOrigin();
+    ent->moveInfo.remainingDistance = VectorNormalize( ent->moveInfo.dir );
+    ent->moveInfo.OnEndFunction = func;
 
-    //if (ent->moveInfo.speed == ent->moveInfo.acceleration && ent->moveInfo.speed == ent->moveInfo.deceleration) {
-    //    if (level.currentEntity == ((ent->flags & EntityFlags::TeamSlave) ? ent->teamMasterPtr : ent)) {
-    //        Brush_Move_Begin(ent);
-    //    }
-    //    else {
-    //        ent->nextThinkTime = level.time + FRAMETIME;
-    //        //ent->Think = Brush_Move_Begin;
-    //    }
-    //}
-    //else {
-    //    // accelerative
-    //    ent->moveInfo.currentSpeed = 0;
-    //    //ent->Think = Think_AccelMove;
-    //    ent->nextThinkTime = level.time + FRAMETIME;
-    //}
+    if (ent->moveInfo.speed == ent->moveInfo.acceleration && ent->moveInfo.speed == ent->moveInfo.deceleration)
+    {
+        if ( level.currentEntity == 
+             ((ent->classEntity->GetFlags() & EntityFlags::TeamSlave) ? 
+             ent->classEntity->GetTeamMasterEntity() : ent->classEntity) ) 
+        {
+            Brush_Move_Begin(ent);
+        }
+        else 
+        {
+            ent->classEntity->SetNextThinkTime( level.time + FRAMETIME );
+            //ent->Think = Brush_Move_Begin;
+        }
+    }
+    else 
+    {
+        // accelerative
+        ent->moveInfo.currentSpeed = 0;
+        //ent->Think = Think_AccelMove;
+        ent->classEntity->SetNextThinkTime( level.time + FRAMETIME );
+    }
 }
 
 
@@ -127,28 +143,33 @@ void Brush_Move_Calc(Entity* ent, const vec3_t &dest, void(*func)(Entity*))
 
 void Brush_AngleMove_Done(Entity* ent)
 {
-    //VectorClear(ent->angularVelocity);
-    //ent->moveInfo.OnEndFunction(ent);
+    ent->classEntity->SetAngularVelocity( vec3_zero() );
+    ent->moveInfo.OnEndFunction( ent );
 }
 
 void Brush_AngleMove_Final(Entity* ent)
 {
-    //vec3_t  move;
+    vec3_t move;
 
-    //if (ent->moveInfo.state == STATE_UP)
-    //    VectorSubtract(ent->moveInfo.endAngles, ent->state.angles, move);
-    //else
-    //    VectorSubtract(ent->moveInfo.startAngles, ent->state.angles, move);
+    if ( ent->moveInfo.state == STATE_UP )
+    {
+        VectorSubtract( ent->moveInfo.endAngles, ent->state.angles, move );
+    }
+    else
+    {
+        VectorSubtract( ent->moveInfo.startAngles, ent->state.angles, move );
+    }
 
-    //if (VectorCompare(move, vec3_origin)) {
-    //    Brush_AngleMove_Done(ent);
-    //    return;
-    //}
+    if ( VectorCompare( move, vec3_origin ) ) 
+    {
+        Brush_AngleMove_Done(ent);
+        return;
+    }
 
-    //VectorScale(move, 1.0 / FRAMETIME, ent->angularVelocity);
-
-    ////ent->Think = Brush_AngleMove_Done;
-    //ent->nextThinkTime = level.time + FRAMETIME;
+    ent->classEntity->SetAngularVelocity( vec3_scale( move, 1.0f / FRAMETIME ) );
+    
+    //ent->Think = Brush_AngleMove_Done;
+    ent->classEntity->SetNextThinkTime( level.time + FRAMETIME );
 }
 
 void Brush_AngleMove_Begin(Entity* ent)
