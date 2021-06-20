@@ -162,9 +162,6 @@ public:
 
     // Get the 'inuse' value.
     inline qboolean IsInUse() {
-        if (!serverEntity)
-            return false;
-
         return serverEntity->inUse;
     }
 
@@ -597,7 +594,7 @@ public:
     }
 
     // Set the 'style' value.
-    inline const uint32_t SetStyle(const int32_t &style) {
+    inline void SetStyle(const int32_t &style) {
         serverEntity->style = style;
     }
 

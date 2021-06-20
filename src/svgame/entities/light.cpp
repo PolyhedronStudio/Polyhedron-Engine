@@ -47,9 +47,9 @@ void Light::Spawn() {
         SetUseCallback(&Light::LightUse);
 
         if (GetSpawnFlags() & START_OFF)
-            gi.configstring(ConfigStrings::Lights + style, "a");
+            SVG_SetConfigString(ConfigStrings::Lights + style, "a");
         else
-            gi.configstring(ConfigStrings::Lights + style, GetServerEntity()->customLightStyle);
+            SVG_SetConfigString(ConfigStrings::Lights + style, GetCustomLightStyle());
     }
 }
 void Light::PostSpawn() {
@@ -70,15 +70,48 @@ void Light::LightUse(SVGBaseEntity* other, SVGBaseEntity* activator) {
 
     if (GetSpawnFlags() & START_OFF) {
         // Switch style.
-        gi.configstring(ConfigStrings::Lights + style, GetServerEntity()->customLightStyle);
+        SVG_SetConfigString(ConfigStrings::Lights + style, GetCustomLightStyle());
 
         // Change spawnflags, the light is on after all.
         SetSpawnFlags(spawnFlags & ~START_OFF);
     }
     else {
-        gi.configstring(ConfigStrings::Lights + style, "a");
+        SVG_SetConfigString(ConfigStrings::Lights + style, "a");
         SetSpawnFlags(spawnFlags | START_OFF);
     }
 }
 
-// Functions.
+//
+//===============
+// Light::SpawnKey
+//
+//===============
+//
+void Light::SpawnKey(const std::string& key, const std::string& value) {
+    // Wait.
+    if (key == "style") {
+        // Parsed float.
+        int32_t parsedInteger = 0;
+
+        // Parse.
+        ParseIntegerKeyValue(key, value, parsedInteger);
+
+        // Assign.
+        SetStyle(parsedInteger);
+    } 
+    // Style.
+    else if (key == "customLightStyle") {
+        // Parsed float.
+        std::string parsedString;
+
+        // Parse.
+        ParseStringKeyValue(key, value, parsedString);
+
+        // Assign.
+        SetCustomLightStyle(parsedString);
+    }
+    // Parent class spawnkey.
+    else {
+        SVGBaseEntity::SpawnKey(key, value);
+    }
+}
