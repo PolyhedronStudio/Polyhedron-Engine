@@ -64,6 +64,14 @@
 #define STATE_UP            2
 #define STATE_DOWN          3
 
+struct MoverState
+{
+	static constexpr uint32_t Top = 0U;
+	static constexpr uint32_t Bottom = 1U;
+	static constexpr uint32_t Up = 2U;
+	static constexpr uint32_t Down = 3U;
+};
+
 //
 // Support routines for movement (changes in origin using velocity)
 //
