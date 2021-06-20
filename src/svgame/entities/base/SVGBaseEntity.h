@@ -51,6 +51,14 @@ public:
     void TakeDamage(SVGBaseEntity* other, float kick, int32_t damage);
 
     //
+    // Entity interaction functions
+    //
+    
+    //  Calls Use on this entity's targets, and deletes its killtargets if any
+    //  @param activatorOverride: if nullptr, the entity's own activator is used and if the entity's own activator is nullptr, then this entity itself is the activator
+    void UseTargets( SVGBaseEntity* activatorOverride = nullptr );
+
+    //
     // Entity Get Functions.
     //
     // Return the bounding box absolute 'min' value.
