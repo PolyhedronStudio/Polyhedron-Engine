@@ -728,6 +728,8 @@ protected:
     Entity* goalEntityPtr;
     // Move Target Entity.
     Entity* moveTargetPtr;
+    // The entity that activated this
+    SVGBaseEntity* activator;
     
     // Yaw Speed. (Should be for monsters...)
     float yawSpeed;
