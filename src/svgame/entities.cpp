@@ -90,13 +90,17 @@ void SVG_FreeClassEntity(Entity* ent) {
     if (!ent->classEntity)
         return;
 
+    // Remove the classEntity reference
+    ent->classEntity->SetServerEntity( nullptr );
+    ent->classEntity = nullptr;
+
     // Fetch entity number.
     int32_t entityNumber = ent->state.number;
 
     // In case it exists in our base entitys, get rid of it, assign nullptr.
     if (g_baseEntities[entityNumber]) {
         delete g_baseEntities[entityNumber];
-        ent->classEntity = g_baseEntities[entityNumber] = nullptr;
+        g_baseEntities[entityNumber] = nullptr;
     }
 }
 

@@ -147,5 +147,5 @@ void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
         gi.Multicast(&origin, MultiCast::PVS);
     }
 
-    SVG_FreeEntity(self->GetServerEntity());
+    Remove();
 }

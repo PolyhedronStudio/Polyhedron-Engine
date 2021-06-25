@@ -652,18 +652,26 @@ public:
         this->yawSpeed = yawSpeed;
     }
 
-
     //
     // General Entity Functions.
     //
     // Link entity to world for collision testing using gi.LinkEntity.
     void LinkEntity();
 
+    // Marks the entity to be removed in the next server frame
+    // This is preferred to SVG_FreeEntity, as it is safer
+    void Remove();
+
     // Returns the server entity pointer.
     inline Entity* GetServerEntity() {
         return serverEntity;
     }
 
+    // Used only in SVG_FreeEntity
+    inline void SetServerEntity( Entity* svEntity )
+    {
+        serverEntity = svEntity;
+    }
 
 protected:
     //

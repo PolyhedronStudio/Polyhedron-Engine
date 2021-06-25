@@ -504,8 +504,6 @@ void SVG_RunFrame(void)
     //
     serverEntity = &g_entities[0];
     for (i = 0; i < globals.numberOfEntities; i++, serverEntity++) {
-
-
         // Don't go on if it isn't in use.
         if (!serverEntity->inUse)
             continue;
@@ -514,6 +512,13 @@ void SVG_RunFrame(void)
         if (!serverEntity->classEntity)
             continue;
         
+        // Admer: entity was marked for removal at the previous tick
+        if ( serverEntity->serverFlags & EntityServerFlags::Remove )
+        {
+            SVG_FreeEntity( serverEntity );
+            continue;
+        }
+
         // Fetch SVGBaseEntity (or inherited variant) of this server entity.
         baseEntity = serverEntity->classEntity;
 
@@ -539,7 +544,7 @@ void SVG_RunFrame(void)
         }
 
         // Last but not least, "run" process the entity.
-        SVG_RunEntity(baseEntity);
+        SVG_RunEntity(serverEntity->classEntity);
     }
 
     // See if it is time to end a deathmatch

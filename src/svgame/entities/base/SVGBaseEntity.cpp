@@ -533,6 +533,14 @@ void SVGBaseEntity::LinkEntity() {
 	gi.LinkEntity(serverEntity);
 }
 
+//===============
+// SVGBaseEntity::Remove
+//===============
+void SVGBaseEntity::Remove()
+{
+	serverEntity->serverFlags |= EntityServerFlags::Remove;
+}
+
 //
 //
 //

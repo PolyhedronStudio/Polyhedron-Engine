@@ -702,7 +702,7 @@ void SVG_Physics_Toss(SVGBaseEntity *ent)
 {
     // Regular thinking
     SVG_RunThink(ent);
-
+    
     if (!ent->IsInUse())
         return;
 
