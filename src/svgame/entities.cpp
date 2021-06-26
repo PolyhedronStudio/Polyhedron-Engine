@@ -27,6 +27,7 @@
 #include "entities/Worldspawn.h"
 #include "entities/Light.h"
 #include "entities/misc/MiscExplosionBox.h"
+#include "entities/func/FuncButton.h"
 
 //
 //===============
@@ -67,6 +68,8 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
         spawnEntity = g_baseEntities[entityNumber] = new PlayerClient(ent);
     else if (className == "BlasterBolt")
         spawnEntity = g_baseEntities[entityNumber] = new BlasterBolt(ent);
+    else if ( className == "func_button" )
+        spawnEntity = g_baseEntities[entityNumber] = new FuncButton( ent );
     else
         spawnEntity = g_baseEntities[entityNumber] = new SVGBaseEntity(ent);
 
@@ -87,13 +90,17 @@ void SVG_FreeClassEntity(Entity* ent) {
     if (!ent->classEntity)
         return;
 
+    // Remove the classEntity reference
+    ent->classEntity->SetServerEntity( nullptr );
+    ent->classEntity = nullptr;
+
     // Fetch entity number.
     int32_t entityNumber = ent->state.number;
 
     // In case it exists in our base entitys, get rid of it, assign nullptr.
     if (g_baseEntities[entityNumber]) {
         delete g_baseEntities[entityNumber];
-        ent->classEntity = g_baseEntities[entityNumber] = nullptr;
+        g_baseEntities[entityNumber] = nullptr;
     }
 }
 

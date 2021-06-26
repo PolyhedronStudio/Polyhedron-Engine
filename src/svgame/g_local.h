@@ -432,6 +432,8 @@ struct TemporarySpawnFields {
     float maxpitch;
 };
 
+using PushMoveEndFunction = void( Entity* );
+
 //-------------------
 // Contains data for keeping track of velocity based moving entities.
 // (In other words, entities that aren't a: Client or AI Player.
@@ -462,7 +464,8 @@ struct PushMoveInfo {
     float nextSpeed;
     float remainingDistance;
     float deceleratedDistance;
-    void (*OnEndFunction)(Entity *);
+    //void (*OnEndFunction)(Entity *);
+    PushMoveEndFunction* OnEndFunction;
 };
 
 // Wrap these in functions such as?:

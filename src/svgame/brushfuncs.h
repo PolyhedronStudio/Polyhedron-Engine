@@ -64,25 +64,35 @@
 #define STATE_UP            2
 #define STATE_DOWN          3
 
+struct MoverState
+{
+	static constexpr uint32_t Top = 0U;
+	static constexpr uint32_t Bottom = 1U;
+	static constexpr uint32_t Up = 2U;
+	static constexpr uint32_t Down = 3U;
+};
+
+// Admer: The functions below are obsolete
+// They are in the process of moving to a mover base class
+
 //
 // Support routines for movement (changes in origin using velocity)
 //
-
-void Brush_Move_Done(Entity* ent);
-void Brush_Move_Final(Entity* ent);
-void Brush_Move_Begin(Entity* ent);
-void Brush_Move_Calc(Entity* ent, const vec3_t &dest, void(*func)(Entity*));
+//void Brush_Move_Done(Entity* ent);
+//void Brush_Move_Final(Entity* ent);
+//void Brush_Move_Begin(Entity* ent);
+//void Brush_Move_Calc(Entity* ent, const vec3_t &dest, void(*func)(Entity*));
 
 //
 // Support routines for angular movement (changes in angle using angularVelocity)
 //
-void Brush_AngleMove_Done(Entity* ent);
-void Brush_AngleMove_Final(Entity* ent);
-void Brush_AngleMove_Begin(Entity* ent);
-void Brush_AngleMove_Calc(Entity* ent, void(*func)(Entity*));
+//void Brush_AngleMove_Done(Entity* ent);
+//void Brush_AngleMove_Final(Entity* ent);
+//void Brush_AngleMove_Begin(Entity* ent);
+//void Brush_AngleMove_Calc(Entity* ent, void(*func)(Entity*));
 
-void plat_CalcAcceleratedMove(PushMoveInfo* moveinfo);
-void plat_Accelerate(PushMoveInfo* moveinfo);
-void Think_AccelMove(Entity* ent);
+//void plat_CalcAcceleratedMove(PushMoveInfo* moveinfo);
+//void plat_Accelerate(PushMoveInfo* moveinfo);
+//void Think_AccelMove(Entity* ent);
 
 #endif // __SVGAME_PLAYER_WEAPONS_H__

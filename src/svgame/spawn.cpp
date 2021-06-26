@@ -44,7 +44,7 @@ static const spawn_func_t spawn_funcs[] = {
     //{"info_player_intermission", SP_info_player_intermission},
 
     //{"func_plat", SP_func_plat},
-    //{"func_button", SP_func_button},
+    {"func_button", nullptr},
     //{"func_door", SP_func_door},
 
     //{"func_door_rotating", SP_func_door_rotating},

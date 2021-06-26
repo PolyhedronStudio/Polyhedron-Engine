@@ -105,6 +105,7 @@ void MiscExplosionBox::Spawn() {
     SetTakeDamage(TakeDamage::Yes);
 
     // Setup our MiscExplosionBox callbacks.
+    SetUseCallback(&MiscExplosionBox::MiscExplosionBoxUse);
     SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxThink);
     SetDieCallback(&MiscExplosionBox::MiscExplosionBoxDie);
     SetTouchCallback(&MiscExplosionBox::MiscExplosionBoxTouch);
@@ -155,6 +156,17 @@ void MiscExplosionBox::Think() {
 //
 // Callback Functions.
 //
+
+// ==============
+// MiscExplosionBox::MiscExplosionBoxUse
+// 
+// So that mappers can trigger this entity in order to blow it up
+// ==============
+void MiscExplosionBox::MiscExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* activator )
+{
+    MiscExplosionBoxDie( caller, activator, 999, GetOrigin() );
+}
+
 //
 //===============
 // MiscExplosionBox::MiscExplosionBoxThink

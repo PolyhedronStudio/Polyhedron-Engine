@@ -51,6 +51,14 @@ public:
     void TakeDamage(SVGBaseEntity* other, float kick, int32_t damage);
 
     //
+    // Entity interaction functions
+    //
+    
+    //  Calls Use on this entity's targets, and deletes its killtargets if any
+    //  @param activatorOverride: if nullptr, the entity's own activator is used and if the entity's own activator is nullptr, then this entity itself is the activator
+    void UseTargets( SVGBaseEntity* activatorOverride = nullptr );
+
+    //
     // Entity Get Functions.
     //
     // Return the bounding box absolute 'min' value.
@@ -644,18 +652,26 @@ public:
         this->yawSpeed = yawSpeed;
     }
 
-
     //
     // General Entity Functions.
     //
     // Link entity to world for collision testing using gi.LinkEntity.
     void LinkEntity();
 
+    // Marks the entity to be removed in the next server frame
+    // This is preferred to SVG_FreeEntity, as it is safer
+    void Remove();
+
     // Returns the server entity pointer.
     inline Entity* GetServerEntity() {
         return serverEntity;
     }
 
+    // Used only in SVG_FreeEntity
+    inline void SetServerEntity( Entity* svEntity )
+    {
+        serverEntity = svEntity;
+    }
 
 protected:
     //
@@ -725,6 +741,8 @@ protected:
     Entity* goalEntityPtr;
     // Move Target Entity.
     Entity* moveTargetPtr;
+    // The entity that activated this
+    SVGBaseEntity* activator;
     
     // Yaw Speed. (Should be for monsters...)
     float yawSpeed;

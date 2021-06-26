@@ -30,6 +30,7 @@ public:
     //
     // Callback Functions.
     //
+    void MiscExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* activator );
     void MiscExplosionBoxThink(void);
     void MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
     void MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);

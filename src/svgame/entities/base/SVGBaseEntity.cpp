@@ -12,6 +12,9 @@
 #include "../../utils.h"		// Util funcs.
 #include "SVGBaseEntity.h"
 
+#include "SVGBaseTrigger.h"
+#include "../trigger/TriggerDelayedUse.h"
+
 // Constructor/Deconstructor.
 SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
 	//
@@ -414,6 +417,111 @@ void SVGBaseEntity::Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* p
 	(this->*touchFunction)(self, other, plane, surf);
 }
 
+//===============
+// SVGBaseEntity::UseTargets
+// 
+// Calls Use on this entity's targets, as well as killtargets
+//===============
+void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
+{
+	if ( nullptr == activatorOverride )
+	{
+		activatorOverride = activator;
+	}
+
+	if ( nullptr == activator )
+	{
+		activatorOverride = this;
+	}
+
+	// Create a temporary DelayedUse entity in case this entity has a trigger delay
+	if ( GetDelayTime() )
+	{
+		Entity* serverTriggerDelay = SVG_Spawn();
+		serverTriggerDelay->className = "DelayedUse";
+
+		// This is all very lengthy. I'd rather have a static method in TriggerDelayedUse that
+		// allocates one such entity and accepts activator, message, target etc. as parameters
+		// Something like 'TriggerDelayedUse::Schedule( GetTarget(), GetKillTarget(), activatorOverride, GetMessage(), GetDelayTime() );'
+		SVGBaseTrigger* triggerDelay = static_cast<SVGBaseTrigger*>(serverTriggerDelay->classEntity = SVG_SpawnClassEntity( serverTriggerDelay, "DelayedUse" ));
+		triggerDelay->SetActivator( activatorOverride );
+		triggerDelay->SetMessage( GetMessage() );
+		triggerDelay->SetTarget( GetTarget() );
+		triggerDelay->SetKillTarget( GetKillTarget() );
+		triggerDelay->SetNextThinkTime( level.time + GetDelayTime() );
+		triggerDelay->SetThinkCallback( &TriggerDelayedUse::TriggerDelayedUseThink );
+		// No need to continue. The rest happens by delay.
+		return;
+	}
+
+	// Print the "message"
+	if ( GetMessage().length() && !(activator->GetServerFlags() & EntityServerFlags::Monster) ) 
+	{
+		// Get the message sound
+		int32_t messageSound = GetNoiseIndex();
+		
+		// Print the message.
+		SVG_CenterPrint( activator, GetMessage() );
+
+		// Play the message sound
+		if ( messageSound ) 
+		{
+			SVG_Sound( activatorOverride, CHAN_AUTO, messageSound, 1, ATTN_NORM, 0 );
+		}
+		else 
+		{
+			SVG_Sound( activatorOverride, CHAN_AUTO, gi.SoundIndex( "misc/talk1.wav" ), 1, ATTN_NORM, 0 );
+		}
+	}
+
+	// Remove all entities that qualify as our killtargets
+	if ( GetKillTarget().length() )
+	{
+		SVGBaseEntity* victim = nullptr;
+		while ( victim = SVG_FindEntityByKeyValue( "targetname", GetKillTarget(), victim ) )
+		{	// It is going to die, free it.
+			SVG_FreeEntity( victim->GetServerEntity() );
+		}
+
+		if ( !IsInUse() ) 
+		{
+			gi.DPrintf( "entity was removed while using killtargets\n" );
+			return;
+		}
+	}
+
+	// Actually fire the targets
+	if ( GetTarget().length() ) 
+	{
+		SVGBaseEntity* targetEntity = nullptr;
+		while ( (targetEntity = SVG_FindEntityByKeyValue( "targetname", GetTarget(), targetEntity )) )
+		{
+			// Doors fire area portals in a special way, so skip those
+			if ( targetEntity->GetClassName() == "func_areaportal"
+				 && (GetClassName() == "func_door" || GetClassName() == "func_door_rotating") ) 
+			{
+				continue;
+			}
+
+			if ( targetEntity == this ) 
+			{
+				gi.DPrintf( "WARNING: Entity #%i used itself.\n", GetServerEntity()->state.number );
+			}
+			else 
+			{
+				targetEntity->Use( this, activatorOverride );
+			}
+
+			// Make sure it is in use
+			if ( !targetEntity->IsInUse() ) 
+			{
+				gi.DPrintf( "WARNING: Entity #%i was removed while using targets\n", GetServerEntity()->state.number );
+				return;
+			}
+		}
+	}
+}
+
 //
 //===============
 // SVGBaseEntity::LinkEntity
@@ -423,6 +531,14 @@ void SVGBaseEntity::Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* p
 //
 void SVGBaseEntity::LinkEntity() {
 	gi.LinkEntity(serverEntity);
+}
+
+//===============
+// SVGBaseEntity::Remove
+//===============
+void SVGBaseEntity::Remove()
+{
+	serverEntity->serverFlags |= EntityServerFlags::Remove;
 }
 
 //
