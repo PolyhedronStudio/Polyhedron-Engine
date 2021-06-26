@@ -101,7 +101,7 @@ void Machinegun_Fire(PlayerClient* ent)
 
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
-    if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
+    if (!((int)dmflags->value & GameModeFlags::InfiniteAmmo))
         client->persistent.inventory[client->ammoIndex]--;
 
     client->animation.priorityAnimation = PlayerAnimation::Attack;

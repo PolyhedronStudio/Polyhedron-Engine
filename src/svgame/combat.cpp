@@ -290,9 +290,9 @@ void SVG_Damage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *at
     // friendly fire avoidance
     // if enabled you can't hurt teammates (but you can hurt yourself)
     // knockback still occurs
-    if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (DeathMatchFlags::ModelTeams | DeathMatchFlags::SkinTeams))) || coop->value)) {
+    if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams))) || coop->value)) {
         if (SVG_OnSameTeam(targ, attacker)) {
-            if ((int)(dmflags->value) & DeathMatchFlags::NoFriendlyFire)
+            if ((int)(dmflags->value) & GameModeFlags::NoFriendlyFire)
                 damage = 0;
             else
                 mod |= MeansOfDeath::FriendlyFire;

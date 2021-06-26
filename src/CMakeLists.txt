@@ -140,6 +140,10 @@ SET ( SRC_SVGAME_ENTITIES
 	svgame/entities/WorldSpawn.cpp
 )
 
+SET ( SRC_SVGAME_GAMEMODES 
+	svgame/gamemodes/DefaultGameMode.cpp
+)
+
 SET ( SRC_SVGAME_PHYSICS 
 	svgame/physics/physics.cpp
 	svgame/physics/stepmove.cpp
@@ -174,6 +178,7 @@ SET(SRC_SVGAME
 	${SRC_SVGAME_ENTITIES_TRIGGER}
 	${SRC_SVGAME_ENTITIES_WEAPONRY}
 	${SRC_SVGAME_ENTITIES}
+	${SRC_SVGAME_GAMEMODES}
 	${SRC_SVGAME_PHYSICS}
 	${SRC_SVGAME_PLAYER}
 	${SRC_SVGAME_WEAPONS}
@@ -217,6 +222,10 @@ SET ( HEADERS_SVGAME_ENTITIES_WEAPONRY
 SET ( HEADERS_SVGAME_ENTITIES 
 	svgame/entities/Light.h
 	svgame/entities/WorldSpawn.h
+)
+SET ( HEADERS_SVGAME_GAMEMODES 
+	svgame/gamemodes/DefaultGameMode.h
+	svgame/gamemodes/IGameMode.h
 )
 SET ( HEADERS_SVGAME_PLAYER 
 	svgame/player/animations.h

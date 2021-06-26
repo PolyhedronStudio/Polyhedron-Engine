@@ -26,7 +26,7 @@ void use_target_changelevel(Entity* self, Entity* other, Entity* activator)
     }
 
     // if noexit, do a ton of damage to other
-    if (deathmatch->value && !((int)dmflags->value & DeathMatchFlags::AllowExit) && other != SVG_GetWorldClassEntity()) {
+    if (deathmatch->value && !((int)dmflags->value & GameModeFlags::AllowExit) && other != SVG_GetWorldClassEntity()) {
         SVG_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 10 * other->maxHealth, 1000, 0, MeansOfDeath::Exit);
         return;
     }

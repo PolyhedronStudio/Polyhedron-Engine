@@ -77,7 +77,7 @@ void weapon_supershotgun_fire(PlayerClient * ent)
     client->playerState.gunFrame++;
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
-    if (!((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
+    if (!((int)dmflags->value & GameModeFlags::InfiniteAmmo))
         client->persistent.inventory[client->ammoIndex] -= 2;
 }
 

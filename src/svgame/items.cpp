@@ -221,7 +221,7 @@ qboolean Pickup_Ammo(SVGBaseEntity *ent, PlayerClient*other)
     //qboolean    weapon;
 
     //weapon = (ent->item->flags & ItemFlags::IsWeapon);
-    //if ((weapon) && ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo))
+    //if ((weapon) && ((int)dmflags->value & GameModeFlags::InfiniteAmmo))
     //    count = 1000;
     //else if (ent->count)
     //    count = ent->count;
@@ -690,25 +690,25 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
 
     //// some items will be prevented in deathmatch
     //if (deathmatch->value) {
-    //    if ((int)dmflags->value & DeathMatchFlags::NoArmor) {
+    //    if ((int)dmflags->value & GameModeFlags::NoArmor) {
     //        if (item->Pickup == Pickup_Armor) {
     //            SVG_FreeEntity(ent);
     //            return;
     //        }
     //    }
-    //    if ((int)dmflags->value & DeathMatchFlags::NoItems) {
+    //    if ((int)dmflags->value & GameModeFlags::NoItems) {
     //        if (item->Pickup == Pickup_Powerup) {
     //            SVG_FreeEntity(ent);
     //            return;
     //        }
     //    }
-    //    if ((int)dmflags->value & DeathMatchFlags::NoHealth) {
+    //    if ((int)dmflags->value & GameModeFlags::NoHealth) {
     //        if (item->Pickup == Pickup_Health) {
     //            SVG_FreeEntity(ent);
     //            return;
     //        }
     //    }
-    //    if ((int)dmflags->value & DeathMatchFlags::InfiniteAmmo) {
+    //    if ((int)dmflags->value & GameModeFlags::InfiniteAmmo) {
     //        if ((item->flags == ItemFlags::IsAmmo)) {
     //            SVG_FreeEntity(ent);
     //            return;
@@ -946,7 +946,7 @@ gitem_t itemlist[] = {
 */
 void SP_item_health(Entity *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
+    if (deathmatch->value && ((int)dmflags->value & GameModeFlags::NoHealth)) {
         SVG_FreeEntity(self);
         return;
     }
@@ -961,7 +961,7 @@ void SP_item_health(Entity *self)
 */
 void SP_item_health_small(Entity *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
+    if (deathmatch->value && ((int)dmflags->value & GameModeFlags::NoHealth)) {
         SVG_FreeEntity(self);
         return;
     }
@@ -977,7 +977,7 @@ void SP_item_health_small(Entity *self)
 */
 void SP_item_health_large(Entity *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
+    if (deathmatch->value && ((int)dmflags->value & GameModeFlags::NoHealth)) {
         SVG_FreeEntity(self);
         return;
     }
@@ -992,7 +992,7 @@ void SP_item_health_large(Entity *self)
 */
 void SP_item_health_mega(Entity *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DeathMatchFlags::NoHealth)) {
+    if (deathmatch->value && ((int)dmflags->value & GameModeFlags::NoHealth)) {
         SVG_FreeEntity(self);
         return;
     }
