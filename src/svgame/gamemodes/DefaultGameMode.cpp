@@ -33,20 +33,22 @@ DefaultGameMode::~DefaultGameMode() {
 //===============
 // DefaultGameMode::OnSameTeam
 //
+// Returns false either way, because yes, there is no... team in this case.
+// PS: ClientTeam <-- weird function, needs C++-fying and oh.. it stinks anyhow.
 //===============
 //
 qboolean DefaultGameMode::OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) {
-    char    ent1Team[512];
-    char    ent2Team[512];
+    //char    ent1Team[512];
+    //char    ent2Team[512];
 
-    if (!((int)(dmflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
-        return false;
+    //if (!((int)(dmflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
+    //    return false;
 
-    //strcpy(ent1Team, ClientTeam(ent1));
-    //strcpy(ent2Team, ClientTeam(ent2));
+    ////strcpy(ent1Team, ClientTeam(ent1));
+    ////strcpy(ent2Team, ClientTeam(ent2));
 
-    if (strcmp(ent1Team, ent2Team) == 0)
-        return true;
+    //if (strcmp(ent1Team, ent2Team) == 0)
+    //    return true;
     return false;
 }
 

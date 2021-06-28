@@ -305,7 +305,7 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     }
     meansOfDeath = mod;
 
-    // easy mode takes half damage
+    // Easy mode takes half damage
     if (skill->value == 0 && deathmatch->value == 0 && targ->GetClient()) {
         damage *= 0.5;
         if (!damage)
@@ -370,7 +370,7 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     asave += save;
 
     // team damage avoidance
-    if (!(dflags & DamageFlags::IgnoreProtection) && CheckTeamDamage(targ, attacker))
+    if (!(dflags & DamageFlags::IgnoreProtection) && game.gameMode->OnSameTeam(targ, attacker))
         return;
 
 // do the damage
@@ -394,23 +394,28 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
         }
     }
 
-    //if (targ->serverFlags & EntityServerFlags::Monster) {
-    //    M_ReactToDamage(targ, attacker);
-    //    if (!(targ->monsterInfo.aiflags & AI_DUCKED) && (take)) {
-    //        targ->Pain(targ, attacker, knockback, take);
-    //        // nightmare mode monsters don't go into pain frames often
-    //        if (skill->value == 3)
-    //            targ->debouncePainTime = level.time + 5;
-    //    }
-    //} else 
-    if (client) {
-        //if (!(targ->flags & EntityFlags::GodMode) && (take))
-        //    targ->Pain(targ, attacker, knockback, take);
-        if (!(targ->GetFlags() & EntityFlags::GodMode) && (take)) {
+    // Special damage handling for monsters.
+    if (targ->GetServerFlags() &EntityServerFlags::Monster) {
+        // WID: Maybe do some check for monster entities here sooner or later? Who knows...
+        // Gotta have them cunts react to it. But we'll see, might as well be on TakeDamage :)
+        //M_ReactToDamage(targ, attacker);
+
+        //if (!(targ->monsterInfo.aiflags & AI_DUCKED) && (take)) {
+            targ->TakeDamage(attacker, knockback, take);
+            //// nightmare mode monsters don't go into pain frames often
+            //if (skill->value == 3)
+            //    targ->debouncePainTime = level.time + 5;
+        //}
+    } else {
+        if (client) {
+            //if (!(targ->flags & EntityFlags::GodMode) && (take))
+            //    targ->Pain(targ, attacker, knockback, take);
+            if (!(targ->GetFlags() & EntityFlags::GodMode) && (take)) {
+                targ->TakeDamage(attacker, knockback, take);
+            }
+        } else if (take) {
             targ->TakeDamage(attacker, knockback, take);
         }
-    } else if (take) {
-        targ->TakeDamage(attacker, knockback, take);
     }
 
     // add to the damage inflicted on a player this frame

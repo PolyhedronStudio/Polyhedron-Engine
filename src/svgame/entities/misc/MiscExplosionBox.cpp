@@ -72,6 +72,9 @@ void MiscExplosionBox::Spawn() {
     // Set move type.
     SetMoveType(MoveType::Step);
 
+    // Since this is a "monster", after all...
+    SetFlags(EntityServerFlags::Monster);
+
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
 
@@ -203,81 +206,14 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
     // Check for ground.
     SVG_StepMove_CheckGround(this);
 
-    //// Calculate direction.
-    //vec3_t dir = { -90.f, 0.f, 0.f };
-
-    //// Calculate yaw to use based on direction.
-    //float yaw = vec3_to_yaw(dir);
-    //float ratio = 2;
-
-    //// Last but not least, move a step ahead.
-    //SVG_StepMove_Walk(this, yaw, 40 * ratio * FRAMETIME);
-
-    SetNextThinkTime(0.05f);
-    // 
-    // 
-    // 
-    //vec3_t      end;
-//trace_t     trace;
-
-//ent->s.origin[2] += 1;
-//VectorCopy(ent->s.origin, end);
-//end[2] -= 256;
-
-//trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
-
-//if (trace.fraction == 1 || trace.allsolid)
-//    return;
-
-//VectorCopy(trace.endpos, ent->s.origin);
-
-//gi.linkentity(ent);
-//M_CheckGround(ent);
-//M_CatagorizePosition(ent);
-
-
-    // Calculate trace end position.
-    //vec3_t end = GetOrigin() + vec3_t { 
-    //    0.f, 
-    //    0.f, 
-    //    1.f 
-    //};
-
-    //// Set origin + 1 on the Z axis.
-    //SetOrigin(GetOrigin() + vec3_t{ 
-    //    0.f, 
-    //    0.f, 
-    //    1.f }
-    //);
-    //
-    //// Calculate the end point for tracing.
-    //end = GetOrigin() + vec3_t { 
-    //    0.f, 
-    //    0.f, 
-    //    256.f 
-    //};
-
-    //// Execute the trace.
-    //SVGTrace trace = SVG_Trace(GetOrigin(), GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
-
-    //// Return in case of fraction 1 or allSolid.
-    //if (trace.fraction == 1 || trace.allSolid) {
-    //    return;
-    //}
-
-    //// Set origin to the trace end position.
-    //SetOrigin(trace.endPosition);
-
-    //if (GetServerEntity()->state.number == 12) {
-    //    gi.DPrintf("I think, therefor, as a misc_explobox I AM!\n");
-    //}
-    //
-    //// Link entity for collision testing.
-    //LinkEntity();
-
+    // Setup its next think time, for a frame ahead.
+    SetNextThinkTime(FRAMETIME);
+ 
     //// Do a check ground for the step move of this pusher.
     //SVG_StepMove_CheckGround(this);
-    //M_CatagorizePosition(ent);
+    //M_CatagorizePosition(ent); <-- This shit, has to be moved to SVG_Stepmove_CheckGround.
+    // ^ <-- if not for that, it either way has to "categorize" its water levels etc.
+    // Not important for this one atm.
 }
 
 //
