@@ -221,36 +221,6 @@ void Com_Error(ErrorType type, const char *fmt, ...)
 //======================================================================
 //
 //=====================
-// SVG_InitServerEntities
-//
-// Sets up the server entity aligned array.
-//=====================
-//
-void SVG_InitServerEntities() {
-    // Initialize all entities for this "game", aka map that is being played.
-    game.maxEntities = MAX_EDICTS;
-    game.maxEntities = Clampi(game.maxEntities, (int)maxClients->value + 1, MAX_EDICTS);
-    globals.entities = g_entities;
-    globals.maxEntities = game.maxEntities;
-}
-
-//
-//=====================
-// SVG_AllocateGameClients
-//
-// Allocates the "GameClient", aligned to the ServerClient data type array properly for
-// the current game at play.
-//=====================
-//
-void SVG_AllocateGameClients() {
-    // Initialize all clients for this game
-    game.maxClients = maxClients->value;
-    game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
-    globals.numberOfEntities = game.maxClients + 1;
-}
-
-//
-//=====================
 // SVG_InitCVars
 //
 // Initializes all server game cvars and/or fetches those belonging to the engine.
@@ -309,6 +279,36 @@ void SVG_InitCVars() {
 
     // Monster footsteps.
     cl_monsterfootsteps = gi.cvar("cl_monsterfootsteps", "1", 0);
+}
+
+//
+//=====================
+// SVG_InitServerEntities
+//
+// Sets up the server entity aligned array.
+//=====================
+//
+void SVG_InitServerEntities() {
+    // Initialize all entities for this "game", aka map that is being played.
+    game.maxEntities = MAX_EDICTS;
+    game.maxEntities = Clampi(game.maxEntities, (int)maxClients->value + 1, MAX_EDICTS);
+    globals.entities = g_entities;
+    globals.maxEntities = game.maxEntities;
+}
+
+//
+//=====================
+// SVG_AllocateGameClients
+//
+// Allocates the "GameClient", aligned to the ServerClient data type array properly for
+// the current game at play.
+//=====================
+//
+void SVG_AllocateGameClients() {
+    // Initialize all clients for this game
+    game.maxClients = maxClients->value;
+    game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    globals.numberOfEntities = game.maxClients + 1;
 }
 
 
@@ -592,229 +592,4 @@ void SVG_RunFrame(void)
 
     // Build the playerstate_t structures for all players
     SVG_ClientEndServerFrames();
-}
-
-//
-// The new loop to be, but it won't run the item entities atm, for a lack of their base entity counterparts.
-//
-//void SVG_RunFrame(void)
-//{
-//    // We're moving the game a frame forward.
-//    level.frameNumber++;
-//
-//    // Calculate the current frame time for this frame number.
-//    level.time = level.frameNumber * FRAMETIME;
-//
-//    // Check for whether an intermission point wants to exit this level.
-//    if (level.intermission.exitIntermission) {
-//        SVG_ExitLevel();
-//        return;
-//    }
-//
-//    //
-//    // Treat each object in turn
-//    // even the world gets a chance to Think
-//    //
-//    SVGBaseEntity *ent = g_baseEntities[0];
-//    for (int32_t i = 0 ; i < globals.numberOfEntities ; i++) {
-//        // Fetch the entity.
-//        ent = g_baseEntities[i];
-//
-//        // Need to be working with a valid base entity.
-//        if (!ent)
-//            continue;
-//
-//        if (!ent->GetServerEntity())
-//            continue;
-//
-//        // Is it in use? If not, continue.
-//        if (!ent->IsInUse())
-//            continue;
-//
-//        // Let the level data know which entity we are processing right now.
-//        level.currentEntity = ent;
-//
-//        // Backup origin as its Old Origin.
-//        ent->SetOldOrigin(ent->GetOrigin());
-//
-//        // if the ground entity moved, make sure we are still on it
-//        if (ent->GetGroundEntity() && (ent->GetLinkCount() != ent->GetGroundEntityLinkCount())) {
-//            ent->SetGroundEntity(nullptr);
-//            if (!(ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (ent->GetServerFlags() & EntityServerFlags::Monster)) {
-//                SVG_StepMove_CheckGround(ent);
-//            }
-//        }
-//
-//        // Time to begin a server frame for all of our clients. (This has to ha
-//        if (i > 0 && i <= maxClients->value) {
-//            SVG_ClientBeginServerFrame(ent->GetServerEntity());
-//            continue;
-//        }
-//
-//        // Last but not least, "run" process the entity.
-//        SVG_RunEntity(ent);
-//    }
-//
-//    // See if it is time to end a deathmatch
-//    SVG_CheckDMRules();
-//
-//    // See if needpass needs updated
-//    SVG_CheckNeedPass();
-//
-//    // Build the playerstate_t structures for all players
-//    SVG_ClientEndServerFrames();
-//}
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// 
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-//
-//===============
-// SVG_CenterPrint
-//
-// Wraps up gi.CenterPrintf for SVGBaseEntity, and nice std::string hurray.
-//===============
-//
-void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str) {
-    if (!ent)
-        return;
-
-    gi.CenterPrintf(ent->GetServerEntity(), "%s", str.c_str());
-}
-
-//
-//===============
-// SVG_CenterPrint
-//
-// Wraps up gi.Sound for SVGBaseEntity.
-//===============
-//
-void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset) {
-    if (!ent)
-        return;
-
-    gi.Sound(ent->GetServerEntity(), channel, soundIndex, volume, attenuation, timeOffset);
-}
-
-
-//
-//===============
-// SVG_BoxEntities
-//
-// Returns an std::vector containing the found boxed entities. Will not exceed listCount.
-//===============
-//
-std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount, int32_t areaType) {
-    Entity* boxedServerEntities[MAX_EDICTS];
-    std::vector<SVGBaseEntity*> boxedBaseEntities;
-
-    // Ensure the listCount can't exceed the max edicts.
-    if (listCount > MAX_EDICTS) {
-        listCount = MAX_EDICTS;
-    }
-
-    // Box the entities.
-    int32_t numEntities = gi.BoxEntities(mins, maxs, boxedServerEntities, MAX_EDICTS, AREA_SOLID);
-
-    // Go through the boxed entities list, and store there classEntities (SVGBaseEntity aka baseEntities).
-    for (int32_t i = 0; i < numEntities; i++) {
-        if (g_baseEntities[boxedServerEntities[i]->state.number] != nullptr)
-            boxedBaseEntities.push_back(g_baseEntities[boxedServerEntities[i]->state.number]);
-    }
-
-    // Return our boxed base entities vector.
-    return boxedBaseEntities;
-}
-
-//
-//===============
-// SVG_Trace
-//
-// The defacto trace function to use, for SVGBaseEntity and its derived family & friends.
-//===============
-//
-SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, SVGBaseEntity* passent, const int32_t &contentMask) {
-    // Fetch server entity in case one was passed to us.
-    Entity* serverPassEntity = (passent ? passent->GetServerEntity() : NULL);
-
-    // Execute server trace.
-    trace_t trace = gi.Trace(start, mins, maxs, end, serverPassEntity, contentMask);
-
-    // Convert results to Server Game Trace.
-    SVGTrace svgTrace;
-    svgTrace.allSolid = trace.allSolid;
-    svgTrace.contents = trace.contents;
-    svgTrace.endPosition = trace.endPosition;
-    svgTrace.fraction = trace.fraction;
-    svgTrace.offsets[0] = trace.offsets[0];
-    svgTrace.offsets[1] = trace.offsets[1];
-    svgTrace.offsets[2] = trace.offsets[2];
-    svgTrace.offsets[3] = trace.offsets[3];
-    svgTrace.offsets[4] = trace.offsets[4];
-    svgTrace.offsets[5] = trace.offsets[5];
-    svgTrace.offsets[6] = trace.offsets[6];
-    svgTrace.offsets[7] = trace.offsets[7];
-    svgTrace.plane = trace.plane;
-    svgTrace.startSolid = trace.startSolid;
-    svgTrace.surface = trace.surface;
-
-    // Special.
-    if (trace.ent) {
-        uint32_t index = trace.ent->state.number;
-
-        if (g_baseEntities[index] != NULL) {
-            svgTrace.ent = g_baseEntities[index];
-        } else {
-            svgTrace.ent = g_entities[0].classEntity;
-        }
-    } else {
-        svgTrace.ent = g_entities[0].classEntity;
-    }
-
-    return svgTrace;
-}
-
-//
-//===============
-// SVG_SetConfigString
-//
-// Sets the config string at the given index number.
-//===============
-//
-void SVG_SetConfigString(const int32_t &configStringIndex, const std::string& configString) {
-    gi.configstring(configStringIndex, configString.c_str());
-}
-
-//
-//===============
-// SVG_PrecacheModel
-//
-// Precaches the model and returns the model index qhandle_t.
-//===============
-//
-qhandle_t SVG_PrecacheModel(const std::string &filename) {
-    return gi.ModelIndex(filename.c_str());
-}
-
-//
-//===============
-// SVG_PrecacheImage
-//
-// Precaches the image and returns the image index qhandle_t.
-//===============
-//
-qhandle_t SVG_PrecacheImage(const std::string& filename) {
-    return gi.ImageIndex(filename.c_str());
-}
-
-//
-//===============
-// SVG_PrecacheSound
-//
-// Precaches the sound and returns the sound index qhandle_t.
-//===============
-//
-qhandle_t SVG_PrecacheSound(const std::string& filename) {
-    return gi.SoundIndex(filename.c_str());
 }

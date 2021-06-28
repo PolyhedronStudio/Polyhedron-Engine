@@ -46,6 +46,7 @@ SET( SRC_SVGAME_MAIN
 	svgame/entities.cpp
 	svgame/functionpointers.cpp
 	svgame/items.cpp
+	svgame/ImportsWrapper.cpp
 	svgame/main.cpp
 	svgame/effects.cpp
 	svgame/save.cpp
