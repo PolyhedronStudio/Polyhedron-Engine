@@ -260,10 +260,11 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
 //
 void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int mod)
 {
+    // Damage point counter for radius sum ups.
     float   points = 0.f;
-    SVGBaseEntity *ent = NULL;
-    vec3_t  v = { 0.f, 0.f, 0.f };
-    vec3_t  dir = { 0.f, 0.f, 0.f };
+
+    // Actual entity loop pointer.
+    SVGBaseEntity *ent = nullptr;
 
     // N&C: From Yamagi Q2, to prevent issues.
     if (!inflictor || !attacker) {
@@ -280,21 +281,21 @@ void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, 
             continue;
 
         // Calculate damage points.
-        v = ent->GetMins() + ent->GetMaxs();
-        v = vec3_fmaf(ent->GetOrigin(), 0.5, v);
-        v -= inflictor->GetOrigin();
-        points = damage - 0.5 * vec3_length(v);
+        vec3_t velocity = ent->GetMins() + ent->GetMaxs();
+        velocity = vec3_fmaf(ent->GetOrigin(), 0.5f, velocity);
+        velocity -= inflictor->GetOrigin();
+        points = damage - 0.5f * vec3_length(velocity);
 
         // In case the attacker is the own entity, half damage.
         if (ent == attacker)
-            points = points * 0.5;
+            points = points * 0.5f;
 
         // Apply damage points.
         if (points > 0) {
             // Ensure whether we CAN actually apply damage.
             if (game.gameMode->CanDamage(ent, inflictor)) {
                 // Calculate direcion.
-                dir = ent->GetOrigin() - inflictor->GetOrigin();
+                vec3_t dir = ent->GetOrigin() - inflictor->GetOrigin();
 
                 // Apply damages.
                 SVG_InflictDamage(ent, inflictor, attacker, dir, inflictor->GetOrigin(), vec3_zero(), (int)points, (int)points, DamageFlags::IndirectFromRadius, mod);

@@ -134,5 +134,5 @@ void DefaultGameMode::SpawnTempDamageEntity(int type, const vec3_t& origin, cons
     //  gi.WriteByte (damage); // <-- This was legacy crap, might wanna implement it ourselves eventually.
     gi.WriteVector3(origin);
     gi.WriteVector3(normal);
-    gi.Multicast(&origin, MultiCast::PVS);
+    gi.Multicast(origin, MultiCast::PVS);
 }

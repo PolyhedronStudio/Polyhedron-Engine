@@ -73,7 +73,7 @@ void weapon_shotgun_fire(PlayerClient * ent)
     gi.WriteShort(ent->GetServerEntity() - g_entities);
     gi.WriteByte(MuzzleFlashType::Shotgun | is_silenced);
     vec3_t origin = ent->GetOrigin();
-    gi.Multicast(&origin, MultiCast::PVS);
+    gi.Multicast(origin, MultiCast::PVS);
 
     client->playerState.gunFrame++;
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);

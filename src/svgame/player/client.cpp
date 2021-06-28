@@ -566,7 +566,7 @@ void spectator_respawn(Entity *ent)
         gi.WriteByte(SVG_CMD_MUZZLEFLASH);
         gi.WriteShort(ent - g_entities);
         gi.WriteByte(MuzzleFlashType::Login);
-        gi.Multicast(&ent->state.origin, MultiCast::PVS);
+        gi.Multicast(ent->state.origin, MultiCast::PVS);
 
         // hold in place briefly
         ent->client->playerState.pmove.flags = PMF_TIME_TELEPORT;
@@ -798,7 +798,7 @@ void SVG_ClientBeginDeathmatch(Entity *ent)
         gi.WriteByte(SVG_CMD_MUZZLEFLASH);
         gi.WriteShort(ent - g_entities);
         gi.WriteByte(MuzzleFlashType::Login);
-        gi.Multicast(&ent->state.origin, MultiCast::PVS);
+        gi.Multicast(ent->state.origin, MultiCast::PVS);
     }
 
     gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
@@ -874,7 +874,7 @@ void SVG_ClientBegin(Entity *ent)
             gi.WriteByte(SVG_CMD_MUZZLEFLASH);
             gi.WriteShort(ent - g_entities);
             gi.WriteByte(MuzzleFlashType::Login);
-            gi.Multicast(&ent->state.origin, MultiCast::PVS);
+            gi.Multicast(ent->state.origin, MultiCast::PVS);
 
             gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
         }
@@ -1045,7 +1045,7 @@ void SVG_ClientDisconnect(Entity *ent)
         gi.WriteByte(SVG_CMD_MUZZLEFLASH);
         gi.WriteShort(ent - g_entities);
         gi.WriteByte(MuzzleFlashType::Logout);
-        gi.Multicast(&ent->state.origin, MultiCast::PVS);
+        gi.Multicast(ent->state.origin, MultiCast::PVS);
     }
 
     gi.UnlinkEntity(ent);

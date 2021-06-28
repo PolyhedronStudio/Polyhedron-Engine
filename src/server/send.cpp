@@ -248,7 +248,7 @@ MultiCast::PVS    send to clients potentially visible from org
 MultiCast::PHS    send to clients potentially hearable from org
 =================
 */
-void SV_Multicast(const vec3_t *origin, int32_t to)
+void SV_Multicast(const vec3_t &origin, int32_t to)
 {
     client_t    *client;
     byte        mask[VIS_MAX_BYTES];
@@ -275,7 +275,7 @@ void SV_Multicast(const vec3_t *origin, int32_t to)
         flags |= MSG_RELIABLE;
         // intentional fallthrough
     case MultiCast::PHS:
-        leaf1 = CM_PointLeaf(&sv.cm, vec3_t{ origin->x, origin->y, origin->z }); // MATHLIB: !! Or do *origin??
+        leaf1 = CM_PointLeaf(&sv.cm, origin); // MATHLIB: !! Or do *origin??
         leafnum = leaf1 - sv.cm.cache->leafs;
         BSP_ClusterVis(sv.cm.cache, mask, leaf1->cluster, DVIS_PHS);
         break;
@@ -283,7 +283,7 @@ void SV_Multicast(const vec3_t *origin, int32_t to)
         flags |= MSG_RELIABLE;
         // intentional fallthrough
     case MultiCast::PVS:
-        leaf1 = CM_PointLeaf(&sv.cm, vec3_t{ origin->x, origin->y, origin->z }); // MATHLIB: !! Or do *origin??
+        leaf1 = CM_PointLeaf(&sv.cm, origin); // MATHLIB: !! Or do *origin??
         leafnum = leaf1 - sv.cm.cache->leafs;
         BSP_ClusterVis(sv.cm.cache, mask, leaf1->cluster, DVIS_PVS2);
         break;

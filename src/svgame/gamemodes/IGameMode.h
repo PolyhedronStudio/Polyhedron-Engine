@@ -35,7 +35,7 @@ public:
     //
     // When implementing this interface, it is suggested to just take DefaultGameMode,
     // or base yours off of that anyhow.
-    virtual void SpawnTempDamageEntity(int type, const vec3_t& origin, const vec3_t& normal, int damage);
+    virtual void SpawnTempDamageEntity(int type, const vec3_t& origin, const vec3_t& normal, int damage) = 0;
 
 private:
 

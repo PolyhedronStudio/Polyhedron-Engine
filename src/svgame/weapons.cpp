@@ -190,7 +190,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                     gi.WriteVector3(tr.endPosition);
                     gi.WriteVector3(tr.plane.normal);
                     gi.WriteByte(color);
-                    gi.Multicast(&tr.endPosition, MultiCast::PVS);
+                    gi.Multicast(tr.endPosition, MultiCast::PVS);
                 }
 
                 // change bullet's course when it enters water
@@ -219,7 +219,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                     gi.WriteByte(te_impact);
                     gi.WriteVector3(tr.endPosition);
                     gi.WriteVector3(tr.plane.normal);
-                    gi.Multicast(&tr.endPosition, MultiCast::PVS);
+                    gi.Multicast(tr.endPosition, MultiCast::PVS);
 
                     if (self->GetClient())
                         SVG_PlayerNoise(self, tr.endPosition, PNOISE_IMPACT);
@@ -247,7 +247,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
         gi.WriteByte(TempEntityEvent::BubbleTrail);
         gi.WriteVector3(water_start);
         gi.WriteVector3(tr.endPosition);
-        gi.Multicast(&pos, MultiCast::PVS);
+        gi.Multicast(pos, MultiCast::PVS);
     }
 }
 

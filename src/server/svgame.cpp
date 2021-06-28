@@ -680,15 +680,15 @@ static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
     // (global radio chatter, voiceovers, etc)
     if (attenuation == ATTN_NONE || (channel & CHAN_NO_PHS_ADD)) {
         if (channel & CHAN_RELIABLE) {
-            SV_Multicast(NULL, MultiCast::All_R);
+            SV_Multicast(vec3_zero(), MultiCast::All_R);
         } else {
-            SV_Multicast(NULL, MultiCast::All);
+            SV_Multicast(vec3_zero(), MultiCast::All);
         }
     } else {
         if (channel & CHAN_RELIABLE) {
-            SV_Multicast(&origin, MultiCast::PHS_R);
+            SV_Multicast(origin, MultiCast::PHS_R);
         } else {
-            SV_Multicast(&origin, MultiCast::PHS);
+            SV_Multicast(origin, MultiCast::PHS);
         }
     }
 }

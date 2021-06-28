@@ -97,7 +97,7 @@ void Machinegun_Fire(PlayerClient* ent)
     gi.WriteShort(ent->GetServerEntity() - g_entities);
     gi.WriteByte(MuzzleFlashType::MachineGun | is_silenced);
     vec3_t origin = ent->GetOrigin();
-    gi.Multicast(&origin, MultiCast::PVS);
+    gi.Multicast(origin, MultiCast::PVS);
 
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
