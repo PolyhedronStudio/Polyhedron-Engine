@@ -89,6 +89,10 @@ cvar_t  *cl_monsterfootsteps;
 
 void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
 
+void SVG_InitServerEntities();
+void SVG_AllocateGameClients();
+void SVG_InitCVars();
+
 void SVG_RunEntity(SVGBaseEntity *ent);
 void SVG_WriteGame(const char *filename, qboolean autosave);
 void SVG_ReadGame(const char *filename);
@@ -128,74 +132,14 @@ is loaded.
 */
 void SVG_InitGame(void)
 {
-
+    // WID: Informed consent. One has to know, right? :D
     gi.DPrintf("==== InitServerGame ====\n");
 
-    gun_x = gi.cvar("gun_x", "0", 0);
-    gun_y = gi.cvar("gun_y", "0", 0);
-    gun_z = gi.cvar("gun_z", "0", 0);
-
-    //FIXME: sv_ prefix is wrong for these
-    sv_rollspeed = gi.cvar("sv_rollspeed", "200", 0);
-    sv_rollangle = gi.cvar("sv_rollangle", "2", 0);
-    sv_maxvelocity = gi.cvar("sv_maxvelocity", "2000", 0);
-    sv_gravity = gi.cvar("sv_gravity", "750", 0);
-
-    // noset vars
-    dedicated = gi.cvar("dedicated", "0", CVAR_NOSET);
-
-    // latched vars
-    sv_cheats = gi.cvar("cheats", "0", CVAR_SERVERINFO | CVAR_LATCH);
-    gi.cvar("gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_LATCH);
-    gi.cvar("gamedate", __DATE__ , CVAR_SERVERINFO | CVAR_LATCH);
-
-    maxClients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
-    maxspectators = gi.cvar("maxspectators", "4", CVAR_SERVERINFO);
-    deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
-    coop = gi.cvar("coop", "0", CVAR_LATCH);
-    skill = gi.cvar("skill", "1", CVAR_LATCH);
-
-    // change anytime vars
-    dmflags = gi.cvar("dmflags", "0", CVAR_SERVERINFO);
-    fraglimit = gi.cvar("fraglimit", "0", CVAR_SERVERINFO);
-    timelimit = gi.cvar("timelimit", "0", CVAR_SERVERINFO);
-    password = gi.cvar("password", "", CVAR_USERINFO);
-    spectator_password = gi.cvar("spectator_password", "", CVAR_USERINFO);
-    needpass = gi.cvar("needpass", "0", CVAR_SERVERINFO);
-    filterban = gi.cvar("filterban", "1", 0);
-
-    g_select_empty = gi.cvar("g_select_empty", "0", CVAR_ARCHIVE);
-
-    run_pitch = gi.cvar("run_pitch", "0.002", 0);
-    run_roll = gi.cvar("run_roll", "0.005", 0);
-    bob_up  = gi.cvar("bob_up", "0.005", 0);
-    bob_pitch = gi.cvar("bob_pitch", "0.002", 0);
-    bob_roll = gi.cvar("bob_roll", "0.002", 0);
-
-    // flood control
-    flood_msgs = gi.cvar("flood_msgs", "4", 0);
-    flood_persecond = gi.cvar("flood_persecond", "4", 0);
-    flood_waitdelay = gi.cvar("flood_waitdelay", "10", 0);
-
-    // dm map list
-    sv_maplist = gi.cvar("sv_maplist", "", 0);
-
-    // Monster footsteps.
-	cl_monsterfootsteps = gi.cvar("cl_monsterfootsteps", "1", 0);
-
-    // items
+    // Initialize and allocate core objects for this "games" map 'round'.
+    SVG_InitCVars();
     SVG_InitItems();
-
-    // initialize all entities for this game
-    game.maxEntities = MAX_EDICTS;
-    game.maxEntities = Clampi(game.maxEntities, (int)maxClients->value + 1, MAX_EDICTS);
-    globals.entities = g_entities;
-    globals.maxEntities = game.maxEntities;
-
-    // initialize all clients for this game
-    game.maxClients = maxClients->value;
-    game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
-    globals.numberOfEntities = game.maxClients + 1;
+    SVG_InitServerEntities();
+    SVG_AllocateGameClients();
 }
 
 
@@ -275,7 +219,100 @@ void Com_Error(ErrorType type, const char *fmt, ...)
 #endif
 
 //======================================================================
+//
+//=====================
+// SVG_InitServerEntities
+//
+// Sets up the server entity aligned array.
+//=====================
+//
+void SVG_InitServerEntities() {
+    // Initialize all entities for this "game", aka map that is being played.
+    game.maxEntities = MAX_EDICTS;
+    game.maxEntities = Clampi(game.maxEntities, (int)maxClients->value + 1, MAX_EDICTS);
+    globals.entities = g_entities;
+    globals.maxEntities = game.maxEntities;
+}
 
+//
+//=====================
+// SVG_AllocateGameClients
+//
+// Allocates the "GameClient", aligned to the ServerClient data type array properly for
+// the current game at play.
+//=====================
+//
+void SVG_AllocateGameClients() {
+    // Initialize all clients for this game
+    game.maxClients = maxClients->value;
+    game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    globals.numberOfEntities = game.maxClients + 1;
+}
+
+//
+//=====================
+// SVG_InitCVars
+//
+// Initializes all server game cvars and/or fetches those belonging to the engine.
+//=====================
+//
+void SVG_InitCVars() {
+    // Debug weapon vars.
+    gun_x = gi.cvar("gun_x", "0", 0);
+    gun_y = gi.cvar("gun_y", "0", 0);
+    gun_z = gi.cvar("gun_z", "0", 0);
+
+    //FIXME: sv_ prefix is wrong for these
+    sv_rollspeed = gi.cvar("sv_rollspeed", "200", 0);
+    sv_rollangle = gi.cvar("sv_rollangle", "2", 0);
+    sv_maxvelocity = gi.cvar("sv_maxvelocity", "2000", 0);
+    sv_gravity = gi.cvar("sv_gravity", "750", 0);
+
+    // Noset vars
+    dedicated = gi.cvar("dedicated", "0", CVAR_NOSET);
+
+    // Latched vars
+    sv_cheats = gi.cvar("cheats", "0", CVAR_SERVERINFO | CVAR_LATCH);
+    gi.cvar("gamename", GAMEVERSION, CVAR_SERVERINFO | CVAR_LATCH);
+    gi.cvar("gamedate", __DATE__, CVAR_SERVERINFO | CVAR_LATCH);
+
+    maxClients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
+    maxspectators = gi.cvar("maxspectators", "4", CVAR_SERVERINFO);
+    deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
+    coop = gi.cvar("coop", "0", CVAR_LATCH);
+    skill = gi.cvar("skill", "1", CVAR_LATCH);
+
+    // Change anytime vars
+    dmflags = gi.cvar("dmflags", "0", CVAR_SERVERINFO);
+    fraglimit = gi.cvar("fraglimit", "0", CVAR_SERVERINFO);
+    timelimit = gi.cvar("timelimit", "0", CVAR_SERVERINFO);
+    password = gi.cvar("password", "", CVAR_USERINFO);
+    spectator_password = gi.cvar("spectator_password", "", CVAR_USERINFO);
+    needpass = gi.cvar("needpass", "0", CVAR_SERVERINFO);
+    filterban = gi.cvar("filterban", "1", 0);
+
+    g_select_empty = gi.cvar("g_select_empty", "0", CVAR_ARCHIVE);
+
+    run_pitch = gi.cvar("run_pitch", "0.002", 0);
+    run_roll = gi.cvar("run_roll", "0.005", 0);
+    bob_up = gi.cvar("bob_up", "0.005", 0);
+    bob_pitch = gi.cvar("bob_pitch", "0.002", 0);
+    bob_roll = gi.cvar("bob_roll", "0.002", 0);
+
+    // Flood control
+    flood_msgs = gi.cvar("flood_msgs", "4", 0);
+    flood_persecond = gi.cvar("flood_persecond", "4", 0);
+    flood_waitdelay = gi.cvar("flood_waitdelay", "10", 0);
+
+    // DM map list
+    sv_maplist = gi.cvar("sv_maplist", "", 0);
+
+    // Monster footsteps.
+    cl_monsterfootsteps = gi.cvar("cl_monsterfootsteps", "1", 0);
+}
+
+
+//======================================================================
 
 /*
 =================
