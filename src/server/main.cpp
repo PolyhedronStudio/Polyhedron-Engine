@@ -1931,7 +1931,7 @@ void SV_Init(void)
     Cvar_Get("fraglimit", "0", CVAR_SERVERINFO);
     Cvar_Get("timelimit", "0", CVAR_SERVERINFO);
 
-    sv_maxclients = Cvar_Get(maxclients, "8", CVAR_SERVERINFO | CVAR_LATCH);
+    sv_maxclients = Cvar_Get("maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH);
     sv_reserved_slots = Cvar_Get("sv_reserved_slots", "0", CVAR_LATCH);
     sv_hostname = Cvar_Get("hostname", "noname", CVAR_SERVERINFO | CVAR_ARCHIVE);
 #if USE_SYSCON

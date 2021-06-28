@@ -376,9 +376,9 @@ void SV_InitGame()
         }
     } else if (Cvar_VariableInteger("coop")) {
         if (sv_maxclients->integer <= 1 || sv_maxclients->integer > 4)
-            Cvar_Set(maxclients, "4");
+            Cvar_Set("maxclients", "4");
     } else {    // non-deathmatch, non-coop is one player
-        Cvar_FullSet(maxclients, "1", CVAR_SERVERINFO | CVAR_LATCH, FROM_CODE);
+        Cvar_FullSet("maxclients", "1", CVAR_SERVERINFO | CVAR_LATCH, FROM_CODE);
     }
 
     // enable networking

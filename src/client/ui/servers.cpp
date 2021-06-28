@@ -257,7 +257,7 @@ void UI_StatusEvent(const serverStatus_t *status)
         map = "???";
     }
 
-    maxClients = Info_ValueForKey(info, maxclients);
+    maxClients = Info_ValueForKey(info, "maxclients");
     if (!COM_IsUint(maxClients)) {
         maxClients = "?";
     }

@@ -42,8 +42,8 @@ qboolean DefaultGameMode::OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) {
     if (!((int)(dmflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
         return false;
 
-    strcpy(ent1Team, ClientTeam(ent1));
-    strcpy(ent2Team, ClientTeam(ent2));
+    //strcpy(ent1Team, ClientTeam(ent1));
+    //strcpy(ent2Team, ClientTeam(ent2));
 
     if (strcmp(ent1Team, ent2Team) == 0)
         return true;
