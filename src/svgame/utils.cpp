@@ -328,7 +328,7 @@ qboolean SVG_KillBox(SVGBaseEntity *ent)
             break;
 
         // nail it
-        SVG_Damage(tr.ent, ent, ent, vec3_origin, ent->GetOrigin(), vec3_origin, 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
+        SVG_InflictDamage(tr.ent, ent, ent, vec3_origin, ent->GetOrigin(), vec3_origin, 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
 
         // if we didn't kill it, fail
         if (tr.ent->GetSolid())

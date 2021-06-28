@@ -291,7 +291,7 @@ void MiscExplosionBox::MiscExplosionBoxThink(void) {
 void MiscExplosionBox::MiscExplosionBoxExplode(void)
 {
     // Execute radius damage.
-    SVG_RadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
+    SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
 
     // Retrieve origin.
     vec3_t save = GetOrigin();

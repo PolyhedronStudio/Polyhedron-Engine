@@ -24,7 +24,7 @@ void func_object_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t*
         return;
     if (other->takeDamage == TakeDamage::No)
         return;
-    SVG_Damage(other, self, self, vec3_origin, self->state.origin, vec3_origin, self->damage, 1, 0, MeansOfDeath::Crush);
+    SVG_InflictDamage(other, self, self, vec3_origin, self->state.origin, vec3_origin, self->damage, 1, 0, MeansOfDeath::Crush);
 }
 
 void func_object_release(Entity* self)

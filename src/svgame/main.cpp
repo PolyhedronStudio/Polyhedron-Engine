@@ -16,11 +16,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+// Core.
 #include "g_local.h"          // Include SVGame header.
+
+// Entities.
 #include "entities.h"
 #include "entities/base/SVGBaseEntity.h"
+
+// Gamemodes.
+#include "gamemodes/IGameMode.h"
+#include "gamemodes/DefaultGameMode.h"
+
+// Player related.
 #include "player/client.h"      // Include Player Client header.
 #include "player/view.h"        // Include Player View header.
+
+// Physics related.
 #include "physics/stepmove.h"
 
 //-----------------
@@ -96,9 +107,10 @@ cvar_t  *cl_monsterfootsteps;
 //-----------------
 void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
 
-void SVG_InitServerEntities();
+void SVG_InitializeServerEntities();
+void SVG_InitializeGameMode();
 void SVG_AllocateGameClients();
-void SVG_InitCVars();
+void SVG_InitializeCVars();
 
 void SVG_RunEntity(SVGBaseEntity *ent);
 void SVG_WriteGame(const char *filename, qboolean autosave);
@@ -131,12 +143,12 @@ void SVG_InitGame(void)
     gi.DPrintf("==== InitServerGame ====\n");
 
     // Initialize and allocate core objects for this "games" map 'round'.
-    SVG_InitCVars();
+    SVG_InitializeCVars();
     SVG_InitItems();
-    SVG_InitServerEntities();
+    SVG_InitializeServerEntities();
     SVG_AllocateGameClients();
+    SVG_InitializeGameMode();
 }
-
 
 //
 //===============
@@ -146,16 +158,16 @@ void SVG_InitGame(void)
 //===============
 //
 void SVG_ShutdownGame(void) {
+    // Informed consent, as always. We appreciate that, dang!
     gi.DPrintf("==== SVG_ShutdownGame ====\n");
 
-    // WatIs: C++-ify: Delete the edicts and clients arrays, they are allocated using new [], so need a delete[]
-    //if (g_entities)
-    //    delete[] g_entities;
+    // Aight, delete C++ vars yo. (I know this check is not required, but I like it.)
+    if (game.gameMode) {
+        delete game.gameMode;
+        game.gameMode = nullptr;
+    }
 
-    //if (game.clients)
-    //    delete[] game.clients;
-
-    // Shutdown the game.
+    // These old school CVars gotta be deleted from their stash. 
     gi.FreeTags(TAG_LEVEL);
     gi.FreeTags(TAG_GAME);
 }
@@ -256,12 +268,12 @@ void Com_Error(ErrorType type, const char *fmt, ...)
 //
 //
 //=====================
-// SVG_InitCVars
+// SVG_InitializeCVars
 //
 // Initializes all server game cvars and/or fetches those belonging to the engine.
 //=====================
 //
-void SVG_InitCVars() {
+void SVG_InitializeCVars() {
     // Debug weapon vars.
     gun_x = gi.cvar("gun_x", "0", 0);
     gun_y = gi.cvar("gun_y", "0", 0);
@@ -318,12 +330,12 @@ void SVG_InitCVars() {
 
 //
 //=====================
-// SVG_InitServerEntities
+// SVG_InitializeServerEntities
 //
 // Sets up the server entity aligned array.
 //=====================
 //
-void SVG_InitServerEntities() {
+void SVG_InitializeServerEntities() {
     // Initialize all entities for this "game", aka map that is being played.
     game.maxEntities = MAX_EDICTS;
     game.maxEntities = Clampi(game.maxEntities, (int)maxClients->value + 1, MAX_EDICTS);
@@ -346,6 +358,18 @@ void SVG_AllocateGameClients() {
     globals.numberOfEntities = game.maxClients + 1;
 }
 
+//
+//===============
+// SVG_InitializeGameMode
+//
+// Allocate AND initialize the proper gamemode that is set for this "game".
+//===============
+//
+void SVG_InitializeGameMode(void) {
+    // Default gamemode.
+    game.gameMode = new DefaultGameMode();
+
+}
 
 
 //

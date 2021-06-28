@@ -20,6 +20,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "g_local.h"         // Include SVGame funcs.
 #include "entities.h"
 #include "utils.h"           // Include Utilities funcs.
+
+// Game Mode interface.
+#include "gamemodes/IGameMode.h"
+
+// Class Entities.
 #include "entities/base/SVGBaseEntity.h"
 
 /*
@@ -150,7 +155,7 @@ void SpawnDamage(int type, const vec3_t &origin, const vec3_t &normal, int damag
 
 /*
 ============
-SVG_Damage
+SVG_InflictDamage
 
 targ        entity that is being damaged
 inflictor   entity that is causing the damage
@@ -163,7 +168,7 @@ normal      normal vector from that point
 damage      amount of damage being inflicted
 knockback   force to be applied against targ as a result of the damage
 
-dflags      these flags are used to control how SVG_Damage works
+dflags      these flags are used to control how SVG_InflictDamage works
     DamageFlags::IndirectFromRadius           damage was indirect (from a nearby explosion)
     DamageFlags::NoArmorProtection         armor does not protect from this damage
     DamageFlags::EnergyBasedWeapon           damage is from an energy based weapon
@@ -270,7 +275,7 @@ qboolean CheckTeamDamage(SVGBaseEntity *targ, SVGBaseEntity *attacker)
     return false;
 }
 
-void SVG_Damage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockback, int dflags, int mod)
+void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockback, int dflags, int mod)
 {
     GameClient   *client;
     int         take;
@@ -317,7 +322,6 @@ void SVG_Damage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *at
     // Retrieve normalized direction.
     vec3_t dir = vec3_normalize(dmgDir);
     //VectorNormalize2(dmgDir, dir);
-
 
 // bonus damage for suprising a monster
     if (!(dflags & DamageFlags::IndirectFromRadius) && (targ->GetServerFlags() & EntityServerFlags::Monster) && (attacker->GetClient()) && (!targ->GetEnemy()) && (targ->GetHealth() > 0))
@@ -424,10 +428,10 @@ void SVG_Damage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *at
 
 /*
 ============
-SVG_RadiusDamage
+SVG_InflictRadiusDamage
 ============
 */
-void SVG_RadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int mod)
+void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int mod)
 {
     float   points;
     SVGBaseEntity *ent = NULL;
@@ -462,12 +466,12 @@ void SVG_RadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float d
         // Apply damage points.
         if (points > 0) {
             // Ensure whether we CAN actually apply damage.
-            if (SVG_CanDamage(ent, inflictor)) {
+            if (game.gameMode->CanDamage(ent, inflictor)) {
                 // Calculate direcion.
                 dir = ent->GetOrigin() - inflictor->GetOrigin();
 
                 // Apply damages.
-                SVG_Damage(ent, inflictor, attacker, dir, inflictor->GetOrigin(), vec3_zero(), (int)points, (int)points, DamageFlags::IndirectFromRadius, mod);
+                SVG_InflictDamage(ent, inflictor, attacker, dir, inflictor->GetOrigin(), vec3_zero(), (int)points, (int)points, DamageFlags::IndirectFromRadius, mod);
             }
         }
     }

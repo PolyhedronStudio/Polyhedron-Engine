@@ -26,7 +26,7 @@ void target_explosion_explode(Entity* self)
     gi.WriteVector3(self->state.origin);
     gi.Multicast(&self->state.origin, MultiCast::PHS);
 
-    SVG_RadiusDamage(self, self->activator, self->damage, NULL, self->damage + 40, MeansOfDeath::Explosive);
+    SVG_InflictRadiusDamage(self, self->activator, self->damage, NULL, self->damage + 40, MeansOfDeath::Explosive);
 
     save = self->delay;
     self->delay = 0;

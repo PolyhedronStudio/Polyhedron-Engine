@@ -39,7 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-------------------
 class SVGBaseEntity;
 class PlayerClient;
-
+class IGameMode;
 
 //==================================================================
 
@@ -325,7 +325,11 @@ typedef struct gitem_s {
 // the server.ssv file for savegames
 //-------------------
 struct GameLocals {
-    GameClient *clients;       // [maxClients]
+    // Game Mode interface, always assigned to whichever game mode we are running.
+    IGameMode* gameMode;
+
+    // List of clients, based on sv_maxclients, or rather in the game dll: maxclients cvar.
+    GameClient *clients;
 
     // Can't store spawnpoint32_t in level, because
     // it would get overwritten by the savegame restore
@@ -653,8 +657,8 @@ void SVG_TouchItem(SVGBaseEntity* ent, SVGBaseEntity* other, cplane_t *plane, cs
 //
 qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2);
 qboolean SVG_CanDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor);
-void SVG_Damage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int32_t damage, int32_t knockback, int32_t dflags, int32_t mod);
-void SVG_RadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int32_t mod);
+void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int32_t damage, int32_t knockback, int32_t dflags, int32_t mod);
+void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int32_t mod);
 
 // damage flags
 struct DamageFlags {

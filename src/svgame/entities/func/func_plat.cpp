@@ -64,14 +64,14 @@ void plat_blocked(Entity* self, Entity* other)
 {
     if (!(other->serverFlags & EntityServerFlags::Monster) && (!other->client)) {
         // give it a chance to go away on it's own terms (like gibs)
-        SVG_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 100000, 1, 0, MeansOfDeath::Crush);
+        SVG_InflictDamage(other, self, self, vec3_origin, other->state.origin, vec3_origin, 100000, 1, 0, MeansOfDeath::Crush);
         // if it's still there, nuke it
         if (other)
             BecomeExplosion1(other);
         return;
     }
 
-    SVG_Damage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->damage, 1, 0, MeansOfDeath::Crush);
+    SVG_InflictDamage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->damage, 1, 0, MeansOfDeath::Crush);
 
     if (self->moveInfo.state == STATE_UP)
         plat_go_down(self);

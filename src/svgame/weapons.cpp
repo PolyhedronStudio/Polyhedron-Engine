@@ -109,7 +109,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int damage, int kick)
     dir = point - self->GetEnemy()->GetOrigin();
 
     // do the damage
-    SVG_Damage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
+    SVG_InflictDamage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
 
     if (!(tr.ent->GetServerFlags() & EntityServerFlags::Monster) && (!tr.ent->GetClient()))
         return false;
@@ -212,7 +212,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
     if (!((tr.surface) && (tr.surface->flags & SURF_SKY))) {
         if (tr.fraction < 1.0) {
             if (tr.ent->GetTakeDamage()) {
-                SVG_Damage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
+                SVG_InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
                     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
@@ -315,12 +315,12 @@ void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *sur
     //    // N&C: Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
     //    if (plane)
     //    {
-    //        //SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
+    //        //SVG_InflictDamage(other, self, self->owner, self->velocity, self->state.origin,
     //        //    plane->normal, self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
     //    }
     //    else
     //    {
-    //        //SVG_Damage(other, self, self->owner, self->velocity, self->state.origin,
+    //        //SVG_InflictDamage(other, self, self->owner, self->velocity, self->state.origin,
     //        //    vec3_zero(), self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
     //    }
 

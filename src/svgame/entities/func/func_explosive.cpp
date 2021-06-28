@@ -42,7 +42,7 @@ void func_explosive_explode(Entity* self, Entity* inflictor, Entity* attacker, i
     self->takeDamage = TakeDamage::No;
 
     if (self->damage)
-        SVG_RadiusDamage(self, attacker, self->damage, NULL, self->damage + 40, MeansOfDeath::Explosive);
+        SVG_InflictRadiusDamage(self, attacker, self->damage, NULL, self->damage + 40, MeansOfDeath::Explosive);
 
     VectorSubtract(self->state.origin, inflictor->state.origin, self->velocity);
     VectorNormalize(self->velocity);
