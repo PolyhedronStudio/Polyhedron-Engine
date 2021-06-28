@@ -68,7 +68,6 @@ cvar_t  *sv_lan_force_rate;
 cvar_t  *sv_calcpings_method;
 cvar_t  *sv_changemapcmd;
 
-cvar_t  *sv_strafejump_hack;
 cvar_t  *sv_waterjump_hack;
 #if USE_PACKETDUP
 cvar_t  *sv_packetdup_hack;
@@ -1966,7 +1965,6 @@ void SV_Init(void)
     sv_calcpings_method = Cvar_Get("sv_calcpings_method", "2", 0);
     sv_changemapcmd = Cvar_Get("sv_changemapcmd", "", 0);
 
-    sv_strafejump_hack = Cvar_Get("sv_strafejump_hack", "1", CVAR_LATCH);
     sv_waterjump_hack = Cvar_Get("sv_waterjump_hack", "0", CVAR_LATCH);
 
 #if USE_PACKETDUP

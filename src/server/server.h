@@ -459,7 +459,6 @@ extern cvar_t       *sv_lan_force_rate;
 extern cvar_t       *sv_calcpings_method;
 extern cvar_t       *sv_changemapcmd;
 
-extern cvar_t       *sv_strafejump_hack;
 #if USE_PACKETDUP
 extern cvar_t       *sv_packetdup_hack;
 #endif
