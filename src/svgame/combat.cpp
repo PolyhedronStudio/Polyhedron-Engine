@@ -127,11 +127,11 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     int damageSaved = 0;   // Damaged saved, from being taken.
 
     // Best be save than sorry.
-    if (!targ || !inflictor || !attacker)
-    {
+    if (!targ || !inflictor || !attacker) {
         return;
     }
 
+    // In case this entity is not taking any damage, all bets are off, don't bother moving on.
     if (!targ->GetTakeDamage())
         return;
 
@@ -147,6 +147,7 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     //            mod |= MeansOfDeath::FriendlyFire;
     //    }
     //}
+    // We resort to defaults, but keep the above as mentioned.
     meansOfDeath = mod;
 
     // Fetch client.
@@ -159,27 +160,28 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     
     // Retrieve normalized direction.
     vec3_t dir = vec3_normalize(dmgDir);
-    //VectorNormalize2(dmgDir, dir);
-
+    
+    // Ensure there is no odd knockback issues.
     if (targ->GetFlags() & EntityFlags::NoKnockBack)
         knockBack = 0;
 
-    // Figure momentum add
+    // Figure out the momentum to add in case KnockBacks are off. 
     if (!(dflags & DamageFlags::NoKnockBack)) {
         if ((knockBack) && (targ->GetMoveType() != MoveType::None) && (targ->GetMoveType() != MoveType::Bounce) && (targ->GetMoveType() != MoveType::Push) && (targ->GetMoveType() != MoveType::Stop)) {
-            vec3_t  kvel;
-            float   mass;
+            vec3_t  kvel = { 0.f, 0.f, 0.f };
+            float   mass = 50; // Defaults to 50, otherwise... issues, this is the OG code style btw.
 
-            if (targ->GetMass() < 50)
-                mass = 50;
-            else
+            // Based on mass, if it is below 50, we wanna hook it to being 50. Otherwise...
+            if (targ->GetMass() > 50)
                 mass = targ->GetMass();
 
+            // Determine whether attacker == target, and the client itself, that means we gotta jump back hard.
             if (targ->GetClient() && attacker == targ)
-                VectorScale(dir, 1600.0 * (float)knockBack / mass, kvel);   // the rocket jump hack...
+                kvel = vec3_scale(dir, 1600.0 * (float)knockBack / mass); // ROCKET JUMP HACK IS HERE BRUH <--
             else
-                VectorScale(dir, 500.0 * (float)knockBack / mass, kvel);
+                kvel = vec3_scale(dir, 500 * (float)knockBack / mass);
 
+            // Assign the new velocity, since yeah, it's bound to knock the fuck out of us.
             targ->SetVelocity(targ->GetVelocity() + kvel);
         }
     }
