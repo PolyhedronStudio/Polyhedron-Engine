@@ -44,8 +44,10 @@ void SVG_EntityKilled(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnti
     // Set the enemy pointer to the current attacker.
     targ->SetEnemy(attacker);
 
-//    if ((targ->serverFlags & EntityServerFlags::Monster) && (targ->deadFlag != DEAD_DEAD)) {
-////      targ->serverFlags |= EntityServerFlags::DeadMonster;   // now treat as a different content type
+    // Determine whether it is a monster, and if it IS set to being dead....
+    if ((targ->GetServerFlags() & EntityServerFlags::Monster) && (targ->GetDeadFlag() != DEAD_DEAD)) {
+        targ->SetServerFlags(targ->GetServerFlags() | EntityServerFlags::DeadMonster);   // Now treat as a different content type
+
 //        if (!(targ->monsterInfo.aiflags & AI_GOOD_GUY)) {
 //            level.killedMonsters++;
 //            if (coop->value && attacker->client)
@@ -54,7 +56,7 @@ void SVG_EntityKilled(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnti
 //            if (strcmp(attacker->className, "monster_medic") == 0)
 //                targ->owner = attacker;
 //        }
-//    }
+    }
 
     if (targ->GetMoveType() == MoveType::Push || targ->GetMoveType() == MoveType::Stop || targ->GetMoveType() == MoveType::None) {
         // Doors, triggers, etc
@@ -73,24 +75,6 @@ void SVG_EntityKilled(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnti
         targ->Die(inflictor, attacker, damage, point);
     }
     //targ->Die(targ, inflictor, attacker, damage, point);
-}
-
-
-/*
-================
-SpawnTempDamageEntity
-================
-*/
-void SpawnTempDamageEntity(int type, const vec3_t &origin, const vec3_t &normal, int damage)
-{
-    if (damage > 255)
-        damage = 255;
-    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
-    gi.WriteByte(type);
-//  gi.WriteByte (damage);
-    gi.WriteVector3(origin);
-    gi.WriteVector3(normal);
-    gi.Multicast(&origin, MultiCast::PVS);
 }
 
 //
@@ -194,7 +178,9 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     if ((targ->GetFlags() & EntityFlags::GodMode) && !(dflags & DamageFlags::IgnoreProtection)) {
         damageTaken = 0;
         damageSaved = damage;
-        SpawnTempDamageEntity(te_sparks, point, normal, damageSaved);
+        
+        // Leave it for the game mode to move on and spawn this temp entity (if allowed.)
+        game.gameMode->SpawnTempDamageEntity(te_sparks, point, normal, damageSaved);
     }
 
     // Team damage avoidance
@@ -207,9 +193,11 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
         // If not... :)... Do not.
         if ((targ->GetServerFlags() & EntityServerFlags::Monster) || (client)) {
             // SpawnTempDamageEntity(TempEntityEvent::Blood, point, normal, take);
-            SpawnTempDamageEntity(TempEntityEvent::Blood, point, dir, damageTaken);
+            // Leave it for the game mode to move on and spawn this temp entity (if allowed.)
+            game.gameMode->SpawnTempDamageEntity(TempEntityEvent::Blood, point, dir, damageTaken);
         } else {
-            SpawnTempDamageEntity(te_sparks, point, normal, damageTaken);
+            // Leave it for the game mode to move on and spawn this temp entity (if allowed.)
+            game.gameMode->SpawnTempDamageEntity(te_sparks, point, normal, damageTaken);
         }
 
         // Adjust health based on calculated damage to take.

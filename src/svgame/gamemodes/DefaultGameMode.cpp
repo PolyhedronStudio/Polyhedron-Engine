@@ -115,3 +115,24 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflicto
     // If we reached this point... Well, it is false :)
     return false;
 }
+
+
+//
+//===============
+// DefaultGameMode::SpawnTempDamageEntity
+// 
+// Sends a message to all clients in the current PVS, spawning a temp entity for
+// displaying damage entities client side. (Sparks, what have ya.)
+//===============
+//
+void DefaultGameMode::SpawnTempDamageEntity(int type, const vec3_t& origin, const vec3_t& normal, int damage) {
+    // WID: Ensure the effect can't send more damage. But that is unimplemented for the clients atm to even detect...
+    if (damage > 255)
+        damage = 255;
+    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+    gi.WriteByte(type);
+    //  gi.WriteByte (damage); // <-- This was legacy crap, might wanna implement it ourselves eventually.
+    gi.WriteVector3(origin);
+    gi.WriteVector3(normal);
+    gi.Multicast(&origin, MultiCast::PVS);
+}
