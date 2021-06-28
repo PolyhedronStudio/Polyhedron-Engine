@@ -35,7 +35,9 @@ public:
     //
     // When implementing this interface, it is suggested to just take DefaultGameMode,
     // or base yours off of that anyhow.
-    virtual void SpawnTempDamageEntity(int type, const vec3_t& origin, const vec3_t& normal, int damage) = 0;
+    virtual void SpawnTempDamageEntity(int32_t type, const vec3_t& origin, const vec3_t& normal, int32_t damage) = 0;
+    // Calculates the velocity for the damage given. (Used in effects, such as gibs.)
+    virtual vec3_t CalculateDamageVelocity(int32_t damage) = 0;
 
 private:
 
