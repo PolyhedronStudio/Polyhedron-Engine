@@ -78,10 +78,10 @@ void SVG_EntityKilled(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnti
 
 /*
 ================
-SpawnDamage
+SpawnTempDamageEntity
 ================
 */
-void SpawnDamage(int type, const vec3_t &origin, const vec3_t &normal, int damage)
+void SpawnTempDamageEntity(int type, const vec3_t &origin, const vec3_t &normal, int damage)
 {
     if (damage > 255)
         damage = 255;
@@ -194,7 +194,7 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     if ((targ->GetFlags() & EntityFlags::GodMode) && !(dflags & DamageFlags::IgnoreProtection)) {
         damageTaken = 0;
         damageSaved = damage;
-        SpawnDamage(te_sparks, point, normal, damageSaved);
+        SpawnTempDamageEntity(te_sparks, point, normal, damageSaved);
     }
 
     // Team damage avoidance
@@ -203,20 +203,25 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
 
     // Inflict the actual damage, in case we got to deciding to do so based on the above.
     if (damageTaken) {
-        if ((targ->GetServerFlags() & EntityServerFlags::Monster) || (client))
-        {
-            // SpawnDamage(TempEntityEvent::Blood, point, normal, take);
-            SpawnDamage(TempEntityEvent::Blood, point, dir, damageTaken);
+        // Check if monster, or client, in which case, we spawn blood.
+        // If not... :)... Do not.
+        if ((targ->GetServerFlags() & EntityServerFlags::Monster) || (client)) {
+            // SpawnTempDamageEntity(TempEntityEvent::Blood, point, normal, take);
+            SpawnTempDamageEntity(TempEntityEvent::Blood, point, dir, damageTaken);
+        } else {
+            SpawnTempDamageEntity(te_sparks, point, normal, damageTaken);
         }
-        else
-            SpawnDamage(te_sparks, point, normal, damageTaken);
 
-
+        // Adjust health based on calculated damage to take.
         targ->SetHealth(targ->GetHealth() - damageTaken);
 
+        // In case health is/was below 0.
         if (targ->GetHealth() <= 0) {
+            // Check if monster, or client, in which case, we execute no knockbacks :)
             if ((targ->GetServerFlags() & EntityServerFlags::Monster) || (client))
                 targ->SetFlags(targ->GetFlags() | EntityFlags::NoKnockBack);
+            
+            // It's dead though, or at least we assume so... Execute the SVG_EntityKilled.
             SVG_EntityKilled(targ, inflictor, attacker, damageTaken, point);
             return;
         }
