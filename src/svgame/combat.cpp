@@ -277,13 +277,10 @@ qboolean CheckTeamDamage(SVGBaseEntity *targ, SVGBaseEntity *attacker)
 
 void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockback, int dflags, int mod)
 {
-    GameClient   *client;
-    int         take;
-    int         save;
-    int         asave;
-    int         psave;
-    int         te_sparks;
+    int damageTaken = 0;   // Damage taken.
+    int damageSaved = 0;   // Damaged saved, from being taken.
 
+    // Best be save than sorry.
     if (!targ || !inflictor || !attacker)
     {
         return;
@@ -292,45 +289,36 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     if (!targ->GetTakeDamage())
         return;
 
+    // WID: This sticks around, cuz of reference, but truly will be all but this itself was.
     // friendly fire avoidance
     // if enabled you can't hurt teammates (but you can hurt yourself)
     // knockback still occurs
-    if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams))) || coop->value)) {
-        if (SVG_OnSameTeam(targ, attacker)) {
-            if ((int)(dmflags->value) & GameModeFlags::NoFriendlyFire)
-                damage = 0;
-            else
-                mod |= MeansOfDeath::FriendlyFire;
-        }
-    }
+    //if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams))) || coop->value)) {
+    //    if (game.gameMode->OnSameTeam(targ, attacker)) {
+    //        if ((int)(dmflags->value) & GameModeFlags::NoFriendlyFire)
+    //            damage = 0;
+    //        else
+    //            mod |= MeansOfDeath::FriendlyFire;
+    //    }
+    //}
     meansOfDeath = mod;
 
-    // Easy mode takes half damage
-    if (skill->value == 0 && deathmatch->value == 0 && targ->GetClient()) {
-        damage *= 0.5;
-        if (!damage)
-            damage = 1;
-    }
+    // Fetch client.
+    GameClient *client = targ->GetClient();
 
-    client = targ->GetClient();
-
+    // Lame thing, regarding the sparks to use. Ancient code, keeping it for now.
+    int te_sparks = TempEntityEvent::Sparks;
     if (dflags & DamageFlags::Bullet)
         te_sparks = TempEntityEvent::BulletSparks;
-    else
-        te_sparks = TempEntityEvent::Sparks;
-
+    
     // Retrieve normalized direction.
     vec3_t dir = vec3_normalize(dmgDir);
     //VectorNormalize2(dmgDir, dir);
 
-// bonus damage for suprising a monster
-    if (!(dflags & DamageFlags::IndirectFromRadius) && (targ->GetServerFlags() & EntityServerFlags::Monster) && (attacker->GetClient()) && (!targ->GetEnemy()) && (targ->GetHealth() > 0))
-        damage *= 2;
-
     if (targ->GetFlags() & EntityFlags::NoKnockBack)
         knockback = 0;
 
-// figure momentum add
+    // Figure momentum add
     if (!(dflags & DamageFlags::NoKnockBack)) {
         if ((knockback) && (targ->GetMoveType() != MoveType::None) && (targ->GetMoveType() != MoveType::Bounce) && (targ->GetMoveType() != MoveType::Push) && (targ->GetMoveType() != MoveType::Stop)) {
             vec3_t  kvel;
@@ -350,46 +338,38 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
         }
     }
 
-    take = damage;
-    save = 0;
+    // Setup damages, so we can maths with them, yay. Misses code cuz we got no armors no more :P
+    damageTaken = damage;       // Damage taken.
+    damageSaved = 0;            // Damaged saved, from being taken.
 
     // check for godmode
     if ((targ->GetFlags() & EntityFlags::GodMode) && !(dflags & DamageFlags::IgnoreProtection)) {
-        take = 0;
-        save = damage;
-        SpawnDamage(te_sparks, point, normal, save);
+        damageTaken = 0;
+        damageSaved = damage;
+        SpawnDamage(te_sparks, point, normal, damageSaved);
     }
 
-    psave = CheckPowerArmor(targ, point, normal, take, dflags);
-    take -= psave;
-
-    asave = CheckArmor(targ, point, normal, take, te_sparks, dflags);
-    take -= asave;
-
-    //treat cheat/powerup savings the same as armor
-    asave += save;
-
-    // team damage avoidance
+    // Team damage avoidance
     if (!(dflags & DamageFlags::IgnoreProtection) && game.gameMode->OnSameTeam(targ, attacker))
         return;
 
-// do the damage
-    if (take) {
+    // Inflict the actual damage, in case we got to deciding to do so based on the above.
+    if (damageTaken) {
         if ((targ->GetServerFlags() & EntityServerFlags::Monster) || (client))
         {
             // SpawnDamage(TempEntityEvent::Blood, point, normal, take);
-            SpawnDamage(TempEntityEvent::Blood, point, dir, take);
+            SpawnDamage(TempEntityEvent::Blood, point, dir, damageTaken);
         }
         else
-            SpawnDamage(te_sparks, point, normal, take);
+            SpawnDamage(te_sparks, point, normal, damageTaken);
 
 
-        targ->SetHealth(targ->GetHealth() - take);
+        targ->SetHealth(targ->GetHealth() - damageTaken);
 
         if (targ->GetHealth() <= 0) {
             if ((targ->GetServerFlags() & EntityServerFlags::Monster) || (client))
                 targ->SetFlags(targ->GetFlags() | EntityFlags::NoKnockBack);
-            Killed(targ, inflictor, attacker, take, point);
+            Killed(targ, inflictor, attacker, damageTaken, point);
             return;
         }
     }
@@ -401,7 +381,7 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
         //M_ReactToDamage(targ, attacker);
 
         //if (!(targ->monsterInfo.aiflags & AI_DUCKED) && (take)) {
-            targ->TakeDamage(attacker, knockback, take);
+            targ->TakeDamage(attacker, knockback, damageTaken);
             //// nightmare mode monsters don't go into pain frames often
             //if (skill->value == 3)
             //    targ->debouncePainTime = level.time + 5;
@@ -410,11 +390,11 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
         if (client) {
             //if (!(targ->flags & EntityFlags::GodMode) && (take))
             //    targ->Pain(targ, attacker, knockback, take);
-            if (!(targ->GetFlags() & EntityFlags::GodMode) && (take)) {
-                targ->TakeDamage(attacker, knockback, take);
+            if (!(targ->GetFlags() & EntityFlags::GodMode) && (damageTaken)) {
+                targ->TakeDamage(attacker, knockback, damageTaken);
             }
-        } else if (take) {
-            targ->TakeDamage(attacker, knockback, take);
+        } else if (damageTaken) {
+            targ->TakeDamage(attacker, knockback, damageTaken);
         }
     }
 
@@ -422,9 +402,7 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     // the total will be turned into screen blends and view angle kicks
     // at the end of the frame
     if (client) {
-        client->damages.powerArmor += psave;
-        client->damages.armor += asave;
-        client->damages.blood += take;
+        client->damages.blood += damageTaken;
         client->damages.knockBack += knockback;
         VectorCopy(point, client->damages.from);
     }
