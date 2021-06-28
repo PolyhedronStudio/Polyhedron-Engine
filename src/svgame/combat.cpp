@@ -27,74 +27,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Class Entities.
 #include "entities/base/SVGBaseEntity.h"
 
-/*
-============
-SVG_CanDamage
-
-Returns true if the inflictor can directly damage the target.  Used for
-explosions and melee attacks.
-============
-*/
-qboolean SVG_CanDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor)
-{
-    vec3_t  dest;
-    SVGTrace trace;
-
-// bmodels need special checking because their origin is 0,0,0
-    if (targ->GetMoveType() == MoveType::Push) {
-        // Calculate destination.
-        dest = vec3_scale(targ->GetAbsoluteMin() + targ->GetAbsoluteMax(), 0.5f);
-        trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
-        if (trace.fraction == 1.0)
-            return true;
-        if (trace.ent == targ)
-            return true;
-        return false;
-    }
-
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, targ->GetOrigin(), inflictor, CONTENTS_MASK_SOLID);
-    if (trace.fraction == 1.0)
-        return true;
-
-    VectorCopy(targ->GetOrigin(), dest);
-    dest[0] += 15.0;
-    dest[1] += 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
-    if (trace.fraction == 1.0)
-        return true;
-
-    VectorCopy(targ->GetOrigin(), dest);
-    dest[0] += 15.0;
-    dest[1] -= 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
-    if (trace.fraction == 1.0)
-        return true;
-
-    VectorCopy(targ->GetOrigin(), dest);
-    dest[0] -= 15.0;
-    dest[1] += 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
-    if (trace.fraction == 1.0)
-        return true;
-
-    VectorCopy(targ->GetOrigin(), dest);
-    dest[0] -= 15.0;
-    dest[1] -= 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
-    if (trace.fraction == 1.0)
-        return true;
-
-
-    return false;
-}
-
-
-/*
-============
-Killed
-============
-*/
-void Killed(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, int damage, vec3_t point)
+//
+//===============
+// SVG_EntityKilled
+// 
+// Called when an entity is killed, or at least, about to be.
+// Determine how to deal with it, usually resides in a callback to Die.
+//===============
+//
+void SVG_EntityKilled(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, int damage, vec3_t point)
 {
     // Ensure health isn't exceeding limits.
     if (targ->GetHealth() < -999)
@@ -116,7 +57,7 @@ void Killed(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attack
 //    }
 
     if (targ->GetMoveType() == MoveType::Push || targ->GetMoveType() == MoveType::Stop || targ->GetMoveType() == MoveType::None) {
-        // doors, triggers, etc
+        // Doors, triggers, etc
         if (targ) {
             targ->Die(inflictor, attacker, damage, point);
         }
@@ -152,130 +93,35 @@ void SpawnDamage(int type, const vec3_t &origin, const vec3_t &normal, int damag
     gi.Multicast(&origin, MultiCast::PVS);
 }
 
-
-/*
-============
-SVG_InflictDamage
-
-targ        entity that is being damaged
-inflictor   entity that is causing the damage
-attacker    entity that caused the inflictor to damage targ
-    example: targ=monster, inflictor=rocket, attacker=player
-
-dir         direction of the attack
-point       point at which the damage is being inflicted
-normal      normal vector from that point
-damage      amount of damage being inflicted
-knockback   force to be applied against targ as a result of the damage
-
-dflags      these flags are used to control how SVG_InflictDamage works
-    DamageFlags::IndirectFromRadius           damage was indirect (from a nearby explosion)
-    DamageFlags::NoArmorProtection         armor does not protect from this damage
-    DamageFlags::EnergyBasedWeapon           damage is from an energy based weapon
-    DamageFlags::NoKnockBack     do not affect velocity, just view angles
-    DamageFlags::Bullet           damage is from a bullet (used for ricochets)
-    DamageFlags::IgnoreProtection    kills godmode, armor, everything
-============
-*/
-static int CheckPowerArmor(SVGBaseEntity *ent, vec3_t point, vec3_t normal, int damage, int dflags)
-{
-    GameClient   *client;
-    int         save;
-    int         power_armor_type;
-    int         index;
-    int         damagePerCell = 0;
-    int         pa_te_type = 0;
-    int         power;
-    int         power_used;
-
-    if (!damage)
-        return 0;
-
-    client = ent->GetClient();
-
-    if (dflags & DamageFlags::NoArmorProtection)
-        return 0;
-
-    index = 0;  // shut up gcc
-
-    if (ent->GetServerFlags() & EntityServerFlags::Monster) {
-        //power_armor_type = ent->monsterInfo.power_armor_type;
-        //power = ent->monsterInfo.power_armor_power;
-    } else
-        return 0;
-
-    if (power_armor_type == POWER_ARMOR_NONE)
-        return 0;
-    if (!power)
-        return 0;
-
-    save = power * damagePerCell;
-    if (!save)
-        return 0;
-    if (save > damage)
-        save = damage;
-
-    SpawnDamage(pa_te_type, point, normal, save);
-    //ent->powerArmorTime = level.time + 0.2;
-
-    power_used = save / damagePerCell;
-
-    if (client)
-        client->persistent.inventory[index] -= power_used;
-    //else
-    //    ent->monsterInfo.power_armor_power -= power_used;
-    return save;
-}
-
-static int CheckArmor(SVGBaseEntity *ent, vec3_t point, vec3_t normal, int damage, int te_sparks, int dflags)
-{
-    GameClient   *client;
-    int         save;
-    int         index;
-    gitem_t     *armor;
-
-    if (!damage)
-        return 0;
-
-    client = ent->GetClient();
-
-    if (!client)
-        return 0;
-
-    if (dflags & DamageFlags::NoArmorProtection)
-        return 0;
-
-    return 0;
-    index = SVG_ArmorIndex(ent);
-    if (!index)
-        return 0;
-
-    armor = SVG_GetItemByIndex(index);
-
-    if (dflags & DamageFlags::EnergyBasedWeapon)
-        save = ceil(((gitem_armor_t *)armor->info)->energyProtection * damage);
-    else
-        save = ceil(((gitem_armor_t *)armor->info)->normalProtection * damage);
-    if (save >= client->persistent.inventory[index])
-        save = client->persistent.inventory[index];
-
-    if (!save)
-        return 0;
-
-    client->persistent.inventory[index] -= save;
-    SpawnDamage(te_sparks, point, normal, save);
-
-    return save;
-}
-
-qboolean CheckTeamDamage(SVGBaseEntity *targ, SVGBaseEntity *attacker)
-{
-    //FIXME make the next line real and uncomment this block
-    // if ((ability to damage a teammate == OFF) && (targ's team == attacker's team))
-    return false;
-}
-
-void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockback, int dflags, int mod)
+//
+//===============
+// SVG_InflictDamage
+//
+// Inflicts actual damage on the targeted entity, the rest speaks for itself.
+// Calls into the GameMode of course, to ensure whether things are solid to do at all.
+// 
+// If you'd like the old info...
+// targ        entity that is being damaged
+// inflictor   entity that is causing the damage
+// attacker    entity that caused the inflictor to damage targ
+// example : targ = monster, inflictor = rocket, attacker = player
+//
+// dir         direction of the attack
+// point       point at which the damage is being inflicted
+// normal      normal vector from that point
+// damage      amount of damage being inflicted
+// knockBack   force to be applied against targ as a result of the damage
+//
+// dflags      these flags are used to control how SVG_InflictDamage works
+// DamageFlags::IndirectFromRadius           damage was indirect(from a nearby explosion)
+// DamageFlags::NoArmorProtection         armor does not protect from this damage
+// DamageFlags::EnergyBasedWeapon           damage is from an energy based weapon
+// DamageFlags::NoKnockBack     do not affect velocity, just view angles
+// DamageFlags::Bullet           damage is from a bullet(used for ricochets)
+// DamageFlags::IgnoreProtection    kills godmode, armor, everything
+//===============
+//
+void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockBack, int dflags, int mod)
 {
     int damageTaken = 0;   // Damage taken.
     int damageSaved = 0;   // Damaged saved, from being taken.
@@ -292,7 +138,7 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     // WID: This sticks around, cuz of reference, but truly will be all but this itself was.
     // friendly fire avoidance
     // if enabled you can't hurt teammates (but you can hurt yourself)
-    // knockback still occurs
+    // knockBack still occurs
     //if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams))) || coop->value)) {
     //    if (game.gameMode->OnSameTeam(targ, attacker)) {
     //        if ((int)(dmflags->value) & GameModeFlags::NoFriendlyFire)
@@ -316,11 +162,11 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     //VectorNormalize2(dmgDir, dir);
 
     if (targ->GetFlags() & EntityFlags::NoKnockBack)
-        knockback = 0;
+        knockBack = 0;
 
     // Figure momentum add
     if (!(dflags & DamageFlags::NoKnockBack)) {
-        if ((knockback) && (targ->GetMoveType() != MoveType::None) && (targ->GetMoveType() != MoveType::Bounce) && (targ->GetMoveType() != MoveType::Push) && (targ->GetMoveType() != MoveType::Stop)) {
+        if ((knockBack) && (targ->GetMoveType() != MoveType::None) && (targ->GetMoveType() != MoveType::Bounce) && (targ->GetMoveType() != MoveType::Push) && (targ->GetMoveType() != MoveType::Stop)) {
             vec3_t  kvel;
             float   mass;
 
@@ -330,9 +176,9 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
                 mass = targ->GetMass();
 
             if (targ->GetClient() && attacker == targ)
-                VectorScale(dir, 1600.0 * (float)knockback / mass, kvel);   // the rocket jump hack...
+                VectorScale(dir, 1600.0 * (float)knockBack / mass, kvel);   // the rocket jump hack...
             else
-                VectorScale(dir, 500.0 * (float)knockback / mass, kvel);
+                VectorScale(dir, 500.0 * (float)knockBack / mass, kvel);
 
             targ->SetVelocity(targ->GetVelocity() + kvel);
         }
@@ -369,7 +215,7 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
         if (targ->GetHealth() <= 0) {
             if ((targ->GetServerFlags() & EntityServerFlags::Monster) || (client))
                 targ->SetFlags(targ->GetFlags() | EntityFlags::NoKnockBack);
-            Killed(targ, inflictor, attacker, damageTaken, point);
+            SVG_EntityKilled(targ, inflictor, attacker, damageTaken, point);
             return;
         }
     }
@@ -381,7 +227,7 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
         //M_ReactToDamage(targ, attacker);
 
         //if (!(targ->monsterInfo.aiflags & AI_DUCKED) && (take)) {
-            targ->TakeDamage(attacker, knockback, damageTaken);
+            targ->TakeDamage(attacker, knockBack, damageTaken);
             //// nightmare mode monsters don't go into pain frames often
             //if (skill->value == 3)
             //    targ->debouncePainTime = level.time + 5;
@@ -389,12 +235,12 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     } else {
         if (client) {
             //if (!(targ->flags & EntityFlags::GodMode) && (take))
-            //    targ->Pain(targ, attacker, knockback, take);
+            //    targ->Pain(targ, attacker, knockBack, take);
             if (!(targ->GetFlags() & EntityFlags::GodMode) && (damageTaken)) {
-                targ->TakeDamage(attacker, knockback, damageTaken);
+                targ->TakeDamage(attacker, knockBack, damageTaken);
             }
         } else if (damageTaken) {
-            targ->TakeDamage(attacker, knockback, damageTaken);
+            targ->TakeDamage(attacker, knockBack, damageTaken);
         }
     }
 
@@ -403,27 +249,29 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     // at the end of the frame
     if (client) {
         client->damages.blood += damageTaken;
-        client->damages.knockBack += knockback;
-        VectorCopy(point, client->damages.from);
+        client->damages.knockBack += knockBack;
+        client->damages.from = point;
     }
 }
 
 
-/*
-============
-SVG_InflictRadiusDamage
-============
-*/
+//
+//===============
+// SVG_InflictRadiusDamage
+//
+// Similar to SVG_InflictDamage, however, we scan for entities within a radious to then
+// go haywire on because we appreciate to put them into a lot of misery. Just sayin' ;-) :P
+//===============
+//
 void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int mod)
 {
-    float   points;
+    float   points = 0.f;
     SVGBaseEntity *ent = NULL;
-    vec3_t  v;
-    vec3_t  dir;
+    vec3_t  v = { 0.f, 0.f, 0.f };
+    vec3_t  dir = { 0.f, 0.f, 0.f };
 
     // N&C: From Yamagi Q2, to prevent issues.
-    if (!inflictor || !attacker)
-    {
+    if (!inflictor || !attacker) {
         return;
     }
 
