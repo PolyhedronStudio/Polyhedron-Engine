@@ -144,18 +144,18 @@ void DefaultGameMode::SpawnTempDamageEntity(int type, const vec3_t& origin, cons
 //
 vec3_t DefaultGameMode::CalculateDamageVelocity(int32_t damage) {
     // Pick random velocities.
-    vec3_t v = {
-        v[0] = 100.0f * crandom(),
-        v[1] = 100.0f * crandom(),
-        v[2] = 200.0f + 100.0f * random()
+    vec3_t velocity = {
+        100.0f * crandom(),
+        100.0f * crandom(),
+        200.0f + 100.0f * random()
     };
 
     // Scale velocities.
     if (damage < 50)
-        VectorScale(v, 0.7f, v);
+        velocity = vec3_scale(velocity, 0.7f);
     else
-        VectorScale(v, 1.2f, v);
+        velocity = vec3_scale(velocity, 1.2f);
 
     // Return.
-    return v;
+    return velocity;
 }
