@@ -425,6 +425,23 @@ Entity* SVG_Spawn(void)
 }
 
 //
+//=====================
+// SVG_CreateTargetChangeLevel
+//
+// Returns the created target changelevel entity.
+//=====================
+//
+Entity* SVG_CreateTargetChangeLevel(char* map) {
+    Entity* ent;
+
+    ent = SVG_Spawn();
+    ent->className = (char*)"target_changelevel"; // C++20: Added a cast.
+    Q_snprintf(level.nextMap, sizeof(level.nextMap), "%s", map);
+    ent->map = level.nextMap;
+    return ent;
+}
+
+//
 //===============
 // SVG_GetWorldServerEntity
 // 

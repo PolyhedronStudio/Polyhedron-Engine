@@ -38,6 +38,7 @@ void    SVG_FreeEntity(Entity* e);
 Entity* SVG_GetWorldServerEntity();
 Entity* SVG_Spawn(void);
 
+Entity* SVG_CreateTargetChangeLevel(char* map);
 
 //
 // ClassEntity handling.

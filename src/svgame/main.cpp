@@ -45,6 +45,9 @@ Entity g_entities[MAX_EDICTS];
 // BaseEntity array, matches similarly index wise.
 SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 
+//-----------------
+// CVars.
+//-----------------
 cvar_t  *deathmatch;
 cvar_t  *coop;
 cvar_t  *dmflags;
@@ -87,6 +90,10 @@ cvar_t  *sv_maplist;
 
 cvar_t  *cl_monsterfootsteps;
 
+
+//-----------------
+// Funcs used locally.
+//-----------------
 void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
 
 void SVG_InitServerEntities();
@@ -102,11 +109,43 @@ void SVG_InitGame(void);
 void SVG_RunFrame(void);
 
 
-//===================================================================
-
-
-void SVG_ShutdownGame(void)
+//
+//=============================================================================
+//
+//	SVGame Core API entry points.
+//
+//=============================================================================
+//
+//
+//===============
+// SVG_InitGame
+//
+// This will be called when the dll is first loaded, which
+// only happens when a new game is started or a save game
+// is loaded.
+//===============
+//
+void SVG_InitGame(void)
 {
+    // WID: Informed consent. One has to know, right? :D
+    gi.DPrintf("==== InitServerGame ====\n");
+
+    // Initialize and allocate core objects for this "games" map 'round'.
+    SVG_InitCVars();
+    SVG_InitItems();
+    SVG_InitServerEntities();
+    SVG_AllocateGameClients();
+}
+
+
+//
+//===============
+// SVG_ShutdownGame
+//
+// Whenever a "game" or aka a "match" ends, this gets called.
+//===============
+//
+void SVG_ShutdownGame(void) {
     gi.DPrintf("==== SVG_ShutdownGame ====\n");
 
     // WatIs: C++-ify: Delete the edicts and clients arrays, they are allocated using new [], so need a delete[]
@@ -121,36 +160,14 @@ void SVG_ShutdownGame(void)
     gi.FreeTags(TAG_GAME);
 }
 
-/*
-============
-SVG_InitGame
-
-This will be called when the dll is first loaded, which
-only happens when a new game is started or a save game
-is loaded.
-============
-*/
-void SVG_InitGame(void)
-{
-    // WID: Informed consent. One has to know, right? :D
-    gi.DPrintf("==== InitServerGame ====\n");
-
-    // Initialize and allocate core objects for this "games" map 'round'.
-    SVG_InitCVars();
-    SVG_InitItems();
-    SVG_InitServerEntities();
-    SVG_AllocateGameClients();
-}
-
-
-/*
-=================
-GetServerGameAPI
-
-Returns a pointer to the structure with all entry points
-and global variables
-=================
-*/
+//
+//===============
+//GetServerGameAPI
+//
+// Returns a pointer to the structure with all entry points
+// and global variables
+//===============
+//
 ServerGameExports* GetServerGameAPI(ServerGameImports* import)
 {
     gi = *import;
@@ -187,6 +204,17 @@ ServerGameExports* GetServerGameAPI(ServerGameImports* import)
     return &globals;
 }
 
+
+
+//
+//=============================================================================
+//
+//	SVGame Wrappers, these are here so that functions in q_shared.cpp can do
+//  their thing. This should actually, need a nicer solution such as using a
+//  .lib instead, that signifies the "core" utility.
+//
+//=============================================================================
+//
 #ifndef GAME_HARD_LINKED
 // this is only here so the functions in q_shared.c can link
 void Com_LPrintf(PrintType type, const char *fmt, ...)
@@ -218,7 +246,14 @@ void Com_Error(ErrorType type, const char *fmt, ...)
 }
 #endif
 
-//======================================================================
+
+//
+//=============================================================================
+//
+//	Initialization utility functions.
+//
+//=============================================================================
+//
 //
 //=====================
 // SVG_InitCVars
@@ -312,13 +347,22 @@ void SVG_AllocateGameClients() {
 }
 
 
-//======================================================================
 
-/*
-=================
-SVG_ClientEndServerFrames
-=================
-*/
+//
+//=============================================================================
+//
+//	Main Entry Point callback functions for the SVGame DLL.
+//
+//=============================================================================
+//
+//
+//=====================
+// SVG_ClientEndServerFrames
+//
+// Called when the game is at the end of its run for this frame, and decides to now
+// instantiate a process for updating each client by the current server frame.
+//=====================
+//
 void SVG_ClientEndServerFrames(void)
 {
     int     i;
@@ -334,24 +378,6 @@ void SVG_ClientEndServerFrames(void)
         SVG_ClientEndServerFrame((PlayerClient*)ent->classEntity);
     }
 
-}
-
-/*
-=================
-SVG_CreateTargetChangeLevel
-
-Returns the created target changelevel
-=================
-*/
-Entity *SVG_CreateTargetChangeLevel(char *map)
-{
-    Entity *ent;
-
-    ent = SVG_Spawn();
-    ent->className = (char*)"target_changelevel"; // C++20: Added a cast.
-    Q_snprintf(level.nextMap, sizeof(level.nextMap), "%s", map);
-    ent->map = level.nextMap;
-    return ent;
 }
 
 /*
