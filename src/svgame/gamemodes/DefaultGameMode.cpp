@@ -82,28 +82,28 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflicto
     if (trace.fraction == 1.0)
         return true;
 
-    VectorCopy(targ->GetOrigin(), dest);
+    dest = targ->GetOrigin();
     dest[0] += 15.0;
     dest[1] += 15.0;
     trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
-    VectorCopy(targ->GetOrigin(), dest);
+    dest = targ->GetOrigin();
     dest[0] += 15.0;
     dest[1] -= 15.0;
     trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
-    VectorCopy(targ->GetOrigin(), dest);
+    dest = targ->GetOrigin();
     dest[0] -= 15.0;
     dest[1] += 15.0;
     trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
-    VectorCopy(targ->GetOrigin(), dest);
+    dest = targ->GetOrigin();
     dest[0] -= 15.0;
     dest[1] -= 15.0;
     trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
