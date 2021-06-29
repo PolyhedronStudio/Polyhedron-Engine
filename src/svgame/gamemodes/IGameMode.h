@@ -25,7 +25,7 @@ public:
     // Returns true if these two entities are on a same team.
     virtual qboolean OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) = 0;
     // Returns true if the target entity can be damaged by the inflictor enemy.
-    virtual qboolean CanDamage(SVGBaseEntity * targ, SVGBaseEntity * inflictor) = 0;
+    virtual qboolean CanDamage(SVGBaseEntity * target, SVGBaseEntity * inflictor) = 0;
 
     //
     // N&C Gamerule additions.

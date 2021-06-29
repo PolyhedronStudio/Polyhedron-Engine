@@ -187,7 +187,7 @@ SVG_HUD_GenerateDMScoreboardLayout
 
 ==================
 */
-void SVG_HUD_GenerateDMScoreboardLayout(Entity *ent, Entity *killer)
+void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *killer)
 {
     char    entry[1024];
     char    string[1400];
@@ -238,9 +238,9 @@ void SVG_HUD_GenerateDMScoreboardLayout(Entity *ent, Entity *killer)
         y = 32 + 32 * (i % 6);
 
         // add a dogtag
-        if (cl_ent == ent)
+        if (cl_ent == ent->GetServerEntity())
             tag = "tag1";
-        else if (cl_ent == killer)
+        else if (cl_ent == killer->GetServerEntity())
             tag = "tag2";
         else
             tag = NULL;
@@ -277,10 +277,15 @@ HUD_SendDMScoreboardMessage
 Sends the deatchmatch scoreboard svc_layout message.
 ==================
 */
-void HUD_SendDMScoreboardMessage(Entity *ent)
+void HUD_SendDMScoreboardMessage(SVGBaseEntity *ent)
 {
-    //SVG_HUD_GenerateDMScoreboardLayout(ent, ent->enemy);
-    //gi.Unicast(ent, true);
+    // WID: Putting this check here for future issue preventing.
+    // Truth is, this stuff has to go when we got RMLUI :)
+    if (!ent)
+        return;
+
+    SVG_HUD_GenerateDMScoreboardLayout(ent, ent->GetEnemy());
+    gi.Unicast(ent->GetServerEntity(), true);
 }
 
 
@@ -291,19 +296,29 @@ SVG_Command_Score_f
 Display the scoreboard
 ==================
 */
-void SVG_Command_Score_f(Entity *ent)
+void SVG_Command_Score_f(SVGBaseEntity*ent)
 {
-    ent->client->showInventory = false;
+    // Entity. Make sure it is valid.
+    if (!ent)
+        return;
+    
+    GameClient* client = ent->GetClient();
+
+    // We obviously should not continue, for some reason it has no client...
+    if (!client)
+        return;
+    
+    client->showInventory = false;
 
     if (!deathmatch->value && !coop->value)
         return;
 
-    if (ent->client->showScores) {
-        ent->client->showScores = false;
+    if (client->showScores) {
+        client->showScores = false;
         return;
     }
 
-    ent->client->showScores = true;
+    client->showScores = true;
     HUD_SendDMScoreboardMessage(ent);
 }
 
