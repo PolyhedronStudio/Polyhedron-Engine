@@ -107,19 +107,11 @@ void SVGBaseMover::Think() {
 //===============
 //
 void SVGBaseMover::SpawnKey(const std::string& key, const std::string& value) {
-	// Wait.
 	if (key == "wait") {
-		// Parsed float.
-		float parsedFloat = 0.f;
-
-		// Parse.
-		ParseFloatKeyValue(key, value, parsedFloat);
-
-		// Assign.
-		SetWaitTime(parsedFloat);
-	}
-	// Parent class spawnkey.
-	else {
+		ParseFloatKeyValue(key, value, waitTime);
+	} else if ( key == "lip" ) {
+		ParseFloatKeyValue( key, value, lip );
+	} else {
 		SVGBaseTrigger::SpawnKey(key, value);
 	}
 }
@@ -155,5 +147,33 @@ void SVGBaseMover::SetMoveDirection(const vec3_t& angles) {
 		AngleVectors(angles, &moveDirection, NULL, NULL);
 	}
 
+	// Admer: is this really intended? Some entities may control their angle
+	// and align it directly with the movement direction.
+	// I suggest we add a bool parameter to this method, 'resetAngles',
+	// which will zero the entity's angles if true
 	SetAngles(vec3_zero());
+}
+
+//===============
+// SVGBaseMover::CalculateEndPosition
+//===============
+vec3_t SVGBaseMover::CalculateEndPosition() {
+	const vec3_t& size = GetSize();
+	vec3_t absoluteDir{
+		fabsf( moveDirection.x ),
+		fabsf( moveDirection.y ),
+		fabsf( moveDirection.z ) 
+	};
+	
+	float distance = (absoluteDir.x * size.x) + (absoluteDir.y * size.y) + (absoluteDir.z * size.z) - GetLip();
+	return vec3_fmaf( GetStartPosition(), distance, moveDirection );
+}
+
+//===============
+// SVGBaseMover::SwapPositions
+//===============
+void SVGBaseMover::SwapPositions() {
+	SetOrigin( GetEndPosition() );			// origin = endpos
+	SetEndPosition( GetStartPosition() );	// endpos = startpos
+	SetStartPosition( GetOrigin() );		// startpos = origin
 }

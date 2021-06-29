@@ -97,6 +97,10 @@ public:
     const inline vec3_t& GetStartPosition() override {
         return startPosition;
     }
+    // Gets the lip
+    const inline float& GetLip() {
+        return lip;
+    }
 
     //
     // Entity Set Functions.
@@ -121,6 +125,18 @@ public:
     inline void SetStartPosition(const vec3_t& startPosition) {
         this->startPosition = startPosition;
     }
+    // Sets the lip
+    inline void SetLip( const float& lip ) {
+        this->lip = lip;
+    }
+
+protected:
+    // Calculates and returns the destination point
+    // ASSUMES: startPosition and moveDirection are set properly
+    vec3_t CalculateEndPosition();
+
+    // Swaps startPosition and endPosition, using the origin as an intermediary
+    void SwapPositions();
 
 protected:
 
@@ -143,6 +159,8 @@ protected:
     vec3_t endPosition;
     // BaseMover moveInfo.
     PushMoveInfo moveInfo;
+    // How far away to stop, from the destination
+    float		lip{ 0.0f };
     // Kill target when triggered.
     //std::string killTargetStr;
 
