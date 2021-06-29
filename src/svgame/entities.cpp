@@ -16,7 +16,7 @@
 //
 #include "entities/base/SVGBaseEntity.h"
 #include "entities/base/SVGBaseTrigger.h"
-#include "entities/base/SVGBasePusher.h"
+#include "entities/base/SVGBaseMover.h"
 #include "entities/base/PlayerClient.h"
 #include "entities/info/InfoPlayerStart.h"
 #include "entities/trigger/TriggerAlways.h"

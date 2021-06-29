@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// SVGBasePusher.cpp
+// SVGBaseMover.cpp
 //
 //
 */
@@ -14,10 +14,10 @@
 // Class Entities.
 #include "SVGBaseEntity.h"
 #include "SVGBaseTrigger.h"
-#include "SVGBasePusher.h"
+#include "SVGBaseMover.h"
 
 // Constructor/Deconstructor.
-SVGBasePusher::SVGBasePusher(Entity* svEntity) : SVGBaseTrigger(svEntity) {
+SVGBaseMover::SVGBaseMover(Entity* svEntity) : SVGBaseTrigger(svEntity) {
 	//
 	// All callback functions best be nullptr.
 	//
@@ -43,28 +43,28 @@ SVGBasePusher::SVGBasePusher(Entity* svEntity) : SVGBaseTrigger(svEntity) {
 	startPosition = { 0.f, 0.f, 0.f };
 	endPosition = { 0.f, 0.f, 0.f };
 }
-SVGBasePusher::~SVGBasePusher() {
+SVGBaseMover::~SVGBaseMover() {
 
 }
 
 // Interface functions. 
 //
 //===============
-// SVGBasePusher::Precache
+// SVGBaseMover::Precache
 //
 //===============
 //
-void SVGBasePusher::Precache() {
+void SVGBaseMover::Precache() {
 	SVGBaseEntity::Precache();
 }
 
 //
 //===============
-// SVGBasePusher::Spawn
+// SVGBaseMover::Spawn
 //
 //===============
 //
-void SVGBasePusher::Spawn() {
+void SVGBaseMover::Spawn() {
 	SVGBaseTrigger::Spawn();
 
 
@@ -72,41 +72,41 @@ void SVGBasePusher::Spawn() {
 
 //
 //===============
-// SVGBasePusher::Respawn
+// SVGBaseMover::Respawn
 // 
 //===============
 //
-void SVGBasePusher::Respawn() {
+void SVGBaseMover::Respawn() {
 	SVGBaseTrigger::Respawn();
 }
 
 //
 //===============
-// SVGBasePusher::PostSpawn
+// SVGBaseMover::PostSpawn
 // 
 //===============
 //
-void SVGBasePusher::PostSpawn() {
+void SVGBaseMover::PostSpawn() {
 	SVGBaseTrigger::PostSpawn();
 }
 
 //
 //===============
-// SVGBasePusher::Think
+// SVGBaseMover::Think
 //
 //===============
 //
-void SVGBasePusher::Think() {
+void SVGBaseMover::Think() {
 	SVGBaseTrigger::Think();
 }
 
 //
 //===============
-// SVGBasePusher::SpawnKey
+// SVGBaseMover::SpawnKey
 //
 //===============
 //
-void SVGBasePusher::SpawnKey(const std::string& key, const std::string& value) {
+void SVGBaseMover::SpawnKey(const std::string& key, const std::string& value) {
 	// Wait.
 	if (key == "wait") {
 		// Parsed float.
@@ -126,11 +126,11 @@ void SVGBasePusher::SpawnKey(const std::string& key, const std::string& value) {
 
 //
 //===============
-// SVGBasePusher::SetMoveDirection
+// SVGBaseMover::SetMoveDirection
 //
 //===============
 //
-void SVGBasePusher::SetMoveDirection(const vec3_t& angles) {
+void SVGBaseMover::SetMoveDirection(const vec3_t& angles) {
 	vec3_t VEC_UP = { 0, -1, 0 };
 	vec3_t MOVEDIR_UP = { 0, 0, 1 };
 	vec3_t VEC_DOWN = { 0, -2, 0 };

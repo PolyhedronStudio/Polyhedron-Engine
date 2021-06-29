@@ -2,10 +2,10 @@
 // LICENSE HERE.
 
 //
-// SVGBasePusher.h
+// SVGBaseMover.h
 //
-// Base pusher class, for buttons, platforms, anything that moves based on acceleration
-// basically.
+// Base move class, for buttons, platforms, anything that moves based on acceleration
+// OR, stepmoves.
 //
 */
 #ifndef __SVGAME_ENTITIES_BASE_SVGBASEPUSHER_H__
@@ -13,13 +13,13 @@
 
 class SVGBaseTrigger;
 
-class SVGBasePusher : public SVGBaseTrigger {
+class SVGBaseMover : public SVGBaseTrigger {
 public:
     //
     // Constructor/Deconstructor.
     //
-    SVGBasePusher(Entity* svEntity);
-    virtual ~SVGBasePusher();
+    SVGBaseMover(Entity* svEntity);
+    virtual ~SVGBaseMover();
 
 
     //

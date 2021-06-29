@@ -13,24 +13,24 @@
 
 #include "../base/SVGBaseEntity.h"
 #include "../base/SVGBaseTrigger.h"
-#include "../base/SVGBasePusher.h"
+#include "../base/SVGBaseMover.h"
 
 #include "FuncButton.h"
 
 FuncButton::FuncButton( Entity* svEntity )
-	: SVGBasePusher( svEntity )
+	: SVGBaseMover( svEntity )
 {
 
 }
 
 void FuncButton::Precache()
 {
-	SVGBasePusher::Precache();
+	SVGBaseMover::Precache();
 }
 
 void FuncButton::Spawn()
 {
-	SVGBasePusher::Spawn();
+	SVGBaseMover::Spawn();
 
 	vec3_t absoluteMovedir;
 	float distance;
@@ -133,7 +133,7 @@ void FuncButton::SpawnKey( const std::string& key, const std::string& value )
 	}
 	else
 	{
-		return SVGBasePusher::SpawnKey( key, value );
+		return SVGBaseMover::SpawnKey( key, value );
 	}
 }
 
