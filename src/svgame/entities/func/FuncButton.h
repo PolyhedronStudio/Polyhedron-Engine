@@ -6,8 +6,7 @@ class SVGBaseMover;
 // A standard button, able to trigger entities once pressed,
 // and changes its texture depending on its state
 //===============
-class FuncButton : public SVGBaseMover
-{
+class FuncButton : public SVGBaseMover {
 public:
 	FuncButton( Entity* svEntity );
 	virtual ~FuncButton() = default;
@@ -34,9 +33,6 @@ protected: // Implementation details, should be moved to SVGBaseMover
 	void		BrushMoveFinal();
 	void		BrushMoveBegin();
 	void		BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function );
-
-protected: // Should also be, perhaps, moved to SVGBaseMover
-	float		lip{ 0.0f };
 };
 
 

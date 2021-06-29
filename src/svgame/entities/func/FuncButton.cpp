@@ -56,31 +56,24 @@ void FuncButton::Spawn() {
 	if ( GetSound() != 1 ) {
 		moveInfo.startSoundIndex = gi.SoundIndex( "switches/butn2.wav" );
 	} // If the mapper didn't specify speed, set it to 40 u/s
-	if ( !serverEntity->speed ) {
-		serverEntity->speed = 40.0f;
+	if ( !GetSpeed() ) {
+		SetSpeed( 40.0f );
 	} // If the mapper didn't specify acceleration & deceleration, set the defaults
-	if ( !serverEntity->acceleration ) {
-		serverEntity->acceleration = serverEntity->speed;
+	if ( !GetAcceleration() ) {
+		SetAcceleration( GetSpeed() );
 	}
-	if ( !serverEntity->deceleration ) {
-		serverEntity->deceleration = serverEntity->speed;
+	if ( !GetDeceleration() ) {
+		SetDeceleration( GetSpeed() );
 	} // If the mapper didn't specify 'wait until return', then default to 3 seconds
-	if ( !waitTime ) {
+	if ( !GetWaitTime() ) {
 		SetWaitTime( 3.0f );
 	} // Lip: how much to subtract from the door's travel distance
-	if ( !lip ) {
-		lip = 4.0f;
+	if ( !GetLip() ) {
+		SetLip( 8.0f );
 	}
-
 	// Set up the trajectory
-	serverEntity->position1 = GetOrigin();
-
-	absoluteMovedir.x = fabsf( moveDirection.x );
-	absoluteMovedir.y = fabsf( moveDirection.y );
-	absoluteMovedir.z = fabsf( moveDirection.z );
-	distance = (absoluteMovedir.x * serverEntity->size.x) + (absoluteMovedir.y * serverEntity->size.y) + (absoluteMovedir.z * serverEntity->size.z) - lip;
-	
-	serverEntity->position2 = vec3_fmaf( serverEntity->position1, distance, moveDirection );
+	SetStartPosition( GetOrigin() );
+	SetEndPosition( CalculateEndPosition() );
 
 	SetEffects( EntityEffectType::AnimCycleFrames01hz2 );
 
@@ -97,13 +90,13 @@ void FuncButton::Spawn() {
 	// Set up moveInfo stuff
 	// Button starts off
 	moveInfo.state			= MoverState::Bottom;
-	moveInfo.speed			= serverEntity->speed;
-	moveInfo.acceleration	= serverEntity->acceleration;
-	moveInfo.deceleration	= serverEntity->deceleration;
-	moveInfo.wait			= waitTime;
-	moveInfo.startOrigin	= serverEntity->position1;
+	moveInfo.speed			= GetSpeed();
+	moveInfo.acceleration	= GetAcceleration();
+	moveInfo.deceleration	= GetDeceleration();
+	moveInfo.wait			= GetWaitTime();
+	moveInfo.startOrigin	= GetStartPosition();
 	moveInfo.startAngles	= GetAngles();
-	moveInfo.endOrigin		= serverEntity->position2;
+	moveInfo.endOrigin		= GetEndPosition();
 	moveInfo.endAngles		= GetAngles();
 
 	LinkEntity();
