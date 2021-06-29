@@ -17,17 +17,26 @@
 
 #include "FuncButton.h"
 
+//===============
+// FuncButton::ctor
+//===============
 FuncButton::FuncButton( Entity* svEntity )
 	: SVGBaseMover( svEntity )
 {
 
 }
 
+//===============
+// FuncButton::dtor
+//===============
 void FuncButton::Precache()
 {
 	SVGBaseMover::Precache();
 }
 
+//===============
+// FuncButton::Spawn
+//===============
 void FuncButton::Spawn()
 {
 	SVGBaseMover::Spawn();
@@ -119,6 +128,9 @@ void FuncButton::Spawn()
 	LinkEntity();
 }
 
+//===============
+// FuncButton::SpawnKey
+//===============
 void FuncButton::SpawnKey( const std::string& key, const std::string& value )
 {
 	// I think serverEntity variables should just be set in SVGBaseEntity::SpawnKey
@@ -137,12 +149,18 @@ void FuncButton::SpawnKey( const std::string& key, const std::string& value )
 	}
 }
 
+//===============
+// FuncButton::OnButtonDone
+//===============
 void FuncButton::OnButtonDone( Entity* self )
 {
-	FuncButton* button = static_cast<FuncButton*>( self->classEntity );
+	FuncButton* button = static_cast<FuncButton*>(self->classEntity);
 	button->ButtonDone();
 }
 
+//===============
+// FuncButton::ButtonDone
+//===============
 void FuncButton::ButtonDone()
 {
 	moveInfo.state = MoverState::Bottom;
@@ -150,24 +168,33 @@ void FuncButton::ButtonDone()
 	serverEntity->state.effects |= EntityEffectType::AnimCycleFrames01hz2;
 }
 
+//===============
+// FuncButton::ButtonReturn
+//===============
 void FuncButton::ButtonReturn()
 {
 	moveInfo.state = MoverState::Down;
 	BrushMoveCalc( moveInfo.startOrigin, OnButtonDone );
 	SetFrame( 0 );
-	
+
 	if ( GetHealth() )
 	{
 		SetTakeDamage( TakeDamage::Yes );
 	}
 }
 
+//===============
+// FuncButton::OnButtonWait
+//===============
 void FuncButton::OnButtonWait( Entity* self )
 {
 	FuncButton* button = static_cast<FuncButton*>(self->classEntity);
 	button->ButtonWait();
 }
 
+//===============
+// FuncButton::ButtonWait
+//===============
 void FuncButton::ButtonWait()
 {
 	moveInfo.state = MoverState::Top;
@@ -175,7 +202,7 @@ void FuncButton::ButtonWait()
 	serverEntity->state.effects |= EntityEffectType::AnimCycleFrames23hz2;
 	SetFrame( 1 );
 
-	UseTargets(GetActivator());
+	UseTargets( GetActivator() );
 
 	if ( moveInfo.wait >= 0.0f )
 	{
@@ -184,6 +211,9 @@ void FuncButton::ButtonWait()
 	}
 }
 
+//===============
+// FuncButton::ButtonFire
+//===============
 void FuncButton::ButtonFire()
 {
 	if ( moveInfo.state == MoverState::Up || moveInfo.state == MoverState::Top )
@@ -200,12 +230,18 @@ void FuncButton::ButtonFire()
 	BrushMoveCalc( moveInfo.endOrigin, OnButtonWait );
 }
 
+//===============
+// FuncButton::ButtonUse
+//===============
 void FuncButton::ButtonUse( SVGBaseEntity* other, SVGBaseEntity* activator )
 {
 	this->activator = activator;
 	ButtonFire();
 }
 
+//===============
+// FuncButton::ButtonTouch
+//===============
 void FuncButton::ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf )
 {
 	if ( !other->GetClient() || other->GetHealth() <= 0 )
@@ -217,6 +253,9 @@ void FuncButton::ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_
 	ButtonFire();
 }
 
+//===============
+// FuncButton::ButtonDie
+//===============
 void FuncButton::ButtonDie( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point )
 {
 	activator = attacker;
@@ -225,7 +264,7 @@ void FuncButton::ButtonDie( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, i
 }
 
 // =========================
-// Brush move methods
+// FuncButton::BrushMoveDone
 // 
 // Will be moved to either SVGBaseEntity or 
 // some sorta SVGBaseMover when we make one
@@ -236,6 +275,9 @@ void FuncButton::BrushMoveDone()
 	moveInfo.OnEndFunction( serverEntity );
 }
 
+//===============
+// SVGBaseMover::BrushMoveFinal
+//===============
 void FuncButton::BrushMoveFinal()
 {
 	// We've traveled our world, time to rest
@@ -252,6 +294,9 @@ void FuncButton::BrushMoveFinal()
 	SetNextThinkTime( level.time + FRAMETIME );
 }
 
+//===============
+// SVGBaseMover::BrushMoveBegin
+//===============
 void FuncButton::BrushMoveBegin()
 {
 	float frames;
@@ -272,6 +317,9 @@ void FuncButton::BrushMoveBegin()
 	SetNextThinkTime( level.time + (frames * FRAMETIME) );
 }
 
+//===============
+// SVGBaseMover::BrushMoveCalc
+//===============
 void FuncButton::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function )
 {
 	PushMoveInfo& mi = moveInfo;
