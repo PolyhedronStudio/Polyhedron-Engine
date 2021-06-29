@@ -82,7 +82,7 @@ SET( SRC_SVGAME_ENTITIES_FUNC
 	#svgame/entities/func/FuncAreaportal.cpp
 	svgame/entities/func/FuncButton.cpp
 	#svgame/entities/func/FuncConveyor.cpp
-	#svgame/entities/func/FuncDoor.cpp 
+	svgame/entities/func/FuncDoor.cpp 
 	#svgame/entities/func/FuncDoorRotating.cpp
 	#svgame/entities/func/FuncExplosive.cpp 
 	#svgame/entities/func/FuncKillbox.cpp
@@ -127,6 +127,7 @@ SET ( SRC_SVGAME_ENTITIES_TRIGGER
 	#svgame/entities/trigger/TriggerPush.cpp
 	#svgame/entities/trigger/TriggerRelay.cpp
 	svgame/entities/trigger/TriggerAlways.cpp
+	svgame/entities/trigger/TriggerAutoDoor.cpp
 	svgame/entities/trigger/TriggerDelayedUse.cpp
 	svgame/entities/trigger/TriggerHurt.cpp
 	svgame/entities/trigger/TriggerMultiple.cpp
@@ -208,12 +209,14 @@ SET ( HEADERS_SVGAME_ENTITIES_BASE
 SET ( HEADERS_SVGAME_ENTITIES_FUNC
 	svgame/entities/func/func_door.h
 	svgame/entities/func/FuncButton.h
+	svgame/entities/func/FuncDoor.h
 )
 SET ( HEADERS_SVGAME_ENTITIES_MISC 
 	svgame/entities/misc/MiscExplosionBox.h
 )
 SET ( HEADERS_SVGAME_ENTITIES_TRIGGER 
 	svgame/entities/trigger/TriggerAlways.h
+	svgame/entities/trigger/TriggerAutoDoor.h
 	svgame/entities/trigger/TriggerDelayedUse.h
 	svgame/entities/trigger/TriggerHurt.h
 	svgame/entities/trigger/TriggerMultiple.h
