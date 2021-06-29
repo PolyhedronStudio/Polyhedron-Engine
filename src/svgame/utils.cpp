@@ -43,123 +43,10 @@ vec3_t SVG_PlayerProjectSource(GameClient* client, const vec3_t& point, const ve
     return SVG_ProjectSource(point, _distance, forward, right);
 }
 
-
-vec3_t SVG_VelocityForDamage(int damage)
-{
-    // Pick random velocities.
-    vec3_t v = {
-        v[0] = 100.0f * crandom(),
-        v[1] = 100.0f * crandom(),
-        v[2] = 200.0f + 100.0f * random()
-    };
-
-    // Scale velocities.
-    if (damage < 50)
-        VectorScale(v, 0.7f, v);
-    else
-        VectorScale(v, 1.2f, v);
-
-    // Return.
-    return v;
-}
-
 void Think_Delay(SVGBaseEntity *ent)
 {
     //UTIL_UseTargets(ent, ent->GetActivator());
     //SVG_FreeEntity(ent->GetServerEntity());
-}
-
-/*
-==============================
-UTIL_UseTargets
-
-the global "activator" should be set to the entity that initiated the firing.
-
-If self.delay is set, a DelayedUse entity will be created that will actually
-do the SUB_UseTargets after that many seconds have passed.
-
-Centerprints any self.message to the activator.
-
-Search for (string)targetName in all entities that
-match (string)self.target and call their .use function
-
-==============================
-*/
-void UTIL_UseTargets(SVGBaseEntity*ent, SVGBaseEntity*activator)
-{
-//    Entity     *t;
-//
-////
-//// check for a delay
-////
-//    if (ent->GetDelay()) {
-//        // create a temp object to fire at a later time
-//        t = SVG_Spawn();
-//        t->className = "DelayedUse";
-////        t->nextThinkTime = level.time + ent->GetDelay();
-//        //t->Think = Think_Delay;
-////        t->activator = activator;
-//        if (!activator)
-//            gi.DPrintf("Think_Delay with no activator\n");
-//        t->message = ent->GetMessage();
-//        t->target = ent->GetTarget();
-//        t->killTarget = ent->GetKillTarget();
-//        return;
-//    }
-//
-//
-////
-//// print the message
-////
-//    if ((ent->GetMessage()) && !(activator->GetServerFlags() & EntityServerFlags::Monster)) {
-//        SVG_CenterPrint(activator, ent->GetMessage());
-//        if (ent->GetNoiseIndex())
-//            SVG_Sound(activator, CHAN_AUTO, ent->GetNoiseIndex(), 1, ATTN_NORM, 0);
-//        else
-//            SVG_Sound(activator, CHAN_AUTO, gi.SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
-//    }
-//
-////
-//// kill killtargets
-////
-//    if (ent->GetKillTarget()) {
-//        t = NULL;
-//        while ((t = SVG_Find(t, FOFS(targetName), ent->GetKillTarget()))) {
-//            SVG_FreeEntity(t);
-//            if (!ent->IsInUse()) {
-//                gi.DPrintf("entity was removed while using killtargets\n");
-//                return;
-//            }
-//        }
-//    }
-//
-////
-//// fire targets
-////
-//    if (ent->GetTarget()) {
-//        t = NULL;
-//        while ((t = SVG_Find(t, FOFS(targetName), ent->GetTarget()))) {
-//            // doors fire area portals in a specific way
-//            if (!Q_stricmp(t->className, "func_areaportal") &&
-//                (!Q_stricmp(ent->GetClassName(), "func_door") || !Q_stricmp(ent->GetClassName(), "func_door_rotating")))
-//                continue;
-//
-//            if (t == ent->GetServerEntity()) {
-//                gi.DPrintf("WARNING: Entity used itself.\n");
-//            } else {
-//                SVGBaseEntity* targetClassEntity = t->classEntity;
-//
-//                // Only continue if there is a classentity.
-//                if (targetClassEntity) {
-//                    targetClassEntity->Use(ent, activator);
-//                }
-//            }
-//            if (!ent->IsInUse()) {
-//                gi.DPrintf("entity was removed while using targets\n");
-//                return;
-//            }
-//        }
-//    }
 }
 
 
@@ -183,7 +70,7 @@ void UTIL_SetMoveDir(vec3_t &angles, vec3_t &moveDirection)
 
 /*
 ============
-G_TouchTriggers
+UTIL_TouchTriggers
 
 ============
 */
