@@ -13,23 +13,24 @@
 
 #include "../base/SVGBaseEntity.h"
 #include "../base/SVGBaseTrigger.h"
+#include "../base/SVGBasePusher.h"
 
 #include "FuncButton.h"
 
 FuncButton::FuncButton( Entity* svEntity )
-	: SVGBaseEntity( svEntity )
+	: SVGBasePusher( svEntity )
 {
 
 }
 
 void FuncButton::Precache()
 {
-	SVGBaseEntity::Precache();
+	SVGBasePusher::Precache();
 }
 
 void FuncButton::Spawn()
 {
-	SVGBaseEntity::Spawn();
+	SVGBasePusher::Spawn();
 
 	vec3_t absoluteMovedir;
 	float distance;
@@ -132,7 +133,7 @@ void FuncButton::SpawnKey( const std::string& key, const std::string& value )
 	}
 	else
 	{
-		return SVGBaseEntity::SpawnKey( key, value );
+		return SVGBasePusher::SpawnKey( key, value );
 	}
 }
 
@@ -174,7 +175,7 @@ void FuncButton::ButtonWait()
 	serverEntity->state.effects |= EntityEffectType::AnimCycleFrames23hz2;
 	SetFrame( 1 );
 
-	UseTargets();
+	UseTargets(GetActivator());
 
 	if ( serverEntity->moveInfo.wait >= 0.0f )
 	{

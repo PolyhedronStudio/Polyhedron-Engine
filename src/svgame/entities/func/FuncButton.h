@@ -1,8 +1,8 @@
 #pragma once
 
-class SVGBaseEntity;
+class SVGBasePusher;
 
-class FuncButton : public SVGBaseEntity
+class FuncButton : public SVGBasePusher
 {
 public:
 	FuncButton( Entity* svEntity );

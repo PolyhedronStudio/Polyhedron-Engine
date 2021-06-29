@@ -62,7 +62,7 @@ SVG_FireHit
 Used for all impact (hit/punch/slash) attacks
 =================
 */
-qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int damage, int kick)
+qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t kick)
 {
     SVGTrace     tr;
     vec3_t      forward, right, up;
