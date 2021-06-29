@@ -679,7 +679,7 @@ ELSE()
 	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
 ENDIF()
 
-if (GLSLANG_COMPILER)
+if (GLSLANG_COMPILER AND CONFIG_VKPT_RENDERER)
 	add_dependencies(client shaders)
 endif()
 
