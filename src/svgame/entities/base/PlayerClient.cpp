@@ -188,7 +188,7 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
 
         // Show the scoreboard in case of a deathmatch mode.
         if (deathmatch->value)
-            SVG_Command_Score_f(serverEntity);
+            SVG_Command_Score_f(this);
 
         // Clear inventory this is kind of ugly, but it's how we want to handle keys in coop
         for (int32_t i = 0; i < game.numberOfItems; i++) {

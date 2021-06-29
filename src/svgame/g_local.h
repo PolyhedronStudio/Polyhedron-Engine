@@ -595,7 +595,7 @@ extern  gitem_t itemlist[];
 //
 // g_cmds.c
 //
-void SVG_Command_Score_f(Entity *ent);
+void SVG_Command_Score_f(SVGBaseEntity *ent);
 
 //
 // g_items.c

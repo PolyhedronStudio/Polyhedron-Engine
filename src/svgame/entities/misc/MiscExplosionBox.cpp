@@ -108,10 +108,10 @@ void MiscExplosionBox::Spawn() {
     SetTakeDamage(TakeDamage::Yes);
 
     // Setup our MiscExplosionBox callbacks.
-    SetUseCallback(&MiscExplosionBox::MiscExplosionBoxUse);
-    SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxThink);
-    SetDieCallback(&MiscExplosionBox::MiscExplosionBoxDie);
-    SetTouchCallback(&MiscExplosionBox::MiscExplosionBoxTouch);
+    SetUseCallback(&MiscExplosionBox::ExplosionBoxUse);
+    SetThinkCallback(&MiscExplosionBox::ExplosionBoxThink);
+    SetDieCallback(&MiscExplosionBox::ExplosionBoxDie);
+    SetTouchCallback(&MiscExplosionBox::ExplosionBoxTouch);
 
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
@@ -161,23 +161,23 @@ void MiscExplosionBox::Think() {
 //
 
 // ==============
-// MiscExplosionBox::MiscExplosionBoxUse
+// MiscExplosionBox::ExplosionBoxUse
 // 
 // So that mappers can trigger this entity in order to blow it up
 // ==============
-void MiscExplosionBox::MiscExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* activator )
+void MiscExplosionBox::ExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* activator )
 {
-    MiscExplosionBoxDie( caller, activator, 999, GetOrigin() );
+    ExplosionBoxDie( caller, activator, 999, GetOrigin() );
 }
 
 //
 //===============
-// MiscExplosionBox::MiscExplosionBoxThink
+// MiscExplosionBox::ExplosionBoxThink
 //
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 //
-void MiscExplosionBox::MiscExplosionBoxThink(void) {
+void MiscExplosionBox::ExplosionBoxThink(void) {
     // First, ensure our origin is +1 off the floor.
     vec3_t newOrigin = GetOrigin() + vec3_t{
         0.f, 0.f, 1.f
@@ -278,12 +278,12 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
 
 //
 //===============
-// MiscExplosionBox::MiscExplosionBoxDie
+// MiscExplosionBox::ExplosionBoxDie
 //
 // 'Die' callback, the explosion box has been damaged too much.
 //===============
 //
-void MiscExplosionBox::MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
     SetTakeDamage(TakeDamage::No);
     
@@ -300,12 +300,12 @@ void MiscExplosionBox::MiscExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEnti
 
 //
 //===============
-// MiscExplosionBox::MiscExplosionBoxTouch
+// MiscExplosionBox::ExplosionBoxTouch
 //
 // 'Touch' callback, to calculate the direction to move into.
 //===============
 //
-void MiscExplosionBox::MiscExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
+void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
     // Safety checks.
     if (!self)
         return;

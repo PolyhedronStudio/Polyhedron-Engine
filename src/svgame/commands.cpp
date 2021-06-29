@@ -851,7 +851,8 @@ void SVG_ClientCommand(Entity *serverEntity)
         return;
     }
     if (Q_stricmp(cmd, "score") == 0) {
-        SVG_Command_Score_f(serverEntity);
+            gi.DPrintf("YO YOU ARE DEBUGGING SCORES");
+        SVG_Command_Score_f(ent);
         return;
     }
 
