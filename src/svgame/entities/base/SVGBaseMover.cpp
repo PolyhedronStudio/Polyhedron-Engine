@@ -136,11 +136,24 @@ void SVGBaseMover::SetMoveDirection(const vec3_t& angles) {
 	vec3_t VEC_DOWN = { 0, -2, 0 };
 	vec3_t MOVEDIR_DOWN = { 0, 0, -1 };
 
+	//if (VectorCompare(angles, VEC_UP)) {
+	//	VectorCopy(MOVEDIR_UP, moveDirection);
+	//} else if (VectorCompare(angles, VEC_DOWN)) {
+	//	VectorCopy(MOVEDIR_DOWN, moveDirection);
+	//} else {
+	//	AngleVectors(angles, &moveDirection, NULL, NULL);
+	//}
+
+	////VectorClear(angles);
+	//SetAngles(vec3_zero());
+
 	if (vec3_equal(angles, VEC_UP)) {
 		moveDirection = MOVEDIR_UP;
 	} else if (vec3_equal(angles, VEC_DOWN)) {
 		moveDirection = MOVEDIR_DOWN;
 	} else {
-		vec3_vectors(angles, &moveDirection, NULL, NULL);
+		AngleVectors(angles, &moveDirection, NULL, NULL);
 	}
+
+	SetAngles(vec3_zero());
 }

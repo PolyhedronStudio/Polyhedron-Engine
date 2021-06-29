@@ -36,7 +36,7 @@ void FuncButton::Spawn()
 	float distance;
 
 	vec3_t angles = GetAngles();
-	UTIL_SetMoveDir( angles, serverEntity->moveDirection );
+	SetMoveDirection( angles );
 	
 	// mappers set angles to determine the movement direction of the button,
 	// so we gotta set the entity's angles to zero
@@ -80,12 +80,12 @@ void FuncButton::Spawn()
 	// Set up the trajectory
 	serverEntity->position1 = GetOrigin();
 
-	absoluteMovedir.x = fabsf( serverEntity->moveDirection.x );
-	absoluteMovedir.y = fabsf( serverEntity->moveDirection.y );
-	absoluteMovedir.z = fabsf( serverEntity->moveDirection.z );
+	absoluteMovedir.x = fabsf( moveDirection.x );
+	absoluteMovedir.y = fabsf( moveDirection.y );
+	absoluteMovedir.z = fabsf( moveDirection.z );
 	distance = (absoluteMovedir.x * serverEntity->size.x) + (absoluteMovedir.y * serverEntity->size.y) + (absoluteMovedir.z * serverEntity->size.z) - lip;
 	
-	serverEntity->position2 = vec3_fmaf( serverEntity->position1, distance, serverEntity->moveDirection );
+	serverEntity->position2 = vec3_fmaf( serverEntity->position1, distance, moveDirection );
 
 	SetEffects( EntityEffectType::AnimCycleFrames01hz2 );
 
