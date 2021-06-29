@@ -49,7 +49,7 @@ void FuncButton::Spawn()
 	// If the mapper didn't specify a sound
 	if ( GetSound() != 1 )
 	{
-		serverEntity->moveInfo.startSoundIndex = gi.SoundIndex( "switches/butn2.wav" );
+		moveInfo.startSoundIndex = gi.SoundIndex( "switches/butn2.wav" );
 	}
 	// If the mapper didn't specify speed, set it to 40 u/s
 	if ( !serverEntity->speed )
@@ -104,17 +104,17 @@ void FuncButton::Spawn()
 
 	// Set up moveInfo stuff
 	// Button starts off
-	serverEntity->moveInfo.state = MoverState::Bottom;
+	moveInfo.state = MoverState::Bottom;
 
-	serverEntity->moveInfo.speed = serverEntity->speed;
-	serverEntity->moveInfo.acceleration = serverEntity->acceleration;
-	serverEntity->moveInfo.deceleration = serverEntity->deceleration;
-	serverEntity->moveInfo.wait = waitTime;
+	moveInfo.speed = serverEntity->speed;
+	moveInfo.acceleration = serverEntity->acceleration;
+	moveInfo.deceleration = serverEntity->deceleration;
+	moveInfo.wait = waitTime;
 
-	serverEntity->moveInfo.startOrigin = serverEntity->position1;
-	serverEntity->moveInfo.startAngles = GetAngles();
-	serverEntity->moveInfo.endOrigin = serverEntity->position2;
-	serverEntity->moveInfo.endAngles = GetAngles();
+	moveInfo.startOrigin = serverEntity->position1;
+	moveInfo.startAngles = GetAngles();
+	moveInfo.endOrigin = serverEntity->position2;
+	moveInfo.endAngles = GetAngles();
 
 	LinkEntity();
 }
@@ -145,15 +145,15 @@ void FuncButton::OnButtonDone( Entity* self )
 
 void FuncButton::ButtonDone()
 {
-	serverEntity->moveInfo.state = MoverState::Bottom;
+	moveInfo.state = MoverState::Bottom;
 	serverEntity->state.effects &= ~(EntityEffectType::AnimCycleFrames23hz2);
 	serverEntity->state.effects |= EntityEffectType::AnimCycleFrames01hz2;
 }
 
 void FuncButton::ButtonReturn()
 {
-	serverEntity->moveInfo.state = MoverState::Down;
-	BrushMoveCalc( serverEntity->moveInfo.startOrigin, OnButtonDone );
+	moveInfo.state = MoverState::Down;
+	BrushMoveCalc( moveInfo.startOrigin, OnButtonDone );
 	SetFrame( 0 );
 	
 	if ( GetHealth() )
@@ -170,34 +170,34 @@ void FuncButton::OnButtonWait( Entity* self )
 
 void FuncButton::ButtonWait()
 {
-	serverEntity->moveInfo.state = MoverState::Top;
+	moveInfo.state = MoverState::Top;
 	serverEntity->state.effects &= ~(EntityEffectType::AnimCycleFrames01hz2);
 	serverEntity->state.effects |= EntityEffectType::AnimCycleFrames23hz2;
 	SetFrame( 1 );
 
 	UseTargets(GetActivator());
 
-	if ( serverEntity->moveInfo.wait >= 0.0f )
+	if ( moveInfo.wait >= 0.0f )
 	{
-		SetNextThinkTime( level.time + serverEntity->moveInfo.wait );
+		SetNextThinkTime( level.time + moveInfo.wait );
 		SetThinkCallback( &FuncButton::ButtonReturn );
 	}
 }
 
 void FuncButton::ButtonFire()
 {
-	if ( serverEntity->moveInfo.state == MoverState::Up || serverEntity->moveInfo.state == MoverState::Top )
+	if ( moveInfo.state == MoverState::Up || moveInfo.state == MoverState::Top )
 	{
 		return;
 	}
 
-	serverEntity->moveInfo.state = MoverState::Up;
-	if ( serverEntity->moveInfo.startSoundIndex && !(flags & EntityFlags::TeamSlave) )
+	moveInfo.state = MoverState::Up;
+	if ( moveInfo.startSoundIndex && !(flags & EntityFlags::TeamSlave) )
 	{
-		gi.Sound( serverEntity, CHAN_NO_PHS_ADD + CHAN_VOICE, serverEntity->moveInfo.startSoundIndex, 1, ATTN_STATIC, 0 );
+		gi.Sound( serverEntity, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0 );
 	}
 	
-	BrushMoveCalc( serverEntity->moveInfo.endOrigin, OnButtonWait );
+	BrushMoveCalc( moveInfo.endOrigin, OnButtonWait );
 }
 
 void FuncButton::ButtonUse( SVGBaseEntity* other, SVGBaseEntity* activator )
@@ -233,20 +233,20 @@ void FuncButton::ButtonDie( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, i
 void FuncButton::BrushMoveDone()
 {
 	SetVelocity( vec3_zero() );
-	serverEntity->moveInfo.OnEndFunction( serverEntity );
+	moveInfo.OnEndFunction( serverEntity );
 }
 
 void FuncButton::BrushMoveFinal()
 {
 	// We've traveled our world, time to rest
-	if ( serverEntity->moveInfo.remainingDistance == 0.0f )
+	if ( moveInfo.remainingDistance == 0.0f )
 	{
 		BrushMoveDone();
 		return;
 	}
 
 	// Move only as far as to clear the remaining distance
-	SetVelocity( vec3_scale( serverEntity->moveInfo.dir, serverEntity->moveInfo.remainingDistance / FRAMETIME ) );
+	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.remainingDistance / FRAMETIME ) );
 
 	SetThinkCallback( &FuncButton::BrushMoveDone );
 	SetNextThinkTime( level.time + FRAMETIME );
@@ -257,16 +257,16 @@ void FuncButton::BrushMoveBegin()
 	float frames;
 
 	// It's time to stop
-	if ( (serverEntity->moveInfo.speed * FRAMETIME) >= serverEntity->moveInfo.remainingDistance )
+	if ( (moveInfo.speed * FRAMETIME) >= moveInfo.remainingDistance )
 	{
 		BrushMoveFinal();
 		return;
 	}
 
-	SetVelocity( vec3_scale( serverEntity->moveInfo.dir, serverEntity->moveInfo.speed ) );
+	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.speed ) );
 
-	frames = floor( (serverEntity->moveInfo.remainingDistance / serverEntity->moveInfo.speed) / FRAMETIME );
-	serverEntity->moveInfo.remainingDistance -= frames * serverEntity->moveInfo.speed * FRAMETIME;
+	frames = floor( (moveInfo.remainingDistance / moveInfo.speed) / FRAMETIME );
+	moveInfo.remainingDistance -= frames * moveInfo.speed * FRAMETIME;
 
 	SetThinkCallback( &FuncButton::BrushMoveFinal );
 	SetNextThinkTime( level.time + (frames * FRAMETIME) );
@@ -274,11 +274,11 @@ void FuncButton::BrushMoveBegin()
 
 void FuncButton::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function )
 {
-	PushMoveInfo& mi = serverEntity->moveInfo;
+	PushMoveInfo& mi = moveInfo;
 
 	SetVelocity( vec3_zero() );
 	mi.dir = destination - GetOrigin();
-	mi.remainingDistance = VectorNormalize( serverEntity->moveInfo.dir );
+	mi.remainingDistance = VectorNormalize( moveInfo.dir );
 	mi.OnEndFunction = function;
 
 	if ( mi.speed == mi.acceleration && mi.speed == mi.deceleration )

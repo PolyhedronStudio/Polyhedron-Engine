@@ -185,30 +185,30 @@ static const save_field_t entityfields[] = {
 
     T(item),
 
-    V(moveInfo.startOrigin),
-    V(moveInfo.startAngles),
-    V(moveInfo.endOrigin),
-    V(moveInfo.endAngles),
+//    V(moveInfo.startOrigin),
+    //V(moveInfo.startAngles),
+    //V(moveInfo.endOrigin),
+    //V(moveInfo.endAngles),
 
-    I(moveInfo.startSoundIndex),
-    I(moveInfo.middleSoundIndex),
-    I(moveInfo.endSoundIndex),
+    //I(moveInfo.startSoundIndex),
+    //I(moveInfo.middleSoundIndex),
+    //I(moveInfo.endSoundIndex),
 
-    F(moveInfo.acceleration),
-    F(moveInfo.speed),
-    F(moveInfo.deceleration),
-    F(moveInfo.distance),
+    //F(moveInfo.acceleration),
+    //F(moveInfo.speed),
+    //F(moveInfo.deceleration),
+    //F(moveInfo.distance),
 
-    F(moveInfo.wait),
+    //F(moveInfo.wait),
 
-    I(moveInfo.state),
-    V(moveInfo.dir),
-    F(moveInfo.currentSpeed),
-    F(moveInfo.moveSpeed),
-    F(moveInfo.nextSpeed),
-    F(moveInfo.remainingDistance),
-    F(moveInfo.deceleratedDistance),
-    P(moveInfo.OnEndFunction, P_moveinfo_endfunc),
+    //I(moveInfo.state),
+    //V(moveInfo.dir),
+    //F(moveInfo.currentSpeed),
+    //F(moveInfo.moveSpeed),
+    //F(moveInfo.nextSpeed),
+    //F(moveInfo.remainingDistance),
+    //F(moveInfo.deceleratedDistance),
+    //P(moveInfo.OnEndFunction, P_moveinfo_endfunc),
 
     {(fieldtype_t)0}
 #undef _OFS

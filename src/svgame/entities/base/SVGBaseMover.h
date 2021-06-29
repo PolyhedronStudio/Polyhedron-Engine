@@ -13,6 +13,42 @@
 
 class SVGBaseTrigger;
 
+using PushMoveEndFunction = void(Entity*);
+
+//-------------------
+// Contains data for keeping track of velocity based moving entities.
+// (In other words, entities that aren't a: Client or AI Player.
+//-------------------
+struct PushMoveInfo {
+    // fixed data
+    vec3_t startOrigin;
+    vec3_t startAngles;
+    vec3_t endOrigin;
+    vec3_t endAngles;
+
+    int32_t startSoundIndex;
+    int32_t middleSoundIndex;
+    int32_t endSoundIndex;
+
+    float acceleration;
+    float speed;
+    float deceleration;
+    float distance;
+
+    float wait;
+
+    // state data
+    int32_t state;
+    vec3_t dir;
+    float currentSpeed;
+    float moveSpeed;
+    float nextSpeed;
+    float remainingDistance;
+    float deceleratedDistance;
+    //void (*OnEndFunction)(Entity *);
+    PushMoveEndFunction* OnEndFunction;
+};
+
 class SVGBaseMover : public SVGBaseTrigger {
 public:
     //
@@ -105,7 +141,8 @@ protected:
     vec3_t startPosition;
     // Position at where to end this thing from moving at all.
     vec3_t endPosition;
-
+    // BaseMover moveInfo.
+    PushMoveInfo moveInfo;
     // Kill target when triggered.
     //std::string killTargetStr;
 

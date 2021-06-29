@@ -436,42 +436,6 @@ struct TemporarySpawnFields {
     float maxpitch;
 };
 
-using PushMoveEndFunction = void( Entity* );
-
-//-------------------
-// Contains data for keeping track of velocity based moving entities.
-// (In other words, entities that aren't a: Client or AI Player.
-//-------------------
-struct PushMoveInfo {
-    // fixed data
-    vec3_t startOrigin;
-    vec3_t startAngles;
-    vec3_t endOrigin;
-    vec3_t endAngles;
-
-    int32_t startSoundIndex;
-    int32_t middleSoundIndex;
-    int32_t endSoundIndex;
-
-    float acceleration;
-    float speed;
-    float deceleration;
-    float distance;
-
-    float wait;
-
-    // state data
-    int32_t state;
-    vec3_t dir;
-    float currentSpeed;
-    float moveSpeed;
-    float nextSpeed;
-    float remainingDistance;
-    float deceleratedDistance;
-    //void (*OnEndFunction)(Entity *);
-    PushMoveEndFunction* OnEndFunction;
-};
-
 // Wrap these in functions such as?:
 // SVG_GetGameLocals
 // SVG_GetLevelLocals
@@ -1099,9 +1063,6 @@ struct entity_s {
     char *customLightStyle;
 
     gitem_t *item;          // for bonus items
-
-    // common data blocks
-    PushMoveInfo moveInfo;
 };
 
 #endif
