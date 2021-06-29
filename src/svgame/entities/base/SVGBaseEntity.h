@@ -70,7 +70,10 @@ public:
     inline const vec3_t& GetAbsoluteMax() {
         return serverEntity->absMax;
     }
-
+    // Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    virtual inline const float& GetAcceleration() {
+        return 0.f;
+    }
     // Return the 'angles' value.
     inline const vec3_t& GetAngles() {
         return serverEntity->state.angles;
@@ -105,7 +108,10 @@ public:
     inline const int32_t GetDeadFlag() {
         return deadFlag;
     }
-
+    // Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    virtual inline const float& GetDeceleration() {
+        return 0.f;
+    }
     // Set the 'delay' value.
     inline const float &GetDelayTime() {
         return delayTime;
@@ -117,8 +123,13 @@ public:
     }
 
     // Return the 'enemyPtr' entity pointer.
-    SVGBaseEntity* GetEnemy() {
+    inline SVGBaseEntity* GetEnemy() {
         return enemyEntity;
+    }
+
+    // Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    virtual inline const vec3_t& GetEndPosition() {
+        return vec3_zero();
     }
 
     // Return the 'eventID' value.
@@ -297,7 +308,14 @@ public:
     inline const int32_t GetSpawnFlags() {
         return spawnFlags;
     }
-
+    // Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    virtual inline const float& GetSpeed() {
+        return 0.f;
+    }
+    // Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    virtual inline const vec3_t& GetStartPosition() {
+        return vec3_zero();
+    }
     // Return the 'style' value.
     inline const int32_t GetStyle() {
         return serverEntity->style;

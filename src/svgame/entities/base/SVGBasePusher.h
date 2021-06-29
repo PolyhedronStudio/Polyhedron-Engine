@@ -36,29 +36,29 @@ public:
     //
     // Pusher functions.
     //
-    
+    virtual void SetMoveDirection(const vec3_t& angles);
 
     //
     // Get/Set
     //
     // Return the 'acceleration' float value.
-    const float& GetAcceleration() {
+    const inline float& GetAcceleration() override {
         return acceleration;
     }
     // Return the 'deceleration' float value.
-    const float& GetDeceleration() {
+    const inline float& GetDeceleration() override {
         return deceleration;
     }
     // Return the 'speed' float value.
-    const float &GetSpeed() {
+    const inline float &GetSpeed() override {
         return speed;
     }
     // Return the 'endPosition' vec3_t value.
-    const vec3_t& GetEndPosition() {
+    const inline vec3_t& GetEndPosition() override {
         return endPosition;
     }
     // Return the 'startPosition' vec3_t value.
-    const vec3_t& GetStartPosition() {
+    const inline vec3_t& GetStartPosition() override {
         return startPosition;
     }
 

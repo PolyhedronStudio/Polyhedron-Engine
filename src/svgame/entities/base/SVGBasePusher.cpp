@@ -123,3 +123,24 @@ void SVGBasePusher::SpawnKey(const std::string& key, const std::string& value) {
 		SVGBaseTrigger::SpawnKey(key, value);
 	}
 }
+
+//
+//===============
+// SVGBasePusher::SetMoveDirection
+//
+//===============
+//
+void SVGBasePusher::SetMoveDirection(const vec3_t& angles) {
+	vec3_t VEC_UP = { 0, -1, 0 };
+	vec3_t MOVEDIR_UP = { 0, 0, 1 };
+	vec3_t VEC_DOWN = { 0, -2, 0 };
+	vec3_t MOVEDIR_DOWN = { 0, 0, -1 };
+
+	if (vec3_equal(angles, VEC_UP)) {
+		moveDirection = MOVEDIR_UP;
+	} else if (vec3_equal(angles, VEC_DOWN)) {
+		moveDirection = MOVEDIR_DOWN;
+	} else {
+		vec3_vectors(angles, &moveDirection, NULL, NULL);
+	}
+}
