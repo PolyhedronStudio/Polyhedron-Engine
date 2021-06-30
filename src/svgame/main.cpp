@@ -581,14 +581,10 @@ Advances the world by 0.05(FRAMETIME) seconds
 */
 void SVG_RunFrame(void)
 {
-    int     i;
-    Entity* serverEntity;
-    SVGBaseEntity* baseEntity;
-
     // We're moving the game a frame forward.
     level.frameNumber++;
 
-    // Calculate the current frame time for this frame number.
+    // Calculate the current frame time for this game its own frame number.
     level.time = level.frameNumber * FRAMETIME;
 
     // Check for whether an intermission point wants to exit this level.
@@ -599,51 +595,63 @@ void SVG_RunFrame(void)
 
     //
     // Treat each object in turn
-    // even the world gets a chance to Think
+    // "even the world gets a chance to Think", it does.
     //
-    serverEntity = &g_entities[0];
-    for (i = 0; i < globals.numberOfEntities; i++, serverEntity++) {
-        // Don't go on if it isn't in use.
-        if (!serverEntity->inUse)
+    // Fetch the WorldSpawn entity number.
+    int32_t stateNumber = g_entities[0].state.number;
+
+    // Fetch the corresponding base entity.
+    SVGBaseEntity* entity = g_baseEntities[stateNumber];
+
+    // Loop through the server entities, and run the base entity frame if any exists.
+    for (int32_t i = 0; i < globals.numberOfEntities; i++) {
+        // Acquire state number.
+        stateNumber = g_entities[i].state.number;
+
+        // Fetch the corresponding base entity.
+        SVGBaseEntity* entity = g_baseEntities[stateNumber];
+
+        // Is it even valid?
+        if (entity == nullptr)
             continue;
 
-        // Don't go on if there is no class entity.
-        if (!serverEntity->classEntity)
+        // Don't go on if it isn't in use.
+        if (!entity->IsInUse())
             continue;
-        
+
         // Admer: entity was marked for removal at the previous tick
-        if ( serverEntity->serverFlags & EntityServerFlags::Remove )
-        {
-            SVG_FreeEntity( serverEntity );
+        if (entity->GetServerFlags() & EntityServerFlags::Remove)         {
+            SVG_FreeEntity(entity->GetServerEntity());
             continue;
         }
 
-        // Fetch SVGBaseEntity (or inherited variant) of this server entity.
-        baseEntity = serverEntity->classEntity;
-
         // Let the level data know which entity we are processing right now.
-        level.currentEntity = baseEntity;
+        level.currentEntity = entity;
 
         // Store previous(old) origin.
-        serverEntity->state.oldOrigin = serverEntity->state.origin;
+        entity->SetOldOrigin(entity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-        if ((baseEntity->GetGroundEntity()) && (baseEntity->GetGroundEntity()->GetLinkCount() != baseEntity->GetGroundEntityLinkCount())) {
-            baseEntity->SetGroundEntity(nullptr);
+        if ((entity->GetGroundEntity()) && (entity->GetGroundEntity()->GetLinkCount() != entity->GetGroundEntityLinkCount())) {
+            // Reset ground entity.
+            entity->SetGroundEntity(nullptr);
 
-            if (!(baseEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (baseEntity->GetServerFlags() & EntityServerFlags::Monster)) {
-                SVG_StepMove_CheckGround(baseEntity);
+            // Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
+            if (!(entity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (entity->GetServerFlags() & EntityServerFlags::Monster)) {
+                SVG_StepMove_CheckGround(entity);
             }
         }
 
         // Time to begin a server frame for all of our clients. (This has to ha
         if (i > 0 && i <= maxClients->value) {
-            SVG_ClientBeginServerFrame(serverEntity);
+            // Ensure the entity actually is owned by a client. 
+            if (entity->GetClient())
+                SVG_ClientBeginServerFrame(entity->GetServerEntity());
             continue;
         }
 
         // Last but not least, "run" process the entity.
-        SVG_RunEntity(serverEntity->classEntity);
+        SVG_RunEntity(entity);
     }
 
     // See if it is time to end a deathmatch
