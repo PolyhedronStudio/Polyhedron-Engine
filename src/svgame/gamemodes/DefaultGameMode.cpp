@@ -52,7 +52,7 @@ qboolean DefaultGameMode::OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) {
 
 //
 //===============
-// DefaultGameMode::OnSameTeam
+// DefaultGameMode::CanDamage
 //
 //===============
 //

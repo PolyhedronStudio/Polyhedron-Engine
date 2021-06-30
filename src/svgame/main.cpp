@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Gamemodes.
 #include "gamemodes/IGameMode.h"
 #include "gamemodes/DefaultGameMode.h"
+#include "gamemodes/DeathMatchMode.h"
 
 // Player related.
 #include "player/client.h"      // Include Player Client header.
@@ -371,8 +372,14 @@ void SVG_AllocateGameClients() {
 //===============
 //
 void SVG_InitializeGameMode(void) {
-    // Default gamemode.
-    game.gameMode = new DefaultGameMode();
+    // Detect which game mode to allocate for this game round.
+    if (deathmatch->value) {
+        game.gameMode = new DeathMatchGameMode();
+    } else if (coop->value) {
+        //game.gameMode = new CoopGameMode()();
+    } else {
+        game.gameMode = new DefaultGameMode();
+    }
 
 }
 
