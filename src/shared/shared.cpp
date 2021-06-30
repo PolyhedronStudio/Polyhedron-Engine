@@ -18,8 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared/shared.h"
 
-vec3_t vec3_origin = { 0, 0, 0 };
-
 //
 //===============
 // AngleVectors

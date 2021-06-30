@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 void InitTrigger(Entity *self)
 {
-    //if (!VectorCompare(self->state.angles, vec3_origin))
+    //if (!VectorCompare(self->state.angles, vec3_zero()))
     //    UTIL_SetMoveDir(self->state.angles, self->moveDirection);
 
     //self->solid = Solid::Trigger;
@@ -77,7 +77,7 @@ void Touch_Multi(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
     //} else
     //    return;
 
-    if (!VectorCompare(self->moveDirection, vec3_origin)) {
+    if (!VectorCompare(self->moveDirection, vec3_zero())) {
         vec3_t  forward;
 
         AngleVectors(other->state.angles, &forward, NULL, NULL);

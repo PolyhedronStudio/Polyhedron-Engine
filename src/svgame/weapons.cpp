@@ -45,7 +45,7 @@ static void check_dodge(Entity *self, const vec3_t &start, const vec3_t &dir, in
     //        return;
     //}
     //VectorMA(start, WORLD_SIZE, dir, end);
-    //tr = gi.Trace(start, vec3_origin, vec3_origin, end, self, CONTENTS_MASK_SHOT);
+    //tr = gi.Trace(start, vec3_zero(), vec3_zero(), end, self, CONTENTS_MASK_SHOT);
     //if ((tr.ent) && (tr.ent->serverFlags & EntityServerFlags::Monster) && (tr.ent->health > 0) && (tr.ent->monsterInfo.dodge) && infront(tr.ent, self)) {
     //    VectorSubtract(tr.endPosition, start, v);
     //    eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
@@ -93,7 +93,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
 
     point = vec3_fmaf(self->GetOrigin(), range, dir);
 
-    tr = SVG_Trace(self->GetOrigin(), vec3_origin, vec3_origin, point, self, CONTENTS_MASK_SHOT);
+    tr = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), point, self, CONTENTS_MASK_SHOT);
     if (tr.fraction < 1) {
         if (!tr.ent->GetTakeDamage())
             return false;
@@ -109,7 +109,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
     dir = point - self->GetEnemy()->GetOrigin();
 
     // do the damage
-    SVG_InflictDamage(tr.ent, self, self, dir, point, vec3_origin, damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
+    SVG_InflictDamage(tr.ent, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
 
     if (!(tr.ent->GetServerFlags() & EntityServerFlags::Monster) && (!tr.ent->GetClient()))
         return false;
@@ -144,7 +144,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
     qboolean    water = false;
     int         content_mask = CONTENTS_MASK_SHOT | CONTENTS_MASK_LIQUID;
 
-    tr = SVG_Trace(self->GetOrigin(), vec3_origin, vec3_origin, start, self, CONTENTS_MASK_SHOT);
+    tr = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), start, self, CONTENTS_MASK_SHOT);
     if (!(tr.fraction < 1.0)) {
         dir = vec3_euler(aimdir);
         AngleVectors(dir, &forward, &right, &up);
@@ -161,7 +161,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
             content_mask &= ~CONTENTS_MASK_LIQUID;
         }
 
-        tr = SVG_Trace(start, vec3_origin, vec3_origin, end, self, content_mask);
+        tr = SVG_Trace(start, vec3_zero(), vec3_zero(), end, self, content_mask);
 
         // see if we hit water
         if (tr.contents & CONTENTS_MASK_LIQUID) {
@@ -204,7 +204,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
             }
 
             // re-trace ignoring water this time
-            tr = SVG_Trace(water_start, vec3_origin, vec3_origin, end, self, CONTENTS_MASK_SHOT);
+            tr = SVG_Trace(water_start, vec3_zero(), vec3_zero(), end, self, CONTENTS_MASK_SHOT);
         }
     }
 
@@ -238,7 +238,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
         if (gi.PointContents(pos) & CONTENTS_MASK_LIQUID)
             VectorCopy(pos, tr.endPosition);
         else
-            tr = SVG_Trace(pos, vec3_origin, vec3_origin, water_start, tr.ent, CONTENTS_MASK_LIQUID);
+            tr = SVG_Trace(pos, vec3_zero(), vec3_zero(), water_start, tr.ent, CONTENTS_MASK_LIQUID);
 
         VectorAdd(water_start, tr.endPosition, pos);
         VectorScale(pos, 0.5, pos);

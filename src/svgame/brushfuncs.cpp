@@ -160,7 +160,7 @@
 //        VectorSubtract( ent->moveInfo.startAngles, ent->state.angles, move );
 //    }
 //
-//    if ( VectorCompare( move, vec3_origin ) ) 
+//    if ( VectorCompare( move, vec3_zero(); ) ) 
 //    {
 //        Brush_AngleMove_Done(ent);
 //        return;

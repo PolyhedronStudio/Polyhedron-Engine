@@ -69,7 +69,7 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     if (target->GetMoveType() == MoveType::Push) {
         // Calculate destination.
         dest = vec3_scale(target->GetAbsoluteMin() + target->GetAbsoluteMax(), 0.5f);
-        trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+        trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
         if (trace.fraction == 1.0)
             return true;
         if (trace.ent == target)
@@ -78,35 +78,35 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     }
 
     // From here on we start tracing in various directions. Look at the code yourself to figure that one out...
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, target->GetOrigin(), inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), target->GetOrigin(), inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     dest = target->GetOrigin();
     dest[0] += 15.0;
     dest[1] += 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     dest = target->GetOrigin();
     dest[0] += 15.0;
     dest[1] -= 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     dest = target->GetOrigin();
     dest[0] -= 15.0;
     dest[1] += 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     dest = target->GetOrigin();
     dest[0] -= 15.0;
     dest[1] -= 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 

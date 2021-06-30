@@ -706,7 +706,7 @@ static void CLG_AddPlayerBeams(void)
 			angles = vec3_euler(dist);
 
 			// if it's a non-origin offset, it's a player, so use the hardcoded player offset
-			if (!VectorCompare(b->offset, vec3_origin)) {
+			if (!VectorCompare(b->offset, vec3_zero())) {
 				vec3_t  tmp, f, r, u;
 
 				tmp[0] = angles[0];

@@ -61,7 +61,7 @@ void hurt_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf)
         dflags = DamageFlags::IgnoreProtection;
     else
         dflags = 0;
-    SVG_InflictDamage(other, self, self, vec3_origin, other->state.origin, vec3_origin, self->damage, self->damage, dflags, MeansOfDeath::TriggerHurt);
+    SVG_InflictDamage(other, self, self, vec3_zero(), other->state.origin, vec3_zero(), self->damage, self->damage, dflags, MeansOfDeath::TriggerHurt);
 }
 
 void SP_trigger_hurt(Entity* self)

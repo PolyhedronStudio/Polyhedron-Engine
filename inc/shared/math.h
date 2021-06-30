@@ -58,6 +58,5 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 #define NUMVERTEXNORMALS    162
 extern const vec3_t bytedirs[NUMVERTEXNORMALS];
-extern vec3_t vec3_origin;
 
 #endif // __SHARED__MATH_H__
