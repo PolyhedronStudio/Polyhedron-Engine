@@ -341,6 +341,11 @@ void SVG_InitializeServerEntities() {
     game.maxEntities = Clampi(game.maxEntities, (int)maxClients->value + 1, MAX_EDICTS);
     globals.entities = g_entities;
     globals.maxEntities = game.maxEntities;
+
+    // Ensure, all base entities are nullptrs. Just to be save.
+    for (int32_t i = 0; i < MAX_EDICTS; i++) {
+        g_baseEntities[i] = nullptr;
+    }
 }
 
 //
@@ -389,17 +394,24 @@ void SVG_InitializeGameMode(void) {
 //
 void SVG_ClientEndServerFrames(void)
 {
-    int     i;
-    Entity *ent;
-
     // Go through each client and calculate their final view for the state.
     // (This happens here, so we can take into consideration objects that have
-    // pushes the player. And of course, because damage has been added.)
-    for (i = 0 ; i < maxClients->value ; i++) {
-        ent = g_entities + 1 + i;
-        if (!ent->inUse || !ent->client)
+    // pushed the player. And of course, because damage has been added.)
+    for (int32_t i = 0; i < maxClients->value; i++) {
+        // First, fetch entity state number.
+        int32_t stateNumber = g_entities[1 + i].state.number;
+
+        // Now, let's go wild. (Purposely, do not assume the pointer is a PlayerClient.)
+        SVGBaseEntity *entity = g_baseEntities[stateNumber]; // WID: 1 +, because 0 == WorldSpawn.
+
+        // See if we're good to go, if not, continue for the next. 
+        if ((entity == nullptr && !entity->GetServerEntity()) && 
+            (!entity->IsInUse() || !entity->GetClient()))
             continue;
-        SVG_ClientEndServerFrame((PlayerClient*)ent->classEntity);
+
+        // Ugly cast, yes, but at this point we know we can do this. And that, to do it, matters more than
+        // ethics, because our morals say otherwise :D
+        SVG_ClientEndServerFrame((PlayerClient*)entity);
     }
 
 }

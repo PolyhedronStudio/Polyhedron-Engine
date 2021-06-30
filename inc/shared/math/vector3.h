@@ -922,7 +922,7 @@ static inline void TransposeAxis(vec3_t *axis)
 //
 static inline void RotatePoint(vec3_t& point, vec3_t* axis)
 {
-    vec3_t temp;
+    vec3_t temp = point;
 
     VectorCopy(point, temp);
     point.xyz[0] = DotProduct(temp, axis[0]);
