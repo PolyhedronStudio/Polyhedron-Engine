@@ -559,15 +559,34 @@ void SVG_ExitLevel(void)
     level.intermission.time = 0;
     SVG_ClientEndServerFrames();
 
-    // Clear some things before going to next level
-    for (i = 0 ; i < maxClients->value ; i++) {
-        ent = g_entities + 1 + i;
-        if (!ent->inUse)
+    // Fetch the WorldSpawn entity number.
+    int32_t stateNumber = g_entities[0].state.number;
+
+    // Fetch the corresponding base entity.
+    SVGBaseEntity* entity = g_baseEntities[stateNumber];
+
+    // Loop through the server entities, and run the base entity frame if any exists.
+    for (int32_t i = 0; i < globals.numberOfEntities; i++) {
+        // Acquire state number.
+        stateNumber = g_entities[i].state.number;
+
+        // Fetch the corresponding base entity.
+        SVGBaseEntity* entity = g_baseEntities[stateNumber];
+
+        // Is it even valid?
+        if (entity == nullptr)
             continue;
-        if (!ent->classEntity)
+
+        // Don't go on if it isn't in use.
+        if (!entity->IsInUse())
             continue;
-        if (ent->classEntity->GetHealth() > ent->client->persistent.maxHealth)
-            ent->classEntity->SetHealth(ent->client->persistent.maxHealth);
+        
+        // Continue in case... cuz we know...
+        if (!entity->GetClient())
+            continue;
+
+        if (entity->GetHealth() > entity->GetClient()->persistent.maxHealth)
+            entity->SetHealth(entity->GetClient()->persistent.maxHealth);
     }
 
 }
