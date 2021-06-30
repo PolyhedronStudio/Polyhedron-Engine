@@ -12,7 +12,7 @@
 #include "../entities/base/SVGBaseEntity.h"
 
 // Game Mode.
-#include "DeathMatchMode.h"
+#include "DeathMatchGameMode.h"
 
 //
 // Constructor/Deconstructor.

@@ -26,7 +26,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Gamemodes.
 #include "gamemodes/IGameMode.h"
 #include "gamemodes/DefaultGameMode.h"
-#include "gamemodes/DeathMatchMode.h"
+#include "gamemodes/CoopGameMode.h"
+#include "gamemodes/DeathMatchGameMode.h"
 
 // Player related.
 #include "player/client.h"      // Include Player Client header.
@@ -372,12 +373,26 @@ void SVG_AllocateGameClients() {
 //===============
 //
 void SVG_InitializeGameMode(void) {
+    // Game mode is determined on... various factors.
+    // Eventually, I'd prefer it to be a numberic index but hey...
+    // Now we check for whichever the fucking dickhead ID we got (ha, see what I did there?)
+    int32_t gameModeID = 0; // <-- default mode index.
+
+    // Check.
+    if (deathmatch->integer && !coop->integer)
+        gameModeID = 1;
+    else if (!deathmatch->integer && coop->integer)
+        gameModeID = 2;
+
     // Detect which game mode to allocate for this game round.
-    if (deathmatch->value) {
+    switch(gameModeID) {
+    case 1:
         game.gameMode = new DeathMatchGameMode();
-    } else if (coop->value) {
-        //game.gameMode = new CoopGameMode()();
-    } else {
+        break;
+    case 2:
+        game.gameMode = new CoopGameMode();
+        break;
+    default:
         game.gameMode = new DefaultGameMode();
     }
 
