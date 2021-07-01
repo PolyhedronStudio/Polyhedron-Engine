@@ -40,41 +40,29 @@
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     // Start with a nice nullptr.
     SVGBaseEntity* spawnEntity = nullptr;
-
-    if (!ent)
+    if ( nullptr == ent ) {
         return nullptr;
+    }
 
     // Fetch entity number.
     int32_t entityNumber = ent->state.number;
 
-    if (className == "misc_explobox")
-        spawnEntity = g_baseEntities[entityNumber] = new MiscExplosionBox(ent);
-    else if (className == "info_player_start")
-        spawnEntity = g_baseEntities[entityNumber] = new InfoPlayerStart(ent);
-    else if (className == "light")
-        spawnEntity = g_baseEntities[entityNumber] = new Light(ent);
-    else if (className == "worldspawn")
-        spawnEntity = g_baseEntities[entityNumber] = new WorldSpawn(ent);
-    else if (className == "trigger_always")
-        spawnEntity = g_baseEntities[entityNumber] = new TriggerAlways(ent);
-    else if (className == "DelayedUse")
-        spawnEntity = g_baseEntities[entityNumber] = new TriggerDelayedUse(ent);
-    else if (className == "trigger_hurt")
-        spawnEntity = g_baseEntities[entityNumber] = new TriggerHurt(ent);
-    else if (className == "trigger_multiple")
-        spawnEntity = g_baseEntities[entityNumber] = new TriggerMultiple(ent);
-    else if (className == "trigger_once")
-        spawnEntity = g_baseEntities[entityNumber] = new TriggerOnce(ent);
-    else if (className == "PlayerClient")
-        spawnEntity = g_baseEntities[entityNumber] = new PlayerClient(ent);
-    else if (className == "BlasterBolt")
-        spawnEntity = g_baseEntities[entityNumber] = new BlasterBolt(ent);
-    else if ( className == "func_button" )
-        spawnEntity = g_baseEntities[entityNumber] = new FuncButton( ent );
-    else
-        spawnEntity = g_baseEntities[entityNumber] = new SVGBaseEntity(ent);
-
-    return spawnEntity;
+    // New type info-based spawning system, to replace endless string comparisons
+    // First find it by the map name
+    TypeInfo* info = TypeInfo::GetInfoByMapName( className.c_str() );
+    if ( nullptr == info ) { // Then try finding it by the C++ class name
+        if ( nullptr == (info = TypeInfo::GetInfoByName( className.c_str() )) ) { 
+            gi.DPrintf( "WARNING: unknown entity '%s'\n", className.c_str() );
+            return nullptr; // Bail out, we didn't find one
+        }
+    }
+    // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know
+    if ( nullptr != info->AllocateInstance ) {
+        return (g_baseEntities[entityNumber] = info->AllocateInstance( ent ));
+    } else {
+        gi.DPrintf( "WARNING: tried to allocate an abstract class '%s'\n", info->className );
+        return nullptr;
+    }
 }
 
 //

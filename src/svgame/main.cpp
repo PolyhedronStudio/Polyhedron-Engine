@@ -144,6 +144,9 @@ void SVG_InitGame(void)
     // WID: Informed consent. One has to know, right? :D
     gi.DPrintf("==== InitServerGame ====\n");
 
+    // Initialise the type info system
+    TypeInfo::SetupSuperClasses();
+
     // Initialize and allocate core objects for this "games" map 'round'.
     SVG_InitializeCVars();
     SVG_InitItems();
