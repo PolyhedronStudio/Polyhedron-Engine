@@ -1310,51 +1310,51 @@ This will be called once for each server frame, before running
 any other entities in the world.
 ==============
 */
-void SVG_ClientBeginServerFrame(Entity *ent)
-{
-    GameClient   *client;
-    int         buttonMask;
-
-    if (level.intermission.time)
-        return;
-
-    client = ent->client;
-
-    if (deathmatch->value &&
-        client->persistent.isSpectator != client->respawn.isSpectator &&
-        (level.time - client->respawnTime) >= 5) {
-        spectator_respawn(ent);
-        return;
-    }
-
-    // run weapon animations if it hasn't been done by a ucmd_t
-    if (!client->weaponThunk && !client->respawn.isSpectator)
-        SVG_ThinkWeapon((PlayerClient*)ent->classEntity);
-    else
-        client->weaponThunk = false;
-
-    if (ent->classEntity->GetDeadFlag()) {
-        // wait for any button just going down
-        if (level.time > client->respawnTime) {
-            // in deathmatch, only wait for attack button
-            if (deathmatch->value)
-                buttonMask = BUTTON_ATTACK;
-            else
-                buttonMask = -1;
-
-            if ((client->latchedButtons & buttonMask) ||
-                (deathmatch->value && ((int)dmflags->value & GameModeFlags::ForceRespawn))) {
-                SVG_RespawnClient(ent);
-                client->latchedButtons = 0;
-            }
-        }
-        return;
-    }
-
-    //// add player trail so monsters can follow
-    //if (!deathmatch->value)
-    //    if (!visible(ent, SVG_PlayerTrail_LastSpot()))
-    //        SVG_PlayerTrail_Add(ent->state.oldOrigin);
-
-    client->latchedButtons = 0;
-}
+//void SVG_ClientBeginServerFrame(SVGBaseEntity*ent)
+//{
+//    GameClient   *client;
+//    int         buttonMask;
+//
+//    if (level.intermission.time)
+//        return;
+//
+//    client = ent->GetClient();
+//
+//    if (deathmatch->value &&
+//        client->persistent.isSpectator != client->respawn.isSpectator &&
+//        (level.time - client->respawnTime) >= 5) {
+//        spectator_respawn(ent->GetServerEntity());
+//        return;
+//    }
+//
+//    // run weapon animations if it hasn't been done by a ucmd_t
+//    if (!client->weaponThunk && !client->respawn.isSpectator)
+//        SVG_ThinkWeapon((PlayerClient*)ent);
+//    else
+//        client->weaponThunk = false;
+//
+//    if (ent->GetDeadFlag()) {
+//        // wait for any button just going down
+//        if (level.time > client->respawnTime) {
+//            // in deathmatch, only wait for attack button
+//            if (deathmatch->value)
+//                buttonMask = BUTTON_ATTACK;
+//            else
+//                buttonMask = -1;
+//
+//            if ((client->latchedButtons & buttonMask) ||
+//                (deathmatch->value && ((int)dmflags->value & GameModeFlags::ForceRespawn))) {
+//                SVG_RespawnClient(ent->GetServerEntity());
+//                client->latchedButtons = 0;
+//            }
+//        }
+//        return;
+//    }
+//
+//    //// add player trail so monsters can follow
+//    //if (!deathmatch->value)
+//    //    if (!visible(ent, SVG_PlayerTrail_LastSpot()))
+//    //        SVG_PlayerTrail_Add(ent->state.oldOrigin);
+//
+//    client->latchedButtons = 0;
+//}

@@ -10,6 +10,11 @@
 
 // Server Game Base Entity.
 #include "../entities/base/SVGBaseEntity.h"
+#include "../entities/base/PlayerClient.h"
+
+// Weapons.h
+#include "../player/client.h"
+#include "../player/weapons.h"
 
 // Game Mode.
 #include "DefaultGameMode.h"
@@ -158,4 +163,131 @@ vec3_t DefaultGameMode::CalculateDamageVelocity(int32_t damage) {
 
     // Return.
     return velocity;
+}
+
+//
+//===============
+// DefaultGameMode::OnLevelExit
+// 
+// Default implementation for exiting levels.
+//===============
+//
+void DefaultGameMode::OnLevelExit() {
+    // Create the command to use for switching to the next game map.
+    std::string command = "gamemap \"";
+    command += level.intermission.changeMap;
+    command += +"\"";
+
+    // Add the gamemap command to the 
+    gi.AddCommandString(command.c_str());
+    // Reset the changeMap string, intermission time, and regular level time.
+    level.intermission.changeMap = NULL;
+    level.intermission.exitIntermission = 0;
+    level.intermission.time = 0;
+
+    // End the server frames for all clients.
+    SVG_ClientEndServerFrames();
+
+    // Fetch the WorldSpawn entity number.
+    int32_t stateNumber = g_entities[0].state.number;
+
+    // Fetch the corresponding base entity.
+    SVGBaseEntity* entity = g_baseEntities[stateNumber];
+
+    // Loop through the server entities, and run the base entity frame if any exists.
+    for (int32_t i = 0; i < globals.numberOfEntities; i++) {
+        // Acquire state number.
+        stateNumber = g_entities[i].state.number;
+
+        // Fetch the corresponding base entity.
+        SVGBaseEntity* entity = g_baseEntities[stateNumber];
+
+        // Is it even valid?
+        if (entity == nullptr)
+            continue;
+
+        // Don't go on if it isn't in use.
+        if (!entity->IsInUse())
+            continue;
+
+        // Continue in case... cuz we know...
+        if (!entity->GetClient())
+            continue;
+
+        // Ensure an entity its health is reset to default.
+        if (entity->GetHealth() > entity->GetClient()->persistent.maxHealth)
+            entity->SetHealth(entity->GetClient()->persistent.maxHealth);
+    }
+}
+
+//===
+// DefaultGameMode::ClientBeginServerFrame
+// 
+// Does logic checking for a client's start of a server frame. In case there
+// is a "level.intermission.time" set, it'll flat out return.
+// 
+// This basically allows for the game to disable fetching user input that makes
+// our movement tick. And/or shoot weaponry while in intermission time.
+//
+void DefaultGameMode::ClientBeginServerFrame(PlayerClient* player) {
+    // Ensure we aren't in an intermission time.
+    if (level.intermission.time)
+        return;
+
+    // Is the entity valid?
+    if (!player)
+        return;
+
+    // Fetch the client.
+    GameClient* client = player->GetClient();
+
+    // In case there is no client, return.
+    if (!client)
+        return;
+
+    // This has to go ofc.... lol. What it simply does though, is determine whether there is 
+    // a need to respawn as spectator.
+    //if (deathmatch->value &&
+    //    client->persistent.isSpectator != client->respawn.isSpectator &&
+    //    (level.time - client->respawnTime) >= 5) {
+    //    spectator_respawn(ent->GetServerEntity());
+    //    return;
+    //}
+
+    // Run weapon animations in case this has not been done by user input itself.
+    // (Idle animations, and general weapon thinking when a weapon is not in action.)
+    if (!client->weaponThunk && !client->respawn.isSpectator)
+        SVG_ThinkWeapon(player);
+    else
+        client->weaponThunk = false;
+
+    // Check if the player is actually dead or not. If he is, we're going to enact on
+    // the user input that's been given to us. When fired, we'll respawn.
+    int32_t buttonMask = 0;
+    if (player->GetDeadFlag()) {
+        // Wait for any button just going down
+        if (level.time > client->respawnTime) {
+            // In old code, the need to hit a key was only set in DM mode.
+            // I figured, let's keep it like this instead.
+            //if (deathmatch->value)
+                buttonMask = BUTTON_ATTACK;
+            //else
+            //buttonMask = -1;
+            
+            if ((client->latchedButtons & buttonMask) ||
+                (deathmatch->value && ((int)dmflags->value & GameModeFlags::ForceRespawn))) {
+                SVG_RespawnClient(player->GetServerEntity());
+                client->latchedButtons = 0;
+            }
+        }
+        return;
+    }
+
+    //// add player trail so monsters can follow
+    //if (!deathmatch->value)
+    //    if (!visible(ent, SVG_PlayerTrail_LastSpot()))
+    //        SVG_PlayerTrail_Add(ent->state.oldOrigin);
+
+    // Reset the latched buttons.
+    client->latchedButtons = 0;
 }

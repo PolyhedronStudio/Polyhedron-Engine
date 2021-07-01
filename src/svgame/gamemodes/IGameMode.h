@@ -12,6 +12,7 @@
 #define __SVGAME_GAMEMODES_IGAMEMODE_H__
 
 class SVGBaseEntity;
+class PlayerClient;
 
 class IGameMode {
 public:
@@ -20,15 +21,33 @@ public:
     virtual ~IGameMode() {};
 
     //
-    // OG Gamerule replacement functions(vanilla q2 stuff).
+    // Map related, also known as the "current game".
+    // 
+    // Gets called at the moment the level exits, this gives the gamemode one last
+    // shot to finish off any last wishes before it gets destroyed.
+    virtual void OnLevelExit() = 0;
+
+
+    //
+    // Client related.
+    //
+    // This will be called once for all clients at the start of each server 
+    // frame. Before running any other entities in the world.
+    virtual void ClientBeginServerFrame(PlayerClient* ent) = 0;
+
+
+    //
+    // Combat Game Rule checks.
     //
     // Returns true if these two entities are on a same team.
     virtual qboolean OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) = 0;
     // Returns true if the target entity can be damaged by the inflictor enemy.
     virtual qboolean CanDamage(SVGBaseEntity * target, SVGBaseEntity * inflictor) = 0;
 
+
     //
-    // N&C Gamerule additions.
+    // Specific random gameplay related functionality. 
+    // (Spawning gibs, checking velocity damage etc.)
     //
     // Spawns a temporary entity for a client, this is best suited to be in game mode.
     // Allows for all modes to customize that when wished for.

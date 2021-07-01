@@ -375,7 +375,7 @@ void SVG_AllocateGameClients() {
 void SVG_InitializeGameMode(void) {
     // Game mode is determined on... various factors.
     // Eventually, I'd prefer it to be a numberic index but hey...
-    // Now we check for whichever the fucking dickhead ID we got (ha, see what I did there?)
+    // Now we check for whichever the ID we got (ha, see what I did there?)
     int32_t gameModeID = 0; // <-- default mode index.
 
     // Check.
@@ -396,6 +396,8 @@ void SVG_InitializeGameMode(void) {
         game.gameMode = new DefaultGameMode();
     }
 
+    //// Inform our gamemodes about the gist of it.
+    //game.gameMode.Start();
 }
 
 
@@ -564,56 +566,6 @@ void SVG_CheckDMRules(void)
 
 
 /*
-=============
-SVG_ExitLevel
-=============
-*/
-void SVG_ExitLevel(void)
-{
-    int     i;
-    Entity *ent;
-    char    command [256];
-
-    Q_snprintf(command, sizeof(command), "gamemap \"%s\"\n", level.intermission.changeMap);
-    gi.AddCommandString(command);
-    level.intermission.changeMap = NULL;
-    level.intermission.exitIntermission = 0;
-    level.intermission.time = 0;
-    SVG_ClientEndServerFrames();
-
-    // Fetch the WorldSpawn entity number.
-    int32_t stateNumber = g_entities[0].state.number;
-
-    // Fetch the corresponding base entity.
-    SVGBaseEntity* entity = g_baseEntities[stateNumber];
-
-    // Loop through the server entities, and run the base entity frame if any exists.
-    for (int32_t i = 0; i < globals.numberOfEntities; i++) {
-        // Acquire state number.
-        stateNumber = g_entities[i].state.number;
-
-        // Fetch the corresponding base entity.
-        SVGBaseEntity* entity = g_baseEntities[stateNumber];
-
-        // Is it even valid?
-        if (entity == nullptr)
-            continue;
-
-        // Don't go on if it isn't in use.
-        if (!entity->IsInUse())
-            continue;
-        
-        // Continue in case... cuz we know...
-        if (!entity->GetClient())
-            continue;
-
-        if (entity->GetHealth() > entity->GetClient()->persistent.maxHealth)
-            entity->SetHealth(entity->GetClient()->persistent.maxHealth);
-    }
-
-}
-
-/*
 ================
 SVG_RunFrame
 
@@ -630,7 +582,8 @@ void SVG_RunFrame(void)
 
     // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {
-        SVG_ExitLevel();
+        //SVG_ExitLevel();
+        game.gameMode->OnLevelExit();
         return;
     }
 
@@ -687,7 +640,7 @@ void SVG_RunFrame(void)
         if (i > 0 && i <= maxClients->value) {
             // Ensure the entity actually is owned by a client. 
             if (entity->GetClient())
-                SVG_ClientBeginServerFrame(entity->GetServerEntity());
+                game.gameMode->ClientBeginServerFrame((PlayerClient*)entity);
             continue;
         }
 
@@ -695,12 +648,12 @@ void SVG_RunFrame(void)
         SVG_RunEntity(entity);
     }
 
-    // See if it is time to end a deathmatch
+    // See if it is time to end a deathmatch.
     SVG_CheckDMRules();
 
-    // See if needpass needs updated
+    // See if needpass needs updated.
     SVG_CheckNeedPass();
 
-    // Build the playerstate_t structures for all players
+    // Build the playerstate_t structures for all players in this frame.
     SVG_ClientEndServerFrames();
 }
