@@ -11,6 +11,8 @@ public:
 	FuncButton( Entity* svEntity );
 	virtual ~FuncButton() = default;
 
+	DefineMapClass( "func_button", FuncButton, SVGBaseMover );
+
 	void		Precache() override;
 	void		Spawn() override;
 	void		SpawnKey( const std::string& key, const std::string& value ) override;

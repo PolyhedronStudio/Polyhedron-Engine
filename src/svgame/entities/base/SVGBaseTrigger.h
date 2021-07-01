@@ -18,6 +18,7 @@ public:
     SVGBaseTrigger(Entity* svEntity);
     virtual ~SVGBaseTrigger();
 
+    DefineAbstractClass( SVGBaseTrigger, SVGBaseEntity );
 
     //
     // Interface functions. 

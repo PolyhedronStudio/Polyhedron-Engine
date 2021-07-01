@@ -19,7 +19,8 @@
 #include "BlasterBolt.h"
 
 // Constructor/Deconstructor.
-BlasterBolt::BlasterBolt(Entity* svEntity) : SVGBaseEntity(svEntity) {
+BlasterBolt::BlasterBolt(Entity* svEntity) 
+    : SVGBaseEntity(svEntity) {
 
 }
 BlasterBolt::~BlasterBolt() {
@@ -33,7 +34,7 @@ BlasterBolt::~BlasterBolt() {
 //===============
 //
 void BlasterBolt::Precache() {
-    SVGBaseEntity::Precache();
+    Base::Precache();
 }
 
 //
@@ -44,7 +45,7 @@ void BlasterBolt::Precache() {
 //
 void BlasterBolt::Spawn() {
     // Spawn.
-    SVGBaseEntity::Spawn();
+    Base::Spawn();
 }
 
 //
@@ -64,7 +65,7 @@ void BlasterBolt::Respawn() {
 //===============
 //
 void BlasterBolt::PostSpawn() {
-    SVGBaseEntity::PostSpawn();
+    Base::PostSpawn();
 }
 
 //
@@ -75,7 +76,7 @@ void BlasterBolt::PostSpawn() {
 //
 void BlasterBolt::Think() {
     // Parent class Think.
-    SVGBaseEntity::Think();
+    Base::Think();
 }
 
 //
@@ -87,7 +88,7 @@ void BlasterBolt::Think() {
 //
 void BlasterBolt::SpawnKey(const std::string& key, const std::string& value) {
     // Parent class spawnkey.
-    SVGBaseEntity::SpawnKey(key, value);
+    Base::SpawnKey(key, value);
 }
 
 //

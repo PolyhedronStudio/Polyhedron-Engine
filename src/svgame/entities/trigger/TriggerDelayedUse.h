@@ -18,6 +18,7 @@ public:
     TriggerDelayedUse(Entity* svEntity);
     virtual ~TriggerDelayedUse();
 
+    DefineClass( TriggerDelayedUse, SVGBaseTrigger );
 
     //
     // Interface functions. 

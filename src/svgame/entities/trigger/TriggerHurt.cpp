@@ -49,7 +49,7 @@ TriggerHurt::~TriggerHurt() {
 //===============
 //
 void TriggerHurt::Precache() {
-	SVGBaseTrigger::Precache();
+	Base::Precache();
 }
 
 //
@@ -60,7 +60,7 @@ void TriggerHurt::Precache() {
 //
 void TriggerHurt::Spawn() {
 	// Spawn base trigger.
-	SVGBaseTrigger::Spawn();
+	Base::Spawn();
 
 	// Initialize Brush Trigger.
 	InitBrushTrigger();
@@ -95,7 +95,7 @@ void TriggerHurt::Spawn() {
 //===============
 //
 void TriggerHurt::Respawn() {
-	SVGBaseTrigger::Respawn();
+	Base::Respawn();
 }
 
 //
@@ -105,7 +105,7 @@ void TriggerHurt::Respawn() {
 //===============
 //
 void TriggerHurt::PostSpawn() {
-	SVGBaseTrigger::PostSpawn();
+	Base::PostSpawn();
 }
 
 //
@@ -115,7 +115,7 @@ void TriggerHurt::PostSpawn() {
 //===============
 //
 void TriggerHurt::Think() {
-	SVGBaseTrigger::Think();
+	Base::Think();
 }
 
 void TriggerHurt::SpawnKey(const std::string& key, const std::string& value) {
@@ -125,7 +125,7 @@ void TriggerHurt::SpawnKey(const std::string& key, const std::string& value) {
 	if (key == "origin") {
 
 	} else {
-		SVGBaseTrigger::SpawnKey(key, value);
+		Base::SpawnKey(key, value);
 	}
 }
 
@@ -209,12 +209,12 @@ void TriggerHurt::TriggerHurtUse(SVGBaseEntity* other, SVGBaseEntity* activator)
 
 //
 //===============
-// SVGBaseTrigger::Use
+// Base::Use
 //
 // Execute the 'Use' callback in case we ran into any.
 //===============
 //
-//void SVGBaseTrigger::Use(SVGBaseEntity* other, SVGBaseEntity* activator) {
+//void Base::Use(SVGBaseEntity* other, SVGBaseEntity* activator) {
 //	// Safety check.
 //	if (useFunction == nullptr)
 //		return;

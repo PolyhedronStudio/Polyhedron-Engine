@@ -45,7 +45,7 @@ TriggerMultiple::~TriggerMultiple() {
 //===============
 //
 void TriggerMultiple::Precache() {
-	SVGBaseTrigger::Precache();
+	Base::Precache();
 }
 
 //
@@ -56,7 +56,7 @@ void TriggerMultiple::Precache() {
 //
 void TriggerMultiple::Spawn() {
 	// Spawn base trigger.
-	SVGBaseTrigger::Spawn();
+	Base::Spawn();
 
 	// Initialize Brush Trigger.
 	InitBrushTrigger();
@@ -92,7 +92,7 @@ void TriggerMultiple::Spawn() {
 //===============
 //
 void TriggerMultiple::Respawn() {
-	SVGBaseTrigger::Respawn();
+	Base::Respawn();
 }
 
 //
@@ -102,7 +102,7 @@ void TriggerMultiple::Respawn() {
 //===============
 //
 void TriggerMultiple::PostSpawn() {
-	SVGBaseTrigger::PostSpawn();
+	Base::PostSpawn();
 }
 
 //
@@ -112,7 +112,7 @@ void TriggerMultiple::PostSpawn() {
 //===============
 //
 void TriggerMultiple::Think() {
-	SVGBaseTrigger::Think();
+	Base::Think();
 }
 
 //
@@ -124,7 +124,7 @@ void TriggerMultiple::Think() {
 void TriggerMultiple::SpawnKey(const std::string& key, const std::string& value) {
 	// Parent class spawnkey.
 	// We don't want it to reposition this fucker.?
-	SVGBaseTrigger::SpawnKey(key, value);
+	Base::SpawnKey(key, value);
 }
 
 void TriggerMultiple::Trigger(SVGBaseEntity *activator) {

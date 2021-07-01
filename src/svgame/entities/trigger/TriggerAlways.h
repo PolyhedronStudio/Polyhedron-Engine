@@ -18,6 +18,7 @@ public:
     TriggerAlways(Entity* svEntity);
     virtual ~TriggerAlways();
 
+    DefineMapClass( "trigger_always", TriggerAlways, SVGBaseTrigger );
 
     //
     // Interface functions. 

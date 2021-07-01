@@ -46,7 +46,7 @@ TriggerOnce::~TriggerOnce() {
 //===============
 //
 void TriggerOnce::Precache() {
-	TriggerMultiple::Precache();
+	Base::Precache();
 }
 
 //
@@ -57,7 +57,7 @@ void TriggerOnce::Precache() {
 //
 void TriggerOnce::Spawn() {
 	// Spawn base trigger.
-	TriggerMultiple::Spawn();
+	Base::Spawn();
 
 	// Set wait time to -1... (So it triggers only once.)
 	SetWaitTime(-1.f);
@@ -70,7 +70,7 @@ void TriggerOnce::Spawn() {
 //===============
 //
 void TriggerOnce::Respawn() {
-	TriggerMultiple::Respawn();
+	Base::Respawn();
 }
 
 //
@@ -80,7 +80,7 @@ void TriggerOnce::Respawn() {
 //===============
 //
 void TriggerOnce::PostSpawn() {
-	TriggerMultiple::PostSpawn();
+	Base::PostSpawn();
 }
 
 //
@@ -90,7 +90,7 @@ void TriggerOnce::PostSpawn() {
 //===============
 //
 void TriggerOnce::Think() {
-	TriggerMultiple::Think();
+	Base::Think();
 }
 
 //
@@ -106,13 +106,13 @@ void TriggerOnce::SpawnKey(const std::string& key, const std::string& value) {
 	} else {
 		// Parent class spawnkey.
 		// We don't want it to reposition this fucker.?
-		TriggerMultiple::SpawnKey(key, value);
+		Base::SpawnKey(key, value);
 	}
 }
 
 void TriggerOnce::Trigger(SVGBaseEntity* activator) {
 	// Parent trigger.
-	TriggerMultiple::Trigger(activator);
+	Base::Trigger(activator);
 }
 
 //

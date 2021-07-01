@@ -10,6 +10,8 @@ public:
 	TriggerAutoDoor( Entity* entity );
 	virtual ~TriggerAutoDoor() = default;
 
+	DefineClass( TriggerAutoDoor, SVGBaseTrigger );
+
 	void					Spawn() override;
 	// Responds to players touching this trigger
 	void					AutoDoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf );

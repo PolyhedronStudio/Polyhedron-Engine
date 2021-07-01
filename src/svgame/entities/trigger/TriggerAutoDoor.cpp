@@ -31,7 +31,7 @@ TriggerAutoDoor::TriggerAutoDoor( Entity* entity )
 // TriggerAutoDoor::Spawn
 //===============
 void TriggerAutoDoor::Spawn() {
-	SVGBaseTrigger::Spawn();
+	Base::Spawn();
 
 	SetSolid( Solid::Trigger );
 	SetMoveType( MoveType::None );
@@ -73,4 +73,5 @@ TriggerAutoDoor* TriggerAutoDoor::Create( SVGBaseEntity* ownerEntity, vec3_t own
 	autoDoor->SetMaxs( ownerMaxs );
 	autoDoor->SetMins( ownerMins );
 	autoDoor->Spawn();
+	return autoDoor;
 }

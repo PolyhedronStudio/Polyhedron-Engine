@@ -18,6 +18,8 @@ public:
     Light(Entity* svEntity);
     virtual ~Light();
 
+    DefineMapClass( "light", Light, SVGBaseTrigger );
+
     //
     // Interface functions. 
     //

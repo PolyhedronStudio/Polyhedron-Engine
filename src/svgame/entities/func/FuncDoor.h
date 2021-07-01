@@ -5,11 +5,12 @@ class SVGBaseMover;
 //===============
 // A standard, sliding door
 //===============
-class FuncDoor : public SVGBaseMover
-{
+class FuncDoor : public SVGBaseMover {
 public:
     FuncDoor( Entity* entity );
     virtual ~FuncDoor() = default;
+
+    DefineMapClass( "func_door", FuncDoor, SVGBaseMover );
 
     // Spawn flags
     static constexpr int32_t SF_StartOpen   = 1 << 0;

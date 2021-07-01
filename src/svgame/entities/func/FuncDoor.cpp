@@ -31,7 +31,7 @@ FuncDoor::FuncDoor( Entity* entity )
 // FuncDoor::Precache
 //===============
 void FuncDoor::Precache() {
-    SVGBaseMover::Precache();
+    Base::Precache();
 
     // Set up the default sounds
     if ( GetSound() != 1 ) {
@@ -47,7 +47,7 @@ void FuncDoor::Precache() {
 void FuncDoor::Spawn() {
     vec3_t absoluteMovedir;
 
-    SVGBaseMover::Spawn();
+    Base::Spawn();
 
     SetMoveDirection( GetAngles()/*, resetAngles = true*/ );
     SetMoveType( MoveType::Push );

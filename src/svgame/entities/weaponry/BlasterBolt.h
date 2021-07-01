@@ -17,6 +17,8 @@ public:
     BlasterBolt(Entity* svEntity);
     virtual ~BlasterBolt();
 
+    DefineClass( BlasterBolt, SVGBaseEntity );
+
     //
     // Interface functions. 
     //

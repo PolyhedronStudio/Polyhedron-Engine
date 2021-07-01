@@ -26,11 +26,11 @@ Light::~Light() {
 // Interface functions. 
 void Light::Precache() {
     // Parent class precache.
-    SVGBaseTrigger::Precache();
+    Base::Precache();
 }
 void Light::Spawn() {
     // Parent class spawn.
-    SVGBaseTrigger::Spawn();
+    Base::Spawn();
 
     // WatIsDeze: I think we want lights. This is for the old 1997/1998
     // no targeted lights in deathmatch, because they cause global messages
@@ -54,11 +54,11 @@ void Light::Spawn() {
 }
 void Light::PostSpawn() {
     // Parent class PostSpawn.
-    SVGBaseTrigger::PostSpawn();
+    Base::PostSpawn();
 }
 void Light::Think() {
     // Parent class think.
-    SVGBaseTrigger::Think();
+    Base::Think();
 }
 
 void Light::LightUse(SVGBaseEntity* other, SVGBaseEntity* activator) {

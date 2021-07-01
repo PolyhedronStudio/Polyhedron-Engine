@@ -57,6 +57,7 @@ public:
     SVGBaseMover(Entity* svEntity);
     virtual ~SVGBaseMover();
 
+    DefineAbstractClass( SVGBaseMover, SVGBaseTrigger );
 
     //
     // Interface functions. 

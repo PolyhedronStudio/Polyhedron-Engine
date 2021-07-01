@@ -45,7 +45,7 @@ TriggerAlways::~TriggerAlways() {
 //===============
 //
 void TriggerAlways::Precache() {
-	SVGBaseTrigger::Precache();
+	Base::Precache();
 }
 
 //
@@ -56,7 +56,7 @@ void TriggerAlways::Precache() {
 //
 void TriggerAlways::Spawn() {
 	// Spawn base trigger.
-	SVGBaseTrigger::Spawn();
+	Base::Spawn();
 
 	// Initialize Brush Trigger.
 	InitPointTrigger();
@@ -79,7 +79,7 @@ void TriggerAlways::Spawn() {
 //===============
 //
 void TriggerAlways::Respawn() {
-	SVGBaseTrigger::Respawn();
+	Base::Respawn();
 }
 
 //
@@ -89,7 +89,7 @@ void TriggerAlways::Respawn() {
 //===============
 //
 void TriggerAlways::PostSpawn() {
-	SVGBaseTrigger::PostSpawn();
+	Base::PostSpawn();
 }
 
 //
@@ -99,13 +99,13 @@ void TriggerAlways::PostSpawn() {
 //===============
 //
 void TriggerAlways::Think() {
-	SVGBaseTrigger::Think();
+	Base::Think();
 }
 
 void TriggerAlways::SpawnKey(const std::string& key, const std::string& value) {
 	// Parent class spawnkey.
 	// We don't want it to reposition this fucker.?
-	SVGBaseTrigger::SpawnKey(key, value);
+	Base::SpawnKey(key, value);
 }
 
 //

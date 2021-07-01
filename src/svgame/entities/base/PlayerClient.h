@@ -17,6 +17,8 @@ public:
     PlayerClient(Entity* svEntity);
     virtual ~PlayerClient();
 
+    DefineClass( PlayerClient, SVGBaseEntity );
+
     //
     // Interface functions. 
     //

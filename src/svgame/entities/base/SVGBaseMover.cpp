@@ -55,7 +55,7 @@ SVGBaseMover::~SVGBaseMover() {
 //===============
 //
 void SVGBaseMover::Precache() {
-	SVGBaseEntity::Precache();
+	Base::Precache();
 }
 
 //
@@ -65,7 +65,7 @@ void SVGBaseMover::Precache() {
 //===============
 //
 void SVGBaseMover::Spawn() {
-	SVGBaseTrigger::Spawn();
+	Base::Spawn();
 
 
 }
@@ -77,7 +77,7 @@ void SVGBaseMover::Spawn() {
 //===============
 //
 void SVGBaseMover::Respawn() {
-	SVGBaseTrigger::Respawn();
+	Base::Respawn();
 }
 
 //
@@ -87,7 +87,7 @@ void SVGBaseMover::Respawn() {
 //===============
 //
 void SVGBaseMover::PostSpawn() {
-	SVGBaseTrigger::PostSpawn();
+	Base::PostSpawn();
 }
 
 //
@@ -97,7 +97,7 @@ void SVGBaseMover::PostSpawn() {
 //===============
 //
 void SVGBaseMover::Think() {
-	SVGBaseTrigger::Think();
+	Base::Think();
 }
 
 //
@@ -112,7 +112,7 @@ void SVGBaseMover::SpawnKey(const std::string& key, const std::string& value) {
 	} else if ( key == "lip" ) {
 		ParseFloatKeyValue( key, value, lip );
 	} else {
-		SVGBaseTrigger::SpawnKey(key, value);
+		Base::SpawnKey(key, value);
 	}
 }
 

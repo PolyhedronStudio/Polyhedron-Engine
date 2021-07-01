@@ -13,7 +13,8 @@
 #include "InfoPlayerStart.h"            // Class.
 
 // Constructor/Deconstructor.
-InfoPlayerStart::InfoPlayerStart(Entity* svEntity) : SVGBaseEntity(svEntity) {
+InfoPlayerStart::InfoPlayerStart(Entity* svEntity) 
+    : SVGBaseEntity(svEntity) {
 
 }
 InfoPlayerStart::~InfoPlayerStart() {
@@ -22,18 +23,18 @@ InfoPlayerStart::~InfoPlayerStart() {
 
 // Interface functions. 
 void InfoPlayerStart::Precache() {
-    SVGBaseEntity::Precache();
+    Base::Precache();
 }
 
 void InfoPlayerStart::Spawn() {
-    SVGBaseEntity::Spawn();
+    Base::Spawn();
 }
 
 void InfoPlayerStart::PostSpawn() {
-    SVGBaseEntity::PostSpawn();
+    Base::PostSpawn();
 }
 
 void InfoPlayerStart::Think() {
     // Parent think.
-    SVGBaseEntity::Think();
+    Base::Think();
 }

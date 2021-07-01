@@ -29,23 +29,18 @@ FuncButton::FuncButton( Entity* svEntity )
 // FuncButton::Precache
 //===============
 void FuncButton::Precache() {
-	SVGBaseMover::Precache();
+	Base::Precache();
 }
 
 //===============
 // FuncButton::Spawn
 //===============
 void FuncButton::Spawn() {
-	SVGBaseMover::Spawn();
+	Base::Spawn();
 
-	vec3_t absoluteMovedir;
-	float distance;
-	vec3_t angles = GetAngles();
-
-	SetMoveDirection( angles );
-	
 	// Mappers set angles to determine the movement direction of the button,
-	// so we gotta zero the entity's angles
+	// so we gotta set the movement direction, then zero the entity's angles
+	SetMoveDirection( GetAngles() );
 	SetAngles( vec3_zero() );
 
 	SetModel( GetModel() );
@@ -113,7 +108,7 @@ void FuncButton::SpawnKey( const std::string& key, const std::string& value ) {
 	} else if ( key == "lip" ) {
 		ParseFloatKeyValue( key, value, lip );
 	} else {
-		return SVGBaseMover::SpawnKey( key, value );
+		return Base::SpawnKey( key, value );
 	}
 }
 
@@ -229,7 +224,7 @@ void FuncButton::BrushMoveDone() {
 }
 
 //===============
-// SVGBaseMover::BrushMoveFinal
+// Base::BrushMoveFinal
 //===============
 void FuncButton::BrushMoveFinal() {
 	// We've traveled our world, time to rest
@@ -246,7 +241,7 @@ void FuncButton::BrushMoveFinal() {
 }
 
 //===============
-// SVGBaseMover::BrushMoveBegin
+// Base::BrushMoveBegin
 //===============
 void FuncButton::BrushMoveBegin() {
 	float frames;
@@ -267,7 +262,7 @@ void FuncButton::BrushMoveBegin() {
 }
 
 //===============
-// SVGBaseMover::BrushMoveCalc
+// Base::BrushMoveCalc
 //===============
 void FuncButton::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function ) {
 	PushMoveInfo& mi = moveInfo;
