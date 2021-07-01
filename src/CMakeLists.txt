@@ -145,6 +145,8 @@ SET ( SRC_SVGAME_ENTITIES
 
 SET ( SRC_SVGAME_GAMEMODES 
 	svgame/gamemodes/DefaultGameMode.cpp
+	svgame/gamemodes/CoopGameMode.cpp
+	svgame/gamemodes/DeathMatchGameMode.cpp
 )
 
 SET ( SRC_SVGAME_PHYSICS 
@@ -231,6 +233,8 @@ SET ( HEADERS_SVGAME_ENTITIES
 )
 SET ( HEADERS_SVGAME_GAMEMODES 
 	svgame/gamemodes/DefaultGameMode.h
+	svgame/gamemodes/CoopGameMode.cpp
+	svgame/gamemodes/DeathMatchGameMode.h
 	svgame/gamemodes/IGameMode.h
 )
 SET ( HEADERS_SVGAME_PLAYER 

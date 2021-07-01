@@ -18,8 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared/shared.h"
 
-vec3_t vec3_origin = { 0, 0, 0 };
-
 //
 //===============
 // AngleVectors
@@ -131,11 +129,11 @@ vec_t VectorNormalize2(const vec3_t& v, vec_t *out)
 //===============
 // ClearBounds
 // 
-// Clears the Min and Max bounds pointers.
+// Clears the Min and Max bounds pointers. (Sets it to the largest around.
+// so it can later on add points to it if < ... etc.)
 //===============
 //
-void ClearBounds(vec3_t& mins, vec3_t& maxs)
-{
+void ClearBounds(vec3_t& mins, vec3_t& maxs) {
     mins.xyz[0] = mins.xyz[1] = mins.xyz[2] = 99999;
     maxs.xyz[0] = maxs.xyz[1] = maxs.xyz[2] = -99999;
 }
@@ -146,10 +144,11 @@ void ClearBounds(vec3_t& mins, vec3_t& maxs)
 // 
 // Adds the given vector point to the bounds, in case it exceeds the
 // current bounds, it will automatically resize them accordingly.
+// 
+// Hence, clearbounds, sets the largest possible value around.
 //===============
 //
-void AddPointToBounds(const vec3_t& v, vec3_t& mins, vec3_t& maxs)
-{
+void AddPointToBounds(const vec3_t& v, vec3_t& mins, vec3_t& maxs) {
     int        i;
     vec_t    val;
 
@@ -169,8 +168,7 @@ void AddPointToBounds(const vec3_t& v, vec3_t& mins, vec3_t& maxs)
 // Merges 2 bounding boxes together, into the outptr.
 //===============
 //
-void UnionBounds(vec3_t* a, vec3_t* b, vec3_t* c)
-{
+void UnionBounds(vec3_t *a, vec3_t *b, vec3_t *c) {
     c[0].xyz[0] = b[0].xyz[0] < a[0].xyz[0] ? b[0].xyz[0] : a[0].xyz[0];
     c[0].xyz[1] = b[0].xyz[1] < a[0].xyz[1] ? b[0].xyz[1] : a[0].xyz[1];
     c[0].xyz[2] = b[0].xyz[2] < a[0].xyz[2] ? b[0].xyz[2] : a[0].xyz[2];
@@ -187,8 +185,7 @@ void UnionBounds(vec3_t* a, vec3_t* b, vec3_t* c)
 // Returns the radius length for the given boundaries.
 //===============
 //
-vec_t RadiusFromBounds(const vec3_t& mins, const vec3_t& maxs)
-{
+vec_t RadiusFromBounds(const vec3_t& mins, const vec3_t& maxs) {
     int     i;
     vec3_t  corner;
     vec_t   a, b;

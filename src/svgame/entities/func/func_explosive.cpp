@@ -89,7 +89,7 @@ void func_explosive_explode(Entity* self, Entity* inflictor, Entity* attacker, i
 
 void func_explosive_use(Entity* self, Entity* other, Entity* activator)
 {
-    func_explosive_explode(self, other, activator, self->health, vec3_origin);
+    func_explosive_explode(self, other, activator, self->health, vec3_zero());
 }
 
 void func_explosive_spawn(Entity* self, Entity* other, Entity* activator)

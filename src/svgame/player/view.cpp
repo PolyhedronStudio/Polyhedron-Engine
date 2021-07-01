@@ -488,7 +488,7 @@ static void SVG_Player_CheckFallingDamage(PlayerClient *ent)
         dir = { 0.f, 0.f, 1.f };
 
         if (!deathmatch->value || !((int)dmflags->value & GameModeFlags::NoFalling))
-            SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, ent->GetOrigin(), vec3_origin, damage, 0, 0, MeansOfDeath::Falling);
+            SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, ent->GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
     } else {
         ent->SetEventID(EntityEvent::FallShort);
         return;
@@ -591,7 +591,7 @@ static void SVG_Player_CheckWorldEffects(void)
 
                 currentPlayer->SetDebouncePainTime(level.time);
 
-                SVG_InflictDamage(currentPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_origin, currentPlayer->GetOrigin(), vec3_origin, currentPlayer->GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+                SVG_InflictDamage(currentPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentPlayer->GetOrigin(), vec3_zero(), currentPlayer->GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
             }
         }
     } else {
@@ -613,11 +613,11 @@ static void SVG_Player_CheckWorldEffects(void)
                 currentPlayer->SetDebouncePainTime(level.time + 1);
             }
 
-            SVG_InflictDamage(currentPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_origin, currentPlayer->GetOrigin(), vec3_zero(), 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
+            SVG_InflictDamage(currentPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentPlayer->GetOrigin(), vec3_zero(), 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
         }
 
         if (currentPlayer->GetWaterType() & CONTENTS_SLIME) {
-            SVG_InflictDamage(currentPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_origin, currentPlayer->GetOrigin(), vec3_zero(), 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
+            SVG_InflictDamage(currentPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentPlayer->GetOrigin(), vec3_zero(), 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 }

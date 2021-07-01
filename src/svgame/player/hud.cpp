@@ -238,9 +238,9 @@ void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *kille
         y = 32 + 32 * (i % 6);
 
         // add a dogtag
-        if (cl_ent == ent->GetServerEntity())
+        if (ent && cl_ent == ent->GetServerEntity())
             tag = "tag1";
-        else if (cl_ent == killer->GetServerEntity())
+        else if (killer && cl_ent == killer->GetServerEntity())
             tag = "tag2";
         else
             tag = NULL;

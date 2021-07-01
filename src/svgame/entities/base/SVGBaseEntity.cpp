@@ -534,6 +534,15 @@ void SVGBaseEntity::LinkEntity() {
 }
 
 //===============
+// SVGBaseEntity::UnlinkEntity
+//
+// 
+//===============
+void SVGBaseEntity::UnlinkEntity() {
+	gi.UnlinkEntity(serverEntity);
+}
+
+//===============
 // SVGBaseEntity::Remove
 //===============
 void SVGBaseEntity::Remove()

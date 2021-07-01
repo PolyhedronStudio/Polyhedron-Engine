@@ -32,7 +32,9 @@ void SVG_ClientBegin(Entity* ent);
 void SVG_ClientCommand(Entity* ent);
 void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo);
 
-void SVG_ClientBeginServerFrame(Entity* ent);
+//void SVG_ClientBeginServerFrame(SVGBaseEntity* ent); // WID: Moved to gamemodes.
 void SVG_ClientThink(Entity* ent, ClientUserCommand* cmd);
+
+void SVG_ClientEndServerFrames(void);
 
 #endif // __SVGAME_PLAYER_CLIENT_H__

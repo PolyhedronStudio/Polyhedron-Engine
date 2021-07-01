@@ -234,7 +234,7 @@ int SVG_FlyMove(SVGBaseEntity *ent, float time, int mask)
 
         if (trace.allSolid) {
             // entity is trapped in another solid
-            ent->SetVelocity(vec3_origin);
+            ent->SetVelocity(vec3_zero());
             return 3;
         }
 
@@ -274,7 +274,7 @@ int SVG_FlyMove(SVGBaseEntity *ent, float time, int mask)
         // cliped to another plane
         if (numplanes >= MAX_CLIP_PLANES) {
             // this shouldn't really happen
-            ent->SetVelocity(vec3_origin);
+            ent->SetVelocity(vec3_zero());
             return 3;
         }
 
@@ -303,7 +303,7 @@ int SVG_FlyMove(SVGBaseEntity *ent, float time, int mask)
             // go along the crease
             if (numplanes != 2) {
 //              gi.DPrintf ("clip velocity, numplanes == %i\n",numplanes);
-                ent->SetVelocity(vec3_origin);
+                ent->SetVelocity(vec3_zero());
                 return 7;
             }
 
@@ -317,7 +317,7 @@ int SVG_FlyMove(SVGBaseEntity *ent, float time, int mask)
 // to avoid tiny occilations in sloping corners
 //
         if (vec3_dot(ent->GetVelocity(), primal_velocity) <= 0) {
-            ent->SetVelocity(vec3_origin);
+            ent->SetVelocity(vec3_zero());
             return Blocked;
         }
     }
@@ -434,7 +434,7 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
     vec3_t maxs = pusher->GetAbsoluteMax() + move;
 
     // We need this for pushing things later
-    VectorSubtract(vec3_origin, amove, org);
+    VectorSubtract(vec3_zero(), amove, org);
     AngleVectors(org, &forward, &right, &up);
 
     // Save the pusher's original position

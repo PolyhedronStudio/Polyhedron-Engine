@@ -31,6 +31,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../entities/base/SVGBaseEntity.h"
 #include "../entities/base/PlayerClient.h"
 
+// Game modes.
+#include "../gamemodes/IGameMode.h"
+
 // Shared Game.
 #include "sharedgame/sharedgame.h" // Include SG Base.
 #include "sharedgame/pmove.h"   // Include SG PMove.
@@ -308,7 +311,7 @@ void InitClientPersistant(GameClient *client)
 }
 
 
-void InitClientResp(GameClient *client)
+void InitClientRespawn(GameClient *client)
 {
     if (!client)
         return;
@@ -786,7 +789,7 @@ void SVG_ClientBeginDeathmatch(Entity *ent)
 {
     SVG_InitEntity(ent);
 
-    InitClientResp(ent->client);
+    InitClientRespawn(ent->client);
 
     // locate ent at a spawn point
     SVG_PutClientInServer(ent);
@@ -862,7 +865,7 @@ void SVG_ClientBegin(Entity *ent)
         // ClientConnect() time
         SVG_InitEntity(ent);
         ent->className = "PlayerClient";
-        InitClientResp(ent->client);
+        InitClientRespawn(ent->client);
         SVG_PutClientInServer(ent);
     }
 
@@ -960,63 +963,31 @@ loadgames will.
 */
 qboolean SVG_ClientConnect(Entity *ent, char *userinfo)
 {
-    char    *value;
-
-    // check to see if they are on the banned IP list
-    value = Info_ValueForKey(userinfo, "ip");
-    if (SVG_FilterPacket(value)) {
-        Info_SetValueForKey(userinfo, "rejmsg", "Banned.");
+    // Check if the game mode allows for this specific client to connect to it.
+    if (!game.gameMode->ClientCanConnect(ent, userinfo))
         return false;
-    }
 
-    // check for a isSpectator
-    value = Info_ValueForKey(userinfo, "isSpectator");
-    if (deathmatch->value && *value && strcmp(value, "0")) {
-        int i, numspec;
-
-        if (*spectator_password->string &&
-            strcmp(spectator_password->string, "none") &&
-            strcmp(spectator_password->string, value)) {
-            Info_SetValueForKey(userinfo, "rejmsg", "Spectator password required or incorrect.");
-            return false;
-        }
-
-        // count spectators
-        for (i = numspec = 0; i < maxClients->value; i++)
-            if (g_entities[i + 1].inUse && g_entities[i + 1].client->persistent.isSpectator)
-                numspec++;
-
-        if (numspec >= maxspectators->value) {
-            Info_SetValueForKey(userinfo, "rejmsg", "Server isSpectator limit is full.");
-            return false;
-        }
-    } else {
-        // check for a password
-        value = Info_ValueForKey(userinfo, "password");
-        if (*password->string && strcmp(password->string, "none") &&
-            strcmp(password->string, value)) {
-            Info_SetValueForKey(userinfo, "rejmsg", "Password required or incorrect.");
-            return false;
-        }
-    }
-
-
-    // they can connect
+    // If we reached this point, game mode states that they can connect.
+    // As such, we assign the client to this server entity.
     ent->client = game.clients + (ent - g_entities - 1);
 
-    // if there is already a body waiting for us (a loadgame), just
+    // If there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
     if (ent->inUse == false) {
-        // clear the respawning variables
-        InitClientResp(ent->client);
+        // Clear the respawning variables
+        InitClientRespawn(ent->client);
         if (!game.autoSaved || !ent->client->persistent.activeWeapon)
             InitClientPersistant(ent->client);
     }
 
+    // Check for changed user info.
     SVG_ClientUserinfoChanged(ent, userinfo);
 
-    if (game.maxClients > 1)
-        gi.DPrintf("%s connected\n", ent->client->persistent.netname);
+    // Connection messages do not display in SP games.
+//    if (game.maxClients > 1)
+//        gi.DPrintf("%s connected\n", ent->client->persistent.netname);
+
+    game.gameMode->ClientConnect(ent);
 
     ent->serverFlags = 0; // make sure we start with known default
     ent->client->persistent.isConnected = true;
@@ -1035,28 +1006,15 @@ void SVG_ClientDisconnect(Entity *ent)
 {
     //int     playernum;
 
+    // Ensure this entity has a client.
     if (!ent->client)
         return;
+    // Ensure it has a class entity also.
+    if (!ent->classEntity)
+        return;
 
-    gi.BPrintf(PRINT_HIGH, "%s disconnected\n", ent->client->persistent.netname);
-
-    // send effect
-    if (ent->inUse) {
-        gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-        gi.WriteShort(ent - g_entities);
-        gi.WriteByte(MuzzleFlashType::Logout);
-        gi.Multicast(ent->state.origin, MultiCast::PVS);
-    }
-
-    gi.UnlinkEntity(ent);
-    ent->state.modelIndex = 0;
-    ent->state.sound = 0;
-    ent->state.eventID = 0;
-    ent->state.effects = 0;
-    ent->solid = Solid::Not;
-    ent->inUse = false;
-    ent->className = "disconnected";
-    ent->client->persistent.isConnected = false;
+    // Since it does, we pass it on to the game mode.
+    game.gameMode->ClientDisconnect((PlayerClient*)ent->classEntity);
 
     // FIXME: don't break skins on corpses, etc
     //playernum = ent-g_entities-1;
@@ -1299,62 +1257,4 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
         if (other->inUse && other->client->chaseTarget == serverEntity)
             SVG_UpdateChaseCam(classEntity);
     }
-}
-
-
-/*
-==============
-ClientBeginServerFrame
-
-This will be called once for each server frame, before running
-any other entities in the world.
-==============
-*/
-void SVG_ClientBeginServerFrame(Entity *ent)
-{
-    GameClient   *client;
-    int         buttonMask;
-
-    if (level.intermission.time)
-        return;
-
-    client = ent->client;
-
-    if (deathmatch->value &&
-        client->persistent.isSpectator != client->respawn.isSpectator &&
-        (level.time - client->respawnTime) >= 5) {
-        spectator_respawn(ent);
-        return;
-    }
-
-    // run weapon animations if it hasn't been done by a ucmd_t
-    if (!client->weaponThunk && !client->respawn.isSpectator)
-        SVG_ThinkWeapon((PlayerClient*)ent->classEntity);
-    else
-        client->weaponThunk = false;
-
-    if (ent->classEntity->GetDeadFlag()) {
-        // wait for any button just going down
-        if (level.time > client->respawnTime) {
-            // in deathmatch, only wait for attack button
-            if (deathmatch->value)
-                buttonMask = BUTTON_ATTACK;
-            else
-                buttonMask = -1;
-
-            if ((client->latchedButtons & buttonMask) ||
-                (deathmatch->value && ((int)dmflags->value & GameModeFlags::ForceRespawn))) {
-                SVG_RespawnClient(ent);
-                client->latchedButtons = 0;
-            }
-        }
-        return;
-    }
-
-    //// add player trail so monsters can follow
-    //if (!deathmatch->value)
-    //    if (!visible(ent, SVG_PlayerTrail_LastSpot()))
-    //        SVG_PlayerTrail_Add(ent->state.oldOrigin);
-
-    client->latchedButtons = 0;
 }

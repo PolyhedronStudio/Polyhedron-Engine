@@ -56,7 +56,7 @@ void SP_trigger_multiple(Entity* ent)
         ent->Use = Use_Multi;
     }
 
-    if (!VectorCompare(ent->state.angles, vec3_origin))
+    if (!VectorCompare(ent->state.angles, vec3_zero()))
         UTIL_SetMoveDir(ent->state.angles, ent->moveDirection);
 
     gi.SetModel(ent, ent->model);

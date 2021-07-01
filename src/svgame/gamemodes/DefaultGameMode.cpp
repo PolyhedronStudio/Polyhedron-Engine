@@ -10,6 +10,11 @@
 
 // Server Game Base Entity.
 #include "../entities/base/SVGBaseEntity.h"
+#include "../entities/base/PlayerClient.h"
+
+// Weapons.h
+#include "../player/client.h"
+#include "../player/weapons.h"
 
 // Game Mode.
 #include "DefaultGameMode.h"
@@ -52,7 +57,7 @@ qboolean DefaultGameMode::OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) {
 
 //
 //===============
-// DefaultGameMode::OnSameTeam
+// DefaultGameMode::CanDamage
 //
 //===============
 //
@@ -69,7 +74,7 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     if (target->GetMoveType() == MoveType::Push) {
         // Calculate destination.
         dest = vec3_scale(target->GetAbsoluteMin() + target->GetAbsoluteMax(), 0.5f);
-        trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+        trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
         if (trace.fraction == 1.0)
             return true;
         if (trace.ent == target)
@@ -78,35 +83,35 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     }
 
     // From here on we start tracing in various directions. Look at the code yourself to figure that one out...
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, target->GetOrigin(), inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), target->GetOrigin(), inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     dest = target->GetOrigin();
     dest[0] += 15.0;
     dest[1] += 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     dest = target->GetOrigin();
     dest[0] += 15.0;
     dest[1] -= 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     dest = target->GetOrigin();
     dest[0] -= 15.0;
     dest[1] += 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
     dest = target->GetOrigin();
     dest[0] -= 15.0;
     dest[1] -= 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_origin, vec3_origin, dest, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
@@ -158,4 +163,209 @@ vec3_t DefaultGameMode::CalculateDamageVelocity(int32_t damage) {
 
     // Return.
     return velocity;
+}
+
+//
+//===============
+// DefaultGameMode::OnLevelExit
+// 
+// Default implementation for exiting levels.
+//===============
+//
+void DefaultGameMode::OnLevelExit() {
+    // Create the command to use for switching to the next game map.
+    std::string command = "gamemap \"";
+    command += level.intermission.changeMap;
+    command += +"\"";
+
+    // Add the gamemap command to the 
+    gi.AddCommandString(command.c_str());
+    // Reset the changeMap string, intermission time, and regular level time.
+    level.intermission.changeMap = NULL;
+    level.intermission.exitIntermission = 0;
+    level.intermission.time = 0;
+
+    // End the server frames for all clients.
+    SVG_ClientEndServerFrames();
+
+    // Fetch the WorldSpawn entity number.
+    int32_t stateNumber = g_entities[0].state.number;
+
+    // Fetch the corresponding base entity.
+    SVGBaseEntity* entity = g_baseEntities[stateNumber];
+
+    // Loop through the server entities, and run the base entity frame if any exists.
+    for (int32_t i = 0; i < globals.numberOfEntities; i++) {
+        // Acquire state number.
+        stateNumber = g_entities[i].state.number;
+
+        // Fetch the corresponding base entity.
+        SVGBaseEntity* entity = g_baseEntities[stateNumber];
+
+        // Is it even valid?
+        if (entity == nullptr)
+            continue;
+
+        // Don't go on if it isn't in use.
+        if (!entity->IsInUse())
+            continue;
+
+        // Continue in case... cuz we know...
+        if (!entity->GetClient())
+            continue;
+
+        // Ensure an entity its health is reset to default.
+        if (entity->GetHealth() > entity->GetClient()->persistent.maxHealth)
+            entity->SetHealth(entity->GetClient()->persistent.maxHealth);
+    }
+}
+
+//===============
+// DefaultGameMode::ClientBeginServerFrame
+// 
+// Does logic checking for a client's start of a server frame. In case there
+// is a "level.intermission.time" set, it'll flat out return.
+// 
+// This basically allows for the game to disable fetching user input that makes
+// our movement tick. And/or shoot weaponry while in intermission time.
+//===============
+void DefaultGameMode::ClientBeginServerFrame(PlayerClient* player) {
+    // Ensure we aren't in an intermission time.
+    if (level.intermission.time)
+        return;
+
+    // Is the entity valid?
+    if (!player)
+        return;
+
+    // Fetch the client.
+    GameClient* client = player->GetClient();
+
+    // In case there is no client, return.
+    if (!client)
+        return;
+
+    // This has to go ofc.... lol. What it simply does though, is determine whether there is 
+    // a need to respawn as spectator.
+    //if (deathmatch->value &&
+    //    client->persistent.isSpectator != client->respawn.isSpectator &&
+    //    (level.time - client->respawnTime) >= 5) {
+    //    spectator_respawn(ent->GetServerEntity());
+    //    return;
+    //}
+
+    // Run weapon animations in case this has not been done by user input itself.
+    // (Idle animations, and general weapon thinking when a weapon is not in action.)
+    if (!client->weaponThunk && !client->respawn.isSpectator)
+        SVG_ThinkWeapon(player);
+    else
+        client->weaponThunk = false;
+
+    // Check if the player is actually dead or not. If he is, we're going to enact on
+    // the user input that's been given to us. When fired, we'll respawn.
+    int32_t buttonMask = 0;
+    if (player->GetDeadFlag()) {
+        // Wait for any button just going down
+        if (level.time > client->respawnTime) {
+            // In old code, the need to hit a key was only set in DM mode.
+            // I figured, let's keep it like this instead.
+            //if (deathmatch->value)
+                buttonMask = BUTTON_ATTACK;
+            //else
+            //buttonMask = -1;
+            
+            if ((client->latchedButtons & buttonMask) ||
+                (deathmatch->value && ((int)dmflags->value & GameModeFlags::ForceRespawn))) {
+                SVG_RespawnClient(player->GetServerEntity());
+                client->latchedButtons = 0;
+            }
+        }
+        return;
+    }
+
+    //// add player trail so monsters can follow
+    //if (!deathmatch->value)
+    //    if (!visible(ent, SVG_PlayerTrail_LastSpot()))
+    //        SVG_PlayerTrail_Add(ent->state.oldOrigin);
+
+    // Reset the latched buttons.
+    client->latchedButtons = 0;
+}
+
+//===============
+// DefaultGameMode::ClientCanConnect
+// 
+// Checks for whether it is OK for a client to connect go here.
+//===============
+qboolean DefaultGameMode::ClientCanConnect(Entity* serverEntity, char* userInfo) {
+    // Check to see if they are on the banned IP list
+    char *value = Info_ValueForKey(userInfo, "ip");
+    if (SVG_FilterPacket(value)) {
+        Info_SetValueForKey(userInfo, "rejmsg", "Banned.");
+        return false;
+    }
+
+    // Check for a password, and if there is one, does it match?
+    value = Info_ValueForKey(userInfo, "password");
+    if (*password->string && strcmp(password->string, "none") &&
+        strcmp(password->string, value)) {
+        Info_SetValueForKey(userInfo, "rejmsg", "Password required or incorrect.");
+        return false;
+    }
+    
+    // Return true, client is allowed to connect.
+    return true;
+}
+
+//===============
+// DefaultGameMode::ClientDisconnect.
+// 
+// Client is connecting, what do? :)
+//===============
+void DefaultGameMode::ClientConnect(Entity* serverEntity) {
+    // This is default behaviour for this function.
+    if (game.maxClients > 1)
+        gi.DPrintf("%s connected\n", serverEntity->client->persistent.netname);
+}
+
+//===============
+// DefaultGameMode::ClientDisconnect.
+// 
+// Does logic checking for a client's start of a server frame. In case there
+// is a "level.intermission.time" set, it'll flat out return.
+// 
+// This basically allows for the game to disable fetching user input that makes
+// our movement tick. And/or shoot weaponry while in intermission time.
+//===============
+void DefaultGameMode::ClientDisconnect(PlayerClient* player) {
+    // Fetch the client.
+    GameClient* client = player->GetClient();
+
+    // Print who disconnected.
+    gi.BPrintf(PRINT_HIGH, "%s disconnected\n", client->persistent.netname);
+
+    // Send effect
+    if (player->IsInUse()) {
+        gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+        //gi.WriteShort(ent - g_entities);
+        gi.WriteShort(player->GetNumber());
+        gi.WriteByte(MuzzleFlashType::Logout);
+        gi.Multicast(player->GetOrigin(), MultiCast::PVS);
+    }
+
+    player->UnlinkEntity();
+    player->SetModelIndex(0);
+    player->SetSound(0);
+    player->SetEventID(0);
+    player->SetEffects(0);
+    player->SetSolid(Solid::Not);
+    player->SetInUse(false);
+    player->SetClassName("disconnected");
+
+    // Ensure a state is stored for that this client is not connected anymore.
+    client->persistent.isConnected = false;
+
+    // FIXME: don't break skins on corpses, etc
+    //playernum = ent-g_entities-1;
+    //gi.configstring (ConfigStrings::PlayerSkins+playernum, "");
 }

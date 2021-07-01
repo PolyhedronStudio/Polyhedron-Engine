@@ -89,6 +89,11 @@ public:
         return serverEntity->className;
     }
 
+    // Return the 'className' value.
+    inline void SetClassName(const char* className) {
+        serverEntity->className = className;
+    }
+
     // Return the 'client' pointer.
     gclient_s* GetClient() {
         return serverEntity->client;
@@ -675,10 +680,13 @@ public:
     //
     // Link entity to world for collision testing using gi.LinkEntity.
     void LinkEntity();
-
+    
     // Marks the entity to be removed in the next server frame
     // This is preferred to SVG_FreeEntity, as it is safer
     void Remove();
+
+    // Unlink the entity from the world for collision testing.
+    void UnlinkEntity();
 
     // Returns the server entity pointer.
     inline Entity* GetServerEntity() {
