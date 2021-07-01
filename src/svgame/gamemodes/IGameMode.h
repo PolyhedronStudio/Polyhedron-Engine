@@ -31,10 +31,13 @@ public:
     //
     // Client related.
     //
+    
     // This will be called once for all clients at the start of each server 
     // frame. Before running any other entities in the world.
     virtual void ClientBeginServerFrame(PlayerClient* ent) = 0;
-
+    // Called when a client disconnects. This does not get called between
+    // load games.
+    virtual void ClientDisconnect(PlayerClient* ent) = 0;
 
     //
     // Combat Game Rule checks.

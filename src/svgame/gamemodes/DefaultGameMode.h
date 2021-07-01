@@ -27,7 +27,9 @@ public:
     virtual vec3_t CalculateDamageVelocity(int32_t damage) override;
 
     virtual void OnLevelExit() override;
+    
     virtual void ClientBeginServerFrame(PlayerClient* ent) override;
+    virtual void ClientDisconnect(PlayerClient* ent) override;
 
 private:
 

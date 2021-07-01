@@ -220,7 +220,7 @@ void DefaultGameMode::OnLevelExit() {
     }
 }
 
-//===
+//===============
 // DefaultGameMode::ClientBeginServerFrame
 // 
 // Does logic checking for a client's start of a server frame. In case there
@@ -228,7 +228,7 @@ void DefaultGameMode::OnLevelExit() {
 // 
 // This basically allows for the game to disable fetching user input that makes
 // our movement tick. And/or shoot weaponry while in intermission time.
-//
+//===============
 void DefaultGameMode::ClientBeginServerFrame(PlayerClient* player) {
     // Ensure we aren't in an intermission time.
     if (level.intermission.time)
@@ -290,4 +290,44 @@ void DefaultGameMode::ClientBeginServerFrame(PlayerClient* player) {
 
     // Reset the latched buttons.
     client->latchedButtons = 0;
+}
+
+//===============
+// DefaultGameMode::ClientDisconnect.
+// 
+// Does logic checking for a client's start of a server frame. In case there
+// is a "level.intermission.time" set, it'll flat out return.
+// 
+// This basically allows for the game to disable fetching user input that makes
+// our movement tick. And/or shoot weaponry while in intermission time.
+//===============
+void DefaultGameMode::ClientDisconnect(PlayerClient* player) {
+    // Fetch the client.
+    GameClient* client = player->GetClient();
+
+    // Print who disconnected.
+    gi.BPrintf(PRINT_HIGH, "%s disconnected\n", client->persistent.netname);
+
+    // Send effect
+    if (player->IsInUse()) {
+        gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+        //gi.WriteShort(ent - g_entities);
+        gi.WriteShort(player->GetNumber());
+        gi.WriteByte(MuzzleFlashType::Logout);
+        gi.Multicast(player->GetOrigin(), MultiCast::PVS);
+    }
+
+    player->UnlinkEntity();
+    player->SetModelIndex(0);
+    player->SetSound(0);
+    player->SetEventID(0);
+    player->SetEffects(0);
+    player->SetSolid(Solid::Not);
+    player->SetInUse(false);
+    player->SetClassName("disconnected");
+    client->persistent.isConnected = false;
+
+    // FIXME: don't break skins on corpses, etc
+    //playernum = ent-g_entities-1;
+    //gi.configstring (ConfigStrings::PlayerSkins+playernum, "");
 }
