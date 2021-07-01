@@ -44,6 +44,9 @@ void TriggerAutoDoor::Spawn() {
 //===============
 void TriggerAutoDoor::AutoDoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf ) {
 	bool isMonster = other->GetServerFlags() & EntityServerFlags::Monster;
+	// Alternatively, when we have a BaseMonster class:
+	// isMonster = other->IsSubclassOf<BaseMonster>();
+
 	if ( other->GetHealth() <= 0 ) {
 		return; // If you're dead, you can't pass
 	}
@@ -68,7 +71,7 @@ void TriggerAutoDoor::AutoDoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, 
 // TriggerAutoDoor::Create
 //===============
 TriggerAutoDoor* TriggerAutoDoor::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMaxs, vec3_t ownerMins ) {
-	TriggerAutoDoor* autoDoor = static_cast<TriggerAutoDoor*>(SVG_SpawnClassEntity( SVG_Spawn(), "trigger_auto_door" ));
+	TriggerAutoDoor* autoDoor = SVG_CreateEntity<TriggerAutoDoor>();
 	autoDoor->SetOwner( ownerEntity );
 	autoDoor->SetMaxs( ownerMaxs );
 	autoDoor->SetMins( ownerMins );
