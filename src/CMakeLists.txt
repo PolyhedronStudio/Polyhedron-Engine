@@ -197,6 +197,7 @@ SET ( HEADERS_SVGAME_MAIN
 	svgame/entities.h
 	svgame/functionpointers.h
 	svgame/trigger.h
+	svgame/TypeInfo.h
 	svgame/utils.h
 )
 SET ( HEADERS_SVGAME_AI 
