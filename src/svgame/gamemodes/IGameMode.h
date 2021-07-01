@@ -31,7 +31,12 @@ public:
     //
     // Client related.
     //
-    
+    // Determines whether a client is allowed to connect at all.
+    // Returns false in case a client is allowed to connect.
+    virtual qboolean ClientCanConnect(Entity* serverEntity, char* userInfo) = 0;
+    // Called when a client connects. This does not get called between
+    // load games, of course.
+    virtual void ClientConnect(Entity* serverEntity) = 0;
     // This will be called once for all clients at the start of each server 
     // frame. Before running any other entities in the world.
     virtual void ClientBeginServerFrame(PlayerClient* ent) = 0;

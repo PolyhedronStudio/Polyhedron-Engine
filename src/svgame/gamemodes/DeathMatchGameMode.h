@@ -22,7 +22,10 @@ public:
     //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
+    // MP has its own damage regulation logic.
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
+    // MP has its own "CanConnect" rules for clients.
+    virtual qboolean ClientCanConnect(Entity* serverEntity, char* userInfo) override;
 
 private:
 

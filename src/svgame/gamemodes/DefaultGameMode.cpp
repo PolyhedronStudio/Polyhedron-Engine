@@ -293,6 +293,42 @@ void DefaultGameMode::ClientBeginServerFrame(PlayerClient* player) {
 }
 
 //===============
+// DefaultGameMode::ClientCanConnect
+// 
+// Checks for whether it is OK for a client to connect go here.
+//===============
+qboolean DefaultGameMode::ClientCanConnect(Entity* serverEntity, char* userInfo) {
+    // Check to see if they are on the banned IP list
+    char *value = Info_ValueForKey(userInfo, "ip");
+    if (SVG_FilterPacket(value)) {
+        Info_SetValueForKey(userInfo, "rejmsg", "Banned.");
+        return false;
+    }
+
+    // Check for a password, and if there is one, does it match?
+    value = Info_ValueForKey(userInfo, "password");
+    if (*password->string && strcmp(password->string, "none") &&
+        strcmp(password->string, value)) {
+        Info_SetValueForKey(userInfo, "rejmsg", "Password required or incorrect.");
+        return false;
+    }
+    
+    // Return true, client is allowed to connect.
+    return true;
+}
+
+//===============
+// DefaultGameMode::ClientDisconnect.
+// 
+// Client is connecting, what do? :)
+//===============
+void DefaultGameMode::ClientConnect(Entity* serverEntity) {
+    // This is default behaviour for this function.
+    if (game.maxClients > 1)
+        gi.DPrintf("%s connected\n", serverEntity->client->persistent.netname);
+}
+
+//===============
 // DefaultGameMode::ClientDisconnect.
 // 
 // Does logic checking for a client's start of a server frame. In case there
@@ -325,6 +361,8 @@ void DefaultGameMode::ClientDisconnect(PlayerClient* player) {
     player->SetSolid(Solid::Not);
     player->SetInUse(false);
     player->SetClassName("disconnected");
+
+    // Ensure a state is stored for that this client is not connected anymore.
     client->persistent.isConnected = false;
 
     // FIXME: don't break skins on corpses, etc
