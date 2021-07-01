@@ -214,6 +214,9 @@ SET ( HEADERS_SVGAME_ENTITIES_FUNC
 	svgame/entities/func/FuncButton.h
 	svgame/entities/func/FuncDoor.h
 )
+SET ( HEADERS_SVGAME_ENTITIES_INFO 
+	svgame/entities/info/InfoPlayerStart.h
+)
 SET ( HEADERS_SVGAME_ENTITIES_MISC 
 	svgame/entities/misc/MiscExplosionBox.h
 )
@@ -234,7 +237,7 @@ SET ( HEADERS_SVGAME_ENTITIES
 )
 SET ( HEADERS_SVGAME_GAMEMODES 
 	svgame/gamemodes/DefaultGameMode.h
-	svgame/gamemodes/CoopGameMode.cpp
+	svgame/gamemodes/CoopGameMode.h
 	svgame/gamemodes/DeathMatchGameMode.h
 	svgame/gamemodes/IGameMode.h
 )
@@ -258,10 +261,12 @@ SET(HEADERS_SVGAME
 	${HEADERS_SVGAME_MAIN}
 	${HEADERS_SVGAME_ENTITIES_BASE}
 	${HEADERS_SVGAME_ENTITIES_FUNC}
+	${HEADERS_SVGAME_ENTITIES_INFO}
 	${HEADERS_SVGAME_ENTITIES_MISC}
 	${HEADERS_SVGAME_ENTITIES_TRIGGER} 
 	${HEADERS_SVGAME_ENTITIES_WEAPONRY}
 	${HEADERS_SVGAME_ENTITIES}
+	${HEADERS_SVGAME_GAMEMODES}
 	${HEADERS_SVGAME_PLAYER}
 	${HEADERS_SVGAME_WEAPONS}
 )
@@ -739,6 +744,7 @@ SOURCE_GROUP("source\\entities\\misc"		FILES ${SRC_SVGAME_ENTITIES_MISC} )
 SOURCE_GROUP("source\\entities\\target"		FILES ${SRC_SVGAME_ENTITIES_TARGET} )
 SOURCE_GROUP("source\\entities\\trigger"	FILES ${SRC_SVGAME_ENTITIES_TRIGGER} )
 SOURCE_GROUP("source\\entities\\weaponry"	FILES ${SRC_SVGAME_ENTITIES_WEAPONRY} )
+SOURCE_GROUP("source\\gamemodes"			FILES ${SRC_SVGAME_GAMEMODES} )
 SOURCE_GROUP("source\\physics"				FILES ${SRC_SVGAME_PHYSICS} )
 SOURCE_GROUP("source\\player"				FILES ${SRC_SVGAME_PLAYER} )
 SOURCE_GROUP("source\\weapons"				FILES ${SRC_SVGAME_WEAPONS} )
@@ -748,9 +754,11 @@ SOURCE_GROUP("source\\entities"				FILES ${HEADERS_SVGAME_ENTITIES} )
 SOURCE_GROUP("source\\entities\\ai"			FILES ${HEADERS_SVGAME_ENTITIES_AI} )
 SOURCE_GROUP("source\\entities\\base"		FILES ${HEADERS_SVGAME_ENTITIES_BASE} )
 SOURCE_GROUP("source\\entities\\func"		FILES ${HEADERS_SVGAME_ENTITIES_FUNC} )
+SOURCE_GROUP("source\\entities\\info"		FILES ${HEADERS_SVGAME_ENTITIES_INFO} )
 SOURCE_GROUP("source\\entities\\misc"		FILES ${HEADERS_SVGAME_ENTITIES_MISC} )
 SOURCE_GROUP("source\\entities\\trigger"	FILES ${HEADERS_SVGAME_ENTITIES_TRIGGER} )
 SOURCE_GROUP("source\\entities\\weaponry"	FILES ${HEADERS_SVGAME_ENTITIES_WEAPONRY} )
+SOURCE_GROUP("source\\gamemodes"			FILES ${HEADERS_SVGAME_GAMEMODES} )
 SOURCE_GROUP("source\\player"				FILES ${HEADERS_SVGAME_PLAYER} )
 SOURCE_GROUP("source\\weapons"				FILES ${HEADERS_SVGAME_WEAPONS} )
 
