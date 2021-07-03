@@ -18,6 +18,7 @@ public:
     TriggerMultiple(Entity* svEntity);
     virtual ~TriggerMultiple();
 
+    DefineMapClass( "trigger_multiple", TriggerMultiple, SVGBaseTrigger );
 
     //
     // Interface functions. 

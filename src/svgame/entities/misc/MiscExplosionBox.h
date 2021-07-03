@@ -18,6 +18,8 @@ public:
     MiscExplosionBox(Entity* svEntity);
     virtual ~MiscExplosionBox();
 
+    DefineMapClass( "misc_explobox", MiscExplosionBox, SVGBaseTrigger );
+
     //
     // Interface functions. 
     //

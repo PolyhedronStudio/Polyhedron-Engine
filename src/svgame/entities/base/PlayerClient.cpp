@@ -33,7 +33,7 @@ PlayerClient::~PlayerClient() {
 //===============
 //
 void PlayerClient::Precache() {
-    SVGBaseEntity::Precache();
+    Base::Precache();
 }
 
 //
@@ -44,7 +44,7 @@ void PlayerClient::Precache() {
 //
 void PlayerClient::Spawn() {
     // Spawn.
-    SVGBaseEntity::Spawn();
+    Base::Spawn();
 
     // When spawned, we aren't on any ground, make sure of that.
     SetGroundEntity(nullptr);
@@ -100,7 +100,7 @@ void PlayerClient::Respawn() {
 //===============
 //
 void PlayerClient::PostSpawn() {
-    SVGBaseEntity::PostSpawn();
+    Base::PostSpawn();
 }
 
 //
@@ -111,7 +111,7 @@ void PlayerClient::PostSpawn() {
 //
 void PlayerClient::Think() {
     // Parent class Think.
-    SVGBaseEntity::Think();
+    Base::Think();
 }
 
 //
@@ -123,7 +123,7 @@ void PlayerClient::Think() {
 //
 void PlayerClient::SpawnKey(const std::string& key, const std::string& value) {
     // Parent class spawnkey.
-    SVGBaseEntity::SpawnKey(key, value);
+    Base::SpawnKey(key, value);
 }
 
 //

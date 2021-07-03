@@ -11,6 +11,10 @@
 #ifndef __SVGAME_ENTITIES_BASE_SVGBASEENTITY_H__
 #define __SVGAME_ENTITIES_BASE_SVGBASEENTITY_H__
 
+// It makes sense to include TypeInfo in SVGBaseEntity.h, 
+// because this class absolutely requires it
+#include "../../TypeInfo.h"
+
 class SVGBaseEntity {
 public:
     //
@@ -29,6 +33,22 @@ public:
     SVGBaseEntity(Entity* svEntity);
     virtual ~SVGBaseEntity();
 
+    // Runtime type information
+    DefineTopAbstractClass( SVGBaseEntity );
+
+    // Checks if this entity class is exactly the given class
+    // @param entityClass: an entity class which must inherint from SVGBaseEntity
+    template<typename entityClass>
+    bool IsClass() { // every entity has a ClassInfo, thanks to the DefineXYZ macro
+        return ClassInfo->IsClass( entityClass::ClassInfo );
+    }
+
+    // Checks if this entity class is a subclass of another, or is the same class
+    // @param entityClass: an entity class which must inherint from SVGBaseEntity
+    template<typename entityClass>
+    bool IsSubclassOf() {
+        return ClassInfo->IsSubclassOf( entityClass::ClassInfo );
+    }
 
     //
     // Interface functions. 

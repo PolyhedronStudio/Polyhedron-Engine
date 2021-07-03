@@ -18,6 +18,7 @@ public:
     TriggerOnce(Entity* svEntity);
     virtual ~TriggerOnce();
 
+    DefineMapClass( "trigger_once", TriggerOnce, TriggerMultiple );
 
     //
     // Interface functions. 

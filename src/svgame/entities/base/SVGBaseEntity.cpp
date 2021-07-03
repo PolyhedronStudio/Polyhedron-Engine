@@ -437,13 +437,10 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 	// Create a temporary DelayedUse entity in case this entity has a trigger delay
 	if ( GetDelayTime() )
 	{
-		Entity* serverTriggerDelay = SVG_Spawn();
-		serverTriggerDelay->className = "DelayedUse";
-
 		// This is all very lengthy. I'd rather have a static method in TriggerDelayedUse that
 		// allocates one such entity and accepts activator, message, target etc. as parameters
 		// Something like 'TriggerDelayedUse::Schedule( GetTarget(), GetKillTarget(), activatorOverride, GetMessage(), GetDelayTime() );'
-		SVGBaseTrigger* triggerDelay = static_cast<SVGBaseTrigger*>(serverTriggerDelay->classEntity = SVG_SpawnClassEntity( serverTriggerDelay, "DelayedUse" ));
+		SVGBaseTrigger* triggerDelay = SVG_CreateEntity<TriggerDelayedUse>();
 		triggerDelay->SetActivator( activatorOverride );
 		triggerDelay->SetMessage( GetMessage() );
 		triggerDelay->SetTarget( GetTarget() );
@@ -554,5 +551,6 @@ void SVGBaseEntity::Remove()
 //
 //
 void SVGBaseEntity::SVGBaseEntityThinkFree(void) {
-	SVG_FreeEntity(serverEntity);
+	//SVG_FreeEntity(serverEntity);
+	Remove();
 }

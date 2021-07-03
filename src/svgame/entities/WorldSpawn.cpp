@@ -165,7 +165,7 @@ WorldSpawn::~WorldSpawn() {
 //
 void WorldSpawn::Precache() {
     // Parent class precache.
-    SVGBaseEntity::Precache();
+    Base::Precache();
 
     // help icon for statusbar
     SVG_PrecacheImage("i_help");
@@ -270,7 +270,7 @@ void WorldSpawn::Precache() {
 //
 void WorldSpawn::Spawn() {
     // Parent class spawn.
-    SVGBaseEntity::Spawn();
+    Base::Spawn();
 
     // Set WorldSpawn specific properties.
     SetMoveType(MoveType::Push);
@@ -360,7 +360,7 @@ void WorldSpawn::Spawn() {
 //
 void WorldSpawn::PostSpawn() {
     // Parent class PostSpawn.
-    SVGBaseEntity::PostSpawn();
+    Base::PostSpawn();
 }
 
 //
@@ -372,7 +372,7 @@ void WorldSpawn::PostSpawn() {
 //
 void WorldSpawn::Think() {
     // Parent class think.
-    SVGBaseEntity::Think();
+    Base::Think();
 }
 
 //
@@ -449,7 +449,7 @@ void WorldSpawn::SpawnKey(const std::string& key, const std::string& value) {
         SVG_SetConfigString(ConfigStrings::CdTrack, va("%i", sounds));
     } else {
         // Pass it on.
-        SVGBaseEntity::SpawnKey(key, value);
+        Base::SpawnKey(key, value);
     }
 }
 

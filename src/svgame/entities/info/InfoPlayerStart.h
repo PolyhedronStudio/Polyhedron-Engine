@@ -17,6 +17,8 @@ public:
     InfoPlayerStart(Entity* svEntity);
     virtual ~InfoPlayerStart();
 
+    DefineMapClass( "info_player_start", InfoPlayerStart, SVGBaseEntity );
+
     // Interface functions. 
     void Precache();    // Precaches data.
     void Spawn();       // Spawns the entity.

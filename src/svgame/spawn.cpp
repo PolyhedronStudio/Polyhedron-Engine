@@ -207,62 +207,21 @@ Allocates the proper server game entity class. Then spawns the entity.
 */
 void ED_CallSpawn(Entity *ent)
 {
-    const spawn_func_t *s;
-    gitem_t *item;
-    int     i;
-
-    // Ensure ent is valid.
-    //if (!ent)
-    //    return;
-
-    // Ensure we have a classname.
-    //if (!ent->className) {
-    //    gi.DPrintf("ED_CallSpawn: NULL className\n");
-    //    return;
-    //}
-
-    // check item spawn functions
-    //for (i = 0, item = itemlist ; i < game.numberOfItems ; i++, item++) {
-    //    if (!item->className)
-    //        continue;
-    //    if (!strcmp(item->className, ent->className)) {
-    //        // found it
-    //        SVG_SpawnItem(ent, item);
-    //        return;
-    //    }
-    //}
-
-    // check normal spawn functions
-    for (s = spawn_funcs ; s->name ; s++) {
-        // Fetch dictionary.
-        auto dictionary = ent->entityDictionary;
-
-        if (dictionary.find("classname") == dictionary.end()) {
-            // TODO: Free the entity?
-            SVG_FreeEntity(ent);
-            continue;
-        }
-
-        if (dictionary["classname"] == s->name) {
-            // Spawn the according server game entity class.
-            ent->className = ED_NewString(ent->entityDictionary["classname"].c_str());
-            ent->classEntity = SVG_SpawnClassEntity(ent, ent->className);
-            
-            // SpawnKey fetching engaged * sunglasses on, this is cool *
-            for (auto& keyValueEntry : ent->entityDictionary) {
-                ent->classEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
-            }
-
-            // Precache.
-            ent->classEntity->Precache();
-
-            // Spawn.
-            ent->classEntity->Spawn();
-            return;
-        }
+    auto dictionary = ent->entityDictionary;
+    ent->className = ED_NewString( ent->entityDictionary["classname"].c_str() );
+    ent->classEntity = SVG_SpawnClassEntity( ent, ent->className );
+    // If we did not find the classname, then give up
+    if ( nullptr == ent->classEntity ) {
+        SVG_FreeEntity( ent );
+        return;
     }
-
-    gi.DPrintf("%s doesn't have a spawn function\n", ent->className);
+    // Initialise the entity with its respected keyvalue properties
+    for ( const auto& keyValueEntry : ent->entityDictionary ) {
+        ent->classEntity->SpawnKey( keyValueEntry.first, keyValueEntry.second );
+    }
+    // Precache and spawn, to set the entity up
+    ent->classEntity->Precache();
+    ent->classEntity->Spawn();
 }
 
 /*

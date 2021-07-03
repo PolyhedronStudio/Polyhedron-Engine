@@ -17,29 +17,30 @@
 
 #include "FuncButton.h"
 
+//===============
+// FuncButton::ctor
+//===============
 FuncButton::FuncButton( Entity* svEntity )
-	: SVGBaseMover( svEntity )
-{
+	: SVGBaseMover( svEntity ) {
 
 }
 
-void FuncButton::Precache()
-{
-	SVGBaseMover::Precache();
+//===============
+// FuncButton::Precache
+//===============
+void FuncButton::Precache() {
+	Base::Precache();
 }
 
-void FuncButton::Spawn()
-{
-	SVGBaseMover::Spawn();
+//===============
+// FuncButton::Spawn
+//===============
+void FuncButton::Spawn() {
+	Base::Spawn();
 
-	vec3_t absoluteMovedir;
-	float distance;
-
-	vec3_t angles = GetAngles();
-	SetMoveDirection( angles );
-	
-	// mappers set angles to determine the movement direction of the button,
-	// so we gotta set the entity's angles to zero
+	// Mappers set angles to determine the movement direction of the button,
+	// so we gotta set the movement direction, then zero the entity's angles
+	SetMoveDirection( GetAngles() );
 	SetAngles( vec3_zero() );
 
 	SetModel( GetModel() );
@@ -47,56 +48,35 @@ void FuncButton::Spawn()
 	SetSolid( Solid::BSP );
 
 	// If the mapper didn't specify a sound
-	if ( GetSound() != 1 )
-	{
+	if ( GetSound() != 1 ) {
 		moveInfo.startSoundIndex = gi.SoundIndex( "switches/butn2.wav" );
+	} // If the mapper didn't specify speed, set it to 40 u/s
+	if ( !GetSpeed() ) {
+		SetSpeed( 40.0f );
+	} // If the mapper didn't specify acceleration & deceleration, set the defaults
+	if ( !GetAcceleration() ) {
+		SetAcceleration( GetSpeed() );
 	}
-	// If the mapper didn't specify speed, set it to 40 u/s
-	if ( !serverEntity->speed )
-	{
-		serverEntity->speed = 40.0f;
-	}
-	// If the mapper didn't specify acceleration & deceleration, set the default
-	if ( !serverEntity->acceleration )
-	{
-		serverEntity->acceleration = serverEntity->speed;
-	}
-	if ( !serverEntity->deceleration )
-	{
-		serverEntity->deceleration = serverEntity->speed;
-	}
-
-	if ( !waitTime )
-	{
+	if ( !GetDeceleration() ) {
+		SetDeceleration( GetSpeed() );
+	} // If the mapper didn't specify 'wait until return', then default to 3 seconds
+	if ( !GetWaitTime() ) {
 		SetWaitTime( 3.0f );
+	} // Lip: how much to subtract from the door's travel distance
+	if ( !GetLip() ) {
+		SetLip( 8.0f );
 	}
-
-	// Lip: how much to subtract from the door's travel distance
-	if ( !lip )
-	{
-		lip = 4.0f;
-	}
-
 	// Set up the trajectory
-	serverEntity->position1 = GetOrigin();
-
-	absoluteMovedir.x = fabsf( moveDirection.x );
-	absoluteMovedir.y = fabsf( moveDirection.y );
-	absoluteMovedir.z = fabsf( moveDirection.z );
-	distance = (absoluteMovedir.x * serverEntity->size.x) + (absoluteMovedir.y * serverEntity->size.y) + (absoluteMovedir.z * serverEntity->size.z) - lip;
-	
-	serverEntity->position2 = vec3_fmaf( serverEntity->position1, distance, moveDirection );
+	SetStartPosition( GetOrigin() );
+	SetEndPosition( CalculateEndPosition() );
 
 	SetEffects( EntityEffectType::AnimCycleFrames01hz2 );
 
-	if ( GetHealth() )
-	{
+	if ( GetHealth() ) {
 		SetMaxHealth( GetHealth() );
 		SetDieCallback( &FuncButton::ButtonDie );
 		SetTakeDamage( TakeDamage::Yes );
-	}
-	else if ( nullptr == serverEntity->targetName )
-	{
+	} else if ( nullptr == serverEntity->targetName ) {
 		SetTouchCallback( &FuncButton::ButtonTouch );
 	}
 
@@ -104,112 +84,118 @@ void FuncButton::Spawn()
 
 	// Set up moveInfo stuff
 	// Button starts off
-	moveInfo.state = MoverState::Bottom;
-
-	moveInfo.speed = serverEntity->speed;
-	moveInfo.acceleration = serverEntity->acceleration;
-	moveInfo.deceleration = serverEntity->deceleration;
-	moveInfo.wait = waitTime;
-
-	moveInfo.startOrigin = serverEntity->position1;
-	moveInfo.startAngles = GetAngles();
-	moveInfo.endOrigin = serverEntity->position2;
-	moveInfo.endAngles = GetAngles();
+	moveInfo.state			= MoverState::Bottom;
+	moveInfo.speed			= GetSpeed();
+	moveInfo.acceleration	= GetAcceleration();
+	moveInfo.deceleration	= GetDeceleration();
+	moveInfo.wait			= GetWaitTime();
+	moveInfo.startOrigin	= GetStartPosition();
+	moveInfo.startAngles	= GetAngles();
+	moveInfo.endOrigin		= GetEndPosition();
+	moveInfo.endAngles		= GetAngles();
 
 	LinkEntity();
 }
 
-void FuncButton::SpawnKey( const std::string& key, const std::string& value )
-{
+//===============
+// FuncButton::SpawnKey
+//===============
+void FuncButton::SpawnKey( const std::string& key, const std::string& value ) {
 	// I think serverEntity variables should just be set in SVGBaseEntity::SpawnKey
 	// It doesn't make sense to set them only here, if these variables are available to every entity
-	if ( key == "speed" )
-	{
+	if ( key == "speed" ) {
 		ParseFloatKeyValue( key, value, serverEntity->speed );
-	}
-	else if ( key == "lip" )
-	{
+	} else if ( key == "lip" ) {
 		ParseFloatKeyValue( key, value, lip );
-	}
-	else
-	{
-		return SVGBaseMover::SpawnKey( key, value );
+	} else {
+		return Base::SpawnKey( key, value );
 	}
 }
 
-void FuncButton::OnButtonDone( Entity* self )
-{
-	FuncButton* button = static_cast<FuncButton*>( self->classEntity );
+//===============
+// FuncButton::OnButtonDone
+//===============
+void FuncButton::OnButtonDone( Entity* self ) {
+	FuncButton* button = static_cast<FuncButton*>(self->classEntity);
 	button->ButtonDone();
 }
 
-void FuncButton::ButtonDone()
-{
+//===============
+// FuncButton::ButtonDone
+//===============
+void FuncButton::ButtonDone() {
 	moveInfo.state = MoverState::Bottom;
 	serverEntity->state.effects &= ~(EntityEffectType::AnimCycleFrames23hz2);
 	serverEntity->state.effects |= EntityEffectType::AnimCycleFrames01hz2;
 }
 
-void FuncButton::ButtonReturn()
-{
+//===============
+// FuncButton::ButtonReturn
+//===============
+void FuncButton::ButtonReturn() {
 	moveInfo.state = MoverState::Down;
 	BrushMoveCalc( moveInfo.startOrigin, OnButtonDone );
 	SetFrame( 0 );
-	
-	if ( GetHealth() )
-	{
+
+	if ( GetHealth() ) {
 		SetTakeDamage( TakeDamage::Yes );
 	}
 }
 
-void FuncButton::OnButtonWait( Entity* self )
-{
+//===============
+// FuncButton::OnButtonWait
+//===============
+void FuncButton::OnButtonWait( Entity* self ) {
 	FuncButton* button = static_cast<FuncButton*>(self->classEntity);
 	button->ButtonWait();
 }
 
-void FuncButton::ButtonWait()
-{
+//===============
+// FuncButton::ButtonWait
+//===============
+void FuncButton::ButtonWait() {
 	moveInfo.state = MoverState::Top;
 	serverEntity->state.effects &= ~(EntityEffectType::AnimCycleFrames01hz2);
 	serverEntity->state.effects |= EntityEffectType::AnimCycleFrames23hz2;
 	SetFrame( 1 );
 
-	UseTargets(GetActivator());
+	UseTargets( GetActivator() );
 
-	if ( moveInfo.wait >= 0.0f )
-	{
+	if ( moveInfo.wait >= 0.0f ) {
 		SetNextThinkTime( level.time + moveInfo.wait );
 		SetThinkCallback( &FuncButton::ButtonReturn );
 	}
 }
 
-void FuncButton::ButtonFire()
-{
-	if ( moveInfo.state == MoverState::Up || moveInfo.state == MoverState::Top )
-	{
+//===============
+// FuncButton::ButtonFire
+//===============
+void FuncButton::ButtonFire() {
+	if ( moveInfo.state == MoverState::Up || moveInfo.state == MoverState::Top ) {
 		return;
 	}
 
 	moveInfo.state = MoverState::Up;
-	if ( moveInfo.startSoundIndex && !(flags & EntityFlags::TeamSlave) )
-	{
+	if ( moveInfo.startSoundIndex && !(flags & EntityFlags::TeamSlave) ) {
 		gi.Sound( serverEntity, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0 );
 	}
 	
 	BrushMoveCalc( moveInfo.endOrigin, OnButtonWait );
 }
 
-void FuncButton::ButtonUse( SVGBaseEntity* other, SVGBaseEntity* activator )
-{
+//===============
+// FuncButton::ButtonUse
+//===============
+void FuncButton::ButtonUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
 	this->activator = activator;
 	ButtonFire();
 }
 
-void FuncButton::ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf )
-{
-	if ( !other->GetClient() || other->GetHealth() <= 0 )
-	{
+//===============
+// FuncButton::ButtonTouch
+//===============
+void FuncButton::ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf ) {
+	if ( !other->GetClient() || other->GetHealth() <= 0 ) {
 		return;
 	}
 
@@ -217,30 +203,32 @@ void FuncButton::ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_
 	ButtonFire();
 }
 
-void FuncButton::ButtonDie( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point )
-{
+//===============
+// FuncButton::ButtonDie
+//===============
+void FuncButton::ButtonDie( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point ) {
 	activator = attacker;
 	SetHealth( GetMaxHealth() );
 	SetTakeDamage( TakeDamage::No );
 }
 
 // =========================
-// Brush move methods
+// FuncButton::BrushMoveDone
 // 
 // Will be moved to either SVGBaseEntity or 
 // some sorta SVGBaseMover when we make one
 // =========================
-void FuncButton::BrushMoveDone()
-{
+void FuncButton::BrushMoveDone() {
 	SetVelocity( vec3_zero() );
 	moveInfo.OnEndFunction( serverEntity );
 }
 
-void FuncButton::BrushMoveFinal()
-{
+//===============
+// Base::BrushMoveFinal
+//===============
+void FuncButton::BrushMoveFinal() {
 	// We've traveled our world, time to rest
-	if ( moveInfo.remainingDistance == 0.0f )
-	{
+	if ( moveInfo.remainingDistance == 0.0f ) {
 		BrushMoveDone();
 		return;
 	}
@@ -252,13 +240,14 @@ void FuncButton::BrushMoveFinal()
 	SetNextThinkTime( level.time + FRAMETIME );
 }
 
-void FuncButton::BrushMoveBegin()
-{
+//===============
+// Base::BrushMoveBegin
+//===============
+void FuncButton::BrushMoveBegin() {
 	float frames;
 
 	// It's time to stop
-	if ( (moveInfo.speed * FRAMETIME) >= moveInfo.remainingDistance )
-	{
+	if ( (moveInfo.speed * FRAMETIME) >= moveInfo.remainingDistance ) {
 		BrushMoveFinal();
 		return;
 	}
@@ -272,8 +261,10 @@ void FuncButton::BrushMoveBegin()
 	SetNextThinkTime( level.time + (frames * FRAMETIME) );
 }
 
-void FuncButton::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function )
-{
+//===============
+// Base::BrushMoveCalc
+//===============
+void FuncButton::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function ) {
 	PushMoveInfo& mi = moveInfo;
 
 	SetVelocity( vec3_zero() );
@@ -281,20 +272,14 @@ void FuncButton::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* 
 	mi.remainingDistance = VectorNormalize( moveInfo.dir );
 	mi.OnEndFunction = function;
 
-	if ( mi.speed == mi.acceleration && mi.speed == mi.deceleration )
-	{
-		if ( level.currentEntity == ((GetFlags() & EntityFlags::TeamSlave) ? GetTeamMasterEntity() : this) )
-		{
+	if ( mi.speed == mi.acceleration && mi.speed == mi.deceleration ) {
+		if ( level.currentEntity == ((GetFlags() & EntityFlags::TeamSlave) ? GetTeamMasterEntity() : this) ) {
 			BrushMoveBegin();
-		}
-		else
-		{
+		} else {
 			SetThinkCallback( &FuncButton::BrushMoveBegin );
 			SetNextThinkTime( level.time + FRAMETIME );
 		}
-	}
-	else
-	{
+	} else {
 		// accelerative
 		mi.currentSpeed = 0;
 

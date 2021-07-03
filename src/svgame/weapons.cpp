@@ -354,12 +354,17 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     vec3_t dir = vec3_normalize(aimdir);
  
     // Spawn the blaster bolt server entity.
-    Entity *serverEntity = SVG_Spawn();
-    serverEntity->className = "BlasterBolt";
+    BlasterBolt* boltEntity = SVG_CreateEntity<BlasterBolt>();
 
-    // Enjoy its class entity.
-    BlasterBolt *boltEntity = (BlasterBolt*)(serverEntity->classEntity = SVG_SpawnClassEntity(serverEntity, "BlasterBolt"));
-    
+    // Welp. It can happen sometimes
+    if ( nullptr == boltEntity ) {
+        return;
+    }
+
+    // Admer: TODO: perform this setup directly in BlasterBolt, e.g.
+    // BlasterBolt::Create( start, aimdir, damage, speed, effect, hyper );
+    // This stuff down there is... really rotten
+
     // Basic attributes.
     boltEntity->Precache();
     boltEntity->Spawn();
@@ -389,7 +394,7 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     boltEntity->SetTouchCallback(&BlasterBolt::BlasterBoltTouch);
 
     // Set think.
-    boltEntity->SetNextThinkTime(level.time + 2);
+    boltEntity->SetNextThinkTime(level.time + 2); // Admer: should this really be a thing?
     boltEntity->SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
 
     // Link Bolt into world.

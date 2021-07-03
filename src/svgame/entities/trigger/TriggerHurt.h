@@ -18,6 +18,7 @@ public:
     TriggerHurt(Entity* svEntity);
     virtual ~TriggerHurt();
 
+    DefineMapClass( "trigger_hurt", TriggerHurt, SVGBaseTrigger );
 
     //
     // Interface functions. 
@@ -44,7 +45,7 @@ public:
 
 protected:
     //
-    // Other base entity members. (These were old fields in edict_T back in the day.)
+    // Other base entity members. (These were old fields in edict_t back in the day.)
     //
     // The time this entity has last been hurting anyone else. It is used for the slow damage flag.
     float lastHurtTime;

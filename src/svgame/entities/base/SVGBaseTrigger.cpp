@@ -65,7 +65,7 @@ SVGBaseTrigger::~SVGBaseTrigger() {
 //===============
 //
 void SVGBaseTrigger::Precache() {
-	SVGBaseEntity::Precache();
+	Base::Precache();
 }
 
 //
@@ -75,9 +75,7 @@ void SVGBaseTrigger::Precache() {
 //===============
 //
 void SVGBaseTrigger::Spawn() {
-	SVGBaseEntity::Spawn();
-
-
+	Base::Spawn();
 }
 
 //
@@ -87,7 +85,7 @@ void SVGBaseTrigger::Spawn() {
 //===============
 //
 void SVGBaseTrigger::Respawn() {
-	SVGBaseEntity::Respawn();
+	Base::Respawn();
 }
 
 //
@@ -97,7 +95,7 @@ void SVGBaseTrigger::Respawn() {
 //===============
 //
 void SVGBaseTrigger::PostSpawn() {
-	SVGBaseEntity::PostSpawn();
+	Base::PostSpawn();
 }
 
 //
@@ -107,7 +105,7 @@ void SVGBaseTrigger::PostSpawn() {
 //===============
 //
 void SVGBaseTrigger::Think() {
-	SVGBaseEntity::Think();
+	Base::Think();
 }
 
 //
@@ -162,7 +160,7 @@ void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) 
 	}
 	// Parent class spawnkey.
 	else {
-		SVGBaseEntity::SpawnKey(key, value);
+		Base::SpawnKey(key, value);
 	}
 }
 
@@ -188,9 +186,7 @@ void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
 	//
     if (GetDelayTime()) {
 		// Create a temporary DelayedTrigger entity, to fire at a latter time.
-	    Entity *serverTriggerDelay = SVG_Spawn();
-		serverTriggerDelay->className = "DelayedUse";
-		SVGBaseTrigger *triggerDelay = (SVGBaseTrigger*)(serverTriggerDelay->classEntity = SVG_SpawnClassEntity(serverTriggerDelay, "DelayedUse"));
+	    SVGBaseTrigger *triggerDelay = SVG_CreateEntity<TriggerDelayedUse>();
 		if (!activator)
 			gi.DPrintf("TriggerDelayThink with no activator\n");
 		triggerDelay->SetActivator(activator);

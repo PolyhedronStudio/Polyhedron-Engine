@@ -24,7 +24,8 @@
 // 
 
 // Constructor/Deconstructor.
-TriggerDelayedUse::TriggerDelayedUse(Entity* svEntity) : SVGBaseTrigger(svEntity) {
+TriggerDelayedUse::TriggerDelayedUse(Entity* svEntity) 
+	: SVGBaseTrigger(svEntity) {
 	//
 	// All callback functions best be nullptr.
 	//
@@ -50,7 +51,7 @@ TriggerDelayedUse::~TriggerDelayedUse() {
 //===============
 //
 void TriggerDelayedUse::Precache() {
-	SVGBaseTrigger::Precache();
+	Base::Precache();
 }
 
 //
@@ -61,7 +62,7 @@ void TriggerDelayedUse::Precache() {
 //
 void TriggerDelayedUse::Spawn() {
 	// Spawn base trigger.
-	SVGBaseTrigger::Spawn();
+	Base::Spawn();
 
 	// Initialize Brush Trigger.
 	//InitPointTrigger();
@@ -79,7 +80,7 @@ void TriggerDelayedUse::Spawn() {
 //===============
 //
 void TriggerDelayedUse::Respawn() {
-	SVGBaseTrigger::Respawn();
+	Base::Respawn();
 }
 
 //
@@ -89,7 +90,7 @@ void TriggerDelayedUse::Respawn() {
 //===============
 //
 void TriggerDelayedUse::PostSpawn() {
-	SVGBaseTrigger::PostSpawn();
+	Base::PostSpawn();
 }
 
 //
@@ -99,7 +100,7 @@ void TriggerDelayedUse::PostSpawn() {
 //===============
 //
 void TriggerDelayedUse::Think() {
-	SVGBaseTrigger::Think();
+	Base::Think();
 }
 
 //
@@ -111,7 +112,7 @@ void TriggerDelayedUse::Think() {
 void TriggerDelayedUse::SpawnKey(const std::string& key, const std::string& value) {
 	// Parent class spawnkey.
 	// We don't want it to reposition this fucker.?
-	SVGBaseTrigger::SpawnKey(key, value);
+	Base::SpawnKey(key, value);
 }
 
 //
