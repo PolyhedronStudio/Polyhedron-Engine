@@ -16,7 +16,7 @@ void SVG_ClientDisconnect(Entity* ent);
 
 void SVG_PutClientInServer(Entity* ent);
 void SVG_InitClientPersistant(GameClient* client);
-void SVG_InitClientResp(GameClient* client);
+void SVG_InitClientRespawn(GameClient* client);
 void SVG_HUD_BeginIntermission(Entity* targ);
 
 // Respawns the actual client.

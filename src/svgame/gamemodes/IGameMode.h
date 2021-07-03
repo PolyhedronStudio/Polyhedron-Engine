@@ -37,6 +37,9 @@ public:
     // Called when a client connects. This does not get called between
     // load games, of course.
     virtual void ClientConnect(Entity* serverEntity) = 0;
+    // Called when a client has finished connecting, and is ready
+    // to be placed into the game.This will happen every level load.
+    virtual void ClientBegin(Entity* serverEntity) = 0;
     // This will be called once for all clients at the start of each server 
     // frame. Before running any other entities in the world.
     virtual void ClientBeginServerFrame(PlayerClient* ent) = 0;

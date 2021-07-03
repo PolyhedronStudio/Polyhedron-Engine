@@ -7,6 +7,9 @@
 //
 */
 #include "../g_local.h"          // SVGame.
+#include "../effects.h"     // Effects.
+#include "../entities.h"    // Entities.
+#include "../utils.h"       // Util funcs.
 
 // Server Game Base Entity.
 #include "../entities/base/SVGBaseEntity.h"
@@ -14,6 +17,7 @@
 
 // Weapons.h
 #include "../player/client.h"
+#include "../player/hud.h"
 #include "../player/weapons.h"
 
 // Game Mode.
@@ -128,7 +132,7 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
 // displaying damage entities client side. (Sparks, what have ya.)
 //===============
 //
-void DefaultGameMode::SpawnTempDamageEntity(int type, const vec3_t& origin, const vec3_t& normal, int damage) {
+void DefaultGameMode::SpawnTempDamageEntity(int32_t type, const vec3_t& origin, const vec3_t& normal, int32_t damage) {
     // WID: Ensure the effect can't send more damage. But that is unimplemented for the clients atm to even detect...
     if (damage > 255)
         damage = 255;
@@ -234,16 +238,8 @@ void DefaultGameMode::ClientBeginServerFrame(PlayerClient* player) {
     if (level.intermission.time)
         return;
 
-    // Is the entity valid?
-    if (!player)
-        return;
-
     // Fetch the client.
     GameClient* client = player->GetClient();
-
-    // In case there is no client, return.
-    if (!client)
-        return;
 
     // This has to go ofc.... lol. What it simply does though, is determine whether there is 
     // a need to respawn as spectator.
@@ -318,7 +314,7 @@ qboolean DefaultGameMode::ClientCanConnect(Entity* serverEntity, char* userInfo)
 }
 
 //===============
-// DefaultGameMode::ClientDisconnect.
+// DefaultGameMode::ClientConnect
 // 
 // Client is connecting, what do? :)
 //===============
@@ -326,6 +322,72 @@ void DefaultGameMode::ClientConnect(Entity* serverEntity) {
     // This is default behaviour for this function.
     if (game.maxClients > 1)
         gi.DPrintf("%s connected\n", serverEntity->client->persistent.netname);
+}
+
+//===============
+// DefaultGameMode::ClientBegin
+// 
+// Called when a client is ready to be placed in the game after connecting.
+//===============
+void DefaultGameMode::ClientBegin(Entity* serverEntity) {
+    // Spawn client class entity.
+    //ent->className = "PlayerClient";
+    //
+    //// If the client already has an entity class, ditch it.
+    //if (ent->classEntity)
+    //    delete ent->classEntity;
+
+    //ent->classEntity = new PlayerClient(ent);
+    //ent->classEntity->Spawn();
+
+    //if (deathmatch->value) {
+    //    SVG_ClientBeginDeathmatch(ent);
+    //    return;
+    //}
+
+    // if there is already a body waiting for us (a loadgame), just
+    // take it, otherwise spawn one from scratch
+    if (serverEntity->inUse == true) { // warning C4805: '==': unsafe mix of type 'qboolean' and type 'bool' in operation
+        // the client has cleared the client side viewAngles upon
+        // connecting to the server, which is different than the
+        // state when the game is saved, so we need to compensate
+        // with deltaangles
+        for (int32_t i = 0; i < 3; i++)
+            serverEntity->client->playerState.pmove.deltaAngles[i] = serverEntity->client->playerState.pmove.viewAngles[i];
+
+        // 
+        // If the client already has an entity class, ditch it.
+        SVG_FreeClassEntity(serverEntity);
+
+        serverEntity->className = "PlayerClient";
+        serverEntity->classEntity = SVG_SpawnClassEntity(serverEntity, serverEntity->className);
+        serverEntity->classEntity->Precache();
+        serverEntity->classEntity->Spawn();
+        serverEntity->classEntity->PostSpawn();
+    } else {
+        // a spawn point will completely reinitialize the entity
+        // except for the persistant data that was initialized at
+        // ClientConnect() time
+        SVG_InitEntity(serverEntity);
+        serverEntity->className = "PlayerClient";
+        SVG_InitClientRespawn(serverEntity->client);
+        SVG_PutClientInServer(serverEntity);
+    }
+
+    if (level.intermission.time) {
+        HUD_MoveClientToIntermission(serverEntity);
+    } else {
+        // send effect if in a multiplayer game
+        if (game.maxClients > 1) {
+            gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+            //gi.WriteShort(ent - g_entities);
+            gi.WriteShort(serverEntity->state.number);
+            gi.WriteByte(MuzzleFlashType::Login);
+            gi.Multicast(serverEntity->state.origin, MultiCast::PVS);
+
+            gi.BPrintf(PRINT_HIGH, "%s entered the game\n", serverEntity->client->persistent.netname);
+        }
+    }
 }
 
 //===============

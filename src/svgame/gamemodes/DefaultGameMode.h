@@ -30,6 +30,7 @@ public:
     
     virtual qboolean ClientCanConnect(Entity* serverEntity, char* userInfo) override;
     virtual void ClientConnect(Entity* serverEntity) override;
+    virtual void ClientBegin(Entity* serverEntity) override;
     virtual void ClientBeginServerFrame(PlayerClient* ent) override;
     virtual void ClientDisconnect(PlayerClient* ent) override;
 

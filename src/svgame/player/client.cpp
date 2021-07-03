@@ -275,13 +275,13 @@ void SVG_TossClientWeapon(PlayerClient *playerClient)
 
 /*
 ==============
-InitClientPersistant
+SVG_InitClientPersistant
 
 This is only called when the game first initializes in single player,
 but is called after each death and level change in deathmatch
 ==============
 */
-void InitClientPersistant(GameClient *client)
+void SVG_InitClientPersistant(GameClient *client)
 {
 	gitem_t     *item = NULL;
 
@@ -311,7 +311,7 @@ void InitClientPersistant(GameClient *client)
 }
 
 
-void InitClientRespawn(GameClient *client)
+void SVG_InitClientRespawn(GameClient *client)
 {
     if (!client)
         return;
@@ -623,7 +623,7 @@ void SVG_PutClientInServer(Entity *ent)
         memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
 
         // Initialize a fresh client persistent state.
-        InitClientPersistant(client);
+        SVG_InitClientPersistant(client);
 
         // Check for changed user info.
         SVG_ClientUserinfoChanged(ent, userinfo);
@@ -658,7 +658,7 @@ void SVG_PutClientInServer(Entity *ent)
 
     // In case of death, initialize a fresh client persistent data.
     if (client->persistent.health <= 0)
-        InitClientPersistant(client);
+        SVG_InitClientPersistant(client);
 
     // Last but not least, respawn.
     client->respawn = resp;
@@ -789,7 +789,7 @@ void SVG_ClientBeginDeathmatch(Entity *ent)
 {
     SVG_InitEntity(ent);
 
-    InitClientRespawn(ent->client);
+    SVG_InitClientRespawn(ent->client);
 
     // locate ent at a spawn point
     SVG_PutClientInServer(ent);
@@ -821,67 +821,13 @@ to be placed into the game.  This will happen every level load.
 */
 void SVG_ClientBegin(Entity *ent)
 {
-    int     i;
+    int32_t     i;
 
+    // Fetch this entity's client.
     ent->client = game.clients + (ent - g_entities - 1);
 
-    // Spawn client class entity.
-    //ent->className = "PlayerClient";
-    //
-    //// If the client already has an entity class, ditch it.
-    //if (ent->classEntity)
-    //    delete ent->classEntity;
-
-    //ent->classEntity = new PlayerClient(ent);
-    //ent->classEntity->Spawn();
-
-    if (deathmatch->value) {
-        SVG_ClientBeginDeathmatch(ent);
-        return;
-    }
-
-    // if there is already a body waiting for us (a loadgame), just
-    // take it, otherwise spawn one from scratch
-    if (ent->inUse == true) { // warning C4805: '==': unsafe mix of type 'qboolean' and type 'bool' in operation
-        // the client has cleared the client side viewAngles upon
-        // connecting to the server, which is different than the
-        // state when the game is saved, so we need to compensate
-        // with deltaangles
-        for (i = 0 ; i < 3 ; i++)
-            ent->client->playerState.pmove.deltaAngles[i] = ent->client->playerState.pmove.viewAngles[i];
-
-        // 
-        // If the client already has an entity class, ditch it.
-        SVG_FreeClassEntity(ent);
-
-        ent->className = "PlayerClient";
-        ent->classEntity = SVG_SpawnClassEntity(ent, ent->className);
-        ent->classEntity->Precache();
-        ent->classEntity->Spawn();
-        ent->classEntity->PostSpawn();
-    } else {
-        // a spawn point will completely reinitialize the entity
-        // except for the persistant data that was initialized at
-        // ClientConnect() time
-        SVG_InitEntity(ent);
-        ent->className = "PlayerClient";
-        InitClientRespawn(ent->client);
-        SVG_PutClientInServer(ent);
-    }
-
-    if (level.intermission.time) {
-        HUD_MoveClientToIntermission(ent);
-    } else {
-        // send effect if in a multiplayer game
-        if (game.maxClients > 1) {
-            gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-            gi.WriteShort(ent - g_entities);
-            gi.WriteByte(MuzzleFlashType::Login);
-            gi.Multicast(ent->state.origin, MultiCast::PVS);
-
-            gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
-        }
-    }
+    // Let the game mode decide from here on out.
+    game.gameMode->ClientBegin(ent);
 
     // Called to make sure all view stuff is valid
     SVG_ClientEndServerFrame((PlayerClient*)ent->classEntity);
@@ -975,18 +921,15 @@ qboolean SVG_ClientConnect(Entity *ent, char *userinfo)
     // take it, otherwise spawn one from scratch
     if (ent->inUse == false) {
         // Clear the respawning variables
-        InitClientRespawn(ent->client);
+        SVG_InitClientRespawn(ent->client);
         if (!game.autoSaved || !ent->client->persistent.activeWeapon)
-            InitClientPersistant(ent->client);
+            SVG_InitClientPersistant(ent->client);
     }
 
     // Check for changed user info.
     SVG_ClientUserinfoChanged(ent, userinfo);
 
-    // Connection messages do not display in SP games.
-//    if (game.maxClients > 1)
-//        gi.DPrintf("%s connected\n", ent->client->persistent.netname);
-
+    // Inform the game mode about it.
     game.gameMode->ClientConnect(ent);
 
     ent->serverFlags = 0; // make sure we start with known default
