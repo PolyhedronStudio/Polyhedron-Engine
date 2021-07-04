@@ -395,13 +395,13 @@ void SVG_AllocateGamePlayerClientEntities() {
         serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
         //serverEntity->className = "PlayerClient";
         //serverEntity->classEntity = SVG_SpawnClassEntity(serverEntity, serverEntity->className);
-        //serverEntity->inUse = true;
+        serverEntity->inUse = false;
         //serverEntity->classEntity->Precache();
         //serverEntity->classEntity->Spawn();
         //serverEntity->classEntity->PostSpawn();
 
         // 
-        ((PlayerClient*)serverEntity->classEntity)->SetClient(&game.clients[serverEntity - g_entities - 1]);
+        ((PlayerClient*)serverEntity->classEntity)->SetClient(&game.clients[i - 1]);
     }
 }
 
