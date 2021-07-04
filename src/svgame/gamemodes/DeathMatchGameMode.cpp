@@ -7,9 +7,19 @@
 //
 */
 #include "../g_local.h"          // SVGame.
+#include "../effects.h"     // Effects.
+#include "../entities.h"    // Entities.
+#include "../utils.h"       // Util funcs.
 
 // Server Game Base Entity.
 #include "../entities/base/SVGBaseEntity.h"
+#include "../entities/base/PlayerClient.h"
+
+// Weapons.h
+#include "../player/client.h"
+#include "../player/hud.h"
+#include "../player/weapons.h"
+#include "../player/view.h"
 
 // Game Mode.
 #include "DeathMatchGameMode.h"
@@ -57,7 +67,7 @@ qboolean DeathMatchGameMode::ClientCanConnect(Entity* serverEntity, char* userIn
     }
 
     // Check for whether the client is a spectator.
-    value = Info_ValueForKey(userInfo, "isSpectator");
+    value = Info_ValueForKey(userInfo, "spectator");
     int32_t i = 0, numspec = 0;
 
     if (*spectator_password->string &&
@@ -80,4 +90,34 @@ qboolean DeathMatchGameMode::ClientCanConnect(Entity* serverEntity, char* userIn
 
     // We CAN connect :)
     return true;
+}
+
+//===============
+// DeathMatchGameMode::ClientBegin
+// 
+// Called when a client is ready to be placed in the game after connecting.
+//===============
+void DeathMatchGameMode::ClientBegin(Entity* serverEntity) {
+    SVG_InitEntity(serverEntity);
+
+    SVG_InitClientRespawn(serverEntity->client);
+
+    // locate ent at a spawn point
+    SVG_PutClientInServer(serverEntity);
+
+    if (level.intermission.time) {
+        HUD_MoveClientToIntermission(serverEntity);
+    } else {
+        // send effect
+        gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+        //gi.WriteShort(ent - g_entities);
+        gi.WriteShort(serverEntity->state.number);
+        gi.WriteByte(MuzzleFlashType::Login);
+        gi.Multicast(serverEntity->state.origin, MultiCast::PVS);
+    }
+
+    gi.BPrintf(PRINT_HIGH, "%s entered the game\n", serverEntity->client->persistent.netname);
+
+    // make sure all view stuff is valid
+    SVG_ClientEndServerFrame((PlayerClient*)serverEntity->classEntity);
 }

@@ -352,6 +352,12 @@ void SVG_SaveClientData(void)
 
 void SVG_FetchClientData(Entity *ent)
 {
+    if (!ent)
+        return;
+
+    if (!ent->classEntity)
+        return;
+
     ent->classEntity->SetHealth(ent->client->persistent.health);
     ent->classEntity->SetMaxHealth(ent->client->persistent.maxHealth);
     ent->classEntity->SetFlags(ent->classEntity->GetFlags() | ent->client->persistent.savedFlags);
@@ -666,10 +672,10 @@ void SVG_PutClientInServer(Entity *ent)
     //
     // Spawn client class entity.
     //
-    SVG_FreeClassEntity(ent);
+//    SVG_FreeClassEntity(ent);
 
-    ent->className = "PlayerClient";
-    PlayerClient *playerClientEntity = (PlayerClient*)(ent->classEntity = SVG_SpawnClassEntity(ent, ent->className));
+    //ent->className = "PlayerClient";
+    PlayerClient* playerClientEntity = (PlayerClient*)(ent->classEntity);
     playerClientEntity->SetClient(&game.clients[index]);
     playerClientEntity->Precache();
     playerClientEntity->Spawn();

@@ -144,6 +144,9 @@ void SVG_ChangeWeapon(PlayerClient*ent)
 {
     int i;
 
+    if (!ent)
+        return;
+
     GameClient* client = ent->GetClient();
 
     client->persistent.lastWeapon = client->persistent.activeWeapon;

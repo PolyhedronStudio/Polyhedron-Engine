@@ -345,33 +345,35 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
     //    return;
     //}
 
-    // if there is already a body waiting for us (a loadgame), just
+    // If there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
-    if (serverEntity->inUse == true) { // warning C4805: '==': unsafe mix of type 'qboolean' and type 'bool' in operation
-        // the client has cleared the client side viewAngles upon
+    if (serverEntity->inUse == true) {
+        // The client has cleared the client side viewAngles upon
         // connecting to the server, which is different than the
         // state when the game is saved, so we need to compensate
         // with deltaangles
         for (int32_t i = 0; i < 3; i++)
             serverEntity->client->playerState.pmove.deltaAngles[i] = serverEntity->client->playerState.pmove.viewAngles[i];
 
-        // 
-        // If the client already has an entity class, ditch it.
-        SVG_FreeClassEntity(serverEntity);
+    //    // 
+    //    // If the client already has an entity class, ditch it.
+    //    SVG_FreeClassEntity(serverEntity);
 
-        serverEntity->className = "PlayerClient";
-        serverEntity->classEntity = SVG_SpawnClassEntity(serverEntity, serverEntity->className);
-        serverEntity->classEntity->Precache();
-        serverEntity->classEntity->Spawn();
-        serverEntity->classEntity->PostSpawn();
+    //    serverEntity->classEntity = SVG_CreateEntity<PlayerClient>(); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
+    //    serverEntity->classEntity->Precache();
+    //    serverEntity->classEntity->Spawn();
+    //    serverEntity->classEntity->PostSpawn();
+
     } else {
-        // a spawn point will completely reinitialize the entity
-        // except for the persistant data that was initialized at
-        // ClientConnect() time
-        SVG_InitEntity(serverEntity);
-        serverEntity->className = "PlayerClient";
+    //    // a spawn point will completely reinitialize the entity
+    //    // except for the persistant data that was initialized at
+    //    // ClientConnect() time
+    //    SVG_InitEntity(serverEntity);
+    //    serverEntity->className = "PlayerClient";
+
         SVG_InitClientRespawn(serverEntity->client);
         SVG_PutClientInServer(serverEntity);
+        //serverEntity->classEntity->Respawn();
     }
 
     if (level.intermission.time) {

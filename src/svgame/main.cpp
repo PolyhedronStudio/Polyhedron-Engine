@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Entities.
 #include "entities.h"
 #include "entities/base/SVGBaseEntity.h"
+#include "entities/base/PlayerClient.h"
 
 // Gamemodes.
 #include "gamemodes/IGameMode.h"
@@ -112,6 +113,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
 void SVG_InitializeServerEntities();
 void SVG_InitializeGameMode();
 void SVG_AllocateGameClients();
+void SVG_AllocateGamePlayerClientEntities();
 void SVG_InitializeCVars();
 
 void SVG_RunEntity(SVGBaseEntity *ent);
@@ -152,6 +154,7 @@ void SVG_InitGame(void)
     SVG_InitItems();
     SVG_InitializeServerEntities();
     SVG_AllocateGameClients();
+    //SVG_AllocateGamePlayerClientEntities();
     SVG_InitializeGameMode();
 }
 
@@ -367,6 +370,41 @@ void SVG_AllocateGameClients() {
     game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     globals.numberOfEntities = game.maxClients + 1;
 }
+
+//
+//=====================
+// SVG_AllocateGamePlayerClientEntities
+//
+// Allocate the client player class entities before hand. No need to redo this all over,
+// that'd just be messy and complicate things more.
+//=====================
+//
+void SVG_AllocateGamePlayerClientEntities() {
+    // Loop over the number of clients.
+    int32_t maxClients = game.maxClients;
+
+    // Allocate a classentity for each client in existence.
+    for (int32_t i = 1; i < maxClients + 1; i++) {
+        // Fetch server entity.
+        Entity* serverEntity = &g_entities[i];
+
+        // Initialize entity.
+        SVG_InitEntity(serverEntity);
+
+        // Allocate their class entities appropriately.
+        serverEntity->classEntity = SVG_CreateEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
+        //serverEntity->className = "PlayerClient";
+        //serverEntity->classEntity = SVG_SpawnClassEntity(serverEntity, serverEntity->className);
+        //serverEntity->inUse = true;
+        //serverEntity->classEntity->Precache();
+        //serverEntity->classEntity->Spawn();
+        //serverEntity->classEntity->PostSpawn();
+
+        // 
+        ((PlayerClient*)serverEntity->classEntity)->SetClient(&game.clients[serverEntity - g_entities - 1]);
+    }
+}
+
 
 //
 //===============

@@ -209,6 +209,9 @@ qboolean SVG_KillBox(SVGBaseEntity *ent)
 {
     SVGTrace tr;
 
+    if (!ent)
+        return false;
+
     while (1) {
         tr = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), NULL, CONTENTS_MASK_PLAYERSOLID);
         if (!tr.ent)
