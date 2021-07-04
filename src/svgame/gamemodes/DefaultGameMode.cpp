@@ -359,7 +359,7 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
     //    // If the client already has an entity class, ditch it.
     //    SVG_FreeClassEntity(serverEntity);
 
-    //    serverEntity->classEntity = SVG_CreateEntity<PlayerClient>(); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
+    //    serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
     //    serverEntity->classEntity->Precache();
     //    serverEntity->classEntity->Spawn();
     //    serverEntity->classEntity->PostSpawn();

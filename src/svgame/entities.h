@@ -42,7 +42,7 @@ Entity* SVG_CreateTargetChangeLevel(char* map);
 
 // Admer: quick little template function to spawn entities, until we have this code in a local game class :)
 template<typename entityClass>
-inline entityClass* SVG_CreateEntity(Entity* edict = nullptr, bool allocateNewEdict = true) {
+inline entityClass* SVG_CreateClassEntity(Entity* edict = nullptr, bool allocateNewEdict = true) {
     entityClass* entity = nullptr;
     // If a null entity was passed, create a new one
     if (nullptr == edict) {

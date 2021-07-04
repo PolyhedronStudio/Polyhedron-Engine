@@ -392,7 +392,7 @@ void SVG_AllocateGamePlayerClientEntities() {
         SVG_InitEntity(serverEntity);
 
         // Allocate their class entities appropriately.
-        serverEntity->classEntity = SVG_CreateEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
+        serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
         //serverEntity->className = "PlayerClient";
         //serverEntity->classEntity = SVG_SpawnClassEntity(serverEntity, serverEntity->className);
         //serverEntity->inUse = true;
