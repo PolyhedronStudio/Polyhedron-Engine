@@ -258,7 +258,7 @@ public:
     // Return the 'movetype' value.
     inline const int32_t GetMoveType() {
         return moveType;
-    }
+    } 
 
     // Return the 'nextThinkTime' value.
     inline const float GetNextThinkTime() {

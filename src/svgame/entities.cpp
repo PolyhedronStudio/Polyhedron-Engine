@@ -30,6 +30,19 @@
 #include "entities/misc/MiscExplosionBox.h"
 #include "entities/func/FuncButton.h"
 
+
+//-----------------
+// Entity Game Variables.
+//
+// TODO: Explain shit, lol.
+//-----------------
+// Actual Server Entity array.
+Entity g_entities[MAX_EDICTS];
+
+// BaseEntity array, matches similarly index wise.
+SVGBaseEntity* g_baseEntities[MAX_EDICTS];
+
+
 //
 //===============
 // SVG_SpawnClassEntity

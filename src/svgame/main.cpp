@@ -37,6 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Physics related.
 #include "physics/stepmove.h"
 
+
 //-----------------
 // Global Game Variables.
 //
@@ -53,11 +54,6 @@ int sm_meat_index;
 int snd_fry;
 int meansOfDeath;
 
-// Actual Server Entity array.
-Entity g_entities[MAX_EDICTS];
-
-// BaseEntity array, matches similarly index wise.
-SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 
 //-----------------
 // CVars.
@@ -398,7 +394,7 @@ void SVG_AllocateGamePlayerClientEntities() {
         serverEntity->classEntity->SetInUse(false);
 
         // Fetch client index.
-        int32_t clientIndex = i - 1; // Same as the older: serverEntity - g_entities - 1;
+        const int32_t clientIndex = i - 1; // Same as the older: serverEntity - g_entities - 1;
 
         // Assign the designated client to this PlayerClient entity.
         ((PlayerClient*)serverEntity->classEntity)->SetClient(&game.clients[clientIndex]);

@@ -428,7 +428,10 @@ SET(SRC_SHAREDGAME
 
 ###################### Shared Folder.
 SET(HEADERS_SHARED
-	# Math shared .cpp lib here.
+	# Container lib.
+	../inc/shared/containers/IterableCArray.h
+
+	# Math lib.
 	../inc/shared/math/color.h
 	../inc/shared/math/matrix3.h
 	../inc/shared/math/matrix4.h
@@ -439,7 +442,8 @@ SET(HEADERS_SHARED
 	../inc/shared/math/vector3.h
 	../inc/shared/math/vector4.h
 	../inc/shared/math/vector5.h
-
+	
+	# Other shared lib functionalities.
 	../inc/shared/clgame.h
 	../inc/shared/cltypes.h
 	../inc/shared/collision.h
