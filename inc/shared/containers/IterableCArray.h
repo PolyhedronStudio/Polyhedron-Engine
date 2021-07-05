@@ -216,67 +216,67 @@ public:
     //*************************************************************************
     /// Swaps the contents of arrays.
     //*************************************************************************
-    template <typename U, U(&ARRAYOTHER)[SIZE_]>
-    typename std::enable_if<std::is_same<T, U>::value, void>::type
-        swap(etl::IteratableCArray<U, SIZE_, ARRAYOTHER>& other) {
-        for (size_t i = 0; i < SIZE; ++i)   {
-            std::swap(ARRAY_[i], other.begin()[i]);
-        }
-    }
+    //template <typename U, U(&ARRAYOTHER)[SIZE_]>
+    //typename std::enable_if<std::is_same<T, U>::value, void>::type
+    //    swap(IteratableCArray<U, SIZE_, ARRAYOTHER>& other) {
+    //    for (size_t i = 0; i < SIZE; ++i)   {
+    //        std::swap(ARRAY_[i], other.begin()[i]);
+    //    }
+    //}
 
-    //*************************************************************************
-    /// Equality for array wrappers.
-    //===============
-    template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
-    bool operator == (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
-        const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
-        return (SIZEL == SIZER) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
-    }
+    ////*************************************************************************
+    ///// Equality for array wrappers.
+    ////===============
+    //template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
+    //bool operator == (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
+    //    const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
+    //    return (SIZEL == SIZER) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    //}
 
-    //*************************************************************************
-    /// Inequality for array wrapper.
-    //*************************************************************************
-    template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
-    bool operator != (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
-        const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
-        return !(lhs == rhs);
-    }
+    ////*************************************************************************
+    ///// Inequality for array wrapper.
+    ////*************************************************************************
+    //template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
+    //bool operator != (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
+    //    const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
+    //    return !(lhs == rhs);
+    //}
 
-    //*************************************************************************
-    /// Less-than for array wrapper.
-    //*************************************************************************
-    template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
-    bool operator < (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
-        const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
-        return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
-    }
+    ////*************************************************************************
+    ///// Less-than for array wrapper.
+    ////*************************************************************************
+    //template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
+    //bool operator < (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
+    //    const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
+    //    return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    //}
 
-    //*************************************************************************
-    /// Greater-than for array wrapper.
-    //*************************************************************************
-    template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
-    bool operator > (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
-        const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
-        return rhs < lhs;
-    }
+    ////*************************************************************************
+    ///// Greater-than for array wrapper.
+    ////*************************************************************************
+    //template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
+    //bool operator > (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
+    //    const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
+    //    return rhs < lhs;
+    //}
 
-    //*************************************************************************
-    /// Less-than-equal for array wrapper.
-    //*************************************************************************
-    template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
-    bool operator <= (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
-        const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
-        return !(lhs > rhs);
-    }
+    ////*************************************************************************
+    ///// Less-than-equal for array wrapper.
+    ////*************************************************************************
+    //template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
+    //bool operator <= (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
+    //    const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
+    //    return !(lhs > rhs);
+    //}
 
-    //*************************************************************************
-    /// Greater-than-equal for array wrapper.
-    //*************************************************************************
-    template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
-    bool operator >= (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
-        const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
-        return !(lhs < rhs);
-    }
+    ////*************************************************************************
+    ///// Greater-than-equal for array wrapper.
+    ////*************************************************************************
+    //template <typename TL, typename TR, std::size_t SIZEL, std::size_t SIZER, TL(&ARRAYL)[SIZEL], TR(&ARRAYR)[SIZER]>
+    //bool operator >= (const IteratableCArray<TL, SIZEL, ARRAYL>& lhs,
+    //    const IteratableCArray<TR, SIZER, ARRAYR>& rhs) {
+    //    return !(lhs < rhs);
+    //}
 
     //*************************************************************************
     /// Swap.

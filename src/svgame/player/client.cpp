@@ -825,6 +825,8 @@ called when a client has finished connecting, and is ready
 to be placed into the game.  This will happen every level load.
 ============
 */
+extern void DebugShitForEntitiesLulz();
+
 void SVG_ClientBegin(Entity *ent)
 {
     int32_t     i;
@@ -834,6 +836,9 @@ void SVG_ClientBegin(Entity *ent)
 
     // Let the game mode decide from here on out.
     game.gameMode->ClientBegin(ent);
+
+    // DEBUG:...
+    DebugShitForEntitiesLulz();
 
     // Called to make sure all view stuff is valid
     SVG_ClientEndServerFrame((PlayerClient*)ent->classEntity);

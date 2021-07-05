@@ -42,6 +42,28 @@ Entity g_entities[MAX_EDICTS];
 // BaseEntity array, matches similarly index wise.
 SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 
+#include "../inc/shared/containers/IterableCArray.h"
+typedef IteratableCArray<Entity, std::size(g_entities), g_entities> WrappedEntities;
+WrappedEntities wrappedEntities;
+
+void DebugShitForEntitiesLulz() {
+    // Loop through it.
+    for (auto& ent : wrappedEntities) {
+        // Ensure it is in use, or ignore it.
+        if (!ent.inUse)
+            continue;
+
+        // Fetch class ent.
+        SVGBaseEntity* classEntity = ent.classEntity;
+
+        // Hue hue cry baby cry, do or die!
+        if (!classEntity)
+            continue;
+
+        // Aight sweet spot hit.
+        gi.DPrintf("DebugShotForEntitiesLulz: %s\n", classEntity->GetClassName());
+    }
+}
 
 //
 //===============
