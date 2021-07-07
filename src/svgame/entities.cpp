@@ -19,16 +19,8 @@
 #include "entities/base/SVGBaseMover.h"
 #include "entities/base/PlayerClient.h"
 #include "entities/info/InfoPlayerStart.h"
-#include "entities/trigger/TriggerAlways.h"
-#include "entities/trigger/TriggerDelayedUse.h"
-#include "entities/trigger/TriggerHurt.h"
-#include "entities/trigger/TriggerMultiple.h"
-#include "entities/trigger/TriggerOnce.h"
-#include "entities/weaponry/BlasterBolt.h"
 #include "entities/Worldspawn.h"
-#include "entities/Light.h"
-#include "entities/misc/MiscExplosionBox.h"
-#include "entities/func/FuncButton.h"
+
 
 
 //-----------------
@@ -91,6 +83,7 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
             return nullptr; // Bail out, we didn't find one
         }
     }
+
     // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know
     if ( nullptr != info->AllocateInstance ) {
         return (g_baseEntities[entityNumber] = info->AllocateInstance( ent ));
@@ -263,9 +256,6 @@ Entity* SVG_Find(Entity* from, int fieldofs, const char* match)
 //===============
 //
 SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::string& fieldValue, SVGBaseEntity* lastEntity) {
-    vec3_t  eorg;
-    int     j;
-
     Entity* serverEnt = (lastEntity ? lastEntity->GetServerEntity() : nullptr);
 
     if (!lastEntity)
@@ -348,9 +338,7 @@ SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::
 //
 SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t origin, float radius, uint32_t excludeSolidFlags)
 {
-    vec3_t  eorg;
-    int     j;
-
+    vec3_t  entityOrigin = vec3_zero();
     Entity* serverEnt = (from ? from->GetServerEntity() : nullptr);
 
     if (!from)
@@ -378,7 +366,7 @@ SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t origin, 
         vec3_t entityOrigin = origin - (classEntity->GetOrigin() + vec3_scale(classEntity->GetMins() + classEntity->GetMaxs(), 0.5f));
 
         // Do they exceed our radius? Then we haven't find any.
-        if (vec3_length(eorg) > radius)
+        if (vec3_length(entityOrigin) > radius)
             continue;
 
         // Cheers, we found our class entity.
