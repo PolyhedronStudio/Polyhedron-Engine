@@ -190,8 +190,8 @@ void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
     // Generated a message?
     if (!message.empty()) {
         gi.BPrintf(PRINT_MEDIUM, "%s %s.\n", self->GetClient()->persistent.netname, message.c_str());
-        if (deathmatch->value)
-            self->GetClient()->respawn.score--;
+        //if (deathmatch->value)
+        self->GetClient()->respawn.score--;
         self->SetEnemy(NULL);
         return;
     }
