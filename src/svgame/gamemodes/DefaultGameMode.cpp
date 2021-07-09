@@ -27,7 +27,8 @@
 // Constructor/Deconstructor.
 //
 DefaultGameMode::DefaultGameMode() {
-
+    // Defaults.
+    meansOfDeath = 0;
 }
 DefaultGameMode::~DefaultGameMode() {
 
@@ -432,4 +433,169 @@ void DefaultGameMode::ClientDisconnect(PlayerClient* player) {
     // FIXME: don't break skins on corpses, etc
     //playernum = ent-g_entities-1;
     //gi.configstring (ConfigStrings::PlayerSkins+playernum, "");
+}
+
+//===============
+// DefaultGameMode::ClientUpdateObituary
+// 
+//===============
+void DefaultGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
+    // 
+    int32_t finalMeansOfDeath = 0;
+    std::string message = ""; // String stating what happened to whichever entity. "suicides", "was squished" etc.
+    std::string messageAddition = ""; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
+    //qboolean    friendlyFire = false; // Is there friendly fire going on? Shame on you guys!
+    
+    // Goes to COOP GAME MODE.
+    //if (coop->value && attacker->GetClient())
+    //    meansOfDeath |= MeansOfDeath::FriendlyFire;
+
+    qboolean friendlyFire = meansOfDeath & MeansOfDeath::FriendlyFire;
+    finalMeansOfDeath = meansOfDeath & ~MeansOfDeath::FriendlyFire;
+
+    switch (finalMeansOfDeath) {
+        case MeansOfDeath::Suicide:
+            message = "suicides";
+            break;
+        case MeansOfDeath::Falling:
+            message = "cratered";
+            break;
+        case MeansOfDeath::Crush:
+            message = "was squished";
+            break;
+        case MeansOfDeath::Water:
+            message = "sank like a rock";
+            break;
+        case MeansOfDeath::Slime:
+            message = "melted";
+            break;
+        case MeansOfDeath::Lava:
+            message = "does a back flip into the lava";
+            break;
+        case MeansOfDeath::Explosive:
+        case MeansOfDeath::Barrel:
+            message = "blew up";
+            break;
+        case MeansOfDeath::Exit:
+            message = "found a way out";
+            break;
+        case MeansOfDeath::Splash:
+        case MeansOfDeath::TriggerHurt:
+            message = "was in the wrong place";
+            break;
+    }
+    if (attacker == self) {
+        switch (finalMeansOfDeath) {
+        case MeansOfDeath::GrenadeSplash:
+                message = "tripped on his own grenade";
+            break;
+        case MeansOfDeath::RocketSplash:
+                message = "blew himself up";
+            break;
+        default:
+                message = "killed himself";
+            break;
+        }
+    }
+    if (!message.empty()) {
+        gi.BPrintf(PRINT_MEDIUM, "%s %s.\n", self->GetClient()->persistent.netname, message.c_str());
+        if (deathmatch->value)
+            self->GetClient()->respawn.score--;
+        self->SetEnemy(NULL);
+        return;
+    }
+
+    // Set the attacker to self.
+    self->SetEnemy(attacker);
+
+    // If we have an attacker, and it IS a client...
+    if (attacker && attacker->GetClient()) {
+        switch (finalMeansOfDeath) {
+        case MeansOfDeath::Blaster:
+            message = "was blasted by";
+            break;
+        case MeansOfDeath::Shotgun:
+            message = "was gunned down by";
+            break;
+        case MeansOfDeath::SuperShotgun:
+            message = "was blown away by";
+            messageAddition = "'s super shotgun";
+            break;
+        case MeansOfDeath::Machinegun:
+            message = "was machinegunned by";
+            break;
+        case MeansOfDeath::Grenade:
+            message = "was popped by";
+            messageAddition = "'s grenade";
+            break;
+        case MeansOfDeath::GrenadeSplash:
+            message = "was shredded by";
+            messageAddition = "'s shrapnel";
+            break;
+        case MeansOfDeath::Rocket:
+            message = "ate";
+            messageAddition = "'s rocket";
+            break;
+        case MeansOfDeath::RocketSplash:
+            message = "almost dodged";
+            messageAddition = "'s rocket";
+            break;
+        case MeansOfDeath::TeleFrag:
+            message = "tried to invade";
+            messageAddition = "'s personal space";
+            break;
+        }
+        if (!message.empty()) {
+            gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClient()->persistent.netname, messageAddition.c_str());
+            // WID: We can uncomment these in case we end up making a SinglePlayerMode after all.
+            //if (deathmatch->value) {
+            //    if (friendlyFire)
+            //        attacker->GetClient()->respawn.score--;
+            //    else
+            //        attacker->GetClient()->respawn.score++;
+            //}
+            return;
+        }
+    }
+
+    // Check for monster deaths here.
+    if (attacker->GetServerFlags() & EntityServerFlags::Monster) {
+        // Fill in message here
+        // aka if (attacker->classname == "monster_1337h4x0r")
+        // Then we do...
+        // Also we gotta adjust that ->classname thing, but this is a template, cheers :)
+        //if (!message.empty()) {
+        //    gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClassName(), messageAddition.c_str());
+        //    if (deathmatch->value) {
+        //        if (friendlyFire)
+        //            attacker->GetClient()->respawn.score--;
+        //        else
+        //            attacker->GetClient()->respawn.score++;
+        //    }
+        //    return;
+        //}
+    }
+
+    // 
+    gi.BPrintf(PRINT_MEDIUM, "%s died.\n", self->GetClient()->persistent.netname);
+    
+    // WID: We can uncomment these in case we end up making a SinglePlayerMode after all.
+    //if (deathmatch->value)
+    //    self->GetClient()->respawn.score--;
+}
+
+//===============
+// DefaultGameMode::SetCurrentMeansOfDeath
+// 
+//===============
+void DefaultGameMode::SetCurrentMeansOfDeath(int32_t meansOfDeath) {
+    this->meansOfDeath = meansOfDeath;
+}
+
+//===============
+// DefaultGameMode::GetCurrentMeansOfDeath
+// 
+//===============
+const int32_t& DefaultGameMode::GetCurrentMeansOfDeath() {
+    return this->meansOfDeath;
 }

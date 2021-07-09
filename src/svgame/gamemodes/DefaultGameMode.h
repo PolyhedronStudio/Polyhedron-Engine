@@ -33,6 +33,10 @@ public:
     virtual void ClientBegin(Entity* serverEntity) override;
     virtual void ClientBeginServerFrame(PlayerClient* ent) override;
     virtual void ClientDisconnect(PlayerClient* ent) override;
+    virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
+
+    virtual void SetCurrentMeansOfDeath(int32_t meansOfDeath) override;
+    virtual const int32_t& GetCurrentMeansOfDeath() override;
 
 private:
 

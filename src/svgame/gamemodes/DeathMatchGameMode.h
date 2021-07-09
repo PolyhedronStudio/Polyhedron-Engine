@@ -28,6 +28,8 @@ public:
     virtual qboolean ClientCanConnect(Entity* serverEntity, char* userInfo) override;
     // MP Does special "ClientBegin" rules for clients.
     virtual void ClientBegin(Entity* serverEntity) override;
+    // DeathMatch has its own Obituary madness.
+    virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
 private:
 

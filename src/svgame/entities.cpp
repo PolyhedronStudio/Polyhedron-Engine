@@ -286,45 +286,6 @@ SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::
     }
 
     return nullptr;
-
-    //if (!from)
-    //    from = g_baseEntities;
-    //else
-    //    from++;
-
-    //for (int32_t i = 0; from < &g_entities[globals.numberOfEntities]; from++) {
-    //    s = *(char**)((byte*)from + fieldofs);
-    //    if (!s)
-    //        continue;
-    //    if (!Q_stricmp(s, mat ch))
-    //        return from;
-    //}
-
-    //// In case we have a last entity, we now know where to start.
-    //int32_t start = (lastEntity != nullptr ? lastEntity->GetNumber() : 0);
-
-    //// Very ugly, but I suppose... it has to be like this for now.
-    //for (int32_t i = start; i < MAX_EDICTS; i++) {
-    //    // Ensure this entity is in use. (Skip otherwise.)
-    //    if (!g_entities[i].inUse)
-    //        continue;
-
-    //    // Ensure this entity has a valid class entity. (Skip otherwise.)
-    //    if (!g_entities[i].classEntity)
-    //        continue;
-
-    //    // Start preparing for checking IF, its dictionary HAS fieldKey.
-    //    auto dictionary = g_entities[i].entityDictionary;
-
-    //    if (dictionary.find(fieldKey) != dictionary.end()) {
-    //        if (dictionary[fieldKey] == fieldValue) {
-    //            return g_entities[i].classEntity;
-    //        }
-    //    }
-    //}
-
-    //// We failed at finding any entity with the specific requirements, return nullptr.
-    //return nullptr;
 }
 
 //
@@ -415,16 +376,15 @@ Entity* SVG_Spawn(void)
     int32_t i = 0;
     // Acquire a pointer to the entity we'll check for.
     serverEntity = &g_entities[game.maxClients + 1];
-    for (int32_t i = game.maxClients + 1; i < globals.numberOfEntities; i++, serverEntity++) {
-
-
-        // the first couple seconds of server time can involve a lot of
+    for (i = game.maxClients + 1; i < globals.numberOfEntities; i++, serverEntity++) {
+        // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!serverEntity->inUse && (serverEntity->freeTime < 2 || level.time - serverEntity->freeTime > 0.5)) {
             SVG_InitEntity(serverEntity);
             return serverEntity;
         }
     }
+
 
     if (i == game.maxEntities)
         gi.Error("ED_Alloc: no free edicts");

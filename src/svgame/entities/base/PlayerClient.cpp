@@ -14,6 +14,9 @@
 #include "../../player/view.h"          // Include Player View functions..
 #include "../../utils.h"                // Util funcs.
 
+// Game Mode interface.
+#include "../../gamemodes/IGameMode.h"
+
 // Class Entities.
 #include "../base/SVGBaseEntity.h"
 #include "PlayerClient.h"
@@ -181,7 +184,8 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
         SetPlayerMoveType(EnginePlayerMoveType::Dead);
 
         // Update the obituary.
-        SVG_ClientUpdateObituary(this, inflictor, attacker);
+        game.gameMode->ClientUpdateObituary(this, inflictor, attacker);
+        //SVG_ClientUpdateObituary(this, inflictor, attacker);
 
         // Toss our weapon, assuming we had any.
         SVG_TossClientWeapon(this);
