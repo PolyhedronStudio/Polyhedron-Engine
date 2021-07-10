@@ -28,7 +28,7 @@ void gib_die(Entity* self, Entity* inflictor, Entity* attacker, int damage, cons
 
 void ThrowHead(Entity* self, const char* gibname, int damage, int type);
 void ThrowClientHead(Entity* self, int damage);
-void ThrowGib(Entity* self, const char* gibname, int damage, int type);
+void ThrowGib(SVGBaseEntity* self, const char* gibname, int damage, int type);
 
 //
 // Explosions.

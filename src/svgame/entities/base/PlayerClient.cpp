@@ -211,10 +211,10 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
         SVG_Sound(this, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
 
         // Throw some gibs around, true horror oh boy.
-        ThrowGib(serverEntity, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        ThrowGib(serverEntity, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        ThrowGib(serverEntity, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        ThrowGib(serverEntity, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+        ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+        ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+        ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+        ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         ThrowClientHead(serverEntity, damage);
 
         // Can't take damage if we're already busted.

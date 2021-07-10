@@ -8,8 +8,8 @@
 // These serve for client entities when they die, and go into the body queue.
 //
 */
-#ifndef __SVGAME_ENTITIES_WEAPONRY_BODYCORPSE_H__
-#define __SVGAME_ENTITIES_WEAPONRY_BODYCORPSE_H__
+#ifndef __SVGAME_ENTITIES_BASE_BODYCORPSE_H__
+#define __SVGAME_ENTITIES_BASE_BODYCORPSE_H__
 
 class SVGBaseEntity;
 
@@ -36,6 +36,7 @@ public:
     // Callback functions.
     //
     //
+    void BodyCorpseDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
     void BodyCorpseTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
 
     //
@@ -49,4 +50,4 @@ private:
 
 };
 
-#endif // __SVGAME_ENTITIES_WEAPONRY_BODYCORPSE_H__
+#endif // __SVGAME_ENTITIES_BASE_BODYCORPSE_H__

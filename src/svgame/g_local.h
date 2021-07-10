@@ -708,6 +708,7 @@ struct SVGTrace {
         offsets[6] = vec3_t{ 0.f, 0.f, 0.f };
         offsets[7] = vec3_t{ 0.f, 0.f, 0.f };
     }
+
     // If true, the trace startedand ended within the same solid.
     qboolean    allSolid;
     // If true, the trace started within a solid, but exited it.
@@ -984,7 +985,6 @@ struct entity_s {
     const char *message;     // C++20: STRING: Added const to char *
     const char *className;   // C++20: STRING: Made const.
     
-
     float timeStamp;
 
     char *target;
@@ -1002,29 +1002,10 @@ struct entity_s {
     vec3_t position1, position2;
 
     // Regular entity velocity, gravity, mass.
-    //vec3_t velocity;
-    //vec3_t angularVelocity;
-    
-    //float gravity;        // per entity gravity multiplier (1.0 is normal)
-                                // use for lowgrav artifact, flares
-
     Entity *goalEntityPtr;
     Entity *moveTargetPtr;
-    //float yawSpeed;
-    //float idealYawAngle;
-
-    //float nextThinkTime;
-    //float lastMoveTime;
-
-    //int32_t health;
-    //int32_t maxHealth;
 
     const char *map;           // target_changelevel // C++20: STRING: Added const to char *
-
-    //int32_t viewHeight;     // height above origin where eyesight is determined
-    //int32_t takeDamage;
-    //int32_t damage;
-    //int32_t sounds;         // make this a spawntemp var?
     int32_t count;
 
     // Chain, enemy, old enemy, and activator entity pointers.
@@ -1032,7 +1013,6 @@ struct entity_s {
     
     // Ground pointers.
     Entity *groundEntityPtr;
-    //int32_t groundEntityLinkCount;
 
     Entity *myNoisePtr;       // can go in client only
     Entity *myNoise2Ptr;
@@ -1042,9 +1022,7 @@ struct entity_s {
     float volume;
     float attenuation;
 
-    // timing variables
-    //float wait;
-    //float delay;          // before firing targets
+    // Timing variables
     float random;
 
     float teleportTime;

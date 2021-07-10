@@ -132,10 +132,6 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
 //===============
 
 void DefaultGameMode::SpawnCorpseFromClient(SVGBaseEntity* ent) {
-    // Entity to be used for placing in the queue.
-    Entity* bodyEntity = nullptr;
-    SVGBaseEntity* bodyClassEntity = nullptr;
-
     // Ensure it is an entity.
     if (!ent)
         return;
@@ -144,16 +140,16 @@ void DefaultGameMode::SpawnCorpseFromClient(SVGBaseEntity* ent) {
     if (!ent->GetClient())
         return;
 
-    //Entity     *body;
-
     // Unlink the player client entity.
     ent->UnlinkEntity();
 
     // Grab a body from the queue, and cycle to the next one.
-    bodyEntity = &g_entities[game.maxClients + level.bodyQue + 1];
+    Entity *bodyEntity = &g_entities[game.maxClients + level.bodyQue + 1];
     level.bodyQue = (level.bodyQue + 1) % BODY_QUEUE_SIZE;
 
-    // Send an effect on the removed body.
+    // Send an effect on this body, in case it already has a model index.
+    // This'll cause a body not to just "disappear", but actually play some
+    // bloody particles over there.
     if (bodyEntity->state.modelIndex) {
         gi.WriteByte(SVG_CMD_TEMP_ENTITY);
         gi.WriteByte(TempEntityEvent::Blood);
@@ -163,7 +159,7 @@ void DefaultGameMode::SpawnCorpseFromClient(SVGBaseEntity* ent) {
     }
 
     // Create the class entity for this queued bodyEntity.
-    bodyClassEntity = SVG_CreateClassEntity<BodyCorpse>(bodyEntity, false);
+    SVGBaseEntity *bodyClassEntity = SVG_CreateClassEntity<BodyCorpse>(bodyEntity, false);
 
     // Unlink the body entity, in case it was linked before.
     bodyClassEntity->UnlinkEntity();
@@ -171,6 +167,7 @@ void DefaultGameMode::SpawnCorpseFromClient(SVGBaseEntity* ent) {
     // Copy over the bodies state of the current entity into the body entity.
     bodyClassEntity->SetState(ent->GetState());
     // Change its number so it is accurately set to the one belonging to bodyEntity.
+    // (Has to happen since we first copied over an entire entity state.)
     bodyClassEntity->SetNumber(bodyEntity - g_entities);
     // Set the event ID for this frame to OtherTeleport.
     bodyClassEntity->SetEventID(EntityEvent::OtherTeleport);
@@ -191,24 +188,11 @@ void DefaultGameMode::SpawnCorpseFromClient(SVGBaseEntity* ent) {
     bodyClassEntity->SetGroundEntity(ent->GetGroundEntity());
 
     // Set the die callback, and set its take damage.
-    //bodyClassEntity->SetDieCallback(&BodyCorpse::BodyCorpseDie);
+    bodyClassEntity->SetDieCallback(&BodyCorpse::BodyCorpseDie);
     bodyClassEntity->SetTakeDamage(TakeDamage::Yes);
+
+    // Link it in for collision etc.
     bodyClassEntity->LinkEntity();
-
-    // Finally, link it back in.
-    //body->size = ent->size; // VectorCopy(ent->size, body->size);
-    ////body->velocity = ent->classEntity->GetVelocity(); // VectorCopy(ent->velocity, body->velocity);
-    ////body->angularVelocity = ent->classEntity->GetAngularVelocity(); //  VectorCopy(ent->angularVelocity, body->angularVelocity);
-    //body->solid = ent->solid;
-    //body->clipMask = ent->clipMask;
-    //body->owner = ent->owner;
-    //body->classEntity->SetMoveType(ent->classEntity->GetMoveType());
-    //body->classEntity->SetGroundEntity(ent->classEntity->GetGroundEntity());
-
-    ////body->Die = body_die;
-    //body->takeDamage = TakeDamage::Yes;
-
-    //gi.LinkEntity(body);
 }
 
 //===============
@@ -415,21 +399,6 @@ void DefaultGameMode::ClientConnect(Entity* serverEntity) {
 // Called when a client is ready to be placed in the game after connecting.
 //===============
 void DefaultGameMode::ClientBegin(Entity* serverEntity) {
-    // Spawn client class entity.
-    //ent->className = "PlayerClient";
-    //
-    //// If the client already has an entity class, ditch it.
-    //if (ent->classEntity)
-    //    delete ent->classEntity;
-
-    //ent->classEntity = new PlayerClient(ent);
-    //ent->classEntity->Spawn();
-
-    //if (deathmatch->value) {
-    //    SVG_ClientBeginDeathmatch(ent);
-    //    return;
-    //}
-
     // If there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
     if (serverEntity->inUse == true) {
@@ -439,23 +408,7 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
         // with deltaangles
         for (int32_t i = 0; i < 3; i++)
             serverEntity->client->playerState.pmove.deltaAngles[i] = serverEntity->client->playerState.pmove.viewAngles[i];
-
-    //    // 
-    //    // If the client already has an entity class, ditch it.
-    //    SVG_FreeClassEntity(serverEntity);
-
-    //    serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
-    //    serverEntity->classEntity->Precache();
-    //    serverEntity->classEntity->Spawn();
-    //    serverEntity->classEntity->PostSpawn();
-
     } else {
-    //    // a spawn point will completely reinitialize the entity
-    //    // except for the persistant data that was initialized at
-    //    // ClientConnect() time
-    //    SVG_InitEntity(serverEntity);
-    //    serverEntity->className = "PlayerClient";
-
         SVG_InitClientRespawn(serverEntity->client);
         SVG_PutClientInServer(serverEntity);
         //serverEntity->classEntity->Respawn();
