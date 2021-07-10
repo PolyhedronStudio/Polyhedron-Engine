@@ -66,6 +66,7 @@ SET( SRC_SVGAME_ENTITIES_BASE
 	svgame/entities/base/SVGBaseEntity.cpp
 	svgame/entities/base/SVGBaseTrigger.cpp
 	svgame/entities/base/SVGBaseMover.cpp
+	svgame/entities/base/BodyCorpse.cpp
 	svgame/entities/base/PlayerClient.cpp
 )
 
@@ -207,6 +208,7 @@ SET ( HEADERS_SVGAME_ENTITIES_BASE
 	svgame/entities/base/SVGBaseEntity.h
 	svgame/entities/base/SVGBaseTrigger.h
 	svgame/entities/base/SVGBaseMover.h
+	svgame/entities/base/BodyCorpse.h
 	svgame/entities/base/PlayerClient.h
 )
 SET ( HEADERS_SVGAME_ENTITIES_FUNC

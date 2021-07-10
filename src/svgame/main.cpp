@@ -150,7 +150,9 @@ void SVG_InitGame(void)
     SVG_InitItems();
     SVG_InitializeServerEntities();
     SVG_AllocateGameClients();
-    //SVG_AllocateGamePlayerClientEntities();
+    // WID: You'd expect PlayerClient allocation for the entities here.
+    // that won't work with the structure of things.
+    // Therefor, it now resides in SVG_SpawnEntities.
     SVG_InitializeGameMode();
 }
 

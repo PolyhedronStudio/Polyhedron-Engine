@@ -55,7 +55,7 @@ void BlasterBolt::Spawn() {
 //===============
 //
 void BlasterBolt::Respawn() {
-    gi.DPrintf("PlayerClient::Respawn();");
+    Base::Respawn();
 }
 
 //
@@ -148,5 +148,6 @@ void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
         gi.Multicast(origin, MultiCast::PVS);
     }
 
+    // Queue the entity for removal. 
     Remove();
 }

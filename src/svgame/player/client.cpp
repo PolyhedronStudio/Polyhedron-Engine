@@ -217,7 +217,7 @@ void SelectSpawnPoint(Entity *ent, vec3_t &origin, vec3_t &angles)
 {
     SVGBaseEntity *spot = nullptr;
 
-    // find a single player start spot
+    // Find a single player start spot
     if (!spot) {
         //while ((spot = SVG_FindEntityByKeyValue("classname", "info_player_start", spot)) != nullptr) {
         //    if (!game.spawnpoint[0] && !spot->GetTargetName())
@@ -311,9 +311,11 @@ void CopyToBodyQue(Entity *ent)
 void SVG_RespawnClient(Entity *self)
 {
     if (deathmatch->value || coop->value) {
-        // isSpectator's don't leave bodies
+        // Spectator's don't leave bodies
         if (self->classEntity->GetMoveType() != MoveType::NoClip && self->classEntity->GetMoveType() != MoveType::Spectator)
-            CopyToBodyQue(self);
+            game.gameMode->SpawnCorpseFromClient(self->classEntity);
+
+            //CopyToBodyQue(self);
         self->serverFlags &= ~EntityServerFlags::NoClient;
         SVG_PutClientInServer(self);
 

@@ -23,6 +23,8 @@ public:
     //
     virtual qboolean OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) override;
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
+   
+    virtual void SpawnCorpseFromClient(SVGBaseEntity* ent) override;
     virtual void SpawnTempDamageEntity(int32_t type, const vec3_t& origin, const vec3_t& normal, int32_t damage) override;
     virtual vec3_t CalculateDamageVelocity(int32_t damage) override;
 

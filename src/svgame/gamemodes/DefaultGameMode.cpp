@@ -13,6 +13,7 @@
 
 // Server Game Base Entity.
 #include "../entities/base/SVGBaseEntity.h"
+#include "../entities/base/BodyCorpse.h"
 #include "../entities/base/PlayerClient.h"
 
 // Weapons.h
@@ -124,15 +125,98 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     return false;
 }
 
+//===============
+// DefaultGameMode::SpawnCorpseFromClient
+// 
+// Spawns a dead body entity for the given client.
+//===============
 
-//
+void DefaultGameMode::SpawnCorpseFromClient(SVGBaseEntity* ent) {
+    // Entity to be used for placing in the queue.
+    Entity* bodyEntity = nullptr;
+    SVGBaseEntity* bodyClassEntity = nullptr;
+
+    // Ensure it is an entity.
+    if (!ent)
+        return;
+
+    // Ensure it is a client.
+    if (!ent->GetClient())
+        return;
+
+    //Entity     *body;
+
+    // Unlink the player client entity.
+    ent->UnlinkEntity();
+
+    // Grab a body from the queue, and cycle to the next one.
+    bodyEntity = &g_entities[game.maxClients + level.bodyQue + 1];
+    level.bodyQue = (level.bodyQue + 1) % BODY_QUEUE_SIZE;
+
+    // Send an effect on the removed body.
+    if (bodyEntity->state.modelIndex) {
+        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+        gi.WriteByte(TempEntityEvent::Blood);
+        gi.WriteVector3(bodyEntity->state.origin);
+        gi.WriteVector3(vec3_zero());
+        gi.Multicast(bodyEntity->state.origin, MultiCast::PVS);
+    }
+
+    // Create the class entity for this queued bodyEntity.
+    bodyClassEntity = SVG_CreateClassEntity<BodyCorpse>(bodyEntity, false);
+
+    // Unlink the body entity, in case it was linked before.
+    bodyClassEntity->UnlinkEntity();
+    
+    // Copy over the bodies state of the current entity into the body entity.
+    bodyClassEntity->SetState(ent->GetState());
+    // Change its number so it is accurately set to the one belonging to bodyEntity.
+    bodyClassEntity->SetNumber(bodyEntity - g_entities);
+    // Set the event ID for this frame to OtherTeleport.
+    bodyClassEntity->SetEventID(EntityEvent::OtherTeleport);
+
+    // Copy over the serverflags from ent.
+    bodyClassEntity->SetServerFlags(ent->GetServerFlags());
+    bodyClassEntity->SetMins(ent->GetMins());
+    bodyClassEntity->SetMaxs(ent->GetMaxs());
+    bodyClassEntity->SetAbsoluteMin(ent->GetAbsoluteMin());
+    bodyClassEntity->SetAbsoluteMax(ent->GetAbsoluteMax());
+    bodyClassEntity->SetSize(ent->GetSize());
+    bodyClassEntity->SetVelocity(ent->GetVelocity());
+    bodyClassEntity->SetAngularVelocity(ent->GetAngularVelocity());
+    bodyClassEntity->SetSolid(ent->GetSolid());
+    bodyClassEntity->SetClipMask(ent->GetClipMask());
+    bodyClassEntity->SetOwner(ent->GetOwner());
+    bodyClassEntity->SetMoveType(ent->GetMoveType());
+    bodyClassEntity->SetGroundEntity(ent->GetGroundEntity());
+
+    // Set the die callback, and set its take damage.
+    //bodyClassEntity->SetDieCallback(&BodyCorpse::BodyCorpseDie);
+    bodyClassEntity->SetTakeDamage(TakeDamage::Yes);
+    bodyClassEntity->LinkEntity();
+
+    // Finally, link it back in.
+    //body->size = ent->size; // VectorCopy(ent->size, body->size);
+    ////body->velocity = ent->classEntity->GetVelocity(); // VectorCopy(ent->velocity, body->velocity);
+    ////body->angularVelocity = ent->classEntity->GetAngularVelocity(); //  VectorCopy(ent->angularVelocity, body->angularVelocity);
+    //body->solid = ent->solid;
+    //body->clipMask = ent->clipMask;
+    //body->owner = ent->owner;
+    //body->classEntity->SetMoveType(ent->classEntity->GetMoveType());
+    //body->classEntity->SetGroundEntity(ent->classEntity->GetGroundEntity());
+
+    ////body->Die = body_die;
+    //body->takeDamage = TakeDamage::Yes;
+
+    //gi.LinkEntity(body);
+}
+
 //===============
 // DefaultGameMode::SpawnTempDamageEntity
 // 
 // Sends a message to all clients in the current PVS, spawning a temp entity for
 // displaying damage entities client side. (Sparks, what have ya.)
 //===============
-//
 void DefaultGameMode::SpawnTempDamageEntity(int32_t type, const vec3_t& origin, const vec3_t& normal, int32_t damage) {
     // WID: Ensure the effect can't send more damage. But that is unimplemented for the clients atm to even detect...
     if (damage > 255)

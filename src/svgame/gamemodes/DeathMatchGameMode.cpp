@@ -130,13 +130,11 @@ void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
     int32_t finalMeansOfDeath = 0; // Sum of things, final means of death.
     std::string message = ""; // String stating what happened to whichever entity. "suicides", "was squished" etc.
     std::string messageAddition = ""; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
-    //qboolean    friendlyFire = false; // Is there friendly fire going on? Shame on you guys!
 
-    // Goes to COOP GAME MODE.
-    //if (coop->value && attacker->GetClient())
-    //    meansOfDeath |= MeansOfDeath::FriendlyFire;
-
+    // Set a bool for whether we got friendly fire.
     qboolean friendlyFire = meansOfDeath & MeansOfDeath::FriendlyFire;
+    // Quickly remove it from meansOfDeath again, our bool is set. This prevents it from 
+    // sticking around when we process the next entity/client.
     finalMeansOfDeath = meansOfDeath & ~MeansOfDeath::FriendlyFire;
 
     // Determine the means of death.
