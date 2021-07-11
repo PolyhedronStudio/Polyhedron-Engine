@@ -55,7 +55,7 @@ void ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
     gibClassEntity->SetDieCallback(&GibEntity::GibEntityDie);
 
     // Default velocity scale for non organic materials.
-    vec3_t velocityScale = { 1.f, 1.f, 1.f };
+    float velocityScale = 1.f;
 
     // Is it an organic gib type?
     if (type == GIB_ORGANIC) {
@@ -66,16 +66,35 @@ void ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
         gibClassEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
 
         // Adjust the velocity scale.
-        velocityScale = vec3_t{
-            0.5f, 0.5f, 0.5f
-        };
+        velocityScale = 0.5f;
     } else {
         // Pick a different movetype, bouncing. No touch callback :)
         gibClassEntity->SetMoveType(MoveType::Bounce);
     }
 
-    // Calculate the velocity for the given damage.
-    gibClassEntity->CalculateVelocity(self, damage);
+    // Calculate the velocity for the given damage, fetch its scale.
+    vec3_t velocityForDamage; // WID: Ugly, but ... yeah, gets set below.
+    velocityScale = gibClassEntity->CalculateVelocityForDamage(self, damage, velocityForDamage);
+
+    // Reassign 'velocityForDamage' and multiply 'self->GetVelocity' to scale, and then 
+    // adding it on to 'velocityForDamage' its old value.
+    velocityForDamage = vec3_fmaf(self->GetVelocity(), velocityScale, velocityForDamage);
+
+    // Be sure to clip our velocity, just in case.
+    gibClassEntity->ClipGibVelocity(velocityForDamage);
+
+    // Last but not least, set our velocity.
+    gibClassEntity->SetVelocity(velocityForDamage);
+
+    // Generate angular velocity.
+    vec3_t angularVelocity = {
+        random() * 600.f,
+        random() * 600.f,
+        random() * 600.f
+    };
+
+    // Set angular velocity.
+    gibClassEntity->SetAngularVelocity(angularVelocity);
 
     // Setup the Gib think function and its think time.
     gibClassEntity->SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
@@ -85,88 +104,83 @@ void ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
     gibClassEntity->LinkEntity();
 }
 
-void ThrowHead(Entity *self, const char *gibname, int damage, int type)
-{
-    //vec3_t  vd;
-    //float   vscale;
+void ThrowClientHead(SVGBaseEntity* self, int damage) {
+    //// Create a gib entity.
+    //GibEntity* gibClassEntity = SVG_CreateClassEntity<GibEntity>();
 
-    //self->state.skinNumber = 0;
-    //self->state.frame = 0;
-    //VectorClear(self->mins);
-    //VectorClear(self->maxs);
+    //// Set size.
+    //vec3_t size = vec3_scale(self->GetSize(), 0.5f);
+    //gibClassEntity->SetSize(size);
 
-    //self->state.modelIndex2 = 0;
-    //gi.SetModel(self, gibname);
-    //self->solid = Solid::Not;
-    //self->state.effects |= EntityEffectType::Gib;
-    //self->state.sound = 0;
-    //self->flags |= EntityFlags::NoKnockBack;
-    //self->serverFlags &= ~EntityServerFlags::Monster;
-    //self->takeDamage = TakeDamage::Yes;
-    ////self->Die = gib_die;
+    //// Generate the origin to start from.
+    //vec3_t origin = self->GetAbsoluteMin() + self->GetSize();
 
+    //// Add some random values to it, so they all differ.
+    //origin.x += crandom() * size.x;
+    //origin.y += crandom() * size.y;
+    //origin.z += crandom() * size.z;
+
+    //// Set the origin.
+    //gibClassEntity->SetOrigin(origin);
+
+    //// Set the model.
+    //gibClassEntity->SetModel(gibname);
+
+    //// Set solid and other properties.
+    //gibClassEntity->SetSolid(Solid::Not);
+    //gibClassEntity->SetEffects(gibClassEntity->GetEffects() | EntityEffectType::Gib);
+    //gibClassEntity->SetFlags(gibClassEntity->GetFlags() | EntityFlags::NoKnockBack);
+    //gibClassEntity->SetTakeDamage(TakeDamage::Yes);
+    //gibClassEntity->SetDieCallback(&GibEntity::GibEntityDie);
+
+    //// Default velocity scale for non organic materials.
+    //float velocityScale = 1.f;
+
+    //// Is it an organic gib type?
     //if (type == GIB_ORGANIC) {
-    //    self->moveType = MoveType::Toss;
-    //    //self->Touch = gib_touch;
-    //    vscale = 0.5;
+    //    // Then we pick a different movetype ;-)
+    //    gibClassEntity->SetMoveType(MoveType::Toss);
+
+    //    // Most of all, we setup a touch callback too ofc.
+    //    gibClassEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
+
+    //    // Adjust the velocity scale.
+    //    velocityScale = 0.5f;
     //} else {
-    //    self->moveType = MoveType::Bounce;
-    //    vscale = 1.0;
+    //    // Pick a different movetype, bouncing. No touch callback :)
+    //    gibClassEntity->SetMoveType(MoveType::Bounce);
     //}
 
-    //// Calculate velocity for given damage.
-    //vd = SVG_VelocityForDamage(damage);
-    //VectorMA(self->velocity, vscale, vd, self->velocity);
-    //ClipGibVelocity(self);
+    //// Calculate the velocity for the given damage, fetch its scale.
+    //vec3_t velocityForDamage; // WID: Ugly, but ... yeah, gets set below.
+    //float velocityScale = gibClassEntity->CalculateVelocityForDamage(self, damage, velocityForDamage);
 
-    //self->angularVelocity[vec3_t::Yaw] = crandom() * 600;
+    //// Reassign 'velocityForDamage' and multiply 'self->GetVelocity' to scale, and then 
+    //// adding it on to 'velocityForDamage' its old value.
+    //velocityForDamage = vec3_fmaf(self->GetVelocity(), velocityScale, velocityForDamage);
 
-    ////self->Think = SVG_FreeEntity;
-    //self->nextThinkTime = level.time + 10 + random() * 10;
+    //// Be sure to clip our velocity, just in case.
+    //gibClassEntity->ClipGibVelocity(velocityForDamage);
 
-    //gi.LinkEntity(self);
-}
+    //// Last but not least, set our velocity.
+    //gibClassEntity->SetVelocity(velocityForDamage);
 
+    //// Generate angular velocity.
+    //vec3_t angularVelocity = {
+    //    random() * 600.f,
+    //    random() * 600.f,
+    //    random() * 600.f
+    //};
 
-void ThrowClientHead(Entity *self, int damage)
-{
-    //vec3_t  vd;
-    //const char    *gibname; // C++20 VKPT: added const.
+    //// Set angular velocity.
+    //gibClassEntity->SetAngularVelocity(angularVelocity);
 
-    //if (rand() & 1) {
-    //    gibname = "models/objects/gibs/head2/tris.md2";
-    //    self->state.skinNumber = 1;        // second skin is player
-    //} else {
-    //    gibname = "models/objects/gibs/skull/tris.md2";
-    //    self->state.skinNumber = 0;
-    //}
+    //// Setup the Gib think function and its think time.
+    //gibClassEntity->SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
+    //gibClassEntity->SetNextThinkTime(level.time + 10 + random() * 10);
 
-    //self->state.origin[2] += 32;
-    //self->state.frame = 0;
-    //gi.SetModel(self, gibname);
-    //VectorSet(self->mins, -16, -16, 0);
-    //VectorSet(self->maxs, 16, 16, 16);
-
-    //self->takeDamage = TakeDamage::No;
-    //self->solid = Solid::Not;
-    //self->state.effects = EntityEffectType::Gib;
-    //self->state.sound = 0;
-    //self->flags |= EntityFlags::NoKnockBack;
-
-    //self->moveType = MoveType::Bounce;
-    //// Calculate velocity for given damage.
-    //vd = SVG_VelocityForDamage(damage);
-    //VectorAdd(self->velocity, vd, self->velocity);
-
-    //if (self->client) { // bodies in the queue don't have a client anymore
-    //    self->client->animation.priorityAnimation = PlayerAnimation::Death;
-    //    self->client->animation.endFrame = self->state.frame;
-    //} else {
-    //    //self->Think = NULL;
-    //    self->nextThinkTime = 0;
-    //}
-
-    //gi.LinkEntity(self);
+    //// Link entity into the world.
+    //gibClassEntity->LinkEntity();
 }
 
 //=================

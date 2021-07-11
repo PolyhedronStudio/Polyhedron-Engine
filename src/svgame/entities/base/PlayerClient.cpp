@@ -185,7 +185,6 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
 
         // Update the obituary.
         game.gameMode->ClientUpdateObituary(this, inflictor, attacker);
-        //SVG_ClientUpdateObituary(this, inflictor, attacker);
 
         // Toss our weapon, assuming we had any.
         SVG_TossClientWeapon(this);
@@ -215,7 +214,7 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
         ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        ThrowClientHead(serverEntity, damage);
+        ThrowClientHead(this, damage);
 
         // Can't take damage if we're already busted.
         SetTakeDamage(TakeDamage::No);

@@ -34,7 +34,13 @@ public:
     //
     // GibEntity functions.
     // 
-    void CalculateVelocity(SVGBaseEntity *other, const int32_t& damage);
+    // WID: These need more restructuring etc, rethinking. Doing a KISS rewrite atm ;-)
+    // 
+    // Used! to calculate the velocity for gib damage.
+    // Returns the scale float, and assigns the new value to &velocity.
+    float CalculateVelocityForDamage(SVGBaseEntity *other, const int32_t damage, vec3_t &velocity);
+    // Can be used to clip the gib velocity.
+    void ClipGibVelocity(vec3_t& velocity);
 
     //
     // Callback functions.
@@ -47,7 +53,7 @@ public:
 protected:
 
 private:
-    void ClipGibVelocity(vec3_t &velocity);
+
 };
 
 #endif // __SVGAME_ENTITIES_BASE_GIBENTITY_H__

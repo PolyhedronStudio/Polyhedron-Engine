@@ -115,13 +115,13 @@ void GibEntity::ClipGibVelocity(vec3_t &velocity) {
 }
 
 //===============
-// GibEntity::CalculateVelocity
+// GibEntity::CalculateVelocityForDamage
 //
 // 'other' is the actual entity that is spawning these gibs.
 //===============
-void GibEntity::CalculateVelocity(SVGBaseEntity *other, const int32_t& damage) {
+float GibEntity::CalculateVelocityForDamage(SVGBaseEntity *other, const int32_t damage, vec3_t &velocity) {
     // Calculate the velocity based on the damage passed over.
-    vec3_t velocityForDamage = {
+    velocity = {
         100.f * crandom(),
         100.f * crandom(),
         200.f + 100.f * random()
@@ -133,26 +133,10 @@ void GibEntity::CalculateVelocity(SVGBaseEntity *other, const int32_t& damage) {
         velocityScale = 0.7f;
     
     // Calculate velocity for damage.
-    velocityForDamage = vec3_scale(velocityForDamage, 0.7);
+    velocity = vec3_scale(velocity, 0.7);
 
-    // Calculate direction of velocity.
-    velocityForDamage = vec3_fmaf(other->GetVelocity(), velocityScale, velocityForDamage);
-
-    // Be sure to clip our velocity, just in case.
-    ClipGibVelocity(velocityForDamage);
-
-    // Last but not least, set our velocity.
-    SetVelocity(velocityForDamage);
-
-    // Generate angular velocity.
-    vec3_t angularVelocity = {
-        random() * 600.f,
-        random() * 600.f,
-        random() * 600.f
-    };
-
-    // Set angular velocity.
-    SetAngularVelocity(angularVelocity);
+    // Return.
+    return velocityScale;
 }
 
 //===============
