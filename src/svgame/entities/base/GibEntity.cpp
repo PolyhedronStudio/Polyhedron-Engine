@@ -119,25 +119,25 @@ void GibEntity::ClipGibVelocity(vec3_t &velocity) {
 //
 // 'other' is the actual entity that is spawning these gibs.
 //===============
-float GibEntity::CalculateVelocityForDamage(SVGBaseEntity *other, const int32_t damage, vec3_t &velocity) {
-    // Calculate the velocity based on the damage passed over.
-    velocity = {
-        100.f * crandom(),
-        100.f * crandom(),
-        200.f + 100.f * random()
-    };
-
-    // Set velocity scale value based on the intensity of the amount of 'damage'.
-    float velocityScale = 1.2f;
-    if (damage < 50)
-        velocityScale = 0.7f;
-    
-    // Calculate velocity for damage.
-    velocity = vec3_scale(velocity, 0.7);
-
-    // Return.
-    return velocityScale;
-}
+//float GibEntity::CalculateVelocityForDamage(SVGBaseEntity *other, const int32_t damage, vec3_t &velocity) {
+//    // Calculate the velocity based on the damage passed over.
+//    velocity = {
+//        100.f * crandom(),
+//        100.f * crandom(),
+//        200.f + 100.f * random()
+//    };
+//
+//    // Set velocity scale value based on the intensity of the amount of 'damage'.
+//    float velocityScale = 1.2f;
+//    if (damage < 50)
+//        velocityScale = 0.7f;
+//    
+//    // Calculate velocity for damage.
+//    velocity = vec3_scale(velocity, 0.7);
+//
+//    // Return.
+//    return velocityScale;
+//}
 
 //===============
 // GibEntity::GibEntityThink

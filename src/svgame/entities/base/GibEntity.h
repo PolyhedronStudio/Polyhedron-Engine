@@ -36,7 +36,8 @@ public:
     // 
     // WID: These need more restructuring etc, rethinking. Doing a KISS rewrite atm ;-)
     // 
-
+    // Can be used to clip the gib velocity.
+    void ClipGibVelocity(vec3_t& velocity);
 
     //
     // Callback functions.

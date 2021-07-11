@@ -12,6 +12,10 @@
 #include "utils.h"           // Include Utilities funcs.
 #include "effects.h"
 
+// Game Mode interface.
+#include "gamemodes/IGameMode.h"
+
+// Class Entities.
 #include "entities/base/SVGBaseEntity.h"
 #include "entities/base/PlayerClient.h"
 #include "entities/base/DebrisEntity.h"
@@ -72,13 +76,12 @@ void ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
         gibClassEntity->SetMoveType(MoveType::Bounce);
     }
 
-    // Calculate the velocity for the given damage, fetch its scale.
-    vec3_t velocityForDamage; // WID: Ugly, but ... yeah, gets set below.
-    velocityScale = gibClassEntity->CalculateVelocityForDamage(self, damage, velocityForDamage);
+    // Comment later...
+    vec3_t velocityForDamage = game.gameMode->CalculateDamageVelocity(damage);
 
     // Reassign 'velocityForDamage' and multiply 'self->GetVelocity' to scale, and then 
     // adding it on to 'velocityForDamage' its old value.
-    velocityForDamage = vec3_fmaf(self->GetVelocity(), velocityScale, velocityForDamage);
+    vec3_t gibVelocity = vec3_fmaf(self->GetVelocity(), velocityScale, velocityForDamage);
 
     // Be sure to clip our velocity, just in case.
     gibClassEntity->ClipGibVelocity(velocityForDamage);
@@ -140,13 +143,10 @@ void ThrowClientHead(SVGBaseEntity* self, int damage) {
     self->SetFlags(EntityFlags::NoKnockBack);
 
     // Calculate the velocity for the given damage, fetch its scale.
-    vec3_t velocityForDamage; // WID: Ugly, but ... yeah, gets set below.
-    float velocityScale = game.gameMode->CalculateVelocityForDamage(self, damage, velocityForDamage);
+    vec3_t velocityForDamage = game.gameMode->CalculateDamageVelocity(damage);
 
     // Add the velocityForDamage up to the current velocity.
     self->SetVelocity(self->GetVelocity() + velocityForDamage);
-
-    //VectorAdd(self->velocity, vd, self->velocity);
 
     // Bodies in the queue don't have a client anymore.
     GameClient* client = self->GetClient();

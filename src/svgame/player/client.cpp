@@ -268,7 +268,7 @@ void SVG_RespawnClient(Entity *self)
     if (deathmatch->value || coop->value) {
         // Spectator's don't leave bodies
         if (self->classEntity->GetMoveType() != MoveType::NoClip && self->classEntity->GetMoveType() != MoveType::Spectator)
-            game.gameMode->SpawnCorpseFromClient(self->classEntity);
+            game.gameMode->SpawnClientCorpse(self->classEntity);
 
         self->serverFlags &= ~EntityServerFlags::NoClient;
         SVG_PutClientInServer(self);

@@ -126,12 +126,12 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
 }
 
 //===============
-// DefaultGameMode::SpawnCorpseFromClient
+// DefaultGameMode::SpawnClientCorpse
 // 
 // Spawns a dead body entity for the given client.
 //===============
 
-void DefaultGameMode::SpawnCorpseFromClient(SVGBaseEntity* ent) {
+void DefaultGameMode::SpawnClientCorpse(SVGBaseEntity* ent) {
     // Ensure it is an entity.
     if (!ent)
         return;

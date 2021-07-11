@@ -75,7 +75,7 @@ public:
     virtual vec3_t CalculateDamageVelocity(int32_t damage) = 0;
     // Copies the model of the dead client, into a separate entity that plays dead.
     // It is a first in first out kinda list.
-    virtual void SpawnCorpseFromClient(SVGBaseEntity* ent) = 0;
+    virtual void SpawnClientCorpse(SVGBaseEntity* ent) = 0;
 
     // This function is for setting a "means of death", aka blaster or what not.
     // The thing is, it has to be able to be overrided so hey, here we go :)
