@@ -76,7 +76,7 @@ public:
     // Copies the model of the dead client, into a separate entity that plays dead.
     // It is a first in first out kinda list.
     virtual void SpawnCorpseFromClient(SVGBaseEntity* ent) = 0;
-    
+
     // This function is for setting a "means of death", aka blaster or what not.
     // The thing is, it has to be able to be overrided so hey, here we go :)
     // Can't have a global like in the old code ;-)
