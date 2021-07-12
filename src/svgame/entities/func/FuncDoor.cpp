@@ -49,13 +49,13 @@ void FuncDoor::Spawn() {
 
     Base::Spawn();
 
-    SetMoveDirection( GetAngles(), true);
+    SetMoveDirection( GetAngles()/*, resetAngles = true*/ );
     SetMoveType( MoveType::Push );
     SetSolid( Solid::BSP );
     SetModel( GetModel() );
 
-    SetBlockedCallback( &FuncDoor::DoorBlocked );
-    SetUseCallback( &FuncDoor::DoorUse );
+    SetBlockedCallback( nullptr /*DoorBlocked*/ );
+    SetUseCallback( nullptr /*DoorUse*/ );
 
     if ( !GetSpeed() ) {
         SetSpeed( 100.0f );
@@ -94,11 +94,11 @@ void FuncDoor::Spawn() {
     // openable by shooting it
     if ( GetHealth() ) {
         SetTakeDamage( TakeDamage::Yes );
-        SetDieCallback( &FuncDoor::DoorDie );
+        SetDieCallback( nullptr /*DoorKilled*/ );
         SetMaxHealth( GetHealth() );
     } else if ( nullptr == serverEntity->targetName ) {
         gi.SoundIndex( "misc/talk.wav" ); // ???
-        SetTouchCallback( &FuncDoor::Touch );
+        SetTouchCallback( nullptr /*DoorTouch*/ );
     }
 
     moveInfo.speed = GetSpeed();
@@ -232,8 +232,6 @@ void FuncDoor::SpawnDoorTrigger() {
 
 //===============
 // FuncDoor::UseAreaportals
-// 
-// Open or closes the specific door its areaportals :)
 //===============
 void FuncDoor::UseAreaportals( bool open ) const {
     if ( targetStr.empty() ) {
@@ -246,108 +244,4 @@ void FuncDoor::UseAreaportals( bool open ) const {
             gi.SetAreaPortalState( portal->GetStyle(), open );
         }
     }
-}
-
-//===============
-// FuncDoor::DoorUse
-//===============
-void FuncDoor::DoorUse(SVGBaseEntity* caller, SVGBaseEntity* activator) {
-    if (GetFlags() & EntityFlags::TeamSlave)
-        return;
-
-    if (GetSpawnFlags() & FuncDoor::SF_Toggle) {
-        if (moveInfo.state == STATE_UP || moveInfo.state == STATE_TOP) {
-            // Trigger all paired doors
-            for (FuncDoor*teamMember = dynamic_cast<FuncDoor*>(GetTeamChainEntity()); teamMember; teamMember = dynamic_cast<FuncDoor*>(teamMember->GetTeamChainEntity())) {
-                // Unset message and touch callback.
-                teamMember->SetMessage("");
-                teamMember->SetTouchCallback(nullptr);
-                
-                // Move the door down, aka "shut".
-                GoDown(teamMember);
-            }
-            return;
-        }
-    }
-
-    // trigger all paired doors
-    for (FuncDoor* teamMember = dynamic_cast<FuncDoor*>(GetTeamChainEntity()); teamMember; teamMember = dynamic_cast<FuncDoor*>(teamMember->GetTeamChainEntity())) {
-        // Unset message and touch callback.
-        teamMember->SetMessage("");
-        teamMember->SetTouchCallback(nullptr);
-
-        // Move the door up, aka "open".
-        GoUp(teamMember, activator);
-    }
-}
-
-//===============
-// FuncDoor::DoorThink
-//===============
-void FuncDoor::DoorThink(void) {
-
-}
-
-//===============
-// FuncDoor::DoorDie
-//===============
-void FuncDoor::DoorDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
-
-}
-
-//===============
-// FuncDoor::DoorTouch
-//===============
-void FuncDoor::DoorTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
-
-}
-
-//===============
-// FuncDoor::DoorBlocked
-//===============
-void FuncDoor::DoorBlocked(SVGBaseEntity* other) {
-
-}
-
-//===============
-// FuncDoor::GoDown
-//===============
-void FuncDoor::GoDown(FuncDoor *ent) {
-    // Check for teamslave, if not, play a start sound.
-    if (!(GetFlags() & EntityFlags::TeamSlave)) {
-        if (moveInfo.startSoundIndex) {
-            SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0);
-        }
-
-        // Set door its sound to play as middle sound index.
-        SetSound(moveInfo.middleSoundIndex);
-    }
-
-    // If a maxHealth is set in case of shooting it to open it...
-    if (GetMaxHealth()) {
-        if (moveInfo.startSoundIndex) {
-            SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0);
-        }
-
-        // Set door its sound to play as middle sound index.
-        SetSound(moveInfo.middleSoundIndex);
-    }
-
-    // Update moveinfo its state.
-    moveInfo.state = STATE_DOWN;
-
-    // Start movement based on which classname we got.
-    // WID: TODO: This needs to be moved into func_door_rotating class ofc.
-    if (GetClassName() == "func_door") {
-        CalculateMove(moveInfo.startOrigin); // //Brush_Move_Calc(self, self->moveInfo.startOrigin, door_hit_bottom);
-    } else if (GetClassName() == "func_door_rotating") {
-        //Brush_AngleMove_Calc(self, door_hit_bottom);
-    }
-}
-
-//===============
-// FuncDoor::GoUp
-//===============
-void FuncDoor::GoUp(FuncDoor* ent, SVGBaseEntity* activator) {
-
 }

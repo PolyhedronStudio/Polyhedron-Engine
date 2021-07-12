@@ -122,7 +122,7 @@ void SVGBaseMover::SpawnKey(const std::string& key, const std::string& value) {
 //
 //===============
 //
-void SVGBaseMover::SetMoveDirection(const vec3_t& angles, bool resetAngles) {
+void SVGBaseMover::SetMoveDirection(const vec3_t& angles) {
 	vec3_t VEC_UP = { 0, -1, 0 };
 	vec3_t MOVEDIR_UP = { 0, 0, 1 };
 	vec3_t VEC_DOWN = { 0, -2, 0 };
@@ -151,9 +151,7 @@ void SVGBaseMover::SetMoveDirection(const vec3_t& angles, bool resetAngles) {
 	// and align it directly with the movement direction.
 	// I suggest we add a bool parameter to this method, 'resetAngles',
 	// which will zero the entity's angles if true
-	if (resetAngles) {
-		SetAngles(vec3_zero());
-	}
+	SetAngles(vec3_zero());
 }
 
 //===============
@@ -162,160 +160,20 @@ void SVGBaseMover::SetMoveDirection(const vec3_t& angles, bool resetAngles) {
 vec3_t SVGBaseMover::CalculateEndPosition() {
 	const vec3_t& size = GetSize();
 	vec3_t absoluteDir{
-		fabsf(moveDirection.x),
-		fabsf(moveDirection.y),
-		fabsf(moveDirection.z)
+		fabsf( moveDirection.x ),
+		fabsf( moveDirection.y ),
+		fabsf( moveDirection.z ) 
 	};
-
+	
 	float distance = (absoluteDir.x * size.x) + (absoluteDir.y * size.y) + (absoluteDir.z * size.z) - GetLip();
-	return vec3_fmaf(GetStartPosition(), distance, moveDirection);
+	return vec3_fmaf( GetStartPosition(), distance, moveDirection );
 }
 
 //===============
 // SVGBaseMover::SwapPositions
 //===============
 void SVGBaseMover::SwapPositions() {
-	SetOrigin(GetEndPosition());			// origin = endpos
-	SetEndPosition(GetStartPosition());	// endpos = startpos
-	SetStartPosition(GetOrigin());		// startpos = origin
-}
-
-//===============
-// SVGBaseMover::CalculateMove
-// 
-// Prepares this basemover to move into the given destination.
-// It'll start the brush movement process if it isn't moving already.
-//===============
-void SVGBaseMover::CalculateMove(const vec3_t& destination) {
-	// Reset velocity.
-	SetVelocity(vec3_zero());
-
-	// Set direction to travel. 
-	moveInfo.dir = destination - GetOrigin();
-	moveInfo.remainingDistance = VectorNormalize(moveInfo.dir);
-	// WID: Got to try this function instead, uggh... old math lib sucks :P 
-	//vec3_normalize_length(destination, moveInfo.remainingDistance);
-	// 
-//	moveInfo.OnEndFunction = func;
-
-	// If move speed is equal to accel and decel...
-	if (moveInfo.speed == moveInfo.acceleration && moveInfo.speed == moveInfo.deceleration) {
-		// Depending on which entity we are processing, slave, or master, start the process differently.
-		if (level.currentEntity == ((GetFlags() & EntityFlags::TeamSlave) ? GetTeamMasterEntity() : this))         {
-			BeginMove();
-		}         else         {
-			SetNextThinkTime(level.time + FRAMETIME);
-			SetThinkCallback(&SVGBaseMover::BaseMoverBeginMoveThink);
-		}
-	} else {
-		moveInfo.currentSpeed = 0;
-		SetNextThinkTime(level.time + FRAMETIME);
-	}
-	//    if (ent->moveInfo.speed == ent->moveInfo.acceleration && ent->moveInfo.speed == ent->moveInfo.deceleration)
-	//    {
-	//        if ( level.currentEntity == 
-	//             ((ent->classEntity->GetFlags() & EntityFlags::TeamSlave) ? 
-	//             ent->classEntity->GetTeamMasterEntity() : ent->classEntity) ) 
-	//        {
-	//            Brush_Move_Begin(ent);
-	//        }
-	//        else 
-	//        {
-	//            ent->classEntity->SetNextThinkTime( level.time + FRAMETIME );
-	//            //ent->Think = Brush_Move_Begin;
-	//        }
-	//    }
-	//    else 
-	//    {
-	//        // accelerative
-	//        ent->moveInfo.currentSpeed = 0;
-	//        //ent->Think = Think_AccelMove;
-	//        ent->classEntity->SetNextThinkTime( level.time + FRAMETIME );
-	//    }
-}
-
-//===============
-// SVGBaseMover::BaseMoverBeginMoveThink
-// 
-// Think callback which'll trigger the beginning of movement for this brush.
-//===============
-void SVGBaseMover::BaseMoverBeginMoveThink() {
-	// Begin move.
-	BeginMove();
-}
-
-//===============
-// SVGBaseMover::BeginMove
-// 
-// Used to engage movement, it allows it to "start".
-//===============
-void SVGBaseMover::BeginMove() {
-	// Check if we got to engage our final movement part.
-	if ((moveInfo.speed * FRAMETIME) >= moveInfo.remainingDistance) {
-		// Engage final movement part.
-		FinalizeMove();
-	}
-
-	// Set new velocity.
-	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.speed ) );
-	
-	// Try and calculate the frames that are left to move.
-	float framesLeft = floor((moveInfo.remainingDistance / moveInfo.speed) / FRAMETIME);
-
-	// Calculate the updated remaining distance to travel for this basemover.
-	moveInfo.remainingDistance -= framesLeft * moveInfo.speed * FRAMETIME;
-
-	// Setup finalize movement think callback.
-	SetNextThinkTime(level.time + (framesLeft * FRAMETIME));
-	SetThinkCallback(&SVGBaseMover::BaseMoverMoveFinalizeThink);
-}
-
-//===============
-// SVGBaseMover::BaseMoverMoveFinalThink
-// 
-// Think callback which'll trigger the "finalization" of movement for this brush.
-//===============
-void SVGBaseMover::BaseMoverMoveFinalizeThink() {
-	// Finalize move.
-	FinalizeMove();
-}
-
-//===============
-// SVGBaseMover::FinalizeMove
-//===============
-void SVGBaseMover::FinalizeMove() {
-	if (moveInfo.remainingDistance == 0) 
-	{
-		MoveFinished();
-	    return;
-	}
-	
-	// Move only as far as to clear the remaining distance
-	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.remainingDistance / FRAMETIME ) );
-	
-	// Set next think callback to move finished.
-	SetNextThinkTime(level.time + FRAMETIME);
-	SetThinkCallback(&SVGBaseMover::BaseMoverMoveFinishedThink);
-}
-
-//===============
-// SVGBaseMover::BaseMoverMoveFinishedThink
-// 
-// Think callback which'll trigger the "finishing" of movement for this brush.
-//===============
-void SVGBaseMover::BaseMoverMoveFinishedThink() {
-	// Finish move.
-	MoveFinished();
-}
-
-//===============
-// SVGBaseMover::MoveFinished
-// 
-// Used to finish a move of a basemover.
-//===============
-void SVGBaseMover::MoveFinished() {
-	// Reset velocity.
-	SetVelocity( vec3_zero() );
-	// WID: TODO: Got to do this still.
-	//moveInfo.OnEndFunction( ent );
+	SetOrigin( GetEndPosition() );			// origin = endpos
+	SetEndPosition( GetStartPosition() );	// endpos = startpos
+	SetStartPosition( GetOrigin() );		// startpos = origin
 }

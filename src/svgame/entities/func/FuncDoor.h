@@ -21,24 +21,12 @@ public:
     static constexpr int32_t SF_XAxis       = 1 << 5;
     static constexpr int32_t SF_YAxis       = 1 << 6;
 
-    // Functions.
     void		Precache() override;
 	void		Spawn() override;
     void        PostSpawn() override;
 	//void		SpawnKey( const std::string& key, const std::string& value ) override;
 
-    // Callbacks.
-    void DoorUse(SVGBaseEntity* caller, SVGBaseEntity* activator);
-    void DoorThink(void);
-    void DoorDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
-    void DoorTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
-    void DoorBlocked(SVGBaseEntity* other);
-
 protected:
-    // Moves the door "down", aka shuts it.
-    void GoDown(FuncDoor *ent);
-    void GoUp(FuncDoor* ent, SVGBaseEntity *activator);
-
     void        CalculateMoveSpeed();
     void        SpawnDoorTrigger();
     void        UseAreaportals( bool open ) const;
