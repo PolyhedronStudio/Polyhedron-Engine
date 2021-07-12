@@ -62,15 +62,12 @@ void SVGBaseMover::Precache() {
 //===============
 // SVGBaseMover::Spawn
 //
-// Sets up the onEnd callback.
 //===============
 //
 void SVGBaseMover::Spawn() {
-	// Spawn base.
 	Base::Spawn();
 
-	// Set on end callback.
-	SetOnEndCallback(&SVGBaseMover::BaseMoverOnEnd)
+
 }
 
 //
@@ -178,9 +175,9 @@ vec3_t SVGBaseMover::CalculateEndPosition() {
 // SVGBaseMover::SwapPositions
 //===============
 void SVGBaseMover::SwapPositions() {
-	SetOrigin(GetEndPosition());		// Origin		 = EndPosition
-	SetEndPosition(GetStartPosition());	// EndPosition	 = StartPosition
-	SetStartPosition(GetOrigin());		// StartPosition = Origin
+	SetOrigin(GetEndPosition());			// origin = endpos
+	SetEndPosition(GetStartPosition());	// endpos = startpos
+	SetStartPosition(GetOrigin());		// startpos = origin
 }
 
 //===============
@@ -199,26 +196,42 @@ void SVGBaseMover::CalculateMove(const vec3_t& destination) {
 	// WID: Got to try this function instead, uggh... old math lib sucks :P 
 	//vec3_normalize_length(destination, moveInfo.remainingDistance);
 	// 
-	//moveInfo.OnEndFunction = func;
+//	moveInfo.OnEndFunction = func;
 
 	// If move speed is equal to accel and decel...
 	if (moveInfo.speed == moveInfo.acceleration && moveInfo.speed == moveInfo.deceleration) {
 		// Depending on which entity we are processing, slave, or master, start the process differently.
 		if (level.currentEntity == ((GetFlags() & EntityFlags::TeamSlave) ? GetTeamMasterEntity() : this))         {
 			BeginMove();
-		} else {
+		}         else         {
 			SetNextThinkTime(level.time + FRAMETIME);
 			SetThinkCallback(&SVGBaseMover::BaseMoverBeginMoveThink);
 		}
 	} else {
-		// Reset speed.
 		moveInfo.currentSpeed = 0;
-
-		// Setup next think.
 		SetNextThinkTime(level.time + FRAMETIME);
-		// WID: TODO: Still gotta add this.
-		//SetThinkCallback(&SVGBaseMover::BaseMoverAccelMoveThink);
 	}
+	//    if (ent->moveInfo.speed == ent->moveInfo.acceleration && ent->moveInfo.speed == ent->moveInfo.deceleration)
+	//    {
+	//        if ( level.currentEntity == 
+	//             ((ent->classEntity->GetFlags() & EntityFlags::TeamSlave) ? 
+	//             ent->classEntity->GetTeamMasterEntity() : ent->classEntity) ) 
+	//        {
+	//            Brush_Move_Begin(ent);
+	//        }
+	//        else 
+	//        {
+	//            ent->classEntity->SetNextThinkTime( level.time + FRAMETIME );
+	//            //ent->Think = Brush_Move_Begin;
+	//        }
+	//    }
+	//    else 
+	//    {
+	//        // accelerative
+	//        ent->moveInfo.currentSpeed = 0;
+	//        //ent->Think = Think_AccelMove;
+	//        ent->classEntity->SetNextThinkTime( level.time + FRAMETIME );
+	//    }
 }
 
 //===============
@@ -271,19 +284,16 @@ void SVGBaseMover::BaseMoverMoveFinalizeThink() {
 // SVGBaseMover::FinalizeMove
 //===============
 void SVGBaseMover::FinalizeMove() {
-	// Check if the move is finished, or not.
-	if (moveInfo.remainingDistance == 0) {
-		// Call to finished move.
+	if (moveInfo.remainingDistance == 0) 
+	{
 		MoveFinished();
-
-		// Return.
 	    return;
 	}
 	
 	// Move only as far as to clear the remaining distance
 	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.remainingDistance / FRAMETIME ) );
 	
-	// Set next think callback to finish the move in the next frame.
+	// Set next think callback to move finished.
 	SetNextThinkTime(level.time + FRAMETIME);
 	SetThinkCallback(&SVGBaseMover::BaseMoverMoveFinishedThink);
 }
@@ -307,19 +317,5 @@ void SVGBaseMover::MoveFinished() {
 	// Reset velocity.
 	SetVelocity( vec3_zero() );
 	// WID: TODO: Got to do this still.
-	// 
-	// 
-	// 	   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//! DO THIS TOMORROW!!!!
-	//! 
-	//! 
 	//moveInfo.OnEndFunction( ent );
-}
-
-//===============
-// SVGBaseMover::BaseMoverOnEnd
-//===============
-void SVGBaseMover::BaseMoverOnEnd() {
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//! DO THIS TOMORROW...
 }

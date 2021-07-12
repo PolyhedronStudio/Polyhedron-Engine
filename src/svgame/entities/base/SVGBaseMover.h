@@ -60,11 +60,6 @@ public:
     DefineAbstractClass( SVGBaseMover, SVGBaseTrigger );
 
     //
-    // Function pointers for actual callbacks.
-    //
-    using OnEndCallbackPointer = void(SVGBaseMover::*)(void);
-
-    //
     // Interface functions. 
     //
     virtual void Precache() override;    // Precaches data.
@@ -136,32 +131,13 @@ public:
         this->lip = lip;
     }
 
-    //
-    // Ugly, but effective callback SET methods.
-    //
-    // Sets the 'OnEnd' callback function.
-    template<typename function>
-    inline void SetOnEndCallback(function f)     {
-        onEndFunction = static_cast<OnEndCallbackPointer>(f);
-    }
-    inline qboolean HasOnEndCallback() {
-        return (onEndFunction != nullptr ? true : false);
-    }
-
 protected:
     //
-    // Callback function pointers.
-    //
-    OnEndCallbackPointer onEndFunction;
-
-protected:
-    //
-    // Callback implementations.
+    // Callbacks.
     //
     void BaseMoverBeginMoveThink();
     void BaseMoverMoveFinalizeThink();
     void BaseMoverMoveFinishedThink();
-    void BaseMoverOnEnd();
 
     //
     // Functions.
