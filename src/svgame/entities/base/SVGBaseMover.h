@@ -20,7 +20,7 @@ using PushMoveEndFunction = void(Entity*);
 // (In other words, entities that aren't a: Client or AI Player.
 //-------------------
 struct PushMoveInfo {
-    // fixed data
+    // Fixed data
     vec3_t startOrigin;
     vec3_t startAngles;
     vec3_t endOrigin;
@@ -37,7 +37,7 @@ struct PushMoveInfo {
 
     float wait;
 
-    // state data
+    // State data
     int32_t state;
     vec3_t dir;
     float currentSpeed;
@@ -73,7 +73,7 @@ public:
     //
     // Pusher functions.
     //
-    virtual void SetMoveDirection(const vec3_t& angles);
+    virtual void SetMoveDirection(const vec3_t& angles, bool resetAngles = false);
 
     //
     // Get/Set
@@ -132,6 +132,28 @@ public:
     }
 
 protected:
+    //
+    // Callbacks.
+    //
+    void BaseMoverBeginMoveThink();
+    void BaseMoverMoveFinalizeThink();
+    void BaseMoverMoveFinishedThink();
+
+    //
+    // Functions.
+    // 
+    // Begins the movement of this brush.
+    void BeginMove();
+
+    // Finalizes/Finishes the movement of this brush.
+    void FinalizeMove();
+
+    // Called when the move is finished.
+    void MoveFinished();
+
+    // Calculate the movement of this brush.
+    void CalculateMove(const vec3_t& destination);
+
     // Calculates and returns the destination point
     // ASSUMES: startPosition and moveDirection are set properly
     vec3_t CalculateEndPosition();
