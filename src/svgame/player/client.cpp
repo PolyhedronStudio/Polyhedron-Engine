@@ -510,7 +510,7 @@ void SVG_PutClientInServer(Entity *ent)
     ent->state.origin = ent->state.oldOrigin = spawn_origin + vec3_t{ 0.f, 0.f, 1.f };
 
     // Set FOV, fixed, or custom.
-    if (deathmatch->value && ((int)dmflags->value & GameModeFlags::FixedFOV)) {
+    if (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::FixedFOV)) {
         client->playerState.fov = 90;
     } else {
         client->playerState.fov = atoi(Info_ValueForKey(client->persistent.userinfo, "fov"));
@@ -671,7 +671,7 @@ void SVG_ClientUserinfoChanged(Entity *ent, char *userinfo)
     gi.configstring(ConfigStrings::PlayerSkins + playernum, va("%s\\%s", ent->client->persistent.netname, s));
 
     // fov
-    if (deathmatch->value && ((int)dmflags->value & GameModeFlags::FixedFOV)) {
+    if (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::FixedFOV)) {
         ent->client->playerState.fov = 90;
     } else {
         ent->client->playerState.fov = atoi(Info_ValueForKey(userinfo, "fov"));

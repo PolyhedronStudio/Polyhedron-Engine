@@ -94,7 +94,7 @@ qboolean Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other)
 
     //index = ITEM_INDEX(ent->item);
 
-    //if ((((int)(dmflags->value) & GameModeFlags::WeaponsStay) || coop->value)
+    //if ((((int)(gamemodeflags->value) & GameModeFlags::WeaponsStay) || coop->value)
     //    && other->client->persistent.inventory[index]) {
     //    if (!(ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem)))
     //        return false;   // leave the weapon for others to pickup
@@ -105,14 +105,14 @@ qboolean Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other)
     //if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem)) {
     //    // give them some ammo with it
     //    ammo = SVG_FindItemByPickupName(ent->item->ammo);
-    //    if ((int)dmflags->value & GameModeFlags::InfiniteAmmo)
+    //    if ((int)gamemodeflags->value & GameModeFlags::InfiniteAmmo)
     //        SVG_AddAmmo(other, ammo, 1000);
     //    else
     //        SVG_AddAmmo(other, ammo, ammo->quantity);
 
     //    if (!(ent->spawnFlags & ItemSpawnFlags::DroppedPlayerItem)) {
     //        if (deathmatch->value) {
-    //            if ((int)(dmflags->value) & GameModeFlags::WeaponsStay)
+    //            if ((int)(gamemodeflags->value) & GameModeFlags::WeaponsStay)
     //                ent->flags |= EntityFlags::Respawn;
     //            else
     //                SVG_SetRespawn(ent, 30);
@@ -277,7 +277,7 @@ void Drop_Weapon(PlayerClient *ent, gitem_t *item)
 {
     int     index;
 
-    if ((int)(dmflags->value) & GameModeFlags::WeaponsStay)
+    if ((int)(gamemodeflags->value) & GameModeFlags::WeaponsStay)
         return;
 
     GameClient* client = ent->GetClient();

@@ -292,20 +292,20 @@ end
 begin gameflags
     background #212F3CD0
     style --compact
-    title "Deathmatch Flags"
+    title "GameMode Flags"
     blank
-    toggle "falling damage" dmflags ~3
-    toggle "weapons stay" dmflags 2
-    toggle "instant powerups" dmflags 4
-    toggle "allow powerups" dmflags ~1
-    toggle "allow health" dmflags ~0
-    toggle "allow armor" dmflags ~11
-    toggle "spawn farthest" dmflags 9
-    toggle "same map" dmflags 5
-    toggle "force respawn" dmflags 10
-    toggle "infinite ammo" dmflags 13
-    toggle "fixed FOV" dmflags 15
-    toggle "quad drop" dmflags 14
+    toggle "falling damage" gamemodeflags ~3
+    toggle "weapons stay" gamemodeflags 2
+    toggle "instant powerups" gamemodeflags 4
+    toggle "allow powerups" gamemodeflags ~1
+    toggle "allow health" gamemodeflags ~0
+    toggle "allow armor" gamemodeflags ~11
+    toggle "spawn farthest" gamemodeflags 9
+    toggle "same map" gamemodeflags 5
+    toggle "force respawn" gamemodeflags 10
+    toggle "infinite ammo" gamemodeflags 13
+    toggle "fixed FOV" gamemodeflags 15
+    toggle "quad drop" gamemodeflags 14
 end
 
 begin startserver

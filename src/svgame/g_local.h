@@ -513,7 +513,7 @@ extern SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 //-------------------
 extern  cvar_t  *deathmatch;
 extern  cvar_t  *coop;
-extern  cvar_t  *dmflags;
+extern  cvar_t  *gamemodeflags;
 extern  cvar_t  *skill;
 extern  cvar_t  *fraglimit;
 extern  cvar_t  *timelimit;

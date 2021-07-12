@@ -38,12 +38,12 @@ char *ClientTeam(SVGBaseEntity *ent)
     if (!p)
         return value;
 
-    if ((int)(dmflags->value) & GameModeFlags::ModelTeams) {
+    if ((int)(gamemodeflags->value) & GameModeFlags::ModelTeams) {
         *p = 0;
         return value;
     }
 
-    // if ((int)(dmflags->value) & DF_SKINTEAMS)
+    // if ((int)(gamemodeflags->value) & DF_SKINTEAMS)
     return ++p;
 }
 
@@ -52,7 +52,7 @@ qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2)
     char    ent1Team [512];
     char    ent2Team [512];
 
-    if (!((int)(dmflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
+    if (!((int)(gamemodeflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
         return false;
 
     strcpy(ent1Team, ClientTeam(ent1));
@@ -720,7 +720,7 @@ void Cmd_Say_f(Entity *ent, qboolean team, qboolean arg0)
     if (gi.argc() < 2 && !arg0)
         return;
 
-    if (!((int)(dmflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
+    if (!((int)(gamemodeflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
         team = false;
 
     if (team)

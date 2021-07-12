@@ -47,11 +47,12 @@ DefaultGameMode::~DefaultGameMode() {
 //===============
 //
 qboolean DefaultGameMode::OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) {
-    //char    ent1Team[512];
-    //char    ent2Team[512];
+        
+    //    char    ent1Team[512];
+//    char    ent2Team[512];
 
-    //if (!((int)(dmflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
-    //    return false;
+    if (!((int)(gamemodeflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
+        return false;
 
     ////strcpy(ent1Team, ClientTeam(ent1));
     ////strcpy(ent2Team, ClientTeam(ent2));
@@ -340,7 +341,7 @@ void DefaultGameMode::ClientBeginServerFrame(PlayerClient* player) {
             //buttonMask = -1;
             
             if ((client->latchedButtons & buttonMask) ||
-                (deathmatch->value && ((int)dmflags->value & GameModeFlags::ForceRespawn))) {
+                (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::ForceRespawn))) {
                 SVG_RespawnClient(player->GetServerEntity());
                 client->latchedButtons = 0;
             }

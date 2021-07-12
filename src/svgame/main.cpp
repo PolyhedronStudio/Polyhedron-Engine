@@ -60,7 +60,7 @@ int meansOfDeath;
 //-----------------
 cvar_t  *deathmatch;
 cvar_t  *coop;
-cvar_t  *dmflags;
+cvar_t  *gamemodeflags;
 cvar_t  *skill;
 cvar_t  *fraglimit;
 cvar_t  *timelimit;
@@ -306,7 +306,7 @@ void SVG_InitializeCVars() {
     skill = gi.cvar("skill", "1", CVAR_LATCH);
 
     // Change anytime vars
-    dmflags = gi.cvar("dmflags", "0", CVAR_SERVERINFO);
+    gamemodeflags = gi.cvar("gamemodeflags", "0", CVAR_SERVERINFO);
     fraglimit = gi.cvar("fraglimit", "0", CVAR_SERVERINFO);
     timelimit = gi.cvar("timelimit", "0", CVAR_SERVERINFO);
     password = gi.cvar("password", "", CVAR_USERINFO);
@@ -493,7 +493,7 @@ void SVG_EndDMLevel(void)
     static const char *seps = " ,\n\r";
 
     // stay on same level flag
-    if ((int)dmflags->value & GameModeFlags::SameLevel) {
+    if ((int)gamemodeflags->value & GameModeFlags::SameLevel) {
         SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
         return;
     }
