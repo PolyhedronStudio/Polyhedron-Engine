@@ -256,9 +256,9 @@ void body_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, con
     //if (self->classEntity && self->classEntity->GetHealth() < -40) {
     //    gi.Sound(self, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
     //    for (n = 0; n < 4; n++)
-    //        ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+    //        SVG_ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
     //    self->state.origin.z -= 48;
-    //    ThrowClientHead(self, damage);
+    //    SVG_ThrowClientHead(self, damage);
     //    self->takeDamage = TakeDamage::No;
     //}
 }

@@ -637,4 +637,4 @@ struct UserFields {
     static constexpr int32_t PlayerFieldOfView = 64;
 };
 
-#endif // SHARED_H
+#endif // __SHARED_SHARED_H__

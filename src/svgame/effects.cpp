@@ -21,14 +21,13 @@
 #include "entities/base/DebrisEntity.h"
 #include "entities/base/GibEntity.h"
 
-//=====================================================
 
-//
 //=================
-// Gibs
+// SVG_ThrowClientHead
+// 
+// Throws a gib entity around at the location of "self".
 //=================
-//
-void ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
+void SVG_ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
 {
     // Create a gib entity.
     GibEntity* gibClassEntity = SVG_CreateClassEntity<GibEntity>();
@@ -77,17 +76,17 @@ void ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
     }
 
     // Comment later...
-    vec3_t velocityForDamage = game.gameMode->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = game.gameMode->CalculateDamageVelocity(damage);
 
-    // Reassign 'velocityForDamage' and multiply 'self->GetVelocity' to scale, and then 
-    // adding it on to 'velocityForDamage' its old value.
-    vec3_t gibVelocity = vec3_fmaf(self->GetVelocity(), velocityScale, velocityForDamage);
+    // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then 
+    // adding it on to 'velocityDamage' its old value.
+    vec3_t gibVelocity = vec3_fmaf(self->GetVelocity(), velocityScale, velocityDamage);
 
     // Be sure to clip our velocity, just in case.
-    gibClassEntity->ClipGibVelocity(velocityForDamage);
+    gibClassEntity->ClipGibVelocity(velocityDamage);
 
     // Last but not least, set our velocity.
-    gibClassEntity->SetVelocity(velocityForDamage);
+    gibClassEntity->SetVelocity(velocityDamage);
 
     // Generate angular velocity.
     vec3_t angularVelocity = {
@@ -107,9 +106,12 @@ void ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
     gibClassEntity->LinkEntity();
 }
 
-void ThrowClientHead(SVGBaseEntity* self, int damage) {
-    vec3_t  vd;
-
+//=================
+// SVG_ThrowClientHead
+// 
+// Tosses a client head entity around.
+//=================
+void SVG_ThrowClientHead(PlayerClient* self, int damage) {
     // Set model based on randomness.
     if (rand() & 1) {
         self->SetModel("models/objects/gibs/head2/tris.md2");
@@ -143,10 +145,10 @@ void ThrowClientHead(SVGBaseEntity* self, int damage) {
     self->SetFlags(EntityFlags::NoKnockBack);
 
     // Calculate the velocity for the given damage, fetch its scale.
-    vec3_t velocityForDamage = game.gameMode->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = game.gameMode->CalculateDamageVelocity(damage);
 
-    // Add the velocityForDamage up to the current velocity.
-    self->SetVelocity(self->GetVelocity() + velocityForDamage);
+    // Add the velocityDamage up to the current velocity.
+    self->SetVelocity(self->GetVelocity() + velocityDamage);
 
     // Bodies in the queue don't have a client anymore.
     GameClient* client = self->GetClient();
@@ -213,11 +215,11 @@ void SVG_ThrowDebris(SVGBaseEntity *self, const char *modelname, float speed, co
 }
 
 //=================
-// BecomeExplosion1
+// SVG_BecomeExplosion1
 // 
 // Sends an explosion effect as a TE cmd, and queues the entity up for removal.
 //=================
-void BecomeExplosion1(SVGBaseEntity *self)
+void SVG_BecomeExplosion1(SVGBaseEntity *self)
 {
     // Fetch origin.
     vec3_t origin = self->GetOrigin();
@@ -234,11 +236,11 @@ void BecomeExplosion1(SVGBaseEntity *self)
 }
 
 //=================
-// BecomeExplosion2
+// SVG_BecomeExplosion2
 // 
 // Sends an explosion effect as a TE cmd, and queues the entity up for removal.
 //=================
-void BecomeExplosion2(SVGBaseEntity*self)
+void SVG_BecomeExplosion2(SVGBaseEntity*self)
 {
     // Fetch origin.
     vec3_t origin = self->GetOrigin();

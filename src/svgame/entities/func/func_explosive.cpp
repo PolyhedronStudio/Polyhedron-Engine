@@ -82,7 +82,7 @@ void func_explosive_explode(Entity* self, Entity* inflictor, Entity* attacker, i
     UTIL_UseTargets(self, attacker);
 
     if (self->damage)
-        BecomeExplosion1(self);
+        SVG_BecomeExplosion1(self);
     else
         SVG_FreeEntity(self);
 }

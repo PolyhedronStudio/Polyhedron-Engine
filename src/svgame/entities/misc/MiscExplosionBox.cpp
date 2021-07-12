@@ -269,9 +269,9 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
 
     // Depending on whether we have a ground entity or not, we determine which explosion to use.
     if (GetGroundEntity())
-        BecomeExplosion2(this);
+        SVG_BecomeExplosion2(this);
     else
-        BecomeExplosion1(this);
+        SVG_BecomeExplosion1(this);
 
     // Ensure we have no more think callback pointer set when this entity has "died"
     SetThinkCallback(nullptr);

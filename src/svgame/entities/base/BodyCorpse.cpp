@@ -114,7 +114,7 @@ void BodyCorpse::BodyCorpseDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker
 
         // Toss gibs.
         for (int32_t i = 0; i < 4; i++)
-            ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+            SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
 
         // Ensure its origin goes -48, it is a lame hack but hey...
         vec3_t origin = GetOrigin();
@@ -122,7 +122,7 @@ void BodyCorpse::BodyCorpseDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker
         SetOrigin(origin);
     
         // Toss head around.
-        //ThrowClientHead(self, damage);
+        //SVG_ThrowClientHead(self, damage);
 
         // Ensure we take no damage no more.
         SetTakeDamage(TakeDamage::No);
