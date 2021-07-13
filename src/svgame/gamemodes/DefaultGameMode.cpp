@@ -38,39 +38,76 @@ DefaultGameMode::~DefaultGameMode() {
 //
 // Interface functions. 
 //
+//===============
+// DefaultGameMode::GetEntityTeamName
 //
+// Assigns the teamname to the string passed, returns false in case the entity
+// is not part of a team at all.
+//===============
+qboolean DefaultGameMode::GetEntityTeamName(SVGBaseEntity* ent, std::string &teamName) {
+    // Placeholder.
+    teamName == "";
+
+    return false;
+
+    //// We'll assume that this entity needs to have a client.
+    //if (!ent->GetClient())
+    //    return "";
+
+    //// Fetch the 'skin' info_valueforkey of the given client.
+    //std::string clientSkin = Info_ValueForKey(ent->GetClient()->persistent.userinfo, "skin");
+
+    //// Start scanning for a /, in case there is none, we can just return the skin as is.
+    //auto slashPosition = clientSkin.find_last_of('/');
+    //if (slashPosition == std::string::npos)
+    //    return clientSkin;
+
+    //// Since we did find one if we reach this code, we'll check waht our game mode flags demand.
+    //if (gamemodeflags->integer & GameModeFlags::ModelTeams) {
+    //    return clientSkin;
+    //}
+
+    //// Otherwise, in case we got skin teams... Return the skin specific part as team name.
+    //if (gamemodeflags->integer & GameModeFlags::SkinTeams) {
+    //    return clientSkin.substr(slashPosition);
+    //}
+
+    //// We should never reach this point, but... there just in case.
+    //return "";
+}
+
 //===============
 // DefaultGameMode::OnSameTeam
 //
 // Returns false either way, because yes, there is no... team in this case.
 // PS: ClientTeam <-- weird function, needs C++-fying and oh.. it stinks anyhow.
 //===============
-//
 qboolean DefaultGameMode::OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) {
-        
-    //    char    ent1Team[512];
-//    char    ent2Team[512];
+    //// There is only a reason to check for this in case these specific
+    //// game mode flags are set.
+    //if (!((int)(gamemodeflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
+    //    return false;
 
-    if (!((int)(gamemodeflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
-        return false;
+    //// Fetch the team names of both entities.
+    //std::string teamEntity1 = GetEntityTeamName(ent1);
+    //std::string teamEntity2 = GetEntityTeamName(ent2);
 
-    ////strcpy(ent1Team, ClientTeam(ent1));
-    ////strcpy(ent2Team, ClientTeam(ent2));
+    //// In case they are equal, return true.
+    //if (!teamEntity1.empty() && !teamEntity2.empty())
+    //    if (teamEntity1 != "" && teamEntity2 != "")
+    //        if (teamEntity1 == teamEntity2)
+    //            return true;
 
-    //if (strcmp(ent1Team, ent2Team) == 0)
-    //    return true;
+    // If we reached this point, we're done, no going on.
     return false;
 }
 
-//
 //===============
 // DefaultGameMode::CanDamage
 //
 //===============
-//
 qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor) {
-	
-    vec3_t  dest;
+    vec3_t  destination;
     SVGTrace trace;
 
     // WID: Admer, why the fuck did they rush hour these comments all the time?
@@ -80,8 +117,8 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     // Exception to the above: the solid entity moves or has an origin brush
     if (target->GetMoveType() == MoveType::Push) {
         // Calculate destination.
-        dest = vec3_scale(target->GetAbsoluteMin() + target->GetAbsoluteMax(), 0.5f);
-        trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
+        destination = vec3_scale(target->GetAbsoluteMin() + target->GetAbsoluteMax(), 0.5f);
+        trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
         if (trace.fraction == 1.0)
             return true;
         if (trace.ent == target)
@@ -94,31 +131,31 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     if (trace.fraction == 1.0)
         return true;
 
-    dest = target->GetOrigin();
-    dest[0] += 15.0;
-    dest[1] += 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
+    destination = target->GetOrigin();
+    destination[0] += 15.0;
+    destination[1] += 15.0;
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
-    dest = target->GetOrigin();
-    dest[0] += 15.0;
-    dest[1] -= 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
+    destination = target->GetOrigin();
+    destination[0] += 15.0;
+    destination[1] -= 15.0;
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
-    dest = target->GetOrigin();
-    dest[0] -= 15.0;
-    dest[1] += 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
+    destination = target->GetOrigin();
+    destination[0] -= 15.0;
+    destination[1] += 15.0;
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
-    dest = target->GetOrigin();
-    dest[0] -= 15.0;
-    dest[1] -= 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), dest, inflictor, CONTENTS_MASK_SOLID);
+    destination = target->GetOrigin();
+    destination[0] -= 15.0;
+    destination[1] -= 15.0;
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
     if (trace.fraction == 1.0)
         return true;
 
@@ -206,6 +243,8 @@ void DefaultGameMode::SpawnTempDamageEntity(int32_t type, const vec3_t& origin, 
     // WID: Ensure the effect can't send more damage. But that is unimplemented for the clients atm to even detect...
     if (damage > 255)
         damage = 255;
+
+    // Write away.
     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(type);
     //  gi.WriteByte (damage); // <-- This was legacy crap, might wanna implement it ourselves eventually.
@@ -456,6 +495,9 @@ void DefaultGameMode::ClientDisconnect(PlayerClient* player) {
         gi.Multicast(player->GetOrigin(), MultiCast::PVS);
     }
 
+    // Unset this entity, after all, it's about to disconnect so.
+    // We don't want it having any model, collision, sound, event, effects...
+    // and ensure it is not in use anymore, also change its classname.
     player->UnlinkEntity();
     player->SetModelIndex(0);
     player->SetSound(0);

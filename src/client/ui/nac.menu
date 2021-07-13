@@ -140,7 +140,7 @@ begin video
         pairs projection pt_projection perspective 0 cylindrical 1
         blank
 		pairs "multi-gpu support" sli "disabled" 0 "when available" 1
-        pairs "ray tracing API" nv_ray_tracing "prefer Vulkan standard (KHR)" 0 "prefer NVIDIA extensions" 1
+        pairs "ray tracing API" ray_tracing_api "automatic selection" "auto" "prefer KHR_ray_query" "query"  "prefer KHR_ray_tracing_pipeline" "pipeline" "prefer NV_ray_tracing" "nv"
         toggle "GPU profiler" profiler
     endif
 
@@ -292,20 +292,20 @@ end
 begin gameflags
     background #212F3CD0
     style --compact
-    title "GameMode Flags"
+    title "Deathmatch Flags"
     blank
-    toggle "falling damage" gamemodeflags ~3
-    toggle "weapons stay" gamemodeflags 2
-    toggle "instant powerups" gamemodeflags 4
-    toggle "allow powerups" gamemodeflags ~1
-    toggle "allow health" gamemodeflags ~0
-    toggle "allow armor" gamemodeflags ~11
-    toggle "spawn farthest" gamemodeflags 9
-    toggle "same map" gamemodeflags 5
-    toggle "force respawn" gamemodeflags 10
-    toggle "infinite ammo" gamemodeflags 13
-    toggle "fixed FOV" gamemodeflags 15
-    toggle "quad drop" gamemodeflags 14
+    toggle "falling damage" dmflags ~3
+    toggle "weapons stay" dmflags 2
+    toggle "instant powerups" dmflags 4
+    toggle "allow powerups" dmflags ~1
+    toggle "allow health" dmflags ~0
+    toggle "allow armor" dmflags ~11
+    toggle "spawn farthest" dmflags 9
+    toggle "same map" dmflags 5
+    toggle "force respawn" dmflags 10
+    toggle "infinite ammo" dmflags 13
+    toggle "fixed FOV" dmflags 15
+    toggle "quad drop" dmflags 14
 end
 
 begin startserver
@@ -316,7 +316,7 @@ begin startserver
     strings "initial map" _ui_nextserver $com_maplist
     field --integer --status "0 - no time limit" --width 3 "time limit" timelimit
     field --integer --status "0 - no frag limit" --width 3 "frag limit" fraglimit
-    field --integer --width 3 "max players" maxClients
+    field --integer --width 3 "max players" maxclients
     field --width 16 "host name" hostname
     blank
     action --align "deathmatch flags..." pushmenu gameflags
@@ -349,24 +349,38 @@ end
 begin development
     background #212F3CD0
     style --compact
-    banner m_banner_game
-    action testmap_0 "skill 0; deathmatch 0; coop 0; maxClients 1; newgame; gamemap dev_testmap_0"
-    action medium "skill 0; deathmatch 0; coop 0; maxClients 1; newgame; gamemap dev_testmap_1"
-    action hard "skill 0; deathmatch 0; coop 0; maxClients 1; newgame; gamemap dev_testmap_2"
-    action nightmare "skill 0; deathmatch 0; coop 0; maxClients 1; newgame; gamemap dev_testmap_3"
+    title "Developer Menu"
     blank
-    action "load game..." pushmenu loadgame
-    action "save game..." pushmenu savegame
+    /*
+    forcemenuoff; is required, otherwise the cvars aren't stored for later usage in the list here. 
+
+    This command is placed on top so we can easily enter through the main menu :)
+    */ 
+    action "Launch Map" "forcemenuoff; disconnect; skill $dev_skill; deathmatch 0; coop 0; maxclients 1; echo $dev_map; map $dev_map force"
+    field --width 32 "map" dev_map
+    blank
+    field --numeric --width 1 "skill" dev_skill
+    field --integer --width 3 "max players" maxclients
+    /*
+    Deathmatch is 1 by default, and I'm not in a mood to spend more time on this men uatm.
+    But with some puzzling around, we could add these settings too.
+    toggle "Deathmatch" deathmatch
+    toggle "Coop" coop
+    */
+    blank
 end
 
 begin singleplayer
     background #212F3CD0
     style --compact
     banner m_banner_game
-    action easy "skill 0; deathmatch 0; coop 0; maxClients 1; map nacstart"
-    action medium "skill 1; deathmatch 0; coop 0; maxClients 1; map nacstart"
-    action hard "skill 2; deathmatch 0; coop 0; maxClients 1; map nacstart"
-    action nightmare "skill 3; deathmatch 0; coop 0; maxClients 1; map nacstart"
+    ifeq developer 1
+        action development pushmenu development
+    endif
+    action easy "skill 0; deathmatch 0; coop 0; maxclients 1; map abc"
+    action medium "skill 1; deathmatch 0; coop 0; maxclients 1; map abc"
+    action hard "skill 2; deathmatch 0; coop 0; maxclients 1; map abc"
+    action nightmare "skill 3; deathmatch 0; coop 0; maxclients 1; map abc"
     blank
     action "load game..." pushmenu loadgame
     action "save game..." pushmenu savegame
@@ -427,9 +441,6 @@ end
 begin main
 //    title "Main Menu"
     plaque m_main_plaque m_main_logo
-    if developer 1
-        action easy pushmenu development
-    endif
     bitmap m_main_game pushmenu singleplayer
     bitmap m_main_multiplayer pushmenu multiplayer
     bitmap m_main_options pushmenu options

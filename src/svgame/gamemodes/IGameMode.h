@@ -16,9 +16,12 @@ class PlayerClient;
 
 class IGameMode {
 public:
+    //
     // Constructor/Deconstructor.
+    //
     IGameMode() {};
     virtual ~IGameMode() {};
+
 
     //
     // Map related, also known as the "current game".
@@ -50,9 +53,13 @@ public:
     // or did other clients, kill any other client/entity.
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) = 0;
     
+
     //
     // Combat Game Rule checks.
     //
+    // Assigns the teamname to 'teamName', returns false/true if they are
+    // on the same specific team.
+    virtual qboolean GetEntityTeamName(SVGBaseEntity* ent, std::string &teamName) = 0;
     // Returns true if these two entities are on a same team.
     virtual qboolean OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) = 0;
     // Returns true if the target entity can be damaged by the inflictor enemy.
