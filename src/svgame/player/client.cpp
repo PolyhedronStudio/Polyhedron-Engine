@@ -220,13 +220,14 @@ void SelectSpawnPoint(Entity *ent, vec3_t &origin, vec3_t &angles)
     // Find a single player start spot
     if (!spot) {
         //while ((spot = SVG_FindEntityByKeyValue("classname", "info_player_start", spot)) != nullptr) {
-        //    if (!game.spawnpoint[0] && !spot->GetTargetName())
+        //    if (!game.spawnpoint[0] && spot->GetTargetName().empty())
         //        break;
 
-        //    if (!game.spawnpoint[0] || !spot->GetTargetName())
+        //    if (!game.spawnpoint[0] || spot->GetTargetName().empty())
         //        continue;
 
-        //    if (Q_stricmp(game.spawnpoint, spot->GetTargetName()) == 0)
+        //    //if (Q_stricmp(game.spawnpoint, spot->GetTargetName()) == 0)
+        //    if (spot->GetTargetName() == game.spawnpoint)
         //        break;
         //}
 

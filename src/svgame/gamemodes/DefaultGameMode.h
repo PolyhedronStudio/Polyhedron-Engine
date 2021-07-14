@@ -38,6 +38,8 @@ public:
     virtual void ClientDisconnect(PlayerClient* ent) override;
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
+    virtual void PutClientInServer(PlayerClient* ent) override;
+
     virtual void SetCurrentMeansOfDeath(int32_t meansOfDeath) override;
     virtual const int32_t& GetCurrentMeansOfDeath() override;
 

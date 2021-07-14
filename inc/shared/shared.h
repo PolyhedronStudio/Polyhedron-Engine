@@ -190,7 +190,6 @@ constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
 #include "shared/math.h"
 
 
-
 //
 //=============================================================================
 //

@@ -58,6 +58,11 @@ SET( SRC_SVGAME_MAIN
 	svgame/weapons.cpp
 )
 
+SET( SRC_SVGAME_UTILS
+	svgame/utils/EntityIterator.cpp
+	svgame/utils/EntityIterator.h
+)
+
 SET( SRC_SVGAME_ENTITIES_AI 
 	svgame/ai/MonsterAI.cpp
 )
@@ -189,6 +194,7 @@ SET(SRC_SVGAME
 	${SRC_SVGAME_GAMEMODES}
 	${SRC_SVGAME_PHYSICS}
 	${SRC_SVGAME_PLAYER}
+	${SRC_SVGAME_UTILS}
 	${SRC_SVGAME_WEAPONS}
 )
 
@@ -206,6 +212,12 @@ SET ( HEADERS_SVGAME_MAIN
 SET ( HEADERS_SVGAME_AI 
 	svgame/ai/MonsterAI.h
 )
+
+SET( HEADERS_SVGAME_UTILS
+	svgame/utils/EntityIterator.cpp
+	svgame/utils/EntityIterator.h
+)
+
 SET ( HEADERS_SVGAME_ENTITIES_BASE 
 	svgame/entities/base/SVGBaseEntity.h
 	svgame/entities/base/SVGBaseTrigger.h
@@ -471,7 +483,6 @@ SET(SRC_SHARED
 	shared/math/plane.cpp
 	shared/math/vector3.cpp
 
-	
 	shared/math.cpp
 	shared/shared.cpp
 )

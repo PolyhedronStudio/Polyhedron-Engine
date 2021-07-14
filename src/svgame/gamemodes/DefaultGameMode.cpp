@@ -168,7 +168,6 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
 // 
 // Spawns a dead body entity for the given client.
 //===============
-
 void DefaultGameMode::SpawnClientCorpse(SVGBaseEntity* ent) {
     // Ensure it is an entity.
     if (!ent)
@@ -253,13 +252,11 @@ void DefaultGameMode::SpawnTempDamageEntity(int32_t type, const vec3_t& origin, 
     gi.Multicast(origin, MultiCast::PVS);
 }
 
-//
 //===============
 // DefaultGameMode::CalculateDamageVelocity
 // 
 // Default implementation for calculating velocity damage.
 //===============
-//
 vec3_t DefaultGameMode::CalculateDamageVelocity(int32_t damage) {
     // Pick random velocities.
     vec3_t velocity = {
@@ -278,13 +275,11 @@ vec3_t DefaultGameMode::CalculateDamageVelocity(int32_t damage) {
     return velocity;
 }
 
-//
 //===============
 // DefaultGameMode::OnLevelExit
 // 
 // Default implementation for exiting levels.
 //===============
-//
 void DefaultGameMode::OnLevelExit() {
     // Create the command to use for switching to the next game map.
     std::string command = "gamemap \"";
@@ -660,6 +655,20 @@ void DefaultGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* i
     // WID: We can uncomment these in case we end up making a SinglePlayerMode after all.
     //if (deathmatch->value)
     //    self->GetClient()->respawn.score--;
+}
+
+//===============
+// DefaultGameMode::PutClientInServer
+// 
+// Can be used to legit respawn a client at a spawn point.
+// For SinglePlayer you want to take it a bit easy with this function.
+// For Multiplayer games however, you definitely want to use this function.
+//
+// SP games: Use it once... (or at load time)
+// MP games: Use it every respawn.
+//===============
+void DefaultGameMode::PutClientInServer(PlayerClient *ent) {
+    // Find a spawn point for this client to be "placed"/"put" at.
 }
 
 //===============

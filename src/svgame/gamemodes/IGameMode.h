@@ -63,7 +63,13 @@ public:
     // 
     // Mainly used by the Client callbacks.
     //
-
+    // Can be used to legit respawn a client at a spawn point.
+    // For SinglePlayer you want to take it a bit easy with this function.
+    // For Multiplayer games however, you definitely want to use this function.
+    //
+    // SP games: Use it once... (or at load time)
+    // MP games: Use it every respawn.
+    virtual void PutClientInServer(PlayerClient* ent) = 0;
 
 
     //
