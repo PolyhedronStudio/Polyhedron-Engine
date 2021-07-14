@@ -46,11 +46,10 @@ qboolean CoopGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor
 // 
 //===============
 void CoopGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
-    int32_t finalMeansOfDeath = 0; // Sum of things, final means of death.
-    std::string message = ""; // String stating what happened to whichever entity. "suicides", "was squished" etc.
-    std::string messageAddition = ""; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
+    std::string message; // String stating what happened to whichever entity. "suicides", "was squished" etc.
+    std::string messageAddition; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
 
-    // If attacker is a client, oops, friendly fire my friend :)
+    // If the attacker is a client, we know it was a friendly fire in this coop mode. :)
     if (attacker->GetClient())
         meansOfDeath |= MeansOfDeath::FriendlyFire;
 
@@ -58,39 +57,39 @@ void CoopGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* infl
     qboolean friendlyFire = meansOfDeath & MeansOfDeath::FriendlyFire;
     // Quickly remove it from meansOfDeath again, our bool is set. This prevents it from 
     // sticking around when we process the next entity/client.
-    finalMeansOfDeath = meansOfDeath & ~MeansOfDeath::FriendlyFire;
+    int32_t finalMeansOfDeath = meansOfDeath & ~MeansOfDeath::FriendlyFire; // Sum of things, final means of death.
 
     // Determine the means of death.
     switch (finalMeansOfDeath) {
-        case MeansOfDeath::Suicide:
-            message = "suicides";
-            break;
-        case MeansOfDeath::Falling:
-            message = "cratered";
-            break;
-        case MeansOfDeath::Crush:
-            message = "was squished";
-            break;
-        case MeansOfDeath::Water:
-            message = "sank like a rock";
-            break;
-        case MeansOfDeath::Slime:
-            message = "melted";
-            break;
-        case MeansOfDeath::Lava:
-            message = "does a back flip into the lava";
-            break;
-        case MeansOfDeath::Explosive:
-        case MeansOfDeath::Barrel:
-            message = "blew up";
-            break;
-        case MeansOfDeath::Exit:
-            message = "found a way out";
-            break;
-        case MeansOfDeath::Splash:
-        case MeansOfDeath::TriggerHurt:
-            message = "was in the wrong place";
-            break;
+    case MeansOfDeath::Suicide:
+        message = "suicides";
+        break;
+    case MeansOfDeath::Falling:
+        message = "cratered";
+        break;
+    case MeansOfDeath::Crush:
+        message = "was squished";
+        break;
+    case MeansOfDeath::Water:
+        message = "sank like a rock";
+        break;
+    case MeansOfDeath::Slime:
+        message = "melted";
+        break;
+    case MeansOfDeath::Lava:
+        message = "does a back flip into the lava";
+        break;
+    case MeansOfDeath::Explosive:
+    case MeansOfDeath::Barrel:
+        message = "blew up";
+        break;
+    case MeansOfDeath::Exit:
+        message = "found a way out";
+        break;
+    case MeansOfDeath::Splash:
+    case MeansOfDeath::TriggerHurt:
+        message = "was in the wrong place";
+        break;
     }
 
     // Check if the attacker hurt himself, if so, ... n00b! :D 
@@ -109,8 +108,9 @@ void CoopGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* infl
     }
 
     // Generated a message?
-    if (!message.empty()) {
+    if (message != "") {
         gi.BPrintf(PRINT_MEDIUM, "%s %s.\n", self->GetClient()->persistent.netname, message.c_str());
+        //if (deathmatch->value)
         self->GetClient()->respawn.score--;
         self->SetEnemy(NULL);
         return;
@@ -158,7 +158,7 @@ void CoopGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* infl
         }
 
         // In case we have a message, proceed.
-        if (!message.empty()) {
+        if (message != "") {
             // Print it.
             gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClient()->persistent.netname, messageAddition.c_str());
 

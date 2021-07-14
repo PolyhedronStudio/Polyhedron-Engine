@@ -520,18 +520,15 @@ void DefaultGameMode::ClientDisconnect(PlayerClient* player) {
 // 
 //===============
 void DefaultGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
-    // 
-    int32_t finalMeansOfDeath = 0;
     std::string message = ""; // String stating what happened to whichever entity. "suicides", "was squished" etc.
     std::string messageAddition = ""; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
-    //qboolean    friendlyFire = false; // Is there friendly fire going on? Shame on you guys!
     
     // Goes to COOP GAME MODE.
     //if (coop->value && attacker->GetClient())
     //    meansOfDeath |= MeansOfDeath::FriendlyFire;
 
     qboolean friendlyFire = meansOfDeath & MeansOfDeath::FriendlyFire;
-    finalMeansOfDeath = meansOfDeath & ~MeansOfDeath::FriendlyFire;
+    int32_t finalMeansOfDeath = meansOfDeath & ~MeansOfDeath::FriendlyFire;
 
     switch (finalMeansOfDeath) {
         case MeansOfDeath::Suicide:
@@ -577,10 +574,11 @@ void DefaultGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* i
             break;
         }
     }
-    if (!message.empty()) {
+    if (message != "") {
         gi.BPrintf(PRINT_MEDIUM, "%s %s.\n", self->GetClient()->persistent.netname, message.c_str());
-        if (deathmatch->value)
-            self->GetClient()->respawn.score--;
+        // WID: We can uncomment these in case we end up making a SinglePlayerMode after all.
+        //if (deathmatch->value)
+        //    self->GetClient()->respawn.score--;
         self->SetEnemy(NULL);
         return;
     }
@@ -625,7 +623,7 @@ void DefaultGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* i
             messageAddition = "'s personal space";
             break;
         }
-        if (!message.empty()) {
+        if (message != "") {
             gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClient()->persistent.netname, messageAddition.c_str());
             // WID: We can uncomment these in case we end up making a SinglePlayerMode after all.
             //if (deathmatch->value) {

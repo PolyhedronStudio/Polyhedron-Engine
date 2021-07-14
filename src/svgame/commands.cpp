@@ -20,8 +20,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "entities.h"
 #include "player/animations.h"
 
+// Class Entities.
 #include "entities/base/SVGBaseEntity.h"
 #include "entities/base/PlayerClient.h"
+
+// Game Modes.
+#include "gamemodes/IGameMode.h"
 
 char *ClientTeam(SVGBaseEntity *ent)
 {
@@ -580,7 +584,7 @@ void Cmd_Kill_f(PlayerClient *ent)
 
     ent->SetFlags(ent->GetFlags() & ~EntityFlags::GodMode);
     ent->SetHealth(0);
-    meansOfDeath = MeansOfDeath::Suicide;
+    game.gameMode->SetCurrentMeansOfDeath(MeansOfDeath::Suicide);
     ent->Die(ent, ent, 100000, vec3_zero());
 }
 

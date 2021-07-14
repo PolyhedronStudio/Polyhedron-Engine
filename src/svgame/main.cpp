@@ -52,7 +52,6 @@ TemporarySpawnFields    st;
 
 int sm_meat_index;
 int snd_fry;
-int meansOfDeath;
 
 
 //-----------------

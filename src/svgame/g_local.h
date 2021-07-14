@@ -485,9 +485,6 @@ struct MeansOfDeath {
     static constexpr int32_t FriendlyFire = 27;
 };
 
-// Extern variable, really ugly.
-extern  int32_t meansOfDeath;
-
 // Once again, ugly.
 extern Entity g_entities[MAX_EDICTS];
 extern SVGBaseEntity* g_baseEntities[MAX_EDICTS];

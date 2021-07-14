@@ -132,7 +132,7 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
     //    }
     //}
     // We resort to defaults, but keep the above as mentioned.
-    meansOfDeath = mod;
+    game.gameMode->SetCurrentMeansOfDeath(mod);
 
     // Fetch client.
     GameClient *client = targ->GetClient();

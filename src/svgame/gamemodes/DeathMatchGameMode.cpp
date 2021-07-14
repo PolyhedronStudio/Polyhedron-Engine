@@ -98,6 +98,7 @@ qboolean DeathMatchGameMode::ClientCanConnect(Entity* serverEntity, char* userIn
 // Called when a client is ready to be placed in the game after connecting.
 //===============
 void DeathMatchGameMode::ClientBegin(Entity* serverEntity) {
+    // Be sure to initialize the entity.
     SVG_InitEntity(serverEntity);
 
     SVG_InitClientRespawn(serverEntity->client);
@@ -127,15 +128,17 @@ void DeathMatchGameMode::ClientBegin(Entity* serverEntity) {
 // 
 //===============
 void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
-    int32_t finalMeansOfDeath = 0; // Sum of things, final means of death.
     std::string message = ""; // String stating what happened to whichever entity. "suicides", "was squished" etc.
     std::string messageAddition = ""; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
+
+    //if (coop->value && attacker->client)
+    //    meansOfDeath |= MOD_FRIENDLY_FIRE;
 
     // Set a bool for whether we got friendly fire.
     qboolean friendlyFire = meansOfDeath & MeansOfDeath::FriendlyFire;
     // Quickly remove it from meansOfDeath again, our bool is set. This prevents it from 
     // sticking around when we process the next entity/client.
-    finalMeansOfDeath = meansOfDeath & ~MeansOfDeath::FriendlyFire;
+    int32_t finalMeansOfDeath = meansOfDeath & ~MeansOfDeath::FriendlyFire; // Sum of things, final means of death.
 
     // Determine the means of death.
     switch (finalMeansOfDeath) {
@@ -186,7 +189,7 @@ void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
     }
 
     // Generated a message?
-    if (!message.empty()) {
+    if (message != "") {
         gi.BPrintf(PRINT_MEDIUM, "%s %s.\n", self->GetClient()->persistent.netname, message.c_str());
         //if (deathmatch->value)
         self->GetClient()->respawn.score--;
@@ -236,7 +239,7 @@ void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
         }
 
         // In case we have a message, proceed.
-        if (!message.empty()) {
+        if (message != "") {
             // Print it.
             gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClient()->persistent.netname, messageAddition.c_str());
             

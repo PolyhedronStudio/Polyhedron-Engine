@@ -32,16 +32,20 @@ public:
 
 
     //
-    // Client related.
+    // Client related callbacks.
+    // 
+    // Game modes have the ability to implement their own, this can be of use
+    // for specific game modes. They like to have control over this.
     //
     // Determines whether a client is allowed to connect at all.
     // Returns false in case a client is allowed to connect.
     virtual qboolean ClientCanConnect(Entity* serverEntity, char* userInfo) = 0;
     // Called when a client connects. This does not get called between
-    // load games, of course.
+    // load games, of course. A client is still connected to the current
+    // game session in that case.
     virtual void ClientConnect(Entity* serverEntity) = 0;
     // Called when a client has finished connecting, and is ready
-    // to be placed into the game.This will happen every level load.
+    // to be placed into the game.This will happen every map load.
     virtual void ClientBegin(Entity* serverEntity) = 0;
     // This will be called once for all clients at the start of each server 
     // frame. Before running any other entities in the world.
@@ -53,6 +57,14 @@ public:
     // or did other clients, kill any other client/entity.
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) = 0;
     
+
+    //
+    // Client related functions/utilities.
+    // 
+    // Mainly used by the Client callbacks.
+    //
+
+
 
     //
     // Combat Game Rule checks.
