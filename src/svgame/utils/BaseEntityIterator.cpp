@@ -16,7 +16,7 @@
 // Returns a reference to the actual base entity index.
 //===============
 inline SVGBaseEntity *BaseIteratorToEntity(size_t index) {
-	return g_baseEntities[index];
+	return g_entities[index].classEntity;
 }
 
 //===============
@@ -32,7 +32,7 @@ BaseEntityIterator::BaseEntityIterator(size_t first, size_t last) :
 // BaseEntityIterator::begin
 //
 //===============
-SVGBaseEntity* BaseEntityIterator::begin() {
+SVGBaseEntity *BaseEntityIterator::begin() {
 	return first;
 }
 
@@ -40,7 +40,7 @@ SVGBaseEntity* BaseEntityIterator::begin() {
 // BaseEntityIterator::end
 //
 //===============
-SVGBaseEntity* BaseEntityIterator::end() {
+SVGBaseEntity *BaseEntityIterator::end() {
 	return last;
 }
 

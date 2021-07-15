@@ -10,6 +10,9 @@
 #include "entities.h"			// Entities header.
 #include "player/client.h"		// Include Player Client header.
 
+#include <span>
+#include <ranges>
+
 //
 // SVG_SpawnClassEntity
 //
@@ -33,53 +36,47 @@ Entity g_entities[MAX_EDICTS];
 
 // BaseEntity array, matches similarly index wise.
 SVGBaseEntity* g_baseEntities[MAX_EDICTS];
+//!! Move elsewhere
+using BaseEntityRange = std::span<SVGBaseEntity*>;
+// using EntityRange = std::span<Entity*>; This is bugged... in VS2019 anyhow.
+
+auto FetchModernMethod(std::size_t start, std::size_t end) {
+    return BaseEntityRange(&g_baseEntities[start], &g_baseEntities[end]) |
+        std::views::filter([](SVGBaseEntity* ent) {
+            return ent != nullptr && ent->GetServerEntity() && ent->IsInUse();
+        }
+    );
+}
+
+auto FetchModernMethod2(std::size_t start, std::size_t end) {
+    return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
+}
 
 void DebugShitForEntitiesLulz() {
     // Line... 
     gi.DPrintf("Entities - ===========================================\n");
 
-
-    // Fetch entities.
-    for (auto& ent : FetchEntitiesInRange()) {
-        if (!ent.inUse)
-            continue;
-        
-        // Fetch class ent.
-        SVGBaseEntity* classEntity = ent.classEntity;
-        
-        // Hue hue cry baby cry, do or die!
-        if (!classEntity)
-            continue;
-        
-        // Aight sweet spot hit.
-        gi.DPrintf("DebugShotForEntitiesLulz: %s\n", classEntity->GetClassName());
+    for (auto entity : FetchModernMethod2(0, MAX_EDICTS)) {
+        gi.DPrintf("Entity stuff FetchModernMethod2: %s", entity.className);
     }
 
+    // Line... 
     gi.DPrintf("BaseEntities - ===========================================\n");
 
     // Fetch base entities.
-    for (SVGBaseEntity *baseEntity : FetchBaseEntitiesInRange()) {
-        if (!baseEntity)
-            continue;
-
-        if (!baseEntity->GetServerEntity())
-            continue;
-
-        if (!baseEntity->IsInUse())
-            continue;
-
+    
+    //for (auto baseEntity : FetchBaseEntitiesInRange()) {
+    for (auto baseEntity : FetchModernMethod(0, MAX_EDICTS)) {
         // Aight sweet spot hit.
         gi.DPrintf("DebugShotForEntitiesLulz: %s\n", baseEntity->GetClassName());
     }
 }
 
-//
 //===============
 // SVG_SpawnClassEntity
 // 
 // 
 //=================
-//
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     // Start with a nice nullptr.
     SVGBaseEntity* spawnEntity = nullptr;
@@ -109,7 +106,6 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     }
 }
 
-//
 //===============
 // SVG_FreeClassEntity
 // 
@@ -117,7 +113,6 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
 // look for SVG_FreeEntity instead. It automatically takes care of 
 // classEntities too.
 //=================
-//
 void SVG_FreeClassEntity(Entity* ent) {
     // Only proceed if it has a classEntity.
     if (!ent->classEntity)
@@ -137,14 +132,13 @@ void SVG_FreeClassEntity(Entity* ent) {
     }
 }
 
-//
+
 //===============
 // SVG_FreeEntity
 // 
 // Will remove the class entity, if it exists. Continues to then mark the
 // entity as "freed". (inUse = false)
 //=================
-//
 void SVG_FreeEntity(Entity* ent)
 {
     if (!ent)
@@ -179,7 +173,6 @@ void SVG_FreeEntity(Entity* ent)
     ent->inUse = false;
 }
 
-//
 //===============
 // SVG_PickTarget
 // 
@@ -190,7 +183,6 @@ void SVG_FreeEntity(Entity* ent)
 // NULL will be returned if the end of the list is reached.
 //
 //===============
-//
 #define MAXCHOICES  8
 
 Entity* SVG_PickTarget(char* targetName)
@@ -230,7 +222,6 @@ Entity* SVG_PickTarget(char* targetName)
     return choice[rand() % num_choices];
 }
 
-//
 //===============
 // SVG_Find
 // 
@@ -240,7 +231,6 @@ Entity* SVG_PickTarget(char* targetName)
 // Searches beginning at the edict after from, or the beginning if NULL
 // NULL will be returned if the end of the list is reached.
 //===============
-//
 Entity* SVG_Find(Entity* from, int fieldofs, const char* match)
 {
     char* s;
@@ -263,14 +253,12 @@ Entity* SVG_Find(Entity* from, int fieldofs, const char* match)
     return NULL;
 }
 
-//
 //===============
 // SVG_FindEntity
 //
 // Returns an entity that matches the given fieldKey and fieldValue in its 
 // entity dictionary.
 //===============
-//
 SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::string& fieldValue, SVGBaseEntity* lastEntity) {
     Entity* serverEnt = (lastEntity ? lastEntity->GetServerEntity() : nullptr);
 
@@ -304,7 +292,6 @@ SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::
     return nullptr;
 }
 
-//
 //===============
 // SVG_FindEntitiesWithinRadius
 // 
@@ -312,7 +299,6 @@ SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::
 // 
 // SVG_FindEntitiesWithinRadius (origin, radius)
 //===============
-//
 SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t origin, float radius, uint32_t excludeSolidFlags)
 {
     vec3_t  entityOrigin = vec3_zero();
@@ -353,13 +339,11 @@ SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t origin, 
     return nullptr;
 }
 
-//
 //===============
 // SVG_InitEntity
 // 
 // Reinitializes a ServerEntity for use.
 //===============
-//
 void SVG_InitEntity(Entity* e)
 {
     // From here on this entity is in use.
@@ -375,7 +359,6 @@ void SVG_InitEntity(Entity* e)
     e->state.number = e - g_entities;
 }
 
-//
 //===============
 // SVG_Spawn
 // 
@@ -385,7 +368,6 @@ void SVG_InitEntity(Entity* e)
 // instead of being removed and recreated, which can cause interpolated
 // angles and bad trails.
 //===============
-//
 Entity* SVG_Spawn(void)
 {
     Entity *serverEntity = nullptr;
@@ -412,13 +394,11 @@ Entity* SVG_Spawn(void)
     return serverEntity;
 }
 
-//
 //=====================
 // SVG_CreateTargetChangeLevel
 //
 // Returns the created target changelevel entity.
 //=====================
-//
 Entity* SVG_CreateTargetChangeLevel(char* map) {
     Entity* ent;
 
@@ -429,24 +409,20 @@ Entity* SVG_CreateTargetChangeLevel(char* map) {
     return ent;
 }
 
-//
 //===============
 // SVG_GetWorldServerEntity
 // 
 // Returns a pointer to the 'Worldspawn' ServerEntity.
 //===============
-//
 Entity* SVG_GetWorldServerEntity() {
     return &g_entities[0];
 };
 
-//
 //===============
 // SVG_GetWorldClassEntity
 // 
 // Returns a pointer to the 'Worldspawn' ClassEntity.
 //===============
-//
 SVGBaseEntity* SVG_GetWorldClassEntity() {
     return g_baseEntities[0];
 };
