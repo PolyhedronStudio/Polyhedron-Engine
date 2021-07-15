@@ -80,174 +80,6 @@ void SP_FixCoopSpots(Entity *self)
 
 //=======================================================================
 
-
-
-
-
-qboolean IsFemale(SVGBaseEntity *ent)
-{
-    char        *info;
-
-    if (!ent->GetClient())
-        return false;
-
-    info = Info_ValueForKey(ent->GetClient()->persistent.userinfo, "gender");
-    if (info[0] == 'f' || info[0] == 'F')
-        return true;
-    return false;
-}
-
-qboolean IsNeutral(SVGBaseEntity *ent)
-{
-    char        *info;
-
-    if (!ent->GetClient())
-        return false;
-
-    info = Info_ValueForKey(ent->GetClient()->persistent.userinfo, "gender");
-    if (info[0] != 'f' && info[0] != 'F' && info[0] != 'm' && info[0] != 'M')
-        return true;
-    return false;
-}
-
-void SVG_ClientUpdateObituary(SVGBaseEntity *self, SVGBaseEntity *inflictor, SVGBaseEntity *attacker)
-{
-    int         mod;
-    const char        *message; // C++20: STRING: Added const to char*
-    const char        *message2; // C++20: STRING: Added const to char*
-    qboolean    ff;
-
-    if (coop->value && attacker->GetClient())
-        meansOfDeath |= MeansOfDeath::FriendlyFire;
-
-    if (deathmatch->value || coop->value) {
-        ff = meansOfDeath & MeansOfDeath::FriendlyFire;
-        mod = meansOfDeath & ~MeansOfDeath::FriendlyFire;
-        message = NULL;
-        message2 = "";
-
-        switch (mod) {
-        case MeansOfDeath::Suicide:
-            message = "suicides";
-            break;
-        case MeansOfDeath::Falling:
-            message = "cratered";
-            break;
-        case MeansOfDeath::Crush:
-            message = "was squished";
-            break;
-        case MeansOfDeath::Water:
-            message = "sank like a rock";
-            break;
-        case MeansOfDeath::Slime:
-            message = "melted";
-            break;
-        case MeansOfDeath::Lava:
-            message = "does a back flip into the lava";
-            break;
-        case MeansOfDeath::Explosive:
-        case MeansOfDeath::Barrel:
-            message = "blew up";
-            break;
-        case MeansOfDeath::Exit:
-            message = "found a way out";
-            break;
-        case MeansOfDeath::Splash:
-        case MeansOfDeath::TriggerHurt:
-            message = "was in the wrong place";
-            break;
-        }
-        if (attacker == self) {
-            switch (mod) {
-            case MeansOfDeath::GrenadeSplash:
-                if (IsNeutral(self))
-                    message = "tripped on its own grenade";
-                else if (IsFemale(self))
-                    message = "tripped on her own grenade";
-                else
-                    message = "tripped on his own grenade";
-                break;
-            case MeansOfDeath::RocketSplash:
-                if (IsNeutral(self))
-                    message = "blew itself up";
-                else if (IsFemale(self))
-                    message = "blew herself up";
-                else
-                    message = "blew himself up";
-                break;
-            default:
-                if (IsNeutral(self))
-                    message = "killed itself";
-                else if (IsFemale(self))
-                    message = "killed herself";
-                else
-                    message = "killed himself";
-                break;
-            }
-        }
-        if (message) {
-            gi.BPrintf(PRINT_MEDIUM, "%s %s.\n", self->GetClient()->persistent.netname, message);
-            if (deathmatch->value)
-                self->GetClient()->respawn.score--;
-            self->SetEnemy(NULL);
-            return;
-        }
-
-        self->SetEnemy(attacker);
-        if (attacker && attacker->GetClient()) {
-            switch (mod) {
-            case MeansOfDeath::Blaster:
-                message = "was blasted by";
-                break;
-            case MeansOfDeath::Shotgun:
-                message = "was gunned down by";
-                break;
-            case MeansOfDeath::SuperShotgun:
-                message = "was blown away by";
-                message2 = "'s super shotgun";
-                break;
-            case MeansOfDeath::Machinegun:
-                message = "was machinegunned by";
-                break;
-            case MeansOfDeath::Grenade:
-                message = "was popped by";
-                message2 = "'s grenade";
-                break;
-            case MeansOfDeath::GrenadeSplash:
-                message = "was shredded by";
-                message2 = "'s shrapnel";
-                break;
-            case MeansOfDeath::Rocket:
-                message = "ate";
-                message2 = "'s rocket";
-                break;
-            case MeansOfDeath::RocketSplash:
-                message = "almost dodged";
-                message2 = "'s rocket";
-                break;
-            case MeansOfDeath::TeleFrag:
-                message = "tried to invade";
-                message2 = "'s personal space";
-                break;
-            }
-            if (message) {
-                gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message, attacker->GetClient()->persistent.netname, message2);
-                if (deathmatch->value) {
-                    if (ff)
-                        attacker->GetClient()->respawn.score--;
-                    else
-                        attacker->GetClient()->respawn.score++;
-                }
-                return;
-            }
-        }
-    }
-
-    gi.BPrintf(PRINT_MEDIUM, "%s died.\n", self->GetClient()->persistent.netname);
-    if (deathmatch->value)
-        self->GetClient()->respawn.score--;
-}
-
 void SVG_TossClientWeapon(PlayerClient *playerClient)
 {
     gitem_t     *item;
@@ -275,13 +107,13 @@ void SVG_TossClientWeapon(PlayerClient *playerClient)
 
 /*
 ==============
-InitClientPersistant
+SVG_InitClientPersistant
 
 This is only called when the game first initializes in single player,
 but is called after each death and level change in deathmatch
 ==============
 */
-void InitClientPersistant(GameClient *client)
+void SVG_InitClientPersistant(GameClient *client)
 {
 	gitem_t     *item = NULL;
 
@@ -311,7 +143,7 @@ void InitClientPersistant(GameClient *client)
 }
 
 
-void InitClientRespawn(GameClient *client)
+void SVG_InitClientRespawn(GameClient *client)
 {
     if (!client)
         return;
@@ -352,6 +184,12 @@ void SVG_SaveClientData(void)
 
 void SVG_FetchClientData(Entity *ent)
 {
+    if (!ent)
+        return;
+
+    if (!ent->classEntity)
+        return;
+
     ent->classEntity->SetHealth(ent->client->persistent.health);
     ent->classEntity->SetMaxHealth(ent->client->persistent.maxHealth);
     ent->classEntity->SetFlags(ent->classEntity->GetFlags() | ent->client->persistent.savedFlags);
@@ -379,16 +217,17 @@ void SelectSpawnPoint(Entity *ent, vec3_t &origin, vec3_t &angles)
 {
     SVGBaseEntity *spot = nullptr;
 
-    // find a single player start spot
+    // Find a single player start spot
     if (!spot) {
         //while ((spot = SVG_FindEntityByKeyValue("classname", "info_player_start", spot)) != nullptr) {
-        //    if (!game.spawnpoint[0] && !spot->GetTargetName())
+        //    if (!game.spawnpoint[0] && spot->GetTargetName().empty())
         //        break;
 
-        //    if (!game.spawnpoint[0] || !spot->GetTargetName())
+        //    if (!game.spawnpoint[0] || spot->GetTargetName().empty())
         //        continue;
 
-        //    if (Q_stricmp(game.spawnpoint, spot->GetTargetName()) == 0)
+        //    //if (Q_stricmp(game.spawnpoint, spot->GetTargetName()) == 0)
+        //    if (spot->GetTargetName() == game.spawnpoint)
         //        break;
         //}
 
@@ -418,64 +257,20 @@ void body_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, con
     //if (self->classEntity && self->classEntity->GetHealth() < -40) {
     //    gi.Sound(self, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
     //    for (n = 0; n < 4; n++)
-    //        ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+    //        SVG_ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
     //    self->state.origin.z -= 48;
-    //    ThrowClientHead(self, damage);
+    //    SVG_ThrowClientHead(self, damage);
     //    self->takeDamage = TakeDamage::No;
     //}
-}
-
-void CopyToBodyQue(Entity *ent)
-{
-    //Entity     *body;
-
-    //gi.UnlinkEntity(ent);
-
-    //// grab a body que and cycle to the next one
-    //body = &g_entities[game.maxClients + level.bodyQue + 1];
-    //level.bodyQue = (level.bodyQue + 1) % BODY_QUEUE_SIZE;
-
-    //// send an effect on the removed body
-    //if (body->state.modelIndex) {
-    //    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
-    //    gi.WriteByte(TempEntityEvent::Blood);
-    //    gi.WriteVector3(body->state.origin);
-    //    gi.WriteVector3(vec3_zero());
-    //    gi.Multicast(&body->state.origin, MultiCast::PVS);
-    //}
-
-    //gi.UnlinkEntity(body);
-    //body->state = ent->state;
-    //body->state.number = body - g_entities;
-    //body->state.eventID = EntityEvent::OtherTeleport;
-
-    //body->serverFlags = ent->serverFlags;
-    //VectorCopy(ent->mins, body->mins);
-    //VectorCopy(ent->maxs, body->maxs);
-    //VectorCopy(ent->absMin, body->absMin);
-    //VectorCopy(ent->absMax, body->absMax);
-
-    //body->size = ent->size; // VectorCopy(ent->size, body->size);
-    ////body->velocity = ent->classEntity->GetVelocity(); // VectorCopy(ent->velocity, body->velocity);
-    ////body->angularVelocity = ent->classEntity->GetAngularVelocity(); //  VectorCopy(ent->angularVelocity, body->angularVelocity);
-    //body->solid = ent->solid;
-    //body->clipMask = ent->clipMask;
-    //body->owner = ent->owner;
-    //body->classEntity->SetMoveType(ent->classEntity->GetMoveType());
-    //body->classEntity->SetGroundEntity(ent->classEntity->GetGroundEntity());
-
-    ////body->Die = body_die;
-    //body->takeDamage = TakeDamage::Yes;
-
-    //gi.LinkEntity(body);
 }
 
 void SVG_RespawnClient(Entity *self)
 {
     if (deathmatch->value || coop->value) {
-        // isSpectator's don't leave bodies
+        // Spectator's don't leave bodies
         if (self->classEntity->GetMoveType() != MoveType::NoClip && self->classEntity->GetMoveType() != MoveType::Spectator)
-            CopyToBodyQue(self);
+            game.gameMode->SpawnClientCorpse(self->classEntity);
+
         self->serverFlags &= ~EntityServerFlags::NoClient;
         SVG_PutClientInServer(self);
 
@@ -623,7 +418,7 @@ void SVG_PutClientInServer(Entity *ent)
         memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
 
         // Initialize a fresh client persistent state.
-        InitClientPersistant(client);
+        SVG_InitClientPersistant(client);
 
         // Check for changed user info.
         SVG_ClientUserinfoChanged(ent, userinfo);
@@ -658,7 +453,7 @@ void SVG_PutClientInServer(Entity *ent)
 
     // In case of death, initialize a fresh client persistent data.
     if (client->persistent.health <= 0)
-        InitClientPersistant(client);
+        SVG_InitClientPersistant(client);
 
     // Last but not least, respawn.
     client->respawn = resp;
@@ -666,10 +461,10 @@ void SVG_PutClientInServer(Entity *ent)
     //
     // Spawn client class entity.
     //
-    SVG_FreeClassEntity(ent);
+//    SVG_FreeClassEntity(ent);
 
-    ent->className = "PlayerClient";
-    PlayerClient *playerClientEntity = (PlayerClient*)(ent->classEntity = SVG_SpawnClassEntity(ent, ent->className));
+    //ent->className = "PlayerClient";
+    PlayerClient* playerClientEntity = (PlayerClient*)(ent->classEntity);
     playerClientEntity->SetClient(&game.clients[index]);
     playerClientEntity->Precache();
     playerClientEntity->Spawn();
@@ -716,7 +511,7 @@ void SVG_PutClientInServer(Entity *ent)
     ent->state.origin = ent->state.oldOrigin = spawn_origin + vec3_t{ 0.f, 0.f, 1.f };
 
     // Set FOV, fixed, or custom.
-    if (deathmatch->value && ((int)dmflags->value & GameModeFlags::FixedFOV)) {
+    if (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::FixedFOV)) {
         client->playerState.fov = 90;
     } else {
         client->playerState.fov = atoi(Info_ValueForKey(client->persistent.userinfo, "fov"));
@@ -789,7 +584,7 @@ void SVG_ClientBeginDeathmatch(Entity *ent)
 {
     SVG_InitEntity(ent);
 
-    InitClientRespawn(ent->client);
+    SVG_InitClientRespawn(ent->client);
 
     // locate ent at a spawn point
     SVG_PutClientInServer(ent);
@@ -819,69 +614,15 @@ called when a client has finished connecting, and is ready
 to be placed into the game.  This will happen every level load.
 ============
 */
+extern void DebugShitForEntitiesLulz();
+
 void SVG_ClientBegin(Entity *ent)
 {
-    int     i;
-
+    // Fetch this entity's client.
     ent->client = game.clients + (ent - g_entities - 1);
 
-    // Spawn client class entity.
-    //ent->className = "PlayerClient";
-    //
-    //// If the client already has an entity class, ditch it.
-    //if (ent->classEntity)
-    //    delete ent->classEntity;
-
-    //ent->classEntity = new PlayerClient(ent);
-    //ent->classEntity->Spawn();
-
-    if (deathmatch->value) {
-        SVG_ClientBeginDeathmatch(ent);
-        return;
-    }
-
-    // if there is already a body waiting for us (a loadgame), just
-    // take it, otherwise spawn one from scratch
-    if (ent->inUse == true) { // warning C4805: '==': unsafe mix of type 'qboolean' and type 'bool' in operation
-        // the client has cleared the client side viewAngles upon
-        // connecting to the server, which is different than the
-        // state when the game is saved, so we need to compensate
-        // with deltaangles
-        for (i = 0 ; i < 3 ; i++)
-            ent->client->playerState.pmove.deltaAngles[i] = ent->client->playerState.pmove.viewAngles[i];
-
-        // 
-        // If the client already has an entity class, ditch it.
-        SVG_FreeClassEntity(ent);
-
-        ent->className = "PlayerClient";
-        ent->classEntity = SVG_SpawnClassEntity(ent, ent->className);
-        ent->classEntity->Precache();
-        ent->classEntity->Spawn();
-        ent->classEntity->PostSpawn();
-    } else {
-        // a spawn point will completely reinitialize the entity
-        // except for the persistant data that was initialized at
-        // ClientConnect() time
-        SVG_InitEntity(ent);
-        ent->className = "PlayerClient";
-        InitClientRespawn(ent->client);
-        SVG_PutClientInServer(ent);
-    }
-
-    if (level.intermission.time) {
-        HUD_MoveClientToIntermission(ent);
-    } else {
-        // send effect if in a multiplayer game
-        if (game.maxClients > 1) {
-            gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-            gi.WriteShort(ent - g_entities);
-            gi.WriteByte(MuzzleFlashType::Login);
-            gi.Multicast(ent->state.origin, MultiCast::PVS);
-
-            gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
-        }
-    }
+    // Let the game mode decide from here on out.
+    game.gameMode->ClientBegin(ent);
 
     // Called to make sure all view stuff is valid
     SVG_ClientEndServerFrame((PlayerClient*)ent->classEntity);
@@ -928,7 +669,7 @@ void SVG_ClientUserinfoChanged(Entity *ent, char *userinfo)
     gi.configstring(ConfigStrings::PlayerSkins + playernum, va("%s\\%s", ent->client->persistent.netname, s));
 
     // fov
-    if (deathmatch->value && ((int)dmflags->value & GameModeFlags::FixedFOV)) {
+    if (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::FixedFOV)) {
         ent->client->playerState.fov = 90;
     } else {
         ent->client->playerState.fov = atoi(Info_ValueForKey(userinfo, "fov"));
@@ -975,18 +716,15 @@ qboolean SVG_ClientConnect(Entity *ent, char *userinfo)
     // take it, otherwise spawn one from scratch
     if (ent->inUse == false) {
         // Clear the respawning variables
-        InitClientRespawn(ent->client);
+        SVG_InitClientRespawn(ent->client);
         if (!game.autoSaved || !ent->client->persistent.activeWeapon)
-            InitClientPersistant(ent->client);
+            SVG_InitClientPersistant(ent->client);
     }
 
     // Check for changed user info.
     SVG_ClientUserinfoChanged(ent, userinfo);
 
-    // Connection messages do not display in SP games.
-//    if (game.maxClients > 1)
-//        gi.DPrintf("%s connected\n", ent->client->persistent.netname);
-
+    // Inform the game mode about it.
     game.gameMode->ClientConnect(ent);
 
     ent->serverFlags = 0; // make sure we start with known default

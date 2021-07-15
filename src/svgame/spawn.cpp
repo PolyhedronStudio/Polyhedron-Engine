@@ -400,6 +400,8 @@ Creates a server's entity / program execution context by
 parsing textual entity definitions out of an ent file.
 ==============
 */
+extern void SVG_AllocateGamePlayerClientEntities();
+
 void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint)
 {
     Entity     *ent;
@@ -500,6 +502,11 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
             g_baseEntities[i]->PostSpawn();
     }
 
+
+    // Spawn PlayerClient entities first.
+    // WID: LAME HACK...
+    SVG_AllocateGamePlayerClientEntities();
+
     gi.DPrintf("%i entities inhibited\n", inhibit);
 
 #ifdef DEBUG
@@ -515,6 +522,9 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     SVG_FindTeams();
 
     SVG_PlayerTrail_Init();
+
+    extern void DebugShitForEntitiesLulz();
+    DebugShitForEntitiesLulz();
 }
 
 

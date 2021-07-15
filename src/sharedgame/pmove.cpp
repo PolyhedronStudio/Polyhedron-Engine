@@ -43,7 +43,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 // Acceleration Constants.
 //-----------------
-constexpr float PM_ACCEL_AIR = 2.125f;
+constexpr float PM_ACCEL_AIR = 3.625f; // WID: [DO NOT REMOVE THIS COMMENT] The default for lesser air control is: 2.125f
 constexpr float PM_ACCEL_AIR_MOD_DUCKED = 0.125f;
 constexpr float PM_ACCEL_GROUND = 10.f;
 constexpr float PM_ACCEL_GROUND_SLICK = 4.375f;
@@ -59,7 +59,7 @@ constexpr float PM_CLIP_BOUNCE = 1.01f;
 //-----------------
 // Friction constants.
 //-----------------
-constexpr float PM_FRICT_AIR = 0.075f; // N&C: Tweaked - old value: 0.1
+constexpr float PM_FRICT_AIR = 0.1f; // WID: [DO NOT REMOVE THIS COMMENT] The default for lesser air control is: 0.075f;
 constexpr float PM_FRICT_GROUND = 6.f;
 constexpr float PM_FRICT_GROUND_SLICK = 2.f;
 constexpr float PM_FRICT_LADDER = 5.f;

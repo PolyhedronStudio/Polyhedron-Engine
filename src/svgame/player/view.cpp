@@ -487,7 +487,7 @@ static void SVG_Player_CheckFallingDamage(PlayerClient *ent)
             damage = 1;
         dir = { 0.f, 0.f, 1.f };
 
-        if (!deathmatch->value || !((int)dmflags->value & GameModeFlags::NoFalling))
+        if (!deathmatch->value || !((int)gamemodeflags->value & GameModeFlags::NoFalling))
             SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, ent->GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
     } else {
         ent->SetEventID(EntityEvent::FallShort);

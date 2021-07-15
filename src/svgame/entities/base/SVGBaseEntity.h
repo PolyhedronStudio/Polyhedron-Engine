@@ -109,7 +109,7 @@ public:
         return serverEntity->className;
     }
 
-    // Return the 'className' value.
+    // Set the 'className' value.
     inline void SetClassName(const char* className) {
         serverEntity->className = className;
     }
@@ -137,7 +137,7 @@ public:
     virtual inline const float& GetDeceleration() {
         return 0.f;
     }
-    // Set the 'delay' value.
+    // Return the 'delay' value.
     inline const float &GetDelayTime() {
         return delayTime;
     }
@@ -258,7 +258,7 @@ public:
     // Return the 'movetype' value.
     inline const int32_t GetMoveType() {
         return moveType;
-    }
+    } 
 
     // Return the 'nextThinkTime' value.
     inline const float GetNextThinkTime() {
@@ -341,6 +341,10 @@ public:
     virtual inline const vec3_t& GetStartPosition() {
         return vec3_zero();
     }
+    // Return a reference to the serverEntity its state.
+    inline const EntityState& GetState() {
+        return serverEntity->state;
+    }
     // Return the 'style' value.
     inline const int32_t GetStyle() {
         return serverEntity->style;
@@ -412,6 +416,16 @@ public:
     //
     // Entity Set Functions.
     //  
+    // Return the bounding box absolute 'min' value.
+    inline void SetAbsoluteMin(const vec3_t &absMin) {
+        serverEntity->absMin = absMin;
+    }
+
+    // Return the bounding box absolute 'max' value.
+    inline void SetAbsoluteMax(const vec3_t &absMax) {
+        serverEntity->absMax = absMax;
+    }
+
     // Return the 'angles' value.
     inline void SetAngles(const vec3_t& angles) {
         serverEntity->state.angles = angles;
@@ -581,6 +595,10 @@ public:
         this->serverEntity->noiseIndex = noiseIndex;
     }
     
+    inline void SetNumber(const int32_t number) {
+        serverEntity->state.number = number;
+    }
+
     // Set the 'oldEnemyPtr' pointer.
     inline void SetOldEnemy(SVGBaseEntity* oldEnemy) {
         this->oldEnemyEntity = oldEnemy;
@@ -634,6 +652,11 @@ public:
     // Set the 'spawnFlags' value.
     inline void SetSpawnFlags(const int32_t& spawnFlags) {
         this->spawnFlags = spawnFlags;
+    }
+
+    // Set another copy of a serverEntity its state.
+    inline void SetState(const EntityState &state) {
+        serverEntity->state = state;
     }
 
     // Set the 'style' value.

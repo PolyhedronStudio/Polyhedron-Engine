@@ -23,6 +23,8 @@ public:
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
+    // Coop has its own Obituary madness.
+    virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
 private:
 

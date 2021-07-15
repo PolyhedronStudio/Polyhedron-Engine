@@ -12,7 +12,9 @@
 
 //=====================================================
 /*QUAKED target_crosslevel_trigger (.5 .5 .5) (-8 -8 -8) (8 8 8) trigger1 trigger2 trigger3 trigger4 trigger5 trigger6 trigger7 trigger8
-Once this trigger is touched/used, any trigger_crosslevel_target with the same trigger number is automatically used when a level is started within the same unit.  It is OK to check multiple triggers.  Message, delay, target, and killTarget also work.
+Once this trigger is touched/used, any trigger_crosslevel_target with the same trigger number is automatically used when a level is started within the same unit.  
+It is OK to check multiple triggers.  
+Message, delay, target, and killTarget also work.
 */
 void trigger_crosslevel_trigger_use(Entity* self, Entity* other, Entity* activator)
 {

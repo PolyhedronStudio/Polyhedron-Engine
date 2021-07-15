@@ -58,6 +58,11 @@ SET( SRC_SVGAME_MAIN
 	svgame/weapons.cpp
 )
 
+SET( SRC_SVGAME_UTILS
+	svgame/utils/EntityIterator.cpp
+	svgame/utils/BaseEntityIterator.cpp
+)
+
 SET( SRC_SVGAME_ENTITIES_AI 
 	svgame/ai/MonsterAI.cpp
 )
@@ -66,6 +71,9 @@ SET( SRC_SVGAME_ENTITIES_BASE
 	svgame/entities/base/SVGBaseEntity.cpp
 	svgame/entities/base/SVGBaseTrigger.cpp
 	svgame/entities/base/SVGBaseMover.cpp
+	svgame/entities/base/BodyCorpse.cpp
+	svgame/entities/base/DebrisEntity.cpp
+	svgame/entities/base/GibEntity.cpp
 	svgame/entities/base/PlayerClient.cpp
 )
 
@@ -186,6 +194,7 @@ SET(SRC_SVGAME
 	${SRC_SVGAME_GAMEMODES}
 	${SRC_SVGAME_PHYSICS}
 	${SRC_SVGAME_PLAYER}
+	${SRC_SVGAME_UTILS}
 	${SRC_SVGAME_WEAPONS}
 )
 
@@ -203,10 +212,19 @@ SET ( HEADERS_SVGAME_MAIN
 SET ( HEADERS_SVGAME_AI 
 	svgame/ai/MonsterAI.h
 )
+
+SET( HEADERS_SVGAME_UTILS
+	svgame/utils/EntityIterator.h
+	svgame/utils/BaseEntityIterator.h
+)
+
 SET ( HEADERS_SVGAME_ENTITIES_BASE 
 	svgame/entities/base/SVGBaseEntity.h
 	svgame/entities/base/SVGBaseTrigger.h
 	svgame/entities/base/SVGBaseMover.h
+	svgame/entities/base/BodyCorpse.h
+	svgame/entities/base/DebrisEntity.h
+	svgame/entities/base/GibEntity.h
 	svgame/entities/base/PlayerClient.h
 )
 SET ( HEADERS_SVGAME_ENTITIES_FUNC
@@ -428,7 +446,10 @@ SET(SRC_SHAREDGAME
 
 ###################### Shared Folder.
 SET(HEADERS_SHARED
-	# Math shared .cpp lib here.
+	# Container lib.
+	../inc/shared/containers/IterableCArray.h
+
+	# Math lib.
 	../inc/shared/math/color.h
 	../inc/shared/math/matrix3.h
 	../inc/shared/math/matrix4.h
@@ -439,7 +460,8 @@ SET(HEADERS_SHARED
 	../inc/shared/math/vector3.h
 	../inc/shared/math/vector4.h
 	../inc/shared/math/vector5.h
-
+	
+	# Other shared lib functionalities.
 	../inc/shared/clgame.h
 	../inc/shared/cltypes.h
 	../inc/shared/collision.h
@@ -461,7 +483,6 @@ SET(SRC_SHARED
 	shared/math/plane.cpp
 	shared/math/vector3.cpp
 
-	
 	shared/math.cpp
 	shared/shared.cpp
 )

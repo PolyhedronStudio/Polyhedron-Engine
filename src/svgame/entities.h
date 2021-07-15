@@ -42,26 +42,26 @@ Entity* SVG_CreateTargetChangeLevel(char* map);
 
 // Admer: quick little template function to spawn entities, until we have this code in a local game class :)
 template<typename entityClass>
-inline entityClass* SVG_CreateEntity( Entity* edict = nullptr, bool allocateNewEdict = true ) {
+inline entityClass* SVG_CreateClassEntity(Entity* edict = nullptr, bool allocateNewEdict = true) {
     entityClass* entity = nullptr;
     // If a null entity was passed, create a new one
-    if ( nullptr == edict ) {
-        if ( allocateNewEdict ) {
+    if (nullptr == edict) {
+        if (allocateNewEdict) {
             edict = SVG_Spawn();
         } else {
-            gi.DPrintf( "WARNING: tried to spawn a class entity when the edict is null\n" );
+            gi.DPrintf("WARNING: tried to spawn a class entity when the edict is null\n");
             return nullptr;
         }
     }
     // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
-    if ( entityClass::ClassInfo.AllocateInstance ) {
-        entity = static_cast<entityClass*>( entityClass::ClassInfo.AllocateInstance( edict ) ); // Entities that aren't in the type info system will error out here
+    if (entityClass::ClassInfo.AllocateInstance) {
+        entity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(edict)); // Entities that aren't in the type info system will error out here
         edict->className = entity->GetTypeInfo()->className;
         edict->classEntity = entity;
-        if ( nullptr == g_baseEntities[edict->state.number] ) {
+        if (nullptr == g_baseEntities[edict->state.number]) {
             g_baseEntities[edict->state.number] = entity;
         } else {
-            gi.DPrintf( "ERROR: edict %i is already taken\n", edict->state.number );
+            gi.DPrintf("ERROR: edict %i is already taken\n", edict->state.number);
         }
     }
     return entity;

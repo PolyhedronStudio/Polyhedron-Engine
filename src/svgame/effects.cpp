@@ -12,263 +12,246 @@
 #include "utils.h"           // Include Utilities funcs.
 #include "effects.h"
 
+// Game Mode interface.
+#include "gamemodes/IGameMode.h"
+
+// Class Entities.
 #include "entities/base/SVGBaseEntity.h"
 #include "entities/base/PlayerClient.h"
-
-//=====================================================
-
-void ClipGibVelocity(Entity *ent)
-{
-    //if (ent->velocity[0] < -300)
-    //    ent->velocity[0] = -300;
-    //else if (ent->velocity[0] > 300)
-    //    ent->velocity[0] = 300;
-    //if (ent->velocity[1] < -300)
-    //    ent->velocity[1] = -300;
-    //else if (ent->velocity[1] > 300)
-    //    ent->velocity[1] = 300;
-    //if (ent->velocity[2] < 200)
-    //    ent->velocity[2] = 200; // always some upwards
-    //else if (ent->velocity[2] > 500)
-    //    ent->velocity[2] = 500;
-}
+#include "entities/base/DebrisEntity.h"
+#include "entities/base/GibEntity.h"
 
 
-//
 //=================
-// Gibs
+// SVG_ThrowClientHead
+// 
+// Throws a gib entity around at the location of "self".
 //=================
-//
-void gib_think(Entity *self)
+void SVG_ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
 {
-    //self->state.frame++;
-    //self->nextThinkTime = level.time + FRAMETIME;
+    // Create a gib entity.
+    GibEntity* gibClassEntity = SVG_CreateClassEntity<GibEntity>();
 
-    //if (self->state.frame == 10) {
-    //    //self->Think = SVG_FreeEntity;
-    //    self->nextThinkTime = level.time + 8 + random() * 10;
-    //}
+    // Set size.
+    vec3_t size = vec3_scale(self->GetSize(), 0.5f);
+    gibClassEntity->SetSize(size);
+    
+    // Generate the origin to start from.
+    vec3_t origin = self->GetAbsoluteMin() + self->GetSize();
+
+    // Add some random values to it, so they all differ.
+    origin.x += crandom() * size.x;
+    origin.y += crandom() * size.y;
+    origin.z += crandom() * size.z;
+
+    // Set the origin.
+    gibClassEntity->SetOrigin(origin);
+
+    // Set the model.
+    gibClassEntity->SetModel(gibname);
+
+    // Set solid and other properties.
+    gibClassEntity->SetSolid(Solid::Not);
+    gibClassEntity->SetEffects(gibClassEntity->GetEffects() | EntityEffectType::Gib);
+    gibClassEntity->SetFlags(gibClassEntity->GetFlags() | EntityFlags::NoKnockBack);
+    gibClassEntity->SetTakeDamage(TakeDamage::Yes);
+    gibClassEntity->SetDieCallback(&GibEntity::GibEntityDie);
+
+    // Default velocity scale for non organic materials.
+    float velocityScale = 1.f;
+
+    // Is it an organic gib type?
+    if (type == GIB_ORGANIC) {
+        // Then we pick a different movetype ;-)
+        gibClassEntity->SetMoveType(MoveType::Toss);
+
+        // Most of all, we setup a touch callback too ofc.
+        gibClassEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
+
+        // Adjust the velocity scale.
+        velocityScale = 0.5f;
+    } else {
+        // Pick a different movetype, bouncing. No touch callback :)
+        gibClassEntity->SetMoveType(MoveType::Bounce);
+    }
+
+    // Comment later...
+    vec3_t velocityDamage = game.gameMode->CalculateDamageVelocity(damage);
+
+    // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then 
+    // adding it on to 'velocityDamage' its old value.
+    vec3_t gibVelocity = vec3_fmaf(self->GetVelocity(), velocityScale, velocityDamage);
+
+    // Be sure to clip our velocity, just in case.
+    gibClassEntity->ClipGibVelocity(velocityDamage);
+
+    // Last but not least, set our velocity.
+    gibClassEntity->SetVelocity(velocityDamage);
+
+    // Generate angular velocity.
+    vec3_t angularVelocity = {
+        random() * 600.f,
+        random() * 600.f,
+        random() * 600.f
+    };
+
+    // Set angular velocity.
+    gibClassEntity->SetAngularVelocity(angularVelocity);
+
+    // Setup the Gib think function and its think time.
+    gibClassEntity->SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
+    gibClassEntity->SetNextThinkTime(level.time + 10 + random() * 10);
+
+    // Link entity into the world.
+    gibClassEntity->LinkEntity();
 }
 
-void gib_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
-{
-    //vec3_t  normal_angles, right;
-
-    //if (!self->groundEntityPtr)
-    //    return;
-
-    ////self->Touch = NULL;
-
-    //if (plane) {
-    //    gi.Sound(self, CHAN_VOICE, gi.SoundIndex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
-
-    //    normal_angles = vec3_euler(plane->normal);
-    //    AngleVectors(normal_angles, NULL, &right, NULL);
-    //    self->state.angles = vec3_euler(right);
-
-    //    if (self->state.modelIndex == sm_meat_index) {
-    //        self->state.frame++;
-    //        //self->Think = gib_think;
-    //        self->nextThinkTime = level.time + FRAMETIME;
-    //    }
-    //}
-}
-
-void gib_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point)
-{
-    //SVG_FreeEntity(self);
-}
-
-void ThrowGib(Entity *self, const char *gibname, int damage, int type)
-{
-    //Entity *gib;
-    //vec3_t  vd;
-    //vec3_t  origin;
-    //vec3_t  size;
-    //float   vscale;
-
-    //gib = SVG_Spawn();
-
-    //VectorScale(self->size, 0.5, size);
-    //VectorAdd(self->absMin, size, origin);
-    //gib->state.origin[0] = origin[0] + crandom() * size[0];
-    //gib->state.origin[1] = origin[1] + crandom() * size[1];
-    //gib->state.origin[2] = origin[2] + crandom() * size[2];
-
-    //gi.SetModel(gib, gibname);
-    //gib->solid = Solid::Not;
-    //gib->state.effects |= EntityEffectType::Gib;
-    //gib->flags |= EntityFlags::NoKnockBack;
-    //gib->takeDamage = TakeDamage::Yes;
-    ////gib->Die = gib_die;
-
-    //if (type == GIB_ORGANIC) {
-    //    gib->moveType = MoveType::Toss;
-    //    //gib->Touch = gib_touch;
-    //    vscale = 0.5;
-    //} else {
-    //    gib->moveType = MoveType::Bounce;
-    //    vscale = 1.0;
-    //}
-
-    //// Calculate velocity for given damage.
-    //vd = SVG_VelocityForDamage(damage);
-    //VectorMA(self->velocity, vscale, vd, gib->velocity);
-    //ClipGibVelocity(gib);
-    //gib->angularVelocity[0] = random() * 600;
-    //gib->angularVelocity[1] = random() * 600;
-    //gib->angularVelocity[2] = random() * 600;
-
-    ////gib->Think = SVG_FreeEntity;
-    //gib->nextThinkTime = level.time + 10 + random() * 10;
-
-    //gi.LinkEntity(gib);
-}
-
-void ThrowHead(Entity *self, const char *gibname, int damage, int type)
-{
-    //vec3_t  vd;
-    //float   vscale;
-
-    //self->state.skinNumber = 0;
-    //self->state.frame = 0;
-    //VectorClear(self->mins);
-    //VectorClear(self->maxs);
-
-    //self->state.modelIndex2 = 0;
-    //gi.SetModel(self, gibname);
-    //self->solid = Solid::Not;
-    //self->state.effects |= EntityEffectType::Gib;
-    //self->state.sound = 0;
-    //self->flags |= EntityFlags::NoKnockBack;
-    //self->serverFlags &= ~EntityServerFlags::Monster;
-    //self->takeDamage = TakeDamage::Yes;
-    ////self->Die = gib_die;
-
-    //if (type == GIB_ORGANIC) {
-    //    self->moveType = MoveType::Toss;
-    //    //self->Touch = gib_touch;
-    //    vscale = 0.5;
-    //} else {
-    //    self->moveType = MoveType::Bounce;
-    //    vscale = 1.0;
-    //}
-
-    //// Calculate velocity for given damage.
-    //vd = SVG_VelocityForDamage(damage);
-    //VectorMA(self->velocity, vscale, vd, self->velocity);
-    //ClipGibVelocity(self);
-
-    //self->angularVelocity[vec3_t::Yaw] = crandom() * 600;
-
-    ////self->Think = SVG_FreeEntity;
-    //self->nextThinkTime = level.time + 10 + random() * 10;
-
-    //gi.LinkEntity(self);
-}
-
-
-void ThrowClientHead(Entity *self, int damage)
-{
-    //vec3_t  vd;
-    //const char    *gibname; // C++20 VKPT: added const.
-
-    //if (rand() & 1) {
-    //    gibname = "models/objects/gibs/head2/tris.md2";
-    //    self->state.skinNumber = 1;        // second skin is player
-    //} else {
-    //    gibname = "models/objects/gibs/skull/tris.md2";
-    //    self->state.skinNumber = 0;
-    //}
-
-    //self->state.origin[2] += 32;
-    //self->state.frame = 0;
-    //gi.SetModel(self, gibname);
-    //VectorSet(self->mins, -16, -16, 0);
-    //VectorSet(self->maxs, 16, 16, 16);
-
-    //self->takeDamage = TakeDamage::No;
-    //self->solid = Solid::Not;
-    //self->state.effects = EntityEffectType::Gib;
-    //self->state.sound = 0;
-    //self->flags |= EntityFlags::NoKnockBack;
-
-    //self->moveType = MoveType::Bounce;
-    //// Calculate velocity for given damage.
-    //vd = SVG_VelocityForDamage(damage);
-    //VectorAdd(self->velocity, vd, self->velocity);
-
-    //if (self->client) { // bodies in the queue don't have a client anymore
-    //    self->client->animation.priorityAnimation = PlayerAnimation::Death;
-    //    self->client->animation.endFrame = self->state.frame;
-    //} else {
-    //    //self->Think = NULL;
-    //    self->nextThinkTime = 0;
-    //}
-
-    //gi.LinkEntity(self);
-}
-
-
-//
 //=================
-// Debris
+// SVG_ThrowClientHead
+// 
+// Tosses a client head entity around.
 //=================
-//
-void debris_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point)
-{
-    SVG_FreeEntity(self);
+void SVG_ThrowClientHead(PlayerClient* self, int damage) {
+    // Set model based on randomness.
+    if (rand() & 1) {
+        self->SetModel("models/objects/gibs/head2/tris.md2");
+        self->SetSkinNumber(1); // second skin is player
+    } else {
+        // WID: This just seems odd to me.. but hey. Sure.
+        self->SetModel("models/objects/gibs/skull/tris.md2");
+        self->SetSkinNumber(0); // Original skin.
+    }
+
+    // Let's fetch origin, add some Z, get going.
+    vec3_t origin = self->GetOrigin();
+    origin.z += 32;
+    self->SetOrigin(origin);
+
+    // Set frame back to 0.
+    self->SetFrame(0);
+
+    // Set mins/maxs.
+    self->SetMins(vec3_t{ -16.f, -16.f, 0.f });
+    self->SetMaxs(vec3_t{ 16.f, 16.f, 0.f });
+
+    // Set MoveType and Solid.
+    self->SetSolid(Solid::Not);
+    self->SetMoveType(MoveType::Bounce);
+
+    // Other properties.
+    self->SetTakeDamage(TakeDamage::No);
+    self->SetEffects(EntityEffectType::Gib);
+    self->SetSound(0);
+    self->SetFlags(EntityFlags::NoKnockBack);
+
+    // Calculate the velocity for the given damage, fetch its scale.
+    vec3_t velocityDamage = game.gameMode->CalculateDamageVelocity(damage);
+
+    // Add the velocityDamage up to the current velocity.
+    self->SetVelocity(self->GetVelocity() + velocityDamage);
+
+    // Bodies in the queue don't have a client anymore.
+    GameClient* client = self->GetClient();
+    if (client) {
+        client->animation.priorityAnimation = PlayerAnimation::Death;
+        client->animation.endFrame = self->GetFrame();
+    } else {
+        self->SetThinkCallback(nullptr);
+        self->SetNextThinkTime(0);
+    }
+
+    // Relink entity, this'll make it... be "not around", but in the "queue".
+    self->LinkEntity();
 }
 
+//=================
+// SVG_ThrowDebris
+// 
+// Thorws a debris piece around.
+//=================
 void SVG_ThrowDebris(SVGBaseEntity *self, const char *modelname, float speed, const vec3_t &origin) // C++20: STRING: Added const to char*
 {
-//    Entity *chunk;
-//    vec3_t  v;
-//
-//    chunk = SVG_Spawn();
-//    VectorCopy(origin, chunk->state.origin);
-//    gi.SetModel(chunk, modelname);
-//    v[0] = 100 * crandom();
-//    v[1] = 100 * crandom();
-//    v[2] = 100 + 100 * crandom();
-//    //VectorMA(self->velocity, speed, v, chunk->velocity);
-//    //chunk->moveType = MoveType::Bounce;
-//    chunk->solid = Solid::Not;
-//    chunk->angularVelocity[0] = random() * 600;
-//    chunk->angularVelocity[1] = random() * 600;
-//    chunk->angularVelocity[2] = random() * 600;
-////    chunk->Think = SVG_FreeEntity;
-//    chunk->nextThinkTime = level.time + 5 + random() * 5;
-//    chunk->state.frame = 0;
-//    chunk->flags = 0;
-//    chunk->className = "debris";
-//    chunk->takeDamage = TakeDamage::Yes;
-////    chunk->Die = debris_die;
-//    gi.LinkEntity(chunk);
+    // Chunk Entity.
+    SVGBaseEntity* chunkEntity = SVG_CreateClassEntity<DebrisEntity>();
+
+    // Set the origin.
+    chunkEntity->SetOrigin(origin);
+
+    // Set the model.
+    chunkEntity->SetModel(modelname);
+
+    // Calculate and set the velocity.
+    vec3_t velocity = {
+        100.f * crandom(),
+        100.f * crandom(),
+        100.f + 100.f * crandom()
+    };
+    chunkEntity->SetVelocity(vec3_fmaf(self->GetVelocity(), speed, velocity));
+
+    // Set Movetype and Solid.
+    chunkEntity->SetMoveType(MoveType::Bounce);
+    chunkEntity->SetSolid(Solid::Not);
+
+    // Calculate and set angular velocity.
+    vec3_t angularVelocity = {
+        random() * 600,
+        random() * 600,
+        random() * 600
+    };
+    chunkEntity->SetAngularVelocity(angularVelocity);
+
+    // Set up the thinking machine.
+    chunkEntity->SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
+    chunkEntity->SetNextThinkTime(level.time + 5 + random() * 5);
+
+    // Setup the other properties.
+    chunkEntity->SetFrame(0);
+    chunkEntity->SetFlags(0);
+    chunkEntity->SetTakeDamage(TakeDamage::Yes);
+    chunkEntity->SetDieCallback(&DebrisEntity::DebrisEntityDie);
+
+    // Link it up.
+    chunkEntity->LinkEntity();
 }
 
-
-void BecomeExplosion1(SVGBaseEntity *self)
+//=================
+// SVG_BecomeExplosion1
+// 
+// Sends an explosion effect as a TE cmd, and queues the entity up for removal.
+//=================
+void SVG_BecomeExplosion1(SVGBaseEntity *self)
 {
+    // Fetch origin.
     vec3_t origin = self->GetOrigin();
+
+    // Execute a TE effect.
     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(TempEntityEvent::Explosion1);
     gi.WriteVector3(origin);
-    
     gi.Multicast(origin, MultiCast::PVS);
 
-    SVG_FreeEntity(self->GetServerEntity());
+    // Queue for removal.
+    self->Remove();
+    //SVG_FreeEntity(self->GetServerEntity());
 }
 
-
-void BecomeExplosion2(SVGBaseEntity*self)
+//=================
+// SVG_BecomeExplosion2
+// 
+// Sends an explosion effect as a TE cmd, and queues the entity up for removal.
+//=================
+void SVG_BecomeExplosion2(SVGBaseEntity*self)
 {
+    // Fetch origin.
     vec3_t origin = self->GetOrigin();
 
+    // Execute a TE effect.
     gi.WriteByte(SVG_CMD_TEMP_ENTITY);
     gi.WriteByte(TempEntityEvent::Explosion2);
     gi.WriteVector3(origin);
     gi.Multicast(origin, MultiCast::PVS);
 
-    SVG_FreeEntity(self->GetServerEntity());
+    // Queue for removal.
+    self->Remove();
+    //SVG_FreeEntity(self->GetServerEntity());
 }

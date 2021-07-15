@@ -17,7 +17,7 @@ public:
     PlayerClient(Entity* svEntity);
     virtual ~PlayerClient();
 
-    DefineClass( PlayerClient, SVGBaseEntity );
+    DefineMapClass("PlayerClient", PlayerClient, SVGBaseEntity );
 
     //
     // Interface functions. 

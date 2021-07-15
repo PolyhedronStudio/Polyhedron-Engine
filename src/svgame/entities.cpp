@@ -10,6 +10,9 @@
 #include "entities.h"			// Entities header.
 #include "player/client.h"		// Include Player Client header.
 
+#include <span>
+#include <ranges>
+
 //
 // SVG_SpawnClassEntity
 //
@@ -19,24 +22,61 @@
 #include "entities/base/SVGBaseMover.h"
 #include "entities/base/PlayerClient.h"
 #include "entities/info/InfoPlayerStart.h"
-#include "entities/trigger/TriggerAlways.h"
-#include "entities/trigger/TriggerDelayedUse.h"
-#include "entities/trigger/TriggerHurt.h"
-#include "entities/trigger/TriggerMultiple.h"
-#include "entities/trigger/TriggerOnce.h"
-#include "entities/weaponry/BlasterBolt.h"
 #include "entities/Worldspawn.h"
-#include "entities/Light.h"
-#include "entities/misc/MiscExplosionBox.h"
-#include "entities/func/FuncButton.h"
 
+
+
+//-----------------
+// Entity Game Variables.
 //
+// TODO: Explain shit, lol.
+//-----------------
+// Actual Server Entity array.
+Entity g_entities[MAX_EDICTS];
+
+// BaseEntity array, matches similarly index wise.
+SVGBaseEntity* g_baseEntities[MAX_EDICTS];
+//!! Move elsewhere
+using BaseEntityRange = std::span<SVGBaseEntity*>;
+// using EntityRange = std::span<Entity*>; This is bugged... in VS2019 anyhow.
+
+auto FetchModernMethod(std::size_t start, std::size_t end) {
+    return BaseEntityRange(&g_baseEntities[start], &g_baseEntities[end]) |
+        std::views::filter([](SVGBaseEntity* ent) {
+            return ent != nullptr && ent->GetServerEntity() && ent->IsInUse();
+        }
+    );
+}
+
+auto FetchModernMethod2(std::size_t start, std::size_t end) {
+    return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
+}
+
+void DebugShitForEntitiesLulz() {
+    // Line... 
+    gi.DPrintf("Entities - ===========================================\n");
+
+    for (auto entity : FetchModernMethod2(0, MAX_EDICTS)) {
+        gi.DPrintf("Entity stuff FetchModernMethod2: %s", entity.className);
+    }
+
+    // Line... 
+    gi.DPrintf("BaseEntities - ===========================================\n");
+
+    // Fetch base entities.
+    
+    //for (auto baseEntity : FetchBaseEntitiesInRange()) {
+    for (auto baseEntity : FetchModernMethod(0, MAX_EDICTS)) {
+        // Aight sweet spot hit.
+        gi.DPrintf("DebugShotForEntitiesLulz: %s\n", baseEntity->GetClassName());
+    }
+}
+
 //===============
 // SVG_SpawnClassEntity
 // 
 // 
 //=================
-//
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     // Start with a nice nullptr.
     SVGBaseEntity* spawnEntity = nullptr;
@@ -56,6 +96,7 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
             return nullptr; // Bail out, we didn't find one
         }
     }
+
     // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know
     if ( nullptr != info->AllocateInstance ) {
         return (g_baseEntities[entityNumber] = info->AllocateInstance( ent ));
@@ -65,7 +106,6 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     }
 }
 
-//
 //===============
 // SVG_FreeClassEntity
 // 
@@ -73,7 +113,6 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
 // look for SVG_FreeEntity instead. It automatically takes care of 
 // classEntities too.
 //=================
-//
 void SVG_FreeClassEntity(Entity* ent) {
     // Only proceed if it has a classEntity.
     if (!ent->classEntity)
@@ -93,14 +132,13 @@ void SVG_FreeClassEntity(Entity* ent) {
     }
 }
 
-//
+
 //===============
 // SVG_FreeEntity
 // 
 // Will remove the class entity, if it exists. Continues to then mark the
 // entity as "freed". (inUse = false)
 //=================
-//
 void SVG_FreeEntity(Entity* ent)
 {
     if (!ent)
@@ -135,7 +173,6 @@ void SVG_FreeEntity(Entity* ent)
     ent->inUse = false;
 }
 
-//
 //===============
 // SVG_PickTarget
 // 
@@ -146,7 +183,6 @@ void SVG_FreeEntity(Entity* ent)
 // NULL will be returned if the end of the list is reached.
 //
 //===============
-//
 #define MAXCHOICES  8
 
 Entity* SVG_PickTarget(char* targetName)
@@ -186,7 +222,6 @@ Entity* SVG_PickTarget(char* targetName)
     return choice[rand() % num_choices];
 }
 
-//
 //===============
 // SVG_Find
 // 
@@ -196,7 +231,6 @@ Entity* SVG_PickTarget(char* targetName)
 // Searches beginning at the edict after from, or the beginning if NULL
 // NULL will be returned if the end of the list is reached.
 //===============
-//
 Entity* SVG_Find(Entity* from, int fieldofs, const char* match)
 {
     char* s;
@@ -219,18 +253,13 @@ Entity* SVG_Find(Entity* from, int fieldofs, const char* match)
     return NULL;
 }
 
-//
 //===============
 // SVG_FindEntity
 //
 // Returns an entity that matches the given fieldKey and fieldValue in its 
 // entity dictionary.
 //===============
-//
 SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::string& fieldValue, SVGBaseEntity* lastEntity) {
-    vec3_t  eorg;
-    int     j;
-
     Entity* serverEnt = (lastEntity ? lastEntity->GetServerEntity() : nullptr);
 
     if (!lastEntity)
@@ -261,48 +290,8 @@ SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::
     }
 
     return nullptr;
-
-    //if (!from)
-    //    from = g_baseEntities;
-    //else
-    //    from++;
-
-    //for (int32_t i = 0; from < &g_entities[globals.numberOfEntities]; from++) {
-    //    s = *(char**)((byte*)from + fieldofs);
-    //    if (!s)
-    //        continue;
-    //    if (!Q_stricmp(s, mat ch))
-    //        return from;
-    //}
-
-    //// In case we have a last entity, we now know where to start.
-    //int32_t start = (lastEntity != nullptr ? lastEntity->GetNumber() : 0);
-
-    //// Very ugly, but I suppose... it has to be like this for now.
-    //for (int32_t i = start; i < MAX_EDICTS; i++) {
-    //    // Ensure this entity is in use. (Skip otherwise.)
-    //    if (!g_entities[i].inUse)
-    //        continue;
-
-    //    // Ensure this entity has a valid class entity. (Skip otherwise.)
-    //    if (!g_entities[i].classEntity)
-    //        continue;
-
-    //    // Start preparing for checking IF, its dictionary HAS fieldKey.
-    //    auto dictionary = g_entities[i].entityDictionary;
-
-    //    if (dictionary.find(fieldKey) != dictionary.end()) {
-    //        if (dictionary[fieldKey] == fieldValue) {
-    //            return g_entities[i].classEntity;
-    //        }
-    //    }
-    //}
-
-    //// We failed at finding any entity with the specific requirements, return nullptr.
-    //return nullptr;
 }
 
-//
 //===============
 // SVG_FindEntitiesWithinRadius
 // 
@@ -310,12 +299,9 @@ SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::
 // 
 // SVG_FindEntitiesWithinRadius (origin, radius)
 //===============
-//
 SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t origin, float radius, uint32_t excludeSolidFlags)
 {
-    vec3_t  eorg;
-    int     j;
-
+    vec3_t  entityOrigin = vec3_zero();
     Entity* serverEnt = (from ? from->GetServerEntity() : nullptr);
 
     if (!from)
@@ -343,7 +329,7 @@ SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t origin, 
         vec3_t entityOrigin = origin - (classEntity->GetOrigin() + vec3_scale(classEntity->GetMins() + classEntity->GetMaxs(), 0.5f));
 
         // Do they exceed our radius? Then we haven't find any.
-        if (vec3_length(eorg) > radius)
+        if (vec3_length(entityOrigin) > radius)
             continue;
 
         // Cheers, we found our class entity.
@@ -353,13 +339,11 @@ SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t origin, 
     return nullptr;
 }
 
-//
 //===============
 // SVG_InitEntity
 // 
 // Reinitializes a ServerEntity for use.
 //===============
-//
 void SVG_InitEntity(Entity* e)
 {
     // From here on this entity is in use.
@@ -375,7 +359,6 @@ void SVG_InitEntity(Entity* e)
     e->state.number = e - g_entities;
 }
 
-//
 //===============
 // SVG_Spawn
 // 
@@ -385,23 +368,21 @@ void SVG_InitEntity(Entity* e)
 // instead of being removed and recreated, which can cause interpolated
 // angles and bad trails.
 //===============
-//
 Entity* SVG_Spawn(void)
 {
     Entity *serverEntity = nullptr;
     int32_t i = 0;
     // Acquire a pointer to the entity we'll check for.
     serverEntity = &g_entities[game.maxClients + 1];
-    for (int32_t i = game.maxClients + 1; i < globals.numberOfEntities; i++, serverEntity++) {
-
-
-        // the first couple seconds of server time can involve a lot of
+    for (i = game.maxClients + 1; i < globals.numberOfEntities; i++, serverEntity++) {
+        // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!serverEntity->inUse && (serverEntity->freeTime < 2 || level.time - serverEntity->freeTime > 0.5)) {
             SVG_InitEntity(serverEntity);
             return serverEntity;
         }
     }
+
 
     if (i == game.maxEntities)
         gi.Error("ED_Alloc: no free edicts");
@@ -413,13 +394,11 @@ Entity* SVG_Spawn(void)
     return serverEntity;
 }
 
-//
 //=====================
 // SVG_CreateTargetChangeLevel
 //
 // Returns the created target changelevel entity.
 //=====================
-//
 Entity* SVG_CreateTargetChangeLevel(char* map) {
     Entity* ent;
 
@@ -430,24 +409,20 @@ Entity* SVG_CreateTargetChangeLevel(char* map) {
     return ent;
 }
 
-//
 //===============
 // SVG_GetWorldServerEntity
 // 
 // Returns a pointer to the 'Worldspawn' ServerEntity.
 //===============
-//
 Entity* SVG_GetWorldServerEntity() {
     return &g_entities[0];
 };
 
-//
 //===============
 // SVG_GetWorldClassEntity
 // 
 // Returns a pointer to the 'Worldspawn' ClassEntity.
 //===============
-//
 SVGBaseEntity* SVG_GetWorldClassEntity() {
     return g_baseEntities[0];
 };

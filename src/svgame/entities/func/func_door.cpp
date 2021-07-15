@@ -254,7 +254,7 @@ void door_blocked(Entity* self, Entity* other)
         SVG_InflictDamage(other, self, self, vec3_zero(), other->state.origin, vec3_zero(), 100000, 1, 0, MeansOfDeath::Crush);
         // if it's still there, nuke it
         if (other)
-            BecomeExplosion1(other);
+            SVG_BecomeExplosion1(other);
         return;
     }
 

@@ -190,7 +190,6 @@ constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
 #include "shared/math.h"
 
 
-
 //
 //=============================================================================
 //
@@ -637,4 +636,4 @@ struct UserFields {
     static constexpr int32_t PlayerFieldOfView = 64;
 };
 
-#endif // SHARED_H
+#endif // __SHARED_SHARED_H__

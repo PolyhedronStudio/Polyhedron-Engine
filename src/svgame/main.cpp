@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Entities.
 #include "entities.h"
 #include "entities/base/SVGBaseEntity.h"
+#include "entities/base/PlayerClient.h"
 
 // Gamemodes.
 #include "gamemodes/IGameMode.h"
@@ -35,6 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Physics related.
 #include "physics/stepmove.h"
+
 
 //-----------------
 // Global Game Variables.
@@ -50,20 +52,14 @@ TemporarySpawnFields    st;
 
 int sm_meat_index;
 int snd_fry;
-int meansOfDeath;
 
-// Actual Server Entity array.
-Entity g_entities[MAX_EDICTS];
-
-// BaseEntity array, matches similarly index wise.
-SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 
 //-----------------
 // CVars.
 //-----------------
 cvar_t  *deathmatch;
 cvar_t  *coop;
-cvar_t  *dmflags;
+cvar_t  *gamemodeflags;
 cvar_t  *skill;
 cvar_t  *fraglimit;
 cvar_t  *timelimit;
@@ -112,6 +108,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
 void SVG_InitializeServerEntities();
 void SVG_InitializeGameMode();
 void SVG_AllocateGameClients();
+void SVG_AllocateGamePlayerClientEntities();
 void SVG_InitializeCVars();
 
 void SVG_RunEntity(SVGBaseEntity *ent);
@@ -152,6 +149,9 @@ void SVG_InitGame(void)
     SVG_InitItems();
     SVG_InitializeServerEntities();
     SVG_AllocateGameClients();
+    // WID: You'd expect PlayerClient allocation for the entities here.
+    // that won't work with the structure of things.
+    // Therefor, it now resides in SVG_SpawnEntities.
     SVG_InitializeGameMode();
 }
 
@@ -305,7 +305,7 @@ void SVG_InitializeCVars() {
     skill = gi.cvar("skill", "1", CVAR_LATCH);
 
     // Change anytime vars
-    dmflags = gi.cvar("dmflags", "0", CVAR_SERVERINFO);
+    gamemodeflags = gi.cvar("gamemodeflags", "0", CVAR_SERVERINFO);
     fraglimit = gi.cvar("fraglimit", "0", CVAR_SERVERINFO);
     timelimit = gi.cvar("timelimit", "0", CVAR_SERVERINFO);
     password = gi.cvar("password", "", CVAR_USERINFO);
@@ -367,6 +367,41 @@ void SVG_AllocateGameClients() {
     game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     globals.numberOfEntities = game.maxClients + 1;
 }
+
+//
+//=====================
+// SVG_AllocateGamePlayerClientEntities
+//
+// Allocate the client player class entities before hand. No need to redo this all over,
+// that'd just be messy and complicate things more.
+//=====================
+//
+void SVG_AllocateGamePlayerClientEntities() {
+    // Loop over the number of clients.
+    int32_t maxClients = game.maxClients;
+
+    // Allocate a classentity for each client in existence.
+    for (int32_t i = 1; i < maxClients + 1; i++) {
+        // Fetch server entity.
+        Entity* serverEntity = &g_entities[i];
+
+        // Initialize entity.
+        SVG_InitEntity(serverEntity);
+
+        // Allocate their class entities appropriately.
+        serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
+        
+        // Be sure to reset their inuse, after all, they aren't in use.
+        serverEntity->classEntity->SetInUse(false);
+
+        // Fetch client index.
+        const int32_t clientIndex = i - 1; // Same as the older: serverEntity - g_entities - 1;
+
+        // Assign the designated client to this PlayerClient entity.
+        ((PlayerClient*)serverEntity->classEntity)->SetClient(&game.clients[clientIndex]);
+    }
+}
+
 
 //
 //===============
@@ -457,7 +492,7 @@ void SVG_EndDMLevel(void)
     static const char *seps = " ,\n\r";
 
     // stay on same level flag
-    if ((int)dmflags->value & GameModeFlags::SameLevel) {
+    if ((int)gamemodeflags->value & GameModeFlags::SameLevel) {
         SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
         return;
     }

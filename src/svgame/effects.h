@@ -15,25 +15,20 @@
 class SVGBaseEntity;
 
 //
-// Misc.
+// Debris.
 //
-void ClipGibVelocity(Entity* ent);
-
-//
-// Gibs.
-//
-void gib_think(Entity* self);
-void gib_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf);
-void gib_die(Entity* self, Entity* inflictor, Entity* attacker, int damage, const vec3_t& point);
-
-void ThrowHead(Entity* self, const char* gibname, int damage, int type);
-void ThrowClientHead(Entity* self, int damage);
-void ThrowGib(Entity* self, const char* gibname, int damage, int type);
+void SVG_ThrowDebris(SVGBaseEntity* self, const char* modelname, float speed, const vec3_t& origin);
 
 //
 // Explosions.
 //
-void BecomeExplosion1(SVGBaseEntity* self);
-void BecomeExplosion2(SVGBaseEntity* self);
+void SVG_BecomeExplosion1(SVGBaseEntity* self);
+void SVG_BecomeExplosion2(SVGBaseEntity* self);
+
+//
+// Gibs.
+//
+void SVG_ThrowClientHead(PlayerClient* self, int damage);
+void SVG_ThrowGib(SVGBaseEntity* self, const char* gibname, int damage, int type);
 
 #endif // __SVGAME_PLAYER_WEAPONS_H__
