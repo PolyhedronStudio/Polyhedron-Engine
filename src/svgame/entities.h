@@ -42,12 +42,16 @@ Entity* SVG_CreateTargetChangeLevel(char* map);
 
 // Admer: quick little template function to spawn entities, until we have this code in a local game class :)
 template<typename entityClass>
-inline entityClass* SVG_CreateEntity() {
+inline entityClass* SVG_CreateEntity( Entity* edict = nullptr, bool allocateNewEdict = true ) {
     entityClass* entity = nullptr;
-    Entity* edict = SVG_Spawn();
-    // If we can't spawn the thing, then let go
+    // If a null entity was passed, create a new one
     if ( nullptr == edict ) {
-        return nullptr;
+        if ( allocateNewEdict ) {
+            edict = SVG_Spawn();
+        } else {
+            gi.DPrintf( "WARNING: tried to spawn a class entity when the edict is null\n" );
+            return nullptr;
+        }
     }
     // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
     if ( entityClass::ClassInfo.AllocateInstance ) {
