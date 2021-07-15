@@ -60,7 +60,7 @@ SET( SRC_SVGAME_MAIN
 
 SET( SRC_SVGAME_UTILS
 	svgame/utils/EntityIterator.cpp
-	svgame/utils/EntityIterator.h
+	svgame/utils/BaseEntityIterator.cpp
 )
 
 SET( SRC_SVGAME_ENTITIES_AI 
@@ -214,8 +214,8 @@ SET ( HEADERS_SVGAME_AI
 )
 
 SET( HEADERS_SVGAME_UTILS
-	svgame/utils/EntityIterator.cpp
 	svgame/utils/EntityIterator.h
+	svgame/utils/BaseEntityIterator.h
 )
 
 SET ( HEADERS_SVGAME_ENTITIES_BASE 

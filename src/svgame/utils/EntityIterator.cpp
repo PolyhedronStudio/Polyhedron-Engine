@@ -45,7 +45,7 @@ Entity* EntityIterator::end() {
 }
 
 //===============
-// InfoPlayerStart::PostSpawn
+// FetchEntitiesInRange
 //
 //===============
 EntityIterator FetchEntitiesInRange(size_t start, size_t end ) {

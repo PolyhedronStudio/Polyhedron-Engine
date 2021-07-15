@@ -522,6 +522,9 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     SVG_FindTeams();
 
     SVG_PlayerTrail_Init();
+
+    extern void DebugShitForEntitiesLulz();
+    DebugShitForEntitiesLulz();
 }
 
 

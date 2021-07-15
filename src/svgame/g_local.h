@@ -38,6 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Utils.
 //
 #include "utils/EntityIterator.h"
+#include "utils/BaseEntityIterator.h"
 
 
 //-------------------

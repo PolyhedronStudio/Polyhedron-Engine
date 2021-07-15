@@ -624,9 +624,6 @@ void SVG_ClientBegin(Entity *ent)
     // Let the game mode decide from here on out.
     game.gameMode->ClientBegin(ent);
 
-    // DEBUG:...
-    DebugShitForEntitiesLulz();
-
     // Called to make sure all view stuff is valid
     SVG_ClientEndServerFrame((PlayerClient*)ent->classEntity);
 }
