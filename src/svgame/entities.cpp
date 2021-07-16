@@ -10,8 +10,7 @@
 #include "entities.h"			// Entities header.
 #include "player/client.h"		// Include Player Client header.
 
-#include <span>
-#include <ranges>
+
 
 //
 // SVG_SpawnClassEntity
@@ -24,7 +23,7 @@
 #include "entities/info/InfoPlayerStart.h"
 #include "entities/Worldspawn.h"
 
-
+#include <ranges>
 
 //-----------------
 // Entity Game Variables.
@@ -40,6 +39,10 @@ SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 using BaseEntityRange = std::span<SVGBaseEntity*>;
 // using EntityRange = std::span<Entity*>; This is bugged... in VS2019 anyhow.
 
+
+//
+// This is the old method, or at least, where we started off with.
+//
 auto FetchModernMethod(std::size_t start, std::size_t end) {
     return BaseEntityRange(&g_baseEntities[start], &g_baseEntities[end]) |
         std::views::filter([](SVGBaseEntity* ent) {
@@ -49,26 +52,50 @@ auto FetchModernMethod(std::size_t start, std::size_t end) {
 }
 
 auto FetchModernMethod2(std::size_t start, std::size_t end) {
+    //return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
+    //std::span<Entity, MAX_EDICTS>(g_entities).subspan(start, end)
     return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
 }
+//
+//===================================================================
+//
+
+//
+// This is the new method, let's roll!
+//
+namespace EntityFilterFunctions {
+    // Returns true if the BaseEntity is NOT a nullptr.
+    bool ValidPointer(SVGBaseEntity* ent) { return ent != nullptr; }
+    // Returns true in case the BaseEntity is properly linked to a server entity.
+    bool HasServerEntity(SVGBaseEntity* ent) { return ent->GetServerEntity(); }
+    // Returns true in case the BaseEntity is in use.
+    bool BaseEntityInUse(SVGBaseEntity* ent) { return ent->IsInUse(); }
+    // Returns true in case the (server-)Entity is in use.
+    bool EntityInUse(const Entity& ent) { return ent.inUse; }
+};
+
+namespace EntityFilters {
+    using namespace std::views;
+    
+    static const auto ValidPointer = std::views::filter ( &EntityFilterFunctions::ValidPointer );
+    static const auto HasServerEntity = std::views::filter ( &EntityFilterFunctions::HasServerEntity );
+    static const auto EntityInUse = std::views::filter ( &EntityFilterFunctions::EntityInUse );
+    static const auto BaseEntityInUse = std::views::filter ( &EntityFilterFunctions::BaseEntityInUse );
+};
+//
+//===================================================================
+//
+
 
 void DebugShitForEntitiesLulz() {
-    // Line... 
+    using namespace EntityFilters;
     gi.DPrintf("Entities - ===========================================\n");
-
-    for (auto entity : FetchModernMethod2(0, MAX_EDICTS)) {
-        gi.DPrintf("Entity stuff FetchModernMethod2: %s", entity.className);
+    for (auto entity : (g_entities | EntityInUse)) {
+        gi.DPrintf("%s\n", entity.className);
     }
-
-    // Line... 
     gi.DPrintf("BaseEntities - ===========================================\n");
-
-    // Fetch base entities.
-    
-    //for (auto baseEntity : FetchBaseEntitiesInRange()) {
-    for (auto baseEntity : FetchModernMethod(0, MAX_EDICTS)) {
-        // Aight sweet spot hit.
-        gi.DPrintf("DebugShotForEntitiesLulz: %s\n", baseEntity->GetClassName());
+    for (auto baseEntity : std::span<SVGBaseEntity*>(g_baseEntities) | ValidPointer | HasServerEntity | BaseEntityInUse) {
+        gi.DPrintf("%s\n", baseEntity->GetClassName());
     }
 }
 

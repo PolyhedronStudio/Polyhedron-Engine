@@ -155,7 +155,7 @@ static inline size_t align(size_t x, size_t alignment)
 }
 
 #ifdef VKPT_IMAGE_DUMPS
-void save_to_pfm_file(char* prefix, uint64_t frame_counter, uint64_t width, uint64_t height, char* data, uint64_t rowPitch, int32_t type);
+void save_to_pfm_file(const char* prefix, uint64_t frame_counter, uint64_t width, uint64_t height, char* data, uint64_t rowPitch, int32_t type);
 #endif
 
 #endif  /*__VK_UTIL_H__*/

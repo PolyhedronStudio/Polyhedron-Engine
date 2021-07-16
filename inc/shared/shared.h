@@ -60,6 +60,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <vector>
 #include <list>
 #include <set>
+#include <span>
+#include <ranges>
 #include <unordered_map>
 #include <unordered_set>
 

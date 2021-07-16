@@ -68,10 +68,35 @@ inline entityClass* SVG_CreateClassEntity(Entity* edict = nullptr, bool allocate
 }
 
 //
+// Entity Fetching.
+//
+//inline auto GetEntitiesInRange(std::size_t start, std::size_t end) {
+//    // WID: DO NOT REMOVE THIS.
+//    // Why?
+//    // Well, it should work based on EntityRange but it won't in VS2019...
+//    // return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
+//    // std::span<Entity, MAX_EDICTS>(g_entities).subspan(start, end)
+//    // return EntityRange(&g_entities[start], &g_entities[end]) | ...
+//    return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
+//}
+//
+////
+//// Base Entity Fetching.
+////
+//inline auto GetBaseEntitiesInRange(std::size_t start, std::size_t end) {
+//    return BaseEntityRange(&g_baseEntities[start], &g_baseEntities[end]) |
+//        std::views::filter([](SVGBaseEntity* ent) {
+//        return ent != nullptr && ent->GetServerEntity() && ent->IsInUse();
+//            }
+//    );
+//}
+
+
+
+//
 // ClassEntity handling.
 //
 SVGBaseEntity* SVG_GetWorldClassEntity();
-
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className);
 void SVG_FreeClassEntity(Entity* ent);
 

@@ -2104,27 +2104,37 @@ copy_to_dump_texture(VkCommandBuffer cmd_buf, int src_image_index)
 	VkImage dst_image = qvk.dump_image;
 
 	VkImageCopy image_copy_region = {
-		.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-		.srcSubresource.mipLevel = 0,
-		.srcSubresource.baseArrayLayer = 0,
-		.srcSubresource.layerCount = 1,
+		.srcSubresource = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.mipLevel = 0,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		},
 
-		.srcOffset.x = 0,
-		.srcOffset.y = 0,
-		.srcOffset.z = 0,
+		.srcOffset = {
+			.x = 0,
+			.y = 0,
+			.z = 0,
+		},
 
-		.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-		.dstSubresource.mipLevel = 0,
-		.dstSubresource.baseArrayLayer = 0,
-		.dstSubresource.layerCount = 1,
+		.dstSubresource = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.mipLevel = 0,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		},
 
-		.dstOffset.x = 0,
-		.dstOffset.y = 0,
-		.dstOffset.z = 0,
+		.dstOffset = {
+			.x = 0,
+			.y = 0,
+			.z = 0,
+		},
 
-		.extent.width = IMG_WIDTH,
-		.extent.height = IMG_HEIGHT,
-		.extent.depth = 1
+		.extent = {
+			.width = IMG_WIDTH,
+			.height = IMG_HEIGHT,
+			.depth = 1
+		}
 	};
 
 	VkImageSubresourceRange subresource_range = {
@@ -2135,46 +2145,46 @@ copy_to_dump_texture(VkCommandBuffer cmd_buf, int src_image_index)
 		.layerCount = 1
 	};
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = src_image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-	);
-
-	IMAGE_BARRIER(cmd_buf,
-		.image = dst_image,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		.image = src_image,
 		.subresourceRange = subresource_range,
+	});
+
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-	);
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.image = dst_image,
+		.subresourceRange = subresource_range,
+	});
 
 	vkCmdCopyImage(cmd_buf,
 		src_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 		dst_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1, &image_copy_region);
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = src_image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL
-	);
-
-	IMAGE_BARRIER(cmd_buf,
-		.image = dst_image,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.image = src_image,
 		.subresourceRange = subresource_range,
+	});
+
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL
-	);
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.image = dst_image,
+		.subresourceRange = subresource_range,
+	});
 }
 #endif
 
@@ -3222,8 +3232,8 @@ R_EndFrame_RTX(void)
 
 		VkImageSubresource subresource = {
 			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.mipLevel = 0,
 			.arrayLayer = 0,
-			.mipLevel = 0
 		};
 
 		VkSubresourceLayout subresource_layout;

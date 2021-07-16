@@ -1811,14 +1811,14 @@ vkpt_create_images()
 	});
 
 #ifdef VKPT_IMAGE_DUMPS
-	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.dump_image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-	);
+		.image = qvk.dump_image,
+		.subresourceRange = subresource_range,
+	});
 #endif
 	
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);

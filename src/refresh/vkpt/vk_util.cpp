@@ -578,7 +578,7 @@ float convert_half_to_float(uint16_t Value)
 	return res[0];
 }
 
-void save_to_pfm_file(char* prefix, uint64_t frame_counter, uint64_t width, uint64_t height, char* data, uint64_t rowPitch, int32_t type)
+void save_to_pfm_file(const char* prefix, uint64_t frame_counter, uint64_t width, uint64_t height, char* data, uint64_t rowPitch, int32_t type)
 {
 	if (frame_counter == 0) return;
 
@@ -589,7 +589,7 @@ void save_to_pfm_file(char* prefix, uint64_t frame_counter, uint64_t width, uint
 	if (file)
 	{
 		{
-			char* buf = "PF\n";
+			const char* buf = "PF\n";
 			fwrite(buf, 1, strlen(buf), file);
 		}
 		{
@@ -598,12 +598,12 @@ void save_to_pfm_file(char* prefix, uint64_t frame_counter, uint64_t width, uint
 			fwrite(resolutionData, 1, strlen(resolutionData), file);
 		}
 		{
-			char* buf = "-1.0\n";
+			const char* buf = "-1.0\n";
 			fwrite(buf, 1, strlen(buf), file);
 		}
 
 		size_t pixelDataSize = width * height * 3 * sizeof(float);
-		float* pixelData = malloc(pixelDataSize);
+		float* pixelData = (float*)malloc(pixelDataSize);
 		memset(pixelData, 0, pixelDataSize);
 		
 		if (type == 0) // input
