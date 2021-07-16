@@ -90,7 +90,7 @@ namespace EntityFilters {
 void DebugShitForEntitiesLulz() {
     using namespace EntityFilters;
     gi.DPrintf("Entities - ===========================================\n");
-    for (auto entity : (g_entities | EntityInUse)) {
+    for (auto& entity : (g_entities | EntityInUse)) {
         gi.DPrintf("%s\n", entity.className);
     }
     gi.DPrintf("BaseEntities - ===========================================\n");
