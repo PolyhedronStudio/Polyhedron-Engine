@@ -34,12 +34,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // the "gameversion" client command will print32_t this plus compile date
 #define GAMEVERSION "basenac"
 
-//
-// Utils.
-//
-#include "utils/EntityIterator.h"
-#include "utils/BaseEntityIterator.h"
-
 
 //-------------------
 // Forward Declaration.

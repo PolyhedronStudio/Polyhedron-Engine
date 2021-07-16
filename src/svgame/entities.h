@@ -16,7 +16,55 @@
 #ifndef __SVGAME_ENTITIES_H__
 #define __SVGAME_ENTITIES_H__
 
-class SVGBaseEntity;
+// Include this guy here, gotta do so to make it work.
+#include "entities/base/SVGBaseEntity.h"
+
+//
+// Filter function namespace that actually contains the entity filter implementations.
+// 
+namespace EntityFilterFunctions {
+    // Returns true in case the (server-)Entity is in use.
+    inline bool EntityInUse(const Entity& ent) { return ent.inUse; }
+    // Returns true in case the (server-)Entity has a client attached to it.
+    inline bool EntityHasClient(const Entity& ent) { return static_cast<bool>(ent.client); }
+    // Returns true if the BaseEntity is NOT a nullptr.
+    inline bool BaseEntityIsValidPointer(SVGBaseEntity* ent) { return ent != nullptr; }
+    // Returns true in case the BaseEntity is properly linked to a server entity.
+    inline bool BaseEntityHasServerEntity(SVGBaseEntity* ent) { return ent->GetServerEntity(); }
+    // Returns true in case the BaseEntity has a client attached to it.
+    inline bool BaseEntityInUse(SVGBaseEntity* ent) { return ent->IsInUse(); }
+    // Returns true in case the (server-)Entity has a client attached to it.
+    inline bool BaseEntityHasClient(SVGBaseEntity* ent) { return ent->GetClient(); }
+};
+
+//
+// Actual filters to use with GetBaseEntityRange, ..., ... TODO: What other functions?
+//
+namespace EntityFilters {
+    using namespace std::views;
+
+    inline auto InUse = std::views::filter( &EntityFilterFunctions::EntityInUse );
+    inline auto HasClient = std::views::filter(&EntityFilterFunctions::EntityHasClient);
+};
+
+//
+// Actual filters to use with GetEntityRange, ..., ... TODO: What other functions?
+//
+namespace BaseEntityFilters {
+    using namespace std::views;
+
+    inline auto IsValidPointer = std::views::filter( &EntityFilterFunctions::BaseEntityIsValidPointer );
+    inline auto HasServerEntity = std::views::filter( &EntityFilterFunctions::BaseEntityHasServerEntity);
+    inline auto InUse = std::views::filter( &EntityFilterFunctions::BaseEntityInUse );
+    inline auto HasClient = std::views::filter ( &EntityFilterFunctions::BaseEntityHasClient );
+};
+
+//
+// C++ using magic.
+//
+using EntitySpan = std::span<Entity>;
+using BaseEntitySpan = std::span<SVGBaseEntity*>;
+
 
 //
 // Entity SEARCH utilities.
@@ -66,32 +114,6 @@ inline entityClass* SVG_CreateClassEntity(Entity* edict = nullptr, bool allocate
     }
     return entity;
 }
-
-//
-// Entity Fetching.
-//
-//inline auto GetEntitiesInRange(std::size_t start, std::size_t end) {
-//    // WID: DO NOT REMOVE THIS.
-//    // Why?
-//    // Well, it should work based on EntityRange but it won't in VS2019...
-//    // return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
-//    // std::span<Entity, MAX_EDICTS>(g_entities).subspan(start, end)
-//    // return EntityRange(&g_entities[start], &g_entities[end]) | ...
-//    return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
-//}
-//
-////
-//// Base Entity Fetching.
-////
-//inline auto GetBaseEntitiesInRange(std::size_t start, std::size_t end) {
-//    return BaseEntityRange(&g_baseEntities[start], &g_baseEntities[end]) |
-//        std::views::filter([](SVGBaseEntity* ent) {
-//        return ent != nullptr && ent->GetServerEntity() && ent->IsInUse();
-//            }
-//    );
-//}
-
-
 
 //
 // ClassEntity handling.

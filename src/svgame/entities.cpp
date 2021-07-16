@@ -35,27 +35,23 @@ Entity g_entities[MAX_EDICTS];
 
 // BaseEntity array, matches similarly index wise.
 SVGBaseEntity* g_baseEntities[MAX_EDICTS];
-//!! Move elsewhere
-using BaseEntityRange = std::span<SVGBaseEntity*>;
-// using EntityRange = std::span<Entity*>; This is bugged... in VS2019 anyhow.
-
 
 //
 // This is the old method, or at least, where we started off with.
 //
-auto FetchModernMethod(std::size_t start, std::size_t end) {
-    return BaseEntityRange(&g_baseEntities[start], &g_baseEntities[end]) |
-        std::views::filter([](SVGBaseEntity* ent) {
-            return ent != nullptr && ent->GetServerEntity() && ent->IsInUse();
-        }
-    );
-}
-
-auto FetchModernMethod2(std::size_t start, std::size_t end) {
-    //return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
-    //std::span<Entity, MAX_EDICTS>(g_entities).subspan(start, end)
-    return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
-}
+//auto FetchModernMethod(std::size_t start, std::size_t end) {
+//    return BaseEntityRange(&g_baseEntities[start], &g_baseEntities[end]) |
+//        std::views::filter([](SVGBaseEntity* ent) {
+//            return ent != nullptr && ent->GetServerEntity() && ent->IsInUse();
+//        }
+//    );
+//}
+//
+//auto FetchModernMethod2(std::size_t start, std::size_t end) {
+//    //return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
+//    //std::span<Entity, MAX_EDICTS>(g_entities).subspan(start, end)
+//    return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
+//}
 //
 //===================================================================
 //
@@ -63,38 +59,25 @@ auto FetchModernMethod2(std::size_t start, std::size_t end) {
 //
 // This is the new method, let's roll!
 //
-namespace EntityFilterFunctions {
-    // Returns true if the BaseEntity is NOT a nullptr.
-    bool ValidPointer(SVGBaseEntity* ent) { return ent != nullptr; }
-    // Returns true in case the BaseEntity is properly linked to a server entity.
-    bool HasServerEntity(SVGBaseEntity* ent) { return ent->GetServerEntity(); }
-    // Returns true in case the BaseEntity is in use.
-    bool BaseEntityInUse(SVGBaseEntity* ent) { return ent->IsInUse(); }
-    // Returns true in case the (server-)Entity is in use.
-    bool EntityInUse(const Entity& ent) { return ent.inUse; }
-};
 
-namespace EntityFilters {
-    using namespace std::views;
-    
-    static const auto ValidPointer = std::views::filter ( &EntityFilterFunctions::ValidPointer );
-    static const auto HasServerEntity = std::views::filter ( &EntityFilterFunctions::HasServerEntity );
-    static const auto EntityInUse = std::views::filter ( &EntityFilterFunctions::EntityInUse );
-    static const auto BaseEntityInUse = std::views::filter ( &EntityFilterFunctions::BaseEntityInUse );
-};
 //
 //===================================================================
 //
-
+EntitySpan GetEntityRange(std::size_t start, std::size_t count) {
+    return EntitySpan(g_entities).subspan(start, count);
+}
+BaseEntitySpan GetBaseEntityRange(std::size_t start, std::size_t count) {
+    return BaseEntitySpan(g_baseEntities).subspan(start, count);
+}
 
 void DebugShitForEntitiesLulz() {
     using namespace EntityFilters;
     gi.DPrintf("Entities - ===========================================\n");
-    for (auto& entity : (g_entities | EntityInUse)) {
+    for (auto& entity : GetEntityRange(0, MAX_EDICTS) | EntityFilters::InUse) {
         gi.DPrintf("%s\n", entity.className);
     }
     gi.DPrintf("BaseEntities - ===========================================\n");
-    for (auto baseEntity : std::span<SVGBaseEntity*>(g_baseEntities) | ValidPointer | HasServerEntity | BaseEntityInUse) {
+    for (auto* baseEntity : GetBaseEntityRange(0, MAX_EDICTS) | BaseEntityFilters::IsValidPointer | BaseEntityFilters::HasServerEntity | BaseEntityFilters::InUse) {
         gi.DPrintf("%s\n", baseEntity->GetClassName());
     }
 }
