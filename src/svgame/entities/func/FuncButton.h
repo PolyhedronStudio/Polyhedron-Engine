@@ -29,12 +29,6 @@ public:
 	void		ButtonUse( SVGBaseEntity* other, SVGBaseEntity* activator );
 	void		ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf );
 	void		ButtonDie( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point );
-
-protected: // Implementation details, should be moved to SVGBaseMover
-	void		BrushMoveDone();
-	void		BrushMoveFinal();
-	void		BrushMoveBegin();
-	void		BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function );
 };
 
 

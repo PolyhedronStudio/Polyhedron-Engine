@@ -51,7 +51,7 @@ public:
     }
 
     //
-    // Interface functions. 
+    // Interface functions.
     //
     virtual void Precache();    // Precaches data.
     virtual void Spawn();       // Spawns the entity.
@@ -63,7 +63,7 @@ public:
 
     //
     // Callback functions.
-    //
+    // // Admer: these should all be prefixed with Dispatch
     void Use(SVGBaseEntity* other, SVGBaseEntity* activator);
     void Die(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
     void Blocked(SVGBaseEntity* other);
@@ -93,6 +93,10 @@ public:
     // Placeholder, implemented by SVGBaseMover, and derivates of that class.
     virtual inline const float& GetAcceleration() {
         return 0.f;
+    }
+    // Get the activator of this entity
+    inline SVGBaseEntity* GetActivator() {
+        return activator;
     }
     // Return the 'angles' value.
     inline const vec3_t& GetAngles() {

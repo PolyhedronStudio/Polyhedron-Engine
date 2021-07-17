@@ -134,10 +134,16 @@ public:
 protected:
     // Calculates and returns the destination point
     // ASSUMES: startPosition and moveDirection are set properly
-    vec3_t CalculateEndPosition();
+    vec3_t      CalculateEndPosition();
 
     // Swaps startPosition and endPosition, using the origin as an intermediary
-    void SwapPositions();
+    void        SwapPositions();
+
+    // Brush movement methods
+    void		BrushMoveDone();
+    void		BrushMoveFinal();
+    void		BrushMoveBegin();
+    void		BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function );
 
 protected:
 

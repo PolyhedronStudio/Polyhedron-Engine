@@ -177,3 +177,82 @@ void SVGBaseMover::SwapPositions() {
 	SetEndPosition( GetStartPosition() );	// endpos = startpos
 	SetStartPosition( GetOrigin() );		// startpos = origin
 }
+
+// =========================
+// SVGBaseMover::BrushMoveDone
+// =========================
+void SVGBaseMover::BrushMoveDone()
+{
+	SetVelocity( vec3_zero() );
+	moveInfo.OnEndFunction( serverEntity );
+}
+
+//===============
+// SVGBaseMover::BrushMoveFinal
+//===============
+void SVGBaseMover::BrushMoveFinal()
+{
+	// We've traveled our world, time to rest
+	if ( moveInfo.remainingDistance == 0.0f ) {
+		BrushMoveDone();
+		return;
+	}
+
+	// Move only as far as to clear the remaining distance
+	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.remainingDistance / FRAMETIME ) );
+
+	SetThinkCallback( &SVGBaseMover::BrushMoveDone );
+	SetNextThinkTime( level.time + FRAMETIME );
+}
+
+//===============
+// SVGBaseMover::BrushMoveBegin
+//===============
+void SVGBaseMover::BrushMoveBegin()
+{
+	float frames;
+
+	// It's time to stop
+	if ( (moveInfo.speed * FRAMETIME) >= moveInfo.remainingDistance ) {
+		BrushMoveFinal();
+		return;
+	}
+
+	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.speed ) );
+
+	frames = floor( (moveInfo.remainingDistance / moveInfo.speed) / FRAMETIME );
+	moveInfo.remainingDistance -= frames * moveInfo.speed * FRAMETIME;
+
+	SetThinkCallback( &SVGBaseMover::BrushMoveFinal );
+	SetNextThinkTime( level.time + (frames * FRAMETIME) );
+}
+
+//===============
+// SVGBaseMover::BrushMoveCalc
+//===============
+void SVGBaseMover::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function )
+{
+	PushMoveInfo& mi = moveInfo;
+
+	SetVelocity( vec3_zero() );
+	mi.dir = destination - GetOrigin();
+	mi.remainingDistance = VectorNormalize( moveInfo.dir );
+	mi.OnEndFunction = function;
+
+	if ( mi.speed == mi.acceleration && mi.speed == mi.deceleration ) {
+		if ( level.currentEntity == ((GetFlags() & EntityFlags::TeamSlave) ? GetTeamMasterEntity() : this) ) {
+			BrushMoveBegin();
+		} else {
+			SetThinkCallback( &SVGBaseMover::BrushMoveBegin );
+			SetNextThinkTime( level.time + FRAMETIME );
+		}
+	} else {
+		// accelerative
+		mi.currentSpeed = 0;
+
+		// Implement Think_AccelMove first
+		//SetThinkCallback( &SVGBaseMover::BrushAccelMove );
+		SetNextThinkTime( level.time + FRAMETIME );
+	}
+}
+
