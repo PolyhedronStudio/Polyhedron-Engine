@@ -63,22 +63,77 @@ SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 //
 //===================================================================
 //
-EntitySpan GetEntityRange(std::size_t start, std::size_t count) {
-    return EntitySpan(g_entities).subspan(start, count);
-}
-BaseEntitySpan GetBaseEntityRange(std::size_t start, std::size_t count) {
-    return BaseEntitySpan(g_baseEntities).subspan(start, count);
+
+//<typename ClassType> bool IsClassOf(ClassType* type) {
+//    return true;
+//}
+template <typename ClassType>
+auto IsClassOf() {
+    return std::ranges::views::filter(
+        [](SVGBaseEntity* ent) {
+            return ent->IsClass<ClassType>();
+        }
+    );
 }
 
+inline auto HasClassName(const std::string& classname) {
+    return std::ranges::views::filter(
+        [classname /*need a copy!*/](SVGBaseEntity* ent) {
+            return ent->GetClassName() == classname;
+        }
+    );
+}
+
+// Returns a span containing all the entities in the range of [start] to [start + count].
+template <std::size_t start, std::size_t count>
+auto GetEntityRange() -> std::span<Entity, count> {
+    return std::span<Entity>(g_entities).subspan<start, count>();
+}
+
+// Returns a span containing all base entities in the range of [start] to [start + count].
+template <std::size_t start, std::size_t count>
+auto GetBaseEntityRange() -> std::span<SVGBaseEntity*, count> {
+    return std::span<SVGBaseEntity*>(g_baseEntities).subspan<start, count>();
+}
+//EntitySpan GetEntityRange(std::size_t start, std::size_t count) {
+//    return EntitySpan(g_entities).subspan(start, count);
+//}
+//BaseEntitySpan GetBaseEntityRange(std::size_t start, std::size_t count) {
+//    return BaseEntitySpan(g_baseEntities).subspan(start, count);
+//}
+#include "entities/info/InfoPlayerStart.h"
 void DebugShitForEntitiesLulz() {
-    using namespace EntityFilters;
     gi.DPrintf("Entities - ===========================================\n");
-    for (auto& entity : GetEntityRange(0, MAX_EDICTS) | EntityFilters::InUse) {
+    for (auto& entity : GetEntityRange<0, MAX_EDICTS>() | EntityFilters::InUse) {
         gi.DPrintf("%s\n", entity.className);
     }
     gi.DPrintf("BaseEntities - ===========================================\n");
-    for (auto* baseEntity : GetBaseEntityRange(0, MAX_EDICTS) | BaseEntityFilters::IsValidPointer | BaseEntityFilters::HasServerEntity | BaseEntityFilters::InUse) {
+    for (auto* baseEntity : GetBaseEntityRange<0, MAX_EDICTS>() | BaseEntityFilters::IsValidPointer | BaseEntityFilters::HasServerEntity | BaseEntityFilters::InUse) {
         gi.DPrintf("%s\n", baseEntity->GetClassName());
+    }
+
+    gi.DPrintf("Entity - info_player_start filter - ===========================================\n");
+    // Hehe, only  fetch info_player_start
+    for (auto& entity : GetEntityRange<0, MAX_EDICTS>() |
+            EF::HasClassEntity |
+            EF::InUse |
+            EF::HasClassName("info_player_start")
+        )
+    {
+        gi.DPrintf("Filtered out the entity #%i: %s\n", entity.state.number, entity.className);
+    }
+
+    gi.DPrintf("BaseEntity - info_player_start filter - ===========================================\n");
+    // Hehe, only  fetch info_player_start
+    for (auto* baseEntity : GetBaseEntityRange<0, MAX_EDICTS>() |
+            BEF::IsValidPointer |
+            BEF::HasServerEntity |
+            BEF::InUse |
+            //BEF::HasClassName("info_player_start")) {
+            IsClassOf<InfoPlayerStart>()
+        )
+    {
+        gi.DPrintf("Filtered out the base entity #%i: %s\n", baseEntity->GetNumber(), baseEntity->GetClassName());
     }
 }
 

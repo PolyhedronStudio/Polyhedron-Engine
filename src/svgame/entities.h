@@ -27,14 +27,20 @@ namespace EntityFilterFunctions {
     inline bool EntityInUse(const Entity& ent) { return ent.inUse; }
     // Returns true in case the (server-)Entity has a client attached to it.
     inline bool EntityHasClient(const Entity& ent) { return static_cast<bool>(ent.client); }
-    // Returns true if the BaseEntity is NOT a nullptr.
-    inline bool BaseEntityIsValidPointer(SVGBaseEntity* ent) { return ent != nullptr; }
+    // Returns true in case the (server-)Entity has a Class Entity attached to it.
+    inline bool EntityHasClassEntity(const Entity& ent) { return static_cast<bool>(ent.classEntity); }
+
+    // Returns true in case the (server-)Entity has a client attached to it.
+    inline bool BaseEntityHasClient(SVGBaseEntity* ent) { return ent->GetClient(); }
     // Returns true in case the BaseEntity is properly linked to a server entity.
     inline bool BaseEntityHasServerEntity(SVGBaseEntity* ent) { return ent->GetServerEntity(); }
     // Returns true in case the BaseEntity has a client attached to it.
     inline bool BaseEntityInUse(SVGBaseEntity* ent) { return ent->IsInUse(); }
-    // Returns true in case the (server-)Entity has a client attached to it.
-    inline bool BaseEntityHasClient(SVGBaseEntity* ent) { return ent->GetClient(); }
+    // Returns true if the BaseEntity is NOT a nullptr.
+    inline bool BaseEntityIsValidPointer(SVGBaseEntity* ent) { return ent != nullptr; }
+
+    // Returns true in case the BaseEntity has the queried for classname.
+    //inline bool BaseEntityHasClass(SVGBaseEntity* ent, std::string classname) { return ent->GetClassName() == classname; }
 };
 
 //
@@ -44,8 +50,20 @@ namespace EntityFilters {
     using namespace std::views;
 
     inline auto InUse = std::views::filter( &EntityFilterFunctions::EntityInUse );
-    inline auto HasClient = std::views::filter(&EntityFilterFunctions::EntityHasClient);
+    inline auto HasClient = std::views::filter( &EntityFilterFunctions::EntityHasClient );
+    inline auto HasClassEntity = std::views::filter( &EntityFilterFunctions::EntityHasClassEntity );
+    // WID: TODO: This one actually has to move into EntityFilterFunctions, and then
+    // be referred to from here. However, I am unsure how to do that as of yet.
+    inline auto HasClassName(const std::string& classname) {
+        return std::ranges::views::filter(
+            [classname /*need a copy!*/](Entity &ent) {
+                return classname == ent.className;
+            }
+        );
+    }
 };
+// Shortcut, lesser typing.
+namespace EF = EntityFilters;
 
 //
 // Actual filters to use with GetEntityRange, ..., ... TODO: What other functions?
@@ -57,7 +75,19 @@ namespace BaseEntityFilters {
     inline auto HasServerEntity = std::views::filter( &EntityFilterFunctions::BaseEntityHasServerEntity);
     inline auto InUse = std::views::filter( &EntityFilterFunctions::BaseEntityInUse );
     inline auto HasClient = std::views::filter ( &EntityFilterFunctions::BaseEntityHasClient );
+    
+    // WID: TODO: This one actually has to move into EntityFilterFunctions, and then
+    // be referred to from here. However, I am unsure how to do that as of yet.
+    inline auto HasClassName(const std::string& classname) {
+        return std::ranges::views::filter(
+            [classname /*need a copy!*/](SVGBaseEntity* ent) {
+                return ent->GetClassName() == classname;
+            }
+        );
+    }
 };
+// Shortcut, lesser typing.
+namespace BEF = BaseEntityFilters;
 
 //
 // C++ using magic.
