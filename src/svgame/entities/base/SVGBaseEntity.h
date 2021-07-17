@@ -39,19 +39,19 @@ public:
     // Checks if this entity class is exactly the given class
     // @param entityClass: an entity class which must inherint from SVGBaseEntity
     template<typename entityClass>
-    bool IsClass() { // every entity has a ClassInfo, thanks to the DefineXYZ macro
+    bool IsClass() const { // every entity has a ClassInfo, thanks to the DefineXYZ macro
         return GetTypeInfo()->IsClass( entityClass::ClassInfo );
     }
 
     // Checks if this entity class is a subclass of another, or is the same class
     // @param entityClass: an entity class which must inherint from SVGBaseEntity
     template<typename entityClass>
-    bool IsSubclassOf() {
+    bool IsSubclassOf() const {
         return GetTypeInfo()->IsSubclassOf( entityClass::ClassInfo );
     }
 
     //
-    // Interface functions. 
+    // Interface functions.
     //
     virtual void Precache();    // Precaches data.
     virtual void Spawn();       // Spawns the entity.
@@ -63,7 +63,7 @@ public:
 
     //
     // Callback functions.
-    //
+    // // Admer: these should all be prefixed with Dispatch
     void Use(SVGBaseEntity* other, SVGBaseEntity* activator);
     void Die(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
     void Blocked(SVGBaseEntity* other);
@@ -93,6 +93,10 @@ public:
     // Placeholder, implemented by SVGBaseMover, and derivates of that class.
     virtual inline const float& GetAcceleration() {
         return 0.f;
+    }
+    // Get the activator of this entity
+    inline SVGBaseEntity* GetActivator() {
+        return activator;
     }
     // Return the 'angles' value.
     inline const vec3_t& GetAngles() {
@@ -943,6 +947,8 @@ public:
     // Callback implementations that can be set by all child entities.
     //
     void SVGBaseEntityThinkFree(void);
+    // "No" thinking
+    void SVGBaseEntityThinkNull() { }
 };
 
 #endif // __SVGAME_ENTITIES_BASE_CBASEENTITY_H__

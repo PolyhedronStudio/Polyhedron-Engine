@@ -124,7 +124,7 @@ public:
 // @param mapClassName - the map classname of this entity, used during entity spawning
 // @param className - the internal C++ class name
 #define __DeclareTypeInfo( mapClassName, className, superClass, allocatorFunction )	\
-virtual TypeInfo* GetTypeInfo() const {								\
+virtual inline TypeInfo* GetTypeInfo() const {					\
 	return &ClassInfo;											\
 }																\
 inline static TypeInfo ClassInfo = TypeInfo( (mapClassName), (className), (superClass), (allocatorFunction) );
