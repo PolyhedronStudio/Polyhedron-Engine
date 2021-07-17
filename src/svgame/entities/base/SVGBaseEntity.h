@@ -39,15 +39,15 @@ public:
     // Checks if this entity class is exactly the given class
     // @param entityClass: an entity class which must inherint from SVGBaseEntity
     template<typename entityClass>
-    bool IsClass() { // every entity has a ClassInfo, thanks to the DefineXYZ macro
-        return ClassInfo->IsClass( entityClass::ClassInfo );
+    bool IsClass() const { // every entity has a ClassInfo, thanks to the DefineXYZ macro
+        return GetTypeInfo()->IsClass( entityClass::ClassInfo );
     }
 
     // Checks if this entity class is a subclass of another, or is the same class
     // @param entityClass: an entity class which must inherint from SVGBaseEntity
     template<typename entityClass>
-    bool IsSubclassOf() {
-        return ClassInfo->IsSubclassOf( entityClass::ClassInfo );
+    bool IsSubclassOf() const {
+        return GetTypeInfo()->IsSubclassOf( entityClass::ClassInfo );
     }
 
     //
