@@ -23,7 +23,7 @@
 // FuncDoor::ctor
 //===============
 FuncDoor::FuncDoor( Entity* entity ) 
-	: SVGBaseMover( entity ) {
+	: Base( entity ) {
 
 }
 
@@ -45,8 +45,6 @@ void FuncDoor::Precache() {
 // FuncDoor::Spawn
 //===============
 void FuncDoor::Spawn() {
-    vec3_t absoluteMovedir;
-
     Base::Spawn();
 
     SetMoveDirection( GetAngles()/*, resetAngles = true*/ );
@@ -54,8 +52,9 @@ void FuncDoor::Spawn() {
     SetSolid( Solid::BSP );
     SetModel( GetModel() );
 
-    SetBlockedCallback( nullptr /*DoorBlocked*/ );
-    SetUseCallback( nullptr /*DoorUse*/ );
+    SetThinkCallback( &SVGBaseEntity::SVGBaseEntityThinkNull );
+    SetBlockedCallback( &FuncDoor::DoorBlocked );
+    SetUseCallback( &FuncDoor::DoorUse );
 
     if ( !GetSpeed() ) {
         SetSpeed( 100.0f );
@@ -82,6 +81,11 @@ void FuncDoor::Spawn() {
     // Calculate the end position, with the assumption that start pos = origin
     SetStartPosition( GetOrigin() );
     SetEndPosition( CalculateEndPosition() );
+    // This should never happen
+    if ( GetStartPosition() == GetEndPosition() ) {
+        gi.DPrintf( "WARNING: func_door has same start & end position\n" );
+        return;
+    }
 
     // If it starts open, swap the positions
     if ( GetSpawnFlags() & FuncDoor::SF_StartOpen ) {
@@ -94,11 +98,11 @@ void FuncDoor::Spawn() {
     // openable by shooting it
     if ( GetHealth() ) {
         SetTakeDamage( TakeDamage::Yes );
-        SetDieCallback( nullptr /*DoorKilled*/ );
+        SetDieCallback( &FuncDoor::DoorShotOpen );
         SetMaxHealth( GetHealth() );
     } else if ( nullptr == serverEntity->targetName ) {
-        gi.SoundIndex( "misc/talk.wav" ); // ???
-        SetTouchCallback( nullptr /*DoorTouch*/ );
+        gi.SoundIndex( MessageSoundPath );
+        SetTouchCallback( &FuncDoor::DoorTouch );
     }
 
     moveInfo.speed = GetSpeed();
@@ -142,6 +146,237 @@ void FuncDoor::PostSpawn() {
 }
 
 //===============
+// FuncDoor::DoorUse
+//===============
+void FuncDoor::DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+    if ( GetFlags() & EntityFlags::TeamSlave ) {
+        return;
+    }
+
+    // This should never happen
+    if ( GetStartPosition() == GetEndPosition() ) {
+        gi.DPrintf( "WARNING: func_door has same start & end position\n" );
+        return;
+    }
+
+    if ( GetSpawnFlags() & SF_Toggle ) {
+        if ( moveInfo.state == MoverState::Up || moveInfo.state == MoverState::Top ) {
+            // Trigger all paired doors
+            for ( SVGBaseEntity* ent = this; nullptr != ent; ent = ent->GetTeamChainEntity() ) {
+                if ( ent->IsSubclassOf<FuncDoor>() ) {
+                    ent->SetMessage( "" );
+                    ent->SetTouchCallback( nullptr );
+                    static_cast<FuncDoor*>( ent )->DoorGoDown();
+                }
+            }
+
+            return;
+        }
+    }
+
+    // Trigger all paired doors
+    for ( SVGBaseEntity* ent = this; nullptr != ent; ent = ent->GetTeamChainEntity() ) {
+        if ( ent->IsSubclassOf<FuncDoor>() ) {
+            ent->SetMessage( "" );
+            ent->SetTouchCallback( nullptr );
+            static_cast<FuncDoor*>( ent )->DoorGoUp( activator );
+        }
+    }
+}
+
+//===============
+// FuncDoor::DoorShotOpen
+//===============
+void FuncDoor::DoorShotOpen( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point ) {
+    SVGBaseEntity* ent;
+    for ( ent = GetTeamMasterEntity(); nullptr != ent; ent = GetTeamChainEntity() ) {
+        ent->SetHealth( GetMaxHealth() );
+        ent->SetTakeDamage( TakeDamage::No );
+    }
+
+    GetTeamMasterEntity()->Use( attacker, attacker );
+}
+
+//===============
+// FuncDoor::DoorBlocked
+//===============
+void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
+    SVGBaseEntity* ent;
+    
+    if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !(other->GetClient()) ) {
+        // Give it a chance to go away on its own terms (like gibs)
+        SVG_InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 10000, 1, 0, MeansOfDeath::Crush );
+        // If it's still there, nuke it
+        if ( other->GetHealth() > 0 || other->GetSolid() != Solid::Not ) {
+            SVG_BecomeExplosion1( other );
+        }
+    }
+
+    SVG_InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
+
+    if ( GetSpawnFlags() & SF_Crusher ) {
+        return;
+    }
+
+    // If a door has a negative wait, it would never come back if blocked,
+    // so let it just squash the object to death real fast
+    if ( moveInfo.wait >= 0 ) {
+        if ( moveInfo.state == MoverState::Down ) {
+            for ( ent = GetTeamMasterEntity(); nullptr != ent; ent = GetTeamChainEntity() ) {
+                if ( ent->IsSubclassOf<FuncDoor>() ) {
+                    static_cast<FuncDoor*>( ent )->DoorGoUp( ent->GetActivator() );
+                }
+            }
+        } else {
+            for ( ent = GetTeamMasterEntity(); nullptr != ent; ent = GetTeamChainEntity() ) {
+                if ( ent->IsSubclassOf<FuncDoor>() ) {
+                    static_cast<FuncDoor*>( ent )->DoorGoDown();
+                }
+            }
+        }
+    }
+}
+
+//===============
+// FuncDoor::DoorTouch
+//===============
+void FuncDoor::DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf ) {
+    if ( nullptr == other->GetClient() ) {
+        return; // Players only; should we have special flags for monsters et al?
+    }
+
+    if ( level.time < debounceTouchTime ) {
+        return;
+    }
+
+    debounceTouchTime = level.time + 5.0f;
+
+    if ( !messageStr.empty() ) {
+        gi.CenterPrintf( other->GetServerEntity(), "%s", messageStr.c_str() );
+        gi.Sound( other->GetServerEntity(), CHAN_AUTO, gi.SoundIndex( MessageSoundPath ), 1.0f, ATTN_NORM, 0.0f );
+    }
+}
+
+//===============
+// FuncDoor::DoorGoUp
+//===============
+void FuncDoor::DoorGoUp( SVGBaseEntity* activator ) {
+    if ( moveInfo.state == MoverState::Up ) {
+        return; // already going up
+    }
+
+    if ( moveInfo.state == MoverState::Top ) {
+        // Reset top wait time 
+        if ( moveInfo.wait >= 0.0f ) {
+            SetNextThinkTime( level.time + moveInfo.wait );
+        }
+        return;
+    }
+
+    if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
+        if ( moveInfo.startSoundIndex ) {
+            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0.0f );
+        }
+        SetSound( moveInfo.middleSoundIndex );
+    }
+
+    moveInfo.state = MoverState::Up;
+
+    DoGoUp();
+    UseTargets( activator );
+    UseAreaportals( true );
+}
+
+//===============
+// FuncDoor::DoorGoDown
+//===============
+void FuncDoor::DoorGoDown() {
+    if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
+        if ( moveInfo.startSoundIndex ) {
+            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0 );
+        }
+        SetSound( moveInfo.middleSoundIndex );
+    }
+
+    if ( GetMaxHealth() ) {
+        SetTakeDamage( TakeDamage::Yes );
+        SetHealth( GetMaxHealth() );
+    }
+
+    moveInfo.state = MoverState::Down;
+    DoGoDown();
+}
+
+//===============
+// FuncDoor::DoGoUp
+//===============
+void FuncDoor::DoGoUp() {
+    BrushMoveCalc( moveInfo.endOrigin, OnDoorHitTop );
+}
+
+//===============
+// FuncDoor::DoGoDown
+//===============
+void FuncDoor::DoGoDown() {
+    BrushMoveCalc( moveInfo.startOrigin, OnDoorHitBottom );
+}
+
+//===============
+// FuncDoor::HitTop
+//===============
+void FuncDoor::HitTop() {
+    if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
+        if ( moveInfo.endSoundIndex ) {
+            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1.0f, ATTN_STATIC, 0.0f );
+        }
+        SetSound( 0 );
+    }
+
+    moveInfo.state = MoverState::Top;
+    if ( GetSpawnFlags() & SF_Toggle ) {
+        return;
+    }
+
+    if ( moveInfo.wait >= 0.0f ) {
+        SetThinkCallback( &FuncDoor::DoorGoDown );
+        SetNextThinkTime( level.time + moveInfo.wait );
+    }
+}
+
+//===============
+// FuncDoor::HitBottom
+//===============
+void FuncDoor::HitBottom() {
+    if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
+        if ( moveInfo.endSoundIndex ) {
+            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1.0f, ATTN_STATIC, 0.0f );
+        }
+        SetSound( 0 );
+    }
+
+    moveInfo.state = MoverState::Bottom;
+    UseAreaportals( false ); // close off area portals
+}
+
+//===============
+// FuncDoor::OnDoorHitTop
+//===============
+void FuncDoor::OnDoorHitTop( Entity* self ) {
+    if ( self->classEntity->IsSubclassOf<FuncDoor>() ) {
+        static_cast<FuncDoor*>( self->classEntity )->HitTop();
+    }
+}
+
+//===============
+// FuncDoor::OnDoorHitBottom
+//===============
+void FuncDoor::OnDoorHitBottom( Entity* self ) {
+    if ( self->classEntity->IsSubclassOf<FuncDoor>() ) {
+        static_cast<FuncDoor*>(self->classEntity)->HitBottom();
+    }
+}
+
+//===============
 // FuncDoor::CalculateMoveSpeed
 //===============
 void FuncDoor::CalculateMoveSpeed() {
@@ -156,7 +391,7 @@ void FuncDoor::CalculateMoveSpeed() {
     float ratio;
     float distance;
     
-    // Find the smallest any member of the team will be moving
+    // Find the smallest distance any member of the team will be moving
     min = fabsf( moveInfo.distance );
     for ( ent = dynamic_cast<FuncDoor*>( GetTeamChainEntity() ); ent; ent = dynamic_cast<FuncDoor*>( ent->GetTeamChainEntity() ) ) {
         distance = fabsf( ent->moveInfo.distance );
@@ -240,7 +475,7 @@ void FuncDoor::UseAreaportals( bool open ) const {
 
     SVGBaseEntity* portal = nullptr;
     while ( portal = SVG_FindEntityByKeyValue( "targetname", targetStr, portal ) ) {
-        if ( std::string( portal->GetClassName() ) == "func_areaportal" ) {
+        if ( std::string( portal->GetClassName() ) == "func_areaportal" /* portal->IsClass<FuncAreaportal>() */ ) {
             gi.SetAreaPortalState( portal->GetStyle(), open );
         }
     }
