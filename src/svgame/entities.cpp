@@ -10,8 +10,7 @@
 #include "entities.h"			// Entities header.
 #include "player/client.h"		// Include Player Client header.
 
-#include <span>
-#include <ranges>
+
 
 //
 // SVG_SpawnClassEntity
@@ -24,7 +23,7 @@
 #include "entities/info/InfoPlayerStart.h"
 #include "entities/Worldspawn.h"
 
-
+#include <ranges>
 
 //-----------------
 // Entity Game Variables.
@@ -36,39 +35,50 @@ Entity g_entities[MAX_EDICTS];
 
 // BaseEntity array, matches similarly index wise.
 SVGBaseEntity* g_baseEntities[MAX_EDICTS];
-//!! Move elsewhere
-using BaseEntityRange = std::span<SVGBaseEntity*>;
-// using EntityRange = std::span<Entity*>; This is bugged... in VS2019 anyhow.
 
-auto FetchModernMethod(std::size_t start, std::size_t end) {
-    return BaseEntityRange(&g_baseEntities[start], &g_baseEntities[end]) |
-        std::views::filter([](SVGBaseEntity* ent) {
-            return ent != nullptr && ent->GetServerEntity() && ent->IsInUse();
-        }
-    );
+//
+// This is the old method, or at least, where we started off with.
+//
+//auto FetchModernMethod(std::size_t start, std::size_t end) {
+//    return BaseEntityRange(&g_baseEntities[start], &g_baseEntities[end]) |
+//        std::views::filter([](SVGBaseEntity* ent) {
+//            return ent != nullptr && ent->GetServerEntity() && ent->IsInUse();
+//        }
+//    );
+//}
+//
+//auto FetchModernMethod2(std::size_t start, std::size_t end) {
+//    //return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
+//    //std::span<Entity, MAX_EDICTS>(g_entities).subspan(start, end)
+//    return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
+//}
+//
+//===================================================================
+//
+
+//
+// This is the new method, let's roll!
+//
+
+//
+//===================================================================
+//
+EntitySpan GetEntityRange(std::size_t start, std::size_t count) {
+    return EntitySpan(g_entities).subspan(start, count);
 }
-
-auto FetchModernMethod2(std::size_t start, std::size_t end) {
-    return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
+BaseEntitySpan GetBaseEntityRange(std::size_t start, std::size_t count) {
+    return BaseEntitySpan(g_baseEntities).subspan(start, count);
 }
 
 void DebugShitForEntitiesLulz() {
-    // Line... 
+    using namespace EntityFilters;
     gi.DPrintf("Entities - ===========================================\n");
-
-    for (auto entity : FetchModernMethod2(0, MAX_EDICTS)) {
-        gi.DPrintf("Entity stuff FetchModernMethod2: %s", entity.className);
+    for (auto& entity : GetEntityRange(0, MAX_EDICTS) | EntityFilters::InUse) {
+        gi.DPrintf("%s\n", entity.className);
     }
-
-    // Line... 
     gi.DPrintf("BaseEntities - ===========================================\n");
-
-    // Fetch base entities.
-    
-    //for (auto baseEntity : FetchBaseEntitiesInRange()) {
-    for (auto baseEntity : FetchModernMethod(0, MAX_EDICTS)) {
-        // Aight sweet spot hit.
-        gi.DPrintf("DebugShotForEntitiesLulz: %s\n", baseEntity->GetClassName());
+    for (auto* baseEntity : GetBaseEntityRange(0, MAX_EDICTS) | BaseEntityFilters::IsValidPointer | BaseEntityFilters::HasServerEntity | BaseEntityFilters::InUse) {
+        gi.DPrintf("%s\n", baseEntity->GetClassName());
     }
 }
 
