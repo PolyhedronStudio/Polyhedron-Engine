@@ -947,6 +947,8 @@ public:
     // Callback implementations that can be set by all child entities.
     //
     void SVGBaseEntityThinkFree(void);
+    // "No" thinking
+    void SVGBaseEntityThinkNull() { }
 };
 
 #endif // __SVGAME_ENTITIES_BASE_CBASEENTITY_H__
