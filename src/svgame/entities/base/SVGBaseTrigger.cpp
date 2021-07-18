@@ -198,16 +198,6 @@ void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
 
 		// Return, the rest happens by delay.
 		return;
-
-	////        t->nextThinkTime = level.time + ent->GetDelay();
-	//        //t->Think = Think_Delay;
-	////        t->activator = activator;
-	//        if (!activator)
-	//            gi.DPrintf("Think_Delay with no activator\n");
-	//        t->message = ent->GetMessage();
-	//        t->target = ent->GetTarget();
-	//        t->killTarget = ent->GetKillTarget();
-	//        return;
 	}
 	
 	//
@@ -234,21 +224,29 @@ void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
 	if (GetKillTarget().length()) {
 		SVGBaseEntity* triggerEntity = nullptr;
 
-		while (triggerEntity = SVG_FindEntityByKeyValue("targetname", GetKillTarget(), triggerEntity))
+		//while (triggerEntity = SVG_FindEntityByKeyValue("targetname", GetKillTarget(), triggerEntity))
+		// Loop over the total entity range, ensure that we're checking for the right filters.
+		for (auto* triggerEntity : GetBaseEntityRange<0, MAX_EDICTS>()
+			| bef::IsValidPointer
+			| bef::HasServerEntity
+			| bef::InUse
+			| bef::HasKeyValue("targetname", GetKillTarget())) {
+
 			// It is going to die, free it.
 			SVG_FreeEntity(triggerEntity->GetServerEntity());
 
 			if (!IsInUse()) {
-                gi.DPrintf("entity was removed while using killtargets\n");
-                return;
+				gi.DPrintf("entity was removed while using killtargets\n");
+				return;
 			}
+		}
 	}
 	
 	//
 	// Fire targets
 	//
 	if (GetTarget().length()) {
-		//while ((triggerEntity = SVG_FindEntityByKeyValue("targetname", GetTarget(), triggerEntity))) {
+		// Loop over the total entity range, ensure that we're checking for the right filters.
 		for (auto* triggerEntity : GetBaseEntityRange<0, MAX_EDICTS>()
 			| bef::IsValidPointer
 			| bef::HasServerEntity
@@ -261,6 +259,7 @@ void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
 				continue;
 			}
 
+			// Do not ALLOW an entity to use ITSELF. :)
 			if (triggerEntity == this) {
 				gi.DPrintf("WARNING: Entity #%i used itself.\n", GetServerEntity()->state.number);
 			} else {
