@@ -248,9 +248,13 @@ void SVGBaseTrigger::UseTargets(SVGBaseEntity* activator) {
 	// Fire targets
 	//
 	if (GetTarget().length()) {
-		SVGBaseEntity* triggerEntity = nullptr;
-
-		while ((triggerEntity = SVG_FindEntityByKeyValue("targetname", GetTarget(), triggerEntity))) {
+		//while ((triggerEntity = SVG_FindEntityByKeyValue("targetname", GetTarget(), triggerEntity))) {
+		for (auto* triggerEntity : GetBaseEntityRange<0, MAX_EDICTS>()
+			| bef::IsValidPointer
+			| bef::HasServerEntity
+			| bef::InUse
+			| bef::HasKeyValue("targetname", GetTarget())) {
+			
 			// Doors fire area portals in a special way. So we skip those.
 			if (triggerEntity->GetClassName() == "func_areaportal"
 				&& (GetClassName() == "func_door" || GetClassName() == "func_door_rotating")) {

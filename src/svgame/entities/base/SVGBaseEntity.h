@@ -161,6 +161,11 @@ public:
         return vec3_zero();
     }
 
+    // Returns a reference to the 'entityDictionary'.
+    virtual inline EntityDictionary &GetEntityDictionary() {
+        return serverEntity->entityDictionary;
+    }
+
     // Return the 'eventID' value.
     inline const uint8_t GetEventID() {
         return serverEntity->state.eventID;

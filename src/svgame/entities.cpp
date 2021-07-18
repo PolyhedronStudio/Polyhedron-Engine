@@ -52,7 +52,6 @@ SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 //    //std::span<Entity, MAX_EDICTS>(g_entities).subspan(start, end)
 //    return std::span(&g_entities[start], &g_entities[end]) | std::views::filter([](auto& ent) { return ent.inUse; });
 //}
-//
 //===================================================================
 //
 
@@ -63,84 +62,40 @@ SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 //
 //===================================================================
 //
-
-//<typename ClassType> bool IsClassOf(ClassType* type) {
-//    return true;
-//}
-template <typename ClassType>
-auto IsClassOf() {
-    return std::ranges::views::filter(
-        [](SVGBaseEntity* ent) {
-            return ent->IsClass<ClassType>();
-        }
-    );
-}
-
-inline auto HasClassName(const std::string& classname) {
-    return std::ranges::views::filter(
-        [classname /*need a copy!*/](SVGBaseEntity* ent) {
-            return ent->GetClassName() == classname;
-        }
-    );
-}
-
-// Returns a span containing all the entities in the range of [start] to [start + count].
-template <std::size_t start, std::size_t count>
-auto GetEntityRange() -> std::span<Entity, count> {
-    return std::span<Entity>(g_entities).subspan<start, count>();
-}
-
-// Returns a span containing all base entities in the range of [start] to [start + count].
-template <std::size_t start, std::size_t count>
-auto GetBaseEntityRange() -> std::span<SVGBaseEntity*, count> {
-    return std::span<SVGBaseEntity*>(g_baseEntities).subspan<start, count>();
-}
-//EntitySpan GetEntityRange(std::size_t start, std::size_t count) {
-//    return EntitySpan(g_entities).subspan(start, count);
-//}
-//BaseEntitySpan GetBaseEntityRange(std::size_t start, std::size_t count) {
-//    return BaseEntitySpan(g_baseEntities).subspan(start, count);
-//}
+// Testing...
 #include "entities/info/InfoPlayerStart.h"
 void DebugShitForEntitiesLulz() {
     gi.DPrintf("Entities - ===========================================\n");
-    for (auto& entity : GetEntityRange<0, MAX_EDICTS>() | EntityFilters::InUse) {
+    for (auto& entity : g_entities | EntityFilters::InUse) {
         gi.DPrintf("%s\n", entity.className);
     }
     gi.DPrintf("BaseEntities - ===========================================\n");
-    for (auto* baseEntity : GetBaseEntityRange<0, MAX_EDICTS>() | BaseEntityFilters::IsValidPointer | BaseEntityFilters::HasServerEntity | BaseEntityFilters::InUse) {
+    for (auto* baseEntity : g_baseEntities | BaseEntityFilters::IsValidPointer | BaseEntityFilters::HasServerEntity | BaseEntityFilters::InUse) {
         gi.DPrintf("%s\n", baseEntity->GetClassName());
     }
 
     gi.DPrintf("Entity - info_player_start filter - ===========================================\n");
     // Hehe, only  fetch info_player_start
-    for (auto& entity : GetEntityRange<0, MAX_EDICTS>() |
-            EF::HasClassEntity |
-            EF::InUse |
-            EF::HasClassName("info_player_start")
-        )
-    {
+    for (auto& entity : GetEntityRange<0, MAX_EDICTS>()
+        | ef::HasClassEntity
+        | ef::InUse
+        | ef::HasClassName("info_player_start")) {
         gi.DPrintf("Filtered out the entity #%i: %s\n", entity.state.number, entity.className);
     }
 
     gi.DPrintf("BaseEntity - info_player_start filter - ===========================================\n");
     // Hehe, only  fetch info_player_start
-    for (auto* baseEntity : GetBaseEntityRange<0, MAX_EDICTS>() |
-            BEF::IsValidPointer |
-            BEF::HasServerEntity |
-            BEF::InUse |
-            //BEF::HasClassName("info_player_start")) {
-            IsClassOf<InfoPlayerStart>()
-        )
-    {
+    for (auto* baseEntity : GetBaseEntityRange<0, MAX_EDICTS>()
+        | bef::IsValidPointer
+        | bef::HasServerEntity
+        | bef::InUse
+        | bef::IsClassOf<InfoPlayerStart>()) {
         gi.DPrintf("Filtered out the base entity #%i: %s\n", baseEntity->GetNumber(), baseEntity->GetClassName());
     }
 }
-
 //===============
 // SVG_SpawnClassEntity
-// 
-// 
+//
 //=================
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     // Start with a nice nullptr.

@@ -19,6 +19,7 @@
 // Include this guy here, gotta do so to make it work.
 #include "entities/base/SVGBaseEntity.h"
 
+
 //
 // Filter function namespace that actually contains the entity filter implementations.
 // 
@@ -34,6 +35,8 @@ namespace EntityFilterFunctions {
     inline bool BaseEntityHasClient(SVGBaseEntity* ent) { return ent->GetClient(); }
     // Returns true in case the BaseEntity is properly linked to a server entity.
     inline bool BaseEntityHasServerEntity(SVGBaseEntity* ent) { return ent->GetServerEntity(); }
+    // Returns true if the BaseEntity contains the sought for targetname.
+    inline bool BaseEntityHasTargetName(SVGBaseEntity* ent) { return ent->GetTargetName() != "" && !ent->GetTargetName().empty(); }
     // Returns true in case the BaseEntity has a client attached to it.
     inline bool BaseEntityInUse(SVGBaseEntity* ent) { return ent->IsInUse(); }
     // Returns true if the BaseEntity is NOT a nullptr.
@@ -42,6 +45,7 @@ namespace EntityFilterFunctions {
     // Returns true in case the BaseEntity has the queried for classname.
     //inline bool BaseEntityHasClass(SVGBaseEntity* ent, std::string classname) { return ent->GetClassName() == classname; }
 };
+
 
 //
 // Actual filters to use with GetBaseEntityRange, ..., ... TODO: What other functions?
@@ -61,9 +65,26 @@ namespace EntityFilters {
             }
         );
     }
+    // WID: TODO: This one actually has to move into EntityFilterFunctions, and then
+    // be referred to from here. However, I am unsure how to do that as of yet.
+    inline auto HasKeyValue(const std::string& fieldKey, const std::string &fieldValue) {
+        return std::ranges::views::filter(
+            [fieldKey, fieldValue /*need a copy!*/](Entity& ent) {
+                auto& dictionary = ent.entityDictionary;
+
+                if (dictionary.find(fieldKey) != dictionary.end()) {
+                    if (dictionary[fieldKey] == fieldValue) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        );
+    }
 };
-// Shortcut, lesser typing.
-namespace EF = EntityFilters;
+namespace ef = EntityFilters; // Shortcut, lesser typing.
+
 
 //
 // Actual filters to use with GetEntityRange, ..., ... TODO: What other functions?
@@ -85,15 +106,62 @@ namespace BaseEntityFilters {
             }
         );
     }
+    // WID: TODO: This one actually has to move into EntityFilterFunctions, and then
+    // be referred to from here. However, I am unsure how to do that as of yet.
+    inline auto HasKeyValue(const std::string& fieldKey, const std::string& fieldValue) {
+        return std::ranges::views::filter(
+            [fieldKey, fieldValue /*need a copy!*/](SVGBaseEntity *ent) {
+                auto& dictionary = ent->GetEntityDictionary();
+
+                if (dictionary.find(fieldKey) != dictionary.end()) {
+                    if (dictionary[fieldKey] == fieldValue) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        );
+    }
+
+    // WID: TODO: This one actually has to move into EntityFilterFunctions, and then
+    // be referred to from here. However, I am unsure how to do that as of yet.
+    template <typename ClassType>
+    auto IsClassOf() {
+        return std::ranges::views::filter(
+            [](SVGBaseEntity* ent) {
+                return ent->IsClass<ClassType>();
+            }
+        );
+    }
 };
-// Shortcut, lesser typing.
-namespace BEF = BaseEntityFilters;
+namespace bef = BaseEntityFilters; // Shortcut, lesser typing.
+
 
 //
 // C++ using magic.
 //
 using EntitySpan = std::span<Entity>;
 using BaseEntitySpan = std::span<SVGBaseEntity*>;
+
+// Returns a span containing all the entities in the range of [start] to [start + count].
+template <std::size_t start, std::size_t count>
+inline auto GetEntityRange() -> std::span<Entity, count> {
+    return std::span(g_entities).subspan<start, count>();
+}
+
+// Returns a span containing all base entities in the range of [start] to [start + count].
+template <std::size_t start, std::size_t count>
+inline auto GetBaseEntityRange() -> std::span<SVGBaseEntity*, count> {
+    return std::span(g_baseEntities).subspan<start, count>();
+}
+
+inline EntitySpan GetEntityRange(std::size_t start, std::size_t count) {
+    return EntitySpan(g_entities).subspan(start, count);
+}
+inline BaseEntitySpan GetBaseEntityRange(std::size_t start, std::size_t count) {
+    return BaseEntitySpan(g_baseEntities).subspan(start, count);
+}
 
 
 //
@@ -106,6 +174,7 @@ Entity* SVG_Find(Entity* from, int32_t fieldofs, const char* match); // C++20: A
 SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t org, float rad, uint32_t excludeSolidFlags = Solid::Not);
 // Find entities based on their field(key), and field(value).
 SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::string& fieldValue, SVGBaseEntity* lastEntity = nullptr);
+
 
 //
 // Server Entity handling.
@@ -144,6 +213,7 @@ inline entityClass* SVG_CreateClassEntity(Entity* edict = nullptr, bool allocate
     }
     return entity;
 }
+
 
 //
 // ClassEntity handling.

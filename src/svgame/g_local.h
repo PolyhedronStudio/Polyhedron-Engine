@@ -932,6 +932,8 @@ struct gclient_s {
 // Entities can be linked to their "classname", this will in turn make sure that
 // the proper inheritance entity is allocated.
 //-------------------
+using EntityDictionary = std::map<std::string, std::string>;
+
 struct entity_s {
     // Actual entity state member. Contains all data that is actually networked.
     EntityState  state;
@@ -972,7 +974,7 @@ struct entity_s {
     SVGBaseEntity* classEntity;
 
     // Hashmap containing the key:value entity properties.
-    std::map<std::string, std::string> entityDictionary;
+    EntityDictionary entityDictionary;
 
     //const char *model;       // C++20: STRING: Added const to char*
     float freeTime;     // sv.time when the object was freed
