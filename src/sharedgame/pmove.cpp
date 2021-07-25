@@ -56,7 +56,7 @@ constexpr float PM_ACCEL_WATER = 2.8f;
 //-----------------
 constexpr float PM_CLIP_BOUNCE = 1.01f;
 
-//-----------------
+//-----------------debug
 // Friction constants.
 //-----------------
 constexpr float PM_FRICT_AIR = 0.1f; // WID: [DO NOT REMOVE THIS COMMENT] The default for lesser air control is: 0.075f;
@@ -268,7 +268,7 @@ static vec3_t PM_ClipVelocity(const vec3_t in, const vec3_t normal, float bounce
 static void PM_TouchEntity(struct entity_s* ent) {
     // Ensure it is valid.
     if (ent == NULL) {
-        //PM_Debug("ent = NULL");
+        PM_Debug("ent = NULL");
         return;
     }
 
@@ -304,6 +304,8 @@ static bool PM_CheckStep(const trace_t * trace) {
         if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
             if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.groundTrace.plane.dist) {
                 return true;
+
+                PM_Debug("PM_CheckStep: true");
             }
         }
     }
@@ -322,6 +324,8 @@ static void PM_StepDown(const trace_t * trace) {
     // Calculate step height.
     pm->state.origin = trace->endPosition;
     pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
+
+    PM_Debug("PM_StepDown");
 }
 
 //
@@ -367,6 +371,8 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins,
                     }
 
                     return trace;
+                } else {
+                    PM_Debug("No fixed solids, aka !trace.AllSolid == FALSE");
                 }
             }
         }
@@ -638,19 +644,24 @@ static qboolean PM_CheckTrickJump(void) {
 //===============
 //
 static qboolean PM_CheckJump(void) {
+    PM_Debug("PM_CheckJump");
+
     // Before allowing a new jump:
     // 1. Wait for landing damage to subside.
     if (pm->state.flags & PMF_TIME_LAND) {
+        PM_Debug("PM_CheckJump - PMF_TIME_LAND");
         return false;
     }
 
     // 2. Wait for jump key to be released
     if (pm->state.flags & PMF_JUMP_HELD) {
+        PM_Debug("PM_CheckJump - PMF_JUMP_HELD");
         return false;
     }
 
     // 3. Check if, they didn't ask to jump.
     if (pm->clientUserCommand.moveCommand.upMove < 1) {
+        PM_Debug("PM_CheckJump - UPMOVE");
         return false;
     }
 
@@ -719,7 +730,7 @@ static void PM_CheckDuck(void) {
         if (!is_ducking && wants_ducking) {
             pm->state.flags |= PMF_DUCKED;
         } else if (is_ducking && !wants_ducking) {
-            const trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pm->state.origin);
+            const trace_t trace = pm->Trace(pm->state.origin, pm->mins, pm->maxs, pm->state.origin);
 
             if (!trace.allSolid && !trace.startSolid) {
                 pm->state.flags &= ~PMF_DUCKED;
@@ -788,7 +799,7 @@ static qboolean PM_CheckLadder(void) {
 
     // Calculate a trace for determining whether there is a isClimbingLadder in front of us.
     const vec3_t pos = vec3_fmaf(pm->state.origin, 1, playerMoveLocals.forwardXY);
-    const trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
+    const trace_t trace = pm->Trace(pm->state.origin, pm->mins, pm->maxs, pos);
 
     // Found one, engage isClimbingLadder state.
     if ((trace.fraction < 1.0f) && (trace.contents & CONTENTS_LADDER)) {
@@ -1744,12 +1755,14 @@ void PMove(PlayerMove * pmove)
     }
     else if (pm->state.flags & PMF_ON_GROUND) {
         PM_WalkMove();
+        PM_Debug("Onground");
     }
     else if (pm->waterLevel > WaterLevel::Feet) {
         PM_WaterMove();
     }
     else {
         PM_AirMove();
+        PM_Debug("Airmove");
     }
 
     // Check for ground at new spot.
