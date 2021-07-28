@@ -15,6 +15,16 @@ class SVGBaseTrigger;
 
 using PushMoveEndFunction = void(Entity*);
 
+
+constexpr uint32_t PlatLowTrigger = 1U;
+struct MoverState
+{
+    static constexpr uint32_t Top = 0U;
+    static constexpr uint32_t Bottom = 1U;
+    static constexpr uint32_t Up = 2U;
+    static constexpr uint32_t Down = 3U;
+};
+
 //-------------------
 // Contains data for keeping track of velocity based moving entities.
 // (In other words, entities that aren't a: Client or AI Player.
