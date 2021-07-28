@@ -29,56 +29,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 //
 //===============
-// SVG_EntityKilled
-// 
-// Called when an entity is killed, or at least, about to be.
-// Determine how to deal with it, usually resides in a callback to Die.
-//===============
-//
-void SVG_EntityKilled(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, int damage, vec3_t point)
-{
-    // Ensure health isn't exceeding limits.
-    if (targ->GetHealth() < -999)
-        targ->SetHealth(-999);
-
-    // Set the enemy pointer to the current attacker.
-    targ->SetEnemy(attacker);
-
-    // Determine whether it is a monster, and if it IS set to being dead....
-    if ((targ->GetServerFlags() & EntityServerFlags::Monster) && (targ->GetDeadFlag() != DEAD_DEAD)) {
-        targ->SetServerFlags(targ->GetServerFlags() | EntityServerFlags::DeadMonster);   // Now treat as a different content type
-
-//        if (!(targ->monsterInfo.aiflags & AI_GOOD_GUY)) {
-//            level.killedMonsters++;
-//            if (coop->value && attacker->client)
-//                attacker->client->respawn.score++;
-//            // medics won't heal monsters that they kill themselves
-//            if (strcmp(attacker->className, "monster_medic") == 0)
-//                targ->owner = attacker;
-//        }
-    }
-
-    if (targ->GetMoveType() == MoveType::Push || targ->GetMoveType() == MoveType::Stop || targ->GetMoveType() == MoveType::None) {
-        // Doors, triggers, etc
-        if (targ) {
-            targ->Die(inflictor, attacker, damage, point);
-        }
-
-        return;
-    }
-
-    //if ((targ->serverFlags & EntityServerFlags::Monster) && (targ->deadFlag != DEAD_DEAD)) {
-    //    targ->Touch = NULL;
-    //    monster_death_use(targ);
-    //}
-    if (targ) {
-        targ->Die(inflictor, attacker, damage, point);
-    }
-    //targ->Die(targ, inflictor, attacker, damage, point);
-}
-
-//
-//===============
 // SVG_InflictDamage
 //
 // Inflicts actual damage on the targeted entity, the rest speaks for itself.

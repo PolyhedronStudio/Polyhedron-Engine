@@ -344,7 +344,7 @@ void DefaultGameMode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
             if ((target->GetServerFlags() & EntityServerFlags::Monster) || (client))
                 target->SetFlags(target->GetFlags() | EntityFlags::NoKnockBack);
 
-            // It's dead though, or at least we assume so... Execute the SVG_EntityKilled.
+            // It's dead though, or at least we assume so... Call on to: EntityKilled.
             EntityKilled(target, inflictor, attacker, damageTaken, point);
             return;
         }
