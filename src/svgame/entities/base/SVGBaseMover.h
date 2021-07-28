@@ -154,6 +154,17 @@ protected:
     void		BrushMoveFinal();
     void		BrushMoveBegin();
     void		BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function );
+    // Same but for angular movement
+    void        BrushAngleMoveDone();
+    void        BrushAngleMoveFinal();
+    void        BrushAngleMoveBegin();
+    void        BrushAngleMoveCalc( PushMoveEndFunction* function );
+    // Accelerative movement
+    void        BrushAccelerateCalc();
+    void        BrushAccelerate();
+    void        BrushAccelerateThink();
+
+    float       CalculateAccelerationDistance( float targetSpeed, float accelerationRate );
 
 protected:
 
