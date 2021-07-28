@@ -91,7 +91,7 @@ public:
         return serverEntity->absMax;
     }
     // Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    virtual inline const float& GetAcceleration() {
+    virtual inline float GetAcceleration() {
         return 0.f;
     }
     // Get the activator of this entity
@@ -138,7 +138,7 @@ public:
         return deadFlag;
     }
     // Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    virtual inline const float& GetDeceleration() {
+    virtual inline float GetDeceleration() {
         return 0.f;
     }
     // Return the 'delay' value.
@@ -343,7 +343,7 @@ public:
         return spawnFlags;
     }
     // Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    virtual inline const float& GetSpeed() {
+    virtual inline float GetSpeed() {
         return 0.f;
     }
     // Placeholder, implemented by SVGBaseMover, and derivates of that class.

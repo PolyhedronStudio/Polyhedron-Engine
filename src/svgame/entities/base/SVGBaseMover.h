@@ -79,15 +79,15 @@ public:
     // Get/Set
     //
     // Return the 'acceleration' float value.
-    const inline float& GetAcceleration() override {
+    inline float GetAcceleration() override {
         return acceleration;
     }
     // Return the 'deceleration' float value.
-    const inline float& GetDeceleration() override {
+    inline float GetDeceleration() override {
         return deceleration;
     }
     // Return the 'speed' float value.
-    const inline float &GetSpeed() override {
+    inline float GetSpeed() override {
         return speed;
     }
     // Return the 'endPosition' vec3_t value.
