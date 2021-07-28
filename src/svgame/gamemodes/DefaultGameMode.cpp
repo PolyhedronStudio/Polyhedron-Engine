@@ -164,6 +164,243 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
 }
 
 //===============
+// DefaultGameMode::FindWithinRadius
+//
+// Returns a BaseEntityVector list containing the results of the found
+// given entities that reside within the origin to radius. 
+// 
+// Flags can be set to determine which "solids" to exclude.
+//===============
+BaseEntityVector DefaultGameMode::FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) {
+    // List of base entities to return.
+    std::vector<SVGBaseEntity*> baseEntityList;
+
+    // Iterate over all entities, see who is nearby, and who is not.
+    for (auto* radiusBaseEntity : GetBaseEntityRange<0, MAX_EDICTS>()
+        | bef::IsValidPointer
+        | bef::HasServerEntity
+        | bef::InUse
+        | bef::WithinRadius(origin, radius, excludeSolidFlags)) {
+
+        // Push radiusEntity result item to the list.
+        baseEntityList.push_back(radiusBaseEntity);
+    }
+
+    // The list might be empty, ensure to check for that ;-)
+    return baseEntityList;
+}
+
+//===============
+// DefaultGameMode::EntityKilled
+//
+// Called when an entity is killed, or at least, about to be.
+// Determine how to deal with it, usually resides in a callback to Die.
+//===============
+void DefaultGameMode::EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int32_t damage, vec3_t point) {
+    // Ensure health isn't exceeding limits.
+    if (target->GetHealth() < -999)
+        target->SetHealth(-999);
+
+    // Set the enemy pointer to the current attacker.
+    target->SetEnemy(attacker);
+
+    // Determine whether it is a monster, and if it IS set to being dead....
+    if ((target->GetServerFlags() & EntityServerFlags::Monster) && (target->GetDeadFlag() != DEAD_DEAD)) {
+        target->SetServerFlags(target->GetServerFlags() | EntityServerFlags::DeadMonster);   // Now treat as a different content type
+
+//        if (!(targ->monsterInfo.aiflags & AI_GOOD_GUY)) {
+//            level.killedMonsters++;
+//            if (coop->value && attacker->client)
+//                attacker->client->respawn.score++;
+//            // medics won't heal monsters that they kill themselves
+//            if (strcmp(attacker->className, "monster_medic") == 0)
+//                targ->owner = attacker;
+//        }
+    }
+
+    if (target->GetMoveType() == MoveType::Push || target->GetMoveType() == MoveType::Stop || target->GetMoveType() == MoveType::None) {
+        // Doors, triggers, etc
+        if (target) {
+            target->Die(inflictor, attacker, damage, point);
+        }
+
+        return;
+    }
+
+    //if ((targ->serverFlags & EntityServerFlags::Monster) && (targ->deadFlag != DEAD_DEAD)) {
+    //    targ->Touch = NULL;
+    //    monster_death_use(targ);
+    //}
+    if (target) {
+        target->Die(inflictor, attacker, damage, point);
+    }
+    //targ->Die(targ, inflictor, attacker, damage, point);
+}
+
+//===============
+// DefaultGameMode::InflictDamage
+// 
+//===============
+void DefaultGameMode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, const vec3_t& dmgDir, const vec3_t& point, const vec3_t& normal, int32_t damage, int32_t knockBack, int32_t damageFlags, int32_t mod) {
+    int32_t damageTaken = 0;   // Damage taken.
+    int32_t damageSaved = 0;   // Damaged saved, from being taken.
+
+    // Best be save than sorry.
+    if (!target || !inflictor || !attacker) {
+        return;
+    }
+
+    // In case this entity is not taking any damage, all bets are off, don't bother moving on.
+    if (!target->GetTakeDamage())
+        return;
+
+    // WID: This sticks around, cuz of reference, but truly will be all but this itself was.
+    // friendly fire avoidance
+    // if enabled you can't hurt teammates (but you can hurt yourself)
+    // knockBack still occurs
+    //if ((targ != attacker) && ((deathmatch->value && ((int)(gamemodeflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams))) || coop->value)) {
+    //    if (game.gameMode->OnSameTeam(targ, attacker)) {
+    //        if ((int)(gamemodeflags->value) & GameModeFlags::NoFriendlyFire)
+    //            damage = 0;
+    //        else
+    //            mod |= MeansOfDeath::FriendlyFire;
+    //    }
+    //}
+    // We resort to defaults, but keep the above as mentioned.
+    SetCurrentMeansOfDeath(mod);
+
+    // Fetch client.
+    GameClient* client = target->GetClient();
+
+    // Lame thing, regarding the sparks to use. Ancient code, keeping it for now.
+    int32_t te_sparks = TempEntityEvent::Sparks;
+    if (damageFlags & DamageFlags::Bullet)
+        te_sparks = TempEntityEvent::BulletSparks;
+
+    // Retrieve normalized direction.
+    vec3_t dir = vec3_normalize(dmgDir);
+
+    // Ensure there is no odd knockback issues.
+    if (target->GetFlags() & EntityFlags::NoKnockBack)
+        knockBack = 0;
+
+    // Figure out the momentum to add in case KnockBacks are off. 
+    if (!(damageFlags & DamageFlags::NoKnockBack)) {
+        if ((knockBack) && (target->GetMoveType() != MoveType::None) && (target->GetMoveType() != MoveType::Bounce) && (target->GetMoveType() != MoveType::Push) && (target->GetMoveType() != MoveType::Stop)) {
+            vec3_t  kvel = { 0.f, 0.f, 0.f };
+            float   mass = 50; // Defaults to 50, otherwise... issues, this is the OG code style btw.
+
+            // Based on mass, if it is below 50, we wanna hook it to being 50. Otherwise...
+            if (target->GetMass() > 50)
+                mass = target->GetMass();
+
+            // Determine whether attacker == target, and the client itself, that means we gotta jump back hard.
+            if (target->GetClient() && attacker == target)
+                kvel = vec3_scale(dir, 1600.0 * (float)knockBack / mass); // ROCKET JUMP HACK IS HERE BRUH <--
+            else
+                kvel = vec3_scale(dir, 500 * (float)knockBack / mass);
+
+            // Assign the new velocity, since yeah, it's bound to knock the fuck out of us.
+            target->SetVelocity(target->GetVelocity() + kvel);
+        }
+    }
+
+    // Setup damages, so we can maths with them, yay. Misses code cuz we got no armors no more :P
+    damageTaken = damage;       // Damage taken.
+    damageSaved = 0;            // Damaged saved, from being taken.
+
+    // check for godmode
+    if ((target->GetFlags() & EntityFlags::GodMode) && !(damageFlags & DamageFlags::IgnoreProtection)) {
+        damageTaken = 0;
+        damageSaved = damage;
+
+        // Leave it for the game mode to move on and spawn this temp entity (if allowed.)
+        SpawnTempDamageEntity(te_sparks, point, normal, damageSaved);
+    }
+
+    // Team damage avoidance
+    if (!(damageFlags & DamageFlags::IgnoreProtection) && game.gameMode->OnSameTeam(target, attacker))
+        return;
+
+    // Inflict the actual damage, in case we got to deciding to do so based on the above.
+    if (damageTaken) {
+        // Check if monster, or client, in which case, we spawn blood.
+        // If not... :)... Do not.
+        if ((target->GetServerFlags() & EntityServerFlags::Monster) || (client)) {
+            // SpawnTempDamageEntity(TempEntityEvent::Blood, point, normal, take);
+            // Leave it for the game mode to move on and spawn this temp entity (if allowed.)
+            SpawnTempDamageEntity(TempEntityEvent::Blood, point, dir, damageTaken);
+        } else {
+            // Leave it for the game mode to move on and spawn this temp entity (if allowed.)
+            SpawnTempDamageEntity(te_sparks, point, normal, damageTaken);
+        }
+
+        // Adjust health based on calculated damage to take.
+        target->SetHealth(target->GetHealth() - damageTaken);
+
+        // In case health is/was below 0.
+        if (target->GetHealth() <= 0) {
+            // Check if monster, or client, in which case, we execute no knockbacks :)
+            if ((target->GetServerFlags() & EntityServerFlags::Monster) || (client))
+                target->SetFlags(target->GetFlags() | EntityFlags::NoKnockBack);
+
+            // It's dead though, or at least we assume so... Execute the SVG_EntityKilled.
+            EntityKilled(target, inflictor, attacker, damageTaken, point);
+            return;
+        }
+    }
+
+    // Special damage handling for monsters.
+    if (target->GetServerFlags() & EntityServerFlags::Monster) {
+        // WID: Maybe do some check for monster entities here sooner or later? Who knows...
+        // Gotta have them cunts react to it. But we'll see, might as well be on TakeDamage :)
+        //M_ReactToDamage(targ, attacker);
+
+        //if (!(targ->monsterInfo.aiflags & AI_DUCKED) && (take)) {
+        target->TakeDamage(attacker, knockBack, damageTaken);
+        //// nightmare mode monsters don't go into pain frames often
+        //if (skill->value == 3)
+        //    targ->debouncePainTime = level.time + 5;
+    //}
+    } else {
+        if (client) {
+            //if (!(targ->flags & EntityFlags::GodMode) && (take))
+            //    targ->Pain(targ, attacker, knockBack, take);
+            if (!(target->GetFlags() & EntityFlags::GodMode) && (damageTaken)) {
+                target->TakeDamage(attacker, knockBack, damageTaken);
+            }
+        } else if (damageTaken) {
+            target->TakeDamage(attacker, knockBack, damageTaken);
+        }
+    }
+
+    // add to the damage inflicted on a player this frame
+    // the total will be turned into screen blends and view angle kicks
+    // at the end of the frame
+    if (client) {
+        client->damages.blood += damageTaken;
+        client->damages.knockBack += knockBack;
+        client->damages.from = point;
+    }
+}
+
+//===============
+// DefaultGameMode::SetCurrentMeansOfDeath
+// 
+//===============
+void DefaultGameMode::SetCurrentMeansOfDeath(int32_t meansOfDeath) {
+    this->meansOfDeath = meansOfDeath;
+}
+
+//===============
+// DefaultGameMode::GetCurrentMeansOfDeath
+// 
+//===============
+const int32_t& DefaultGameMode::GetCurrentMeansOfDeath() {
+    return this->meansOfDeath;
+}
+
+//===============
 // DefaultGameMode::SpawnClientCorpse
 // 
 // Spawns a dead body entity for the given client.
@@ -669,20 +906,4 @@ void DefaultGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* i
 //===============
 void DefaultGameMode::PutClientInServer(PlayerClient *ent) {
     // Find a spawn point for this client to be "placed"/"put" at.
-}
-
-//===============
-// DefaultGameMode::SetCurrentMeansOfDeath
-// 
-//===============
-void DefaultGameMode::SetCurrentMeansOfDeath(int32_t meansOfDeath) {
-    this->meansOfDeath = meansOfDeath;
-}
-
-//===============
-// DefaultGameMode::GetCurrentMeansOfDeath
-// 
-//===============
-const int32_t& DefaultGameMode::GetCurrentMeansOfDeath() {
-    return this->meansOfDeath;
 }

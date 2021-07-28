@@ -7,6 +7,9 @@
 //
 */
 #include "../g_local.h"          // SVGame.
+#include "../effects.h"     // Effects.
+#include "../entities.h"    // Entities.
+#include "../utils.h"       // Util funcs.
 
 // Server Game Base Entity.
 #include "../entities/base/SVGBaseEntity.h"

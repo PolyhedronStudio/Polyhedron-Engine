@@ -241,7 +241,7 @@ void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
         // In case we have a message, proceed.
         if (message != "") {
             // Print it.
-            gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClient()->persistent.netname, messageAddition.c_str());
+            gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s.\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClient()->persistent.netname, messageAddition.c_str());
             
             // WID: Old piec of code // if (deathmatch->value) {
             if (friendlyFire)

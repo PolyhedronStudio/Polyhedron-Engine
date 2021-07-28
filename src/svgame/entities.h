@@ -106,6 +106,7 @@ namespace BaseEntityFilters {
             }
         );
     }
+
     // WID: TODO: This one actually has to move into EntityFilterFunctions, and then
     // be referred to from here. However, I am unsure how to do that as of yet.
     inline auto HasKeyValue(const std::string& fieldKey, const std::string& fieldValue) {
@@ -134,6 +135,24 @@ namespace BaseEntityFilters {
             }
         );
     }
+
+    // WID: TODO: This one actually has to move into EntityFilterFunctions, and then
+    // be referred to from here. However, I am unsure how to do that as of yet.
+    inline auto WithinRadius(vec3_t origin, float radius, uint32_t excludeSolidFlags) {
+        return std::ranges::views::filter(
+            [origin, radius, excludeSolidFlags/*need a copy!*/](SVGBaseEntity* ent) {
+                // Find distances between entity origins.
+                vec3_t entityOrigin = origin - (ent->GetOrigin() + vec3_scale(ent->GetMins() + ent->GetMaxs(), 0.5f));
+
+                // Do they exceed our radius? Then we haven't find any.
+                if (vec3_length(entityOrigin) > radius)
+                    return false;
+
+                // Cheers, we found our class entity.
+                return true;
+            }
+        );
+    }
 };
 namespace bef = BaseEntityFilters; // Shortcut, lesser typing.
 
@@ -143,6 +162,8 @@ namespace bef = BaseEntityFilters; // Shortcut, lesser typing.
 //
 using EntitySpan = std::span<Entity>;
 using BaseEntitySpan = std::span<SVGBaseEntity*>;
+
+using BaseEntityVector = std::vector<SVGBaseEntity*>;
 
 // Returns a span containing all the entities in the range of [start] to [start + count].
 template <std::size_t start, std::size_t count>
@@ -171,7 +192,9 @@ Entity* SVG_PickTarget(char* targetName);
 Entity* SVG_Find(Entity* from, int32_t fieldofs, const char* match); // C++20: Added const to char*
 
 // Find entities within a given radius.
-SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t org, float rad, uint32_t excludeSolidFlags = Solid::Not);
+// Moved to gamemodes. This allows for them to customize what actually belongs in a certain radius.
+// All that might sound silly, but the key here is customization.
+//BaseEntityVector SVG_FindEntitiesWithinRadius(vec3_t org, float rad, uint32_t excludeSolidFlags = Solid::Not);
 // Find entities based on their field(key), and field(value).
 SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::string& fieldValue, SVGBaseEntity* lastEntity = nullptr);
 

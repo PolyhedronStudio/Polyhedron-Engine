@@ -319,44 +319,23 @@ SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::
 // 
 // SVG_FindEntitiesWithinRadius (origin, radius)
 //===============
-SVGBaseEntity* SVG_FindEntitiesWithinRadius(SVGBaseEntity* from, vec3_t origin, float radius, uint32_t excludeSolidFlags)
+BaseEntityVector SVG_FindEntitiesWithinRadius(vec3_t origin, float radius, uint32_t excludeSolidFlags)
 {
-    vec3_t  entityOrigin = vec3_zero();
-    Entity* serverEnt = (from ? from->GetServerEntity() : nullptr);
+    BaseEntityVector entityList;
 
-    if (!from)
-        serverEnt = g_entities;
-    else
-        serverEnt++;
+    // Iterate over all entities, see who is nearby, and who is not.
+    for (auto* radiusEntity : GetBaseEntityRange<0, MAX_EDICTS>()
+        | bef::IsValidPointer
+        | bef::HasServerEntity
+        | bef::InUse
+        | bef::WithinRadius(origin, radius, excludeSolidFlags)) {
 
-    for (; serverEnt < &g_entities[globals.numberOfEntities]; serverEnt++) {
-        // Fetch serverEntity its ClassEntity.
-        SVGBaseEntity* classEntity = serverEnt->classEntity;
-
-        // Ensure it has a class entity.
-        if (!serverEnt->classEntity)
-            continue;
-
-        // Ensure it is in use.
-        if (!classEntity->IsInUse())
-            continue;
-
-        // And last but not least, we can't find entities within radious if they aren't solid.
-        if (classEntity->GetSolid() & excludeSolidFlags)
-            continue;
-
-        // Find distances between entity origins.
-        vec3_t entityOrigin = origin - (classEntity->GetOrigin() + vec3_scale(classEntity->GetMins() + classEntity->GetMaxs(), 0.5f));
-
-        // Do they exceed our radius? Then we haven't find any.
-        if (vec3_length(entityOrigin) > radius)
-            continue;
-
-        // Cheers, we found our class entity.
-        return classEntity;
+        // Push radiusEntity result item to the list.
+        entityList.push_back(radiusEntity);
     }
 
-    return nullptr;
+    // The list might be empty, ensure to check for that ;-)
+    return entityList;
 }
 
 //===============

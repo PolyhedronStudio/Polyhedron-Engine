@@ -14,6 +14,8 @@
 class SVGBaseEntity;
 class PlayerClient;
 
+using BaseEntityVector = std::vector<SVGBaseEntity*>;
+
 class IGameMode {
 public:
     //
@@ -60,7 +62,6 @@ public:
 
     //
     // Client related functions/utilities.
-    // 
     // Mainly used by the Client callbacks.
     //
     // Can be used to legit respawn a client at a spawn point.
@@ -73,7 +74,7 @@ public:
 
 
     //
-    // Combat Game Rule checks.
+    // Combat GameRules checks.
     //
     // Assigns the teamname to 'teamName', returns false/true if they are
     // on the same specific team.
@@ -82,7 +83,44 @@ public:
     virtual qboolean OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) = 0;
     // Returns true if the target entity can be damaged by the inflictor enemy.
     virtual qboolean CanDamage(SVGBaseEntity * target, SVGBaseEntity * inflictor) = 0;
+    // Returns the entities found within a radius. Great for game mode fun times,
+    // and that is why it resides here. Allows for customization.
+    virtual BaseEntityVector FindBaseEnitiesWithinRadius(const vec3_t &origin, float radius, uint32_t excludeSolidFlags) = 0;
 
+    //
+    // Combat GameMode actions.
+    //
+    // Called when an entity is killed, or at least, about to be.
+    // Determine how to deal with it, usually resides in a callback to Die.
+    virtual void EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int32_t damage, vec3_t point) = 0;
+
+    // Inflicts actual damage on the targeted entity.
+    // 
+    // Old Documentation stated:
+    // target      Entity that is being damaged
+    // inflictor   Entity that is causing the damage
+    // attacker    Entity that caused the inflictor to damage targ
+    // 
+    // example: target = monster, inflictor = rocket, attacker = player
+    //
+    // dmgDir      Direction of which the attack came from.
+    // point       Point at which the damage is being inflicted
+    // normal      Normal vector from that point
+    // damage      Amount of damage being inflicted
+    // knockBack   Force to be applied against targ as a result of the damage
+    //
+    // damageFlags These flags are used to control how SVG_InflictDamage works
+    // DamageFlags::IndirectFromRadius    Damage was indirect(from a nearby explosion)
+    // DamageFlags::NoArmorProtection     Armor does not protect from this damage
+    // DamageFlags::EnergyBasedWeapon     Damage is from an energy based weapon
+    // DamageFlags::NoKnockBack           Do not affect velocity, just view angles
+    // DamageFlags::Bullet                Damage is from a bullet(used for ricochets)
+    // DamageFlags::IgnoreProtection      Kills godmode, armor, everything
+    virtual void InflictDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, const vec3_t& dmgDir, const vec3_t& point, const vec3_t& normal, int32_t damage, int32_t knockBack, int32_t damageFlags, int32_t mod) = 0;
+    // Sets the current means of death for whichever client/entity is being processed.
+    virtual void SetCurrentMeansOfDeath(int32_t meansOfDeath) = 0;
+    // Retrieves the current means of death for whichever client/entity is being processed.
+    virtual const int32_t& GetCurrentMeansOfDeath() = 0;
 
     //
     // Specific random gameplay related functionality. 
@@ -102,13 +140,13 @@ public:
     // It is a first in first out kinda list.
     virtual void SpawnClientCorpse(SVGBaseEntity* ent) = 0;
 
+
     // This function is for setting a "means of death", aka blaster or what not.
     // The thing is, it has to be able to be overrided so hey, here we go :)
     // Can't have a global like in the old code ;-)
     //
     // TODO: WID: This stuff should move to a Game/World class.
-    virtual void SetCurrentMeansOfDeath(int32_t meansOfDeath) = 0;
-    virtual const int32_t& GetCurrentMeansOfDeath() = 0;
+
 
 protected:
     // Means of Death, for the current client that is being processed this frame.
