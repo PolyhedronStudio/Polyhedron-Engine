@@ -86,7 +86,7 @@ SET( SRC_SVGAME_ENTITIES_FUNC
 	svgame/entities/func/FuncButton.cpp
 	#svgame/entities/func/FuncConveyor.cpp
 	svgame/entities/func/FuncDoor.cpp 
-	#svgame/entities/func/FuncDoorRotating.cpp
+	svgame/entities/func/FuncDoorRotating.cpp
 	#svgame/entities/func/FuncExplosive.cpp 
 	#svgame/entities/func/FuncKillbox.cpp
 	#svgame/entities/func/FuncObject.cpp
@@ -220,6 +220,7 @@ SET ( HEADERS_SVGAME_ENTITIES_FUNC
 	svgame/entities/func/func_door.h
 	svgame/entities/func/FuncButton.h
 	svgame/entities/func/FuncDoor.h
+	svgame/entities/func/FuncDoorRotating.h
 )
 SET ( HEADERS_SVGAME_ENTITIES_INFO 
 	svgame/entities/info/InfoPlayerStart.h

@@ -226,14 +226,11 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	// Angle.
 	if (key == "angle") {
 		// Parse angle.
-		float parsedAngle = 0.f;
-		ParseFloatKeyValue(key, value, parsedAngle);
-
-		// Set our own angle.
-		//SetAngle(parsedAngle);
+		vec3_t hackedAngles = vec3_zero();
+		ParseFloatKeyValue(key, value, hackedAngles.y);
 
 		// Set angle.
-		SetAngles(vec3_t{ vec3_to_yaw({ parsedAngle , 0.f, 0.f }), 0.f, 0.f });
+		SetAngles( hackedAngles );
 	}
 	// Angles.
 	else if (key == "angles") {

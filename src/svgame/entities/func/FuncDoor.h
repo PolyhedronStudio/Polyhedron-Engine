@@ -24,7 +24,7 @@ public:
     static constexpr const char* MessageSoundPath = "misc/talk.wav";
 
     void		Precache() override;
-	void		Spawn() override;
+	virtual void Spawn() override;
     void        PostSpawn() override;
 	//void		SpawnKey( const std::string& key, const std::string& value ) override;
 

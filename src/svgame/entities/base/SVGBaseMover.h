@@ -15,6 +15,16 @@ class SVGBaseTrigger;
 
 using PushMoveEndFunction = void(Entity*);
 
+
+constexpr uint32_t PlatLowTrigger = 1U;
+struct MoverState
+{
+    static constexpr uint32_t Top = 0U;
+    static constexpr uint32_t Bottom = 1U;
+    static constexpr uint32_t Up = 2U;
+    static constexpr uint32_t Down = 3U;
+};
+
 //-------------------
 // Contains data for keeping track of velocity based moving entities.
 // (In other words, entities that aren't a: Client or AI Player.
@@ -79,15 +89,15 @@ public:
     // Get/Set
     //
     // Return the 'acceleration' float value.
-    const inline float& GetAcceleration() override {
+    inline float GetAcceleration() override {
         return acceleration;
     }
     // Return the 'deceleration' float value.
-    const inline float& GetDeceleration() override {
+    inline float GetDeceleration() override {
         return deceleration;
     }
     // Return the 'speed' float value.
-    const inline float &GetSpeed() override {
+    inline float GetSpeed() override {
         return speed;
     }
     // Return the 'endPosition' vec3_t value.
@@ -144,6 +154,17 @@ protected:
     void		BrushMoveFinal();
     void		BrushMoveBegin();
     void		BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function );
+    // Same but for angular movement
+    void        BrushAngleMoveDone();
+    void        BrushAngleMoveFinal();
+    void        BrushAngleMoveBegin();
+    void        BrushAngleMoveCalc( PushMoveEndFunction* function );
+    // Accelerative movement
+    void        BrushAccelerateCalc();
+    void        BrushAccelerate();
+    void        BrushAccelerateThink();
+
+    float       CalculateAccelerationDistance( float targetSpeed, float accelerationRate );
 
 protected:
 

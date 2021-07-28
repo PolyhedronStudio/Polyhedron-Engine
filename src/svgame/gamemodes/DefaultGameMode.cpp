@@ -46,7 +46,7 @@ DefaultGameMode::~DefaultGameMode() {
 //===============
 qboolean DefaultGameMode::GetEntityTeamName(SVGBaseEntity* ent, std::string &teamName) {
     // Placeholder.
-    teamName == "";
+    teamName = "";
 
     return false;
 
