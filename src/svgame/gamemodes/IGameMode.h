@@ -117,6 +117,9 @@ public:
     // DamageFlags::Bullet                Damage is from a bullet(used for ricochets)
     // DamageFlags::IgnoreProtection      Kills godmode, armor, everything
     virtual void InflictDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, const vec3_t& dmgDir, const vec3_t& point, const vec3_t& normal, int32_t damage, int32_t knockBack, int32_t damageFlags, int32_t mod) = 0;
+    // Similar to InflictDamage, but damages all entities within the given radius.
+    // Of course, only if they apply to the same rules as InflictDamage accepts them.
+    virtual void InflictRadiusDamage(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, float damage, SVGBaseEntity* ignore, float radius, int32_t mod) = 0;
     // Sets the current means of death for whichever client/entity is being processed.
     virtual void SetCurrentMeansOfDeath(int32_t meansOfDeath) = 0;
     // Retrieves the current means of death for whichever client/entity is being processed.

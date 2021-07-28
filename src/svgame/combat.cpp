@@ -121,49 +121,5 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
 //
 void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int mod)
 {
-    // Damage point counter for radius sum ups.
-    float   points = 0.f;
-
-    // Actual entity loop pointer.
-    SVGBaseEntity *ent = nullptr;
-
-    // N&C: From Yamagi Q2, to prevent issues.
-    if (!inflictor || !attacker) {
-        return;
-    }
-
-    // Find entities within radius.
-    BaseEntityVector radiusEntities = game.gameMode->FindBaseEnitiesWithinRadius(inflictor->GetOrigin(), radius, Solid::Not);
-
-    //while ((ent = SVG_FindEntitiesWithinRadius(ent, inflictor->GetOrigin(), radius)) != NULL) {
-    for (auto& baseEntity : radiusEntities) {
-        //// Continue in case this entity has to be ignored from applying damage.
-        //if (ent == ignore)
-        //    continue;
-        // Continue in case this entity CAN'T take any damage.
-        if (!baseEntity->GetTakeDamage())
-            continue;
-
-        // Calculate damage points.
-        vec3_t velocity = baseEntity->GetMins() + baseEntity->GetMaxs();
-        velocity = vec3_fmaf(baseEntity->GetOrigin(), 0.5f, velocity);
-        velocity -= inflictor->GetOrigin();
-        points = damage - 0.5f * vec3_length(velocity);
-
-        // In case the attacker is the own entity, half damage.
-        if (ent == attacker)
-            points = points * 0.5f;
-
-        // Apply damage points.
-        if (points > 0) {
-            // Ensure whether we CAN actually apply damage.
-            if (game.gameMode->CanDamage(baseEntity, inflictor)) {
-                // Calculate direcion.
-                vec3_t dir = baseEntity->GetOrigin() - inflictor->GetOrigin();
-
-                // Apply damages.
-                SVG_InflictDamage(baseEntity, inflictor, attacker, dir, inflictor->GetOrigin(), vec3_zero(), (int)points, (int)points, DamageFlags::IndirectFromRadius, mod);
-            }
-        }
-    }
+    game.gameMode->InflictRadiusDamage(inflictor, attacker, damage, ignore, radius, mod);
 }
