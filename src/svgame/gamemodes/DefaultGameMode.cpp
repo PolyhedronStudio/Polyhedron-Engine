@@ -406,8 +406,9 @@ void DefaultGameMode::InflictRadiusDamage(SVGBaseEntity* inflictor, SVGBaseEntit
     //while ((ent = SVG_FindEntitiesWithinRadius(ent, inflictor->GetOrigin(), radius)) != NULL) {
     for (auto& baseEntity : radiusEntities) {
         //// Continue in case this entity has to be ignored from applying damage.
-        //if (ent == ignore)
-        //    continue;
+        if (baseEntity == ignore)
+            continue;
+
         // Continue in case this entity CAN'T take any damage.
         if (!baseEntity->GetTakeDamage())
             continue;
