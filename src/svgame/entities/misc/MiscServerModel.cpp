@@ -99,7 +99,12 @@ void MiscServerModel::Spawn() {
         SetDamage(150);
     }
 
-    // Set entity to allow taking damage (can't explode otherwise.)
+    // Setup the start frame to animate from.
+    if (startFrame) {
+        SetFrame(startFrame);
+    }
+
+    // Set entity to allow taking damage.
     //SetTakeDamage(TakeDamage::Yes);
 
     //// Setup our MiscServerModel callbacks.
@@ -145,6 +150,15 @@ void MiscServerModel::PostSpawn() {
 void MiscServerModel::Think() {
     // Always call parent class method.
     Base::Think();
+
+    // Continue the animation on a per frame basis.
+    int32_t currentFrame = GetFrame();
+
+    if (currentFrame == endFrame) {
+        SetFrame(startFrame);
+    } else {
+        SetFrame(currentFrame + 1);
+    }
 
     //gi.DPrintf("MiscServerModel::Think();");
 }
