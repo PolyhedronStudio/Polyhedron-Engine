@@ -281,7 +281,7 @@ vkpt_asvgf_filter(VkCommandBuffer cmd_buf, qboolean enable_lf)
 	const int num_atrous_iterations_gradient = 7;
 	for(int i = 0; i < num_atrous_iterations_gradient; i++) {
 		uint32_t push_constants[1] = {
-			i
+			(uint32_t)i
 		};
 
 		vkCmdPushConstants(cmd_buf, pipeline_layout_atrous,
@@ -327,7 +327,7 @@ vkpt_asvgf_filter(VkCommandBuffer cmd_buf, qboolean enable_lf)
 		if (enable_lf)
 		{
 			uint32_t push_constants[1] = {
-				i
+				(uint32_t)i
 			};
 
 			vkCmdBindPipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_asvgf[ATROUS_LF]);
@@ -428,7 +428,7 @@ vkpt_interleave(VkCommandBuffer cmd_buf)
 
 		// create full interleaved motion and color buffers on GPU 0
 		VkOffset2D offset_left = { 0, 0 };
-		VkOffset2D offset_right = { qvk.extent_render.width / 2, 0 };
+		VkOffset2D offset_right = { (int32_t)qvk.extent_render.width / 2, 0 };
 		VkExtent2D extent = { qvk.extent_render.width / 2, qvk.extent_render.height };
 
 		vkpt_mgpu_image_copy(cmd_buf,

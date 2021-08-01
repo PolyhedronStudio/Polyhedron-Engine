@@ -137,7 +137,6 @@ void PlayerClient::SpawnKey(const std::string& key, const std::string& value) {
 //===============
 //
 void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
-
     // Fetch server entity.
     Entity* serverEntity = GetServerEntity();
 

@@ -104,6 +104,7 @@ SET ( SRC_SVGAME_ENTITIES_MISC
 	#svgame/entities/misc/MiscGibLeg.cpp 
 	#svgame/entities/misc/MiscGibHead.cpp 
 	svgame/entities/misc/MiscExplosionBox.cpp
+	svgame/entities/misc/MiscServerModel.cpp
 	#svgame/entities/misc/MiscTeleporter.cpp
 	#svgame/entities/misc/MiscTeleporterDest.cpp
 )
@@ -227,6 +228,7 @@ SET ( HEADERS_SVGAME_ENTITIES_INFO
 )
 SET ( HEADERS_SVGAME_ENTITIES_MISC 
 	svgame/entities/misc/MiscExplosionBox.h
+	svgame/entities/misc/MiscServerModel.h
 )
 SET ( HEADERS_SVGAME_ENTITIES_TRIGGER 
 	svgame/entities/trigger/TriggerAlways.h

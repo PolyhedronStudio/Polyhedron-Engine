@@ -880,7 +880,6 @@ void SVG_Physics_Step(SVGBaseEntity *ent)
 {
     // Stores whether to play a "surface hit" sound.
     qboolean    hitSound = false;
-    int         mask;
 
     // If we have no ground entity.
     if (!ent->GetGroundEntity()) {
