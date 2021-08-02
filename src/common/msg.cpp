@@ -634,6 +634,9 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, msgPsFla
         from->blend[3] != to->blend[3])
         pflags |= PS_BLEND;
 
+    if (from->pmove.stepOffset != to->pmove.stepOffset)
+        pflags |= PS_PM_STEP_OFFSET;
+
     if (from->fov != to->fov)
         pflags |= PS_FOV;
 
@@ -713,6 +716,10 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, msgPsFla
         MSG_WriteFloat(to->pmove.viewOffset[0]);
         MSG_WriteFloat(to->pmove.viewOffset[1]);
         MSG_WriteFloat(to->pmove.viewOffset[2]);
+    }
+
+    if (pflags & PS_PM_STEP_OFFSET) {
+        MSG_WriteFloat(to->pmove.stepOffset);
     }
 
     if (pflags & PS_PM_VIEW_ANGLES) {
@@ -1214,6 +1221,10 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int fla
         to->pmove.viewOffset.x = MSG_ReadFloat();
         to->pmove.viewOffset.y = MSG_ReadFloat();
         to->pmove.viewOffset.z = MSG_ReadFloat();
+    }
+
+    if (flags & PS_PM_STEP_OFFSET) {
+        to->pmove.stepOffset = MSG_ReadFloat();
     }
 
     // View Angles X Y Z.
