@@ -88,16 +88,7 @@ void MiscServerModel::Spawn() {
     }
 
     // Set the bounding box.
-    SetBoundingBox(
-        // Mins.
-        {
-            -16, -16, 0
-        },
-        // Maxs.
-        {
-            16, 16, 40
-        }
-    );
+    SetBoundingBox(boundingBoxMins, boundingBoxMaxs);
 
     //SetFlags(EntityFlags::Swim);
     // Set default values in case we have none.
@@ -186,6 +177,10 @@ void MiscServerModel::SpawnKey(const std::string& key, const std::string& value)
         ParseIntegerKeyValue(key, value, endFrame);
     } else if (key == "startframe") {
         ParseIntegerKeyValue(key, value, startFrame);
+    } else if (key == "effects") {
+        uint32_t effects = 0;
+        ParseUnsignedIntegerKeyValue(key, value, effects);
+        SetEffects(effects);
     } else {
         Base::SpawnKey(key, value);
     }

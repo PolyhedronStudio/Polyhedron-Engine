@@ -80,6 +80,7 @@ struct EntityEffectType {
 
     // 'Other' Effects. (Mostly null model entity stuff, weapon particles.)
     static constexpr uint32_t Blaster     = (1 << 16);
+    static constexpr uint32_t Torch       = (1 << 17);
     static constexpr uint32_t Teleporter  = (1 << 24);
 
     // Maximum last effect slot, feel free to rename it and use it.

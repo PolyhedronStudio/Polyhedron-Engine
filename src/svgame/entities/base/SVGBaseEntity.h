@@ -759,6 +759,7 @@ protected:
     // 
     qboolean ParseFloatKeyValue(const std::string& key, const std::string& value, float& floatNumber);
     qboolean ParseIntegerKeyValue(const std::string& key, const std::string& value, int32_t& integerNumber);
+    qboolean ParseUnsignedIntegerKeyValue(const std::string& key, const std::string& value, uint32_t& unsignedIntegerNumber);
     qboolean ParseStringKeyValue(const std::string& key, const std::string& value, std::string& stringValue);
     qboolean ParseVector3KeyValue(const std::string& key, const std::string& value, vec3_t& vectorValue);
 

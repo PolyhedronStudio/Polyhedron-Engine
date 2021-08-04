@@ -159,6 +159,19 @@ qboolean SVGBaseEntity::ParseIntegerKeyValue(const std::string& key, const std::
 
 //
 //===============
+// SVGBaseEntity::ParseUnsignedIntegerKeyValue
+//
+// PROTECTED function to help parsing uint32_t key:value string pairs with.
+//===============
+//
+qboolean SVGBaseEntity::ParseUnsignedIntegerKeyValue(const std::string& key, const std::string& value, uint32_t& unsignedIntegerNumber) {
+	unsignedIntegerNumber = std::stoul(value);
+
+	return true;
+}
+
+//
+//===============
 // SVGBaseEntity::ParseStringKeyValue
 //
 // PROTECTED function to help parsing string key:value string pairs with.

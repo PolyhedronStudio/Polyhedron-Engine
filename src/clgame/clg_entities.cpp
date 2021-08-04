@@ -358,6 +358,8 @@ void CLG_AddPacketEntities(void)
                 V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
             } else if (effects & EntityEffectType::Gib) {
                 CLG_DiminishingTrail(cent->lerpOrigin, ent.origin, cent, effects);
+            } else if (effects & EntityEffectType::Torch) {
+                V_AddLight(ent.origin, 200 * RandomRangef(0.75, 1.0f), 0.8f, 0.4f, 0.12f);
             }
         }
 

@@ -47,4 +47,8 @@ private:
 
     // The actual frame that this model its animation should end at.
     int32_t endFrame{ 0 };
+
+    // The bounding box its bottom left, this can be custom set in map editors.
+    vec3_t boundingBoxMins = { -16, -16, 0 };
+    vec3_t boundingBoxMaxs = { 16, 16, 40 };
 };
