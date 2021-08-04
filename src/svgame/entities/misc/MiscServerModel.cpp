@@ -46,8 +46,15 @@ void MiscServerModel::Precache() {
     // Always call parent class method.
     Base::Precache();
 
-    // Precache the passed model.
-    SVG_PrecacheModel(model);
+    // Precache the passed image/model.
+    // WID: TODO: We can probably do this check in SetModel, store a bool for it or so.
+    // that'd save us from having to parse it again in the Spawn function.
+    if (model.find_last_of(".sp2") != std::string::npos) {
+        SVG_PrecacheModel(model);
+    } else {
+        SVG_PrecacheImage(model);
+    }
+    //sprites / torchflame1_1.sp2
 }
 
 //
@@ -74,6 +81,11 @@ void MiscServerModel::Spawn() {
 
     // Set the barrel model, and model index.
     SetModel(model);
+
+    // Determine whether the model is a sprite. In case it is, we must set the Translucent flag for it to render properly.
+    if (model.find_last_of(".sp2") != std::string::npos) {
+        SetRenderEffects(RenderEffects::Translucent);
+    }
 
     // Set the bounding box.
     SetBoundingBox(
