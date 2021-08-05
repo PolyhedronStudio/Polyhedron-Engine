@@ -359,7 +359,18 @@ void CLG_AddPacketEntities(void)
             } else if (effects & EntityEffectType::Gib) {
                 CLG_DiminishingTrail(cent->lerpOrigin, ent.origin, cent, effects);
             } else if (effects & EntityEffectType::Torch) {
-                V_AddLight(ent.origin, 200 * RandomRangef(0.75, 1.0f), 0.8f, 0.4f, 0.12f);
+                const float anim = sinf((float)ent.id + ((float)cl->time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
+                const float offset = anim * 0.0f;
+                const float brightness = anim * 1.2f + 1.6f;
+                const vec3_t origin = { 
+                    ent.origin.x,
+                    ent.origin.y,
+                    ent.origin.z + offset 
+                };
+
+                V_AddLightEx(origin, 25.f, 1.0f * brightness, 0.425f * brightness, 0.1f * brightness, 3.6f);
+
+                //V_AddLight(ent.origin, 200 * RandomRangef(0.65, 1.0f), 0.8f, 0.4f, 0.12f);
             }
         }
 

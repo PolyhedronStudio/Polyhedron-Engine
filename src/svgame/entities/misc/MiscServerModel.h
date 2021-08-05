@@ -29,7 +29,35 @@ public:
     void Think() override;       // General entity thinking routine.
 
     void SpawnKey(const std::string& key, const std::string& value) override;
-    
+
+    //
+    // Set/Get
+    // 
+    // Set the 'endFrame' value.
+    inline void SetEndFrame(const uint32_t endFrame) {
+        this->endFrame = endFrame;
+    }
+
+    // Set the 'startFrame' value.
+    inline void SetStartFrame(const uint32_t startFrame) {
+        this->startFrame = startFrame;
+    }
+
+    // Get the 'endFrame' value.
+    inline const uint32_t GetEndFrame() {
+        return this->endFrame;
+    }
+
+    // Get the 'noisePath' value.
+    inline const std::string& GetNoisePath() {
+        return this->noisePath;
+    }
+
+    // Get the 'startFrame' value.
+    inline const uint32_t GetStartFrame() {
+        return this->startFrame;
+    }
+
     //
     // Callback Functions.
     //
@@ -42,6 +70,10 @@ public:
     //void MiscServerModelBoxExplode(void);
 
 private:
+    // The noise path that got parsed and is in use.
+    std::string noisePath{ "" };
+    uint32_t precachedNoiseIndex{ 0 };
+
     // The actual frame that this model its animation should start off with.
     int32_t startFrame{ 0 };
 

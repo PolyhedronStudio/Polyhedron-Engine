@@ -54,6 +54,12 @@ void MiscServerModel::Precache() {
     } else {
         SVG_PrecacheImage(model);
     }
+
+    // Should we precache sound? aka noise?
+    if (!noisePath.empty()) {
+        precachedNoiseIndex = SVG_PrecacheSound(noisePath);
+    }
+
     //sprites / torchflame1_1.sp2
 }
 
@@ -71,16 +77,22 @@ void MiscServerModel::Spawn() {
     SetSolid(Solid::BoundingBox);
 
     // Set move type.
-    SetMoveType(MoveType::Step);
+    SetMoveType(MoveType::None);
 
     // Since this is a "monster", after all...
-    SetFlags(EntityServerFlags::Monster);
+    //SetFlags(EntityServerFlags::Monster);
 
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
 
     // Set the barrel model, and model index.
     SetModel(model);
+
+    // Set noise ( in case one is precached. )
+    if (precachedNoiseIndex) {
+        SetNoiseIndex(precachedNoiseIndex);
+        SetSound(GetNoiseIndex());
+    }
 
     // Determine whether the model is a sprite. In case it is, we must set the Translucent flag for it to render properly.
     if (model.find_last_of(".sp2") != std::string::npos) {
@@ -163,6 +175,10 @@ void MiscServerModel::Think() {
         SetFrame(currentFrame + 1);
     }
 
+    //if (GetNoiseIndex()) {
+    //    SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, GetSound(), 1.f, ATTN_NONE, 0.f);
+    //}
+
     //gi.DPrintf("MiscServerModel::Think();");
 }
 
@@ -178,18 +194,17 @@ void MiscServerModel::SpawnKey(const std::string& key, const std::string& value)
     } else if (key == "startframe") {
         ParseIntegerKeyValue(key, value, startFrame);
     } else if (key == "effects") {
-        uint32_t effects = 0;
-        ParseUnsignedIntegerKeyValue(key, value, effects);
-        SetEffects(effects);
+        uint32_t parsedEffects = 0;
+        ParseUnsignedIntegerKeyValue(key, value, parsedEffects);
+        SetEffects(parsedEffects);
+    } else if (key == "noise") {
+        std::string parsedNoisePath = "";
+
+        ParseStringKeyValue(key, value, parsedNoisePath);
+        noisePath = parsedNoisePath;
     } else {
         Base::SpawnKey(key, value);
     }
-    //    ParseFloatKeyValue(key, value, waitTime);
-    //} else if (key == "lip") {
-    //    ParseFloatKeyValue(key, value, lip);
-    //} else {
-    //    Base::SpawnKey(key, value);
-    //}
 }
 
 //
