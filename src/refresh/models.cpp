@@ -299,14 +299,30 @@ static qerror_t MOD_LoadSP2(model_t *model, const void *rawdata, size_t length)
 		dst_frame++;
 	}
 
-	if (strstr(model->name, "vrty"))
+	// WID: TODO: This might need some improvements since we first assign a char* to a std::string
+	std::string modelName = model->name;
+	std::string subModelPart = modelName.substr(0, 4);
+
+	if (subModelPart == "vrty_") {
 		model->sprite_vertical = true;
-	else if (strstr(model->name, "fxup"))
+	} else if (subModelPart == "fxup_") {
 		model->sprite_fxup = true;
-	else if (strstr(model->name, "fxft"))
+	} else if (subModelPart == "fxft_") {
 		model->sprite_fxft = true;
-	else if (strstr(model->name, "fxlt")) 
+	} else if (subModelPart == "fxlt_") {
 		model->sprite_fxlt = true;
+	}
+
+	// WID: This is the old Omega way which will really be relentless if for whichever reason a file contains these same
+	// parts.
+	//if (strstr(model->name, "vrty"))
+	//	model->sprite_vertical = true;
+	//else if (strstr(model->name, "fxup"))
+	//	model->sprite_fxup = true;
+	//else if (strstr(model->name, "fxft"))
+	//	model->sprite_fxft = true;
+	//else if (strstr(model->name, "fxlt")) 
+	//	model->sprite_fxlt = true;
 
 	Hunk_End(&model->hunk);
 

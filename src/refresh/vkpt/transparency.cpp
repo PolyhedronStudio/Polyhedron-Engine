@@ -669,28 +669,107 @@ static void write_sprite_geometry(const float* view_matrix, const r_entity_t* en
 
 			VectorScale(world_y, -frame->origin_y, down);
 			VectorScale(world_y, frame->height - frame->origin_y, up);
-		}
-		else
-		{
-			VectorScale(view_x, frame->origin_x, left);
-			VectorScale(view_x, frame->origin_x - frame->width, right);
+		} else {
+			// WID: Omega code begins here.
+			if (model->sprite_fxup) {
+				// Fixed Up/dn
+				vertex_positions[3][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[3][1] = e->origin[1] - frame->height / 2;
+				vertex_positions[3][2] = e->origin[2];
 
-			if (model->sprite_vertical)
-			{
-				VectorScale(world_y, -frame->origin_y, down);
-				VectorScale(world_y, frame->height - frame->origin_y, up);
-			}
-			else
-			{
+				vertex_positions[2][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[2][1] = e->origin[1] - frame->height / 2;
+				vertex_positions[2][2] = e->origin[2];
+
+				vertex_positions[1][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[1][1] = e->origin[1] + frame->height / 2;
+				vertex_positions[1][2] = e->origin[2];
+
+				vertex_positions[0][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[0][1] = e->origin[1] + frame->height / 2;
+				vertex_positions[0][2] = e->origin[2];
+			} else if (model->sprite_fxft) {
+				// Fixed Front/Back
+				vertex_positions[0][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[0][1] = e->origin[1];
+				vertex_positions[0][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[1][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[1][1] = e->origin[1];
+				vertex_positions[1][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[2][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[2][1] = e->origin[1];
+				vertex_positions[2][2] = e->origin[2] + frame->height / 2;
+
+				vertex_positions[3][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[3][1] = e->origin[1];
+				vertex_positions[3][2] = e->origin[2] + frame->height / 2;
+			} else if (model->sprite_fxlt) {
+				// Fixed Left/Right
+				vertex_positions[0][0] = e->origin[0];
+				vertex_positions[0][1] = e->origin[1] + frame->width / 2;
+				vertex_positions[0][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[1][0] = e->origin[0];
+				vertex_positions[1][1] = e->origin[1] - frame->width / 2;
+				vertex_positions[1][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[2][0] = e->origin[0];
+				vertex_positions[2][1] = e->origin[1] - frame->width / 2;
+				vertex_positions[2][2] = e->origin[2] + frame->height / 2;
+
+				vertex_positions[3][0] = e->origin[0];
+				vertex_positions[3][1] = e->origin[1] + frame->width / 2;
+				vertex_positions[3][2] = e->origin[2] + frame->height / 2;
+			} else if (model->sprite_vertical) {
+				// 3D Billboard
+				VectorScale(view_x, frame->origin_x, left);
+				VectorScale(view_x, frame->origin_x - frame->width, right);
 				VectorScale(view_y, -frame->origin_y, down);
 				VectorScale(view_y, frame->height - frame->origin_y, up);
+
+				VectorAdd3(e->origin, down, left, vertex_positions[0]);
+				VectorAdd3(e->origin, up, left, vertex_positions[1]);
+				VectorAdd3(e->origin, up, right, vertex_positions[2]);
+				VectorAdd3(e->origin, down, right, vertex_positions[3]);
+			} else {
+				// 2D Billboard
+				VectorScale(view_x, frame->origin_x, left);
+				VectorScale(view_x, frame->origin_x - frame->width, right);
+				VectorScale(world_y, -frame->origin_y, down);
+				VectorScale(world_y, frame->height - frame->origin_y, up);
+
+				VectorAdd3(e->origin, down, left, vertex_positions[0]);
+				VectorAdd3(e->origin, up, left, vertex_positions[1]);
+				VectorAdd3(e->origin, up, right, vertex_positions[2]);
+				VectorAdd3(e->origin, down, right, vertex_positions[3]);
 			}
+			// WID: Omega code ends here :)
 		}
 
-		VectorAdd3(e->origin, down, left, vertex_positions[0]);
-		VectorAdd3(e->origin, up, left, vertex_positions[1]);
-		VectorAdd3(e->origin, up, right, vertex_positions[2]);
-		VectorAdd3(e->origin, down, right, vertex_positions[3]);
+		// WID: This is the old OG code, up above in the else statement you will find Omega's stuff.
+		//else
+		//{
+		//	VectorScale(view_x, frame->origin_x, left);
+		//	VectorScale(view_x, frame->origin_x - frame->width, right);
+
+		//	if (model->sprite_vertical)
+		//	{
+		//		VectorScale(world_y, -frame->origin_y, down);
+		//		VectorScale(world_y, frame->height - frame->origin_y, up);
+		//	}
+		//	else
+		//	{
+		//		VectorScale(view_y, -frame->origin_y, down);
+		//		VectorScale(view_y, frame->height - frame->origin_y, up);
+		//	}
+		//}
+
+		//VectorAdd3(e->origin, down, left, vertex_positions[0]);
+		//VectorAdd3(e->origin, up, left, vertex_positions[1]);
+		//VectorAdd3(e->origin, up, right, vertex_positions[2]);
+		//VectorAdd3(e->origin, down, right, vertex_positions[3]);
 
 		vertex_positions += 4;
 		sprite_info += TR_SPRITE_INFO_SIZE / sizeof(int);
