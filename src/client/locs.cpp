@@ -181,41 +181,41 @@ LOC_AddLocationsToScene
 */
 void LOC_AddLocationsToScene(void)
 {
-    location_t *loc, *nearest;
-    vec3_t dir;
-    float dist;
-    r_entity_t ent;
+    //location_t *loc, *nearest;
+    //vec3_t dir;
+    //float dist;
+    //r_entity_t ent;
 
-    if (!loc_draw->integer) {
-        return;
-    }
+    //if (!loc_draw->integer) {
+    //    return;
+    //}
 
-    memset(&ent, 0, sizeof(ent));
-    ent.model = R_RegisterModel("models/items/c_head/tris.md2");
-    ent.skin = R_RegisterSkin("models/items/c_head/skin.pcx");
+    //memset(&ent, 0, sizeof(ent));
+    //ent.model = R_RegisterModel("models/items/c_head/tris.md2");
+    //ent.skin = R_RegisterSkin("models/items/c_head/skin.pcx");
 
-    nearest = LOC_FindClosest(cl.playerEntityOrigin);
-    if (!nearest) {
-        return;
-    }
+    //nearest = LOC_FindClosest(cl.playerEntityOrigin);
+    //if (!nearest) {
+    //    return;
+    //}
 
-    LIST_FOR_EACH(location_t, loc, &cl_locations, entry) {
-        VectorSubtract(cl.playerEntityOrigin, loc->origin, dir);
-        dist = VectorLength(dir);
+    //LIST_FOR_EACH(location_t, loc, &cl_locations, entry) {
+    //    VectorSubtract(cl.playerEntityOrigin, loc->origin, dir);
+    //    dist = VectorLength(dir);
 
-        if (dist > loc_dist->integer) {
-            continue;
-        }
+    //    if (dist > loc_dist->integer) {
+    //        continue;
+    //    }
 
-        VectorCopy(loc->origin, ent.origin);
+    //    VectorCopy(loc->origin, ent.origin);
 
-        if (loc == nearest) {
-            ent.origin[2] += 10.0f * std::sinf(cl.time * 0.01f);
-            V_AddLight(loc->origin, 200, 1, 1, 1);
-        }
+    //    if (loc == nearest) {
+    //        ent.origin[2] += 10.0f * std::sinf(cl.time * 0.01f);
+    //        V_AddLight(loc->origin, 200, 1, 1, 1);
+    //    }
 
-        V_AddEntity(&ent);
-    }
+    //    V_AddEntity(&ent);
+    //}
 }
 
 /*

@@ -111,38 +111,7 @@ typedef struct dlight_s {
     vec3_t  color;
     float   intensity;
 	float   radius;
-	float   nacLightType;
-	vec3_t  nacDirection;
-	float   nacUmbra;
-	float   nacPenumbra;
-	float   nacLightPower;
-	float   nacLightMaxDist;
-	float   naclightStyle;
-	char    nacTarget[MAX_QPATH];
-	void    *nacTargetBind;
-	void    *nacTargetLightLSBind;
-	void    *nacTargetLightBind;
-	char    nacTargetName[MAX_QPATH];
-	void    *nacLightBind;
-	int     nacLsDirection;
-
-	int     nacusecustom;
-	char    nacCustom[MAX_QPATH];
-	int     nacCustomEnabled;
-	int     nacCustomLoopEnabled;
-	int     nacCustomToggleEnabled;
 } rdlight_t;
-
-typedef struct dlightLS_s {
-	int		frame;
-	int		done;
-	float	hzOver1k;
-	float   power;
-	float   maxdist;
-	char    lightstyle[MAX_QPATH];
-	int     length;
-	int     lastCtime;
-} dlightLS_t;
 
 typedef struct particle_s {
     vec3_t  origin;

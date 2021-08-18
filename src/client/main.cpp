@@ -606,33 +606,34 @@ CL_ClearState
 */
 void CL_ClearState(void)
 {
+    // Stop all sounds.
     S_StopAllSounds();
-    //  WatIsDeze: Inform the CG Module.
+ 
+    // WID: Inform the CG Module.
     CL_GM_ClearState();
 
-//    CL_ClearEffects();
-//#if USE_LIGHTSTYLES
-//    CL_ClearLightStyles();
-//#endif
-//    CL_ClearTEnts();
-    //LOC_FreeLocations();
-
-    // wipe the entire cl structure
+    // Wipe the entire cl structure
     BSP_Free(cl.bsp);
-    memset(&cl, 0, sizeof(cl));
-    memset(&cs.entities, 0, sizeof(cs.entities));
-
+    //memset(&cl, 0, sizeof(cl));
+    //memset(&cs.entities, 0, sizeof(cs.entities));
+    // C++ Style, no more memset. I suppose I prefer this, if you do not, ouche.
+    cl = {};
+    for (uint32_t i = 0; i < sizeof(cs.entities); i++) {
+        cs.entities[i] = {};
+    }
+    
+    // In case we are more than connected, reset it to just connected.
     if (cls.connectionState > ClientConnectionState::Connected) {
         cls.connectionState = ClientConnectionState::Connected;
         CL_CheckForPause();
         CL_UpdateFrameTimes();
     }
 
-    // unprotect game cvar
+    // Unprotect game cvar
     fs_game->flags &= ~CVAR_ROM;
 
 #if USE_REF == REF_GL
-    // unprotect our custom modulate cvars
+    // Unprotect our custom modulate cvars
     if(gl_modulate_world) gl_modulate_world->flags &= ~CVAR_CHEAT;
     if(gl_modulate_entities) gl_modulate_entities->flags &= ~CVAR_CHEAT;
     if(gl_brightness) gl_brightness->flags &= ~CVAR_CHEAT;
@@ -648,9 +649,6 @@ Sends a disconnect message to the server
 This is also called on Com_Error, so it shouldn't cause any errors
 =====================
 */
-
-//qboolean snd_is_underwater; // OAL: Moved to client.
-
 void CL_Disconnect(ErrorType type)
 {
     if (!cls.connectionState) {
@@ -661,7 +659,6 @@ void CL_Disconnect(ErrorType type)
 
     // N&C: Call into the CG Module to inform that we're disconnected.
     CL_GM_ClientDisconnect();
-    //SCR_ClearChatHUD_f();   // clear chat HUD on server change
 
     if (cls.connectionState > ClientConnectionState::Disconnected && !cls.demo.playback) {
         EXEC_TRIGGER(cl_disconnectcmd);

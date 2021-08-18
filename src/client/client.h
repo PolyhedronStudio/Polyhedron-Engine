@@ -462,7 +462,6 @@ void CL_SeekDemoMessage(void);
 //
 void CL_DeltaFrame(void);
 void CL_AddEntities(void);
-void CL_UpdateOrigin(void);
 
 #ifdef _DEBUG
 void CL_CheckEntityPresent(int entnum, const char *what);
@@ -482,120 +481,24 @@ extern    qhandle_t gun_model;
 void V_Init(void);
 void V_Shutdown(void);
 void V_RenderView(void);
-void V_AddEntity(r_entity_t *ent);
-void V_AddParticle(rparticle_t *p);
-#if USE_DLIGHTS
-void V_AddLight(const vec3_t &org, float intensity, float r, float g, float b);
-void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius);
-#else
-#define V_AddLight(org, intensity, r, g, b)
-#define V_AddLightEx(org, intensity, r, g, b, radius)
-#endif
+//void V_AddEntity(r_entity_t *ent);
+//void V_AddParticle(rparticle_t *p);
+//#if USE_DLIGHTS
+//void V_AddLight(const vec3_t &org, float intensity, float r, float g, float b);
+//void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius);
+//#else
+//#define V_AddLight(org, intensity, r, g, b)
+//#define V_AddLightEx(org, intensity, r, g, b, radius)
+//#endif
 #if USE_LIGHTSTYLES
 void V_AddLightStyle(int style, const vec4_t &value);
 #endif
-void CL_UpdateBlendSetting(void);
-
-
-//
-// tent.c
-//
-
-void CL_SmokeAndFlash(vec3_t origin);
-
-void CL_RegisterTEntSounds(void);
-void CL_RegisterTEntModels(void);
-void CL_ParseTEnt(void);
-void CL_AddTEnts(void);
-void CL_ClearTEnts(void);
-void CL_InitTEnts(void);
-
 
 //
 // predict.c
 //
 void CL_PredictMovement(void);
 void CL_CheckPredictionError(void);
-
-
-//
-// effects.c
-//
-
-
-void CL_BigTeleportParticles(vec3_t org);
-void CL_RocketTrail(vec3_t start, vec3_t end, cl_entity_t *old);
-void CL_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t *old, int flags);
-void CL_FlyEffect(cl_entity_t *ent, vec3_t origin);
-void CL_BfgParticles(r_entity_t *ent);
-void CL_ItemRespawnParticles(vec3_t org);
-void CL_InitEffects(void);
-void CL_ClearEffects(void);
-void CL_BlasterParticles(vec3_t org, vec3_t dir);
-void CL_ExplosionParticles(vec3_t org);
-void CL_BFGExplosionParticles(vec3_t org);
-void CL_BlasterTrail(vec3_t start, vec3_t end);
-void CL_QuadTrail(vec3_t start, vec3_t end);
-void CL_OldRailTrail(void);
-void CL_BubbleTrail(vec3_t start, vec3_t end);
-void CL_FlagTrail(vec3_t start, vec3_t end, int color);
-void CL_MuzzleFlash(void);
-void CL_MuzzleFlash2(void);
-void CL_TeleporterParticles(vec3_t org);
-void CL_TeleportParticles(vec3_t org);
-void CL_ParticleEffect(vec3_t org, vec3_t dir, int color, int count);
-void CL_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count);
-void CL_BloodParticleEffect(vec3_t org, vec3_t dir, int color, int count);
-void CL_ParticleEffect2(vec3_t org, vec3_t dir, int color, int count);
-cparticle_t *CL_AllocParticle(void);
-void CL_RunParticles(void);
-void CL_AddParticles(void);
-#if USE_DLIGHTS
-cdlight_t *CL_AllocDlight(int key);
-void CL_RunDLights(void);
-void CL_AddDLights(void);
-#endif
-#if USE_LIGHTSTYLES
-void CL_ClearLightStyles(void);
-void CL_SetLightStyle(int index, const char *s);
-void CL_RunLightStyles(void);
-void CL_AddLightStyles(void);
-#endif
-
-//
-// newfx.c
-//
-
-void CL_BlasterParticles2(vec3_t org, vec3_t dir, unsigned int color);
-void CL_BlasterTrail2(vec3_t start, vec3_t end);
-void CL_DebugTrail(vec3_t start, vec3_t end);
-void CL_SmokeTrail(vec3_t start, vec3_t end, int colorStart, int colorRun, int spacing);
-#if USE_DLIGHTS
-void CL_Flashlight(int ent, vec3_t pos);
-#endif
-void CL_ForceWall(vec3_t start, vec3_t end, int color);
-void CL_GenericParticleEffect(vec3_t org, vec3_t dir, int color, int count, int numcolors, int dirspread, float alphavel);
-void CL_BubbleTrail2(vec3_t start, vec3_t end, int dist);
-void CL_Heatbeam(vec3_t start, vec3_t end);
-void CL_ParticleSteamEffect(vec3_t org, vec3_t dir, int color, int count, int magnitude);
-void CL_TrackerTrail(vec3_t start, vec3_t end, int particleColor);
-void CL_Tracker_Explode(vec3_t origin);
-void CL_TagTrail(vec3_t start, vec3_t end, int color);
-#if USE_DLIGHTS
-void CL_ColorFlash(vec3_t pos, int ent, int intensity, float r, float g, float b);
-#endif
-void CL_Tracker_Shell(vec3_t origin);
-void CL_MonsterPlasma_Shell(vec3_t origin);
-void CL_ColorExplosionParticles(vec3_t org, int color, int run);
-void CL_ParticleSmokeEffect(vec3_t org, vec3_t dir, int color, int count, int magnitude);
-void CL_Widowbeamout(cl_sustain_t *self);
-void CL_Nukeblast(cl_sustain_t *self);
-void CL_WidowSplash(void);
-void CL_IonripperTrail(vec3_t start, vec3_t end);
-void CL_TrapParticles(r_entity_t *ent);
-void CL_ParticleEffect3(vec3_t org, vec3_t dir, int color, int count);
-void CL_ParticleSteamEffect2(cl_sustain_t *self);
-
 
 //
 // demo.c
