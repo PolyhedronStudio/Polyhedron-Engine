@@ -287,6 +287,9 @@ struct ClientPredictedState {
 // * the client game module to provide access to media and other client state.
 //
 struct ClientState {
+    ClientState() {
+        bsp = nullptr;
+    }
     //
     // Client User Command Related.
     // 
