@@ -172,9 +172,9 @@ vec3_t SVGBaseMover::CalculateEndPosition() {
 // SVGBaseMover::SwapPositions
 //===============
 void SVGBaseMover::SwapPositions() {
-	SetOrigin( GetEndPosition() );			// origin = endpos
+	vec3_t temp = GetEndPosition();			// temp = endpos
 	SetEndPosition( GetStartPosition() );	// endpos = startpos
-	SetStartPosition( GetOrigin() );		// startpos = origin
+	SetStartPosition( temp );				// startpos = temp
 }
 
 // =========================
