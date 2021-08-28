@@ -614,16 +614,14 @@ void CL_ClearState(void)
 
     // Wipe the entire cl structure
     BSP_Free(cl.bsp);
-    
-    // WID: TODO: This still has to be adjusted to never use memset ofc...
     memset(&cl, 0, sizeof(cl));
     //memset(&cs.entities, 0, sizeof(cs.entities));
-    // C++ Style, no more memset. I suppose I prefer this, if you do not, ouche.  
-    //memset(&cs.entities, 0, sizeof(cs.entities));
-    for (uint32_t i = 0; i < sizeof(cs.entities) / sizeof(cl_entity_t); i++) {
+    // C++ Style, no more memset. I suppose I prefer this, if you do not, ouche.
+    cl = {};
+    for (uint32_t i = 0; i < sizeof(cs.entities); i++) {
         cs.entities[i] = {};
     }
-    
+
     // In case we are more than connected, reset it to just connected.
     if (cls.connectionState > ClientConnectionState::Connected) {
         cls.connectionState = ClientConnectionState::Connected;
