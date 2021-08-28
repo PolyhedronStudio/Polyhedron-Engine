@@ -27,4 +27,5 @@ void Com_WPrint(const char* fmt, ...);
 void Com_EPrint(const char* fmt, ...);
 void Com_Error(ErrorType code, const char* fmt, ...);
 void Com_LPrintf(PrintType type, const char* fmt, ...);
-#endif // __CLGAME_INPUT_H__
+
+#endif // __CLGAME_MAIN_H__

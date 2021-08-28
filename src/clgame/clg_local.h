@@ -39,8 +39,6 @@
 #include "shared/clgame.h"
 
 
-
-
 //
 //=============================================================================
 //
@@ -89,7 +87,6 @@ typedef struct clientgame_s {
     // This is required for C to compile. It doesn't like to compile an empty
     // struct.
     int nothingHereYet;
-
 } clientgame_t;
 
 extern clientgame_t clg;
