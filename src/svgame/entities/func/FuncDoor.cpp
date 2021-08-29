@@ -17,6 +17,7 @@
 
 #include "../trigger/TriggerAutoDoor.h"
 
+#include "FuncAreaportal.hpp"
 #include "FuncDoor.h"
 
 //===============
@@ -473,10 +474,10 @@ void FuncDoor::UseAreaportals( bool open ) const {
         return;
     }
 
-    SVGBaseEntity* portal = nullptr;
-    while ( portal = SVG_FindEntityByKeyValue( "targetname", targetStr, portal ) ) {
-        if ( std::string( portal->GetClassName() ) == "func_areaportal" /* portal->IsClass<FuncAreaportal>() */ ) {
-            gi.SetAreaPortalState( portal->GetStyle(), open );
+    SVGBaseEntity* ent = nullptr;
+    while ( ent = SVG_FindEntityByKeyValue( "targetname", targetStr, ent ) ) {
+        if ( ent->IsClass<FuncAreaportal>() ) {
+            static_cast<FuncAreaportal*>(ent)->ActivatePortal( open );
         }
     }
 }
