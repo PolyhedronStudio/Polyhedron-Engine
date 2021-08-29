@@ -74,7 +74,7 @@ SET( SRC_SVGAME_ENTITIES_BASE
 
 SET( SRC_SVGAME_ENTITIES_INFO 
 	#svgame/entities/info/InfoNotNull.cpp
-	#svgame/entities/info/InfoNull.cpp
+	svgame/entities/info/InfoNull.cpp
 	#svgame/entities/info/InfoPlayerCoop.cpp
 	#svgame/entities/info/InfoPlayerDeathmatch.cpp
 	#svgame/entities/info/InfoPlayerIntermission.cpp
