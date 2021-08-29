@@ -82,7 +82,7 @@ SET( SRC_SVGAME_ENTITIES_INFO
 )
 
 SET( SRC_SVGAME_ENTITIES_FUNC 
-	#svgame/entities/func/FuncAreaportal.cpp
+	svgame/entities/func/FuncAreaportal.cpp
 	svgame/entities/func/FuncButton.cpp
 	#svgame/entities/func/FuncConveyor.cpp
 	svgame/entities/func/FuncDoor.cpp 
@@ -219,6 +219,7 @@ SET ( HEADERS_SVGAME_ENTITIES_BASE
 )
 SET ( HEADERS_SVGAME_ENTITIES_FUNC
 	svgame/entities/func/func_door.h
+	svgame/entities/func/FuncAreaportal.h
 	svgame/entities/func/FuncButton.h
 	svgame/entities/func/FuncDoor.h
 	svgame/entities/func/FuncDoorRotating.h

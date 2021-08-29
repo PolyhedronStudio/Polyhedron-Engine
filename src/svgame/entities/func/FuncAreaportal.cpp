@@ -1,7 +1,7 @@
 /*
 // LICENSE HERE.
 
-// FuncTimer.cpp
+// FuncAreaportal.cpp
 */
 
 #include "../../g_local.h"
@@ -13,7 +13,7 @@
 
 #include "../base/SVGBaseEntity.h"
 
-#include "FuncAreaportal.hpp"
+#include "FuncAreaportal.h"
 
 //===============
 // FuncAreaportal::ctor

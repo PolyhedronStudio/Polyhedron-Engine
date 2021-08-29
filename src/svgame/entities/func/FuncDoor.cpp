@@ -17,7 +17,7 @@
 
 #include "../trigger/TriggerAutoDoor.h"
 
-#include "FuncAreaportal.hpp"
+#include "FuncAreaportal.h"
 #include "FuncDoor.h"
 
 //===============
