@@ -7,6 +7,8 @@ cmake_minimum_required (VERSION 3.8)
 ###############################################################################
 ###################### CLIENT GAME
 SET(SRC_CLGAME
+	clgame/ClientGameExports.cpp
+
 	clgame/clg_effects.cpp
 	clgame/clg_entities.cpp
 	clgame/clg_input.cpp
@@ -23,6 +25,8 @@ SET(SRC_CLGAME
 )
 
 SET(HEADERS_CLGAME
+	clgame/ClientGameExports.h
+
 	clgame/clg_effects.h
 	clgame/clg_entities.h
 	clgame/clg_input.h
@@ -441,6 +445,9 @@ SET(SRC_SHAREDGAME
 SET(HEADERS_SHARED
 	# Container lib.
 	../inc/shared/containers/IterableCArray.h
+
+	# Interfaces
+	../inc/shared/interfaces/IClientGameExports.h
 
 	# Math lib.
 	../inc/shared/math/color.h
