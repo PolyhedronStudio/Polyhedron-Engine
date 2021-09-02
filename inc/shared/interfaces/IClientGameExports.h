@@ -468,7 +468,7 @@ class IClientGameExportScreen {
 };
 
 //---------------------------------------------------------------------
-// Sound.
+// Sound interface.
 //---------------------------------------------------------------------
 class IClientGameExportSound {
 	// Begins the sound registration process.

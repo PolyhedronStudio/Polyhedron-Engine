@@ -10,7 +10,7 @@
 #include "shared/IClientGameExports.h"
 
 //---------------------------------------------------------------------
-// CORE interface.
+// CORE implementation.
 //---------------------------------------------------------------------
 class ClientGameCore : public IClientGameCore {
 	void Initialize();
@@ -18,7 +18,7 @@ class ClientGameCore : public IClientGameCore {
 };
 
 //---------------------------------------------------------------------
-// COMMANDBUFFER interface.
+// COMMANDBUFFER implementation.
 //---------------------------------------------------------------------
 class ClientGameExportCommandBuffer : public IClientGameExportCommandBuffer {
 	void AddText(const std::string& text);
@@ -28,7 +28,7 @@ class ClientGameExportCommandBuffer : public IClientGameExportCommandBuffer {
 };
 
 //---------------------------------------------------------------------
-// COLLISIONMODEL interface.
+// COLLISIONMODEL implementation.
 //---------------------------------------------------------------------
 class ClientGameExportCollisionModel : public IClientGameExportCollisionModel {
 	mnode_t* HeadnodeForBox(const vec3_t& mins, const vec3_t& maxs);
@@ -41,7 +41,7 @@ class ClientGameExportCollisionModel : public IClientGameExportCollisionModel {
 };
 
 //---------------------------------------------------------------------
-// COMMAND interface.
+// COMMAND implementation.
 //---------------------------------------------------------------------
 class ClientGameExportCommand : public IClientGameExportCommand {
 	void AddCommand(const std::string& commandName, xcommand_t function);
@@ -60,7 +60,7 @@ class ClientGameExportCommand : public IClientGameExportCommand {
 };
 
 //---------------------------------------------------------------------
-// COMMON interface.
+// COMMON implementation.
 //---------------------------------------------------------------------
 class ClientGameExportCommon : public IClientGameExports {
 	void Error(ErrorType code, const char* fmt, ...);
@@ -70,7 +70,7 @@ class ClientGameExportCommon : public IClientGameExports {
 };
 
 //---------------------------------------------------------------------
-// CONSOLE interface.
+// CONSOLE implementation.
 //---------------------------------------------------------------------
 class ClientGameExportConsole : public IClientGameExportConsole {
 	void ClearNotify();
@@ -78,7 +78,7 @@ class ClientGameExportConsole : public IClientGameExportConsole {
 };
 
 //---------------------------------------------------------------------
-// CVAR interface.
+// CVAR implementation.
 //---------------------------------------------------------------------
 class IClientGameExportCVar : public IClientGameExportCVar {
 	cvar_t* Get(const char* variableName, const char* value, int32_t flags);
@@ -99,7 +99,7 @@ class IClientGameExportCVar : public IClientGameExportCVar {
 };
 
 //---------------------------------------------------------------------
-// FILESYSTEM interface.
+// FILESYSTEM implementation.
 //---------------------------------------------------------------------
 class ClientGameExportFileSystem : public IClientGameExportFileSystem {
 	qerror_t RenameFile(const char* from, const char* to);
@@ -136,7 +136,7 @@ class ClientGameExportFileSystem : public IClientGameExportFileSystem {
 };
 
 //---------------------------------------------------------------------
-// KEYBOARD interface.
+// KEYBOARD implementation.
 //---------------------------------------------------------------------
 class ClientGameExportKeyboard : public IClientGameExportKeyboard {
 	qboolean GetOverstrikeMode(void);
@@ -154,7 +154,7 @@ class ClientGameExportKeyboard : public IClientGameExportKeyboard {
 };
 
 //---------------------------------------------------------------------
-// MEDIA interface.
+// MEDIA implementation.
 //---------------------------------------------------------------------
 class ClientGameExportMedia : public IClientGameExportMedia{
 	std::string GetLoadStateName(LoadState loadState);
@@ -162,7 +162,7 @@ class ClientGameExportMedia : public IClientGameExportMedia{
 };
 
 //---------------------------------------------------------------------
-// MEMORY interface.
+// MEMORY implementation.
 //---------------------------------------------------------------------
 class ClientGameExportMouse : public IClientGameExportMouse {
 	void* ZoneTagMalloc(size_t size, memtag_t memoryTag);
@@ -173,7 +173,7 @@ class ClientGameExportMouse : public IClientGameExportMouse {
 };
 
 //---------------------------------------------------------------------
-// MOVEMENT interface.
+// MOVEMENT implementation.
 //---------------------------------------------------------------------
 class ClientGameExportMovement : public IClientGameExportMovement {
 	void BuildFrameMovementCommand(int32_t msec);
@@ -181,14 +181,14 @@ class ClientGameExportMovement : public IClientGameExportMovement {
 };
 
 //---------------------------------------------------------------------
-// MOUSE interface.
+// MOUSE implementation.
 //---------------------------------------------------------------------
 class ClientGameExportMouse : public IClientGameExportMouse {
 	void GetMotion(int32_t deltaX, int32_t deltaY);
 };
 
 //---------------------------------------------------------------------
-// MESSAGE interface.
+// MESSAGE implementation.
 //---------------------------------------------------------------------
 class ClientGameExportMessage : public IClientGameExportMessage {
 	int32_t	ReadChar();
@@ -208,7 +208,7 @@ class ClientGameExportMessage : public IClientGameExportMessage {
 };
 
 //---------------------------------------------------------------------
-// REGISTER interface.
+// REGISTER implementation.
 //---------------------------------------------------------------------
 class ClientGameExportRegister : public IClientGameExportRegister {
 	qhandle_t Model(const char* name);
@@ -251,14 +251,14 @@ class ClientGameExportRenderer : public IClientGameExportRenderer {
 };
 
 //---------------------------------------------------------------------
-// SCREEN interface.
+// SCREEN implementation.
 //---------------------------------------------------------------------
 class ClientGameExportScreen : public IClientGameExportScreen {
 	void UpdateScreen();
 };
 
 //---------------------------------------------------------------------
-// Sound.
+// Sound implementation.
 //---------------------------------------------------------------------
 class IClientGameExportSound {
 	// Begins the sound registration process.
@@ -284,14 +284,14 @@ class IClientGameExportSound {
 };
 
 //---------------------------------------------------------------------
-// SYSTEM interface.
+// SYSTEM implementation.
 //---------------------------------------------------------------------
 class IClientGameExportSystem {
 	virtual uint32_t Milliseconds() = 0;
 };
 
 //---------------------------------------------------------------------
-// ENTITY interface.
+// ENTITY implementation.
 //---------------------------------------------------------------------
 class IClientGameExportEntities {
 	// Executed whenever an entity event is receieved.
@@ -300,8 +300,7 @@ class IClientGameExportEntities {
 
 
 //---------------------------------------------------------------------
-// MAIN interface to implement. It holds pointers to actual sub interfaces,
-// which one of course has to implement as well.
+// MAIN interface implementation.
 //---------------------------------------------------------------------
 class IClientGameExports {
 public:
