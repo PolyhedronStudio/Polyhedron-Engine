@@ -7,8 +7,6 @@
 // WID: Time to re-adjust here with new files. I agree, at last.
 #pragma once
 
-#include "shared/IClientGameExports.h"
-
 //---------------------------------------------------------------------
 // CORE implementation.
 //---------------------------------------------------------------------
@@ -32,7 +30,7 @@ class ClientGameExportCommandBuffer : public IClientGameExportCommandBuffer {
 //---------------------------------------------------------------------
 class ClientGameExportCollisionModel : public IClientGameExportCollisionModel {
 	mnode_t* HeadnodeForBox(const vec3_t& mins, const vec3_t& maxs);
-	mmodel_t* (*CM_InlineModel) (cm_t* cm, const char* name);
+	mmodel_t* InlineModel(cm_t* cm, const char* name);
 	int32_t PointContents(const vec3_t& p, mnode_t* headNode);
 	int32_t TransformedPointContents(const vec3_t& p, mnode_t* headNode, const vec3_t& origin, const vec3_t& angles);
 	void BoxTrace(trace_t * trace, const vec3_t & start, const vec3_t & end, const vec3_t & mins, const vec3_t & maxs, mnode_t * headNode, int32_t brushmask);
@@ -65,7 +63,7 @@ class ClientGameExportCommand : public IClientGameExportCommand {
 class ClientGameExportCommon : public IClientGameExports {
 	void Error(ErrorType code, const char* fmt, ...);
 	void Printf(PrintType type, const char* fmt, ...);
-	const char* ErrorString) (qerror_t type);
+	const char* ErrorString(qerror_t type);
 	unsigned GetEventTime(void);
 };
 
@@ -80,7 +78,7 @@ class ClientGameExportConsole : public IClientGameExportConsole {
 //---------------------------------------------------------------------
 // CVAR implementation.
 //---------------------------------------------------------------------
-class IClientGameExportCVar : public IClientGameExportCVar {
+class ClientGameExportCVar : public IClientGameExportCVar {
 	cvar_t* Get(const char* variableName, const char* value, int32_t flags);
 	cvar_t* WeakGet(const char* variableName);
 	qboolean Exists(const char* name, qboolean weak);
@@ -148,7 +146,7 @@ class ClientGameExportKeyboard : public IClientGameExportKeyboard {
 	int32_t StringToKeynum(const char* str);
 	const char* KeynumToString(int32_t keyNumber);
 	const char* GetBinding(const char* binding);
-	const char* GetBindingForKey(int32_tkeynum);
+	const char* GetBindingForKey(int32_t keynum);
 	int EnumBindings(int32_t key, const char* binding);
 	void SetBinding(int32_t keyNumber, const char* binding);
 };
@@ -164,7 +162,7 @@ class ClientGameExportMedia : public IClientGameExportMedia{
 //---------------------------------------------------------------------
 // MEMORY implementation.
 //---------------------------------------------------------------------
-class ClientGameExportMouse : public IClientGameExportMouse {
+class ClientGameExportMemory : public IClientGameExportMouse {
 	void* ZoneTagMalloc(size_t size, memtag_t memoryTag);
 	void* ZoneTagMallocz(size_t size, memtag_t memoryTag);
 	void ZoneTagReserve(size_t size, memtag_t memoryTag);
@@ -242,7 +240,7 @@ class ClientGameExportRenderer : public IClientGameExportRenderer {
 	void DrawCharacater(int32_t x, int32_t y, int32_t flags, int32_t character, qhandle_t font);
 	int DrawString(int32_t x, int32_t y, int32_t flags, size_t maxChars,
 		const char* string, qhandle_t font);
-	qboolean GetPictureSize) (int32_t* width, int32_t* height, qhandle_t picture);
+	qboolean GetPictureSize(int32_t* width, int32_t* height, qhandle_t picture);
 	void DrawPicture(int32_t x, int32_t y, qhandle_t picture);
 	void DrawStretchedPicture(int32_t x, int32_t y, int32_t width, int32_t height, qhandle_t picture);
 	void TileClear(int32_t x, int32_t y, int32_t width, int32_t height, qhandle_t picture);
@@ -267,7 +265,7 @@ class ClientGameExportSound : public IClientGameExportSound {
 	void StartSound(const vec3_t* origin, int32_t entityNumber, int32_t entityChannel,
 		qhandle_t sfx, float fvol, float attenuation, float timeOffset);
 	void StartLocalSound(const char* s);
-	void StartLocalSound(const char* s);
+	void StartLocalSound_(const char* s);
 	void EnableUnderWater();
 	void DisableUnderWater();
 };
