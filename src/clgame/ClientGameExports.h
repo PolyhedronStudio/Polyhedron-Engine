@@ -102,219 +102,159 @@ class IClientGameExportCVar : public IClientGameExportCVar {
 // FILESYSTEM interface.
 //---------------------------------------------------------------------
 class ClientGameExportFileSystem : public IClientGameExportFileSystem {
-	qerror_t RenameFile(const char* from, const char* to) = 0;
-	qerror_t CreatePath(char* path) = 0;
-	ssize_t OpenFile(const char* filename, qhandle_t* file, uint32_t mode) = 0;
-	void CloseFile(qhandle_t file) = 0;
+	qerror_t RenameFile(const char* from, const char* to);
+	qerror_t CreatePath(char* path);
+	ssize_t OpenFile(const char* filename, qhandle_t* file, uint32_t mode);
+	void CloseFile(qhandle_t file);
 	qhandle_t EasyOpenFile(char* buffer, size_t size, uint32_t mode,
-		const char* directory, const char* name, const char* extension) = 0;
-	qhandle_t FileExists(const char* path) = 0;
-	qhandle_t FileExistsEx(const char* path, uint32_t flags) = 0;
-	qerror_t WriteFile(const char* path, const void* data, size_t length) = 0;
+		const char* directory, const char* name, const char* extension);
+	qhandle_t FileExists(const char* path);
+	qhandle_t FileExistsEx(const char* path, uint32_t flags);
+	qerror_t WriteFile(const char* path, const void* data, size_t length);
 	qboolean EasyWriteFile(char* buffer, size_t size, unsigned mode,
 		const char* directory, const char* name, const char* extension,
-		const void* data, size_t length) = 0;
-	ssize_t Read(void* buffer, size_t length, qhandle_t file) = 0;
-	ssize_t Write(const void* buffer, size_t len, qhandle_t f) = 0;
-	ssize_t Printf(qhandle_t file, const char* format, ...) = 0;
-	ssize_t ReadLine(qhandle_t file, char* buffer, size_t size) = 0;
-	void Flush(qhandle_t file) = 0;
-	ssize_t Tell(qhandle_t file) = 0;
-	qerror_t Seek(qhandle_t file, off_t offset) = 0;
-	ssize_t Length(qhandle_t file) = 0;
-	qboolean WildCardCompare(const char* filter, const char* string) = 0;
-	qboolean ExtensionCompare(const char* extension, const char* string) = 0;
-	qerror_t LastModified(char const* file, uint64_t* lastTimeModified) = 0;
-	void** ListFiles(const char* path, const char* filter, uint32_t flags, int32_t* count_p) = 0;
-	void** CopyList(void** list, int count) = 0;
-	file_info_t* CopyInfo(const char* name, size_t size, time_t ctime, time_t mtime) = 0;
-	void FreeList(void** list) = 0;
-	size_t NormalizePath(char* out, const char* in) = 0;
-	size_t NormalizePathBuffer(char* out, const char* in, size_t size) = 0;
-	int32_t ValidatePath(const char* s) = 0;
-	void SanitizeFilenameVariable(cvar_t* var) = 0;
+		const void* data, size_t length);
+	ssize_t Read(void* buffer, size_t length, qhandle_t file);
+	ssize_t Write(const void* buffer, size_t len, qhandle_t f);
+	ssize_t Printf(qhandle_t file, const char* format, ...);
+	ssize_t ReadLine(qhandle_t file, char* buffer, size_t size);
+	void Flush(qhandle_t file);
+	ssize_t Tell(qhandle_t file);
+	qerror_t Seek(qhandle_t file, off_t offset);
+	ssize_t Length(qhandle_t file);
+	qboolean WildCardCompare(const char* filter, const char* string);
+	qboolean ExtensionCompare(const char* extension, const char* string);
+	qerror_t LastModified(char const* file, uint64_t* lastTimeModified);
+	void** ListFiles(const char* path, const char* filter, uint32_t flags, int32_t* count_p);
+	void** CopyList(void** list, int count);
+	file_info_t* CopyInfo(const char* name, size_t size, time_t ctime, time_t mtime);
+	void FreeList(void** list);
+	size_t NormalizePath(char* out, const char* in);
+	size_t NormalizePathBuffer(char* out, const char* in, size_t size);
+	int32_t ValidatePath(const char* s);
+	void SanitizeFilenameVariable(cvar_t* var);
 };
 
 //---------------------------------------------------------------------
 // KEYBOARD interface.
 //---------------------------------------------------------------------
-class IClientGameExportKeyboard {
-	// Returns whether in overstrike mode.
-	virtual qboolean GetOverstrikeMode(void) = 0;
-	// Sets key in overstrike mode.
-	virtual void SetOverstrikeMode(qboolean overStrike) = 0;
-	// Returns the current client state key destination.
-	virtual keydest_t GetDest(void) = 0;
-	// Sets the key destination.
-	virtual void SetDest(keydest_t dest) = 0;
-	// Returns key down status: if > 1, it is auto-repeating
-	virtual int32_t IsDown(int32_t key) = 0;
-	// Returns total number of keys down.
-	virtual int32_t AnyKeyDown(void) = 0;
-	// Returns a key number to be used to index keybindings[] by looking at
-	// the given string.  Single ascii characters return themselves, while
-	// the K_* names are matched up.
-	virtual int32_t StringToKeynum(const char* str) = 0;
-	// Returns a string (either a single ascii char, or a K_* name) for the
-	// given keynum.
-	virtual const char* KeynumToString(int32_t keyNumber) = 0;
-	//Returns the name of the first key found.
-	virtual const char* GetBinding(const char* binding) = 0;
-	// Returns the command bound to a given key.
-	virtual const char* GetBindingForKey(int32_tkeynum) = 0;
-	// Fills the binding string with the name of the binding matching to the key.
-	// Returns -1 in case nothing was found.
-	virtual int EnumBindings(int32_t key, const char* binding) = 0;
-	// Sets keybinding for the given keynum.
-	virtual void SetBinding(int32_t keyNumber, const char* binding) = 0;
+class ClientGameExportKeyboard : public IClientGameExportKeyboard {
+	qboolean GetOverstrikeMode(void);
+	void SetOverstrikeMode(qboolean overStrike);
+	keydest_t GetDest(void);
+	void SetDest(keydest_t dest);
+	int32_t IsDown(int32_t key);
+	int32_t AnyKeyDown(void);
+	int32_t StringToKeynum(const char* str);
+	const char* KeynumToString(int32_t keyNumber);
+	const char* GetBinding(const char* binding);
+	const char* GetBindingForKey(int32_tkeynum);
+	int EnumBindings(int32_t key, const char* binding);
+	void SetBinding(int32_t keyNumber, const char* binding);
 };
 
 //---------------------------------------------------------------------
 // MEDIA interface.
 //---------------------------------------------------------------------
-class IClientGameExportMedia {
-	// Called when the client wants to know the name of a custom load state.
-	virtual std::string GetLoadStateName(LoadState loadState) = 0;
-
-	// Called upon initialization of the renderer.
-	virtual void Initialize() = 0;
+class ClientGameExportMedia : public IClientGameExportMedia{
+	std::string GetLoadStateName(LoadState loadState);
+	void Initialize();
 };
 
 //---------------------------------------------------------------------
 // MEMORY interface.
 //---------------------------------------------------------------------
-class IClientGameExportMouse {
-	// TODO: Document.
-	virtual void* ZoneTagMalloc(size_t size, memtag_t memoryTag) = 0;
-	// TODO: Document.
-	virtual void* ZoneTagMallocz(size_t size, memtag_t memoryTag) = 0;
-	// TODO: Document.
-	virtual void ZoneTagReserve(size_t size, memtag_t memoryTag) = 0;
-	// TODO: Document.
-	virtual char* ZoneTagCopyString(const char* in, memtag_t memoryTag) = 0;
-	// TODO: Document.
-	virtual void ZoneFree(void* ptr) = 0;
+class ClientGameExportMouse : public IClientGameExportMouse {
+	void* ZoneTagMalloc(size_t size, memtag_t memoryTag);
+	void* ZoneTagMallocz(size_t size, memtag_t memoryTag);
+	void ZoneTagReserve(size_t size, memtag_t memoryTag);
+	char* ZoneTagCopyString(const char* in, memtag_t memoryTag);
+	void ZoneFree(void* ptr);
 };
 
 //---------------------------------------------------------------------
 // MOVEMENT interface.
 //---------------------------------------------------------------------
-class IClientGameExportMovement {
-	// Called when the movement command needs to be build for the given
-	// client networking frame.
-	virtual void BuildFrameMovementCommand(int32_t msec) = 0;
-	// Finished off building the actual movement vector before sending it
-	// to server.
-	virtual void FinalizeFrameMovementCommand() = 0;
+class ClientGameExportMovement : public IClientGameExportMovement {
+	void BuildFrameMovementCommand(int32_t msec);
+	void FinalizeFrameMovementCommand();
 };
 
 //---------------------------------------------------------------------
 // MOUSE interface.
 //---------------------------------------------------------------------
-class IClientGameExportMouse {
-	virtual void GetMotion(int32_t deltaX, int32_t deltaY) = 0;
+class ClientGameExportMouse : public IClientGameExportMouse {
+	void GetMotion(int32_t deltaX, int32_t deltaY);
 };
 
 //---------------------------------------------------------------------
 // MESSAGE interface.
 //---------------------------------------------------------------------
-class IClientGameExportMessage {
-	// Reads a character from the network.
-	virtual int32_t	ReadChar() = 0;
-	// Reads a byte from the network.
-	virtual int32_t ReadByte() = 0;
-	// Reads a short from the network.
-	virtual int32_t ReadShort() = 0;
-	// Reads a word from the network.
-	virtual int32_t ReadWord() = 0;
-	// Reads a long from the network.
-	virtual int32_t ReadLong() = 0;
-	// Reads a string from the network.
-	virtual size_t ReadString(char* destination, size_t size) = 0;
-	// Reads a vector3 from the network.
-	virtual vec3_t ReadVector3() = 0;
-
-	// Writes a character over the network.
-	virtual int32_t WriteChar(int32_t characterValue) = 0;
-	// Writes a byte over the network.
-	virtual int32_t WriteByte(int32_t byteValue) = 0;
-	// Writes a short over the network.
-	virtual int32_t WriteShort(int32_t shortValue) = 0;
-	// Writes a long over the network.
-	virtual int32_t WriteLong(int32_t longValue) = 0;
-	// Writes a string over the network.
-	virtual int32_t WriteString(const char* stringValue) = 0;
-	// Writes a position over the network.
-	virtual int32_t WriteVector3(const vec3_t& vectorValue) = 0;
-	// Flushes message.
-	virtual int32_t FlushTo(sizebuf_t* buffer) = 0;
+class ClientGameExportMessage : public IClientGameExportMessage {
+	int32_t	ReadChar();
+	int32_t ReadByte();
+	int32_t ReadShort();
+	int32_t ReadWord();
+	int32_t ReadLong();
+	size_t ReadString(char* destination, size_t size);
+	vec3_t ReadVector3();
+	int32_t WriteChar(int32_t characterValue);
+	int32_t WriteByte(int32_t byteValue);
+	int32_t WriteShort(int32_t shortValue);
+	int32_t WriteLong(int32_t longValue);
+	int32_t WriteString(const char* stringValue);
+	int32_t WriteVector3(const vec3_t& vectorValue);
+	int32_t FlushTo(sizebuf_t* buffer);
 };
 
 //---------------------------------------------------------------------
 // REGISTER interface.
 //---------------------------------------------------------------------
-class IClientGameExportRegister {
-	// Precaches a model, and returns its handle.
-	virtual qhandle_t Model(const char* name) = 0;
-	// Precaches an image(3d use, filters etc), and returns its handle.
-	virtual qhandle_t Image(const char* name, imagetype_t type,
-		imageflags_t flags, qerror_t* err_p) = 0;
-	// More advanced version of R_RegisterImage.
-	virtual qhandle_t RawImage(const char* name, int32_t width, int32_t height, byte* pic, imagetype_t type,
-		imageflags_t flags) = 0;
-	// Uncaches the image matching the given handle.
-	virtual void UnregisterImage(qhandle_t handle) = 0;
-
-	// Precaches a 2D image, and returns its handle.
-	virtual qhandle_t Picture(const char* name) = 0;
-	// Precaches a 2D image permanently and returns its handle.
-	virtual qhandle_t PermanentPicture(const char* name) = 0;
-	// Precache a font, returns its handle. These are permanent by default.
-	virtual qhandle_t Font(const char* name) = 0;
-	// Precaches a skin, and returns its handle.
-	virtual qhandle_t Skin(const char* name) = 0;
-
-	// Returns a pointer to the model based on the given handle.
-	virtual model_t* GetModelHandlePointer(qhandle_t handle) = 0;
+class ClientGameExportRegister : public IClientGameExportRegister {
+	qhandle_t Model(const char* name);
+	qhandle_t Image(const char* name, imagetype_t type,
+		imageflags_t flags, qerror_t* err_p);
+	qhandle_t RawImage(const char* name, int32_t width, int32_t height, byte* pic, imagetype_t type,
+		imageflags_t flags);
+	void UnregisterImage(qhandle_t handle);
+	qhandle_t Picture(const char* name);
+	qhandle_t PermanentPicture(const char* name);
+	qhandle_t Font(const char* name);
+	qhandle_t Skin(const char* name);
+	model_t* GetModelHandlePointer(qhandle_t handle);
 };
 
 //---------------------------------------------------------------------
-// RENDERER interface.
+// RENDERER implementation.
 //---------------------------------------------------------------------
-class IClientGameExportRenderer {
-	virtual void AddDecal(decal_t* d) = 0;
-	virtual void LightPoint(const vec3_t& origin, vec3_t& light) = 0;
-	virtual void SetSky(const char* name, float rotate, vec3_t& axis) = 0;
+class ClientGameExportRenderer : public IClientGameExportRenderer {
+	void AddDecal(decal_t* d);
+	void LightPoint(const vec3_t& origin, vec3_t& light);
+	void SetSky(const char* name, float rotate, vec3_t& axis);
 
-	virtual void ClearColor(void) = 0;
-	virtual void SetAlpha(float clpha) = 0;
-	virtual void SetAlphaScale(float alpha) = 0;
-	virtual void SetColor(uint32_t color) = 0;
-	virtual void SetClipRect(const clipRect_t* clip) = 0;
-	virtual float ClampScale(cvar_t* var) = 0;
-	virtual void SetScale(float scale) = 0;
-	virtual void DrawCharacater(int32_t x, int32_t y, int32_t flags, int32_t character, qhandle_t font) = 0;
-	virtual int DrawString(int32_t x, int32_t y, int32_t flags, size_t maxChars,
-		const char* string, qhandle_t font) = 0;  // returns advanced x coord
-	virtual qboolean GetPictureSize) (int32_t* width, int32_t* height, qhandle_t picture) = 0;   // returns transparency bit
-	virtual void DrawPicture(int32_t x, int32_t y, qhandle_t picture) = 0;
-	virtual void DrawStretchedPicture(int32_t x, int32_t y, int32_t width, int32_t height, qhandle_t picture) = 0;
-	virtual void TileClear(int32_t x, int32_t y, int32_t width, int32_t height, qhandle_t picture) = 0;
-	virtual void DrawFill8(int32_t x, int32_t y, int32_t width, int32_t height, int32_t character) = 0;
-	virtual void DrawFill32(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color) = 0;
+	void ClearColor(void);
+	void SetAlpha(float clpha);
+	void SetAlphaScale(float alpha);
+	void SetColor(uint32_t color);
+	void SetClipRect(const clipRect_t* clip);
+	float ClampScale(cvar_t* var);
+	void SetScale(float scale);
+	void DrawCharacater(int32_t x, int32_t y, int32_t flags, int32_t character, qhandle_t font);
+	int DrawString(int32_t x, int32_t y, int32_t flags, size_t maxChars,
+		const char* string, qhandle_t font);
+	qboolean GetPictureSize) (int32_t* width, int32_t* height, qhandle_t picture);   // returns transparency bit
+	void DrawPicture(int32_t x, int32_t y, qhandle_t picture);
+	void DrawStretchedPicture(int32_t x, int32_t y, int32_t width, int32_t height, qhandle_t picture);
+	void TileClear(int32_t x, int32_t y, int32_t width, int32_t height, qhandle_t picture);
+	void DrawFill8(int32_t x, int32_t y, int32_t width, int32_t height, int32_t character);
+	void DrawFill32(int32_t x, int32_t y, int32_t width, int32_t height, uint32_t color);
 };
 
 //---------------------------------------------------------------------
 // SCREEN interface.
 //---------------------------------------------------------------------
-class IClientGameExportScreen {
-	//---------------------------------------------------------------------
-	// Screen.
-	//---------------------------------------------------------------------
-	// This is called every frame by the client itself. However in the case
-	// of this CG Module, it can also be called explicitly to flush text to
-	// the screen.
-	virtual void UpdateScreen() = 0;
+class ClientGameExportScreen : public IClientGameExportScreen {
+	void UpdateScreen();
 };
 
 //---------------------------------------------------------------------
@@ -322,25 +262,25 @@ class IClientGameExportScreen {
 //---------------------------------------------------------------------
 class IClientGameExportSound {
 	// Begins the sound registration process.
-	virtual void BeginRegistration) (void);
+	void BeginRegistration(void);
 	// Precaches a sound with the given filename. (Can be a path.)
-	virtual qhandle_t RegisterSound) (const char* name);
+	qhandle_t RegisterSound(const char* name);
 	// Ends the sound registration process.
-	virtual void EndRegistration) (void);
+	void EndRegistration(void);
 
 	// Plays a sound at the given origin. If origin is NULL, the sound will
 	// be dynamically sourced from the entity.
-	virtual void StartSound(const vec3_t* origin, int32_t entityNumber, int32_t entityChannel,
+	void StartSound(const vec3_t* origin, int32_t entityNumber, int32_t entityChannel,
 		qhandle_t sfx, float fvol, float attenuation, float timeOffset);
 	// Plays a local 2D sound on entchannel 0.                               
-	virtual void StartLocalSound(const char* s) = 0;
+	void StartLocalSound(const char* s);
 	// Plays a local 2D sound on entchannel 256.                               
-	virtual void StartLocalSound(const char* s) = 0;
+	void StartLocalSound(const char* s);
 
 	// Enables under water special audio effect.
-	virtual void EnableUnderWater() = 0;
+	void EnableUnderWater();
 	// Disables under water special audio effect.
-	virtual void DisableUnderWater() = 0;
+	void DisableUnderWater();
 };
 
 //---------------------------------------------------------------------

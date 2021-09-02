@@ -472,11 +472,11 @@ class IClientGameExportScreen {
 //---------------------------------------------------------------------
 class IClientGameExportSound {
 	// Begins the sound registration process.
-	virtual void BeginRegistration) (void);
+	virtual void BeginRegistration(void) = 0;
 	// Precaches a sound with the given filename. (Can be a path.)
-	virtual qhandle_t RegisterSound) (const char* name);
+	virtual qhandle_t RegisterSound(const char* name) = 0;
 	// Ends the sound registration process.
-	virtual void EndRegistration) (void);
+	virtual void EndRegistration(void) = 0;
 
 	// Plays a sound at the given origin. If origin is NULL, the sound will
 	// be dynamically sourced from the entity.

@@ -617,7 +617,7 @@ void CL_ClearState(void)
     memset(&cl, 0, sizeof(cl));
     //memset(&cs.entities, 0, sizeof(cs.entities));
     // C++ Style, no more memset. I suppose I prefer this, if you do not, ouche.
-    cl = {};
+    //cl = {};
     for (uint32_t i = 0; i < sizeof(cs.entities); i++) {
         cs.entities[i] = {};
     }
