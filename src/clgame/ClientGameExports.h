@@ -242,7 +242,7 @@ class ClientGameExportRenderer : public IClientGameExportRenderer {
 	void DrawCharacater(int32_t x, int32_t y, int32_t flags, int32_t character, qhandle_t font);
 	int DrawString(int32_t x, int32_t y, int32_t flags, size_t maxChars,
 		const char* string, qhandle_t font);
-	qboolean GetPictureSize) (int32_t* width, int32_t* height, qhandle_t picture);   // returns transparency bit
+	qboolean GetPictureSize) (int32_t* width, int32_t* height, qhandle_t picture);
 	void DrawPicture(int32_t x, int32_t y, qhandle_t picture);
 	void DrawStretchedPicture(int32_t x, int32_t y, int32_t width, int32_t height, qhandle_t picture);
 	void TileClear(int32_t x, int32_t y, int32_t width, int32_t height, qhandle_t picture);
@@ -260,42 +260,30 @@ class ClientGameExportScreen : public IClientGameExportScreen {
 //---------------------------------------------------------------------
 // Sound implementation.
 //---------------------------------------------------------------------
-class IClientGameExportSound {
-	// Begins the sound registration process.
+class ClientGameExportSound : public IClientGameExportSound {
 	void BeginRegistration(void);
-	// Precaches a sound with the given filename. (Can be a path.)
 	qhandle_t RegisterSound(const char* name);
-	// Ends the sound registration process.
 	void EndRegistration(void);
-
-	// Plays a sound at the given origin. If origin is NULL, the sound will
-	// be dynamically sourced from the entity.
 	void StartSound(const vec3_t* origin, int32_t entityNumber, int32_t entityChannel,
 		qhandle_t sfx, float fvol, float attenuation, float timeOffset);
-	// Plays a local 2D sound on entchannel 0.                               
 	void StartLocalSound(const char* s);
-	// Plays a local 2D sound on entchannel 256.                               
 	void StartLocalSound(const char* s);
-
-	// Enables under water special audio effect.
 	void EnableUnderWater();
-	// Disables under water special audio effect.
 	void DisableUnderWater();
 };
 
 //---------------------------------------------------------------------
 // SYSTEM implementation.
 //---------------------------------------------------------------------
-class IClientGameExportSystem {
-	virtual uint32_t Milliseconds() = 0;
+class ClientGameExportSystem : public IClientGameExportSystem {
+	uint32_t Milliseconds();
 };
 
 //---------------------------------------------------------------------
 // ENTITY implementation.
 //---------------------------------------------------------------------
-class IClientGameExportEntities {
-	// Executed whenever an entity event is receieved.
-	virtual void Event(int32_t number) = 0;
+class ClientGameExportEntities : IClientGameExportEntities {
+	void Event(int32_t number);
 };
 
 
@@ -304,8 +292,6 @@ class IClientGameExportEntities {
 //---------------------------------------------------------------------
 class ClientGameExports : public IClientGameExports {
 public:
-	// WID: TODO: Normally we'd use a Get, should we do that and make these private?
-	// Perhaps not.
 	IClientGameCore* core;
 	IClientGameExportCollisionModel* collisionModel;
 	IClientGameExportCommand* command;
@@ -333,7 +319,7 @@ public:
 	void ClientDeltaFrame();
 	void ClientFrame();
 	void ClientDisconnect();
-	void ClientUpdateUserinfo(cvar_t* var, from_t from) = 0;
+	void ClientUpdateUserinfo(cvar_t* var, from_t from);
 	void SetClientLoadState(LoadState loadState);
 	uint32_t GetClientState();
 	qboolean CheckForIgnore(const std::string& str);
