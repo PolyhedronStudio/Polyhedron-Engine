@@ -21,7 +21,7 @@
 //
 //=============================================================================
 //
-#include "shared/interfaces/IClientGameExports.h"
+#include "shared/interfaces/IClientGameImports.h"
 
 #ifdef __cplusplus
 extern "C" {

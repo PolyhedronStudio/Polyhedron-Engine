@@ -8,6 +8,7 @@ cmake_minimum_required (VERSION 3.8)
 ###################### CLIENT GAME
 SET(SRC_CLGAME
 	clgame/ClientGameExports.cpp
+	clgame/ClientGameImports.cpp
 
 	clgame/clg_effects.cpp
 	clgame/clg_entities.cpp
@@ -26,6 +27,7 @@ SET(SRC_CLGAME
 
 SET(HEADERS_CLGAME
 	clgame/ClientGameExports.h
+	clgame/ClientGameImports.h
 
 	clgame/clg_effects.h
 	clgame/clg_entities.h
@@ -448,6 +450,7 @@ SET(HEADERS_SHARED
 
 	# Interfaces
 	../inc/shared/interfaces/IClientGameExports.h
+	../inc/shared/interfaces/IClientGameImports.h
 
 	# Math lib.
 	../inc/shared/math/color.h
