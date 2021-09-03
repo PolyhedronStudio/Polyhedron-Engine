@@ -10,7 +10,7 @@
 //---------------------------------------------------------------------
 // CORE implementation.
 //---------------------------------------------------------------------
-class ClientGameCore : public IClientGameImportCore {
+class ClientGameImportCore : public IClientGameImportCore {
 	void Initialize();
 	void Shutdown();
 };
