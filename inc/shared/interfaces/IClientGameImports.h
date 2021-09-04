@@ -294,17 +294,6 @@ class IClientGameImportKeyboard {
 };
 
 //---------------------------------------------------------------------
-// MEDIA interface.
-//---------------------------------------------------------------------
-class IClientGameImportMedia {
-	// Called when the client wants to know the name of a custom load state.
-	virtual std::string GetLoadStateName(LoadState loadState) = 0;
-
-	// Called upon initialization of the renderer.
-	virtual void Initialize() = 0;
-};
-
-//---------------------------------------------------------------------
 // MEMORY interface.
 //---------------------------------------------------------------------
 class IClientGameImportMemory {
@@ -482,7 +471,6 @@ class IClientGameImportEntities {
 	virtual void Event(int32_t number) = 0;
 };
 
-
 //---------------------------------------------------------------------
 // MAIN interface to implement. It holds pointers to actual sub interfaces,
 // which one of course has to implement as well.
@@ -500,7 +488,6 @@ public:
 	IClientGameImportCVar* cvar;
 	IClientGameImportEntities* entities;
 	IClientGameImportFileSystem* filesystem;
-	IClientGameImportMedia* media;
 	IClientGameImportMessage* message;
 	IClientGameImportMouse* mouse;
 	IClientGameImportMovement* movement;
@@ -510,43 +497,35 @@ public:
 	IClientGameImportSound* sound;
 	IClientGameImportSystem* system;
 
-	// Calculates the FOV the client is running. (Important to have in order.)
-	virtual float CalculateClientFieldOfView(float x, float width, float height) = 0;
 
-	// Called upon whenever a client disconnects, for whichever reason.
-	// Could be him quiting, or pinging out etc.
-	virtual void ClearClientState() = 0;
+	///
+	/// Belong to exports.
+	///
+	//// Calculates the FOV the client is running. (Important to have in order.)
+	//virtual float CalculateClientFieldOfView(float x, float width, float height) = 0;
 
-	// Updates the origin. (Used by the engine for determining current audio position too.)
-	virtual void UpdateClientOrigin() = 0;
+	//// Called upon whenever a client disconnects, for whichever reason.
+	//// Could be him quiting, or pinging out etc.
+	//virtual void ClearClientState() = 0;
 
-	// Called when a demo is being seeked through.
-	virtual void DemoSeek() = 0;
+	//// Updates the origin. (Used by the engine for determining current audio position too.)
+	//virtual void UpdateClientOrigin() = 0;
 
-	// Called after all downloads are done. (Aka, a map has started.)
-	// Not used for demos.
-	virtual void ClientBegin() = 0;
-	// Called each VALID client frame. Handle per VALID frame basis 
-	// things here.
-	virtual void ClientDeltaFrame() = 0;
-	// Called each client frame. Handle per frame basis things here.
-	virtual void ClientFrame() = 0;
-	// Called when a disconnect even occures. Including those for Com_Error
-	virtual void ClientDisconnect() = 0;
+	//// Called when a demo is being seeked through.
+	//virtual void DemoSeek() = 0;
 
-	// Called when there is a needed retransmit of user info variables.
-	virtual void ClientUpdateUserinfo(cvar_t* var, from_t from) = 0;
+	//// Called after all downloads are done. (Aka, a map has started.)
+	//// Not used for demos.
+	//virtual void ClientBegin() = 0;
+	//// Called each VALID client frame. Handle per VALID frame basis 
+	//// things here.
+	//virtual void ClientDeltaFrame() = 0;
+	//// Called each client frame. Handle per frame basis things here.
+	//virtual void ClientFrame() = 0;
+	//// Called when a disconnect even occures. Including those for Com_Error
+	//virtual void ClientDisconnect() = 0;
 
-	// Sets the client load state.
-	virtual void SetClientLoadState(LoadState loadState);
-
-	// Returns the current state of the client.
-	virtual uint32_t GetClientState() = 0;
-
-	// Checks if the name of the player is on the client's ignore list.
-	virtual qboolean CheckForIgnore(const std::string &str) = 0;
-	
-	// Add scanned out IP address to circular array of recent addresses.
-	virtual void CheckForIP(const std::string &str) = 0;
+	//// Called when there is a needed retransmit of user info variables.
+	//virtual void ClientUpdateUserinfo(cvar_t* var, from_t from) = 0;
 };
 

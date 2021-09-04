@@ -152,14 +152,6 @@ class ClientGameImportKeyboard : public IClientGameImportKeyboard {
 };
 
 //---------------------------------------------------------------------
-// MEDIA implementation.
-//---------------------------------------------------------------------
-class ClientGameImportMedia : public IClientGameImportMedia{
-	std::string GetLoadStateName(LoadState loadState);
-	void Initialize();
-};
-
-//---------------------------------------------------------------------
 // MEMORY implementation.
 //---------------------------------------------------------------------
 class ClientGameImportMemory : public IClientGameImportMouse {
@@ -299,7 +291,6 @@ public:
 	IClientGameImportCVar* cvar;
 	IClientGameImportEntities* entities;
 	IClientGameImportFileSystem* filesystem;
-	IClientGameImportMedia* media;
 	IClientGameImportMessage* message;
 	IClientGameImportMouse* mouse;
 	IClientGameImportMovement* movement;
