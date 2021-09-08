@@ -9,5 +9,9 @@ public:
 
 	DefineMapClass( "path_corner", PathCorner, SVGBaseEntity );
 
-	void Spawn() override;
+	const vec3_t	BboxSize = vec3_t( 8.0f, 8.0f, 8.0f );
+
+	void			Spawn() override;
+	virtual void	OnReachedCorner( SVGBaseEntity* ent );
 };
+

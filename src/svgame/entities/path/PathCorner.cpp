@@ -1,17 +1,11 @@
 /*
 // LICENSE HERE.
 
-// FuncAreaportal.cpp
+// PathCorner.cpp
 */
 
 #include "../../g_local.h"
-#include "../../effects.h"
 #include "../../entities.h"
-#include "../../utils.h"
-#include "../../physics/stepmove.h"
-#include "../../brushfuncs.h"
-
-#include "../base/SVGBaseEntity.h"
 
 #include "PathCorner.h"
 
@@ -19,9 +13,25 @@
 // PathCorner::ctor
 //===============
 PathCorner::PathCorner( Entity* entity )
-	: Base( entity )
-{
+	: Base( entity ) {
 
 }
 
+void PathCorner::Spawn() {
+    Base::Spawn();
 
+    if ( targetNameStr.empty() ) {
+        gi.DPrintf( "path_corner with no targetname at %s\n", vec3_to_str( GetOrigin() ).c_str() );
+        return Remove();
+    }
+
+    SetSolid( Solid::Trigger );
+    SetMaxs( BboxSize );
+    SetMins( vec3_negate( BboxSize ) );
+    serverEntity->serverFlags |= EntityServerFlags::NoClient;
+    LinkEntity();
+}
+
+void PathCorner::OnReachedCorner( SVGBaseEntity* ent ) {
+
+}
