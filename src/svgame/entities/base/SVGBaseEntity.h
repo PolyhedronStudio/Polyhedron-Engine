@@ -81,6 +81,11 @@ public:
     //
     // Entity Get Functions.
     //
+    // @returns The entity's center in world coordinates
+    inline vec3_t GetAbsoluteCenter(){
+        return vec3_scale( GetAbsoluteMax() + GetAbsoluteMin(), 0.5f );
+    }
+
     // Return the bounding box absolute 'min' value.
     inline const vec3_t& GetAbsoluteMin() {
         return serverEntity->absMin;
@@ -106,6 +111,10 @@ public:
     // Return the 'angularVelocity' value.
     inline const vec3_t& GetAngularVelocity() {
         return angularVelocity;
+    }
+    // @returns The local center
+    inline vec3_t GetCenter() {
+        return vec3_scale( GetMaxs() + GetMins(), 0.5f );
     }
 
     // Return the 'className' value.
