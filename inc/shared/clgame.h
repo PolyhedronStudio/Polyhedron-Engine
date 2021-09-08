@@ -21,6 +21,8 @@
 //
 //=============================================================================
 //
+#include "shared/interfaces/IClientGameExports.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -164,7 +166,6 @@ extern "C" {
         // Called right after the engine renders the scene, and prepares to
         // finish up its current frame loop iteration.
         void        (*PostRenderView) (void);
-
     } ClientGameExport;
 
     // Structure containing all the engine function pointers for the client dll to work with.

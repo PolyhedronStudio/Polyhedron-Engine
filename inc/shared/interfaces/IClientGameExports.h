@@ -50,9 +50,9 @@
 // is not met.
 //---------------------------------------------------------------------
 struct APIVersion {
-	int32_t major; // TODO: Set version hard mode, right here, best place.
-	int32_t minor;
-	int32_t point;
+	int32_t major{ VERSION_MAJOR }; // TODO: Set version hard mode, right here, best place.
+	int32_t minor{ VERSION_MINOR };
+	int32_t point{ VERSION_POINT };
 };
 
 //---------------------------------------------------------------------
@@ -74,7 +74,7 @@ class IClientGameCore {
 //---------------------------------------------------------------------
 class IClientGameExportCommandBuffer {
 	// Adds text at the end of command buffer.
-	virtual void AddText(const std::strring &text) = 0;
+	virtual void AddText(const std::string &text) = 0;
 
 	// Inserts text at the beginning of the command buffer.
 	virtual void InsertText(const std::string& text) = 0;
@@ -96,10 +96,10 @@ class IClientGameExportCollisionModel {
 	// Creates a clipping hull for an arbitrary box.
 	virtual mnode_t* HeadnodeForBox(const vec3_t& mins, const vec3_t& maxs) = 0;
 	// We need a way to share these values to cgame dll.
-	virtual mmodel_t* (*CM_InlineModel) (cm_t* cm, const char* name);
+	virtual mmodel_t* InlineModel(cm_t* cm, const char* name) = 0;
 	// TODO: Document.
 	virtual int32_t PointContents(const vec3_t& p, mnode_t* headNode) = 0;
-	virtual int32_t TransformedPointContents(const vec3_t& p, mnode_t* headNode, const vec3_t& origin, const vec3_t& angles) = -
+	virtual int32_t TransformedPointContents(const vec3_t& p, mnode_t* headNode, const vec3_t& origin, const vec3_t& angles) = 0;
 	virtual void BoxTrace(trace_t* trace, const vec3_t& start, const vec3_t& end, const vec3_t& mins, const vec3_t& maxs, mnode_t* headNode, int32_t brushmask) = 0;
 	virtual void TransformedBoxTrace(trace_t* trace, const vec3_t& start, const vec3_t& end, const vec3_t& mins, const vec3_t& maxs, mnode_t* headNode, int32_t brushmask, const vec3_t& origin, const vec3_t& angles) = 0;
 	virtual void ClipEntity(trace_t* dst, const trace_t* src, struct entity_s* ent) = 0;
@@ -152,13 +152,13 @@ class IClientGameExportCommon {
 	// I'd suggest actually wrapping them up, as per usual.
 	//
 	// Will discuss this later with you, Mr Fox ;-)
-	virtual void Error(ErrorType code, const char* fmt, ...);
-	virtual void Printf(PrintType type, const char* fmt, ...);
+	virtual void Error(ErrorType code, const char* fmt, ...) = 0;
+	virtual void Printf(PrintType type, const char* fmt, ...) = 0;
 
 	// Returns a string description value of the given qerror_t type.
-	const char* ErrorString) (qerror_t type);
+	virtual const char* ErrorString (qerror_t type) = 0;
 	// Returns the event time between "common event frames" engine internal.
-	unsigned GetEventTime(void);
+	virtual unsigned GetEventTime(void) = 0;
 };
 
 //---------------------------------------------------------------------
@@ -220,9 +220,6 @@ class IClientGameExportCVar {
 // FILESYSTEM interface.
 //---------------------------------------------------------------------
 class IClientGameExportFileSystem {
-	//---------------------------------------------------------------------
-	// Filesystem.
-	//---------------------------------------------------------------------
 	// Renames the file contained in string from, to the one in string to.
 	virtual qerror_t RenameFile(const char* from, const char* to) = 0;
 	// Creates the directories of the given path.
@@ -314,7 +311,7 @@ class IClientGameExportKeyboard {
 	//Returns the name of the first key found.
 	virtual const char* GetBinding(const char* binding) = 0;
 	// Returns the command bound to a given key.
-	virtual const char* GetBindingForKey(int32_tkeynum) = 0;
+	virtual const char* GetBindingForKey(int32_t keynum) = 0;
 	// Fills the binding string with the name of the binding matching to the key.
 	// Returns -1 in case nothing was found.
 	virtual int EnumBindings(int32_t key, const char* binding) = 0;
@@ -336,7 +333,7 @@ class IClientGameExportMedia {
 //---------------------------------------------------------------------
 // MEMORY interface.
 //---------------------------------------------------------------------
-class IClientGameExportMouse {
+class IClientGameExportMemory {
 	// TODO: Document.
 	virtual void* ZoneTagMalloc(size_t size, memtag_t memoryTag) = 0;
 	// TODO: Document.
@@ -449,7 +446,7 @@ class IClientGameExportRenderer {
 	virtual void DrawCharacater(int32_t x, int32_t y, int32_t flags, int32_t character, qhandle_t font) = 0;
 	virtual int DrawString(int32_t x, int32_t y, int32_t flags, size_t maxChars,
 		const char* string, qhandle_t font) = 0;  // returns advanced x coord
-	virtual qboolean GetPictureSize) (int32_t* width, int32_t* height, qhandle_t picture) = 0;   // returns transparency bit
+	virtual qboolean GetPictureSize(int32_t* width, int32_t* height, qhandle_t picture) = 0;   // returns transparency bit
 	virtual void DrawPicture(int32_t x, int32_t y, qhandle_t picture) = 0;
 	virtual void DrawStretchedPicture(int32_t x, int32_t y, int32_t width, int32_t height, qhandle_t picture) = 0;
 	virtual void TileClear(int32_t x, int32_t y, int32_t width, int32_t height, qhandle_t picture) = 0;
@@ -471,15 +468,15 @@ class IClientGameExportScreen {
 };
 
 //---------------------------------------------------------------------
-// Sound.
+// Sound interface.
 //---------------------------------------------------------------------
 class IClientGameExportSound {
 	// Begins the sound registration process.
-	virtual void BeginRegistration) (void);
+	virtual void BeginRegistration(void) = 0;
 	// Precaches a sound with the given filename. (Can be a path.)
-	virtual qhandle_t RegisterSound) (const char* name);
+	virtual qhandle_t RegisterSound(const char* name) = 0;
 	// Ends the sound registration process.
-	virtual void EndRegistration) (void);
+	virtual void EndRegistration(void) = 0;
 
 	// Plays a sound at the given origin. If origin is NULL, the sound will
 	// be dynamically sourced from the entity.
@@ -488,7 +485,7 @@ class IClientGameExportSound {
 	// Plays a local 2D sound on entchannel 0.                               
 	virtual void StartLocalSound(const char* s) = 0;
 	// Plays a local 2D sound on entchannel 256.                               
-	virtual void StartLocalSound(const char* s) = 0;
+	virtual void StartLocalSound_(const char* s) = 0;
 
 	// Enables under water special audio effect.
 	virtual void EnableUnderWater() = 0;
@@ -518,6 +515,27 @@ class IClientGameExportEntities {
 //---------------------------------------------------------------------
 class IClientGameExports {
 public:
+	// WID: TODO: Normally we'd use a Get, should we do that and make these private?
+	// Perhaps not.
+	IClientGameCore* core;
+	IClientGameExportCollisionModel* collisionModel;
+	IClientGameExportCommand* command;
+	IClientGameExportCommandBuffer* commandBuffer;
+	IClientGameExportCommon* common;
+	IClientGameExportConsole* console;
+	IClientGameExportCVar* cvar;
+	IClientGameExportEntities* entities;
+	IClientGameExportFileSystem* filesystem;
+	IClientGameExportMedia* media;
+	IClientGameExportMessage* message;
+	IClientGameExportMouse* mouse;
+	IClientGameExportMovement* movement;
+	IClientGameExportRegister* registry;
+	IClientGameExportRenderer* renderer;
+	IClientGameExportScreen* screen;
+	IClientGameExportSound* sound;
+	IClientGameExportSystem* system;
+
 	// Calculates the FOV the client is running. (Important to have in order.)
 	virtual float CalculateClientFieldOfView(float x, float width, float height) = 0;
 
