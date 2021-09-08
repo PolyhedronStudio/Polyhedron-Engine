@@ -109,6 +109,10 @@ SET ( SRC_SVGAME_ENTITIES_MISC
 	#svgame/entities/misc/MiscTeleporterDest.cpp
 )
 
+SET ( SRC_SVGAME_ENTITIES_PATH 
+	svgame/entities/path/PathCorner.cpp
+)
+
 SET ( SRC_SVGAME_ENTITIES_TARGET 
 	#svgame/entities/target/TargetBlaster.cpp
 	#svgame/entities/target/TargetChangelevel.cpp
@@ -183,6 +187,7 @@ SET(SRC_SVGAME
 	${SRC_SVGAME_ENTITIES_INFO}
 	${SRC_SVGAME_ENTITIES_FUNC}
 	${SRC_SVGAME_ENTITIES_MISC}
+	${SRC_SVGAME_ENTITIES_PATH}
 	${SRC_SVGAME_ENTITIES_TARGET}
 	${SRC_SVGAME_ENTITIES_TRIGGER}
 	${SRC_SVGAME_ENTITIES_WEAPONRY}
@@ -232,6 +237,9 @@ SET ( HEADERS_SVGAME_ENTITIES_MISC
 	svgame/entities/misc/MiscExplosionBox.h
 	svgame/entities/misc/MiscServerModel.h
 )
+SET ( HEADERS_SVGAME_ENTITIES_PATH 
+	svgame/entities/path/PathCorner.h
+)
 SET ( HEADERS_SVGAME_ENTITIES_TRIGGER 
 	svgame/entities/trigger/TriggerAlways.h
 	svgame/entities/trigger/TriggerAutoDoor.h
@@ -275,6 +283,7 @@ SET(HEADERS_SVGAME
 	${HEADERS_SVGAME_ENTITIES_FUNC}
 	${HEADERS_SVGAME_ENTITIES_INFO}
 	${HEADERS_SVGAME_ENTITIES_MISC}
+	${HEADERS_SVGAME_ENTITIES_PATH}
 	${HEADERS_SVGAME_ENTITIES_TRIGGER} 
 	${HEADERS_SVGAME_ENTITIES_WEAPONRY}
 	${HEADERS_SVGAME_ENTITIES}
@@ -756,6 +765,7 @@ SOURCE_GROUP("source\\entities\\base"		FILES ${SRC_SVGAME_ENTITIES_BASE} )
 SOURCE_GROUP("source\\entities\\info"		FILES ${SRC_SVGAME_ENTITIES_INFO} )
 SOURCE_GROUP("source\\entities\\func"		FILES ${SRC_SVGAME_ENTITIES_FUNC} )
 SOURCE_GROUP("source\\entities\\misc"		FILES ${SRC_SVGAME_ENTITIES_MISC} )
+SOURCE_GROUP("source\\entities\\path"		FILES ${SRC_SVGAME_ENTITIES_PATH} )
 SOURCE_GROUP("source\\entities\\target"		FILES ${SRC_SVGAME_ENTITIES_TARGET} )
 SOURCE_GROUP("source\\entities\\trigger"	FILES ${SRC_SVGAME_ENTITIES_TRIGGER} )
 SOURCE_GROUP("source\\entities\\weaponry"	FILES ${SRC_SVGAME_ENTITIES_WEAPONRY} )
@@ -771,6 +781,7 @@ SOURCE_GROUP("source\\entities\\base"		FILES ${HEADERS_SVGAME_ENTITIES_BASE} )
 SOURCE_GROUP("source\\entities\\func"		FILES ${HEADERS_SVGAME_ENTITIES_FUNC} )
 SOURCE_GROUP("source\\entities\\info"		FILES ${HEADERS_SVGAME_ENTITIES_INFO} )
 SOURCE_GROUP("source\\entities\\misc"		FILES ${HEADERS_SVGAME_ENTITIES_MISC} )
+SOURCE_GROUP("source\\entities\\path"		FILES ${HEADERS_SVGAME_ENTITIES_PATH} )
 SOURCE_GROUP("source\\entities\\trigger"	FILES ${HEADERS_SVGAME_ENTITIES_TRIGGER} )
 SOURCE_GROUP("source\\entities\\weaponry"	FILES ${HEADERS_SVGAME_ENTITIES_WEAPONRY} )
 SOURCE_GROUP("source\\gamemodes"			FILES ${HEADERS_SVGAME_GAMEMODES} )
