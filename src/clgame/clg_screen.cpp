@@ -12,34 +12,7 @@
 #include "clg_media.h"
 #include "clg_screen.h"
 
-// Number of "sb_pics"
-#define STAT_PICS   11              // Number of "sb_pics"
-#define STAT_MINUS  (STAT_PICS - 1) // Index into the sb_pics array pointing at the pic name for the '-'
-
-// Our client game screen container struct.
-static struct {
-    qboolean    initialized;        // ready to draw
-
-    qhandle_t   font_pic;
-
-    qhandle_t   pause_pic;
-    int         pause_width, pause_height;
-
-    qhandle_t   loading_pic;
-    int         loading_width, loading_height;
-
-    qhandle_t   crosshair_pic;
-    int         crosshair_width, crosshair_height;
-    color_t     crosshair_color;
-
-    qhandle_t   sb_pics[2][STAT_PICS];
-    qhandle_t   inven_pic;
-    qhandle_t   field_pic;
-
-    int         hud_width, hud_height;
-    float       hud_scale;
-    float       hud_alpha;
-} scr;
+RenderScreenData scr;
 
 //-----
 // CVars.
@@ -50,9 +23,9 @@ static cvar_t* scr_fps;         // Show FPS count, or not.
 static cvar_t* scr_showitemname;// Show item name, or not.
 
 static cvar_t* scr_draw2d;      // To draw 2D elements or not.
-static cvar_t* scr_alpha;       // Alpha value for elements.
+cvar_t* scr_alpha;              // WID: TODO: Move elsewhere... // Alpha value for elements.
 static cvar_t* scr_font;        // The quake fontset to use for rendering.
-static cvar_t* scr_scale;       // Determines the scale we render our screen elements at.
+cvar_t* scr_scale;       // WID: TODO: Move elsewhere... // Determines the scale we render our screen elements at.
 
 static cvar_t* scr_centertime;  // The amount of time the center print is on-screen.
 
@@ -390,7 +363,7 @@ void SCR_CenterPrint(const char* str)
 // Takes care of actually drawing the center print string.
 //===============
 //
-static void SCR_DrawCenterString(void)
+void SCR_DrawCenterString(void)
 {
     int y;
     float alpha;
@@ -709,7 +682,7 @@ static void SCR_UnDraw_f(void)
     Com_Print("Draw string '%s' not found.\n", s);
 }
 
-static void SCR_DrawObjects(void)
+void SCR_DrawObjects(void)
 {
     char buffer[MAX_QPATH];
     int x, y;
@@ -741,7 +714,7 @@ static void SCR_DrawObjects(void)
     }
 }
 
-static void SCR_DrawFPS(void)
+void SCR_DrawFPS(void)
 {
     if (scr_fps->integer == 0)
         return;
@@ -802,7 +775,7 @@ void SCR_AddToChatHUD(const char* text)
         *p = 0;
 }
 
-static void SCR_DrawChatHUD(void)
+void SCR_DrawChatHUD(void)
 {
     int x, y, flags, step;
     unsigned i, lines, time;
@@ -962,7 +935,7 @@ static void HUD_DrawNumber(int x, int y, int color, int width, int value)
 
 #define DISPLAY_ITEMS   17
 
-static void SCR_DrawInventory(void)
+void SCR_DrawInventory(void)
 {
     int     i;
     int     num, selected_num, item;
@@ -1382,7 +1355,7 @@ static void SCR_ExecuteLayoutString(const char* s)
 //=============================================================================
 
 
-static void SCR_DrawCrosshair(void)
+void SCR_DrawCrosshair(void)
 {
     int x, y;
 
@@ -1402,7 +1375,7 @@ static void SCR_DrawCrosshair(void)
 }
 
 // The status bar is a small layout program that is based on the stats array
-static void SCR_DrawStats(void)
+void SCR_DrawStats(void)
 {
     if (scr_draw2d->integer <= 1)
         return;
@@ -1410,7 +1383,7 @@ static void SCR_DrawStats(void)
     SCR_ExecuteLayoutString(cl->configstrings[ConfigStrings::StatusBar]);
 }
 
-static void SCR_DrawLayout(void)
+void SCR_DrawLayout(void)
 {
     if (scr_draw2d->integer == 3 && !clgi.Key_IsDown(K_F1))
         return;     // turn off for GTV
@@ -1479,7 +1452,7 @@ static void SCR_Sky_f(void)
     clgi.R_SetSky(name, rotate, axis);
 }
 
-static void SCR_CalcVRect(void) {
+void SCR_CalcVRect(void) {
     scr_vrect.width = scr.hud_width;
     scr_vrect.height = scr.hud_height;
     scr_vrect.x = 0;
