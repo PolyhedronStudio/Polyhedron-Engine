@@ -97,7 +97,40 @@ void FuncTrain::NextCornerThink() {
 // FuncTrain::WaitAtCorner
 //===============
 void FuncTrain::WaitAtCorner() {
+	// Trigger stuff that is associated with the current path corner
+	if ( currentPathEntity->GetPathTarget() ) {
+		// Temporarily swap target and pathTarget
+		std::string nextCorner = currentPathEntity->GetTarget();
+		currentPathEntity->SetTarget( currentPathEntity->GetPathTarget() );
+		currentPathEntity->UseTargets( activator );
+		currentPathEntity->SetTarget( nextCorner );
 
+		// Do not proceed if we got killed by a killtarget
+		if ( GetServerFlags() & EntityServerFlags::Remove ) {
+			return;
+		}
+	}
+
+	if ( moveInfo.wait ) {
+		if ( moveInfo.wait > 0.0f ) {
+			SetNextThinkTime( level.time + moveInfo.wait );
+			SetThinkCallback( &FuncTrain::NextCornerThink );
+		} else if ( GetSpawnFlags() & SF_Toggled ) {
+			NextCornerThink();
+			spawnFlags &= ~SF_StartOn;
+			SetVelocity( vec3_zero() );
+			SetNextThinkTime( 0.0f );
+		}
+
+		if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
+			if ( moveInfo.endSoundIndex ) {
+				gi.Sound( serverEntity, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1, ATTN_STATIC, 0 );
+			}
+			SetSound( 0 );
+		}
+	} else {
+		NextCornerThink();
+	}
 }
 
 //===============
