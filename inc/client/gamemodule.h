@@ -38,7 +38,7 @@ void		CL_GM_UpdateUserInfo(cvar_t* var, from_t from);
 //
 // Entities.
 //
-void		CL_GM_EntityEvent(int number);
+void		CL_GM_EntityEvent(int32_t number);
 
 //
 // Media
@@ -52,7 +52,7 @@ void        CL_GM_ShutdownMedia(void);
 //
 // Movement.
 // 
-void CL_GM_BuildFrameMoveCommand(int msec);
+void CL_GM_BuildFrameMoveCommand(int32_t msec);
 void CL_GM_FinalizeFrameMoveCommand(void);
 
 //
@@ -60,15 +60,15 @@ void CL_GM_FinalizeFrameMoveCommand(void);
 //
 void		CL_GM_CheckPredictionError(ClientUserCommand* clientUserCommand);
 void		CL_GM_PredictAngles(void);
-void		CL_GM_PredictMovement(unsigned int acknowledgedCommandIndex, unsigned int currentCommandIndex);
+void		CL_GM_PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex);
 
 //
 // Parse
 //
 qboolean	CL_GM_UpdateConfigString(int index, const char* str);
 void		CL_GM_StartServerMessage(void);
-qboolean	CL_GM_ParseServerMessage(int serverCommand);
-qboolean    CL_GM_SeekDemoMessage(int demoCommand);
+qboolean	CL_GM_ParseServerMessage(int32_t serverCommand);
+qboolean    CL_GM_SeekDemoMessage(int32_t demoCommand);
 void		CL_GM_EndServerMessage(void);
 
 //

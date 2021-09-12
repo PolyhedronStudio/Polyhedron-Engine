@@ -801,7 +801,7 @@ void CL_GM_StartServerMessage (void) {
 // give the CG Module access to do with it as it pleases.
 //===============
 //
-qboolean CL_GM_UpdateConfigString (int index, const char *str) {
+qboolean CL_GM_UpdateConfigString (int32_t index, const char *str) {
     if (cge && cge->serverMessage)
         return cge->serverMessage->UpdateConfigString(index, str);
 
@@ -816,7 +816,7 @@ qboolean CL_GM_UpdateConfigString (int index, const char *str) {
 // Returns true if the message was parsed
 //===============
 //
-qboolean CL_GM_ParseServerMessage (int serverCommand) {
+qboolean CL_GM_ParseServerMessage (int32_t serverCommand) {
     if (cge && cge->serverMessage)
         return cge->serverMessage->Parse(serverCommand);
 
@@ -832,7 +832,7 @@ qboolean CL_GM_ParseServerMessage (int serverCommand) {
 // svc_centerprint can be skipped.
 //===============
 //
-qboolean CL_GM_SeekDemoMessage (int demoCommand) {
+qboolean CL_GM_SeekDemoMessage (int32_t demoCommand) {
     if (cge && cge->serverMessage)
         return cge->serverMessage->SeekDemoMessage(demoCommand);
 
@@ -871,7 +871,7 @@ void CL_GM_CheckPredictionError(ClientUserCommand *clientUserCommand) {
 // the current frame.
 //===============
 //
-void CL_GM_BuildFrameMoveCommand(int msec) {
+void CL_GM_BuildFrameMoveCommand(int32_t msec) {
     if (cge && cge->movement)
         cge->movement->BuildFrameMovementCommand(msec);
 }
@@ -908,7 +908,7 @@ void CL_GM_PredictAngles(void) {
 // Called by the client to predict the actual movement.
 //===============
 //
-void CL_GM_PredictMovement(unsigned int ack, unsigned int current) {
+void CL_GM_PredictMovement(uint32_t ack, uint32_t current) {
     if (cge && cge->prediction)
         cge->prediction->PredictMovement(ack, current);
 }

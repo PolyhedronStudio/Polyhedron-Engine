@@ -48,7 +48,10 @@ void ClientGameExports::ClearClientState() {
     CLG_ClearTempEntities();
 }
 
-// Updates the origin. (Used by the engine for determining current audio position too.)
+//---------------
+// ClientGameExports::UpdateClientOrigin
+//
+//---------------
 void ClientGameExports::UpdateClientOrigin() {
     PlayerState* currentPlayerState = NULL;
     PlayerState* previousPlayerState = NULL;
@@ -138,7 +141,10 @@ void ClientGameExports::UpdateClientOrigin() {
     clgi.UpdateListenerOrigin();
 }
 
-// Called when a demo is being seeked through.
+//---------------
+// ClientGameExports::DemoSeek
+//
+//---------------
 void ClientGameExports::DemoSeek() {
     // Clear Effects.
     CLG_ClearEffects();
@@ -146,20 +152,27 @@ void ClientGameExports::DemoSeek() {
     CLG_ClearTempEntities();
 }
 
-// Called after all downloads are done. (Aka, a map has started.)
-// Not used for demos.
+//---------------
+// ClientGameExports::ClientBegin
+//
+//---------------
 void ClientGameExports::ClientBegin() {
 
 }
 
-// Called each VALID client frame. Handle per VALID frame basis 
-// things here.
+//---------------
+// ClientGameExports::ClientDeltaFrame
+//
+//---------------
 void ClientGameExports::ClientDeltaFrame() {
     // Called each time a valid client frame has been 
     SCR_SetCrosshairColor();
 }
 
-// Called each client frame. Handle per frame basis things here.
+//---------------
+// ClientGameExports::ClientFrame
+//
+//---------------
 void ClientGameExports::ClientFrame() {
     // Advance local effects.
 #if USE_DLIGHTS
@@ -170,14 +183,20 @@ void ClientGameExports::ClientFrame() {
 #endif
 }
 
-// Called when a disconnect even occures. Including those for Com_Error
+//---------------
+// ClientGameExports::ClientDisconnect
+//
+//---------------
 void ClientGameExports::ClientDisconnect() {
     // Clear the chat hud.
     SCR_ClearChatHUD_f();
 }
 
 
-// Called when there is a needed retransmit of user info variables.
+//---------------
+// ClientGameExports::ClientUpdateUserinfo
+//
+//---------------
 void ClientGameExports::ClientUpdateUserinfo(cvar_t* var, from_t from) {
     // If there is a skin change, and the gender setting is set to auto find it...
     if (var == info_skin && from > FROM_CONSOLE && gender_auto->integer) {
@@ -198,7 +217,10 @@ void ClientGameExports::ClientUpdateUserinfo(cvar_t* var, from_t from) {
 }
 
 
-// Utility function for CLG_UpdateOrigin
+//---------------
+// ClientGameExports::LerpClientFieldOfView
+//
+//---------------
 float ClientGameExports::LerpClientFieldOfView(float oldFieldOfView, float newFieldOfView, float lerp) {
     if (clgi.IsDemoPlayback()) {
         float fov = info_fov->value;
