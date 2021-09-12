@@ -12,6 +12,8 @@ public:
 	const vec3_t	BboxSize = vec3_t( 8.0f, 8.0f, 8.0f );
 
 	void			Spawn() override;
-	virtual void	OnReachedCorner( SVGBaseEntity* ent );
+
+	// For AI
+	virtual void	OnReachedCorner( SVGBaseEntity* traveler );
 };
 

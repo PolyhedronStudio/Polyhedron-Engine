@@ -17,6 +17,9 @@ PathCorner::PathCorner( Entity* entity )
 
 }
 
+//===============
+// PathCorner::Spawn
+//===============
 void PathCorner::Spawn() {
     Base::Spawn();
 
@@ -32,6 +35,9 @@ void PathCorner::Spawn() {
     LinkEntity();
 }
 
-void PathCorner::OnReachedCorner( SVGBaseEntity* ent ) {
-
+//===============
+// PathCorner::OnReachedCorner
+//===============
+void PathCorner::OnReachedCorner( SVGBaseEntity* traveler ) {
+    // Not implemented   
 }
