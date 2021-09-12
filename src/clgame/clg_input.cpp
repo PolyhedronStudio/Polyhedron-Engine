@@ -308,7 +308,7 @@ static void IN_MLookUp(void)
 // Handles the mouse move based input adjustment.
 //================
 //
-static void CLG_MouseMove() {
+void CLG_MouseMove() {
     int deltaX, deltaY;
     float motionX, motionY;
     float speed;
@@ -375,7 +375,7 @@ static void CLG_MouseMove() {
 // Moves the local angle positions
 //================
 //
-static void CLG_AdjustAngles(int msec)
+void CLG_AdjustAngles(int msec)
 {
     float speed;
 
@@ -404,7 +404,7 @@ static void CLG_AdjustAngles(int msec)
 // Build and return the intended movement vector
 //================
 //
-static vec3_t CLG_BaseMove(const vec3_t& inMove)
+vec3_t CLG_BaseMove(const vec3_t& inMove)
 {
     vec3_t outMove = inMove;
 
@@ -444,7 +444,7 @@ static vec3_t CLG_BaseMove(const vec3_t& inMove)
 // Returns the clamped movement speeds.
 //================
 //
-static vec3_t CLG_ClampSpeed(const vec3_t& inMove)
+vec3_t CLG_ClampSpeed(const vec3_t& inMove)
 {
     vec3_t outMove = inMove;
 
@@ -464,7 +464,7 @@ static vec3_t CLG_ClampSpeed(const vec3_t& inMove)
 // Ensures the Pitch is clamped to prevent camera issues.
 //================
 //
-static void CLG_ClampPitch(void)
+void CLG_ClampPitch(void)
 {
     float pitch;
 

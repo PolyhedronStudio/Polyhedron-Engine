@@ -1,7 +1,7 @@
 // License here.
 // 
 //
-// ClientGameExportCore implementation.
+// ClientGameCore implementation.
 #pragma once
 
 #include "shared/interfaces/IClientGameExports.h"
@@ -9,7 +9,7 @@
 //---------------------------------------------------------------------
 // Client Game Core IMPLEMENTATION.
 //---------------------------------------------------------------------
-class ClientGameExportCore : public IClientGameExportCore {
+class ClientGameCore : public IClientGameExportCore {
 public:
 	// Initializes the client game.
 	void Initialize() final;

@@ -1,7 +1,7 @@
 // License here.
 // 
 //
-// ClientGameExportCore implementation.
+// ClientGameMedia implementation.
 #pragma once
 
 #include "shared/interfaces/IClientGameExports.h"
@@ -12,21 +12,21 @@
 class ClientGameMedia : public IClientGameExportMedia {
 public:
     // Called when the client wants to know the name of a custom load state.
-    virtual std::string GetLoadStateName(LoadState loadState) = 0;
+    std::string GetLoadStateName(LoadState loadState) final;
 
     // This is called when the client starts, but also when the renderer has had
     // modified settings.
     //
     // It should register the basic screen media, 2D icons etc.
-    virtual void LoadScreen() = 0;
+    void LoadScreen() final;
 
     // This is called when the client spawns into a server,
     //
     // It should register world related media here, such as particles that are
     // used in-game, or view models, or sounds, etc.
-    virtual void LoadWorld() = 0;
+    void LoadWorld() final;
 
     // Called upon initialization of the renderer.
-    virtual void Initialize() = 0;
+    void Initialize() final;
 };
 

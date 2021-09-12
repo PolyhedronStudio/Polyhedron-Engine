@@ -161,7 +161,7 @@ static const cmdreg_t cmd_cgmodule[] = {
 // ClientGameExportCore::Initialize
 //
 //---------------
-void ClientGameExportCore::Initialize() {
+void ClientGameCore::Initialize() {
     // Begin init log.
     Com_Print("\n%s\n", "==== InitCLGame ====");
 
@@ -251,6 +251,6 @@ void ClientGameExportCore::Initialize() {
 // ClientGameExportCore::Shutdown
 //
 //---------------
-void ClientGameExportCore::Shutdown() {
+void ClientGameCore::Shutdown() {
 
 }

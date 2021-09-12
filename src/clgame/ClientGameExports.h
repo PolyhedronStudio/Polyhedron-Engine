@@ -23,24 +23,24 @@ public:
     void ClearClientState() final;
 
     // Updates the origin. (Used by the engine for determining current audio position too.)
-    void UpdateClientOrigin();
+    void UpdateClientOrigin() final;
 
     // Called when a demo is being seeked through.
-    void DemoSeek();
+    void DemoSeek() final;
 
     // Called after all downloads are done. (Aka, a map has started.)
     // Not used for demos.
-    void ClientBegin();
+    void ClientBegin() final;
     // Called each VALID client frame. Handle per VALID frame basis 
     // things here.
-    void ClientDeltaFrame();
+    void ClientDeltaFrame() final;
     // Called each client frame. Handle per frame basis things here.
-    void ClientFrame();
+    void ClientFrame() final;
     // Called when a disconnect even occures. Including those for Com_Error
-    void ClientDisconnect();
+    void ClientDisconnect() final;
 
     // Called when there is a needed retransmit of user info variables.
-    void ClientUpdateUserinfo(cvar_t* var, from_t from);
+    void ClientUpdateUserinfo(cvar_t* var, from_t from) final;
 
 private:
     // Utility function for CLG_UpdateOrigin
