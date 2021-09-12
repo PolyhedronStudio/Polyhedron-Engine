@@ -300,7 +300,7 @@ public:
 	IClientGameImportSound* sound;
 	IClientGameImportSystem* system;
 
-	float CalculateClientFieldOfView(float x, float width, float height);
+	float CalculateClientFieldOfView(float fieldOfViewX, float width, float height);
 	void ClearClientState();
 	void UpdateClientOrigin();
 	void DemoSeek();

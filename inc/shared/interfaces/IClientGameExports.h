@@ -153,7 +153,7 @@ public:
     // General.
     //---------------------------------------------------------------------
     // Calculates the FOV the client is running. (Important to have in order.)
-    virtual float CalculateClientFieldOfView(float x, float width, float height) = 0;
+    virtual float CalculateClientFieldOfView(float fieldOfViewX, float width, float height) = 0;
 
     // Called upon whenever a client disconnects, for whichever reason.
     // Could be him quiting, or pinging out etc.
