@@ -90,7 +90,61 @@ void FuncTrain::PostSpawn() {
 // FuncTrain::NextCornerThink
 //===============
 void FuncTrain::NextCornerThink() {
+	SVGBaseEntity* entity = nullptr;
+	vec3_t destination;
+	bool first = true;
+	bool again = true;
 
+	// Train encountered teleporting path_corners, so pick the next one each time
+	// Originally, this used a goto
+	while ( again )
+	{
+		again = false;
+
+		if ( targetStr.empty() ) {
+			return;
+		}
+
+		entity = SVG_FindEntityByKeyValue( "targetname", GetTarget() );
+		if ( nullptr == entity ) {
+			gi.DPrintf( "FuncTrain::NextCornerThink: Target '%s' doesn't exist\n", GetTarget().c_str() );
+			return;
+		}
+		
+		// QUESTIONABLE: Are mappers gonna use non-path_corner ents?
+		// We'll probably be rewriting this logic anyway someday...
+		if ( !entity->IsClass<PathCorner>() ) {
+			gi.DPrintf( "FuncTrain::NextCornerThink: Target '%s' isn't a path_corner\n", GetTarget().c_str() );
+			return;
+		}
+		
+		SetTarget( entity->GetTarget() );
+
+		if ( entity->GetSpawnFlags() & PathCorner::SF_Teleport ) {
+			if ( !first ) {
+				gi.DPrintf( "Connected teleport path_corners, see '%s' at '%s'\n" );
+				return;
+			}
+
+			first = false;
+			again = true;
+			SetOrigin( entity->GetOrigin() - GetMins() );
+			SetOldOrigin( GetOrigin() );
+			SetEventID( EntityEvent::OtherTeleport );
+			LinkEntity();
+		}
+	}
+
+	moveInfo.wait = entity->GetWaitTime();
+	currentPathEntity = static_cast<PathCorner*>(entity);
+
+	destination = entity->GetOrigin() - GetMins();
+	moveInfo.state = MoverState::Top;
+	moveInfo.startOrigin = GetOrigin();
+	moveInfo.endAngles = destination;
+
+	BrushMoveCalc( destination, &FuncTrain::OnWaitAtCorner );
+	spawnFlags |= SF_StartOn;
 }
 
 //===============
@@ -130,6 +184,15 @@ void FuncTrain::WaitAtCorner() {
 		}
 	} else {
 		NextCornerThink();
+	}
+}
+
+//===============
+// FuncTrain::OnWaitAtCorner
+//===============
+void FuncTrain::OnWaitAtCorner( Entity* ent ) {
+	if ( ent->classEntity->IsSubclassOf<FuncTrain>() ) {
+		static_cast<FuncTrain*>( ent->classEntity )->WaitAtCorner();
 	}
 }
 

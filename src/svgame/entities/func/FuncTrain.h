@@ -25,6 +25,7 @@ public:
 	void			NextCornerThink();
 	// Waits at the arrived path_corner
 	void			WaitAtCorner();
+	static void		OnWaitAtCorner( Entity* ent );
 	// The train has been blocked by an obstacle, damage it or stop?
 	void			TrainBlocked( SVGBaseEntity* other );
 
