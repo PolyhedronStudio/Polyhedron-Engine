@@ -30,4 +30,5 @@ public:
 
 private:
 	PathCorner*		currentPathEntity{ nullptr };
+	float			damageDebounceTime{ 0.0f };
 };

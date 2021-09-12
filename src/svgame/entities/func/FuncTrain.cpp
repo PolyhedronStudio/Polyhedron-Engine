@@ -6,6 +6,7 @@
 
 #include "../../g_local.h"
 #include "../../entities.h"
+#include "../../effects.h"
 
 #include "../base/SVGBaseTrigger.h"
 #include "../base/SVGBaseMover.h"
@@ -103,5 +104,21 @@ void FuncTrain::WaitAtCorner() {
 // FuncTrain::TrainBlocked
 //===============
 void FuncTrain::TrainBlocked( SVGBaseEntity* other ) {
+	if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !other->GetClient() ) {
+		// Give it a chance to go away on its own terms (like gibs)
+		SVG_InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 100000, 1, 0, MeansOfDeath::Crush );
+		// If it's still there, nuke it
+		if ( other ) {
+			SVG_BecomeExplosion1( other );
+		}
 
+		return;
+	}
+
+	if ( level.time < damageDebounceTime || !GetDamage() ) {
+		return;
+	}
+
+	damageDebounceTime = level.time + 0.5f;
+	SVG_InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 }
