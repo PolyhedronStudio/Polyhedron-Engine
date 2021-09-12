@@ -11,6 +11,8 @@
 
 void CLG_RegisterInput(void);
 
+void CLG_KeyClear(KeyBinding* b);
+
 void CLG_BuildFrameMoveCommand(int32_t miliseconds);
 void CLG_FinalizeFrameMoveCommand(void);
 
