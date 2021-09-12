@@ -115,7 +115,7 @@ static void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, cons
 CL_PMTrace
 ================
 */
-static trace_t q_gameabi CLG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end)
+trace_t q_gameabi CLG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end)
 {
     trace_t    t;
 
@@ -130,7 +130,7 @@ static trace_t q_gameabi CLG_Trace(const vec3_t &start, const vec3_t &mins, cons
     return t;
 }
 
-static int CLG_PointContents(const vec3_t &point)
+int CLG_PointContents(const vec3_t &point)
 {
     int         i;
     cl_entity_t* ent;
@@ -165,7 +165,7 @@ static int CLG_PointContents(const vec3_t &point)
 // Can be called by either the server or the client
 //================
 //
-static void CLG_UpdateClientSoundSpecialEffects(PlayerMove* pm)
+void CLG_UpdateClientSoundSpecialEffects(PlayerMove* pm)
 {
     static int underwater;
 
