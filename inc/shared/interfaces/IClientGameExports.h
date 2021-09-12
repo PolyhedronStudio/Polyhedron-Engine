@@ -11,6 +11,7 @@
 // CORE Export Interface.
 //---------------------------------------------------------------------
 class IClientGameExportCore {
+public:
 	//---------------------------------------------------------------------
 	// API Version.
 	// 
@@ -47,6 +48,7 @@ class IClientGameExportCore {
 // ENTITY interface to implement. 
 //---------------------------------------------------------------------
 class IClientGameExportEntities {
+public:
     // Executed whenever an entity event is receieved.
     virtual void Event(int32_t number) = 0;
 };
@@ -55,6 +57,7 @@ class IClientGameExportEntities {
 // MOVEMENT interface.
 //---------------------------------------------------------------------
 class IClientGameExportMovement {
+public:
     // Called when the movement command needs to be build for the given
     // client networking frame.
     virtual void BuildFrameMovementCommand(int32_t msec) = 0;
@@ -67,8 +70,21 @@ class IClientGameExportMovement {
 // MEDIA interface.
 //---------------------------------------------------------------------
 class IClientGameExportMedia {
+public:
     // Called when the client wants to know the name of a custom load state.
     virtual std::string GetLoadStateName(LoadState loadState) = 0;
+
+    // This is called when the client starts, but also when the renderer has had
+    // modified settings.
+    //
+    // It should register the basic screen media, 2D icons etc.
+    virtual void LoadScreen() = 0;
+
+    // This is called when the client spawns into a server,
+    //
+    // It should register world related media here, such as particles that are
+    // used in-game, or view models, or sounds, etc.
+    virtual void LoadWorld() = 0;
 
     // Called upon initialization of the renderer.
     virtual void Initialize() = 0;
@@ -78,6 +94,7 @@ class IClientGameExportMedia {
 // Predict Movement (Client Side)
 //---------------------------------------------------------------------
 class IClientGameExportPrediction {
+public:
     virtual void CheckPredictionError(ClientUserCommand* clientUserCommand) = 0;
     virtual void PredictAngles() = 0;
     virtual void PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) = 0;
@@ -87,6 +104,7 @@ class IClientGameExportPrediction {
 // Screen
 //---------------------------------------------------------------------
 class IClientGameExportScreen {
+public:
     // Called when the engine decides to render the 2D display.
     virtual void RenderScreen() = 0;
     // Called when the screen mode has changed.
@@ -101,6 +119,7 @@ class IClientGameExportScreen {
 // ServerMessage Parsing.
 //---------------------------------------------------------------------
 class IClientGameExportServerMessage {
+public:
     // Called when a configstring update has been parsed and still left
     // unhandled by the client.
     virtual qboolean UpdateConfigString(int32_t index, const char* str) = 0;
@@ -121,6 +140,7 @@ class IClientGameExportServerMessage {
 // View
 //---------------------------------------------------------------------
 class IClientGameExportView {
+public:
     // Called right after the engine clears the scene, and begins a new one.
     virtual void PreRenderView() = 0;
     // Called whenever the engine wants to clear the scene.

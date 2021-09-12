@@ -25,7 +25,7 @@
 // Contains the function pointers being passed in from the engine.
 ClientGameImport clgi;
 // Static export variable, lives as long as the client game dll lives.
-ClientGameExport clge;
+IClientGameExports *clge;
 
 // Pointer to the actual client frame state.
 ClientState* cl = NULL;
@@ -175,7 +175,7 @@ cvar_t* vid_rtx = NULL;
 //    // Return cgame function pointer struct.
 //    return &clge;
 //}
-q_exported ClientGameExport* GetClientGameAPI(ClientGameImport* clgimp) {
+q_exported IClientGameExports* GetClientGameAPI(ClientGameImport* clgimp) {
     // Store a copy of the engine imported function pointer struct.
     clgi = *clgimp;
 
@@ -184,17 +184,17 @@ q_exported ClientGameExport* GetClientGameAPI(ClientGameImport* clgimp) {
     cs = clgimp->cs;
 
     // Setup the API version.
-    clge.apiversion = {
-        CGAME_API_VERSION_MAJOR,
-        CGAME_API_VERSION_MINOR,
-        CGAME_API_VERSION_POINT,
-    };
+    //clge.apiversion = {
+    //    CGAME_API_VERSION_MAJOR,
+    //    CGAME_API_VERSION_MINOR,
+    //    CGAME_API_VERSION_POINT,
+    //};
 
     // Test if it is compatible, if not, return clge with only the apiversion set.
     // The client will handle the issue from there on.
     if (clgimp->apiversion.major != CGAME_API_VERSION_MAJOR ||
         clgimp->apiversion.minor != CGAME_API_VERSION_MINOR) {
-        clge.apiversion = { CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT };
+        //clge.apiversion = { CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT };
         
         // WID: TODO: Gotta do something alternative here.
         return nullptr;
@@ -202,7 +202,7 @@ q_exported ClientGameExport* GetClientGameAPI(ClientGameImport* clgimp) {
     }
 
     // Return cgame function pointer struct.
-    return &clge;
+    return clge;
 }
 
 //#ifdef __cplusplus

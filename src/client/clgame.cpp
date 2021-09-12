@@ -29,7 +29,7 @@
 #include "shared/clgame.h"
 
 // Contains the functions being exported to client game dll.
-ClientGameExport *cge;
+IClientGameExports *cge;
 
 // Operating System handle to the cgame library.
 static void *cgame_library;
@@ -361,23 +361,23 @@ void CL_ShutdownGameProgs(void)
 void CL_InitGameProgs(void)
 {
     ClientGameImport   importAPI;
-    ClientGameExport* (*entry)(ClientGameImport*) = NULL;
+    IClientGameExports* (*entry)(ClientGameImport*) = NULL;
 
     // unload anything we have now
     CL_ShutdownGameProgs();
 
     // for debugging or `proxy' mods
     if (sys_forcecgamelib->string[0])
-        entry = (ClientGameExport * (*)(ClientGameImport*))_CL_LoadGameLibrary(sys_forcecgamelib->string); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
+        entry = (IClientGameExports * (*)(ClientGameImport*))_CL_LoadGameLibrary(sys_forcecgamelib->string); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
 
     // try game first
     if (!entry && fs_game->string[0]) {
-        entry = (ClientGameExport * (*)(ClientGameImport*))CL_LoadGameLibrary(fs_game->string, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
+        entry = (IClientGameExports * (*)(ClientGameImport*))CL_LoadGameLibrary(fs_game->string, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
     }
 
     // then try basenac
     if (!entry) {
-        entry = (ClientGameExport * (*)(ClientGameImport*))CL_LoadGameLibrary(BASEGAME, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
+        entry = (IClientGameExports * (*)(ClientGameImport*))CL_LoadGameLibrary(BASEGAME, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
     }
 
     // all paths failed
@@ -614,10 +614,10 @@ void CL_InitGameProgs(void)
         return;
     }
 
-    if (cge->apiversion.major != CGAME_API_VERSION_MAJOR ||
-        cge->apiversion.minor != CGAME_API_VERSION_MINOR) {
+    if (cge->core->version.major != CGAME_API_VERSION_MAJOR ||
+        cge->core->version.minor != CGAME_API_VERSION_MINOR) {
         Com_Error(ERR_DROP, "Client Game DLL is version %i.%i.%i, expected %i.%i.%i",
-            cge->apiversion, cge->apiversion.major, cge->apiversion.minor, cge->apiversion.point, CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT);
+            cge->core->version.major, cge->core->version.minor, cge->core->version.point, CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT);
         return;
     }
 
@@ -639,9 +639,9 @@ void CL_InitGameProgs(void)
 // Called when the client is seeking in a demo playback.
 //===============
 //
-void CL_GM_EntityEvent(int number) {
-    if (cge)
-        cge->EntityEvent(number);
+void CL_GM_EntityEvent(int32_t number) {
+    if (cge && cge->entities)
+        cge->entities->Event(number);
 }
 
 //
@@ -652,8 +652,8 @@ void CL_GM_EntityEvent(int number) {
 //===============
 //
 void CL_GM_Init (void) {
-    if (cge)
-        cge->Init();
+    if (cge && cge->core)
+        cge->core->Initialize();
 }
 
 //
@@ -664,8 +664,8 @@ void CL_GM_Init (void) {
 //===============
 //
 void CL_GM_Shutdown (void) {
-    if (cge)
-        cge->Shutdown(); 
+    if (cge && cge->core)
+        cge->core->Shutdown(); 
 }
 
 //
@@ -677,7 +677,7 @@ void CL_GM_Shutdown (void) {
 //
 float CL_GM_CalcFOV(float fov_x, float width, float height) {
     if (cge)
-        return cge->CalcFOV(fov_x, width, height);
+        return cge->CalculateClientFieldOfView(fov_x, width, height);
     else
         return 0.f;
 }
@@ -691,7 +691,7 @@ float CL_GM_CalcFOV(float fov_x, float width, float height) {
 //
 void CL_GM_UpdateOrigin(void) {
     if (cge)
-        cge->UpdateOrigin();
+        cge->UpdateClientOrigin();
 }
 
 //
@@ -752,7 +752,7 @@ void CL_GM_ClientDisconnect(void) {
 //
 void CL_GM_ClearState(void) {
     if (cge)
-        cge->ClearState();
+        cge->ClearClientState();
 }
 
 //
@@ -778,7 +778,7 @@ void CL_GM_DemoSeek(void) {
 //
 void CL_GM_UpdateUserInfo(cvar_t* var, from_t from) {
     if (cge)
-        cge->UpdateUserinfo(var, from);
+        cge->ClientUpdateUserinfo(var, from);
 }
 
 //
@@ -789,8 +789,8 @@ void CL_GM_UpdateUserInfo(cvar_t* var, from_t from) {
 //===============
 //
 void CL_GM_StartServerMessage (void) {
-    if (cge)
-        cge->StartServerMessage();
+    if (cge && cge->serverMessage)
+        cge->serverMessage->Start();
 }
 
 //
@@ -802,8 +802,8 @@ void CL_GM_StartServerMessage (void) {
 //===============
 //
 qboolean CL_GM_UpdateConfigString (int index, const char *str) {
-    if (cge)
-        return cge->UpdateConfigString(index, str);
+    if (cge && cge->serverMessage)
+        return cge->serverMessage->UpdateConfigString(index, str);
 
     return false;
 }
@@ -817,8 +817,8 @@ qboolean CL_GM_UpdateConfigString (int index, const char *str) {
 //===============
 //
 qboolean CL_GM_ParseServerMessage (int serverCommand) {
-    if (cge)
-        return cge->ParseServerMessage(serverCommand);
+    if (cge && cge->serverMessage)
+        return cge->serverMessage->Parse(serverCommand);
 
     return false;
 }
@@ -833,8 +833,8 @@ qboolean CL_GM_ParseServerMessage (int serverCommand) {
 //===============
 //
 qboolean CL_GM_SeekDemoMessage (int demoCommand) {
-    if (cge)
-        return cge->SeekDemoMessage(demoCommand);
+    if (cge && cge->serverMessage)
+        return cge->serverMessage->SeekDemoMessage(demoCommand);
 
     return false;
 }
@@ -847,8 +847,8 @@ qboolean CL_GM_SeekDemoMessage (int demoCommand) {
 //===============
 //
 void CL_GM_EndServerMessage () {
-    if (cge)
-        cge->EndServerMessage(cls.realtime);
+    if (cge && cge->serverMessage)
+        cge->serverMessage->End(cls.realtime);
 }
 
 //
@@ -859,8 +859,8 @@ void CL_GM_EndServerMessage () {
 //===============
 //
 void CL_GM_CheckPredictionError(ClientUserCommand *clientUserCommand) {
-    if (cge)
-        cge->CheckPredictionError(clientUserCommand);
+    if (cge && cge->prediction)
+        cge->prediction->CheckPredictionError(clientUserCommand);
 }
 
 //
@@ -872,8 +872,8 @@ void CL_GM_CheckPredictionError(ClientUserCommand *clientUserCommand) {
 //===============
 //
 void CL_GM_BuildFrameMoveCommand(int msec) {
-    if (cge)
-        cge->BuildFrameMoveCommand(msec);
+    if (cge && cge->movement)
+        cge->movement->BuildFrameMovementCommand(msec);
 }
 
 //
@@ -885,8 +885,8 @@ void CL_GM_BuildFrameMoveCommand(int msec) {
 //===============
 //
 void CL_GM_FinalizeFrameMoveCommand(void) {
-    if (cge)
-        cge->FinalizeFrameMoveCommand();
+    if (cge && cge->movement)
+        cge->movement->FinalizeFrameMovementCommand();
 }
 
 //
@@ -897,8 +897,8 @@ void CL_GM_FinalizeFrameMoveCommand(void) {
 //===============
 //
 void CL_GM_PredictAngles(void) {
-    if (cge)
-        cge->PredictAngles();
+    if (cge && cge->prediction)
+        cge->prediction->PredictAngles();
 }
 
 //
@@ -909,8 +909,8 @@ void CL_GM_PredictAngles(void) {
 //===============
 //
 void CL_GM_PredictMovement(unsigned int ack, unsigned int current) {
-    if (cge)
-        cge->PredictMovement(ack, current);
+    if (cge && cge->prediction)
+        cge->prediction->PredictMovement(ack, current);
 }
 
 //
@@ -922,8 +922,8 @@ void CL_GM_PredictMovement(unsigned int ack, unsigned int current) {
 //
 void CL_GM_InitMedia(void)
 {
-    if (cge)
-        cge->InitMedia();
+    if (cge && cge->media)
+        cge->media->Initialize();
 }
 
 //
@@ -935,8 +935,8 @@ void CL_GM_InitMedia(void)
 //
 const char *CL_GM_GetMediaLoadStateName(LoadState state)
 {
-    if (cge)
-        return cge->GetMediaLoadStateName(state);
+    if (cge && cge->media)
+        return cge->media->GetLoadStateName(state).c_str();
     else
         return "";
 }
@@ -950,8 +950,8 @@ const char *CL_GM_GetMediaLoadStateName(LoadState state)
 //
 void CL_GM_LoadScreenMedia(void)
 {
-    if (cge)
-        cge->LoadScreenMedia();
+    if (cge && cge->media)
+        cge->media->LoadScreen();
 }
 
 //
@@ -963,8 +963,8 @@ void CL_GM_LoadScreenMedia(void)
 //
 void CL_GM_LoadWorldMedia(void)
 {
-    if (cge)
-        cge->LoadWorldMedia();
+    if (cge && cge->media)
+        cge->media->LoadWorld();
 }
 
 
@@ -976,8 +976,8 @@ void CL_GM_LoadWorldMedia(void)
 //===============
 //
 void CL_GM_ShutdownMedia (void) {
-    if (cge)
-        cge->ShutdownMedia();
+    if (cge && cge->core)
+        cge->core->Shutdown();
 }
 
 //
@@ -988,8 +988,8 @@ void CL_GM_ShutdownMedia (void) {
 //===============
 //
 void CL_GM_RenderScreen(void) {
-    if (cge)
-        cge->RenderScreen();
+    if (cge && cge->screen)
+        cge->screen->RenderScreen();
 }
 
 //
@@ -1000,8 +1000,8 @@ void CL_GM_RenderScreen(void) {
 //===============
 //
 void CL_GM_ScreenModeChanged(void) {
-    if (cge)
-        cge->ScreenModeChanged();
+    if (cge && cge->screen)
+        cge->screen->ScreenModeChanged();
 }
 
 //
@@ -1012,8 +1012,8 @@ void CL_GM_ScreenModeChanged(void) {
 //===============
 //
 void CL_GM_DrawLoadScreen(void) {
-    if (cge)
-        cge->DrawLoadScreen();
+    if (cge && cge->screen)
+        cge->screen->DrawLoadScreen();
 }
 
 //
@@ -1024,8 +1024,8 @@ void CL_GM_DrawLoadScreen(void) {
 //===============
 //
 void CL_GM_DrawPauseScreen(void) {
-    if (cge)
-        cge->DrawPauseScreen();
+    if (cge && cge->screen)
+        cge->screen->DrawPauseScreen();
 }
 
 //
@@ -1036,8 +1036,8 @@ void CL_GM_DrawPauseScreen(void) {
 //===============
 //
 void CL_GM_ClearScene() {
-    if (cge)
-        cge->ClearScene();
+    if (cge && cge->view)
+        cge->view->ClearScene();
 }
 
 //
@@ -1048,8 +1048,8 @@ void CL_GM_ClearScene() {
 //===============
 //
 void CL_GM_PreRenderView() {
-    if (cge)
-        cge->PreRenderView();
+    if (cge && cge->view)
+        cge->view->PreRenderView();
 }
 
 //
@@ -1060,8 +1060,8 @@ void CL_GM_PreRenderView() {
 //===============
 //
 void CL_GM_RenderView () {
-    if (cge)
-        cge->RenderView();
+    if (cge && cge->view)
+        cge->view->RenderView();
 }
 
 //
@@ -1072,6 +1072,6 @@ void CL_GM_RenderView () {
 //===============
 //
 void CL_GM_PostRenderView () {
-    if (cge)
-        cge->PostRenderView();
+    if (cge && cge->view)
+        cge->view->PostRenderView();
 }
