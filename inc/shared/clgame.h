@@ -639,7 +639,7 @@ extern "C" {
     } ClientGameImport;
 
     // Function pointer type for handling the actual import function.
-    typedef IClientGameExports (*GetClientGameAPI_t) (ClientGameImport);
+    typedef IClientGameExports (*GetClientGameAPI_t) (ClientGameImport*);
 #ifdef __cplusplus
 };  // Extern C.
 #endif

@@ -10,6 +10,15 @@ SET(SRC_CLGAME
 	clgame/ClientGameExports.cpp
 	clgame/ClientGameImports.cpp
 
+	clgame/exports/Core.cpp
+	clgame/exports/Entities.cpp
+	clgame/exports/Media.cpp
+	clgame/exports/Movement.cpp
+	clgame/exports/Prediction.cpp
+	clgame/exports/Screen.cpp
+	clgame/exports/ServerMessage.cpp
+	clgame/exports/View.cpp
+
 	clgame/clg_effects.cpp
 	clgame/clg_entities.cpp
 	clgame/clg_input.cpp
@@ -28,6 +37,15 @@ SET(SRC_CLGAME
 SET(HEADERS_CLGAME
 	clgame/ClientGameExports.h
 	clgame/ClientGameImports.h
+
+	clgame/exports/Core.h
+	clgame/exports/Entities.h
+	clgame/exports/Media.h
+	clgame/exports/Movement.h
+	clgame/exports/Prediction.h
+	clgame/exports/Screen.h
+	clgame/exports/ServerMessage.h
+	clgame/exports/View.h
 
 	clgame/clg_effects.h
 	clgame/clg_entities.h

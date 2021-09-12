@@ -1,19 +1,161 @@
-#include "clg_local.h"
+#include "../clg_local.h"
 
-#include "clg_effects.h"
-#include "clg_entities.h"
-#include "clg_input.h"
-#include "clg_main.h"
-#include "clg_media.h"
-#include "clg_parse.h"
-#include "clg_predict.h"
-#include "clg_screen.h"
-#include "clg_tents.h"
-#include "clg_view.h"
+#include "../clg_effects.h"
+#include "../clg_entities.h"
+#include "../clg_input.h"
+#include "../clg_main.h"
+#include "../clg_media.h"
+#include "../clg_parse.h"
+#include "../clg_predict.h"
+#include "../clg_screen.h"
+#include "../clg_tents.h"
+#include "../clg_view.h"
 
 #include "shared/interfaces/IClientGameExports.h"
-#include "ClientGameExports.h"
+#include "../ClientGameExports.h"
 #include "Core.h"
+
+//---------------
+// Minor command macro functions.
+//
+// They can have the same name as a cvar, but when a macro $ is used,
+// it gains a higher priority than the cvar.
+//
+// Example: echo $cl_health
+// will output the amount of health.
+//
+// These can be useful for debugging purposes, or for general use cases
+// where commands may need to be constructed for menus etc.
+//---------------
+static size_t CL_Health_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_HEALTH]);
+}
+
+static size_t CL_Ammo_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_AMMO]);
+}
+
+static size_t CL_Armor_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_ARMOR]);
+}
+
+static size_t CL_WeaponModel_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "%s",
+        cl->configstrings[cl->frame.playerState.gunIndex + ConfigStrings::Models]);
+}
+
+/*
+=================
+CL_Skins_f
+
+Load or download any custom player skins and models
+=================
+*/
+static void CL_Skins_f(void) {
+    int i;
+    char* s;
+    ClientInfo* ci;
+
+    if (clgi.GetClienState() < ClientConnectionState::Loading) {
+        Com_Print("Must be in a level to load skins.\n");
+        return;
+    }
+
+    CLG_RegisterVWepModels();
+
+    for (i = 0; i < MAX_CLIENTS; i++) {
+        s = cl->configstrings[ConfigStrings::PlayerSkins + i];
+        if (!s[0])
+            continue;
+        ci = &cl->clientInfo[i];
+        CLG_LoadClientInfo(ci, s);
+        if (!ci->model_name[0] || !ci->skin_name[0])
+            ci = &cl->baseClientInfo;
+        Com_Print("client %d: %s --> %s/%s\n", i, s,
+            ci->model_name, ci->skin_name);
+        clgi.SCR_UpdateScreen();
+    }
+}
+
+//---------------
+// Update functions for when cvars change.
+//
+// These will notify the server about the changes, this will apply to for
+// example, spectators who are viewing a game. They'll see/hear the same
+// as the actual player they are spectating due to the settings being shared
+// to the server.
+//---------------
+static void cl_chat_sound_changed(cvar_t* self) {
+    if (!*self->string)
+        self->integer = 0;
+    else if (!Q_stricmp(self->string, "misc/talk.wav"))
+        self->integer = 1;
+    else if (!Q_stricmp(self->string, "misc/talk1.wav"))
+        self->integer = 2;
+    else if (!self->integer && !COM_IsUint(self->string))
+        self->integer = 1;
+}
+
+static void cl_noskins_changed(cvar_t* self) {
+    int i;
+    char* s;
+    ClientInfo* ci;
+
+    if (clgi.GetClienState() < ClientConnectionState::Loading) {
+        return;
+    }
+
+    for (i = 0; i < MAX_CLIENTS; i++) {
+        s = cl->configstrings[ConfigStrings::PlayerSkins + i];
+        if (!s[0])
+            continue;
+        ci = &cl->clientInfo[i];
+        CLG_LoadClientInfo(ci, s);
+    }
+}
+
+static void cl_player_model_changed(cvar_t* self) {
+
+}
+
+static void cl_vwep_changed(cvar_t* self) {
+    if (clgi.GetClienState() < ClientConnectionState::Loading) {
+        return;
+    }
+    // Register view weapon models again.
+    CLG_RegisterVWepModels();
+    //cl_noskins_changed(self);
+}
+
+
+//---------------
+// Commands to register to the client.
+//---------------
+static const cmdreg_t cmd_cgmodule[] = {
+    //
+    // Client commands.
+    //
+    { "skins", CL_Skins_f },
+
+    //
+    // Forward to server commands
+    //
+    // The only thing this does is allow command completion
+    // to work. All of the unknown commands are automatically
+    // forwarded to the server for handling.
+
+    // TODO: maybe some day, we'll move these over to the CG Module.
+    //{ "say", NULL, CL_Say_c },
+    //{ "say_team", NULL, CL_Say_c },
+
+    { "wave" }, { "inven" }, { "kill" }, { "use" },
+    { "drop" }, { "info" }, { "prog" },
+    { "give" }, { "god" }, { "notarget" }, { "noclip" },
+    { "invuse" }, { "invprev" }, { "invnext" }, { "invdrop" },
+    { "weapnext" }, { "weapprev" },
+
+    {NULL}
+};
 
 //---------------
 // ClientGameExportCore::Initialize
