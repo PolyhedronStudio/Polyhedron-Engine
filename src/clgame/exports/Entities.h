@@ -1,14 +1,13 @@
 // License here.
 // 
 //
-// ClientGameExportCore implementation.
+// ClientGameEntities implementation.
 #pragma once
 
 #include "shared/interfaces/IClientGameExports.h"
 
 //---------------------------------------------------------------------
-// MAIN interface to implement. It holds pointers to actual sub interfaces,
-// which one of course has to implement as well.
+// Client Game Entities IMPLEMENTATION.
 //---------------------------------------------------------------------
 class ClientGameEntities : public IClientGameExportEntities {
 public:

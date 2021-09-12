@@ -7,8 +7,7 @@
 #include "shared/interfaces/IClientGameExports.h"
 
 //---------------------------------------------------------------------
-// MAIN interface to implement. It holds pointers to actual sub interfaces,
-// which one of course has to implement as well.
+// Client Game Core IMPLEMENTATION.
 //---------------------------------------------------------------------
 class ClientGameExportCore : public IClientGameExportCore {
 public:

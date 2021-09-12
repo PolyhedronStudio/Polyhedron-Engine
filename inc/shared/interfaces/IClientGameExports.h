@@ -73,7 +73,11 @@ public:
     // used in-game, or view models, or sounds, etc.
     virtual void LoadWorld() = 0;
 
-    // Called upon initialization of the renderer.
+    // This is called upon every time the renderer initializes, or does a total
+    // hard restart.
+    //
+    // Use this to load in persistent data, such as 2D pics. Or use it to
+    // register certain CVars related to.
     virtual void Initialize() = 0;
 };
 
