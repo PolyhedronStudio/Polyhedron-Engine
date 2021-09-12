@@ -140,7 +140,10 @@ void ClientGameExports::UpdateClientOrigin() {
 
 // Called when a demo is being seeked through.
 void ClientGameExports::DemoSeek() {
-
+    // Clear Effects.
+    CLG_ClearEffects();
+    // Clear Temp Entities.
+    CLG_ClearTempEntities();
 }
 
 // Called after all downloads are done. (Aka, a map has started.)
@@ -152,21 +155,46 @@ void ClientGameExports::ClientBegin() {
 // Called each VALID client frame. Handle per VALID frame basis 
 // things here.
 void ClientGameExports::ClientDeltaFrame() {
+    // Called each time a valid client frame has been 
+    SCR_SetCrosshairColor();
 }
 
 // Called each client frame. Handle per frame basis things here.
 void ClientGameExports::ClientFrame() {
-
+    // Advance local effects.
+#if USE_DLIGHTS
+    CLG_RunDLights();
+#endif
+#if USE_LIGHTSTYLES
+    CLG_RunLightStyles();
+#endif
 }
 
 // Called when a disconnect even occures. Including those for Com_Error
 void ClientGameExports::ClientDisconnect() {
-
+    // Clear the chat hud.
+    SCR_ClearChatHUD_f();
 }
 
 
 // Called when there is a needed retransmit of user info variables.
 void ClientGameExports::ClientUpdateUserinfo(cvar_t* var, from_t from) {
+    // If there is a skin change, and the gender setting is set to auto find it...
+    if (var == info_skin && from > FROM_CONSOLE && gender_auto->integer) {
+        char* p;
+        char sk[MAX_QPATH];
+
+        Q_strlcpy(sk, info_skin->string, sizeof(sk));
+        if ((p = strchr(sk, '/')) != NULL)
+            *p = 0;
+        if (Q_stricmp(sk, "male") == 0 || Q_stricmp(sk, "cyborg") == 0)
+            clgi.Cvar_Set("gender", "male");
+        else if (Q_stricmp(sk, "female") == 0 || Q_stricmp(sk, "crackhor") == 0)
+            clgi.Cvar_Set("gender", "female");
+        else
+            clgi.Cvar_Set("gender", "none");
+        info_gender->modified = false;
+    }
 }
 
 
