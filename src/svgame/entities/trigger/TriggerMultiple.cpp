@@ -173,7 +173,7 @@ void TriggerMultiple::TriggerMultipleTouch(SVGBaseEntity* self, SVGBaseEntity* o
 	if (this == other)
 		return;
 
-	gi.DPrintf("#1 Touched trigger multiple");
+	//gi.DPrintf("#1 Touched trigger multiple");
 	if (other->GetClient()) {
 	    if (GetSpawnFlags() & 2)
 	        return;
@@ -183,7 +183,7 @@ void TriggerMultiple::TriggerMultipleTouch(SVGBaseEntity* self, SVGBaseEntity* o
 	} else {
 		return;
 	}
-	gi.DPrintf("#2 Touched trigger multiple");
+	//gi.DPrintf("#2 Touched trigger multiple");
 
 	//if (!vec3_equal(self->moveDirection, vec3_zero())) {
 	//	vec3_t  forward;
