@@ -96,7 +96,11 @@ void FuncTrain::PostSpawn() {
 // I've put this here in case we add new KVs
 //===============
 void FuncTrain::SpawnKey( const std::string& key, const std::string& value ) {
-	return Base::SpawnKey( key, value );
+	if ( key == "speed" ) {
+		ParseFloatKeyValue( key, value, speed );
+	} else {
+		return Base::SpawnKey( key, value );
+	}
 }
 
 //===============
@@ -159,12 +163,12 @@ void FuncTrain::NextCornerThink() {
 
 		if ( entity->GetSpawnFlags() & PathCorner::SF_Teleport ) {
 			if ( !first ) {
-				gi.DPrintf( "Connected teleport path_corners, see '%s' at '%s'\n" );
+				gi.DPrintf( "Connected teleport path_corners, see '%s' at '%s'\n", entity->GetTypeInfo()->mapClass, vec3_to_str( entity->GetOrigin() ).c_str() );
 				return;
 			}
 
 			first = false;
-			again = true;
+			again = true; // loop it
 			SetOrigin( entity->GetOrigin() - GetMins() );
 			SetOldOrigin( GetOrigin() );
 			SetEventID( EntityEvent::OtherTeleport );
