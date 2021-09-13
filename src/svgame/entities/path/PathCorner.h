@@ -15,7 +15,15 @@ public:
 	static constexpr int32_t SF_Teleport = 1 << 0;
 
 	void			Spawn() override;
+	void			SpawnKey( const std::string& key, const std::string& value ) override;
 
 	// For AI
 	virtual void	OnReachedCorner( SVGBaseEntity* traveler );
+
+	inline const char* GetPathTarget() override {
+		return pathTarget.c_str();
+	}
+
+private:
+	std::string		pathTarget;
 };

@@ -36,6 +36,17 @@ void PathCorner::Spawn() {
 }
 
 //===============
+// PathCorner::SpawnKey
+//===============
+void PathCorner::SpawnKey( const std::string& key, const std::string& value ) {
+    if ( key == "pathtarget" ) {
+        pathTarget = value;
+    } else {
+        return Base::SpawnKey( key, value );
+    }
+}
+
+//===============
 // PathCorner::OnReachedCorner
 //===============
 void PathCorner::OnReachedCorner( SVGBaseEntity* traveler ) {
