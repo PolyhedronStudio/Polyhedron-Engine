@@ -26,6 +26,8 @@ FuncTrain::FuncTrain( Entity* entity )
 // FuncTrain::Spawn
 //===============
 void FuncTrain::Spawn() {
+	Base::Spawn();
+
 	SetMoveType( MoveType::Push );
 	SetSolid( Solid::BSP );
 	SetAngles( vec3_zero() );
@@ -71,6 +73,8 @@ void FuncTrain::PostSpawn() {
 		return;
 	}
 
+	SetUseCallback( &FuncTrain::TrainUse );
+
 	serverEntity->state.origin = ent->GetOrigin() - GetMins();
 	LinkEntity();
 
@@ -81,9 +85,42 @@ void FuncTrain::PostSpawn() {
 
 	if ( spawnFlags & SF_StartOn ) {
 		SetNextThinkTime( level.time + FRAMETIME );
-		SetThinkCallback( nullptr );
+		SetThinkCallback( &FuncTrain::NextCornerThink );
 		activator = this;
 	}
+}
+
+//===============
+// FuncTrain::SpawnKey
+// 
+// I've put this here in case we add new KVs
+//===============
+void FuncTrain::SpawnKey( const std::string& key, const std::string& value ) {
+	return Base::SpawnKey( key, value );
+}
+
+//===============
+// FuncTrain::TrainUse
+//===============
+void FuncTrain::TrainUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+	this->activator = activator;
+
+	if ( spawnFlags & SF_StartOn ) {
+		if ( ~spawnFlags & SF_Toggled ) {
+			return;
+		}
+
+		spawnFlags &= ~SF_StartOn;
+		SetVelocity( vec3_zero() );
+		SetNextThinkTime( 0.0f );
+	} else {
+		if ( nullptr != currentPathEntity ) {
+			ResumePath();
+		} else {
+			NextCornerThink();
+		}
+	}
+
 }
 
 //===============
@@ -142,6 +179,20 @@ void FuncTrain::NextCornerThink() {
 	moveInfo.state = MoverState::Top;
 	moveInfo.startOrigin = GetOrigin();
 	moveInfo.endAngles = destination;
+
+	BrushMoveCalc( destination, &FuncTrain::OnWaitAtCorner );
+	spawnFlags |= SF_StartOn;
+}
+
+//===============
+// FuncTrain::ResumePath
+//===============
+void FuncTrain::ResumePath() {
+	vec3_t destination = currentPathEntity->GetOrigin() - GetMins();
+
+	moveInfo.state = MoverState::Top;
+	moveInfo.startOrigin = GetOrigin();
+	moveInfo.endOrigin = destination;
 
 	BrushMoveCalc( destination, &FuncTrain::OnWaitAtCorner );
 	spawnFlags |= SF_StartOn;
