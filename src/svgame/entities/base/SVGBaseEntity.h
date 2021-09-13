@@ -312,7 +312,7 @@ public:
         return serverEntity->state.origin;
     }
 
-    // Set the 'owner' value.
+    // Get the 'owner' value.
     inline SVGBaseEntity* GetOwner() {
         return this->ownerEntity;
     }
@@ -322,9 +322,11 @@ public:
         return serverEntity->state.renderEffects;
     }
 
-    // Set the 'pathTarget' entity value.
-    inline char* GetPathTarget() {
-        return serverEntity->pathTarget;
+    // Get the 'pathTarget' entity value.
+    // Overridden by PathCorner
+    // TODO: replace this ugly workaround with some component system
+    inline virtual const char* GetPathTarget() {
+        return nullptr;
     }
 
     // Return the 'serverFlags' value.
