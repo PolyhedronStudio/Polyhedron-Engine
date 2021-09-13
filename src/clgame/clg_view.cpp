@@ -206,7 +206,7 @@ void V_Shutdown(void)
 // Set the lightLevel of the client.
 //===============
 //
-static void V_SetLightLevel(void)
+void V_SetLightLevel(void)
 {
     vec3_t shadelight;
 
@@ -317,7 +317,7 @@ static void CLG_SetupThirdPersionView(void)
 // Finish the view values, calculate first/third -person view.
 //===============
 //
-static void CLG_FinishViewValues(void)
+void CLG_FinishViewValues(void)
 {
     cl_entity_t* ent;
 
