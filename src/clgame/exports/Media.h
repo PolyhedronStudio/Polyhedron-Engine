@@ -28,5 +28,9 @@ public:
 
     // Called upon initialization of the renderer.
     void Initialize() final;
+
+    // This is called when the client stops the renderer.
+    // Use this to unload remaining data.
+    void Shutdown() final;
 };
 

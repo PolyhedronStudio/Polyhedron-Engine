@@ -19,6 +19,17 @@
 #include "clg_tents.h"
 #include "clg_view.h"
 
+// ClientGameExports interface implementations.
+#include "ClientGameExports.h"
+#include "exports/Core.h"
+#include "exports/Entities.h"
+#include "exports/Media.h"
+#include "exports/Movement.h"
+#include "exports/Prediction.h"
+#include "exports/Screen.h"
+#include "exports/ServerMessage.h"
+#include "exports/View.h"
+
 //
 // Core.
 //
@@ -89,9 +100,9 @@ cvar_t* vid_rtx = NULL;
 //
 
 // CPP: These might need to be re-enabled on Linux.
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //q_exported ClientGameExport *GetClientGameAPI (ClientGameImport *clgimp)
 //{
@@ -201,13 +212,24 @@ q_exported IClientGameExports* GetClientGameAPI(ClientGameImport* clgimp) {
         //return &clge;
     }
 
+    // Allocate the client game exports interface and its member implementations.
+    clge = new ClientGameExports();
+    clge->core = new ClientGameCore();
+    clge->entities = new ClientGameEntities();
+    clge->media = new ClientGameMedia();
+    clge->movement = new ClientGameMovement();
+    clge->prediction = new ClientGamePrediction();
+    clge->screen = new ClientGameScreen();
+    clge->serverMessage = new ClientGameServerMessage();
+    clge->view = new ClientGameView();
+
     // Return cgame function pointer struct.
     return clge;
 }
 
-//#ifdef __cplusplus
-//}; // Extern "C"
-//#endif
+#ifdef __cplusplus
+}; // Extern "C"
+#endif
 
 //
 //=============================================================================

@@ -976,8 +976,8 @@ void CL_GM_LoadWorldMedia(void)
 //===============
 //
 void CL_GM_ShutdownMedia (void) {
-    if (cge && cge->core)
-        cge->core->Shutdown();
+    if (cge && cge->media)
+        cge->media->Shutdown();
 }
 
 //

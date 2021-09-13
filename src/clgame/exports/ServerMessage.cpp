@@ -110,6 +110,27 @@ qboolean ClientGameServerMessage::Parse(int32_t serverCommand) {
 }
 
 //---------------
+// ClientGameServerMessage::SeekDemoMessage
+//
+//---------------
+qboolean ClientGameServerMessage::SeekDemoMessage(int32_t demoCommand) {
+    // Switch cmd.
+    switch (demoCommand) {
+    case SVG_CMD_INVENTORY:
+        CLG_ParseInventory();
+        return true;
+        break;
+    case SVG_CMD_LAYOUT:
+        CLG_ParseLayout();
+        return true;
+        break;
+        // Return false for failure in case we've reached this checkpoint.
+    default:
+        return false;
+    }
+}
+
+//---------------
 // ClientGameServerMessage::End
 //
 //---------------

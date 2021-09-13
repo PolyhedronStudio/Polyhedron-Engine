@@ -79,6 +79,10 @@ public:
     // Use this to load in persistent data, such as 2D pics. Or use it to
     // register certain CVars related to.
     virtual void Initialize() = 0;
+
+    // This is called when the client stops the renderer.
+    // Use this to unload remaining data.
+    virtual void Shutdown() = 0;
 };
 
 //---------------------------------------------------------------------

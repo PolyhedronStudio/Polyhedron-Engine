@@ -160,3 +160,16 @@ void ClientGameMedia::Initialize() {
     // Initialize the Screen Data.
     SCR_Init();
 }
+
+
+//---------------
+// ClientGameMedia::Shutdown
+//
+//---------------
+void ClientGameMedia::Shutdown() {
+    // Shutdown View Data.
+    V_Shutdown();
+
+    // Shutdown Screen Data.
+    SCR_Shutdown();
+}
