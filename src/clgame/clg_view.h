@@ -26,6 +26,10 @@ void CLG_ClearScene(void);
 void CLG_RenderView(void);
 void CLG_PostRenderView(void);
 
+// WID: TODO: ...
+void CLG_FinishViewValues(void);
+void V_SetLightLevel(void);
+
 // Externs. Debugging reasons.
 extern int         gun_frame;
 extern qhandle_t   gun_model;

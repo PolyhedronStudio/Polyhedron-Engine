@@ -19,13 +19,24 @@
 #include "clg_tents.h"
 #include "clg_view.h"
 
+// ClientGameExports interface implementations.
+#include "ClientGameExports.h"
+#include "exports/Core.h"
+#include "exports/Entities.h"
+#include "exports/Media.h"
+#include "exports/Movement.h"
+#include "exports/Prediction.h"
+#include "exports/Screen.h"
+#include "exports/ServerMessage.h"
+#include "exports/View.h"
+
 //
 // Core.
 //
 // Contains the function pointers being passed in from the engine.
 ClientGameImport clgi;
 // Static export variable, lives as long as the client game dll lives.
-ClientGameExport clge;
+IClientGameExports *clge;
 
 // Pointer to the actual client frame state.
 ClientState* cl = NULL;
@@ -89,96 +100,136 @@ cvar_t* vid_rtx = NULL;
 //
 
 // CPP: These might need to be re-enabled on Linux.
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-q_exported ClientGameExport *GetClientGameAPI (ClientGameImport *clgimp)
-{
+//q_exported ClientGameExport *GetClientGameAPI (ClientGameImport *clgimp)
+//{
+//    // Store a copy of the engine imported function pointer struct.
+//    clgi = *clgimp;
+//
+//    // Store pointers to client  data.
+//    cl  = clgimp->cl;
+//    cs  = clgimp->cs;
+//
+//    // Setup the API version.
+//    clge.apiversion = {
+//        CGAME_API_VERSION_MAJOR,
+//        CGAME_API_VERSION_MINOR,
+//        CGAME_API_VERSION_POINT,
+//    };
+//
+//    // Test if it is compatible, if not, return clge with only the apiversion set.
+//    // The client will handle the issue from there on.
+//    if (clgimp->apiversion.major != CGAME_API_VERSION_MAJOR ||
+//        clgimp->apiversion.minor != CGAME_API_VERSION_MINOR) {
+//        clge.apiversion = { CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT };
+//        return &clge;
+//    }
+//
+//    // Setup the game export function pointers.
+//    // Core.
+//    clge.Init                       = CLG_Init;
+//    clge.Shutdown                   = CLG_Shutdown;
+//
+//    clge.CalcFOV                    = CLG_CalculateFOV;
+//    clge.UpdateOrigin             = CLG_UpdateOrigin;
+//    clge.ClearState                 = CLG_ClearState;
+//    clge.DemoSeek                   = CLG_DemoSeek;
+//
+//    clge.ClientBegin                = CLG_ClientBegin;
+//    clge.ClientDeltaFrame           = CLG_ClientDeltaFrame;
+//    clge.ClientFrame                = CLG_ClientFrame;
+//    clge.ClientDisconnect           = CLG_ClientDisconnect;
+//
+//    clge.UpdateUserinfo             = CLG_UpdateUserInfo;
+//
+//    // Entities.
+//    clge.EntityEvent                = CLG_EntityEvent;
+//
+//    // Movement Command.
+//    clge.BuildFrameMoveCommand      = CLG_BuildFrameMoveCommand;
+//    clge.FinalizeFrameMoveCommand   = CLG_FinalizeFrameMoveCommand;
+//
+//    // Media.
+//    clge.InitMedia                  = CLG_InitMedia;
+//    clge.GetMediaLoadStateName      = CLG_GetMediaLoadStateName;
+//    clge.LoadScreenMedia            = CLG_LoadScreenMedia;
+//    clge.LoadWorldMedia             = CLG_LoadWorldMedia;
+//    clge.ShutdownMedia              = CLG_ShutdownMedia;
+//
+//    // Predict Movement (Client Side)
+//    clge.CheckPredictionError       = CLG_CheckPredictionError;
+//    clge.PredictAngles              = CLG_PredictAngles;
+//    clge.PredictMovement            = CLG_PredictMovement;
+//
+//    // ServerMessage.
+//    clge.UpdateConfigString         = CLG_UpdateConfigString;
+//    clge.StartServerMessage         = CLG_StartServerMessage;
+//    clge.ParseServerMessage         = CLG_ParseServerMessage;
+//    clge.SeekDemoMessage            = CLG_SeekDemoMessage;
+//    clge.EndServerMessage           = CLG_EndServerMessage;
+//
+//    // Screen.
+//    clge.RenderScreen               = CLG_RenderScreen;
+//    clge.ScreenModeChanged          = CLG_ScreenModeChanged;
+//    clge.DrawLoadScreen             = CLG_DrawLoadScreen;
+//    clge.DrawPauseScreen            = CLG_DrawPauseScreen;
+//
+//    // View.
+//    clge.PreRenderView              = CLG_PreRenderView;
+//    clge.ClearScene                 = CLG_ClearScene;
+//    clge.RenderView                 = CLG_RenderView;
+//    clge.PostRenderView             = CLG_PostRenderView;
+//
+//    // Return cgame function pointer struct.
+//    return &clge;
+//}
+q_exported IClientGameExports* GetClientGameAPI(ClientGameImport* clgimp) {
     // Store a copy of the engine imported function pointer struct.
     clgi = *clgimp;
 
     // Store pointers to client  data.
-    cl  = clgimp->cl;
-    cs  = clgimp->cs;
+    cl = clgimp->cl;
+    cs = clgimp->cs;
 
     // Setup the API version.
-    clge.apiversion = {
-        CGAME_API_VERSION_MAJOR,
-        CGAME_API_VERSION_MINOR,
-        CGAME_API_VERSION_POINT,
-    };
+    //clge.apiversion = {
+    //    CGAME_API_VERSION_MAJOR,
+    //    CGAME_API_VERSION_MINOR,
+    //    CGAME_API_VERSION_POINT,
+    //};
 
     // Test if it is compatible, if not, return clge with only the apiversion set.
     // The client will handle the issue from there on.
     if (clgimp->apiversion.major != CGAME_API_VERSION_MAJOR ||
         clgimp->apiversion.minor != CGAME_API_VERSION_MINOR) {
-        clge.apiversion = { CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT };
-        return &clge;
+        //clge.apiversion = { CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT };
+        
+        // WID: TODO: Gotta do something alternative here.
+        return nullptr;
+        //return &clge;
     }
 
-    // Setup the game export function pointers.
-    // Core.
-    clge.Init                       = CLG_Init;
-    clge.Shutdown                   = CLG_Shutdown;
-
-    clge.CalcFOV                    = CLG_CalculateFOV;
-    clge.UpdateOrigin             = CLG_UpdateOrigin;
-    clge.ClearState                 = CLG_ClearState;
-    clge.DemoSeek                   = CLG_DemoSeek;
-
-    clge.ClientBegin                = CLG_ClientBegin;
-    clge.ClientDeltaFrame           = CLG_ClientDeltaFrame;
-    clge.ClientFrame                = CLG_ClientFrame;
-    clge.ClientDisconnect           = CLG_ClientDisconnect;
-
-    clge.UpdateUserinfo             = CLG_UpdateUserInfo;
-
-    // Entities.
-    clge.EntityEvent                = CLG_EntityEvent;
-
-    // Movement Command.
-    clge.BuildFrameMoveCommand      = CLG_BuildFrameMoveCommand;
-    clge.FinalizeFrameMoveCommand   = CLG_FinalizeFrameMoveCommand;
-
-    // Media.
-    clge.InitMedia                  = CLG_InitMedia;
-    clge.GetMediaLoadStateName      = CLG_GetMediaLoadStateName;
-    clge.LoadScreenMedia            = CLG_LoadScreenMedia;
-    clge.LoadWorldMedia             = CLG_LoadWorldMedia;
-    clge.ShutdownMedia              = CLG_ShutdownMedia;
-
-    // Predict Movement (Client Side)
-    clge.CheckPredictionError       = CLG_CheckPredictionError;
-    clge.PredictAngles              = CLG_PredictAngles;
-    clge.PredictMovement            = CLG_PredictMovement;
-
-    // ServerMessage.
-    clge.UpdateConfigString         = CLG_UpdateConfigString;
-    clge.StartServerMessage         = CLG_StartServerMessage;
-    clge.ParseServerMessage         = CLG_ParseServerMessage;
-    clge.SeekDemoMessage            = CLG_SeekDemoMessage;
-    clge.EndServerMessage           = CLG_EndServerMessage;
-
-    // Screen.
-    clge.RenderScreen               = CLG_RenderScreen;
-    clge.ScreenModeChanged          = CLG_ScreenModeChanged;
-    clge.DrawLoadScreen             = CLG_DrawLoadScreen;
-    clge.DrawPauseScreen            = CLG_DrawPauseScreen;
-
-    // View.
-    clge.PreRenderView              = CLG_PreRenderView;
-    clge.ClearScene                 = CLG_ClearScene;
-    clge.RenderView                 = CLG_RenderView;
-    clge.PostRenderView             = CLG_PostRenderView;
+    // Allocate the client game exports interface and its member implementations.
+    clge = new ClientGameExports();
+    clge->core = new ClientGameCore();
+    clge->entities = new ClientGameEntities();
+    clge->media = new ClientGameMedia();
+    clge->movement = new ClientGameMovement();
+    clge->prediction = new ClientGamePrediction();
+    clge->screen = new ClientGameScreen();
+    clge->serverMessage = new ClientGameServerMessage();
+    clge->view = new ClientGameView();
 
     // Return cgame function pointer struct.
-    return &clge;
+    return clge;
 }
 
-//#ifdef __cplusplus
-//}; // Extern "C"
-//#endif
+#ifdef __cplusplus
+}; // Extern "C"
+#endif
 
 //
 //=============================================================================
@@ -535,7 +586,7 @@ void CLG_DemoSeek(void) {
 //
 void CLG_Shutdown(void) {
     // Deregister commands.
-    clgi.Cmd_Deregister(cmd_cgmodule);
+    clgi.Cmd_Unregister(cmd_cgmodule);
 }
 
 

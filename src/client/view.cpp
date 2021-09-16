@@ -414,7 +414,7 @@ void V_Init(void)
 
 void V_Shutdown(void)
 {
-    Cmd_Deregister(v_cmds);
+    Cmd_Unregister(v_cmds);
 }
 
 

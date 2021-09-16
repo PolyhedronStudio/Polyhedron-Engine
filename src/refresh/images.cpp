@@ -1449,6 +1449,6 @@ void IMG_Init(void)
 
 void IMG_Shutdown(void)
 {
-    Cmd_Deregister(img_cmd);
+    Cmd_Unregister(img_cmd);
     r_numImages = 0;
 }
