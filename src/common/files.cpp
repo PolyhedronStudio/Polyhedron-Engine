@@ -3690,7 +3690,7 @@ void FS_Shutdown(void)
 
     Z_LeakTest(TAG_FILESYSTEM);
 
-    Cmd_Deregister(c_fs);
+    Cmd_Unregister(c_fs);
 }
 
 // this is called when local server starts up and gets it's latched variables,

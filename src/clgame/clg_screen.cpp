@@ -1651,6 +1651,6 @@ void CLG_DrawPauseScreen(void) {
 //
 void SCR_Shutdown(void)
 {
-    clgi.Cmd_Deregister(scr_cmds);
+    clgi.Cmd_Unregister(scr_cmds);
     scr.initialized = false;
 }

@@ -789,7 +789,7 @@ void SCR_Init(void)
 
 void SCR_Shutdown(void)
 {
-    Cmd_Deregister(scr_cmds);
+    Cmd_Unregister(scr_cmds);
     scr.initialized = false;
 }
 

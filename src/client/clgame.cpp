@@ -342,6 +342,14 @@ static void *CL_LoadGameLibrary(const char *game, const char *prefix)
 void CL_ShutdownGameProgs(void)
 {
     if (cge) {
+        delete cge->core;
+        delete cge->entities;
+        delete cge->media;
+        delete cge->movement;
+        delete cge->prediction;
+        delete cge->screen;
+        delete cge->serverMessage;
+        delete cge->view;
         cge = NULL;
     }
 
@@ -438,7 +446,7 @@ void CL_InitGameProgs(void)
     importAPI.Cmd_RemoveCommand = Cmd_RemoveCommand;
 
     importAPI.Cmd_Register = Cmd_Register;
-    importAPI.Cmd_Deregister = Cmd_Deregister;
+    importAPI.Cmd_Unregister = Cmd_Unregister;
 
     importAPI.Cmd_AddMacro = Cmd_AddMacro;
     importAPI.Cmd_FindMacro = Cmd_FindMacro;

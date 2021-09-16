@@ -586,7 +586,7 @@ void CLG_DemoSeek(void) {
 //
 void CLG_Shutdown(void) {
     // Deregister commands.
-    clgi.Cmd_Deregister(cmd_cgmodule);
+    clgi.Cmd_Unregister(cmd_cgmodule);
 }
 
 

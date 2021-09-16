@@ -1577,7 +1577,7 @@ void Cmd_Register(const cmdreg_t *reg)
     }
 }
 
-void Cmd_Deregister(const cmdreg_t *reg)
+void Cmd_Unregister(const cmdreg_t *reg)
 {
     while (reg->name) {
         Cmd_RemoveCommand(reg->name);

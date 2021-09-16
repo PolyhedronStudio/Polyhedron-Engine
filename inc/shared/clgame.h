@@ -285,7 +285,7 @@ extern "C" {
         // Registers the list of commands to the client command list.
         void        (*Cmd_Register) (const cmdreg_t* reg);
         // Deregisters the list of commands to the client command list.
-        void        (*Cmd_Deregister) (const cmdreg_t* reg);
+        void        (*Cmd_Unregister) (const cmdreg_t* reg);
 
         // Adds a macro command to the list of client macros.
         void            (*Cmd_AddMacro) (const char* name, xmacro_t function);
