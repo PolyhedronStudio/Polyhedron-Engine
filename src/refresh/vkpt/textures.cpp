@@ -24,7 +24,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <assert.h>
 
-#include "material.h"
 #include "../stb/stb_image.h"
 #include "../stb/stb_image_resize.h"
 #include "../stb/stb_image_write.h"
@@ -66,20 +65,18 @@ static DeviceMemory     tex_invalid_texture_image_memory = { 0 };
 
 static VkDeviceMemory mem_images[NUM_VKPT_IMAGES];
 
-static DeviceMemory            tex_image_memory[MAX_RIMAGES] = { 0 };
-static VkBindImageMemoryInfo   tex_bind_image_info[MAX_RIMAGES] = { 0 };
+static DeviceMemory            tex_image_memory[MAX_RIMAGES] = { };
+static VkBindImageMemoryInfo   tex_bind_image_info[MAX_RIMAGES] = { };
 static DeviceMemoryAllocator*  tex_device_memory_allocator = NULL;
 
 static int image_loading_dirty_flag = 0;
-static uint8_t descriptor_set_dirty_flags[MAX_FRAMES_IN_FLIGHT] = { 0 }; // initialized in vkpt_textures_initialize
+static uint8_t descriptor_set_dirty_flags[MAX_FRAMES_IN_FLIGHT] = { }; // initialized in vkpt_textures_initialize
 
 static const float megabyte = 1048576.0f;
 
-extern cvar_t* cvar_pt_nearest;
-
 void vkpt_textures_prefetch()
 {
-    char * buffer = NULL;
+    byte* buffer = NULL;
     ssize_t buffer_size = 0;
     char const * filename = "prefetch.txt";
     buffer_size = FS_LoadFile(filename, (void**)&buffer);
@@ -89,7 +86,7 @@ void vkpt_textures_prefetch()
         return;
     }
 
-    char const * ptr = buffer;
+    char const * ptr = (const char*)buffer;
 	char linebuf[MAX_QPATH];
 	while (sgets(linebuf, sizeof(linebuf), &ptr))
 	{
@@ -97,16 +94,28 @@ void vkpt_textures_prefetch()
 		if (!line)
 			continue;
 
-		MAT_Find(line, IT_SKIN, IF_PERMANENT);
+		image_t const * img1 = IMG_Find(line, IT_SKIN, (imageflags_t)(IF_PERMANENT | IF_SRGB));
+
+		char other_name[MAX_QPATH];
+
+		// attempt loading a matching normal map
+		if (!Q_strlcpy(other_name, line, strlen(line) - 3))
+			continue;
+		Q_concat(other_name, sizeof(other_name), other_name, "_n.tga", NULL);
+		FS_NormalizePath(other_name, other_name);
+		image_t const * img2 = IMG_Find(other_name, IT_SKIN, IF_PERMANENT);
+		/* if (img2 != R_NOTEXTURE)
+			Com_Printf("Prefetched '%s' (%d)\n", other_name, (int)(img2 - r_images)); */
+
+		// attempt loading a matching emissive map
+		if (!Q_strlcpy(other_name, line, strlen(line) - 3))
+			continue;
+		Q_concat(other_name, sizeof(other_name), other_name, "_light.tga", NULL);
+		FS_NormalizePath(other_name, other_name);
+		image_t const * img3 = IMG_Find(other_name, IT_SKIN, (imageflags_t)(IF_PERMANENT | IF_SRGB));
 	}
     // Com_Printf("Loaded '%s'\n", filename);
     FS_FreeFile(buffer);
-}
-
-void vkpt_invalidate_texture_descriptors()
-{
-	for (int index = 0; index < MAX_FRAMES_IN_FLIGHT; index++)
-		descriptor_set_dirty_flags[index] = 1;
 }
 
 static void textures_destroy_unused_set(uint32_t set_index)
@@ -166,13 +175,14 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_R8G8B8A8_UNORM,
 		.extent = {
-			.width  = w,
-			.height = h,
+			.width  = (uint32_t)w,
+			.height = (uint32_t)h,
 			.depth  = 1,
 		},
-		.imageType             = VK_IMAGE_TYPE_2D,
-		.format                = VK_FORMAT_R8G8B8A8_UNORM,
 		.mipLevels             = 1,
 		.arrayLayers           = num_images,
 		.samples               = VK_SAMPLE_COUNT_1_BIT,
@@ -180,9 +190,8 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 		.usage                 = VK_IMAGE_USAGE_STORAGE_BIT
 		                       | VK_IMAGE_USAGE_TRANSFER_DST_BIT
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT,
-		.flags                 = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics,
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
@@ -199,21 +208,21 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 
 	VkImageViewCreateInfo img_view_info = {
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = img_envmap,
 		.viewType   = VK_IMAGE_VIEW_TYPE_CUBE,
 		.format     = VK_FORMAT_R8G8B8A8_UNORM,
-		.image      = img_envmap,
+		.components = {
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_G,
+			VK_COMPONENT_SWIZZLE_B,
+			VK_COMPONENT_SWIZZLE_A,
+		},
 		.subresourceRange = {
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
 			.baseArrayLayer = 0,
 			.layerCount     = num_images,
-		},
-		.components     = {
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_G,
-			VK_COMPONENT_SWIZZLE_B,
-			VK_COMPONENT_SWIZZLE_A,
 		},
 	};
 	_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_envmap));
@@ -227,51 +236,55 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
-			.baseArrayLayer = layer,
+			.baseArrayLayer = (uint32_t)layer,
 			.layerCount     = 1,
 		};
 
-		IMAGE_BARRIER(cmd_buf,
-				.image            = img_envmap,
+		IMAGE_BARRIER(cmd_buf, {
+				.srcAccessMask = 0,
+				.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+				.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+				.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				.image = img_envmap,
 				.subresourceRange = subresource_range,
-				.srcAccessMask    = 0,
-				.dstAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
-				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-		);
+		});
 
 		VkBufferImageCopy cpy_info = {
 			.bufferOffset = img_size * layer,
 			.imageSubresource = { 
 				.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 				.mipLevel       = 0,
-				.baseArrayLayer = layer,
+				.baseArrayLayer = (uint32_t)layer,
 				.layerCount     = 1,
 			},
 			.imageOffset    = { 0, 0, 0 },
-			.imageExtent    = { w, h, 1 }
+			.imageExtent    = { 
+				(uint32_t)w, 
+				(uint32_t)h,
+				1 
+			}
 		};
 		vkCmdCopyBufferToImage(cmd_buf, buf_img_upload.buffer, img_envmap,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &cpy_info);
 
 
-		IMAGE_BARRIER(cmd_buf,
-				.image            = img_envmap,
+		IMAGE_BARRIER(cmd_buf, {
+				.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				.image = img_envmap,
 				.subresourceRange = subresource_range,
-				.srcAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				.newLayout        = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		);
+		});
 	}
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 
 	{
 	VkDescriptorImageInfo desc_img_info = {
+		.sampler = qvk.tex_sampler,
+		.imageView = imv_envmap,
 		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		.imageView   = imv_envmap,
-		.sampler     = qvk.tex_sampler,
 	};
 
 	VkWriteDescriptorSet s = {
@@ -279,8 +292,8 @@ vkpt_textures_upload_envmap(int w, int h, byte *data)
 		.dstSet          = qvk.desc_set_textures_even,
 		.dstBinding      = BINDING_OFFSET_ENVMAP,
 		.dstArrayElement = 0,
-		.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.descriptorCount = 1,
+		.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.pImageInfo      = &desc_img_info,
 	};
 
@@ -322,7 +335,7 @@ load_blue_noise()
 		ssize_t filelen = FS_LoadFile(buf, (void**)&filedata);
 
 		if (filedata) {
-			data = stbi_load_16_from_memory(filedata, (int)filelen, &w, &h, &n, 4);
+			data = stbi_load_16_from_memory(filedata, filelen, &w, &h, &n, 4);
 			Z_Free(filedata);
 		}
 
@@ -346,13 +359,13 @@ load_blue_noise()
 
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_R16_UNORM,
 		.extent = {
 			.width  = BLUE_NOISE_RES,
 			.height = BLUE_NOISE_RES,
 			.depth  = 1,
 		},
-		.imageType             = VK_IMAGE_TYPE_2D,
-		.format                = VK_FORMAT_R16_UNORM,
 		.mipLevels             = 1,
 		.arrayLayers           = NUM_BLUE_NOISE_TEX,
 		.samples               = VK_SAMPLE_COUNT_1_BIT,
@@ -361,7 +374,7 @@ load_blue_noise()
 		                       | VK_IMAGE_USAGE_TRANSFER_DST_BIT
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics,
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
@@ -378,21 +391,21 @@ load_blue_noise()
 
 	VkImageViewCreateInfo img_view_info = {
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = img_blue_noise,
 		.viewType   = VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 		.format     = VK_FORMAT_R16_UNORM,
-		.image      = img_blue_noise,
-		.subresourceRange = {
-			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-			.baseMipLevel   = 0,
-			.levelCount     = 1,
-			.baseArrayLayer = 0,
-			.layerCount     = NUM_BLUE_NOISE_TEX,
-		},
 		.components     = {
 			VK_COMPONENT_SWIZZLE_R,
 			VK_COMPONENT_SWIZZLE_R,
 			VK_COMPONENT_SWIZZLE_R,
 			VK_COMPONENT_SWIZZLE_R,
+		},
+		.subresourceRange = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = NUM_BLUE_NOISE_TEX,
 		},
 	};
 	_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_blue_noise));
@@ -406,25 +419,25 @@ load_blue_noise()
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
-			.baseArrayLayer = layer,
+			.baseArrayLayer = (uint32_t)layer,
 			.layerCount     = 1,
 		};
 
-		IMAGE_BARRIER(cmd_buf,
-				.image            = img_blue_noise,
+		IMAGE_BARRIER(cmd_buf, {
+				.srcAccessMask = 0,
+				.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+				.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+				.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				.image = img_blue_noise,
 				.subresourceRange = subresource_range,
-				.srcAccessMask    = 0,
-				.dstAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
-				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-		);
+		});
 
 		VkBufferImageCopy cpy_info = {
 			.bufferOffset = total_size * layer,
 			.imageSubresource = { 
 				.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 				.mipLevel       = 0,
-				.baseArrayLayer = layer,
+				.baseArrayLayer = (uint32_t)layer,
 				.layerCount     = 1,
 			},
 			.imageOffset    = { 0, 0, 0 },
@@ -434,22 +447,22 @@ load_blue_noise()
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &cpy_info);
 
 
-		IMAGE_BARRIER(cmd_buf,
-				.image            = img_blue_noise,
-				.subresourceRange = subresource_range,
-				.srcAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				.newLayout        = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		);
+		IMAGE_BARRIER(cmd_buf, {
+			.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			.image = img_blue_noise,
+			.subresourceRange = subresource_range,
+		});
 	}
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 	
 	VkDescriptorImageInfo desc_img_info = {
+		.sampler = qvk.tex_sampler,
+		.imageView = imv_blue_noise,
 		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		.imageView   = imv_blue_noise,
-		.sampler     = qvk.tex_sampler,
 	};
 
 	VkWriteDescriptorSet s = {
@@ -457,8 +470,8 @@ load_blue_noise()
 		.dstSet          = qvk.desc_set_textures_even,
 		.dstBinding      = BINDING_OFFSET_BLUE_NOISE,
 		.dstArrayElement = 0,
-		.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.descriptorCount = 1,
+		.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.pImageInfo      = &desc_img_info,
 	};
 
@@ -521,376 +534,6 @@ static inline byte encode_linear(float x)
     return (byte)roundf(x * 255.f);
 }
 
-struct filterscratch_s
-{
-	int num_comps;
-	int pad_left, pad_right;
-	float *ptr;
-};
-
-static void filterscratch_init(struct filterscratch_s* scratch, unsigned kernel_size, int stripe_size, int num_comps)
-{
-	scratch->num_comps = num_comps;
-	scratch->pad_left = kernel_size / 2;
-	scratch->pad_right = kernel_size - scratch->pad_left - 1;
-	int num_scratch_pixels = scratch->pad_left + stripe_size + scratch->pad_right;
-	scratch->ptr = Z_Malloc(num_scratch_pixels * num_comps * sizeof(float));
-}
-
-static void filterscratch_free(struct filterscratch_s* scratch)
-{
-	Z_Free(scratch->ptr);
-}
-
-static void filterscratch_fill_from_float_image(struct filterscratch_s *scratch, float *current_stripe, int stripe_size, int element_stride)
-{
-	const int num_comps = scratch->num_comps;
-	int src = -scratch->pad_left;
-	float *dest_ptr = scratch->ptr;
-	if ((stripe_size >= scratch->pad_left) && (stripe_size >= scratch->pad_right))
-	{
-		for (; src < 0; src++)
-		{
-			const float *src_data = current_stripe + (src + stripe_size) * element_stride * num_comps;
-			memcpy(dest_ptr, src_data, num_comps * sizeof(float));
-			dest_ptr += num_comps;
-		}
-		for (; src < stripe_size; src++)
-		{
-			const float *src_data = current_stripe + src * element_stride * num_comps;
-			memcpy(dest_ptr, src_data, num_comps * sizeof(float));
-			dest_ptr += num_comps;
-		}
-		for (; src < stripe_size + scratch->pad_right; src++)
-		{
-			const float *src_data = current_stripe + (src - stripe_size) * element_stride * num_comps;
-			memcpy(dest_ptr, src_data, num_comps * sizeof(float));
-			dest_ptr += num_comps;
-		}
-	}
-	else
-	{
-		// The (probably) rarer case - filter kernel is larger than image
-		while(src < 0)
-			src += stripe_size;
-		for (int i = 0; i < scratch->pad_left + stripe_size + scratch->pad_right; i++)
-		{
-			const float *src_data = current_stripe + src * element_stride * num_comps;
-			memcpy(dest_ptr, src_data, num_comps * sizeof(float));
-			dest_ptr += scratch->num_comps;
-			src = (src + 1) % stripe_size;
-		}
-	}
-}
-
-/* Apply a (separable) filter along one dimension of an image.
- * Whether this is done along the X or Y dimension depends on the "stripe size"
- * and "stripe stride" options. See filter_image() for how to use it practically. */
-static void filter_one_dimension_float(float* pixels, int num_comps,
-									   const float kernel[], unsigned kernel_size,
-									   int stripe_size, int num_stripes,
-									   int stripe_stride, int element_stride)
-{
-	struct filterscratch_s scratch;
-	filterscratch_init(&scratch, kernel_size, stripe_size, num_comps);
-	float *current_stripe = pixels;
-	float* values = alloca(num_comps * sizeof(float));
-	for (int s = 0; s < num_stripes; s++)
-	{
-		// back up image data to scratch buffer
-		filterscratch_fill_from_float_image(&scratch, current_stripe, stripe_size, element_stride);
-		// filter the stripe
-		for (int i = 0; i < stripe_size; i++)
-		{
-			memset(values, 0, num_comps * sizeof(float));
-			for (int j = 0; j < kernel_size; j++)
-			{
-				float f = kernel[j];
-				float *src_p = scratch.ptr + (i + j) * num_comps;
-				for (int c = 0; c < num_comps; c++)
-				{
-					values[c] += f * src_p[c];
-				}
-			}
-			memcpy(current_stripe + i * element_stride * num_comps, values, num_comps * sizeof(float));
-		}
-		current_stripe += stripe_stride * num_comps;
-	}
-	filterscratch_free(&scratch);
-}
-
-// Apply a (separable) filter to an image.
-static void filter_float_image(float* pixels, int num_comps, const float kernel[], unsigned kernel_size, int width, int height)
-{
-	// Filter horizontally
-	filter_one_dimension_float(pixels, num_comps, kernel, kernel_size, width, height, width, 1);
-	// Filter vertically
-	filter_one_dimension_float(pixels, num_comps, kernel, kernel_size, height, width, 1, width);
-}
-
-struct bilerp_s
-{
-	int current_output_row;
-	float *current_input_data;
-	float *next_input_data;
-	float *output_data;
-};
-
-static void bilerp_init(struct bilerp_s* bilerp, int input_w)
-{
-	bilerp->current_output_row = -1;
-	bilerp->current_input_data = IMG_AllocPixels(input_w * sizeof(float) * 3);
-	bilerp->next_input_data = IMG_AllocPixels(input_w * sizeof(float) * 3);
-	bilerp->output_data = IMG_AllocPixels(input_w * 2 * sizeof(float) * 3);
-}
-
-static void bilerp_free(struct bilerp_s* bilerp)
-{
-	Z_Free(bilerp->current_input_data);
-	Z_Free(bilerp->next_input_data);
-	Z_Free(bilerp->output_data);
-}
-
-static inline void _bilerp_get_next_output_line(struct bilerp_s *bilerp, const float** output_line, const float* next_input, int input_w)
-{
-	if(bilerp->current_output_row == -1) {
-		memcpy(bilerp->next_input_data, next_input, input_w * sizeof(float) * 3);
-		bilerp->current_output_row = 0;
-	}
-
-	if((bilerp->current_output_row & 1) == 0) {
-		// Even output line: use input lines
-		// Swap next_input_data into current_input_data
-		float *tmp = bilerp->next_input_data;
-		bilerp->next_input_data = bilerp->current_input_data;
-		bilerp->current_input_data = tmp;
-	} else {
-		// Odd output line: interpolate between input lines
-		float *color_dest = bilerp->next_input_data;
-		memcpy(bilerp->next_input_data, next_input, input_w * sizeof(float) * 3);
-
-		float *color_ptr = bilerp->current_input_data;
-		float *next_color_ptr = bilerp->next_input_data;
-		for (int x = 0; x < input_w; x++) {
-			color_ptr[0] = (color_ptr[0] + next_color_ptr[0]) * 0.5f;
-			color_ptr[1] = (color_ptr[1] + next_color_ptr[1]) * 0.5f;
-			color_ptr[2] = (color_ptr[2] + next_color_ptr[2]) * 0.5f;
-			color_ptr += 3;
-			next_color_ptr += 3;
-		}
-	}
-
-	float *out_ptr = bilerp->output_data;
-	float color[3];
-	const float* color_ptr = bilerp->current_input_data;
-	for (int out_x = 0; out_x < input_w * 2 - 1; out_x++) {
-		if((out_x & 1) == 0) {
-			// Even output row: direct value
-			memcpy(color, color_ptr, 3 * sizeof(float));
-		} else {
-			// Odd output row: interpolate between colors
-			color_ptr += 3;
-			color[0] = (color[0] + color_ptr[0]) * 0.5f;
-			color[1] = (color[1] + color_ptr[1]) * 0.5f;
-			color[2] = (color[2] + color_ptr[2]) * 0.5f;
-		}
-		memcpy(out_ptr, color, 3 * sizeof(float));
-		out_ptr += 3;
-	}
-
-	// Last row: interpolate between last and first pixel
-	color[0] = (color_ptr[0] + bilerp->current_input_data[0]) * 0.5f;
-	color[1] = (color_ptr[1] + bilerp->current_input_data[1]) * 0.5f;
-	color[2] = (color_ptr[2] + bilerp->current_input_data[2]) * 0.5f;
-	memcpy(out_ptr, color, 3 * sizeof(float));
-
-	*output_line = bilerp->output_data;
-
-	bilerp->current_output_row++;
-}
-
-static inline void bilerp_get_next_output_line_from_rgb_f32(struct bilerp_s *bilerp, const float** output_line, const float* input_data, int input_w, int input_h)
-{
-	const float *next_input = NULL;
-	if (bilerp->current_output_row == -1) {
-		next_input = input_data;
-	} else if ((bilerp->current_output_row & 1) != 0) {
-		int in_y = (bilerp->current_output_row + 1) >> 1;
-		// Wraparound last line
-		if(in_y >= input_h)
-			in_y = 0;
-		next_input = input_data + in_y * input_w * 3;
-	}
-	_bilerp_get_next_output_line(bilerp, output_line, next_input, input_w);
-}
-
-// Fake an emissive texture from a diffuse texture by using pixels brighter than a certain amount
-static void apply_fake_emissive_threshold(image_t *image, int bright_threshold_int)
-{
-	int w = image->upload_width;
-	int h = image->upload_height;
-
-	float *bright_mask = IMG_AllocPixels(w * h * sizeof(float));
-
-	/* Extract "bright" pixels by choosing all those that have one component
-	   larger than some threshold. */
-	clamp(bright_threshold_int, 0, 255);
-	byte bright_threshold = (byte)bright_threshold_int;
-
-	float *current_bright_mask = bright_mask;
-	byte *src_pixel = image->pix_data;
-	float max_src_lum = 0;
-	for (int y = 0; y < h; y++) {
-		for (int x = 0; x < w; x++) {
-			float src_lum = LUMINANCE(decode_srgb(src_pixel[0]), decode_srgb(src_pixel[1]), decode_srgb(src_pixel[2]));
-			byte max_comp = max(src_pixel[0], src_pixel[1]);
-			max_comp = max(src_pixel[2], max_comp);
-			if (max_comp < bright_threshold) {
-				*current_bright_mask = 0;
-			} else {
-				*current_bright_mask = src_lum;
-			}
-			if (src_lum > max_src_lum)
-				max_src_lum = src_lum;
-			current_bright_mask++;
-			src_pixel += 4;
-		}
-	}
-	float src_lum_scale = max_src_lum > 0 ? 1.0f / max_src_lum : 1.0f;
-
-	// Blur those "bright" pixels
-	const float filter[] = { 0.0093f, 0.028002f, 0.065984f, 0.121703f, 0.175713f, 0.198596f, 0.175713f, 0.121703f, 0.065984f, 0.028002f, 0.0093f };
-	filter_float_image(bright_mask, 1, filter, sizeof(filter) / sizeof(filter[0]), w, h);
-
-	// Do a pass to find max luminance of bright_mask...
-	current_bright_mask = bright_mask;
-	float max_lum = 0;
-	for (int y = 0; y < h; y++) {
-		for (int x = 0; x < w; x++) {
-			float lum = *current_bright_mask;
-			if (lum > max_lum)
-				max_lum = lum;
-
-			current_bright_mask++;
-		}
-	}
-	// ...and use it to normalize max luminance to 1
-	float lum_scale = max_lum > 0 ? 1.0f / max_lum : 1.0f;
-
-	/* Combine blurred "bright" mask with original image (to retain some colorization).
-	   Produce float output for upsampling pass */
-	float *final = IMG_AllocPixels(w * h * 3 * sizeof(float));
-
-	float *out_final = final;
-	current_bright_mask = bright_mask;
-	byte *current_img_pixel = image->pix_data;
-	for (int y = 0; y < h; y++) {
-		for (int x = 0; x < w; x++) {
-			vec3_t color_img;
-			color_img[0] = decode_srgb(current_img_pixel[0]);
-			color_img[1] = decode_srgb(current_img_pixel[1]);
-			color_img[2] = decode_srgb(current_img_pixel[2]);
-
-			/* The formula for the "emissive" color is objectively weird,
-			   but is subjectively suitable for typical "light" textures...
-			   It keeps the "light" pixels but avoids bleeding from neighbouring
-			   "other" pixels */
-			float src_lum = LUMINANCE(color_img[0], color_img[1], color_img[2]);
-			/* Normalize source luminance to increase resulting emissive intensity
-			 * on textures that are relatively dark */
-			src_lum *= src_lum_scale;
-			src_lum *= src_lum;
-			float scale = *current_bright_mask * src_lum * lum_scale;
-			out_final[0] = color_img[0] * scale;
-			out_final[1] = color_img[1] * scale;
-			out_final[2] = color_img[2] * scale;
-
-			out_final += 3;
-			current_bright_mask++;
-			current_img_pixel += 4;
-		}
-	}
-	Z_Free(bright_mask);
-
-	// Interpolate final image to 2x size, apply a mild filter, to have it look less blocky
-	int width_2x = w * 2;
-	int height_2x = h * 2;
-	float *final_2x = IMG_AllocPixels(width_2x * height_2x * 3 * sizeof(float));
-
-	struct bilerp_s bilerp_final;
-	bilerp_init(&bilerp_final, w);
-	float *out_final_2x = final_2x;
-	for (int out_y = 0; out_y < height_2x; out_y++) {
-		float *img_line;
-		bilerp_get_next_output_line_from_rgb_f32(&bilerp_final, (const float**)&img_line, final, w, h);
-		memcpy(out_final_2x, img_line, width_2x * 3 * sizeof(float));
-		out_final_2x += width_2x * 3;
-	}
-	bilerp_free(&bilerp_final);
-	Z_Free(final);
-
-	const float filter_final[] = { 0.157731f, 0.684538f, 0.157731f };
-	filter_float_image(final_2x, 3, filter_final, sizeof(filter_final) / sizeof(filter_final[0]), width_2x, height_2x);
-
-	// Final -> SRGB
-	int new_size = width_2x * height_2x * 4;
-	Z_Free(image->pix_data);
-	image->pix_data = IMG_AllocPixels(new_size);
-	image->upload_width = width_2x;
-	image->upload_height = height_2x;
-
-	float* current_pixel = final_2x;
-	byte *out_pixel = image->pix_data;
-	for (int y = 0; y < height_2x; y++) {
-		for (int x = 0; x < width_2x; x++) {
-			out_pixel[0] = encode_srgb(current_pixel[0]);
-			out_pixel[1] = encode_srgb(current_pixel[1]);
-			out_pixel[2] = encode_srgb(current_pixel[2]);
-			out_pixel[3] = 255;
-
-			current_pixel += 3;
-			out_pixel += 4;
-		}
-	}
-
-	Z_Free(final_2x);
-}
-
-image_t *vkpt_fake_emissive_texture(image_t *image, int bright_threshold_int)
-{
-	if((image->upload_width == 1) && (image->upload_height == 1))
-	{
-		// Not much to do...
-		return image;
-	}
-
-	// Construct a new name for the fake emissive image
-	const char emissive_image_suffix[] = "*E.wal"; // 'fake' extension needed for image lookup logic
-	char emissive_image_name[MAX_QPATH];
-	Q_strlcpy(emissive_image_name, image->name, sizeof(emissive_image_name));
-	size_t pos = strlen(emissive_image_name) - 4;
-	if (pos + sizeof(emissive_image_suffix) > sizeof(emissive_image_name))
-		pos = sizeof(emissive_image_name) - sizeof(emissive_image_suffix);
-	Q_strlcpy(emissive_image_name + pos, emissive_image_suffix, sizeof(emissive_image_name) - pos);
-
-	// See if we previously created a fake emissive texture for the same base texture
-	image_t *prev_image = IMG_FindExisting(emissive_image_name, image->type);
-	if(prev_image != R_NOTEXTURE)
-	{
-		prev_image->registration_sequence = registration_sequence;
-		return prev_image;
-	}
-
-	image_t *new_image = IMG_Clone(image, emissive_image_name);
-	if(new_image == R_NOTEXTURE)
-		return image;
-
-	new_image->flags |= IF_FAKE_EMISSIVE | (CLAMP(bright_threshold_int, 0, 255) << IF_FAKE_EMISSIVE_THRESH_SHIFT);
-	apply_fake_emissive_threshold(new_image, bright_threshold_int);
-
-	return new_image;
-}
-
 void
 vkpt_extract_emissive_texture_info(image_t *image)
 {
@@ -948,7 +591,7 @@ vkpt_extract_emissive_texture_info(image_t *image)
 
 	image->entire_texture_emissive = (min_x == 0) && (min_y == 0) && (max_x == w - 1) && (max_y == h - 1);
 
-	image->processing_complete = qtrue;
+	image->processing_complete = true;
 }
 
 void
@@ -988,7 +631,7 @@ vkpt_normalize_normal_map(image_t *image)
         }
     }
 
-    image->processing_complete = qtrue;
+    image->processing_complete = true;
 }
 
 void
@@ -1021,7 +664,7 @@ IMG_Unload_RTX(image_t *image)
 	tex_images[index] = VK_NULL_HANDLE;
 	tex_image_views[index] = VK_NULL_HANDLE;
 
-	vkpt_invalidate_texture_descriptors();
+	memset(descriptor_set_dirty_flags, 0xff, sizeof(descriptor_set_dirty_flags));
 	}
 }
 
@@ -1063,18 +706,14 @@ void IMG_ReloadAll(void)
             image->height = new_image.width;
             image->upload_width = new_image.upload_width;
             image->upload_height = new_image.upload_height;
-            image->processing_complete = qfalse;
+            image->processing_complete = false;
+
+            IMG_Load(image, new_image.pix_data);
 
             if (strstr(filepath, "_n."))
             {
                 vkpt_normalize_normal_map(image);
             }
-            if(image->flags & IF_FAKE_EMISSIVE)
-            {
-                apply_fake_emissive_threshold(image, (image->flags >> IF_FAKE_EMISSIVE_THRESH_SHIFT) & 0xff);
-            }
-
-            IMG_Load(image, new_image.pix_data);
 
             image->last_modified = last_modifed; // reset time stamp because load_img doesn't
 
@@ -1145,34 +784,31 @@ void create_invalid_texture()
 
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = tex_invalid_texture_image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-	);
+		.image = tex_invalid_texture_image,
+		.subresourceRange = subresource_range,
+	});
 
 	const VkClearColorValue color = {
-		.float32[0] = 1.0f,
-		.float32[1] = 0.0f,
-		.float32[2] = 1.0f,
-		.float32[3] = 1.0f
+		.float32 = { 1.0f, 0.0f, 1.0f, 1.0f }
 	};
 	const VkImageSubresourceRange range = subresource_range;
 	vkCmdClearColorImage(cmd_buf, tex_invalid_texture_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &color, 1, &range);
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = tex_invalid_texture_image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-	);
+		.image = tex_invalid_texture_image,
+		.subresourceRange = subresource_range,
+	});
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 
 	vkQueueWaitIdle(qvk.queue_graphics);
 }
@@ -1187,7 +823,7 @@ void destroy_invalid_texture()
 VkResult
 vkpt_textures_initialize()
 {
-	vkpt_invalidate_texture_descriptors();
+	memset(descriptor_set_dirty_flags, 0xff, sizeof(descriptor_set_dirty_flags));
 	memset(&texture_system, 0, sizeof(texture_system));
 
 	tex_device_memory_allocator = create_device_memory_allocator(qvk.device);
@@ -1198,24 +834,24 @@ vkpt_textures_initialize()
 		.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
 		.magFilter               = VK_FILTER_LINEAR,
 		.minFilter               = VK_FILTER_LINEAR,
+		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		.addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.anisotropyEnable        = VK_TRUE,
 		.maxAnisotropy           = 16,
+		.minLod = 0.0f,
+		.maxLod = 128.0f,
 		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
 		.unnormalizedCoordinates = VK_FALSE,
-		.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-		.minLod                  = 0.0f,
-		.maxLod                  = 128.0f,
 	};
 	_VK(vkCreateSampler(qvk.device, &sampler_info, NULL, &qvk.tex_sampler));
 	ATTACH_LABEL_VARIABLE(qvk.tex_sampler, SAMPLER);
-
 	VkSamplerCreateInfo sampler_nearest_info = {
 		.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
 		.magFilter               = VK_FILTER_NEAREST,
 		.minFilter               = VK_FILTER_NEAREST,
+		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST,
 		.addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
@@ -1223,33 +859,15 @@ vkpt_textures_initialize()
 		.maxAnisotropy           = 16,
 		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
 		.unnormalizedCoordinates = VK_FALSE,
-		.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_NEAREST,
 	};
 	_VK(vkCreateSampler(qvk.device, &sampler_nearest_info, NULL, &qvk.tex_sampler_nearest));
 	ATTACH_LABEL_VARIABLE(qvk.tex_sampler_nearest, SAMPLER);
-
-	VkSamplerCreateInfo sampler_nearest_mipmap_aniso_info = {
-		.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-		.magFilter               = VK_FILTER_NEAREST,
-		.minFilter               = VK_FILTER_LINEAR,
-		.addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-		.addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-		.anisotropyEnable        = VK_TRUE,
-		.maxAnisotropy           = 16,
-		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
-		.unnormalizedCoordinates = VK_FALSE,
-		.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-		.minLod                  = 0.0f,
-		.maxLod                  = 128.0f,
-	};
-	_VK(vkCreateSampler(qvk.device, &sampler_nearest_mipmap_aniso_info, NULL, &qvk.tex_sampler_nearest_mipmap_aniso));
-	ATTACH_LABEL_VARIABLE(qvk.tex_sampler_nearest_mipmap_aniso, SAMPLER);
 
 	VkSamplerCreateInfo sampler_linear_clamp_info = {
 		.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
 		.magFilter               = VK_FILTER_LINEAR,
 		.minFilter               = VK_FILTER_LINEAR,
+		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		.addressModeU            = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 		.addressModeV            = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
@@ -1257,23 +875,22 @@ vkpt_textures_initialize()
 		.maxAnisotropy           = 16,
 		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
 		.unnormalizedCoordinates = VK_FALSE,
-		.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 	};
 	_VK(vkCreateSampler(qvk.device, &sampler_linear_clamp_info, NULL, &qvk.tex_sampler_linear_clamp));
 	ATTACH_LABEL_VARIABLE(qvk.tex_sampler_linear_clamp, SAMPLER);
 
 	VkDescriptorSetLayoutBinding layout_bindings[] = {
 		{
+			.binding = 0,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = MAX_RIMAGES,
-			.binding         = 0,
 			.stageFlags      = VK_SHADER_STAGE_ALL,
 		},
 #define IMG_DO(_name, _binding, ...) \
 		{ \
+			.binding         = BINDING_OFFSET_IMAGES + _binding, \
 			.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, \
 			.descriptorCount = 1, \
-			.binding         = BINDING_OFFSET_IMAGES + _binding, \
 			.stageFlags      = VK_SHADER_STAGE_ALL, \
 		},
 	LIST_IMAGES
@@ -1281,84 +898,84 @@ vkpt_textures_initialize()
 #undef IMG_DO
 #define IMG_DO(_name, _binding, ...) \
 		{ \
+			.binding         = BINDING_OFFSET_TEXTURES + _binding, \
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, \
 			.descriptorCount = 1, \
-			.binding         = BINDING_OFFSET_TEXTURES + _binding, \
 			.stageFlags      = VK_SHADER_STAGE_ALL, \
 		},
 	LIST_IMAGES
 	LIST_IMAGES_A_B
 #undef IMG_DO
 		{
+			.binding = BINDING_OFFSET_BLUE_NOISE,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
-			.binding         = BINDING_OFFSET_BLUE_NOISE,
 			.stageFlags      = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.binding = BINDING_OFFSET_ENVMAP,
 			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
-			.binding         = BINDING_OFFSET_ENVMAP,
 			.stageFlags      = VK_SHADER_STAGE_ALL,
 		},
         {
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .binding = BINDING_OFFSET_PHYSICAL_SKY,
-            .stageFlags = VK_SHADER_STAGE_ALL,
-        },
-        {
-            .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .descriptorCount = 1,
-            .binding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
-            .stageFlags = VK_SHADER_STAGE_ALL,
-        },
-		{
+			.binding = BINDING_OFFSET_PHYSICAL_SKY,
 			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_ALL,
+        },
+        {
+			.binding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_ALL,
+        },
+		{
 			.binding = BINDING_OFFSET_SKY_TRANSMITTANCE,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_SKY_SCATTERING,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_SKY_IRRADIANCE,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_SKY_CLOUDS,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_TERRAIN_ALBEDO,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_TERRAIN_NORMALS,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_TERRAIN_DEPTH,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},
 		{
+			.binding = BINDING_OFFSET_TERRAIN_SHADOWMAP,
 			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
-			.binding = BINDING_OFFSET_TERRAIN_SHADOWMAP,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		}
 	};
@@ -1378,9 +995,9 @@ vkpt_textures_initialize()
 
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		.maxSets = 2,
 		.poolSizeCount = 1,
 		.pPoolSizes    = &pool_size,
-		.maxSets       = 2,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_textures));
@@ -1437,9 +1054,8 @@ vkpt_textures_destroy()
 	vkFreeMemory      (qvk.device, mem_blue_noise,      NULL);
 	vkDestroyImage    (qvk.device, img_blue_noise,      NULL);
 	vkDestroyImageView(qvk.device, imv_blue_noise,      NULL);
-	vkDestroySampler  (qvk.device, qvk.tex_sampler, NULL);
+	vkDestroySampler  (qvk.device, qvk.tex_sampler,         NULL);
 	vkDestroySampler  (qvk.device, qvk.tex_sampler_nearest, NULL);
-	vkDestroySampler  (qvk.device, qvk.tex_sampler_nearest_mipmap_aniso, NULL);
 	vkDestroySampler  (qvk.device, qvk.tex_sampler_linear_clamp, NULL);
 
 	if(imv_envmap != VK_NULL_HANDLE) {
@@ -1479,13 +1095,13 @@ vkpt_textures_end_registration()
 
 	VkImageCreateInfo img_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_UNDEFINED,
 		.extent = {
 			.width  = 1337,
 			.height = 1337,
 			.depth  = 1
 		},
-		.imageType             = VK_IMAGE_TYPE_2D,
-		.format                = VK_FORMAT_UNDEFINED,
 		.mipLevels             = 1,
 		.arrayLayers           = 1,
 		.samples               = VK_SAMPLE_COUNT_1_BIT,
@@ -1494,7 +1110,7 @@ vkpt_textures_end_registration()
 		                       | VK_IMAGE_USAGE_TRANSFER_SRC_BIT
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics,
 		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 
@@ -1502,18 +1118,18 @@ vkpt_textures_end_registration()
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 		.viewType   = VK_IMAGE_VIEW_TYPE_2D,
 		.format     = VK_FORMAT_UNDEFINED,
+		.components = {
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_G,
+			VK_COMPONENT_SWIZZLE_B,
+			VK_COMPONENT_SWIZZLE_A
+		},
 		.subresourceRange = {
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
 			.levelCount     = 1,
 			.baseArrayLayer = 0,
 			.layerCount     = 1
-		},
-		.components     = {
-			VK_COMPONENT_SWIZZLE_R,
-			VK_COMPONENT_SWIZZLE_G,
-			VK_COMPONENT_SWIZZLE_B,
-			VK_COMPONENT_SWIZZLE_A
 		},
 	};
 
@@ -1578,7 +1194,7 @@ vkpt_textures_end_registration()
 	
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
-	char *staging_buffer = buffer_map(&buf_img_upload);
+	char *staging_buffer = (char*)buffer_map(&buf_img_upload);
 
 	size_t offset = 0;
 	for(int i = 0; i < MAX_RIMAGES; i++) {
@@ -1602,19 +1218,19 @@ vkpt_textures_end_registration()
 		VkImageSubresourceRange subresource_range = {
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel   = 0,
-			.levelCount     = num_mip_levels,
+			.levelCount     = (uint32_t)num_mip_levels,
 			.baseArrayLayer = 0,
 			.layerCount     = 1
 		};
 
-		IMAGE_BARRIER(cmd_buf,
-				.image            = tex_images[i],
-				.subresourceRange = subresource_range,
-				.srcAccessMask    = 0,
-				.dstAccessMask    = VK_ACCESS_TRANSFER_WRITE_BIT,
-				.oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
-				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-		);
+		IMAGE_BARRIER(cmd_buf, {
+			.srcAccessMask = 0,
+			.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			.image = tex_images[i],
+			.subresourceRange = subresource_range,
+		});
 
 		{
 			memcpy(staging_buffer + offset, q_img->pix_data, wd * ht * 4);
@@ -1641,14 +1257,14 @@ vkpt_textures_end_registration()
 		{
 			subresource_range.baseMipLevel = mip - 1;
 
-			IMAGE_BARRIER(cmd_buf,
-				.image = tex_images[i],
-				.subresourceRange = subresource_range,
+			IMAGE_BARRIER(cmd_buf, {
 				.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 				.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-				);
+				.image = tex_images[i],
+				.subresourceRange = subresource_range,
+			});
 
 			int nwd = (wd > 1) ? (wd >> 1) : wd;
 			int nht = (ht > 1) ? (ht >> 1) : ht;
@@ -1656,17 +1272,22 @@ vkpt_textures_end_registration()
 			VkImageBlit region = {
 				.srcSubresource = {
 					.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-					.mipLevel = mip - 1,
+					.mipLevel = (uint32_t)mip - 1,
 					.baseArrayLayer = 0,
 					.layerCount = 1
 				},
 				.srcOffsets = { 
 					{ 0, 0, 0 }, 
-					{ wd, ht, 1 } },
+					{ 
+						(int32_t)wd, 
+						(int32_t)ht, 
+						1 
+					}
+				},
 
 				.dstSubresource = {
 					.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-					.mipLevel = mip,
+					.mipLevel = (uint32_t)mip,
 					.baseArrayLayer = 0,
 					.layerCount = 1
 				},
@@ -1684,14 +1305,14 @@ vkpt_textures_end_registration()
 
 			subresource_range.baseMipLevel = mip - 1;
 
-			IMAGE_BARRIER(cmd_buf,
-				.image = tex_images[i],
-				.subresourceRange = subresource_range,
+			IMAGE_BARRIER(cmd_buf, {
 				.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				);
+				.image = tex_images[i],
+				.subresourceRange = subresource_range,
+			});
 
 			wd = nwd;
 			ht = nht;
@@ -1699,14 +1320,14 @@ vkpt_textures_end_registration()
 
 		subresource_range.baseMipLevel = num_mip_levels - 1;
 
-		IMAGE_BARRIER(cmd_buf,
-			.image = tex_images[i],
-			.subresourceRange = subresource_range,
+		IMAGE_BARRIER(cmd_buf, {
 			.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 			.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			);
+			.image = tex_images[i],
+			.subresourceRange = subresource_range,
+		});
 
 		img_view_info.image = tex_images[i];
 		img_view_info.subresourceRange.levelCount = num_mip_levels;
@@ -1720,7 +1341,7 @@ vkpt_textures_end_registration()
 	buffer_unmap(&buf_img_upload);
 	staging_buffer = NULL; 
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 	
 
 	const uint32_t destroy_frame_index = (qvk.frame_counter + MAX_FRAMES_IN_FLIGHT) % DESTROY_LATENCY;
@@ -1730,7 +1351,7 @@ vkpt_textures_end_registration()
 	unused_resources->buffers[unused_index] = buf_img_upload.buffer;
 	unused_resources->buffer_memory[unused_index] = buf_img_upload.memory;
 
-	vkpt_invalidate_texture_descriptors();
+	memset(descriptor_set_dirty_flags, 0xff, sizeof(descriptor_set_dirty_flags));
 
 	size_t texture_memory_allocated, texture_memory_used;
 	get_device_malloc_stats(tex_device_memory_allocator, &texture_memory_allocated, &texture_memory_used);
@@ -1746,7 +1367,7 @@ void vkpt_textures_update_descriptor_set()
 		return;
 
 	descriptor_set_dirty_flags[qvk.current_frame_index] = 0;
-	
+
 	for(int i = 0; i < MAX_RIMAGES; i++) {
 		image_t *q_img = r_images + i;
 		
@@ -1759,15 +1380,11 @@ void vkpt_textures_update_descriptor_set()
 			sampler = qvk.tex_sampler_nearest;
 		else if (q_img->type == IT_SPRITE)
 			sampler = qvk.tex_sampler_linear_clamp;
-		else if (cvar_pt_nearest->integer == 1)
-			sampler = qvk.tex_sampler_nearest_mipmap_aniso;
-		else if (cvar_pt_nearest->integer >= 2)
-			sampler = qvk.tex_sampler_nearest;
 
 		VkDescriptorImageInfo img_info = {
+			.sampler = sampler,
+			.imageView = image_view,
 			.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			.imageView   = image_view,
-			.sampler     = sampler,
 		};
 
 		if (i >= VKPT_IMG_BLOOM_HBLUR &&
@@ -1779,9 +1396,9 @@ void vkpt_textures_update_descriptor_set()
 			.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet          = qvk_get_current_desc_set_textures(),
 			.dstBinding      = GLOBAL_TEXTURES_TEX_ARR_BINDING_IDX,
-			.dstArrayElement = i,
-			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.dstArrayElement = (uint32_t)i,
 			.descriptorCount = 1,
+			.descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.pImageInfo      = &img_info,
 		};
 
@@ -1796,9 +1413,11 @@ create_readback_image(VkImage *image, VkDeviceMemory *memory, VkDeviceSize *memo
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 		.imageType = VK_IMAGE_TYPE_2D,
 		.format = format,
-		.extent.width = width,
-		.extent.height = height,
-		.extent.depth = 1,
+		.extent = {
+			.width = width,
+			.height = height,
+			.depth = 1,
+		},
 		.mipLevels = 1,
 		.arrayLayers = 1,
 		.samples = VK_SAMPLE_COUNT_1_BIT,
@@ -1842,47 +1461,48 @@ destroy_readback_image(VkImage *image, VkDeviceMemory *memory, VkDeviceSize *mem
 VkResult
 vkpt_create_images()
 {
-	VkImageCreateInfo images_create_info[NUM_VKPT_IMAGES] = {
+	// C++20 VKPT: vkpt_create_images changed to not do array designators
+	VkImageCreateInfo images_create_info[NUM_VKPT_IMAGES];// = {
 #define IMG_DO(_name, _binding, _vkformat, _glslformat, _w, _h) \
-	[VKPT_IMG_##_name] = { \
+	images_create_info[VKPT_IMG_##_name] = { \
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, \
 		.imageType = VK_IMAGE_TYPE_2D, \
 		.format = VK_FORMAT_##_vkformat, \
 		.extent = { \
-			.width  = _w, \
-			.height = _h, \
+			.width  = (uint32_t)_w, \
+			.height = (uint32_t)_h, \
 			.depth  = 1 \
 		}, \
 		.mipLevels             = 1, \
 		.arrayLayers           = 1, \
 		.samples               = VK_SAMPLE_COUNT_1_BIT, \
 		.tiling                = VK_IMAGE_TILING_OPTIMAL, \
-		.usage                 = VK_IMAGE_USAGE_STORAGE_BIT \
+		.usage                 = (VkImageUsageFlags)(VK_IMAGE_USAGE_STORAGE_BIT \
 		                       | VK_IMAGE_USAGE_TRANSFER_SRC_BIT \
 		                       | VK_IMAGE_USAGE_TRANSFER_DST_BIT \
 		                       | VK_IMAGE_USAGE_SAMPLED_BIT \
-		                       | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, \
+		                       | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT), \
 		.sharingMode           = VK_SHARING_MODE_EXCLUSIVE, \
-		.queueFamilyIndexCount = qvk.queue_idx_graphics, \
-		.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED, \
-	},
-LIST_IMAGES
-LIST_IMAGES_A_B
-#undef IMG_DO
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics, \
+		.initialLayout         = (VkImageLayout)VK_IMAGE_LAYOUT_UNDEFINED \
 	};
+	LIST_IMAGES
+		LIST_IMAGES_A_B
+#undef IMG_DO
+		//	};
 
 #ifdef VKPT_DEVICE_GROUPS
 #define IMG_DO(_name, _binding, _vkformat, _glslformat, _w, _h) \
 	images_create_info[VKPT_IMG_##_name].flags |= \
 		VK_IMAGE_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT;
-LIST_IMAGES
-LIST_IMAGES_A_B
+		LIST_IMAGES
+		LIST_IMAGES_A_B
 #undef IMG_DO
 #endif
 
-	size_t total_size = 0;
+		size_t total_size = 0;
 
-	for(int i = 0; i < NUM_VKPT_IMAGES; i++)
+	for (int i = 0; i < NUM_VKPT_IMAGES; i++)
 	{
 		_VK(vkCreateImage(qvk.device, images_create_info + i, NULL, qvk.images + i));
 		ATTACH_LABEL_VARIABLE(qvk.images[i], IMAGE);
@@ -1892,16 +1512,10 @@ LIST_IMAGES_A_B
 
 		total_size += align(mem_req.size, mem_req.alignment);
 
-		VkResult alloc_result = allocate_gpu_memory(mem_req, &mem_images[i]);
-		if (alloc_result != VK_SUCCESS)
-		{
-            Com_Printf("Memory allocation error. Current total = %.2f MB, failed chunk = %.2f MB\n", (float)total_size / megabyte, (float)mem_req.size / megabyte);
-            Com_Error(ERR_FATAL, "Failed to allocate GPU memory for screen-space textures!\n");
-			return alloc_result;
-		}
+		_VK(allocate_gpu_memory(mem_req, &mem_images[i]));
 
 		ATTACH_LABEL_VARIABLE(mem_images[i], DEVICE_MEMORY);
-		
+
 		_VK(vkBindImageMemory(qvk.device, qvk.images[i], mem_images[i], 0));
 
 #ifdef VKPT_DEVICE_GROUPS
@@ -1909,7 +1523,7 @@ LIST_IMAGES_A_B
 			// create per-device local image bindings so we can copy back and forth
 
 			// create copies of the same image object that will receive full per-GPU mappings
-			for(int d = 0; d < qvk.device_count; d++)
+			for (int d = 0; d < qvk.device_count; d++)
 			{
 				_VK(vkCreateImage(qvk.device, images_create_info + i, NULL, &qvk.images_local[d][i]));
 				ATTACH_LABEL_VARIABLE(qvk.images_local[d][i], IMAGE);
@@ -1931,7 +1545,7 @@ LIST_IMAGES_A_B
 				VkBindImageMemoryDeviceGroupInfo device_group_info = {
 					.sType = VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_DEVICE_GROUP_INFO,
 					.pNext = NULL,
-					.deviceIndexCount = qvk.device_count,
+					.deviceIndexCount = (uint32_t)qvk.device_count, // C++20 VKPT: Added a cast.
 					.pDeviceIndices = device_indices,
 					.splitInstanceBindRegionCount = 0,
 					.pSplitInstanceBindRegions = NULL,
@@ -1951,28 +1565,34 @@ LIST_IMAGES_A_B
 #endif
 	}
 
-	Com_DPrintf("Screen-space image memory: %.2f MB\n", (float)total_size / megabyte);
+	Com_Printf("Screen-space image memory: %.2f MB\n", (float)total_size / 1048576.f);
 
 	/* attach labels to images */
 #define IMG_DO(_name, _binding, ...) \
 	ATTACH_LABEL_VARIABLE_NAME(qvk.images[VKPT_IMG_##_name], IMAGE, #_name);
 	LIST_IMAGES
-	LIST_IMAGES_A_B
+		LIST_IMAGES_A_B
 #undef IMG_DO
-	/* attach labels to images */
+		/* attach labels to images */
 #define IMG_DO(_name, _binding, ...) \
 	ATTACH_LABEL_VARIABLE_NAME(qvk.images[VKPT_IMG_##_name], IMAGE, #_name);
-	LIST_IMAGES
-	LIST_IMAGES_A_B
+		LIST_IMAGES
+		LIST_IMAGES_A_B
 #undef IMG_DO
 
 
 #define IMG_DO(_name, _binding, _vkformat, _glslformat, _w, _h) \
-	[VKPT_IMG_##_name] = { \
+	images_view_create_info[VKPT_IMG_##_name] = { \
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO, \
+		.image      = qvk.images[VKPT_IMG_##_name], \
 		.viewType   = VK_IMAGE_VIEW_TYPE_2D, \
 		.format     = VK_FORMAT_##_vkformat, \
-		.image      = qvk.images[VKPT_IMG_##_name], \
+		.components     = { \
+			VK_COMPONENT_SWIZZLE_R, \
+			VK_COMPONENT_SWIZZLE_G, \
+			VK_COMPONENT_SWIZZLE_B, \
+			VK_COMPONENT_SWIZZLE_A \
+		}, \
 		.subresourceRange = { \
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
 			.baseMipLevel   = 0, \
@@ -1980,20 +1600,59 @@ LIST_IMAGES_A_B
 			.baseArrayLayer = 0, \
 			.layerCount     = 1 \
 		}, \
-		.components     = { \
-			VK_COMPONENT_SWIZZLE_R, \
-			VK_COMPONENT_SWIZZLE_G, \
-			VK_COMPONENT_SWIZZLE_B, \
-			VK_COMPONENT_SWIZZLE_A \
-		}, \
-	},
-
-	VkImageViewCreateInfo images_view_create_info[NUM_VKPT_IMAGES] = {
-		LIST_IMAGES
-		LIST_IMAGES_A_B
 	};
+
+		VkImageViewCreateInfo images_view_create_info[NUM_VKPT_IMAGES];// = {
+	LIST_IMAGES
+		LIST_IMAGES_A_B
+		//};
 #undef IMG_DO
 
+
+		for (int i = 0; i < NUM_VKPT_IMAGES; i++) {
+			_VK(vkCreateImageView(qvk.device, images_view_create_info + i, NULL, qvk.images_views + i));
+
+#ifdef VKPT_DEVICE_GROUPS
+			if (qvk.device_count > 1) {
+				for (int d = 0; d < qvk.device_count; d++) {
+					VkImageViewCreateInfo info = images_view_create_info[i];
+					info.image = qvk.images_local[d][i];
+					_VK(vkCreateImageView(qvk.device, &info, NULL, &qvk.images_views_local[d][i]));
+				}
+			}
+#endif
+		}
+
+	/* attach labels to image views */
+#define IMG_DO(_name, ...) \
+	ATTACH_LABEL_VARIABLE_NAME(qvk.images_views[VKPT_IMG_##_name], IMAGE_VIEW, #_name);
+	LIST_IMAGES
+		LIST_IMAGES_A_B
+#undef IMG_DO
+
+#define IMG_DO(_name, ...) \
+	desc_output_img_info[VKPT_IMG_##_name] = { \
+		.sampler     = VK_NULL_HANDLE, \
+		.imageView   = qvk.images_views[VKPT_IMG_##_name], \
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL \
+	};
+
+		VkDescriptorImageInfo desc_output_img_info[NUM_VKPT_IMAGES]; // C++20 VKPT: Added NUM_VKPT_IMAGES size to desc_output_img_info array.
+	LIST_IMAGES
+		LIST_IMAGES_A_B
+#undef IMG_DO
+
+		VkDescriptorImageInfo img_info[NUM_VKPT_IMAGES]; //= { // C++20 VKPT: Added NUM_VKPT_IMAGES size to desc_output_img_info array.
+#define IMG_DO(_name, ...) \
+		img_info[VKPT_IMG_##_name] = { \
+			.sampler     = qvk.tex_sampler_nearest, \
+			.imageView   = qvk.images_views[VKPT_IMG_##_name], \
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL \
+		};
+
+	LIST_IMAGES
+		LIST_IMAGES_A_B
+#undef IMG_DO
 
 	for(int i = 0; i < NUM_VKPT_IMAGES; i++) {
 		_VK(vkCreateImageView(qvk.device, images_view_create_info + i, NULL, qvk.images_views + i));
@@ -2013,32 +1672,35 @@ LIST_IMAGES_A_B
 #define IMG_DO(_name, ...) \
 	ATTACH_LABEL_VARIABLE_NAME(qvk.images_views[VKPT_IMG_##_name], IMAGE_VIEW, #_name);
 	LIST_IMAGES
-	LIST_IMAGES_A_B
+		LIST_IMAGES_A_B
 #undef IMG_DO
 
 #define IMG_DO(_name, ...) \
-	[VKPT_IMG_##_name] = { \
+	desc_output_img_info[VKPT_IMG_##_name] = { \
 		.sampler     = VK_NULL_HANDLE, \
 		.imageView   = qvk.images_views[VKPT_IMG_##_name], \
 		.imageLayout = VK_IMAGE_LAYOUT_GENERAL \
-	},
-	VkDescriptorImageInfo desc_output_img_info[] = {
-		LIST_IMAGES
-		LIST_IMAGES_A_B
 	};
+
+		//VkDescriptorImageInfo desc_output_img_info[NUM_VKPT_IMAGES]; // C++20 VKPT: Added NUM_VKPT_IMAGES size to desc_output_img_info array.
+	for (int i = 0; i < NUM_VKPT_IMAGES; i++)
+		desc_output_img_info[i] = {};
+	LIST_IMAGES
+	LIST_IMAGES_A_B
 #undef IMG_DO
 
-	VkDescriptorImageInfo img_info[] = {
+	//VkDescriptorImageInfo img_info[NUM_VKPT_IMAGES]; //= { // C++20 VKPT: Added NUM_VKPT_IMAGES size to desc_output_img_info array.
+		for (int i = 0; i < NUM_VKPT_IMAGES; i++)
+			img_info[i] = {};
 #define IMG_DO(_name, ...) \
-		[VKPT_IMG_##_name] = { \
-			.imageLayout = VK_IMAGE_LAYOUT_GENERAL, \
-			.imageView   = qvk.images_views[VKPT_IMG_##_name], \
+		img_info[VKPT_IMG_##_name] = { \
 			.sampler     = qvk.tex_sampler_nearest, \
-		},
+			.imageView   = qvk.images_views[VKPT_IMG_##_name], \
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL \
+		};
 
-		LIST_IMAGES
-		LIST_IMAGES_A_B
-	};
+	LIST_IMAGES
+	LIST_IMAGES_A_B
 #undef IMG_DO
 
 	for(int i = VKPT_IMG_BLOOM_HBLUR; i <= VKPT_IMG_BLOOM_VBLUR; i++) {
@@ -2108,14 +1770,14 @@ LIST_IMAGES_A_B
 	};
 
 	for (int i = 0; i < NUM_VKPT_IMAGES; i++) {
-		IMAGE_BARRIER(cmd_buf,
-			.image = qvk.images[i],
-			.subresourceRange = subresource_range,
+		IMAGE_BARRIER(cmd_buf, {
 			.srcAccessMask = 0,
 			.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 			.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-		);
+			.image = qvk.images[i],
+			.subresourceRange = subresource_range,
+		});
 
 #ifdef VKPT_DEVICE_GROUPS
 		if (qvk.device_count > 1) {
@@ -2123,14 +1785,14 @@ LIST_IMAGES_A_B
 			{
 				set_current_gpu(cmd_buf, d);
 
-				IMAGE_BARRIER(cmd_buf,
-					.image = qvk.images_local[d][i],
-					.subresourceRange = subresource_range,
+				IMAGE_BARRIER(cmd_buf, {
 					.srcAccessMask = 0,
 					.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 					.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-					.newLayout = VK_IMAGE_LAYOUT_GENERAL
-				);
+					.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+					.image = qvk.images_local[d][i],
+					.subresourceRange = subresource_range,
+				});
 			}
 
 			set_current_gpu(cmd_buf, ALL_GPUS);
@@ -2139,27 +1801,27 @@ LIST_IMAGES_A_B
 
 	}
 
-	IMAGE_BARRIER(cmd_buf,
+	IMAGE_BARRIER(cmd_buf, {
+		.srcAccessMask = 0,
+		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
 		.image = qvk.screenshot_image,
 		.subresourceRange = subresource_range,
-		.srcAccessMask = 0,
-		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
-		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-		);
+	});
 
 #ifdef VKPT_IMAGE_DUMPS
-	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.dump_image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-	);
+		.image = qvk.dump_image,
+		.subresourceRange = subresource_range,
+	});
 #endif
 	
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 
 	vkQueueWaitIdle(qvk.queue_graphics);
 

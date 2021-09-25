@@ -124,24 +124,22 @@ VkResult UploadImage(void* FirstPixel, size_t total_size, unsigned int Width, un
 	VkImageCreateInfo img_info =
 	{
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.flags = 0,
+		.imageType = ImageType,
+		.format = PixelFormat,
 		.extent = {
-		.width = Width,
-		.height = Height,
-		.depth = Depth,
-	},
-	.imageType = ImageType,
-	.format = PixelFormat,
-	.mipLevels = 1,
-	.arrayLayers = ArraySize,
-	.samples = VK_SAMPLE_COUNT_1_BIT,
-	.tiling = VK_IMAGE_TILING_OPTIMAL,
-	.usage = VK_IMAGE_USAGE_STORAGE_BIT
-	| VK_IMAGE_USAGE_TRANSFER_DST_BIT
-		| VK_IMAGE_USAGE_SAMPLED_BIT,
+			.width = Width,
+			.height = Height,
+			.depth = Depth,
+		},
+		.mipLevels = 1,
+		.arrayLayers = ArraySize,
+		.samples = VK_SAMPLE_COUNT_1_BIT,
+		.tiling = VK_IMAGE_TILING_OPTIMAL,
+		.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 		.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = qvk.queue_idx_graphics,
+		.queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics,
 		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-		.flags = 0
 	};
 
 	if (Cube)
@@ -164,7 +162,7 @@ VkResult UploadImage(void* FirstPixel, size_t total_size, unsigned int Width, un
 	VkMemoryAllocateFlagsInfo mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
 		.flags = VK_MEMORY_ALLOCATE_DEVICE_MASK_BIT,
-		.deviceMask = (1 << qvk.device_count) - 1
+		.deviceMask = (uint32_t)(1 << qvk.device_count) - 1
 	};
 
 	if (qvk.device_count > 1) {
@@ -186,22 +184,22 @@ VkResult UploadImage(void* FirstPixel, size_t total_size, unsigned int Width, un
 
 	VkImageViewCreateInfo img_view_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = Info->Image,
 		.viewType = viewType,
 		.format = PixelFormat,
-		.image = Info->Image,
+		.components = {
+			VK_COMPONENT_SWIZZLE_R,
+			VK_COMPONENT_SWIZZLE_G,
+			VK_COMPONENT_SWIZZLE_B,
+			VK_COMPONENT_SWIZZLE_A,
+		},
 		.subresourceRange = {
-		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-		.baseMipLevel = 0,
-		.levelCount = 1,
-		.baseArrayLayer = 0,
-		.layerCount = ArraySize,
-	},
-	.components = {
-		VK_COMPONENT_SWIZZLE_R,
-		VK_COMPONENT_SWIZZLE_G,
-		VK_COMPONENT_SWIZZLE_B,
-		VK_COMPONENT_SWIZZLE_A,			
-	},
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = ArraySize,
+		},
 	};
 
 	_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &Info->View));
@@ -217,14 +215,14 @@ VkResult UploadImage(void* FirstPixel, size_t total_size, unsigned int Width, un
 		.layerCount = ArraySize,
 	};
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = Info->Image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-	);
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.image = Info->Image,
+		.subresourceRange = subresource_range,
+	});
 
 	VkBufferImageCopy cpy_info = {
 		.bufferOffset = 0,
@@ -241,22 +239,22 @@ VkResult UploadImage(void* FirstPixel, size_t total_size, unsigned int Width, un
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &cpy_info);
 
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = Info->Image,
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		);
+		.image = Info->Image,
+		.subresourceRange = subresource_range,
+	});
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 
 
 	VkDescriptorImageInfo desc_img_info = {
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		.imageView = Info->View,
 		.sampler = qvk.tex_sampler,
+		.imageView = Info->View,
+		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
 	VkWriteDescriptorSet s = {
@@ -264,8 +262,8 @@ VkResult UploadImage(void* FirstPixel, size_t total_size, unsigned int Width, un
 		.dstSet = qvk.desc_set_textures_even,
 		.dstBinding = Binding,
 		.dstArrayElement = 0,
-		.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.descriptorCount = 1,
+		.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.pImageInfo = &desc_img_info,
 	};
 
@@ -291,13 +289,19 @@ qboolean LoadImageFromDDS(const char* FileName, uint32_t Binding, struct ImageGP
 	if (!data)
 	{
 		Com_EPrintf("Couldn't read file %s\n", FileName);
-		return qfalse;
+		return false;
 	}
 
-	qboolean retval = qfalse;
+	qboolean retval = false;
 
 	const DDS_HEADER* dds = (DDS_HEADER*)data;
 	const DDS_HEADER_DXT10* dxt10 = (DDS_HEADER_DXT10*)(data + sizeof(DDS_HEADER));
+
+	// VKPT: Moved here because of C++ and labels...
+	int Cube = 0;
+	int ArraySize = 1;
+	VkFormat PixelFormat = VK_FORMAT_UNDEFINED;
+	size_t dds_header_size = sizeof(DDS_HEADER);
 
 	if (dds->magic != DDS_MAGIC || dds->size != sizeof(DDS_HEADER) - 4)
 	{
@@ -305,10 +309,6 @@ qboolean LoadImageFromDDS(const char* FileName, uint32_t Binding, struct ImageGP
 		goto done;
 	}
 
-	int Cube = 0;
-	int ArraySize = 1;
-	VkFormat PixelFormat = VK_FORMAT_UNDEFINED;
-	size_t dds_header_size = sizeof(DDS_HEADER);
 
 	if (dds->ddspf.fourCC == MAKEFOURCC('D', 'X', '1', '0'))
 	{
@@ -358,7 +358,7 @@ VkDescriptorSetLayout* SkyGetDescriptorLayout()
 	return &uniform_precomputed_descriptor_layout;
 }
 
-VkDescriptorSet SkyGetDescriptorSet()
+VkDescriptorSet SkyGetDescriptorSet(uint32_t framenumber)
 {
 	return desc_set_precomputed_ubo;
 }
@@ -367,9 +367,9 @@ VkResult
 vkpt_uniform_precomputed_buffer_create()
 {
 	VkDescriptorSetLayoutBinding ubo_layout_binding = {
+		.binding = PRECOMPUTED_SKY_BINDING_IDX,
 		.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 		.descriptorCount = 1,
-		.binding = PRECOMPUTED_SKY_BINDING_IDX,
 		.stageFlags = VK_SHADER_STAGE_ALL,
 	};
 
@@ -396,9 +396,9 @@ vkpt_uniform_precomputed_buffer_create()
 
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		.maxSets = MAX_FRAMES_IN_FLIGHT,
 		.poolSizeCount = 1,
 		.pPoolSizes = &pool_size,
-		.maxSets = MAX_FRAMES_IN_FLIGHT,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_precomputed_ubo));
@@ -427,8 +427,8 @@ vkpt_uniform_precomputed_buffer_create()
 			.dstSet = desc_set_precomputed_ubo,
 			.dstBinding = PRECOMPUTED_SKY_BINDING_IDX,
 			.dstArrayElement = 0,
-			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			.pBufferInfo = &buf_info,
 		};
 
@@ -459,7 +459,7 @@ vkpt_uniform_precomputed_buffer_update()
 	assert(ubo->buffer != VK_NULL_HANDLE);
 	assert(qvk.current_frame_index < MAX_FRAMES_IN_FLIGHT);
 
-	struct AtmosphereParameters *mapped_ubo = buffer_map(ubo);
+	struct AtmosphereParameters *mapped_ubo = (AtmosphereParameters*)buffer_map(ubo);
 	assert(mapped_ubo);
 	memcpy(mapped_ubo, Constants, sizeof(struct AtmosphereParameters));
 	buffer_unmap(ubo);
@@ -554,8 +554,8 @@ void UpdateTerrainShadowMapView(vec3_t forward)
 
 	float BoundingOffset = ShadowmapWorldSize * 0.75f;
 	create_centered_orthographic_matrix(Proj, -BoundingOffset, BoundingOffset, -BoundingOffset, BoundingOffset, -ShadowmapWorldSize * 0.75f, ShadowmapWorldSize * 0.75f);
-	vec3_t up = { 0, 0, 1.0f };
-	vec3_t origin = { 0.f };
+	vec3_t up = vec3_up();
+	vec3_t origin = vec3_zero();
 	create_look_at_matrix(View, origin, forward, up);
 
 	mult_matrix_matrix(terrain_shadowmap_viewproj, Proj, View);
@@ -684,14 +684,42 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 	unsigned char* file_data = NULL;
 	ssize_t file_len = FS_LoadFile(FileName, (void**)&file_data);
 
+	// VKPT: All these variables moved up here because of C++ labels...
+	DDS_HEADER* dds = NULL;
+	DDS_HEADER_DXT10* dxt10 = NULL;
+
+	float* file_pixels = NULL;
+
+	size_t VertexBufferSize = 0;
+	size_t IndexBufferSize = 0;
+	size_t IndexCount = 0;
+
+	BufferResource_t upload_buffer;
+
+	byte* mapped_upload_buf = NULL;
+
+	struct ShadowVertex* vertexes = NULL;
+	struct ShadowFace* indexes = NULL;
+
+	float delta = 0.f;
+	float X = 0.f;
+	float Y = 0.f;
+
+	unsigned int i = 0;
+
+	VkCommandBuffer cmd_buf;
+
+	VkBufferCopy region;
+	// VKPT: End of var list hehe...
+
 	if (!file_data)
 	{
 		Com_EPrintf("Couldn't read file %s\n", FileName);
 		goto done;
 	}
 
-	DDS_HEADER* dds = (DDS_HEADER*)file_data;
-	DDS_HEADER_DXT10* dxt10 = (DDS_HEADER_DXT10*)(file_data + sizeof(DDS_HEADER));
+	dds = (DDS_HEADER*)file_data;
+	dxt10 = (DDS_HEADER_DXT10*)(file_data + sizeof(DDS_HEADER));
 
 	if (dds->magic != DDS_MAGIC || dds->size != sizeof(DDS_HEADER) - 4 || dds->ddspf.fourCC != MAKEFOURCC('D', 'X', '1', '0') || dxt10->dxgiFormat != DXGI_FORMAT_R32_FLOAT)
 	{
@@ -699,34 +727,32 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 		goto done;
 	}
 
-	float* file_pixels = (float*)(file_data + sizeof(DDS_HEADER) + sizeof(DDS_HEADER_DXT10));
-	
+	file_pixels = (float*)(file_data + sizeof(DDS_HEADER) + sizeof(DDS_HEADER_DXT10));
 
-	size_t VertexBufferSize = SideSize * SideSize * sizeof(struct ShadowVertex);	
-	size_t IndexBufferSize = (SideSize - 1) * (SideSize - 1) * 2 * sizeof(struct ShadowFace);
-	size_t IndexCount = IndexBufferSize / sizeof(uint32_t);
+	VertexBufferSize = SideSize * SideSize * sizeof(struct ShadowVertex);
+	IndexBufferSize = (SideSize - 1) * (SideSize - 1) * 2 * sizeof(struct ShadowFace);
+	IndexCount = IndexBufferSize / sizeof(uint32_t);
 
 	VertexBufferSize = align(VertexBufferSize, 64 * 1024);
 	IndexBufferSize = align(IndexBufferSize, 64 * 1024);
 
-	BufferResource_t upload_buffer;
 	buffer_create(&upload_buffer, VertexBufferSize + IndexBufferSize,
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-	byte* mapped_upload_buf = (byte*)buffer_map(&upload_buffer);
+	mapped_upload_buf = (byte*)buffer_map(&upload_buffer);
 
-	struct ShadowVertex* vertexes = (struct ShadowVertex*)mapped_upload_buf;
-	struct ShadowFace* indexes = (struct ShadowFace*)(mapped_upload_buf + VertexBufferSize);
+	vertexes = (struct ShadowVertex*)mapped_upload_buf;
+	indexes = (struct ShadowFace*)(mapped_upload_buf + VertexBufferSize);
 
 	if (!vertexes || !indexes)
 		return result;
 
 	result.IndexCount = IndexCount;
 
-	float delta = size_km / (float)SideSize;
-	float X = -0.5f * size_km;
-	float Y = -0.5f * size_km;
+	delta = size_km / (float)SideSize;
+	X = -0.5f * size_km;
+	Y = -0.5f * size_km;
 
 	for (unsigned int y = 0; y < SideSize; y++)
 	{
@@ -745,10 +771,9 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 		Y += delta;
 	}
 
-	unsigned int i = 0;
-	for (unsigned int y = 0; y < SideSize-1; y++)
+	for (unsigned int y = 0; y < SideSize - 1; y++)
 	{
-		for (unsigned int x = 0; x < SideSize-1; x++)
+		for (unsigned int x = 0; x < SideSize - 1; x++)
 		{
 			unsigned int upper_index = (y + 1) * SideSize + x;
 			unsigned int lower_index = y * SideSize + x;
@@ -776,30 +801,33 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	ATTACH_LABEL_VARIABLE_NAME(result.Indexes.buffer, BUFFER, "Shadowmap Index Buffer");
 
-	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
+	cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
-	BUFFER_BARRIER(cmd_buf, 
-		.buffer = upload_buffer.buffer, 
+	BUFFER_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
+		.buffer = upload_buffer.buffer,
 		.offset = 0,
-		.size = VK_WHOLE_SIZE);
+		.size = VK_WHOLE_SIZE
+		});
 
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
+		.srcAccessMask = 0,
+		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.buffer = result.Vertexes.buffer,
+		.offset = 0,
+		.size = VK_WHOLE_SIZE
+		});
+
+	BUFFER_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-		.offset = 0,
-		.size = VK_WHOLE_SIZE);
-
-	BUFFER_BARRIER(cmd_buf,
 		.buffer = result.Indexes.buffer,
-		.srcAccessMask = 0,
-		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.offset = 0,
-		.size = VK_WHOLE_SIZE);
+		.size = VK_WHOLE_SIZE
+		});
 
-	VkBufferCopy region = {
+	region = {
 		.srcOffset = 0,
 		.dstOffset = 0,
 		.size = VertexBufferSize
@@ -812,29 +840,32 @@ struct ShadowmapGeometry FillVertexAndIndexBuffers(const char* FileName, unsigne
 
 	vkCmdCopyBuffer(cmd_buf, upload_buffer.buffer, result.Indexes.buffer, 1, &region);
 
-	BUFFER_BARRIER(cmd_buf,
-		.buffer = result.Vertexes.buffer,
+	BUFFER_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
+		.buffer = result.Vertexes.buffer,
 		.offset = 0,
-		.size = VK_WHOLE_SIZE);
+		.size = VK_WHOLE_SIZE
+		});
 
-	BUFFER_BARRIER(cmd_buf,
-		.buffer = result.Indexes.buffer,
+	BUFFER_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_INDEX_READ_BIT,
+		.buffer = result.Indexes.buffer,
 		.offset = 0,
-		.size = VK_WHOLE_SIZE);
+		.size = VK_WHOLE_SIZE
+	});
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = ShadowmapData.TargetTexture,
-		.subresourceRange = { .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,.levelCount = 1,.layerCount = 1 },
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-		.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.image = ShadowmapData.TargetTexture,
+		.subresourceRange = {.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,.levelCount = 1,.layerCount = 1 },
+	});
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 
 	vkQueueWaitIdle(qvk.queue_graphics);
 	buffer_destroy(&upload_buffer);
@@ -874,14 +905,16 @@ void CreateShadowMap(struct Shadowmap* InOutShadowmap)
 	VkImageCreateInfo ShadowTexInfo = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 		.imageType = VK_IMAGE_TYPE_2D,
-		.extent.width = InOutShadowmap->Width,
-		.extent.height = InOutShadowmap->Height,
-		.extent.depth = 1,
+		.format = InOutShadowmap->DepthFormat,																// Depth stencil attachment
+		.extent = {
+			.width = InOutShadowmap->Width,
+			.height = InOutShadowmap->Height,
+			.depth = 1,
+		},
 		.mipLevels = 1,
 		.arrayLayers = 1,
 		.samples = VK_SAMPLE_COUNT_1_BIT,
 		.tiling = VK_IMAGE_TILING_OPTIMAL,
-		.format = InOutShadowmap->DepthFormat,																// Depth stencil attachment
 		.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,		// We will sample directly from the depth attachment for the shadow mapping
 	};
 
@@ -904,6 +937,7 @@ void CreateShadowMap(struct Shadowmap* InOutShadowmap)
 	VkImageViewCreateInfo depthStencilView = 
 	{
 		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = InOutShadowmap->TargetTexture,
 		.viewType = VK_IMAGE_VIEW_TYPE_2D,
 		.format = InOutShadowmap->DepthFormat,
 		.subresourceRange = {
@@ -911,17 +945,16 @@ void CreateShadowMap(struct Shadowmap* InOutShadowmap)
 			.baseMipLevel = 0,
 			.levelCount = 1,
 			.baseArrayLayer = 0,
-			.layerCount = 1
+			.layerCount = 1,
 		},
-		.image = InOutShadowmap->TargetTexture,
 	};
 
 	_VK(vkCreateImageView(qvk.device, &depthStencilView, NULL, &InOutShadowmap->DepthView));
 
 	VkDescriptorImageInfo desc_img_info = {
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		.imageView = InOutShadowmap->DepthView,
 		.sampler = qvk.tex_sampler,
+		.imageView = InOutShadowmap->DepthView,
+		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
 	VkWriteDescriptorSet s = {
@@ -929,8 +962,8 @@ void CreateShadowMap(struct Shadowmap* InOutShadowmap)
 		.dstSet = qvk.desc_set_textures_even,
 		.dstBinding = BINDING_OFFSET_TERRAIN_SHADOWMAP,
 		.dstArrayElement = 0,
-		.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.descriptorCount = 1,
+		.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		.pImageInfo = &desc_img_info,
 	};
 
@@ -991,14 +1024,14 @@ void ReleaseShadowmapResources()
 
 void RecordCommandBufferShadowmap(VkCommandBuffer cmd_buf)
 {
-	IMAGE_BARRIER(cmd_buf,
-		.image = ShadowmapData.TargetTexture,
-		.subresourceRange = { .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT, .levelCount = 1, .layerCount = 1 },
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 		.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-	);
+		.image = ShadowmapData.TargetTexture,
+		.subresourceRange = {.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT, .levelCount = 1, .layerCount = 1 },
+	});
 	
 	VkClearValue clearValues;
 	clearValues.depthStencil.depth = 1.0f;
@@ -1009,8 +1042,12 @@ void RecordCommandBufferShadowmap(VkCommandBuffer cmd_buf)
 		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.renderPass = render_pass_smap,
 		.framebuffer = ShadowmapData.FrameBuffer,
-		.renderArea.extent.width = ShadowmapData.Width,
-		.renderArea.extent.height = ShadowmapData.Height,
+		.renderArea = {
+			.extent = {
+				.width = ShadowmapData.Width,
+				.height = ShadowmapData.Height,
+			}
+		},
 		.clearValueCount = 1,
 		.pClearValues = &clearValues,
 	};
@@ -1021,8 +1058,8 @@ void RecordCommandBufferShadowmap(VkCommandBuffer cmd_buf)
 
 	VkViewport viewport = 
 	{
-		.width = ShadowmapData.Width,
-		.height = ShadowmapData.Height,
+		.width = (float)ShadowmapData.Width,
+		.height = (float)ShadowmapData.Height,
 		.minDepth = 0,
 		.maxDepth = 1.0f,
 	};
@@ -1031,10 +1068,14 @@ void RecordCommandBufferShadowmap(VkCommandBuffer cmd_buf)
 
 	VkRect2D rect2D = 
 	{
-		.extent.width = ShadowmapData.Width,
-		.extent.height = ShadowmapData.Height,
-		.offset.x = 0,
-		.offset.y = 0,
+		.offset = {
+			.x = 0,
+			.y = 0,
+		},
+		.extent = {
+			.width = ShadowmapData.Width,
+			.height = ShadowmapData.Height,
+		},
 	};
 
 	vkCmdSetScissor(cmd_buf, 0, 1, &rect2D);
@@ -1049,12 +1090,12 @@ void RecordCommandBufferShadowmap(VkCommandBuffer cmd_buf)
 	vkCmdDrawIndexed(cmd_buf, ShadowmapGrid.IndexCount, 1, 0, 0, 0);
 	vkCmdEndRenderPass(cmd_buf);
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = ShadowmapData.TargetTexture,
-		.subresourceRange = { .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,.levelCount = 1,.layerCount = 1 },
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 		.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-	);
+		.image = ShadowmapData.TargetTexture,
+		.subresourceRange = {.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,.levelCount = 1,.layerCount = 1 },
+	});
 }

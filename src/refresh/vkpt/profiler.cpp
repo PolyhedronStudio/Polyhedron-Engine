@@ -28,7 +28,6 @@ static uint64_t query_pool_results[NUM_PROFILER_QUERIES_PER_FRAME * 2];
 // the buffer if it's properly sized.
 
 extern cvar_t *cvar_pt_reflect_refract;
-extern cvar_t *cvar_flt_fsr_enable;
 
 static qboolean profiler_queries_used[NUM_PROFILER_QUERIES_PER_FRAME * MAX_FRAMES_IN_FLIGHT] = { 0 };
 
@@ -66,7 +65,7 @@ vkpt_profiler_query(VkCommandBuffer cmd_buf, int idx, VKPTProfilerAction action)
 
 	set_current_gpu(cmd_buf, ALL_GPUS);
 
-	profiler_queries_used[idx] = qtrue;
+	profiler_queries_used[idx] = true;
 
 	return VK_SUCCESS;
 }
@@ -74,13 +73,13 @@ vkpt_profiler_query(VkCommandBuffer cmd_buf, int idx, VKPTProfilerAction action)
 VkResult
 vkpt_profiler_next_frame(VkCommandBuffer cmd_buf)
 {
-	qboolean any_queries_used = qfalse;
+	qboolean any_queries_used = false;
 
 	for (int idx = 0; idx < NUM_PROFILER_QUERIES_PER_FRAME; idx++)
 	{
 		if (profiler_queries_used[idx + qvk.current_frame_index * NUM_PROFILER_QUERIES_PER_FRAME])
 		{
-			any_queries_used = qtrue;
+			any_queries_used = true;
 			break;
 		}
 	}
@@ -98,7 +97,7 @@ vkpt_profiler_next_frame(VkCommandBuffer cmd_buf)
 		if (result != VK_SUCCESS && result != VK_NOT_READY)
 		{
 			Com_EPrintf("Failed call to vkGetQueryPoolResults, error code = %d\n", result);
-			any_queries_used = qfalse;
+			any_queries_used = false;
 		}
 	}
 
@@ -130,7 +129,7 @@ draw_query(int x, int y, qhandle_t font, const char *enum_name, int idx)
 	char buf[256];
 	int i;
 	for(i = 0; i < LENGTH(buf) - 1 && enum_name[i]; i++)
-		buf[i] = enum_name[i] == '_' ? ' ' : (char)tolower(enum_name[i]); 
+		buf[i] = enum_name[i] == '_' ? ' ' : tolower(enum_name[i]); 
 	buf[i] = 0;
 
 	R_DrawString(x, y, 0, 128, buf, font);
@@ -156,7 +155,7 @@ draw_profiler(int enable_asvgf)
 		return;
 
 #define PROFILER_DO(name, indent) \
-	draw_query(x, y, font, &#name[9], name); y += 10;
+	draw_query(x, y, font, #name + 9, name); y += 10;
 
 	PROFILER_DO(PROFILER_FRAME_TIME, 0);
 	PROFILER_DO(PROFILER_INSTANCE_GEOMETRY, 1);
@@ -193,12 +192,6 @@ draw_profiler(int enable_asvgf)
 	PROFILER_DO(PROFILER_INTERLEAVE, 1);
 	PROFILER_DO(PROFILER_BLOOM, 1);
 	PROFILER_DO(PROFILER_TONE_MAPPING, 2);
-	if(cvar_flt_fsr_enable->integer != 0)
-	{
-		PROFILER_DO(PROFILER_FSR, 1);
-		PROFILER_DO(PROFILER_FSR_EASU, 2);
-		PROFILER_DO(PROFILER_FSR_RCAS, 2);
-	}
 #undef PROFILER_DO
 }
 

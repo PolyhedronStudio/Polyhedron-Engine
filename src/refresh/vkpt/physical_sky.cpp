@@ -69,7 +69,7 @@ static time_t latched_local_time;
 
 static int current_preset = 0;
 
-static qboolean sdl_initialized = qfalse;
+static qboolean sdl_initialized = false;
 static SDL_GameController* game_controller = 0;
 
 void vkpt_physical_sky_latch_local_time()
@@ -93,7 +93,7 @@ typedef enum
 
 static int active_sun_preset()
 {
-	qboolean multiplayer = cl.maxclients > 1;
+	qboolean multiplayer = cl.maxClients > 1;
 
 	if (multiplayer)
 	{
@@ -137,13 +137,14 @@ initializeEnvTexture(int width, int height)
 
     VkImageCreateInfo img_info = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-        .extent = {
-            .width = width,
-            .height = height,
+		.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = VK_FORMAT_R16G16B16A16_SFLOAT,
+		.extent = {
+            .width = (uint32_t)width,
+            .height = (uint32_t)height,
             .depth = 1,
         },
-        .imageType = VK_IMAGE_TYPE_2D,
-        .format = VK_FORMAT_R16G16B16A16_SFLOAT,
         .mipLevels = 1,
         .arrayLayers = num_images,
         .samples = VK_SAMPLE_COUNT_1_BIT,
@@ -151,9 +152,8 @@ initializeEnvTexture(int width, int height)
         .usage = VK_IMAGE_USAGE_STORAGE_BIT
                                | VK_IMAGE_USAGE_TRANSFER_DST_BIT
                                | VK_IMAGE_USAGE_SAMPLED_BIT,
-        .flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .queueFamilyIndexCount = qvk.queue_idx_graphics,
+        .queueFamilyIndexCount = (uint32_t)qvk.queue_idx_graphics,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
     };
 
@@ -182,16 +182,16 @@ initializeEnvTexture(int width, int height)
 
     VkImageViewCreateInfo img_view_info = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-        .viewType = VK_IMAGE_VIEW_TYPE_CUBE,
+		.image = img_envmap,
+		.viewType = VK_IMAGE_VIEW_TYPE_CUBE,
         .format = VK_FORMAT_R16G16B16A16_SFLOAT,
-        .image = img_envmap,
-        .subresourceRange = subresource_range,
         .components = {
             VK_COMPONENT_SWIZZLE_R,
             VK_COMPONENT_SWIZZLE_G,
             VK_COMPONENT_SWIZZLE_B,
             VK_COMPONENT_SWIZZLE_A,
         },
+		.subresourceRange = subresource_range,
     };
     _VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_envmap));
     ATTACH_LABEL_VARIABLE(imv_envmap, IMAGE_VIEW);
@@ -199,18 +199,18 @@ initializeEnvTexture(int width, int height)
     // cube descriptor layout
     {
         VkDescriptorImageInfo desc_img_info = {
-            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .imageView = imv_envmap,
-            .sampler = qvk.tex_sampler,
-        };
+			.sampler = qvk.tex_sampler,
+			.imageView = imv_envmap,
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		};
 
         VkWriteDescriptorSet s = {
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
             .dstSet = qvk.desc_set_textures_even,
             .dstBinding = BINDING_OFFSET_PHYSICAL_SKY,
             .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
             .pImageInfo = &desc_img_info,
         };
 
@@ -223,8 +223,8 @@ initializeEnvTexture(int width, int height)
     // image descriptor
     {
         VkDescriptorImageInfo desc_img_info = {
-            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .imageView = imv_envmap,
+			.imageView = imv_envmap,
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
         };
 
         VkWriteDescriptorSet s = {
@@ -232,8 +232,8 @@ initializeEnvTexture(int width, int height)
             .dstSet = qvk.desc_set_textures_even,
             .dstBinding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
             .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .descriptorCount = 1,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
             .pImageInfo = &desc_img_info,
         };
 
@@ -294,7 +294,7 @@ vkpt_physical_sky_initialize()
 	if (!sdl_initialized)
 	{
 		SDL_InitSubSystem(SDL_INIT_JOYSTICK);
-		sdl_initialized = qtrue;
+		sdl_initialized = true;
 	}
 
 	for (int i = 0; i < SDL_NumJoysticks(); i++)
@@ -413,47 +413,64 @@ vkpt_physical_sky_destroy_pipelines()
 	return VK_SUCCESS;
 }
 
-#define BARRIER_COMPUTE(cmd_buf, img) \
-	do { \
-		VkImageSubresourceRange subresource_range = { \
-			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
-			.baseMipLevel   = 0, \
-			.levelCount     = 1, \
-			.baseArrayLayer = 0, \
-			.layerCount     = 1 \
-		}; \
-		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
-				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
-				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-		); \
-	} while(0)
+//#define BARRIER_COMPUTE(cmd_buf, img) \
+//	do { \
+//		VkImageSubresourceRange subresource_range = { \
+//			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
+//			.baseMipLevel   = 0, \
+//			.levelCount     = 1, \
+//			.baseArrayLayer = 0, \
+//			.layerCount     = 1 \
+//		}; \
+//		IMAGE_BARRIER(cmd_buf, \
+//				.image            = img, \
+//				.subresourceRange = subresource_range, \
+//				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
+//				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
+//				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+//				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+//		); \
+//	} while(0)
+static inline void BARRIER_COMPUTE(VkCommandBuffer& commandBuffer, VkImage& image) {
+	VkImageSubresourceRange subresource_range = {
+		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+		.baseMipLevel = 0,
+		.levelCount = 1,
+		.baseArrayLayer = 0,
+		.layerCount = 1
+	};
+	IMAGE_BARRIER(commandBuffer, {
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.image = image,
+		.subresourceRange = subresource_range,
+	});
+}
 
 
 static void
 reset_sun_color_buffer(VkCommandBuffer cmd_buf)
 {
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_UNIFORM_READ_BIT,
+		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_UNIFORM_READ_BIT,
-		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT
-	);
+		});
 
 	vkCmdFillBuffer(cmd_buf, qvk.buf_sun_color.buffer,
 		0, VK_WHOLE_SIZE, 0);
 
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT
-	);
+	});
 }
 
 qboolean vkpt_physical_sky_needs_update()
@@ -473,19 +490,20 @@ vkpt_physical_sky_record_cmd_buffer(VkCommandBuffer cmd_buf)
 
 	reset_sun_color_buffer(cmd_buf);
 
-    {
-        VkDescriptorSet desc_sets[] = {
-            qvk.desc_set_ubo,
-            qvk_get_current_desc_set_textures(),
-            qvk.desc_set_vertex_buffer,
-            SkyGetDescriptorSet(qvk.current_frame_index)
-        };
+	{
+		VkDescriptorSet desc_sets[] = {
+			qvk.desc_set_ubo,
+			qvk_get_current_desc_set_textures(),
+			qvk.desc_set_vertex_buffer,
+			SkyGetDescriptorSet(qvk.current_frame_index)
+		};
 
-        if (physical_sky_space->integer > 0) {
-            vkCmdBindPipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_physical_sky_space);
-        } else {
-            vkCmdBindPipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_physical_sky);
-        }
+		if (physical_sky_space->integer > 0) {
+			vkCmdBindPipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_physical_sky_space);
+		}
+		else {
+			vkCmdBindPipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_physical_sky);
+		}
 
 		vkCmdPushConstants(cmd_buf, pipeline_layout_physical_sky, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(float) * 16, terrain_shadowmap_viewproj);
 
@@ -497,13 +515,13 @@ vkpt_physical_sky_record_cmd_buffer(VkCommandBuffer cmd_buf)
 
 	BARRIER_COMPUTE(cmd_buf, img_envmap);
 
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT
-	);
+		});
 
 	{
 		VkDescriptorSet desc_sets[] = {
@@ -514,17 +532,17 @@ vkpt_physical_sky_record_cmd_buffer(VkCommandBuffer cmd_buf)
 		vkCmdBindPipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_resolve);
 		vkCmdBindDescriptorSets(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE,
 			pipeline_layout_resolve, 0, LENGTH(desc_sets), desc_sets, 0, 0);
-		
+
 		vkCmdDispatch(cmd_buf, 1, 1, 1);
 	}
 
-	BUFFER_BARRIER(cmd_buf,
+	BUFFER_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_UNIFORM_READ_BIT,
 		.buffer = qvk.buf_sun_color.buffer,
 		.offset = 0,
 		.size = VK_WHOLE_SIZE,
-		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_UNIFORM_READ_BIT
-	);
+	});
 
     skyNeedsUpdate = VK_FALSE;
 	
@@ -535,16 +553,16 @@ static void change_image_layouts(VkImage image, const VkImageSubresourceRange* s
 {
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = img_envmap,
-		.subresourceRange = *subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-	);
+		.image = img_envmap,
+		.subresourceRange = *subresource_range,
+	});
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
 	vkpt_wait_idle(qvk.queue_graphics, &qvk.cmd_buffers_graphics);
 }
 
@@ -638,7 +656,7 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 	if (skyIndex != current_preset)
 	{
 		vkQueueWaitIdle(qvk.queue_graphics);
-		SkyLoadScatterParameters(skyDesc->preset);
+		SkyLoadScatterParameters((SkyPreset)skyDesc->preset);
 		current_preset = skyIndex;
 	}
 
@@ -751,7 +769,7 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 
 	light->angular_size_rad = max(1.f, min(10.f, sun_angle->value)) * M_PI / 180.f;
 
-	light->use_physical_sky = qtrue;
+	light->use_physical_sky = true;
 
 	// color before occlusion
 	vec3_t sunColor = { sun_color[0]->value, sun_color[1]->value, sun_color[2]->value };
@@ -759,11 +777,11 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 
 	// potentially visible - can be overridden if readback data says it's occluded
 	if (physical_sky_space->integer)
-		light->visible = qtrue;
+		light->visible = true;
 	else
 		light->visible = (light->direction_envmap[2] >= -sinf(light->angular_size_rad * 0.5f));
 
-	vec3_t sun_direction_world = { 0.f };
+	vec3_t sun_direction_world = vec3_zero();
 	sun_direction_world[0] = light->direction_envmap[0] * sky_matrix[0][0] + light->direction_envmap[1] * sky_matrix[0][1] + light->direction_envmap[2] * sky_matrix[0][2];
 	sun_direction_world[1] = light->direction_envmap[0] * sky_matrix[1][0] + light->direction_envmap[1] * sky_matrix[1][1] + light->direction_envmap[2] * sky_matrix[1][2];
 	sun_direction_world[2] = light->direction_envmap[0] * sky_matrix[2][0] + light->direction_envmap[1] * sky_matrix[2][1] + light->direction_envmap[2] * sky_matrix[2][2];
@@ -985,7 +1003,7 @@ static PhysicalSkyDesc_t skyPresets[3] = {
 
 PhysicalSkyDesc_t const * GetSkyPreset(uint16_t index)
 {
-    if (index >= 0 && index < q_countof(skyPresets))
+    if (index >= 0 && index < Q_COUNTOF(skyPresets))
         return &skyPresets[index];
 
     return &skyPresets[0];

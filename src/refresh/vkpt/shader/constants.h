@@ -25,6 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define HISTOGRAM_BINS 128
 
+#define ALBEDO_TRANSFORM_SCALE 1.0
+#define ALBEDO_TRANSFORM_BIAS -0.05
+#define ALBEDO_TRANSFORM_POWER 0.4545
+
 #define EMISSIVE_TRANSFORM_BIAS -0.001
 
 #define MAX_MIRROR_ROUGHNESS 0.02
@@ -68,6 +72,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MATERIAL_KIND_CHROME_MODEL   0xd0000000
 
 #define MATERIAL_FLAG_LIGHT          0x08000000
+#define MATERIAL_FLAG_CORRECT_ALBEDO 0x04000000
 #define MATERIAL_FLAG_HANDEDNESS     0x02000000
 #define MATERIAL_FLAG_WEAPON         0x01000000
 #define MATERIAL_FLAG_WARP           0x00800000
@@ -104,7 +109,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SHADER_MAX_ENTITIES                  1024
 #define SHADER_MAX_BSP_ENTITIES              128
 #define MAX_LIGHT_SOURCES                    32
-#define MAX_LIGHT_STYLES                     64
+#define MAX_LIGHT_STYLES                     256
 
 #define AS_FLAG_OPAQUE          (1 << 0)
 #define AS_FLAG_TRANSPARENT     (1 << 1)
@@ -125,29 +130,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SBT_RMISS_SHADOW 2
 #define SBT_RCHIT_OPAQUE 3
 #define SBT_RCHIT_EMPTY 4
-#define SBT_RAHIT_MASKED 5
-#define SBT_RAHIT_MASKED_SHADOW 6
-#define SBT_RAHIT_PARTICLE 7
-#define SBT_RAHIT_PARTICLE_SHADOW 8
-#define SBT_RAHIT_EXPLOSION 9
-#define SBT_RAHIT_EXPLOSION_SHADOW 10
-#define SBT_RAHIT_SPRITE 11
-#define SBT_RAHIT_SPRITE_SHADOW 12
-#define SBT_RINT_BEAM 13
-#define SBT_ENTRIES_PER_PIPELINE 14
+#define SBT_RAHIT_PARTICLE 5
+#define SBT_RAHIT_EXPLOSION 6
+#define SBT_RAHIT_SPRITE 7
+#define SBT_RINT_BEAM 8
+#define SBT_ENTRIES_PER_PIPELINE 9
 // vkpt_pt_create_pipelines() relies on all 'transparency' SBT entries coming after SBT_FIRST_TRANSPARENCY
 #define SBT_FIRST_TRANSPARENCY SBT_RAHIT_PARTICLE
 
 // SBT indices, for primary rays
 #define SBTO_OPAQUE     (SBT_RCHIT_OPAQUE - SBT_RCHIT_OPAQUE)
-#define SBTO_MASKED     (SBT_RAHIT_MASKED - SBT_RCHIT_OPAQUE)
 #define SBTO_PARTICLE   (SBT_RAHIT_PARTICLE - SBT_RCHIT_OPAQUE)
 #define SBTO_EXPLOSION  (SBT_RAHIT_EXPLOSION - SBT_RCHIT_OPAQUE)
 #define SBTO_SPRITE     (SBT_RAHIT_SPRITE - SBT_RCHIT_OPAQUE)
 #define SBTO_BEAM       (SBT_RINT_BEAM - SBT_RCHIT_OPAQUE)
-
-#ifndef M_PI
-#define M_PI 3.1415926535897932384626433832795
-#endif
 
 #endif /*_CONSTANTS_H_*/

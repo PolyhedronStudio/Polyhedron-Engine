@@ -66,6 +66,9 @@ buffer_create(
 	assert(buf);
 	VkResult result = VK_SUCCESS;
 
+	if (!qvk.use_khr_ray_tracing)
+		usage &= ~VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+
 	VkBufferCreateInfo buf_create_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
 		.size  = size,
@@ -78,6 +81,9 @@ buffer_create(
 	buf->size = size;
 	buf->is_mapped = 0;
 
+	// VKPT: Put here for C++
+	VkMemoryAllocateInfo mem_alloc_info;
+	VkMemoryAllocateFlagsInfo mem_alloc_flags;
 	result = vkCreateBuffer(qvk.device, &buf_create_info, NULL, &buf->buffer);
 	if(result != VK_SUCCESS) {
 		goto fail_buffer;
@@ -87,15 +93,15 @@ buffer_create(
 	VkMemoryRequirements mem_reqs;
 	vkGetBufferMemoryRequirements(qvk.device, buf->buffer, &mem_reqs);
 
-	VkMemoryAllocateInfo mem_alloc_info = {
+	mem_alloc_info = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
 		.allocationSize = mem_reqs.size,
 		.memoryTypeIndex = get_memory_type(mem_reqs.memoryTypeBits, mem_properties)
 	};
 
-	VkMemoryAllocateFlagsInfo mem_alloc_flags = {
+	mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
-		.flags = (usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT : 0,
+		.flags = (VkMemoryAllocateFlags)((usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT : 0),
 		.deviceMask = 0
 	};
 
@@ -438,7 +444,7 @@ VkResult allocate_gpu_memory(VkMemoryRequirements mem_req, VkDeviceMemory* pMemo
 	VkMemoryAllocateFlagsInfo mem_alloc_flags = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
 		.flags = VK_MEMORY_ALLOCATE_DEVICE_MASK_BIT,
-		.deviceMask = (1 << qvk.device_count) - 1
+		.deviceMask = (uint32_t)(1 << qvk.device_count) - 1
 	};
 
 	if (qvk.device_count > 1) {
@@ -572,7 +578,7 @@ float convert_half_to_float(uint16_t Value)
 	return res[0];
 }
 
-void save_to_pfm_file(char* prefix, uint64_t frame_counter, uint64_t width, uint64_t height, char* data, uint64_t rowPitch, int32_t type)
+void save_to_pfm_file(const char* prefix, uint64_t frame_counter, uint64_t width, uint64_t height, char* data, uint64_t rowPitch, int32_t type)
 {
 	if (frame_counter == 0) return;
 
@@ -583,7 +589,7 @@ void save_to_pfm_file(char* prefix, uint64_t frame_counter, uint64_t width, uint
 	if (file)
 	{
 		{
-			char* buf = "PF\n";
+			const char* buf = "PF\n";
 			fwrite(buf, 1, strlen(buf), file);
 		}
 		{
@@ -592,12 +598,12 @@ void save_to_pfm_file(char* prefix, uint64_t frame_counter, uint64_t width, uint
 			fwrite(resolutionData, 1, strlen(resolutionData), file);
 		}
 		{
-			char* buf = "-1.0\n";
+			const char* buf = "-1.0\n";
 			fwrite(buf, 1, strlen(buf), file);
 		}
 
 		size_t pixelDataSize = width * height * 3 * sizeof(float);
-		float* pixelData = malloc(pixelDataSize);
+		float* pixelData = (float*)malloc(pixelDataSize);
 		memset(pixelData, 0, pixelDataSize);
 		
 		if (type == 0) // input

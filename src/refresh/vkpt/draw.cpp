@@ -43,7 +43,7 @@ typedef struct {
 } StretchPic_t;
 
 static clipRect_t clip_rect;
-static qboolean clip_enable = qfalse;
+static qboolean clip_enable = false;
 
 static StretchPic_t stretch_pic_queue[MAX_STRETCH_PICS];
 
@@ -52,7 +52,7 @@ static VkPipelineLayout        pipeline_layout_final_blit;
 static VkRenderPass            render_pass_stretch_pic;
 static VkPipeline              pipeline_stretch_pic;
 static VkPipeline              pipeline_final_blit;
-static VkFramebuffer*          framebuffer_stretch_pic = NULL;
+static VkFramebuffer           framebuffer_stretch_pic[MAX_SWAPCHAIN_IMAGES];
 static BufferResource_t        buf_stretch_pic_queue[MAX_FRAMES_IN_FLIGHT];
 static VkDescriptorSetLayout   desc_set_layout_sbo;
 static VkDescriptorPool        desc_pool_sbo;
@@ -187,16 +187,15 @@ create_render_pass()
 		.pColorAttachments    = &color_attachment_ref,
 	};
 
-	VkSubpassDependency dependencies[] = {
-		{
-			.srcSubpass    = VK_SUBPASS_EXTERNAL,
-			.dstSubpass    = 0, /* index for own subpass */
-			.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			.srcAccessMask = 0, /* XXX verify */
-			.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
-			               | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-		},
+	VkSubpassDependency dependencies[1];// = {
+	dependencies[0] = {
+		.srcSubpass = VK_SUBPASS_EXTERNAL,
+		.dstSubpass = 0, /* index for own subpass */
+		.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.srcAccessMask = 0, /* XXX verify */
+		.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+					   | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 	};
 
 	VkRenderPassCreateInfo render_pass_info = {
@@ -225,13 +224,12 @@ vkpt_draw_initialize()
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
 	}
 
-	VkDescriptorSetLayoutBinding layout_bindings[] = {
-		{
-			.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+	VkDescriptorSetLayoutBinding layout_bindings[1];// = {
+	layout_bindings[0] = {
+			.binding = 0,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.descriptorCount = 1,
-			.binding         = 0,
-			.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT,
-		},
+			.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
 	};
 
 	VkDescriptorSetLayoutCreateInfo layout_info = {
@@ -250,9 +248,9 @@ vkpt_draw_initialize()
 
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		.maxSets = MAX_FRAMES_IN_FLIGHT,
 		.poolSizeCount = 1,
 		.pPoolSizes    = &pool_size,
-		.maxSets       = MAX_FRAMES_IN_FLIGHT,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_sbo));
@@ -281,8 +279,8 @@ vkpt_draw_initialize()
 			.dstSet          = desc_set_sbo[i],
 			.dstBinding      = 0,
 			.dstArrayElement = 0,
-			.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.descriptorCount = 1,
+			.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.pBufferInfo     = &buf_info,
 		};
 
@@ -316,9 +314,6 @@ vkpt_draw_destroy_pipelines()
 	for(int i = 0; i < qvk.num_swap_chain_images; i++) {
 		vkDestroyFramebuffer(qvk.device, framebuffer_stretch_pic[i], NULL);
 	}
-	free(framebuffer_stretch_pic);
-	framebuffer_stretch_pic = NULL;
-	
 	return VK_SUCCESS;
 }
 
@@ -389,19 +384,19 @@ vkpt_draw_create_pipelines()
 		.depthClampEnable        = VK_FALSE,
 		.rasterizerDiscardEnable = VK_FALSE, /* skip rasterizer */
 		.polygonMode             = VK_POLYGON_MODE_FILL,
-		.lineWidth               = 1.0f,
-		.cullMode                = VK_CULL_MODE_BACK_BIT,
-		.frontFace               = VK_FRONT_FACE_CLOCKWISE,
+		.cullMode = VK_CULL_MODE_BACK_BIT,
+		.frontFace = VK_FRONT_FACE_CLOCKWISE,
 		.depthBiasEnable         = VK_FALSE,
 		.depthBiasConstantFactor = 0.0f,
 		.depthBiasClamp          = 0.0f,
 		.depthBiasSlopeFactor    = 0.0f,
+		.lineWidth = 1.0f,
 	};
 
 	VkPipelineMultisampleStateCreateInfo multisample_state = {
 		.sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+		.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
 		.sampleShadingEnable   = VK_FALSE,
-		.rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT,
 		.minSampleShading      = 1.0f,
 		.pSampleMask           = NULL,
 		.alphaToCoverageEnable = VK_FALSE,
@@ -409,17 +404,17 @@ vkpt_draw_create_pipelines()
 	};
 
 	VkPipelineColorBlendAttachmentState color_blend_attachment = {
-		.colorWriteMask      = VK_COLOR_COMPONENT_R_BIT
-			                 | VK_COLOR_COMPONENT_G_BIT
-			                 | VK_COLOR_COMPONENT_B_BIT
-			                 | VK_COLOR_COMPONENT_A_BIT,
-		.blendEnable         = VK_TRUE,
+		.blendEnable = VK_TRUE,
 		.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA,
 		.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
 		.colorBlendOp        = VK_BLEND_OP_ADD,
 		.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
 		.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
 		.alphaBlendOp        = VK_BLEND_OP_ADD,
+		.colorWriteMask = VK_COLOR_COMPONENT_R_BIT
+							 | VK_COLOR_COMPONENT_G_BIT
+							 | VK_COLOR_COMPONENT_B_BIT
+							 | VK_COLOR_COMPONENT_A_BIT,
 	};
 
 	VkPipelineColorBlendStateCreateInfo color_blend_state = {
@@ -468,7 +463,7 @@ vkpt_draw_create_pipelines()
 	_VK(vkCreateGraphicsPipelines(qvk.device, VK_NULL_HANDLE, 1, &pipeline_info, NULL, &pipeline_final_blit));
 	ATTACH_LABEL_VARIABLE(pipeline_final_blit, PIPELINE);
 
-	framebuffer_stretch_pic = malloc(qvk.num_swap_chain_images * sizeof(*framebuffer_stretch_pic));
+
 	for(int i = 0; i < qvk.num_swap_chain_images; i++) {
 		VkImageView attachments[] = {
 			qvk.swap_chain_image_views[i]
@@ -514,8 +509,10 @@ vkpt_draw_submit_stretch_pics(VkCommandBuffer cmd_buf)
 		.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.renderPass        = render_pass_stretch_pic,
 		.framebuffer       = framebuffer_stretch_pic[qvk.current_swap_chain_image_index],
-		.renderArea.offset = { 0, 0 },
-		.renderArea.extent = vkpt_draw_get_extent()
+		.renderArea = {
+			.offset = { 0, 0 },
+			.extent = vkpt_draw_get_extent()
+		}
 	};
 
 	VkDescriptorSet desc_sets[] = {
@@ -535,7 +532,7 @@ vkpt_draw_submit_stretch_pics(VkCommandBuffer cmd_buf)
 }
 
 VkResult
-vkpt_final_blit_simple(VkCommandBuffer cmd_buf, VkImage image, VkExtent2D extent)
+vkpt_final_blit_simple(VkCommandBuffer cmd_buf)
 {
 	VkImageSubresourceRange subresource_range = {
 		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -545,61 +542,67 @@ vkpt_final_blit_simple(VkCommandBuffer cmd_buf, VkImage image, VkExtent2D extent
 		.layerCount = 1
 	};
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-	);
-
-	IMAGE_BARRIER(cmd_buf,
-		.image = image,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
 		.subresourceRange = subresource_range,
+	});
+
+	int output_img = VKPT_IMG_TAA_OUTPUT;
+
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-	);
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		.image = qvk.images[output_img],
+		.subresourceRange = subresource_range,
+	});
 
 	VkOffset3D blit_size = {
-		.x = extent.width,
-		.y = extent.height,
+		.x = (int32_t)qvk.extent_taa_output.width,
+		.y = (int32_t)qvk.extent_taa_output.height,
 		.z = 1
 	};
 	VkOffset3D blit_size_unscaled = {
-		.x = qvk.extent_unscaled.width,.y = qvk.extent_unscaled.height,.z = 1
+		.x = (int32_t)qvk.extent_unscaled.width,
+		.y = (int32_t)qvk.extent_unscaled.height,
+		.z = 1
 	};
 	VkImageBlit img_blit = {
 		.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
 		.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
-		.srcOffsets = { [1] = blit_size },
-		.dstOffsets = { [1] = blit_size_unscaled },
+		//.srcOffsets = { [1] = blit_size },
+		//.dstOffsets = { [1] = blit_size_unscaled },
 	};
+	img_blit.srcOffsets[1] = blit_size;
+	img_blit.dstOffsets[1] = blit_size_unscaled;
 	vkCmdBlitImage(cmd_buf,
-		image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		qvk.images[output_img], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 		qvk.swap_chain_images[qvk.current_swap_chain_image_index], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1, &img_blit, VK_FILTER_NEAREST);
 
-	IMAGE_BARRIER(cmd_buf,
-		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
-		.subresourceRange = subresource_range,
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = 0,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-	);
-
-	IMAGE_BARRIER(cmd_buf,
-		.image = image,
+		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.image = qvk.swap_chain_images[qvk.current_swap_chain_image_index],
 		.subresourceRange = subresource_range,
+	});
+
+	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL
-	);
-
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.image = qvk.images[output_img],
+		.subresourceRange = subresource_range,
+	});
+	
 	return VK_SUCCESS;
 }
 
@@ -610,8 +613,10 @@ vkpt_final_blit_filtered(VkCommandBuffer cmd_buf)
 		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.renderPass = render_pass_stretch_pic,
 		.framebuffer = framebuffer_stretch_pic[qvk.current_swap_chain_image_index],
-		.renderArea.offset = { 0, 0 },
-		.renderArea.extent = vkpt_draw_get_extent()
+		.renderArea = {
+			.offset = { 0, 0 },
+			.extent = vkpt_draw_get_extent()
+		}
 	};
 
 	VkDescriptorSet desc_sets[] = {
@@ -633,12 +638,12 @@ void R_SetClipRect_RTX(const clipRect_t *clip)
 { 
 	if (clip)
 	{
-		clip_enable = qtrue;
+		clip_enable = true;
 		clip_rect = *clip;
 	}
 	else
 	{
-		clip_enable = qfalse;
+		clip_enable = false;
 	}
 }
 
@@ -670,7 +675,7 @@ R_SetColor_RTX(uint32_t color)
 }
 
 void
-R_LightPoint_RTX(vec3_t origin, vec3_t light)
+R_LightPoint_RTX(const vec3_t& origin, vec3_t& light)
 {
 	VectorSet(light, 1, 1, 1);
 }

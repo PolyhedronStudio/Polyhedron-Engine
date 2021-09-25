@@ -37,7 +37,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	UBO_CVAR_DO(flt_antilag_hf, 1) /* A-SVGF anti-lag filter strength, [0..inf) */ \
 	UBO_CVAR_DO(flt_antilag_lf, 0.2) \
 	UBO_CVAR_DO(flt_antilag_spec, 2) \
-	UBO_CVAR_DO(flt_antilag_spec_motion, 0.004) /* scaler for motion vector scaled specular anti-blur adjustment */ \
 	UBO_CVAR_DO(flt_atrous_depth, 0.5) /* wavelet fitler sensitivity to depth, [0..inf) */ \
 	UBO_CVAR_DO(flt_atrous_deflicker_lf, 2) /* max brightness difference between adjacent pixels in the LF channel, (0..inf) */ \
 	UBO_CVAR_DO(flt_atrous_hf, 4) /* number of a-trous wavelet filter iterations on the LF channel, [0..4] */ \
@@ -74,6 +73,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	UBO_CVAR_DO(pt_cameras, 1) /* switch for security cameras, 0 or 1 */ \
 	UBO_CVAR_DO(pt_direct_polygon_lights, 1) /* switch for direct lighting from local polygon lights, 0 or 1 */ \
 	UBO_CVAR_DO(pt_direct_roughness_threshold, 0.18) /* roughness value where the path tracer switches direct light specular sampling from NDF based to light based, [0..1] */ \
+	UBO_CVAR_DO(pt_direct_area_threshold, 0.2) /* projected area of triangle light at which direct light sampling for specular is replaced with random sampling, [0..1] */ \
 	UBO_CVAR_DO(pt_direct_sphere_lights, 1) /* switch for direct lighting from local sphere lights, 0 or 1 */ \
 	UBO_CVAR_DO(pt_direct_sun_light, 1) /* switch for direct lighting from the sun, 0 or 1 */ \
 	UBO_CVAR_DO(pt_explosion_brightness, 4.0) /* brightness factor for explosions */ \
@@ -91,7 +91,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	UBO_CVAR_DO(pt_reflect_refract, 2) /* number of reflection or refraction bounces: 0, 1 or 2 */ \
 	UBO_CVAR_DO(pt_roughness_override, -1) /* overrides roughness of all materials if non-negative, [0..1] */ \
 	UBO_CVAR_DO(pt_specular_anti_flicker, 2) /* fade factor for rough reflections of surfaces far away, [0..inf) */ \
-	UBO_CVAR_DO(pt_specular_mis, 1) /* enables the use of MIS between specular direct lighting and BRDF specular rays */ \
 	UBO_CVAR_DO(pt_show_sky, 0) /* switch for showing the sky polygons, 0 or 1 */ \
 	UBO_CVAR_DO(pt_sun_bounce_range, 2000) /* range limiter for indirect lighting from the sun, helps reduce noise, (0..inf) */ \
 	UBO_CVAR_DO(pt_sun_specular, 1.0) /* scale for the direct specular reflection of the sun */ \
@@ -190,12 +189,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	GLOBAL_UBO_VAR_LIST_DO(int,             prev_taa_output_width) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             prev_taa_output_height) \
 	\
-	GLOBAL_UBO_VAR_LIST_DO(uvec4,           easu_const0) \
-	GLOBAL_UBO_VAR_LIST_DO(uvec4,           easu_const1) \
-	GLOBAL_UBO_VAR_LIST_DO(uvec4,           easu_const2) \
-	GLOBAL_UBO_VAR_LIST_DO(uvec4,           easu_const3) \
-	GLOBAL_UBO_VAR_LIST_DO(uvec4,           rcas_const0) \
-	\
 	GLOBAL_UBO_VAR_LIST_DO(vec2,            sub_pixel_jitter) \
 	GLOBAL_UBO_VAR_LIST_DO(float,           prev_adapted_luminance) \
 	GLOBAL_UBO_VAR_LIST_DO(float,           padding1) \
@@ -249,21 +242,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 typedef uint32_t uvec4_t[4];
-typedef int ivec4_t[4];
+//typedef int ivec4_t[4];
 typedef uint32_t uint;
 
 typedef struct {
-	float M[16]; // mat4
+	float M[16]; // 16
 
 	uint32_t material;
 	int offset_curr;
-	int offset_prev; // matrix offset for IQM
+	int offset_prev;
 	float backlerp;
 
 	float alpha;
 	int idx_offset;
 	int model_index;
-	int is_iqm;
+	int pad;
 } ModelInstance;
 
 typedef struct {
@@ -292,13 +285,13 @@ struct ModelInstance {
 
 	uint material;
 	int offset_curr;
-	int offset_prev; // matrix offset for IQM
+	int offset_prev;
 	float backlerp;
 
 	float alpha;
 	int idx_offset;
 	int model_index;
-	int is_iqm;
+	int pad;
 };
 
 struct BspMeshInstance {

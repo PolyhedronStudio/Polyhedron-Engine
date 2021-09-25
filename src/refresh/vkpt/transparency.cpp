@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TR_BEAM_INTERSECT_SIZE (12 * sizeof(float))
 #define TR_SPRITE_INFO_SIZE    (2 * sizeof(float))
 
-struct
+struct VkPtTransperancy
 {
 	size_t vertex_position_host_offset;
 	size_t beam_aabb_host_offset;
@@ -74,20 +74,21 @@ struct
 // initialization
 static void create_buffers();
 static qboolean allocate_and_bind_memory_to_buffers();
-static void create_buffer_views();
-static void fill_index_buffer();
+static void create_buffer_views(VkPtTransperancy &trans);
+static void fill_index_buffer(VkPtTransperancy& trans);
 
 // update
-static void write_particle_geometry(const float* view_matrix, const particle_t* particles, int particle_num);
-static void write_beam_geometry(const entity_t* entities, int entity_num);
-static void write_sprite_geometry(const float* view_matrix, const entity_t* entities, int entity_num);
+static void write_particle_geometry(const float* view_matrix, const rparticle_t* particles, int particle_num);
+static void write_beam_geometry(const r_entity_t* entities, int entity_num);
+static void write_sprite_geometry(const float* view_matrix, const r_entity_t* entities, int entity_num);
 static void upload_geometry(VkCommandBuffer command_buffer);
 
 cvar_t* cvar_pt_particle_size = NULL;
 cvar_t* cvar_pt_beam_width = NULL;
 cvar_t* cvar_pt_beam_lights = NULL;
+cvar_t* cvar_pt_particle_emissive = NULL;
 extern cvar_t* cvar_pt_enable_particles;
-extern cvar_t* cvar_pt_particle_emissive;
+
 extern cvar_t* cvar_pt_projection;
 
 void cast_u32_to_f32_color(int color_index, const color_t* pcolor, float* color_f32, float hdr_factor)
@@ -107,6 +108,7 @@ qboolean initialize_transparency()
 	cvar_pt_particle_size = Cvar_Get("pt_particle_size", "0.35", 0);
 	cvar_pt_beam_width = Cvar_Get("pt_beam_width", "1.0", 0);
 	cvar_pt_beam_lights = Cvar_Get("pt_beam_lights", "1.0", 0);
+	cvar_pt_particle_emissive = Cvar_Get("pt_particle_emissive", "1", 0);
 
 	memset(&transparency, 0, sizeof(transparency));
 
@@ -130,12 +132,12 @@ qboolean initialize_transparency()
 	create_buffers();
 
 	if (allocate_and_bind_memory_to_buffers() != VK_TRUE)
-		return qfalse;
+		return false;
 
 	create_buffer_views(transparency);
 	fill_index_buffer(transparency);
 
-	return qtrue;
+	return true;
 }
 
 void destroy_transparency()
@@ -163,7 +165,7 @@ void destroy_transparency()
 }
 
 void update_transparency(VkCommandBuffer command_buffer, const float* view_matrix,
-	const particle_t* particles, int particle_num, const entity_t* entities, int entity_num)
+	const rparticle_t* particles, int particle_num, const r_entity_t* entities, int entity_num)
 {
 	transparency.host_frame_index = (transparency.host_frame_index + 1) % transparency.host_buffered_frame_num;
 	particle_num = min(particle_num, TR_PARTICLE_MAX_NUM);
@@ -172,7 +174,7 @@ void update_transparency(VkCommandBuffer command_buffer, const float* view_matri
 	uint32_t sprite_num = 0;
 	for (int i = 0; i < entity_num; i++)
 	{
-		if (entities[i].flags & RF_BEAM)
+		if (entities[i].flags & RenderEffects::Beam)
 		{
 			// write_beam_geometry skips zero-width beams as well
 			if(entities[i].frame > 0)
@@ -181,7 +183,7 @@ void update_transparency(VkCommandBuffer command_buffer, const float* view_matri
 		else if ((entities[i].model & 0x80000000) == 0)
 		{
 			const model_t* model = MOD_ForHandle(entities[i].model);
-			if (model && model->type == MOD_SPRITE)
+			if (model && model->type == model_t::MOD_SPRITE)
 				++sprite_num;
 		}
 	}
@@ -284,7 +286,7 @@ void get_transparency_counts(int* particle_num, int* beam_num, int* sprite_num)
 	*sprite_num = transparency.sprite_num;
 }
 
-static void write_particle_geometry(const float* view_matrix, const particle_t* particles, int particle_num)
+static void write_particle_geometry(const float* view_matrix, const rparticle_t* particles, int particle_num)
 {
 	const float particle_size = cvar_pt_particle_size->value;
 
@@ -299,7 +301,7 @@ static void write_particle_geometry(const float* view_matrix, const particle_t* 
 
 	for (int i = 0; i < particle_num; i++)
 	{
-		const particle_t* particle = particles + i;
+		const rparticle_t* particle = particles + i;
 
 		cast_u32_to_f32_color(particle->color, &particle->rgba, particle_colors, particle->brightness);
 		particle_colors[3] = particle->alpha;
@@ -346,7 +348,7 @@ static void write_particle_geometry(const float* view_matrix, const particle_t* 
 	}
 }
 
-static void write_beam_geometry(const entity_t* entities, int entity_num)
+static void write_beam_geometry(const r_entity_t* entities, int entity_num)
 {
 	const float hdr_factor = cvar_pt_particle_emissive->value;
 
@@ -362,17 +364,17 @@ static void write_beam_geometry(const entity_t* entities, int entity_num)
 
 	for (int i = 0; i < entity_num; i++)
 	{
-		if ((entities[i].flags & RF_BEAM) == 0)
+		if ((entities[i].flags & RenderEffects::Beam) == 0)
 			continue;
 
-		const entity_t* beam = entities + i;
+		const r_entity_t* beam = entities + i;
 
 		// Adjust beam width. Default "narrow" beams have a width of 4, "fat" beams have 16.
 		if (beam->frame == 0)
 			continue;
 		const float beam_radius = cvar_pt_beam_width->value * beam->frame * 0.5;
 
-		cast_u32_to_f32_color(beam->skinnum, &beam->rgba, beam_colors, hdr_factor);
+		cast_u32_to_f32_color(beam->skinNumber, &beam->rgba, beam_colors, hdr_factor);
 		beam_colors[3] = beam->alpha;
 		beam_colors += 4;
 
@@ -435,7 +437,7 @@ static void write_beam_geometry(const entity_t* entities, int entity_num)
 		world_to_beam[14] = -DotProduct(begin, norm_dir);
 		world_to_beam[15] = 1;
 
-		Vector4Copy((world_to_beam + 12), (float *)(beam_infos));
+		Vec4_Copy((world_to_beam + 12), (float *)(beam_infos));
 		// First three columns are normals, so it's fine to pack them to half floats
 		packHalf4x16(beam_infos + 4, world_to_beam);
 		packHalf4x16(beam_infos + 6, world_to_beam + 4);
@@ -450,8 +452,8 @@ static void write_beam_geometry(const entity_t* entities, int entity_num)
 
 static int compare_beams(const void* _a, const void* _b)
 {
-	const entity_t* a = *(void**)_a;
-	const entity_t* b = *(void**)_b;
+	const r_entity_t* a = (const r_entity_t*)*(void**)_a;
+	const r_entity_t* b = (const r_entity_t*)*(void**)_b;
 
 	if (a->origin[0] < b->origin[0]) return -1;
 	if (a->origin[0] > b->origin[0]) return 1;
@@ -468,7 +470,7 @@ static int compare_beams(const void* _a, const void* _b)
 	return 0;
 }
 
-qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, vec3_t begin, vec3_t end, vec3_t color, float radius)
+qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, const vec4_t &begin, const vec4_t &end, const vec4_t &color, float radius)
 {
 	vec3_t dir, norm_dir;
 	VectorSubtract(end, begin, dir);
@@ -524,7 +526,7 @@ qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, in
 	for (int tri = 0; tri < 6; tri++)
 	{
 		if (*num_lights >= max_lights)
-			return qfalse;
+			return false;
 
 		int i0 = indices[tri * 3 + 0];
 		int i1 = indices[tri * 3 + 1];
@@ -535,7 +537,7 @@ qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, in
 		VectorCopy(vertices[i0], light->positions + 0);
 		VectorCopy(vertices[i1], light->positions + 3);
 		VectorCopy(vertices[i2], light->positions + 6);
-		get_triangle_off_center(light->positions, light->off_center, NULL, 1.f);
+		get_triangle_off_center(light->positions, light->off_center, NULL);
 
 		light->cluster = BSP_PointLeaf(bsp->nodes, light->off_center)->cluster;
 		light->material = NULL;
@@ -549,10 +551,10 @@ qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, in
 		}
 	}
 
-	return qtrue;
+	return true;
 }
 
-void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, entity_t* entities, int num_entites, float adapted_luminance)
+void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, r_entity_t* entities, int num_entites, float adapted_luminance)
 {
 	const float hdr_factor = cvar_pt_beam_lights->value * adapted_luminance * 20.f;
 
@@ -561,36 +563,36 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 
 	int num_beams = 0;
 
-	static entity_t* beams[MAX_BEAMS];
+	static r_entity_t* beams[MAX_BEAMS];
 
 	for (int i = 0; i < num_entites; i++)
 	{
 		if(num_beams == MAX_BEAMS)
 			break;
 
-		if ((entities[i].flags & RF_BEAM) != 0)
+		if ((entities[i].flags & RenderEffects::Beam) != 0)
 			beams[num_beams++] = entities + i;
 	}
 
 	if (num_beams == 0)
 		return;
 
-	qsort(beams, num_beams, sizeof(entity_t*), compare_beams);
+	qsort(beams, num_beams, sizeof(r_entity_t*), compare_beams);
 
 	for (int i = 0; i < num_beams; i++)
 	{
 		if (*num_lights >= max_lights)
 			return;
 		
-		const entity_t* beam = beams[i];
+		const r_entity_t* beam = beams[i];
 
 		// Adjust beam width. Default "narrow" beams have a width of 4, "fat" beams have 16.
 		if (beam->frame == 0)
 			continue;
 		const float beam_radius = cvar_pt_beam_width->value * beam->frame * 0.5;
 
-		vec3_t begin;
-		vec3_t end;
+		vec4_t begin = { 0.f, 0.f, 0.f, 0.f };
+		vec4_t end = { 0.f, 0.f, 0.f, 0.f };
 		VectorCopy(beam->oldorigin, begin);
 		VectorCopy(beam->origin, end);
 
@@ -603,14 +605,14 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 		VectorMA(begin, -5.f, norm_dir, begin);
 		VectorMA(end, 5.f, norm_dir, end);
 
-		vec3_t color;
-		cast_u32_to_f32_color(beam->skinnum, &beam->rgba, color, hdr_factor);
+		vec4_t color = { 0.f, 0.f, 0.f, 0.f };
+		cast_u32_to_f32_color(beam->skinNumber, &beam->rgba, color, hdr_factor);
 
 		vkpt_build_cylinder_light(light_list, num_lights, max_lights, bsp, begin, end, color, beam_radius);
 	}
 }
 
-static void write_sprite_geometry(const float* view_matrix, const entity_t* entities, int entity_num)
+static void write_sprite_geometry(const float* view_matrix, const r_entity_t* entities, int entity_num)
 {
 	if (transparency.sprite_num == 0)
 		return;
@@ -632,13 +634,13 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 	int sprite_count = 0;
 	for (int i = 0; i < entity_num; i++)
 	{
-		const entity_t *e = entities + i;
+		const r_entity_t*e = entities + i;
 
 		if (e->model & 0x80000000)
 			continue;
 
 		const model_t* model = MOD_ForHandle(e->model);
-		if (!model || model->type != MOD_SPRITE)
+		if (!model || model->type != model_t::MOD_SPRITE)
 			continue;
 
 		mspriteframe_t *frame = &model->spriteframes[e->frame % model->numframes];
@@ -667,28 +669,107 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 
 			VectorScale(world_y, -frame->origin_y, down);
 			VectorScale(world_y, frame->height - frame->origin_y, up);
-		}
-		else
-		{
-			VectorScale(view_x, frame->origin_x, left);
-			VectorScale(view_x, frame->origin_x - frame->width, right);
+		} else {
+			// WID: Omega code begins here.
+			if (model->sprite_fxup) {
+				// Fixed Up/dn
+				vertex_positions[3][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[3][1] = e->origin[1] - frame->height / 2;
+				vertex_positions[3][2] = e->origin[2];
 
-			if (model->sprite_vertical)
-			{
-				VectorScale(world_y, -frame->origin_y, down);
-				VectorScale(world_y, frame->height - frame->origin_y, up);
-			}
-			else
-			{
+				vertex_positions[2][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[2][1] = e->origin[1] - frame->height / 2;
+				vertex_positions[2][2] = e->origin[2];
+
+				vertex_positions[1][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[1][1] = e->origin[1] + frame->height / 2;
+				vertex_positions[1][2] = e->origin[2];
+
+				vertex_positions[0][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[0][1] = e->origin[1] + frame->height / 2;
+				vertex_positions[0][2] = e->origin[2];
+			} else if (model->sprite_fxft) {
+				// Fixed Front/Back
+				vertex_positions[0][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[0][1] = e->origin[1];
+				vertex_positions[0][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[1][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[1][1] = e->origin[1];
+				vertex_positions[1][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[2][0] = e->origin[0] - frame->width / 2;
+				vertex_positions[2][1] = e->origin[1];
+				vertex_positions[2][2] = e->origin[2] + frame->height / 2;
+
+				vertex_positions[3][0] = e->origin[0] + frame->width / 2;
+				vertex_positions[3][1] = e->origin[1];
+				vertex_positions[3][2] = e->origin[2] + frame->height / 2;
+			} else if (model->sprite_fxlt) {
+				// Fixed Left/Right
+				vertex_positions[0][0] = e->origin[0];
+				vertex_positions[0][1] = e->origin[1] + frame->width / 2;
+				vertex_positions[0][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[1][0] = e->origin[0];
+				vertex_positions[1][1] = e->origin[1] - frame->width / 2;
+				vertex_positions[1][2] = e->origin[2] - frame->height / 2;
+
+				vertex_positions[2][0] = e->origin[0];
+				vertex_positions[2][1] = e->origin[1] - frame->width / 2;
+				vertex_positions[2][2] = e->origin[2] + frame->height / 2;
+
+				vertex_positions[3][0] = e->origin[0];
+				vertex_positions[3][1] = e->origin[1] + frame->width / 2;
+				vertex_positions[3][2] = e->origin[2] + frame->height / 2;
+			} else if (model->sprite_vertical) {
+				// 3D Billboard
+				VectorScale(view_x, frame->origin_x, left);
+				VectorScale(view_x, frame->origin_x - frame->width, right);
 				VectorScale(view_y, -frame->origin_y, down);
 				VectorScale(view_y, frame->height - frame->origin_y, up);
+
+				VectorAdd3(e->origin, down, left, vertex_positions[0]);
+				VectorAdd3(e->origin, up, left, vertex_positions[1]);
+				VectorAdd3(e->origin, up, right, vertex_positions[2]);
+				VectorAdd3(e->origin, down, right, vertex_positions[3]);
+			} else {
+				// 2D Billboard
+				VectorScale(view_x, frame->origin_x, left);
+				VectorScale(view_x, frame->origin_x - frame->width, right);
+				VectorScale(world_y, -frame->origin_y, down);
+				VectorScale(world_y, frame->height - frame->origin_y, up);
+
+				VectorAdd3(e->origin, down, left, vertex_positions[0]);
+				VectorAdd3(e->origin, up, left, vertex_positions[1]);
+				VectorAdd3(e->origin, up, right, vertex_positions[2]);
+				VectorAdd3(e->origin, down, right, vertex_positions[3]);
 			}
+			// WID: Omega code ends here :)
 		}
 
-		VectorAdd3(e->origin, down, left, vertex_positions[0]);
-		VectorAdd3(e->origin, up, left, vertex_positions[1]);
-		VectorAdd3(e->origin, up, right, vertex_positions[2]);
-		VectorAdd3(e->origin, down, right, vertex_positions[3]);
+		// WID: This is the old OG code, up above in the else statement you will find Omega's stuff.
+		//else
+		//{
+		//	VectorScale(view_x, frame->origin_x, left);
+		//	VectorScale(view_x, frame->origin_x - frame->width, right);
+
+		//	if (model->sprite_vertical)
+		//	{
+		//		VectorScale(world_y, -frame->origin_y, down);
+		//		VectorScale(world_y, frame->height - frame->origin_y, up);
+		//	}
+		//	else
+		//	{
+		//		VectorScale(view_y, -frame->origin_y, down);
+		//		VectorScale(view_y, frame->height - frame->origin_y, up);
+		//	}
+		//}
+
+		//VectorAdd3(e->origin, down, left, vertex_positions[0]);
+		//VectorAdd3(e->origin, up, left, vertex_positions[1]);
+		//VectorAdd3(e->origin, up, right, vertex_positions[2]);
+		//VectorAdd3(e->origin, down, right, vertex_positions[3]);
 
 		vertex_positions += 4;
 		sprite_info += TR_SPRITE_INFO_SIZE / sizeof(int);
@@ -864,7 +945,7 @@ static qboolean allocate_and_bind_memory_to_buffers()
 
 	_VK(vkAllocateMemory(qvk.device, &host_memory_allocate_info, NULL, &transparency.host_buffer_memory));
 
-	VkBindBufferMemoryInfo bindings[1] = { 0 };
+	VkBindBufferMemoryInfo bindings[1] = { };
 
 	bindings[0].sType = VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_INFO;
 	bindings[0].buffer = transparency.host_buffer;
@@ -878,57 +959,57 @@ static qboolean allocate_and_bind_memory_to_buffers()
 	_VK(vkMapMemory(qvk.device, transparency.host_buffer_memory, 0, host_buffer_size, 0,
 		(void**)&transparency.mapped_host_buffer));
 
-	transparency.host_buffer_shadow = Z_Mallocz(transparency.host_frame_size);
+	transparency.host_buffer_shadow = (char*)Z_Mallocz(transparency.host_frame_size);
 	
-	return qtrue;
+	return true;
 }
 
-static void create_buffer_views()
+static void create_buffer_views(VkPtTransperancy& trans)
 {
 	const VkBufferViewCreateInfo particle_color_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = transparency.particle_color_buffer.buffer,
+		.buffer = trans.particle_color_buffer.buffer,
 		.format = VK_FORMAT_R32G32B32A32_SFLOAT,
 		.range = TR_PARTICLE_MAX_NUM * TR_COLOR_SIZE
 	};
 
 	const VkBufferViewCreateInfo beam_color_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = transparency.beam_color_buffer.buffer,
+		.buffer = trans.beam_color_buffer.buffer,
 		.format = VK_FORMAT_R32G32B32A32_SFLOAT,
 		.range = TR_BEAM_MAX_NUM * TR_COLOR_SIZE
 	};
 
 	const VkBufferViewCreateInfo sprite_info_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = transparency.sprite_info_buffer.buffer,
+		.buffer = trans.sprite_info_buffer.buffer,
 		.format = VK_FORMAT_R32G32_UINT,
 		.range = TR_SPRITE_MAX_NUM * TR_SPRITE_INFO_SIZE
 	};
 
 	const VkBufferViewCreateInfo beam_intersect_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = transparency.beam_intersect_buffer.buffer,
+		.buffer = trans.beam_intersect_buffer.buffer,
 		.format = VK_FORMAT_R32G32B32A32_UINT,
 		.range = TR_BEAM_MAX_NUM * TR_BEAM_INTERSECT_SIZE
 	};
 
 	_VK(vkCreateBufferView(qvk.device, &particle_color_view_info, NULL,
-		&transparency.particle_color_buffer_view));
+		&trans.particle_color_buffer_view));
 
 	_VK(vkCreateBufferView(qvk.device, &beam_color_view_info, NULL,
-		&transparency.beam_color_buffer_view));
+		&trans.beam_color_buffer_view));
 
 	_VK(vkCreateBufferView(qvk.device, &sprite_info_view_info, NULL,
-		&transparency.sprite_info_buffer_view));
+		&trans.sprite_info_buffer_view));
 
 	_VK(vkCreateBufferView(qvk.device, &beam_intersect_view_info, NULL,
-		&transparency.beam_intersect_buffer_view));
+		&trans.beam_intersect_buffer_view));
 }
 
-static void fill_index_buffer()
+static void fill_index_buffer(VkPtTransperancy& trans)
 {
-	uint16_t* indices = (uint16_t*)transparency.host_buffer_shadow;
+	uint16_t* indices = (uint16_t*)trans.host_buffer_shadow;
 
 	for (size_t i = 0; i < TR_INDEX_MAX_NUM / 6; i++)
 	{
@@ -943,7 +1024,7 @@ static void fill_index_buffer()
 		quad[5] = base_vertex + 0;
 	}
 
-	memcpy(transparency.mapped_host_buffer, transparency.host_buffer_shadow, sizeof(uint16_t) * TR_INDEX_MAX_NUM);
+	memcpy(trans.mapped_host_buffer, trans.host_buffer_shadow, sizeof(uint16_t) * TR_INDEX_MAX_NUM);
 
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_transfer);
 
@@ -953,7 +1034,7 @@ static void fill_index_buffer()
 		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.buffer = transparency.index_buffer.buffer,
+		.buffer = trans.index_buffer.buffer,
 		.size = VK_WHOLE_SIZE
 	};
 
@@ -964,7 +1045,7 @@ static void fill_index_buffer()
 		.size = TR_INDEX_MAX_NUM * sizeof(uint16_t)
 	};
 
-	vkCmdCopyBuffer(cmd_buf, transparency.host_buffer, transparency.index_buffer.buffer, 1, &region);
+	vkCmdCopyBuffer(cmd_buf, trans.host_buffer, trans.index_buffer.buffer, 1, &region);
 
 	const VkBufferMemoryBarrier post_barrier = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
@@ -972,13 +1053,13 @@ static void fill_index_buffer()
 		.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.buffer = transparency.index_buffer.buffer,
+		.buffer = trans.index_buffer.buffer,
 		.size = VK_WHOLE_SIZE
 	};
 
 	vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
 		0, 0, NULL, 1, &post_barrier, 0, NULL);
 
-	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_transfer, qtrue);
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_transfer, true);
 	vkpt_wait_idle(qvk.queue_transfer, &qvk.cmd_buffers_transfer);
 }

@@ -33,7 +33,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/cvar.h"
 #include "common/files.h"
-#include "common/math.h"
 #include "client/video.h"
 #include "client/client.h"
 #include "refresh/refresh.h"
@@ -95,10 +94,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	SHADER_MODULE_DO(QVK_MOD_GOD_RAYS_FILTER_COMP)                   \
 	SHADER_MODULE_DO(QVK_MOD_SHADOW_MAP_VERT)                        \
 	SHADER_MODULE_DO(QVK_MOD_COMPOSITING_COMP)                       \
-	SHADER_MODULE_DO(QVK_MOD_FSR_EASU_FP16_COMP)                     \
-	SHADER_MODULE_DO(QVK_MOD_FSR_EASU_FP32_COMP)                     \
-	SHADER_MODULE_DO(QVK_MOD_FSR_RCAS_FP16_COMP)                     \
-	SHADER_MODULE_DO(QVK_MOD_FSR_RCAS_FP32_COMP)                     \
 
 #define LIST_RT_RGEN_SHADER_MODULES \
 	SHADER_MODULE_DO(QVK_MOD_PRIMARY_RAYS_RGEN)                      \
@@ -108,7 +103,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define LIST_RT_PIPELINE_SHADER_MODULES \
 	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_RCHIT)                      \
-	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_MASKED_RAHIT)               \
 	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_PARTICLE_RAHIT)             \
 	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_BEAM_RAHIT)                 \
 	SHADER_MODULE_DO(QVK_MOD_PATH_TRACER_BEAM_RINT)                  \
@@ -145,6 +139,7 @@ enum QVK_SHADER_MODULES {
 };
 
 #define MAX_FRAMES_IN_FLIGHT 2
+#define MAX_SWAPCHAIN_IMAGES 4
 
 typedef struct cmd_buf_group_s {
 	uint32_t count_per_frame;
@@ -177,8 +172,10 @@ typedef struct QVK_s {
 
 	VkDevice                    device;
 	VkQueue                     queue_graphics;
+	VkQueue                     queue_compute;
 	VkQueue                     queue_transfer;
 	int32_t                     queue_idx_graphics;
+	int32_t                     queue_idx_compute;
 	int32_t                     queue_idx_transfer;
 	VkSurfaceKHR                surface;
 	VkSwapchainKHR              swap_chain;
@@ -193,14 +190,15 @@ typedef struct QVK_s {
 	uint32_t                    gpu_slice_width;
 	uint32_t                    gpu_slice_width_prev;
 	uint32_t                    num_swap_chain_images;
-	VkImage*                    swap_chain_images;
-	VkImageView*                swap_chain_image_views;
-	
+	VkImage                     swap_chain_images[MAX_SWAPCHAIN_IMAGES];
+	VkImageView                 swap_chain_image_views[MAX_SWAPCHAIN_IMAGES];
+
+	qboolean                    use_khr_ray_tracing;
 	qboolean                    use_ray_query;
 	qboolean                    enable_validation;
-	qboolean                    supports_fp16;
 
 	cmd_buf_group_t             cmd_buffers_graphics;
+	cmd_buf_group_t             cmd_buffers_compute;
 	cmd_buf_group_t             cmd_buffers_transfer;
 	semaphore_group_t           semaphores[MAX_FRAMES_IN_FLIGHT][VKPT_MAX_GPUS];
 
@@ -262,11 +260,6 @@ typedef struct QVK_s {
 	BufferResource_t            buf_light;
 	BufferResource_t            buf_light_staging[MAX_FRAMES_IN_FLIGHT];
 	BufferResource_t            buf_light_stats[NUM_LIGHT_STATS_BUFFERS];
-	
-	BufferResource_t            buf_iqm_matrices;
-	BufferResource_t            buf_iqm_matrices_staging[MAX_FRAMES_IN_FLIGHT];
-	float*                      iqm_matrices_shadow;
-	float*                      iqm_matrices_prev;
 
 	BufferResource_t            buf_readback;
 	BufferResource_t            buf_readback_staging[MAX_FRAMES_IN_FLIGHT];
@@ -276,7 +269,6 @@ typedef struct QVK_s {
 
     VkSampler                   tex_sampler, 
                                 tex_sampler_nearest,
-                                tex_sampler_nearest_mipmap_aniso,
                                 tex_sampler_linear_clamp;
 
 	float                       sintab[256];
@@ -295,7 +287,7 @@ typedef struct QVK_s {
 
 extern QVK_t qvk;
 
-#define LIST_EXTENSIONS_ACCEL_STRUCT \
+#define LIST_EXTENSIONS_KHR \
 	VK_EXTENSION_DO(vkCreateAccelerationStructureKHR) \
 	VK_EXTENSION_DO(vkDestroyAccelerationStructureKHR) \
 	VK_EXTENSION_DO(vkCmdBuildAccelerationStructuresKHR) \
@@ -305,10 +297,23 @@ extern QVK_t qvk;
 	VK_EXTENSION_DO(vkGetAccelerationStructureBuildSizesKHR) \
 	VK_EXTENSION_DO(vkGetBufferDeviceAddress) \
 
-#define LIST_EXTENSIONS_RAY_PIPELINE \
+#define LIST_EXTENSIONS_KHR_PIPELINE \
 	VK_EXTENSION_DO(vkCreateRayTracingPipelinesKHR) \
 	VK_EXTENSION_DO(vkCmdTraceRaysKHR) \
 	VK_EXTENSION_DO(vkGetRayTracingShaderGroupHandlesKHR) \
+
+#define LIST_EXTENSIONS_NV \
+	VK_EXTENSION_DO(vkCreateAccelerationStructureNV) \
+	VK_EXTENSION_DO(vkDestroyAccelerationStructureNV) \
+	VK_EXTENSION_DO(vkGetAccelerationStructureMemoryRequirementsNV) \
+	VK_EXTENSION_DO(vkBindAccelerationStructureMemoryNV) \
+	VK_EXTENSION_DO(vkCmdBuildAccelerationStructureNV) \
+	VK_EXTENSION_DO(vkCmdCopyAccelerationStructureNV) \
+	VK_EXTENSION_DO(vkCmdTraceRaysNV) \
+	VK_EXTENSION_DO(vkCreateRayTracingPipelinesNV) \
+	VK_EXTENSION_DO(vkGetRayTracingShaderGroupHandlesNV) \
+	VK_EXTENSION_DO(vkGetAccelerationStructureHandleNV) \
+	VK_EXTENSION_DO(vkCmdWriteAccelerationStructuresPropertiesNV) \
 
 #define LIST_EXTENSIONS_DEBUG \
 	VK_EXTENSION_DO(vkDebugMarkerSetObjectNameEXT) \
@@ -318,13 +323,23 @@ extern QVK_t qvk;
 	VK_EXTENSION_DO(vkCmdEndDebugUtilsLabelEXT)
 
 #define VK_EXTENSION_DO(a) extern PFN_##a q##a;
-LIST_EXTENSIONS_ACCEL_STRUCT
-LIST_EXTENSIONS_RAY_PIPELINE
+LIST_EXTENSIONS_KHR
+LIST_EXTENSIONS_KHR_PIPELINE
+LIST_EXTENSIONS_NV
 LIST_EXTENSIONS_DEBUG
 LIST_EXTENSIONS_INSTANCE
 #undef VK_EXTENSION_DO
 
 #define MAX_SKY_CLUSTERS 1024
+
+typedef struct light_poly_s {
+	float positions[9]; // 3x vec3_t
+	vec3_t off_center;
+	vec3_t color;
+	struct pbr_material_s* material;
+	int cluster;
+	int style;
+} light_poly_t;
 
 typedef struct bsp_model_s {
 	uint32_t idx_offset;
@@ -338,7 +353,6 @@ typedef struct bsp_model_s {
 	light_poly_t *light_polys;
 
 	qboolean transparent;
-	qboolean masked;
 } bsp_model_t;
 
 typedef struct aabb_s {
@@ -355,9 +369,6 @@ typedef struct bsp_mesh_s {
 
 	uint32_t world_transparent_offset;
 	uint32_t world_transparent_count;
-	
-	uint32_t world_masked_offset;
-	uint32_t world_masked_count;
 
 	uint32_t world_sky_offset;
 	uint32_t world_sky_count;
@@ -370,7 +381,6 @@ typedef struct bsp_mesh_s {
 	int *indices;
 	uint32_t *materials;
 	float *texel_density;
-	float *emissive_factors;
 	int num_indices;
 	int num_vertices;
 
@@ -392,7 +402,7 @@ typedef struct bsp_mesh_s {
 	struct { vec3_t pos; vec3_t dir; } cameras[MAX_CAMERAS];
 	int num_cameras;
 
-	byte sky_visibility[VIS_MAX_BYTES];
+	char sky_visibility[VIS_MAX_BYTES];
 
 	aabb_t* cluster_aabbs;
 } bsp_mesh_t;
@@ -400,7 +410,6 @@ typedef struct bsp_mesh_s {
 void bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name);
 void bsp_mesh_destroy(bsp_mesh_t *wm);
 void bsp_mesh_register_textures(bsp_t *bsp);
-void bsp_mesh_animate_light_polys(bsp_mesh_t *wm);
 
 typedef struct vkpt_refdef_s {
 	QVKUniformBuffer_t uniform_buffer;
@@ -434,7 +443,7 @@ typedef struct sun_light_s {
 
 void mult_matrix_matrix(mat4_t p, const mat4_t a, const mat4_t b);
 void mult_matrix_vector(mat4_t p, const mat4_t a, const vec4_t b);
-void create_entity_matrix(mat4_t matrix, entity_t *e, qboolean enable_left_hand);
+void create_entity_matrix(mat4_t matrix, r_entity_t *e, qboolean enable_left_hand);
 void create_projection_matrix(mat4_t matrix, float znear, float zfar, float fov_x, float fov_y);
 void create_view_matrix(mat4_t matrix, refdef_t *fd);
 void inverse(const mat4_t m, mat4_t inv);
@@ -460,9 +469,6 @@ void create_orthographic_matrix(mat4_t matrix, float xmin, float xmax,
 	PROFILER_DO(PROFILER_ASVGF_TAA,                  2) \
 	PROFILER_DO(PROFILER_BLOOM,                      1) \
 	PROFILER_DO(PROFILER_TONE_MAPPING,               1) \
-	PROFILER_DO(PROFILER_FSR,                        1) \
-	PROFILER_DO(PROFILER_FSR_EASU,                   2) \
-	PROFILER_DO(PROFILER_FSR_RCAS,                   2) \
 	PROFILER_DO(PROFILER_UPDATE_ENVIRONMENT,         1) \
 	PROFILER_DO(PROFILER_GOD_RAYS,                   1) \
 	PROFILER_DO(PROFILER_GOD_RAYS_REFLECT_REFRACT,   1) \
@@ -491,8 +497,6 @@ typedef struct EntityUploadInfo
 	uint32_t dynamic_vertex_num;
 	uint32_t transparent_model_vertex_offset;
 	uint32_t transparent_model_vertex_num;
-	uint32_t masked_model_vertex_offset;
-	uint32_t masked_model_vertex_num;
 	uint32_t viewer_model_vertex_offset;
 	uint32_t viewer_model_vertex_num;
 	uint32_t viewer_weapon_vertex_offset;
@@ -520,10 +524,8 @@ VkResult vkpt_textures_upload_envmap(int w, int h, byte *data);
 void vkpt_textures_destroy_unused();
 void vkpt_textures_update_descriptor_set();
 void vkpt_normalize_normal_map(image_t *image);
-image_t *vkpt_fake_emissive_texture(image_t *image, int bright_threshold_int);
 void vkpt_extract_emissive_texture_info(image_t *image);
 void vkpt_textures_prefetch();
-void vkpt_invalidate_texture_descriptors();
 void vkpt_init_light_textures();
 
 VkCommandBuffer vkpt_begin_command_buffer(cmd_buf_group_t* group);
@@ -582,7 +584,7 @@ VkResult vkpt_draw_destroy();
 VkResult vkpt_draw_destroy_pipelines();
 VkResult vkpt_draw_create_pipelines();
 VkResult vkpt_draw_submit_stretch_pics(VkCommandBuffer cmd_buf);
-VkResult vkpt_final_blit_simple(VkCommandBuffer cmd_buf, VkImage image, VkExtent2D extent);
+VkResult vkpt_final_blit_simple(VkCommandBuffer cmd_buf);
 VkResult vkpt_final_blit_filtered(VkCommandBuffer cmd_buf);
 VkResult vkpt_draw_clear_stretch_pics();
 
@@ -604,8 +606,6 @@ VkResult vkpt_light_buffer_upload_staging(VkCommandBuffer cmd_buf);
 VkResult vkpt_light_stats_create(bsp_mesh_t *bsp_mesh);
 VkResult vkpt_light_stats_destroy();
 
-VkResult vkpt_iqm_matrix_buffer_upload_staging(VkCommandBuffer cmd_buf);
-
 VkResult vkpt_load_shader_modules();
 VkResult vkpt_destroy_shader_modules();
 VkResult vkpt_create_images();
@@ -617,7 +617,7 @@ VkResult vkpt_pt_create_pipelines();
 VkResult vkpt_pt_destroy_pipelines();
 
 VkResult vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world, qboolean weapon_left_handed);
-VkResult vkpt_pt_create_static(int num_vertices, int num_vertices_transparent, int num_vertices_maksed, int num_vertices_sky, int num_vertices_custom_sky);
+VkResult vkpt_pt_create_static(int num_vertices, int num_vertices_transparent, int num_vertices_sky, int num_vertices_custom_sky);
 void vkpt_pt_destroy_static();
 VkResult vkpt_pt_trace_primary_rays(VkCommandBuffer cmd_buf);
 VkResult vkpt_pt_trace_reflections(VkCommandBuffer cmd_buf, int bounce);
@@ -634,17 +634,6 @@ VkResult vkpt_compositing(VkCommandBuffer cmd_buf);
 VkResult vkpt_interleave(VkCommandBuffer cmd_buf);
 VkResult vkpt_taa(VkCommandBuffer cmd_buf);
 VkResult vkpt_asvgf_gradient_reproject(VkCommandBuffer cmd_buf);
-
-void vkpt_fsr_init_cvars();
-VkResult vkpt_fsr_initialize();
-VkResult vkpt_fsr_destroy();
-VkResult vkpt_fsr_create_pipelines();
-VkResult vkpt_fsr_destroy_pipelines();
-qboolean vkpt_fsr_is_enabled();
-qboolean vkpt_fsr_needs_upscale();
-void vkpt_fsr_update_ubo(QVKUniformBuffer_t *ubo);
-VkResult vkpt_fsr_do(VkCommandBuffer cmd_buf);
-VkResult vkpt_fsr_final_blit(VkCommandBuffer cmd_buf);
 
 VkResult vkpt_bloom_initialize();
 VkResult vkpt_bloom_destroy();
@@ -677,7 +666,7 @@ qboolean initialize_transparency();
 void destroy_transparency();
 
 void update_transparency(VkCommandBuffer command_buffer, const float* view_matrix,
-	const particle_t* particles, int particle_num, const entity_t* entities, int entity_num);
+	const rparticle_t* particles, int particle_num, const r_entity_t* entities, int entity_num);
 
 typedef enum {
 	VKPT_TRANSPARENCY_PARTICLES,
@@ -704,9 +693,9 @@ VkBufferView get_transparency_beam_color_buffer_view();
 VkBufferView get_transparency_sprite_info_buffer_view();
 VkBufferView get_transparency_beam_intersect_buffer_view();
 void get_transparency_counts(int* particle_num, int* beam_num, int* sprite_num);
-void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, entity_t* entities, int num_entites, float adapted_luminance);
-qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, vec3_t begin, vec3_t end, vec3_t color, float radius);
-qboolean get_triangle_off_center(const float* positions, float* center, float* anti_center, float offset);
+void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, r_entity_t* entities, int num_entites, float adapted_luminance);
+qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, const vec4_t &begin, const vec4_t &end, const vec4_t &color, float radius);
+qboolean get_triangle_off_center(const float* positions, float* center, float* anti_center);
 
 VkResult vkpt_initialize_god_rays();
 VkResult vkpt_destroy_god_rays();
@@ -746,9 +735,6 @@ typedef struct maliasmesh_s {
     vec3_t          *positions;
     vec3_t          *normals;
     vec2_t          *tex_coords;
-	vec3_t          *tangents;      // iqm only
-	uint32_t        *blend_indices; // iqm only
-	vec4_t          *blend_weights; // iqm only
 	struct pbr_material_s *materials[MAX_ALIAS_SKINS];
     int             numskins;
 } maliasmesh_t;
@@ -794,7 +780,7 @@ void R_ClearColor_RTX(void);
 void R_SetAlpha_RTX(float alpha);
 void R_SetAlphaScale_RTX(float alpha);
 void R_SetColor_RTX(uint32_t color);
-void R_LightPoint_RTX(vec3_t origin, vec3_t light);
+void R_LightPoint_RTX(const vec3_t& origin, vec3_t& light);
 void R_SetScale_RTX(float scale);
 void R_DrawStretchPic_RTX(int x, int y, int w, int h, qhandle_t pic);
 void R_DrawPic_RTX(int x, int y, qhandle_t pic);
@@ -809,9 +795,8 @@ void IMG_Load_RTX(image_t *image, byte *pic);
 void IMG_Unload_RTX(image_t *image);
 byte *IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes);
 
-qerror_t MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length, const char* mod_name);
-qerror_t MOD_LoadMD3_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-qerror_t MOD_LoadIQM_RTX(model_t *model, const void *rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length);
+qerror_t MOD_LoadMD3_RTX(model_t *model, const void *rawdata, size_t length);
 void MOD_Reference_RTX(model_t *model);
 
 #endif  /*__VKPT_H__*/

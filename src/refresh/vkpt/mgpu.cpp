@@ -45,20 +45,20 @@ vkpt_mgpu_global_barrier(VkCommandBuffer cmd_buf)
 
 void
 vkpt_mgpu_image_copy(VkCommandBuffer cmd_buf,
-					int src_image_index,
-					int dst_image_index,
-					int src_gpu_index,
-					int dst_gpu_index,
-					VkOffset2D src_offset,
-					VkOffset2D dst_offset,
-					VkExtent2D size)
+	int src_image_index,
+	int dst_image_index,
+	int src_gpu_index,
+	int dst_gpu_index,
+	VkOffset2D src_offset,
+	VkOffset2D dst_offset,
+	VkExtent2D size)
 {
 	VkImageSubresourceRange subresource_range = {
-		.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-		.baseMipLevel   = 0,
-		.levelCount     = 1,
+		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+		.baseMipLevel = 0,
+		.levelCount = 1,
 		.baseArrayLayer = 0,
-		.layerCount     = 1
+		.layerCount = 1
 	};
 
 	VkImageSubresourceLayers subresource_layers = {
@@ -70,16 +70,22 @@ vkpt_mgpu_image_copy(VkCommandBuffer cmd_buf,
 
 	VkImageCopy copy_region = {
 		.srcSubresource = subresource_layers,
-		.srcOffset.x = src_offset.x,
-		.srcOffset.y = src_offset.y,
-		.srcOffset.z = 0,
+		.srcOffset = {
+			.x = src_offset.x,
+			.y = src_offset.y,
+			.z = 0,
+		},
 		.dstSubresource = subresource_layers,
-		.dstOffset.x = dst_offset.x,
-		.dstOffset.y = dst_offset.y,
-		.dstOffset.z = 0,
-		.extent.width = size.width,
-		.extent.height = size.height,
-		.extent.depth = 1
+		.dstOffset = {
+			.x = dst_offset.x,
+			.y = dst_offset.y,
+			.z = 0
+		},
+		.extent = {
+			.width = size.width,
+			.height = size.height,
+			.depth = 1
+		}
 	};
 
 	set_current_gpu(cmd_buf, src_gpu_index);
@@ -132,16 +138,22 @@ vkpt_image_copy(VkCommandBuffer cmd_buf,
 
 	VkImageCopy copy_region = {
 		.srcSubresource = subresource_layers,
-		.srcOffset.x = src_offset.x,
-		.srcOffset.y = src_offset.y,
-		.srcOffset.z = 0,
+		.srcOffset {
+			.x = src_offset.x,
+			.y = src_offset.y,
+			.z = 0,
+		},
 		.dstSubresource = subresource_layers,
-		.dstOffset.x = dst_offset.x,
-		.dstOffset.y = dst_offset.y,
-		.dstOffset.z = 0,
-		.extent.width = size.width,
-		.extent.height = size.height,
-		.extent.depth = 1
+		.dstOffset = {
+			.x = dst_offset.x,
+			.y = dst_offset.y,
+			.z = 0,
+		},
+		.extent = {
+			.width = size.width,
+			.height = size.height,
+			.depth = 1
+		}
 	};
 
 	VkMemoryBarrier mem_barrier = {
