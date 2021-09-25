@@ -60,7 +60,7 @@ void UpdateTerrainShadowMapView(vec3_t forward);
 VkResult SkyLoadScatterParameters(SkyPreset preset);
 
 VkDescriptorSetLayout* SkyGetDescriptorLayout();
-VkDescriptorSet SkyGetDescriptorSet(uint32_t framenumber);
+VkDescriptorSet SkyGetDescriptorSet();
 
 void RecordCommandBufferShadowmap(VkCommandBuffer cmd_buf);
 

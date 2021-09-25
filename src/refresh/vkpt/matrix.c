@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "vkpt.h"
 
 void
-create_entity_matrix(mat4_t matrix, r_entity_t *e, qboolean enable_left_hand)
+create_entity_matrix(mat4_t matrix, entity_t *e, qboolean enable_left_hand)
 {
 	vec3_t axis[3];
 	vec3_t origin;
@@ -131,7 +131,7 @@ void
 create_view_matrix(mat4_t matrix, refdef_t *fd)
 {
 	vec3_t viewaxis[3];
-	AnglesToAxis(fd->viewAngles, viewaxis);
+	AnglesToAxis(fd->viewangles, viewaxis);
 
 	matrix[0]  = -viewaxis[1][0];
 	matrix[4]  = -viewaxis[1][1];

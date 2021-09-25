@@ -31,11 +31,11 @@ player model is switched to third person.
 */
 
 
-static vec3_t freecam_vieworg = vec3_zero();
-static vec3_t freecam_viewangles = vec3_zero();
+static vec3_t freecam_vieworg = { 0.f };
+static vec3_t freecam_viewangles = { 0.f };
 static float freecam_zoom = 1.f;
-static qboolean freecam_keystate[6] = { 0, 0, 0, 0, 0, 0};
-static qboolean freecam_active = false;
+static qboolean freecam_keystate[6] = { 0 };
+static qboolean freecam_active = qfalse;
 static int freecam_player_model = 0;
 
 extern float autosens_x;
@@ -58,7 +58,7 @@ void vkpt_freecam_reset()
 		return;
 
 	Cvar_SetByVar(cl_player_model, va("%d", freecam_player_model), FROM_CODE);
-	freecam_active = false;
+	freecam_active = qfalse;
 }
 
 static void vkpt_freecam_mousemove()
@@ -85,7 +85,7 @@ static void vkpt_freecam_mousemove()
 	if (Key_IsDown(K_MOUSE1) && Key_IsDown(K_MOUSE2))
 	{
 		mx *= sensitivity->value;
-		freecam_viewangles[vec3_t::PYR::Roll] += m_yaw->value * mx;
+		freecam_viewangles[ROLL] += m_yaw->value * mx;
 	}
 	else if (Key_IsDown(K_MOUSE1))
 	{
@@ -98,17 +98,17 @@ static void vkpt_freecam_mousemove()
 		my *= speed;
 
 		if (m_autosens->integer) {
-			mx *= cl.fov_x * cl.autosens_x;
-			my *= cl.fov_y * cl.autosens_y;
+			mx *= cl.fov_x * autosens_x;
+			my *= cl.fov_y * autosens_y;
 		}
 
 		mx /= freecam_zoom;
 		my /= freecam_zoom;
 
-		freecam_viewangles[vec3_t::PYR::Yaw] -= m_yaw->value * mx;
-		freecam_viewangles[vec3_t::PYR::Pitch] += m_pitch->value * my * (m_invert->integer ? -1.f : 1.f);
+		freecam_viewangles[YAW] -= m_yaw->value * mx;
+		freecam_viewangles[PITCH] += m_pitch->value * my * (m_invert->integer ? -1.f : 1.f);
 
-		freecam_viewangles[vec3_t::PYR::Pitch] = max(-90.f, min(90.f, freecam_viewangles[vec3_t::PYR::Pitch]));
+		freecam_viewangles[PITCH] = max(-90.f, min(90.f, freecam_viewangles[PITCH]));
 	}
 	else if (Key_IsDown(K_MOUSE2))
 	{
@@ -127,11 +127,11 @@ void vkpt_freecam_update(float frame_time)
 
 	if (!freecam_active)
 	{
-		freecam_vieworg = vkpt_refdef.fd->vieworg;
-		freecam_viewangles = vkpt_refdef.fd->viewAngles;
+		VectorCopy(vkpt_refdef.fd->vieworg, freecam_vieworg);
+		VectorCopy(vkpt_refdef.fd->viewangles, freecam_viewangles);
 		freecam_zoom = 1.f;
 		freecam_player_model = cl_player_model->integer;
-		freecam_active = true;
+		freecam_active = qtrue;
 	}
 
 	vec3_t prev_vieworg;
@@ -140,7 +140,7 @@ void vkpt_freecam_update(float frame_time)
 	VectorCopy(freecam_viewangles, prev_viewangles);
 	float prev_zoom = freecam_zoom;
 
-	vec3_t velocity = vec3_zero();
+	vec3_t velocity = { 0.f };
 	if (freecam_keystate[0]) velocity[0] += 1.f;
 	if (freecam_keystate[1]) velocity[0] -= 1.f;
 	if (freecam_keystate[2]) velocity[1] += 1.f;
@@ -154,7 +154,7 @@ void vkpt_freecam_update(float frame_time)
 		VectorScale(velocity, 0.1f, velocity);
 
 	vec3_t forward, right, up;
-	AngleVectors(freecam_viewangles, &forward, &right, &up);
+	AngleVectors(freecam_viewangles, forward, right, up);
 	float speed = 100.f;
 	VectorMA(freecam_vieworg, velocity[0] * frame_time * speed, forward, freecam_vieworg);
 	VectorMA(freecam_vieworg, velocity[1] * frame_time * speed, right, freecam_vieworg);
@@ -162,10 +162,10 @@ void vkpt_freecam_update(float frame_time)
 
 	vkpt_freecam_mousemove();
 
-	vkpt_refdef.fd->vieworg = freecam_vieworg;
-	vkpt_refdef.fd->viewAngles = freecam_viewangles;
-	vkpt_refdef.fd->fov_x = Degrees(atanf(tanf(Radians(vkpt_refdef.fd->fov_x) * 0.5f) / freecam_zoom)) * 2.f;
-	vkpt_refdef.fd->fov_y = Degrees(atanf(tanf(Radians(vkpt_refdef.fd->fov_y) * 0.5f) / freecam_zoom)) * 2.f;
+	VectorCopy(freecam_vieworg, vkpt_refdef.fd->vieworg);
+	VectorCopy(freecam_viewangles, vkpt_refdef.fd->viewangles);
+	vkpt_refdef.fd->fov_x = RAD2DEG(atanf(tanf(DEG2RAD(vkpt_refdef.fd->fov_x) * 0.5f) / freecam_zoom)) * 2.f;
+	vkpt_refdef.fd->fov_y = RAD2DEG(atanf(tanf(DEG2RAD(vkpt_refdef.fd->fov_y) * 0.5f) / freecam_zoom)) * 2.f;
 
 	if (!VectorCompare(freecam_vieworg, prev_vieworg) || !VectorCompare(freecam_viewangles, prev_viewangles))
 	{
@@ -185,11 +185,11 @@ void vkpt_freecam_update(float frame_time)
 qboolean R_InterceptKey_RTX(unsigned key, qboolean down)
 {
 	if (cl_paused->integer != 2 || !sv_paused->integer)
-		return false;
+		return qfalse;
 
 	const char* kb = Key_GetBindingForKey(key);
 	if (kb && strstr(kb, "pause"))
-		return false;
+		return qfalse;
 
 	if (cvar_pt_dof->integer != 0 && down && (key == K_MWHEELUP || key == K_MWHEELDOWN))
 	{
@@ -220,17 +220,17 @@ qboolean R_InterceptKey_RTX(unsigned key, qboolean down)
 		value = max(minvalue, min(maxvalue, value));
 		Cvar_SetByVar(var, va("%f", value), FROM_CONSOLE);
 
-		return true;
+		return qtrue;
 	}
 
 	switch (key)
 	{
-	case 'w': freecam_keystate[0] = down; return true;
-	case 's': freecam_keystate[1] = down; return true;
-	case 'd': freecam_keystate[2] = down; return true;
-	case 'a': freecam_keystate[3] = down; return true;
-	case 'e': freecam_keystate[4] = down; return true;
-	case 'q': freecam_keystate[5] = down; return true;
+	case 'w': freecam_keystate[0] = down; return qtrue;
+	case 's': freecam_keystate[1] = down; return qtrue;
+	case 'd': freecam_keystate[2] = down; return qtrue;
+	case 'a': freecam_keystate[3] = down; return qtrue;
+	case 'e': freecam_keystate[4] = down; return qtrue;
+	case 'q': freecam_keystate[5] = down; return qtrue;
 
     // make sure that other keys that control the freecam mode don't
     // interfere with the game, for example MOUSE1 usually maps to fire
@@ -240,8 +240,8 @@ qboolean R_InterceptKey_RTX(unsigned key, qboolean down)
     case K_MWHEELUP:
     case K_MOUSE1:
     case K_MOUSE2:
-        return true;
+        return qtrue;
 	}
 
-	return false;
+	return qfalse;
 }

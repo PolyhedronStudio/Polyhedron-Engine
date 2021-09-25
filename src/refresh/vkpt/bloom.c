@@ -176,21 +176,22 @@ vkpt_bloom_destroy()
 VkResult
 vkpt_bloom_create_pipelines()
 {
-	VkComputePipelineCreateInfo pipeline_info[BLOOM_NUM_PIPELINES];
-	pipeline_info[BLUR] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_BLOOM_BLUR_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_blur,
-	};
-	pipeline_info[COMPOSITE] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_BLOOM_COMPOSITE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_composite,
-	};
-	pipeline_info[DOWNSCALE] = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-		.stage = SHADER_STAGE(QVK_MOD_BLOOM_DOWNSCALE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
-		.layout = pipeline_layout_composite,
+	VkComputePipelineCreateInfo pipeline_info[BLOOM_NUM_PIPELINES] = {
+		[BLUR] = {
+			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage = SHADER_STAGE(QVK_MOD_BLOOM_BLUR_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_blur,
+		},
+		[COMPOSITE] = {
+			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage = SHADER_STAGE(QVK_MOD_BLOOM_COMPOSITE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_composite,
+		},
+		[DOWNSCALE] = {
+			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage = SHADER_STAGE(QVK_MOD_BLOOM_DOWNSCALE_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+			.layout = pipeline_layout_composite,
+		}
 	};
 
 	_VK(vkCreateComputePipelines(qvk.device, 0, LENGTH(pipeline_info), pipeline_info, 0, pipelines));
@@ -207,117 +208,62 @@ vkpt_bloom_destroy_pipelines()
 }
 
 
-//#define BARRIER_COMPUTE(cmd_buf, img) \
-//	do { \
-//		VkImageSubresourceRange subresource_range = { \
-//			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
-//			.baseMipLevel   = 0, \
-//			.levelCount     = 1, \
-//			.baseArrayLayer = 0, \
-//			.layerCount     = 1 \
-//		}; \
-//		IMAGE_BARRIER(cmd_buf, \
-//				.image            = img, \
-//				.subresourceRange = subresource_range, \
-//				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
-//				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
-//				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-//				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-//		); \
-//	} while(0)
-static inline void BARRIER_COMPUTE(VkCommandBuffer &commandBuffer, VkImage &image) {
-	VkImageSubresourceRange subresource_range = {
-		.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-		.baseMipLevel   = 0,
-		.levelCount     = 1,
-		.baseArrayLayer = 0,
-		.layerCount     = 1
-	};
+#define BARRIER_COMPUTE(cmd_buf, img) \
+	do { \
+		VkImageSubresourceRange subresource_range = { \
+			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
+			.baseMipLevel   = 0, \
+			.levelCount     = 1, \
+			.baseArrayLayer = 0, \
+			.layerCount     = 1 \
+		}; \
+		IMAGE_BARRIER(cmd_buf, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
+				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
+				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
+				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+		); \
+	} while(0)
 
-	IMAGE_BARRIER(commandBuffer, {
-			.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
-			.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-			.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-			.image = image,
-			.subresourceRange = subresource_range,
-	});
-}
+#define BARRIER_TO_COPY_DEST(cmd_buf, img) \
+	do { \
+		VkImageSubresourceRange subresource_range = { \
+			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
+			.baseMipLevel   = 0, \
+			.levelCount     = 1, \
+			.baseArrayLayer = 0, \
+			.layerCount     = 1 \
+		}; \
+		IMAGE_BARRIER(cmd_buf, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
+				.srcAccessMask    = 0, \
+				.dstAccessMask    = 0, \
+				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, \
+		); \
+	} while(0)
 
-//#define BARRIER_TO_COPY_DEST(cmd_buf, img) \
-//	do { \
-//		VkImageSubresourceRange subresource_range = { \
-//			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
-//			.baseMipLevel   = 0, \
-//			.levelCount     = 1, \
-//			.baseArrayLayer = 0, \
-//			.layerCount     = 1 \
-//		}; \
-//		IMAGE_BARRIER(cmd_buf, \
-//				.image            = img, \
-//				.subresourceRange = subresource_range, \
-//				.srcAccessMask    = 0, \
-//				.dstAccessMask    = 0, \
-//				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-//				.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, \
-//		); \
-//	} while(0)
-static inline void BARRIER_TO_COPY_DEST(VkCommandBuffer &commandBuffer, VkImage& image) {
-	VkImageSubresourceRange subresource_range = {
-		.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-		.baseMipLevel   = 0,
-		.levelCount     = 1,
-		.baseArrayLayer = 0,
-		.layerCount     = 1
-	};
-
-	IMAGE_BARRIER(commandBuffer, {
-		.srcAccessMask    = 0,
-		.dstAccessMask    = 0,
-		.oldLayout        = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.image = image,
-		.subresourceRange = subresource_range,
-	});
-}
-
-//#define BARRIER_FROM_COPY_DEST(cmd_buf, img) \
-//	do { \
-//		VkImageSubresourceRange subresource_range = { \
-//			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
-//			.baseMipLevel   = 0, \
-//			.levelCount     = 1, \
-//			.baseArrayLayer = 0, \
-//			.layerCount     = 1 \
-//		}; \
-//		IMAGE_BARRIER(cmd_buf, \
-//				.image            = img, \
-//				.subresourceRange = subresource_range, \
-//				.srcAccessMask    = 0, \
-//				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
-//				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, \
-//				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-//		); \
-//	} while(0)
-
-static inline void BARRIER_FROM_COPY_DEST(VkCommandBuffer &commandBuffer, VkImage& image) {
-	VkImageSubresourceRange subresource_range = {
-		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-		.baseMipLevel = 0,
-		.levelCount = 1,
-		.baseArrayLayer = 0,
-		.layerCount = 1
-	};
-
-	IMAGE_BARRIER(commandBuffer, {
-		.srcAccessMask = 0,
-		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
-		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.image = image,
-		.subresourceRange = subresource_range,
-	});
-}
+#define BARRIER_FROM_COPY_DEST(cmd_buf, img) \
+	do { \
+		VkImageSubresourceRange subresource_range = { \
+			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
+			.baseMipLevel   = 0, \
+			.levelCount     = 1, \
+			.baseArrayLayer = 0, \
+			.layerCount     = 1 \
+		}; \
+		IMAGE_BARRIER(cmd_buf, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
+				.srcAccessMask    = 0, \
+				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
+				.oldLayout        = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, \
+				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+		); \
+	} while(0)
 
 VkResult
 vkpt_bloom_record_cmd_buffer(VkCommandBuffer cmd_buf)
@@ -386,18 +332,18 @@ vkpt_bloom_record_cmd_buffer(VkCommandBuffer cmd_buf)
 		};
 
 		VkOffset3D offset_LR_input = {
-			.x = (int32_t)IMG_WIDTH,
-			.y = (int32_t)IMG_HEIGHT,
+			.x = IMG_WIDTH,
+			.y = IMG_HEIGHT,
 			.z = 1
 		};
 
 		VkImageBlit blit_region = {
 			.srcSubresource = subresource,
+			.srcOffsets[0] = offset_UL,
 			.dstSubresource = subresource,
+			.dstOffsets[0] = offset_UL,
+			.dstOffsets[1] = offset_LR_input,
 		};
-		blit_region.srcOffsets[0] = offset_UL,
-		blit_region.dstOffsets[0] = offset_UL,
-		blit_region.dstOffsets[1] = offset_LR_input,
 
 		BARRIER_TO_COPY_DEST(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT]);
 
@@ -406,14 +352,14 @@ vkpt_bloom_record_cmd_buffer(VkCommandBuffer cmd_buf)
 		{
 			case 1:
 				vis_img = VKPT_IMG_BLOOM_DOWNSCALE_MIP_1;
-				blit_region.srcOffsets[1].x = (int32_t)IMG_WIDTH / 2;
-				blit_region.srcOffsets[1].y = (int32_t)IMG_HEIGHT / 2;
+				blit_region.srcOffsets[1].x = IMG_WIDTH / 2;
+				blit_region.srcOffsets[1].y = IMG_HEIGHT / 2;
 				break;
 
 			case 2:
 				vis_img = VKPT_IMG_BLOOM_HBLUR;
-				blit_region.srcOffsets[1].x = (int32_t)IMG_WIDTH / 4;
-				blit_region.srcOffsets[1].y = (int32_t)IMG_HEIGHT / 4;
+				blit_region.srcOffsets[1].x = IMG_WIDTH / 4;
+				blit_region.srcOffsets[1].y = IMG_HEIGHT / 4;
 				break;
 
 			default:

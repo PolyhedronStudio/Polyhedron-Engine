@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2019, NVIDIA CORPORATION. All rights reserved.
+Copyright (C) 2021, NVIDIA CORPORATION. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,22 +32,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "path_tracer_transparency.glsl"
 #include "path_tracer_hit_shaders.h"
 
-hitAttributeEXT HitAttributeBeam beam_hit_attrib;
+rayPayloadInEXT RayPayload ray_payload;
+hitAttributeEXT vec2 hit_attribs;
 
 void main()
 {
-	const int beam_index = gl_PrimitiveID;
-
-	float tShapeHit;
-	vec2 fade_and_thickness;
-
-	if (!pt_logic_beam_intersection(gl_PrimitiveID, gl_WorldRayOriginEXT, gl_WorldRayDirectionEXT,
-		gl_RayTminEXT, gl_RayTmaxEXT, fade_and_thickness, tShapeHit))
-	{
-		return;
-	}
-
-	beam_hit_attrib.fade_and_thickness = packHalf2x16(fade_and_thickness);
-
-	reportIntersectionEXT(tShapeHit, 0);
+	if (!pt_logic_masked(gl_PrimitiveID, gl_InstanceCustomIndexEXT, hit_attribs.xy))
+		ignoreIntersectionEXT;
 }

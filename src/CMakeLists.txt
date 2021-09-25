@@ -540,41 +540,45 @@ SET(HEADERS_WINDOWS
 
 ###################### VKPT.
 SET(SRC_VKPT
-	refresh/vkpt/asvgf.cpp
-	refresh/vkpt/bloom.cpp
-	refresh/vkpt/bsp_mesh.cpp
-	refresh/vkpt/conversion.cpp
-	refresh/vkpt/draw.cpp
-	refresh/vkpt/freecam.cpp
-	refresh/vkpt/main.cpp
-	refresh/vkpt/material.cpp
-	refresh/vkpt/matrix.cpp
-	refresh/vkpt/mgpu.cpp
-	refresh/vkpt/models.cpp
-	refresh/vkpt/path_tracer.cpp
-	refresh/vkpt/physical_sky.cpp
-	refresh/vkpt/precomputed_sky.cpp
-	refresh/vkpt/profiler.cpp
-	refresh/vkpt/shadow_map.cpp
-	refresh/vkpt/textures.cpp
-	refresh/vkpt/tone_mapping.cpp
-	refresh/vkpt/transparency.cpp
-	refresh/vkpt/uniform_buffer.cpp
-	refresh/vkpt/vertex_buffer.cpp
-	refresh/vkpt/vk_util.cpp
-	refresh/vkpt/buddy_allocator.cpp
-	refresh/vkpt/device_memory_allocator.cpp
-	refresh/vkpt/god_rays.cpp
+	refresh/vkpt/asvgf.c
+	refresh/vkpt/bloom.c
+	refresh/vkpt/bsp_mesh.c
+	refresh/vkpt/buddy_allocator.c
+	refresh/vkpt/conversion.c
+	refresh/vkpt/device_memory_allocator.c
+	refresh/vkpt/draw.c
+	refresh/vkpt/freecam.c
+	refresh/vkpt/fsr.c
+	refresh/vkpt/god_rays.c
+	refresh/vkpt/main.c
+	refresh/vkpt/material.c
+	refresh/vkpt/matrix.c
+	refresh/vkpt/mgpu.c
+	refresh/vkpt/models.c
+	refresh/vkpt/path_tracer.c
+	refresh/vkpt/physical_sky.c
+	refresh/vkpt/precomputed_sky.c
+	refresh/vkpt/profiler.c
+	refresh/vkpt/shadow_map.c
+	refresh/vkpt/textures.c
+	refresh/vkpt/tone_mapping.c
+	refresh/vkpt/transparency.c
+	refresh/vkpt/uniform_buffer.c
+	refresh/vkpt/vertex_buffer.c
+	refresh/vkpt/vk_util.c
 )
 SET(HEADERS_VKPT
-	refresh/vkpt/vkpt.h
-	refresh/vkpt/vk_util.h
+	refresh/vkpt/fsr/ffx_a.h
+	refresh/vkpt/fsr/ffx_fsr1.h
+
 	refresh/vkpt/buddy_allocator.h
 	refresh/vkpt/conversion.h
 	refresh/vkpt/device_memory_allocator.h
 	refresh/vkpt/material.h
 	refresh/vkpt/physical_sky.h
 	refresh/vkpt/precomputed_sky.h
+	refresh/vkpt/vk_util.h
+	refresh/vkpt/vkpt.h
 )
 
 ###################### Vulkan Shaders.

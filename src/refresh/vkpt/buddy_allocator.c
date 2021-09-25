@@ -77,7 +77,7 @@ BuddyAllocator* create_buddy_allocator(uint64_t capacity, uint64_t block_size)
 	const size_t free_list_array_size = _align(level_num * sizeof(AllocatorFreeListItem*), alignment);
 	const size_t free_item_buffer_size = _align(block_num * sizeof(AllocatorFreeListItem), alignment);
 	const size_t block_state_size = _align(block_num * sizeof(uint8_t), alignment);
-	char* memory = (char*)Z_Mallocz(allocator_size + free_list_array_size + free_item_buffer_size + block_state_size);
+	char* memory = Z_Mallocz(allocator_size + free_list_array_size + free_item_buffer_size + block_state_size);
 
 	BuddyAllocator* allocator = (BuddyAllocator*)memory;
 	allocator->block_size = block_size;
@@ -193,14 +193,14 @@ qboolean merge_blocks(BuddyAllocator* allocator, uint32_t level, uint32_t block_
 	if (level == allocator->level_num - 1)
 	{
 		write_free_block_to_list(allocator, level, block_index);
-		return true;
+		return qtrue;
 	}
 
 	const uint32_t level_block_offset = get_level_offset(allocator, level);
 	const uint32_t buddy_block_index = (block_index % 2) == 0 ? block_index + 1 : block_index - 1;
 
 	if (allocator->block_states[level_block_offset + buddy_block_index] != BLOCK_FREE)
-		return false;
+		return qfalse;
 
 	remove_block_from_free_list(allocator, level, buddy_block_index);
 
@@ -212,7 +212,7 @@ qboolean merge_blocks(BuddyAllocator* allocator, uint32_t level, uint32_t block_
 	if (!merge_blocks(allocator, level + 1, next_level_block_index))
 		write_free_block_to_list(allocator, level + 1, next_level_block_index);
 
-	return true;
+	return qtrue;
 }
 
 void remove_block_from_free_list(BuddyAllocator* allocator, uint32_t level, uint32_t block_index)

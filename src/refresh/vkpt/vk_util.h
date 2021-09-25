@@ -55,48 +55,32 @@ VkDeviceAddress get_buffer_device_address(VkBuffer buffer);
 uint32_t get_memory_type(uint32_t mem_req_type_bits, VkMemoryPropertyFlags mem_prop);
 
 
-//#define IMAGE_BARRIER(cmd_buf, ...) \
-//	do { \
-//		VkImageMemoryBarrier img_mem_barrier = { \
-//			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
-//			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-//			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-//			__VA_ARGS__ \
-//		}; \
-//		vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
-//				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, \
-//				1, &img_mem_barrier); \
-//	} while(0)
-static inline void IMAGE_BARRIER(VkCommandBuffer &commandBuffer, VkImageMemoryBarrier img_mem_barrier) {
-	img_mem_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	img_mem_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	img_mem_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
-		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, \
-		1, &img_mem_barrier);
-}
+#define IMAGE_BARRIER(cmd_buf, ...) \
+	do { \
+		VkImageMemoryBarrier img_mem_barrier = { \
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, \
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+			__VA_ARGS__ \
+		}; \
+		vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
+				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, \
+				1, &img_mem_barrier); \
+	} while(0)
 
-//#define BUFFER_BARRIER(cmd_buf, ...) \
-//	do { \
-//		VkBufferMemoryBarrier buf_mem_barrier = { \
-//			.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER, \
-//			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-//			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
-//			__VA_ARGS__ \
-//		}; \
-//		vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
-//				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 1, &buf_mem_barrier, \
-//				0, NULL); \
-//	} while(0)
-static inline void BUFFER_BARRIER(VkCommandBuffer& commandBuffer, VkBufferMemoryBarrier buf_mem_barrier) {
-	buf_mem_barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-	buf_mem_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	buf_mem_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+#define BUFFER_BARRIER(cmd_buf, ...) \
+	do { \
+		VkBufferMemoryBarrier buf_mem_barrier = { \
+			.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER, \
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED, \
+			__VA_ARGS__ \
+		}; \
+		vkCmdPipelineBarrier(cmd_buf, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
+				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 1, &buf_mem_barrier, \
+				0, NULL); \
+	} while(0)
 
-	vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, \
-			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 1, &buf_mem_barrier, \
-			0, NULL); \
-}
 
 #define CREATE_PIPELINE_LAYOUT(dev, layout, ...) \
 	do { \
@@ -115,8 +99,8 @@ const char *qvk_result_to_string(VkResult result);
 		/*Com_Printf("attaching object label 0x%08lx %s\n", (uint64_t) a, #a);*/ \
 		VkDebugMarkerObjectNameInfoEXT name_info = { \
 			.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT, \
-			.objectType = VK_DEBUG_REPORT_OBJECT_TYPE_##type##_EXT, \
 			.object = (uint64_t) a, \
+			.objectType = VK_DEBUG_REPORT_OBJECT_TYPE_##type##_EXT, \
 			.pObjectName = #a \
 		}; \
 		qvkDebugMarkerSetObjectNameEXT(qvk.device, &name_info); \
@@ -127,8 +111,8 @@ const char *qvk_result_to_string(VkResult result);
 		/*Com_Printf("attaching object label 0x%08lx %s\n", (uint64_t) a, name);*/ \
 		VkDebugMarkerObjectNameInfoEXT name_info = { \
 			.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT, \
-			.objectType = VK_DEBUG_REPORT_OBJECT_TYPE_##type##_EXT, \
 			.object = (uint64_t) a, \
+			.objectType = VK_DEBUG_REPORT_OBJECT_TYPE_##type##_EXT, \
 			.pObjectName = name, \
 		}; \
 		qvkDebugMarkerSetObjectNameEXT(qvk.device, &name_info); \
@@ -155,7 +139,7 @@ static inline size_t align(size_t x, size_t alignment)
 }
 
 #ifdef VKPT_IMAGE_DUMPS
-void save_to_pfm_file(const char* prefix, uint64_t frame_counter, uint64_t width, uint64_t height, char* data, uint64_t rowPitch, int32_t type);
+void save_to_pfm_file(char* prefix, uint64_t frame_counter, uint64_t width, uint64_t height, char* data, uint64_t rowPitch, int32_t type);
 #endif
 
 #endif  /*__VK_UTIL_H__*/

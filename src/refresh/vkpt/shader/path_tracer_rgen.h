@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define RAY_GEN_DESCRIPTOR_SET_IDX 0
 layout(set = RAY_GEN_DESCRIPTOR_SET_IDX, binding = 0)
-uniform rt_accelerationStructure topLevelAS;
+uniform accelerationStructureEXT topLevelAS;
 
 #define GLOBAL_TEXTURES_DESC_SET_IDX 2
 #include "global_textures.h"
@@ -80,8 +80,8 @@ RayPayload ray_payload_brdf;
 
 #define RT_PAYLOAD_SHADOW  0
 #define RT_PAYLOAD_BRDF 1
-layout(location = RT_PAYLOAD_SHADOW) rt_rayPayload RayPayloadShadow ray_payload_shadow;
-layout(location = RT_PAYLOAD_BRDF) rt_rayPayload RayPayload ray_payload_brdf;
+layout(location = RT_PAYLOAD_SHADOW) rayPayloadEXT RayPayloadShadow ray_payload_shadow;
+layout(location = RT_PAYLOAD_BRDF) rayPayloadEXT RayPayload ray_payload_brdf;
 
 #endif
 
@@ -249,12 +249,6 @@ is_camera(uint material)
 }
 
 vec3
-correct_albedo(vec3 albedo)
-{
-    return max(vec3(0), pow(albedo, vec3(ALBEDO_TRANSFORM_POWER)) * ALBEDO_TRANSFORM_SCALE + vec3(ALBEDO_TRANSFORM_BIAS));
-}
-
-vec3
 correct_emissive(uint material_id, vec3 emissive)
 {
 	return max(vec3(0), emissive.rgb + vec3(EMISSIVE_TRANSFORM_BIAS));
@@ -267,7 +261,7 @@ trace_ray(Ray ray, bool cull_back_faces, int instance_mask, bool skip_procedural
 	if (cull_back_faces)
 		rayFlags |= gl_RayFlagsCullBackFacingTrianglesEXT;
 	if (skip_procedural)
-		rayFlags |= 0x200; // RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES - the corresponding constant is not defined in GLSL
+		rayFlags |= gl_RayFlagsSkipProceduralPrimitives;
 
 	ray_payload_brdf.barycentric = vec2(0);
 	ray_payload_brdf.instance_prim = 0;
@@ -318,6 +312,11 @@ trace_ray(Ray ray, bool cull_back_faces, int instance_mask, bool skip_procedural
 		{
 			switch(sbtOffset)
 			{
+			case SBTO_MASKED: // masked materials
+				if (pt_logic_masked(primitiveID, instanceCustomIndex, bary))
+					rayQueryConfirmIntersectionEXT(rayQuery);
+				break;
+
 			case SBTO_PARTICLE: // particles
 				pt_logic_particle(ray_payload_brdf, primitiveID, hitT, bary);
 				break;
@@ -349,7 +348,7 @@ trace_ray(Ray ray, bool cull_back_faces, int instance_mask, bool skip_procedural
 
 #else
 
-	rt_traceRay( topLevelAS, rayFlags, instance_mask,
+	traceRayEXT( topLevelAS, rayFlags, instance_mask,
 			SBT_RCHIT_OPAQUE /*sbtRecordOffset*/, 0 /*sbtRecordStride*/, SBT_RMISS_PATH_TRACER /*missIndex*/,
 			ray.origin, ray.t_min, ray.direction, ray.t_max, RT_PAYLOAD_BRDF);
 
@@ -374,7 +373,7 @@ Ray get_shadow_ray(vec3 p1, vec3 p2, float tmin)
 float
 trace_shadow_ray(Ray ray, int cull_mask)
 {
-	const uint rayFlags = gl_RayFlagsOpaqueEXT | gl_RayFlagsTerminateOnFirstHitEXT;
+	const uint rayFlags = gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsSkipProceduralPrimitives;
 
 
 #ifdef KHR_RAY_QUERY
@@ -383,7 +382,20 @@ trace_shadow_ray(Ray ray, int cull_mask)
 	rayQueryInitializeEXT(rayQuery, topLevelAS, rayFlags, cull_mask, 
 		ray.origin, ray.t_min, ray.direction, ray.t_max);
 
-	rayQueryProceedEXT(rayQuery);
+	while (rayQueryProceedEXT(rayQuery))
+	{
+		uint sbtOffset = rayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetEXT(rayQuery, false);
+		int primitiveID = rayQueryGetIntersectionPrimitiveIndexEXT(rayQuery, false);
+		uint instanceCustomIndex = rayQueryGetIntersectionInstanceCustomIndexEXT(rayQuery, false);
+		vec2 bary = rayQueryGetIntersectionBarycentricsEXT(rayQuery, false);
+		bool isProcedural = rayQueryGetIntersectionTypeEXT(rayQuery, false) == gl_RayQueryCandidateIntersectionAABBEXT;
+
+		if (!isProcedural && sbtOffset == SBTO_MASKED)
+		{
+			if (pt_logic_masked(primitiveID, instanceCustomIndex, bary))
+				rayQueryConfirmIntersectionEXT(rayQuery);
+		}
+	}
 
 	if(rayQueryGetIntersectionTypeEXT(rayQuery, true) != gl_RayQueryCommittedIntersectionNoneEXT)
 		return 0.0f;
@@ -394,7 +406,7 @@ trace_shadow_ray(Ray ray, int cull_mask)
 
 	ray_payload_shadow.missed = 0;
 
-	rt_traceRay( topLevelAS, rayFlags, cull_mask,
+	traceRayEXT( topLevelAS, rayFlags, cull_mask,
 			SBT_RCHIT_EMPTY /*sbtRecordOffset*/, 0 /*sbtRecordStride*/, SBT_RMISS_SHADOW /*missIndex*/,
 			ray.origin, ray.t_min, ray.direction, ray.t_max, RT_PAYLOAD_SHADOW);
 
@@ -416,7 +428,7 @@ trace_caustic_ray(Ray ray, int surface_medium)
 	ray_payload_brdf.farthest_transparent_depth = 0;
 
 
-	uint rayFlags = gl_RayFlagsCullBackFacingTrianglesEXT | gl_RayFlagsOpaqueEXT;
+	uint rayFlags = gl_RayFlagsCullBackFacingTrianglesEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipProceduralPrimitives;
 	uint instance_mask = AS_FLAG_TRANSPARENT;
 	
 #ifdef KHR_RAY_QUERY
@@ -443,7 +455,7 @@ trace_caustic_ray(Ray ray, int surface_medium)
 
 #else
 
-	rt_traceRay(topLevelAS, rayFlags, instance_mask, SBT_RCHIT_OPAQUE, 0, SBT_RMISS_PATH_TRACER,
+	traceRayEXT(topLevelAS, rayFlags, instance_mask, SBT_RCHIT_OPAQUE, 0, SBT_RMISS_PATH_TRACER,
 			ray.origin, ray.t_min, ray.direction, ray.t_max, RT_PAYLOAD_BRDF);
 
 #endif
@@ -461,7 +473,7 @@ trace_caustic_ray(Ray ray, int surface_medium)
 		if((is_water(triangle.material_id) || is_slime(triangle.material_id)) && !is_vertical)
 		{
 			vec3 position = ray.origin + ray.direction * ray_payload_brdf.hit_distance;
-			vec3 w = get_water_normal(triangle.material_id, geo_normal, triangle.tangent, position, true);
+			vec3 w = get_water_normal(triangle.material_id, geo_normal, triangle.tangents[0], position, true);
 
 			float caustic = clamp((1 - pow(clamp(1 - length(w.xz), 0, 1), 2)) * 100, 0, 8);
 			caustic = mix(1, caustic, clamp(ray_payload_brdf.hit_distance * 0.02, 0, 1));
@@ -488,12 +500,12 @@ trace_caustic_ray(Ray ray, int surface_medium)
 
 			MaterialInfo minfo = get_material_info(triangle.material_id);
 
-	    	vec3 albedo = global_textureLod(minfo.diffuse_texture, tex_coord, 2).rgb;
+	    	vec3 base_color = vec3(minfo.base_factor);
+	    	if (minfo.base_texture > 0)
+	    		base_color *= global_textureLod(minfo.base_texture, tex_coord, 2).rgb;
+	    	base_color = clamp(base_color, vec3(0), vec3(1));
 
-			if((triangle.material_id & MATERIAL_FLAG_CORRECT_ALBEDO) != 0)
-				albedo = correct_albedo(albedo);
-
-			throughput = albedo;
+			throughput = base_color;
 		}
 	}
 
@@ -520,6 +532,15 @@ AdjustRoughnessToksvig(float roughness, float normalMapLen, float mip_level)
     return SpecPowerToRoughnessSquare(ft * shininess / effect);
 }
 
+float
+get_specular_sampled_lighting_weight(float roughness, vec3 N, vec3 V, vec3 L, float pdfw)
+{
+    float ggxVndfPdf = ImportanceSampleGGX_VNDF_PDF(max(roughness, 0.01), N, V, L);
+  
+    // Balance heuristic assuming one sample from each strategy: light sampling and BRDF sampling
+    return clamp(pdfw / (pdfw + ggxVndfPdf), 0, 1);
+}
+
 void
 get_direct_illumination(
 	vec3 position, 
@@ -529,10 +550,12 @@ get_direct_illumination(
 	uint material_id,
 	int shadow_cull_mask, 
 	vec3 view_direction, 
+	vec3 albedo,
+	vec3 base_reflectivity,
+	float specular_factor,
 	float roughness, 
 	int surface_medium, 
 	bool enable_caustics, 
-	float surface_specular, 
 	float direct_specular_weight, 
 	bool enable_polygonal,
 	bool enable_spherical,
@@ -553,10 +576,11 @@ get_direct_illumination(
 	float alpha = square(roughness);
 	float phong_exp = RoughnessSquareToSpecPower(alpha);
 	float phong_scale = min(100, 1 / (M_PI * square(alpha)));
-	float phong_weight = clamp(surface_specular * direct_specular_weight, 0, 0.9);
+	float phong_weight = clamp(specular_factor * luminance(base_reflectivity) / (luminance(base_reflectivity) + luminance(albedo)), 0, 0.9);
 
 	int polygonal_light_index = -1;
-	float polygonal_light_area = 0;
+	float polygonal_light_pdfw = 0;
+	bool polygonal_light_is_sky = false;
 
 	vec3 rng = vec3(
 		get_rng(RNG_NEE_LIGHT_SELECTION(bounce)),
@@ -579,7 +603,8 @@ get_direct_illumination(
 			pos_on_light_polygonal, 
 			contrib_polygonal,
 			polygonal_light_index,
-			polygonal_light_area,
+			polygonal_light_pdfw,
+			polygonal_light_is_sky,
 			rng);
 	}
 
@@ -621,7 +646,7 @@ get_direct_illumination(
 	vec3 pos_on_light = null_light ? position : (is_polygonal ? pos_on_light_polygonal : pos_on_light_spherical);
 	vec3 contrib = is_polygonal ? contrib_polygonal : contrib_spherical;
 
-	Ray shadow_ray = get_shadow_ray(position - view_direction * 0.001, pos_on_light, 0);
+	Ray shadow_ray = get_shadow_ray(position - view_direction * 0.01, pos_on_light, 0);
 	
 	vis *= trace_shadow_ray(shadow_ray, null_light ? 0 : shadow_cull_mask);
 #ifdef ENABLE_SHADOW_CAUSTICS
@@ -666,31 +691,35 @@ get_direct_illumination(
 	if(null_light)
 		return;
 
-	diffuse = vis * contrib;
+	vec3 radiance = vis * contrib;
 
-	if(is_polygonal && direct_specular_weight > 0)
+	vec3 L = pos_on_light - position;
+	L = normalize(L);
+
+	if(is_polygonal && direct_specular_weight > 0 && polygonal_light_is_sky && global_ubo.pt_specular_mis != 0)
 	{
 		// MIS with direct specular and indirect specular.
 		// Only applied to sky lights, for two reasons:
 		//  1) Non-sky lights are trimmed to match the light texture, and indirect rays don't see that;
 		//  2) Non-sky lights are usually away from walls, so the direct sampling issue is not as pronounced.
-		direct_specular_weight *= 1.0 - smoothstep(
-			global_ubo.pt_direct_area_threshold,
-			global_ubo.pt_direct_area_threshold * 2, 
-			polygonal_light_area);
+
+		direct_specular_weight *= get_specular_sampled_lighting_weight(roughness,
+			normal, -view_direction, L, polygonal_light_pdfw);
 	}
+
+	vec3 F = vec3(0);
 
 	if(vis > 0 && direct_specular_weight > 0)
 	{
-		specular = diffuse * (GGX(view_direction, normalize(pos_on_light - position), normal, roughness, 0.0) * direct_specular_weight);
+		vec3 specular_brdf = GGX_times_NdotL(view_direction, normalize(pos_on_light - position),
+			normal, roughness, base_reflectivity, 0.0, specular_factor, F);
+		specular = radiance * specular_brdf * direct_specular_weight;
 	}
-
-	vec3 L = pos_on_light - position;
-	L = normalize(L);
 
 	float NdotL = max(0, dot(normal, L));
 
-	diffuse *= NdotL / M_PI;
+	float diffuse_brdf = NdotL / M_PI;
+	diffuse = radiance * diffuse_brdf * (vec3(1.0) - F);
 }
 
 void
@@ -701,6 +730,8 @@ get_sunlight(
 	vec3 normal, 
 	vec3 geo_normal, 
 	vec3 view_direction, 
+	vec3 base_reflectivity,
+	float specular_factor,
 	float roughness, 
 	int surface_medium, 
 	bool enable_caustics, 
@@ -731,7 +762,7 @@ get_sunlight(
 	if(NdotL <= 0 || GNdotL <= 0)
 		return;
 
-	Ray shadow_ray = get_shadow_ray(position - view_direction * 0.001, position + direction * 10000, 0);
+	Ray shadow_ray = get_shadow_ray(position - view_direction * 0.01, position + direction * 10000, 0);
  
 	float vis = trace_shadow_ray(shadow_ray, shadow_cull_mask);
 
@@ -747,27 +778,32 @@ get_sunlight(
 	
     vec3 envmap = textureLod(TEX_PHYSICAL_SKY, envmap_direction.xzy, 0).rgb;
 
-    diffuse = (global_ubo.sun_solid_angle * global_ubo.pt_env_scale) * envmap;
+    vec3 radiance = (global_ubo.sun_solid_angle * global_ubo.pt_env_scale) * envmap;
 #else
     // Fetch the average sun color from the resolved UBO - it's faster.
 
-    diffuse = sun_color_ubo.sun_color;
+    vec3 radiance = sun_color_ubo.sun_color;
 #endif
 
 #ifdef ENABLE_SHADOW_CAUSTICS
 	if(enable_caustics)
 	{
-    	diffuse *= trace_caustic_ray(shadow_ray, surface_medium);
+    	radiance *= trace_caustic_ray(shadow_ray, surface_medium);
 	}
 #endif
+
+	vec3 F = vec3(0);
 
     if(global_ubo.pt_sun_specular > 0)
     {
 		float NoH_offset = 0.5 * square(global_ubo.sun_tan_half_angle);
-    	specular = diffuse * GGX(view_direction, global_ubo.sun_direction, normal, roughness, NoH_offset);
+		vec3 specular_brdf = GGX_times_NdotL(view_direction, global_ubo.sun_direction,
+			normal,roughness, base_reflectivity, NoH_offset, specular_factor, F);
+    	specular = radiance * specular_brdf;
 	}
 
-	diffuse *= NdotL / M_PI;
+	float diffuse_brdf = NdotL / M_PI;
+	diffuse = radiance * diffuse_brdf * (vec3(1.0) - F);
 }
 
 vec3 clamp_output(vec3 c)
@@ -791,28 +827,10 @@ sample_emissive_texture(uint material_id, MaterialInfo minfo, vec2 tex_coord, ve
 
     	vec3 corrected = correct_emissive(material_id, image3.rgb);
 
-	    return corrected * minfo.emissive_scale;
+	    return corrected * minfo.emissive_factor;
 	}
 
 	return vec3(0);
-}
-
-vec2
-lava_uv_warp(vec2 uv)
-{
-	// Lava UV warp that (hopefully) matches the warp in the original Quake 2.
-	// Relevant bits of the original rasterizer:
-
-	// #define AMP     8*0x10000
-	// #define SPEED   20
-	// #define CYCLE   128
-	// sintable[i] = AMP + sin(i * M_PI * 2 / CYCLE) * AMP; 
-	// #define TURB_SIZE               64  // base turbulent texture size
-	// #define TURB_MASK               (TURB_SIZE - 1)
-	// turb_s = ((s + turb[(t >> 16) & (CYCLE - 1)]) >> 16) & TURB_MASK;
-    // turb_t = ((t + turb[(s >> 16) & (CYCLE - 1)]) >> 16) & TURB_MASK;
-    
-    return uv.xy + sin(fract(uv.yx * 0.5 + global_ubo.time * 20 / 128) * 2 * M_PI) * 0.125;
 }
 
 vec3 get_emissive_shell(uint material_id)
@@ -852,40 +870,42 @@ bool get_is_gradient(ivec2 ipos)
 
 
 void
-get_material(Triangle triangle, vec2 tex_coord, vec2 tex_coord_x, vec2 tex_coord_y, float mip_level, vec3 geo_normal,
-    out vec3 albedo, out vec3 normal, out float metallic, out float specular, out float roughness, out vec3 emissive)
+get_material(
+	Triangle triangle,
+	vec3 bary,
+	vec2 tex_coord,
+	vec2 tex_coord_x,
+	vec2 tex_coord_y,
+	float mip_level,
+	vec3 geo_normal,
+    out vec3 base_color,
+    out vec3 normal,
+    out float metallic,
+    out float roughness,
+    out vec3 emissive,
+    out float specular_factor)
 {
-	if((triangle.material_id & MATERIAL_FLAG_FLOWING) != 0)
-	{
-		tex_coord.x -= global_ubo.time * 0.5;
-	}
-
-	if((triangle.material_id & MATERIAL_FLAG_WARP) != 0)
-	{
-		tex_coord = lava_uv_warp(tex_coord);
-	}
-
-
 	MaterialInfo minfo = get_material_info(triangle.material_id);
-	
 
-    vec4 image1;
-	if (mip_level >= 0)
-	    image1 = global_textureLod(minfo.diffuse_texture, tex_coord, mip_level);
-	else
-	    image1 = global_textureGrad(minfo.diffuse_texture, tex_coord, tex_coord_x, tex_coord_y);
+	perturb_tex_coord(triangle.material_id, global_ubo.time, tex_coord);	
 
-	if((triangle.material_id & MATERIAL_FLAG_CORRECT_ALBEDO) != 0)
-		albedo = correct_albedo(image1.rgb);
-	else
-		albedo = image1.rgb;
+    vec4 image1 = vec4(1);
+    if (minfo.base_texture != 0)
+    {
+		if (mip_level >= 0)
+		    image1 = global_textureLod(minfo.base_texture, tex_coord, mip_level);
+		else
+		    image1 = global_textureGrad(minfo.base_texture, tex_coord, tex_coord_x, tex_coord_y);
+	}
+
+	base_color = image1.rgb * minfo.base_factor;
+	base_color = clamp(base_color, vec3(0), vec3(1));
 
 	normal = geo_normal;
 	metallic = 0;
-    specular = 0;
     roughness = 1;
 
-    if (minfo.normals_texture != 0)// && dot(triangle.tangent, triangle.tangent) > 0)
+    if (minfo.normals_texture != 0)
     {
         vec4 image2;
 	    if (mip_level >= 0)
@@ -896,10 +916,10 @@ get_material(Triangle triangle, vec2 tex_coord, vec2 tex_coord_x, vec2 tex_coord
 		float normalMapLen;
 		vec3 local_normal = rgbToNormal(image2.rgb, normalMapLen);
 
-		if(dot(triangle.tangent, triangle.tangent) > 0)
+		if(dot(triangle.tangents[0], triangle.tangents[0]) > 0)
 		{
-			vec3 tangent = triangle.tangent,
-				 bitangent = cross(geo_normal, tangent);
+			vec3 tangent = normalize(triangle.tangents * bary);
+			vec3 bitangent = cross(geo_normal, tangent);
 
 			if((triangle.material_id & MATERIAL_FLAG_HANDEDNESS) != 0)
         		bitangent = -bitangent;
@@ -913,7 +933,7 @@ get_material(Triangle triangle, vec2 tex_coord, vec2 tex_coord_x, vec2 tex_coord
 			normal = normalize(mix(geo_normal, normal, bump_scale));
 		}
 
-        metallic = clamp(image2.a * minfo.specular_scale, 0, 1);
+        metallic = clamp(image2.a * minfo.metalness_factor, 0, 1);
         
         if(minfo.roughness_override >= 0)
         	roughness = max(image1.a, minfo.roughness_override);
@@ -943,12 +963,19 @@ get_material(Triangle triangle, vec2 tex_coord, vec2 tex_coord_x, vec2 tex_coord
 
     if(global_ubo.pt_roughness_override >= 0) roughness = global_ubo.pt_roughness_override;
     if(global_ubo.pt_metallic_override >= 0) metallic = global_ubo.pt_metallic_override;
+    
+    // The specular factor parameter should only affect dielectrics, so make it 1.0 for metals
+    specular_factor = mix(minfo.specular_factor, 1.0, metallic);
 
-	specular = mix(0.05, 1.0, metallic);
+	if (triangle.emissive_factor > 0)
+	{
+	    emissive = sample_emissive_texture(triangle.material_id, minfo, tex_coord, tex_coord_x, tex_coord_y, mip_level);
+	    emissive *= triangle.emissive_factor;
+	}
+	else
+		emissive = vec3(0);
 
-    emissive = sample_emissive_texture(triangle.material_id, minfo, tex_coord, tex_coord_x, tex_coord_y, mip_level);
-
-    emissive += get_emissive_shell(triangle.material_id) * albedo * (1 - metallic * 0.9);
+    emissive += get_emissive_shell(triangle.material_id) * base_color * (1 - metallic * 0.9);
 }
 
 bool get_camera_uv(vec2 tex_coord, out vec2 cameraUV)

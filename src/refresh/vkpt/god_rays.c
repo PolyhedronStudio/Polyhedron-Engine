@@ -118,41 +118,24 @@ vkpt_god_rays_noop()
 	return VK_SUCCESS;
 }
 
-//#define BARRIER_COMPUTE(cmd_buf, img) \
-//	do { \
-//		VkImageSubresourceRange subresource_range = { \
-//			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
-//			.baseMipLevel   = 0, \
-//			.levelCount     = 1, \
-//			.baseArrayLayer = 0, \
-//			.layerCount     = 1 \
-//		}; \
-//		IMAGE_BARRIER(cmd_buf, \
-//				.image            = img, \
-//				.subresourceRange = subresource_range, \
-//				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
-//				.dstAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
-//				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-//				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-//		); \
-//	} while(0)
-static inline void BARRIER_COMPUTE(VkCommandBuffer& commandBuffer, VkImage& image) {
-	VkImageSubresourceRange subresource_range = {
-		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-		.baseMipLevel = 0,
-		.levelCount = 1,
-		.baseArrayLayer = 0,
-		.layerCount = 1
-	};
-	IMAGE_BARRIER(commandBuffer, {
-		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.image = image,
-		.subresourceRange = subresource_range,
-	});
-}
+#define BARRIER_COMPUTE(cmd_buf, img) \
+	do { \
+		VkImageSubresourceRange subresource_range = { \
+			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
+			.baseMipLevel   = 0, \
+			.levelCount     = 1, \
+			.baseArrayLayer = 0, \
+			.layerCount     = 1 \
+		}; \
+		IMAGE_BARRIER(cmd_buf, \
+				.image            = img, \
+				.subresourceRange = subresource_range, \
+				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
+				.dstAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
+				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+		); \
+	} while(0)
 
 void vkpt_record_god_rays_trace_command_buffer(VkCommandBuffer command_buffer, int pass)
 {
@@ -267,7 +250,7 @@ static void create_image_views()
 
 static void create_pipeline_layout()
 {
-	VkDescriptorSetLayoutBinding bindings[1] = { };
+	VkDescriptorSetLayoutBinding bindings[1] = { 0 };
 	bindings[0].binding = 0;
 	bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	bindings[0].descriptorCount = 1;
@@ -298,8 +281,8 @@ static void create_pipeline_layout()
 
 	const VkPipelineLayoutCreateInfo layout_create_info = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-		.setLayoutCount = LENGTH(desc_set_layouts),
 		.pSetLayouts = desc_set_layouts,
+		.setLayoutCount = LENGTH(desc_set_layouts),
 		.pushConstantRangeCount = 1,
 		.pPushConstantRanges = &push_constant_range
 	};
@@ -374,17 +357,17 @@ static void update_descriptor_set()
 		return;
 
 	VkDescriptorImageInfo image_info = {
-		.sampler = god_rays.shadow_sampler,
-		.imageView = god_rays.shadow_image_view,
 		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.imageView = god_rays.shadow_image_view,
+		.sampler = god_rays.shadow_sampler
 	};
 	
 	VkWriteDescriptorSet writes[1] = {
 		{
 			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet = god_rays.descriptor_set,
-			.dstBinding = 0,
 			.descriptorCount = 1,
+			.dstBinding = 0,
 			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.pImageInfo = &image_info
 		}
