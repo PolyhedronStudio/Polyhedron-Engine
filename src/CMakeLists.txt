@@ -425,6 +425,20 @@ SET(HEADERS_COMMON
 	common/net/win.h
 )
 
+###################### Format.
+#SET(SRC_FORMAT
+#)
+SET(HEADERS_COMMON
+	../inc/format/bsp.h
+	../inc/format/iqm.h
+	../inc/format/md2.h
+	../inc/format/md3.h
+	../inc/format/pak.h
+	../inc/format/pcx.h
+	../inc/format/sp2.h
+	../inc/format/wal.h
+)
+
 ###################### Refresh.
 SET(SRC_REFRESH
 	refresh/images.cpp
