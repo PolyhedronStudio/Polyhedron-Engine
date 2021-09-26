@@ -61,6 +61,9 @@ unsigned _wrp_GetRealTime(void) {
 float _wrp_GetFrameTime(void) {
     return cls.frameTime;
 }
+int _wrp_GetRFps(void) {
+    return cls.measure.fps[1];
+}
 qboolean _wrp_IsDemoPlayback(void) {
     return cls.demo.playback;
 }
@@ -409,7 +412,7 @@ void CL_InitGameProgs(void)
     importAPI.GetFrameTime = _wrp_GetFrameTime;
     importAPI.GetRealTime = _wrp_GetRealTime;
 
-    importAPI.GetFramesPerSecond = CL_GetFps;
+    importAPI.GetFramesPerSecond = _wrp_GetRFps;
     importAPI.GetResolutionScale = CL_GetResolutionScale;
 
     importAPI.GetServerState = _wrp_GetServerState;
