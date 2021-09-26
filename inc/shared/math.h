@@ -54,6 +54,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared/math/rectangle.h"
 
 //-----------------
+// Quaternion.
+//-----------------
+#include "shared/math/quaternion.h"
+
+//-----------------
 // TODO: These should ultimately be removed and/or replaced.
 //-----------------
 #define NUMVERTEXNORMALS    162
