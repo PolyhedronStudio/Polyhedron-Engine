@@ -387,7 +387,7 @@ is_sky_or_lava_cluster(bsp_mesh_t* wm, mface_t* surf, int cluster, int material_
 	return false;
 }
 
-static void merge_pvs_rows(bsp_t* bsp, char* src, char* dst)
+static void merge_pvs_rows(bsp_t* bsp, byte* src, byte* dst)
 {
 	for (int i = 0; i < bsp->visrowsize; i++)
 	{
@@ -404,7 +404,7 @@ static void merge_pvs_rows(bsp_t* bsp, char* src, char* dst)
 
 #define FOREACH_BIT_END  } } } }
 
-static void connect_pvs(bsp_t* bsp, int cluster_a, char* pvs_a, int cluster_b, char* pvs_b)
+static void connect_pvs(bsp_t* bsp, int cluster_a, byte* pvs_a, int cluster_b, byte* pvs_b)
 {
 	FOREACH_BIT_BEGIN(pvs_a, bsp->visrowsize, vis_cluster_a)
 		if (vis_cluster_a != cluster_a && vis_cluster_a != cluster_b)
@@ -428,12 +428,12 @@ static void make_pvs_symmetric(bsp_t* bsp)
 {
 	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++)
 	{
-		char* pvs = BSP_GetPvs(bsp, cluster);
+		byte* pvs = BSP_GetPvs(bsp, cluster);
 
 		FOREACH_BIT_BEGIN(pvs, bsp->visrowsize, vis_cluster)
 			if (vis_cluster != cluster)
 			{
-				char* vis_pvs = BSP_GetPvs(bsp, vis_cluster);
+				byte* vis_pvs = BSP_GetPvs(bsp, vis_cluster);
 				Q_SetBit(vis_pvs, cluster);
 			}
 		FOREACH_BIT_END
@@ -444,16 +444,16 @@ static void build_pvs2(bsp_t* bsp)
 {
 	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
 
-	bsp->pvs2_matrix = (char*)Z_Mallocz(matrix_size);
+	bsp->pvs2_matrix = (byte*)Z_Mallocz(matrix_size);
 
 	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++)
 	{
-		char* pvs = BSP_GetPvs(bsp, cluster);
-		char* dest_pvs = BSP_GetPvs2(bsp, cluster);
+		byte* pvs = BSP_GetPvs(bsp, cluster);
+		byte* dest_pvs = BSP_GetPvs2(bsp, cluster);
 		memcpy(dest_pvs, pvs, bsp->visrowsize);
 
 		FOREACH_BIT_BEGIN(pvs, bsp->visrowsize, vis_cluster)
-			char* pvs2 = BSP_GetPvs(bsp, vis_cluster);
+			byte* pvs2 = BSP_GetPvs(bsp, vis_cluster);
 			merge_pvs_rows(bsp, pvs2, dest_pvs);
 		FOREACH_BIT_END
 	}
@@ -559,8 +559,8 @@ collect_surfaces(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, int model_idx, int (*
 
 						if (cluster >= 0 && anti_cluster >= 0 && cluster != anti_cluster)
 						{
-							char* pvs_cluster = BSP_GetPvs(bsp, cluster);
-							char* pvs_anti_cluster = BSP_GetPvs(bsp, anti_cluster);
+							byte* pvs_cluster = BSP_GetPvs(bsp, cluster);
+							byte* pvs_anti_cluster = BSP_GetPvs(bsp, anti_cluster);
 
 							if (!Q_IsBitSet(pvs_cluster, anti_cluster) || !Q_IsBitSet(pvs_anti_cluster, cluster))
 							{
@@ -1379,7 +1379,7 @@ compute_sky_visibility(bsp_mesh_t *wm, bsp_t *bsp)
 	{
 		if (clusters_with_sky[cluster >> 3] & (1 << (cluster & 7)))
 		{
-			char* mask = BSP_GetPvs(bsp, cluster);
+			byte* mask = BSP_GetPvs(bsp, cluster);
 
 			for (int i = 0; i < bsp->visrowsize; i++)
 				wm->sky_visibility[i] |= mask[i];

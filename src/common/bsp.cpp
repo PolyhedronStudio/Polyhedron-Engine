@@ -960,7 +960,7 @@ static void BSP_BuildPvsMatrix(bsp_t *bsp)
 
 	// allocate the matrix but don't set it in the BSP structure yet: 
 	// we want BSP_CluterVis to use the old PVS data here, and not the new empty matrix
-	char* pvs_matrix = (char*)Z_Mallocz(matrix_size); // CPP: Cast
+	byte* pvs_matrix = (byte*)Z_Mallocz(matrix_size); // CPP: Cast
 	
 	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++)
 	{
@@ -970,7 +970,7 @@ static void BSP_BuildPvsMatrix(bsp_t *bsp)
 	bsp->pvs_matrix = pvs_matrix;
 }
 
-char* BSP_GetPvs(bsp_t *bsp, int cluster)
+byte* BSP_GetPvs(bsp_t *bsp, int cluster)
 {
 	if (!bsp->vis || !bsp->pvs_matrix)
 		return NULL;
@@ -981,7 +981,7 @@ char* BSP_GetPvs(bsp_t *bsp, int cluster)
 	return bsp->pvs_matrix + bsp->visrowsize * cluster;
 }
 
-char* BSP_GetPvs2(bsp_t *bsp, int cluster)
+byte* BSP_GetPvs2(bsp_t *bsp, int cluster)
 {
 	if (!bsp->vis || !bsp->pvs2_matrix)
 		return NULL;
@@ -1036,10 +1036,10 @@ static qboolean BSP_LoadPatchedPVS(bsp_t *bsp)
 		return false;
 	}
 
-	bsp->pvs_matrix = (char*)Z_Malloc(matrix_size); // CPP: Cast
+	bsp->pvs_matrix = (byte*)Z_Malloc(matrix_size); // CPP: Cast
 	memcpy(bsp->pvs_matrix, filebuf, matrix_size);
 
-	bsp->pvs2_matrix = (char*)Z_Malloc(matrix_size); // CPP: Cast
+	bsp->pvs2_matrix = (byte*)Z_Malloc(matrix_size); // CPP: Cast
 	memcpy(bsp->pvs2_matrix, filebuf + matrix_size, matrix_size);
 
 	FS_FreeFile(filebuf);
@@ -1355,7 +1355,7 @@ byte *BSP_ClusterVis(bsp_t *bsp, byte *mask, int cluster, int vis)
 	{
 		if (bsp->pvs2_matrix)
 		{
-			char* row = BSP_GetPvs2(bsp, cluster);
+            byte* row = BSP_GetPvs2(bsp, cluster);
 			memcpy(mask, row, bsp->visrowsize);
 			return mask;
 		}
@@ -1366,7 +1366,7 @@ byte *BSP_ClusterVis(bsp_t *bsp, byte *mask, int cluster, int vis)
 
 	if (vis == DVIS_PVS && bsp->pvs_matrix)
 	{
-		char* row = BSP_GetPvs(bsp, cluster);
+        byte* row = BSP_GetPvs(bsp, cluster);
 		memcpy(mask, row, bsp->visrowsize);
 		return mask;
 	}
