@@ -225,7 +225,7 @@ get_model_class(const char *name)
 		return MCLASS_REGULAR;
 }
 
-static qerror_t MOD_LoadSP2(model_t *model, const void *rawdata, size_t length)
+static qerror_t MOD_LoadSP2(model_t* model, const void* rawdata, size_t length, const char* mod_name)
 {
 	dsp2header_t header;
 	dsp2frame_t *src_frame;
@@ -428,7 +428,7 @@ qhandle_t R_RegisterModel(const char *name)
 	memcpy(model->name, normalized, namelen + 1);
 	model->registration_sequence = registration_sequence;
 
-	ret = load(model, rawdata, filelen);
+	ret = load(model, rawdata, filelen, name);
 
 	FS_FreeFile(rawdata);
 
