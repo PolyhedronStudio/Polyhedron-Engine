@@ -117,7 +117,7 @@ void ClientGameExports::UpdateClientOrigin() {
 #endif
 
     // don't interpolate blend color
-    Vec4_Copy(currentPlayerState->blend, cl->refdef.blend);
+    Vector4Copy(currentPlayerState->blend, cl->refdef.blend);
 
     // Interpolate field of view
     cl->fov_x = LerpClientFieldOfView(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);

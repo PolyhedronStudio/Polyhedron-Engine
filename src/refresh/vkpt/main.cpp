@@ -2704,9 +2704,9 @@ R_RenderFrame_RTX(refdef_t *fd)
 	ubo->prev_adapted_luminance = prev_adapted_luminance;
 
 	if (cvar_tm_blend_enable->integer)
-		Vec4_Copy(fd->blend, ubo->fs_blend_color);
+		Vector4Copy(fd->blend, ubo->fs_blend_color);
 	else
-		Vec4_Set(ubo->fs_blend_color, 0.f, 0.f, 0.f, 0.f);
+		Vector4Set(ubo->fs_blend_color, 0.f, 0.f, 0.f, 0.f);
 
 	vkpt_physical_sky_update_ubo(ubo, &sun_light, render_world);
 	vkpt_bloom_update(ubo, frame_time, ubo->medium != MEDIUM_NONE, menu_mode);
