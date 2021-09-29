@@ -52,7 +52,7 @@ static VkPipelineLayout        pipeline_layout_final_blit;
 static VkRenderPass            render_pass_stretch_pic;
 static VkPipeline              pipeline_stretch_pic;
 static VkPipeline              pipeline_final_blit;
-static VkFramebuffer           framebuffer_stretch_pic[MAX_SWAPCHAIN_IMAGES];
+static VkFramebuffer*          framebuffer_stretch_pic = NULL;
 static BufferResource_t        buf_stretch_pic_queue[MAX_FRAMES_IN_FLIGHT];
 static VkDescriptorSetLayout   desc_set_layout_sbo;
 static VkDescriptorPool        desc_pool_sbo;
@@ -314,6 +314,9 @@ vkpt_draw_destroy_pipelines()
 	for(int i = 0; i < qvk.num_swap_chain_images; i++) {
 		vkDestroyFramebuffer(qvk.device, framebuffer_stretch_pic[i], NULL);
 	}
+	free(framebuffer_stretch_pic);
+	framebuffer_stretch_pic = NULL;
+
 	return VK_SUCCESS;
 }
 
@@ -463,6 +466,7 @@ vkpt_draw_create_pipelines()
 	_VK(vkCreateGraphicsPipelines(qvk.device, VK_NULL_HANDLE, 1, &pipeline_info, NULL, &pipeline_final_blit));
 	ATTACH_LABEL_VARIABLE(pipeline_final_blit, PIPELINE);
 
+	framebuffer_stretch_pic = malloc(qvk.num_swap_chain_images * sizeof(*framebuffer_stretch_pic));
 
 	for(int i = 0; i < qvk.num_swap_chain_images; i++) {
 		VkImageView attachments[] = {
@@ -532,7 +536,7 @@ vkpt_draw_submit_stretch_pics(VkCommandBuffer cmd_buf)
 }
 
 VkResult
-vkpt_final_blit_simple(VkCommandBuffer cmd_buf)
+vkpt_final_blit_simple(VkCommandBuffer cmd_buf, VkImage image, VkExtent2D extent)
 {
 	VkImageSubresourceRange subresource_range = {
 		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -558,13 +562,13 @@ vkpt_final_blit_simple(VkCommandBuffer cmd_buf)
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
 		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		.image = qvk.images[output_img],
+		.image = image,
 		.subresourceRange = subresource_range,
 	});
 
 	VkOffset3D blit_size = {
-		.x = (int32_t)qvk.extent_taa_output.width,
-		.y = (int32_t)qvk.extent_taa_output.height,
+		.x = (int32_t)extent.width,
+		.y = (int32_t)extent.height,
 		.z = 1
 	};
 	VkOffset3D blit_size_unscaled = {
@@ -581,7 +585,7 @@ vkpt_final_blit_simple(VkCommandBuffer cmd_buf)
 	img_blit.srcOffsets[1] = blit_size;
 	img_blit.dstOffsets[1] = blit_size_unscaled;
 	vkCmdBlitImage(cmd_buf,
-		qvk.images[output_img], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 		qvk.swap_chain_images[qvk.current_swap_chain_image_index], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1, &img_blit, VK_FILTER_NEAREST);
 
@@ -599,7 +603,7 @@ vkpt_final_blit_simple(VkCommandBuffer cmd_buf)
 		.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.image = qvk.images[output_img],
+		.image = image,
 		.subresourceRange = subresource_range,
 	});
 	
