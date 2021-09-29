@@ -560,6 +560,7 @@ SET(SRC_VKPT
 	refresh/vkpt/conversion.cpp
 	refresh/vkpt/draw.cpp
 	refresh/vkpt/freecam.cpp
+	refresh/vkpt/fsr.cpp
 	refresh/vkpt/main.cpp
 	refresh/vkpt/material.cpp
 	refresh/vkpt/matrix.cpp
@@ -581,6 +582,9 @@ SET(SRC_VKPT
 	refresh/vkpt/god_rays.cpp
 )
 SET(HEADERS_VKPT
+	refresh/vkpt/fsr/ffx_a.h
+	refresh/vkpt/fsr/ffx_fsr1.h
+
 	refresh/vkpt/vkpt.h
 	refresh/vkpt/vk_util.h
 	refresh/vkpt/buddy_allocator.h
