@@ -97,6 +97,20 @@ vkpt_light_buffer_upload_staging(VkCommandBuffer cmd_buf)
 }
 
 VkResult
+vkpt_iqm_matrix_buffer_upload_staging(VkCommandBuffer cmd_buf) {
+	BufferResource_t* staging = qvk.buf_iqm_matrices_staging + qvk.current_frame_index;
+
+	assert(!staging->is_mapped);
+
+	VkBufferCopy copyRegion = {
+		.size = sizeof(IqmMatrixBuffer),
+	};
+	vkCmdCopyBuffer(cmd_buf, staging->buffer, qvk.buf_iqm_matrices.buffer, 1, &copyRegion);
+
+	return VK_SUCCESS;
+}
+
+VkResult
 vkpt_vertex_buffer_upload_bsp_mesh_to_staging(bsp_mesh_t *bsp_mesh)
 {
 	assert(bsp_mesh);
@@ -110,12 +124,14 @@ vkpt_vertex_buffer_upload_bsp_mesh_to_staging(bsp_mesh_t *bsp_mesh)
 		num_vertices = MAX_VERT_BSP;
 	}
 
-	memcpy(vbo->positions_bsp,  bsp_mesh->positions, num_vertices * sizeof(float) * 3   );
-	memcpy(vbo->tex_coords_bsp, bsp_mesh->tex_coords,num_vertices * sizeof(float) * 2   );
-    memcpy(vbo->tangents_bsp,   bsp_mesh->tangents,  num_vertices * sizeof(uint32_t) / 3);
-	memcpy(vbo->materials_bsp,  bsp_mesh->materials, num_vertices * sizeof(uint32_t) / 3);
+	memcpy(vbo->positions_bsp, bsp_mesh->positions, num_vertices * sizeof(float) * 3);
+	memcpy(vbo->tex_coords_bsp, bsp_mesh->tex_coords, num_vertices * sizeof(float) * 2);
+	memcpy(vbo->tangents_bsp, bsp_mesh->tangents, num_vertices * sizeof(uint32_t) / 3);
+	memcpy(vbo->materials_bsp, bsp_mesh->materials, num_vertices * sizeof(uint32_t) / 3);
+	memcpy(vbo->emissive_factors_bsp, bsp_mesh->emissive_factors, num_vertices * sizeof(uint32_t) / 3);
 	memcpy(vbo->clusters_bsp, bsp_mesh->clusters, num_vertices * sizeof(uint32_t) / 3);
 	memcpy(vbo->texel_density_bsp, bsp_mesh->texel_density, num_vertices * sizeof(float) / 3);
+
 
 	int num_clusters = bsp_mesh->num_clusters;
 	if (num_clusters > MAX_LIGHT_LISTS)
@@ -183,6 +199,25 @@ inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, ligh
 		max_cluster_model_lights[c] = max(max_cluster_model_lights[c], cluster_light_counts[c]);
 	}
 
+	// Count the total required list size
+
+	int required_size = bsp_mesh->cluster_light_offsets[bsp_mesh->num_clusters];
+	for (int c = 0; c < bsp_mesh->num_clusters; c++) 	{
+		required_size += max_cluster_model_lights[c];
+	}
+
+	// See if we have enough room in the interaction buffer
+
+	if (required_size > MAX_LIGHT_LIST_NODES) 	{
+		Com_WPrintf("Insufficient light interaction buffer size (%d needed). Increase MAX_LIGHT_LIST_NODES.\n", required_size);
+
+		// Copy the BSP light lists verbatim
+		memcpy(dst_lists, bsp_mesh->cluster_lights, sizeof(uint32_t) * bsp_mesh->cluster_light_offsets[bsp_mesh->num_clusters]);
+		memcpy(dst_list_offsets, bsp_mesh->cluster_light_offsets, sizeof(uint32_t) * (bsp_mesh->num_clusters + 1));
+
+		return;
+	}
+
 	// Copy the static light lists, and make room in these lists to inject the model lights
 
 	int tail = 0;
@@ -193,6 +228,9 @@ inject_model_lights(bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, ligh
 		dst_list_offsets[c] = tail;
 		memcpy(dst_lists + tail, bsp_mesh->cluster_lights + bsp_mesh->cluster_light_offsets[c], sizeof(uint32_t) * original_size);
 		tail += original_size;
+
+		assert(tail + max_cluster_model_lights[c] < MAX_LIGHT_LIST_NODES);
+
 		if (max_cluster_model_lights[c] > 0) {
 			memset(dst_lists + tail, 0xff, sizeof(uint32_t) * max_cluster_model_lights[c]);
 		}
@@ -229,13 +267,13 @@ copy_light(const light_poly_t* light, float* vblight, const float* sky_radiance)
 	if (light->style != 0 && vkpt_refdef.fd->lightstyles)
 	{
 		style_scale = vkpt_refdef.fd->lightstyles[light->style].white;
-		style_scale = max(0, min(1, style_scale));
+		style_scale = max(0.f, min(2.f, style_scale));
 
 		prev_style = vkpt_refdef.prev_lightstyles[light->style].white;
-		prev_style = max(0, min(1, prev_style));
+		prev_style = max(0.f, min(2.f, prev_style));
 	}
 
-	float mat_scale = light->material ? light->material->emissive_scale : 1.f;
+	float mat_scale = light->material ? light->material->emissive_factor : 1.f;
 
 	VectorCopy(light->positions + 0, vblight + 0);
 	VectorCopy(light->positions + 3, vblight + 4);
@@ -277,7 +315,6 @@ vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t *bsp_mesh,
 	{
 		assert(bsp_mesh->num_clusters + 1 < MAX_LIGHT_LISTS);
 		assert(bsp_mesh->num_cluster_lights < MAX_LIGHT_LIST_NODES);
-		assert(MAT_GetNumPBRMaterials() < MAX_PBR_MATERIALS);
 		assert(bsp_mesh->num_light_polys + num_model_lights < MAX_LIGHT_POLYS);
 
 		int model_light_offset = bsp_mesh->num_light_polys;
@@ -336,25 +373,28 @@ vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t *bsp_mesh,
 	}
 
 	// materials
-	int nmaterials = MAT_GetNumPBRMaterials();
-	pbr_material_t const * materials = MAT_GetPBRMaterialsTable();
+	for (int nmat = 0; nmat < MAX_PBR_MATERIALS; nmat++) 	{
+		pbr_material_t const* material = r_materials + nmat;
 
-	for (int nmat = 0; nmat < nmaterials; nmat++)
-	{
-		pbr_material_t const * material = materials + nmat;
-		uint32_t* mat_data = lbo->material_table + nmat * 4;
-		memset(mat_data, 0, sizeof(uint32_t) * 4);
+		uint32_t* mat_data = lbo->material_table + nmat * MATERIAL_UINTS;
+		memset(mat_data, 0, sizeof(uint32_t) * MATERIAL_UINTS);
 
-		if (material->image_diffuse) mat_data[0] |= (material->image_diffuse - r_images);
+		if (material->registration_sequence == 0)
+			continue;
+
+		if (material->image_base) mat_data[0] |= (material->image_base - r_images);
 		if (material->image_normals) mat_data[0] |= (material->image_normals - r_images) << 16;
 		if (material->image_emissive) mat_data[1] |= (material->image_emissive - r_images);
-		mat_data[1] |= (material->num_frames & 0x000f) << 28;
-		mat_data[1] |= (material->next_frame & 0x0fff) << 16;
+		if (material->image_mask) mat_data[1] |= (material->image_mask - r_images) << 16;
 
 		mat_data[2] = floatToHalf(material->bump_scale);
-		mat_data[2] |= floatToHalf(material->rough_override) << 16;
-		mat_data[3] = floatToHalf(material->specular_scale);
-		mat_data[3] |= floatToHalf(material->emissive_scale) << 16;
+		mat_data[2] |= floatToHalf(material->roughness_override) << 16;
+		mat_data[3] = floatToHalf(material->metalness_factor);
+		mat_data[3] |= floatToHalf(material->emissive_factor) << 16;
+		mat_data[4] |= (material->num_frames & 0xffff);
+		mat_data[4] |= (material->next_frame & 0xffff) << 16;
+		mat_data[5] = floatToHalf(material->specular_factor);
+		mat_data[5] |= floatToHalf(material->base_factor) << 16;
 	}
 
 	memcpy(lbo->cluster_debug_mask, cluster_debug_mask, MAX_LIGHT_LISTS / 8);
@@ -395,8 +435,10 @@ vkpt_vertex_buffer_upload_models()
 
 	for(int i = 0; i < MAX_MODELS; i++)
 	{
+		const model_t* model = &r_models[i];
 		model_vbo_t* vbo = model_vertex_data + i;
-		if (!r_models[i].meshes && vbo->buffer.buffer) {
+
+		if (!model->meshes && vbo->buffer.buffer) {
 			// model unloaded, destroy the VBO
 			write_model_vbo_descriptor(i, null_buffer.buffer, null_buffer.size);
 			buffer_destroy(&vbo->buffer);
@@ -405,32 +447,37 @@ vkpt_vertex_buffer_upload_models()
 			continue;
 		}
 
-		if(!r_models[i].meshes) {
+		if (!model->meshes) {
 			// model does not exist
 			continue;
 		}
 
-		if (r_models[i].registration_sequence <= vbo->registration_sequence) {
+		if (model->registration_sequence <= vbo->registration_sequence) {
 			// VBO is valid, nothing to do
 			continue;
 		}
 
 		//Com_Printf("Loading model[%d] %s\n", i, r_models[i].name);
 
-		assert(r_models[i].numframes > 0);
+		assert(model->numframes > 0);
 
 		int model_vertices = 0;
 		int model_indices = 0;
-		for (int nmesh = 0; nmesh < r_models[i].nummeshes; nmesh++)
+		for (int nmesh = 0; nmesh < model->nummeshes; nmesh++)
 		{
-			maliasmesh_t *m = r_models[i].meshes + nmesh;
-			int num_verts = r_models[i].numframes * m->numverts;
+			maliasmesh_t* m = model->meshes + nmesh;
+			int num_verts = model->numframes * m->numverts;
 
 			model_vertices += num_verts;
 			model_indices += m->numindices;
 		}
 
-		size_t vbo_size = model_vertices * sizeof(model_vertex_t) + model_indices * sizeof(uint32_t);
+		size_t vbo_size = model_indices * sizeof(uint32_t);
+		if (model->iqmData)
+			vbo_size += model_vertices * sizeof(iqm_vertex_t);
+		else
+			vbo_size += model_vertices * sizeof(model_vertex_t);
+
 		buffer_create(&vbo->buffer, vbo_size, 
 			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, 
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -442,25 +489,49 @@ vkpt_vertex_buffer_upload_models()
 		uint32_t* staging_data = (uint32_t*)buffer_map(&vbo->staging_buffer);
 		int write_ptr = 0;
 
-		for (int nmesh = 0; nmesh < r_models[i].nummeshes; nmesh++)
-		{
-			maliasmesh_t *m = r_models[i].meshes + nmesh;
+		for (int nmesh = 0; nmesh < model->nummeshes; nmesh++) {
+			maliasmesh_t* m = model->meshes + nmesh;
 
 			assert(m->numverts > 0);
 
 			m->vertex_offset = write_ptr;
 
-			int num_verts = r_models[i].numframes * m->numverts;
+			int num_verts = model->numframes * m->numverts;
 
-			for (int nvert = 0; nvert < num_verts; nvert++)
-			{
-				model_vertex_t* vtx = (model_vertex_t*)(staging_data + write_ptr) + nvert;
-				memcpy(vtx->position, m->positions + nvert, sizeof(vec3_t));
-				memcpy(vtx->normal, m->normals + nvert, sizeof(vec3_t));
-				memcpy(vtx->texcoord, m->tex_coords + nvert, sizeof(vec2_t));
+			if (model->iqmData) 			{
+				for (int nvert = 0; nvert < num_verts; nvert++) 				{
+					iqm_vertex_t* vtx = (iqm_vertex_t*)(staging_data + write_ptr) + nvert;
+					memcpy(vtx->position, m->positions + nvert, sizeof(vec3_t));
+					memcpy(vtx->normal, m->normals + nvert, sizeof(vec3_t));
+					memcpy(vtx->texcoord, m->tex_coords + nvert, sizeof(vec2_t));
+
+					if (m->tangents)
+						memcpy(vtx->tangent, m->tangents + nvert, sizeof(vec3_t));
+					else
+						VectorSet(vtx->tangent, 0.f, 0.f, 0.f);
+
+					if (m->blend_indices && m->blend_weights) 					{
+						vtx->blend_indices = m->blend_indices[nvert];
+						memcpy(vtx->blend_weights, m->blend_weights + nvert, sizeof(vec4_t));
+					}
+					else 					{
+						vtx->blend_indices = 0;
+						Vector4Set(vtx->blend_weights, 0.f, 0.f, 0.f, 0.f);
+					}
+				}
+
+				write_ptr += num_verts * (int)(sizeof(iqm_vertex_t) / sizeof(uint32_t));
 			}
+			else 			{
+				for (int nvert = 0; nvert < num_verts; nvert++) 				{
+					model_vertex_t* vtx = (model_vertex_t*)(staging_data + write_ptr) + nvert;
+					memcpy(vtx->position, m->positions + nvert, sizeof(vec3_t));
+					memcpy(vtx->normal, m->normals + nvert, sizeof(vec3_t));
+					memcpy(vtx->texcoord, m->tex_coords + nvert, sizeof(vec2_t));
+				}
 
-			write_ptr += num_verts * (sizeof(model_vertex_t) / sizeof(uint32_t));
+				write_ptr += num_verts * (int)(sizeof(model_vertex_t) / sizeof(uint32_t));
+			}
 			
 			m->idx_offset = write_ptr;
 
@@ -505,7 +576,7 @@ vkpt_vertex_buffer_upload_models()
 
 		buffer_unmap(&vbo->staging_buffer);
 
-		vbo->registration_sequence = r_models[i].registration_sequence;
+		vbo->registration_sequence = model->registration_sequence;
 		any_models_to_upload = true;
 	}
 
@@ -566,6 +637,12 @@ vkpt_vertex_buffer_create()
 		},
 		{
 			.binding = LIGHT_BUFFER_BINDING_IDX,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_ALL,
+		},
+		{
+			.binding = IQM_MATRIX_BUFFER_BINDING_IDX,
 			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			.descriptorCount = 1,
 			.stageFlags = VK_SHADER_STAGE_ALL,
@@ -637,6 +714,19 @@ vkpt_vertex_buffer_create()
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
+	buffer_create(&qvk.buf_iqm_matrices, sizeof(IqmMatrixBuffer),
+		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	for (int frame = 0; frame < MAX_FRAMES_IN_FLIGHT; frame++) 	{
+		buffer_create(qvk.buf_iqm_matrices_staging + frame, sizeof(IqmMatrixBuffer),
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	}
+
+	qvk.iqm_matrices_shadow = Z_Mallocz(sizeof(IqmMatrixBuffer));
+	qvk.iqm_matrices_prev = Z_Mallocz(sizeof(IqmMatrixBuffer));
+
 	buffer_create(&qvk.buf_tonemap, sizeof(ToneMappingBuffer),
 		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -701,6 +791,11 @@ vkpt_vertex_buffer_create()
 	output_buf_write.dstBinding = LIGHT_BUFFER_BINDING_IDX;
 	buf_info.buffer = qvk.buf_light.buffer;
 	buf_info.range = sizeof(LightBuffer);
+	vkUpdateDescriptorSets(qvk.device, 1, &output_buf_write, 0, NULL);
+
+	output_buf_write.dstBinding = IQM_MATRIX_BUFFER_BINDING_IDX;
+	buf_info.buffer = qvk.buf_iqm_matrices.buffer;
+	buf_info.range = sizeof(IqmMatrixBuffer);
 	vkUpdateDescriptorSets(qvk.device, 1, &output_buf_write, 0, NULL);
 
 	output_buf_write.dstBinding = READBACK_BUFFER_BINDING_IDX;
@@ -800,15 +895,22 @@ vkpt_vertex_buffer_destroy()
 	buffer_destroy(&qvk.buf_vertex_model_dynamic);
 
 	buffer_destroy(&qvk.buf_light);
+	buffer_destroy(&qvk.buf_iqm_matrices);
 	buffer_destroy(&qvk.buf_readback);
 	for (int frame = 0; frame < MAX_FRAMES_IN_FLIGHT; frame++)
 	{
 		buffer_destroy(qvk.buf_light_staging + frame);
+		buffer_destroy(qvk.buf_iqm_matrices_staging + frame);
 		buffer_destroy(qvk.buf_readback_staging + frame);
 	}
 
 	buffer_destroy(&qvk.buf_tonemap);
 	buffer_destroy(&qvk.buf_sun_color);
+
+	Z_Free(qvk.iqm_matrices_shadow);
+	Z_Free(qvk.iqm_matrices_prev);
+	qvk.iqm_matrices_shadow = NULL;
+	qvk.iqm_matrices_prev = NULL;
 
 	return VK_SUCCESS;
 }
@@ -951,7 +1053,8 @@ vkpt_instance_geometry(VkCommandBuffer cmd_buf, uint32_t num_instances, qboolean
 	{
 		vkCmdBindPipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_animate_materials);
 
-		int num_groups = (((vkpt_refdef.bsp_mesh_world.world_idx_count + vkpt_refdef.bsp_mesh_world.world_transparent_count) / 3) + 255) / 256;
+		int num_groups = (((vkpt_refdef.bsp_mesh_world.world_idx_count + vkpt_refdef.bsp_mesh_world.world_transparent_count
+			+ vkpt_refdef.bsp_mesh_world.world_masked_count) / 3) + 255) / 256;
 		vkCmdDispatch(cmd_buf, num_groups, 1, 1);
 	}
 
