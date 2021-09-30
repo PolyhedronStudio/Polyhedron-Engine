@@ -224,8 +224,8 @@ void Sys_Init(void)
         getcwd(baseDirectory, PATH_MAX);
     }
 
-    if (!baseDirectory) {
-	Sys_Error("Game basedir not found!\n");
+    if (!baseDirectory[0]) {
+        Sys_Error("Game basedir not found!\n");
     }
     // basedir <path>
     // allows the game to run from outside the data tree
