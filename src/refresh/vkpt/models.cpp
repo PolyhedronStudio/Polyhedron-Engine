@@ -100,7 +100,101 @@ static void export_obj_frames(model_t* model, const char* path_pattern)
 	}
 }
 
-qerror_t MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length, const char *name)
+static void extract_model_lights(model_t* model) {
+	// Count the triangles in the model that have a material with the is_light flag set
+
+	int num_lights = 0;
+
+	for (int mesh_idx = 0; mesh_idx < model->nummeshes; mesh_idx++) 	{
+		const maliasmesh_t* mesh = model->meshes + mesh_idx;
+		for (int skin_idx = 0; skin_idx < mesh->numskins; skin_idx++) 		{
+			const pbr_material_t* mat = mesh->materials[skin_idx];
+			if ((mat->flags & MATERIAL_FLAG_LIGHT) != 0 && mat->image_emissive) 			{
+				if (mesh->numskins != 1) 				{
+					Com_DPrintf("Warning: model %s mesh %d has LIGHT material(s) but more than 1 skin (%d), "
+						"which is unsupported.\n", model->name, mesh->numskins);
+					return;
+				}
+
+				num_lights += mesh->numtris;
+			}
+		}
+	}
+
+	// If there are no light triangles, there's nothing to do
+	if (num_lights == 0)
+		return;
+
+	// Validate our current implementation limitations, give warnings if they are hit
+
+	if (model->numframes > 1) 	{
+		Com_DPrintf("Warning: model %s has LIGHT material(s) but more than 1 vertex animation frame, "
+			"which is unsupported.\n", model->name);
+		return;
+	}
+
+	if (model->iqmData && model->iqmData->blend_weights) 	{
+		Com_DPrintf("Warning: model %s has LIGHT material(s) and skeletal animations, "
+			"which is unsupported.\n", model->name);
+		return;
+	}
+
+	// Actually extract the lights now
+
+	model->light_polys = Hunk_Alloc(&model->hunk, sizeof(light_poly_t) * num_lights);
+	model->num_light_polys = num_lights;
+
+	num_lights = 0;
+
+	for (int mesh_idx = 0; mesh_idx < model->nummeshes; mesh_idx++) 	{
+		const maliasmesh_t* mesh = model->meshes + mesh_idx;
+		assert(mesh->numskins == 1);
+		assert(mesh->indices);
+		assert(mesh->positions);
+
+		pbr_material_t* mat = mesh->materials[0];
+		if ((mat->flags & MATERIAL_FLAG_LIGHT) != 0 && mat->image_emissive) 		{
+			for (int tri_idx = 0; tri_idx < mesh->numtris; tri_idx++) 			{
+				light_poly_t* light = model->light_polys + num_lights;
+				num_lights++;
+
+				int i0 = mesh->indices[tri_idx * 3 + 0];
+				int i1 = mesh->indices[tri_idx * 3 + 1];
+				int i2 = mesh->indices[tri_idx * 3 + 2];
+
+				assert(i0 < mesh->numverts);
+				assert(i1 < mesh->numverts);
+				assert(i2 < mesh->numverts);
+
+				memcpy(light->positions + 0, mesh->positions + i0, sizeof(vec3_t));
+				memcpy(light->positions + 3, mesh->positions + i1, sizeof(vec3_t));
+				memcpy(light->positions + 6, mesh->positions + i2, sizeof(vec3_t));
+
+				// Cluster is assigned after model instancing and transformation
+				light->cluster = -1;
+
+				light->material = mat;
+
+				VectorCopy(mat->image_emissive->light_color, light->color);
+
+				if (!mat->image_emissive->entire_texture_emissive) 				{
+					// This extraction doesn't support partially emissive textures, so pretend the entire
+					// texture is uniformly emissive and dim the light according to the area fraction.
+					light->emissive_factor =
+						(mat->image_emissive->max_light_texcoord[0] - mat->image_emissive->min_light_texcoord[0]) *
+						(mat->image_emissive->max_light_texcoord[1] - mat->image_emissive->min_light_texcoord[1]);
+				}
+				else
+					light->emissive_factor = 1.f;
+
+				get_triangle_off_center(light->positions, light->off_center, NULL, 1.f);
+
+			}
+		}
+	}
+}
+
+qerror_t MOD_LoadMD2_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name)
 {
 	dmd2header_t    header;
 	dmd2frame_t     *src_frame;
@@ -254,36 +348,7 @@ qerror_t MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length, con
 		}
 		FS_NormalizePath(skinname, skinname);
 
-		pbr_material_t * mat = MAT_FindPBRMaterial(skinname);
-		if (!mat)
-			Com_EPrintf("error finding material '%s'\n", skinname);
-
-		image_t* image_diffuse = IMG_Find(skinname, IT_SKIN, IF_SRGB);
-		image_t* image_normals = NULL;
-		image_t* image_emissive = NULL;
-
-		if (image_diffuse != R_NOTEXTURE)
-		{
-			// attempt loading the normals texture
-			if (!Q_strlcpy(skinname, src_skin, strlen(src_skin) - 3))
-				return Q_ERR_STRING_TRUNCATED;
-
-			Q_concat(skinname, sizeof(skinname), skinname, "_n.tga", NULL);
-			FS_NormalizePath(skinname, skinname);
-			image_normals = IMG_Find(skinname, IT_SKIN, IF_NONE);
-			if (image_normals == R_NOTEXTURE) image_normals = NULL;
-
-			// attempt loading the emissive texture
-			if (!Q_strlcpy(skinname, src_skin, strlen(src_skin) - 3))
-				return Q_ERR_STRING_TRUNCATED;
-
-			Q_concat(skinname, sizeof(skinname), skinname, "_light.tga", NULL);
-			FS_NormalizePath(skinname, skinname);
-			image_emissive = IMG_Find(skinname, IT_SKIN, IF_SRGB);
-			if (image_emissive == R_NOTEXTURE) image_emissive = NULL;
-		}
-
-		MAT_RegisterPBRMaterial(mat, image_diffuse, image_normals, image_emissive);
+		pbr_material_t* mat = MAT_Find(skinname, IT_SKIN, IF_NONE);
 
 		dst_mesh->materials[i] = mat;
 
@@ -386,6 +451,8 @@ qerror_t MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length, con
 		dst_mesh->indices[i + 2] = tmp;
 	}
 
+	extract_model_lights(model);
+
 	Hunk_End(&model->hunk);
 	return Q_ERR_SUCCESS;
 
@@ -459,41 +526,12 @@ static qerror_t MOD_LoadMD3Mesh(model_t *model, maliasmesh_t *mesh,
 
 	// load all skins
 	src_skin = (dmd3skin_t *)(rawdata + header.ofs_skins);
-	for (i = 0; i < header.num_skins; i++) {
+	for (i = 0; i < header.num_skins; i++, src_skin++) {
 		if (!Q_memccpy(skinname, src_skin->name, 0, sizeof(skinname)))
 			return Q_ERR_STRING_TRUNCATED;
 		FS_NormalizePath(skinname, skinname);
 
-		pbr_material_t * mat = MAT_FindPBRMaterial(skinname);
-		if (!mat)
-			Com_EPrintf("error finding material '%s'\n", skinname);
-
-		image_t* image_diffuse = IMG_Find(skinname, IT_SKIN, IF_SRGB);
-		image_t* image_normals = NULL;
-		image_t* image_emissive = NULL;
-
-		if (image_diffuse != R_NOTEXTURE)
-		{
-			// attempt loading the normals texture
-			if (!Q_strlcpy(skinname, src_skin->name, strlen(src_skin->name) - 3))
-				return Q_ERR_STRING_TRUNCATED;
-
-			Q_concat(skinname, sizeof(skinname), skinname, "_n.tga", NULL);
-			FS_NormalizePath(skinname, skinname);
-			image_normals = IMG_Find(skinname, IT_SKIN, IF_NONE);
-			if (image_normals == R_NOTEXTURE) image_normals = NULL;
-
-			// attempt loading the emissive texture
-			if (!Q_strlcpy(skinname, src_skin->name, strlen(src_skin->name) - 3))
-				return Q_ERR_STRING_TRUNCATED;
-
-			Q_concat(skinname, sizeof(skinname), skinname, "_light.tga", NULL);
-			FS_NormalizePath(skinname, skinname);
-			image_emissive = IMG_Find(skinname, IT_SKIN, IF_SRGB);
-			if (image_emissive == R_NOTEXTURE) image_emissive = NULL;
-		}
-
-		MAT_RegisterPBRMaterial(mat, image_diffuse, image_normals, image_emissive);
+		pbr_material_t* mat = MAT_Find(skinname, IT_SKIN, IF_NONE);
 
 		mesh->materials[i] = mat;
     }
@@ -552,7 +590,7 @@ static qerror_t MOD_LoadMD3Mesh(model_t *model, maliasmesh_t *mesh,
 	return Q_ERR_SUCCESS;
 }
 
-qerror_t MOD_LoadMD3_RTX(model_t *model, const void *rawdata, size_t length, const char* name)
+qerror_t MOD_LoadMD3_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name)
 {
 	dmd3header_t    header;
 	size_t          end, offset, remaining;
@@ -623,6 +661,8 @@ qerror_t MOD_LoadMD3_RTX(model_t *model, const void *rawdata, size_t length, con
 	//if (strstr(model->name, "v_blast"))
 	//	export_obj_frames(model, "export/v_blast_%d.obj");
 
+	extract_model_lights(model);
+
 	Hunk_End(&model->hunk);
 	return Q_ERR_SUCCESS;
 
@@ -631,6 +671,68 @@ fail:
 	return ret;
 }
 #endif
+
+qerror_t MOD_LoadIQM_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name) {
+	Hunk_Begin(&model->hunk, 0x4000000);
+	model->type = model_t::MOD_ALIAS;
+
+	qerror_t res = MOD_LoadIQM_Base(model, rawdata, length, mod_name);
+
+	if (res != Q_ERR_SUCCESS) 	{
+		Hunk_Free(&model->hunk);
+		return res;
+	}
+
+	char base_path[MAX_QPATH];
+	COM_FilePath(mod_name, base_path, sizeof(base_path));
+
+	model->meshes = (maliasmesh_s*)MOD_Malloc(sizeof(maliasmesh_t) * model->iqmData->num_meshes);
+	model->nummeshes = (int)model->iqmData->num_meshes;
+	model->numframes = 1; // these are baked frames, so that the VBO uploader will only make one copy of the vertices
+
+	for (unsigned model_idx = 0; model_idx < model->iqmData->num_meshes; model_idx++) 	{
+		iqm_mesh_t* iqm_mesh = &model->iqmData->meshes[model_idx];
+		maliasmesh_t* mesh = &model->meshes[model_idx];
+
+		mesh->indices = iqm_mesh->data->indices ? (int*)iqm_mesh->data->indices + iqm_mesh->first_triangle * 3 : NULL;
+		mesh->positions = iqm_mesh->data->positions ? (vec3_t*)(iqm_mesh->data->positions + iqm_mesh->first_vertex * 3) : NULL;
+		mesh->normals = iqm_mesh->data->normals ? (vec3_t*)(iqm_mesh->data->normals + iqm_mesh->first_vertex * 3) : NULL;
+		mesh->tex_coords = iqm_mesh->data->texcoords ? (vec2_t*)(iqm_mesh->data->texcoords + iqm_mesh->first_vertex * 2) : NULL;
+		mesh->tangents = iqm_mesh->data->tangents ? (vec3_t*)(iqm_mesh->data->tangents + iqm_mesh->first_vertex * 3) : NULL;
+		mesh->blend_indices = iqm_mesh->data->blend_indices ? (uint32_t*)(iqm_mesh->data->blend_indices + iqm_mesh->first_vertex * 4) : NULL;
+		mesh->blend_weights = iqm_mesh->data->blend_weights ? (vec4_t*)(iqm_mesh->data->blend_weights + iqm_mesh->first_vertex * 4) : NULL;
+
+		mesh->numindices = (int)(iqm_mesh->num_triangles * 3);
+		mesh->numverts = (int)iqm_mesh->num_vertexes;
+		mesh->numtris = (int)iqm_mesh->num_triangles;
+
+		// convert the indices from IQM global space to mesh-local space; fix winding order.
+		for (unsigned triangle_idx = 0; triangle_idx < iqm_mesh->num_triangles; triangle_idx++) 		{
+			int tri[3];
+			tri[0] = mesh->indices[triangle_idx * 3 + 0];
+			tri[1] = mesh->indices[triangle_idx * 3 + 1];
+			tri[2] = mesh->indices[triangle_idx * 3 + 2];
+
+			mesh->indices[triangle_idx * 3 + 0] = tri[2] - (int)iqm_mesh->first_vertex;
+			mesh->indices[triangle_idx * 3 + 1] = tri[1] - (int)iqm_mesh->first_vertex;
+			mesh->indices[triangle_idx * 3 + 2] = tri[0] - (int)iqm_mesh->first_vertex;
+		}
+
+		char filename[MAX_QPATH];
+		Q_snprintf(filename, sizeof(filename), "%s/%s.pcx", base_path, iqm_mesh->material);
+		pbr_material_t* mat = MAT_Find(filename, IT_SKIN, IF_NONE);
+		assert(mat); // it's either found or created
+
+		mesh->materials[0] = mat;
+		mesh->numskins = 1; // looks like IQM only supports one skin?
+	}
+
+	extract_model_lights(model);
+
+	Hunk_End(&model->hunk);
+
+	return Q_ERR_SUCCESS;
+}
 
 void MOD_Reference_RTX(model_t *model)
 {
