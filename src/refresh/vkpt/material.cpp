@@ -337,11 +337,12 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 
 	float fvalue = 0.f; qboolean bvalue = false;
 	int ivalue = 0;
+	const char* asterisk;
 	switch (t->type) 	{
 	case ATTR_BOOL:   bvalue = atoi(value) == 0 ? false : true; break;
 	case ATTR_FLOAT:  fvalue = (float)atof(value); break;
 	case ATTR_STRING: {
-		const char* asterisk = strchr(value, '*');
+		asterisk = strchr(value, '*');
 		if (asterisk) {
 			// get the base name of the material, i.e. without the path
 			// material names have no extensions, so no need to remove that

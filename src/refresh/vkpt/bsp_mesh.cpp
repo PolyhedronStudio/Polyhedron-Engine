@@ -965,11 +965,11 @@ collect_one_light_poly(bsp_t* bsp, mface_t* surf, mtexinfo_t* texinfo, int model
 
 static qboolean
 collect_frames_emissive_info(pbr_material_t* material, qboolean* entire_texture_emissive, vec2_t min_light_texcoord, vec2_t max_light_texcoord, vec3_t light_color) {
-	*entire_texture_emissive = qfalse;
+	*entire_texture_emissive = false;
 	min_light_texcoord[0] = min_light_texcoord[1] = 1.0f;
 	max_light_texcoord[0] = max_light_texcoord[1] = 0.0f;
 
-	qboolean any_emissive_valid = qfalse;
+	qboolean any_emissive_valid = false;
 	pbr_material_t* current_material = material;
 	do 	{
 		const image_t* image = current_material->image_emissive;
@@ -981,7 +981,7 @@ collect_frames_emissive_info(pbr_material_t* material, qboolean* entire_texture_
 			// emissive light color of first frame
 			memcpy(light_color, image->light_color, sizeof(vec3_t));
 		}
-		any_emissive_valid = qtrue;
+		any_emissive_valid = true;
 
 		*entire_texture_emissive |= image->entire_texture_emissive;
 		min_light_texcoord[0] = MIN(min_light_texcoord[0], image->min_light_texcoord[0]);
@@ -1079,7 +1079,7 @@ collect_sky_and_lava_light_polys(bsp_mesh_t* wm, bsp_t* bsp) {
 		qboolean is_sky = !!(flags & SURF_SKY);
 		qboolean is_light = !!(flags & SURF_LIGHT);
 		qboolean is_nodraw = !!(flags & SURF_NODRAW);
-		qboolean is_lava = surf->texinfo->material ? MAT_IsKind(surf->texinfo->material->flags, MATERIAL_KIND_LAVA) : qfalse;
+		qboolean is_lava = surf->texinfo->material ? MAT_IsKind(surf->texinfo->material->flags, MATERIAL_KIND_LAVA) : false;
 
 		is_lava &= (surf->texinfo->material->image_emissive != NULL);
 
@@ -1737,7 +1737,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
     wm->tex_coords = (float*)Z_Malloc(MAX_VERT_BSP * 2 * sizeof(*wm->tex_coords));
     wm->materials = (uint32_t*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->materials));
     wm->clusters = (int*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->clusters));
-	wm->emissive_factors = Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->emissive_factors));
+	wm->emissive_factors = (float*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->emissive_factors));
 
 	// clear these here because `bsp_mesh_load_custom_sky` creates lights before `collect_light_polys`
 	wm->num_light_polys = 0;

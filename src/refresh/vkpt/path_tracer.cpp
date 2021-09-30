@@ -438,7 +438,7 @@ vkpt_pt_create_accel_bottom(
 		.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT,
 		.vertexData = {.deviceAddress = buffer_vertex->address + offset_vertex },
 		.vertexStride = sizeof(float) * 3,
-		.maxVertex = num_vertices - 1,
+		.maxVertex = (uint32_t)num_vertices - 1,
 		.indexType = buffer_index ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_NONE_KHR,
 		.indexData = {.deviceAddress = buffer_index ? (buffer_index->address + offset_index) : 0 },
 	};
@@ -532,7 +532,7 @@ vkpt_pt_create_accel_bottom(
 	assert(scratch_buf_ptr < SIZE_SCRATCH_BUFFER);
 
 	// build offset
-	VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = max(num_vertices, num_indices) / 3 };
+	VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = (uint32_t)max(num_vertices, num_indices) / 3 };
 	const VkAccelerationStructureBuildRangeInfoKHR* offsets = &offset;
 
 	qvkCmdBuildAccelerationStructuresKHR(cmd_buf, 1, &buildInfo, &offsets);

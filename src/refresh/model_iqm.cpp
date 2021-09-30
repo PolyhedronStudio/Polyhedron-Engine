@@ -157,6 +157,26 @@ static vec_t QuatNormalize2(const quat_t v, quat_t out) {
 
 // ReSharper disable CppClangTidyClangDiagnosticCastAlign
 
+// WID: Adding these to make this file build, without it getting too tricky.
+// TODO: Obviously get IQM to just use vec3_t bounds[2]; instead.
+void IQM_ClearBounds(float *mins, float *maxs) {
+	mins[0] = mins[1] = mins[2] = 99999;
+	maxs[0] = maxs[1] = maxs[2] = -99999;
+}
+
+void IQM_AddPointToBounds(const float* v, float* mins, float* maxs) {
+	int        i;
+	vec_t    val;
+
+	for (i = 0; i < 3; i++) {
+		val = v[i];
+		if (val < mins[i])
+			mins[i] = val;
+		if (val > maxs[i])
+			maxs[i] = val;
+	}
+}
+
 /*
 =================
 MOD_LoadIQM_Base
@@ -624,9 +644,9 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 	else if (header->num_meshes && header->num_frames == 0) 	{
 		mat = iqmData->bounds;
 
-		ClearBounds(&iqmData->bounds[0], &iqmData->bounds[3]);
+		IQM_ClearBounds(&iqmData->bounds[0], &iqmData->bounds[3]);
 		for (uint32_t vertex_idx = 0; vertex_idx < header->num_vertexes; vertex_idx++) 		{
-			AddPointToBounds(&iqmData->positions[vertex_idx * 3], &iqmData->bounds[0], &iqmData->bounds[3]);
+			IQM_AddPointToBounds(&iqmData->positions[vertex_idx * 3], &iqmData->bounds[0], &iqmData->bounds[3]);
 		}
 	}
 
