@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 // models.h -- common models manager
 //
-
+#include "shared/refresh.h"
 #include "system/hunk.h"
 #include "common/error.h"
 

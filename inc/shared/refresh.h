@@ -352,6 +352,11 @@ typedef struct model_s {
 	qboolean sprite_fxup;
 	qboolean sprite_fxft;
 	qboolean sprite_fxlt;
+
+    iqm_model_t* iqmData;
+
+    int num_light_polys;
+    light_poly_t* light_polys;
 } model_t;
 
 #endif // __SHARED_REFRESH_H__

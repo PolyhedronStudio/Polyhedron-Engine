@@ -198,7 +198,7 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 		return Q_ERR_INVALID_FORMAT;
 	}
 
-	for (uint32_t vertexarray_idx = 0; vertexarray_idx < q_countof(vertexArrayFormat); vertexarray_idx++) 	{
+	for (uint32_t vertexarray_idx = 0; vertexarray_idx < Q_COUNTOF(vertexArrayFormat); vertexarray_idx++) 	{
 		vertexArrayFormat[vertexarray_idx] = -1;
 	}
 
@@ -236,7 +236,7 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 				return Q_ERR_INVALID_FORMAT;
 			}
 
-			if (vertexarray->type < q_countof(vertexArrayFormat)) 			{
+			if (vertexarray->type < Q_COUNTOF(vertexArrayFormat)) 			{
 				vertexArrayFormat[vertexarray->type] = (int)vertexarray->format;
 			}
 
@@ -472,7 +472,7 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 		const iqmVertexArray_t* vertexarray = (const iqmVertexArray_t*)((const byte*)header + header->ofs_vertexarrays);
 		for (uint32_t vertexarray_idx = 0; vertexarray_idx < header->num_vertexarrays; vertexarray_idx++, vertexarray++) 		{
 			// skip disabled arrays
-			if (vertexarray->type < q_countof(vertexArrayFormat)
+			if (vertexarray->type < Q_COUNTOF(vertexArrayFormat)
 				&& vertexArrayFormat[vertexarray->type] == -1)
 				continue;
 

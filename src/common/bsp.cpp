@@ -1495,11 +1495,10 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
         return filelen;
     }
 
-    // N&C: BSP: Version check, currently supports ID and WID formats.
+    // N&C: BSP: Version check, currently supports ID and QBSP formats.
     // byte swap and validate the header
     header = (dheader_t *)buf;
-    if ((LittleLong(header->ident) != IDBSPHEADER) && 
-        (LittleLong(header->ident) != WIDBSPHEADER) && 
+    if (LittleLong(header->ident) != IDBSPHEADER &&
         LittleLong(header->ident) != QBSPHEADER) {
         ret = Q_ERR_UNKNOWN_FORMAT;
         goto fail2;
@@ -1513,7 +1512,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 
     // byte swap and validate all lumps
     memsize = 0;
-    for (info = bsp_lumps; info->load; info++) {
+    for (info = lumps; info->load; info++) {
         ofs = LittleLong(header->lumps[info->lump].fileofs);
         len = LittleLong(header->lumps[info->lump].filelen);
         end = ofs + len;
