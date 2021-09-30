@@ -437,13 +437,13 @@ static void write_beam_geometry(const r_entity_t* entities, int entity_num)
 		world_to_beam[14] = -DotProduct(begin, norm_dir);
 		world_to_beam[15] = 1;
 
-		Vector4Copy((world_to_beam + 12), (float *)(beam_infos));
+		Vector4Copy((world_to_beam + 12), (float*)(beam_infos));
 		// First three columns are normals, so it's fine to pack them to half floats
 		packHalf4x16(beam_infos + 4, world_to_beam);
 		packHalf4x16(beam_infos + 6, world_to_beam + 4);
 		packHalf4x16(beam_infos + 8, world_to_beam + 8);
-		*(float *)(beam_infos + 10) = beam_radius;
-		*(float *)(beam_infos + 11) = VectorLength(to_end);
+		*(float*)(beam_infos + 10) = beam_radius;
+		*(float*)(beam_infos + 11) = VectorLength(to_end);
 		beam_infos += TR_BEAM_INTERSECT_SIZE / sizeof(uint32_t);
 	}
 }
@@ -537,7 +537,7 @@ qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, in
 		VectorCopy(vertices[i0], light->positions + 0);
 		VectorCopy(vertices[i1], light->positions + 3);
 		VectorCopy(vertices[i2], light->positions + 6);
-		get_triangle_off_center(light->positions, light->off_center, NULL);
+		get_triangle_off_center(light->positions, light->off_center, NULL, 1.f);
 
 		light->cluster = BSP_PointLeaf(bsp->nodes, light->off_center)->cluster;
 		light->material = NULL;
@@ -785,7 +785,7 @@ static void upload_geometry(VkCommandBuffer command_buffer)
 
 	transparency.sprite_vertex_device_offset = transparency.particle_num * 4 * TR_POSITION_SIZE;
 
-    const size_t host_buffer_offset = transparency.host_frame_index * transparency.host_frame_size;
+	const size_t host_buffer_offset = transparency.host_frame_index * transparency.host_frame_size;
 
 	assert(transparency.current_upload_size > 0);
 	memcpy(transparency.mapped_host_buffer + host_buffer_offset, transparency.host_buffer_shadow, transparency.current_upload_size);
@@ -830,7 +830,7 @@ static void upload_geometry(VkCommandBuffer command_buffer)
 	if (vertices.size)
 		vkCmdCopyBuffer(command_buffer, transparency.host_buffer, transparency.vertex_buffer.buffer,
 			1, &vertices);
-	
+
 	if (beam_aabbs.size)
 		vkCmdCopyBuffer(command_buffer, transparency.host_buffer, transparency.beam_aabb_buffer.buffer,
 			1, &beam_aabbs);
@@ -968,48 +968,48 @@ static void create_buffer_views(VkPtTransperancy& trans)
 {
 	const VkBufferViewCreateInfo particle_color_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = trans.particle_color_buffer.buffer,
+		.buffer = transparency.particle_color_buffer.buffer,
 		.format = VK_FORMAT_R32G32B32A32_SFLOAT,
 		.range = TR_PARTICLE_MAX_NUM * TR_COLOR_SIZE
 	};
 
 	const VkBufferViewCreateInfo beam_color_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = trans.beam_color_buffer.buffer,
+		.buffer = transparency.beam_color_buffer.buffer,
 		.format = VK_FORMAT_R32G32B32A32_SFLOAT,
 		.range = TR_BEAM_MAX_NUM * TR_COLOR_SIZE
 	};
 
 	const VkBufferViewCreateInfo sprite_info_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = trans.sprite_info_buffer.buffer,
+		.buffer = transparency.sprite_info_buffer.buffer,
 		.format = VK_FORMAT_R32G32_UINT,
 		.range = TR_SPRITE_MAX_NUM * TR_SPRITE_INFO_SIZE
 	};
 
 	const VkBufferViewCreateInfo beam_intersect_view_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
-		.buffer = trans.beam_intersect_buffer.buffer,
+		.buffer = transparency.beam_intersect_buffer.buffer,
 		.format = VK_FORMAT_R32G32B32A32_UINT,
 		.range = TR_BEAM_MAX_NUM * TR_BEAM_INTERSECT_SIZE
 	};
 
 	_VK(vkCreateBufferView(qvk.device, &particle_color_view_info, NULL,
-		&trans.particle_color_buffer_view));
+		&transparency.particle_color_buffer_view));
 
 	_VK(vkCreateBufferView(qvk.device, &beam_color_view_info, NULL,
-		&trans.beam_color_buffer_view));
+		&transparency.beam_color_buffer_view));
 
 	_VK(vkCreateBufferView(qvk.device, &sprite_info_view_info, NULL,
-		&trans.sprite_info_buffer_view));
+		&transparency.sprite_info_buffer_view));
 
 	_VK(vkCreateBufferView(qvk.device, &beam_intersect_view_info, NULL,
-		&trans.beam_intersect_buffer_view));
+		&transparency.beam_intersect_buffer_view));
 }
 
 static void fill_index_buffer(VkPtTransperancy& trans)
 {
-	uint16_t* indices = (uint16_t*)trans.host_buffer_shadow;
+	uint16_t* indices = (uint16_t*)transparency.host_buffer_shadow;
 
 	for (size_t i = 0; i < TR_INDEX_MAX_NUM / 6; i++)
 	{
@@ -1024,7 +1024,7 @@ static void fill_index_buffer(VkPtTransperancy& trans)
 		quad[5] = base_vertex + 0;
 	}
 
-	memcpy(trans.mapped_host_buffer, trans.host_buffer_shadow, sizeof(uint16_t) * TR_INDEX_MAX_NUM);
+	memcpy(transparency.mapped_host_buffer, transparency.host_buffer_shadow, sizeof(uint16_t) * TR_INDEX_MAX_NUM);
 
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_transfer);
 
