@@ -443,6 +443,7 @@ SET(HEADERS_COMMON
 SET(SRC_REFRESH
 	refresh/images.cpp
 	refresh/models.cpp
+	refresh/model_iqm.cpp
 	refresh/stb/stb.cpp
 )
 
