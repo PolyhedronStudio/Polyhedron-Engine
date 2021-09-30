@@ -601,10 +601,10 @@ out:;
 
 	vkGetSwapchainImagesKHR(qvk.device, qvk.swap_chain, &qvk.num_swap_chain_images, NULL);
 	assert(qvk.num_swap_chain_images);
-	qvk.swap_chain_images = malloc(qvk.num_swap_chain_images * sizeof(*qvk.swap_chain_images));
+	qvk.swap_chain_images = (VkImage*)malloc(qvk.num_swap_chain_images * sizeof(*qvk.swap_chain_images));
 	vkGetSwapchainImagesKHR(qvk.device, qvk.swap_chain, &qvk.num_swap_chain_images, qvk.swap_chain_images);
 
-	qvk.swap_chain_image_views = malloc(qvk.num_swap_chain_images * sizeof(*qvk.swap_chain_image_views));
+	qvk.swap_chain_image_views = (VkImageView*)malloc(qvk.num_swap_chain_images * sizeof(*qvk.swap_chain_image_views));
 	for(int i = 0; i < qvk.num_swap_chain_images; i++) {
 		VkImageViewCreateInfo img_create_info = {
 			.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -1116,7 +1116,7 @@ init_vulkan()
 	if (qvk.queue_idx_transfer != qvk.queue_idx_graphics) {
 		VkDeviceQueueCreateInfo q = {
 			.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-			.queueFamilyIndex = qvk.queue_idx_transfer,
+			.queueFamilyIndex = (uint32_t)qvk.queue_idx_transfer,
 			.queueCount = 1,
 			.pQueuePriorities = &queue_priorities,
 		};
@@ -1148,14 +1148,14 @@ init_vulkan()
 
 	VkPhysicalDeviceVulkan12Features device_features_vk12 = {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
-		.descriptorIndexing = VK_TRUE,
 		.shaderFloat16 = qvk.supports_fp16,
+		.descriptorIndexing = VK_TRUE,
 		.shaderSampledImageArrayNonUniformIndexing = VK_TRUE,
 		.shaderStorageBufferArrayNonUniformIndexing = VK_TRUE,
 		.runtimeDescriptorArray = VK_TRUE,
 		.samplerFilterMinmax = VK_TRUE,
 		.bufferDeviceAddress = VK_TRUE,
-		.bufferDeviceAddressMultiDevice = qvk.device_count > 1 ? VK_TRUE : VK_FALSE,
+		.bufferDeviceAddressMultiDevice = (VkBool32)(qvk.device_count > 1 ? VK_TRUE : VK_FALSE),
 	};
 	VkPhysicalDeviceFeatures2 device_features = {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR,
@@ -1266,7 +1266,6 @@ init_vulkan()
 	}
 
 	vkGetDeviceQueue(qvk.device, qvk.queue_idx_graphics, 0, &qvk.queue_graphics);
-	vkGetDeviceQueue(qvk.device, qvk.queue_idx_compute,  0, &qvk.queue_compute);
 	vkGetDeviceQueue(qvk.device, qvk.queue_idx_transfer, 0, &qvk.queue_transfer);
 
 #define VK_EXTENSION_DO(a) \
@@ -1356,7 +1355,7 @@ vkpt_load_shader_modules()
 #define IS_RT_SHADER false
 	LIST_SHADER_MODULES;
 #undef IS_RT_SHADER
-#define IS_RT_SHADER qtrue
+#define IS_RT_SHADER true
 	LIST_RT_RGEN_SHADER_MODULES
 	if (!qvk.use_ray_query) 	{
 		LIST_RT_PIPELINE_SHADER_MODULES
@@ -1925,7 +1924,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 
 			if (model->num_light_polys > 0) 			{
 				float transform[16];
-				const qboolean is_viewer_weapon = (entity->flags & RF_WEAPONMODEL) != 0;
+				const qboolean is_viewer_weapon = (entity->flags & RenderEffects::WeaponModel) != 0;
 				create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
 
 				instance_model_lights(model->num_light_polys, model->light_polys, transform);
@@ -2070,7 +2069,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 		memcpy(qvk.iqm_matrices_prev, qvk.iqm_matrices_shadow, iqm_matrix_count[entity_frame_num] * 12 * sizeof(float));
 
 		// Upload the current matrices to the staging buffer
-		IqmMatrixBuffer* iqm_matrix_staging = buffer_map(&qvk.buf_iqm_matrices_staging[qvk.current_frame_index]);
+		IqmMatrixBuffer* iqm_matrix_staging = (IqmMatrixBuffer*)buffer_map(&qvk.buf_iqm_matrices_staging[qvk.current_frame_index]);
 
 		int total_matrix_count = (iqm_matrix_count[entity_frame_num] + iqm_matrix_count[!entity_frame_num]);
 		memcpy(iqm_matrix_staging, qvk.iqm_matrices_shadow, total_matrix_count * 12 * sizeof(float));
@@ -3433,6 +3432,10 @@ R_Init_RTX(qboolean total)
 	//  pipeline - prefer KHR_ray_tracing_pipeline
 	cvar_ray_tracing_api = Cvar_Get("ray_tracing_api", "auto", CVAR_REFRESH | CVAR_ARCHIVE);
 	cvar_ray_tracing_api->generator = &ray_tracing_api_g;
+
+	// When nonzero, the Vulkan validation layer is requested
+	cvar_vk_validation = Cvar_Get("vk_validation", "0", CVAR_REFRESH | CVAR_ARCHIVE);
+
 
 	InitialiseSkyCVars();
 

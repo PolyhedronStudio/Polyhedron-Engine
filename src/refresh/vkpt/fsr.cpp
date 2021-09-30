@@ -198,24 +198,43 @@ void vkpt_fsr_update_ubo(QVKUniformBuffer_t* ubo) {
 	FsrRcasCon(&ubo->rcas_const0[0], cvar_flt_fsr_sharpness->value);
 }
 
-#define BARRIER_COMPUTE(cmd_buf, img) \
-	do { \
-		VkImageSubresourceRange subresource_range = { \
-			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
-			.baseMipLevel   = 0, \
-			.levelCount     = 1, \
-			.baseArrayLayer = 0, \
-			.layerCount     = 1 \
-		}; \
-		IMAGE_BARRIER(cmd_buf, \
-				.image            = img, \
-				.subresourceRange = subresource_range, \
-				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
-				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
-				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
-		); \
-	} while(0)
+//#define BARRIER_COMPUTE(cmd_buf, img) \
+//	do { \
+//		VkImageSubresourceRange subresource_range = { \
+//			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT, \
+//			.baseMipLevel   = 0, \
+//			.levelCount     = 1, \
+//			.baseArrayLayer = 0, \
+//			.layerCount     = 1 \
+//		}; \
+//		IMAGE_BARRIER(cmd_buf, \
+//				.image            = img, \
+//				.subresourceRange = subresource_range, \
+//				.srcAccessMask    = VK_ACCESS_SHADER_WRITE_BIT, \
+//				.dstAccessMask    = VK_ACCESS_SHADER_READ_BIT, \
+//				.oldLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+//				.newLayout        = VK_IMAGE_LAYOUT_GENERAL, \
+//		); \
+//	} while(0)
+
+static inline void BARRIER_COMPUTE(VkCommandBuffer& commandBuffer, VkImage& image) {
+	VkImageSubresourceRange subresource_range = {
+		.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+		.baseMipLevel   = 0,
+		.levelCount     = 1,
+		.baseArrayLayer = 0,
+		.layerCount     = 1
+	};
+	IMAGE_BARRIER(commandBuffer, {
+		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.image = image,
+		.subresourceRange = subresource_range,
+		}
+	);
+}
 
 static void vkpt_fsr_easu(VkCommandBuffer cmd_buf) {
 	VkDescriptorSet desc_sets[] = {

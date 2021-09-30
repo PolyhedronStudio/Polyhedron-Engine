@@ -299,7 +299,7 @@ copy_light(const light_poly_t* light, float* vblight, const float* sky_radiance)
 }
 
 extern vkpt_refdef_t vkpt_refdef;
-extern char cluster_debug_mask[VIS_MAX_BYTES];
+extern byte cluster_debug_mask[VIS_MAX_BYTES];
 
 VkResult
 vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t *bsp_mesh, bsp_t* bsp, int num_model_lights, light_poly_t* transformed_model_lights, const float* sky_radiance)

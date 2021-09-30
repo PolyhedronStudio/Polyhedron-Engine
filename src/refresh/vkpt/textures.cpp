@@ -1215,10 +1215,10 @@ vkpt_textures_initialize()
 		.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		.anisotropyEnable = VK_TRUE,
 		.maxAnisotropy = 16,
-		.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
-		.unnormalizedCoordinates = VK_FALSE,
 		.minLod = 0.0f,
 		.maxLod = 128.0f,
+		.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+		.unnormalizedCoordinates = VK_FALSE,
 	};
 	_VK(vkCreateSampler(qvk.device, &sampler_nearest_mipmap_aniso_info, NULL, &qvk.tex_sampler_nearest_mipmap_aniso));
 	ATTACH_LABEL_VARIABLE(qvk.tex_sampler_nearest_mipmap_aniso, SAMPLER);

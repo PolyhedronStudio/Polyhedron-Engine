@@ -231,7 +231,7 @@ vkpt_pt_init()
 
 	/* create pipeline */
 	VkPushConstantRange push_constant_range = {
-		.stageFlags		= qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_RAYGEN_BIT_KHR,
+		.stageFlags		= (VkShaderStageFlags)(qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_RAYGEN_BIT_KHR),
 		.offset			= 0,
 		.size			= sizeof(pt_push_constants_t),
 	};
@@ -653,7 +653,7 @@ vkpt_pt_create_accel_bottom_aabb(
 	assert(scratch_buf_ptr < SIZE_SCRATCH_BUFFER);
 
 	// build offset
-	VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = num_aabbs };
+	VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = (uint32_t)num_aabbs };
 	const VkAccelerationStructureBuildRangeInfoKHR* offsets = &offset;
 
 	qvkCmdBuildAccelerationStructuresKHR(cmd_buf, 1, &buildInfo, &offsets);

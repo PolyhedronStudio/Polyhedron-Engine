@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern cvar_t* cvar_pt_surface_lights_fake_emissive_algo;
 extern cvar_t* cvar_pt_surface_lights_threshold;
 
-extern void CL_PrepRefresh();
+extern void CL_PrepareMedia();
 
 pbr_material_t r_materials[MAX_PBR_MATERIALS];
 static pbr_material_t r_global_materials[MAX_PBR_MATERIALS];
@@ -1008,7 +1008,7 @@ static void material_command(void) {
 		}
 	}
 	if ((reload_flags & RELOAD_MAP) != 0)
-		CL_PrepRefresh();
+		CL_PrepareMedia();
 }
 
 static void material_completer(genctx_t* ctx, int argnum) {
