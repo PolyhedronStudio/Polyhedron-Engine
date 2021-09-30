@@ -141,7 +141,7 @@ static void extract_model_lights(model_t* model) {
 
 	// Actually extract the lights now
 
-	model->light_polys = Hunk_Alloc(&model->hunk, sizeof(light_poly_t) * num_lights);
+	model->light_polys = (light_poly_t*)Hunk_Alloc(&model->hunk, sizeof(light_poly_t) * num_lights);
 	model->num_light_polys = num_lights;
 
 	num_lights = 0;

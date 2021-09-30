@@ -140,22 +140,21 @@ vkpt_fsr_create_pipelines() {
 
 	enum QVK_SHADER_MODULES qvk_mod_easu = qvk.supports_fp16 ? QVK_MOD_FSR_EASU_FP16_COMP : QVK_MOD_FSR_EASU_FP32_COMP;
 	enum QVK_SHADER_MODULES qvk_mod_rcas = qvk.supports_fp16 ? QVK_MOD_FSR_RCAS_FP16_COMP : QVK_MOD_FSR_RCAS_FP32_COMP;
-	VkComputePipelineCreateInfo pipeline_info[FSR_NUM_PIPELINES] = {
-		[FSR_EASU] = {
+	VkComputePipelineCreateInfo pipeline_info[FSR_NUM_PIPELINES];// = {
+	pipeline_info[FSR_EASU] = {
 			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
 			.stage = SHADER_STAGE(qvk_mod_easu, VK_SHADER_STAGE_COMPUTE_BIT),
 			.layout = pipeline_layout_fsr,
-		},
-		[FSR_RCAS_AFTER_EASU] = {
+	};
+	pipeline_info[FSR_RCAS_AFTER_EASU] = {
 			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
 			.stage = SHADER_STAGE_SPEC(qvk_mod_rcas, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[0]),
 			.layout = pipeline_layout_fsr,
-		},
-		[FSR_RCAS_AFTER_TAAU] = {
+	};
+	pipeline_info[FSR_RCAS_AFTER_TAAU] = {
 			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
 			.stage = SHADER_STAGE_SPEC(qvk_mod_rcas, VK_SHADER_STAGE_COMPUTE_BIT, &specInfo[1]),
 			.layout = pipeline_layout_fsr,
-		},
 	};
 
 	_VK(vkCreateComputePipelines(qvk.device, 0, LENGTH(pipeline_info), pipeline_info, 0, pipeline_fsr));
@@ -263,6 +262,7 @@ static void vkpt_fsr_rcas(VkCommandBuffer cmd_buf) {
 		(dispatch_size.width + 15) / 16,
 		(dispatch_size.height + 15) / 16,
 		1);
+
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_FSR_RCAS_OUTPUT]);
 
 	END_PERF_MARKER(cmd_buf, PROFILER_FSR_RCAS);

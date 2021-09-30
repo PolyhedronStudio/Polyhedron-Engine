@@ -724,8 +724,8 @@ vkpt_vertex_buffer_create()
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 	}
 
-	qvk.iqm_matrices_shadow = Z_Mallocz(sizeof(IqmMatrixBuffer));
-	qvk.iqm_matrices_prev = Z_Mallocz(sizeof(IqmMatrixBuffer));
+	qvk.iqm_matrices_shadow = (float*)Z_Mallocz(sizeof(IqmMatrixBuffer));
+	qvk.iqm_matrices_prev = (float*)Z_Mallocz(sizeof(IqmMatrixBuffer));
 
 	buffer_create(&qvk.buf_tonemap, sizeof(ToneMappingBuffer),
 		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,

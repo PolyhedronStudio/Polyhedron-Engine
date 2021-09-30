@@ -114,9 +114,11 @@ create_poly(
 	float sc[2] = { 1.f, 1.f };
 	if (texinfo->material)
 	{
-		image_t* image_diffuse = texinfo->material->image_diffuse;
-		sc[0] = 1.0f / image_diffuse->width;
-		sc[1] = 1.0f / image_diffuse->height;
+		image_t* image_diffuse = texinfo->material->image_base;
+		if (image_diffuse && image_diffuse->width && image_diffuse->height) {
+			sc[0] = 1.0f / (float)image_diffuse->width;
+			sc[1] = 1.0f / (float)image_diffuse->height;
+		}
 	}
 
 	float pos_center[3] = { 0.f, 0.f, 0.f };
@@ -1011,7 +1013,7 @@ collect_light_polys(bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int* num_lights, 
 			continue;
 
 		// Check if any animation frame is a light material
-		qboolean any_light_frame = qfalse;
+		qboolean any_light_frame = false;
 		{
 			pbr_material_t* current_material = texinfo->material;
 			do 			{
