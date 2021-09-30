@@ -625,6 +625,10 @@ set(SRC_SHADERS
 	refresh/vkpt/shader/stretch_pic.vert
 	refresh/vkpt/shader/final_blit_lanczos.frag
 	refresh/vkpt/shader/final_blit.vert
+	refresh/vkpt/shader/fsr_easu_fp16.comp
+	refresh/vkpt/shader/fsr_easu_fp32.comp
+	refresh/vkpt/shader/fsr_rcas_fp16.comp
+	refresh/vkpt/shader/fsr_rcas_fp32.comp
 )
 
 set(SRC_RT_SHADERS
@@ -633,6 +637,7 @@ set(SRC_RT_SHADERS
 	refresh/vkpt/shader/indirect_lighting.rgen
 	refresh/vkpt/shader/path_tracer.rchit
 	refresh/vkpt/shader/path_tracer.rmiss
+	refresh/vkpt/shader/path_tracer_masked.rahit
 	refresh/vkpt/shader/path_tracer_particle.rahit
 	refresh/vkpt/shader/path_tracer_sprite.rahit
 	refresh/vkpt/shader/path_tracer_beam.rahit
@@ -644,27 +649,28 @@ set(SRC_RT_SHADERS
 
 # Check for a shader compiler.
 if (CONFIG_VKPT_RENDERER)
-	include(../cmake/compileShaders.cmake)
+IF(IS_64_BIT)
+    include(../cmake/compileShaders.cmake)
 
-	foreach(s ${SRC_RT_SHADERS})
-		get_filename_component(shader_name ${s} NAME)
-		get_filename_component(shader_ext ${s} EXT)
-		compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.nv" DEFINES "-DNV_RAY_TRACING")
-		compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.khr" DEFINES "-DKHR_RAY_TRACING")
-		if (shader_ext STREQUAL ".rgen")
-			compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.rq" DEFINES "-DKHR_RAY_QUERY -DCOMPSTAGE" STAGE "comp")
-		endif()
-	endforeach()
+    foreach(s ${SRC_RT_SHADERS})
+        get_filename_component(shader_name ${s} NAME)
+        get_filename_component(shader_ext ${s} EXT)
+        compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.pipeline")
+        if (shader_ext STREQUAL ".rgen")
+            compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.query" DEFINES "-DKHR_RAY_QUERY" STAGE "comp")
+        endif()
+    endforeach()
 
-	foreach(s ${SRC_SHADERS})
-		compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode)
-	endforeach()
+    foreach(s ${SRC_SHADERS})
+        compile_shader(SOURCE_FILE ${s} INCLUDES "-I${CMAKE_CURRENT_SOURCE_DIR}/refresh/vkpt/fsr" OUTPUT_FILE_LIST shader_bytecode)
+    endforeach()
 
-	add_custom_target(shaders DEPENDS ${shader_bytecode})
+    add_custom_target(shaders DEPENDS ${shader_bytecode})
 
-	if(TARGET glslangValidator)
-		add_dependencies(shaders glslangValidator)
-	endif()
+    if(TARGET glslangValidator)
+        add_dependencies(shaders glslangValidator)
+    endif()
+ENDIF()
 endif()
 # Embed version number
 ADD_DEFINITIONS(-DVERSION_MAJOR=${NAC_VERSION_MAJOR})

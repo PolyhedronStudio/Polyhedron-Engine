@@ -3418,6 +3418,7 @@ R_Init_RTX(qboolean total)
 	cvar_tm_blend_enable = Cvar_Get("tm_blend_enable", "1", CVAR_ARCHIVE);
 
 	drs_init();
+	vkpt_fsr_init_cvars();
 
 	// Minimum NVIDIA driver version - this is a cvar in case something changes in the future,
 	// and the current test no longer works.

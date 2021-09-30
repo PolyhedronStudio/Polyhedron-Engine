@@ -61,10 +61,10 @@ typedef enum {
 	PIPELINE_PRIMARY_RAYS,
 	PIPELINE_REFLECT_REFRACT_1,
 	PIPELINE_REFLECT_REFRACT_2,
-    PIPELINE_DIRECT_LIGHTING,
-    PIPELINE_DIRECT_LIGHTING_CAUSTICS,
-    PIPELINE_INDIRECT_LIGHTING_FIRST,
-    PIPELINE_INDIRECT_LIGHTING_SECOND,
+	PIPELINE_DIRECT_LIGHTING,
+	PIPELINE_DIRECT_LIGHTING_CAUSTICS,
+	PIPELINE_INDIRECT_LIGHTING_FIRST,
+	PIPELINE_INDIRECT_LIGHTING_SECOND,
 
 	PIPELINE_COUNT
 } pipeline_index_t;
@@ -988,15 +988,15 @@ static void setup_rt_pipeline(VkCommandBuffer cmd_buf, VkPipelineBindPoint bind_
 static void
 dispatch_rays(VkCommandBuffer cmd_buf, pipeline_index_t pipeline_index, pt_push_constants_t push, uint32_t width, uint32_t height, uint32_t depth)
 {
-	if (qvk.use_ray_query) {
+	if (qvk.use_ray_query) 	{
 		setup_rt_pipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_index);
 
 		vkCmdPushConstants(cmd_buf, rt_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(push), &push);
 
 		vkCmdDispatch(cmd_buf, (width + 7) / 8, (height + 7) / 8, depth);
-	} else {
+	}
+	else 	{
 		setup_rt_pipeline(cmd_buf, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipeline_index);
-
 
 		vkCmdPushConstants(cmd_buf, rt_pipeline_layout, VK_SHADER_STAGE_RAYGEN_BIT_KHR, 0, sizeof(push), &push);
 
@@ -1268,9 +1268,7 @@ vkpt_pt_create_pipelines()
 		qboolean needs_transparency = needs_beams || index == PIPELINE_INDIRECT_LIGHTING_FIRST;
 		unsigned int num_shader_stages = needs_beams ? LENGTH(shader_stages) : (needs_transparency ? num_transparent_no_beam_shader_stages : num_base_shader_stages);
 
-
-		switch (index)
-		{
+		switch (index) {
 		case PIPELINE_PRIMARY_RAYS:
 			shader_stages[0].module = qvk.shader_modules[QVK_MOD_PRIMARY_RAYS_RGEN];
 			shader_stages[0].pSpecializationInfo = NULL;

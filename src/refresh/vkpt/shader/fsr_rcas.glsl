@@ -34,8 +34,8 @@ layout(constant_id = 0) const uint spec_input_tex = 0;
 #define A_GLSL 1
 
 // Those headers contain the bulk of the implementation
-#include "ffx_a.h"
-#include "ffx_fsr1.h"
+#include "../fsr/ffx_a.h"
+#include "../fsr/ffx_fsr1.h"
 
 layout(local_size_x=64) in;
 
