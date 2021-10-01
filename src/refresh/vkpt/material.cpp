@@ -805,6 +805,8 @@ pbr_material_t* MAT_Find(const char* name, imagetype_t type, imageflags_t flags)
 	if (mat->image_emissive && !mat->image_emissive->processing_complete)
 		vkpt_extract_emissive_texture_info(mat->image_emissive);
 
+
+
 	mat->image_type = type;
 	mat->image_flags = (imageflags_t)(mat->image_flags | flags);
 

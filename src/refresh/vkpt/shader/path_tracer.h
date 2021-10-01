@@ -19,35 +19,35 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /*
 // ========================================================================== //
-   This file contains declarations used by all path tracer shaders, including
+   This file contains declarations used by all path tracer shaders, including 
    rgen and all the hit shaders.
 
 General notes about the Q2RTX path tracer.
 
 The path tracer is separated into 4 stages for performance reasons:
 
-  1. `primary_rays.rgen` - responsible for shooting primary rays from the
+  1. `primary_rays.rgen` - responsible for shooting primary rays from the 
      camera. It can work with different projections, see `projection.glsl` for
-     more information. The primary rays stage will find the primary visible
-     surface or test the visibility of a gradient sample. For the visible
-     surface, it will compute motion vectors and texture gradients.
-     This stage will also collect transparent objects such as sprites and
-     particles between the camera and the primary surface, and store them in
+     more information. The primary rays stage will find the primary visible 
+     surface or test the visibility of a gradient sample. For the visible 
+     surface, it will compute motion vectors and texture gradients. 
+     This stage will also collect transparent objects such as sprites and 
+     particles between the camera and the primary surface, and store them in 
      the transparency channel. Surface information is stored as a visibility
      buffer, which is enough to reconstruct the position and material parameters
      of the surface in a later shader stage.
 
-     The primary rays stage can potentially be replaced with a rasterization
+     The primary rays stage can potentially be replaced with a rasterization 
      pass, but that pass would have to process checkerboarding and per-pixel
-     offsets for temporal AA using programmable sample positions. Also, a
-     rasterization pass will not be able to handle custom projections like
+     offsets for temporal AA using programmable sample positions. Also, a 
+     rasterization pass will not be able to handle custom projections like 
      the cylindrical projection.
 
-  2. `reflect_refract.rgen` - shoots a single reflection or refraction ray
-     per pixel if the G-buffer surface is a special material like water, glass,
+  2. `reflect_refract.rgen` - shoots a single reflection or refraction ray 
+     per pixel if the G-buffer surface is a special material like water, glass, 
      mirror, or a security camera. The surface found with this ray replaces the
-     surface that was in the G-buffer originally. This shaded is executed a
-     number of times to support recursive reflections, and that number is
+     surface that was in the G-buffer originally. This shaded is executed a 
+     number of times to support recursive reflections, and that number is 
      specified with the `pt_reflect_refract` cvar.
 
      To support surfaces that need more than just a reflection, the frame is
@@ -57,59 +57,59 @@ The path tracer is separated into 4 stages for performance reasons:
      information about the checkerboard rendering approach, see the comments
      in `checkerboard_interleave.comp`.
 
-     Between stages (1) and (2), and also between the first and second
-     iterations of stage (2), the volumetric lighting tracing shader is
-     executed, `god_rays.comp`. That shader accumulates the inscatter through
+     Between stages (1) and (2), and also between the first and second 
+     iterations of stage (2), the volumetric lighting tracing shader is 
+     executed, `god_rays.comp`. That shader accumulates the inscatter through 
      the media (air, glass or water) along the primary or reflection ray
      and accumulates that inscatter.
 
-  3. `direct_lighting.rgen` - computes direct lighting from local polygonal and
+  3. `direct_lighting.rgen` - computes direct lighting from local polygonal and 
      sphere lights and sun light for the surface stored in the G-buffer.
 
   4. `indirect_lighting.rgen` - takes the opaque surface from the G-buffer,
      as produced by stages (1-2) or previous iteration of stage (4). From that
      surface, it traces a single bounce ray - either diffuse or specular,
-     depending on whether it's the first or second bounce (second bounce
+     depending on whether it's the first or second bounce (second bounce 
      doesn't do specular) and depending on material roughness and incident
      ray direction. For the surface hit by the bounce ray, this stage will
-     compute direct lighting in the same way as stage (3) does, including
-     local lights and sun light.
+     compute direct lighting in the same way as stage (3) does, including 
+     local lights and sun light. 
 
      Stage (4) can be invoked multiple times, currently that number is limited
-     to 2. First invocation computes the first lighting bounce and replaces
+     to 2. First invocation computes the first lighting bounce and replaces 
      the surface parameters in the G-buffer with the surface hit by the bounce
      ray. Second invocation computes the second lighting bounce.
 
-     Second bounce does not include local lights because they are very
-     expensive, yet their contribution from the second bounce is barely
+     Second bounce does not include local lights because they are very 
+     expensive, yet their contribution from the second bounce is barely 
      noticeable, if at all.
 
 
 Also note that "local lights" in this path tracer includes skybox triangles in
-some cases. Generally, if there is an area with a relatively small opening
+some cases. Generally, if there is an area with a relatively small opening 
 that exposes the sky, that opening will be marked as an analytic local light.
 Quake 2 geometry includes these skyboxes that are often placed right where
 we would need a portal light. But in many cases, they are also big and complex
 meshes that enclose large outdoor areas, and we don't want to create analytic
 light from those. So specific places in the game where portal lights make sense
 are marked in the "sky_clusters.txt" file in the game directory. Same conversion
-is applied for lava geometry in many places in the game, and is guided by
+is applied for lava geometry in many places in the game, and is guided by 
 the same file.
 
 Converting skyboxes to local lights provides two benefits:
 
-  - Reducing noise that comes from small openings. For example, if there is a
+  - Reducing noise that comes from small openings. For example, if there is a 
     room with a window, and that window is visible as a 0.3 steradian opening
-    from a wall on the other side (which corresponds to a roughly 36 degree
+    from a wall on the other side (which corresponds to a roughly 36 degree 
     cone), that window covers only 5% of the hemisphere above the surface,
-    so the probability of a diffuse bounce ray of hitting that window is also
-    about 5%. If we place a portal light, and there are no other lights in the
+    so the probability of a diffuse bounce ray of hitting that window is also 
+    about 5%. If we place a portal light, and there are no other lights in the 
     room, that probability becomes 100%.
 
   - Adding a free bounce of sky light. Without portal lights, the first bounce
     stage will compute direct lighting from the sky, and the second bounce
     stage will compute bounce lighting from the sky. With portal lights, the
-    direct lighting stage will compute direct sky lighting, and the first
+    direct lighting stage will compute direct sky lighting, and the first 
     bounce stage will compute bounce lighting. For this reason, you might
     notice that some areas lose sky lighting when you disable all bounce passes,
     and some do not.
@@ -127,9 +127,9 @@ Converting skyboxes to local lights provides two benefits:
 #define rt_LaunchID gl_LaunchIDEXT
 #endif
 
-#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_ray_tracing             : require
 #extension GL_ARB_separate_shader_objects : enable
-#extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_EXT_nonuniform_qualifier    : enable
 
 #define gl_RayFlagsSkipProceduralPrimitives 0x200 // not defined in GLSL
 
@@ -141,28 +141,28 @@ Converting skyboxes to local lights provides two benefits:
 #include "global_ubo.h"
 
 
-layout(push_constant) uniform push_constant_block {
-    int gpu_index;
+layout (push_constant) uniform push_constant_block {
+	int gpu_index;
     int bounce_index;
 } push_constants;
 
 struct RayPayload {
-    vec2 barycentric;
-    uint instance_prim;
-    float hit_distance;
-    uvec2 close_transparencies; // half4x16
-    uvec2 farthest_transparency; // half4x16
-    float closest_max_transparent_distance;
-    float farthest_transparent_distance;
-    float farthest_transparent_depth;
+	vec2 barycentric;
+	uint instance_prim;
+	float hit_distance;
+	uvec2 close_transparencies; // half4x16
+	uvec2 farthest_transparency; // half4x16
+	float closest_max_transparent_distance;
+	float farthest_transparent_distance;
+	float farthest_transparent_depth;
 };
 
 struct RayPayloadShadow {
-    int missed;
+	int missed;
 };
 
 struct HitAttributeBeam {
-    uint fade_and_thickness; // half2x16
+	uint fade_and_thickness; // half2x16
 };
 
 #endif // PATH_TRACER_H_

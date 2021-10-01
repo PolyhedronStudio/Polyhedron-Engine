@@ -29,19 +29,23 @@ uniform utextureBuffer sprite_texure_buffer;
 layout(set = 0, binding = 4)
 uniform utextureBuffer beam_info_buffer;
 
-void pt_logic_rchit(inout RayPayload ray_payload, int primitiveID, uint instanceCustomIndex, float hitT, vec2 bary) {
-	ray_payload.barycentric = bary.xy;
-	ray_payload.instance_prim = primitiveID + instanceCustomIndex & AS_INSTANCE_MASK_OFFSET;
-	if ((instanceCustomIndex & AS_INSTANCE_FLAG_DYNAMIC) != 0) 	{
+void pt_logic_rchit(inout RayPayload ray_payload, int primitiveID, uint instanceCustomIndex, float hitT, vec2 bary)
+{
+	ray_payload.barycentric    = bary.xy;
+	ray_payload.instance_prim  = primitiveID + instanceCustomIndex & AS_INSTANCE_MASK_OFFSET;
+	if((instanceCustomIndex & AS_INSTANCE_FLAG_DYNAMIC) != 0)
+	{
 		ray_payload.instance_prim |= INSTANCE_DYNAMIC_FLAG;
 	}
-	if ((instanceCustomIndex & AS_INSTANCE_FLAG_SKY) != 0) 	{
+	if((instanceCustomIndex & AS_INSTANCE_FLAG_SKY) != 0)
+	{
 		ray_payload.instance_prim |= INSTANCE_SKY_FLAG;
 	}
-	ray_payload.hit_distance = hitT;
+	ray_payload.hit_distance   = hitT;
 }
 
-bool pt_logic_masked(int primitiveID, uint instanceCustomIndex, vec2 bary) {
+bool pt_logic_masked(int primitiveID, uint instanceCustomIndex, vec2 bary)
+{
 	Triangle triangle;
 	uint prim = primitiveID + instanceCustomIndex & AS_INSTANCE_MASK_OFFSET;
 	if ((instanceCustomIndex & AS_INSTANCE_FLAG_DYNAMIC) != 0)
@@ -53,23 +57,25 @@ bool pt_logic_masked(int primitiveID, uint instanceCustomIndex, vec2 bary) {
 
 	if (minfo.mask_texture == 0)
 		return true;
-
+	
 	vec2 tex_coord = triangle.tex_coords * vec3(1.0 - bary.x - bary.y, bary.x, bary.y);
 
-	perturb_tex_coord(triangle.material_id, global_ubo.time, tex_coord);
+	perturb_tex_coord(triangle.material_id, global_ubo.time, tex_coord);	
 
 	vec4 mask_value = global_textureLod(minfo.mask_texture, tex_coord, /* mip_level = */ 0);
 
 	return mask_value.x >= 0.5;
 }
 
-void pt_logic_particle(inout RayPayload ray_payload, int primitiveID, float hitT, vec2 bary) {
+void pt_logic_particle(inout RayPayload ray_payload, int primitiveID, float hitT, vec2 bary)
+{
 	const vec3 barycentric = vec3(1.0 - bary.x - bary.y, bary.x, bary.y);
 	const vec2 uv = vec2(0.0, 0.0) * barycentric.x + vec2(1.0, 0.0) * barycentric.y + vec2(1.0, 1.0) * barycentric.z;
 
 	const float factor = pow(clamp(1.0 - length(vec2(0.5) - uv) * 2.0, 0.0, 1.0), global_ubo.pt_particle_softness);
 
-	if (factor > 0.0) 	{
+	if (factor > 0.0)
+	{
 		const int particle_index = primitiveID / 2;
 		vec4 color = texelFetch(particle_color_buffer, particle_index);
 		color.a *= factor;
@@ -81,11 +87,13 @@ void pt_logic_particle(inout RayPayload ray_payload, int primitiveID, float hitT
 	}
 }
 
-void pt_logic_beam(inout RayPayload ray_payload, int primitiveID, vec2 beam_fade_and_thickness, float hitT) {
+void pt_logic_beam(inout RayPayload ray_payload, int primitiveID, vec2 beam_fade_and_thickness, float hitT)
+{
 	const float x = beam_fade_and_thickness.x;
 	const float factor = pow(clamp(x, 0.0, 1.0), global_ubo.pt_beam_softness);
 
-	if (factor > 0.0) 	{
+	if (factor > 0.0)
+	{
 		const int beam_index = primitiveID;
 		vec4 color = texelFetch(beam_color_buffer, beam_index);
 
@@ -94,23 +102,24 @@ void pt_logic_beam(inout RayPayload ray_payload, int primitiveID, vec2 beam_fade
 
 		color.rgb *= global_ubo.prev_adapted_luminance * 20;
 
-		int texnum = global_ubo.current_frame_idx & (NUM_BLUE_NOISE_TEX - 1);
-		ivec2 texpos = ivec2(rt_LaunchID.xy) & ivec2(BLUE_NOISE_RES - 1);
-		float noise = texelFetch(TEX_BLUE_NOISE, ivec3(texpos, texnum), 0).r;
-		color.rgb *= noise * noise + 0.1;
+	    int texnum = global_ubo.current_frame_idx & (NUM_BLUE_NOISE_TEX - 1);
+	    ivec2 texpos = ivec2(rt_LaunchID.xy) & ivec2(BLUE_NOISE_RES - 1);
+	    float noise = texelFetch(TEX_BLUE_NOISE, ivec3(texpos, texnum), 0).r;
+	    color.rgb *= noise * noise + 0.1;
 
 		update_payload_transparency(ray_payload, color, beam_fade_and_thickness.y, hitT);
 	}
 }
 
-void pt_logic_sprite(inout RayPayload ray_payload, int primitiveID, float hitT, vec2 bary) {
+void pt_logic_sprite(inout RayPayload ray_payload, int primitiveID, float hitT, vec2 bary)
+{
 	const vec3 barycentric = vec3(1.0 - bary.x - bary.y, bary.x, bary.y);
-
+	
 	vec2 uv;
-	if ((primitiveID & 1) == 0)
-		uv = vec2(0.0, 1.0) * barycentric.x + vec2(0.0, 0.0) * barycentric.y + vec2(1.0, 0.0) * barycentric.z;
+	if((primitiveID & 1) == 0)
+	   uv = vec2(0.0, 1.0) * barycentric.x + vec2(0.0, 0.0) * barycentric.y + vec2(1.0, 0.0) * barycentric.z;
 	else
-		uv = vec2(1.0, 0.0) * barycentric.x + vec2(1.0, 1.0) * barycentric.y + vec2(0.0, 1.0) * barycentric.z;
+	   uv = vec2(1.0, 0.0) * barycentric.x + vec2(1.0, 1.0) * barycentric.y + vec2(0.0, 1.0) * barycentric.z;
 
 	const int sprite_index = primitiveID / 2;
 
@@ -119,10 +128,11 @@ void pt_logic_sprite(inout RayPayload ray_payload, int primitiveID, float hitT, 
 	uint texture_index = info.x;
 	float alpha = uintBitsToFloat(info.y);
 	vec4 color = global_textureLod(texture_index, uv, 0);
-
+	
 	color.a *= alpha;
 	float lum = luminance(color.rgb);
-	if (lum > 0) 	{
+	if(lum > 0)
+	{
 		float lum2 = pow(lum, 2.2);
 		color.rgb = color.rgb * (lum2 / lum) * color.a * alpha;
 
@@ -132,7 +142,8 @@ void pt_logic_sprite(inout RayPayload ray_payload, int primitiveID, float hitT, 
 	update_payload_transparency(ray_payload, color, 0, hitT);
 }
 
-void pt_logic_explosion(inout RayPayload ray_payload, int primitiveID, uint instanceCustomIndex, float hitT, vec3 worldRayDirection, vec2 bary) {
+void pt_logic_explosion(inout RayPayload ray_payload, int primitiveID, uint instanceCustomIndex, float hitT, vec3 worldRayDirection, vec2 bary)
+{
 	const uint primitive_id = primitiveID + instanceCustomIndex & AS_INSTANCE_MASK_OFFSET;
 	const Triangle triangle = get_instanced_triangle(primitive_id);
 
@@ -142,7 +153,8 @@ void pt_logic_explosion(inout RayPayload ray_payload, int primitiveID, uint inst
 	MaterialInfo minfo = get_material_info(triangle.material_id);
 	vec4 emission = global_textureLod(minfo.base_texture, tex_coord, 0);
 
-	if ((triangle.material_id & MATERIAL_KIND_MASK) == MATERIAL_KIND_EXPLOSION) 	{
+	if((triangle.material_id & MATERIAL_KIND_MASK) == MATERIAL_KIND_EXPLOSION)
+	{
 		const vec3 normal = triangle.normals * barycentric;
 		emission.rgb = mix(emission.rgb, get_explosion_color(normal, worldRayDirection.xyz), triangle.alpha);
 		emission.rgb *= global_ubo.pt_explosion_brightness;
@@ -157,7 +169,8 @@ void pt_logic_explosion(inout RayPayload ray_payload, int primitiveID, uint inst
 }
 
 // Adapted from: http://www.pbr-book.org/3ed-2018/Utilities/Mathematical_Routines.html#SolvingQuadraticEquations
-bool solve_quadratic(in float a, in float b, in float c, out vec2 t) {
+bool solve_quadratic(in float a, in float b, in float c, out vec2 t)
+{
 	float discrim = b * b - 4 * a * c;
 	if (discrim < 0) return false;
 	float q;
@@ -171,7 +184,8 @@ bool solve_quadratic(in float a, in float b, in float c, out vec2 t) {
 	return true;
 }
 
-bool hit_cylinder(in vec3 o, in vec3 d, in float radius, out vec2 t) {
+bool hit_cylinder(in vec3 o, in vec3 d, in float radius, out vec2 t)
+{
 	// Adapted from: http://www.pbr-book.org/3ed-2018/Shapes/Cylinders.html#IntersectionTests
 	float a = dot(d.xy, d.xy);
 	float b = 2 * dot(d.xy, o.xy);
@@ -180,7 +194,8 @@ bool hit_cylinder(in vec3 o, in vec3 d, in float radius, out vec2 t) {
 	return solve_quadratic(a, b, c, t);
 }
 
-bool hit_sphere(in vec3 o, in vec3 d, in float radius, out vec2 t) {
+bool hit_sphere(in vec3 o, in vec3 d, in float radius, out vec2 t)
+{
 	// Adapted from: http://www.pbr-book.org/3ed-2018/Shapes/Spheres.html#IntersectionTests
 	float a = dot(d, d);
 	float b = 2 * dot(d, o);
@@ -191,7 +206,8 @@ bool hit_sphere(in vec3 o, in vec3 d, in float radius, out vec2 t) {
 
 bool pt_logic_beam_intersection(int beam_index,
 	vec3 worldRayOrigin, vec3 worldRayDirection,
-	float rayTmin, float rayTmax, out vec2 beam_fade_and_thickness, out float tShapeHit) {
+	float rayTmin, float rayTmax, out vec2 beam_fade_and_thickness, out float tShapeHit)
+{
 	beam_fade_and_thickness = vec2(0);
 	tShapeHit = 0;
 
@@ -201,9 +217,9 @@ bool pt_logic_beam_intersection(int beam_index,
 	/* Transform from world space to "beam space" (really, object space),
 	   where the beam starts at the origin and points towards +Z */
 	const mat4 world_to_beam = mat4(unpackHalf4x16(beam_info[1].xy),
-		unpackHalf4x16(beam_info[1].zw),
-		unpackHalf4x16(beam_info[2].xy),
-		uintBitsToFloat(beam_info[0]));
+									unpackHalf4x16(beam_info[1].zw),
+									unpackHalf4x16(beam_info[2].xy),
+									uintBitsToFloat(beam_info[0]));
 	const float beam_radius = uintBitsToFloat(beam_info[2].z);
 	const float beam_length = uintBitsToFloat(beam_info[2].w);
 
@@ -212,7 +228,7 @@ bool pt_logic_beam_intersection(int beam_index,
 	const vec3 d = (world_to_beam * vec4(worldRayDirection, 0)).xyz;
 
 	vec2 t;
-	if (!hit_cylinder(o, d, beam_radius, t))
+	if(!hit_cylinder(o, d, beam_radius, t)) 
 		return false;
 
 	// The intersection Z values (ie "height on beam")
@@ -221,30 +237,33 @@ bool pt_logic_beam_intersection(int beam_index,
 	   if so, see if we hit the "end spheres",
 	   and update the hit location */
 	bvec2 hit_below_0 = lessThan(hit_z, vec2(0));
-	if (any(hit_below_0)) 	{
+	if(any(hit_below_0))
+	{
 		vec2 t_sphere;
-		if (!hit_sphere(o, d, beam_radius, t_sphere))
+		if(!hit_sphere(o, d, beam_radius, t_sphere))
 			return false;
 
-		if (hit_below_0.x) t.x = max(t.x, t_sphere.x);
-		if (hit_below_0.y) t.y = min(t.y, t_sphere.y);
+		if(hit_below_0.x) t.x = max(t.x, t_sphere.x);
+		if(hit_below_0.y) t.y = min(t.y, t_sphere.y);
 	}
 
 	bvec2 hit_above_end = greaterThan(hit_z, vec2(beam_length));
-	if (any(hit_above_end)) 	{
+	if(any(hit_above_end))
+	{
 		vec2 t_sphere;
-		if (!hit_sphere(o - vec3(0, 0, beam_length), d, beam_radius, t_sphere))
+		if(!hit_sphere(o - vec3(0, 0, beam_length), d, beam_radius, t_sphere))
 			return false;
 
-		if (hit_above_end.x) t.x = max(t.x, t_sphere.x);
-		if (hit_above_end.y) t.y = min(t.y, t_sphere.y);
+		if(hit_above_end.x) t.x = max(t.x, t_sphere.x);
+		if(hit_above_end.y) t.y = min(t.y, t_sphere.y);
 	}
 
-	if ((t.x >= rayTmax) || (t.y < rayTmin))
+	if((t.x >= rayTmax) || (t.y < rayTmin))
 		return false;
 
 	tShapeHit = t.x;
-	if (tShapeHit < rayTmin) 	{
+	if (tShapeHit < rayTmin)
+	{
 		tShapeHit = t.y;
 		if (tShapeHit >= rayTmax)
 			return false;

@@ -139,7 +139,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	IMG_DO(ASVGF_GRAD_SMPL_POS_A,     NUM_IMAGES_BASE + 27, R32_UINT,            r32ui,   IMG_WIDTH_GRAD_MGPU, IMG_HEIGHT_GRAD) \
 
 #define NUM_IMAGES (NUM_IMAGES_BASE + 28) /* this really sucks but I don't know how to fix it
-											 counting with enum does not work in GLSL */
+                                             counting with enum does not work in GLSL */
 
 // todo: make naming consistent!
 #define GLOBAL_TEXTURES_TEX_ARR_BINDING_IDX  0

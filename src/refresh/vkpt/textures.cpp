@@ -923,7 +923,11 @@ vkpt_extract_emissive_texture_info(image_t *image)
 	{
 		VectorSet(image->light_color, 0.f, 0.f, 0.f);
 	}
+	if (strstr(image->filepath, "baselt_3")) {
+		int x = 0;
+		x += 10;
 
+	}
 	image->min_light_texcoord[0] = (float)min_x / (float)w;
 	image->min_light_texcoord[1] = (float)min_y / (float)h;
 	image->max_light_texcoord[0] = (float)(max_x + 1) / (float)w;

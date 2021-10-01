@@ -98,22 +98,20 @@ static int obj_vertex_num = 0;
 
 static int
 create_poly(
-	const mface_t *surf,
+	const mface_t* surf,
 	uint32_t  material_id,
-	float    *positions_out,
-	float    *tex_coord_out,
-	uint32_t *material_out,
-	float* emissive_factors_out)
-{
+	float* positions_out,
+	float* tex_coord_out,
+	uint32_t* material_out,
+	float* emissive_factors_out) {
 	static const int max_vertices = 32;
-	float positions [3 * /*max_vertices*/ 32];
+	float positions[3 * /*max_vertices*/ 32];
 	float tex_coords[2 * /*max_vertices*/ 32];
-	mtexinfo_t *texinfo = surf->texinfo;
+	mtexinfo_t* texinfo = surf->texinfo;
 	assert(surf->numsurfedges < max_vertices);
-	
+
 	float sc[2] = { 1.f, 1.f };
-	if (texinfo->material)
-	{
+	if (texinfo->material) 	{
 		image_t* image_diffuse = texinfo->material->image_base;
 		if (image_diffuse && image_diffuse->width && image_diffuse->height) {
 			sc[0] = 1.0f / (float)image_diffuse->width;
@@ -121,16 +119,16 @@ create_poly(
 		}
 	}
 
-	float pos_center[3] = { 0.f, 0.f, 0.f };
+	float pos_center[3] = { 0 };
 	float tc_center[2];
 
 	for (int i = 0; i < surf->numsurfedges; i++) {
-		msurfedge_t *src_surfedge = surf->firstsurfedge + i;
-		medge_t     *src_edge     = src_surfedge->edge;
-		mvertex_t   *src_vert     = src_edge->v[src_surfedge->vert];
+		msurfedge_t* src_surfedge = surf->firstsurfedge + i;
+		medge_t* src_edge = src_surfedge->edge;
+		mvertex_t* src_vert = src_edge->v[src_surfedge->vert];
 
-		float *p = positions + i * 3;
-		float *t = tex_coords + i * 2;
+		float* p = positions + i * 3;
+		float* t = tex_coords + i * 2;
 
 		VectorCopy(src_vert->point, p);
 
@@ -142,16 +140,14 @@ create_poly(
 		t[1] = (DotProduct(p, texinfo->axis[1]) + texinfo->offset[1]) * sc[1];
 
 #if DUMP_WORLD_MESH_TO_OBJ
-		if (obj_dump_file)
-		{
+		if (obj_dump_file) 		{
 			fprintf(obj_dump_file, "v %.3f %.3f %.3f\n", src_vert->point[0], src_vert->point[1], src_vert->point[2]);
 		}
 #endif
 	}
 
 #if DUMP_WORLD_MESH_TO_OBJ
-	if (obj_dump_file)
-	{
+	if (obj_dump_file) 	{
 		fprintf(obj_dump_file, "f ");
 		for (int i = 0; i < surf->numsurfedges; i++) {
 			fprintf(obj_dump_file, "%d ", obj_vertex_num);
@@ -171,8 +167,7 @@ create_poly(
 	int num_vertices = surf->numsurfedges;
 
 	qboolean is_sky = MAT_IsKind(material_id, MATERIAL_KIND_SKY);
-	if (is_sky)
-	{
+	if (is_sky) 	{
 		// process skybox geometry in the same way as we process it for analytic light generation
 		// to avoid mismatches between lights and geometry
 		remove_collinear_edges(positions, tex_coords, &num_vertices);
@@ -205,8 +200,7 @@ create_poly(
 		? (float)texinfo->radiance * cvar_pt_bsp_radiance_scale->value
 		: 1.f;
 
-	for (int i = 0; i < num_triangles; i++)
-	{
+	for (int i = 0; i < num_triangles; i++) 	{
 		int i1 = (i + 2 - tess_center) % num_vertices;
 		int i2 = (i + 1 - tess_center) % num_vertices;
 
@@ -233,6 +227,7 @@ create_poly(
 
 #undef CP_V
 #undef CP_T
+#undef CP_M
 
 	assert(k % 3 == 0);
 	return k;
@@ -1131,7 +1126,7 @@ collect_sky_and_lava_light_polys(bsp_mesh_t* wm, bsp_t* bsp) {
 			light.cluster = BSP_PointLeaf(bsp->nodes, light.off_center)->cluster;
 
 			if (is_sky_or_lava_cluster(wm, surf, light.cluster, surf->texinfo->material->flags) ||
-				cvar_pt_bsp_sky_lights->integer && is_sky && is_light && (cvar_pt_bsp_sky_lights->integer > 1 || !is_nodraw)) 			{
+				cvar_pt_bsp_sky_lights->integer && is_sky && is_light && (cvar_pt_bsp_sky_lights->integer > 1 || !is_nodraw)) {
 				light_poly_t* list_light = append_light_poly(&wm->num_light_polys, &wm->allocated_light_polys, &wm->light_polys);
 				memcpy(list_light, &light, sizeof(light_poly_t));
 			}
@@ -1758,11 +1753,11 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 #endif
 
 	collect_surfaces(&idx_ctr, wm, bsp, -1, filter_static_opaque);
-    wm->world_idx_count = idx_ctr;
+	wm->world_idx_count = idx_ctr;
 
-    wm->world_transparent_offset = idx_ctr;
-    collect_surfaces(&idx_ctr, wm, bsp, -1, filter_static_transparent);
-    wm->world_transparent_count = idx_ctr - wm->world_transparent_offset;
+	wm->world_transparent_offset = idx_ctr;
+	collect_surfaces(&idx_ctr, wm, bsp, -1, filter_static_transparent);
+	wm->world_transparent_count = idx_ctr - wm->world_transparent_offset;
 
 	wm->world_masked_offset = idx_ctr;
 	collect_surfaces(&idx_ctr, wm, bsp, -1, filter_static_masked);
@@ -1778,12 +1773,12 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 		collect_surfaces(&idx_ctr, wm, bsp, -1, filter_nodraw_sky_lights);
 	wm->world_custom_sky_count = idx_ctr - wm->world_custom_sky_offset;
 
-    for (int k = 0; k < bsp->nummodels; k++) {
+	for (int k = 0; k < bsp->nummodels; k++) {
 		bsp_model_t* model = wm->models + k;
-        model->idx_offset = idx_ctr;
-        collect_surfaces(&idx_ctr, wm, bsp, k, filter_all);
-        model->idx_count = idx_ctr - model->idx_offset;
-    }
+		model->idx_offset = idx_ctr;
+		collect_surfaces(&idx_ctr, wm, bsp, k, filter_all);
+		model->idx_count = idx_ctr - model->idx_offset;
+	}
 
 #if DUMP_WORLD_MESH_TO_OBJ
 	fclose(obj_dump_file);

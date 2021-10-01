@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "format/md3.h"
 #endif
 #include "format/sp2.h"
+#include "format/iqm.h"
 #include "refresh/images.h"
 #include "refresh/models.h"
 
@@ -413,6 +414,9 @@ qhandle_t R_RegisterModel(const char *name)
 #endif
 	case SP2_IDENT:
 		load = MOD_LoadSP2;
+		break;
+	case IQM_IDENT:
+		load = MOD_LoadIQM;
 		break;
 	default:
 		ret = Q_ERR_UNKNOWN_FORMAT;

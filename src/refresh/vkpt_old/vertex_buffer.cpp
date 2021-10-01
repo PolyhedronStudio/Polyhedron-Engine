@@ -325,48 +325,41 @@ vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t *bsp_mesh,
 
 	BufferResource_t* staging = qvk.buf_light_staging + qvk.current_frame_index;
 
-	LightBuffer *lbo = (LightBuffer *)buffer_map(staging);
+	LightBuffer* lbo = (LightBuffer*)buffer_map(staging);
 	assert(lbo);
 
-	if (render_world)
-	{
-		assert(bsp_mesh->numClusters + 1 < MAX_LIGHT_LISTS);
+	if (render_world) 	{
+		assert(bsp_mesh->num_clusters + 1 < MAX_LIGHT_LISTS);
 		assert(bsp_mesh->num_cluster_lights < MAX_LIGHT_LIST_NODES);
-		assert(MAT_GetNumPBRMaterials() < MAX_PBR_MATERIALS);
 		assert(bsp_mesh->num_light_polys + num_model_lights < MAX_LIGHT_POLYS);
 
 		int model_light_offset = bsp_mesh->num_light_polys;
 		max_model_lights = max(max_model_lights, num_model_lights);
 
-		if(max_model_lights > 0)
-		{
+		if (max_model_lights > 0) 		{
 			// If any of the BSP models contain lights, inject these lights right into the visibility lists.
 			// The shader doesn't know that these lights are dynamic.
-
+			 
 			inject_model_lights(bsp_mesh, bsp, num_model_lights, transformed_model_lights, model_light_offset, lbo->light_list_offsets, lbo->light_list_lights);
 		}
-		else
-		{
-			memcpy(lbo->light_list_offsets, bsp_mesh->cluster_light_offsets, (bsp_mesh->numClusters + 1) * sizeof(uint32_t));
+		else 		{
+			memcpy(lbo->light_list_offsets, bsp_mesh->cluster_light_offsets, (bsp_mesh->num_clusters + 1) * sizeof(uint32_t));
 			memcpy(lbo->light_list_lights, bsp_mesh->cluster_lights, bsp_mesh->num_cluster_lights * sizeof(uint32_t));
 		}
 
-		for (int nlight = 0; nlight < bsp_mesh->num_light_polys; nlight++)
-		{
+		for (int nlight = 0; nlight < bsp_mesh->num_light_polys; nlight++) 		{
 			light_poly_t* light = bsp_mesh->light_polys + nlight;
 			float* vblight = lbo->light_polys + nlight * (LIGHT_POLY_VEC4S * 4);
 			copy_light(light, vblight, sky_radiance);
 		}
 
-		for (int nlight = 0; nlight < num_model_lights; nlight++)
-		{
+		for (int nlight = 0; nlight < num_model_lights; nlight++) 		{
 			light_poly_t* light = transformed_model_lights + nlight;
 			float* vblight = lbo->light_polys + (nlight + model_light_offset) * (LIGHT_POLY_VEC4S * 4);
 			copy_light(light, vblight, sky_radiance);
 		}
 	}
-	else
-	{
+	else 	{
 		lbo->light_list_offsets[0] = 0;
 		lbo->light_list_offsets[1] = 0;
 	}
@@ -379,11 +372,9 @@ vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t *bsp_mesh,
 	*/
 
 	assert(MAX_LIGHT_STYLES == MAX_QPATH);
-	for (int nstyle = 0; nstyle < MAX_LIGHT_STYLES; nstyle++)
-	{
+	for (int nstyle = 0; nstyle < MAX_LIGHT_STYLES; nstyle++) 	{
 		float style_scale = 1.f;
-		if (vkpt_refdef.fd->lightstyles)
-		{
+		if (vkpt_refdef.fd->lightstyles) 		{
 			style_scale = vkpt_refdef.fd->lightstyles[nstyle].white;
 			style_scale = max(0, min(1, style_scale));
 		}
@@ -391,25 +382,29 @@ vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t *bsp_mesh,
 	}
 
 	// materials
-	int nmaterials = MAT_GetNumPBRMaterials();
-	pbr_material_t const * materials = MAT_GetPBRMaterialsTable();
 
-	for (int nmat = 0; nmat < nmaterials; nmat++)
-	{
-		pbr_material_t const * material = materials + nmat;
-		uint32_t* mat_data = lbo->material_table + nmat * 4;
-		memset(mat_data, 0, sizeof(uint32_t) * 4);
+	for (int nmat = 0; nmat < MAX_PBR_MATERIALS; nmat++) 	{
+		pbr_material_t const* material = r_materials + nmat;
 
-		if (material->image_diffuse) mat_data[0] |= (material->image_diffuse - r_images);
+		uint32_t* mat_data = lbo->material_table + nmat * MATERIAL_UINTS;
+		memset(mat_data, 0, sizeof(uint32_t) * MATERIAL_UINTS);
+
+		if (material->registration_sequence == 0)
+			continue;
+
+		if (material->image_base) mat_data[0] |= (material->image_base - r_images);
 		if (material->image_normals) mat_data[0] |= (material->image_normals - r_images) << 16;
 		if (material->image_emissive) mat_data[1] |= (material->image_emissive - r_images);
-		mat_data[1] |= (material->num_frames & 0x000f) << 28;
-		mat_data[1] |= (material->next_frame & 0x0fff) << 16;
+		if (material->image_mask) mat_data[1] |= (material->image_mask - r_images) << 16;
 
 		mat_data[2] = floatToHalf(material->bump_scale);
-		mat_data[2] |= floatToHalf(material->rough_override) << 16;
-		mat_data[3] = floatToHalf(material->specular_scale);
-		mat_data[3] |= floatToHalf(material->emissive_scale) << 16;
+		mat_data[2] |= floatToHalf(material->roughness_override) << 16;
+		mat_data[3] = floatToHalf(material->metalness_factor);
+		mat_data[3] |= floatToHalf(material->emissive_factor) << 16;
+		mat_data[4] |= (material->num_frames & 0xffff);
+		mat_data[4] |= (material->next_frame & 0xffff) << 16;
+		mat_data[5] = floatToHalf(material->specular_factor);
+		mat_data[5] |= floatToHalf(material->base_factor) << 16;
 	}
 
 	memcpy(lbo->cluster_debug_mask, cluster_debug_mask, MAX_LIGHT_LISTS / 8);
