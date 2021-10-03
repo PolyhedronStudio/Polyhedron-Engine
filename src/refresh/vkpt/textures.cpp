@@ -923,11 +923,7 @@ vkpt_extract_emissive_texture_info(image_t *image)
 	{
 		VectorSet(image->light_color, 0.f, 0.f, 0.f);
 	}
-	if (strstr(image->filepath, "baselt_3")) {
-		int x = 0;
-		x += 10;
 
-	}
 	image->min_light_texcoord[0] = (float)min_x / (float)w;
 	image->min_light_texcoord[1] = (float)min_y / (float)h;
 	image->max_light_texcoord[0] = (float)(max_x + 1) / (float)w;
@@ -1881,7 +1877,13 @@ vkpt_create_images()
 
 		total_size += align(mem_req.size, mem_req.alignment);
 
-		_VK(allocate_gpu_memory(mem_req, &mem_images[i]));
+		VkResult alloc_result = allocate_gpu_memory(mem_req, &mem_images[i]);
+
+		if (alloc_result != VK_SUCCESS) 		{
+			Com_Printf("Memory allocation error. Current total = %.2f MB, failed chunk = %.2f MB\n", (float)total_size / megabyte, (float)mem_req.size / megabyte);
+			Com_Error(ERR_FATAL, "Failed to allocate GPU memory for screen-space textures!\n");
+			return alloc_result;
+		}
 
 		ATTACH_LABEL_VARIABLE(mem_images[i], DEVICE_MEMORY);
 
@@ -1934,7 +1936,7 @@ vkpt_create_images()
 #endif
 	}
 
-	Com_Printf("Screen-space image memory: %.2f MB\n", (float)total_size / 1048576.f);
+	Com_DPrintf("Screen-space image memory: %.2f MB\n", (float)total_size / megabyte);
 
 	/* attach labels to images */
 #define IMG_DO(_name, _binding, ...) \

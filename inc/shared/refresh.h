@@ -201,7 +201,7 @@ typedef struct {
     int left, right, top, bottom;
 } clipRect_t;
 
-typedef enum {
+enum imageflags_t : int32_t {
     IF_NONE         = 0,
     IF_PERMANENT    = (1 << 0),
     IF_TRANSPARENT  = (1 << 1),
@@ -220,7 +220,7 @@ typedef enum {
     IF_SRC_BASE = (0x1 << 16),
     IF_SRC_GAME = (0x2 << 16),
     IF_SRC_MASK = (0x3 << 16),
-} imageflags_t;
+};
 
 // Shift amount for storing fake emissive synthesis threshold
 #define IF_FAKE_EMISSIVE_THRESH_SHIFT  20

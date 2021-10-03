@@ -47,7 +47,7 @@ vkpt_vertex_buffer_bsp_upload_staging()
 {
 	vkWaitForFences(qvk.device, 1, &qvk.fence_vertex_sync, VK_TRUE, ~((uint64_t)0));
 	vkResetFences(qvk.device, 1, &qvk.fence_vertex_sync);
-	
+
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
 	VkBufferCopy copyRegion = {
@@ -63,8 +63,7 @@ vkpt_vertex_buffer_bsp_upload_staging()
 		.size = VK_WHOLE_SIZE,
 	});
 
-	if (qvk.buf_light_stats[0].buffer)
-	{
+	if (qvk.buf_light_stats[0].buffer) 	{
 		vkCmdFillBuffer(cmd_buf, qvk.buf_light_stats[0].buffer, 0, qvk.buf_light_stats[0].size, 0);
 		vkCmdFillBuffer(cmd_buf, qvk.buf_light_stats[1].buffer, 0, qvk.buf_light_stats[1].size, 0);
 		vkCmdFillBuffer(cmd_buf, qvk.buf_light_stats[2].buffer, 0, qvk.buf_light_stats[2].size, 0);
@@ -88,8 +87,7 @@ vkpt_light_buffer_upload_staging(VkCommandBuffer cmd_buf)
 	vkCmdCopyBuffer(cmd_buf, staging->buffer, qvk.buf_light.buffer, 1, &copyRegion);
 
 	int buffer_idx = qvk.frame_counter % 3;
-	if (qvk.buf_light_stats[buffer_idx].buffer)
-	{
+	if (qvk.buf_light_stats[buffer_idx].buffer) {
 		vkCmdFillBuffer(cmd_buf, qvk.buf_light_stats[buffer_idx].buffer, 0, qvk.buf_light_stats[buffer_idx].size, 0);
 	}
 

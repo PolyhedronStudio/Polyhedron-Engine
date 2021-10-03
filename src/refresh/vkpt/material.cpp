@@ -337,12 +337,12 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 
 	float fvalue = 0.f; qboolean bvalue = false;
 	int ivalue = 0;
-	const char* asterisk;
-	switch (t->type) 	{
+	
+	switch (t->type) {
 	case ATTR_BOOL:   bvalue = atoi(value) == 0 ? false : true; break;
 	case ATTR_FLOAT:  fvalue = (float)atof(value); break;
 	case ATTR_STRING: {
-		asterisk = strchr(value, '*');
+		const char* asterisk = strchr(value, '*');
 		if (asterisk) {
 			// get the base name of the material, i.e. without the path
 			// material names have no extensions, so no need to remove that
@@ -357,10 +357,10 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 		else
 			Q_strlcpy(svalue, value, sizeof(svalue));
 		break;
+	}
 	case ATTR_INT:
 		ivalue = atoi(value);
 		break;
-	}
 	default:
 		assert(!"unknown PBR MAT attribute attribute type");
 	}
@@ -374,9 +374,9 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 	case 3: mat->emissive_factor = fvalue; break;
 	case 4: {
 		uint32_t kind = getMaterialKind(svalue);
-		if (kind != 0)
+		if (kind != 0) {
 			mat->flags = MAT_SetKind(mat->flags, kind);
-		else 		{
+		} else {
 			if (sourceFile)
 				Com_EPrintf("%s:%d: unknown material kind '%s'\n", sourceFile, lineno, svalue);
 			else
@@ -449,11 +449,13 @@ static uint32_t load_material_file(const char* file_name, pbr_material_t* dest, 
 	if (!filebuf)
 		return 0;
 
-	enum 	{
+	enum : int32_t {
 		INITIAL,
 		ACCUMULATING_NAMES,
 		READING_PARAMS
-	} state = INITIAL;
+	};
+	
+	int32_t state = INITIAL;
 
 	const char* ptr = filebuf;
 	char linebuf[1024];

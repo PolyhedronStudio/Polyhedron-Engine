@@ -146,15 +146,15 @@ static void extract_model_lights(model_t* model) {
 
 	num_lights = 0;
 
-	for (int mesh_idx = 0; mesh_idx < model->nummeshes; mesh_idx++) 	{
+	for (int mesh_idx = 0; mesh_idx < model->nummeshes; mesh_idx++) {
 		const maliasmesh_t* mesh = model->meshes + mesh_idx;
 		assert(mesh->numskins == 1);
 		assert(mesh->indices);
 		assert(mesh->positions);
 
 		pbr_material_t* mat = mesh->materials[0];
-		if ((mat->flags & MATERIAL_FLAG_LIGHT) != 0 && mat->image_emissive) 		{
-			for (int tri_idx = 0; tri_idx < mesh->numtris; tri_idx++) 			{
+		if ((mat->flags & MATERIAL_FLAG_LIGHT) != 0 && mat->image_emissive) {
+			for (int tri_idx = 0; tri_idx < mesh->numtris; tri_idx++) {
 				light_poly_t* light = model->light_polys + num_lights;
 				num_lights++;
 
@@ -177,15 +177,15 @@ static void extract_model_lights(model_t* model) {
 
 				VectorCopy(mat->image_emissive->light_color, light->color);
 
-				if (!mat->image_emissive->entire_texture_emissive) 				{
+				if (!mat->image_emissive->entire_texture_emissive) {
 					// This extraction doesn't support partially emissive textures, so pretend the entire
 					// texture is uniformly emissive and dim the light according to the area fraction.
 					light->emissive_factor =
 						(mat->image_emissive->max_light_texcoord[0] - mat->image_emissive->min_light_texcoord[0]) *
 						(mat->image_emissive->max_light_texcoord[1] - mat->image_emissive->min_light_texcoord[1]);
-				}
-				else
+				} else {
 					light->emissive_factor = 1.f;
+				}
 
 				get_triangle_off_center(light->positions, light->off_center, NULL, 1.f);
 

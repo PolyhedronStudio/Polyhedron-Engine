@@ -187,6 +187,13 @@ create_poly(
         } \
     } while(0)
 
+#define CP_M(idx) \
+    do { \
+        if(material_out) { \
+            material_out[k] = material_id; \
+        } \
+    } while(0)
+
 	int k = 0;
 	/* switch between triangle fan around center or first vertex */
 	//int tess_center = 0;
@@ -206,14 +213,17 @@ create_poly(
 
 		CP_V(k, tess_center ? pos_center : positions);
 		CP_T(k, tess_center ? tc_center : tex_coords);
+		CP_M(k);
 		k++;
 
 		CP_V(k, positions + i1 * 3);
 		CP_T(k, tex_coords + i1 * 2);
+		CP_M(k);
 		k++;
 
 		CP_V(k, positions + i2 * 3);
 		CP_T(k, tex_coords + i2 * 2);
+		CP_M(k);
 		k++;
 
 		if (material_out) {
@@ -468,14 +478,12 @@ static void make_pvs_symmetric(bsp_t* bsp)
 	}
 }
 
-static void build_pvs2(bsp_t* bsp)
-{
+static void build_pvs2(bsp_t* bsp) {
 	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
 
 	bsp->pvs2_matrix = (byte*)Z_Mallocz(matrix_size);
 
-	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++)
-	{
+	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++) 	{
 		byte* pvs = BSP_GetPvs(bsp, cluster);
 		byte* dest_pvs = BSP_GetPvs2(bsp, cluster);
 		memcpy(dest_pvs, pvs, bsp->visrowsize);
@@ -485,7 +493,6 @@ static void build_pvs2(bsp_t* bsp)
 			merge_pvs_rows(bsp, pvs2, dest_pvs);
 		FOREACH_BIT_END
 	}
-
 }
 
 static void
@@ -1007,27 +1014,13 @@ collect_light_polys(bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int* num_lights, 
 		if (!texinfo->material)
 			continue;
 
-		// Check if any animation frame is a light material
-		qboolean any_light_frame = false;
-		{
-			pbr_material_t* current_material = texinfo->material;
-			do 			{
-				any_light_frame |= is_light_material(current_material->flags);
-				current_material = r_materials + current_material->next_frame;
-			} while (current_material != texinfo->material);
-		}
-		if (!any_light_frame)
-			continue;
-
 		uint32_t material_id = texinfo->material->flags;
 
-		// Collect emissive texture info from across frames
-		qboolean entire_texture_emissive;
-		vec2_t min_light_texcoord;
-		vec2_t max_light_texcoord;
-		vec3_t light_color;
+		if (!is_light_material(material_id))
+			continue;
 
-		if (!collect_frames_emissive_info(texinfo->material, &entire_texture_emissive, min_light_texcoord, max_light_texcoord, light_color)) 		{
+		const image_t* image = texinfo->material->image_emissive;
+		if (!image) 		{
 			// This algorithm relies on information from the emissive texture,
 			// specifically the extents of the emissive pixels in that texture.
 			// Ignore surfaces that don't have an emissive texture attached.
@@ -1040,8 +1033,8 @@ collect_light_polys(bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int* num_lights, 
 
 		int light_style = (texinfo->material->light_styles) ? get_surf_light_style(surf) : 0;
 
-		if (entire_texture_emissive) 		{
-			collect_one_light_poly_entire_texture(bsp, surf, texinfo, light_color, emissive_factor, light_style,
+		if (image->entire_texture_emissive) 		{
+			collect_one_light_poly_entire_texture(bsp, surf, texinfo, image->light_color, emissive_factor, light_style,
 				num_lights, allocated_lights, lights);
 			continue;
 		}
@@ -1056,8 +1049,8 @@ collect_light_polys(bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int* num_lights, 
 		float tex_scale[2] = { 1.0f / image_diffuse->width, 1.0f / image_diffuse->height };
 
 		collect_one_light_poly(bsp, surf, texinfo, model_idx, plane,
-			tex_scale, min_light_texcoord, max_light_texcoord,
-			light_color, emissive_factor, light_style,
+			tex_scale, image->min_light_texcoord, image->max_light_texcoord,
+			image->light_color, emissive_factor, light_style,
 			num_lights, allocated_lights, lights);
 	}
 }

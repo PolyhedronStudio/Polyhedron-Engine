@@ -470,7 +470,7 @@ static int compare_beams(const void* _a, const void* _b)
 	return 0;
 }
 
-qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, const vec4_t &begin, const vec4_t &end, const vec4_t &color, float radius)
+qboolean vkpt_build_cylinder_light(light_poly_t* light_list, int* num_lights, int max_lights, bsp_t *bsp, const vec3_t &begin, const vec3_t &end, const vec3_t &color, float radius)
 {
 	vec3_t dir, norm_dir;
 	VectorSubtract(end, begin, dir);
@@ -591,8 +591,8 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 			continue;
 		const float beam_radius = cvar_pt_beam_width->value * beam->frame * 0.5;
 
-		vec4_t begin = { 0.f, 0.f, 0.f, 0.f };
-		vec4_t end = { 0.f, 0.f, 0.f, 0.f };
+		vec3_t begin = { 0.f, 0.f, 0.f};
+		vec3_t end = { 0.f, 0.f, 0.f};
 		VectorCopy(beam->oldorigin, begin);
 		VectorCopy(beam->origin, end);
 
@@ -605,7 +605,7 @@ void vkpt_build_beam_lights(light_poly_t* light_list, int* num_lights, int max_l
 		VectorMA(begin, -5.f, norm_dir, begin);
 		VectorMA(end, 5.f, norm_dir, end);
 
-		vec4_t color = { 0.f, 0.f, 0.f, 0.f };
+		vec3_t color = { 0.f, 0.f, 0.f };
 		cast_u32_to_f32_color(beam->skinNumber, &beam->rgba, color, hdr_factor);
 
 		vkpt_build_cylinder_light(light_list, num_lights, max_lights, bsp, begin, end, color, beam_radius);
