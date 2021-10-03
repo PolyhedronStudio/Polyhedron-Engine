@@ -337,12 +337,14 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 
 	float fvalue = 0.f; qboolean bvalue = false;
 	int ivalue = 0;
-	
+	const char* asterisk;
+
 	switch (t->type) {
 	case ATTR_BOOL:   bvalue = atoi(value) == 0 ? false : true; break;
 	case ATTR_FLOAT:  fvalue = (float)atof(value); break;
-	case ATTR_STRING: {
-		const char* asterisk = strchr(value, '*');
+	case ATTR_STRING:
+	{
+		asterisk = strchr(value, '*');
 		if (asterisk) {
 			// get the base name of the material, i.e. without the path
 			// material names have no extensions, so no need to remove that
@@ -353,14 +355,13 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 			Q_strlcpy(svalue, value, min(asterisk - value + 1, sizeof(svalue)));
 			Q_strlcat(svalue, mat_base, sizeof(svalue));
 			Q_strlcat(svalue, asterisk + 1, sizeof(svalue));
-		}
-		else
+		} 		else
 			Q_strlcpy(svalue, value, sizeof(svalue));
 		break;
-	}
 	case ATTR_INT:
 		ivalue = atoi(value);
 		break;
+	}
 	default:
 		assert(!"unknown PBR MAT attribute attribute type");
 	}
