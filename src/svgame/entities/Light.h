@@ -12,6 +12,11 @@
 
 class SVGBaseTrigger;
 
+enum LightState : uint32_t {
+    Off = 1,
+    On = 2,
+};
+
 class Light : public SVGBaseTrigger {
 public:
     // Constructor/Deconstructor.
@@ -49,6 +54,9 @@ public:
 private:
     // Custom lightstyle string.
     std::string customLightStyle;
+
+    // Light State flags. (Is it currently off, or triggered?)
+    uint32_t lightState;
 };
 
-#endif // __SVGAME_ENTITIES_MISC_PLAYERCLIENT_H__
+#endif // __SVGAME_ENTITIES_LIGHT_H__

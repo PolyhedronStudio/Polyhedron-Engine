@@ -117,6 +117,8 @@ void MiscServerModel::Spawn() {
     // Setup the start frame to animate from.
     if (startFrame) {
         SetFrame(startFrame);
+    } else {
+        SetFrame(0);
     }
 
     // Set entity to allow taking damage.
@@ -170,9 +172,15 @@ void MiscServerModel::Think() {
     int32_t currentFrame = GetFrame();
 
     if (currentFrame == endFrame) {
-        SetFrame(startFrame);
+        if (startFrame != 0) {
+            SetFrame(startFrame);
+        } else {
+            SetFrame(0);
+        }
     } else {
-        SetFrame(currentFrame + 1);
+        if (startFrame != 0 && endFrame != 0) {
+            SetFrame(currentFrame + 1);
+        }
     }
 
     //if (GetNoiseIndex()) {
