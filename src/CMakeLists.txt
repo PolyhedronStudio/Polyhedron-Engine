@@ -561,6 +561,7 @@ SET(SRC_VKPT
 	refresh/vkpt/conversion.cpp
 	refresh/vkpt/draw.cpp
 	refresh/vkpt/freecam.cpp
+	refresh/vkpt/fog.cpp
 	refresh/vkpt/fsr.cpp
 	refresh/vkpt/main.cpp
 	refresh/vkpt/material.cpp
@@ -591,6 +592,7 @@ SET(HEADERS_VKPT
 	refresh/vkpt/buddy_allocator.h
 	refresh/vkpt/conversion.h
 	refresh/vkpt/device_memory_allocator.h
+	refresh/vkpt/fog.h
 	refresh/vkpt/material.h
 	refresh/vkpt/physical_sky.h
 	refresh/vkpt/precomputed_sky.h
@@ -643,7 +645,6 @@ set(SRC_RT_SHADERS
 	refresh/vkpt/shader/path_tracer_beam.rahit
 	refresh/vkpt/shader/path_tracer_beam.rint
 	refresh/vkpt/shader/path_tracer_explosion.rahit
-	refresh/vkpt/shader/path_tracer_shadow.rmiss
 	refresh/vkpt/shader/reflect_refract.rgen
 )
 

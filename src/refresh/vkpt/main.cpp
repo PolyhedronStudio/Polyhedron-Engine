@@ -31,6 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "system/hunk.h"
 #include "vkpt.h"
 #include "material.h"
+#include "fog.h"
 #include "physical_sky.h"
 #include "../../client/client.h"
 #include "../../client/ui/ui.h"
@@ -2495,6 +2496,8 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	ubo->num_static_primitives = (vkpt_refdef.bsp_mesh_world.world_idx_count + vkpt_refdef.bsp_mesh_world.world_transparent_count + vkpt_refdef.bsp_mesh_world.world_masked_count) / 3;
 	ubo->num_static_lights = vkpt_refdef.bsp_mesh_world.num_light_polys;
 
+	vkpt_fog_upload(ubo->fog_volumes);
+
 #define UBO_CVAR_DO(name, default_value) ubo->name = cvar_##name->value;
 	UBO_CVAR_LIST
 #undef UBO_CVAR_DO
@@ -3196,7 +3199,7 @@ R_EndFrame_RTX(void)
 			extent_unscaled_half.height = qvk.extent_unscaled.height / 2;
 
 			if (extents_equal(qvk.extent_render, qvk.extent_unscaled) ||
-				extents_equal(qvk.extent_render, extent_unscaled_half) && drs_effective_scale == 0) // don't do nearest filter 2x upscale with DRS enabled
+				(extents_equal(qvk.extent_render, extent_unscaled_half) && drs_effective_scale == 0)) // don't do nearest filter 2x upscale with DRS enabled
 				vkpt_final_blit_simple(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT], qvk.extent_taa_output);
 			else
 				vkpt_final_blit_filtered(cmd_buf);
@@ -3494,6 +3497,8 @@ R_Init_RTX(qboolean total)
 	Cmd_AddCommand("drop_balls", (xcommand_t)&vkpt_drop_shaderballs);
 #endif
 
+	vkpt_fog_init();
+
 	for (int i = 0; i < 256; i++) {
 		qvk.sintab[i] = sinf(i * (2 * M_PI / 255));
 	}
@@ -3523,6 +3528,7 @@ R_Shutdown_RTX(qboolean total)
 	Cmd_RemoveCommand("drop_balls");
 #endif
 	
+	vkpt_fog_shutdown();
 	MAT_Shutdown();
 	IMG_FreeAll();
 	vkpt_textures_destroy_unused();
@@ -3746,6 +3752,8 @@ R_BeginRegistration_RTX(const char *name)
 	LOG_FUNC();
 	Com_Printf("loading %s\n", name);
 	vkDeviceWaitIdle(qvk.device);
+
+	vkpt_fog_reset();
 
 	Com_AddConfigFile("maps/default.cfg", 0);
 	Com_AddConfigFile(va("maps/%s.cfg", name), 0);
