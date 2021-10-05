@@ -183,7 +183,7 @@ static void export_obj_frames(model_t* model, const char* path_pattern)
 	}
 }
 
-qerror_t MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length)
+qerror_t MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length, const char *name)
 {
 	dmd2header_t    header;
 	dmd2frame_t     *src_frame;
@@ -646,7 +646,7 @@ static qerror_t MOD_LoadMD3Mesh(model_t *model, maliasmesh_t *mesh,
 	return Q_ERR_SUCCESS;
 }
 
-qerror_t MOD_LoadMD3_RTX(model_t *model, const void *rawdata, size_t length)
+qerror_t MOD_LoadMD3_RTX(model_t *model, const void *rawdata, size_t length, const char* mod_name)
 {
 	dmd3header_t    header;
 	size_t          end, offset, remaining;

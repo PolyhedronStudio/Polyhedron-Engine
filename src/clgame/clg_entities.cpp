@@ -718,7 +718,7 @@ void CLG_UpdateOrigin(void)
 #endif
 
     // don't interpolate blend color
-    Vec4_Copy(currentPlayerState->blend, cl->refdef.blend);
+    Vector4Copy(currentPlayerState->blend, cl->refdef.blend);
 
     // Interpolate field of view
     cl->fov_x = lerp_client_fov(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);

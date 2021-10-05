@@ -425,10 +425,25 @@ SET(HEADERS_COMMON
 	common/net/win.h
 )
 
+###################### Format.
+#SET(SRC_FORMAT
+#)
+SET(HEADERS_COMMON
+	../inc/format/bsp.h
+	../inc/format/iqm.h
+	../inc/format/md2.h
+	../inc/format/md3.h
+	../inc/format/pak.h
+	../inc/format/pcx.h
+	../inc/format/sp2.h
+	../inc/format/wal.h
+)
+
 ###################### Refresh.
 SET(SRC_REFRESH
 	refresh/images.cpp
 	refresh/models.cpp
+	refresh/model_iqm.cpp
 	refresh/stb/stb.cpp
 )
 
@@ -546,6 +561,8 @@ SET(SRC_VKPT
 	refresh/vkpt/conversion.cpp
 	refresh/vkpt/draw.cpp
 	refresh/vkpt/freecam.cpp
+	refresh/vkpt/fog.cpp
+	refresh/vkpt/fsr.cpp
 	refresh/vkpt/main.cpp
 	refresh/vkpt/material.cpp
 	refresh/vkpt/matrix.cpp
@@ -567,11 +584,15 @@ SET(SRC_VKPT
 	refresh/vkpt/god_rays.cpp
 )
 SET(HEADERS_VKPT
+	refresh/vkpt/fsr/ffx_a.h
+	refresh/vkpt/fsr/ffx_fsr1.h
+
 	refresh/vkpt/vkpt.h
 	refresh/vkpt/vk_util.h
 	refresh/vkpt/buddy_allocator.h
 	refresh/vkpt/conversion.h
 	refresh/vkpt/device_memory_allocator.h
+	refresh/vkpt/fog.h
 	refresh/vkpt/material.h
 	refresh/vkpt/physical_sky.h
 	refresh/vkpt/precomputed_sky.h
@@ -606,6 +627,10 @@ set(SRC_SHADERS
 	refresh/vkpt/shader/stretch_pic.vert
 	refresh/vkpt/shader/final_blit_lanczos.frag
 	refresh/vkpt/shader/final_blit.vert
+	refresh/vkpt/shader/fsr_easu_fp16.comp
+	refresh/vkpt/shader/fsr_easu_fp32.comp
+	refresh/vkpt/shader/fsr_rcas_fp16.comp
+	refresh/vkpt/shader/fsr_rcas_fp32.comp
 )
 
 set(SRC_RT_SHADERS
@@ -614,38 +639,39 @@ set(SRC_RT_SHADERS
 	refresh/vkpt/shader/indirect_lighting.rgen
 	refresh/vkpt/shader/path_tracer.rchit
 	refresh/vkpt/shader/path_tracer.rmiss
+	refresh/vkpt/shader/path_tracer_masked.rahit
 	refresh/vkpt/shader/path_tracer_particle.rahit
 	refresh/vkpt/shader/path_tracer_sprite.rahit
 	refresh/vkpt/shader/path_tracer_beam.rahit
 	refresh/vkpt/shader/path_tracer_beam.rint
 	refresh/vkpt/shader/path_tracer_explosion.rahit
-	refresh/vkpt/shader/path_tracer_shadow.rmiss
 	refresh/vkpt/shader/reflect_refract.rgen
 )
 
 # Check for a shader compiler.
 if (CONFIG_VKPT_RENDERER)
-	include(../cmake/compileShaders.cmake)
+	IF(IS_64_BIT)
+		include(../cmake/compileShaders.cmake)
 
-	foreach(s ${SRC_RT_SHADERS})
-		get_filename_component(shader_name ${s} NAME)
-		get_filename_component(shader_ext ${s} EXT)
-		compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.nv" DEFINES "-DNV_RAY_TRACING")
-		compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.khr" DEFINES "-DKHR_RAY_TRACING")
-		if (shader_ext STREQUAL ".rgen")
-			compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.rq" DEFINES "-DKHR_RAY_QUERY -DCOMPSTAGE" STAGE "comp")
+		foreach(s ${SRC_RT_SHADERS})
+			get_filename_component(shader_name ${s} NAME)
+			get_filename_component(shader_ext ${s} EXT)
+			compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.pipeline")
+			if (shader_ext STREQUAL ".rgen")
+				compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode OUTPUT_FILE_NAME "${shader_name}.query" DEFINES "-DKHR_RAY_QUERY" STAGE "comp")
+			endif()
+		endforeach()
+
+		foreach(s ${SRC_SHADERS})
+			compile_shader(SOURCE_FILE ${s} INCLUDES "-I${CMAKE_CURRENT_SOURCE_DIR}/refresh/vkpt/fsr" OUTPUT_FILE_LIST shader_bytecode)
+		endforeach()
+
+		add_custom_target(shaders DEPENDS ${shader_bytecode})
+
+		if(TARGET glslangValidator)
+			add_dependencies(shaders glslangValidator)
 		endif()
-	endforeach()
-
-	foreach(s ${SRC_SHADERS})
-		compile_shader(SOURCE_FILE ${s} OUTPUT_FILE_LIST shader_bytecode)
-	endforeach()
-
-	add_custom_target(shaders DEPENDS ${shader_bytecode})
-
-	if(TARGET glslangValidator)
-		add_dependencies(shaders glslangValidator)
-	endif()
+	ENDIF()
 endif()
 # Embed version number
 ADD_DEFINITIONS(-DVERSION_MAJOR=${NAC_VERSION_MAJOR})

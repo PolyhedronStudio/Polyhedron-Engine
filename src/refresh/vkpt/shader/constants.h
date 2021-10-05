@@ -25,10 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define HISTOGRAM_BINS 128
 
-#define ALBEDO_TRANSFORM_SCALE 1.0
-#define ALBEDO_TRANSFORM_BIAS -0.05
-#define ALBEDO_TRANSFORM_POWER 0.4545
-
 #define EMISSIVE_TRANSFORM_BIAS -0.001
 
 #define MAX_MIRROR_ROUGHNESS 0.02
@@ -43,6 +39,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PRIMARY_RAY_T_MAX 10000
 
 #define MAX_CAMERAS 8
+
+#define MAX_FOG_VOLUMES 8
 
 #define AA_MODE_OFF 0
 #define AA_MODE_TAA 1
@@ -72,7 +70,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MATERIAL_KIND_CHROME_MODEL   0xd0000000
 
 #define MATERIAL_FLAG_LIGHT          0x08000000
-#define MATERIAL_FLAG_CORRECT_ALBEDO 0x04000000
 #define MATERIAL_FLAG_HANDEDNESS     0x02000000
 #define MATERIAL_FLAG_WEAPON         0x01000000
 #define MATERIAL_FLAG_WARP           0x00800000
@@ -109,40 +106,56 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SHADER_MAX_ENTITIES                  1024
 #define SHADER_MAX_BSP_ENTITIES              128
 #define MAX_LIGHT_SOURCES                    32
-#define MAX_LIGHT_STYLES                     256
+#define MAX_LIGHT_STYLES                     64
 
+#define TLAS_INDEX_GEOMETRY      0
+#define TLAS_INDEX_EFFECTS       1
+#define TLAS_COUNT               2
+
+// Geometry TLAS flags
 #define AS_FLAG_OPAQUE          (1 << 0)
 #define AS_FLAG_TRANSPARENT     (1 << 1)
-#define AS_FLAG_PARTICLES       (1 << 2)
-#define AS_FLAG_VIEWER_MODELS   (1 << 3)
-#define AS_FLAG_VIEWER_WEAPON   (1 << 4)
-#define AS_FLAG_EXPLOSIONS      (1 << 5)
-#define AS_FLAG_SKY             (1 << 6)
-#define AS_FLAG_CUSTOM_SKY      (1 << 7)
-#define AS_FLAG_EVERYTHING      0xFF
+#define AS_FLAG_VIEWER_MODELS   (1 << 2)
+#define AS_FLAG_VIEWER_WEAPON   (1 << 3)
+#define AS_FLAG_SKY             (1 << 4)
+#define AS_FLAG_CUSTOM_SKY      (1 << 5)
+
+// Effects TLAS flags
+#define AS_FLAG_EFFECTS         (1 << 0)
 
 #define AS_INSTANCE_FLAG_DYNAMIC        (1 << 23)
 #define AS_INSTANCE_FLAG_SKY            (1 << 22)
 #define AS_INSTANCE_MASK_OFFSET (AS_INSTANCE_FLAG_SKY - 1)
 
-#define SBT_RGEN 0
-#define SBT_RMISS_PATH_TRACER 1
-#define SBT_RMISS_SHADOW 2
-#define SBT_RCHIT_OPAQUE 3
-#define SBT_RCHIT_EMPTY 4
-#define SBT_RAHIT_PARTICLE 5
-#define SBT_RAHIT_EXPLOSION 6
-#define SBT_RAHIT_SPRITE 7
-#define SBT_RINT_BEAM 8
+#define RT_PAYLOAD_GEOMETRY      0
+#define RT_PAYLOAD_EFFECTS       1
+
+#define SBT_RGEN                 0
+#define SBT_RMISS_EMPTY          1
+
+#define SBT_RCHIT_GEOMETRY       2
+#define SBT_RAHIT_MASKED         3
+
+#define SBT_RCHIT_EFFECTS        4
+#define SBT_RAHIT_PARTICLE       5
+#define SBT_RAHIT_EXPLOSION      6
+#define SBT_RAHIT_SPRITE         7
+#define SBT_RINT_BEAM            8
 #define SBT_ENTRIES_PER_PIPELINE 9
 // vkpt_pt_create_pipelines() relies on all 'transparency' SBT entries coming after SBT_FIRST_TRANSPARENCY
-#define SBT_FIRST_TRANSPARENCY SBT_RAHIT_PARTICLE
+#define SBT_FIRST_TRANSPARENCY SBT_RCHIT_EFFECTS
 
-// SBT indices, for primary rays
-#define SBTO_OPAQUE     (SBT_RCHIT_OPAQUE - SBT_RCHIT_OPAQUE)
-#define SBTO_PARTICLE   (SBT_RAHIT_PARTICLE - SBT_RCHIT_OPAQUE)
-#define SBTO_EXPLOSION  (SBT_RAHIT_EXPLOSION - SBT_RCHIT_OPAQUE)
-#define SBTO_SPRITE     (SBT_RAHIT_SPRITE - SBT_RCHIT_OPAQUE)
-#define SBTO_BEAM       (SBT_RINT_BEAM - SBT_RCHIT_OPAQUE)
+// SBT indices for geometry and shadow rays
+#define SBTO_OPAQUE     (SBT_RCHIT_GEOMETRY - SBT_RCHIT_GEOMETRY)
+#define SBTO_MASKED     (SBT_RAHIT_MASKED - SBT_RCHIT_GEOMETRY)
+// SBT indices for effect rays
+#define SBTO_PARTICLE   (SBT_RAHIT_PARTICLE - SBT_RCHIT_EFFECTS)
+#define SBTO_EXPLOSION  (SBT_RAHIT_EXPLOSION - SBT_RCHIT_EFFECTS)
+#define SBTO_SPRITE     (SBT_RAHIT_SPRITE - SBT_RCHIT_EFFECTS)
+#define SBTO_BEAM       (SBT_RINT_BEAM - SBT_RCHIT_EFFECTS)
+
+#ifndef M_PI
+#define M_PI 3.1415926535897932384626433832795
+#endif
 
 #endif /*_CONSTANTS_H_*/

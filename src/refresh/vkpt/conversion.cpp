@@ -18,8 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "conversion.h"
 
-void packHalf4x16(uint32_t* half, float* vec4)
-{
+void packHalf4x16(uint32_t* half, float* vec4) {
 	half[0] = floatToHalf(vec4[0]) | (floatToHalf(vec4[1]) << 16);
 	half[1] = floatToHalf(vec4[2]) | (floatToHalf(vec4[3]) << 16);
 }

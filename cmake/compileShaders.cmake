@@ -8,6 +8,8 @@ set(SHADER_SOURCE_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/light_lists.h
     ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/path_tracer_rgen.h
     ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/path_tracer.h
+    ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/path_tracer_hit_shaders.h
+    ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/path_tracer_transparency.glsl
     ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/precomputed_sky.glsl
     ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/precomputed_sky_params.h
     ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/projection.glsl
@@ -18,7 +20,6 @@ set(SHADER_SOURCE_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/utils.glsl
     ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/vertex_buffer.h
     ${CMAKE_SOURCE_DIR}/src/refresh/vkpt/shader/water.glsl)
-
 
 if(TARGET glslangValidator)
     set(GLSLANG_COMPILER "$<TARGET_FILE:glslangValidator>")
@@ -37,7 +38,7 @@ endif()
 function(compile_shader)
     set(options "")
     set(oneValueArgs SOURCE_FILE OUTPUT_FILE_NAME OUTPUT_FILE_LIST STAGE)
-    set(multiValueArgs DEFINES)
+    set(multiValueArgs DEFINES INCLUDES)
     cmake_parse_arguments(params "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if (NOT params_SOURCE_FILE)
@@ -73,6 +74,7 @@ function(compile_shader)
             -DVKPT_SHADER
             -V
             ${params_DEFINES}
+            ${params_INCLUDES}
             "${src_file}"
             -o "${out_file}")
 
@@ -85,4 +87,3 @@ function(compile_shader)
     
     set(${params_OUTPUT_FILE_LIST} ${${params_OUTPUT_FILE_LIST}} ${out_file} PARENT_SCOPE)
 endfunction()
-

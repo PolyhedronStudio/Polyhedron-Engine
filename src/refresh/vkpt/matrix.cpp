@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "vkpt.h"
 
 void
-create_entity_matrix(mat4_t matrix, r_entity_t *e, qboolean enable_left_hand)
+create_entity_matrix(mat4_t matrix, r_entity_t* e, qboolean enable_left_hand)
 {
 	vec3_t axis[3];
 	vec3_t origin;
@@ -98,7 +98,7 @@ create_projection_matrix(mat4_t matrix, float znear, float zfar, float fov_x, fl
 
 void
 create_orthographic_matrix(mat4_t matrix, float xmin, float xmax,
-		float ymin, float ymax, float znear, float zfar)
+	float ymin, float ymax, float znear, float zfar)
 {
 	float width, height, depth;
 
@@ -128,7 +128,7 @@ create_orthographic_matrix(mat4_t matrix, float xmin, float xmax,
 }
 
 void
-create_view_matrix(mat4_t matrix, refdef_t *fd)
+create_view_matrix(mat4_t matrix, refdef_t* fd)
 {
 	vec3_t viewaxis[3];
 	AnglesToAxis(fd->viewAngles, viewaxis);

@@ -15,7 +15,7 @@
 
 #include "system/hunk.h"
 
-#define MAX_DLIGHTS     256
+#define MAX_DLIGHTS     32
 #define MAX_ENTITIES    1024     // == MAX_PACKET_ENTITIES * 2
 #define MAX_PARTICLES   16384
 #define MAX_LIGHTSTYLES 256
@@ -149,6 +149,7 @@ typedef struct ref_feedback_s {
 
 	char        view_material[MAX_QPATH];
 	char        view_material_override[MAX_QPATH];
+    int         view_material_index;
 
 	vec3_t      hdr_color;
 } ref_feedback_t;
@@ -185,8 +186,7 @@ typedef struct refdef_s {
 typedef enum {
     QVF_ACCELERATED     = (1 << 0),
     QVF_GAMMARAMP       = (1 << 1),
-    QVF_FULLSCREEN      = (1 << 2),
-    QVF_VIDEOSYNC       = (1 << 3)
+    QVF_FULLSCREEN      = (1 << 2)
 } vidFlags_t;
 
 typedef struct {
@@ -201,7 +201,7 @@ typedef struct {
     int left, right, top, bottom;
 } clipRect_t;
 
-typedef enum {
+enum imageflags_t : int32_t {
     IF_NONE         = 0,
     IF_PERMANENT    = (1 << 0),
     IF_TRANSPARENT  = (1 << 1),
@@ -212,8 +212,18 @@ typedef enum {
     IF_REPEAT       = (1 << 6),
     IF_NEAREST      = (1 << 7),
     IF_OPAQUE       = (1 << 8),
-	IF_SRGB         = (1 << 9)
-} imageflags_t;
+    IF_SRGB = (1 << 9),
+    IF_FAKE_EMISSIVE = (1 << 10),
+    IF_EXACT = (1 << 11),
+
+    // Image source indicator/requirement flags
+    IF_SRC_BASE = (0x1 << 16),
+    IF_SRC_GAME = (0x2 << 16),
+    IF_SRC_MASK = (0x3 << 16),
+};
+
+// Shift amount for storing fake emissive synthesis threshold
+#define IF_FAKE_EMISSIVE_THRESH_SHIFT  20
 
 typedef enum {
     IT_PIC,
@@ -240,6 +250,71 @@ typedef enum
     MCLASS_STATIC_LIGHT,
     MCLASS_FLARE
 } model_class_t;
+
+typedef struct {
+    vec3_t translate;
+    quat_t rotate;
+    vec3_t scale;
+} iqm_transform_t;
+
+typedef struct {
+    char name[MAX_QPATH];
+    uint32_t first_frame;
+    uint32_t num_frames;
+    qboolean loop;
+} iqm_anim_t;
+
+// inter-quake-model
+typedef struct {
+    uint32_t num_vertexes;
+    uint32_t num_triangles;
+    uint32_t num_frames;
+    uint32_t num_meshes;
+    uint32_t num_joints;
+    uint32_t num_poses;
+    uint32_t num_animations;
+    struct iqm_mesh_s* meshes;
+
+    uint32_t* indices;
+
+    // vertex arrays
+    float* positions;
+    float* texcoords;
+    float* normals;
+    float* tangents;
+    byte* colors;
+    byte* blend_indices; // byte4 per vertex
+    float* blend_weights; // float4 per vertex
+
+    char* jointNames;
+    int* jointParents;
+    float* bindJoints; // [num_joints * 12]
+    float* invBindJoints; // [num_joints * 12]
+    iqm_transform_t* poses; // [num_frames * num_poses]
+    float* bounds;
+
+    iqm_anim_t* animations;
+} iqm_model_t;
+
+// inter-quake-model mesh
+typedef struct iqm_mesh_s {
+    char name[MAX_QPATH];
+    char material[MAX_QPATH];
+    iqm_model_t* data;
+    uint32_t first_vertex, num_vertexes;
+    uint32_t first_triangle, num_triangles;
+    uint32_t first_influence, num_influences;
+} iqm_mesh_t;
+
+typedef struct light_poly_s {
+    float positions[9]; // 3x vec3_t
+    vec3_t off_center;
+    vec3_t color;
+    struct pbr_material_s* material;
+    int cluster;
+    int style;
+    float emissive_factor;
+} light_poly_t;
 
 typedef struct model_s {
     enum {
@@ -277,6 +352,11 @@ typedef struct model_s {
 	qboolean sprite_fxup;
 	qboolean sprite_fxft;
 	qboolean sprite_fxlt;
+
+    iqm_model_t* iqmData;
+
+    int num_light_polys;
+    light_poly_t* light_polys;
 } model_t;
 
 #endif // __SHARED_REFRESH_H__
