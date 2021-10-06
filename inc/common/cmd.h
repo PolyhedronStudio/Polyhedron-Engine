@@ -169,7 +169,7 @@ typedef struct cmdbuf_s {
     // The cmd_name is referenced later, so it should not be in temp memory
     // if function is NULL, the command will be forwarded to the server
     // as a clc_stringcmd instead of executed locally
-    void Cmd_Deregister(const cmdreg_t *reg);
+    void Cmd_Unregister(const cmdreg_t *reg);
     void Cmd_RemoveCommand(const char *cmd_name);
 
     void Cmd_AddMacro(const char *name, xmacro_t function);

@@ -687,7 +687,7 @@ void UI_Shutdown(void)
 
     UI_FreeMenus();
 
-    Cmd_Deregister(c_ui);
+    Cmd_Unregister(c_ui);
 
     memset(&uis, 0, sizeof(uis));
 

@@ -709,8 +709,8 @@ static void Cmd_OpenURL_f(void)
 #ifdef __linux__
     pid_t pid = fork();
     if (pid == 0) {
-	char * args[] = { "xdg-open", url, NULL};
-	execv("/usr/bin/xdg-open", args);
+    const char* args[] = { "xdg-open", url, NULL };
+    execv("/usr/bin/xdg-open", (char* const*)args);
 	exit(0);
     }
 #elif _WINDOWS
@@ -1577,7 +1577,7 @@ void Cmd_Register(const cmdreg_t *reg)
     }
 }
 
-void Cmd_Deregister(const cmdreg_t *reg)
+void Cmd_Unregister(const cmdreg_t *reg)
 {
     while (reg->name) {
         Cmd_RemoveCommand(reg->name);

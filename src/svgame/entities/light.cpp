@@ -12,8 +12,9 @@
 #include "base/SVGBaseTrigger.h"
 #include "Light.h"
 
-// Yeah, the spawnflag for start off.
-#define START_OFF   1
+// SpawnFlags.
+#define START_OFF   1   
+#define TRIGGERABLE 2
 
 // Constructor/Deconstructor.
 Light::Light(Entity* svEntity) : SVGBaseTrigger(svEntity) {

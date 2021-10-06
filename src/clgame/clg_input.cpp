@@ -21,8 +21,9 @@ static cvar_t* cl_forwardspeed;
 static cvar_t* cl_sidespeed;
 static cvar_t* cl_yawspeed;
 static cvar_t* cl_pitchspeed;
-static cvar_t* cl_run;
+//static cvar_t* cl_run; // WID: TODO: This one is old.
 static cvar_t* cl_anglespeedkey;
+cvar_t* cl_run; // WID: TODO: This is the new one, so it can be externed.
 
 static cvar_t* cl_instantpacket;
 
@@ -66,13 +67,13 @@ static in_state_t inputState;
 // 
 //==============================================================================
 // 
-static KeyBinding in_klook;
-static KeyBinding in_left, in_right, in_forward, in_back;
-static KeyBinding in_lookup, in_lookdown, in_moveleft, in_moveright;
-static KeyBinding in_strafe, in_speed, in_use, in_attack;
-static KeyBinding in_up, in_down;
+KeyBinding in_klook;
+KeyBinding in_left, in_right, in_forward, in_back;
+KeyBinding in_lookup, in_lookdown, in_moveleft, in_moveright;
+KeyBinding in_strafe, in_speed, in_use, in_attack;
+KeyBinding in_up, in_down;
 
-static int        in_impulse;
+int32_t        in_impulse;
 static qboolean   in_mlooking;
 
 //
@@ -174,7 +175,7 @@ static void CLG_KeyUp(KeyBinding* b)
 // Clears the key binding state.
 //================
 //
-static void CLG_KeyClear(KeyBinding* b)
+void CLG_KeyClear(KeyBinding* b)
 {
     unsigned com_eventTime = clgi.Com_GetEventTime();
     b->msec = 0;
@@ -308,7 +309,7 @@ static void IN_MLookUp(void)
 // Handles the mouse move based input adjustment.
 //================
 //
-static void CLG_MouseMove() {
+void CLG_MouseMove() {
     int deltaX, deltaY;
     float motionX, motionY;
     float speed;
@@ -375,7 +376,7 @@ static void CLG_MouseMove() {
 // Moves the local angle positions
 //================
 //
-static void CLG_AdjustAngles(int msec)
+void CLG_AdjustAngles(int msec)
 {
     float speed;
 
@@ -404,7 +405,7 @@ static void CLG_AdjustAngles(int msec)
 // Build and return the intended movement vector
 //================
 //
-static vec3_t CLG_BaseMove(const vec3_t& inMove)
+vec3_t CLG_BaseMove(const vec3_t& inMove)
 {
     vec3_t outMove = inMove;
 
@@ -444,7 +445,7 @@ static vec3_t CLG_BaseMove(const vec3_t& inMove)
 // Returns the clamped movement speeds.
 //================
 //
-static vec3_t CLG_ClampSpeed(const vec3_t& inMove)
+vec3_t CLG_ClampSpeed(const vec3_t& inMove)
 {
     vec3_t outMove = inMove;
 
@@ -464,7 +465,7 @@ static vec3_t CLG_ClampSpeed(const vec3_t& inMove)
 // Ensures the Pitch is clamped to prevent camera issues.
 //================
 //
-static void CLG_ClampPitch(void)
+void CLG_ClampPitch(void)
 {
     float pitch;
 

@@ -32,6 +32,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "stb_image.h"
 #include "stb_image_write.h"
 
+#include <assert.h>
+
 #define R_COLORMAP_PCX    "pics/colormap.pcx"
 
 #define IMG_LOAD(x) \
@@ -785,16 +787,40 @@ static image_t *lookup_image(const char *name,
     return NULL;
 }
 
-static int _try_image_format(imageformat_t fmt, image_t *image, byte **pic)
+#define TRY_IMAGE_SRC_GAME      1
+#define TRY_IMAGE_SRC_BASE      0
+
+static int _try_image_format(imageformat_t fmt, image_t* image, int try_src, byte** pic)
 {
-    byte        *data;
+    byte* data;
     ssize_t     len;
     qerror_t    ret;
 
     // load the file
-    len = FS_LoadFile(image->name, (void **)&data);
+    int fs_flags = 0;
+    if (try_src > 0)
+        fs_flags = try_src == TRY_IMAGE_SRC_GAME ? FS_PATH_GAME : FS_PATH_BASE;
+    len = FS_LoadFileFlags(image->name, (void**)&data, fs_flags);
     if (!data) {
         return len;
+    }
+    /* Don't prefer game image if it's identical to the base version
+       Some games (eg rogue) ship image assets that are identical to the
+       baseq2 version.
+       If that is the case, prefer the baseq2 copy - because those may have
+       override image and additional material images!
+     */
+    if (try_src == TRY_IMAGE_SRC_GAME) {
+        byte* data_base;
+        ssize_t len_base;
+        len_base = FS_LoadFileFlags(image->name, (void**)&data_base, FS_PATH_BASE);
+        if ((len == len_base) && (memcmp(data, data_base, len) == 0)) {
+            // Identical data in game, pretend file doesn't exist
+            FS_FreeFile(data);
+            FS_FreeFile(data_base);
+            return Q_ERR_NOENT;
+        }
+        FS_FreeFile(data_base);
     }
 
     // decompress the image
@@ -812,17 +838,15 @@ static int _try_image_format(imageformat_t fmt, image_t *image, byte **pic)
     return ret < 0 ? ret : fmt;
 }
 
-static int try_image_format(imageformat_t fmt, image_t *image, byte **pic)
-{
+static int try_image_format(imageformat_t fmt, image_t* image, int try_src, byte** pic) {
     // replace the extension
     memcpy(image->name + image->baselen + 1, img_loaders[fmt].ext, 4);
-    return _try_image_format(fmt, image, pic);
+    return _try_image_format(fmt, image, try_src, pic);
 }
 
 
 // tries to load the image with a different extension
-static int try_other_formats(imageformat_t orig, image_t *image, byte **pic)
-{
+static int try_other_formats(imageformat_t orig, image_t* image, int try_src, byte** pic) {
     imageformat_t   fmt;
     qerror_t        ret;
     int             i;
@@ -834,7 +858,7 @@ static int try_other_formats(imageformat_t orig, image_t *image, byte **pic)
             continue;   // don't retry twice
         }
 
-        ret = try_image_format(fmt, image, pic);
+        ret = try_image_format(fmt, image, try_src, pic);
         if (ret != Q_ERR_NOENT) {
             return ret; // found something
         }
@@ -846,51 +870,75 @@ static int try_other_formats(imageformat_t orig, image_t *image, byte **pic)
         return Q_ERR_NOENT; // don't retry twice
     }
 
-    return try_image_format(fmt, image, pic);
+    return try_image_format(fmt, image, try_src, pic);
 }
 
-static void get_image_dimensions(imageformat_t fmt, image_t *image)
-{
-    char        buffer[MAX_QPATH];
-    ssize_t     len;
-    miptex_t    mt;
-    dpcx_t      pcx;
-    qhandle_t   f;
-    unsigned    w, h;
+qerror_t IMG_GetDimensions(const char* name, int* width, int* height) {
+    assert(name);
+    assert(width);
+    assert(height);
 
-    memcpy(buffer, image->name, image->baselen + 1);
+    int w = 0;
+    int h = 0;
 
-    w = h = 0;
-    if (fmt == IM_WAL) {
-        memcpy(buffer + image->baselen + 1, "wal", 4);
-        FS_FOpenFile(buffer, &f, FS_MODE_READ);
-        if (f) {
-            len = FS_Read(&mt, sizeof(mt), f);
-            if (len == sizeof(mt)) {
-                w = LittleLong(mt.width);
-                h = LittleLong(mt.height);
-            }
-            FS_FCloseFile(f);
-        }
-    } else {
-        memcpy(buffer + image->baselen + 1, "pcx", 4);
-        FS_FOpenFile(buffer, &f, FS_MODE_READ);
-        if (f) {
-            len = FS_Read(&pcx, sizeof(pcx), f);
-            if (len == sizeof(pcx)) {
-                w = LittleShort(pcx.xmax) + 1;
-                h = LittleShort(pcx.ymax) + 1;
-            }
-            FS_FCloseFile(f);
+    ssize_t len = strlen(name);
+    if (len <= 4)
+        return Q_ERR_NAMETOOSHORT;
+
+    imageformat_t format;
+    if (Q_stricmp(name + len - 4, ".wal") == 0)
+        format = IM_WAL;
+    else if (Q_stricmp(name + len - 4, ".pcx") == 0)
+        format = IM_PCX;
+    else
+        return Q_ERR_INVALID_FORMAT;
+
+    qhandle_t f;
+    FS_FOpenFile(name, &f, FS_MODE_READ);
+    if (!f)
+        return Q_ERR_NOENT;
+
+    if (format == IM_WAL)     {
+        miptex_t mt;
+        len = FS_Read(&mt, sizeof(mt), f);
+        if (len == sizeof(mt)) {
+            w = LittleLong(mt.width);
+            h = LittleLong(mt.height);
         }
     }
+    else if (format == IM_PCX)     {
+        dpcx_t pcx;
+        len = FS_Read(&pcx, sizeof(pcx), f);
+        if (len == sizeof(pcx)) {
+            w = LittleShort(pcx.xmax) + 1;
+            h = LittleShort(pcx.ymax) + 1;
+        }
+    }
+
+    FS_FCloseFile(f);
 
     if (w < 1 || h < 1 || w > 512 || h > 512) {
-        return;
+        return Q_ERR_INVALID_FORMAT;
     }
 
-    image->width = w;
-    image->height = h;
+    *width = w;
+    *height = h;
+
+    return Q_ERR_SUCCESS;
+}
+
+static void get_image_dimensions(imageformat_t fmt, image_t* image) {
+    char buffer[MAX_QPATH];
+    memcpy(buffer, image->name, image->baselen + 1);
+
+    if (fmt == IM_WAL) {
+        memcpy(buffer + image->baselen + 1, "wal", 4);
+    }
+    else {
+        memcpy(buffer + image->baselen + 1, "pcx", 4);
+    }
+
+    IMG_GetDimensions(buffer, &image->width, &image->height);
 }
 
 static void r_texture_formats_changed(cvar_t *self)
@@ -957,17 +1005,22 @@ load_img(const char *name, image_t *image)
     // load the pic from disk
     pic = NULL;
 
-	// first try with original extension
-	ret = _try_image_format(fmt, image, &pic);
-	if (ret == Q_ERR_NOENT) {
-		// retry with remaining extensions
-		ret = try_other_formats(fmt, image, &pic);
-    }
+    // Always prefer images from the game dir, even if format might be 'inferior'
+    for (int try_location = Q_stricmp(fs_game->string, BASEGAME) ? TRY_IMAGE_SRC_GAME : TRY_IMAGE_SRC_BASE;
+        try_location >= TRY_IMAGE_SRC_BASE;
+        try_location--)     {
+        int location_flag = try_location == TRY_IMAGE_SRC_GAME ? IF_SRC_GAME : IF_SRC_MASK;
+        if (((image->flags & IF_SRC_MASK) != 0) && ((image->flags & IF_SRC_MASK) != location_flag))
+            continue;
 
-    // if we are replacing 8-bit texture with a higher resolution 32-bit
-    // texture, we need to recover original image dimensions
-    if (fmt <= IM_WAL && ret > IM_WAL) {
-        get_image_dimensions(fmt, image);
+        // first try with original extension
+        ret = _try_image_format(fmt, image, try_location, &pic);
+        if (ret == Q_ERR_NOENT) {
+            // retry with remaining extensions
+            ret = try_other_formats(fmt, image, try_location, &pic);
+        }
+        if (ret >= 0)
+            break;
     }
 
     // if we are replacing 8-bit texture with a higher resolution 32-bit
@@ -988,6 +1041,66 @@ load_img(const char *name, image_t *image)
     return Q_ERR_SUCCESS;
 }
 
+// Try to load an image, possibly with an alternative extension
+static qerror_t try_load_image_candidate(image_t* image, const char* orig_name, size_t orig_len, byte** pic_p, imagetype_t type, imageflags_t flags, qboolean ignore_extension, int try_location) {
+    qerror_t ret;
+
+    image->type = type;
+    image->flags = flags;
+    image->registration_sequence = registration_sequence;
+
+    // find out original extension
+    //imageformat_t fmt; WID: This used to be that, but C++ needs int32 or so for this.
+    int32_t fmt;
+    for (fmt = 0; fmt < IM_MAX; fmt++)     {
+        if (!Q_stricmp(image->name + image->baselen + 1, img_loaders[fmt].ext))         {
+            break;
+        }
+    }
+
+    // load the pic from disk
+    *pic_p = NULL;
+
+    if (fmt == IM_MAX)     {
+        // unknown extension, but give it a chance to load anyway
+        ret = try_other_formats(IM_MAX, image, try_location, pic_p);
+        if (ret == Q_ERR_NOENT)         {
+            // not found, change error to invalid path
+            ret = Q_ERR_INVALID_PATH;
+        }
+    }
+    else if (ignore_extension)     {
+        // forcibly replace the extension
+        ret = try_other_formats(IM_MAX, image, try_location, pic_p);
+    }
+    else     {
+        // first try with original extension
+        ret = _try_image_format((imageformat_t)fmt, image, try_location, pic_p);
+        if (ret == Q_ERR_NOENT && !(flags & IF_EXACT))         {
+            // retry with remaining extensions
+            ret = try_other_formats((imageformat_t)fmt, image, try_location, pic_p);
+        }
+    }
+
+    // record last modified time (skips reload when invoking IMG_ReloadAll)
+    image->last_modified = 0;
+    FS_LastModified(image->name, &image->last_modified);
+
+    // Restore original name if it was overridden
+    if (orig_name) {
+        memcpy(image->name, orig_name, orig_len + 1);
+        image->baselen = orig_len - 4;
+    }
+
+    // if we are replacing 8-bit texture with a higher resolution 32-bit
+    // texture, we need to recover original image dimensions
+    if (fmt <= IM_WAL && ret > IM_WAL)     {
+        get_image_dimensions((imageformat_t)fmt, image);
+    }
+
+    return ret;
+}
+
 // finds or loads the given image, adding it to the hash table.
 static qerror_t find_or_load_image(const char *name, size_t len,
                                    imagetype_t type, imageflags_t flags,
@@ -997,7 +1110,7 @@ static qerror_t find_or_load_image(const char *name, size_t len,
     byte            *pic;
     unsigned        hash;
     imageformat_t   fmt;
-    qerror_t        ret;
+    qerror_t        ret = Q_ERR_NOENT;
 
     *image_p = NULL;
 
@@ -1025,84 +1138,49 @@ static qerror_t find_or_load_image(const char *name, size_t len,
         return Q_ERR_OUT_OF_SLOTS;
     }
 
-	int override_textures = !!r_override_textures->integer;
-	if (!vid_rtx->integer && (type != IT_PIC))
-		override_textures = 0;
+    int override_textures = !!r_override_textures->integer;
+    if (!vid_rtx->integer && (type != IT_PIC))
+        override_textures = 0;
+    if (flags & IF_EXACT)
+        override_textures = 0;
 
-    for (int use_override = override_textures; use_override >= 0; use_override--)
-	{
-		// fill in some basic info
-		if (use_override)
-		{
-			const char* last_slash = strrchr(name, '/');
-			if (!last_slash) 
-				last_slash = name; 
-			else 
-				last_slash += 1;
+    if (override_textures)     {
+        const char* last_slash = strrchr(name, '/');
+        if (!last_slash)
+            last_slash = name;
+        else
+            last_slash += 1;
 
-			strcpy(image->name, "overrides/");
-			strcat(image->name, last_slash);
-			image->baselen = strlen(image->name) - 4;
-		}
-		else
-		{
-			memcpy(image->name, name, len + 1);
-			image->baselen = len - 4;
-		}
-		image->type = type;
-		image->flags = flags;
-		image->registration_sequence = registration_sequence;
+        strcpy(image->name, "overrides/");
+        strcat(image->name, last_slash);
+        image->baselen = strlen(image->name) - 4;
+        ret = try_load_image_candidate(image, name, len, &pic, type, flags, true, -1);
+        memcpy(image->name, name, len + 1);
+        image->baselen = len - 4;
+    }
 
-		// find out original extension
-		for (fmt = (imageformat_t)0; fmt < IM_MAX; fmt = (imageformat_t)(fmt + 1)) { // CPP: Cast for loop
-			if (!Q_stricmp(image->name + image->baselen + 1, img_loaders[fmt].ext)) {
-				break;
-			}
-		}
+    // Try non-overridden image
+    if (ret < 0)     {
+        qboolean is_not_baseq2 = fs_game->string[0] && strcmp(fs_game->string, BASEGAME) != 0;
 
-		// load the pic from disk
-		pic = NULL;
+        // Always prefer images from the game dir, even if format might be 'inferior'
+        for (int try_location = is_not_baseq2 ? TRY_IMAGE_SRC_GAME : TRY_IMAGE_SRC_BASE;
+            try_location >= TRY_IMAGE_SRC_BASE;
+            try_location--)         {
+            int location_flag = try_location == TRY_IMAGE_SRC_GAME ? IF_SRC_GAME : IF_SRC_BASE;
+            if (((flags & IF_SRC_MASK) != 0) && ((flags & IF_SRC_MASK) != location_flag))
+                continue;
 
-		if (fmt == IM_MAX) {
-			// unknown extension, but give it a chance to load anyway
-			ret = try_other_formats(IM_MAX, image, &pic);
-			if (ret == Q_ERR_NOENT) {
-				// not found, change error to invalid path
-				ret = Q_ERR_INVALID_PATH;
-			}
-		}
-		else if (override_textures) {
-			// forcibly replace the extension
-			ret = try_other_formats(IM_MAX, image, &pic);
-		}
-		else {
-			// first try with original extension
-			ret = _try_image_format(fmt, image, &pic);
-			if (ret == Q_ERR_NOENT) {
-				// retry with remaining extensions
-				ret = try_other_formats(fmt, image, &pic);
-			}
-		}
-
-        // record last modified time (skips reload when invoking IMG_ReloadAll)
-        image->last_modified = 0;
-        FS_LastModified(image->name, &image->last_modified);
-
-		if (use_override)
-		{
+            // fill in some basic info
             memcpy(image->name, name, len + 1);
-			image->baselen = len - 4;
-		}
+            image->baselen = len - 4;
+            ret = try_load_image_candidate(image, NULL, 0, &pic, type, flags, !!override_textures, try_location);
+            image->flags = (imageflags_t)(image->flags | location_flag);
 
-		// if we are replacing 8-bit texture with a higher resolution 32-bit
-		// texture, we need to recover original image dimensions
-		if (fmt <= IM_WAL && ret > IM_WAL) {
-			get_image_dimensions(fmt, image);
-		}
-
-		if(ret >= 0)
-			break;
-	}
+            if (ret >= 0)
+                break;
+        }
+    }
 
     if (ret < 0) {
         memset(image, 0, sizeof(*image));
@@ -1111,7 +1189,7 @@ static qerror_t find_or_load_image(const char *name, size_t len,
 
     List_Append(&r_imageHash[hash], &image->entry);
 
-	image->is_srgb = !!(flags & IF_SRGB);
+    image->is_srgb = !!(flags & IF_SRGB);
 
     // upload the image
     IMG_Load(image, pic);
@@ -1147,6 +1225,80 @@ image_t *IMG_Find(const char *name, imagetype_t type, imageflags_t flags)
     }
 
     return R_NOTEXTURE;
+}
+
+image_t* IMG_FindExisting(const char* name, imagetype_t type) {
+    image_t* image;
+    size_t len;
+    unsigned hash;
+
+    if (!name) {
+        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+    }
+
+    // this should never happen
+    len = strlen(name);
+    if (len >= MAX_QPATH) {
+        Com_Error(ERR_FATAL, "%s: oversize name", __func__);
+    }
+
+    // must have an extension and at least 1 char of base name
+    if (len <= 4) {
+        return R_NOTEXTURE;
+    }
+    if (name[len - 4] != '.') {
+        return R_NOTEXTURE;
+    }
+
+    hash = FS_HashPathLen(name, len - 4, RIMAGES_HASH);
+
+    // look for it
+    if ((image = lookup_image(name, type, hash, len - 4)) != NULL) {
+        return image;
+    }
+
+    return R_NOTEXTURE;
+}
+
+/*
+===============
+IMG_Clone
+===============
+*/
+image_t* IMG_Clone(image_t* image, const char* new_name) {
+    if (image == R_NOTEXTURE)
+        return image;
+
+    image_t* new_image = alloc_image();
+    if (!new_image)
+        return R_NOTEXTURE;
+
+    memcpy(new_image, image, sizeof(image_t));
+
+#if USE_REF == REF_VKPT
+    size_t image_size = image->upload_width * image->upload_height * 4;
+    if (image->pix_data != NULL)     {
+        new_image->pix_data = (byte*)IMG_AllocPixels(image_size);
+        memcpy(new_image->pix_data, image->pix_data, image_size);
+    }
+#else
+    for (int m = 0; m < 4; m++)     {
+        if (image->pixels[m] != NULL)         {
+            size_t mip_size = (image->upload_width >> m) * (image->upload_height >> m) * 4;
+            new_image->pixels[m] = IMG_AllocPixels(mip_size);
+            memcpy(new_image->pixels[m], image->pixels[m], mip_size);
+        }
+    }
+#endif
+
+    if (new_name)     {
+        Q_strlcpy(new_image->name, new_name, sizeof(new_image->name));
+        new_image->baselen = strlen(new_image->name) - 4;
+        assert(new_image->name[new_image->baselen] == '.');
+    }
+    unsigned hash = FS_HashPathLen(new_image->name, new_image->baselen, RIMAGES_HASH);
+    List_Append(&r_imageHash[hash], &new_image->entry);
+    return new_image;
 }
 
 /*
@@ -1449,6 +1601,6 @@ void IMG_Init(void)
 
 void IMG_Shutdown(void)
 {
-    Cmd_Deregister(img_cmd);
+    Cmd_Unregister(img_cmd);
     r_numImages = 0;
 }

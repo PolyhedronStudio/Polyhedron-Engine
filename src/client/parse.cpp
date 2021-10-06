@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared/clgame.h"
 
 // N&C: Cheesy hack, we need to actually make this extern in a header.
-extern ClientGameExport* cge;
+extern IClientGameExports* cge;
 
 /*
 =====================================================================

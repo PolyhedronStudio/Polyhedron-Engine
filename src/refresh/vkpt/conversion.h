@@ -26,15 +26,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   https://stackoverflow.com/questions/1659440/32-bit-to-16-bit-floating-point-conversion
 */
 
-typedef union
-{
+typedef union {
 	float f;
 	int32_t si;
 	uint32_t ui;
 } f2hBits;
 
-static inline uint16_t floatToHalf(float value)
-{
+static inline uint16_t floatToHalf(float value) {
 	static int const shift = 13;
 	static int const shiftSign = 16;
 

@@ -35,7 +35,7 @@ snd_params_t    sndParameters;
 // and copies it into the client state structure.
 //===============
 //
-static void CLG_ParseLayout(void)
+void CLG_ParseLayout(void)
 {
     clgi.MSG_ReadString(cl->layout, sizeof(cl->layout));
 }
@@ -47,7 +47,7 @@ static void CLG_ParseLayout(void)
 // Parses the the inventory that's sent by the server game module.
 //===============
 //
-static void CLG_ParseInventory(void)
+void CLG_ParseInventory(void)
 {
     int        i;
 
@@ -66,7 +66,7 @@ static void CLG_ParseInventory(void)
 // The teParameters variable is prepared for the CLG_ParseTempEntity function.
 //===============
 //
-static void CLG_ParseTempEntitiesPacket(void)
+void CLG_ParseTempEntitiesPacket(void)
 {
     teParameters.type = clgi.MSG_ReadByte();
 
@@ -146,7 +146,7 @@ static void CLG_ParseTempEntitiesPacket(void)
 // The mzParameters variable is prepared for the CLG_MuzzleFlash(1/2) function.
 //===============
 //
-static void CLG_ParseMuzzleFlashPacket(int mask)
+void CLG_ParseMuzzleFlashPacket(int mask)
 {
     int entity, weapon;
 
@@ -190,7 +190,7 @@ static void CLG_CheckForVersion(const char* s)
     cl->replyDelta = 1024 + (rand() & 1023);
 }
 #endif
-static void CLG_ParsePrint(void)
+void CLG_ParsePrint(void)
 {
     int level;
     char s[MAX_STRING_CHARS];
@@ -261,7 +261,7 @@ static void CLG_ParsePrint(void)
 // Parses center print messages.
 //===============
 //
-static void CLG_ParseCenterPrint(void)
+void CLG_ParseCenterPrint(void)
 {
     char s[MAX_STRING_CHARS];
 

@@ -339,7 +339,7 @@ void V_RenderView(void)
             r_numdlights = 0;
 #endif
         if (!cl_add_blend->integer)
-            Vec4_Clear(cl.refdef.blend);
+            Vector4Clear(cl.refdef.blend);
 
         cl.refdef.rdflags = cl.frame.playerState.rdflags;
 
@@ -414,7 +414,7 @@ void V_Init(void)
 
 void V_Shutdown(void)
 {
-    Cmd_Deregister(v_cmds);
+    Cmd_Unregister(v_cmds);
 }
 
 

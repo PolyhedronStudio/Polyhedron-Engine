@@ -33,39 +33,36 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define SIZE_SCRATCH_BUFFER (1 << 25)
 
-#define INSTANCE_MAX_NUM 12
+#define INSTANCE_MAX_NUM 14
 
 static uint32_t shaderGroupHandleSize = 0;
 static uint32_t shaderGroupBaseAlignment = 0;
 static uint32_t minAccelerationStructureScratchOffsetAlignment = 0;
 
-typedef struct accel_bottom_match_info_s {
+typedef struct {
 	int fast_build;
 	uint32_t vertex_count;
 	uint32_t index_count;
 	uint32_t aabb_count;
-} accel_bottom_match_info_t;
-
-typedef struct accel_top_match_info_s {
-	uint32_t instanceCount;
-} accel_top_match_info_t;
+	uint32_t instance_count;
+} accel_match_info_t;
 
 typedef struct {
-	VkAccelerationStructureKHR accel_khr;
-	VkAccelerationStructureNV accel_nv;
-	accel_bottom_match_info_t match;
+	VkAccelerationStructureKHR accel;
+	accel_match_info_t match;
 	BufferResource_t mem;
 	qboolean present;
-} blas_t;
+} accel_struct_t;
+
 
 typedef enum {
 	PIPELINE_PRIMARY_RAYS,
 	PIPELINE_REFLECT_REFRACT_1,
 	PIPELINE_REFLECT_REFRACT_2,
-    PIPELINE_DIRECT_LIGHTING,
-    PIPELINE_DIRECT_LIGHTING_CAUSTICS,
-    PIPELINE_INDIRECT_LIGHTING_FIRST,
-    PIPELINE_INDIRECT_LIGHTING_SECOND,
+	PIPELINE_DIRECT_LIGHTING,
+	PIPELINE_DIRECT_LIGHTING_CAUSTICS,
+	PIPELINE_INDIRECT_LIGHTING_FIRST,
+	PIPELINE_INDIRECT_LIGHTING_SECOND,
 
 	PIPELINE_COUNT
 } pipeline_index_t;
@@ -74,29 +71,32 @@ static BufferResource_t           buf_accel_scratch;
 static size_t                     scratch_buf_ptr = 0;
 static BufferResource_t           buf_instances[MAX_FRAMES_IN_FLIGHT];
 static int                        transparent_primitive_offset = 0;
+static int                        masked_primitive_offset = 0;
 static int                        sky_primitive_offset = 0;
 static int                        custom_sky_primitive_offset = 0;
 static int                        transparent_model_primitive_offset = 0;
+static int                        masked_model_primitive_offset = 0;
 static int                        viewer_model_primitive_offset = 0;
 static int                        viewer_weapon_primitive_offset = 0;
 static int                        explosions_primitive_offset = 0;
-static blas_t                     blas_static;
-static blas_t                     blas_transparent;
-static blas_t                     blas_sky;
-static blas_t                     blas_custom_sky;
-static blas_t                     blas_dynamic[MAX_FRAMES_IN_FLIGHT];
-static blas_t                     blas_transparent_models[MAX_FRAMES_IN_FLIGHT];
-static blas_t                     blas_viewer_models[MAX_FRAMES_IN_FLIGHT];
-static blas_t                     blas_viewer_weapon[MAX_FRAMES_IN_FLIGHT];
-static blas_t                     blas_explosions[MAX_FRAMES_IN_FLIGHT];
-static blas_t                     blas_particles[MAX_FRAMES_IN_FLIGHT];
-static blas_t                     blas_beams[MAX_FRAMES_IN_FLIGHT];
-static blas_t                     blas_sprites[MAX_FRAMES_IN_FLIGHT];
+static accel_struct_t             blas_static;
+static accel_struct_t             blas_transparent;
+static accel_struct_t             blas_masked;
+static accel_struct_t             blas_sky;
+static accel_struct_t             blas_custom_sky;
+static accel_struct_t             blas_dynamic[MAX_FRAMES_IN_FLIGHT];
+static accel_struct_t             blas_transparent_models[MAX_FRAMES_IN_FLIGHT];
+static accel_struct_t             blas_masked_models[MAX_FRAMES_IN_FLIGHT];
+static accel_struct_t             blas_viewer_models[MAX_FRAMES_IN_FLIGHT];
+static accel_struct_t             blas_viewer_weapon[MAX_FRAMES_IN_FLIGHT];
+static accel_struct_t             blas_explosions[MAX_FRAMES_IN_FLIGHT];
+static accel_struct_t             blas_particles[MAX_FRAMES_IN_FLIGHT];
+static accel_struct_t             blas_beams[MAX_FRAMES_IN_FLIGHT];
+static accel_struct_t             blas_sprites[MAX_FRAMES_IN_FLIGHT];
 
-static VkAccelerationStructureKHR accel_top_khr[MAX_FRAMES_IN_FLIGHT];
-static VkAccelerationStructureNV  accel_top_nv[MAX_FRAMES_IN_FLIGHT];
-static accel_top_match_info_t     accel_top_match[MAX_FRAMES_IN_FLIGHT];
-static BufferResource_t           mem_accel_top[MAX_FRAMES_IN_FLIGHT];
+static accel_struct_t             tlas_geometry[MAX_FRAMES_IN_FLIGHT];
+static accel_struct_t             tlas_effects[MAX_FRAMES_IN_FLIGHT];
+
 
 static BufferResource_t      buf_shader_binding_table;
 
@@ -120,7 +120,7 @@ typedef struct QvkGeometryInstance_s {
 	uint32_t mask            :  8;
 	uint32_t instance_offset : 24;
 	uint32_t flags           :  8;
-	uint64_t acceleration_structure; // handle on NV, address on KHR
+	VkDeviceAddress acceleration_structure;
 } QvkGeometryInstance_t;
 
 typedef struct {
@@ -146,88 +146,68 @@ typedef struct {
 VkResult
 vkpt_pt_init()
 {
-	if (qvk.use_khr_ray_tracing)
-	{
-		VkPhysicalDeviceAccelerationStructurePropertiesKHR accel_struct_properties = {
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR,
-			.pNext = NULL
-		};
+	VkPhysicalDeviceAccelerationStructurePropertiesKHR accel_struct_properties = {
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR,
+		.pNext = NULL
+	};
 
-		VkPhysicalDeviceRayTracingPipelinePropertiesKHR rt_properties_khr = {
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR,
-			.pNext = &accel_struct_properties
-		};
+	VkPhysicalDeviceRayTracingPipelinePropertiesKHR ray_pipeline_properties = {
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR,
+		.pNext = &accel_struct_properties
+	};
 
-		VkPhysicalDeviceProperties2 dev_props2 = {
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
-			.pNext = &rt_properties_khr,
-		};
+	VkPhysicalDeviceProperties2 dev_props2 = {
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
+		.pNext = &ray_pipeline_properties,
+	};
 
-		vkGetPhysicalDeviceProperties2(qvk.physical_device, &dev_props2);
+	vkGetPhysicalDeviceProperties2(qvk.physical_device, &dev_props2);
 
-		shaderGroupBaseAlignment = rt_properties_khr.shaderGroupBaseAlignment;
-		shaderGroupHandleSize = rt_properties_khr.shaderGroupHandleSize;
-		minAccelerationStructureScratchOffsetAlignment = accel_struct_properties.minAccelerationStructureScratchOffsetAlignment;
-	}
-	else
-	{
-		VkPhysicalDeviceRayTracingPropertiesNV rt_properties_nv = {
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV,
-			.pNext = NULL
-		};
+	shaderGroupBaseAlignment = ray_pipeline_properties.shaderGroupBaseAlignment;
+	shaderGroupHandleSize = ray_pipeline_properties.shaderGroupHandleSize;
+	minAccelerationStructureScratchOffsetAlignment = accel_struct_properties.minAccelerationStructureScratchOffsetAlignment;
 
-		VkPhysicalDeviceProperties2 dev_props2 = {
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
-			.pNext = &rt_properties_nv,
-		};
-
-		vkGetPhysicalDeviceProperties2(qvk.physical_device, &dev_props2);
-
-		shaderGroupBaseAlignment = rt_properties_nv.shaderGroupBaseAlignment;
-		shaderGroupHandleSize = rt_properties_nv.shaderGroupHandleSize;
-	}
-
-	buffer_create(&buf_accel_scratch, SIZE_SCRATCH_BUFFER, 
-		qvk.use_khr_ray_tracing ? VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT : VK_BUFFER_USAGE_RAY_TRACING_BIT_NV,
+	buffer_create(&buf_accel_scratch, SIZE_SCRATCH_BUFFER,
+		VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		buffer_create(buf_instances + i, INSTANCE_MAX_NUM * sizeof(QvkGeometryInstance_t), 
-			VK_BUFFER_USAGE_TRANSFER_DST_BIT | (qvk.use_khr_ray_tracing ? VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT : VK_BUFFER_USAGE_RAY_TRACING_BIT_NV),
+	for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		buffer_create(buf_instances + i, INSTANCE_MAX_NUM * sizeof(QvkGeometryInstance_t),
+			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 	}
 
 	/* create descriptor set layout */
 	VkDescriptorSetLayoutBinding bindings[] = {
 		{
-			.binding         = RAY_GEN_ACCEL_STRUCTURE_BINDING_IDX,
-			.descriptorType  = qvk.use_khr_ray_tracing ? VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR : VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV,
-			.descriptorCount = 1,
-			.stageFlags      = (VkShaderStageFlags)(qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_RAYGEN_BIT_KHR),
+			.binding = RAY_GEN_ACCEL_STRUCTURE_BINDING_IDX,
+			.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR,
+			.descriptorCount = TLAS_COUNT,
+			.stageFlags = (VkShaderStageFlags)(qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_RAYGEN_BIT_KHR),
 		},
 		{
-			.binding         = RAY_GEN_PARTICLE_COLOR_BUFFER_BINDING_IDX,
-			.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
+			.binding = RAY_GEN_PARTICLE_COLOR_BUFFER_BINDING_IDX,
+			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
 			.descriptorCount = 1,
-			.stageFlags      = (VkShaderStageFlags)(qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_ANY_HIT_BIT_KHR),
+			.stageFlags = (VkShaderStageFlags)(qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_ANY_HIT_BIT_KHR),
 		},
 		{
-			.binding         = RAY_GEN_BEAM_COLOR_BUFFER_BINDING_IDX,
-			.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
+			.binding = RAY_GEN_BEAM_COLOR_BUFFER_BINDING_IDX,
+			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
 			.descriptorCount = 1,
-			.stageFlags      = (VkShaderStageFlags)(qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_ANY_HIT_BIT_KHR),
+			.stageFlags = (VkShaderStageFlags)(qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_ANY_HIT_BIT_KHR),
 		},
 		{
-			.binding         = RAY_GEN_SPRITE_INFO_BUFFER_BINDING_IDX,
-			.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
+			.binding = RAY_GEN_SPRITE_INFO_BUFFER_BINDING_IDX,
+			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
 			.descriptorCount = 1,
-			.stageFlags      = (VkShaderStageFlags)(qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_ANY_HIT_BIT_KHR),
+			.stageFlags = (VkShaderStageFlags)(qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_ANY_HIT_BIT_KHR),
 		},
 		{
-			.binding         = RAY_GEN_BEAM_INTERSECT_BUFFER_BINDING_IDX,
-			.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
+			.binding = RAY_GEN_BEAM_INTERSECT_BUFFER_BINDING_IDX,
+			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
 			.descriptorCount = 1,
-			.stageFlags      = (VkShaderStageFlags)(qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_INTERSECTION_BIT_KHR),
+			.stageFlags = (VkShaderStageFlags)(qvk.use_ray_query ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_INTERSECTION_BIT_KHR),
 		},
 	};
 
@@ -267,7 +247,7 @@ vkpt_pt_init()
 
 	VkDescriptorPoolSize pool_sizes[] = {
 		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, MAX_FRAMES_IN_FLIGHT * LENGTH(bindings) },
-		{ qvk.use_khr_ray_tracing ? VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR : VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV, MAX_FRAMES_IN_FLIGHT }
+		{ VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, MAX_FRAMES_IN_FLIGHT }
 	};
 
 	VkDescriptorPoolCreateInfo pool_create_info = {
@@ -303,16 +283,14 @@ VkResult
 vkpt_pt_update_descripter_set_bindings(int idx)
 {
 	/* update descriptor set bindings */
-	VkWriteDescriptorSetAccelerationStructureKHR desc_accel_struct_info_khr = {
-		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR,
-		.accelerationStructureCount = 1,
-		.pAccelerationStructures = accel_top_khr + idx
-	};
+	VkAccelerationStructureKHR tlas[TLAS_COUNT];
+	tlas[TLAS_INDEX_GEOMETRY] = tlas_geometry[idx].accel;
+	tlas[TLAS_INDEX_EFFECTS] = tlas_effects[idx].accel;
 
-	VkWriteDescriptorSetAccelerationStructureNV desc_accel_struct_info_nv = {
-		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_NV,
-		.accelerationStructureCount = 1,
-		.pAccelerationStructures = accel_top_nv + idx
+	VkWriteDescriptorSetAccelerationStructureKHR desc_accel_struct = {
+		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR,
+		.accelerationStructureCount = TLAS_COUNT,
+		.pAccelerationStructures = tlas
 	};
 
 	VkBufferView particle_color_buffer_view = get_transparency_particle_color_buffer_view();
@@ -323,11 +301,11 @@ vkpt_pt_update_descripter_set_bindings(int idx)
 	VkWriteDescriptorSet writes[] = {
 		{
 			.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-			.pNext           = qvk.use_khr_ray_tracing ? (const void*)&desc_accel_struct_info_khr : (const void*)&desc_accel_struct_info_nv,
+			.pNext           = (const void*)&desc_accel_struct,
 			.dstSet          = rt_descriptor_set[idx],
 			.dstBinding      = RAY_GEN_ACCEL_STRUCTURE_BINDING_IDX,
-			.descriptorCount = 1,
-			.descriptorType  = qvk.use_khr_ray_tracing ? VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR : VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV
+			.descriptorCount = TLAS_COUNT,
+			.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR
 		},
 		{
 			.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -361,6 +339,14 @@ vkpt_pt_update_descripter_set_bindings(int idx)
 			.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
 			.pTexelBufferView = &beam_intersect_buffer_view
 		},
+		{
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = rt_descriptor_set[idx],
+			.dstBinding = RAY_GEN_BEAM_INTERSECT_BUFFER_BINDING_IDX,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
+			.pTexelBufferView = &beam_intersect_buffer_view
+		},
 	};
 
 	vkUpdateDescriptorSets(qvk.device, LENGTH(writes), writes, 0, NULL);
@@ -368,78 +354,65 @@ vkpt_pt_update_descripter_set_bindings(int idx)
 	return VK_SUCCESS;
 }
 
-static size_t
-get_scratch_buffer_size_nv(VkAccelerationStructureNV ac)
-{
-	VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
-		.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
-		.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_BUILD_SCRATCH_NV,
-		.accelerationStructure = ac,
-	};
-
-	VkMemoryRequirements2 mem_req = { };
-	mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
-	qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
-
-	return mem_req.memoryRequirements.size;
-}
-
-static void destroy_blas(blas_t* blas)
+static void destroy_accel_struct(accel_struct_t* blas)
 {
 	buffer_destroy(&blas->mem);
 
-	if (blas->accel_khr)
-	{
-		qvkDestroyAccelerationStructureKHR(qvk.device, blas->accel_khr, NULL);
-		blas->accel_khr = VK_NULL_HANDLE;
-	}
-
-	if (blas->accel_nv)
-	{
-		qvkDestroyAccelerationStructureNV(qvk.device, blas->accel_nv, NULL);
-		blas->accel_nv = VK_NULL_HANDLE;
+	if (blas->accel) 	{
+		qvkDestroyAccelerationStructureKHR(qvk.device, blas->accel, NULL);
+		blas->accel = VK_NULL_HANDLE;
 	}
 
 	blas->match.fast_build = 0;
 	blas->match.index_count = 0;
 	blas->match.vertex_count = 0;
 	blas->match.aabb_count = 0;
+	blas->match.instance_count = 0;
 }
 
 void vkpt_pt_destroy_static()
 {
-	destroy_blas(&blas_static);
-	destroy_blas(&blas_transparent);
-	destroy_blas(&blas_sky);
-	destroy_blas(&blas_custom_sky);
+	destroy_accel_struct(&blas_static);
+	destroy_accel_struct(&blas_transparent);
+	destroy_accel_struct(&blas_masked);
+	destroy_accel_struct(&blas_sky);
+	destroy_accel_struct(&blas_custom_sky);
 }
 
 static void vkpt_pt_destroy_dynamic(int idx)
 {
-	destroy_blas(&blas_dynamic[idx]);
-	destroy_blas(&blas_transparent_models[idx]);
-	destroy_blas(&blas_viewer_models[idx]);
-	destroy_blas(&blas_viewer_weapon[idx]);
-	destroy_blas(&blas_explosions[idx]);
-	destroy_blas(&blas_particles[idx]);
-	destroy_blas(&blas_beams[idx]);
-	destroy_blas(&blas_sprites[idx]);
+	destroy_accel_struct(&blas_dynamic[idx]);
+	destroy_accel_struct(&blas_transparent_models[idx]);
+	destroy_accel_struct(&blas_masked_models[idx]);
+	destroy_accel_struct(&blas_viewer_models[idx]);
+	destroy_accel_struct(&blas_viewer_weapon[idx]);
+	destroy_accel_struct(&blas_explosions[idx]);
+	destroy_accel_struct(&blas_particles[idx]);
+	destroy_accel_struct(&blas_beams[idx]);
+	destroy_accel_struct(&blas_sprites[idx]);
 }
 
-static inline int accel_matches(accel_bottom_match_info_t *match,
+static inline int accel_matches(accel_match_info_t* match,
 								int fast_build,
 								uint32_t vertex_count,
 								uint32_t index_count) {
 	return match->fast_build == fast_build &&
-		   match->vertex_count >= vertex_count &&
-		   match->index_count >= index_count;
+		match->vertex_count >= vertex_count &&
+		match->index_count >= index_count;
 }
 
-static inline int accel_matches_aabb(accel_bottom_match_info_t *match,
+static inline int accel_matches_aabb(accel_match_info_t *match,
 								int fast_build,
 								uint32_t aabb_count) {
 	return match->fast_build == fast_build &&
 		   match->aabb_count >= aabb_count;
+}
+
+static inline int accel_matches_top_level(accel_match_info_t *match,
+								int fast_build,
+								uint32_t instance_count) {
+	return match->fast_build == fast_build &&
+		   match->instance_count >= instance_count;
 }
 
 // How much to bloat the dynamic geometry allocations
@@ -456,238 +429,124 @@ vkpt_pt_create_accel_bottom(
 	VkDeviceAddress offset_index,
 	int num_vertices,
 	int num_indices,
-	blas_t* blas,
+	accel_struct_t* blas,
 	qboolean is_dynamic,
 	qboolean fast_build)
 {
 	assert(blas);
 
-	if (num_vertices == 0)
-	{
+	if (num_vertices == 0) 	{
 		blas->present = false;
 		return VK_SUCCESS;
 	}
 
-	if (qvk.use_khr_ray_tracing)
-	{
-		assert(buffer_vertex->address);
-		if (buffer_index) assert(buffer_index->address);
+	assert(buffer_vertex->address);
+	if (buffer_index) assert(buffer_index->address);
 
-		const VkAccelerationStructureGeometryTrianglesDataKHR triangles = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR,
-			.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT,
-			.vertexData = {.deviceAddress = buffer_vertex->address + offset_vertex },
-			.vertexStride = sizeof(float) * 3,
-			.maxVertex = (uint32_t)num_vertices - 1,
-			.indexType = buffer_index ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_NONE_KHR,
-			.indexData = {.deviceAddress = buffer_index ? (buffer_index->address + offset_index) : 0 },
-		};
+	const VkAccelerationStructureGeometryTrianglesDataKHR triangles = {
+		.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR,
+		.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT,
+		.vertexData = {.deviceAddress = buffer_vertex->address + offset_vertex },
+		.vertexStride = sizeof(float) * 3,
+		.maxVertex = (uint32_t)num_vertices - 1,
+		.indexType = buffer_index ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_NONE_KHR,
+		.indexData = {.deviceAddress = buffer_index ? (buffer_index->address + offset_index) : 0 },
+	};
 
-		const VkAccelerationStructureGeometryDataKHR geometry_data = { 
-			.triangles = triangles
-		};
+	const VkAccelerationStructureGeometryDataKHR geometry_data = {
+		.triangles = triangles
+	};
 
-		const VkAccelerationStructureGeometryKHR geometry = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR,
-			.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR,
-			.geometry = geometry_data
-		};
+	const VkAccelerationStructureGeometryKHR geometry = {
+		.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR,
+		.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR,
+		.geometry = geometry_data
+	};
 
-		const VkAccelerationStructureGeometryKHR* geometries = &geometry;
+	const VkAccelerationStructureGeometryKHR* geometries = &geometry;
 
-		VkAccelerationStructureBuildGeometryInfoKHR buildInfo;
+	VkAccelerationStructureBuildGeometryInfoKHR buildInfo;
 
-		// Prepare build info now, acceleration is filled later
-		buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
-		buildInfo.pNext = NULL;
-		buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
-		buildInfo.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
-		buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
-		buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
-		buildInfo.dstAccelerationStructure = VK_NULL_HANDLE;
-		buildInfo.geometryCount = 1;
-		buildInfo.pGeometries = geometries;
-		buildInfo.ppGeometries = NULL;
+	// Prepare build info now, acceleration is filled later
+	buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+	buildInfo.pNext = NULL;
+	buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+	buildInfo.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+	buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+	buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
+	buildInfo.dstAccelerationStructure = VK_NULL_HANDLE;
+	buildInfo.geometryCount = 1;
+	buildInfo.pGeometries = geometries;
+	buildInfo.ppGeometries = NULL;
 
-		int doFree = 0;
-		int doAlloc = 0;
+	int doFree = 0;
+	int doAlloc = 0;
 
-		if (!is_dynamic || !accel_matches(&blas->match, fast_build, num_vertices, num_indices) || blas->accel_khr == VK_NULL_HANDLE)
-		{
-			doAlloc = 1;
-			doFree = (blas->accel_khr != VK_NULL_HANDLE);
-		}
-
-		if (doFree)
-		{
-			destroy_blas(blas);
-		}
-
-		// Find size to build on the device
-		uint32_t max_primitive_count = max(num_vertices, num_indices) / 3; // number of tris
-		VkAccelerationStructureBuildSizesInfoKHR sizeInfo = { .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
-		qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &max_primitive_count, &sizeInfo);
-
-		if (doAlloc)
-		{
-			int num_vertices_to_allocate = num_vertices;
-			int num_indices_to_allocate = num_indices;
-
-			// Allocate more memory / larger BLAS for dynamic objects
-			if (is_dynamic)
-			{
-				num_vertices_to_allocate *= DYNAMIC_GEOMETRY_BLOAT_FACTOR;
-				num_indices_to_allocate *= DYNAMIC_GEOMETRY_BLOAT_FACTOR;
-
-				max_primitive_count = max(num_vertices_to_allocate, num_indices_to_allocate) / 3;
-				qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &max_primitive_count, &sizeInfo);
-			}
-
-			// Create acceleration structure
-			VkAccelerationStructureCreateInfoKHR createInfo = {
-				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
-				.size = sizeInfo.accelerationStructureSize,
-				.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
-			};
-
-			// Create the buffer for the acceleration structure
-			buffer_create(&blas->mem, sizeInfo.accelerationStructureSize, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-			createInfo.buffer = blas->mem.buffer;
-
-			// Create the acceleration structure
-			qvkCreateAccelerationStructureKHR(qvk.device, &createInfo, NULL, &blas->accel_khr);
-
-			blas->match.fast_build = fast_build;
-			blas->match.vertex_count = num_vertices_to_allocate;
-			blas->match.index_count = num_indices_to_allocate;
-			blas->match.aabb_count = 0;
-		}
-
-		// set where the build lands
-		buildInfo.dstAccelerationStructure = blas->accel_khr;
-
-		// Use shared scratch buffer for holding the temporary data of the acceleration structure builder
-		buildInfo.scratchData.deviceAddress = buf_accel_scratch.address + scratch_buf_ptr;
-		assert(buf_accel_scratch.address);
-
-		// Update the scratch buffer ptr
-		scratch_buf_ptr += sizeInfo.buildScratchSize;
-		scratch_buf_ptr = align(scratch_buf_ptr, minAccelerationStructureScratchOffsetAlignment);
-		assert(scratch_buf_ptr < SIZE_SCRATCH_BUFFER);
-
-		// build offset
-		VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = (uint32_t)max(num_vertices, num_indices) / 3 };
-		VkAccelerationStructureBuildRangeInfoKHR* offsets = &offset;
-
-		qvkCmdBuildAccelerationStructuresKHR(cmd_buf, 1, &buildInfo, &offsets);
+	if (!is_dynamic || !accel_matches(&blas->match, fast_build, num_vertices, num_indices) || blas->accel == VK_NULL_HANDLE) 	{
+		doAlloc = 1;
+		doFree = (blas->accel != VK_NULL_HANDLE);
 	}
-	else // (!qvk.use_khr_ray_tracing)
-	{
-		VkGeometryNV geometry = {
-			.sType = VK_STRUCTURE_TYPE_GEOMETRY_NV,
-			.geometry = {
-				.triangles = {
-					.sType = VK_STRUCTURE_TYPE_GEOMETRY_TRIANGLES_NV,
-					.vertexData = buffer_vertex->buffer,
-					.vertexOffset = offset_vertex,
-					.vertexCount = (uint32_t)num_vertices,
-					.vertexStride = sizeof(float) * 3,
-					.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT,
-					.indexData = buffer_index ? buffer_index->buffer : VK_NULL_HANDLE,
-					.indexCount = (uint32_t)num_indices,
-					.indexType = buffer_index ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_NONE_NV,
-				},
-				.aabbs = { .sType = VK_STRUCTURE_TYPE_GEOMETRY_AABB_NV }
-			}
-		};
 
-		int doFree = 0;
-		int doAlloc = 0;
-
-		if (!is_dynamic || !accel_matches(&blas->match, fast_build, num_vertices, num_indices) || blas->accel_nv == VK_NULL_HANDLE) {
-			doAlloc = 1;
-			doFree = (blas->accel_nv != VK_NULL_HANDLE);
-		}
-
-		if (doFree) 
-		{
-			destroy_blas(blas);
-		}
-
-		if (doAlloc) 
-		{
-			VkGeometryNV allocGeometry = geometry;
-
-			// Allocate more memory / larger BLAS for dynamic objects
-			if (is_dynamic)
-			{
-				allocGeometry.geometry.triangles.indexCount *= DYNAMIC_GEOMETRY_BLOAT_FACTOR;
-				allocGeometry.geometry.triangles.vertexCount *= DYNAMIC_GEOMETRY_BLOAT_FACTOR;
-			}
-
-			VkAccelerationStructureCreateInfoNV accel_create_info = 
-			{
-				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_NV,
-				.info = {
-					.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
-					.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
-					.flags = (VkBuildAccelerationStructureFlagsNV)(fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV),
-					.instanceCount = 0,
-					.geometryCount = 1,
-					.pGeometries = &allocGeometry,
-				}
-			};
-
-			qvkCreateAccelerationStructureNV(qvk.device, &accel_create_info, NULL, &blas->accel_nv);
-
-			VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
-				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
-				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV,
-				.accelerationStructure = blas->accel_nv,
-			};
-
-			VkMemoryRequirements2 mem_req = { };
-			mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
-			qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
-
-			_VK(buffer_create(&blas->mem, mem_req.memoryRequirements.size, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT));
-
-			VkBindAccelerationStructureMemoryInfoNV bind_info = {
-				.sType = VK_STRUCTURE_TYPE_BIND_ACCELERATION_STRUCTURE_MEMORY_INFO_NV,
-				.accelerationStructure = blas->accel_nv,
-				.memory = blas->mem.memory
-			};
-
-			_VK(qvkBindAccelerationStructureMemoryNV(qvk.device, 1, &bind_info));
-
-			blas->match.fast_build = fast_build;
-			blas->match.vertex_count = allocGeometry.geometry.triangles.vertexCount;
-			blas->match.index_count = allocGeometry.geometry.triangles.indexCount;
-			blas->match.aabb_count = 0;
-		}
-
-		size_t scratch_buf_size = get_scratch_buffer_size_nv(blas->accel_nv);
-		assert(scratch_buf_ptr + scratch_buf_size < SIZE_SCRATCH_BUFFER);
-
-		VkAccelerationStructureInfoNV as_info = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
-			.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
-			.flags = (VkBuildAccelerationStructureFlagsNV)(fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV),
-			.geometryCount = 1,
-			.pGeometries = &geometry,
-		};
-
-		qvkCmdBuildAccelerationStructureNV(cmd_buf, &as_info,
-			VK_NULL_HANDLE, /* instance buffer */
-			0 /* instance offset */,
-			VK_FALSE,  /* update */
-			blas->accel_nv,
-			VK_NULL_HANDLE,
-			buf_accel_scratch.buffer,
-			scratch_buf_ptr);
-
-		scratch_buf_ptr += scratch_buf_size;
+	if (doFree) 	{
+		destroy_accel_struct(blas);
 	}
+
+	// Find size to build on the device
+	uint32_t max_primitive_count = max(num_vertices, num_indices) / 3; // number of tris
+	VkAccelerationStructureBuildSizesInfoKHR sizeInfo = { .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
+	qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &max_primitive_count, &sizeInfo);
+
+	if (doAlloc) 	{
+		int num_vertices_to_allocate = num_vertices;
+		int num_indices_to_allocate = num_indices;
+
+		// Allocate more memory / larger BLAS for dynamic objects
+		if (is_dynamic) 		{
+			num_vertices_to_allocate *= DYNAMIC_GEOMETRY_BLOAT_FACTOR;
+			num_indices_to_allocate *= DYNAMIC_GEOMETRY_BLOAT_FACTOR;
+
+			max_primitive_count = max(num_vertices_to_allocate, num_indices_to_allocate) / 3;
+			qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &max_primitive_count, &sizeInfo);
+		}
+
+		// Create acceleration structure
+		VkAccelerationStructureCreateInfoKHR createInfo = {
+			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
+			.size = sizeInfo.accelerationStructureSize,
+			.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
+		};
+
+		// Create the buffer for the acceleration structure
+		buffer_create(&blas->mem, sizeInfo.accelerationStructureSize, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		createInfo.buffer = blas->mem.buffer;
+
+		// Create the acceleration structure
+		qvkCreateAccelerationStructureKHR(qvk.device, &createInfo, NULL, &blas->accel);
+
+		blas->match.fast_build = fast_build;
+		blas->match.vertex_count = num_vertices_to_allocate;
+		blas->match.index_count = num_indices_to_allocate;
+		blas->match.aabb_count = 0;
+		blas->match.instance_count = 0;
+	}
+
+	// set where the build lands
+	buildInfo.dstAccelerationStructure = blas->accel;
+
+	// Use shared scratch buffer for holding the temporary data of the acceleration structure builder
+	buildInfo.scratchData.deviceAddress = buf_accel_scratch.address + scratch_buf_ptr;
+	assert(buf_accel_scratch.address);
+
+	// Update the scratch buffer ptr
+	scratch_buf_ptr += sizeInfo.buildScratchSize;
+	scratch_buf_ptr = align(scratch_buf_ptr, minAccelerationStructureScratchOffsetAlignment);
+	assert(scratch_buf_ptr < SIZE_SCRATCH_BUFFER);
+
+	// build offset
+	VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = (uint32_t)max(num_vertices, num_indices) / 3 };
+	const VkAccelerationStructureBuildRangeInfoKHR* offsets = &offset;
+
+	qvkCmdBuildAccelerationStructuresKHR(cmd_buf, 1, &buildInfo, &offsets);
 
 	blas->present = true;
 
@@ -700,229 +559,116 @@ vkpt_pt_create_accel_bottom_aabb(
 	BufferResource_t* buffer_aabb,
 	VkDeviceAddress offset_aabb,
 	int num_aabbs,
-	blas_t* blas,
+	accel_struct_t* blas,
 	qboolean is_dynamic,
-	qboolean fast_build)
-{
+	qboolean fast_build) {
 	assert(blas);
 
-	if (num_aabbs == 0)
-	{
+	if (num_aabbs == 0) 	{
 		blas->present = false;
 		return VK_SUCCESS;
 	}
 
-	if (qvk.use_khr_ray_tracing)
-	{
-		assert(buffer_aabb->address);
+	assert(buffer_aabb->address);
 
-		const VkAccelerationStructureGeometryAabbsDataKHR aabbs = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_AABBS_DATA_KHR,
-			.data = {.deviceAddress = buffer_aabb->address + offset_aabb },
-			.stride = sizeof(VkAabbPositionsKHR)
-		};
+	const VkAccelerationStructureGeometryAabbsDataKHR aabbs = {
+		.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_AABBS_DATA_KHR,
+		.data = {.deviceAddress = buffer_aabb->address + offset_aabb },
+		.stride = sizeof(VkAabbPositionsKHR)
+	};
 
-		const VkAccelerationStructureGeometryDataKHR geometry_data = { 
-			.aabbs = aabbs
-		};
+	const VkAccelerationStructureGeometryDataKHR geometry_data = {
+		.aabbs = aabbs
+	};
 
-		const VkAccelerationStructureGeometryKHR geometry = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR,
-			.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR,
-			.geometry = geometry_data
-		};
+	const VkAccelerationStructureGeometryKHR geometry = {
+		.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR,
+		.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR,
+		.geometry = geometry_data
+	};
 
-		const VkAccelerationStructureGeometryKHR* geometries = &geometry;
+	const VkAccelerationStructureGeometryKHR* geometries = &geometry;
 
-		VkAccelerationStructureBuildGeometryInfoKHR buildInfo;
+	VkAccelerationStructureBuildGeometryInfoKHR buildInfo;
 
-		// Prepare build info now, acceleration is filled later
-		buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
-		buildInfo.pNext = NULL;
-		buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
-		buildInfo.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
-		buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
-		buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
-		buildInfo.dstAccelerationStructure = VK_NULL_HANDLE;
-		buildInfo.geometryCount = 1;
-		buildInfo.pGeometries = geometries;
-		buildInfo.ppGeometries = NULL;
+	// Prepare build info now, acceleration is filled later
+	buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+	buildInfo.pNext = NULL;
+	buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+	buildInfo.flags = fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+	buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+	buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
+	buildInfo.dstAccelerationStructure = VK_NULL_HANDLE;
+	buildInfo.geometryCount = 1;
+	buildInfo.pGeometries = geometries;
+	buildInfo.ppGeometries = NULL;
 
-		int doFree = 0;
-		int doAlloc = 0;
+	int doFree = 0;
+	int doAlloc = 0;
 
-		if (!is_dynamic || !accel_matches_aabb(&blas->match, fast_build, num_aabbs) || blas->accel_khr == VK_NULL_HANDLE)
-		{
-			doAlloc = 1;
-			doFree = (blas->accel_khr != VK_NULL_HANDLE);
-		}
-
-		if (doFree)
-		{
-			destroy_blas(blas);
-		}
-
-		// Find size to build on the device
-		uint32_t max_primitive_count = num_aabbs;
-		VkAccelerationStructureBuildSizesInfoKHR sizeInfo = { .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
-		qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &max_primitive_count, &sizeInfo);
-
-		if (doAlloc)
-		{
-			int num_aabs_to_allocate = num_aabbs;
-
-			// Allocate more memory / larger BLAS for dynamic objects
-			if (is_dynamic)
-			{
-				num_aabs_to_allocate *= DYNAMIC_GEOMETRY_BLOAT_FACTOR;
-
-				max_primitive_count = num_aabs_to_allocate;
-				qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &max_primitive_count, &sizeInfo);
-			}
-
-			// Create acceleration structure
-			VkAccelerationStructureCreateInfoKHR createInfo = {
-				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
-				.size = sizeInfo.accelerationStructureSize,
-				.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
-			};
-
-			// Create the buffer for the acceleration structure
-			buffer_create(&blas->mem, sizeInfo.accelerationStructureSize, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-			createInfo.buffer = blas->mem.buffer;
-
-			// Create the acceleration structure
-			qvkCreateAccelerationStructureKHR(qvk.device, &createInfo, NULL, &blas->accel_khr);
-
-			blas->match.fast_build = fast_build;
-			blas->match.vertex_count = 0;
-			blas->match.index_count = 0;
-			blas->match.aabb_count = num_aabs_to_allocate;
-		}
-
-		// set where the build lands
-		buildInfo.dstAccelerationStructure = blas->accel_khr;
-
-		// Use shared scratch buffer for holding the temporary data of the acceleration structure builder
-		buildInfo.scratchData.deviceAddress = buf_accel_scratch.address + scratch_buf_ptr;
-		assert(buf_accel_scratch.address);
-
-		// Update the scratch buffer ptr
-		scratch_buf_ptr += sizeInfo.buildScratchSize;
-		scratch_buf_ptr = align(scratch_buf_ptr, minAccelerationStructureScratchOffsetAlignment);
-		assert(scratch_buf_ptr < SIZE_SCRATCH_BUFFER);
-
-		// build offset
-		VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = (uint32_t)num_aabbs };
-		VkAccelerationStructureBuildRangeInfoKHR* offsets = &offset;
-
-		qvkCmdBuildAccelerationStructuresKHR(cmd_buf, 1, &buildInfo, &offsets);
+	if (!is_dynamic || !accel_matches_aabb(&blas->match, fast_build, num_aabbs) || blas->accel == VK_NULL_HANDLE) 	{
+		doAlloc = 1;
+		doFree = (blas->accel != VK_NULL_HANDLE);
 	}
-	else // (!qvk.use_khr_ray_tracing)
-	{
-		VkGeometryNV geometry = {
-			.sType = VK_STRUCTURE_TYPE_GEOMETRY_NV,
-			.geometryType = VK_GEOMETRY_TYPE_AABBS_NV,
-			.geometry = {
-				.triangles = {
-					.sType = VK_STRUCTURE_TYPE_GEOMETRY_TRIANGLES_NV
-				},
-				.aabbs = {
-					.sType = VK_STRUCTURE_TYPE_GEOMETRY_AABB_NV,
-					.aabbData = buffer_aabb->buffer,
-					.numAABBs = (uint32_t)num_aabbs,
-					.stride = sizeof(VkAabbPositionsKHR),
-					.offset = offset_aabb,
-				}
-			}
-		};
 
-		int doFree = 0;
-		int doAlloc = 0;
-
-		if (!is_dynamic || !accel_matches_aabb(&blas->match, fast_build, num_aabbs) || blas->accel_nv == VK_NULL_HANDLE) {
-			doAlloc = 1;
-			doFree = (blas->accel_nv != VK_NULL_HANDLE);
-		}
-
-		if (doFree) 
-		{
-			destroy_blas(blas);
-		}
-
-		if (doAlloc) 
-		{
-			VkGeometryNV allocGeometry = geometry;
-
-			// Allocate more memory / larger BLAS for dynamic objects
-			if (is_dynamic)
-			{
-				allocGeometry.geometry.aabbs.numAABBs *= DYNAMIC_GEOMETRY_BLOAT_FACTOR;
-			}
-
-			VkAccelerationStructureCreateInfoNV accel_create_info = 
-			{
-				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_NV,
-				.info = {
-					.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
-					.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
-					.flags = (VkBuildAccelerationStructureFlagsNV)(fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV),
-					.instanceCount = 0,
-					.geometryCount = 1,
-					.pGeometries = &allocGeometry,
-				}
-			};
-
-			qvkCreateAccelerationStructureNV(qvk.device, &accel_create_info, NULL, &blas->accel_nv);
-
-			VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
-				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
-				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV,
-				.accelerationStructure = blas->accel_nv,
-			};
-
-			VkMemoryRequirements2 mem_req = { };
-			mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
-			qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
-
-			_VK(buffer_create(&blas->mem, mem_req.memoryRequirements.size, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT));
-
-			VkBindAccelerationStructureMemoryInfoNV bind_info = {
-				.sType = VK_STRUCTURE_TYPE_BIND_ACCELERATION_STRUCTURE_MEMORY_INFO_NV,
-				.accelerationStructure = blas->accel_nv,
-				.memory = blas->mem.memory
-			};
-
-			_VK(qvkBindAccelerationStructureMemoryNV(qvk.device, 1, &bind_info));
-
-			blas->match.fast_build = fast_build;
-			blas->match.vertex_count = 0;
-			blas->match.index_count = 0;
-			blas->match.aabb_count = allocGeometry.geometry.aabbs.numAABBs;
-		}
-
-		size_t scratch_buf_size = get_scratch_buffer_size_nv(blas->accel_nv);
-		assert(scratch_buf_ptr + scratch_buf_size < SIZE_SCRATCH_BUFFER);
-
-		VkAccelerationStructureInfoNV as_info = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
-			.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV,
-			.flags = (VkBuildAccelerationStructureFlagsNV)(fast_build ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_NV : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_NV),
-			.geometryCount = 1,
-			.pGeometries = &geometry,
-		};
-
-		qvkCmdBuildAccelerationStructureNV(cmd_buf, &as_info,
-			VK_NULL_HANDLE, /* instance buffer */
-			0 /* instance offset */,
-			VK_FALSE,  /* update */
-			blas->accel_nv,
-			VK_NULL_HANDLE,
-			buf_accel_scratch.buffer,
-			scratch_buf_ptr);
-
-		scratch_buf_ptr += scratch_buf_size;
+	if (doFree) 	{
+		destroy_accel_struct(blas);
 	}
+
+	// Find size to build on the device
+	uint32_t max_primitive_count = num_aabbs;
+	VkAccelerationStructureBuildSizesInfoKHR sizeInfo = { .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
+	qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &max_primitive_count, &sizeInfo);
+
+	if (doAlloc) 	{
+		int num_aabs_to_allocate = num_aabbs;
+
+		// Allocate more memory / larger BLAS for dynamic objects
+		if (is_dynamic) 		{
+			num_aabs_to_allocate *= DYNAMIC_GEOMETRY_BLOAT_FACTOR;
+
+			max_primitive_count = num_aabs_to_allocate;
+			qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &max_primitive_count, &sizeInfo);
+		}
+
+		// Create acceleration structure
+		VkAccelerationStructureCreateInfoKHR createInfo = {
+			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
+			.size = sizeInfo.accelerationStructureSize,
+			.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
+		};
+
+		// Create the buffer for the acceleration structure
+		buffer_create(&blas->mem, sizeInfo.accelerationStructureSize, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		createInfo.buffer = blas->mem.buffer;
+
+		// Create the acceleration structure
+		qvkCreateAccelerationStructureKHR(qvk.device, &createInfo, NULL, &blas->accel);
+
+		blas->match.fast_build = fast_build;
+		blas->match.vertex_count = 0;
+		blas->match.index_count = 0;
+		blas->match.aabb_count = num_aabs_to_allocate;
+		blas->match.instance_count = 0;
+	}
+
+	// set where the build lands
+	buildInfo.dstAccelerationStructure = blas->accel;
+
+	// Use shared scratch buffer for holding the temporary data of the acceleration structure builder
+	buildInfo.scratchData.deviceAddress = buf_accel_scratch.address + scratch_buf_ptr;
+	assert(buf_accel_scratch.address);
+
+	// Update the scratch buffer ptr
+	scratch_buf_ptr += sizeInfo.buildScratchSize;
+	scratch_buf_ptr = align(scratch_buf_ptr, minAccelerationStructureScratchOffsetAlignment);
+	assert(scratch_buf_ptr < SIZE_SCRATCH_BUFFER);
+
+	// build offset
+	VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = (uint32_t)num_aabbs };
+	const VkAccelerationStructureBuildRangeInfoKHR* offsets = &offset;
+
+	qvkCmdBuildAccelerationStructuresKHR(cmd_buf, 1, &buildInfo, &offsets);
 
 	blas->present = true;
 
@@ -933,6 +679,7 @@ VkResult
 vkpt_pt_create_static(
 	int num_vertices, 
 	int num_vertices_transparent,
+	int num_vertices_masked,
 	int num_vertices_sky,
 	int num_vertices_custom_sky)
 {
@@ -959,6 +706,12 @@ vkpt_pt_create_static(
 	address_vertex += num_vertices_sky * sizeof(float) * 3;
 	scratch_buf_ptr = 0;
 
+	ret = vkpt_pt_create_accel_bottom(cmd_buf, &qvk.buf_vertex_bsp, address_vertex, NULL, 0, num_vertices_masked, 0, &blas_masked, false, false);
+
+	MEM_BARRIER_BUILD_ACCEL(cmd_buf);
+	address_vertex += num_vertices_masked * sizeof(float) * 3;
+	scratch_buf_ptr = 0;
+
 	ret = vkpt_pt_create_accel_bottom(cmd_buf, &qvk.buf_vertex_bsp, address_vertex, NULL, 0, num_vertices_custom_sky, 0, &blas_custom_sky, false, false);
 
 	MEM_BARRIER_BUILD_ACCEL(cmd_buf);
@@ -966,7 +719,8 @@ vkpt_pt_create_static(
 	scratch_buf_ptr = 0;
 
 	transparent_primitive_offset = num_vertices / 3;
-	sky_primitive_offset = transparent_primitive_offset + num_vertices_transparent / 3;
+	masked_primitive_offset = transparent_primitive_offset + num_vertices_transparent / 3;
+	sky_primitive_offset = masked_primitive_offset + num_vertices_masked / 3;
 	custom_sky_primitive_offset = sky_primitive_offset + num_vertices_sky / 3;
 
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
@@ -992,6 +746,10 @@ vkpt_pt_create_all_dynamic(
 	offset_vertex = offset_vertex_base + upload_info->transparent_model_vertex_offset * sizeof(float) * 3;
 	vkpt_pt_create_accel_bottom(cmd_buf, &qvk.buf_vertex_model_dynamic, offset_vertex, NULL, offset_index, upload_info->transparent_model_vertex_num, 0, blas_transparent_models + idx, true, true);
 
+	masked_model_primitive_offset = upload_info->masked_model_vertex_offset / 3;
+	offset_vertex = offset_vertex_base + upload_info->masked_model_vertex_offset * sizeof(float) * 3;
+	vkpt_pt_create_accel_bottom(cmd_buf, &qvk.buf_vertex_model_dynamic, offset_vertex, NULL, offset_index, upload_info->masked_model_vertex_num, 0, blas_masked_models + idx, true, true);
+
 	viewer_model_primitive_offset = upload_info->viewer_model_vertex_offset / 3;
 	offset_vertex = offset_vertex_base + upload_info->viewer_model_vertex_offset * sizeof(float) * 3;
 	vkpt_pt_create_accel_bottom(cmd_buf, &qvk.buf_vertex_model_dynamic, offset_vertex, NULL, offset_index, upload_info->viewer_model_vertex_num, 0, blas_viewer_models + idx, true, true);
@@ -1011,12 +769,12 @@ vkpt_pt_create_all_dynamic(
 	vkpt_get_transparency_buffers(VKPT_TRANSPARENCY_PARTICLES, &buffer_vertex, &offset_vertex, &buffer_index, &offset_index, &num_vertices, &num_indices);
 	vkpt_pt_create_accel_bottom(cmd_buf, buffer_vertex, offset_vertex, buffer_index, offset_index, num_vertices, num_indices, blas_particles + idx, true, true);
 
-	BufferResource_t *buffer_aabb = NULL;
+	BufferResource_t* buffer_aabb = NULL;
 	uint64_t offset_aabb = 0;
 	uint32_t num_aabbs = 0;
 	vkpt_get_beam_aabb_buffer(&buffer_aabb, &offset_aabb, &num_aabbs);
 	vkpt_pt_create_accel_bottom_aabb(cmd_buf, buffer_aabb, offset_aabb, num_aabbs, blas_beams + idx, true, true);
-	
+		
 	vkpt_get_transparency_buffers(VKPT_TRANSPARENCY_SPRITES, &buffer_vertex, &offset_vertex, &buffer_index, &offset_index, &num_vertices, &num_indices);
 	vkpt_pt_create_accel_bottom(cmd_buf, buffer_vertex, offset_vertex, buffer_index, offset_index, num_vertices, num_indices, blas_sprites + idx, true, true);
 
@@ -1026,26 +784,8 @@ vkpt_pt_create_all_dynamic(
 	return VK_SUCCESS;
 }
 
-void
-vkpt_pt_destroy_toplevel(int idx)
-{
-	if(accel_top_khr[idx]) {
-		qvkDestroyAccelerationStructureKHR(qvk.device, accel_top_khr[idx], NULL);
-		accel_top_khr[idx] = VK_NULL_HANDLE;
-		accel_top_match[idx].instanceCount = 0;
-	}
-
-	if (accel_top_nv[idx]) {
-		qvkDestroyAccelerationStructureNV(qvk.device, accel_top_nv[idx], NULL);
-		accel_top_nv[idx] = VK_NULL_HANDLE;
-		accel_top_match[idx].instanceCount = 0;
-	}
-
-	buffer_destroy(&mem_accel_top[idx]);
-}
-
 static void
-append_blas(QvkGeometryInstance_t *instances, int *num_instances, blas_t* blas, int instance_id, int mask, int flags, int sbt_offset)
+append_blas(QvkGeometryInstance_t* instances, uint32_t* num_instances, accel_struct_t* blas, int instance_id, int mask, int flags, int sbt_offset)
 {
 	if (!blas->present)
 		return;
@@ -1063,80 +803,29 @@ append_blas(QvkGeometryInstance_t *instances, int *num_instances, blas_t* blas, 
 		.acceleration_structure = 0
 	};
 
-	if (qvk.use_khr_ray_tracing)
-	{
-		VkAccelerationStructureDeviceAddressInfoKHR  as_device_address_info = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR,
-			.accelerationStructure = blas->accel_khr,
-		};
+	VkAccelerationStructureDeviceAddressInfoKHR  as_device_address_info = {
+		.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR,
+		.accelerationStructure = blas->accel,
+	};
 
-		instance.acceleration_structure = qvkGetAccelerationStructureDeviceAddressKHR(qvk.device, &as_device_address_info);
-	}
-	else
-	{
-		_VK(qvkGetAccelerationStructureHandleNV(qvk.device, blas->accel_nv, sizeof(uint64_t), &instance.acceleration_structure));
-	}
+	instance.acceleration_structure = qvkGetAccelerationStructureDeviceAddressKHR(qvk.device, &as_device_address_info);
 
 	assert(*num_instances < INSTANCE_MAX_NUM);
 	memcpy(instances + *num_instances, &instance, sizeof(instance));
-	++*num_instances;
+	++* num_instances;
 }
 
-VkResult
-vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world, qboolean weapon_left_handed)
-{
-	QvkGeometryInstance_t instances[INSTANCE_MAX_NUM];
-	int num_instances = 0;
+static void
+build_tlas(VkCommandBuffer cmd_buf, accel_struct_t* as, VkDeviceAddress instance_data, uint32_t num_instances)
 
-	if (include_world)
-	{
-		append_blas(instances, &num_instances, &blas_static, 0, AS_FLAG_OPAQUE, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
-		append_blas(instances, &num_instances, &blas_transparent, transparent_primitive_offset, AS_FLAG_TRANSPARENT, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
-		append_blas(instances, &num_instances, &blas_sky, AS_INSTANCE_FLAG_SKY | sky_primitive_offset, AS_FLAG_SKY, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
-		append_blas(instances, &num_instances, &blas_custom_sky, AS_INSTANCE_FLAG_SKY | custom_sky_primitive_offset, AS_FLAG_CUSTOM_SKY, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
-	}
-
-	append_blas(instances, &num_instances, &blas_dynamic[idx], AS_INSTANCE_FLAG_DYNAMIC, AS_FLAG_OPAQUE, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
-	append_blas(instances, &num_instances, &blas_transparent_models[idx], AS_INSTANCE_FLAG_DYNAMIC | transparent_model_primitive_offset, AS_FLAG_TRANSPARENT, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
-	append_blas(instances, &num_instances, &blas_explosions[idx], AS_INSTANCE_FLAG_DYNAMIC | explosions_primitive_offset, AS_FLAG_EXPLOSIONS, 0, SBTO_EXPLOSION);
-    append_blas(instances, &num_instances, &blas_viewer_weapon[idx], AS_INSTANCE_FLAG_DYNAMIC | viewer_weapon_primitive_offset, AS_FLAG_VIEWER_WEAPON, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR | (weapon_left_handed ? VK_GEOMETRY_INSTANCE_TRIANGLE_FRONT_COUNTERCLOCKWISE_BIT_KHR : 0), SBTO_OPAQUE);
-
-	if (cl_player_model->integer == CL_PLAYER_MODEL_FIRST_PERSON)
-	{
-		append_blas(instances, &num_instances, &blas_viewer_models[idx], AS_INSTANCE_FLAG_DYNAMIC | viewer_model_primitive_offset, AS_FLAG_VIEWER_MODELS, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR | VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR, SBTO_OPAQUE);
-	}
-
-	if (cvar_pt_enable_particles->integer != 0)
-	{
-		append_blas(instances, &num_instances, &blas_particles[idx], 0, AS_FLAG_PARTICLES, VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR, SBTO_PARTICLE);
-	}
-
-	if (cvar_pt_enable_beams->integer != 0)
-	{
-		append_blas(instances, &num_instances, &blas_beams[idx], 0, AS_FLAG_PARTICLES, VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR, SBTO_BEAM);
-	}
-
-	if (cvar_pt_enable_sprites->integer != 0)
-	{
-		append_blas(instances, &num_instances, &blas_sprites[idx], 0, AS_FLAG_EXPLOSIONS, VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR, SBTO_SPRITE);
-	}
-	
-	void *instance_data = buffer_map(buf_instances + idx);
-	memcpy(instance_data, &instances, sizeof(QvkGeometryInstance_t) * num_instances);
-
-	buffer_unmap(buf_instances + idx);
-	instance_data = NULL;
-
-	if (qvk.use_khr_ray_tracing)
 	{
 		// Build the TLAS
 		VkAccelerationStructureGeometryDataKHR geometry = {
 			.instances = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR,
-				.data = {.deviceAddress = buf_instances[idx].address }
+				.data = {.deviceAddress = instance_data}
 			}
 		};
-		assert(buf_instances[idx].address);
 
 		VkAccelerationStructureGeometryKHR topASGeometry = {
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR,
@@ -1156,126 +845,106 @@ vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world
 		};
 
 		VkAccelerationStructureBuildSizesInfoKHR sizeInfo = { .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
-		qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, (const uint32_t*)&num_instances, &sizeInfo);
+		qvkGetAccelerationStructureBuildSizesKHR(qvk.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &num_instances, &sizeInfo);
 		assert(sizeInfo.accelerationStructureSize < SIZE_SCRATCH_BUFFER);
 
-		if (accel_top_match[idx].instanceCount < num_instances) {
-			vkpt_pt_destroy_toplevel(idx);
+		if (!accel_matches_top_level(&as->match, true, num_instances)) 	{
+			destroy_accel_struct(as);
 
 			// Create the buffer for the acceleration structure
-			buffer_create(&mem_accel_top[idx], sizeInfo.accelerationStructureSize, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+			buffer_create(&as->mem, sizeInfo.accelerationStructureSize,
+				VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 			// Create TLAS
 			// Create acceleration structure
 			VkAccelerationStructureCreateInfoKHR createInfo = {
 				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
-				.buffer = mem_accel_top[idx].buffer,
+				.buffer = as->mem.buffer,
 				.size = sizeInfo.accelerationStructureSize,
 				.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
 			};
 
 			// Create the acceleration structure
-			qvkCreateAccelerationStructureKHR(qvk.device, &createInfo, NULL, &accel_top_khr[idx]);
+			qvkCreateAccelerationStructureKHR(qvk.device, &createInfo, NULL, &as->accel);
 
-			accel_top_match[idx].instanceCount = num_instances;
+			as->match.fast_build = true;
+			as->match.index_count = 0;
+			as->match.vertex_count = 0;
+			as->match.aabb_count = 0;
+			as->match.instance_count = num_instances;
 		}
 
 		// Update build information
-		buildInfo.dstAccelerationStructure = accel_top_khr[idx];
-		buildInfo.scratchData.deviceAddress = buf_accel_scratch.address;
+		buildInfo.dstAccelerationStructure = as->accel;
+		buildInfo.scratchData.deviceAddress = buf_accel_scratch.address + scratch_buf_ptr;
 		assert(buf_accel_scratch.address);
 
-		VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = (uint32_t)num_instances };
+		// Update the scratch buffer ptr
+		scratch_buf_ptr += sizeInfo.buildScratchSize;
+		scratch_buf_ptr = align(scratch_buf_ptr, minAccelerationStructureScratchOffsetAlignment);
+		assert(scratch_buf_ptr < SIZE_SCRATCH_BUFFER);
 
-		VkAccelerationStructureBuildRangeInfoKHR* offsets = &offset;
+		VkAccelerationStructureBuildRangeInfoKHR offset = { .primitiveCount = num_instances };
+
+		const VkAccelerationStructureBuildRangeInfoKHR* offsets = &offset;
 
 		qvkCmdBuildAccelerationStructuresKHR(
 			cmd_buf,
 			1,
 			&buildInfo,
 			&offsets);
+}
+
+VkResult
+vkpt_pt_create_toplevel(VkCommandBuffer cmd_buf, int idx, qboolean include_world, qboolean weapon_left_handed) {
+	QvkGeometryInstance_t instances[INSTANCE_MAX_NUM];
+	uint32_t num_instances = 0;
+
+	if (include_world) 	{
+		append_blas(instances, &num_instances, &blas_static, 0, AS_FLAG_OPAQUE, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
+		append_blas(instances, &num_instances, &blas_transparent, transparent_primitive_offset, AS_FLAG_TRANSPARENT, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
+		append_blas(instances, &num_instances, &blas_masked, masked_primitive_offset, AS_FLAG_OPAQUE, VK_GEOMETRY_INSTANCE_FORCE_NO_OPAQUE_BIT_KHR | VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR, SBTO_MASKED);
+		append_blas(instances, &num_instances, &blas_sky, AS_INSTANCE_FLAG_SKY | sky_primitive_offset, AS_FLAG_SKY, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
+		append_blas(instances, &num_instances, &blas_custom_sky, AS_INSTANCE_FLAG_SKY | custom_sky_primitive_offset, AS_FLAG_CUSTOM_SKY, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
 	}
-	else // (!qvk.use_khr_ray_tracing)
-	{
-		VkAccelerationStructureCreateInfoNV accel_create_info = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_NV,
-			.info = {
-				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
-				.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_NV,
-				.instanceCount = (uint32_t)num_instances,
-				.geometryCount = 0,
-				.pGeometries = NULL,
-			}
-		};
 
-		if (accel_top_match[idx].instanceCount < accel_create_info.info.instanceCount) 
-		{
-			vkpt_pt_destroy_toplevel(idx);
+	append_blas(instances, &num_instances, &blas_dynamic[idx], AS_INSTANCE_FLAG_DYNAMIC, AS_FLAG_OPAQUE, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
+	append_blas(instances, &num_instances, &blas_transparent_models[idx], AS_INSTANCE_FLAG_DYNAMIC | transparent_model_primitive_offset, AS_FLAG_TRANSPARENT, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR, SBTO_OPAQUE);
+	append_blas(instances, &num_instances, &blas_masked_models[idx], AS_INSTANCE_FLAG_DYNAMIC | masked_model_primitive_offset, AS_FLAG_OPAQUE, VK_GEOMETRY_INSTANCE_FORCE_NO_OPAQUE_BIT_KHR | VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR, SBTO_MASKED);
+	append_blas(instances, &num_instances, &blas_viewer_weapon[idx], AS_INSTANCE_FLAG_DYNAMIC | viewer_weapon_primitive_offset, AS_FLAG_VIEWER_WEAPON, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR | (weapon_left_handed ? VK_GEOMETRY_INSTANCE_TRIANGLE_FRONT_COUNTERCLOCKWISE_BIT_KHR : 0), SBTO_OPAQUE);
 
-			qvkCreateAccelerationStructureNV(qvk.device, &accel_create_info, NULL, accel_top_nv + idx);
-
-			/* XXX: do allocation only once with safety margin */
-			VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
-				.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
-				.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_OBJECT_NV,
-				.accelerationStructure = accel_top_nv[idx],
-			};
-			VkMemoryRequirements2 mem_req = { };
-			mem_req.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
-			qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
-
-			buffer_create(&mem_accel_top[idx], mem_req.memoryRequirements.size, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-			VkBindAccelerationStructureMemoryInfoNV bind_info = {
-				.sType = VK_STRUCTURE_TYPE_BIND_ACCELERATION_STRUCTURE_MEMORY_INFO_NV,
-				.accelerationStructure = accel_top_nv[idx],
-				.memory = mem_accel_top[idx].memory,
-			};
-
-			_VK(qvkBindAccelerationStructureMemoryNV(qvk.device, 1, &bind_info));
-
-			assert(get_scratch_buffer_size_nv(accel_top_nv[idx]) < SIZE_SCRATCH_BUFFER);
-
-			accel_top_match[idx].instanceCount = accel_create_info.info.instanceCount;
-		}
-
-		VkAccelerationStructureInfoNV as_info = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
-			.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_NV,
-			.instanceCount = (uint32_t)num_instances,
-			.geometryCount = 0,
-			.pGeometries = NULL,
-		};
-
-		// Request the amount of scratch memory, just to make the validation layer happy.
-		// Our static scratch buffer is definitely big enough.
-
-		VkAccelerationStructureMemoryRequirementsInfoNV mem_req_info = {
-			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV,
-			.type = VK_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_TYPE_BUILD_SCRATCH_NV,
-			.accelerationStructure = accel_top_nv[idx],
-		};
-
-		VkMemoryRequirements2 mem_req = { .sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2 };
-
-		qvkGetAccelerationStructureMemoryRequirementsNV(qvk.device, &mem_req_info, &mem_req);
-
-		assert(mem_req.memoryRequirements.size <= SIZE_SCRATCH_BUFFER);
-
-		// Build the TLAS
-
-		qvkCmdBuildAccelerationStructureNV(
-			cmd_buf,
-			&as_info,
-			buf_instances[idx].buffer, /* instance buffer */
-			0 /* instance offset */,
-			VK_FALSE,  /* update */
-			accel_top_nv[idx],
-			VK_NULL_HANDLE, /* source acceleration structure */
-			buf_accel_scratch.buffer,
-			0 /* scratch offset */);
-
+	if (cl_player_model->integer == CL_PLAYER_MODEL_FIRST_PERSON) 	{
+		append_blas(instances, &num_instances, &blas_viewer_models[idx], AS_INSTANCE_FLAG_DYNAMIC | viewer_model_primitive_offset, AS_FLAG_VIEWER_MODELS, VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR | VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR, SBTO_OPAQUE);
 	}
+
+	uint32_t num_instances_geometry = num_instances;
+
+	append_blas(instances, &num_instances, &blas_explosions[idx], AS_INSTANCE_FLAG_DYNAMIC | explosions_primitive_offset, AS_FLAG_EFFECTS, 0, SBTO_EXPLOSION);
+
+	if (cvar_pt_enable_particles->integer != 0) 	{
+		append_blas(instances, &num_instances, &blas_particles[idx], 0, AS_FLAG_EFFECTS, VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR, SBTO_PARTICLE);
+	}
+
+	if (cvar_pt_enable_beams->integer != 0) 	{
+		append_blas(instances, &num_instances, &blas_beams[idx], 0, AS_FLAG_EFFECTS, VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR, SBTO_BEAM);
+	}
+
+	if (cvar_pt_enable_sprites->integer != 0) 	{
+		append_blas(instances, &num_instances, &blas_sprites[idx], 0, AS_FLAG_EFFECTS, VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR, SBTO_SPRITE);
+	}
+
+	uint32_t num_instances_effects = num_instances - num_instances_geometry;
+
+	void* instance_data = buffer_map(buf_instances + idx);
+	memcpy(instance_data, &instances, sizeof(QvkGeometryInstance_t) * num_instances);
+
+	buffer_unmap(buf_instances + idx);
+	instance_data = NULL;
+
+	scratch_buf_ptr = 0;
+	build_tlas(cmd_buf, &tlas_geometry[idx], buf_instances[idx].address, num_instances_geometry);
+	build_tlas(cmd_buf, &tlas_effects[idx], buf_instances[idx].address + num_instances_geometry * sizeof(QvkGeometryInstance_t), num_instances_effects);
 
 	MEM_BARRIER_BUILD_ACCEL(cmd_buf); /* probably not needed here but doesn't matter */
 
@@ -1318,8 +987,7 @@ static inline void BARRIER_COMPUTE(VkCommandBuffer& commandBuffer, VkImage& imag
 	});
 }
 
-static void setup_rt_pipeline(VkCommandBuffer cmd_buf, VkPipelineBindPoint bind_point, pipeline_index_t index)
-{
+static void setup_rt_pipeline(VkCommandBuffer cmd_buf, VkPipelineBindPoint bind_point, pipeline_index_t index) {
 	vkCmdBindPipeline(cmd_buf, bind_point, rt_pipelines[index]);
 
 	vkCmdBindDescriptorSets(cmd_buf, bind_point,
@@ -1339,60 +1007,46 @@ static void setup_rt_pipeline(VkCommandBuffer cmd_buf, VkPipelineBindPoint bind_
 static void
 dispatch_rays(VkCommandBuffer cmd_buf, pipeline_index_t pipeline_index, pt_push_constants_t push, uint32_t width, uint32_t height, uint32_t depth)
 {
-	if (qvk.use_ray_query)
-	{
+	if (qvk.use_ray_query) 	{
 		setup_rt_pipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_index);
 
 		vkCmdPushConstants(cmd_buf, rt_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(push), &push);
 
 		vkCmdDispatch(cmd_buf, (width + 7) / 8, (height + 7) / 8, depth);
 	}
-	else
-	{
+	else 	{
 		setup_rt_pipeline(cmd_buf, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipeline_index);
 
 		vkCmdPushConstants(cmd_buf, rt_pipeline_layout, VK_SHADER_STAGE_RAYGEN_BIT_KHR, 0, sizeof(push), &push);
 
 		uint32_t sbt_offset = SBT_ENTRIES_PER_PIPELINE * pipeline_index * shaderGroupBaseAlignment;
 
-		if (qvk.use_khr_ray_tracing)
-		{
-			assert(buf_shader_binding_table.address);
+		assert(buf_shader_binding_table.address);
 
-			VkStridedDeviceAddressRegionKHR raygen = {
-				.deviceAddress = buf_shader_binding_table.address + sbt_offset,
-				.stride = shaderGroupBaseAlignment,
-				.size = shaderGroupBaseAlignment
-			};
+		VkStridedDeviceAddressRegionKHR raygen = {
+			.deviceAddress = buf_shader_binding_table.address + sbt_offset,
+			.stride = shaderGroupBaseAlignment,
+			.size = shaderGroupBaseAlignment
+		};
 
-			VkStridedDeviceAddressRegionKHR miss_and_hit = {
-				.deviceAddress = buf_shader_binding_table.address + sbt_offset,
-				.stride = shaderGroupBaseAlignment,
-				.size = (VkDeviceSize)shaderGroupBaseAlignment * SBT_ENTRIES_PER_PIPELINE
-			};
+		VkStridedDeviceAddressRegionKHR miss_and_hit = {
+			.deviceAddress = buf_shader_binding_table.address + sbt_offset,
+			.stride = shaderGroupBaseAlignment,
+			.size = (VkDeviceSize)shaderGroupBaseAlignment * SBT_ENTRIES_PER_PIPELINE
+		};
 
-			VkStridedDeviceAddressRegionKHR callable = {
-				.deviceAddress = VK_NULL_HANDLE,
-				.stride = 0,
-				.size = 0
-			};
+		VkStridedDeviceAddressRegionKHR callable = {
+			.deviceAddress = VK_NULL_HANDLE,
+			.stride = 0,
+			.size = 0
+		};
 
-			qvkCmdTraceRaysKHR(cmd_buf,
-				&raygen,
-				&miss_and_hit,
-				&miss_and_hit,
-				&callable,
-				width, height, depth);
-		}
-		else // (!qvk.use_khr_ray_tracing)
-		{
-			qvkCmdTraceRaysNV(cmd_buf,
-				buf_shader_binding_table.buffer, sbt_offset,
-				buf_shader_binding_table.buffer, sbt_offset, shaderGroupBaseAlignment,
-				buf_shader_binding_table.buffer, sbt_offset, shaderGroupBaseAlignment,
-				VK_NULL_HANDLE, 0, 0,
-				width, height, depth);
-		}
+		qvkCmdTraceRaysKHR(cmd_buf,
+			&raygen,
+			&miss_and_hit,
+			&miss_and_hit,
+			&callable,
+			width, height, depth);
 	}
 }
 
@@ -1434,7 +1088,7 @@ vkpt_pt_trace_primary_rays(VkCommandBuffer cmd_buf)
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_THROUGHPUT]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_BOUNCE_THROUGHPUT]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_GODRAYS_THROUGHPUT_DIST]);
-	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_ALBEDO]);
+	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_BASE_COLOR_A + frame_idx]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_METALLIC_A + frame_idx]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_CLUSTER_A + frame_idx]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_VIEW_DEPTH_A + frame_idx]);
@@ -1470,7 +1124,7 @@ vkpt_pt_trace_reflections(VkCommandBuffer cmd_buf, int bounce)
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_VIEW_DIRECTION]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_THROUGHPUT]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_GODRAYS_THROUGHPUT_DIST]);
-	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_ALBEDO]);
+	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_BASE_COLOR_A + frame_idx]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_METALLIC_A + frame_idx]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_CLUSTER_A + frame_idx]);
 	BARRIER_COMPUTE(cmd_buf, qvk.images[VKPT_IMG_PT_VIEW_DEPTH_A + frame_idx]);
@@ -1561,7 +1215,8 @@ vkpt_pt_destroy()
 {
 	for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
-		vkpt_pt_destroy_toplevel(i);
+		destroy_accel_struct(tlas_geometry + i);
+		destroy_accel_struct(tlas_effects + i);
 		buffer_destroy(buf_instances + i);
 		vkpt_pt_destroy_dynamic(i);
 	}
@@ -1614,8 +1269,8 @@ vkpt_pt_create_pipelines()
 			// Shader module is set below
 		},
 		SHADER_STAGE(QVK_MOD_PATH_TRACER_RMISS,               VK_SHADER_STAGE_MISS_BIT_KHR),
-		SHADER_STAGE(QVK_MOD_PATH_TRACER_SHADOW_RMISS,        VK_SHADER_STAGE_MISS_BIT_KHR),
 		SHADER_STAGE(QVK_MOD_PATH_TRACER_RCHIT,               VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR),
+		SHADER_STAGE(QVK_MOD_PATH_TRACER_MASKED_RAHIT,        VK_SHADER_STAGE_ANY_HIT_BIT_KHR),
 		// Stages used by all pipelines that consider transparency
 		SHADER_STAGE(QVK_MOD_PATH_TRACER_PARTICLE_RAHIT,      VK_SHADER_STAGE_ANY_HIT_BIT_KHR),
 		SHADER_STAGE(QVK_MOD_PATH_TRACER_EXPLOSION_RAHIT,     VK_SHADER_STAGE_ANY_HIT_BIT_KHR),
@@ -1624,8 +1279,8 @@ vkpt_pt_create_pipelines()
 		SHADER_STAGE(QVK_MOD_PATH_TRACER_BEAM_RAHIT,          VK_SHADER_STAGE_ANY_HIT_BIT_KHR),
 		SHADER_STAGE(QVK_MOD_PATH_TRACER_BEAM_RINT,           VK_SHADER_STAGE_INTERSECTION_BIT_KHR),
 	};
-	const unsigned num_base_shader_stages = 4;
-	const unsigned num_transparent_no_beam_shader_stages = 7;
+	const unsigned num_base_shader_stages = 5;
+	const unsigned num_transparent_no_beam_shader_stages = 8;
 
 	for (uint32_t index = 0; index < PIPELINE_COUNT; index++)
 	{
@@ -1633,8 +1288,7 @@ vkpt_pt_create_pipelines()
 		qboolean needs_transparency = needs_beams || index == PIPELINE_INDIRECT_LIGHTING_FIRST;
 		unsigned int num_shader_stages = needs_beams ? LENGTH(shader_stages) : (needs_transparency ? num_transparent_no_beam_shader_stages : num_base_shader_stages);
 
-		switch (index)
-		{
+		switch (index) {
 		case PIPELINE_PRIMARY_RAYS:
 			shader_stages[0].module = qvk.shader_modules[QVK_MOD_PRIMARY_RAYS_RGEN];
 			shader_stages[0].pSpecializationInfo = NULL;
@@ -1668,8 +1322,7 @@ vkpt_pt_create_pipelines()
 			break;
 		}
 
-		if (qvk.use_ray_query)
-		{
+		if (qvk.use_ray_query) 		{
 			VkComputePipelineCreateInfo compute_pipeline_info = {
 				.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
 				.stage = {
@@ -1677,31 +1330,30 @@ vkpt_pt_create_pipelines()
 					.stage = VK_SHADER_STAGE_COMPUTE_BIT,
 					.module = shader_stages[0].module,
 					.pName = "main",
-					.pSpecializationInfo = shader_stages[0].pSpecializationInfo,
+					.pSpecializationInfo = shader_stages[0].pSpecializationInfo
 				},
 				.layout = rt_pipeline_layout,
 			};
 
 			VkResult res = vkCreateComputePipelines(qvk.device, 0, 1, &compute_pipeline_info, NULL, &rt_pipelines[index]);
 
-			if (res != VK_SUCCESS)
-			{
+			if (res != VK_SUCCESS) 			{
 				Com_EPrintf("Failed to create ray tracing compute pipeline #%d, vkCreateComputePipelines error code is %s\n", index, qvk_result_to_string(res));
 				return res;
 			}
 		}
-		else if (qvk.use_khr_ray_tracing)
+		else
 		{
 			VkRayTracingShaderGroupCreateInfoKHR rt_shader_group_info[SBT_ENTRIES_PER_PIPELINE];
 			rt_shader_group_info[SBT_RGEN] = {
-					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
-					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR,
-					.generalShader = 0,
-					.closestHitShader = VK_SHADER_UNUSED_KHR,
-					.anyHitShader = VK_SHADER_UNUSED_KHR,
-					.intersectionShader = VK_SHADER_UNUSED_KHR
+				.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
+				.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR,
+				.generalShader = 0,
+				.closestHitShader = VK_SHADER_UNUSED_KHR,
+				.anyHitShader = VK_SHADER_UNUSED_KHR,
+				.intersectionShader = VK_SHADER_UNUSED_KHR
 			};
-			rt_shader_group_info[SBT_RMISS_PATH_TRACER] = {
+			rt_shader_group_info[SBT_RMISS_EMPTY] = {
 					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
 					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR,
 					.generalShader = 1,
@@ -1709,61 +1361,61 @@ vkpt_pt_create_pipelines()
 					.anyHitShader = VK_SHADER_UNUSED_KHR,
 					.intersectionShader = VK_SHADER_UNUSED_KHR
 			};
-			rt_shader_group_info[SBT_RMISS_SHADOW] = {
+			rt_shader_group_info[SBT_RCHIT_GEOMETRY] = {
 					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
-					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR,
-					.generalShader = 2,
+					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,
+					.generalShader = VK_SHADER_UNUSED_KHR,
+					.closestHitShader = 2,
+					.anyHitShader = VK_SHADER_UNUSED_KHR,
+					.intersectionShader = VK_SHADER_UNUSED_KHR
+			};
+			rt_shader_group_info[SBT_RAHIT_MASKED] = {
+					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
+					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,
+					.generalShader = VK_SHADER_UNUSED_KHR,
+					.closestHitShader = 2,
+					.anyHitShader = 3,
+					.intersectionShader = VK_SHADER_UNUSED_KHR
+			};
+			rt_shader_group_info[SBT_RCHIT_EFFECTS] = {
+					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
+					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,
+					.generalShader = VK_SHADER_UNUSED_KHR,
 					.closestHitShader = VK_SHADER_UNUSED_KHR,
 					.anyHitShader = VK_SHADER_UNUSED_KHR,
 					.intersectionShader = VK_SHADER_UNUSED_KHR
 			};
-			rt_shader_group_info[SBT_RCHIT_OPAQUE] = {
+			rt_shader_group_info[SBT_RAHIT_PARTICLE] = {
 					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
 					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,
 					.generalShader = VK_SHADER_UNUSED_KHR,
-					.closestHitShader = 3,
-					.anyHitShader = VK_SHADER_UNUSED_KHR,
+					.closestHitShader = VK_SHADER_UNUSED_KHR,
+					.anyHitShader = 4,
 					.intersectionShader = VK_SHADER_UNUSED_KHR
 			};
-			rt_shader_group_info[SBT_RCHIT_EMPTY] = {
-				.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
-				.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,
-				.generalShader = VK_SHADER_UNUSED_KHR,
-				.closestHitShader = VK_SHADER_UNUSED_KHR,
-				.anyHitShader = VK_SHADER_UNUSED_KHR,
-				.intersectionShader = VK_SHADER_UNUSED_KHR
-			};
-			rt_shader_group_info[SBT_RAHIT_PARTICLE] = {
-				.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
-				.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,
-				.generalShader = VK_SHADER_UNUSED_KHR,
-				.closestHitShader = VK_SHADER_UNUSED_KHR,
-				.anyHitShader = 4,
-				.intersectionShader = VK_SHADER_UNUSED_KHR
-			};
 			rt_shader_group_info[SBT_RAHIT_EXPLOSION] = {
-				.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
-				.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,
-				.generalShader = VK_SHADER_UNUSED_KHR,
-				.closestHitShader = VK_SHADER_UNUSED_KHR,
-				.anyHitShader = 5,
-				.intersectionShader = VK_SHADER_UNUSED_KHR
+					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
+					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,
+					.generalShader = VK_SHADER_UNUSED_KHR,
+					.closestHitShader = VK_SHADER_UNUSED_KHR,
+					.anyHitShader = 5,
+					.intersectionShader = VK_SHADER_UNUSED_KHR
 			};
 			rt_shader_group_info[SBT_RAHIT_SPRITE] = {
-				.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
-				.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,
-				.generalShader = VK_SHADER_UNUSED_KHR,
-				.closestHitShader = VK_SHADER_UNUSED_KHR,
-				.anyHitShader = 6,
-				.intersectionShader = VK_SHADER_UNUSED_KHR
+					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
+					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR,
+					.generalShader = VK_SHADER_UNUSED_KHR,
+					.closestHitShader = VK_SHADER_UNUSED_KHR,
+					.anyHitShader = 6,
+					.intersectionShader = VK_SHADER_UNUSED_KHR
 			};
 			rt_shader_group_info[SBT_RINT_BEAM] = {
-				.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
-				.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_PROCEDURAL_HIT_GROUP_KHR,
-				.generalShader = VK_SHADER_UNUSED_KHR,
-				.closestHitShader = VK_SHADER_UNUSED_KHR,
-				.anyHitShader = 7,
-				.intersectionShader = 8
+					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
+					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_PROCEDURAL_HIT_GROUP_KHR,
+					.generalShader = VK_SHADER_UNUSED_KHR,
+					.closestHitShader = VK_SHADER_UNUSED_KHR,
+					.anyHitShader = 7,
+					.intersectionShader = 8
 			};
 
 			unsigned int num_shader_groups = needs_beams ? LENGTH(rt_shader_group_info) : (needs_transparency ? SBT_RINT_BEAM : SBT_FIRST_TRANSPARENCY);
@@ -1797,109 +1449,6 @@ vkpt_pt_create_pipelines()
 			}
 
 			_VK(qvkGetRayTracingShaderGroupHandlesKHR(
-				qvk.device, rt_pipelines[index], 0, num_shader_groups,
-				/* dataSize = */ num_shader_groups * shaderGroupHandleSize,
-				/* pData = */ shader_handles + SBT_ENTRIES_PER_PIPELINE * shaderGroupHandleSize * index));
-		}
-		else // (!qvk.use_khr_ray_tracing)
-		{
-			VkRayTracingShaderGroupCreateInfoNV rt_shader_group_info[SBT_ENTRIES_PER_PIPELINE];
-			rt_shader_group_info[SBT_RGEN] = {
-					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV,
-					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_NV,
-					.generalShader = 0,
-					.closestHitShader = VK_SHADER_UNUSED_NV,
-					.anyHitShader = VK_SHADER_UNUSED_NV,
-					.intersectionShader = VK_SHADER_UNUSED_NV
-			};
-			rt_shader_group_info[SBT_RMISS_PATH_TRACER] = {
-					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV,
-					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_NV,
-					.generalShader = 1,
-					.closestHitShader = VK_SHADER_UNUSED_NV,
-					.anyHitShader = VK_SHADER_UNUSED_NV,
-					.intersectionShader = VK_SHADER_UNUSED_NV
-			};
-			rt_shader_group_info[SBT_RMISS_SHADOW] = {
-					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV,
-					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_NV,
-					.generalShader = 2,
-					.closestHitShader = VK_SHADER_UNUSED_NV,
-					.anyHitShader = VK_SHADER_UNUSED_NV,
-					.intersectionShader = VK_SHADER_UNUSED_NV
-			};
-			rt_shader_group_info[SBT_RCHIT_OPAQUE] = {
-					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV,
-					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_NV,
-					.generalShader = VK_SHADER_UNUSED_NV,
-					.closestHitShader = 3,
-					.anyHitShader = VK_SHADER_UNUSED_NV,
-					.intersectionShader = VK_SHADER_UNUSED_NV
-			};
-			rt_shader_group_info[SBT_RCHIT_EMPTY] = {
-					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV,
-					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_NV,
-					.generalShader = VK_SHADER_UNUSED_NV,
-					.closestHitShader = VK_SHADER_UNUSED_NV,
-					.anyHitShader = VK_SHADER_UNUSED_NV,
-					.intersectionShader = VK_SHADER_UNUSED_NV
-			};
-			rt_shader_group_info[SBT_RAHIT_PARTICLE] = {
-					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV,
-					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_NV,
-					.generalShader = VK_SHADER_UNUSED_NV,
-					.closestHitShader = VK_SHADER_UNUSED_NV,
-					.anyHitShader = 4,
-					.intersectionShader = VK_SHADER_UNUSED_NV
-			};
-			rt_shader_group_info[SBT_RAHIT_EXPLOSION] = {
-					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV,
-					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_NV,
-					.generalShader = VK_SHADER_UNUSED_NV,
-					.closestHitShader = VK_SHADER_UNUSED_NV,
-					.anyHitShader = 5,
-					.intersectionShader = VK_SHADER_UNUSED_NV
-			};
-			rt_shader_group_info[SBT_RAHIT_SPRITE] = {
-					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV,
-					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_NV,
-					.generalShader = VK_SHADER_UNUSED_NV,
-					.closestHitShader = VK_SHADER_UNUSED_NV,
-					.anyHitShader = 6,
-					.intersectionShader = VK_SHADER_UNUSED_NV
-			};
-			rt_shader_group_info[SBT_RINT_BEAM] = {
-					.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV,
-					.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_PROCEDURAL_HIT_GROUP_NV,
-					.generalShader = VK_SHADER_UNUSED_NV,
-					.closestHitShader = VK_SHADER_UNUSED_NV,
-					.anyHitShader = 7,
-					.intersectionShader = 8
-			};
-
-			unsigned int num_shader_groups = needs_beams ? LENGTH(rt_shader_group_info) : (needs_transparency ? SBT_RINT_BEAM : SBT_FIRST_TRANSPARENCY);
-
-			VkRayTracingPipelineCreateInfoNV rt_pipeline_info = {
-				.sType             = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_NV,
-				.stageCount        = num_shader_stages,
-				.pStages           = shader_stages,
-				.groupCount        = num_shader_groups,
-				.pGroups           = rt_shader_group_info,
-				.maxRecursionDepth = 1,
-				.layout            = rt_pipeline_layout,
-			};
-
-			assert(LENGTH(rt_shader_group_info) == SBT_ENTRIES_PER_PIPELINE);
-
-			VkResult res = qvkCreateRayTracingPipelinesNV(qvk.device, NULL, 1, &rt_pipeline_info, NULL, &rt_pipelines[index]);
-
-			if (res != VK_SUCCESS)
-			{
-				Com_EPrintf("Failed to create ray tracing pipeline #%d, vkCreateRayTracingPipelinesNV error code is %s\n", index, qvk_result_to_string(res));
-				return res;
-			}
-
-			_VK(qvkGetRayTracingShaderGroupHandlesNV(
 				qvk.device, rt_pipelines[index], 0, num_shader_groups,
 				/* dataSize = */ num_shader_groups* shaderGroupHandleSize,
 				/* pData = */ shader_handles + SBT_ENTRIES_PER_PIPELINE * shaderGroupHandleSize * index));

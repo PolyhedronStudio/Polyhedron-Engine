@@ -367,7 +367,7 @@ void S_Shutdown(void)
 
     s_auto_focus->changed = NULL;
 
-    Cmd_Deregister(c_sound);
+    Cmd_Unregister(c_sound);
 
     Z_LeakTest(TAG_SOUND);
 }
