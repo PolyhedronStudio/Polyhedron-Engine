@@ -118,10 +118,15 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     }
 
     // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know
-    if ( nullptr != info->AllocateInstance ) {
+    // Entity classes with 'DefineDummyMapClass' won't be reported here
+    if ( nullptr != info->AllocateInstance && info->IsMapSpawnable() ) {
         return (g_baseEntities[entityNumber] = info->AllocateInstance( ent ));
     } else {
-        gi.DPrintf( "WARNING: tried to allocate an abstract class '%s'\n", info->className );
+        if ( info->IsAbstract() ) {
+            gi.DPrintf( "WARNING: tried to allocate an abstract class '%s'\n", info->className );
+        } else if ( !info->IsMapSpawnable() ) {
+            gi.DPrintf( "WARNING: tried to allocate a code-only class '%s'\n", info->className );
+        }
         return nullptr;
     }
 }

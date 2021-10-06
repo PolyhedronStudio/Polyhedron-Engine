@@ -15,5 +15,9 @@ public:
 	void SpawnKey( const std::string& key, const std::string& value ) override;
 
 protected:
+	void DoGoUp() override;
+	void DoGoDown() override;
+
+protected:
 	float distance{};
 };

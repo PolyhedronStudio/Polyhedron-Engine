@@ -1,7 +1,7 @@
 /*
 // LICENSE HERE.
 
-// FuncDoorRotating.cpp
+// FuncTimer.cpp
 */
 
 #include "../../g_local.h"
@@ -12,7 +12,6 @@
 #include "../../brushfuncs.h"
 
 #include "../base/SVGBaseEntity.h"
-#include "../base/SVGBaseTrigger.h"
 
 #include "FuncTimer.h"
 

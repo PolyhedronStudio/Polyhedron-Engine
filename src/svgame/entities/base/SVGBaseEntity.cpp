@@ -219,7 +219,6 @@ qboolean SVGBaseEntity::ParseVector3KeyValue(const std::string& key, const std::
 //===============
 //
 void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
-
 	//{"lip", STOFS(lip), F_INT},
 	//{ "distance", STOFS(distance), F_INT },
 	//{ "height", STOFS(height), F_INT },
@@ -236,8 +235,14 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	//{ "minpitch", STOFS(minpitch), F_FLOAT },
 	//{ "maxpitch", STOFS(maxpitch), F_FLOAT },
 	//{ "nextmap", STOFS(nextMap), F_LSTRING },
+	
+	// STOOOOOOOP WITH THE GOD DAMN WARNINGS IN THE CONSOLE ABOUT CLASSNAME
+	// RAAAAAAAAHHHHH
+	if ( key == "classname" ) {
+		SetClassName( value.c_str() );
+	}
 	// Angle.
-	if (key == "angle") {
+	else if (key == "angle") {
 		// Parse angle.
 		vec3_t hackedAngles = vec3_zero();
 		ParseFloatKeyValue(key, value, hackedAngles.y);

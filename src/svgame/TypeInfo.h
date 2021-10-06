@@ -33,8 +33,18 @@ using EntityAllocatorFn = SVGBaseEntity* ( Entity* );
 //===============
 class TypeInfo {
 public:
-	TypeInfo( const char* mapClassName, const char* entClassName, const char* superClassName, EntityAllocatorFn entityAllocator )
-		: mapClass( mapClassName ), className( entClassName ), superName( superClassName ) {
+	enum
+	{
+		TypeFlag_None = 0,
+		// Cannot be allocated
+		TypeFlag_Abstract = 1 << 0,
+		// Can be spawned in the map
+		TypeFlag_MapSpawn = 1 << 1
+	};
+
+public:
+	TypeInfo( const char* mapClassName, const char* entClassName, const char* superClassName, uint8_t flags, EntityAllocatorFn entityAllocator )
+		: mapClass( mapClassName ), className( entClassName ), superName( superClassName ), typeFlags( flags ) {
 		AllocateInstance = entityAllocator;
 		prev = head;
 		head = this;
@@ -63,8 +73,20 @@ public:
 		return super->IsSubclassOf( eci );
 	}
 
+	bool IsMapSpawnable() const {
+		return !IsAbstract() && typeFlags & TypeFlag_MapSpawn;
+	}
+
+	bool IsAbstract() const {
+		return typeFlags & TypeFlag_Abstract;
+	}
+
 	// Get type info by map classname
 	static TypeInfo* GetInfoByMapName( const char* name ) { 
+		if ( nullptr == name ) {
+			return nullptr;
+		}
+
 		TypeInfo* current = nullptr;
 		current = head;
 
@@ -80,6 +102,10 @@ public:
 
 	// Get type info by name
 	static TypeInfo* GetInfoByName( const char* name ) {
+		if ( nullptr == name ) {
+			return nullptr;
+		}
+
 		TypeInfo* current = nullptr;
 		current = head;
 
@@ -113,6 +139,7 @@ public:
 	const char*     mapClass;
 	const char*     className;
 	const char*     superName;
+	uint8_t			typeFlags;
 };
 
 // ========================================================================
@@ -120,26 +147,26 @@ public:
 // TODO: rewrite these macros using templates? It'd be quite nicer that way
 // ========================================================================
 
-// Declares and initialises the type information for a class
-// @param mapClassName - the map classname of this entity, used during entity spawning
-// @param className - the internal C++ class name
-#define __DeclareTypeInfo( mapClassName, className, superClass, allocatorFunction )	\
+// Declares and initialises the type information for a class 
+// @param mapClassName - the map classname of this entity, used during entity spawning 
+// @param className - the internal C++ class name 
+#define __DeclareTypeInfo( mapClassName, className, superClass, typeFlags, allocatorFunction )	\
 virtual inline TypeInfo* GetTypeInfo() const {					\
 	return &ClassInfo;											\
 }																\
-inline static TypeInfo ClassInfo = TypeInfo( (mapClassName), (className), (superClass), (allocatorFunction) );
+inline static TypeInfo ClassInfo = TypeInfo( (mapClassName), (className), (superClass), (typeFlags), (allocatorFunction) );
 
-// Top abstract class, the start of the class tree
-// Instances of this cannot be allocated, as it is abstract
+// Top abstract class, the start of the class tree 
+// Instances of this cannot be allocated, as it is abstract 
 #define DefineTopAbstractClass( className )						\
-__DeclareTypeInfo( #className "_abs", #className, "none", nullptr );
+__DeclareTypeInfo( #className, #className, nullptr, TypeInfo::TypeFlag_Abstract, nullptr );
 
-// Abstract class that inherits from another
-// Instances of this cannot be allocated
+// Abstract class that inherits from another 
+// Instances of this cannot be allocated 
 // NOTE: multiple inheritance not supported
 #define DefineAbstractClass( className, superClass )			\
 using Base = superClass;										\
-__DeclareTypeInfo( #className "_abs", #className, #superClass, nullptr );
+__DeclareTypeInfo( #className, #className, #superClass, TypeInfo::TypeFlag_Abstract, nullptr );
 
 // Declares and initialises the type information for this class, so it can be spawned in a map. 
 // NOTE: multiple inheritance not supported
@@ -151,9 +178,17 @@ using Base = superClass;										\
 static SVGBaseEntity* AllocateInstance( Entity* entity ) {		\
 	return new className( entity );								\
 }																\
-__DeclareTypeInfo( mapClassName, #className, #superClass, &className::AllocateInstance );
+__DeclareTypeInfo( mapClassName, #className, #superClass, TypeInfo::TypeFlag_MapSpawn, &className::AllocateInstance );
 
-// Declares and initialises the type information for this class
+// Declares type information the same as DefineMapClass, however, it doesn't allocate anything. 
+// Used by InfoNull. Cannot be instantiated. 
+// Its type flag is TypeFlag_MapSpawn, but it has a nullptr AllocateInstance. This is to avoid
+// a certain developer warning when spawning info_null
+#define DefineDummyMapClass( mapClassName, className, superClass )\
+using Base = superClass;											\
+__DeclareTypeInfo( mapClassName, #className, #superClass, TypeInfo::TypeFlag_MapSpawn, nullptr );
+
+// Declares and initialises the type information for this class 
 // NOTE: multiple inheritance not supported
 // @param className (symbol) - the internal C++ class name
 // @param superClass (symbol) - the class this entity class inherits from
@@ -162,4 +197,4 @@ using Base = superClass;										\
 static SVGBaseEntity* AllocateInstance( Entity* entity ) {		\
 	return new className( entity );								\
 }																\
-__DeclareTypeInfo( #className "_dyn", #className, #superClass, &className::AllocateInstance );
+__DeclareTypeInfo( #className, #className, #superClass, TypeInfo::TypeFlag_None, &className::AllocateInstance );

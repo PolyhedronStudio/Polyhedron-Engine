@@ -70,6 +70,7 @@ void FuncDoorRotating::Spawn() {
 	moveInfo.endOrigin = GetOrigin();
 	moveInfo.startAngles = GetStartPosition();
 	moveInfo.endAngles = GetEndPosition();
+	moveInfo.dir = moveDirection;
 
 	LinkEntity();
 }
@@ -83,4 +84,18 @@ void FuncDoorRotating::SpawnKey( const std::string& key, const std::string& valu
 	} else {
 		Base::SpawnKey( key, value );
 	}
+}
+
+//===============
+// FuncDoorRotating::DoGoUp
+//===============
+void FuncDoorRotating::DoGoUp() {
+	BrushAngleMoveCalc( OnDoorHitTop );
+}
+
+//===============
+// FuncDoorRotating::DoGoDown
+//===============
+void FuncDoorRotating::DoGoDown() {
+	BrushAngleMoveCalc( OnDoorHitBottom );
 }

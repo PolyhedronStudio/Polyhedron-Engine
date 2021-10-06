@@ -81,6 +81,11 @@ public:
     //
     // Entity Get Functions.
     //
+    // @returns The entity's center in world coordinates
+    inline vec3_t GetAbsoluteCenter(){
+        return vec3_scale( GetAbsoluteMax() + GetAbsoluteMin(), 0.5f );
+    }
+
     // Return the bounding box absolute 'min' value.
     inline const vec3_t& GetAbsoluteMin() {
         return serverEntity->absMin;
@@ -106,6 +111,10 @@ public:
     // Return the 'angularVelocity' value.
     inline const vec3_t& GetAngularVelocity() {
         return angularVelocity;
+    }
+    // @returns The local center
+    inline vec3_t GetCenter() {
+        return vec3_scale( GetMaxs() + GetMins(), 0.5f );
     }
 
     // Return the 'className' value.
@@ -303,7 +312,7 @@ public:
         return serverEntity->state.origin;
     }
 
-    // Set the 'owner' value.
+    // Get the 'owner' value.
     inline SVGBaseEntity* GetOwner() {
         return this->ownerEntity;
     }
@@ -313,9 +322,11 @@ public:
         return serverEntity->state.renderEffects;
     }
 
-    // Set the 'pathTarget' entity value.
-    inline char* GetPathTarget() {
-        return serverEntity->pathTarget;
+    // Get the 'pathTarget' entity value.
+    // Overridden by PathCorner
+    // TODO: replace this ugly workaround with some component system
+    inline virtual const char* GetPathTarget() {
+        return nullptr;
     }
 
     // Return the 'serverFlags' value.
