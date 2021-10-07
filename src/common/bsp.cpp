@@ -49,10 +49,9 @@ static cvar_t *map_visibility_patch;
 // Regular Q2 BSP
 #define LOAD(func) \
     static qerror_t BSP_Load##func(bsp_t *bsp, void *base, size_t count)
-
 // QBSP
 #define LOAD_EXT(func) \
-    static qerror_t BSP_QBSP_Load##func(bsp_t *bsp, void *base, size_t count)
+static qerror_t BSP_QBSP_Load##func(bsp_t *bsp, void *base, size_t count)
 
 
 #define DEBUG(msg) \
@@ -77,7 +76,7 @@ LOAD(Visibility)
     memcpy(bsp->vis, base, count);
 
     numclusters = LittleLong(bsp->vis->numclusters);
-    if (numclusters > MAX_MAP_LEAFS) {
+    if (numclusters > (bsp->extended ? MAX_QBSP_MAP_LEAFS : MAX_MAP_LEAFS)) {
         DEBUG("bad numclusters");
         return Q_ERR_TOO_MANY;
     }
@@ -1326,130 +1325,122 @@ void BSP_Free(bsp_t *bsp)
     }
 }
 
-static void BSP_BuildPvsMatrix(bsp_t *bsp)
-{
-	if (!bsp->vis)
-		return;
+static void BSP_BuildPvsMatrix(bsp_t* bsp) {
+    if (!bsp->vis)
+        return;
 
-	// a typical map with 2K clusters will take half a megabyte of memory for the matrix
-	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
+    // a typical map with 2K clusters will take half a megabyte of memory for the matrix
+    size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
 
-	// allocate the matrix but don't set it in the BSP structure yet: 
-	// we want BSP_CluterVis to use the old PVS data here, and not the new empty matrix
-	byte* pvs_matrix = (byte*)Z_Mallocz(matrix_size); // CPP: Cast
-	
-	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++)
-	{
-		BSP_ClusterVis(bsp, (byte*)(pvs_matrix + bsp->visrowsize * cluster), cluster, DVIS_PVS);
-	}
+    // allocate the matrix but don't set it in the BSP structure yet: 
+    // we want BSP_CluterVis to use the old PVS data here, and not the new empty matrix
+    byte* pvs_matrix = (byte*)Z_Mallocz(matrix_size);
 
-	bsp->pvs_matrix = pvs_matrix;
+    for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++) 	{
+        BSP_ClusterVis(bsp, pvs_matrix + bsp->visrowsize * cluster, cluster, DVIS_PVS);
+    }
+
+    bsp->pvs_matrix = pvs_matrix;
 }
 
-byte* BSP_GetPvs(bsp_t *bsp, int cluster)
-{
-	if (!bsp->vis || !bsp->pvs_matrix)
-		return NULL;
-	
-	if (cluster < 0 || cluster >= bsp->vis->numclusters)
-		return NULL;
+byte* BSP_GetPvs(bsp_t* bsp, int cluster) {
+    if (!bsp->vis || !bsp->pvs_matrix)
+        return NULL;
 
-	return bsp->pvs_matrix + bsp->visrowsize * cluster;
+    if (cluster < 0 || cluster >= bsp->vis->numclusters)
+        return NULL;
+
+    return bsp->pvs_matrix + bsp->visrowsize * cluster;
 }
 
-byte* BSP_GetPvs2(bsp_t *bsp, int cluster)
-{
-	if (!bsp->vis || !bsp->pvs2_matrix)
-		return NULL;
+byte* BSP_GetPvs2(bsp_t* bsp, int cluster) {
+    if (!bsp->vis || !bsp->pvs2_matrix)
+        return NULL;
 
-	if (cluster < 0 || cluster >= bsp->vis->numclusters)
-		return NULL;
+    if (cluster < 0 || cluster >= bsp->vis->numclusters)
+        return NULL;
 
-	return bsp->pvs2_matrix + bsp->visrowsize * cluster;
+    return bsp->pvs2_matrix + bsp->visrowsize * cluster;
 }
 
 // Converts `maps/<name>.bsp` into `maps/pvs/<name>.bin`
-static qboolean BSP_GetPatchedPVSFileName(const char* map_path, char pvs_path[MAX_QPATH])
-{
-	int path_len = strlen(map_path);
-	if (path_len < 5 || strcmp(map_path + path_len - 4, ".bsp") != 0)
-		return false;
+static qboolean BSP_GetPatchedPVSFileName(const char* map_path, char pvs_path[MAX_QPATH]) {
+    int path_len = strlen(map_path);
+    if (path_len < 5 || strcmp(map_path + path_len - 4, ".bsp") != 0)
+        return false;
 
-	const char* map_file = strrchr(map_path, '/');
-	if (map_file)
-		map_file += 1;
-	else
-		map_file = map_path;
+    const char* map_file = strrchr(map_path, '/');
+    if (map_file)
+        map_file += 1;
+    else
+        map_file = map_path;
 
-	memset(pvs_path, 0, MAX_QPATH);
-	strncpy(pvs_path, map_path, map_file - map_path);
-	strcat(pvs_path, "pvs/");
-	strncat(pvs_path, map_file, strlen(map_file) - 4);
-	strcat(pvs_path, ".bin");
+    memset(pvs_path, 0, MAX_QPATH);
+    strncpy(pvs_path, map_path, map_file - map_path);
+    strcat(pvs_path, "pvs/");
+    strncat(pvs_path, map_file, strlen(map_file) - 4);
+    strcat(pvs_path, ".bin");
 
-	return true;
+    return true;
 }
 
-// Loads the first- and second-order PVS matrices from a file called `maps/pvs/<mapName>.bin`
-static qboolean BSP_LoadPatchedPVS(bsp_t *bsp)
-{
-	char pvs_path[MAX_QPATH];
+// Loads the first- and second-order PVS matrices from a file called `maps/pvs/<mapname>.bin`
+static qboolean BSP_LoadPatchedPVS(bsp_t* bsp) {
+    char pvs_path[MAX_QPATH];
 
-	if (!BSP_GetPatchedPVSFileName(bsp->name, pvs_path))
-		return false;
+    if (!BSP_GetPatchedPVSFileName(bsp->name, pvs_path))
+        return false;
 
-	unsigned char* filebuf = 0;
-	ssize_t filelen = 0;
-	filelen = FS_LoadFile(pvs_path, (void**)&filebuf); // C++20: Repositioned the & and add a * to the original: &(void*)filebuf
+    unsigned char* filebuf = 0;
+    ssize_t filelen = 0;
+    filelen = FS_LoadFile(pvs_path, (void**)&filebuf);
 
-	if (filebuf == 0)
-		return false;
+    if (filebuf == 0)
+        return false;
 
-	size_t matrix_size = (size_t)bsp->visrowsize * (size_t)bsp->vis->numclusters;
-	if (filelen != matrix_size * 2)
-	{
-		FS_FreeFile(filebuf);
-		return false;
-	}
+    size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
+    if (filelen != matrix_size * 2) 	{
+        FS_FreeFile(filebuf);
+        return false;
+    }
 
-	bsp->pvs_matrix = (byte*)Z_Malloc(matrix_size); // CPP: Cast
-	memcpy(bsp->pvs_matrix, filebuf, matrix_size);
+    bsp->pvs_matrix = (byte*)Z_Malloc(matrix_size);
+    memcpy(bsp->pvs_matrix, filebuf, matrix_size);
 
-	bsp->pvs2_matrix = (byte*)Z_Malloc(matrix_size); // CPP: Cast
-	memcpy(bsp->pvs2_matrix, filebuf + matrix_size, matrix_size);
+    bsp->pvs2_matrix = (byte*)Z_Malloc(matrix_size);
+    memcpy(bsp->pvs2_matrix, filebuf + matrix_size, matrix_size);
 
-	FS_FreeFile(filebuf);
-	return true;
+    FS_FreeFile(filebuf);
+    return true;
 }
 
-// Saves the first- and second-order PVS matrices to a file called `maps/pvs/<mapName>.bin`
-qboolean BSP_SavePatchedPVS(bsp_t *bsp)
-{
-	char pvs_path[MAX_QPATH];
+// Saves the first- and second-order PVS matrices to a file called `maps/pvs/<mapname>.bin`
+qboolean BSP_SavePatchedPVS(bsp_t* bsp) {
+    char pvs_path[MAX_QPATH];
 
-	if (!BSP_GetPatchedPVSFileName(bsp->name, pvs_path))
-		return false;
+    if (!BSP_GetPatchedPVSFileName(bsp->name, pvs_path))
+        return false;
 
-	if (!bsp->pvs_matrix)
-		return false;
+    if (!bsp->pvs_matrix)
+        return false;
 
-	if (!bsp->pvs2_matrix)
-		return false;
+    if (!bsp->pvs2_matrix)
+        return false;
 
-	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
-	unsigned char* filebuf = (unsigned char*)Z_Malloc(matrix_size * 2); // CPP: Cast
+    size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
+    unsigned char* filebuf = (unsigned char*)Z_Malloc(matrix_size * 2);
 
-	memcpy(filebuf, bsp->pvs_matrix, matrix_size);
-	memcpy(filebuf + matrix_size, bsp->pvs2_matrix, matrix_size);
+    memcpy(filebuf, bsp->pvs_matrix, matrix_size);
+    memcpy(filebuf + matrix_size, bsp->pvs2_matrix, matrix_size);
 
-	qerror_t err = FS_WriteFile(pvs_path, filebuf, matrix_size * 2);
+    qerror_t err = FS_WriteFile(pvs_path, filebuf, matrix_size * 2);
 
-	Z_Free(filebuf);
+    Z_Free(filebuf);
 
-	if (err >= 0)
-		return true;
-	else
-		return false;
+    if (err >= 0)
+        return true;
+    else
+        return false;
 }
 
 /*
@@ -1509,7 +1500,6 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
     }
 
     lumps = LittleLong(header->ident) == IDBSPHEADER ? bsp_lumps : qbsp_lumps;
-
     // byte swap and validate all lumps
     memsize = 0;
     for (info = lumps; info->load; info++) {
@@ -1541,6 +1531,8 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
     bsp = (bsp_t*)Z_Mallocz(sizeof(*bsp) + len); // CPP: Cast
     memcpy(bsp->name, name, len + 1);
     bsp->refcount = 1;
+    // Extended qbsp?
+    bsp->extended = (lumps == qbsp_lumps);
 
     // add an extra page for cacheline alignment overhead
     Hunk_Begin(&bsp->hunk, memsize + 4096);

@@ -104,6 +104,7 @@ create_poly(
 	float* tex_coord_out,
 	uint32_t* material_out,
 	float* emissive_factors_out) {
+
 	static const int max_vertices = 32;
 	float positions[3 * /*max_vertices*/ 32];
 	float tex_coords[2 * /*max_vertices*/ 32];
@@ -187,13 +188,6 @@ create_poly(
         } \
     } while(0)
 
-#define CP_M(idx) \
-    do { \
-        if(material_out) { \
-            material_out[k] = material_id; \
-        } \
-    } while(0)
-
 	int k = 0;
 	/* switch between triangle fan around center or first vertex */
 	//int tess_center = 0;
@@ -213,17 +207,14 @@ create_poly(
 
 		CP_V(k, tess_center ? pos_center : positions);
 		CP_T(k, tess_center ? tc_center : tex_coords);
-		CP_M(k);
 		k++;
 
 		CP_V(k, positions + i1 * 3);
 		CP_T(k, tex_coords + i1 * 2);
-		CP_M(k);
 		k++;
 
 		CP_V(k, positions + i2 * 3);
 		CP_T(k, tex_coords + i2 * 2);
-		CP_M(k);
 		k++;
 
 		if (material_out) {
@@ -237,7 +228,6 @@ create_poly(
 
 #undef CP_V
 #undef CP_T
-#undef CP_M
 
 	assert(k % 3 == 0);
 	return k;
@@ -1119,7 +1109,7 @@ collect_sky_and_lava_light_polys(bsp_mesh_t* wm, bsp_t* bsp) {
 			light.cluster = BSP_PointLeaf(bsp->nodes, light.off_center)->cluster;
 
 			if (is_sky_or_lava_cluster(wm, surf, light.cluster, surf->texinfo->material->flags) ||
-				(cvar_pt_bsp_sky_lights->integer && is_sky && is_light && (cvar_pt_bsp_sky_lights->integer > 1 || !is_nodraw))) {
+				(cvar_pt_bsp_sky_lights->integer && is_sky && is_light && (cvar_pt_bsp_sky_lights->integer > 1 || !is_nodraw))) 			{
 				light_poly_t* list_light = append_light_poly(&wm->num_light_polys, &wm->allocated_light_polys, &wm->light_polys);
 				memcpy(list_light, &light, sizeof(light_poly_t));
 			}
@@ -1439,7 +1429,7 @@ compute_sky_visibility(bsp_mesh_t* wm, bsp_t* bsp) {
 
 	int numclusters = bsp->vis->numclusters;
 
-	char clusters_with_sky[VIS_MAX_BYTES];
+	static char clusters_with_sky[VIS_MAX_BYTES];
 
 	memset(clusters_with_sky, 0, VIS_MAX_BYTES);
 

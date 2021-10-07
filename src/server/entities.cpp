@@ -269,8 +269,8 @@ void SV_BuildClientFrame(client_t *client)
 	int         l;
     int         clientarea, clientcluster;
     mleaf_t     *leaf;
-    byte        clientphs[VIS_MAX_BYTES];
-    byte        clientpvs[VIS_MAX_BYTES];
+    static byte        clientphs[VIS_MAX_BYTES];
+    static byte        clientpvs[VIS_MAX_BYTES];
     qboolean    ent_visible;
     int cull_nonvisible_entities = Cvar_Get("sv_cull_nonvisible_entities", "1", CVAR_CHEAT)->integer;
 
@@ -344,6 +344,9 @@ void SV_BuildClientFrame(client_t *client)
             if (!ent->state.eventID) {
                 continue;
             }
+            if (ent->state.eventID = EntityEvent::Footstep) {
+                continue;
+            }
         }
 
         ent_visible = true;
@@ -406,17 +409,22 @@ void SV_BuildClientFrame(client_t *client)
         state = &svs.entities[svs.next_entity % svs.num_entities];
         MSG_PackEntity(state, &es);
 
+        if (ent->state.eventID = EntityEvent::Footstep) {
+            ent->state.eventID = 0;
+        }
+
         // hide POV entity from renderer, unless this is player's own entity
         if (e == frame->clientNumber + 1 && ent != clent) {
             state->modelIndex = 0;
         }
 
-        //if (ent->owner == clent) {
-        //    // don't mark players missiles as solid
-        //    state->solid = 0;
-        //} else if (client->esFlags & MSG_ES_LONGSOLID) {
+        if (ent->owner == clent) {
+            //    // don't mark players missiles as solid
+            state->solid = 0;
+            //} else if (client->esFlags & MSG_ES_LONGSOLID) {
+        } else {
             state->solid = sv.entities[e].solid32;
-        //}
+        }
 
         svs.next_entity++;
 

@@ -31,11 +31,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 // maximum size of a PVS row, in bytes
-#define VIS_MAX_BYTES   (MAX_MAP_LEAFS >> 3)
+#define VIS_MAX_BYTES   (MAX_MAP_LEAFS)
 
 // take advantage of 64-bit systems
 #define VIS_FAST_LONGS(bsp) \
     (((bsp)->visrowsize + sizeof(uint_fast32_t) - 1) / sizeof(uint_fast32_t))
+
+
+// for lightmap block calculation
+#define S_MAX(surf) (((surf)->extents[0] >> 4) + 1)
+#define T_MAX(surf) (((surf)->extents[1] >> 4) + 1)
 
 typedef struct mtexinfo_s {  // used internally due to name len probs //ZOID
     csurface_t          c;
@@ -286,6 +291,8 @@ typedef struct bsp_s {
     byte            *pvs_matrix;
     byte            *pvs2_matrix;
 	qboolean        pvs_patched;
+
+    qboolean extended;
 
 	// WARNING: the 'name' string is actually longer than this, and the bsp_t structure is allocated larger than sizeof(bsp_t) in BSP_Load
     char            name[1];

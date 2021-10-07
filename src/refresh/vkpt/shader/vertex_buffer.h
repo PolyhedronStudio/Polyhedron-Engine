@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #ifndef _VERTEX_BUFFER_H_
 #define _VERTEX_BUFFER_H_
-
 #define MAX_VERT_BSP            (1 << 21)
 
 #define MAX_VERT_MODEL          (1 << 23)
@@ -95,31 +94,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define VERTEX_BUFFER_LIST_DO(type, dim, name, size) \
 	type name[ALIGN_SIZE_4(size, dim)];
 
-struct BspVertexBuffer
-{
+struct BspVertexBuffer {
 	BSP_VERTEX_BUFFER_LIST
 };
 
-struct ModelDynamicVertexBuffer
-{
+struct ModelDynamicVertexBuffer {
 	MODEL_DYNAMIC_VERTEX_BUFFER_LIST
 };
 
-struct LightBuffer
-{
+struct LightBuffer {
 	LIGHT_BUFFER_LIST
 };
 
-struct IqmMatrixBuffer
-{
+struct IqmMatrixBuffer {
 	IQM_MATRIX_BUFFER_LIST
 };
 
 #undef VERTEX_BUFFER_LIST_DO
 
 
-struct ToneMappingBuffer
-{
+struct ToneMappingBuffer {
 	int accumulator[HISTOGRAM_BINS];
 	float curve[HISTOGRAM_BINS];
 	float normalized[HISTOGRAM_BINS];
@@ -128,16 +122,18 @@ struct ToneMappingBuffer
 };
 
 #ifndef VKPT_SHADER
-//typedef int ivec3_t[3];
-//typedef int ivec4_t[4];
+// Otherwise these would conflict.
+#ifndef __INC_SHARED_MATH_VECTOR3_H__
+typedef int ivec3_t[3];
+typedef int ivec4_t[4];
+#endif
 #else
 #define ivec3_t ivec3
 #define ivec4_t ivec4
 #define vec3_t vec3
 #endif
 
-struct ReadbackBuffer
-{
+struct ReadbackBuffer {
 	uint32_t material;
 	uint32_t cluster;
 	float sun_luminance;
@@ -146,8 +142,7 @@ struct ReadbackBuffer
 	float adapted_luminance;
 };
 
-struct SunColorBuffer
-{
+struct SunColorBuffer {
 	ivec3_t accum_sun_color;
 	int padding1;
 
@@ -175,8 +170,7 @@ typedef struct {
 	vec2_t texcoord;
 } model_vertex_t;
 
-typedef struct
-{
+typedef struct {
 	vec3_t position;
 	vec3_t normal;
 	vec2_t texcoord;
@@ -201,8 +195,7 @@ typedef struct
 
 #ifdef VKPT_SHADER
 
-struct MaterialInfo
-{
+struct MaterialInfo {
 	uint base_texture;
 	uint normals_texture;
 	uint emissive_texture;
@@ -218,8 +211,7 @@ struct MaterialInfo
 	uint next_frame;
 };
 
-struct LightPolygon
-{
+struct LightPolygon {
 	mat3 positions;
 	vec3 color;
 	float light_style_scale;
@@ -412,8 +404,7 @@ LIGHT_BUFFER_LIST
 IQM_MATRIX_BUFFER_LIST
 #undef VERTEX_BUFFER_LIST_DO
 
-struct Triangle
-{
+struct Triangle {
 	mat3x3 positions;
 	mat3x3 positions_prev;
 	mat3x3 normals;
@@ -427,8 +418,7 @@ struct Triangle
 };
 
 Triangle
-get_bsp_triangle(uint prim_id)
-{
+get_bsp_triangle(uint prim_id) {
 	Triangle t;
 	t.positions[0] = get_positions_bsp(prim_id * 3 + 0);
 	t.positions[1] = get_positions_bsp(prim_id * 3 + 1);
@@ -437,8 +427,8 @@ get_bsp_triangle(uint prim_id)
 	t.positions_prev = t.positions;
 
 	vec3 normal = normalize(cross(
-				t.positions[1] - t.positions[0],
-				t.positions[2] - t.positions[0]));
+		t.positions[1] - t.positions[0],
+		t.positions[2] - t.positions[0]));
 
 	t.normals[0] = normal;
 	t.normals[1] = normal;
@@ -448,9 +438,9 @@ get_bsp_triangle(uint prim_id)
 	t.tex_coords[1] = get_tex_coords_bsp(prim_id * 3 + 1);
 	t.tex_coords[2] = get_tex_coords_bsp(prim_id * 3 + 2);
 
-    t.tangents[0] = decode_normal(get_tangents_bsp(prim_id));
-    t.tangents[1] = t.tangents[0];
-    t.tangents[2] = t.tangents[0];
+	t.tangents[0] = decode_normal(get_tangents_bsp(prim_id));
+	t.tangents[1] = t.tangents[0];
+	t.tangents[2] = t.tangents[0];
 
 	t.material_id = get_materials_bsp(prim_id);
 
@@ -466,8 +456,7 @@ get_bsp_triangle(uint prim_id)
 }
 
 Triangle
-get_instanced_triangle(uint prim_id)
-{
+get_instanced_triangle(uint prim_id) {
 	Triangle t;
 	t.positions[0] = get_positions_instanced(prim_id * 3 + 0);
 	t.positions[1] = get_positions_instanced(prim_id * 3 + 1);
@@ -504,8 +493,7 @@ get_instanced_triangle(uint prim_id)
 
 #ifndef VERTEX_READONLY
 void
-store_instanced_triangle(Triangle t, uint instance_id, uint prim_id)
-{
+store_instanced_triangle(Triangle t, uint instance_id, uint prim_id) {
 	set_positions_instanced(prim_id * 3 + 0, t.positions[0]);
 	set_positions_instanced(prim_id * 3 + 1, t.positions[1]);
 	set_positions_instanced(prim_id * 3 + 2, t.positions[2]);
@@ -539,10 +527,9 @@ store_instanced_triangle(Triangle t, uint instance_id, uint prim_id)
 #endif
 
 MaterialInfo
-get_material_info(uint material_id)
-{
+get_material_info(uint material_id) {
 	uint material_index = material_id & MATERIAL_INDEX_MASK;
-	
+
 	uint data[MATERIAL_UINTS];
 	data[0] = get_material_table(material_index * MATERIAL_UINTS + 0);
 	data[1] = get_material_table(material_index * MATERIAL_UINTS + 1);
@@ -567,11 +554,9 @@ get_material_info(uint material_id)
 
 	// Apply the light style for non-camera materials.
 	// Camera materials use the same bits to store the camera ID.
-	if((material_id & MATERIAL_KIND_MASK) != MATERIAL_KIND_CAMERA)
-	{
+	if ((material_id & MATERIAL_KIND_MASK) != MATERIAL_KIND_CAMERA) 	{
 		uint light_style = (material_id & MATERIAL_LIGHT_STYLE_MASK) >> MATERIAL_LIGHT_STYLE_SHIFT;
-		if(light_style != 0) 
-		{
+		if (light_style != 0) 		{
 			minfo.emissive_factor *= get_light_styles(light_style);
 		}
 	}
@@ -580,8 +565,7 @@ get_material_info(uint material_id)
 }
 
 LightPolygon
-get_light_polygon(uint index)
-{
+get_light_polygon(uint index) {
 	vec4 p0 = get_light_polys(index * LIGHT_POLY_VEC4S + 0);
 	vec4 p1 = get_light_polys(index * LIGHT_POLY_VEC4S + 1);
 	vec4 p2 = get_light_polys(index * LIGHT_POLY_VEC4S + 2);
@@ -596,8 +580,7 @@ get_light_polygon(uint index)
 }
 
 mat3x4
-get_iqm_matrix(uint index)
-{
+get_iqm_matrix(uint index) {
 	mat3x4 result;
 	result[0] = get_iqm_matrices(index * 3 + 0);
 	result[1] = get_iqm_matrices(index * 3 + 1);

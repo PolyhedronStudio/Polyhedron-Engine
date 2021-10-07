@@ -439,7 +439,7 @@ SV_PointContents
 */
 int SV_PointContents(const vec3_t &p)
 {
-    Entity     *touch[MAX_EDICTS], *hit;
+    static Entity     *touch[MAX_EDICTS], *hit;
     int         i, num;
     int         contents;
 
@@ -475,7 +475,7 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
 {
     vec3_t      boxmins, boxmaxs;
     int         i, num;
-    Entity     *touchlist[MAX_EDICTS], *touch;
+    static Entity     *touchlist[MAX_EDICTS], *touch;
     trace_t     trace;
 
     // create the bounding box of the entire move

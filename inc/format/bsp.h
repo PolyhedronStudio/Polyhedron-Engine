@@ -26,24 +26,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 ==============================================================================
 */
-
 #define IDBSPHEADER    (('P'<<24)+('S'<<16)+('B'<<8)+'I')
 #define BSPVERSION    38
-
-// N&C: WIDBSPHEADER
-#define WIDBSPHEADER    (('P'<<24)+('S'<<16)+('B'<<8)+'W')
-#define WIDBSPVERSION    1
-
 
 // upper design bounds
 // leaffaces, leafbrushes, planes, and verts are still bounded by
 // 16 bit short limits
-#define     MAX_MAP_MODELS      8192    // WID: Was 1024
-#define     MAX_MAP_BRUSHES     65536   // WID: Was 8192
-#define     MAX_MAP_ENTITIES    8192    // WID: Was 2048
+#define     MAX_MAP_MODELS      1024
+#define     MAX_MAP_BRUSHES     8192
+#define     MAX_MAP_ENTITIES    2048
 #define     MAX_MAP_ENTSTRING   0x40000
 #define     MAX_MAP_TEXINFO     8192
-
 
 #define     MAX_MAP_AREAS       256
 #define     MAX_MAP_AREAPORTALS 1024
@@ -67,7 +60,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // upper design bounds
 // leaffaces, leafbrushes, planes, and verts are still bounded by
-// INT_MAX limits
+// 16 bit short limits
 #define     MAX_QBSP_MAP_MODELS      INT_MAX
 #define     MAX_QBSP_MAP_BRUSHES     INT_MAX
 #define     MAX_QBSP_MAP_ENTITIES    INT_MAX
@@ -125,6 +118,9 @@ typedef struct {
 #define    LUMP_AREAS           17
 #define    LUMP_AREAPORTALS     18
 #define    HEADER_LUMPS         19
+
+
+//=============================================================================
 
 typedef struct {
     uint32_t    ident;

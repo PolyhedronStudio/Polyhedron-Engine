@@ -355,10 +355,12 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 			Q_strlcpy(svalue, value, min(asterisk - value + 1, sizeof(svalue)));
 			Q_strlcat(svalue, mat_base, sizeof(svalue));
 			Q_strlcat(svalue, asterisk + 1, sizeof(svalue));
-		} 		else
+		} else {
 			Q_strlcpy(svalue, value, sizeof(svalue));
+		}
 		break;
-	case ATTR_INT:
+	}
+	case ATTR_INT: {
 		ivalue = atoi(value);
 		break;
 	}

@@ -1105,7 +1105,7 @@ so we can't use a single PVS point
 */
 byte *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t &org, int vis)
 {
-    byte    temp[VIS_MAX_BYTES];
+    static byte    temp[VIS_MAX_BYTES];
     mleaf_t *leafs[64];
     int     clusters[64];
     int     i, j, count, longs;

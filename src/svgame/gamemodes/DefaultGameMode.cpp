@@ -117,7 +117,8 @@ qboolean DefaultGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     // Exception to the above: the solid entity moves or has an origin brush
     if (target->GetMoveType() == MoveType::Push) {
         // Calculate destination.
-        destination = vec3_scale(target->GetAbsoluteMin() + target->GetAbsoluteMax(), 0.5f);
+        destination = target->GetAbsoluteMin() + target->GetAbsoluteMax();
+        destination = vec3_scale(destination, 0.5f);
         trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
         if (trace.fraction == 1.0)
             return true;

@@ -555,8 +555,6 @@ vkpt_final_blit_simple(VkCommandBuffer cmd_buf, VkImage image, VkExtent2D extent
 		.subresourceRange = subresource_range,
 	});
 
-	int output_img = VKPT_IMG_TAA_OUTPUT;
-
 	IMAGE_BARRIER(cmd_buf, {
 		.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,

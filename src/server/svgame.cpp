@@ -415,7 +415,7 @@ static void PF_configstring(int index, const char *val)
 static qboolean PF_inVIS(vec3_t p1, vec3_t p2, int vis)
 {
     mleaf_t *leaf1 = NULL, *leaf2 = NULL;
-    byte mask[VIS_MAX_BYTES];
+    static byte mask[VIS_MAX_BYTES];
     bsp_t *bsp = sv.cm.cache;
 
     if (!bsp) {
@@ -505,7 +505,7 @@ static void PF_StartSound(Entity *edict, int channel,
     int         ent;
     vec3_t      origin;
     client_t    *client;
-    byte        mask[VIS_MAX_BYTES];
+    static byte mask[VIS_MAX_BYTES];
     mleaf_t     *leaf;
     int         area;
     PlayerState      *ps;

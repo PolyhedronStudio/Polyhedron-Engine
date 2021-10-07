@@ -92,7 +92,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef unsigned char byte;
 
 // "qboolean" - Bool.
-typedef bool qboolean;
+typedef uint32_t qboolean;
 
 //-----------------
 // Engine
@@ -114,14 +114,14 @@ constexpr int32_t MAX_STRING_TOKENS = 256;  // max tokens resulting from Cmd_Tok
 constexpr int32_t MAX_TOKEN_CHARS   = 1024;   // max length of an individual token
 constexpr int32_t MAX_NET_STRING    = 2048;    // max length of a string used in network protocol
 
-constexpr int32_t MAX_QPATH     = 256;  // max length of a quake game pathname
+constexpr int32_t MAX_QPATH     = 64;  // max length of a quake game pathname
 constexpr int32_t MAX_OSPATH    = 256; // max length of a filesystem pathname
 
 //-----------------
 // Per-level limits
 //-----------------
-constexpr int32_t MAX_CLIENTS   = 256;    // absolute limit
-constexpr int32_t MAX_EDICTS    = 2048;    // N&C: POOL: Was 1024 // must change protocol to increase more
+constexpr int32_t MAX_CLIENTS   = 256;   // absolute limit
+constexpr int32_t MAX_EDICTS    = 1024; // N&C: POOL: Was 1024 // must change protocol to increase more
 constexpr int32_t MAX_LIGHTSTYLES   = 256;
 constexpr int32_t MAX_MODELS    = 256; // these are sent over the net as bytes
 constexpr int32_t MAX_SOUNDS    = 256;// so they cannot be blindly increased

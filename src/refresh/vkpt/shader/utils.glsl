@@ -318,7 +318,7 @@ struct SH
 
 // Switch to enable or disable the *look* of spherical harmonics lighting.
 // Does not affect the performance, just for A/B image comparison.
-#define ENABLE_SH 1
+//#define ENABLE_SH 1
 
 vec3 project_SH_irradiance(SH sh, vec3 N)
 {

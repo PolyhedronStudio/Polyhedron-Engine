@@ -250,7 +250,7 @@ typedef struct maliasmesh_s {
 #define LIGHT_STYLE(surf, i) \
     &glr.fd.lightstyles[gl_static.lightstylemap[(surf)->styles[i]]]
 
-#define LM_MAX_LIGHTMAPS    32
+#define LM_MAX_LIGHTMAPS    256
 #define LM_BLOCK_WIDTH      256
 #define LM_BLOCK_HEIGHT     256
 
