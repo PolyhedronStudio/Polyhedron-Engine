@@ -15,10 +15,10 @@
 #include "ClientGameExports.h"
 
 //---------------
-// ClientGameExports::CalculateClientFieldOfView
+// ClientGameExports::ClientCalculateFieldOfView
 //
 //---------------
-float ClientGameExports::CalculateClientFieldOfView(float fieldOfViewX, float width, float height) {
+float ClientGameExports::ClientCalculateFieldOfView(float fieldOfViewX, float width, float height) {
     float    a;
     float    x;
 
@@ -34,10 +34,10 @@ float ClientGameExports::CalculateClientFieldOfView(float fieldOfViewX, float wi
 }
 
 //---------------
-// ClientGameExports::ClearClientState
+// ClientGameExports::ClientClearState
 //
 //---------------
-void ClientGameExports::ClearClientState() {
+void ClientGameExports::ClientClearState() {
     // Clear Effects.
     CLG_ClearEffects();
 
@@ -49,10 +49,10 @@ void ClientGameExports::ClearClientState() {
 }
 
 //---------------
-// ClientGameExports::UpdateClientOrigin
+// ClientGameExports::ClientUpdateOrigin
 //
 //---------------
-void ClientGameExports::UpdateClientOrigin() {
+void ClientGameExports::ClientUpdateOrigin() {
     PlayerState* currentPlayerState = NULL;
     PlayerState* previousPlayerState = NULL;
 
@@ -120,7 +120,7 @@ void ClientGameExports::UpdateClientOrigin() {
     Vector4Copy(currentPlayerState->blend, cl->refdef.blend);
 
     // Interpolate field of view
-    cl->fov_x = LerpClientFieldOfView(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);
+    cl->fov_x = LerpFieldOfView(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);
     cl->fov_y = CLG_CalculateFOV(cl->fov_x, 4, 3);
 
     // Calculate new client forward, right, and up vectors.
@@ -198,30 +198,19 @@ void ClientGameExports::ClientDisconnect() {
 //
 //---------------
 void ClientGameExports::ClientUpdateUserinfo(cvar_t* var, from_t from) {
-    // If there is a skin change, and the gender setting is set to auto find it...
-    if (var == info_skin && from > FROM_CONSOLE && gender_auto->integer) {
-        char* p;
+    // If there is a skin change, let's go for it.
+    if (var == info_skin && from > FROM_CONSOLE) {
         char sk[MAX_QPATH];
-
         Q_strlcpy(sk, info_skin->string, sizeof(sk));
-        if ((p = strchr(sk, '/')) != NULL)
-            *p = 0;
-        if (Q_stricmp(sk, "male") == 0 || Q_stricmp(sk, "cyborg") == 0)
-            clgi.Cvar_Set("gender", "male");
-        else if (Q_stricmp(sk, "female") == 0 || Q_stricmp(sk, "crackhor") == 0)
-            clgi.Cvar_Set("gender", "female");
-        else
-            clgi.Cvar_Set("gender", "none");
-        info_gender->modified = false;
     }
 }
 
 
 //---------------
-// ClientGameExports::LerpClientFieldOfView
+// ClientGameExports::LerpFieldOfView
 //
 //---------------
-float ClientGameExports::LerpClientFieldOfView(float oldFieldOfView, float newFieldOfView, float lerp) {
+float ClientGameExports::LerpFieldOfView(float oldFieldOfView, float newFieldOfView, float lerp) {
     if (clgi.IsDemoPlayback()) {
         float fov = info_fov->value;
 

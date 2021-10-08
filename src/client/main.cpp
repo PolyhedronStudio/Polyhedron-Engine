@@ -66,8 +66,6 @@ cvar_t  *cl_beginmapcmd;
 
 cvar_t  *cl_protocol;
 
-cvar_t  *gender_auto;
-
 cvar_t  *cl_vwep;
 
 cvar_t  *cl_cinematics;
@@ -83,7 +81,6 @@ cvar_t  *info_rate;
 cvar_t  *info_fov;
 cvar_t  *info_msg;
 cvar_t  *info_hand;
-cvar_t  *info_gender;
 cvar_t  *info_uf;
 
 // N&C: Developer utilities.
@@ -611,7 +608,7 @@ void CL_ClearState(void)
     S_StopAllSounds();
  
     // WID: Inform the CG Module.
-    CL_GM_ClearState();
+    CL_GM_ClientClearState();
 
     // Wipe the entire cl structure
     BSP_Free(cl.bsp);
@@ -1448,37 +1445,12 @@ void CL_ErrorEvent(netadr_t *from)
 
 //=============================================================================
 
-/*
-==============
-CL_FixUpGender_f
-==============
-*/
-//static void CL_FixUpGender(void)
-//{
-//    char *p;
-//    char sk[MAX_QPATH];
-//
-//    Q_strlcpy(sk, info_skin->string, sizeof(sk));
-//    if ((p = strchr(sk, '/')) != NULL)
-//        *p = 0;
-//    if (Q_stricmp(sk, "male") == 0 || Q_stricmp(sk, "cyborg") == 0)
-//        Cvar_Set("gender", "male");
-//    else if (Q_stricmp(sk, "female") == 0 || Q_stricmp(sk, "crackhor") == 0)
-//        Cvar_Set("gender", "female");
-//    else
-//        Cvar_Set("gender", "none");
-//    info_gender->modified = false;
-//}
-
 void CL_UpdateUserinfo(cvar_t *var, from_t from)
 {
     int i;
 
     // N&C: Allow the CG Module to work with it.
-    CL_GM_UpdateUserInfo(var, from);
-    //if (var == info_skin && from > FROM_CONSOLE && gender_auto->integer) {
-    //    CL_FixUpGender();
-    //}
+    CL_GM_ClientUpdateUserInfo(var, from);
 
     if (!cls.netchan) {
         return;
@@ -2266,9 +2238,6 @@ void CL_RestartFilesystem(qboolean total)
     } else if (clientConnectionState >= ClientConnectionState::Loading && clientConnectionState <= ClientConnectionState::Active) {
         CL_LoadState(LOAD_MAP);
         CL_PrepareMedia();
-        // Moved tl CL_PrepareMedia
-        // CL_LoadState(LOAD_SOUNDS);
-        // CL_RegisterSounds();
         CL_LoadState(LOAD_NONE);
     } else if (clientConnectionState == ClientConnectionState::Cinematic) {
         cl.precaches.images[0] = R_RegisterPic2(cl.mapName);
@@ -3083,7 +3052,7 @@ run_fx:
         SCR_RunCinematic();
     } else if (sync_mode == SYNC_SLEEP_20) {
         // Force audio and effects update if not rendering
-        CL_GM_UpdateOrigin();
+        CL_GM_ClientUpdateOrigin();
         goto run_fx;
     }
 

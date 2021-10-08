@@ -260,6 +260,18 @@ typedef enum {
     PRINT_NOTICE        // print in cyan color
 } PrintType;
 
+//
+// Contains the client load states, clg_local.h can expand upon it with custom
+// states. They can send a text name for the loading state to show in display.
+//
+typedef enum {
+    LOAD_NONE,
+    LOAD_MAP,
+    LOAD_MODELS,
+    LOAD_IMAGES,
+    LOAD_CLIENTS,
+    LOAD_SOUNDS
+} LoadState;
 
 
 //-----------------

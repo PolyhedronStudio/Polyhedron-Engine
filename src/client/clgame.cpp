@@ -688,21 +688,21 @@ void CL_GM_Shutdown (void) {
 //
 float CL_GM_CalcFOV(float fov_x, float width, float height) {
     if (cge)
-        return cge->CalculateClientFieldOfView(fov_x, width, height);
+        return cge->ClientCalculateFieldOfView(fov_x, width, height);
     else
         return 0.f;
 }
 
 //
 //===============
-// CL_GM_UpdateOrigin
+// CL_GM_ClientUpdateOrigin
 // 
 // Called by the client in case it wants to update audio positioning.
 //===============
 //
-void CL_GM_UpdateOrigin(void) {
+void CL_GM_ClientUpdateOrigin(void) {
     if (cge)
-        cge->UpdateClientOrigin();
+        cge->ClientUpdateOrigin();
 }
 
 //
@@ -756,14 +756,14 @@ void CL_GM_ClientDisconnect(void) {
 
 //
 //===============
-// CL_GM_ClearState
+// CL_GM_ClientClearState
 // 
 // Called when the client (and/is) disconnected for whichever reasons.
 //===============
 //
-void CL_GM_ClearState(void) {
+void CL_GM_ClientClearState(void) {
     if (cge)
-        cge->ClearClientState();
+        cge->ClientClearState();
 }
 
 //
@@ -780,20 +780,6 @@ void CL_GM_DemoSeek(void) {
 
 //
 //===============
-// CL_GM_UpdateUserInfo
-// 
-// Called when the client has changed user info.
-// Here we can fix up the gender for example before all data gets applied and
-// send to the other clients.
-//===============
-//
-void CL_GM_UpdateUserInfo(cvar_t* var, from_t from) {
-    if (cge)
-        cge->ClientUpdateUserinfo(var, from);
-}
-
-//
-//===============
 // CL_GM_StartServerMessage 
 // 
 // Called by the client BEFORE all server messages have been parsed
@@ -802,6 +788,17 @@ void CL_GM_UpdateUserInfo(cvar_t* var, from_t from) {
 void CL_GM_StartServerMessage (void) {
     if (cge && cge->serverMessage)
         cge->serverMessage->Start();
+}
+
+//
+//===============
+// Breaks up playerskin into name (optional), model and skin components.
+// If model or skin are found to be invalid, replaces them with sane defaults.
+//===============
+//
+void CL_GM_ParsePlayerSkin(char* name, char* model, char* skin, const char* s) {
+    if (cge && cge->serverMessage)
+        cge->serverMessage->ParsePlayerSkin(name, model, skin, s);
 }
 
 //
@@ -821,6 +818,19 @@ qboolean CL_GM_UpdateConfigString (int32_t index, const char *str) {
 
 //
 //===============
+// CL_GM_ClientUpdateUserInfo
+// 
+// Called when the engine has had a cvar changed that involved userinfo.
+// Think about skin, or name, etc.
+//===============
+//
+void CL_GM_ClientUpdateUserInfo(cvar_t* var, from_t from) {
+    if (cge)
+        return cge->ClientUpdateUserinfo(var, from);
+}
+
+//
+//===============
 // CL_GM_ParseServerMessage
 // 
 // Parses command operations known to the game dll
@@ -829,7 +839,7 @@ qboolean CL_GM_UpdateConfigString (int32_t index, const char *str) {
 //
 qboolean CL_GM_ParseServerMessage (int32_t serverCommand) {
     if (cge && cge->serverMessage)
-        return cge->serverMessage->Parse(serverCommand);
+        return cge->serverMessage->ParseMessage(serverCommand);
 
     return false;
 }

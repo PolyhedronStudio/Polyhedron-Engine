@@ -179,7 +179,6 @@ void ClientGameCore::Initialize() {
     sv_paused = clgi.Cvar_Get("sv_paused", NULL, 0);
 
     // Create the CG Module its own cvars here.
-    gender_auto = clgi.Cvar_Get("gender_auto", "1", CVAR_ARCHIVE);
 
     cl_footsteps = clgi.Cvar_Get("cl_footsteps", "1", 0);
     cl_gunalpha = clgi.Cvar_Get("cl_gunalpha", "1", 0);
@@ -208,8 +207,6 @@ void ClientGameCore::Initialize() {
     //
     info_name = clgi.Cvar_Get("name", "Player", CVAR_USERINFO | CVAR_ARCHIVE);
     info_fov = clgi.Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_gender = clgi.Cvar_Get("gender", "male", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_gender->modified = false; // clear this so we know when user sets it manually
     info_hand = clgi.Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
     info_skin = clgi.Cvar_Get("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
     info_uf = clgi.Cvar_Get("uf", "", CVAR_USERINFO);

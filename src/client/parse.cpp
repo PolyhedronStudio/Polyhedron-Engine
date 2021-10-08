@@ -679,6 +679,11 @@ void CL_CheckForIP(const char *s)
     }
 }
 
+void CL_ClientUpdateUserinfo(cvar_t* var, from_t from) {
+    // Call in straight to the GM module.
+    CL_GM_ClientUpdateUserInfo(var, from);
+}
+
 static void CL_ParseStuffText(void)
 {
     char s[MAX_STRING_CHARS];

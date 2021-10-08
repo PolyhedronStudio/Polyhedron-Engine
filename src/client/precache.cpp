@@ -35,65 +35,8 @@ If model or skin are found to be invalid, replaces them with sane defaults.
 */
 void CL_ParsePlayerSkin(char *name, char *model, char *skin, const char *s)
 {
-    size_t len;
-    char *t;
-
-    // configstring parsing guarantees that playerskins can never
-    // overflow, but still check the length to be entirely fool-proof
-    len = strlen(s);
-    if (len >= MAX_QPATH) {
-        Com_Error(ERR_DROP, "%s: oversize playerskin", __func__);
-    }
-
-    // isolate the player's name
-    t = (char*)strchr(s, '\\'); // CPP: WARNING: Cast from const char* to char*
-    if (t) {
-        len = t - s;
-        strcpy(model, t + 1);
-    } else {
-        len = 0;
-        strcpy(model, s);
-    }
-
-    // copy the player's name
-    if (name) {
-        memcpy(name, s, len);
-        name[len] = 0;
-    }
-
-    // isolate the model name
-    t = strchr(model, '/');
-    if (!t)
-        t = strchr(model, '\\');
-    if (!t)
-        goto default_model;
-    *t = 0;
-
-    // isolate the skin name
-    strcpy(skin, t + 1);
-
-    // fix empty model to male
-    if (t == model)
-        strcpy(model, "male");
-
-    // apply restrictions on skins
-    if (cl_noskins->integer == 2 || !COM_IsPath(skin))
-        goto default_skin;
-
-    if (cl_noskins->integer || !COM_IsPath(model))
-        goto default_model;
-
-    return;
-
-default_skin:
-    if (!Q_stricmp(model, "female")) {
-        strcpy(model, "female");
-        strcpy(skin, "athena");
-    } else {
-default_model:
-        strcpy(model, "male");
-        strcpy(skin, "grunt");
-    }
+    // Let client game module handle this.
+    CL_GM_ParsePlayerSkin(name, model, skin, s);
 }
 
 

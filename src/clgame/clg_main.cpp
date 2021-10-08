@@ -77,10 +77,8 @@ cvar_t* cvar_pt_beam_lights = NULL;
 cvar_t *sv_paused   = NULL;
 
 // User Info.
-cvar_t *gender_auto     = NULL;
 cvar_t *info_fov        = NULL;
 cvar_t *info_hand       = NULL;
-cvar_t *info_gender     = NULL;
 cvar_t *info_msg        = NULL;
 cvar_t *info_name       = NULL;
 cvar_t *info_password   = NULL;
@@ -420,8 +418,6 @@ void CLG_Init() {
     sv_paused                = clgi.Cvar_Get("sv_paused", NULL, 0);
 
     // Create the CG Module its own cvars here.
-    gender_auto              = clgi.Cvar_Get("gender_auto", "1", CVAR_ARCHIVE);
-
     cl_footsteps             = clgi.Cvar_Get("cl_footsteps", "1", 0);
     cl_gunalpha              = clgi.Cvar_Get("cl_gunalpha", "1", 0);
     // TODO: This one was never implemented at all!!
@@ -449,8 +445,6 @@ void CLG_Init() {
     //
     info_name               = clgi.Cvar_Get("name", "Player", CVAR_USERINFO | CVAR_ARCHIVE);
     info_fov                = clgi.Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_gender             = clgi.Cvar_Get("gender", "male", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_gender->modified   = false; // clear this so we know when user sets it manually
     info_hand               = clgi.Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
     info_skin               = clgi.Cvar_Get("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
     info_uf                 = clgi.Cvar_Get("uf", "", CVAR_USERINFO);
@@ -587,35 +581,6 @@ void CLG_DemoSeek(void) {
 void CLG_Shutdown(void) {
     // Deregister commands.
     clgi.Cmd_Unregister(cmd_cgmodule);
-}
-
-
-//
-//===============
-// CLG_UpdateUserInfo
-// 
-// Called when the client has changed user info.
-// Here we can fix up the gender for example before all data gets applied and
-// send to the other clients.
-//===============
-//
-void CLG_UpdateUserInfo(cvar_t* var, from_t from) {
-    // If there is a skin change, and the gender setting is set to auto find it...
-    if (var == info_skin && from > FROM_CONSOLE && gender_auto->integer) {
-        char* p;
-        char sk[MAX_QPATH];
-
-        Q_strlcpy(sk, info_skin->string, sizeof(sk));
-        if ((p = strchr(sk, '/')) != NULL)
-            *p = 0;
-        if (Q_stricmp(sk, "male") == 0 || Q_stricmp(sk, "cyborg") == 0)
-            clgi.Cvar_Set("gender", "male");
-        else if (Q_stricmp(sk, "female") == 0 || Q_stricmp(sk, "crackhor") == 0)
-            clgi.Cvar_Set("gender", "female");
-        else
-            clgi.Cvar_Set("gender", "none");
-        info_gender->modified = false;
-    }
 }
 
 //

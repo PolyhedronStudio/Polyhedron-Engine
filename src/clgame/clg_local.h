@@ -159,10 +159,8 @@ extern cvar_t* cvar_pt_beam_lights;
 extern cvar_t* sv_paused;
 
 // User Info.
-extern cvar_t* gender_auto;
 extern cvar_t* info_fov;
 extern cvar_t* info_hand;
-extern cvar_t* info_gender;
 extern cvar_t* info_msg;
 extern cvar_t* info_name;
 extern cvar_t* info_password;

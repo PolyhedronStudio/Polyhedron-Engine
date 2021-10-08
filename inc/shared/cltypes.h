@@ -241,19 +241,6 @@ typedef struct {
 } ServerFrame;
 
 //
-// Contains the client load states, clg_local.h can expand upon it with custom
-// states. They can send a text name for the loading state to show in display.
-//
-typedef enum {
-    LOAD_NONE,
-    LOAD_MAP,
-    LOAD_MODELS,
-    LOAD_IMAGES,
-    LOAD_CLIENTS,
-    LOAD_SOUNDS
-} LoadState;
-
-//
 // This structure contains all (persistent)shared data with the client.
 //
 struct ClientShared {

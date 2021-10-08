@@ -9,6 +9,12 @@
 #ifndef __CLGAME_MAIN_H__
 #define __CLGAME_MAIN_H__
 
+// Externs.
+// Contains the function pointers being passed in from the engine.
+extern ClientGameImport clgi;
+// Static export variable, lives as long as the client game dll lives.
+extern IClientGameExports* clge;
+
 void CLG_Init();
 void CLG_Shutdown(void);
 
@@ -18,8 +24,6 @@ void CLG_ClientBegin(void);
 void CLG_ClientDisconnect(void);
 void CLG_ClearState(void);
 void CLG_DemoSeek(void);
-
-void CLG_UpdateUserInfo(cvar_t* var, from_t from);
 
 void Com_Print(const char* fmt, ...);
 void Com_DPrint(const char* fmt, ...);

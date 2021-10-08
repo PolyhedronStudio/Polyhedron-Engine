@@ -502,11 +502,11 @@ public:
 	/// Belong to exports.
 	///
 	//// Calculates the FOV the client is running. (Important to have in order.)
-	//virtual float CalculateClientFieldOfView(float x, float width, float height) = 0;
+	//virtual float ClientCalculateFieldOfView(float x, float width, float height) = 0;
 
 	//// Called upon whenever a client disconnects, for whichever reason.
 	//// Could be him quiting, or pinging out etc.
-	//virtual void ClearClientState() = 0;
+	//virtual void ClientClearState() = 0;
 
 	//// Updates the origin. (Used by the engine for determining current audio position too.)
 	//virtual void UpdateClientOrigin() = 0;

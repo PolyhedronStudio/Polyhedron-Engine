@@ -128,6 +128,9 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExportServerMessage {
 public:
+    // Breaks up playerskin into name(optional), modeland skin components.
+    // If model or skin are found to be invalid, replaces them with sane defaults.
+    virtual qboolean ParsePlayerSkin(char* name, char* model, char* skin, const char* str) = 0;
     // Called when a configstring update has been parsed and still left
     // unhandled by the client.
     virtual qboolean UpdateConfigString(int32_t index, const char* str) = 0;
@@ -136,7 +139,7 @@ public:
     virtual void Start() = 0;
     // Actually parses the server message, and handles it accordingly.
     // Returns false in case the message was unkown, or corrupted, etc.
-    virtual qboolean Parse(int32_t serverCommand) = 0;
+    virtual qboolean ParseMessage(int32_t serverCommand) = 0;
     // Handles the demo message during playback.
     // Returns false in case the message was unknown, or corrupted, etc.
     virtual qboolean SeekDemoMessage(int32_t demoCommand) = 0;
@@ -181,14 +184,11 @@ public:
     // General.
     //---------------------------------------------------------------------
     // Calculates the FOV the client is running. (Important to have in order.)
-    virtual float CalculateClientFieldOfView(float fieldOfViewX, float width, float height) = 0;
+    virtual float ClientCalculateFieldOfView(float fieldOfViewX, float width, float height) = 0;
 
     // Called upon whenever a client disconnects, for whichever reason.
     // Could be him quiting, or pinging out etc.
-    virtual void ClearClientState() = 0;
-
-    // Updates the origin. (Used by the engine for determining current audio position too.)
-    virtual void UpdateClientOrigin() = 0;
+    virtual void ClientClearState() = 0;
 
     // Called when a demo is being seeked through.
     virtual void DemoSeek() = 0;
@@ -203,6 +203,9 @@ public:
     virtual void ClientFrame() = 0;
     // Called when a disconnect even occures. Including those for Com_Error
     virtual void ClientDisconnect() = 0;
+
+    // Updates the origin. (Used by the engine for determining current audio position too.)
+    virtual void ClientUpdateOrigin() = 0;
 
     // Called when there is a needed retransmit of user info variables.
     virtual void ClientUpdateUserinfo(cvar_t* var, from_t from) = 0;

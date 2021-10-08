@@ -312,7 +312,6 @@ extern cvar_t    *info_rate;
 extern cvar_t    *info_fov;
 extern cvar_t    *info_msg;
 extern cvar_t    *info_hand;
-extern cvar_t    *info_gender;
 extern cvar_t    *info_uf;
 
 //=============================================================================
@@ -407,9 +406,7 @@ void        CL_SetLoadState (LoadState state);   // WATISDEZE Added for CG Modul
 
 void CL_ParsePlayerSkin(char *name, char *model, char *skin, const char *s);
 void CL_LoadState(LoadState state);
-void CL_RegisterSounds(void);
 void CL_RegisterBspModels(void);
-void CL_RegisterVWepModels(void);
 void CL_PrepareMedia(void);
 void CL_UpdateConfigstring(int index);
 

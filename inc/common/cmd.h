@@ -28,25 +28,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ALIAS_LOOP_COUNT    16
 
 // where did current command come from?
-typedef enum {
+enum from_t : int32_t {
     FROM_STUFFTEXT,
     FROM_RCON,
     FROM_MENU,
     FROM_CONSOLE,
     FROM_CMDLINE,
     FROM_CODE
-} from_t;
+};
 
 // WatIsDeze: Added for cgame dll, it doesn't need these functions.
-typedef struct cmdbuf_s {
+struct cmdbuf_t {
     from_t      from;
     char* text; // may not be NULL terminated
     size_t      cursize;
     size_t      maxsize;
     int         waitCount;
     int         aliasCount; // for detecting runaway loops
-    void        (*exec)(struct cmdbuf_s*, const char*);
-} cmdbuf_t;
+    void        (*exec)(struct cmdbuf_t*, const char*);
+};
 
 #ifndef CGAME_INCLUDE
     // generic console buffer

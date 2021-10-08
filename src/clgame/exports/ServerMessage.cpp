@@ -15,8 +15,67 @@
 #include "../ClientGameExports.h"
 #include "ServerMessage.h"
 
+qboolean ClientGameServerMessage::ParsePlayerSkin(char* name, char* model, char* skin, const char* str) {
+    size_t len;
+    char* t;
+
+    // configstring parsing guarantees that playerskins can never
+    // overflow, but still check the length to be entirely fool-proof
+    len = strlen(str);
+    if (len >= MAX_QPATH) {
+        Com_Error(ERR_DROP, "%s: oversize playerskin", __func__);
+    }
+
+    // isolate the player's name
+    t = (char*)strchr(str, '\\'); // CPP: WARNING: Cast from const char* to char*
+    if (t) {
+        len = t - str;
+        strcpy(model, t + 1);
+    } else {
+        len = 0;
+        strcpy(model, str);
+    }
+
+    // copy the player's name
+    if (name) {
+        memcpy(name, str, len);
+        name[len] = 0;
+    }
+
+    // isolate the model name
+    t = strchr(model, '/');
+    if (!t)
+    t = strchr(model, '\\');
+    if (!t)
+    goto default_model;
+    *t = 0;
+
+    // isolate the skin name
+    strcpy(skin, t + 1);
+
+    // fix empty model to male
+    if (t == model)
+    strcpy(model, "male");
+
+    // apply restrictions on skins
+    if (cl_noskins->integer == 2 || !COM_IsPath(skin))
+    goto default_skin;
+
+    if (cl_noskins->integer || !COM_IsPath(model))
+    goto default_model;
+
+    return false;
+
+    default_skin:
+        strcpy(skin, "grunt");
+        return true;
+    default_model:
+        strcpy(model, "male");
+        return true;
+}
+
 //---------------
-// ClientGameServerMessage::CheckPredictionError
+// ClientGameServerMessage::UpdateConfigString
 //
 //---------------
 qboolean ClientGameServerMessage::UpdateConfigString(int32_t index, const char* str) {
@@ -56,7 +115,7 @@ void ClientGameServerMessage::Start() {
 // ClientGameServerMessage::Parse
 //
 //---------------
-qboolean ClientGameServerMessage::Parse(int32_t serverCommand) {
+qboolean ClientGameServerMessage::ParseMessage(int32_t serverCommand) {
     // Switch cmd.
     switch (serverCommand) {
 

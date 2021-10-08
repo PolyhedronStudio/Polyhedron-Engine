@@ -64,7 +64,7 @@ unsigned CL_Frame(unsigned msec);
 void CL_UpdateListenerOrigin(void);
 void CL_RestartFilesystem(qboolean total);
 void CL_Activate(active_t active);
-void CL_UpdateUserinfo(cvar_t *var, from_t from);
+void CL_UpdateUserinfo(cvar_t* var, from_t from);
 void CL_SendStatusRequest(const netadr_t *address);
 void CL_CheckForIP(const char* s);
 demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info);
