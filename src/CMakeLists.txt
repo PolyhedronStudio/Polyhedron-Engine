@@ -427,13 +427,17 @@ SET(SRC_COMMON
 	common/sizebuf.cpp
 	common/utils.cpp
 	common/zone.cpp
-	common/net/chan.cpp
-	common/net/net.cpp
+	common/net/chan.cpp	# These got to go sooner or later.
+	common/net/net.cpp	# These got to go sooner or later.
+
+	common/enet/enet.cpp
 )
 SET(HEADERS_COMMON
-	common/net/inet_ntop.h
-	common/net/inet_pton.h
-	common/net/win.h
+	common/net/inet_ntop.h	# These got to go sooner or later.
+	common/net/inet_pton.h	# These got to go sooner or later.
+	common/net/win.h		# These got to go sooner or later.
+
+	common/enet/enet.h
 )
 
 ###################### Format.
@@ -800,6 +804,8 @@ ENDIF()
 
 TARGET_LINK_LIBRARIES(client stb)
 TARGET_LINK_LIBRARIES(client tinyobjloader)
+TARGET_LINK_LIBRARIES(client enet)
+TARGET_LINK_LIBRARIES(server enet)
 
 SOURCE_GROUP("common" FILES ${SRC_COMMON})
 SOURCE_GROUP("common" FILES ${HEADERS_COMMON})
