@@ -1448,10 +1448,6 @@ void CL_ErrorEvent(netadr_t *from)
 void CL_UpdateUserinfo(cvar_t *var, from_t from)
 {
     int i;
-
-    // N&C: Allow the CG Module to work with it.
-    CL_GM_ClientUpdateUserInfo(var, from);
-
     if (!cls.netchan) {
         return;
     }
@@ -1466,6 +1462,10 @@ void CL_UpdateUserinfo(cvar_t *var, from_t from)
         // can't hold any more
         goto done;
     }
+
+
+    // N&C: Allow the CG Module to work with it.
+    CL_GM_ClientUpdateUserInfo(var, from);
 
     // check for the same variable being modified twice
     for (i = 0; i < cls.userinfo_modified; i++) {
@@ -2099,50 +2099,41 @@ static size_t CL_Lag_m(char *buffer, size_t size)
                         cls.netchan->totalReceived) * 100.0f : 0);
 }
 
-static size_t CL_Cluster_m(char *buffer, size_t size)
-{
-	return Q_scnprintf(buffer, size, "%i", cl.refdef.feedback.viewcluster);
+static size_t CL_Cluster_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "%i", cl.refdef.feedback.viewcluster);
 }
 
-static size_t CL_ClusterThere_m(char *buffer, size_t size)
-{
-	return Q_scnprintf(buffer, size, "%i", cl.refdef.feedback.lookatcluster);
+static size_t CL_ClusterThere_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "%i", cl.refdef.feedback.lookatcluster);
 }
 
-static size_t CL_NumLightPolys_m(char *buffer, size_t size)
-{
-	return Q_scnprintf(buffer, size, "%i", cl.refdef.feedback.num_light_polys);
+static size_t CL_NumLightPolys_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "%i", cl.refdef.feedback.num_light_polys);
 }
 
-static size_t CL_Material_m(char *buffer, size_t size)
-{
-	return Q_scnprintf(buffer, size, "%s", cl.refdef.feedback.view_material);
+static size_t CL_Material_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "%s", cl.refdef.feedback.view_material);
 }
 
-static size_t CL_Material_Override_m(char *buffer, size_t size)
-{
-	return Q_scnprintf(buffer, size, "%s", cl.refdef.feedback.view_material_override);
+static size_t CL_Material_Override_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "%s", cl.refdef.feedback.view_material_override);
 }
 
-static size_t CL_ViewPos_m(char *buffer, size_t size)
-{
-	return Q_scnprintf(buffer, size, "(%.1f, %.1f, %.1f)", cl.refdef.vieworg[0], cl.refdef.vieworg[1], cl.refdef.vieworg[2]);
+static size_t CL_ViewPos_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "(%.1f, %.1f, %.1f)", cl.refdef.vieworg[0], cl.refdef.vieworg[1], cl.refdef.vieworg[2]);
 }
 
-static size_t CL_ViewDir_m(char *buffer, size_t size)
-{
-	return Q_scnprintf(buffer, size, "(%.3f, %.3f, %.3f)", cl.v_forward[0], cl.v_forward[1], cl.v_forward[2]);
+static size_t CL_ViewDir_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "(%.3f, %.3f, %.3f)", cl.v_forward[0], cl.v_forward[1], cl.v_forward[2]);
 }
 
-static size_t CL_HdrColor_m(char *buffer, size_t size)
-{
-	const float* color = cl.refdef.feedback.hdr_color;
-	return Q_scnprintf(buffer, size, "(%.5f, %.5f, %.5f)", color[0], color[1], color[2]);
+static size_t CL_HdrColor_m(char* buffer, size_t size) {
+    const float* color = cl.refdef.feedback.hdr_color;
+    return Q_scnprintf(buffer, size, "(%.5f, %.5f, %.5f)", color[0], color[1], color[2]);
 }
 
-static size_t CL_ResolutionScale_m(char *buffer, size_t size)
-{
-	return Q_scnprintf(buffer, size, "%d", cl.refdef.feedback.resolution_scale);
+static size_t CL_ResolutionScale_m(char* buffer, size_t size) {
+    return Q_scnprintf(buffer, size, "%d", cl.refdef.feedback.resolution_scale);
 }
 
 int CL_GetFps()

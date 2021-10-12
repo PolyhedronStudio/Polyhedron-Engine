@@ -284,7 +284,7 @@ copy_light(const light_poly_t* light, float* vblight, const float* sky_radiance)
 }
 
 extern vkpt_refdef_t vkpt_refdef;
-extern byte cluster_debug_mask[VIS_MAX_BYTES];
+extern char cluster_debug_mask[VIS_MAX_BYTES];
 
 VkResult
 vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t* bsp_mesh, bsp_t* bsp, int num_model_lights, light_poly_t* transformed_model_lights, const float* sky_radiance) {
@@ -339,6 +339,14 @@ vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t* bsp_mesh,
 	*/
 
 	// materials
+	for (int nstyle = 0; nstyle < MAX_LIGHT_STYLES; nstyle++) 	{
+		float style_scale = 1.f;
+		if (vkpt_refdef.fd->lightstyles) 		{
+			style_scale = vkpt_refdef.fd->lightstyles[nstyle].white;
+			style_scale = max(0, min(1, style_scale));
+		}
+		lbo->light_styles[nstyle] = style_scale;
+	}
 
 	for (int nmat = 0; nmat < MAX_PBR_MATERIALS; nmat++) {
 		pbr_material_t const* material = r_materials + nmat;
@@ -872,7 +880,6 @@ vkpt_vertex_buffer_destroy()
 
 VkResult vkpt_light_stats_create(bsp_mesh_t *bsp_mesh)
 {
-	vkpt_light_stats_destroy();
 	vkpt_light_stats_destroy();
 
 	// Light statistics: 2 uints (shadowed, unshadowed) per light per surface orientation (6) per cluster.

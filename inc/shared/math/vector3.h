@@ -856,6 +856,9 @@ inline const std::string vec3_to_str(const vec3_t& v, qboolean rounded = true)
      (e)[2]=(a)[2]*(c)+(b)[2]*(d))
 #define PlaneDiff(v,p)   (DotProduct(v,(p)->normal)-(p)->dist)
 
+#define Vector2Subtract(a,b,c)  ((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1])
+#define Vector2Add(a,b,c)       ((c)[0]=(a)[0]+(b)[0],(c)[1]=(a)[1]+(b)[1])
+
 //---------------------------------------------------------------------------------
 
 void SetupRotationMatrix(vec3_t* matrix, const vec3_t& dir, float degrees);

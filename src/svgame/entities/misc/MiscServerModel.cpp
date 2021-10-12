@@ -171,16 +171,10 @@ void MiscServerModel::Think() {
     // Continue the animation on a per frame basis.
     int32_t currentFrame = GetFrame();
 
-    if (currentFrame == endFrame) {
-        if (startFrame != 0) {
-            SetFrame(startFrame);
-        } else {
-            SetFrame(0);
-        }
+    if (currentFrame >= endFrame) {
+        SetFrame(startFrame);
     } else {
-        if (startFrame != 0 && endFrame != 0) {
-            SetFrame(currentFrame + 1);
-        }
+        SetFrame(currentFrame + 1);
     }
 
     //if (GetNoiseIndex()) {

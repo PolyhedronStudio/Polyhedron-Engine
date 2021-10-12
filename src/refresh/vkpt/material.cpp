@@ -31,6 +31,38 @@ extern cvar_t* cvar_pt_surface_lights_threshold;
 
 extern void CL_PrepareMedia();
 
+/*
+Copyright (C) 2019, NVIDIA CORPORATION. All rights reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+#include "material.h"
+#include "vkpt.h"
+#include <common/prompt.h>
+
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+
+extern cvar_t* cvar_pt_surface_lights_fake_emissive_algo;
+extern cvar_t* cvar_pt_surface_lights_threshold;
+
+extern void CL_PrepareMedia();
+
 pbr_material_t r_materials[MAX_PBR_MATERIALS];
 static pbr_material_t r_global_materials[MAX_PBR_MATERIALS];
 static pbr_material_t r_map_materials[MAX_PBR_MATERIALS];
@@ -48,8 +80,8 @@ static void material_command();
 static void material_completer(genctx_t* ctx, int argnum);
 
 static int compare_materials(const void* a, const void* b) {
-	const pbr_material_t* ma = (const pbr_material_t*)a;
-	const pbr_material_t* mb = (const pbr_material_t*)b;
+	const pbr_material_t* ma = (const pbr_material_t *)a;
+	const pbr_material_t* mb = (const pbr_material_t *)b;
 
 	int names = strcmp(ma->name, mb->name);
 	if (names != 0)
@@ -130,8 +162,7 @@ void MAT_Init() {
 			num_global_materials += count;
 
 			Com_Printf("Loaded %d materials from %s\n", count, buffer);
-		}
-		else {
+		} 		else {
 			Com_WPrintf("Coundn't load materials from %s: no free slots.\n", buffer);
 		}
 
@@ -295,17 +326,14 @@ static void set_material_texture(pbr_material_t* mat, const char* svalue, char m
 	if (strcmp(svalue, "0") == 0) {
 		mat_texture_path[0] = 0;
 		*mat_image = NULL;
-	}
-	else if (from_console) {
+	} 	else if (from_console) {
 		image_t* image = IMG_Find(svalue, mat->image_type, (imageflags_t)(flags | IF_EXACT | (mat->image_flags & IF_SRC_MASK)));
 		if (image != R_NOTEXTURE) {
 			Q_strlcpy(mat_texture_path, svalue, MAX_QPATH);
 			*mat_image = image;
-		}
-		else
+		} 		else
 			Com_WPrintf("Cannot load texture '%s'\n", svalue);
-	}
-	else {
+	} 	else {
 		Q_strlcpy(mat_texture_path, svalue, MAX_QPATH);
 	}
 }
@@ -334,12 +362,10 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 	}
 
 	char svalue[MAX_QPATH];
-
 	float fvalue = 0.f; qboolean bvalue = false;
 	int ivalue = 0;
 	const char* asterisk;
-
-	switch (t->type) {
+	switch (t->type) 	{
 	case ATTR_BOOL:   bvalue = atoi(value) == 0 ? false : true; break;
 	case ATTR_FLOAT:  fvalue = (float)atof(value); break;
 	case ATTR_STRING:
@@ -355,12 +381,10 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 			Q_strlcpy(svalue, value, min(asterisk - value + 1, sizeof(svalue)));
 			Q_strlcat(svalue, mat_base, sizeof(svalue));
 			Q_strlcat(svalue, asterisk + 1, sizeof(svalue));
-		} else {
+		} 		else
 			Q_strlcpy(svalue, value, sizeof(svalue));
-		}
 		break;
-	}
-	case ATTR_INT: {
+	case ATTR_INT:
 		ivalue = atoi(value);
 		break;
 	}
@@ -375,11 +399,12 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 	case 1: mat->roughness_override = fvalue; break;
 	case 2: mat->metalness_factor = fvalue; break;
 	case 3: mat->emissive_factor = fvalue; break;
-	case 4: {
+	case 4:
+	{
 		uint32_t kind = getMaterialKind(svalue);
-		if (kind != 0) {
+		if (kind != 0)
 			mat->flags = MAT_SetKind(mat->flags, kind);
-		} else {
+		else 		{
 			if (sourceFile)
 				Com_EPrintf("%s:%d: unknown material kind '%s'\n", sourceFile, lineno, svalue);
 			else
@@ -389,7 +414,7 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 		if (reload_flags) *reload_flags |= RELOAD_MAP;
 	} break;
 	case 5:
-		mat->flags = bvalue == true ? mat->flags | MATERIAL_FLAG_LIGHT : mat->flags & ~(MATERIAL_FLAG_LIGHT);
+		mat->flags = (bvalue == (uint32_t)true ? mat->flags | MATERIAL_FLAG_LIGHT : mat->flags & ~(MATERIAL_FLAG_LIGHT));
 		if (reload_flags) *reload_flags |= RELOAD_MAP;
 		break;
 	case 6:
@@ -436,7 +461,7 @@ static uint32_t load_material_file(const char* file_name, pbr_material_t* dest, 
 	assert(max_items >= 1);
 
 	char* filebuf = NULL;
-	unsigned source = IF_SRC_GAME;
+	imageflags_t source = IF_SRC_GAME;
 
 	if (fs_game->string[0] && strcmp(fs_game->string, BASEGAME) != 0) {
 		// try the game specific path first
@@ -452,13 +477,13 @@ static uint32_t load_material_file(const char* file_name, pbr_material_t* dest, 
 	if (!filebuf)
 		return 0;
 
-	enum : int32_t {
+	enum mat_load_state_t {
 		INITIAL,
 		ACCUMULATING_NAMES,
 		READING_PARAMS
 	};
 	
-	int32_t state = INITIAL;
+	mat_load_state_t state = INITIAL;
 
 	const char* ptr = filebuf;
 	char linebuf[1024];
@@ -503,7 +528,7 @@ static uint32_t load_material_file(const char* file_name, pbr_material_t* dest, 
 			// copy the material name but not the colon
 			linebuf[len - 1] = 0;
 			Q_strlcpy(dest->name, linebuf, sizeof(dest->name));
-			dest->image_flags = (imageflags_t)source;
+			dest->image_flags = source;
 			dest->registration_sequence = registration_sequence;
 
 			// copy the material file name
@@ -738,8 +763,7 @@ pbr_material_t* MAT_Find(const char* name, imagetype_t type, imageflags_t flags)
 				if (mat->image_base == R_NOTEXTURE) {
 					mat->image_base = NULL;
 				}
-			}
-			else 			{
+			} 			else 			{
 				IMG_GetDimensions(name, &mat->image_base->width, &mat->image_base->height);
 			}
 		}
@@ -767,8 +791,7 @@ pbr_material_t* MAT_Find(const char* name, imagetype_t type, imageflags_t flags)
 				mat->image_mask = NULL;
 			}
 		}
-	}
-	else 	{
+	} 	else 	{
 		MAT_Reset(mat);
 		Q_strlcpy(mat->name, mat_name_no_ext, sizeof(mat->name));
 
@@ -809,8 +832,6 @@ pbr_material_t* MAT_Find(const char* name, imagetype_t type, imageflags_t flags)
 
 	if (mat->image_emissive && !mat->image_emissive->processing_complete)
 		vkpt_extract_emissive_texture_info(mat->image_emissive);
-
-
 
 	mat->image_type = type;
 	mat->image_flags = (imageflags_t)(mat->image_flags | flags);
@@ -1009,7 +1030,7 @@ static void material_command(void) {
 		if (mat->synth_emissive && !mat->image_emissive) 		{
 			// Regenerate emissive image
 			MAT_SynthesizeEmissive(mat);
-			// Make sure it's loaded by CL_PrepRefresh()
+			// Make sure it's loaded by CL_PrepareMedia()
 			IMG_Load(mat->image_emissive, mat->image_emissive->pix_data);
 			reload_flags |= RELOAD_MAP;
 		}
@@ -1028,8 +1049,7 @@ static void material_completer(genctx_t* ctx, int argnum) {
 
 		for (int i = 0; i < c_NumAttributes; i++)
 			Prompt_AddMatch(ctx, c_Attributes[i].name);
-	}
-	else if (argnum > 2 && strcmp(Cmd_Argv(1), "save") == 0) 	{
+	} 	else if (argnum > 2 && strcmp(Cmd_Argv(1), "save") == 0) 	{
 		// extra arguments for 'save'
 
 		Prompt_AddMatch(ctx, "all");

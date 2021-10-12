@@ -250,11 +250,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #error need to update constant here
 #endif
 
-#ifndef VKPT_SHADER
 typedef uint32_t uvec4_t[4];
-//typedef int ivec4_t[4];
-typedef uint32_t uint;
+#ifdef VKPT_SHADER
+typedef int ivec4_t[4];
 #endif
+typedef uint32_t uint;
 
 typedef struct {
 	float M[16]; // mat4

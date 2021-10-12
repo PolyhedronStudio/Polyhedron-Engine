@@ -16,7 +16,7 @@
 #include "system/hunk.h"
 
 #define MAX_DLIGHTS     32
-#define MAX_ENTITIES    2048     // == MAX_PACKET_ENTITIES * 2
+#define MAX_ENTITIES    1024     // == MAX_PACKET_ENTITIES * 2
 #define MAX_PARTICLES   16384
 #define MAX_LIGHTSTYLES 256
 
@@ -201,7 +201,10 @@ typedef struct {
     int left, right, top, bottom;
 } clipRect_t;
 
-enum imageflags_t : int32_t {
+//---------------------
+// Added our own operator to the int32_t enum.
+//---------------------
+enum imageflags_t : int {
     IF_NONE         = 0,
     IF_PERMANENT    = (1 << 0),
     IF_TRANSPARENT  = (1 << 1),

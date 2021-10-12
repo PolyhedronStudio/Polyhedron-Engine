@@ -92,7 +92,7 @@ cvar_t *cvar_sli = NULL;
 cvar_t *cvar_dump_image = NULL;
 #endif
 
-byte cluster_debug_mask[VIS_MAX_BYTES];
+char cluster_debug_mask[VIS_MAX_BYTES];
 int cluster_debug_index;
 
 #define UBO_CVAR_DO(name, default_value) cvar_t *cvar_##name;
@@ -1575,7 +1575,7 @@ add_dlights(const rdlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
 static inline void transform_point(const float* p, const float* matrix, float* result)
 {
 	vec4_t point = { p[0], p[1], p[2], 1.f };
-	vec4_t transformed;
+	float transformed[16];
 	mult_matrix_vector(transformed, matrix, point);
 	VectorCopy(transformed, result); // vec4 -> vec3
 }
@@ -1612,23 +1612,21 @@ static void instance_model_lights(int num_light_polys, const light_poly_t* light
 	}
 }
 
-static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int* instance_idx, int* num_instanced_vert)
-{
+static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int* instance_idx, int* num_instanced_vert) {
 	QVKInstanceBuffer_t* uniform_instance_buffer = &vkpt_refdef.uniform_instance_buffer;
 	uint32_t* ubo_bsp_cluster_id = (uint32_t*)uniform_instance_buffer->bsp_cluster_id;
 	uint32_t* ubo_bsp_prim_offset = (uint32_t*)uniform_instance_buffer->bsp_prim_offset;
 	uint32_t* ubo_instance_buf_offset = (uint32_t*)uniform_instance_buffer->bsp_instance_buf_offset;
 	uint32_t* ubo_instance_buf_size = (uint32_t*)uniform_instance_buffer->bsp_instance_buf_size;
 
+
 	const int current_bsp_mesh_index = *bsp_mesh_idx;
-	if (current_bsp_mesh_index >= SHADER_MAX_BSP_ENTITIES)
-	{
+	if (current_bsp_mesh_index >= SHADER_MAX_BSP_ENTITIES) 	{
 		assert(!"BSP entity count overflow");
 		return;
 	}
 
-	if (*instance_idx >= (SHADER_MAX_ENTITIES + SHADER_MAX_BSP_ENTITIES))
-	{
+	if (*instance_idx >= (SHADER_MAX_ENTITIES + SHADER_MAX_BSP_ENTITIES)) 	{
 		assert(!"Total entity count overflow");
 		return;
 	}
@@ -1648,14 +1646,12 @@ static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int*
 	transform_point(model->center, transform, origin);
 	int cluster = BSP_PointLeaf(bsp_world_model->nodes, origin)->cluster;
 
-	if (cluster < 0)
-	{
+	if (cluster < 0) 	{
 		// In some cases, a model slides into a wall, like a push button, so that its center 
 		// is no longer in any BSP node. We still need to assign a cluster to the model,
 		// so try the corners of the model instead, see if any of them has a valid cluster.
 
-		for (int corner = 0; corner < 8; corner++)
-		{
+		for (int corner = 0; corner < 8; corner++) 		{
 			vec3_t corner_pt = {
 				(corner & 1) ? model->aabb_max[0] : model->aabb_min[0],
 				(corner & 2) ? model->aabb_max[1] : model->aabb_min[1],
@@ -1667,19 +1663,19 @@ static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int*
 
 			cluster = BSP_PointLeaf(bsp_world_model->nodes, corner_pt_world)->cluster;
 
-			if(cluster >= 0)
+			if (cluster >= 0)
 				break;
 		}
 	}
 	ubo_bsp_cluster_id[current_bsp_mesh_index] = cluster;
 
 	ubo_bsp_prim_offset[current_bsp_mesh_index] = model->idx_offset / 3;
-	
+
 	const int mesh_vertex_num = model->idx_count;
 
 	ubo_instance_buf_offset[current_bsp_mesh_index] = *num_instanced_vert / 3;
 	ubo_instance_buf_size[current_bsp_mesh_index] = mesh_vertex_num / 3;
-	
+
 	((int*)uniform_instance_buffer->model_indices)[*instance_idx] = ~current_bsp_mesh_index;
 
 	*num_instanced_vert += mesh_vertex_num;
@@ -1690,8 +1686,7 @@ static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int*
 	(*instance_idx)++;
 }
 
-static inline qboolean is_transparent_material(uint32_t material)
-{
+static inline qboolean is_transparent_material(uint32_t material) {
 	return MAT_IsKind(material, MATERIAL_KIND_SLIME)
 		|| MAT_IsKind(material, MATERIAL_KIND_WATER)
 		|| MAT_IsKind(material, MATERIAL_KIND_GLASS)
@@ -1710,19 +1705,18 @@ static inline qboolean is_masked_material(uint32_t material) {
 #define MESH_FILTER_ALL 7
 
 static void process_regular_entity(
-	const r_entity_t* entity, 
-	const model_t* model, 
-	qboolean is_viewer_weapon, 
-	qboolean is_double_sided, 
-	int* model_instance_idx, 
-	int* instance_idx, 
-	int* num_instanced_vert, 
-	int mesh_filter, 
+	const r_entity_t* entity,
+	const model_t* model,
+	qboolean is_viewer_weapon,
+	qboolean is_double_sided,
+	int* model_instance_idx,
+	int* instance_idx,
+	int* num_instanced_vert,
+	int mesh_filter,
 	qboolean* contains_transparent,
 	qboolean* contains_masked,
 	int* iqm_matrix_offset,
-	float* iqm_matrix_data)
-{
+	float* iqm_matrix_data) {
 	QVKInstanceBuffer_t* uniform_instance_buffer = &vkpt_refdef.uniform_instance_buffer;
 	uint32_t* ubo_instance_buf_offset = (uint32_t*)uniform_instance_buffer->model_instance_buf_offset;
 	uint32_t* ubo_instance_buf_size = (uint32_t*)uniform_instance_buffer->model_instance_buf_size;
@@ -1731,7 +1725,7 @@ static void process_regular_entity(
 
 	float transform[16];
 	create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
-	
+
 	int current_model_instance_index = *model_instance_idx;
 	int current_instance_index = *instance_idx;
 	int current_num_instanced_vert = *num_instanced_vert;
@@ -1740,10 +1734,10 @@ static void process_regular_entity(
 		*contains_transparent = false;
 
 	int iqm_matrix_index = -1;
-	if (model->iqmData && model->iqmData->num_poses) 	{
+	if (model->iqmData && model->iqmData->num_poses) {
 		iqm_matrix_index = *iqm_matrix_offset;
 
-		if (iqm_matrix_index + model->iqmData->num_poses > MAX_IQM_MATRICES) 		{
+		if (iqm_matrix_index + model->iqmData->num_poses > MAX_IQM_MATRICES) {
 			assert(!"IQM matrix buffer overflow");
 			return;
 		}
@@ -1753,24 +1747,20 @@ static void process_regular_entity(
 		*iqm_matrix_offset += (int)model->iqmData->num_poses;
 	}
 
-	for (int i = 0; i < model->nummeshes; i++)
-	{
+	for (int i = 0; i < model->nummeshes; i++) {
 		const maliasmesh_t* mesh = model->meshes + i;
 
-		if (current_model_instance_index >= SHADER_MAX_ENTITIES)
-		{
+		if (current_model_instance_index >= SHADER_MAX_ENTITIES) {
 			assert(!"Model entity count overflow");
 			break;
 		}
 
-		if (current_instance_index >= (SHADER_MAX_ENTITIES + SHADER_MAX_BSP_ENTITIES))
-		{
+		if (current_instance_index >= (SHADER_MAX_ENTITIES + SHADER_MAX_BSP_ENTITIES)) {
 			assert(!"Total entity count overflow");
 			break;
 		}
 
-		if (mesh->idx_offset < 0 || mesh->vertex_offset < 0)
-		{
+		if (mesh->idx_offset < 0 || mesh->vertex_offset < 0) {
 			// failed to upload the vertex data - don't instance this mesh
 			continue;
 		}
@@ -1781,17 +1771,17 @@ static void process_regular_entity(
 		if (!material_id)
 			continue;
 
-		if (is_masked_material(material_id)) 		{
+		if (is_masked_material(material_id)) {
 			if (contains_masked)
 				*contains_masked = true;
 
 			if (!(mesh_filter & MESH_FILTER_MASKED))
 				continue;
 		} else if (is_transparent_material(material_id)) {
-			if(contains_transparent)
+			if (contains_transparent)
 				*contains_transparent = true;
 
-			if(!(mesh_filter & MESH_FILTER_TRANSPARENT))
+			if (!(mesh_filter & MESH_FILTER_TRANSPARENT))
 				continue;
 		} else {
 			if (!(mesh_filter & MESH_FILTER_OPAQUE))
@@ -1806,7 +1796,7 @@ static void process_regular_entity(
 		model_entity_ids[entity_frame_num][current_model_instance_index] = *(uint32_t*)&hash;
 
 		uint32_t cluster_id = ~0u;
-		if(bsp_world_model) 
+		if (bsp_world_model)
 			cluster_id = BSP_PointLeaf(bsp_world_model->nodes, ((r_entity_t*)entity)->origin)->cluster;
 		ubo_model_cluster_id[current_model_instance_index] = cluster_id;
 
@@ -1823,21 +1813,18 @@ static void process_regular_entity(
 	}
 
 	// add cylinder lights for wall lamps
-	if (model->model_class == MCLASS_STATIC_LIGHT)
-	{
+	if (model->model_class == MCLASS_STATIC_LIGHT) {
 		vec4_t begin, end, color;
-		vec4_t offset1 = { 0.f, 0.5f, -10.f, 1.f };
-		vec4_t offset2 = { 0.f, 0.5f,  10.f, 1.f };
+		vec4_t offset1 = {0.f, 0.5f, -10.f, 1.f};
+		vec4_t offset2 = {0.f, 0.5f,  10.f, 1.f};
 
 		mult_matrix_vector(begin, transform, offset1);
 		mult_matrix_vector(end, transform, offset2);
 		VectorSet(color, 0.25f, 0.5f, 0.07f);
 
-		vec3_t begin_v3 = { begin.x, begin.y, begin.z };
-		vec3_t end_v3 = { end.x, end.y, end.z };
-		vec3_t color_v3 = { color.x, color.y, color.z };
-
-		vkpt_build_cylinder_light(model_lights, &num_model_lights, MAX_MODEL_LIGHTS, bsp_world_model, begin_v3, end_v3, color_v3, 1.5f);
+		vkpt_build_cylinder_light(model_lights, &num_model_lights, MAX_MODEL_LIGHTS, bsp_world_model, vec3_t{begin.x, begin.y, begin.z}, vec3_t{end.x, end.y, end.z}, vec3_t
+			{color.x, color.y, color.z
+}, 1.5f);
 	}
 
 	*model_instance_idx = current_model_instance_index;
@@ -1857,8 +1844,7 @@ vkpt_drop_shaderballs()
 #endif
 
 static void
-prepare_entities(EntityUploadInfo* upload_info)
-{
+prepare_entities(EntityUploadInfo* upload_info) {
 	entity_frame_num = !entity_frame_num;
 
 	QVKInstanceBuffer_t* instance_buffer = &vkpt_refdef.uniform_instance_buffer;
@@ -1890,12 +1876,10 @@ prepare_entities(EntityUploadInfo* upload_info)
 
 	const qboolean first_person_model = (cl_player_model->integer == CL_PLAYER_MODEL_FIRST_PERSON) && cl.baseClientInfo.model;
 
-	for (int i = 0; i < vkpt_refdef.fd->num_entities; i++)
-	{
+	for (int i = 0; i < vkpt_refdef.fd->num_entities; i++) 	{
 		const r_entity_t* entity = vkpt_refdef.fd->entities + i;
 
-		if (entity->model & 0x80000000)
-		{
+		if (entity->model & 0x80000000) 		{
 			const bsp_model_t* model = vkpt_refdef.bsp_mesh_world.models + (~entity->model);
 			if (model->masked)
 				masked_model_indices[masked_model_num++] = i;
@@ -1903,26 +1887,25 @@ prepare_entities(EntityUploadInfo* upload_info)
 				transparent_model_indices[transparent_model_num++] = i;
 			else
 				process_bsp_entity(entity, &bsp_mesh_idx, &instance_idx, &num_instanced_vert); /* embedded in bsp */
-		}
-		else
-		{
+		} 		else 		{
 			const model_t* model = MOD_ForHandle(entity->model);
 			if (model == NULL || model->meshes == NULL)
 				continue;
 
 			if (entity->flags & RenderEffects::ViewerModel)
 				viewer_model_indices[viewer_model_num++] = i;
-			else if (entity->flags & RenderEffects::ViewerModel)
+			else if (entity->flags & RenderEffects::WeaponModel)
 				viewer_weapon_indices[viewer_weapon_num++] = i;
 			else if (model->model_class == MCLASS_EXPLOSION || model->model_class == MCLASS_SMOKE)
 				explosion_indices[explosion_num++] = i;
-			else
-			{
+			else 			{
 				qboolean contains_transparent = false;
 				qboolean contains_masked = false;
 				process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
 					MESH_FILTER_OPAQUE, &contains_transparent, &contains_masked, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
 
+				if (contains_transparent)
+					transparent_model_indices[transparent_model_num++] = i;
 				if (contains_masked)
 					masked_model_indices[masked_model_num++] = i;
 			}
@@ -1936,20 +1919,16 @@ prepare_entities(EntityUploadInfo* upload_info)
 			}
 		}
 	}
-	
+
 	upload_info->dynamic_vertex_num = num_instanced_vert;
 
 	const uint32_t transparent_model_base_vertex_num = num_instanced_vert;
-	for (int i = 0; i < transparent_model_num; i++)
-	{
+	for (int i = 0; i < transparent_model_num; i++) 	{
 		const r_entity_t* entity = vkpt_refdef.fd->entities + transparent_model_indices[i];
 
-		if (entity->model & 0x80000000)
-		{
+		if (entity->model & 0x80000000) 		{
 			process_bsp_entity(entity, &bsp_mesh_idx, &instance_idx, &num_instanced_vert);
-		}
-		else
-		{
+		} 		else 		{
 			const model_t* model = MOD_ForHandle(entity->model);
 			process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
 				MESH_FILTER_TRANSPARENT, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
@@ -1965,7 +1944,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 
 		if (entity->model & 0x80000000) 		{
 			process_bsp_entity(entity, &bsp_mesh_idx, &instance_idx, &num_instanced_vert);
-		} else {
+		} 		else 		{
 			const model_t* model = MOD_ForHandle(entity->model);
 			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert,
 				MESH_FILTER_MASKED, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
@@ -1975,12 +1954,9 @@ prepare_entities(EntityUploadInfo* upload_info)
 	upload_info->masked_model_vertex_offset = masked_model_base_vertex_num;
 	upload_info->masked_model_vertex_num = num_instanced_vert - masked_model_base_vertex_num;
 
-
 	const uint32_t viewer_model_base_vertex_num = num_instanced_vert;
-	if (first_person_model)
-	{
-		for (int i = 0; i < viewer_model_num; i++)
-		{
+	if (first_person_model) 	{
+		for (int i = 0; i < viewer_model_num; i++) 		{
 			const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_model_indices[i];
 			const model_t* model = MOD_ForHandle(entity->model);
 			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert,
@@ -1994,8 +1970,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	upload_info->weapon_left_handed = false;
 
 	const uint32_t viewer_weapon_base_vertex_num = num_instanced_vert;
-	for (int i = 0; i < viewer_weapon_num; i++)
-	{
+	for (int i = 0; i < viewer_weapon_num; i++) 	{
 		const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_weapon_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
 		process_regular_entity(entity, model, true, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
@@ -2009,8 +1984,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	upload_info->viewer_weapon_vertex_num = num_instanced_vert - viewer_weapon_base_vertex_num;
 
 	const uint32_t explosion_base_vertex_num = num_instanced_vert;
-	for (int i = 0; i < explosion_num; i++)
-	{
+	for (int i = 0; i < explosion_num; i++) 	{
 		const r_entity_t* entity = vkpt_refdef.fd->entities + explosion_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
 		process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
@@ -2021,7 +1995,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 	upload_info->explosions_vertex_num = num_instanced_vert - explosion_base_vertex_num;
 
 	upload_info->num_instances = instance_idx;
-	upload_info->num_vertices  = num_instanced_vert;
+	upload_info->num_vertices = num_instanced_vert;
 
 	memset(instance_buffer->world_current_to_prev, ~0u, sizeof(instance_buffer->world_current_to_prev));
 	memset(instance_buffer->world_prev_to_current, ~0u, sizeof(instance_buffer->world_prev_to_current));
@@ -2029,9 +2003,9 @@ prepare_entities(EntityUploadInfo* upload_info)
 	memset(instance_buffer->model_prev_to_current, ~0u, sizeof(instance_buffer->model_prev_to_current));
 
 	world_entity_id_count[entity_frame_num] = bsp_mesh_idx;
-	for(int i = 0; i < world_entity_id_count[entity_frame_num]; i++) {
-		for(int j = 0; j < world_entity_id_count[!entity_frame_num]; j++) {
-			if(world_entity_ids[entity_frame_num][i] == world_entity_ids[!entity_frame_num][j]) {
+	for (int i = 0; i < world_entity_id_count[entity_frame_num]; i++) {
+		for (int j = 0; j < world_entity_id_count[!entity_frame_num]; j++) {
+			if (world_entity_ids[entity_frame_num][i] == world_entity_ids[!entity_frame_num][j]) {
 				instance_buffer->world_current_to_prev[i] = j;
 				instance_buffer->world_prev_to_current[j] = i;
 			}
@@ -2039,11 +2013,11 @@ prepare_entities(EntityUploadInfo* upload_info)
 	}
 
 	model_entity_id_count[entity_frame_num] = model_instance_idx;
-	for(int i = 0; i < model_entity_id_count[entity_frame_num]; i++) {
-		for(int j = 0; j < model_entity_id_count[!entity_frame_num]; j++) {
+	for (int i = 0; i < model_entity_id_count[entity_frame_num]; i++) {
+		for (int j = 0; j < model_entity_id_count[!entity_frame_num]; j++) {
 			entity_hash_t hash = *(entity_hash_t*)&model_entity_ids[entity_frame_num][i];
 
-			if(model_entity_ids[entity_frame_num][i] == model_entity_ids[!entity_frame_num][j] && hash.entity != 0) {
+			if (model_entity_ids[entity_frame_num][i] == model_entity_ids[!entity_frame_num][j] && hash.entity != 0) {
 				instance_buffer->model_current_to_prev[i] = j;
 				instance_buffer->model_prev_to_current[j] = i;
 			}
@@ -2408,12 +2382,11 @@ prepare_camera(const vec3_t position, const vec3_t direction, mat4_t data)
 }
 
 static void
-prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, const vec3_t sky_matrix[3], qboolean render_world)
-{
+prepare_ubo(refdef_t* fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, const vec3_t sky_matrix[3], qboolean render_world) {
 	float P[16];
 	float V[16];
 
-	QVKUniformBuffer_t *ubo = &vkpt_refdef.uniform_buffer;
+	QVKUniformBuffer_t* ubo = &vkpt_refdef.uniform_buffer;
 	memcpy(ubo->V_prev, ubo->V, sizeof(float) * 16);
 	memcpy(ubo->P_prev, ubo->P, sizeof(float) * 16);
 	memcpy(ubo->invP_prev, ubo->invP, sizeof(float) * 16);
@@ -2428,18 +2401,14 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 		// In some cases (ex.: player setup), 'fd' will describe a viewport that is not full screen.
 		// Simulate that with a projection matrix adjustment to avoid modifying the rendering code.
 
-		float viewport_proj[16] = {
-			0.f, 0.f, 0.f, 0.f,
-			0.f, 0.f, 0.f, 0.f,
-			0.f, 0.f, 0.f, 0.f,
-			0.f, 0.f, 0.f, 0.f,
-		};
+		float viewport_proj[16] = {};
 		viewport_proj[0] = (float)fd->width / (float)qvk.extent_unscaled.width;
 		viewport_proj[12] = (float)(fd->x * 2 + fd->width - (int)qvk.extent_unscaled.width) / (float)qvk.extent_unscaled.width;
 		viewport_proj[5] = (float)fd->height / (float)qvk.extent_unscaled.height;
 		viewport_proj[13] = -(float)(fd->y * 2 + fd->height - (int)qvk.extent_unscaled.height) / (float)qvk.extent_unscaled.height;
 		viewport_proj[10] = 1.f;
 		viewport_proj[15] = 1.f;
+		
 
 		mult_matrix_matrix(P, viewport_proj, raw_proj);
 	}
@@ -2449,16 +2418,13 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	inverse(V, ubo->invV);
 	inverse(P, ubo->invP);
 
-	if (cvar_pt_projection->integer == 1 && render_world)
-	{
+	if (cvar_pt_projection->integer == 1 && render_world) 	{
 		float rad_per_pixel = atanf(tanf(fd->fov_y * M_PI / 360.0f) / ((float)qvk.extent_unscaled.height * 0.5f));
 		ubo->cylindrical_hfov = rad_per_pixel * (float)qvk.extent_unscaled.width;
-	}
-	else
-	{
+	} 	else 	{
 		ubo->cylindrical_hfov = 0.f;
 	}
-	
+
 	ubo->current_frame_idx = qvk.frame_counter;
 	ubo->width = qvk.extent_render.width;
 	ubo->height = qvk.extent_render.height;
@@ -2502,10 +2468,9 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	UBO_CVAR_LIST
 #undef UBO_CVAR_DO
 
-	qboolean fsr_enabled = vkpt_fsr_is_enabled();
+		qboolean fsr_enabled = vkpt_fsr_is_enabled();
 
-	if (!ref_mode->enable_denoiser)
-	{
+	if (!ref_mode->enable_denoiser) 	{
 		// disable fake specular because it is not supported without denoiser, and the result
 		// looks too dark with it missing
 		ubo->pt_fake_roughness_threshold = 1.f;
@@ -2514,8 +2479,7 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 		// both reflection and refraction in every pixel
 		ubo->pt_swap_checkerboard = (qvk.frame_counter & 1);
 
-		if (ref_mode->enable_accumulation)
-		{
+		if (ref_mode->enable_accumulation) 		{
 			ubo->pt_texture_lod_bias = -log2(sqrt(get_accumulation_rendering_framenum()));
 
 			// disable the other stabilization hacks
@@ -2523,8 +2487,7 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 			ubo->pt_sun_bounce_range = 10000.f;
 			ubo->pt_ndf_trim = 1.f;
 		}
-	}
-	else if (fsr_enabled || (qvk.effective_aa_mode == AA_MODE_UPSCALE)) 	{
+	} 	else if (fsr_enabled || (qvk.effective_aa_mode == AA_MODE_UPSCALE)) 	{
 		// adjust texture LOD bias to the resolution scale, i.e. use negative bias if scale is < 100
 		float resolution_scale = (drs_effective_scale != 0) ? (float)drs_effective_scale : (float)scr_viewsize->integer;
 		resolution_scale *= 0.01f;
@@ -2537,22 +2500,19 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 
 		qboolean enable_dof = true;
 
-		switch (cvar_pt_dof->integer)
-		{
+		switch (cvar_pt_dof->integer) 		{
 		case 0: enable_dof = false; break;
 		case 1: enable_dof = ref_mode->enable_accumulation; break;
 		case 2: enable_dof = !ref_mode->enable_denoiser; break;
 		default: enable_dof = true; break;
 		}
 
-		if (cvar_pt_projection->integer != 0)
-		{
+		if (cvar_pt_projection->integer != 0) 		{
 			// DoF does not make physical sense with the cylindrical projection
 			enable_dof = false;
 		}
 
-		if (!enable_dof)
-		{
+		if (!enable_dof) 		{
 			// if DoF should not be enabled, make the aperture size zero
 			ubo->pt_aperture = 0.f;
 		}
@@ -2576,26 +2536,23 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	memcpy(ubo->cam_pos, fd->vieworg, sizeof(float) * 3);
 	ubo->cluster_debug_index = cluster_debug_index;
 
-	if (!temporal_frame_valid)
-	{
+	if (!temporal_frame_valid) 	{
 		ubo->flt_temporal_lf = 0;
 		ubo->flt_temporal_hf = 0;
 		ubo->flt_temporal_spec = 0;
 		ubo->flt_taa = 0;
 	}
 
-	if (qvk.effective_aa_mode == AA_MODE_UPSCALE)
-	{
+	if (qvk.effective_aa_mode == AA_MODE_UPSCALE) 	{
 		int taa_index = (int)(qvk.frame_counter % NUM_TAA_SAMPLES);
 		ubo->sub_pixel_jitter[0] = taa_samples[taa_index][0];
 		ubo->sub_pixel_jitter[1] = taa_samples[taa_index][1];
-	}
-	else
-	{
+	} 	else 	{
 		ubo->sub_pixel_jitter[0] = 0.f;
 		ubo->sub_pixel_jitter[1] = 0.f;
 	}
 
+	// Set up constants for FSR
 	if (fsr_enabled) 	{
 		vkpt_fsr_update_ubo(ubo);
 	}
@@ -2606,19 +2563,15 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	VectorCopy(sky_matrix[0], ubo->environment_rotation_matrix + 0);
 	VectorCopy(sky_matrix[1], ubo->environment_rotation_matrix + 4);
 	VectorCopy(sky_matrix[2], ubo->environment_rotation_matrix + 8);
-	
+
 	add_dlights(vkpt_refdef.fd->dlights, vkpt_refdef.fd->num_dlights, ubo);
 
 	const bsp_mesh_t* wm = &vkpt_refdef.bsp_mesh_world;
-	if (wm->num_cameras > 0)
-	{
-		for (int n = 0; n < wm->num_cameras; n++)
-		{
+	if (wm->num_cameras > 0) 	{
+		for (int n = 0; n < wm->num_cameras; n++) 		{
 			prepare_camera(wm->cameras[n].pos, wm->cameras[n].dir, ubo->security_camera_data[n]);
 		}
-	}
-	else
-	{
+	} 	else 	{
 		ubo->pt_cameras = 0;
 	}
 

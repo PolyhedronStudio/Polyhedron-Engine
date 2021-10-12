@@ -19,9 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef __MATERIAL_H_
 #define __MATERIAL_H_
 
-#include "shared/shared.h"
-#include "shared/list.h"
-#include "refresh/refresh.h"
+#include <shared/shared.h>
+#include <shared/list.h>
+#include <refresh/refresh.h>
 
 #define MAX_PBR_MATERIALS 4096
 
@@ -97,5 +97,6 @@ qboolean MAT_IsKind(uint32_t material, uint32_t kind);
 
 // synthesize 'emissive' image for a material, if necessary
 void MAT_SynthesizeEmissive(pbr_material_t* mat);
+
 
 #endif // __MATERIAL_H_

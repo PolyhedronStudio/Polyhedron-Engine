@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 // maximum size of a PVS row, in bytes
-#define VIS_MAX_BYTES   (MAX_MAP_LEAFS)
+#define VIS_MAX_BYTES   (MAX_MAP_LEAFS  >> 3)
 
 // take advantage of 64-bit systems
 #define VIS_FAST_LONGS(bsp) \

@@ -34,12 +34,10 @@ extern cvar_t* cvar_pt_bsp_radiance_scale;
 extern cvar_t* cvar_pt_bsp_sky_lights;
 
 static void
-remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices)
-{
+remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices) {
 	int num_vertices_local = *num_vertices;
 
-	for (int i = 1; i < num_vertices_local;)
-	{
+	for (int i = 1; i < num_vertices_local;) 	{
 		float* p0 = positions + (i - 1) * 3;
 		float* p1 = positions + (i % num_vertices_local) * 3;
 		float* p2 = positions + ((i + 1) % num_vertices_local) * 3;
@@ -51,12 +49,9 @@ remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices)
 		float l2 = VectorLength(e2);
 
 		qboolean remove = false;
-		if (l1 == 0)
-		{
+		if (l1 == 0) 		{
 			remove = true;
-		}
-		else if (l2 > 0)
-		{
+		} 		else if (l2 > 0) 		{
 			VectorScale(e1, 1.f / l1, e1);
 			VectorScale(e2, 1.f / l2, e2);
 
@@ -65,14 +60,11 @@ remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices)
 				remove = true;
 		}
 
-		if (remove)
-		{
-			if (num_vertices_local - i >= 1)
-			{
+		if (remove) 		{
+			if (num_vertices_local - i >= 1) 			{
 				memcpy(p1, p2, (num_vertices_local - i - 1) * 3 * sizeof(float));
 
-				if (tex_coords)
-				{
+				if (tex_coords) 				{
 					float* t1 = tex_coords + (i % num_vertices_local) * 2;
 					float* t2 = tex_coords + ((i + 1) % num_vertices_local) * 2;
 					memcpy(t1, t2, (num_vertices_local - i - 1) * 2 * sizeof(float));
@@ -80,9 +72,7 @@ remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices)
 			}
 
 			num_vertices_local--;
-		}
-		else
-		{
+		} 		else 		{
 			i++;
 		}
 	}
@@ -104,14 +94,13 @@ create_poly(
 	float* tex_coord_out,
 	uint32_t* material_out,
 	float* emissive_factors_out) {
-
 	static const int max_vertices = 32;
 	float positions[3 * /*max_vertices*/ 32];
 	float tex_coords[2 * /*max_vertices*/ 32];
 	mtexinfo_t* texinfo = surf->texinfo;
 	assert(surf->numsurfedges < max_vertices);
 
-	float sc[2] = { 1.f, 1.f };
+	float sc[2] = {1.f, 1.f};
 	if (texinfo->material) 	{
 		image_t* image_diffuse = texinfo->material->image_base;
 		if (image_diffuse && image_diffuse->width && image_diffuse->height) {
@@ -120,8 +109,8 @@ create_poly(
 		}
 	}
 
-	float pos_center[3] = { 0 };
-	float tc_center[2];
+	float pos_center[3] = {0, 0, 0};
+	float tc_center[2] = {0, 0};
 
 	for (int i = 0; i < surf->numsurfedges; i++) {
 		msurfedge_t* src_surfedge = surf->firstsurfedge + i;
@@ -228,17 +217,17 @@ create_poly(
 
 #undef CP_V
 #undef CP_T
+#undef CP_M
 
 	assert(k % 3 == 0);
 	return k;
 }
 
 static int
-belongs_to_model(bsp_t *bsp, mface_t *surf)
-{
+belongs_to_model(bsp_t* bsp, mface_t* surf) {
 	for (int i = 0; i < bsp->nummodels; i++) {
 		if (surf >= bsp->models[i].firstface
-		&& surf < bsp->models[i].firstface + bsp->models[i].numfaces)
+			&& surf < bsp->models[i].firstface + bsp->models[i].numfaces)
 			return 1;
 	}
 	return 0;
@@ -335,7 +324,7 @@ get_triangle_off_center(const float* positions, float* center, float* anti_cente
 	VectorScale(normal, offset, normal);
 	VectorAdd(center, normal, center);
 
-	if (anti_center) 	{
+	if (anti_center) {
 		VectorMA(center, -2.f, normal, anti_center);
 	}
 
@@ -343,12 +332,9 @@ get_triangle_off_center(const float* positions, float* center, float* anti_cente
 }
 
 static int
-get_surf_light_style(const mface_t* surf)
-{
-	for (int nstyle = 0; nstyle < 4; nstyle++)
-	{
-		if (surf->styles[nstyle] != 0 && surf->styles[nstyle] != 255)
-		{
+get_surf_light_style(const mface_t* surf) {
+	for (int nstyle = 0; nstyle < 4; nstyle++) 	{
+		if (surf->styles[nstyle] != 0 && surf->styles[nstyle] != 255) 		{
 			return surf->styles[nstyle];
 		}
 	}
@@ -387,26 +373,19 @@ get_surf_plane_equation(mface_t* surf, float* plane) {
 }
 
 static qboolean
-is_sky_or_lava_cluster(bsp_mesh_t* wm, mface_t* surf, int cluster, int material_id)
-{
+is_sky_or_lava_cluster(bsp_mesh_t* wm, mface_t* surf, int cluster, int material_id) {
 	if (cluster < 0)
 		return false;
 
-	if (MAT_IsKind(material_id, MATERIAL_KIND_LAVA) && wm->all_lava_emissive)
-	{
-		vec4_t plane;
-		if (get_surf_plane_equation(surf, plane))
-		{
+	if (MAT_IsKind(material_id, MATERIAL_KIND_LAVA) && wm->all_lava_emissive) 	{
+		float plane[4];
+		if (get_surf_plane_equation(surf, plane)) 		{
 			if (plane[2] < 0.f)
 				return true;
 		}
-	}
-	else
-	{
-		for (int i = 0; i < wm->num_sky_clusters; i++)
-		{
-			if (wm->sky_clusters[i] == cluster)
-			{
+	} 	else 	{
+		for (int i = 0; i < wm->num_sky_clusters; i++) 		{
+			if (wm->sky_clusters[i] == cluster) 			{
 				return true;
 			}
 		}
@@ -415,10 +394,8 @@ is_sky_or_lava_cluster(bsp_mesh_t* wm, mface_t* surf, int cluster, int material_
 	return false;
 }
 
-static void merge_pvs_rows(bsp_t* bsp, byte* src, byte* dst)
-{
-	for (int i = 0; i < bsp->visrowsize; i++)
-	{
+static void merge_pvs_rows(bsp_t* bsp, byte* src, byte* dst) {
+	for (int i = 0; i < bsp->visrowsize; i++) 	{
 		dst[i] |= src[i];
 	}
 }
@@ -432,35 +409,29 @@ static void merge_pvs_rows(bsp_t* bsp, byte* src, byte* dst)
 
 #define FOREACH_BIT_END  } } } }
 
-static void connect_pvs(bsp_t* bsp, int cluster_a, byte* pvs_a, int cluster_b, byte* pvs_b)
-{
+static void connect_pvs(bsp_t* bsp, int cluster_a, byte* pvs_a, int cluster_b, byte* pvs_b) {
 	FOREACH_BIT_BEGIN(pvs_a, bsp->visrowsize, vis_cluster_a)
-		if (vis_cluster_a != cluster_a && vis_cluster_a != cluster_b)
-		{
+		if (vis_cluster_a != cluster_a && vis_cluster_a != cluster_b) 		{
 			merge_pvs_rows(bsp, pvs_b, BSP_GetPvs(bsp, vis_cluster_a));
 		}
 	FOREACH_BIT_END
 
-	FOREACH_BIT_BEGIN(pvs_b, bsp->visrowsize, vis_cluster_b)
-		if (vis_cluster_b != cluster_a && vis_cluster_b != cluster_b)
-		{
+		FOREACH_BIT_BEGIN(pvs_b, bsp->visrowsize, vis_cluster_b)
+		if (vis_cluster_b != cluster_a && vis_cluster_b != cluster_b) 		{
 			merge_pvs_rows(bsp, pvs_a, BSP_GetPvs(bsp, vis_cluster_b));
 		}
 	FOREACH_BIT_END
 
-	merge_pvs_rows(bsp, pvs_a, pvs_b);
+		merge_pvs_rows(bsp, pvs_a, pvs_b);
 	merge_pvs_rows(bsp, pvs_b, pvs_a);
 }
 
-static void make_pvs_symmetric(bsp_t* bsp)
-{
-	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++)
-	{
+static void make_pvs_symmetric(bsp_t* bsp) {
+	for (int cluster = 0; cluster < bsp->vis->numclusters; cluster++) 	{
 		byte* pvs = BSP_GetPvs(bsp, cluster);
 
 		FOREACH_BIT_BEGIN(pvs, bsp->visrowsize, vis_cluster)
-			if (vis_cluster != cluster)
-			{
+			if (vis_cluster != cluster) 			{
 				byte* vis_pvs = BSP_GetPvs(bsp, vis_cluster);
 				Q_SetBit(vis_pvs, cluster);
 			}
@@ -480,9 +451,10 @@ static void build_pvs2(bsp_t* bsp) {
 
 		FOREACH_BIT_BEGIN(pvs, bsp->visrowsize, vis_cluster)
 			byte* pvs2 = BSP_GetPvs(bsp, vis_cluster);
-			merge_pvs_rows(bsp, pvs2, dest_pvs);
+		merge_pvs_rows(bsp, pvs2, dest_pvs);
 		FOREACH_BIT_END
 	}
+
 }
 
 static void
@@ -591,9 +563,9 @@ collect_surfaces(int* idx_ctr, bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int (*
 						}
 					}
 				}
-			}
-			else
+			} else {
 				wm->clusters[it] = -1;
+			}
 		}
 
 		*idx_ctr += cnt;
@@ -619,20 +591,17 @@ typedef struct {
 } poly_t;
 
 static inline float
-dot2(point2_t* a, point2_t* b)
-{
+dot2(point2_t* a, point2_t* b) {
 	return a->x * b->x + a->y * b->y;
 }
 
 static inline float
-cross2(point2_t* a, point2_t* b)
-{
+cross2(point2_t* a, point2_t* b) {
 	return a->x * b->y - a->y * b->x;
 }
 
 static inline point2_t
-vsub(point2_t* a, point2_t* b)
-{
+vsub(point2_t* a, point2_t* b) {
 	point2_t res;
 	res.x = a->x - b->x;
 	res.y = a->y - b->y;
@@ -643,8 +612,7 @@ vsub(point2_t* a, point2_t* b)
  * 1 if left, -1 if right, 0 if colinear
  */
 static int
-left_of(point2_t* a, point2_t* b, point2_t* c)
-{
+left_of(point2_t* a, point2_t* b, point2_t* c) {
 	float x;
 	point2_t tmp1 = vsub(b, a);
 	point2_t tmp2 = vsub(c, b);
@@ -653,8 +621,7 @@ left_of(point2_t* a, point2_t* b, point2_t* c)
 }
 
 static int
-line_sect(point2_t* x0, point2_t* x1, point2_t* y0, point2_t* y1, point2_t* res)
-{
+line_sect(point2_t* x0, point2_t* x1, point2_t* y0, point2_t* y1, point2_t* res) {
 	point2_t dx, dy, d;
 	dx = vsub(x1, x0);
 	dy = vsub(y1, y0);
@@ -673,21 +640,18 @@ line_sect(point2_t* x0, point2_t* x1, point2_t* y0, point2_t* y1, point2_t* res)
 }
 
 static void
-poly_append(poly_t* p, point2_t* v)
-{
+poly_append(poly_t* p, point2_t* v) {
 	assert(p->len < MAX_POLY_VERTS - 1);
 	p->v[p->len++] = *v;
 }
 
 static int
-poly_winding(poly_t* p)
-{
+poly_winding(poly_t* p) {
 	return left_of(p->v, p->v + 1, p->v + 2);
 }
 
 static void
-poly_edge_clip(poly_t* sub, point2_t* x0, point2_t* x1, int left, poly_t* res)
-{
+poly_edge_clip(poly_t* sub, point2_t* x0, point2_t* x1, int left, poly_t* res) {
 	int i, side0, side1;
 	point2_t tmp;
 	point2_t* v0 = sub->v + sub->len - 1;
@@ -712,8 +676,7 @@ poly_edge_clip(poly_t* sub, point2_t* x0, point2_t* x1, int left, poly_t* res)
 }
 
 static void
-clip_polygon(poly_t* input, poly_t* clipper, poly_t* output)
-{
+clip_polygon(poly_t* input, poly_t* clipper, poly_t* output) {
 	int i;
 	poly_t p1_m, p2_m;
 	poly_t* p1 = &p1_m;
@@ -737,24 +700,21 @@ clip_polygon(poly_t* input, poly_t* clipper, poly_t* output)
 }
 
 static light_poly_t*
-append_light_poly(int* num_lights, int* allocated, light_poly_t** lights)
-{
-	if (*num_lights == *allocated)
-	{
+append_light_poly(int* num_lights, int* allocated, light_poly_t** lights) {
+	if (*num_lights == *allocated) 	{
 		*allocated = max(*allocated * 2, 128);
-		*lights = (light_poly_t*)Z_Realloc(*lights, *allocated * sizeof(light_poly_t));
+		*lights = (light_poly_t *)Z_Realloc(*lights, *allocated * sizeof(light_poly_t));
 	}
 	return *lights + (*num_lights)++;
 }
 
 static inline qboolean
-is_light_material(uint32_t material)
-{
+is_light_material(uint32_t material) {
 	return (material & MATERIAL_FLAG_LIGHT) != 0;
 }
 
 static void
-collect_one_light_poly_entire_texture(bsp_t* bsp, mface_t* surf, mtexinfo_t* texinfo,
+collect_one_light_poly_entire_texture(bsp_t* bsp, mface_t* surf, mtexinfo_t* texinfo, int model_idx,
 	const vec3_t light_color, float emissive_factor, int light_style,
 	int* num_lights, int* allocated_lights, light_poly_t** lights) {
 	float positions[3 * /*max_vertices*/ 32];
@@ -792,10 +752,14 @@ collect_one_light_poly_entire_texture(bsp_t* bsp, mface_t* surf, mtexinfo_t* tex
 		if (!get_triangle_off_center(light.positions, light.off_center, NULL, 1.f))
 			continue;
 
-		light.cluster = BSP_PointLeaf(bsp->nodes, light.off_center)->cluster;
 		light.emissive_factor = emissive_factor;
 
-		if (light.cluster >= 0) 		{
+		if (model_idx >= 0)
+			light.cluster = -1; // Cluster will be determined when the model is instanced
+		else
+			light.cluster = BSP_PointLeaf(bsp->nodes, light.off_center)->cluster;
+
+		if (model_idx >= 0 || light.cluster >= 0) 		{
 			light_poly_t* list_light = append_light_poly(num_lights, allocated_lights, lights);
 			memcpy(list_light, &light, sizeof(light_poly_t));
 		}
@@ -838,8 +802,8 @@ collect_one_light_poly(bsp_t* bsp, mface_t* surf, mtexinfo_t* texinfo, int model
 	poly_t tex_poly;
 	tex_poly.len = surf->numsurfedges;
 
-	point2_t tex_min = { FLT_MAX, FLT_MAX };
-	point2_t tex_max = { -FLT_MAX, -FLT_MAX };
+	point2_t tex_min = {FLT_MAX, FLT_MAX};
+	point2_t tex_max = {-FLT_MAX, -FLT_MAX};
 
 	for (int i = 0; i < surf->numsurfedges; i++) 	{
 		msurfedge_t* src_surfedge = surf->firstsurfedge + i;
@@ -946,8 +910,7 @@ collect_one_light_poly(bsp_t* bsp, mface_t* surf, mtexinfo_t* texinfo, int model
 						// The lighting system can't work with lights that have no cluster, so remove the triangle.
 						(*num_lights)--;
 					}
-				}
-				else 				{
+				} 				else 				{
 					// It's a model: cluster will be determined after model instantiation.
 					light->cluster = -1;
 				}
@@ -958,7 +921,7 @@ collect_one_light_poly(bsp_t* bsp, mface_t* surf, mtexinfo_t* texinfo, int model
 }
 
 static qboolean
-collect_frames_emissive_info(pbr_material_t* material, qboolean* entire_texture_emissive, vec2_t min_light_texcoord, vec2_t max_light_texcoord, vec3_t light_color) {
+collect_frames_emissive_info(pbr_material_t* material, qboolean* entire_texture_emissive, vec2_t &min_light_texcoord, vec2_t &max_light_texcoord, vec3_t &light_color) {
 	*entire_texture_emissive = false;
 	min_light_texcoord[0] = min_light_texcoord[1] = 1.0f;
 	max_light_texcoord[0] = max_light_texcoord[1] = 0.0f;
@@ -973,7 +936,8 @@ collect_frames_emissive_info(pbr_material_t* material, qboolean* entire_texture_
 		}
 		if (!any_emissive_valid) 		{
 			// emissive light color of first frame
-			memcpy(light_color, image->light_color, sizeof(vec3_t));
+			//memcpy(light_color, image->light_color, sizeof(vec3_t));
+			light_color = image->light_color;
 		}
 		any_emissive_valid = true;
 
@@ -1004,13 +968,27 @@ collect_light_polys(bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int* num_lights, 
 		if (!texinfo->material)
 			continue;
 
-		uint32_t material_id = texinfo->material->flags;
-
-		if (!is_light_material(material_id))
+		// Check if any animation frame is a light material
+		qboolean any_light_frame = false;
+		{
+			pbr_material_t* current_material = texinfo->material;
+			do 			{
+				any_light_frame |= is_light_material(current_material->flags);
+				current_material = r_materials + current_material->next_frame;
+			} while (current_material != texinfo->material);
+		}
+		if (!any_light_frame)
 			continue;
 
-		const image_t* image = texinfo->material->image_emissive;
-		if (!image) 		{
+		uint32_t material_id = texinfo->material->flags;
+
+		// Collect emissive texture info from across frames
+		qboolean entire_texture_emissive;
+		vec2_t min_light_texcoord;
+		vec2_t max_light_texcoord;
+		vec3_t light_color;
+
+		if (!collect_frames_emissive_info(texinfo->material, &entire_texture_emissive, min_light_texcoord, max_light_texcoord, light_color)) 		{
 			// This algorithm relies on information from the emissive texture,
 			// specifically the extents of the emissive pixels in that texture.
 			// Ignore surfaces that don't have an emissive texture attached.
@@ -1023,8 +1001,8 @@ collect_light_polys(bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int* num_lights, 
 
 		int light_style = (texinfo->material->light_styles) ? get_surf_light_style(surf) : 0;
 
-		if (image->entire_texture_emissive) 		{
-			collect_one_light_poly_entire_texture(bsp, surf, texinfo, image->light_color, emissive_factor, light_style,
+		if (entire_texture_emissive) 		{
+			collect_one_light_poly_entire_texture(bsp, surf, texinfo, model_idx, light_color, emissive_factor, light_style,
 				num_lights, allocated_lights, lights);
 			continue;
 		}
@@ -1036,11 +1014,11 @@ collect_light_polys(bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int* num_lights, 
 		}
 
 		image_t* image_diffuse = texinfo->material->image_base;
-		float tex_scale[2] = { 1.0f / image_diffuse->width, 1.0f / image_diffuse->height };
+		float tex_scale[2] = {1.0f / image_diffuse->width, 1.0f / image_diffuse->height};
 
 		collect_one_light_poly(bsp, surf, texinfo, model_idx, plane,
-			tex_scale, image->min_light_texcoord, image->max_light_texcoord,
-			image->light_color, emissive_factor, light_style,
+			tex_scale, min_light_texcoord, max_light_texcoord,
+			light_color, emissive_factor, light_style,
 			num_lights, allocated_lights, lights);
 	}
 }
@@ -1095,8 +1073,7 @@ collect_sky_and_lava_light_polys(bsp_mesh_t* wm, bsp_t* bsp) {
 			if (is_sky) 			{
 				VectorSet(light.color, -1.f, -1.f, -1.f); // special value for the sky
 				light.material = 0;
-			}
-			else 			{
+			} else {
 				VectorCopy(surf->texinfo->material->image_emissive->light_color, light.color);
 				light.material = surf->texinfo->material;
 			}
@@ -1118,13 +1095,11 @@ collect_sky_and_lava_light_polys(bsp_mesh_t* wm, bsp_t* bsp) {
 }
 
 static qboolean
-is_model_transparent(bsp_mesh_t *wm, bsp_model_t *model)
-{
+is_model_transparent(bsp_mesh_t* wm, bsp_model_t* model) {
 	if (model->idx_count == 0)
 		return false;
 
-	for (int i = 0; i < model->idx_count / 3; i++)
-	{
+	for (int i = 0; i < model->idx_count / 3; i++) 	{
 		int prim = model->idx_offset / 3 + i;
 		int material = wm->materials[prim];
 
@@ -1155,39 +1130,37 @@ is_model_masked(bsp_mesh_t* wm, bsp_model_t* model) {
 
 // direct port of the encode_normal function from utils.glsl
 uint32_t
-encode_normal(vec3_t normal)
-{
+encode_normal(vec3_t normal) {
 	float invL1Norm = 1.0f / (fabsf(normal[0]) + fabsf(normal[1]) + fabsf(normal[2]));
 
-    vec2_t p = { normal[0] * invL1Norm, normal[1] * invL1Norm };
-	vec2_t pp = { p[0], p[1] };
+	vec2_t p = {normal[0] * invL1Norm, normal[1] * invL1Norm};
+	vec2_t pp = {p[0], p[1]};
 
-    if(normal[2] < 0.f)
-    {
-    	pp[0] = (1.f - fabsf(p[1])) * ((p[0] >= 0.f) ? 1.f : -1.f);
-    	pp[1] = (1.f - fabsf(p[0])) * ((p[1] >= 0.f) ? 1.f : -1.f);
-    }
+	if (normal[2] < 0.f)     {
+		pp[0] = (1.f - fabsf(p[1])) * ((p[0] >= 0.f) ? 1.f : -1.f);
+		pp[1] = (1.f - fabsf(p[0])) * ((p[1] >= 0.f) ? 1.f : -1.f);
+	}
 
-    pp[0] = pp[0] * 0.5f + 0.5f;
-    pp[1] = pp[1] * 0.5f + 0.5f;
+	pp[0] = pp[0] * 0.5f + 0.5f;
+	pp[1] = pp[1] * 0.5f + 0.5f;
 
-	clamp(pp[0], 0.f, 1.f);
-	clamp(pp[1], 0.f, 1.f);
+	//clamp(pp[0], 0.f, 1.f);
+	//clamp(pp[1], 0.f, 1.f);
+	pp[0] = Clampf(pp[0], 0.f, 1.f);
+	pp[1] = Clampf(pp[1], 0.f, 1.f);
 
-    uint32_t ux = (uint32_t)(pp[0] * 0xffffu);
-    uint32_t uy = (uint32_t)(pp[1] * 0xffffu);
+	uint32_t ux = (uint32_t)(pp[0] * 0xffffu);
+	uint32_t uy = (uint32_t)(pp[1] * 0xffffu);
 
-    return ux | (uy << 16);
+	return ux | (uy << 16);
 }
 
 void
-compute_aabb(const float* positions, int numvert, float* aabb_min, float* aabb_max)
-{
+compute_aabb(const float* positions, int numvert, float* aabb_min, float* aabb_max) {
 	VectorSet(aabb_min, FLT_MAX, FLT_MAX, FLT_MAX);
 	VectorSet(aabb_max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	for (int i = 0; i < numvert; i++)
-	{
+	for (int i = 0; i < numvert; i++) 	{
 		float const* position = positions + i * 3;
 
 		aabb_min[0] = min(aabb_min[0], position[0]);
@@ -1201,8 +1174,7 @@ compute_aabb(const float* positions, int numvert, float* aabb_min, float* aabb_m
 }
 
 void
-compute_world_tangents(bsp_mesh_t* wm)
-{
+compute_world_tangents(bsp_mesh_t* wm) {
 	// compute tangent space
 	uint32_t ntriangles = wm->num_indices / 3;
 
@@ -1211,39 +1183,38 @@ compute_world_tangents(bsp_mesh_t* wm)
 	wm->tangents = (uint32_t*)Z_Malloc(MAX_VERT_BSP * sizeof(uint32_t) / 3);
 	wm->texel_density = (float*)Z_Malloc(MAX_VERT_BSP * sizeof(float) / 3);
 
-	for (int idx_tri = 0; idx_tri < ntriangles; ++idx_tri)
-	{
+	for (int idx_tri = 0; idx_tri < ntriangles; ++idx_tri) 	{
 		uint32_t iA = wm->indices[idx_tri * 3 + 0]; // no vertex indexing
 		uint32_t iB = wm->indices[idx_tri * 3 + 1];
 		uint32_t iC = wm->indices[idx_tri * 3 + 2];
 
-		float const * pA = wm->positions + (iA * 3);
-		float const * pB = wm->positions + (iB * 3);
-		float const * pC = wm->positions + (iC * 3);
+		float const* pA = wm->positions + (iA * 3);
+		float const* pB = wm->positions + (iB * 3);
+		float const* pC = wm->positions + (iC * 3);
 
-		float const * tA = wm->tex_coords + (iA * 2);
-		float const * tB = wm->tex_coords + (iB * 2);
-		float const * tC = wm->tex_coords + (iC * 2);
+		float const* tA = wm->tex_coords + (iA * 2);
+		float const* tB = wm->tex_coords + (iB * 2);
+		float const* tC = wm->tex_coords + (iC * 2);
 
 		vec3_t dP0, dP1;
 		VectorSubtract(pB, pA, dP0);
 		VectorSubtract(pC, pA, dP1);
 
 		vec2_t dt0, dt1;
-		Vec2_Subtract(tB, tA, dt0);
-		Vec2_Subtract(tC, tA, dt1);
+		Vector2Subtract(tB, tA, dt0);
+		Vector2Subtract(tC, tA, dt1);
 
 		float r = 1.f / (dt0[0] * dt1[1] - dt1[0] * dt0[1]);
 
 		vec3_t sdir = {
 			(dt1[1] * dP0[0] - dt0[1] * dP1[0]) * r,
 			(dt1[1] * dP0[1] - dt0[1] * dP1[1]) * r,
-			(dt1[1] * dP0[2] - dt0[1] * dP1[2]) * r };
+			(dt1[1] * dP0[2] - dt0[1] * dP1[2]) * r};
 
 		vec3_t tdir = {
 			(dt0[0] * dP1[0] - dt1[0] * dP0[0]) * r,
 			(dt0[0] * dP1[1] - dt1[0] * dP0[1]) * r,
-			(dt0[0] * dP1[2] - dt1[0] * dP0[2]) * r };
+			(dt0[0] * dP1[2] - dt1[0] * dP0[2]) * r};
 
 		vec3_t normal;
 		CrossProduct(dP0, dP1, normal);
@@ -1262,8 +1233,7 @@ compute_world_tangents(bsp_mesh_t* wm)
 		CrossProduct(normal, t, cross);
 		float dot = DotProduct(cross, tdir);
 
-		if (dot < 0.0f)
-		{
+		if (dot < 0.0f) 		{
 			wm->materials[idx_tri] |= MATERIAL_FLAG_HANDEDNESS;
 		}
 
@@ -1291,69 +1261,57 @@ compute_world_tangents(bsp_mesh_t* wm)
 }
 
 static void
-load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name)
-{
+load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name) {
 	wm->num_sky_clusters = 0;
 	wm->all_lava_emissive = false;
 
-    // try a map-specific file first
-    char filename[MAX_QPATH];
-    Q_snprintf(filename, sizeof(filename), "maps/sky/%s.txt", map_name);
+	// try a map-specific file first
+	char filename[MAX_QPATH];
+	Q_snprintf(filename, sizeof(filename), "maps/sky/%s.txt", map_name);
 
-    qboolean found_map = false;
+	qboolean found_map = false;
 
-    char* filebuf = NULL;
+	char* filebuf = NULL;
 	FS_LoadFile(filename, (void**)&filebuf);
 
 	if (filebuf)     {
 		// we have a map-specific file - no need to look for map name
 		found_map = true;
-	}
-	else     {
+	}     else     {
 		// try to load the global file
 		FS_LoadFile("sky_clusters.txt", (void**)&filebuf);
-        if (!filebuf)
-        {
-            Com_WPrintf("Couldn't read sky_clusters.txt\n");
-            return;
-        }
-    }
+		if (!filebuf)         {
+			Com_WPrintf("Couldn't read sky_clusters.txt\n");
+			return;
+		}
+	}
 
-	char const * ptr = (char const *)filebuf;
+	char const* ptr = (char const*)filebuf;
 	char linebuf[1024];
 
-	while (sgets(linebuf, sizeof(linebuf), &ptr))
-	{
+	while (sgets(linebuf, sizeof(linebuf), &ptr)) 	{
 		{ char* t = strchr(linebuf, '#'); if (t) *t = 0; }   // remove comments
 		{ char* t = strchr(linebuf, '\n'); if (t) *t = 0; }  // remove newline
 
 		const char* delimiters = " \t\r\n";
-		
+
 		const char* word = strtok(linebuf, delimiters);
-		while (word)
-		{
-			if ((word[0] >= 'a' && word[0] <= 'z') || (word[0] >= 'A' && word[0] <= 'Z'))
-			{
+		while (word) 		{
+			if ((word[0] >= 'a' && word[0] <= 'z') || (word[0] >= 'A' && word[0] <= 'Z')) 			{
 				qboolean matches = strcmp(word, map_name) == 0;
 
-				if (!found_map && matches)
-				{
+				if (!found_map && matches) 				{
 					found_map = true;
-				}
-				else if (found_map && !matches)
-				{
+				} 				else if (found_map && !matches) 				{
 					Z_Free(filebuf);
 					return;
 				}
-			}
-			else if (found_map)
-			{
+			} 			else if (found_map) 			{
 				assert(wm->num_sky_clusters < MAX_SKY_CLUSTERS);
 
 				if (!strcmp(word, "!all_lava"))
 					wm->all_lava_emissive = true;
-				else
-				{
+				else 				{
 					int cluster = atoi(word);
 					wm->sky_clusters[wm->num_sky_clusters++] = cluster;
 				}
@@ -1367,49 +1325,39 @@ load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name)
 }
 
 static void
-load_cameras(bsp_mesh_t* wm, const char* map_name)
-{
+load_cameras(bsp_mesh_t* wm, const char* map_name) {
 	wm->num_cameras = 0;
 
 	char* filebuf = NULL;
 	FS_LoadFile("cameras.txt", (void**)&filebuf);
-	if (!filebuf)
-	{
+	if (!filebuf) 	{
 		Com_WPrintf("Couldn't read cameras.txt\n");
 		return;
 	}
 
-	char const * ptr = (char const *)filebuf;
+	char const* ptr = (char const*)filebuf;
 	char linebuf[1024];
 	qboolean found_map = false;
 
-	while (sgets(linebuf, sizeof(linebuf), &ptr))
-	{
+	while (sgets(linebuf, sizeof(linebuf), &ptr)) 	{
 		{ char* t = strchr(linebuf, '#'); if (t) *t = 0; }   // remove comments
 		{ char* t = strchr(linebuf, '\n'); if (t) *t = 0; }  // remove newline
 
 
 		vec3_t pos, dir;
-		if ((linebuf[0] >= 'a' && linebuf[0] <= 'z') || (linebuf[0] >= 'A' && linebuf[0] <= 'Z'))
-		{
+		if ((linebuf[0] >= 'a' && linebuf[0] <= 'z') || (linebuf[0] >= 'A' && linebuf[0] <= 'Z')) 		{
 			const char* delimiters = " \t\r\n";
 			const char* word = strtok(linebuf, delimiters);
 			qboolean matches = strcmp(word, map_name) == 0;
 
-			if (!found_map && matches)
-			{
+			if (!found_map && matches) 			{
 				found_map = true;
-			}
-			else if (found_map && !matches)
-			{
+			} 			else if (found_map && !matches) 			{
 				Z_Free(filebuf);
 				return;
 			}
-		}
-		else if (found_map && sscanf(linebuf, "(%f, %f, %f) (%f, %f, %f)", &pos[0], &pos[1], &pos[2], &dir[0], &dir[1], &dir[2]) == 6)
-		{
-			if (wm->num_cameras < MAX_CAMERAS)
-			{
+		} 		else if (found_map && sscanf(linebuf, "(%f, %f, %f) (%f, %f, %f)", &pos[0], &pos[1], &pos[2], &dir[0], &dir[1], &dir[2]) == 6) 		{
+			if (wm->num_cameras < MAX_CAMERAS) 			{
 				VectorCopy(pos, wm->cameras[wm->num_cameras].pos);
 				VectorCopy(dir, wm->cameras[wm->num_cameras].dir);
 				wm->num_cameras++;
@@ -1429,7 +1377,7 @@ compute_sky_visibility(bsp_mesh_t* wm, bsp_t* bsp) {
 
 	int numclusters = bsp->vis->numclusters;
 
-	static char clusters_with_sky[VIS_MAX_BYTES];
+	char clusters_with_sky[VIS_MAX_BYTES];
 
 	memset(clusters_with_sky, 0, VIS_MAX_BYTES);
 
@@ -1452,26 +1400,22 @@ compute_sky_visibility(bsp_mesh_t* wm, bsp_t* bsp) {
 }
 
 static void
-compute_cluster_aabbs(bsp_mesh_t* wm)
-{
+compute_cluster_aabbs(bsp_mesh_t* wm) {
 	wm->cluster_aabbs = (aabb_t*)Z_Malloc(wm->num_clusters * sizeof(aabb_t));
-	for (int c = 0; c < wm->num_clusters; c++)
-	{
+	for (int c = 0; c < wm->num_clusters; c++) 	{
 		VectorSet(wm->cluster_aabbs[c].mins, FLT_MAX, FLT_MAX, FLT_MAX);
 		VectorSet(wm->cluster_aabbs[c].maxs, -FLT_MAX, -FLT_MAX, -FLT_MAX);
 	}
 
-	for (int tri = 0; tri < wm->world_idx_count / 3; tri++)
-	{
+	for (int tri = 0; tri < wm->world_idx_count / 3; tri++) 	{
 		int c = wm->clusters[tri];
 
-		if(c < 0 || c >= wm->num_clusters)
+		if (c < 0 || c >= wm->num_clusters)
 			continue;
 
 		aabb_t* aabb = wm->cluster_aabbs + c;
 
-		for (int i = 0; i < 3; i++)
-		{
+		for (int i = 0; i < 3; i++) 		{
 			float const* position = wm->positions + tri * 9 + i * 3;
 
 			aabb->mins[0] = min(aabb->mins[0], position[0]);
@@ -1486,16 +1430,14 @@ compute_cluster_aabbs(bsp_mesh_t* wm)
 }
 
 static void
-get_aabb_corner(aabb_t* aabb, int corner_idx, vec3_t corner)
-{
+get_aabb_corner(aabb_t* aabb, int corner_idx, vec3_t &corner) {
 	corner[0] = (corner_idx & 1) ? aabb->maxs[0] : aabb->mins[0];
 	corner[1] = (corner_idx & 2) ? aabb->maxs[1] : aabb->mins[1];
 	corner[2] = (corner_idx & 4) ? aabb->maxs[2] : aabb->mins[2];
 }
 
 static qboolean
-light_affects_cluster(light_poly_t* light, aabb_t* aabb)
-{
+light_affects_cluster(light_poly_t* light, aabb_t* aabb) {
 	// Empty cluster, nothing is visible
 	if (aabb->mins[0] > aabb->maxs[0])
 		return false;
@@ -1503,21 +1445,20 @@ light_affects_cluster(light_poly_t* light, aabb_t* aabb)
 	const float* v0 = light->positions + 0;
 	const float* v1 = light->positions + 3;
 	const float* v2 = light->positions + 6;
-	
+
 	// Get the light plane equation
 	vec3_t e1, e2, normal;
 	VectorSubtract(v1, v0, e1);
 	VectorSubtract(v2, v0, e2);
 	CrossProduct(e1, e2, normal);
 	VectorNormalize(normal);
-	
+
 	float plane_distance = -DotProduct(normal, v0);
 
 	qboolean all_culled = true;
 
 	// If all 8 corners of the cluster's AABB are behind the light, it's definitely invisible
-	for (int corner_idx = 0; corner_idx < 8; corner_idx++)
-	{
+	for (int corner_idx = 0; corner_idx < 8; corner_idx++) 	{
 		vec3_t corner;
 		get_aabb_corner(aabb, corner_idx, corner);
 
@@ -1526,8 +1467,7 @@ light_affects_cluster(light_poly_t* light, aabb_t* aabb)
 			all_culled = false;
 	}
 
-	if (all_culled)
-	{
+	if (all_culled) 	{
 		return false;
 	}
 
@@ -1535,8 +1475,7 @@ light_affects_cluster(light_poly_t* light, aabb_t* aabb)
 }
 
 static void
-collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
-{
+collect_cluster_lights(bsp_mesh_t* wm, bsp_t* bsp) {
 #define MAX_LIGHTS_PER_CLUSTER 1024
 	int* cluster_lights = (int*)Z_Malloc(MAX_LIGHTS_PER_CLUSTER * wm->num_clusters * sizeof(int));
 	int* cluster_light_counts = (int*)Z_Mallocz(wm->num_clusters * sizeof(int));
@@ -1544,34 +1483,30 @@ collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 	// Construct an array of visible lights for each cluster.
 	// The array is in `cluster_lights`, with MAX_LIGHTS_PER_CLUSTER stride.
 
-	for (int nlight = 0; nlight < wm->num_light_polys; nlight++)
-	{
+	for (int nlight = 0; nlight < wm->num_light_polys; nlight++) 	{
 		light_poly_t* light = wm->light_polys + nlight;
 
-		if(light->cluster < 0)
+		if (light->cluster < 0)
 			continue;
 
-		const byte* pvs = (const byte*)BSP_GetPvs(bsp, light->cluster);
+		byte* pvs = (byte*)BSP_GetPvs(bsp, light->cluster);
 
 		FOREACH_BIT_BEGIN(pvs, bsp->visrowsize, other_cluster)
 			aabb_t* cluster_aabb = wm->cluster_aabbs + other_cluster;
-			if (light_affects_cluster(light, cluster_aabb))
-			{
-				int* num_cluster_lights = cluster_light_counts + other_cluster;
-				if (*num_cluster_lights < MAX_LIGHTS_PER_CLUSTER)
-				{
-					cluster_lights[other_cluster * MAX_LIGHTS_PER_CLUSTER + *num_cluster_lights] = nlight;
-					(*num_cluster_lights)++;
-				}
+		if (light_affects_cluster(light, cluster_aabb)) 			{
+			int* num_cluster_lights = cluster_light_counts + other_cluster;
+			if (*num_cluster_lights < MAX_LIGHTS_PER_CLUSTER) 				{
+				cluster_lights[other_cluster * MAX_LIGHTS_PER_CLUSTER + *num_cluster_lights] = nlight;
+				(*num_cluster_lights)++;
 			}
+		}
 		FOREACH_BIT_END
 	}
 
 	// Count the total number of cluster <-> light relations to allocate memory
 
 	wm->num_cluster_lights = 0;
-	for (int cluster = 0; cluster < wm->num_clusters; cluster++)
-	{
+	for (int cluster = 0; cluster < wm->num_clusters; cluster++) 	{
 		wm->num_cluster_lights += cluster_light_counts[cluster];
 	}
 
@@ -1583,14 +1518,13 @@ collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 	// Compact the previously constructed array into wm->cluster_lights
 
 	int list_offset = 0;
-	for (int cluster = 0; cluster < wm->num_clusters; cluster++)
-	{
+	for (int cluster = 0; cluster < wm->num_clusters; cluster++) 	{
 		assert(list_offset >= 0);
 		wm->cluster_light_offsets[cluster] = list_offset;
 		int count = cluster_light_counts[cluster];
 		memcpy(
-			wm->cluster_lights + list_offset, 
-			cluster_lights + MAX_LIGHTS_PER_CLUSTER * cluster, 
+			wm->cluster_lights + list_offset,
+			cluster_lights + MAX_LIGHTS_PER_CLUSTER * cluster,
 			count * sizeof(int));
 		list_offset += count;
 	}
@@ -1602,8 +1536,7 @@ collect_cluster_lights(bsp_mesh_t *wm, bsp_t *bsp)
 }
 
 static qboolean
-bsp_mesh_load_custom_sky(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
-{
+bsp_mesh_load_custom_sky(int* idx_ctr, bsp_mesh_t* wm, bsp_t* bsp, const char* map_name) {
 	char filename[MAX_QPATH];
 	Q_snprintf(filename, sizeof(filename), "maps/sky/%s.obj", map_name);
 
@@ -1630,8 +1563,7 @@ bsp_mesh_load_custom_sky(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, const char* m
 	}
 
 	int face_offset = 0;
-	for (int nprim = 0; nprim < attrib.num_face_num_verts; nprim++)
-	{
+	for (int nprim = 0; nprim < attrib.num_face_num_verts; nprim++) 	{
 		int face_num_verts = attrib.face_num_verts[nprim];
 		int i0 = attrib.faces[face_offset + 0].v_idx;
 		int i1 = attrib.faces[face_offset + 1].v_idx;
@@ -1687,8 +1619,7 @@ bsp_mesh_load_custom_sky(int *idx_ctr, bsp_mesh_t *wm, bsp_t *bsp, const char* m
 }
 
 void
-bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
-{
+bsp_mesh_create_from_bsp(bsp_mesh_t* wm, bsp_t* bsp, const char* map_name) {
 	const char* full_game_map_name = map_name;
 	if (strcmp(map_name, "demo1") == 0)
 		full_game_map_name = "base1";
@@ -1703,20 +1634,19 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 	wm->models = (bsp_model_t*)Z_Malloc(bsp->nummodels * sizeof(bsp_model_t));
 	memset(wm->models, 0, bsp->nummodels * sizeof(bsp_model_t));
 
-    wm->num_models = bsp->nummodels;
+	wm->num_models = bsp->nummodels;
 	wm->num_clusters = bsp->vis->numclusters;
 
-	if (wm->num_clusters + 1 >= MAX_LIGHT_LISTS)
-	{
+	if (wm->num_clusters + 1 >= MAX_LIGHT_LISTS) 	{
 		Com_Error(ERR_FATAL, "The BSP model has too many clusters (%d)", wm->num_clusters);
 	}
 
-    wm->num_vertices = 0;
-    wm->num_indices = 0;
-    wm->positions = (float*)Z_Malloc(MAX_VERT_BSP * 3 * sizeof(*wm->positions));
-    wm->tex_coords = (float*)Z_Malloc(MAX_VERT_BSP * 2 * sizeof(*wm->tex_coords));
-    wm->materials = (uint32_t*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->materials));
-    wm->clusters = (int*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->clusters));
+	wm->num_vertices = 0;
+	wm->num_indices = 0;
+	wm->positions = (float*)Z_Malloc(MAX_VERT_BSP * 3 * sizeof(*wm->positions));
+	wm->tex_coords = (float*)Z_Malloc(MAX_VERT_BSP * 2 * sizeof(*wm->tex_coords));
+	wm->materials = (uint32_t*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->materials));
+	wm->clusters = (int*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->clusters));
 	wm->emissive_factors = (float*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->emissive_factors));
 
 	// clear these here because `bsp_mesh_load_custom_sky` creates lights before `collect_light_polys`
@@ -1724,7 +1654,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 	wm->allocated_light_polys = 0;
 	wm->light_polys = NULL;
 
-    int idx_ctr = 0;
+	int idx_ctr = 0;
 
 #if DUMP_WORLD_MESH_TO_OBJ
 	{
@@ -1768,31 +1698,28 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 	obj_dump_file = NULL;
 #endif
 
-	if (!bsp->pvs_patched)
-	{
+	if (!bsp->pvs_patched) 	{
 		build_pvs2(bsp);
 
-		if (!BSP_SavePatchedPVS(bsp))
-		{
+		if (!BSP_SavePatchedPVS(bsp)) 		{
 			Com_EPrintf("Couldn't save patched PVS for %s.\n", bsp->name);
 		}
 	}
 
-    wm->num_indices = idx_ctr;
-    wm->num_vertices = idx_ctr;
+	wm->num_indices = idx_ctr;
+	wm->num_vertices = idx_ctr;
 
-    wm->indices = (int*)Z_Malloc(idx_ctr * sizeof(int));
-    for (int i = 0; i < wm->num_vertices; i++)
-        wm->indices[i] = i;
+	wm->indices = (int*)Z_Malloc(idx_ctr * sizeof(int));
+	for (int i = 0; i < wm->num_vertices; i++)
+		wm->indices[i] = i;
 
 	compute_world_tangents(wm);
-	
-    if (wm->num_vertices >= MAX_VERT_BSP) {
+
+	if (wm->num_vertices >= MAX_VERT_BSP) {
 		Com_Error(ERR_FATAL, "The BSP model has too many vertices (%d)", wm->num_vertices);
 	}
 
-	for(int i = 0; i < wm->num_models; i++) 
-	{
+	for (int i = 0; i < wm->num_models; i++) 	{
 		bsp_model_t* model = wm->models + i;
 
 		compute_aabb(wm->positions + model->idx_offset * 3, model->idx_count, model->aabb_min, model->aabb_max);
@@ -1803,7 +1730,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 
 	compute_aabb(wm->positions, wm->world_idx_count, wm->world_aabb.mins, wm->world_aabb.maxs);
 
-	vec3_t margin = { 1.f, 1.f, 1.f };
+	vec3_t margin = {1.f, 1.f, 1.f};
 	VectorSubtract(wm->world_aabb.mins, margin, wm->world_aabb.mins);
 	VectorAdd(wm->world_aabb.maxs, margin, wm->world_aabb.maxs);
 
@@ -1812,14 +1739,13 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 	collect_light_polys(wm, bsp, -1, &wm->num_light_polys, &wm->allocated_light_polys, &wm->light_polys);
 	collect_sky_and_lava_light_polys(wm, bsp);
 
-	for (int k = 0; k < bsp->nummodels; k++)
-	{
+	for (int k = 0; k < bsp->nummodels; k++) 	{
 		bsp_model_t* model = wm->models + k;
 
 		model->num_light_polys = 0;
 		model->allocated_light_polys = 0;
 		model->light_polys = NULL;
-		
+
 		collect_light_polys(wm, bsp, k, &model->num_light_polys, &model->allocated_light_polys, &model->light_polys);
 
 		model->transparent = is_model_transparent(wm, model);
@@ -1832,13 +1758,12 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 }
 
 void
-bsp_mesh_destroy(bsp_mesh_t *wm)
-{
+bsp_mesh_destroy(bsp_mesh_t* wm) {
 	Z_Free(wm->models);
 
 	Z_Free(wm->positions);
 	Z_Free(wm->tex_coords);
-    Z_Free(wm->tangents);
+	Z_Free(wm->tangents);
 	Z_Free(wm->indices);
 	Z_Free(wm->clusters);
 	Z_Free(wm->materials);
