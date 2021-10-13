@@ -2818,7 +2818,7 @@ static int ref_msec, phys_msec, main_msec;
 static int ref_extra, phys_extra, main_extra;
 static sync_mode_t sync_mode;
 
-#define MIN_PHYS_HZ 10
+#define MIN_PHYS_HZ 20
 #define MAX_PHYS_HZ 125
 #define MIN_REF_HZ MIN_PHYS_HZ
 #define MAX_REF_HZ 1000
@@ -2853,7 +2853,7 @@ void CL_UpdateFrameTimes(void)
     }
     else if (cls.active == ACT_MINIMIZED) {
         // run at 10 fps if minimized
-        main_msec = fps_to_msec(10);
+        main_msec = fps_to_msec(20);
         sync_mode = SYNC_SLEEP_20;
     }
     else if (cls.active == ACT_RESTORED || cls.connectionState != ClientConnectionState::Active) {

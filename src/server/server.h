@@ -126,19 +126,19 @@ typedef struct {
 // Main server structure.
 //-----------------
 typedef struct {
-    int32_t serverState;      // precache commands are only valid during load
-    int32_t spawncount; // random number generated each server spawn
+    int32_t serverState;    // precache commands are only valid during load
+    int32_t spawncount;     // random number generated each server spawn
 
     int32_t  frameNumber;
     uint32_t frameResidual;
 
-    char        mapcmd[MAX_QPATH];          // ie: *intro.cin+base
+    char    mapcmd[MAX_QPATH];          // ie: *intro.cin+base
 
-    char        name[MAX_QPATH];            // map name, or cinematic name
-    cm_t        cm;
-    char        *entityString;
+    char    name[MAX_QPATH];            // map name, or cinematic name
+    cm_t    cm;
+    char    *entityString;
 
-    char        configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
+    char    configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
 
     server_entity_t entities[MAX_EDICTS];
 
@@ -407,11 +407,11 @@ typedef struct server_static_s {
     qboolean    initialized;        // sv_init has completed
     unsigned    realtime;           // always increasing, no clamping, etc
 
-    client_t    *client_pool;   // [maxClients]
+    client_t    *client_pool;       // [maxClients]
 
-    unsigned        num_entities;   // maxClients*UPDATE_BACKUP*MAX_PACKET_ENTITIES
+    unsigned        num_entities;   // maxClients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
     unsigned        next_entity;    // next state to use
-    PackedEntity *entities;      // [num_entities]
+    PackedEntity    *entities;      // [num_entities]
 
 #if USE_ZLIB
     z_stream        z;  // for compressing messages at once

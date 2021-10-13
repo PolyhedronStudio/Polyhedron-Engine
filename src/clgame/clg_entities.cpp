@@ -724,8 +724,13 @@ void CLG_UpdateOrigin(void)
     cl->fov_x = lerp_client_fov(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);
     cl->fov_y = CLG_CalculateFOV(cl->fov_x, 4, 3);
 
+    vec3_t viewoffset;
+    LerpVector(previousPlayerState->pmove.viewOffset, currentPlayerState->pmove.viewOffset, lerpFraction, viewoffset);
+
     // Calculate new client forward, right, and up vectors.
     vec3_vectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
+
+    VectorAdd(cl->refdef.vieworg, viewoffset, cl->refdef.vieworg);
 
     // Setup player entity origin and angles accordingly to update the client's listener origins with.
     cl->playerEntityOrigin = cl->refdef.vieworg;
@@ -734,9 +739,7 @@ void CLG_UpdateOrigin(void)
     if (cl->playerEntityAngles[vec3_t::Pitch] > 180) {
         cl->playerEntityAngles[vec3_t::Pitch] -= 360;
     }
-
     cl->playerEntityAngles[vec3_t::Pitch] = cl->playerEntityAngles[vec3_t::Pitch] / 3;
-
 
     // Update the client's listener origin values.
     clgi.UpdateListenerOrigin();

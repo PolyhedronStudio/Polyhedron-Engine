@@ -39,7 +39,7 @@ void Blaster_Fire(PlayerClient* ent, const vec3_t &g_offset, int damage, qboolea
         damage *= 4;
     AngleVectors(client->aimAngles, &forward, &right, NULL);
     vec3_t offset = { 
-        24.f, 8.f, ent->GetViewHeight() - 8.f 
+        24.f, 8.f, (float)ent->GetViewHeight() + 8.f
     };
     VectorAdd(offset, g_offset, offset);
     start = SVG_PlayerProjectSource(client, ent->GetOrigin(), offset, forward, right);

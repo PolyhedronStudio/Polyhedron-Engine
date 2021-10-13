@@ -373,9 +373,9 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     boltEntity->SetDamage(damage);
     if (hyper)
         boltEntity->SetSpawnFlags(1);
-    boltEntity->SetServerFlags(EntityServerFlags::DeadMonster);
     boltEntity->SetMoveType(MoveType::FlyMissile);
     boltEntity->SetSolid(Solid::BoundingBox);
+    boltEntity->SetClipMask(CONTENTS_MASK_SHOT);
     boltEntity->SetEffects(boltEntity->GetEffects() | effect);
 
     // Physics attributes.
