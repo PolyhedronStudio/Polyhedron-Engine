@@ -99,7 +99,7 @@ void MiscExplosionBox::Spawn() {
         SetMass(400);
     }
     if (!GetHealth()) {
-        SetHealth(10);
+        SetHealth(80);
     }
     if (!GetDamage()) {
         SetDamage(150);

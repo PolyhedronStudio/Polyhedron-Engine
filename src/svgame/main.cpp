@@ -664,7 +664,8 @@ void SVG_RunFrame(void)
         entity->SetOldOrigin(entity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-        if ((entity->GetGroundEntity()) && (entity->GetGroundEntity()->GetLinkCount() != entity->GetGroundEntityLinkCount())) {
+        if ((entity->GetGroundEntity() && entity->GetServerEntity() 
+            && (entity->GetGroundEntity()->GetLinkCount() != entity->GetGroundEntityLinkCount()))) {
             // Reset ground entity.
             entity->SetGroundEntity(nullptr);
 

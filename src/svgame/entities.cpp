@@ -63,6 +63,7 @@ SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 //===================================================================
 //
 // Testing...
+#ifdef DEBUG_SHIT_FOR_ENTITIES_LULZ
 #include "entities/info/InfoPlayerStart.h"
 void DebugShitForEntitiesLulz() {
     gi.DPrintf("Entities - ===========================================\n");
@@ -93,6 +94,7 @@ void DebugShitForEntitiesLulz() {
         gi.DPrintf("Filtered out the base entity #%i: %s\n", baseEntity->GetNumber(), baseEntity->GetClassName());
     }
 }
+#endif
 //===============
 // SVG_SpawnClassEntity
 //
