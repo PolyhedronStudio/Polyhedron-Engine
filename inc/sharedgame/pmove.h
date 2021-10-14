@@ -35,7 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 // Step Climbing.
 //----------------- 
-constexpr float PM_STEP_HEIGHT			= 16.f; // The vertical distance afforded in step climbing.
+constexpr float PM_STEP_HEIGHT			= 18.f; // The vertical distance afforded in step climbing.
 
 //-----------------
 // Player bounding box scaling. mins = VectorScale(PM_MINS, PM_SCALE)..

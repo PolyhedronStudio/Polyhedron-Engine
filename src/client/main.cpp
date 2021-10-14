@@ -2852,7 +2852,7 @@ void CL_UpdateFrameTimes(void)
         sync_mode = SYNC_TIMEDEMO;
     }
     else if (cls.active == ACT_MINIMIZED) {
-        // run at 10 fps if minimized
+        // run at 20 fps if minimized
         main_msec = fps_to_msec(20);
         sync_mode = SYNC_SLEEP_20;
     }
