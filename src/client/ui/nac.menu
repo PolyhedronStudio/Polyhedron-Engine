@@ -106,7 +106,7 @@ begin photomode
 end
 
 begin video
-    //title "Video Setup"
+   //title "Video Setup"
     background #212F3CD0
     style --compact
     banner m_banner_video
@@ -125,6 +125,8 @@ begin video
         range -p -f "%.0f%%" "contrast" tm_reinhard 0 1 0.1
 		range "texture LOD bias" pt_texture_lod_bias -2 2 0.5
         pairs "anti-aliasing" flt_taa "none" 0 "temporal AA" 1 "temporal upscaling" 2
+        toggle "AMD FSR 1.0" flt_fsr_enable
+        range --status "lower is sharper" "AMD FSR 1.0 sharpness" flt_fsr_sharpness 0 2 0.01
         pairs "global illumination" pt_num_bounce_rays low 0.5 medium 1 high 2
         pairs "reflection/refraction depth" pt_reflect_refract off 0 1 1 2 2 4 4 8 8
 		toggle --status "turn some monitors in the game into security camera views" \
@@ -135,12 +137,13 @@ begin video
         blank
         toggle "denoiser" flt_enable
         toggle "textures" flt_fixed_albedo ~1
+        pairs "texture filtering" pt_nearest "anisotropic" 0 "mixed" 1 "nearest (noisy)" 2
         pairs --status "experimental feature - simulates reflection and refraction effects in thick glass" \
             "thick glass refraction" pt_thick_glass "disabled" 0 "photo mode only" 1 "enabled" 2
         pairs projection pt_projection perspective 0 cylindrical 1
         blank
 		pairs "multi-gpu support" sli "disabled" 0 "when available" 1
-        pairs "ray tracing API" ray_tracing_api "automatic selection" "auto" "prefer KHR_ray_query" "query"  "prefer KHR_ray_tracing_pipeline" "pipeline" "prefer NV_ray_tracing" "nv"
+        pairs "ray tracing API" ray_tracing_api "automatic selection" "auto" "prefer KHR_ray_query" "query"  "prefer KHR_ray_tracing_pipeline" "pipeline"
         toggle "GPU profiler" profiler
     endif
 
@@ -335,15 +338,6 @@ begin multiplayer
         action "player setup" pushmenu players
         action "disconnect" disconnect
     endif
-    ifneq fs_shareware 0
-        action "multiplayer can only be enabled" _ignore
-        action "with the full version of quake 2" _ignore
-        blank            
-        action "Purchase Quake II on Bethesda.net" "openurl https://store.bethesda.net/store/bethesda/en_US/pd/ThemeID.39243600/productID.5199706000"
-        action "Purchase Quake II on Steam" "openurl https://store.steampowered.com/app/2320/QUAKE_II/"
-        action "Purchase Quake II on GOG" "openurl https://www.gog.com/game/quake_ii_quad_damage"
-        blank
-    endif
 end
 
 begin development
@@ -356,11 +350,11 @@ begin development
 
     This command is placed on top so we can easily enter through the main menu :)
     */ 
-    action "Launch Map" "forcemenuoff; disconnect; skill $dev_skill; deathmatch 0; coop 0; maxclients 1; echo $dev_map; map $dev_map force"
+    action "Launch Map" "forcemenuoff; disconnect; skill $dev_skill; deathmatch 0; coop 0; maxclients $dev_maxclients; echo $dev_map; map $dev_map force"
     field --width 32 "map" dev_map
     blank
     field --numeric --width 1 "skill" dev_skill
-    field --integer --width 3 "max players" maxclients
+    field --numeric --width 2 "max clients" dev_maxclients
     /*
     Deathmatch is 1 by default, and I'm not in a mood to spend more time on this men uatm.
     But with some puzzling around, we could add these settings too.
@@ -491,7 +485,6 @@ begin input
     toggle "invert mouse" m_invert
     toggle "adjust sensitivity with FOV" m_autosens
     toggle "filter mouse input" m_filter
-    toggle "free look" freelook
     blank
     toggle "always run" cl_run
 end
@@ -505,19 +498,25 @@ begin keys
     bind "next weapon" weapnext
     bind "previous weapon" weapprev
     bind "walk forward" +forward
-    bind "backpedal" +back
-    bind "run" +speed
+    bind "walk backwards" +back
     bind "step left" +moveleft
     bind "step right" +moveright
-    bind "up / jump" +moveup
-    bind "down / crouch" +movedown
+    blank
+    bind "turn left" +left
+    bind "turn right" +right
+    bind "look up" +lookup
+    bind "look down" +lookdown
+    bind "center view" centerview
+    blank
+    bind "run" +speed
+    bind "jump" +moveup
+    bind "crouch" +movedown
+    blank
     bind "inventory" inven
     bind "use item" invuse
     bind "drop item" invdrop
     bind "prev item" invprev
     bind "next item" invnext
-    blank
-    action "legacy keys..." pushmenu keys_legacy
 end
 
 begin keys_function
@@ -553,19 +552,4 @@ begin weapons
     bind "shotgun" "use Shotgun"
     bind "super shotgun" "use Super Shotgun"
     bind "machinegun" "use Machinegun"
-    bind "chaingun" "use Chaingun"
-    bind "grenade launcher" "use Grenade Launcher"
-    bind "rocket launcher" "use Rocket Launcher"
-    bind "hyperblaster" "use HyperBlaster"
-    bind "railgun" "use Railgun"
-    bind "bfg10k" "use BFG10K"
-    bind "flare gun" "use flare gun"
-    bind "grenades" "use grenades"
-    blank
-    bind "quad damage" "use quad damage"
-    bind "sliencer" "use silencer"
-    bind "rebreather" "use rebreather"
-    bind "environment suit" "use environment suit"
-    bind "invulnerability" "use invulnerability"
-    bind "power shield" "use power shield"
 end

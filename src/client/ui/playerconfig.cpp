@@ -30,7 +30,7 @@ PLAYER CONFIG MENU
 */
 
 #define ID_MODEL 103
-#define ID_SKIN    104
+#define ID_SKIN  104
 
 typedef struct m_player_s {
     menuFrameWork_t     menu;
