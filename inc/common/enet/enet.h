@@ -10,6 +10,18 @@ License here.
 //
 //==============================================================================================
 //---------------
+// Defauult settings: Port # only in this case (for now.)
+//---------------
+// Default Q2 (And for now still, N&C port to use.)
+#define ENET_PORT_SERVER         27910
+
+// Portable network error codes (Taken from Q2 also)
+#define ENET_OK       0  // success
+#define ENET_ERROR   -1  // failure (NET_ErrorString returns error message)
+#define ENET_AGAIN   -2  // operation would block, try again
+#define ENET_CLOSED  -3  // peer has closed connection
+
+//---------------
 // ENET_Init
 //
 // Will initialize enet itself, in case it isn't so already.
@@ -25,6 +37,13 @@ int ENET_Init(void);
 //---------------
 void ENET_Shutdown(void);
 
+//---------------
+// ENET_ProcessHost
+//
+// Will shutdown enet, call at end of application.
+//---------------
+int ENET_ProcessHost(ENetHost* eHost, uint32_t timeOut = 0);
+
 
 
 //==============================================================================================
@@ -38,7 +57,7 @@ void ENET_Shutdown(void);
 // Create an ENet Server Host. Everything is a host in this UDP layered protocol.
 // Connections are Peers, and they can go both ways, or just a single direction.
 //---------------
-ENetHost* ENET_InitServerHost(uint32_t maxClients, uint16_t port, uint32_t numberOfChannels, uint32_t outGoingBandwidthlimit, uint32_t incomingBandwidthLimit);
+ENetHost* ENET_InitServerHost(uint32_t maxClients = MAX_CLIENTS, uint16_t port = ENET_PORT_SERVER, uint32_t numberOfChannels = 2, uint32_t incomingBandwidthLimit = 0, uint32_t outGoingBandwidthlimit = 0);
 
 //---------------
 // ENET_DestroyServerHost
@@ -60,7 +79,7 @@ void ENET_DestroyServerHost(ENetHost* e_ServerHost);
 // Create an ENet Client Host. Everything is a host in this UDP layered protocol.
 // Connections are Peers, and they can go both ways, or just a single direction.
 //---------------
-ENetHost* ENET_InitClientHost(uint32_t maxConnections, uint32_t numberOfChannels = 2);
+ENetHost* ENET_InitClientHost(uint32_t maxConnections = 1, uint32_t numberOfChannels = 2);
 
 //---------------
 // ENET_DestroyClientHost
@@ -77,8 +96,15 @@ void ENET_DestroyClientHost(ENetHost * eClientHost);
 //
 //==============================================================================================
 //---------------
-// ENET_DestroyClientPeer
-// 
-// Destroys (resets the client peer.)
+// ENET_ConnectClientPeerHost
+//
+// Connects the selected client peer host to the given foreign address host.
 //---------------
-void ENET_DisconnectClientPeer(ENetPeer* eClientPeer, ENetHost* eClientHost);
+ENetPeer* ENET_ConnectClientPeer(ENetHost* eClientHost, const std::string &address = "127.0.0.1", size_t channelCount = 2, uint32_t timeOut = 0, enet_uint32 data = 0);
+
+//---------------
+// ENET_DisconnectClientPeer
+// 
+// Disconnects (- and resets the client peer.)
+//---------------
+void ENET_DisconnectClientPeer(ENetPeer* eClientPeer, ENetHost* eClientHost, uint32_t timeOut = 0, uint32_t data = 0);

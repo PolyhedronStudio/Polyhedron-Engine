@@ -372,6 +372,7 @@ void CL_InitRefresh(void)
 
     // Load client screen media first.
     SCR_RegisterMedia();
+
     // N&C: Inform the CG Module about the registration of media.
     CL_GM_LoadScreenMedia();
 

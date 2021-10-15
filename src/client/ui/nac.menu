@@ -544,22 +544,6 @@ begin keys_function
     bind "chat" messagemode
 end
 
-begin keys_legacy
-    background #212F3CD0
-    style --compact
-    title "Legacy Key Bindings"
-    blank
-
-    bind "turn left" +left
-    bind "turn right" +right
-    bind "sidestep" +strafe
-    bind "look up" +lookup
-    bind "look down" +lookdown
-    bind "center view" centerview
-    bind "mouse look" +mlook
-    bind "keyboard look" +klook
-end
-
 begin weapons
     background #212F3CD0
     style --compact

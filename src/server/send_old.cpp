@@ -80,7 +80,6 @@ static qboolean SV_RateDrop(client_t *client)
 
     return false;
 }
-
 static void SV_CalcSendTime(client_t *client, size_t size)
 {
     // never drop over the loopback

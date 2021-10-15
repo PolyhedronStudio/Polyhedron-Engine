@@ -288,9 +288,6 @@ static void IN_MLookDown(void)
 static void IN_MLookUp(void)
 {
     in_mlooking = false;
-
-    //if (!freelook->integer && lookspring->integer)
-    //    IN_CenterView();
 }
 
 
@@ -353,20 +350,6 @@ void CLG_MouseMove() {
     // Add mouse X/Y movement
     cl->viewAngles[vec3_t::Yaw] -= m_yaw->value * motionX;
     cl->viewAngles[vec3_t::Pitch] += m_pitch->value * motionY * (m_invert->integer ? -1.f : 1.f);
-
-    //if ((in_strafe.state & 1) || (lookstrafe->integer && !in_mlooking)) {
-    //    cl->mousemove[1] += m_side->value * motionX;
-    //}
-    //else {
-//        cl->viewAngles[vec3_t::Yaw] -= m_yaw->value * motionX;
-//  //  }
-//
-////    if ((in_mlooking || freelook->integer) && !(in_strafe.state & 1)) {
-//        cl->viewAngles[vec3_t::Pitch] += m_pitch->value * motionY * (m_invert->integer ? -1.f : 1.f);
-    //}
-    //else {
-    //    cl->mousemove[0] -= m_forward->value * motionY;
-    //}
 }
 
 //
@@ -385,15 +368,8 @@ void CLG_AdjustAngles(int msec)
     else
         speed = msec * 0.001f;
 
-//if (!(in_strafe.state & 1)) {
-        cl->viewAngles[vec3_t::Yaw] -= speed * cl_yawspeed->value * CLG_KeyState(&in_right);
-        cl->viewAngles[vec3_t::Yaw] += speed * cl_yawspeed->value * CLG_KeyState(&in_left);
-//    }
-//if (in_klook.state & 1) {
-//        cl->viewAngles[vec3_t::Pitch] -= speed * cl_pitchspeed->value * CLG_KeyState(&in_forward);
-//        cl->viewAngles[vec3_t::Pitch] += speed * cl_pitchspeed->value * CLG_KeyState(&in_back);
-// }
-
+    cl->viewAngles[vec3_t::Yaw] -= speed * cl_yawspeed->value * CLG_KeyState(&in_right);
+    cl->viewAngles[vec3_t::Yaw] += speed * cl_yawspeed->value * CLG_KeyState(&in_left);
     cl->viewAngles[vec3_t::Pitch] -= speed * cl_pitchspeed->value * CLG_KeyState(&in_lookup);
     cl->viewAngles[vec3_t::Pitch] += speed * cl_pitchspeed->value * CLG_KeyState(&in_lookdown);
 }
@@ -424,16 +400,6 @@ vec3_t CLG_BaseMove(const vec3_t& inMove)
         outMove[0] += cl_forwardspeed->value * CLG_KeyState(&in_forward);
         outMove[0] -= cl_forwardspeed->value * CLG_KeyState(&in_back);
     }
-
-    // Adjust for speed key / running
-    //if ((in_speed.state & 1) ^ cl_run->integer) {
-    //    cl->cmd.buttons |= BUTTON_WALK;
-    //    //VectorScale(outMove, 2, outMove);
-    //    //Com_Print("HELLO IN_SPEED");
-    //}
-    //else {
-
-    //}
 
     return outMove;
 }
@@ -527,10 +493,6 @@ void CLG_RegisterInput(void)
     clgi.Cmd_AddCommand("+use", IN_UseDown);
     clgi.Cmd_AddCommand("-use", IN_UseUp);
     clgi.Cmd_AddCommand("impulse", IN_Impulse);
-    clgi.Cmd_AddCommand("+klook", IN_KLookDown);
-    clgi.Cmd_AddCommand("-klook", IN_KLookUp);
-    clgi.Cmd_AddCommand("+mlook", IN_MLookDown);
-    clgi.Cmd_AddCommand("-mlook", IN_MLookUp);
 
     // Create Cvars.
     cl_upspeed = clgi.Cvar_Get("cl_upspeed", "300", 0);
@@ -540,10 +502,6 @@ void CLG_RegisterInput(void)
     cl_pitchspeed = clgi.Cvar_Get("cl_pitchspeed", "0.150", CVAR_CHEAT);
     cl_anglespeedkey = clgi.Cvar_Get("cl_anglespeedkey", "1.5", CVAR_CHEAT);
     cl_run = clgi.Cvar_Get("cl_run", "1", CVAR_ARCHIVE);
-
-    //freelook = clgi.Cvar_Get("freelook", "1", CVAR_ARCHIVE);
-    //lookspring = clgi.Cvar_Get("lookspring", "0", CVAR_ARCHIVE);
-    //lookstrafe = clgi.Cvar_Get("lookstrafe", "0", CVAR_ARCHIVE);
 
     // Fetch CVars.
     cl_instantpacket = clgi.Cvar_Get("cl_instantpacket", "0", 0);

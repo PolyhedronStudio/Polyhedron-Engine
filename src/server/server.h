@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/cvar.h"
 #include "common/error.h"
+#include "common/enet/enet.h"   // WID: Enet.
 #include "common/files.h"
 #include "common/msg.h"
 #include "common/net/net.h"
@@ -324,6 +325,8 @@ typedef struct client_s {
     // misc
     time_t timeOfInitialConnect; // time of initial connect
 	int32_t lastValidCluster;
+
+
 } client_t;
 
 // a client can leave the server in one of four ways:
@@ -483,7 +486,7 @@ extern cvar_t       *sv_zombietime;
 extern cvar_t       *sv_ghostime;
 
 extern client_t     *sv_client;
-extern Entity      *sv_player;
+extern Entity       *sv_player;
 
 extern qboolean     sv_pending_autosave;
 
