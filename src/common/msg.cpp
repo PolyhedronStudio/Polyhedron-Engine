@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sharedgame/protocol.h"
 
 //===========================================================================//
-// Q3 MSG Style.
+// Q3 MSG Style. (Later on, replace all that states Q3MSG with MSG :)
 //===========================================================================//
 static huffman_t    msgHuffmanBuffer;
 static qboolean     isQ3MsgInitialized = false; // Stores whether we have initialized a message yet at all, (later on will be used for Mr Huffman)
