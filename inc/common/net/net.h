@@ -248,13 +248,7 @@ char        *NET_BaseAdrToString(const netadr_t *a);
 
 const char  *NET_ErrorString(void);
 
-void        NET_CloseStream(netstream_t *s);
 neterr_t    NET_Listen(qboolean listen);
-neterr_t    NET_Accept(netstream_t *s);
-neterr_t    NET_Connect(const netadr_t *peer, netstream_t *s);
-neterr_t    NET_RunConnect(netstream_t *s);
-neterr_t    NET_RunStream(netstream_t *s);
-void        NET_UpdateStream(netstream_t *s);
 
 ioentry_t   *NET_AddFd(qsocket_t fd);
 void        NET_RemoveFd(qsocket_t fd);

@@ -60,7 +60,7 @@ constexpr int32_t UPDATE_BACKUP = 64;  // Must be Power Of Two.
 constexpr int32_t UPDATE_MASK = (UPDATE_BACKUP - 1);
 
 // Allow a lot of command backups for very fast systems, used to be 64.
-constexpr int32_t CMD_BACKUP = 512; 
+constexpr int32_t CMD_BACKUP = 256; 
 constexpr int32_t CMD_MASK = (CMD_BACKUP - 1);
 
 
