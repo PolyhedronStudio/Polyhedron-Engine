@@ -1020,7 +1020,6 @@ void Qcommon_Init(int argc, char **argv)
 
     Netchan_Init();
     NET_Init(); // WID: ENET: TODO: Remove.
-    ENET_Init(); // WID: ENET: TODO: Remove.
     BSP_Init();
     CM_Init();
     SV_Init();
