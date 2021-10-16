@@ -421,6 +421,7 @@ SET(SRC_COMMON
 	common/field.cpp
 	common/fifo.cpp
 	common/files.cpp
+	common/huffman.cpp
 	common/mdfour.cpp
 	common/msg.cpp
 	common/prompt.cpp
@@ -436,7 +437,7 @@ SET(HEADERS_COMMON
 	common/net/inet_ntop.h	# These got to go sooner or later.
 	common/net/inet_pton.h	# These got to go sooner or later.
 	common/net/win.h		# These got to go sooner or later.
-
+	common/huffman.h
 	common/enet/enet.h
 )
 

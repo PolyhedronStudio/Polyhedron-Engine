@@ -22,6 +22,72 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/protocol.h"
 #include "common/sizebuf.h"
 
+//===========================================================================//
+// Q3 MSG Style.
+//===========================================================================//
+//---------------
+// Taken straight from Quake III Source. (And modified cuz typedef structs? Piss off.)
+//---------------
+struct msg_t {
+    qboolean allowoverflow;	// If false, do a Com_Error
+    qboolean overflowed;    // Set to true if the buffer size failed (with allowoverflow set)
+    qboolean oob;			// Set to true if the buffer size failed (with allowoverflow set)
+   
+    byte    *data;
+
+    int32_t maxsize;
+    int32_t cursize;
+    int32_t readcount;
+    int32_t	bit;            // For bitwise reads and writes
+};
+
+//---------------
+// Message Buffer Init, Clear, Write, Copy, and Set to Bitstream functions.
+//---------------
+void Q3MSG_Init(msg_t* buf, byte* data, int32_t length);
+void Q3MSG_InitOOB(msg_t* buf, byte* data, int32_t length);
+void Q3MSG_Clear(msg_t* buf);
+void Q3MSG_WriteData(msg_t* buf, const void* data, int32_t length);
+void Q3MSG_Bitstream(msg_t* buf);
+void Q3MSG_Copy(msg_t* buf, byte* data, int32_t length, msg_t* src);
+
+//---------------
+// Message Buffer Write functions.
+//---------------
+void Q3MSG_WriteBits(msg_t* msg, int32_t value, int32_t bits);
+void Q3MSG_WriteChar(msg_t* sb, int32_t c);
+void Q3MSG_WriteByte(msg_t* sb, int32_t c);
+void Q3MSG_WriteShort(msg_t* sb, int32_t c);
+void Q3MSG_WriteLong(msg_t* sb, int32_t c);
+void Q3MSG_WriteFloat(msg_t* sb, float f);
+void Q3MSG_WriteString(msg_t* sb, const char* s);
+void Q3MSG_WriteBigString(msg_t* sb, const char* s);
+void Q3MSG_WriteAngle16(msg_t* sb, float f);
+
+//---------------
+// Message Buffer Read functions.
+//---------------
+void    Q3MSG_BeginReading(msg_t* sb);
+void    Q3MSG_BeginReadingOOB(msg_t* sb);
+
+int32_t Q3MSG_ReadBits(msg_t* msg, int32_t bits);
+
+int32_t Q3MSG_ReadChar(msg_t* sb);
+int32_t Q3MSG_ReadByte(msg_t* sb);
+int32_t Q3MSG_ReadShort(msg_t* sb);
+int32_t Q3MSG_ReadLong(msg_t* sb);
+float   Q3MSG_ReadFloat(msg_t* sb);
+char*   Q3MSG_ReadString(msg_t* sb);
+char*   Q3MSG_ReadBigString(msg_t* sb);
+char*   Q3MSG_ReadStringLine(msg_t* sb);
+float   Q3MSG_ReadAngle16(msg_t* sb);
+void    Q3MSG_ReadData(msg_t* sb, void* buffer, int32_t size);
+
+
+
+//===========================================================================//
+// (Antique) Q2-Pro MSG Style.
+//===========================================================================//
 //---------------
 // A trick taken from Quetoo. Use an int32_t and a float in an union to
 // simplify the networking of a float.
