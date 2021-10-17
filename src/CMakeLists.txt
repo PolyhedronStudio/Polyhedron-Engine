@@ -428,19 +428,31 @@ SET(SRC_COMMON
 	common/sizebuf.cpp
 	common/utils.cpp
 	common/zone.cpp
-	common/netq3/netchan.cpp
-	common/netq3/net.cpp
-	common/net/chan.cpp
+
+	common/enet/enetchan.cpp
+	common/enet/enet.cpp
+
+	#common/net/chan.cpp
 	common/net/net.cpp
+
+	# These might have to go some day.
+	#common/netq3/netchan.cpp
+	#common/netq3/net.cpp
 )
 SET(HEADERS_COMMON
 	common/net/inet_ntop.h
 	common/net/inet_pton.h
 	common/net/win.h
+	
+	common/enet/enet.h
+	common/enet/enetchan.h
+	
+	#common/enet/enetchan.h
+	common/net/net.h
+
+	# These might have to go some day.
 	common/netq3/netchan.h
 	common/netq3/net.h
-	common/net/chan.h
-	common/net/net.h
 	common/huffman.h
 )
 

@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/files.h"
 #include "common/msg.h"
 #include "common/net/net.h"
-#include "common/net/chan.h"
+#include "common/enet/enetchan.h"
 #include "common/prompt.h"
 #include "common/protocol.h"
 #include "common/zone.h"

@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/files.h"
 #endif
 #include "common/msg.h"
+#include "common/enet/enet.h"
 #include "common/net/net.h"
 #include "common/protocol.h"
 #include "common/zone.h"
@@ -61,13 +62,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif // __linux__
 #endif // !_WIN32
 
+
+
+//--------------------------------
+// LoopBack
+//--------------------------------
 // prevents infinite retry loops caused by broken TCP/IP stacks
 #define MAX_ERROR_RETRIES   64
 
 #if USE_CLIENT
-
 #define MAX_LOOPBACK    4
-
 typedef struct {
     byte    data[MAX_PACKETLEN];
     size_t  datalen;
@@ -80,9 +84,11 @@ typedef struct {
 } loopback_t;
 
 static loopback_t   loopbacks[NS_COUNT];
-
 #endif // USE_CLIENT
 
+//--------------------------------
+// CVars
+//--------------------------------
 cvar_t          *net_ip;
 cvar_t          *net_ip6;
 cvar_t          *net_port;
@@ -1584,6 +1590,7 @@ NET_Init
 void NET_Init(void)
 {
     os_net_init();
+    ENET_Init();
 
     net_ip = Cvar_Get("net_ip", "", 0);
     net_ip->changed = net_udp_param_changed;
@@ -1643,6 +1650,7 @@ void NET_Shutdown(void)
     NET_Listen(false);
     NET_Config(NET_NONE);
     os_net_shutdown();
+    ENET_Shutdown();
 
     Cmd_RemoveCommand("net_restart");
     Cmd_RemoveCommand("net_stats");

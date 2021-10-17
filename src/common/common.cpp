@@ -36,7 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/msg.h"
 #include "common/enet/enet.h"
 #include "common/net/net.h"
-#include "common/net/chan.h"
+#include "common/enet/enetchan.h"
 //#include "common/pmove.h"
 #include "common/prompt.h"
 #include "common/protocol.h"
