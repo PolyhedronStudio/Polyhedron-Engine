@@ -134,24 +134,61 @@ int ENET_ProcessHost(ENetHost* eHost, uint32_t timeOut) {
     return ENET_OK;
 }
 
-qboolean ENET_SendToPeer(ENetPeer* peer, ENetHost* host, int flags,
-    sizebuf_t* data) {
-    ENetPacket* packet = enet_packet_create(data->data, data->cursize, flags);
-    if (!packet)
-        return false;
+//---------------
+// ENET_SendToPeer
+//
+// Send a packet of data, to the given peer from the given host, with the given flags.
+// 
+// Optional flags:
+//    ENET_PACKET_FLAG_RELIABLE - packet must be received by the target peer and resend attempts should be made until the packet is delivered
+//    ENET_PACKET_FLAG_UNSEQUENCED - packet will not be sequenced with other packets(not supported for reliable packets)
+//    ENET_PACKET_FLAG_NO_ALLOCATE - packet will not allocate data, and user must supply it instead
+//    ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT - packet will be fragmented using unreliable(instead of reliable) sends if it exceeds the MTU
+//    ENET_PACKET_FLAG_SENT - whether the packet has been sent from all queues it has been entered into
+//---------------
+qboolean ENET_SendBufferToPeer(ENetPeer* ePeer, ENetHost* eHost, sizebuf_t* dataBuffer, int32_t flags) {
 
-    if (enet_peer_send(peer, 0, packet) < 0)
+    // Create the actual packet.
+    ENetPacket* packet = enet_packet_create(dataBuffer->data, dataBuffer->cursize, flags);
+    if (!packet) {
         return false;
-    enet_host_flush(host);
+    }
+
+    // Send the packet to the peer.
+    if (enet_peer_send(ePeer, 0, packet) < 0) {
+        return false;
+    }
+
+    // Flush the host, aka, send it away.
+    enet_host_flush(eHost);
+
+    // Success.
     return true;
 }
 
-void ENET_PacketToBuffer(ENetPacket* packet, sizebuf_t* buf) {
-    SZ_Clear(buf);
-    SZ_Write(buf, packet->data, packet->dataLength);
-    enet_packet_destroy(packet);
+//---------------
+// ENET_PacketToBuffer
+//
+// Clear the given buffer and write over the packet data into the buffer.
+// Optionally can be told NOT to destroy the packet instantly after doing so.
+//---------------
+void ENET_ConvertPacketToBuffer(ENetPacket* ePacket, sizebuf_t* destDataBuffer, qboolean destroyPacket) {
+    // Clear.
+    SZ_Clear(destDataBuffer);
+
+    // Write.
+    SZ_Write(destDataBuffer, ePacket->data, ePacket->dataLength);
+
+    // Destroy the packet.
+    enet_packet_destroy(ePacket);
 }
 
-const std::string& NET_SocketAddress(int sock_id) {
-    return net_activeSockets[sock_id].address;
+//---------------
+// ENET_GetSocketIDAddress
+//
+// Return the string socket address matching the socket ID.
+//---------------
+// Return the string of the socket ID address.
+const std::string& ENET_GetSocketIDAddress(int32_t socketID) {
+    return net_activeSockets[socketID].address;
 }

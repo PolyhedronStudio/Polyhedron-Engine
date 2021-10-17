@@ -3,6 +3,7 @@
 License here.
 */
 #include <enet.h>
+#include "common/sizebuf.h"
 
 //==============================================================================================
 //
@@ -44,67 +45,32 @@ void ENET_Shutdown(void);
 //---------------
 int ENET_ProcessHost(ENetHost* eHost, uint32_t timeOut = 0);
 
-
-
-//==============================================================================================
-//
-// SERVER: Hosts
-//
-//==============================================================================================
 //---------------
-// ENET_InitServerHost
+// ENET_SendBufferToPeer
 //
-// Create an ENet Server Host. Everything is a host in this UDP layered protocol.
-// Connections are Peers, and they can go both ways, or just a single direction.
-//---------------
-ENetHost* ENET_InitServerHost(uint32_t maxClients = MAX_CLIENTS, uint16_t port = ENET_PORT_SERVER, uint32_t numberOfChannels = 2, uint32_t incomingBandwidthLimit = 0, uint32_t outGoingBandwidthlimit = 0);
-
-//---------------
-// ENET_DestroyServerHost
+// Send a packet of data, to the given peer from the given host, with the given flags.
 // 
-// Destroys the Enet server host.
+// Optional flags:
+//    ENET_PACKET_FLAG_RELIABLE - packet must be received by the target peer and resend attempts should be made until the packet is delivered
+//    ENET_PACKET_FLAG_UNSEQUENCED - packet will not be sequenced with other packets(not supported for reliable packets)
+//    ENET_PACKET_FLAG_NO_ALLOCATE - packet will not allocate data, and user must supply it instead
+//    ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT - packet will be fragmented using unreliable(instead of reliable) sends if it exceeds the MTU
+//    ENET_PACKET_FLAG_SENT - whether the packet has been sent from all queues it has been entered into
 //---------------
-void ENET_DestroyServerHost(ENetHost* e_ServerHost);
+qboolean ENET_SendBufferToPeer(ENetPeer* ePeer, ENetHost* eHost, sizebuf_t* dataBuffer, int32_t flags = 0);
 
-
-
-//==============================================================================================
+//---------------
+// ENET_ConvertPacketToBuffer
 //
-// CLIENT: Hosts
-//
-//==============================================================================================
+// Clear the given buffer and write over the packet data into the buffer.
+// Optionally can be told NOT to destroy the packet instantly after doing so.
 //---------------
-// ENET_InitClientHost
-//
-// Create an ENet Client Host. Everything is a host in this UDP layered protocol.
-// Connections are Peers, and they can go both ways, or just a single direction.
-//---------------
-ENetHost* ENET_InitClientHost(uint32_t maxConnections = 1, uint32_t numberOfChannels = 2);
+void ENET_ConvertPacketToBuffer(ENetPacket* ePacket, sizebuf_t* destDataBuffer, qboolean destroyPacket = true);
 
 //---------------
-// ENET_DestroyClientHost
-// 
-// Destroys the Enet Client Host.
-//---------------
-void ENET_DestroyClientHost(ENetHost * eClientHost);
-
-
-
-//==============================================================================================
+// ENET_GetSocketIDAddress
 //
-// CLIENT: Peers
-//
-//==============================================================================================
+// Return the string socket address matching the socket ID.
 //---------------
-// ENET_ConnectClientPeerHost
-//
-// Connects the selected client peer host to the given foreign address host.
-//---------------
-ENetPeer* ENET_ConnectClientPeer(ENetHost* eClientHost, const std::string &address = "127.0.0.1", size_t channelCount = 2, uint32_t timeOut = 0, enet_uint32 data = 0);
-
-//---------------
-// ENET_DisconnectClientPeer
-// 
-// Disconnects (- and resets the client peer.)
-//---------------
-void ENET_DisconnectClientPeer(ENetPeer* eClientPeer, ENetHost* eClientHost, uint32_t timeOut = 0, uint32_t data = 0);
+// Return the string of the socket ID address.
+const std::string& ENET_GetSocketIDAddress(int32_t socketID);
