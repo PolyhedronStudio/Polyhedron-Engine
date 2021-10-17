@@ -1019,7 +1019,7 @@ void Qcommon_Init(int argc, char **argv)
     Com_LPrintf(PRINT_NOTICE, "\nEngine version: " APPLICATION " " LONG_VERSION_STRING ", built on " __DATE__ "\n\n");
 
     Netchan_Init();
-    NET_Init(); // WID: ENET: TODO: Remove.
+    NET_Init();
     BSP_Init();
     CM_Init();
     SV_Init();

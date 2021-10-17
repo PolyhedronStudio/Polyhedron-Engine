@@ -141,13 +141,12 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
 // classEntities too.
 //=================
 void SVG_FreeClassEntity(Entity* ent) {
-    // Only proceed if it has a classEntity.
-    if (!ent->classEntity)
-        return;
-
-    // Remove the classEntity reference
-    ent->classEntity->SetServerEntity( nullptr );
-    ent->classEntity = nullptr;
+    // Special class entity handling IF it still has one.
+    if (ent->classEntity) {
+        // Remove the classEntity reference
+        ent->classEntity->SetServerEntity(nullptr);
+        ent->classEntity = nullptr;
+    }
 
     // Fetch entity number.
     int32_t entityNumber = ent->state.number;
@@ -198,6 +197,9 @@ void SVG_FreeEntity(Entity* ent)
 
     // Last but not least, since it isn't in use anymore, let it be known.
     ent->inUse = false;
+
+    // Reset serverFlags.
+    ent->serverFlags = 0;
 }
 
 //===============

@@ -428,17 +428,20 @@ SET(SRC_COMMON
 	common/sizebuf.cpp
 	common/utils.cpp
 	common/zone.cpp
-	common/net/chan.cpp	# These got to go sooner or later.
-	common/net/net.cpp	# These got to go sooner or later.
-
-	common/enet/enet.cpp
+	common/netq3/netchan.cpp
+	common/netq3/net.cpp
+	common/net/chan.cpp
+	common/net/net.cpp
 )
 SET(HEADERS_COMMON
-	common/net/inet_ntop.h	# These got to go sooner or later.
-	common/net/inet_pton.h	# These got to go sooner or later.
-	common/net/win.h		# These got to go sooner or later.
+	common/net/inet_ntop.h
+	common/net/inet_pton.h
+	common/net/win.h
+	common/netq3/netchan.h
+	common/netq3/net.h
+	common/net/chan.h
+	common/net/net.h
 	common/huffman.h
-	common/enet/enet.h
 )
 
 ###################### Format.

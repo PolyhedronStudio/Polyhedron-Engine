@@ -254,7 +254,7 @@ char *NET_BaseAdrToString(const netadr_t *a)
 NET_AdrToString
 ===================
 */
-char *NET_AdrToString(const netadr_t *a)
+const char *NET_AdrToString(const netadr_t *a)
 {
     static char s[MAX_QPATH];
 

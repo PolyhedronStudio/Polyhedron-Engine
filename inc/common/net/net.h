@@ -239,7 +239,7 @@ void        NET_GetPackets(netsrc_t sock, void (*packet_cb)(void));
 qboolean    NET_SendPacket(netsrc_t sock, const void *data,
                            size_t len, const netadr_t *to);
 
-char        *NET_AdrToString(const netadr_t *a);
+const char *NET_AdrToString(const netadr_t *a);
 qboolean    NET_StringToAdr(const char *s, netadr_t *a, int default_port);
 qboolean    NET_StringPairToAdr(const char *host, const char *port, netadr_t *a);
 

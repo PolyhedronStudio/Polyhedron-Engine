@@ -26,6 +26,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //===========================================================================//
 // Q3 MSG Style. (Later on, replace all that states Q3MSG with MSG :)
 //===========================================================================//
+constexpr uint32_t BIG_INFO_STRING = 8192;  // used for system info key only
+constexpr uint32_t BIG_INFO_KEY = 8192;
+constexpr uint32_t BIG_INFO_VALUE = 8192;
+
 static huffman_t    msgHuffmanBuffer;
 static qboolean     isQ3MsgInitialized = false; // Stores whether we have initialized a message yet at all, (later on will be used for Mr Huffman)
 
@@ -95,7 +99,7 @@ bit functions
 int	overflows;
 
 // negative bit values include signs
-void MSG_WriteBits(msg_t* msg, int32_t value, int32_t bits) {
+void Q3MSG_WriteBits(msg_t* msg, int32_t value, int32_t bits) {
     int	i;
     //	FILE*	fp;
 
@@ -108,7 +112,7 @@ void MSG_WriteBits(msg_t* msg, int32_t value, int32_t bits) {
     }
 
     if (bits == 0 || bits < -31 || bits > 32) {
-        Com_Error(ERR_DROP, "MSG_WriteBits: bad bits %i", bits);
+        Com_Error(ERR_DROP, "Q3MSG_WriteBits: bad bits %i", bits);
     }
 
     // check for overflows
@@ -172,7 +176,7 @@ void MSG_WriteBits(msg_t* msg, int32_t value, int32_t bits) {
     }
 }
 
-int MSG_ReadBits(msg_t* msg, int bits) {
+int Q3MSG_ReadBits(msg_t* msg, int bits) {
     int			value;
     int			get;
     qboolean	sgn;
@@ -235,6 +239,271 @@ int MSG_ReadBits(msg_t* msg, int bits) {
     return value;
 }
 
+
+//
+// writing functions
+//
+
+void Q3MSG_WriteChar(msg_t* sb, int c) {
+#ifdef PARANOID
+    if (c < -128 || c > 127)
+        Com_Error(ERR_FATAL, "Q3MSG_WriteChar: range error");
+#endif
+
+    Q3MSG_WriteBits(sb, c, 8);
+}
+
+void Q3MSG_WriteByte(msg_t* sb, int c) {
+#ifdef PARANOID
+    if (c < 0 || c > 255)
+        Com_Error(ERR_FATAL, "Q3MSG_WriteByte: range error");
+#endif
+
+    Q3MSG_WriteBits(sb, c, 8);
+}
+
+void Q3MSG_WriteData(msg_t* buf, const void* data, int length) {
+    int i;
+    for (i = 0; i < length; i++) {
+        Q3MSG_WriteByte(buf, ((byte*)data)[i]);
+    }
+}
+
+void Q3MSG_WriteShort(msg_t* sb, int c) {
+#ifdef PARANOID
+    if (c < ((short)0x8000) || c >(short)0x7fff)
+        Com_Error(ERR_FATAL, "Q3MSG_WriteShort: range error");
+#endif
+
+    Q3MSG_WriteBits(sb, c, 16);
+}
+
+void Q3MSG_WriteLong(msg_t* sb, int c) {
+    Q3MSG_WriteBits(sb, c, 32);
+}
+
+void Q3MSG_WriteFloat(msg_t* sb, float f) {
+    union {
+        float	f;
+        int	l;
+    } dat;
+
+    dat.f = f;
+    Q3MSG_WriteBits(sb, dat.l, 32);
+}
+
+void Q3MSG_WriteString(msg_t* sb, const char* s) {
+    if (!s) {
+        Q3MSG_WriteData(sb, "", 1);
+    } else {
+        int		l, i;
+        char	string[MAX_STRING_CHARS];
+
+        l = strlen(s);
+        if (l >= MAX_STRING_CHARS) {
+            Com_Printf("Q3MSG_WriteString: MAX_STRING_CHARS");
+            Q3MSG_WriteData(sb, "", 1);
+            return;
+        }
+        Q_strncpyz(string, s, sizeof(string));
+
+        // get rid of 0xff chars, because old clients don't like them
+        for (i = 0; i < l; i++) {
+            if (((byte*)string)[i] > 127) {
+                string[i] = '.';
+            }
+        }
+
+        Q3MSG_WriteData(sb, string, l + 1);
+    }
+}
+
+void Q3MSG_WriteBigString(msg_t* sb, const char* s) {
+    if (!s) {
+        Q3MSG_WriteData(sb, "", 1);
+    } else {
+        int		l, i;
+        char	string[BIG_INFO_STRING];
+
+        l = strlen(s);
+        if (l >= BIG_INFO_STRING) {
+            Com_Printf("Q3MSG_WriteString: BIG_INFO_STRING");
+            Q3MSG_WriteData(sb, "", 1);
+            return;
+        }
+        Q_strncpyz(string, s, sizeof(string));
+
+        // get rid of 0xff chars, because old clients don't like them
+        for (i = 0; i < l; i++) {
+            if (((byte*)string)[i] > 127) {
+                string[i] = '.';
+            }
+        }
+
+        Q3MSG_WriteData(sb, string, l + 1);
+    }
+}
+
+void Q3MSG_WriteAngle(msg_t* sb, float f) {
+    Q3MSG_WriteByte(sb, (int)(f * 256 / 360) & 255);
+}
+
+void Q3MSG_WriteAngle16(msg_t* sb, float f) {
+    Q3MSG_WriteShort(sb, ANGLE2SHORT(f));
+}
+
+
+//============================================================
+
+//
+// reading functions
+//
+
+// returns -1 if no more characters are available
+int Q3MSG_ReadChar(msg_t* msg) {
+    int	c;
+
+    c = (signed char)Q3MSG_ReadBits(msg, 8);
+    if (msg->readcount > msg->cursize) {
+        c = -1;
+    }
+
+    return c;
+}
+
+int Q3MSG_ReadByte(msg_t* msg) {
+    int	c;
+
+    c = (unsigned char)Q3MSG_ReadBits(msg, 8);
+    if (msg->readcount > msg->cursize) {
+        c = -1;
+    }
+    return c;
+}
+
+int Q3MSG_ReadShort(msg_t* msg) {
+    int	c;
+
+    c = (short)Q3MSG_ReadBits(msg, 16);
+    if (msg->readcount > msg->cursize) {
+        c = -1;
+    }
+
+    return c;
+}
+
+int Q3MSG_ReadLong(msg_t* msg) {
+    int	c;
+
+    c = Q3MSG_ReadBits(msg, 32);
+    if (msg->readcount > msg->cursize) {
+        c = -1;
+    }
+
+    return c;
+}
+
+float Q3MSG_ReadFloat(msg_t* msg) {
+    union {
+        byte	b[4];
+        float	f;
+        int	l;
+    } dat;
+
+    dat.l = Q3MSG_ReadBits(msg, 32);
+    if (msg->readcount > msg->cursize) {
+        dat.f = -1;
+    }
+
+    return dat.f;
+}
+
+char* Q3MSG_ReadString(msg_t* msg) {
+    static char	string[MAX_STRING_CHARS];
+    int		l, c;
+
+    l = 0;
+    do {
+        c = Q3MSG_ReadByte(msg);		// use ReadByte so -1 is out of bounds
+        if (c == -1 || c == 0) {
+            break;
+        }
+        // translate all fmt spec to avoid crash bugs
+        if (c == '%') {
+            c = '.';
+        }
+        // don't allow higher ascii values
+        if (c > 127) {
+            c = '.';
+        }
+
+        string[l] = c;
+        l++;
+    } while (l < sizeof(string) - 1);
+
+    string[l] = 0;
+
+    return string;
+}
+
+char* Q3MSG_ReadBigString(msg_t* msg) {
+    static char	string[BIG_INFO_STRING];
+    int		l, c;
+
+    l = 0;
+    do {
+        c = Q3MSG_ReadByte(msg);		// use ReadByte so -1 is out of bounds
+        if (c == -1 || c == 0) {
+            break;
+        }
+        // translate all fmt spec to avoid crash bugs
+        if (c == '%') {
+            c = '.';
+        }
+
+        string[l] = c;
+        l++;
+    } while (l < sizeof(string) - 1);
+
+    string[l] = 0;
+
+    return string;
+}
+
+char* Q3MSG_ReadStringLine(msg_t* msg) {
+    static char	string[MAX_STRING_CHARS];
+    int		l, c;
+
+    l = 0;
+    do {
+        c = Q3MSG_ReadByte(msg);		// use ReadByte so -1 is out of bounds
+        if (c == -1 || c == 0 || c == '\n') {
+            break;
+        }
+        // translate all fmt spec to avoid crash bugs
+        if (c == '%') {
+            c = '.';
+        }
+        string[l] = c;
+        l++;
+    } while (l < sizeof(string) - 1);
+
+    string[l] = 0;
+
+    return string;
+}
+
+float Q3MSG_ReadAngle16(msg_t* msg) {
+    return SHORT2ANGLE(Q3MSG_ReadShort(msg));
+}
+
+void Q3MSG_ReadData(msg_t* msg, void* data, int32_t len) {
+    int		i;
+
+    for (i = 0; i < len; i++) {
+        ((byte*)data)[i] = Q3MSG_ReadByte(msg);
+    }
+}
 
 
 //===========================================================================//

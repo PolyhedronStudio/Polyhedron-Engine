@@ -780,7 +780,7 @@ static qboolean parse_enhanced_params(conn_params_t *p)
     return true;
 }
 
-static char *userinfo_ip_string(void)
+static const char *userinfo_ip_string(void)
 {
     static char s[MAX_QPATH];
 

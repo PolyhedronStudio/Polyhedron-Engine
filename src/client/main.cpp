@@ -475,7 +475,7 @@ static void CL_FollowIP_f(void)
 
     a = &cls.recent_addr[i & RECENT_MASK];
     if (a->type) {
-        char *s = NET_AdrToString(a);
+        const char *s = NET_AdrToString(a);
         Com_Printf("Following %s...\n", s);
         Cbuf_InsertText(cmd_current, va("connect %s\n", s));
     }

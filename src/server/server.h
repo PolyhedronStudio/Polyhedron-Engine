@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/cvar.h"
 #include "common/error.h"
-#include "common/enet/enet.h"   // WID: Enet.
+#include "common/enet/enet.h"
 #include "common/files.h"
 #include "common/msg.h"
 #include "common/net/net.h"

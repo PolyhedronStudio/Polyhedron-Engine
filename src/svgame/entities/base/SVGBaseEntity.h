@@ -226,6 +226,11 @@ public:
 
     // Get the 'linkCount' value.
     inline const int32_t GetLinkCount() {
+        // WID: Should we really do this? Fixes a bug when MiscExploboxes are on top of each other and "die".
+        if (!serverEntity) {
+            return 0;
+        }
+
         return serverEntity->linkCount;
     }
 

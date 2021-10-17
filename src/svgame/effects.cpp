@@ -231,7 +231,7 @@ void SVG_BecomeExplosion1(SVGBaseEntity *self)
     gi.Multicast(origin, MultiCast::PVS);
 
     // Queue for removal.
-    self->Remove();
+    //self->Remove();
     //SVG_FreeEntity(self->GetServerEntity());
 }
 
@@ -250,8 +250,4 @@ void SVG_BecomeExplosion2(SVGBaseEntity*self)
     gi.WriteByte(TempEntityEvent::Explosion2);
     gi.WriteVector3(origin);
     gi.Multicast(origin, MultiCast::PVS);
-
-    // Queue for removal.
-    self->Remove();
-    //SVG_FreeEntity(self->GetServerEntity());
 }

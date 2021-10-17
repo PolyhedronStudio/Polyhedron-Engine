@@ -277,12 +277,11 @@ typedef enum {
 //-----------------
 // WATISDEZE: We don't want these defined in clgame.h
 //-----------------
+void    Com_Error(ErrorType code, const char* fmt, ...)
+q_noreturn q_printf(2, 3);
 #ifndef CGAME_INCLUDE
 void    Com_LPrintf(PrintType type, const char* fmt, ...)
 q_printf(2, 3);
-void    Com_Error(ErrorType code, const char* fmt, ...)
-q_noreturn q_printf(2, 3);
-
 #define Com_Printf(...) Com_LPrintf(PRINT_ALL, __VA_ARGS__)
 #define Com_DPrintf(...) Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
 #define Com_WPrintf(...) Com_LPrintf(PRINT_WARNING, __VA_ARGS__)
@@ -326,9 +325,9 @@ typedef enum {
 //
 //=============================================================================
 //
-#define MAX_INFO_KEY        64
-#define MAX_INFO_VALUE      64
-#define MAX_INFO_STRING     512
+constexpr uint32_t MAX_INFO_KEY = 64;
+constexpr uint32_t MAX_INFO_VALUE = 64; 
+constexpr uint32_t MAX_INFO_STRING = 512;
 
 char* Info_ValueForKey(const char* s, const char* key);
 void    Info_RemoveKey(char* s, const char* key);

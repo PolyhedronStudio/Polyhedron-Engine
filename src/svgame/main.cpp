@@ -651,8 +651,11 @@ void SVG_RunFrame(void)
         if (!entity->IsInUse())
             continue;
 
+        if (!entity->GetServerEntity())
+            continue;
+
         // Admer: entity was marked for removal at the previous tick
-        if (entity->GetServerFlags() & EntityServerFlags::Remove)         {
+        if (entity->GetServerFlags() & EntityServerFlags::Remove) {
             SVG_FreeEntity(entity->GetServerEntity());
             continue;
         }
@@ -664,8 +667,8 @@ void SVG_RunFrame(void)
         entity->SetOldOrigin(entity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-        if ((entity->GetGroundEntity() && entity->GetServerEntity() 
-            && (entity->GetGroundEntity()->GetLinkCount() != entity->GetGroundEntityLinkCount()))) {
+        if ((entity->GetGroundEntity() && entity->GetGroundEntity()->GetServerEntity())
+            && (entity->GetGroundEntity()->GetLinkCount() != entity->GetGroundEntityLinkCount())) {
             // Reset ground entity.
             entity->SetGroundEntity(nullptr);
 

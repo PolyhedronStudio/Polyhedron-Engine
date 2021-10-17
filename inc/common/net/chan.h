@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/net/net.h"
 #include "common/sizebuf.h"
 
-typedef struct netchan_s {
+struct netchan_t {
     int         protocol;
     size_t      maxpacketlen;
 
@@ -72,7 +72,7 @@ typedef struct netchan_s {
 
     sizebuf_t   outFragment;
     byte        outFragmentBuffer[MAX_MSGLEN];
-} netchan_t;
+};
 
 extern cvar_t       *net_qport;
 extern cvar_t       *net_maxmsglen;
@@ -82,10 +82,10 @@ void Netchan_Init(void);
 void Netchan_OutOfBand(netsrc_t sock, const netadr_t *adr, const char *format, ...) q_printf(3, 4);
 netchan_t *Netchan_Setup(netsrc_t sock, const netadr_t *adr, int qport, size_t maxpacketlen, int protocol);
 
-size_t      Netchan_Transmit(struct netchan_s*, size_t, const void*, int);
-size_t      Netchan_TransmitNextFragment(struct netchan_s*);
-qboolean    Netchan_Process(struct netchan_s*);
-qboolean    Netchan_ShouldUpdate(struct netchan_s*);
+size_t      Netchan_Transmit(netchan_t*, size_t, const void*, int);
+size_t      Netchan_TransmitNextFragment(netchan_t*);
+qboolean    Netchan_Process(netchan_t*);
+qboolean    Netchan_ShouldUpdate(netchan_t*);
 
 void Netchan_Close(netchan_t*netchan);
 
