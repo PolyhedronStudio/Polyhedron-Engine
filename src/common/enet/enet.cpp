@@ -46,9 +46,20 @@ ENetHost* enetListenHost = nullptr;
 ENetHost* enetClientHost = nullptr;
 #endif
 
-std::unordered_map<int, netchan_t> net_activeSockets;
-std::vector<netchan_t> net_connectingSockets;
-std::vector<netchan_t> net_disconnectingSockets;
+// Active net time.
+double enetNetTime = 0.;
+
+double ENET_SetNetTime() {
+    enetNetTime = com_localTime;
+    return enetNetTime;
+}
+
+// Unordered map, based on socket indexes which contain the netchannels that are active.
+std::unordered_map<uint32_t, netchan_t> enetActiveSockets;
+// Vector containing the netchannels that are currently in a connection process.
+std::vector<netchan_t> enetConnectingSockets;
+// Vector containing the netchannels that are currently in a disconnection process.
+std::vector<netchan_t> enetDisconnectingSockets;
 
 //---------------
 // ENET_Init
@@ -58,10 +69,10 @@ std::vector<netchan_t> net_disconnectingSockets;
 // Returns true with success, false by failure.
 //---------------
 int ENET_Init(void) {
-	// We need to ensure this one is zero-ed out.
-	std::memset(&enetCallbacks, 0, sizeof(ENetCallbacks));
+    // We need to ensure this one is zero-ed out.
+    std::memset(&enetCallbacks, 0, sizeof(ENetCallbacks));
 
-	// Add any callbacks to it here.
+    // Add any callbacks to it here.
     // Options are:
     // malloc
     // free
@@ -69,7 +80,7 @@ int ENET_Init(void) {
     // packet_create
     // packet_destroy
 
-	// Initialize ENET with callbacks.
+    // Initialize ENET with callbacks.
     if (enet_initialize_with_callbacks(ENET_VERSION, &enetCallbacks) < 0) {
         Com_Printf("ENET: Failed to initialize ENet. Application won't function without it.\n");
     }
@@ -82,15 +93,30 @@ int ENET_Init(void) {
         Com_Printf("ENET: Failed to create enetListenHost. Application won't function without it.\n");
     }
 
-	return ENET_OK;
+    return ENET_OK;
 }
 
 //---------------
 // ENET_Shutdown
 //
-// Will shutdown enet, call at end of application.
+// Will shutdown ENet, only called at the end of the application of course.
 //---------------
 void ENET_Shutdown(void) {
+    // If there are any sockets, we got to close them down.
+    for (auto& enetSocket : enetActiveSockets) {
+        ENET_Close(enetSocket.first, true);
+    }
+    
+#if USE_CLIENT
+    // Destroy the client host.
+    enet_host_destroy(enetClientHost);
+    enetClientHost = nullptr;
+#endif
+
+    // Destroy the server listening host.
+    enet_host_destroy(enetListenHost);
+    enetListenHost = nullptr;
+
     // Deinitialize enet.
     enet_deinitialize();
 }
@@ -133,6 +159,108 @@ int ENET_ProcessHost(ENetHost* eHost, uint32_t timeOut) {
 
     return ENET_OK;
 }
+
+//---------------
+// ENET_Connect
+//
+// Connects (attempts that is) to the host listening actively on the given address.
+//---------------
+#if USE_CLIENT
+void ENET_Connect(const std::string& hostAddress) {
+    // ENet address struct, needs to be filled in nicely.
+    ENetAddress address;
+
+    // Our sweet holy peer.
+    ENetPeer* peer = nullptr;
+
+    // Set Net Time.
+    ENET_SetNetTime();
+    
+    // Create a client host in case we haven't done so yet.
+    if (!enetClientHost) {
+        // Allow up to 4 connections on the client host, to give us space to
+        // timeout and disconnect stale sockets.
+        enetClientHost = enet_host_create(NULL, 4, 2, 0, 0);
+
+        if (!enetClientHost)
+            Com_Error(ERR_DROP, "ENET: Cannot create a client host, aborting\n");
+    }
+
+    // See if we can resolve the host name
+    if (enet_address_set_host_new(&address, hostAddress.c_str()) < 0) {
+        Com_Error(ERR_DROP, "ENET: Cannot resolve address %s, aborting\n", hostAddress);
+        return;
+    }
+    address.port = ENET_PORT_SERVER;
+
+    // Connect our client host and fetch our peer to use for it.
+    peer = enet_host_connect(enetClientHost, &address, 2, 0);
+    if (!peer)
+        Sys_Error("Could not allocate peer for ENet connection, aborting\n");
+
+    // Create our new netchan socket.
+    netchan_t sock{};
+    sock.connectTime = enetNetTime;
+    sock.peer = peer;
+    sock.host = enetClientHost;
+    sock.lastMessageTime = enetNetTime;
+
+    char addressBuffer[256];
+    if (enet_address_get_host_new(&peer->address, addressBuffer, 256) == 0)
+        sock.address = addressBuffer;
+    else if (enet_address_get_host_ip_new(&peer->address, addressBuffer, 256) == 0)
+        sock.address = addressBuffer;
+    else
+        sock.address = "<unknown>";
+
+    // From here on, we'll be polling the connection process.
+    enetConnectingSockets.push_back(sock);
+}
+#endif
+
+//---------------
+// ENET_Close
+//
+// Closes an active socket connection, default behavior kindly requests it
+// and might give it some time before it processes. 
+// 
+// It can also be harshly forced, aka done DIRECTLY.
+//---------------
+void ENET_Close(int32_t socketID, qboolean closeNow = false) {
+    // Surely do need a valid ID.
+    if (!socketID)
+        return;
+
+    // It isn't an active socket.
+    if (!enetActiveSockets.count(socketID)) {
+        Com_WPrintf("ENET: Unable to close SocketID #%i since it isn't active.\n");
+        return;
+    }
+
+    // Fetch a reference to the active socket.
+    netchan_t& socket = enetActiveSockets[socketID];
+
+    // Disconnect from the peer in case we have one actively going.
+    if (socket.peer) {
+        if (closeNow) {
+            // Force a disconnection from a peer.
+            enet_peer_disconnect_now(socket.peer, 0);  // WID: TODO: Perhaps pass some data along?
+
+            // Forcefully disconnect the peer.
+            enet_peer_reset(socket.peer);
+        } else {
+            // Just a regular disconnect request.
+            enet_peer_disconnect(socket.peer);
+
+            // Add a copy of the socket to the disconnecting queue.
+            enetDisconnectingSockets.push_back(socket);
+        }
+    }
+
+    // Take it out of the active queue.
+    enetActiveSockets.erase(socketID);
+}
+
 
 //---------------
 // ENET_SendToPeer
@@ -190,5 +318,5 @@ void ENET_ConvertPacketToBuffer(ENetPacket* ePacket, sizebuf_t* destDataBuffer, 
 //---------------
 // Return the string of the socket ID address.
 const std::string& ENET_GetSocketIDAddress(int32_t socketID) {
-    return net_activeSockets[socketID].address;
+    return enetActiveSockets[socketID].address;
 }

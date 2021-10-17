@@ -76,6 +76,14 @@ struct netchan_t {
 
 //--------------------------------
 // ENet
+//--------------------------------
+    double connectTime;
+    double disconnectTime;
+    double lastMessageTime;
+    double lastSendTime;
+
+    bool disconnected;
+
     ENetPeer* peer;
     ENetHost* host;
 

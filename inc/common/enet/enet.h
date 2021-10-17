@@ -22,6 +22,12 @@ License here.
 #define ENET_AGAIN   -2  // operation would block, try again
 #define ENET_CLOSED  -3  // peer has closed connection
 
+
+//=============================================================================
+// 
+// Core ENet Functionality.
+// 
+//=============================================================================
 //---------------
 // ENET_Init
 //
@@ -45,6 +51,38 @@ void ENET_Shutdown(void);
 //---------------
 int ENET_ProcessHost(ENetHost* eHost, uint32_t timeOut = 0);
 
+
+//=============================================================================
+// 
+// Connection Functionality.
+// 
+//=============================================================================
+//---------------
+// ENET_Connect
+//
+// Connects (attempts that is) to the host listening actively on the given address.
+//---------------
+#if USE_CLIENT
+void ENET_Connect(const std::string &hostAddress);
+#endif
+
+//---------------
+// ENET_Close
+//
+// Closes an active socket connection, default behavior kindly requests it
+// and might give it some time before it processes. 
+// 
+// It can also be harshly forced, aka done DIRECTLY.
+//---------------
+void ENET_Close(int32_t socketID, qboolean closeNow = false);
+
+
+
+//=============================================================================
+// 
+// (Size-)Buffer Functionality.
+// 
+//=============================================================================
 //---------------
 // ENET_SendBufferToPeer
 //
@@ -67,10 +105,15 @@ qboolean ENET_SendBufferToPeer(ENetPeer* ePeer, ENetHost* eHost, sizebuf_t* data
 //---------------
 void ENET_ConvertPacketToBuffer(ENetPacket* ePacket, sizebuf_t* destDataBuffer, qboolean destroyPacket = true);
 
+
+//=============================================================================
+// 
+// Other Functionality.
+// 
+//=============================================================================
 //---------------
 // ENET_GetSocketIDAddress
 //
-// Return the string socket address matching the socket ID.
+// Return the string address matching the socket ID.
 //---------------
-// Return the string of the socket ID address.
 const std::string& ENET_GetSocketIDAddress(int32_t socketID);
