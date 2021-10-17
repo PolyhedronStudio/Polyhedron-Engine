@@ -226,7 +226,7 @@ void ENET_Connect(const std::string& hostAddress) {
 // 
 // It can also be harshly forced, aka done DIRECTLY.
 //---------------
-void ENET_Close(int32_t socketID, qboolean closeNow = false) {
+void ENET_Close(int32_t socketID, qboolean closeNow) {
     // Surely do need a valid ID.
     if (!socketID)
         return;
@@ -244,13 +244,13 @@ void ENET_Close(int32_t socketID, qboolean closeNow = false) {
     if (socket.peer) {
         if (closeNow) {
             // Force a disconnection from a peer.
-            enet_peer_disconnect_now(socket.peer, 0);  // WID: TODO: Perhaps pass some data along?
+            enet_peer_disconnect_now(socket.peer, 0); // WID: TODO: Perhaps pass some data along?
 
             // Forcefully disconnect the peer.
             enet_peer_reset(socket.peer);
         } else {
             // Just a regular disconnect request.
-            enet_peer_disconnect(socket.peer);
+            enet_peer_disconnect(socket.peer, 0); // WID: TODO: Perhaps pass some data along?
 
             // Add a copy of the socket to the disconnecting queue.
             enetDisconnectingSockets.push_back(socket);
