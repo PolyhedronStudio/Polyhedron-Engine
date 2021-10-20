@@ -417,7 +417,7 @@ CL_SendUserCommand
 static void CL_SendUserCommand(void)
 {
     size_t currentSize q_unused, checksumIndex;
-    ClientUserCommand *cmd, *oldcmd;
+    ClientMoveCommand *cmd, *oldcmd;
     ClientUserCommandHistory*history;
 
     // archive this packet

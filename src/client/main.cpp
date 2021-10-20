@@ -110,29 +110,29 @@ char        cl_cmdbuf_text[MAX_STRING_CHARS];
 
 //======================================================================
 
-typedef enum {
+enum RequestType {
     REQ_FREE,
     REQ_STATUS_CL,
     REQ_STATUS_UI,
     REQ_INFO,
     REQ_RCON
-} requestType_t;
+};
 
-typedef struct {
-    requestType_t type;
+struct Request {
+    RequestType type;
     netadr_t adr;
     unsigned time;
-} request_t;
+};
 
 #define MAX_REQUESTS    64
 #define REQUEST_MASK    (MAX_REQUESTS - 1)
 
-static request_t    clientRequests[MAX_REQUESTS];
+static Request    clientRequests[MAX_REQUESTS];
 static unsigned     nextRequest;
 
-static request_t *CL_AddRequest(const netadr_t *adr, requestType_t type)
+static Request *CL_AddRequest(const netadr_t *adr, RequestType type)
 {
-    request_t *r;
+    Request *r;
 
     r = &clientRequests[nextRequest++ & REQUEST_MASK];
     r->adr = *adr;
@@ -142,9 +142,9 @@ static request_t *CL_AddRequest(const netadr_t *adr, requestType_t type)
     return r;
 }
 
-static request_t *CL_FindRequest(void)
+static Request *CL_FindRequest(void)
 {
-    request_t *r;
+    Request *r;
     int i, count;
 
     count = MAX_REQUESTS;
@@ -423,10 +423,12 @@ static void CL_EConnect_f(void) {
         }
     }
 
-    if (!NET_StringToAdr(server, &address, PORT_SERVER)) {
-        Com_Printf("Bad server address\n");
-        return;
-    }
+
+
+    //if (!NET_StringToAdr(server, &address, PORT_SERVER)) {
+    //    Com_Printf("Bad server address\n");
+    //    return;
+    //}
 
     // copy early to avoid potential cmd_argv[1] clobbering
     Q_strlcpy(cls.servername, server, sizeof(cls.servername));
@@ -924,7 +926,7 @@ static void CL_ParsePrintMessage(void)
 {
     char string[MAX_NET_STRING];
     serverStatus_t status;
-    request_t *r;
+    Request *r;
 
     MSG_ReadString(string, sizeof(string));
 
@@ -977,7 +979,7 @@ Handle a reply from a ping
 static void CL_ParseInfoMessage(void)
 {
     char string[MAX_QPATH];
-    request_t *r;
+    Request *r;
 
     r = CL_FindRequest();
     if (!r)

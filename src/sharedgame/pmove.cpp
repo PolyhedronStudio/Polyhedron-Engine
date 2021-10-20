@@ -561,7 +561,7 @@ static void PM_StepSlideMove(void)
     PM_StepSlideMove_();
 
     // Attempt to step down to remain on ground
-    if ((pm->state.flags & PMF_ON_GROUND) && pm->clientUserCommand.moveCommand.upMove <= 0) {
+    if ((pm->state.flags & PMF_ON_GROUND) && pm->clientMoveCommand.moveInput.upMove <= 0) {
         const vec3_t down = vec3_fmaf(pm->state.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
         const trace_t downTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
 
@@ -625,7 +625,7 @@ static qboolean PM_CheckTrickJump(void) {
     // False in the following conditions.
     if (pm->groundEntityPtr) { return false; }
     if (playerMoveLocals.previousVelocity.z < PM_SPEED_UP) { return false; }
-    if (pm->clientUserCommand.moveCommand.upMove < 1) { return false; }
+    if (pm->clientMoveCommand.moveInput.upMove < 1) { return false; }
     if (pm->state.flags & PMF_JUMP_HELD) { return false; }
     if (pm->state.flags & PMF_TIME_MASK) { return false; }
 
@@ -659,7 +659,7 @@ static qboolean PM_CheckJump(void) {
     }
 
     // 3. Check if, they didn't ask to jump.
-    if (pm->clientUserCommand.moveCommand.upMove < 1) {
+    if (pm->clientMoveCommand.moveInput.upMove < 1) {
         PM_Debug("PM_CheckJump - UPMOVE");
         return false;
     }
@@ -679,9 +679,9 @@ static qboolean PM_CheckJump(void) {
         pm->state.flags &= ~PMF_TIME_TRICK_JUMP;
         pm->state.time = 0;
 
-        PM_Debug("Trick jump: %i", pm->clientUserCommand.moveCommand.upMove);
+        PM_Debug("Trick jump: %i", pm->clientMoveCommand.moveInput.upMove);
     } else {
-        PM_Debug("Jump: %i", pm->clientUserCommand.moveCommand.upMove);
+        PM_Debug("Jump: %i", pm->clientMoveCommand.moveInput.upMove);
     }
 
     if (pm->state.velocity.z < 0.0f) {
@@ -724,7 +724,7 @@ static void PM_CheckDuck(void) {
     } else {
 
         const qboolean is_ducking = pm->state.flags & PMF_DUCKED;
-        const qboolean wants_ducking = (pm->clientUserCommand.moveCommand.upMove < 0) && !(playerMoveLocals.isClimbingLadder);
+        const qboolean wants_ducking = (pm->clientMoveCommand.moveInput.upMove < 0) && !(playerMoveLocals.isClimbingLadder);
 
         if (!is_ducking && wants_ducking) {
             pm->state.flags |= PMF_DUCKED;
@@ -836,7 +836,7 @@ static qboolean PM_CheckWaterJump(void) {
         return false;
     }
 
-    if (pm->clientUserCommand.moveCommand.upMove < 1 && pm->clientUserCommand.moveCommand.forwardMove < 1) {
+    if (pm->clientMoveCommand.moveInput.upMove < 1 && pm->clientMoveCommand.moveInput.forwardMove < 1) {
         return false;
     }
 
@@ -1203,8 +1203,8 @@ static void PM_LadderMove(void) {
 
     // user intentions in X/Y
     vec3_t vel = vec3_zero();
-    vel = vec3_fmaf(vel, pm->clientUserCommand.moveCommand.forwardMove, playerMoveLocals.forwardXY);
-    vel = vec3_fmaf(vel, pm->clientUserCommand.moveCommand.rightMove, playerMoveLocals.rightXY);
+    vel = vec3_fmaf(vel, pm->clientMoveCommand.moveInput.forwardMove, playerMoveLocals.forwardXY);
+    vel = vec3_fmaf(vel, pm->clientMoveCommand.moveInput.rightMove, playerMoveLocals.rightXY);
 
     const float s = PM_SPEED_LADDER * 0.125f;
 
@@ -1216,16 +1216,16 @@ static void PM_LadderMove(void) {
     // handle Z intentions differently
     if (std::fabsf(pm->state.velocity.z) < PM_SPEED_LADDER) {
 
-        if ((pm->viewAngles.x <= -15.0f) && (pm->clientUserCommand.moveCommand.forwardMove > 0)) {
+        if ((pm->viewAngles.x <= -15.0f) && (pm->clientMoveCommand.moveInput.forwardMove > 0)) {
             vel.z = PM_SPEED_LADDER;
         }
-        else if ((pm->viewAngles.x >= 15.0f) && (pm->clientUserCommand.moveCommand.forwardMove > 0)) {
+        else if ((pm->viewAngles.x >= 15.0f) && (pm->clientMoveCommand.moveInput.forwardMove > 0)) {
             vel.z = -PM_SPEED_LADDER;
         }
-        else if (pm->clientUserCommand.moveCommand.upMove > 0) {
+        else if (pm->clientMoveCommand.moveInput.upMove > 0) {
             vel.z = PM_SPEED_LADDER;
         }
-        else if (pm->clientUserCommand.moveCommand.upMove < 0) {
+        else if (pm->clientMoveCommand.moveInput.upMove < 0) {
             vel.z = -PM_SPEED_LADDER;
         }
         else {
@@ -1233,7 +1233,7 @@ static void PM_LadderMove(void) {
         }
     }
 
-    if (pm->clientUserCommand.moveCommand.upMove > 0) { // avoid jumps when exiting ladders
+    if (pm->clientMoveCommand.moveInput.upMove > 0) { // avoid jumps when exiting ladders
         pm->state.flags |= PMF_JUMP_HELD;
     }
 
@@ -1305,7 +1305,7 @@ static void PM_WaterMove(void) {
 	}
 
     // And sink if idle
-    if (!pm->clientUserCommand.moveCommand.forwardMove && !pm->clientUserCommand.moveCommand.rightMove && !pm->clientUserCommand.moveCommand.upMove) {
+    if (!pm->clientMoveCommand.moveInput.forwardMove && !pm->clientMoveCommand.moveInput.rightMove && !pm->clientMoveCommand.moveInput.upMove) {
         if (pm->state.velocity.z > PM_SPEED_WATER_SINK) {
             PM_Gravity();
         }
@@ -1316,11 +1316,11 @@ static void PM_WaterMove(void) {
 
     // user intentions on X/Y/Z
     vec3_t vel = vec3_zero();
-    vel = vec3_fmaf(vel, pm->clientUserCommand.moveCommand.forwardMove, playerMoveLocals.forward);
-    vel = vec3_fmaf(vel, pm->clientUserCommand.moveCommand.rightMove, playerMoveLocals.right);
+    vel = vec3_fmaf(vel, pm->clientMoveCommand.moveInput.forwardMove, playerMoveLocals.forward);
+    vel = vec3_fmaf(vel, pm->clientMoveCommand.moveInput.rightMove, playerMoveLocals.right);
 
     // add explicit Z
-    vel.z += pm->clientUserCommand.moveCommand.upMove;
+    vel.z += pm->clientMoveCommand.moveInput.upMove;
 
     // disable water skiing
     if (pm->waterLevel == WaterLevel::Waist) {
@@ -1342,7 +1342,7 @@ static void PM_WaterMove(void) {
 
     PM_Accelerate(dir, speed, PM_ACCEL_WATER);
 
-    if (pm->clientUserCommand.moveCommand.upMove > 0) {
+    if (pm->clientMoveCommand.moveInput.upMove > 0) {
         PM_StepSlideMove_();
     }
     else {
@@ -1366,14 +1366,14 @@ static void PM_AirMove(void) {
     PM_Gravity();
 
     vec3_t vel = vec3_zero();
-    vel = vec3_fmaf(vel, pm->clientUserCommand.moveCommand.forwardMove, playerMoveLocals.forwardXY);
-    vel = vec3_fmaf(vel, pm->clientUserCommand.moveCommand.rightMove, playerMoveLocals.rightXY);
+    vel = vec3_fmaf(vel, pm->clientMoveCommand.moveInput.forwardMove, playerMoveLocals.forwardXY);
+    vel = vec3_fmaf(vel, pm->clientMoveCommand.moveInput.rightMove, playerMoveLocals.rightXY);
     vel.z = 0.f;
 
     float max_speed = PM_SPEED_AIR;
 
     // Accounting for walk modulus
-    if (pm->clientUserCommand.moveCommand.buttons & BUTTON_WALK) {
+    if (pm->clientMoveCommand.moveInput.buttons & BUTTON_WALK) {
         max_speed *= PM_SPEED_MOD_WALK;
     }
 
@@ -1419,8 +1419,8 @@ static void PM_WalkMove(void) {
     const vec3_t right = vec3_normalize(PM_ClipVelocity(playerMoveLocals.rightXY, playerMoveLocals.groundTrace.plane.normal, PM_CLIP_BOUNCE));
 
     vec3_t vel = vec3_zero();
-    vel = vec3_fmaf(vel, pm->clientUserCommand.moveCommand.forwardMove, forward);
-    vel = vec3_fmaf(vel, pm->clientUserCommand.moveCommand.rightMove, right);
+    vel = vec3_fmaf(vel, pm->clientMoveCommand.moveInput.forwardMove, forward);
+    vel = vec3_fmaf(vel, pm->clientMoveCommand.moveInput.rightMove, right);
 
     float max_speed;
 
@@ -1436,7 +1436,7 @@ static void PM_WalkMove(void) {
     }
 
     // Accounting for walk modulus
-    if (pm->clientUserCommand.moveCommand.buttons & BUTTON_WALK) {
+    if (pm->clientMoveCommand.moveInput.buttons & BUTTON_WALK) {
         max_speed *= PM_SPEED_MOD_WALK;
     }
 
@@ -1484,11 +1484,11 @@ static void PM_SpectatorMove(void) {
 
     // User intentions on X/Y/Z
     vec3_t vel = vec3_zero();
-    vel = vec3_fmaf(vel, pm->clientUserCommand.moveCommand.forwardMove, playerMoveLocals.forward);
-    vel = vec3_fmaf(vel, pm->clientUserCommand.moveCommand.rightMove, playerMoveLocals.right);
+    vel = vec3_fmaf(vel, pm->clientMoveCommand.moveInput.forwardMove, playerMoveLocals.forward);
+    vel = vec3_fmaf(vel, pm->clientMoveCommand.moveInput.rightMove, playerMoveLocals.right);
 
     // Add explicit Z
-    vel.z += pm->clientUserCommand.moveCommand.upMove;
+    vel.z += pm->clientMoveCommand.moveInput.upMove;
 
     float speed;
     vel = vec3_normalize_length(vel, speed);
@@ -1517,11 +1517,11 @@ static void PM_NoclipMove() {
 
     // User intentions on X/Y/Z
     vec3_t vel = vec3_zero();
-    vel = vec3_fmaf( vel, pm->clientUserCommand.moveCommand.forwardMove, playerMoveLocals.forward );
-    vel = vec3_fmaf( vel, pm->clientUserCommand.moveCommand.rightMove, playerMoveLocals.right );
+    vel = vec3_fmaf( vel, pm->clientMoveCommand.moveInput.forwardMove, playerMoveLocals.forward );
+    vel = vec3_fmaf( vel, pm->clientMoveCommand.moveInput.rightMove, playerMoveLocals.right );
 
     // Add explicit Z
-    vel.z += pm->clientUserCommand.moveCommand.upMove;
+    vel.z += pm->clientMoveCommand.moveInput.upMove;
 
     float speed;
     vel = vec3_normalize_length( vel, speed );
@@ -1598,19 +1598,19 @@ static void PM_Init(PlayerMove * pmove) {
     pm->step = 0.0f;
 
     // Jump "held" also, in case its key was released.
-    if (pm->clientUserCommand.moveCommand.upMove < 1) {
+    if (pm->clientMoveCommand.moveInput.upMove < 1) {
         pm->state.flags &= ~PMF_JUMP_HELD;
     }
 
     // Decrement the movement timer, used for "dropping" the player, landing after jumps, 
     // or falling off a ledge/slope, by the duration of the command.
     if (pm->state.time) {
-        if (pm->clientUserCommand.moveCommand.msec >= pm->state.time) { // clear the timer and timed flags
+        if (pm->clientMoveCommand.moveInput.msec >= pm->state.time) { // clear the timer and timed flags
             pm->state.flags &= ~PMF_TIME_MASK;
             pm->state.time = 0;
         }
         else { // or just decrement the timer
-            pm->state.time -= pm->clientUserCommand.moveCommand.msec;
+            pm->state.time -= pm->clientMoveCommand.moveInput.msec;
         }
     }
 }
@@ -1625,7 +1625,7 @@ static void PM_Init(PlayerMove * pmove) {
 static void PM_ClampAngles(void) {
     // Copy the command angles into the outgoing state
     for (int i = 0; i < 3; i++) {
-        float temp = pm->clientUserCommand.moveCommand.viewAngles[i] + pm->state.deltaAngles[i];
+        float temp = pm->clientMoveCommand.moveInput.viewAngles[i] + pm->state.deltaAngles[i];
         pm->viewAngles[i] = temp;
     }
 
@@ -1678,7 +1678,7 @@ static void PM_InitLocal() {
     playerMoveLocals = {};
 
     // Increase frame time based on seconds.
-    playerMoveLocals.frameTime = pm->clientUserCommand.moveCommand.msec * 0.001f;
+    playerMoveLocals.frameTime = pm->clientMoveCommand.moveInput.msec * 0.001f;
 
     // Save in case we get stuck and wish to undo this move.
     playerMoveLocals.previousOrigin = pm->state.origin;
@@ -1726,9 +1726,9 @@ void PMove(PlayerMove * pmove)
 
     // Erase input direction values in case we are dead, or something alike.
     if (pm->state.type >= EnginePlayerMoveType::Dead) {
-        pm->clientUserCommand.moveCommand.forwardMove = 0;
-        pm->clientUserCommand.moveCommand.rightMove = 0;
-        pm->clientUserCommand.moveCommand.upMove = 0;
+        pm->clientMoveCommand.moveInput.forwardMove = 0;
+        pm->clientMoveCommand.moveInput.rightMove = 0;
+        pm->clientMoveCommand.moveInput.upMove = 0;
     }
 
     // Check for Ladders.

@@ -206,11 +206,11 @@ static float CLG_KeyState(KeyBinding* key)
     }
 
     // special case for instant packet
-    if (!cl->clientUserCommand.moveCommand.msec) {
+    if (!cl->clientMoveCommand.moveInput.msec) {
         return (float)(key->state & BUTTON_STATE_HELD);
     }
 
-    val = (float)msec / cl->clientUserCommand.moveCommand.msec;
+    val = (float)msec / cl->clientMoveCommand.moveInput.msec;
 
     return Clampf(val, 0, 1);
 }
@@ -544,7 +544,7 @@ void CLG_BuildFrameMoveCommand(int msec)
     }
 
     // Add to milliseconds of time to apply the move
-    cl->clientUserCommand.moveCommand.msec += msec;
+    cl->clientMoveCommand.moveInput.msec += msec;
 
     // Adjust viewAngles
     CLG_AdjustAngles(msec);
@@ -564,9 +564,9 @@ void CLG_BuildFrameMoveCommand(int msec)
 
     CLG_ClampPitch();
 
-    cl->clientUserCommand.moveCommand.viewAngles[0] = cl->viewAngles[0];
-    cl->clientUserCommand.moveCommand.viewAngles[1] = cl->viewAngles[1];
-    cl->clientUserCommand.moveCommand.viewAngles[2] = cl->viewAngles[2];
+    cl->clientMoveCommand.moveInput.viewAngles[0] = cl->viewAngles[0];
+    cl->clientMoveCommand.moveInput.viewAngles[1] = cl->viewAngles[1];
+    cl->clientMoveCommand.moveInput.viewAngles[2] = cl->viewAngles[2];
 }
 
 //
@@ -591,10 +591,10 @@ void CLG_FinalizeFrameMoveCommand(void)
     // figure button bits
     //
     if (in_attack.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->clientUserCommand.moveCommand.buttons |= BUTTON_ATTACK;
+        cl->clientMoveCommand.moveInput.buttons |= BUTTON_ATTACK;
 
     if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->clientUserCommand.moveCommand.buttons |= BUTTON_USE;
+        cl->clientMoveCommand.moveInput.buttons |= BUTTON_USE;
 
     // Undo the button_state_down for the next frame, it needs a repress for
     // that to be re-enabled.
@@ -604,22 +604,22 @@ void CLG_FinalizeFrameMoveCommand(void)
     // Whether to run or not, depends on whether auto-run is on or off.
     if (cl_run->value) {
         if (in_speed.state & BUTTON_STATE_HELD) {
-            cl->clientUserCommand.moveCommand.buttons |= BUTTON_WALK;
+            cl->clientMoveCommand.moveInput.buttons |= BUTTON_WALK;
         }
     }
     else {
         if (!(in_speed.state & BUTTON_STATE_HELD)) {
-            cl->clientUserCommand.moveCommand.buttons |= BUTTON_WALK;
+            cl->clientMoveCommand.moveInput.buttons |= BUTTON_WALK;
         }
     }
 
     // Always send in case any button was down at all in-game.
     if (clgi.Key_GetDest() == KEY_GAME && clgi.Key_AnyKeyDown()) {
-        cl->clientUserCommand.moveCommand.buttons |= BUTTON_ANY;
+        cl->clientMoveCommand.moveInput.buttons |= BUTTON_ANY;
     }
 
-    if (cl->clientUserCommand.moveCommand.msec > 250) {
-        cl->clientUserCommand.moveCommand.msec = 100;        // time was unreasonable
+    if (cl->clientMoveCommand.moveInput.msec > 250) {
+        cl->clientMoveCommand.moveInput.msec = 100;        // time was unreasonable
     }
 
     // Rebuild the movement vector
@@ -636,20 +636,20 @@ void CLG_FinalizeFrameMoveCommand(void)
     move = CLG_ClampSpeed(move);
 
     // Store the movement vector
-    cl->clientUserCommand.moveCommand.forwardMove = move[0];
-    cl->clientUserCommand.moveCommand.rightMove = move[1];
-    cl->clientUserCommand.moveCommand.upMove = move[2];
+    cl->clientMoveCommand.moveInput.forwardMove = move[0];
+    cl->clientMoveCommand.moveInput.rightMove = move[1];
+    cl->clientMoveCommand.moveInput.upMove = move[2];
 
     // Clear all states
     cl->mousemove[0] = 0;
     cl->mousemove[1] = 0;
     
-    cl->clientUserCommand.moveCommand.impulse = in_impulse;
+    cl->clientMoveCommand.moveInput.impulse = in_impulse;
     in_impulse = 0;
 
     // Save this command off for prediction
     cl->currentClientCommandNumber++;
-    cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->clientUserCommand;
+    cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->clientMoveCommand;
 
     CLG_KeyClear(&in_right);
     CLG_KeyClear(&in_left);
@@ -668,5 +668,5 @@ void CLG_FinalizeFrameMoveCommand(void)
 
 
     // Clear pending cmd
-    cl->clientUserCommand = {};
+    cl->clientMoveCommand = {};
 }

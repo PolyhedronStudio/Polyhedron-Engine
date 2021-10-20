@@ -159,7 +159,7 @@ extern byte         msg_read_buffer[MAX_MSGLEN];
 
 extern const PackedEntity    nullEntityState;
 extern const PlayerState     nullPlayerState;
-extern const ClientUserCommand          nullUserCmd;
+extern const ClientMoveCommand          nullUserCmd;
 
 void    MSG_Init(void);
 
@@ -173,7 +173,7 @@ void    MSG_WriteString(const char* s);
 void    MSG_WriteVector3(const vec3_t& pos);
 #if USE_CLIENT
 void    MSG_WriteBits(int value, int bits);
-int     MSG_WriteDeltaUsercmd(const ClientUserCommand* from, const ClientUserCommand* cmd);
+int     MSG_WriteDeltaUsercmd(const ClientMoveCommand* from, const ClientMoveCommand* cmd);
 #endif
 void    MSG_PackEntity(PackedEntity* out, const EntityState* in);
 void    MSG_WriteDeltaEntity(const PackedEntity* from, const PackedEntity* to, EntityStateMessageFlags flags);
@@ -204,7 +204,7 @@ size_t  MSG_ReadStringLine(char* dest, size_t size);
 vec3_t  MSG_ReadVector3(void);
 vec3_t  MSG_ReadVector3(void);
 #endif
-void    MSG_ReadDeltaUsercmd(const ClientUserCommand* from, ClientUserCommand* cmd);
+void    MSG_ReadDeltaUsercmd(const ClientMoveCommand* from, ClientMoveCommand* cmd);
 int     MSG_ParseEntityBits(int* bits);
 void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, int bits, EntityStateMessageFlags flags);
 #if USE_CLIENT

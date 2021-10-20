@@ -526,7 +526,7 @@ byte        msg_read_buffer[MAX_MSGLEN];
 
 const PackedEntity   nullEntityState = {};
 const PlayerState    nullPlayerState = {};
-const ClientUserCommand         nullUserCmd = {};
+const ClientMoveCommand         nullUserCmd = {};
 
 /*
 =============
@@ -703,7 +703,7 @@ void MSG_WriteVector3(const vec3_t& pos)
 // 
 //===============
 //
-int MSG_WriteDeltaUsercmd(const ClientUserCommand* from, const ClientUserCommand* cmd)
+int MSG_WriteDeltaUsercmd(const ClientMoveCommand* from, const ClientMoveCommand* cmd)
 {
     // Send a null message in case we had none.
     if (!from) {
@@ -716,48 +716,48 @@ int MSG_WriteDeltaUsercmd(const ClientUserCommand* from, const ClientUserCommand
     //
     int32_t bits = 0;
 
-    if (cmd->moveCommand.viewAngles[0] != from->moveCommand.viewAngles[0])
+    if (cmd->moveInput.viewAngles[0] != from->moveInput.viewAngles[0])
         bits |= CM_ANGLE1;
-    if (cmd->moveCommand.viewAngles[1] != from->moveCommand.viewAngles[1])
+    if (cmd->moveInput.viewAngles[1] != from->moveInput.viewAngles[1])
         bits |= CM_ANGLE2;
-    if (cmd->moveCommand.viewAngles[2] != from->moveCommand.viewAngles[2])
+    if (cmd->moveInput.viewAngles[2] != from->moveInput.viewAngles[2])
         bits |= CM_ANGLE3;
-    if (cmd->moveCommand.forwardMove != from->moveCommand.forwardMove)
+    if (cmd->moveInput.forwardMove != from->moveInput.forwardMove)
         bits |= CM_FORWARD;
-    if (cmd->moveCommand.rightMove != from->moveCommand.rightMove)
+    if (cmd->moveInput.rightMove != from->moveInput.rightMove)
         bits |= CM_SIDE;
-    if (cmd->moveCommand.upMove != from->moveCommand.upMove)
+    if (cmd->moveInput.upMove != from->moveInput.upMove)
         bits |= CM_UP;
-    if (cmd->moveCommand.buttons != from->moveCommand.buttons)
+    if (cmd->moveInput.buttons != from->moveInput.buttons)
         bits |= CM_BUTTONS;
-    if (cmd->moveCommand.impulse != from->moveCommand.impulse)
+    if (cmd->moveInput.impulse != from->moveInput.impulse)
         bits |= CM_IMPULSE;
 
     // Write out the changed bits.
     MSG_WriteByte(bits);
 
     if (bits & CM_ANGLE1)
-        MSG_WriteFloat(cmd->moveCommand.viewAngles[0]);
+        MSG_WriteFloat(cmd->moveInput.viewAngles[0]);
     if (bits & CM_ANGLE2)
-        MSG_WriteFloat(cmd->moveCommand.viewAngles[1]);
+        MSG_WriteFloat(cmd->moveInput.viewAngles[1]);
     if (bits & CM_ANGLE3)
-        MSG_WriteFloat(cmd->moveCommand.viewAngles[2]);
+        MSG_WriteFloat(cmd->moveInput.viewAngles[2]);
 
     if (bits & CM_FORWARD)
-        MSG_WriteShort(cmd->moveCommand.forwardMove);
+        MSG_WriteShort(cmd->moveInput.forwardMove);
     if (bits & CM_SIDE)
-        MSG_WriteShort(cmd->moveCommand.rightMove);
+        MSG_WriteShort(cmd->moveInput.rightMove);
     if (bits & CM_UP)
-        MSG_WriteShort(cmd->moveCommand.upMove);
+        MSG_WriteShort(cmd->moveInput.upMove);
 
     if (bits & CM_BUTTONS)
-        MSG_WriteByte(cmd->moveCommand.buttons);
+        MSG_WriteByte(cmd->moveInput.buttons);
 
     if (bits & CM_IMPULSE)
-        MSG_WriteByte(cmd->moveCommand.impulse);
+        MSG_WriteByte(cmd->moveInput.impulse);
 
-    MSG_WriteByte(cmd->moveCommand.msec);
-    MSG_WriteByte(cmd->moveCommand.lightLevel);
+    MSG_WriteByte(cmd->moveInput.msec);
+    MSG_WriteByte(cmd->moveInput.lightLevel);
 
     // (Returned bits isn't used anywhere, but might as well keep it around.)
     return bits;
@@ -1436,7 +1436,7 @@ vec3_t MSG_ReadVector3(void) {
     };
 }
 
-void MSG_ReadDeltaUsercmd(const ClientUserCommand* from, ClientUserCommand* to)
+void MSG_ReadDeltaUsercmd(const ClientMoveCommand* from, ClientMoveCommand* to)
 {
     int bits;
 
@@ -1451,32 +1451,32 @@ void MSG_ReadDeltaUsercmd(const ClientUserCommand* from, ClientUserCommand* to)
 
     // read current angles
     if (bits & CM_ANGLE1)
-        to->moveCommand.viewAngles[0] = MSG_ReadFloat();
+        to->moveInput.viewAngles[0] = MSG_ReadFloat();
     if (bits & CM_ANGLE2)
-        to->moveCommand.viewAngles[1] = MSG_ReadFloat();
+        to->moveInput.viewAngles[1] = MSG_ReadFloat();
     if (bits & CM_ANGLE3)
-        to->moveCommand.viewAngles[2] = MSG_ReadFloat();
+        to->moveInput.viewAngles[2] = MSG_ReadFloat();
 
     // read movement
     if (bits & CM_FORWARD)
-        to->moveCommand.forwardMove = MSG_ReadShort();
+        to->moveInput.forwardMove = MSG_ReadShort();
     if (bits & CM_SIDE)
-        to->moveCommand.rightMove = MSG_ReadShort();
+        to->moveInput.rightMove = MSG_ReadShort();
     if (bits & CM_UP)
-        to->moveCommand.upMove = MSG_ReadShort();
+        to->moveInput.upMove = MSG_ReadShort();
 
     // read buttons
     if (bits & CM_BUTTONS)
-        to->moveCommand.buttons = MSG_ReadByte();
+        to->moveInput.buttons = MSG_ReadByte();
 
     if (bits & CM_IMPULSE)
-        to->moveCommand.impulse = MSG_ReadByte();
+        to->moveInput.impulse = MSG_ReadByte();
 
     // read time to run command
-    to->moveCommand.msec = MSG_ReadByte();
+    to->moveInput.msec = MSG_ReadByte();
 
     // read the light level
-    to->moveCommand.lightLevel = MSG_ReadByte();
+    to->moveInput.lightLevel = MSG_ReadByte();
 }
 
 #if USE_CLIENT

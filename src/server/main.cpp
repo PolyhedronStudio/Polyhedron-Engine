@@ -1112,7 +1112,7 @@ static void SVC_RemoteCommand(void)
     Com_EndRedirect();
 }
 
-static const ucmd_t svcmds[] = {
+static const UserCommand svcmds[] = {
     { "ping",           SVC_Ping          },
     { "ack",            SVC_Ack           },
     { "status",         SVC_Status        },

@@ -907,7 +907,7 @@ static void SV_CvarResult_f(void)
     }
 }
 
-static const ucmd_t ucmds[] = {
+static const UserCommand userCommands[] = {
     // auto issued
     { "new", SV_New_f },
     { "begin", SV_Begin_f },
@@ -969,7 +969,7 @@ SV_ExecuteUserCommand
 */
 static void SV_ExecuteUserCommand(const char *s)
 {
-    const ucmd_t *u;
+    const UserCommand *u;
     FilterCommand *filter;
     const char *c;
 
@@ -981,7 +981,7 @@ static void SV_ExecuteUserCommand(const char *s)
         return;
     }
 
-    if ((u = Com_Find(ucmds, c)) != NULL) {
+    if ((u = Com_Find(userCommands, c)) != NULL) {
         if (u->func) {
             u->func();
         }
@@ -1028,11 +1028,11 @@ static int         userinfoUpdateCount;
 SV_ClientThink
 ==================
 */
-static inline void SV_ClientThink(ClientUserCommand *cmd)
+static inline void SV_ClientThink(ClientMoveCommand *cmd)
 {
-    ClientUserCommand *old = &sv_client->lastClientUserCommand;
+    ClientMoveCommand *old = &sv_client->lastClientUserCommand;
 
-    sv_client->clientUserCommandMiliseconds -= cmd->moveCommand.msec;
+    sv_client->clientUserCommandMiliseconds -= cmd->moveInput.msec;
     sv_client->numberOfMoves++;
 
     if (sv_client->clientUserCommandMiliseconds < 0 && sv_enforcetime->integer) {
@@ -1041,10 +1041,10 @@ static inline void SV_ClientThink(ClientUserCommand *cmd)
         return;
     }
 
-    if (cmd->moveCommand.buttons != old->moveCommand.buttons
-        || cmd->moveCommand.forwardMove != old->moveCommand.forwardMove
-        || cmd->moveCommand.rightMove != old->moveCommand.rightMove
-        || cmd->moveCommand.upMove != old->moveCommand.upMove) {
+    if (cmd->moveInput.buttons != old->moveInput.buttons
+        || cmd->moveInput.forwardMove != old->moveInput.forwardMove
+        || cmd->moveInput.rightMove != old->moveInput.rightMove
+        || cmd->moveInput.upMove != old->moveInput.upMove) {
         // don't timeout
         sv_client->lastActivity = svs.realtime;
     }
@@ -1087,7 +1087,7 @@ SV_ExecuteMove
 */
 static void SV_ExecuteMove(void)
 {
-    ClientUserCommand   oldest, oldcmd, newcmd;
+    ClientMoveCommand   oldest, oldcmd, newcmd;
     int         lastFrame;
     int         net_drop;
 

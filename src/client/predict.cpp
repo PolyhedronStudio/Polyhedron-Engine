@@ -50,11 +50,11 @@ void CL_CheckPredictionError(void)
         return;
     }
 
-    // Calculate the last ClientUserCommand we sent that the server has processed
+    // Calculate the last ClientMoveCommand we sent that the server has processed
     uint32_t frame = cls.netchan->incomingAcknowledged & CMD_MASK;
     uint32_t commandNumber = cl.clientCommandHistory[frame].commandNumber;
 
-    ClientUserCommand* cmd = &cl.clientUserCommands[commandNumber & CMD_MASK];
+    ClientMoveCommand* cmd = &cl.clientUserCommands[commandNumber & CMD_MASK];
 
     // Call into the CG Module to let it handle this.
     CL_GM_CheckPredictionError(cmd);
@@ -100,7 +100,7 @@ void CL_PredictMovement(void)
     }
 
     // Ensure we had moved.
-    if (!cl.clientUserCommand.moveCommand.msec && currentFrameIndex == ack) {
+    if (!cl.clientMoveCommand.moveInput.msec && currentFrameIndex == ack) {
         SHOWMISS("%i: not moved\n", cl.frame.number);
         return;
     }

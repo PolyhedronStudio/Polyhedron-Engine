@@ -241,7 +241,7 @@ typedef struct client_s {
     uint32_t lastMessage;    // svs.realTime when packet was last received
     uint32_t lastActivity;   // svs.realTime when user activity was last seen
     int32_t lastFrame;      // for delta compression
-    ClientUserCommand lastClientUserCommand;        // for filling in big drops
+    ClientMoveCommand lastClientUserCommand;        // for filling in big drops
     int32_t clientUserCommandMiliseconds;   // every seconds this is reset, if user
                                     // commands exhaust it, assume time cheating
     int32_t numberOfMoves;      // reset every 10 seconds
@@ -372,14 +372,14 @@ typedef enum {
     FA_MAX
 } FilterAction;
 
-typedef struct {
+struct FilterCommand {
     list_t entry;
     
     FilterAction action;
 
     char *comment;
     char  string[1];
-} FilterCommand;
+};
 
 typedef struct {
     list_t entry;

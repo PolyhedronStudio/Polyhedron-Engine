@@ -95,7 +95,7 @@ constexpr int32_t PM_MAX_TOUCH_ENTS = 32;
 //-------------------
 typedef struct {
     // Movement command (in)
-    ClientUserCommand clientUserCommand;  
+    ClientMoveCommand clientMoveCommand;  
 
     // Movement state (in/out)
     PlayerMoveState state;

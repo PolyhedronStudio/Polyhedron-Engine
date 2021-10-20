@@ -292,9 +292,9 @@ struct ClientState {
     qboolean    sendPacketNow;
 
     // Actual current client user command.
-    ClientUserCommand    clientUserCommand;
+    ClientMoveCommand    clientMoveCommand;
     // Actual current client user command list.
-    ClientUserCommand    clientUserCommands[CMD_BACKUP];    // each mesage will send several old clientUserCommands
+    ClientMoveCommand    clientUserCommands[CMD_BACKUP];    // each mesage will send several old clientUserCommands
     // Current command number.
     uint32_t     currentClientCommandNumber;
     // History book of time sent, received, and command number.

@@ -20,12 +20,12 @@
 // Checks for prediction errors.
 //================
 //
-void CLG_CheckPredictionError(ClientUserCommand *clientUserCommand) {
+void CLG_CheckPredictionError(ClientMoveCommand *clientMoveCommand) {
     const PlayerMoveState* in = &cl->frame.playerState.pmove;
     ClientPredictedState* out = &cl->predictedState;
 
     // if prediction was not run (just spawned), don't sweat it
-    if (clientUserCommand->prediction.simulationTime == 0) {
+    if (clientMoveCommand->prediction.simulationTime == 0) {
         out->viewOrigin = in->origin;
         out->viewOffset = in->viewOffset;
         out->viewAngles = in->viewAngles;
@@ -36,7 +36,7 @@ void CLG_CheckPredictionError(ClientUserCommand *clientUserCommand) {
     }
 
     // Subtract what the server returned from our predicted origin for that frame
-    out->error = clientUserCommand->prediction.error = (clientUserCommand->prediction.origin - in->origin);
+    out->error = clientMoveCommand->prediction.error = (clientMoveCommand->prediction.origin - in->origin);
 
     // If the error is too large, it was likely a teleport or respawn, so ignore it
     const float len = vec3_length(out->error);
@@ -225,14 +225,14 @@ void CLG_PredictMovement(unsigned int acknowledgedCommandIndex, unsigned int cur
     // Run frames in order.
     while (++acknowledgedCommandIndex <= currentCommandIndex) {
         // Fetch the command.
-        ClientUserCommand* cmd = &cl->clientUserCommands[acknowledgedCommandIndex & CMD_MASK];
+        ClientMoveCommand* cmd = &cl->clientUserCommands[acknowledgedCommandIndex & CMD_MASK];
 
         // Execute a pmove with it.
-        if (cmd->moveCommand.msec) {
+        if (cmd->moveInput.msec) {
             // Saved for prediction error checking.
             cmd->prediction.simulationTime = clgi.GetRealTime();
 
-            pm.clientUserCommand = *cmd;
+            pm.clientMoveCommand = *cmd;
             PMove(&pm);
 
             // Update player move client side audio effects.
@@ -244,21 +244,21 @@ void CLG_PredictMovement(unsigned int acknowledgedCommandIndex, unsigned int cur
     }
 
     // Run pending cmd
-    if (cl->clientUserCommand.moveCommand.msec) {
+    if (cl->clientMoveCommand.moveInput.msec) {
         // Saved for prediction error checking.
-        cl->clientUserCommand.prediction.simulationTime = clgi.GetRealTime();
+        cl->clientMoveCommand.prediction.simulationTime = clgi.GetRealTime();
 
-        pm.clientUserCommand = cl->clientUserCommand;
-        pm.clientUserCommand.moveCommand.forwardMove = cl->localmove[0];
-        pm.clientUserCommand.moveCommand.rightMove = cl->localmove[1];
-        pm.clientUserCommand.moveCommand.upMove = cl->localmove[2];
+        pm.clientMoveCommand = cl->clientMoveCommand;
+        pm.clientMoveCommand.moveInput.forwardMove = cl->localmove[0];
+        pm.clientMoveCommand.moveInput.rightMove = cl->localmove[1];
+        pm.clientMoveCommand.moveInput.upMove = cl->localmove[2];
         PMove(&pm);
 
         // Update player move client side audio effects.
         CLG_UpdateClientSoundSpecialEffects(&pm);
 
         // Save for error detection
-        cl->clientUserCommand.prediction.origin = pm.state.origin;
+        cl->clientMoveCommand.prediction.origin = pm.state.origin;
     }
 
     // Copy results out for rendering

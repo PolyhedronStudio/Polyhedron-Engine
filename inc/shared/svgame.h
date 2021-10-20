@@ -265,7 +265,7 @@ typedef struct {
     void (*ClientUserinfoChanged)(Entity *ent, char *userinfo);
     void (*ClientDisconnect)(Entity *ent);
     void (*ClientCommand)(Entity *ent);
-    void (*ClientThink)(Entity *ent, ClientUserCommand *cmd);
+    void (*ClientThink)(Entity *ent, ClientMoveCommand *cmd);
 
     void (*RunFrame)(void);
 
